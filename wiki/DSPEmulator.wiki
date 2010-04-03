@@ -12,13 +12,13 @@ Why delphi, and not C or C++ or Java or (put here your own language)? Well, delp
 You can not distribute this emulator with ROMS, except those that include the original ZIP file.<br>
 
 <b>1-. Emulation</b>
--------------
+<h><br>
 + INFO: DSP can handle ZIP format, you can load roms, tapes, snapshots or disks from a zip file.<br>
 + FILES NEEDED: DSP NEED to run a file that must be in the same folder as an executable file, this file you can download from  the same site and is the library 'SDL.DLL'.<br>
 The ZIP also includes the ROMS Spectrum 48K, 128K Spectrum, Spectrum +3 and Coleco. You can download most of roms page of the emulator, and you also have the 'Spectrum is Alive!!!' where you have games for the Spectrum.<br>
 
 <b>1.1-. Keys during emulation</b><br>
----------------------------
+<h><br>
 1 --> Start one player<br>
 5 --> Insert coin<br>
 F1 --> Play/Stop tape<br>
@@ -31,33 +31,33 @@ CUSOR KEYS --> Up, down, left & right. (In spectrum and Amstrad are joystick)<br
 LEFT ALT & LEFT CTRL --> Action. (In Spectrum Kempston Joystick fire button)<br><br>
 Not all keys work during emulation, for example in phoenix you can not play/pause a tape!<br>
 <b>1.2-. Language Files</b><br>
---------------------<br>
+<h><br>
 DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
 You can select Castellano, Catalan, English, German, French or Brazil and if you want to add another language to the folder 'LNG' edit the file 'español.lng', rename it and send it to me to add it to the next version.<br>
 If the language files are not present, the emulation can not begin.<br>
 
 <b>1.3-. Configure DSP</b><br>
--------------------<br>
+<h><br>
 Clicking the Settings button you can configure the options in the emulator can select the language, quality of audio, video settings and default directories.<br>
 In addition there are drivers that allow it can configure the options separately from the driver. (for example Spectrum)<br>
 
 <b>1.4-. Audio</b><br>
------------<br>
+<h><br>
 You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cost to move emulation, I recommend 22050Khz which is a sufficient value to almost everything.<br>
 If you do not have sound card (¿although there is anyone who has not?), The sound is turned off, don't worry. Anyway you can select the option 'Mute' to save a few frames ;-)<br>
 
 <b>1.5-. Save Pictures</b><br>
--------------------<br>
+<h><br>
 Since DSP 0.2wipb5 you can save GIF files from spectrum emulation (48k, 128k and +3 emulation).<br>
 Since 0.7ß2 version you can save JPG and PNG formats<br>
 
 <b>1.6-. Initial Game List</b><br>
------------------------<br>
+<h<><br>
 Since version 0.9 there is the possibility of booting DSP with the list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system.<br>
 In general configuration you can choose this way of booting, or the old way (last driver load).<br>
 
 <b>2-. Drivers</b><br>
------------<br>
+<h><br>
 <b>Spectrum 48k, 128K and Plus+3</b><br>
 *****************************<br>
 - ROMS: Now you can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name) or in ROM format. By default the ROM files are: SPECTRUM.ZIP (Spectrum 48K), SPEC128.ZIP (Spectrum 128K) y PLUS3.ZIP (Spectrum Plus+3).<br>
