@@ -11,118 +11,110 @@ Yes, its open source, you can compile it yourself. But you cannot use it for com
 Why delphi, and not C or C++ or Java or (put here your own language)? Well, delphi it is powerful enough to handle my emulator (120fps in spectrum driver with a 300Mhz processor!!!!) and it is as good as any other languages.<br>
 You can not distribute this emulator with ROMS, except those that include the original ZIP file.<br>
 
-1-. Emulation
+<b>1-. Emulation</b>
 -------------
-+ INFO: DSP can handle ZIP format, you can load roms, tapes, snapshots or disks from a zip file.
-+ FILES NEEDED: DSP NEED to run a file that must be in the same folder as an executable file, this file you can download from  the same site and is the library 'SDL.DLL'.
-The ZIP also includes the ROMS Spectrum 48K, 128K Spectrum, Spectrum +3 and Coleco. You can download most of roms 
-page of the emulator, and you also have the 'Spectrum is Alive!!!' where you have games for the Spectrum.
++ INFO: DSP can handle ZIP format, you can load roms, tapes, snapshots or disks from a zip file.<br>
++ FILES NEEDED: DSP NEED to run a file that must be in the same folder as an executable file, this file you can download from  the same site and is the library 'SDL.DLL'.<br>
+The ZIP also includes the ROMS Spectrum 48K, 128K Spectrum, Spectrum +3 and Coleco. You can download most of roms page of the emulator, and you also have the 'Spectrum is Alive!!!' where you have games for the Spectrum.<br>
 
-1.1-. Keys during emulation
+<b>1.1-. Keys during emulation</b><br>
 ---------------------------
-1 --> Start one player
-5 --> Insert coin
-F1 --> Play/Stop tape
-F2 --> Full speed/Normal Speed
-F3 --> Reset machine
-F4 --> Save snapshot (not working during Full Screen Mode)
-F5 --> Remove Disk (Spectrum +3 and Amstrad CPC)
-F11 --> Changes emulation speed from 25%, 50%, 75% and 100%
-F12 --> Full Screen Mode/Window Mode (Disabled)
-CUSOR KEYS --> Up, down, left & right. (In spectrum and Amstrad are joystick)
-LEFT ALT & LEFT CTRL --> Action. (In Spectrum Kempston Joystick fire button)
+1 --> Start one player<br>
+5 --> Insert coin<br>
+F1 --> Play/Stop tape<br>
+F2 --> Full speed/Normal Speed<br>
+F3 --> Reset machine<br>
+F4 --> Save snapshot (not working during Full Screen Mode)<br>
+F5 --> Remove Disk (Spectrum +3 and Amstrad CPC)<br>
+F11 --> Changes emulation speed from 25%, 50%, 75% and 100%<br>
+CUSOR KEYS --> Up, down, left & right. (In spectrum and Amstrad are joystick)<br>
+LEFT ALT & LEFT CTRL --> Action. (In Spectrum Kempston Joystick fire button)<br><br>
+Not all keys work during emulation, for example in phoenix you can not play/pause a tape!<br>
+<b>1.2-. Language Files</b><br>
+--------------------<br>
+DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
+You can select Castellano, Catalan, English, German, French or Brazil and if you want to add another language to the folder 'LNG' edit the file 'español.lng', rename it and send it to me to add it to the next version.<br>
+If the language files are not present, the emulation can not begin.<br>
 
-Not all keys work during emulation, for example in phoenix you can not play/pause a tape!
+<b>1.3-. Configure DSP</b><br>
+-------------------<br>
+Clicking the Settings button you can configure the options in the emulator can select the language, quality of audio, video settings and default directories.<br>
+In addition there are drivers that allow it can configure the options separately from the driver. (for example Spectrum)<br>
 
-1.2-. Language Files
---------------------
-DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button. 
-You can select Castellano, Catalan, English, German, French or Brazil and if you want to add another language to the folder 'LNG' edit the file 'español.lng', rename it and send it to me to add it to the next version. 
-If the language files are not present, the emulation can not begin.
+<b>1.4-. Audio</b><br>
+-----------<br>
+You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cost to move emulation, I recommend 22050Khz which is a sufficient value to almost everything.<br>
+If you do not have sound card (¿although there is anyone who has not?), The sound is turned off, don't worry. Anyway you can select the option 'Mute' to save a few frames ;-)<br>
 
-1.3-. Configure DSP
--------------------
-Clicking the Settings button you can configure the options in the emulator can select the language, quality of audio, video settings and default directories.
-In addition there are drivers that allow it can configure the options separately from the driver. (for example Spectrum)
+<b>1.5-. Save Pictures</b><br>
+-------------------<br>
+Since DSP 0.2wipb5 you can save GIF files from spectrum emulation (48k, 128k and +3 emulation).<br>
+Since 0.7ß2 version you can save JPG and PNG formats<br>
 
-1.4-. Audio
------------
-You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cost to move 
-emulation, I recommend 22050Khz which is a sufficient value to almost everything. 
-If you do not have sound card (¿although there is anyone who has not?), The sound is turned off, don't worry. Anyway you can select the option 'Mute' to save a few frames ;-)
+<b>1.6-. Initial Game List</b><br>
+-----------------------<br>
+Since version 0.9 there is the possibility of booting DSP with the list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system.<br>
+In general configuration you can choose this way of booting, or the old way (last driver load).<br>
 
-1.5-. Save Pictures
--------------------
-Since DSP 0.2wipb5 you can save GIF files from spectrum emulation (48k, 128k and +3 emulation).
-Since 0.7ß2 version you can save JPG and PNG formats
-
-1.6-. Initial Game List
------------------------
-Since version 0.9 there is the possibility of booting DSP with the list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system.
-In general configuration you can choose this way of booting, or the old way (last driver load).
-
-2-. Drivers
------------
-Spectrum 48k, 128K and Plus+3
-*****************************
-- ROMS: Now you can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name) or in ROM format. By default the ROM files are: SPECTRUM.ZIP (Spectrum 48K), SPEC128.ZIP (Spectrum 128K) y PLUS3.ZIP (Spectrum Plus+3).
-- Border: Now you can choose line by line emulation or pixel by pixel emulation (slowly but more exact) and disable border emulation.
-- Keyboard: Fully working keyboard emulation, and LShift and LControl working as Capshift and SimbolShift.
-- Joystick: You can choose from four joysticks; Kempston, Cursor, Sinclair 1 and Sinclair 2. Joystick ir emulated with cursor keys and left alt as fire button.
-- Gunstick/Lightgun: The mouse is used as Gunstick, and left button is used as fire.
-- Virtual Tapes: Can load ZIP, TAP, TZX, PZX, WAV and CSW. Fully working spectrum load schemes (bleepload, alkatraz, original rom...). With the mouse you can move inside virtual tape and select the star possition. Tape begin to play when detects - LOAD "" - and stop when reaches the final.
-If inside the ZIP file there is a ROM file, emulator load fisrt ROM file and then loads then virtual tape.
-Also, if inside the ZIP is a .SCR image, it's used as a preview.
-- Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.
+<b>2-. Drivers</b><br>
+-----------<br>
+<b>Spectrum 48k, 128K and Plus+3</b><br>
+*****************************<br>
+- ROMS: Now you can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name) or in ROM format. By default the ROM files are: SPECTRUM.ZIP (Spectrum 48K), SPEC128.ZIP (Spectrum 128K) y PLUS3.ZIP (Spectrum Plus+3).<br>
+- Border: Now you can choose line by line emulation or pixel by pixel emulation (slowly but more exact) and disable border emulation.<br>
+- Keyboard: Fully working keyboard emulation, and LShift and LControl working as Capshift and SimbolShift.<br>
+- Joystick: You can choose from four joysticks; Kempston, Cursor, Sinclair 1 and Sinclair 2. Joystick ir emulated with cursor keys and left alt as fire button.<br>
+- Gunstick/Lightgun: The mouse is used as Gunstick, and left button is used as fire.<br>
+- Virtual Tapes: Can load ZIP, TAP, TZX, PZX, WAV and CSW. Fully working spectrum load schemes (bleepload, alkatraz, original rom...). With the mouse you can move inside virtual tape and select the star possition. Tape begin to play when detects - LOAD "" - and stop when reaches the final.<br>
+If inside the ZIP file there is a ROM file, emulator load fisrt ROM file and then loads then virtual tape.<br>
+Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
+- Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
 - Audio: Spectrum beeper, and in 128K and Plus+3 version there is a AY-8912 emulation.
-- Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.
-- To do: Contented memory is not working correctly at 100%, some ULA bugs.
+- Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
+- To do: Contented memory is not working correctly at 100%, some ULA bugs.<br>
 
-Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.
+Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br>
 
-Amstrad CPC 464,664 y 6128
-**************************
-- ROMS: By default the files are those: CPC464.ZIP, CPC664.ZIP y CPC6128.ZIP.
-- Keyboard: Missing some CPC keys on the keyboard, but most are. To use of 'F1' to 'F8' need to press right Shift.
-- Joystick: The keys are the cursor keys. The fire key is right Ctrl.
-- Virtual Tape: you can load ZIP, CDT, WAV and CSW. Are working the classical loading squemas (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.
-- Sound: Polyphonic sound from AY-8912 chip
-- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.
--To do:
-	- Snapshots are not implemented.
-	- Some disk protections are not working.
-        - Sometimes the driver just reset
-	- Some video effect are missing (M6845 video)
+<b>Amstrad CPC 464,664 y 6128</b><br>
+**************************<br>
+- ROMS: By default the files are those: CPC464.ZIP, CPC664.ZIP y CPC6128.ZIP.<br>
+- Keyboard: Missing some CPC keys on the keyboard, but most are. To use of 'F1' to 'F8' need to press right Shift.<br>
+- Joystick: The keys are the cursor keys. The fire key is right Ctrl.<br>
+- Virtual Tape: you can load ZIP, CDT, WAV and CSW. Are working the classical loading squemas (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
+- Sound: Polyphonic sound from AY-8912 chip<br>
+- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
+-To do:<br>
+	- Snapshots are not implemented.<br>
+	- Some disk protections are not working.<br>
+        - Sometimes the driver just reset<br>
+	- Some video effect are missing (M6845 video)<br><br>
 
-NES
-***
-Rewriting process.
+<b>NES</b><br>
+***<br>
+Rewriting process.<br><br>
 
+<b>ColecoVision</b><br>
+************<br>
+-ROM: The default ROM is 'COLECO.ZIP' and within 'COLECO.ROM'. Without it can not begin the emulation.<br>
+-Joystick: The numbers on the keyboard from '1'to '0' emulate the keys on the two joysticks. Keys 'Q' and 'W' emulate the Keys '*' and '#' of the two joysticks also, and the arrow keys to 'CTRL' and 'ALT' left emulate the main joystick (The secondary joystick does not have keys assigned). Does not support (even) the special joysticks.<br>
+-Cartridges: It supports the standard game cartridges (not expansion cartirdges), in 'ROM' and 'COL'. Support ZIP files, of course.<br><br>
 
-ColecoVision
-************
--ROM: The default ROM is 'COLECO.ZIP' and within 'COLECO.ROM'. Without it can not begin the emulation.
--Joystick: The numbers on the keyboard from '1'to '0' emulate the keys on the two joysticks. Keys 'Q' and 'W' emulate the Keys '*' and '#' of the two joysticks also, and the arrow keys to 'CTRL' and 'ALT' left emulate the main joystick (The secondary joystick does not have keys assigned). Does not support (even) the special joysticks.
--Cartridges: It supports the standard game cartridges (not expansion cartirdges), in 'ROM' and 'COL'. Support ZIP files, of course.
+<b>GameBoy</b><br>
+*******<br>
+I beggin with the CPU... yahooooo!<br>
 
-GameBoy
-*******
-I beggin with the CPU... yahooooo!
+<b>Phoenix</b><br>
+*******<br>
+- ROMS: MAME compatible PHOENIX.ZIP<br>
+Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.<br>
+Working 99,1%<br>
 
+<b>Bombjack</b><br>
+********<br>
+- ROMS: MAME compatible BOMBJACK.ZIP<br>
+Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br>
 
-Phoenix
-*******
-- ROMS: MAME compatible PHOENIX.ZIP
-Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.
-Working 99,1%
-
-
-Bombjack
-********
-- ROMS: MAME compatible BOMBJACK.ZIP
-Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.
-
-Pacman
+Pacman<br>
 ******
 - ROMS: MAME compatible PACMAN.ZIP
 Working 100%, sample of chars and sprites, with sound.
@@ -382,50 +374,45 @@ This driver uses A,S,D,Z,X and C keys as action buttons
 You can contribute in the emulator DSP! Get the source code and works on the drivers. Do you help me? So please contact me! 
 Have you done a new driver? Do you have any idea? Well then contact me! Anything is good!
 
-4-. Acknowledgments
--------------------
-* First, of course, the team's MAME. Without them, this emulator never had existed, thanks to distribute the code source to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria). 
+4-. Acknowledgments<br>
+-------------------<br>
+* First, of course, the team's MAME. Without them, this emulator never had existed, thanks to distribute the code source to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria). <br>
 * Chris Cowley, author of VBSpec, from where I've pick a lot of information about that little black box called Spectrum, 
-I never belived how powerful it was... In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME, and sounds very good! 
-* Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to locate errors in my emulator Z80. 
-* These awesome guys from World of Spectrum!! I have taken many tapes and snapshots of his page, in addition to technical information, including the format TZX. Do not miss this page!
-* Javi [@] fsmail.net that helped me in a moment of desperation, with DirectSound! 
-* Thanks to Michael Franzen, who sent me so disinterested drivers Pooyan, Coleco, System1 and many others! to be included in DSP. 
-* And many pages of the Internet, many documents ... and people who I forget, thank you all.
-
-5-. Copyright
--------------
-The NES driver it's being rewritten by NESBr.
-The Coleco and Pooyan has been rewrited from the original by Michael Franzen.
-The rest of the drivers, Z80 core, M6502 core, M6809 core and M68000 core are writed by me, Leniad.
-AY-3-8912 emulator rewrite by Chris Cowley, original emulator come from MAME team.
-SN76496 emulator is a delphi conversion writed by me from MAME original.
-YM2203 emulator is a delphi conversion writed by me from MAME original.
-TMS36XX emulator is a delphi conversion writed by me from MAME original.
-VLM-5030 emulator is a delphi conversion writed by me from MAME original.
-YM3812/YM3526 emulator is a delphi conversion writed by me from MAME original.
-YM2151 emulator is a delphi conversion writed by me from MAME original.
-TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME
-NEC765 emulator is a delphi conversion writed and enhanced by me from MESS original.
-i8255 emulator is a delphi conversion writed and enhanced by me from MAME original.
-Spectrum 48k, Spectrum 128K, Spectrum+3, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.
-
-6-. Contact & Links
--------------------
-If you want to contact me, send me feedback or anything just use leniad2@hotmail.com
-My DSP home page leniad.cjb.net
-
-If you want info...
-www.mamedev.org
-www.aarongiles.com
-www.emulatronia.com
-
-if you want spectrum tapes, snapshot, info...
-leniad.cjb.net/sp
-www.worldofspectrum.org
-tzxvault.retrogames.com
-zx.dyndns.org/trastero
-www.speccy.org/spa2
-
-If you want Coleco games
+I never belived how powerful it was... In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME, and sounds very good! <br>
+* Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to locate errors in my emulator Z80. <br>
+* These awesome guys from World of Spectrum!! I have taken many tapes and snapshots of his page, in addition to technical information, including the format TZX. Do not miss this page!<br>
+* Javi [@] fsmail.net that helped me in a moment of desperation, with DirectSound! <br>
+* Thanks to Michael Franzen, who sent me so disinterested drivers Pooyan, Coleco, System1 and many others! to be included in DSP. <br>
+* And many pages of the Internet, many documents ... and people who I forget, thank you all.<br><br>
+5-. Copyright<br>
+-------------<br>
+The NES driver it's being rewritten by NESBr.<br>
+The Coleco and Pooyan has been rewrited from the original by Michael Franzen.<br>
+The rest of the drivers, Z80 core, M6502 core, M6809 core and M68000 core are writed by me, Leniad.<br>
+AY-3-8912 emulator rewrite by Chris Cowley, original emulator come from MAME team.<br>
+SN76496 emulator is a delphi conversion writed by me from MAME original.<br>
+YM2203 emulator is a delphi conversion writed by me from MAME original.<br>
+TMS36XX emulator is a delphi conversion writed by me from MAME original.<br>
+VLM-5030 emulator is a delphi conversion writed by me from MAME original.<br>
+YM3812/YM3526 emulator is a delphi conversion writed by me from MAME original.<br>
+YM2151 emulator is a delphi conversion writed by me from MAME original.<br>
+TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME<br>
+NEC765 emulator is a delphi conversion writed and enhanced by me from MESS original.<br>
+i8255 emulator is a delphi conversion writed and enhanced by me from MAME original.<br>
+Spectrum 48k, Spectrum 128K, Spectrum+3, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.<br><br>
+6-. Contact & Links<br>
+-------------------<br>
+If you want to contact me, send me feedback or anything just use leniad2@hotmail.com<br>
+My DSP home page leniad.cjb.net<br><br>
+If you want info...<br>
+www.mamedev.org<br>
+www.aarongiles.com<br>
+www.emulatronia.com<br><br>
+if you want spectrum tapes, snapshot, info...<br>
+leniad.cjb.net/sp<br>
+www.worldofspectrum.org<br>
+tzxvault.retrogames.com<br>
+zx.dyndns.org/trastero<br>
+www.speccy.org/spa2<br><br>
+If you want Coleco games<br>
 leniad.cjb.net/coleco
