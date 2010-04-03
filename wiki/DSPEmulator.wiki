@@ -6,10 +6,10 @@ DSP Emulator v0.9ß3 by Leniad Soft 2001-2010
 
 = Details =
 
-Well, this is just another emulator!. But, where is the difference? This is a delphi open source emulator. There are not so many emulators in delphi...
-Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes, and if you enhance a driver, please send it back to me and I will include it in the next release of DSP.
-Why delphi, and not C or C++ or Java or (put here your own language)? Well, delphi it is powerful enough to handle my emulator (120fps in spectrum driver with a 300Mhz processor!!!!) and it is as good as any other languages.
-You can not distribute this emulator with ROMS, except those that include the original ZIP file.
+Well, this is just another emulator!. But, where is the difference? This is a delphi open source emulator. There are not so many emulators in delphi...<br>
+Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes, and if you enhance a driver, please send it back to me and I will include it in the next release of DSP.<br>
+Why delphi, and not C or C++ or Java or (put here your own language)? Well, delphi it is powerful enough to handle my emulator (120fps in spectrum driver with a 300Mhz processor!!!!) and it is as good as any other languages.<br>
+You can not distribute this emulator with ROMS, except those that include the original ZIP file.<br>
 
 1-. Emulation
 -------------
