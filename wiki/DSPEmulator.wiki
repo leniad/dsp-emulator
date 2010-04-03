@@ -52,13 +52,13 @@ Since DSP 0.2wipb5 you can save GIF files from spectrum emulation (48k, 128k and
 Since 0.7ß2 version you can save JPG and PNG formats<br>
 
 <b>1.6-. Initial Game List</b><br>
-<h<><br>
+<h><br>
 Since version 0.9 there is the possibility of booting DSP with the list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system.<br>
 In general configuration you can choose this way of booting, or the old way (last driver load).<br>
 
 <b>2-. Drivers</b><br>
 <h><br>
-<b>Spectrum 48k, 128K and Plus+3</b><br>
+<b>Spectrum 48k, 128K and Plus+3 </b><br>
 *****************************<br>
 - ROMS: Now you can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name) or in ROM format. By default the ROM files are: SPECTRUM.ZIP (Spectrum 48K), SPEC128.ZIP (Spectrum 128K) y PLUS3.ZIP (Spectrum Plus+3).<br>
 - Border: Now you can choose line by line emulation or pixel by pixel emulation (slowly but more exact) and disable border emulation.<br>
