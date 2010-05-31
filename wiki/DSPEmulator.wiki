@@ -22,13 +22,13 @@ The ZIP also includes the ROMS Spectrum 48K, 128K Spectrum, Spectrum +3 and Cole
 General Keys<br>
     F2 --> Full speed/Normal Speed<br>
     F3 --> Reset machine<br>
-    F11 --> Changes emulation speed from 25%, 50%, 75% and 100%<br><br>
+    F11 --> Changes emulation speed from 25%, 50%, 75% and 100%<br>
 Arcade drivers basic keys<br>
     1 --> Start player one<br>
     2 --> Start player two<br>
     5 --> Insert coin<br>
     6 --> Inser Coin<br>
-Keys for both players are redefinible, and you can select any joystick for any player<br><br>
+Keys for both players are redefinible, and you can select any joystick for any player<br>
 Spectrum/Amstrad basic keys<br>
     F1 --> Play/Stop tape<br>
     F4 --> Save snapshot<br>
