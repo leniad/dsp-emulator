@@ -1,16 +1,16 @@
 #summary DSP Emulator
 = Introduction =
 
-DSP Emulator v0.9ß3 by Leniad Soft 2001-2010
+DSP Emulator v0.10 by Leniad Soft 2001-2010
 
 
 = Details =
 
-Well, this is just another emulator!. But, where is the difference? This is a delphi open source emulator. There are not so many emulators in delphi...<br>
+Well, this is just another emulator!. But, where is the difference? This is a delphi open source emulator. There are not so many emulators in delphi...
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes, and if you enhance a driver, please send it back to me and I will include it in the next release of DSP.<br>
-Why delphi, and not C or C++ or Java or (put here your own language)? Well, delphi it is powerful enough to handle my emulator (120fps in spectrum driver with a 300Mhz processor!!!!) and it is as good as any other languages.<br>
+Why delphi, and not C or C++ or Java or (put here your own language)? Well, delphi it is powerful enough to handle my emulator (120fps in spectrum driver with a 300Mhz processor!!!!) and it is as good as many any other languages.
 You can not distribute this emulator with ROMS, except those that include the original ZIP file.<br>
-
+Now since version 0.9ß3 portability has begun to Lazarus and Free Pascal, so there is a basic Linux version executable<br><br>
 <b>1-. Emulation</b>
 <hr><br>
 + INFO: DSP can handle ZIP format, you can load roms, tapes, snapshots or disks from a zip file.<br>
@@ -19,17 +19,24 @@ The ZIP also includes the ROMS Spectrum 48K, 128K Spectrum, Spectrum +3 and Cole
 
 <b>1.1-. Keys during emulation</b><br>
 <hr><br>
-1 --> Start one player<br>
-5 --> Insert coin<br>
-F1 --> Play/Stop tape<br>
-F2 --> Full speed/Normal Speed<br>
-F3 --> Reset machine<br>
-F4 --> Save snapshot (not working during Full Screen Mode)<br>
-F5 --> Remove Disk (Spectrum +3 and Amstrad CPC)<br>
-F11 --> Changes emulation speed from 25%, 50%, 75% and 100%<br>
-CUSOR KEYS --> Up, down, left & right. (In spectrum and Amstrad are joystick)<br>
-LEFT ALT & LEFT CTRL --> Action. (In Spectrum Kempston Joystick fire button)<br><br>
-Not all keys work during emulation, for example in phoenix you can not play/pause a tape!<br>
+General Keys<br>
+    F2 --> Full speed/Normal Speed<br>
+    F3 --> Reset machine<br>
+    F11 --> Changes emulation speed from 25%, 50%, 75% and 100%<br><br>
+Arcade drivers basic keys<br>
+    1 --> Start player one<br>
+    2 --> Start player two<br>
+    5 --> Insert coin<br>
+    6 --> Inser Coin<br>
+Keys for both players are redefinible, and you can select any joystick for any player<br><br>
+Spectrum/Amstrad basic keys<br>
+    F1 --> Play/Stop tape<br>
+    F4 --> Save snapshot<br>
+    F5 --> Remove Disk<br>
+For Spectrum/Amstrad the no redefinible keys for joystick are<br>
+    CUSOR KEYS --> Cursor Up, down, left & right.<br>
+    LEFT ALT --> Fire<br>
+In Amstrad CPC for use 'F1' to 'F8' keys you must press right Shift.<br><br>
 <b>1.2-. Language Files</b><br>
 <hr><br>
 DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
