@@ -40,8 +40,8 @@ In Amstrad CPC for use 'F1' to 'F8' keys you must press right Shift.<br><br>
 <b>1.2-. Language Files</b><br>
 <hr><br>
 DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
-You can select Castellano, Catalan, English, German, French or Brazil and if you want to add another language to the folder 'LNG' edit the file 'español.lng', rename it and send it to me to add it to the next version.<br>
-If the language files are not present, the emulation can not begin.<br>
+You can select Castellano, Catalan, English, German, French or Brazil and if you want to add another language to the folder 'LNG' edit the file 'español.lng', rename it and send it to me to add it to the next version. 
+If the language files are not present, the emulation can not start.<br>
 
 <b>1.3-. Configure DSP</b><br>
 <hr><br>
@@ -50,13 +50,13 @@ In addition there are drivers that allow it can configure the options separately
 
 <b>1.4-. Audio</b><br>
 <hr><br>
-You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cost to move emulation, I recommend 22050Khz which is a sufficient value to almost everything.<br>
+You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cost to move emulation.<br>
 If you do not have sound card (¿although there is anyone who has not?), The sound is turned off, don't worry. Anyway you can select the option 'Mute' to save a few frames ;-)<br>
 
 <b>1.5-. Save Pictures</b><br>
 <hr><br>
 Since DSP 0.2wipb5 you can save GIF files from spectrum emulation (48k, 128k and +3 emulation).<br>
-Since 0.7ß2 version you can save JPG and PNG formats<br>
+Since 0.7ß2 version you can save JPG and PNG formats from all drivers.<br>
 
 <b>1.6-. Initial Game List</b><br>
 <hr><br>
