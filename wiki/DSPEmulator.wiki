@@ -12,13 +12,12 @@ Why delphi, and not C or C++ or Java or (put here your own language)? Well, delp
 You can not distribute this emulator with ROMS, except those that include the original ZIP file.<br>
 Now since version 0.9ß3 portability has begun to Lazarus and Free Pascal, so there is a basic Linux version executable<br><br>
 <b>1-. Emulation</b>
-<hr><br>
+<hr>
 + INFO: DSP can handle ZIP format, you can load roms, tapes, snapshots or disks from a zip file.<br>
 + FILES NEEDED: DSP NEED to run a file that must be in the same folder as an executable file, this file you can download from  the same site and is the library 'SDL.DLL'.<br>
-The ZIP also includes the ROMS Spectrum 48K, 128K Spectrum, Spectrum +3 and Coleco. You can download most of roms page of the emulator, and you also have the 'Spectrum is Alive!!!' where you have games for the Spectrum.<br>
-
+The ZIP also includes the ROMS Spectrum 48K, 128K Spectrum, Spectrum +3 and Coleco. You can download most of roms page of the emulator, and you also have the 'Spectrum is Alive!!!' where you have games for the Spectrum.<br><br>
 <b>1.1-. Keys during emulation</b><br>
-<hr><br>
+<hr>
 General Keys<br>
     'F2' --> Full speed/Normal Speed<br>
     'F3' --> Reset machine<br>
@@ -38,37 +37,32 @@ For Spectrum/Amstrad the no redefinible keys for joystick are<br>
     LEFT ALT --> Fire<br>
 In Amstrad CPC for use 'F1' to 'F8' keys you must press right Shift.<br><br>
 <b>1.2-. Language Files</b><br>
-<hr><br>
+<hr>
 DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
 You can select Castellano, Catalan, English, German, French, Brazil or Italian and if you want to add another language to the folder 'LNG' edit the file 'español.lng', rename it and send it to me to add it to the next version.
-If the language files are not present, the emulation can not start.<br>
-
+If the language files are not present, the emulation can not start.<br><br>
 <b>1.3-. Configure DSP</b><br>
-<hr><br>
+<hr>
 Clicking the Settings button you can configure the options in the emulator can select the language, quality of audio, video settings and default directories.<br>
-In addition there are drivers that allow it can configure the options separately from the driver (for example Spectrum).<br>
-
+In addition there are drivers that allow it can configure the options separately from the driver (for example Spectrum).<br><br>
 <b>1.4-. Audio</b><br>
-<hr><br>
+<hr>
 You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cost to move emulation.<br>
-If you do not have sound card (¿although there is anyone who has not?), The sound is turned off, don't worry. Anyway you can select the option 'Mute' to save a few frames ;-)<br>
-
+If you do not have sound card (¿although there is anyone who has not?), The sound is turned off, don't worry. Anyway you can select the option 'Mute' to save a few frames ;-)<br><br>
 <b>1.5-. Save Pictures</b><br>
-<hr><br>
+<hr>
 Since DSP 0.2wipb5 you can save GIF files from spectrum emulation (48k, 128k and +3 emulation).<br>
-Since 0.7ß2 version you can save JPG and PNG formats from all drivers.<br>
-
+Since 0.7ß2 version you can save JPG and PNG formats from all drivers.<br><br>
 <b>1.6-. Initial Game List</b><br>
-<hr><br>
+<hr>
 Since version 0.9 there is the possibility of booting DSP with the list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system.<br>
-In general configuration you can choose this way of booting, or the old way (last driver load).<br>
-
+In general configuration you can choose this way of booting, or the old way (last driver load).<br><br>
 <b>2-. Drivers</b><br>
-<hr><br><br>
+<hr><br>
 <b>2.1 COMPUTERS</b><br>
-<hr><br>
+<hr>
 <b>Spectrum 48k, 128K and Plus+3 </b><br>
-<hr><br>
+<hr>
 This driver have it's own configuration window.<br>
 - ROMS: Now you can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name) or in ROM format. By default the ROM files are: SPECTRUM.ZIP (Spectrum 48K), SPEC128.ZIP (Spectrum 128K) y PLUS3.ZIP (Spectrum Plus+3).<br>
 - Border: Now you can choose line by line emulation or pixel by pixel emulation (slowly but more exact) and disable border emulation.<br>
@@ -82,10 +76,9 @@ Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
 - Audio: Spectrum beeper, and in 128K and Plus+3 version there is a AY-8912 emulation.
 - Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
 - To do: Contented memory is not working correctly at 100%, some ULA bugs.<br><br>
-Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br>
-
+Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br><br>
 <b>Amstrad CPC 464,664 y 6128</b><br>
-<hr><br>
+<hr>
 - ROMS: By default the files are those: CPC464.ZIP, CPC664.ZIP y CPC6128.ZIP.<br>
 - Keyboard: Missing some CPC keys on the keyboard, but most are. To use of 'F1' to 'F8' need to press right Shift.<br>
 - Joystick: The keys are the cursor keys. The fire key is right Ctrl.<br>
@@ -97,13 +90,11 @@ Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br>
      -Some disk protections are not working.<br>
      -Sometimes the driver just reset<br>
      -Some video effect are missing (M6845 video)<br><br>
-
 <b>2.2 CONSOLES</b><br>
-<hr><br><br>
+<hr><br>
 <b>NES</b><br>
 <hr>
 Rewriting process.<br><br>
-
 <b>GameBoy/Gameboy Color</b><br>
 <hr>
 -ROM: Not required, but if present are loaded and run as the original console. The ROMs are 'GAMEBOY.ZIP' containing 'dmg_boot.bin' (CRC: 0x59C8598E) and 'GBCOLOR.ZIP' containing 'gbc_boot.1' and 'gbc_boot.2' (CRC's: 0x779EA374 and 0xF741807D).<br>
@@ -111,23 +102,23 @@ Rewriting process.<br><br>
 -Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not. For now, mappers are supported are MBC0, MBC1 and MBC5 (some bugs!).<br>
 -CPU: Similar to Z80, still has some bugs.<br><br>
 <b>ColecoVision</b><br>
-<hr><br>
+<hr>
 -ROM: The default ROM is 'COLECO.ZIP' and within 'COLECO.ROM'. Without it can not begin the emulation.<br>
 -Joystick: The numbers on the keyboard from '1'to '0' emulate the keys on the two joysticks. Keys 'Q' and 'W' emulate the Keys '{{{*}}}' and '#' of the two joysticks also, and the arrow keys to 'CTRL' and 'ALT' left emulate the main joystick (The secondary joystick does not have keys assigned). Does not support (even) the special joysticks.<br>
 -Cartridges: It supports the standard game cartridges (not expansion cartirdges), in 'ROM' and 'COL'. Support ZIP files, of course.<br><br>
 <b>2.3 ARCADE</b><br>
-<hr><br><br>
-Phoenix<br>
 <hr><br>
+Phoenix<br>
+<hr>
 - ROMS: MAME compatible PHOENIX.ZIP<br>
 Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.<br>
 Working 99,1%<br><br>
 Bombjack<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible BOMBJACK.ZIP<br>
 Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br><br>
 Pacman Hardware<br>
-<hr><br>
+<hr>
 Pac-man<br>
 - ROMS: MAME compatible PACMAN.ZIP<br>
 Working 100%<br><br>
@@ -135,11 +126,11 @@ Ms. Pac-man<br>
 - ROMS: MAME compatible MSPACMAN.ZIP<br>
 Working 100%<br><br>
 Mysterious Stones<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible MYSTSTON.ZIP<br>
 Working 100%<br><br>
 Galaxian Hardware<br>
-<hr><br>
+<hr>
 Frogger<br>
 - ROMS: MAME compatible FROGGER.ZIP<br>
 Working 100%<br><br>
@@ -154,7 +145,7 @@ Moon Cresta<br>
 - ROMS: MAME compatible MOONCRST.ZIP<br>
 Working 90%, no sound<br><br>
 Donkey Kong<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible DKONG.ZIP<br>
 Working 95%, sound with samples<br>
 Sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV', 'TUNE04.WAV', 'TUNE05.WAV', 
@@ -162,50 +153,50 @@ Sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV', 'TUNE04.WAV', 'TUNE05.WAV'
 'TUNE0d.WAV', 'TUNE0e.WAV', 'TUNE0f.WAV', 'EFFECT01.WAV', 'EFFECT02.WAV', 'EFFECT03.WAV', 
 'EFFECT04.WAV', 'EFFECT05.WAV', 'INTERUPT.WAV' and 'run01.WAv'<br><br>
 Black Tiger<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible BLKTIGER.ZIP<br>
 Working 100%<br><br>
 Green Beret<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible GBERET.ZIP<br>
 Working 100%<br><br>
 Commando<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible GBERET.ZIP<br>
 Working 100%<br><br>
 Ghost'n'Goblins<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible GNG.ZIP<br>
 Working 100%<br><br>
 Mikie<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible MIKIE.ZIP<br>
 Working 100%<br><br>
 Shaolin's Road<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible SHAOLIN.ZIP<br>
 Working 100%<br><br>
 Yie Ar Kung-Fu<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible YIEAR.ZIP<br>
 Working 100%<br><br>
 Son Son<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible SONSON.ZIP<br>
 Working 100%<br><br>
 Asteroids<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible ASTEROID.ZIP<br>
 Working 95%<br>
 Basic analogic sound and samples<br>
 Sample list: 'explode1.wav', 'explode2.wav' and 'explode3.wav'.<br><br>
 Star Force<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible STARFORC.ZIP<br>
 Working 90%<br>
 Missing sound<br><br>
 Tecmo Hardware<br>
-<hr><br>
+<hr>
 Rygar<br>
 - ROMS: MAME compatible RYGAR.ZIP<br>
 Working 100%<br><br>
@@ -213,7 +204,7 @@ Silk Worm<br>
 - ROMS: MAME compatible SILKWORM.ZIP<br>
 Working 100%<br><br>
 Sega System 1/2<br>
-<hr><br>
+<hr>
 Pitfall II<br>
 - ROMS: MAME compatible PITFALL2.ZIP<br>
 Working 100%<br><br>
@@ -228,11 +219,11 @@ Wonder Boy in Monster Land<br>
 Working 99%<br>
 Problems with some audio effects<br><br>
 Pooyan<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible POOYAN.ZIP<br>
 Working 100%<br><br>
 Rally X Hardware<br>
-<hr><br>
+<hr>
 Jungler<br>
 - ROMS: MAME compatible JUNGLER.ZIP<br>
 Working 100%<br><br>
@@ -245,41 +236,41 @@ New Rally X<br>
 Funcionando el 100%<br>
 Sample list: 'bang.wav'.<br><br>
 City Connection<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible CITYCON.ZIP<br>
 Working 100%<br><br>
 Burger Time<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible BTIME.ZIP<br>
 Working 100%<br><br>
 Express Raider<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible ERAIDER.ZIP<br>
 Working 100%<br><br>
 Super Basketball<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible SBASKETB.ZIP<br>
 Working 100%<br><br>
 Lady Bug<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible LADYBUG.ZIP<br>
 Working 100%<br><br>
 Tehkan World Cup<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible TEHKANWC.ZIP<br>
 Working 99%<br>
 Problems CPU's syncronization<br><br>
 Popeye<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible POPEYE.ZIP<br>
 Working 100%<br><br>
 Psychic 5<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible PSYCHIC5.ZIP<br>
 Working 96%<br>
 Missing Alpha render (background and sprites) and colour internsity.<br>
 Irem M62 Hardware<br>
-<hr><br>
+<hr>
 Kung-Fu Master<br>
 - ROMS: MAME compatible KUNGFUM.ZIP<br>
 Working 100%<br><br>
@@ -296,31 +287,31 @@ Lode Runner II<br>
 - ROMS: MAME compatible LODERUN2.ZIP<br>
 Working 100%<br><br>
 Terra Cresta<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible TERRACRE.ZIP<br>
 Working 100%<br><br>
 Shoot Out!<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible SHOOTOUT.ZIP<br>
 Working 100%<br><br>
 Vigilante<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible VIGILANT.ZIP<br>
 Working 100%<br><br>
 Jackal<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible JACKAL.ZIP<br>
 Working 100%<br><br>
 Bubble Bobble<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible BUBLBOBL.ZIP<br>
 Working 100%<br>
 Prehistoric Isle 1930<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible PREHISLE.ZIP<br>
 Working 40%, no sound, IRQ hack, no controls<br><br>
 Tiger Road Hardware<br>
-<hr><br>
+<hr>
 Tiger Road<br>
 - ROMS: MAME compatible TIGEROAD.ZIP<br>
 Working 100%<br><br>
@@ -328,19 +319,19 @@ F1 Dream<br>
 - ROMS: MAME compatible F1DREAM.ZIP<br>
 Working 100%, using bootleg version<br><br>
 Snow Bros<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible SNOWBROS.ZIP<br>
 Working 99%, M68000 bugs<br><br>
 Toki<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible TOKI.ZIP<br>
 Working 95%, some problems with OKI6295<br><br>
 Contra<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible CONTRA.ZIP<br>
 Working 99%, some bugs (maybe M6809 bugs)<br><br>
 Mappy Hardware<br>
-<hr><br>
+<hr>
 Mappy<br>
 - ROMS: MAME compatible MAPPY.ZIP<br>
 Working 100%<br><br>
@@ -351,11 +342,11 @@ Super Pacman<br>
 - ROMS: MAME compatible SUPERPAC.ZIP<br>
 Working 100%<br><br>
 Rastan<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible RASTAN.ZIP<br>
 Working 100%<br><br>
 Legendary Wings Hardware<br>
-<hr><br>
+<hr>
 Legendary Wings<br>
 - ROMS: MAME compatible LWINGS.ZIP<br>
 Working 100%<br><br>
@@ -366,21 +357,21 @@ Trojan<br>
 - ROMS: MAME compatible TROJAN.ZIP<br>
 Working 97%, basic ADPCM sound<br><br>
 Street Fighter<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible SF.ZIP<br>
 Working 90%, ADPCM missing<br>
 This driver uses A,S,D,Z,X and C keys as action buttons<br><br>
 Galaga Hardware<br>
-<hr><br>
+<hr>
 Galaga<br>
 - ROMS: MAME compatible GALAGA.ZIP<br>
 Working 40%, problems with NAMCO custom IO's<br><br>
 Xain'd Sleena<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible XAIN.ZIP<br>
 Working 100%, missing M68705<br><br>
 Suna Hardware<br>
-<hr><br>
+<hr>
 Hard Head<br>
 - ROMS: MAME compatible HARDHEAD.ZIP<br>
 Working 100%<br><br>
@@ -388,7 +379,7 @@ Hard Head 2<br>
 - ROMS: MAME compatible HARDHED2.ZIP<br>
 Working 10%, just a started driver<br><br>
 NMK 16 Hardware<br>
-<hr><br>
+<hr>
 - Problems with OKI6295 (M68000 bugs)<br>
 Saboten Bombers<br>
 - ROMS: MAME compatible SABOTENB.ZIP<br>
@@ -397,15 +388,15 @@ Bomb Jack Twin<br>
 - ROMS: MAME compatible BJTWIN.ZIP<br>
 Working 100%<br><br>
 Knuckle Joe<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible KNCLJOE.ZIP<br>
 Working 100%<br><br>
 Wardner<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible WARDNER.ZIP<br>
 Working 100%<br><br>
 Gaelco Hardware<br>
-<hr><br>
+<hr>
 Big Karnak<br>
 - ROMS: MAME compatible BIGKARNC.ZIP<br>
 Working 100%<br><br>
@@ -413,11 +404,11 @@ Thunder Hoop<br>
 - ROMS: MAME compatible THOOP.ZIP<br>
 Working 100%<br><br>
 Exed Exes<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible EXEDEXES.ZIP<br>
 Working 100%<br><br>
 Gun.Smoke Hardware<br>
-<hr><br>
+<hr>
 Gun.Smoke<br>
 - ROMS: MAME compatible GUNSMOKE.ZIP<br>
 Working 100%<br><br>
@@ -428,28 +419,28 @@ Working 100%<br><br>
 - ROMS: MAME compatible 1943KAI.ZIP<br>
 Working 100%<br><br>
 1942<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible 1942.ZIP<br>
 Working 100%<br><br>
 Jail Break<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible JAILBREK.ZIP<br>
 Working 100%<br><br>
 Circus Charlie<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible CIRCUSC.ZIP<br>
 Working 100%<br><br>
 Iron Horse<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible IRONHORS.ZIP<br>
 Working 100%<br><br>
 Irem M72 Hardware<br>
-<hr><br>
+<hr>
 R-Type<br>
 - ROMS: MAME compatible RTYPE.ZIP<br>
 Working 40%, missing sound and controls. NEC v30 bugs<br><br>
 Break Thru Hardware<br>
-<hr><br>
+<hr>
 Break Thru<br>
 - ROMS: MAME compatible BRKTHRU.ZIP<br>
 Working 100%<br><br>
@@ -457,11 +448,11 @@ Darwin 4078<br>
 - ROMS: MAME compatible DARWIN.ZIP<br>
 Working 100%<br><br>
 Super Real Darwin<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible SRDARWIN.ZIP<br>
 Working 100%<br><br>
 Double Dragon Hardware<br>
-<hr><br>
+<hr>
 Double Dragon<br>
 - ROMS: MAME compatible DDRAGON.ZIP<br>
 Working 100%<br><br>
@@ -469,11 +460,11 @@ Double Dragon II - The Revenge<br>
 - ROMS: MAME compatible DDRAGON2.ZIP<br>
 Working 100%<br><br>
 Mr. Do!<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible MRDO.ZIP<br>
 Working 100%<br><br>
 Epos Hardware<br>
-<hr><br>
+<hr>
 The Glob<br>
 - ROMS: MAME compatible THEGLOB.ZIP<br>
 Working 100%<br><br>
@@ -481,7 +472,7 @@ Super Glob<br>
 - ROMS: MAME compatible SUPRGLOB.ZIP<br>
 Working 100%<br><br>
 Slap Fight Hardware<br>
-<hr><br>
+<hr>
 - Missing M68705 CPU<br>
 Tiger Heli<br>
 - ROMS: MAME compatible TIGERH.ZIP<br>
@@ -490,15 +481,15 @@ Slap Fight<br>
 - ROMS: MAME compatible SLAPFGTR.ZIP<br>
 Working 100%<br><br>
 The Legend of Kage<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible LKAGE.ZIP<br>
 Working 100%, missing M68705 CPU using bootleg<br><br>
 Cabal<br>
-<hr><br>
+<hr>
 - ROMS: MAME compatible CABAL.ZIP<br>
 Working 95%, bugs on M68000 core<br><br>
 Capcom Play System 1 - CPS1
-<hr><br>
+<hr>
 Ghouls and Ghosts<br>
 - ROMS: MAME compatible GHOULS.ZIP<br>
 Working 100%<br><br>
@@ -534,12 +525,11 @@ The Punisher<br>
 - ROMS: MAME compatible PUNISHER.ZIP<br>
 Working 100%<br><br>
 <b>3-. Contribute</b><br>
-<hr><br>
+<hr>
 You can contribute in the emulator DSP! Get the source code and works on the drivers. Do you help me? If so, please contact me!<br>
 Have you done a new driver? Do you have any idea? Well then contact me! Anything is good!<br><br>
-
 <b>4-. Acknowledgments</b><br>
-<hr><br>
+<hr>
 - First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).<br>
 - Chris Cowley, author of VBSpec, from where I've pick a lot of information about that little black box called Spectrum, I never belived how powerful it was... In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME, and sounds very good!<br>
 - Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to trace errors in my emulator Z80.<br>
@@ -549,9 +539,8 @@ Have you done a new driver? Do you have any idea? Well then contact me! Anything
 - Thanks to Tom Walker, he sent me his driver CPS1 where I got and understood a lot of
 information.<br>
 - And many pages of the Internet, many documents ... and people who I forget, thank you all.<br><br>
-
 <b>5-. Copyright</b><br>
-<hr><br>
+<hr>
 The Coleco and Pooyan has been rewrited from the originals by Michael Franzen.<br>
 The CPS1 has been rewrited from the original by Tomas Walker.<br>
 The rest of the drivers the Z80 core, M6502 core, M6809 core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core and LR35902 core are writed by me, Leniad.<br>
@@ -561,9 +550,8 @@ TMS99XX emulator have been rewrited from the original by Michael Franzen and hav
 NEC765 emulator is a delphi conversion writed and enhanced by me from MESS original.<br>
 GameBoy/GameBoy Color sound emulator is a delphi conversion writed by me from MESS original.<br>
 Spectrum 48k, Spectrum 128K, Spectrum+3, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.<br><br>
-
 <b>6-. Contact & Links</b><br>
-<hr><br>
+<hr>
 If you want to contact me, send me feedback or anything just use leniad2@hotmail.com<br>
 My DSP home page leniad.cjb.net<br>
 You can also download the offical version and WIP versions from Google Code page<br><br>
