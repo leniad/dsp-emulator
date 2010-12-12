@@ -1,7 +1,7 @@
 #summary DSP Emulator
 = Introduction =
 
-DSP Emulator v0.10 by Leniad Soft 2001-2010
+DSP Emulator v0.10b3 by Leniad Soft 2001-2010
 
 
 = Details =
@@ -40,13 +40,13 @@ In Amstrad CPC for use 'F1' to 'F8' keys you must press right Shift.<br><br>
 <b>1.2-. Language Files</b><br>
 <hr><br>
 DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
-You can select Castellano, Catalan, English, German, French or Brazil and if you want to add another language to the folder 'LNG' edit the file 'español.lng', rename it and send it to me to add it to the next version. 
+You can select Castellano, Catalan, English, German, French, Brazil or Italian and if you want to add another language to the folder 'LNG' edit the file 'español.lng', rename it and send it to me to add it to the next version.
 If the language files are not present, the emulation can not start.<br>
 
 <b>1.3-. Configure DSP</b><br>
 <hr><br>
 Clicking the Settings button you can configure the options in the emulator can select the language, quality of audio, video settings and default directories.<br>
-In addition there are drivers that allow it can configure the options separately from the driver. (for example Spectrum)<br>
+In addition there are drivers that allow it can configure the options separately from the driver (for example Spectrum).<br>
 
 <b>1.4-. Audio</b><br>
 <hr><br>
@@ -64,9 +64,12 @@ Since version 0.9 there is the possibility of booting DSP with the list of games
 In general configuration you can choose this way of booting, or the old way (last driver load).<br>
 
 <b>2-. Drivers</b><br>
+<hr><br><br>
+<b>2.1 COMPUTERS</b><br>
 <hr><br>
 <b>Spectrum 48k, 128K and Plus+3 </b><br>
 <hr><br>
+This driver have it's own configuration window.<br>
 - ROMS: Now you can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name) or in ROM format. By default the ROM files are: SPECTRUM.ZIP (Spectrum 48K), SPEC128.ZIP (Spectrum 128K) y PLUS3.ZIP (Spectrum Plus+3).<br>
 - Border: Now you can choose line by line emulation or pixel by pixel emulation (slowly but more exact) and disable border emulation.<br>
 - Keyboard: Fully working keyboard emulation, and LShift and LControl working as Capshift and SimbolShift.<br>
@@ -78,12 +81,11 @@ Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
 - Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
 - Audio: Spectrum beeper, and in 128K and Plus+3 version there is a AY-8912 emulation.
 - Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
-- To do: Contented memory is not working correctly at 100%, some ULA bugs.<br>
-
+- To do: Contented memory is not working correctly at 100%, some ULA bugs.<br><br>
 Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br>
 
 <b>Amstrad CPC 464,664 y 6128</b><br>
-**************************<br>
+<hr><br>
 - ROMS: By default the files are those: CPC464.ZIP, CPC664.ZIP y CPC6128.ZIP.<br>
 - Keyboard: Missing some CPC keys on the keyboard, but most are. To use of 'F1' to 'F8' need to press right Shift.<br>
 - Joystick: The keys are the cursor keys. The fire key is right Ctrl.<br>
@@ -96,35 +98,44 @@ Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br>
         - Sometimes the driver just reset<br>
 	- Some video effect are missing (M6845 video)<br><br>
 
+
+<b>2.2 CONSOLES</b><br>
+<hr><br><br>
 <b>NES</b><br>
-***<br>
+<hr><br>
 Rewriting process.<br><br>
 
+<b>GameBoy/Gameboy Color</b><br>
+<hr><br>
+-ROM: Not required, but if present are loaded and run as the original console. The ROMs are 'GAMEBOY.ZIP' containing 'dmg_boot.bin' (CRC: 0x59C8598E) and 'GBCOLOR.ZIP' containing 'gbc_boot.1' and 'gbc_boot.2' (CRC's: 0x779EA374 and 0xF741807D).<br>
+-Keys: Use the redefined keys and 'SELECT' is mapped as key '5 'and 'START' is mapper in the '1' key.<br>
+-Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not. For now, mappers are supported are MBC0, MBC1 and MBC5 (some bugs!).<br>
+-CPU: Similar to Z80, still has some bugs.<br><br>
+
 <b>ColecoVision</b><br>
-************<br>
+<hr><br>
 -ROM: The default ROM is 'COLECO.ZIP' and within 'COLECO.ROM'. Without it can not begin the emulation.<br>
 -Joystick: The numbers on the keyboard from '1'to '0' emulate the keys on the two joysticks. Keys 'Q' and 'W' emulate the Keys '*' and '#' of the two joysticks also, and the arrow keys to 'CTRL' and 'ALT' left emulate the main joystick (The secondary joystick does not have keys assigned). Does not support (even) the special joysticks.<br>
 -Cartridges: It supports the standard game cartridges (not expansion cartirdges), in 'ROM' and 'COL'. Support ZIP files, of course.<br><br>
 
-<b>GameBoy</b><br>
-*******<br>
-I beggin with the CPU... yahooooo!<br>
+<b>2.3 ARCADE</b><br>
+<hr><br><br>
 
 <b>Phoenix</b><br>
 *******<br>
 - ROMS: MAME compatible PHOENIX.ZIP<br>
 Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.<br>
-Working 99,1%<br>
+Working 99,1%<br><br>
 
 <b>Bombjack</b><br>
 ********<br>
 - ROMS: MAME compatible BOMBJACK.ZIP<br>
-Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br>
+Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br><br>
 
 Pacman<br>
 ******
-- ROMS: MAME compatible PACMAN.ZIP
-Working 100%, sample of chars and sprites, with sound.
+- ROMS: MAME compatible PACMAN.ZIP<br>
+Working 100%, sample of chars and sprites, with sound.<br>
 
 Mysterious Stones
 *****************
