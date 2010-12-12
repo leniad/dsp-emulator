@@ -93,11 +93,10 @@ Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br>
 - Sound: Polyphonic sound from AY-8912 chip<br>
 - Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
 -To do:<br>
-	- Snapshots are not implemented.<br>
-	- Some disk protections are not working.<br>
-        - Sometimes the driver just reset<br>
-	- Some video effect are missing (M6845 video)<br><br>
-
+&nbsp;&nbsp;- Snapshots are not implemented.<br>
+&nbsp;&nbsp;- Some disk protections are not working.<br>
+&nbsp;&nbsp;- Sometimes the driver just reset<br>
+&nbsp;&nbsp;- Some video effect are missing (M6845 video)<br><br>
 
 <b>2.2 CONSOLES</b><br>
 <hr><br><br>
@@ -122,96 +121,123 @@ Rewriting process.<br><br>
 <hr><br><br>
 
 <b>Phoenix</b><br>
-*******<br>
+<hr><br>
 - ROMS: MAME compatible PHOENIX.ZIP<br>
 Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.<br>
 Working 99,1%<br><br>
 
 <b>Bombjack</b><br>
-********<br>
+<hr><br>
 - ROMS: MAME compatible BOMBJACK.ZIP<br>
 Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br><br>
 
-Pacman<br>
-******
+Pacman Hardware<br>
+<hr><br>
+Pac-man<br>
 - ROMS: MAME compatible PACMAN.ZIP<br>
-Working 100%, sample of chars and sprites, with sound.<br>
+Working 100%<br><br>
+Ms. Pac-man<br>
+- ROMS: MAME compatible MSPACMAN.ZIP<br>
+Working 100%<br><br>
 
-Mysterious Stones
-*****************
-- ROMS: MAME compatible MYSTSTON.ZIP
-Working 100%
+Mysterious Stones<br>
+<hr><br>
+- ROMS: MAME compatible MYSTSTON.ZIP<br>
+Working 100%<br><br>
 
+Galaxian Hardware
+<hr><br>
 Frogger
-*******
 - ROMS: MAME compatible FROGGER.ZIP
 Working 100%
 
+Galaxian
+- ROMS: MAME compatible GALAXIAN.ZIP
+Working 95%, partial sound with samples
+Sample list: 'shot.wav', 'death.wav' and 'back.wav'.
+
+Jump Bug
+- ROMS: MAME compatible JUMPBUG.ZIP
+Working 100%
+
+Moon Cresta
+- ROMS: MAME compatible MOONCRST.ZIP
+Working 90%, no sound
+
 Donkey Kong
-***********
+<hr><br>
 - ROMS: MAME compatible DKONG.ZIP
-Working 90%
-No sound.
+Working 95%, sound with samples
+Sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV', 'TUNE04.WAV', 'TUNE05.WAV', 
+'TUNE06.WAV', 'TUNE07.WAV', 'TUNE08.WAV', 'TUNE09.WAV', 'TUNE0b.WAV', 'TUNE0c.WAV', 
+'TUNE0d.WAV', 'TUNE0e.WAV', 'TUNE0f.WAV', 'EFFECT01.WAV', 'EFFECT02.WAV', 'EFFECT03.WAV', 
+'EFFECT04.WAV', 'EFFECT05.WAV', 'INTERUPT.WAV' and 'run01.WAv'
 
 Black Tiger
-***********
+<hr><br>
 - ROMS: MAME compatible BLKTIGER.ZIP
 Working 100%
 
 Green Beret
-***********
+<hr><br>
 - ROMS: MAME compatible GBERET.ZIP
 Working 100%
 
 Commando
-********
+<hr><br>
 - ROMS: MAME compatible GBERET.ZIP
 Working 100%
 
 Ghost'n'Goblins
-***************
+<hr><br>
 - ROMS: MAME compatible GNG.ZIP
 Working 100%
 
 Mikie
-*****
+<hr><br>
 - ROMS: MAME compatible MIKIE.ZIP
 Working 100%
 
 Shaolin's Road
-**************
+<hr><br>
 - ROMS: MAME compatible SHAOLIN.ZIP
 Working 100%
 
 Yie Ar Kung-Fu
-**************
+<hr><br>
 - ROMS: MAME compatible YIEAR.ZIP
 Working 100%
 
-SonSon
-******
+Son Son
+<hr><br>
 - ROMS: MAME compatible SONSON.ZIP
 Working 100%
 
 Asteroids
-*********
+<hr><br>
 - ROMS: MAME compatible ASTEROID.ZIP
 Working 95%
-Basic analogic sound
+Basic analogic sound and samples
+Sample list: 'explode1.wav', 'explode2.wav' and 'explode3.wav'.
 
 Star Force
-**********
+<hr><br>
 - ROMS: MAME compatible STARFORC.ZIP
 Working 90%
 Missing sound
 
+Tecmo Hardware
+<hr><br>
 Rygar
-*****
 - ROMS: MAME compatible RYGAR.ZIP
 Working 100%
 
+Silk Worm
+- ROMS: MAME compatible SILKWORM.ZIP
+Working 100%
+
 Sega System 1/2
-***************
+<hr><br>
 Pitfall II
 - ROMS: MAME compatible PITFALL2.ZIP
 Working 100%
@@ -230,12 +256,12 @@ Working 99%
 Problems with some audio effects
 
 Pooyan
-******
+<hr><br>
 - ROMS: MAME compatible POOYAN.ZIP
 Working 100%
 
 Rally X Hardware
-****************
+<hr><br>
 Jungler
 - ROMS: MAME compatible JUNGLER.ZIP
 Working 100%
@@ -243,131 +269,153 @@ Working 100%
 Rally X
 - ROMS: MAME compatible RALLYX.ZIP
 Working 100%
+Sample list: 'bang.wav'.
+
+New Rally X
+- ROMS: MAME compatible NRALLYX.ZIP
+Funcionando el 100%
+Sample list: 'bang.wav'.
 
 City Connection
-***************
+<hr><br>
 - ROMS: MAME compatible CITYCON.ZIP
 Working 100%
 
 Burger Time
-***********
+<hr><br>
 - ROMS: MAME compatible BTIME.ZIP
 Working 100%
 
 Express Raider
-**************
+<hr><br>
 - ROMS: MAME compatible ERAIDER.ZIP
 Working 100%
 
 Super Basketball
-****************
+<hr><br>
 - ROMS: MAME compatible SBASKETB.ZIP
 Working 100%
 
 Lady Bug
-********
+<hr><br>
 - ROMS: MAME compatible LADYBUG.ZIP
 Working 100%
 
 Tehkan World Cup
-****************
+<hr><br>
 - ROMS: MAME compatible TEHKANWC.ZIP
 Working 99%
-Problems with digital sound, missing controls.
+Problems CPU's syncronization
 
 Popeye
-******
+<hr><br>
 - ROMS: MAME compatible POPEYE.ZIP
 Working 100%
 
 Psychic 5
-*********
+<hr><br>
 - ROMS: MAME compatible PSYCHIC5.ZIP
-Working 95%
-Missing Alpha render (background and sprites), colour internsity and initial presentation clipping
+Working 96%
+Missing Alpha render (background and sprites) and colour internsity.
 
+Irem M62 Hardware
+<hr><br>
 Kung-Fu Master
-**************
 - ROMS: MAME compatible KUNGFUM.ZIP
-Working 90%
-No sound (missing M6803)
+Working 100%
+
+Spelunker
+- ROMS: MAME compatible SPELUNKR.ZIP
+Working 100%
+
+Spelunker II
+- ROMS: MAME compatible SPELUNK2.ZIP
+Working 100%
+
+Lode Runner
+- ROMS: MAME compatible LODERUN.ZIZ
+Working 100%
+
+Lode Runner II
+- ROMS: MAME compatible LODERUN2.ZIP
+Working 100%
 
 Terra Cresta
-************
+<hr><br>
 - ROMS: MAME compatible TERRACRE.ZIP
 Working 100%
 
 Shoot Out!
-**********
+<hr><br>
 - ROMS: MAME compatible SHOOTOUT.ZIP
 Working 100%
 
 Vigilante
-*********
+<hr><br>
 - ROMS: MAME compatible VIGILANT.ZIP
 Working 100%
 
 Jackal
-******
+<hr><br>
 - ROMS: MAME compatible JACKAL.ZIP
 Working 100%
 
-Galaxian Hardware
-*****************
-Galaxian
-- ROMS: MAME compatible GALAXIAN.ZIP
-Working 90%, no sound
-
-Jump Bug
-- ROMS: MAME compatible JUMPBUG.ZIP
-Working 80%, some Z80 NMI problems
-
-Moon Cresta
-- ROMS: MAME compatible MOONCRST.ZIP
-Working 90%, no sound
+Bubble Bobble
+<hr><br>
+- ROMS: MAME compatible BUBLBOBL.ZIP
+Working 100%
 
 Prehistoric Isle 1930
-*********************
+<hr><br>
 - ROMS: MAME compatible PREHISLE.ZIP
 Working 40%, no sound, IRQ hack, no controls
 
 Tiger Road Hardware
-*******************
+<hr><br>
 Tiger Road
 - ROMS: MAME compatible TIGEROAD.ZIP
 Working 100%
 
 F1 Dream
 - ROMS: MAME compatible F1DREAM.ZIP
-Working 99%, using bootleg version
+Working 100%, using bootleg version
 
 Snow Bros
-*********
+<hr><br>
 - ROMS: MAME compatible SNOWBROS.ZIP
-Working 60%, no sound M68000 bugs
+Working 99%, M68000 bugs
 
 Toki
-****
+<hr><br>
 - ROMS: MAME compatible TOKI.ZIP
-Working 90%, partial sound (missing OKI6295), M68000 bugs
+Working 95%, some problems with OKI6295
 
 Contra
-******
+<hr><br>
 - ROMS: MAME compatible CONTRA.ZIP
 Working 99%, some bugs (maybe M6809 bugs)
 
+Mappy Hardware
+<hr><br>
 Mappy
-*****
 - ROMS: MAME compatible MAPPY.ZIP
-Working 85%, no sound and some M6809 bugs
+Working 100%
+
+Dig-Dug II
+- ROMS: MAME compatible DISGDUG2.ZIP
+Working 100%
+
+Super Pacman
+- ROMS: MAME compatible SUPERPAC.ZIP
+Working 100%
 
 Rastan
-******
+<hr><br>
 - ROMS: MAME compatible RASTAN.ZIP
-Working 95%, some M68000 bugs
+Working 100%
 
 Legendary Wings Hardware
-************************
+<hr><br>
 Legendary Wings
 - ROMS: MAME compatible LWINGS.ZIP
 Working 100%
@@ -378,50 +426,254 @@ Working 100%
 
 Trojan
 - ROMS: MAME compatible TROJAN.ZIP
-Working 95%, missing ADPCM sound
+Working 97%, basic ADPCM sound
 
 Street Fighter
-**************
+<hr><br>
 - ROMS: MAME compatible SF.ZIP
-Working 80%, sound problems, maybe M68000 bugs
+Working 90%, ADPCM missing
 This driver uses A,S,D,Z,X and C keys as action buttons
 
+Galaga Hardware
+<hr><br>
+Galaga
+- ROMS: MAME compatible GALAGA.ZIP
+Working 40%, problems with NAMCO custom IO's
 
-3-. Contributions
------------------
-You can contribute in the emulator DSP! Get the source code and works on the drivers. Do you help me? So please contact me! 
-Have you done a new driver? Do you have any idea? Well then contact me! Anything is good!
+Xain'd Sleena
+<hr><br>
+- ROMS: MAME compatible RASTAN.ZIP
+Working 100%, missing M68705
 
-4-. Acknowledgments<br>
--------------------<br>
-* First, of course, the team's MAME. Without them, this emulator never had existed, thanks to distribute the code source to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria). <br>
-* Chris Cowley, author of VBSpec, from where I've pick a lot of information about that little black box called Spectrum, 
-I never belived how powerful it was... In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME, and sounds very good! <br>
-* Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to locate errors in my emulator Z80. <br>
-* These awesome guys from World of Spectrum!! I have taken many tapes and snapshots of his page, in addition to technical information, including the format TZX. Do not miss this page!<br>
-* Javi [@] fsmail.net that helped me in a moment of desperation, with DirectSound! <br>
-* Thanks to Michael Franzen, who sent me so disinterested drivers Pooyan, Coleco, System1 and many others! to be included in DSP. <br>
-* And many pages of the Internet, many documents ... and people who I forget, thank you all.<br><br>
-5-. Copyright<br>
--------------<br>
-The NES driver it's being rewritten by NESBr.<br>
-The Coleco and Pooyan has been rewrited from the original by Michael Franzen.<br>
-The rest of the drivers, Z80 core, M6502 core, M6809 core and M68000 core are writed by me, Leniad.<br>
-AY-3-8912 emulator rewrite by Chris Cowley, original emulator come from MAME team.<br>
-SN76496 emulator is a delphi conversion writed by me from MAME original.<br>
-YM2203 emulator is a delphi conversion writed by me from MAME original.<br>
-TMS36XX emulator is a delphi conversion writed by me from MAME original.<br>
-VLM-5030 emulator is a delphi conversion writed by me from MAME original.<br>
-YM3812/YM3526 emulator is a delphi conversion writed by me from MAME original.<br>
-YM2151 emulator is a delphi conversion writed by me from MAME original.<br>
-TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME<br>
+Suna Hardware
+<hr><br>
+Hard Head
+- ROMS: MAME compatible HARDHEAD.ZIP
+Working 100%
+
+Hard Head 2
+- ROMS: MAME compatible HARDHED2.ZIP
+Working 10%, just a started driver
+
+NMK 16 Hardware
+<hr><br>
+- Problems with OKI6295 (M68000 bugs)
+Saboten Bombers
+- ROMS: MAME compatible SABOTENB.ZIP
+Working 100%
+
+Bomb Jack Twin
+- ROMS: MAME compatible BJTWIN.ZIP
+Working 100%
+
+Knuckle Joe
+<hr><br>
+- ROMS: MAME compatible KNCLJOE.ZIP
+Working 100%
+
+Wardner
+<hr><br>
+- ROMS: MAME compatible WARDNER.ZIP
+Working 100%
+
+Gaelco Hardware
+<hr><br>
+Big Karnak
+- ROMS: MAME compatible BIGKARNC.ZIP
+Working 100%
+
+Thunder Hoop
+- ROMS: MAME compatible THOOP.ZIP
+Working 100%
+
+Exed Exes
+<hr><br>
+- ROMS: MAME compatible EXEDEXES.ZIP
+Working 100%
+
+Gun.Smoke Hardware
+<hr><br>
+Gun.Smoke
+- ROMS: MAME compatible GUNSMOKE.ZIP
+Working 100%
+
+1943: The Battle of Midway
+- ROMS: MAME compatible 1943.ZIP
+Working 100%
+
+1943 Kai: Midway Kaisen
+- ROMS: MAME compatible 1943KAI.ZIP
+Working 100%
+
+1942
+<hr><br>
+- ROMS: MAME compatible 1942.ZIP
+Working 100%
+
+Jail Break
+<hr><br>
+- ROMS: MAME compatible JAILBREK.ZIP
+Working 100%
+
+Circus Charlie
+<hr><br>
+- ROMS: MAME compatible CIRCUSC.ZIP
+Working 100%
+
+Iron Horse
+<hr><br>
+- ROMS: MAME compatible IRONHORS.ZIP
+Working 100%
+
+Irem M72 Hardware
+<hr><br>
+R-Type
+- ROMS: MAME compatible RTYPE.ZIP
+Working 40%, missing sound and controls. NEC v30 bugs
+
+Break Thru Hardware
+<hr><br>
+Break Thru
+- ROMS: MAME compatible BRKTHRU.ZIP
+Working 100%
+
+Darwin 4078
+- ROMS: MAME compatible DARWIN.ZIP
+Working 100%
+
+Super Real Darwin
+<hr><br>
+- ROMS: MAME compatible SRDARWIN.ZIP
+Working 100%
+
+Double Dragon Hardware
+<hr><br>
+Double Dragon
+- ROMS: MAME compatible DDRAGON.ZIP
+Working 100%
+
+Double Dragon II - The Revenge
+- ROMS: MAME compatible DDRAGON2.ZIP
+Working 100%
+
+Mr. Do!
+<hr><br>
+- ROMS: MAME compatible MRDO.ZIP
+Working 100%
+
+Epos Hardware
+<hr><br>
+The Glob
+- ROMS: MAME compatible THEGLOB.ZIP
+Working 100%
+
+Super Glob
+- ROMS: MAME compatible SUPRGLOB.ZIP
+Working 100%
+
+Slap Fight Hardware
+<hr><br>
+- Missing M68705 CPU
+Tiger Heli
+- ROMS: MAME compatible TIGERH.ZIP
+Working 100%
+
+Slap Fight
+- ROMS: MAME compatible SLAPFGTR.ZIP
+Working 100%
+
+The Legend of Kage
+<hr><br>
+- ROMS: MAME compatible LKAGE.ZIP
+Working 100%, missing M68705 CPU using bootleg
+
+Cabal
+<hr><br>
+- ROMS: MAME compatible CABAL.ZIP
+Working 95%, bugs on M68000 core
+
+Capcom Play System 1 - CPS1
+<hr><br>
+Ghouls and Ghosts
+- ROMS: MAME compatible GHOULS.ZIP
+Working 100%
+
+Final Fight
+- ROMS: MAME compatible FFIGHT.ZIP
+Working 100%
+
+The King of Dragons
+- ROMS: MAME compatible KOD.ZIP
+Working 100%, missing third player controls.
+
+Street Fighter II - The World Warrior
+- ROMS: MAME compatible SF2.ZIP
+Working 95%, missing some controls and missing scroll row
+
+Strider
+- ROMS: MAME compatible STRIDER.ZIP
+Working 100%
+
+Three Wonders
+- ROMS: MAME compatible 3WONDERS.ZIP
+Working 100%
+
+Captain Commando
+- ROMS: MAME compatible CCOMANDO.ZIP
+Working 100%
+
+Knights of the Round
+- ROMS: MAME compatible KNIGHTS.ZIP
+Working 100%
+
+Street Fighter II': Champion Edition
+- ROMS: MAME compatible SF2CE.ZIP
+Working 95%, missing some controls and missing scroll row
+
+Cadillacs and Dinosaurs
+Knights of the Round
+- ROMS: MAME compatible DINO.ZIP
+Working 100%
+
+The Punisher
+- ROMS: MAME compatible PUNISHER.ZIP
+Working 100%
+
+<b>3-. Contribute</b><br>
+<hr><br><br>
+You can contribute in the emulator DSP! Get the source code and works on the drivers. Do you help me? If so, please contact me!<br>
+Have you done a new driver? Do you have any idea? Well then contact me! Anything is good!<br><br>
+
+<b>4-. Acknowledgments</b><br>
+<hr><br><br>
+- First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).<br>
+- Chris Cowley, author of VBSpec, from where I've pick a lot of information about that little black box called Spectrum, I never belived how powerful it was... In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME, and sounds very good!<br>
+- Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to trace errors in my emulator Z80.<br>
+- These awesome guys from World of Spectrum!! I have taken many tapes and snapshots of his page, in addition to technical information, including the format TZX. Don't you miss his page!<br>
+- javi[@]fsmail.net that helped me in a moment of desperation, with directSound!<br>
+- Thanks to Michael Franzen, who sent me drivers for Pooyan, Coleco, System1 and many others to be included in DSP.<br>
+- Thanks to Tom Walker, he sent me his driver CPS1 where I got and understood a lot of
+information.<br>
+- And many pages of the Internet, many documents ... and people who I forget, thank you all.<br><br>
+
+<b>5-. Copyright</b><br>
+<hr><br><br>
+The Coleco and Pooyan has been rewrited from the originals by Michael Franzen.<br>
+The CPS1 has been rewrited from the original by Tomas Walker.<br>
+The rest of the drivers the Z80 core, M6502 core, M6809 core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core and LR35902 core are writed by me, Leniad.<br>
+AY-3-8912 emulator is a conversion from Chris Cowley, but the original emulator come from MAME team.<br>
+SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255 and OKI6295 emulators are a delphi conversion writed by me from MAME original.<br>
+TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME.<br>
 NEC765 emulator is a delphi conversion writed and enhanced by me from MESS original.<br>
-i8255 emulator is a delphi conversion writed and enhanced by me from MAME original.<br>
+GameBoy/GameBoy Color sound emulator is a delphi conversion writed by me from MESS original.<br>
 Spectrum 48k, Spectrum 128K, Spectrum+3, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.<br><br>
-6-. Contact & Links<br>
--------------------<br>
+
+<b>6-. Contact & Links</b><br>
+<hr><br><br>
 If you want to contact me, send me feedback or anything just use leniad2@hotmail.com<br>
-My DSP home page leniad.cjb.net<br><br>
+My DSP home page leniad.cjb.net<br>
+You can also download the offical version and WIP versions from Google Code page<br><br>
+http://code.google.com/p/dsp-emulator/<br><br>
 If you want info...<br>
 www.mamedev.org<br>
 www.aarongiles.com<br>
@@ -433,4 +685,4 @@ tzxvault.retrogames.com<br>
 zx.dyndns.org/trastero<br>
 www.speccy.org/spa2<br><br>
 If you want Coleco games<br>
-leniad.cjb.net/coleco
+leniad.cjb.net/coleco<br>
