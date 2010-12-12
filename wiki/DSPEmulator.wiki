@@ -110,27 +110,22 @@ Rewriting process.<br><br>
 -Keys: Use the redefined keys and 'SELECT' is mapped as key '5 'and 'START' is mapper in the '1' key.<br>
 -Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not. For now, mappers are supported are MBC0, MBC1 and MBC5 (some bugs!).<br>
 -CPU: Similar to Z80, still has some bugs.<br><br>
-
 <b>ColecoVision</b><br>
 <hr><br>
 -ROM: The default ROM is 'COLECO.ZIP' and within 'COLECO.ROM'. Without it can not begin the emulation.<br>
 -Joystick: The numbers on the keyboard from '1'to '0' emulate the keys on the two joysticks. Keys 'Q' and 'W' emulate the Keys '*' and '#' of the two joysticks also, and the arrow keys to 'CTRL' and 'ALT' left emulate the main joystick (The secondary joystick does not have keys assigned). Does not support (even) the special joysticks.<br>
 -Cartridges: It supports the standard game cartridges (not expansion cartirdges), in 'ROM' and 'COL'. Support ZIP files, of course.<br><br>
-
 <b>2.3 ARCADE</b><br>
 <hr><br><br>
-
 <b>Phoenix</b><br>
 <hr><br>
 - ROMS: MAME compatible PHOENIX.ZIP<br>
 Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.<br>
 Working 99,1%<br><br>
-
 <b>Bombjack</b><br>
 <hr><br>
 - ROMS: MAME compatible BOMBJACK.ZIP<br>
 Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br><br>
-
 Pacman Hardware<br>
 <hr><br>
 Pac-man<br>
@@ -139,513 +134,412 @@ Working 100%<br><br>
 Ms. Pac-man<br>
 - ROMS: MAME compatible MSPACMAN.ZIP<br>
 Working 100%<br><br>
-
 Mysterious Stones<br>
 <hr><br>
 - ROMS: MAME compatible MYSTSTON.ZIP<br>
 Working 100%<br><br>
-
-Galaxian Hardware
+Galaxian Hardware<br>
 <hr><br>
-Frogger
-- ROMS: MAME compatible FROGGER.ZIP
-Working 100%
-
-Galaxian
-- ROMS: MAME compatible GALAXIAN.ZIP
-Working 95%, partial sound with samples
-Sample list: 'shot.wav', 'death.wav' and 'back.wav'.
-
-Jump Bug
-- ROMS: MAME compatible JUMPBUG.ZIP
-Working 100%
-
-Moon Cresta
-- ROMS: MAME compatible MOONCRST.ZIP
-Working 90%, no sound
-
-Donkey Kong
+Frogger<br>
+- ROMS: MAME compatible FROGGER.ZIP<br>
+Working 100%<br><br>
+Galaxian<br>
+- ROMS: MAME compatible GALAXIAN.ZIP<br>
+Working 95%, partial sound with samples<br>
+Sample list: 'shot.wav', 'death.wav' and 'back.wav'.<br><br>
+Jump Bug<br>
+- ROMS: MAME compatible JUMPBUG.ZIP<br>
+Working 100%<br><br>
+Moon Cresta<br>
+- ROMS: MAME compatible MOONCRST.ZIP<br>
+Working 90%, no sound<br><br>
+Donkey Kong<br>
 <hr><br>
-- ROMS: MAME compatible DKONG.ZIP
-Working 95%, sound with samples
+- ROMS: MAME compatible DKONG.ZIP<br>
+Working 95%, sound with samples<br>
 Sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV', 'TUNE04.WAV', 'TUNE05.WAV', 
 'TUNE06.WAV', 'TUNE07.WAV', 'TUNE08.WAV', 'TUNE09.WAV', 'TUNE0b.WAV', 'TUNE0c.WAV', 
 'TUNE0d.WAV', 'TUNE0e.WAV', 'TUNE0f.WAV', 'EFFECT01.WAV', 'EFFECT02.WAV', 'EFFECT03.WAV', 
-'EFFECT04.WAV', 'EFFECT05.WAV', 'INTERUPT.WAV' and 'run01.WAv'
-
-Black Tiger
+'EFFECT04.WAV', 'EFFECT05.WAV', 'INTERUPT.WAV' and 'run01.WAv'<br><br>
+Black Tiger<br>
 <hr><br>
-- ROMS: MAME compatible BLKTIGER.ZIP
-Working 100%
-
-Green Beret
+- ROMS: MAME compatible BLKTIGER.ZIP<br>
+Working 100%<br><br>
+Green Beret<br>
 <hr><br>
-- ROMS: MAME compatible GBERET.ZIP
-Working 100%
-
-Commando
+- ROMS: MAME compatible GBERET.ZIP<br>
+Working 100%<br><br>
+Commando<br>
 <hr><br>
-- ROMS: MAME compatible GBERET.ZIP
-Working 100%
-
-Ghost'n'Goblins
+- ROMS: MAME compatible GBERET.ZIP<br>
+Working 100%<br><br>
+Ghost'n'Goblins<br>
 <hr><br>
-- ROMS: MAME compatible GNG.ZIP
-Working 100%
-
-Mikie
+- ROMS: MAME compatible GNG.ZIP<br>
+Working 100%<br><br>
+Mikie<br>
 <hr><br>
-- ROMS: MAME compatible MIKIE.ZIP
-Working 100%
-
-Shaolin's Road
+- ROMS: MAME compatible MIKIE.ZIP<br>
+Working 100%<br><br>
+Shaolin's Road<br>
 <hr><br>
-- ROMS: MAME compatible SHAOLIN.ZIP
-Working 100%
-
-Yie Ar Kung-Fu
+- ROMS: MAME compatible SHAOLIN.ZIP<br>
+Working 100%<br><br>
+Yie Ar Kung-Fu<br>
 <hr><br>
-- ROMS: MAME compatible YIEAR.ZIP
-Working 100%
-
-Son Son
+- ROMS: MAME compatible YIEAR.ZIP<br>
+Working 100%<br><br>
+Son Son<br>
 <hr><br>
-- ROMS: MAME compatible SONSON.ZIP
-Working 100%
-
-Asteroids
+- ROMS: MAME compatible SONSON.ZIP<br>
+Working 100%<br><br>
+Asteroids<br>
 <hr><br>
-- ROMS: MAME compatible ASTEROID.ZIP
-Working 95%
-Basic analogic sound and samples
-Sample list: 'explode1.wav', 'explode2.wav' and 'explode3.wav'.
-
-Star Force
+- ROMS: MAME compatible ASTEROID.ZIP<br>
+Working 95%<br>
+Basic analogic sound and samples<br>
+Sample list: 'explode1.wav', 'explode2.wav' and 'explode3.wav'.<br><br>
+Star Force<br>
 <hr><br>
-- ROMS: MAME compatible STARFORC.ZIP
-Working 90%
-Missing sound
-
-Tecmo Hardware
+- ROMS: MAME compatible STARFORC.ZIP<br>
+Working 90%<br>
+Missing sound<br><br>
+Tecmo Hardware<br>
 <hr><br>
-Rygar
-- ROMS: MAME compatible RYGAR.ZIP
-Working 100%
-
-Silk Worm
-- ROMS: MAME compatible SILKWORM.ZIP
-Working 100%
-
-Sega System 1/2
+Rygar<br>
+- ROMS: MAME compatible RYGAR.ZIP<br>
+Working 100%<br><br>
+Silk Worm<br>
+- ROMS: MAME compatible SILKWORM.ZIP<br>
+Working 100%<br><br>
+Sega System 1/2<br>
 <hr><br>
-Pitfall II
-- ROMS: MAME compatible PITFALL2.ZIP
-Working 100%
-
-Teddy Boy Blues
-- ROMS: MAME compatible TEDDYBB.ZIP
-Working 100%
-
-Wonder Boy
-- ROMS: MAME compatible WBOY.ZIP
-Working 100%
-
-Wonder Boy in Monster Land
-- ROMS: MAME compatible WBML.ZIP
-Working 99%
-Problems with some audio effects
-
-Pooyan
+Pitfall II<br>
+- ROMS: MAME compatible PITFALL2.ZIP<br>
+Working 100%<br><br>
+Teddy Boy Blues<br>
+- ROMS: MAME compatible TEDDYBB.ZIP<br>
+Working 100%<br><br>
+Wonder Boy<br>
+- ROMS: MAME compatible WBOY.ZIP<br>
+Working 100%<br><br>
+Wonder Boy in Monster Land<br>
+- ROMS: MAME compatible WBML.ZIP<br>
+Working 99%<br>
+Problems with some audio effects<br><br>
+Pooyan<br>
 <hr><br>
-- ROMS: MAME compatible POOYAN.ZIP
-Working 100%
-
-Rally X Hardware
+- ROMS: MAME compatible POOYAN.ZIP<br>
+Working 100%<br><br>
+Rally X Hardware<br>
 <hr><br>
-Jungler
-- ROMS: MAME compatible JUNGLER.ZIP
-Working 100%
-
-Rally X
-- ROMS: MAME compatible RALLYX.ZIP
-Working 100%
-Sample list: 'bang.wav'.
-
-New Rally X
-- ROMS: MAME compatible NRALLYX.ZIP
-Funcionando el 100%
-Sample list: 'bang.wav'.
-
-City Connection
+Jungler<br>
+- ROMS: MAME compatible JUNGLER.ZIP<br>
+Working 100%<br><br>
+Rally X<br>
+- ROMS: MAME compatible RALLYX.ZIP<br>
+Working 100%<br>
+Sample list: 'bang.wav'.<br><br>
+New Rally X<br>
+- ROMS: MAME compatible NRALLYX.ZIP<br>
+Funcionando el 100%<br>
+Sample list: 'bang.wav'.<br><br>
+City Connection<br>
 <hr><br>
-- ROMS: MAME compatible CITYCON.ZIP
-Working 100%
-
-Burger Time
+- ROMS: MAME compatible CITYCON.ZIP<br>
+Working 100%<br><br>
+Burger Time<br>
 <hr><br>
-- ROMS: MAME compatible BTIME.ZIP
-Working 100%
-
-Express Raider
+- ROMS: MAME compatible BTIME.ZIP<br>
+Working 100%<br><br>
+Express Raider<br>
 <hr><br>
-- ROMS: MAME compatible ERAIDER.ZIP
-Working 100%
-
-Super Basketball
+- ROMS: MAME compatible ERAIDER.ZIP<br>
+Working 100%<br><br>
+Super Basketball<br>
 <hr><br>
-- ROMS: MAME compatible SBASKETB.ZIP
-Working 100%
-
-Lady Bug
+- ROMS: MAME compatible SBASKETB.ZIP<br>
+Working 100%<br><br>
+Lady Bug<br>
 <hr><br>
-- ROMS: MAME compatible LADYBUG.ZIP
-Working 100%
-
-Tehkan World Cup
+- ROMS: MAME compatible LADYBUG.ZIP<br>
+Working 100%<br><br>
+Tehkan World Cup<br>
 <hr><br>
-- ROMS: MAME compatible TEHKANWC.ZIP
-Working 99%
-Problems CPU's syncronization
-
-Popeye
+- ROMS: MAME compatible TEHKANWC.ZIP<br>
+Working 99%<br>
+Problems CPU's syncronization<br><br>
+Popeye<br>
 <hr><br>
-- ROMS: MAME compatible POPEYE.ZIP
-Working 100%
-
-Psychic 5
+- ROMS: MAME compatible POPEYE.ZIP<br>
+Working 100%<br><br>
+Psychic 5<br>
 <hr><br>
-- ROMS: MAME compatible PSYCHIC5.ZIP
-Working 96%
-Missing Alpha render (background and sprites) and colour internsity.
-
-Irem M62 Hardware
+- ROMS: MAME compatible PSYCHIC5.ZIP<br>
+Working 96%<br>
+Missing Alpha render (background and sprites) and colour internsity.<br>
+Irem M62 Hardware<br>
 <hr><br>
-Kung-Fu Master
-- ROMS: MAME compatible KUNGFUM.ZIP
-Working 100%
-
-Spelunker
-- ROMS: MAME compatible SPELUNKR.ZIP
-Working 100%
-
-Spelunker II
-- ROMS: MAME compatible SPELUNK2.ZIP
-Working 100%
-
-Lode Runner
-- ROMS: MAME compatible LODERUN.ZIZ
-Working 100%
-
-Lode Runner II
-- ROMS: MAME compatible LODERUN2.ZIP
-Working 100%
-
-Terra Cresta
+Kung-Fu Master<br>
+- ROMS: MAME compatible KUNGFUM.ZIP<br>
+Working 100%<br><br>
+Spelunker<br>
+- ROMS: MAME compatible SPELUNKR.ZIP<br>
+Working 100%<br><br>
+Spelunker II<br>
+- ROMS: MAME compatible SPELUNK2.ZIP<br>
+Working 100%<br><br>
+Lode Runner<br>
+- ROMS: MAME compatible LODERUN.ZIP<br>
+Working 100%<br><br>
+Lode Runner II<br>
+- ROMS: MAME compatible LODERUN2.ZIP<br>
+Working 100%<br><br>
+Terra Cresta<br>
 <hr><br>
-- ROMS: MAME compatible TERRACRE.ZIP
-Working 100%
-
-Shoot Out!
+- ROMS: MAME compatible TERRACRE.ZIP<br>
+Working 100%<br><br>
+Shoot Out!<br>
 <hr><br>
-- ROMS: MAME compatible SHOOTOUT.ZIP
-Working 100%
-
-Vigilante
+- ROMS: MAME compatible SHOOTOUT.ZIP<br>
+Working 100%<br><br>
+Vigilante<br>
 <hr><br>
-- ROMS: MAME compatible VIGILANT.ZIP
-Working 100%
-
-Jackal
+- ROMS: MAME compatible VIGILANT.ZIP<br>
+Working 100%<br><br>
+Jackal<br>
 <hr><br>
-- ROMS: MAME compatible JACKAL.ZIP
-Working 100%
-
-Bubble Bobble
+- ROMS: MAME compatible JACKAL.ZIP<br>
+Working 100%<br><br>
+Bubble Bobble<br>
 <hr><br>
-- ROMS: MAME compatible BUBLBOBL.ZIP
-Working 100%
-
-Prehistoric Isle 1930
+- ROMS: MAME compatible BUBLBOBL.ZIP<br>
+Working 100%<br>
+Prehistoric Isle 1930<br>
 <hr><br>
-- ROMS: MAME compatible PREHISLE.ZIP
-Working 40%, no sound, IRQ hack, no controls
-
-Tiger Road Hardware
+- ROMS: MAME compatible PREHISLE.ZIP<br>
+Working 40%, no sound, IRQ hack, no controls<br><br>
+Tiger Road Hardware<br>
 <hr><br>
-Tiger Road
-- ROMS: MAME compatible TIGEROAD.ZIP
-Working 100%
-
-F1 Dream
-- ROMS: MAME compatible F1DREAM.ZIP
-Working 100%, using bootleg version
-
-Snow Bros
+Tiger Road<br>
+- ROMS: MAME compatible TIGEROAD.ZIP<br>
+Working 100%<br><br>
+F1 Dream<br>
+- ROMS: MAME compatible F1DREAM.ZIP<br>
+Working 100%, using bootleg version<br><br>
+Snow Bros<br>
 <hr><br>
-- ROMS: MAME compatible SNOWBROS.ZIP
-Working 99%, M68000 bugs
-
-Toki
+- ROMS: MAME compatible SNOWBROS.ZIP<br>
+Working 99%, M68000 bugs<br><br>
+Toki<br>
 <hr><br>
-- ROMS: MAME compatible TOKI.ZIP
-Working 95%, some problems with OKI6295
-
-Contra
+- ROMS: MAME compatible TOKI.ZIP<br>
+Working 95%, some problems with OKI6295<br><br>
+Contra<br>
 <hr><br>
-- ROMS: MAME compatible CONTRA.ZIP
-Working 99%, some bugs (maybe M6809 bugs)
-
-Mappy Hardware
+- ROMS: MAME compatible CONTRA.ZIP<br>
+Working 99%, some bugs (maybe M6809 bugs)<br><br>
+Mappy Hardware<br>
 <hr><br>
-Mappy
-- ROMS: MAME compatible MAPPY.ZIP
-Working 100%
-
-Dig-Dug II
-- ROMS: MAME compatible DISGDUG2.ZIP
-Working 100%
-
-Super Pacman
-- ROMS: MAME compatible SUPERPAC.ZIP
-Working 100%
-
-Rastan
+Mappy<br>
+- ROMS: MAME compatible MAPPY.ZIP<br>
+Working 100%<br><br>
+Dig-Dug II<br>
+- ROMS: MAME compatible DISGDUG2.ZIP<br>
+Working 100%<br><br>
+Super Pacman<br>
+- ROMS: MAME compatible SUPERPAC.ZIP<br>
+Working 100%<br><br>
+Rastan<br>
 <hr><br>
-- ROMS: MAME compatible RASTAN.ZIP
-Working 100%
-
-Legendary Wings Hardware
+- ROMS: MAME compatible RASTAN.ZIP<br>
+Working 100%<br><br>
+Legendary Wings Hardware<br>
 <hr><br>
-Legendary Wings
-- ROMS: MAME compatible LWINGS.ZIP
-Working 100%
-
-Section Z
-- ROMS: MAME compatible SECTIONZ.ZIP
-Working 100%
-
-Trojan
-- ROMS: MAME compatible TROJAN.ZIP
-Working 97%, basic ADPCM sound
-
-Street Fighter
+Legendary Wings<br>
+- ROMS: MAME compatible LWINGS.ZIP<br>
+Working 100%<br><br>
+Section Z<br>
+- ROMS: MAME compatible SECTIONZ.ZIP<br>
+Working 100%<br><br>
+Trojan<br>
+- ROMS: MAME compatible TROJAN.ZIP<br>
+Working 97%, basic ADPCM sound<br><br>
+Street Fighter<br>
 <hr><br>
-- ROMS: MAME compatible SF.ZIP
-Working 90%, ADPCM missing
-This driver uses A,S,D,Z,X and C keys as action buttons
-
-Galaga Hardware
+- ROMS: MAME compatible SF.ZIP<br>
+Working 90%, ADPCM missing<br>
+This driver uses A,S,D,Z,X and C keys as action buttons<br><br>
+Galaga Hardware<br>
 <hr><br>
-Galaga
-- ROMS: MAME compatible GALAGA.ZIP
-Working 40%, problems with NAMCO custom IO's
-
-Xain'd Sleena
+Galaga<br>
+- ROMS: MAME compatible GALAGA.ZIP<br>
+Working 40%, problems with NAMCO custom IO's<br><br>
+Xain'd Sleena<br>
 <hr><br>
-- ROMS: MAME compatible RASTAN.ZIP
-Working 100%, missing M68705
-
-Suna Hardware
+- ROMS: MAME compatible XAIN.ZIP<br>
+Working 100%, missing M68705<br><br>
+Suna Hardware<br>
 <hr><br>
-Hard Head
-- ROMS: MAME compatible HARDHEAD.ZIP
-Working 100%
-
-Hard Head 2
-- ROMS: MAME compatible HARDHED2.ZIP
-Working 10%, just a started driver
-
-NMK 16 Hardware
+Hard Head<br>
+- ROMS: MAME compatible HARDHEAD.ZIP<br>
+Working 100%<br><br>
+Hard Head 2<br>
+- ROMS: MAME compatible HARDHED2.ZIP<br>
+Working 10%, just a started driver<br><br>
+NMK 16 Hardware<br>
 <hr><br>
-- Problems with OKI6295 (M68000 bugs)
-Saboten Bombers
-- ROMS: MAME compatible SABOTENB.ZIP
-Working 100%
-
-Bomb Jack Twin
-- ROMS: MAME compatible BJTWIN.ZIP
-Working 100%
-
-Knuckle Joe
+- Problems with OKI6295 (M68000 bugs)<br>
+Saboten Bombers<br>
+- ROMS: MAME compatible SABOTENB.ZIP<br>
+Working 100%<br><br>
+Bomb Jack Twin<br>
+- ROMS: MAME compatible BJTWIN.ZIP<br>
+Working 100%<br><br>
+Knuckle Joe<br>
 <hr><br>
-- ROMS: MAME compatible KNCLJOE.ZIP
-Working 100%
-
-Wardner
+- ROMS: MAME compatible KNCLJOE.ZIP<br>
+Working 100%<br><br>
+Wardner<br>
 <hr><br>
-- ROMS: MAME compatible WARDNER.ZIP
-Working 100%
-
-Gaelco Hardware
+- ROMS: MAME compatible WARDNER.ZIP<br>
+Working 100%<br><br>
+Gaelco Hardware<br>
 <hr><br>
-Big Karnak
-- ROMS: MAME compatible BIGKARNC.ZIP
-Working 100%
-
-Thunder Hoop
-- ROMS: MAME compatible THOOP.ZIP
-Working 100%
-
-Exed Exes
+Big Karnak<br>
+- ROMS: MAME compatible BIGKARNC.ZIP<br>
+Working 100%<br><br>
+Thunder Hoop<br>
+- ROMS: MAME compatible THOOP.ZIP<br>
+Working 100%<br><br>
+Exed Exes<br>
 <hr><br>
-- ROMS: MAME compatible EXEDEXES.ZIP
-Working 100%
-
-Gun.Smoke Hardware
+- ROMS: MAME compatible EXEDEXES.ZIP<br>
+Working 100%<br><br>
+Gun.Smoke Hardware<br>
 <hr><br>
-Gun.Smoke
-- ROMS: MAME compatible GUNSMOKE.ZIP
-Working 100%
-
-1943: The Battle of Midway
-- ROMS: MAME compatible 1943.ZIP
-Working 100%
-
-1943 Kai: Midway Kaisen
-- ROMS: MAME compatible 1943KAI.ZIP
-Working 100%
-
-1942
+Gun.Smoke<br>
+- ROMS: MAME compatible GUNSMOKE.ZIP<br>
+Working 100%<br><br>
+1943: The Battle of Midway<br>
+- ROMS: MAME compatible 1943.ZIP<br>
+Working 100%<br><br>
+1943 Kai: Midway Kaisen<br>
+- ROMS: MAME compatible 1943KAI.ZIP<br>
+Working 100%<br><br>
+1942<br>
 <hr><br>
-- ROMS: MAME compatible 1942.ZIP
-Working 100%
-
-Jail Break
+- ROMS: MAME compatible 1942.ZIP<br>
+Working 100%<br><br>
+Jail Break<br>
 <hr><br>
-- ROMS: MAME compatible JAILBREK.ZIP
-Working 100%
-
-Circus Charlie
+- ROMS: MAME compatible JAILBREK.ZIP<br>
+Working 100%<br><br>
+Circus Charlie<br>
 <hr><br>
-- ROMS: MAME compatible CIRCUSC.ZIP
-Working 100%
-
-Iron Horse
+- ROMS: MAME compatible CIRCUSC.ZIP<br>
+Working 100%<br><br>
+Iron Horse<br>
 <hr><br>
-- ROMS: MAME compatible IRONHORS.ZIP
-Working 100%
-
-Irem M72 Hardware
+- ROMS: MAME compatible IRONHORS.ZIP<br>
+Working 100%<br><br>
+Irem M72 Hardware<br>
 <hr><br>
-R-Type
-- ROMS: MAME compatible RTYPE.ZIP
-Working 40%, missing sound and controls. NEC v30 bugs
-
-Break Thru Hardware
+R-Type<br>
+- ROMS: MAME compatible RTYPE.ZIP<br>
+Working 40%, missing sound and controls. NEC v30 bugs<br><br>
+Break Thru Hardware<br>
 <hr><br>
-Break Thru
-- ROMS: MAME compatible BRKTHRU.ZIP
-Working 100%
-
-Darwin 4078
-- ROMS: MAME compatible DARWIN.ZIP
-Working 100%
-
-Super Real Darwin
+Break Thru<br>
+- ROMS: MAME compatible BRKTHRU.ZIP<br>
+Working 100%<br><br>
+Darwin 4078<br>
+- ROMS: MAME compatible DARWIN.ZIP<br>
+Working 100%<br><br>
+Super Real Darwin<br>
 <hr><br>
-- ROMS: MAME compatible SRDARWIN.ZIP
-Working 100%
-
-Double Dragon Hardware
+- ROMS: MAME compatible SRDARWIN.ZIP<br>
+Working 100%<br><br>
+Double Dragon Hardware<br>
 <hr><br>
-Double Dragon
-- ROMS: MAME compatible DDRAGON.ZIP
-Working 100%
-
-Double Dragon II - The Revenge
-- ROMS: MAME compatible DDRAGON2.ZIP
-Working 100%
-
-Mr. Do!
+Double Dragon<br>
+- ROMS: MAME compatible DDRAGON.ZIP<br>
+Working 100%<br><br>
+Double Dragon II - The Revenge<br>
+- ROMS: MAME compatible DDRAGON2.ZIP<br>
+Working 100%<br><br>
+Mr. Do!<br>
 <hr><br>
-- ROMS: MAME compatible MRDO.ZIP
-Working 100%
-
-Epos Hardware
+- ROMS: MAME compatible MRDO.ZIP<br>
+Working 100%<br><br>
+Epos Hardware<br>
 <hr><br>
-The Glob
-- ROMS: MAME compatible THEGLOB.ZIP
-Working 100%
-
-Super Glob
-- ROMS: MAME compatible SUPRGLOB.ZIP
-Working 100%
-
-Slap Fight Hardware
+The Glob<br>
+- ROMS: MAME compatible THEGLOB.ZIP<br>
+Working 100%<br><br>
+Super Glob<br>
+- ROMS: MAME compatible SUPRGLOB.ZIP<br>
+Working 100%<br><br>
+Slap Fight Hardware<br>
 <hr><br>
-- Missing M68705 CPU
-Tiger Heli
-- ROMS: MAME compatible TIGERH.ZIP
-Working 100%
-
-Slap Fight
-- ROMS: MAME compatible SLAPFGTR.ZIP
-Working 100%
-
-The Legend of Kage
+- Missing M68705 CPU<br>
+Tiger Heli<br>
+- ROMS: MAME compatible TIGERH.ZIP<br>
+Working 100%<br><br>
+Slap Fight<br>
+- ROMS: MAME compatible SLAPFGTR.ZIP<br>
+Working 100%<br><br>
+The Legend of Kage<br>
 <hr><br>
-- ROMS: MAME compatible LKAGE.ZIP
-Working 100%, missing M68705 CPU using bootleg
-
-Cabal
+- ROMS: MAME compatible LKAGE.ZIP<br>
+Working 100%, missing M68705 CPU using bootleg<br><br>
+Cabal<br>
 <hr><br>
-- ROMS: MAME compatible CABAL.ZIP
-Working 95%, bugs on M68000 core
-
+- ROMS: MAME compatible CABAL.ZIP<br>
+Working 95%, bugs on M68000 core<br><br>
 Capcom Play System 1 - CPS1
 <hr><br>
-Ghouls and Ghosts
-- ROMS: MAME compatible GHOULS.ZIP
-Working 100%
-
-Final Fight
-- ROMS: MAME compatible FFIGHT.ZIP
-Working 100%
-
-The King of Dragons
-- ROMS: MAME compatible KOD.ZIP
-Working 100%, missing third player controls.
-
-Street Fighter II - The World Warrior
-- ROMS: MAME compatible SF2.ZIP
-Working 95%, missing some controls and missing scroll row
-
-Strider
-- ROMS: MAME compatible STRIDER.ZIP
-Working 100%
-
-Three Wonders
-- ROMS: MAME compatible 3WONDERS.ZIP
-Working 100%
-
-Captain Commando
-- ROMS: MAME compatible CCOMANDO.ZIP
-Working 100%
-
-Knights of the Round
-- ROMS: MAME compatible KNIGHTS.ZIP
-Working 100%
-
-Street Fighter II': Champion Edition
-- ROMS: MAME compatible SF2CE.ZIP
-Working 95%, missing some controls and missing scroll row
-
-Cadillacs and Dinosaurs
-Knights of the Round
-- ROMS: MAME compatible DINO.ZIP
-Working 100%
-
-The Punisher
-- ROMS: MAME compatible PUNISHER.ZIP
-Working 100%
-
+Ghouls and Ghosts<br>
+- ROMS: MAME compatible GHOULS.ZIP<br>
+Working 100%<br><br>
+Final Fight<br>
+- ROMS: MAME compatible FFIGHT.ZIP<br>
+Working 100%<br><br>
+The King of Dragons<br>
+- ROMS: MAME compatible KOD.ZIP<br>
+Working 100%, missing third player controls.<br><br>
+Street Fighter II - The World Warrior<br>
+- ROMS: MAME compatible SF2.ZIP<br>
+Working 95%, missing some controls and missing scroll row<br><br>
+Strider<br>
+- ROMS: MAME compatible STRIDER.ZIP<br>
+Working 100%<br><br>
+Three Wonders<br>
+- ROMS: MAME compatible 3WONDERS.ZIP<br>
+Working 100%<br><br>
+Captain Commando<br>
+- ROMS: MAME compatible CCOMANDO.ZIP<br>
+Working 100%<br><br>
+Knights of the Round<br>
+- ROMS: MAME compatible KNIGHTS.ZIP<br>
+Working 100%<br><br>
+Street Fighter II': Champion Edition<br>
+- ROMS: MAME compatible SF2CE.ZIP<br>
+Working 95%, missing some controls and missing scroll row<br><br>
+Cadillacs and Dinosaurs<br>
+Knights of the Round<br>
+- ROMS: MAME compatible DINO.ZIP<br>
+Working 100%<br><br>
+The Punisher<br>
+- ROMS: MAME compatible PUNISHER.ZIP<br>
+Working 100%<br><br>
 <b>3-. Contribute</b><br>
-<hr><br><br>
+<hr><br>
 You can contribute in the emulator DSP! Get the source code and works on the drivers. Do you help me? If so, please contact me!<br>
 Have you done a new driver? Do you have any idea? Well then contact me! Anything is good!<br><br>
 
 <b>4-. Acknowledgments</b><br>
-<hr><br><br>
+<hr><br>
 - First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).<br>
 - Chris Cowley, author of VBSpec, from where I've pick a lot of information about that little black box called Spectrum, I never belived how powerful it was... In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME, and sounds very good!<br>
 - Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to trace errors in my emulator Z80.<br>
@@ -657,7 +551,7 @@ information.<br>
 - And many pages of the Internet, many documents ... and people who I forget, thank you all.<br><br>
 
 <b>5-. Copyright</b><br>
-<hr><br><br>
+<hr><br>
 The Coleco and Pooyan has been rewrited from the originals by Michael Franzen.<br>
 The CPS1 has been rewrited from the original by Tomas Walker.<br>
 The rest of the drivers the Z80 core, M6502 core, M6809 core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core and LR35902 core are writed by me, Leniad.<br>
@@ -669,7 +563,7 @@ GameBoy/GameBoy Color sound emulator is a delphi conversion writed by me from ME
 Spectrum 48k, Spectrum 128K, Spectrum+3, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.<br><br>
 
 <b>6-. Contact & Links</b><br>
-<hr><br><br>
+<hr><br>
 If you want to contact me, send me feedback or anything just use leniad2@hotmail.com<br>
 My DSP home page leniad.cjb.net<br>
 You can also download the offical version and WIP versions from Google Code page<br><br>
@@ -685,4 +579,4 @@ tzxvault.retrogames.com<br>
 zx.dyndns.org/trastero<br>
 www.speccy.org/spa2<br><br>
 If you want Coleco games<br>
-leniad.cjb.net/coleco<br>
+leniad.cjb.net/coleco
