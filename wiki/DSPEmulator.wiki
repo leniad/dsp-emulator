@@ -117,12 +117,12 @@ Rewriting process.<br><br>
 -Cartridges: It supports the standard game cartridges (not expansion cartirdges), in 'ROM' and 'COL'. Support ZIP files, of course.<br><br>
 <b>2.3 ARCADE</b><br>
 <hr><br><br>
-<b>Phoenix</b><br>
+Phoenix<br>
 <hr><br>
 - ROMS: MAME compatible PHOENIX.ZIP<br>
 Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.<br>
 Working 99,1%<br><br>
-<b>Bombjack</b><br>
+Bombjack<br>
 <hr><br>
 - ROMS: MAME compatible BOMBJACK.ZIP<br>
 Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br><br>
