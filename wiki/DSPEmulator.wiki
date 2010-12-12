@@ -93,19 +93,19 @@ Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br>
 - Sound: Polyphonic sound from AY-8912 chip<br>
 - Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
 -To do:<br>
-&nbsp;&nbsp;- Snapshots are not implemented.<br>
-&nbsp;&nbsp;- Some disk protections are not working.<br>
-&nbsp;&nbsp;- Sometimes the driver just reset<br>
-&nbsp;&nbsp;- Some video effect are missing (M6845 video)<br><br>
+     -Snapshots are not implemented.<br>
+     -Some disk protections are not working.<br>
+     -Sometimes the driver just reset<br>
+     -Some video effect are missing (M6845 video)<br><br>
 
 <b>2.2 CONSOLES</b><br>
 <hr><br><br>
 <b>NES</b><br>
-<hr><br>
+<hr>
 Rewriting process.<br><br>
 
 <b>GameBoy/Gameboy Color</b><br>
-<hr><br>
+<hr>
 -ROM: Not required, but if present are loaded and run as the original console. The ROMs are 'GAMEBOY.ZIP' containing 'dmg_boot.bin' (CRC: 0x59C8598E) and 'GBCOLOR.ZIP' containing 'gbc_boot.1' and 'gbc_boot.2' (CRC's: 0x779EA374 and 0xF741807D).<br>
 -Keys: Use the redefined keys and 'SELECT' is mapped as key '5 'and 'START' is mapper in the '1' key.<br>
 -Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not. For now, mappers are supported are MBC0, MBC1 and MBC5 (some bugs!).<br>
