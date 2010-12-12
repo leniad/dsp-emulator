@@ -544,7 +544,7 @@ Have you done a new driver? Do you have any idea? Well then contact me! Anything
 - Chris Cowley, author of VBSpec, from where I've pick a lot of information about that little black box called Spectrum, I never belived how powerful it was... In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME, and sounds very good!<br>
 - Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to trace errors in my emulator Z80.<br>
 - These awesome guys from World of Spectrum!! I have taken many tapes and snapshots of his page, in addition to technical information, including the format TZX. Don't you miss his page!<br>
-- javi[@]fsmail.net that helped me in a moment of desperation, with directSound!<br>
+- javi{{{[@]}}}fsmail.net that helped me in a moment of desperation, with directSound!<br>
 - Thanks to Michael Franzen, who sent me drivers for Pooyan, Coleco, System1 and many others to be included in DSP.<br>
 - Thanks to Tom Walker, he sent me his driver CPS1 where I got and understood a lot of
 information.<br>
