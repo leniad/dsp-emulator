@@ -151,7 +151,7 @@ Working 95%, sound with samples<br>
 Sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV', 'TUNE04.WAV', 'TUNE05.WAV', 
 'TUNE06.WAV', 'TUNE07.WAV', 'TUNE08.WAV', 'TUNE09.WAV', 'TUNE0b.WAV', 'TUNE0c.WAV', 
 'TUNE0d.WAV', 'TUNE0e.WAV', 'TUNE0f.WAV', 'EFFECT01.WAV', 'EFFECT02.WAV', 'EFFECT03.WAV', 
-'EFFECT04.WAV', 'EFFECT05.WAV', 'INTERUPT.WAV' and 'run01.WAv'<br><br>
+'EFFECT04.WAV', 'EFFECT05.WAV', 'INTERUPT.WAV' and 'RUN01.WAv'<br><br>
 Black Tiger<br>
 <hr>
 - ROMS: MAME compatible BLKTIGER.ZIP<br>
@@ -162,7 +162,7 @@ Green Beret<br>
 Working 100%<br><br>
 Commando<br>
 <hr>
-- ROMS: MAME compatible GBERET.ZIP<br>
+- ROMS: MAME compatible COMMANDO.ZIP<br>
 Working 100%<br><br>
 Ghost'n'Goblins<br>
 <hr>
