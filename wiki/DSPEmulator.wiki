@@ -122,7 +122,7 @@ Working 99,1%<br><br>
 Bombjack<br>
 <hr>
 - ROMS: BOMBJACK.ZIP<br>
-Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br><br>
+Working 100%<br><br>
 Pacman Hardware<br>
 <hr>
 Pac-man<br>
