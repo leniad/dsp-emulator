@@ -274,7 +274,7 @@ Working 100%<br><br>
 <hr>
 - ROMS: PSYCHIC5.ZIP<br>
 Working 96%<br>
-Missing Alpha render (background and sprites) and colour internsity.<br>
+Missing Alpha render (background and sprites) and colour internsity.<br><br>
 <b>Irem M62 Hardware</b><br>
 <hr>
 Kung-Fu Master<br>
@@ -296,27 +296,27 @@ Working 100%<br><br>
 <hr>
 - ROMS: TERRACRE.ZIP<br>
 Working 100%<br><br>
-Shoot Out!<br>
+<b>Shoot Out!</b><br>
 <hr>
 - ROMS: SHOOTOUT.ZIP<br>
 Working 100%<br><br>
-Vigilante<br>
+<b>Vigilante</b><br>
 <hr>
 - ROMS: VIGILANT.ZIP<br>
 Working 100%<br><br>
-Jackal<br>
+<b>Jackal</b><br>
 <hr>
 - ROMS: JACKAL.ZIP<br>
 Working 100%<br><br>
-Bubble Bobble<br>
+<b>Bubble Bobble</b><br>
 <hr>
 - ROMS: BUBLBOBL.ZIP<br>
 Working 100%<br><br>
-Prehistoric Isle in 1930<br>
+<b>Prehistoric Isle in 1930</b><br>
 <hr>
 - ROMS: PREHISLE.ZIP<br>
 Working 100%<br><br>
-Tiger Road Hardware<br>
+<b>Tiger Road Hardware</b><br>
 <hr>
 Tiger Road<br>
 - ROMS: TIGEROAD.ZIP<br>
@@ -324,19 +324,19 @@ Working 100%<br><br>
 F1 Dream<br>
 - ROMS: F1DREAM.ZIP<br>
 Working 100%, using bootleg version<br><br>
-Snow Bros<br>
+<b>Snow Bros</b><br>
 <hr>
 - ROMS: SNOWBROS.ZIP<br>
 Working 99%, M68000 bugs<br><br>
-Toki<br>
+<b>Toki</b><br>
 <hr>
 - ROMS: TOKI.ZIP<br>
 Working 95%, some problems with sound, M68000 bugs<br><br>
-Contra<br>
+<b>Contra</b><br>
 <hr>
 - ROMS: CONTRA.ZIP<br>
 Working 99%, some graphics bugs<br><br>
-Mappy Hardware<br>
+<b>Mappy Hardware</b><br>
 <hr>
 Mappy<br>
 - ROMS: MAPPY.ZIP<br>
@@ -347,11 +347,11 @@ Working 100%<br><br>
 Super Pacman<br>
 - ROMS: SUPERPAC.ZIP<br>
 Working 100%<br><br>
-Rastan<br>
+<b>Rastan</b><br>
 <hr>
 - ROMS: RASTAN.ZIP<br>
 Working 100%<br><br>
-Legendary Wings Hardware<br>
+<b>Legendary Wings Hardware</b><br>
 <hr>
 Legendary Wings<br>
 - ROMS: LWINGS.ZIP<br>
@@ -362,21 +362,21 @@ Working 100%<br><br>
 Trojan<br>
 - ROMS: TROJAN.ZIP<br>
 Working 97%, basic ADPCM sound<br><br>
-Street Fighter<br>
+<b>Street Fighter</b><br>
 <hr>
 - ROMS: SF.ZIP<br>
 Working 90%, ADPCM missing<br>
 This driver uses A,S,D,Z,X and C keys as action buttons<br><br>
-Galaga Hardware<br>
+<b>Galaga Hardware</b><br>
 <hr>
 Galaga<br>
 - ROMS: GALAGA.ZIP<br>
 Working 40%, problems with NAMCO custom IO's<br><br>
-Xain'd Sleena<br>
+<b>Xain'd Sleena</b><br>
 <hr>
 - ROMS: XAIN.ZIP<br>
 Working 100%<br><br>
-Suna Hardware<br>
+<b>Suna Hardware</b><br>
 <hr>
 Hard Head<br>
 - ROMS: HARDHEAD.ZIP<br>
@@ -384,7 +384,7 @@ Working 100%<br><br>
 Hard Head 2<br>
 - ROMS: HARDHED2.ZIP<br>
 Working 10%, just a started driver<br><br>
-NMK 16 Hardware<br>
+<b>NMK 16 Hardware</b><br>
 <hr>
 Saboten Bombers<br>
 - ROMS: SABOTENB.ZIP<br>
@@ -392,15 +392,15 @@ Working 100%<br><br>
 Bomb Jack Twin<br>
 - ROMS: BJTWIN.ZIP<br>
 Working 100%<br><br>
-Knuckle Joe<br>
+<b>Knuckle Joe</b><br>
 <hr>
 - ROMS: KNCLJOE.ZIP<br>
 Working 100%<br><br>
-Wardner<br>
+<b>Wardner</b><br>
 <hr>
 - ROMS: WARDNER.ZIP<br>
 Working 100%<br><br>
-Gaelco Hardware<br>
+<b>Gaelco Hardware</b><br>
 <hr>
 Big Karnak<br>
 - ROMS: BIGKARNC.ZIP<br>
@@ -408,11 +408,11 @@ Working 100%<br><br>
 Thunder Hoop<br>
 - ROMS: THOOP.ZIP<br>
 Working 100%<br><br>
-Exed Exes<br>
+<b>Exed Exes</b><br>
 <hr>
 - ROMS: EXEDEXES.ZIP<br>
 Working 100%<br><br>
-Gun.Smoke Hardware<br>
+<b>Gun.Smoke Hardware</b><br>
 <hr>
 Gun.Smoke<br>
 - ROMS: GUNSMOKE.ZIP<br>
@@ -423,28 +423,28 @@ Working 100%<br><br>
 1943 Kai: Midway Kaisen<br>
 - ROMS: 1943KAI.ZIP<br>
 Working 100%<br><br>
-1942<br>
+<b>1942</b><br>
 <hr>
 - ROMS: 1942.ZIP<br>
 Working 100%<br><br>
-Jail Break<br>
+<b>Jail Break</b><br>
 <hr>
 - ROMS: JAILBREK.ZIP<br>
 Working 100%<br><br>
-Circus Charlie<br>
+<b>Circus Charlie</b><br>
 <hr>
 - ROMS: CIRCUSC.ZIP<br>
 Working 100%<br><br>
-Iron Horse<br>
+<b>Iron Horse</b><br>
 <hr>
 - ROMS: IRONHORS.ZIP<br>
 Working 100%<br><br>
-Irem M72 Hardware<br>
+<b>Irem M72 Hardware</b><br>
 <hr>
 R-Type<br>
 - ROMS: RTYPE.ZIP<br>
 Working 70%, missing sound and controls, some sprite problems and missing some NEC v30 opcodes<br><br>
-Break Thru Hardware<br>
+<b>Break Thru Hardware</b><br>
 <hr>
 Break Thru<br>
 - ROMS: BRKTHRU.ZIP<br>
@@ -452,11 +452,11 @@ Working 100%<br><br>
 Darwin 4078<br>
 - ROMS: DARWIN.ZIP<br>
 Working 100%<br><br>
-Super Real Darwin<br>
+<b>Super Real Darwin</b><br>
 <hr>
 - ROMS: SRDARWIN.ZIP<br>
 Working 100%<br><br>
-Double Dragon Hardware<br>
+<b>Double Dragon Hardware</b><br>
 <hr>
 Double Dragon<br>
 - ROMS: DDRAGON.ZIP<br>
@@ -464,11 +464,11 @@ Working 100%<br><br>
 Double Dragon II - The Revenge<br>
 - ROMS: DDRAGON2.ZIP<br>
 Working 100%<br><br>
-Mr. Do!<br>
+<b>Mr. Do!</b><br>
 <hr>
 - ROMS: MRDO.ZIP<br>
 Working 100%<br><br>
-Epos Hardware<br>
+<b>Epos Hardware</b><br>
 <hr>
 The Glob<br>
 - ROMS: THEGLOB.ZIP<br>
@@ -476,7 +476,7 @@ Working 100%<br><br>
 Super Glob<br>
 - ROMS: SUPRGLOB.ZIP<br>
 Working 100%<br><br>
-Slap Fight Hardware<br>
+<b>Slap Fight Hardware</b><br>
 <hr>
 Tiger Heli<br>
 - ROMS: TIGERH.ZIP<br>
@@ -484,11 +484,11 @@ Working 100%<br><br>
 Slap Fight<br>
 - ROMS: SLAPFIGH.ZIP<br>
 Working 100%<br><br>
-The Legend of Kage<br>
+<b>The Legend of Kage</b><br>
 <hr>
 - ROMS: LKAGE.ZIP<br>
 Working 100%<br><br>
-Cabal<br>
+<b>Cabal</b><br>
 <hr>
 - ROMS: CABAL.ZIP<br>
 Working 95%, bugs on M68000 core<br><br>
