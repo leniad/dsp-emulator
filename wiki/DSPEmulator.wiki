@@ -1,7 +1,7 @@
 #summary DSP Emulator
 = Introduction =
 
-DSP Emulator v0.11b3 by Leniad 2001-2011
+DSP Emulator v0.11b3 - Leniad 2001-2011
 
 
 = Details =
