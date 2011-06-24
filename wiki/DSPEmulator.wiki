@@ -60,7 +60,7 @@ In general configuration you can choose this way of booting, or the old way (las
 <b>2-. Drivers</b><br>
 <hr><br>
 <b>2.1 COMPUTERS</b><br>
-<hr>
+<hr><br>
 <b>Spectrum 48k, 128K and Plus+3 </b><br>
 <hr>
 This driver have it's own configuration window.<br>
@@ -113,7 +113,7 @@ Some games, given the difficulty of emulating old sound systems, uses 'samples'.
 Currently only 'Asteroids', 'Donkey Kong', 'Galaxy' and 'Rally X / New Rally X' use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
 <br>
-<b>2.3.2 EMULATED SYSTEMS</b><hr>
+<b>2.3.2 EMULATED SYSTEMS</b><hr><br>
 <b>Phoenix</b><br>
 <hr>
 - ROMS: PHOENIX.ZIP<br>
