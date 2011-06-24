@@ -112,7 +112,7 @@ Rewriting process.<br><br>
 Some games, given the difficulty of emulating old sound systems, uses 'samples'. Such files are portions of digitized sound, played instead of emulating the sound system.<br>
 Currently only 'Asteroids', 'Donkey Kong', 'Galaxy' and 'Rally X / New Rally X' use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
-<hr><br>
+<br>
 <b>2.3.2 EMULATED SYSTEMS</b><hr>
 <b>Phoenix</b><br>
 <hr>
