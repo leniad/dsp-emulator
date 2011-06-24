@@ -652,6 +652,7 @@ Have you done a new driver? Do you have any idea? Well then contact me! Anything
 - Thanks to Michael Franzen, who sent me drivers for Pooyan, Coleco, System1 and many others to be included in DSP.<br>
 - Thanks to Tom Walker, he sent me his driver CPS1 where I got and understood a lot of
 information.<br>
+- Thanks to sremulador he made the drivers list, and constant source updates.<br>
 - And many pages of the Internet, many documents ... and people who I forget, thank you all.<br><br>
 <b>5-. Copyright</b><br>
 <hr>
