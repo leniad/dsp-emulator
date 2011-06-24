@@ -528,7 +528,7 @@ Working 100%<br><br>
 The Punisher<br>
 - ROMS: PUNISHER.ZIP<br>
 Working 100%<br><br>
-Sega System 16A<br>
+<b>Sega System 16A</b><br>
 <hr>
 -No sound<br>
 Shinobi<br>
@@ -540,19 +540,19 @@ Working 90%<br><br>
 Fantasy Zone<br>
 - ROMS: FANTZONE.ZIP<br>
 Working 90%<br><br>
-Time Pilot '84<br>
+<b>Time Pilot '84</b><br>
 <hr>
 - ROMS: TP84.ZIP<br>
 Working 99%, missing RC filters<br><br>
-Tutankham<br>
+<b>Tutankham</b><br>
 <hr>
 - ROMS: TUTANKHM.ZIP<br>
 Working 100%<br><br>
-Pang<br>
+<b>Pang</b><br>
 <hr>
 - ROMS: PANG.ZIP<br>
 Working 95%, missing YM2413<br><br>
-UPL Hardware<br>
+<b>UPL Hardware</b><br>
 <hr>
 - Missing some sprite effects<br>
 Ninja Kid II<br>
@@ -564,11 +564,11 @@ Working 95%<br><br>
 Mutant Night<br>
 - ROMS: MNIGHT.ZIP<br>
 Working 95%<br><br>
-Sky Kid<br>
+<b>Sky Kid</b><br>
 <hr>
 - ROMS: SKYKID.ZIP<br>
 Working 100%<br><br>
-Namco System 86<br>
+<b>Namco System 86</b><br>
 <hr>
 Rolling Thunder<br>
 - ROMS: RTHUNDER.ZIP<br>
@@ -579,15 +579,15 @@ Working 100%<br><br>
 Sky Kid Deluxe<br>
 - ROMS: SKYKIDDX.ZIP<br>
 Working 100%<br><br>
-Roc'n Rope<br>
+<b>Roc'n Rope</b><br>
 <hr>
 - ROMS: ROCNROPE.ZIP<br>
 Working 100%<br><br>
-Repulse<br>
+<b>Repulse</b><br>
 <hr>
 - ROMS: REPULSE.ZIP<br>
 Working 100%<br><br>
-The NewZealand Story Hardware<br>
+<b>The NewZealand Story Hardware</b><br>
 <hr>
 The NewZealand Story<br>
 - ROMS: TNZS.ZIP<br>
@@ -595,27 +595,27 @@ Working 100%<br><br>
 Insector X<br>
 - ROMS: INSECTX.ZIP<br>
 Working 100%<br><br>
-Pacland<br>
+<b>Pacland</b><br>
 <hr>
 - ROMS: PACLAND.ZIP<br>
 Working 100%<br><br>
-Mario Bros.<br>
+<b>Mario Bros.</b><br>
 <hr>
 - ROMS: MARIO.ZIP<br>
 Working 80%, no sound<br><br>
-Solomon Key<br>
+<b>Solomon Key</b><br>
 <hr>
 - ROMS: SOLOMON.ZIP<br>
 Working 100%<br><br>
-Combat School<br>
+<b>Combat School</b><br>
 <hr>
 - ROMS: COMBATSC.ZIP<br>
 Working 100%<br><br>
-Heavy Unit<br>
+<b>Heavy Unit</b><br>
 <hr>
 - ROMS: HVYUNIT.ZIP<br>
 Working 100%<br><br>
-SNK 68K Hardware<br>
+<b>SNK 68K Hardware</b><br>
 <hr>
 P.O.W. - Prisoners of War<br>
 - ROMS: POW.ZIP<br>
@@ -623,7 +623,7 @@ Working 100%<br><br>
 Street Smart<br>
 - ROMS: STREETSM.ZIP<br>
 Working 100%<br><br>
-Jaleco Megasystem<br>
+<b>Jaleco Megasystem</b><br>
 <hr>
 P47 - Phantom Fighter<br>
 - ROMS: P47.ZIP<br>
@@ -634,7 +634,7 @@ Working 60%, graphics problems and some 68000 bugs<br><br>
 Saint Dragon<br>
 - ROMS: STDRAGON.ZIP<br>
 Working 20%, don't work...<br><br>
-Time Pilot<br>
+<b>Time Pilot</b><br>
 <hr>
 - ROMS: TIMEPLT.ZIP<br>
 Working 100%<br><br>
