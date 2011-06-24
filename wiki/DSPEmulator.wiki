@@ -18,7 +18,7 @@ Now since version 0.9ß3 portability has begun to Lazarus and Free Pascal, so th
 The ZIP also includes the ROMS Spectrum 48K, 128K Spectrum, Spectrum +3 and Coleco. You can download most of roms page of the emulator, and you also have the 'Spectrum is Alive!!!' where you have games for the Spectrum.<br><br>
 <b>1.1-. Keys during emulation</b><br>
 <hr>
-General Keys
+General Keys:
     'F2' --> Full speed/Normal Speed<br>
     'F3' --> Reset machine<br>
     'F11' --> Changes emulation speed from 25%, 50%, 75% and 100%<br>
@@ -28,7 +28,7 @@ Arcade drivers basic keys:
     '5' --> Insert coin<br>
     '6' --> Inser Coin<br>
 Keys for both players are redefinible, and you can select any joystick for any player<br>
-Spectrum/Amstrad basic keys
+Spectrum/Amstrad basic keys:
     'F1' --> Play/Stop tape<br>
     'F4' --> Save snapshot<br>
     'F5' --> Remove Disk<br>
