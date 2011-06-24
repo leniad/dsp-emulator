@@ -1,7 +1,7 @@
 #summary DSP Emulator
 = Introduction =
 
-DSP Emulator v0.10b3 by Leniad Soft 2001-2010
+DSP Emulator v0.11b3 by Leniad Soft 2001-2011
 
 
 = Details =
@@ -43,12 +43,12 @@ You can select Castellano, Catalan, English, German, French, Brazil or Italian a
 If the language files are not present, the emulation can not start.<br><br>
 <b>1.3-. Configure DSP</b><br>
 <hr>
-Clicking the Settings button you can configure the options in the emulator can select the language, quality of audio, video settings and default directories.<br>
-In addition there are drivers that allow it can configure the options separately from the driver (for example Spectrum).<br><br>
+Clicking the Settings button you can configure the options in the emulator can select the language, audio quality, video settings, default directories and redefine keys/use joystick.<br>
+In addition there are drivers that allow it can configure the options separately from the driver.<br><br>
 <b>1.4-. Audio</b><br>
 <hr>
-You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cost to move emulation.<br>
-If you do not have sound card (¿although there is anyone who has not?), The sound is turned off, don't worry. Anyway you can select the option 'Mute' to save a few frames ;-)<br><br>
+You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cristal crear will sound the emulation.<br>
+If you do not have sound card (there is anyone who has not today?), the sound is turned off, don't worry. Anyway you can select the option 'Mute' to save a few frames ;-)<br><br>
 <b>1.5-. Save Pictures</b><br>
 <hr>
 Since DSP 0.2wipb5 you can save GIF files from spectrum emulation (48k, 128k and +3 emulation).<br>
@@ -108,45 +108,50 @@ Rewriting process.<br><br>
 -Cartridges: It supports the standard game cartridges (not expansion cartirdges), in 'ROM' and 'COL'. Support ZIP files, of course.<br><br>
 <b>2.3 ARCADE</b><br>
 <hr><br>
+<b>2.3.1 SAMPLES</b><hr>
+Some games, given the difficulty of emulating old sound systems, uses 'samples'. Such files are portions of digitized sound, played instead of emulating the sound system.<br>
+Currently only 'Asteroids', 'Donkey Kong', 'Galaxy' and 'Rally X / New Rally X' use wholly or partly this system.<br>
+If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
+<hr><br>
 Phoenix<br>
 <hr>
-- ROMS: MAME compatible PHOENIX.ZIP<br>
+- ROMS: PHOENIX.ZIP<br>
 Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.<br>
 Working 99,1%<br><br>
 Bombjack<br>
 <hr>
-- ROMS: MAME compatible BOMBJACK.ZIP<br>
+- ROMS: BOMBJACK.ZIP<br>
 Working 100%, emulation is working OK (sprites, background, chars, etc), with sound.<br><br>
 Pacman Hardware<br>
 <hr>
 Pac-man<br>
-- ROMS: MAME compatible PACMAN.ZIP<br>
+- ROMS: PACMAN.ZIP<br>
 Working 100%<br><br>
 Ms. Pac-man<br>
-- ROMS: MAME compatible MSPACMAN.ZIP<br>
+- ROMS: MSPACMAN.ZIP<br>
 Working 100%<br><br>
 Mysterious Stones<br>
 <hr>
-- ROMS: MAME compatible MYSTSTON.ZIP<br>
+- ROMS: MYSTSTON.ZIP<br>
 Working 100%<br><br>
 Galaxian Hardware<br>
 <hr>
 Frogger<br>
-- ROMS: MAME compatible FROGGER.ZIP<br>
+- ROMS: FROGGER.ZIP<br>
 Working 100%<br><br>
 Galaxian<br>
-- ROMS: MAME compatible GALAXIAN.ZIP<br>
+- ROMS: GALAXIAN.ZIP<br>
 Working 95%, partial sound with samples<br>
 Sample list: 'shot.wav', 'death.wav' and 'back.wav'.<br><br>
 Jump Bug<br>
-- ROMS: MAME compatible JUMPBUG.ZIP<br>
+- ROMS: JUMPBUG.ZIP<br>
 Working 100%<br><br>
 Moon Cresta<br>
-- ROMS: MAME compatible MOONCRST.ZIP<br>
+- ROMS: MOONCRST.ZIP<br>
 Working 90%, no sound<br><br>
 Donkey Kong<br>
 <hr>
-- ROMS: MAME compatible DKONG.ZIP<br>
+- ROMS: DKONG.ZIP<br>
 Working 95%, sound with samples<br>
 Sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV', 'TUNE04.WAV', 'TUNE05.WAV', 
 'TUNE06.WAV', 'TUNE07.WAV', 'TUNE08.WAV', 'TUNE09.WAV', 'TUNE0b.WAV', 'TUNE0c.WAV', 
@@ -154,375 +159,483 @@ Sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV', 'TUNE04.WAV', 'TUNE05.WAV'
 'EFFECT04.WAV', 'EFFECT05.WAV', 'INTERUPT.WAV' and 'RUN01.WAv'<br><br>
 Black Tiger<br>
 <hr>
-- ROMS: MAME compatible BLKTIGER.ZIP<br>
+- ROMS: BLKTIGER.ZIP<br>
 Working 100%<br><br>
 Green Beret<br>
 <hr>
-- ROMS: MAME compatible GBERET.ZIP<br>
+- ROMS: GBERET.ZIP<br>
 Working 100%<br><br>
 Commando<br>
 <hr>
-- ROMS: MAME compatible COMMANDO.ZIP<br>
+- ROMS: COMMANDO.ZIP<br>
 Working 100%<br><br>
 Ghost'n'Goblins<br>
 <hr>
-- ROMS: MAME compatible GNG.ZIP<br>
+- ROMS: GNG.ZIP<br>
 Working 100%<br><br>
 Mikie<br>
 <hr>
-- ROMS: MAME compatible MIKIE.ZIP<br>
+- ROMS: MIKIE.ZIP<br>
 Working 100%<br><br>
 Shaolin's Road<br>
 <hr>
-- ROMS: MAME compatible SHAOLIN.ZIP<br>
+- ROMS: SHAOLIN.ZIP<br>
 Working 100%<br><br>
 Yie Ar Kung-Fu<br>
 <hr>
-- ROMS: MAME compatible YIEAR.ZIP<br>
+- ROMS: YIEAR.ZIP<br>
 Working 100%<br><br>
 Son Son<br>
 <hr>
-- ROMS: MAME compatible SONSON.ZIP<br>
+- ROMS: SONSON.ZIP<br>
 Working 100%<br><br>
 Asteroids<br>
 <hr>
-- ROMS: MAME compatible ASTEROID.ZIP<br>
+- ROMS: ASTEROID.ZIP<br>
 Working 95%<br>
 Basic analogic sound and samples<br>
 Sample list: 'explode1.wav', 'explode2.wav' and 'explode3.wav'.<br><br>
 Star Force<br>
 <hr>
-- ROMS: MAME compatible STARFORC.ZIP<br>
+- ROMS: STARFORC.ZIP<br>
 Working 90%<br>
 Missing sound<br><br>
 Tecmo Hardware<br>
 <hr>
 Rygar<br>
-- ROMS: MAME compatible RYGAR.ZIP<br>
+- ROMS: RYGAR.ZIP<br>
 Working 100%<br><br>
 Silk Worm<br>
-- ROMS: MAME compatible SILKWORM.ZIP<br>
+- ROMS: SILKWORM.ZIP<br>
 Working 100%<br><br>
 Sega System 1/2<br>
 <hr>
 Pitfall II<br>
-- ROMS: MAME compatible PITFALL2.ZIP<br>
+- ROMS: PITFALL2.ZIP<br>
 Working 100%<br><br>
 Teddy Boy Blues<br>
-- ROMS: MAME compatible TEDDYBB.ZIP<br>
+- ROMS: TEDDYBB.ZIP<br>
 Working 100%<br><br>
 Wonder Boy<br>
-- ROMS: MAME compatible WBOY.ZIP<br>
+- ROMS: WBOY.ZIP<br>
 Working 100%<br><br>
 Wonder Boy in Monster Land<br>
-- ROMS: MAME compatible WBML.ZIP<br>
+- ROMS: WBML.ZIP<br>
 Working 99%<br>
 Problems with some audio effects<br><br>
 Pooyan<br>
 <hr>
-- ROMS: MAME compatible POOYAN.ZIP<br>
+- ROMS: POOYAN.ZIP<br>
 Working 100%<br><br>
 Rally X Hardware<br>
 <hr>
 Jungler<br>
-- ROMS: MAME compatible JUNGLER.ZIP<br>
+- ROMS: JUNGLER.ZIP<br>
 Working 100%<br><br>
 Rally X<br>
-- ROMS: MAME compatible RALLYX.ZIP<br>
+- ROMS: RALLYX.ZIP<br>
 Working 100%<br>
 Sample list: 'bang.wav'.<br><br>
 New Rally X<br>
-- ROMS: MAME compatible NRALLYX.ZIP<br>
-Funcionando el 100%<br>
+- ROMS: NRALLYX.ZIP<br>
+Working 100%<br>
 Sample list: 'bang.wav'.<br><br>
 City Connection<br>
 <hr>
-- ROMS: MAME compatible CITYCON.ZIP<br>
+- ROMS: CITYCON.ZIP<br>
 Working 100%<br><br>
 Burger Time<br>
 <hr>
-- ROMS: MAME compatible BTIME.ZIP<br>
+- ROMS: BTIME.ZIP<br>
 Working 100%<br><br>
 Express Raider<br>
 <hr>
-- ROMS: MAME compatible ERAIDER.ZIP<br>
+- ROMS: EXPRRAID.ZIP<br>
 Working 100%<br><br>
 Super Basketball<br>
 <hr>
-- ROMS: MAME compatible SBASKETB.ZIP<br>
+- ROMS: SBASKETB.ZIP<br>
 Working 100%<br><br>
 Lady Bug<br>
 <hr>
-- ROMS: MAME compatible LADYBUG.ZIP<br>
+- ROMS: LADYBUG.ZIP<br>
 Working 100%<br><br>
 Tehkan World Cup<br>
 <hr>
-- ROMS: MAME compatible TEHKANWC.ZIP<br>
+- ROMS: TEHKANWC.ZIP<br>
 Working 99%<br>
 Problems CPU's syncronization<br><br>
 Popeye<br>
 <hr>
-- ROMS: MAME compatible POPEYE.ZIP<br>
+- ROMS: POPEYE.ZIP<br>
 Working 100%<br><br>
 Psychic 5<br>
 <hr>
-- ROMS: MAME compatible PSYCHIC5.ZIP<br>
+- ROMS: PSYCHIC5.ZIP<br>
 Working 96%<br>
 Missing Alpha render (background and sprites) and colour internsity.<br>
 Irem M62 Hardware<br>
 <hr>
 Kung-Fu Master<br>
-- ROMS: MAME compatible KUNGFUM.ZIP<br>
+- ROMS: KUNGFUM.ZIP<br>
 Working 100%<br><br>
 Spelunker<br>
-- ROMS: MAME compatible SPELUNKR.ZIP<br>
+- ROMS: SPELUNKR.ZIP<br>
 Working 100%<br><br>
 Spelunker II<br>
 - ROMS: MAME compatible SPELUNK2.ZIP<br>
 Working 100%<br><br>
 Lode Runner<br>
-- ROMS: MAME compatible LODERUN.ZIP<br>
+- ROMS: LODERUN.ZIP<br>
 Working 100%<br><br>
 Lode Runner II<br>
-- ROMS: MAME compatible LODERUN2.ZIP<br>
+- ROMS: LODERUN2.ZIP<br>
 Working 100%<br><br>
 Terra Cresta<br>
 <hr>
-- ROMS: MAME compatible TERRACRE.ZIP<br>
+- ROMS: TERRACRE.ZIP<br>
 Working 100%<br><br>
 Shoot Out!<br>
 <hr>
-- ROMS: MAME compatible SHOOTOUT.ZIP<br>
+- ROMS: SHOOTOUT.ZIP<br>
 Working 100%<br><br>
 Vigilante<br>
 <hr>
-- ROMS: MAME compatible VIGILANT.ZIP<br>
+- ROMS: VIGILANT.ZIP<br>
 Working 100%<br><br>
 Jackal<br>
 <hr>
-- ROMS: MAME compatible JACKAL.ZIP<br>
+- ROMS: JACKAL.ZIP<br>
 Working 100%<br><br>
 Bubble Bobble<br>
 <hr>
-- ROMS: MAME compatible BUBLBOBL.ZIP<br>
-Working 100%<br>
-Prehistoric Isle 1930<br>
+- ROMS: BUBLBOBL.ZIP<br>
+Working 100%<br><br>
+Prehistoric Isle in 1930<br>
 <hr>
-- ROMS: MAME compatible PREHISLE.ZIP<br>
-Working 40%, no sound, IRQ hack, no controls<br><br>
+- ROMS: PREHISLE.ZIP<br>
+Working 100%<br><br>
 Tiger Road Hardware<br>
 <hr>
 Tiger Road<br>
-- ROMS: MAME compatible TIGEROAD.ZIP<br>
+- ROMS: TIGEROAD.ZIP<br>
 Working 100%<br><br>
 F1 Dream<br>
-- ROMS: MAME compatible F1DREAM.ZIP<br>
+- ROMS: F1DREAM.ZIP<br>
 Working 100%, using bootleg version<br><br>
 Snow Bros<br>
 <hr>
-- ROMS: MAME compatible SNOWBROS.ZIP<br>
+- ROMS: SNOWBROS.ZIP<br>
 Working 99%, M68000 bugs<br><br>
 Toki<br>
 <hr>
-- ROMS: MAME compatible TOKI.ZIP<br>
-Working 95%, some problems with OKI6295<br><br>
+- ROMS: TOKI.ZIP<br>
+Working 95%, some problems with sound, M68000 bugs<br><br>
 Contra<br>
 <hr>
-- ROMS: MAME compatible CONTRA.ZIP<br>
-Working 99%, some bugs (maybe M6809 bugs)<br><br>
+- ROMS: CONTRA.ZIP<br>
+Working 99%, some graphics bugs<br><br>
 Mappy Hardware<br>
 <hr>
 Mappy<br>
-- ROMS: MAME compatible MAPPY.ZIP<br>
+- ROMS: MAPPY.ZIP<br>
 Working 100%<br><br>
 Dig-Dug II<br>
-- ROMS: MAME compatible DISGDUG2.ZIP<br>
+- ROMS: DIGDUG2.ZIP<br>
 Working 100%<br><br>
 Super Pacman<br>
-- ROMS: MAME compatible SUPERPAC.ZIP<br>
+- ROMS: SUPERPAC.ZIP<br>
 Working 100%<br><br>
 Rastan<br>
 <hr>
-- ROMS: MAME compatible RASTAN.ZIP<br>
+- ROMS: RASTAN.ZIP<br>
 Working 100%<br><br>
 Legendary Wings Hardware<br>
 <hr>
 Legendary Wings<br>
-- ROMS: MAME compatible LWINGS.ZIP<br>
+- ROMS: LWINGS.ZIP<br>
 Working 100%<br><br>
 Section Z<br>
-- ROMS: MAME compatible SECTIONZ.ZIP<br>
+- ROMS: SECTIONZ.ZIP<br>
 Working 100%<br><br>
 Trojan<br>
-- ROMS: MAME compatible TROJAN.ZIP<br>
+- ROMS: TROJAN.ZIP<br>
 Working 97%, basic ADPCM sound<br><br>
 Street Fighter<br>
 <hr>
-- ROMS: MAME compatible SF.ZIP<br>
+- ROMS: SF.ZIP<br>
 Working 90%, ADPCM missing<br>
 This driver uses A,S,D,Z,X and C keys as action buttons<br><br>
 Galaga Hardware<br>
 <hr>
 Galaga<br>
-- ROMS: MAME compatible GALAGA.ZIP<br>
+- ROMS: GALAGA.ZIP<br>
 Working 40%, problems with NAMCO custom IO's<br><br>
 Xain'd Sleena<br>
 <hr>
-- ROMS: MAME compatible XAIN.ZIP<br>
-Working 100%, missing M68705<br><br>
+- ROMS: XAIN.ZIP<br>
+Working 100%<br><br>
 Suna Hardware<br>
 <hr>
 Hard Head<br>
-- ROMS: MAME compatible HARDHEAD.ZIP<br>
+- ROMS: HARDHEAD.ZIP<br>
 Working 100%<br><br>
 Hard Head 2<br>
-- ROMS: MAME compatible HARDHED2.ZIP<br>
+- ROMS: HARDHED2.ZIP<br>
 Working 10%, just a started driver<br><br>
 NMK 16 Hardware<br>
 <hr>
-- Problems with OKI6295 (M68000 bugs)<br>
 Saboten Bombers<br>
-- ROMS: MAME compatible SABOTENB.ZIP<br>
+- ROMS: SABOTENB.ZIP<br>
 Working 100%<br><br>
 Bomb Jack Twin<br>
-- ROMS: MAME compatible BJTWIN.ZIP<br>
+- ROMS: BJTWIN.ZIP<br>
 Working 100%<br><br>
 Knuckle Joe<br>
 <hr>
-- ROMS: MAME compatible KNCLJOE.ZIP<br>
+- ROMS: KNCLJOE.ZIP<br>
 Working 100%<br><br>
 Wardner<br>
 <hr>
-- ROMS: MAME compatible WARDNER.ZIP<br>
+- ROMS: WARDNER.ZIP<br>
 Working 100%<br><br>
 Gaelco Hardware<br>
 <hr>
 Big Karnak<br>
-- ROMS: MAME compatible BIGKARNC.ZIP<br>
+- ROMS: BIGKARNC.ZIP<br>
 Working 100%<br><br>
 Thunder Hoop<br>
-- ROMS: MAME compatible THOOP.ZIP<br>
+- ROMS: THOOP.ZIP<br>
 Working 100%<br><br>
 Exed Exes<br>
 <hr>
-- ROMS: MAME compatible EXEDEXES.ZIP<br>
+- ROMS: EXEDEXES.ZIP<br>
 Working 100%<br><br>
 Gun.Smoke Hardware<br>
 <hr>
 Gun.Smoke<br>
-- ROMS: MAME compatible GUNSMOKE.ZIP<br>
+- ROMS: GUNSMOKE.ZIP<br>
 Working 100%<br><br>
 1943: The Battle of Midway<br>
-- ROMS: MAME compatible 1943.ZIP<br>
+- ROMS: 1943.ZIP<br>
 Working 100%<br><br>
 1943 Kai: Midway Kaisen<br>
-- ROMS: MAME compatible 1943KAI.ZIP<br>
+- ROMS: 1943KAI.ZIP<br>
 Working 100%<br><br>
 1942<br>
 <hr>
-- ROMS: MAME compatible 1942.ZIP<br>
+- ROMS: 1942.ZIP<br>
 Working 100%<br><br>
 Jail Break<br>
 <hr>
-- ROMS: MAME compatible JAILBREK.ZIP<br>
+- ROMS: JAILBREK.ZIP<br>
 Working 100%<br><br>
 Circus Charlie<br>
 <hr>
-- ROMS: MAME compatible CIRCUSC.ZIP<br>
+- ROMS: CIRCUSC.ZIP<br>
 Working 100%<br><br>
 Iron Horse<br>
 <hr>
-- ROMS: MAME compatible IRONHORS.ZIP<br>
+- ROMS: IRONHORS.ZIP<br>
 Working 100%<br><br>
 Irem M72 Hardware<br>
 <hr>
 R-Type<br>
-- ROMS: MAME compatible RTYPE.ZIP<br>
-Working 40%, missing sound and controls. NEC v30 bugs<br><br>
+- ROMS: RTYPE.ZIP<br>
+Working 70%, missing sound and controls, some sprite problems and missing some NEC v30 opcodes<br><br>
 Break Thru Hardware<br>
 <hr>
 Break Thru<br>
-- ROMS: MAME compatible BRKTHRU.ZIP<br>
+- ROMS: BRKTHRU.ZIP<br>
 Working 100%<br><br>
 Darwin 4078<br>
-- ROMS: MAME compatible DARWIN.ZIP<br>
+- ROMS: DARWIN.ZIP<br>
 Working 100%<br><br>
 Super Real Darwin<br>
 <hr>
-- ROMS: MAME compatible SRDARWIN.ZIP<br>
+- ROMS: SRDARWIN.ZIP<br>
 Working 100%<br><br>
 Double Dragon Hardware<br>
 <hr>
 Double Dragon<br>
-- ROMS: MAME compatible DDRAGON.ZIP<br>
+- ROMS: DDRAGON.ZIP<br>
 Working 100%<br><br>
 Double Dragon II - The Revenge<br>
-- ROMS: MAME compatible DDRAGON2.ZIP<br>
+- ROMS: DDRAGON2.ZIP<br>
 Working 100%<br><br>
 Mr. Do!<br>
 <hr>
-- ROMS: MAME compatible MRDO.ZIP<br>
+- ROMS: MRDO.ZIP<br>
 Working 100%<br><br>
 Epos Hardware<br>
 <hr>
 The Glob<br>
-- ROMS: MAME compatible THEGLOB.ZIP<br>
+- ROMS: THEGLOB.ZIP<br>
 Working 100%<br><br>
 Super Glob<br>
-- ROMS: MAME compatible SUPRGLOB.ZIP<br>
+- ROMS: SUPRGLOB.ZIP<br>
 Working 100%<br><br>
 Slap Fight Hardware<br>
 <hr>
-- Missing M68705 CPU<br>
 Tiger Heli<br>
-- ROMS: MAME compatible TIGERH.ZIP<br>
+- ROMS: TIGERH.ZIP<br>
 Working 100%<br><br>
 Slap Fight<br>
-- ROMS: MAME compatible SLAPFGTR.ZIP<br>
+- ROMS: SLAPFIGH.ZIP<br>
 Working 100%<br><br>
 The Legend of Kage<br>
 <hr>
-- ROMS: MAME compatible LKAGE.ZIP<br>
-Working 100%, missing M68705 CPU using bootleg<br><br>
+- ROMS: LKAGE.ZIP<br>
+Working 100%<br><br>
 Cabal<br>
 <hr>
-- ROMS: MAME compatible CABAL.ZIP<br>
+- ROMS: CABAL.ZIP<br>
 Working 95%, bugs on M68000 core<br><br>
 Capcom Play System 1 - CPS1
 <hr>
 Ghouls and Ghosts<br>
-- ROMS: MAME compatible GHOULS.ZIP<br>
+- ROMS: GHOULS.ZIP<br>
 Working 100%<br><br>
 Final Fight<br>
-- ROMS: MAME compatible FFIGHT.ZIP<br>
+- ROMS: FFIGHT.ZIP<br>
 Working 100%<br><br>
 The King of Dragons<br>
-- ROMS: MAME compatible KOD.ZIP<br>
+- ROMS: KOD.ZIP<br>
 Working 100%, missing third player controls.<br><br>
 Street Fighter II - The World Warrior<br>
-- ROMS: MAME compatible SF2.ZIP<br>
+- ROMS: SF2.ZIP<br>
 Working 95%, missing some controls and missing scroll row<br><br>
 Strider<br>
-- ROMS: MAME compatible STRIDER.ZIP<br>
+- ROMS: STRIDER.ZIP<br>
 Working 100%<br><br>
 Three Wonders<br>
-- ROMS: MAME compatible 3WONDERS.ZIP<br>
+- ROMS: 3WONDERS.ZIP<br>
 Working 100%<br><br>
 Captain Commando<br>
-- ROMS: MAME compatible CCOMANDO.ZIP<br>
+- ROMS: CCOMANDO.ZIP<br>
 Working 100%<br><br>
 Knights of the Round<br>
-- ROMS: MAME compatible KNIGHTS.ZIP<br>
+- ROMS: KNIGHTS.ZIP<br>
 Working 100%<br><br>
 Street Fighter II': Champion Edition<br>
-- ROMS: MAME compatible SF2CE.ZIP<br>
+- ROMS: SF2CE.ZIP<br>
 Working 95%, missing some controls and missing scroll row<br><br>
 Cadillacs and Dinosaurs<br>
 Knights of the Round<br>
-- ROMS: MAME compatible DINO.ZIP<br>
+- ROMS: DINO.ZIP<br>
 Working 100%<br><br>
 The Punisher<br>
-- ROMS: MAME compatible PUNISHER.ZIP<br>
+- ROMS: PUNISHER.ZIP<br>
+Working 100%<br><br>
+Sega System 16A<br>
+<hr>
+-No sound<br>
+Shinobi<br>
+- ROMS: SHINOBI.ZIP<br>
+Working 90%<br><br>
+Alex Kidd<br>
+- ROMS: ALEXKIDD.ZIP<br>
+Working 90%<br><br>
+Fantasy Zone<br>
+- ROMS: FANTZONE.ZIP<br>
+Working 90%<br><br>
+Time Pilot '84<br>
+<hr>
+- ROMS: TP84.ZIP<br>
+Working 99%, missing RC filters<br><br>
+Tutankham<br>
+<hr>
+- ROMS: TUTANKHM.ZIP<br>
+Working 100%<br><br>
+Pang<br>
+<hr>
+- ROMS: PANG.ZIP<br>
+Working 95%, missing YM2413<br><br>
+UPL Hardware<br>
+<hr>
+- Missing some sprite effects<br>
+Ninja Kid II<br>
+- ROMS: NINJAKD2.ZIP<br>
+Working 90%, missing ADPCM sound<br><br>
+Ark Area<br>
+- ROMS: ARKAREA.ZIP<br>
+Working 95%<br><br>
+Mutant Night<br>
+- ROMS: MNIGHT.ZIP<br>
+Working 95%<br><br>
+Sky Kid<br>
+<hr>
+- ROMS: SKYKID.ZIP<br>
+Working 100%<br><br>
+Namco System 86<br>
+<hr>
+Rolling Thunder<br>
+- ROMS: RTHUNDER.ZIP<br>
+Working 95%, ADPCM sound missing<br><br>
+Hopping Mappy<br>
+- ROMS: HOPMAPPY.ZIP<br>
+Working 100%<br><br>
+Sky Kid Deluxe<br>
+- ROMS: SKYKIDDX.ZIP<br>
+Working 100%<br><br>
+Roc'n Rope<br>
+<hr>
+- ROMS: ROCNROPE.ZIP<br>
+Working 100%<br><br>
+Repulse<br>
+<hr>
+- ROMS: REPULSE.ZIP<br>
+Working 100%<br><br>
+The NewZealand Story Hardware<br>
+<hr>
+The NewZealand Story<br>
+- ROMS: TNZS.ZIP<br>
+Working 100%<br><br>
+Insector X<br>
+- ROMS: INSECTX.ZIP<br>
+Working 100%<br><br>
+Pacland<br>
+<hr>
+- ROMS: PACLAND.ZIP<br>
+Working 100%<br><br>
+Mario Bros.<br>
+<hr>
+- ROMS: MARIO.ZIP<br>
+Working 80%, no sound<br><br>
+Solomon Key<br>
+<hr>
+- ROMS: SOLOMON.ZIP<br>
+Working 100%<br><br>
+Combat School<br>
+<hr>
+- ROMS: COMBATSC.ZIP<br>
+Working 100%<br><br>
+Heavy Unit<br>
+<hr>
+- ROMS: HVYUNIT.ZIP<br>
+Working 100%<br><br>
+SNK 68K Hardware<br>
+<hr>
+P.O.W. - Prisoners of War<br>
+- ROMS: POW.ZIP<br>
+Working 100%<br><br>
+Street Smart<br>
+- ROMS: STREETSM.ZIP<br>
+Working 100%<br><br>
+Jaleco Megasystem<br>
+<hr>
+P47 - Phantom Fighter<br>
+- ROMS: P47.ZIP<br>
+Working 100%<br><br>
+Rodland<br>
+- ROMS: RODLAND.ZIP<br>
+Working 60%, graphics problems and some 68000 bugs<br><br>
+Saint Dragon<br>
+- ROMS: STDRAGON.ZIP<br>
+Working 20%, don't work...<br><br>
+Time Pilot<br>
+<hr>
+- ROMS: TIMEPLT.ZIP<br>
 Working 100%<br><br>
 <b>3-. Contribute</b><br>
 <hr>
@@ -543,7 +656,7 @@ information.<br>
 <hr>
 The Coleco and Pooyan has been rewrited from the originals by Michael Franzen.<br>
 The CPS1 has been rewrited from the original by Tomas Walker.<br>
-The rest of the drivers the Z80 core, M6502 core, M6809 core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core and LR35902 core are writed by me, Leniad.<br>
+The rest of the drivers the Z80 core, M6502 core, M6809 core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core, LR35902 core, M6805 core and MCS51 core are writed by me, Leniad.br>
 AY-3-8912 emulator is a conversion from Chris Cowley, but the original emulator come from MAME team.<br>
 SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255 and OKI6295 emulators are a delphi conversion writed by me from MAME original.<br>
 TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME.<br>
