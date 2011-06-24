@@ -59,7 +59,7 @@ Since version 0.9 there is the possibility of booting DSP with the list of games
 In general configuration you can choose this way of booting, or the old way (last driver load).<br><br>
 <b>2-. Drivers</b><br>
 <hr><br>
-<b>2.1 COMPUTERS</b><br>
+<b>2.1 Computers</b><br>
 <hr><br>
 <b>Spectrum 48k, 128K and Plus+3 </b><br>
 <hr>
@@ -90,7 +90,7 @@ Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br><br>
      -Some disk protections are not working.<br>
      -Sometimes the driver just reset<br>
      -Some video effect are missing (M6845 video)<br><br>
-<b>2.2 CONSOLES</b><br>
+<b>2.2 Consoles</b><br>
 <hr><br>
 <b>NES</b><br>
 <hr>
@@ -106,14 +106,14 @@ Rewriting process.<br><br>
 -ROM: The default ROM is 'COLECO.ZIP' and within 'COLECO.ROM'. Without it can not begin the emulation.<br>
 -Joystick: The numbers on the keyboard from '1'to '0' emulate the keys on the two joysticks. Keys 'Q' and 'W' emulate the Keys '{{{*}}}' and '#' of the two joysticks also, and the arrow keys to 'CTRL' and 'ALT' left emulate the main joystick (The secondary joystick does not have keys assigned). Does not support (even) the special joysticks.<br>
 -Cartridges: It supports the standard game cartridges (not expansion cartirdges), in 'ROM' and 'COL'. Support ZIP files, of course.<br><br>
-<b>2.3 ARCADE</b><br>
+<b>2.3 Arcade</b><br>
 <hr><br>
-<b>2.3.1 SAMPLES</b><hr>
+<b>2.3.1 Samples</b><hr>
 Some games, given the difficulty of emulating old sound systems, uses 'samples'. Such files are portions of digitized sound, played instead of emulating the sound system.<br>
 Currently only 'Asteroids', 'Donkey Kong', 'Galaxy' and 'Rally X / New Rally X' use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
 <br>
-<b>2.3.2 EMULATED SYSTEMS</b><hr><br>
+<b>2.3.2 Emulated Systems</b><hr><br>
 <b>Phoenix</b><br>
 <hr>
 - ROMS: PHOENIX.ZIP<br>
