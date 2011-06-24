@@ -114,16 +114,16 @@ Currently only 'Asteroids', 'Donkey Kong', 'Galaxy' and 'Rally X / New Rally X' 
 If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
 <hr><br>
 <b>2.3.2 EMULATED SYSTEMS</b><hr>
-Phoenix<br>
+<b>Phoenix</b><br>
 <hr>
 - ROMS: PHOENIX.ZIP<br>
 Preliminary analog sound, music sound (TMS36XX) and digital sound are OK.<br>
 Working 99,1%<br><br>
-Bombjack<br>
+<b>Bombjack</b><br>
 <hr>
 - ROMS: BOMBJACK.ZIP<br>
 Working 100%<br><br>
-Pacman Hardware<br>
+<b>Pacman Hardware</b><br>
 <hr>
 Pac-man<br>
 - ROMS: PACMAN.ZIP<br>
@@ -131,11 +131,11 @@ Working 100%<br><br>
 Ms. Pac-man<br>
 - ROMS: MSPACMAN.ZIP<br>
 Working 100%<br><br>
-Mysterious Stones<br>
+<b>Mysterious Stones</b><br>
 <hr>
 - ROMS: MYSTSTON.ZIP<br>
 Working 100%<br><br>
-Galaxian Hardware<br>
+<b>Galaxian Hardware</b><br>
 <hr>
 Frogger<br>
 - ROMS: FROGGER.ZIP<br>
@@ -150,7 +150,7 @@ Working 100%<br><br>
 Moon Cresta<br>
 - ROMS: MOONCRST.ZIP<br>
 Working 90%, no sound<br><br>
-Donkey Kong<br>
+<b>Donkey Kong</b><br>
 <hr>
 - ROMS: DKONG.ZIP<br>
 Working 95%, sound with samples<br>
@@ -158,50 +158,50 @@ Sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV', 'TUNE04.WAV', 'TUNE05.WAV'
 'TUNE06.WAV', 'TUNE07.WAV', 'TUNE08.WAV', 'TUNE09.WAV', 'TUNE0b.WAV', 'TUNE0c.WAV', 
 'TUNE0d.WAV', 'TUNE0e.WAV', 'TUNE0f.WAV', 'EFFECT01.WAV', 'EFFECT02.WAV', 'EFFECT03.WAV', 
 'EFFECT04.WAV', 'EFFECT05.WAV', 'INTERUPT.WAV' and 'RUN01.WAv'<br><br>
-Black Tiger<br>
+<b>Black Tiger</b><br>
 <hr>
 - ROMS: BLKTIGER.ZIP<br>
 Working 100%<br><br>
-Green Beret<br>
+<b>Green Beret</b><br>
 <hr>
 - ROMS: GBERET.ZIP<br>
 Working 100%<br><br>
-Commando<br>
+<b>Commando</b><br>
 <hr>
 - ROMS: COMMANDO.ZIP<br>
 Working 100%<br><br>
-Ghost'n'Goblins<br>
+<b>Ghost'n'Goblins</b><br>
 <hr>
 - ROMS: GNG.ZIP<br>
 Working 100%<br><br>
-Mikie<br>
+<b>Mikie</b><br>
 <hr>
 - ROMS: MIKIE.ZIP<br>
 Working 100%<br><br>
-Shaolin's Road<br>
+<b>Shaolin's Road</b><br>
 <hr>
 - ROMS: SHAOLIN.ZIP<br>
 Working 100%<br><br>
-Yie Ar Kung-Fu<br>
+<b>Yie Ar Kung-Fu</b><br>
 <hr>
 - ROMS: YIEAR.ZIP<br>
 Working 100%<br><br>
-Son Son<br>
+<b>Son Son</b><br>
 <hr>
 - ROMS: SONSON.ZIP<br>
 Working 100%<br><br>
-Asteroids<br>
+<b>Asteroids</b><br>
 <hr>
 - ROMS: ASTEROID.ZIP<br>
 Working 95%<br>
 Basic analogic sound and samples<br>
 Sample list: 'explode1.wav', 'explode2.wav' and 'explode3.wav'.<br><br>
-Star Force<br>
+<b>Star Force</b><br>
 <hr>
 - ROMS: STARFORC.ZIP<br>
 Working 90%<br>
 Missing sound<br><br>
-Tecmo Hardware<br>
+<b>Tecmo Hardware</b><br>
 <hr>
 Rygar<br>
 - ROMS: RYGAR.ZIP<br>
@@ -209,7 +209,7 @@ Working 100%<br><br>
 Silk Worm<br>
 - ROMS: SILKWORM.ZIP<br>
 Working 100%<br><br>
-Sega System 1/2<br>
+<b>Sega System 1/2</b><br>
 <hr>
 Pitfall II<br>
 - ROMS: PITFALL2.ZIP<br>
@@ -224,11 +224,11 @@ Wonder Boy in Monster Land<br>
 - ROMS: WBML.ZIP<br>
 Working 99%<br>
 Problems with some audio effects<br><br>
-Pooyan<br>
+<b>Pooyan</b><br>
 <hr>
 - ROMS: POOYAN.ZIP<br>
 Working 100%<br><br>
-Rally X Hardware<br>
+<b>Rally X Hardware</b><br>
 <hr>
 Jungler<br>
 - ROMS: JUNGLER.ZIP<br>
@@ -241,41 +241,41 @@ New Rally X<br>
 - ROMS: NRALLYX.ZIP<br>
 Working 100%<br>
 Sample list: 'bang.wav'.<br><br>
-City Connection<br>
+<b>City Connection</b><br>
 <hr>
 - ROMS: CITYCON.ZIP<br>
 Working 100%<br><br>
-Burger Time<br>
+<b>Burger Time</b><br>
 <hr>
 - ROMS: BTIME.ZIP<br>
 Working 100%<br><br>
-Express Raider<br>
+<b>Express Raider</b><br>
 <hr>
 - ROMS: EXPRRAID.ZIP<br>
 Working 100%<br><br>
-Super Basketball<br>
+<b>Super Basketball</b><br>
 <hr>
 - ROMS: SBASKETB.ZIP<br>
 Working 100%<br><br>
-Lady Bug<br>
+<b>Lady Bug</b><br>
 <hr>
 - ROMS: LADYBUG.ZIP<br>
 Working 100%<br><br>
-Tehkan World Cup<br>
+<b>Tehkan World Cup</b><br>
 <hr>
 - ROMS: TEHKANWC.ZIP<br>
 Working 99%<br>
 Problems CPU's syncronization<br><br>
-Popeye<br>
+<b>Popeye</b><br>
 <hr>
 - ROMS: POPEYE.ZIP<br>
 Working 100%<br><br>
-Psychic 5<br>
+<b>Psychic 5</b><br>
 <hr>
 - ROMS: PSYCHIC5.ZIP<br>
 Working 96%<br>
 Missing Alpha render (background and sprites) and colour internsity.<br>
-Irem M62 Hardware<br>
+<b>Irem M62 Hardware</b><br>
 <hr>
 Kung-Fu Master<br>
 - ROMS: KUNGFUM.ZIP<br>
@@ -292,7 +292,7 @@ Working 100%<br><br>
 Lode Runner II<br>
 - ROMS: LODERUN2.ZIP<br>
 Working 100%<br><br>
-Terra Cresta<br>
+<b>Terra Cresta</b><br>
 <hr>
 - ROMS: TERRACRE.ZIP<br>
 Working 100%<br><br>
