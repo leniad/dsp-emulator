@@ -113,6 +113,7 @@ Some games, given the difficulty of emulating old sound systems, uses 'samples'.
 Currently only 'Asteroids', 'Donkey Kong', 'Galaxy' and 'Rally X / New Rally X' use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
 <hr><br>
+<b>2.3.2 EMULATED SYSTEMS</b><hr>
 Phoenix<br>
 <hr>
 - ROMS: PHOENIX.ZIP<br>
