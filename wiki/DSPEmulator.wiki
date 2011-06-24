@@ -274,7 +274,7 @@ Working 100%<br><br>
 <hr>
 - ROMS: PSYCHIC5.ZIP<br>
 Working 96%<br>
-Missing Alpha render (background and sprites) and colour internsity.<br><br>
+Missing Alpha render (background and sprites) and colour intensity.<br><br>
 <b>Irem M62 Hardware</b><br>
 <hr>
 Kung-Fu Master<br>
@@ -492,7 +492,7 @@ Working 100%<br><br>
 <hr>
 - ROMS: CABAL.ZIP<br>
 Working 95%, bugs on M68000 core<br><br>
-Capcom Play System 1 - CPS1
+<b>Capcom Play System 1 - CPS1</b>
 <hr>
 Ghouls and Ghosts<br>
 - ROMS: GHOULS.ZIP<br>
