@@ -113,19 +113,17 @@ Currently only some drivers use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
 <br>
 <b>2.3.2 Emulated Systems</b><hr><br>
-||*Name*                       || *ROM*          || *Completed*  || *Notes*||
+|| *Name*                      || *ROM*          || *Completed*  || *Notes*||
 ||Phoenix                    || PHOENIX.ZIP  ||      99,1  || Preliminary analog sound, music (TMS36XX) and digital sound are OK||
 ||Bombjack                   || BOMBJACK.ZIP ||     100    ||
 ||Pac-man                    || PACMAN.ZIP   ||     100    || Pac-man Hardware||
 ||Ms. Pac-man                || MSPACMAN.ZIP ||     100    || Pac-man Hardware||
-Mysterious Stones          | MYSTSTON.ZIP |     100    |<br>
-Frogger                    | FROGGER.ZIP  |     100    | Galaxian Hardware<br>
-Galaxian                   | GALAXIAN.ZIP |      95    | Galaxian Hardware
-                                                       | Partial sound with samples, sample list: 'shot.wav', 'death.wav' and 'back.wav'<br>
-Jump Bug                   | JUMPBUG.ZIP  |     100    | Galaxian Hardware<br>
-Moon Cresta                | MOONCRST.ZIP |      90    | Galaxian Hardware
-                                                       | No sound<br>
-Scramble                   | SCRAMBLE.ZIP |     100    | Galaxian Hardware<br>
+||Mysterious Stones          || MYSTSTON.ZIP ||     100    ||
+||Frogger                    || FROGGER.ZIP  ||     100    || Galaxian Hardware||
+||Galaxian                   || GALAXIAN.ZIP ||      95    || Galaxian Hardware<br>Partial sound with samples, sample list: 'shot.wav', 'death.wav' and 'back.wav'||
+||Jump Bug                   || JUMPBUG.ZIP  ||     100    || Galaxian Hardware||
+||Moon Cresta                || MOONCRST.ZIP ||      90    || Galaxian Hardware<br>No sound||
+||Scramble                   || SCRAMBLE.ZIP ||     100    || Galaxian Hardware||
 Super Cobra                | SCOBRA.ZIP   |     100    | Galaxian Hardware<br>
 Amidar                     | AMIDAR.ZIP   |     100    | Galaxian Hardware<br>
 Donkey Kong                | DKONG.ZIP    |      95    | Samples sound, sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV',
