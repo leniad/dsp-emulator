@@ -124,80 +124,70 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Jump Bug                   || JUMPBUG.ZIP  ||     100    || Galaxian Hardware||
 ||Moon Cresta                || MOONCRST.ZIP ||      90    || Galaxian Hardware<br>No sound||
 ||Scramble                   || SCRAMBLE.ZIP ||     100    || Galaxian Hardware||
-Super Cobra                | SCOBRA.ZIP   |     100    | Galaxian Hardware<br>
-Amidar                     | AMIDAR.ZIP   |     100    | Galaxian Hardware<br>
-Donkey Kong                | DKONG.ZIP    |      95    | Samples sound, sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV',
-                                                       | 'TUNE04.WAV', 'TUNE05.WAV', 'TUNE06.WAV', 'TUNE07.WAV', 'TUNE08.WAV', 'TUNE09.WAV',
-                                                       | 'TUNE0b.WAV', 'TUNE0c.WAV', 'TUNE0d.WAV', 'TUNE0e.WAV', 'TUNE0f.WAV',
-                                                       | 'EFFECT01.WAV', 'EFFECT02.WAV', 'EFFECT03.WAV', 'EFFECT04.WAV', EFFECT05.WAV',
-                                                       | 'INTERUPT.WAV' and 'run01.WAv'<br>
-Black Tiger                | BLKTIGER.ZIP |     100    |<br>
-Green Beret                | GBERET.ZIP   |     100    |<br>
-Commando                   | COMMANDO.ZIP |     100    |<br>
-Ghost'n'Goblins            | GNG.ZIP      |     100    |<br>
-Mikie                      | MIKIE.ZIP    |     100    |<br>
-Shaolin's Road             | SHAOLIN.ZIP  |     100    |<br>
-Yie Ar Kung-Fu             | YIEAR.ZIP    |     100    |<br>
-Son Son                    | SONSON.ZIP   |     100    |<br>
-Asteroids                  | ASTEROID.ZIP |      95    | Basic analogic sound and samples, sample list: 'explode1.wav', 'explode2.wav'
-                                                       | and 'explode3.wav'<br>
-Star Force                 | STARFORC.ZIP |      90    | No sound<br>
-Rygar                      | RYGAR.ZIP    |     100    | Tecmo Hardware<br>
-Silk Worm                  | SILKWORM.ZIP |     100    | Tecmo Hardware<br>
-Pitfall II                 | PITFALL2.ZIP |     100    | Sega System 1/2<br>
-Teddy Boy Blues            | TEDDYBB.ZIP  |     100    | Sega System 1/2<br>
-Wonder Boy                 | WBOY.ZIP     |     100    | Sega System 1/2<br>
-Wonder Boy in Monster Land | WBML.ZIP     |      99    | Sega System 1/2
-                                                       | Problems with some audio effects<br>
-Pooyan                     | POOYAN.ZIP   |     100    |<br>
-Jungler                    | JUNGLER.ZIP  |     100    | Rally X Hardware <br>
-Rally X                    | RALLYX.ZIP   |     100    | Rally X Hardware
-                                                       | Sample list: 'bang.wav'<br>
-New Rally X                | NRALLYX.ZIP  |     100    | Rally X Hardware
-                                                       | Sample list: 'bang.wav'<br>
-City Connection            | CITYCON.ZIP  |     100    |<br>
-Burger Time                | BTIME.ZIP    |     100    |<br>
-Express Raider             | EXPRRAID.ZIP |     100    |<br>
-Super Basketball           | SBASKETB.ZIP |     100    |<br>
-Lady Bug                   | LADYBUG.ZIP  |     100    |<br>
-Tehkan World Cup           | TEHKANWC.ZIP |      99    | Problem with CPUs syncronization<br>
-Popeye                     | POPEYE.ZIP   |     100    |<br>
-Psychic 5                  | PSYCHIC5.ZIP |      96    | Missing Alpha render (background and sprites) and colour intensity<br>
-Kung-Fu Master             | KUNGFUM.ZIP  |     100    | Irem M62 Hardware<br>
-Spelunker                  | SPELUNKR.ZIP |     100    | Irem M62 Hardware<br>
-Spelunker II               | SPELUNK2.ZIP |     100    | Irem M62 Hardware<br>
-Lode Runner                | LODERUN.ZIP  |     100    | Irem M62 Hardware<br>
-Lode Runner II             | LODERUN2.ZIP |     100    | Irem M62 Hardware<br>
-Terra Cresta               | TERRACRE.ZIP |     100    |<br>
-Shoot Out!                 | SHOOTOUT.ZIP |     100    |<br>
-Vigilante                  | VIGILANT.ZIP |     100    |<br>
-Jackal                     | JACKAL.ZIP   |     100    |<br>
-Bubble Bobble              | BUBLBOBL.ZIP |     100    |<br>
-Prehistoric Isle in 1930   | PREHISLE.ZIP |     100    |<br>
-Tiger Road                 | TIGEROAD.ZIP |     100    | Tiger Road Hardware<br>
-F1 Dream                   | F1DREAM.ZIP  |     100    | Tiger Road Hardware
-                                                       | Using bootleg version<br>
-Snow Bros                  | SNOWBROS.ZIP |      99    | Bugs in M68000 core?<br>
-Toki                       | TOKI.ZIP     |      95    | Some problems with sound, M68000 core bugs?<br>
-Contra                     | CONTRA.ZIP   |      99    | Some graphics bugs<br>
-Mappy                      | MAPPY.ZIP    |     100    | Mappy Hardware<br>
-Dig-Dug II                 | DIGDUG2.ZIP  |     100    | Mappy Hardware<br>
-Super Pacman               | SUPERPAC.ZIP |     100    | Mappy Hardware<br>
-Rastan                     | RASTAN.ZIP   |     100    |<br>
-Legendary Wings            | LWINGS.ZIP   |     100    | Legendary Wings Hardware<br>
-Section Z                  | SECTIONZ.ZIP |     100    | Legendary Wings <br>Hardware<br>
-Trojan                     | TROJAN.ZIP   |      97    | Legendary Wings Hardware
-                                                       | Basic ADPCM sound<br>
-Street Fighter             | SF.ZIP       |      95    | Missing ADPCM sound<br>
-Galaga                     | GALAGA.ZIP   |     100    | Galaga Hardware<br>
-Xain'd Sleena              | XSLEENA.ZIP  |     100    |<br>
-Hard Head                  | HARDHEAD.ZIP |     100    | Suna Hardware<br>
-Hard Head 2                | HARDHED2.ZIP |      10    | Basic driver<br>
-Saboten Bombers            | SABOTENB.ZIP |     100    | NMK 16 Hardware<br>
-Bomb Jack Twin             | BJTWIN.ZIP   |     100    | NMK 16 Hardware<br>
-Knuckle Joe                | KNCLJOE.ZIP  |     100    |<br>
-Wardner                    | WARDNER.ZIP  |     100    |<br>
-Big Karnak                 | BIGKARNC.ZIP |     100    | Gaelco Hardware<br>
+||Super Cobra                || SCOBRA.ZIP   ||     100    || Galaxian Hardware||
+||Amidar                     || AMIDAR.ZIP   ||     100    || Galaxian Hardware||
+||Donkey Kong                || DKONG.ZIP    ||      95    || Samples sound, sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV',            'TUNE04.WAV', 'TUNE05.WAV', 'TUNE06.WAV', 'TUNE07.WAV', 'TUNE08.WAV', 'TUNE09.WAV', 'TUNE0b.WAV', 'TUNE0c.WAV', 'TUNE0d.WAV', 'TUNE0e.WAV', 'TUNE0f.WAV', 'EFFECT01.WAV', 'EFFECT02.WAV', 'EFFECT03.WAV', 'EFFECT04.WAV', EFFECT05.WAV','INTERUPT.WAV' and 'run01.WAv'||
+||Black Tiger                || BLKTIGER.ZIP ||     100    ||
+||Green Beret                || GBERET.ZIP   ||     100    ||
+||Commando                   || COMMANDO.ZIP ||     100    ||
+||Ghost'n'Goblins            || GNG.ZIP      ||     100    ||
+||Mikie                      || MIKIE.ZIP    ||     100    ||
+||Shaolin's Road             || SHAOLIN.ZIP  ||     100    ||
+||Yie Ar Kung-Fu             || YIEAR.ZIP    ||     100    ||
+||Son Son                    || SONSON.ZIP   ||     100    ||
+||Asteroids                  || ASTEROID.ZIP ||      95    | Basic analogic sound and samples, sample list: 'explode1.wav', 'explode2.wav' and 'explode3.wav'||
+||Star Force                 || STARFORC.ZIP ||      90    || No sound||
+||Rygar                      || RYGAR.ZIP    ||     100    || Tecmo Hardware||
+||Silk Worm                  || SILKWORM.ZIP ||     100    || Tecmo Hardware||
+||Pitfall II                 || PITFALL2.ZIP ||    100    || Sega System 1/2||
+||Teddy Boy Blues            || TEDDYBB.ZIP  ||     100    || Sega System 1/2||
+||Wonder Boy                 || WBOY.ZIP     ||     100    || Sega System 1/2||
+||Wonder Boy in Monster Land || WBML.ZIP     ||      99    || Sega System 1/2<br>Problems with some audio effects||
+||Pooyan                     || POOYAN.ZIP   ||     100    ||
+||Jungler                    || JUNGLER.ZIP  ||     100    || Rally X Hardware||
+||Rally X                    || RALLYX.ZIP   ||     100    | Rally X Hardware<br>Sample list: 'bang.wav'||
+||New Rally X                || NRALLYX.ZIP  ||     100    | Rally X Hardware<br>Sample list: 'bang.wav'||
+||City Connection            || CITYCON.ZIP  ||     100    ||
+||Burger Time                || BTIME.ZIP    ||     100    ||
+||Express Raider             || EXPRRAID.ZIP ||     100    ||
+||Super Basketball           || SBASKETB.ZIP ||     100    ||
+||Lady Bug                   || LADYBUG.ZIP  ||     100    ||
+||Tehkan World Cup           || TEHKANWC.ZIP ||      99    || Problem with CPUs syncronization||
+||Popeye                     || POPEYE.ZIP   ||     100    ||
+||Psychic 5                  || PSYCHIC5.ZIP ||      96    || Missing Alpha render (background and sprites) and colour intensity||
+||Kung-Fu Master             || KUNGFUM.ZIP  ||     100    || Irem M62 Hardware||
+||Spelunker                  || SPELUNKR.ZIP ||     100    || Irem M62 Hardware||
+||Spelunker II               || SPELUNK2.ZIP ||     100    || Irem M62 Hardware||
+||Lode Runner                || LODERUN.ZIP  ||     100    || Irem M62 Hardware||
+||Lode Runner II             || LODERUN2.ZIP ||     100    | Irem M62 Hardware||
+||Terra Cresta               || TERRACRE.ZIP ||     100    ||
+||Shoot Out!                 || SHOOTOUT.ZIP ||     100    ||
+||Vigilante                  || VIGILANT.ZIP ||     100    ||
+||Jackal                     || JACKAL.ZIP   ||     100    ||
+||Bubble Bobble              || BUBLBOBL.ZIP ||     100    ||
+||Prehistoric Isle in 1930   || PREHISLE.ZIP ||     100    ||
+||Tiger Road                 || TIGEROAD.ZIP ||     100    || Tiger Road Hardware||
+||F1 Dream                   || F1DREAM.ZIP  ||     100    || Tiger Road Hardware<br>Using bootleg version||
+||Snow Bros                  || SNOWBROS.ZIP ||      99    || Bugs in M68000 core?||
+||Toki                       || TOKI.ZIP     ||      95    || Some problems with sound, M68000 core bugs?||
+||Contra                     || CONTRA.ZIP   ||      99    || Some graphics bugs||
+||Mappy                      || MAPPY.ZIP    ||     100    || Mappy Hardware||
+||Dig-Dug II                 || DIGDUG2.ZIP  ||     100    || Mappy Hardware||
+||Super Pacman               || SUPERPAC.ZIP ||     100    || Mappy Hardware||
+||Rastan                     || RASTAN.ZIP   ||     100    ||
+||Legendary Wings            || LWINGS.ZIP   ||     100    || Legendary Wings Hardware||
+||Section Z                  || SECTIONZ.ZIP ||     100    || Legendary Wings Hardware||
+||Trojan                     || TROJAN.ZIP   ||      97    || Legendary Wings Hardware<br>Basic ADPCM sound||
+||Street Fighter             || SF.ZIP       ||      95    || Missing ADPCM sound||
+||Galaga                     || GALAGA.ZIP   ||     100    || Galaga Hardware||
+||Xain'd Sleena              || XSLEENA.ZIP  ||     100    ||
+||Hard Head                  || HARDHEAD.ZIP ||     100    || Suna Hardware||
+||Hard Head 2                || HARDHED2.ZIP ||      10    || Basic driver||
+||Saboten Bombers            || SABOTENB.ZIP ||     100    || NMK 16 Hardware||
+||Bomb Jack Twin             || BJTWIN.ZIP   ||     100    || NMK 16 Hardware||
+||Knuckle Joe                || KNCLJOE.ZIP  ||     100    ||
+||Wardner                    || WARDNER.ZIP  ||     100    ||
+||Big Karnak                 || BIGKARNC.ZIP ||     100    || Gaelco Hardware||
 Thunder Hoop               | THOOP.ZIP    |     100    | Gaelco Hardware<br>
 Exed Exes                  | EXEDEXES.ZIP |     100    |<br>
 Gun.Smoke                  | GUNSMOKE.ZIP |     100    | Gun.Smoke Hardware<br>
