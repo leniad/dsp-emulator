@@ -255,6 +255,7 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Twin Cobra                 || TWINCOBR.ZIP ||     100    || Twin Cobra Hardware||
 ||Flying Shark               || FSHARK.ZIP   ||     100    || Twin Cobra Hardware||
 ||Jr. Pac-Man                || JRPACMAN.ZIP ||     100    ||
+
 <br>
 Total: 140<hr><br>
 
