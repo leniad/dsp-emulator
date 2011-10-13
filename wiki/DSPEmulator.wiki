@@ -255,11 +255,11 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Twin Cobra                 || TWINCOBR.ZIP ||     100    || Twin Cobra Hardware||
 ||Flying Shark               || FSHARK.ZIP   ||     100    || Twin Cobra Hardware||
 ||Jr. Pac-Man                || JRPACMAN.ZIP ||     100    ||
-<hr><br>
+
+<br><br>
 Total: 140<hr><br>
 
-<b>3-. Contribute/Code distribution
-</b><br>
+<b>3-. Contribute/Code distribution</b><br>
 <hr>
 If you make any improvements to any driver, processor, main code, etc. or add drivers, please send the changes to me, so they can be added to the main code.<br>
 If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)<br><br>
