@@ -159,7 +159,7 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Spelunker                  || SPELUNKR.ZIP ||     100    || Irem M62 Hardware||
 ||Spelunker II               || SPELUNK2.ZIP ||     100    || Irem M62 Hardware||
 ||Lode Runner                || LODERUN.ZIP  ||     100    || Irem M62 Hardware||
-||Lode Runner II             || LODERUN2.ZIP ||     100    | Irem M62 Hardware||
+||Lode Runner II             || LODERUN2.ZIP ||     100    || Irem M62 Hardware||
 ||Terra Cresta               || TERRACRE.ZIP ||     100    ||
 ||Shoot Out!                 || SHOOTOUT.ZIP ||     100    ||
 ||Vigilante                  || VIGILANT.ZIP ||     100    ||
