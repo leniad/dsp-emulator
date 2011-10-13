@@ -113,7 +113,7 @@ Currently only some drivers use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
 <br>
 <b>2.3.2 Emulated Systems</b><hr><br>
-||Name                       || ROM          || Completed  || Notes||
+||*Name*                       || *ROM*          || *Completed*  || *Notes*||
 ||Phoenix                    || PHOENIX.ZIP  ||      99,1  || Preliminary analog sound, music (TMS36XX) and digital sound are OK||
 ||Bombjack                   || BOMBJACK.ZIP ||     100    ||
 ||Pac-man                    || PACMAN.ZIP   ||     100    || Pac-man Hardware||
