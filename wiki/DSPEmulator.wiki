@@ -20,21 +20,25 @@ The emulator includes (not in WIP versions) inside the ZIP the ROMS for Spectrum
 IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH A COPYRIGHTED ROMS.<br><br>
 <b>1.1-. Keys during emulation</b><br>
 <hr>
-General Keys:<br>    'F2' --> Full speed/Normal Speed<br>
+General Keys:
+    'F2' --> Full speed/Normal Speed<br>
     'F3' --> Reset machine<br>
     'F11' --> Changes emulation speed from 25%, 50%, 75% and 100%<br><br>
-Arcade drivers basic keys are redefinable, by default are:<br>    '1' --> Start player one<br>
+Arcade drivers basic keys are redefinable, by default are:
+    '1' --> Start player one<br>
     '2' --> Start player two<br>
     '5' --> Insert coin<br>
     '6' --> Inser Coin<br>
-Keys for both players are redefinable, and you can select any joystick for any player and up to 6 buttons per player, by default keys are:<br>    Player 1 Up       --> Key 'Cursor UP'<br>
+Keys for both players are redefinable, and you can select any joystick for any player and up to 6 buttons per player, by default keys are:
+    Player 1 Up       --> Key 'Cursor UP'<br>
     Player 1 Down     --> Key 'Cursor DOWN'<br>
     Player 1 Left     --> Key 'Cursor LEFT'<br>
     Player 1 Right    --> Key 'Cursor RIGHT'<br>
     Player 1 Button 1 --> Key 'LEFT CONTROL'<br>
     Player 1 Button 2 --> Key 'LEFT ALT'
 Any other control, by default, is not defined. You can redefine it in the main configuration menu.<br><br>
-Spectrum/Amstrad basic keys:<br>    'F1' --> Play/Stop tape<br>
+Spectrum/Amstrad basic keys:
+    'F1' --> Play/Stop tape<br>
     'F4' --> Save snapshot<br>
     'F5' --> Remove Disk
 The joystick uses keys redefinable or external joystick.<br>
@@ -103,7 +107,8 @@ Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
 - Virtual Tape: you can load ZIP, CDT, WAV and CSW. Are working the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
 - Sound: Polyphonic sound from AY-8912 chip<br>
 - Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
--To do:<br>     -Snapshots are not implemented.<br>
+-To do:
+     -Snapshots are not implemented.<br>
      -Some disk protections are not working (a few).<br>
      -Some video effect are missing (M6845 video)<br><br>
 <b>2.2 Consoles</b><br>
@@ -114,7 +119,8 @@ Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
 -Keys: Use the redefined keys and 'SELECT' uses coin 1 (by default is mapped as key '5' and 'START' uses start player 1 (by default is mapped as the '1' key).<br>
 -Sound: Support sound, only remains DPCM<br>
 -Mappers: Supports 0,1,2,3,4,7,66 y 87<br>
--To Do<br>     - Snapshots<br>
+-To Do
+     - Snapshots<br>
      - Add more mappers<br>
      - Video Timmings<br><br>
 <b>GameBoy/Gameboy Color</b><br>
@@ -126,7 +132,8 @@ The default ROMs names are<br>
 -Keys: Use the redefined keys and 'SELECT' uses coin 1 (by default is mapped as key '5' and 'START' uses start player 1 (by default is mapped as the '1' key).<br>
 -Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not.<br>
 Mappers are supported are MBC0, MBC1 and MBC5.<br>
--To Do<br>     - Snapshots<br>
+-To Do
+     - Snapshots<br>
      - Audio problems, do not work  with high frequencies<br>
      - Video Timmings<br>
      - Add more mappers<br><br>
@@ -141,7 +148,8 @@ ROM file name is<br>
 <b>Chip 8/Super Chip8</b><br>
 <hr>
 -ROM: Does not have. It's a simulation of a pseudo CPU.<br>
--Keyboard: Mapped the system keys<br>    {{{1 2 3 A --> 1 2 3 4}}}<br>
+-Keyboard: Mapped the system keys
+    {{{1 2 3 A --> 1 2 3 4}}}<br>
     {{{4 5 6 B --> Q W E R}}}<br>
     {{{7 8 9 C --> A S D F}}}<br>
     {{{D 0 E F --> Z X C V}}}<br>
