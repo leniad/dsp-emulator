@@ -250,7 +250,7 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Wardner                    || WARDNER.ZIP  ||     100    ||
 ||Big Karnak                 || BIGKARNC.ZIP ||     100    || Gaelco Hardware||
 ||Thunder Hoop               || THOOP.ZIP    ||     100    || Gaelco Hardware||
-||Squash                     || SQUASH.ZIP   ||     100    || Gaelco ||Hardware||
+||Squash                     || SQUASH.ZIP   ||     100    || Gaelco Hardware||
 ||Biomechanical Toy          || BIOMTOY.ZIP  ||     100    || Gaelco Hardware||
 ||Exed Exes                  || EXEDEXES.ZIP ||     100    ||
 ||Gun.Smoke                  || GUNSMOKE.ZIP ||     100    || Gun.Smoke Hardware||
