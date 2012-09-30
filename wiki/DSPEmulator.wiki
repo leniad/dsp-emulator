@@ -20,27 +20,27 @@ The emulator includes (not in WIP versions) inside the ZIP the ROMS for Spectrum
 IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH A COPYRIGHTED ROMS.<br><br>
 <b>1.1-. Keys during emulation</b><br>
 <hr>
-General Keys:<br>
+General Keys:
     'F2' --> Full speed/Normal Speed<br>
     'F3' --> Reset machine<br>
     'F11' --> Changes emulation speed from 25%, 50%, 75% and 100%<br><br>
-Arcade drivers basic keys are redefinable, by default are:<br>
+Arcade drivers basic keys are redefinable, by default are:
     '1' --> Start player one<br>
     '2' --> Start player two<br>
     '5' --> Insert coin<br>
     '6' --> Inser Coin<br>
-Keys for both players are redefinable, and you can select any joystick for any player and up to 6 buttons per player, by default keys are:<br>
+Keys for both players are redefinable, and you can select any joystick for any player and up to 6 buttons per player, by default keys are:
     Player 1 Up       --> Key 'Cursor UP'<br>
     Player 1 Down     --> Key 'Cursor DOWN'<br>
     Player 1 Left     --> Key 'Cursor LEFT'<br>
     Player 1 Right    --> Key 'Cursor RIGHT'<br>
     Player 1 Button 1 --> Key 'LEFT CONTROL'<br>
-    Player 1 Button 2 --> Key 'LEFT ALT'<br>
+    Player 1 Button 2 --> Key 'LEFT ALT'
 Any other control, by default, is not defined. You can redefine it in the main configuration menu.<br><br>
-Spectrum/Amstrad basic keys:<br>
+Spectrum/Amstrad basic keys:
     'F1' --> Play/Stop tape<br>
     'F4' --> Save snapshot<br>
-    'F5' --> Remove Disk<br>
+    'F5' --> Remove Disk
 The joystick uses keys redefinable or external joystick.<br>
 In Amstrad CPC for use 'F1' to 'F10' keys you must press right Shift.<br><br>
 <b>1.2-. Language Files</b><br>
@@ -71,7 +71,7 @@ In general configuration you can choose this way of booting (show a game list), 
 <b>Spectrum</b><br>
 <hr>
 This driver have it's own configuration system. You can choose:<br>
-- ROMS: You can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name, for example 'SPECTRUM.ZIP' and the ROM inside the ZIP 'SPECTRUM.ROM') or in ROM format.<br>
+- ROMS: You can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name, for example 'SPECTRUM.ZIP' and the ROM inside the ZIP 'SPECTRUM.ROM') or in ROM format.
 By default the ROM files are:<br>
      -Spectrum 16k/48k: 'SPECTRUM.ZIP' --> 'spectrum.rom' CRC: 0xDDEE531F<br>
      -Spectrum 128k: 'SPEC128.ZIP' --> '128-0.rom' CRC: 0xE76799D2 and '128-1.rom' CRC: 0xB96A36BE<br>
@@ -98,7 +98,7 @@ Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
 - To do: Contented memory is not working correctly at 100%.<br><br>
 <b>Amstrad CPC 464,664 y 6128</b><br>
 <hr>
-- ROMS: By default the files are:<br>
+- ROMS: By default the files are:
      -CPC-464: 'CPC464.ZIP' --> 'cpc464.rom' CRC: 0x40852F25<br>
      -CPC-664: 'CPC664.ZIP' --> 'cpc664.rom' CRC: 0x9AB5A036 and 'amsdos.rom' CRC: 0x37F1BB31<br>
      -CPC-6128: 'CPC6128.ZIP' --> 'cpc6128.rom' CRC: 0x9E827FE1 and 'amsdos.rom' CRC: 0x37F1BB31<br>
