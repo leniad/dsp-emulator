@@ -1,35 +1,43 @@
 #summary DSP Emulator
 = Introduction =
 
-DSP Emulator v0.12 - Leniad 2001-2011
+DSP Emulator v0.14 - Leniad 2001-2011
 
 
 = Details =
 
-Well, this is just another emulator!. But, where is the difference? This is a pascal open source emulator using Delphi enviroment. There are not so many emulators in pascal...<br>
+Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus enviroment. There are not so many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
-Why pascal, and not C, C++, Java or any other languaje? Well, pascal it is powerful enough to handle my emulator (120fps in spectrum driver with a 300Mhz Pentium CPU) and it is as good as many any other languages.<br>
+Why pascal, and not C, C++, Java or any other languaje? Well, pascal it is powerful enough to handle my emulator (120fps in spectrum driver with a Pentium CPU) and it is as good as many any other languages.<br>
 You can not distribute this emulator with ROMS, except those that include the original ZIP file.<br>
-Now since version 0.9ß3 portability has begun to Lazarus and Free Pascal, so there is a Linux version available.<br><br>
+Since version 0.9ß3 portability has begun to Lazarus/Free Pascal, so there is a Linux 32/64bits version available.<br><br>
 <b>1-. Emulation</b>
 <hr>
 + INFO: Emulator can handle ZIP format. You can load roms, tapes, snapshots or disks from a ZIP file.<br>
-+ FILES NEEDED: In Windows the emulator needs the library 'SDL.DLL' that must be in the same folder that the executable, you can download it from the emulator site or you can download the last version from 'www.libsdl.org'. In Linux this library comes with your OS.<br><br>
-The emulator includes (not in beta versions) inside the ZIP the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco. You can download more tapes, disks and coleco ROMS from the 'Spectrum is Alive!!!' and 'Coleco is Alive!!!' pages, from the original emulator web.<br><br>
++ FILES NEEDED: In Windows the emulator needs the library 'SDL.DLL' that must be in the same folder that the executable, you can download it from the emulator site or you can download the last version from 'www.libsdl.org'.<br>
+In Linux this library comes with your OS.<br><br>
+The emulator includes (not in WIP versions) inside the ZIP the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco. You can download more tapes, disks and coleco ROMS from the 'Spectrum is Alive!!!' and 'Coleco is Alive!!!' pages, from the original emulator web.<br><br>
 IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH A COPYRIGHTED ROMS.<br><br>
 <b>1.1-. Keys during emulation</b><br>
 <hr>
-General Keys:
+General Keys:<br>
     'F2' --> Full speed/Normal Speed<br>
     'F3' --> Reset machine<br>
     'F11' --> Changes emulation speed from 25%, 50%, 75% and 100%<br><br>
-Arcade drivers basic keys:
+Arcade drivers basic keys are redefinable, by default are:<br>
     '1' --> Start player one<br>
     '2' --> Start player two<br>
     '5' --> Insert coin<br>
     '6' --> Inser Coin<br>
-Keys for both players are redefinable, and you can select any joystick for any player and up to 6 buttons per player.<br><br>
-Spectrum/Amstrad basic keys:
+Keys for both players are redefinable, and you can select any joystick for any player and up to 6 buttons per player, by default keys are:<br>
+    Player 1 Up       --> Key 'Cursor UP'<br>
+    Player 1 Down     --> Key 'Cursor DOWN'<br>
+    Player 1 Left     --> Key 'Cursor LEFT'<br>
+    Player 1 Right    --> Key 'Cursor RIGHT'<br>
+    Player 1 Button 1 --> Key 'LEFT CONTROL'<br>
+    Player 1 Button 2 --> Key 'LEFT ALT'<br>
+Any other control, by default, is not defined. You can redefine it in the main configuration menu.<br><br>
+Spectrum/Amstrad basic keys:<br>
     'F1' --> Play/Stop tape<br>
     'F4' --> Save snapshot<br>
     'F5' --> Remove Disk<br>
@@ -42,11 +50,11 @@ If you want to add another language, edit any file whith the extension '.lng' in
 If the language files are not present, the emulation can not start.<br><br>
 <b>1.3-. Configure DSP</b><br>
 <hr>
-Clicking the Settings button you can configure the options in the emulator can select the language, quality of audio, video settings, default directories and redefine keys/use joystick.<br>
-In addition there are drivers that allow it can configure the options separately from the driver.<br><br>
+Clicking the Settings button you can configure the options in the emulator can select the language, quality of audio, video settings, default directories, redefine keys/use joystick and redefine main keys.<br>
+In addition there are systems that can configure the options separately from the driver (Spectrum) and in arcade drivers, since version 0.12ß4 dipswitches can be modified through this button, to set game options.<br><br>
 <b>1.4-. Audio</b><br>
 <hr>
-You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cristal crear will sound the emulation. <br>
+You can select the sound quality: 11025Khz, 22050Khz and 44100Khz. The more quality you choose more cristal crear will sound the emulation.<br>
 If you do not have sound card the sound is turned off. Anyway you can select the option 'Mute' to save a few frames.<br><br>
 <b>1.5-. Save Pictures</b><br>
 <hr>
@@ -54,32 +62,46 @@ Since DSP 0.2wipb5 you can save GIF files from Spectrum emulation.<br>
 Since 0.7ß2 version you can also save JPG and PNG formats from all drivers.<br><br>
 <b>1.6-. Initial Game List</b><br>
 <hr>
-Since version 0.9 there is the possibility of booting DSP with the list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system.<br>
-In general configuration you can choose this way of booting, or the old way (load the last driver).<br><br>
+Since version 0.9 there is the possibility of booting DSP with the list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system, distribution year, conpany, etc.<br>
+In general configuration you can choose this way of booting (show a game list), or the old way (load the last driver).<br><br>
 <b>2-. Drivers</b><br>
 <hr><br>
 <b>2.1 Computers</b><br>
 <hr><br>
 <b>Spectrum</b><br>
 <hr>
-This driver have it's own configuration window.<br>
-- ROMS: Now you can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name, for example 'SPECTRUM.ZIP' and the ROM inside the ZIP 'SPECTRUM.ROM') or in ROM format.<br>
-By default the ROM files are: SPECTRUM.ZIP (Spectrum 48K), SPEC128.ZIP (Spectrum 128K) y PLUS3.ZIP (Spectrum Plus+3).<br>
-- Border: Now you can choose line by line emulation or pixel by pixel emulation (slowly but more exact) and disable border emulation.<br>
-- Keyboard: Fully working keyboard emulation, and LShift and LControl working as Capshift and SimbolShift.<br>
+This driver have it's own configuration system. You can choose:<br>
+- ROMS: You can change Spectrum's ROM. Configure you favorite ROM in 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name, for example 'SPECTRUM.ZIP' and the ROM inside the ZIP 'SPECTRUM.ROM') or in ROM format.<br>
+By default the ROM files are:<br>
+     -Spectrum 16k/48k: 'SPECTRUM.ZIP' --> 'spectrum.rom' CRC: 0xDDEE531F<br>
+     -Spectrum 128k: 'SPEC128.ZIP' --> '128-0.rom' CRC: 0xE76799D2 and '128-1.rom' CRC: 0xB96A36BE<br>
+     -Spectrum +2: 'PLUS2.ZIP' --> 'plus2-0.rom' CRC: 0x5D2E8C66 and 'plus2-1.rom' CRC: 0x98B1320B<br>
+     -Spectrum +2A/+3: 'PLUS3.ZIP' --> 'plus3-0.rom' CRC: 0x30C9F490 , 'plus3-1.rom' CRC: 0xA7916B3F , 'plus3-2.rom' CRC: 0xC9A0B748 and 'plus3-3.rom' CRC: 0xB88FD6E3<br>
+- Border: You can choose line by line emulation, pixel by pixel emulation (slowly but more exact) or disable border emulation (festest).<br>
+- Lens Lock: Enable/disable the LensLock protection simulation<br>
+- Spectrum 48K issue: Choose spectrum issue 2 or 3<br>
 - Joystick: You can choose from four joysticks; Kempston, Cursor, Sinclair 1 and Sinclair 2. Joystick is emulated with the redefinable keys or external joystick.<br>
 - Gunstick/Lightgun: The mouse is used as Gunstick, and left button is used as fire.<br>
+- AMX Mouse/Kempston Mouse: Use the mouse and the buttons.<br>
+- ULA+: Enable/disable ULA+ extended colors. Supported since 0.9ß3 version.<br>
+- AY8912 sound: Set the type of sound channels. Supports mono, stereo ABC channels and stereo ACB channels.<br>
+- Tape loading sound: Enable/disable the sound of the tape when loading.<br>
+- Speaker filter: Enable/disable filter to reduce the noise in speaker emulation.<br>
+- Speaker oversample: Quality of speaker emulation.<br><br>
+- Keyboard: Fully working keyboard emulation, and LShift and LControl working as Capshift and SimbolShift.<br>
 - Virtual Tapes: Can load ZIP, TAP, TZX, PZX, WAV and CSW. Fully working spectrum load schemes (bleepload, alkatraz, original rom...). With the mouse you can move inside virtual tape and select the star possition. Tape begin to play when detects - LOAD "" - and stop when reaches the final.<br>
 If inside the ZIP file there is a ROM file, emulator load fisrt ROM file and then loads then virtual tape.<br>
 Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
 - Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
-- Audio: Spectrum beeper, and in version wich have it there is a AY-8912 emulation.<br>
+- Audio: Spectrum beeper, and in version wich have it there is a AY-8912 emulation. You can choose the speaker rate, as high you choose the better sound quality.<br>
 - Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
-- To do: Contented memory is not working correctly at 100%, some ULA bugs.<br><br>
-Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br><br>
+- To do: Contented memory is not working correctly at 100%.<br><br>
 <b>Amstrad CPC 464,664 y 6128</b><br>
 <hr>
-- ROMS: By default the files are those: CPC464.ZIP, CPC664.ZIP y CPC6128.ZIP.<br>
+- ROMS: By default the files are:<br>
+     -CPC-464: 'CPC464.ZIP' --> 'cpc464.rom' CRC: 0x40852F25<br>
+     -CPC-664: 'CPC664.ZIP' --> 'cpc664.rom' CRC: 0x9AB5A036 and 'amsdos.rom' CRC: 0x37F1BB31<br>
+     -CPC-6128: 'CPC6128.ZIP' --> 'cpc6128.rom' CRC: 0x9E827FE1 and 'amsdos.rom' CRC: 0x37F1BB31<br>
 - Keyboard: Mapped the keys for each of the CPC. To press the '|' press left shift key and '><' next to the Z.<br>
 - Joystick: emulated with the redefinable keys or external joystick.<br>
 - Virtual Tape: you can load ZIP, CDT, WAV and CSW. Are working the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
@@ -87,28 +109,59 @@ Since 0.9ß3 DPS Emulator also supports ULA+ enhanced colors.<br><br>
 - Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
 -To do:<br>
      -Snapshots are not implemented.<br>
-     - Some disk protections are not working (a few).<br>
+     -Some disk protections are not working (a few).<br>
      -Some video effect are missing (M6845 video)<br><br>
 <b>2.2 Consoles</b><br>
 <hr><br>
 <b>NES</b><br>
 <hr>
-Rewriting process.<br><br>
+-Cartridge: Supports '.nes' ROM format, compressed in ZIP format or not.<br>
+-Keys: Use the redefined keys and 'SELECT' uses coin 1 (by default is mapped as key '5' and 'START' uses start player 1 (by default is mapped as the '1' key).<br>
+-Sound: Support sound, only remains DPCM<br>
+-Mappers: Supports 0,1,2,3,4,7,66 y 87<br>
+-To Do<br>
+	- Snapshots<br>
+	- Add more mappers<br>
+        - Video Timmings<br><br>
 <b>GameBoy/Gameboy Color</b><br>
 <hr>
--ROM: Not required, but if present are loaded and run as the original console. The ROMs are 'GAMEBOY.ZIP' containing 'dmg_boot.bin' (CRC: 0x59C8598E) and 'GBCOLOR.ZIP' containing 'gbc_boot.1' and 'gbc_boot.2' (CRC's: 0x779EA374 and 0xF741807D).<br>
--Keys: Use the redefined keys and 'SELECT' is mapped as key '5 'and 'START' is mapper in the '1' key.<br>
--Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not. For now, mappers are supported are MBC0, MBC1 and MBC5 (with bugs!).<br>
--CPU: Similar to Z80, still has some bugs.<br><br>
+-ROM: Not required, but if present are loaded and run as the original console.<br>
+The default ROMs names are<br>
+     -GameBoy: 'GAMEBOY.ZIP' --> 'dmg_boot.bin' CRC: 0x59C8598E<br>
+     -GameBoy Color: 'GBCOLOR.ZIP' --> 'gbc_boot.1' CRC: 0x779EA374 and 'gbc_boot.2' CRC: 0xF741807D<br>
+-Keys: Use the redefined keys and 'SELECT' uses coin 1 (by default is mapped as key '5' and 'START' uses start player 1 (by default is mapped as the '1' key).<br>
+-Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not.<br>
+Mappers are supported are MBC0, MBC1 and MBC5.<br>
+-To Do<br>
+	- Snapshots<br>
+	- Audio problems, do not work  with high frequencies<br>
+        - Video Timmings<br>
+	- Add more mappers<br><br>
 <b>ColecoVision</b><br>
 <hr>
--ROM: The default ROM is 'COLECO.ZIP' and within 'COLECO.ROM'. Without it can not begin the emulation.<br>
+-ROM: The ROM is needed for emulation<br>
+ROM file name is<br>
+     -Coleco: 'COLECO.ZIP' --> 'coleco.rom' CRC: 0x3AA93EF3<br>
 -Joystick: The numbers on the keyboard from '1'to '0' emulate the keys on the two joysticks. Keys 'Q' and 'W' emulate the Keys '{{{*}}}' and '#' of the two joysticks also, main joystick is emulated with the redefinable keys or external joystick (the secondary joystick does not have keys assigned). Does not support (still) the special joysticks.<br>
--Cartridges: It supports the standard game cartridges (not expansion cartridges) with 'ROM' and 'COL' file extension. Support ZIP files, of course.<br><br>
+-Cartridges: It supports the standard game cartridges (not expansion cartridges) with 'ROM' and 'COL' file extension. Support ZIP files, of course.<br>
+-Sound: Support the sound with AY-8912<br><br>
+<b>Chip 8/Super Chip8</b><br>
+<hr>
+-ROM: Does not have. It's a simulation of a pseudo CPU.<br>
+-Keyboard: Mapped the system keys<br>
+    1 2 3 A --> 1 2 3 4<br>
+    4 5 6 B --> Q W E R<br>
+    7 8 9 C --> A S D F<br>
+    D 0 E F --> Z X C V<br>
+-Sound: basic sound<br>
+-Video: Supports 64x32 format from Chip8, 64x64 from Chip8 Hires and 128x64 from SuperChip8<br>
+-Files: Supports '.CH8' y '.BIN' formats<br>
+-To do<br>
+	- Snapshots<br><br>
 <b>2.3 Arcade</b><br>
 <hr><br>
 <b>2.3.1 Samples</b><hr>
-Some games, given the difficulty of emulating old sound systems, uses 'samples'. Such files are portions of digitized sound, played instead of emulating the sound system.<br>
+Some games, given the difficulty of emulating old sound systems, uses 'samples'. Such files are portions of digitized sound, played instead of emulating the sound system.br>
 Currently only some drivers use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the files with the same name as the ROM in a folder named 'samples'.<br>
 <br>
@@ -120,13 +173,15 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Ms. Pac-man                || MSPACMAN.ZIP ||     100    || Pac-man Hardware||
 ||Mysterious Stones          || MYSTSTON.ZIP ||     100    ||
 ||Frogger                    || FROGGER.ZIP  ||     100    || Galaxian Hardware||
-||Galaxian                   || GALAXIAN.ZIP ||      95    || Galaxian Hardware<br>Partial sound with samples, sample list: 'shot.wav', 'death.wav' and 'back.wav'||
+||Galaxian                   || GALAXIAN.ZIP ||      95    || Galaxian Hardware<br>Partial sound with samples||
 ||Jump Bug                   || JUMPBUG.ZIP  ||     100    || Galaxian Hardware||
 ||Moon Cresta                || MOONCRST.ZIP ||      90    || Galaxian Hardware<br>No sound||
 ||Scramble                   || SCRAMBLE.ZIP ||     100    || Galaxian Hardware||
 ||Super Cobra                || SCOBRA.ZIP   ||     100    || Galaxian Hardware||
 ||Amidar                     || AMIDAR.ZIP   ||     100    || Galaxian Hardware||
-||Donkey Kong                || DKONG.ZIP    ||      95    || Samples sound, sample list: 'TUNE01.WAV, 'TUNE02.WAV', 'TUNE03.WAV',            'TUNE04.WAV', 'TUNE05.WAV', 'TUNE06.WAV', 'TUNE07.WAV', 'TUNE08.WAV', 'TUNE09.WAV', 'TUNE0b.WAV', 'TUNE0c.WAV', 'TUNE0d.WAV', 'TUNE0e.WAV', 'TUNE0f.WAV', 'EFFECT01.WAV', 'EFFECT02.WAV', 'EFFECT03.WAV', 'EFFECT04.WAV', EFFECT05.WAV','INTERUPT.WAV' and 'run01.WAv'||
+||Donkey Kong                || DKONG.ZIP    ||     100    || Donkey Kong Hardware<br>Samples sound||
+||Donkey Kong Junior         || DKONGJR.ZIP  ||     100    || Donkey Kong Hardware<br>Samples sound||
+||Donkey Kong 3              || DKONG3.ZIP   ||     100    || Donkey Kong Hardware||
 ||Black Tiger                || BLKTIGER.ZIP ||     100    ||
 ||Green Beret                || GBERET.ZIP   ||     100    ||
 ||Commando                   || COMMANDO.ZIP ||     100    ||
@@ -135,18 +190,23 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Shaolin's Road             || SHAOLIN.ZIP  ||     100    ||
 ||Yie Ar Kung-Fu             || YIEAR.ZIP    ||     100    ||
 ||Son Son                    || SONSON.ZIP   ||     100    ||
-||Asteroids                  || ASTEROID.ZIP ||      95    || Basic analogic sound and samples, sample list: 'explode1.wav', 'explode2.wav' and 'explode3.wav'||
-||Star Force                 || STARFORC.ZIP ||      90    || No sound||
+||Asteroids                  || ASTEROID.ZIP ||     100    || Analog sound and samples||
+||Star Force                 || STARFORC.ZIP ||     100    ||
 ||Rygar                      || RYGAR.ZIP    ||     100    || Tecmo Hardware||
 ||Silk Worm                  || SILKWORM.ZIP ||     100    || Tecmo Hardware||
-||Pitfall II                 || PITFALL2.ZIP ||    100    || Sega System 1/2||
-||Teddy Boy Blues            || TEDDYBB.ZIP  ||     100    || Sega System 1/2||
-||Wonder Boy                 || WBOY.ZIP     ||     100    || Sega System 1/2||
-||Wonder Boy in Monster Land || WBML.ZIP     ||      99    || Sega System 1/2<br>Problems with some audio effects||
+||Pitfall II                 || PITFALL2.ZIP ||     100    || Sega System 1||
+||Teddy Boy Blues            || TEDDYBB.ZIP  ||     100    || Sega System 1||
+||Wonder Boy                 || WBOY.ZIP     ||     100    || Sega System 1||
+||Wonder Boy in Monster Land || WBML.ZIP     ||     100    || Sega System 2||
+||Choplifter                 || CHOPLIFT.ZIP ||     100    || Sega System 2||
+||Mister Viking              || MRVIKING.ZIP ||     100    || Sega System 1||
+||Sega Ninja                 || SEGANINJ.ZIP ||     100    || Sega System 1||
+||Up'n Down                  || UPNDOWN.ZIP  ||     100    || Sega System 1||
+||Flicky                     || FLICKY.ZIP   ||     100    || Sega System 1||
 ||Pooyan                     || POOYAN.ZIP   ||     100    ||
 ||Jungler                    || JUNGLER.ZIP  ||     100    || Rally X Hardware||
-||Rally X                    || RALLYX.ZIP   ||     100    || Rally X Hardware<br>Sample list: 'bang.wav'||
-||New Rally X                || NRALLYX.ZIP  ||     100    || Rally X Hardware<br>Sample list: 'bang.wav'||
+||Rally X                    || RALLYX.ZIP   ||     100    || Rally X Hardware<br>Explosion sound uses samples||
+||New Rally X                || NRALLYX.ZIP  ||     100    || Rally X Hardware<br>Explosion sound uses samples||
 ||City Connection            || CITYCON.ZIP  ||     100    ||
 ||Burger Time                || BTIME.ZIP    ||     100    ||
 ||Express Raider             || EXPRRAID.ZIP ||     100    ||
@@ -167,8 +227,8 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Bubble Bobble              || BUBLBOBL.ZIP ||     100    ||
 ||Prehistoric Isle in 1930   || PREHISLE.ZIP ||     100    ||
 ||Tiger Road                 || TIGEROAD.ZIP ||     100    || Tiger Road Hardware||
-||F1 Dream                   || F1DREAM.ZIP  ||     100    || Tiger Road Hardware<br>Using bootleg version||
-||Snow Bros                  || SNOWBROS.ZIP ||      99    || Bugs in M68000 core?||
+||F1 Dream                   || F1DREAM.ZIP  ||     100    || Tiger Road Hardware||
+||Snow Bros                  || SNOWBROS.ZIP ||     100    ||
 ||Toki                       || TOKI.ZIP     ||      95    || Some problems with sound, M68000 core bugs?||
 ||Contra                     || CONTRA.ZIP   ||      99    || Some graphics bugs||
 ||Mappy                      || MAPPY.ZIP    ||     100    || Mappy Hardware||
@@ -177,9 +237,10 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Rastan                     || RASTAN.ZIP   ||     100    ||
 ||Legendary Wings            || LWINGS.ZIP   ||     100    || Legendary Wings Hardware||
 ||Section Z                  || SECTIONZ.ZIP ||     100    || Legendary Wings Hardware||
-||Trojan                     || TROJAN.ZIP   ||      97    || Legendary Wings Hardware<br>Basic ADPCM sound||
-||Street Fighter             || SF.ZIP       ||      95    || Missing ADPCM sound||
+||Trojan                     || TROJAN.ZIP   ||     100    || Legendary Wings Hardware||
+||Street Fighter             || SF.ZIP       ||     100    ||
 ||Galaga                     || GALAGA.ZIP   ||     100    || Galaga Hardware||
+||DigDug                     || DIGDUG.ZIP   ||      95    || Galaga Hardware<br>Problems with IO 53XX (dipswitch)||
 ||Xain'd Sleena              || XSLEENA.ZIP  ||     100    ||
 ||Hard Head                  || HARDHEAD.ZIP ||     100    || Suna Hardware||
 ||Hard Head 2                || HARDHED2.ZIP ||      10    || Basic driver||
@@ -189,6 +250,8 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Wardner                    || WARDNER.ZIP  ||     100    ||
 ||Big Karnak                 || BIGKARNC.ZIP ||     100    || Gaelco Hardware||
 ||Thunder Hoop               || THOOP.ZIP    ||     100    || Gaelco Hardware||
+||Squash                     || SQUASH.ZIP   ||     100    || Gaelco ||Hardware||
+||Biomechanical Toy          || BIOMTOY.ZIP  ||     100    || Gaelco Hardware||
 ||Exed Exes                  || EXEDEXES.ZIP ||     100    ||
 ||Gun.Smoke                  || GUNSMOKE.ZIP ||     100    || Gun.Smoke Hardware||
 ||1943: The Battle of Midway || 1943.ZIP     ||     100    || Gun.Smoke Hardware||
@@ -221,15 +284,15 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Street Fighter II' Champion Edition || SF2CE.ZIP    ||      95    || Capcom Play System 1 - CPS1<br>Missing some controls and scroll row||
 ||Cadillacs and Dinosaurs    || DINO.ZIP     ||     100    || Capcom Play System 1 - CPS1||
 ||The Punisher               || PUNISHER.ZIP ||     100    || Capcom Play System 1 - CPS1||
-||Shinobi                    || SHINOBI.ZIP  ||      90    || Sega System 16A<br>No sound||
-||Alex Kidd                  || ALEXKIDD.ZIP ||      90    || Sega System 16A<br>No sound||
-||Fantasy Zone               || FANTZONE.ZIP ||      90    || Sega System 16A<br>No sound||
+||Shinobi                    || SHINOBI.ZIP  ||      95    || Sega System 16A<br>Missing PCM Sound||
+||Alex Kidd                  || ALEXKIDD.ZIP ||      95    || Sega System 16A<br>Missing PCM Sound||
+||Fantasy Zone               || FANTZONE.ZIP ||      95    || Sega System 16A<br>Missing PCM Sound||
 ||Time Pilot '84             || TP84.ZIP     ||      99    || Missing RC filters||
 ||Tutankham                  || TUTANKHM.ZIP ||     100    ||
 ||Pang                       || PANG.ZIP     ||      95    || Missing YM2413||
-||Ninja Kid II               || NINJAKD2.ZIP ||      90    || UPL Hardware<br>Missing some sprite effects and no PCM sound||
-||Ark Area                   || ARKAREA.ZIP  ||      95    || UPL Hardware<br>Missing some sprite effects||
-||Mutant Night               || MNIGHT.ZIP   ||      95    || UPL Hardware<br>Missing some sprite effects||
+||Ninja Kid II               || NINJAKD2.ZIP ||      95    || UPL Hardware<br>No PCM sound||
+||Ark Area                   || ARKAREA.ZIP  ||     100    || UPL Hardware||
+||Mutant Night               || MNIGHT.ZIP   ||     100    || UPL Hardware||
 ||Sky Kid                    || SKYKID.ZIP   ||     100    ||
 ||Rolling Thunder            || RTHUNDER.ZIP ||      95    || Namco System 86<br>Missing ADPCM sound||
 ||Hopping Mappy              || HOPMAPPY.ZIP ||     100    || Namco System 86||
@@ -239,7 +302,7 @@ If you want the emulator to use the samples, put the files with the same name as
 ||The NewZealand Story       || TNZS.ZIP     ||     100    || The NewZealand Story Hardware||
 ||Insector X                 || INSECTX.ZIP  ||     100    || The NewZealand Story Hardware||
 ||Pacland                    || PACLAND.ZIP  ||     100    ||
-||Mario Bros.                || MARIO.ZIP    ||      90    || Partial sound with samples, sample list: 'run.wav', 'luigirun.wav' and 'skid.wav'||
+||Mario Bros.                || MARIO.ZIP    ||     100    || Full sound with samples||
 ||Solomon Key                || SOLOMON.ZIP  ||     100    ||
 ||Combat School              || COMBATSC.ZIP ||      95    || Minimal graphics problems||
 ||Heavy Unit                 || HVYUNIT.ZIP  ||     100    ||
@@ -248,48 +311,61 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Ikari III - The Rescue     || IKARI3.ZIP   ||     100    || SNK 68K Hardware||
 ||Search and Rescue          || SEARCHAR.ZIP ||     100    || SNK 68K Hardware||
 ||P47 - Phantom Fighter      || P47.ZIP      ||     100    || Jaleco Megasystem||
-||Rodland                    || RODLAND.ZIP  ||      60    || Jaleco Megasystem<br>Graphics problems and some 68000 core bugs||
-||Saint Dragon               || STDRAGON.ZIP ||      20    || Jaleco Megasystem<br>Don't work...||
+||Rodland                    || RODLAND.ZIP  ||     100    || Jaleco Megasystem||
+||Saint Dragon               || STDRAGON.ZIP ||      95    || Jaleco Megasystem<br>Missing Protection||
 ||Time Pilot                 || TIMEPLT.ZIP  ||     100    ||
 ||Pengo                      || PENGO.ZIP    ||     100    ||
 ||Twin Cobra                 || TWINCOBR.ZIP ||     100    || Twin Cobra Hardware||
 ||Flying Shark               || FSHARK.ZIP   ||     100    || Twin Cobra Hardware||
 ||Jr. Pac-Man                || JRPACMAN.ZIP ||     100    ||
-
+||Robocop                    || ROBOCOP.ZIP  ||     100    || Deco0 Hardware||
+||Baddudes vs. DragonNinja   || BADDUDES.ZIP ||     100    || Deco0 Hardware||
+||Hippodrome                 || HIPPODRM.ZIP ||      95    || Deco0 Hardware<br>Some times the game resets, maybe Hu6280 bugs?||
+||Tumble Pop                 || TUMBLEP.ZIP  ||     100    ||
+||Funky Jet                  || FUNKYJET.ZIP ||     100    ||
+||Super Burger Time          || SUPBTIME.ZIP ||     100    ||
+||Caveman Ninja              || CNINJA.ZIP   ||     100    || Caveman Ninja Hardware||
+||Robocop 2                  || ROBOCOP2.ZIP ||     100    || Caveman Ninja Hardware||
+||Diet Go Go                 || DIETGO.ZIP   ||     100    ||
+||Act-Fancer Cybernetick Hyper Weapon|| ACTFANCR.ZIP ||      95    || Bugs on Hu6280||
+||Arabian                    || ARABIAN.ZIP  ||     100    ||
+||Pirate Ship Higemaru       || HIGEMARU.ZIP ||     100    ||
+||Bagman                     || BAGMAN.ZIP   ||      95    | Bagman Hardware<br>Missing TSM 5110 sound||
+||Super Bagman               || SBAGMAN.ZIP  ||      95    || Bagman Hardware<br>Missing TSM 5110 sound||
+||Congo                      || CONGO.ZIP    ||      20    || Zaxxon Hardware<br>Missing controls, audio, background and palette||
 <br>
-Total: 140<hr><br>
+Total: 166<hr><br>
 
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
-If you make any improvements to any driver, processor, main code, etc. or add drivers, please send the changes to me, so they can be added to the main code.<br>
-If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)<br><br>
+If you make any improvements to any driver, processor, main code, etc. or add drivers, please send the changes to me, so they can be added to the main code.br>
+If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)br><br>
 <b>4-. Acknowledgments</b><br>
 <hr>
-- First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).<br>
-- Chris Cowley, author of VBSpec, from where I've pick a lot of information about that little black box called Spectrum, I never belived how powerful it was... In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME, and sounds very good!<br>
+- First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).br>
+- Chris Cowley, author of VBSpec, from where I've pick a lot of information about Spectrum. In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME.<br>
 - Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to trace errors in my emulator Z80.<br>
-- These awesome guys from World of Spectrum!! I have taken many tapes and snapshots of his page, in addition to technical information, including the format TZX. Don't you miss his page!<br>
-- javi{{{[@]}}}fsmail.net that helped me in a moment of desperation, with directSound!<br>
-- Thanks to Michael Franzen, who sent me drivers for Pooyan, Coleco, System1 and many others to be included in DSP.<br>
-- Thanks to Tom Walker, he sent me his driver CPS1 where I got and understood a lot of
-information.<br>
-- Thanks to sremulador he made the drivers list, and constant source updates.<br>
-- sremulador for begin the rewriting of NES driver<br>
+- World of Spectrum, they have many tapes, snapshots, in addition many technical information, including the format TZX, DSK, Z80, etc.<br>
+- javi{{{[@]}}}fsmail.net that helped me in a moment of desperation, with directSound.<br>
+- Thanks to Michael Franzen, who sent me drivers for Pooyan, Coleco, System1, Chip8 and many others to be included in DSP.<br>
+- Thanks to Tom Walker, he sent me his driver CPS1 where I got and understood a lot of information.<br>
+- Thanks to sremulador he made the drivers list, and constant source updates and for begin the rewriting of NES driver<br>
 - And many pages of the Internet, many documents ... and people who I forget, thank you all.<br><br>
 <b>5-. Copyright</b><br>
 <hr>
 The Coleco and Pooyan has been rewrited from the originals by Michael Franzen.<br>
 The CPS1 has been rewrited from the original by Tomas Walker.<br>
-The rest of the drivers the Z80 core, M6502 core, M6809 core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core, LR35902 core, M6805 core and MCS51 core are writed by me, Leniad.br>
+The rest of the drivers the Z80 core, M6502 core, M6809 (HD6309) core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core, LR35902 core, M6805 core, MCS51 core,Hu6280 core and MB88XX core are writed by me, Leniad.<br>
 AY-3-8912 emulator is a conversion from Chris Cowley, but the original emulator come from MAME team.<br>
-SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255 and OKI6295 emulators are a delphi conversion writed by me from MAME original.<br>
+SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255, OKI6295, UPD7759, Z80PIO and Z80CTC emulators are a conversion writed by me from MAME original.<br>
 TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME.<br>
-NEC765 emulator is a delphi conversion writed and enhanced by me from MESS original.<br>
-GameBoy/GameBoy Color sound emulator is a delphi conversion writed by me from MESS original.<br>
-Spectrum 48k, Spectrum 128K, Spectrum+3, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.<br><br>
+NEC765 emulator is a conversion writed and adapted by me, from MESS original.<br>
+GameBoy/GameBoy Color sound emulator is a conversion writed by me from MESS original.<br>
+NES sound emulator is a conversion writed by me from MAME original.<br>
+All Spectrum, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.<br><br>
 <b>6-. Contact & Links</b><br>
 <hr>
-If you want to contact me, send me feedback or anything just use leniad2{{{@}}}hotmail.com<br>
+If you want to contact me, send me feedback or anything just use leniad2{{{[@]}}}hotmail.com<br>
 My DSP home page leniad.cjb.net<br>
 You can also download the offical version and WIP versions from Google Code page<br><br>
 http://code.google.com/p/dsp-emulator/<br><br>
