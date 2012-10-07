@@ -332,8 +332,7 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Bagman                     || BAGMAN.ZIP   ||      95    || Bagman Hardware<br>Missing TSM 5110 sound||
 ||Super Bagman               || SBAGMAN.ZIP  ||      95    || Bagman Hardware<br>Missing TSM 5110 sound||
 ||Congo                      || CONGO.ZIP    ||      20    || Zaxxon Hardware<br>Missing controls, audio, background and palette||
-<br><br>
-Total: 166<hr><br>
+Total: 166||
 
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
