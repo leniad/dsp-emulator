@@ -104,7 +104,7 @@ Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
      -CPC-6128: 'CPC6128.ZIP' --> 'cpc6128.rom' CRC: 0x9E827FE1 and 'amsdos.rom' CRC: 0x37F1BB31<br>
 - Keyboard: Mapped the keys for each of the CPC. To press the '|' press left shift key and '><' next to the Z.<br>
 - Joystick: emulated with the redefinable keys or external joystick.<br>
-- Virtual Tape: you can load ZIP, CDT, WAV and CSW. Are working the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
+- Virtual Tape: you can load ZIP, CDT, WAV and CSW. It's working the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
 - Sound: Polyphonic sound from AY-8912 chip<br>
 - Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
 -To do:
@@ -329,19 +329,19 @@ If you want the emulator to use the samples, put the files with the same name as
 ||Act-Fancer Cybernetick Hyper Weapon|| ACTFANCR.ZIP ||      95    || Bugs on Hu6280||
 ||Arabian                    || ARABIAN.ZIP  ||     100    ||
 ||Pirate Ship Higemaru       || HIGEMARU.ZIP ||     100    ||
-||Bagman                     || BAGMAN.ZIP   ||      95    | Bagman Hardware<br>Missing TSM 5110 sound||
+||Bagman                     || BAGMAN.ZIP   ||      95    || Bagman Hardware<br>Missing TSM 5110 sound||
 ||Super Bagman               || SBAGMAN.ZIP  ||      95    || Bagman Hardware<br>Missing TSM 5110 sound||
 ||Congo                      || CONGO.ZIP    ||      20    || Zaxxon Hardware<br>Missing controls, audio, background and palette||
-<br>
+<br><br>
 Total: 166<hr><br>
 
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
-If you make any improvements to any driver, processor, main code, etc. or add drivers, please send the changes to me, so they can be added to the main code.br>
-If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)br><br>
+If you make any improvements to any driver, processor, main code, etc. or add drivers, please send the changes to me, so they can be added to the main code.<br>
+If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)<br><br>
 <b>4-. Acknowledgments</b><br>
 <hr>
-- First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).br>
+- First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).<br>
 - Chris Cowley, author of VBSpec, from where I've pick a lot of information about Spectrum. In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME.<br>
 - Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to trace errors in my emulator Z80.<br>
 - World of Spectrum, they have many tapes, snapshots, in addition many technical information, including the format TZX, DSK, Z80, etc.<br>
