@@ -1,7 +1,5 @@
 # dsp-emulator
-Dsp emulator
-Delphi & Lazarus+Free Pascal free emulator.
-Arcade, Spectrum, Amstrad CPC, NES, Coleco Vision...
+Dsp emulator WIP
 
 <b>06/02/15</b> - DSP 0.15b2 Final. Windows 32bits and 64bits, Linux 32bits and 64 bits and MAC OSX 32 bits binary.<br>
 Many changes, focused on drivers completion (screen rotation, controls, etc.) and stability. Please read the documentation for more information.<br>
