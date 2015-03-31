@@ -1,0 +1,337 @@
+unit commando_hw;
+
+interface
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
+     nz80,main_engine,controls_engine,ym_2203,gfx_engine,misc_functions,
+     rom_engine,pal_engine,sound_engine,timer_engine;
+
+procedure Cargar_commando;
+procedure commando_principal;
+function iniciar_commando:boolean;
+procedure reset_commando;
+procedure cerrar_commando;
+//Main CPU
+function commando_getbyte(direccion:word):byte;
+procedure commando_putbyte(direccion:word;valor:byte);
+//Sound CPU
+function commando_snd_getbyte(direccion:word):byte;
+procedure commando_snd_putbyte(direccion:word;valor:byte);
+procedure commando_sound_update;
+procedure commando_snd_irq;
+
+const
+        commando_rom:array[0..2] of tipo_roms=(
+        (n:'cm04.9m';l:$8000;p:0;crc:$8438b694),(n:'cm03.8m';l:$4000;p:$8000;crc:$35486542),());
+        commando_snd_rom:tipo_roms=(n:'cm02.9f';l:$4000;p:0;crc:$f9cc4a74);
+        commando_pal:array[0..3] of tipo_roms=(
+        (n:'vtb1.1d';l:$100;p:0;crc:$3aba15a1),(n:'vtb2.2d';l:$100;p:$100;crc:$88865754),
+        (n:'vtb3.3d';l:$100;p:$200;crc:$4c14c3f6),());
+        commando_char:tipo_roms=(n:'vt01.5d';l:$4000;p:0;crc:$505726e0);
+        commando_sprites:array[0..6] of tipo_roms=(
+        (n:'vt05.7e';l:$4000;p:0;crc:$79f16e3d),(n:'vt06.8e';l:$4000;p:$4000;crc:$26fee521),
+        (n:'vt07.9e';l:$4000;p:$8000;crc:$ca88bdfd),(n:'vt08.7h';l:$4000;p:$c000;crc:$2019c883),
+        (n:'vt09.8h';l:$4000;p:$10000;crc:$98703982),(n:'vt10.9h';l:$4000;p:$14000;crc:$f069d2f8),());
+        commando_tiles:array[0..6] of tipo_roms=(
+        (n:'vt11.5a';l:$4000;p:0;crc:$7b2e1b48),(n:'vt12.6a';l:$4000;p:$4000;crc:$81b417d3),
+        (n:'vt13.7a';l:$4000;p:$8000;crc:$5612dbd2),(n:'vt14.8a';l:$4000;p:$c000;crc:$2b2dee36),
+        (n:'vt15.9a';l:$4000;p:$10000;crc:$de70babf),(n:'vt16.10a';l:$4000;p:$14000;crc:$14178237),());
+        //DIP
+        commando_dip_a:array [0..4] of def_dip=(
+        (mask:$3;name:'Starting Area';number:4;dip:((dip_val:$3;dip_name:'0 (Forest 1)'),(dip_val:$1;dip_name:'2 (Desert 1)'),(dip_val:$2;dip_name:'4 (Forest 2)'),(dip_val:$0;dip_name:'6 (Desert 2)'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$4;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$40;dip_name:'1C 2C'),(dip_val:$80;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        commando_dip_b:array [0..5] of def_dip=(
+        (mask:$7;name:'Bonus Life';number:8;dip:((dip_val:$7;dip_name:'10k 50k+'),(dip_val:$3;dip_name:'10k 60k+'),(dip_val:$5;dip_name:'20k 60k+'),(dip_val:$1;dip_name:'20k 70k+'),(dip_val:$6;dip_name:'30k 70k+'),(dip_val:$2;dip_name:'30k 80k+'),(dip_val:$4;dip_name:'40k 100k+'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Difficulty';number:2;dip:((dip_val:$10;dip_name:'Normal'),(dip_val:$0;dip_name:'Difficult'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Flip Screen';number:2;dip:((dip_val:$20;dip_name:'On'),(dip_val:$0;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Cabinet';number:3;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Upright Two Players'),(dip_val:$c0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
+var
+ memoria_dec:array[0..$bfff] of byte;
+ scroll_x,scroll_y:word;
+ sound_command:byte;
+
+implementation
+
+procedure Cargar_commando;
+begin
+llamadas_maquina.iniciar:=iniciar_commando;
+llamadas_maquina.bucle_general:=commando_principal;
+llamadas_maquina.cerrar:=cerrar_commando;
+llamadas_maquina.reset:=reset_commando;
+end;
+
+function iniciar_commando:boolean;
+var
+  colores:tpaleta;
+  f:word;
+  memoria_temp:array[0..$17fff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
+    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
+    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
+    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_commando:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,512,512,false,true);
+screen_init(2,512,512);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,256,256,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,256);
+main_z80.change_ram_calls(commando_getbyte,commando_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.change_ram_calls(commando_snd_getbyte,commando_snd_putbyte);
+snd_z80.init_sound(commando_sound_update);
+//IRQ Sound CPU
+init_timer(snd_z80.numero_cpu,3000000/(4*60),commando_snd_irq,true);
+//Sound Chips
+YM2203_0:=ym2203_chip.create(0,1500000,2);
+YM2203_1:=ym2203_chip.create(1,1500000,2);
+//cargar y desencriptar las ROMS
+if not(cargar_roms(@memoria[0],@commando_rom[0],'commando.zip',0)) then exit;
+memoria_dec[0]:=memoria[0];
+for f:=1 to $bfff do memoria_dec[f]:=bitswap8(memoria[f],3,2,1,4,7,6,5,0);
+//cargar ROMS sonido
+if not(cargar_roms(@mem_snd[0],@commando_snd_rom,'commando.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@commando_char,'commando.zip')) then exit;
+init_gfx(0,8,8,1024);
+gfx[0].trans[3]:=true;
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@commando_sprites[0],'commando.zip',0)) then exit;
+init_gfx(1,16,16,768);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
+convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//tiles
+if not(cargar_roms(@memoria_temp[0],@commando_tiles[0],'commando.zip',0)) then exit;
+init_gfx(2,16,16,1024);
+gfx_set_desc_data(3,0,32*8,0,$8000*8,$8000*8*2);
+convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@commando_pal[0],'commando.zip',0)) then exit;
+for f:=0 to 255 do begin
+  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
+  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+set_pal(colores,256);
+//crear la tabla de colores
+for f:=0 to 63 do begin
+  gfx[1].colores[f]:=f+128;
+  gfx[0].colores[f]:=f+192;
+end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$1f;
+marcade.dswa_val:=@commando_dip_a;
+marcade.dswb_val:=@commando_dip_b;
+//final
+reset_commando;
+iniciar_commando:=true;
+end;
+
+procedure cerrar_commando;
+begin
+main_z80.free;
+snd_z80.free;
+YM2203_0.Free;
+YM2203_1.Free;
+close_audio;
+close_video;
+end;
+
+procedure reset_commando;
+begin
+ main_z80.reset;
+ main_z80.im0:=$d7;  //rst 10
+ snd_z80.reset;
+ YM2203_0.reset;
+ YM2203_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ scroll_x:=0;
+ scroll_y:=0;
+ sound_command:=0;
+end;
+
+procedure update_video_commando;inline;
+var
+  f,color,nchar,x,y:word;
+  attr,bank:byte;
+begin
+for f:=$3ff downto 0 do begin
+  //tiles
+  if gfx[2].buffer[f] then begin
+      x:=f mod 32;
+      y:=31-(f div 32);
+      attr:=memoria[$dc00+f];
+      nchar:=memoria[$d800+f]+((attr and $c0) shl 2);
+      color:=(attr and $f) shl 3;
+      put_gfx_flip(x*16,y*16,nchar,color,2,2,(attr and $20)<>0,(attr and $10)<>0);
+      gfx[2].buffer[f]:=false;
+  end;
+  //Chars
+  if gfx[0].buffer[f] then begin
+    x:=f div 32;
+    y:=31-(f mod 32);
+    attr:=memoria[f+$d400];
+    color:=(attr and $f) shl 2;
+    nchar:=memoria[f+$d000]+((attr and $c0) shl 2);
+    put_gfx_trans_flip(x*8,y*8,nchar,color,3,0,(attr and $20)<>0,(attr and $10)<>0);
+    gfx[0].buffer[f]:=false;
+  end;
+end;
+scroll_x_y(2,1,scroll_x,256-scroll_y);
+//sprites
+for f:=$7f downto 0 do begin
+    attr:=buffer_sprites[1+(f*4)];
+    bank:=(attr and $c0) shr 6;
+    if bank<3 then begin
+      nchar:=buffer_sprites[f*4]+(bank shl 8);
+      color:=attr and $30;
+      x:=buffer_sprites[2+(f*4)];
+      y:=240-(buffer_sprites[3+(f*4)]+((attr and $1) shl 8));
+      put_gfx_sprite(nchar,color,(attr and $8)<>0,(attr and $4)<>0,1);
+      actualiza_gfx_sprite(x,y,1,1);
+    end;
+end;
+actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
+actualiza_trozo_final(16,0,224,256,1);
+copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
+end;
+
+procedure eventos_commando;inline;
+begin
+if event.arcade then begin
+  //P1
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  //BUT
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P2
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+end;
+end;
+
+procedure commando_principal;
+var
+  f:byte;
+  frame_m,frame_s:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+frame_s:=snd_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    //main
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    //snd
+    snd_z80.run(frame_s);
+    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    if f=239 then begin
+      main_z80.pedir_irq:=HOLD_LINE;
+      update_video_commando;
+    end;
+  end;
+  eventos_commando;
+  video_sync;
+end;
+end;
+
+function commando_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0..$bfff:if main_z80.opcode then commando_getbyte:=memoria_dec[direccion]
+                 else commando_getbyte:=memoria[direccion];
+  $c000:commando_getbyte:=marcade.in0;
+  $c001:commando_getbyte:=marcade.in1;
+  $c002:commando_getbyte:=marcade.in2;
+  $c003:commando_getbyte:=marcade.dswa;
+  $c004:commando_getbyte:=marcade.dswb;
+  $d000..$ffff:commando_getbyte:=memoria[direccion];
+end;
+end;
+
+procedure commando_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$c000 then exit;
+memoria[direccion]:=valor;
+case direccion of
+   $c800:sound_command:=valor;
+   $c804:begin
+            if (valor and $10)<>0 then snd_z80.pedir_reset:=ASSERT_LINE
+                    else snd_z80.pedir_reset:=CLEAR_LINE;
+            main_screen.flip_main_screen:=(valor and $80)<>0;
+         end;
+   $c808:scroll_y:=(scroll_y and $ff00) or valor;
+   $c809:scroll_y:=(scroll_y and $00ff) or ((valor and $1) shl 8);
+   $c80a:scroll_x:=(scroll_x and $ff00) or valor;
+   $c80b:scroll_x:=(scroll_x and $00ff) or ((valor and $1) shl 8);
+   $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
+   $d800..$dfff:gfx[2].buffer[direccion and $3ff]:=true;
+end;
+end;
+
+function commando_snd_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$47ff:commando_snd_getbyte:=mem_snd[direccion];
+  $6000:commando_snd_getbyte:=sound_command;
+end;
+end;
+
+procedure commando_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$4000 then exit;
+case direccion of
+  $4000..$47ff:mem_snd[direccion]:=valor;
+  $8000:ym2203_0.Control(valor);
+  $8001:ym2203_0.Write_Reg(valor);
+  $8002:ym2203_1.Control(valor);
+  $8003:ym2203_1.Write_Reg(valor);
+end;
+end;
+
+procedure commando_sound_update;
+begin
+  ym2203_0.Update;
+  ym2203_1.Update;
+end;
+
+procedure commando_snd_irq;
+begin
+  snd_z80.pedir_irq:=HOLD_LINE;
+end;
+
+end.

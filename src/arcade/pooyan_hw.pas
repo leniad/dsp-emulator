@@ -1,0 +1,226 @@
+unit pooyan_hw;
+
+interface
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
+     nz80,main_engine,controls_engine,gfx_engine,rom_engine,
+     pal_engine,konami_snd,sound_engine;
+
+procedure Cargar_pooyan;
+procedure pooyan_principal; 
+function iniciar_pooyan:boolean; 
+procedure reset_pooyan; 
+procedure cerrar_pooyan; 
+//Main CPU
+function pooyan_getbyte(direccion:word):byte;  
+procedure pooyan_putbyte(direccion:word;valor:byte); 
+
+const
+        pooyan_rom:array[0..4] of tipo_roms=(
+        (n:'1.4a';l:$2000;p:0;crc:$bb319c63),(n:'2.5a';l:$2000;p:$2000;crc:$a1463d98),
+        (n:'3.6a';l:$2000;p:$4000;crc:$fe1a9e08),(n:'4.7a';l:$2000;p:$6000;crc:$9e0f9bcc),());
+        pooyan_pal:array[0..3] of tipo_roms=(
+        (n:'pooyan.pr1';l:$20;p:0;crc:$a06a6d0e),(n:'pooyan.pr2';l:$100;p:$20;crc:$82748c0b),
+        (n:'pooyan.pr3';l:$100;p:$120;crc:$8cd4cd60),());
+        pooyan_char:array[0..2] of tipo_roms=(
+        (n:'8.10g';l:$1000;p:0;crc:$931b29eb),(n:'7.9g';l:$1000;p:$1000;crc:$bbe6d6e4),());
+        pooyan_sound:array[0..2] of tipo_roms=(
+        (n:'xx.7a';l:$1000;p:0;crc:$fbe2b368),(n:'xx.8a';l:$1000;p:$1000;crc:$e1795b3d),());
+        pooyan_sprites:array[0..2] of tipo_roms=(
+        (n:'6.9a';l:$1000;p:0;crc:$b2d8c121),(n:'5.8a';l:$1000;p:$1000;crc:$1097c2b6),());
+var
+ nmi_vblank:boolean;
+ last:byte;
+
+implementation
+
+procedure Cargar_pooyan;
+begin
+llamadas_maquina.iniciar:=iniciar_pooyan;
+llamadas_maquina.bucle_general:=pooyan_principal;
+llamadas_maquina.cerrar:=cerrar_pooyan;
+llamadas_maquina.reset:=reset_pooyan;
+end;
+
+function iniciar_pooyan:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      ctemp1:byte;
+      memoria_temp:array[0..$1fff] of byte;
+const
+  ps_x:array[0..15] of dword=(0, 1, 2, 3,  8*8+0, 8*8+1, 8*8+2, 8*8+3,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3,  24*8+0, 24*8+1, 24*8+2, 24*8+3);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+begin
+iniciar_pooyan:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256);
+screen_init(2,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(3072000,256);
+main_z80.change_ram_calls(pooyan_getbyte,pooyan_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(1789772,256);
+snd_z80.change_ram_calls(konamisnd_getbyte,konamisnd_putbyte);
+//Sound Chip
+konamisnd_init(4,snd_z80.numero_cpu,TWO_AY8910,snd_z80.clock,nil);
+//cargar roms
+if not(cargar_roms(@memoria[0],@pooyan_rom[0],'pooyan.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@pooyan_sound[0],'pooyan.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@pooyan_char[0],'pooyan.zip',0)) then exit;
+init_gfx(0,8,8,256);
+gfx_set_desc_data(4,0,16*8,$1000*8+4,$1000*8+0,4,0);
+convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@pooyan_sprites[0],'pooyan.zip',0)) then exit;
+init_gfx(1,16,16,64);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,$1000*8+4,$1000*8+0,4,0);
+convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@pooyan_pal[0],'pooyan.zip',0)) then exit;
+for f:=0 to 31 do begin
+    ctemp1:=memoria_temp[f];
+    colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
+    colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
+    colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
+end;
+set_pal(colores,32);
+for f:=0 to $ff do begin
+  gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
+  gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;
+end;
+//final
+reset_pooyan;
+iniciar_pooyan:=true;
+end;
+
+procedure cerrar_pooyan;
+begin
+main_z80.free;
+snd_z80.free;
+konamisnd_close;
+close_audio;
+close_video;
+end;
+
+procedure reset_pooyan;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ reset_audio;
+ konamisnd_reset;
+ nmi_vblank:=false;
+ last:=0;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+end;
+
+procedure update_video_pooyan;inline;
+var
+  f:word;
+  x,y,color,nchar,atrib:byte;
+begin
+for f:=$0 to $3ff do begin
+  if gfx[0].buffer[f] then begin
+    x:=31-(f div 32);
+    y:=f mod 32;
+    atrib:=memoria[$8000+f];
+    color:=(atrib and $f) shl 4;
+    nchar:=memoria[$8400+f]+8*(atrib and $20);
+    put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $80)<>0,(atrib and $40)<>0);
+    gfx[0].buffer[f]:=false;
+  end;
+end;
+actualiza_trozo(0,0,256,256,1,0,0,256,256,2);
+for f:=0 to $17 do begin
+    atrib:=memoria[$9410+(f*2)];
+    nchar:=memoria[$9011+(f*2)] and $3f;
+    color:=(atrib and $f) shl 4;
+    y:=memoria[$9010+(f*2)];
+    x:=memoria[$9411+(f*2)];
+    put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)=0,1);
+    actualiza_gfx_sprite(x,y,2,1);
+end;
+actualiza_trozo_final(16,0,224,256,2);
+end;
+
+procedure eventos_pooyan;
+begin
+if event.arcade then begin
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+end;
+end;
+
+procedure pooyan_principal;
+var
+  frame_m,frame_s:single;
+  f:byte;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+frame_s:=snd_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    konami_sound.frame:=f;
+    //Main CPU
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    //SND CPU
+    snd_z80.run(frame_s);
+    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    if f=239 then begin
+      if nmi_vblank then main_z80.pedir_nmi:=ASSERT_LINE;
+      update_video_pooyan;
+    end;
+  end;
+  eventos_pooyan;
+  video_sync;
+end;
+end;
+
+function pooyan_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $a000:pooyan_getbyte:=$7b;
+  $a080:pooyan_getbyte:=marcade.in0;
+  $a0a0:pooyan_getbyte:=marcade.in1;
+  $a0c0:pooyan_getbyte:=marcade.in2;
+  $a0e0:pooyan_getbyte:=$ff;
+    else pooyan_getbyte:=memoria[direccion];
+end;
+end;
+
+procedure pooyan_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$8000 then exit;
+case direccion of
+    $8000..$87ff:gfx[0].buffer[direccion and $3ff]:=true;
+    $a100:konami_sound.sound_latch:=valor;
+    $a180:begin
+            nmi_vblank:=valor<>0;
+            if not(nmi_vblank) then main_z80.clear_nmi;
+          end;
+    $a181:begin
+              if ((last=0) and (valor<>0)) then snd_z80.pedir_irq:=HOLD_LINE;
+              last:=valor;
+          end;
+end;
+memoria[direccion]:=valor;
+end;
+
+end.

@@ -1,0 +1,53 @@
+object Form7: TForm7
+  Left = 672
+  Height = 152
+  Top = 458
+  Width = 166
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'LensLock'
+  ClientHeight = 152
+  ClientWidth = 166
+  Font.CharSet = ANSI_CHARSET
+  Font.Color = clBlack
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Pitch = fpVariable
+  Font.Quality = fqDraft
+  OnClose = FormClose
+  LCLVersion = '1.1'
+  object BitBtn1: TBitBtn
+    Left = 27
+    Height = 25
+    Top = 113
+    Width = 43
+    Caption = 'Show'
+    OnClick = BitBtn1Click
+    TabOrder = 0
+  end
+  object GroupBox2: TGroupBox
+    Left = 16
+    Height = 81
+    Top = 8
+    Width = 137
+    Caption = 'LensLok'
+    ClientHeight = 63
+    ClientWidth = 133
+    TabOrder = 1
+    object Image1: TImage
+      Left = 3
+      Height = 57
+      Top = 1
+      Width = 129
+    end
+  end
+  object BitBtn18: TBitBtn
+    Left = 96
+    Height = 25
+    Top = 113
+    Width = 43
+    Caption = 'Close'
+    OnClick = close_button
+    TabOrder = 2
+  end
+end

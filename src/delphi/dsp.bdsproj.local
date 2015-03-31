@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2006/01/15 18:04:16.109.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\ordenadores\cpc464.pas</Transaction>
+    <Transaction>2006/06/10 15:44:52.171.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\6502\m6809.pas</Transaction>
+    <Transaction>2006/06/14 19:10:56.734.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\arcade\blktiger.pas</Transaction>
+    <Transaction>2006/08/07 17:44:15.953.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\sn76496.pas</Transaction>
+    <Transaction>2006/08/07 17:53:14.796.pas,C:\dsp\src\snd\sn76496.pas=C:\dsp\src\snd\sn_76496.pas</Transaction>
+    <Transaction>2006/08/13 17:48:38.156.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\ym_2203.pas</Transaction>
+    <Transaction>2006/08/14 13:36:56.609.pas,C:\dsp\src\snd\ym_2203.pas=C:\dsp\src\snd\ym_2203_new.pas</Transaction>
+    <Transaction>2006/08/14 13:37:05.609.pas,C:\dsp\src\snd\ym_2203_new.pas=C:\dsp\src\snd\ym_2203.pas</Transaction>
+    <Transaction>2006/08/19 12:32:08.437.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\arcade\commando.pas</Transaction>
+    <Transaction>2006/08/24 22:45:59.640.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\motorola\m6809_10.pas</Transaction>
+    <Transaction>2006/10/04 13:24:22.109.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\fm\fm3slot.pas</Transaction>
+    <Transaction>2006/10/04 13:30:44.531.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\fm\fmconstants.pas</Transaction>
+    <Transaction>2006/10/04 13:34:00.562.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\fm\fmchan.pas</Transaction>
+    <Transaction>2006/10/04 13:51:10.171.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\fm\fmslot.pas</Transaction>
+    <Transaction>2006/10/04 13:59:36.125.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\fm.pas</Transaction>
+    <Transaction>2006/10/08 20:43:14.250.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\z80\z80_daa.pas</Transaction>
+    <Transaction>2006/10/08 20:55:42.093.pas,C:\dsp\src\z80\z80_daa.pas=</Transaction>
+    <Transaction>2006/10/25 15:27:40.500.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\tmp\test.pas</Transaction>
+    <Transaction>2006/10/26 11:17:33.671.pas,C:\dsp\src\snd\fm.pas=</Transaction>
+    <Transaction>2006/10/29 00:27:36.921.pas,C:\dsp\src\tmp\test.pas=</Transaction>
+    <Transaction>2006/11/22 21:04:44.843.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\fm_constants.pas</Transaction>
+    <Transaction>2006/12/02 19:05:09.843.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\arcade\gng.pas</Transaction>
+    <Transaction>2006/12/17 21:52:32.531.pas,C:\dsp\src\motorola\m6809_10.pas=C:\dsp\src\motorola\m6809_11.pas</Transaction>
+    <Transaction>2007/01/20 16:06:44.984.pas,C:\dsp\src\snd\fm_constants.pas=</Transaction>
+    <Transaction>2007/01/20 16:07:53.171.pas,C:\dsp\src\Unit1.pas=C:\dsp\src\snd\opna.pas</Transaction>
+    <Transaction>2007/03/09 18:58:47.671.pas,C:\dsp\src\arcade\Shaolins.pas=C:\dsp\src\arcade\yiear.pas</Transaction>
+  </Transactions>
+</BorlandProject>

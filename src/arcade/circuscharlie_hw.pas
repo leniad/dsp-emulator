@@ -1,0 +1,324 @@
+unit circuscharlie_hw;
+
+interface
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
+     m6809,nz80,main_engine,controls_engine,sn_76496,gfx_engine,dac,rom_engine,
+     pal_engine,konami_decrypt,sound_engine;
+
+//main
+procedure Cargar_circusc;
+procedure circusc_principal; 
+function iniciar_circusc:boolean; 
+procedure reset_circusc; 
+procedure cerrar_circusc; 
+//cpu
+function circusc_getbyte(direccion:word):byte;
+procedure circusc_putbyte(direccion:word;valor:byte);
+//snd cpu
+function circusc_snd_getbyte(direccion:word):byte;  
+procedure circusc_snd_putbyte(direccion:word;valor:byte); 
+procedure circusc_sound; 
+
+const
+        circusc_rom:array[0..5] of tipo_roms=(
+        (n:'380_s05.3h';l:$2000;p:$6000;crc:$48feafcf),(n:'380_r04.4h';l:$2000;p:$8000;crc:$c283b887),
+        (n:'380_r03.5h';l:$2000;p:$a000;crc:$e90c0e86),(n:'380_q02.6h';l:$2000;p:$c000;crc:$4d847dc6),
+        (n:'380_q01.7h';l:$2000;p:$e000;crc:$18c20adf),());
+        circusc_snd:array[0..2] of tipo_roms=(
+        (n:'380_l14.5c';l:$2000;p:0;crc:$607df0fb),(n:'380_l15.7c';l:$2000;p:$2000;crc:$a6ad30e1),());
+        circusc_char:array[0..2] of tipo_roms=(
+        (n:'380_j12.4a';l:$2000;p:0;crc:$56e5b408),(n:'380_j13.5a';l:$2000;p:$2000;crc:$5aca0193),());
+        circusc_sprites:array[0..6] of tipo_roms=(
+        (n:'380_j06.11e';l:$2000;p:0;crc:$df0405c6),(n:'380_j07.12e';l:$2000;p:$2000;crc:$23dfe3a6),
+        (n:'380_j08.13e';l:$2000;p:$4000;crc:$3ba95390),(n:'380_j09.14e';l:$2000;p:$6000;crc:$a9fba85a),
+        (n:'380_j10.15e';l:$2000;p:$8000;crc:$0532347e),(n:'380_j11.16e';l:$2000;p:$a000;crc:$e1725d24),());
+        circusc_pal:array[0..3] of tipo_roms=(
+        (n:'380_j18.2a';l:$20;p:0;crc:$10dd4eaa),(n:'380_j17.7b';l:$100;p:$20;crc:$13989357),
+        (n:'380_j16.10c';l:$100;p:$120;crc:$c244f2aa),());
+        //Dip
+        circusc_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$00;dip_name:'Free Play'))),());
+        circusc_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$8;dip_name:'20K 90K 70K+'),(dip_val:$0;dip_name:'30K 110K 80K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
+var
+ pedir_irq:boolean;
+ mem_opcodes:array[0..$9fff] of byte;
+ sound_latch,scroll_x,linea:byte;
+ spritebank:word;
+
+implementation
+
+procedure Cargar_circusc;
+begin
+llamadas_maquina.iniciar:=iniciar_circusc;
+llamadas_maquina.bucle_general:=circusc_principal;
+llamadas_maquina.cerrar:=cerrar_circusc;
+llamadas_maquina.reset:=reset_circusc;
+end;
+
+function iniciar_circusc:boolean;
+var
+  colores:tpaleta;
+  bit0,bit1,bit2:byte;
+  f:word;
+  memoria_temp:array[0..$ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+    ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
+			8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4);
+    ps_y:array[0..15] of dword=(0*4*16, 1*4*16, 2*4*16, 3*4*16, 4*4*16, 5*4*16, 6*4*16, 7*4*16,
+			8*4*16, 9*4*16, 10*4*16, 11*4*16, 12*4*16, 13*4*16, 14*4*16, 15*4*16);
+begin
+iniciar_circusc:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256,true);
+screen_mod_scroll(1,256,256,255,0,0,0);
+screen_init(2,256,256);
+screen_mod_scroll(2,256,256,255,0,0,0);
+screen_init(3,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_m6809:=cpu_m6809.Create(2048000,$100);
+main_m6809.change_ram_calls(circusc_getbyte,circusc_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,$100);
+snd_z80.change_ram_calls(circusc_snd_getbyte,circusc_snd_putbyte);
+snd_z80.init_sound(circusc_sound);
+//Sound Chip
+sn_76496_0:=sn76496_chip.Create(1789772);
+sn_76496_1:=sn76496_chip.Create(1789772);
+dac_0:=dac_chip.Create;
+//cargar roms y desencriptarlas
+if not(cargar_roms(@memoria[0],@circusc_rom[0],'circusc.zip',0)) then exit;
+konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
+//roms sonido
+if not(cargar_roms(@mem_snd[0],@circusc_snd[0],'circusc.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@circusc_char[0],'circusc.zip',0)) then exit;
+init_gfx(0,8,8,512);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@circusc_sprites[0],'circusc.zip',0)) then exit;
+init_gfx(1,16,16,384);
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//paleta
+if not(cargar_roms(@memoria_temp[0],@circusc_pal[0],'circusc.zip',0)) then exit;
+for f:=0 to $1f do begin
+    bit0:=(memoria_temp[f] shr 0) and $01;
+		bit1:=(memoria_temp[f] shr 1) and $01;
+		bit2:=(memoria_temp[f] shr 2) and $01;
+		colores[f].r:=$21*bit0+$47*bit1+$97*bit2;
+		bit0:=(memoria_temp[f] shr 3) and $01;
+		bit1:=(memoria_temp[f] shr 4) and $01;
+		bit2:=(memoria_temp[f] shr 5) and $01;
+		colores[f].g:=$21*bit0+$47*bit1+$97*bit2;
+		bit0:=0;
+		bit1:=(memoria_temp[f] shr 6) and $01;
+		bit2:=(memoria_temp[f] shr 7) and $01;
+		colores[f].b:=$21*bit0+$47*bit1+$97*bit2;
+end;
+set_pal(colores,32);
+for f:=0 to $ff do begin
+  gfx[0].colores[f]:=(memoria_temp[$20+f] and $f)+$10;  //chars
+  gfx[1].colores[f]:=memoria_temp[$120+f] and $f;  //sprites
+end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$4b;
+marcade.dswa_val:=@circusc_dip_a;
+marcade.dswb_val:=@circusc_dip_b;
+//final
+reset_circusc;
+iniciar_circusc:=true;
+end;
+
+procedure cerrar_circusc;
+begin
+main_m6809.Free;
+snd_z80.free;
+sn_76496_0.Free;
+sn_76496_1.Free;
+dac_0.Free;
+close_audio;
+close_video;
+end;
+
+procedure reset_circusc;
+begin
+ main_m6809.reset;
+ snd_z80.reset;
+ sn_76496_0.reset;
+ sn_76496_1.reset;
+ dac_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ pedir_irq:=false;
+ sound_latch:=0;
+ scroll_x:=0;
+ spritebank:=$3800;
+end;
+
+procedure update_video_circusc;inline;
+var
+  x,y,atrib:byte;
+  f:word;
+  nchar,color:word;
+begin
+for f:=0 to $3ff do begin
+    if gfx[0].buffer[f] then begin
+      x:=31-(f div 32);
+      y:=f mod 32;
+      atrib:=memoria[$3000+f];
+      nchar:=memoria[$3400+f]+((atrib and $20) shl 3);
+      color:=(atrib and $f) shl 4;
+      if (atrib and $10)=0 then begin
+        put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $80)<>0,(atrib and $40)<>0);
+        put_gfx_block(x*8,y*8,2,8,8,0);
+      end else begin
+        put_gfx_block_trans(x*8,y*8,1,8,8);
+        put_gfx_flip(x*8,y*8,nchar,color,2,0,(atrib and $80)<>0,(atrib and $40)<>0);
+      end;
+      gfx[0].buffer[f]:=false;
+    end;
+end;
+actualiza_trozo(0,0,256,80,2,0,0,256,80,3);
+scroll__x_part(2,3,scroll_x,0,80,176);
+//Sprites
+for f:=0 to $3f do begin
+  atrib:=memoria[spritebank+1+(f*4)];
+  nchar:=memoria[spritebank+(f*4)]+((atrib and $20) shl 3);
+  color:=(atrib and $f) shl 4;
+  x:=240-memoria[spritebank+3+(f*4)];
+  y:=memoria[spritebank+2+(f*4)];
+  put_gfx_sprite_mask(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,1,0,$f);
+  actualiza_gfx_sprite(x,y,3,1);
+end;
+actualiza_trozo(0,0,256,80,1,0,0,256,80,3);
+scroll__x_part(1,3,scroll_x,0,80,176);
+actualiza_trozo_final(16,0,224,256,3);
+end;
+
+procedure eventos_circusc;inline;
+begin
+if event.arcade then begin
+  //p1
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  //p2
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  //misc
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+end;
+end;
+
+procedure circusc_principal;
+var
+  frame_m,frame_s:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_m6809.tframes;
+frame_s:=snd_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for linea:=0 to $ff do begin
+    //main
+    main_m6809.run(frame_m);
+    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    //snd
+    snd_z80.run(frame_s);
+    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    if linea=239 then begin
+      if pedir_irq then main_m6809.pedir_irq:=HOLD_LINE;
+      update_video_circusc;
+    end;
+  end;
+  eventos_circusc;
+  video_sync;
+end;
+end;
+
+function circusc_getbyte(direccion:word):byte;
+begin
+case direccion of
+    $1000..$13ff:case (direccion and $3) of
+                0:circusc_getbyte:=marcade.in2;  //system
+                1:circusc_getbyte:=marcade.in0;  //p1
+                2:circusc_getbyte:=marcade.in1;  //p2
+                3:circusc_getbyte:=0;
+               end;
+    $1400..$17ff:circusc_getbyte:=marcade.dswa;  //dsw1
+    $1800..$1bff:circusc_getbyte:=marcade.dswb;  //dsw2
+    $2000..$3fff:circusc_getbyte:=memoria[direccion];
+    $6000..$ffff:if main_m6809.opcode then circusc_getbyte:=mem_opcodes[direccion-$6000]
+                    else circusc_getbyte:=memoria[direccion];
+end;
+end;
+
+procedure circusc_putbyte(direccion:word;valor:byte);
+begin
+if direccion>$5fff then exit;
+memoria[direccion]:=valor;
+case direccion of
+  $0..$3ff:case (direccion and $7) of
+              0:main_screen.flip_main_screen:=(valor and 1)<>0;
+              1:pedir_irq:=(valor<>0);
+              5:if (valor and 1)<>0 then spritebank:=$3900
+                  else spritebank:=$3800;
+           end;
+  $800..$bff:sound_latch:=valor;
+  $c00..$fff:snd_z80.pedir_irq:=HOLD_LINE;
+  $1c00..$1fff:scroll_x:=256-valor;
+  $3000..$37ff:gfx[0].buffer[direccion and $3ff]:=true;
+end;
+end;
+
+function circusc_snd_getbyte(direccion:word):byte;
+begin
+case direccion of
+ $0..$3fff:circusc_snd_getbyte:=mem_snd[direccion];
+ $4000..$5fff:circusc_snd_getbyte:=mem_snd[$4000+(direccion and $3ff)];
+ $6000..$7fff:circusc_snd_getbyte:=sound_latch;
+ $8000..$9fff:circusc_snd_getbyte:=((trunc(snd_z80.tframes*linea)+snd_z80.contador) shr 9 and $1e);
+end;
+end;
+
+procedure circusc_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$4000 then exit;
+case direccion of
+  $4000..$5fff:mem_snd[$4000+(direccion and $3ff)]:=valor;
+  $a000..$bfff:case (direccion and $7) of
+                0:sound_latch:=valor;
+                1:sn_76496_0.Write(sound_latch);
+		            2:sn_76496_1.Write(sound_latch);
+                3:dac_0.data8_w(valor);
+              end;
+end;
+end;
+
+procedure circusc_sound;
+begin
+  sn_76496_0.Update;
+  sn_76496_1.Update;
+  dac_0.update;
+end;
+
+end.

@@ -1,0 +1,164 @@
+object FLoadRom: TFLoadRom
+  Left = 232
+  Height = 510
+  Top = 58
+  Width = 562
+  BorderIcons = []
+  BorderStyle = bsSingle
+  Caption = 'Load Rom'
+  ClientHeight = 510
+  ClientWidth = 562
+  Font.CharSet = ANSI_CHARSET
+  Font.Color = clBlack
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Pitch = fpVariable
+  Font.Quality = fqDraft
+  OnKeyUp = FormKeyUp
+  OnShow = FormShow
+  LCLVersion = '1.3'
+  object GroupBox1: TGroupBox
+    Left = 261
+    Height = 311
+    Top = 143
+    Width = 289
+    Caption = 'Preview'
+    ClientHeight = 293
+    ClientWidth = 285
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 0
+    object ImgPreview: TImage
+      Left = 9
+      Height = 281
+      Top = 1
+      Width = 266
+      Stretch = True
+    end
+  end
+  object RomList: TStringGrid
+    Left = 8
+    Height = 481
+    Top = 8
+    Width = 249
+    ColCount = 2
+    DefaultRowHeight = 15
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowSelect]
+    RowCount = 41
+    TabOrder = 1
+    TitleFont.CharSet = ANSI_CHARSET
+    TitleFont.Color = clBlack
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Pitch = fpVariable
+    TitleFont.Quality = fqDraft
+    Visible = False
+    OnClick = RomListClick
+    OnDblClick = RomListDblClick
+    ColWidths = (
+      163
+      65
+    )
+  end
+  object BitBtn3: TBitBtn
+    Left = 293
+    Height = 29
+    Top = 467
+    Width = 86
+    Caption = 'OK'
+    Kind = bkOK
+    OnClick = BitBtn3Click
+    TabOrder = 2
+    TabStop = False
+  end
+  object BitBtn1: TBitBtn
+    Left = 444
+    Height = 29
+    Top = 467
+    Width = 86
+    Caption = 'Cancel'
+    Kind = bkCancel
+    OnClick = BitBtn1Click
+    TabOrder = 3
+    TabStop = False
+  end
+  object gpxrominfo: TGroupBox
+    Left = 273
+    Height = 129
+    Top = 8
+    Width = 281
+    Caption = 'Driver Info'
+    ClientHeight = 111
+    ClientWidth = 277
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 4
+    object Label1: TLabel
+      Left = 8
+      Height = 13
+      Top = 16
+      Width = 29
+      Caption = 'Year:'
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 8
+      Height = 13
+      Top = 44
+      Width = 97
+      Caption = 'Hi Score Support:'
+      ParentColor = False
+    end
+    object Label3: TLabel
+      Left = 8
+      Height = 13
+      Top = 30
+      Width = 38
+      Caption = 'Sound:'
+      ParentColor = False
+    end
+    object Label4: TLabel
+      Left = 120
+      Height = 1
+      Top = 16
+      Width = 1
+      ParentColor = False
+    end
+    object Label5: TLabel
+      Left = 120
+      Height = 1
+      Top = 30
+      Width = 1
+      ParentColor = False
+    end
+    object Label6: TLabel
+      Left = 120
+      Height = 1
+      Top = 44
+      Width = 1
+      ParentColor = False
+    end
+    object Label9: TLabel
+      Left = 120
+      Height = 1
+      Top = 58
+      Width = 1
+      ParentColor = False
+    end
+    object Label10: TLabel
+      Left = 8
+      Height = 13
+      Top = 58
+      Width = 56
+      Caption = 'Company:'
+      ParentColor = False
+    end
+  end
+end

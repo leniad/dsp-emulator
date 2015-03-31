@@ -1,0 +1,777 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{263fa042-67a7-4d00-9bdd-ad14b0af0fc4}</ProjectGuid>
+        <MainSource>dsp.dpr</MainSource>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+        <DCC_DependencyCheckOutputName>..\..\dsp.exe</DCC_DependencyCheckOutputName>
+        <FrameworkType>VCL</FrameworkType>
+        <ProjectVersion>16.1</ProjectVersion>
+        <Base>True</Base>
+        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <TargetedPlatforms>3</TargetedPlatforms>
+        <AppType>Application</AppType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+        <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Base)'=='true') or '$(Base_Win64)'!=''">
+        <Base_Win64>true</Base_Win64>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+        <Cfg_1>true</Cfg_1>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win32)'!=''">
+        <Cfg_1_Win32>true</Cfg_1_Win32>
+        <CfgParent>Cfg_1</CfgParent>
+        <Cfg_1>true</Cfg_1>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+        <Cfg_2>true</Cfg_2>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
+        <Cfg_2_Win64>true</Cfg_2_Win64>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base)'!=''">
+        <SanitizedProjectName>dsp</SanitizedProjectName>
+        <Icon_MainIcon>dsp_Icon.ico</Icon_MainIcon>
+        <Manifest_File>None</Manifest_File>
+        <DCC_Define>WINDOWS;$(DCC_Define)</DCC_Define>
+        <VerInfo_MinorVer>14</VerInfo_MinorVer>
+        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_MajorVer>0</VerInfo_MajorVer>
+        <VerInfo_Build>218</VerInfo_Build>
+        <VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
+        <VerInfo_Locale>1034</VerInfo_Locale>
+        <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_Keys>CompanyName=(C) Leniad 2002-2012;FileDescription=DSP Emulator;FileVersion=0.14.1.218;InternalName=Mi super emulador...;LegalCopyright=(C) Leniad 2002-2012;LegalTrademarks=DSP Emulator;OriginalFilename=DSP Emulator;ProductName=DSP Emulator;ProductVersion=0.14;Comments=Thanks for read!</VerInfo_Keys>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
+        <VerInfo_Build>0</VerInfo_Build>
+        <VerInfo_Release>2</VerInfo_Release>
+        <DCC_Namespace>System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_Locale>3082</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.14.2.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win64)'!=''">
+        <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_Build>0</VerInfo_Build>
+        <DCC_Namespace>System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
+        <VerInfo_Locale>3082</VerInfo_Locale>
+        <DCC_Define>CPU64;$(DCC_Define)</DCC_Define>
+        <VerInfo_Release>2</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.14.2.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <Version>7.0</Version>
+        <DCC_DebugInformation>0</DCC_DebugInformation>
+        <DCC_LocalDebugSymbols>False</DCC_LocalDebugSymbols>
+        <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+        <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+        <DCC_ExeOutput>..\</DCC_ExeOutput>
+        <DCC_DcuOutput>obj\</DCC_DcuOutput>
+        <DCC_ObjOutput>obj\</DCC_ObjOutput>
+        <DCC_HppOutput>obj\</DCC_HppOutput>
+        <DCC_UnitSearchPath>varios\;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_ResourcePath>varios\;$(DCC_ResourcePath)</DCC_ResourcePath>
+        <DCC_ObjPath>varios\;$(DCC_ObjPath)</DCC_ObjPath>
+        <DCC_IncludePath>varios\;$(DCC_IncludePath)</DCC_IncludePath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_MajorVer>1</VerInfo_MajorVer>
+        <VerInfo_Build>0</VerInfo_Build>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Release>0</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_MinorVer>0</VerInfo_MinorVer>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <Version>7.0</Version>
+        <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+        <DCC_ExeOutput>..\..\</DCC_ExeOutput>
+        <DCC_DcuOutput>obj\</DCC_DcuOutput>
+        <DCC_ObjOutput>obj\</DCC_ObjOutput>
+        <DCC_HppOutput>obj\</DCC_HppOutput>
+        <DCC_UnitSearchPath>..\varios\;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_ResourcePath>..\varios\;$(DCC_ResourcePath)</DCC_ResourcePath>
+        <DCC_ObjPath>..\varios\;$(DCC_ObjPath)</DCC_ObjPath>
+        <DCC_IncludePath>..\varios\;$(DCC_IncludePath)</DCC_IncludePath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <VerInfo_Release>2</VerInfo_Release>
+        <VerInfo_MinorVer>15</VerInfo_MinorVer>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <BRCC_Defines>WINDOWS;$(BRCC_Defines)</BRCC_Defines>
+        <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_Build>365</VerInfo_Build>
+        <VerInfo_Locale>3082</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=Leniad;FileDescription=;FileVersion=0.15.2.365;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.15;Comments=</VerInfo_Keys>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <DCC_FullBooleanEvaluations>true</DCC_FullBooleanEvaluations>
+        <BRCC_Defines>CPU64;WINDOWS;$(BRCC_Defines)</BRCC_Defines>
+        <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
+        <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
+        <VerInfo_Build>275</VerInfo_Build>
+        <VerInfo_Locale>3082</VerInfo_Locale>
+        <VerInfo_Release>3</VerInfo_Release>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=0.14.3.275;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=0.14;Comments=</VerInfo_Keys>
+    </PropertyGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType>VCLApplication</Borland.ProjectType>
+        <BorlandProject>
+            <Delphi.Personality>
+                <Parameters>
+                    <Parameters Name="UseLauncher">False</Parameters>
+                    <Parameters Name="LoadAllSymbols">True</Parameters>
+                    <Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+                </Parameters>
+                <VersionInfo>
+                    <VersionInfo Name="IncludeVerInfo">True</VersionInfo>
+                    <VersionInfo Name="AutoIncBuild">True</VersionInfo>
+                    <VersionInfo Name="MajorVer">0</VersionInfo>
+                    <VersionInfo Name="MinorVer">14</VersionInfo>
+                    <VersionInfo Name="Release">1</VersionInfo>
+                    <VersionInfo Name="Build">314</VersionInfo>
+                    <VersionInfo Name="Debug">False</VersionInfo>
+                    <VersionInfo Name="PreRelease">False</VersionInfo>
+                    <VersionInfo Name="Special">False</VersionInfo>
+                    <VersionInfo Name="Private">False</VersionInfo>
+                    <VersionInfo Name="DLL">False</VersionInfo>
+                    <VersionInfo Name="Locale">1034</VersionInfo>
+                    <VersionInfo Name="CodePage">1252</VersionInfo>
+                </VersionInfo>
+                <VersionInfoKeys>
+                    <VersionInfoKeys Name="CompanyName">(C) Leniad 2002-2012</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileDescription">DSP Emulator</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">0.14.1.314</VersionInfoKeys>
+                    <VersionInfoKeys Name="InternalName">Mi super emulador...</VersionInfoKeys>
+                    <VersionInfoKeys Name="LegalCopyright">(C) Leniad 2002-2012</VersionInfoKeys>
+                    <VersionInfoKeys Name="LegalTrademarks">DSP Emulator</VersionInfoKeys>
+                    <VersionInfoKeys Name="OriginalFilename">DSP Emulator</VersionInfoKeys>
+                    <VersionInfoKeys Name="ProductName">DSP Emulator</VersionInfoKeys>
+                    <VersionInfoKeys Name="ProductVersion">0.14</VersionInfoKeys>
+                    <VersionInfoKeys Name="Comments">Thanks for read!</VersionInfoKeys>
+                </VersionInfoKeys>
+                <Source>
+                    <Source Name="MainSource">dsp.dpr</Source>
+                </Source>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k210.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp210.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
+            </Delphi.Personality>
+            <ModelSupport>False</ModelSupport>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">True</Platform>
+            </Platforms>
+            <Deployment>
+                <DeployFile LocalName="..\..\dsp.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>dsp.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployClass Required="true" Name="DependencyPackage">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.bpl</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="DependencyModule">
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.dll;.bpl</Extensions>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch2048">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectOSXInfoPList"/>
+                <DeployClass Name="ProjectiOSDeviceDebug">
+                    <Platform Name="iOSDevice">
+                        <RemoteDir>..\$(PROJECTNAME).app.dSYM\Contents\Resources\DWARF</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_SplashImage470">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-normal</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidLibnativeX86File">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\x86</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSResource">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectOSXEntitlements"/>
+                <DeployClass Name="AndroidGDBServer">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\armeabi-v7a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch640">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_SplashImage960">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xlarge</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon96">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch320">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon144">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-xxhdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidLibnativeMipsFile">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\mips</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashImageDef">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="DebugSymbols">
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="DependencyFramework">
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                        <Extensions>.framework</Extensions>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_SplashImage426">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-small</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSEntitlements"/>
+                <DeployClass Name="AdditionalDebugSymbols">
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidClassesDexFile">
+                    <Platform Name="Android">
+                        <RemoteDir>classes</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSInfoPList"/>
+                <DeployClass Name="iPad_Launch1024">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_DefaultAppIcon">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectOSXResource">
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\Resources</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectiOSDeviceResourceRules"/>
+                <DeployClass Name="iPad_Launch768">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Required="true" Name="ProjectOutput">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\armeabi-v7a</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidLibnativeArmeabiFile">
+                    <Platform Name="Android">
+                        <RemoteDir>library\lib\armeabi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_SplashImage640">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-large</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="File">
+                    <Platform Name="iOSDevice">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="Android">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <Operation>0</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>0</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPhone_Launch640x1136">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon36">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-ldpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashStyles">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="iPad_Launch1536">
+                    <Platform Name="iOSDevice">
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon48">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-mdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_LauncherIcon72">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-hdpi</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="ProjectAndroidManifest">
+                    <Platform Name="Android">
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSDevice" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+            </Deployment>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
+    <ItemGroup>
+        <DelphiCompile Include="$(MainSource)">
+            <MainSource>MainSource</MainSource>
+        </DelphiCompile>
+        <DCCReference Include="..\CONSOLAS\coleco.pas"/>
+        <DCCReference Include="..\CONSOLAS\gb.pas"/>
+        <DCCReference Include="..\arcade\yiearkungfu_hw.pas"/>
+        <DCCReference Include="..\arcade\asteroids_hw.pas"/>
+        <DCCReference Include="..\arcade\blacktiger_hw.pas"/>
+        <DCCReference Include="..\arcade\bombjack_hw.pas"/>
+        <DCCReference Include="..\arcade\bubblebobble_hw.pas"/>
+        <DCCReference Include="..\arcade\burgertime_hw.pas"/>
+        <DCCReference Include="..\arcade\cityconnection_hw.pas"/>
+        <DCCReference Include="..\arcade\commando_hw.pas"/>
+        <DCCReference Include="..\arcade\donkeykong_hw.pas"/>
+        <DCCReference Include="..\arcade\expressraider_hw.pas"/>
+        <DCCReference Include="..\arcade\galaxian_hw.pas"/>
+        <DCCReference Include="..\arcade\greenberet_hw.pas"/>
+        <DCCReference Include="..\arcade\skykid_hw.pas"/>
+        <DCCReference Include="..\arcade\jackal_hw.pas"/>
+        <DCCReference Include="..\arcade\m62_hw.pas"/>
+        <DCCReference Include="..\arcade\ladybug_hw.pas"/>
+        <DCCReference Include="..\arcade\mikie_hw.pas"/>
+        <DCCReference Include="..\arcade\mysteriousstones_hw.pas"/>
+        <DCCReference Include="..\arcade\pacman_hw.pas"/>
+        <DCCReference Include="..\arcade\phoenix_hw.pas"/>
+        <DCCReference Include="..\arcade\pooyan_hw.pas"/>
+        <DCCReference Include="..\arcade\popeye_hw.pas"/>
+        <DCCReference Include="..\arcade\prehistoricisle_hw.pas"/>
+        <DCCReference Include="..\arcade\psychic5_hw.pas"/>
+        <DCCReference Include="..\arcade\rallyx_hw.pas"/>
+        <DCCReference Include="..\arcade\tecmo_hw.pas"/>
+        <DCCReference Include="..\arcade\superbasketball_hw.pas"/>
+        <DCCReference Include="..\arcade\shaolinsroad_hw.pas"/>
+        <DCCReference Include="..\arcade\shootout_hw.pas"/>
+        <DCCReference Include="..\arcade\snowbros_hw.pas"/>
+        <DCCReference Include="..\arcade\sonson_hw.pas"/>
+        <DCCReference Include="..\arcade\starforce_hw.pas"/>
+        <DCCReference Include="..\arcade\system1_hw.pas"/>
+        <DCCReference Include="..\arcade\system1_hw_misc.pas"/>
+        <DCCReference Include="..\arcade\system2_hw_misc.pas"/>
+        <DCCReference Include="..\arcade\tehkanworldcup_hw.pas"/>
+        <DCCReference Include="..\arcade\terracresta_hw.pas"/>
+        <DCCReference Include="..\arcade\tigerroad_hw.pas"/>
+        <DCCReference Include="..\arcade\toki_hw.pas"/>
+        <DCCReference Include="..\arcade\vigilante_hw.pas"/>
+        <DCCReference Include="..\cpu\m6809.pas"/>
+        <DCCReference Include="..\cpu\z80\z80daisy.pas"/>
+        <DCCReference Include="..\devices\ppi8255.pas"/>
+        <DCCReference Include="..\devices\upd765.pas"/>
+        <DCCReference Include="..\devices\z80ctc.pas"/>
+        <DCCReference Include="..\devices\z80pio.pas"/>
+        <DCCReference Include="..\misc\gfx_engine.pas"/>
+        <DCCReference Include="..\misc\main_engine.pas"/>
+        <DCCReference Include="..\misc\controls_engine.pas"/>
+        <DCCReference Include="..\misc\init_games.pas"/>
+        <DCCReference Include="..\misc\lenguaje.pas"/>
+        <DCCReference Include="..\misc\snapshot.pas"/>
+        <DCCReference Include="..\misc\Tap_tzx.pas"/>
+        <DCCReference Include="..\misc\timer_engine.pas"/>
+        <DCCReference Include="..\ordenadores\amstrad_cpc.pas"/>
+        <DCCReference Include="..\ordenadores\misc\poke_spectrum.pas"/>
+        <DCCReference Include="..\ordenadores\spectrum_3.pas"/>
+        <DCCReference Include="..\ordenadores\spectrum_48k.pas"/>
+        <DCCReference Include="..\ordenadores\spectrum_128k.pas"/>
+        <DCCReference Include="..\ordenadores\misc\spectrum_misc.pas"/>
+        <DCCReference Include="..\snd\ym_3812.pas"/>
+        <DCCReference Include="..\snd\asteroids_hw_audio.pas"/>
+        <DCCReference Include="..\snd\Ay_8910.pas"/>
+        <DCCReference Include="..\snd\dac.pas"/>
+        <DCCReference Include="..\snd\fm_2151.pas"/>
+        <DCCReference Include="..\snd\fmopl.pas"/>
+        <DCCReference Include="..\snd\fmopn.pas"/>
+        <DCCReference Include="..\snd\konami_snd.pas"/>
+        <DCCReference Include="..\snd\msm5205.pas"/>
+        <DCCReference Include="..\snd\namco_snd.pas"/>
+        <DCCReference Include="..\snd\phoenix_audio_digital.pas"/>
+        <DCCReference Include="..\snd\samples.pas"/>
+        <DCCReference Include="..\snd\sn_76496.pas"/>
+        <DCCReference Include="..\snd\tms36xx.pas"/>
+        <DCCReference Include="..\snd\vlm_5030.pas"/>
+        <DCCReference Include="..\snd\ym_2151.pas"/>
+        <DCCReference Include="..\snd\ym_2203.pas"/>
+        <DCCReference Include="acercade.pas">
+            <Form>AboutBox</Form>
+        </DCCReference>
+        <DCCReference Include="cargar_dsk.pas">
+            <Form>Form6</Form>
+        </DCCReference>
+        <DCCReference Include="config.pas">
+            <Form>ConfigSP</Form>
+        </DCCReference>
+        <DCCReference Include="config_general.pas">
+            <Form>MConfig</Form>
+        </DCCReference>
+        <DCCReference Include="LoadRom.pas">
+            <Form>FLoadRom</Form>
+        </DCCReference>
+        <DCCReference Include="poke_memoria.pas">
+            <Form>Form3</Form>
+        </DCCReference>
+        <DCCReference Include="..\CONSOLAS\nes_ppu.pas"/>
+        <DCCReference Include="principal.pas">
+            <Form>Form1</Form>
+        </DCCReference>
+        <DCCReference Include="..\cpu\m680x.pas"/>
+        <DCCReference Include="..\arcade\contra_hw.pas"/>
+        <DCCReference Include="..\arcade\mappy_hw.pas"/>
+        <DCCReference Include="..\arcade\rastan_hw.pas"/>
+        <DCCReference Include="..\snd\taitosnd.pas"/>
+        <DCCReference Include="..\devices\namcoio_56xx_58xx.pas"/>
+        <DCCReference Include="..\arcade\legendarywings_hw.pas"/>
+        <DCCReference Include="..\arcade\streetfighter_hw.pas"/>
+        <DCCReference Include="..\arcade\galaga_hw.pas"/>
+        <DCCReference Include="..\devices\namcoio_06xx_51xx_53xx.pas"/>
+        <DCCReference Include="..\arcade\xaindsleena_hw.pas"/>
+        <DCCReference Include="..\arcade\suna8_hw.pas"/>
+        <DCCReference Include="..\arcade\nmk16_hw.pas"/>
+        <DCCReference Include="..\arcade\knucklejoe_hw.pas"/>
+        <DCCReference Include="..\arcade\wardner_hw.pas"/>
+        <DCCReference Include="..\cpu\tms32010.pas"/>
+        <DCCReference Include="..\arcade\gaelco_hw.pas"/>
+        <DCCReference Include="..\arcade\exedexes_hw.pas"/>
+        <DCCReference Include="..\arcade\gunsmoke_hw.pas"/>
+        <DCCReference Include="redefine.pas">
+            <Form>Form4</Form>
+        </DCCReference>
+        <DCCReference Include="..\arcade\hw_1942.pas"/>
+        <DCCReference Include="..\cpu\mb88xx.pas"/>
+        <DCCReference Include="..\arcade\jailbreak_hw.pas"/>
+        <DCCReference Include="..\arcade\circuscharlie_hw.pas"/>
+        <DCCReference Include="..\arcade\ironhorse_hw.pas"/>
+        <DCCReference Include="..\arcade\m72_hw.pas"/>
+        <DCCReference Include="..\arcade\breakthru_hw.pas"/>
+        <DCCReference Include="..\arcade\dec8_hw.pas"/>
+        <DCCReference Include="..\arcade\doubledragon_hw.pas"/>
+        <DCCReference Include="..\cpu\hd6309.pas"/>
+        <DCCReference Include="..\arcade\mrdo_hw.pas"/>
+        <DCCReference Include="..\arcade\epos_hw.pas"/>
+        <DCCReference Include="..\snd\oki6295.pas"/>
+        <DCCReference Include="..\arcade\slapfight_hw.pas"/>
+        <DCCReference Include="..\arcade\legendkage_hw.pas"/>
+        <DCCReference Include="..\arcade\cabal_hw.pas"/>
+        <DCCReference Include="..\snd\seibu_sound.pas"/>
+        <DCCReference Include="..\arcade\cps1_hw.pas"/>
+        <DCCReference Include="..\snd\qsound.pas"/>
+        <DCCReference Include="cargar_spec.pas">
+            <Form>Form2</Form>
+        </DCCReference>
+        <DCCReference Include="..\snd\gb_sound.pas"/>
+        <DCCReference Include="..\misc\rom_engine.pas"/>
+        <DCCReference Include="..\misc\misc_functions.pas"/>
+        <DCCReference Include="..\arcade\system16a_hw.pas"/>
+        <DCCReference Include="..\misc\pal_engine.pas"/>
+        <DCCReference Include="..\arcade\timepilot84_hw.pas"/>
+        <DCCReference Include="..\arcade\tutankham_hw.pas"/>
+        <DCCReference Include="..\cpu\m6805.pas"/>
+        <DCCReference Include="..\arcade\pang_hw.pas"/>
+        <DCCReference Include="..\arcade\ninjakid2_hw.pas"/>
+        <DCCReference Include="..\devices\mc8123.pas"/>
+        <DCCReference Include="..\arcade\gng_hw.pas"/>
+        <DCCReference Include="..\arcade\system86_hw.pas"/>
+        <DCCReference Include="..\arcade\rocnrope_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\konami_decrypt.pas"/>
+        <DCCReference Include="..\arcade\misc\gaelco_hw_decrypt.pas"/>
+        <DCCReference Include="..\arcade\misc\kabuki_decript.pas"/>
+        <DCCReference Include="..\cpu\mcs51.pas"/>
+        <DCCReference Include="..\arcade\kyugo_hw.pas"/>
+        <DCCReference Include="..\arcade\thenewzealandstory_hw.pas"/>
+        <DCCReference Include="..\arcade\pacland_hw.pas"/>
+        <DCCReference Include="..\arcade\mariobros_hw.pas"/>
+        <DCCReference Include="..\arcade\solomonkey_hw.pas"/>
+        <DCCReference Include="..\arcade\combatschool_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\konami_video.pas"/>
+        <DCCReference Include="..\arcade\misc\kaneco_pandora.pas"/>
+        <DCCReference Include="..\arcade\heavyunit_hw.pas"/>
+        <DCCReference Include="uchild.pas">
+            <Form>frChild</Form>
+        </DCCReference>
+        <DCCReference Include="..\snd\upd7759.pas"/>
+        <DCCReference Include="..\misc\sound_engine.pas"/>
+        <DCCReference Include="..\arcade\snk68_hw.pas"/>
+        <DCCReference Include="..\arcade\megasys1_hw.pas"/>
+        <DCCReference Include="..\arcade\timepilot_hw.pas"/>
+        <DCCReference Include="..\arcade\pengo_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\sega_decrypt.pas"/>
+        <DCCReference Include="..\arcade\misc\galaga_stars_const.pas"/>
+        <DCCReference Include="tape_window.pas">
+            <Form>Form5</Form>
+        </DCCReference>
+        <DCCReference Include="..\misc\file_engine.pas"/>
+        <DCCReference Include="lenslock.pas">
+            <Form>Form7</Form>
+        </DCCReference>
+        <DCCReference Include="..\arcade\twincobra_hw.pas"/>
+        <DCCReference Include="..\arcade\jrpacman_hw.pas"/>
+        <DCCReference Include="..\arcade\dec0_hw.pas"/>
+        <DCCReference Include="..\cpu\hu6280.pas"/>
+        <DCCReference Include="..\arcade\cavemanninja_hw.pas"/>
+        <DCCReference Include="..\arcade\tumblepop_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\deco16ic.pas"/>
+        <DCCReference Include="..\arcade\misc\deco_decr.pas"/>
+        <DCCReference Include="..\arcade\funkyjet_hw.pas"/>
+        <DCCReference Include="..\arcade\superburgertime_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\deco_common.pas"/>
+        <DCCReference Include="..\arcade\dietgogo_hw.pas"/>
+        <DCCReference Include="..\cpu\m68000.pas"/>
+        <DCCReference Include="..\cpu\m6502.pas"/>
+        <DCCReference Include="..\cpu\lr35902.pas"/>
+        <DCCReference Include="..\arcade\actfancer_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\deco_bac06.pas"/>
+        <DCCReference Include="..\arcade\arabian_hw.pas"/>
+        <DCCReference Include="..\snd\n2a03_sound.pas"/>
+        <DCCReference Include="..\arcade\higemaru_hw.pas"/>
+        <DCCReference Include="arcade_config.pas">
+            <Form>config_arcade</Form>
+        </DCCReference>
+        <DCCReference Include="..\arcade\bagman_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\bagman_pal.pas"/>
+        <DCCReference Include="..\consolas\chip8_hw.pas"/>
+        <DCCReference Include="..\consolas\nes_mappers.pas"/>
+        <DCCReference Include="..\consolas\nes.pas"/>
+        <DCCReference Include="..\consolas\gb_mappers.pas"/>
+        <DCCReference Include="..\devices\tms99xx.pas"/>
+        <DCCReference Include="..\arcade\zaxxon_hw.pas"/>
+        <DCCReference Include="..\cpu\z80\nz80.pas"/>
+        <DCCReference Include="..\cpu\z80\z80_sp.pas"/>
+        <DCCReference Include="..\cpu\nec_v20_v30.pas"/>
+        <DCCReference Include="..\arcade\kangaroo_hw.pas"/>
+        <DCCReference Include="..\arcade\bioniccommando_hw.pas"/>
+        <DCCReference Include="..\arcade\wwfsuperstars_hw.pas"/>
+        <DCCReference Include="..\misc\qsnapshot.pas"/>
+        <DCCReference Include="..\arcade\rainbowislands_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\rainbow_cchip.pas"/>
+        <DCCReference Include="..\ordenadores\misc\spectrum_load.pas"/>
+        <DCCReference Include="..\arcade\volfied_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\volfied_cchip.pas"/>
+        <DCCReference Include="..\arcade\operationwolf_hw.pas"/>
+        <DCCReference Include="..\arcade\misc\opwolf_cchip.pas"/>
+        <DCCReference Include="joystick_calibrate.pas">
+            <Form>Form8</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="..\devices\eeprom.pas"/>
+        <DCCReference Include="..\arcade\outrun_hw.pas"/>
+        <DCCReference Include="..\arcade\taitosj_hw.pas"/>
+        <DCCReference Include="..\devices\fd1089.pas"/>
+        <DCCReference Include="..\misc\vars_hide.pas"/>
+        <DCCReference Include="..\arcade\misc\deco_146.pas"/>
+        <DCCReference Include="..\arcade\misc\deco_104.pas"/>
+        <DCCReference Include="..\arcade\vulgus_hw.pas"/>
+        <DCCReference Include="..\arcade\ddragon3_hw.pas"/>
+        <DCCReference Include="..\arcade\blockout_hw.pas"/>
+        <DCCReference Include="..\arcade\foodfight_hw.pas"/>
+        <DCCReference Include="..\misc\SDL2\sdl2.pas"/>
+        <DCCReference Include="..\snd\pokey.pas"/>
+        <DCCReference Include="..\misc\disk_file_format.pas"/>
+        <DCCReference Include="..\misc\ipf_disk.pas"/>
+        <DCCReference Include="..\arcade\nemesis_hw.pas"/>
+        <DCCReference Include="..\arcade\pirates_hw.pas"/>
+        <DCCReference Include="..\arcade\junofirst_hw.pas"/>
+        <BuildConfiguration Include="Debug">
+            <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Base">
+            <Key>Base</Key>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+    </ItemGroup>
+    <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+    <Import Project="$(MSBuildProjectName).deployproj" Condition="Exists('$(MSBuildProjectName).deployproj')"/>
+</Project>
