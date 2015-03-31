@@ -1,6 +1,6 @@
-# dsp-emulator
-Dsp emulator WIP
-
+﻿# dsp-emulator
+DSP Emulator WIP
+<b>31/03/15</b> - Migrated from Google. Published WIP source.
 <b>06/02/15</b> - DSP 0.15b2 Final. Windows 32bits and 64bits, Linux 32bits and 64 bits and MAC OSX 32 bits binary.<br>
 Many changes, focused on drivers completion (screen rotation, controls, etc.) and stability. Please read the documentation for more information.<br>
 Three new drivers: Pleiads (no sound), Snap Jack and Cosmic Avenger.<br>
@@ -17,26 +17,26 @@ Three new drivers: Pleiads (no sound), Snap Jack and Cosmic Avenger.<br>
 
 <b>04/12/14</b> - DSP 0.15b2WIP. Windows 32bits, Linux 32bits and 64 bits and MAC OSX 32  bits binary.<br>
 <pre>-General<br>
-+ Z80: Fixed LDD and LDDR (Was fixed on Spectrum Z80 engine, but I forget to update!)<br>
-+ Loading dynamically the necessary libraries. No more errors if the SDL2 library is not present, warns and finishes execution. If Zlib or IPF libraries are not available, do not perform the function but continues execution.<br>
-+ Pokey: Started writing chip emulation<br>
-+ Lazarus (Linux and OSX)<br>
-- Fixed search function within a ZIP, it was doubling the results<br>
-- Optional libraries: Zlib and IPF (CAPS Image)<br>
-- Needed libraries: SDL2 and SDL2 Mixer<br>
-+ Delphi (Windows)<br>
-- Optional library: IPF (CAPS Image), the Zlib library is included on Delphi and don't need a external library<br>
-- Needed library: SDL2<br>
-+ UPD765:<br>
-- Fixed length when full track read is selected<br>
-- Fixed length when a sector read is selected<br>
-- Fixed function that searches for the next id sector ('Tintin on the Moon' loads again on Spectrum +3)<br>
-- Fixed when trying to read beyond the end of a track ('Short Circuit', 'Head Over Heels', etc. loads on Amstrad)<br>
-- Fixed sector selection when it's deleted and SK is selected<br>
-+ IPF: Started writing an interface to the IPF disk format<br>
-Amstrad<br>
-+ Implemented snapshots. Now load and save in 'SNA' format.<br>
-+ Fixed selection of high ROM. If an unmapped ROM is selected by default basic ROM is slected (Fixes 'avant JC 20000', '2112AD', etc.)<br>
++ Z80: Fixed LDD and LDDR (Was fixed on Spectrum Z80 engine, but I forget to update!)
++ Loading dynamically the necessary libraries. No more errors if the SDL2 library is not present, warns and finishes execution. If Zlib or IPF libraries are not available, do not perform the function but continues execution.
++ Pokey: Started writing chip emulation
++ Lazarus (Linux and OSX)
+- Fixed search function within a ZIP, it was doubling the results
+- Optional libraries: Zlib and IPF (CAPS Image)
+- Needed libraries: SDL2 and SDL2 Mixer
++ Delphi (Windows)
+- Optional library: IPF (CAPS Image), the Zlib library is included on Delphi and don't need a external library
+- Needed library: SDL2
++ UPD765:
+- Fixed length when full track read is selected
+- Fixed length when a sector read is selected
+- Fixed function that searches for the next id sector ('Tintin on the Moon' loads again on Spectrum +3)
+- Fixed when trying to read beyond the end of a track ('Short Circuit', 'Head Over Heels', etc. loads on Amstrad)
+- Fixed sector selection when it's deleted and SK is selected
++ IPF: Started writing an interface to the IPF disk format
+Amstrad
++ Implemented snapshots. Now load and save in 'SNA' format.
++ Fixed selection of high ROM. If an unmapped ROM is selected by default basic ROM is slected (Fixes 'avant JC 20000', '2112AD', etc.)
 + Some enhancement on Z80 timings, but still are wrong ('Prohibition' loads)</pre>
 
 <strike>Windows 0.15b2WIP 32Bits binary</strike><br>
@@ -45,23 +45,23 @@ Amstrad<br>
 <strike>MAC OSX 0.15b2WIP 32bits binary</strike><br><br>
 
 <b>06/11/14</b> - DSP 0.15b2WIP. Windows 32bits, Linux 32bits and 64 bits and MAC OSX 32  bits binary.<br>
-<pre>-General<br>
-+ Small cosmetical details fixes (icons, screen sizes, etc.)<br>
-+ Lazarus: Modified the use of the Zlib library, now it links the external library, so compiled objects are no longer needed. Zlib libray must be installed on Linux and OSX (Linux 64bit fails).<br>
-+ Simplified the creation of audio emulated device, the audio CPU information is saved internally (number and CPU clock), so it is no longer necessary to add it when initializing a sound chip<br>
-+ Simplified keyboard system. It is not based on events to see if the key is pressed or not.<br>
-+ M68000: Fixed and added the timings of all opcodes<br>
--Spectrum<br>
-+ If a snapshot is loaded and that the maximum speed is set, it's reduced to normal speed<br>
--Amstrad<br>
-+ Fixed mode 2 display. I can not change the physical resolution of the screen, because there are games that combine several resolutions in the same frame. It is now the color is estimated from the sum of then two real pixels. (Thanks to cpcbegin)<br>
-+ Fixed removal of the IRQ when values are modified in the GA. It fixes audio speed and video timings in some games.<br>
-+ M6845 video: The address value is calculated with a table. 32k screen display effect and hardware scrolling now work<br>
--Taito SJ HW<br>
-+ Fixed audio<br>
--Zaxxon HW<br>
-+ Congo: Fixed audio<br>
--Contra<br>
+<pre>-General
++ Small cosmetical details fixes (icons, screen sizes, etc.)
++ Lazarus: Modified the use of the Zlib library, now it links the external library, so compiled objects are no longer needed. Zlib libray must be installed on Linux and OSX (Linux 64bit fails).
++ Simplified the creation of audio emulated device, the audio CPU information is saved internally (number and CPU clock), so it is no longer necessary to add it when initializing a sound chip
++ Simplified keyboard system. It is not based on events to see if the key is pressed or not.
++ M68000: Fixed and added the timings of all opcodes
+-Spectrum
++ If a snapshot is loaded and that the maximum speed is set, it's reduced to normal speed
+-Amstrad
++ Fixed mode 2 display. I can not change the physical resolution of the screen, because there are games that combine several resolutions in the same frame. It is now the color is estimated from the sum of then two real pixels. (Thanks to cpcbegin)
++ Fixed removal of the IRQ when values are modified in the GA. It fixes audio speed and video timings in some games.
++ M6845 video: The address value is calculated with a table. 32k screen display effect and hardware scrolling now work
+-Taito SJ HW
++ Fixed audio
+-Zaxxon HW
++ Congo: Fixed audio
+-Contra
 + Fixed video</pre>
 
 <strike>Windows 0.15b2WIP 32Bits binary</strike><br>
