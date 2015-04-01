@@ -1,24 +1,23 @@
-﻿#summary DSP Emulator
-DSP Emulator v0.15ß2 by Leniad 2001-2015
+﻿= DSP Emulator v0.15ß2 by Leniad 2001-2015 =
 = Details =
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 Why pascal, and not C, C++, Java or any other language? Well, pascal it is powerful enough to handle my emulator (120fps the Spectrum driver with a Pentium CPU) and it is as good as many any other languages.<br>
 Since version 0.9ß3 portability has begun to Lazarus/Free Pascal, so there is a Linux 32/64bits version available.<br>
-Since version 0.14ß3 there is a Mac OSX WIP version.<br>
+Since version 0.14ß3 there is a Mac OSX WIP version.<br><br>
 <b>1-. Emulation</b>
 <hr>
 - Can handle ZIP format. You can load ROMS, tapes, snapshots or disks from a ZIP files.<br>
 - Needed libraries<br>
-    - Windows<br>
-       + The library 'SDL2.DLL' is essential. You can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start.<br>
-       + The library 'CAPSImg.dll' is optional and it's needed to open disk images IPF. (Not working)<br>
-    - Linux and OSX<br>
-       + The libraries 'SDL2' and 'SDL2 Mixer' are needed, if cannot be loaded the emulator warns and can not start the emulation. Each OS has its own installation.<br>
-       + The libraries ' CAPSImg' (IPF images) and 'Zlib' (Snapshots) are optional, emulation can start without them, but there are features that are not available if can not be found<br>
-The emulator includes (not in WIP or beta versions) inside the ZIP the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco.<br>
-IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS<br>
-<b>1.1-. Keys</b><br>
+<pre style='display:inline'>&#09;</pre>- Windows<br>
+<pre style='display:inline'>&#09;&#09;</pre>+ The library 'SDL2.DLL' is essential. You can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start<br>
+<pre style='display:inline'>&#09;&#09;</pre>+ The library 'CAPSImg.dll' is optional and it's needed to open disk images IPF. (Not working)<br>
+<pre style='display:inline'>&#09;</pre>- Linux and OSX<br>
+<pre style='display:inline'>&#09;&#09;</pre>+ The libraries 'SDL2' and 'SDL2 Mixer' are needed, if cannot be loaded the emulator warns and can not start the emulation. Each OS has its own installation<br>
+<pre style='display:inline'>&#09;&#09;</pre>+ The libraries 'CAPSImg' (IPF images) and 'Zlib' (Snapshots) are optional, emulation can start without them, but there are features that are not available if can not be found<br>
+The emulator includes (not in WIP or beta versions) inside the ZIP the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco<br>
+IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS<br><br>
+<b>1.1-. Keys</b>
 <hr>
 -General Keys:
     F2 --> Full speed/Normal Speed
@@ -44,20 +43,20 @@ Since 0.15ß1 'Full Screen' works again<br>
     Insert coin 1     --> Key '5'
     Insert Coin 2     --> Key '6' 
 Any other control is not defined. You can redefine it in the main configuration menu.<br>
-- Spectrum/Amstrad basic keys:
-    F1 --> Play/Stop tape
+- Spectrum/Amstrad basic keys:<br>
+<pre style='display:inline'>&#09;</pre>F1 --> Play/Stop tape
     F4 --> Save snapshot
     F5 --> Remove Disk
 
-<b>1.2-. Language Files</b><br>
+<b>1.2-. Language Files</b>
 <hr>
 DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
 You can select 'Castellano', 'Catalan', 'English', 'German', 'French', 'Brazilian' or 'Italian'.<br>
-If the language files are not present, you receive a warning and the emulator will be in Spanish and you can not change the language.<br>
-<b>1.3-. Configuration</b><br>
+If the language files are not present, you receive a warning and the emulator will be in Spanish and you can not change the language.<br><br>
+<b>1.3-. Configuration</b>
 <hr>
 In the main screen of the emulator you can press some buttons<br>
-     - Reset/Start/Pause emulation<br>
+<np>- Reset/Start/Pause emulation<br>
      - Fastest/Slow emulation<br>
      - Configure DSP: you can configure some options<br>
             - Select the main language<br>
