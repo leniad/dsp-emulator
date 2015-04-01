@@ -1,5 +1,5 @@
 ﻿# dsp-emulator
-DSP Emulator WIP status<br>
+DSP Emulator WIP
 <b>31/03/15</b> - Migrated from Google. Published WIP source.
 <b>06/02/15</b> - DSP 0.15b2 Final. Windows 32bits and 64bits, Linux 32bits and 64 bits and MAC OSX 32 bits binary.<br>
 Many changes, focused on drivers completion (screen rotation, controls, etc.) and stability. Please read the documentation for more information.<br>

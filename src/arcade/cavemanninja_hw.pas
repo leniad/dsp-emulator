@@ -405,10 +405,10 @@ while EmuStatus=EsRuning do begin
    main_h6280.run(frame_s);
    frame_s:=frame_s+main_h6280.tframes-main_h6280.contador;
    case screen_line of
-      0..239:if (((irq_mask and $2)<>0) and (irq_line=(screen_line+1))) then begin
+      0..239:if (((irq_mask and $2)<>0) and (irq_line>0) and (irq_line<240)) then begin
               if (irq_mask and $10)<>0 then main_m68000.irq[3]:=ASSERT_LINE
                 else main_m68000.irq[4]:=ASSERT_LINE;
-             end;
+          end;
       247:begin
             main_m68000.irq[5]:=HOLD_LINE;
             proc_update_video;
