@@ -1,4 +1,4 @@
-﻿= DSP Emulator v0.15ß2 by Leniad 2001-2015 =
+﻿# DSP Emulator v0.15ß2 by Leniad 2001-2015
 = Details =
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
@@ -72,16 +72,16 @@ In the main screen of the emulator you can press some buttons<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Show game list: Since version 0.9 there is allowed boot DSP with a list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system, distribution year, company, etc.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;In general configuration you can choose this way of booting (show a game list), or the old way (run the last driver loaded).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Save Pictures: Since DSP 0.2wipb5 you can save GIF files from Spectrum emulation.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Since 0.7ß2 version you can also save JPG and PNG formats from all drivers.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Since 0.7ß2 version you can also save JPG and PNG formats from all drivers.<br><br>
 <b>2-. Drivers</b><br>
-<hr><br>
+<hr>
 <b>2.1 Computers</b><br>
-<hr><br>
+<hr>
 <b>Spectrum</b><br>
 <hr>
 You can configure<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROMS: You can change Spectrum ROM loading. Configure your favorite ROM or a stand alone file or 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name, for example 'SPECTRUM.ZIP' and the ROM inside the ZIP 'SPECTRUM.ROM')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;By default the ROM files are:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;By default the ROM files are:
      -Spectrum 16k/48k: 'SPECTRUM.ZIP' --> 'spectrum.rom' CRC: 0xDDEE531F
      -Spectrum 128k: 'SPEC128.ZIP' --> '128-0.rom' CRC: 0xE76799D2 and '128-1.rom' CRC: 0xB96A36BE
      -Spectrum +2: 'PLUS2.ZIP' --> 'plus2-0.rom' CRC: 0x5D2E8C66 and 'plus2-1.rom' CRC: 0x98B1320B
@@ -111,7 +111,7 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Audio: Spectrum beeper and in modern Spectrum revisions there is a AY-8912.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To do: Contented memory is not working correctly at 100%.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- To do: Contented memory is not working correctly at 100%.<br><br>
 <b>Amstrad CPC 464,664 y 6128</b><br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROMS - By default the files are:
@@ -125,11 +125,11 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Sound: All version have the AY-8912 chip<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots: Support load/save 'SNA' format<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To do
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Some disk protections are not working (a few left)
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Some video effect are missing (M6845 chip)
+&nbsp;&nbsp;&nbsp;&nbsp;- To do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Some disk protections are not working (a few left)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Some video effect are missing (M6845 chip)<br><br>
 <b>2.2 Consoles</b><br>
-<hr><br>
+<hr>
 <b>NES</b><br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- Cartridge: Supports '.nes' ROM format, compressed in ZIP format or not.<br>
@@ -141,7 +141,7 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- To Do:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Video Timings<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Video Timings<br><br>
 <b>GameBoy/Gameboy Color</b><br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROM: Not required, but if present are loaded and run as the original console.<br>
@@ -157,7 +157,7 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Audio problems, do not work fine with high frequencies<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Video Timings<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br><br>
 <b>ColecoVision</b><br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROM: The ROM is needed for emulation<br>
@@ -168,7 +168,7 @@ Other features<br>
       Keys 'Q' and 'W' emulate the keys '*' and '#'
 &nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: It supports the standard game cartridges (not expansion cartridges) with 'ROM' and 'COL' file extension compressed or not<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshot: Records snapshots compressed with its own format. Also includes the ROM cartridge loaded, so they are independent and can be loaded without the ROM.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Sound: Support the sound AY-8912 chip<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Sound: Support the sound AY-8912 chip<br><br>
 <b>Chip 8/Super Chip8</b><br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROM: Does not have. It's a simulation of a pseudo CPU.<br>
@@ -182,9 +182,9 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Video: Supports 64x32 format from Chip8, 64x64 from Chip8 Hires and 128x64 from SuperChip8<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Files: Supports '.CH8' y '.BIN' formats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- To do:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
 <b>2.3 Arcade</b><br>
-<hr><br>
+<hr>
 <b>2.3.1 Samples</b><hr>
 Some games, given the difficulty of emulating old sound systems, uses 'samples'. Such files are portions of digitized sound, played instead of emulating the sound system.<br>
 Currently only some drivers use wholly or partly this system.<br>
@@ -420,7 +420,7 @@ Total: 192</pre>
 <hr>
 If you want to add another language, edit any file with the extension '.lng' in the 'LNG' directory, rename it with the name of the language and send it to me to add it to the next version.<br>
 If you make any improvements to any driver, processor, main code, etc. or add drivers, please send the changes to me, so they can be added to the main code.<br>
-If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)<br>
+If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)<br><br>
 <b>4-. Acknowledgments</b><br>
 <hr>
 - First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria)<br>
@@ -432,7 +432,7 @@ If you use part of the code of the emulator for any non commercial purpose, you 
 - Thanks to Tom Walker, he sent me his driver CPS1 where I got and understood a lot of information<br>
 - sremulador for begin the rewriting of NES driver<br>
 - Thanks to Martijn from Revival Studios for the info about Chip8<br>
-- And many pages from Internet, many documents ... and people who I forget, thank you all<br>
+- And many pages from Internet, many documents ... and people who I forget, thank you all<br><br>
 <b>5-. Copyright</b><br>
 <hr>
 - The Coleco and Pooyan has been rewrited from the originals by Michael Franzen<br>
@@ -444,12 +444,12 @@ If you use part of the code of the emulator for any non commercial purpose, you 
 - NEC765 emulator is a conversion writed and adapted by me, from MESS original<br>
 - GameBoy/GameBoy Color sound emulator is a conversion writed by me from MESS original<br>
 - NES sound emulator is a conversion writed by me from MAME original<br>
-All Spectrum, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad<br>
+All Spectrum, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad<br><br>
 <b>6-. Contact & Links</b><br>
 <hr>
 If you want to contact me to send me some feedback or anything, just use leniad2[@]hotmail.com<br>
 You can download the official version and WIP versions from Google Code page http://code.google.com/p/dsp-emulator/<br>
-
+<br>
 If you want info...<br>
 www.mamedev.org<br>
 www.aarongiles.com<br>
@@ -458,5 +458,5 @@ www.emulation9.com<br>
 <br>
 if you want spectrum tapes, snapshot, info...<br>
 www.worldofspectrum.org<br>
-trastero.speccy.org<br>
-spa2.speccy.org<br>
+http://trastero.speccy.org<br>
+http://spa2.speccy.org<br>
