@@ -1,5 +1,5 @@
-﻿# DSP Emulator v0.15ß2 by Leniad 2001-2015
-= Details =
+﻿= DSP Emulator v0.15ß2 by Leniad 2001-2015 =
+<b>Details</b>
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 Why pascal, and not C, C++, Java or any other language? Well, pascal it is powerful enough to handle my emulator (120fps the Spectrum driver with a Pentium CPU) and it is as good as many any other languages.<br>
@@ -448,7 +448,7 @@ All Spectrum, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad<br><br>
 <b>6-. Contact & Links</b><br>
 <hr>
 If you want to contact me to send me some feedback or anything, just use leniad2[@]hotmail.com<br>
-You can download the official version and WIP versions from Google Code page http://code.google.com/p/dsp-emulator/<br>
+You can download the source, official version and WIP versions from https://github.com/leniad/dsp-emulator<br>
 <br>
 If you want info...<br>
 www.mamedev.org<br>
