@@ -2,17 +2,17 @@ unit pooyan_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,konami_snd,sound_engine;
+     nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
+     konami_snd,sound_engine;
 
 procedure Cargar_pooyan;
-procedure pooyan_principal; 
-function iniciar_pooyan:boolean; 
-procedure reset_pooyan; 
-procedure cerrar_pooyan; 
+procedure pooyan_principal;
+function iniciar_pooyan:boolean;
+procedure reset_pooyan;
+procedure cerrar_pooyan;
 //Main CPU
-function pooyan_getbyte(direccion:word):byte;  
-procedure pooyan_putbyte(direccion:word;valor:byte); 
+function pooyan_getbyte(direccion:word):byte;
+procedure pooyan_putbyte(direccion:word;valor:byte);
 
 const
         pooyan_rom:array[0..4] of tipo_roms=(
@@ -27,6 +27,19 @@ const
         (n:'xx.7a';l:$1000;p:0;crc:$fbe2b368),(n:'xx.8a';l:$1000;p:$1000;crc:$e1795b3d),());
         pooyan_sprites:array[0..2] of tipo_roms=(
         (n:'6.9a';l:$1000;p:0;crc:$b2d8c121),(n:'5.8a';l:$1000;p:$1000;crc:$1097c2b6),());
+        //Dip
+        pooyan_dip_a:array [0..4] of def_dip=(
+        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Test';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        pooyan_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'255'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$8;dip_name:'50K 80K+'),(dip_val:$0;dip_name:'30K 70K+'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$70;name:'Difficulty';number:8;dip:((dip_val:$70;dip_name:'1 (Easy)'),(dip_val:$60;dip_name:'2'),(dip_val:$50;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$30;dip_name:'5'),(dip_val:$20;dip_name:'6'),(dip_val:$10;dip_name:'7'),(dip_val:$0;dip_name:'8 (Hard)'),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
 var
  nmi_vblank:boolean;
  last:byte;
@@ -97,6 +110,11 @@ for f:=0 to $ff do begin
   gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
   gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;
 end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$7b;
+marcade.dswa_val:=@pooyan_dip_a;
+marcade.dswb_val:=@pooyan_dip_b;
 //final
 reset_pooyan;
 iniciar_pooyan:=true;
@@ -128,6 +146,7 @@ procedure update_video_pooyan;inline;
 var
   f:word;
   x,y,color,nchar,atrib:byte;
+  flipx,flipy:boolean;
 begin
 for f:=$0 to $3ff do begin
   if gfx[0].buffer[f] then begin
@@ -145,9 +164,18 @@ for f:=0 to $17 do begin
     atrib:=memoria[$9410+(f*2)];
     nchar:=memoria[$9011+(f*2)] and $3f;
     color:=(atrib and $f) shl 4;
-    y:=memoria[$9010+(f*2)];
-    x:=memoria[$9411+(f*2)];
-    put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)=0,1);
+    if main_screen.flip_main_screen then begin
+      x:=240-memoria[$9411+(f*2)];
+      y:=240-memoria[$9010+(f*2)];
+      flipx:=(atrib and $80)=0;
+      flipy:=(atrib and $40)<>0;
+    end else begin
+      x:=memoria[$9411+(f*2)];
+      y:=memoria[$9010+(f*2)];
+      flipx:=(atrib and $80)<>0;
+      flipy:=(atrib and $40)=0;
+    end;
+    put_gfx_sprite(nchar,color,flipx,flipy,1);
     actualiza_gfx_sprite(x,y,2,1);
 end;
 actualiza_trozo_final(16,0,224,256,2);
@@ -156,9 +184,15 @@ end;
 procedure eventos_pooyan;
 begin
 if event.arcade then begin
+  //P1
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  //P2
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  //system
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
@@ -196,12 +230,18 @@ end;
 function pooyan_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $a000:pooyan_getbyte:=$7b;
-  $a080:pooyan_getbyte:=marcade.in0;
-  $a0a0:pooyan_getbyte:=marcade.in1;
-  $a0c0:pooyan_getbyte:=marcade.in2;
-  $a0e0:pooyan_getbyte:=$ff;
-    else pooyan_getbyte:=memoria[direccion];
+  0..$8fff:pooyan_getbyte:=memoria[direccion];
+  $9000..$9fff:case (direccion and $7ff) of
+                  0..$3ff:pooyan_getbyte:=memoria[$9000+(direccion and $ff)];
+                  $400..$7ff:pooyan_getbyte:=memoria[$9400+(direccion and $ff)];
+               end;
+  $a000..$bfff:case (direccion and $3ff) of
+                    0..$7f,$200..$27f:pooyan_getbyte:=marcade.dswb; //dsw1
+                    $80..$9f,$280..$29f:pooyan_getbyte:=marcade.in0;
+                    $a0..$bf,$2a0..$2bf:pooyan_getbyte:=marcade.in1;
+                    $c0..$df,$2c0..$2df:pooyan_getbyte:=marcade.in2;
+                    $e0..$ff,$2e0..$2ff:pooyan_getbyte:=marcade.dswa; //dsw0
+               end;
 end;
 end;
 
@@ -209,18 +249,29 @@ procedure pooyan_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
 case direccion of
-    $8000..$87ff:gfx[0].buffer[direccion and $3ff]:=true;
-    $a100:konami_sound.sound_latch:=valor;
-    $a180:begin
-            nmi_vblank:=valor<>0;
-            if not(nmi_vblank) then main_z80.clear_nmi;
-          end;
-    $a181:begin
-              if ((last=0) and (valor<>0)) then snd_z80.pedir_irq:=HOLD_LINE;
-              last:=valor;
-          end;
+    $8000..$87ff:begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $8800..$8fff:memoria[direccion]:=valor;
+    $9000..$9fff:case (direccion and $7ff) of
+                  0..$3ff:memoria[$9000+(direccion and $ff)]:=valor;
+                  $400..$7ff:memoria[$9400+(direccion and $ff)]:=valor;
+               end;
+    $a000..$bfff:case (direccion and $3ff) of
+                  $0..$7f,$200..$27f:; //WatchDog
+                  $100..$17f,$300..$37f:konami_sound.sound_latch:=valor;
+                  $180,$380:begin
+                              nmi_vblank:=valor<>0;
+                              if not(nmi_vblank) then main_z80.clear_nmi;
+                            end;
+                  $181,$381:begin
+                              if ((last=0) and (valor<>0)) then snd_z80.pedir_irq:=HOLD_LINE;
+                              last:=valor;
+                            end;
+                  $187,$387:main_screen.flip_main_screen:=(valor and 1)=0;
+               end;
 end;
-memoria[direccion]:=valor;
 end;
 
 end.
