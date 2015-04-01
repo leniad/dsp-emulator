@@ -9,12 +9,12 @@ Since version 0.14ß3 there is a Mac OSX WIP version.<br><br>
 <hr>
 - Can handle ZIP format. You can load ROMS, tapes, snapshots or disks from a ZIP files.<br>
 - Needed libraries<br>
-<pre style='display:inline'>&#09;</pre>- Windows<br>
-<pre style='display:inline'>&#09;&#09;</pre>+ The library 'SDL2.DLL' is essential. You can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start<br>
-<pre style='display:inline'>&#09;&#09;</pre>+ The library 'CAPSImg.dll' is optional and it's needed to open disk images IPF. (Not working)<br>
-<pre style='display:inline'>&#09;</pre>- Linux and OSX<br>
-<pre style='display:inline'>&#09;&#09;</pre>+ The libraries 'SDL2' and 'SDL2 Mixer' are needed, if cannot be loaded the emulator warns and can not start the emulation. Each OS has its own installation<br>
-<pre style='display:inline'>&#09;&#09;</pre>+ The libraries 'CAPSImg' (IPF images) and 'Zlib' (Snapshots) are optional, emulation can start without them, but there are features that are not available if can not be found<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Windows<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The library 'SDL2.DLL' is essential. You can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The library 'CAPSImg.dll' is optional and it's needed to open disk images IPF. (Not working)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Linux and OSX<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The libraries 'SDL2' and 'SDL2 Mixer' are needed, if cannot be loaded the emulator warns and can not start the emulation. Each OS has its own installation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The libraries 'CAPSImg' (IPF images) and 'Zlib' (Snapshots) are optional, emulation can start without them, but there are features that are not available if can not be found<br>
 The emulator includes (not in WIP or beta versions) inside the ZIP the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco<br>
 IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS<br><br>
 <b>1.1-. Keys</b>
