@@ -2,8 +2,8 @@ unit cavemanninja_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m68000,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,oki6295,sound_engine,hu6280,deco16ic,deco_common,deco_104,deco_146,
+     m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
+     oki6295,sound_engine,hu6280,deco16ic,deco_common,deco_104,deco_146,
      misc_functions;
 
 procedure Cargar_cninja;
