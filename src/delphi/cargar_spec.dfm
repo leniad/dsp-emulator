@@ -1,4 +1,4 @@
-object Form2: TForm2
+object load_spec: Tload_spec
   Left = 219
   Top = 115
   BorderIcons = [biSystemMenu]

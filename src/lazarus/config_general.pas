@@ -426,7 +426,7 @@ begin
               else if radiobutton11.Checked then tmp_var:=6;
   if tmp_var<> main_vars.idioma then begin
     main_vars.idioma:=tmp_var;
-    form1.IdiomaClick(nil);
+    principal1.IdiomaClick(nil);
   end;
   if radiobutton12.Checked then tmp_var:=0
     else if radiobutton13.Checked then tmp_var:=1
@@ -434,7 +434,7 @@ begin
         else if radiobutton15.Checked then tmp_var:=3;
   if tmp_var<>sound_status.calidad_audio then begin
     sound_status.calidad_audio:=tmp_var;
-    form1.CambiaAudio(nil);
+    principal1.CambiaAudio(nil);
   end;
   if radiobutton16.Checked then tmp_var:=1
     else if radiobutton17.Checked then tmp_var:=2
@@ -443,7 +443,7 @@ begin
           else if radiobutton20.Checked then tmp_var:=5;
   if tmp_var<>main_screen.video_mode then begin
     main_screen.video_mode:=tmp_var;
-    form1.CambiarVideo(nil);
+    principal1.CambiarVideo(nil);
   end;
   main_vars.auto_exec:=checkbox2.Checked;
   main_vars.show_crc_error:=checkbox1.Checked;

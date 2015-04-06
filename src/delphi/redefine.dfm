@@ -1,4 +1,4 @@
-object Form4: TForm4
+object redefine1: Tredefine1
   Left = 0
   Top = 0
   BorderIcons = []

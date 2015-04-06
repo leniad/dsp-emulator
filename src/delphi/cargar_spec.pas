@@ -5,7 +5,7 @@ interface
 uses ExtCtrls, Controls, StdCtrls, FileCtrl, Classes, Forms, Vcl.ComCtrls;
 
 type
-  TForm2 = class(TForm)
+  Tload_spec = class(TForm)
     DirectoryListBox1: TDirectoryListBox;
     DriveComboBox1: TDriveComboBox;
     FileListBox1: TFileListBox;
@@ -32,35 +32,35 @@ type
   end;
 
 var
-  Form2: TForm2;
+  load_spec: Tload_spec;
 
 {$R *.dfm}
 
 implementation
 uses spectrum_load;
 
-procedure TForm2.Button1Click(Sender: TObject);
+procedure Tload_spec.Button1Click(Sender: TObject);
 begin
 spectrum_load_close;
-form2.close;
+load_spec.close;
 end;
 
-procedure TForm2.Button2Click(Sender: TObject);
+procedure Tload_spec.Button2Click(Sender: TObject);
 begin
 FileListBox1DblClick(self);
 end;
 
-procedure TForm2.FileListBox1Click(Sender: TObject);
+procedure Tload_spec.FileListBox1Click(Sender: TObject);
 begin
 spectrum_load_click;
 end;
 
-procedure TForm2.FileListBox1DblClick(Sender: TObject);
+procedure Tload_spec.FileListBox1DblClick(Sender: TObject);
 begin
 spectrum_load_exit;
 end;
 
-procedure TForm2.FileListBox1KeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
+procedure Tload_spec.FileListBox1KeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
 begin
 case key of
   13:Button2Click(sender);
@@ -68,7 +68,7 @@ case key of
 end;
 end;
 
-procedure TForm2.FormShow(Sender: TObject);
+procedure Tload_spec.FormShow(Sender: TObject);
 begin
 spectrum_load_init;
 filelistbox1.setfocus;

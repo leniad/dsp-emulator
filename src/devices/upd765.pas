@@ -119,8 +119,8 @@ if FDCCommand[5]=0 then begin
 end;
 FDCCounter:=0;
 StatusRegister:=$f0;
-form1.Image1.visible:=true;
-form1.Image1.Refresh;
+principal1.Image1.visible:=true;
+principal1.Image1.Refresh;
 end;
 
 procedure read_track;
@@ -200,8 +200,8 @@ case (FDCCommand[0] and $1f) of
         st0:=st0 or $48;
         GetRes7;
       end else begin
-        form1.Image1.visible:=true;
-        form1.Image1.Refresh;
+        principal1.Image1.visible:=true;
+        principal1.Image1.Refresh;
         dsk[FDCCurrDrv].sector_read_track:=0;
         read_track;
       end;
@@ -364,8 +364,8 @@ begin
         if dsk[FDCCurrDrv].sector_read_track=FDCCommand[6]-1 then begin
             st1:=st1 or $80;
             GetRes7;
-            form1.Image1.visible:=false;
-            form1.Image1.Refresh;
+            principal1.Image1.visible:=false;
+            principal1.Image1.Refresh;
         end else begin
             inc(dsk[FDCCurrDrv].sector_read_track);
             read_track;
@@ -401,8 +401,8 @@ begin
                 read_sector;
                 siguiente_sector;
               end;
-              form1.Image1.visible:=false;
-              form1.Image1.Refresh;
+              principal1.Image1.visible:=false;
+              principal1.Image1.Refresh;
             end;
           end;
       end;
@@ -434,8 +434,8 @@ begin
     fillchar(FDCCommand[0],9,0);
     fillchar(FDCResult[0],7,0);
     SeekTrack:=FALSE;
-    form1.Image1.visible:=false;
-    form1.Image1.Refresh;
+    principal1.Image1.visible:=false;
+    principal1.Image1.Refresh;
     st0:=0;
     st1:=0;
     st2:=0;
@@ -506,8 +506,8 @@ if contador_status>$10 then begin
   end;
   FDCPointer:=0;
   contador_status:=0;
-  form1.Image1.visible:=false;
-  form1.Image1.Refresh;
+  principal1.Image1.visible:=false;
+  principal1.Image1.Refresh;
 end;
 ReadFDCStatus:=StatusRegister;
 end;

@@ -230,16 +230,16 @@ var
   memoria_temp:array[0..$7fff] of byte;
 begin
 //Lateral
-form1.Panel2.Visible:=true;
+principal1.Panel2.Visible:=true;
 //Botones Lateral
-form1.BitBtn9.visible:=true;
-form1.BitBtn11.visible:=true;
-form1.BitBtn10.visible:=true;
-form1.BitBtn10.Glyph:=nil;
-form1.ImageList2.GetBitmap(3,form1.BitBtn10.Glyph);
-form1.BitBtn9.enabled:=true;
-form1.BitBtn11.enabled:=true;
-if main_vars.tipo_maquina<>7 then form1.BitBtn10.enabled:=true;
+principal1.BitBtn9.visible:=true;
+principal1.BitBtn11.visible:=true;
+principal1.BitBtn10.visible:=true;
+principal1.BitBtn10.Glyph:=nil;
+principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
+principal1.BitBtn9.enabled:=true;
+principal1.BitBtn11.enabled:=true;
+if main_vars.tipo_maquina<>7 then principal1.BitBtn10.enabled:=true;
 iniciar_cpc:=false;
 iniciar_audio(false);
 screen_init(1,pantalla_largo,pantalla_alto);
@@ -372,8 +372,8 @@ if event.keyboard then begin
       keyl_val[1]:=(keyl_val[1] and $df);
     end else begin
       if cinta_tzx.cargada then begin
-        if cinta_tzx.play_tape then Form5.fStopCinta(nil)
-          else Form5.fPlayCinta(nil);
+        if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
+          else tape_window1.fPlayCinta(nil);
       end;
     end;
   end else begin
@@ -809,11 +809,11 @@ ay_control:=((valor and $c0) shr 6);
 update_ay;
 if cinta_tzx.cargada then begin
   if (valor and $10)<>0 then begin
-    form5.fPlayCinta(nil);
+    tape_window1.fPlayCinta(nil);
     main_screen.rapido:=true;
   end else begin
     if cinta_tzx.play_tape then begin
-      form5.fstopcinta(nil);
+      tape_window1.fstopcinta(nil);
       main_screen.rapido:=false;
     end;
   end;
@@ -889,10 +889,10 @@ begin
       change_caption(llamadas_maquina.caption+' - Snap: '+nombre_file);
   end;
   if (resultado and es_cinta) then begin
-        form5.edit1.Text:=nombre_file;
-        form5.show;
-        form5.BitBtn1.Enabled:=true;
-        form5.BitBtn2.Enabled:=false;
+        tape_window1.edit1.Text:=nombre_file;
+        tape_window1.show;
+        tape_window1.BitBtn1.Enabled:=true;
+        tape_window1.BitBtn2.Enabled:=false;
         cinta_tzx.play_tape:=false;
         amstrad_tapes:=true;
   end;
@@ -902,8 +902,8 @@ end;
 
 function amstrad_loaddisk:boolean;
 begin
-form6.show;
-while form6.Showing do application.ProcessMessages;
+load_dsk.show;
+while load_dsk.Showing do application.ProcessMessages;
 amstrad_loaddisk:=true;
 end;
 
@@ -912,22 +912,22 @@ var
   nombre:string;
   correcto:boolean;
 begin
-form1.savedialog1.InitialDir:=Directory.amstrad_snap;
-form1.saveDialog1.Filter := 'SNA Format (*.SNA)|*.SNA';
-if form1.savedialog1.execute then begin
-        nombre:=form1.savedialog1.FileName;
-        case form1.SaveDialog1.FilterIndex of
+principal1.savedialog1.InitialDir:=Directory.amstrad_snap;
+principal1.saveDialog1.Filter := 'SNA Format (*.SNA)|*.SNA';
+if principal1.savedialog1.execute then begin
+        nombre:=principal1.savedialog1.FileName;
+        case principal1.SaveDialog1.FilterIndex of
           1:nombre:=changefileext(nombre,'.sna');
         end;
         if FileExists(nombre) then begin
             if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
         end;
-        case form1.SaveDialog1.FilterIndex of
+        case principal1.SaveDialog1.FilterIndex of
           1:correcto:=grabar_amstrad_sna(nombre);
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end;
-Directory.amstrad_snap:=extractfiledir(form1.savedialog1.FileName)+main_vars.cadena_dir;
+Directory.amstrad_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
 end;
 
 end.

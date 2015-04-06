@@ -316,7 +316,7 @@ begin
   //if error<>0 then exit;
   getmem(track,sizeof(CapsTrackInfo));
   CAPSLockTrack(track,id,0,0,DI_LOCK_DENVAR);
-  form1.statusbar1.panels[2].text:=inttostr(track.type_);
+  principal1.statusbar1.panels[2].text:=inttostr(track.type_);
   //cerrar
   freemem(track);
   freemem(info);

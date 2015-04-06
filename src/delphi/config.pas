@@ -197,7 +197,7 @@ with ConfigSP do begin
     spec_z80.daisy:=true;
   end;
   lenslok.activo:=radiobutton12.Checked;
-  if lenslok.activo then form7.Show;
+  if lenslok.activo then lenslock1.Show;
   if RadioButton14.Checked then new_audio:=0;
   if RadioButton15.Checked then new_audio:=1;
   if RadioButton16.Checked then new_audio:=2;
@@ -230,9 +230,9 @@ samples_beeper:=llamadas_maquina.velocidad_cpu/(44100*beeper_oversample);
 if necesita_reset then begin
   main_vars.driver_ok:=llamadas_maquina.iniciar;
   if not(main_vars.driver_ok) then begin
-    form1.Pausa1click(nil);
-    form1.BitBtn3.Enabled:=false;
-    form1.BitBtn4.Enabled:=false;
+    principal1.Pausa1click(nil);
+    principal1.BitBtn3.Enabled:=false;
+    principal1.BitBtn4.Enabled:=false;
   end;
 end;
 ulaplus.enabled:=radiobutton23.checked;

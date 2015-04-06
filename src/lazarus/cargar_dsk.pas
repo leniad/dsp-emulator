@@ -11,9 +11,9 @@ uses
 
 type
 
-  { TForm6 }
+  { Tload_dsk }
 
-  TForm6 = class(TForm)
+  Tload_dsk = class(TForm)
     Button1: TButton;
     Button2: TButton;
     DirectoryEdit1: TDirectoryEdit;
@@ -37,7 +37,7 @@ type
   end; 
 
 var
-  Form6:TForm6;
+  load_dsk:Tload_dsk;
   nombre_dsk,extension_dsk:string;
   extension_zip,nombre_zip:string;
   datos_dsk:pbyte;
@@ -46,19 +46,19 @@ var
 implementation
 uses principal;
 
-{ TForm6 }
+{ Tload_dsk }
 
-procedure TForm6.Button2Click(Sender: TObject);
+procedure Tload_dsk.Button2Click(Sender: TObject);
 begin
   FileListBox1DblClick(self);
 end;
 
-procedure TForm6.DirectoryEdit1Change(Sender: TObject);
+procedure Tload_dsk.DirectoryEdit1Change(Sender: TObject);
 begin
-form6.FileListBox1.Directory:=form6.DirectoryEdit1.Directory;
+load_dsk.FileListBox1.Directory:=load_dsk.DirectoryEdit1.Directory;
 end;
 
-procedure TForm6.FileListBox1Click(Sender: TObject);
+procedure Tload_dsk.FileListBox1Click(Sender: TObject);
 var
   f:word;
   nombre_def:string;
@@ -109,7 +109,7 @@ if extension_dsk='IPF' then begin
 end;
 end;
 
-procedure TForm6.FileListBox1DblClick(Sender: TObject);
+procedure Tload_dsk.FileListBox1DblClick(Sender: TObject);
 var
   cadena:string;
   correcto:boolean;
@@ -124,7 +124,7 @@ if correcto then begin
     change_caption(llamadas_maquina.caption+' - '+extension_dsk+': '+cadena);
     ResetFDC;
     dsk[0].ImageName:=cadena;
-    form6.Button1Click(self);
+    load_dsk.Button1Click(self);
 end else begin
   MessageDlg('Error abriendo el disco: "'+cadena+'".', mtError,[mbOk], 0);
 end;
@@ -132,7 +132,7 @@ freemem(datos_dsk);
 datos_dsk:=nil;
 end;
 
-procedure TForm6.FileListBox1KeyUp(Sender: TObject; var Key: Word;
+procedure Tload_dsk.FileListBox1KeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
 case key of
@@ -141,7 +141,7 @@ case key of
 end;
 end;
 
-procedure TForm6.FormShow(Sender: TObject);
+procedure Tload_dsk.FormShow(Sender: TObject);
 begin
 stringgrid1.Cells[0,0]:=leng[main_vars.idioma].varios[0];
 stringgrid1.Cells[1,0]:=leng[main_vars.idioma].varios[1];
@@ -169,7 +169,7 @@ filelistbox1.setfocus;
 FileListBox1Click(nil);
 end;
 
-procedure TForm6.StringGrid1Click(Sender: TObject);
+procedure Tload_dsk.StringGrid1Click(Sender: TObject);
 var
   crc:integer;
 begin
@@ -184,13 +184,13 @@ if not(load_file_from_zip(nombre_dsk,nombre_zip,datos_dsk,file_size,crc,true)) t
 extension_zip:=extension_fichero(nombre_zip);
 end;
 
-procedure TForm6.StringGrid1DblClick(Sender: TObject);
+procedure Tload_dsk.StringGrid1DblClick(Sender: TObject);
 begin
 StringGrid1Click(self);
 FileListBox1DblClick(self);
 end;
 
-procedure TForm6.Button1Click(Sender: TObject);
+procedure Tload_dsk.Button1Click(Sender: TObject);
 var
    cadena:string;
 begin
@@ -203,7 +203,7 @@ case main_vars.tipo_maquina of
     8,9:Directory.amstrad_disk:=cadena;
 end;
 ultima_posicion:=filelistbox1.ItemIndex;
-Form6.close;
+load_dsk.close;
 end;
 
 initialization

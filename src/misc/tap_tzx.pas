@@ -354,12 +354,12 @@ begin
 if not(cinta_tzx.grupo) then begin
   datos_totales:=0;
   {$ifndef fpc}
-    p:=form5.StringGrid1.Selection;
+    p:=tape_window1.StringGrid1.Selection;
     p.top:=cinta_tzx.indice_saltos[cinta_tzx.indice_cinta];
-    if ((form5.StringGrid1.Row>6) and (form5.StringGrid1.Row<(form5.StringGrid1.RowCount-6)) and (tzx_contador_loop=0)) then form5.StringGrid1.TopRow:=form5.StringGrid1.Row-4;
+    if ((tape_window1.StringGrid1.Row>6) and (tape_window1.StringGrid1.Row<(tape_window1.StringGrid1.RowCount-6)) and (tzx_contador_loop=0)) then tape_window1.StringGrid1.TopRow:=tape_window1.StringGrid1.Row-4;
     p.Bottom:=p.top;
-    form5.stringgrid1.Selection:=p;
-    form5.StringGrid1.Refresh;
+    tape_window1.stringgrid1.Selection:=p;
+    tape_window1.StringGrid1.Refresh;
   {$endif}
 end;
 cinta_tzx.estados:=0;
@@ -431,7 +431,7 @@ tzx_contador_datos:=0;
             end;
         $20:begin //pausa
                 tzx_estados_necesarios:= cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(llamadas_maquina.velocidad_cpu div 1000);
-                if tzx_estados_necesarios=0 then form5.fStopCinta(nil);
+                if tzx_estados_necesarios=0 then tape_window1.fStopCinta(nil);
             end;
         $21:begin //inicio grupo
                 cinta_tzx.grupo:=true;
@@ -476,7 +476,7 @@ tzx_contador_datos:=0;
               cinta_tzx.indice_cinta:=indice_vuelta;
               tzx_estados_necesarios:=0;
             end;
-        $2a:if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then form5.fStopCinta(nil) //stop if 48K
+        $2a:if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then tape_window1.fStopCinta(nil) //stop if 48K
               else tzx_estados_necesarios:=0;
         $f3:begin  //secuencias de pulsos muy grandes
                 tzx_estados_necesarios:=sacar_word(tzx_datos_p);
@@ -487,16 +487,16 @@ tzx_contador_datos:=0;
             end;
         $fe:begin //final de la cinta, la paro y me voy al principio
               cinta_tzx.indice_cinta:=0;
-              form5.StringGrid1.TopRow:=0;
+              tape_window1.StringGrid1.TopRow:=0;
               siguiente_bloque_tzx;
               cinta_tzx.play_once:=true;
-              form5.fStopCinta(nil);
+              tape_window1.fStopCinta(nil);
             end;
       end;
 {$ifdef fpc}
 if not(cinta_tzx.grupo) then begin
-    form5.StringGrid1.row:=cinta_tzx.indice_saltos[cinta_tzx.indice_cinta];
-    if ((form5.StringGrid1.Row>6) and (form5.StringGrid1.Row<(form5.StringGrid1.RowCount-6)) and (tzx_contador_loop=0)) then form5.StringGrid1.TopRow:=form5.StringGrid1.Row-4;
+    tape_window1.StringGrid1.row:=cinta_tzx.indice_saltos[cinta_tzx.indice_cinta];
+    if ((tape_window1.StringGrid1.Row>6) and (tape_window1.StringGrid1.Row<(tape_window1.StringGrid1.RowCount-6)) and (tzx_contador_loop=0)) then tape_window1.StringGrid1.TopRow:=tape_window1.StringGrid1.Row-4;
 end;
 {$endif}
 end;
@@ -538,7 +538,7 @@ var
   temp:word;
   f:byte;
 begin
-if not(form5.Showing) then exit;
+if not(tape_window1.Showing) then exit;
 if cinta_tzx.cargada then begin
   cinta_tzx.en_pausa:=false;
   cinta_tzx.cargada:=false;
@@ -564,13 +564,13 @@ if cinta_tzx.cargada then begin
 end;
 cinta_tzx.es_tap:=false;
 cinta_tzx.indice_cinta:=0;
-//for temp:=0 to (form5.stringgrid1.RowCount-1) do form5.StringGrid1.Cells[0,temp]:='';
-form5.stringgrid1.RowCount:=1;
+//for temp:=0 to (tape_window1.stringgrid1.RowCount-1) do tape_window1.StringGrid1.Cells[0,temp]:='';
+tape_window1.stringgrid1.RowCount:=1;
 sd_1:=false;
-if form7.Showing then form7.Close;
+if lenslock1.Showing then lenslock1.Close;
 lenslok.activo:=false;
 main_vars.mensaje_general:='';
-form5.label2.caption:='';
+tape_window1.label2.caption:='';
 end;
 
 procedure analizar_tzx;
@@ -579,7 +579,7 @@ var
 begin
 indice:=0;
 //comprobar LensLok
-form5.label2.caption:='';
+tape_window1.label2.caption:='';
 sd_1:=false;
 lenslok.activo:=false;
 lenslok.indice:=255;
@@ -614,12 +614,12 @@ while cinta_tzx.datos_tzx[indice].tipo_bloque<>$fe do begin
   end;
 indice:=indice+1;
 end;
-form5.label2.caption:='';
+tape_window1.label2.caption:='';
 if lenslok.activo then begin
-  form7.Show;
-  form5.label2.caption:='LensLok Protection Active';
+  lenslock1.Show;
+  tape_window1.label2.caption:='LensLok Protection Active';
 end;
-if sd_1 then form5.label2.caption:='SD1 Protection Active';
+if sd_1 then tape_window1.label2.caption:='SD1 Protection Active';
 end;
 
 function abrir_tap(datos:pbyte;long:integer):boolean;
@@ -670,15 +670,15 @@ while longitud<long do begin
                 $ff:cadena:=leng[main_vars.idioma].cinta[1]; //bytes
                 else cadena:=leng[main_vars.idioma].cinta[2]; //datos
         end;
-        form5.stringgrid1.Cells[0,temp]:=cadena;
-        form5.stringgrid1.Cells[1,temp]:=inttostr(cinta_tzx.datos_tzx[temp].lbloque);
-        form5.stringgrid1.Cells[2,temp]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
+        tape_window1.stringgrid1.Cells[0,temp]:=cadena;
+        tape_window1.stringgrid1.Cells[1,temp]:=inttostr(cinta_tzx.datos_tzx[temp].lbloque);
+        tape_window1.stringgrid1.Cells[2,temp]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
         inc(temp);
         cinta_tzx.indice_saltos[temp]:=temp;
         cinta_tzx.indice_select[temp]:=temp;
-        form5.stringgrid1.RowCount:=form5.stringgrid1.RowCount+1;
+        tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
 end;
-form5.stringgrid1.RowCount:=form5.stringgrid1.RowCount-1;
+tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount-1;
 getmem(cinta_tzx.datos_tzx[temp],sizeof(tipo_datos_tzx));
 zero_tape_data(temp);
 cinta_tzx.datos_tzx[temp].tipo_bloque:=$fe;
@@ -730,9 +730,9 @@ if pos<>0 then begin
   cinta_tzx.datos_tzx[0].lbyte:=pos;
 end;
 freemem(ptemp_w);
-form5.stringgrid1.RowCount:=1;
-form5.stringgrid1.Cells[0,0]:='Wave File';
-form5.stringgrid1.Cells[1,0]:=inttostr(cinta_tzx.datos_tzx[0].lbloque);
+tape_window1.stringgrid1.RowCount:=1;
+tape_window1.stringgrid1.Cells[0,0]:='Wave File';
+tape_window1.stringgrid1.Cells[1,0]:=inttostr(cinta_tzx.datos_tzx[0].lbloque);
 getmem(cinta_tzx.datos_tzx[1],sizeof(tipo_datos_tzx));
 zero_tape_data(1);
 cinta_tzx.datos_tzx[1].tipo_bloque:=$fe;
@@ -839,10 +839,10 @@ cinta_tzx.datos_tzx[0].lbloque:=long_final;
 getmem(cinta_tzx.datos_tzx[0].datos,cinta_tzx.datos_tzx[0].lbloque);
 copymemory(cinta_tzx.datos_tzx[0].datos,punt1,cinta_tzx.datos_tzx[0].lbloque);
 freemem(punt1);
-form5.stringgrid1.Cells[0,0]:='Compressed Square Wave v'+inttostr(tipo_compresion)+'.0';
+tape_window1.stringgrid1.Cells[0,0]:='Compressed Square Wave v'+inttostr(tipo_compresion)+'.0';
 //form1.stringgrid1.Cells[0,0]:='=>';
-form5.stringgrid1.RowCount:=1;
-form5.stringgrid1.Cells[1,0]:=inttostr(long_final);
+tape_window1.stringgrid1.RowCount:=1;
+tape_window1.stringgrid1.Cells[1,0]:=inttostr(long_final);
 abrir_csw:=true;
 getmem(cinta_tzx.datos_tzx[1],sizeof(tipo_datos_tzx));
 zero_tape_data(1);
@@ -1273,7 +1273,7 @@ while longitud<long do begin
                           getmem(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,cinta_tzx.datos_tzx[temp].lbloque);
                           inc(data,cinta_tzx.datos_tzx[temp].lbloque);inc(longitud,cinta_tzx.datos_tzx[temp].lbloque);
-                          //form5.StringGrid1.cells[0,contador]:='';
+                          //tape_window1.StringGrid1.cells[0,contador]:='';
                           puntero:=cinta_tzx.datos_tzx[temp].datos;
                           cadena:=leng[main_vars.idioma].cinta[15]+': ';
                           cadena2:=' ';
@@ -1348,22 +1348,22 @@ while longitud<long do begin
         if cinta_tzx.datos_tzx[temp].datos<>nil then cinta_tzx.datos_tzx[temp].crc32:=calc_crc(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque)
            else cinta_tzx.datos_tzx[temp].crc32:=0;
         crc_grupo:=(crc_grupo+cinta_tzx.datos_tzx[temp].crc32) and $FFFFFFFF;
-        if cadena2='' then form5.stringgrid1.Cells[1,contador]:=inttostr(long_final)
-            else form5.stringgrid1.Cells[1,contador]:=cadena2;
+        if cadena2='' then tape_window1.stringgrid1.Cells[1,contador]:=inttostr(long_final)
+            else tape_window1.stringgrid1.Cells[1,contador]:=cadena2;
         cadena2:='';
         if (not(cinta_tzx.grupo) and not(fin_grupo)) then begin
-          form5.stringgrid1.RowCount:=form5.stringgrid1.RowCount+1;
+          tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
           cinta_tzx.indice_select[contador]:=temp;
-          form5.stringgrid1.Cells[0,contador]:=cadena;
-          form5.stringgrid1.Cells[2,contador]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
+          tape_window1.stringgrid1.Cells[0,contador]:=cadena;
+          tape_window1.stringgrid1.Cells[2,contador]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
           inc(contador);
           long_final:=0;
         end;
         if fin_grupo then begin
-          form5.stringgrid1.RowCount:=form5.stringgrid1.RowCount+1;
+          tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
           fin_grupo:=false;
-          form5.stringgrid1.Cells[0,contador]:=nombre_grupo;
-          form5.stringgrid1.Cells[2,contador]:=inttohex(crc_grupo,8);
+          tape_window1.stringgrid1.Cells[0,contador]:=nombre_grupo;
+          tape_window1.stringgrid1.Cells[2,contador]:=inttohex(crc_grupo,8);
           cinta_tzx.indice_select[contador]:=inicio_grupo;
           cinta_tzx.datos_tzx[temp].crc32:=crc_grupo;
           inc(contador);
@@ -1371,7 +1371,7 @@ while longitud<long do begin
         end;
         inc(temp);
 end; {del while not}
-form5.stringgrid1.RowCount:=form5.stringgrid1.RowCount-1;
+tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount-1;
 getmem(cinta_tzx.datos_tzx[temp],sizeof(tipo_datos_tzx));
 zero_tape_data(temp);
 cinta_tzx.datos_tzx[temp].tipo_bloque:=$fe;
@@ -1468,9 +1468,9 @@ while longitud<long do begin
         cinta_tzx.indice_saltos[contador]:=contador;
         cinta_tzx.indice_select[contador]:=contador;
         cinta_tzx.datos_tzx[contador].crc32:=calc_crc(cinta_tzx.datos_tzx[contador].datos,cinta_tzx.datos_tzx[contador].lbloque);
-        form5.stringgrid1.RowCount:=form5.stringgrid1.RowCount+1;
-        form5.stringgrid1.Cells[1,contador]:=' ';
-        form5.stringgrid1.Cells[0,contador]:=leng[main_vars.idioma].cinta[5];
+        tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
+        tape_window1.stringgrid1.Cells[1,contador]:=' ';
+        tape_window1.stringgrid1.Cells[0,contador]:=leng[main_vars.idioma].cinta[5];
         inc(contador);
         getmem(cinta_tzx.datos_tzx[contador],sizeof(tipo_datos_tzx));
         zero_tape_data(contador);
@@ -1554,7 +1554,7 @@ while longitud<long do begin
     cinta_tzx.datos_tzx[contador].lbloque:=lbloque;
     getmem(cinta_tzx.datos_tzx[contador].datos,lbloque);
     copymemory(cinta_tzx.datos_tzx[contador].datos,ptemp,lbloque);
-    //form5.StringGrid1.cells[0,contador]:='';
+    //tape_window1.StringGrid1.cells[0,contador]:='';
     ptemp:=cinta_tzx.datos_tzx[contador].datos;
     cadena3:=leng[main_vars.idioma].cinta[15]+': ';
     cadena2:=' ';
@@ -1593,15 +1593,15 @@ while longitud<long do begin
   cinta_tzx.indice_saltos[contador]:=contador;
   cinta_tzx.indice_select[contador]:=contador;
   cinta_tzx.datos_tzx[contador].crc32:=calc_crc(cinta_tzx.datos_tzx[contador].datos,cinta_tzx.datos_tzx[contador].lbloque);
-  form5.stringgrid1.RowCount:=form5.stringgrid1.RowCount+1;
-  if cadena2='' then form5.stringgrid1.Cells[1,contador]:=inttostr(cinta_tzx.datos_tzx[contador].lbloque)
-      else form5.stringgrid1.Cells[1,contador]:=cadena2;
+  tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
+  if cadena2='' then tape_window1.stringgrid1.Cells[1,contador]:=inttostr(cinta_tzx.datos_tzx[contador].lbloque)
+      else tape_window1.stringgrid1.Cells[1,contador]:=cadena2;
   cadena2:='';
-  form5.stringgrid1.Cells[0,contador]:=cadena3;
+  tape_window1.stringgrid1.Cells[0,contador]:=cadena3;
   inc(contador);
 end; //fin del while
 //final
-form5.stringgrid1.RowCount:=form5.stringgrid1.RowCount-1;
+tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount-1;
 getmem(cinta_tzx.datos_tzx[contador],sizeof(tipo_datos_tzx));
 zero_tape_data(contador);
 cinta_tzx.datos_tzx[contador].tipo_bloque:=$fe;

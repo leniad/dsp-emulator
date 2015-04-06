@@ -40,7 +40,7 @@ end;
 
 procedure Cargar_Spectrum128K;
 begin
-form1.panel2.Visible:=true;
+principal1.panel2.Visible:=true;
 llamadas_maquina.iniciar:=iniciar_128k;
 llamadas_maquina.bucle_general:=spectrum128_main;
 llamadas_maquina.reset:=spec128k_reset;

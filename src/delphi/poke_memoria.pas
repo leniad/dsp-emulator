@@ -7,7 +7,7 @@ uses
   Dialogs, StdCtrls,spectrum_48k,spectrum_128k,spectrum_3,lenguaje,main_engine;
 
 type
-  TForm3 = class(TForm)
+  Tpoke_spec = class(TForm)
     Button1: TButton;
     Button2: TButton;
     Label1: TLabel;
@@ -25,7 +25,7 @@ type
   end;
 
 var
-  Form3: TForm3;
+  poke_spec: Tpoke_spec;
   cadena:string='';
   direccion:word;
   valor:byte;
@@ -35,7 +35,7 @@ implementation
 
 {$R *.dfm}
 
-procedure TForm3.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
+procedure Tpoke_spec.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
 var
   f:word;
   p:string;
@@ -67,10 +67,10 @@ if posicion=0 then label3.Caption:=cadena+'<'
   else label5.caption:=cadena+'<';
 end;
 
-procedure TForm3.FormShow(Sender: TObject);
+procedure Tpoke_spec.FormShow(Sender: TObject);
 begin
-form3.Button2.Caption:=leng[main_vars.idioma].mensajes[8];
-form3.ActiveControl:=nil;
+poke_spec.Button2.Caption:=leng[main_vars.idioma].mensajes[8];
+poke_spec.ActiveControl:=nil;
 cadena:='';
 posicion:=0;
 direccion:=0;
@@ -79,15 +79,15 @@ label5.Caption:='';
 label3.Caption:='<';
 end;
 
-procedure TForm3.Button2Click(Sender: TObject);
+procedure Tpoke_spec.Button2Click(Sender: TObject);
 begin
-form3.close;
+poke_spec.close;
 end;
 
-procedure TForm3.Button1Click(Sender: TObject);
+procedure Tpoke_spec.Button1Click(Sender: TObject);
 begin
 if posicion=0 then begin
-  form3.ActiveControl:=nil;
+  poke_spec.ActiveControl:=nil;
   exit;
 end;
 if cadena<>'' then valor:=strtoint(cadena);
@@ -96,7 +96,7 @@ case main_vars.tipo_maquina of
   1:spec128_putbyte(direccion,valor);
   2:spec3_putbyte(direccion,valor);
 end;
-form3.close;
+poke_spec.close;
 end;
 
 end.

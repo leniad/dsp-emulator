@@ -108,11 +108,11 @@ if fileexists(directory.Base+'dsp.ini') then begin
   sound_status.calidad_audio:=fich_ini.ReadInteger('dsp','sonido',1);
   if sound_status.calidad_audio>3 then sound_status.calidad_audio:=3;
   case sound_status.calidad_audio of
-    0:form1.N110251.Checked:=true;
-    1:form1.N220501.Checked:=true;
-    2:form1.N441001.Checked:=true;
+    0:principal1.N110251.Checked:=true;
+    1:principal1.N220501.Checked:=true;
+    2:principal1.N441001.Checked:=true;
     3:begin
-      form1.SinSonido1.Checked:=true;
+      principal1.SinSonido1.Checked:=true;
       sound_status.hay_sonido:=false;
       end;
   end;

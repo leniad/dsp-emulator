@@ -59,8 +59,8 @@ end;
 
 function spectrum3_loaddisk:boolean;
 begin
-form6.show;
-while form6.Showing do application.ProcessMessages;
+load_dsk.show;
+while load_dsk.Showing do application.ProcessMessages;
 spectrum3_loaddisk:=true;
 end;
 

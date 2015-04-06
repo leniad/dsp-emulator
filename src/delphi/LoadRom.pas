@@ -145,7 +145,7 @@ if main_vars.tipo_maquina=255 then exit;
 floadrom.close;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 EmuStatus:=EmuStatusTemp;
-form1.timer1.Enabled:=true;
+principal1.timer1.Enabled:=true;
 end;
 
 procedure TFLoadRom.BitBtn3Click(Sender: TObject);

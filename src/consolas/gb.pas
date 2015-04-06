@@ -61,13 +61,13 @@ uses principal;
 
 procedure Cargar_gb;
 begin
-form1.Panel2.Visible:=true;
-form1.BitBtn9.visible:=false;
-form1.BitBtn10.Glyph:=nil;
-form1.BitBtn10.Enabled:=true;
-form1.imagelist2.GetBitmap(2,form1.BitBtn10.Glyph);
-form1.BitBtn10.visible:=true;
-form1.BitBtn10.OnClick:=form1.fLoadCartucho;
+principal1.Panel2.Visible:=true;
+principal1.BitBtn9.visible:=false;
+principal1.BitBtn10.Glyph:=nil;
+principal1.BitBtn10.Enabled:=true;
+principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
+principal1.BitBtn10.visible:=true;
+principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 llamadas_maquina.iniciar:=iniciar_gb;
 llamadas_maquina.bucle_general:=gb_principal;
 llamadas_maquina.cerrar:=cerrar_gb;

@@ -9,9 +9,9 @@ uses
 
 type
 
-  { TForm2 }
+  { Tload_spec }
 
-  TForm2 = class(TForm)
+  Tload_spec = class(TForm)
     Button1: TButton;
     Button2: TButton;
     DirectoryEdit1: TDirectoryEdit;
@@ -38,48 +38,48 @@ type
   end;
 
 var
-  Form2: TForm2;
+  load_spec: Tload_spec;
 
 implementation
 uses main_engine,spectrum_load;
 
-{ TForm2 }
+{ Tload_spec }
 
-procedure TForm2.Button1Click(Sender: TObject);
+procedure Tload_spec.Button1Click(Sender: TObject);
 begin
 spectrum_load_close;
-form2.close;
+load_spec.close;
 end;
 
-procedure TForm2.Button2Click(Sender: TObject);
+procedure Tload_spec.Button2Click(Sender: TObject);
 begin
 FileListBox1DblClick(self);
 end;
 
-procedure TForm2.DirectoryEdit1Change(Sender: TObject);
+procedure Tload_spec.DirectoryEdit1Change(Sender: TObject);
 var
    cadena:string;
    f:integer;
 begin
-  cadena:=form2.DirectoryEdit1.Directory;
+  cadena:=load_spec.DirectoryEdit1.Directory;
   if cadena='' then exit;
-  form2.FileListBox1.Directory:='';
+  load_spec.FileListBox1.Directory:='';
   if cadena[length(cadena)]=main_vars.cadena_dir then
-  for f:=1 to (length(cadena)-1) do form2.FileListBox1.Directory:=form2.FileListBox1.Directory+cadena[f]
-     else form2.FileListBox1.Directory:=cadena;
+  for f:=1 to (length(cadena)-1) do load_spec.FileListBox1.Directory:=load_spec.FileListBox1.Directory+cadena[f]
+     else load_spec.FileListBox1.Directory:=cadena;
 end;
 
-procedure TForm2.FileListBox1Click(Sender: TObject);
+procedure Tload_spec.FileListBox1Click(Sender: TObject);
 begin
 spectrum_load_click;
 end;
 
-procedure TForm2.FileListBox1DblClick(Sender: TObject);
+procedure Tload_spec.FileListBox1DblClick(Sender: TObject);
 begin
 spectrum_load_exit;
 end;
 
-procedure TForm2.FileListBox1KeyUp(Sender: TObject; var Key: Word;
+procedure Tload_spec.FileListBox1KeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
 case key of
@@ -88,7 +88,7 @@ case key of
 end;
 end;
 
-procedure TForm2.FormShow(Sender: TObject);
+procedure Tload_spec.FormShow(Sender: TObject);
 begin
 spectrum_load_init;
 filelistbox1.setfocus;

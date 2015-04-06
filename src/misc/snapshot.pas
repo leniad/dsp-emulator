@@ -39,18 +39,18 @@ todos_false;
 reset_dsp;
 case model of
   0,5:begin //Spectrum 48k y Spectrum 16k
-      if model=0 then main_vars.tipo_maquina:=tipo_cambio_maquina(form1.Spectrum48K1)
-        else main_vars.tipo_maquina:=tipo_cambio_maquina(form1.Spectrum16K1);
+      if model=0 then main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum48K1)
+        else main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum16K1);
       Cargar_Spectrum48K;
     end;
   1,4:begin //Spectrum 128k y Spectrum +2
-      if model=1 then main_vars.tipo_maquina:=tipo_cambio_maquina(form1.Spectrum128K1)
-        else main_vars.tipo_maquina:=tipo_cambio_maquina(form1.Spectrum21);
+      if model=1 then main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum128K1)
+        else main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum21);
       Cargar_Spectrum128K;
     end;
   2,3:begin //Spectrum +3 y Spectrum +2A
-      if model=2 then main_vars.tipo_maquina:=tipo_cambio_maquina(form1.Spectrum31)
-        else main_vars.tipo_maquina:=tipo_cambio_maquina(form1.Spectrum2A1);
+      if model=2 then main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum31)
+        else main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum2A1);
       Cargar_Spectrum3;
     end;
 end;

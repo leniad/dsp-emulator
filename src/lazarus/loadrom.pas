@@ -149,12 +149,12 @@ begin
 if main_vars.tipo_maquina=255 then exit;
 floadrom.close;
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
 //SDL_WM_GrabInput(SDL_GRAB_ON);
 {$endif}
 EmuStatus:=EmuStatusTemp;
-form1.timer1.Enabled:=true;
+principal1.timer1.Enabled:=true;
 end;
 
 procedure TFLoadRom.RomListDblClick(Sender: TObject);

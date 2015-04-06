@@ -271,450 +271,450 @@ uses principal;
 procedure load_game(numero:word);
 begin
 case numero of
-  0:form1.CambiarMaquina(form1.Spectrum48K1);
-  1:form1.CambiarMaquina(form1.Spectrum128K1);
-  2:form1.CambiarMaquina(form1.Spectrum31);
-  3:form1.CambiarMaquina(form1.Spectrum2a1);
-  4:form1.CambiarMaquina(form1.Spectrum21);
-  5:form1.CambiarMaquina(form1.Spectrum16K1);
-  7:form1.CambiarMaquina(form1.cpc1);
-  8:form1.CambiarMaquina(form1.cpc6641);
-  9:form1.CambiarMaquina(form1.cpc61281);
-  10:form1.CambiarMaquina(form1.Pacman1);
-  11:form1.CambiarMaquina(form1.Phoenix1);
-  12:form1.CambiarMaquina(form1.MisteriousStone1);
-  13:form1.CambiarMaquina(form1.BombJack1);
-  14:form1.CambiarMaquina(form1.Frogger1);
-  15:form1.CambiarMaquina(form1.Dkong1);
-  16:form1.CambiarMaquina(form1.Blacktiger1);
-  17:form1.CambiarMaquina(form1.Gberet1);
-  18:form1.CambiarMaquina(form1.Commando1);
-  19:form1.CambiarMaquina(form1.gng1);
-  20:form1.CambiarMaquina(form1.Mikie1);
-  21:form1.CambiarMaquina(form1.Shaolin1);
-  22:form1.CambiarMaquina(form1.Yiear1);
-  23:form1.CambiarMaquina(form1.Asteroids1);
-  24:form1.CambiarMaquina(form1.SonSon1);
-  25:form1.CambiarMaquina(form1.StarForce1);
-  26:form1.CambiarMaquina(form1.Rygar1);
-  27:form1.CambiarMaquina(form1.PitfallII1);
-  28:form1.CambiarMaquina(form1.Pooyan1);
-  29:form1.CambiarMaquina(form1.jungler1);
-  30:form1.CambiarMaquina(form1.citycon1);
-  31:form1.CambiarMaquina(form1.burgertime1);
-  32:form1.CambiarMaquina(form1.expressraider1);
-  33:form1.CambiarMaquina(form1.superbasketball1);
-  34:form1.CambiarMaquina(form1.ladybug1);
-  35:form1.CambiarMaquina(form1.teddy1);
-  36:form1.CambiarMaquina(form1.wboy1);
-  37:form1.CambiarMaquina(form1.wbml1);
-  38:form1.CambiarMaquina(form1.tehkanwc1);
-  39:form1.CambiarMaquina(form1.popeye1);
-  40:form1.CambiarMaquina(form1.psychic51);
-  41:form1.CambiarMaquina(form1.terracre1);
-  42:form1.CambiarMaquina(form1.kungfum1);
-  43:form1.CambiarMaquina(form1.shootout1);
-  44:form1.CambiarMaquina(form1.vigilante1);
-  45:form1.CambiarMaquina(form1.jackal1);
-  46:form1.CambiarMaquina(form1.bubblebobble1);
-  47:form1.CambiarMaquina(form1.galaxian1);
-  48:form1.CambiarMaquina(form1.jumpb1);
-  49:form1.CambiarMaquina(form1.mooncresta1);
-  50:form1.CambiarMaquina(form1.rallyx1);
-  51:form1.CambiarMaquina(form1.prehisle1);
-  52:form1.CambiarMaquina(form1.tigerRoad1);
-  53:form1.CambiarMaquina(form1.f1dream1);
-  54:form1.CambiarMaquina(form1.snowbros1);
-  55:form1.CambiarMaquina(form1.toki1);
-  56:form1.CambiarMaquina(form1.contra1);
-  57:form1.CambiarMaquina(form1.mappy1);
-  58:form1.CambiarMaquina(form1.rastan1);
-  59:form1.CambiarMaquina(form1.legendw1);
-  60:form1.CambiarMaquina(form1.sectionz1);
-  61:form1.CambiarMaquina(form1.trojan1);
-  62:form1.CambiarMaquina(form1.sf1);
-  63:form1.CambiarMaquina(form1.digdug21);
-  64:form1.CambiarMaquina(form1.spacman1);
-  65:form1.CambiarMaquina(form1.galaga1);
-  66:form1.CambiarMaquina(form1.xain1);
-  67:form1.CambiarMaquina(form1.hardhead1);
-  68:form1.CambiarMaquina(form1.hardhead21);
-  69:form1.CambiarMaquina(form1.sbombers1);
-  70:form1.CambiarMaquina(form1.newrallyx1);
-  71:form1.CambiarMaquina(form1.bjtwin1);
-  72:form1.CambiarMaquina(form1.spelunker1);
-  73:form1.CambiarMaquina(form1.spelunker21);
-  74:form1.CambiarMaquina(form1.ldrun1);
-  75:form1.CambiarMaquina(form1.ldrun21);
-  76:form1.CambiarMaquina(form1.knjoe1);
-  77:form1.CambiarMaquina(form1.wardner1);
-  78:form1.CambiarMaquina(form1.bigkarnak1);
-  79:form1.CambiarMaquina(form1.exedexes1);
-  80:form1.CambiarMaquina(form1.gunsmoke1);
-  81:form1.CambiarMaquina(form1.n19421);
-  82:form1.CambiarMaquina(form1.n19431);
-  83:form1.CambiarMaquina(form1.n1943kai1);
-  84:form1.CambiarMaquina(form1.jailbreak1);
-  85:form1.CambiarMaquina(form1.circusc1);
-  86:form1.CambiarMaquina(form1.ironhorse1);
-  87:form1.CambiarMaquina(form1.rtype1);
-  88:form1.CambiarMaquina(form1.mspacman1);
-  89:form1.CambiarMaquina(form1.brkthru1);
-  90:form1.CambiarMaquina(form1.darwin1);
-  91:form1.CambiarMaquina(form1.srd1);
-  92:form1.CambiarMaquina(form1.ddragon1);
-  93:form1.CambiarMaquina(form1.mrdo1);
-  94:form1.CambiarMaquina(form1.theglob1);
-  95:form1.CambiarMaquina(form1.superglob1);
-  96:form1.CambiarMaquina(form1.ddragon21);
-  97:form1.CambiarMaquina(form1.silkworm1);
-  98:form1.CambiarMaquina(form1.tigerh1);
-  99:form1.CambiarMaquina(form1.slapfight1);
-  100:form1.CambiarMaquina(form1.legendofkage1);
-  101:form1.CambiarMaquina(form1.thoop1);
-  102:form1.CambiarMaquina(form1.cabal1);
-  103:form1.CambiarMaquina(form1.ghouls1);
-  104:form1.CambiarMaquina(form1.ffight1);
-  105:form1.CambiarMaquina(form1.kod1);
-  106:form1.CambiarMaquina(form1.sf21);
-  107:form1.CambiarMaquina(form1.strider1);
-  108:form1.CambiarMaquina(form1.wonder31);
-  109:form1.CambiarMaquina(form1.ccommando1);
-  110:form1.CambiarMaquina(form1.knights1);
-  111:form1.CambiarMaquina(form1.sf2ce1);
-  112:form1.CambiarMaquina(form1.dino1);
-  113:form1.CambiarMaquina(form1.punisher1);
-  114:form1.CambiarMaquina(form1.shinobi1);
-  115:form1.CambiarMaquina(form1.alexkid1);
-  116:form1.CambiarMaquina(form1.fantasyzone1);
-  117:form1.CambiarMaquina(form1.tp841);
-  118:form1.CambiarMaquina(form1.tutankhm1);
-  119:form1.CambiarMaquina(form1.Pang1);
-  120:form1.CambiarMaquina(form1.ninjakid21);
-  121:form1.CambiarMaquina(form1.arkarea1);
-  122:form1.CambiarMaquina(form1.mnight1);
-  123:form1.CambiarMaquina(form1.skykid1);
-  124:form1.CambiarMaquina(form1.rthunder1);
-  125:form1.CambiarMaquina(form1.hopmappy1);
-  126:form1.CambiarMaquina(form1.skykiddx1);
-  127:form1.CambiarMaquina(form1.rocnrope1);
-  128:form1.CambiarMaquina(form1.repulse1);
-  129:form1.CambiarMaquina(form1.tnzs1);
-  130:form1.CambiarMaquina(form1.insectorx1);
-  131:form1.CambiarMaquina(form1.pacland1);
-  132:form1.CambiarMaquina(form1.mariob1);
-  133:form1.CambiarMaquina(form1.solomon1);
-  134:form1.CambiarMaquina(form1.combatsc1);
-  135:form1.CambiarMaquina(form1.hvyunit1);
-  136:form1.CambiarMaquina(form1.pow1);
-  137:form1.CambiarMaquina(form1.streetsm1);
-  138:form1.CambiarMaquina(form1.p471);
-  139:form1.CambiarMaquina(form1.rodland1);
-  140:form1.CambiarMaquina(form1.saintdragon1);
-  141:form1.CambiarMaquina(form1.TimePilot1);
-  142:form1.CambiarMaquina(form1.Pengo1);
-  143:form1.CambiarMaquina(form1.Scramble1);
-  144:form1.CambiarMaquina(form1.Scobra1);
-  145:form1.CambiarMaquina(form1.Amidar1);
-  146:form1.CambiarMaquina(form1.twincobr1);
-  147:form1.CambiarMaquina(form1.FlyingShark1);
-  148:form1.CambiarMaquina(form1.JrPacman1);
-  149:form1.CambiarMaquina(form1.Ikari31);
-  150:form1.CambiarMaquina(form1.searchar1);
-  151:form1.CambiarMaquina(form1.Choplifter1);
-  152:form1.CambiarMaquina(form1.mrviking1);
-  153:form1.CambiarMaquina(form1.SegaNinja1);
-  154:form1.CambiarMaquina(form1.UpnDown1);
-  155:form1.CambiarMaquina(form1.flicky1);
-  156:form1.CambiarMaquina(form1.robocop1);
-  157:form1.CambiarMaquina(form1.baddudes1);
-  158:form1.CambiarMaquina(form1.hippo1);
-  159:form1.CambiarMaquina(form1.tumblep1);
-  160:form1.CambiarMaquina(form1.funkyjet1);
-  161:form1.CambiarMaquina(form1.SuperBurgerTime1);
-  162:form1.CambiarMaquina(form1.cninja1);
-  163:form1.CambiarMaquina(form1.robocop21);
-  164:form1.CambiarMaquina(form1.DietGo1);
-  165:form1.CambiarMaquina(form1.actfancer1);
-  166:form1.CambiarMaquina(form1.arabian1);
-  167:form1.CambiarMaquina(form1.digdug1);
-  168:form1.CambiarMaquina(form1.dkongjr1);
-  169:form1.CambiarMaquina(form1.dkong31);
-  170:form1.CambiarMaquina(form1.higemaru1);
-  171:form1.CambiarMaquina(form1.bagman1);
-  172:form1.CambiarMaquina(form1.sbagman1);
-  173:form1.CambiarMaquina(form1.squash1);
-  174:form1.CambiarMaquina(form1.biomtoy1);
-  175:form1.CambiarMaquina(form1.congo1);
-  176:form1.CambiarMaquina(form1.kangaroo1);
-  177:form1.CambiarMaquina(form1.bionicc1);
-  178:form1.CambiarMaquina(form1.wwfsuperstar1);
-  179:form1.CambiarMaquina(form1.rbisland1);
-  180:form1.CambiarMaquina(form1.rbislande1);
-  181:form1.CambiarMaquina(form1.Volfied1);
-  182:form1.CambiarMaquina(form1.Opwolf1);
-  183:form1.CambiarMaquina(form1.SPang1);
-  184:form1.CambiarMaquina(form1.Outrun1);
-  185:form1.CambiarMaquina(form1.elevator1);
-  186:form1.CambiarMaquina(form1.aliensyn1);
-  187:form1.CambiarMaquina(form1.wb31);
-  188:form1.CambiarMaquina(form1.zaxxon1);
-  189:form1.CambiarMaquina(form1.jungleking1);
-  190:form1.CambiarMaquina(form1.hharry1);
-  191:form1.CambiarMaquina(form1.rtype21);
-  192:form1.CambiarMaquina(form1.todruaga1);
-  193:form1.CambiarMaquina(form1.motos1);
-  194:form1.CambiarMaquina(form1.drgnbstr1);
-  195:form1.CambiarMaquina(form1.vulgus1);
-  196:form1.CambiarMaquina(form1.ddragon31);
-  197:form1.CambiarMaquina(form1.blockout1);
-  198:form1.CambiarMaquina(form1.tetris1);
-  199:form1.CambiarMaquina(form1.foodf1);
-  200:form1.CambiarMaquina(form1.snapjack1);
-  201:form1.CambiarMaquina(form1.cavenger1);
-  202:form1.CambiarMaquina(form1.pleiads1);
-  203:form1.CambiarMaquina(form1.mrgoemon1);
-  204:form1.CambiarMaquina(form1.nemesis1);
-  205:form1.CambiarMaquina(form1.twinbee1);
-  206:form1.CambiarMaquina(form1.pirates1);
-  207:form1.CambiarMaquina(form1.genixfamily1);
-  208:form1.CambiarMaquina(form1.junofirst1);
-  1000:form1.CambiarMaquina(form1.NES1);
-  1001:form1.CambiarMaquina(form1.colecovision1);
-  1002:form1.CambiarMaquina(form1.Gameboy1);
-  1003:form1.CambiarMaquina(form1.CHIP81);
+  0:principal1.CambiarMaquina(principal1.Spectrum48K1);
+  1:principal1.CambiarMaquina(principal1.Spectrum128K1);
+  2:principal1.CambiarMaquina(principal1.Spectrum31);
+  3:principal1.CambiarMaquina(principal1.Spectrum2a1);
+  4:principal1.CambiarMaquina(principal1.Spectrum21);
+  5:principal1.CambiarMaquina(principal1.Spectrum16K1);
+  7:principal1.CambiarMaquina(principal1.cpc1);
+  8:principal1.CambiarMaquina(principal1.cpc6641);
+  9:principal1.CambiarMaquina(principal1.cpc61281);
+  10:principal1.CambiarMaquina(principal1.Pacman1);
+  11:principal1.CambiarMaquina(principal1.Phoenix1);
+  12:principal1.CambiarMaquina(principal1.MisteriousStone1);
+  13:principal1.CambiarMaquina(principal1.BombJack1);
+  14:principal1.CambiarMaquina(principal1.Frogger1);
+  15:principal1.CambiarMaquina(principal1.Dkong1);
+  16:principal1.CambiarMaquina(principal1.Blacktiger1);
+  17:principal1.CambiarMaquina(principal1.Gberet1);
+  18:principal1.CambiarMaquina(principal1.Commando1);
+  19:principal1.CambiarMaquina(principal1.gng1);
+  20:principal1.CambiarMaquina(principal1.Mikie1);
+  21:principal1.CambiarMaquina(principal1.Shaolin1);
+  22:principal1.CambiarMaquina(principal1.Yiear1);
+  23:principal1.CambiarMaquina(principal1.Asteroids1);
+  24:principal1.CambiarMaquina(principal1.SonSon1);
+  25:principal1.CambiarMaquina(principal1.StarForce1);
+  26:principal1.CambiarMaquina(principal1.Rygar1);
+  27:principal1.CambiarMaquina(principal1.PitfallII1);
+  28:principal1.CambiarMaquina(principal1.Pooyan1);
+  29:principal1.CambiarMaquina(principal1.jungler1);
+  30:principal1.CambiarMaquina(principal1.citycon1);
+  31:principal1.CambiarMaquina(principal1.burgertime1);
+  32:principal1.CambiarMaquina(principal1.expressraider1);
+  33:principal1.CambiarMaquina(principal1.superbasketball1);
+  34:principal1.CambiarMaquina(principal1.ladybug1);
+  35:principal1.CambiarMaquina(principal1.teddy1);
+  36:principal1.CambiarMaquina(principal1.wboy1);
+  37:principal1.CambiarMaquina(principal1.wbml1);
+  38:principal1.CambiarMaquina(principal1.tehkanwc1);
+  39:principal1.CambiarMaquina(principal1.popeye1);
+  40:principal1.CambiarMaquina(principal1.psychic51);
+  41:principal1.CambiarMaquina(principal1.terracre1);
+  42:principal1.CambiarMaquina(principal1.kungfum1);
+  43:principal1.CambiarMaquina(principal1.shootout1);
+  44:principal1.CambiarMaquina(principal1.vigilante1);
+  45:principal1.CambiarMaquina(principal1.jackal1);
+  46:principal1.CambiarMaquina(principal1.bubblebobble1);
+  47:principal1.CambiarMaquina(principal1.galaxian1);
+  48:principal1.CambiarMaquina(principal1.jumpb1);
+  49:principal1.CambiarMaquina(principal1.mooncresta1);
+  50:principal1.CambiarMaquina(principal1.rallyx1);
+  51:principal1.CambiarMaquina(principal1.prehisle1);
+  52:principal1.CambiarMaquina(principal1.tigerRoad1);
+  53:principal1.CambiarMaquina(principal1.f1dream1);
+  54:principal1.CambiarMaquina(principal1.snowbros1);
+  55:principal1.CambiarMaquina(principal1.toki1);
+  56:principal1.CambiarMaquina(principal1.contra1);
+  57:principal1.CambiarMaquina(principal1.mappy1);
+  58:principal1.CambiarMaquina(principal1.rastan1);
+  59:principal1.CambiarMaquina(principal1.legendw1);
+  60:principal1.CambiarMaquina(principal1.sectionz1);
+  61:principal1.CambiarMaquina(principal1.trojan1);
+  62:principal1.CambiarMaquina(principal1.sf1);
+  63:principal1.CambiarMaquina(principal1.digdug21);
+  64:principal1.CambiarMaquina(principal1.spacman1);
+  65:principal1.CambiarMaquina(principal1.galaga1);
+  66:principal1.CambiarMaquina(principal1.xain1);
+  67:principal1.CambiarMaquina(principal1.hardhead1);
+  68:principal1.CambiarMaquina(principal1.hardhead21);
+  69:principal1.CambiarMaquina(principal1.sbombers1);
+  70:principal1.CambiarMaquina(principal1.newrallyx1);
+  71:principal1.CambiarMaquina(principal1.bjtwin1);
+  72:principal1.CambiarMaquina(principal1.spelunker1);
+  73:principal1.CambiarMaquina(principal1.spelunker21);
+  74:principal1.CambiarMaquina(principal1.ldrun1);
+  75:principal1.CambiarMaquina(principal1.ldrun21);
+  76:principal1.CambiarMaquina(principal1.knjoe1);
+  77:principal1.CambiarMaquina(principal1.wardner1);
+  78:principal1.CambiarMaquina(principal1.bigkarnak1);
+  79:principal1.CambiarMaquina(principal1.exedexes1);
+  80:principal1.CambiarMaquina(principal1.gunsmoke1);
+  81:principal1.CambiarMaquina(principal1.n19421);
+  82:principal1.CambiarMaquina(principal1.n19431);
+  83:principal1.CambiarMaquina(principal1.n1943kai1);
+  84:principal1.CambiarMaquina(principal1.jailbreak1);
+  85:principal1.CambiarMaquina(principal1.circusc1);
+  86:principal1.CambiarMaquina(principal1.ironhorse1);
+  87:principal1.CambiarMaquina(principal1.rtype1);
+  88:principal1.CambiarMaquina(principal1.mspacman1);
+  89:principal1.CambiarMaquina(principal1.brkthru1);
+  90:principal1.CambiarMaquina(principal1.darwin1);
+  91:principal1.CambiarMaquina(principal1.srd1);
+  92:principal1.CambiarMaquina(principal1.ddragon1);
+  93:principal1.CambiarMaquina(principal1.mrdo1);
+  94:principal1.CambiarMaquina(principal1.theglob1);
+  95:principal1.CambiarMaquina(principal1.superglob1);
+  96:principal1.CambiarMaquina(principal1.ddragon21);
+  97:principal1.CambiarMaquina(principal1.silkworm1);
+  98:principal1.CambiarMaquina(principal1.tigerh1);
+  99:principal1.CambiarMaquina(principal1.slapfight1);
+  100:principal1.CambiarMaquina(principal1.legendofkage1);
+  101:principal1.CambiarMaquina(principal1.thoop1);
+  102:principal1.CambiarMaquina(principal1.cabal1);
+  103:principal1.CambiarMaquina(principal1.ghouls1);
+  104:principal1.CambiarMaquina(principal1.ffight1);
+  105:principal1.CambiarMaquina(principal1.kod1);
+  106:principal1.CambiarMaquina(principal1.sf21);
+  107:principal1.CambiarMaquina(principal1.strider1);
+  108:principal1.CambiarMaquina(principal1.wonder31);
+  109:principal1.CambiarMaquina(principal1.ccommando1);
+  110:principal1.CambiarMaquina(principal1.knights1);
+  111:principal1.CambiarMaquina(principal1.sf2ce1);
+  112:principal1.CambiarMaquina(principal1.dino1);
+  113:principal1.CambiarMaquina(principal1.punisher1);
+  114:principal1.CambiarMaquina(principal1.shinobi1);
+  115:principal1.CambiarMaquina(principal1.alexkid1);
+  116:principal1.CambiarMaquina(principal1.fantasyzone1);
+  117:principal1.CambiarMaquina(principal1.tp841);
+  118:principal1.CambiarMaquina(principal1.tutankhm1);
+  119:principal1.CambiarMaquina(principal1.Pang1);
+  120:principal1.CambiarMaquina(principal1.ninjakid21);
+  121:principal1.CambiarMaquina(principal1.arkarea1);
+  122:principal1.CambiarMaquina(principal1.mnight1);
+  123:principal1.CambiarMaquina(principal1.skykid1);
+  124:principal1.CambiarMaquina(principal1.rthunder1);
+  125:principal1.CambiarMaquina(principal1.hopmappy1);
+  126:principal1.CambiarMaquina(principal1.skykiddx1);
+  127:principal1.CambiarMaquina(principal1.rocnrope1);
+  128:principal1.CambiarMaquina(principal1.repulse1);
+  129:principal1.CambiarMaquina(principal1.tnzs1);
+  130:principal1.CambiarMaquina(principal1.insectorx1);
+  131:principal1.CambiarMaquina(principal1.pacland1);
+  132:principal1.CambiarMaquina(principal1.mariob1);
+  133:principal1.CambiarMaquina(principal1.solomon1);
+  134:principal1.CambiarMaquina(principal1.combatsc1);
+  135:principal1.CambiarMaquina(principal1.hvyunit1);
+  136:principal1.CambiarMaquina(principal1.pow1);
+  137:principal1.CambiarMaquina(principal1.streetsm1);
+  138:principal1.CambiarMaquina(principal1.p471);
+  139:principal1.CambiarMaquina(principal1.rodland1);
+  140:principal1.CambiarMaquina(principal1.saintdragon1);
+  141:principal1.CambiarMaquina(principal1.TimePilot1);
+  142:principal1.CambiarMaquina(principal1.Pengo1);
+  143:principal1.CambiarMaquina(principal1.Scramble1);
+  144:principal1.CambiarMaquina(principal1.Scobra1);
+  145:principal1.CambiarMaquina(principal1.Amidar1);
+  146:principal1.CambiarMaquina(principal1.twincobr1);
+  147:principal1.CambiarMaquina(principal1.FlyingShark1);
+  148:principal1.CambiarMaquina(principal1.JrPacman1);
+  149:principal1.CambiarMaquina(principal1.Ikari31);
+  150:principal1.CambiarMaquina(principal1.searchar1);
+  151:principal1.CambiarMaquina(principal1.Choplifter1);
+  152:principal1.CambiarMaquina(principal1.mrviking1);
+  153:principal1.CambiarMaquina(principal1.SegaNinja1);
+  154:principal1.CambiarMaquina(principal1.UpnDown1);
+  155:principal1.CambiarMaquina(principal1.flicky1);
+  156:principal1.CambiarMaquina(principal1.robocop1);
+  157:principal1.CambiarMaquina(principal1.baddudes1);
+  158:principal1.CambiarMaquina(principal1.hippo1);
+  159:principal1.CambiarMaquina(principal1.tumblep1);
+  160:principal1.CambiarMaquina(principal1.funkyjet1);
+  161:principal1.CambiarMaquina(principal1.SuperBurgerTime1);
+  162:principal1.CambiarMaquina(principal1.cninja1);
+  163:principal1.CambiarMaquina(principal1.robocop21);
+  164:principal1.CambiarMaquina(principal1.DietGo1);
+  165:principal1.CambiarMaquina(principal1.actfancer1);
+  166:principal1.CambiarMaquina(principal1.arabian1);
+  167:principal1.CambiarMaquina(principal1.digdug1);
+  168:principal1.CambiarMaquina(principal1.dkongjr1);
+  169:principal1.CambiarMaquina(principal1.dkong31);
+  170:principal1.CambiarMaquina(principal1.higemaru1);
+  171:principal1.CambiarMaquina(principal1.bagman1);
+  172:principal1.CambiarMaquina(principal1.sbagman1);
+  173:principal1.CambiarMaquina(principal1.squash1);
+  174:principal1.CambiarMaquina(principal1.biomtoy1);
+  175:principal1.CambiarMaquina(principal1.congo1);
+  176:principal1.CambiarMaquina(principal1.kangaroo1);
+  177:principal1.CambiarMaquina(principal1.bionicc1);
+  178:principal1.CambiarMaquina(principal1.wwfsuperstar1);
+  179:principal1.CambiarMaquina(principal1.rbisland1);
+  180:principal1.CambiarMaquina(principal1.rbislande1);
+  181:principal1.CambiarMaquina(principal1.Volfied1);
+  182:principal1.CambiarMaquina(principal1.Opwolf1);
+  183:principal1.CambiarMaquina(principal1.SPang1);
+  184:principal1.CambiarMaquina(principal1.Outrun1);
+  185:principal1.CambiarMaquina(principal1.elevator1);
+  186:principal1.CambiarMaquina(principal1.aliensyn1);
+  187:principal1.CambiarMaquina(principal1.wb31);
+  188:principal1.CambiarMaquina(principal1.zaxxon1);
+  189:principal1.CambiarMaquina(principal1.jungleking1);
+  190:principal1.CambiarMaquina(principal1.hharry1);
+  191:principal1.CambiarMaquina(principal1.rtype21);
+  192:principal1.CambiarMaquina(principal1.todruaga1);
+  193:principal1.CambiarMaquina(principal1.motos1);
+  194:principal1.CambiarMaquina(principal1.drgnbstr1);
+  195:principal1.CambiarMaquina(principal1.vulgus1);
+  196:principal1.CambiarMaquina(principal1.ddragon31);
+  197:principal1.CambiarMaquina(principal1.blockout1);
+  198:principal1.CambiarMaquina(principal1.tetris1);
+  199:principal1.CambiarMaquina(principal1.foodf1);
+  200:principal1.CambiarMaquina(principal1.snapjack1);
+  201:principal1.CambiarMaquina(principal1.cavenger1);
+  202:principal1.CambiarMaquina(principal1.pleiads1);
+  203:principal1.CambiarMaquina(principal1.mrgoemon1);
+  204:principal1.CambiarMaquina(principal1.nemesis1);
+  205:principal1.CambiarMaquina(principal1.twinbee1);
+  206:principal1.CambiarMaquina(principal1.pirates1);
+  207:principal1.CambiarMaquina(principal1.genixfamily1);
+  208:principal1.CambiarMaquina(principal1.junofirst1);
+  1000:principal1.CambiarMaquina(principal1.NES1);
+  1001:principal1.CambiarMaquina(principal1.colecovision1);
+  1002:principal1.CambiarMaquina(principal1.Gameboy1);
+  1003:principal1.CambiarMaquina(principal1.CHIP81);
 end;
 end;
 
 procedure todos_false;
 begin
 //Computer
-form1.Spectrum48K1.Checked:=false;
-form1.Spectrum128K1.Checked:=false;
-form1.Spectrum31.Checked:=false;
-form1.Spectrum2A1.Checked:=false;
-form1.Spectrum21.Checked:=false;
-form1.Spectrum16k1.Checked:=false;
-form1.CPC1.Checked:=false;
-form1.CPC6641.Checked:=false;
-form1.CPC61281.Checked:=false;
+principal1.Spectrum48K1.Checked:=false;
+principal1.Spectrum128K1.Checked:=false;
+principal1.Spectrum31.Checked:=false;
+principal1.Spectrum2A1.Checked:=false;
+principal1.Spectrum21.Checked:=false;
+principal1.Spectrum16k1.Checked:=false;
+principal1.CPC1.Checked:=false;
+principal1.CPC6641.Checked:=false;
+principal1.CPC61281.Checked:=false;
 //Arcade
-form1.phoenix1.Checked:=false;
-form1.bombjack1.Checked:=false;
-form1.pacman1.Checked:=false;
-form1.frogger1.Checked:=false;
-form1.dkong1.Checked:=false;
-form1.blacktiger1.Checked:=false;
-form1.gberet1.Checked:=false;
-form1.StarForce1.Checked:=false;
-form1.PitfallII1.Checked:=false;
-form1.jungler1.Checked:=false;
-form1.pooyan1.Checked:=false;
-form1.Rygar1.Checked:=false;
-form1.misteriousstone1.Checked:=false;
-form1.Commando1.Checked:=false;
-form1.gng1.Checked:=false;
-form1.mikie1.Checked:=false;
-form1.shaolin1.Checked:=false;
-form1.yiear1.Checked:=false;
-form1.asteroids1.Checked:=false;
-form1.sonson1.Checked:=false;
-form1.citycon1.Checked:=false;
-form1.BurgerTime1.Checked:=false;
-form1.ExpressRaider1.Checked:=false;
-form1.superbasketball1.Checked:=false;
-form1.teddy1.Checked:=false;
-form1.wboy1.Checked:=false;
-form1.wbml1.Checked:=false;
-form1.ladybug1.Checked:=false;
-form1.tehkanwc1.Checked:=false;
-form1.popeye1.Checked:=false;
-form1.Psychic51.Checked:=false;
-form1.terracre1.Checked:=false;
-form1.kungfum1.Checked:=false;
-form1.shootout1.Checked:=false;
-form1.Vigilante1.Checked:=false;
-form1.bubblebobble1.Checked:=false;
-form1.Jackal1.checked:=false;
-form1.Galaxian1.Checked:=false;
-form1.jumpb1.Checked:=false;
-form1.mooncresta1.Checked:=false;
-form1.RallyX1.Checked:=false;
-form1.prehisle1.Checked:=false;
-form1.TigerRoad1.Checked:=false;
-form1.F1Dream1.Checked:=false;
-form1.Snowbros1.Checked:=false;
-form1.toki1.Checked:=false;
-form1.Contra1.Checked:=false;
-form1.Mappy1.Checked:=false;
-form1.Rastan1.Checked:=false;
-form1.legendw1.Checked:=false;
-form1.SectionZ1.Checked:=false;
-form1.Trojan1.Checked:=false;
-form1.SF1.Checked:=false;
-form1.DigDug21.Checked:=false;
-form1.SPacman1.Checked:=false;
-form1.Galaga1.Checked:=false;
-form1.Xain1.Checked:=false;
-form1.HardHead1.Checked:=false;
-form1.hardhead21.checked:=false;
-form1.sbombers1.Checked:=false;
-form1.NewRallyX1.Checked:=false;
-form1.bjtwin1.Checked:=false;
-form1.Spelunker1.Checked:=false;
-form1.Spelunker21.Checked:=false;
-form1.ldrun1.Checked:=false;
-form1.ldrun21.Checked:=false;
-form1.knJoe1.Checked:=false;
-form1.Wardner1.Checked:=false;
-form1.BigKarnak1.Checked:=false;
-form1.ExedExes1.Checked:=false;
-form1.GunSmoke1.Checked:=false;
-form1.N19421.Checked:=false;
-form1.N19431.Checked:=false;
-form1.N1943kai1.Checked:=false;
-form1.JailBreak1.Checked:=false;
-form1.Circusc1.Checked:=false;
-form1.IronHorse1.Checked:=false;
-form1.RType1.Checked:=false;
-form1.MSPacman1.Checked:=false;
-form1.BrkThru1.Checked:=false;
-form1.Darwin1.Checked:=false;
-form1.SRD1.Checked:=false;
-form1.ddragon1.Checked:=false;
-form1.MrDo1.Checked:=false;
-form1.theglob1.Checked:=false;
-form1.superglob1.Checked:=false;
-form1.ddragon21.Checked:=false;
-form1.Silkworm1.Checked:=false;
-form1.tigerh1.Checked:=false;
-form1.SlapFight1.Checked:=false;
-form1.LegendofKage1.Checked:=false;
-form1.thoop1.checked:=false;
-form1.Cabal1.Checked:=false;
-form1.ghouls1.Checked:=false;
-form1.ffight1.Checked:=false;
-form1.kod1.Checked:=false;
-form1.sf21.Checked:=false;
-form1.strider1.Checked:=false;
-form1.wonder31.Checked:=false;
-form1.ccommando1.Checked:=false;
-form1.knights1.Checked:=false;
-form1.sf2ce1.Checked:=false;
-form1.dino1.Checked:=false;
-form1.Punisher1.Checked:=false;
-form1.Shinobi1.Checked:=false;
-form1.AlexKid1.Checked:=false;
-form1.FantasyZone1.Checked:=false;
-form1.tp841.Checked:=false;
-form1.tutankhm1.Checked:=false;
-form1.Pang1.Checked:=false;
-form1.ninjakid21.Checked:=false;
-form1.ArkArea1.Checked:=false;
-form1.mnight1.Checked:=false;
-form1.SkyKid1.Checked:=false;
-form1.rthunder1.Checked:=false;
-form1.hopmappy1.Checked:=false;
-form1.skykiddx1.Checked:=false;
-form1.RocnRope1.Checked:=false;
-form1.repulse1.checked:=false;
-form1.tnzs1.Checked:=false;
-form1.InsectorX1.Checked:=false;
-form1.Pacland1.Checked:=false;
-form1.mariob1.Checked:=false;
-form1.Solomon1.Checked:=false;
-form1.combatsc1.Checked:=false;
-form1.hvyunit1.Checked:=false;
-form1.pow1.Checked:=false;
-form1.streetsm1.checked:=false;
-form1.P471.Checked:=false;
-form1.RodLand1.Checked:=false;
-form1.SaintDragon1.Checked:=false;
-form1.TimePilot1.Checked:=false;
-form1.Pengo1.Checked:=false;
-form1.scramble1.checked:=false;
-form1.scobra1.Checked:=false;
-form1.Amidar1.Checked:=false;
-form1.twincobr1.checked:=false;
-form1.FlyingShark1.Checked:=false;
-form1.JrPacMan1.Checked:=false;
-form1.Ikari31.Checked:=false;
-form1.Searchar1.Checked:=false;
-form1.Choplifter1.Checked:=false;
-form1.mrviking1.Checked:=false;
-form1.SegaNinja1.Checked:=false;
-form1.UpnDown1.Checked:=false;
-form1.flicky1.Checked:=false;
-form1.robocop1.Checked:=false;
-form1.Baddudes1.Checked:=false;
-form1.Hippo1.Checked:=false;
-form1.tumblep1.checked:=false;
-form1.funkyjet1.checked:=false;
-form1.SuperBurgerTime1.Checked:=false;
-form1.cninja1.Checked:=false;
-form1.Robocop21.Checked:=false;
-form1.DietGo1.Checked:=false;
-form1.ActFancer1.Checked:=false;
-form1.Arabian1.Checked:=false;
-form1.DigDug1.Checked:=false;
-form1.dkongjr1.Checked:=false;
-form1.dkong31.Checked:=false;
-form1.Higemaru1.Checked:=false;
-form1.Bagman1.Checked:=false;
-form1.sBagman1.Checked:=false;
-form1.squash1.Checked:=false;
-form1.biomtoy1.Checked:=false;
-form1.congo1.Checked:=false;
-form1.kangaroo1.Checked:=false;
-form1.bionicc1.Checked:=false;
-form1.wwfsuperstar1.Checked:=false;
-form1.rbisland1.checked:=false;
-form1.rbislande1.checked:=false;
-form1.Volfied1.Checked:=false;
-form1.opwolf1.Checked:=false;
-form1.spang1.checked:=false;
-form1.Outrun1.Checked:=false;
-form1.elevator1.checked:=false;
-form1.aliensyn1.checked:=false;
-form1.wb31.checked:=false;
-form1.zaxxon1.checked:=false;
-form1.jungleking1.checked:=false;
-form1.hharry1.Checked:=false;
-form1.RType21.Checked:=false;
-form1.todruaga1.checked:=false;
-form1.motos1.checked:=false;
-form1.drgnbstr1.checked:=false;
-form1.vulgus1.checked:=false;
-form1.ddragon31.Checked:=false;
-form1.BlockOut1.Checked:=false;
-form1.tetris1.checked:=false;
-form1.foodf1.checked:=false;
-form1.snapjack1.checked:=false;
-form1.cavenger1.Checked:=false;
-form1.pleiads1.checked:=false;
-form1.MrGoemon1.Checked:=false;
-form1.Nemesis1.Checked:=false;
-form1.twinbee1.Checked:=false;
-form1.Pirates1.Checked:=false;
-form1.GenixFamily1.Checked:=false;
-form1.junofirst1.checked:=false;
+principal1.phoenix1.Checked:=false;
+principal1.bombjack1.Checked:=false;
+principal1.pacman1.Checked:=false;
+principal1.frogger1.Checked:=false;
+principal1.dkong1.Checked:=false;
+principal1.blacktiger1.Checked:=false;
+principal1.gberet1.Checked:=false;
+principal1.StarForce1.Checked:=false;
+principal1.PitfallII1.Checked:=false;
+principal1.jungler1.Checked:=false;
+principal1.pooyan1.Checked:=false;
+principal1.Rygar1.Checked:=false;
+principal1.misteriousstone1.Checked:=false;
+principal1.Commando1.Checked:=false;
+principal1.gng1.Checked:=false;
+principal1.mikie1.Checked:=false;
+principal1.shaolin1.Checked:=false;
+principal1.yiear1.Checked:=false;
+principal1.asteroids1.Checked:=false;
+principal1.sonson1.Checked:=false;
+principal1.citycon1.Checked:=false;
+principal1.BurgerTime1.Checked:=false;
+principal1.ExpressRaider1.Checked:=false;
+principal1.superbasketball1.Checked:=false;
+principal1.teddy1.Checked:=false;
+principal1.wboy1.Checked:=false;
+principal1.wbml1.Checked:=false;
+principal1.ladybug1.Checked:=false;
+principal1.tehkanwc1.Checked:=false;
+principal1.popeye1.Checked:=false;
+principal1.Psychic51.Checked:=false;
+principal1.terracre1.Checked:=false;
+principal1.kungfum1.Checked:=false;
+principal1.shootout1.Checked:=false;
+principal1.Vigilante1.Checked:=false;
+principal1.bubblebobble1.Checked:=false;
+principal1.Jackal1.checked:=false;
+principal1.Galaxian1.Checked:=false;
+principal1.jumpb1.Checked:=false;
+principal1.mooncresta1.Checked:=false;
+principal1.RallyX1.Checked:=false;
+principal1.prehisle1.Checked:=false;
+principal1.TigerRoad1.Checked:=false;
+principal1.F1Dream1.Checked:=false;
+principal1.Snowbros1.Checked:=false;
+principal1.toki1.Checked:=false;
+principal1.Contra1.Checked:=false;
+principal1.Mappy1.Checked:=false;
+principal1.Rastan1.Checked:=false;
+principal1.legendw1.Checked:=false;
+principal1.SectionZ1.Checked:=false;
+principal1.Trojan1.Checked:=false;
+principal1.SF1.Checked:=false;
+principal1.DigDug21.Checked:=false;
+principal1.SPacman1.Checked:=false;
+principal1.Galaga1.Checked:=false;
+principal1.Xain1.Checked:=false;
+principal1.HardHead1.Checked:=false;
+principal1.hardhead21.checked:=false;
+principal1.sbombers1.Checked:=false;
+principal1.NewRallyX1.Checked:=false;
+principal1.bjtwin1.Checked:=false;
+principal1.Spelunker1.Checked:=false;
+principal1.Spelunker21.Checked:=false;
+principal1.ldrun1.Checked:=false;
+principal1.ldrun21.Checked:=false;
+principal1.knJoe1.Checked:=false;
+principal1.Wardner1.Checked:=false;
+principal1.BigKarnak1.Checked:=false;
+principal1.ExedExes1.Checked:=false;
+principal1.GunSmoke1.Checked:=false;
+principal1.N19421.Checked:=false;
+principal1.N19431.Checked:=false;
+principal1.N1943kai1.Checked:=false;
+principal1.JailBreak1.Checked:=false;
+principal1.Circusc1.Checked:=false;
+principal1.IronHorse1.Checked:=false;
+principal1.RType1.Checked:=false;
+principal1.MSPacman1.Checked:=false;
+principal1.BrkThru1.Checked:=false;
+principal1.Darwin1.Checked:=false;
+principal1.SRD1.Checked:=false;
+principal1.ddragon1.Checked:=false;
+principal1.MrDo1.Checked:=false;
+principal1.theglob1.Checked:=false;
+principal1.superglob1.Checked:=false;
+principal1.ddragon21.Checked:=false;
+principal1.Silkworm1.Checked:=false;
+principal1.tigerh1.Checked:=false;
+principal1.SlapFight1.Checked:=false;
+principal1.LegendofKage1.Checked:=false;
+principal1.thoop1.checked:=false;
+principal1.Cabal1.Checked:=false;
+principal1.ghouls1.Checked:=false;
+principal1.ffight1.Checked:=false;
+principal1.kod1.Checked:=false;
+principal1.sf21.Checked:=false;
+principal1.strider1.Checked:=false;
+principal1.wonder31.Checked:=false;
+principal1.ccommando1.Checked:=false;
+principal1.knights1.Checked:=false;
+principal1.sf2ce1.Checked:=false;
+principal1.dino1.Checked:=false;
+principal1.Punisher1.Checked:=false;
+principal1.Shinobi1.Checked:=false;
+principal1.AlexKid1.Checked:=false;
+principal1.FantasyZone1.Checked:=false;
+principal1.tp841.Checked:=false;
+principal1.tutankhm1.Checked:=false;
+principal1.Pang1.Checked:=false;
+principal1.ninjakid21.Checked:=false;
+principal1.ArkArea1.Checked:=false;
+principal1.mnight1.Checked:=false;
+principal1.SkyKid1.Checked:=false;
+principal1.rthunder1.Checked:=false;
+principal1.hopmappy1.Checked:=false;
+principal1.skykiddx1.Checked:=false;
+principal1.RocnRope1.Checked:=false;
+principal1.repulse1.checked:=false;
+principal1.tnzs1.Checked:=false;
+principal1.InsectorX1.Checked:=false;
+principal1.Pacland1.Checked:=false;
+principal1.mariob1.Checked:=false;
+principal1.Solomon1.Checked:=false;
+principal1.combatsc1.Checked:=false;
+principal1.hvyunit1.Checked:=false;
+principal1.pow1.Checked:=false;
+principal1.streetsm1.checked:=false;
+principal1.P471.Checked:=false;
+principal1.RodLand1.Checked:=false;
+principal1.SaintDragon1.Checked:=false;
+principal1.TimePilot1.Checked:=false;
+principal1.Pengo1.Checked:=false;
+principal1.scramble1.checked:=false;
+principal1.scobra1.Checked:=false;
+principal1.Amidar1.Checked:=false;
+principal1.twincobr1.checked:=false;
+principal1.FlyingShark1.Checked:=false;
+principal1.JrPacMan1.Checked:=false;
+principal1.Ikari31.Checked:=false;
+principal1.Searchar1.Checked:=false;
+principal1.Choplifter1.Checked:=false;
+principal1.mrviking1.Checked:=false;
+principal1.SegaNinja1.Checked:=false;
+principal1.UpnDown1.Checked:=false;
+principal1.flicky1.Checked:=false;
+principal1.robocop1.Checked:=false;
+principal1.Baddudes1.Checked:=false;
+principal1.Hippo1.Checked:=false;
+principal1.tumblep1.checked:=false;
+principal1.funkyjet1.checked:=false;
+principal1.SuperBurgerTime1.Checked:=false;
+principal1.cninja1.Checked:=false;
+principal1.Robocop21.Checked:=false;
+principal1.DietGo1.Checked:=false;
+principal1.ActFancer1.Checked:=false;
+principal1.Arabian1.Checked:=false;
+principal1.DigDug1.Checked:=false;
+principal1.dkongjr1.Checked:=false;
+principal1.dkong31.Checked:=false;
+principal1.Higemaru1.Checked:=false;
+principal1.Bagman1.Checked:=false;
+principal1.sBagman1.Checked:=false;
+principal1.squash1.Checked:=false;
+principal1.biomtoy1.Checked:=false;
+principal1.congo1.Checked:=false;
+principal1.kangaroo1.Checked:=false;
+principal1.bionicc1.Checked:=false;
+principal1.wwfsuperstar1.Checked:=false;
+principal1.rbisland1.checked:=false;
+principal1.rbislande1.checked:=false;
+principal1.Volfied1.Checked:=false;
+principal1.opwolf1.Checked:=false;
+principal1.spang1.checked:=false;
+principal1.Outrun1.Checked:=false;
+principal1.elevator1.checked:=false;
+principal1.aliensyn1.checked:=false;
+principal1.wb31.checked:=false;
+principal1.zaxxon1.checked:=false;
+principal1.jungleking1.checked:=false;
+principal1.hharry1.Checked:=false;
+principal1.RType21.Checked:=false;
+principal1.todruaga1.checked:=false;
+principal1.motos1.checked:=false;
+principal1.drgnbstr1.checked:=false;
+principal1.vulgus1.checked:=false;
+principal1.ddragon31.Checked:=false;
+principal1.BlockOut1.Checked:=false;
+principal1.tetris1.checked:=false;
+principal1.foodf1.checked:=false;
+principal1.snapjack1.checked:=false;
+principal1.cavenger1.Checked:=false;
+principal1.pleiads1.checked:=false;
+principal1.MrGoemon1.Checked:=false;
+principal1.Nemesis1.Checked:=false;
+principal1.twinbee1.Checked:=false;
+principal1.Pirates1.Checked:=false;
+principal1.GenixFamily1.Checked:=false;
+principal1.junofirst1.checked:=false;
 //consolas
-form1.NES1.Checked:=false;
-form1.colecovision1.Checked:=false;
-form1.GameBoy1.Checked:=false;
-form1.chip81.checked:=false;
+principal1.NES1.Checked:=false;
+principal1.colecovision1.Checked:=false;
+principal1.GameBoy1.Checked:=false;
+principal1.chip81.checked:=false;
 //Resto
-form1.BitBtn9.visible:=false;
-form1.BitBtn10.visible:=false;
-form1.BitBtn11.visible:=false;
-form1.BitBtn12.visible:=false;
-form1.BitBtn14.visible:=false;
-form1.BitBtn9.enabled:=false;
-form1.BitBtn10.enabled:=false;
-form1.BitBtn11.enabled:=false;
-form1.BitBtn12.enabled:=false;
-form1.BitBtn14.enabled:=false;
-form1.Panel2.Visible:=false;
+principal1.BitBtn9.visible:=false;
+principal1.BitBtn10.visible:=false;
+principal1.BitBtn11.visible:=false;
+principal1.BitBtn12.visible:=false;
+principal1.BitBtn14.visible:=false;
+principal1.BitBtn9.enabled:=false;
+principal1.BitBtn10.enabled:=false;
+principal1.BitBtn11.enabled:=false;
+principal1.BitBtn12.enabled:=false;
+principal1.BitBtn14.enabled:=false;
+principal1.Panel2.Visible:=false;
 end;
 
 procedure cargar_maquina(tmaquina:word);
@@ -851,855 +851,855 @@ var
   tipo,f:word;
 begin
 //Computers
-if sender=form1.Spectrum48K1 then begin
+if sender=principal1.Spectrum48K1 then begin
   tipo:=0;
-  form1.Spectrum48K1.Checked:=true;
+  principal1.Spectrum48K1.Checked:=true;
 end;
-if sender=form1.Spectrum128K1 then begin
+if sender=principal1.Spectrum128K1 then begin
   tipo:=1;
-  form1.Spectrum128K1.Checked:=true;
+  principal1.Spectrum128K1.Checked:=true;
 end;
-if sender=form1.Spectrum31 then begin
+if sender=principal1.Spectrum31 then begin
   tipo:=2;
-  form1.Spectrum31.Checked:=true;
+  principal1.Spectrum31.Checked:=true;
 end;
-if sender=form1.Spectrum2A1 then begin
+if sender=principal1.Spectrum2A1 then begin
   tipo:=3;
-  form1.Spectrum2A1.Checked:=true;
+  principal1.Spectrum2A1.Checked:=true;
 end;
-if sender=form1.Spectrum21 then begin
+if sender=principal1.Spectrum21 then begin
   tipo:=4;
-  form1.Spectrum21.Checked:=true;
+  principal1.Spectrum21.Checked:=true;
 end;
-if sender=form1.Spectrum16k1 then begin
+if sender=principal1.Spectrum16k1 then begin
   tipo:=5;
-  form1.Spectrum16K1.Checked:=true;
+  principal1.Spectrum16K1.Checked:=true;
 end;
-if sender=form1.CPC1 then begin
+if sender=principal1.CPC1 then begin
   tipo:=7;
-  form1.CPC1.Checked:=true;
+  principal1.CPC1.Checked:=true;
 end;
-if sender=form1.CPC6641 then begin
+if sender=principal1.CPC6641 then begin
   tipo:=8;
-  form1.CPC6641.Checked:=true;
+  principal1.CPC6641.Checked:=true;
 end;
-if sender=form1.CPC61281 then begin
+if sender=principal1.CPC61281 then begin
   tipo:=9;
-  form1.CPC61281.Checked:=true;
+  principal1.CPC61281.Checked:=true;
 end;
 //Arcade
-if sender=form1.Pacman1 then begin
+if sender=principal1.Pacman1 then begin
   tipo:=10;
-  form1.pacman1.Checked:=true;
+  principal1.pacman1.Checked:=true;
 end;
-if sender=form1.Phoenix1 then begin
+if sender=principal1.Phoenix1 then begin
   tipo:=11;
-  form1.phoenix1.Checked:=true;
+  principal1.phoenix1.Checked:=true;
 end;
-if sender=form1.MisteriousStone1 then begin
+if sender=principal1.MisteriousStone1 then begin
   tipo:=12;
-  form1.misteriousstone1.Checked:=true;
+  principal1.misteriousstone1.Checked:=true;
 end;
-if sender=form1.BombJack1 then begin
+if sender=principal1.BombJack1 then begin
   tipo:=13;
-  form1.bombjack1.Checked:=true;
+  principal1.bombjack1.Checked:=true;
 end;
-if sender=form1.Frogger1 then begin
+if sender=principal1.Frogger1 then begin
   tipo:=14;
-  form1.frogger1.Checked:=true;
+  principal1.frogger1.Checked:=true;
 end;
-if sender=form1.Dkong1 then begin
+if sender=principal1.Dkong1 then begin
   tipo:=15;
-  form1.dkong1.Checked:=true;
+  principal1.dkong1.Checked:=true;
 end;
-if sender=form1.BlackTiger1 then begin
+if sender=principal1.BlackTiger1 then begin
   tipo:=16;
-  form1.blacktiger1.Checked:=true;
+  principal1.blacktiger1.Checked:=true;
 end;
-if sender=form1.Gberet1 then begin
+if sender=principal1.Gberet1 then begin
   tipo:=17;
-  form1.gberet1.Checked:=true;
+  principal1.gberet1.Checked:=true;
 end;
-if sender=form1.Commando1 then begin
+if sender=principal1.Commando1 then begin
   tipo:=18;
-  form1.commando1.Checked:=true;
+  principal1.commando1.Checked:=true;
 end;
-if sender=form1.gng1 then begin
+if sender=principal1.gng1 then begin
   tipo:=19;
-  form1.gng1.Checked:=true;
+  principal1.gng1.Checked:=true;
 end;
-if sender=form1.Mikie1 then begin
+if sender=principal1.Mikie1 then begin
   tipo:=20;
-  form1.mikie1.Checked:=true;
+  principal1.mikie1.Checked:=true;
 end;
-if sender=form1.Shaolin1 then begin
+if sender=principal1.Shaolin1 then begin
   tipo:=21;
-  form1.shaolin1.Checked:=true;
+  principal1.shaolin1.Checked:=true;
 end;
-if sender=form1.Yiear1 then begin
+if sender=principal1.Yiear1 then begin
   tipo:=22;
-  form1.Yiear1.Checked:=true;
+  principal1.Yiear1.Checked:=true;
 end;
-if sender=form1.Asteroids1 then begin
+if sender=principal1.Asteroids1 then begin
   tipo:=23;
-  form1.asteroids1.Checked:=true;
+  principal1.asteroids1.Checked:=true;
 end;
-if sender=form1.Sonson1 then begin
+if sender=principal1.Sonson1 then begin
   tipo:=24;
-  form1.sonson1.Checked:=true;
+  principal1.sonson1.Checked:=true;
 end;
-if sender=form1.starforce1 then begin
+if sender=principal1.starforce1 then begin
   tipo:=25;
-  form1.starforce1.Checked:=true;
+  principal1.starforce1.Checked:=true;
 end;
-if sender=form1.rygar1 then begin
+if sender=principal1.rygar1 then begin
   tipo:=26;
-  form1.rygar1.Checked:=true;
+  principal1.rygar1.Checked:=true;
 end;
-if sender=form1.pitfallII1 then begin
+if sender=principal1.pitfallII1 then begin
   tipo:=27;
-  form1.PitfallII1.Checked:=true;
+  principal1.PitfallII1.Checked:=true;
 end;
-if sender=form1.pooyan1 then begin
+if sender=principal1.pooyan1 then begin
   tipo:=28;
-  form1.pooyan1.Checked:=true;
+  principal1.pooyan1.Checked:=true;
 end;
-if sender=form1.jungler1 then begin
+if sender=principal1.jungler1 then begin
   tipo:=29;
-  form1.jungler1.Checked:=true;
+  principal1.jungler1.Checked:=true;
 end;
-if sender=form1.citycon1 then begin
+if sender=principal1.citycon1 then begin
   tipo:=30;
-  form1.citycon1.Checked:=true;
+  principal1.citycon1.Checked:=true;
 end;
-if sender=form1.burgertime1 then begin
+if sender=principal1.burgertime1 then begin
   tipo:=31;
-  form1.burgertime1.Checked:=true;
+  principal1.burgertime1.Checked:=true;
 end;
-if sender=form1.expressraider1 then begin
+if sender=principal1.expressraider1 then begin
   tipo:=32;
-  form1.expressraider1.Checked:=true;
+  principal1.expressraider1.Checked:=true;
 end;
-if sender=form1.superbasketball1 then begin
+if sender=principal1.superbasketball1 then begin
   tipo:=33;
-  form1.superbasketball1.Checked:=true;
+  principal1.superbasketball1.Checked:=true;
 end;
-if sender=form1.ladybug1 then begin
+if sender=principal1.ladybug1 then begin
   tipo:=34;
-  form1.ladybug1.Checked:=true;
+  principal1.ladybug1.Checked:=true;
 end;
-if sender=form1.teddy1 then begin
+if sender=principal1.teddy1 then begin
   tipo:=35;
-  form1.teddy1.Checked:=true;
+  principal1.teddy1.Checked:=true;
 end;
-if sender=form1.wboy1 then begin
+if sender=principal1.wboy1 then begin
   tipo:=36;
-  form1.wboy1.Checked:=true;
+  principal1.wboy1.Checked:=true;
 end;
-if sender=form1.wbml1 then begin
+if sender=principal1.wbml1 then begin
   tipo:=37;
-  form1.wbml1.Checked:=true;
+  principal1.wbml1.Checked:=true;
 end;
-if sender=form1.tehkanwc1 then begin
+if sender=principal1.tehkanwc1 then begin
   tipo:=38;
-  form1.tehkanwc1.Checked:=true;
+  principal1.tehkanwc1.Checked:=true;
 end;
-if sender=form1.popeye1 then begin
+if sender=principal1.popeye1 then begin
   tipo:=39;
-  form1.popeye1.Checked:=true;
+  principal1.popeye1.Checked:=true;
 end;
-if sender=form1.psychic51 then begin
+if sender=principal1.psychic51 then begin
   tipo:=40;
-  form1.psychic51.Checked:=true;
+  principal1.psychic51.Checked:=true;
 end;
-if sender=form1.terracre1 then begin
+if sender=principal1.terracre1 then begin
   tipo:=41;
-  form1.terracre1.Checked:=true;
+  principal1.terracre1.Checked:=true;
 end;
-if sender=form1.kungfum1 then begin
+if sender=principal1.kungfum1 then begin
   tipo:=42;
-  form1.kungfum1.Checked:=true;
+  principal1.kungfum1.Checked:=true;
 end;
-if sender=form1.shootout1 then begin
+if sender=principal1.shootout1 then begin
   tipo:=43;
-  form1.shootout1.Checked:=true;
+  principal1.shootout1.Checked:=true;
 end;
-if sender=form1.vigilante1 then begin
+if sender=principal1.vigilante1 then begin
   tipo:=44;
-  form1.vigilante1.Checked:=true;
+  principal1.vigilante1.Checked:=true;
 end;
-if sender=form1.jackal1 then begin
+if sender=principal1.jackal1 then begin
   tipo:=45;
-  form1.jackal1.Checked:=true;
+  principal1.jackal1.Checked:=true;
 end;
-if sender=form1.bubblebobble1 then begin
+if sender=principal1.bubblebobble1 then begin
   tipo:=46;
-  form1.bubblebobble1.Checked:=true;
+  principal1.bubblebobble1.Checked:=true;
 end;
-if sender=form1.galaxian1 then begin
+if sender=principal1.galaxian1 then begin
   tipo:=47;
-  form1.galaxian1.Checked:=true;
+  principal1.galaxian1.Checked:=true;
 end;
-if sender=form1.jumpb1 then begin
+if sender=principal1.jumpb1 then begin
   tipo:=48;
-  form1.jumpb1.Checked:=true;
+  principal1.jumpb1.Checked:=true;
 end;
-if sender=form1.mooncresta1 then begin
+if sender=principal1.mooncresta1 then begin
   tipo:=49;
-  form1.mooncresta1.Checked:=true;
+  principal1.mooncresta1.Checked:=true;
 end;
-if sender=form1.rallyx1 then begin
+if sender=principal1.rallyx1 then begin
   tipo:=50;
-  form1.rallyx1.Checked:=true;
+  principal1.rallyx1.Checked:=true;
 end;
-if sender=form1.prehisle1 then begin
+if sender=principal1.prehisle1 then begin
   tipo:=51;
-  form1.prehisle1.Checked:=true;
+  principal1.prehisle1.Checked:=true;
 end;
-if sender=form1.TigerRoad1 then begin
+if sender=principal1.TigerRoad1 then begin
   tipo:=52;
-  form1.tigerroad1.Checked:=true;
+  principal1.tigerroad1.Checked:=true;
 end;
-if sender=form1.F1Dream1 then begin
+if sender=principal1.F1Dream1 then begin
   tipo:=53;
-  form1.f1dream1.Checked:=true;
+  principal1.f1dream1.Checked:=true;
 end;
-if sender=form1.Snowbros1 then begin
+if sender=principal1.Snowbros1 then begin
   tipo:=54;
-  form1.snowbros1.Checked:=true;
+  principal1.snowbros1.Checked:=true;
 end;
-if sender=form1.Toki1 then begin
+if sender=principal1.Toki1 then begin
   tipo:=55;
-  form1.toki1.Checked:=true;
+  principal1.toki1.Checked:=true;
 end;
-if sender=form1.Contra1 then begin
+if sender=principal1.Contra1 then begin
   tipo:=56;
-  form1.contra1.Checked:=true;
+  principal1.contra1.Checked:=true;
 end;
-if sender=form1.Mappy1 then begin
+if sender=principal1.Mappy1 then begin
   tipo:=57;
-  form1.mappy1.Checked:=true;
+  principal1.mappy1.Checked:=true;
 end;
-if sender=form1.Rastan1 then begin
+if sender=principal1.Rastan1 then begin
   tipo:=58;
-  form1.rastan1.Checked:=true;
+  principal1.rastan1.Checked:=true;
 end;
-if sender=form1.Legendw1 then begin
+if sender=principal1.Legendw1 then begin
   tipo:=59;
-  form1.legendw1.Checked:=true;
+  principal1.legendw1.Checked:=true;
 end;
-if sender=form1.SectionZ1 then begin
+if sender=principal1.SectionZ1 then begin
   tipo:=60;
-  form1.sectionz1.Checked:=true;
+  principal1.sectionz1.Checked:=true;
 end;
-if sender=form1.Trojan1 then begin
+if sender=principal1.Trojan1 then begin
   tipo:=61;
-  form1.trojan1.Checked:=true;
+  principal1.trojan1.Checked:=true;
 end;
-if sender=form1.SF1 then begin
+if sender=principal1.SF1 then begin
   tipo:=62;
-  form1.sf1.Checked:=true;
+  principal1.sf1.Checked:=true;
 end;
-if sender=form1.digdug21 then begin
+if sender=principal1.digdug21 then begin
   tipo:=63;
-  form1.digdug21.Checked:=true;
+  principal1.digdug21.Checked:=true;
 end;
-if sender=form1.spacman1 then begin
+if sender=principal1.spacman1 then begin
   tipo:=64;
-  form1.SPacman1.Checked:=true;
+  principal1.SPacman1.Checked:=true;
 end;
-if sender=form1.galaga1 then begin
+if sender=principal1.galaga1 then begin
   tipo:=65;
-  form1.galaga1.Checked:=true;
+  principal1.galaga1.Checked:=true;
 end;
-if sender=form1.xain1 then begin
+if sender=principal1.xain1 then begin
   tipo:=66;
-  form1.xain1.Checked:=true;
+  principal1.xain1.Checked:=true;
 end;
-if sender=form1.hardhead1 then begin
+if sender=principal1.hardhead1 then begin
   tipo:=67;
-  form1.hardhead1.Checked:=true;
+  principal1.hardhead1.Checked:=true;
 end;
-if sender=form1.hardhead21 then begin
+if sender=principal1.hardhead21 then begin
   tipo:=68;
-  form1.hardhead21.Checked:=true;
+  principal1.hardhead21.Checked:=true;
 end;
-if sender=form1.sbombers1 then begin
+if sender=principal1.sbombers1 then begin
   tipo:=69;
-  form1.sbombers1.Checked:=true;
+  principal1.sbombers1.Checked:=true;
 end;
-if sender=form1.NewRallyX1 then begin
+if sender=principal1.NewRallyX1 then begin
   tipo:=70;
-  form1.newrallyx1.Checked:=true;
+  principal1.newrallyx1.Checked:=true;
 end;
-if sender=form1.bjtwin1 then begin
+if sender=principal1.bjtwin1 then begin
   tipo:=71;
-  form1.bjtwin1.Checked:=true;
+  principal1.bjtwin1.Checked:=true;
 end;
-if sender=form1.spelunker1 then begin
+if sender=principal1.spelunker1 then begin
   tipo:=72;
-  form1.Spelunker1.Checked:=true;
+  principal1.Spelunker1.Checked:=true;
 end;
-if sender=form1.spelunker21 then begin
+if sender=principal1.spelunker21 then begin
   tipo:=73;
-  form1.Spelunker21.Checked:=true;
+  principal1.Spelunker21.Checked:=true;
 end;
-if sender=form1.ldrun1 then begin
+if sender=principal1.ldrun1 then begin
   tipo:=74;
-  form1.ldrun1.Checked:=true;
+  principal1.ldrun1.Checked:=true;
 end;
-if sender=form1.ldrun21 then begin
+if sender=principal1.ldrun21 then begin
   tipo:=75;
-  form1.ldrun21.Checked:=true;
+  principal1.ldrun21.Checked:=true;
 end;
-if sender=form1.knjoe1 then begin
+if sender=principal1.knjoe1 then begin
   tipo:=76;
-  form1.knjoe1.Checked:=true;
+  principal1.knjoe1.Checked:=true;
 end;
-if sender=form1.wardner1 then begin
+if sender=principal1.wardner1 then begin
   tipo:=77;
-  form1.wardner1.Checked:=true;
+  principal1.wardner1.Checked:=true;
 end;
-if sender=form1.bigkarnak1 then begin
+if sender=principal1.bigkarnak1 then begin
   tipo:=78;
-  form1.bigkarnak1.Checked:=true;
+  principal1.bigkarnak1.Checked:=true;
 end;
-if sender=form1.exedexes1 then begin
+if sender=principal1.exedexes1 then begin
   tipo:=79;
-  form1.exedexes1.Checked:=true;
+  principal1.exedexes1.Checked:=true;
 end;
-if sender=form1.gunsmoke1 then begin
+if sender=principal1.gunsmoke1 then begin
   tipo:=80;
-  form1.gunsmoke1.Checked:=true;
+  principal1.gunsmoke1.Checked:=true;
 end;
-if sender=form1.n19421 then begin
+if sender=principal1.n19421 then begin
   tipo:=81;
-  form1.n19421.Checked:=true;
+  principal1.n19421.Checked:=true;
 end;
-if sender=form1.n19431 then begin
+if sender=principal1.n19431 then begin
   tipo:=82;
-  form1.n19431.Checked:=true;
+  principal1.n19431.Checked:=true;
 end;
-if sender=form1.n1943kai1 then begin
+if sender=principal1.n1943kai1 then begin
   tipo:=83;
-  form1.n1943kai1.Checked:=true;
+  principal1.n1943kai1.Checked:=true;
 end;
-if sender=form1.jailbreak1 then begin
+if sender=principal1.jailbreak1 then begin
   tipo:=84;
-  form1.jailbreak1.Checked:=true;
+  principal1.jailbreak1.Checked:=true;
 end;
-if sender=form1.circusc1 then begin
+if sender=principal1.circusc1 then begin
   tipo:=85;
-  form1.circusc1.Checked:=true;
+  principal1.circusc1.Checked:=true;
 end;
-if sender=form1.ironhorse1 then begin
+if sender=principal1.ironhorse1 then begin
   tipo:=86;
-  form1.ironhorse1.Checked:=true;
+  principal1.ironhorse1.Checked:=true;
 end;
-if sender=form1.rtype1 then begin
+if sender=principal1.rtype1 then begin
   tipo:=87;
-  form1.rtype1.Checked:=true;
+  principal1.rtype1.Checked:=true;
 end;
-if sender=form1.mspacman1 then begin
+if sender=principal1.mspacman1 then begin
   tipo:=88;
-  form1.mspacman1.Checked:=true;
+  principal1.mspacman1.Checked:=true;
 end;
-if sender=form1.brkthru1 then begin
+if sender=principal1.brkthru1 then begin
   tipo:=89;
-  form1.brkthru1.Checked:=true;
+  principal1.brkthru1.Checked:=true;
 end;
-if sender=form1.darwin1 then begin
+if sender=principal1.darwin1 then begin
   tipo:=90;
-  form1.darwin1.Checked:=true;
+  principal1.darwin1.Checked:=true;
 end;
-if sender=form1.srd1 then begin
+if sender=principal1.srd1 then begin
   tipo:=91;
-  form1.srd1.Checked:=true;
+  principal1.srd1.Checked:=true;
 end;
-if sender=form1.ddragon1 then begin
+if sender=principal1.ddragon1 then begin
   tipo:=92;
-  form1.ddragon1.Checked:=true;
+  principal1.ddragon1.Checked:=true;
 end;
-if sender=form1.mrdo1 then begin
+if sender=principal1.mrdo1 then begin
   tipo:=93;
-  form1.mrdo1.Checked:=true;
+  principal1.mrdo1.Checked:=true;
 end;
-if sender=form1.theglob1 then begin
+if sender=principal1.theglob1 then begin
   tipo:=94;
-  form1.theglob1.Checked:=true;
+  principal1.theglob1.Checked:=true;
 end;
-if sender=form1.superglob1 then begin
+if sender=principal1.superglob1 then begin
   tipo:=95;
-  form1.superglob1.Checked:=true;
+  principal1.superglob1.Checked:=true;
 end;
-if sender=form1.ddragon21 then begin
+if sender=principal1.ddragon21 then begin
   tipo:=96;
-  form1.ddragon21.Checked:=true;
+  principal1.ddragon21.Checked:=true;
 end;
-if sender=form1.silkworm1 then begin
+if sender=principal1.silkworm1 then begin
   tipo:=97;
-  form1.silkworm1.Checked:=true;
+  principal1.silkworm1.Checked:=true;
 end;
-if sender=form1.tigerh1 then begin
+if sender=principal1.tigerh1 then begin
   tipo:=98;
-  form1.tigerh1.Checked:=true;
+  principal1.tigerh1.Checked:=true;
 end;
-if sender=form1.SlapFight1 then begin
+if sender=principal1.SlapFight1 then begin
   tipo:=99;
-  form1.slapfight1.Checked:=true;
+  principal1.slapfight1.Checked:=true;
 end;
-if sender=form1.LegendofKage1 then begin
+if sender=principal1.LegendofKage1 then begin
   tipo:=100;
-  form1.legendofkage1.Checked:=true;
+  principal1.legendofkage1.Checked:=true;
 end;
-if sender=form1.thoop1 then begin
+if sender=principal1.thoop1 then begin
   tipo:=101;
-  form1.thoop1.Checked:=true;
+  principal1.thoop1.Checked:=true;
 end;
-if sender=form1.cabal1 then begin
+if sender=principal1.cabal1 then begin
   tipo:=102;
-  form1.cabal1.Checked:=true;
+  principal1.cabal1.Checked:=true;
 end;
-if sender=form1.ghouls1 then begin
+if sender=principal1.ghouls1 then begin
   tipo:=103;
-  form1.ghouls1.Checked:=true;
+  principal1.ghouls1.Checked:=true;
 end;
-if sender=form1.ffight1 then begin
+if sender=principal1.ffight1 then begin
   tipo:=104;
-  form1.ffight1.Checked:=true;
+  principal1.ffight1.Checked:=true;
 end;
-if sender=form1.kod1 then begin
+if sender=principal1.kod1 then begin
   tipo:=105;
-  form1.kod1.Checked:=true;
+  principal1.kod1.Checked:=true;
 end;
-if sender=form1.sf21 then begin
+if sender=principal1.sf21 then begin
   tipo:=106;
-  form1.sf21.Checked:=true;
+  principal1.sf21.Checked:=true;
 end;
-if sender=form1.strider1 then begin
+if sender=principal1.strider1 then begin
   tipo:=107;
-  form1.strider1.Checked:=true;
+  principal1.strider1.Checked:=true;
 end;
-if sender=form1.wonder31 then begin
+if sender=principal1.wonder31 then begin
   tipo:=108;
-  form1.wonder31.Checked:=true;
+  principal1.wonder31.Checked:=true;
 end;
-if sender=form1.ccommando1 then begin
+if sender=principal1.ccommando1 then begin
   tipo:=109;
-  form1.ccommando1.Checked:=true;
+  principal1.ccommando1.Checked:=true;
 end;
-if sender=form1.knights1 then begin
+if sender=principal1.knights1 then begin
   tipo:=110;
-  form1.knights1.Checked:=true;
+  principal1.knights1.Checked:=true;
 end;
-if sender=form1.sf2ce1 then begin
+if sender=principal1.sf2ce1 then begin
   tipo:=111;
-  form1.sf2ce1.Checked:=true;
+  principal1.sf2ce1.Checked:=true;
 end;
-if sender=form1.dino1 then begin
+if sender=principal1.dino1 then begin
   tipo:=112;
-  form1.dino1.Checked:=true;
+  principal1.dino1.Checked:=true;
 end;
-if sender=form1.punisher1 then begin
+if sender=principal1.punisher1 then begin
   tipo:=113;
-  form1.punisher1.Checked:=true;
+  principal1.punisher1.Checked:=true;
 end;
-if sender=form1.shinobi1 then begin
+if sender=principal1.shinobi1 then begin
   tipo:=114;
-  form1.shinobi1.Checked:=true;
+  principal1.shinobi1.Checked:=true;
 end;
-if sender=form1.alexkid1 then begin
+if sender=principal1.alexkid1 then begin
   tipo:=115;
-  form1.alexkid1.Checked:=true;
+  principal1.alexkid1.Checked:=true;
 end;
-if sender=form1.fantasyzone1 then begin
+if sender=principal1.fantasyzone1 then begin
   tipo:=116;
-  form1.fantasyzone1.Checked:=true;
+  principal1.fantasyzone1.Checked:=true;
 end;
-if sender=form1.tp841 then begin
+if sender=principal1.tp841 then begin
   tipo:=117;
-  form1.tp841.Checked:=true;
+  principal1.tp841.Checked:=true;
 end;
-if sender=form1.Tutankhm1 then begin
+if sender=principal1.Tutankhm1 then begin
   tipo:=118;
-  form1.tutankhm1.Checked:=true;
+  principal1.tutankhm1.Checked:=true;
 end;
-if sender=form1.Pang1 then begin
+if sender=principal1.Pang1 then begin
   tipo:=119;
-  form1.pang1.Checked:=true;
+  principal1.pang1.Checked:=true;
 end;
-if sender=form1.ninjakid21 then begin
+if sender=principal1.ninjakid21 then begin
   tipo:=120;
-  form1.ninjakid21.Checked:=true;
+  principal1.ninjakid21.Checked:=true;
 end;
-if sender=form1.arkarea1 then begin
+if sender=principal1.arkarea1 then begin
   tipo:=121;
-  form1.arkarea1.Checked:=true;
+  principal1.arkarea1.Checked:=true;
 end;
-if sender=form1.mnight1 then begin
+if sender=principal1.mnight1 then begin
   tipo:=122;
-  form1.mnight1.Checked:=true;
+  principal1.mnight1.Checked:=true;
 end;
-if sender=form1.skykid1 then begin
+if sender=principal1.skykid1 then begin
   tipo:=123;
-  form1.skykid1.Checked:=true;
+  principal1.skykid1.Checked:=true;
 end;
-if sender=form1.rthunder1 then begin
+if sender=principal1.rthunder1 then begin
   tipo:=124;
-  form1.rthunder1.Checked:=true;
+  principal1.rthunder1.Checked:=true;
 end;
-if sender=form1.hopmappy1 then begin
+if sender=principal1.hopmappy1 then begin
   tipo:=125;
-  form1.hopmappy1.Checked:=true;
+  principal1.hopmappy1.Checked:=true;
 end;
-if sender=form1.skykiddx1 then begin
+if sender=principal1.skykiddx1 then begin
   tipo:=126;
-  form1.skykiddx1.Checked:=true;
+  principal1.skykiddx1.Checked:=true;
 end;
-if sender=form1.rocnrope1 then begin
+if sender=principal1.rocnrope1 then begin
   tipo:=127;
-  form1.rocnrope1.Checked:=true;
+  principal1.rocnrope1.Checked:=true;
 end;
-if sender=form1.repulse1 then begin
+if sender=principal1.repulse1 then begin
   tipo:=128;
-  form1.repulse1.Checked:=true;
+  principal1.repulse1.Checked:=true;
 end;
-if sender=form1.tnzs1 then begin
+if sender=principal1.tnzs1 then begin
   tipo:=129;
-  form1.tnzs1.Checked:=true;
+  principal1.tnzs1.Checked:=true;
 end;
-if sender=form1.insectorx1 then begin
+if sender=principal1.insectorx1 then begin
   tipo:=130;
-  form1.insectorx1.Checked:=true;
+  principal1.insectorx1.Checked:=true;
 end;
-if sender=form1.pacland1 then begin
+if sender=principal1.pacland1 then begin
   tipo:=131;
-  form1.pacland1.Checked:=true;
+  principal1.pacland1.Checked:=true;
 end;
-if sender=form1.mariob1 then begin
+if sender=principal1.mariob1 then begin
   tipo:=132;
-  form1.mariob1.Checked:=true;
+  principal1.mariob1.Checked:=true;
 end;
-if sender=form1.solomon1 then begin
+if sender=principal1.solomon1 then begin
   tipo:=133;
-  form1.solomon1.Checked:=true;
+  principal1.solomon1.Checked:=true;
 end;
-if sender=form1.combatsc1 then begin
+if sender=principal1.combatsc1 then begin
   tipo:=134;
-  form1.combatsc1.Checked:=true;
+  principal1.combatsc1.Checked:=true;
 end;
-if sender=form1.hvyunit1 then begin
+if sender=principal1.hvyunit1 then begin
   tipo:=135;
-  form1.hvyunit1.Checked:=true;
+  principal1.hvyunit1.Checked:=true;
 end;
-if sender=form1.pow1 then begin
+if sender=principal1.pow1 then begin
   tipo:=136;
-  form1.pow1.Checked:=true;
+  principal1.pow1.Checked:=true;
 end;
-if sender=form1.streetsm1 then begin
+if sender=principal1.streetsm1 then begin
   tipo:=137;
-  form1.streetsm1.Checked:=true;
+  principal1.streetsm1.Checked:=true;
 end;
-if sender=form1.p471 then begin
+if sender=principal1.p471 then begin
   tipo:=138;
-  form1.p471.Checked:=true;
+  principal1.p471.Checked:=true;
 end;
-if sender=form1.rodland1 then begin
+if sender=principal1.rodland1 then begin
   tipo:=139;
-  form1.rodland1.Checked:=true;
+  principal1.rodland1.Checked:=true;
 end;
-if sender=form1.saintdragon1 then begin
+if sender=principal1.saintdragon1 then begin
   tipo:=140;
-  form1.saintdragon1.Checked:=true;
+  principal1.saintdragon1.Checked:=true;
 end;
-if sender=form1.timepilot1 then begin
+if sender=principal1.timepilot1 then begin
   tipo:=141;
-  form1.timepilot1.Checked:=true;
+  principal1.timepilot1.Checked:=true;
 end;
-if sender=form1.pengo1 then begin
+if sender=principal1.pengo1 then begin
   tipo:=142;
-  form1.pengo1.Checked:=true;
+  principal1.pengo1.Checked:=true;
 end;
-if sender=form1.scramble1 then begin
+if sender=principal1.scramble1 then begin
   tipo:=143;
-  form1.scramble1.Checked:=true;
+  principal1.scramble1.Checked:=true;
 end;
-if sender=form1.scobra1 then begin
+if sender=principal1.scobra1 then begin
   tipo:=144;
-  form1.scobra1.Checked:=true;
+  principal1.scobra1.Checked:=true;
 end;
-if sender=form1.amidar1 then begin
+if sender=principal1.amidar1 then begin
   tipo:=145;
-  form1.amidar1.Checked:=true;
+  principal1.amidar1.Checked:=true;
 end;
-if sender=form1.twincobr1 then begin
+if sender=principal1.twincobr1 then begin
   tipo:=146;
-  form1.twincobr1.Checked:=true;
+  principal1.twincobr1.Checked:=true;
 end;
-if sender=form1.FlyingShark1 then begin
+if sender=principal1.FlyingShark1 then begin
   tipo:=147;
-  form1.flyingshark1.Checked:=true;
+  principal1.flyingshark1.Checked:=true;
 end;
-if sender=form1.JrPacman1 then begin
+if sender=principal1.JrPacman1 then begin
   tipo:=148;
-  form1.jrpacman1.Checked:=true;
+  principal1.jrpacman1.Checked:=true;
 end;
-if sender=form1.ikari31 then begin
+if sender=principal1.ikari31 then begin
   tipo:=149;
-  form1.ikari31.Checked:=true;
+  principal1.ikari31.Checked:=true;
 end;
-if sender=form1.searchar1 then begin
+if sender=principal1.searchar1 then begin
   tipo:=150;
-  form1.searchar1.Checked:=true;
+  principal1.searchar1.Checked:=true;
 end;
-if sender=form1.Choplifter1 then begin
+if sender=principal1.Choplifter1 then begin
   tipo:=151;
-  form1.Choplifter1.Checked:=true;
+  principal1.Choplifter1.Checked:=true;
 end;
-if sender=form1.mrviking1 then begin
+if sender=principal1.mrviking1 then begin
   tipo:=152;
-  form1.mrviking1.Checked:=true;
+  principal1.mrviking1.Checked:=true;
 end;
-if sender=form1.SegaNinja1 then begin
+if sender=principal1.SegaNinja1 then begin
   tipo:=153;
-  form1.seganinja1.Checked:=true;
+  principal1.seganinja1.Checked:=true;
 end;
-if sender=form1.UpnDown1 then begin
+if sender=principal1.UpnDown1 then begin
   tipo:=154;
-  form1.upndown1.Checked:=true;
+  principal1.upndown1.Checked:=true;
 end;
-if sender=form1.flicky1 then begin
+if sender=principal1.flicky1 then begin
   tipo:=155;
-  form1.flicky1.Checked:=true;
+  principal1.flicky1.Checked:=true;
 end;
-if sender=form1.robocop1 then begin
+if sender=principal1.robocop1 then begin
   tipo:=156;
-  form1.robocop1.Checked:=true;
+  principal1.robocop1.Checked:=true;
 end;
-if sender=form1.baddudes1 then begin
+if sender=principal1.baddudes1 then begin
   tipo:=157;
-  form1.baddudes1.Checked:=true;
+  principal1.baddudes1.Checked:=true;
 end;
-if sender=form1.hippo1 then begin
+if sender=principal1.hippo1 then begin
   tipo:=158;
-  form1.hippo1.Checked:=true;
+  principal1.hippo1.Checked:=true;
 end;
-if sender=form1.TumbleP1 then begin
+if sender=principal1.TumbleP1 then begin
   tipo:=159;
-  form1.tumblep1.Checked:=true;
+  principal1.tumblep1.Checked:=true;
 end;
-if sender=form1.funkyjet1 then begin
+if sender=principal1.funkyjet1 then begin
   tipo:=160;
-  form1.funkyjet1.Checked:=true;
+  principal1.funkyjet1.Checked:=true;
 end;
-if sender=form1.SuperBurgerTime1 then begin
+if sender=principal1.SuperBurgerTime1 then begin
   tipo:=161;
-  form1.superburgertime1.Checked:=true;
+  principal1.superburgertime1.Checked:=true;
 end;
-if sender=form1.cninja1 then begin
+if sender=principal1.cninja1 then begin
   tipo:=162;
-  form1.cninja1.Checked:=true;
+  principal1.cninja1.Checked:=true;
 end;
-if sender=form1.robocop21 then begin
+if sender=principal1.robocop21 then begin
   tipo:=163;
-  form1.robocop21.Checked:=true;
+  principal1.robocop21.Checked:=true;
 end;
-if sender=form1.dietgo1 then begin
+if sender=principal1.dietgo1 then begin
   tipo:=164;
-  form1.dietgo1.Checked:=true;
+  principal1.dietgo1.Checked:=true;
 end;
-if sender=form1.actfancer1 then begin
+if sender=principal1.actfancer1 then begin
   tipo:=165;
-  form1.ActFancer1.Checked:=true;
+  principal1.ActFancer1.Checked:=true;
 end;
-if sender=form1.arabian1 then begin
+if sender=principal1.arabian1 then begin
   tipo:=166;
-  form1.arabian1.Checked:=true;
+  principal1.arabian1.Checked:=true;
 end;
-if sender=form1.digdug1 then begin
+if sender=principal1.digdug1 then begin
   tipo:=167;
-  form1.digdug1.Checked:=true;
+  principal1.digdug1.Checked:=true;
 end;
-if sender=form1.dkongjr1 then begin
+if sender=principal1.dkongjr1 then begin
   tipo:=168;
-  form1.dkongjr1.Checked:=true;
+  principal1.dkongjr1.Checked:=true;
 end;
-if sender=form1.dkong31 then begin
+if sender=principal1.dkong31 then begin
   tipo:=169;
-  form1.dkong31.Checked:=true;
+  principal1.dkong31.Checked:=true;
 end;
-if sender=form1.higemaru1 then begin
+if sender=principal1.higemaru1 then begin
   tipo:=170;
-  form1.higemaru1.Checked:=true;
+  principal1.higemaru1.Checked:=true;
 end;
-if sender=form1.bagman1 then begin
+if sender=principal1.bagman1 then begin
   tipo:=171;
-  form1.bagman1.Checked:=true;
+  principal1.bagman1.Checked:=true;
 end;
-if sender=form1.sbagman1 then begin
+if sender=principal1.sbagman1 then begin
   tipo:=172;
-  form1.sbagman1.Checked:=true;
+  principal1.sbagman1.Checked:=true;
 end;
-if sender=form1.squash1 then begin
+if sender=principal1.squash1 then begin
   tipo:=173;
-  form1.squash1.Checked:=true;
+  principal1.squash1.Checked:=true;
 end;
-if sender=form1.biomtoy1 then begin
+if sender=principal1.biomtoy1 then begin
   tipo:=174;
-  form1.biomtoy1.Checked:=true;
+  principal1.biomtoy1.Checked:=true;
 end;
-if sender=form1.congo1 then begin
+if sender=principal1.congo1 then begin
   tipo:=175;
-  form1.congo1.Checked:=true;
+  principal1.congo1.Checked:=true;
 end;
-if sender=form1.kangaroo1 then begin
+if sender=principal1.kangaroo1 then begin
   tipo:=176;
-  form1.kangaroo1.Checked:=true;
+  principal1.kangaroo1.Checked:=true;
 end;
-if sender=form1.bionicc1 then begin
+if sender=principal1.bionicc1 then begin
   tipo:=177;
-  form1.bionicc1.Checked:=true;
+  principal1.bionicc1.Checked:=true;
 end;
-if sender=form1.wwfsuperstar1 then begin
+if sender=principal1.wwfsuperstar1 then begin
   tipo:=178;
-  form1.wwfsuperstar1.Checked:=true;
+  principal1.wwfsuperstar1.Checked:=true;
 end;
-if sender=form1.rbisland1 then begin
+if sender=principal1.rbisland1 then begin
   tipo:=179;
-  form1.rbisland1.Checked:=true;
+  principal1.rbisland1.Checked:=true;
 end;
-if sender=form1.rbislande1 then begin
+if sender=principal1.rbislande1 then begin
   tipo:=180;
-  form1.rbislande1.Checked:=true;
+  principal1.rbislande1.Checked:=true;
 end;
-if sender=form1.volfied1 then begin
+if sender=principal1.volfied1 then begin
   tipo:=181;
-  form1.volfied1.Checked:=true;
+  principal1.volfied1.Checked:=true;
 end;
-if sender=form1.opwolf1 then begin
+if sender=principal1.opwolf1 then begin
   tipo:=182;
-  form1.opwolf1.Checked:=true;
+  principal1.opwolf1.Checked:=true;
 end;
-if sender=form1.sPang1 then begin
+if sender=principal1.sPang1 then begin
   tipo:=183;
-  form1.spang1.Checked:=true;
+  principal1.spang1.Checked:=true;
 end;
-if sender=form1.outrun1 then begin
+if sender=principal1.outrun1 then begin
   tipo:=184;
-  form1.outrun1.Checked:=true;
+  principal1.outrun1.Checked:=true;
 end;
-if sender=form1.elevator1 then begin
+if sender=principal1.elevator1 then begin
   tipo:=185;
-  form1.elevator1.Checked:=true;
+  principal1.elevator1.Checked:=true;
 end;
-if sender=form1.aliensyn1 then begin
+if sender=principal1.aliensyn1 then begin
   tipo:=186;
-  form1.aliensyn1.Checked:=true;
+  principal1.aliensyn1.Checked:=true;
 end;
-if sender=form1.wb31 then begin
+if sender=principal1.wb31 then begin
   tipo:=187;
-  form1.wb31.Checked:=true;
+  principal1.wb31.Checked:=true;
 end;
-if sender=form1.zaxxon1 then begin
+if sender=principal1.zaxxon1 then begin
   tipo:=188;
-  form1.zaxxon1.Checked:=true;
+  principal1.zaxxon1.Checked:=true;
 end;
-if sender=form1.jungleking1 then begin
+if sender=principal1.jungleking1 then begin
   tipo:=189;
-  form1.jungleking1.Checked:=true;
+  principal1.jungleking1.Checked:=true;
 end;
-if sender=form1.hharry1 then begin
+if sender=principal1.hharry1 then begin
   tipo:=190;
-  form1.hharry1.Checked:=true;
+  principal1.hharry1.Checked:=true;
 end;
-if sender=form1.rtype21 then begin
+if sender=principal1.rtype21 then begin
   tipo:=191;
-  form1.rtype21.Checked:=true;
+  principal1.rtype21.Checked:=true;
 end;
-if sender=form1.todruaga1 then begin
+if sender=principal1.todruaga1 then begin
   tipo:=192;
-  form1.todruaga1.Checked:=true;
+  principal1.todruaga1.Checked:=true;
 end;
-if sender=form1.motos1 then begin
+if sender=principal1.motos1 then begin
   tipo:=193;
-  form1.motos1.Checked:=true;
+  principal1.motos1.Checked:=true;
 end;
-if sender=form1.drgnbstr1 then begin
+if sender=principal1.drgnbstr1 then begin
   tipo:=194;
-  form1.drgnbstr1.Checked:=true;
+  principal1.drgnbstr1.Checked:=true;
 end;
-if sender=form1.vulgus1 then begin
+if sender=principal1.vulgus1 then begin
   tipo:=195;
-  form1.vulgus1.Checked:=true;
+  principal1.vulgus1.Checked:=true;
 end;
-if sender=form1.ddragon31 then begin
+if sender=principal1.ddragon31 then begin
   tipo:=196;
-  form1.ddragon31.Checked:=true;
+  principal1.ddragon31.Checked:=true;
 end;
-if sender=form1.blockout1 then begin
+if sender=principal1.blockout1 then begin
   tipo:=197;
-  form1.blockout1.Checked:=true;
+  principal1.blockout1.Checked:=true;
 end;
-if sender=form1.tetris1 then begin
+if sender=principal1.tetris1 then begin
   tipo:=198;
-  form1.tetris1.Checked:=true;
+  principal1.tetris1.Checked:=true;
 end;
-if sender=form1.foodf1 then begin
+if sender=principal1.foodf1 then begin
   tipo:=199;
-  form1.foodf1.Checked:=true;
+  principal1.foodf1.Checked:=true;
 end;
-if sender=form1.snapjack1 then begin
+if sender=principal1.snapjack1 then begin
   tipo:=200;
-  form1.snapjack1.Checked:=true;
+  principal1.snapjack1.Checked:=true;
 end;
-if sender=form1.cavenger1 then begin
+if sender=principal1.cavenger1 then begin
   tipo:=201;
-  form1.cavenger1.Checked:=true;
+  principal1.cavenger1.Checked:=true;
 end;
-if sender=form1.pleiads1 then begin
+if sender=principal1.pleiads1 then begin
   tipo:=202;
-  form1.pleiads1.Checked:=true;
+  principal1.pleiads1.Checked:=true;
 end;
-if sender=form1.mrgoemon1 then begin
+if sender=principal1.mrgoemon1 then begin
   tipo:=203;
-  form1.mrgoemon1.Checked:=true;
+  principal1.mrgoemon1.Checked:=true;
 end;
-if sender=form1.nemesis1 then begin
+if sender=principal1.nemesis1 then begin
   tipo:=204;
-  form1.nemesis1.Checked:=true;
+  principal1.nemesis1.Checked:=true;
 end;
-if sender=form1.twinbee1 then begin
+if sender=principal1.twinbee1 then begin
   tipo:=205;
-  form1.twinbee1.Checked:=true;
+  principal1.twinbee1.Checked:=true;
 end;
-if sender=form1.pirates1 then begin
+if sender=principal1.pirates1 then begin
   tipo:=206;
-  form1.pirates1.Checked:=true;
+  principal1.pirates1.Checked:=true;
 end;
-if sender=form1.genixfamily1 then begin
+if sender=principal1.genixfamily1 then begin
   tipo:=207;
-  form1.genixfamily1.Checked:=true;
+  principal1.genixfamily1.Checked:=true;
 end;
-if sender=form1.junofirst1 then begin
+if sender=principal1.junofirst1 then begin
   tipo:=208;
-  form1.junofirst1.Checked:=true;
+  principal1.junofirst1.Checked:=true;
 end;
 //consolas
-if sender=form1.NES1 then begin
+if sender=principal1.NES1 then begin
   tipo:=1000;
-  form1.NES1.Checked:=true;
+  principal1.NES1.Checked:=true;
 end;
-if sender=form1.colecovision1 then begin
+if sender=principal1.colecovision1 then begin
   tipo:=1001;
-  form1.colecovision1.Checked:=true;
+  principal1.colecovision1.Checked:=true;
 end;
-if sender=form1.gameboy1 then begin
+if sender=principal1.gameboy1 then begin
   tipo:=1002;
-  form1.GameBoy1.Checked:=true;
+  principal1.GameBoy1.Checked:=true;
 end;
-if sender=form1.chip81 then begin
+if sender=principal1.chip81 then begin
   tipo:=1003;
-  form1.CHIP81.Checked:=true;
+  principal1.CHIP81.Checked:=true;
 end;
 //Buscar el nombre de la maquina
 for f:=1 to games_cont do begin

@@ -588,8 +588,8 @@ if (event.mouse and (mouse.tipo<>0)) then begin
 end;
 if event.keyboard then begin
   if ((keyboard[SDL_SCANCODE_F1]) and cinta_tzx.cargada) then begin
-    if cinta_tzx.play_tape then Form5.fStopCinta(nil)
-      else Form5.fPlayCinta(nil);
+    if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
+      else tape_window1.fPlayCinta(nil);
   end;
   if ((keyboard[SDL_SCANCODE_F5]) and (main_vars.tipo_maquina=2)) then begin
     clear_disk(0);
@@ -692,27 +692,27 @@ if borde.tipo=2 then begin
   end;
 end else borde.borde_spectrum:=borde_normal;
 //Lateral
-form1.Panel2.Visible:=true;
+principal1.Panel2.Visible:=true;
 //Botones Lateral
-form1.BitBtn9.visible:=true;
-form1.BitBtn10.visible:=true;
-form1.BitBtn11.visible:=true;
-form1.BitBtn12.visible:=true;
-form1.BitBtn14.visible:=true;
-form1.BitBtn10.Glyph:=nil;
-form1.ImageList2.GetBitmap(3,form1.BitBtn10.Glyph);
-form1.BitBtn9.enabled:=true;
-if (main_vars.tipo_maquina=2) then form1.BitBtn10.enabled:=true;
-form1.BitBtn11.enabled:=true;
-form1.BitBtn12.enabled:=true;
-form1.BitBtn14.enabled:=true;
+principal1.BitBtn9.visible:=true;
+principal1.BitBtn10.visible:=true;
+principal1.BitBtn11.visible:=true;
+principal1.BitBtn12.visible:=true;
+principal1.BitBtn14.visible:=true;
+principal1.BitBtn10.Glyph:=nil;
+principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
+principal1.BitBtn9.enabled:=true;
+if (main_vars.tipo_maquina=2) then principal1.BitBtn10.enabled:=true;
+principal1.BitBtn11.enabled:=true;
+principal1.BitBtn12.enabled:=true;
+principal1.BitBtn14.enabled:=true;
 //Tape Stop and Fastload enabled
 fastload:=true;
-form1.BitBtn14.Glyph:=nil;
-form1.imagelist2.GetBitmap(0,form1.BitBtn14.Glyph);
+principal1.BitBtn14.Glyph:=nil;
+principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
 cinta_tzx.play_tape:=false;
-form5.BitBtn1.Enabled:=true;
-form5.BitBtn2.Enabled:=false;
+tape_window1.BitBtn1.Enabled:=true;
+tape_window1.BitBtn2.Enabled:=false;
 main_vars.mensaje_general:='';
 main_vars.frames_sec:=0;
 screen_init(1,352,288);
@@ -739,7 +739,7 @@ if mouse.tipo<>0 then sdl_showcursor(1)
   else sdl_showcursor(0);
 ear_channel:=init_channel; //iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
 spec_comun:=true;
-if cinta_tzx.cargada then form5.Show;
+if cinta_tzx.cargada then tape_window1.Show;
 end;
 
 procedure reset_misc;
@@ -813,8 +813,8 @@ end;
 
 function spectrum_tapes:boolean;
 begin
-form2.show;
-while form2.showing do application.HandleMessage;
+load_spec.show;
+while load_spec.showing do application.HandleMessage;
 spectrum_tapes:=true;
 end;
 
@@ -823,12 +823,12 @@ var
   nombre:string;
   correcto:boolean;
 begin
-form1.savedialog1.InitialDir:=Directory.spectrum_snap;
-if ((main_vars.tipo_maquina=2) or (main_vars.tipo_maquina=3)) then form1.saveDialog1.Filter := 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP'
-  else form1.saveDialog1.Filter := 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP|SNA Format (*.SNA)|*.SNA';
-if form1.savedialog1.execute then begin
-        nombre:=form1.savedialog1.FileName;
-        case form1.SaveDialog1.FilterIndex of
+principal1.savedialog1.InitialDir:=Directory.spectrum_snap;
+if ((main_vars.tipo_maquina=2) or (main_vars.tipo_maquina=3)) then principal1.saveDialog1.Filter := 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP'
+  else principal1.saveDialog1.Filter := 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP|SNA Format (*.SNA)|*.SNA';
+if principal1.savedialog1.execute then begin
+        nombre:=principal1.savedialog1.FileName;
+        case principal1.SaveDialog1.FilterIndex of
           1:nombre:=changefileext(nombre,'.szx');
           2:nombre:=changefileext(nombre,'.z80');
           3:nombre:=changefileext(nombre,'.dsp');
@@ -837,7 +837,7 @@ if form1.savedialog1.execute then begin
         if FileExists(nombre) then begin
             if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
         end;
-        case form1.SaveDialog1.FilterIndex of
+        case principal1.SaveDialog1.FilterIndex of
           1:correcto:=grabar_szx(nombre);
           2:correcto:=grabar_z80(nombre,false);
           3:correcto:=grabar_z80(nombre,true);
@@ -845,7 +845,7 @@ if form1.savedialog1.execute then begin
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end;
-Directory.spectrum_snap:=extractfiledir(form1.savedialog1.FileName)+main_vars.cadena_dir;
+Directory.spectrum_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
 end;
 
 procedure spectrum_despues_instruccion(estados_t:byte);
@@ -909,7 +909,7 @@ if cinta_tzx.cargada then begin
       if ((spec_z80_reg.pc=$0556) and not(cinta_tzx.play_once)) then begin
        cinta_tzx.play_once:=true;
        if not(cinta_tzx.es_tap) then main_screen.rapido:=true;
-       form5.fPlayCinta(nil);
+       tape_window1.fPlayCinta(nil);
       end;
     end;
 end;

@@ -1,4 +1,4 @@
-object Form8: TForm8
+object joy_calibration: Tjoy_calibration
   Left = 0
   Top = 0
   BorderIcons = []

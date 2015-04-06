@@ -18,8 +18,8 @@ uses sdl2,{$IFDEF WINDOWS}windows,{$else}LCLType,{$endif}
 
 type
 
-  { TForm1 }
-  TForm1 = class(TForm)
+  { Tprincipal1 }
+  Tprincipal1 = class(TForm)
     BitBtn10: TBitBtn;
     BitBtn11: TBitBtn;
     BitBtn12: TBitBtn;
@@ -394,7 +394,7 @@ type
 
 var
   //Main Vars
-  Form1: TForm1;
+  principal1: Tprincipal1;
   //Misc Vars
   tipo_new:word;
   //Status bitmap
@@ -403,16 +403,16 @@ var
 implementation
 uses acercade,tap_tzx,spectrum_misc,lenslock,file_engine;
 
-{ TForm1 }
+{ Tprincipal1 }
 {$ifdef windows}
 //Para evitar que cuando se pulsa ALT se vaya al menu añado esta funcion...
-procedure TForm1.WndProc(var Message : TMessage);
+procedure Tprincipal1.WndProc(var Message : TMessage);
 begin
 if ((Message.Msg=WM_SYSCOMMAND) and (Message.WParam=SC_KEYMENU)) then exit;
 inherited WndProc(Message);
 end;
 {$endif}
-procedure TForm1.fSaveGIF(Sender: TObject);
+procedure Tprincipal1.fSaveGIF(Sender: TObject);
 var
   r:integer;
   nombre:string;
@@ -442,7 +442,7 @@ if Savedialog1.execute then begin
     r:=application.messagebox(pansichar(leng[main_vars.idioma].mensajes[3]),pansichar(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
       {$ifdef windows}
-       if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+       if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
        {$else}
        cont_sincroniza:=sdl_getticks;
        valor_sync:=1000/llamadas_maquina.fps_max;
@@ -502,7 +502,7 @@ end;
 timer4.Enabled:=true;
 end;
 
-procedure TForm1.IdiomaClick(Sender: TObject);
+procedure Tprincipal1.IdiomaClick(Sender: TObject);
 var
   tmp_idioma:byte;
 begin
@@ -516,7 +516,7 @@ if main_vars.idioma<>tmp_idioma then begin
   cambiar_idioma(main_vars.idioma);
 end;
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
 cont_sincroniza:=sdl_getticks();
 valor_sync:=1000/llamadas_maquina.fps_max;
@@ -524,7 +524,7 @@ cont_micro:=valor_sync;
 {$endif}
 end;
 
-procedure TForm1.Timer1Timer(Sender: TObject);
+procedure Tprincipal1.Timer1Timer(Sender: TObject);
 var
   velocidad:integer;
 begin
@@ -535,7 +535,7 @@ statusbar1.panels[1].text:=leng[main_vars.idioma].mensajes[0]+': '+inttostr(velo
 main_vars.frames_sec:=0;
 end;
 
-procedure TForm1.CambiarMaquina(Sender:TObject);
+procedure Tprincipal1.CambiarMaquina(Sender:TObject);
 var
   tipo:word;
 begin
@@ -544,7 +544,7 @@ todos_false;
 tipo:=tipo_cambio_maquina(sender);
 if main_vars.tipo_maquina=tipo then begin
    {$ifdef windows}
-   if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+   if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
    {$else}
    cont_sincroniza:=sdl_getticks();
    valor_sync:=1000/llamadas_maquina.fps_max;
@@ -553,15 +553,15 @@ if main_vars.tipo_maquina=tipo then begin
    exit;
 end;
 if tipo>9 then begin
-  if form5.Showing then form5.close;
-  if form7.Showing then form7.close;
+  if tape_window1.Showing then tape_window1.close;
+  if lenslock1.Showing then lenslock1.close;
 end;
 if main_vars.driver_ok then EmuStatus:=EsPause;
 tipo_new:=tipo;
 timer3.Enabled:=true;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure Tprincipal1.FormCreate(Sender: TObject);
 var
   t:tcloseaction;
   {$ifdef darwin}cadena:string;f:word;count:byte;{$endif}
@@ -591,11 +591,11 @@ directory.Base:=copy(cadena,1,f);
 if not DirectoryExists(directory.Base+'preview'+main_vars.cadena_dir) then CreateDir(directory.Base+'preview');
 file_ini_load;
 main_vars.lenguaje_ok:=leer_idioma;
-form1.idiomaclick(nil);
-form1.timer2.Enabled:=true;
+principal1.idiomaclick(nil);
+principal1.timer2.Enabled:=true;
 end;
 
-procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure Tprincipal1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
@@ -611,7 +611,7 @@ close_sdl_lib;
 halt(0);
 end;
 
-procedure TForm1.CambiarVideo(Sender: TObject);
+procedure Tprincipal1.CambiarVideo(Sender: TObject);
 var
   nuevo:byte;
 begin
@@ -630,7 +630,7 @@ if main_vars.driver_ok then begin
   end;
 end;
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
 cont_sincroniza:=sdl_getticks();
 valor_sync:=1000/llamadas_maquina.fps_max;
@@ -638,7 +638,7 @@ cont_micro:=valor_sync;
 {$endif}
 end;
 
-procedure TForm1.Acercade1Click(Sender: TObject);
+procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
@@ -648,27 +648,27 @@ while aboutbox.Showing do application.ProcessMessages;
 timer4.Enabled:=true;
 end;
 
-procedure TForm1.BitBtn12Click(Sender: TObject);
+procedure Tprincipal1.BitBtn12Click(Sender: TObject);
 begin
 
 end;
 
-procedure TForm1.BitBtn14Click(Sender: TObject);
+procedure Tprincipal1.BitBtn14Click(Sender: TObject);
 begin
 fastload:=not(fastload);
 BitBtn14.Glyph:=nil;
-if fastload then form1.imagelist2.GetBitmap(0,form1.BitBtn14.Glyph)
-  else imagelist2.GetBitmap(1,form1.BitBtn14.Glyph);
+if fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
+  else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$endif}
 end;
 
-procedure TForm1.BitBtn8Click(Sender: TObject);
+procedure Tprincipal1.BitBtn8Click(Sender: TObject);
 begin
 if ((addr(llamadas_maquina.configurar)=nil) or ((main_vars.tipo_maquina>9) and (marcade.dswa_val=nil))) then begin
    {$ifdef windows}
-   if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+   if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
    {$else}
    cont_sincroniza:=sdl_getticks();
    valor_sync:=1000/llamadas_maquina.fps_max;
@@ -683,7 +683,7 @@ llamadas_maquina.configurar;
 timer4.Enabled:=true;
 end;
 
-procedure TForm1.fLoadCinta(Sender: TObject);
+procedure Tprincipal1.fLoadCinta(Sender: TObject);
 begin
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
@@ -693,7 +693,7 @@ if addr(llamadas_maquina.cintas)<>nil then
 timer4.Enabled:=true;
 end;
 
-procedure TForm1.fSaveSnapShot(Sender: TObject);
+procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
 begin
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
@@ -702,14 +702,14 @@ if addr(llamadas_maquina.grabar_snapshot)<>nil then llamadas_maquina.grabar_snap
 timer4.enabled:=true;
 end;
 
-procedure TForm1.Ejecutar1Click(Sender: TObject);
+procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
 EmuStatus:=EsRuning;
 timer1.Enabled:=true;
 BitBtn3.Enabled:=false;
 BitBtn4.Enabled:=true;
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
 cont_sincroniza:=sdl_getticks();
 valor_sync:=1000/llamadas_maquina.fps_max;
@@ -718,12 +718,12 @@ cont_micro:=valor_sync;
 if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
 end;
 
-procedure TForm1.fSlow(Sender: TObject);
+procedure Tprincipal1.fSlow(Sender: TObject);
 begin
 main_vars.vactual:=(main_vars.vactual+1) and 3;
 {$ifdef windows}
 valor_sync:=(1000000/(llamadas_maquina.fps_max/(main_vars.vactual+1)))*(cont_micro/1000000);
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
 valor_sync:=1000/(llamadas_maquina.fps_max/(main_vars.vactual+1));
 cont_micro:=valor_sync;
@@ -731,31 +731,31 @@ cont_sincroniza:=sdl_getticks();
 {$endif}
 end;
 
-procedure TForm1.fFast(Sender: TObject);
+procedure Tprincipal1.fFast(Sender: TObject);
 begin
 main_screen.rapido:=not(main_screen.rapido);
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$endif}
 end;
 
-procedure TForm1.Reset1Click(Sender: TObject);
+procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
 main_screen.flip_main_screen:=false;
 ulaplus.activa:=false;
 if addr(llamadas_maquina.reset)<>nil then llamadas_maquina.reset;
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$endif}
 end;
 
-procedure TForm1.CambiaAudio(Sender: TObject);
+procedure Tprincipal1.CambiaAudio(Sender: TObject);
 var
   tmp_audio:byte;
 begin
 if not(sound_status.hay_tsonido) then begin
    {$ifdef windows}
-   if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+   if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
    {$else}
    cont_sincroniza:=sdl_getticks();
    valor_sync:=1000/llamadas_maquina.fps_max;
@@ -782,7 +782,7 @@ if tmp_audio<>sound_status.calidad_audio then begin
   end;
 end;
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
 cont_sincroniza:=sdl_getticks();
 valor_sync:=1000/llamadas_maquina.fps_max;
@@ -790,7 +790,7 @@ cont_micro:=valor_sync;
 {$endif}
 end;
 
-procedure TForm1.fLoadCartucho(Sender: TObject);
+procedure Tprincipal1.fLoadCartucho(Sender: TObject);
 begin
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
@@ -800,7 +800,7 @@ if addr(llamadas_maquina.cartuchos)<>nil then
 timer4.Enabled:=true;
 end;
 
-procedure TForm1.LstRomsClick(Sender: TObject);
+procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
@@ -808,7 +808,7 @@ EmuStatus:=EsPause;
 FLoadRom.Show;
 while FLoadRom.Showing do application.ProcessMessages;
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
 cont_sincroniza:=sdl_getticks();
 valor_sync:=1000/llamadas_maquina.fps_max;
@@ -816,7 +816,7 @@ cont_micro:=valor_sync;
 {$endif}
 end;
 
-procedure TForm1.Pausa1Click(Sender: TObject);
+procedure Tprincipal1.Pausa1Click(Sender: TObject);
 begin
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
@@ -824,33 +824,33 @@ BitBtn3.Enabled:=true;
 BitBtn4.Enabled:=false;
 end;
 
-procedure TForm1.pleiads1Click(Sender: TObject);
+procedure Tprincipal1.pleiads1Click(Sender: TObject);
 begin
 
 end;
 
-procedure TForm1.Salir1Click(Sender: TObject);
+procedure Tprincipal1.Salir1Click(Sender: TObject);
 begin
 close;
 end;
 
-procedure TForm1.Timer2Timer(Sender: TObject);
+procedure Tprincipal1.Timer2Timer(Sender: TObject);
 var
   cadena:string;
   tipo:word;
 begin
 timer2.Enabled:=false;
-form1.Caption:=form1.Caption+dsp_version;
+principal1.Caption:=principal1.Caption+dsp_version;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=255;
 if not(main_vars.auto_exec) then begin
-  Form1.LstRomsClick(nil);
+  principal1.LstRomsClick(nil);
   exit;
 end;
 load_game(tipo);
 end;
 
-procedure TForm1.fConfigurar_general(Sender: TObject);
+procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
@@ -860,7 +860,7 @@ while MConfig.Showing do application.ProcessMessages;
 timer4.Enabled:=true;
 end;
 
-procedure TForm1.Timer3Timer(Sender: TObject);
+procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.enabled:=false;
 if @llamadas_maquina.cerrar<>nil then llamadas_maquina.cerrar;
@@ -875,45 +875,45 @@ if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.ini
   else main_vars.driver_ok:=false;
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
-  form1.timer1.Enabled:=false;
-  form1.BitBtn2.Enabled:=false;
-  form1.BitBtn3.Enabled:=false;
-  form1.BitBtn4.Enabled:=false;
-  form1.BitBtn5.Enabled:=false;
-  form1.BitBtn6.Enabled:=false;
-  form1.BitBtn8.Enabled:=false;
-  form1.BitBtn9.Enabled:=false;
-  form1.BitBtn10.Enabled:=false;
-  form1.BitBtn11.Enabled:=false;
-  form1.BitBtn12.Enabled:=false;
-  form1.BitBtn14.Enabled:=false;
-  form1.BitBtn19.Enabled:=false;
+  principal1.timer1.Enabled:=false;
+  principal1.BitBtn2.Enabled:=false;
+  principal1.BitBtn3.Enabled:=false;
+  principal1.BitBtn4.Enabled:=false;
+  principal1.BitBtn5.Enabled:=false;
+  principal1.BitBtn6.Enabled:=false;
+  principal1.BitBtn8.Enabled:=false;
+  principal1.BitBtn9.Enabled:=false;
+  principal1.BitBtn10.Enabled:=false;
+  principal1.BitBtn11.Enabled:=false;
+  principal1.BitBtn12.Enabled:=false;
+  principal1.BitBtn14.Enabled:=false;
+  principal1.BitBtn19.Enabled:=false;
 end else begin
-  form1.timer1.Enabled:=true;
-  form1.BitBtn2.Enabled:=true;
-  form1.BitBtn5.Enabled:=true;
-  form1.BitBtn6.Enabled:=true;
-  form1.BitBtn19.Enabled:=true;
-  form1.BitBtn8.Enabled:=true;
+  principal1.timer1.Enabled:=true;
+  principal1.BitBtn2.Enabled:=true;
+  principal1.BitBtn5.Enabled:=true;
+  principal1.BitBtn6.Enabled:=true;
+  principal1.BitBtn19.Enabled:=true;
+  principal1.BitBtn8.Enabled:=true;
   {$ifdef windows}
           QueryPerformanceCounter(Int64((@cont_sincroniza)^));
-          if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+          if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
   {$else}
          cont_sincroniza:=sdl_getticks();
          valor_sync:=1000/llamadas_maquina.fps_max;
          cont_micro:=valor_sync;
   {$endif}
-  form1.ejecutar1click(nil);
+  principal1.ejecutar1click(nil);
 end;
 end;
 
-procedure TForm1.Timer4Timer(Sender: TObject);
+procedure Tprincipal1.Timer4Timer(Sender: TObject);
 begin
 timer4.Enabled:=false;
 EmuStatus:=EmuStatusTemp;
 timer1.Enabled:=true;
 {$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(form1.Panel4.Handle);
+if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
 cont_sincroniza:=sdl_getticks();
 valor_sync:=1000/llamadas_maquina.fps_max;

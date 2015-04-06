@@ -7,7 +7,7 @@ uses
   Dialogs, StdCtrls, Buttons, ExtCtrls,lenguaje,main_engine;
 
 type
-  TForm4 = class(TForm)
+  Tredefine1 = class(TForm)
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
@@ -120,330 +120,330 @@ type
   end;
 
 var
-  Form4: TForm4;
+  redefine1: Tredefine1;
 
 implementation
 uses config_general;
 {$R *.dfm}
 
-procedure TForm4.Button10Click(Sender: TObject);
+procedure Tredefine1.Button10Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_9;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button11Click(Sender: TObject);
+procedure Tredefine1.Button11Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_0;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button12Click(Sender: TObject);
+procedure Tredefine1.Button12Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_Q;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button13Click(Sender: TObject);
+procedure Tredefine1.Button13Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_W;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button14Click(Sender: TObject);
+procedure Tredefine1.Button14Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_E;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button15Click(Sender: TObject);
+procedure Tredefine1.Button15Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_R;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button16Click(Sender: TObject);
+procedure Tredefine1.Button16Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_T;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button17Click(Sender: TObject);
+procedure Tredefine1.Button17Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_Y;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button18Click(Sender: TObject);
+procedure Tredefine1.Button18Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_U;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button19Click(Sender: TObject);
+procedure Tredefine1.Button19Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_I;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button1Click(Sender: TObject);
+procedure Tredefine1.Button1Click(Sender: TObject);
 begin
 tecla_leida:=$ffff;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button20Click(Sender: TObject);
+procedure Tredefine1.Button20Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_O;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button21Click(Sender: TObject);
+procedure Tredefine1.Button21Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_P;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button22Click(Sender: TObject);
+procedure Tredefine1.Button22Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_TAB;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button23Click(Sender: TObject);
+procedure Tredefine1.Button23Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_A;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button24Click(Sender: TObject);
+procedure Tredefine1.Button24Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_S;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button25Click(Sender: TObject);
+procedure Tredefine1.Button25Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_D;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button26Click(Sender: TObject);
+procedure Tredefine1.Button26Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_F;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button27Click(Sender: TObject);
+procedure Tredefine1.Button27Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_G;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button28Click(Sender: TObject);
+procedure Tredefine1.Button28Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_H;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button29Click(Sender: TObject);
+procedure Tredefine1.Button29Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_J;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button2Click(Sender: TObject);
+procedure Tredefine1.Button2Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_1;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button30Click(Sender: TObject);
+procedure Tredefine1.Button30Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_K;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button31Click(Sender: TObject);
+procedure Tredefine1.Button31Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_L;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button32Click(Sender: TObject);
+procedure Tredefine1.Button32Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_LSHIFT;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button33Click(Sender: TObject);
+procedure Tredefine1.Button33Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_Z;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button34Click(Sender: TObject);
+procedure Tredefine1.Button34Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_X;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button35Click(Sender: TObject);
+procedure Tredefine1.Button35Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_C;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button36Click(Sender: TObject);
+procedure Tredefine1.Button36Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_V;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button37Click(Sender: TObject);
+procedure Tredefine1.Button37Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_B;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button38Click(Sender: TObject);
+procedure Tredefine1.Button38Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_N;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button39Click(Sender: TObject);
+procedure Tredefine1.Button39Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_M;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button3Click(Sender: TObject);
+procedure Tredefine1.Button3Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_2;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button40Click(Sender: TObject);
+procedure Tredefine1.Button40Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_RSHIFT;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button41Click(Sender: TObject);
+procedure Tredefine1.Button41Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_LCTRL;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button42Click(Sender: TObject);
+procedure Tredefine1.Button42Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_LALT;
-form4.Close;
+redefine1.Close;
 end;
 
-procedure TForm4.Button43Click(Sender: TObject);
+procedure Tredefine1.Button43Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_SPACE;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button44Click(Sender: TObject);
+procedure Tredefine1.Button44Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_RALT;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button45Click(Sender: TObject);
+procedure Tredefine1.Button45Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_RCTRL;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button46Click(Sender: TObject);
+procedure Tredefine1.Button46Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_DOWN;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button47Click(Sender: TObject);
+procedure Tredefine1.Button47Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_UP;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button48Click(Sender: TObject);
+procedure Tredefine1.Button48Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_LEFT;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button49Click(Sender: TObject);
+procedure Tredefine1.Button49Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_RIGHT;
-form4.Close;
+redefine1.Close;
 end;
 
-procedure TForm4.Button4Click(Sender: TObject);
+procedure Tredefine1.Button4Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_3;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button50Click(Sender: TObject);
+procedure Tredefine1.Button50Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_RETURN;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button51Click(Sender: TObject);
+procedure Tredefine1.Button51Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_ESCAPE;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button5Click(Sender: TObject);
+procedure Tredefine1.Button5Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_4;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button6Click(Sender: TObject);
+procedure Tredefine1.Button6Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_5;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button7Click(Sender: TObject);
+procedure Tredefine1.Button7Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_6;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button8Click(Sender: TObject);
+procedure Tredefine1.Button8Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_7;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.Button9Click(Sender: TObject);
+procedure Tredefine1.Button9Click(Sender: TObject);
 begin
 tecla_leida:=SDL_SCANCODE_8;
-form4.close;
+redefine1.close;
 end;
 
-procedure TForm4.FormShow(Sender: TObject);
+procedure Tredefine1.FormShow(Sender: TObject);
 begin
-form4.Button1.Enabled:=false;
-form4.SetFocus;
-form4.Button1.Enabled:=true;
-form4.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
+redefine1.Button1.Enabled:=false;
+redefine1.SetFocus;
+redefine1.Button1.Enabled:=true;
+redefine1.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
 end;
 
-procedure TForm4.SpeedButton1Click(Sender: TObject);
+procedure Tredefine1.SpeedButton1Click(Sender: TObject);
 begin
 tecla_leida:=$fffe;
-form4.close;
+redefine1.close;
 end;
 
 end.

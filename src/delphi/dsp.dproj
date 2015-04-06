@@ -585,7 +585,7 @@
             <Form>AboutBox</Form>
         </DCCReference>
         <DCCReference Include="cargar_dsk.pas">
-            <Form>Form6</Form>
+            <Form>load_dsk</Form>
         </DCCReference>
         <DCCReference Include="config.pas">
             <Form>ConfigSP</Form>
@@ -597,11 +597,11 @@
             <Form>FLoadRom</Form>
         </DCCReference>
         <DCCReference Include="poke_memoria.pas">
-            <Form>Form3</Form>
+            <Form>poke_spec</Form>
         </DCCReference>
         <DCCReference Include="..\CONSOLAS\nes_ppu.pas"/>
         <DCCReference Include="principal.pas">
-            <Form>Form1</Form>
+            <Form>principal1</Form>
         </DCCReference>
         <DCCReference Include="..\cpu\m680x.pas"/>
         <DCCReference Include="..\arcade\contra_hw.pas"/>
@@ -623,7 +623,7 @@
         <DCCReference Include="..\arcade\exedexes_hw.pas"/>
         <DCCReference Include="..\arcade\gunsmoke_hw.pas"/>
         <DCCReference Include="redefine.pas">
-            <Form>Form4</Form>
+            <Form>redefine1</Form>
         </DCCReference>
         <DCCReference Include="..\arcade\hw_1942.pas"/>
         <DCCReference Include="..\cpu\mb88xx.pas"/>
@@ -645,7 +645,7 @@
         <DCCReference Include="..\arcade\cps1_hw.pas"/>
         <DCCReference Include="..\snd\qsound.pas"/>
         <DCCReference Include="cargar_spec.pas">
-            <Form>Form2</Form>
+            <Form>load_spec</Form>
         </DCCReference>
         <DCCReference Include="..\snd\gb_sound.pas"/>
         <DCCReference Include="..\misc\rom_engine.pas"/>
@@ -686,11 +686,11 @@
         <DCCReference Include="..\arcade\misc\sega_decrypt.pas"/>
         <DCCReference Include="..\arcade\misc\galaga_stars_const.pas"/>
         <DCCReference Include="tape_window.pas">
-            <Form>Form5</Form>
+            <Form>tape_window1</Form>
         </DCCReference>
         <DCCReference Include="..\misc\file_engine.pas"/>
         <DCCReference Include="lenslock.pas">
-            <Form>Form7</Form>
+            <Form>lenslock1</Form>
         </DCCReference>
         <DCCReference Include="..\arcade\twincobra_hw.pas"/>
         <DCCReference Include="..\arcade\jrpacman_hw.pas"/>
@@ -738,7 +738,7 @@
         <DCCReference Include="..\arcade\operationwolf_hw.pas"/>
         <DCCReference Include="..\arcade\misc\opwolf_cchip.pas"/>
         <DCCReference Include="joystick_calibrate.pas">
-            <Form>Form8</Form>
+            <Form>joy_calibration</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="..\devices\eeprom.pas"/>

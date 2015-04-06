@@ -40,6 +40,25 @@ const
         mrgoemon_char:tipo_roms=(n:'621a05.6d';l:$4000;p:0;crc:$f0a6dfc5);
         mrgoemon_sprites:array[0..2] of tipo_roms=(
         (n:'621d03.4d';l:$8000;p:0;crc:$66f2b973),(n:'621d04.5d';l:$8000;p:$8000;crc:$47df6301),());
+        //Dip
+        gberet_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Invalid'))),());
+        gberet_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'30K 70K+'),(dip_val:$10;dip_name:'40K 80K+'),(dip_val:$8;dip_name:'50K 100K+'),(dip_val:$0;dip_name:'50K 200K+'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        gberet_dip_c:array [0..2] of def_dip=(
+        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Upright Controls';number:2;dip:((dip_val:$2;dip_name:'Single'),(dip_val:$0;dip_name:'Dual'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        mrgoemon_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'20K 60K+'),(dip_val:$10;dip_name:'30K 70K+'),(dip_val:$8;dip_name:'40K 80K+'),(dip_val:$0;dip_name:'50K 90K+'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  scroll_lineas:array[0..$1f] of word;
@@ -74,6 +93,18 @@ const
 		32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
       ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 		64*8+0*32, 64*8+1*32, 64*8+2*32, 64*8+3*32, 64*8+4*32, 64*8+5*32, 64*8+6*32, 64*8+7*32);
+procedure convert_chars;
+begin
+  init_gfx(0,8,8,512);
+  gfx_set_desc_data(4,0,32*8,0,1,2,3);
+  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+end;
+procedure convert_sprites;
+begin
+  init_gfx(1,16,16,512);
+  gfx_set_desc_data(4,0,128*8,0,1,2,3);
+  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+end;
 begin
 iniciar_gberet:=false;
 iniciar_audio(false);
@@ -98,16 +129,13 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria[0],@gberet_rom[0],'gberet.zip',0)) then exit;
         //convertir chars
         if not(cargar_roms(@memoria_temp[0],@gberet_char,'gberet.zip')) then exit;
-        init_gfx(0,8,8,512);
-        gfx_set_desc_data(4,0,32*8,0,1,2,3);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+        convert_chars;
         //convertir sprites
         if not(cargar_roms(@memoria_temp[0],@gberet_sprites[0],'gberet.zip',0)) then exit;
-        init_gfx(1,16,16,512);
-        gfx_set_desc_data(4,0,128*8,0,1,2,3);
-        convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+        convert_sprites;
         //poner la paleta
         if not(cargar_roms(@memoria_temp[0],@gberet_pal[0],'gberet.zip',0)) then exit;
+        marcade.dswb_val:=@gberet_dip_b;
   end;
   203:begin //Mr. Goemon
         if not(cargar_roms(@memoria_temp[0],@mrgoemon_rom[0],'mrgoemon.zip',0)) then exit;
@@ -115,16 +143,13 @@ case main_vars.tipo_maquina of
         for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$c000+(f*$800)],$800);
         //convertir chars
         if not(cargar_roms(@memoria_temp[0],@mrgoemon_char,'mrgoemon.zip')) then exit;
-        init_gfx(0,8,8,512);
-        gfx_set_desc_data(4,0,32*8,0,1,2,3);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+        convert_chars;
         //convertir sprites
         if not(cargar_roms(@memoria_temp[0],@mrgoemon_sprites[0],'mrgoemon.zip',0)) then exit;
-        init_gfx(1,16,16,512);
-        gfx_set_desc_data(4,0,128*8,0,1,2,3);
-        convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+        convert_sprites;
         //poner la paleta
         if not(cargar_roms(@memoria_temp[0],@mrgoemon_pal[0],'mrgoemon.zip',0)) then exit;
+        marcade.dswb_val:=@mrgoemon_dip_b;
   end;
 end;
 for f:=0 to 31 do begin
@@ -139,6 +164,12 @@ for f:=0 to $FF do begin
   gfx[0].colores[f]:=memoria_temp[$20+f]+$10;
   gfx[1].colores[f]:=memoria_temp[$120+f] and $f;
 end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$4a;
+marcade.dswc:=$ff;
+marcade.dswa_val:=@gberet_dip_a;
+marcade.dswc_val:=@gberet_dip_c;
 //final
 reset_gberet;
 iniciar_gberet:=true;
@@ -146,7 +177,7 @@ end;
 
 procedure cerrar_gberet;
 begin
-save_hi('gberet.hi',@memoria[$d900],60);
+if main_vars.tipo_maquina=17 then save_hi('gberet.hi',@memoria[$d900],60);
 main_z80.free;
 sn_76496_0.Free;
 close_audio;
@@ -262,9 +293,9 @@ function gberet_getbyte(direccion:word):byte;
 begin
 case direccion of
   $0000..$e03f:gberet_getbyte:=memoria[direccion];
-  $f200:gberet_getbyte:=$5a;//$4a;
-  $f400:gberet_getbyte:=$0f;
-  $f600:gberet_getbyte:=$ff;
+  $f200:gberet_getbyte:=marcade.dswb;
+  $f400:gberet_getbyte:=marcade.dswc;
+  $f600:gberet_getbyte:=marcade.dswa;
   $f601:gberet_getbyte:=marcade.in1;
   $f602:gberet_getbyte:=marcade.in0;
   $f603:gberet_getbyte:=marcade.in2;
@@ -309,7 +340,7 @@ if ((memoria[$db06]=3) and (memoria[$db07]=$30) and (memoria[$db08]=0) and (memo
     load_hi('gberet.hi',@memoria[$d900],60);
     copymemory(@memoria[$db06],@memoria[$d900],3);
     timer[timer_hs].enabled:=false;
-  end;
+end;
 end;
 
 procedure gberet_qsave(nombre:string);

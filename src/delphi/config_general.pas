@@ -266,7 +266,7 @@ end;
 
 procedure TMConfig.BitBtn10Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     if tecla_leida=$FFFE then begin
       bitbtn10.Caption:='N/D';
@@ -280,7 +280,7 @@ end;
 
 procedure TMConfig.BitBtn11Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     if tecla_leida=$FFFE then begin
       bitbtn11.Caption:='N/D';
@@ -294,7 +294,7 @@ end;
 
 PROCEDURE TMConfig.BitBtn12Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn12.Caption:='N/D';
@@ -308,7 +308,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn13Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn13.Caption:='N/D';
@@ -322,7 +322,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn14Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn14.Caption:='N/D';
@@ -336,7 +336,7 @@ END;
 
 procedure TMConfig.BitBtn15Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn16.Caption:='N/D';
@@ -350,7 +350,7 @@ end;
 
 procedure TMConfig.BitBtn16Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn15.Caption:='N/D';
@@ -364,7 +364,7 @@ end;
 
 procedure TMConfig.BitBtn17Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn17.Caption:='N/D';
@@ -378,7 +378,7 @@ end;
 
 procedure TMConfig.BitBtn18Click(Sender: TObject);
 begin
-form4.showmodal;
+redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn18.Caption:='N/D';
@@ -392,7 +392,7 @@ end;
 
 procedure TMConfig.BitBtn19Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn19.Caption:='N/D';
@@ -406,7 +406,7 @@ end;
 
 PROCEDURE TMConfig.BitBtn1Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn1.Caption:='N/D';
@@ -814,7 +814,7 @@ end;
 
 procedure TMConfig.Button3Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     if tecla_leida=$FFFE then begin
       bitbtn3.Caption:='N/D';
@@ -828,7 +828,7 @@ end;
 
 procedure TMConfig.Button4Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     if tecla_leida=$FFFE then begin
       bitbtn4.Caption:='N/D';
@@ -842,7 +842,7 @@ end;
 
 procedure TMConfig.Button5Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     if tecla_leida=$FFFE then begin
       bitbtn5.Caption:='N/D';
@@ -856,7 +856,7 @@ end;
 
 procedure TMConfig.Button6Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     if tecla_leida=$FFFE then begin
       bitbtn6.Caption:='N/D';
@@ -870,19 +870,19 @@ end;
 
 procedure TMConfig.Button7Click(Sender: TObject);
 begin
-form8.show;
+joy_calibration.show;
 bucle_joystick(0);
 end;
 
 procedure TMConfig.Button8Click(Sender: TObject);
 begin
-form8.show;
+joy_calibration.show;
 bucle_joystick(1);
 end;
 
 procedure TMConfig.BitBtn20Click(Sender: TObject);
 begin
-form4.showmodal;
+redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn20.Caption:='N/D';
@@ -896,7 +896,7 @@ end;
 
 PROCEDURE TMConfig.BitBtn2Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn2.Caption:='N/D';
@@ -910,7 +910,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn3Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn3.Caption:='N/D';
@@ -924,7 +924,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn4Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn4.Caption:='N/D';
@@ -938,7 +938,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn5Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn5.Caption:='N/D';
@@ -952,7 +952,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn6Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn6.Caption:='N/D';
@@ -966,7 +966,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn7Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn7.Caption:='N/D';
@@ -980,7 +980,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn8Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn8.Caption:='N/D';
@@ -994,7 +994,7 @@ END;
 
 PROCEDURE TMConfig.BitBtn9Click(Sender: TObject);
 BEGIN
-  form4.showmodal;
+  redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
     if tecla_leida=$FFFE then begin
       bitbtn9.Caption:='N/D';
@@ -1024,7 +1024,7 @@ begin
               else if radiobutton11.Checked then tmp_var:=6;
   if tmp_var<> main_vars.idioma then begin
     main_vars.idioma:=tmp_var;
-    form1.IdiomaClick(nil);
+    principal1.IdiomaClick(nil);
   end;
   if radiobutton12.Checked then tmp_var:=0
     else if radiobutton13.Checked then tmp_var:=1
@@ -1032,7 +1032,7 @@ begin
         else if radiobutton15.Checked then tmp_var:=3;
   if tmp_var<>sound_status.calidad_audio then begin
     sound_status.calidad_audio:=tmp_var;
-    form1.CambiaAudio(nil);
+    principal1.CambiaAudio(nil);
   end;
   if radiobutton16.Checked then tmp_var:=1
     else if radiobutton17.Checked then tmp_var:=2
@@ -1041,7 +1041,7 @@ begin
           else if radiobutton20.Checked then tmp_var:=5;
   if tmp_var<>main_screen.video_mode then begin
     main_screen.video_mode:=tmp_var;
-    form1.CambiarVideo(nil);
+    principal1.CambiarVideo(nil);
   end;
   main_vars.auto_exec:=checkbox2.Checked;
   main_vars.show_crc_error:=checkbox1.Checked;

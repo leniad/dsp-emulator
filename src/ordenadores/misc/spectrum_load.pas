@@ -29,19 +29,19 @@ implementation
 
 procedure spectrum_load_init;
 begin
-form2.Button2.Caption:=leng[main_vars.idioma].mensajes[7];
-form2.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
-form2.FileListBox1.Mask:='*.zip;*.sp;*.zx;*.sna;*.z80;*.tzx;*.tap;*.csw;*.dsp;*.wav;*.szx;*.pzx';
-if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then form2.FileListBox1.Mask:=form2.FileListBox1.Mask+';*.rom';
+load_spec.Button2.Caption:=leng[main_vars.idioma].mensajes[7];
+load_spec.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
+load_spec.FileListBox1.Mask:='*.zip;*.sp;*.zx;*.sna;*.z80;*.tzx;*.tap;*.csw;*.dsp;*.wav;*.szx;*.pzx';
+if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then load_spec.FileListBox1.Mask:=load_spec.FileListBox1.Mask+';*.rom';
 {$ifdef fpc}
-form2.DirectoryEdit1.Directory:=Directory.spectrum_tap;
+load_spec.DirectoryEdit1.Directory:=Directory.spectrum_tap;
 {$else}
-form2.DirectoryListBox1.Directory:=Directory.spectrum_tap;
+load_spec.DirectoryListBox1.Directory:=Directory.spectrum_tap;
 {$endif}
-if (form2.filelistbox1.Count=0) then ultima_posicion:=-1
+if (load_spec.filelistbox1.Count=0) then ultima_posicion:=-1
   else begin
-    if ultima_posicion<form2.filelistbox1.Count then begin
-      form2.filelistbox1.Selected[ultima_posicion]:=true;
+    if ultima_posicion<load_spec.filelistbox1.Count then begin
+      load_spec.filelistbox1.Selected[ultima_posicion]:=true;
     end else ultima_posicion:=-1;
 end;
 end;
@@ -56,13 +56,13 @@ var
   temp,temp2,temp3,datos_scr:pbyte;
   cadena,nombre_file:string;
 begin
-form2.label3.Caption:='';
-form2.label4.Caption:='';
+load_spec.label3.Caption:='';
+load_spec.label4.Caption:='';
 hay_imagen:=false;
 spec_rom.hay_rom:=false;
 hay_scr:=false;
 datos_scr:=nil;
-nombre:=form2.filelistbox1.FileName;
+nombre:=load_spec.filelistbox1.FileName;
 extension:=extension_fichero(nombre);
 if extension='ZIP' then begin
   //Comprobar si hay un SCR
@@ -79,7 +79,7 @@ if extension='ZIP' then begin
   spec_rom.hay_rom:=search_file_from_zip(nombre,'*.rom',spec_rom.nombre_rom,t1,t2,false);
   if spec_rom.hay_rom then begin
       spec_rom.rom_size:=t1;
-      form2.label3.Caption:='ROM';
+      load_spec.label3.Caption:='ROM';
       if spec_rom.datos_rom<>nil then begin
         freemem(spec_rom.datos_rom);
         spec_rom.datos_rom:=nil;
@@ -97,7 +97,7 @@ if extension='ZIP' then begin
     extension:=extension_fichero(nombre_file);
     if ((extension='TAP') or (extension='TZX') or (extension='PZX') or (extension='CSW') or (extension='WAV') or (extension='DSP') or (extension='SZX') or (extension='ZX') or (extension='Z80') or (extension='SP') or (extension='SNA')) then begin
       load_file_from_zip(nombre,nombre_file,datos,t1,t2,true);
-      if ((extension='CSW') or (extension='WAV')) then form2.label3.Caption:=extension+' Spectrum AudioFile';
+      if ((extension='CSW') or (extension='WAV')) then load_spec.label3.Caption:=extension+' Spectrum AudioFile';
       nombre:=nombre_file;
       break;
     end;
@@ -105,7 +105,7 @@ if extension='ZIP' then begin
 end else begin  //fichero normal
   if not(read_file_size(nombre,file_size)) then exit;
   if extension='ROM' then begin
-    form2.label3.Caption:='ROM';
+    load_spec.label3.Caption:='ROM';
     if spec_rom.datos_rom<>nil then begin
       freemem(spec_rom.datos_rom);
       spec_rom.datos_rom:=nil;
@@ -129,16 +129,16 @@ temp:=datos;
 temp2:=nil;
 nombre:=extractfilename(nombre);
 if extension='SZX' then begin
-  form2.label3.Caption:='SZX Spectrum Snapshot';
+  load_spec.label3.Caption:='SZX Spectrum Snapshot';
   g:=0;
   inc(temp,6);inc(g,6);
   case temp^ of
-    0:form2.label4.Caption:='Spectrum 16K';
-    1:form2.label4.Caption:='Spectrum 48K';
-    2:form2.label4.Caption:='Spectrum 128K';
-    3:form2.label4.Caption:='Spectrum +2';
-    4:form2.label4.Caption:='Spectrum +2A';
-    5:form2.label4.Caption:='Spectrum +3';
+    0:load_spec.label4.Caption:='Spectrum 16K';
+    1:load_spec.label4.Caption:='Spectrum 48K';
+    2:load_spec.label4.Caption:='Spectrum 128K';
+    3:load_spec.label4.Caption:='Spectrum +2';
+    4:load_spec.label4.Caption:='Spectrum +2A';
+    5:load_spec.label4.Caption:='Spectrum +3';
   end;
   inc(temp,2);inc(g,2);
   while (not(hay_imagen) and (g<file_size)) do begin
@@ -172,7 +172,7 @@ if extension='SZX' then begin
   end;
 end;
 if extension='TAP' then begin
-  form2.label3.Caption:='TAP Spectrum Tape';
+  load_spec.label3.Caption:='TAP Spectrum Tape';
   g:=0;
   while (not(hay_imagen) and (g<file_size)) do begin
     long_bloque:=0;
@@ -187,7 +187,7 @@ if extension='TAP' then begin
   end;
 end;
 if extension='TZX' then begin
-  form2.label3.Caption:='TZX Spectrum Tape';
+  load_spec.label3.Caption:='TZX Spectrum Tape';
   inc(temp,10);
   g:=0;
   salida:=false;
@@ -272,7 +272,7 @@ if extension='TZX' then begin
   end;
 end;
 if extension='PZX' then begin
-  form2.label3.Caption:='PZX Spectrum Tape';
+  load_spec.label3.Caption:='PZX Spectrum Tape';
   g:=0;
   inc(temp,4);inc(g,4);
   copymemory(@long_bloque,temp,4);
@@ -308,8 +308,8 @@ if extension='PZX' then begin
   end;
 end;
 if ((extension='Z80') or (extension='DSP')) then begin
-  if extension='Z80' then form2.label3.Caption:='Z80 Spectrum Snapshot'
-    else form2.label3.Caption:='DSP Spectrum Snapshot';
+  if extension='Z80' then load_spec.label3.Caption:='Z80 Spectrum Snapshot'
+    else load_spec.label3.Caption:='DSP Spectrum Snapshot';
   inc(temp,6);
   g:=0;
   copymemory(@g,temp,2);
@@ -319,13 +319,13 @@ if ((extension='Z80') or (extension='DSP')) then begin
     copymemory(@g,temp,2);
     inc(temp,4);
     case temp^ of
-      0,1:form2.label4.Caption:='Spectrum 48K';  //Modo 48k
-      3:if g=23 then form2.label4.Caption:='Spectrum 128K'
-          else form2.label4.Caption:='Spectrum 48K';
-      4,5,6:form2.label4.Caption:='Spectrum 128K';  //Modo 128K
-      7,8:form2.label4.Caption:='Spectrum +3';  //Modo +3
-      12:form2.label4.Caption:='Spectrum +2A'; //Modo +2A
-      13:form2.label4.Caption:='Spectrum +2'; //Modo +2
+      0,1:load_spec.label4.Caption:='Spectrum 48K';  //Modo 48k
+      3:if g=23 then load_spec.label4.Caption:='Spectrum 128K'
+          else load_spec.label4.Caption:='Spectrum 48K';
+      4,5,6:load_spec.label4.Caption:='Spectrum 128K';  //Modo 128K
+      7,8:load_spec.label4.Caption:='Spectrum +3';  //Modo +3
+      12:load_spec.label4.Caption:='Spectrum +2A'; //Modo +2A
+      13:load_spec.label4.Caption:='Spectrum +2'; //Modo +2
     end;
     inc(temp,g-2);
     f:=0;
@@ -345,7 +345,7 @@ if ((extension='Z80') or (extension='DSP')) then begin
         else inc(temp,g);
     end;
   end else begin
-    form2.label4.Caption:='Spectrum 48K';
+    load_spec.label4.Caption:='Spectrum 48K';
     getmem(temp2,49192);
     descomprimir_z80(temp2,temp,file_size-34);
   end;
@@ -353,21 +353,21 @@ if ((extension='Z80') or (extension='DSP')) then begin
   hay_imagen:=true;
 end;
 if extension='SNA' then begin
-  form2.label3.Caption:='SNA Spectrum Snapshot';
-  if file_size>49179 then form2.label4.caption:='Spectrum 128K'
-    else form2.label4.caption:='Spectrum 48K';
+  load_spec.label3.Caption:='SNA Spectrum Snapshot';
+  if file_size>49179 then load_spec.label4.caption:='Spectrum 128K'
+    else load_spec.label4.caption:='Spectrum 48K';
   inc(temp,27);
   hay_imagen:=true;
 end;
 if extension='SP' then begin
-  form2.label3.Caption:='SP Spectrum Snapshot';
-  form2.label4.caption:='Spectrum 48K';
+  load_spec.label3.Caption:='SP Spectrum Snapshot';
+  load_spec.label4.caption:='Spectrum 48K';
   inc(temp,38);
   hay_imagen:=true;
 end;
 if extension='ZX' then begin
-  form2.label3.Caption:='ZX Spectrum Snapshot';
-  form2.label4.caption:='Spectrum 48K';
+  load_spec.label3.Caption:='ZX Spectrum Snapshot';
+  load_spec.label4.caption:='Spectrum 48K';
   inc(temp,132);
   hay_imagen:=true;
 end;
@@ -377,9 +377,9 @@ if hay_scr then begin
 end;
 //mostrar imagen si hay...
 if hay_imagen then begin
-  spec_a_pantalla(temp,form2.image1.picture.Bitmap);
+  spec_a_pantalla(temp,load_spec.image1.picture.Bitmap);
 end else begin
-  form2.image1.picture:=nil;
+  load_spec.image1.picture:=nil;
 end;
 if temp2<>nil then freemem(temp2);
 if datos_scr<>nil then freemem(datos_scr);
@@ -451,17 +451,17 @@ if extension='SZX' then resultado:=abrir_szx(datos,file_size);
 if not(resultado) then MessageDlg('No es una cinta o un snapshot válido.'+chr(10)+chr(13)+'Not a valid tape or snapshot', mtInformation,[mbOk], 0)
   else begin
     if cinta then begin
-      form5.edit1.Text:=nombre;
-      form5.show;
-      form5.BitBtn1.Enabled:=true;
-      form5.BitBtn2.Enabled:=false;
+      tape_window1.edit1.Text:=nombre;
+      tape_window1.show;
+      tape_window1.BitBtn1.Enabled:=true;
+      tape_window1.BitBtn2.Enabled:=false;
     end else begin  //Snap shot
       change_caption(llamadas_maquina.caption+cadena+nombre);
       main_screen.rapido:=false;
     end;
-    Directory.spectrum_tap:=form2.FileListBox1.Directory+main_vars.cadena_dir;
-    ultima_posicion:=form2.filelistbox1.ItemIndex;
-    form2.close;
+    Directory.spectrum_tap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
+    ultima_posicion:=load_spec.filelistbox1.ItemIndex;
+    load_spec.close;
    end;
 if datos<>nil then freemem(datos);
 datos:=nil;
@@ -479,7 +479,7 @@ if spec_rom.datos_rom<>nil then begin
   freemem(spec_rom.datos_rom);
   spec_rom.datos_rom:=nil;
 end;
-Directory.spectrum_tap:=form2.FileListBox1.Directory+main_vars.cadena_dir;
+Directory.spectrum_tap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
 end;
 
 end.

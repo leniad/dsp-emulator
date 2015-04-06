@@ -20,9 +20,9 @@ const
 	( 0, -20, -41, -69, -53,   6, -29, 0,  0,  -9,	64, 20,  46, 33, 81, 0 ));	// TT Racer
 
 type
-  { TForm7 }
+  { Tlenslock1 }
 
-  TForm7 = class(TForm)
+  Tlenslock1 = class(TForm)
     BitBtn1: TBitBtn;
     BitBtn18: TBitBtn;
     GroupBox2: TGroupBox;
@@ -41,13 +41,13 @@ type
   end;
 
 var
-  Form7: TForm7;
+  lenslock1: Tlenslock1;
   lenslok:def_lens;
 
 implementation
 uses principal,spectrum_misc;
 
-{ TForm7 }
+{ Tlenslock1 }
 
 procedure sens_lock(image_to_show:TImage);
 var
@@ -72,18 +72,18 @@ image_to_show.Visible:=true;
 imagen1.free;
 end;
 
-procedure TForm7.BitBtn1Click(Sender: TObject);
+procedure Tlenslock1.BitBtn1Click(Sender: TObject);
 begin
-sens_lock(form7.Image1);
+sens_lock(lenslock1.Image1);
 end;
 
-procedure TForm7.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure Tlenslock1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-form5.label2.caption:='';
+tape_window1.label2.caption:='';
 lenslok.activo:=false;
 end;
 
-procedure TForm7.close_button(Sender: TObject);
+procedure Tlenslock1.close_button(Sender: TObject);
 begin
 close;
 end;
@@ -92,4 +92,4 @@ initialization
   {$I lenslock.lrs}
 
 end.
-
+

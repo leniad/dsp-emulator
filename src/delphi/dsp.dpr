@@ -82,13 +82,13 @@ uses
   ym_2151 in '..\snd\ym_2151.pas',
   ym_2203 in '..\snd\ym_2203.pas',
   acercade in 'acercade.pas' {AboutBox},
-  cargar_dsk in 'cargar_dsk.pas' {Form6},
+  cargar_dsk in 'cargar_dsk.pas' {load_dsk},
   config in 'config.pas' {ConfigSP},
   config_general in 'config_general.pas' {MConfig},
   LoadRom in 'LoadRom.pas' {FLoadRom},
-  poke_memoria in 'poke_memoria.pas' {Form3},
+  poke_memoria in 'poke_memoria.pas' {poke_spec},
   nes_ppu in '..\CONSOLAS\nes_ppu.pas',
-  principal in 'principal.pas' {Form1},
+  principal in 'principal.pas' {principal1},
   m680x in '..\cpu\m680x.pas',
   contra_hw in '..\arcade\contra_hw.pas',
   mappy_hw in '..\arcade\mappy_hw.pas',
@@ -108,7 +108,7 @@ uses
   gaelco_hw in '..\arcade\gaelco_hw.pas',
   exedexes_hw in '..\arcade\exedexes_hw.pas',
   gunsmoke_hw in '..\arcade\gunsmoke_hw.pas',
-  redefine in 'redefine.pas' {Form4},
+  redefine in 'redefine.pas' {redefine1},
   hw_1942 in '..\arcade\hw_1942.pas',
   mb88xx in '..\cpu\mb88xx.pas',
   jailbreak_hw in '..\arcade\jailbreak_hw.pas',
@@ -128,7 +128,7 @@ uses
   seibu_sound in '..\snd\seibu_sound.pas',
   cps1_hw in '..\arcade\cps1_hw.pas',
   qsound in '..\snd\qsound.pas',
-  cargar_spec in 'cargar_spec.pas' {Form2},
+  cargar_spec in 'cargar_spec.pas' {load_spec},
   gb_sound in '..\snd\gb_sound.pas',
   rom_engine in '..\misc\rom_engine.pas',
   misc_functions in '..\misc\misc_functions.pas',
@@ -165,9 +165,9 @@ uses
   pengo_hw in '..\arcade\pengo_hw.pas',
   sega_decrypt in '..\arcade\misc\sega_decrypt.pas',
   galaga_stars_const in '..\arcade\misc\galaga_stars_const.pas',
-  tape_window in 'tape_window.pas' {Form5},
+  tape_window in 'tape_window.pas' {tape_window1},
   file_engine in '..\misc\file_engine.pas',
-  lenslock in 'lenslock.pas' {Form7},
+  lenslock in 'lenslock.pas' {lenslock1},
   twincobra_hw in '..\arcade\twincobra_hw.pas',
   jrpacman_hw in '..\arcade\jrpacman_hw.pas',
   dec0_hw in '..\arcade\dec0_hw.pas',
@@ -211,7 +211,7 @@ uses
   volfied_cchip in '..\arcade\misc\volfied_cchip.pas',
   operationwolf_hw in '..\arcade\operationwolf_hw.pas',
   opwolf_cchip in '..\arcade\misc\opwolf_cchip.pas',
-  joystick_calibrate in 'joystick_calibrate.pas' {Form8},
+  joystick_calibrate in 'joystick_calibrate.pas' {joy_calibration},
   eeprom in '..\devices\eeprom.pas',
   outrun_hw in '..\arcade\outrun_hw.pas',
   taitosj_hw in '..\arcade\taitosj_hw.pas',
@@ -236,17 +236,17 @@ uses
 begin
   Application.Initialize;
   Application.Title:='DSP Emulator';
-  Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TForm2, Form2);
-  Application.CreateForm(TForm4, Form4);
-  Application.CreateForm(TForm5, Form5);
-  Application.CreateForm(TForm7, Form7);
+  Application.CreateForm(Tprincipal1, principal1);
+  Application.CreateForm(Tload_spec, load_spec);
+  Application.CreateForm(Tredefine1, redefine1);
+  Application.CreateForm(Ttape_window1, tape_window1);
+  Application.CreateForm(Tlenslock1, lenslock1);
   Application.CreateForm(TMConfig, MConfig);
   Application.CreateForm(TConfigSP, ConfigSP);
   Application.CreateForm(TAboutBox, AboutBox);
-  Application.CreateForm(TForm6, Form6);
+  Application.CreateForm(Tload_dsk, load_dsk);
   Application.CreateForm(TFLoadRom, FLoadRom);
   Application.CreateForm(Tconfig_arcade, config_arcade);
-  Application.CreateForm(TForm8, Form8);
+  Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.Run;
 end.

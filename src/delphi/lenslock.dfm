@@ -1,4 +1,4 @@
-object Form7: TForm7
+object lenslock1: Tlenslock1
   Left = 658
   Top = 538
   BorderIcons = [biSystemMenu]

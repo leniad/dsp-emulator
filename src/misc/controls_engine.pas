@@ -282,8 +282,8 @@ begin
   event.keyboard:=false;
   event.mouse:=false;
   //Primero las teclas independientes de los drivers
-  if ((keystate[SDL_SCANCODE_F2]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then Form1.fFast(nil);
-  if ((keystate[SDL_SCANCODE_F3]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then Form1.Reset1Click(nil);
+  if ((keystate[SDL_SCANCODE_F2]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then principal1.fFast(nil);
+  if ((keystate[SDL_SCANCODE_F3]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then principal1.Reset1Click(nil);
   if ((keystate[SDL_SCANCODE_F4]<>0) and not(main_screen.pantalla_completa) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then begin
       if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
   end;
@@ -300,7 +300,7 @@ begin
   if ((keystate[SDL_SCANCODE_F10]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then begin
     if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-02');
   end;
-  if (keystate[SDL_SCANCODE_F11]<>0) then form1.fSlow(nil);
+  if (keystate[SDL_SCANCODE_F11]<>0) then principal1.fSlow(nil);
   //Arcade
   if event.earcade then begin
     evaluar_arcade_basic;

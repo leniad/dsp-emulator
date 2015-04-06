@@ -48,16 +48,16 @@ uses principal;
 
 procedure Cargar_NES;
 begin
-  form1.Panel2.Visible:=true;
-  form1.BitBtn9.Visible:=false;
-  form1.BitBtn10.Glyph:=nil;
-  form1.BitBtn10.Enabled:=true;
-  form1.imagelist2.GetBitmap(2,form1.BitBtn10.Glyph);
-  form1.BitBtn10.Visible:=true;
-  form1.BitBtn10.OnClick:=form1.fLoadCartucho;
-  form1.BitBtn11.Visible:=true;
-  form1.BitBtn12.Visible:=false;
-  form1.BitBtn14.Visible:=false;
+  principal1.Panel2.Visible:=true;
+  principal1.BitBtn9.Visible:=false;
+  principal1.BitBtn10.Glyph:=nil;
+  principal1.BitBtn10.Enabled:=true;
+  principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
+  principal1.BitBtn10.Visible:=true;
+  principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+  principal1.BitBtn11.Visible:=true;
+  principal1.BitBtn12.Visible:=false;
+  principal1.BitBtn14.Visible:=false;
   llamadas_maquina.iniciar:=iniciar_nes;
   llamadas_maquina.bucle_general:=nes_principal;
   llamadas_maquina.cerrar:=nes_cerrar;

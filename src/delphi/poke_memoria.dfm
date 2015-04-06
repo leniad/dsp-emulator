@@ -1,4 +1,4 @@
-object Form3: TForm3
+object poke_spec: Tpoke_spec
   Left = 379
   Top = 213
   BorderIcons = []

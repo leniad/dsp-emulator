@@ -29,27 +29,27 @@ begin
 {$ifndef windows}
 form1.BorderStyle:=bsSizeable;
 {$endif}
-if width<>0 then form1.ClientWidth:=width;
-if height<>0 then form1.ClientHeight:=height;
+if width<>0 then principal1.ClientWidth:=width;
+if height<>0 then principal1.ClientHeight:=height;
 {$ifndef windows}
-form1.BorderStyle:=bsSingle;
+principal1.BorderStyle:=bsSingle;
 {$endif}
 //arreglar la barra del fondo
-form1.statusbar1.Width:=width-25;
-form1.Image1.Left:=form1.statusbar1.Width;
-form1.Image1.top:=form1.statusbar1.top;
-form1.statusbar1.Panels[0].Width:=60;
-form1.statusbar1.Panels[1].Width:=125;
+principal1.statusbar1.Width:=width-25;
+principal1.Image1.Left:=principal1.statusbar1.Width;
+principal1.Image1.top:=principal1.statusbar1.top;
+principal1.statusbar1.Panels[0].Width:=60;
+principal1.statusbar1.Panels[1].Width:=125;
 //botones
-form1.BitBtn2.left:=(form1.statusbar1.width div 2)-123; //3
-form1.BitBtn3.left:=(form1.statusbar1.width div 2)-92;
-form1.BitBtn4.left:=(form1.statusbar1.width div 2)-64;  //3
-form1.BitBtn5.left:=(form1.statusbar1.width div 2)-32;
-form1.BitBtn6.left:=(form1.statusbar1.width div 2)-4; //3
-form1.btncfg.left:=(form1.statusbar1.width div 2)+29;
-form1.BitBtn8.left:=(form1.statusbar1.width div 2)+57;
-form1.BitBtn13.left:=(form1.statusbar1.width div 2)+85;  //3
-form1.BitBtn19.left:=(form1.statusbar1.width div 2)+116;
+principal1.BitBtn2.left:=(principal1.statusbar1.width div 2)-123; //3
+principal1.BitBtn3.left:=(principal1.statusbar1.width div 2)-92;
+principal1.BitBtn4.left:=(principal1.statusbar1.width div 2)-64;  //3
+principal1.BitBtn5.left:=(principal1.statusbar1.width div 2)-32;
+principal1.BitBtn6.left:=(principal1.statusbar1.width div 2)-4; //3
+principal1.btncfg.left:=(principal1.statusbar1.width div 2)+29;
+principal1.BitBtn8.left:=(principal1.statusbar1.width div 2)+57;
+principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+85;  //3
+principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+116;
 end;
 
 function bit(data:dword;bitpos:byte):boolean;inline;
@@ -218,32 +218,32 @@ function OpenRom(Sistema:TSistema;var name:string):boolean;
 begin
 case Sistema of
   StColecovision:begin
-         form1.opendialog1.InitialDir:=Directory.ColecoVision;
-         form1.OpenDialog1.Filter:='ColecoVision Files (*.col;*.rom;*.csn;*.bin;*.zip)|*.col;*.rom;*.csn;*.bin;*.zip';
+         principal1.opendialog1.InitialDir:=Directory.ColecoVision;
+         principal1.OpenDialog1.Filter:='ColecoVision Files (*.col;*.rom;*.csn;*.bin;*.zip)|*.col;*.rom;*.csn;*.bin;*.zip';
        end;
   Stnes:begin
-         form1.opendialog1.InitialDir:=Directory.Nes;
-         form1.OpenDialog1.Filter:='NES Files (*.nes;*zip)|*.nes;*.zip';
+         principal1.opendialog1.InitialDir:=Directory.Nes;
+         principal1.OpenDialog1.Filter:='NES Files (*.nes;*zip)|*.nes;*.zip';
        end;
   Stgb:begin
-         form1.opendialog1.InitialDir:=Directory.GameBoy;
-         form1.OpenDialog1.Filter:='GB Files (*.gb;*.gbc;*zip)|*.gb;*.gbc;*.zip';
+         principal1.opendialog1.InitialDir:=Directory.GameBoy;
+         principal1.OpenDialog1.Filter:='GB Files (*.gb;*.gbc;*zip)|*.gb;*.gbc;*.zip';
        end;
   StChip8:begin
-         form1.opendialog1.InitialDir:=Directory.Chip8;
-         form1.OpenDialog1.Filter:='Chip-8 Files (*.ch8;*.bin;*zip)|*.ch8;*.bin;*.zip';
+         principal1.opendialog1.InitialDir:=Directory.Chip8;
+         principal1.OpenDialog1.Filter:='Chip-8 Files (*.ch8;*.bin;*zip)|*.ch8;*.bin;*.zip';
        end;
   StAmstrad:begin
-         form1.opendialog1.InitialDir:=directory.amstrad_tap;
-         form1.OpenDialog1.Filter:='CPC Tape or Snapshot (*.cdt;*.tzx;*.csw;*.wav;*.sna;*zip;)|*.cdt;*.tzx;*.csw;*.wav;*.sna;*.zip';
+         principal1.opendialog1.InitialDir:=directory.amstrad_tap;
+         principal1.OpenDialog1.Filter:='CPC Tape or Snapshot (*.cdt;*.tzx;*.csw;*.wav;*.sna;*zip;)|*.cdt;*.tzx;*.csw;*.wav;*.sna;*.zip';
        end;
   StROM:begin
-         form1.opendialog1.InitialDir:=Directory.Arcade_roms;
-         form1.OpenDialog1.Filter:='ROM Files|*.rom;*.zip';
+         principal1.opendialog1.InitialDir:=Directory.Arcade_roms;
+         principal1.OpenDialog1.Filter:='ROM Files|*.rom;*.zip';
        end;
 end;
-OpenRom:=form1.OpenDialog1.execute;
-name:=form1.OpenDialog1.FileName;
+OpenRom:=principal1.OpenDialog1.execute;
+name:=principal1.OpenDialog1.FileName;
 end;
 
 end.

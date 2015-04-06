@@ -1,4 +1,4 @@
-object Form5: TForm5
+object tape_window1: Ttape_window1
   Left = 658
   Top = 192
   BorderIcons = [biSystemMenu]

@@ -1,12 +1,12 @@
-object Form2: TForm2
-  Left = 266
-  Height = 480
-  Top = 187
+object load_spec: Tload_spec
+  Left = 389
+  Height = 471
+  Top = 220
   Width = 611
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Spectrum Tape/Snapshot Load'
-  ClientHeight = 480
+  ClientHeight = 471
   ClientWidth = 611
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -16,7 +16,7 @@ object Form2: TForm2
   Font.Quality = fqDraft
   OnKeyUp = FileListBox1KeyUp
   OnShow = FormShow
-  LCLVersion = '1.3'
+  LCLVersion = '1.4.0.2'
   object FileListBox1: TFileListBox
     Left = 24
     Height = 410

@@ -74,7 +74,7 @@ screen_mod_scroll(1,1024,256,1023,1024,256,1023);
 screen_init(3,512,512,false,true);
 iniciar_video(256,240);
 sprite_bac06_color:=$200;
-deco_bac06_init(0,1,2,0,1,2,0,$100,$000,$000,$fff,$fff,0,2,1,1);
+deco_bac06_init(0,1,2,0,1,2,0,$100,$000,$000,$fff,$fff,$000,2,1,1);
 //Main CPU
 main_h6280:=cpu_h6280.create(21477200 div 3,$100);
 main_h6280.change_ram_calls(actfancer_getbyte,actfancer_putbyte);

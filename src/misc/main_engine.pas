@@ -198,20 +198,20 @@ begin
 case main_vars.tipo_maquina of
      0..9,1000..1003:begin
              fix_screen_pos(350,110);
-             form1.Panel2.width:=350;
-             form1.Panel2.height:=49;
-             form1.Panel2.Align:=alLeft;
-             form1.Panel2.Anchors:=[akTop,akLeft,akRight];
-             form1.BitBtn9.top:=4;
-             form1.BitBtn9.left:=24;
-             form1.BitBtn10.top:=4;
-             form1.BitBtn10.left:=66;
-             form1.BitBtn11.top:=4;
-             form1.BitBtn11.left:=111;
-             form1.BitBtn12.top:=4;
-             form1.BitBtn12.left:=159;
-             form1.BitBtn14.top:=4;
-             form1.BitBtn14.left:=206;
+             principal1.Panel2.width:=350;
+             principal1.Panel2.height:=49;
+             principal1.Panel2.Align:=alLeft;
+             principal1.Panel2.Anchors:=[akTop,akLeft,akRight];
+             principal1.BitBtn9.top:=4;
+             principal1.BitBtn9.left:=24;
+             principal1.BitBtn10.top:=4;
+             principal1.BitBtn10.left:=66;
+             principal1.BitBtn11.top:=4;
+             principal1.BitBtn11.left:=111;
+             principal1.BitBtn12.top:=4;
+             principal1.BitBtn12.left:=159;
+             principal1.BitBtn14.top:=4;
+             principal1.BitBtn14.left:=206;
           end;
      else fix_screen_pos(350,70);
 end;
@@ -222,19 +222,19 @@ var
 begin
 x:=p_final[0].x*mul_video;
 y:=p_final[0].y*mul_video;
-form1.n1x1.Checked:=false;
-form1.n2x1.Checked:=false;
-form1.scanlines1.Checked:=false;
-form1.scanlines2x1.Checked:=false;
-form1.n3x1.Checked:=false;
-form1.FullScreen1.Checked:=false;
+principal1.n1x1.Checked:=false;
+principal1.n2x1.Checked:=false;
+principal1.scanlines1.Checked:=false;
+principal1.scanlines2x1.Checked:=false;
+principal1.n3x1.Checked:=false;
+principal1.FullScreen1.Checked:=false;
 case main_screen.video_mode of
-  1:form1.n1x1.Checked:=true;
-  2:form1.n2x1.Checked:=true;
-  3:form1.scanlines1.Checked:=true;
-  4:form1.scanlines2x1.Checked:=true;
-  5:form1.n3x1.Checked:=true;
-  6:form1.FullScreen1.checked:=true;
+  1:principal1.n1x1.Checked:=true;
+  2:principal1.n2x1.Checked:=true;
+  3:principal1.scanlines1.Checked:=true;
+  4:principal1.scanlines2x1.Checked:=true;
+  5:principal1.n3x1.Checked:=true;
+  6:principal1.FullScreen1.checked:=true;
 end;
 //Si el video el *2 necesito una temporal
 if pantalla[pant_doble]<>nil then SDL_FreeSurface(pantalla[pant_doble]);
@@ -244,11 +244,11 @@ pantalla[pant_doble]:=SDL_CreateRGBSurface(0,x,y,16,0,0,0,0);
 uses_sdl_window;
 {$else}
 {$ifdef fpc}
-form1.panel4.Width:=x;
-form1.panel4.Height:=y;
-form1.GroupBox4.Width:=x+15;
-form1.GroupBox4.Height:=y+25;
-x:=form1.GroupBox4.width;
+principal1.panel4.Width:=x;
+principal1.panel4.Height:=y;
+principal1.GroupBox4.Width:=x+15;
+principal1.GroupBox4.Height:=y+25;
+x:=principal1.GroupBox4.width;
 {$else}
 child.clientWidth:=x;
 child.clientHeight:=y;
@@ -265,23 +265,23 @@ case main_vars.tipo_maquina of
   end;
 end;
 {$ifdef fpc}
-fix_screen_pos(x,form1.groupbox4.height+60);
-if form1.Panel2.visible then x:=x-60;
-form1.groupbox4.Left:=((x-form1.groupbox4.width) div 2)+3;
-form1.groupbox4.top:=36;
-form1.panel4.top:=0;
-form1.Panel4.Left:=5;
+fix_screen_pos(x,principal1.groupbox4.height+60);
+if principal1.Panel2.visible then x:=x-60;
+principal1.groupbox4.Left:=((x-principal1.groupbox4.width) div 2)+3;
+principal1.groupbox4.top:=36;
+principal1.panel4.top:=0;
+principal1.Panel4.Left:=5;
 {$else}
 fix_screen_pos(x,child.height+60);
-if form1.Panel2.visible then x:=x-60;
+if principal1.Panel2.visible then x:=x-60;
 child.Left:=(x-child.width) div 2;
 {$endif}
 {$endif}
 //pongo el nombre de la maquina...
 change_caption(llamadas_maquina.caption);
 if main_vars.center_screen then begin
-  form1.Left:=(screen.Width div 2)-(form1.ClientWidth div 2);
-  form1.Top:=(screen.Height div 2)-(form1.ClientHeight div 2);
+  principal1.Left:=(screen.Width div 2)-(principal1.ClientWidth div 2);
+  principal1.Top:=(screen.Height div 2)-(principal1.ClientHeight div 2);
 end;
 SDL_SetWindowSize(window_render,x,y);
 if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
@@ -312,10 +312,10 @@ handle_:=child.Handle;
 if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
 {$else}
 {$ifdef windows}
-handle_:=form1.panel4.Handle;
+handle_:=principal1.panel4.Handle;
 if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
 {$else}
-form1.groupbox4.visible:=false;
+principal1.groupbox4.visible:=false;
 if window_render=nil then window_render:=SDL_CreateWindow('',SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,x,y,0);
 {$endif}
 {$endif}
@@ -401,12 +401,12 @@ end else begin
   window_render:=SDL_CreateWindowFrom(pointer(handle_));
   {$else}
   {$ifdef windows}
-  form1.panel4.visible:=false;
-  form1.panel4.visible:=true;
-  handle_:=form1.panel4.Handle;
+  principal1.panel4.visible:=false;
+  principal1.panel4.visible:=true;
+  handle_:=principal1.panel4.Handle;
   window_render:=SDL_CreateWindowFrom(pointer(handle_));
   {$else}
-  form1.groupbox4.visible:=false;
+  principal1.groupbox4.visible:=false;
   window_render:=SDL_CreateWindow('',SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,0);
   {$endif}
   {$endif}
@@ -655,7 +655,7 @@ child.Caption:=nombre;
 {$ifndef windows}
 SDL_SetWindowTitle(window_render,pointer(nombre));
 {$Else}
-form1.GroupBox4.Caption:=nombre;
+principal1.GroupBox4.Caption:=nombre;
 {$endif}
 {$ENDIF}
 end;
@@ -727,7 +727,7 @@ llamadas_maquina.fps_max:=60;
 main_vars.vactual:=0;
 main_vars.mensaje_general:='';
 sound_status.canales_usados:=-1;
-form1.timer1.Enabled:=false;
+principal1.timer1.Enabled:=false;
 main_screen.rot90_screen:=false;
 main_screen.rol90_screen:=false;
 main_screen.flip_main_screen:=false;

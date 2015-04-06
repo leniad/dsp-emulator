@@ -62,17 +62,17 @@ uses principal;
 
 procedure Cargar_chip8;
 begin
-form1.Panel2.Visible:=true;
-form1.BitBtn9.visible:=false;
-form1.BitBtn10.Enabled:=true;
-form1.BitBtn10.Glyph:=nil;
-form1.imagelist2.GetBitmap(4,form1.BitBtn10.Glyph);
-form1.BitBtn10.visible:=true;
-form1.BitBtn10.OnClick:=form1.fLoadCartucho;
-form1.BitBtn11.visible:=true;
-form1.BitBtn11.Enabled:=true;
-form1.BitBtn12.visible:=false;
-form1.BitBtn14.visible:=false;
+principal1.Panel2.Visible:=true;
+principal1.BitBtn9.visible:=false;
+principal1.BitBtn10.Enabled:=true;
+principal1.BitBtn10.Glyph:=nil;
+principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
+principal1.BitBtn10.visible:=true;
+principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+principal1.BitBtn11.visible:=true;
+principal1.BitBtn11.Enabled:=true;
+principal1.BitBtn12.visible:=false;
+principal1.BitBtn14.visible:=false;
 llamadas_maquina.iniciar:=iniciar_chip8;
 llamadas_maquina.bucle_general:=chip8_principal;
 llamadas_maquina.cerrar:=cerrar_chip8;

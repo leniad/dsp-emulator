@@ -1,7 +1,7 @@
-object Form6: TForm6
-  Left = 300
+object load_dsk: Tload_dsk
+  Left = 462
   Height = 407
-  Top = 259
+  Top = 233
   Width = 568
   BorderIcons = []
   BorderStyle = bsSingle
@@ -15,7 +15,7 @@ object Form6: TForm6
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '1.3'
+  LCLVersion = '1.4.0.2'
   object GroupBox1: TGroupBox
     Left = 288
     Height = 192

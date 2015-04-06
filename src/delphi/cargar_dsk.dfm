@@ -1,4 +1,4 @@
-object Form6: TForm6
+object load_dsk: Tload_dsk
   Left = 183
   Top = 154
   Caption = 'Open/Abrir DSK'
