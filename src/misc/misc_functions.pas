@@ -27,7 +27,7 @@ uses principal,main_engine;
 procedure fix_screen_pos(width,height:word);
 begin
 {$ifndef windows}
-form1.BorderStyle:=bsSizeable;
+principal1.BorderStyle:=bsSizeable;
 {$endif}
 if width<>0 then principal1.ClientWidth:=width;
 if height<>0 then principal1.ClientHeight:=height;

@@ -104,11 +104,6 @@ const
   DIV_64  =    28;       // divisor for 1.78979 MHz clock to 63.9211 kHz */
   DIV_15  =    114;      // divisor for 1.78979 MHz clock to 15.6999 kHz */
 
-//#define P4(chip)  chip->poly4[chip->p4]
-//#define P5(chip)  chip->poly5[chip->p5]
-//#define P9(chip)  chip->poly9[chip->p9]
-//#define P17(chip) chip->poly17[chip->p17]
-
   CLK_1= 0;
   CLK_28= 1;
   CLK_114= 2;
@@ -117,8 +112,8 @@ const
   clock_divisors:array[0..2] of integer= (1, DIV_64, DIV_15);
 
 type
-  serin_allpot=function(offset:word):byte;
-  single_pot=function:byte;
+  serin_allpot=function(offset:byte):byte;
+  single_pot=function(offset:byte):byte;
   irq_funct=procedure(irq:byte);
 
   pokey_channel=class
@@ -141,18 +136,20 @@ type
   end;
 
   pokey_chip=class(snd_chip_class)
-        constructor Create(num:byte;clock:dword;cpu:byte;cpu_clock:dword);
+        constructor Create(num:byte;clock:dword);
         procedure Free;
         destructor Destroy;
         procedure update;
+        procedure reset;
       public
         function read(offset:word):byte;
         procedure write(offset:word;data:byte);
+        procedure change_pot(pot0,pot1,pot2,pot3,pot4,pot5,pot6,pot7:single_pot);
         //function save_snapshot(data:pbyte):word;
         //procedure load_snapshot(data:pbyte);
       private
 	      // internal state
-	      stream,number,buf_pos:byte;
+	      number,buf_pos:byte;
 	      channel:array[0..POKEY_CHANNELS-1] of pokey_channel;
 
 	      output_:dword;        // raw output */
@@ -214,6 +211,18 @@ type
   pokey_0,pokey_1,pokey_2:pokey_chip;
 
 implementation
+
+procedure pokey_chip.change_pot(pot0,pot1,pot2,pot3,pot4,pot5,pot6,pot7:single_pot);
+begin
+  self.pot0_r_cb:=pot0;
+  self.pot1_r_cb:=pot1;
+  self.pot2_r_cb:=pot2;
+  self.pot3_r_cb:=pot3;
+  self.pot4_r_cb:=pot4;
+  self.pot5_r_cb:=pot5;
+  self.pot6_r_cb:=pot6;
+  self.pot7_r_cb:=pot7;
+end;
 
 procedure pokey_chip.update_internal;
 var
@@ -315,6 +324,37 @@ begin
   check_borrow:=false;
 end;
 
+procedure pokey_chip.reset;
+var
+  i:byte;
+begin
+  self.output_:=0;
+  // Setup channels */
+	for i:=0 to (POKEY_CHANNELS-1) do self.channel[i].INTMask:=0;
+	self.channel[CHAN1].INTMask:=IRQ_TIMR1;
+	self.channel[CHAN2].INTMask:=IRQ_TIMR2;
+	self.channel[CHAN4].INTMask:=IRQ_TIMR4;
+	self.KBCODE:=$09;         // Atari 800 'no key' */
+	self.SKCTL:=SK_RESET;  // let the RNG run after reset */
+	self.SKSTAT:=0;
+	self.IRQST:=0;
+	self.IRQEN:=0;
+	self.AUDCTL:=0;
+	self.p4:=0;
+	self.p5:=0;
+	self.p9:=0;
+	self.p17:=0;
+	self.ALLPOT:=0;
+	self.pot_counter:=0;
+	self.kbd_cnt:=0;
+	self.out_filter:=0;
+	self.output_:=0;
+	self.kbd_state:=0;
+	// reset more internal state */
+	for i:=0 to 2 do self.clock_cnt[i]:=0;
+	for i:=0 to 7 do self.POTx[i]:=0;
+end;
+
 procedure pokey_chip.vol_init;
 const
   resistors:array[0..3] of double=(90000, 26500, 8050, 3400);
@@ -397,7 +437,7 @@ begin
 	end;
 end;
 
-constructor pokey_chip.Create(num:byte;clock:dword;cpu:byte;cpu_clock:dword);
+constructor pokey_chip.Create(num:byte;clock:dword);
 var
   i:integer;
 begin
@@ -405,9 +445,9 @@ begin
   self.number:=num;
   self.buf_pos:=0;
   case num of
-    0:init_timer(cpu,cpu_clock/clock,pokey0_update_internal,true);
-    1:init_timer(cpu,cpu_clock/clock,pokey1_update_internal,true);
-    2:init_timer(cpu,cpu_clock/clock,pokey2_update_internal,true);
+    0:init_timer(sound_status.cpu_num,sound_status.cpu_clock/clock,pokey0_update_internal,true);
+    1:init_timer(sound_status.cpu_num,sound_status.cpu_clock/clock,pokey1_update_internal,true);
+    2:init_timer(sound_status.cpu_num,sound_status.cpu_clock/clock,pokey2_update_internal,true);
   end;
 	// Setup channels */
 	for i:=0 to (POKEY_CHANNELS-1) do begin
@@ -474,7 +514,7 @@ begin
   self.irq_f:=nil;
 	//self.serout_w_cb:=nil;
 
-	self.stream:=init_channel;
+	self.tsample_num:=init_channel;
 end;
 
 destructor pokey_chip.Destroy;
@@ -542,12 +582,57 @@ end;
 
 procedure pokey_chip.potgo;
 var
-  pot:integer;
+  pot,r:byte;
+procedure update_pot;
 begin
-  self.ALLPOT:=$00;
+if (r>=228) then r:=228;
+if (r=0) then begin
+  // immediately set the ready - bit of m_ALLPOT
+  // In this case, most likely no capacitor is connected
+  self.ALLPOT:=self.ALLPOT or (1 shl pot);
+end;
+// final value */
+self.POTx[pot]:=r;
+end;
+begin
+  self.ALLPOT:=0;
 	self.pot_counter:=0;
 	for pot:=0 to 7 do begin
 		self.POTx[pot]:=228;
+    case pot of
+      0:if(addr(self.pot0_r_cb)<>nil) then begin
+          r:=self.pot0_r_cb(pot);
+          update_pot;
+        end;
+      1:if(addr(self.pot1_r_cb)<>nil) then begin
+          r:=self.pot1_r_cb(pot);
+          update_pot;
+        end;
+      2:if(addr(self.pot2_r_cb)<>nil) then begin
+          r:=self.pot2_r_cb(pot);
+          update_pot;
+        end;
+      3:if(addr(self.pot3_r_cb)<>nil) then begin
+          r:=self.pot3_r_cb(pot);
+          update_pot;
+        end;
+      4:if(addr(self.pot4_r_cb)<>nil) then begin
+          r:=self.pot4_r_cb(pot);
+          update_pot;
+        end;
+      5:if(addr(self.pot5_r_cb)<>nil) then begin
+          r:=self.pot5_r_cb(pot);
+          update_pot;
+        end;
+      6:if(addr(self.pot6_r_cb)<>nil) then begin
+          r:=self.pot6_r_cb(pot);
+          update_pot;
+        end;
+      7:if(addr(self.pot7_r_cb)<>nil) then begin
+          r:=self.pot7_r_cb(pot);
+          update_pot;
+        end;
+    end;
   end;
 end;
 
@@ -737,22 +822,17 @@ begin
       else self.channel[CHAN1].filter_sample:=1;
 	end;
 	for ch:=0 to 3 do
-    if (self.channel[ch].AUDC and VOLUME_ONLY)<>0 then
-      sum:=sum or (((self.channel[ch].output_ xor self.channel[ch].filter_sample) or (self.channel[ch].AUDC and VOLUME_MASK)) shl (ch*4))
-        else
-      sum:=sum or ((self.channel[ch].output_ xor self.channel[ch].filter_sample) shl (ch*4));
+    if (((self.channel[ch].output_ xor self.channel[ch].filter_sample)<>0) or ((self.channel[ch].AUDC and VOLUME_ONLY)<>0)) then
+      sum:=sum or ((self.channel[ch].AUDC and VOLUME_MASK) shl (ch*4));
+      //else sum:= sum or (0 shl (ch*4))
   self.output_:=sum;
 end;
 
 
 procedure pokey0_update_internal;
-//var
-//  temp:integer;
 begin
   pokey_0.step_one_clock;
   pokey_0.update_internal;
-  //temp:=(tsample[pokey_0.stream,sound_status.posicion_sonido]+pokey_0.output_) div 2;
-  //tsample[pokey_0.stream,sound_status.posicion_sonido]:=temp;
 end;
 
 procedure pokey1_update_internal;
@@ -769,7 +849,7 @@ end;
 
 procedure pokey_chip.update;
 begin
-  tsample[self.stream,sound_status.posicion_sonido]:=self.output_;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=self.output_;
   if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=self.output_;
 end;
 

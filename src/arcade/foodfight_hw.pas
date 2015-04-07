@@ -14,6 +14,7 @@ procedure cerrar_foodf;
 function foodf_getword(direccion:dword;putbyte:boolean):word;
 procedure foodf_putword(direccion:dword;valor:word);
 procedure foodf_sound_update;
+function foodf_pot_r(pot:byte):byte;
 
 const
         foodf_rom:array[0..8] of tipo_roms=(
@@ -71,15 +72,16 @@ screen_mod_scroll(1,256,256,255,255,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(12096000 div 2,259);
+main_m68000:=cpu_m68000.create(trunc(12096000/2),259);
 main_m68000.change_ram16_calls(foodf_getword,foodf_putword);
 main_m68000.init_sound(foodf_sound_update);
 //Init Analog
 init_analog(main_m68000.numero_cpu,main_m68000.clock,100,10,$7f,$ff,0);
 //Sound Chips
-pokey_0:=pokey_chip.create(0,600000,main_m68000.numero_cpu,6048000);
-pokey_1:=pokey_chip.create(1,600000,main_m68000.numero_cpu,6048000);
-pokey_2:=pokey_chip.create(2,600000,main_m68000.numero_cpu,6048000);
+pokey_0:=pokey_chip.create(0,trunc(12096000/2/10));
+pokey_0.change_pot(foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r);
+pokey_1:=pokey_chip.create(1,trunc(12096000/2/10));
+pokey_2:=pokey_chip.create(2,trunc(12096000/2/10));
 //cargar roms
 if not(cargar_roms16w(@rom[0],@foodf_rom[0],'foodf.zip',0)) then exit;
 //convertir chars
@@ -112,6 +114,9 @@ procedure cerrar_foodf;
 begin
 write_file(Directory.Arcade_nvram+'foodf.nv',@nvram[0],$200);
 main_m68000.free;
+pokey_0.Free;
+pokey_1.Free;
+pokey_2.Free;
 close_audio;
 close_video;
 end;
@@ -119,6 +124,9 @@ end;
 procedure reset_foodf;
 begin
  main_m68000.reset;
+ pokey_0.reset;
+ pokey_1.reset;
+ pokey_2.reset;
  reset_audio;
  marcade.in0:=$FF;
  analog_select:=0;
@@ -280,6 +288,11 @@ case direccion of
     $a80000..$abffff:pokey_0.write((direccion and $1f) shr 1,valor and $ff);
     $ac0000..$afffff:pokey_2.write((direccion and $1f) shr 1,valor and $ff);
 end;
+end;
+
+function foodf_pot_r(pot:byte):byte;
+begin
+  foodf_pot_r:=(marcade.dswa shr pot) shl 7;
 end;
 
 procedure foodf_sound_update;
