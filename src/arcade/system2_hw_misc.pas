@@ -62,7 +62,7 @@ begin
 init_gfx(0,8,8,4096);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0,$8000*8,$10000*8);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 
 begin

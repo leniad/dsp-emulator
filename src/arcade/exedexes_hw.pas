@@ -138,24 +138,24 @@ if not(cargar_roms(@mem_snd[0],@exedexes_snd_rom,'exedexes.zip')) then exit;
 if not(cargar_roms(@memoria_temp[0],@exedexes_char,'exedexes.zip')) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //tiles 32x32
 if not(cargar_roms(@memoria_temp[0],@exedexes_tiles1,'exedexes.zip')) then exit;
 init_gfx(1,32,32,64);
 gfx_set_desc_data(2,0,256*8,0,4);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
 //tiles 16x16
 if not(cargar_roms(@memoria_temp[0],@exedexes_tiles2[0],'exedexes.zip',0)) then exit;
 init_gfx(2,16,16,256);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@exedexes_sprites[0],'exedexes.zip',0)) then exit;
 init_gfx(3,16,16,256);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(@gfx[3],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //poner la paleta y clut
 if not(cargar_roms(@memoria_temp[0],@exedexes_pal[0],'exedexes.zip',0)) then exit;
 for f:=0 to $ff do begin

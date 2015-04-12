@@ -98,17 +98,17 @@ if not(cargar_roms(@memoria_temp[0],@btime_char[0],'btime.zip',0)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //sprites
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*256*16*16,256*16*16,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //Cargar tiles
 if not(cargar_roms(@memoria_temp[0],@btime_tiles[0],'btime.zip',0)) then exit;
 init_gfx(2,16,16,64);
 gfx_set_desc_data(3,0,32*8,2*64*16*16,64*16*16,0);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 if not(cargar_roms(@mem_tiles[0],@btime_tiles_mem,'btime.zip',1)) then exit;
 //DIP
 marcade.dswa:=$3f;

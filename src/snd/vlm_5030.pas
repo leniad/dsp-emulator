@@ -429,7 +429,7 @@ begin
 			if (u[0] > 511) then val:=511 shl 6
 			  else if (u[0] < -511) then val:=-511 shl 6
 			    else val:=u[0] shl 6;
-      self.out_:=val*self.amp;
+      self.out_:=trunc(val*self.amp);
       if self.out_<-32767 then self.out_:=-32767
         else if self.out_>32767 then self.out_:=32767;
 			// sample count */

@@ -102,7 +102,7 @@ if not(cargar_roms(@memoria_temp[0],@srd_char,'srdarwin.zip',1)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,4);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //Cargar tiles y ponerlas en su sitio
 if not(cargar_roms(@memoria_temp[0],@srd_tiles[0],'srdarwin.zip',0)) then exit;
 for f:=0 to 3 do copymemory(@memoria_temp2[$10000*f],@memoria_temp[$4000*f],$4000);
@@ -111,13 +111,13 @@ init_gfx(1,16,16,$400);
 for f:=0 to 7 do gfx[1].trans[f]:=true;
 gfx_set_desc_data(4,4,32*8,$8000*8,$8000*8+4,0,4);
 for f:=0 to 3 do
-  convert_gfx(@gfx[1],$100*f*16*16,@memoria_temp2[$10000*f],@pt_x[0],@pt_y[0],false,true);
+  convert_gfx(1,$100*f*16*16,@memoria_temp2[$10000*f],@pt_x[0],@pt_y[0],false,true);
 //Cargar sprites
 if not(cargar_roms(@memoria_temp[0],@srd_sprites[0],'srdarwin.zip',0)) then exit;
 init_gfx(2,16,16,$800);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,16*16,$10000*8,$20000*8,$0*8);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //final
 reset_dec8;
 iniciar_dec8:=true;

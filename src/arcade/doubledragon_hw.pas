@@ -107,20 +107,20 @@ begin
   init_gfx(0,8,8,num);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(4,0,32*8,0,2,4,6);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 procedure extract_tiles(num:word);
 begin
   init_gfx(1,16,16,num);
   gfx_set_desc_data(4,0,64*8,$20000*8+0,$20000*8+4,0,4);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
 procedure extract_sprites(num:word;pos:byte);
 begin
   init_gfx(2,16,16,num);
   gfx[2].trans[0]:=true;
   gfx_set_desc_data(4,0,64*8,pos*$10000*8+0,pos*$10000*8+4,0,4);
-  convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
 begin
 iniciar_ddragon:=false;

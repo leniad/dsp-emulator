@@ -111,18 +111,18 @@ if not(cargar_roms(@memoria_temp[0],@commando_char,'commando.zip')) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@commando_sprites[0],'commando.zip',0)) then exit;
 init_gfx(1,16,16,768);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //tiles
 if not(cargar_roms(@memoria_temp[0],@commando_tiles[0],'commando.zip',0)) then exit;
 init_gfx(2,16,16,1024);
 gfx_set_desc_data(3,0,32*8,0,$8000*8,$8000*8*2);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@commando_pal[0],'commando.zip',0)) then exit;
 for f:=0 to 255 do begin

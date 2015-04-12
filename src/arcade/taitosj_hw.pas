@@ -242,20 +242,20 @@ end;
 procedure conv_chars1;inline;
 begin
   gfx_set_desc_data(3,0,8*8,512*8*8,256*8*8,0);
-  convert_gfx(@gfx[0],0,@memoria[$9000],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria[$9000],@pc_x[0],@pc_y[0],false,false);
   //sprites
   gfx_set_desc_data(3,0,32*8,128*16*16,64*16*16,0);
-  convert_gfx(@gfx[1],0,@memoria[$9000],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,@memoria[$9000],@ps_x[0],@ps_y[0],false,false);
 end;
 
 procedure conv_chars2;inline;
 begin
   //Chars 2
   gfx_set_desc_data(3,0,8*8,512*8*8,256*8*8,0);
-  convert_gfx(@gfx[2],0,@memoria[$a800],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(2,0,@memoria[$a800],@pc_x[0],@pc_y[0],false,false);
   //sprites
   gfx_set_desc_data(3,0,32*8,128*16*16,64*16*16,0);
-  convert_gfx(@gfx[3],0,@memoria[$a800],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(3,0,@memoria[$a800],@ps_x[0],@ps_y[0],false,false);
 end;
 
 procedure taitosj_cerrar;

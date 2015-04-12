@@ -128,19 +128,19 @@ if not(cargar_roms(@memoria_temp[0],@mrdo_char1[0],'mrdo.zip',0)) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,512*8*8);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //convertir chars bg
 if not(cargar_roms(@memoria_temp[0],@mrdo_char2[0],'mrdo.zip',0)) then exit;
 init_gfx(1,8,8,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,512*8*8);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@mrdo_sprites[0],'mrdo.zip',0)) then exit;
 init_gfx(2,16,16,128);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(2,0,64*8,4,0);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@mrdo_pal[0],'mrdo.zip',0)) then exit;
 calc_paleta;

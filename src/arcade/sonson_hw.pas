@@ -105,13 +105,13 @@ if not(cargar_roms(@mem_snd[0],@sonson_sonido,'sonson.zip')) then exit;
 if not(cargar_roms(@memoria_temp[0],@sonson_char[0],'sonson.zip',0)) then exit;
 init_gfx(0,8,8,1024);
 gfx_set_desc_data(2,0,8*8,$2000*8,0*8);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@sonson_sprites[0],'sonson.zip',0)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,$8000*8,$4000*8,0*8);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //colores
 if not(cargar_roms(@memoria_temp[0],@sonson_prom[0],'sonson.zip',0)) then exit;
 for f:=0 to 31 do begin

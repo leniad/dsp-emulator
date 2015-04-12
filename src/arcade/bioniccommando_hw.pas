@@ -113,13 +113,13 @@ if not(cargar_roms(@memoria_temp[0],@bionicc_char,'bionicc.zip',1)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,128,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //convertir bg
 if not(cargar_roms(@memoria_temp[0],@bionicc_bg[0],'bionicc.zip',0)) then exit;
 init_gfx(1,8,8,2048);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128,($8000*8)+4,$8000*8,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //convertir fg
 if not(cargar_roms(@memoria_temp[0],@bionicc_fg[0],'bionicc.zip',0)) then exit;
 init_gfx(2,16,16,2048);
@@ -131,13 +131,13 @@ gfx[2].trans_alt[1,4]:=true;
 gfx[2].trans_alt[1,5]:=true;
 gfx[2].trans_alt[1,15]:=true;
 gfx_set_desc_data(4,0,512,($20000*8)+4,$20000*8,4,0);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@pf_x[0],@pf_y[0],false,false);
+convert_gfx(2,0,@memoria_temp[0],@pf_x[0],@pf_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@bionicc_sprites[0],'bionicc.zip',0)) then exit;
 init_gfx(3,16,16,2048);
 gfx[3].trans[15]:=true;
 gfx_set_desc_data(4,0,256,$30000*8,$20000*8,$10000*8,0);
-convert_gfx(@gfx[3],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //DIP
 marcade.dswa:=$dfff;
 marcade.dswa_val:=@bionicc_dip;

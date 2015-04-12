@@ -105,20 +105,20 @@ begin
 init_gfx(0,8,8,num);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0*8*8,num*8*8);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 end;
 procedure make_tiles(num:word);
 begin
   init_gfx(1,8,8,num);
   gfx_set_desc_data(4,0,8*8,num*8*8*0,num*8*8*1,num*8*8*2,num*8*8*3);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 end;
 procedure make_sprites(num:word);
 begin
   init_gfx(2,16,16,num);
   gfx[2].trans[0]:=true;
   gfx_set_desc_data(4,0,32*8,num*32*8*0,num*32*8*1,num*32*8*2,num*32*8*3);
-  convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 end;
 
 begin

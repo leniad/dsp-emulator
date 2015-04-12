@@ -205,14 +205,14 @@ begin
   init_gfx(ngfx,8,8,num);
   gfx[ngfx].trans[15]:=true;
   gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
-  convert_gfx(@gfx[ngfx],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(ngfx,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 end;
 procedure convert_sprites(ngfx:byte;num:dword);
 begin
   init_gfx(ngfx,16,16,num);
   gfx[ngfx].trans[15]:=true;
   gfx_set_desc_data(4,0,16*16*4,0,1,2,3);
-  convert_gfx(@gfx[ngfx],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(ngfx,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 end;
 procedure convert_pri;
 var

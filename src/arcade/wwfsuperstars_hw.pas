@@ -104,18 +104,18 @@ if not(cargar_roms(memoria_temp,@wwfsstar_char,'wwfsstar.zip',1)) then exit;
 init_gfx(0,8,8,$1000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,2,4,6);
-convert_gfx(@gfx[0],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 //convertir background
 if not(cargar_roms(memoria_temp,@wwfsstar_bg[0],'wwfsstar.zip',0)) then exit;
 init_gfx(1,16,16,$1000);
 gfx_set_desc_data(4,0,64*8,$40000*8+0,$40000*8+4,0,4);
-convert_gfx(@gfx[1],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(memoria_temp,@wwfsstar_sprites[0],'wwfsstar.zip',0)) then exit;
 init_gfx(2,16,16,$4000);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$100000*8+0,$100000*8+4,0,4);
-convert_gfx(@gfx[2],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@wwfsstar_dip_a;

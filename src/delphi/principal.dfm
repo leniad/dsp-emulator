@@ -2050,6 +2050,11 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object Gyruss1: TMenuItem
+            Caption = 'Gyruss'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2637,7 +2642,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010105000700040320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000700080320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

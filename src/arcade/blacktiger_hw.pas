@@ -134,13 +134,13 @@ if not(cargar_roms(@memoria_temp[0],@blktiger_char,'blktiger.zip')) then exit;
 init_gfx(0,8,8,2048);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@blktiger_sprites[0],'blktiger.zip',0)) then exit;
 init_gfx(1,16,16,$800);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,32*16,$800*32*16+4,$800*32*16+0,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //tiles
 if not(cargar_roms(@memoria_temp[0],@blktiger_tiles[0],'blktiger.zip',0)) then exit;
 init_gfx(2,16,16,$800);
@@ -150,7 +150,7 @@ for f:=4 to 15 do gfx[2].trans_alt[1,f]:=true;
 for f:=8 to 15 do gfx[2].trans_alt[2,f]:=true;
 for f:=12 to 15 do gfx[2].trans_alt[3,f]:=true;
 gfx_set_desc_data(4,0,32*16,$800*32*16+4,$800*32*16+0,4,0);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$6f;

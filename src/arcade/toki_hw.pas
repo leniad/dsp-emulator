@@ -119,22 +119,22 @@ if not(cargar_roms(memoria_temp,@toki_char,'toki.zip',0)) then exit;
 init_gfx(0,8,8,4096);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,16*8,4096*16*8+0,4096*16*8+4,0,4);
-convert_gfx(@gfx[0],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 //sprites
 if not(cargar_roms(memoria_temp,@toki_sprites,'toki.zip',0)) then exit;
 init_gfx(1,16,16,8192);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,2*4,3*4,0*4,1*4);
-convert_gfx(@gfx[1],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //tiles
 if not(cargar_roms(memoria_temp,@toki_tiles1,'toki.zip',1)) then exit;
 init_gfx(2,16,16,4096);
 gfx[2].trans[15]:=true;
-convert_gfx(@gfx[2],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 if not(cargar_roms(memoria_temp,@toki_tiles2,'toki.zip',1)) then exit;
 init_gfx(3,16,16,4096);
 gfx[3].trans[15]:=true;
-convert_gfx(@gfx[3],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //DIP
 marcade.dswa:=$ffdf;
 marcade.dswa_val:=@toki_dip;

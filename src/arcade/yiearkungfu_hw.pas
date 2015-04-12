@@ -97,13 +97,13 @@ if not(cargar_roms(@memoria[0],@yiear_rom[0],'yiear.zip',0)) then exit;
 if not(cargar_roms(@memoria_temp[0],@yiear_char[0],'yiear.zip',0)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,16*8,4,0,$2000*8+4,$2000*8+0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@yiear_sprites[0],'yiear.zip',0)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,4,0,$8000*8+4,$8000*8+0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //paleta
 if not(cargar_roms(@memoria_temp[0],@yiear_pal,'yiear.zip')) then exit;
 for f:=0 to 31 do begin

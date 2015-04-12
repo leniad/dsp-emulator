@@ -93,14 +93,14 @@ if not(cargar_roms(@memoria_temp[0],@mikie_char,'mikie.zip',1)) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@mikie_sprites[0],'mikie.zip',0)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 for f:=0 to 1 do begin
   gfx_set_desc_data(4,2,128*8,0+f*8,4+f*8,f*8+$8000*8+0,f*8+$8000*8+4);
-  convert_gfx(@gfx[1],$100*f*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(1,$100*f*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end;
 //paleta
 if not(cargar_roms(@memoria_temp[0],@mikie_pal[0],'mikie.zip',0)) then exit;

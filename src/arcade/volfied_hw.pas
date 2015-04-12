@@ -102,7 +102,7 @@ if not(cargar_roms16b(memoria_temp,@volfied_sprites,'volfied.zip',0)) then exit;
 init_gfx(0,16,16,$2000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(@gfx[0],0,memoria_temp,@ps_x[0],@ps_y[0],false,true);
+convert_gfx(0,0,memoria_temp,@ps_x[0],@ps_y[0],false,true);
 freemem(memoria_temp);
 //DIP
 marcade.dswa:=$fe;

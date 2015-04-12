@@ -102,13 +102,13 @@ konami1_decode(@memoria[$8000],@mem_opcodes[0],$8000);
 if not(cargar_roms(@memoria_temp[0],@jailbreak_char[0],'jailbrek.zip',0)) then exit;
 init_gfx(0,8,8,1024);
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@jailbreak_sprites[0],'jailbrek.zip',0)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //paleta
 if not(cargar_roms(@memoria_temp[0],@jailbreak_pal[0],'jailbrek.zip',0)) then exit;
 for f:=0 to $1f do begin

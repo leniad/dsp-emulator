@@ -102,19 +102,19 @@ if not(cargar_roms(@mem_snd[0],@knjoe_sound,'kncljoe.zip')) then exit;
 if not(cargar_roms(@memoria_temp[0],@knjoe_tiles[0],'kncljoe.zip',0)) then exit;
 init_gfx(0,8,8,$800);
 gfx_set_desc_data(3,0,8*8,2*$800*8*8,$800*8*8,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@knjoe_sprites[0],'kncljoe.zip',0)) then exit;
 init_gfx(1,16,16,$400);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*$400*32*8,$400*32*8,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //convertir sprites 2
 if not(cargar_roms(@memoria_temp[0],@knjoe_sprites2[0],'kncljoe.zip',0)) then exit;
 init_gfx(2,16,16,$200);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*$200*32*8,$200*32*8,0);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@knjoe_pal[0],'kncljoe.zip',0)) then exit;
 for f:=0 to $7f do begin

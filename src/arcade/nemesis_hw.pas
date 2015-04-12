@@ -214,35 +214,35 @@ begin
 case num of
   0:begin//8x8 char
       gfx_set_desc_data(4,0,4*8*8,0,1,2,3);
-      convert_gfx(@gfx[0],0,@char_ram[0],@pc_x[0],@pc_y[0],false,flipy_char);
+      convert_gfx(0,0,@char_ram[0],@pc_x[0],@pc_y[0],false,flipy_char);
   end;
   1:begin//16x16
       gfx_set_desc_data(4,1,4*16*16,0,1,2,3);
-      convert_gfx(@gfx[1],0,@char_ram[0],@sprite0_x[0],@sprite0_y[0],false,flipy_char);
+      convert_gfx(1,0,@char_ram[0],@sprite0_x[0],@sprite0_y[0],false,flipy_char);
   end;
   2:begin//32x16
       gfx_set_desc_data(4,2,4*32*16,0,1,2,3);
-      convert_gfx(@gfx[2],0,@char_ram[0],@sprite1_x[0],@sprite1_y[0],false,flipy_char);
+      convert_gfx(2,0,@char_ram[0],@sprite1_x[0],@sprite1_y[0],false,flipy_char);
   end;
   3:begin//16x32
       gfx_set_desc_data(4,3,4*8*16,0,1,2,3);
-      convert_gfx(@gfx[3],0,@char_ram[0],@pc_x[0],@sprite4_y[0],false,flipy_char);
+      convert_gfx(3,0,@char_ram[0],@pc_x[0],@sprite4_y[0],false,flipy_char);
   end;
   4:begin//32x32
       gfx_set_desc_data(4,4,4*32*32,0,1,2,3);
-      convert_gfx(@gfx[4],0,@char_ram[0],@sprite1_x[0],@sprite3_y[0],false,flipy_char);
+      convert_gfx(4,0,@char_ram[0],@sprite1_x[0],@sprite3_y[0],false,flipy_char);
   end;
   5:begin//8x16
       gfx_set_desc_data(4,5,4*16*32,0,1,2,3);
-      convert_gfx(@gfx[5],0,@char_ram[0],@sprite0_x[0],@sprite3_y[0],false,flipy_char);
+      convert_gfx(5,0,@char_ram[0],@sprite0_x[0],@sprite3_y[0],false,flipy_char);
   end;
   6:begin//16x8
       gfx_set_desc_data(4,6,4*16*8,0,1,2,3);
-      convert_gfx(@gfx[6],0,@char_ram[0],@sprite0_x[0],@sprite5_y[0],false,flipy_char);
+      convert_gfx(6,0,@char_ram[0],@sprite0_x[0],@sprite5_y[0],false,flipy_char);
   end;
   7:begin//64x64
       gfx_set_desc_data(4,7,4*64*64,0,1,2,3);
-      convert_gfx(@gfx[7],0,@char_ram[0],@sprite6_x[0],@sprite6_y[0],false,flipy_char);
+      convert_gfx(7,0,@char_ram[0],@sprite6_x[0],@sprite6_y[0],false,flipy_char);
   end;
 end;
 recalc_char[num]:=false;

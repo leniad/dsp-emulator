@@ -104,23 +104,23 @@ if not(cargar_roms(@memoria_temp[0],@bombjack_char[0],'bombjack.zip',0)) then ex
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0*8,512*8*8,512*2*8*8);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //convertir chars16
 if not(cargar_roms(@memoria_temp[0],@bombjack_char16[0],'bombjack.zip',0)) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,0,1024*8*8,1024*2*8*8);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@bombjack_sprites[0],'bombjack.zip',0)) then exit;
 init_gfx(2,16,16,128);
 gfx[2].trans[0]:=true;
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //sprites grandes
 init_gfx(3,32,32,32);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(3,0,128*8,0*8+$1000*8,1024*8*8+$1000*8,2*1024*8*8+$1000*8);
-convert_gfx(@gfx[3],0,@memoria_temp[0],@pt_x[0],@pt_y[0],true,false);
+convert_gfx(3,0,@memoria_temp[0],@pt_x[0],@pt_y[0],true,false);
 //final
 bombjack_reset;
 bombjack_iniciar:=true;

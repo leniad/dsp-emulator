@@ -94,7 +94,7 @@ begin
 init_gfx(0,8,8,$800);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 end;
 
 procedure tiger_road_tiles(nchars:word);
@@ -104,7 +104,7 @@ begin
 init_gfx(1,32,32,nchars);
 for f:=0 to 8 do gfx[1].trans[f]:=true;
 gfx_set_desc_data(4,0,256*8,nchars*256*8+4,nchars*256*8+0,4,0);
-convert_gfx(@gfx[1],0,memoria_temp,@pb_x[0],@pb_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@pb_x[0],@pb_y[0],false,false);
 end;
 
 procedure tiger_road_sprites(nchars:word);
@@ -112,7 +112,7 @@ begin
 init_gfx(2,16,16,nchars);
 gfx[2].trans[15]:=true;
 gfx_set_desc_data(4,0,32*8,nchars*32*8*3,nchars*32*8*2,nchars*32*8*1,nchars*32*8*0);
-convert_gfx(@gfx[2],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 end;
 
 begin

@@ -111,7 +111,7 @@ const
 begin
 init_gfx(ngfx,8,8,num);
 gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(@gfx[ngfx],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 end;
 
 procedure galaga_spr(num:word);
@@ -123,7 +123,7 @@ const
 begin
 init_gfx(1,16,16,num);
 gfx_set_desc_data(2,0,64*8,0,4);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end;
 
 begin
@@ -216,7 +216,7 @@ case main_vars.tipo_maquina of
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(1,0,8*8,0);
-          convert_gfx(@gfx[0],0,@memoria_temp[$0],@pc_x_digdug[0],@pc_y_digdug[0],true,false);
+          convert_gfx(0,0,@memoria_temp[$0],@pc_x_digdug[0],@pc_y_digdug[0],true,false);
           //sprites
           if not(cargar_roms(@memoria_temp[0],@digdug_sprites,'digdug.zip',0)) then exit;
           galaga_spr($100);

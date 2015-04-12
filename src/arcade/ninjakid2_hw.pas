@@ -160,14 +160,14 @@ begin
   lineswap_gfx_roms($8000,@memoria_temp[0],13);
   init_gfx(0,8,8,$400);
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 procedure extract_gr2(size:dword;num:byte;size_gr:word);
 begin
   lineswap_gfx_roms(size,@memoria_temp[0],14);
   init_gfx(num,16,16,size_gr);
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(@gfx[num],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(num,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
 begin
 iniciar_ninjakid2:=false;

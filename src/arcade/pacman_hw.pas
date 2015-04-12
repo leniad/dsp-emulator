@@ -222,13 +222,13 @@ procedure conv_chars;
 begin
   init_gfx(0,8,8,256);
   gfx_set_desc_data(2,0,16*8,0,4);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 end;
 procedure conv_sprites;
 begin
   init_gfx(1,16,16,64);
   gfx_set_desc_data(2,0,64*8,0,4);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end;
 begin
 iniciar_pacman:=false;

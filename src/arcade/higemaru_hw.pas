@@ -68,13 +68,13 @@ if not(cargar_roms(@memoria[0],@higemaru_rom[0],'higemaru.zip',0)) then exit;
 if not(cargar_roms(@memoria_temp[0],@higemaru_char,'higemaru.zip',1)) then exit;
 init_gfx(0,8,8,$200);
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@higemaru_sprites[0],'higemaru.zip',0)) then exit;
 init_gfx(1,16,16,$80);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$80*8*64+4,$80*8*64+0,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@higemaru_pal[0],'higemaru.zip',0)) then exit;
 for f:=0 to $1f do begin

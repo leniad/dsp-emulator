@@ -127,26 +127,26 @@ if not(cargar_roms(memoria_temp,@sfighter_char,'sf.zip',1)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 //convertir bg y cargar tile maps
 if not(cargar_roms(memoria_temp,@sfighter_bg[0],'sf.zip',0)) then exit;
 if not(cargar_roms(@ram_tile_map1[0],@sfighter_tile_map1[0],'sf.zip',0)) then exit;
 init_gfx(1,16,16,$1000);
 gfx_set_desc_data(4,0,64*8,4,0,$40000*8+4,$40000*8+0);
-convert_gfx(@gfx[1],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //convertir fg y cargar tile maps
 if not(cargar_roms(memoria_temp,@sfighter_fg[0],'sf.zip',0)) then exit;
 if not(cargar_roms(@ram_tile_map2[0],@sfighter_tile_map2[0],'sf.zip',0)) then exit;
 init_gfx(2,16,16,$2000);
 gfx[2].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,4,0,$80000*8+4,$80000*8+0);
-convert_gfx(@gfx[2],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //sprites
 if not(cargar_roms(memoria_temp,@sfighter_sprites[0],'sf.zip',0)) then exit;
 init_gfx(3,16,16,$4000);
 gfx[3].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,4,0,$e0000*8+4,$e0000*8+0);
-convert_gfx(@gfx[3],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //final
 freemem(memoria_temp);
 reset_sfighter;

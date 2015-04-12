@@ -88,19 +88,19 @@ if not(cargar_roms(@mem_snd[0],@jackal_sound,'jackal.zip',1)) then exit;
 if not(cargar_roms16b(@memoria_temp[0],@jackal_chars,'jackal.zip',0)) then exit;
 init_gfx(0,8,8,4096);
 gfx_set_desc_data(8,0,32*8,0,1,2,3,$40000*8+0,$40000*8+1,$40000*8+2,$40000*8+3);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //sprites 8
 init_gfx(1,8,8,4096*2);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,2,32*8,0,1,2,3);
-convert_gfx(@gfx[1],0,@memoria_temp[$20000],@pc_x[0],@pc_y[0],true,false);
-convert_gfx(@gfx[1],4096*8*8,@memoria_temp[$60000],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[$20000],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(1,4096*8*8,@memoria_temp[$60000],@pc_x[0],@pc_y[0],true,false);
 //tiles
 init_gfx(2,16,16,1024*2);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,2,32*32,0,1,2,3);
-convert_gfx(@gfx[2],0,@memoria_temp[$20000],@ps_x[0],@ps_y[0],true,false);
-convert_gfx(@gfx[2],1024*16*16,@memoria_temp[$60000],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(2,0,@memoria_temp[$20000],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(2,1024*16*16,@memoria_temp[$60000],@ps_x[0],@ps_y[0],true,false);
 //Color lookup
 if not(cargar_roms(@memoria_temp[0],@jackal_proms,'jackal.zip',0)) then exit;
 for f:=0 to $ff do gfx[0].colores[f]:=f or $100;

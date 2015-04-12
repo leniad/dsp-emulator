@@ -130,31 +130,31 @@ if not(cargar_roms(@memoria_temp[0],@starforce_fg[0],'starforc.zip',0)) then exi
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0,512*8*8,2*512*8*8);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //big sprites
 if not(cargar_roms(@memoria_temp[0],@starforce_sprites[0],'starforc.zip',0)) then exit;
 init_gfx(2,32,32,128);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,128*8,0,128*32*32,2*128*32*32);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
+convert_gfx(2,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
 //sprites
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,0,512*16*16,2*512*16*16);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //bg1
 if not(cargar_roms(@memoria_temp[0],@starforce_bg1[0],'starforc.zip',0)) then exit;
 init_gfx(3,16,16,768);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(3,3,32*8,0,256*16*16,2*256*16*16);
-convert_gfx(@gfx[3],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //bg2
 if not(cargar_roms(@memoria_temp[0],@starforce_bg2[0],'starforc.zip',0)) then exit;
-convert_gfx(@gfx[3],256*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(3,256*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //bg3
 if not(cargar_roms(@memoria_temp[0],@starforce_bg3[0],'starforc.zip',0)) then exit;
 gfx_set_desc_data(3,3,32*8,0,128*16*16,2*128*16*16);
-convert_gfx(@gfx[3],512*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(3,512*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //DIP
 marcade.dswa:=$c0;
 marcade.dswa_val:=@starforce_dipa;

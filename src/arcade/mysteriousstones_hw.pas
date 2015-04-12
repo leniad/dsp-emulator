@@ -117,16 +117,16 @@ if not(cargar_roms(@memoria_temp[0],@ms_char[0],'mystston.zip',0)) then exit;
 init_gfx(0,8,8,2048);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,$4000*8*2,$4000*8,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //sprites
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,$4000*8*2,$4000*8,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //Cargar sprites fondo
 if not(cargar_roms(@memoria_temp[0],@ms_sprite[0],'mystston.zip',0)) then exit;
 init_gfx(2,16,16,512);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@ms_pal,'mystston.zip',1)) then exit;
 compute_resistor_weights(0,	255, -1.0,

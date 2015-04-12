@@ -77,13 +77,13 @@ if not(cargar_roms(@memoria_temp[0],@timepilot_char,'timeplt.zip')) then exit;
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //cargar sprites
 if not(cargar_roms(@memoria_temp[0],@timepilot_sprt[0],'timeplt.zip',0)) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,64*8,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //paleta de colores
 if not(cargar_roms(@memoria_temp[0],@timepilot_pal[0],'timeplt.zip',0)) then exit;
 for f:=0 to 31 do begin

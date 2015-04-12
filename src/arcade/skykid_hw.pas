@@ -113,7 +113,7 @@ case  main_vars.tipo_maquina of
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+          convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
           //sprites
           fillchar(memoria_temp[0],$10000,0);
           if not(cargar_roms(@memoria_temp[0],@skykid_sprites[0],'skykid.zip',0)) then exit;
@@ -125,12 +125,12 @@ case  main_vars.tipo_maquina of
           end;
           init_gfx(1,16,16,$200);
           gfx_set_desc_data(3,0,64*8,$200*64*8+4,0,4);
-          convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+          convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
           //tiles
           if not(cargar_roms(@memoria_temp[0],@skykid_tiles,'skykid.zip')) then exit;
           init_gfx(2,8,8,$200);
           gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+          convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
           //Paleta
           if not(cargar_roms(@memoria_temp[0],@skykid_prom[0],'skykid.zip',0)) then exit;
           screen_flip:=false;
@@ -149,7 +149,7 @@ case  main_vars.tipo_maquina of
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+          convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
           //sprites
           fillchar(memoria_temp[0],$10000,0);
           if not(cargar_roms(@memoria_temp[0],@drgnbstr_sprites[0],'drgnbstr.zip',0)) then exit;
@@ -161,12 +161,12 @@ case  main_vars.tipo_maquina of
           end;
           init_gfx(1,16,16,$200);
           gfx_set_desc_data(3,0,64*8,$200*64*8+4,0,4);
-          convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+          convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
           //tiles
           if not(cargar_roms(@memoria_temp[0],@drgnbstr_tiles,'drgnbstr.zip')) then exit;
           init_gfx(2,8,8,$200);
           gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+          convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
           //Paleta
           if not(cargar_roms(@memoria_temp[0],@drgnbstr_prom[0],'drgnbstr.zip',0)) then exit;
           screen_flip:=true;

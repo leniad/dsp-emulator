@@ -14,7 +14,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="15"/>
       <RevisionNr Value="3"/>
-      <BuildNr Value="429"/>
+      <BuildNr Value="431"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.15"/>
     </VersionInfo>
@@ -59,8 +59,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="principal"/>
-        <TopLine Value="544"/>
-        <CursorPos X="15" Y="559"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="545"/>
+        <CursorPos X="15" Y="560"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -286,12 +287,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoadRom"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="144"/>
         <CursorPos X="10" Y="157"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit34>
       <Unit35>
@@ -301,11 +300,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="config_general"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="433"/>
         <CursorPos X="14" Y="447"/>
         <UsageCount Value="202"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit35>
       <Unit36>
@@ -315,12 +313,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="redefine"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="431"/>
         <CursorPos X="3" Y="452"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit36>
       <Unit37>
@@ -401,12 +397,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="cargar_dsk"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="58"/>
         <CursorPos Y="67"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit47>
       <Unit48>
@@ -416,11 +410,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="tape_window"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="56"/>
         <CursorPos X="12" Y="69"/>
         <UsageCount Value="221"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit48>
       <Unit49>
@@ -430,12 +423,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="cargar_spec"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="75"/>
         <CursorPos X="20" Y="93"/>
         <UsageCount Value="224"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit49>
       <Unit50>
@@ -445,12 +436,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="lenslock"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="69"/>
         <CursorPos X="13" Y="82"/>
         <UsageCount Value="224"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit50>
       <Unit51>
@@ -460,11 +449,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="config"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="149"/>
         <CursorPos X="62" Y="164"/>
         <UsageCount Value="224"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit51>
       <Unit52>
@@ -664,20 +652,21 @@
       </Unit80>
       <Unit81>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="468"/>
-        <CursorPos X="34" Y="481"/>
+        <UnitName Value="init_games"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="471"/>
+        <CursorPos X="44" Y="483"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit81>
       <Unit82>
         <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
         <UnitName Value="tehkanworldcup_hw"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="415"/>
         <CursorPos X="43" Y="429"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit82>
       <Unit83>
@@ -691,149 +680,53 @@
       <Unit84>
         <Filename Value="..\misc\tap_tzx.pas"/>
         <UnitName Value="tap_tzx"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="558"/>
         <CursorPos X="13" Y="570"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit84>
       <Unit85>
         <Filename Value="..\misc\snapshot.pas"/>
         <UnitName Value="snapshot"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="29"/>
         <CursorPos X="67" Y="42"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit85>
       <Unit86>
         <Filename Value="..\ordenadores\misc\spectrum_misc.pas"/>
         <UnitName Value="spectrum_misc"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="803"/>
         <CursorPos Y="816"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit86>
       <Unit87>
         <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
         <UnitName Value="amstrad_cpc"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="892"/>
         <CursorPos X="9" Y="905"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit87>
     </Units>
-    <JumpHistory Count="27" HistoryIndex="26">
+    <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="429" TopLine="412"/>
-      </Position1>
-      <Position2>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="430" TopLine="412"/>
-      </Position2>
-      <Position3>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="431" TopLine="412"/>
-      </Position3>
-      <Position4>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="425" TopLine="412"/>
-      </Position4>
-      <Position5>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="426" TopLine="412"/>
-      </Position5>
-      <Position6>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="427" TopLine="412"/>
-      </Position6>
-      <Position7>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="433" TopLine="412"/>
-      </Position7>
-      <Position8>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="425" TopLine="412"/>
-      </Position8>
-      <Position9>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="429" TopLine="412"/>
-      </Position9>
-      <Position10>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="430" TopLine="412"/>
-      </Position10>
-      <Position11>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="5" Column="60"/>
-      </Position11>
-      <Position12>
-        <Filename Value="..\arcade\tehkanworldcup_hw.pas"/>
-        <Caret Line="42" TopLine="29"/>
-      </Position12>
-      <Position13>
-        <Filename Value="..\misc\tap_tzx.pas"/>
-      </Position13>
-      <Position14>
-        <Filename Value="..\misc\tap_tzx.pas"/>
-        <Caret Line="434" Column="50" TopLine="422"/>
-      </Position14>
-      <Position15>
-        <Filename Value="..\misc\snapshot.pas"/>
-      </Position15>
-      <Position16>
-        <Filename Value="config.pas"/>
-        <Caret Line="2" Column="13"/>
-      </Position16>
-      <Position17>
-        <Filename Value="config.pas"/>
-        <Caret Line="113" Column="19" TopLine="99"/>
-      </Position17>
-      <Position18>
-        <Filename Value="config.pas"/>
-        <Caret Line="148" Column="15" TopLine="133"/>
-      </Position18>
-      <Position19>
-        <Filename Value="..\ordenadores\misc\spectrum_misc.pas"/>
-      </Position19>
-      <Position20>
-        <Filename Value="lenslock.pas"/>
-        <Caret Line="8" Column="34"/>
-      </Position20>
-      <Position21>
         <Filename Value="principal.pas"/>
         <Caret Line="402" Column="18" TopLine="391"/>
-      </Position21>
-      <Position22>
-        <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
-      </Position22>
-      <Position23>
-        <Filename Value="..\ordenadores\misc\spectrum_misc.pas"/>
-        <Caret Line="816" Column="10" TopLine="803"/>
-      </Position23>
-      <Position24>
-        <Filename Value="tape_window.pas"/>
-        <Caret Line="114" TopLine="93"/>
-      </Position24>
-      <Position25>
-        <Filename Value="config_general.pas"/>
-        <Caret Line="589" Column="36" TopLine="577"/>
-      </Position25>
-      <Position26>
-        <Filename Value="loadrom.pas"/>
-        <Caret Line="148" Column="6" TopLine="138"/>
-      </Position26>
-      <Position27>
-        <Filename Value="loadrom.pas"/>
-        <Caret Line="152" Column="70" TopLine="139"/>
-      </Position27>
+      </Position1>
+      <Position2>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="481" Column="34" TopLine="468"/>
+      </Position2>
+      <Position3>
+        <Filename Value="principal.pas"/>
+        <Caret Line="559" Column="15" TopLine="544"/>
+      </Position3>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

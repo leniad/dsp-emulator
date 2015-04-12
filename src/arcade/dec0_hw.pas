@@ -218,7 +218,7 @@ begin
 init_gfx(0,8,8,ch_num);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8,0,ch_num*8*8*2,ch_num*8*8*1,ch_num*8*8*3);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 
 procedure convert_tiles(num_gfx:byte;tl_num:word);
@@ -226,7 +226,7 @@ begin
 init_gfx(num_gfx,16,16,tl_num);
 gfx[num_gfx].trans[0]:=true;
 gfx_set_desc_data(4,0,16*16,tl_num*16*16*1,tl_num*16*16*3,tl_num*16*16*0,tl_num*16*16*2);
-convert_gfx(@gfx[num_gfx],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 end;
 
 begin

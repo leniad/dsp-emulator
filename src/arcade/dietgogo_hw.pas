@@ -96,18 +96,18 @@ deco56_decrypt_gfx(memoria_temp,$100000);
 init_gfx(0,8,8,$8000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,16*8,$8000*16*8+8,$8000*16*8+0,8,0);
-convert_gfx(@gfx[0],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 //Tiles
 init_gfx(1,16,16,$2000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*16,$2000*32*16+8,$2000*32*16+0,8,0);
-convert_gfx(@gfx[1],0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
 //Sprites
 if not(cargar_roms16b(memoria_temp,@dietgo_sprites[0],'dietgo.zip',0)) then exit;
 init_gfx(2,16,16,$4000);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*32,24,8,16,0);
-convert_gfx(@gfx[2],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //Proteccion deco104
 main_deco104:=cpu_deco_104.create;
 main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;

@@ -25,7 +25,7 @@ const
 
 type
   ay8910_chip=class(snd_chip_class)
-        constructor create(clock:integer;amp:byte;internal:boolean=false);
+        constructor create(clock:integer;amp:single;internal:boolean=false);
         procedure Free;
         destructor Destroy;
       public
@@ -61,7 +61,7 @@ type
 var
   salida_ay:array[0..3] of integer;
   vol_table:array[0..31] of single;
-  ay8910_0,ay8910_1,ay8910_2,ay8910_3:ay8910_chip;
+  ay8910_0,ay8910_1,ay8910_2,ay8910_3,ay8910_4:ay8910_chip;
 
 implementation
 
@@ -78,7 +78,7 @@ begin
   Vol_Table[0]:=0;
 end;
 
-constructor ay8910_chip.create(clock:integer;amp:byte;internal:boolean=false);
+constructor ay8910_chip.create(clock:integer;amp:single;internal:boolean=false);
 begin
   init_table;
   self.clock:=clock;
@@ -513,10 +513,10 @@ begin
       else if lout3<-32768 then lout3:=-32768;
     if temp2>32767 then temp2:=32767
       else if temp2<-32768 then temp2:=-32768;
-    salida_ay[0]:=temp2*self.amp;
-    salida_ay[1]:=lout1*self.amp;
-    salida_ay[2]:=lout2*self.amp;
-    salida_ay[3]:=lout3*self.amp;
+    salida_ay[0]:=trunc(temp2*self.amp);
+    salida_ay[1]:=trunc(lout1*self.amp);
+    salida_ay[2]:=trunc(lout2*self.amp);
+    salida_ay[3]:=trunc(lout3*self.amp);
     update_internal:=@salida_ay[0];
 end;
 

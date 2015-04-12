@@ -121,7 +121,7 @@ for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]); //invertir las roms
 init_gfx(0,8,8,$4000);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,16*8,0,4,$4000*16*8+0,$4000*16*8+4);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //DIP
 marcade.dswa:=$fe;
 marcade.dswb:=$ff;

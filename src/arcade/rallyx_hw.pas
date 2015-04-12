@@ -412,7 +412,7 @@ end else begin
   gfx[0].trans[3]:=true;
   gfx_set_desc_data(2,0,16*8,0,4);
 end;
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],(tipo=1),false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],(tipo=1),false);
 end;
 procedure cargar_sprites(tipo:byte);
 begin
@@ -420,10 +420,10 @@ init_gfx(1,16,16,64);
 gfx[1].trans[0]:=true;
 if tipo=1 then begin
   gfx_set_desc_data(2,0,64*8,4,0);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end else begin
   gfx_set_desc_data(2,0,64*8,0,4);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_rx[0],@ps_y[0],false,false);
+  convert_gfx(1,0,@memoria_temp[0],@ps_rx[0],@ps_y[0],false,false);
 end;
 end;
 procedure cargar_disparo;
@@ -431,7 +431,7 @@ begin
 init_gfx(2,4,4,8);
 gfx[2].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,6,7);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@pd_x[0],@pd_y[0],false,false)
+convert_gfx(2,0,@memoria_temp[0],@pd_x[0],@pd_y[0],false,false)
 end;
 begin
 iniciar_rallyxh:=false;

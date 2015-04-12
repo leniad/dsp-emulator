@@ -1248,14 +1248,14 @@ begin
   init_gfx(0,8,8,n);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(2,0,8*8,0,n*8*8);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 end;
 procedure convert_sprt(n:word);
 begin
   init_gfx(1,16,16,n);
   gfx[1].trans[0]:=true;
   gfx_set_desc_data(2,0,32*8,0,n*16*16);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end;
 begin
 iniciar_hgalaxian:=false;

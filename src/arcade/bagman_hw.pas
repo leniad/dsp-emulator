@@ -89,14 +89,14 @@ procedure conv_chars(num_gfx:byte);
 begin
   init_gfx(num_gfx,8,8,$200);
   gfx_set_desc_data(2,0,8*8,0,512*8*8);
-  convert_gfx(@gfx[num_gfx],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(num_gfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 end;
 procedure conv_sprites;
 begin
   init_gfx(1,16,16,$80);
   gfx[1].trans[0]:=true;
   gfx_set_desc_data(2,0,32*8,0,128*16*16);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end;
 begin
 iniciar_bagman:=false;

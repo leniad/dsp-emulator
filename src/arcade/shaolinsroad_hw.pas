@@ -94,13 +94,13 @@ if not(cargar_roms(@memoria[0],@shaolin_rom[0],'shaolins.zip',0)) then exit;
 if not(cargar_roms(@memoria_temp[0],@shaolin_char[0],'shaolins.zip',0)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,16*8,512*16*8+4,512*16*8+0,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@shaolin_sprites[0],'shaolins.zip',0)) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,256*64*8+4,256*64*8+0,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //paleta
 if not(cargar_roms(@memoria_temp[0],@shaolin_pal[0],'shaolins.zip',0)) then exit;
 for f:=0 to 255 do begin

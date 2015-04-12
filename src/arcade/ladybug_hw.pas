@@ -138,18 +138,18 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,0,8*8,0,512*8*8);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
         //convertir sprites
         if not(cargar_roms(@memoria_temp[0],@ladybug_sprites[0],'ladybug.zip',0)) then exit;
         init_gfx(1,16,16,128);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(2,0,64*8,1,0);
-        convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+        convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
         //convetir sprites pequeños
         init_gfx(2,8,8,512);
         gfx[2].trans[0]:=true;
         gfx_set_desc_data(2,0,16*8,1,0);
-        convert_gfx(@gfx[2],0,@memoria_temp[0],@pss_x[0],@pss_y[0],false,true);
+        convert_gfx(2,0,@memoria_temp[0],@pss_x[0],@pss_y[0],false,true);
         //DIP
         marcade.dswa:=$df;
         marcade.dswb:=$ff;
@@ -166,18 +166,18 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,0,8*8,0,512*8*8);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
         //convertir sprites
         if not(cargar_roms(@memoria_temp[0],@snapjack_sprites[0],'snapjack.zip',0)) then exit;
         init_gfx(1,16,16,128);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(2,0,64*8,1,0);
-        convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+        convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
         //convetir sprites pequeños
         init_gfx(2,8,8,512);
         gfx[2].trans[0]:=true;
         gfx_set_desc_data(2,0,16*8,1,0);
-        convert_gfx(@gfx[2],0,@memoria_temp[0],@pss_x[0],@pss_y[0],false,true);
+        convert_gfx(2,0,@memoria_temp[0],@pss_x[0],@pss_y[0],false,true);
         //DIP
         marcade.dswa:=$c7;
         marcade.dswb:=$ff;
@@ -194,18 +194,18 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,0,8*8,0,512*8*8);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
         //convertir sprites
         if not(cargar_roms(@memoria_temp[0],@cavenger_sprites[0],'cavenger.zip',0)) then exit;
         init_gfx(1,16,16,128);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(2,0,64*8,1,0);
-        convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+        convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
         //convetir sprites pequeños
         init_gfx(2,8,8,512);
         gfx[2].trans[0]:=true;
         gfx_set_desc_data(2,0,16*8,1,0);
-        convert_gfx(@gfx[2],0,@memoria_temp[0],@pss_x[0],@pss_y[0],false,true);
+        convert_gfx(2,0,@memoria_temp[0],@pss_x[0],@pss_y[0],false,true);
         //DIP
         marcade.dswa:=$c7;
         marcade.dswb:=$ff;

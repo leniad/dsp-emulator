@@ -105,10 +105,10 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,2,8*8,256*8*8,0);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
         //Segundo juego de chars
         if not(cargar_roms(@memoria_temp[0],@phoenix_char2[0],'phoenix.zip',0)) then exit;
-        convert_gfx(@gfx[0],256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
         //poner paleta
         if not(cargar_roms(@memoria_temp[0],@phoenix_pal[0],'phoenix.zip',0)) then exit;
         for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $60);
@@ -128,10 +128,10 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,2,8*8,256*8*8,0);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
         //Segundo juego de chars
         if not(cargar_roms(@memoria_temp[0],@pleiads_char2[0],'pleiads.zip',0)) then exit;
-        convert_gfx(@gfx[0],256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
         //poner paleta
         if not(cargar_roms(@memoria_temp[0],@pleiads_pal[0],'pleiads.zip',0)) then exit;
         for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $e0);

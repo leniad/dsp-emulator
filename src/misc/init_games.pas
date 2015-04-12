@@ -26,7 +26,7 @@ uses sysutils,main_engine,
   arabian_hw,higemaru_hw,bagman_hw,chip8_hw,zaxxon_hw,kangaroo_hw,
   bioniccommando_hw,wwfsuperstars_hw,rainbowislands_hw,volfied_hw,
   operationwolf_hw,outrun_hw,taitosj_hw,vulgus_hw,ddragon3_hw,blockout_hw,
-  foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw;
+  foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw;
 
 type
   tgame_desc=record
@@ -39,7 +39,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=212;
+  games_cont=213;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum.zip';grid:0;company:'Sinclair'),
@@ -251,6 +251,7 @@ const
   (name:'Pirates';year:'1994';snd:1;hi:false;zip:'pirates.zip';grid:206;company:'NIX'),
   (name:'Genix Family';year:'1994';snd:1;hi:false;zip:'genix.zip';grid:207;company:'NIX'),
   (name:'Juno First';year:'1983';snd:1;hi:false;zip:'junofrst.zip';grid:208;company:'Konami'),
+  (name:'Gyruss';year:'1983';snd:1;hi:false;zip:'gyruss.zip';grid:209;company:'Konami'),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco.zip';grid:1001;company:'Coleco'),
@@ -479,6 +480,7 @@ case numero of
   206:principal1.CambiarMaquina(principal1.pirates1);
   207:principal1.CambiarMaquina(principal1.genixfamily1);
   208:principal1.CambiarMaquina(principal1.junofirst1);
+  209:principal1.CambiarMaquina(principal1.gyruss1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -698,6 +700,7 @@ principal1.twinbee1.Checked:=false;
 principal1.Pirates1.Checked:=false;
 principal1.GenixFamily1.Checked:=false;
 principal1.junofirst1.checked:=false;
+principal1.gyruss1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -838,6 +841,7 @@ case tmaquina of
   204,205:Cargar_nemesis;
   206,207:Cargar_pirates;
   208:Cargar_junofrst;
+  209:Cargar_gyruss;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1683,6 +1687,10 @@ end;
 if sender=principal1.junofirst1 then begin
   tipo:=208;
   principal1.junofirst1.Checked:=true;
+end;
+if sender=principal1.gyruss1 then begin
+  tipo:=209;
+  principal1.gyruss1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

@@ -110,13 +110,13 @@ if not(cargar_roms16w(pword(memoria_temp),@ddragon3_bg[0],'ddragon3.zip',0)) the
 init_gfx(0,16,16,$2000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,8,0,$80000*8+8,$80000*8+0);
-convert_gfx(@gfx[0],0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(memoria_temp,@ddragon3_sprites[0],'ddragon3.zip',0)) then exit;
 init_gfx(1,16,16,$8000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,$100000*8,$100000*8*2,$100000*8*3);
-convert_gfx(@gfx[1],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@ddragon3_dip_a;

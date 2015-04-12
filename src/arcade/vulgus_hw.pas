@@ -100,18 +100,18 @@ if not(cargar_roms(@memoria_temp[0],@vulgus_char,'vulgus.zip')) then exit;
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@vulgus_sprites[0],'vulgus.zip',0)) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //tiles
 if not(cargar_roms(@memoria_temp[0],@vulgus_tiles[0],'vulgus.zip',0)) then exit;
 init_gfx(2,16,16,$200);
 gfx_set_desc_data(3,0,32*8,0,$4000*8,$4000*8*2);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@vulgus_pal[0],'vulgus.zip',0)) then exit;
 for f:=0 to 255 do begin

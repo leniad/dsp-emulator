@@ -88,13 +88,13 @@ if hay_samples then main_z80.init_sound(mario_sound_update);
 if not(cargar_roms(@memoria_temp[0],@mario_char[0],'mario.zip',0)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(2,0,8*8,512*8*8,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@mario_sprites[0],'mario.zip',0)) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,16*8,2*256*16*16,256*16*16,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@mario_pal,'mario.zip')) then exit;
 for f:=0 to 511 do begin

@@ -367,7 +367,7 @@ begin
   if inv then for f:=0 to $fff do memoria_temp[f]:=not(memoria_temp[f]);
   init_gfx(0,8,8,$100);
   gfx_set_desc_data(2,0,16*8,0,4);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 end;
 
 procedure set_sprites(num,tipo:byte);
@@ -377,7 +377,7 @@ begin
     0:gfx_set_desc_data(4,0,64*8,0,4,8192*8*num,(8192*8*num)+4);
     1:gfx_set_desc_data(2,0,64*8,0,4);
   end;
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end;
 
 procedure set_color_lookup(tipo:byte;long_sprites:word);

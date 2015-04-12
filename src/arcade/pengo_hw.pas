@@ -80,11 +80,11 @@ copymemory(@memoria_temp[$3000],@memoria_temp[$5000],$1000);
 //chars
 init_gfx(0,8,8,$200);
 gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //sprites
 init_gfx(1,16,16,$80);
 gfx_set_desc_data(2,0,64*8,0,4);
-convert_gfx(@gfx[1],0,@memoria_temp[$2000],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[$2000],@ps_x[0],@ps_y[0],true,false);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@pengo_pal[0],'pengo.zip',0)) then exit;
 compute_resistor_weights(0,	255, -1.0,

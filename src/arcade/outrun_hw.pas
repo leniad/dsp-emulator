@@ -125,7 +125,7 @@ if not(cargar_roms(@memoria_temp[0],@outrun_tiles[0],'outrun.zip',0)) then exit;
 init_gfx(0,8,8,$2000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,$20000*8,$10000*8,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 //Cargar ROM de los sprites y recolocarlos
 {if not(cargar_roms16b(@memoria_temp[0],@outrun_sprites[0],'outrun.zip',0)) then exit;
 for f:=0 to 7 do begin

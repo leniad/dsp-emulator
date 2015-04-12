@@ -98,13 +98,13 @@ if not(cargar_roms(@memoria_temp[0],@opwolf_char,'opwolf.zip',1)) then exit;
 init_gfx(0,8,8,$4000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@opwolf_sprites,'opwolf.zip',1)) then exit;
 init_gfx(1,16,16,$1000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //final
 old_cursor:=sdl_getcursor;
 sdl_setcursor(sdl_createcursor(@cdata,@cmask,16,16,7,7));

@@ -219,7 +219,7 @@ begin
   init_gfx(0,8,8,$100);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(3,0,8*8,512*8*8+4,0,4);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,invert);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,invert);
 end;
 procedure convert_tiles(invert:boolean);
 var
@@ -242,9 +242,9 @@ begin
   gfx[1].trans[0]:=true;
   for f:=0 to 3 do begin
     gfx_set_desc_data(3,8,32*8,$4000*8+4,0,4);
-    convert_gfx(@gfx[1],(f*2)*16*16*$80,@memoria_temp2[$8000*f],@pt_x[0],@pt_y[0],false,invert);
+    convert_gfx(1,(f*2)*16*16*$80,@memoria_temp2[$8000*f],@pt_x[0],@pt_y[0],false,invert);
     gfx_set_desc_data(3,8,32*8,$3000*8+0,0,4);
-    convert_gfx(@gfx[1],((f*2)+1)*16*16*$80,@memoria_temp2[($8000*f)+$1000],@pt_x[0],@pt_y[0],false,invert);
+    convert_gfx(1,((f*2)+1)*16*16*$80,@memoria_temp2[($8000*f)+$1000],@pt_x[0],@pt_y[0],false,invert);
   end;
 end;
 procedure convert_sprt(invert:boolean);
@@ -252,7 +252,7 @@ begin
   init_gfx(2,16,16,$400);
   gfx[2].trans[0]:=true;
   gfx_set_desc_data(3,0,32*8,2*1024*32*8,1024*32*8,0);
-  convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,invert);
+  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,invert);
 end;
 
 begin

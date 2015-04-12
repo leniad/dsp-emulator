@@ -147,7 +147,7 @@ procedure dkong_char_load(num_char:word);
 begin
   init_gfx(0,8,8,num_char);
   gfx_set_desc_data(2,0,8*8,num_char*8*8,0);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 end;
 procedure dkong_sprites_load(num_spr:word);
 begin
@@ -155,8 +155,8 @@ begin
   gfx[1].trans[0]:=true;
   gfx_set_desc_data(2,0,16*8,num_spr*16*16,0);
   case main_vars.tipo_maquina of
-    15,168:convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_dkong_x[0],@ps_y[0],true,false);
-    169:convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_dkong3_x[0],@ps_y[0],true,false);
+    15,168:convert_gfx(1,0,@memoria_temp[0],@ps_dkong_x[0],@ps_y[0],true,false);
+    169:convert_gfx(1,0,@memoria_temp[0],@ps_dkong3_x[0],@ps_y[0],true,false);
   end;
 end;
 procedure pal_dkong;

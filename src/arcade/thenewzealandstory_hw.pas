@@ -152,7 +152,7 @@ case main_vars.tipo_maquina of
         init_gfx(0,16,16,$2000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,$2000*32*8*3,$2000*32*8*2,$2000*32*8,0);
-        convert_gfx(@gfx[0],0,mem_temp,@pt_x[0],@pt_y[0],false,false);
+        convert_gfx(0,0,mem_temp,@pt_x[0],@pt_y[0],false,false);
         freemem(mem_temp);
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;
@@ -182,7 +182,7 @@ case main_vars.tipo_maquina of
         init_gfx(0,16,16,$2000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,64*8,8,0,$2000*64*8+8,$2000*64*8+0);
-        convert_gfx(@gfx[0],0,mem_temp,@pt2_x[0],@pt2_y[0],false,false);
+        convert_gfx(0,0,mem_temp,@pt2_x[0],@pt2_y[0],false,false);
         freemem(mem_temp);
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;

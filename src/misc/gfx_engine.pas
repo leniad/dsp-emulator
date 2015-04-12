@@ -30,7 +30,7 @@ var
 
 //GFX
 procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
-procedure convert_gfx(ngfx:pgfx;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
+procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
 //GFX put
 procedure put_gfx(pos_x,pos_y,nchar,color:word;screen,ngfx:byte);
@@ -114,46 +114,56 @@ inc(pos,oct_nbr);
 getbit:=((pos^ shr (7-bit_n)) and 1);
 end;
 
-procedure Rotatel(n:word;ngfx:pgfx;increment:dword);inline;
+procedure Rotatel(n:word;ngfx:pgfx;increment:dword);
 var
-  x,y:byte;
-  src,t:array[0..1023] of byte;
+  y,cojo_la_x:byte;
+  src,t:array[0..((ADD_SPRITE*ADD_SPRITE)-1)] of byte;
   pos:pbyte;
-  long:word;
+  long,x:word;
 begin
 long:=ngfx.x*ngfx.y;
 pos:=ngfx.datos;
 inc(pos,long*n+increment);
 copymemory(@src[0],pos,long);
-for y:=0 to (ngfx.y-1) do
-  for x:=0 to (ngfx.x-1) do T[x*ngfx.x+y]:=src[((ngfx.x-1)-x)+y*ngfx.y];
+x:=0;
+for cojo_la_x:=(ngfx.x-1) downto 0 do
+  for y:=0 to (ngfx.y-1) do begin
+    t[x]:=src[cojo_la_x+(ngfx.y*y)];
+    x:=x+1;
+  end;
 copymemory(pos,@t[0],long);
 end;
 
-procedure Rotater(n:word;ngfx:pgfx;increment:dword);inline;
+procedure Rotater(n:word;ngfx:pgfx;increment:dword);
 var
-  x,y:byte;
-  src,t:array[0..1023] of byte;
+  cojo_la_y,y_final:byte;
+  src,t:array[0..((ADD_SPRITE*ADD_SPRITE)-1)] of byte;
   pos:pbyte;
-  long:word;
+  long,x:word;
 begin
 long:=ngfx.x*ngfx.y;
 pos:=ngfx.datos;
 inc(pos,long*n+increment);
 copymemory(@src[0],pos,long);
-for y:=0 to (ngfx.y-1) do
-  for x:=0 to (ngfx.x-1) do T[((ngfx.x-1)-x)+y*ngfx.y]:=src[x*ngfx.x+y];
+x:=0;
+for y_final:=0 to (ngfx.x-1) do
+  for cojo_la_y:=(ngfx.y-1) downto 0 do begin
+    t[x]:=src[(cojo_la_y*ngfx.x)+y_final];
+    x:=x+1;
+  end;
 copymemory(pos,@t[0],long);
 end;
 
-procedure convert_gfx(ngfx:pgfx;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
+procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
 var
   n,elements:dword;
   oct,b0,o,i,bit_pixel:byte;
   SpriteNbr,ind:dword;
   pos:pbyte;
   temp_cx,temp_cy:pdword;
+  ngfx:pgfx;
 begin
+ngfx:=@gfx[num_gfx];
 ind:=0;
 temp_cx:=cx;
 temp_cy:=cy;

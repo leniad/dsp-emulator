@@ -334,8 +334,8 @@ begin
   gfx[0].trans[15]:=true;
   gfx[1].trans[15]:=true;
   gfx_set_desc_data(4,0,64*8,0,1,2,3);
-  convert_gfx(@gfx[0],0,memoria_temp,@pc_x1[0],@pc_y[0],false,false);
-  convert_gfx(@gfx[1],0,memoria_temp,@pc_x2[0],@pc_y[0],false,false);
+  convert_gfx(0,0,memoria_temp,@pc_x1[0],@pc_y[0],false,false);
+  convert_gfx(1,0,memoria_temp,@pc_x2[0],@pc_y[0],false,false);
 end;
 
 procedure convert_tiles16(memoria_temp:pbyte;n:dword);
@@ -343,7 +343,7 @@ begin
   init_gfx(2,16,16,n);
   gfx[2].trans[15]:=true;
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(@gfx[2],0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
 end;
 
 procedure convert_tiles32(memoria_temp:pbyte;n:dword);
@@ -351,7 +351,7 @@ begin
   init_gfx(3,32,32,n);
   gfx[3].trans[15]:=true;
   gfx_set_desc_data(4,0,512*8,0,1,2,3);
-  convert_gfx(@gfx[3],0,memoria_temp,@pt2_x[0],@pt2_y[0],false,false);
+  convert_gfx(3,0,memoria_temp,@pt2_x[0],@pt2_y[0],false,false);
 end;
 
 begin

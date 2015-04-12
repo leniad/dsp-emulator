@@ -101,17 +101,17 @@ if not(cargar_roms(@memoria_temp[0],@psychic5_char,'psychic5.zip',1)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@psychic5_sprites[0],'psychic5.zip',0)) then exit;
 init_gfx(1,16,16,1024);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //convertir tiles
 if not(cargar_roms(@memoria_temp[0],@psychic5_tiles[0],'psychic5.zip',0)) then exit;
 init_gfx(2,16,16,1024);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //final
 reset_psychic5;
 iniciar_psychic5:=true;

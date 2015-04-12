@@ -341,6 +341,7 @@ type
     Pirates1: TMenuItem;
     GenixFamily1: TMenuItem;
     JunoFirst1: TMenuItem;
+    Gyruss1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

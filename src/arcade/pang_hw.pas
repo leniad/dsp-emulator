@@ -76,7 +76,7 @@ begin
   init_gfx(0,8,8,$8000);
   gfx[0].trans[15]:=true;
   gfx_set_desc_data(4,0,16*8,$8000*16*8+4,$8000*16*8+0,4,0);
-  convert_gfx(@gfx[0],0,ptemp,@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,ptemp,@pc_x[0],@pc_y[0],false,false);
 end;
 
 procedure convert_sprites;
@@ -84,7 +84,7 @@ begin
   init_gfx(1,16,16,$800);
   gfx[1].trans[15]:=true;
   gfx_set_desc_data(4,0,64*8,$800*64*8+4,$800*64*8+0,4,0);
-  convert_gfx(@gfx[1],0,ptemp,@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,ptemp,@ps_x[0],@ps_y[0],false,false);
 end;
 
 begin

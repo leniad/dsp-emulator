@@ -398,20 +398,20 @@ begin
   init_gfx(0,12,8,$200);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(3,0,8*8,0,$4000*8,2*$4000*8);
-  convert_gfx(@gfx[0],0,@mem_char[0],@pc_spl_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@mem_char[0],@pc_spl_x[0],@pc_y[0],false,false);
 end;
 procedure make_chars(num:word;ngfx:byte);
 begin
 init_gfx(ngfx,8,8,num);
 gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
-convert_gfx(@gfx[ngfx],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 procedure make_sprites(num:word);
 begin
   init_gfx(1,16,16,num);
   gfx[1].trans[0]:=true;
   gfx_set_desc_data(3,0,32*8,2*num*32*8,num*32*8,0);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 end;
 
 begin

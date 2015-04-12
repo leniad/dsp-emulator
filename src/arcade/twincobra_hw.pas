@@ -107,7 +107,7 @@ begin
   init_gfx(0,8,8,2048);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(3,0,8*8,0*2048*8*8,1*2048*8*8,2*2048*8*8);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 end;
 
 procedure convert_tiles(ngfx:byte;ntiles:word);
@@ -115,7 +115,7 @@ begin
 init_gfx(ngfx,8,8,ntiles);
 gfx[ngfx].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8,0*ntiles*8*8,1*ntiles*8*8,2*ntiles*8*8,3*ntiles*8*8);
-convert_gfx(@gfx[ngfx],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
 end;
 
 procedure convert_sprites;
@@ -123,7 +123,7 @@ begin
 init_gfx(3,16,16,2048);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0*2048*32*8,1*2048*32*8,2*2048*32*8,3*2048*32*8);
-convert_gfx(@gfx[3],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 end;
 
 begin

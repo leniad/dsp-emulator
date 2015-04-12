@@ -96,13 +96,13 @@ if not(cargar_roms(@mem_snd[0],@sbasketb_snd,'sbasketb.zip',1)) then exit;
 if not(cargar_roms(@memoria_temp[0],@sbasketb_char,'sbasketb.zip',1)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,8*4*8,0,1,2,3);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@sbasketb_sprites[0],'sbasketb.zip',0)) then exit;
 init_gfx(1,16,16,384);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*4*8,0,1,2,3);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //paleta
 if not(cargar_roms(@memoria_temp[0],@sbasketb_pal[0],'sbasketb.zip',0)) then exit;
 for f:=0 to $ff do begin

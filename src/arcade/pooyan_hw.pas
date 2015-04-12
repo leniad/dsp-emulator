@@ -88,13 +88,13 @@ if not(cargar_roms(@mem_snd[0],@pooyan_sound[0],'pooyan.zip',0)) then exit;
 if not(cargar_roms(@memoria_temp[0],@pooyan_char[0],'pooyan.zip',0)) then exit;
 init_gfx(0,8,8,256);
 gfx_set_desc_data(4,0,16*8,$1000*8+4,$1000*8+0,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@pooyan_sprites[0],'pooyan.zip',0)) then exit;
 init_gfx(1,16,16,64);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$1000*8+4,$1000*8+0,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@pooyan_pal[0],'pooyan.zip',0)) then exit;
 for f:=0 to 31 do begin
@@ -162,16 +162,15 @@ for f:=0 to $17 do begin
     atrib:=memoria[$9410+(f*2)];
     nchar:=memoria[$9011+(f*2)] and $3f;
     color:=(atrib and $f) shl 4;
+    x:=memoria[$9411+(f*2)];
+    y:=memoria[$9010+(f*2)];
+    flipx:=(atrib and $80)<>0;
+    flipy:=(atrib and $40)=0;
     if main_screen.flip_main_screen then begin
-      x:=240-memoria[$9411+(f*2)];
-      y:=240-memoria[$9010+(f*2)];
-      flipx:=(atrib and $80)=0;
-      flipy:=(atrib and $40)<>0;
-    end else begin
-      x:=memoria[$9411+(f*2)];
-      y:=memoria[$9010+(f*2)];
-      flipx:=(atrib and $80)<>0;
-      flipy:=(atrib and $40)=0;
+      x:=240-x;
+      y:=240-y;
+      flipx:=not(flipx);
+      flipy:=not(flipy);
     end;
     put_gfx_sprite(nchar,color,flipx,flipy,1);
     actualiza_gfx_sprite(x,y,2,1);

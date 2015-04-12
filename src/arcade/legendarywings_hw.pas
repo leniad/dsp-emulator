@@ -120,20 +120,20 @@ begin
   init_gfx(0,8,8,1024);
   gfx[0].trans[3]:=true;
   gfx_set_desc_data(2,0,16*8,0,4);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 procedure convert_sprites_lw;
 begin
   init_gfx(1,16,16,1024);
   gfx[1].trans[15]:=true;
   gfx_set_desc_data(4,0,64*8,$10000*8+4,$10000*8+0,4,0);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 end;
 procedure convert_tiles_lw;
 begin
   init_gfx(2,16,16,$800);
   gfx_set_desc_data(4,0,32*8,$30000*8,$20000*8,$10000*8,$0*8);
-  convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
 
 begin
@@ -254,7 +254,7 @@ case main_vars.tipo_maquina of
         init_gfx(1,16,16,2048);
         gfx[1].trans[15]:=true;
         gfx_set_desc_data(4,0,64*8,$20000*8+4,$20000*8+0,4,0);
-        convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+        convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
         //tiles
         if not(cargar_roms(@memoria_temp[0],@trojan_tiles[0],'trojan.zip',0)) then exit;
         convert_tiles_lw;
@@ -265,7 +265,7 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@trojan_tiles2[0],'trojan.zip',0)) then exit;
         init_gfx(3,16,16,$200);
         gfx_set_desc_data(4,0,64*8,$8000*8+0,$8000*8+4,0,4);
-        convert_gfx(@gfx[3],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+        convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
         //Map
         if not(cargar_roms(@trojan_map[0],@trojan_tile_map,'trojan.zip',1)) then exit;
       end;

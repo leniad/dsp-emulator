@@ -161,21 +161,21 @@ begin
   init_gfx(0,8,8,num);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(4,0,16*8,num*16*8+8,num*16*8+0,8,0);
-  convert_gfx(@gfx[0],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 end;
 procedure cninja_convert_tiles(ngfx:byte;num:word);
 begin
   init_gfx(ngfx,16,16,num);
   gfx[ngfx].trans[0]:=true;
   gfx_set_desc_data(4,0,64*8,num*64*8+8,num*64*8+0,8,0);
-  convert_gfx(@gfx[ngfx],0,memoria_temp2,@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(ngfx,0,memoria_temp2,@pt_x[0],@pt_y[0],false,false);
 end;
 procedure cninja_convert_sprites(num:dword);
 begin
   init_gfx(3,16,16,num);
   gfx[3].trans[0]:=true;
   gfx_set_desc_data(4,0,128*8,16,0,24,8);
-  convert_gfx(@gfx[3],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 end;
 begin
 iniciar_cninja:=false;
@@ -310,7 +310,7 @@ case main_vars.tipo_maquina of
         init_gfx(4,16,16,$1000);
         gfx[4].trans[0]:=true;
         gfx_set_desc_data(8,0,64*8,$100000*8+8,$100000*8,$40000*8+8,$40000*8,$c0000*8+8,$c0000*8,8,0);
-        convert_gfx(@gfx[4],0,memoria_temp2,@pt_x[0],@pt_y[0],false,false);
+        convert_gfx(4,0,memoria_temp2,@pt_x[0],@pt_y[0],false,false);
         freemem(memoria_temp2);
         //Sprites
         if not(cargar_roms16b(memoria_temp,@robocop2_sprites[0],'robocop2.zip',0)) then exit;

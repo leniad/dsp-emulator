@@ -232,7 +232,7 @@ begin
   init_gfx(0,8,8,$800);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(4,0,16*8,0,4,$800*16*8+0,$800*16*8+4);
-  convert_gfx(@gfx[0],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 end;
 
 procedure convert_sprites(num:dword);
@@ -240,7 +240,7 @@ begin
   init_gfx(1,16,16,num);
   gfx[1].trans[0]:=true;
   gfx_set_desc_data(4,0,64*8,0,8,num*64*8+0,num*64*8+8);
-  convert_gfx(@gfx[1],0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
 end;
 
 begin

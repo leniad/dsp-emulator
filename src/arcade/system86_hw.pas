@@ -152,7 +152,7 @@ begin
   init_gfx(0,8,8,num);
   gfx[0].trans[7]:=true;
   gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 procedure convert_tiles(num:word);
 begin
@@ -160,14 +160,14 @@ begin
   init_gfx(1,8,8,num);
   gfx[1].trans[7]:=true;
   gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 procedure convert_sprites(num:word);
 begin
   init_gfx(2,32,32,num);
   gfx[2].trans[15]:=true;
   gfx_set_desc_data(4,0,64*64,0,1,2,3);
-  convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
   bank_sprites:=num div 8;
 end;
 begin

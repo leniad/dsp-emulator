@@ -86,7 +86,7 @@ if not(cargar_roms16b(@memoria_temp[0],@ironhorse_gfx[0],'ironhors.zip',0)) then
 init_gfx(0,8,8,$1000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //paleta
 if not(cargar_roms(@memoria_temp[0],@ironhorse_pal[0],'ironhors.zip',0)) then exit;
 for f:=0 to $ff do begin

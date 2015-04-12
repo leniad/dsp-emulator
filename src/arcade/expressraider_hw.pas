@@ -103,13 +103,13 @@ if not(cargar_roms(@memoria_temp[0],@expraid_char,'exprraid.zip',1)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,4);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@expraid_sprites[0],'exprraid.zip',0)) then exit;
 init_gfx(1,16,16,2048);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*2048*32*8,2048*32*8,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //Cargar tiles
 if not(cargar_roms(@memoria_temp[0],@expraid_tiles[0],'exprraid.zip',0)) then exit;
 //Mover los datos de los tiles para poder usar las rutinas de siempre...
@@ -126,9 +126,9 @@ init_gfx(2,16,16,1024);
 gfx[2].trans[0]:=true;
 for f:=0 to 3 do begin
   gfx_set_desc_data(3,8,32*8,4+(f*$4000)*8,($10000+f*$4000)*8+0,($10000+f*$4000)*8+4);
-  convert_gfx(@gfx[2],f*$100*16*16,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,f*$100*16*16,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
   gfx_set_desc_data(3,8,32*8,0+(f*$4000)*8,($11000+f*$4000)*8+0,($11000+f*$4000)*8+4);
-  convert_gfx(@gfx[2],(f*$100*16*16)+($80*16*16),@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,(f*$100*16*16)+($80*16*16),@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
 if not(cargar_roms(@mem_tiles[0],@expraid_tiles_mem,'exprraid.zip',1)) then exit;
 //Paleta

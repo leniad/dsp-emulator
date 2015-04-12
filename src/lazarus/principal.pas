@@ -173,6 +173,7 @@ type
     MenuItem27: TMenuItem;
     genixfamily1: TMenuItem;
     junofirst1: TMenuItem;
+    gyruss1: TMenuItem;
     pirates1: TMenuItem;
     twinbee1: TMenuItem;
     mrgoemon1: TMenuItem;

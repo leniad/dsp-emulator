@@ -99,18 +99,18 @@ if not(cargar_roms(@memoria_temp[0],@cabal_char,'cabal.zip',1)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //sprites
 if not(cargar_roms16b(@memoria_temp[0],@cabal_sprites,'cabal.zip',0)) then exit;
 init_gfx(1,16,16,$1000);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //tiles
 if not(cargar_roms16b(@memoria_temp[0],@cabal_tiles,'cabal.zip',0)) then exit;
 init_gfx(2,16,16,$1000);
 gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
-convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 //final
 reset_cabal;
 iniciar_cabal:=true;

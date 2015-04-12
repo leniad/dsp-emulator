@@ -33,6 +33,14 @@ const
         junofrst_blit:array[0..3] of tipo_roms=(
         (n:'jfs3_c7.bin';l:$2000;p:$0;crc:$aeacf6db),(n:'jfs4_d7.bin';l:$2000;p:$2000;crc:$206d954c),
         (n:'jfs5_e7.bin';l:$2000;p:$4000;crc:$1eb87a6e),());
+        //Dip
+        junofrst_dip_a:array [0..1] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),());
+        junofrst_dip_b:array [0..4] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'256'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$70;name:'Difficulty';number:8;dip:((dip_val:$70;dip_name:'1 (Easiest)'),(dip_val:$60;dip_name:'2'),(dip_val:$50;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$30;dip_name:'5'),(dip_val:$20;dip_name:'6'),(dip_val:$10;dip_name:'7'),(dip_val:$0;dip_name:'8 (Hardest)'),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom_bank,rom_bank_dec:array[0..$f,0..$fff] of byte;
@@ -84,6 +92,11 @@ end;
 if not(cargar_roms(@blit_mem[0],@junofrst_blit[0],'junofrst.zip',0)) then exit;
 //Cargar roms sound
 if not(cargar_roms(@mem_snd[0],@junofrst_sound,'junofrst.zip')) then exit;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$7b;
+marcade.dswa_val:=@junofrst_dip_a;
+marcade.dswb_val:=@junofrst_dip_b;
 //final
 reset_junofrst;
 iniciar_junofrst:=true;
@@ -196,11 +209,11 @@ function junofrst_getbyte(direccion:word):byte;
 begin
 case direccion of
   $0..$800f,$8100..$8fff:junofrst_getbyte:=memoria[direccion];
-  $8010:junofrst_getbyte:=$7b; //dsw1
+  $8010:junofrst_getbyte:=marcade.dswb; //dsw2
   $8020:junofrst_getbyte:=marcade.in0;
   $8024:junofrst_getbyte:=marcade.in1;
   $8028:junofrst_getbyte:=marcade.in2;
-  $802c:junofrst_getbyte:=$ff; //dsw2
+  $802c:junofrst_getbyte:=marcade.dswa; //dsw1
   $9000..$9fff:if main_m6809.opcode then junofrst_getbyte:=rom_bank_dec[rom_nbank,direccion and $fff]
                   else junofrst_getbyte:=rom_bank[rom_nbank,direccion and $fff];
   $a000..$ffff:if main_m6809.opcode then junofrst_getbyte:=mem_opcodes[direccion-$a000]

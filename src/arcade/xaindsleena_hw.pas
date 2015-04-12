@@ -141,23 +141,23 @@ if not(cargar_roms(@memoria_temp[0],@xain_char,'xsleena.zip')) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,2,4,6);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@xain_sprites[0],'xsleena.zip',0)) then exit;
 init_gfx(1,16,16,$800);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$8000*4*8+0,$8000*4*8+4,0,4);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //convertir tiles1
 if not(cargar_roms(@memoria_temp[0],@xain_tiles1[0],'xsleena.zip',0)) then exit;
 init_gfx(2,16,16,$800);
 gfx[2].trans[0]:=true;
-convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //convertir tiles2
 if not(cargar_roms(@memoria_temp[0],@xain_tiles2[0],'xsleena.zip',0)) then exit;
 init_gfx(3,16,16,$800);
 gfx[3].trans[0]:=true;
-convert_gfx(@gfx[3],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //iniciar scanlines
 for f:=8 to $ff do xain_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
 for f:=$e8 to $ff do xain_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF

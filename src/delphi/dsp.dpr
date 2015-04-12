@@ -229,7 +229,8 @@ uses
   ipf_disk in '..\misc\ipf_disk.pas',
   nemesis_hw in '..\arcade\nemesis_hw.pas',
   pirates_hw in '..\arcade\pirates_hw.pas',
-  junofirst_hw in '..\arcade\junofirst_hw.pas';
+  junofirst_hw in '..\arcade\junofirst_hw.pas',
+  gyruss_hw in '..\arcade\gyruss_hw.pas';
 
 {$R *.res}
 

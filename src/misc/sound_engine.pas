@@ -31,7 +31,8 @@ type
           public
             function get_sample_num:byte;
           protected
-            tsample_num,amp:byte;
+            tsample_num:byte;
+            amp:single;
             clock:dword;
         end;
 

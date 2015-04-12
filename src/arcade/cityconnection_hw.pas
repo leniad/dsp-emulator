@@ -104,13 +104,13 @@ if not(cargar_roms(@memoria_temp[0],@citycon_char,'citycon.zip')) then exit;
 init_gfx(0,8,8,256);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //tiles
 if not(cargar_roms(@memoria_temp[0],@citycon_tiles[0],'citycon.zip',0)) then exit;
 init_gfx(1,8,8,3072);
 for f:=0 to $b do begin
   gfx_set_desc_data(4,12,8*8,4+($1000*f*8),0+($1000*f*8),($c000+($1000*f))*8+4,($c000+($1000*f))*8+0);
-  convert_gfx(@gfx[1],$100*8*8*f,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(1,$100*8*8*f,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 if not(cargar_roms(@memoria_fondo[0],@citycon_fondo[0],'citycon.zip',0)) then exit;
 //sprites
@@ -119,7 +119,7 @@ init_gfx(2,8,16,256);
 gfx[2].trans[0]:=true;
 for f:=0 to 1 do begin
   gfx_set_desc_data(4,2,16*8,($1000*f*8)+4,($1000*f*8)+0,($2000+$1000*f)*8+4,($2000+$1000*f)*8+0);
-  convert_gfx(@gfx[2],$80*16*8*f,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(2,$80*16*8*f,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 end;
 //DIP
 marcade.dswa:=$0;

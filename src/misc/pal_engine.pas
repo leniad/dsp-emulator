@@ -96,8 +96,8 @@ begin
 			fatalerror("compute_resistor_weights(): too many resistors in net #%i. The maximum allowed is %i, the number requested was: %i\n",n, MAX_RES_PER_NET, count);
    }
 
+    rescount[networks_no]:=count;
 		if (count > 0) then begin
-			rescount[networks_no]:=count;
 			for i:=0 to (count-1) do begin
         ptemp:=resistances;
         inc(ptemp,i);

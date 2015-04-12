@@ -173,14 +173,14 @@ procedure convert_chars;
 begin
   init_gfx(0,8,8,$800);
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 procedure convert_sprites(num:word);
 begin
   init_gfx(2,16,16,num);
   gfx[2].trans[15]:=true;
   gfx_set_desc_data(4,0,32*32,0,1,2,3);
-  convert_gfx(@gfx[2],0,mem_char,@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(2,0,mem_char,@ps_x[0],@ps_y[0],false,false);
 end;
 begin
 iniciar_nmk16:=false;
@@ -228,7 +228,7 @@ case main_vars.tipo_maquina of
       if not(cargar_roms(mem_char,@sbombers_char2,'sabotenb.zip',1)) then exit;
       decode_gfx(mem_char,$200000);
       init_gfx(1,8,8,$10000);
-      convert_gfx(@gfx[1],0,mem_char,@pc_x[0],@pc_y[0],false,false);
+      convert_gfx(1,0,mem_char,@pc_x[0],@pc_y[0],false,false);
       //convertir sprites
       if not(cargar_roms_swap_word(mem_char,@sbombers_sprites,'sabotenb.zip',1)) then exit;
       decode_sprites(mem_char,$200000);
@@ -248,7 +248,7 @@ case main_vars.tipo_maquina of
       if not(cargar_roms(mem_char,@bjtwin_char2,'bjtwin.zip',1)) then exit;
       decode_gfx(mem_char,$100000);
       init_gfx(1,8,8,$8000);
-      convert_gfx(@gfx[1],0,mem_char,@pc_x[0],@pc_y[0],false,false);
+      convert_gfx(1,0,mem_char,@pc_x[0],@pc_y[0],false,false);
       //convertir sprites
       if not(cargar_roms_swap_word(mem_char,@bjtwin_sprites,'bjtwin.zip',1)) then exit;
       decode_sprites(mem_char,$100000);

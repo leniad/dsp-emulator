@@ -88,18 +88,18 @@ deco74_decrypt_gfx(memoria_temp,$80000);
 init_gfx(0,8,8,$4000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,16*8,$4000*16*8+8,$4000*16*8+0,8,0);
-convert_gfx(@gfx[0],0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
 //Tiles
 init_gfx(1,16,16,$1000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$1000*64*8+8,$1000*64*8+0,8,0);
-convert_gfx(@gfx[1],0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
 //Sprites
 if not(cargar_roms(memoria_temp,@funkyjet_sprites[0],'funkyjet.zip',0)) then exit;
 init_gfx(2,16,16,$2000);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$2000*64*8+8,$2000*64*8+0,8,0);
-convert_gfx(@gfx[2],0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
 //Deco 146
 main_deco146:=cpu_deco_146.create;
 main_deco146.SET_INTERFACE_SCRAMBLE_INTERLEAVE;

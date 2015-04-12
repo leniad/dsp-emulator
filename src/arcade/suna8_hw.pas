@@ -144,7 +144,7 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,$2000);
         gfx[0].trans[15]:=true;
         gfx_set_desc_data(4,0,8*8*2,$20000*8+0,$20000*8+4,0,4);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
      end;
      68:begin
         //Main CPU
@@ -191,7 +191,7 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,$4000);
         gfx[0].trans[15]:=true;
         gfx_set_desc_data(4,0,8*8*2,$40000*8+0,$40000*8+4,0,4);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
      end;
 end;
 //final

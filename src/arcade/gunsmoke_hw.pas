@@ -279,13 +279,13 @@ begin
 init_gfx(ngfx,16,16,2048);
 gfx[ngfx].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,2048*64*8+4,2048*64*8+0,4,0);
-convert_gfx(@gfx[ngfx],0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(ngfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 end;
 procedure convertir_tiles(ngfx:byte);
 begin
 init_gfx(ngfx,32,32,512);
 gfx_set_desc_data(4,0,256*8,512*256*8+4,512*256*8+0,4,0);
-convert_gfx(@gfx[ngfx],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+convert_gfx(ngfx,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
 end;
 procedure convert_paleta;
 var
@@ -345,7 +345,7 @@ case main_vars.tipo_maquina of
        if not(cargar_roms(@memoria_temp[0],@gunsmoke_char,'gunsmoke.zip',1)) then exit;
        init_gfx(0,8,8,1024);
        gfx_set_desc_data(2,0,16*8,4,0);
-       convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+       convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
        //convertir sprites
        if not(cargar_roms(@memoria_temp[0],@gunsmoke_sprites[0],'gunsmoke.zip',0)) then exit;
        convertir_sprites(1);
@@ -379,7 +379,7 @@ case main_vars.tipo_maquina of
        init_gfx(0,8,8,2048);
        gfx[0].trans[0]:=true;
        gfx_set_desc_data(2,0,16*8,4,0);
-       convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_1943_x[0],@pc_1943_y[0],false,true);
+       convert_gfx(0,0,@memoria_temp[0],@pc_1943_x[0],@pc_1943_y[0],false,true);
        //convertir tiles 1
        if not(cargar_roms(@tiles_pos[0],@hw1943_tilesbg_pos[0],'1943.zip',0)) then exit;
        if not(cargar_roms(@memoria_temp[0],@hw1943_tiles1,'1943.zip',0)) then exit;
@@ -388,7 +388,7 @@ case main_vars.tipo_maquina of
        if not(cargar_roms(@memoria_temp[0],@hw1943_tiles2,'1943.zip',0)) then exit;
        init_gfx(2,32,32,$80);
        gfx_set_desc_data(4,0,256*8,128*256*8+4,128*256*8+0,4,0);
-       convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+       convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
        //convertir_sprites
        if not(cargar_roms(@memoria_temp[0],@hw1943_sprites[0],'1943.zip',0)) then exit;
        convertir_sprites(3);
@@ -419,7 +419,7 @@ case main_vars.tipo_maquina of
        init_gfx(0,8,8,2048);
        gfx[0].trans[0]:=true;
        gfx_set_desc_data(2,0,16*8,4,0);
-       convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_1943_x[0],@pc_1943_y[0],false,true);
+       convert_gfx(0,0,@memoria_temp[0],@pc_1943_x[0],@pc_1943_y[0],false,true);
        //convertir tiles 1
        if not(cargar_roms(@tiles_pos[0],@hw1943kai_tilesbg_pos[0],'1943kai.zip',0)) then exit;
        if not(cargar_roms(@memoria_temp[0],@hw1943kai_tiles1,'1943kai.zip',0)) then exit;
@@ -428,7 +428,7 @@ case main_vars.tipo_maquina of
        if not(cargar_roms(@memoria_temp[0],@hw1943kai_tiles2,'1943kai.zip',0)) then exit;
        init_gfx(2,32,32,$80);
        gfx_set_desc_data(4,0,256*8,128*256*8+4,128*256*8+0,4,0);
-       convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+       convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
        //convertir_sprites
        if not(cargar_roms(@memoria_temp[0],@hw1943kai_sprites[0],'1943kai.zip',0)) then exit;
        convertir_sprites(3);

@@ -105,14 +105,14 @@ if not(cargar_roms(@memoria_temp[0],@popeye_char,'popeye.zip',1)) then exit;
 init_gfx(0,16,16,256);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(1,0,8*8,0);
-convert_gfx(@gfx[0],0,@memoria_temp[$800],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[$800],@pc_x[0],@pc_y[0],false,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@popeye_sprites[0],'popeye.zip',0)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 for f:=0 to 1 do begin
   gfx_set_desc_data(2,2,16*8,(0+f*$1000)*8,($4000+f*$1000)*8);
-  convert_gfx(@gfx[1],256*f*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,256*f*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 end;
 //poner la paleta chars
 if not(cargar_roms(@memoria_temp[0],@popeye_pal[0],'popeye.zip',0)) then exit;

@@ -99,12 +99,12 @@ if not(cargar_roms(@mem_snd[0],@tp84_sound,'tp84.zip',1)) then exit;
 if not(cargar_roms(@memoria_temp[0],@tp84_chars[0],'tp84.zip',0)) then exit;
 init_gfx(0,8,8,$400);
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@tp84_sprites[0],'tp84.zip',0)) then exit;
 init_gfx(1,16,16,$100);
 gfx_set_desc_data(4,0,64*8,4+$4000*8,0+$4000*8,4,0);
-convert_gfx(@gfx[1],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //Colores y lookup
 if not(cargar_roms(@memoria_temp[0],@tp84_proms,'tp84.zip',0)) then exit;
 compute_resistor_weights(0,	255, -1.0,

@@ -134,13 +134,13 @@ begin
   init_gfx(0,8,8,256);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(2,0,8*8,256*8*8,0);
-  convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 end;
 procedure conv_background;
 begin
   init_gfx(1,8,8,1024);
   gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
-  convert_gfx(@gfx[1],0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
 end;
 procedure conv_static_background(size:word);
 var
@@ -169,7 +169,7 @@ begin
   init_gfx(2,32,32,size);
   gfx[2].trans[0]:=true;
   gfx_set_desc_data(3,0,128*8,2*size*128*8,128*size*8,0);
-  convert_gfx(@gfx[2],0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end;
 procedure convert_palette(size:word);
 var

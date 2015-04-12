@@ -2359,6 +2359,10 @@ object principal1: Tprincipal1
             Caption = 'Vulgus'
             OnClick = CambiarMaquina
           end
+          object gyruss1: TMenuItem
+            Caption = 'Gyruss'
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'

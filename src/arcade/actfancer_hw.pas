@@ -99,19 +99,19 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,$1000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,8*8,$08000*8,$18000*8,0,$10000*8);
-        convert_gfx(@gfx[0],0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
         //tiles 1
         if not(cargar_roms(@memoria_temp[0],@actfancer_tiles,'actfancr.zip',0)) then exit;
         init_gfx(1,16,16,$c00);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,0,$10000*8,$20000*8,$30000*8);
-        convert_gfx(@gfx[1],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+        convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
         //sprites
         if not(cargar_roms(@memoria_temp[0],@actfancer_sprites,'actfancr.zip',0)) then exit;
         init_gfx(2,16,16,$c00);
         gfx[2].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,0,$18000*8,$30000*8,$48000*8);
-        convert_gfx(@gfx[2],0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+        convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
         dip_b:=$7f;
       end;
 end;

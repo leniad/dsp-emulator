@@ -443,8 +443,8 @@ begin
 	self.pos:=pos;
   if out_>32767 then out_:=32767
     else if out_<-32768 then out_:=-32768;
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=out_*self.amp;
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=out_*self.amp;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(out_*self.amp);
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(out_*self.amp);
 end;
 
 end.
