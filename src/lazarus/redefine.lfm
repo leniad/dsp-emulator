@@ -1,7 +1,7 @@
-object Form4: TForm4
-  Left = 222
+object redefine1: Tredefine1
+  Left = 627
   Height = 216
-  Top = 235
+  Top = 328
   Width = 532
   BorderIcons = []
   BorderStyle = bsSingle
@@ -15,7 +15,7 @@ object Form4: TForm4
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '1.3'
+  LCLVersion = '1.4.0.2'
   object Button1: TButton
     Left = 148
     Height = 25

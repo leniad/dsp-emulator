@@ -1,12 +1,12 @@
 unit file_engine;
 
 interface
-uses sdl2,
+uses sdl2,unzip2,
      {$ifdef fpc}
-     unzip2,ziputils,ZLibEx,
+     ziputils2,ZLibEx,
      {$IFDEF windows}windows,{$endif}
      {$else}
-     {$IFDEF windows}windows,Zlib,zipforge,{$ENDIF}
+     {$IFDEF windows}windows,Zlib,{$ENDIF}
      {$endif}
      sysutils,dialogs,lenguaje,misc_functions,sound_engine,inifiles,main_engine,
      controls_engine;
@@ -498,183 +498,6 @@ write_file:=true;
 end;
 
 //Parte ZIP
-{$ifndef fpc}
-function find_first_file_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
-var
-  zip_obj:tzipforge;
-  a_item:TZFArchiveItem;
-begin
-find_first_file_zip:=false;
-//Si no existe el ZIP -> Error
-if not(FileExists(nombre_zip)) then begin
-  if warning then MessageDlg('ZIP File not found: '+'"'+nombre_zip+'"', mtError,[mbOk], 0);
-  exit;
-end;
-zip_obj:=tzipforge.Create(nil);       //Creo el extractor ZIP
-zip_obj.CleanupInstance;              //Lo limpio
-zip_obj.FileName:=nombre_zip;         //Le doy el nombre (comprobado que existe)
-zip_obj.OpenArchive;                  //Lo abro
-if not(zip_obj.FindFirst(file_mask,a_item)) then begin
-  //No existe lo cierro todo
-  if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-  zip_obj.CloseArchive;
-  zip_obj.Destroy;
-  exit;
-end;
-//Existe...
-longitud:=a_item.UncompressedSize;
-crc:=a_item.CRC;
-nombre_file:=a_item.StoredPath+a_item.FileName;
-zip_find_files_data.posicion_dentro_zip:=0;
-zip_find_files_data.nombre_zip:=nombre_zip;
-zip_find_files_data.file_mask:=file_mask;
-//Cerrar y destruir el objeto ZIP
-zip_obj.CloseArchive;
-zip_obj.Destroy;
-find_first_file_zip:=true;
-end;
-
-function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
-var
-  zip_obj:tzipforge;
-  a_item:TZFArchiveItem;
-  f:integer;
-begin
-find_next_file_zip:=false;
-zip_obj:=tzipforge.Create(nil);                     //Creo el extractor ZIP
-zip_obj.CleanupInstance;                            //Lo limpio
-zip_obj.FileName:=zip_find_files_data.nombre_zip;   //Le doy el nombre (viene de antes)
-zip_obj.OpenArchive;                  //Lo abro
-zip_obj.FindFirst(zip_find_files_data.file_mask,a_item);
-zip_find_files_data.posicion_dentro_zip:=zip_find_files_data.posicion_dentro_zip+1;
-//He llegado al final?
-if zip_find_files_data.posicion_dentro_zip>=zip_obj.FileCount then begin
-  zip_obj.CloseArchive;
-  zip_obj.Destroy;
-  exit;
-end;
-//Busco el siguiente
-for f:=1 to zip_find_files_data.posicion_dentro_zip do begin
-  if not(zip_obj.FindNext(a_item)) then begin
-      zip_obj.CloseArchive;
-      zip_obj.Destroy;
-      exit;
-  end;
-end;
-//Existe...
-longitud:=a_item.UncompressedSize;
-crc:=a_item.CRC;
-nombre_file:=a_item.StoredPath+a_item.FileName;
-//Cerrar y destruir el objeto ZIP
-zip_obj.CloseArchive;
-zip_obj.Destroy;
-find_next_file_zip:=true;
-end;
-
-function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
-var
-  zip_obj:tzipforge;
-  a_item:TZFArchiveItem;
-begin
-search_file_from_zip:=false;
-//Si no existe el ZIP -> Error
-if not(FileExists(nombre_zip)) then begin
-  if warning then MessageDlg('ZIP File not found: '+'"'+nombre_zip+'"', mtError,[mbOk], 0);
-  exit;
-end;
-zip_obj:=tzipforge.Create(nil);       //Creo el extractor ZIP
-zip_obj.CleanupInstance;              //Lo limpio
-zip_obj.FileName:=nombre_zip;         //Le doy el nombre (comprobado que existe)
-zip_obj.OpenArchive;                  //Lo abro
-if not(zip_obj.FindFirst(file_mask,a_item)) then begin
-  //No existe lo cierro todo
-  if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-  zip_obj.CloseArchive;
-  zip_obj.Destroy;
-  exit;
-end;
-//Existe...
-longitud:=a_item.UncompressedSize;
-crc:=a_item.CRC;
-nombre_file:=a_item.StoredPath+a_item.FileName;
-//Cerrar y destruir el objeto ZIP
-zip_obj.CloseArchive;
-zip_obj.Destroy;
-search_file_from_zip:=true;
-end;
-
-function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
-var
-  zip_obj:tzipforge;
-  a_item:TZFArchiveItem;
-begin
-load_file_from_zip:=false;
-//Si no existe el ZIP -> Error
-if not(FileExists(nombre_zip)) then begin
-  if warning then MessageDlg('ZIP File not found: '+'"'+nombre_zip+'"', mtError,[mbOk], 0);
-  exit;
-end;
-zip_obj:=tzipforge.Create(nil);       //Creo el extractor ZIP
-zip_obj.CleanupInstance;              //Lo limpio
-zip_obj.FileName:=nombre_zip;         //Le doy el nombre (comprobado que existe)
-zip_obj.OpenArchive;                  //Lo abro
-//Busco el archivo
-if not(zip_obj.FindFirst(nombre_file,a_item)) then begin
-  //No existe lo cierro todo
-  if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-  zip_obj.CloseArchive;
-  zip_obj.Destroy;
-  exit;
-end;
-//Si existe, lo extraigo al buffer
-zip_obj.ExtractTobuffer(nombre_file,donde^,a_item.UncompressedSize,0);
-longitud:=a_item.UncompressedSize;
-crc:=a_item.CRC;
-//Cerrar y destruir el objeto ZIP
-zip_obj.CloseArchive;
-zip_obj.Destroy;
-load_file_from_zip:=true;
-end;
-
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
-var
-  zip_obj:tzipforge;
-  a_item:TZFArchiveItem;
-  f:word;
-  find:boolean;
-  nombre_file:string;
-begin
-load_file_from_zip_crc:=false;
-//Si no existe el ZIP -> Error
-if not(FileExists(nombre_zip)) then exit;
-zip_obj:=tzipforge.Create(nil);  //Creo el objeto extractor ZIP
-zip_obj.CleanupInstance;         //Lo limpio
-zip_obj.FileName:=nombre_zip;    //Le doy el nombre (comprobado que existe)
-zip_obj.OpenArchive;             //Lo abro...
-find:=false;
-zip_obj.FindFirst('*.*',a_item);  //Busco el primer archivo dentro del ZIP
-for f:=1 to zip_obj.FileCount do begin
-  if a_item.CRC=crc then begin  //El crc coincide?
-    find:=true;
-    nombre_file:=a_item.FileName;
-    break;
-  end;
-  zip_obj.Findnext(a_item);  //Siguiente archivo dentro del ZIP
-end;
-//No existe lo cierro todo
-if not(find) then begin
-  zip_obj.CloseArchive;
-  zip_obj.Destroy;
-  exit;
-end;
-//Si existe, lo cargo y devuelvo la longitud
-zip_obj.ExtractTobuffer(nombre_file,donde^,a_item.UncompressedSize,0);
-longitud:=a_item.UncompressedSize;
-zip_obj.CloseArchive;
-zip_obj.Destroy;
-load_file_from_zip_crc:=true;
-end;
-{$else}
 function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
 var
   zfile:unzFile;
@@ -934,7 +757,6 @@ unzClose(zfile);
 freemem(zfile_info);
 load_file_from_zip_crc:=true;
 end;
-{$ENDIF}
 
 procedure compress_zlib(in_buffer:pointer;in_size:integer;out_buffer:pointer;var out_size:integer);
 var

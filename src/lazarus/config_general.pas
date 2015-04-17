@@ -230,7 +230,7 @@ end;
 
 procedure TMConfig.BitBtn10Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
     if tecla_leida<>$FFFF then begin
       bitbtn10.Caption:=nombre_tecla(tecla_leida);
       arcade_input.nbut1[0]:=tecla_leida;
@@ -239,7 +239,7 @@ end;
 
 procedure TMConfig.BitBtn11Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn11.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut2[0]:=tecla_leida;
@@ -248,7 +248,7 @@ end;
 
 procedure TMConfig.BitBtn12Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn12.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut0[1]:=tecla_leida;
@@ -257,7 +257,7 @@ end;
 
 procedure TMConfig.BitBtn13Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn13.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut1[1]:=tecla_leida;
@@ -266,7 +266,7 @@ end;
 
 procedure TMConfig.BitBtn14Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn14.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut2[1]:=tecla_leida;
@@ -275,7 +275,7 @@ end;
 
 procedure TMConfig.BitBtn15Click(Sender: TObject);
 begin
-form4.showmodal;
+redefine1.showmodal;
 if tecla_leida<>$FFFF then begin
     bitbtn15.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut4[0]:=tecla_leida;
@@ -284,7 +284,7 @@ end;
 
 procedure TMConfig.BitBtn16Click(Sender: TObject);
 begin
-form4.showmodal;
+redefine1.showmodal;
 if tecla_leida<>$FFFF then begin
       bitbtn16.Caption:=nombre_tecla(tecla_leida);
       arcade_input.nbut5[0]:=tecla_leida;
@@ -293,7 +293,7 @@ end;
 
 procedure TMConfig.BitBtn17Click(Sender: TObject);
 begin
-form4.showmodal;
+redefine1.showmodal;
 if tecla_leida<>$FFFF then begin
     bitbtn17.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut3[0]:=tecla_leida;
@@ -302,7 +302,7 @@ end;
 
 procedure TMConfig.BitBtn18Click(Sender: TObject);
 begin
-form4.showmodal;
+redefine1.showmodal;
 if tecla_leida<>$FFFF then begin
     bitbtn18.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut3[1]:=tecla_leida;
@@ -311,7 +311,7 @@ end;
 
 procedure TMConfig.BitBtn19Click(Sender: TObject);
 begin
-form4.showmodal;
+redefine1.showmodal;
 if tecla_leida<>$FFFF then begin
     bitbtn19.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut4[1]:=tecla_leida;
@@ -320,7 +320,7 @@ end;
 
 procedure TMConfig.BitBtn1Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn1.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nleft[0]:= tecla_leida;
@@ -329,7 +329,7 @@ end;
 
 procedure TMConfig.BitBtn20Click(Sender: TObject);
 begin
-form4.showmodal;
+redefine1.showmodal;
 if tecla_leida<>$FFFF then begin
     bitbtn20.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut5[1]:=tecla_leida;
@@ -338,7 +338,7 @@ end;
 
 procedure TMConfig.BitBtn2Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn2.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nright[0]:=tecla_leida;
@@ -347,7 +347,7 @@ end;
 
 procedure TMConfig.BitBtn3Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn3.Caption:=nombre_tecla(tecla_leida);
     arcade_input.ndown[0]:=tecla_leida;
@@ -356,7 +356,7 @@ end;
 
 procedure TMConfig.BitBtn4Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn4.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nup[0]:=tecla_leida;
@@ -365,7 +365,7 @@ end;
 
 procedure TMConfig.BitBtn5Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn5.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nup[1]:=tecla_leida;
@@ -374,7 +374,7 @@ end;
 
 procedure TMConfig.BitBtn6Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn6.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nleft[1]:=tecla_leida;
@@ -383,7 +383,7 @@ end;
 
 procedure TMConfig.BitBtn7Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn7.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nright[1]:=tecla_leida;
@@ -392,7 +392,7 @@ end;
 
 procedure TMConfig.BitBtn8Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn8.Caption:=nombre_tecla(tecla_leida);
     arcade_input.ndown[1]:=tecla_leida;
@@ -401,7 +401,7 @@ end;
 
 procedure TMConfig.BitBtn9Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     bitbtn9.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut0[0]:=tecla_leida;
@@ -476,7 +476,7 @@ end;
 
 procedure TMConfig.Button3Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     button3.Caption:=nombre_tecla(tecla_leida);
     arcade_input.ncoin[0]:=tecla_leida;
@@ -485,7 +485,7 @@ end;
 
 procedure TMConfig.Button4Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     button4.Caption:=nombre_tecla(tecla_leida);
     arcade_input.ncoin[1]:=tecla_leida;
@@ -494,7 +494,7 @@ end;
 
 procedure TMConfig.Button5Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     button5.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nstart[0]:=tecla_leida;
@@ -503,7 +503,7 @@ end;
 
 procedure TMConfig.Button6Click(Sender: TObject);
 begin
-  form4.showmodal;
+  redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
     button6.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nstart[1]:=tecla_leida;
@@ -512,13 +512,13 @@ end;
 
 procedure TMConfig.Button7Click(Sender: TObject);
 begin
-form8.show;
+joy_calibration.show;
 bucle_joystick(0);
 end;
 
 procedure TMConfig.Button8Click(Sender: TObject);
 begin
-form8.show;
+joy_calibration.show;
 bucle_joystick(1);
 end;
 

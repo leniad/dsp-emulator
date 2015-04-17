@@ -230,7 +230,9 @@ uses
   nemesis_hw in '..\arcade\nemesis_hw.pas',
   pirates_hw in '..\arcade\pirates_hw.pas',
   junofirst_hw in '..\arcade\junofirst_hw.pas',
-  gyruss_hw in '..\arcade\gyruss_hw.pas';
+  gyruss_hw in '..\arcade\gyruss_hw.pas',
+  unzip2 in '..\misc\unzip2.pas',
+  ziputils2 in '..\misc\ziputils2.pas';
 
 {$R *.res}
 

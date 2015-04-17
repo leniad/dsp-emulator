@@ -10,9 +10,9 @@ uses
 
 type
 
-  { TForm8 }
+  { Tjoy_calibration }
 
-  TForm8 = class(TForm)
+  Tjoy_calibration = class(TForm)
     Button1: TButton;
     Image1: TImage;
     Label1: TLabel;
@@ -28,7 +28,7 @@ type
   end;
 
 var
-  Form8: TForm8;
+  joy_calibration: Tjoy_calibration;
   salir:boolean;
 
 procedure bucle_joystick(numero:byte);
@@ -39,8 +39,8 @@ procedure bucle_joystick(numero:byte);
 var
   sdl_event:TSDL_Event;
 begin
-form8.label1.caption:=inttostr(arcade_input.joy_ax0_cent[numero]);
-form8.label2.caption:=inttostr(arcade_input.joy_ax1_cent[numero]);
+joy_calibration.label1.caption:=inttostr(arcade_input.joy_ax0_cent[numero]);
+joy_calibration.label2.caption:=inttostr(arcade_input.joy_ax1_cent[numero]);
 salir:=false;
 while not(salir) do begin
   while SDL_PollEvent(@sdl_event)=0 do begin
@@ -50,22 +50,22 @@ while not(salir) do begin
   SDL_JoystickUpdate();
   if sdl_event.type_=SDL_JOYAXISMOTION then begin
     arcade_input.joy_ax0_cent[numero]:=SDL_JoystickGetAxis(joystick_def[numero],0);
-    form8.label1.caption:=inttostr(arcade_input.joy_ax0_cent[numero]);
+    joy_calibration.label1.caption:=inttostr(arcade_input.joy_ax0_cent[numero]);
     arcade_input.joy_ax1_cent[numero]:=SDL_JoystickGetAxis(joystick_def[numero],1);
-    form8.label2.caption:=inttostr(arcade_input.joy_ax1_cent[numero]);
+    joy_calibration.label2.caption:=inttostr(arcade_input.joy_ax1_cent[numero]);
   end;
 end;
-form8.close;
+joy_calibration.close;
 end;
 
-{ TForm8 }
+{ Tjoy_calibration }
 
-procedure TForm8.Button1Click(Sender: TObject);
+procedure Tjoy_calibration.Button1Click(Sender: TObject);
 begin
 salir:=true;
 end;
 
-procedure TForm8.FormShow(Sender: TObject);
+procedure Tjoy_calibration.FormShow(Sender: TObject);
 begin
 //(Image1.Picture.Graphic as TGIFImage).Animate:= True;
 end;

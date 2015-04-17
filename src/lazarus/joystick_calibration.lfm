@@ -1,4 +1,4 @@
-object Form8: TForm8
+object joy_calibration: Tjoy_calibration
   Left = 306
   Height = 236
   Top = 140
@@ -9,7 +9,7 @@ object Form8: TForm8
   ClientHeight = 236
   ClientWidth = 243
   OnShow = FormShow
-  LCLVersion = '1.1'
+  LCLVersion = '1.4.0.2'
   object Label1: TLabel
     Left = 35
     Height = 15

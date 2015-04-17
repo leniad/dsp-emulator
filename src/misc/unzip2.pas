@@ -1,4 +1,4 @@
-unit unzip2; 
+unit unzip2;
 
 { ----------------------------------------------------------------- }
 { unzip.c -- IO on .zip files using zlib
@@ -27,9 +27,12 @@ interface
 
 uses
   //zutil,
+  {$ifdef fpc}
   zbase,
-  //zLib,
-  ziputils;
+  {$else}
+  zLib,windows,
+  {$endif}
+  ziputils2;
 
 const
   UNZ_OK    = (0);
@@ -40,6 +43,10 @@ const
   UNZ_BADZIPFILE = (-103);
   UNZ_INTERNALERROR = (-104);
   UNZ_CRCERROR = (-105);
+  {$ifndef fpc}
+  MAX_WBITS = 15; { 32K LZ77 window }
+  {$endif}
+
 (*
 { tm_unz contain date/time info }
 type
@@ -63,7 +70,6 @@ type
 
 
 { unz_file_info contain information about a file in the zipfile }
-type
   unz_file_info = record
     version: longint;                  { version made by                 2 bytes }
     version_needed: longint;           { version needed to extract       2 bytes }
@@ -84,6 +90,9 @@ type
     tmu_date: tm_unz;
   end;
   unz_file_info_ptr = ^unz_file_info;
+  {$ifndef fpc}
+  unzFile = pointer;
+  {$endif}
 
 
 function unzStringFileNameCompare(const fileName1: PChar; const fileName2: PChar; iCaseSensitivity: longint): longint;
@@ -222,12 +231,11 @@ function unzGetLocalExtrafield(afile: unzFile; buf: pointer; len: cardinal): lon
 implementation
 
 uses
-  {$ifdef Delphi}
-  SysUtils,
+  {$ifndef fpc}
+  SysUtils;
   {$else}
-  strings,
+  strings,zInflate, crc;
   {$endif}
-  zInflate, crc;
 
 {$ifdef unix and not def (CASESENSITIVITYDEFAULT_YES) and \
                       !defined(CASESENSITIVITYDEFAULT_NO)}
@@ -699,6 +707,9 @@ var
   err:    longint;
   uMagic: longint;
   lSeek:  longint;
+  ptemp,ptemp2:pbyte;
+  ptemp3:pwidechar;
+  h:integer;
 var
   uSizeRead: longint;
 begin
@@ -777,15 +788,25 @@ begin
     begin
       (szFileName +file_info.size_filename)^ := #0;
       uSizeRead := file_info.size_filename;
-    end
-    else
-      uSizeRead := fileNameBufferSize;
-
+    end else uSizeRead := fileNameBufferSize;
+    {$ifndef fpc}
+    getmem(ptemp,file_info.size_filename);
     if (file_info.size_filename > 0) and (fileNameBufferSize > 0) then
-      if fread(szFileName, integer(uSizeRead), 1, s^.afile) <> 1 then
-        err := UNZ_ERRNO;
+      if fread(ptemp, integer(uSizeRead), 1, s^.afile) <> 1 then err := UNZ_ERRNO;
+    ptemp3:=szFileName;
+    ptemp2:=ptemp;
+    for h:=1 to file_info.size_filename do begin
+      ptemp3^:=widechar(ptemp2^);
+      inc(ptemp3);
+      inc(ptemp2);
+    end;
+    freemem(ptemp);
+    {$else}
+    if (file_info.size_filename > 0) and (fileNameBufferSize > 0) then
+      if fread(szFileName, integer(uSizeRead), 1, s^.afile) <> 1 then err := UNZ_ERRNO;
+    {$endif}
     Dec(lSeek, uSizeRead);
-  end;
+   end;
 
   if ((err = UNZ_OK) and (extraField <> nil)) then
   begin
@@ -965,7 +986,7 @@ begin
   while (err = UNZ_OK) do
   begin
     unzGetCurrentFileInfo(afile, nil,
-      szCurrentFileName, sizeof(szCurrentFileName) - 1, nil, 0, nil, 0);
+      @szCurrentFileName, sizeof(szCurrentFileName) - 1, nil, 0, nil, 0);
     if (unzStringFileNameCompare(szCurrentFileName,
       szFileName, iCaseSensitivity) = 0) then
     begin
