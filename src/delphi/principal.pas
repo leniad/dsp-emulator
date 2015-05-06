@@ -13,7 +13,7 @@ uses
   poke_spectrum,main_engine,sound_engine,tape_window,lenguaje,init_games,
   controls_engine,LoadRom,config_general,
   //Devices
-  upd765,vars_hide;
+  upd765,vars_hide, System.ImageList;
 
 type
   Tprincipal1 = class(TForm)
@@ -342,6 +342,9 @@ type
     GenixFamily1: TMenuItem;
     JunoFirst1: TMenuItem;
     Gyruss1: TMenuItem;
+    FreeKickHW1: TMenuItem;
+    FreeKick1: TMenuItem;
+    boogwins1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

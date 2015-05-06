@@ -232,7 +232,9 @@ uses
   junofirst_hw in '..\arcade\junofirst_hw.pas',
   gyruss_hw in '..\arcade\gyruss_hw.pas',
   unzip2 in '..\misc\unzip2.pas',
-  ziputils2 in '..\misc\ziputils2.pas';
+  ziputils2 in '..\misc\ziputils2.pas',
+  freekick_hw in '..\arcade\freekick_hw.pas',
+  boogiewings_hw in '..\arcade\boogiewings_hw.pas';
 
 {$R *.res}
 

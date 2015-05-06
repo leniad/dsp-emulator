@@ -289,7 +289,7 @@ begin
  timer[timer_sound].enabled:=false;
 end;
 
-procedure draw_sprites;inline;
+procedure draw_sprites;
 var
   f,nchar,atrib,color,c:word;
   flipx,flipy:boolean;
@@ -306,7 +306,7 @@ for f:=0 to $7f do begin
 		flipy:=(atrib and $400)<>0;
 		w:=1 shl ((atrib and $c000) shr 14);
 		h:=1 shl ((atrib and $3000) shr 12);
-		y:=y-(16*h);
+    y:=y-(16*h);
 		for wx:=0 to (w-1) do begin
 			for wy:=0 to (h-1) do begin
         c:=nchar;
@@ -472,7 +472,8 @@ begin
 case direccion of
   0..$3ffff,$ffff0..$fffff:exit;
   $40000..$43fff:ram[direccion and $3fff]:=valor;  //ram 1
-  $c0000..$c03ff:spriteram[direccion and $3ff]:=valor; //ram 7
+  $c0000..$c00ff:spriteram[direccion and $3ff]:=valor; //ram 7
+  $c0100..$c03ff:spriteram[direccion and $3ff]:=valor; //ram 7
   $c8000..$c8bff:begin //ram 0
                     palette1[(direccion and $1ff)+(direccion and $c00)]:=valor;
                     cambiar_color1(direccion and $1fe);

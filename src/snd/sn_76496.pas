@@ -38,7 +38,7 @@ type
  end;
 
 var
-  sn_76496_0,sn_76496_1,sn_76496_2:sn76496_chip;//chip_sn:array[0..3] of psn76496;
+  sn_76496_0,sn_76496_1,sn_76496_2,sn_76496_3:sn76496_chip;//chip_sn:array[0..3] of psn76496;
 
 implementation
 

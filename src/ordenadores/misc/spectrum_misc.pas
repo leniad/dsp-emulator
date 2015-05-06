@@ -69,7 +69,7 @@ type
     gs_activa:boolean;
   end;
   tinterface2_spectrum=record
-    retraso:integer;
+    retraso:dword;
     cargado:boolean;
     hay_if2:boolean;
     rom:array[0..$7FFF] of byte;
@@ -752,6 +752,7 @@ key6_0:=$ff;keyY_P:=$ff;keyQ_T:=$ff;key1_5:=$ff;keyH_ENT:=$ff;keyA_G:=$FF;keyCAP
 kempston:=0;
 mouse.lg_val:=$20;
 flash:=0;
+spectrum_irq_pos:=0;
 cinta_tzx.value:=0;
 altavoz:=0;
 spec_z80.im2_lo:=$ff;
@@ -790,7 +791,7 @@ mouse.data_a:=0;
 mouse.data_b:=0;
 if interface2.hay_if2 then begin
   interface2.cargado:=false;
-  interface2.retraso:=10500000;
+  interface2.retraso:=0;
   copymemory(@memoria[0],@interface2.rom[0],$4000);
 end;
 spectrum_reset_video;
@@ -856,7 +857,8 @@ var
   spec_z80_reg:npreg_z80;
 begin
 //Longitud de la IRQ probado con el Soldier of Fortune
-if (((spec_z80.contador-spectrum_irq_pos)>=32) and (spec_z80.pedir_irq<>CLEAR_LINE)) then spec_z80.pedir_irq:=CLEAR_LINE;
+spectrum_irq_pos:=spectrum_irq_pos+estados_t;
+if ((spectrum_irq_pos>31) and (spec_z80.pedir_irq<>CLEAR_LINE)) then spec_z80.pedir_irq:=CLEAR_LINE;
 if sound_status.hay_sonido then begin
   testados_sonido:=testados_sonido+estados_t;
   testados_sonido_beeper:=testados_sonido_beeper+estados_t;
@@ -915,8 +917,8 @@ if cinta_tzx.cargada then begin
 end;
 //Cargar ROMS 32k Interface II
 if interface2.hay_if2 and not(interface2.cargado) then begin
-  interface2.retraso:=interface2.retraso-estados_t;
-  if interface2.retraso<=0 then begin
+  interface2.retraso:=interface2.retraso+estados_t;
+  if interface2.retraso>10500000 then begin
     interface2.cargado:=true;
     copymemory(@memoria[0],@interface2.rom[$4000],$4000);
   end;

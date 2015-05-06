@@ -217,7 +217,7 @@ while EmuStatus=EsRuning do begin
     linea:=linea+1;
   end;
   spec_z80.pedir_irq:=ASSERT_LINE;
-  spectrum_irq_pos:=spec_z80.contador;
+  spectrum_irq_pos:=0;
   flash:=(flash+1) and $f;
   if flash=0 then haz_flash:=not(haz_flash);
   if mouse.tipo=1 then evalua_gunstick;

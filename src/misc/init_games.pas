@@ -26,7 +26,8 @@ uses sysutils,main_engine,
   arabian_hw,higemaru_hw,bagman_hw,chip8_hw,zaxxon_hw,kangaroo_hw,
   bioniccommando_hw,wwfsuperstars_hw,rainbowislands_hw,volfied_hw,
   operationwolf_hw,outrun_hw,taitosj_hw,vulgus_hw,ddragon3_hw,blockout_hw,
-  foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw;
+  foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw,freekick_hw,
+  boogiewings_hw;
 
 type
   tgame_desc=record
@@ -39,7 +40,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=213;
+  games_cont=215;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum.zip';grid:0;company:'Sinclair'),
@@ -252,6 +253,8 @@ const
   (name:'Genix Family';year:'1994';snd:1;hi:false;zip:'genix.zip';grid:207;company:'NIX'),
   (name:'Juno First';year:'1983';snd:1;hi:false;zip:'junofrst.zip';grid:208;company:'Konami'),
   (name:'Gyruss';year:'1983';snd:1;hi:false;zip:'gyruss.zip';grid:209;company:'Konami'),
+  (name:'Boogie Wings';year:'1992';snd:1;hi:false;zip:'boogwing.zip';grid:210;company:'Data East'),
+  (name:'Free Kick';year:'1987';snd:1;hi:false;zip:'freekick.zip';grid:211;company:'Nihon System'),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco.zip';grid:1001;company:'Coleco'),
@@ -481,6 +484,7 @@ case numero of
   207:principal1.CambiarMaquina(principal1.genixfamily1);
   208:principal1.CambiarMaquina(principal1.junofirst1);
   209:principal1.CambiarMaquina(principal1.gyruss1);
+  210:principal1.CambiarMaquina(principal1.freekick1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -701,6 +705,8 @@ principal1.Pirates1.Checked:=false;
 principal1.GenixFamily1.Checked:=false;
 principal1.junofirst1.checked:=false;
 principal1.gyruss1.checked:=false;
+principal1.boogwins1.checked:=false;
+principal1.freekick1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -842,6 +848,8 @@ case tmaquina of
   206,207:Cargar_pirates;
   208:Cargar_junofrst;
   209:Cargar_gyruss;
+  210:Cargar_boogwins;
+  211:Cargar_freekick;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1691,6 +1699,14 @@ end;
 if sender=principal1.gyruss1 then begin
   tipo:=209;
   principal1.gyruss1.Checked:=true;
+end;
+if sender=principal1.boogwins1 then begin
+  tipo:=210;
+  principal1.boogwins1.Checked:=true;
+end;
+if sender=principal1.freekick1 then begin
+  tipo:=211;
+  principal1.freekick1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin
