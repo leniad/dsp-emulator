@@ -998,11 +998,12 @@ for f:=$0 to $3ff do begin
     color:=(atributos_mem[$1+(y shl 1)] and $07) shl 2;
     scroll:=(x*8)+atributos_mem[y shl 1];
     nchar:=calc_nchar(f);
-    put_gfx_trans(scroll,y*8,nchar,color,2,0);
+    if y<2 then put_gfx(scroll,y*8,nchar,color,2,0)
+      else put_gfx_trans(scroll,y*8,nchar,color,2,0);
     gfx[0].buffer[f]:=false;
   end;
 end;
-actualiza_trozo(0,0,256,256,2,0,0,256,256,1);
+actualiza_trozo(0,24,256,232,2,0,24,256,232,1);
 //Disparos
 for f:=0 to 7 do begin
   if f=7 then color:=32 else color:=33;
@@ -1014,7 +1015,6 @@ end;
 //Sprites
 for f:=7 downto 0 do begin
   y:=sprite_mem[$3+(f*4)]+1;
-  if y<16 then continue; //en las dos primeras lineas no hay sprites
   nchar:=calc_sprite(f);
   atrib:=sprite_mem[$1+(f*4)];
   color:=(sprite_mem[$2+(f*4)] and $7) shl 2;
@@ -1022,6 +1022,7 @@ for f:=7 downto 0 do begin
   put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,1);
   actualiza_gfx_sprite(x,y,1,1);
 end;
+actualiza_trozo(0,0,256,24,2,0,0,256,24,1);
 actualiza_trozo_final(16,0,224,256,1);
 end;
 

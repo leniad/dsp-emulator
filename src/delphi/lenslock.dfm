@@ -15,6 +15,7 @@ object lenslock1: Tlenslock1
   OldCreateOrder = False
   Position = poDesigned
   OnClose = FormClose
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object BitBtn1: TBitBtn

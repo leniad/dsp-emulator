@@ -82,12 +82,12 @@ var
       ctemp1:byte;
       memoria_temp:array[0..$ffff] of byte;
 const
-      pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-      pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-      ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
-		32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
-      ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-		64*8+0*32, 64*8+1*32, 64*8+2*32, 64*8+3*32, 64*8+4*32, 64*8+5*32, 64*8+6*32, 64*8+7*32);
+      pc_x:array[0..7] of dword=(0,1,2,3, 4,5,6,7);
+      pc_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
+      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+	128+0,128+1,128+2,128+3,128+4,128+5,128+6,128+7);
+      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		8*8, 9*8, 10*8, 11*8,12*8,13*8,14*8,15*8);
 procedure convert_chars;
 begin
   init_gfx(0,8,8,512);
@@ -111,7 +111,7 @@ screen_init(3,512,256,true,false);
 screen_mod_scroll(3,512,256,511,0,0,0);
 iniciar_video(240,224);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,256);
+main_z80:=cpu_z80.create(3000000,256);
 main_z80.change_ram_calls(freekick_getbyte,freekick_putbyte);
 main_z80.init_sound(freekick_sound_update);
 //Sound Chips

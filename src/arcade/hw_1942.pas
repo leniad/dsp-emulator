@@ -78,7 +78,7 @@ begin
 iniciar_hw1942:=false;
 iniciar_audio(false);
 //Pantallas:  principal+char y sprites
-screen_init(1,256,256,false,true);
+screen_init(1,256,512,false,true);
 screen_init(2,256,512);
 screen_mod_scroll(2,0,0,0,512,256,511);
 screen_init(3,256,256,true);

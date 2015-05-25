@@ -1,5 +1,5 @@
 object tape_window1: Ttape_window1
-  Left = 658
+  Left = 683
   Top = 192
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
@@ -436,9 +436,9 @@ object tape_window1: Ttape_window1
       65)
   end
   object StringGrid1: TStringGrid
-    Left = 16
-    Top = 116
-    Width = 288
+    Left = 15
+    Top = 111
+    Width = 289
     Height = 194
     Cursor = crHandPoint
     TabStop = False

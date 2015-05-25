@@ -484,7 +484,8 @@ case numero of
   207:principal1.CambiarMaquina(principal1.genixfamily1);
   208:principal1.CambiarMaquina(principal1.junofirst1);
   209:principal1.CambiarMaquina(principal1.gyruss1);
-  210:principal1.CambiarMaquina(principal1.freekick1);
+  210:principal1.CambiarMaquina(principal1.boogwins1);
+  211:principal1.CambiarMaquina(principal1.freekick1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);

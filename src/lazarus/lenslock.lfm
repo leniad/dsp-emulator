@@ -15,6 +15,7 @@ object lenslock1: Tlenslock1
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnClose = FormClose
+  OnShow = FormShow
   LCLVersion = '1.4.0.2'
   object BitBtn1: TBitBtn
     Left = 27

@@ -273,63 +273,63 @@ case ModRM of
       end;
   $40,$48,$50,$58,$60,$68,$70,$78:begin
         tempb:=self.fetch;
-        EO:=r.bw.w+r.ix.w+shortint(tempb);
+        EO:=word(r.bw.w+r.ix.w+shortint(tempb));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   $44,$4c,$54,$5c,$64,$6c,$74,$7c:begin
         tempb:=self.fetch;
-        EO:=r.ix.w+shortint(tempb);
+        EO:=word(r.ix.w+shortint(tempb));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   $45,$4d,$55,$5d,$65,$6d,$75,$7d:begin
         tempb:=self.fetch;
-        EO:=r.iy.w+shortint(tempb);
+        EO:=word(r.iy.w+shortint(tempb));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   $46,$4e,$56,$5e,$66,$6e,$76,$7e:begin
         tempb:=self.fetch;
-        EO:=r.bp.w+shortint(tempb);
+        EO:=word(r.bp.w+shortint(tempb));
         EA:=self.DefaultBase(SS)+EO;
       end;
   $47,$4f,$57,$5f,$67,$6f,$77,$7f:begin
         tempb:=self.fetch;
-        EO:=r.bw.w+shortint(tempb);
+        EO:=word(r.bw.w+shortint(tempb));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   $80,$88,$90,$98,$a0,$a8,$b0,$b8:begin
         E16:=self.FETCH;
         E16:=E16+(self.FETCH shl 8);
-        EO:=r.bw.w+r.ix.w+smallint(E16);
+        EO:=word(r.bw.w+r.ix.w+smallint(E16));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   $81,$89,$91,$99,$a1,$a9,$b1,$b9:begin
         E16:=self.FETCH;
         E16:=E16+(self.FETCH shl 8);
-        EO:=(r.bw.w+r.iy.w)+smallint(E16);
+        EO:=word(r.bw.w+r.iy.w+smallint(E16));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   $84,$8c,$94,$9c,$a4,$ac,$b4,$bc:begin
         E16:=self.FETCH;
         E16:=E16+(self.FETCH shl 8);
-        EO:=r.ix.w+smallint(E16);
+        EO:=word(r.ix.w+smallint(E16));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   $85,$8d,$95,$9d,$a5,$ad,$b5,$bd:begin
         E16:=self.FETCH;
         E16:=E16+(self.FETCH shl 8);
-        EO:=r.iy.w+smallint(E16);
+        EO:=word(r.iy.w+smallint(E16));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   $86,$8e,$96,$9e,$a6,$ae,$b6,$be:begin
         E16:=self.FETCH;
         E16:=E16+(self.FETCH shl 8);
-        EO:=r.bp.w-smallint(E16);
+        EO:=word(r.bp.w-smallint(E16));
         EA:=self.DefaultBase(SS)+EO;
       end;
   $87,$8f,$97,$9f,$a7,$af,$b7,$bf:begin
         E16:=self.FETCH;
         E16:=E16+(self.FETCH shl 8);
-        EO:=r.bw.w+smallint(E16);
+        EO:=word(r.bw.w+smallint(E16));
         EA:=self.DefaultBase(DS0)+EO;
       end;
   else MessageDlg('GetEA No Implementado ModRM '+inttohex(ModRM,10)+'. PC='+inttohex((r.ps_r shl 4)+r.ip,10), mtInformation,[mbOk], 0);
@@ -899,6 +899,7 @@ begin
   if r.f.CarryVal then ROL_BYTE:=(dst shl 1)+1
     else ROL_BYTE:=(dst shl 1);
 end;
+
 function cpu_nec.ROL_WORD(dst:word):word;
 begin
    r.f.CarryVal:=(dst and $8000)<>0;
@@ -960,12 +961,18 @@ begin
  RORC_WORD:=temp shr 1;
 end;
 
+function sshr(num:integer;fac:byte):integer;inline;
+begin
+  if num<0 then sshr:=-(abs(num) shr fac)
+    else sshr:=num shr fac;
+end;
+
 procedure cpu_nec.SHRA_WORD(c:byte;dst:word;ModRM:byte);
 begin
   self.contador:=self.contador+c;
-  dst:= smallint(dst) shr (c-1);
+  dst:=sshr(smallint(dst),c-1);
   r.f.CarryVal:=(dst and $1)<>0;
-  dst:=smallint(word(dst)) shr 1;
+  dst:=sshr(smallint(word(dst)),1);
   self.SetSZPF_Word(dst);
   PutbackRMWord(ModRM,WORD(dst));
 end;
@@ -1013,7 +1020,7 @@ begin
 	self.prefetch_reset:=true;
 	tmp:=self.FETCH;
 	if flag then begin
-    r.ip:=r.ip+shortint(tmp);
+    r.ip:=word(r.ip+shortint(tmp));
     self.contador:=self.contador+table[self.tipo_cpu];
 	end;
 end;
@@ -1025,8 +1032,8 @@ var
 begin
   tmp:=self.GetMemB(DS0,r.ix.w);
   self.PutMemB(DS1,r.iy.w,tmp);
-  if r.f.d then df:=-(2*1)+1
-    else df:=-(2*0)+1;
+  if r.f.d then df:=-1
+    else df:=1;
   r.ix.w:=r.ix.w+df;
   r.iy.w:=r.iy.w+df;
   CLKS(8,8,6);
@@ -1039,8 +1046,8 @@ var
 begin
   tmp:=self.GetMemW(DS0,r.ix.w);
   self.PutMemW(DS1,r.iy.w,tmp);
-  if r.f.d then df:=-(4*1)+2
-    else df:=-(4*0)+2;
+  if r.f.d then df:=-2
+    else df:=2;
   r.ix.w:=r.ix.w+df;
   r.iy.w:=r.iy.w+df;
   CLKS(16,16,10);
@@ -2279,7 +2286,7 @@ case instruccion of
             tmpb:=fetch;
             r.cw.w:=r.cw.w-1;
             if (r.f.ZeroVal and (r.cw.w<>0)) then begin
-              r.ip:=r.ip+shortint(tmpb);
+              r.ip:=word(r.ip+shortint(tmpb));
               CLKS(14,14,6);
             end else begin
               CLKS(5,5,3);
@@ -2289,7 +2296,7 @@ case instruccion of
             tmpb:=fetch;
             r.cw.w:=r.cw.w-1;
             if (r.cw.w<>0) then begin
-              r.ip:=r.ip+shortint(tmpb);
+              r.ip:=word(r.ip+shortint(tmpb));
               CLKS(13,13,6);
             end else begin
               CLKS(5,5,3);
@@ -2313,13 +2320,13 @@ case instruccion of
      $e8:begin //i_call_d16
           tmpw:=self.FETCHWORD;
           PUSH(r.ip);
-          r.ip:=r.ip+smallint(tmpw);
+          r.ip:=word(r.ip+smallint(tmpw));
           self.prefetch_reset:=true;
           self.contador:=self.contador+24;
         end;
     $e9:begin //jmp_d16
           tmpw:=self.FETCHWORD;
-          r.ip:=r.ip+smallint(tmpw);
+          r.ip:=word(r.ip+smallint(tmpw));
           self.prefetch_reset:=true;
           self.contador:=self.contador+15;
         end;
@@ -2333,14 +2340,14 @@ case instruccion of
         end;
     $eb:begin //i_jmp_d8
             tmpb:=fetch;
-            r.ip:=r.ip+shortint(tmpb);
+            r.ip:=word(r.ip+shortint(tmpb));
             self.contador:=self.contador+12;
         end;
     $f2:begin //i_repne 29_04
             tmpb:=fetch; //next
             tmpw:=r.cw.w; //c
             case tmpb of
-            $26:begin
+              $26:begin
                     seg_prefix:=TRUE;
                     prefix_base:=r.ds1_r shl 4;
                     tmpb:=fetch;
@@ -2382,7 +2389,7 @@ case instruccion of
            	  $ae:if (tmpw<>0) then begin
                     self.i_scasb;
                     tmpw:=tmpw-1;
-                    while ((tmpw>0) and not(r.f.ZeroVal)) do begin //<-- revisar esta PM
+                    while ((tmpw>0) and not(r.f.ZeroVal)) do begin
                       self.i_scasb;
                       tmpw:=tmpw-1;
                     end;
@@ -2590,7 +2597,7 @@ case instruccion of
     $fe:begin  //fepre
            ModRM:=fetch;  //modmr
            tmpb:=GetRMByte(ModRM);  //tmp
-           case (ModRM and $38) of //<--revisar esto 16bits
+           case (ModRM and $38) of
     	        $00:begin  // INC
                      tmpb1:=tmpb+1;
                      r.f.OverVal:=(tmpb=$7f);
@@ -2613,7 +2620,7 @@ case instruccion of
     $ff:begin  //i_ffpre
           ModRM:=fetch;
           tmpw:=GetRMWord(ModRM);  //tmp
-          case (ModRM and $38) of //<-- revisar esto 32 bits!
+          case (ModRM and $38) of
           	  $00:begin  //INC
                     tmpw1:=tmpw+1;  //tmp1
                     r.f.OverVal:=(tmpw=$7fff);
@@ -2684,7 +2691,6 @@ end;
 procedure cpu_nec.run(maximo:single);
 var
   instruccion:byte;
-  tmpw:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
@@ -2694,12 +2700,6 @@ while self.contador<maximo do begin
     else if self.pedir_irq then nec_interrupt(self.vect_req);
   self.opcode:=true;
   self.r.old_pc:=self.r.ip;
-  {if ((self.r.ps_r shl 4)+self.r.ip)=$27d7 then begin
-    tmpw:=0;
-  end;
-  if ((self.r.ps_r shl 4)+self.r.ip)=$2079 then begin
-    tmpw:=0;
-  end;}
   instruccion:=fetch;
   self.opcode:=false;
   self.ea_calculated:=false;

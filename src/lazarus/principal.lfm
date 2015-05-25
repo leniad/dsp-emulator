@@ -2363,6 +2363,13 @@ object principal1: Tprincipal1
             Caption = 'Gyruss'
             OnClick = CambiarMaquina
           end
+          object MenuItem28: TMenuItem
+            Caption = 'Free Kick HW'
+            object freekick1: TMenuItem
+              Caption = 'Free Kick'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2835,6 +2842,10 @@ object principal1: Tprincipal1
               Caption = 'Genix Family'
               OnClick = CambiarMaquina
             end
+          end
+          object boogwins1: TMenuItem
+            Caption = 'Boogie Wings'
+            OnClick = CambiarMaquina
           end
           object outrun1: TMenuItem
             Caption = 'Outrun'

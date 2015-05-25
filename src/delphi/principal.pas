@@ -389,6 +389,9 @@ var
   //Status bitmap
   status_bitmap:tbitmap;
 
+const
+  SCREEN_DIF=20;
+
 implementation
 uses acercade,file_engine,poke_memoria,lenslock,spectrum_misc,tap_tzx;
 

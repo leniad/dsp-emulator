@@ -50,7 +50,8 @@ end;
 procedure Ttape_window1.FormShow(Sender: TObject);
 begin
 //Hacer que no se solape con la principal
-tape_window1.Left:=principal1.Left+principal1.Width;
+tape_window1.Left:=SCREEN_DIF+principal1.Left+principal1.Width;
+tape_window1.top:=principal1.top;
 Tape_Bitmap:=TBitmap.Create;
 //Varios
 tape_window1.StringGrid2.cells[0,0]:=leng[main_vars.idioma].varios[0];  //nombre

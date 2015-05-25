@@ -14,7 +14,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="15"/>
       <RevisionNr Value="3"/>
-      <BuildNr Value="437"/>
+      <BuildNr Value="438"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.15"/>
     </VersionInfo>
@@ -59,8 +59,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="principal"/>
-        <TopLine Value="545"/>
-        <CursorPos X="15" Y="560"/>
+        <TopLine Value="389"/>
+        <CursorPos X="17" Y="408"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -278,7 +278,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="acercade"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -302,7 +302,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="config_general"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="514"/>
         <CursorPos Y="529"/>
         <UsageCount Value="202"/>
@@ -316,7 +316,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="redefine"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="108"/>
         <CursorPos X="45" Y="118"/>
         <UsageCount Value="200"/>
@@ -390,8 +390,10 @@
       <Unit46>
         <Filename Value="..\misc\file_engine.pas"/>
         <UnitName Value="file_engine"/>
-        <EditorIndex Value="7"/>
-        <CursorPos X="15" Y="6"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="695"/>
+        <CursorPos Y="707"/>
         <UsageCount Value="97"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -414,10 +416,13 @@
         <ComponentName Value="tape_window1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="56"/>
-        <CursorPos X="12" Y="69"/>
+        <UnitName Value="tape_window"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="73"/>
+        <CursorPos X="20" Y="81"/>
         <UsageCount Value="221"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit48>
       <Unit49>
@@ -438,10 +443,13 @@
         <ComponentName Value="lenslock1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="69"/>
-        <CursorPos X="13" Y="82"/>
+        <UnitName Value="lenslock"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="76"/>
+        <CursorPos X="64" Y="89"/>
         <UsageCount Value="224"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit50>
       <Unit51>
@@ -506,7 +514,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="joystick_calibration"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="14"/>
         <CursorPos X="18" Y="31"/>
         <UsageCount Value="226"/>
@@ -658,9 +666,9 @@
       <Unit81>
         <Filename Value="..\misc\init_games.pas"/>
         <UnitName Value="init_games"/>
-        <EditorIndex Value="9"/>
-        <TopLine Value="471"/>
-        <CursorPos X="44" Y="483"/>
+        <EditorIndex Value="11"/>
+        <TopLine Value="477"/>
+        <CursorPos X="53" Y="487"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -716,7 +724,7 @@
       <Unit88>
         <Filename Value="C:\lazarus\fpc\2.6.4\source\packages\paszlib\src\zbase.pas"/>
         <UnitName Value="zbase"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="82"/>
         <CursorPos X="38" Y="94"/>
         <UsageCount Value="11"/>
@@ -750,14 +758,13 @@
       <Unit92>
         <Filename Value="..\misc\ziputils2.pas"/>
         <UnitName Value="ziputils2"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit92>
     </Units>
-    <JumpHistory Count="12" HistoryIndex="11">
+    <JumpHistory Count="23" HistoryIndex="22">
       <Position1>
         <Filename Value="..\misc\file_engine.pas"/>
         <Caret Line="9" Column="47" TopLine="3"/>
@@ -805,6 +812,50 @@
         <Filename Value="..\misc\file_engine.pas"/>
         <Caret Line="469" Column="35" TopLine="468"/>
       </Position12>
+      <Position13>
+        <Filename Value="principal.pas"/>
+        <Caret Line="560" Column="15" TopLine="545"/>
+      </Position13>
+      <Position14>
+        <Filename Value="lenslock.pas"/>
+        <Caret Line="83" Column="13" TopLine="70"/>
+      </Position14>
+      <Position15>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="483" Column="44" TopLine="471"/>
+      </Position15>
+      <Position16>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="499" Column="44" TopLine="486"/>
+      </Position16>
+      <Position17>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="1707" Column="5" TopLine="1702"/>
+      </Position17>
+      <Position18>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="347" TopLine="347"/>
+      </Position18>
+      <Position19>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="709" Column="12" TopLine="692"/>
+      </Position19>
+      <Position20>
+        <Filename Value="principal.pas"/>
+        <Caret Line="405" Column="17" TopLine="386"/>
+      </Position20>
+      <Position21>
+        <Filename Value="principal.pas"/>
+        <Caret Line="406" Column="17" TopLine="387"/>
+      </Position21>
+      <Position22>
+        <Filename Value="principal.pas"/>
+        <Caret Line="407" Column="17" TopLine="388"/>
+      </Position22>
+      <Position23>
+        <Filename Value="principal.pas"/>
+        <Caret Line="408" Column="17" TopLine="389"/>
+      </Position23>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -844,7 +895,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <BreakPoints Count="3">
+    <BreakPoints Count="2">
       <Item1>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsGlobal"/>
@@ -859,13 +910,6 @@
         <Source Value="C:\lazarus\fpc\2.6.1\source\packages\paszlib\src\zuncompr.pas"/>
         <Line Value="49"/>
       </Item2>
-      <Item3>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="..\misc\file_engine.pas"/>
-        <Line Value="707"/>
-      </Item3>
     </BreakPoints>
     <Exceptions Count="10">
       <Item1>

@@ -296,7 +296,7 @@ var
   w,h,wx,wy:byte;
   x,y:integer;
 begin
-for f:=0 to $7f do begin
+for f:=$0 to $7f do begin
 		nchar:=(buffer_sprites[(f*8)+2]+(buffer_sprites[(f*8)+3] shl 8)) and $fff;
 		atrib:=buffer_sprites[(f*8)+4]+(buffer_sprites[(f*8)+5] shl 8);
     color:=(atrib and $f) shl 4;
@@ -472,8 +472,7 @@ begin
 case direccion of
   0..$3ffff,$ffff0..$fffff:exit;
   $40000..$43fff:ram[direccion and $3fff]:=valor;  //ram 1
-  $c0000..$c00ff:spriteram[direccion and $3ff]:=valor; //ram 7
-  $c0100..$c03ff:spriteram[direccion and $3ff]:=valor; //ram 7
+  $c0000..$c03ff:spriteram[direccion and $3ff]:=valor; //ram 7
   $c8000..$c8bff:begin //ram 0
                     palette1[(direccion and $1ff)+(direccion and $c00)]:=valor;
                     cambiar_color1(direccion and $1fe);
@@ -641,7 +640,7 @@ case puerto of
   2:video_off:=(valor and $08)<>0;
   4:begin //DMA
       copymemory(@buffer_sprites[0],@spriteram[0],$400);
-      fillchar(spriteram[0],$400,0);
+      //fillchar(spriteram[0],$400,0);
    end;
   6:m72_raster_irq_position:=valor-128;
   $40:begin
@@ -762,10 +761,7 @@ procedure rtype2_putbyte(direccion:dword;valor:byte);
 begin
 case direccion of
   0..$7ffff,$ffff0..$fffff:exit;
-  $b0000..$b0001:begin //DMA
-      copymemory(@buffer_sprites[0],@spriteram[0],$400);
-      //fillchar(spriteram[0],$400,0);
-   end;
+  $b0000..$b0001:copymemory(@buffer_sprites[0],@spriteram[0],$400); //DMA
   $bc000..$bc001:m72_raster_irq_position:=valor+64;
   $c0000..$c03ff:spriteram[direccion and $3ff]:=valor; //ram 7
   $c8000..$c8bff:begin //ram 0

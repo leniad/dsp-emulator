@@ -174,6 +174,9 @@ type
     genixfamily1: TMenuItem;
     junofirst1: TMenuItem;
     gyruss1: TMenuItem;
+    MenuItem28: TMenuItem;
+    freekick1: TMenuItem;
+    boogwins1: TMenuItem;
     pirates1: TMenuItem;
     twinbee1: TMenuItem;
     mrgoemon1: TMenuItem;
@@ -400,6 +403,9 @@ var
   tipo_new:word;
   //Status bitmap
   status_bitmap:tbitmap;
+
+const
+  SCREEN_DIF=20;
 
 implementation
 uses acercade,tap_tzx,spectrum_misc,lenslock,file_engine;

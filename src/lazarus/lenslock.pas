@@ -30,6 +30,7 @@ type
     procedure close_button(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -81,6 +82,12 @@ procedure Tlenslock1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
 tape_window1.label2.caption:='';
 lenslok.activo:=false;
+end;
+
+procedure Tlenslock1.FormShow(Sender: TObject);
+begin
+lenslock1.Left:=SCREEN_DIF+principal1.Left+principal1.Width;
+lenslock1.Top:=SCREEN_DIF+tape_window1.top+tape_window1.Height;
 end;
 
 procedure Tlenslock1.close_button(Sender: TObject);

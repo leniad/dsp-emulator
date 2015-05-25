@@ -144,29 +144,23 @@ end;
 procedure evaluar_arcade_keyb(player:byte);
 begin
 if (arcade_input.up[player]<>(keystate[arcade_input.nup[player] and $ff]<>0)) then begin
-  if not(arcade_input.down[player]) then begin
     arcade_input.up[player]:=keystate[arcade_input.nup[player] and $ff]<>0;
     event.arcade:=true;
-  end;
 end;
 if (arcade_input.down[player]<>(keystate[arcade_input.ndown[player] and $ff]<>0)) then begin
-  if not(arcade_input.up[player]) then begin
     arcade_input.down[player]:=keystate[arcade_input.ndown[player] and $ff]<>0;
     event.arcade:=true;
-  end;
 end;
+if (arcade_input.up[player] and arcade_input.down[player]) then arcade_input.down[player]:=false;
 if (arcade_input.left[player]<>(keystate[arcade_input.nleft[player] and $ff]<>0)) then begin
-  if not(arcade_input.right[player]) then begin
     arcade_input.left[player]:=keystate[arcade_input.nleft[player] and $ff]<>0;
     event.arcade:=true;
-  end;
 end;
 if (arcade_input.right[player]<>(keystate[arcade_input.nright[player] and $ff]<>0)) then begin
-  if not(arcade_input.left[player]) then begin
     arcade_input.right[player]:=keystate[arcade_input.nright[player] and $ff]<>0;
     event.arcade:=true;
-  end;
 end;
+if (arcade_input.left[player] and arcade_input.right[player]) then arcade_input.right[player]:=false;
 if (arcade_input.but0[player]<>(keystate[arcade_input.nbut0[player] and $ff]<>0)) then begin
   arcade_input.but0[player]:=keystate[arcade_input.nbut0[player] and $ff]<>0;
   event.arcade:=true;
