@@ -28,6 +28,7 @@ type
     def_analog=record
         x,y:array[0..1] of integer;
         delta,mid_val,max_val,min_val:integer;
+        return_center:boolean;
     end;
 
 const
@@ -66,7 +67,7 @@ procedure init_controls(evalue_mouse,evalue_keyboard,evalue_joystick,evalue_arca
 procedure open_joystick(player:byte);
 procedure close_joystick(num:byte);
 //Analog
-procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer);
+procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean);
 procedure analog_read;
 
 implementation
@@ -315,7 +316,7 @@ begin
   end;
 end;
 
-procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer);
+procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean);
 begin
 init_timer(cpu,cpu_clock/sensitivity,analog_read,true);
 analog.delta:=port_delta;
@@ -326,6 +327,7 @@ analog.x[0]:=mid_val;
 analog.y[0]:=mid_val;
 analog.x[1]:=mid_val;
 analog.y[1]:=mid_val;
+analog.return_center:=return_center;
 end;
 
 procedure analog_read;
@@ -333,42 +335,40 @@ var
   f:byte;
 begin
 for f:=0 to 1 do begin
-  if arcade_input.up[f] then begin  //eje y p1
-    analog.y[f]:=analog.y[f]+analog.delta;
-    if analog.y[f]>analog.max_val then analog.y[f]:=analog.max_val;
-  end else begin
-    if arcade_input.down[f] then begin  //eje y p1
-        analog.y[f]:=analog.y[f]-analog.delta;
-        if analog.y[f]<analog.min_val then analog.y[f]:=analog.min_val;
-    end else begin
-        if analog.y[f]>analog.mid_val then begin
+  if arcade_input.up[f] then analog.y[f]:=analog.y[f]+analog.delta;
+  if arcade_input.down[f] then analog.y[f]:=analog.y[f]-analog.delta;
+  if analog.y[f]>analog.max_val then analog.y[f]:=analog.max_val;
+  if analog.y[f]<analog.min_val then analog.y[f]:=analog.min_val;
+  if analog.return_center then begin
+    if not(arcade_input.up[f]) then begin
+      if analog.y[f]>analog.mid_val then begin
           analog.y[f]:=analog.y[f]-analog.delta;
           if analog.y[f]<analog.mid_val then analog.y[f]:=analog.mid_val;
-        end else begin
-          if analog.y[f]<analog.mid_val then begin
-            analog.y[f]:=analog.y[f]+analog.delta;
-            if analog.y[f]>analog.mid_val then analog.y[f]:=analog.mid_val;
-          end;
-        end;
+      end;
+    end;
+    if not(arcade_input.down[f]) then begin
+      if analog.y[f]<analog.mid_val then begin
+          analog.y[f]:=analog.y[f]+analog.delta;
+          if analog.y[f]>analog.mid_val then analog.y[f]:=analog.mid_val;
+      end;
     end;
   end;
-  if arcade_input.left[f] then begin  //eje x p1
-    analog.x[f]:=analog.x[f]+analog.delta;
-    if analog.x[f]>analog.max_val then analog.x[f]:=analog.max_val;
-  end else begin
-    if arcade_input.right[f] then begin  //eje x p1
-        analog.x[f]:=analog.x[f]-analog.delta;
-        if analog.x[f]<analog.min_val then analog.x[f]:=analog.min_val;
-    end else begin
-        if analog.x[f]>analog.mid_val then begin
+  if arcade_input.left[f] then analog.x[f]:=analog.x[f]+analog.delta;
+  if arcade_input.right[f] then analog.x[f]:=analog.x[f]-analog.delta;
+  if analog.x[f]>analog.max_val then analog.x[f]:=analog.max_val;
+  if analog.x[f]<analog.min_val then analog.x[f]:=analog.min_val;
+  if analog.return_center then begin
+    if not(arcade_input.left[f]) then begin
+      if analog.x[f]>analog.mid_val then begin
           analog.x[f]:=analog.x[f]-analog.delta;
           if analog.x[f]<analog.mid_val then analog.x[f]:=analog.mid_val;
-        end else begin
-          if analog.x[f]<analog.mid_val then begin
-            analog.x[f]:=analog.x[f]+analog.delta;
-            if analog.x[f]>analog.mid_val then analog.x[f]:=analog.mid_val;
-          end;
-        end;
+      end;
+    end;
+    if not(arcade_input.right[f]) then begin
+      if analog.x[f]<analog.mid_val then begin
+          analog.x[f]:=analog.x[f]+analog.delta;
+          if analog.x[f]>analog.mid_val then analog.x[f]:=analog.mid_val;
+      end;
     end;
   end;
 end;

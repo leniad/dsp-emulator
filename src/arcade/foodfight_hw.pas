@@ -76,7 +76,7 @@ main_m68000:=cpu_m68000.create(trunc(12096000/2),259);
 main_m68000.change_ram16_calls(foodf_getword,foodf_putword);
 main_m68000.init_sound(foodf_sound_update);
 //Init Analog
-init_analog(main_m68000.numero_cpu,main_m68000.clock,100,10,$7f,$ff,0);
+init_analog(main_m68000.numero_cpu,main_m68000.clock,100,10,$7f,$ff,0,true);
 //Sound Chips
 pokey_0:=pokey_chip.create(0,trunc(12096000/2/10));
 pokey_0.change_pot(foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r);

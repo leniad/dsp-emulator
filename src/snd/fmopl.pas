@@ -55,7 +55,7 @@ slot_array:array[0..31] of integer=(
 // table is 3dB/octave , DV converts this into 6dB/octave */
 // 0.1875 is bit 0 weight of the envelope counter (volume) expressed in the 'decibel' scale */
 DV=(0.1875/2.0);
-base_ksl_tab:array[0..(8*16)-1] of single=(
+base_ksl_tab:array[0..(8*16)-1] of double=(
 	// OCT 0 */
 	 0,0,0,0,
 	 0,0,0,0,
@@ -203,7 +203,7 @@ eg_rate_shift:array[0..(16+64+16)-1] of byte=(	// Envelope Generator counter shi
 
 // multiple table */
 ML=2;
-base_mul_tab:array[0..15] of single= (
+base_mul_tab:array[0..15] of double= (
 // 1/2, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,10,12,12,15,15 */
    0.50*ML,1.00*ML,2.00*ML,3.00*ML,4.00*ML,5.00*ML,6.00*ML,7.00*ML,
    8.00*ML,9.00*ML,10.00*ML,10.00*ML,12.00*ML,12.00*ML,15.00*ML,15.00*ML
@@ -711,7 +711,7 @@ var
 begin
 	CH:=OPL.P_CH[slot_v shr 1];
 	SLOT:=CH.SLOT[slot_v and 1];
-	SLOT.mul:= mul_tab[v and $0f];
+	SLOT.mul:=byte(mul_tab[v and $0f]);
   if (v and $10)<>0 then SLOT.KSR_m:=0
     else SLOT.KSR_m:=2;
 	SLOT.eg_type:=(v and $20);
@@ -968,7 +968,7 @@ begin
 
 			      CH.block_fnum:=block_fnum;
 
-			      CH.ksl_base:=trunc(ksl_tab[block_fnum shr 6]);
+			      CH.ksl_base:=word(trunc(ksl_tab[block_fnum shr 6]));
 			      CH.fc:= OPL.fn_tab[block_fnum and $03ff] shr (7-block);
 
 			      // BLK 2,1,0 bits -> bits 3,2,1 of kcode */

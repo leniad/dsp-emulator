@@ -96,7 +96,7 @@ main_z80.change_ram_calls(tehkanwc_getbyte,tehkanwc_putbyte);
 sub_z80:=cpu_z80.create(4608000,$200);
 sub_z80.change_ram_calls(tehkanwc_misc_getbyte,tehkanwc_misc_putbyte);
 //analog
-init_analog(main_z80.numero_cpu,main_z80.clock,100,10,0,63,-63);
+init_analog(main_z80.numero_cpu,main_z80.clock,100,10,0,63,-63,false);
 //Sound CPU
 snd_z80:=cpu_z80.create(4608000,$200);
 snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
