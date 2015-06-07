@@ -33,7 +33,6 @@ var
   Aboutbox: TAboutbox;
 
 implementation
-uses principal;
 
 { TAboutbox }
 

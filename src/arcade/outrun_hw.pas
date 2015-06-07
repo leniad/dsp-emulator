@@ -7,7 +7,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 procedure Cargar_outrun;
 procedure outrun_principal;
-function outrun_getword(direccion:dword;putbyte:boolean):word;
+function outrun_getword(direccion:dword):word;
 procedure outrun_putword(direccion:dword;valor:word);
 function iniciar_outrun:boolean;
 procedure reset_outrun;
@@ -468,7 +468,7 @@ case (direccion and $3000) of
 standar_s16_io_r:=res;
 end;
 
-function outrun_getword(direccion:dword;putbyte:boolean):word;
+function outrun_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

@@ -12,7 +12,7 @@ procedure reset_boogwins;
 procedure cerrar_boogwins;
 procedure boogwins_principal;
 //Main CPU
-function boogwins_getword(direccion:dword;putbyte:boolean):word;
+function boogwins_getword(direccion:dword):word;
 procedure boogwins_putword(direccion:dword;valor:word);
 function boogwins_bank_callback(bank:word):word;
 procedure sound_bank_rom(valor:byte);
@@ -232,7 +232,7 @@ begin
 	boogwins_protection_region_0_104_r:=data;
 end;
 
-function boogwins_getword(direccion:dword;putbyte:boolean):word;
+function boogwins_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

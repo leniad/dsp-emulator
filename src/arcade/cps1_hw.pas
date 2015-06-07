@@ -8,7 +8,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 procedure Cargar_cps1;
 procedure cps1_principal;
-function cps1_getword(direccion:dword;putbyte:boolean):word;
+function cps1_getword(direccion:dword):word;
 procedure cps1_putword(direccion:dword;valor:word);
 function iniciar_cps1:boolean;
 procedure reset_cps1;
@@ -19,7 +19,7 @@ procedure cps1_snd_putbyte(direccion:word;valor:byte);
 procedure cps1_ym2151_snd_irq(irqstate:byte);
 procedure cps1_sound_update;
 //qsound
-function cps1_qsnd_getword(direccion:dword;putbyte:boolean):word;
+function cps1_qsnd_getword(direccion:dword):word;
 procedure cps1_qsnd_putword(direccion:dword;valor:word);
 function cps1_qz80_getbyte(direccion:word):byte;
 procedure cps1_qz80_putbyte(direccion:word;valor:byte);
@@ -1143,7 +1143,7 @@ if (dir=cps1_cps_b[cps_b].mulh) then res:=(cps1_mula*cps1_mulb) shr 16;
 cps1_read_io_w:=res;
 end;
 
-function cps1_getword(direccion:dword;putbyte:boolean):word;
+function cps1_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of
@@ -1313,7 +1313,7 @@ begin
 end;
 
 //Qsound
-function cps1_qsnd_getword(direccion:dword;putbyte:boolean):word;
+function cps1_qsnd_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

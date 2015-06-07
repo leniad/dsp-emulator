@@ -4,7 +4,7 @@ interface
 uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,controls_engine,ay_8910,sysutils,gfx_engine,upd765,cargar_dsk,forms,
      dialogs,rom_engine,misc_functions,main_engine,pal_engine,sound_engine,
-     tape_window,file_engine,ppi8255,timer_engine,lenguaje,disk_file_format;
+     tape_window,file_engine,ppi8255,lenguaje,disk_file_format;
 
 const
   TO1=7;
@@ -166,7 +166,7 @@ var
     cpc_mem:array[0..10,0..$3fff] of byte;
     mem_marco:array[0..3] of byte;
     current_pen,cpc_video_mode,new_video_mode:byte;
-    lowrom,highrom,crtc_vsync,change_video:boolean;
+    motor_on,lowrom,highrom,crtc_vsync,change_video:boolean;
     cpcpal:array[0..16] of byte;
     latch_ppi_read_a,latch_ppi_write_a,ay_control:byte;
     crtcreg:array[0..31] of byte;
@@ -807,17 +807,7 @@ procedure port_c_write(valor:byte);
 begin
 ay_control:=((valor and $c0) shr 6);
 update_ay;
-if cinta_tzx.cargada then begin
-  if (valor and $10)<>0 then begin
-    tape_window1.fPlayCinta(nil);
-    main_screen.rapido:=true;
-  end else begin
-    if cinta_tzx.play_tape then begin
-      tape_window1.fstopcinta(nil);
-      main_screen.rapido:=false;
-    end;
-  end;
-end;
+motor_on:=(valor and $10)<>0;
 keyline:=valor and $f;
 old_port_c_w:=valor;
 end;
@@ -838,11 +828,35 @@ end;
 
 //Tape
 procedure amstrad_despues_instruccion(estados_t:word);
+var
+  amst_z80_reg:npreg_z80;
 begin
 if cinta_tzx.cargada then begin
-  if cinta_tzx.play_tape then begin
-    cinta_tzx.estados:=cinta_tzx.estados+estados_t;
-    play_cinta_tzx;
+  if (not(motor_on) and cinta_tzx.play_once) then begin
+    case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta+1].tipo_bloque of
+      $22:begin
+            cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+            siguiente_bloque_tzx;
+          end;
+      $fe:begin
+            cinta_tzx.indice_cinta:=0;
+            tape_window1.StringGrid1.TopRow:=0;
+            siguiente_bloque_tzx;
+            cinta_tzx.play_once:=true;
+            tape_window1.fStopCinta(nil);
+      end;
+    end;
+  end;
+  if (motor_on and cinta_tzx.play_tape) then begin
+      cinta_tzx.estados:=cinta_tzx.estados+estados_t;
+      play_cinta_tzx;
+  end else begin
+    amst_z80_reg:=main_z80.get_internal_r;
+    if ((amst_z80_reg.pc=$bc77) and not(cinta_tzx.play_once)) then begin
+       cinta_tzx.play_once:=true;
+       main_screen.rapido:=true;
+       tape_window1.fPlayCinta(nil);
+    end;
   end;
 end;
 end;

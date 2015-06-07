@@ -3,7 +3,7 @@ unit freekick_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
-     timer_engine,file_engine,pal_engine,sound_engine,ppi8255;
+     timer_engine,pal_engine,sound_engine,ppi8255;
 
 procedure Cargar_freekick;
 procedure freekick_principal;

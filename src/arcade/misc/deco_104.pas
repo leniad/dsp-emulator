@@ -1,7 +1,7 @@
 unit deco_104;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}deco_146,main_engine;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}deco_146;
 
 type
   cpu_deco_104=class(cpu_deco_146)

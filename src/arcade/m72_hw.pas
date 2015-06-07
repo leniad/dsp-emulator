@@ -640,7 +640,7 @@ case puerto of
   2:video_off:=(valor and $08)<>0;
   4:begin //DMA
       copymemory(@buffer_sprites[0],@spriteram[0],$400);
-      //fillchar(spriteram[0],$400,0);
+      fillchar(spriteram[0],$400,0);
    end;
   6:m72_raster_irq_position:=valor-128;
   $40:begin

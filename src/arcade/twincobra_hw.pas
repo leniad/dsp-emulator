@@ -11,7 +11,7 @@ procedure reset_twincobra;
 procedure cerrar_twincobra;
 function iniciar_twincobra:boolean;
 //Main CPU
-function twincobr_getword(direccion:dword;putbyte:boolean):word;
+function twincobr_getword(direccion:dword):word;
 procedure twincobr_putword(direccion:dword;valor:word);
 //SND
 function twincobr_snd_getbyte(direccion:word):byte;
@@ -391,7 +391,7 @@ function twincobr_dsp_r:word;
 begin
 	// DSP can read data from main CPU RAM via DSP IO port 1 */
 	case main_ram_seg of
-		$30000,$40000,$50000:twincobr_dsp_r:=twincobr_getword(main_ram_seg+dsp_addr_w,false);
+		$30000,$40000,$50000:twincobr_dsp_r:=twincobr_getword(main_ram_seg+dsp_addr_w);
       else twincobr_dsp_r:=0;
 	end;
 end;
@@ -470,7 +470,7 @@ begin
 end;
 
 //Main CPU
-function twincobr_getword(direccion:dword;putbyte:boolean):word;
+function twincobr_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

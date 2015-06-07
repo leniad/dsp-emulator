@@ -2,7 +2,7 @@ unit vlm_5030;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
-     sound_engine,timer_engine,misc_functions;
+     sound_engine,timer_engine;
 
 const
   FR_SIZE=4;

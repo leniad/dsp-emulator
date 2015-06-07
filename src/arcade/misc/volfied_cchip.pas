@@ -1,8 +1,7 @@
 unit volfied_cchip;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     controls_engine,timer_engine;
+uses controls_engine,timer_engine;
 
 const
   palette_data:array[1..$11,0..$4f] of word=((

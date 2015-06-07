@@ -3,7 +3,7 @@ unit dietgogo_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,deco_104,deco_146,
+     oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,deco_104,
      misc_functions;
 
 procedure Cargar_dietgo;
@@ -12,7 +12,7 @@ procedure reset_dietgo;
 procedure cerrar_dietgo;
 procedure dietgo_principal;
 //Main CPU
-function dietgo_getword(direccion:dword;putbyte:boolean):word;
+function dietgo_getword(direccion:dword):word;
 procedure dietgo_putword(direccion:dword;valor:word);
 function dietgo_bank_callback(bank:word):word;
 procedure sound_bank_rom(valor:byte);
@@ -221,7 +221,7 @@ begin
 	dietgo_protection_region_0_104_r:=data;
 end;
 
-function dietgo_getword(direccion:dword;putbyte:boolean):word;
+function dietgo_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

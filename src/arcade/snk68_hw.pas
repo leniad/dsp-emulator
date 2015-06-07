@@ -11,7 +11,7 @@ function iniciar_snk68:boolean;
 procedure reset_snk68;
 procedure cerrar_snk68;
 //Main CPU
-function pow_getword(direccion:dword;putbyte:boolean):word;
+function pow_getword(direccion:dword):word;
 procedure pow_putword(direccion:dword;valor:word);
 //Sound CPU
 function pow_snd_getbyte(direccion:word):byte;
@@ -21,7 +21,7 @@ procedure pow_snd_outbyte(valor:byte;puerto:word);
 procedure snk68_sound_update;
 procedure snd_irq(irqstate:byte);
 //Ikari 3
-function ikari3_getword(direccion:dword;putbyte:boolean):word;
+function ikari3_getword(direccion:dword):word;
 procedure ikari3_putword(direccion:dword;valor:word);
 
 const
@@ -430,7 +430,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function pow_getword(direccion:dword;putbyte:boolean):word;
+function pow_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of
@@ -538,7 +538,7 @@ begin
 end;
 
 //Ikari 3
-function ikari3_getword(direccion:dword;putbyte:boolean):word;
+function ikari3_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

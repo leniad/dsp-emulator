@@ -338,7 +338,6 @@ procedure setup_connection(OPN:pfm_opn;CH:pfm_chan;num:integer);
 procedure refresh_fc_eg_slot(OPN:pfm_opn;SLOT:pfm_slot;fc,kc:integer);
 
 implementation
-uses ym_2203;
 
 //FMSLOT
 // update phase increment and envelope generator */

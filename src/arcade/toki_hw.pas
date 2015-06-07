@@ -11,7 +11,7 @@ function iniciar_toki:boolean;
 procedure reset_toki;
 procedure cerrar_toki;
 //Main CPU
-function toki_getword(direccion:dword;putbyte:boolean):word;
+function toki_getword(direccion:dword):word;
 procedure toki_putword(direccion:dword;valor:word);
 //Sound CPU
 function toki_snd_getbyte(direccion:word):byte;
@@ -287,7 +287,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function toki_getword(direccion:dword;putbyte:boolean):word;
+function toki_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

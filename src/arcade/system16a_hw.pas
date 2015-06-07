@@ -7,8 +7,8 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 procedure Cargar_system16a;
 procedure system16a_principal;
-function system16a_getword(direccion:dword;putbyte:boolean):word;
-function system16a_getword_fd1089(direccion:dword;putbyte:boolean):word;
+function system16a_getword(direccion:dword):word;
+function system16a_getword_fd1089(direccion:dword):word;
 procedure system16a_putword(direccion:dword;valor:word);
 function iniciar_system16a:boolean;
 procedure reset_system16a;
@@ -669,7 +669,7 @@ end;
 standar_s16_io_r:=res;
 end;
 
-function system16a_getword_fd1089(direccion:dword;putbyte:boolean):word;
+function system16a_getword_fd1089(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of
@@ -695,7 +695,7 @@ case direccion of
 end;
 end;
 
-function system16a_getword(direccion:dword;putbyte:boolean):word;
+function system16a_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

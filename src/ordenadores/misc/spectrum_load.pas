@@ -2,7 +2,7 @@ unit spectrum_load;
 
 interface
 uses {$ifdef windows}windows,{$endif}
-     Dialogs,main_engine,spectrum_48k,misc_functions,init_games,file_engine,principal,
+     Dialogs,main_engine,spectrum_48k,misc_functions,file_engine,
      lenguaje,spectrum_misc,tap_tzx,snapshot,tape_window,cargar_spec,sysutils;
 
 type

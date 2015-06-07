@@ -11,7 +11,7 @@ function iniciar_sfighter:boolean;
 procedure reset_sfighter;
 procedure cerrar_sfighter;
 //Main CPU
-function sfighter_getword(direccion:dword;putbyte:boolean):word;
+function sfighter_getword(direccion:dword):word;
 procedure sfighter_putword(direccion:dword;valor:word);
 //Sound CPUs
 function sf_snd_getbyte(direccion:word):byte;
@@ -359,7 +359,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function sfighter_getword(direccion:dword;putbyte:boolean):word;
+function sfighter_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

@@ -60,7 +60,6 @@ llamadas_maquina.iniciar:=iniciar_arabian;
 llamadas_maquina.bucle_general:=arabian_principal;
 llamadas_maquina.cerrar:=cerrar_arabian;
 llamadas_maquina.reset:=reset_arabian;
-llamadas_maquina.fps_max:=60;
 end;
 
 procedure create_palette;

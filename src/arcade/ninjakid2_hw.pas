@@ -1,7 +1,7 @@
 unit ninjakid2_hw;
 
 interface
-uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,
      pal_engine,mc8123,sound_engine;
 

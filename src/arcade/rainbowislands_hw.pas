@@ -11,7 +11,7 @@ function iniciar_rainbow:boolean;
 procedure reset_rainbow;
 procedure cerrar_rainbow;
 //Main CPU
-function rainbow_getword(direccion:dword;putbyte:boolean):word;
+function rainbow_getword(direccion:dword):word;
 procedure rainbow_putword(direccion:dword;valor:word);
 //Sound CPU
 function rainbow_snd_getbyte(direccion:word):byte;
@@ -283,7 +283,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function rainbow_getword(direccion:dword;putbyte:boolean):word;
+function rainbow_getword(direccion:dword):word;
 begin
 direccion:=direccion and $ffffff;
 case direccion of

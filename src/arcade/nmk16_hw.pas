@@ -11,7 +11,7 @@ function iniciar_nmk16:boolean;
 procedure reset_nmk16;
 procedure cerrar_nmk16;
 //Main CPU
-function sbombers_getword(direccion:dword;putbyte:boolean):word;
+function sbombers_getword(direccion:dword):word;
 procedure sbombers_putword(direccion:dword;valor:word);
 procedure sound_irq;
 procedure nmk16_update_sound;
@@ -397,7 +397,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function sbombers_getword(direccion:dword;putbyte:boolean):word;
+function sbombers_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

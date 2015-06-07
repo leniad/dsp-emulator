@@ -27,7 +27,6 @@ var
   AboutBox: TAboutBox;
 
 implementation
-uses principal;
 {$R *.dfm}
 
 procedure TAboutBox.OKButtonClick(Sender: TObject);

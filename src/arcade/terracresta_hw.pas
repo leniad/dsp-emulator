@@ -11,7 +11,7 @@ function iniciar_terracre:boolean;
 procedure reset_terracre;
 procedure cerrar_terracre;
 //Main CPU
-function terracre_getword(direccion:dword;putbyte:boolean):word;
+function terracre_getword(direccion:dword):word;
 procedure terracre_putword(direccion:dword;valor:word);
 //Sound CPU
 function terracre_snd_getbyte(direccion:word):byte;
@@ -289,7 +289,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function terracre_getword(direccion:dword;putbyte:boolean):word;
+function terracre_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

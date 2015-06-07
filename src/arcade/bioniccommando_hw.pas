@@ -11,7 +11,7 @@ function iniciar_bionicc:boolean;
 procedure reset_bionicc;
 procedure cerrar_bionicc;
 //Main CPU
-function bionicc_getword(direccion:dword;putbyte:boolean):word;
+function bionicc_getword(direccion:dword):word;
 procedure bionicc_putword(direccion:dword;valor:word);
 //Sound CPU
 function bionicc_snd_getbyte(direccion:word):byte;
@@ -301,7 +301,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function bionicc_getword(direccion:dword;putbyte:boolean):word;
+function bionicc_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

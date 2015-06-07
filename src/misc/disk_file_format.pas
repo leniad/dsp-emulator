@@ -1,7 +1,7 @@
 unit disk_file_format;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}upd765,main_engine,ipf_disk;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ipf_disk;
 
 function dsk_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
 function ipf_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
@@ -65,7 +65,7 @@ var
   cadena,cadena2:string;
   longi:dword;
   estandar,hay_multi,rehacer_multi,sp3_presente:boolean;
-  posicion,cont,tempw:word;
+  posicion,tempw:word;
   cara,track,f:byte;
 begin
    dsk_format:=false;

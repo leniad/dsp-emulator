@@ -11,7 +11,7 @@ unit tap_tzx;
 interface
 
 uses nz80,z80_sp,{$IFDEF WINDOWS}windows,{$ENDIF}dialogs,main_engine,spectrum_misc,
-     principal,grids,sysutils,lenguaje,misc_functions,tape_window,file_engine,
+     grids,sysutils,lenguaje,misc_functions,tape_window,file_engine,
      lenslock,samples;
 
 const
@@ -346,7 +346,7 @@ end;
 
 procedure siguiente_bloque_tzx;
 var
-   p:TGridRect;
+   {$ifndef fpc}p:TGridRect;{$endif}
    f:byte;
    cadena:string;
    ptemp:pbyte;

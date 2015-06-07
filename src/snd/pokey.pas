@@ -1,7 +1,7 @@
 unit pokey;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,main_engine,timer_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine;
 
 const
   // POKEY WRITE LOGICALS */
@@ -359,7 +359,6 @@ procedure pokey_chip.vol_init;
 const
   resistors:array[0..3] of double=(90000, 26500, 8050, 3400);
 var
-  pull_up:double;
 	r_off:double;
   r_chan:array[0..15] of double;
 	rTot:double;

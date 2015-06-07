@@ -1,7 +1,7 @@
 unit dac;
 
 interface
-uses {$ifdef windows}windows,{$endif}sound_engine,main_engine;
+uses {$ifdef windows}windows,{$else}main_engine,{$ENDIF}sound_engine;
 
 type
   dac_chip=class(snd_chip_class)

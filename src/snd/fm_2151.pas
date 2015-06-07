@@ -1330,7 +1330,6 @@ function YM_2151UpdateOne(num:byte):pinteger;
 var
 	outl,outr:integer;
   chip:pYM2151;
-  oldstate:integer;
 begin
     chip:=FM2151[num];
 	  advance_eg(num);

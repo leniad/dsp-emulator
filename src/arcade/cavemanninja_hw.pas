@@ -12,11 +12,11 @@ procedure reset_cninja;
 procedure cerrar_cninja;
 procedure cninja_principal;
 //Caveman Ninja
-function cninja_getword(direccion:dword;putbyte:boolean):word;
+function cninja_getword(direccion:dword):word;
 procedure cninja_putword(direccion:dword;valor:word);
 function cninja_video_bank(bank:word):word;
 //Robocop 2
-function robocop2_getword(direccion:dword;putbyte:boolean):word;
+function robocop2_getword(direccion:dword):word;
 procedure robocop2_putword(direccion:dword;valor:word);
 function robocop2_video_bank(bank:word):word;
 //sound
@@ -434,7 +434,7 @@ begin
 	cninja_protection_deco_104_r:=data;
 end;
 
-function cninja_getword(direccion:dword;putbyte:boolean):word;
+function cninja_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of
@@ -553,7 +553,7 @@ begin
   robocop2_protection_deco_146_r:=data;
 end;
 
-function robocop2_getword(direccion:dword;putbyte:boolean):word;
+function robocop2_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

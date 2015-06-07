@@ -11,7 +11,7 @@ function iniciar_opwolf:boolean;
 procedure reset_opwolf;
 procedure cerrar_opwolf;
 //Main CPU
-function opwolf_getword(direccion:dword;putbyte:boolean):word;
+function opwolf_getword(direccion:dword):word;
 procedure opwolf_putword(direccion:dword;valor:word);
 //Sound CPU
 function opwolf_snd_getbyte(direccion:word):byte;
@@ -32,7 +32,7 @@ const
         opwolf_adpcm:tipo_roms=(n:'b20-08.21';l:$80000;p:0;crc:$f3e19c64);
 
 var
- scroll_x1,scroll_y1,scroll_x2,scroll_y2,buffer_taitosound_comm_r:word;
+ scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
  bank_sound:array[0..3,$0..$3fff] of byte;
  rom:array[0..$2ffff] of word;
  ram1:array[0..$3fff] of word;
@@ -247,8 +247,12 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function opwolf_getword(direccion:dword;putbyte:boolean):word;
+function opwolf_getword(direccion:dword):word;
 begin
+direccion:=direccion and $ffffff;
+case direccion of
+  $3e0003:opwolf_getword:=taitosound_comm_r;
+end;
 direccion:=direccion and $fffffe;
 case direccion of
   0..$3ffff:opwolf_getword:=rom[direccion shr 1];
@@ -262,10 +266,6 @@ case direccion of
   $380002:opwolf_getword:=$7f;
   $3a0000:opwolf_getword:=raton.x+15;  //mouse x
   $3a0002:opwolf_getword:=raton.y;  //mouse y
-  $3e0002:begin
-              if not(putbyte) then buffer_taitosound_comm_r:=taitosound_comm_r;
-              opwolf_getword:=buffer_taitosound_comm_r;
-          end;
   $c00000..$c0ffff:opwolf_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:opwolf_getword:=ram3[(direccion and $3fff) shr 1];
 end;

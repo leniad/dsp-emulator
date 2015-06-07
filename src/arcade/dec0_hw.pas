@@ -13,7 +13,7 @@ procedure cerrar_dec0;
 procedure dec0_h6280_principal;
 procedure dec0_principal;
 //Main CPU
-function dec0_getword(direccion:dword;putbyte:boolean):word;
+function dec0_getword(direccion:dword):word;
 procedure dec0_putword(direccion:dword;valor:word);
 //Sound CPU
 function dec0_snd_getbyte(direccion:word):byte;
@@ -482,7 +482,7 @@ begin
   end;
 end;
 
-function dec0_getword(direccion:dword;putbyte:boolean):word;
+function dec0_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

@@ -2,7 +2,7 @@ unit samples;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     dialogs,sysutils,misc_functions,sound_engine,file_engine,main_engine;
+     dialogs,sysutils,sound_engine,file_engine,main_engine;
 
 const
   MAX_SAMPLES=30;

@@ -12,7 +12,7 @@ procedure reset_funkyjet;
 procedure cerrar_funkyjet;
 procedure funkyjet_principal;
 //Main CPU
-function funkyjet_getword(direccion:dword;putbyte:boolean):word;
+function funkyjet_getword(direccion:dword):word;
 procedure funkyjet_putword(direccion:dword;valor:word);
 
 const
@@ -208,7 +208,7 @@ begin
 	funkyjet_deco146_r:=data;
 end;
 
-function funkyjet_getword(direccion:dword;putbyte:boolean):word;
+function funkyjet_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

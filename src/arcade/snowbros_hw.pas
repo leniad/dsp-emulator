@@ -11,7 +11,7 @@ function iniciar_snowbros:boolean;
 procedure reset_snowbros;
 procedure cerrar_snowbros;
 //Main CPU
-function snowbros_getword(direccion:dword;putbyte:boolean):word;
+function snowbros_getword(direccion:dword):word;
 procedure snowbros_putword(direccion:dword;valor:word);
 //Sound CPU
 function snowbros_snd_getbyte(direccion:word):byte;
@@ -187,7 +187,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function snowbros_getword(direccion:dword;putbyte:boolean):word;
+function snowbros_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

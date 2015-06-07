@@ -11,7 +11,7 @@ procedure reset_tumblep;
 procedure cerrar_tumblep;
 procedure tumblep_principal;
 //Main CPU
-function tumblep_getword(direccion:dword;putbyte:boolean):word;
+function tumblep_getword(direccion:dword):word;
 procedure tumblep_putword(direccion:dword;valor:word);
 
 const
@@ -180,7 +180,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function tumblep_getword(direccion:dword;putbyte:boolean):word;
+function tumblep_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

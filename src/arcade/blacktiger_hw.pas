@@ -340,7 +340,7 @@ case direccion of
   $8000..$bfff:blktiger_getbyte:=memoria_rom[banco_rom,(direccion and $3fff)];
   $c000..$cfff:blktiger_getbyte:=scroll_ram[scroll_bank+(direccion and $fff)];
   $d800..$dfff:blktiger_getbyte:=buffer_paleta[direccion and $7ff];
-  //$f3a1:blktiger_getbyte:=4;
+  // $f3a1:blktiger_getbyte:=4;
 end;
 end;
 

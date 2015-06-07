@@ -11,7 +11,7 @@ function iniciar_cabal:boolean;
 procedure reset_cabal;
 procedure cerrar_cabal;
 //Main CPU
-function cabal_getword(direccion:dword;putbyte:boolean):word;
+function cabal_getword(direccion:dword):word;
 procedure cabal_putword(direccion:dword;valor:word); 
 //Sound CPU
 function cabal_snd_getbyte(direccion:word):byte;
@@ -239,7 +239,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function cabal_getword(direccion:dword;putbyte:boolean):word;
+function cabal_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

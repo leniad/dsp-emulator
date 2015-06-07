@@ -11,11 +11,11 @@ function iniciar_pirates:boolean;
 procedure reset_pirates;
 procedure cerrar_pirates;
 //Pirates
-function pirates_getword(direccion:dword;putbyte:boolean):word;
+function pirates_getword(direccion:dword):word;
 procedure pirates_putword(direccion:dword;valor:word);
 procedure pirates_sound_update;
 //Genix
-function genix_getword(direccion:dword;putbyte:boolean):word;
+function genix_getword(direccion:dword):word;
 
 const
         //Pirates
@@ -343,7 +343,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function pirates_getword(direccion:dword;putbyte:boolean):word;
+function pirates_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of
@@ -405,7 +405,7 @@ begin
   oki_6295_0.update;
 end;
 
-function genix_getword(direccion:dword;putbyte:boolean):word;
+function genix_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

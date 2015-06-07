@@ -6,14 +6,14 @@ interface
 
 uses
   sdl2,Windows,SysUtils,Forms,graphics,uchild,Classes,Dialogs,StdCtrls,ExtCtrls,
-  Buttons,Grids,ComCtrls,Menus,ImgList,Controls,messages,
+  Buttons,Grids,ComCtrls,Menus,ImgList,Controls,messages,System.ImageList,
   //graphics
   jpeg,gifimg,pngimage,
   //misc
   poke_spectrum,main_engine,sound_engine,tape_window,lenguaje,init_games,
   controls_engine,LoadRom,config_general,
-  //Devices
-  upd765,vars_hide, System.ImageList;
+  //other...
+  vars_hide;
 
 type
   Tprincipal1 = class(TForm)

@@ -3,7 +3,7 @@ unit snapshot;
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
      sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,forms,file_engine,
-     init_games,tap_tzx,tape_window,rom_engine,ppi8255;
+     init_games,rom_engine,ppi8255;
 
 //Spectrum
 function abrir_sna(datos:pbyte;long:integer):boolean;

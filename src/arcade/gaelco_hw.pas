@@ -12,13 +12,13 @@ procedure reset_gaelco_hw;
 procedure cerrar_gaelco_hw;
 //Big Karnak
 procedure bigk_principal;
-function bigk_getword(direccion:dword;putbyte:boolean):word;
+function bigk_getword(direccion:dword):word;
 procedure bigk_putword(direccion:dword;valor:word);
 function bigk_snd_getbyte(direccion:word):byte;
 procedure bigk_snd_putbyte(direccion:word;valor:byte);
 //Thunder Hoop
 procedure thoop_principal;
-function thoop_getword(direccion:dword;putbyte:boolean):word;
+function thoop_getword(direccion:dword):word;
 procedure thoop_putword(direccion:dword;valor:word);
 //Biomechanical Toy
 procedure biomtoy_putword(direccion:dword;valor:word);
@@ -532,7 +532,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function bigk_getword(direccion:dword;putbyte:boolean):word;
+function bigk_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of
@@ -743,7 +743,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function thoop_getword(direccion:dword;putbyte:boolean):word;
+function thoop_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

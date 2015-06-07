@@ -11,7 +11,7 @@ function iniciar_prehisle:boolean;
 procedure reset_prehisle;
 procedure cerrar_prehisle;
 //Main CPU
-function prehisle_getword(direccion:dword;putbyte:boolean):word;
+function prehisle_getword(direccion:dword):word;
 procedure prehisle_putword(direccion:dword;valor:word);
 //Sound CPU
 function prehisle_snd_getbyte(direccion:word):byte;
@@ -292,7 +292,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function prehisle_getword(direccion:dword;putbyte:boolean):word;
+function prehisle_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

@@ -13,13 +13,13 @@ procedure sound_instruccion;
 function ay0_porta_read:byte;
 //Nemesis
 procedure nemesis_principal;
-function nemesis_getword(direccion:dword;putbyte:boolean):word;
+function nemesis_getword(direccion:dword):word;
 procedure nemesis_putword(direccion:dword;valor:word);
 function nemesis_snd_getbyte(direccion:word):byte;
 procedure nemesis_snd_putbyte(direccion:word;valor:byte);
 //GX400
 procedure gx400_principal;
-function gx400_getword(direccion:dword;putbyte:boolean):word;
+function gx400_getword(direccion:dword):word;
 procedure gx400_putword(direccion:dword;valor:word);
 function gx400_snd_getbyte(direccion:word):byte;
 procedure gx400_snd_putbyte(direccion:word;valor:byte);
@@ -128,7 +128,6 @@ end;
 
 function iniciar_nemesis:boolean;
 var
-  memoria_temp:array[0..$1ff] of byte;
   f:byte;
 begin
 iniciar_nemesis:=false;
@@ -483,7 +482,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function nemesis_getword(direccion:dword;putbyte:boolean):word;
+function nemesis_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of
@@ -616,7 +615,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function gx400_getword(direccion:dword;putbyte:boolean):word;
+function gx400_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

@@ -11,7 +11,7 @@ function iniciar_volfied:boolean;
 procedure reset_volfied;
 procedure cerrar_volfied;
 //Main CPU
-function volfied_getword(direccion:dword;putbyte:boolean):word;
+function volfied_getword(direccion:dword):word;
 procedure volfied_putword(direccion:dword;valor:word);
 //Sound CPU
 function volfied_snd_getbyte(direccion:word):byte;
@@ -221,7 +221,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function volfied_getword(direccion:dword;putbyte:boolean):word;
+function volfied_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

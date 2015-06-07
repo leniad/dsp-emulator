@@ -11,7 +11,7 @@ function iniciar_wwfsstar:boolean;
 procedure reset_wwfsstar;
 procedure cerrar_wwfsstar;
 //Main CPU
-function wwfsstar_getword(direccion:dword;putbyte:boolean):word;
+function wwfsstar_getword(direccion:dword):word;
 procedure wwfsstar_putword(direccion:dword;valor:word);
 //Sound CPU
 function wwfsstar_snd_getbyte(direccion:word):byte;
@@ -263,7 +263,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function wwfsstar_getword(direccion:dword;putbyte:boolean):word;
+function wwfsstar_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

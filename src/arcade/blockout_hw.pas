@@ -11,7 +11,7 @@ function iniciar_blockout:boolean;
 procedure reset_blockout;
 procedure cerrar_blockout;
 //Main CPU
-function blockout_getword(direccion:dword;putbyte:boolean):word;
+function blockout_getword(direccion:dword):word;
 procedure blockout_putword(direccion:dword;valor:word);
 //Sound CPU
 function blockout_snd_getbyte(direccion:word):byte;
@@ -207,7 +207,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function blockout_getword(direccion:dword;putbyte:boolean):word;
+function blockout_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

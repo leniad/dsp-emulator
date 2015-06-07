@@ -11,7 +11,7 @@ function iniciar_ddragon3:boolean;
 procedure reset_ddragon3;
 procedure cerrar_ddragon3;
 //Main CPU
-function ddragon3_getword(direccion:dword;putbyte:boolean):word;
+function ddragon3_getword(direccion:dword):word;
 procedure ddragon3_putword(direccion:dword;valor:word);
 //Sound CPU
 function ddragon3_snd_getbyte(direccion:word):byte;
@@ -293,7 +293,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function ddragon3_getword(direccion:dword;putbyte:boolean):word;
+function ddragon3_getword(direccion:dword):word;
 begin
 
 direccion:=direccion and $fffffe;

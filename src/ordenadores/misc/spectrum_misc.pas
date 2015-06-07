@@ -6,7 +6,7 @@ uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      principal,nz80,z80_sp,spectrum_128k,ay_8910,controls_engine,sysutils,
      forms,lenguaje,spectrum_48k,dialogs,spectrum_3,upd765,cargar_spec,
      gfx_engine,main_engine,graphics,pal_engine,sound_engine,tape_window,
-     z80pio,z80daisy,lenslock,disk_file_format;
+     z80pio,z80daisy,disk_file_format;
 
 const tabla_scr:array[0..191] of word=(
         0,    256, 512, 768,1024,1280,1536,1792,

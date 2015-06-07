@@ -2,8 +2,7 @@ unit sn_76496;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     {$IFDEF fpc}main_engine,{$ENDIF}
-     sound_engine,timer_engine;
+     sound_engine;
 
 const
  MAX_OUTPUT=$7fff;

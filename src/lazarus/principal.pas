@@ -14,7 +14,7 @@ uses sdl2,{$IFDEF WINDOWS}windows,{$else}LCLType,{$endif}
      sound_engine,lenguaje,controls_engine,main_engine,loadrom,config_general,
      init_games,tape_window,
      //Devices
-     upd765,vars_hide;
+     vars_hide;
 
 type
 
@@ -369,6 +369,7 @@ type
     procedure CambiarVideo(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure GroupBox4Click(Sender: TObject);
     procedure IdiomaClick(Sender: TObject);
     procedure CambiaAudio(Sender: TObject);
     procedure fLoadCartucho(Sender: TObject);
@@ -569,9 +570,10 @@ timer3.Enabled:=true;
 end;
 
 procedure Tprincipal1.FormCreate(Sender: TObject);
+{$ifdef darwin}
 var
-  t:tcloseaction;
-  {$ifdef darwin}cadena:string;f:word;count:byte;{$endif}
+  cadena:string;f:word;count:byte;
+{$endif}
 begin
 {$ifdef windows}
 //SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
@@ -600,6 +602,11 @@ file_ini_load;
 main_vars.lenguaje_ok:=leer_idioma;
 principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
+end;
+
+procedure Tprincipal1.GroupBox4Click(Sender: TObject);
+begin
+
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -843,7 +850,6 @@ end;
 
 procedure Tprincipal1.Timer2Timer(Sender: TObject);
 var
-  cadena:string;
   tipo:word;
 begin
 timer2.Enabled:=false;

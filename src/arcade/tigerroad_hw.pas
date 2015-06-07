@@ -11,7 +11,7 @@ function iniciar_tigeroad:boolean;
 procedure reset_tigeroad;
 procedure cerrar_tigeroad;
 //Main CPU
-function tigeroad_getword(direccion:dword;putbyte:boolean):word;
+function tigeroad_getword(direccion:dword):word;
 procedure tigeroad_putword(direccion:dword;valor:word);
 //Sound CPU
 function tigeroad_snd_getbyte(direccion:word):byte;
@@ -320,7 +320,7 @@ begin
   end;
 end;
 
-function tigeroad_getword(direccion:dword;putbyte:boolean):word;
+function tigeroad_getword(direccion:dword):word;
 var
   tempw:word;
 begin

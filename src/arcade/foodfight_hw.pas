@@ -11,7 +11,7 @@ function iniciar_foodf:boolean;
 procedure reset_foodf;
 procedure cerrar_foodf;
 //Main CPU
-function foodf_getword(direccion:dword;putbyte:boolean):word;
+function foodf_getword(direccion:dword):word;
 procedure foodf_putword(direccion:dword;valor:word);
 procedure foodf_sound_update;
 function foodf_pot_r(pot:byte):byte;
@@ -214,7 +214,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function foodf_getword(direccion:dword;putbyte:boolean):word;
+function foodf_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

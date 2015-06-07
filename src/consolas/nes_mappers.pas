@@ -2,7 +2,7 @@ unit nes_mappers;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m6502,nes_ppu,main_engine,file_engine;
+     m6502,nes_ppu,main_engine;
 
 type
   tmapper1=record

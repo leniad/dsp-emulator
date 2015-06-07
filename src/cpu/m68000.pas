@@ -33,7 +33,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      sysutils,dialogs,main_engine,timer_engine,vars_hide;
 
 type
-        ttgetword=function (direccion:dword;putbyte:boolean=false):word;
         band_m68000=record
                 t,s,i,x,n,z,v,c:boolean;
                 im:byte;
@@ -52,14 +51,14 @@ type
             procedure free;
             destructor destroy;
           public
-            getword:ttgetword;
+            getword:tgetword;
             putword:tputword;
             halt:boolean;
             irq:array[0..7] of byte;
             procedure reset;
             procedure run(maximo:single);
             function get_internal_r:preg_m68000;
-            procedure change_ram16_calls(getword:ttgetword;putword:tputword);
+            procedure change_ram16_calls(getword:tgetword;putword:tputword);
             function save_snapshot(data:pbyte):word;
             procedure load_snapshot(data:pbyte);
           private
@@ -147,7 +146,7 @@ begin
   get_internal_r:=self.r;
 end;
 
-procedure cpu_m68000.change_ram16_calls(getword:ttgetword;putword:tputword);
+procedure cpu_m68000.change_ram16_calls(getword:tgetword;putword:tputword);
 begin
   self.getword:=getword;
   self.putword:=putword;
@@ -271,7 +270,7 @@ procedure cpu_m68000.putbyte(addr:dword;val:byte);
 var
   tempw:word;
 begin
-tempw:=self.getword(addr and $fffffe,true);
+tempw:=self.getword(addr and $fffffe);
 if (addr and 1)<>0 then self.putword(addr,(tempw and $ff00) or val)
   else self.putword(addr,(tempw and $ff) or (val shl 8));
 end;
@@ -890,7 +889,7 @@ var
   instruccion,tempw,tempw2:word;
   dir,dest,orig,tempb,tempb2,tempb3,f:byte;
   templ,templ2,templ3:dword;
-  tempdl,tempdl2:uint64;
+  tempdl:uint64;
   pcontador:integer;
   remainder,quotient,divisor:integer;
 begin

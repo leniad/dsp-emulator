@@ -11,10 +11,10 @@ function iniciar_megasys1:boolean;
 procedure reset_megasys1;
 procedure cerrar_megasys1;
 //Main CPU
-function megasys1_a_getword(direccion:dword;putbyte:boolean):word;
+function megasys1_a_getword(direccion:dword):word;
 procedure megasys1_a_putword(direccion:dword;valor:word);
 //Sound CPU
-function megasys1_snd_a_getword(direccion:dword;putbyte:boolean):word;
+function megasys1_snd_a_getword(direccion:dword):word;
 procedure megasys1_snd_a_putword(direccion:dword;valor:word);
 procedure megasys1_sound_update;
 procedure snd_irq(irqstate:byte);
@@ -654,7 +654,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function megasys1_a_getword(direccion:dword;putbyte:boolean):word;
+function megasys1_a_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of
@@ -794,7 +794,7 @@ case direccion of
   end;
 end;
 
-function megasys1_snd_a_getword(direccion:dword;putbyte:boolean):word;
+function megasys1_snd_a_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

@@ -1654,6 +1654,7 @@ object principal1: Tprincipal1
     Font.Quality = fqDraft
     ParentFont = False
     TabOrder = 3
+    OnClick = GroupBox4Click
     object Panel4: TPanel
       AnchorSideLeft.Control = GroupBox4
       AnchorSideTop.Control = GroupBox4

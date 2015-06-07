@@ -11,7 +11,7 @@ procedure reset_supbtime;
 procedure cerrar_supbtime;
 procedure supbtime_principal;
 //Main CPU
-function supbtime_getword(direccion:dword;putbyte:boolean):word;
+function supbtime_getword(direccion:dword):word;
 procedure supbtime_putword(direccion:dword;valor:word);
 
 const
@@ -179,7 +179,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function supbtime_getword(direccion:dword;putbyte:boolean):word;
+function supbtime_getword(direccion:dword):word;
 begin
 direccion:=direccion and $fffffe;
 case direccion of

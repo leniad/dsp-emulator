@@ -11,7 +11,7 @@ function iniciar_rastan:boolean;
 procedure reset_rastan;
 procedure cerrar_rastan;
 //Main CPU
-function rastan_getword(direccion:dword;putbyte:boolean):word;
+function rastan_getword(direccion:dword):word;
 procedure rastan_putword(direccion:dword;valor:word);
 //Sound CPU
 function rastan_snd_getbyte(direccion:word):byte;
@@ -233,7 +233,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function rastan_getword(direccion:dword;putbyte:boolean):word;
+function rastan_getword(direccion:dword):word;
 begin
 direccion:=direccion and $ffffff;
 case direccion of
