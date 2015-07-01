@@ -1145,7 +1145,6 @@ end;
 
 function cps1_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     $000000..$17ffff:cps1_getword:=rom[direccion+1] or (rom[direccion] shl 8);
     $800000..$8001ff:cps1_getword:=cps1_read_io_w(direccion and $1fe);
@@ -1262,7 +1261,6 @@ end;
 
 procedure cps1_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     $000000..$17ffff:exit;
     $800000..$8001ff:cps1_write_io_w(direccion and $1fe,valor);
@@ -1315,7 +1313,6 @@ end;
 //Qsound
 function cps1_qsnd_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     $000000..$17ffff:cps1_qsnd_getword:=rom[direccion+1] or (rom[direccion] shl 8);
     $800000..$8001ff:cps1_qsnd_getword:=cps1_read_io_w(direccion and $1fe);
@@ -1331,7 +1328,6 @@ end;
 
 procedure cps1_qsnd_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     $000000..$17ffff:exit;
     $800000..$8001ff:cps1_write_io_w(direccion and $1fe,valor);

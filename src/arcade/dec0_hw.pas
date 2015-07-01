@@ -484,7 +484,6 @@ end;
 
 function dec0_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$5ffff:dec0_getword:=rom[direccion shr 1];
   $180000..$180fff:dec0_getword:=mcu_shared_ram[(direccion and $fff) shr 1];
@@ -530,7 +529,6 @@ end;
 
 procedure dec0_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$60000 then exit;
 case direccion of
     $180000..$180fff:begin

@@ -9,7 +9,7 @@ type
               prg:array[0..31,0..$3fff] of byte;
               chr:array[0..31,0..$1fff] of byte;
               name_table:array[0..1,0..$fff] of byte;
-              reg0,reg1,reg2,reg3:word;
+              reg:array[0..3] of byte;
               last_prg,last_chr:byte;
               dreg:array[0..7] of byte;
               serial_cnt:byte;
@@ -35,7 +35,7 @@ uses nes;
 
 procedure mapper_1_mirror;
 begin
-case (mapper_nes.reg0 and 3) of
+case (mapper_nes.reg[0] and 3) of
   0,1:ppu_mirror:=MIRROR_SINGLE_0;
   2:ppu_mirror:=MIRROR_VERTICAL; //Vertical
   3:ppu_mirror:=MIRROR_HORIZONTAL; //Horizontal
@@ -47,13 +47,14 @@ var
   tempb:byte;
 begin
   if ppu_chr_rom then begin
-    if (mapper_nes.reg0 and $10)<>0 then begin //VROM de 4Kb
-          tempb:=mapper_nes.reg1 mod ((mapper_nes.last_chr+1) shl 1);
+    //VROM de 4Kb, en la cebecera se cuentan de 8kb lo multiplico por 2
+    if (mapper_nes.reg[0] and $10)<>0 then begin
+          tempb:=mapper_nes.reg[1] mod ((mapper_nes.last_chr+1) shl 1);
           copymemory(@ppu_mem[$0],@mapper_nes.chr[tempb shr 1,$1000*(tempb and 1)],$1000);
-          tempb:=mapper_nes.reg2 mod ((mapper_nes.last_chr+1) shl 1);
+          tempb:=mapper_nes.reg[2] mod ((mapper_nes.last_chr+1) shl 1);
           copymemory(@ppu_mem[$1000],@mapper_nes.chr[tempb shr 1,$1000*(tempb and 1)],$1000);
         end else begin //VROM de 8Kb
-          tempb:=(mapper_nes.reg1 shr 1) mod (mapper_nes.last_chr+1);
+          tempb:=mapper_nes.reg[1] mod (mapper_nes.last_chr+1);
           copymemory(@ppu_mem[$0],@mapper_nes.chr[tempb,0],$2000);
         end;
       end;
@@ -63,19 +64,19 @@ procedure mapper_1_prg;
 var
   tempb:byte;
 begin
-case (mapper_nes.reg0 and $c) of
+case (mapper_nes.reg[0] and $c) of
     $c:begin
-        tempb:=(mapper_nes.reg3+(mapper_nes.reg1 and $10)) mod (mapper_nes.last_prg+1);
+        tempb:=mapper_nes.reg[3] mod (mapper_nes.last_prg+1);
         copymemory(@memoria[$8000],@mapper_nes.prg[tempb,0],$4000);
         copymemory(@memoria[$c000],@mapper_nes.prg[mapper_nes.last_prg,0],$4000);
        end;
     $8:begin
-        tempb:=(mapper_nes.reg3+(mapper_nes.reg1 and $10)) mod (mapper_nes.last_prg+1);
-        copymemory(@memoria[$c000],@mapper_nes.prg[tempb,0],$4000);
+        tempb:=mapper_nes.reg[3] mod (mapper_nes.last_prg+1);
         copymemory(@memoria[$8000],@mapper_nes.prg[0,0],$4000);
+        copymemory(@memoria[$c000],@mapper_nes.prg[tempb,0],$4000);
        end;
     $0,$4:begin  //32Kb
-        tempb:=((mapper_nes.reg3 and $fe)+(mapper_nes.reg1 and $10)) mod (mapper_nes.last_prg+1);
+        tempb:=(mapper_nes.reg[3] shr 1) mod ((mapper_nes.last_prg+1) shr 1);
         copymemory(@memoria[$8000],@mapper_nes.prg[tempb,0],$4000);
         copymemory(@memoria[$c000],@mapper_nes.prg[tempb+1,0],$4000);
        end;
@@ -83,44 +84,25 @@ end;
 end;
 
 procedure mapper_1_write_rom(direccion:word;valor:byte);
-var
-  io_dir:byte;
 begin
-io_dir:=(direccion shr 13)-4;
 if (valor and $80)<>0 then begin
   mapper_nes.serial_cnt:=0;
   mapper_nes.valor_map:=0;
-  mapper_nes.reg0:=$1c;
+  mapper_nes.reg[0]:=$1c;
 end else begin
   mapper_nes.valor_map:=mapper_nes.valor_map or ((valor and 1) shl mapper_nes.serial_cnt);
   mapper_nes.serial_cnt:=mapper_nes.serial_cnt+1;
   if mapper_nes.serial_cnt=5 then begin
-    case io_dir of
-      0:begin
-          mapper_nes.reg0:=mapper_nes.valor_map;
-          mapper_1_mirror;
-          mapper_1_chr;
-          mapper_1_prg;
-        end;
-      1:begin
-          mapper_nes.reg1:=mapper_nes.valor_map;
-          mapper_1_chr;
-          mapper_1_prg;
-        end;
-      2:begin
-          mapper_nes.reg2:=mapper_nes.valor_map;
-          mapper_1_chr;
-        end;
-      3:begin
-          mapper_nes.reg3:=mapper_nes.valor_map;
-          mapper_1_prg;
-        end;
-    end;
+    mapper_nes.reg[(direccion shr 13) and 3]:=mapper_nes.valor_map;
+    mapper_1_mirror;
+    mapper_1_chr;
+    mapper_1_prg;
     mapper_nes.valor_map:=0;
     mapper_nes.serial_cnt:=0;
   end;
   end;
 end;
+
 
 procedure mapper_2_write_rom(direccion:word;valor:byte);
 begin
@@ -162,25 +144,29 @@ begin
 direccion:=direccion and $e001;
 case direccion of
   $8000:begin
-          mapper_nes.reg0:=valor;  //command
+          mapper_nes.reg[0]:=valor;  //command
           if ppu_chr_rom then mapper_4_update_chr(valor);
           mapper_4_update_prg(valor);
         end;
   $8001:begin
-          case (mapper_nes.reg0 and 7) of
-            0..5:mapper_nes.dreg[mapper_nes.reg0 and 7]:=valor mod ((mapper_nes.last_chr+1) shl 3);
-            6,7:mapper_nes.dreg[mapper_nes.reg0 and 7]:=valor mod ((mapper_nes.last_prg+1) shl 1);
+          case (mapper_nes.reg[0] and 7) of
+            0..5:mapper_nes.dreg[mapper_nes.reg[0] and 7]:=valor mod ((mapper_nes.last_chr+1) shl 3);
+            6,7:mapper_nes.dreg[mapper_nes.reg[0] and 7]:=valor mod ((mapper_nes.last_prg+1) shl 1);
           end;
-          if ppu_chr_rom then mapper_4_update_chr(mapper_nes.reg0);
-          mapper_4_update_prg(mapper_nes.reg0);
+          if ppu_chr_rom then mapper_4_update_chr(mapper_nes.reg[0]);
+          mapper_4_update_prg(mapper_nes.reg[0]);
         end;
   $a000:if ppu_mirror<>MIRROR_FOUR_SCREEN then begin //Usado por Guntlet!!!
           if (valor and 1)=0 then ppu_mirror:=MIRROR_VERTICAL //Vertical
             else ppu_mirror:=MIRROR_HORIZONTAL; //Horizontal
         end;
-  $c000:mapper_nes.reg2:=valor;  //ctr
+  $a001:;
+  $c000:mapper_nes.reg[2]:=valor;
   $c001:mapper_nes.reload:=true;
-  $e000:mapper_nes.irq_ena:=false;
+  $e000:begin
+          mapper_nes.irq_ena:=false;
+          main_m6502.pedir_irq:=CLEAR_LINE;
+        end;
   $e001:mapper_nes.irq_ena:=true;
 end;
 end;
@@ -189,16 +175,15 @@ procedure mapper_4_line;
 var
   count:word;
 begin
-  count:=mapper_nes.reg1;
-  if ((count=0) or mapper_nes.reload) then begin
-    mapper_nes.reg1:=mapper_nes.reg2;
+  if ((mapper_nes.reg[1]=0) or mapper_nes.reload) then begin
+    mapper_nes.reg[1]:=mapper_nes.reg[2];
     mapper_nes.reload:=false;
   end else begin
-    mapper_nes.reg1:=mapper_nes.reg1-1;
-    if ((count<>0) and (mapper_nes.reg1=0)) then begin
+    count:=mapper_nes.reg[1];
+    mapper_nes.reg[1]:=mapper_nes.reg[1]-1;
+    if ((count<>0) and (mapper_nes.reg[1]=0)) then
         if mapper_nes.irq_ena then main_m6502.pedir_irq:=HOLD_LINE;
-      end;
-    end;
+  end;
 end;
 
 procedure mapper_7_write_rom(direccion:word;valor:byte);

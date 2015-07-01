@@ -361,7 +361,6 @@ end;
 
 function sfighter_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   0..$4ffff:sfighter_getword:=rom[direccion shr 1];
   $800000..$800fff:sfighter_getword:=ram1[(direccion+1) and $fff] or (ram1[direccion and $fff] shl 8);
@@ -394,7 +393,6 @@ end;
 
 procedure sfighter_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$50000 then exit;
 case direccion of
     $800000..$800fff:begin

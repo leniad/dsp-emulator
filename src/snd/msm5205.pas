@@ -106,6 +106,7 @@ end;
 
 procedure MSM5205_chip.free;
 begin
+self.Destroy;
 end;
 
 procedure MSM5205_chip.reset;

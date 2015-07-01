@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,nz80,z80daisy,vars_hide;
 
 type
  tretraso=procedure(direccion:word);
- tretraso_puerto=function(direccion:word):byte;
+ tretraso_puerto=procedure(direccion:word);
  cpu_z80_sp=class(cpu_z80)
     public
       procedure run(maximo:integer);
@@ -44,21 +44,15 @@ begin
 end;
 
 procedure cpu_z80_sp.spec_outbyte(valor:byte;posicion:word);
-var
-  estados:byte;
 begin
 self.out_port(valor,posicion);
-estados:=self.retraso_puerto(posicion);
-inc(self.contador,estados);
+self.retraso_puerto(posicion);
 end;
 
 function cpu_z80_sp.spec_inbyte(posicion:word):byte;
-var
-  estados:byte;
 begin
 spec_inbyte:=self.in_port(posicion);
-estados:=self.retraso_puerto(posicion);
-inc(self.contador,estados);
+self.retraso_puerto(posicion);
 end;
 
 procedure cpu_z80_sp.spec_putbyte(posicion:word;valor:byte);
@@ -136,8 +130,8 @@ if not(self.halt) then begin
             end;
         $02:spec_putbyte(r.bc.w,r.a); {ld (BC),A >7t<}
         $03:begin  {inc BC >6t<}
-              self.retraso((r.i shl 8)+r.r);inc(self.contador); 
-              self.retraso((r.i shl 8)+r.r);inc(self.contador); 
+              self.retraso((r.i shl 8)+r.r);inc(self.contador);
+              self.retraso((r.i shl 8)+r.r);inc(self.contador);
               inc(r.bc.w);
             end;
         $04:inc_8(self.r,@r.bc.h); {inc B >4t<}
@@ -770,7 +764,7 @@ if not(self.halt) then begin
         $d7:begin  {rst 10H >11t<}
                 self.retraso((r.i shl 8)+r.r);inc(self.contador); 
                 self.retraso(r.sp-1);inc(self.contador,3); 
-                self.retraso(r.sp-2);inc(self.contador,3); 
+                self.retraso(r.sp-2);inc(self.contador,3);
                 push_sp(r.pc);
                 r.pc:=$10;
              end;
@@ -810,7 +804,7 @@ if not(self.halt) then begin
               posicion.h:=spec_getbyte(r.pc+1);
               inc(r.pc,2);
               if r.f.c then begin
-                self.retraso(r.pc-1);inc(self.contador); 
+                self.retraso(r.pc-1);inc(self.contador);
                 push_sp(r.pc);
                 self.retraso(r.sp);inc(self.contador,3);
                 self.retraso(r.sp+1);inc(self.contador,3);

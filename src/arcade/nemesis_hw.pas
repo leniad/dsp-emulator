@@ -150,8 +150,8 @@ snd_z80:=cpu_z80.create(14318180 div 4,256);
 snd_z80.init_sound(sound_instruccion);
 //Sound Chips
 ay8910_0:=ay8910_chip.create(18432000 div 8,1);
-ay8910_1:=ay8910_chip.create(18432000 div 8,1);
 ay8910_0.change_io_calls(ay0_porta_read,nil,nil,nil);
+ay8910_1:=ay8910_chip.create(18432000 div 8,1);
 case main_vars.tipo_maquina of
   204:begin //nemesis
         //cargar roms
@@ -188,6 +188,8 @@ procedure cerrar_nemesis;
 begin
 main_m68000.free;
 snd_z80.free;
+ay8910_0.Free;
+ay8910_1.Free;
 close_audio;
 close_video;
 end;
@@ -196,6 +198,8 @@ procedure reset_nemesis;
 begin
  main_m68000.reset;
  snd_z80.reset;
+ ay8910_0.reset;
+ ay8910_1.reset;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
@@ -484,7 +488,6 @@ end;
 
 function nemesis_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   0..$3ffff:nemesis_getword:=rom[direccion shr 1];
   $40000..$4ffff:nemesis_getword:=(char_ram[(direccion and $ffff) shr 1] shr 8)+((char_ram[(direccion and $ffff) shr 1] and $ff) shl 8);//char_ram[(direccion+1) and $ffff] or (char_ram[direccion and $ffff] shl 8);
@@ -509,7 +512,6 @@ procedure nemesis_putword(direccion:dword;valor:word);
 var
   dir:word;
 begin
-direccion:=direccion and $fffffe;
 if direccion<$40000 then exit;
 case direccion of
   $40000..$4ffff:if char_ram[(direccion and $ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
@@ -617,7 +619,6 @@ end;
 
 function gx400_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   0..$ffff:gx400_getword:=bios_rom[direccion shr 1];
   $10000..$1ffff:gx400_getword:=ram3[(direccion and $ffff) shr 1];
@@ -646,7 +647,6 @@ procedure gx400_putword(direccion:dword;valor:word);
 var
   dir:word;
 begin
-direccion:=direccion and $fffffe;
 if ((direccion<$10000) or (direccion>$7ffff)) then exit;
 case direccion of
   $10000..$1ffff:ram3[(direccion and $ffff) shr 1]:=valor;

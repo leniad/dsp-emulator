@@ -1093,6 +1093,7 @@ end;
 
 procedure cpu_deco_146.Free;
 begin
+self.destroy;
 end;
 
 procedure cpu_deco_146.reset;

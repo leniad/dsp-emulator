@@ -32,6 +32,7 @@ type
             r:preg_m6502;
             //RAM calls/IO Calls
             in_port0,in_port1:cpu_inport_call;
+            read_dummy:boolean;
             //IRQ
             function call_nmi:byte;
             function call_irq:byte;
@@ -119,12 +120,11 @@ end;
 destructor cpu_m6502.Destroy;
 begin
 freemem(self.r);
-self.r:=nil;
 end;
 
 procedure cpu_m6502.Free;
 begin
-  if Self.r<>nil then Destroy;
+  self.Destroy;
 end;
 
 procedure cpu_m6502.change_io_calls(in_port0,in_port1:cpu_inport_call);
@@ -341,10 +341,8 @@ end;
 
 procedure cpu_m6502.run(maximo:single);
 var
-    instruccion,numero,temp,carry:byte;
-    tempw:word;
-    posicion:word;
-    tempb:byte;
+    instruccion,numero,tempb,carry:byte;
+    tempw,posicion:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
@@ -355,6 +353,7 @@ if self.pedir_reset<>CLEAR_LINE then begin
   exit;
 end;
 r.old_pc:=r.pc;
+self.read_dummy:=false;
 if (self.pedir_nmi<>CLEAR_LINE) then self.estados_demas:=self.call_nmi
   else if (self.pedir_irq<>CLEAR_LINE) then self.estados_demas:=self.call_irq
     else self.estados_demas:=0;
@@ -383,8 +382,12 @@ case tipo_dir[instruccion] of
             end;
         $05:begin //absoluto indexado por X (rev)
                 posicion:=self.getbyte(r.pc);
-                if (posicion+r.x)>$ff then self.estados_demas:=self.estados_demas+1;
-                posicion:=posicion+(self.getbyte(r.pc+1) shl 8)+r.x;
+                posicion:=posicion+(self.getbyte(r.pc+1) shl 8);
+                if (((posicion + r.x) xor posicion) and $ff00)<>0 then begin
+                  self.estados_demas:=self.estados_demas+1;
+                  self.getbyte((posicion and $ff00) or ((posicion+r.x) and $ff));
+                end;
+                posicion:=posicion+r.x;
                 r.pc:=r.pc+2;
             end;
         $06:begin //absoluto indexado por Y (rev)
@@ -398,34 +401,34 @@ case tipo_dir[instruccion] of
                 r.pc:=r.pc+1;
             end;
         $08:begin  //pagina cero indexado por X (rev)
-                temp:=self.getbyte(r.pc);
+                tempb:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                posicion:=(temp+r.x) and $ff;
+                posicion:=(tempb+r.x) and $ff;
             end;
         $09:begin  //pagina cero indexado por Y (rev)
-                temp:=self.getbyte(r.pc);
+                tempb:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                posicion:=(temp+r.y) and $ff;
+                posicion:=(tempb+r.y) and $ff;
             end;
         $0a:begin //indirecto indexado por X (rev)
-                temp:=self.getbyte(r.pc);
+                tempb:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                temp:=(temp+r.x);
-                posicion:=self.getbyte(temp);
-                posicion:=posicion or (self.getbyte((temp+1) and $ff) shl 8);
+                tempb:=(tempb+r.x);
+                posicion:=self.getbyte(tempb);
+                posicion:=posicion or (self.getbyte((tempb+1) and $ff) shl 8);
             end;
         $0b:begin  //indirecto indexado por Y (rev)
-                temp:=self.getbyte(r.pc);
+                tempb:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                posicion:=self.getbyte(temp);
-                posicion:=(posicion or (self.getbyte((temp+1) and $ff) shl 8))+r.y;
+                posicion:=self.getbyte(tempb);
+                posicion:=(posicion or (self.getbyte((tempb+1) and $ff) shl 8))+r.y;
                 if (((posicion and $ff00)<>(r.pc and $ff00)) and (instruccion<>$91)) then self.estados_demas:=self.estados_demas+1;
             end;
         $0c:begin //indexado pagina 0 opcode+puntero 8bits (rev)
-                temp:=self.getbyte(r.pc);
+                tempb:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                posicion:=self.getbyte(temp);
-                posicion:=posicion+(self.getbyte((temp+1) and $ff) shl 8);
+                posicion:=self.getbyte(tempb);
+                posicion:=posicion+(self.getbyte((tempb+1) and $ff) shl 8);
             end;
         $0d:begin //relativo
                 numero:=self.getbyte(r.pc);

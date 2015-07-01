@@ -153,8 +153,6 @@ type
 	      channel:array[0..POKEY_CHANNELS-1] of pokey_channel;
 
 	      output_:dword;        // raw output */
-        out_buf:array[0..20] of dword;
-        out_final:integer;
 	      out_filter:double;    // filtered output */
 	      clock_cnt:array[0..2] of integer;       // clock counters */
         p4:dword;              // poly4 index */
@@ -286,6 +284,7 @@ end;
 
 procedure pokey_channel.Free;
 begin
+self.Destroy;
 end;
 
 destructor pokey_channel.Destroy;
@@ -511,13 +510,19 @@ begin
 	self.allpot_r_cb:=nil;
 	self.serin_r_cb:=nil;
   self.irq_f:=nil;
+
 	//self.serout_w_cb:=nil;
 
 	self.tsample_num:=init_channel;
 end;
 
 destructor pokey_chip.Destroy;
+var
+  i:byte;
 begin
+for i:=0 to (POKEY_CHANNELS-1) do begin
+    self.channel[i].free;
+end;
 end;
 
 procedure pokey_chip.Free;

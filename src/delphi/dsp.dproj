@@ -150,9 +150,9 @@
         <BRCC_Defines>WINDOWS;$(BRCC_Defines)</BRCC_Defines>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>377</VerInfo_Build>
+        <VerInfo_Build>382</VerInfo_Build>
         <VerInfo_Locale>3082</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Leniad;FileDescription=;FileVersion=0.15.3.377;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.15;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Leniad;FileDescription=;FileVersion=0.15.3.382;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.15;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <DCC_Optimize>false</DCC_Optimize>
@@ -541,13 +541,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
-                <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME)"/>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
@@ -794,7 +794,6 @@
         <DCCReference Include="..\arcade\misc\opwolf_cchip.pas"/>
         <DCCReference Include="joystick_calibrate.pas">
             <Form>joy_calibration</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="..\devices\eeprom.pas"/>
         <DCCReference Include="..\arcade\outrun_hw.pas"/>

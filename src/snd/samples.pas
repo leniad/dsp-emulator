@@ -294,12 +294,8 @@ begin
 if data_samples=nil then exit;
 for f:=0 to data_samples.num_samples-1 do begin
   if data_samples.audio[f]<>nil then begin
-    if data_samples.audio[f].data<>nil then begin
-      freemem(data_samples.audio[f].data);
-      data_samples.audio[f].data:=nil;
-    end;
+    if data_samples.audio[f].data<>nil then freemem(data_samples.audio[f].data);
     freemem(data_samples.audio[f]);
-    data_samples.audio[f]:=nil;
   end;
 end;
 freemem(data_samples);

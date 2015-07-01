@@ -285,17 +285,13 @@ end;
 
 function rainbow_getword(direccion:dword):word;
 begin
-direccion:=direccion and $ffffff;
-case direccion of
-  $3e0003:rainbow_getword:=taitosound_comm_r;
-end;
-direccion:=direccion and $fffffe;
 case direccion of
   0..$7ffff:rainbow_getword:=rom[direccion shr 1];
   $10c000..$10ffff:rainbow_getword:=ram1[(direccion and $3fff) shr 1];
   $200000..$203fff:rainbow_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $390000..$390002:rainbow_getword:=marcade.dswa;
   $3b0000..$3b0002:rainbow_getword:=marcade.dswb;
+  $3e0002:if main_m68000.access_8bits then rainbow_getword:=taitosound_comm_r;
   $800000..$8007ff:rainbow_getword:=rbisland_cchip_ram_r(direccion and $7ff);
 	$800802:rainbow_getword:=rbisland_cchip_ctrl_r;
   $c00000..$c0ffff:rainbow_getword:=ram2[(direccion and $ffff) shr 1];
@@ -316,7 +312,6 @@ end;
 
 procedure rainbow_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$80000 then exit;
 case direccion of
       $10c000..$10ffff:ram1[(direccion and $3fff) shr 1]:=valor;

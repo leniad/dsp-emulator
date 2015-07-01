@@ -116,6 +116,7 @@ main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
 marcade.dswa:=$ffff;
 marcade.dswa_val:=@dietgo_dip_a;
 //final
+freemem(memoria_temp_rom);
 freemem(memoria_temp);
 reset_dietgo;
 iniciar_dietgo:=true;
@@ -193,7 +194,7 @@ while EmuStatus=EsRuning do begin
    main_m68000.run(frame_m);
    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
    //Sound
-   main_h6280.run(frame_s);
+   main_h6280.run(trunc(frame_s));
    frame_s:=frame_s+main_h6280.tframes-main_h6280.contador;
    case f of
       247:begin
@@ -223,7 +224,6 @@ end;
 
 function dietgo_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$7ffff:if main_m68000.opcode then dietgo_getword:=rom_opcode[direccion shr 1]
                   else dietgo_getword:=rom_data[direccion shr 1];
@@ -263,7 +263,6 @@ end;
 
 procedure dietgo_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$80000 then exit;
 case direccion of
   $200000..$20000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);

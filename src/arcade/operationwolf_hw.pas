@@ -249,11 +249,6 @@ end;
 
 function opwolf_getword(direccion:dword):word;
 begin
-direccion:=direccion and $ffffff;
-case direccion of
-  $3e0003:opwolf_getword:=taitosound_comm_r;
-end;
-direccion:=direccion and $fffffe;
 case direccion of
   0..$3ffff:opwolf_getword:=rom[direccion shr 1];
   $0f0000..$0fffff:case (direccion and $fff) of
@@ -266,6 +261,7 @@ case direccion of
   $380002:opwolf_getword:=$7f;
   $3a0000:opwolf_getword:=raton.x+15;  //mouse x
   $3a0002:opwolf_getword:=raton.y;  //mouse y
+  $3e0002:if main_m68000.access_8bits then opwolf_getword:=taitosound_comm_r;
   $c00000..$c0ffff:opwolf_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:opwolf_getword:=ram3[(direccion and $3fff) shr 1];
 end;
@@ -284,7 +280,6 @@ end;
 
 procedure opwolf_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$40000 then exit;
 case direccion of
       $0ff000..$0ff7ff:opwolf_cchip_data_w(direccion and $7ff,valor);

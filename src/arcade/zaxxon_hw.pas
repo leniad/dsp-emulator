@@ -301,8 +301,8 @@ begin
   snd_z80.reset;
   sn_76496_0.reset;
   sn_76496_1.reset;
-  if hay_samples then reset_samples;
  end;
+ if hay_samples then reset_samples;
  reset_ppi8255(0);
  reset_audio;
  irq_vblank:=false;

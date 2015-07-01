@@ -51,11 +51,6 @@ const tabla_scr:array[0..191] of word=(
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,
           6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0,6,5,4,3,2,1,0,0);
-        cmemory_128:array[0..127] of byte=(
-          1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
-          1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
-          1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,
-          1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2,1,0,7,6,5,4,3,2);
 
 type
   tmouse_spectrum=record
@@ -99,7 +94,7 @@ var
       flash:byte;
       haz_flash,audio_load:boolean;
       testados_sonido,testados_sonido_beeper,samples_audio,samples_beeper:single;
-      linea,posicion_beeper:word;
+      posicion_beeper:word;
       pantalla_128k,old_7ffd:byte;
       marco:array[0..3] of byte;
       interface2:tinterface2_spectrum;

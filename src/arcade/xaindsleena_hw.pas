@@ -174,6 +174,7 @@ end;
 procedure cerrar_xain;
 begin
 main_m6809.Free;
+misc_m6809.free;
 snd_m6809.Free;
 main_m6805.Free;
 YM2203_0.Free;

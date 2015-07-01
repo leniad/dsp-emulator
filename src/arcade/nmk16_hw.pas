@@ -399,7 +399,6 @@ end;
 
 function sbombers_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$7ffff:sbombers_getword:=rom[direccion shr 1];
     $80000:sbombers_getword:=marcade.in0;
@@ -429,7 +428,6 @@ procedure sbombers_putword(direccion:dword;valor:word);
 var
   offset:byte;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     $0..$7ffff,$80014,$94002:exit;
     $84000:oki_6295_0.write(valor and $ff);

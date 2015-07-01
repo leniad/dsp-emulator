@@ -289,7 +289,6 @@ end;
 
 function toki_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     $0..$5ffff:toki_getword:=rom[direccion shr 1];
     $60000..$6dfff,$6e800..$6ffff:toki_getword:=ram[(direccion and $ffff) shr 1];
@@ -318,7 +317,6 @@ end;
 
 procedure toki_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$60000 then exit;
 case direccion of
   $60000..$6dfff:ram[(direccion and $ffff) shr 1]:=valor;

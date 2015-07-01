@@ -189,7 +189,6 @@ end;
 
 function snowbros_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3ffff:snowbros_getword:=rom[direccion shr 1];
     $100000..$103fff:snowbros_getword:=ram[(direccion and $3fff) shr 1];
@@ -214,7 +213,6 @@ end;
 
 procedure snowbros_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$40000 then exit;
 case direccion of
     $100000..$103fff:ram[(direccion and $3fff) shr 1]:=valor;

@@ -42,6 +42,7 @@ function nes_getbyte(direccion:word):byte;
 procedure nes_putbyte(direccion:word;valor:byte);
 //Sound
 procedure nes_sound_update;
+procedure nes_irq(status:byte);
 
 implementation
 uses principal;
@@ -76,7 +77,7 @@ begin
   main_m6502:=cpu_m6502.create(NTSC_clock,NTSC_lines+1,TCPU_NES);
   main_m6502.change_ram_calls(nes_getbyte,nes_putbyte);
   main_m6502.init_sound(nes_sound_update);
-  init_n2a03_sound(0);
+  init_n2a03_sound(0,nes_getbyte,nes_irq);
   nes_init_palette;
   iniciar_nes:=abrir_nes;
 end;
@@ -92,10 +93,10 @@ begin
   reset_ppu;
   joy1:=0;
   joy2:=0;
-  mapper_nes.reg0:=0;
-  mapper_nes.reg1:=0;
-  mapper_nes.reg2:=0;
-  mapper_nes.reg3:=0;
+  mapper_nes.reg[0]:=0;
+  mapper_nes.reg[1]:=0;
+  mapper_nes.reg[2]:=0;
+  mapper_nes.reg[3]:=0;
 end;
 
 procedure nes_cerrar;
@@ -218,6 +219,7 @@ begin
           end;
       end;
     end;
+    open_bus:=0;
     eventos_nes;
     actualiza_trozo_simple(0,0,256,240,2);
     video_sync;
@@ -319,6 +321,11 @@ begin
   n2a03_sound_update(0);
 end;
 
+procedure nes_irq(status:byte);
+begin
+  main_m6502.pedir_irq:=status;
+end;
+
 function abrir_nes:boolean;
 var
   cabecera_nes:array [0..$F] of byte;
@@ -417,10 +424,10 @@ begin
           end;
           mal:=false;
           llamadas_nes.write_rom:=mapper_1_write_rom;
-          mapper_nes.reg0:=$1f;
-          mapper_nes.reg1:=0;
-          mapper_nes.reg2:=0;
-          mapper_nes.reg3:=0;
+          mapper_nes.reg[0]:=$1f;
+          mapper_nes.reg[1]:=0;
+          mapper_nes.reg[2]:=0;
+          mapper_nes.reg[3]:=0;
         end;
       2:begin
           mapper_nes.last_prg:=cabecera_nes[4]-1;
@@ -475,9 +482,9 @@ begin
           mal:=false;
           llamadas_nes.write_rom:=mapper_4_write_rom;
           llamadas_nes.line_counter:=mapper_4_line;
-          mapper_nes.reg0:=0;
-          mapper_nes.reg1:=0;
-          mapper_nes.reg2:=0;
+          mapper_nes.reg[0]:=0;
+          mapper_nes.reg[1]:=0;
+          mapper_nes.reg[2]:=0;
           mapper_nes.irq_ena:=false;
           mapper_nes.dreg[0]:=0;
           mapper_nes.dreg[1]:=2;
@@ -519,8 +526,8 @@ begin
             copymemory(@ppu_mem[0],@mapper_nes.chr[0,0],$2000);
             ppu_chr_rom:=true;
           end;
-          mapper_nes.reg0:=0;
-          mapper_nes.reg1:=0;
+          mapper_nes.reg[0]:=0;
+          mapper_nes.reg[1]:=0;
           mal:=false;
           llamadas_nes.write_rom:=mapper_66_write_rom;
         end;

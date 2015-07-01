@@ -40,7 +40,7 @@ procedure update_timer(time_add:word;cpu:byte);
 var
   f:integer;
 begin
-for f:=0 to timer_count do begin
+for f:=timer_count downto 0 do begin
   if (timer[f].enabled and (cpu=timer[f].cpu)) then begin
     timer[f].actual_time:=timer[f].actual_time+time_add;
     while timer[f].actual_time>=timer[f].time_final do begin

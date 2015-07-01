@@ -402,7 +402,7 @@ while EmuStatus=EsRuning do begin
  for screen_line:=0 to $ff do begin
    main_m68000.run(frame_m);
    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   main_h6280.run(frame_s);
+   main_h6280.run(trunc(frame_s));
    frame_s:=frame_s+main_h6280.tframes-main_h6280.contador;
    case screen_line of
       0..239:if (((irq_mask and $2)<>0) and (irq_line=(screen_line+1))) then begin
@@ -436,7 +436,6 @@ end;
 
 function cninja_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$bffff:cninja_getword:=rom[direccion shr 1];
   $144000..$144fff:cninja_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
@@ -492,7 +491,6 @@ end;
 
 procedure cninja_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$c0000 then exit;
 case direccion of
   $140000..$14000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
@@ -555,7 +553,6 @@ end;
 
 function robocop2_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$fffff:robocop2_getword:=rom[direccion shr 1];
   $144000..$144fff:robocop2_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
@@ -596,7 +593,6 @@ end;
 
 procedure robocop2_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$100000 then exit;
 case direccion of
   $140000..$14000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);

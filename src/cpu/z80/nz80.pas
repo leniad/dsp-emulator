@@ -8,7 +8,7 @@ type
   band_z80 = record
      c,n,p_v,bit3,h,bit5,z,s:boolean;
   end;
-  tdespues_instruccion=procedure(estados_t:word);
+  tdespues_instruccion=procedure (estados_t:word);
   type_raised=function:byte;
   nreg_z80=record
         ppc,pc,sp:word;

@@ -51,10 +51,11 @@ type
             procedure free;
             destructor destroy;
           public
-            getword:tgetword;
-            putword:tputword;
+            getword_:tgetword;
+            putword_:tputword;
             halt:boolean;
             irq:array[0..7] of byte;
+            access_8bits:boolean;
             procedure reset;
             procedure run(maximo:single);
             function get_internal_r:preg_m68000;
@@ -69,6 +70,8 @@ type
             procedure poner_band(pila:word);
             function getbyte(addr:dword):byte;
             procedure putbyte(addr:dword;val:byte);
+            function getword(addr:dword):word;
+            procedure putword(addr:dword;val:word);
             //byte
             function leerdir_b(dir:byte):byte;
             procedure ponerdir_b2(des,res:byte);
@@ -118,6 +121,8 @@ const
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff,
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff);
 
+  addr_mask=$fffffe;
+
 implementation
 
 constructor cpu_m68000.create(clock:dword;frames_div:word);
@@ -141,6 +146,16 @@ begin
   if Self.r<>nil then Destroy;
 end;
 
+function cpu_m68000.getword(addr:dword):word;
+begin
+getword:=self.getword_(addr and addr_mask);
+end;
+
+procedure cpu_m68000.putword(addr:dword;val:word);
+begin
+self.putword_(addr and addr_mask,val);
+end;
+
 function cpu_m68000.get_internal_r:preg_m68000;
 begin
   get_internal_r:=self.r;
@@ -148,8 +163,8 @@ end;
 
 procedure cpu_m68000.change_ram16_calls(getword:tgetword;putword:tputword);
 begin
-  self.getword:=getword;
-  self.putword:=putword;
+  self.getword_:=getword;
+  self.putword_:=putword;
 end;
 
 procedure cpu_m68000.reset;
@@ -172,6 +187,7 @@ for f:=0 to 7 do self.irq[f]:=CLEAR_LINE;
 self.pedir_halt:=CLEAR_LINE;
 self.pedir_reset:=CLEAR_LINE;
 self.halt:=false;
+self.access_8bits:=false;
 end;
 
 procedure cpu_m68000.poner_band(pila:word);
@@ -261,21 +277,25 @@ function cpu_m68000.getbyte(addr:dword):byte;
 var
   tempw:word;
 begin
+if (addr and 1)<>0 then begin
+  self.access_8bits:=true;
   tempw:=self.getword(addr);
-  if (addr and 1)<>0 then getbyte:=tempw and $ff
-    else getbyte:=tempw shr 8;
+  getbyte:=tempw and $ff;
+  self.access_8bits:=false;
+end else begin
+  tempw:=self.getword(addr);
+  getbyte:=tempw shr 8;
+end;
 end;
 
 procedure cpu_m68000.putbyte(addr:dword;val:byte);
 var
   tempw:word;
 begin
-tempw:=self.getword(addr and $fffffe);
+tempw:=self.getword(addr);
 if (addr and 1)<>0 then self.putword(addr,(tempw and $ff00) or val)
   else self.putword(addr,(tempw and $ff) or (val shl 8));
 end;
-
-
 
 function cpu_m68000.leerdir_b(dir:byte):byte;
 var

@@ -35,7 +35,7 @@ implementation
 
 uses nes;
 
-procedure putsprites(nes_linea,pri:byte);
+procedure putsprites(nes_linea:word;pri:byte);
 var
   f,x,size,pos_x,pos_y,punto,tempb1,tempb2:byte;
   num_char,atrib,temp,def_y,num_sprites:byte;
@@ -44,11 +44,11 @@ var
   ptemp:pword;
 begin
 num_sprites:=0;
-for f:=0 to 63 do begin
- pos_y:=sprite_ram[f*4]+1;
- if (((sprite_ram[(f*4)+2] and $20)<>pri) or (pos_y>240)) then continue;
- pos_linea:=nes_linea-pos_y;
+for f:=63 downto 0 do begin
+ pos_y:=sprite_ram[f*4];
+ if (((sprite_ram[(f*4)+2] and $20)<>pri) or (pos_y>239)) then continue;
  size:=8 shl ((ppu_control1 and $20) shr 5);
+ pos_linea:=nes_linea-(pos_y+1);
  if (pos_linea<size) then begin
    num_sprites:=num_sprites+1;
    if num_sprites=9 then begin
@@ -85,16 +85,17 @@ for f:=0 to 63 do begin
               if (((ppu_control2 and $4)=0) and ((pos_x+x)<8)) then begin
                 ptemp^:=paleta[max_colores];
               end else begin
-                if ((ppu_dot_line_trans[pos_x+x] and $3f)>f) then begin
-                  ptemp^:=paleta[ppu_mem[$3f10+punto+atrib] and $3f];
-                  ppu_dot_line_trans[pos_x+x]:=(ppu_dot_line_trans[pos_x+x] and $c0) or f;
-                end else ptemp^:=paleta[max_colores];
-              end;
-              //Sprite 0 Hit
-              if ((f=0) and ((ppu_dot_line_trans[pos_x+x] and $80)<>0) and not(sprite0_hit)) then begin
-                sprite0_hit:=true;
-                sprite0_hit_pos:=round((pos_x+x)*PPU_PIXEL_TIMING);
-              end;
+                 if ((ppu_dot_line_trans[pos_x+x] and $3f)>=f) then begin
+                    ptemp^:=paleta[ppu_mem[$3f10+punto+atrib] and $3f];
+                    ppu_dot_line_trans[pos_x+x]:=(ppu_dot_line_trans[pos_x+x] and $c0) or f;
+                 end else
+                    ptemp^:=paleta[max_colores];
+                 end;
+                 //Sprite 0 Hit
+                 if ((f=0) and ((ppu_dot_line_trans[pos_x+x] and $80)<>0) and not(sprite0_hit)) then begin
+                   sprite0_hit:=true;
+                   sprite0_hit_pos:=round((pos_x+x)*PPU_PIXEL_TIMING);
+                 end;
             end;
           inc(ptemp);
         end;
@@ -107,7 +108,7 @@ for f:=0 to 63 do begin
               if (((ppu_control2 and $4)=0) and ((pos_x+(7-x))<8)) then begin
                 ptemp^:=paleta[max_colores];
               end else begin
-                if ((ppu_dot_line_trans[pos_x+(7-x)] and $3f)>f) then begin //Prioridad sprite/sprite
+                if ((ppu_dot_line_trans[pos_x+(7-x)] and $3f)>=f) then begin //Prioridad sprite/sprite
                   ptemp^:=paleta[ppu_mem[$3f10+punto+atrib] and $3f];
                   ppu_dot_line_trans[pos_x+(7-x)]:=(ppu_dot_line_trans[pos_x+(7-x)] and $c0) or f;
                 end else ptemp^:=paleta[max_colores];
@@ -122,11 +123,16 @@ for f:=0 to 63 do begin
         end;
         putpixel(0,0,8,punbuf,pant_sprites);
    end;
-   if (pos_x+8)>255 then temp:=255-pos_x
-    else temp:=8;
-   actualiza_trozo(0,0,temp,1,pant_sprites,pos_x,pos_y+pos_linea,temp,1,2);
+   if (pos_x+8)>255 then begin
+    actualiza_trozo(0,0,255-pos_x,1,pant_sprites,pos_x,nes_linea,255-pos_x,1,2);
+    if (ppu_control2 and $4)<>0 then actualiza_trozo(255-pos_x,0,8-(255-pos_x),1,pant_sprites,0,nes_linea,8-(255-pos_x),1,2);
+   end else begin
+    if (ppu_control2 and $4)<>0 then actualiza_trozo(0,0,8,1,pant_sprites,pos_x,nes_linea,8,1,2)
+      else if ((pos_x+8)<8) then actualiza_trozo(0,0,8-pos_x,1,pant_sprites,pos_x,nes_linea,8-pos_x,1,2)
+              else actualiza_trozo(0,0,8,1,pant_sprites,pos_x,nes_linea,8,1,2);
    end;
  end;
+end;
 end;
 
 procedure putbackground(nes_line:byte);
@@ -198,8 +204,7 @@ var
   newfinescroll:word;
 begin
 //increment loopy_v to next row of tiles
-newfinescroll:=ppu_address and $7000;
-newfinescroll:=newfinescroll+$1000;
+newfinescroll:=(ppu_address and $7000)+$1000;
 ppu_address:=ppu_address and not($7000);
 //reset the fine scroll bits and increment tile address to next row
 if (newfinescroll>$7000) then ppu_address:=ppu_address+32
@@ -219,7 +224,7 @@ fillchar(ppu_dot_line_trans[0],264,$7f);
 if (ppu_control2 and $8)=$8 then putbackground(nes_linea);
 if (ppu_control2 and $10)=$10 then putsprites(nes_linea,$20);
 if (ppu_control2 and $8)=$8 then actualiza_trozo(ppu_tile_x_offset,0,256,1,1,0,nes_linea,256,1,2);
-if (ppu_control2 and $10)=$10 then putsprites(nes_linea,0);
+if (ppu_control2 and $10)=$10 then putsprites(nes_linea,$0);
 end;
 
 function ppu_read:byte;
@@ -318,8 +323,7 @@ if sprite_ram_pos<>0 then begin
 end else begin
   copymemory(@sprite_ram[0],@memoria[$100*direccion],$100);
 end;
-if (main_m6502.contador and 1)<>0 then  main_m6502.estados_demas:=main_m6502.estados_demas+514
-  else main_m6502.estados_demas:=main_m6502.estados_demas+513;
+main_m6502.estados_demas:=main_m6502.estados_demas+513+(main_m6502.contador and 1);
 end;
 
 procedure reset_ppu;

@@ -14,6 +14,7 @@ const
 var
    memoria_128k:array[0..9,0..$3fff] of byte;
    paginacion_activa:boolean;
+   linea:word;
 
 procedure Cargar_Spectrum128K;
 procedure spectrum128_main;
@@ -24,11 +25,11 @@ procedure spec128_outbyte(valor:byte;puerto:word);
 function iniciar_128k:boolean;
 procedure spec128k_reset;
 procedure spec128_retraso_memoria(direccion:word);
-function spec128_retraso_puerto(puerto:word):byte;
+procedure spec128_retraso_puerto(puerto:word);
 function spec128_lg():byte;
 //Video
 procedure borde_128_full(linea:word);
-procedure video_128k(pvideo:pbyte);
+procedure video_128k(linea:word;pvideo:pbyte);
 
 implementation
 uses tap_tzx,principal,spectrum_misc;
@@ -122,7 +123,7 @@ pantalla_128k:=5;
 paginacion_activa:=true;
 end;
 
-procedure video_128k(pvideo:pbyte);
+procedure video_128k(linea:word;pvideo:pbyte);
 var
         nlinea1,nlinea2,x,color2,color,atrib,video,temp:byte;
         pant_x,pos_video:word;
@@ -234,13 +235,11 @@ procedure spectrum128_main;
 begin
 init_controls(true,true,true,false);
 while EmuStatus=EsRuning do begin
-  linea:=0;
-  while linea<311 do begin
+  for linea:=0 to 310 do begin
     spec_z80.run(228);
     borde.borde_spectrum(linea);
-    video_128k(@memoria_128k[pantalla_128k,0]);
+    video_128k(linea,@memoria_128k[pantalla_128k,0]);
     spec_z80.contador:=spec_z80.contador-228;
-    linea:=linea+1;
   end;
   spec_z80.pedir_irq:=ASSERT_LINE; //Pedir IRQ
   spectrum_irq_pos:=0;
@@ -264,7 +263,7 @@ end;
 spec_z80.contador:=spec_z80.contador+estados;
 end;
 
-function spec128_retraso_puerto(puerto:word):byte;
+procedure spec128_retraso_puerto(puerto:word);
 var
   estados,estados_f:byte;
   posicion:dword;
@@ -327,7 +326,7 @@ case puerto of
             else estados_f:=1+retraso[posicion+1]+3; //ultimo bit 0
       end;
 end;
-spec128_retraso_puerto:=estados_f;
+spec_z80.contador:=spec_z80.contador+estados_f;
 end;
 
 function spec128_getbyte(direccion:word):byte;

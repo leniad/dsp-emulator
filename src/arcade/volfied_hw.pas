@@ -223,7 +223,6 @@ end;
 
 function volfied_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   0..$3ffff:volfied_getword:=rom[direccion shr 1];
   $080000..$0fffff:volfied_getword:=rom2[(direccion and $7ffff) shr 1];
@@ -251,7 +250,6 @@ end;
 procedure volfied_putword(direccion:dword;valor:word);
 begin
 if direccion<$100000 then exit;
-direccion:=direccion and $fffffe;
 case direccion of
       $100000..$103fff:ram1[(direccion and $3fff) shr 1]:=valor;
       $200000..$203fff:ram3[(direccion and $3fff) shr 1]:=valor;

@@ -303,7 +303,6 @@ end;
 
 function bionicc_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3ffff:bionicc_getword:=rom[direccion shr 1];
     $fe0000..$fe3fff:bionicc_getword:=ram[(direccion and $3fff) shr 1];
@@ -353,7 +352,6 @@ end;
 
 procedure bionicc_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$40000 then exit;
 case direccion of
     $fe0000..$fe3fff:ram[(direccion and $3fff) shr 1]:=valor;

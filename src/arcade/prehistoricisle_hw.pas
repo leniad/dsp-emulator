@@ -294,7 +294,6 @@ end;
 
 function prehisle_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$3ffff:prehisle_getword:=rom[direccion shr 1];
   $70000..$73fff:prehisle_getword:=ram[(direccion and $3fff) shr 1];
@@ -327,7 +326,6 @@ end;
 
 procedure prehisle_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     $70000..$73fff:ram[(direccion and $3fff) shr 1]:=valor;
     $90000..$907ff:begin

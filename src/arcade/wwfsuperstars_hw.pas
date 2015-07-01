@@ -132,6 +132,7 @@ begin
 main_m68000.free;
 snd_z80.free;
 YM2151_close(0);
+oki_6295_0.Free;
 close_audio;
 close_video;
 end;
@@ -141,6 +142,7 @@ begin
  main_m68000.reset;
  snd_z80.reset;
  YM2151_reset(0);
+ oki_6295_0.reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -265,7 +267,6 @@ end;
 
 function wwfsstar_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3ffff:wwfsstar_getword:=rom[direccion shr 1];
     $080000..$080fff:wwfsstar_getword:=fg_ram[(direccion and $fff) shr 1];
@@ -296,7 +297,6 @@ end;
 
 procedure wwfsstar_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$40000 then exit;
 case direccion of
     $80000..$80fff:begin

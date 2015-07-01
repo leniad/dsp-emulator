@@ -194,7 +194,7 @@ frame_s:=snd_m6502.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    //Main
-   main_h6280.run(frame_m);
+   main_h6280.run(trunc(frame_m));
    frame_m:=frame_m+main_h6280.tframes-main_h6280.contador;
    //Sound
    snd_m6502.run(frame_s);

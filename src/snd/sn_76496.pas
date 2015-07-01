@@ -56,6 +56,7 @@ end;
 
 procedure sn76496_chip.Free;
 begin
+self.destroy;
 end;
 
 function sn76496_chip.save_snapshot(data:pbyte):word;

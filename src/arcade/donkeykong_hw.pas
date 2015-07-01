@@ -269,12 +269,12 @@ case main_vars.tipo_maquina of
         main_m6502:=cpu_m6502.create(1789772,264,TCPU_M6502);
         main_m6502.change_ram_calls(dkong3_snd1_getbyte,dkong3_snd1_putbyte);
         main_m6502.init_sound(dkong3_sound_update);
-        init_n2a03_sound(0);
+        init_n2a03_sound(0,nil,nil);
         //sound 2
         if not(cargar_roms(@mem_misc[0],@dkong3_snd2,'dkong3.zip')) then exit;
         snd_m6502:=cpu_m6502.create(1789772,264,TCPU_M6502);
         snd_m6502.change_ram_calls(dkong3_snd2_getbyte,dkong3_snd2_putbyte);
-        init_n2a03_sound(1);
+        init_n2a03_sound(1,nil,nil);
         //convertir chars
         if not(cargar_roms(@memoria_temp[0],@dkong3_char[0],'dkong3.zip',0)) then exit;
         dkong_char_load($200);

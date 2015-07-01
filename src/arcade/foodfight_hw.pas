@@ -216,7 +216,6 @@ end;
 
 function foodf_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3fffff:case (direccion and $1ffff) of
                   0..$ffff:foodf_getword:=rom[direccion shr 1];
@@ -262,7 +261,6 @@ end;
 
 procedure foodf_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3fffff:case (direccion and $1ffff) of
                   0..$ffff:exit;

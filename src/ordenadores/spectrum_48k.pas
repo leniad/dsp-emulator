@@ -9,6 +9,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 var
     rom_cambiada_48:boolean=false;
     spec_16k:boolean;
+    linea:word;
 
 procedure Cargar_Spectrum48K;
 function iniciar_48k:boolean;
@@ -20,7 +21,7 @@ procedure spec48_putbyte(direccion:word;valor:byte);
 function spec48_inbyte(puerto:word):byte;
 procedure spec48_outbyte(valor:byte;puerto:word);
 procedure spec48_retraso_memoria(direccion:word);
-function spec48_retraso_puerto(puerto:word):byte;
+procedure spec48_retraso_puerto(puerto:word);
 //Video
 procedure borde_48_full(linea:word);
 
@@ -208,13 +209,11 @@ procedure spectrum48_main;
 begin
 init_controls(true,true,true,false);
 while EmuStatus=EsRuning do begin
-  linea:=0;
-  while linea<312 do begin
+  for linea:=0 to 311 do begin
     spec_z80.run(224);
     borde.borde_spectrum(linea);
     video48k(linea);
     spec_z80.contador:=spec_z80.contador-224;
-    linea:=linea+1;
   end;
   spec_z80.pedir_irq:=ASSERT_LINE;
   spectrum_irq_pos:=0;
@@ -237,7 +236,7 @@ end;
 spec_z80.contador:=spec_z80.contador+estados;
 end;
 
-function spec48_retraso_puerto(puerto:word):byte;
+procedure spec48_retraso_puerto(puerto:word);
 var
   estados,estados_f:byte;
   posicion:dword;
@@ -274,7 +273,7 @@ case puerto of
             else estados_f:=1+retraso[posicion+1]+3; //ultimo bit 0
        end;
 end;
-spec48_retraso_puerto:=estados_f;
+spec_z80.contador:=spec_z80.contador+estados_f;
 end;
 
 function spec48_getbyte(direccion:word):byte;

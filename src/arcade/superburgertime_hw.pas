@@ -163,7 +163,7 @@ while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    main_m68000.run(frame_m);
    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   main_h6280.run(frame_s);
+   main_h6280.run(trunc(frame_s));
    frame_s:=frame_s+main_h6280.tframes-main_h6280.contador;
    case f of
       247:begin
@@ -181,7 +181,6 @@ end;
 
 function supbtime_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$3ffff:supbtime_getword:=rom[direccion shr 1];
   $100000..$103fff:supbtime_getword:=ram[(direccion and $3fff) shr 1];
@@ -213,7 +212,6 @@ end;
 
 procedure supbtime_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$40000 then exit;
 case direccion of
   $100000..$103fff:ram[(direccion and $3fff) shr 1]:=valor;

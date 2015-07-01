@@ -656,7 +656,6 @@ end;
 
 function megasys1_a_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$5ffff:if (mcu_hs and (((mcu_hs_ram[4] shl 6) and $3ffc0)=(direccion and $3ffc0))) then megasys1_a_getword:=$835d
                 else megasys1_a_getword:=rom[direccion shr 1];
@@ -720,7 +719,6 @@ end;
 
 procedure megasys1_a_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$23fef,$23ffa..$5ffff:exit;
     $23ff0..$23ff9:begin
@@ -796,7 +794,6 @@ end;
 
 function megasys1_snd_a_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   0..$1ffff:megasys1_snd_a_getword:=rom_snd[direccion shr 1];
   $40000:megasys1_snd_a_getword:=sound_latch;
@@ -810,7 +807,6 @@ end;
 
 procedure megasys1_snd_a_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   0..$1ffff:exit;
   $60000:sound_latch2:=valor;

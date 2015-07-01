@@ -15,6 +15,7 @@ var
    old_1ffd:byte;
    memoria_3:array[0..11,0..$3fff] of byte;
    paginacion_especial,disk_present:boolean;
+   linea:word;
 
 procedure Cargar_Spectrum3;
 function iniciar_3:boolean;
@@ -27,7 +28,7 @@ procedure spec3_putbyte(direccion:word;valor:byte);
 function spec3_inbyte(puerto:word):byte;
 procedure spec3_outbyte(valor:byte;puerto:word);
 procedure spec3_retraso_memoria(direccion:word);
-function spec3_retraso_puerto(puerto:word):byte;
+procedure spec3_retraso_puerto(puerto:word);
 
 implementation
 uses tap_tzx,spectrum_misc;
@@ -134,22 +135,20 @@ begin
   spec_z80.contador:=spec_z80.contador+temp;
 end;
 
-function spec3_retraso_puerto(puerto:word):byte;
+procedure spec3_retraso_puerto(puerto:word);
 begin
-spec3_retraso_puerto:=4;
+spec_z80.contador:=spec_z80.contador+4;
 end;
 
 procedure spectrum3_main;
 begin
 init_controls(true,true,true,false);
 while EmuStatus=EsRuning do begin
-  linea:=0;
-  while linea<311 do begin  //16 lineas despues IRQ
+  for linea:=0 to 310 do begin  //16 lineas despues IRQ
     spec_z80.run(228);
     borde.borde_spectrum(linea);
-    video_128k(@memoria_3[pantalla_128k,0]);
+    video_128k(linea,@memoria_3[pantalla_128k,0]);
     spec_z80.contador:=spec_z80.contador-228;
-    linea:=linea+1;
   end;
   spec_z80.pedir_irq:=ASSERT_LINE;
   spectrum_irq_pos:=0;

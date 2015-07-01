@@ -671,7 +671,6 @@ end;
 
 function system16a_getword_fd1089(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3fffff:if main_m68000.opcode then system16a_getword_fd1089:=rom[(direccion and $3ffff) shr 1]
       else system16a_getword_fd1089:=rom_data[(direccion and $3ffff) shr 1];
@@ -697,7 +696,6 @@ end;
 
 function system16a_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3fffff:system16a_getword:=rom[(direccion and $3ffff) shr 1];
     $400000..$7fffff:case (direccion and $7ffff) of
@@ -817,7 +815,6 @@ end;
 
 procedure system16a_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3fffff:exit;
     $400000..$7fffff:case (direccion and $7ffff) of

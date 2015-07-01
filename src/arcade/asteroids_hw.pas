@@ -87,8 +87,8 @@ end;
 procedure cerrar_as;
 begin
 main_m6502.free;
-close_audio;
 close_samples;
+close_audio;
 close_video;
 end;
 

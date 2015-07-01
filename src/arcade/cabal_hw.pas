@@ -241,7 +241,6 @@ end;
 
 function cabal_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3ffff:cabal_getword:=rom[direccion shr 1];
     $40000..$4ffff:cabal_getword:=main_ram[(direccion and $ffff) shr 1];
@@ -273,7 +272,6 @@ end;
 
 procedure cabal_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$3ffff:exit;
   $40000..$4ffff:main_ram[(direccion and $ffff) shr 1]:=valor;

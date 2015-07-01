@@ -133,6 +133,7 @@ begin
 main_m68000.free;
 snd_z80.free;
 YM2151_close(0);
+oki_6295_0.free;
 close_audio;
 close_video;
 end;
@@ -142,6 +143,7 @@ begin
  main_m68000.reset;
  snd_z80.reset;
  YM2151_reset(0);
+ oki_6295_0.reset;
  reset_audio;
  marcade.in0:=$FFFF;
  marcade.in1:=$FFFF;
@@ -295,8 +297,6 @@ end;
 
 function ddragon3_getword(direccion:dword):word;
 begin
-
-direccion:=direccion and $fffffe;
 case direccion of
     0..$7ffff:ddragon3_getword:=rom[direccion shr 1];
     $080000..$080fff:ddragon3_getword:=fg_ram[(direccion and $fff) shr 1];
@@ -327,7 +327,6 @@ end;
 
 procedure ddragon3_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$80000 then exit;
 case direccion of
     $080000..$080fff:begin

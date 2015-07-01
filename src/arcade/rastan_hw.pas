@@ -235,11 +235,6 @@ end;
 
 function rastan_getword(direccion:dword):word;
 begin
-direccion:=direccion and $ffffff;
-case direccion of
-  $3e0003:rastan_getword:=taitosound_comm_r;
-end;
-direccion:=direccion and $fffffe;
 case direccion of
   0..$5ffff:rastan_getword:=rom[direccion shr 1];
   $10c000..$10ffff:rastan_getword:=ram1[(direccion and $3fff) shr 1];
@@ -250,6 +245,7 @@ case direccion of
   $390006:rastan_getword:=marcade.in0;
   $390008:rastan_getword:=$fe;
   $39000c..$39000f:rastan_getword:=$00;
+  $3e0002:if main_m68000.access_8bits then rastan_getword:=taitosound_comm_r;
   $c00000..$c0ffff:rastan_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:rastan_getword:=ram3[(direccion and $3fff) shr 1];
 end;
@@ -268,7 +264,6 @@ end;
 
 procedure rastan_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$60000 then exit;
 case direccion of
       $10c000..$10ffff:ram1[(direccion and $3fff) shr 1]:=valor;

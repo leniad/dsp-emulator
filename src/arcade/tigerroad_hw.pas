@@ -324,7 +324,6 @@ function tigeroad_getword(direccion:dword):word;
 var
   tempw:word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   0..$3ffff:tigeroad_getword:=rom[direccion shr 1];
   $fe4000:tigeroad_getword:=$ff00 or marcade.in0;
@@ -348,7 +347,6 @@ var
   tempw:word;
   bank:byte;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$3ffff:exit;
   $fe0800..$fe1807:begin

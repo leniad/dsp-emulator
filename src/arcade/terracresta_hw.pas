@@ -291,7 +291,6 @@ end;
 
 function terracre_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$1ffff:terracre_getword:=rom[direccion shr 1];
     $20000..$23fff:terracre_getword:=ram[(direccion and $3fff) shr 1];
@@ -305,7 +304,6 @@ end;
 
 procedure terracre_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$20000 then exit;
 case direccion of
     $20000..$21fff,$23000..$23fff:ram[(direccion and $3fff) shr 1]:=valor;

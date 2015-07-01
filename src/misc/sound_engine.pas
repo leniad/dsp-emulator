@@ -186,9 +186,9 @@ begin
 if not(sound_status.hay_tsonido) then exit;
 for g:=0 to max_canales-1 do
     for f:=0 to max_audio_buffer-1 do if chunks[g,f].abuf<>nil then begin
-                                          freemem(chunks[g,f].abuf);
-                                          chunks[g,f].abuf:=nil;
-                                       end;
+      freemem(chunks[g,f].abuf);
+      chunks[g,f].abuf:=nil;
+    end;
 mix_closeaudio();
 end;
 {$endif}

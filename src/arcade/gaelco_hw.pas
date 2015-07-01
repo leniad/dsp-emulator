@@ -534,7 +534,6 @@ end;
 
 function bigk_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$7ffff:bigk_getword:=rom[direccion shr 1];
     $100000..$103fff:bigk_getword:=video_ram[(direccion and $3fff) shr 1];
@@ -551,7 +550,6 @@ end;
 
 procedure bigk_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$80000 then exit;
 case direccion of
     $100000..$100fff:begin
@@ -745,7 +743,6 @@ end;
 
 function thoop_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$fffff:thoop_getword:=rom[direccion shr 1];
     $100000..$103fff:thoop_getword:=video_ram[(direccion and $3fff) shr 1];
@@ -765,7 +762,6 @@ var
   dec:word;
   ptemp:pbyte;
 begin
-direccion:=direccion and $fffffe;
 if direccion<$100000 then exit;
 case direccion of
     $100000..$100fff:begin
@@ -819,7 +815,6 @@ procedure biomtoy_putword(direccion:dword;valor:word);
 var
   ptemp:pbyte;
 begin
-direccion:=direccion and $fffffe;
 if direccion<$100000 then exit;
 case direccion of
     $100000..$100fff:begin

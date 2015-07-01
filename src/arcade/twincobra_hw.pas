@@ -472,7 +472,6 @@ end;
 //Main CPU
 function twincobr_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   0..$2ffff:twincobr_getword:=rom[direccion shr 1];
   $30000..$33fff:twincobr_getword:=ram[(direccion and $3fff) shr 1];
@@ -507,7 +506,6 @@ end;
 
 procedure twincobr_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $30000..$33fff:ram[(direccion and $3fff) shr 1]:=valor;
   $3ffe0..$3ffef:;

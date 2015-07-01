@@ -179,7 +179,7 @@ while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    main_m68000.run(frame_m);
    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   main_h6280.run(frame_s);
+   main_h6280.run(trunc(frame_s));
    frame_s:=frame_s+main_h6280.tframes-main_h6280.contador;
    case f of
       247:begin
@@ -210,7 +210,6 @@ end;
 
 function funkyjet_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$7ffff:funkyjet_getword:=rom[direccion shr 1];
   $120000..$1207ff:funkyjet_getword:=buffer_paleta[(direccion and $7ff) shr 1];
@@ -251,7 +250,6 @@ end;
 
 procedure funkyjet_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$80000 then exit;
 case direccion of
   $120000..$1207ff:if (buffer_paleta[(direccion and $7ff) shr 1]<>valor) then begin

@@ -182,7 +182,6 @@ end;
 
 function tumblep_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$7ffff:tumblep_getword:=rom[direccion shr 1];
   $120000..$123fff:tumblep_getword:=ram[(direccion and $3fff) shr 1];
@@ -213,7 +212,6 @@ end;
 
 procedure tumblep_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$80000 then exit;
 case direccion of
   $100000:begin

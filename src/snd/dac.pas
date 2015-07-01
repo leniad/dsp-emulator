@@ -39,6 +39,7 @@ end;
 
 procedure dac_chip.Free;
 begin
+self.Destroy;
 end;
 
 function dac_chip.save_snapshot(data:pbyte):word;

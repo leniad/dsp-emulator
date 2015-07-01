@@ -55,6 +55,7 @@ SYNCS_MAX2=$80;
 
 // CHANNEL TYPE DEFINITIONS */
 type
+  tcall_frame_irq=procedure (status:byte);
   square_t=record // Square Wave */
 	  regs:array[0..3] of byte;
 	  vbl_length:integer;
@@ -102,6 +103,7 @@ type
     enabled:boolean;
     irq_occurred:boolean;
     vol:shortint;
+    getbyte:tgetbyte;
   end;
   pdpcm_t=^dpcm_t;
   apu_t=record // APU type */
@@ -128,13 +130,15 @@ type
     buffer:array[1..TOTAL_BUFFER_SIZE] of integer;
     buffer_pos:byte;
     tsample:byte;
+    frame_irq_timer:byte;
+    frame_call_irq:tcall_frame_irq;
   end;
   ptipo_n2a03_apu=^tipo_n2a03_apu;
 
 var
     n2a03:array[0..1] of ptipo_n2a03_apu;
 
-procedure init_n2a03_sound(num:byte);
+procedure init_n2a03_sound(num:byte;read_byte_dpcm:tgetbyte;call_irq:tcall_frame_irq);
 procedure close_n2a03_sound(num:byte);
 procedure reset_n2a03_sound(num:byte);
 function n2a03_read(num:byte;direccion:word):byte;
@@ -142,6 +146,8 @@ procedure n2a03_write(num:byte;posicion:word;value:byte);
 procedure n2a03_sound_update(num:byte);
 procedure n2a03_sound_advance_0;
 procedure n2a03_sound_advance_1;
+procedure n2a03_irq_call_0;
+procedure n2a03_irq_call_1;
 
 implementation
 
@@ -193,7 +199,7 @@ begin
 	end;
 end;
 
-procedure init_n2a03_sound(num:byte);
+procedure init_n2a03_sound(num:byte;read_byte_dpcm:tgetbyte;call_irq:tcall_frame_irq);
 var
   rate:integer;
 begin
@@ -204,6 +210,8 @@ begin
   getmem(n2a03[num].apu.tri,sizeof(triangle_t));
   getmem(n2a03[num].apu.noi,sizeof(noise_t));
   getmem(n2a03[num].apu.dpcm,sizeof(dpcm_t));
+  n2a03[num].apu.dpcm.getbyte:=read_byte_dpcm;
+  n2a03[num].frame_call_irq:=call_irq;
   rate:=sound_status.cpu_clock div 4;
   // Initialize global variables */
   n2a03[num].samps_per_sync:=round(rate/llamadas_maquina.fps_max);
@@ -215,23 +223,41 @@ begin
   create_vbltimes(num,n2a03[num].samps_per_sync);
   create_syncs(num,n2a03[num].samps_per_sync);
   case num of
-    0:init_timer(sound_status.cpu_num,4,n2a03_sound_advance_0,true);
-    1:init_timer(sound_status.cpu_num,4,n2a03_sound_advance_1,true);
+    0:begin
+        init_timer(sound_status.cpu_num,4,n2a03_sound_advance_0,true);
+        n2a03[0].frame_irq_timer:=init_timer(sound_status.cpu_num,29830,n2a03_irq_call_0,false);
+      end;
+    1:begin
+        init_timer(sound_status.cpu_num,4,n2a03_sound_advance_1,true);
+        n2a03[1].frame_irq_timer:=init_timer(sound_status.cpu_num,29830,n2a03_irq_call_1,false);
+      end;
   end;
   n2a03[num].tsample:=init_channel;
 end;
 
 procedure reset_n2a03_sound(num:byte);
+var
+  f:byte;
 begin
   fillchar(n2a03[num].apu.squ[0]^,sizeof(square_t),0);
   fillchar(n2a03[num].apu.squ[1]^,sizeof(square_t),0);
   fillchar(n2a03[num].apu.tri^,sizeof(triangle_t),0);
   fillchar(n2a03[num].apu.noi^,sizeof(noise_t),0);
-  fillchar(n2a03[num].apu.dpcm^,sizeof(dpcm_t),0);
+  for f:=0 to 3 do n2a03[num].apu.dpcm.regs[f]:=0;
+  n2a03[num].apu.dpcm.address:=0;
+  n2a03[num].apu.dpcm.length:=0;
+  n2a03[num].apu.dpcm.bits_left:=0;
+  n2a03[num].apu.dpcm.phaseacc:=0;
+  n2a03[num].apu.dpcm.output_vol:=0;
+  n2a03[num].apu.dpcm.cur_byte:=0;
+  n2a03[num].apu.dpcm.enabled:=false;
+  n2a03[num].apu.dpcm.irq_occurred:=false;
+  n2a03[num].apu.dpcm.vol:=0;
   fillchar(n2a03[num].apu.regs[0],$17,0);
   fillchar(n2a03[num].buffer[1],TOTAL_BUFFER_SIZE*sizeof(integer),0);
   n2a03[num].apu.step_mode:=0;
   n2a03[num].buffer_pos:=1;
+  timer[n2a03[num].frame_irq_timer].enabled:=false;
 end;
 
 procedure close_n2a03_sound(num:byte);
@@ -336,6 +362,7 @@ begin
 	  // DMC */
 	  APU_WRE0:begin
 		    apu.dpcm.regs[0]:=value;
+        //downcast<n2a03_device &>(m_APU.dpcm.memory->device()).set_input_line(N2A03_APU_IRQ_LINE, CLEAR_LINE);
 		    if (value and $80)=0 then apu.dpcm.irq_occurred:=false;
 		  end;
 	  APU_WRE1:begin // 7-bit DAC */
@@ -344,8 +371,15 @@ begin
 		  end;
 	  APU_WRE2:apu.dpcm.regs[2]:=value;
 	  APU_WRE3:apu.dpcm.regs[3]:=value;
-	  APU_IRQCTRL:if (value and $80)<>0 then apu.step_mode:=5
-		              else apu.step_mode:=4;
+	  APU_IRQCTRL:begin
+                  if (value and $80)<>0 then begin
+                    apu.step_mode:=5;
+                    timer[n2a03[num].frame_irq_timer].enabled:=false;
+                  end else begin
+                    apu.step_mode:=4;
+                    if (value and $40)=$0 then timer[n2a03[num].frame_irq_timer].enabled:=true;
+                  end;
+                end;
 	  APU_SMASK:begin
     		if (value and $01)<>0 then apu.squ[0].enabled:=true
 		    else begin
@@ -392,6 +426,7 @@ begin
   apu:=n2a03[num].apu;
 	if (address=$15) then begin
 		readval:=0;
+    if (@n2a03[num].frame_call_irq<>nil) then n2a03[num].frame_call_irq(CLEAR_LINE);
 		if (apu.squ[0].vbl_length>0) then readval:=readval or 1;
 		if (apu.squ[1].vbl_length>0) then readval:=readval or 2;
 		if (apu.tri.vbl_length>0) then readval:=readval or 4;
@@ -483,13 +518,13 @@ begin
     apu_triangle:=0;
     exit;
   end;
-	if (not(tri.counter_started) and ((tri.regs[0] and $80)<>0)) then begin
+	if (not(tri.counter_started) and ((tri.regs[0] and $80)=0)) then begin
 		if (tri.write_latency)<>0 then tri.write_latency:=tri.write_latency-1;
 		if (tri.write_latency=0) then tri.counter_started:=true;
 	end;
 	if (tri.counter_started) then begin
 		if (tri.linear_length>0) then tri.linear_length:=tri.linear_length-1;
-		if ((tri.vbl_length<>0) and ((tri.regs[0] and $80)<>0)) then tri.vbl_length:=tri.vbl_length-1;
+		if ((tri.vbl_length<>0) and ((tri.regs[0] and $80)=0)) then tri.vbl_length:=tri.vbl_length-1;
 		if (tri.vbl_length=0) then begin
       apu_triangle:=0;
       exit;
@@ -568,14 +603,47 @@ end;
 function apu_dpcm(num:byte):integer;
 var
   dpcm:pdpcm_t;
+  freq,bit_pos:integer;
 begin
   dpcm:=n2a03[num].apu.dpcm;
   if not(dpcm.enabled) then begin
     apu_dpcm:=0;
     exit;
   end;
-  apu_dpcm:=0;
-  //ufffffffff
+  freq:=dpcm_clocks[dpcm.regs[0] and $0F];
+  dpcm.phaseacc:=dpcm.phaseacc-n2a03[num].apu_incsize; // # of cycles per sample */
+  while (dpcm.phaseacc<0) do begin
+    dpcm.phaseacc:=dpcm.phaseacc+freq;
+    if (dpcm.length=0) then begin
+      dpcm.enabled:=FALSE; // Fixed * Proper DPCM channel ENABLE/DISABLE flag behaviour*/
+      dpcm.vol:=0; // Fixed * DPCM DAC resets itself when restarted */
+      if (dpcm.regs[0] and $40)<>0 then begin
+					apu_dpcmreset(dpcm);
+      end else begin
+					if (dpcm.regs[0] and $80)<>0 then begin // IRQ Generator */
+						dpcm.irq_occurred:=TRUE;
+						//downcast<n2a03_device &>(m_APU.dpcm.memory->device()).set_input_line(N2A03_APU_IRQ_LINE, ASSERT_LINE);
+          end;
+					break;
+      end;
+    end;
+    dpcm.bits_left:=dpcm.bits_left-1;
+    bit_pos:=7-(dpcm.bits_left and 7);
+    if (bit_pos=7) then begin
+				dpcm.cur_byte:= dpcm.getbyte(dpcm.address);
+				dpcm.address:=dpcm.address+1;
+				dpcm.length:=dpcm.length-1;
+    end;
+    if (dpcm.cur_byte and (1 shl bit_pos))<>0 then begin
+				dpcm.vol:=dpcm.vol+2; // FIXED * DPCM channel only uses the upper 6 bits of the DAC */
+    end else begin
+				dpcm.vol:=dpcm.vol-2;
+    end;
+  end; //while
+
+	if (dpcm.vol>63) then dpcm.vol:=63
+	  else if (dpcm.vol<-64) then dpcm.vol:=-64;
+	apu_dpcm:=dpcm.vol;
 end;
 
 // UPDATE SOUND BUFFER USING CURRENT DATA */
@@ -616,6 +684,16 @@ end;
 procedure n2a03_sound_advance_1;
 begin
   n2a03_sound_advance(1);
+end;
+
+procedure n2a03_irq_call_0;
+begin
+  n2a03[0].frame_call_irq(ASSERT_LINE);
+end;
+
+procedure n2a03_irq_call_1;
+begin
+  n2a03[1].frame_call_irq(ASSERT_LINE);
 end;
 
 end.

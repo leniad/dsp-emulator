@@ -432,7 +432,6 @@ end;
 
 function pow_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$3ffff:pow_getword:=rom[direccion shr 1];
   $40000..$43fff:pow_getword:=ram[(direccion and $3fff)+1] or (ram[direccion and $3fff] shl 8);
@@ -461,7 +460,6 @@ end;
 
 procedure pow_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3ffff:exit;
     $40000..$43fff:begin
@@ -540,7 +538,6 @@ end;
 //Ikari 3
 function ikari3_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
   $0..$3ffff:ikari3_getword:=rom[direccion shr 1];
   $40000..$43fff:ikari3_getword:=ram[(direccion and $3fff)+1] or (ram[direccion and $3fff] shl 8);
@@ -560,7 +557,6 @@ end;
 
 procedure ikari3_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$3ffff,$300000..$33ffff:exit;
     $40000..$43fff:begin

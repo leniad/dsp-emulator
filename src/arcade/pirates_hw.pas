@@ -221,6 +221,7 @@ end;
 procedure cerrar_pirates;
 begin
 main_m68000.free;
+oki_6295_0.Free;
 close_audio;
 close_video;
 end;
@@ -228,6 +229,7 @@ end;
 procedure reset_pirates;
 begin
  main_m68000.reset;
+ oki_6295_0.reset;
  reset_audio;
  marcade.in0:=$9f;
  marcade.in1:=$FFFF;
@@ -345,7 +347,6 @@ end;
 
 function pirates_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$fffff:pirates_getword:=rom[direccion shr 1];
     $100000..$10ffff:pirates_getword:=ram1[(direccion and $ffff) shr 1];
@@ -373,7 +374,6 @@ end;
 
 procedure pirates_putword(direccion:dword;valor:word);
 begin
-direccion:=direccion and $fffffe;
 if direccion<$100000 then exit;
 case direccion of
     $100000..$10ffff:ram1[(direccion and $ffff) shr 1]:=valor;
@@ -407,7 +407,6 @@ end;
 
 function genix_getword(direccion:dword):word;
 begin
-direccion:=direccion and $fffffe;
 case direccion of
     0..$fffff:genix_getword:=rom[direccion shr 1];
     $100000..$10ffff:case (direccion and $ffff) of
