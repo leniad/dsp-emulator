@@ -16,7 +16,7 @@ procedure ppu_end_linea;
 const
   MIRROR_HORIZONTAL=1;
   MIRROR_VERTICAL=2;
-  MIRROR_SINGLE_0=3;
+  MIRROR_SINGLE=3;
   MIRROR_SINGLE_1=4;
   MIRROR_FOUR_SCREEN=5;
   PPU_PIXEL_TIMING=((128*2)/3)/256;
@@ -27,6 +27,7 @@ var
   pos_bg,pos_spt,sprite0_hit_pos:byte;
   ppu_dir_first,ppu_chr_rom,sprite0_hit:boolean;
   ppu_mem:array [0..$3FFF] of byte;
+  ppu_mem_single:array [0..1,0..$fff] of byte;
   ppu_address_temp,ppu_address:word;
   ppu_mirror,ppu_buffer_read,ppu_tile_x_offset:byte;
   ppu_dot_line_trans:array[0..((33*8)-1)] of byte;  //0-63 sprites + $40 trans bg + $80 dot bg
@@ -192,7 +193,7 @@ begin
         ptemp:=punbuf;
         inc(ptemp,ppu_tile_x_offset);
         for x:=0 to 7 do begin
-          ptemp^:=paleta[$100];
+          ptemp^:=paleta[ppu_mem[$3f00]];
           inc(ptemp);
         end;
     end;
@@ -221,10 +222,13 @@ procedure ppu_linea(nes_linea:word);
 begin
 single_line(0,nes_linea,ppu_mem[$3f00],256,2);
 fillchar(ppu_dot_line_trans[0],264,$7f);
-if (ppu_control2 and $8)=$8 then putbackground(nes_linea);
-if (ppu_control2 and $10)=$10 then putsprites(nes_linea,$20);
-if (ppu_control2 and $8)=$8 then actualiza_trozo(ppu_tile_x_offset,0,256,1,1,0,nes_linea,256,1,2);
-if (ppu_control2 and $10)=$10 then putsprites(nes_linea,$0);
+if (ppu_control2 and $8)<>0 then begin
+  putbackground(nes_linea);
+  if (@llamadas_nes.line_counter<>nil) then llamadas_nes.line_counter;
+end;
+if (ppu_control2 and $10)<>0 then putsprites(nes_linea,$20);
+if (ppu_control2 and $8)<>0 then actualiza_trozo(ppu_tile_x_offset,0,256,1,1,0,nes_linea,256,1,2);
+if (ppu_control2 and $10)<>0 then putsprites(nes_linea,$0);
 end;
 
 function ppu_read:byte;
@@ -233,7 +237,8 @@ var
 begin
 ret:=ppu_buffer_read;
 case ppu_address of
-  $0..$1fff:ppu_buffer_read:=ppu_mem[ppu_address];
+  $0..$1fff:if ppu_chr_rom then ppu_buffer_read:=ppu_mem[ppu_address]
+              else ppu_buffer_read:=random(256);
   $2000..$3eff:case ppu_mirror of
                     MIRROR_HORIZONTAL:case (ppu_address and $c00) of
                                         $000,$400:ppu_buffer_read:=ppu_mem[$2000+(ppu_address and $3ff)];
@@ -243,14 +248,13 @@ case ppu_address of
                                         $000,$800:ppu_buffer_read:=ppu_mem[$2000+(ppu_address and $3ff)];
                                         $400,$c00:ppu_buffer_read:=ppu_mem[$2400+(ppu_address and $3ff)];
                                       end;
-                    MIRROR_SINGLE_0:ppu_buffer_read:=ppu_mem[$2000+(ppu_address and $3ff)];
-                    MIRROR_SINGLE_1:ppu_buffer_read:=ppu_mem[$2400+(ppu_address and $3ff)];
-                    MIRROR_FOUR_SCREEN:case (ppu_address and $c00) of
-                                        $000:ppu_buffer_read:=ppu_mem[$2000+(ppu_address and $3ff)];
-                                        $400:ppu_buffer_read:=ppu_mem[$2400+(ppu_address and $3ff)];
-                                        $800:ppu_buffer_read:=ppu_mem[$2800+(ppu_address and $3ff)];
-                                        $c00:ppu_buffer_read:=ppu_mem[$2c00+(ppu_address and $3ff)];
-                                      end;
+                    MIRROR_SINGLE:begin
+                                      ppu_buffer_read:=ppu_mem[$2000+(ppu_address and $3ff)];
+                                      ppu_buffer_read:=ppu_mem[$2400+(ppu_address and $3ff)];
+                                      ppu_buffer_read:=ppu_mem[$2800+(ppu_address and $3ff)];
+                                      ppu_buffer_read:=ppu_mem[$2c00+(ppu_address and $3ff)];
+                                  end;
+                    MIRROR_FOUR_SCREEN:ppu_buffer_read:=ppu_mem[$2000+(ppu_address and $fff)];
                   end;
   $3f00..$3fff:begin
                   ppu_buffer_read:=ppu_mem[(ppu_address and $1F)+$3f00]; //Palete
@@ -287,19 +291,13 @@ case ppu_address of
                                                     ppu_mem[$2c00+(ppu_address and $3ff)]:=valor;
                                                   end;
                                       end;
-                    MIRROR_SINGLE_0,MIRROR_SINGLE_1:begin
-                                        ppu_mem[$2000+(ppu_address and $3ff)]:=valor;
-                                        ppu_mem[$2400+(ppu_address and $3ff)]:=valor;
-                                        ppu_mem[$2800+(ppu_address and $3ff)]:=valor;
-                                        ppu_mem[$2c00+(ppu_address and $3ff)]:=valor;
-                                    end;
-//                    MIRROR_SINGLE_1:ppu_mem[$2400+(ppu_address and $3ff)]:=valor;
-                    MIRROR_FOUR_SCREEN:case (ppu_address and $c00) of
-                                        $000:ppu_mem[$2000+(ppu_address and $3ff)]:=valor;
-                                        $400:ppu_mem[$2400+(ppu_address and $3ff)]:=valor;
-                                        $800:ppu_mem[$2800+(ppu_address and $3ff)]:=valor;
-                                        $c00:ppu_mem[$2c00+(ppu_address and $3ff)]:=valor;
-                                      end;
+                    MIRROR_SINGLE:begin
+                                      ppu_mem[$2000+(ppu_address and $3ff)]:=valor;
+                                      ppu_mem[$2400+(ppu_address and $3ff)]:=valor;
+                                      ppu_mem[$2800+(ppu_address and $3ff)]:=valor;
+                                      ppu_mem[$2c00+(ppu_address and $3ff)]:=valor;
+                                  end;
+                    MIRROR_FOUR_SCREEN:ppu_mem[$2000+(ppu_address and $fff)]:=valor;
                end;
   $3f00..$3fff:case (ppu_address and $1f) of //Palete
                     0,$10:begin

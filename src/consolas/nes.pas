@@ -17,19 +17,20 @@ Type
            end;
 
 const
-  NTSC_clock=1789772;
+  NTSC_clock=1789773;
   PAL_clock=1773447;
-  NTSC_refresh=60.098;
-  PAL_refresh=53.355;
+  NTSC_refresh=60.0988;
+  PAL_refresh=50.0070;
   NTSC_lines=262-1;
   PAL_lines=312-1;
 
 var
   joy1,joy2,joy1_read,joy2_read,open_bus:byte;
   llamadas_nes:tllamadas_nes;
-  sram_enabled:boolean=false;
+  sram_present:boolean=false;
   cart_name:string;
   cartucho_cargado:boolean;
+  sram_enable:boolean;
 
 procedure Cargar_NES;
 function iniciar_nes:boolean;
@@ -101,7 +102,7 @@ end;
 
 procedure nes_cerrar;
 begin
-  if sram_enabled then write_file(cart_name,@memoria[$6000],$2000);
+  if sram_present then write_file(cart_name,@memoria[$6000],$2000);
   main_m6502.free;
   close_n2a03_sound(0);
   close_audio;
@@ -155,33 +156,8 @@ begin
   while EmuStatus=EsRuning do begin
     for nes_linea:=0 to NTSC_lines do begin
       case nes_linea of
-        0:begin
-              //Ejecutar NMI
-              if (ppu_control1 and $80)=$80 then main_m6502.pedir_nmi:=PULSE_LINE;
-              //Despues 106t -> HBLANK
-              main_m6502.run(frame);
-              frame:=frame+main_m6502.tframes-main_m6502.contador;
-            end;
-        19:begin //HBLANK --> Quitar VBLank + Sprite Hit + mas de 8
-              //2270t
-              main_m6502.run(110);
-              frame:=frame-main_m6502.contador;
-              ppu_status:=ppu_status and $7F;
-              main_m6502.run(frame);
-              frame:=frame+main_m6502.tframes-main_m6502.contador;
-              ppu_status:=ppu_status and $9F;
-              sprite0_hit:=false;
-           end;
-        20:begin
-              //Dummy render
-              main_m6502.run(frame);
-              frame:=frame+main_m6502.tframes-main_m6502.contador;
-              if (ppu_control2 and $8)<>0 then ppu_address:=ppu_address_temp;
-            end;
-        21..260:begin//Draw screen
-              ppu_linea(nes_linea-21);
-              if (((ppu_control2 and $8)<>0) and (@llamadas_nes.line_counter<>nil)) then llamadas_nes.line_counter;
-              //Primero 85.33333333T para pintar la linea
+        0..239:begin//0..239 - 21..260
+              ppu_linea(nes_linea);
               if sprite0_hit then begin
                 main_m6502.run(sprite0_hit_pos);
                 frame:=frame-main_m6502.contador;
@@ -192,34 +168,37 @@ begin
                 main_m6502.run(85);
                 frame:=frame-main_m6502.contador;
               end;
-              //Fin de linea 20.6666666t
-              main_m6502.run(18);
-              frame:=frame-main_m6502.contador;
               if (ppu_control2 and $8)<>0 then begin
                 ppu_address:=(ppu_address and $FBE0) or (ppu_address_temp and $41F);
                 ppu_end_linea;
               end;
-              //HBLANK (4.66666666t)
               main_m6502.run(frame);
               frame:=frame+main_M6502.tframes-main_M6502.contador;
             end;
-        261:begin //Begin VB
-              //Antes de cambiar STATUS 106t
-              main_m6502.run(106);
-              frame:=frame-main_M6502.contador;
-              // HBLANK (4.66666t) --> final
+          240,242..260:begin //240,242..260 - 261,1..19
+                main_m6502.run(frame);
+                frame:=frame+main_m6502.tframes-main_m6502.contador;
+              end;
+          241:begin //241 - 0
               ppu_status:=ppu_status or $80;
+              main_m6502.run(1);
+              frame:=frame-main_M6502.contador;
+              if (ppu_control1 and $80)=$80 then main_m6502.pedir_nmi:=PULSE_LINE;
               main_m6502.run(frame);
               frame:=frame+main_m6502.tframes-main_m6502.contador;
             end;
-          else begin
-            //Primero 106t + HBLANK
-            main_m6502.run(frame);
-            frame:=frame+main_m6502.tframes-main_m6502.contador;
-          end;
+          261:begin //261 - 20
+              main_m6502.run(1);
+              frame:=frame-main_m6502.contador;
+              ppu_status:=ppu_status and $1F;
+              sprite0_hit:=false;
+              main_m6502.run(frame);
+              frame:=frame+main_m6502.tframes-main_m6502.contador;
+              if (ppu_control2 and $8)<>0 then ppu_address:=ppu_address_temp;
+           end;
       end;
     end;
-    open_bus:=0;
+    //open_bus:=0;
     eventos_nes;
     actualiza_trozo_simple(0,0,256,240,2);
     video_sync;
@@ -260,7 +239,8 @@ begin
           end;
     $4018..$5fff:if @llamadas_nes.read_expansion<>nil then nes_getbyte:=llamadas_nes.read_expansion(direccion) //Expansion Area
                     else nes_getbyte:=direccion shr 8;
-    $6000..$ffff:nes_getbyte:=memoria[direccion]; //SRAM Area + PRG-ROM Area
+    $6000..$7fff:if sram_enable then nes_getbyte:=memoria[direccion]; //SRAM Area
+    $8000..$ffff:nes_getbyte:=memoria[direccion]; // PRG-ROM Area
   end;
 end;
 
@@ -310,8 +290,11 @@ begin
                 joy2:=0;
               end;
         $4018..$5fff:if @llamadas_nes.write_expansion<>nil then llamadas_nes.write_expansion(direccion,valor); //Expansion Area
-        $6000..$7fff:if @llamadas_nes.write_extra_ram=nil then memoria[direccion]:=valor //SRAM Area
-                        else llamadas_nes.write_extra_ram(direccion,valor);
+        $6000..$7fff:if @llamadas_nes.write_extra_ram=nil then begin
+                        if sram_enable then memoria[direccion]:=valor; //SRAM Area
+                     end else begin
+                          llamadas_nes.write_extra_ram(direccion,valor);
+                     end;
         $8000..$ffff:if @llamadas_nes.write_rom<>nil then llamadas_nes.write_rom(direccion,valor); //PRG-ROM Area
   end;
 end;
@@ -335,7 +318,7 @@ var
   longitud,crc:integer;
   f,mapper:byte;
 begin
-  if sram_enabled then write_file(cart_name,@memoria[$6000],$2000);
+  if sram_present then write_file(cart_name,@memoria[$6000],$2000);
   if not(OpenRom(StNes,RomFile)) then begin
     abrir_nes:=true;
     exit;
@@ -363,122 +346,92 @@ begin
   copymemory(@cabecera_nes[0],temp,$10);
   inc(temp,$10);
   if ((cabecera_nes[0]<>ord('N')) and ((cabecera_nes[1]<>ord('E'))) and ((cabecera_nes[2]<>ord('S')))) then exit;
-  //Pos 4 Numero de paginas de ROM de 16k 1-255
-  //Pos 5 Numero de paginas de CHR de 8k 0-255
-  //Pos 6 bit7-4 mapper low - bit3 4 screen - bit2 trainer - bit1 battery - bit0 mirror
-  if (cabecera_nes[6] and 4)<>0 then inc(temp,$200);
-  //Pos 7 bit7-4 mapper hi
-  if cabecera_nes[$f]<>0 then cabecera_nes[7]:=0;
-  mapper:=(cabecera_nes[6] shr 4) or (cabecera_nes[7] and $f0);
   mal:=true;
-  cart_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
-  if (cabecera_nes[6] and 2)<>0 then begin
-    if read_file_size(cart_name,longitud) then read_file(cart_name,@memoria[$6000],longitud);
-    sram_enabled:=true;
-  end else sram_enabled:=false;
   llamadas_nes.read_expansion:=nil;
   llamadas_nes.write_expansion:=nil;
   llamadas_nes.write_extra_ram:=nil;
   llamadas_nes.line_counter:=nil;
+  llamadas_nes.write_rom:=nil;
+  cart_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
+  sram_enable:=false;
+  //Pos 4 Numero de paginas de ROM de 16k 1-255
+  mapper_nes.last_prg:=cabecera_nes[4];
+  for f:=0 to (mapper_nes.last_prg-1) do begin
+    copymemory(@mapper_nes.prg[f,0],temp,$4000);
+    inc(temp,$4000);
+  end;
+  copymemory(@memoria[$8000],@mapper_nes.prg[0,0],$4000);
+  if mapper_nes.last_prg=1 then copymemory(@memoria[$C000],@mapper_nes.prg[0,0],$4000)
+    else copymemory(@memoria[$C000],@mapper_nes.prg[1,0],$4000);
+  //Pos 5 Numero de paginas de CHR de 8k 0-255
+  mapper_nes.last_chr:=cabecera_nes[5];
+  if mapper_nes.last_chr=0 then begin
+    ppu_chr_rom:=false;
+  end else begin
+    ppu_chr_rom:=true;
+    for f:=0 to (mapper_nes.last_chr-1) do begin
+      copymemory(@mapper_nes.chr[f,0],temp,$2000);
+      inc(temp,$2000);
+    end;
+    copymemory(@ppu_mem[0],@mapper_nes.chr[0,0],$2000);
+  end;
+  //Hay trainer, de momento lo ignoro...
+  if (cabecera_nes[6] and 4)<>0 then inc(temp,$200);
+  //Pos 6 bit7-4 mapper low - bit3 4 screen - bit2 trainer - bit1 battery - bit0 mirror
+  //Pos 7 bit7-4 mapper high
+  //Si la pos 7 tiene la marca --> iNes 2.0
+  if (cabecera_nes[7] and 8)=8 then begin
+    //cabecera_nes[$f]<>0 then cabecera_nes[7]:=0;
+    MessageDlg('NES: Cabecera iNes 2.0', mtError,[mbOk], 0);
+  end else begin
+    //Si las pos 12,13,14 y 15 <>0 --> Archaic
+    if ((cabecera_nes[12]<>0) and (cabecera_nes[13]<>0) and (cabecera_nes[14]<>0) and (cabecera_nes[15]<>0)) then begin
+      mapper:=cabecera_nes[6] shr 4;
+    end else begin //iNes
+      mapper:=(cabecera_nes[6] shr 4) or (cabecera_nes[7] and $f0);
+      if (cabecera_nes[9] and 1)<>0 then MessageDlg('NES: PAL', mtError,[mbOk], 0);
+    end;
+  end;
+  if (cabecera_nes[6] and 2)<>0 then begin
+    if read_file_size(cart_name,longitud) then read_file(cart_name,@memoria[$6000],longitud);
+    sram_present:=true;
+  end else sram_present:=false;
   if (cabecera_nes[6] and 8)<>0 then ppu_mirror:=MIRROR_FOUR_SCREEN
     else if (cabecera_nes[6] and 1)=0 then ppu_mirror:=MIRROR_HORIZONTAL  //Horizontal
       else ppu_mirror:=MIRROR_VERTICAL;  //Vertical
   case mapper of
-      0:begin
-          copymemory(@memoria[$8000],temp,$4000);
-          //Si solo hay una pagina de hace mirror...
-          if cabecera_nes[4]=1 then copymemory(@memoria[$C000],temp,$4000)
-            else begin
-              inc(temp,$4000);
-              copymemory(@memoria[$C000],temp,$4000);
-            end;
-          inc(temp,$4000);
-          //Solo hay una pagina de CHR
-          if cabecera_nes[5]=0 then begin
-            ppu_chr_rom:=false;
-          end else begin
-            copymemory(@ppu_mem[0],temp,$2000);
-            ppu_chr_rom:=true;
+      0:mal:=false; //Nada que hacer...
+      1,2,67,68,93,94,180:begin
+          copymemory(@memoria[$c000],@mapper_nes.prg[(mapper_nes.last_prg-1),0],$4000);
+          case mapper of
+             1:begin
+                llamadas_nes.write_rom:=mapper_1_write_rom;
+                mapper_nes.reg[0]:=$1f;
+                mapper_nes.reg[1]:=0;
+                mapper_nes.reg[2]:=0;
+                mapper_nes.reg[3]:=0;
+                sram_enable:=true;
+              end;
+             2:llamadas_nes.write_rom:=mapper_2_write_rom;
+            67:llamadas_nes.write_rom:=mapper_67_write_rom;
+            68:llamadas_nes.write_rom:=mapper_68_write_rom;
+            93:llamadas_nes.write_rom:=mapper_93_write_rom;
+            94:llamadas_nes.write_rom:=mapper_94_write_rom;
+           180:llamadas_nes.write_rom:=mapper_180_write_rom;
           end;
           mal:=false;
-          llamadas_nes.write_rom:=nil;
         end;
-      1:begin
-          mapper_nes.last_prg:=cabecera_nes[4]-1;
-          for f:=0 to mapper_nes.last_prg do begin
-            copymemory(@mapper_nes.prg[f,0],temp,$4000);
-            inc(temp,$4000);
-          end;
-          copymemory(@memoria[$8000],@mapper_nes.prg[0,0],$4000);
-          copymemory(@memoria[$c000],@mapper_nes.prg[mapper_nes.last_prg,0],$4000);
-          if cabecera_nes[5]=0 then begin
-            ppu_chr_rom:=false;
-          end else begin
-            mapper_nes.last_chr:=cabecera_nes[5]-1;
-            for f:=0 to mapper_nes.last_chr do begin
-              copymemory(@mapper_nes.chr[f,0],temp,$2000);
-              inc(temp,$2000);
-            end;
-            copymemory(@ppu_mem[0],@mapper_nes.chr[1,0],$2000);
-            ppu_chr_rom:=true;
+      3,87,185:begin
+          case mapper of
+            3:llamadas_nes.write_rom:=mapper_3_write_rom;
+           87:llamadas_nes.write_extra_ram:=mapper_87_write_rom;
+          185:llamadas_nes.write_rom:=mapper_185_write_rom;
           end;
           mal:=false;
-          llamadas_nes.write_rom:=mapper_1_write_rom;
-          mapper_nes.reg[0]:=$1f;
-          mapper_nes.reg[1]:=0;
-          mapper_nes.reg[2]:=0;
-          mapper_nes.reg[3]:=0;
-        end;
-      2:begin
-          mapper_nes.last_prg:=cabecera_nes[4]-1;
-          for f:=0 to mapper_nes.last_prg do begin
-            copymemory(@mapper_nes.prg[f,0],temp,$4000);
-            inc(temp,$4000);
-          end;
-          copymemory(@memoria[$8000],@mapper_nes.prg[0,0],$4000);
-          copymemory(@memoria[$c000],@mapper_nes.prg[mapper_nes.last_prg,0],$4000);
-          ppu_chr_rom:=false;
-          mal:=false;
-          llamadas_nes.write_rom:=mapper_2_write_rom;
-        end;
-      3,87:begin
-          copymemory(@memoria[$8000],temp,$4000);
-          inc(temp,$4000);
-          if cabecera_nes[4]=1 then copymemory(@memoria[$c000],@memoria[$8000],$4000)
-            else begin
-              copymemory(@memoria[$c000],temp,$4000);
-              inc(temp,$4000);
-            end;
-          mapper_nes.last_chr:=cabecera_nes[5];
-          for f:=0 to (mapper_nes.last_chr-1) do begin
-            copymemory(@mapper_nes.chr[f,0],temp,$2000);
-            inc(temp,$2000);
-          end;
-          copymemory(@ppu_mem[0],@mapper_nes.chr[0,0],$2000);
-          ppu_chr_rom:=true;
-          mal:=false;
-          if mapper=3 then llamadas_nes.write_rom:=mapper_3_write_rom
-            else llamadas_nes.write_extra_ram:=mapper_87_write_rom;
         end;
       4:begin
-          mapper_nes.last_prg:=cabecera_nes[4]-1;
-          for f:=0 to mapper_nes.last_prg do begin
-            copymemory(@mapper_nes.prg[f,0],temp,$4000);
-            inc(temp,$4000);
-          end;
-          copymemory(@memoria[$8000],@mapper_nes.prg[mapper_nes.last_prg,0],$4000);
-          copymemory(@memoria[$c000],@mapper_nes.prg[mapper_nes.last_prg,0],$4000);
-          if cabecera_nes[5]=0 then begin
-            ppu_chr_rom:=false;
-          end else begin
-            mapper_nes.last_chr:=cabecera_nes[5]-1;
-            for f:=0 to mapper_nes.last_chr do begin
-              copymemory(@mapper_nes.chr[f,0],temp,$2000);
-              inc(temp,$2000);
-            end;
-            copymemory(@ppu_mem[0],@mapper_nes.chr[0,0],$2000);
-            ppu_chr_rom:=true;
-          end;
+          copymemory(@memoria[$8000],@mapper_nes.prg[mapper_nes.last_prg-1,0],$4000);
+          copymemory(@memoria[$c000],@mapper_nes.prg[mapper_nes.last_prg-1,0],$4000);
           mal:=false;
           llamadas_nes.write_rom:=mapper_4_write_rom;
           llamadas_nes.line_counter:=mapper_4_line;
@@ -495,41 +448,16 @@ begin
           mapper_nes.dreg[6]:=0;
           mapper_nes.dreg[7]:=1;
         end;
-      7:begin
-          mapper_nes.last_prg:=cabecera_nes[4];
-          for f:=0 to (mapper_nes.last_prg-1) do begin
-            copymemory(@mapper_nes.prg[f,0],temp,$4000);
-            inc(temp,$4000);
+      7,66:begin
+          case mapper of
+            7:llamadas_nes.write_rom:=mapper_7_write_rom;
+            66:begin
+                  mapper_nes.reg[0]:=0;
+                  mapper_nes.reg[1]:=0;
+                  llamadas_nes.write_rom:=mapper_66_write_rom;
+               end;
           end;
-          copymemory(@memoria[$8000],@mapper_nes.prg[0,0],$4000);
-          copymemory(@memoria[$c000],@mapper_nes.prg[1,0],$4000);
-          ppu_chr_rom:=false;
           mal:=false;
-          llamadas_nes.write_rom:=mapper_7_write_rom;
-        end;
-      66:begin
-          mapper_nes.last_prg:=cabecera_nes[4];
-          for f:=0 to (mapper_nes.last_prg-1) do begin
-            copymemory(@mapper_nes.prg[f,0],temp,$4000);
-            inc(temp,$4000);
-          end;
-          copymemory(@memoria[$8000],@mapper_nes.prg[0,0],$4000);
-          copymemory(@memoria[$c000],@mapper_nes.prg[1,0],$4000);
-          if cabecera_nes[5]=0 then begin
-            ppu_chr_rom:=false;
-          end else begin
-            mapper_nes.last_chr:=cabecera_nes[5];
-            for f:=0 to (mapper_nes.last_chr-1) do begin
-              copymemory(@mapper_nes.chr[f,0],temp,$2000);
-              inc(temp,$2000);
-            end;
-            copymemory(@ppu_mem[0],@mapper_nes.chr[0,0],$2000);
-            ppu_chr_rom:=true;
-          end;
-          mapper_nes.reg[0]:=0;
-          mapper_nes.reg[1]:=0;
-          mal:=false;
-          llamadas_nes.write_rom:=mapper_66_write_rom;
         end;
       else MessageDlg('NES: Mapper unknown!!! - Type: '+inttostr(mapper), mtError,[mbOk], 0);
   end;
