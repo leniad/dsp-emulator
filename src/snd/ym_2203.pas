@@ -38,10 +38,10 @@ procedure ym2203_0_timer1;
 procedure ym2203_0_timer2;
 procedure ym2203_1_timer1;
 procedure ym2203_1_timer2;
-procedure ym2203_0_init_timer_a(count:integer);
-procedure ym2203_0_init_timer_b(count:integer);
-procedure ym2203_1_init_timer_a(count:integer);
-procedure ym2203_1_init_timer_b(count:integer);
+procedure ym2203_0_init_timer_a(count:single);
+procedure ym2203_0_init_timer_b(count:single);
+procedure ym2203_1_init_timer_a(count:single);
+procedure ym2203_1_init_timer_b(count:single);
 
 implementation
 
@@ -437,22 +437,22 @@ begin
     end;
 end;
 
-procedure ym2203_0_init_timer_a(count:integer);
+procedure ym2203_0_init_timer_a(count:single);
 begin
   change_timer_status(ym2203_0.timer1,count*ym2203_0.timer_adjust);
 end;
 
-procedure ym2203_0_init_timer_b(count:integer);
+procedure ym2203_0_init_timer_b(count:single);
 begin
   change_timer_status(ym2203_0.timer2,count*ym2203_0.timer_adjust);
 end;
 
-procedure ym2203_1_init_timer_a(count:integer);
+procedure ym2203_1_init_timer_a(count:single);
 begin
   change_timer_status(ym2203_1.timer1,count*ym2203_1.timer_adjust);
 end;
 
-procedure ym2203_1_init_timer_b(count:integer);
+procedure ym2203_1_init_timer_b(count:single);
 begin
   change_timer_status(ym2203_1.timer2,count*ym2203_1.timer_adjust);
 end;

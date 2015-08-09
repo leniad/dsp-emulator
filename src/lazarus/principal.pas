@@ -177,6 +177,7 @@ type
     MenuItem28: TMenuItem;
     freekick1: TMenuItem;
     boogwins1: TMenuItem;
+    pbaction1: TMenuItem;
     pirates1: TMenuItem;
     twinbee1: TMenuItem;
     mrgoemon1: TMenuItem;

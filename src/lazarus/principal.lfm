@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.4.0.2'
+  LCLVersion = '1.4.2.0'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -2370,6 +2370,9 @@ object principal1: Tprincipal1
               Caption = 'Free Kick'
               OnClick = CambiarMaquina
             end
+          end
+          object pbaction1: TMenuItem
+            Caption = 'Pinball Action'
           end
         end
         object M65021: TMenuItem

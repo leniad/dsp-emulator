@@ -990,16 +990,20 @@ while EmuStatus=EsRuning do begin
     main_lr.run(frame_m);
     frame_m:=frame_m+main_lr.tframes-main_lr.contador;
     case f of
-        0..142:gameboy.video_render;
-        143:begin //Modo 1 + VBLANK IRQ
-              gameboy.video_render;
+        0..143:gameboy.video_render;
+        144:begin //Modo 1 + VBLANK IRQ
               main_lr.vblank_req:=true;
-              if (stat and $3)<>1 then main_lr.lcdstat_req:=(stat and $10)<>0;
+              main_lr.lcdstat_req:=((stat and $10)<>0) and ((stat and $3)<>1);
               stat:=(stat and $fc) or $1;
             end;
     end;
     linea:=linea+1;
-    stat:=stat and $fb;
+    if linea=ly_compare then begin
+        main_lr.lcdstat_req:=(stat and $40)<>0;
+        stat:=stat or $4;
+    end else begin
+       stat:=stat and $fb;
+    end;
   end;
   eventos_gb;
   actualiza_trozo_simple(0,0,160,144,2);
@@ -1057,10 +1061,6 @@ end;
 //Sonido and timers
 procedure gb_despues_instruccion(estados_t:word);
 begin
-if linea=ly_compare then begin
-  main_lr.lcdstat_req:=(stat and $40)<>0;
-  stat:=stat or $4;
-end;
 if hdma_ena then begin
     dma_trans($10);
     main_lr.estados_demas:=main_lr.estados_demas+8;
@@ -1069,21 +1069,23 @@ if hdma_ena then begin
     hdma_pos:=hdma_pos+1;
     if hdma_pos>=hdma_size then hdma_ena:=false;
   end;
-if linea>143 then exit;
+if (linea>143) then exit;
 // Mode 2  2_____2_____2_____2_____2_____2___________________2____
 // Mode 3  _33____33____33____33____33____33__________________3___
 // Mode 0  ___000___000___000___000___000___000________________000
 // Mode 1  ____________________________________11111111111111_____
 if main_lr.contador<80 then begin
-    //mode 2 OAM
-    main_lr.lcdstat_req:=(((stat and $20)<>0) and ((stat and $3)<>2));
-    stat:=(stat and $fc) or $2;
+    if  lcd_ena then begin
+      //mode 2 OAM,se genera una IRQ si cambia a 2, pero solo cuando cambia!!
+      main_lr.lcdstat_req:=(((stat and $20)<>0) and ((stat and $3)<>2));
+      stat:=(stat and $fc) or $2;
+    end;
   end else begin //Mode 3
     if ((main_lr.contador<(172+80+sprites_time)) or hdma_ena) then begin
-      stat:=(stat and $fc) or $3;
-      end else begin //H-Blank mode 0
-            main_lr.lcdstat_req:=(((stat and $8)<>0) and ((stat and $3)<>0));
-            stat:=stat and $fc;
+      if lcd_ena then stat:=(stat and $fc) or $3;
+      end else begin //H-Blank mode 0, se genera una IRQ si cambia a 0, pero solo cuando cambia!!
+          main_lr.lcdstat_req:=(((stat and $8)<>0) and ((stat and $3)<>0));
+          stat:=stat and $fc;
       end;
   end;
 end;

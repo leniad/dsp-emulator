@@ -1,7 +1,6 @@
 program dsp;
 
 uses
-  //FastMM4,
   Forms,
   coleco in '..\CONSOLAS\coleco.pas',
   gb in '..\CONSOLAS\gb.pas',
@@ -235,7 +234,8 @@ uses
   unzip2 in '..\misc\unzip2.pas',
   ziputils2 in '..\misc\ziputils2.pas',
   freekick_hw in '..\arcade\freekick_hw.pas',
-  boogiewings_hw in '..\arcade\boogiewings_hw.pas';
+  boogiewings_hw in '..\arcade\boogiewings_hw.pas',
+  pinballaction_hw in '..\arcade\pinballaction_hw.pas';
 
 {$R *.res}
 

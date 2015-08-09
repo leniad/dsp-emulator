@@ -2074,10 +2074,7 @@ case instruccion of
 	        CLKM(7,7,2,19,19,6,ModRM);
 	        if (c<>0) then case (ModRM and $38) of
 		          $00:begin // 03_05
-                     dstb:=ROL_BYTE(dstb);
-                     c:=c-1;
-                     self.contador:=self.contador+1;
-                     while (c>0) do begin
+                     while (c<>0) do begin
                         dstb:=ROL_BYTE(dstb);
                         c:=c-1;
                         self.contador:=self.contador+1;
@@ -2101,10 +2098,7 @@ case instruccion of
 	        CLKM(7,7,2,27,19,6,ModRM);
           if (c<>0) then case (ModRM and $38) of
 		          $00:begin //03_05
-                    dstw:=ROL_WORD(dstw);
-                    c:=c-1;
-                    self.contador:=self.contador+1;
-                    while (c>0) do begin
+                    while (c<>0) do begin
                        dstw:=ROL_WORD(dstw);
                        c:=c-1;
                        self.contador:=self.contador+1;
@@ -2112,10 +2106,7 @@ case instruccion of
                     PutbackRMWord(ModRM,dstw);
                   end;
 		          $08:begin //03_05
-                    dstw:=ROR_WORD(dstw);
-                    c:=c-1;
-                    self.contador:=self.contador+1;
-                    while (c>0) do begin
+                    while (c<>0) do begin
                        dstw:=ROR_WORD(dstw);
                        c:=c-1;
                        self.contador:=self.contador+1;
@@ -2255,10 +2246,7 @@ case instruccion of
 		        $00:MessageDlg('$d2 ROL_BYTE', mtInformation,[mbOk],0); // do { ROL_BYTE;  c--; CLK(1); } //while (c>0); PutbackRMByte(ModRM,(BYTE)dst); break;
 		        $08:MessageDlg('$d2 ROR_BYTE', mtInformation,[mbOk],0); // do { ROR_BYTE;  c--; CLK(1); }// while (c>0); PutbackRMByte(ModRM,(BYTE)dst); break;
             $10:begin
-                   dstb:=ROLC_BYTE(dstb);
-                   c:=c-1;
-                   self.contador:=self.contador+1;
-                   while (c>0) do begin
+                   while (c<>0) do begin
                       dstb:=ROLC_BYTE(dstb);
                       c:=c-1;
                       self.contador:=self.contador+1;
@@ -2266,10 +2254,7 @@ case instruccion of
                    PutbackRMByte(ModRM,dstb);
                 end;
 		        $18:begin
-                   dstb:=RORC_BYTE(dstb);
-                   c:=c-1;
-                   self.contador:=self.contador+1;
-                   while (c>0) do begin
+                   while (c<>0) do begin
                       dstb:=RORC_BYTE(dstb);
                       c:=c-1;
                       self.contador:=self.contador+1;
@@ -2435,18 +2420,14 @@ case instruccion of
         	    $6e:MessageDlg('$f3 i_outsb', mtInformation,[mbOk],0);
         	    $6f:MessageDlg('$f3 i_outsw', mtInformation,[mbOk],0);
         	    $a4:if (tmpw<>0) then begin
-                    self.i_movsb;
-                    tmpw:=tmpw-1;
-                    while (tmpw>0) do begin
+                    while (tmpw<>0) do begin
                        self.i_movsb;
                        tmpw:=tmpw-1;
                     end;
                     r.cw.w:=tmpw;
                   end;
         	    $a5:if (tmpw<>0) then begin
-                    self.i_movsw;
-                    tmpw:=tmpw-1;
-                    while (tmpw>0) do begin
+                    while (tmpw<>0) do begin
                        self.i_movsw;
                        tmpw:=tmpw-1;
                     end;
@@ -2455,36 +2436,28 @@ case instruccion of
         	    $a6:MessageDlg('$f3 i_cmpsb', mtInformation,[mbOk],0);
         	    $a7:MessageDlg('$f3 i_cmpsw', mtInformation,[mbOk],0);
         	    $aa:if (tmpw<>0) then begin
-                    self.i_stosb;
-                    tmpw:=tmpw-1;
-                    while (tmpw>0) do begin
+                    while (tmpw<>0) do begin
                        self.i_stosb;
                        tmpw:=tmpw-1;
                     end;
                     r.cw.w:=tmpw;
                   end;
         	    $ab:if (tmpw<>0) then begin
-                    self.i_stosw;
-                    tmpw:=tmpw-1;
-                    while (tmpw>0) do begin
+                    while (tmpw<>0) do begin
                        self.i_stosw;
                        tmpw:=tmpw-1;
                     end;
                     r.cw.w:=tmpw;
                   end;
         	    $ac:if (tmpw<>0) then begin
-                    self.i_lodsb;
-                    tmpw:=tmpw-1;
-                    while (tmpw>0) do begin
+                    while (tmpw<>0) do begin
                        self.i_lodsb;
                        tmpw:=tmpw-1;
                     end;
                     r.cw.w:=tmpw;
                   end;
         	    $ad:if (tmpw<>0) then begin
-                    self.i_lodsw;
-                    tmpw:=tmpw-1;
-                    while (tmpw>0) do begin
+                    while (tmpw<>0) do begin
                        self.i_lodsw;
                        tmpw:=tmpw-1;
                     end;

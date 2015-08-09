@@ -1,7 +1,7 @@
 unit sn_76496;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
      sound_engine;
 
 const

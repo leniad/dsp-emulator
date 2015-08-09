@@ -68,7 +68,7 @@ iniciar_foodf:=false;
 iniciar_audio(false);
 //Pantallas
 screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,255,256,256);
+screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU

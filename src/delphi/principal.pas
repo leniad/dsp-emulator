@@ -345,6 +345,7 @@ type
     FreeKickHW1: TMenuItem;
     FreeKick1: TMenuItem;
     boogwins1: TMenuItem;
+    pbaction1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

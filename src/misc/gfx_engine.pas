@@ -824,7 +824,7 @@ inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 if flipx then begin
   for y:=0 to (gfx[ngfx].y-1) do begin
     post:=pos;
-    inc(post,(y*gfx[ngfx].x)+gfx[ngfx].x{%H-}-1);
+    inc(post,(y*gfx[ngfx].x)+gfx[ngfx].x-1);
     temp:=punbuf;
     for x:=(gfx[ngfx].x-1) downto 0 do begin
       punto:=gfx[ngfx].colores[post^+color];
@@ -938,8 +938,8 @@ if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
   SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 end;
-origen.x:=(pos_x+scr_x) and p_final[dest].sprite_mask_x;
-origen.y:=(pos_y+scr_y) and p_final[dest].sprite_mask_y;
+origen.x:=(pos_x+scr_x) and p_final[src_over].scroll.mask_x;
+origen.y:=(pos_y+scr_y) and p_final[src_over].scroll.mask_y;
 SDL_UpperBlit(pantalla[src_over],@origen,pantalla[dest],@destino);
 end;
 

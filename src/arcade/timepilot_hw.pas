@@ -166,6 +166,7 @@ for f:=$1f downto $8 do begin
   actualiza_gfx_sprite_over(x,y,3,1,2,0,0);
 end;
 actualiza_trozo(0,0,256,32,1,0,0,256,32,3);
+actualiza_trozo(0,248,256,8,1,0,248,256,8,3);
 actualiza_trozo_final(16,0,256,256,3);
 end;
 
@@ -198,9 +199,7 @@ while EmuStatus=EsRuning do begin
     frame_m:=frame_m+main_z80.tframes-main_z80.contador;
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    if (scan_line=244) then begin
-      if nmi_enable then main_z80.pedir_nmi:=ASSERT_LINE;
-    end;
+    if (scan_line=244) then if nmi_enable then main_z80.pedir_nmi:=ASSERT_LINE;
   end;
   update_video_timepilot;
   eventos_timepilot;

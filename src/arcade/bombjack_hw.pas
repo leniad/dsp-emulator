@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_BJ;
+procedure Cargar_bombjack;
 procedure bombjack_principal;
 function bombjack_iniciar:boolean;
 procedure bombjack_reset;
@@ -14,10 +14,10 @@ procedure bombjack_cerrar;
 function bombjack_getbyte(direccion:word):byte;
 procedure bombjack_putbyte(direccion:word;valor:byte);
 //Sound CPU
-function sbj_getbyte(direccion:word):byte;
-procedure sbj_putbyte(direccion:word;valor:byte);
-procedure sbj_outbyte(valor:byte;puerto:word);
-procedure bj_despues_instruccion;
+function snd_getbyte(direccion:word):byte;
+procedure snd_putbyte(direccion:word;valor:byte);
+procedure snd_outbyte(valor:byte;puerto:word);
+procedure bombjack_update_sound;
 //Save/load
 procedure bombjack_qsave(nombre:string);
 procedure bombjack_qload(nombre:string);
@@ -38,15 +38,27 @@ const
         (n:'14_j07b.bin';l:$2000;p:$4000;crc:$101c858d),());
         bombjack_tiles:tipo_roms=(n:'02_p04t.bin';l:$1000;p:0;crc:$398d4a02);
         bombjack_sonido:tipo_roms=(n:'01_h03t.bin';l:$2000;p:0;crc:$8407917d);
+        //DIP
+        bombjack_dipa:array [0..5] of def_dip=(
+        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$c;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'2'),(dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$40;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        bombjack_dipb:array [0..4] of def_dip=(
+        (mask:$7;name:'Bonus Life';number:8;dip:((dip_val:$2;dip_name:'30k+'),(dip_val:$1;dip_name:'100k+'),(dip_val:$7;dip_name:'50k 100k 300k'),(dip_val:$5;dip_name:'50k 100k'),(dip_val:$3;dip_name:'50k'),(dip_val:$6;dip_name:'100k 300k'),(dip_val:$4;dip_name:'100k'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Bird Speed';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$8;dip_name:'Medium'),(dip_val:$10;dip_name:'Hard'),(dip_val:$18;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Enemies Number & Speed';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$0;dip_name:'Medium'),(dip_val:$40;dip_name:'Hard'),(dip_val:$60;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Special Coin';number:2;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$80;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  memoria_fondo:array[0..$fff] of byte;
- numero_fondo,comando_sonido:byte;
+ numero_fondo,sound_latch:byte;
  fondo_activo,nmi_vblank:boolean;
 
 implementation
 
-procedure Cargar_BJ;
+procedure Cargar_bombjack;
 begin
 llamadas_maquina.iniciar:=bombjack_iniciar;
 llamadas_maquina.bucle_general:=bombjack_principal;
@@ -85,10 +97,10 @@ iniciar_video(224,256);
 main_z80:=cpu_z80.create(4000000,256);
 main_z80.change_ram_calls(bombjack_getbyte,bombjack_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3072000,256);
-snd_z80.change_ram_calls(sbj_getbyte,sbj_putbyte);
-snd_z80.change_io_calls(nil,sbj_outbyte);
-snd_z80.init_sound(bj_despues_instruccion);
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
+snd_z80.change_io_calls(nil,snd_outbyte);
+snd_z80.init_sound(bombjack_update_sound);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(1500000,1);
 ay8910_1:=ay8910_chip.create(1500000,1);
@@ -121,6 +133,11 @@ init_gfx(3,32,32,32);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(3,0,128*8,0*8+$1000*8,1024*8*8+$1000*8,2*1024*8*8+$1000*8);
 convert_gfx(3,0,@memoria_temp[0],@pt_x[0],@pt_y[0],true,false);
+//DIP
+marcade.dswa:=$c0;
+marcade.dswa_val:=@bombjack_dipa;
+marcade.dswb:=$50;
+marcade.dswb_val:=@bombjack_dipb;
 //final
 bombjack_reset;
 bombjack_iniciar:=true;
@@ -147,7 +164,7 @@ ay8910_2.reset;
 reset_audio;
 nmi_vblank:=false;
 fondo_activo:=false;
-comando_sonido:=0;
+sound_latch:=0;
 numero_fondo:=0;
 marcade.in0:=0;
 marcade.in1:=0;
@@ -248,12 +265,12 @@ end;
 function bombjack_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$97ff,$9820..$987f,$c000..$dfff:bombjack_getbyte:=memoria[direccion];
+  0..$97ff,$c000..$dfff:bombjack_getbyte:=memoria[direccion];
   $b000:bombjack_getbyte:=marcade.in0;
   $b001:bombjack_getbyte:=marcade.in1;
   $b002:bombjack_getbyte:=marcade.in2;
-  $b004:bombjack_getbyte:=$c0;
-  $b005:bombjack_getbyte:=$50;
+  $b004:bombjack_getbyte:=marcade.dswa;
+  $b005:bombjack_getbyte:=marcade.dswb;
 end;
 end;
 
@@ -288,9 +305,12 @@ end;
 procedure bombjack_putbyte(direccion:word;valor:byte);
 begin
 if ((direccion<$8000) or ((direccion>$bfff) and (direccion<$e000))) then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $9000..$97ff:gfx[0].buffer[direccion and $3ff]:=true;
+        $8000..$8fff,$9820..$987f:memoria[direccion]:=valor;
+        $9000..$97ff:begin
+                        gfx[0].buffer[direccion and $3ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $9c00..$9cff:if buffer_paleta[direccion and $ff]<>valor then begin
                           buffer_paleta[direccion and $ff]:=valor;
                           cambiar_color(direccion and $fe);
@@ -308,28 +328,30 @@ case direccion of
               end;
         $b000:nmi_vblank:=valor<>0;
         $b004:main_screen.flip_main_screen:=(valor and 1)<>0;
-        $b800:comando_sonido:=valor;
+        $b800:sound_latch:=valor;
 end;
 end;
 
-function sbj_getbyte(direccion:word):byte;
+function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$1fff,$4000..$43ff:sbj_getbyte:=mem_snd[direccion];
+  0..$1fff,$4000..$43ff:snd_getbyte:=mem_snd[direccion];
   $6000:begin
-          sbj_getbyte:=comando_sonido;
-          comando_sonido:=0;
+          snd_getbyte:=sound_latch;
+          sound_latch:=0;
         end;
 end;
 end;
 
-procedure sbj_putbyte(direccion:word;valor:byte);
+procedure snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$2000 then exit;
-mem_snd[direccion]:=valor;
+case direccion of
+  $4000..$43ff:mem_snd[direccion]:=valor;
+end;
 end;
 
-procedure sbj_outbyte(valor:byte;puerto:word);
+procedure snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   $00:ay8910_0.Control(valor);
@@ -341,7 +363,7 @@ case (puerto and $ff) of
 end
 end;
 
-procedure bj_despues_instruccion;
+procedure bombjack_update_sound;
 begin
   ay8910_0.update;
   ay8910_1.update;
@@ -373,7 +395,7 @@ savedata_com_qsnapshot(@memoria[$8000],$8000);
 savedata_com_qsnapshot(@mem_snd[$2000],$e000);
 //MISC
 buffer[0]:=numero_fondo;
-buffer[1]:=comando_sonido;
+buffer[1]:=sound_latch;
 buffer[2]:=byte(fondo_activo);
 buffer[3]:=byte(nmi_vblank);
 savedata_qsnapshot(@buffer[0],4);
@@ -408,7 +430,7 @@ loaddata_qsnapshot(@mem_snd[$2000]);
 //MISC
 loaddata_qsnapshot(@buffer[0]);
 numero_fondo:=buffer[0];
-comando_sonido:=buffer[1];
+sound_latch:=buffer[1];
 fondo_activo:=buffer[2]<>0;
 nmi_vblank:=buffer[3]<>0;
 loaddata_qsnapshot(@buffer_paleta[0]);

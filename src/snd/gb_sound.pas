@@ -70,7 +70,7 @@ type
   	env_count:integer;
   	signal:shortint;
   	// Mode 1 */
-  	frequency:dword;
+  	frequency:integer;
   	swp_shift:integer;
   	swp_direction:integer;
   	swp_time:integer;
@@ -174,7 +174,7 @@ begin
 		      gb_snd.snd_1.swp_shift:= valor and $7;
 		      gb_snd.snd_1.swp_direction:=(valor and $8) shr 3;
 		      gb_snd.snd_1.swp_direction:=gb_snd.snd_1.swp_direction or (gb_snd.snd_1.swp_direction-1);
-		      gb_snd.snd_1.swp_time:= gb_snd.swp_time_table[(valor and $70) shr 4];
+		      gb_snd.snd_1.swp_time:=gb_snd.swp_time_table[(valor and $70) shr 4];
        end;
 	NR11:begin // Sound length/Wave pattern duty (R/W) */
       		gb_snd.snd_1.duty:=(valor and $C0) shr 6;
@@ -361,30 +361,30 @@ begin
 	gb_snd.rate:=sample_rate;
 	// Calculate the envelope and sweep tables */
 	for i:=0 to 7 do begin
-		gb_snd.env_length_table[i]:=trunc((i* ((1*$10000)/64) * gb_snd.rate)) div $10000;
-		gb_snd.swp_time_table[i]:=trunc((((i*$10000) / 128) * gb_snd.rate)) div $8000;
+		gb_snd.env_length_table[i]:=trunc((i* ((1 shl FIXED_POINT)/64) * gb_snd.rate)) shr FIXED_POINT;
+		gb_snd.swp_time_table[i]:=trunc((((i shl FIXED_POINT) / 128) * gb_snd.rate)) shr (FIXED_POINT-1);
 	end;
 	// Calculate the period tables */
 	for i:=0 to (MAX_FREQUENCIES-1) do begin
-		gb_snd.period_table[i]:=trunc(((1*$10000) / (131072 / (2048 - i))) * gb_snd.rate);
-		gb_snd.period_mode3_table[i]:=trunc(((1*$10000) / (65536 / (2048 - i))) * gb_snd.rate);
+		gb_snd.period_table[i]:=trunc(((1 shl FIXED_POINT) / (131072 / (2048 - i))) * gb_snd.rate);
+		gb_snd.period_mode3_table[i]:=trunc(((1 shl FIXED_POINT) / (65536 / (2048 - i))) * gb_snd.rate);
 	end;
 	// Calculate the period table for mode 4 */
 	for i:=0 to 7 do begin
 		for j:=0 to 15 do begin
 			// I is the dividing ratio of frequencies
       // J is the shift clock frequency
-      if i=0 then gb_snd.period_mode4_table[i,j]:=trunc(((1*$10000) / (524288 / 0.5 / (1 shl (j + 1)))) * gb_snd.rate)
-          else gb_snd.period_mode4_table[i,j]:=trunc(((1*$10000) / (524288 / i / (1 shl (j + 1)))) * gb_snd.rate);
+      if i=0 then gb_snd.period_mode4_table[i,j]:=trunc(((1 shl FIXED_POINT) / (524288 / 0.5 / (1 shl (j + 1)))) * gb_snd.rate)
+          else gb_snd.period_mode4_table[i,j]:=trunc(((1 shl FIXED_POINT) / (524288 / i / (1 shl (j + 1)))) * gb_snd.rate);
 		end;
 	end;
 	// Calculate the length table */
 	for i:=0 to 63 do begin
-		gb_snd.length_table[i]:=trunc((64 - i)*((1 shl FIXED_POINT)/256) * gb_snd.rate) div $10000;
+		gb_snd.length_table[i]:=trunc((64 - i)*((1 shl FIXED_POINT)/256) * gb_snd.rate) shr FIXED_POINT;
 	end;
 	// Calculate the length table for mode 3 */
 	for i:=0 to 255 do begin
-		gb_snd.length_mode3_table[i]:=trunc((256 - i) * ((1 shl FIXED_POINT)/256) * gb_snd.rate) div $10000;
+		gb_snd.length_mode3_table[i]:=trunc((256 - i) * ((1 shl FIXED_POINT)/256) * gb_snd.rate) shr FIXED_POINT;
 	end;
 	gameboy_sound_reset;
   gb_snd.tsample:=init_channel;

@@ -86,10 +86,10 @@ iniciar_gng:=false;
 iniciar_audio(false);
 //Background
 screen_init(1,512,512);
-screen_mod_scroll(1,512,256,511,511,256,512);
+screen_mod_scroll(1,512,256,511,512,256,511);
 //Foreground
 screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,511,256,512);
+screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true); //Chars
 screen_init(4,512,256,false,true); //Final
 iniciar_video(256,224);

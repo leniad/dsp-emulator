@@ -3,7 +3,7 @@ unit shootout_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,
-     pal_engine,sound_engine;
+     pal_engine,sound_engine,misc_functions;
 
 procedure Cargar_shootout;
 procedure principal_shootout;
@@ -33,7 +33,7 @@ const
 var
   mem_bank,mem_bank_dec:array[0..2,0..$3fff] of byte;
   mem_dec:array[0..$7fff] of byte;
-  banco,sound_latch,vblank_val:byte;
+  banco,sound_latch:byte;
   bflicker,old_val:boolean;
 
 implementation
@@ -71,7 +71,7 @@ iniciar_video(256,240);
 main_m6502:=cpu_m6502.create(2000000,256,TCPU_M6502);
 main_m6502.change_ram_calls(getbyte_shootout,putbyte_shootout);
 //sound CPU
-snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
+snd_m6502:=cpu_m6502.create(1000000,256,TCPU_M6502);
 snd_m6502.change_ram_calls(getbyte_snd_shootout,putbyte_snd_shootout);
 snd_m6502.init_sound(shootout_sound_update);
 //Sound Chip
@@ -85,11 +85,11 @@ copymemory(@mem_bank[0,0],@memoria_temp[$8000],$4000);
 copymemory(@mem_bank[1,0],@memoria_temp[$c000],$4000);
 copymemory(@mem_bank[2,0],@memoria_temp[$10000],$4000);
 //Y las desencripto
-for f:=0 to $7fff do mem_dec[f]:=(memoria[f+$8000] and $9f) or ((memoria[f+$8000] and $40) shr 1) or ((memoria[f+$8000] and $20) shl 1);
+for f:=0 to $7fff do mem_dec[f]:=BITSWAP8(memoria[f+$8000],7,5,6,4,3,2,1,0);
 for f:=0 to $3fff do begin
-  mem_bank_dec[0,f]:=(mem_bank[0,f] and $9f) or ((mem_bank[0,f] and $40) shr 1) or ((mem_bank[0,f] and $20) shl 1);
-  mem_bank_dec[1,f]:=(mem_bank[1,f] and $9f) or ((mem_bank[1,f] and $40) shr 1) or ((mem_bank[1,f] and $20) shl 1);
-  mem_bank_dec[2,f]:=(mem_bank[2,f] and $9f) or ((mem_bank[2,f] and $40) shr 1) or ((mem_bank[2,f] and $20) shl 1);
+  mem_bank_dec[0,f]:=BITSWAP8(mem_bank[0,f],7,5,6,4,3,2,1,0);
+  mem_bank_dec[1,f]:=BITSWAP8(mem_bank[1,f],7,5,6,4,3,2,1,0);;
+  mem_bank_dec[2,f]:=BITSWAP8(mem_bank[2,f],7,5,6,4,3,2,1,0);;
 end;
 //Roms audio
 if not(cargar_roms(@mem_snd[0],@shootout_audio,'shootout.zip',1)) then exit;
@@ -145,14 +145,14 @@ ym2203_0.reset;
 reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$3f;
-marcade.in2:=$ff;
+marcade.in2:=$7f;
 bflicker:=false;
 banco:=0;
 sound_latch:=0;
 old_val:=false;
 end;
 
-procedure sprites(prioridad:byte);inline;
+procedure sprites(prioridad:byte);
 var
   f:word;
   nchar,x,y,atrib:word;
@@ -167,15 +167,13 @@ begin
 bflicker:=not(bflicker);
 for f:=$7f downto 0 do begin
  atrib:=memoria[$1801+(f*4)];
- if (atrib and 1)=0 then continue; //visible?
- if ((atrib shr 3) and 1)<>prioridad then continue;
- if (bFlicker or ((atrib and $2)=0)) then begin
-    nchar:=memoria[$1803+(f*4)]+((atrib and $e0) shl 3);
-    x:=240-memoria[$1802+(f*4)];
-    y:=240-memoria[$1800+(f*4)];
+ if (((atrib and 1)=0) or ((atrib and 8)<>prioridad)) then continue;
+ if (bflicker or ((atrib and $2)=0)) then begin
+    nchar:=memoria[$1803+(f*4)]+((atrib shl 3) and $700);
+    x:=(240-memoria[$1802+(f*4)]) and $ff;
+    y:=(240-memoria[$1800+(f*4)]) and $ff;
     if (atrib and $10)<>0 then begin //tamaño doble
-      nchar:=nchar and $fffe;
-      put_gfx_sprite(nchar,64,(atrib and $4)<>0,false,1);
+      put_gfx_sprite(nchar and $7fe,64,(atrib and $4)<>0,false,1);
       actualiza_gfx_sprite(x,y-16,3,1);
       nchar:=nchar+1;
     end;
@@ -185,7 +183,7 @@ for f:=$7f downto 0 do begin
 end;
 end;
 
-procedure update_video_shootout;inline;
+procedure update_video_shootout;
 var
   f,nchar,color:word;
   x,y:word;
@@ -214,7 +212,7 @@ for f:=0 to $3ff do begin
   end;
 end;
 actualiza_trozo(0,0,256,256,2,0,0,256,256,3);
-sprites(1);
+sprites(8);
 actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
 sprites(0);
 actualiza_trozo_final(0,8,256,240,3);
@@ -254,16 +252,14 @@ frame_m:=main_m6502.tframes;
 frame_s:=snd_m6502.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-   //Main CPU
    main_m6502.run(frame_m);
    frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
-   //Main CPU
    snd_m6502.run(frame_s);
    frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
    case f of
-      0:vblank_val:=0;
+      30:marcade.in2:=marcade.in2 and $7f;
       247:begin
-            vblank_val:=$80;
+            marcade.in2:=marcade.in2 or $80;
             update_video_shootout;
           end;
    end;
@@ -276,47 +272,53 @@ end;
 function getbyte_shootout(direccion:word):byte;
 begin
 case direccion of
+  0..$fff,$1004..$19ff,$2000..$2fff:getbyte_shootout:=memoria[direccion];
   $1000:getbyte_shootout:=$bf;
   $1001:getbyte_shootout:=marcade.in0;
   $1002:getbyte_shootout:=marcade.in1;
-  $1003:getbyte_shootout:=marcade.in2+vblank_val;
+  $1003:getbyte_shootout:=marcade.in2;
   $4000..$7fff:if main_m6502.opcode then getbyte_shootout:=mem_bank_dec[banco,direccion and $3fff]
                   else getbyte_shootout:=mem_bank[banco,direccion and $3fff];
   $8000..$ffff:if main_m6502.opcode then getbyte_shootout:=mem_dec[direccion and $7fff]
                   else getbyte_shootout:=memoria[direccion];
-  else getbyte_shootout:=memoria[direccion];
 end;
 end;
 
 procedure putbyte_shootout(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
+  0..$fff,$1004..$19ff:memoria[direccion]:=valor;
   $1000:banco:=valor and $f;
   $1003:begin
           sound_latch:=valor;
           snd_m6502.pedir_nmi:=PULSE_LINE;
         end;
-  $2000..$27ff:gfx[0].buffer[direccion and $3ff]:=true;
-  $2800..$2fff:gfx[2].buffer[direccion and $3ff]:=true;
+  $2000..$27ff:begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $2800..$2fff:begin
+                  gfx[2].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
 end;
 end;
 
 function getbyte_snd_shootout(direccion:word):byte;
 begin
 case direccion of
+  0..$7ff,$c000..$ffff:getbyte_snd_shootout:=mem_snd[direccion];
   $4000:getbyte_snd_shootout:=ym2203_0.read_status;
   $a000:getbyte_snd_shootout:=sound_latch;
-  else getbyte_snd_shootout:=mem_snd[direccion];
 end;
 end;
 
 procedure putbyte_snd_shootout(direccion:word;valor:byte);
 begin
 if direccion>$bfff then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  0..$7ff:mem_snd[direccion]:=valor;
   $4000:ym2203_0.control(valor);
   $4001:ym2203_0.write_reg(valor);
 end;

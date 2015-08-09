@@ -26,6 +26,7 @@ type
           long_sample,sample_final:word;
           canales_usados:integer;
           stereo,hay_sonido,hay_tsonido:boolean;
+          filter_call:array[0..max_canales-1] of procedure(canal:byte);
         end;
         snd_chip_class=class
           public
@@ -233,6 +234,7 @@ for f:=0 to sound_status.canales_usados do begin
       end;
     2:;
   end;
+  if @sound_status.filter_call[f]<>nil then sound_status.filter_call[f](f);
   {$ifdef windows}
   copymemory(cab_audio[f][sound_status.num_buffer].lpData,@tsample[f],sound_status.sample_final*2);
   waveOutWrite(sound_status.audio[f],@cab_audio[f][sound_status.num_buffer],sizeof(WAVEHDR));

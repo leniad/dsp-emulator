@@ -34,7 +34,7 @@ var
 
 implementation
 
-uses nes;
+uses nes,nes_mappers;
 
 procedure putsprites(nes_linea:word;pri:byte);
 var
@@ -78,6 +78,7 @@ for f:=63 downto 0 do begin
    ptemp:=punbuf;
    tempb1:=ppu_mem[(temp*$1000)+(num_char*16)+def_y];
    tempb2:=ppu_mem[(temp*$1000)+(num_char*16)+8+def_y];
+   if @mapper_nes.ppu_read<>nil then mapper_nes.ppu_read((temp*$1000)+(num_char*16)+def_y);
    if flipx then begin
         for x:=0 to 7 do begin
           punto:=(((tempb1 and (1 shl x)) shr x) and 1)+((((tempb2 and (1 shl x)) shr x) and 1) shl 1);
@@ -156,6 +157,7 @@ begin
     end;
     for Tiles:=32 downto 0 do begin
         PatternAdr:=(pos_bg*$1000)+(ppu_mem[$2000+(ppu_address and $FFF)]*$10)+TileYOffset;
+        if @mapper_nes.ppu_read<>nil then mapper_nes.ppu_read(PatternAdr);
         // Draw tile line
         for x:=7 downto 0 do begin
             Col:=((ppu_mem[PatternAdr] and (1 shl x)) shr x)+((ppu_mem[PatternAdr+8] and (1 shl x)) shr x)*2;

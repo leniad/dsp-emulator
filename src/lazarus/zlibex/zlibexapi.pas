@@ -109,14 +109,14 @@ type
 
   {** TZStreamRec ***********************************************************}
 
-  TZStreamRec = packed record
+  TZStreamRec = record
     next_in  : Pointer;   // next input byte
-    avail_in : Longint;   // number of bytes available at next_in
-    total_in : Longint;   // total nb of input bytes read so far
+    avail_in : cardinal;   // number of bytes available at next_in
+    total_in : longword;   // total nb of input bytes read so far
 
     next_out : Pointer;   // next output byte should be put here
-    avail_out: Longint;   // remaining free space at next_out
-    total_out: Longint;   // total nb of bytes output so far
+    avail_out: cardinal;   // remaining free space at next_out
+    total_out: Longword;   // total nb of bytes output so far
 
     msg      : Pointer;   // last error message, NULL if no error
     state    : Pointer;   // not visible by applications
@@ -126,9 +126,10 @@ type
     opaque   : Pointer;   // private data object passed to zalloc and zfree
 
     data_type: Integer;   // best guess about the data type: ascii or binary
-    adler    : Longint;   // adler32 value of the uncompressed data
-    reserved : Longint;   // reserved for future use
+    adler    : Longword;   // adler32 value of the uncompressed data
+    reserved : Longword;   // reserved for future use
   end;
+
   TdeflateInit_=function(var strm:TZStreamRec;level:Integer;version:PAnsiChar;recsize:Integer):Integer;cdecl;
   TdeflateInit2_=function(var strm: TZStreamRec;level,method,windowBits,memLevel,strategy:Integer;version:PAnsiChar;recsize:Integer):Integer; cdecl;
   Tdeflate=function(var strm:TZStreamRec;flush:Integer):Integer; cdecl;
@@ -272,4 +273,4 @@ begin
   Move(source^,dest^,count);
 end;
 
-end.
+end.

@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 type
   type_IRQ_Handler=procedure (irqstate:byte);
-  type_Timer_set_Handler=procedure(counter:integer);
+  type_Timer_set_Handler=procedure(counter:single);
   //FMSLOT3
   fm_3slot=record
     	fc:array[0..2] of dword;			// fnum3,blk3: calculated */
@@ -104,8 +104,8 @@ end;
     P_CH:array[0..7] of pfm_chan; // pointer of CH */
 	  pan:array[0..(6*2)-1] of dword;	// fm channels output masks (0xffffffff = enable) */
 	  eg_cnt:dword;			// global envelope generator counter */
-	  eg_timer:dword;		// global envelope generator counter works at frequency = chipclock/64/3 */
-	  eg_timer_add:dword;	// step of eg_timer */
+	  eg_timer:single;		// global envelope generator counter works at frequency = chipclock/64/3 */
+	  eg_timer_add:single;	// step of eg_timer */
 	  eg_timer_overflow:dword;// envelope generator timer overlfows every 3 samples (on real chip) */
 	  // there are 2048 FNUMs that can be generated using FNUM/BLK registers
     //      but LFO works with one more bit of a precision so we really need 4096 elements */
@@ -649,7 +649,7 @@ begin
         if ST.TBC=0 then begin
   				ST.TBC:=(256-ST.TB) shl 4;
 	  			// External timer handler */
-		  		ST.TIMER_set_b(trunc(ST.TBC*ST.timer_prescaler));
+		  		ST.TIMER_set_b(ST.TBC*ST.timer_prescaler);
         end;
 		end else begin
       if (ST.TBC<>0) then begin
@@ -662,7 +662,7 @@ begin
 			if ST.TAC=0 then begin
 				ST.TAC:=(1024-ST.TA);
 				// External timer handler */
-				ST.TIMER_set_a(trunc(ST.TAC*ST.timer_prescaler));
+				ST.TIMER_set_a(ST.TAC*ST.timer_prescaler);
 			end;
 		end else begin
 			if (ST.TAC<>0) then begin
@@ -680,7 +680,7 @@ begin
 	  // clear or reload the counter */
 	  ST.TAC:=(1024-ST.TA);
 	//llamada externa
-  ST.TIMER_set_a(trunc(ST.TAC*ST.timer_prescaler));
+  ST.TIMER_set_a(ST.TAC*ST.timer_prescaler);
 end;
 
 // Timer B Overflow */
@@ -691,7 +691,7 @@ begin
   	// clear or reload the counter */
   	ST.TBC:=(256-ST.TB) shl 4;
 	//llamada externa
-  ST.TIMER_set_b(trunc(ST.TBC*ST.timer_prescaler));
+  ST.TIMER_set_b(ST.TBC*ST.timer_prescaler);
 end;
 
 // ----- internal timer mode , update timer */
@@ -911,7 +911,7 @@ begin
 	if OPN.ST.rate<>0 then OPN.ST.freqbase:=OPN.ST.clock/OPN.ST.rate/pres
     else OPN.ST.freqbase:=0;
 
-	OPN.eg_timer_add:=trunc((1 shl EG_SH)*OPN.ST.freqbase);
+	OPN.eg_timer_add:=(1 shl EG_SH)*OPN.ST.freqbase;
 	OPN.eg_timer_overflow:= ( 3 ) * (1 shl EG_SH);
 
 	// Timer base time */

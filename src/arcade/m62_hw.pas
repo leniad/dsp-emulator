@@ -313,8 +313,8 @@ for f:=0 to $fff do begin
 end;
 scroll_x_y(1,2,scroll_x,scroll_y);
 draw_sprites(2,sprites_sp,$1f,0,0);
+actualiza_trozo(0,0,384,256,3,64,128,384,256,2);
 actualiza_trozo_final(64,128,384,256,2);
-actualiza_trozo(0,0,384,256,3,0,0,384,256,0);
 end;
 
 function iniciar_irem_m62:boolean;

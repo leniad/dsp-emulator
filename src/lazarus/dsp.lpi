@@ -14,7 +14,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="15"/>
       <RevisionNr Value="3"/>
-      <BuildNr Value="445"/>
+      <BuildNr Value="448"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.15"/>
     </VersionInfo>
@@ -58,10 +58,9 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="principal"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="571"/>
-        <CursorPos Y="576"/>
+        <TopLine Value="572"/>
+        <CursorPos Y="577"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -467,9 +466,12 @@
       </Unit53>
       <Unit54>
         <Filename Value="zlibex\zlibexapi.pas"/>
-        <TopLine Value="8"/>
-        <CursorPos X="61" Y="21"/>
+        <UnitName Value="ZLibExApi"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="73"/>
+        <CursorPos X="3" Y="73"/>
         <UsageCount Value="86"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit54>
       <Unit55>
@@ -651,10 +653,11 @@
       </Unit80>
       <Unit81>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="477"/>
-        <CursorPos X="53" Y="487"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="478"/>
+        <CursorPos X="44" Y="490"/>
         <UsageCount Value="12"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit81>
       <Unit82>
@@ -802,7 +805,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit100>
     </Units>
-    <JumpHistory Count="8" HistoryIndex="7">
+    <JumpHistory Count="10" HistoryIndex="9">
       <Position1>
         <Filename Value="principal.pas"/>
         <Caret Line="560" Column="15" TopLine="545"/>
@@ -835,6 +838,14 @@
         <Filename Value="principal.pas"/>
         <Caret Line="17" Column="6"/>
       </Position8>
+      <Position9>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="487" Column="53" TopLine="477"/>
+      </Position9>
+      <Position10>
+        <Filename Value="principal.pas"/>
+        <Caret Line="576" TopLine="571"/>
+      </Position10>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -858,7 +869,8 @@
       </SyntaxOptions>
     </Parsing>
     <CodeGeneration>
-      <TargetOS Value="win32"/>
+      <TargetCPU Value="x86_64"/>
+      <TargetOS Value="win64"/>
       <Optimizations>
         <OptimizationLevel Value="3"/>
       </Optimizations>

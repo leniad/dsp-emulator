@@ -30,7 +30,7 @@ type
     read_port:array[0..3] of read_chip;
     write_port:array[0..1] of write_chip;
   end;
-  tipo_53xx=record
+tipo_53xx=record
     port_o:byte;
     timer:byte;
     frame:single;
@@ -243,12 +243,9 @@ begin
 end;
 
 function namcoio_53xx_read:byte;
-var
-  res:byte;
 begin
+  namcoio_53xx_read:=namco_53xx.port_o;
   namcoio_53xx_read_req;
-  res:=namco_53xx.port_o;
-  namcoio_53xx_read:=res;
 end;
 
 procedure namcoio_53xx_init(port_k:cpu_inport_call;port_r_r:type_mb88xx_inport_r;zip_name:string);
@@ -257,7 +254,7 @@ main_mb88xx:=cpu_mb88xx.Create(1536000,264);
 main_mb88xx.change_io_calls(port_k,namco_53xx_o_w,nil,nil,port_r_r,nil);
 namco_53xx.frame:=main_mb88xx.tframes;
 //namco 53XX clock 1536000*0.000021=32.256
-namco_53xx.timer:=init_timer(main_mb88xx.numero_cpu,32,namcoio_53xx_irq_clear,false);
+namco_53xx.timer:=init_timer(main_mb88xx.numero_cpu,32.256,namcoio_53xx_irq_clear,false);
 //rom
 if not(cargar_roms(main_mb88xx.get_rom_addr,@namco_53xx_rom,zip_name,1)) then exit;
 end;
@@ -300,13 +297,15 @@ begin
 end;
 procedure namco_53xx_chip(io,num:byte);
 begin
-namco_06xx[io].fread[num]:=namcoio_53xx_read;
-namco_06xx[io].fwrite[num]:=nil;
-namco_06xx[io].fread_req[num]:=namcoio_53xx_read_req;
+  namco_06xx[io].fread[num]:=namcoio_53xx_read;
+  namco_06xx[io].fwrite[num]:=nil;
+  namco_06xx[io].fread_req[num]:=namcoio_53xx_read_req;
 end;
 begin
-  {Namco 06xx clock 48000Hz -> Z80 Clock 3072000*0.0002=614,4}
-  namco_06xx[num].nmi_timer:=init_timer(0,614.4,nmi_function,false);
+  //Namco 06xx clock 48000Hz --> 200us --> 48000*0.0002 = 9.6
+  //Z80 Clock 3072000
+  // (3072000*9.6)/48000 = 614.4 --> No funciona?!?!? Con 768 Sip (250us) un 25% mas de tiempo...
+  namco_06xx[num].nmi_timer:=init_timer(0,768,nmi_function,false);
   case chip0 of
     IO51XX:namco_51xx_chip(num,0);  //51XX
     IO53XX:namco_53xx_chip(num,0); //53XX

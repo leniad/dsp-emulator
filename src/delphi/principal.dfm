@@ -2063,6 +2063,11 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object pbaction1: TMenuItem
+            Caption = 'Pinball Action'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2654,7 +2659,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010105000700200320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000700240320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -11,21 +11,15 @@ procedure reset_galagahw;
 procedure cerrar_galagahw;
 //Galaga
 procedure galaga_principal;
-//Main CPU
 function galaga_getbyte(direccion:word):byte;
 procedure galaga_putbyte(direccion:word;valor:byte);
-//Sub1 CPU
 function galaga_sub_getbyte(direccion:word):byte;
-//Sub2 CPU
 function galaga_sub2_getbyte(direccion:word):byte;
 //DigDug
 procedure digdug_principal;
-//Main CPU
 function digdug_getbyte(direccion:word):byte;
 procedure digdug_putbyte(direccion:word;valor:byte);
-//Sub1 CPU
 function digdug_sub_getbyte(direccion:word):byte;
-//Sub2 CPU
 function digdug_sub2_getbyte(direccion:word):byte;
 //Namco IO's
 procedure namco_06xx_nmi;
@@ -334,10 +328,10 @@ if (galaga_starcontrol[5] and 1)=1 then begin
 		set_b:=(galaga_starcontrol[4] and 1) or $2;
 		for star_cntr:=0 to (MAX_STARS-1) do begin
 			if ((set_a=star_seed_tab[star_cntr].set_) or (set_b=star_seed_tab[star_cntr].set_)) then begin
-				y:=(star_seed_tab[star_cntr].y+stars_scrolly) mod 256+48;
+				y:=(star_seed_tab[star_cntr].y+stars_scrolly) mod 256+16;
 				x:=(112+star_seed_tab[star_cntr].x+stars_scrollx) mod 256;
         color:=paleta[32+star_seed_tab[star_cntr].col];
-        putpixel(x,y,1,@color,2);
+        putpixel(x+ADD_SPRITE,y+ADD_SPRITE,1,@color,2);
 			end;
 		end;
 end;
@@ -396,33 +390,34 @@ frame_s1:=snd_z80.tframes;
 frame_s2:=sub_z80.tframes;
 scanline:=63;
 while EmuStatus=EsRuning do begin
- for f:=0 to 263 do begin
-  //Main CPU
-  main_z80.run(frame_m);
-  frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-  //Sub CPU
-  snd_z80.run(frame_s1);
-  frame_s1:=frame_s1+snd_z80.tframes-snd_z80.contador;
-  //Sub 2 CPU
-  sub_z80.run(frame_s2);
-  frame_s2:=frame_s2+sub_z80.tframes-sub_z80.contador;
-  if (f=scanline) then begin
-    if sub2_nmi then sub_z80.pedir_nmi:=PULSE_LINE;
-    scanline:=scanline+128;
-	  if (scanline>=272) then scanline:=63;
+  for f:=0 to 263 do begin
+    //Main CPU
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    //Sub CPU
+    snd_z80.run(frame_s1);
+    frame_s1:=frame_s1+snd_z80.tframes-snd_z80.contador;
+    //Sub 2 CPU
+    sub_z80.run(frame_s2);
+    frame_s2:=frame_s2+sub_z80.tframes-sub_z80.contador;
+    if (f=scanline) then begin
+        if sub2_nmi then sub_z80.pedir_nmi:=PULSE_LINE;
+        scanline:=scanline+128;
+	      if (scanline>=272) then scanline:=63;
+    end;
+    if f=223 then begin
+        if main_irq then main_z80.pedir_irq:=ASSERT_LINE;
+        if sub_irq then snd_z80.pedir_irq:=ASSERT_LINE;
+        update_video_galaga;
+        copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
+    end;
   end;
-  if f=223 then begin
-    if main_irq then main_z80.pedir_irq:=ASSERT_LINE;
-    if sub_irq then snd_z80.pedir_irq:=ASSERT_LINE;
-    update_video_galaga;
-  end;
- end;
- if sound_status.hay_sonido then begin
+  if sound_status.hay_sonido then begin
       namco_playsound;
       play_sonido;
- end;
- eventos_galaga;
- video_sync;
+  end;
+  eventos_galaga;
+  video_sync;
 end;
 end;
 
@@ -434,11 +429,11 @@ bit:=val and 1;
 case dir of
 		$0:begin	// IRQ1 */
         main_irq:=bit<>0;
-			  if (bit=0) then main_z80.pedir_irq:=CLEAR_LINE;
+			  if not(main_irq) then main_z80.pedir_irq:=CLEAR_LINE;
 			 end;
 		$1:begin	// IRQ2 */
 			    sub_irq:=bit<>0;
-  			  if (bit=0) then snd_z80.pedir_irq:=CLEAR_LINE;
+  			  if not(sub_irq) then snd_z80.pedir_irq:=CLEAR_LINE;
 			 end;
 		$2:sub2_nmi:=(bit=0);	// NMION */
 		$3:if (bit<>0) then begin  // RESET */
@@ -490,29 +485,33 @@ begin
  for f:=0 to 7 do galaga_latch(f,0);
 end;
 
-function galaga_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $6800..$6802,$6804,$6807:galaga_getbyte:=$3; //Leer DSW A y B
-  $6803:galaga_getbyte:=$0;
-  $6805,$6806:galaga_getbyte:=$2;
-  $7000..$70ff:galaga_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:galaga_getbyte:=namco_06xx_ctrl_r(0);
-  else galaga_getbyte:=memoria[direccion];
-end;
-end;
-
 procedure galaga_putbyte(direccion:word;valor:byte);
 begin
 if (direccion<$4000) then exit;
-memoria[direccion]:=valor;
 case direccion of
     $6800..$681f:namco_sound.registros_namco[direccion and $1f]:=valor;
     $6820..$6827:galaga_latch(direccion and $7,valor);
     $7000..$70ff:namco_06xx_data_w(direccion and $ff,0,valor);
     $7100..$7100:namco_06xx_ctrl_w(0,valor);
-    $8000..$87ff:gfx[0].buffer[direccion and $3ff]:=true;
+    $8000..$87ff:begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $8800..$8bff,$9000..$93ff,$9800..$9bff:memoria[direccion]:=valor;
     $a000..$a005:galaga_starcontrol[direccion and $7]:=valor;
+    $a007:main_screen.flip_main_screen:=(valor and 1)<>0;
+end;
+end;
+
+function galaga_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$3fff,$8000..$8bff,$9000..$93ff,$9800..$9bff:galaga_getbyte:=memoria[direccion];
+  $6800..$6802,$6804,$6807:galaga_getbyte:=$3; //Leer DSW A y B
+  $6803:galaga_getbyte:=$0;
+  $6805,$6806:galaga_getbyte:=$2;
+  $7000..$70ff:galaga_getbyte:=namco_06xx_data_r(direccion and $ff,0);
+  $7100..$7100:galaga_getbyte:=namco_06xx_ctrl_r(0);
 end;
 end;
 
@@ -656,16 +655,6 @@ end;
 end;
 
 //Main CPU
-function digdug_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$3fff,$8000..$83ff,$8400..$8bff,$9000..$93ff,$9800..$9bff:digdug_getbyte:=memoria[direccion];
-  $7000..$70ff:digdug_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:digdug_getbyte:=namco_06xx_ctrl_r(0);
-  $b800..$b83f:digdug_getbyte:=memoria[direccion]; //De momento
-end;
-end;
-
 procedure digdug_putbyte(direccion:word;valor:byte);
 var
   mask,shift:byte;
@@ -691,12 +680,10 @@ case direccion of
                           end;
                         end;
 		                2:if (tx_color_mode<>(valor and 1)) then tx_color_mode:=valor and 1;	// select alpha layer color mode
-		                3:begin	// "disable" background
-			                  if (bg_disable<>(valor and 1)) then begin
+		                3:if (bg_disable<>(valor and 1)) then begin // "disable" background
 				                    bg_disable:=valor and 1;
                             bg_repaint:=true;
                         end;
-                      end;
 		                4,5:begin //background color bank
 				                  shift:=direccion and $7;
 				                  mask:=1 shl shift;
@@ -708,9 +695,20 @@ case direccion of
 		              6:;	// n.c. */
 		              7:main_screen.flip_main_screen:=(valor and 1)<>0;	// FLIP */
                  end;
-    $b800..$b840:memoria[direccion]:=valor; //de momento!
+    $b800..$b840:memoria[direccion]:=valor; //eeprom
 end;
 end;
+
+function digdug_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$3fff,$8000..$8bff,$9000..$93ff,$9800..$9bff:digdug_getbyte:=memoria[direccion];
+  $7000..$70ff:digdug_getbyte:=namco_06xx_data_r(direccion and $ff,0);
+  $7100..$7100:digdug_getbyte:=namco_06xx_ctrl_r(0);
+  $b800..$b83f:digdug_getbyte:=memoria[direccion]; //eeprom
+end;
+end;
+
 //Sub1 CPU
 function digdug_sub_getbyte(direccion:word):byte;
 begin
@@ -718,8 +716,8 @@ case direccion of
   $0..$3fff:digdug_sub_getbyte:=mem_snd[direccion];
   $7000..$70ff:digdug_sub_getbyte:=namco_06xx_data_r(direccion and $ff,0);
   $7100..$7100:digdug_sub_getbyte:=namco_06xx_ctrl_r(0);
-  $8000..$83ff,$8400..$8bff,$9000..$93ff,$9800..$9bff:digdug_sub_getbyte:=memoria[direccion];
-  $b800..$b83f:digdug_sub_getbyte:=memoria[direccion]; //De momento
+  $8000..$8bff,$9000..$93ff,$9800..$9bff:digdug_sub_getbyte:=memoria[direccion];
+  $b800..$b83f:digdug_sub_getbyte:=memoria[direccion]; //eeprom
 end;
 end;
 //Sub2 CPU
@@ -729,8 +727,8 @@ case direccion of
   $0..$3fff:digdug_sub2_getbyte:=mem_misc[direccion];
   $7000..$70ff:digdug_sub2_getbyte:=namco_06xx_data_r(direccion and $ff,0);
   $7100..$7100:digdug_sub2_getbyte:=namco_06xx_ctrl_r(0);
-  $8000..$83ff,$8400..$8bff,$9000..$93ff,$9800..$9bff:digdug_sub2_getbyte:=memoria[direccion];
-  $b800..$b83f:digdug_sub2_getbyte:=memoria[direccion]; //De momento
+  $8000..$8bff,$9000..$93ff,$9800..$9bff:digdug_sub2_getbyte:=memoria[direccion];
+  $b800..$b83f:digdug_sub2_getbyte:=memoria[direccion]; //eeprom
 end;
 end;
 
@@ -763,10 +761,10 @@ end;
 function namco_53xx_r_r(port:byte):byte;
 begin
 case port of //DSW A+B
-  0:namco_53xx_r_r:=$4; // continue+cabinet+diff(2)
-  1:namco_53xx_r_r:=$2; // coin a (2)+freeze+demo sound
-  2:namco_53xx_r_r:=$0; // $4;
-  3:namco_53xx_r_r:=$0; // $2 freeze
+  0:namco_53xx_r_r:=$9; // DIP A low
+  1:namco_53xx_r_r:=$9; // DIP A high
+  2:namco_53xx_r_r:=$4; // DIP B low
+  3:namco_53xx_r_r:=$2; // DIP B high
 end;
 end;
 
