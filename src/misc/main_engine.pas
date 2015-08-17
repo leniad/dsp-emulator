@@ -8,9 +8,9 @@ uses sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
 
 const
         {$ifndef fpc}
-        dsp_version='0.15ß3WIP';
+        dsp_version='0.16';//ß3WIP';
         {$else}
-        dsp_version='0.15b3WIP';
+        dsp_version='0.16';//b3WIP';
         {$endif}
 
         pant_sprites=20;

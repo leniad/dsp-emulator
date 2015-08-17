@@ -33,16 +33,16 @@ const
         (n:'30j-7.ic4';l:$40000;p:0;crc:$89d58d32),(n:'30j-6.ic5';l:$40000;p:$1;crc:$9bf1538e),
         (n:'30j-5.ic6';l:$40000;p:$80000;crc:$8f671a62),(n:'30j-4.ic7';l:$40000;p:$80001;crc:$0f74ea1c),());
         //DIP
-        ddragon3_dip_a:array [0..3] of def_dip=(
-        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        ddragon3_dip_b:array [0..5] of def_dip=(
-        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Super Techniques';number:2;dip:((dip_val:$8;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Time';number:4;dip:((dip_val:$20;dip_name:'+2:30'),(dip_val:$30;dip_name:'Default'),(dip_val:$10;dip_name:'-2:30'),(dip_val:$0;dip_name:'-5:00'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Health for Winning';number:2;dip:((dip_val:$80;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        ddragon3_dip_a:array [0..9] of def_dip=(
+        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Continue Discount';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$300;name:'Difficulty';number:4;dip:((dip_val:$200;dip_name:'Easy'),(dip_val:$300;dip_name:'Normal'),(dip_val:$100;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$400;name:'Player Vs. Player Damage';number:2;dip:((dip_val:$400;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2000;name:'Stage Clear Energy';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2000;dip_name:'50'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4000;name:'Starting Energy';number:2;dip:((dip_val:$0;dip_name:'200'),(dip_val:$4000;dip_name:'230'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8000;name:'Players';number:2;dip:((dip_val:$8000;dip_name:'2'),(dip_val:$0;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  vreg,bg_tilebase,fg_scrollx,fg_scrolly,bg_scrollx,bg_scrolly:word;
@@ -98,30 +98,28 @@ snd_z80.init_sound(ddragon3_sound_update);
 YM2151_Init(0,3579545,nil,ym2151_snd_irq);
 oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH);
 //Cargar ADPCM ROMS
-if not(cargar_roms(@mem_oki[0],@ddragon3_oki,'ddragon3.zip',1)) then exit;
-copymemory(oki_6295_0.get_rom_addr,@mem_oki[0],$40000);
+if not(cargar_roms(@mem_oki,@ddragon3_oki,'ddragon3.zip')) then exit;
+copymemory(oki_6295_0.get_rom_addr,@mem_oki,$40000);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@ddragon3_rom[0],'ddragon3.zip',0)) then exit;
+if not(cargar_roms16w(@rom,@ddragon3_rom,'ddragon3.zip',0)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@ddragon3_sound,'ddragon3.zip',1)) then exit;
+if not(cargar_roms(@mem_snd,@ddragon3_sound,'ddragon3.zip')) then exit;
 getmem(memoria_temp,$400000);
 //convertir background
-if not(cargar_roms16w(pword(memoria_temp),@ddragon3_bg[0],'ddragon3.zip',0)) then exit;
+if not(cargar_roms16w(pword(memoria_temp),@ddragon3_bg,'ddragon3.zip',0)) then exit;
 init_gfx(0,16,16,$2000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,8,0,$80000*8+8,$80000*8+0);
-convert_gfx(0,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pt_x,@pt_y,false,false);
 //convertir sprites
-if not(cargar_roms(memoria_temp,@ddragon3_sprites[0],'ddragon3.zip',0)) then exit;
+if not(cargar_roms(memoria_temp,@ddragon3_sprites,'ddragon3.zip',0)) then exit;
 init_gfx(1,16,16,$8000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,$100000*8,$100000*8*2,$100000*8*3);
-convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
-marcade.dswa:=$ff;
+marcade.dswa:=$ffff;
 marcade.dswa_val:=@ddragon3_dip_a;
-marcade.dswb:=$ff;
-marcade.dswb_val:=@ddragon3_dip_b;
 //final
 freemem(memoria_temp);
 reset_ddragon3;
@@ -161,12 +159,10 @@ var
   atrib,nchar,color,x,y,count:word;
   f,h:byte;
 	{- SPR RAM Format -**
-
 	  16 bytes per sprite  (8-bit RAM? only every other byte is used)
 
 	  ---- ----  yyyy yyyy  ---- ----  lllF fXYE  ---- ----  nnnn nnnn  ---- ----  NNNN NNNN
 	  ---- ----  ---- CCCC  ---- ----  xxxx xxxx  ---- ----  ---- ----  ---- ----  ---- ----
-
 	  Yy = sprite Y Position
 	  Xx = sprite X Position
 	  C  = colour bank
@@ -303,7 +299,7 @@ case direccion of
     $082000..$0827ff:ddragon3_getword:=bg_ram[(direccion and $7ff) shr 1];
     $100000:ddragon3_getword:=marcade.in0;
     $100002:ddragon3_getword:=marcade.in1;
-    $100004:ddragon3_getword:=$FFFF;//marcade.dswa;
+    $100004:ddragon3_getword:=marcade.dswa;
     $100006:ddragon3_getword:=$FFFF;  //P3!!
     $140000..$1405ff:ddragon3_getword:=buffer_paleta[(direccion and $fff)];
     $180000..$180fff:ddragon3_getword:=sprite_ram[(direccion and $fff) shr 1];

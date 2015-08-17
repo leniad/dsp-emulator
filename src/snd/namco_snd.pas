@@ -2,7 +2,7 @@ unit namco_snd;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
-     sound_engine;
+     sound_engine,timer_engine;
 
 procedure namco_playsound;
 procedure namco_sound_reset;
@@ -10,28 +10,42 @@ procedure namco_sound_init(num_voces:byte;wave_ram:boolean);
 //Namco CUS30
 procedure namcos1_cus30_w(direccion:word;valor:byte);
 function namcos1_cus30_r(direccion:word):byte;
+//ADPCM sound
+procedure namco_63701x_start(clock:dword);
+procedure namco_63701x_close;
+procedure namco_63701x_update;
+procedure namco_63701x_w(dir:word;valor:byte);
+procedure namco_63701x_internal_update;
+procedure namco_63701x_reset;
 //Snapshot
 function namco_sound_save_snapshot(data:pbyte):word;
 procedure namco_sound_load_snapshot(data:pbyte);
 
 type
   nvoice=record
-          volume:byte;
-          numero_onda:byte;
-          frecuencia:integer;
-          activa:boolean;
-          dentro_onda:dword;
+            volume:byte;
+            numero_onda:byte;
+            frecuencia:integer;
+            activa:boolean;
+            dentro_onda:dword;
          end;
   tnamco_sound=record
-         onda_namco:array[0..$ff] of byte;
-         ram:array[0..$3ff] of byte;
-         num_voces:byte;
-         registros_namco:array[0..$3F] of byte;
-         namco_wave:array[0..$1ff] of byte;
-         wave_size:byte;
-         wave_on_ram,enabled:boolean;
-         tsample:byte;
-  end;
+            onda_namco:array[0..$ff] of byte;
+            ram:array[0..$3ff] of byte;
+            num_voces:byte;
+            registros_namco:array[0..$3F] of byte;
+            namco_wave:array[0..$1ff] of byte;
+            wave_size:byte;
+            wave_on_ram,enabled:boolean;
+            tsample:byte;
+         end;
+  tnamco_63701=record
+            select:integer;
+	          playing:boolean;
+	          base_addr,position,volume,silence_counter:integer;
+            timer,tsample:byte;
+            signal:integer;
+          end;
 
 const
   max_voices=8;
@@ -40,6 +54,8 @@ const
 var
   voice:array[0..(max_voices-1)] of nvoice;
   namco_sound:tnamco_sound;
+  namco_63701:array[0..1] of tnamco_63701;
+  namco_63701_rom:pbyte;
 
 implementation
 
@@ -237,6 +253,121 @@ begin
   temp:=data;
   for f:=0 to 7 do copymemory(@voice[f],temp,sizeof(nvoice));inc(temp,sizeof(nvoice));
   copymemory(@namco_sound,temp,sizeof(tnamco_sound));
+end;
+
+procedure namco_63701x_start(clock:dword);
+begin
+getmem(namco_63701_rom,$40000);
+namco_63701[0].tsample:=init_channel;
+namco_63701[1].tsample:=init_channel;
+namco_63701[0].timer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/1000),namco_63701x_internal_update,true);
+end;
+
+procedure namco_63701x_close;
+begin
+freemem(namco_63701_rom);
+end;
+
+procedure namco_63701x_reset;
+var
+  f:byte;
+begin
+for f:=0 to 1 do begin
+  namco_63701[f].select:=0;
+  namco_63701[f].playing:=false;
+  namco_63701[f].base_addr:=0;
+  namco_63701[f].position:=0;
+  namco_63701[f].volume:=0;
+  namco_63701[f].silence_counter:=0;
+  namco_63701[f].signal:=0;
+end;
+end;
+
+procedure namco_63701x_update;
+var
+  f:byte;
+begin
+for f:=0 to 1 do begin
+  tsample[namco_63701[f].tsample,sound_status.posicion_sonido]:=namco_63701[f].signal;
+  if sound_status.stereo then tsample[namco_63701[f].tsample,sound_status.posicion_sonido+1]:=namco_63701[f].signal;
+end;
+end;
+
+procedure namco_63701x_internal_update;
+const
+  vol_table:array[0..3] of word=(26,84,200,258);
+var
+  data,ch:byte;
+  ptemp,ptemp2:pbyte;
+  pos,vol:integer;
+begin
+for ch:=0 to 1 do begin
+		if namco_63701[ch].playing then begin
+      ptemp:=namco_63701_rom;
+      inc(ptemp,namco_63701[ch].base_addr);
+			pos:=namco_63701[ch].position;
+			vol:=vol_table[namco_63701[ch].volume];
+      if (namco_63701[ch].silence_counter<>0) then begin
+					namco_63701[ch].silence_counter:=namco_63701[ch].silence_counter-1;
+					namco_63701[ch].signal:=0;
+      end	else begin
+          ptemp2:=ptemp;
+          inc(ptemp2,pos and $ffff);
+          pos:=pos+1;
+					data:=ptemp2^;
+					if (data=$ff) then begin   // end of sample */
+						namco_63701[ch].playing:=false;
+            namco_63701[ch].signal:=0;
+          end else begin
+            if (data=$00) then begin  // silence compression */
+              ptemp2:=ptemp;
+              inc(ptemp2,pos and $ffff);
+              pos:=pos+1;
+						  data:=ptemp2^;
+						  namco_63701[ch].silence_counter:=data;
+						  namco_63701[ch].signal:=0;
+            end else begin
+						  namco_63701[ch].signal:=vol*(data-$80);
+            end;
+          end;
+      end;
+      namco_63701[ch].position:=pos;
+    end else begin //si no esta en marcha...
+      namco_63701[ch].signal:=0;
+    end;
+end;
+end;
+
+procedure namco_63701x_w(dir:word;valor:byte);
+var
+  ch:byte;
+  rom_offs:integer;
+  ptemp:pbyte;
+begin
+  ch:=(dir shl 1) and 1;
+	if (dir and 1)<>0 then begin
+		namco_63701[ch].select:=valor;
+	end else begin
+		  {should we stop the playing sample if voice_select[ch] == 0 ?
+		  originally we were, but this makes us lose a sample in genpeitd,
+		  after the continue counter reaches 0. Either we shouldn't stop
+		  the sample, or genpeitd is returning to the title screen too soon.}
+		if (namco_63701[ch].select and $1f)<>0 then begin
+			// update the streams */
+			namco_63701[ch].playing:=true;
+			namco_63701[ch].base_addr:=$10000*((namco_63701[ch].select and $e0) shr 5);
+			rom_offs:=namco_63701[ch].base_addr+2*((namco_63701[ch].select and $1f)-1);
+      ptemp:=namco_63701_rom;
+      inc(ptemp,rom_offs);
+			namco_63701[ch].position:=(ptemp^ shl 8);
+      inc(ptemp);
+      namco_63701[ch].position:=namco_63701[ch].position+ptemp^;
+			// bits 6-7 = volume */
+			namco_63701[ch].volume:=valor shr 6;
+			// bits 0-5 = counter to indicate new sample start? we don't use them */
+			namco_63701[ch].silence_counter:=0;
+    end;
+  end;
 end;
 
 end.

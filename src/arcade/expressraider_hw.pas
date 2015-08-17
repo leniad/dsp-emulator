@@ -40,12 +40,10 @@ const
 implementation
 
 var
-  vb:byte;
+  vb,prot_val,sound_latch,scroll_x,scroll_y,scroll_x2:byte;
   mem_tiles:array[0..$7fff] of byte;
-  scroll_x,scroll_y,scroll_x2:byte;
   bg_tiles:array[0..3] of byte;
   bg_tiles_cam:array[0..3] of boolean;
-  sound_latch:byte;
   old_val,old_val2:boolean;
 
 procedure Cargar_expraid;
@@ -54,6 +52,7 @@ llamadas_maquina.iniciar:=iniciar_expraid;
 llamadas_maquina.bucle_general:=principal_expraid;
 llamadas_maquina.cerrar:=cerrar_expraid;
 llamadas_maquina.reset:=reset_expraid;
+llamadas_maquina.fps_max:=59.637405;
 end;
 
 function iniciar_expraid:boolean;
@@ -84,34 +83,34 @@ screen_init(4,512,512,true);
 screen_init(6,256,256,true);
 iniciar_video(240,240);
 //Main CPU
-main_m6502:=cpu_m6502.create(4000000,256,TCPU_DECO16);
+main_m6502:=cpu_m6502.create(1500000,262,TCPU_DECO16);
 main_m6502.change_ram_calls(getbyte_expraid,putbyte_expraid);
 main_m6502.change_io_calls(nil,get_io_expraid);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(2000000,256);
+snd_m6809:=cpu_m6809.Create(1500000,262);
 snd_m6809.change_ram_calls(getbyte_snd_expraid,putbyte_snd_expraid);
 snd_m6809.init_sound(expraid_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(0,1500000,2);
-ym3812_init(0,3600000,snd_irq);
+ym3812_init(0,3000000,snd_irq);
 //cargar roms
-if not(cargar_roms(@memoria[0],@expraid_rom[0],'exprraid.zip',0)) then exit;
+if not(cargar_roms(@memoria,@expraid_rom,'exprraid.zip',0)) then exit;
 //cargar roms audio
-if not(cargar_roms(@mem_snd[0],@expraid_snd,'exprraid.zip',1)) then exit;
+if not(cargar_roms(@mem_snd,@expraid_snd,'exprraid.zip')) then exit;
 //Cargar chars
-if not(cargar_roms(@memoria_temp[0],@expraid_char,'exprraid.zip',1)) then exit;
+if not(cargar_roms(@memoria_temp,@expraid_char,'exprraid.zip')) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@expraid_sprites[0],'exprraid.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@expraid_sprites,'exprraid.zip',0)) then exit;
 init_gfx(1,16,16,2048);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*2048*32*8,2048*32*8,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //Cargar tiles
-if not(cargar_roms(@memoria_temp[0],@expraid_tiles[0],'exprraid.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@expraid_tiles,'exprraid.zip',0)) then exit;
 //Mover los datos de los tiles para poder usar las rutinas de siempre...
 i:=$8000-$1000;
 offs:=$10000-$1000;
@@ -126,13 +125,13 @@ init_gfx(2,16,16,1024);
 gfx[2].trans[0]:=true;
 for f:=0 to 3 do begin
   gfx_set_desc_data(3,8,32*8,4+(f*$4000)*8,($10000+f*$4000)*8+0,($10000+f*$4000)*8+4);
-  convert_gfx(2,f*$100*16*16,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,f*$100*16*16,@memoria_temp,@pt_x,@pt_y,false,false);
   gfx_set_desc_data(3,8,32*8,0+(f*$4000)*8,($11000+f*$4000)*8+0,($11000+f*$4000)*8+4);
-  convert_gfx(2,(f*$100*16*16)+($80*16*16),@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,(f*$100*16*16)+($80*16*16),@memoria_temp,@pt_x,@pt_y,false,false);
 end;
-if not(cargar_roms(@mem_tiles[0],@expraid_tiles_mem,'exprraid.zip',1)) then exit;
+if not(cargar_roms(@mem_tiles,@expraid_tiles_mem,'exprraid.zip')) then exit;
 //Paleta
-if not(cargar_roms(@memoria_temp[0],@expraid_proms[0],'exprraid.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@expraid_proms,'exprraid.zip',0)) then exit;
 for f:=0 to 255 do begin
   colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
   colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
@@ -164,6 +163,7 @@ marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;
 vb:=0;
+prot_val:=0;
 sound_latch:=0;
 old_val:=false;
 old_val2:=false;
@@ -186,7 +186,7 @@ for i:=0 to 3 do begin
     x:=(f mod 16)*16;
     y:=(f div 16)*16;
     if i>1 then y:=y+256;
-    if (i and 1)<>0 then x:=x+256;
+    x:=x+(256*(i and 1));
     atrib:=mem_tiles[$4000+pos_ini+f];
     nchar:=mem_tiles[pos_ini+f]+((atrib and $03) shl 8);
     color:=atrib and $18;
@@ -245,13 +245,13 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
   if (arcade_input.coin[0] and not(old_val)) then begin
       marcade.in2:=(marcade.in2 and $bf);
-      main_m6502.pedir_nmi:=PULSE_LINE;
+      main_m6502.pedir_nmi:=ASSERT_LINE;;
   end else begin
       marcade.in2:=(marcade.in2 or $40);
   end;
   if (arcade_input.coin[1] and not(old_val2)) then begin
       marcade.in2:=(marcade.in2 and $7f);
-      main_m6502.pedir_nmi:=PULSE_LINE;
+      main_m6502.pedir_nmi:=ASSERT_LINE;
   end else begin
       marcade.in2:=(marcade.in2 or $80);
   end;
@@ -265,24 +265,24 @@ end;
 procedure principal_expraid;
 var
   frame_m,frame_s:single;
-  f:byte;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_m6502.tframes;
 frame_s:=snd_m6809.tframes;
 while EmuStatus=EsRuning do begin
- for f:=0 to $ff do begin
+ for f:=0 to 261 do begin
    main_m6502.run(frame_m);
    frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
    //Sound
    snd_m6809.run(frame_s);
    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
    case f of
-      239:begin
+      7:vb:=0;
+      247:begin
             update_video_expraid;
             vb:=$2;
           end;
-      255:vb:=0;
    end;
  end;
  eventos_expraid;
@@ -293,25 +293,29 @@ end;
 function getbyte_expraid(direccion:word):byte;
 begin
 case direccion of
+   0..$fff,$4000..$ffff:getbyte_expraid:=memoria[direccion];
    $1800:getbyte_expraid:=$bf;
    $1801:getbyte_expraid:=marcade.in0;
    $1802:getbyte_expraid:=marcade.in2;
    $1803:getbyte_expraid:=$ff;
-   $2800:getbyte_expraid:=memoria[$02a9]; //Proteccion (parte 1)
-   $2801:getbyte_expraid:=$2; //Proteccion (parte 2)
-    else getbyte_expraid:=memoria[direccion];
+   $2800:getbyte_expraid:=prot_val;
+   $2801:getbyte_expraid:=$2;
 end;
 end;
 
 procedure putbyte_expraid(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $800..$fff:gfx[0].buffer[direccion and $3ff]:=true;
+  0..$7ff:memoria[direccion]:=valor;
+  $800..$fff:begin
+                gfx[0].buffer[direccion and $3ff]:=true;
+                memoria[direccion]:=valor;
+             end;
+  $2000:main_m6502.clear_nmi;
   $2001:begin
            sound_latch:=valor;
-           snd_m6809.pedir_nmi:=PULSE_LINE;
+           snd_m6809.pedir_nmi:=ASSERT_LINE;
         end;
   $2800..$2803:if bg_tiles[direccion and $3]<>(valor and $3f) then begin
                 bg_tiles[direccion and $3]:=valor and $3f;
@@ -320,6 +324,11 @@ case direccion of
   $2804:scroll_y:=valor;
   $2805:scroll_x:=valor;
   $2806:scroll_x2:=valor;
+  $2807:case valor of
+          $20,$60:;
+          $80:prot_val:=prot_val+1;
+          $90:prot_val:=0;
+        end;
 end;
 end;
 
@@ -331,19 +340,22 @@ end;
 function getbyte_snd_expraid(direccion:word):byte;
 begin
   case direccion of
+    0..$1fff,$8000..$ffff:getbyte_snd_expraid:=mem_snd[direccion];
     $2000:getbyte_snd_expraid:=ym2203_0.read_status;
     $2001:getbyte_snd_expraid:=ym2203_0.Read_Reg;
     $4000:getbyte_snd_expraid:=ym3812_status_port(0);
-    $6000:getbyte_snd_expraid:=sound_latch;
-      else getbyte_snd_expraid:=mem_snd[direccion];
+    $6000:begin
+            getbyte_snd_expraid:=sound_latch;
+            snd_m6809.clear_nmi;
+          end;
   end;
 end;
 
 procedure putbyte_snd_expraid(direccion:word;valor:byte);
 begin
 if direccion>$7fff then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  0..$1fff:mem_snd[direccion]:=valor;
   $2000:ym2203_0.control(valor);
   $2001:ym2203_0.write_reg(valor);
   $4000:ym3812_control_port(0,valor);

@@ -96,7 +96,7 @@ main_z80.change_ram_calls(tehkanwc_getbyte,tehkanwc_putbyte);
 sub_z80:=cpu_z80.create(4608000,$200);
 sub_z80.change_ram_calls(tehkanwc_misc_getbyte,tehkanwc_misc_putbyte);
 //analog
-init_analog(main_z80.numero_cpu,main_z80.clock,100,10,0,63,-63,false);
+init_analog(main_z80.numero_cpu,main_z80.clock,100,10,0,63,-63,true);
 //Sound CPU
 snd_z80:=cpu_z80.create(4608000,$200);
 snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
@@ -109,30 +109,30 @@ ay8910_1:=ay8910_chip.create(1536000,1);
 ay8910_1.change_io_calls(tehkan_porta_read,tehkan_portb_read,nil,nil);
 msm_5205_0:=MSM5205_chip.create(0,384000,MSM5205_S96_4B,0.45,msm5205_sound);
 //cargar roms
-if not(cargar_roms(@memoria[0],@tehkanwc_rom[0],'tehkanwc.zip',0)) then exit;
+if not(cargar_roms(@memoria,@tehkanwc_rom,'tehkanwc.zip',0)) then exit;
 //cargar cpu 2
-if not(cargar_roms(@mem_misc[0],@tehkanwc_cpu2,'tehkanwc.zip')) then exit;
+if not(cargar_roms(@mem_misc,@tehkanwc_cpu2,'tehkanwc.zip')) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@tehkanwc_sound,'tehkanwc.zip')) then exit;
+if not(cargar_roms(@mem_snd,@tehkanwc_sound,'tehkanwc.zip')) then exit;
 //Cargar ADPCM
-if not(cargar_roms(@mem_adpcm[0],@tehkanwc_adpcm,'tehkanwc.zip')) then exit;
+if not(cargar_roms(@mem_adpcm,@tehkanwc_adpcm,'tehkanwc.zip')) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@tehkanwc_chars,'tehkanwc.zip')) then exit;
+if not(cargar_roms(@memoria_temp,@tehkanwc_chars,'tehkanwc.zip')) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@tehkanwc_sprites[0],'tehkanwc.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@tehkanwc_sprites,'tehkanwc.zip',0)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms(@memoria_temp[0],@tehkanwc_tiles[0],'tehkanwc.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@tehkanwc_tiles,'tehkanwc.zip',0)) then exit;
 init_gfx(2,16,8,1024);
 gfx_set_desc_data(4,0,64*8,0,1,2,3);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@tehkanwc_dipa;

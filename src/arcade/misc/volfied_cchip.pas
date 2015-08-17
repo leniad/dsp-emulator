@@ -320,7 +320,7 @@ begin
 timer[cc_timer].enabled:=false;
 // Palette commands - palette data written to bank 0: $10 - $af
 if ((current_cmd>=$1) and (current_cmd<$12)) then begin
-  for i:=0 to $49 do begin
+  for i:=0 to $4f do begin
     cchip_ram[$10+i*2+0]:=palette_data[current_cmd,i] shr 8;
     cchip_ram[$10+i*2+1]:=palette_data[current_cmd,i] and $ff;
   end;

@@ -9,11 +9,11 @@ procedure Cargar_system86;
 procedure system86_principal;
 function iniciar_system86:boolean;
 procedure reset_system86;
-procedure cerrar_system86; 
+procedure cerrar_system86;
 //Main CPU
 function system86_getbyte(direccion:word):byte;
 procedure system86_putbyte(direccion:word;valor:byte);
-procedure system86_putbyte_ext(direccion:word;valor:byte);
+procedure rthunder_putbyte(direccion:word;valor:byte);
 //Sub CPU
 function rthunder_sub_getbyte(direccion:word):byte;
 procedure rthunder_sub_putbyte(direccion:word;valor:byte);
@@ -25,10 +25,11 @@ procedure rthunder_mcu_putbyte(direccion:word;valor:byte);
 function in_port1:byte;
 function in_port2:byte;
 //Video
-procedure rthunder_video; 
-procedure skykiddx_video; 
+procedure rthunder_video;
+procedure skykiddx_video;
 //Sound
-procedure sound_instruccion;
+procedure sound_update;
+procedure sound_update_adpcm;
 
 type
     tipo_update_video_system86=procedure;
@@ -55,6 +56,8 @@ const
         (n:'rt1-1.3r';l:$200;p:$0;crc:$8ef3bb9d),(n:'rt1-2.3s';l:$200;p:$200;crc:$6510a8f2),
         (n:'rt1-3.4v';l:$800;p:$400;crc:$95c7d944),(n:'rt1-4.5v';l:$800;p:$c00;crc:$1391fec9),
         (n:'rt1-5.6u';l:$20;p:$1400;crc:$e4130804),());
+        rthunder_adpcm:array[0..2] of tipo_roms=(
+        (n:'rt1_21.f3';l:$10000;p:$0;crc:$454968f3),(n:'rt2_22.h3';l:$10000;p:$20000;crc:$fe963e72),());
         //Hopping Mappy
         hopmappy_rom:tipo_roms=(n:'hm1_1.9c';l:$8000;p:$8000;crc:$1a83914e);
         hopmappy_sub_rom:tipo_roms=(n:'hm1_2.12c';l:$4000;p:$c000;crc:$c46cda65);
@@ -192,15 +195,16 @@ snd_m6809:=cpu_m6809.Create(1536000,256);
 main_m6800:=cpu_m6800.create(6144000,$100,cpu_hd63701);
 main_m6800.change_ram_calls(rthunder_mcu_getbyte,rthunder_mcu_putbyte);
 main_m6800.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
-main_m6800.init_sound(sound_instruccion);
+if main_vars.tipo_maquina<>124 then main_m6800.init_sound(sound_update)
+  else main_m6800.init_sound(sound_update_adpcm);
 //Sound
 namco_sound_init(8,true);
-YM2151_Init(0,3579580,nil,nil);
+YM2151_Init(0,3579580,nil,nil,0.4);
 case main_vars.tipo_maquina of
     124:begin
             //cargar roms main CPU
             if not(cargar_roms(@memoria[$0],@rthunder_rom,'rthunder.zip',1)) then exit;
-            main_m6809.change_ram_calls(system86_getbyte,system86_putbyte_ext);
+            main_m6809.change_ram_calls(system86_getbyte,rthunder_putbyte);
             //Pongo las ROMs en su banco
             if not(cargar_roms(@memoria_temp[0],@rthunder_rom_bank[0],'rthunder.zip',0)) then exit;
             for f:=0 to $1f do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
@@ -212,6 +216,9 @@ case main_vars.tipo_maquina of
             for f:=0 to $3 do copymemory(@rom_sub_bank[f,0],@memoria_temp[(f*$2000)+$8000],$2000);
             //Cargar MCU
             if not(cargar_roms(@mem_snd[0],@rthunder_mcu[0],'rthunder.zip',0)) then exit;
+            //Cargar ADPCM
+            namco_63701x_start(6000000);
+            if not(cargar_roms(namco_63701_rom,@rthunder_adpcm,'rthunder.zip',0)) then exit;
             //convertir chars
             if not(cargar_roms(@memoria_temp[0],@rthunder_chars[0],'rthunder.zip',0)) then exit;
             convert_data($18000);
@@ -309,6 +316,7 @@ main_m6809.Free;
 snd_m6809.free;
 main_m6800.Free;
 YM2151_Close(0);
+if main_vars.tipo_maquina=124 then namco_63701x_close;
 close_audio;
 close_video;
 end;
@@ -321,6 +329,8 @@ begin
  snd_m6809.reset;
  main_m6800.reset;
  namco_sound_reset;
+ YM2151_reset(0);
+ if main_vars.tipo_maquina=124 then namco_63701x_close;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -578,7 +588,8 @@ end;
 if direccion<$6000 then memoria[direccion]:=valor;
 end;
 
-procedure system86_putbyte_ext(direccion:word;valor:byte);
+//Rolling Thunder
+procedure rthunder_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$1fff:if memoria[direccion]<>valor then gfx[0].buffer[direccion shr 1]:=true;
@@ -587,7 +598,7 @@ case direccion of
   $5ff2:copy_sprites:=true;
   $6000..$7fff:begin
                  case ((direccion and $1e00) shr 9) of
-    		            0,1,2,3:;//namco_63701x_w(space->machine->device("namco2"), (offset & 0x1e00) >> 9,data);
+    		            0,1,2,3:namco_63701x_w((direccion and $1e00) shr 9,valor);
 		                4:rom_nbank:=valor and $1f;
                  end;
                  exit;
@@ -623,7 +634,6 @@ end;
 if direccion<$6000 then memoria[direccion]:=valor;
 end;
 
-//Rolling Thunder
 function rthunder_sub_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -713,9 +723,15 @@ begin
   in_port2:=$ff;
 end;
 
-procedure sound_instruccion;
+procedure sound_update;
 begin
   ym2151_Update(0);
+end;
+
+procedure sound_update_adpcm;
+begin
+  ym2151_Update(0);
+  namco_63701x_update;
 end;
 
 end.

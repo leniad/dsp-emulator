@@ -48,10 +48,12 @@ procedure msm5205_internal_update_0;
 procedure msm5205_internal_update_1;
 procedure msm5205_final_update_0;
 procedure msm5205_final_update_1;
+procedure msm5205_ComputeTables;
+function msm5205_clock(val:integer;var step:integer;signal:integer):integer;
 
 implementation
 
-procedure ComputeTables;
+procedure msm5205_ComputeTables;
 // nibble to bit map */
 const
   nbl2bit:array[0..15,0..3] of integer= (
@@ -90,7 +92,7 @@ begin
     0:begin
         self.timer_:=init_timer(sound_status.cpu_num,1,msm5205_internal_update_0,false);
         init_timer(sound_status.cpu_num,sound_status.cpu_clock/freq_base_audio,msm5205_final_update_0,true);
-        ComputeTables;
+        msm5205_ComputeTables;
       end;
     1:begin
         self.timer_:=init_timer(sound_status.cpu_num,1,msm5205_internal_update_1,false);
@@ -116,7 +118,7 @@ begin
 	self.vclk:=0;
 	self.reset_data:=0;
 	self.signal:=0;
-	self.step:=0;
+	self.step:=-2;
 	// timer and bitwidth set */
 	self.playmode_w(self.select);
 end;
@@ -152,6 +154,19 @@ begin
   self.reset_data:=reset_data;
 end;
 
+function msm5205_clock(val:integer;var step:integer;signal:integer):integer;
+begin
+// update signal */
+// !! MSM5205 has internal 12bit decoding, signal width is 0 to 8191 !! */
+signal:=signal+diff_lookup[step*16+(val and 15)];
+if (signal>2047) then signal:=2047
+  else if (signal<-2048) then signal:=-2048;
+step:=step+index_shift[val and 7];
+if (step>48) then step:=48
+  else if (step<0) then step:=0;
+msm5205_clock:=signal;
+end;
+
 procedure msm5205_stream_update(num:byte);
 var
   voice:MSM5205_chip;
@@ -166,14 +181,7 @@ begin
 		voice.signal:=0;
 		voice.step:=0;
 	end else begin
-		// update signal */
-		// !! MSM5205 has internal 12bit decoding, signal width is 0 to 8191 !! */
-		voice.signal:=voice.signal+diff_lookup[voice.step*16+(voice.data and 15)];
-		if (voice.signal>2047) then voice.signal:=2047
-     else if (voice.signal<-2048) then voice.signal:=-2048;
-		voice.step:=voice.step+index_shift[voice.data and 7];
-		if (voice.step>48) then voice.step:=48
-		  else if (voice.step<0) then voice.step:=0;
+    voice.signal:=msm5205_clock(voice.data,voice.step,voice.signal);
 	end;
 end;
 

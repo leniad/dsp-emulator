@@ -106,36 +106,36 @@ init_timer(snd_z80.numero_cpu,3000000/(4*60),gng_snd_irq,true);
 ym2203_0:=ym2203_chip.create(0,1500000,4);
 ym2203_1:=ym2203_chip.create(1,1500000,4);
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@gng_rom[0],'gng.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@gng_rom,'gng.zip',0)) then exit;
 //Pongo las ROMs en su banco
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2000);
 copymemory(@memoria[$6000],@memoria_temp[$6000],$2000);
 copymemory(@memoria_rom[4,0],@memoria_temp[$4000],$2000);
 //Cargar Sound
-if not(cargar_roms(@mem_snd[0],@gng_sound,'gng.zip')) then exit;
+if not(cargar_roms(@mem_snd,@gng_sound,'gng.zip')) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@gng_char,'gng.zip')) then exit;
+if not(cargar_roms(@memoria_temp,@gng_char,'gng.zip')) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx[0].trans_alt[0,3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@gng_sprites[0],'gng.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@gng_sprites,'gng.zip',0)) then exit;
 init_gfx(1,16,16,1024);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms(@memoria_temp[0],@gng_tiles[0],'gng.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@gng_tiles,'gng.zip',0)) then exit;
 init_gfx(2,16,16,1024);
 gfx[2].trans[0]:=true;
 gfx[2].trans[6]:=true;
 gfx[2].trans_alt[0,0]:=true;
 gfx[2].trans_alt[0,6]:=true;
 gfx_set_desc_data(3,0,32*8,$10000*8,$8000*8,0);
-convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //Poner colores aleatorios hasta que inicie la paleta
 for f:=0 to 255 do begin
   colores[f].r:=random(256);

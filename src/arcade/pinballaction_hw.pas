@@ -102,31 +102,31 @@ ay8910_0:=ay8910_chip.create(1500000,1);
 ay8910_1:=ay8910_chip.create(1500000,1);
 ay8910_2:=ay8910_chip.create(1500000,1);
 //cargar roms
-if not(cargar_roms(@memoria[0],@pinballaction_rom[0],'pbaction.zip',0)) then exit;
+if not(cargar_roms(@memoria,@pinballaction_rom,'pbaction.zip',0)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@pinballaction_sound,'pbaction.zip')) then exit;
+if not(cargar_roms(@mem_snd,@pinballaction_sound,'pbaction.zip')) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@pinballaction_chars[0],'pbaction.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@pinballaction_chars,'pbaction.zip',0)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,$400*0*8*8,$400*1*8*8,$400*2*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
 //tiles
-if not(cargar_roms(@memoria_temp[0],@pinballaction_tiles[0],'pbaction.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@pinballaction_tiles,'pbaction.zip',0)) then exit;
 init_gfx(1,8,8,$800);
 gfx_set_desc_data(4,0,8*8,$800*0*8*8,$800*1*8*8,$800*2*8*8,$800*3*8*8);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,true,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@pinballaction_sprites[0],'pbaction.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@pinballaction_sprites,'pbaction.zip',0)) then exit;
 init_gfx(2,16,16,$100);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,$100*0*8*32,$100*1*8*32,$100*2*8*32);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //convertir sprites double
 init_gfx(3,32,32,$20);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(3,0,128*8,$40*0*8*128,$40*1*8*128,$40*2*8*128);
-convert_gfx(3,0,@memoria_temp[$1000],@psd_x[0],@psd_y[0],true,false);
+convert_gfx(3,0,@memoria_temp[$1000],@psd_x,@psd_y,true,false);
 //DIP
 marcade.dswa:=$40;
 marcade.dswa_val:=@pinballaction_dipa;

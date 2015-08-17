@@ -41,7 +41,6 @@ const
         (mask:$8;name:'Demo_Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Coin A';number:4;dip:((dip_val:$00;dip_name:'4C-1C'),(dip_val:$10;dip_name:'3C-1C'),(dip_val:$20;dip_name:'2C-1C'),(dip_val:$30;dip_name:'1C-1C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$c0;dip_name:'1C-2C'),(dip_val:$80;dip_name:'1C-3C'),(dip_val:$40;dip_name:'1C-4C'),(dip_val:$00;dip_name:'1C-6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        //DIP
         volfied_dip2:array [0..4] of def_dip=(
         (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$2;dip_name:'20k 40k 120k 480k 2400k'),(dip_val:$3;dip_name:'50k 150k 600k 3000k'),(dip_val:$1;dip_name:'70k 280k 1400k'),(dip_val:$0;dip_name:'100k 500k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Medium'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -92,17 +91,17 @@ ym2203_0.change_irq_calls(snd_irq);
 //MCU
 volfied_init_cchip(main_m68000.numero_cpu);
 //ROMS
-if not(cargar_roms16w(@rom[0],@volfied_rom[0],'volfied.zip',0)) then exit;
-if not(cargar_roms16w(@rom2[0],@volfied_rom2[0],'volfied.zip',0)) then exit;
+if not(cargar_roms16w(@rom,@volfied_rom,'volfied.zip',0)) then exit;
+if not(cargar_roms16w(@rom2,@volfied_rom2,'volfied.zip',0)) then exit;
 //cargar sonido+ponerlas en su banco
-if not(cargar_roms(@mem_snd[0],@volfied_sound,'volfied.zip')) then exit;
+if not(cargar_roms(@mem_snd,@volfied_sound,'volfied.zip')) then exit;
 //convertir sprites
 getmem(memoria_temp,$100000);
 if not(cargar_roms16b(memoria_temp,@volfied_sprites,'volfied.zip',0)) then exit;
-init_gfx(0,16,16,$2000);
+init_gfx(0,16,16,$1800);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(0,0,memoria_temp,@ps_x[0],@ps_y[0],false,true);
+convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,true);
 freemem(memoria_temp);
 //DIP
 marcade.dswa:=$fe;
@@ -164,10 +163,10 @@ begin
 actualiza_trozo(0,0,248,336,1,0,0,248,336,2);
 //Sprites
 for f:=$ff downto 0 do begin
-  nchar:=(ram3[$2+(f*4)]) and $1fff;
+  nchar:=(ram3[$2+(f*4)]) mod $1800;
   if nchar<>0 then begin
     atrib:=ram3[f*4];
-    color:=((atrib and $f) or ((spritebank and $f) shl 4)) shl 4;
+    color:=((atrib and $f) or spritebank) shl 4;
     put_gfx_sprite(nchar,color+$1000,(atrib and $8000)<>0,(atrib and $4000)<>0,0);
     y:=(320-ram3[$3+(f*4)]) and $1ff;
     x:=(ram3[$1+(f*4)]) and $1ff;
@@ -231,7 +230,7 @@ case direccion of
   $400000..$47ffff:volfied_getword:=ram2[(direccion and $7ffff) shr 1];
   $500000..$503fff:volfied_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $d00000:volfied_getword:=$60;
-  $e00002:volfied_getword:=taitosound_comm_r;
+  $e00002:if main_m68000.access_8bits then volfied_getword:=taitosound_comm_r;
   $f00000..$f007ff:volfied_getword:=volfied_cchip_ram_r(direccion and $7ff);
 	$f00802:volfied_getword:=volfied_cchip_ctrl_r;
 end;
@@ -259,7 +258,7 @@ case direccion of
                               cambiar_color(valor,(direccion and $3fff) shr 1);
                        end;
       $600000:video_mask:=valor;
-      $700000:spritebank:=(valor and $3c) shr 2;
+      $700000:spritebank:=(valor and $3c) shl 2;
       $d00000:video_ctrl:=valor;
       $e00000:taitosound_port_w(valor and $ff);
       $e00002:taitosound_comm_w(valor and $ff);

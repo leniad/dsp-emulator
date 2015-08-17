@@ -3,7 +3,7 @@ unit cabal_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,seibu_sound,
-     rom_engine,pal_engine,sound_engine;
+     msm5205,rom_engine,pal_engine,sound_engine,timer_engine,misc_functions;
 
 procedure Cargar_cabal;
 procedure cabal_principal;
@@ -12,11 +12,11 @@ procedure reset_cabal;
 procedure cerrar_cabal;
 //Main CPU
 function cabal_getword(direccion:dword):word;
-procedure cabal_putword(direccion:dword;valor:word); 
+procedure cabal_putword(direccion:dword;valor:word);
 //Sound CPU
 function cabal_snd_getbyte(direccion:word):byte;
-procedure cabal_snd_putbyte(direccion:word;valor:byte); 
-procedure cabal_sound_act; 
+procedure cabal_snd_putbyte(direccion:word;valor:byte);
+procedure cabal_sound_act;
 procedure snd_irq(irqstate:byte);
 
 const
@@ -38,6 +38,19 @@ const
         (n:'4-3n';l:$2000;p:0;crc:$4038eff2),(n:'3-3p';l:$8000;p:$8000;crc:$d9defcbf),());
         cabal_adpcm:array[0..2] of tipo_roms=(
         (n:'2-1s';l:$10000;p:0;crc:$850406b4),(n:'1-1u';l:$10000;p:$10000;crc:$8b3e0789),());
+        //Dip
+        cabal_dip_a:array [0..11] of def_dip=(
+        (mask:$f;name:'Coinage';number:16;dip:((dip_val:$a;dip_name:'6C 1C'),(dip_val:$b;dip_name:'5C 1C'),(dip_val:$c;dip_name:'4C 1C'),(dip_val:$d;dip_name:'3C 1C'),(dip_val:$1;dip_name:'8C 3C'),(dip_val:$e;dip_name:'2C 1C'),(dip_val:$2;dip_name:'5C 3C'),(dip_val:$3;dip_name:'3C 2C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$4;dip_name:'2C 3C'),(dip_val:$9;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C 3C'),(dip_val:$7;dip_name:'1C 4C'),(dip_val:$6;dip_name:'1C 5C'),(dip_val:$5;dip_name:'1C 6C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$c;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 5C'),(dip_val:$0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Coin Mode';number:2;dip:((dip_val:$10;dip_name:'Mode 1'),(dip_val:$0;dip_name:'Mode 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Invert Buttons';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Track Ball';number:2;dip:((dip_val:$80;dip_name:'Small'),(dip_val:$0;dip_name:'Large'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$300;name:'Lives';number:4;dip:((dip_val:$200;dip_name:'2'),(dip_val:$300;dip_name:'3'),(dip_val:$100;dip_name:'5'),(dip_val:$0;dip_name:'121 (Cheat)'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c00;name:'Bonus Life';number:4;dip:((dip_val:$c00;dip_name:'150k 650k 500k+'),(dip_val:$800;dip_name:'200k 800k 600k+'),(dip_val:$400;dip_name:'300k 1000k 700k+'),(dip_val:$0;dip_name:'300k'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$3000;dip_name:'Easy'),(dip_val:$2000;dip_name:'Normal'),(dip_val:$1000;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8000;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8000;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom:array[0..$1ffff] of word;
@@ -45,6 +58,7 @@ var
  main_ram:array[0..$7fff] of word;
  bg_ram:array[0..$1ff] of word;
  fg_ram:array[0..$3ff] of word;
+ nmi_timer:byte;
 
 implementation
 
@@ -71,6 +85,7 @@ const
 			14*32, 12*32, 10*32,  8*32,  6*32,  4*32,  2*32,  0*32 );
 var
   memoria_temp:array[0..$7ffff] of byte;
+  f:word;
 begin
 iniciar_cabal:=false;
 iniciar_audio(false);
@@ -89,28 +104,39 @@ snd_z80.init_sound(cabal_sound_act);
 //Sound Chips
 YM2151_Init(0,3579545,nil,snd_irq);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@cabal_rom[0],'cabal.zip',0)) then exit;
+if not(cargar_roms16w(@rom,@cabal_rom,'cabal.zip',0)) then exit;
 //cargar sonido
-if not(cargar_roms(@memoria_temp[0],@cabal_sound,'cabal.zip',0)) then exit;
-decript_seibu_sound(@memoria_temp[0],@decrypt[0],@mem_snd[0]);
+if not(cargar_roms(@memoria_temp,@cabal_sound,'cabal.zip',0)) then exit;
+decript_seibu_sound(@memoria_temp,@decrypt,@mem_snd);
 copymemory(@mem_snd[$8000],@memoria_temp[$8000],$8000);
+//adpcm
+init_seibu_adpcm(0);
+init_seibu_adpcm(1);
+if not(cargar_roms(@memoria_temp,@cabal_adpcm,'cabal.zip',0)) then exit;
+for f:=0 to $ffff do begin
+  seibu_adpcm[0].mem[f]:=BITSWAP8(memoria_temp[f],7,5,3,1,6,4,2,0);
+  seibu_adpcm[1].mem[f]:=BITSWAP8(memoria_temp[$10000+f],7,5,3,1,6,4,2,0);
+end;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@cabal_char,'cabal.zip',1)) then exit;
+if not(cargar_roms(@memoria_temp,@cabal_char,'cabal.zip')) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
-if not(cargar_roms16b(@memoria_temp[0],@cabal_sprites,'cabal.zip',0)) then exit;
+if not(cargar_roms16b(@memoria_temp,@cabal_sprites,'cabal.zip',0)) then exit;
 init_gfx(1,16,16,$1000);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms16b(@memoria_temp[0],@cabal_tiles,'cabal.zip',0)) then exit;
+if not(cargar_roms16b(@memoria_temp,@cabal_tiles,'cabal.zip',0)) then exit;
 init_gfx(2,16,16,$1000);
 gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
-convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
+//Dip
+marcade.dswa:=$efff;
+marcade.dswa_val:=@cabal_dip_a;
 //final
 reset_cabal;
 iniciar_cabal:=true;
@@ -130,6 +156,8 @@ begin
  main_m68000.reset;
  snd_z80.reset;
  YM2151_reset(0);
+ seibu_adpcm_reset(0);
+ seibu_adpcm_reset(1);
  seibu_reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -140,7 +168,7 @@ end;
 
 procedure update_video_cabal;inline;
 var
-  f,color,x,y,nchar,atrib,atrib2,atrib3:word;
+  f,color,x,y,nchar,atrib:word;
 begin
 //Background
 for f:=0 to $ff do begin
@@ -169,16 +197,13 @@ end;
 actualiza_trozo(0,0,256,256,2,0,0,256,256,3);
 //Sprites
 for f:=$1ff downto 0 do begin
-    atrib:=main_ram[(f*4)+$1c00];
-		if (atrib and $100)<>0  then begin
-      atrib2:=main_ram[(f*4)+$1c01];
-      atrib3:=main_ram[(f*4)+$1c02];
-      nchar:=atrib2 and $fff;
-      color:=(atrib3 and $7800) shr 7;
-      y:=atrib;
-			x:=atrib3;
-      //if ((nchar=$cc) and (x>$f0)) then form1.statusbar1.Panels[2].Text:=inttohex(x,3)+' - '+inttohex(y,3);
-      put_gfx_sprite(nchar,color+256,(atrib3 and $400)<>0,false,1);
+    y:=main_ram[(f*4)+$1c00];
+		if (y and $100)<>0 then begin
+      atrib:=main_ram[(f*4)+$1c01];
+      x:=main_ram[(f*4)+$1c02];
+      nchar:=atrib and $fff;
+      color:=(x and $7800) shr 7;
+      put_gfx_sprite(nchar,color+256,(x and $400)<>0,false,1);
       actualiza_gfx_sprite(x,y,3,1);
     end;
 end;
@@ -246,7 +271,7 @@ case direccion of
     $40000..$4ffff:cabal_getword:=main_ram[(direccion and $ffff) shr 1];
     $60000..$607ff:cabal_getword:=fg_ram[(direccion and $7ff) shr 1];
     $80000..$803ff:cabal_getword:=bg_ram[(direccion and $3ff) shr 1];
-    $a0000:cabal_getword:=$efff;  //DSW
+    $a0000:cabal_getword:=marcade.dswa;  //DSW
     $a0008:cabal_getword:=$ff+(marcade.in0 shl 8);
     $a000c:cabal_getword:=$ffff;  //track 0
     $a000a,$a000e:cabal_getword:=$0;  //track 1
@@ -298,13 +323,12 @@ begin
 case direccion of
   0..$1fff:if snd_z80.opcode then cabal_snd_getbyte:=decrypt[direccion]
               else cabal_snd_getbyte:=mem_snd[direccion];
+  $2000..$27ff,$8000..$ffff:cabal_snd_getbyte:=mem_snd[direccion];
   $4009:cabal_snd_getbyte:=YM2151_status_port_read(0);
   $4010:cabal_snd_getbyte:=sound_latch[0];
   $4011:cabal_snd_getbyte:=sound_latch[1];
-  $4012:if sub2main_pending then cabal_snd_getbyte:=1
-          else cabal_snd_getbyte:=0;
+  $4012:cabal_snd_getbyte:=byte(sub2main_pending);
   $4013:cabal_snd_getbyte:=marcade.in2;
-    else cabal_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
@@ -312,20 +336,25 @@ procedure cabal_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$1fff,$8000..$ffff:exit;
-  $4001:;//seibu_update_irq_lines(RESET_ASSERT);
-  $4002:;
+  $2000..$27ff:mem_snd[direccion]:=valor;
+  $4001,$4002:;
   $4003:seibu_update_irq_lines(RST18_CLEAR);
+  $4005,$4006:seibu_adpcm_adr_w(0,(direccion and 1) xor 1,valor);
   $4008:YM2151_register_port_write(0,valor);
   $4009:YM2151_data_port_write(0,valor);
   $4018:sub2main[0]:=valor;
   $4019:sub2main[1]:=valor;
-    else mem_snd[direccion]:=valor;
+  $401a:seibu_adpcm_ctl_w(0,valor);
+  $6005,$6006:seibu_adpcm_adr_w(1,(direccion and 1) xor 1,valor);
+  $601a:seibu_adpcm_ctl_w(1,valor);
 end;
 end;
 
 procedure cabal_sound_act;
 begin
   ym2151_Update(0);
+  seibu_adpcm_update(0);
+  seibu_adpcm_update(1);
 end;
 
 procedure snd_irq(irqstate:byte);

@@ -116,6 +116,7 @@ type
 	  sampfreq:dword;				// sampling frequency in Hz (passed from 2151intf.c) */
     lastreg:byte;
     tsample:byte;
+    amp:single;
 end;
   pYM2151=^YM2151;
 
