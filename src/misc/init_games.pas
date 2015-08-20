@@ -5,7 +5,7 @@ uses sysutils,main_engine,
   //Computer
   spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,
   //Console
-  nes,coleco,gb,
+  nes,coleco,gb,sms,
   //Arcade
   phoenix_hw,bombjack_hw,pacman_hw,mysteriousstones_hw,donkeykong_hw,
   greenberet_hw,blacktiger_hw,commando_hw,gng_hw,mikie_hw,shaolinsroad_hw,
@@ -40,7 +40,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=216;
+  games_cont=217;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum.zip';grid:0;company:'Sinclair'),
@@ -260,7 +260,8 @@ const
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco.zip';grid:1001;company:'Coleco'),
   (name:'GameBoy/GameBoy Color';year:'198X';snd:1;hi:false;zip:'';grid:1002;company:'Nintendo'),
-  (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-'));
+  (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-'),
+  (name:'Sega Master System';year:'1985';snd:1;hi:false;zip:'';grid:1004;company:'Sega'));
 
 var
   orden_games:array[1..games_cont] of word;
@@ -492,6 +493,7 @@ case numero of
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
   1003:principal1.CambiarMaquina(principal1.CHIP81);
+  1004:principal1.CambiarMaquina(principal1.SegaMS1);
 end;
 end;
 
@@ -716,6 +718,7 @@ principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
 principal1.GameBoy1.Checked:=false;
 principal1.chip81.checked:=false;
+principal1.segams1.checked:=false;
 //Resto
 principal1.BitBtn9.visible:=false;
 principal1.BitBtn10.visible:=false;
@@ -860,6 +863,7 @@ case tmaquina of
   1001:Cargar_coleco;
   1002:Cargar_gb;
   1003:Cargar_chip8;
+  1004:Cargar_SMS;
 end;
 end;
 
@@ -1733,6 +1737,10 @@ end;
 if sender=principal1.chip81 then begin
   tipo:=1003;
   principal1.CHIP81.Checked:=true;
+end;
+if sender=principal1.segams1 then begin
+  tipo:=1004;
+  principal1.segams1.Checked:=true;
 end;
 //Buscar el nombre de la maquina
 for f:=1 to games_cont do begin

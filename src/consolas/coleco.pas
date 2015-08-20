@@ -3,6 +3,7 @@ unit coleco;
 {
 23/12/12 Snapshot v2 - New Z80 CPU Engine
 04/03/13 Snapshot v2.1 - Añadido al snapshot el SN76496
+18/08/15 Snapshot v2.2 - Modificado el TMS
 }
 
 
@@ -63,10 +64,10 @@ function iniciar_coleco:boolean;
 begin
 iniciar_coleco:=false;
 iniciar_audio(false);
-screen_init(1,256+BORDER*2,192+BORDER*2);
-iniciar_video(256+BORDER*2,192+BORDER*2);
+screen_init(1,342,262);
+iniciar_video(342,262);
 //Main CPU
-main_z80:=cpu_z80.create(3579545,1);
+main_z80:=cpu_z80.create(3579545,262);
 main_z80.change_ram_calls(coleco_getbyte,coleco_putbyte);
 main_z80.change_io_calls(coleco_inbyte,coleco_outbyte);
 main_z80.init_sound(coleco_sound_update);
@@ -97,7 +98,7 @@ begin
  sn_76496_0.reset;
  TMS99XX_reset;
  reset_audio;
- fillchar(memoria[$2000],$E000,0);
+ fillchar(memoria[$6000],$1fff,0);
  njoymode:=false;
  nJoyState[0]:=0;
  nJoyState[1]:=$FFFF;
@@ -106,15 +107,17 @@ end;
 procedure coleco_principal;
 var
   frame:single;
+  f:word;
 begin
 init_controls(false,true,true,false);
 frame:=main_z80.tframes;
 while EmuStatus=EsRuning do begin
-  main_z80.run(frame);
-  frame:=frame+main_z80.tframes-main_z80.contador;
-  TMS99XX_Interrupt;
-  TMS99XX_refresh;
-  actualiza_trozo_simple(0,0,256+BORDER*2,192+BORDER*2,1);
+  for f:=0 to 261 do begin
+      main_z80.run(frame);
+      frame:=frame+main_z80.tframes-main_z80.contador;
+      TMS99XX_refresh(f);
+  end;
+  actualiza_trozo_simple(0,0,342,262,1);
   video_sync;
 end;
 end;
@@ -191,12 +194,30 @@ begin
   end;
 end;
 
+procedure coleco_interrupt(int:boolean);
+begin
+  if int then main_z80.pedir_nmi:=ASSERT_LINE
+    else main_z80.clear_nmi;
+end;
+
 procedure coleco_sound_update;
 begin
   sn_76496_0.update;
 end;
 
 function coleco_cargar_snapshot(data:pbyte;long:dword):boolean;
+type
+  old_tms=record
+      regs: array[0..7] of byte;
+      colour,pattern,nametbl,spriteattribute,spritepattern,colourmask,patternmask,nAddr:word;
+      latch,nVR,status_reg,nFGColor,nBGColor,wkey:byte;
+      int:boolean;
+      TMS9918A_VRAM_SIZE:word;
+      memory:array[0..$3FFF] of byte;
+      dBackMem:array[0..$FFFF] of byte;  //Calculo de las colisiones de los sprites
+      IRQ_Handler:procedure(int:boolean);
+      pant:byte;
+  end;
 var
   f:byte;
   cadena:string;
@@ -204,6 +225,7 @@ var
   ptemp,ptemp2:pbyte;
   main_z80_reg:npreg_z80;
   version:word;
+  told_tms:old_tms;
 begin
 coleco_cargar_snapshot:=false;
 longitud:=0;
@@ -327,8 +349,39 @@ while longitud<>long do begin
     inc(data,6);inc(longitud,6);
     getmem(ptemp,sizeof(TTMS99XX));
     decompress_zlib(data,comprimido,pointer(ptemp),descomprimido);
-    copymemory(TMS,ptemp,descomprimido);
+    case version of
+      {regs: array[0..7] of byte;
+      colour,pattern,nametbl,spriteattribute,spritepattern,colourmask,patternmask,nAddr:word;
+      latch,nVR,status_reg,nFGColor,nBGColor,wkey:byte;
+      int:boolean;
+      TMS9918A_VRAM_SIZE:word;
+      memory:array[0..$3FFF] of byte;
+      dBackMem:array[0..$FFFF] of byte;  //Calculo de las colisiones de los sprites
+      IRQ_Handler:procedure(int:boolean);
+      pant:byte; }
+      $100,$200,$210:begin
+            copymemory(@told_tms,ptemp,descomprimido);
+            copymemory(@tms.regs,@told_tms.regs,8);
+            tms.colour:=told_tms.colour;
+            tms.pattern:=told_tms.pattern;
+            tms.nametbl:=told_tms.nametbl;
+            tms.spriteattribute:=told_tms.spriteattribute;
+            tms.spritepattern:=told_tms.spritepattern;
+            tms.colourmask:=tms.colourmask;
+            tms.patternmask:=tms.patternmask;
+            tms.addr:=told_tms.nAddr;
+            tms.status_reg:=told_tms.status_reg;
+            tms.nFGColor:=told_tms.nFGColor;
+            tms.nBGColor:=told_tms.nBGColor;
+            tms.int:=told_tms.int;
+            tms.TMS9918A_VRAM_SIZE:=told_tms.TMS9918A_VRAM_SIZE;
+            copymemory(@tms.memory,@told_tms.memory,$4000);
+            tms.pant:=1;
+        end;
+      $220:copymemory(TMS,ptemp,descomprimido);
+    end;
     freemem(ptemp);
+    tms.IRQ_Handler:=coleco_interrupt;
     inc(data,comprimido);inc(longitud,comprimido);
     if tms.nBGColor=0 then paleta[0]:=0
       else paleta[0]:=paleta[tms.nBGColor];
@@ -433,8 +486,8 @@ buffer[0]:=ord('C'); //Nombre Bloque
 buffer[1]:=ord('L');
 buffer[2]:=ord('S');
 buffer[3]:=ord('N');
-buffer[4]:=2; //version 2.1, nuevos procesos load/save Z80
-buffer[5]:=$10;
+buffer[4]:=2; //version 2.2, modificado el TMS
+buffer[5]:=$20;
 buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0; //reservado
 copymemory(data,@buffer[0],10);
 inc(data,10);inc(long_final,10);
@@ -503,11 +556,6 @@ freemem(puntero);
 //Final
 write_file(nombre,datos_final,long_final);
 freemem(datos_final);
-end;
-
-procedure coleco_interrupt(int:boolean);
-begin
-  if int then main_z80.pedir_nmi:=PULSE_LINE;
 end;
 
 end.

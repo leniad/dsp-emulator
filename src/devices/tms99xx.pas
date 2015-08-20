@@ -6,30 +6,34 @@ uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
      main_engine,pal_engine;
 
   const
-    BORDER=8;
+    PIXELS_VISIBLES_TOTAL=342;
+    PIXELS_RIGHT_BORDER=8+26;
+    PIXELS_RIGHT_BORDER_VISIBLES=15;
+    PIXELS_RIGHT_BORDER_VISIBLES_TEXT=25;
+    PIXELS_LEFT_BORDER=2+14+8;
+    PIXELS_LEFT_BORDER_VISIBLES=13;
+    PIXELS_LEFT_BORDER_VISIBLES_TEXT=19;
+    LINEAS_TOP_BORDE=40;
   type
     TTMS99XX=record
-      regs: array[0..7] of byte;
-      colour,pattern,nametbl,spriteattribute,spritepattern,colourmask,patternmask:word;
-      nAddr:word;
-      latch,nVR,status_reg,nFGColor,nBGColor,wkey:byte;
-      int:boolean;
+      regs:array[0..7] of byte;
+      colour,pattern,nametbl,spriteattribute,spritepattern,colourmask,patternmask,addr:word;
+      modo_video,status_reg,buffer,nFGColor,nBGColor,FifthSprite:byte;
+      int,segundo_byte,espera_read:boolean;
       TMS9918A_VRAM_SIZE:word;
       memory:array[0..$3FFF] of byte;
-      dBackMem:array[0..$FFFF] of byte;  //Calculo de las colisiones de los sprites
       IRQ_Handler:procedure(int:boolean);
       pant:byte;
     end;
     PTMS99XX=^TTMS99XX;
 
 procedure TMS99XX_Init(pant:byte);
-procedure TMS99XX_refresh;
+procedure TMS99XX_refresh(linea:word);
 procedure TMS99XX_reset;
-procedure TMS99XX_Interrupt;
 function TMS99XX_vram_r:byte;
 function TMS99XX_register_r:integer;
-procedure TMS99XX_register_w(value:byte);
-procedure TMS99XX_vram_w(nValue:byte);
+procedure TMS99XX_register_w(valor:byte);
+procedure TMS99XX_vram_w(valor:byte);
 procedure TMS99XX_close;
 
 var
@@ -39,10 +43,12 @@ implementation
 
 procedure TMS99XX_reset;
 begin
-  fillchar(tms.regs[0],16,0);
-  tms.latch:=1;
-  tms.naddr:=0;
-  tms.nVR:=0;
+  fillchar(tms.regs[0],7,0);
+  tms.segundo_byte:=false;
+  tms.espera_read:=false;
+  tms.FifthSprite:=$1f;
+  tms.addr:=0;
+  tms.buffer:=0;
   tms.status_reg:=0;
   tms.nFGColor:=0;
   tms.nBGColor:=0;
@@ -51,12 +57,11 @@ begin
   tms.nametbl:=0;
   tms.spriteattribute:=0;
   tms.spritepattern:=0;
-  tms.colourmask:=0;
-  tms.patternmask:=0;
+  tms.colourmask:=$3fff;
+  tms.patternmask:=$3fff;
   tms.int:=false;
   tms.TMS9918A_VRAM_SIZE:=$3FFF;
   fillchar(tms.memory[0],$4000,0);
-  fillchar(tms.dBackMem[0],$10000,0);
   paleta[0]:=0;
 end;
 
@@ -83,32 +88,401 @@ tms.pant:=pant;
 TMS99XX_reset;
 end;
 
+procedure TMS99XX_Interrupt;
+var
+  b:boolean;
+begin
+b:=((tms.regs[1] and $20)<>0) and ((tms.status_reg and $80)<>0);
+if b<>tms.int then begin
+    tms.int:=b;
+    if @tms.IRQ_Handler<>nil then tms.IRQ_Handler(tms.INT);
+end;
+end;
+
+procedure draw_sprites(linea:byte);
+var
+  sprite_size,sprite_mag,sprite_height,num_sprites,sprattr,spr_y:byte;
+  spr_x,sprcode,sprcol,pattern,s,i,z:byte;
+  pataddr:word;
+  spr_drawn:array[0..(32+256+32)-1] of byte;
+  fifth_encountered:boolean;
+  colission_index:integer;
+begin
+  if (tms.regs[1] and 2)<>0 then sprite_size:=16
+    else sprite_size:=8;
+  sprite_mag:=tms.regs[1] and 1;
+  sprite_height:=sprite_size*(sprite_mag+1);
+  fillchar(spr_drawn[0],32+256+32,0);
+  num_sprites:=0;
+  fifth_encountered:=false;
+  for sprattr:=0 to 31 do begin
+			spr_y:=tms.memory[tms.spriteattribute+(sprattr*4)];
+			tms.FifthSprite:=sprattr;
+			// Stop processing sprites */
+			if (spr_y=208) then break;
+			if (spr_y>$E0) then spr_y:=spr_y-256;
+			// vert pos 255 is displayed on the first line of the screen */
+			spr_y:=spr_y+1;
+			// is sprite enabled on this line? */
+			if ((spr_y<=linea) and (linea<(spr_y+sprite_height))) then begin
+					spr_x:= tms.memory[tms.spriteattribute+(sprattr*4)+1];
+					sprcode:=tms.memory[tms.spriteattribute+(sprattr*4)+2];
+					sprcol:=tms.memory[tms.spriteattribute+(sprattr*4)+3];
+          if (sprite_size=16) then pataddr:=tms.spritepattern+(sprcode and $fc)*8
+            else pataddr:=tms.spritepattern+sprcode*8;
+					num_sprites:=num_sprites+1;
+					// Fifth sprite encountered? */
+					if (num_sprites=5) then begin
+						fifth_encountered:=true;
+						break;
+          end;
+					if (sprite_mag<>0) then pataddr:=pataddr+(((linea-spr_y) and $1F) shl 1)
+					  else pataddr:=pataddr+((linea-spr_y) and $0F );
+					pattern:=tms.memory[pataddr];
+					if (sprcol and $80)<>0 then spr_x:=spr_x-32;
+					 sprcol:=sprcol and $0f;
+					 for s:=0 to ((sprite_size-1) div 8) do begin
+						  for i:=0 to 7 do begin
+                if sprite_mag<>0 then colission_index:=spr_x+(i*2)+32
+                  else colission_index:=spr_x+i+32;
+							  for z:=0 to sprite_mag do begin
+                  // Check if pixel should be drawn */
+								  if (pattern and $80)<>0 then begin
+									  if ((colission_index>=32) and (colission_index<32+256)) then begin
+										  // Check for colission */
+ 										  if (spr_drawn[colission_index]<>0) then tms.status_reg:=tms.status_reg or $20;
+										  spr_drawn[colission_index]:=spr_drawn[colission_index] or $01;
+ 										  if (sprcol<>0) then begin
+                        // Has another sprite already drawn here? */
+											  if ((spr_drawn[colission_index] and $02)=0) then begin
+												  spr_drawn[colission_index]:=spr_drawn[colission_index] or $02;
+                          punbuf^:=paleta[sprcol];
+                          putpixel(colission_index-32+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea+LINEAS_TOP_BORDE,1,punbuf,tms.pant);
+                        end;
+                      end; //del if sprcol
+                  end; //del colision
+                end; //del if pattern $80
+              colission_index:=colission_index+1;
+              end; //del for z
+            pattern:=pattern shl 1;
+            end; //del for de la i
+						pattern:=tms.memory[pataddr+16];
+            if sprite_mag<>0 then spr_x:=spr_x+16
+              else spr_x:=spr_x+8;
+          end; //del for de la s
+      end; //del if dentro
+  end; //del for
+	// Update sprite overflow bits */
+  if (tms.status_reg and $40)=0 then begin
+    tms.status_reg:=(tms.status_reg and $e0) or tms.FifthSprite;
+				if (fifth_encountered and ((tms.status_reg  and $80)=0)) then tms.status_reg:=tms.status_reg or $40;
+  end;
+
+end;
+
+procedure draw_mode0(linea:byte);
+var
+  I,X,FC,BC,k:byte;
+  ptemp:pword;
+  patternptr,charcode,name_base:dword;
+  linea_real:byte;
+begin //256x192 --> Caracteres de 8x8
+ linea_real:=linea+LINEAS_TOP_BORDE;
+ single_line(0,linea_real,tms.nBGColor,PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,tms.pant);
+ single_line(256+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,tms.nBGColor,PIXELS_RIGHT_BORDER_VISIBLES+PIXELS_RIGHT_BORDER,tms.pant);
+ name_base:=tms.NameTbl+((linea div 8)*32);
+ //     for Y:=0 to 23 do begin
+ for x:=0 to 31 do begin
+     charcode:=tms.memory[name_base];
+     name_base:=name_base+1;
+     patternptr:=tms.pattern+(charcode shl 3)+(linea and 7);
+     bc:=tms.memory[tms.colour+(charcode shr 3)];
+     fc:=bc shr 4;
+     bc:=bc and $f;
+     //for i:=0 to 7 do begin
+     ptemp:=punbuf;
+     K:=tms.memory[patternptr];
+     //    patternptr:=patternptr+1;
+     if (k and $80)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and $40)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and $20)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and $10)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and 8)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and 4)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and 2)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and 1)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];
+     putpixel((x*8)+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,8,punbuf,tms.pant);
+     //end;
+ end;
+  //    end;
+end;
+
+procedure draw_mode1(linea:byte);
+var
+  name_base,s:word;
+  ptemp:pword;
+  x,fc,bc,k,linea_real:byte;
+begin //240x192 --> Caracteres de 6x8
+ linea_real:=linea+LINEAS_TOP_BORDE;
+ single_line(0,linea_real,tms.nBGColor,PIXELS_LEFT_BORDER_VISIBLES_TEXT+PIXELS_LEFT_BORDER,tms.pant);
+ single_line(240+PIXELS_LEFT_BORDER_VISIBLES_TEXT+PIXELS_LEFT_BORDER,linea_real,tms.nBGColor,PIXELS_RIGHT_BORDER_VISIBLES_TEXT+PIXELS_RIGHT_BORDER,tms.pant);
+ FC:=tms.nFGColor;
+ BC:=tms.nBGColor;
+ name_base:=tms.Nametbl+((linea div 8)*40);
+ for x:=0 to 39 do begin
+     s:=tms.pattern+(tms.memory[name_base] shl 3)+(linea and 7);
+     name_base:=name_base+1;
+     k:=tms.memory[s];
+     ptemp:=punbuf;
+     if (k and $80)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and $40)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and $20)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and $10)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and 8)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (k and 4)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];
+     putpixel((x*6)+PIXELS_LEFT_BORDER_VISIBLES_TEXT+PIXELS_LEFT_BORDER,linea_real,6,punbuf,tms.pant);
+ end;
+end;
+
+procedure draw_mode12(linea:byte);
+var
+  charcode,patternptr,name_base:word;
+  ptemp:pword;
+  x,fc,bc,linea_real,pattern:byte;
+begin //240x192 --> Caracteres de 6x8
+ linea_real:=linea+LINEAS_TOP_BORDE;
+ single_line(0,linea_real,tms.nBGColor,PIXELS_LEFT_BORDER_VISIBLES_TEXT+PIXELS_LEFT_BORDER,tms.pant);
+ single_line(240+PIXELS_LEFT_BORDER_VISIBLES_TEXT+PIXELS_LEFT_BORDER,linea_real,tms.nBGColor,PIXELS_RIGHT_BORDER_VISIBLES_TEXT+PIXELS_RIGHT_BORDER,tms.pant);
+ fc:=tms.nFGColor;
+ bc:=tms.nBGColor;
+ name_base:=tms.Nametbl+((linea div 8)*40);
+ for x:=0 to 39 do begin
+     charcode:=(tms.memory[name_base]+(linea shr 6)*256) and tms.patternmask;
+     name_base:=name_base+1;
+     patternptr:=tms.pattern+(charcode shl 3)+(linea and 7);
+     pattern:=tms.memory[patternptr];
+     ptemp:=punbuf;
+     if (pattern and $80)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (pattern and $40)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (pattern and $20)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (pattern and $10)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (pattern and 8)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
+     if (pattern and 4)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];
+     putpixel((x*6)+PIXELS_LEFT_BORDER_VISIBLES_TEXT+PIXELS_LEFT_BORDER,linea_real,6,punbuf,tms.pant);
+ end;
+end;
+
+procedure draw_mode2(linea:byte);
+var
+  x,fc,bc,linea_real:byte;
+  name_base,colour,pattern,patternptr,colourptr,charcode:word;
+  ptemp:pword;
+begin //256x192 --> Caracteres de 8x8
+ linea_real:=linea+LINEAS_TOP_BORDE;
+ single_line(0,linea_real,tms.nBGColor,PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,tms.pant);
+ single_line(256+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,tms.nBGColor,PIXELS_RIGHT_BORDER_VISIBLES+PIXELS_RIGHT_BORDER,tms.pant);
+ name_base:=tms.NameTbl+((linea div 8)*32);
+ for x:=0 to 31 do begin
+     charcode:=tms.memory[name_base]+(linea shr 6)*256;
+     name_base:=name_base+1;
+     colour:=charcode and tms.colourmask;
+     pattern:=charcode and tms.patternmask;
+     patternptr:=tms.pattern+(colour*8)+(linea and 7);
+     colourptr:=tms.colour+(pattern*8)+(linea and 7);
+     pattern:=tms.memory[patternptr];
+     bc:=tms.memory[colourptr];
+     fc:=bc shr 4;
+     bc:=bc and $F;
+     ptemp:=punbuf;
+     if (pattern and $80)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
+     if (pattern and $40)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
+     if (pattern and $20)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
+     if (pattern and $10)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
+     if (pattern and 8)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
+     if (pattern and 4)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
+     if (pattern and 2)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
+     if (pattern and 1)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];
+     putpixel((x*8)+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,8,punbuf,tms.pant);
+ end;
+end;
+
+procedure draw_mode3(linea:byte);
+var
+    fc,bg,x,linea_real:byte;
+    colorptr,charcode,name_base:word;
+    ptemp:pword;
+begin //256x192 --> Caracteres de 4x4 en dos bloques
+ linea_real:=linea+LINEAS_TOP_BORDE;
+ single_line(0,linea_real,tms.nBGColor,PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,tms.pant);
+ single_line(256+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,tms.nBGColor,PIXELS_RIGHT_BORDER_VISIBLES+PIXELS_RIGHT_BORDER,tms.pant);
+ name_base:=tms.nametbl+((linea div 8)*32);
+ for x:=0 to 31 do begin
+     charcode:=tms.memory[name_base];
+     name_base:=name_base+1;
+     colorptr:=tms.pattern+(charcode*8)+((linea shr 2) and 7);
+     FC:=tms.memory[colorptr] shr 4;
+     BG:=tms.memory[colorptr] and $f;
+     ptemp:=punbuf;
+     ptemp^:=paleta[fc];inc(ptemp); //(x+0)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+1)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+2)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+3)
+     ptemp^:=paleta[bg];inc(ptemp); //(x+4)
+     ptemp^:=paleta[bg];inc(ptemp); //(x+5)
+     ptemp^:=paleta[bg];inc(ptemp); //(x+6)
+     ptemp^:=paleta[bg]; //(x+7)
+     putpixel(x*8+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,8,punbuf,tms.pant);
+ end;
+ //end;
+end;
+
+procedure draw_modebogus(linea:byte);
+var
+    fc,bc,x,linea_real:byte;
+    ptemp:pword;
+begin //240x192 --> Caracteres de 6x8
+ linea_real:=linea+LINEAS_TOP_BORDE;
+ single_line(0,linea_real,tms.nBGColor,PIXELS_LEFT_BORDER_VISIBLES_TEXT+PIXELS_LEFT_BORDER,tms.pant);
+ single_line(240+PIXELS_LEFT_BORDER_VISIBLES_TEXT+PIXELS_LEFT_BORDER,linea_real,tms.nBGColor,PIXELS_RIGHT_BORDER_VISIBLES_TEXT+PIXELS_RIGHT_BORDER,tms.pant);
+ for x:=0 to 39 do begin
+     FC:=tms.nFGColor;
+     BC:=tms.nBGColor;
+     ptemp:=punbuf;
+     ptemp^:=paleta[fc];inc(ptemp); //(x+0)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+1)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+2)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+3)
+     ptemp^:=paleta[bc];inc(ptemp); //(x+4)
+     ptemp^:=paleta[bc]; //(x+5)
+     putpixel(x*8+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,8,punbuf,tms.pant);
+ end;
+end;
+
+procedure draw_mode23(linea:byte);
+var
+    fc,bg,x,linea_real:byte;
+    colorptr,charcode,name_base:word;
+    ptemp:pword;
+begin //256x192 --> Caracteres de 4x4 en dos bloques
+ linea_real:=linea+LINEAS_TOP_BORDE;
+ single_line(0,linea_real,tms.nBGColor,PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,tms.pant);
+ single_line(256+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,tms.nBGColor,PIXELS_RIGHT_BORDER_VISIBLES+PIXELS_RIGHT_BORDER,tms.pant);
+ name_base:=tms.nametbl+((linea div 8)*32);
+ for x:=0 to 31 do begin
+     charcode:=tms.memory[name_base];
+     name_base:=name_base+1;
+     colorptr:=tms.pattern+(((charcode+((linea shr 2) and 7)+((linea shr 6) shl 8)) and tms.patternmask) shl 3);
+     FC:=tms.memory[colorptr] shr 4;
+     BG:=tms.memory[colorptr] and $f;
+     ptemp:=punbuf;
+     ptemp^:=paleta[fc];inc(ptemp); //(x+0)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+1)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+2)
+     ptemp^:=paleta[fc];inc(ptemp); //(x+3)
+     ptemp^:=paleta[bg];inc(ptemp); //(x+4)
+     ptemp^:=paleta[bg];inc(ptemp); //(x+5)
+     ptemp^:=paleta[bg];inc(ptemp); //(x+6)
+     ptemp^:=paleta[bg]; //(x+7)
+     putpixel(x*8+PIXELS_LEFT_BORDER_VISIBLES+PIXELS_LEFT_BORDER,linea_real,8,punbuf,tms.pant);
+ end;
+end;
+
+{Lineas de video fisicas
+Active display       192
+Bottom border         24
+Bottom blanking        3
+Vertical sync          3
+Top blanking          13
+Top border            27
+Total                262
+
+Pixes fisicos dentro de la linea
+Active display 240 256
+Right border    25 15
+Right blanking   8 8
+Horiz sync      26 26
+Left blanking    2 2
+Color burst     14 14
+Left blanking    8 8
+Left border     19 13
+Total          342 342}
+procedure TMS99XX_refresh(linea:word);
+var
+  modo:byte;
+begin
+  //ESPERO UNA LINEA FISICA
+  //Pantalla apagada, solo pinto el color de fondo
+  if (tms.regs[1] and $40)=0 then begin
+    single_line(0,linea,tms.nBGColor,PIXELS_VISIBLES_TOTAL,tms.pant);
+    if linea=192 then begin
+                tms.status_reg:=tms.status_reg or $80;
+                TMS99XX_Interrupt;
+    end;
+    exit;
+  end;
+  case linea of
+     0..191:begin //Pantalla visible (192)
+               modo:=(tms.Regs[0] and 2) or ((tms.Regs[1] and $10) shr 4) or ((tms.Regs[1] and 8) shr 1);
+               case Modo of
+                    0:draw_mode0(linea);
+                    1:draw_mode1(linea);
+                    2:draw_mode2(linea);
+                    3:draw_mode12(linea);
+                    4:draw_mode3(linea);
+                    6:draw_mode23(linea);
+                    5,7:draw_modebogus(linea);
+               end;
+               if ((tms.regs[1] and $50)=$40) then draw_sprites(linea)
+                else tms.FifthSprite:=$1f;
+            end;
+     192:begin //Borde inferior y activar las IRQs
+              single_line(0,linea+LINEAS_TOP_BORDE,tms.nBGColor,PIXELS_VISIBLES_TOTAL,tms.pant);
+              tms.status_reg:=tms.status_reg or $80;
+              TMS99XX_Interrupt;
+         end;
+              //Borde inferior y resto
+     193..221:single_line(0,linea+LINEAS_TOP_BORDE,tms.nBGColor,PIXELS_VISIBLES_TOTAL,tms.pant);
+              //BB 3 + VS 3 + TB 13
+     //Borde superior
+     222..261:single_line(0,linea-222,tms.nBGColor,PIXELS_VISIBLES_TOTAL,tms.pant);
+  end;
+end;
+
+procedure update_table_masks;
+begin
+	tms.colourmask:=((tms.regs[3] and $7f) shl 3) or 7;
+	//on 91xx family, the colour table mask doesn't affect the pattern table mask
+	tms.patternmask:=((tms.regs[4] and 3) shl 8) or $ff;
+end;
+
 //change register
-procedure OutByte(nAddr,Val:byte);
+procedure change_reg(addr,Val:byte);
 const
   Mask:array[0..7] of byte=($03,$fb,$0f,$ff,$07,$7f,$07,$ff);
 begin
-  val:=val and mask[naddr];
-  tms.regs[nAddr]:=Val;
-  case nAddr of
-     0:if (val and 2)<>0 then begin
-			    tms.colour:=((tms.Regs[3] and $80)*64) and tms.TMS9918A_VRAM_SIZE;
-			    tms.colourmask:=(tms.Regs[3] and $7f)*8 or 7;
-			    tms.pattern:=((tms.Regs[4] and 4)*2048) and tms.TMS9918A_VRAM_SIZE;
-			    tms.patternmask:=(tms.Regs[4] and 3)*256 or (tms.colourmask and 255);
-		    end else begin
-			    tms.colour:=(tms.Regs[3]*64) and tms.TMS9918A_VRAM_SIZE;
-			    tms.pattern:=(tms.Regs[4]*2048) and tms.TMS9918A_VRAM_SIZE;
+  val:=val and mask[addr];
+  tms.regs[addr]:=Val;
+  case addr of
+     0:begin
+	        if (val and 2)<>0 then begin
+			      tms.colour:=((tms.Regs[3] and $80)*64) and tms.TMS9918A_VRAM_SIZE;
+			      tms.pattern:=((tms.Regs[4] and 4)*2048) and tms.TMS9918A_VRAM_SIZE;
+            update_table_masks;
+		      end else begin
+			      tms.colour:=(tms.Regs[3]*64) and tms.TMS9918A_VRAM_SIZE;
+			      tms.pattern:=(tms.Regs[4]*2048) and tms.TMS9918A_VRAM_SIZE;
+          end;
+          tms.modo_video:=(tms.Regs[0] and 2) or ((tms.Regs[1] and $10) shr 4) or ((tms.Regs[1] and 8) shr 1);
        end;
      1:begin
-        tms.int:=((((tms.regs[1] xor val) and val and $20)<>0) and ((tms.Status_reg and $80)<>0));
-        if @tms.IRQ_Handler<>nil then tms.IRQ_Handler(tms.int);
+        TMS99XX_Interrupt;
+        tms.modo_video:=(tms.Regs[0] and 2) or ((tms.Regs[1] and $10) shr 4) or ((tms.Regs[1] and 8) shr 1);
        end;
-     2:tms.NameTbl:=(val shl 10) and tms.TMS9918A_VRAM_SIZE;
+     2:tms.NameTbl:=(val*1024) and tms.TMS9918A_VRAM_SIZE;
      3:begin
         if (tms.Regs[0] and 2)<>0 then begin
             tms.colour:=((val and $80)*64) and tms.TMS9918A_VRAM_SIZE;
-            tms.colourmask:=(val and $7f)*8 or 7;
+            update_table_masks;
         end else begin
             tms.colour:=(val*64) and tms.TMS9918A_VRAM_SIZE;
         end;
@@ -116,7 +490,7 @@ begin
        end;
      4:if (tms.Regs[0] and 2)<>0 then begin
             tms.pattern:=((val and 4)*2048) and tms.TMS9918A_VRAM_SIZE;
-            tms.patternmask:=(val and 3)*256 or 255;
+            update_table_masks;
         end else begin
             tms.pattern:=(val*2048) and tms.TMS9918A_VRAM_SIZE;
         end;
@@ -138,453 +512,71 @@ begin
   end;
 end;
 
-procedure draw_sprites;
-var
-    attributeptr,patternptr,ptemp:pbyte;
-    c:byte;
-    p,x,y,size,i,j,large,yy,xx,illegalsprite,illegalspriteline:integer;
-    limit:array[0..191] of integer;
-    line,line2:word;
-    tmp:integer;
+
+function TMS99XX_register_r:integer; //GetStatus
 begin
-    fillchar(tms.dBackMem[0],$10000,0);
-    attributeptr:=@tms.memory[0];
-    inc(attributeptr,tms.spriteattribute);
-    if (tms.Regs[1] and 2)<>0 then size:=16
-      else size:=8;
-    large:=tms.Regs[1] and 1;
-    for x:=0 to 191 do limit[x]:=4;
-    tms.Status_Reg:=$80;
-    illegalspriteline:=255;
-    illegalsprite:=0;
-    for p:=0 to 31 do begin
-        y:=attributeptr^;
-        inc(attributeptr);
-        if (y=208) then break;
-        if (y>208) then y:=-(not(y and 255))
-          else y:=y+1;
-        x:=attributeptr^;
-        inc(attributeptr);
-        patternptr:=@tms.memory[0];
-        if size=16 then tmp:=tms.spritepattern+((attributeptr^ and $fc)*8)
-          else tmp:=tms.spritepattern+(attributeptr^*8);
-        inc(patternptr,tmp);
-        inc(attributeptr);
-        c:=attributeptr^ and $0f;
-        if (attributeptr^ and $80)<>0 then x:=x-32;
-        inc(attributeptr);
-        if (large=0) then begin // draw sprite (not enlarged) */
-            for yy:=y to (y+size)-1 do begin
-                if ((yy < 0) or (yy > 191) ) then continue;
-                if (limit[yy]=0) then begin
-                    // illegal sprite line */
-                    if (yy < illegalspriteline) then begin
-                        illegalspriteline:= yy;
-                        illegalsprite:= p;
-                    end else begin
-                        if (illegalspriteline=yy) then begin
-                            if (illegalsprite > p) then begin
-                              illegalsprite:= p;
-                            end;
-                        end;
-                    end;
-                continue;
-                end else begin
-                  limit[yy]:=limit[yy]-1;
-                end;
-                ptemp:=patternptr;
-                inc(ptemp,yy-y);
-                line:=256*ptemp^;
-                inc(ptemp,16);
-                line:=line+ptemp^;
-                for xx:=x to (x+size)-1 do begin
-                    if (line and $8000)<>0 then begin
-                        if ((xx >= 0) and (xx < 256)) then begin
-                            if (tms.dBackMem[yy*256+xx])<>0 then begin
-                                tms.Status_Reg:=tms.status_reg or $20;
-                            end else begin
-                                tms.dBackMem[yy*256+xx]:=$01;
-                            end;
-                            if ((c<>0) and ((tms.dBackMem[yy*256+xx] and $02)=0)) then begin
-                            	  tms.dBackMem[yy*256+xx]:=tms.dBackMem[yy*256+xx] or $02;
-                                punbuf^:=paleta[c];
-                            	  putpixel(xx+BORDER,yy+BORDER,1,punbuf,tms.pant);
-                            end;
-                        end;
-                    end;
-                    line:=line*2;
-                end;
-            end;
-        end else begin  // draw enlarged sprite */
-            for i:=0 to size-1 do begin
-                yy:=y+i*2;
-                ptemp:=patternptr;
-                inc(ptemp,i);
-                line2:=256*ptemp^;
-                inc(ptemp,16);
-                line2:=line2+ptemp^;
-                for j:=0 to 1 do begin
-                    if ((yy>=0) and (yy<=191)) then begin
-                        if (limit[yy]=0) then begin
-                            // illegal sprite line */
-                            if (yy < illegalspriteline) then begin
-                                illegalspriteline:= yy;
-                                illegalsprite:=p;
-                            end else begin
-                              if (illegalspriteline=yy) then begin
-                                if (illegalsprite > p) then begin
-                                    illegalsprite:= p;
-                                end;
-                              end;
-                            end;
-                        continue;
-                        end else begin
-                          limit[yy]:=limit[yy]-1;
-                        end;
-                        line:=line2;
-                        xx:=x;
-                        repeat
-                            if (line and $8000)<>0 then begin
-                                if ((xx >=0) and (xx < 256)) then begin
-                                    if (tms.dBackMem[yy*256+xx]<>0) then begin
-                                        tms.Status_Reg:=tms.Status_Reg or $20;
-                                    end else begin
-                                        tms.dBackMem[yy*256+xx]:= $01;
-                                    end;
-		                                if ((c<>0) and ((tms.dBackMem[yy*256+xx] and $02)=0)) then begin
-                		            	      tms.dBackMem[yy*256+xx]:=tms.dBackMem[yy*256+xx] or $02;
-		                            	      punbuf^:=paleta[c];
-                            	          putpixel(xx+BORDER,yy+BORDER,1,punbuf,tms.pant);
-                                    end;
-                                end;
-                                if (((xx+1)>=0) and ((xx+1) < 256)) then begin
-                                    if (tms.dBackMem[yy*256+xx+1])<>0 then begin
-                                        tms.Status_Reg:=tms.Status_Reg or $20;
-                                    end else begin
-                                        tms.dBackMem[yy*256+xx+1]:=$01;
-                                    end;
-		                                if ((c<>0) and ((tms.dBackMem[yy*256+xx+1] and $02)=0)) then begin
-                		            	      tms.dBackMem[yy*256+xx+1]:=tms.dBackMem[yy*256+xx+1] or $02;
-                                        punbuf^:=paleta[c];
-                            	          putpixel(xx+1+BORDER,yy+BORDER,1,punbuf,tms.pant);
-                                    end;
-                                end;
-                            end;
-                            line:=line*2;
-                            xx:=xx+2;
-                        until (xx=x+size*2);
-                    end;
-                    yy:=yy+1;
-                end;
-            end;
-        end;
-    end;
-    if (illegalspriteline=255) then begin
-        if p>31 then tms.Status_Reg:=tms.Status_Reg or 31
-          else  tms.Status_Reg:=tms.Status_Reg or p;
-    end else begin
-        tms.Status_Reg:=tms.Status_Reg or $40+illegalsprite;
-    end;
+  TMS99XX_register_r:=tms.status_reg;
+  tms.status_reg:=tms.FifthSprite;
+  tms.segundo_byte:=false;
+  TMS99XX_Interrupt;
 end;
 
-procedure draw_mode0;
-var
-  I,X,Y,FC,BC,k:byte;
-  ptemp:pword;
-  patternptr,charcode,name_base:dword;
-begin
-     name_base:=tms.NameTbl;
-      for Y:=0 to 23 do begin
-        for x:=0 to 31 do begin
-          charcode:=tms.memory[name_base];
-          name_base:=name_base+1;
-          patternptr:=tms.pattern+charcode shl 3;
-          bc:=tms.memory[tms.colour+charcode shr 3];
-          fc:=bc shr 4;
-          bc:=bc and $f;
-          for i:=0 to 7 do begin
-            ptemp:=punbuf;
-            K:=tms.memory[patternptr];
-            patternptr:=patternptr+1;
-            if (k and $80)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and $40)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and $20)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and $10)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and 8)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and 4)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and 2)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and 1)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];
-            putpixel((x*8)+BORDER,(Y shl 3+i)+BORDER,8,punbuf,tms.pant);
-          end;
-        end;
-      end;
-end;
+//http://bifi.msxnet.org/msxnet/tech/tms9918a.txt
+//http://bifi.msxnet.org/msxnet/tech/tmsposting.txt
 
-procedure draw_mode1;
-var
-  I,X,Y,name_base:word;
-  ptemp:pword;
-  FC,BC:byte;
-  S,k:integer;
+procedure TMS99XX_register_w(valor:byte);
 begin
-      FC:=tms.nFGColor;
-      BC:=tms.nBGColor;
-      name_base:=tms.Nametbl;
-      for Y:=0 to 23 do begin    // 6x8
-        for x:=0 to 39 do begin
-          S:=tms.pattern+(tms.memory[name_base] shl 3);
-          for i:=0 to 7 do begin
-            K:=tms.memory[S];
-            ptemp:=punbuf;
-            if (k and $80)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and $40)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and $20)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and $10)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and 8)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (k and 4)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];
-            putpixel((6*X)+BORDER, (Y shl 3+i)+BORDER, 6,punbuf,tms.pant);
-            s:=s+1;
-          end;
-          name_base:=name_base+1;
+{Definicion de los dos bytes escritos
+Byte #0		V7	V6	V5	V4	V3	V2	V1	V0
+Byte #1		1(CR)	?	?	?	?	R2	R1	R0
+CR --> Si es 1 cambiar registro
+	VX --> Valor (1 byte)
+	RX --> Registro
+CR --> 0 cambiar direccion L/E (ver mas abajo la descripcion)
+}
+if not(tms.segundo_byte) then begin
+  tms.addr:=((tms.addr and $ff00) or valor) and tms.TMS9918A_VRAM_SIZE;
+  tms.segundo_byte:=true;
+end else begin
+  tms.segundo_byte:=false;
+  tms.addr:=((tms.addr and $ff) or (valor shl 8)) and tms.TMS9918A_VRAM_SIZE;
+  case (valor and $C0) of
+    $80:change_reg(valor and $7,tms.addr and $ff);
+    $00:begin
+          tms.buffer:=tms.memory[tms.addr];
+          tms.espera_read:=true;
         end;
-      end;
-end;
-
-procedure draw_mode12;
-var
-  I,X,Y,name_base:word;
-  ptemp:pword;
-  FC,BC,pattern:byte;
-  charcode,patternptr:word;
-begin
-      FC:=tms.nFGColor;
-      BC:=tms.nBGColor;
-      name_base:=tms.Nametbl;
-      for Y:=0 to 23 do begin
-        for x:=0 to 39 do begin
-          charcode:=(tms.memory[name_base]+(y shr 3)*256) and tms.patternmask;
-          name_base:=name_base+1;
-          patternptr:=tms.pattern+(charcode shl 3);
-          for i:=0 to 7 do begin
-            pattern:=tms.memory[patternptr];
-            patternptr:=patternptr+1;
-            ptemp:=punbuf;
-            if (pattern and $80)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (pattern and $40)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (pattern and $20)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (pattern and $10)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (pattern and 8)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
-            if (pattern and 4)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];
-            putpixel((6*X)+BORDER, (Y shl 3+i)+BORDER, 6,punbuf,tms.pant);
-          end;
-        end;
-      end;
-end;
-
-procedure draw_mode2;
-var
-  i,x,y,fc,bc:byte;
-  name_base,colour,pattern,patternptr,colourptr,charcode:word;
-  ptemp:pword;
- begin
-      name_base:=tms.NameTbl;
-      for y:=0 to 23 do begin
-          for x:=0 to 31 do begin
-            charcode:=tms.memory[name_base]+(y shr 3)*256;
-            name_base:=name_base+1;
-            colour:=charcode and tms.colourmask;
-            pattern:=charcode and tms.patternmask;
-            patternptr:=tms.pattern+(colour*8);
-            colourptr:=tms.colour+(pattern*8);
-            for i:=0 to 7 do begin
-              pattern:=tms.memory[patternptr];
-              patternptr:=patternptr+1;
-              bc:=tms.memory[colourptr];
-              colourptr:=colourptr+1;
-              fc:=bc shr 4;
-              bc:=bc and $F;
-              ptemp:=punbuf;
-              if (pattern and $80)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-              if (pattern and $40)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-              if (pattern and $20)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-              if (pattern and $10)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-              if (pattern and 8)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-              if (pattern and 4)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-              if (pattern and 2)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
-              if (pattern and 1)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];
-              putpixel((x shl 3)+BORDER,(y shl 3)+i+BORDER,8,punbuf,tms.pant);
-            end;
-          end;
-      end;
-end;
-
-procedure draw_mode3;
-var
-    fc,x,y,i,h:byte;
-    patternptr,charcode,name_base:word;
-begin
-    name_base:=tms.nametbl;
-    for y:=0 to 23 do begin
-        for x:=0 to 31 do begin
-            charcode:=tms.memory[name_base];
-            name_base:=name_base+1;
-            patternptr:=tms.pattern+(charcode*8)+(y and 3)*2;
-            for i:=0 to 1 do begin
-                FC:=tms.memory[patternptr] shr 4;
-                patternptr:=patternptr+1;
-                for h:=0 to 3 do begin
-                    punbuf^:=paleta[fc];
-                    putpixel((X shl 3)+0+BORDER,(y shl 3)+i*4+h+BORDER,1,punbuf,tms.pant);
-                    putpixel((X shl 3)+1+BORDER,(y shl 3)+i*4+h+BORDER,1,punbuf,tms.pant);
-                    putpixel((X shl 3)+2+BORDER,(y shl 3)+i*4+h+BORDER,1,punbuf,tms.pant);
-                    putpixel((X shl 3)+3+BORDER,(y shl 3)+i*4+h+BORDER,1,punbuf,tms.pant);
-                    putpixel((X shl 3)+4+BORDER,(y shl 3)+i*4+h+BORDER,1,punbuf,tms.pant);
-                    putpixel((X shl 3)+5+BORDER,(y shl 3)+i*4+h+BORDER,1,punbuf,tms.pant);
-                    putpixel((X shl 3)+6+BORDER,(y shl 3)+i*4+h+BORDER,1,punbuf,tms.pant);
-                    putpixel((X shl 3)+7+BORDER,(y shl 3)+i*4+h+BORDER,1,punbuf,tms.pant);
-                end;
-            end;
-        end;
-    end;
-end;
-
-procedure draw_modebogus;
-var
-    fc,bc:byte;
-    x,y,n,xx:byte;
-begin
-    fc:=tms.nFGColor;
-    bc:=tms.nBGColor;
-    for y:=0 to 191 do begin
-        xx:=0;
-        n:=8;
-        punbuf^:=paleta[bc];
-        while (n<>0) do begin
-          n:=n-1;
-          putpixel(xx+BORDER,y+BORDER,1,punbuf,tms.pant);
-          xx:=xx+1;
-        end;
-        for x:=0 to 39 do begin
-            n:=4;
-            punbuf^:=paleta[fc];
-            while (n<>0) do begin
-              n:=n-1;
-              putpixel(xx+BORDER,y+BORDER,1,punbuf,tms.pant);
-              xx:=xx+1;
-            end;
-            n:=2;
-            punbuf^:=paleta[bc];
-            while (n<>0) do begin
-              n:=n-1;
-              putpixel(xx+BORDER,y+BORDER,1,punbuf,tms.pant);
-              xx:=xx+1;
-            end;
-        end;
-        n:=8;
-        punbuf^:=paleta[bc];
-        while (n<>0) do begin
-          n:=n-1;
-          putpixel(xx+BORDER,y+BORDER,1,punbuf,tms.pant);
-          xx:=xx+1;
-        end;
-    end;
-end;
-
-procedure refresh_border(bcolor:byte);
-var
-  f:word;
-begin
-for f:=0 to (BORDER-1) do begin
-  single_line(0,f,bcolor,256+(BORDER*2),tms.pant);
-  single_line(0,192+BORDER+f,bcolor,256+(BORDER*2),tms.pant);
-end;
-for f:=BORDER to 191+BORDER do begin
-  single_line(0,f,bcolor,BORDER,tms.pant);
-  single_line(256+BORDER,f,bcolor,BORDER,tms.pant);
+    $40:tms.espera_read:=false;
+  end;
 end;
 end;
 
-procedure TMS99XX_refresh;
-var
-  modo:byte;
+{Definicion del word de la direccion
+Byte #0		A7	A6	A5	A4	A3	A2	A1	A0
+Byte #1		0	R/W	A13	A12	A11	A10	A9	A8
+AX --> Direccion
+R/W --> 0 para leer y 1 para escribir}
+
+function TMS99XX_vram_r:byte;  //ReadDataPort
 begin
-  if (tms.regs[1] and $40)=0 then begin
-    fill_full_screen(0,tms.nBGColor);
+  //Si el bit R/W esta a 1 (escritura) que hago???
+  if not(tms.espera_read) then begin
+    TMS99XX_vram_r:=$ff;
     exit;
   end;
-  refresh_border(tms.nBGColor);
-  modo:=(tms.Regs[0] and 2) or ((tms.Regs[1] and $10) shr 4) or ((tms.Regs[1] and 8) shr 1);
-  case Modo of
-    0:draw_mode0;
-    1:draw_mode1;
-    2:draw_mode2;
-    3:draw_mode12;
-    4:draw_mode3;
-    5,7:draw_modebogus;
-  end;
-  if((tms.regs[1] and $50)=$40) then draw_sprites;
+  TMS99XX_vram_r:=tms.buffer;
+  tms.buffer:=tms.memory[tms.addr];
+  tms.addr:=(tms.addr+1) and tms.TMS9918A_VRAM_SIZE;
+  tms.segundo_byte:=false;
 end;
 
-function TMS99XX_register_r:integer;
+procedure TMS99XX_vram_w(valor:byte);
 begin
-     TMS99XX_register_r:=tms.status_reg;
-     tms.status_reg:=tms.status_reg and $5F;
-     tms.latch:=1;
-     if tms.int then begin
-      tms.int:=false;
-      if @tms.IRQ_Handler<>nil then tms.IRQ_Handler(tms.INT);
-     end;
-end;
-
-procedure TMS99XX_register_w(value:byte);
-begin
-if tms.latch<>0 then begin
-  tms.nVR:=value;
-  tms.latch:=0;
-end else begin
-  tms.latch:=1;
-  case (value and $C0) of
-    $80:OutByte(value and $7,tms.nVR);
-    $00,$40:begin
-              tms.nAddr:=(tms.nVR or (value shl 8)) and tms.TMS9918A_VRAM_SIZE;
-              tms.wkey:=value and $40;
-            end;
-  end;
-end;
-end;
-
-procedure TMS99XX_Interrupt;
-var
-  b:boolean;
-begin
-b:=((tms.regs[1] and $20)<>0);
-if b<>tms.int then begin
-    tms.int:=b;
-    if @tms.IRQ_Handler<>nil then tms.IRQ_Handler(tms.INT);
-    tms.status_reg:=tms.status_reg or $80;
-end;
-end;
-
-function TMS99XX_vram_r:byte;
-begin
-  TMS99XX_vram_r:=tms.memory[tms.nAddr];
-  tms.nAddr:=(tms.nAddr+1) and tms.TMS9918A_VRAM_SIZE; // neue adresse setzten
-end;
-
-procedure WriteVRAM(nValue:byte);
-begin
-if tms.wkey<>0 then begin
-  tms.memory[tms.nAddr]:=nValue;
-  tms.nAddr:=(tms.nAddr+1) and tms.TMS9918A_VRAM_SIZE;
-end else begin
-  tms.nAddr:=(tms.nAddr+1) and tms.TMS9918A_VRAM_SIZE;
-  tms.memory[tms.nAddr]:=nValue;
-end;
-end;
-
-procedure TMS99XX_vram_w(nValue:byte);
-begin
-if (tms.latch<>0) then WriteVram(nValue);
+if tms.espera_read then exit;
+tms.memory[tms.addr]:=valor;
+tms.addr:=(tms.addr+1) and tms.TMS9918A_VRAM_SIZE;
+tms.segundo_byte:=false;
+tms.buffer:=valor;
 end;
 
 procedure TMS99XX_close;

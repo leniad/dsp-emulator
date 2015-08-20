@@ -330,7 +330,7 @@ begin
  main_m6800.reset;
  namco_sound_reset;
  YM2151_reset(0);
- if main_vars.tipo_maquina=124 then namco_63701x_close;
+ if main_vars.tipo_maquina=124 then namco_63701x_reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;

@@ -2629,6 +2629,10 @@ object principal1: Tprincipal1
           Caption = 'CHIP 8'
           OnClick = CambiarMaquina
         end
+        object SegaMS1: TMenuItem
+          Caption = 'Sega Master System'
+          OnClick = CambiarMaquina
+        end
       end
     end
     object uProcesador1: TMenuItem
@@ -2659,7 +2663,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010105000700240320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000700280320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

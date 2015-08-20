@@ -235,7 +235,8 @@ uses
   ziputils2 in '..\misc\ziputils2.pas',
   freekick_hw in '..\arcade\freekick_hw.pas',
   boogiewings_hw in '..\arcade\boogiewings_hw.pas',
-  pinballaction_hw in '..\arcade\pinballaction_hw.pas';
+  pinballaction_hw in '..\arcade\pinballaction_hw.pas',
+  sms in '..\consolas\sms.pas';
 
 {$R *.res}
 
