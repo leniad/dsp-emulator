@@ -19,6 +19,7 @@ function circusc_snd_getbyte(direccion:word):byte;
 procedure circusc_snd_putbyte(direccion:word;valor:byte); 
 procedure circusc_sound; 
 
+implementation
 const
         circusc_rom:array[0..5] of tipo_roms=(
         (n:'380_s05.3h';l:$2000;p:$6000;crc:$48feafcf),(n:'380_r04.4h';l:$2000;p:$8000;crc:$c283b887),
@@ -51,8 +52,6 @@ var
  mem_opcodes:array[0..$9fff] of byte;
  sound_latch,scroll_x,linea:byte;
  spritebank:word;
-
-implementation
 
 procedure Cargar_circusc;
 begin

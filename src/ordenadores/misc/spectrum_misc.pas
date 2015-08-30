@@ -839,9 +839,9 @@ if principal1.savedialog1.execute then begin
           3:correcto:=grabar_z80(nombre,true);
           4:correcto:=grabar_sna(nombre);
         end;
-        if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
+        if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0)
+          else Directory.spectrum_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
 end;
-Directory.spectrum_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
 end;
 
 procedure spectrum_despues_instruccion(estados_t:byte);

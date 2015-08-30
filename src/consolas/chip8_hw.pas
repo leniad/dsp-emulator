@@ -5,6 +5,16 @@ uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sysutils,dialogs,
      sound_engine,file_engine,pal_engine,gfx_engine,misc_functions;
 
+procedure Cargar_chip8;
+procedure chip8_principal;
+function iniciar_chip8:boolean;
+procedure reset_chip8;
+procedure cerrar_chip8;
+function abrir_chip8:boolean;
+
+implementation
+uses principal;
+
 const
   font:array[0..79] of byte= (
 		$F0, $90, $90, $90, $F0,	// 0
@@ -41,14 +51,6 @@ const
 		$FF, $FF, $C0, $C0, $FF, $FF, $C0, $C0, $FF, $FF, // E
 		$FF, $FF, $C0, $C0, $FF, $FF, $C0, $C0, $C0, $C0);  // F
 
-procedure Cargar_chip8;
-procedure chip8_principal;
-function iniciar_chip8:boolean;
-procedure reset_chip8;
-procedure cerrar_chip8;
-function abrir_chip8:boolean;
-//procedure coleco_grabar_snapshot;
-
 var
   i,pc:word;
   regs,hp_regs:array[0..$f] of byte;
@@ -56,9 +58,6 @@ var
   key:array[0..$f] of boolean;
   screen_val:array[0..127,0..63] of byte;
   stack:array[0..$f] of word;
-
-implementation
-uses principal;
 
 procedure Cargar_chip8;
 begin

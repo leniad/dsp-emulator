@@ -19,6 +19,7 @@ procedure bionicc_snd_putbyte(direccion:word;valor:byte);
 procedure bionicc_sound_update;
 procedure bionicc_snd_irq;
 
+implementation
 const
         bionicc_rom:array[0..4] of tipo_roms=(
         (n:'tse_02.1a';l:$10000;p:0;crc:$e4aeefaa),(n:'tse_04.1b';l:$10000;p:$1;crc:$d0c8ec75),
@@ -55,8 +56,6 @@ var
  txt_ram:array[0..$7ff] of word;
  input:array[0..5] of byte;
  sprite_ram:array[0..$27f] of word;
-
-implementation
 
 procedure Cargar_bionicc;
 begin

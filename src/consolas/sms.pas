@@ -323,8 +323,8 @@ while longitud<>long do begin
     copymemory(TMS,ptemp,descomprimido);
     freemem(ptemp);
     inc(data,comprimido);inc(longitud,comprimido);
-    if tms.nBGColor=0 then paleta[0]:=0
-      else paleta[0]:=paleta[tms.nBGColor];
+    if tms.bgcolor=0 then paleta[0]:=0
+      else paleta[0]:=paleta[tms.bgcolor];
   end;
   if cadena='7649' then begin
     copymemory(@comprimido,data,4);

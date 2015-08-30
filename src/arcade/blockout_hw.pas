@@ -19,6 +19,7 @@ procedure blockout_snd_putbyte(direccion:word;valor:byte);
 procedure blockout_sound_update;
 procedure ym2151_snd_irq(irqstate:byte);
 
+implementation
 const
         blockout_rom:array[0..2] of tipo_roms=(
         (n:'bo29a0-2.bin';l:$20000;p:0;crc:$b0103427),(n:'bo29a1-2.bin';l:$20000;p:$1;crc:$5984d5a2),());
@@ -41,8 +42,6 @@ var
  video_ram_buff:array[0..$1ffff] of boolean;
  fvideo_ram:array[0..$7fff] of byte;
  sound_latch:byte;
-
-implementation
 
 procedure Cargar_blockout;
 begin

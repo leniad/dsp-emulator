@@ -18,6 +18,7 @@ function getbyte_snd_btime(direccion:word):byte;
 procedure putbyte_snd_btime(direccion:word;valor:byte);
 procedure btime_sound_update;
 
+implementation
 const
         btime_rom:array[0..4] of tipo_roms=(
         (n:'aa04.9b';l:$1000;p:$c000;crc:$368a25b5),(n:'aa06.13b';l:$1000;p:$d000;crc:$b4ba400d),
@@ -42,8 +43,6 @@ const
         (mask:$6;name:'Bonus Life';number:4;dip:((dip_val:$6;dip_name:'10k'),(dip_val:$4;dip_name:'15k'),(dip_val:$2;dip_name:'20k'),(dip_val:$0;dip_name:'30k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Enemies';number:2;dip:((dip_val:$8;dip_name:'4'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'End of Level Pepper';number:2;dip:((dip_val:$10;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-
-implementation
 
 var
   memoria_dec:array[0..$ffff] of byte;

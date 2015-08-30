@@ -2,6 +2,10 @@ unit bagman_pal;
 
 interface
 
+procedure bagman_pal16r6_w(posicion,valor:byte);
+function bagman_pal16r6_r:byte;
+procedure bagman_update_pal;
+
 const
   fusemap:array[0..(64*32)-1] of byte=(
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -77,16 +81,11 @@ var
 	// 8 output pins (actually 6 output and 2 input/output)*/
 	outvalue:array[0..7] of byte;
 
-procedure bagman_pal16r6_w(posicion,valor:byte);
-function bagman_pal16r6_r:byte;
-procedure bagman_update_pal;
-
 implementation
-
-procedure bagman_update_pal;inline;
+procedure bagman_update_pal;
 var
   rowoffs:word;
-  row, column, val:byte;
+  row,column,val:byte;
 begin
  // calculate all rows ANDs
 	for row:=0 to 63 do begin

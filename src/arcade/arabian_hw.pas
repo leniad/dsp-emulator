@@ -24,6 +24,7 @@ function mcu_port_k_r:byte;
 procedure mcu_port_o_w(valor:byte);
 procedure mcu_port_p_w(valor:byte);
 
+implementation
 const
         //arabian
         arabian_rom:array[0..4] of tipo_roms=(
@@ -51,8 +52,6 @@ var
  punt:array[0..$ffff] of word;
  video_control,mcu_port_p,mcu_port_o:byte;
  mcu_port_r:array[0..3] of byte;
-
-implementation
 
 procedure Cargar_arabian;
 begin
@@ -372,7 +371,7 @@ case direccion of
                   blitter[direccion and $7]:=valor;
                   if (direccion and $7)=6 then blit_area(blitter[0],blitter[1] or (blitter[2] shl 8),blitter[4] shl 2,blitter[3],blitter[6],blitter[5]);
                end;
-end;
+end;
 end;
 
 procedure arabian_outbyte(valor:byte;puerto:word);

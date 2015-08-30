@@ -24,6 +24,7 @@ const
         ASSERT_LINE=2;
         PULSE_LINE=3;
         ALREADY_RESET=4;
+        IRQ_DELAY=5;
         INPUT_LINE_NMI=$20;
 
         MAX_DIP_VALUES=$f;

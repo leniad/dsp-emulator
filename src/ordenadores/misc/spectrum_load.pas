@@ -347,7 +347,8 @@ if ((extension='Z80') or (extension='DSP')) then begin
   end else begin
     load_spec.label4.Caption:='Spectrum 48K';
     getmem(temp2,49192);
-    descomprimir_z80(temp2,temp,file_size-34);
+    g:=file_size-34;
+    descomprimir_z80(temp2,temp,g);
   end;
   temp:=temp2;
   hay_imagen:=true;

@@ -23,6 +23,7 @@ procedure citycon_sound_update;
 procedure citycon_qsave(nombre:string);
 procedure citycon_qload(nombre:string);
 
+implementation
 const
         citycon_rom:array[0..2] of tipo_roms=(
         (n:'c10';l:$4000;p:$4000;crc:$ae88b53c),(n:'c11';l:$8000;p:$8000;crc:$139eb1aa),());
@@ -51,8 +52,6 @@ var
  lines_color_look:array[0..$ff] of byte;
  memoria_fondo:array[0..$dfff] of byte;
  cambia_fondo:boolean;
-
-implementation
 
 procedure Cargar_citycon;
 begin

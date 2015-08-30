@@ -22,6 +22,7 @@ procedure gng_snd_irq;
 procedure gng_qsave(nombre:string);
 procedure gng_qload(nombre:string);
 
+implementation
 const
         gng_rom:array[0..3] of tipo_roms=(
         (n:'gg3.bin';l:$8000;p:$8000;crc:$9e01c65e),(n:'gg4.bin';l:$4000;p:$4000;crc:$66606beb),
@@ -51,8 +52,6 @@ var
  memoria_rom:array[0..4,0..$1FFF] of byte;
  banco,soundlatch:byte;
  scroll_x,scroll_y:word;
-
-implementation
 
 procedure Cargar_Gng;
 begin

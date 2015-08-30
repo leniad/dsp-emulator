@@ -177,6 +177,7 @@ type
     MenuItem28: TMenuItem;
     freekick1: TMenuItem;
     boogwins1: TMenuItem;
+    SegaMS1: TMenuItem;
     pbaction1: TMenuItem;
     pirates1: TMenuItem;
     twinbee1: TMenuItem;
@@ -399,18 +400,17 @@ type
   end;
 
 var
-  //Main Vars
   principal1: Tprincipal1;
-  //Misc Vars
-  tipo_new:word;
-  //Status bitmap
-  status_bitmap:tbitmap;
-
 const
   SCREEN_DIF=20;
 
 implementation
 uses acercade,tap_tzx,spectrum_misc,lenslock,file_engine;
+var
+  //Misc Vars
+  tipo_new:word;
+  //Status bitmap
+  status_bitmap:tbitmap;
 
 { Tprincipal1 }
 {$ifdef windows}

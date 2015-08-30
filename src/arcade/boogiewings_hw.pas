@@ -17,6 +17,7 @@ procedure boogwins_putword(direccion:dword;valor:word);
 function boogwins_bank_callback(bank:word):word;
 procedure sound_bank_rom(valor:byte);
 
+implementation
 const
         boogwins_rom:array[0..4] of tipo_roms=(
         (n:'kn_00-2.2b';l:$40000;p:0;crc:$e38892b9),(n:'kn_02-2.2e';l:$40000;p:$1;crc:$8426efef),
@@ -48,8 +49,6 @@ var
  rom_opcode,rom_data:array[0..$7ffff] of word;
  ram:array[0..$7fff] of word;
  oki1_mem,oki2_mem:pbyte;
-
-implementation
 
 procedure Cargar_boogwins;
 begin

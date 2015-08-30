@@ -25,6 +25,7 @@ function cps1_qz80_getbyte(direccion:word):byte;
 procedure cps1_qz80_putbyte(direccion:word;valor:byte);
 procedure cps1_qsnd_int;
 
+implementation
 type
   cps1_games_def=record
         layerctrl:word;
@@ -256,8 +257,6 @@ var
  cps1_palcltr,pri_mask0,pri_mask1,pri_mask2,pri_mask3:word;
  cps1_rowscrollstart:word;
  pal_change,mask_change,sprites_pri_draw,rowscroll_ena:boolean;
-
-implementation
 
 procedure Cargar_cps1;
 begin

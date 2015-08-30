@@ -22,6 +22,7 @@ function robocop2_video_bank(bank:word):word;
 //sound
 procedure sound_bank_rom(valor:byte);
 
+implementation
 const
         //Caveman Ninja
         cninja_rom:array[0..6] of tipo_roms=(
@@ -92,8 +93,6 @@ var
  oki2_mem:pbyte;
  prioridad:word;
  proc_update_video:tipo_update_video;
-
-implementation
 
 procedure Cargar_cninja;
 begin

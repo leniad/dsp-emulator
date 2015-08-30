@@ -20,6 +20,7 @@ function bagman_portar:byte;
 function bagman_portbr:byte;
 procedure bagman_sound;
 
+implementation
 const
         //bagman
         bagman_rom:array[0..6] of tipo_roms=(
@@ -56,8 +57,6 @@ const
 
 var
  irq_enable,video_enable:boolean;
-
-implementation
 
 procedure Cargar_bagman;
 begin

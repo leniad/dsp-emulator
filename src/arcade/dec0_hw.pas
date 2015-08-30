@@ -27,6 +27,7 @@ procedure robocop_mcu_putbyte(direccion:dword;valor:byte);
 function hippo_mcu_getbyte(direccion:dword):byte;
 procedure hippo_mcu_putbyte(direccion:dword;valor:byte);
 
+implementation
 const
         //Robocop
         robocop_rom:array[0..4] of tipo_roms=(
@@ -106,7 +107,6 @@ var
  //8751
  i8751_return:word;
 
-implementation
 
 procedure Cargar_dec0;
 begin

@@ -18,6 +18,7 @@ function sound_getbyte(direccion:word):byte;
 procedure sound_putbyte(direccion:word;valor:byte);
 procedure contra_sound_update;
 
+implementation
 const
         contra_rom:array[0..2] of tipo_roms=(
         (n:'633m03.18a';l:$10000;p:$0;crc:$d045e1da),(n:'633i02.17a';l:$10000;p:$10000;crc:$b2f7bd9a),());
@@ -33,8 +34,6 @@ const
 var
  memoria_rom:array[0..$b,0..$1FFF] of byte;
  banco,sound_latch:byte;
-
-implementation
 
 procedure Cargar_contra;
 begin

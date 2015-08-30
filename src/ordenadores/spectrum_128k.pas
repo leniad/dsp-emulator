@@ -241,8 +241,8 @@ while EmuStatus=EsRuning do begin
     video_128k(linea,@memoria_128k[pantalla_128k,0]);
     spec_z80.contador:=spec_z80.contador-228;
   end;
-  spec_z80.pedir_irq:=ASSERT_LINE; //Pedir IRQ
-  spectrum_irq_pos:=0;
+  spec_z80.pedir_irq:=IRQ_DELAY;
+  spectrum_irq_pos:=spec_z80.contador;
   flash:=(flash+1) and $f;
   if flash=0 then haz_flash:=not(haz_flash);
   if mouse.tipo=1 then evalua_gunstick;

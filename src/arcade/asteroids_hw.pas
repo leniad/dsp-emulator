@@ -16,6 +16,7 @@ procedure putbyte_as(direccion:word;valor:byte);
 procedure as_sound;
 procedure as_snd_nmi;
 
+implementation
 const
         as_rom:array[0..4] of tipo_roms=(
         (n:'035145-04e.ef2';l:$800;p:$6800;crc:$b503eaf7),(n:'035144-04e.h2';l:$800;p:$7000;crc:$25233192),
@@ -34,8 +35,6 @@ var
   ram:array[0..1,0..$ff] of byte;
   x_actual,y_actual:integer;
   invertir_ram:byte;
-
-implementation
 
 procedure Cargar_as;
 begin

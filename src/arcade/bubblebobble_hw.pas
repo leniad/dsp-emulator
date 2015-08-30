@@ -25,6 +25,7 @@ procedure snd_irq(irqstate:byte);
 function mcu_getbyte(direccion:word):byte;
 procedure mcu_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         bublbobl_rom:array[0..2] of tipo_roms=(
         (n:'a78-06-1.51';l:$8000;p:0;crc:$567934b6),(n:'a78-05-1.52';l:$10000;p:$8000;crc:$9f8ee242),());
@@ -60,8 +61,6 @@ var
  sound_nmi,pending_nmi,video_enable:boolean;
  ddr1,ddr2,ddr3,ddr4:byte;
  port1_in,port1_out,port2_in,port2_out,port3_in,port3_out,port4_in,port4_out:byte;
-
-implementation
 
 procedure Cargar_bublbobl;
 begin

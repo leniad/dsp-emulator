@@ -23,6 +23,7 @@ procedure ppi8255_wportb(valor:byte);
 procedure ppi8255_wportc(valor:byte);
 procedure ym2151_snd_irq(irqstate:byte);
 
+implementation
 const
         //Shinobi
         shinobi_rom:array[0..4] of tipo_roms=(
@@ -160,8 +161,6 @@ var
  s16_screen:array[0..7] of byte;
  screen_enabled:boolean;
  sound_latch:byte;
-
-implementation
 
 procedure Cargar_system16a;
 begin

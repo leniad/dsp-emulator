@@ -4,13 +4,6 @@ interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
      sound_engine;
 
-const
- MAX_OUTPUT=$7fff;
- SN_STEP=$10000;
- FB_WNOISE=$14002;
- FB_PNOISE=$8000;
- NG_PRESET=$0f35;
-
 type
 
  SN76496_chip=class(snd_chip_class)
@@ -40,6 +33,13 @@ var
   sn_76496_0,sn_76496_1,sn_76496_2,sn_76496_3:sn76496_chip;//chip_sn:array[0..3] of psn76496;
 
 implementation
+const
+     REGS_SIZE=161;
+     MAX_OUTPUT=$7fff;
+     SN_STEP=$10000;
+     FB_WNOISE=$14002;
+     FB_PNOISE=$8000;
+     NG_PRESET=$0f35;
 
 constructor sn76496_chip.Create(clock:dword);
 begin
@@ -59,40 +59,56 @@ begin
 self.destroy;
 end;
 
+type
+    tsn76496=packed record
+        UpdateStep:dword;
+        VolTable:array[0..15] of integer;
+        Registers:array[0..7] of integer;
+        LastRegister:byte;
+        Volume,Period,Count:array [0..3] of integer;
+        Output:array [0..3] of byte;
+        RNG:cardinal;
+        NoiseFB:integer;
+    end;
+
+
 function sn76496_chip.save_snapshot(data:pbyte):word;
 var
-  temp:pbyte;
-  size:word;
+  sn76496:^tsn76496;
 begin
-  temp:=data;
-  copymemory(temp,@self.UpdateStep,4);inc(temp,4);size:=4;
-  copymemory(temp,@self.VolTable[0],16*4);inc(temp,16*4);size:=size+(16*4);
-  copymemory(temp,@self.Registers[0],8*4);inc(temp,8*4);size:=size+(8*4);
-  temp^:=self.LastRegister;inc(temp);size:=size+1;
-  copymemory(temp,@self.Volume[0],4*4);inc(temp,4*4);size:=size+(4*4);
-  copymemory(temp,@self.Period[0],4*4);inc(temp,4*4);size:=size+(4*4);
-  copymemory(temp,@self.Count[0],4*4);inc(temp,4*4);size:=size+(4*4);
-  copymemory(temp,@self.Output[0],4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.RNG,4);inc(temp,4);size:=size+4;
-  copymemory(temp,@self.NoiseFB,4);size:=size+4;
-  save_snapshot:=size;
+  getmem(sn76496,sizeof(tsn76496));
+  sn76496.UpdateStep:=self.UpdateStep;
+  copymemory(@sn76496.VolTable,@self.VolTable,16*4);
+  copymemory(@sn76496.Registers,@self.Registers,8*4);
+  sn76496.LastRegister:=self.LastRegister;
+  copymemory(@sn76496.Volume,@self.Volume,4*4);
+  copymemory(@sn76496.Period,@self.Period,4*4);
+  copymemory(@sn76496.Count,@self.Count,4*4);
+  copymemory(@sn76496.Output,@self.Output,4);
+  sn76496.RNG:=self.RNG;
+  sn76496.NoiseFB:=self.NoiseFB;
+  copymemory(data,sn76496,REGS_SIZE);
+  freemem(sn76496);
+  save_snapshot:=REGS_SIZE;
 end;
 
 procedure sn76496_chip.load_snapshot(data:pbyte);
 var
-  temp:pbyte;
+  sn76496:^tsn76496;
 begin
-  temp:=data;
-  copymemory(@self.UpdateStep,temp,4);inc(temp,4);
-  copymemory(@self.VolTable[0],temp,16*4);inc(temp,16*4);
-  copymemory(@self.Registers[0],temp,8*4);inc(temp,8*4);
-  self.LastRegister:=temp^;inc(temp);
-  copymemory(@self.Volume[0],temp,4*4);inc(temp,4*4);
-  copymemory(@self.Period[0],temp,4*4);inc(temp,4*4);
-  copymemory(@self.Count[0],temp,4*4);inc(temp,4*4);
-  copymemory(@self.Output[0],temp,4);inc(temp,4);
-  copymemory(@self.RNG,temp,4);inc(temp,4);
-  copymemory(@self.NoiseFB,temp,4);
+  getmem(sn76496,sizeof(tsn76496));
+  copymemory(sn76496,data,REGS_SIZE);
+  self.UpdateStep:=sn76496.UpdateStep;
+  copymemory(@self.VolTable,@sn76496.VolTable,16*4);
+  copymemory(@self.Registers,@sn76496.Registers,8*4);
+  self.LastRegister:=sn76496.LastRegister;
+  copymemory(@self.Volume,@sn76496.Volume,4*4);
+  copymemory(@self.Period,@sn76496.Period,4*4);
+  copymemory(@self.Count,@sn76496.Count,4*4);
+  copymemory(@self.Output,@sn76496.Output,4);
+  self.RNG:=sn76496.RNG;
+  self.NoiseFB:=sn76496.NoiseFB;
+  freemem(sn76496);
 end;
 
 procedure sn76496_chip.Write(data:byte);
@@ -156,7 +172,7 @@ begin
 					if ((n and 3)=3) then self.Period[3]:=2 * self.Period[2]
             else self.Period[3]:=self.UpdateStep shl (5+(n and 3));
 					// reset noise shifter */
-					self.RNG:= NG_PRESET;
+					self.RNG:=NG_PRESET;
 					self.Output[3]:= self.RNG and 1;
 				end;
     end;  //del case
@@ -177,7 +193,7 @@ begin
   // build volume table (2dB per step) */
   for i:=0 to 14 do begin
     // limit volume to avoid clipping */
-    if (out_sn > (MAX_OUTPUT/3)) then self.VolTable[i]:=round(MAX_OUTPUT/3)
+    if (out_sn>(MAX_OUTPUT/3)) then self.VolTable[i]:=round(MAX_OUTPUT/3)
       else self.VolTable[i]:=round(out_sn);
     out_sn:=out_sn/1.258925412;	// = 10 ^ (2/20) = 2dB */
   end;
@@ -259,7 +275,7 @@ begin
 			end; //del while
 			if (self.Output[i])<>0 then dec(vol[i],self.Count[i]);
 		end; //del for
-		left:= SN_STEP;
+		left:=SN_STEP;
     repeat
 			if (self.Count[3] < left) then nextevent:=self.Count[3]
 			  else nextevent:=left;

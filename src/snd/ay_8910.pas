@@ -3,26 +3,6 @@ unit ay_8910;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,main_engine;
 
-const
-  AY_AFINE = 0;
-  AY_ACOARSE = 1;
-  AY_BFINE = 2;
-  AY_BCOARSE = 3;
-  AY_CFINE = 4;
-  AY_CCOARSE = 5;
-  AY_NOISEPER = 6;
-  AY_ENABLE = 7;
-  AY_AVOL = 8;
-  AY_BVOL = 9;
-  AY_CVOL = 10;
-  AY_EFINE = 11;
-  AY_ECOARSE = 12;
-  AY_ESHAPE = 13;
-  AY_PORTA = 14;
-  AY_PORTB = 15;
-  STEP=$1000;
-  MAX_OUTPUT=$7FFF;
-
 type
   ay8910_chip=class(snd_chip_class)
         constructor create(clock:integer;amp:single;internal:boolean=false);
@@ -37,6 +17,7 @@ type
         function update_internal:pinteger;
         function get_control:byte;
         function get_reg(reg:byte):byte;
+        procedure set_reg(reg,valor:byte);
         procedure change_io_calls(porta_read,portb_read:cpu_inport_call;porta_write,portb_write:cpu_outport_call);
         function save_snapshot(data:pbyte):word;
         procedure load_snapshot(data:pbyte);
@@ -59,11 +40,32 @@ type
   end;
 
 var
-  salida_ay:array[0..3] of integer;
-  vol_table:array[0..31] of single;
   ay8910_0,ay8910_1,ay8910_2,ay8910_3,ay8910_4:ay8910_chip;
 
 implementation
+const
+  AY_AFINE = 0;
+  AY_ACOARSE = 1;
+  AY_BFINE = 2;
+  AY_BCOARSE = 3;
+  AY_CFINE = 4;
+  AY_CCOARSE = 5;
+  AY_NOISEPER = 6;
+  AY_ENABLE = 7;
+  AY_AVOL = 8;
+  AY_BVOL = 9;
+  AY_CVOL = 10;
+  AY_EFINE = 11;
+  AY_ECOARSE = 12;
+  AY_ESHAPE = 13;
+  AY_PORTA = 14;
+  AY_PORTB = 15;
+  STEP=$1000;
+  MAX_OUTPUT=$7FFF;
+
+var
+  salida_ay:array[0..3] of integer;
+  vol_table:array[0..31] of single;
 
 procedure init_table;
 var
@@ -330,6 +332,11 @@ end;
 function ay8910_chip.get_reg(reg:byte):byte;
 begin
   get_reg:=self.Regs[reg];
+end;
+
+procedure ay8910_chip.set_reg(reg,valor:byte);
+begin
+  self.Regs[reg]:=valor;
 end;
 
 procedure ay8910_chip.write(v:byte);

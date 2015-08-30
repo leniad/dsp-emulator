@@ -10,7 +10,7 @@ type
   end;
   tdespues_instruccion=procedure (estados_t:word);
   type_raised=function:byte;
-  nreg_z80=record
+  nreg_z80=packed record
         ppc,pc,sp:word;
         bc,de,hl:parejas;
         bc2,de2,hl2:parejas;
@@ -563,7 +563,7 @@ if not(self.halt) then begin
                 r.f.bit5:=(r.a and $20)<>0;
                 r.f.bit3:=(r.a and 8)<>0;
             end;
-        $20:begin  {jp NZ,(PC+e)}
+        $20:begin  {jr NZ,(PC+e)}
                 r.pc:=r.pc+1;
                 if not(r.f.z) then begin
                         temp:=self.getbyte(r.pc-1);
@@ -609,7 +609,7 @@ if not(self.halt) then begin
                 r.f.bit5:=(r.a and $20)<>0;
                 r.f.bit3:=(r.a and 8)<>0;
             end;
-        $28:begin  {jp Z,(PC+e)}
+        $28:begin  {jr Z,(PC+e)}
                 r.pc:=r.pc+1;
                 if r.f.z then begin
                         temp:=self.getbyte(r.pc-1);
@@ -639,7 +639,7 @@ if not(self.halt) then begin
                 r.f.h:=true;
                 r.f.n:=true;
             end;
-        $30:begin  {jp NC,(PC+e)}
+        $30:begin  {jr NC,(PC+e)}
                 r.pc:=r.pc+1;
                 if not(r.f.c) then begin
                         temp:=self.getbyte(r.pc-1);
@@ -680,7 +680,7 @@ if not(self.halt) then begin
                 r.f.h:=false;
                 r.f.n:=false;
             end;
-        $38:begin  {jp C,(PC+e)}
+        $38:begin  {jr C,(PC+e)}
                 r.pc:=r.pc+1;
                 if r.f.c then begin
                         temp:=self.getbyte(r.pc-1);

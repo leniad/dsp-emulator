@@ -19,6 +19,7 @@ procedure actfancer_snd_putbyte(direccion:word;valor:byte);
 procedure actfancer_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         //Act Fancer
         actfancer_rom:array[0..3] of tipo_roms=(
@@ -41,8 +42,6 @@ var
  rom:array[0..$2ffff] of byte;
  ram:array[0..$3fff] of byte;
  sound_latch,dip_b,vblank_val:byte;
-
-implementation
 
 procedure Cargar_actfancer;
 begin

@@ -18,6 +18,9 @@ function sound_getbyte(direccion:word):byte;
 procedure sound_putbyte(direccion:word;valor:byte);
 procedure combatsc_sound_update;
 
+implementation
+//uses principal,sysutils;
+
 const
         combatsc_rom:array[0..2] of tipo_roms=(
         (n:'611g01.rom';l:$10000;p:$0;crc:$857ffffe),(n:'611g02.rom';l:$20000;p:$10000;crc:$9ba05327),());
@@ -36,9 +39,6 @@ var
  video_circuit,bank_rom,prot_0,prot_1,vreg,priority,sound_latch:byte;
  page_ram:array[0..1,0..$1fff] of byte;
  scroll_ram:array[0..1,0..$3f] of byte;
-
-implementation
-//uses principal,sysutils;
 
 procedure Cargar_combatsc;
 begin

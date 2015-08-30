@@ -219,7 +219,7 @@ begin
 case Sistema of
   StColecovision:begin
          principal1.opendialog1.InitialDir:=Directory.ColecoVision;
-         principal1.OpenDialog1.Filter:='ColecoVision Files (*.col;*.rom;*.csn;*.bin;*.zip)|*.col;*.rom;*.csn;*.bin;*.zip';
+         principal1.OpenDialog1.Filter:='ColecoVision Files (*.col;*.rom;*.csn;*.dsp;*.bin;*.zip)|*.col;*.rom;*.csn;*.dsp;*.bin;*.zip';
        end;
   Stnes:begin
          principal1.opendialog1.InitialDir:=Directory.Nes;

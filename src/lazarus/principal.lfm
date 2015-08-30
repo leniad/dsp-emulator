@@ -2900,6 +2900,10 @@ object principal1: Tprincipal1
           Caption = 'CHIP 8'
           OnClick = CambiarMaquina
         end
+        object SegaMS1: TMenuItem
+          Caption = 'Sega Master System'
+          OnClick = CambiarMaquina
+        end
       end
     end
     object uProcesador1: TMenuItem

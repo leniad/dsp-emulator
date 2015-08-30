@@ -8,8 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 var
     rom_cambiada_48:boolean=false;
-    spec_16k:boolean;
-    linea:word;
 
 procedure Cargar_Spectrum48K;
 function iniciar_48k:boolean;
@@ -27,6 +25,9 @@ procedure borde_48_full(linea:word);
 
 implementation
 uses tap_tzx,spectrum_misc;
+var
+    spec_16k:boolean;
+    linea:word;
 
 procedure Cargar_Spectrum48K;
 begin
@@ -215,8 +216,8 @@ while EmuStatus=EsRuning do begin
     video48k(linea);
     spec_z80.contador:=spec_z80.contador-224;
   end;
-  spec_z80.pedir_irq:=ASSERT_LINE;
-  spectrum_irq_pos:=0;
+  spec_z80.pedir_irq:=IRQ_DELAY;
+  spectrum_irq_pos:=spec_z80.contador;
   flash:=(flash+1) and $f;
   if flash=0 then haz_flash:=not(haz_flash);
   if mouse.tipo=1 then evalua_gunstick;

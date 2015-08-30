@@ -1,12 +1,11 @@
 unit coleco;
-
 {
 23/12/12 Snapshot v2 - New Z80 CPU Engine
 04/03/13 Snapshot v2.1 - Añadido al snapshot el SN76496
 18/08/15 Snapshot v2.2 - Modificado el TMS
+21/08/15 Cambiados los controles y la NMI
+         La memoria no hay que iniciarla a 0... sino hay juegos que fallan!
 }
-
-
 interface
 uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,lenguaje,main_engine,controls_engine,tms99xx,sn_76496,sysutils,dialogs,
@@ -28,15 +27,16 @@ function coleco_inbyte(puerto:word):byte;
 procedure coleco_outbyte(valor:byte;puerto:word);
 procedure coleco_interrupt(int:boolean);
 
-const
-        coleco_bios:tipo_roms=(n:'coleco.rom';l:$2000;p:0;crc:$3aa93ef3);
-        keycodes:array[0..15] of byte=($0A,$0D,$07,$0C,$02,$03,$0E,$05,$01,$0B,$06,$09,$0F,$0F,$0F,$0F);
-var
-  njoymode:boolean;
-  nJoyState:array[0..1] of Integer;
-
 implementation
-uses principal;
+uses snapshot,principal;
+
+const
+  coleco_bios:tipo_roms=(n:'coleco.rom';l:$2000;p:0;crc:$3aa93ef3);
+
+var
+  joymode,last_nmi:boolean;
+  joystick:array[0..1] of byte;
+  keypad:array[0..1] of word;
 
 procedure Cargar_coleco;
 begin
@@ -56,7 +56,7 @@ llamadas_maquina.bucle_general:=coleco_principal;
 llamadas_maquina.cerrar:=cerrar_coleco;
 llamadas_maquina.reset:=reset_coleco;
 llamadas_maquina.cartuchos:=abrir_coleco;
-llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;
+llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;;
 llamadas_maquina.fps_max:=10738635/2/342/262;
 end;
 
@@ -64,8 +64,8 @@ function iniciar_coleco:boolean;
 begin
 iniciar_coleco:=false;
 iniciar_audio(false);
-screen_init(1,342,262);
-iniciar_video(342,262);
+screen_init(1,284,243);
+iniciar_video(284,243);
 //Main CPU
 main_z80:=cpu_z80.create(3579545,262);
 main_z80.change_ram_calls(coleco_getbyte,coleco_putbyte);
@@ -93,15 +93,69 @@ close_video;
 end;
 
 procedure reset_coleco;
+var
+  f:word;
 begin
  main_z80.reset;
  sn_76496_0.reset;
  TMS99XX_reset;
  reset_audio;
- fillchar(memoria[$6000],$1fff,0);
- njoymode:=false;
- nJoyState[0]:=0;
- nJoyState[1]:=$FFFF;
+ //Importante o el juego 'The Yolk's on You' se para
+ for f:=0 to $3ff do memoria[$6000+f]:=random(256);
+ joymode:=false;
+ last_nmi:=false;
+ joystick[0]:=$ff;
+ joystick[1]:=$ff;
+ keypad[0]:=$ffff;
+ keypad[1]:=$ffff;
+end;
+
+procedure eventos_coleco;
+begin
+if event.arcade then begin
+   //P1
+   if arcade_input.up[0] then joystick[0]:=(joystick[0] and $fe) else joystick[0]:=(joystick[0] or 1);
+   if arcade_input.right[0] then joystick[0]:=(joystick[0] and $fd) else joystick[0]:=(joystick[0] or 2);
+   if arcade_input.down[0] then joystick[0]:=(joystick[0] and $fb) else joystick[0]:=(joystick[0] or 4);
+   if arcade_input.left[0] then joystick[0]:=(joystick[0] and $f7) else joystick[0]:=(joystick[0] or 8);
+   if arcade_input.but0[0] then joystick[0]:=(joystick[0] and $bf) else joystick[0]:=(joystick[0] or $40);
+   if arcade_input.but1[0] then keypad[0]:=(keypad[0] and $bfff) else keypad[0]:=(keypad[0] or $4000);
+   //P2
+   if arcade_input.up[1] then joystick[1]:=(joystick[1] and $fe) else joystick[1]:=(joystick[1] or 1);
+   if arcade_input.right[1] then joystick[1]:=(joystick[1] and $fd) else joystick[1]:=(joystick[1] or 2);
+   if arcade_input.down[1] then joystick[1]:=(joystick[1] and $fb) else joystick[1]:=(joystick[1] or 4);
+   if arcade_input.left[1] then joystick[1]:=(joystick[1] and $f7) else joystick[1]:=(joystick[1] or 8);
+   if arcade_input.but0[1] then joystick[1]:=(joystick[1] and $bf) else joystick[1]:=(joystick[1] or $40);
+   if arcade_input.but1[1] then keypad[1]:=(keypad[1] and $bfff) else keypad[1]:=(keypad[1] or $4000);
+end;
+if event.keyboard then begin
+   //P1
+   if keyboard[SDL_SCANCODE_0] then keypad[0]:=(keypad[0] and $fffe) else keypad[0]:=(keypad[0] or $0001);
+   if keyboard[SDL_SCANCODE_1] then keypad[0]:=(keypad[0] and $fffd) else keypad[0]:=(keypad[0] or $0002);
+   if keyboard[SDL_SCANCODE_2] then keypad[0]:=(keypad[0] and $fffb) else keypad[0]:=(keypad[0] or $0004);
+   if keyboard[SDL_SCANCODE_3] then keypad[0]:=(keypad[0] and $fff7) else keypad[0]:=(keypad[0] or $0008);
+   if keyboard[SDL_SCANCODE_4] then keypad[0]:=(keypad[0] and $ffef) else keypad[0]:=(keypad[0] or $0010);
+   if keyboard[SDL_SCANCODE_5] then keypad[0]:=(keypad[0] and $ffdf) else keypad[0]:=(keypad[0] or $0020);
+   if keyboard[SDL_SCANCODE_6] then keypad[0]:=(keypad[0] and $ffbf) else keypad[0]:=(keypad[0] or $0040);
+   if keyboard[SDL_SCANCODE_7] then keypad[0]:=(keypad[0] and $ff7f) else keypad[0]:=(keypad[0] or $0080);
+   if keyboard[SDL_SCANCODE_8] then keypad[0]:=(keypad[0] and $feff) else keypad[0]:=(keypad[0] or $0100);
+   if keyboard[SDL_SCANCODE_9] then keypad[0]:=(keypad[0] and $fdff) else keypad[0]:=(keypad[0] or $0200);
+   if keyboard[SDL_SCANCODE_A] then keypad[0]:=(keypad[0] and $fbff) else keypad[0]:=(keypad[0] or $0400);
+   if keyboard[SDL_SCANCODE_S] then keypad[0]:=(keypad[0] and $f7ff) else keypad[0]:=(keypad[0] or $0800);
+   //P2
+   if keyboard[SDL_SCANCODE_Q] then keypad[1]:=(keypad[1] and $fffe) else keypad[1]:=(keypad[1] or $0001);
+   if keyboard[SDL_SCANCODE_W] then keypad[1]:=(keypad[1] and $fffd) else keypad[1]:=(keypad[1] or $0002);
+   if keyboard[SDL_SCANCODE_E] then keypad[1]:=(keypad[1] and $fffb) else keypad[1]:=(keypad[1] or $0004);
+   if keyboard[SDL_SCANCODE_R] then keypad[1]:=(keypad[1] and $fff7) else keypad[1]:=(keypad[1] or $0008);
+   if keyboard[SDL_SCANCODE_T] then keypad[1]:=(keypad[1] and $ffef) else keypad[1]:=(keypad[1] or $0010);
+   if keyboard[SDL_SCANCODE_Y] then keypad[1]:=(keypad[1] and $ffdf) else keypad[1]:=(keypad[1] or $0020);
+   if keyboard[SDL_SCANCODE_U] then keypad[1]:=(keypad[1] and $ffbf) else keypad[1]:=(keypad[1] or $0040);
+   if keyboard[SDL_SCANCODE_I] then keypad[1]:=(keypad[1] and $ff7f) else keypad[1]:=(keypad[1] or $0080);
+   if keyboard[SDL_SCANCODE_O] then keypad[1]:=(keypad[1] and $feff) else keypad[1]:=(keypad[1] or $0100);
+   if keyboard[SDL_SCANCODE_P] then keypad[1]:=(keypad[1] and $fdff) else keypad[1]:=(keypad[1] or $0200);
+   if keyboard[SDL_SCANCODE_Z] then keypad[1]:=(keypad[1] and $fbff) else keypad[1]:=(keypad[1] or $0400);
+   if keyboard[SDL_SCANCODE_X] then keypad[1]:=(keypad[1] and $f7ff) else keypad[1]:=(keypad[1] or $0800);
+end;
 end;
 
 procedure coleco_principal;
@@ -118,6 +172,7 @@ while EmuStatus=EsRuning do begin
       TMS99XX_refresh(f);
   end;
   actualiza_trozo_simple(0,0,342,262,1);
+  eventos_coleco;
   video_sync;
 end;
 end;
@@ -133,267 +188,66 @@ end;
 procedure coleco_putbyte(direccion:word;valor:byte);
 begin
 //Solo tiene $400 bytes de memoria RAM, hace mirror desde $6000 hasta la $7fff
-if ((direccion>$5fff) and (direccion<$8000)) then memoria[$6000+(direccion and $3ff)]:=valor;
+case direccion of
+  //$2000..$3fff:memoria[direccion]:=valor;
+  $6000..$7fff:memoria[$6000+(direccion and $3ff)]:=valor;
+end;
 end;
 
 function coleco_inbyte(puerto:word):byte;
 var
-  nPAux: Integer;
-  nResult:byte;
+  player,data:byte;
+  input:word;
 begin
-  nResult:=$FF;
-  case (puerto and $E0) of
-    $E0: begin
-      nJoyState[0]:=$FFFF;
-      if event.arcade then begin
-        if arcade_input.left[0] then nJoyState[0]:=nJoyState[0] and $F7FF;
-        if arcade_input.right[0] then nJoyState[0]:=nJoyState[0] and $FDFF;
-        if arcade_input.up[0] then nJoyState[0]:=nJoyState[0] and $FEFF;
-        if arcade_input.down[0] then nJoyState[0]:=nJoyState[0] and $FBFF;
-        if arcade_input.but1[0] then nJoyState[0]:=nJoyState[0] and $FFBF;
-        if arcade_input.but0[0] then nJoyState[0]:=nJoyState[0] and $BFFF;
-      end;
-      if event.keyboard then begin
-        if keyboard[SDL_SCANCODE_SPACE] then nJoyState[0]:=nJoyState[0] and $FFBF;
-        if keyboard[SDL_SCANCODE_RETURN] then nJoyState[0]:=nJoyState[0] and $FFBF;
-        if keyboard[SDL_SCANCODE_0] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $0;
-        if keyboard[SDL_SCANCODE_1] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $1;
-        if keyboard[SDL_SCANCODE_2] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $2;
-        if keyboard[SDL_SCANCODE_3] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $3;
-        if keyboard[SDL_SCANCODE_4] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $4;
-        if keyboard[SDL_SCANCODE_5] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $5;
-        if keyboard[SDL_SCANCODE_6] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $6;
-        if keyboard[SDL_SCANCODE_7] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $7;
-        if keyboard[SDL_SCANCODE_8] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $8;
-        if keyboard[SDL_SCANCODE_9] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $9;
-        if keyboard[SDL_SCANCODE_Q] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $a;
-        if keyboard[SDL_SCANCODE_W] then nJoyState[0]:=(nJoyState[0] and $FFF0) or $b;
-      end;
-      nPAux:=(puerto shr 1) and $01;
-      //Para emular los dos joysticks con las mismas teclas de funcion
-      //Pero no las direcciones
-      nJoyState[1]:=$fff0 or nJoyState[0] and $f;
-      if nJoyMode then nPAux:=nJoyState[nPAux] shr 8
-        else nPAux:=(nJoyState[nPAux] and $F0) or keycodes[nJoyState[nPAux] and $0F];
-      nResult:=(nPAux or $B0) and $7F;
-    end;
-    $A0:if (puerto and $01)<>0 then nResult:=TMS99XX_register_r
-          else nResult:= TMS99XX_vram_r;
+  case (puerto and $e0) of
+    $a0:if (puerto and $01)<>0 then coleco_inbyte:=TMS99XX_register_r
+             else coleco_inbyte:=TMS99XX_vram_r;
+    $e0:begin
+             player:=(puerto shr 1) and $01;
+             if joymode then begin //leer joystick
+                coleco_inbyte:=joystick[player] and $7f;
+             end else begin //leer keypad
+                data:=$f;
+                input:=keypad[player];
+                if (input and 1)=0 then data:=data and $a; //0
+                if (input and 2)=0 then data:=data and $d; //1
+                if (input and 4)=0 then data:=data and $7; //2
+                if (input and 8)=0 then data:=data and $c; //2
+                if (input and $10)=0 then data:=data and $2; //4
+                if (input and $20)=0 then data:=data and $3; //5
+                if (input and $40)=0 then data:=data and $e; //6
+                if (input and $80)=0 then data:=data and $5; //7
+                if (input and $100)=0 then data:=data and $1; //8
+                if (input and $200)=0 then data:=data and $b; //9
+                if (input and $400)=0 then data:=data and $6; //#
+                if (input and $800)=0 then data:=data and $9; //*
+                //Segundo boton
+                coleco_inbyte:=((input and $4000) shr 8) or $30 or data;
+             end;
+        end;
   end;
-  coleco_inbyte:=nResult;
 end;
 
 procedure coleco_outbyte(valor:byte;puerto:word);
 begin
-  case (puerto and $E0) of
-    $80:nJoyMode:=false;
-    $C0:nJoyMode:=true;
-    $E0:sn_76496_0.Write(valor);
-    $A0:if (puerto and $01)<>0 then TMS99XX_register_w(valor)
-          else TMS99XX_vram_w(valor);
+  case (puerto and $e0) of
+    $80:joymode:=false;
+    $a0:if (puerto and $01)<>0 then TMS99XX_register_w(valor)
+                else TMS99XX_vram_w(valor);
+    $c0:joymode:=true;
+    $e0:sn_76496_0.Write(valor);
   end;
 end;
 
 procedure coleco_interrupt(int:boolean);
 begin
-  if int then main_z80.pedir_nmi:=ASSERT_LINE
-    else main_z80.clear_nmi;
+  if (int and not(last_nmi)) then main_z80.pedir_nmi:=PULSE_LINE;
+  last_nmi:=int;
 end;
 
 procedure coleco_sound_update;
 begin
   sn_76496_0.update;
-end;
-
-function coleco_cargar_snapshot(data:pbyte;long:dword):boolean;
-type
-  old_tms=record
-      regs: array[0..7] of byte;
-      colour,pattern,nametbl,spriteattribute,spritepattern,colourmask,patternmask,nAddr:word;
-      latch,nVR,status_reg,nFGColor,nBGColor,wkey:byte;
-      int:boolean;
-      TMS9918A_VRAM_SIZE:word;
-      memory:array[0..$3FFF] of byte;
-      dBackMem:array[0..$FFFF] of byte;  //Calculo de las colisiones de los sprites
-      IRQ_Handler:procedure(int:boolean);
-      pant:byte;
-  end;
-var
-  f:byte;
-  cadena:string;
-  longitud,comprimido,descomprimido:integer;
-  ptemp,ptemp2:pbyte;
-  main_z80_reg:npreg_z80;
-  version:word;
-  told_tms:old_tms;
-begin
-coleco_cargar_snapshot:=false;
-longitud:=0;
-for f:=0 to 3 do begin
-  cadena:=cadena+chr(data^);
-  inc(data);
-end;
-//Todos las cabeceras tienen 10bytes
-if cadena<>'CLSN' then exit;
-reset_coleco;
-version:=data^ shl 8; //Version
-inc(data);
-version:=version or data^;
-if ((version<>$100) and (version<>$200) and (version<>$210)) then exit;
-inc(data,5);inc(longitud,10);
-while longitud<>long do begin
-  if longitud>long then exit;
-  cadena:='';
-  for f:=0 to 3 do begin
-        cadena:=cadena+chr(data^);
-        inc(data);inc(longitud);
-  end;
-  if cadena='CRAM' then begin
-    copymemory(@comprimido,data,4);
-    inc(data,6);inc(longitud,6);
-    getmem(ptemp,$e000);
-    decompress_zlib(data,comprimido,pointer(ptemp),descomprimido);
-    copymemory(@memoria[$2000],ptemp,$e000);
-    freemem(ptemp);
-    inc(data,comprimido);inc(longitud,comprimido);
-  end;
-  if cadena='Z80R' then begin
-    comprimido:=0;
-    copymemory(@comprimido,data,2);
-    inc(data,6);inc(longitud,6);
-    case version of
-     $100:begin //Version 1.00
-        { 68 bytes:
-        ppc,pc,sp:word;
-        bc,de,hl:parejas;
-        bc2,de2,hl2:parejas;
-        ix,iy:parejas;
-        iff1,iff2,halt:boolean;
-        pedir_irq,pedir_nmi,nmi_state:byte;
-        a,a2,i,r:byte;
-        f,f2:band_z80;
-        contador:dword;
-        im,im2_lo,im0:byte;
-        daisy,opcode,after_ei:boolean;
-        numero_cpu:byte;
-        tframes:single;
-        enabled:boolean;
-        estados_demas:word;}
-          getmem(ptemp2,comprimido);
-          ptemp:=ptemp2;
-          copymemory(ptemp,data,comprimido);
-          getmem(main_z80_reg,sizeof(nreg_z80));
-          copymemory(@main_z80_reg.ppc,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.pc,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.sp,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.bc.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.de.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.hl.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.bc2.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.de2.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.hl2.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.ix.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.iy.w,ptemp,2);inc(ptemp,2);
-          main_z80_reg.iff1:=(ptemp^<>0);inc(ptemp);
-          main_z80_reg.iff2:=(ptemp^<>0);inc(ptemp);
-          main_z80.halt:=(ptemp^<>0);inc(ptemp);
-          main_z80.pedir_irq:=ptemp^;inc(ptemp);
-          main_z80.pedir_nmi:=ptemp^;inc(ptemp);
-          {main_z80.nmi_state:=(ptemp^<>0);}inc(ptemp);
-          main_z80_reg.a:=ptemp^;inc(ptemp);
-          main_z80_reg.a2:=ptemp^;inc(ptemp);
-          main_z80_reg.i:=ptemp^;inc(ptemp);
-          main_z80_reg.r:=ptemp^;inc(ptemp);
-          main_z80_reg.f.s:=(ptemp^ and 128)<>0;inc(ptemp);
-          main_z80_reg.f.z:=(ptemp^ and 64)<>0;inc(ptemp);
-          main_z80_reg.f.bit5:=(ptemp^ and 32)<>0;inc(ptemp);
-          main_z80_reg.f.h:=(ptemp^ and 16)<>0;inc(ptemp);
-          main_z80_reg.f.bit3:=(ptemp^ and 8)<>0;inc(ptemp);
-          main_z80_reg.f.p_v:=(ptemp^ and 4)<>0;inc(ptemp);
-          main_z80_reg.f.n:=(ptemp^ and 2)<>0;inc(ptemp);
-          main_z80_reg.f.c:=(ptemp^ and 1)<>0;inc(ptemp);
-          main_z80_reg.f2.s:=(ptemp^ and 128)<>0;inc(ptemp);
-          main_z80_reg.f2.z:=(ptemp^ and 64)<>0;inc(ptemp);
-          main_z80_reg.f2.bit5:=(ptemp^ and 32)<>0;inc(ptemp);
-          main_z80_reg.f2.h:=(ptemp^ and 16)<>0;inc(ptemp);
-          main_z80_reg.f2.bit3:=(ptemp^ and 8)<>0;inc(ptemp);
-          main_z80_reg.f2.p_v:=(ptemp^ and 4)<>0;inc(ptemp);
-          main_z80_reg.f2.n:=(ptemp^ and 2)<>0;inc(ptemp);
-          main_z80_reg.f2.c:=(ptemp^ and 1)<>0;inc(ptemp);
-          copymemory(@main_z80.contador,ptemp,4);inc(ptemp,4);
-          main_z80_reg.im:=ptemp^;inc(ptemp);
-          main_z80.im2_lo:=ptemp^;inc(ptemp);
-          main_z80.im0:=ptemp^;
-          main_z80.set_internal_r(main_z80_reg);
-          freemem(ptemp2);
-      end;
-      $200:begin //Version 2.00
-          main_z80_reg:=main_z80.get_internal_r;
-          ptemp:=data;
-          copymemory(main_z80_reg,ptemp,comprimido-9);
-          inc(ptemp,comprimido-9);
-          //resto
-          main_z80.halt:=(ptemp^<>0);inc(ptemp);
-          main_z80.pedir_irq:=ptemp^;inc(ptemp);
-          main_z80.pedir_nmi:=ptemp^;inc(ptemp);
-          copymemory(@main_z80.contador,ptemp,4);inc(ptemp,4);
-          main_z80.im2_lo:=ptemp^;inc(ptemp);
-          main_z80.im0:=ptemp^;inc(ptemp);
-        end;
-      $210:main_z80.load_snapshot(data); //Version 2.10
-    end;
-    inc(data,comprimido);inc(longitud,comprimido);
-  end;
-  if cadena='TMSR' then begin
-    copymemory(@comprimido,data,4);
-    inc(data,6);inc(longitud,6);
-    getmem(ptemp,sizeof(TTMS99XX));
-    decompress_zlib(data,comprimido,pointer(ptemp),descomprimido);
-    case version of
-      {regs: array[0..7] of byte;
-      colour,pattern,nametbl,spriteattribute,spritepattern,colourmask,patternmask,nAddr:word;
-      latch,nVR,status_reg,nFGColor,nBGColor,wkey:byte;
-      int:boolean;
-      TMS9918A_VRAM_SIZE:word;
-      memory:array[0..$3FFF] of byte;
-      dBackMem:array[0..$FFFF] of byte;  //Calculo de las colisiones de los sprites
-      IRQ_Handler:procedure(int:boolean);
-      pant:byte; }
-      $100,$200,$210:begin
-            copymemory(@told_tms,ptemp,descomprimido);
-            copymemory(@tms.regs,@told_tms.regs,8);
-            tms.colour:=told_tms.colour;
-            tms.pattern:=told_tms.pattern;
-            tms.nametbl:=told_tms.nametbl;
-            tms.spriteattribute:=told_tms.spriteattribute;
-            tms.spritepattern:=told_tms.spritepattern;
-            tms.colourmask:=tms.colourmask;
-            tms.patternmask:=tms.patternmask;
-            tms.addr:=told_tms.nAddr;
-            tms.status_reg:=told_tms.status_reg;
-            tms.nFGColor:=told_tms.nFGColor;
-            tms.nBGColor:=told_tms.nBGColor;
-            tms.int:=told_tms.int;
-            tms.TMS9918A_VRAM_SIZE:=told_tms.TMS9918A_VRAM_SIZE;
-            copymemory(@tms.memory,@told_tms.memory,$4000);
-            tms.pant:=1;
-        end;
-      $220:copymemory(TMS,ptemp,descomprimido);
-    end;
-    freemem(ptemp);
-    tms.IRQ_Handler:=coleco_interrupt;
-    inc(data,comprimido);inc(longitud,comprimido);
-    if tms.nBGColor=0 then paleta[0]:=0
-      else paleta[0]:=paleta[tms.nBGColor];
-  end;
-  if cadena='7649' then begin
-    copymemory(@comprimido,data,4);
-    inc(data,6);inc(longitud,6);
-    sn_76496_0.load_snapshot(data);
-    inc(data,comprimido);inc(longitud,comprimido);
-  end;
-end;
-coleco_cargar_snapshot:=true;
 end;
 
 function abrir_cartucho(datos:pbyte;longitud:integer):boolean;
@@ -414,6 +268,7 @@ var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
   longitud,crc:integer;
+  resultado:boolean;
 begin
   if not(OpenRom(StColecovision,Romfile)) then begin
     abrir_coleco:=true;
@@ -425,14 +280,15 @@ begin
     if not(search_file_from_zip(RomFile,'*.col',nombre_file,longitud,crc,false)) then
       if not(search_file_from_zip(RomFile,'*.rom',nombre_file,longitud,crc,false)) then
         if not(search_file_from_zip(RomFile,'*.bin',nombre_file,longitud,crc,false)) then
-          if not(search_file_from_zip(RomFile,'*.csn',nombre_file,longitud,crc,true)) then exit;
+          if not(search_file_from_zip(RomFile,'*.csn',nombre_file,longitud,crc,true)) then
+            if not(search_file_from_zip(RomFile,'*.dsp',nombre_file,longitud,crc,true)) then exit;
     getmem(datos,longitud);
     if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
       freemem(datos);
       exit;
     end;
   end else begin
-    if ((extension<>'COL') and (extension<>'ROM') and (extension<>'BIN') and (extension<>'CSN')) then exit;
+    if ((extension<>'COL') and (extension<>'ROM') and (extension<>'BIN') and (extension<>'CSN') and (extension<>'DSP')) then exit;
     if not(read_file_size(RomFile,longitud)) then exit;
     getmem(datos,longitud);
     if not(read_file(RomFile,datos,longitud)) then begin
@@ -441,121 +297,38 @@ begin
     end;
     nombre_file:=extractfilename(RomFile);
   end;
-directory.ColecoVision:=ExtractFilePath(romfile);
-extension:=extension_fichero(nombre_file);
-if extension='CSN' then begin
-  if not(coleco_cargar_snapshot(datos,longitud)) then begin
-    freemem(datos);
-    exit;
-  end;
-end;
-if ((extension='COL') or (extension='ROM') or (extension='BIN')) then begin
-  if not(abrir_cartucho(datos,longitud)) then begin
-    freemem(datos);
-    exit;
-  end;
-end;
-freemem(datos);
-change_caption(llamadas_maquina.caption+' - '+nombre_file);
-//Restauro la llamada de interrupcion del TMS
-tms.IRQ_Handler:=coleco_interrupt;
 abrir_coleco:=true;
+extension:=extension_fichero(nombre_file);
+if ((extension='CSN') or (extension='DSP')) then resultado:=abrir_coleco_snapshot(datos,longitud)
+   else resultado:=abrir_cartucho(datos,longitud);
+freemem(datos);
+if resultado then change_caption(llamadas_maquina.caption+' - '+nombre_file)
+   else MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+directory.ColecoVision:=ExtractFilePath(romfile);
 end;
 
 procedure coleco_grabar_snapshot;
 var
-  cantidad,long_final,comprimido:integer;
-  buffer:array[0..9] of byte;  //Cabecera de los bloques siempre 10bytes
   nombre:string;
-  puntero,datos_final,data:pbyte;
-  ptemp:pointer;
+  correcto:boolean;
 begin
 principal1.savedialog1.InitialDir:=Directory.coleco_snap;
-principal1.saveDialog1.Filter := 'CSN Format (*.csn)|*.csn';
+principal1.saveDialog1.Filter := 'DSP Format (*.dsp)|*.dsp|CSN Format (*.csn)|*.csn';
 if principal1.savedialog1.execute then begin
-        nombre:=changefileext(principal1.savedialog1.FileName,'.csn');
+        nombre:=principal1.savedialog1.FileName;
+        case principal1.SaveDialog1.FilterIndex of
+          1:nombre:=changefileext(nombre,'.dsp');
+          2:nombre:=changefileext(nombre,'.csn');
+        end;
         if FileExists(nombre) then begin                                         //Respuesta 'NO' es 7
             if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
         end;
+        case principal1.SaveDialog1.FilterIndex of
+          1,2:correcto:=grabar_coleco_snapshot(nombre);
+        end;
+        if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end else exit;
-long_final:=0;
-getmem(datos_final,139400);
-data:=datos_final;
-//Cabecera
-buffer[0]:=ord('C'); //Nombre Bloque
-buffer[1]:=ord('L');
-buffer[2]:=ord('S');
-buffer[3]:=ord('N');
-buffer[4]:=2; //version 2.2, modificado el TMS
-buffer[5]:=$20;
-buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0; //reservado
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-//Coleco RAM longitud=$e000
-buffer[0]:=ord('C');
-buffer[1]:=ord('R');
-buffer[2]:=ord('A');
-buffer[3]:=ord('M');
-buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0;  //reservado
-getmem(puntero,$e000);
-ptemp:=@memoria[$2000];
-compress_zlib(ptemp,$e000,pointer(puntero),comprimido);
-buffer[4]:=comprimido mod 256; //longitud
-buffer[5]:=comprimido div 256; //longitud
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-copymemory(data,puntero,comprimido);
-inc(data,comprimido);inc(long_final,comprimido);
-freemem(puntero);
-//TMS9918 longitud=81960
-cantidad:=sizeof(TTMS99XX);
-buffer[0]:=ord('T');
-buffer[1]:=ord('M');
-buffer[2]:=ord('S');
-buffer[3]:=ord('R');
-buffer[7]:=0;buffer[8]:=0;buffer[9]:=0;
-getmem(puntero,cantidad);
-ptemp:=pointer(TMS);
-compress_zlib(ptemp,cantidad,pointer(puntero),comprimido);
-buffer[4]:=(comprimido mod 65536) and $ff;
-buffer[5]:=(comprimido mod 65536) shr 8;
-buffer[6]:=comprimido div 65536;
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-copymemory(data,puntero,comprimido);
-inc(data,comprimido);inc(long_final,comprimido);
-freemem(puntero);
-//Z80
-getmem(puntero,100);
-cantidad:=main_z80.save_snapshot(puntero);
-buffer[0]:=ord('Z');
-buffer[1]:=ord('8');
-buffer[2]:=ord('0');
-buffer[3]:=ord('R');
-buffer[4]:=cantidad;
-buffer[5]:=0;buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0;
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-copymemory(data,puntero,cantidad);
-inc(data,cantidad);inc(long_final,cantidad);
-freemem(puntero);
-//Sound
-getmem(puntero,200);
-cantidad:=sn_76496_0.save_snapshot(puntero);
-buffer[0]:=ord('7');
-buffer[1]:=ord('6');
-buffer[2]:=ord('4');
-buffer[3]:=ord('9');
-buffer[4]:=cantidad;
-buffer[5]:=0;buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0;
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-copymemory(data,puntero,cantidad);
-inc(long_final,cantidad);
-freemem(puntero);
-//Final
-write_file(nombre,datos_final,long_final);
-freemem(datos_final);
+Directory.coleco_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
 end;
 
-end.
+end.

@@ -28,6 +28,8 @@ function in_port0:byte;
 procedure blktiger_qsave(nombre:string);
 procedure blktiger_qload(nombre:string);
 
+implementation
+//uses principal,sysutils;
 const
         blktiger_rom:array[0..5] of tipo_roms=(
         (n:'bdu-01a.5e';l:$8000;p:0;crc:$a8f98f22),(n:'bdu-02a.6e';l:$10000;p:$8000;crc:$7bef96e8),
@@ -66,9 +68,6 @@ var
  i8751_latch,z80_latch:byte;
  timer_hs:byte;
  bg_on,ch_on,spr_on:boolean;
-
-implementation
-//uses principal,sysutils;
 
 procedure Cargar_blktiger;
 begin

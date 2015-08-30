@@ -19,6 +19,7 @@ procedure commando_snd_putbyte(direccion:word;valor:byte);
 procedure commando_sound_update;
 procedure commando_snd_irq;
 
+implementation
 const
         commando_rom:array[0..2] of tipo_roms=(
         (n:'cm04.9m';l:$8000;p:0;crc:$8438b694),(n:'cm03.8m';l:$4000;p:$8000;crc:$35486542),());
@@ -52,8 +53,6 @@ var
  memoria_dec:array[0..$bfff] of byte;
  scroll_x,scroll_y:word;
  sound_command:byte;
-
-implementation
 
 procedure Cargar_commando;
 begin

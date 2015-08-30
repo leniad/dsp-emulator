@@ -19,6 +19,7 @@ procedure ddragon3_snd_putbyte(direccion:word;valor:byte);
 procedure ddragon3_sound_update;
 procedure ym2151_snd_irq(irqstate:byte);
 
+implementation
 const
         ddragon3_rom:array[0..2] of tipo_roms=(
         (n:'30a14-0.ic78';l:$40000;p:1;crc:$f42fe016),(n:'30a15-0.ic79';l:$20000;p:$0;crc:$ad50e92c),());
@@ -53,8 +54,6 @@ var
  ram:array[0..$1fff] of word;
  sprite_ram:array[0..$7ff] of word;
  sound_latch:byte;
-
-implementation
 
 procedure Cargar_ddragon3;
 begin

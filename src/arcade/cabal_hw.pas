@@ -19,6 +19,7 @@ procedure cabal_snd_putbyte(direccion:word;valor:byte);
 procedure cabal_sound_act;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         cabal_rom:array[0..4] of tipo_roms=(
         (n:'13.7h';l:$10000;p:0;crc:$00abbe0c),(n:'11.6h';l:$10000;p:$1;crc:$44736281),
@@ -58,9 +59,6 @@ var
  main_ram:array[0..$7fff] of word;
  bg_ram:array[0..$1ff] of word;
  fg_ram:array[0..$3ff] of word;
- nmi_timer:byte;
-
-implementation
 
 procedure Cargar_cabal;
 begin
