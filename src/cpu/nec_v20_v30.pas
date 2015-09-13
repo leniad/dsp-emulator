@@ -15,23 +15,6 @@ const
   NEC_V20=0;
   NEC_V30=1;
   NEC_V33=2;
-  parity_table:array[0..$ff] of boolean=(
-  true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true, false, true, true, false, true, false,
-  false, true, true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true, true, false, false, true,
-  false, true, true, false, true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true, false, true,
-  true, false, true, false, false, true, true, false, false, true, false, true, true, false, true, false, false, true, false, true, true, false,
-  false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, false, true, true, false, true, false,
-  false, true, false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, false, true, true, false,
-  true, false, false, true, true, false, false, true, false, true, true, false, true, false, false, true, false, true, true, false, false, true,
-  true, false, true, false, false, true, true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true,
-  false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, true, false, false, true, false, true,
-  true, false, false, true, true, false, true, false, false, true, false, true, true, false, true, false, false, true, true, false, false, true,
-  false, true, true, false, false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, true, false,
-  false, true, false, true, true, false, false, true, true, false, true, false, false, true);
-  DS1=0;
-  PS=1;
-  SS=2;
-  DS0=3;
 
 type
         band_nec=record
@@ -146,9 +129,26 @@ var
   main_nec:cpu_nec;
 
 implementation
-
 var
   prev_icount:integer;
+const
+  parity_table:array[0..$ff] of boolean=(
+    true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true, false, true, true, false, true, false,
+    false, true, true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true, true, false, false, true,
+    false, true, true, false, true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true, false, true,
+    true, false, true, false, false, true, true, false, false, true, false, true, true, false, true, false, false, true, false, true, true, false,
+    false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, false, true, true, false, true, false,
+    false, true, false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, false, true, true, false,
+    true, false, false, true, true, false, false, true, false, true, true, false, true, false, false, true, false, true, true, false, false, true,
+    true, false, true, false, false, true, true, false, false, true, false, true, true, false, false, true, true, false, true, false, false, true,
+    false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, true, false, false, true, false, true,
+    true, false, false, true, true, false, true, false, false, true, false, true, true, false, true, false, false, true, true, false, false, true,
+    false, true, true, false, false, true, true, false, true, false, false, true, true, false, false, true, false, true, true, false, true, false,
+    false, true, false, true, true, false, false, true, true, false, true, false, false, true);
+    DS1=0;
+    PS=1;
+    SS=2;
+    DS0=3;
 
 constructor cpu_nec.create(clock:dword;frames_div:word;tipo:byte);
 begin

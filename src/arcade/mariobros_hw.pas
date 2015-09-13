@@ -16,6 +16,7 @@ procedure mario_putbyte(direccion:word;valor:byte);
 //Sound
 procedure mario_sound_update;
 
+implementation
 const
         mario_rom:array[0..4] of tipo_roms=(
         (n:'tma1-c-7f_f.7f';l:$2000;p:0;crc:$c0c6e014),(n:'tma1-c-7e_f.7e';l:$2000;p:$2000;crc:$94fb60d6),
@@ -43,8 +44,6 @@ const
 var
  haz_nmi,hay_samples:boolean;
  gfx_bank,palette_bank,scroll_y,death_val,skid_val,coin_val:byte;
-
-implementation
 
 procedure Cargar_mario;
 begin

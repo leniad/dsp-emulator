@@ -51,6 +51,11 @@ type
             function pop_uw:word;
         end;
 
+var
+  main_m6809,snd_m6809,misc_m6809:cpu_m6809;
+
+implementation
+
 const
     estados_t:array[0..255] of byte=(
       //0 1 2 3 4 5 6 7 8 9 a b c d e f
@@ -146,11 +151,6 @@ const
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,1,  //d0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,4,  //e0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,3); //f0
-
-var
-  main_m6809,snd_m6809,misc_m6809:cpu_m6809;
-
-implementation
 
 constructor cpu_m6809.create(clock:dword;frames_div:word);
 begin

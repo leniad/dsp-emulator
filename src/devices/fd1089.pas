@@ -6,6 +6,11 @@ uses {$IFDEF WINDOWS}windows,{$endif}misc_functions;
 const
   fd_typeA=1;
   fd_typeB=2;
+
+procedure fd1089_decrypt(size:dword;srcptr,opcodesptr,dataptr:pword;m_key:pbyte;fd_type:byte);
+
+implementation
+const
   s_basetable_fd1089:array[0..$ff] of byte=(
 	$00,$1c,$76,$6a,$5e,$42,$24,$38,$4b,$67,$ad,$81,$e9,$c5,$03,$2f,
 	$45,$69,$af,$83,$e7,$cb,$01,$2d,$02,$1e,$78,$64,$5c,$40,$2a,$36,
@@ -60,10 +65,6 @@ const
 	($f7, 6,3,7,0,5,4,2,1),
 	($3a, 6,1,3,2,7,4,5,0),
 	($ac, 1,6,3,5,0,7,4,2));
-
-procedure fd1089_decrypt(size:dword;srcptr,opcodesptr,dataptr:pword;m_key:pbyte;fd_type:byte);
-
-implementation
 
 function rearrange_key(table:byte;opcode:boolean):byte;
 begin

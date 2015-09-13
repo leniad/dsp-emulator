@@ -48,6 +48,7 @@ procedure irem_m72_sound_update;
 procedure rtype2_sound_update;
 procedure rtype2_perodic_int;
 
+implementation
 const
         //Rtype
         rtype_rom:array[0..4] of tipo_roms=(
@@ -111,8 +112,6 @@ var
  //video
  update_video_irem_m72:tipo_update_video_m72;
  paint_video_irem_m72:tipo_paint_video_irem_m72;
-
-implementation
 
 procedure Cargar_irem_m72;
 begin

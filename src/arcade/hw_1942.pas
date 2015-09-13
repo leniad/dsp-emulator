@@ -22,6 +22,7 @@ procedure hw1942_sound_update;
 procedure hw1942_qsave(nombre:string);
 procedure hw1942_qload(nombre:string);
 
+implementation
 const
         hw1942_rom:array[0..5] of tipo_roms=(
         (n:'srb-03.m3';l:$4000;p:0;crc:$d9dafcc3),(n:'srb-04.m4';l:$4000;p:$4000;crc:$da0cf924),
@@ -45,8 +46,6 @@ var
  memoria_rom:array[0..2,0..$3fff] of byte;
  scroll:word;
  sound_command,rom_bank,palette_bank:byte;
-
-implementation
 
 procedure Cargar_hw1942;
 begin

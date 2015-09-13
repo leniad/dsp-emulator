@@ -32,44 +32,52 @@ type
             r:preg_m6502;
             //RAM calls/IO Calls
             in_port0,in_port1:cpu_inport_call;
-            read_dummy:boolean;
+            read_dummy,after_ei:boolean;
             //IRQ
             function call_nmi:byte;
             function call_irq:byte;
         end;
+const
+  TCPU_M6502=0;
+  TCPU_DECO16=1;
+  TCPU_NES=2;
 
+var
+  main_m6502,snd_m6502:cpu_m6502;
+
+implementation
 const
         tipo_dir:array[0..255] of byte=(
       //0  1  2  3 4  5 6 7 8  9 a b c  d e f
-        0,$a, 0,$a,7, 7,7,0,0, 1,0,0,2, 2,2,2,  //00
-       $d,$b, 0,$b,7, 8,8,0,0, 6,0,6,2, 5,4,5,  //10
-        0,$a, 0,$a,7, 7,7,7,0, 1,0,0,2, 2,2,2,  //20
-       $d,$b, 0,$b,8, 8,8,0,0, 6,0,6,5, 5,4,5,  //30
-        0,$a, 0,$a,0, 7,7,0,0, 1,0,0,2, 2,2,2,  //40
-       $d,$b, 0,$b,0, 8,8,0,0, 6,0,6,0, 5,4,5,  //50
-        0,$a, 0,$a,7, 7,7,0,0, 1,0,0,0, 2,2,2,  //60
-       $d,$b, 0,$b,8, 8,8,0,0, 6,0,6,3, 5,4,5,  //70
-       $d,$a, 1, 0,7, 7,7,0,0, 1,0,0,2, 2,2,0,  //80
-       $d,$b, 0, 0,8, 8,9,0,0, 6,0,0,2, 4,5,0,  //90
+        0,$a, 0,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //00
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //10
+        0,$a, 0,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //20
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //30
+        0,$a, 0,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //40
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //50
+        0,$a, 0,$a,7, 7,7,7,0, 1,0,1,0, 2,2,2,  //60
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //70
+       $d,$a, 1,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //80
+       $d,$b, 0,$b,8, 8,9,9,0, 6,0,6,2, 4,5,5,  //90
         1,$a, 1, 0,7, 7,7,0,0, 1,0,0,2, 2,2,0,  //A0
        $d,$b, 0, 0,8, 8,9,0,0, 6,0,0,5, 5,6,0,  //B0
         1,$a, 1,$a,7, 7,7,0,0, 1,0,0,2, 2,2,2,  //C0
-       $d,$b, 0,$b,0, 8,8,0,0, 6,0,6,0, 5,4,5,  //D0
-        1,$a, 1,$a,7, 7,7,0,0, 1,0,0,2, 2,2,2,  //E0
-       $d,$b, 0,$b,0, 8,8,0,0, 6,0,6,0, 5,4,5); //F0
+       $d,$b, 0,$b,8, 8,8,0,0, 6,0,6,5, 5,4,5,  //D0
+        1,$a, 1,$a,7, 7,7,0,0, 1,0,1,2, 2,2,2,  //E0
+       $d,$b, 0,$b,8, 8,8,0,0, 6,0,6,5, 5,4,5); //F0
 
         estados_t:array[0..1,0..255] of byte=((
         //M6502 + NES
-        7, 6, 1, 7, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6,
-        2, 5, 1, 7, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
-        6, 6, 1, 7, 3, 3, 5, 5, 4, 2, 2, 2, 4, 4, 6, 6,
-        2, 5, 1, 7, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
-        6, 6, 1, 7, 3, 3, 5, 5, 3, 2, 2, 2, 3, 4, 6, 6,
-        2, 5, 1, 7, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
-        6, 6, 1, 7, 3, 3, 5, 5, 4, 2, 2, 2, 5, 4, 6, 6,
-        2, 5, 1, 7, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
+        7, 6, 1, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6,
+        2, 5, 1, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
+        6, 6, 1, 8, 3, 3, 5, 5, 4, 2, 2, 2, 4, 4, 6, 6,
+        2, 5, 1, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
+        6, 6, 1, 8, 3, 3, 5, 5, 3, 2, 2, 2, 3, 4, 6, 6,
+        2, 5, 1, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
+        6, 6, 1, 8, 3, 3, 5, 5, 4, 2, 2, 2, 5, 4, 6, 6,
+        2, 5, 1, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
         2, 6, 2, 6, 3, 3, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4,
-        2, 6, 1, 5, 4, 4, 4, 4, 2, 5, 2, 5, 5, 5, 5, 5,
+        2, 6, 1, 6, 4, 4, 4, 4, 2, 5, 2, 5, 5, 5, 5, 5,
         2, 6, 2, 6, 3, 3, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4,
         2, 5, 1, 5, 4, 4, 4, 4, 2, 4, 2, 4, 4, 4, 4, 4,
         2, 6, 2, 7, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6,
@@ -94,15 +102,6 @@ const
         2, 6, 2, 2, 3, 3, 5, 2, 2, 2, 2, 2, 4, 4, 6, 2,  //e
         2, 5, 2, 2, 2, 4, 6, 2, 2, 4, 4, 2, 2, 4, 7, 2));
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-
-        TCPU_M6502=0;
-        TCPU_DECO16=1;
-        TCPU_NES=2;
-
-var
-  main_m6502,snd_m6502:cpu_m6502;
-
-implementation
 
 constructor cpu_m6502.Create(clock:dword;frames_div:word;cpu_type:byte);
 begin
@@ -183,6 +182,7 @@ r.p.dec:=false;
 r.p.int:=true;
 r.p.z:=false;
 r.p.c:=false;
+self.after_ei:=false;
 self.pedir_nmi:=CLEAR_LINE;
 self.pedir_irq:=CLEAR_LINE;
 self.nmi_state:=CLEAR_LINE;
@@ -236,107 +236,62 @@ call_irq:=7;
 if self.pedir_irq=HOLD_LINE then self.pedir_irq:=CLEAR_LINE;
 end;
 
-procedure sbc(r:preg_m6502;numero,tipo_cpu:byte);inline;
+procedure sbc(r:preg_m6502;numero,tipo_cpu:byte);
 var
-  carry:byte;
-  temp3,tempw:word;
+  carry,al,ah:byte;
+  diff:word;
 begin
-case tipo_cpu of //SBC
-              TCPU_M6502,TCPU_DECO16:begin
-                    if r.p.c then carry:=1 else carry:=0;
-                    if ((r.a xor numero) and $80)<>0 then R.p.o_v:=false
-                       else R.P.o_v:=true;
-                    if (R.p.dec) then begin
-                      temp3:= $f + (R.A and $f) - (numero and $f) + carry;
-                      if (temp3 < $10) then begin
-                        tempw:= 0;
-                        temp3:=temp3-6;
-                      end else begin
-                        tempw:=$10;
-                        temp3:=temp3-$10;
-                      end;
-                      tempw:=tempw+ $f0 + (R.A and $f0) - (numero and $f0);
-                      if (tempw < $100) then begin
-                        R.P.c:=false;
-                        if ((R.P.o_v) and (tempw < $80)) then R.p.o_v:=false;
-                        tempw:=tempw-$60;
-                      end else begin
-                        R.P.c:=true;
-                        if ((R.p.o_v) and (tempw >= $180)) then R.p.o_v:=false;
-                      end;
-                      tempw:=tempw+temp3;
-                    end else begin
-                      tempw:=$ff + R.A - numero + carry;
-                      if (tempw < $100) then begin
-                        R.p.c:=false;
-                        if ((R.p.o_v) and (tempw < $80)) then R.p.o_v:=false;
-                      end else begin
-                        R.p.c:=true;
-                        if ((R.p.o_v) and (tempw >= $180)) then r.p.o_v:=false;
-                      end;
-                    end;
-                    R.A:=tempw and $FF;
-                    r.p.z:=(r.a=0);
-                    r.p.n:=(r.a and $80)<>0;
-                end;
-              TCPU_NES:begin
-                    if not(r.p.c) then tempw:=r.a-numero-1
-                      else tempw:=r.a-numero;
-                    r.p.o_v:=((r.a xor numero) and (r.a xor tempw) and $80)<>0;
-                    r.p.c:=(tempw and $ff00)=0;
-                    r.a:=tempw and $FF;
-                    r.p.z:=(r.a=0);
-                    r.p.n:=(r.a and $80)<>0;
-                end;
+if (r.p.dec and (tipo_cpu<>TCPU_NES)) then begin
+  if r.p.c then carry:=1 else carry:=0;
+  diff:=r.a-numero-carry;
+  al:=(r.a and 15)-(numero and 15)-carry;
+  if (shortint(al)<0) then al:=al-6;
+  ah:=(r.a shr 4)-(numero shr 4)-byte((shortint(al)<0));
+  r.p.z:=(diff and $ff)=0;
+  if not(r.p.z) then r.p.n:=(diff and $80)<>0
+    else r.p.n:=false;
+  r.p.o_v:=((r.a xor numero) and (r.a xor diff) and $80)<>0;
+  r.p.c:=(diff and $ff00)=0;
+  if (shortint(ah)<0) then ah:=ah-6;
+  r.a:=(ah shl 4) or (al and 15);
+end else begin
+  if not(r.p.c) then diff:=r.a-numero-1
+    else diff:=r.a-numero;
+  r.p.o_v:=((r.a xor numero) and (r.a xor diff) and $80)<>0;
+  r.p.c:=(diff and $ff00)=0;
+  r.a:=diff and $FF;
+  r.p.z:=(r.a=0);
+  if not(r.p.z) then r.p.n:=(r.a and $80)<>0
+    else r.p.n:=false;
 end;
 end;
 
-procedure adc(r:preg_m6502;numero,tipo_cpu:byte);inline;
+procedure adc(r:preg_m6502;numero,tipo_cpu:byte);
 var
-  carry:byte;
+  al,ah,carry:byte;
   tempw:word;
 begin
-case tipo_cpu of
-  TCPU_M6502,TCPU_DECO16:begin //ADC
-                      if r.p.c then carry:=1 else carry:=0;
-                      if ((r.a xor numero) and $80)<>0 then R.p.o_v:=false
-                         else R.P.o_v:=true;
-                      if (R.p.dec) then begin
-                         tempw:=(r.a and $f)+(numero and $f)+carry;
-                         if (tempw >= 10) then tempw:=$10 or ((tempw+6) and $f);
-                         tempw:=tempw+(r.a and $f0)+(numero and $f0);
-                         if (tempw>=160) then begin
-                           R.P.c:=true;
-                           if (R.P.o_v and (tempw>=$180)) then R.P.o_v:=false;
-                           tempw:=tempw+$60;
-                         end else begin
-                           r.p.c:=false;
-                           if (R.p.o_v and (tempw<$80)) then R.P.o_v:=false;
-                         end;
-                      end else begin
-                        tempw:=r.a+numero+carry;
-                        if (tempw>=$100) then begin
-                            R.P.c:=true;
-                            if ((R.p.o_v) and (tempw >= $180)) then r.p.o_v:=false;
-                        end else begin
-                            R.P.c:=false;
-                            if ((R.P.o_v) and (tempw < $80)) then R.P.o_v:=false;
-                        end;
-                      end;
-                      r.a:=tempw and $FF;
-                      r.p.z:=(r.a=0);
-                      r.p.n:=(r.a and $80)<>0;
-                     end;
-           TCPU_NES:begin
-                      if r.p.c then tempw:=r.a+numero+1
-                        else tempw:=r.a+numero;
-                      r.p.o_v:=(not(r.a xor numero) and (r.a xor tempw) and $80)<>0;
-                      r.p.c:=(tempw and $ff00)<>0;
-                      r.a:=tempw and $ff;
-                      r.p.z:=(r.a=0);
-                      r.p.n:=(r.a and $80)<>0;
-                   end;
-end;
+if (r.p.dec and (tipo_cpu<>TCPU_NES)) then begin
+  if r.p.c then carry:=1 else carry:=0;
+    al:=(r.a and 15)+(numero and 15)+carry;
+	  if (al>9) then al:=al+6;
+	  ah:=(r.a shr 4)+(numero shr 4)+byte(al>15);
+	  r.p.z:=((r.a+numero+carry) and $ff)=0;
+	  if not(r.p.z) then r.p.n:=(ah and 8)<>0;
+	  r.p.o_v:=(not(r.a xor numero) and (r.a xor (ah shl 4)) and $80)<>0;
+	  if (ah>9) then ah:=ah+6;
+	  r.p.c:=(ah>15);
+	  r.a:=(ah shl 4) or (al and 15);
+  end else begin
+    if r.p.c then tempw:=r.a+numero+1
+      else tempw:=r.a+numero;
+    r.p.o_v:=(not(r.a xor numero) and (r.a xor tempw) and $80)<>0;
+    r.p.c:=(tempw and $ff00)<>0;
+    r.a:=tempw and $ff;
+    r.p.z:=(r.a=0);
+    if not(r.p.z) then r.p.n:=(r.a and $80)<>0
+      else r.p.n:=false;
+  end;
 end;
 
 procedure cpu_m6502.run(maximo:single);
@@ -354,9 +309,12 @@ if self.pedir_reset<>CLEAR_LINE then begin
 end;
 r.old_pc:=r.pc;
 self.read_dummy:=false;
-if (self.pedir_nmi<>CLEAR_LINE) then self.estados_demas:=self.call_nmi
-  else if (self.pedir_irq<>CLEAR_LINE) then self.estados_demas:=self.call_irq
-    else self.estados_demas:=0;
+if not(self.after_ei) then begin
+  if (self.pedir_nmi<>CLEAR_LINE) then self.estados_demas:=self.call_nmi
+    else if (self.pedir_irq<>CLEAR_LINE) then self.estados_demas:=self.call_irq
+      else self.estados_demas:=0;
+end;
+self.after_ei:=false;
 self.opcode:=true;
 instruccion:=self.getbyte(r.pc);
 self.opcode:=false;
@@ -373,7 +331,7 @@ case tipo_dir[instruccion] of
                 r.pc:=r.pc+2;
             end;
         $03:begin  //desconocido!!!! -> MAL
-                MessageDlg('Modo dir. mal, intruccion: '+inttostr(instruccion)+'. PC='+inttostr(r.pc), mtInformation,[mbOk], 0)
+                MessageDlg('Modo dir. mal, instruccion: '+inttohex(instruccion,2)+'. PC='+inttostr(r.pc), mtInformation,[mbOk], 0)
             end;
         $04:begin //absoluto indexado por X no page cross
                 posicion:=self.getbyte(r.pc);
@@ -381,19 +339,21 @@ case tipo_dir[instruccion] of
                 r.pc:=r.pc+2;
             end;
         $05:begin //absoluto indexado por X (rev)
-                posicion:=self.getbyte(r.pc);
-                posicion:=posicion+(self.getbyte(r.pc+1) shl 8);
-                if (((posicion + r.x) xor posicion) and $ff00)<>0 then begin
-                  self.estados_demas:=self.estados_demas+1;
-                  self.getbyte((posicion and $ff00) or ((posicion+r.x) and $ff));
+                posicion:=self.getbyte(r.pc)+(self.getbyte(r.pc+1) shl 8);
+                case instruccion of
+                  $1f,$3f,$5f,$7f:;
+                  else if (((posicion+r.x) xor posicion) and $ff00)<>0 then self.estados_demas:=self.estados_demas+1;
                 end;
                 posicion:=posicion+r.x;
                 r.pc:=r.pc+2;
             end;
         $06:begin //absoluto indexado por Y (rev)
-                posicion:=self.getbyte(r.pc);
-                if (((posicion+r.y)>$ff) and (instruccion<>$99)) then self.estados_demas:=self.estados_demas+1;
-                posicion:=posicion+(self.getbyte(r.pc+1) shl 8)+r.y;
+                posicion:=self.getbyte(r.pc)+(self.getbyte(r.pc+1) shl 8);
+                case instruccion of
+                  $1b,$3b,$5b,$7b,$99:;
+                  else if (((posicion+r.y) xor posicion) and $ff00)<>0 then self.estados_demas:=self.estados_demas+1;
+                end;
+                posicion:=posicion+r.y;
                 r.pc:=r.pc+2;
             end;
         $07:begin //pagina 0  opcode+direccion 8bits (rev)
@@ -413,16 +373,19 @@ case tipo_dir[instruccion] of
         $0a:begin //indirecto indexado por X (rev)
                 tempb:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                tempb:=(tempb+r.x);
-                posicion:=self.getbyte(tempb);
-                posicion:=posicion or (self.getbyte((tempb+1) and $ff) shl 8);
+                tempb:=tempb+r.x;
+                posicion:=self.getbyte(tempb) or (self.getbyte((tempb+1) and $ff) shl 8);
             end;
         $0b:begin  //indirecto indexado por Y (rev)
                 tempb:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 posicion:=self.getbyte(tempb);
-                posicion:=(posicion or (self.getbyte((tempb+1) and $ff) shl 8))+r.y;
-                if (((posicion and $ff00)<>(r.pc and $ff00)) and (instruccion<>$91)) then self.estados_demas:=self.estados_demas+1;
+                posicion:=posicion or (self.getbyte((tempb+1) and $ff) shl 8);
+                case instruccion of
+                  $13,$33,$53,$73,$93,$91:;
+                  else if (((posicion+r.y) xor posicion) and $ff00)<>0 then self.estados_demas:=self.estados_demas+1;
+                end;
+                posicion:=posicion+r.y;
             end;
         $0c:begin //indexado pagina 0 opcode+puntero 8bits (rev)
                 tempb:=self.getbyte(r.pc);
@@ -456,7 +419,7 @@ case instruccion of
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
-      $03,$13,$0f,$1b,$1f:begin //SLO
+      $03,$07,$0f,$13,$17,$1b,$1f:begin //SLO
             tempb:=self.getbyte(posicion);
             self.putbyte(posicion,tempb); // <-- Fallo de la CPU
             r.p.c:=(tempb and $80)<>0;
@@ -466,7 +429,7 @@ case instruccion of
             r.p.n:=(r.a and $80)<>0;
             self.putbyte(posicion,tempb);
           end;
-      $04:self.getbyte(r.pc);  // <-- Fallo CPU NOP
+      $04,$0c,$14,$1a,$1c,$34,$3a,$3c,$44,$54,$5a,$5c,$64,$74,$7a,$7c,$80,$82,$89,$c2,$d4,$da,$dc,$e2,$ea,$f4,$fa,$fc:self.getbyte(r.pc);  // <-- Fallo CPU NOP
       $06,$0e,$16,$1e:begin //asl
                 tempb:=self.getbyte(posicion);
                 self.putbyte(posicion,tempb); // <-- Fallo de la CPU
@@ -490,6 +453,14 @@ case instruccion of
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
+      $0b,$2b:begin //anc
+            r.a:=r.a and self.getbyte(posicion);
+            if r.p.c then carry:=1 else carry:=0;
+            r.p.c:=(r.a and $80)<>0;
+            r.a:=(r.a shl 1) or carry;
+            r.p.z:=(r.a=0);
+            r.p.n:=(r.a and $80)<>0;
+          end;
       $10:if not(r.p.n) then begin //BPL salta si n false
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
@@ -499,7 +470,6 @@ case instruccion of
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.c:=false;
           end;
-      $1a,$3a,$5a,$7a,$da,$ea,$fa:self.getbyte(r.pc);  // <-- Fallo CPU NOP
       $20:begin // JSR absoluto
             tempb:=self.getbyte(r.pc);
             r.pc:=r.pc+1;
@@ -514,7 +484,7 @@ case instruccion of
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
         end;
-      $23,$2f,$33,$3b,$3f:begin //RLA
+      $23,$27,$2f,$33,$37,$3b,$3f:begin //RLA
             tempb:=self.getbyte(posicion);
             self.putbyte(posicion,tempb); // <-- Fallo de la CPU
             if r.p.c then tempw:=(tempb shl 1)+1
@@ -546,6 +516,7 @@ case instruccion of
             r.sp:=r.sp+1;
             tempb:=self.getbyte($100+r.sp);
             pon_pila(self.r,tempb);
+            self.after_ei:=true;
           end;
       $2a:begin //ROL A
             self.getbyte(r.pc);  // <-- Fallo CPU
@@ -571,13 +542,14 @@ case instruccion of
                 r.pc:=self.getbyte($100+r.sp);
                 r.sp:=r.sp+1;
                 r.pc:=r.pc or (self.getbyte($100+r.sp) shl 8);
+                self.after_ei:=false;
           end;
       $41,$45,$49,$4d,$51,$55,$59,$5d:begin //EOR
             r.a:=r.a xor self.getbyte(posicion);
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
-      $43,$4f,$53,$5b,$5f:begin //SRE
+      $43,$47,$4f,$53,$57,$5b,$5f:begin //SRE
             tempb:=self.getbyte(posicion);
             self.putbyte(posicion,tempb); // <-- Fallo de la CPU
             r.p.c:=(tempb and $1)<>0;
@@ -609,7 +581,14 @@ case instruccion of
              r.p.n:=false;
           end;
       $4b:case self.tipo_cpu of
-            TCPU_M6502,TCPU_NES:MessageDlg('Instruccion: '+inttostr(instruccion)+' desconocida. PC='+inttostr(r.pc), mtInformation,[mbOk], 0);
+            TCPU_M6502,TCPU_NES:begin //alr
+                                  r.p.c:=(r.a and $1)<>0;
+                                  r.a:=r.a and self.getbyte(posicion);
+                                  r.p.c:=(r.a and $1)<>0;
+                                  r.a:=r.a shr 1;
+                                  r.p.z:=(r.a=0);
+                                  r.p.n:=false;
+                                end;
             TCPU_DECO16:begin
                           r.pc:=r.pc+1;
                           if @self.in_port1<>nil then r.a:=self.in_port1;
@@ -624,6 +603,7 @@ case instruccion of
       $58:begin  //CLI
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.int:=false;
+            self.after_ei:=true;
           end;
       $60:begin  //RTS
              r.sp:=r.sp+1;
@@ -636,7 +616,7 @@ case instruccion of
              numero:=self.getbyte(posicion);
              adc(self.r,numero,self.tipo_cpu);
            end;
-      $63,$6f,$73,$7b,$7f:begin //RRA
+      $63,$67,$6f,$73,$77,$7b,$7f:begin //RRA
             tempb:=self.getbyte(posicion);
             self.putbyte(posicion,tempb); // <-- Fallo de la CPU
             if r.p.c then tempw:=tempb or $100
@@ -671,6 +651,14 @@ case instruccion of
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
+      $6b:begin  //arr
+            r.a:=r.a and self.getbyte(posicion);
+            if r.p.c then carry:=$80 else carry:=0;
+            r.p.c:=(r.a and $1)<>0;
+            r.a:=(r.a shr 1) or carry;
+            r.p.z:=(r.a=0);
+            r.p.n:=(r.a and $80)<>0;
+          end;
       $6c:begin  //jmp rel
             //abs
             posicion:=self.getbyte(r.pc);
@@ -686,8 +674,10 @@ case instruccion of
       $78:begin  //SEI
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.int:=true;
+            self.after_ei:=true;
           end;
       $81,$85,$8d,$91,$95,$99,$9d:self.putbyte(posicion,r.a); //STA
+      $83,$87,$8f,$97:self.putbyte(posicion,r.a and r.x); //sax
       $84,$8c,$94:self.putbyte(posicion,r.y); //STY
       $86,$8e,$96:self.putbyte(posicion,r.x); //STX
       $88:begin  //DEY
@@ -702,11 +692,17 @@ case instruccion of
              r.p.z:=(r.a=0);
              r.p.n:=(r.a and $80)<>0;
            end;
+      $8b:begin //XAA
+             r.a:=r.x and self.getbyte(posicion);
+             r.p.z:=(r.a=0);
+             r.p.n:=(r.a and $80)<>0;
+           end;
       $90:if not(r.p.c) then begin  //BCC salta si c false
              if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
              r.pc:=r.pc+shortint(numero);
           end;
+      $93,$9f:self.putbyte(posicion,r.a and r.x and tempb); //ahx
       $98:begin  //TYA
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.a:=r.y;
@@ -816,7 +812,7 @@ case instruccion of
               r.p.z:=(tempw and $ff)=0;
               r.p.n:=(tempw and $80)<>0;
           end;
-      $E1,$e5,$e9,$ed,$f1,$f5,$f9,$fd:begin  //SBC
+      $E1,$e5,$e9,$eb,$ed,$f1,$f5,$f9,$fd:begin  //SBC
               numero:=self.getbyte(posicion);
               sbc(self.r,numero,self.tipo_cpu);
           end;
@@ -851,7 +847,7 @@ case instruccion of
             r.p.dec:=true;
           end;
       else
-        MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0)
+        MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0)
 end; //del case!!
 tempw:=estados_t[self.tipo_cpu and $1,instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;

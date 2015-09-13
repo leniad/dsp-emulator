@@ -210,7 +210,7 @@ for y:=0 to 7 do begin
 end;
 end;
 
-procedure update_backgroud(screen:byte);inline;
+procedure update_backgroud(screen:byte);
 var
   source,f,color,nchar,atrib:word;
   x,y:word;
@@ -229,7 +229,7 @@ for f:=0 to $3ff do begin
 end;
 end;
 
-procedure update_video_system1;inline;
+procedure update_video_system1;
 var
   x,y:integer;
   temp:pword;

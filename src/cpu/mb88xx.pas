@@ -63,6 +63,10 @@ type
           function update_pio(cycles:byte):byte;
      end;
 
+var
+  main_mb88xx:cpu_mb88xx;
+
+implementation
 const
   INT_CAUSE_SERIAL=01;
   INT_CAUSE_TIMER =02;
@@ -76,11 +80,6 @@ const
 	MB88_PORTR2=5;    // R8-R11, 4 bits */
 	MB88_PORTR3=6;    // R12-R15, 4 bits */
 	MB88_PORTSI=7;     // SI, 1 bit */
-
-var
-  main_mb88xx:cpu_mb88xx;
-
-implementation
 
 constructor cpu_mb88xx.create(clock:dword;frames_div:word);
 begin

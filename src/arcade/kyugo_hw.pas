@@ -25,6 +25,7 @@ function kyugo_portb_r:byte;
 procedure kyugo_hw_despues_instruccion;
 procedure kyugo_snd_irq;
 
+implementation
 const
         repulse_rom:array[0..3] of tipo_roms=(
         (n:'repulse.b5';l:$2000;p:0;crc:$fb2b7c9d),(n:'repulse.b6';l:$2000;p:$2000;crc:$99129918),
@@ -48,8 +49,6 @@ var
   scroll_x:word;
   scroll_y,fg_color,bg_pal_bank:byte;
   nmi_enable:boolean;
-
-implementation
 
 procedure Cargar_kyugo_hw;
 begin

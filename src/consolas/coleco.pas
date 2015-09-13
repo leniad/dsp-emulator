@@ -143,16 +143,16 @@ if event.keyboard then begin
    if keyboard[SDL_SCANCODE_A] then keypad[0]:=(keypad[0] and $fbff) else keypad[0]:=(keypad[0] or $0400);
    if keyboard[SDL_SCANCODE_S] then keypad[0]:=(keypad[0] and $f7ff) else keypad[0]:=(keypad[0] or $0800);
    //P2
-   if keyboard[SDL_SCANCODE_Q] then keypad[1]:=(keypad[1] and $fffe) else keypad[1]:=(keypad[1] or $0001);
-   if keyboard[SDL_SCANCODE_W] then keypad[1]:=(keypad[1] and $fffd) else keypad[1]:=(keypad[1] or $0002);
-   if keyboard[SDL_SCANCODE_E] then keypad[1]:=(keypad[1] and $fffb) else keypad[1]:=(keypad[1] or $0004);
-   if keyboard[SDL_SCANCODE_R] then keypad[1]:=(keypad[1] and $fff7) else keypad[1]:=(keypad[1] or $0008);
-   if keyboard[SDL_SCANCODE_T] then keypad[1]:=(keypad[1] and $ffef) else keypad[1]:=(keypad[1] or $0010);
-   if keyboard[SDL_SCANCODE_Y] then keypad[1]:=(keypad[1] and $ffdf) else keypad[1]:=(keypad[1] or $0020);
-   if keyboard[SDL_SCANCODE_U] then keypad[1]:=(keypad[1] and $ffbf) else keypad[1]:=(keypad[1] or $0040);
-   if keyboard[SDL_SCANCODE_I] then keypad[1]:=(keypad[1] and $ff7f) else keypad[1]:=(keypad[1] or $0080);
-   if keyboard[SDL_SCANCODE_O] then keypad[1]:=(keypad[1] and $feff) else keypad[1]:=(keypad[1] or $0100);
-   if keyboard[SDL_SCANCODE_P] then keypad[1]:=(keypad[1] and $fdff) else keypad[1]:=(keypad[1] or $0200);
+   if keyboard[SDL_SCANCODE_P] then keypad[1]:=(keypad[1] and $fffe) else keypad[1]:=(keypad[1] or $0001);
+   if keyboard[SDL_SCANCODE_Q] then keypad[1]:=(keypad[1] and $fffd) else keypad[1]:=(keypad[1] or $0002);
+   if keyboard[SDL_SCANCODE_W] then keypad[1]:=(keypad[1] and $fffb) else keypad[1]:=(keypad[1] or $0004);
+   if keyboard[SDL_SCANCODE_E] then keypad[1]:=(keypad[1] and $fff7) else keypad[1]:=(keypad[1] or $0008);
+   if keyboard[SDL_SCANCODE_R] then keypad[1]:=(keypad[1] and $ffef) else keypad[1]:=(keypad[1] or $0010);
+   if keyboard[SDL_SCANCODE_T] then keypad[1]:=(keypad[1] and $ffdf) else keypad[1]:=(keypad[1] or $0020);
+   if keyboard[SDL_SCANCODE_Y] then keypad[1]:=(keypad[1] and $ffbf) else keypad[1]:=(keypad[1] or $0040);
+   if keyboard[SDL_SCANCODE_U] then keypad[1]:=(keypad[1] and $ff7f) else keypad[1]:=(keypad[1] or $0080);
+   if keyboard[SDL_SCANCODE_I] then keypad[1]:=(keypad[1] and $feff) else keypad[1]:=(keypad[1] or $0100);
+   if keyboard[SDL_SCANCODE_O] then keypad[1]:=(keypad[1] and $fdff) else keypad[1]:=(keypad[1] or $0200);
    if keyboard[SDL_SCANCODE_Z] then keypad[1]:=(keypad[1] and $fbff) else keypad[1]:=(keypad[1] or $0400);
    if keyboard[SDL_SCANCODE_X] then keypad[1]:=(keypad[1] and $f7ff) else keypad[1]:=(keypad[1] or $0800);
 end;
@@ -171,7 +171,7 @@ while EmuStatus=EsRuning do begin
       frame:=frame+main_z80.tframes-main_z80.contador;
       TMS99XX_refresh(f);
   end;
-  actualiza_trozo_simple(0,0,342,262,1);
+  actualiza_trozo_simple(0,0,284,243,1);
   eventos_coleco;
   video_sync;
 end;
@@ -231,10 +231,9 @@ end;
 procedure coleco_outbyte(valor:byte;puerto:word);
 begin
   case (puerto and $e0) of
-    $80:joymode:=false;
+    $80,$c0:joymode:=(puerto and $40)<>0;
     $a0:if (puerto and $01)<>0 then TMS99XX_register_w(valor)
                 else TMS99XX_vram_w(valor);
-    $c0:joymode:=true;
     $e0:sn_76496_0.Write(valor);
   end;
 end;

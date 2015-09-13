@@ -4,6 +4,10 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      misc_functions,controls_engine,hu6280,main_engine,deco_common;
 
+const
+  INPUT_PORT_A=-1;
+  INPUT_PORT_B=-2;
+  INPUT_PORT_C=-3;
 type
   ram_type=record
     wo:integer;
@@ -38,11 +42,11 @@ type
       function read_protport(address:word):word;
     end;
 
-const
-  INPUT_PORT_A=-1;
-  INPUT_PORT_B=-2;
-  INPUT_PORT_C=-3;
+var
+  main_deco146:cpu_deco_146;
 
+implementation
+const
   deco_146ram:array[0..$3ff] of ram_type=(
 (wo:$08a;m:($04,$05,$06,$07,$08,$09,$0a,$0b,$0c,$0d,$0e,$0f,$ff,$ff,$ff,$ff);ux:false;un:true), //0x000
 (wo:$0aa;m:($0c,$0d,$0e,$0f,$08,$09,$0a,$0b,$00,$01,$02,$03,$04,$05,$06,$07);ux:false;un:false), //0x002
@@ -1068,11 +1072,6 @@ const
 (wo:$02e;m:($08,$09,$0a,$0b,$0c,$0d,$0e,$0f,$04,$05,$06,$07,$00,$01,$02,$03);ux:false;un:true), //0x7fa
 (wo:$06e;m:($04,$05,$06,$07,$00,$01,$02,$03,$0c,$0d,$0e,$0f,$08,$09,$0a,$0b);ux:true;un:false), //0x7fc
 (wo:$04c;m:($04,$05,$06,$07,$08,$09,$0a,$0b,$00,$01,$02,$03,$0c,$0d,$0e,$0f);ux:false;un:true)); //0x7fe
-
-var
-  main_deco146:cpu_deco_146;
-
-implementation
 
 constructor cpu_deco_146.create;
 begin

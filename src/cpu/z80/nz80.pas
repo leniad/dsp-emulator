@@ -4,6 +4,33 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,z80daisy,timer_engine,dialogs,sysutils,vars_hide;
 
+const
+    paridad:array [0..255] of boolean=(
+        True,False,False,True,False,True,True,False,False,True,True,
+        False,True,False,False,True,False,True,True,False,True,False,
+        False,True,True,False,False,True,False,True,True,False,False,
+        True,True,False,True,False,False,True,True,False,False,True,
+        False,True,True,False,True,False,False,True,False,True,True,
+        False,False,True,True,False,True,False,False,True,False,True,
+        True,False,True,False,False,True,True,False,False,True,False,
+        True,True,False,True,False,False,True,False,True,True,False,
+        False,True,True,False,True,False,False,True,True,False,False,
+        True,False,True,True,False,False,True,True,False,True,False,
+        False,True,False,True,True,False,True,False,False,True,True,
+        False,False,True,False,True,True,False,False,True,True,False,
+        True,False,False,True,True,False,False,True,False,True,True,
+        False,True,False,False,True,False,True,True,False,False,True,
+        True,False,True,False,False,True,True,False,False,True,False,
+        True,True,False,False,True,True,False,True,False,False,True,
+        False,True,True,False,True,False,False,True,True,False,False,
+        True,False,True,True,False,True,False,False,True,False,True,
+        True,False,False,True,True,False,True,False,False,True,False,
+        True,True,False,True,False,False,True,True,False,False,True,
+        False,True,True,False,False,True,True,False,True,False,False,
+        True,True,False,False,True,False,True,True,False,True,False,
+        False,True,False,True,True,False,False,True,True,False,True,
+        False,False,True);
+
 type
   band_z80 = record
      c,n,p_v,bit3,h,bit5,z,s:boolean;
@@ -58,6 +85,10 @@ type
           function pop_sp:word;
         end;
 
+var
+  main_z80,sub_z80,snd_z80:cpu_z80;
+
+implementation
 const
         z80t_m:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -172,37 +203,8 @@ const
 	      6, 0, 0, 0, 7, 0, 0, 2, 6, 0, 0, 0, 7, 0, 0, 2,
 	      6, 0, 0, 0, 7, 0, 0, 2, 6, 0, 0, 0, 7, 0, 0, 2);
 
-       paridad:array [0..255] of boolean=(
-        True,False,False,True,False,True,True,False,False,True,True,
-        False,True,False,False,True,False,True,True,False,True,False,
-        False,True,True,False,False,True,False,True,True,False,False,
-        True,True,False,True,False,False,True,True,False,False,True,
-        False,True,True,False,True,False,False,True,False,True,True,
-        False,False,True,True,False,True,False,False,True,False,True,
-        True,False,True,False,False,True,True,False,False,True,False,
-        True,True,False,True,False,False,True,False,True,True,False,
-        False,True,True,False,True,False,False,True,True,False,False,
-        True,False,True,True,False,False,True,True,False,True,False,
-        False,True,False,True,True,False,True,False,False,True,True,
-        False,False,True,False,True,True,False,False,True,True,False,
-        True,False,False,True,True,False,False,True,False,True,True,
-        False,True,False,False,True,False,True,True,False,False,True,
-        True,False,True,False,False,True,True,False,False,True,False,
-        True,True,False,False,True,True,False,True,False,False,True,
-        False,True,True,False,True,False,False,True,True,False,False,
-        True,False,True,True,False,True,False,False,True,False,True,
-        True,False,False,True,True,False,True,False,False,True,False,
-        True,True,False,True,False,False,True,True,False,False,True,
-        False,True,True,False,False,True,True,False,True,False,False,
-        True,True,False,False,True,False,True,True,False,True,False,
-        False,True,False,True,True,False,False,True,True,False,True,
-        False,False,True);
-
 var
-  main_z80,sub_z80,snd_z80:cpu_z80;
   z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
-
-implementation
 
 constructor cpu_z80.create(clock:dword;frames_div:word);
 begin

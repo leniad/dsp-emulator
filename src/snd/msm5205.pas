@@ -4,7 +4,6 @@ interface
 uses math,timer_engine,sound_engine{$ifdef windows},windows{$endif};
 
 const
-  index_shift:array[0..7] of integer=(-1, -1, -1, -1, 2, 4, 6, 8);
   MSM5205_S96_3B=0;     // prsicaler 1/96(4KHz) , data 3bit */
   MSM5205_S48_3B=1;     // prsicaler 1/48(8KHz) , data 3bit */
   MSM5205_S64_3B=2;     // prsicaler 1/64(6KHz) , data 3bit */
@@ -40,8 +39,8 @@ type
         external_call:procedure;
         procedure playmode_w(select:byte);
   end;
+
 var
-  diff_lookup:array[0..(49*16)-1] of integer;
   msm_5205_0,msm_5205_1:MSM5205_chip;
 
 procedure msm5205_internal_update_0;
@@ -52,6 +51,11 @@ procedure msm5205_ComputeTables;
 function msm5205_clock(val:integer;var step:integer;signal:integer):integer;
 
 implementation
+var
+  diff_lookup:array[0..(49*16)-1] of integer;
+
+const
+  index_shift:array[0..7] of integer=(-1, -1, -1, -1, 2, 4, 6, 8);
 
 procedure msm5205_ComputeTables;
 // nibble to bit map */

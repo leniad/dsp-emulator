@@ -26,6 +26,7 @@ function trojan_inbyte(puerto:word):byte;
 procedure trojan_outbyte(valor:byte;puerto:word);
 procedure trojan_adpcm_instruccion;
 
+implementation
 const
         //legendary wings
         lwings_rom:array[0..3] of tipo_roms=(
@@ -86,8 +87,6 @@ var
  scroll_x2,image:byte;
  pintar_image:boolean;
  mem_adpcm:array[0..$3fff] of byte;
-
-implementation
 
 procedure Cargar_hlwings;
 begin

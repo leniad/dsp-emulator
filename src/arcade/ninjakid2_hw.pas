@@ -23,6 +23,7 @@ procedure ninjakid2_snd_outbyte(valor:byte;puerto:word);
 procedure ninjakid2_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         //Ninja Kid II
         ninjakid2_rom:array[0..5] of tipo_roms=(
@@ -76,8 +77,6 @@ var
   bg_enable,sprite_overdraw:boolean;
   pant_sprites_tmp:array[0..$3ffff] of byte;
   update_background:tipo_update_background;
-
-implementation
 
 procedure Cargar_ninjakid2;
 begin

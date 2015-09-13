@@ -19,6 +19,7 @@ procedure putbyte_snd_dec8(direccion:word;valor:byte);
 procedure dec8_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         srd_rom:array[0..2] of tipo_roms=(
         (n:'dy01-e.b14';l:$10000;p:$0;crc:$176e9299),(n:'dy00.b16';l:$10000;p:$10000;crc:$2bf6b461),());
@@ -30,8 +31,6 @@ const
         (n:'dy07.h16';l:$8000;p:$0000;crc:$97eaba60),(n:'dy06.h14';l:$8000;p:$8000;crc:$c279541b),
         (n:'dy09.k13';l:$8000;p:$10000;crc:$d30d1745),(n:'dy08.k11';l:$8000;p:$18000;crc:$71d645fd),
         (n:'dy11.k16';l:$8000;p:$20000;crc:$fd9ccc5b),(n:'dy10.k14';l:$8000;p:$28000;crc:$88770ab8),());
-
-implementation
 
 var
   scroll_x,i8751_return,i8751_value:word;

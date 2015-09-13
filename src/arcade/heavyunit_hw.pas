@@ -35,6 +35,7 @@ function mcu_in_port2:byte;
 procedure mcu_out_port3(valor:byte);
 function mcu_in_port3:byte;
 
+implementation
 const
         hvyunit_cpu1:tipo_roms=(n:'b73_10.5c';l:$20000;p:0;crc:$ca52210f);
         hvyunit_cpu2:tipo_roms=(n:'b73_11.5p';l:$10000;p:0;crc:$cb451695);
@@ -56,8 +57,6 @@ var
  mermaid_to_z80_full,data_to_z80:byte;
  data_to_mermaid,z80_to_mermaid_full,mermaid_int0_l:byte;
  mermaid_p:array[0..3] of byte;
-
-implementation
 
 procedure Cargar_hvyunit;
 begin

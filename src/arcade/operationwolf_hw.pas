@@ -22,6 +22,10 @@ procedure ym2151_snd_irq(irqstate:byte);
 procedure snd_adpcm_0;
 procedure snd_adpcm_1;
 
+var
+ rom:array[0..$2ffff] of word;
+
+implementation
 const
         opwolf_rom:array[0..4] of tipo_roms=(
         (n:'b20-05-02.40';l:$10000;p:0;crc:$3ffbfe3a),(n:'b20-03-02.30';l:$10000;p:$1;crc:$fdabd8a5),
@@ -34,7 +38,6 @@ const
 var
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
  bank_sound:array[0..3,$0..$3fff] of byte;
- rom:array[0..$2ffff] of word;
  ram1:array[0..$3fff] of word;
  ram3:array[0..$1fff] of word;
  spritebank,sound_bank:byte;
@@ -42,8 +45,6 @@ var
  adpcm:array[0..$7ffff] of byte;
  adpcm_b,adpcm_c:array[0..5] of byte;
  adpcm_pos,adpcm_end,adpcm_data:array[0..1] of dword;
-
-implementation
 
 procedure Cargar_opwolf;
 begin

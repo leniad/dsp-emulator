@@ -4,6 +4,11 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,dialogs,sysutils,timer_engine,vars_hide;
 
+const
+  CPU_M6801=1;
+  CPU_M6803=3;
+  CPU_HD63701=10;
+
 type
         band_m6800=record
                 h,i,n,z,v,c:boolean;
@@ -53,6 +58,11 @@ type
               procedure MODIFIED_counters;
               procedure check_timer_event;
         end;
+
+var
+  main_m6800,snd_m6800:cpu_m6800;
+
+implementation
 const
   direc_680x:array[0..$ff] of byte=(
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -123,10 +133,6 @@ const
   M6800_TRCSR_TE=$02; // Transmit Enable
   M6800_TRCSR_WU=$01; // Wake Up
 
-  CPU_M6801=1;
-  CPU_M6803=3;
-  CPU_HD63701=10;
-
   TCSR_OLVL=$01;
   TCSR_IEDG=$02;
   TCSR_ETOI=$04;
@@ -135,11 +141,6 @@ const
   TCSR_TOF=$20;
   TCSR_OCF=$40;
   TCSR_ICF=$80;
-
-var
-  main_m6800,snd_m6800:cpu_m6800;
-
-implementation
 
 constructor cpu_m6800.create(clock:dword;frames_div:word;tipo_cpu:byte);
 begin

@@ -17,6 +17,7 @@ function epos_inbyte(puerto:word):byte;
 procedure epos_outbyte(valor:byte;puerto:word); 
 procedure epos_despues_instruccion; 
 
+implementation
 const
         //The Glob
         theglob_rom:array[0..8] of tipo_roms=(
@@ -35,8 +36,6 @@ const
 var
  palette:byte;
  buffer:array[0..$7fff] of boolean;
-
-implementation
 
 procedure Cargar_epos_hw;
 begin

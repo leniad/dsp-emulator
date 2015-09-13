@@ -9,7 +9,7 @@ procedure Cargar_pacland;
 procedure pacland_principal;
 function iniciar_pacland:boolean;
 procedure reset_pacland; 
-procedure cerrar_pacland; 
+procedure cerrar_pacland;
 //Main CPU
 function pacland_getbyte(direccion:word):byte;
 procedure pacland_putbyte(direccion:word;valor:byte);
@@ -19,6 +19,7 @@ procedure mcu_putbyte(direccion:word;valor:byte);
 function in_port1:byte;
 function in_port2:byte;
 
+implementation
 const
         pacland_rom:array[0..6] of tipo_roms=(
         (n:'pl5_01b.8b';l:$4000;p:$0;crc:$b0ea7631),(n:'pl5_02.8d';l:$4000;p:$4000;crc:$d903e84e),
@@ -42,8 +43,6 @@ var
  rom_nbank,palette_bank:byte;
  scroll_x1,scroll_x2:word;
  irq_enable,irq_enable_mcu:boolean;
-
-implementation
 
 procedure Cargar_pacland;
 begin

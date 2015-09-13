@@ -59,6 +59,7 @@ function amidar_getbyte(direccion:word):byte;
 procedure amidar_putbyte(direccion:word;valor:byte);
 function port_1_c_read:byte;
 
+implementation
 type
   tstars=record
           x,y,color:word;
@@ -163,8 +164,6 @@ var
   scramble_prot:byte;
   //frogger
   timer_hs_frogger:byte;
-
-implementation
 
 //Galaxian
 procedure eventos_galaxian;

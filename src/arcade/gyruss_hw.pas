@@ -24,6 +24,7 @@ procedure gyruss_sound_outbyte(valor:byte;puerto:word);
 function gyruss_portar:byte;
 procedure gyruss_sound_update;
 
+implementation
 const
     gyruss_rom:array[0..3] of tipo_roms=(
     (n:'gyrussk.1';l:$2000;p:0;crc:$c673b43d),(n:'gyrussk.2';l:$2000;p:$2000;crc:$a4ec03e4),
@@ -57,8 +58,6 @@ var
   scan_line,sound_latch:byte;
   main_nmi,sub_irq:boolean;
   mem_opcodes:array[0..$1fff] of byte;
-
-implementation
 
 procedure Cargar_gyruss;
 begin

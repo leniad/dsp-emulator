@@ -24,6 +24,7 @@ procedure gx400_putword(direccion:dword;valor:word);
 function gx400_snd_getbyte(direccion:word):byte;
 procedure gx400_snd_putbyte(direccion:word;valor:byte);
 
+implementation
 type
   tipo_sprite=record
                 width,height,char_type:byte;
@@ -111,8 +112,6 @@ var
  screen_par,irq_on,irq2_on,irq4_on,flipy_char:boolean;
  sound_latch,linea:byte;
  recalc_char:array[0..7] of boolean;
-
-implementation
 
 procedure Cargar_nemesis;
 begin

@@ -5,6 +5,24 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,gfx_engine,nz80,sn_76496,controls_engine,sega_decrypt,
      z80pio,ppi8255,rom_engine,pal_engine,sound_engine;
 
+function iniciar_system1:boolean;
+procedure system1_principal;
+procedure reset_system1;
+//Main CPU
+function system1_getbyte(direccion:word):byte;
+procedure system1_putbyte(direccion:word;valor:byte);
+function system1_inbyte_pio(puerto:word):byte;
+procedure system1_outbyte_pio(valor:byte;puerto:word);
+//Sound CPU
+function system1_snd_getbyte_pio(direccion:word):byte;
+//PIO
+procedure system1_pio_porta_write(valor:byte);
+procedure system1_pio_porta_nmi(state:boolean);
+procedure system1_pio_portb_write(valor:byte);
+
+implementation
+  uses system1_hw;
+
 const
     //Pitfall 2
     pitfall2_rom:array[0..3] of tipo_roms=(
@@ -94,24 +112,6 @@ const
         (n:'epr-5866.64';l:$2000;p:$4000;crc:$967f1d9a),(n:'epr-5865.63';l:$2000;p:$6000;crc:$03d9a34c),
         (n:'epr-5864.66';l:$2000;p:$8000;crc:$e659f358),(n:'epr-5863.65';l:$2000;p:$a000;crc:$a496ca15),());
     flicky_video_prom:tipo_roms=(n:'pr-5317.76';l:$100;p:0;crc:$648350b8);
-
- function iniciar_system1:boolean;
- procedure system1_principal;
- procedure reset_system1;
- //Main CPU
- function system1_getbyte(direccion:word):byte;
- procedure system1_putbyte(direccion:word;valor:byte);
- function system1_inbyte_pio(puerto:word):byte;
- procedure system1_outbyte_pio(valor:byte;puerto:word);
- //Sound CPU
- function system1_snd_getbyte_pio(direccion:word):byte;
- //PIO
- procedure system1_pio_porta_write(valor:byte);
- procedure system1_pio_porta_nmi(state:boolean);
- procedure system1_pio_portb_write(valor:byte);
-
-implementation
-uses system1_hw;
 
 procedure decodifica_wonder_boy;
 const

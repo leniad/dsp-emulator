@@ -30,6 +30,7 @@ function namco_51xx_io3:byte;
 function namco_53xx_r_r(port:byte):byte;
 function namco_53xx_k_r:byte;
 
+implementation
 const
         //Galaga
         galaga_rom:array[0..4] of tipo_roms=(
@@ -72,8 +73,6 @@ var
  custom_mod,bg_select,bg_color_bank,bg_disable,tx_color_mode:byte;
  bg_repaint:boolean;
  in0,in1,in2:byte;
-
-implementation
 
 procedure Cargar_galagahw;
 begin

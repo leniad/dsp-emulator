@@ -30,10 +30,11 @@ function inport1_0:byte;
 function inport1_1:byte; 
 function inport1_2:byte; 
 function inport1_3:byte; 
-procedure outport1_0(data:byte); 
+procedure outport1_0(data:byte);
 procedure mappy_io0;
-procedure mappy_io1; 
+procedure mappy_io1;
 
+implementation
 const
         //Mappy
         mappy_rom:array[0..3] of tipo_roms=(
@@ -95,8 +96,6 @@ var
  snd_int,main_int:boolean;
  scroll_x,mux,io_timer0,io_timer1:byte;
  update_video_proc:tipo_update_video;
-
-implementation
 
 procedure Cargar_mappyhw;
 begin

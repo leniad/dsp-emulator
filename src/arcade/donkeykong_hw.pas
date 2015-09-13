@@ -30,6 +30,7 @@ procedure dkong3_snd1_putbyte(direccion:word;valor:byte);
 function dkong3_snd2_getbyte(direccion:word):byte;
 procedure dkong3_snd2_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         //Donkey Kong
         dkong_rom:array[0..4] of tipo_roms=(
@@ -115,8 +116,6 @@ var
  //dkong
  tune01,tune08,tune09,tune11:byte;
  effect0,effect1,effect2:byte;
-
-implementation
 
 procedure Cargar_dkong;
 begin
@@ -436,7 +435,7 @@ case direccion of
 end;
 end;
 
-procedure dkong_tune_sound(valor:byte);inline;
+procedure dkong_tune_sound(valor:byte);
 begin
 case valor of
   1:begin
@@ -492,7 +491,7 @@ case valor of
 end;
 end;
 
-procedure dkong_effects_sound(direccion,valor:byte);inline;
+procedure dkong_effects_sound(direccion,valor:byte);
 begin
 case direccion of
   $0:begin
@@ -508,7 +507,7 @@ case direccion of
 end;
 end;
 
-procedure dkongjr_tune_sound(valor:byte);inline;
+procedure dkongjr_tune_sound(valor:byte);
 begin
 case valor of
   1:if tune01=0 then begin
@@ -541,7 +540,7 @@ case valor of
 end;
 end;
 
-procedure dkongjr_effects_sound(direccion,valor:byte);inline;
+procedure dkongjr_effects_sound(direccion,valor:byte);
 begin
 case direccion of
   $0:begin

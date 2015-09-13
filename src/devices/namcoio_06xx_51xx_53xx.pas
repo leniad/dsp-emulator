@@ -3,6 +3,35 @@ unit namcoio_06xx_51xx_53xx;
 interface
 uses main_engine,timer_engine,mb88xx,rom_engine;
 
+const
+  NONE=0;
+  IO51XX=1;
+  IO53XX=2;
+
+type
+  read_chip=function:byte;
+  write_chip=procedure(data:byte);
+  read_req_chip=procedure;
+  tipo_51xx=record
+  	mode,coincred_mode,credits,in_count,lastcoins,lastbuttons:byte;
+    coins_per_cred,creds_per_coin,coins:array[0..1] of byte;
+    remap_joy:boolean;
+    read_port:array[0..3] of read_chip;
+    write_port:array[0..1] of write_chip;
+  end;
+  tipo_53xx=record
+    port_o:byte;
+    timer:byte;
+    frame:single;
+  end;
+  tipo_06xx=record
+    control:byte;
+    fread:array[0..3] of read_chip;
+    fwrite:array[0..3] of write_chip;
+    fread_req:array[0..3] of read_req_chip;
+    nmi_timer:byte;
+  end;
+
 //Namco 06XX
 procedure namco_06xx_init(num:byte;chip0,chip1,chip2,chip3:byte;nmi_function:exec_type);
 procedure namcoio_06xx_reset(num:byte);
@@ -19,42 +48,14 @@ procedure namcoio_53xx_reset;
 procedure run_namco_53xx;
 procedure namco_53xx_close;
 
-type
-  read_chip=function:byte;
-  write_chip=procedure(data:byte);
-  read_req_chip=procedure;
-  tipo_51xx=record
-  	mode,coincred_mode,credits,in_count,lastcoins,lastbuttons:byte;
-    coins_per_cred,creds_per_coin,coins:array[0..1] of byte;
-    remap_joy:boolean;
-    read_port:array[0..3] of read_chip;
-    write_port:array[0..1] of write_chip;
-  end;
-tipo_53xx=record
-    port_o:byte;
-    timer:byte;
-    frame:single;
-  end;
-  tipo_06xx=record
-    control:byte;
-    fread:array[0..3] of read_chip;
-    fwrite:array[0..3] of write_chip;
-    fread_req:array[0..3] of read_req_chip;
-    nmi_timer:byte;
-  end;
-
-const
-  NONE=0;
-  IO51XX=1;
-  IO53XX=2;
-  namco_53xx_rom:tipo_roms=(n:'53xx.bin';l:$400;p:0;crc:$b326fecb);
-
 var
   namco_06xx:array[0..1] of tipo_06xx;
   namco_51xx:tipo_51xx;
   namco_53xx:tipo_53xx;
 
 implementation
+const
+  namco_53xx_rom:tipo_roms=(n:'53xx.bin';l:$400;p:0;crc:$b326fecb);
 
 //Namco 51XX
 procedure namcoio_51XX_write(data:byte);

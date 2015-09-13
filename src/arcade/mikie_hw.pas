@@ -21,6 +21,7 @@ procedure sound_despues_instruccion;
 procedure mikie_qsave(nombre:string);
 procedure mikie_qload(nombre:string);
 
+implementation
 const
         mikie_rom:array[0..3] of tipo_roms=(
         (n:'n14.11c';l:$2000;p:$6000;crc:$f698e6dd),(n:'o13.12a';l:$4000;p:$8000;crc:$826e7035),
@@ -39,8 +40,6 @@ var
  banco_pal,video_line:byte;
  pedir_irq:boolean;
  sound_latch,sound_trq:byte;
-
-implementation
 
 procedure Cargar_mikie;
 begin

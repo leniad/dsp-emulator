@@ -18,6 +18,7 @@ function sound_getbyte(direccion:word):byte;
 procedure sound_putbyte(direccion:word;valor:byte);
 procedure sound_instruccion;
 
+implementation
 const
         jackal_rom:array[0..2] of tipo_roms=(
         (n:'j-v02.rom';l:$10000;p:$0;crc:$0b7e0584),(n:'j-v03.rom';l:$4000;p:$10000;crc:$3e0dfb83),());
@@ -37,8 +38,6 @@ var
  scroll_x,scroll_y,scroll_crt,sprite_crt:byte;
  irq_enable:boolean;
  ram_bank,sprite_bank:byte;
-
-implementation
 
 procedure Cargar_jackal;
 begin

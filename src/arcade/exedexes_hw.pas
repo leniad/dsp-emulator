@@ -20,6 +20,7 @@ procedure exedexes_snd_putbyte(direccion:word;valor:byte);
 procedure exedexes_snd_irq;
 procedure exedexes_sound;
 
+implementation
 const
         exedexes_rom:array[0..3] of tipo_roms=(
         (n:'11m_ee04.bin';l:$4000;p:0;crc:$44140dbd),(n:'10m_ee03.bin';l:$4000;p:$4000;crc:$bf72cfba),
@@ -43,8 +44,6 @@ var
  scroll_x,scroll_y,scroll_bg:word;
  sound_command:byte;
  sc2on,sc1on,objon,chon:boolean;
-
-implementation
 
 procedure Cargar_exedexes_hw;
 begin

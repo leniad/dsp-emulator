@@ -22,6 +22,7 @@ procedure gunsmoke_snd_putbyte(direccion:word;valor:byte);
 procedure gunsmoke_sound_update;
 procedure gunsmoke_snd_irq;
 
+implementation
 const
         //Gun Smoke
         gunsmoke_rom:array[0..3] of tipo_roms=(
@@ -105,8 +106,6 @@ var
  rom_mem:array[0..7,0..$3fff] of byte;
  tiles_pos:array[0..$ffff] of byte;
  drawvideo_gs_hw:procedure;
-
-implementation
 
 procedure Cargar_gunsmokehw;
 begin

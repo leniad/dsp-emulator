@@ -57,8 +57,12 @@ type
                 procedure clear_irqs;
                 function evalue_irq:byte;
         end;
-const
 
+var
+  main_mcs51:cpu_mcs51;
+
+implementation
+const
   ciclos_mcs51:array[0..$ff] of byte=(
          1,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,
          2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -105,11 +109,6 @@ const
 	V_IE1	 =$013;	// External Interrupt 1 */
 	V_TF1	 =$01b;	// Timer 1 Overflow */
 	V_RITI =$023;	// Serial Receive/Transmit */
-
-var
-  main_mcs51:cpu_mcs51;
-
-implementation
 
 constructor cpu_mcs51.create(clock:dword;frames_div:word);
 begin

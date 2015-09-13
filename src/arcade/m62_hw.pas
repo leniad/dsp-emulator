@@ -39,6 +39,7 @@ procedure ay0_portb_w(valor:byte);
 procedure irem_m62_play_sound;
 procedure adpcm_int; 
 
+implementation
 const
         //Kung-Fu Master
         kungfum_rom:array[0..2] of tipo_roms=(
@@ -172,8 +173,6 @@ var
  bankcontrol:array[0..1] of byte;
  update_video_m62:tipo_update_video_m62;
  calc_nchar_sp:tipo_calc_nchar_spelunker;
-
-implementation
 
 procedure Cargar_irem_m62;
 begin

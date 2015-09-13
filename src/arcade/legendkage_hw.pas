@@ -24,6 +24,7 @@ procedure mcu_lk_hw_putbyte(direccion:word;valor:byte);
 procedure lk_hw_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         lk_rom:array[0..2] of tipo_roms=(
         (n:'a54-01-2.37';l:$8000;p:0;crc:$60fd9734),(n:'a54-02-2.38';l:$8000;p:$8000;crc:$878a25ce),());
@@ -45,8 +46,6 @@ var
  port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
  ddr_a,ddr_b,ddr_c:byte;
  mcu_sent,from_main,main_sent,from_mcu:byte;
-
-implementation
 
 procedure Cargar_lk_hw;
 begin

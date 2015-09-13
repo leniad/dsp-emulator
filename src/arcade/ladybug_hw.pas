@@ -15,6 +15,7 @@ function ladybug_getbyte(direccion:word):byte;
 procedure ladybug_putbyte(direccion:word;valor:byte);
 procedure ladybug_sound_update;
 
+implementation
 const
         //Lady Bug
         ladybug_rom:array[0..6] of tipo_roms=(
@@ -79,8 +80,6 @@ const
 var
  irq_vblank:boolean;
  vblank_val:byte;
-
-implementation
 
 procedure Cargar_ladybug;
 begin

@@ -18,6 +18,7 @@ procedure putbyte_snd_shootout(direccion:word;valor:byte);
 procedure shootout_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         shootout_rom:array[0..3] of tipo_roms=(
         (n:'cu00.b1';l:$8000;p:$0;crc:$090edeb6),(n:'cu02.c3';l:$8000;p:$8000;crc:$2a913730),
@@ -35,8 +36,6 @@ var
   mem_dec:array[0..$7fff] of byte;
   banco,sound_latch:byte;
   bflicker,old_val:boolean;
-
-implementation
 
 procedure Cargar_shootout;
 begin

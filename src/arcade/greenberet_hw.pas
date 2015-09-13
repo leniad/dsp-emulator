@@ -19,6 +19,7 @@ procedure gberet_hi_score;
 procedure gberet_qsave(nombre:string);
 procedure gberet_qload(nombre:string);
 
+implementation
 const
         //Green Beret
         gberet_rom:array[0..3] of tipo_roms=(
@@ -66,8 +67,6 @@ var
  interrupt_mask,interrupt_ticks,sound_latch,rom_bank:byte;
  banco_sprites:word;
  timer_hs:byte;
-
-implementation
 
 procedure Cargar_gberet;
 begin

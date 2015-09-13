@@ -15,6 +15,7 @@ function jrpacman_getbyte(direccion:word):byte;
 procedure jrpacman_putbyte(direccion:word;valor:byte);
 procedure jrpacman_outbyte(valor:byte;puerto:word);
 
+implementation
 type
       tipo_table_dec=record
                   count:word;
@@ -58,8 +59,6 @@ const
 var
  irq_vblank,bg_prio:boolean;
  gfx_bank,colortable_bank,pal_bank,scroll_x,sprite_bank:byte;
-
-implementation
 
 procedure Cargar_JrPacman;
 begin

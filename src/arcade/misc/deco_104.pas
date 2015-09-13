@@ -10,6 +10,10 @@ type
       private
     end;
 
+var
+  main_deco104:cpu_deco_104;
+
+implementation
 const
   deco_104ram:array[0..$3ff] of ram_type=(
 (wo:$04;m:($0c,$0d,$0e,$0f,$00,$01,$02,$03,$04,$05,$06,$07,$08,$09,$0a,$0b);ux:true;un:true), //0x000
@@ -1036,11 +1040,6 @@ const
 (wo:$80;m:($0e,$0f,$0c,$0d,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);ux:true;un:true), //0x7fa
 (wo:INPUT_PORT_C;m:($ff,$ff,$ff,$ff,$0c,$0d,$0e,$0f,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff);ux:false;un:false), //0x7fc
 (wo:$d8;m:($0a,$0b,$08,$09,$0c,$0d,$0e,$0f,$00,$01,$02,$03,$04,$05,$06,$07);ux:true;un:true)); //0x7fe
-
-var
-  main_deco104:cpu_deco_104;
-
-implementation
 
 constructor cpu_deco_104.create;
 begin

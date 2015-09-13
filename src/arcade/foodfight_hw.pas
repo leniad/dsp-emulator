@@ -16,6 +16,7 @@ procedure foodf_putword(direccion:dword;valor:word);
 procedure foodf_sound_update;
 function foodf_pot_r(pot:byte):byte;
 
+implementation
 const
         foodf_rom:array[0..8] of tipo_roms=(
         (n:'136020-301.8c';l:$2000;p:1;crc:$dfc3d5a8),(n:'136020-302.9c';l:$2000;p:$0;crc:$ef92dc5c),
@@ -42,8 +43,6 @@ var
  rweights,gweights,bweights:array[0..2] of single;
  analog_data:array[0..7] of byte;
  analog_select:byte;
-
-implementation
 
 procedure Cargar_foodf;
 begin

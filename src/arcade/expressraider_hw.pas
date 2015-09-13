@@ -20,6 +20,7 @@ procedure putbyte_snd_expraid(direccion:word;valor:byte);
 procedure expraid_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         expraid_rom:array[0..2] of tipo_roms=(
         (n:'cz01';l:$4000;p:$4000;crc:$dc8f9fba),(n:'cz00';l:$8000;p:$8000;crc:$a81290bc),());
@@ -36,8 +37,6 @@ const
         expraid_proms:array[0..4] of tipo_roms=(
         (n:'cz17.prm';l:$100;p:$000;crc:$da31dfbc),(n:'cz16.prm';l:$100;p:$100;crc:$51f25b4c),
         (n:'cz15.prm';l:$100;p:$200;crc:$a6168d7f),(n:'cz14.prm';l:$100;p:$300;crc:$52aad300),());
-
-implementation
 
 var
   vb,prot_val,sound_latch,scroll_x,scroll_y,scroll_x2:byte;

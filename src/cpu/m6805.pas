@@ -3,6 +3,10 @@ unit m6805;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      dialogs,sysutils,timer_engine,main_engine;
+const
+  tipo_m6805=0;
+  tipo_m68705=1;
+  tipo_hd63705=2;
 
 type
         band_m6805=record
@@ -38,11 +42,11 @@ type
             function pullbyte:byte;
             function pullword:word;
         end;
+ var
+    main_m6805:cpu_m6805;
 
+implementation
 const
-  tipo_m6805=0;
-  tipo_m68705=1;
-  tipo_hd63705=2;
   dir_mode_6805:array[0..$ff] of byte=(
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,  //00
@@ -80,11 +84,6 @@ const
          6, 6, 6, 6, 6, 6, 6, 7, 6, 6, 6, 6, 5, 9, 6, 7,
          5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 4, 8, 5, 6,
          4, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 3, 7, 4, 5);
-
- var
-    main_m6805:cpu_m6805;
-
-implementation
 
 constructor cpu_m6805.create(clock:dword;frames_div:word;tipo_cpu:byte);
 begin

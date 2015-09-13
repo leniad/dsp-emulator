@@ -700,17 +700,16 @@ case main_vars.tipo_maquina of
     end;
 end;
 //Si he modificado la ROM del spectrum la guardo
-getmem(szx_rom,sizeof(tszx_rom));
 if rom_cambiada_48 then begin
+  getmem(szx_rom,sizeof(tszx_rom));
   szx_block.name:='ROM'+char(0);
   szx_rom.flags:=1; //Comprimida!
-  szx_rom.longitud:=$4000;
   Compress_zlib(pointer(@memoria[0]),$4000,pointer(@szx_rom.data[0]),cantidad);
   szx_block.longitud:=cantidad+6;
   copymemory(ptemp,szx_block,8);inc(ptemp,8);longitud:=longitud+8;
   copymemory(ptemp,szx_rom,cantidad+6);inc(ptemp,cantidad+6);longitud:=longitud+cantidad+6;
+  freemem(szx_rom);
 end;
-freemem(szx_rom);
 freemem(szx_ramp);
 freemem(szx_block);
 grabar_szx:=write_file(nombre,pdatos,longitud);

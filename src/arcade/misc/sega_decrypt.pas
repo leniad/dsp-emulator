@@ -2,6 +2,9 @@ unit sega_decrypt;
 
 interface
 
+procedure decrypt_sega(memoria,mem_dec:pbyte;juego:byte);
+
+implementation
 const
   convtable:array[0..6,0..31,0..3] of byte=(
      //Pitfall II
@@ -123,10 +126,6 @@ const
 		( $a8,$88,$28,$08 ), ( $80,$00,$a0,$20 ),	// ...1...1...0...1 */
 		( $28,$08,$20,$00 ), ( $28,$08,$20,$00 ),	// ...1...1...1...0 */
 		( $08,$88,$00,$80 ), ( $88,$80,$08,$00 )));	// ...1...1...1...1 */
-
-procedure decrypt_sega(memoria,mem_dec:pbyte;juego:byte);
-
-implementation
 
 procedure decrypt_sega(memoria,mem_dec:pbyte;juego:byte);
 var

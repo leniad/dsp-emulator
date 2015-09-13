@@ -5,58 +5,16 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,sound_engine,timer_engine;
 
 const
-  APU_WRA0=$00;
-  APU_WRA1=$01;
-  APU_WRA2=$02;
-  APU_WRA3=$03;
-  APU_WRB0=$04;
-  APU_WRB1=$05;
-  APU_WRB2=$06;
-  APU_WRB3=$07;
-  APU_WRC0=$08;
-  APU_WRC2=$0A;
-  APU_WRC3=$0B;
-  APU_WRD0=$0C;
-  APU_WRD2=$0E;
-  APU_WRD3=$0F;
-  APU_WRE0=$10;
-  APU_WRE1=$11;
-  APU_WRE2=$12;
-  APU_WRE3=$13;
-  APU_SMASK=$15;
-  APU_IRQCTRL=$17;
-
+  // GLOBAL CONSTANTS */
+  SYNCS_MAX1=$20;
+  SYNCS_MAX2=$80;
   NOISE_LONG=$4000;
-  NOISE_SHORT=93;
-
   TOTAL_BUFFER_SIZE=150;
-
-// CONSTANTS */
-
-// vblank length table used for squares, triangle, noise */
-vbl_length:array[0..31] of byte=(
-   5, 127, 10, 1, 19,  2, 40,  3, 80,  4, 30,  5, 7,  6, 13,  7,
-   6,   8, 12, 9, 24, 10, 48, 11, 96, 12, 36, 13, 8, 14, 16, 15);
-// frequency limit of square channels */
-freq_limit:array[0..7] of word=($3FF,$555,$666,$71C,$787,$7C1,$7E0,$7F0);
-// table of noise frequencies */
-noise_freq:array[0..15] of word=(
-   4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 2046);
-// dpcm transfer freqs */
-dpcm_clocks:array[0..15] of word=(
-   428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 85, 72, 54);
-// ratios of pos/neg pulse for square waves */
-// 2/16 = 12.5%, 4/16 = 25%, 8/16 = 50%, 12/16 = 75% */
-duty_lut:array[0..3] of byte=(2,4,8,12);
-
-// GLOBAL CONSTANTS */
-SYNCS_MAX1=$20;
-SYNCS_MAX2=$80;
 
 // CHANNEL TYPE DEFINITIONS */
 type
   tcall_frame_irq=procedure (status:byte);
-  square_t=record // Square Wave */
+  square_t=packed record // Square Wave */
 	  regs:array[0..3] of byte;
 	  vbl_length:integer;
 	  freq:integer;
@@ -69,7 +27,7 @@ type
     enabled:boolean;
   end;
   psquare_t=^square_t;
-  triangle_t=record // Triangle Wave */
+  triangle_t=packed record // Triangle Wave */
 	  regs:array[0..3] of byte; // regs[1] unused */
 	  linear_length:integer;
     vbl_length:integer;
@@ -81,7 +39,7 @@ type
     enabled:boolean;
   end;
   ptriangle_t=^triangle_t;
-  noise_t=record // Noise Wave */
+  noise_t=packed record // Noise Wave */
 	  regs:array[0..3] of byte; // regs[1] unused */
     cur_pos:integer;
     vbl_length:integer;
@@ -92,7 +50,7 @@ type
     enabled:boolean;
   end;
   pnoise_t=^noise_t;
-  dpcm_t=record // DPCM Wave */
+  dpcm_t=packed record // DPCM Wave */
     regs:array[0..3] of byte;
     address:dword;
     length:dword;
@@ -106,7 +64,7 @@ type
     getbyte:tgetbyte;
   end;
   pdpcm_t=^dpcm_t;
-  apu_t=record // APU type */
+  apu_t=packed record // APU type */
 	  // Sound channels */
 	  squ:array[0..1] of psquare_t;
     tri:ptriangle_t;
@@ -117,7 +75,7 @@ type
     step_mode:integer;
   end;
   papu_t=^apu_t;
-  tipo_n2a03_apu=record
+  tipo_n2a03_apu=packed record
     apu:papu_t;			       // Actual APUs */
     apu_incsize:single;           // Adjustment increment */
     samps_per_sync:dword;        // Number of samples per vsync */
@@ -150,6 +108,47 @@ procedure n2a03_irq_call_0;
 procedure n2a03_irq_call_1;
 
 implementation
+const
+  APU_WRA0=$00;
+  APU_WRA1=$01;
+  APU_WRA2=$02;
+  APU_WRA3=$03;
+  APU_WRB0=$04;
+  APU_WRB1=$05;
+  APU_WRB2=$06;
+  APU_WRB3=$07;
+  APU_WRC0=$08;
+  APU_WRC2=$0A;
+  APU_WRC3=$0B;
+  APU_WRD0=$0C;
+  APU_WRD2=$0E;
+  APU_WRD3=$0F;
+  APU_WRE0=$10;
+  APU_WRE1=$11;
+  APU_WRE2=$12;
+  APU_WRE3=$13;
+  APU_SMASK=$15;
+  APU_IRQCTRL=$17;
+
+  NOISE_SHORT=93;
+
+// CONSTANTS */
+
+// vblank length table used for squares, triangle, noise */
+vbl_length:array[0..31] of byte=(
+   5, 127, 10, 1, 19,  2, 40,  3, 80,  4, 30,  5, 7,  6, 13,  7,
+   6,   8, 12, 9, 24, 10, 48, 11, 96, 12, 36, 13, 8, 14, 16, 15);
+// frequency limit of square channels */
+freq_limit:array[0..7] of word=($3FF,$555,$666,$71C,$787,$7C1,$7E0,$7F0);
+// table of noise frequencies */
+noise_freq:array[0..15] of word=(
+   4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 2046);
+// dpcm transfer freqs */
+dpcm_clocks:array[0..15] of word=(
+   428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 85, 72, 54);
+// ratios of pos/neg pulse for square waves */
+// 2/16 = 12.5%, 4/16 = 25%, 8/16 = 50%, 12/16 = 75% */
+duty_lut:array[0..3] of byte=(2,4,8,12);
 
 function sshr(num:integer;fac:byte):integer;
 begin
@@ -362,7 +361,7 @@ begin
 	  // DMC */
 	  APU_WRE0:begin
 		    apu.dpcm.regs[0]:=value;
-        //downcast<n2a03_device &>(m_APU.dpcm.memory->device()).set_input_line(N2A03_APU_IRQ_LINE, CLEAR_LINE);
+        if (@n2a03[num].frame_call_irq<>nil) then n2a03[num].frame_call_irq(CLEAR_LINE);
 		    if (value and $80)=0 then apu.dpcm.irq_occurred:=false;
 		  end;
 	  APU_WRE1:begin // 7-bit DAC */

@@ -13,8 +13,9 @@ procedure cerrar_mrdo;
 //Main CPU
 function mrdo_getbyte(direccion:word):byte;
 procedure mrdo_putbyte(direccion:word;valor:byte);
-procedure mrdo_despues_instruccion; 
+procedure mrdo_despues_instruccion;
 
+implementation
 const
         mrdo_rom:array[0..4] of tipo_roms=(
         (n:'a4-01.bin';l:$2000;p:0;crc:$03dcfba2),(n:'c4-02.bin';l:$2000;p:$2000;crc:$0ecdd39c),
@@ -30,8 +31,6 @@ const
         (n:'h5-05.bin';l:$1000;p:0;crc:$e1218cc5),(n:'k5-06.bin';l:$1000;p:$1000;crc:$b1f68b04),());
 var
   scroll_x,scroll_y:byte;
-
-implementation
 
 procedure Cargar_mrdo;
 begin

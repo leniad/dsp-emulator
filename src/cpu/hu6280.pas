@@ -45,7 +45,10 @@ type
             procedure DO_INTERRUPT(vector:word);
             procedure CHECK_AND_TAKE_IRQ_LINES;
         end;
+var
+    main_h6280:cpu_h6280;
 
+implementation
   const
   tipo_dir:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -84,11 +87,6 @@ type
         2,7,7,0,3,4,6,7,2,5,3,2,2,5,7,4, //d0
         2,7,2,0,4,4,6,7,2,2,2,2,5,5,7,4, //e0
         2,7,7,0,2,4,6,7,2,5,4,2,2,5,7,4);//f0
-
-var
-    main_h6280:cpu_h6280;
-
-implementation
 
 constructor cpu_h6280.create(clock:dword;frames_div:word);
 begin

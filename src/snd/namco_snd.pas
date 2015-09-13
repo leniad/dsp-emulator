@@ -4,23 +4,8 @@ interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
      sound_engine,timer_engine;
 
-procedure namco_playsound;
-procedure namco_sound_reset;
-procedure namco_sound_init(num_voces:byte;wave_ram:boolean);
-//Namco CUS30
-procedure namcos1_cus30_w(direccion:word;valor:byte);
-function namcos1_cus30_r(direccion:word):byte;
-//ADPCM sound
-procedure namco_63701x_start(clock:dword);
-procedure namco_63701x_close;
-procedure namco_63701x_update;
-procedure namco_63701x_w(dir:word;valor:byte);
-procedure namco_63701x_internal_update;
-procedure namco_63701x_reset;
-//Snapshot
-function namco_sound_save_snapshot(data:pbyte):word;
-procedure namco_sound_load_snapshot(data:pbyte);
-
+const
+  max_voices=8;
 type
   nvoice=record
             volume:byte;
@@ -47,10 +32,23 @@ type
             signal:integer;
           end;
 
-const
-  max_voices=8;
-  MAX_VOLUME=16;
-  MIXLEVEL=(1 shl (16-4-4));
+procedure namco_playsound;
+procedure namco_sound_reset;
+procedure namco_sound_init(num_voces:byte;wave_ram:boolean);
+//Namco CUS30
+procedure namcos1_cus30_w(direccion:word;valor:byte);
+function namcos1_cus30_r(direccion:word):byte;
+//ADPCM sound
+procedure namco_63701x_start(clock:dword);
+procedure namco_63701x_close;
+procedure namco_63701x_update;
+procedure namco_63701x_w(dir:word;valor:byte);
+procedure namco_63701x_internal_update;
+procedure namco_63701x_reset;
+//Snapshot
+function namco_sound_save_snapshot(data:pbyte):word;
+procedure namco_sound_load_snapshot(data:pbyte);
+
 var
   voice:array[0..(max_voices-1)] of nvoice;
   namco_sound:tnamco_sound;
@@ -58,6 +56,9 @@ var
   namco_63701_rom:pbyte;
 
 implementation
+const
+  MAX_VOLUME=16;
+  MIXLEVEL=(1 shl (16-4-4));
 
 procedure getvoice_3(numero_voz:byte);inline;
 var

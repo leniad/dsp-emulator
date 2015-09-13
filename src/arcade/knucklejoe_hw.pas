@@ -23,6 +23,7 @@ function ay0_porta_r:byte;
 procedure knjoe_sound_update;
 procedure knjoe_snd_nmi;
 
+implementation
 const
         knjoe_rom:array[0..3] of tipo_roms=(
         (n:'kj-1.bin';l:$4000;p:0;crc:$4e4f5ff2),(n:'kj-2.bin';l:$4000;p:$4000;crc:$cb11514b),
@@ -45,8 +46,6 @@ const
 var
  sound_command,val_port1,val_port2,tile_bank,sprite_bank:byte;
  scroll_x:word;
-
-implementation
 
 procedure Cargar_knjoe;
 begin

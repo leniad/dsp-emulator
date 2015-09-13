@@ -19,6 +19,7 @@ procedure megasys1_snd_a_putword(direccion:dword;valor:word);
 procedure megasys1_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         pant_0_16:array[0..1,0..15] of byte=(
         (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
@@ -118,6 +119,7 @@ type
     filas,cols,info:word;
     mask_x,mask_y:word;
   end;
+
 var
  rom:array[0..$2ffff] of word;
  ram:array[0..$7fff] of word;
@@ -130,8 +132,6 @@ var
  sprite_bank:byte;
  sprites_split,mcu_hs:boolean;
  mcu_hs_ram:array[0..9] of word;
-
-implementation
 
 procedure Cargar_megasys1;
 begin

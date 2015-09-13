@@ -25,6 +25,7 @@ function ppi1_a_read:byte;
 function ppi1_b_read:byte;
 function ppi1_c_read:byte;
 
+implementation
 const
         //Freekick
         freekick_rom:tipo_roms=(n:'ns6201-a_1987.10_free_kick.cpu';l:$d000;p:0;crc:$6d172850);
@@ -59,8 +60,6 @@ var
   snd_rom_addr:word;
   snd_rom:array[0..$7fff] of byte;
   freekick_ff:byte;
-
-implementation
 
 procedure Cargar_freekick;
 begin

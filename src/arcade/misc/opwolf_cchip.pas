@@ -4,6 +4,19 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      controls_engine,timer_engine;
 
+procedure opwolf_init_cchip(num:byte);
+procedure opwolf_cchip_reset;
+function opwolf_cchip_data_r(direccion:word):word;
+procedure opwolf_cchip_data_w(direccion,valor:word);
+function opwolf_cchip_status_r:word;
+procedure opwolf_cchip_status_w(valor:word);
+procedure opwolf_cchip_bank_w(valor:word);
+procedure opwolf_timer;
+procedure opwolf_timer_callback;
+
+implementation
+uses operationwolf_hw;
+
 const
   level_data:array[0..6,0..$cb] of word=((
 	$0480,$1008,$0300,$5701,$0001,$0010,$0480,$1008,
@@ -193,19 +206,6 @@ var
   cchip_ram:array[0..($400*8)-1] of byte;
   current_cmd,current_bank,cc_timer,cchip_last_7a,cchip_last_04,cchip_last_05,c588,c589,c58a:byte;
   cchip_coins,cchip_coins_for_credit,cchip_credits_for_coin:array[0..1] of byte;
-
-procedure opwolf_init_cchip(num:byte);
-procedure opwolf_cchip_reset;
-function opwolf_cchip_data_r(direccion:word):word;
-procedure opwolf_cchip_data_w(direccion,valor:word);
-function opwolf_cchip_status_r:word;
-procedure opwolf_cchip_status_w(valor:word);
-procedure opwolf_cchip_bank_w(valor:word);
-procedure opwolf_timer;
-procedure opwolf_timer_callback;
-
-implementation
-uses operationwolf_hw;
 
 procedure updateDifficulty(mode:byte);
 begin

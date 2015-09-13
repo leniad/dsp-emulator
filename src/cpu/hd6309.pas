@@ -55,6 +55,10 @@ type
                 procedure trf_ex(valor:byte);
         end;
 
+var
+    main_hd6309:cpu_hd6309;
+
+implementation
 const
     IIP0=19;
     IIP1=20;
@@ -190,11 +194,6 @@ const
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, //d0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, //e0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0); //f0
-
-var
-    main_hd6309:cpu_hd6309;
-
-implementation
 
 constructor cpu_hd6309.create(clock:dword;frames_div:word);
 begin

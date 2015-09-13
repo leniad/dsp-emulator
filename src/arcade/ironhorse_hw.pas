@@ -19,8 +19,9 @@ function ironhorse_snd_getbyte(direccion:word):byte;
 procedure ironhorse_snd_putbyte(direccion:word;valor:byte);
 procedure ironhorse_snd_outbyte(valor:byte;puerto:word);
 function ironhorse_snd_inbyte(puerto:word):byte;
-procedure ironhorse_sound_update; 
+procedure ironhorse_sound_update;
 
+implementation
 const
         ironhorse_rom:array[0..2] of tipo_roms=(
         (n:'13c_h03.bin';l:$8000;p:$4000;crc:$24539af1),(n:'12c_h02.bin';l:$4000;p:$c000;crc:$fab07f86),());
@@ -38,8 +39,6 @@ var
  sound_latch,charbank,palettebank:byte;
  spritebank:word;
  scroll_lineas:array[0..$1f] of byte;
-
-implementation
 
 procedure Cargar_ironhorse;
 begin

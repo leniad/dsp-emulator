@@ -120,8 +120,23 @@ type
 end;
   pYM2151=^YM2151;
 
-const
+var
+  FM2151:array[0..3] of pYM2151;
 
+procedure YM_2151Init(num:byte;clock:dword);
+function YM_2151ReadStatus(num:byte):byte;
+procedure YM_2151ResetChip(num:byte);
+procedure YM_2151WriteReg(num:byte;r,v:integer);
+function YM_2151UpdateOne(num:byte):pinteger;
+procedure YM_2151Close(num:byte);
+//timers
+procedure timer_a_exec_0;
+procedure timer_b_exec_0;
+procedure timer_a_exec_1;
+procedure timer_b_exec_1;
+
+implementation
+const
   M_PI=3.1415926535;
 	MAXOUT=32767;
 	MINOUT=-32768;
@@ -370,22 +385,7 @@ var
   sin_tab:array[0..SIN_LEN-1] of word;
   // translate from D1L to volume index (16 D1L levels) */
   d1l_tab:array[0..15] of dword;
-  FM2151:array[0..3] of pYM2151;
   salida_fm:array[0..2] of integer;
-
-procedure YM_2151Init(num:byte;clock:dword);
-function YM_2151ReadStatus(num:byte):byte;
-procedure YM_2151ResetChip(num:byte);
-procedure YM_2151WriteReg(num:byte;r,v:integer);
-function YM_2151UpdateOne(num:byte):pinteger;
-procedure YM_2151Close(num:byte);
-//timers
-procedure timer_a_exec_0;
-procedure timer_b_exec_0;
-procedure timer_a_exec_1;
-procedure timer_b_exec_1;
-
-implementation
 
 function sshr(num:int64;fac:byte):int64;
 begin

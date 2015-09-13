@@ -5,6 +5,21 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,gfx_engine,nz80,sn_76496,controls_engine,rom_engine,
      pal_engine,sound_engine,ppi8255;
 
+function iniciar_system2:boolean;
+procedure system2_principal;
+procedure reset_system2;
+//Main CPU
+function system2_getbyte(direccion:word):byte;
+procedure system2_putbyte(direccion:word;valor:byte);
+
+var
+  type_row_scroll:boolean;
+  bg_ram_bank,rom_bank:byte;
+  roms,roms_dec:array[0..3,0..$3fff] of byte;
+
+implementation
+uses system1_hw;
+
 const
     wbml_rom:array[0..3] of tipo_roms=(
         (n:'wbml.01';l:$10000;p:0;crc:$66482638),(n:'wbml.02';l:$10000;p:$10000;crc:$48746bb6),
@@ -34,21 +49,6 @@ const
         (n:'pr7119.ic20';l:$100;p:0;crc:$b2a8260f),(n:'pr7118.ic14';l:$100;p:$100;crc:$693e20c7),
         (n:'pr7117.ic8';l:$100;p:$200;crc:$4124307e),());
     choplift_video_prom:tipo_roms=(n:'pr5317.ic28';l:$100;p:0;crc:$648350b8);
-
-function iniciar_system2:boolean;
-procedure system2_principal;
-procedure reset_system2;
-//Main CPU
-function system2_getbyte(direccion:word):byte;
-procedure system2_putbyte(direccion:word;valor:byte);
-
-var
-  type_row_scroll:boolean;
-  bg_ram_bank,rom_bank:byte;
-  roms,roms_dec:array[0..3,0..$3fff] of byte;
-
-implementation
-uses system1_hw;
 
 function iniciar_system2:boolean;
 const

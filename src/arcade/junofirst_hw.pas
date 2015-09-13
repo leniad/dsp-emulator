@@ -20,6 +20,7 @@ function junofrst_portar:byte;
 procedure junofrst_portbw(valor:byte);
 procedure junofrst_sound_update;
 
+implementation
 const
         junofrst_rom:array[0..3] of tipo_roms=(
         (n:'jfa_b9.bin';l:$2000;p:$a000;crc:$f5a7ab9d),(n:'jfb_b10.bin';l:$2000;p:$c000;crc:$f20626e0),
@@ -49,8 +50,6 @@ var
  irq_enable:boolean;
  frame,xorx,xory,last_snd_val,sound_latch,rom_nbank,scroll_y:byte;
  blit_data:array[0..3] of byte;
-
-implementation
 
 procedure Cargar_junofrst;
 begin

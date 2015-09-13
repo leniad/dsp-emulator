@@ -18,6 +18,7 @@ procedure shaolin_sound;
 procedure shaolin_qsave(nombre:string);
 procedure shaolin_qload(nombre:string);
 
+implementation
 const
         shaolin_rom:array[0..3] of tipo_roms=(
         (n:'477-l03.d9';l:$2000;p:$6000;crc:$2598dfdd),(n:'477-l04.d10';l:$4000;p:$8000;crc:$0cf0351a),
@@ -47,8 +48,6 @@ const
 var
  banco_pal,scroll:byte;
  pedir_nmi:boolean;
-
-implementation
 
 procedure Cargar_shaolin;
 begin

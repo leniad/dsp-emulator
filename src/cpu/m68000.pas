@@ -91,6 +91,7 @@ type
 var
     main_m68000,snd_m68000:cpu_m68000;
 
+implementation
 const
   m68ki_shift_8_table:array[0..64] of byte=(
   $00, $80, $c0, $e0, $f0, $f8, $fc, $fe, $ff, $ff, $ff, $ff,
@@ -122,8 +123,6 @@ const
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff);
 
   addr_mask=$fffffe;
-
-implementation
 
 constructor cpu_m68000.create(clock:dword;frames_div:word);
 begin

@@ -16,6 +16,7 @@ procedure sbombers_putword(direccion:dword;valor:word);
 procedure sound_irq;
 procedure nmk16_update_sound;
 
+implementation
 const
         //Saboten Bombers
         sbombers_rom:array[0..2] of tipo_roms=(
@@ -41,8 +42,6 @@ var
  sound_latch,bg_bank:byte;
  adpcm_rom:array[0..1] of pbyte;
  nmk112_bank:array[0..7] of byte;
-
-implementation
 
 procedure Cargar_nmk16;
 begin

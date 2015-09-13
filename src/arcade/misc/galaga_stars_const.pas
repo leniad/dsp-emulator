@@ -267,7 +267,6 @@ const
 (x:$00DE;y:$00F9;col:$1D;set_:$03),
 (x:$002C;y:$00FA;col:$13;set_:$03));
 
-
 implementation
 
 end.

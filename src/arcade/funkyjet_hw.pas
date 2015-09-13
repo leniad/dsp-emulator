@@ -15,6 +15,7 @@ procedure funkyjet_principal;
 function funkyjet_getword(direccion:dword):word;
 procedure funkyjet_putword(direccion:dword;valor:word);
 
+implementation
 const
         funkyjet_rom:array[0..2] of tipo_roms=(
         (n:'jk00.12f';l:$40000;p:0;crc:$712089c1),(n:'jk01.13f';l:$40000;p:$1;crc:$be3920d7),());
@@ -38,8 +39,6 @@ var
  rom:array[0..$3ffff] of word;
  ram:array[0..$1fff] of word;
  prot146_ram:array[0..$7ff] of byte;
-
-implementation
 
 procedure Cargar_funkyjet;
 begin

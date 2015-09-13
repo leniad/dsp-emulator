@@ -17,6 +17,7 @@ procedure dietgo_putword(direccion:dword;valor:word);
 function dietgo_bank_callback(bank:word):word;
 procedure sound_bank_rom(valor:byte);
 
+implementation
 const
         dietgo_rom:array[0..2] of tipo_roms=(
         (n:'jy00-2.h4';l:$40000;p:1;crc:$014dcf62),(n:'jy01-2.h5';l:$40000;p:$0;crc:$793ebd83),());
@@ -38,8 +39,6 @@ var
  rom_opcode,rom_data:array[0..$3ffff] of word;
  ram:array[0..$7fff] of word;
  oki1_mem:pbyte;
-
-implementation
 
 procedure Cargar_dietgo;
 begin

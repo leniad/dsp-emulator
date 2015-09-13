@@ -26,6 +26,7 @@ procedure biomtoy_putword(direccion:dword;valor:word);
 procedure bigk_sound_update;
 procedure thoop_sound_update;
 
+implementation
 const
         //Big Karnak
         bigkarnak_rom:array[0..2] of tipo_roms=(
@@ -109,8 +110,6 @@ var
  main_ram:array[0..$7fff] of word;
  sound_latch,gaelco_dec_val:byte;
  oki_rom:array[0..$c,0..$ffff] of byte;
-
-implementation
 
 procedure Cargar_gaelco_hw;
 begin

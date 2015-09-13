@@ -5,32 +5,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      math,dialogs,timer_engine,sysutils,sound_engine;
 
 const
-  MAX_SAMPLE_CHUNK=10000;
   OKIM6295_VOICES=4;
   OKIM6295_PIN7_LOW=0;
   OKIM6295_PIN7_HIGH=1;
-  // step size index shift table */
-  index_shift:array[0..7] of integer =(-1, -1, -1, -1, 2, 4, 6, 8 );
-  // volume lookup table. The manual lists only 9 steps, ~3dB per step. Given the dB values,
-  // that seems to map to a 5-bit volume control. Any volume parameter beyond the 9th index
-  // results in silent playback.
-  volume_table:array[0..15] of integer =(
-	$20,	//   0 dB
-	$16,	//  -3.2 dB
-	$10,	//  -6.0 dB
-	$0b,	//  -9.2 dB
-	$08,	// -12.0 dB
-	$06,	// -14.5 dB
-	$04,	// -18.0 dB
-	$03,	// -20.5 dB
-	$02,	// -24.0 dB
-	$00,
-	$00,
-	$00,
-	$00,
-	$00,
-	$00,
-	$00);
 
 type
       adpcm_state=record
@@ -69,15 +46,42 @@ type
             function generate_adpcm(num_voice:byte):integer;
             procedure stream_update;
       end;
-var
-    //lookup table for the precomputed difference */
-    diff_lookup:array[0..(49*16)-1] of single;
-    oki_6295_0,oki_6295_1:snd_okim6295;
 
 procedure internal_update_oki6295_0;
 procedure internal_update_oki6295_1;
 
+var
+    oki_6295_0,oki_6295_1:snd_okim6295;
+
 implementation
+const
+  MAX_SAMPLE_CHUNK=10000;
+  // step size index shift table */
+  index_shift:array[0..7] of integer =(-1, -1, -1, -1, 2, 4, 6, 8 );
+  // volume lookup table. The manual lists only 9 steps, ~3dB per step. Given the dB values,
+  // that seems to map to a 5-bit volume control. Any volume parameter beyond the 9th index
+  // results in silent playback.
+  volume_table:array[0..15] of integer =(
+	$20,	//   0 dB
+	$16,	//  -3.2 dB
+	$10,	//  -6.0 dB
+	$0b,	//  -9.2 dB
+	$08,	// -12.0 dB
+	$06,	// -14.5 dB
+	$04,	// -18.0 dB
+	$03,	// -20.5 dB
+	$02,	// -24.0 dB
+	$00,
+	$00,
+	$00,
+	$00,
+	$00,
+	$00,
+	$00);
+
+var
+    //lookup table for the precomputed difference */
+    diff_lookup:array[0..(49*16)-1] of single;
 
 procedure compute_tables;inline;
 const

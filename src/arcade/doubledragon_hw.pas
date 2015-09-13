@@ -32,6 +32,7 @@ procedure ddragon2_snd_putbyte(direccion:word;valor:byte);
 procedure ym2151_snd_irq_dd2(irqstate:byte);
 procedure dd2_sound_update;
 
+implementation
 const
         //Double Dragon
         ddragon_rom:array[0..4] of tipo_roms=(
@@ -76,8 +77,6 @@ var
  adpcm_pos,adpcm_end:array[0..1] of dword;
  tipo_video,mask:byte;
  ddragon_scanline:array[0..271] of word;
-
-implementation
 
 procedure Cargar_ddragon;
 begin
@@ -583,7 +582,7 @@ begin
     else snd_m6809.pedir_firq:=CLEAR_LINE;
 end;
 
-procedure snd_adpcm0;inline;
+procedure snd_adpcm0;
 begin
 if ((adpcm_pos[0]>=adpcm_end[0]) or (adpcm_pos[0]>=$10000)) then begin
 		adpcm_idle[0]:=1;
@@ -599,7 +598,7 @@ if ((adpcm_pos[0]>=adpcm_end[0]) or (adpcm_pos[0]>=$10000)) then begin
             end;
 end;
 
-procedure snd_adpcm1;inline;
+procedure snd_adpcm1;
 begin
 if ((adpcm_pos[1]>=adpcm_end[1]) or (adpcm_pos[1]>=$10000)) then begin
 		adpcm_idle[1]:=1;

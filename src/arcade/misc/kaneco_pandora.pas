@@ -12,14 +12,14 @@ type
     color_offset:word;
   end;
 
-var
-  pandora:pandora_type;
-
 procedure pandora_reset;
 procedure pandora_update_video(screen,ngfx:byte);
 //Read/write 8 bits
 procedure pandora_spriteram_w(offset:word;data:byte);
 function pandora_spriteram_r(offset:word):byte;
+
+var
+  pandora:pandora_type;
 
 implementation
 

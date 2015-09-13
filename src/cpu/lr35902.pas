@@ -53,6 +53,10 @@ type
         procedure add_hl(val:word);
   end;
 
+var
+  main_lr:cpu_lr;
+
+implementation
 const
   gb_t:array[0..255] of byte=(
    4,12, 8, 8, 4, 4, 8, 4,20, 8, 8, 8, 4, 4, 8, 4,  //0
@@ -88,11 +92,6 @@ const
 	 8, 8, 8, 8, 8, 8,16, 8, 8, 8, 8, 8, 8, 8,16, 8,  //d
 	 8, 8, 8, 8, 8, 8,16, 8, 8, 8, 8, 8, 8, 8,16, 8,  //e
 	 8, 8, 8, 8, 8, 8,16, 8, 8, 8, 8, 8, 8, 8,16, 8); //f
-
-var
-  main_lr:cpu_lr;
-
-implementation
 
 constructor cpu_lr.create(clock:dword;frames_div:word);
 begin

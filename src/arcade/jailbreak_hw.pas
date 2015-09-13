@@ -17,6 +17,7 @@ procedure jailbreak_putbyte(direccion:word;valor:byte);
 procedure jailbreak_sound;
 procedure jailbreak_snd_nmi;
 
+implementation
 const
         jailbreak_rom:array[0..2] of tipo_roms=(
         (n:'507p03.11d';l:$4000;p:$8000;crc:$a0b88dfd),(n:'507p02.9d';l:$4000;p:$c000;crc:$444b7d8e),());
@@ -47,8 +48,6 @@ var
  pedir_irq,pedir_nmi,scroll_dir:boolean;
  mem_opcodes:array[0..$7fff] of byte;
  scroll_lineas:array[0..$1f] of word;
-
-implementation
 
 procedure Cargar_jailbreak;
 begin

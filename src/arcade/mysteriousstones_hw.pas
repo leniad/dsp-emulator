@@ -15,6 +15,7 @@ function getbyte_ms(direccion:word):byte;
 procedure putbyte_ms(direccion:word;valor:byte);
 procedure ms_sound_update;
 
+implementation
 const
         ms_rom:array[0..6] of tipo_roms=(
         (n:'rom6.bin';l:$2000;p:$4000;crc:$7bd9c6cd),(n:'rom5.bin';l:$2000;p:$6000;crc:$a83f04a6),
@@ -46,8 +47,6 @@ var
   weights_rg:array[0..2] of single;
   weights_b:array[0..1] of single;
   ms_scanline:array[0..271] of word;
-
-implementation
 
 procedure Cargar_MS;
 begin

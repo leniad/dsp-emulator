@@ -15,6 +15,7 @@ function higemaru_getbyte(direccion:word):byte;
 procedure higemaru_putbyte(direccion:word;valor:byte);
 procedure higemaru_sound;
 
+implementation
 const
         higemaru_rom:array[0..4] of tipo_roms=(
         (n:'hg4.p12';l:$2000;p:0;crc:$dc67a7f9),(n:'hg5.m12';l:$2000;p:$2000;crc:$f65a4b68),
@@ -25,8 +26,6 @@ const
         higemaru_char:tipo_roms=(n:'hg3.m1';l:$2000;p:0;crc:$b37b88c8);
         higemaru_sprites:array[0..2] of tipo_roms=(
         (n:'hg1.c14';l:$2000;p:0;crc:$ef4c2f5d),(n:'hg2.e14';l:$2000;p:$2000;crc:$9133f804),());
-
-implementation
 
 procedure Cargar_higemaru;
 begin
