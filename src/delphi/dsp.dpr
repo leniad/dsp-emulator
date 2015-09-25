@@ -236,7 +236,9 @@ uses
   freekick_hw in '..\arcade\freekick_hw.pas',
   boogiewings_hw in '..\arcade\boogiewings_hw.pas',
   pinballaction_hw in '..\arcade\pinballaction_hw.pas',
-  sms in '..\consolas\sms.pas';
+  sms in '..\consolas\sms.pas',
+  sega_vdp in '..\consolas\sega_vdp.pas',
+  config_sms in 'config_sms.pas' {SMSConfig};
 
 {$R *.res}
 
@@ -255,5 +257,6 @@ begin
   Application.CreateForm(TFLoadRom, FLoadRom);
   Application.CreateForm(Tconfig_arcade, config_arcade);
   Application.CreateForm(Tjoy_calibration, joy_calibration);
+  Application.CreateForm(TSMSConfig, SMSConfig);
   Application.Run;
 end.

@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, principal, acercade, LoadRom, config_general, redefine,
   cargar_dsk, tape_window, cargar_spec, lenslock, config, arcade_config, 
-joystick_calibration, dac, SDL2;
+  joystick_calibration, dac, SDL2, config_sms;
 
 {$IFDEF WINDOWS}
 {$IFDEF CPU32}
@@ -34,6 +34,7 @@ begin
   Application.CreateForm(TFLoadRom, FLoadRom);
   Application.CreateForm(Tconfig_arcade, config_arcade);
   Application.CreateForm(Tjoy_calibration, joy_calibration);
+  Application.CreateForm(TSMSConfig, SMSConfig);
   Application.Run;
 end.
 

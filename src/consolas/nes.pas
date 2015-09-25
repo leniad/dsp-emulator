@@ -14,7 +14,7 @@ type
            write_rom:procedure(direccion:word;valor:byte);
            line_counter:procedure;
            end;
-
+
 procedure Cargar_NES;
 function iniciar_nes:boolean;
 procedure nes_principal;
@@ -156,18 +156,26 @@ end;
 procedure nes_principal;
 var
   frame:single;
+  even:boolean;
   nes_linea:word;
 begin
   if not(cartucho_cargado) then exit;
   init_controls(false,true,false,true);
   frame:=main_m6502.tframes;
+  even:=true;
   while EmuStatus=EsRuning do begin
     for nes_linea:=0 to NTSC_lines do begin
       case nes_linea of
           0..239:begin//0..239
+              //El sprite hit se evalua en 85T, para compensar de las otras lineas pongo la resta...
               ppu_linea(nes_linea);
+              if ppu_nes.sprite_over_flow then begin
+                main_m6502.run(43-(main_m6502.tframes-frame));
+                frame:=frame-main_m6502.contador;
+                ppu_nes.status:=ppu_nes.status or $20;
+              end;
               if ppu_nes.sprite0_hit then begin
-                main_m6502.run(85-ppu_nes.sprite0_hit_pos);
+                main_m6502.run(ppu_nes.sprite0_hit_pos-(main_m6502.tframes-frame));
                 frame:=frame-main_m6502.contador;
                 ppu_nes.status:=ppu_nes.status or $40;
               end;
@@ -180,12 +188,15 @@ begin
             end;
           241:begin //241
               //Poner VBL
-              ppu_nes.status:=ppu_nes.status or $80;
-              if (main_m6502.tframes-frame)<0.33 then begin
-                main_m6502.run(0.33);
+              if (main_m6502.tframes-frame)<0.333 then begin
+                main_m6502.run(0.333);
                 frame:=frame-main_m6502.contador;
               end;
-              if (ppu_nes.control1 and $80)=$80 then main_m6502.pedir_nmi:=PULSE_LINE;
+              ppu_nes.status:=ppu_nes.status or $80;
+              if (ppu_nes.control1 and $80)<>0 then begin
+                 main_m6502.pedir_nmi:=PULSE_LINE;
+                 main_m6502.after_ei:=true;
+              end;
               main_m6502.run(frame);
               frame:=frame+main_m6502.tframes-main_m6502.contador;
             end;
@@ -194,16 +205,19 @@ begin
                 frame:=frame+main_m6502.tframes-main_m6502.contador;
               end;
            261:begin
-              if (main_m6502.tframes-frame)<0.33 then begin
-                main_m6502.run(0.33);
+              if (main_m6502.tframes-frame)<0.333 then begin
+                main_m6502.run(0.333);
                 frame:=frame-main_m6502.contador;
               end;
               //Limpiar VBL, sprite 0 hit y sprite overflow
               ppu_nes.status:=ppu_nes.status and $1F;
               ppu_nes.sprite0_hit:=false;
+              ppu_nes.sprite_over_flow:=false;
               main_m6502.run(frame);
               frame:=frame+main_m6502.tframes-main_m6502.contador;
               if (ppu_nes.control2 and $8)<>0 then ppu_nes.address:=ppu_nes.address_temp;
+              if even then frame:=frame-0.333;
+              even:=not(even);
            end;
       end;
     end;
@@ -262,6 +276,10 @@ begin
         open_bus:=valor;
         case (direccion and 7) of
             0:begin
+                if (((ppu_nes.status and $80)<>0) and ((ppu_nes.control1 and $80)=0) and ((valor and $80)<>0)) then begin
+                   main_m6502.pedir_nmi:=PULSE_LINE;
+                   main_m6502.after_ei:=true;
+                end;
                 ppu_nes.control1:=valor;
                 ppu_nes.pos_bg:=(valor shr 4) and 1;
                 ppu_nes.pos_spt:=(valor shr 3) and 1;

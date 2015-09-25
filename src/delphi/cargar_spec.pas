@@ -23,7 +23,7 @@ type
     procedure Button1Click(Sender:TObject);
     procedure Button2Click(Sender:TObject);
     procedure FileListBox1DblClick(Sender:TObject);
-    procedure FileListBox1KeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
+    procedure FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
     procedure FileListBox1Click(Sender: TObject);
   private
     { Private declarations }
@@ -60,7 +60,7 @@ begin
 spectrum_load_exit;
 end;
 
-procedure Tload_spec.FileListBox1KeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
+procedure Tload_spec.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
 begin
 case key of
   13:Button2Click(sender);

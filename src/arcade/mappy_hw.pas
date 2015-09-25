@@ -716,7 +716,7 @@ end;
 
 function inport1_0:byte;
 begin
-inport1_0:=$f;  //dib_mux
+inport1_0:=$ff shr (mux*4);  //dib_mux
 end;
 
 function inport1_1:byte;
@@ -736,7 +736,7 @@ end;
 
 procedure outport1_0(data:byte);
 begin
-mux:=data;
+mux:=data and $1;
 end;
 
 procedure mappy_io0;

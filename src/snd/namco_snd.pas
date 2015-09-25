@@ -56,9 +56,6 @@ var
   namco_63701_rom:pbyte;
 
 implementation
-const
-  MAX_VOLUME=16;
-  MIXLEVEL=(1 shl (16-4-4));
 
 procedure getvoice_3(numero_voz:byte);inline;
 var

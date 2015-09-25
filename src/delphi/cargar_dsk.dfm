@@ -40,7 +40,7 @@ object load_dsk: Tload_dsk
       Height = 159
       TabStop = False
       ColCount = 2
-      DefaultColWidth = 20
+      DefaultColWidth = 134
       DefaultRowHeight = 15
       FixedCols = 0
       RowCount = 2
@@ -51,9 +51,6 @@ object load_dsk: Tload_dsk
       OnClick = StringGrid1Click
       OnDblClick = StringGrid1DblClick
       OnKeyUp = FileListBox1KeyUp
-      ColWidths = (
-        220
-        61)
     end
   end
   object Button2: TButton

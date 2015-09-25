@@ -26,7 +26,7 @@ const
         foodf_char:tipo_roms=(n:'136020-109.6lm';l:$2000;p:0;crc:$c13c90eb);
         foodf_sprites:array[0..2] of tipo_roms=(
         (n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),(n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf),());
-        foodf_prom:tipo_roms=(n:'136020-112.2p';l:$100;p:0;crc:$0aa962d6);
+        //foodf_prom:tipo_roms=(n:'136020-112.2p';l:$100;p:0;crc:$0aa962d6);
         //DIP
         foodf_dip:array [0..4] of def_dip=(
         (mask:$7;name:'Bonus Coins';number:5;dip:((dip_val:$0;dip_name:'None'),(dip_val:$5;dip_name:'1 for every 2'),(dip_val:$2;dip_name:'1 for every 4'),(dip_val:$1;dip_name:'1 for every 5'),(dip_val:$6;dip_name:'2 for every 4'),(),(),(),(),(),(),(),(),(),(),())),

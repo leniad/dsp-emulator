@@ -78,7 +78,6 @@ const
         (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$80;dip_name:'4'),(dip_val:$40;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- irq_vblank:boolean;
  vblank_val:byte;
 
 procedure Cargar_ladybug;
@@ -260,7 +259,6 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
- irq_vblank:=false;
  vblank_val:=$40;
  marcade.in0:=$FF;
  marcade.in1:=$3F;

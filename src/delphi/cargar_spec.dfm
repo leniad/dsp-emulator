@@ -14,7 +14,7 @@ object load_spec: Tload_spec
   Font.Style = []
   OldCreateOrder = False
   Position = poDesigned
-  OnKeyUp = FileListBox1KeyUp
+  OnKeyUp = FormKeyUp
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -43,7 +43,7 @@ object load_spec: Tload_spec
     TabOrder = 2
     OnClick = FileListBox1Click
     OnDblClick = FileListBox1DblClick
-    OnKeyUp = FileListBox1KeyUp
+    OnKeyUp = FormKeyUp
   end
   object Button1: TButton
     Left = 464

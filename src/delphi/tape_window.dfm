@@ -412,12 +412,12 @@ object tape_window1: Ttape_window1
   end
   object StringGrid2: TStringGrid
     Left = 16
-    Top = 93
+    Top = 95
     Width = 288
     Height = 20
     TabStop = False
     ColCount = 3
-    DefaultColWidth = 10
+    DefaultColWidth = 94
     DefaultRowHeight = 15
     FixedCols = 0
     RowCount = 4
@@ -430,21 +430,17 @@ object tape_window1: Ttape_window1
     ParentFont = False
     ScrollBars = ssNone
     TabOrder = 1
-    ColWidths = (
-      162
-      55
-      65)
   end
   object StringGrid1: TStringGrid
     Left = 15
-    Top = 111
+    Top = 110
     Width = 289
     Height = 194
     Cursor = crHandPoint
     TabStop = False
     ColCount = 3
     Ctl3D = True
-    DefaultColWidth = 10
+    DefaultColWidth = 94
     DefaultRowHeight = 15
     FixedCols = 0
     RowCount = 3
@@ -462,10 +458,6 @@ object tape_window1: Ttape_window1
     ShowHint = True
     TabOrder = 2
     OnClick = StringGrid1Click
-    ColWidths = (
-      162
-      55
-      65)
   end
   object Edit1: TEdit
     Left = 15

@@ -799,9 +799,9 @@ end;
 
 procedure Tprincipal1.fConfigurar(Sender: TObject);
 begin
-if ((@llamadas_maquina.configurar=nil) or ((main_vars.tipo_maquina>9) and (marcade.dswa_val=nil))) then begin
-  if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
-  exit;
+if (@llamadas_maquina.configurar=nil) then begin
+    if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+    exit;
 end;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;

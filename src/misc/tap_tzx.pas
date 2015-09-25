@@ -672,7 +672,7 @@ while longitud<long do begin
         end;
         tape_window1.stringgrid1.Cells[0,temp]:=cadena;
         tape_window1.stringgrid1.Cells[1,temp]:=inttostr(cinta_tzx.datos_tzx[temp].lbloque);
-        tape_window1.stringgrid1.Cells[2,temp]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
+        //tape_window1.stringgrid1.Cells[2,temp]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
         inc(temp);
         cinta_tzx.indice_saltos[temp]:=temp;
         cinta_tzx.indice_select[temp]:=temp;
@@ -1355,7 +1355,7 @@ while longitud<long do begin
           tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
           cinta_tzx.indice_select[contador]:=temp;
           tape_window1.stringgrid1.Cells[0,contador]:=cadena;
-          tape_window1.stringgrid1.Cells[2,contador]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
+          //tape_window1.stringgrid1.Cells[2,contador]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
           inc(contador);
           long_final:=0;
         end;
@@ -1363,7 +1363,7 @@ while longitud<long do begin
           tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
           fin_grupo:=false;
           tape_window1.stringgrid1.Cells[0,contador]:=nombre_grupo;
-          tape_window1.stringgrid1.Cells[2,contador]:=inttohex(crc_grupo,8);
+          //tape_window1.stringgrid1.Cells[2,contador]:=inttohex(crc_grupo,8);
           cinta_tzx.indice_select[contador]:=inicio_grupo;
           cinta_tzx.datos_tzx[temp].crc32:=crc_grupo;
           inc(contador);

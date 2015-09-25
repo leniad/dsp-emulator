@@ -3,7 +3,7 @@ unit cabal_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,seibu_sound,
-     msm5205,rom_engine,pal_engine,sound_engine,timer_engine,misc_functions;
+     rom_engine,pal_engine,sound_engine,misc_functions;
 
 procedure Cargar_cabal;
 procedure cabal_principal;

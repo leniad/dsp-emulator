@@ -363,7 +363,6 @@ type
     Timer1: TTimer;
     Timer2: TTimer;
     procedure Acercade1Click(Sender: TObject);
-    procedure BitBtn12Click(Sender: TObject);
     procedure BitBtn14Click(Sender: TObject);
     procedure BitBtn8Click(Sender: TObject);
     procedure fLoadCinta(Sender: TObject);
@@ -371,13 +370,11 @@ type
     procedure CambiarVideo(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
-    procedure GroupBox4Click(Sender: TObject);
     procedure IdiomaClick(Sender: TObject);
     procedure CambiaAudio(Sender: TObject);
     procedure fLoadCartucho(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
     procedure Pausa1Click(Sender: TObject);
-    procedure pleiads1Click(Sender: TObject);
     procedure Salir1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
@@ -421,6 +418,7 @@ if ((Message.Msg=WM_SYSCOMMAND) and (Message.WParam=SC_KEYMENU)) then exit;
 inherited WndProc(Message);
 end;
 {$endif}
+
 procedure Tprincipal1.fSaveGIF(Sender: TObject);
 var
   r:integer;
@@ -605,11 +603,6 @@ principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
 end;
 
-procedure Tprincipal1.GroupBox4Click(Sender: TObject);
-begin
-
-end;
-
 procedure Tprincipal1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
 timer1.Enabled:=false;
@@ -663,11 +656,6 @@ while aboutbox.Showing do application.ProcessMessages;
 timer4.Enabled:=true;
 end;
 
-procedure Tprincipal1.BitBtn12Click(Sender: TObject);
-begin
-
-end;
-
 procedure Tprincipal1.BitBtn14Click(Sender: TObject);
 begin
 fastload:=not(fastload);
@@ -681,7 +669,7 @@ end;
 
 procedure Tprincipal1.BitBtn8Click(Sender: TObject);
 begin
-if ((addr(llamadas_maquina.configurar)=nil) or ((main_vars.tipo_maquina>9) and (marcade.dswa_val=nil))) then begin
+if (addr(llamadas_maquina.configurar)=nil) then begin
    {$ifdef windows}
    if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
    {$else}
@@ -837,11 +825,6 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 BitBtn3.Enabled:=true;
 BitBtn4.Enabled:=false;
-end;
-
-procedure Tprincipal1.pleiads1Click(Sender: TObject);
-begin
-
 end;
 
 procedure Tprincipal1.Salir1Click(Sender: TObject);

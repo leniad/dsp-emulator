@@ -249,7 +249,7 @@ end;
 
 procedure cpu_z80.reset;
 begin
-  r.sp:=$0;
+  r.sp:=$ffff;
   r.pc:=0;
   r.a:=0;r.bc.w:=0;r.de.w:=0;r.hl.w:=0;
   r.a2:=0;r.bc2.w:=0;r.de2.w:=0;r.hl2.w:=0;
@@ -348,6 +348,7 @@ call_nmi:=0;
 self.halt:=false;
 self.pedir_halt:=CLEAR_LINE;
 if self.nmi_state<>CLEAR_LINE then exit;
+r.r:=((r.r+1) and $7f) or (r.r and $80);
 self.push_sp(r.pc);
 r.IFF1:=false;
 r.pc:=$66;
@@ -364,6 +365,7 @@ begin
 call_irq:=0;
 self.halt:=false;
 if not(r.iff1) then exit; //se esta ejecutando otra
+r.r:=((r.r+1) and $7f) or (r.r and $80);
 if @self.raised_z80<>nil then estados_t:=self.raised_z80
   else estados_t:=0;
 if self.pedir_irq=HOLD_LINE then self.pedir_irq:=CLEAR_LINE;
@@ -1812,11 +1814,7 @@ case instruccion of
         $e5:self.push_sp(registro^.w);  {push IX}
         $e9:r.pc:=registro^.w; {jp IX}
         $f9:r.sp:=registro^.w; {ld SP,IX}
-        else begin
-          //MessageDlg('Instruccion desconocida DD. PC= '+inttostr(r.pc.w), mtInformation,[mbOk], 0);
-          r.pc:=r.pc-1;
-          r.r:=(r.r-1) and $7f;
-        end;
+        else r.pc:=r.pc-1;
 end;
 exec_dd_fd:=z80t_dd[instruccion]+estados_dd_cb;
 end;
@@ -3026,11 +3024,19 @@ case instruccion of
             end;
         $a3:begin //outi el primer programa que lo usa una demo!!!
                  //08 de feb 2003
+                 temp:=self.getbyte(r.hl.w);
                  r.bc.h:=r.bc.h-1;
                  if @self.out_port<>nil then self.out_port(self.getbyte(r.hl.w),r.bc.w);
                  r.hl.w:=r.hl.w+1;
+                 r.f.n:=(temp and $80)<>0;
+                 tempw:=temp+r.hl.l;
+                 r.f.h:=(tempw and $100)<>0;
+                 r.f.c:=(tempw and $100)<>0;
+                 r.f.p_v:=paridad[(tempw and $7) xor r.bc.h];
                  r.f.z:=(r.bc.h=0);
-                 r.f.n:= True;
+                 r.f.bit5:=(r.bc.h and $20)<>0;
+                 r.f.bit3:=(r.bc.h and 8)<>0;
+                 r.f.s:=(r.bc.h and $80)<>0;
              end;
         {$a4..$a7:nop*2}
         $a8:begin  {ldd}

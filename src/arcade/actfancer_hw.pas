@@ -41,7 +41,7 @@ const
 var
  rom:array[0..$2ffff] of byte;
  ram:array[0..$3fff] of byte;
- sound_latch,dip_b,vblank_val:byte;
+ sound_latch,vblank_val:byte;
 
 procedure Cargar_actfancer;
 begin
@@ -111,7 +111,6 @@ case main_vars.tipo_maquina of
         gfx[2].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,0,$18000*8,$30000*8,$48000*8);
         convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
-        dip_b:=$7f;
       end;
 end;
 //final

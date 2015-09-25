@@ -2,8 +2,8 @@ unit sms;
 
 interface
 uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,lenguaje,main_engine,controls_engine,tms99xx,sn_76496,sysutils,dialogs,
-     rom_engine,misc_functions,sound_engine,file_engine,pal_engine;
+     nz80,lenguaje,main_engine,controls_engine,sega_vdp,sn_76496,sysutils,dialogs,
+     rom_engine,misc_functions,sound_engine,file_engine,pal_engine,forms;
 
 procedure Cargar_sms;
 procedure sms_principal;
@@ -11,6 +11,7 @@ function iniciar_sms:boolean;
 procedure reset_sms;
 procedure cerrar_sms;
 procedure sms_sound_update;
+procedure sms_configurar;
 //Snapshot
 function abrir_sms:boolean;
 procedure sms_grabar_snapshot;
@@ -21,16 +22,31 @@ function sms_inbyte(puerto:word):byte;
 procedure sms_outbyte(valor:byte;puerto:word);
 procedure sms_interrupt(int:boolean);
 
-const
-        sms_bios:tipo_roms=(n:'sms.rom';l:$2000;p:0;crc:$3aa93ef3);
-        keycodes:array[0..15] of byte=($0A,$0D,$07,$0C,$02,$03,$0E,$05,$01,$0B,$06,$09,$0F,$0F,$0F,$0F);
+type
+  tmapper_sms=record
+      rom:array[0..63,0..$3fff] of byte;
+      ram:array[0..$1fff] of byte;
+      ram_slot2,bios:array[0..$3fff] of byte;
+      slot0,slot1,slot2,max:byte;
+      slot2_ram,is_sg:boolean;
+      bios_enabled,bios_loaded,bios_show:boolean;
+  end;
+
 var
-  njoymode:boolean;
-  nJoyState:array[0..1] of Integer;
-  mapper_reg:array[0..3] of byte;
+  sms_linea:word;
+  joy1,joy2:byte;
+  mapper_sms:^tmapper_sms;
+const
+  CLOCK_NTSC=3579545;
+  CLOCK_PAL=3546895;
+  FPS_NTSC=60;
+  FPS_PAL=50;
+  LINES_NTSC=262;
+  LINES_PAL=313;
+  sms_bios:tipo_roms=(n:'mpr-12808.ic2';l:$2000;p:0;crc:$0072ed54);
 
 implementation
-uses principal;
+uses principal,config_sms;
 
 procedure Cargar_sms;
 begin
@@ -51,46 +67,58 @@ llamadas_maquina.cerrar:=cerrar_sms;
 llamadas_maquina.reset:=reset_sms;
 llamadas_maquina.cartuchos:=abrir_sms;
 llamadas_maquina.grabar_snapshot:=sms_grabar_snapshot;
-llamadas_maquina.fps_max:=60;
+llamadas_maquina.fps_max:=FPS_NTSC;
+llamadas_maquina.configurar:=sms_configurar;
 end;
 
 function iniciar_sms:boolean;
-var
-  longitud:integer;
 begin
 iniciar_sms:=false;
 iniciar_audio(false);
-screen_init(1,352,262);
-iniciar_video(352,262);
+if file_data.sms_is_pal then begin
+  screen_init(1,284,294);
+  iniciar_video(284,294);
+  main_z80:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
+end else begin
+  screen_init(1,284,243);
+  iniciar_video(284,243);
+  main_z80:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
+end;
 //Main CPU
-main_z80:=cpu_z80.create(3579545,1);
 main_z80.change_ram_calls(sms_getbyte,sms_putbyte);
 main_z80.change_io_calls(sms_inbyte,sms_outbyte);
 main_z80.init_sound(sms_sound_update);
+//Mapper
+getmem(mapper_sms,sizeof(tmapper_sms));
+mapper_sms.bios_loaded:=cargar_roms(@mapper_sms.bios[0],@sms_bios,'sms.zip',1);
+if mapper_sms.bios_loaded then mapper_sms.bios_enabled:=file_data.sms_bios_enabled
+  else mapper_sms.bios_loaded:=false;
 //TMS
-TMS99XX_Init(1);
-tms.IRQ_Handler:=sms_interrupt;
-//Chip Sonido
-sn_76496_0:=sn76496_chip.Create(3579545);
-//cargar roms
-//if not(read_file_size('c:\dsp\sms\Teddy Boy (UEB) [!].sms',longitud)) then exit;
-//if not(read_file('c:\dsp\sms\Teddy Boy (UEB) [!].sms',@memoria[$4000],longitud)) then begin
-//      exit;
-//    end;
-if not(read_file_size('c:\dsp\sms\mpr-12808.ic2',longitud)) then exit;
-if not(read_file('c:\dsp\sms\mpr-12808.ic2',@memoria[$0],longitud)) then begin
-      exit;
-    end;
+sega_vdp_Init(1);
+vdp.IRQ_Handler:=sms_interrupt;
+vdp.is_pal:=file_data.sms_is_pal;
+if file_data.sms_is_pal then begin
+    vdp.VIDEO_VISIBLE_Y_TOTAL:=294;
+    vdp.VIDEO_Y_TOTAL:=LINES_PAL;
+    sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
+end else begin
+  vdp.VIDEO_VISIBLE_Y_TOTAL:=243;
+  vdp.VIDEO_Y_TOTAL:=LINES_NTSC;
+  sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
+end;
 //final
-reset_sms;
+abrir_sms;
 iniciar_sms:=true;
 end;
 
 procedure cerrar_sms;
 begin
+file_data.sms_is_pal:=vdp.is_pal;
+file_data.sms_bios_enabled:=mapper_sms.bios_enabled;
 main_z80.free;
 sn_76496_0.Free;
-TMS99XX_close;
+sega_vdp_close;
+freemem(mapper_sms);
 close_audio;
 close_video;
 end;
@@ -99,25 +127,51 @@ procedure reset_sms;
 begin
  main_z80.reset;
  sn_76496_0.reset;
- TMS99XX_reset;
+ sega_vdp_reset;
  reset_audio;
- njoymode:=false;
- nJoyState[0]:=0;
- nJoyState[1]:=$FFFF;
+ mapper_sms.slot2_ram:=false;
+ mapper_sms.bios_show:=mapper_sms.bios_enabled;
+ joy1:=$ff;
+ joy2:=$ff;
+ mapper_sms.slot0:=0;
+ mapper_sms.slot1:=1;
+ mapper_sms.slot2:=2;
+end;
+
+procedure eventos_sms;inline;
+begin
+if event.arcade then begin
+  //P1
+  if arcade_input.up[0] then joy1:=(joy1 and $fe) else joy1:=(joy1 or $1);
+  if arcade_input.down[0] then joy1:=(joy1 and $fd) else joy1:=(joy1 or $2);
+  if arcade_input.left[0] then joy1:=(joy1 and $fb) else joy1:=(joy1 or $4);
+  if arcade_input.right[0] then joy1:=(joy1 and $f7) else joy1:=(joy1 or $8);
+  if arcade_input.but0[0] then joy1:=(joy1 and $ef) else joy1:=(joy1 or $10);
+  if arcade_input.but1[0] then joy1:=(joy1 and $df) else joy1:=(joy1 or $20);
+  //P2
+  if arcade_input.up[1] then joy1:=(joy1 and $bf) else joy1:=(joy1 or $40);
+  if arcade_input.down[1] then joy1:=(joy1 and $7f) else joy1:=(joy1 or $80);
+  if arcade_input.left[1] then joy2:=(joy2 and $fe) else joy2:=(joy2 or $1);
+  if arcade_input.right[1] then joy2:=(joy2 and $fd) else joy2:=(joy2 or $2);
+  if arcade_input.but0[1] then joy2:=(joy2 and $fb) else joy2:=(joy2 or $4);
+  if arcade_input.but1[1] then joy2:=(joy2 and $f7) else joy2:=(joy2 or $8);
+end;
 end;
 
 procedure sms_principal;
 var
   frame:single;
 begin
-init_controls(false,true,true,false);
+init_controls(false,false,true,false);
 frame:=main_z80.tframes;
 while EmuStatus=EsRuning do begin
-  main_z80.run(frame);
-  frame:=frame+main_z80.tframes-main_z80.contador;
-  //TMS99XX_Interrupt;
-  //TMS99XX_refresh;
-  //actualiza_trozo_simple(0,0,256+BORDER*2,192+BORDER*2,1);
+  for sms_linea:=0 to (vdp.VIDEO_Y_TOTAL-1) do begin
+      main_z80.run(frame);
+      frame:=frame+main_z80.tframes-main_z80.contador;
+      sega_vdp_refresh(sms_linea);
+  end;
+  actualiza_trozo_simple(0,0,284,vdp.VIDEO_VISIBLE_Y_TOTAL,1);
+  eventos_sms;
   video_sync;
 end;
 end;
@@ -125,63 +179,101 @@ end;
 function sms_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$bfff:sms_getbyte:=memoria[direccion];
-  $c000..$dfff:sms_getbyte:=memoria[direccion];
-  $e000..$fffb:sms_getbyte:=memoria[direccion-$2000];
-  $fffc..$ffff:sms_getbyte:=mapper_reg[direccion and $3];
+  0..$3fff:if mapper_sms.bios_show then sms_getbyte:=mapper_sms.bios[direccion]
+              else sms_getbyte:=mapper_sms.rom[mapper_sms.slot0,direccion];
+  $4000..$7fff:sms_getbyte:=mapper_sms.rom[mapper_sms.slot1,direccion and $3fff];
+  $8000..$bfff:if mapper_sms.slot2_ram then sms_getbyte:=mapper_sms.ram_slot2[direccion and $3fff]
+                  else sms_getbyte:=mapper_sms.rom[mapper_sms.slot2,direccion and $3fff];
+  $c000..$ffff:if mapper_sms.is_sg then sms_getbyte:=mapper_sms.ram[direccion and $7ff]
+                  else sms_getbyte:=mapper_sms.ram[direccion and $1fff];
 end;
 end;
 
 procedure sms_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$7fff then exit;
 case direccion of
-  $8000..$bfff:memoria[direccion]:=valor;
-  $c000..$dfff:memoria[direccion]:=valor;
-  $e000..$fffb:memoria[direccion-$2000]:=valor;
+  0:mapper_sms.slot0:=valor mod mapper_sms.max; //Code Masters mapper slot 0
+  $3ffe:begin // 4 pack mapper slot 0
+			    mapper_sms.slot0:=valor mod mapper_sms.max;
+			    mapper_sms.slot2:=((valor and $30)+mapper_sms.slot2) mod mapper_sms.max;
+        end;
+  $4000:mapper_sms.slot1:=valor mod mapper_sms.max; //Code Masters mapper slot 1
+  1..$3ffd,$3fff,$4001..$7ffe:exit; //slot 0+1
+  $7fff:mapper_sms.slot1:=valor mod mapper_sms.max; //4 pack slot 1
+  $8000:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[direccion and $3fff]:=valor //slot 2
+          else mapper_sms.slot2:=valor mod mapper_sms.max; //Code Masters mapper slor 2
+  $8001..$9fff:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[direccion and $3fff]:=valor; //slot 2
+  $a000:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[direccion and $3fff]:=valor //slot 2
+          else mapper_sms.slot2:=valor mod mapper_sms.max; //Korean mapper slor 2
+  $a001..$bffe:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[direccion and $3fff]:=valor; //slot 2
+  $bfff:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[direccion and $3fff]:=valor //slot 2
+                   else mapper_sms.slot2:=((mapper_sms.slot0 and $30)+valor) mod mapper_sms.max; //4 pack slot 2
+  $c000..$fffb:if mapper_sms.is_sg then mapper_sms.ram[direccion and $7ff]:=valor
+                  else mapper_sms.ram[direccion and $1fff]:=valor;
   $fffc..$ffff:begin //Mapper registers
-                  mapper_reg[direccion and $3]:=valor;
+                  mapper_sms.ram[direccion and $1fff]:=valor;
                   case (direccion and $3) of
                     0:begin //RAM register
+                        mapper_sms.slot2_ram:=(valor and 8)<>0;
+                        //if (valor and 4)<>0  then halt(0);
+                        //if (valor and $10)<>0  then halt(0);
                       end;
-                    1:begin //Page 0 ROM bank
-                      end;
-                    2:begin //Page 1 ROM bank
-                      end;
-                    3:begin //Page 2 ROM bank
-                      end;
+                    1:mapper_sms.slot0:=valor mod mapper_sms.max;
+                    2:mapper_sms.slot1:=valor mod mapper_sms.max;
+                    3:mapper_sms.slot2:=valor mod mapper_sms.max;
                   end;
                end;
 end;
 end;
 
 function sms_inbyte(puerto:word):byte;
-var
-  nPAux: Integer;
-  nResult:byte;
 begin
-  nResult:=$FF;
+  sms_inbyte:=$ff;
   case (puerto and $ff) of
-    $40..$7f:halt(0);
-    $80..$bf:if (puerto and $01)<>0 then nResult:=TMS99XX_register_r
-          else nResult:=TMS99XX_vram_r;
-    $dc,$dd:nResult:=$ff; //Joystick
+    $40..$7f:if (puerto and 1)<>0 then sms_inbyte:=vdp.hpos
+                else sms_inbyte:=vdp.linea_back and $ff;
+    $80..$bf:if (puerto and $01)<>0 then sms_inbyte:=sega_vdp_register_r
+          else sms_inbyte:=sega_vdp_vram_r;
+    $dc:sms_inbyte:=joy1; //Joystick 1
+    $dd:sms_inbyte:=joy2; //Joystick 2
   end;
-  sms_inbyte:=nResult;
+end;
+
+procedure config_io(valor:byte);
+var
+  haz_xor:byte;
+begin
+if (valor and 1)=0 then joy1:=(joy1 and $df) or ((valor and $10) shl 1) //TR port A
+  else joy1:=joy1 or $20;
+if (valor and 2)=0 then joy2:=(joy2 and $bf) or ((valor and $20) shl 1) //TH port A
+  else joy2:=joy2 or $40;
+if (valor and 4)=0 then joy2:=(joy2 and $f7) or ((valor and $40) shr 3) //TR port B
+  else joy2:=joy2 or $8;
+haz_xor:=byte(vdp.is_pal) shl 7;
+if (valor and 8)=0 then joy2:=(joy2 and $7f) or ((valor and $80) xor haz_xor) //TH port B
+  else joy2:=joy2 or $80;
+if (((vdp.port_3f and 2)=0) and ((valor and 2)<>0)) then
+  vdp.hpos:=vdp.hpos_temp;
+if (((vdp.port_3f and 8)=0) and ((valor and 8)<>0)) then
+  vdp.hpos:=vdp.hpos_temp;
+vdp.port_3f:=valor;
 end;
 
 procedure sms_outbyte(valor:byte;puerto:word);
 begin
   case (puerto and $ff) of
+    0..$3f:if (puerto and $01)<>0 then config_io(valor)
+              else if (valor and 8)=0 then mapper_sms.bios_show:=false;
     $40..$7f:sn_76496_0.Write(valor);
-    $80..$bf:if (puerto and $01)<>0 then TMS99XX_register_w(valor)
-          else TMS99XX_vram_w(valor);
+    $80..$bf:if (puerto and $01)<>0 then sega_vdp_register_w(valor)
+          else sega_vdp_vram_w(valor);
   end;
 end;
 
 procedure sms_interrupt(int:boolean);
 begin
-  if int then main_z80.pedir_irq:=HOLD_LINE;
+  if int then main_z80.pedir_irq:=ASSERT_LINE
+     else main_z80.pedir_irq:=CLEAR_LINE;
 end;
 
 procedure sms_sound_update;
@@ -189,164 +281,26 @@ begin
   sn_76496_0.update;
 end;
 
-function sms_cargar_snapshot(data:pbyte;long:dword):boolean;
-var
-  f:byte;
-  cadena:string;
-  longitud,comprimido,descomprimido:integer;
-  ptemp,ptemp2:pbyte;
-  main_z80_reg:npreg_z80;
-  version:word;
+procedure sms_configurar;
 begin
-sms_cargar_snapshot:=false;
-longitud:=0;
-for f:=0 to 3 do begin
-  cadena:=cadena+chr(data^);
-  inc(data);
-end;
-//Todos las cabeceras tienen 10bytes
-if cadena<>'CLSN' then exit;
-reset_sms;
-version:=data^ shl 8; //Version
-inc(data);
-version:=version or data^;
-if ((version<>$100) and (version<>$200) and (version<>$210)) then exit;
-inc(data,5);inc(longitud,10);
-while longitud<>long do begin
-  if longitud>long then exit;
-  cadena:='';
-  for f:=0 to 3 do begin
-        cadena:=cadena+chr(data^);
-        inc(data);inc(longitud);
-  end;
-  if cadena='CRAM' then begin
-    copymemory(@comprimido,data,4);
-    inc(data,6);inc(longitud,6);
-    getmem(ptemp,$e000);
-    decompress_zlib(data,comprimido,pointer(ptemp),descomprimido);
-    copymemory(@memoria[$2000],ptemp,$e000);
-    freemem(ptemp);
-    inc(data,comprimido);inc(longitud,comprimido);
-  end;
-  if cadena='Z80R' then begin
-    comprimido:=0;
-    copymemory(@comprimido,data,2);
-    inc(data,6);inc(longitud,6);
-    case version of
-     $100:begin //Version 1.00
-        { 68 bytes:
-        ppc,pc,sp:word;
-        bc,de,hl:parejas;
-        bc2,de2,hl2:parejas;
-        ix,iy:parejas;
-        iff1,iff2,halt:boolean;
-        pedir_irq,pedir_nmi,nmi_state:byte;
-        a,a2,i,r:byte;
-        f,f2:band_z80;
-        contador:dword;
-        im,im2_lo,im0:byte;
-        daisy,opcode,after_ei:boolean;
-        numero_cpu:byte;
-        tframes:single;
-        enabled:boolean;
-        estados_demas:word;}
-          getmem(ptemp2,comprimido);
-          ptemp:=ptemp2;
-          copymemory(ptemp,data,comprimido);
-          getmem(main_z80_reg,sizeof(nreg_z80));
-          copymemory(@main_z80_reg.ppc,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.pc,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.sp,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.bc.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.de.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.hl.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.bc2.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.de2.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.hl2.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.ix.w,ptemp,2);inc(ptemp,2);
-          copymemory(@main_z80_reg.iy.w,ptemp,2);inc(ptemp,2);
-          main_z80_reg.iff1:=(ptemp^<>0);inc(ptemp);
-          main_z80_reg.iff2:=(ptemp^<>0);inc(ptemp);
-          main_z80.halt:=(ptemp^<>0);inc(ptemp);
-          main_z80.pedir_irq:=ptemp^;inc(ptemp);
-          main_z80.pedir_nmi:=ptemp^;inc(ptemp);
-          {main_z80.nmi_state:=(ptemp^<>0);}inc(ptemp);
-          main_z80_reg.a:=ptemp^;inc(ptemp);
-          main_z80_reg.a2:=ptemp^;inc(ptemp);
-          main_z80_reg.i:=ptemp^;inc(ptemp);
-          main_z80_reg.r:=ptemp^;inc(ptemp);
-          main_z80_reg.f.s:=(ptemp^ and 128)<>0;inc(ptemp);
-          main_z80_reg.f.z:=(ptemp^ and 64)<>0;inc(ptemp);
-          main_z80_reg.f.bit5:=(ptemp^ and 32)<>0;inc(ptemp);
-          main_z80_reg.f.h:=(ptemp^ and 16)<>0;inc(ptemp);
-          main_z80_reg.f.bit3:=(ptemp^ and 8)<>0;inc(ptemp);
-          main_z80_reg.f.p_v:=(ptemp^ and 4)<>0;inc(ptemp);
-          main_z80_reg.f.n:=(ptemp^ and 2)<>0;inc(ptemp);
-          main_z80_reg.f.c:=(ptemp^ and 1)<>0;inc(ptemp);
-          main_z80_reg.f2.s:=(ptemp^ and 128)<>0;inc(ptemp);
-          main_z80_reg.f2.z:=(ptemp^ and 64)<>0;inc(ptemp);
-          main_z80_reg.f2.bit5:=(ptemp^ and 32)<>0;inc(ptemp);
-          main_z80_reg.f2.h:=(ptemp^ and 16)<>0;inc(ptemp);
-          main_z80_reg.f2.bit3:=(ptemp^ and 8)<>0;inc(ptemp);
-          main_z80_reg.f2.p_v:=(ptemp^ and 4)<>0;inc(ptemp);
-          main_z80_reg.f2.n:=(ptemp^ and 2)<>0;inc(ptemp);
-          main_z80_reg.f2.c:=(ptemp^ and 1)<>0;inc(ptemp);
-          copymemory(@main_z80.contador,ptemp,4);inc(ptemp,4);
-          main_z80_reg.im:=ptemp^;inc(ptemp);
-          main_z80.im2_lo:=ptemp^;inc(ptemp);
-          main_z80.im0:=ptemp^;
-          main_z80.set_internal_r(main_z80_reg);
-          freemem(ptemp2);
-      end;
-      $200:begin //Version 2.00
-          main_z80_reg:=main_z80.get_internal_r;
-          ptemp:=data;
-          copymemory(main_z80_reg,ptemp,comprimido-9);
-          inc(ptemp,comprimido-9);
-          //resto
-          main_z80.halt:=(ptemp^<>0);inc(ptemp);
-          main_z80.pedir_irq:=ptemp^;inc(ptemp);
-          main_z80.pedir_nmi:=ptemp^;inc(ptemp);
-          copymemory(@main_z80.contador,ptemp,4);inc(ptemp,4);
-          main_z80.im2_lo:=ptemp^;inc(ptemp);
-          main_z80.im0:=ptemp^;inc(ptemp);
-        end;
-      $210:main_z80.load_snapshot(data); //Version 2.10
-    end;
-    inc(data,comprimido);inc(longitud,comprimido);
-  end;
-  if cadena='TMSR' then begin
-    copymemory(@comprimido,data,4);
-    inc(data,6);inc(longitud,6);
-    getmem(ptemp,sizeof(TTMS99XX));
-    decompress_zlib(data,comprimido,pointer(ptemp),descomprimido);
-    copymemory(TMS,ptemp,descomprimido);
-    freemem(ptemp);
-    inc(data,comprimido);inc(longitud,comprimido);
-    if tms.bgcolor=0 then paleta[0]:=0
-      else paleta[0]:=paleta[tms.bgcolor];
-  end;
-  if cadena='7649' then begin
-    copymemory(@comprimido,data,4);
-    inc(data,6);inc(longitud,6);
-    sn_76496_0.load_snapshot(data);
-    inc(data,comprimido);inc(longitud,comprimido);
-  end;
-end;
-sms_cargar_snapshot:=true;
+  SMSConfig.Show;
+  while SMSConfig.Showing do application.ProcessMessages;
 end;
 
-function abrir_cartucho(datos:pbyte;longitud:integer):boolean;
+function abrir_cartucho_sms(data:pbyte;long:dword):boolean;
 var
   ptemp:pbyte;
+  f:integer;
 begin
-abrir_cartucho:=false;
-ptemp:=datos;
-inc(ptemp,1);
-if not(((datos^=$55) and (ptemp^=$aa)) or ((datos^=$aa) and (ptemp^=$55)) or ((datos^=$66) and (ptemp^=$99))) then exit;
-reset_sms;
-copymemory(@memoria[$8000],datos,longitud);
-abrir_cartucho:=true;
+//cargar roms
+ptemp:=data;
+if (long mod $4000)=512 then inc(ptemp,512);
+mapper_sms.max:=long div $4000;
+for f:=0 to (mapper_sms.max-1) do begin
+      copymemory(@mapper_sms.rom[f,0],ptemp,$4000);
+      inc(ptemp,$4000);
+end;
+abrir_cartucho_sms:=true;
 end;
 
 function abrir_sms:boolean;
@@ -354,26 +308,30 @@ var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
   longitud,crc:integer;
+  resultado:boolean;
+  crc_val:dword;
 begin
-  exit;
-  if not(OpenRom(Stcolecovision,Romfile)) then begin
+  if not(OpenRom(StSMS,RomFile)) then begin
     abrir_sms:=true;
+    if mapper_sms.max=0 then mapper_sms.max:=1;
+    EmuStatusTemp:=EsRuning;
+    principal1.timer1.Enabled:=true;
+    principal1.BitBtn3.Enabled:=false;
+    principal1.BitBtn4.Enabled:=true;
     exit;
   end;
   abrir_sms:=false;
   extension:=extension_fichero(RomFile);
   if extension='ZIP' then begin
-    if not(search_file_from_zip(RomFile,'*.col',nombre_file,longitud,crc,false)) then
-      if not(search_file_from_zip(RomFile,'*.rom',nombre_file,longitud,crc,false)) then
-        if not(search_file_from_zip(RomFile,'*.bin',nombre_file,longitud,crc,false)) then
-          if not(search_file_from_zip(RomFile,'*.csn',nombre_file,longitud,crc,true)) then exit;
+    if not(search_file_from_zip(RomFile,'*.sms',nombre_file,longitud,crc,true)) then
+      if not(search_file_from_zip(RomFile,'*.sg',nombre_file,longitud,crc,true)) then exit;
     getmem(datos,longitud);
     if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
       freemem(datos);
       exit;
     end;
   end else begin
-    if ((extension<>'COL') and (extension<>'ROM') and (extension<>'BIN') and (extension<>'CSN')) then exit;
+    if ((extension<>'SMS') and (extension<>'SG')) then exit;
     if not(read_file_size(RomFile,longitud)) then exit;
     getmem(datos,longitud);
     if not(read_file(RomFile,datos,longitud)) then begin
@@ -382,122 +340,37 @@ begin
     end;
     nombre_file:=extractfilename(RomFile);
   end;
-directory.colecoVision:=ExtractFilePath(romfile);
-extension:=extension_fichero(nombre_file);
-if extension='CSN' then begin
-  if not(sms_cargar_snapshot(datos,longitud)) then begin
-    freemem(datos);
-    exit;
-  end;
-end;
-if ((extension='COL') or (extension='ROM') or (extension='BIN')) then begin
-  if not(abrir_cartucho(datos,longitud)) then begin
-    freemem(datos);
-    exit;
-  end;
-end;
-freemem(datos);
-change_caption(llamadas_maquina.caption+' - '+nombre_file);
-//Restauro la llamada de interrupcion del TMS
-tms.IRQ_Handler:=sms_interrupt;
-abrir_sms:=true;
+  //Abrirlo
+  extension:=extension_fichero(nombre_file);
+  if extension='SG' then begin
+    mapper_sms.is_sg:=true;
+    mapper_sms.bios_enabled:=false;
+  end else mapper_sms.is_sg:=false;
+  //if extension='DSP' then resultado:=abrir_coleco_snapshot(datos,longitud)
+  //  else
+  resultado:=abrir_cartucho_sms(datos,longitud);
+  if resultado then begin
+    directory.sms:=ExtractFilePath(romfile);
+    if mapper_sms.is_sg then change_caption('SG - '+nombre_file)
+      else change_caption('SMS - '+nombre_file);
+    abrir_sms:=true;
+    reset_sms;
+    crc_val:=calc_crc(datos,longitud);
+    case crc_val of
+      $91E93385,$81C3476B:mapper_sms.bios_show:=false;
+    end;
+    EmuStatusTemp:=EsRuning;
+    principal1.timer1.Enabled:=true;
+    principal1.BitBtn3.Enabled:=false;
+    principal1.BitBtn4.Enabled:=true;
+    if mapper_sms.max=0 then mapper_sms.max:=1;
+  end else MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+  Directory.sms:=ExtractFilePath(romfile);
+  freemem(datos);
 end;
 
 procedure sms_grabar_snapshot;
-var
-  cantidad,long_final,comprimido:integer;
-  buffer:array[0..9] of byte;  //Cabecera de los bloques siempre 10bytes
-  nombre:string;
-  puntero,datos_final,data:pbyte;
-  ptemp:pointer;
 begin
-exit;
-principal1.savedialog1.InitialDir:=Directory.coleco_snap;
-principal1.saveDialog1.Filter := 'CSN Format (*.csn)|*.csn';
-if principal1.savedialog1.execute then begin
-        nombre:=changefileext(principal1.savedialog1.FileName,'.csn');
-        if FileExists(nombre) then begin                                         //Respuesta 'NO' es 7
-            if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
-        end;
-end else exit;
-long_final:=0;
-getmem(datos_final,139400);
-data:=datos_final;
-//Cabecera
-buffer[0]:=ord('C'); //Nombre Bloque
-buffer[1]:=ord('L');
-buffer[2]:=ord('S');
-buffer[3]:=ord('N');
-buffer[4]:=2; //version 2.1, nuevos procesos load/save Z80
-buffer[5]:=$10;
-buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0; //reservado
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-//sms RAM longitud=$e000
-buffer[0]:=ord('C');
-buffer[1]:=ord('R');
-buffer[2]:=ord('A');
-buffer[3]:=ord('M');
-buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0;  //reservado
-getmem(puntero,$e000);
-ptemp:=@memoria[$2000];
-compress_zlib(ptemp,$e000,pointer(puntero),comprimido);
-buffer[4]:=comprimido mod 256; //longitud
-buffer[5]:=comprimido div 256; //longitud
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-copymemory(data,puntero,comprimido);
-inc(data,comprimido);inc(long_final,comprimido);
-freemem(puntero);
-//TMS9918 longitud=81960
-cantidad:=sizeof(TTMS99XX);
-buffer[0]:=ord('T');
-buffer[1]:=ord('M');
-buffer[2]:=ord('S');
-buffer[3]:=ord('R');
-buffer[7]:=0;buffer[8]:=0;buffer[9]:=0;
-getmem(puntero,cantidad);
-ptemp:=pointer(TMS);
-compress_zlib(ptemp,cantidad,pointer(puntero),comprimido);
-buffer[4]:=(comprimido mod 65536) and $ff;
-buffer[5]:=(comprimido mod 65536) shr 8;
-buffer[6]:=comprimido div 65536;
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-copymemory(data,puntero,comprimido);
-inc(data,comprimido);inc(long_final,comprimido);
-freemem(puntero);
-//Z80
-getmem(puntero,100);
-cantidad:=main_z80.save_snapshot(puntero);
-buffer[0]:=ord('Z');
-buffer[1]:=ord('8');
-buffer[2]:=ord('0');
-buffer[3]:=ord('R');
-buffer[4]:=cantidad;
-buffer[5]:=0;buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0;
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-copymemory(data,puntero,cantidad);
-inc(data,cantidad);inc(long_final,cantidad);
-freemem(puntero);
-//Sound
-getmem(puntero,200);
-cantidad:=sn_76496_0.save_snapshot(puntero);
-buffer[0]:=ord('7');
-buffer[1]:=ord('6');
-buffer[2]:=ord('4');
-buffer[3]:=ord('9');
-buffer[4]:=cantidad;
-buffer[5]:=0;buffer[6]:=0;buffer[7]:=0;buffer[8]:=0;buffer[9]:=0;
-copymemory(data,@buffer[0],10);
-inc(data,10);inc(long_final,10);
-copymemory(data,puntero,cantidad);
-inc(long_final,cantidad);
-freemem(puntero);
-//Final
-write_file(nombre,datos_final,long_final);
-freemem(datos_final);
 end;
 
 end.

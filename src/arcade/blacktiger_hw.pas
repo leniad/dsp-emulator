@@ -200,7 +200,7 @@ end;
 
 procedure update_video_blktiger;inline;
 const
-  split_table:array[0..15] of byte=(3,3,0,0,0,1,0,0,0,0,0,0,0,0,0,0);
+  split_table:array[0..15] of byte=(3,3,2,2,1,1,0,0,0,0,0,0,0,0,0,0);
 var
     f,x,y,nchar,pos_x,pos_y,color:word;
     sx,sy,pos,atrib:word;
@@ -339,7 +339,7 @@ case direccion of
   $8000..$bfff:blktiger_getbyte:=memoria_rom[banco_rom,(direccion and $3fff)];
   $c000..$cfff:blktiger_getbyte:=scroll_ram[scroll_bank+(direccion and $fff)];
   $d800..$dfff:blktiger_getbyte:=buffer_paleta[direccion and $7ff];
-  // $f3a1:blktiger_getbyte:=4;
+  //$f3a1:blktiger_getbyte:=3;
 end;
 end;
 

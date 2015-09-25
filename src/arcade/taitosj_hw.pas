@@ -31,6 +31,7 @@ procedure ay1_portb_write(valor:byte);
 procedure ay2_porta_write(valor:byte);
 procedure ay3_portb_write(valor:byte);
 
+implementation
 const
         //Elevator Action
         elevator_rom:array[0..8] of tipo_roms=(
@@ -107,8 +108,6 @@ var
  mcu_mem:array[0..$7ff] of byte;
  mcu_toz80,mcu_zready,mcu_zaccept,mcu_address,mcu_busreq,mcu_fromz80,mcu_portA_in,
  mcu_portA_out:byte;
-
-implementation
 
 procedure Cargar_taitosj;
 begin
@@ -577,6 +576,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=main_z80.tframes;
 frame_s:=snd_z80.tframes;
+frame_mcu:=main_m6805.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU

@@ -185,6 +185,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=main_m6809.tframes;
 frame_s:=snd_z80.tframes;
+irq_req:=false;
 while EmuStatus=EsRuning do begin
   for frame:=0 to $ff do begin
     //Main CPU

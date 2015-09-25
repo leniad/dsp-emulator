@@ -31,12 +31,9 @@ var
 
 implementation
 const
-    PIXELS_TOTAL=342;
     PIXELS_VISIBLES_TOTAL=284;
-    PIXELS_RIGHT_BORDER_SYNC=8+26;
     PIXELS_RIGHT_BORDER_VISIBLES=15;
     PIXELS_RIGHT_BORDER_VISIBLES_TEXT=25;
-    PIXELS_LEFT_BORDER_SYNC=2+14+8;
     PIXELS_LEFT_BORDER_VISIBLES=13;
     PIXELS_LEFT_BORDER_VISIBLES_TEXT=19;
     LINEAS_TOP_BORDE=27;
@@ -421,13 +418,13 @@ begin
                if ((tms.regs[1] and $50)=$40) then draw_sprites(linea)
                 else tms.FifthSprite:=$1f;
             end;
-     192:begin //Borde inferior (1) y activar las IRQs
+     193:begin //Borde inferior (1) y activar las IRQs
               single_line(0,linea+LINEAS_TOP_BORDE,tms.bgcolor,PIXELS_VISIBLES_TOTAL,tms.pant);
               tms.status_reg:=tms.status_reg or $80;
               TMS99XX_Interrupt;
          end;
      //Borde inferior (23)
-     193..215:single_line(0,linea+LINEAS_TOP_BORDE,tms.bgcolor,PIXELS_VISIBLES_TOTAL,tms.pant);
+     192,194..215:single_line(0,linea+LINEAS_TOP_BORDE,tms.bgcolor,PIXELS_VISIBLES_TOTAL,tms.pant);
      //Lineas no dibujadas sincronismos (3+3+13)
      216..234:;
      //Borde superior (27)

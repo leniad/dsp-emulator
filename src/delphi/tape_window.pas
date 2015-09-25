@@ -54,9 +54,17 @@ tape_window1.Left:=SCREEN_DIF+principal1.Left+principal1.Width;
 tape_window1.top:=principal1.top;
 Tape_Bitmap:=TBitmap.Create;
 //Varios
-tape_window1.StringGrid2.cells[0,0]:=leng[main_vars.idioma].varios[0];  //nombre
-tape_window1.StringGrid2.cells[1,0]:=leng[main_vars.idioma].varios[1];  //longitud
-tape_window1.StringGrid2.cells[2,0]:='CRC';  //CRC
+stringgrid1.ColWidths[0]:=stringgrid1.Width-100;
+stringgrid1.ColWidths[1]:=100;
+stringgrid1.ColCount:=2;
+//stringgrid1.ColWidths[2]:=60;
+stringgrid2.ColWidths[0]:=stringgrid1.Width-100;
+stringgrid2.ColWidths[1]:=100;
+stringgrid2.ColCount:=2;
+//stringgrid2.ColWidths[2]:=60;
+StringGrid2.cells[0,0]:=leng[main_vars.idioma].varios[0];  //nombre
+StringGrid2.cells[1,0]:=leng[main_vars.idioma].varios[1];  //longitud
+//StringGrid2.cells[2,0]:='CRC';
 //mensajes
 tape_window1.Caption:=leng[main_vars.idioma].mensajes[2];  //nombre
 tape_window1.label1.Caption:=leng[main_vars.idioma].mensajes[9];  //nombre cinta

@@ -43,7 +43,7 @@ const
         (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$80;dip_name:'Medium'),(dip_val:$40;dip_name:'Hard'),(dip_val:$c0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
  haz_nmi,hay_samples:boolean;
- gfx_bank,palette_bank,scroll_y,death_val,skid_val,coin_val:byte;
+ gfx_bank,palette_bank,scroll_y,death_val,skid_val:byte;
 
 procedure Cargar_mario;
 begin
@@ -139,7 +139,6 @@ begin
  scroll_y:=0;
  death_val:=0;
  skid_val:=0;
- coin_val:=0;
 end;
 
 procedure update_video_mario;inline;

@@ -78,6 +78,10 @@ screen_init(1,256,256,true);
 screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
 screen_mod_scroll(2,256,256,255,256,256,255);
+screen_init(3,256,256,true);
+screen_mod_scroll(3,256,256,255,256,256,255);
+screen_init(4,256,256,true);
+screen_mod_scroll(4,256,256,255,256,256,255);
 screen_init(5,512,256,false,true); //Final
 screen_init(6,256,256,true); //Text
 screen_mod_scroll(6,256,256,255,256,256,255);
@@ -164,7 +168,21 @@ var
   x,y,f,nchar,color:word;
   atrib:byte;
   bank:integer;
-  flip_x:boolean;
+procedure draw_chip(chip,pant1,pant2:byte);inline;
+var
+  f:byte;
+begin
+if (K007121_chip[chip].control[1] and 2)<>0 then begin
+    for f:=0 to 31 do begin
+      scroll__x_part(pant1,5,scroll_ram[1,f],0,f*8,8);
+      scroll__x_part(pant2,5,scroll_ram[1,f],0,f*8,8);
+    end;
+  end else begin
+    scroll_x_y(pant1,5,K007121_chip[chip].control[0] or ((K007121_chip[chip].control[1] and 1) shl 8),K007121_chip[chip].control[2]);
+    scroll_x_y(pant2,5,K007121_chip[chip].control[0] or ((K007121_chip[chip].control[1] and 1) shl 8),K007121_chip[chip].control[2]);
+  end;
+end;
+
 begin
 for f:=$0 to $3ff do begin
     y:=f div 32;
@@ -181,8 +199,13 @@ for f:=$0 to $3ff do begin
 	    if (atrib and $10)<>0 then bank:=bank+2;
 	    if (atrib and $20)<>0 then bank:=bank+4;
       nchar:=page_ram[0,$400+f]+bank*256;
-      if priority=0 then put_gfx_trans_flip(x*8,y*8,nchar,color shl 4,1,0,flip_x,false)
-        else put_gfx(x*8,y*8,nchar,color shl 4,1,0);
+      if (atrib and $40)<>0 then begin
+        put_gfx_trans(x*8,y*8,nchar,color shl 4,2,0);
+        put_gfx_block_trans(x*8,y*8,1,8,8);
+      end else begin
+        put_gfx_trans(x*8,y*8,nchar,color shl 4,1,0);
+        put_gfx_block_trans(x*8,y*8,2,8,8);
+      end;
       gfx[0].buffer[$400+f]:=false;
     end;
     //foreground
@@ -196,10 +219,14 @@ for f:=$0 to $3ff do begin
 	    if (atrib and $80)<>0 then bank:=bank+1;
 	    if (atrib and $10)<>0 then bank:=bank+2;
 	    if (atrib and $20)<>0 then bank:=bank+4;
-      flip_x:=false;//(atrib and $40)<>0;
       nchar:=page_ram[1,$400+f]+bank*256;
-      if priority=0 then put_gfx_flip(x*8,y*8,nchar,color shl 4,2,1,flip_x,false)
-        else put_gfx_trans_flip(x*8,y*8,nchar,color shl 4,2,1,flip_x,false);
+      if (atrib and $40)<>0 then begin
+        put_gfx_trans(x*8,y*8,nchar,color shl 4,4,1);
+        put_gfx_block_trans(x*8,y*8,3,8,8);
+      end else begin
+        put_gfx_trans(x*8,y*8,nchar,color shl 4,3,1);
+        put_gfx_block_trans(x*8,y*8,4,8,8);
+      end;
       gfx[1].buffer[f]:=false;
     end;
     //text
@@ -211,26 +238,20 @@ for f:=$0 to $3ff do begin
       gfx[0].buffer[f]:=false;
     end;
 end;
+fill_full_screen(5,0);
 if priority=0 then begin
-  if (K007121_chip[1].control[1] and 2)<>0 then for f:=0 to 31 do scroll__x_part(2,5,scroll_ram[1,f],0,f*8,8)
-    else scroll_x_y(2,5,K007121_chip[1].control[0] or ((K007121_chip[1].control[1] and 1) shl 8),K007121_chip[1].control[2]);
+  // 3 4 2 1
+  draw_chip(1,3,4);
   draw_sprites(0);
-  if (K007121_chip[0].control[1] and 2)<>0 then for f:=0 to 31 do scroll__x_part(1,5,scroll_ram[0,f],0,f*8,8)
-    else scroll_x_y(1,5,K007121_chip[0].control[0] or ((K007121_chip[0].control[1] and 1) shl 8),K007121_chip[0].control[2]);
+  draw_chip(0,1,2);
   draw_sprites(1);
 end else begin
-  if (K007121_chip[0].control[1] and 2)<>0 then for f:=0 to 31 do scroll__x_part(1,5,scroll_ram[0,f],0,f*8,8)
-    else scroll_x_y(1,5,K007121_chip[0].control[0] or ((K007121_chip[0].control[1] and 1) shl 8),K007121_chip[0].control[2]);
+  // 1 2 3 4
+  draw_chip(0,1,2);
   draw_sprites(1);
-  if (K007121_chip[1].control[1] and 2)<>0 then for f:=0 to 31 do scroll__x_part(2,5,scroll_ram[1,f],0,f*8,8)
-    else scroll_x_y(2,5,K007121_chip[1].control[0] or ((K007121_chip[1].control[1] and 1) shl 8),K007121_chip[1].control[2]);
+  draw_chip(1,3,4);
   draw_sprites(0);
 end;
-{f:=K007121_chip[0].control[0] or ((K007121_chip[0].control[1] and 1) shl 8);
-atrib:=K007121_chip[0].control[2];
-form1.statusbar1.panels[2].text:=inttostr(f)+' '+inttostr(atrib);
-//scroll_x_y(1,5,f,atrib);
-actualiza_trozo(0,0,256,256,1,0,0,256,256,5);}
 //Text
 if (K007121_chip[0].control[$1] and 8)<>0 then for f:=0 to 31 do scroll__x_part(6,5,scroll_ram[0,32+f],0,f*8,8);
 //Crop
@@ -242,7 +263,6 @@ if (K007121_chip[0].control[$3] and $40)<>0 then begin
 end;
 actualiza_trozo_final(0,16,256,224,5);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
-//actualiza_trozo_final(0,0,256,256,5);
 end;
 
 procedure eventos_combatsc;

@@ -76,6 +76,7 @@ type
             Nes:String;
             GameBoy:String;
             Chip8:String;
+            sms:String;
             //Coleco
             ColecoVision:String;
             Coleco_snap:string;

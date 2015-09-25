@@ -122,6 +122,7 @@ object FLoadRom: TFLoadRom
     Height = 481
     ColCount = 2
     Ctl3D = False
+    DefaultColWidth = 120
     DefaultRowHeight = 15
     FixedCols = 0
     RowCount = 41
@@ -131,9 +132,6 @@ object FLoadRom: TFLoadRom
     Visible = False
     OnClick = RomListClick
     OnDblClick = RomListDblClick
-    ColWidths = (
-      163
-      65)
   end
   object BitBtn3: TBitBtn
     Left = 305

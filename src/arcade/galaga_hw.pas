@@ -72,7 +72,6 @@ var
  digdug_bg:array[0..$fff] of byte;
  custom_mod,bg_select,bg_color_bank,bg_disable,tx_color_mode:byte;
  bg_repaint:boolean;
- in0,in1,in2:byte;
 
 procedure Cargar_galagahw;
 begin
@@ -366,15 +365,15 @@ end;
 procedure eventos_galaga;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then in1:=(in1 and $fe) else in1:=(in1 or $1);
-  if arcade_input.right[0] then in1:=(in1 and $Fd) else in1:=(in1 or $2);
-  if arcade_input.down[0] then in1:=(in1 and $fb) else in1:=(in1 or $4);
-  if arcade_input.left[0] then in1:=(in1 and $f7) else in1:=(in1 or $8);
-  if arcade_input.but0[0] then in0:=(in0 and $fe) else in0:=(in0 or $1);
-  if arcade_input.start[0] then in0:=(in0 and $fb) else in0:=(in0 or $4);
-  if arcade_input.start[1] then in0:=(in0 and $f7) else in0:=(in0 or $8);
-  if arcade_input.coin[0] then in0:=(in0 and $ef) else in0:=(in0 or $10);
-  if arcade_input.coin[1] then in0:=(in0 and $df) else in0:=(in0 or $20);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
 end;
 end;
 
@@ -479,8 +478,8 @@ begin
  main_irq:=false;
  sub_irq:=false;
  sub2_nmi:=false;
- in0:=$ff;
- in1:=$ff;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
  for f:=0 to 7 do galaga_latch(f,0);
 end;
 
@@ -739,22 +738,22 @@ end;
 
 function namco_51xx_io0:byte;
 begin
-  namco_51xx_io0:=in0 and $f;
+  namco_51xx_io0:=marcade.in0 and $f;
 end;
 
 function namco_51xx_io1:byte;
 begin
-  namco_51xx_io1:=in0 shr 4;
+  namco_51xx_io1:=marcade.in0 shr 4;
 end;
 
 function namco_51xx_io2:byte;
 begin
-  namco_51xx_io2:=in1 and $f;
+  namco_51xx_io2:=marcade.in1 and $f;
 end;
 
 function namco_51xx_io3:byte;
 begin
-  namco_51xx_io3:=in1 shr 4;
+  namco_51xx_io3:=marcade.in1 shr 4;
 end;
 
 function namco_53xx_r_r(port:byte):byte;
@@ -772,4 +771,4 @@ begin
   namco_53xx_k_r:=custom_mod shl 1;
 end;
 
-end.
+end.

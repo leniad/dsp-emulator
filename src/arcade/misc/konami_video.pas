@@ -54,11 +54,11 @@ begin
  *   4  | -------x | x position (high bit)}
   for f:=0 to $3f do begin
     //variables
-		sprite_bank:=K007121_chip[num].sprite_ram[$1+(f*$5)] and $0f;
-    atrib:=K007121_chip[num].sprite_ram[$4+(f*$5)];
+		sprite_bank:=K007121_chip[num].sprite_ram[1+(f*5)] and $f;
+    atrib:=K007121_chip[num].sprite_ram[4+(f*5)];
     if flip_all then begin
-  		sx:=224-(K007121_chip[num].sprite_ram[$2+(f*$5)]+((atrib and $1) shl 8));
-      sy:=K007121_chip[num].sprite_ram[$3+(f*$5)];
+  		sx:=224-(K007121_chip[num].sprite_ram[2+(f*5)]+((atrib and $1) shl 8));
+      sy:=K007121_chip[num].sprite_ram[3+(f*5)];
       flip_y:=(atrib and $10) shr 1;
       flip_x:=(atrib and $20) shr 2;
       tipo_gfx:=0;
@@ -69,9 +69,9 @@ begin
       flip_y:=(atrib and $20) shr 2;
       tipo_gfx:=1;
     end;
-		color:=(color_base+((K007121_chip[num].sprite_ram[$1+(f*$5)] and $f0) shr 4)) shl 4;
+		color:=(color_base+((K007121_chip[num].sprite_ram[1+(f*5)] and $f0) shr 4)) shl 4;
 		//calcular numero de char
-    nchar:=K007121_chip[num].sprite_ram[f*$5]+(((sprite_bank and $3) shl 8)+((atrib and $c0) shl 4));
+    nchar:=K007121_chip[num].sprite_ram[f*5]+(((sprite_bank and $3) shl 8)+((atrib and $c0) shl 4));
 		nchar:=nchar shl 2;
 		nchar:=nchar+((sprite_bank shr 2) and 3);
     case (atrib and $e) of
@@ -80,6 +80,7 @@ begin
               x_tmp1:=flip_x xor 8;
               y_tmp1:=flip_y;
               y_tmp3:=flip_y xor 8;
+              nchar:=nchar and $fffc;
               put_gfx_sprite_diff(nchar+tipo_2x2[tipo_gfx,0],color,flip_x<>0,flip_y<>0,num,x_tmp1,y_tmp1);
               put_gfx_sprite_diff(nchar+tipo_2x2[tipo_gfx,1],color,flip_x<>0,flip_y<>0,num,x_tmp1,y_tmp3);
               put_gfx_sprite_diff(nchar+tipo_2x2[tipo_gfx,2],color,flip_x<>0,flip_y<>0,num,x_tmp3,y_tmp1);
@@ -89,6 +90,7 @@ begin
 			   $02:begin //2x ancho y 1x largo
               x_tmp1:=flip_x xor 8;
               x_tmp3:=flip_x;
+              nchar:=nchar and $fffe;
               put_gfx_sprite_diff(nchar+tipo_2x1[tipo_gfx,0],color,flip_x<>0,flip_y<>0,num,x_tmp3,0);
               put_gfx_sprite_diff(nchar+tipo_2x1[tipo_gfx,1],color,flip_x<>0,flip_y<>0,num,x_tmp1,0);
               actualiza_gfx_sprite_size(sx+x_sinc,sy,screen,16,8);
@@ -96,6 +98,7 @@ begin
         $04:begin //1x ancho y 2x largo
               y_tmp1:=flip_y;
               y_tmp3:=flip_y xor 8;
+              nchar:=nchar and $fffd;
               put_gfx_sprite_diff(nchar+tipo_1x2[tipo_gfx,0],color,flip_x<>0,flip_y<>0,num,0,y_tmp1);
               put_gfx_sprite_diff(nchar+tipo_1x2[tipo_gfx,1],color,flip_x<>0,flip_y<>0,num,0,y_tmp3);
               actualiza_gfx_sprite_size(sx+x_sinc,sy,screen,8,16);
@@ -111,6 +114,7 @@ begin
               end else begin
                 y_tmp1:=0;y_tmp2:=16;y_tmp3:=8;y_tmp4:=24;
               end;
+              nchar:=nchar and $fffc;
               //0
               put_gfx_sprite_diff(nchar+tipo_4x4[tipo_gfx,0],color,flip_x<>0,flip_y<>0,num,x_tmp1,y_tmp1);
               put_gfx_sprite_diff(nchar+tipo_4x4[tipo_gfx,1],color,flip_x<>0,flip_y<>0,num,x_tmp3,y_tmp1);

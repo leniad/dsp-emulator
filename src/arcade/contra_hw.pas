@@ -139,7 +139,7 @@ procedure draw_sprites(bank:byte);inline;
 var
   color_base:word;
 begin
-  color_base:=(K007121_chip[bank].control[$06] and $30)*2;
+  color_base:=(K007121_chip[bank].control[6] and $30)*2;
   K007121_draw_sprites(bank,4,16,color_base,true);
 end;
 
@@ -155,19 +155,19 @@ for f:=$0 to $3ff do begin
     atrib:=memoria[$4000+f];
     color:=atrib and 7;
     if (gfx[1].buffer[f] or buffer_color[color]) then begin
-      color:=color+((K007121_chip[1].control[$06] and $30)*2+16);
+      color:=color+((K007121_chip[1].control[6] and $30)*2+16);
       bit0:=(K007121_chip[1].control[$05] shr 0) and $03;
       bit1:=(K007121_chip[1].control[$05] shr 2) and $03;
       bit2:=(K007121_chip[1].control[$05] shr 4) and $03;
       bit3:=(K007121_chip[1].control[$05] shr 6) and $03;
-      bank:= ((atrib and $80) shr 7) or
+      bank:=((atrib and $80) shr 7) or
 			((atrib shr (bit0+2)) and $02) or
 			((atrib shr (bit1+1)) and $04) or
 			((atrib shr (bit2  )) and $08) or
 			((atrib shr (bit3-1)) and $10) or
-      ((K007121_chip[1].control[$03] and $01) shl 5);
+      ((K007121_chip[1].control[3] and 1) shl 5);
       mask:=(K007121_chip[1].control[$04] and $f0) shr 4;
-      bank:=(bank and not(mask shl 1)) or ((K007121_chip[1].control[$04] and mask) shl 1);
+      bank:=(bank and not(mask shl 1)) or ((K007121_chip[1].control[4] and mask) shl 1);
       nchar:=memoria[$4400+f]+bank*256;
       put_gfx(x*8,y*8,nchar,color shl 4,2,1);
       gfx[1].buffer[f]:=false;

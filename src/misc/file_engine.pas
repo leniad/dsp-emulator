@@ -16,6 +16,9 @@ type
       posicion_dentro_zip:integer;
       nombre_zip,file_mask:string;
     end;
+type tfile_data=record
+      sms_bios_enabled,sms_is_pal:boolean;
+    end;
 
 //Hi Score
 procedure save_hi(nombre:string;posicion:pbyte;longitud:dword);
@@ -39,6 +42,7 @@ procedure decompress_zlib(in_buffer:pointer;in_size:integer;var out_buffer:point
 
 var
   zip_find_files_data:tzip_find_files;
+  file_data:tfile_data;
 
 implementation
 uses spectrum_misc,principal;
@@ -91,7 +95,9 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.Nes:=fich_ini.readString('Dir','nes',directory.Base+'nes'+main_vars.cadena_dir);
   Directory.GameBoy:=fich_ini.readString('Dir','GameBoy',directory.Base+'gameboy'+main_vars.cadena_dir);
   Directory.Chip8:=fich_ini.readString('Dir','Chip8',directory.Base+'chip8'+main_vars.cadena_dir);
+  Directory.sms:=fich_ini.readString('Dir','SMS',directory.Base+'sms'+main_vars.cadena_dir);
   Directory.ColecoVision:=fich_ini.readString('Dir','Colecovision',directory.Base+'coleco'+main_vars.cadena_dir);
+  Directory.Coleco_snap:=fich_ini.readString('Dir','ColecoSnap',directory.Base+'coleco'+main_vars.cadena_dir+'snap'+main_vars.cadena_dir);
   Directory.spectrum_48:=fich_ini.ReadString('Dir','spectrum_rom_48',directory.Base+'roms'+main_vars.cadena_dir+'spectrum.zip');
   Directory.spectrum_128:=fich_ini.ReadString('Dir','spectrum_rom_128',directory.Base+'roms'+main_vars.cadena_dir+'spec128.zip');
   Directory.spectrum_3:=fich_ini.ReadString('Dir','spectrum_rom_plus3',directory.Base+'roms'+main_vars.cadena_dir+'plus3.zip');
@@ -152,6 +158,11 @@ if fileexists(directory.Base+'dsp.ini') then begin
   beeper_oversample:=fich_ini.ReadInteger('spectrum','beeper_oversample',1);
   f:=fich_ini.ReadInteger('spectrum','ulaplus',0);
   ulaplus.enabled:=(f=1);
+  //Configuracion SMS
+  f:=fich_ini.ReadInteger('sms','is_pal',1);
+  file_data.sms_is_pal:=(f<>0);
+  f:=fich_ini.ReadInteger('sms','bios_enabled',0);
+  file_data.sms_bios_enabled:=(f<>0);
   //Teclas
   arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',SDL_SCANCODE_UP);
   arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',SDL_SCANCODE_DOWN);
@@ -209,6 +220,7 @@ end else begin
   Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
   Directory.ColecoVision:=directory.base+'coleco'+main_vars.cadena_dir;
   Directory.Coleco_snap:=directory.Base+'coleco'+main_vars.cadena_dir+'snap'+main_vars.cadena_dir;
+  Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
   Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
   Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
   Directory.Arcade_roms:=directory.base+'roms'+main_vars.cadena_dir;
@@ -246,6 +258,9 @@ end else begin
   mouse.tipo:=0;
   beeper_oversample:=1;
   ulaplus.enabled:=true;
+  //Configuracion basica SMS
+  file_data.sms_is_pal:=false;
+  file_data.sms_bios_enabled:=true;
   //Teclas
   arcade_input.nup[0]:=SDL_SCANCODE_UP;
   arcade_input.ndown[0]:=SDL_SCANCODE_DOWN;
@@ -296,7 +311,9 @@ end;
 if ((directory.Nes='') or (directory.nes[length(directory.nes)]<>main_vars.cadena_dir)) then Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
 if ((Directory.GameBoy='') or (directory.gameboy[length(directory.gameboy)]<>main_vars.cadena_dir)) then Directory.GameBoy:=directory.base+'gameboy'+main_vars.cadena_dir;
 if ((Directory.Chip8='') or (directory.chip8[length(directory.chip8)]<>main_vars.cadena_dir)) then Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
+if ((Directory.sms='') or (directory.chip8[length(directory.sms)]<>main_vars.cadena_dir)) then Directory.Chip8:=directory.base+'sms'+main_vars.cadena_dir;
 if ((Directory.ColecoVision='') or (directory.ColecoVision[length(directory.ColecoVision)]<>main_vars.cadena_dir)) then Directory.ColecoVision:=directory.base+'coleco'+main_vars.cadena_dir;
+if ((Directory.Coleco_snap='') or (directory.ColecoVision[length(directory.Coleco_snap)]<>main_vars.cadena_dir)) then Directory.ColecoVision:=directory.base+'coleco'+main_vars.cadena_dir+'snap'+main_vars.cadena_dir;
 if ((Directory.spectrum_image='') or (directory.spectrum_image[length(directory.spectrum_image)]<>main_vars.cadena_dir)) then Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
 if Directory.qsnapshot='' then Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
 if Directory.spectrum_48='' then Directory.spectrum_48:=directory.base+'roms'+main_vars.cadena_dir+'spectrum.zip';
@@ -335,9 +352,11 @@ fich_ini.Writestring('dir','dir_nvram',Directory.Arcade_nvram);
 fich_ini.Writestring('dir','dir_samples',Directory.Arcade_samples);
 fich_ini.Writestring('dir','nes',Directory.Nes);
 fich_ini.Writestring('dir','chip8',Directory.Chip8);
+fich_ini.Writestring('dir','sms',Directory.sms);
 fich_ini.Writestring('dir','qsnapshot',Directory.qsnapshot);
 fich_ini.Writestring('dir','GameBoy',Directory.GameBoy);
 fich_ini.Writestring('dir','Colecovision',Directory.ColecoVision);
+fich_ini.Writestring('dir','ColecoSnap',Directory.Coleco_snap);
 fich_ini.Writestring('dir','spectrum_rom_48',Directory.spectrum_48);
 fich_ini.Writestring('dir','spectrum_rom_128',Directory.spectrum_128);
 fich_ini.Writestring('dir','spectrum_rom_plus3',Directory.spectrum_3);
@@ -362,7 +381,7 @@ fich_ini.WriteInteger('dsp','center_screen',f);
 if main_vars.x11 then f:=1 else f:=0;
 fich_ini.WriteInteger('dsp','x11',f);
 //Config Spectrum
-if issue2 then f:=0 else f:=1;
+f:=byte(issue2);
 fich_ini.WriteInteger('spectrum','issue',f);
 if jkempston then f:=0;
 if jcursor then f:=1;
@@ -371,15 +390,20 @@ if jsinclair2 then f:=3;
 fich_ini.WriteInteger('spectrum','joystick',f);
 fich_ini.WriteInteger('spectrum','border',borde.tipo);
 fich_ini.WriteInteger('spectrum','tipo_mouse',mouse.tipo);
-if beeper_filter then f:=1 else f:=0;
+f:=byte(beeper_filter);
 fich_ini.WriteInteger('spectrum','beepfilter',f);
-if audio_load then f:=1 else f:=0;
+f:=byte(audio_load);
 if main_vars.tipo_maquina=255 then f:=0;
 fich_ini.WriteInteger('spectrum','audioload',f);
 fich_ini.WriteInteger('spectrum','audio_128k',audio_128k);
 fich_ini.WriteInteger('spectrum','beeper_oversample',beeper_oversample);
-if ulaplus.enabled then f:=1 else f:=0;
+f:=byte(ulaplus.enabled);
 fich_ini.WriteInteger('spectrum','ulaplus',f);
+//Config SMS
+f:=byte(file_data.sms_is_pal);
+fich_ini.WriteInteger('sms','is_pal',f);
+f:=byte(file_data.sms_bios_enabled);
+fich_ini.WriteInteger('sms','bios_enabled',f);
 //Teclas P1
 fich_ini.WriteInteger('keyboard','up_0',arcade_input.nup[0]);
 fich_ini.WriteInteger('keyboard','down_0',arcade_input.ndown[0]);

@@ -14,6 +14,7 @@ procedure cerrar_tutankham;
 function tutankham_getbyte(direccion:word):byte;
 procedure tutankham_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         tutan_rom:array[0..15] of tipo_roms=(
         (n:'m1.1h';l:$1000;p:$0;crc:$da18679f),(n:'m2.2h';l:$1000;p:$1000;crc:$a0f02c85),
@@ -33,8 +34,6 @@ var
  rom_nbank,scroll_y:byte;
  rom_bank:array[0..$f,0..$fff] of byte;
  punt:array[0..$ffff] of word;
-
-implementation
 
 procedure Cargar_tutankham;
 begin
@@ -150,6 +149,7 @@ begin
 init_controls(false,false,false,true);
 frame_m:=main_m6809.tframes;
 frame_s:=snd_z80.tframes;
+irq_req:=false;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     konami_sound.frame:=f;

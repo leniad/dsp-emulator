@@ -143,6 +143,8 @@ end;
 
 procedure Tload_dsk.FormShow(Sender: TObject);
 begin
+stringgrid1.ColWidths[0]:=stringgrid1.Width-60;
+stringgrid1.ColWidths[1]:=60;
 stringgrid1.Cells[0,0]:=leng[main_vars.idioma].varios[0];
 stringgrid1.Cells[1,0]:=leng[main_vars.idioma].varios[1];
 Button2.Caption:=leng[main_vars.idioma].mensajes[7];

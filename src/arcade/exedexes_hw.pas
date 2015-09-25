@@ -213,6 +213,7 @@ var
   x,y:word;
   atrib:byte;
 begin
+if not(objon) then exit;
 	for f:=127 downto 0 do begin
     atrib:=buffer_sprites[(f*32)+1];
 		if ((atrib and $40)=pri) then begin

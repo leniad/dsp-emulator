@@ -10,7 +10,7 @@ type
       control1,control2,status,sprite_ram_pos:byte;
       sprite_ram:array[0..$ff] of byte;
       pos_bg,pos_spt,sprite0_hit_pos:byte;
-      dir_first,chr_rom,sprite0_hit:boolean;
+      dir_first,chr_rom,sprite0_hit,sprite_over_flow:boolean;
       mem:array [0..$3fff] of byte;
       mem_single:array [0..1,0..$fff] of byte;
       address_temp,address:word;
@@ -35,6 +35,8 @@ const
   MIRROR_FOUR_SCREEN=5;
   MIRROR_HIGH=6;
   MIRROR_LOW=7;
+  //Los sprites se evaluan desde 64 al 255 (PPU T), convertidos en CPU T --> 21.333 al 85 o lo que es lo mismo aprox 8T por sprite
+  //Como el sprite 0 siempre se evalua el primero, si hay un hit sera desde el 21.333 al 29
   PPU_PIXEL_TIMING=((128*2)/3)/256;
 
 var
@@ -52,6 +54,7 @@ var
   pos_linea:word;
   ptemp:pword;
 begin
+if (nsprites=9) then exit;
 for f:=0 to 63 do begin
  pos_y:=ppu_nes.sprite_ram[f*4];
  if (((ppu_nes.sprite_ram[(f*4)+2] and $20)<>pri) or (pos_y>239)) then continue;
@@ -59,11 +62,6 @@ for f:=0 to 63 do begin
  size:=8 shl ((ppu_nes.control1 and $20) shr 5);
  pos_linea:=nes_linea-(pos_y+1);
  if (pos_linea<size) then begin
-   nsprites:=nsprites+1;
-   if nsprites=9 then begin
-      ppu_nes.status:=ppu_nes.status or $20;
-      exit;
-   end;
    atrib:=(ppu_nes.sprite_ram[(f*4)+2] and $3) shl 2;
    flipx:=(ppu_nes.sprite_ram[(f*4)+2] and $40)=$40;
    flipy:=(ppu_nes.sprite_ram[(f*4)+2] and $80)=$80;
@@ -203,6 +201,26 @@ begin
     putpixel(0,0,256+ppu_nes.tile_x_offset,punbuf,1);
 end;
 
+procedure sprite_line_overflow(nes_linea:word;var nsprites:byte);
+var
+   f,pos_y,size,pos_linea:byte;
+begin
+if (nsprites=9) then exit;
+for f:=0 to 63 do begin
+    pos_y:=ppu_nes.sprite_ram[f*4];
+    if (pos_y>239) then continue;
+    size:=8 shl ((ppu_nes.control1 and $20) shr 5);
+    pos_linea:=nes_linea-pos_y;
+    if (pos_linea<size) then begin
+       nsprites:=nsprites+1;
+       if nsprites=9 then begin
+          ppu_nes.sprite_over_flow:=true;
+          exit;
+       end;
+    end;
+end;
+end;
+
 procedure ppu_end_linea;
 var
   newfinescroll:word;
@@ -228,6 +246,7 @@ begin
 single_line(0,nes_linea,ppu_nes.mem[$3f00],256,2);
 fillchar(ppu_nes.dot_line_trans[0],264,$3f);
 nsprites:=0;
+if (ppu_nes.control2 and $18)<>0 then sprite_line_overflow(nes_linea,nsprites);
 if (ppu_nes.control2 and $8)<>0 then putbackground(nes_linea);
 if (ppu_nes.control2 and $10)<>0 then putsprites(nes_linea,$20,nsprites);
 if (ppu_nes.control2 and $8)<>0 then begin
@@ -259,8 +278,8 @@ case ppu_nes.address of
                     MIRROR_FOUR_SCREEN:ppu_nes.buffer_read:=ppu_nes.mem[$2000+(ppu_nes.address and $fff)];
                   end;
   $3f00..$3fff:begin
-                  ppu_nes.buffer_read:=ppu_nes.mem[(ppu_nes.address and $1F)+$3f00]; //Palete
-                  ret:=ppu_nes.buffer_read;
+                  ppu_nes.buffer_read:=ppu_nes.mem[ppu_nes.address];
+                  ret:=ppu_nes.mem[(ppu_nes.address and $1F)+$3f00]; //Palete
                 end;
 end;
 if (ppu_nes.control1 and $4)=$4 then ppu_nes.address:=(ppu_nes.address+32) and $3fff

@@ -5,7 +5,7 @@ uses {$IFDEF windows}windows,{$ENDIF}{$ifdef fpc}crc,{$else}
      {$IFDEF windows}pngimage,{$ENDIF}{$endif}sysutils,forms,controls;
 
 type
-  TSistema = (StNes,StColecovision,STGb,StChip8,StAmstrad,StROM);
+  TSistema = (StNes,StColecovision,STGb,StChip8,StAmstrad,StROM,StSMS);
 
 function extension_fichero(nombre:string):string;
 procedure fix_screen_pos(width,height:word);
@@ -225,6 +225,10 @@ case Sistema of
          principal1.opendialog1.InitialDir:=Directory.Nes;
          principal1.OpenDialog1.Filter:='NES Files (*.nes;*zip)|*.nes;*.zip';
        end;
+  StSMS:begin
+         principal1.opendialog1.InitialDir:=Directory.sms;
+         principal1.OpenDialog1.Filter:='SMS Files (*.sms;*.sg;*.zip)|*.sms;*.sg;*.zip';
+       end;
   Stgb:begin
          principal1.opendialog1.InitialDir:=Directory.GameBoy;
          principal1.OpenDialog1.Filter:='GB Files (*.gb;*.gbc;*zip)|*.gb;*.gbc;*.zip';
@@ -239,7 +243,7 @@ case Sistema of
        end;
   StROM:begin
          principal1.opendialog1.InitialDir:=Directory.Arcade_roms;
-         principal1.OpenDialog1.Filter:='ROM Files|*.rom;*.zip';
+         principal1.OpenDialog1.Filter:='ROM Files (*.rom;*.zip)|*.rom;*.zip';
        end;
 end;
 OpenRom:=principal1.OpenDialog1.execute;

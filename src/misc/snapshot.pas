@@ -3,7 +3,7 @@ unit snapshot;
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
      sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,forms,file_engine,
-     init_games,rom_engine,ppi8255,tms99xx,pal_engine,sn_76496,lenguaje;
+     init_games,rom_engine,ppi8255,tms99xx,pal_engine,sn_76496;
 
 //Spectrum
 function abrir_sna(datos:pbyte;long:integer):boolean;
@@ -885,10 +885,8 @@ end else begin //version 1.XX solo 48k
         spec_z80_reg.pc:=z80_regs.pc;
         if (z80_regs.misc and $20)<>0 then begin //comprimido
             contador:=long-30;
-            getmem(puntero,$c000);
-            descomprimir_z80(puntero,datos,contador);
-            copymemory(@memoria[$4000],puntero,$c000);
-            freemem(puntero);
+            if contador>$c000 then exit;
+            descomprimir_z80(@memoria[$4000],datos,contador);
         end else copymemory(@memoria[$4000],datos,$c000); //Si no esta comprimida copio directamente los datos...
 end;
 spec_z80_reg.a:=z80_regs.a;
@@ -1001,7 +999,6 @@ var
   z80_ram:^tz80_ram;
 begin
 grabar_z80:=false;
-//Grabo snapshot version 3
 getmem(pdatos,$30000);
 ptemp:=pdatos;
 spec_z80_reg:=spec_z80.get_internal_r;
@@ -1042,7 +1039,7 @@ z80_regs.ix:=spec_z80_reg.ix.w;
 z80_regs.iff1:=byte(spec_z80_reg.iff1);
 z80_regs.iff2:=byte(spec_z80_reg.iff2);
 z80_regs.misc2:=spec_z80_reg.im or (byte(issue2) shl 2);
-z80_ext.long:=55;
+z80_ext.long:=55; //Grabo snapshot version 3
 z80_ext.pc:=spec_z80_reg.pc;
 case main_vars.tipo_maquina of
   0,5:z80_ext.hw_mode:=0;
@@ -1438,7 +1435,6 @@ type
       im2_lo,im0:byte;
   end;
 var
-  f:byte;
   ptemp,ptemp2,ptemp3:pbyte;
   longitud,descomprimido:integer;
   main_z80_reg:npreg_z80;

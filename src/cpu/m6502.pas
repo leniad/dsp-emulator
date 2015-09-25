@@ -20,6 +20,7 @@ type
             procedure Free;
             destructor Destroy;
           public
+            after_ei:boolean;
             pedir_nmi,pedir_irq,nmi_state:byte;
             tipo_cpu:byte;
             procedure reset;
@@ -32,7 +33,7 @@ type
             r:preg_m6502;
             //RAM calls/IO Calls
             in_port0,in_port1:cpu_inport_call;
-            read_dummy,after_ei:boolean;
+            read_dummy:boolean;
             //IRQ
             function call_nmi:byte;
             function call_irq:byte;
