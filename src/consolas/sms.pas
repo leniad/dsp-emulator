@@ -1,9 +1,9 @@
 unit sms;
 
 interface
-uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,lenguaje,main_engine,controls_engine,sega_vdp,sn_76496,sysutils,dialogs,
-     rom_engine,misc_functions,sound_engine,file_engine,pal_engine,forms;
+uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}
+     main_engine,controls_engine,sega_vdp,sn_76496,sysutils,dialogs,
+     rom_engine,misc_functions,sound_engine,file_engine,forms;
 
 procedure Cargar_sms;
 procedure sms_principal;
@@ -21,6 +21,7 @@ procedure sms_putbyte(direccion:word;valor:byte);
 function sms_inbyte(puerto:word):byte;
 procedure sms_outbyte(valor:byte;puerto:word);
 procedure sms_interrupt(int:boolean);
+procedure sms_hlines(estados:word);
 
 type
   tmapper_sms=record
@@ -28,21 +29,19 @@ type
       ram:array[0..$1fff] of byte;
       ram_slot2,bios:array[0..$3fff] of byte;
       slot0,slot1,slot2,max:byte;
-      slot2_ram,is_sg:boolean;
+      slot2_ram:boolean;
       bios_enabled,bios_loaded,bios_show:boolean;
   end;
 
 var
-  sms_linea:word;
   joy1,joy2:byte;
+  is_sg:boolean;
   mapper_sms:^tmapper_sms;
 const
   CLOCK_NTSC=3579545;
   CLOCK_PAL=3546895;
   FPS_NTSC=60;
   FPS_PAL=50;
-  LINES_NTSC=262;
-  LINES_PAL=313;
   sms_bios:tipo_roms=(n:'mpr-12808.ic2';l:$2000;p:0;crc:$0072ed54);
 
 implementation
@@ -67,7 +66,8 @@ llamadas_maquina.cerrar:=cerrar_sms;
 llamadas_maquina.reset:=reset_sms;
 llamadas_maquina.cartuchos:=abrir_sms;
 llamadas_maquina.grabar_snapshot:=sms_grabar_snapshot;
-llamadas_maquina.fps_max:=FPS_NTSC;
+if file_data.sms_is_pal then llamadas_maquina.fps_max:=FPS_PAL
+  else llamadas_maquina.fps_max:=FPS_NTSC;
 llamadas_maquina.configurar:=sms_configurar;
 end;
 
@@ -90,22 +90,19 @@ main_z80.change_io_calls(sms_inbyte,sms_outbyte);
 main_z80.init_sound(sms_sound_update);
 //Mapper
 getmem(mapper_sms,sizeof(tmapper_sms));
-mapper_sms.bios_loaded:=cargar_roms(@mapper_sms.bios[0],@sms_bios,'sms.zip',1);
+mapper_sms.bios_loaded:=carga_rom_zip(Directory.Arcade_roms+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
 if mapper_sms.bios_loaded then mapper_sms.bios_enabled:=file_data.sms_bios_enabled
   else mapper_sms.bios_loaded:=false;
-//TMS
-sega_vdp_Init(1);
-vdp.IRQ_Handler:=sms_interrupt;
-vdp.is_pal:=file_data.sms_is_pal;
+//VDP
+vdp_0:=vdp_chip.create(1,sms_interrupt);
 if file_data.sms_is_pal then begin
-    vdp.VIDEO_VISIBLE_Y_TOTAL:=294;
-    vdp.VIDEO_Y_TOTAL:=LINES_PAL;
-    sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
+  vdp_0.set_pal_video;
+  sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
 end else begin
-  vdp.VIDEO_VISIBLE_Y_TOTAL:=243;
-  vdp.VIDEO_Y_TOTAL:=LINES_NTSC;
+  vdp_0.set_ntsc_video;
   sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
 end;
+main_z80.change_misc_calls(sms_hlines,nil);
 //final
 abrir_sms;
 iniciar_sms:=true;
@@ -113,11 +110,11 @@ end;
 
 procedure cerrar_sms;
 begin
-file_data.sms_is_pal:=vdp.is_pal;
+file_data.sms_is_pal:=vdp_0.is_pal;
 file_data.sms_bios_enabled:=mapper_sms.bios_enabled;
 main_z80.free;
 sn_76496_0.Free;
-sega_vdp_close;
+vdp_0.Free;
 freemem(mapper_sms);
 close_audio;
 close_video;
@@ -127,15 +124,15 @@ procedure reset_sms;
 begin
  main_z80.reset;
  sn_76496_0.reset;
- sega_vdp_reset;
+ vdp_0.reset;
  reset_audio;
  mapper_sms.slot2_ram:=false;
  mapper_sms.bios_show:=mapper_sms.bios_enabled;
  joy1:=$ff;
  joy2:=$ff;
  mapper_sms.slot0:=0;
- mapper_sms.slot1:=1;
- mapper_sms.slot2:=2;
+ mapper_sms.slot1:=1 mod mapper_sms.max;
+ mapper_sms.slot2:=2 mod mapper_sms.max;
 end;
 
 procedure eventos_sms;inline;
@@ -161,16 +158,17 @@ end;
 procedure sms_principal;
 var
   frame:single;
+  f:word;
 begin
 init_controls(false,false,true,false);
 frame:=main_z80.tframes;
 while EmuStatus=EsRuning do begin
-  for sms_linea:=0 to (vdp.VIDEO_Y_TOTAL-1) do begin
+  for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin
       main_z80.run(frame);
       frame:=frame+main_z80.tframes-main_z80.contador;
-      sega_vdp_refresh(sms_linea);
+      vdp_0.refresh(f);
   end;
-  actualiza_trozo_simple(0,0,284,vdp.VIDEO_VISIBLE_Y_TOTAL,1);
+  actualiza_trozo_simple(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,1);
   eventos_sms;
   video_sync;
 end;
@@ -184,7 +182,7 @@ case direccion of
   $4000..$7fff:sms_getbyte:=mapper_sms.rom[mapper_sms.slot1,direccion and $3fff];
   $8000..$bfff:if mapper_sms.slot2_ram then sms_getbyte:=mapper_sms.ram_slot2[direccion and $3fff]
                   else sms_getbyte:=mapper_sms.rom[mapper_sms.slot2,direccion and $3fff];
-  $c000..$ffff:if mapper_sms.is_sg then sms_getbyte:=mapper_sms.ram[direccion and $7ff]
+  $c000..$ffff:if is_sg then sms_getbyte:=mapper_sms.ram[direccion and $7ff]
                   else sms_getbyte:=mapper_sms.ram[direccion and $1fff];
 end;
 end;
@@ -208,7 +206,7 @@ case direccion of
   $a001..$bffe:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[direccion and $3fff]:=valor; //slot 2
   $bfff:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[direccion and $3fff]:=valor //slot 2
                    else mapper_sms.slot2:=((mapper_sms.slot0 and $30)+valor) mod mapper_sms.max; //4 pack slot 2
-  $c000..$fffb:if mapper_sms.is_sg then mapper_sms.ram[direccion and $7ff]:=valor
+  $c000..$fffb:if is_sg then mapper_sms.ram[direccion and $7ff]:=valor
                   else mapper_sms.ram[direccion and $1fff]:=valor;
   $fffc..$ffff:begin //Mapper registers
                   mapper_sms.ram[direccion and $1fff]:=valor;
@@ -230,10 +228,10 @@ function sms_inbyte(puerto:word):byte;
 begin
   sms_inbyte:=$ff;
   case (puerto and $ff) of
-    $40..$7f:if (puerto and 1)<>0 then sms_inbyte:=vdp.hpos
-                else sms_inbyte:=vdp.linea_back and $ff;
-    $80..$bf:if (puerto and $01)<>0 then sms_inbyte:=sega_vdp_register_r
-          else sms_inbyte:=sega_vdp_vram_r;
+    $40..$7f:if (puerto and 1)<>0 then sms_inbyte:=vdp_0.hpos
+                else sms_inbyte:=vdp_0.linea_back and $ff;
+    $80..$bf:if (puerto and $01)<>0 then sms_inbyte:=vdp_0.register_r
+          else sms_inbyte:=vdp_0.vram_r;
     $dc:sms_inbyte:=joy1; //Joystick 1
     $dd:sms_inbyte:=joy2; //Joystick 2
   end;
@@ -249,24 +247,26 @@ if (valor and 2)=0 then joy2:=(joy2 and $bf) or ((valor and $20) shl 1) //TH por
   else joy2:=joy2 or $40;
 if (valor and 4)=0 then joy2:=(joy2 and $f7) or ((valor and $40) shr 3) //TR port B
   else joy2:=joy2 or $8;
-haz_xor:=byte(vdp.is_pal) shl 7;
+haz_xor:=byte(vdp_0.is_pal) shl 7;
 if (valor and 8)=0 then joy2:=(joy2 and $7f) or ((valor and $80) xor haz_xor) //TH port B
   else joy2:=joy2 or $80;
-if (((vdp.port_3f and 2)=0) and ((valor and 2)<>0)) then
-  vdp.hpos:=vdp.hpos_temp;
-if (((vdp.port_3f and 8)=0) and ((valor and 8)<>0)) then
-  vdp.hpos:=vdp.hpos_temp;
-vdp.port_3f:=valor;
+if (((vdp_0.port_3f and 2)=0) and ((valor and 2)<>0)) then
+  vdp_0.hpos:=vdp_0.hpos_temp;
+if (((vdp_0.port_3f and 8)=0) and ((valor and 8)<>0)) then
+  vdp_0.hpos:=vdp_0.hpos_temp;
+vdp_0.port_3f:=valor;
 end;
 
 procedure sms_outbyte(valor:byte;puerto:word);
 begin
   case (puerto and $ff) of
     0..$3f:if (puerto and $01)<>0 then config_io(valor)
-              else if (valor and 8)=0 then mapper_sms.bios_show:=false;
+              else begin
+                   mapper_sms.bios_show:=(valor and 8)=0;
+              end;
     $40..$7f:sn_76496_0.Write(valor);
-    $80..$bf:if (puerto and $01)<>0 then sega_vdp_register_w(valor)
-          else sega_vdp_vram_w(valor);
+    $80..$bf:if (puerto and $01)<>0 then vdp_0.register_w(valor)
+          else vdp_0.vram_w(valor);
   end;
 end;
 
@@ -281,9 +281,14 @@ begin
   sn_76496_0.update;
 end;
 
+procedure sms_hlines(estados:word);
+begin
+  vdp_0.hlines(round(main_z80.contador));
+end;
+
 procedure sms_configurar;
 begin
-  SMSConfig.Show;
+  SMSConfig.Show;
   while SMSConfig.Showing do application.ProcessMessages;
 end;
 
@@ -343,17 +348,18 @@ begin
   //Abrirlo
   extension:=extension_fichero(nombre_file);
   if extension='SG' then begin
-    mapper_sms.is_sg:=true;
+    is_sg:=true;
     mapper_sms.bios_enabled:=false;
-  end else mapper_sms.is_sg:=false;
+  end else is_sg:=false;
   //if extension='DSP' then resultado:=abrir_coleco_snapshot(datos,longitud)
   //  else
   resultado:=abrir_cartucho_sms(datos,longitud);
   if resultado then begin
     directory.sms:=ExtractFilePath(romfile);
-    if mapper_sms.is_sg then change_caption('SG - '+nombre_file)
+    if is_sg then change_caption('SG - '+nombre_file)
       else change_caption('SMS - '+nombre_file);
     abrir_sms:=true;
+    if mapper_sms.max=0 then mapper_sms.max:=1;
     reset_sms;
     crc_val:=calc_crc(datos,longitud);
     case crc_val of
@@ -363,7 +369,6 @@ begin
     principal1.timer1.Enabled:=true;
     principal1.BitBtn3.Enabled:=false;
     principal1.BitBtn4.Enabled:=true;
-    if mapper_sms.max=0 then mapper_sms.max:=1;
   end else MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
   Directory.sms:=ExtractFilePath(romfile);
   freemem(datos);

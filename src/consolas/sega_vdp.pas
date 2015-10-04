@@ -3,46 +3,55 @@ unit sega_vdp;
 interface
 
 uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
-     main_engine,pal_engine,nz80;
+     main_engine,pal_engine,tms99xx;
+
+const
+  LINES_NTSC=262;
+  LINES_PAL=313;
 
   type
-    tsega_vdp=packed record
-      regs:array[0..$f] of byte;
-      addr:word;
-      modo_video,status_reg,buffer:byte;
-      int,segundo_byte:boolean;
-      memory:array[0..$3FFF] of byte;
-      IRQ_Handler:procedure(int:boolean);
-      pant:byte;
-
-      vdp_mode,display_disabled,is_pal:boolean;
-      current_pal:array[0..31] of word;
-      cram:array[0..63] of byte;
-      addr_mode,cram_mask,pending_status:byte;
-      line_counter,sprite_count,sprite_height,sprite_zoom:byte;
-      sprite_base,y_pixels,linea_back:word;
-      sprite_x,sprite_flags:array[0..7] of byte;
-      sprite_tile_selected,sprite_pattern_line:array[0..7] of word;
-      hpos,hpos_temp,reg9tmp,port_3f:byte;
-      LINEAS_TOP_BORDE,BORDER_COLOR:byte;
-      LINEAS_Y_BORDE_INFERIOR,LINEAS_Y_SYNC,VIDEO_VISIBLE_Y_TOTAL,VIDEO_Y_TOTAL:word;
+    vdp_chip=class
+      constructor create(pant:byte;irq_call:irq_type);
+      procedure Free;
+      destructor Destroy;
+      public
+        is_pal:boolean;
+        hpos,hpos_temp,port_3f:byte;
+        linea_back,VIDEO_VISIBLE_Y_TOTAL,VIDEO_Y_TOTAL:word;
+        procedure refresh(linea:word);
+        procedure reset;
+        function vram_r:byte;
+        function register_r:integer;
+        procedure register_w(valor:byte);
+        procedure vram_w(valor:byte);
+        procedure hlines(estados:word);
+        procedure set_pal_video;
+        procedure set_ntsc_video;
+      private
+        SMS_IRQ_Handler:procedure(int:boolean);
+        tms:tms99xx_chip;
+        display_disabled:boolean;
+        current_pal:array[0..31] of word;
+        cram:array[0..63] of byte;
+        addr_mode,cram_mask,reg9tmp:byte;
+        line_counter,sprite_count,sprite_height,sprite_zoom:byte;
+        sprite_base,y_pixels:word;
+        sprite_x:array[0..7] of byte;
+        sprite_tile_selected,sprite_pattern_line:array[0..7] of word;
+        LINEAS_TOP_BORDE:byte;
+        LINEAS_Y_BORDE_INFERIOR,LINEAS_Y_SYNC:word;
+        procedure select_sprites(linea:word);
+        procedure draw_sprites(linea:byte);
+        procedure draw_mode_sms(linea:byte);
     end;
 
-procedure sega_vdp_Init(pant:byte);
-procedure sega_vdp_refresh(linea:word);
-procedure sega_vdp_reset;
-function sega_vdp_vram_r:byte;
-function sega_vdp_register_r:integer;
-procedure sega_vdp_register_w(valor:byte);
-procedure sega_vdp_vram_w(valor:byte);
-procedure sega_vdp_close;
-procedure sega_vdp_hlines(estados:word);
-
 var
-  vdp:^tsega_vdp;
-  priority_selected:array[0..255] of word;
+  vdp_0:vdp_chip;
 
 implementation
+var
+  priority_selected:array[0..255] of word;
+
 const
     PIXELS_TOTAL=342;
     PIXELS_VISIBLES_TOTAL=284;
@@ -70,63 +79,52 @@ const
                              $E9,$EA,$EA,$EB,$EC,$ED,$ED,$EE,$EF,$F0,$F0,
     $F1,$F2,$F3,$F3);
 
-
-procedure sega_vdp_reset;
+procedure vdp_chip.reset;
 begin
-  fillchar(vdp.regs[0],16,0);
-  vdp.regs[10]:=$ff;
-  vdp.segundo_byte:=false;
-  vdp.cram_mask:=$1f;
-  vdp.addr:=0;
-  vdp.buffer:=0;
-  vdp.status_reg:=0;
-  vdp.int:=false;
-  fillchar(vdp.memory[0],$4000,0);
-  vdp.vdp_mode:=false;
-  vdp.BORDER_COLOR:=$20;
+  self.tms.reset;
+  self.tms.regs[10]:=$ff;
+  self.tms.regs[2]:=$e;
+  self.cram_mask:=$1f;
   //video
-  vdp.y_pixels:=192;
-  if vdp.is_pal then begin
-    vdp.LINEAS_TOP_BORDE:=54;
-    vdp.LINEAS_Y_BORDE_INFERIOR:=240;
-    vdp.LINEAS_Y_SYNC:=259;
+  self.y_pixels:=192;
+  if self.is_pal then begin
+    self.LINEAS_TOP_BORDE:=54;
+    self.LINEAS_Y_BORDE_INFERIOR:=240;
+    self.LINEAS_Y_SYNC:=259;
   end else begin
-    vdp.LINEAS_TOP_BORDE:=27;
-    vdp.LINEAS_Y_BORDE_INFERIOR:=216;
-    vdp.LINEAS_Y_SYNC:=235;
+    self.LINEAS_TOP_BORDE:=27;
+    self.LINEAS_Y_BORDE_INFERIOR:=216;
+    self.LINEAS_Y_SYNC:=235;
   end;
 end;
 
-procedure sega_vdp_init(pant:byte);
-const
-    tms992X_palete:array[0..15, 0..2] of byte =(
-     (0,0,0),(0,0,0),(33, 200, 66),(94, 220, 120),
-	  (84, 85, 237),(125, 118, 252),(212, 82, 77),(66, 235, 245),
-    (252, 85, 84),(255, 121, 120),(212, 193, 84),(230, 206, 128),
-	  (33, 176, 59),(201, 91, 186),(204, 204, 204),(255,255,255));
+destructor vdp_chip.destroy;
+begin
+self.tms.free;
+end;
+
+procedure vdp_chip.free;
+begin
+self.Destroy;
+end;
+
+constructor vdp_chip.create(pant:byte;irq_call:irq_type);
 var
   f:byte;
   colores:tpaleta;
 begin
-//poner la paleta
-for f:=0 to 15 do begin
-  colores[f].r:=tms992X_palete[f,0];
-  colores[f].g:=tms992X_palete[f,1];
-  colores[f].b:=tms992X_palete[f,2];
-end;
 for f:=0 to 63 do begin
     colores[f+16].r:=pal2bit(f and $3);
     colores[f+16].g:=pal2bit((f and $c) shr 2);
     colores[f+16].b:=pal2bit((f and $30) shr 4);
 end;
-set_pal(colores,16+64);
-getmem(vdp,sizeof(tsega_vdp));
-vdp.pant:=pant;
-main_z80.change_misc_calls(sega_vdp_hlines,nil);
-sega_vdp_reset;
+set_pal(colores,64+16);
+self.tms:=tms99xx_chip.create(pant,irq_call);
+self.SMS_IRQ_Handler:=irq_call;
+self.reset;
 end;
 
-procedure select_sprites(linea:word);
+procedure vdp_chip.select_sprites(linea:word);
 var
   max_sprites,sprite_index,sprite_x,flags:byte;
   parse_line,sprite_tile_selected:word;
@@ -136,85 +134,49 @@ begin
   //because the logical start point is slightly shifted on the scanline */
 	parse_line:=linea-1;
 	// Check if SI is set */
-	if (vdp.regs[1] and 2)<>0 then vdp.sprite_height:=16
-    else vdp.sprite_height:=8;
+	if (self.tms.regs[1] and 2)<>0 then self.sprite_height:=16
+    else self.sprite_height:=8;
 	// Check if MAG is set */
-	if (vdp.regs[1] and 1)<>0 then vdp.sprite_zoom:=2
-    else vdp.sprite_zoom:=1;
-	if (vdp.sprite_zoom>1) then begin
+	if (self.tms.regs[1] and 1)<>0 then self.sprite_zoom:=2
+    else self.sprite_zoom:=1;
+	if (self.sprite_zoom>1) then begin
 		// Divide before use the value for comparison, same later with sprite_y, or
     // else an off-by-one bug could occur, as seen with Tarzan, for Game Gear
 		parse_line:=parse_line shr 1;
 	end;
-	vdp.sprite_count:=0;
-	if not(vdp.vdp_mode) then begin
-		// TMS9918 compatibility sprites */
-		max_sprites:=4;
-		vdp.sprite_base:=((vdp.regs[5] and $7f) shl 7);
-		for sprite_index:=0 to 31 do begin
-      if vdp.sprite_count>max_sprites then break;
-			sprite_y:=vdp.memory[vdp.sprite_base+(sprite_index*4)];
-			if (sprite_y=$d0) then break;
-			if (sprite_y>240) then sprite_y:=sprite_y-256;
-			if (vdp.sprite_zoom>1) then sprite_y:=sprite_y shr 1;
-			if ((parse_line>=sprite_y) and (parse_line<(sprite_y+vdp.sprite_height))) then begin
-				if (vdp.sprite_count < max_sprites) then begin
-					sprite_x:=vdp.memory[vdp.sprite_base+(sprite_index*4)+1];
-          sprite_tile_selected:=vdp.memory[vdp.sprite_base+(sprite_index*4)+2];
-					flags:=vdp.memory[vdp.sprite_base+(sprite_index*4)+3];
-					if (flags and $80)<>0 then sprite_x:=sprite_x-32;
-					sprite_line:=parse_line-sprite_y;
-					if (vdp.regs[1] and 1)<>0 then sprite_line:=sprite_line shr 1;
-					if (vdp.regs[1] and 2)<>0 then begin
-						sprite_tile_selected:=sprite_tile_selected and $fc;
-						if (sprite_line>7) then begin
-							sprite_tile_selected:=sprite_tile_selected+1;
-							sprite_line:=sprite_line-8;
-						end;
-          end;
- 					vdp.sprite_x[vdp.sprite_count]:=sprite_x;
- 					vdp.sprite_tile_selected[vdp.sprite_count]:=sprite_tile_selected;
- 					vdp.sprite_flags[vdp.sprite_count]:=flags;
- 					vdp.sprite_pattern_line[vdp.sprite_count]:=((vdp.regs[6] and 7) shl 11)+sprite_line;
- 				end;
- 				vdp.sprite_count:=vdp.sprite_count+1;
- 			end;
-    end;
-	end else begin
-		// Regular sprites */
-		max_sprites:=8;
-		vdp.sprite_base:=((vdp.regs[5] shl 7) and $3f00);
-		for sprite_index:=0 to 63 do begin
-      if (vdp.sprite_count>max_sprites) then break;
-			sprite_y:=vdp.memory[(vdp.sprite_base+sprite_index) and $3fff];
-			if ((vdp.y_pixels=192) and (sprite_y=$d0)) then break;
+	self.sprite_count:=0;
+  max_sprites:=8;
+  self.sprite_base:=((self.tms.regs[5] shl 7) and $3f00);
+  for sprite_index:=0 to 63 do begin
+      if (self.sprite_count>max_sprites) then break;
+			sprite_y:=self.tms.memory[(self.sprite_base+sprite_index) and $3fff];
+			if ((self.y_pixels=192) and (sprite_y=$d0)) then break;
 			if (sprite_y>240) then sprite_y:=sprite_y-256; // wrap from top if y position is > 240
-			if (vdp.sprite_zoom>1) then sprite_y:=sprite_y shr 1;
-			if ((parse_line>=sprite_y) and (parse_line<(sprite_y+vdp.sprite_height))) then begin
-				if (vdp.sprite_count<max_sprites) then begin
-					sprite_x:=vdp.memory[(vdp.sprite_base+$80+(sprite_index shl 1)) and $3fff];
-					sprite_tile_selected:=vdp.memory[(vdp.sprite_base+$81+(sprite_index shl 1)) and $3fff];
-					if (vdp.regs[0] and 8)<>0 then sprite_x:=sprite_x-8;    // sprite shift */
-					if (vdp.regs[6] and 4)<>0 then sprite_tile_selected:=sprite_tile_selected+256; // pattern table select */
-					if (vdp.regs[1] and 2)<>0 then sprite_tile_selected:=sprite_tile_selected and $01fe; // force even index */
+			if (self.sprite_zoom>1) then sprite_y:=sprite_y shr 1;
+			if ((parse_line>=sprite_y) and (parse_line<(sprite_y+self.sprite_height))) then begin
+				if (self.sprite_count<max_sprites) then begin
+					sprite_x:=self.tms.memory[(self.sprite_base+$80+(sprite_index shl 1)) and $3fff];
+					sprite_tile_selected:=self.tms.memory[(self.sprite_base+$81+(sprite_index shl 1)) and $3fff];
+					if (self.tms.regs[0] and 8)<>0 then sprite_x:=sprite_x-8;    // sprite shift */
+					if (self.tms.regs[6] and 4)<>0 then sprite_tile_selected:=sprite_tile_selected+256; // pattern table select */
+					if (self.tms.regs[1] and 2)<>0 then sprite_tile_selected:=sprite_tile_selected and $01fe; // force even index */
 					sprite_line:=parse_line-sprite_y;
 					if (sprite_line>7) then sprite_tile_selected:=sprite_tile_selected+1;
-					vdp.sprite_x[vdp.sprite_count]:=sprite_x;
-					vdp.sprite_tile_selected[vdp.sprite_count]:=sprite_tile_selected;
-					vdp.sprite_pattern_line[vdp.sprite_count]:=((sprite_line and 7) shl 2);
+					self.sprite_x[self.sprite_count]:=sprite_x;
+					self.sprite_tile_selected[self.sprite_count]:=sprite_tile_selected;
+					self.sprite_pattern_line[self.sprite_count]:=((sprite_line and 7) shl 2);
 				end;
-				vdp.sprite_count:=vdp.sprite_count+1;
+				self.sprite_count:=self.sprite_count+1;
 			end;
-		end;
-	end;
-	if (vdp.sprite_count>max_sprites) then begin
+  end;
+	if (self.sprite_count>max_sprites) then begin
 		// Too many sprites per line */
-		vdp.sprite_count:=max_sprites;
-		vdp.status_reg:=vdp.status_reg or STATUS_SPROVR;
+		self.sprite_count:=max_sprites;
+		self.tms.status_reg:=self.tms.status_reg or STATUS_SPROVR;
 	end;
 end;
 
-procedure draw_sprites(linea:byte);
+procedure vdp_chip.draw_sprites(linea:byte);
 var
   sprite_col_occurred:boolean;
   sprite_col_x,plot_min_x,sprite_x,pixel_plot_x,sprite_tile_selected,sprite_pattern_line:word;
@@ -227,19 +189,19 @@ begin
 	sprite_col_occurred:=false;
 	sprite_col_x:=PIXELS_TOTAL;
 	plot_min_x:= 0;
-	if (vdp.display_disabled or (vdp.sprite_count=0)) then exit;
+	if (self.display_disabled or (self.sprite_count=0)) then exit;
 	// Sprites aren't drawn and collisions don't occur on column 0 if it is disabled */
-	if (vdp.regs[0] and $20)<>0 then plot_min_x:=8;
+	if (self.tms.regs[0] and $20)<>0 then plot_min_x:=8;
 	fillchar(collision_buffer[0],PIXELS_TOTAL,0);
 	// Draw sprite layer
-	for sprite_buffer_index:=(vdp.sprite_count-1) downto 0 do begin
-		sprite_x:=vdp.sprite_x[sprite_buffer_index];
-		sprite_tile_selected:=vdp.sprite_tile_selected[sprite_buffer_index];
-		sprite_pattern_line:=vdp.sprite_pattern_line[sprite_buffer_index];
-		bit_plane_0:=vdp.memory[(sprite_tile_selected shl 5)+sprite_pattern_line+0];
-		bit_plane_1:=vdp.memory[(sprite_tile_selected shl 5)+sprite_pattern_line+1];
-		bit_plane_2:=vdp.memory[(sprite_tile_selected shl 5)+sprite_pattern_line+2];
-		bit_plane_3:=vdp.memory[(sprite_tile_selected shl 5)+sprite_pattern_line+3];
+	for sprite_buffer_index:=(self.sprite_count-1) downto 0 do begin
+		sprite_x:=self.sprite_x[sprite_buffer_index];
+		sprite_tile_selected:=self.sprite_tile_selected[sprite_buffer_index];
+		sprite_pattern_line:=self.sprite_pattern_line[sprite_buffer_index];
+		bit_plane_0:=self.tms.memory[(sprite_tile_selected shl 5)+sprite_pattern_line+0];
+		bit_plane_1:=self.tms.memory[(sprite_tile_selected shl 5)+sprite_pattern_line+1];
+		bit_plane_2:=self.tms.memory[(sprite_tile_selected shl 5)+sprite_pattern_line+2];
+		bit_plane_3:=self.tms.memory[(sprite_tile_selected shl 5)+sprite_pattern_line+3];
 		for pixel_x:=0 to 7 do begin
 			pen_bit_0:=(bit_plane_0 shr (7-pixel_x)) and 1;
 			pen_bit_1:=(bit_plane_1 shr (7-pixel_x)) and 1;
@@ -247,7 +209,7 @@ begin
 			pen_bit_3:=(bit_plane_3 shr (7-pixel_x)) and 1;
 			pen_selected:=(pen_bit_3 shl 3) or (pen_bit_2 shl 2) or (pen_bit_1 shl 1) or (pen_bit_0) or $10;
 			if (pen_selected=$10) then continue;       // Transparent palette so skip draw
-			if (vdp.sprite_zoom>1) then begin
+			if (self.sprite_zoom>1) then begin
 				// sprite doubling is enabled */
 				pixel_plot_x:=sprite_x+(pixel_x shl 1);
 				// check to prevent going outside of active display area */
@@ -255,22 +217,22 @@ begin
 				if ((priority_selected[pixel_plot_x] and PRIORITY_BIT)=0) then begin
           ptemp:=punbuf;
           inc(ptemp,pixel_plot_x+PIXELS_LEFT_BORDER_VISIBLES);
-					ptemp^:=paleta[vdp.current_pal[pen_selected]];
+					ptemp^:=paleta[self.current_pal[pen_selected]];
 					priority_selected[pixel_plot_x]:=pen_selected;
           inc(ptemp);
-					ptemp^:=paleta[vdp.current_pal[pen_selected]];
+					ptemp^:=paleta[self.current_pal[pen_selected]];
 					priority_selected[pixel_plot_x+1]:=pen_selected;
 				end else begin
 					if (priority_selected[pixel_plot_x]=PRIORITY_BIT) then begin
             ptemp:=punbuf;
             inc(ptemp,pixel_plot_x+PIXELS_LEFT_BORDER_VISIBLES);
-					  ptemp^:=paleta[vdp.current_pal[pen_selected]];
+					  ptemp^:=paleta[self.current_pal[pen_selected]];
 						priority_selected[pixel_plot_x]:=pen_selected;
 					end;
 					if (priority_selected[pixel_plot_x+1]=PRIORITY_BIT) then begin
             ptemp:=punbuf;
             inc(ptemp,pixel_plot_x+1+PIXELS_LEFT_BORDER_VISIBLES);
-					  ptemp^:=paleta[vdp.current_pal[pen_selected]];
+					  ptemp^:=paleta[self.current_pal[pen_selected]];
 						priority_selected[pixel_plot_x+1]:=pen_selected;
 					end;
 				end;
@@ -295,13 +257,13 @@ begin
 				if ((priority_selected[pixel_plot_x] and PRIORITY_BIT)=0) then begin
           ptemp:=punbuf;
           inc(ptemp,pixel_plot_x+PIXELS_LEFT_BORDER_VISIBLES);
-          ptemp^:=paleta[vdp.current_pal[pen_selected]];
+          ptemp^:=paleta[self.current_pal[pen_selected]];
 					priority_selected[pixel_plot_x]:=pen_selected;
 				end else begin
 					if (priority_selected[pixel_plot_x]=PRIORITY_BIT) then begin
             ptemp:=punbuf;
             inc(ptemp,pixel_plot_x+PIXELS_LEFT_BORDER_VISIBLES);
-					  ptemp^:=paleta[vdp.current_pal[pen_selected]];
+					  ptemp^:=paleta[self.current_pal[pen_selected]];
 						priority_selected[pixel_plot_x]:=pen_selected;
 					end;
 				end;
@@ -315,27 +277,22 @@ begin
 			end;
 		end;
 		if sprite_col_occurred then begin
-			vdp.status_reg:=vdp.status_reg or STATUS_SPRCOL;
+			self.tms.status_reg:=self.tms.status_reg or STATUS_SPRCOL;
 			//m_pending_sprcol_x = SPRCOL_BASEHPOS + sprite_col_x;
 		end;
 	end;
 end;
 
-procedure draw_sprites_tms(linea:word);
-begin
-
-end;
-
-function get_name_table_row(row:word):word;
+function get_name_table_row(vdp:vdp_chip;row:word):word;
 var
   tempw:word;
 begin
-  if vdp.y_pixels=192 then tempw:=((row shr 3) shl 6) and (((vdp.regs[2] and 1) shl 10) or $3bff)
+  if vdp.y_pixels=192 then tempw:=((row shr 3) shl 6) and (((vdp.tms.regs[2] and 1) shl 10) or $3bff)
     else tempw:=((row shr 3) shl 6);
   get_name_table_row:=tempw;
 end;
 
-procedure draw_mode_sms(linea:byte);
+procedure vdp_chip.draw_mode_sms(linea:byte);
 var
    y_scroll,x_scroll,x_scroll_start_column,tile_column:byte;
    scroll_mod,name_table_address:word;
@@ -348,25 +305,25 @@ var
 begin
 // if top 2 rows of screen not affected by horizontal scrolling, then x_scroll = 0 */
 // else x_scroll = m_reg8copy                                                      */
-if (((vdp.regs[0] and $40)<>0) and (linea<16)) then x_scroll:=0
-   else x_scroll:=$0100-vdp.regs[8];
+if (((self.tms.regs[0] and $40)<>0) and (linea<16)) then x_scroll:=0
+   else x_scroll:=$0100-self.tms.regs[8];
 x_scroll_start_column:=(x_scroll shr 3); // x starting column tile
-if (vdp.y_pixels<>192) then begin
-   name_table_address:=((vdp.regs[2] and $0c) shl 10) or $0700;
+if (self.y_pixels<>192) then begin
+   name_table_address:=((self.tms.regs[2] and $0c) shl 10) or $0700;
    scroll_mod:=256;
 end else begin
-    name_table_address:=((vdp.regs[2] and $e) shl 10) and $3800;
+    name_table_address:=((self.tms.regs[2] and $e) shl 10) and $3800;
     scroll_mod:=224;
 end;
 // Draw background layer */
 for tile_column:=0 to 32 do begin
     // Rightmost 8 columns for SMS (or 2 columns for GG) not affected by */
     // vertical scrolling when bit 7 of reg[0x00] is set */
-    if (((vdp.regs[0] and $80)<>0) and (tile_column>23)) then y_scroll:=0
-       else y_scroll:=vdp.reg9tmp;
+    if (((self.tms.regs[0] and $80)<>0) and (tile_column>23)) then y_scroll:=0
+       else y_scroll:=self.reg9tmp;
     tile_line:=((tile_column+x_scroll_start_column) and $1f) shl 1;
-    addr_tmp:=name_table_address+get_name_table_row((linea+y_scroll) mod scroll_mod)+tile_line;
-    tile_data:=vdp.memory[addr_tmp]+(vdp.memory[addr_tmp+1] shl 8);
+    addr_tmp:=name_table_address+get_name_table_row(self,(linea+y_scroll) mod scroll_mod)+tile_line;
+    tile_data:=self.tms.memory[addr_tmp]+(self.tms.memory[addr_tmp+1] shl 8);
     tile_selected:=(tile_data and $1ff);
     priority_select:=tile_data and PRIORITY_BIT;
     palette_selected:=((tile_data shr 11) and 1)<>0;
@@ -374,10 +331,10 @@ for tile_column:=0 to 32 do begin
     horiz_selected:=((tile_data shr 9) and 1)<>0;
     tile_line:= linea-((7-(y_scroll and 7))+1);
     if vert_selected then tile_line:=7-tile_line;
-    bit_plane_0:=vdp.memory[((tile_selected shl 5)+((tile_line and 7) shl 2))+0];
-    bit_plane_1:=vdp.memory[((tile_selected shl 5)+((tile_line and 7) shl 2))+1];
-    bit_plane_2:=vdp.memory[((tile_selected shl 5)+((tile_line and 7) shl 2))+2];
-    bit_plane_3:=vdp.memory[((tile_selected shl 5)+((tile_line and 7) shl 2))+3];
+    bit_plane_0:=self.tms.memory[((tile_selected shl 5)+((tile_line and 7) shl 2))+0];
+    bit_plane_1:=self.tms.memory[((tile_selected shl 5)+((tile_line and 7) shl 2))+1];
+    bit_plane_2:=self.tms.memory[((tile_selected shl 5)+((tile_line and 7) shl 2))+2];
+    bit_plane_3:=self.tms.memory[((tile_selected shl 5)+((tile_line and 7) shl 2))+3];
     for pixel_x:=0 to 7 do begin
       pen_bit_0:=(bit_plane_0 shr (7-pixel_x)) and 1;
       pen_bit_1:=(bit_plane_1 shr (7-pixel_x)) and 1;
@@ -394,57 +351,20 @@ for tile_column:=0 to 32 do begin
 	      if ((tile_column=0) and ((x_scroll and 7)<>0)) then begin
 	        //when the first column hasn't completely entered in the screen, its
 	        //background is filled only with color #0 of the selected palette */
-	        if palette_selected then ptemp^:=paleta[vdp.current_pal[$10]]
-            else ptemp^:=paleta[vdp.current_pal[0]];
+	        if palette_selected then ptemp^:=paleta[self.current_pal[$10]]
+            else ptemp^:=paleta[self.current_pal[0]];
 	        priority_selected[pixel_plot_x]:=priority_select;
 	      end else begin
-	        ptemp^:=paleta[vdp.current_pal[pen_selected]];
+	        ptemp^:=paleta[self.current_pal[pen_selected]];
 	        priority_selected[pixel_plot_x]:=priority_select or (pen_selected and $f);
 	      end;
 	    end;
     end;
 end;
-fillword(punbuf,PIXELS_LEFT_BORDER_VISIBLES,paleta[vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f]]);
+fillword(punbuf,PIXELS_LEFT_BORDER_VISIBLES,paleta[self.current_pal[$10+self.tms.regs[7] and $f]]);
 ptemp:=punbuf;
 inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES+256);
-fillword(ptemp,PIXELS_RIGHT_BORDER_VISIBLES,paleta[vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f]]);
-end;
-
-procedure draw_mode_tms(linea:word);
-var
-  name_table_base,color_base,pattern_base,color_mask,pattern_mask,pattern_offset,pixel_plot_x:word;
-  tile_column,name,pattern,colors,pixel_x,pen_selected:byte;
-  ptemp:pword;
-begin
-if vdp.modo_video=2 then begin
-	name_table_base:=((vdp.regs[2] and $f) shl 10)+((linea shr 3)*32);
-	color_base:=((vdp.regs[3] and $80) shl 6);
-	color_mask:=((vdp.regs[3] and $7f) shl 3) or 7;
-	pattern_base:=((vdp.regs[4] and 4) shl 11);
-	pattern_mask:=((vdp.regs[4] and 3) shl 8) or $ff;
-	pattern_offset:=(linea and $c0) shl 2;
-	// Draw background layer */
-	for tile_column:=0 to 31 do begin
-		name:=vdp.memory[name_table_base+tile_column];
-		pattern:=vdp.memory[pattern_base+(((pattern_offset + name) and pattern_mask)*8)+(linea and 7)];
-		colors:=vdp.memory[color_base+(((pattern_offset + name) and color_mask)*8)+(linea and 7)];
-		for pixel_x:=0 to 7 do  begin
-			if (pattern and (1 shl (7-pixel_x)))<>0 then pen_selected:=colors shr 4
-			  else pen_selected:=colors and $f;
-			if (pen_selected=0) then pen_selected:=vdp.BORDER_COLOR+(vdp.regs[7] and $f);
-			pixel_plot_x:=(tile_column shl 3)+pixel_x;
-      ptemp:=punbuf;
-      inc(ptemp,pixel_plot_x+PIXELS_LEFT_BORDER_VISIBLES);
-			ptemp^:=paleta[pen_selected];
-		end
-	end
-end else begin
-
-end;
-fillword(punbuf,PIXELS_LEFT_BORDER_VISIBLES,paleta[vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f]]);
-ptemp:=punbuf;
-inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES+256);
-fillword(ptemp,PIXELS_RIGHT_BORDER_VISIBLES,paleta[vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f]]);
+fillword(ptemp,PIXELS_RIGHT_BORDER_VISIBLES,paleta[self.current_pal[$10+self.tms.regs[7] and $f]]);
 end;
 
 {Lineas de video fisicas NTSC
@@ -468,92 +388,88 @@ Color burst     14     -
 Left blanking    8     -
 Left border     13     *
 Total          342   284}
-procedure sega_vdp_refresh(linea:word);
+procedure vdp_chip.refresh(linea:word);
 var
   ptemp:pword;
 begin
-vdp.linea_back:=linea;
-if linea<vdp.y_pixels then begin //Visible
-  if not(vdp.display_disabled) then begin
+if self.tms.vdp_mode then begin
+ self.linea_back:=linea;
+ if linea<self.y_pixels then begin //Visible
+  if not(self.display_disabled) then begin
     fillword(@priority_selected[0],256,0);
-    if vdp.vdp_mode then draw_mode_sms(linea)
-      else draw_mode_tms(linea);
-    select_sprites(linea);
-    if vdp.vdp_mode then draw_sprites(linea)
-      else draw_sprites_tms(linea);
-    if (vdp.regs[0] and $20)<>0 then begin
+    self.draw_mode_sms(linea);
+    self.select_sprites(linea);
+    self.draw_sprites(linea);
+    if (self.tms.regs[0] and $20)<>0 then begin
       ptemp:=punbuf;
       inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES);
-      fillword(ptemp,8,paleta[vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f]]);
+      fillword(ptemp,8,paleta[self.current_pal[$10+self.tms.regs[7] and $f]]);
     end;
-    putpixel(0,linea+vdp.LINEAS_TOP_BORDE,PIXELS_VISIBLES_TOTAL,punbuf,vdp.pant);
-  end else single_line(0,linea+vdp.LINEAS_TOP_BORDE,vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f],PIXELS_VISIBLES_TOTAL,vdp.pant);
-  if vdp.line_counter=0 then begin
-    vdp.line_counter:=vdp.regs[$a];
-    vdp.status_reg:=vdp.status_reg or $40;
-    vdp.int:=true;
-    if (vdp.regs[0] and $10)<>0 then vdp.IRQ_Handler(true);
-  end else vdp.line_counter:=vdp.line_counter-1;
-end else if linea=vdp.y_pixels then begin //1da linea borde inferior
-              single_line(0,linea+vdp.LINEAS_TOP_BORDE,vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f],PIXELS_VISIBLES_TOTAL,vdp.pant);
-              if vdp.line_counter=0 then begin
-                 vdp.line_counter:=vdp.regs[$a];
-                 vdp.status_reg:=vdp.status_reg or $40;
-                 vdp.int:=true;
-                 if (vdp.regs[0] and $10)<>0 then vdp.IRQ_Handler(true);
-              end else vdp.line_counter:=vdp.line_counter-1;
+    putpixel(0,linea+self.LINEAS_TOP_BORDE,PIXELS_VISIBLES_TOTAL,punbuf,self.tms.pant);
+  end else single_line(0,linea+self.LINEAS_TOP_BORDE,self.current_pal[$10+self.tms.regs[7] and $f],PIXELS_VISIBLES_TOTAL,self.tms.pant);
+  if self.line_counter=0 then begin
+    self.line_counter:=self.tms.regs[$a];
+    self.tms.status_reg:=self.tms.status_reg or $40;
+    self.tms.int:=true;
+    if (self.tms.regs[0] and $10)<>0 then self.SMS_IRQ_Handler(true);
+  end else self.line_counter:=self.line_counter-1;
+ end else if linea=self.y_pixels then begin //1da linea borde inferior
+              single_line(0,linea+self.LINEAS_TOP_BORDE,self.current_pal[$10+self.tms.regs[7] and $f],PIXELS_VISIBLES_TOTAL,self.tms.pant);
+              if self.line_counter=0 then begin
+                 self.line_counter:=self.tms.regs[$a];
+                 self.tms.status_reg:=self.tms.status_reg or $40;
+                 self.tms.int:=true;
+                 if (self.tms.regs[0] and $10)<>0 then self.SMS_IRQ_Handler(true);
+              end else self.line_counter:=self.line_counter-1;
               //La señal de que estoy en el final del frame hay que ponerla antes que ejecute la IRQ
               //sino 'Zool' se para...
-              vdp.status_reg:=vdp.status_reg or $80;
-         end else if linea=(vdp.y_pixels+1) then begin //2da linea borde inferior
-                    single_line(0,linea+vdp.LINEAS_TOP_BORDE,vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f],PIXELS_VISIBLES_TOTAL,vdp.pant);
-                    vdp.line_counter:=vdp.regs[$a];
-                    if (vdp.regs[1] and $20)<>0 then begin
-                      vdp.int:=true;
-                      vdp.IRQ_Handler(true);
+              self.tms.status_reg:=self.tms.status_reg or $80;
+         end else if linea=(self.y_pixels+1) then begin //2da linea borde inferior
+                    single_line(0,linea+self.LINEAS_TOP_BORDE,self.current_pal[$10+self.tms.regs[7] and $f],PIXELS_VISIBLES_TOTAL,self.tms.pant);
+                    self.line_counter:=self.tms.regs[$a];
+                    if (self.tms.regs[1] and $20)<>0 then begin
+                      self.tms.int:=true;
+                      self.SMS_IRQ_Handler(true);
                     end;
-                  end else if linea<vdp.LINEAS_Y_BORDE_INFERIOR then begin //Resto borde inferior
-                              single_line(0,linea+vdp.LINEAS_TOP_BORDE,vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f],PIXELS_VISIBLES_TOTAL,vdp.pant);
-                              vdp.line_counter:=vdp.regs[$a];
-                           end else if linea<(vdp.LINEAS_Y_BORDE_INFERIOR+3) then begin //Resto borde inferior
-                              single_line(0,linea+vdp.LINEAS_TOP_BORDE,vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f],PIXELS_VISIBLES_TOTAL,vdp.pant);
-                              vdp.line_counter:=vdp.regs[$a];
-                              if vdp.is_pal then vdp.linea_back:=vdp.linea_back-$38
-                                else vdp.linea_back:=vdp.linea_back-5;
-                              end else if linea<vdp.LINEAS_Y_SYNC then begin //Sincronismos
-                                          vdp.line_counter:=vdp.regs[$a];
+                  end else if linea<self.LINEAS_Y_BORDE_INFERIOR then begin //Resto borde inferior
+                              single_line(0,linea+self.LINEAS_TOP_BORDE,self.current_pal[$10+self.tms.regs[7] and $f],PIXELS_VISIBLES_TOTAL,self.tms.pant);
+                              self.line_counter:=self.tms.regs[$a];
+                           end else if linea<(self.LINEAS_Y_BORDE_INFERIOR+3) then begin //Resto borde inferior
+                              single_line(0,linea+self.LINEAS_TOP_BORDE,self.current_pal[$10+self.tms.regs[7] and $f],PIXELS_VISIBLES_TOTAL,self.tms.pant);
+                              self.line_counter:=self.tms.regs[$a];
+                              if self.is_pal then self.linea_back:=self.linea_back-$38
+                                else self.linea_back:=self.linea_back-5;
+                              end else if linea<self.LINEAS_Y_SYNC then begin //Sincronismos
+                                          self.line_counter:=self.tms.regs[$a];
                                         end else begin //Borde superior
-                                            single_line(0,linea-vdp.LINEAS_Y_SYNC,vdp.current_pal[vdp.BORDER_COLOR+vdp.regs[7] and $f],PIXELS_VISIBLES_TOTAL,vdp.pant);
-                                            vdp.line_counter:=vdp.regs[$a];
+                                            single_line(0,linea-self.LINEAS_Y_SYNC,self.current_pal[$10+self.tms.regs[7] and $f],PIXELS_VISIBLES_TOTAL,self.tms.pant);
+                                            self.line_counter:=self.tms.regs[$a];
                                         end;
+end else self.tms.refresh(linea);
 end;
 
 //change register
-procedure change_reg(addr,Val:byte);
+procedure change_reg(vdp:vdp_chip;addr,Val:byte);
 begin
-  vdp.regs[addr]:=val;
+  vdp.tms.regs[addr]:=val;
   case addr of
      0:begin
-         vdp.vdp_mode:=(val and 4)<>0;
-         if not(vdp.vdp_mode) then begin
-            vdp.modo_video:=vdp.regs[0] and 2;
-            vdp.BORDER_COLOR:=$0;
-         end else vdp.BORDER_COLOR:=$10;
-         if (vdp.status_reg and $40)<>0 then begin
+         vdp.tms.vdp_mode:=(val and 4)<>0;
+         if (vdp.tms.status_reg and $40)<>0 then begin
           if not((val and $10)<>0) then begin
-            if vdp.int then begin
-              vdp.int:=false;
-              vdp.IRQ_Handler(false);
+              if vdp.tms.int then begin
+                vdp.tms.int:=false;
+                vdp.SMS_IRQ_Handler(false);
+              end;
+            end else begin
+              vdp.tms.int:=true;
+              vdp.SMS_IRQ_Handler(true);
             end;
-          end else begin
-            vdp.int:=true;
-            vdp.IRQ_Handler(true);
          end;
-       end;
      end;
      1:begin
          vdp.display_disabled:=(val and $40)=0;
-         if (vdp.regs[1] and $10)<>0 then begin
+         if (vdp.tms.regs[1] and $10)<>0 then begin
             vdp.y_pixels:=224;
             if vdp.is_pal then begin
               vdp.LINEAS_TOP_BORDE:=38;
@@ -576,95 +492,115 @@ begin
               vdp.LINEAS_Y_SYNC:=235;
             end;
          end;
-         if (vdp.status_reg and $80)<>0 then begin
+         if (vdp.tms.status_reg and $80)<>0 then begin
             if not((val and $20)<>0) then begin
-              if vdp.int then begin
-                vdp.int:=false;
-                vdp.IRQ_Handler(false);
+              if vdp.tms.int then begin
+                vdp.tms.int:=false;
+                vdp.SMS_IRQ_Handler(false);
               end;
             end else begin
-              vdp.int:=true;
-              vdp.IRQ_Handler(true);
+              vdp.tms.int:=true;
+              vdp.SMS_IRQ_Handler(true);
             end;
          end;
        end;
   end;
 end;
 
-function sega_vdp_register_r:integer;
+function vdp_chip.register_r:integer;
 begin
-  //'PGA Tour Golf' se cuelga si no pongo esto $1d
-  sega_vdp_register_r:=vdp.status_reg or $1f;
-  vdp.status_reg:=0;
-  if vdp.int then begin
-     vdp.int:=false;
-     vdp.IRQ_Handler(false);
-  end;
-  vdp.segundo_byte:=false;
+  if self.tms.vdp_mode then begin
+    //'PGA Tour Golf' se cuelga si no pongo esto $1d
+    register_r:=self.tms.status_reg or $1f;
+    self.tms.status_reg:=0;
+    if self.tms.int then begin
+       self.tms.int:=false;
+       self.SMS_IRQ_Handler(false);
+    end;
+    self.tms.segundo_byte:=false;
+  end else register_r:=self.tms.register_r;
 end;
 
-procedure sega_vdp_register_w(valor:byte);
+procedure vdp_chip.register_w(valor:byte);
 begin
-if not(vdp.segundo_byte) then begin
-  vdp.addr:=((vdp.addr and $ff00) or valor) and $3FFF;
-  vdp.segundo_byte:=true;
-end else begin
-  vdp.segundo_byte:=false;
-  vdp.addr:=((vdp.addr and $ff) or (valor shl 8)) and $3FFF;
-  vdp.addr_mode:=(valor and $c0) shr 6;
-  case vdp.addr_mode of
-    0:begin // VRAM reading mode
-          vdp.buffer:=vdp.memory[vdp.addr];
-          vdp.addr:=(vdp.addr+1) and $3FFF;
-          vdp.segundo_byte:=false;
+if self.tms.vdp_mode then begin
+  if not(self.tms.segundo_byte) then begin
+    self.tms.addr:=((self.tms.addr and $ff00) or valor) and $3FFF;
+    self.tms.segundo_byte:=true;
+  end else begin
+    self.tms.segundo_byte:=false;
+    self.tms.addr:=((self.tms.addr and $ff) or (valor shl 8)) and $3FFF;
+    self.addr_mode:=(valor and $c0) shr 6;
+    case self.addr_mode of
+      0:begin // VRAM reading mode
+          self.tms.buffer:=self.tms.memory[self.tms.addr];
+          self.tms.addr:=(self.tms.addr+1) and $3FFF;
+          self.tms.segundo_byte:=false;
         end;
-    1,3:; // VRAM writing mode o CRAM writing mode
-    2:change_reg(valor and $f,vdp.addr and $ff); // VDP register write
+      1,3:; // VRAM writing mode o CRAM writing mode
+      2:change_reg(self,valor and $f,self.tms.addr and $ff); // VDP register write
+    end;
   end;
-end;
+end else self.tms.register_w(valor);
 end;
 
-function sega_vdp_vram_r:byte;  //ReadDataPort
+function vdp_chip.vram_r:byte;
 begin
-  sega_vdp_vram_r:=vdp.buffer;
-  vdp.buffer:=vdp.memory[vdp.addr];
-  vdp.addr:=(vdp.addr+1) and $3FFF;
-  vdp.segundo_byte:=false;
+if self.tms.vdp_mode then begin
+  vram_r:=self.tms.buffer;
+  self.tms.buffer:=self.tms.memory[self.tms.addr];
+  self.tms.addr:=(self.tms.addr+1) and $3FFF;
+  self.tms.segundo_byte:=false;
+end else vram_r:=self.tms.vram_r;
 end;
 
-procedure cram_write(valor:byte);
+procedure cram_write(vdp:vdp_chip;valor:byte);
 var
    address:word;
    f:byte;
 begin
-address:=vdp.addr and vdp.cram_mask;
+address:=vdp.tms.addr and vdp.cram_mask;
 if (vdp.cram[address]<>valor) then begin
    vdp.CRAM[address]:=valor;
    for f:=0 to 31 do vdp.current_pal[f]:=(vdp.cram[f] and $3f)+$10;
 end;
 end;
 
-procedure sega_vdp_vram_w(valor:byte);
+procedure vdp_chip.vram_w(valor:byte);
 begin
-if vdp.addr_mode=3 then cram_write(valor)
-   else vdp.memory[vdp.addr]:=valor;
-vdp.buffer:=valor;
-vdp.addr:=(vdp.addr+1) and $3FFF;
-vdp.segundo_byte:=false;
+if self.tms.vdp_mode then begin
+  if self.addr_mode=3 then cram_write(self,valor)
+     else self.tms.memory[self.tms.addr]:=valor;
+  self.tms.buffer:=valor;
+  self.tms.addr:=(self.tms.addr+1) and $3FFF;
+  self.tms.segundo_byte:=false;
+end else self.tms.vram_w(valor);
 end;
 
-procedure sega_vdp_close;
+procedure vdp_chip.hlines(estados:word);
 begin
-if vdp<>nil then begin
-  freemem(vdp);
-  vdp:=nil;
-end;
+  self.hpos_temp:=hpos_conv[estados mod 228];
+  if self.hpos_temp>$7f then self.reg9tmp:=self.tms.regs[9];
 end;
 
-procedure sega_vdp_hlines(estados:word);
+procedure vdp_chip.set_pal_video;
 begin
-  vdp.hpos_temp:=hpos_conv[round(main_z80.contador) mod 228];
-  if vdp.hpos_temp>$7f then vdp.reg9tmp:=vdp.regs[9];
+self.is_pal:=true;
+self.VIDEO_VISIBLE_Y_TOTAL:=294;
+self.VIDEO_Y_TOTAL:=LINES_PAL;
+self.LINEAS_TOP_BORDE:=54;
+self.LINEAS_Y_BORDE_INFERIOR:=240;
+self.LINEAS_Y_SYNC:=259;
+end;
+
+procedure vdp_chip.set_ntsc_video;
+begin
+self.is_pal:=false;
+self.VIDEO_VISIBLE_Y_TOTAL:=243;
+self.VIDEO_Y_TOTAL:=LINES_NTSC;
+self.LINEAS_TOP_BORDE:=27;
+self.LINEAS_Y_BORDE_INFERIOR:=216;
+self.LINEAS_Y_SYNC:=235;
 end;
 
 end.

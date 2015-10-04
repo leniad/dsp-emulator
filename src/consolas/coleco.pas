@@ -9,7 +9,7 @@ unit coleco;
 interface
 uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,lenguaje,main_engine,controls_engine,tms99xx,sn_76496,sysutils,dialogs,
-     rom_engine,misc_functions,sound_engine,file_engine,pal_engine;
+     rom_engine,misc_functions,sound_engine,file_engine;
 
 procedure Cargar_coleco;
 procedure coleco_principal;
@@ -72,8 +72,7 @@ main_z80.change_ram_calls(coleco_getbyte,coleco_putbyte);
 main_z80.change_io_calls(coleco_inbyte,coleco_outbyte);
 main_z80.init_sound(coleco_sound_update);
 //TMS
-TMS99XX_Init(1);
-tms.IRQ_Handler:=coleco_interrupt;
+tms_0:=tms99xx_chip.create(1,coleco_interrupt);
 //Chip Sonido
 sn_76496_0:=sn76496_chip.Create(3579545);
 //cargar roms
@@ -87,7 +86,7 @@ procedure cerrar_coleco;
 begin
 main_z80.free;
 sn_76496_0.Free;
-TMS99XX_close;
+tms_0.Free;
 close_audio;
 close_video;
 end;
@@ -98,7 +97,7 @@ var
 begin
  main_z80.reset;
  sn_76496_0.reset;
- TMS99XX_reset;
+ tms_0.reset;
  reset_audio;
  //Importante o el juego 'The Yolk's on You' se para
  for f:=0 to $3ff do memoria[$6000+f]:=random(256);
@@ -169,7 +168,7 @@ while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
       main_z80.run(frame);
       frame:=frame+main_z80.tframes-main_z80.contador;
-      TMS99XX_refresh(f);
+      tms_0.refresh(f);
   end;
   actualiza_trozo_simple(0,0,284,243,1);
   eventos_coleco;
@@ -200,8 +199,8 @@ var
   input:word;
 begin
   case (puerto and $e0) of
-    $a0:if (puerto and $01)<>0 then coleco_inbyte:=TMS99XX_register_r
-             else coleco_inbyte:=TMS99XX_vram_r;
+    $a0:if (puerto and $01)<>0 then coleco_inbyte:=tms_0.register_r
+             else coleco_inbyte:=tms_0.vram_r;
     $e0:begin
              player:=(puerto shr 1) and $01;
              if joymode then begin //leer joystick
@@ -232,8 +231,8 @@ procedure coleco_outbyte(valor:byte;puerto:word);
 begin
   case (puerto and $e0) of
     $80,$c0:joymode:=(puerto and $40)<>0;
-    $a0:if (puerto and $01)<>0 then TMS99XX_register_w(valor)
-                else TMS99XX_vram_w(valor);
+    $a0:if (puerto and $01)<>0 then tms_0.register_w(valor)
+                else tms_0.vram_w(valor);
     $e0:sn_76496_0.Write(valor);
   end;
 end;

@@ -38,7 +38,6 @@ const
 var
  rom:array[0..$3ffff] of word;
  ram:array[0..$1fff] of word;
- prot146_ram:array[0..$7ff] of byte;
 
 procedure Cargar_funkyjet;
 begin

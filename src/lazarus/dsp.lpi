@@ -13,7 +13,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="16"/>
-      <BuildNr Value="475"/>
+      <BuildNr Value="477"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.16"/>
     </VersionInfo>
@@ -42,7 +42,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="143">
+    <Units Count="148">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -58,7 +58,6 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="355"/>
         <CursorPos X="44" Y="377"/>
         <UsageCount Value="200"/>
@@ -219,8 +218,12 @@
       <Unit25>
         <Filename Value="..\misc\rom_engine.pas"/>
         <IsPartOfProject Value="True"/>
-        <CursorPos X="13" Y="4"/>
+        <UnitName Value="Rom_engine"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="52"/>
+        <CursorPos X="10" Y="18"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit25>
       <Unit26>
@@ -325,17 +328,17 @@
         <Filename Value="..\consolas\coleco.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="279"/>
-        <CursorPos X="11" Y="172"/>
+        <CursorPos X="56" Y="12"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit37>
       <Unit38>
         <Filename Value="..\consolas\gb.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="28"/>
-        <CursorPos X="94" Y="37"/>
-        <UsageCount Value="10"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1224"/>
+        <CursorPos X="117" Y="1238"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit38>
       <Unit39>
@@ -674,28 +677,28 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit82>
       <Unit83>
-        <Filename Value="..\misc\tap_tzx.pas"/>
+        <Filename Value="..\misc\Tap_tzx.pas"/>
+        <UnitName Value="tap_tzx"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="558"/>
-        <CursorPos X="13" Y="570"/>
-        <UsageCount Value="4"/>
+        <TopLine Value="1375"/>
+        <CursorPos X="11" Y="9"/>
+        <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit83>
       <Unit84>
         <Filename Value="..\misc\snapshot.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1400"/>
         <CursorPos X="20" Y="1424"/>
         <UsageCount Value="34"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit84>
       <Unit85>
         <Filename Value="..\ordenadores\misc\spectrum_misc.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="585"/>
-        <CursorPos X="17" Y="593"/>
-        <UsageCount Value="8"/>
+        <TopLine Value="581"/>
+        <CursorPos X="11" Y="593"/>
+        <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit85>
       <Unit86>
@@ -744,8 +747,8 @@
       <Unit92>
         <Filename Value="..\misc\gfx_engine.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="820"/>
-        <CursorPos X="41" Y="827"/>
+        <TopLine Value="781"/>
+        <CursorPos X="41" Y="788"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit92>
@@ -948,21 +951,21 @@
       </Unit117>
       <Unit118>
         <Filename Value="..\consolas\sms.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="263"/>
-        <CursorPos X="3" Y="272"/>
-        <UsageCount Value="23"/>
+        <TopLine Value="351"/>
+        <CursorPos Y="267"/>
+        <UsageCount Value="24"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit118>
       <Unit119>
         <Filename Value="..\consolas\sega_vdp.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="207"/>
         <CursorPos Y="215"/>
-        <UsageCount Value="45"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="48"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit119>
       <Unit120>
@@ -1011,12 +1014,10 @@
         <ComponentName Value="SMSConfig"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="58"/>
         <CursorPos X="5" Y="65"/>
-        <UsageCount Value="22"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
+        <UsageCount Value="25"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit125>
       <Unit126>
@@ -1123,11 +1124,10 @@
       </Unit138>
       <Unit139>
         <Filename Value="..\arcade\combatschool_hw.pas"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="160"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="165"/>
         <CursorPos X="81" Y="184"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit139>
       <Unit140>
@@ -1154,52 +1154,164 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit142>
+      <Unit143>
+        <Filename Value="..\snd\fm_2151.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="118"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit143>
+      <Unit144>
+        <Filename Value="..\snd\oki6295.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="52"/>
+        <CursorPos X="6" Y="57"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit144>
+      <Unit145>
+        <Filename Value="..\arcade\legendarywings_hw.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="10"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit145>
+      <Unit146>
+        <Filename Value="..\arcade\funkyjet_hw.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos X="30" Y="40"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit146>
+      <Unit147>
+        <Filename Value="..\arcade\nemesis_hw.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="104"/>
+        <CursorPos X="11" Y="110"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit147>
     </Units>
-    <JumpHistory Count="11" HistoryIndex="10">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="..\arcade\combatschool_hw.pas"/>
-        <Caret Line="40" Column="12" TopLine="34"/>
+        <Filename Value="..\consolas\gb.pas"/>
+        <Caret Line="38" Column="9" TopLine="31"/>
       </Position1>
       <Position2>
-        <Filename Value="..\arcade\combatschool_hw.pas"/>
-        <Caret Line="167" Column="9" TopLine="165"/>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="93" Column="72" TopLine="87"/>
       </Position2>
       <Position3>
-        <Filename Value="..\arcade\combatschool_hw.pas"/>
-        <Caret Line="184" Column="81" TopLine="170"/>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="267" Column="40" TopLine="252"/>
       </Position3>
       <Position4>
-        <Filename Value="..\arcade\combatschool_hw.pas"/>
-        <Caret Line="199" Column="13" TopLine="185"/>
+        <Filename Value="..\consolas\sms.pas"/>
       </Position4>
       <Position5>
-        <Filename Value="..\arcade\combatschool_hw.pas"/>
-        <Caret Line="166" Column="9" TopLine="159"/>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="32" Column="41" TopLine="17"/>
       </Position5>
       <Position6>
-        <Filename Value="..\arcade\combatschool_hw.pas"/>
-        <Caret Line="167" Column="9" TopLine="159"/>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="133" Column="22" TopLine="118"/>
       </Position6>
       <Position7>
-        <Filename Value="..\misc\snapshot.pas"/>
-        <Caret Line="1434" Column="31" TopLine="1425"/>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="217" Column="36" TopLine="210"/>
       </Position7>
       <Position8>
-        <Filename Value="config_sms.pas"/>
-        <Caret Line="7"/>
+        <Filename Value="..\consolas\sms.pas"/>
       </Position8>
       <Position9>
-        <Filename Value="config_sms.pas"/>
-        <Caret Line="75" Column="5" TopLine="50"/>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="31" Column="16" TopLine="16"/>
       </Position9>
       <Position10>
-        <Filename Value="principal.pas"/>
-        <Caret Line="943" TopLine="918"/>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="132" Column="22" TopLine="117"/>
       </Position10>
       <Position11>
-        <Filename Value="principal.pas"/>
-        <Caret Line="398" TopLine="382"/>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="221" TopLine="215"/>
       </Position11>
+      <Position12>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="268" Column="25" TopLine="258"/>
+      </Position12>
+      <Position13>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="267" Column="42" TopLine="258"/>
+      </Position13>
+      <Position14>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="221" TopLine="213"/>
+      </Position14>
+      <Position15>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="267" Column="57" TopLine="258"/>
+      </Position15>
+      <Position16>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="221" TopLine="213"/>
+      </Position16>
+      <Position17>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="269" Column="50" TopLine="258"/>
+      </Position17>
+      <Position18>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="271" Column="38" TopLine="259"/>
+      </Position18>
+      <Position19>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="98" Column="7" TopLine="89"/>
+      </Position19>
+      <Position20>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="371" Column="53" TopLine="359"/>
+      </Position20>
+      <Position21>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="274" Column="30" TopLine="265"/>
+      </Position21>
+      <Position22>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="273" Column="16" TopLine="265"/>
+      </Position22>
+      <Position23>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="269" TopLine="265"/>
+      </Position23>
+      <Position24>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="31" Column="22" TopLine="19"/>
+      </Position24>
+      <Position25>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="96" TopLine="87"/>
+      </Position25>
+      <Position26>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="186" Column="24" TopLine="175"/>
+      </Position26>
+      <Position27>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="267" Column="58" TopLine="259"/>
+      </Position27>
+      <Position28>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="361" Column="31" TopLine="352"/>
+      </Position28>
+      <Position29>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="111" TopLine="111"/>
+      </Position29>
+      <Position30>
+        <Filename Value="..\consolas\sms.pas"/>
+        <Caret Line="364" Column="84" TopLine="350"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

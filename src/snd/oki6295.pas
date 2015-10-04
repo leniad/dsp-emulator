@@ -55,7 +55,6 @@ var
 
 implementation
 const
-  MAX_SAMPLE_CHUNK=10000;
   // step size index shift table */
   index_shift:array[0..7] of integer =(-1, -1, -1, -1, 2, 4, 6, 8 );
   // volume lookup table. The manual lists only 9 steps, ~3dB per step. Given the dB values,
@@ -319,4 +318,4 @@ begin
   if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=self.out_;
 end;
 
-end.
+end.

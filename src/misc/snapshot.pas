@@ -1554,30 +1554,30 @@ while longitud<long do begin
   $1,$2,$1002:begin
             getmem(tms_v1,sizeof(ttms_v1));
             copymemory(tms_v1,ptemp,sizeof(ttms_v1));
-            copymemory(@tms.regs,@tms_v1.regs[0],8);
-            tms.color:=tms_v1.colour;
-            tms.pattern:=tms_v1.pattern;
-            tms.nametbl:=tms_v1.nametbl;
-            tms.spriteattribute:=tms_v1.spriteattribute;
-            tms.spritepattern:=tms_v1.spritepattern;
-            tms.colormask:=tms_v1.colourmask;
-            tms.patternmask:=tms_v1.patternmask;
-            tms.addr:=tms_v1.nAddr;
-            tms.status_reg:=tms_v1.status_reg;
-            tms.fgcolor:=tms_v1.nFGColor;
-            tms.bgcolor:=tms_v1.nbgcolor;
-            tms.int:=tms_v1.int;
-            tms.TMS9918A_VRAM_SIZE:=tms_v1.TMS9918A_VRAM_SIZE;
-            copymemory(@tms.memory[0],@tms_v1.memory[0],$4000);
+            copymemory(@tms_0.regs,@tms_v1.regs[0],8);
+            tms_0.color:=tms_v1.colour;
+            tms_0.pattern:=tms_v1.pattern;
+            tms_0.nametbl:=tms_v1.nametbl;
+            tms_0.spriteattribute:=tms_v1.spriteattribute;
+            tms_0.spritepattern:=tms_v1.spritepattern;
+            tms_0.colormask:=tms_v1.colourmask;
+            tms_0.patternmask:=tms_v1.patternmask;
+            tms_0.addr:=tms_v1.nAddr;
+            tms_0.status_reg:=tms_v1.status_reg;
+            tms_0.fgcolor:=tms_v1.nFGColor;
+            tms_0.bgcolor:=tms_v1.nbgcolor;
+            tms_0.int:=tms_v1.int;
+            tms_0.TMS9918A_VRAM_SIZE:=tms_v1.TMS9918A_VRAM_SIZE;
+            copymemory(@tms_0.memory[0],@tms_v1.memory[0],$4000);
             freemem(tms_v1);
         end;
-      $220:copymemory(TMS,ptemp,descomprimido);
+      $220:tms_0.load_snapshot(ptemp);
     end;
     freemem(ptemp);
-    tms.IRQ_Handler:=coleco_interrupt;
-    tms.pant:=1;
-    if tms.bgcolor=0 then paleta[0]:=0
-      else paleta[0]:=paleta[tms.bgcolor];
+    tms_0.change_irq(coleco_interrupt);
+    tms_0.pant:=1;
+    if tms_0.bgcolor=0 then paleta[0]:=0
+      else paleta[0]:=paleta[tms_0.bgcolor];
   end;
   if coleco_block.nombre='7649' then sn_76496_0.load_snapshot(data);
   inc(data,coleco_block.longitud);inc(longitud,coleco_block.longitud);
@@ -1589,10 +1589,10 @@ end;
 
 function grabar_coleco_snapshot(nombre:string):boolean;
 var
-  longitud,comprimido:integer;
+  longitud,comprimido,long2:integer;
   coleco_header:^tcoleco_header;
   coleco_block:^tcoleco_block;
-  pdata,ptemp,ptemp2:pbyte;
+  pdata,ptemp,ptemp2,ptemp3:pbyte;
 begin
 grabar_coleco_snapshot:=false;
 getmem(coleco_header,sizeof(tcoleco_header));
@@ -1620,7 +1620,10 @@ fillchar(coleco_block^,sizeof(tcoleco_block),0);
 coleco_block.nombre:='TMSR';
 ptemp2:=ptemp;
 inc(ptemp2,10);
-compress_zlib(tms,sizeof(TTMS99XX),ptemp2,comprimido);
+getmem(ptemp3,$5000);
+long2:=tms_0.save_snapshot(ptemp3);
+compress_zlib(ptemp3,long2,ptemp2,comprimido);
+freemem(ptemp3);
 coleco_block.longitud:=comprimido;
 copymemory(ptemp,coleco_block,10);
 inc(ptemp,10);inc(longitud,10);
