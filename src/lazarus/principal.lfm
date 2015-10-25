@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 269
+  Left = 538
   Height = 355
-  Top = 188
+  Top = 249
   Width = 340
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -9,7 +9,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 335
+  ClientHeight = 328
   ClientWidth = 340
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -704,8 +704,8 @@ object principal1: Tprincipal1
     Top = 56
     Width = 323
     Caption = 'CINTA'
-    ClientHeight = 307
-    ClientWidth = 319
+    ClientHeight = 311
+    ClientWidth = 321
     Color = clBtnFace
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
@@ -776,7 +776,7 @@ object principal1: Tprincipal1
     end
     object Edit1: TEdit
       Left = 15
-      Height = 24
+      Height = 27
       Top = 67
       Width = 289
       Font.Height = -13
@@ -1074,12 +1074,12 @@ object principal1: Tprincipal1
   end
   object Panel2: TPanel
     Left = 291
-    Height = 283
+    Height = 276
     Top = 33
     Width = 49
     Align = alRight
     Anchors = [akTop, akBottom]
-    ClientHeight = 283
+    ClientHeight = 276
     ClientWidth = 49
     TabOrder = 2
     Visible = False
@@ -1636,15 +1636,15 @@ object principal1: Tprincipal1
     AnchorSideTop.Control = Owner
     Left = 4
     Height = 252
-    Top = 36
+    Top = 33
     Width = 228
     Anchors = []
     BorderSpacing.Left = 2
     BorderSpacing.Top = 34
     BorderSpacing.Bottom = 2
     BorderSpacing.Around = 2
-    ClientHeight = 234
-    ClientWidth = 224
+    ClientHeight = 250
+    ClientWidth = 226
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -1658,7 +1658,7 @@ object principal1: Tprincipal1
       AnchorSideTop.Control = GroupBox4
       Left = 3
       Height = 142
-      Top = 44
+      Top = 52
       Width = 201
       Anchors = [akLeft]
       BorderSpacing.Around = 3
@@ -1668,7 +1668,7 @@ object principal1: Tprincipal1
   object Panel5: TPanel
     Left = 0
     Height = 19
-    Top = 316
+    Top = 309
     Width = 340
     Align = alBottom
     ClientHeight = 19
@@ -2393,6 +2393,10 @@ object principal1: Tprincipal1
           end
           object ShootOut1: TMenuItem
             Caption = 'Shoot Out'
+            OnClick = CambiarMaquina
+          end
+          object Renegade1: TMenuItem
+            Caption = 'Renegade'
             OnClick = CambiarMaquina
           end
         end

@@ -2,7 +2,7 @@ unit sound_engine;
 
 interface
 uses {$ifdef fpc}
-     {$ifndef windows}sdl2,SDL2_mixer,{$else}windows,mmsystem,{$endif}
+     {$ifndef windows}lib_sdl2,SDL2_mixer,{$else}windows,mmsystem,{$endif}
      {$else}
      {$ifdef windows}windows,mmsystem,{$endif}
      {$endif}
@@ -160,7 +160,7 @@ case sound_status.calidad_audio of
     end;
     else audio_rate:=44100;
 end;
-audio_format:=AUDIO_S16;
+audio_format:=libAUDIO_S16;
 audio_channels:=canales;
 sound_status.sample_final:=(trunc(audio_rate/llamadas_maquina.fps_max)+1)*canales;
 //audio_buffers:=sound_status.sample_final;

@@ -21,27 +21,18 @@ type
 
   TSDL_JoystickID = SInt32;
 
-  TSDL_JoystickUpdate=procedure;cdecl;
-  TSDL_JoystickGetAxis=function(joystick:PSDL_Joystick;axis:SInt32):SInt16;cdecl;
-  TSDL_NumJoysticks=function:SInt32;cdecl;
-  TSDL_JoystickName=function(joystick:PSDL_Joystick):PAnsiChar;cdecl;
-  TSDL_JoystickNumButtons=function(joystick:PSDL_Joystick):SInt32;cdecl;
-  TSDL_JoystickOpen=function(device_index:SInt32):PSDL_Joystick;cdecl;
-  TSDL_JoystickClose=procedure(joystick:PSDL_Joystick);cdecl;
-  TSDL_JoystickGetButton=function(joystick:PSDL_Joystick;button:SInt32):UInt8;cdecl;
-
   {* Function prototypes *}
   {**
    *  Count the number of joysticks attached to the system right now
    *}
-//function SDL_NumJoysticks: SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_NumJoysticks' {$ENDIF} {$ENDIF};
+function SDL_NumJoysticks: SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_NumJoysticks' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the implementation dependent name of a joystick.
    *  This can be called before any joysticks are opened.
    *  If no name can be found, this function returns NULL.
    *}
-//function SDL_JoystickNameForIndex(device_index: SInt32): PAnsiChar cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNameForIndex' {$ENDIF} {$ENDIF};
+function SDL_JoystickNameForIndex(device_index: SInt32): PAnsiChar cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNameForIndex' {$ENDIF} {$ENDIF};
 
   {**
    *  Open a joystick for use.
@@ -51,49 +42,49 @@ type
    *
    *  A joystick identifier, or NULL if an error occurred.
    *}
-//function SDL_JoystickOpen(device_index: SInt32): PSDL_Joystick cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickOpen' {$ENDIF} {$ENDIF};
+function SDL_JoystickOpen(device_index: SInt32): PSDL_Joystick cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickOpen' {$ENDIF} {$ENDIF};
 
   {**
    *  Return the name for this currently opened joystick.
    *  If no name can be found, this function returns NULL.
    *}
-//function SDL_JoystickName(joystick: PSDL_Joystick): PAnsiChar cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickName' {$ENDIF} {$ENDIF};
+function SDL_JoystickName(joystick: PSDL_Joystick): PAnsiChar cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickName' {$ENDIF} {$ENDIF};
 
   {**
    *  Return the GUID for the joystick at this index
    *}
-//function SDL_JoystickGetDeviceGUID(device_index: SInt32): TSDL_JoystickGUID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetDeviceGUID' {$ENDIF} {$ENDIF};
+function SDL_JoystickGetDeviceGUID(device_index: SInt32): TSDL_JoystickGUID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetDeviceGUID' {$ENDIF} {$ENDIF};
 
   {**
    *  Return the GUID for this opened joystick
    *}
-//function SDL_JoystickGetGUID(joystick: PSDL_Joystick): TSDL_JoystickGUID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetGUID' {$ENDIF} {$ENDIF};
+function SDL_JoystickGetGUID(joystick: PSDL_Joystick): TSDL_JoystickGUID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetGUID' {$ENDIF} {$ENDIF};
 
   {**
    *  Return a string representation for this guid. pszGUID must point to at least 33 bytes
    *  (32 for the string plus a NULL terminator).
    *}
-//procedure SDL_JoystickGetGUIDString(guid: TSDL_JoystickGUId; pszGUID: PAnsiChar; cbGUID: SInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetGUIDString' {$ENDIF} {$ENDIF};
+procedure SDL_JoystickGetGUIDString(guid: TSDL_JoystickGUId; pszGUID: PAnsiChar; cbGUID: SInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetGUIDString' {$ENDIF} {$ENDIF};
 
   {**
    *  convert a string into a joystick formatted guid
    *}
-//function SDL_JoystickGetGUIDFromString(const pchGUID: PAnsiChar): TSDL_JoystickGUID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetGUIDFromString' {$ENDIF} {$ENDIF};
+function SDL_JoystickGetGUIDFromString(const pchGUID: PAnsiChar): TSDL_JoystickGUID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetGUIDFromString' {$ENDIF} {$ENDIF};
 
   {**
    *  Returns SDL_TRUE if the joystick has been opened and currently connected, or SDL_FALSE if it has not.
    *}
-//function SDL_JoystickGetAttached(joystick: PSDL_Joystick): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetAttached' {$ENDIF} {$ENDIF};
+function SDL_JoystickGetAttached(joystick: PSDL_Joystick): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetAttached' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the instance ID of an opened joystick or -1 if the joystick is invalid.
    *}
-//function SDL_JoystickInstanceID(joystick: PSDL_Joystick): TSDL_JoystickID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickInstanceID' {$ENDIF} {$ENDIF};
+function SDL_JoystickInstanceID(joystick: PSDL_Joystick): TSDL_JoystickID cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickInstanceID' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the number of general axis controls on a joystick.
    *}
-//function SDL_JoystickNumAxes(joystick: PSDL_Joystick): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNumAxes' {$ENDIF} {$ENDIF};
+function SDL_JoystickNumAxes(joystick: PSDL_Joystick): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNumAxes' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the number of trackballs on a joystick.
@@ -101,17 +92,17 @@ type
    *  Joystick trackballs have only relative motion events associated
    *  with them and their state cannot be polled.
    *}
-//function SDL_JoystickNumBalls(joystick: PSDL_Joystick): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNumBalls' {$ENDIF} {$ENDIF};
+function SDL_JoystickNumBalls(joystick: PSDL_Joystick): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNumBalls' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the number of POV hats on a joystick.
    *}
-//function SDL_JoystickNumHats(joystick: PSDL_Joystick): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNumHats' {$ENDIF} {$ENDIF};
+function SDL_JoystickNumHats(joystick: PSDL_Joystick): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNumHats' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the number of buttons on a joystick.
    *}
-//function SDL_JoystickNumButtons(joystick: PSDL_Joystick): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNumButtons' {$ENDIF} {$ENDIF};
+function SDL_JoystickNumButtons(joystick: PSDL_Joystick): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickNumButtons' {$ENDIF} {$ENDIF};
 
   {**
    *  Update the current state of the open joysticks.
@@ -119,7 +110,7 @@ type
    *  This is called automatically by the event loop if any joystick
    *  events are enabled.
    *}
-//procedure SDL_JoystickUpdate cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickUpdate' {$ENDIF} {$ENDIF};
+procedure SDL_JoystickUpdate cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickUpdate' {$ENDIF} {$ENDIF};
 
   {**
    *  Enable/disable joystick event polling.
@@ -130,7 +121,7 @@ type
    *
    *  The state can be one of ::SDL_QUERY, ::SDL_ENABLE or ::SDL_IGNORE.
    *}
-//function SDL_JoystickEventState(state: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickEventState' {$ENDIF} {$ENDIF};
+function SDL_JoystickEventState(state: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickEventState' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the current state of an axis control on a joystick.
@@ -139,7 +130,7 @@ type
    *
    *  The axis indices start at index 0.
    *}
-//function SDL_JoystickGetAxis(joystick: PSDL_Joystick; axis: SInt32): SInt16 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetAxis' {$ENDIF} {$ENDIF};
+function SDL_JoystickGetAxis(joystick: PSDL_Joystick; axis: SInt32): SInt16 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetAxis' {$ENDIF} {$ENDIF};
 
   {**
    *  Hat positions
@@ -171,7 +162,7 @@ const
    *   - SDL_HAT_LEFTUP
    *   - SDL_HAT_LEFTDOWN
    *}
-//function SDL_JoystickGetHat(joystick: PSDL_Joystick; hat: SInt32): UInt8 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetHat' {$ENDIF} {$ENDIF};
+function SDL_JoystickGetHat(joystick: PSDL_Joystick; hat: SInt32): UInt8 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetHat' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the ball axis change since the last poll.
@@ -180,15 +171,15 @@ const
    *
    *  The ball indices start at index 0.
    *}
-//function SDL_JoystickGetBall(joystick: PSDL_Joystick; ball: SInt32; dx: PInt; dy: PInt): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetBall' {$ENDIF} {$ENDIF};
+function SDL_JoystickGetBall(joystick: PSDL_Joystick; ball: SInt32; dx: PInt; dy: PInt): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetBall' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the current state of a button on a joystick.
    *
    *  The button indices start at index 0.
    *}
-//function SDL_JoystickGetButton(joystick: PSDL_Joystick; button: SInt32): UInt8 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetButton' {$ENDIF} {$ENDIF};
+function SDL_JoystickGetButton(joystick: PSDL_Joystick; button: SInt32): UInt8 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickGetButton' {$ENDIF} {$ENDIF};
   {**
    *  Close a joystick previously opened with SDL_JoystickOpen().
    *}
-//procedure SDL_JoystickClose(joystick: PSDL_Joystick) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickClose' {$ENDIF} {$ENDIF};
+procedure SDL_JoystickClose(joystick: PSDL_Joystick) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_JoystickClose' {$ENDIF} {$ENDIF};

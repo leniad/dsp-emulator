@@ -257,8 +257,6 @@ SDL_HINT_TIMER_RESOLUTION = 'SDL_TIMER_RESOLUTION';
 type
   SDL_HintPriority = (SDL_HINT_DEFAULT, SDL_HINT_NORMAL, SDL_HINT_OVERRIDE);
 
-  TSDL_SetHintWithPriority=function (const name:PChar;const value:PChar;priority:SDL_HintPriority):boolean; cdecl;
-  TSDL_SetHint=function (const name:PChar;const value:PChar):boolean; cdecl;
 
 {/**
  *  \brief Set a hint with a specific priority
@@ -269,7 +267,7 @@ type
  *
  *  \return SDL_TRUE if the hint was set, SDL_FALSE otherwise
  */}
-//function SDL_SetHintWithPriority( const name: PChar; const value: PChar; priority: SDL_HintPriority) : boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetHintWithPriority' {$ENDIF} {$ENDIF};
+function SDL_SetHintWithPriority( const name: PChar; const value: PChar; priority: SDL_HintPriority) : boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetHintWithPriority' {$ENDIF} {$ENDIF};
 
 // extern DECLSPEC SDL_bool SDLCALL SDL_SetHintWithPriority(const char *name,
 //                                                         const char *value,
@@ -279,7 +277,7 @@ type
  *
  *  \return SDL_TRUE if the hint was set, SDL_FALSE otherwise
  */}
- //function SDL_SetHint( const name: PChar; const value: PChar) : boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetHint' {$ENDIF} {$ENDIF};
+ function SDL_SetHint( const name: PChar; const value: PChar) : boolean; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetHint' {$ENDIF} {$ENDIF};
 
  //extern DECLSPEC SDL_bool SDLCALL SDL_SetHint(const char *name,
   //                                           const char *value);
@@ -289,7 +287,7 @@ type
  *
  *  \return The string value of a hint variable.
  */}
-//function SDL_GetHint( const name: PChar): PChar; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetHint' {$ENDIF} {$ENDIF};
+function SDL_GetHint( const name: PChar): PChar; cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetHint' {$ENDIF} {$ENDIF};
  //extern DECLSPEC const char * SDLCALL SDL_GetHint(const char *name);
 
 
@@ -302,7 +300,7 @@ type
  */}
 type
 TSDL_HintCallback = procedure(userdata: Pointer; const name: PChar; const oldValue: PChar; const newValue: PChar);
-//procedure SDL_AddHintCallback(const name: PChar; callback: TSDL_HintCallback; userdata: Pointer); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AddHintCallback' {$ENDIF} {$ENDIF};
+procedure SDL_AddHintCallback(const name: PChar; callback: TSDL_HintCallback; userdata: Pointer); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AddHintCallback' {$ENDIF} {$ENDIF};
  //typedef void (*SDL_HintCallback)(void *userdata, const char *name, const char *oldValue, const char *newValue);
 //extern DECLSPEC void SDLCALL SDL_AddHintCallback(const char *name,
 //                                                 SDL_HintCallback callback,
@@ -315,7 +313,7 @@ TSDL_HintCallback = procedure(userdata: Pointer; const name: PChar; const oldVal
  *  \param callback The function being called when the hint value changes
  *  \param userdata A pointer being passed to the callback function
  */}
-//procedure SDL_DelHintCallback(const name: PChar; callback: TSDL_HintCallback; userdata: Pointer); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_DelHintCallback' {$ENDIF} {$ENDIF};
+procedure SDL_DelHintCallback(const name: PChar; callback: TSDL_HintCallback; userdata: Pointer); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_DelHintCallback' {$ENDIF} {$ENDIF};
 //extern DECLSPEC void SDLCALL SDL_DelHintCallback(const char *name,
 //                                                 SDL_HintCallback callback,
 //                                                 void *userdata);
@@ -326,5 +324,5 @@ TSDL_HintCallback = procedure(userdata: Pointer; const name: PChar; const oldVal
  *  This function is called during SDL_Quit() to free stored hints.
  */}
 //extern DECLSPEC void SDLCALL SDL_ClearHints(void);
-//procedure SDL_ClearHints(); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_ClearHints' {$ENDIF} {$ENDIF};
+procedure SDL_ClearHints(); cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_ClearHints' {$ENDIF} {$ENDIF};
 

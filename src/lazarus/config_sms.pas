@@ -41,7 +41,7 @@ uses sega_vdp,sms,nz80;
 
 procedure TSMSConfig.FormShow(Sender: TObject);
 begin
-if vdp.is_pal then begin
+if vdp_0.is_pal then begin
   radiobutton2.Checked:=true;
   radiobutton1.Checked:=false;
 end else begin
@@ -67,7 +67,7 @@ end;
 procedure TSMSConfig.SpeedButton1Click(Sender: TObject);
 begin
 if radiobutton1.Checked then begin //NTSC
-  if vdp.is_pal then begin
+  if vdp_0.is_pal then begin
     llamadas_maquina.fps_max:=FPS_NTSC;
     valor_sync:=(1000000/FPS_NTSC)*(cont_micro/1000000);
     close_audio;
@@ -80,15 +80,10 @@ if radiobutton1.Checked then begin //NTSC
     sound_engine_change_clock(CLOCK_NTSC);
     sn_76496_0.free;
     sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
-    vdp.is_pal:=false;
-    vdp.VIDEO_VISIBLE_Y_TOTAL:=243;
-    vdp.VIDEO_Y_TOTAL:=LINES_NTSC;
-    vdp.LINEAS_TOP_BORDE:=27;
-    vdp.LINEAS_Y_BORDE_INFERIOR:=216;
-    vdp.LINEAS_Y_SYNC:=235;
+    vdp_0.set_ntsc_video;
   end;
 end else begin //PAL
-  if not(vdp.is_pal) then begin
+  if not(vdp_0.is_pal) then begin
     llamadas_maquina.fps_max:=FPS_PAL;
     valor_sync:=(1000000/FPS_PAL)*(cont_micro/1000000);
     close_audio;
@@ -101,12 +96,7 @@ end else begin //PAL
     sound_engine_change_clock(CLOCK_PAL);
     sn_76496_0.free;
     sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
-    vdp.is_pal:=true;
-    vdp.VIDEO_VISIBLE_Y_TOTAL:=294;
-    vdp.VIDEO_Y_TOTAL:=LINES_PAL;
-    vdp.LINEAS_TOP_BORDE:=54;
-    vdp.LINEAS_Y_BORDE_INFERIOR:=240;
-    vdp.LINEAS_Y_SYNC:=259;
+    vdp_0.set_pal_video;
   end;
 end;
 if mapper_sms.bios_loaded then begin

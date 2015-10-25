@@ -243,7 +243,7 @@ var
   diff:word;
 begin
 if (r.p.dec and (tipo_cpu<>TCPU_NES)) then begin
-  if r.p.c then carry:=1 else carry:=0;
+  carry:=byte(not(r.p.c));
   diff:=r.a-numero-carry;
   al:=(r.a and 15)-(numero and 15)-carry;
   if (shortint(al)<0) then al:=al-6;
@@ -590,10 +590,7 @@ case instruccion of
                                   r.p.z:=(r.a=0);
                                   r.p.n:=false;
                                 end;
-            TCPU_DECO16:begin
-                          r.pc:=r.pc+1;
-                          if @self.in_port1<>nil then r.a:=self.in_port1;
-                       end;
+            TCPU_DECO16:if @self.in_port1<>nil then r.a:=self.in_port1;
           end;
       $4c:r.pc:=posicion; //JMP absoluto
       $50:if not(r.p.o_v) then begin  //BVC salta si Overflow false

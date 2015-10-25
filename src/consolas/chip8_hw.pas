@@ -1,7 +1,7 @@
 unit chip8_hw;
 
 interface
-uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
+uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sysutils,dialogs,
      sound_engine,file_engine,pal_engine,gfx_engine,misc_functions;
 
@@ -368,22 +368,22 @@ end;
 procedure eventos_chip8;
 begin
   if event.keyboard then begin
-    key[0]:=keyboard[SDL_SCANCODE_X];
-    key[1]:=keyboard[SDL_SCANCODE_1];
-    key[2]:=keyboard[SDL_SCANCODE_2];
-    key[3]:=keyboard[SDL_SCANCODE_3];
-    key[4]:=keyboard[SDL_SCANCODE_Q];
-    key[5]:=keyboard[SDL_SCANCODE_W];
-    key[6]:=keyboard[SDL_SCANCODE_E];
-    key[7]:=keyboard[SDL_SCANCODE_A];
-    key[8]:=keyboard[SDL_SCANCODE_S];
-    key[9]:=keyboard[SDL_SCANCODE_D];
-    key[$a]:=keyboard[SDL_SCANCODE_Z];
-    key[$b]:=keyboard[SDL_SCANCODE_C];
-    key[$c]:=keyboard[SDL_SCANCODE_4];
-    key[$d]:=keyboard[SDL_SCANCODE_R];
-    key[$e]:=keyboard[SDL_SCANCODE_F];
-    key[$f]:=keyboard[SDL_SCANCODE_V];
+    key[0]:=keyboard[libSDL_SCANCODE_X];
+    key[1]:=keyboard[libSDL_SCANCODE_1];
+    key[2]:=keyboard[libSDL_SCANCODE_2];
+    key[3]:=keyboard[libSDL_SCANCODE_3];
+    key[4]:=keyboard[libSDL_SCANCODE_Q];
+    key[5]:=keyboard[libSDL_SCANCODE_W];
+    key[6]:=keyboard[libSDL_SCANCODE_E];
+    key[7]:=keyboard[libSDL_SCANCODE_A];
+    key[8]:=keyboard[libSDL_SCANCODE_S];
+    key[9]:=keyboard[libSDL_SCANCODE_D];
+    key[$a]:=keyboard[libSDL_SCANCODE_Z];
+    key[$b]:=keyboard[libSDL_SCANCODE_C];
+    key[$c]:=keyboard[libSDL_SCANCODE_4];
+    key[$d]:=keyboard[libSDL_SCANCODE_R];
+    key[$e]:=keyboard[libSDL_SCANCODE_F];
+    key[$f]:=keyboard[libSDL_SCANCODE_V];
   end;
 end;
 

@@ -39,7 +39,7 @@ var
  rom:array[0..$3ffff] of word;
  ram:array[0..$ffff] of byte;
  bg_ram:array[0..$fff] of byte;
- sound_latch,bg_bank:byte;
+ bg_bank:byte;
  adpcm_rom:array[0..1] of pbyte;
  nmk112_bank:array[0..7] of byte;
 
@@ -282,7 +282,6 @@ begin
  marcade.in0:=$FF;
  marcade.in1:=$FF;
  marcade.in2:=$FF;
- sound_latch:=0;
  bg_bank:=0;
  for f:=0 to 7 do begin
   nmk112_bank[f]:=0;

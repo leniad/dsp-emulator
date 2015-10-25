@@ -238,7 +238,10 @@ uses
   pinballaction_hw in '..\arcade\pinballaction_hw.pas',
   sms in '..\consolas\sms.pas',
   sega_vdp in '..\consolas\sega_vdp.pas',
-  config_sms in 'config_sms.pas' {SMSConfig};
+  config_sms in 'config_sms.pas' {SMSConfig},
+  lib_sdl2 in '..\misc\lib_sdl2.pas',
+  renegade_hw in '..\arcade\renegade_hw.pas',
+  generic_adpcm in '..\snd\generic_adpcm.pas';
 
 {$R *.res}
 

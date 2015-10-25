@@ -19,6 +19,7 @@ procedure toki_snd_putbyte(direccion:word;valor:byte);
 procedure toki_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         toki_rom:array[0..4] of tipo_roms=(
         (n:'l10_6.bin';l:$20000;p:0;crc:$94015d91),(n:'k10_4e.bin';l:$20000;p:$1;crc:$531bd3ef),
@@ -53,8 +54,6 @@ var
  scroll_x2_tmp,scroll_x1,scroll_y1,scroll_y2:word;
  scroll_x2:array[0..$ff] of word;
  prioridad_pant:boolean;
-
-implementation
 
 procedure Cargar_toki;
 begin

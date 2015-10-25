@@ -27,22 +27,17 @@ type
   PSDL_SystemCursor = ^TSDL_SystemCursor;
   TSDL_SystemCursor = Word;
 
-  TSDL_GetCursor=function:PSDL_Cursor;cdecl;
-  TSDL_CreateCursor=function(const data:PUInt8;const mask:PUInt8;w:SInt32;h:SInt32;hot_x:SInt32;hot_y:SInt32):PSDL_Cursor;cdecl;
-  TSDL_SetCursor=procedure(cursor:PSDL_Cursor);cdecl;
-  TSDL_ShowCursor=function(toggle:SInt32):SInt32;cdecl;
-
   {* Function prototypes *}
 
   {**
    *  Get the window which currently has mouse focus.
    *}
 
-//  function SDL_GetMouseFocus: PSDL_Window cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetMouseFocus' {$ENDIF}{$ENDIF};
+  function SDL_GetMouseFocus: PSDL_Window cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetMouseFocus' {$ENDIF}{$ENDIF};
 
   {**
    *  Retrieve the current state of the mouse.
-   *
+   *  
    *  The current button state is returned as a button bitmask, which can
    *  be tested using the SDL_BUTTON(X) macros, and x and y are set to the
    *  mouse cursor position relative to the focus window for the currently
@@ -51,7 +46,7 @@ type
    * SDL_Button = 1 shl ((X)-1)
    *}
 
-//  function SDL_GetMouseState(x: PInt; y: PInt): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetMouseState' {$ENDIF}{$ENDIF};
+  function SDL_GetMouseState(x: PInt; y: PInt): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetMouseState' {$ENDIF}{$ENDIF};
 
   {**
    *  Retrieve the relative state of the mouse.
@@ -61,7 +56,7 @@ type
    *  mouse deltas since the last call to SDL_GetRelativeMouseState().
    *}
 
-//  function SDL_GetRelativeMouseState(x: PInt; y: PInt): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetRelativeMouseState' {$ENDIF}{$ENDIF};
+  function SDL_GetRelativeMouseState(x: PInt; y: PInt): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetRelativeMouseState' {$ENDIF}{$ENDIF};
 
   {**
    *  Moves the mouse to the given position within the window.
@@ -73,7 +68,7 @@ type
    *  This function generates a mouse motion event
    *}
 
-//  procedure SDL_WarpMouseInWindow(window: PSDL_Window; x: SInt32; y: SInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_WarpMouseInWindow' {$ENDIF}{$ENDIF};
+  procedure SDL_WarpMouseInWindow(window: PSDL_Window; x: SInt32; y: SInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_WarpMouseInWindow' {$ENDIF}{$ENDIF};
 
   {**
    *  Set relative mouse mode.
@@ -88,19 +83,19 @@ type
    *  will not change.
    *
    *  This function will flush any pending mouse motion.
-   *
+   *  
    *  SDL_GetRelativeMouseMode()
    *}
 
-//  function SDL_SetRelativeMouseMode(enabled: TSDL_Bool): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetRelativeMouseMode' {$ENDIF}{$ENDIF};
+  function SDL_SetRelativeMouseMode(enabled: TSDL_Bool): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetRelativeMouseMode' {$ENDIF}{$ENDIF};
 
   {**
    *  Query whether relative mouse mode is enabled.
-   *
+   *  
    *  SDL_SetRelativeMouseMode()
    *}
 
-//  function SDL_GetRelativeMouseMode: TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetRelativeMouseMode' {$ENDIF}{$ENDIF};
+  function SDL_GetRelativeMouseMode: TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetRelativeMouseMode' {$ENDIF}{$ENDIF};
 
   {**
    *  Create a cursor, using the specified bitmap data and
@@ -114,14 +109,14 @@ type
    *  <tr><td>  0   </td><td>  1   </td><td> White </td></tr>
    *  <tr><td>  1   </td><td>  1   </td><td> Black </td></tr>
    *  <tr><td>  0   </td><td>  0   </td><td> Transparent </td></tr>
-   *  <tr><td>  1   </td><td>  0   </td><td> Inverted color if possible, black
+   *  <tr><td>  1   </td><td>  0   </td><td> Inverted color if possible, black 
    *                                         if not. </td></tr>
    *  </table>
-   *
+   *  
    *  SDL_FreeCursor()
    *}
 
-//  function SDL_CreateCursor(const data: PUInt8; const mask: PUInt8; w: SInt32; h: SInt32; hot_x: SInt32; hot_y: SInt32): PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CreateCursor' {$ENDIF}{$ENDIF};
+  function SDL_CreateCursor(const data: PUInt8; const mask: PUInt8; w: SInt32; h: SInt32; hot_x: SInt32; hot_y: SInt32): PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CreateCursor' {$ENDIF}{$ENDIF};
 
   {**
    *  Create a color cursor.
@@ -129,7 +124,7 @@ type
    *  SDL_FreeCursor()
    *}
 
-//  function SDL_CreateColorCursor(surface: PSDL_Surface; hot_x: SInt32; hot_y: SInt32): PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CreateColorCursor' {$ENDIF}{$ENDIF};
+  function SDL_CreateColorCursor(surface: PSDL_Surface; hot_x: SInt32; hot_y: SInt32): PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CreateColorCursor' {$ENDIF}{$ENDIF};
 
   {**
    *  Create a system cursor.
@@ -137,19 +132,19 @@ type
    *  SDL_FreeCursor()
    *}
 
-//  function SDL_CreateSystemCursor(id: TSDL_SystemCursor): PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CreateSystemCursor' {$ENDIF}{$ENDIF};
+  function SDL_CreateSystemCursor(id: TSDL_SystemCursor): PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CreateSystemCursor' {$ENDIF}{$ENDIF};
 
   {**
    *  Set the active cursor.
    *}
 
-//  procedure SDL_SetCursor(cursor: PSDL_Cursor) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetCursor' {$ENDIF}{$ENDIF};
+  procedure SDL_SetCursor(cursor: PSDL_Cursor) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetCursor' {$ENDIF}{$ENDIF};
 
   {**
    *  Return the active cursor.
    *}
 
-//  function SDL_GetCursor: PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetCursor' {$ENDIF}{$ENDIF};
+  function SDL_GetCursor: PSDL_Cursor cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetCursor' {$ENDIF}{$ENDIF};
 
   {**
    *  Frees a cursor created with SDL_CreateCursor().
@@ -157,18 +152,18 @@ type
    *  SDL_CreateCursor()
    *}
 
-//  procedure SDL_FreeCursor(cursor: PSDL_Cursor) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FreeCursor' {$ENDIF}{$ENDIF};
+  procedure SDL_FreeCursor(cursor: PSDL_Cursor) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FreeCursor' {$ENDIF}{$ENDIF};
 
   {**
    *  Toggle whether or not the cursor is shown.
    *
    *  toggle 1 to show the cursor, 0 to hide it, -1 to query the current
    *                state.
-   *
+   *  
    *  1 if the cursor is shown, or 0 if the cursor is hidden.
    *}
 
-//  function SDL_ShowCursor(toggle: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_ShowCursor' {$ENDIF}{$ENDIF};
+  function SDL_ShowCursor(toggle: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_ShowCursor' {$ENDIF}{$ENDIF};
 
 const
   {**

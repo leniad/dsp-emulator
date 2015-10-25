@@ -2,7 +2,7 @@ unit spectrum_misc;
 
 interface
 
-uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
+uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      principal,nz80,z80_sp,spectrum_128k,ay_8910,controls_engine,sysutils,
      forms,lenguaje,spectrum_48k,dialogs,spectrum_3,upd765,cargar_spec,
      gfx_engine,main_engine,graphics,pal_engine,sound_engine,tape_window,
@@ -189,341 +189,6 @@ end;
 
 procedure teclado_matriz;
 begin
-//adr_11 $8
-  if keyboard[SDL_SCANCODE_1] then begin
-    kb_0:=true;
-    adr_11:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_5]) then adr_11:=false;
-    if not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_SPACE]) then kb_0:=false;
-  end;
-  if keyboard[SDL_SCANCODE_2] then begin
-    kb_1:=true;
-    adr_11:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_5]) then adr_11:=false;
-    if not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_LCTRL]) then kb_1:=false;
-  end;
-  if keyboard[SDL_SCANCODE_3] then begin
-    kb_2:=true;
-    adr_11:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_5]) then adr_11:=false;
-    if not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_M]) then kb_2:=false;
-  end;
-  if keyboard[SDL_SCANCODE_4] then begin
-    kb_3:=true;
-    adr_11:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_5]) then adr_11:=false;
-    if not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_N]) then kb_3:=false;
-  end;
-  if keyboard[SDL_SCANCODE_5] then begin
-    kb_4:=true;
-    adr_11:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_4]) then adr_11:=false;
-    if not(keyboard[SDL_SCANCODE_T]) and not(keyboard[SDL_SCANCODE_G]) and not(keyboard[SDL_SCANCODE_6]) and not(keyboard[SDL_SCANCODE_Y]) and not(keyboard[SDL_SCANCODE_V]) and not(keyboard[SDL_SCANCODE_H]) and not(keyboard[SDL_SCANCODE_B]) then kb_4:=false;
-  end;
-  //adr_12 $10
-  if keyboard[SDL_SCANCODE_0] then begin
-    kb_0:=true;
-    adr_12:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_6]) then adr_12:=false;
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_SPACE]) then kb_0:=false;
-  end;
-  if keyboard[SDL_SCANCODE_9] then begin
-    kb_1:=true;
-    adr_12:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_6]) then adr_12:=false;
-    if not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_LCTRL]) then kb_1:=false;
-  end;
-  if keyboard[SDL_SCANCODE_8] then begin
-    kb_2:=true;
-    adr_12:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_6]) then adr_12:=false;
-    if not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_M]) then kb_2:=false;
-  end;
-  if keyboard[SDL_SCANCODE_7] then begin
-    kb_3:=true;
-    adr_12:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_6]) then adr_12:=false;
-    if not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_N]) then kb_3:=false;
-  end;
-  if keyboard[SDL_SCANCODE_6] then begin
-    kb_4:=true;
-    adr_12:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_7]) then adr_12:=false;
-    if not(keyboard[SDL_SCANCODE_5]) and not(keyboard[SDL_SCANCODE_T]) and not(keyboard[SDL_SCANCODE_G]) and not(keyboard[SDL_SCANCODE_Y]) and not(keyboard[SDL_SCANCODE_V]) and not(keyboard[SDL_SCANCODE_H]) and not(keyboard[SDL_SCANCODE_B]) then kb_4:=false;
-  end;
-  //adr_10 $4
-  if keyboard[SDL_SCANCODE_Q] then begin
-    adr_10:=true;
-    kb_0:=true;
-  end else begin
-   if not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_T]) then adr_10:=false;
-   if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_SPACE]) then kb_0:=false;
-  end;
-  if keyboard[SDL_SCANCODE_W] then begin
-    adr_10:=true;
-    kb_1:=true;
-  end else begin
-   if not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_T]) then adr_10:=false;
-   if not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_LCTRL]) then kb_1:=false;
-  end;
-  if keyboard[SDL_SCANCODE_E] then begin
-    adr_10:=true;
-    kb_2:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_T]) then adr_10:=false;
-    if not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_M]) then kb_2:=false;
-  end;
-  if keyboard[SDL_SCANCODE_R] then begin
-    adr_10:=true;
-    kb_3:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_T]) then adr_10:=false;
-    if not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_N]) then kb_3:=false;
-  end;
-  if keyboard[SDL_SCANCODE_T] then begin
-    adr_10:=true;
-    kb_4:=true;
-  end else begin
-   if not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_R]) then adr_10:=false;
-   if not(keyboard[SDL_SCANCODE_5]) and not(keyboard[SDL_SCANCODE_G]) and not(keyboard[SDL_SCANCODE_6]) and not(keyboard[SDL_SCANCODE_Y]) and not(keyboard[SDL_SCANCODE_V]) and not(keyboard[SDL_SCANCODE_H]) and not(keyboard[SDL_SCANCODE_B]) then kb_4:=false;
-  end;
-  //adr_13 $20
-  if keyboard[SDL_SCANCODE_P] then begin
-    adr_13:=true;
-    kb_0:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_Y]) then adr_13:=false;
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_SPACE]) then kb_0:=false;
-  end;
-  if keyboard[SDL_SCANCODE_O] then begin
-    adr_13:=true;
-    kb_1:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_Y]) then adr_13:=false;
-    if not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_LCTRL]) then kb_1:=false;
-  end;
-  if keyboard[SDL_SCANCODE_I] then begin
-    adr_13:=true;
-    kb_2:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_Y]) then adr_13:=false;
-    if not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_M]) then kb_2:=false;
-  end;
-  if keyboard[SDL_SCANCODE_U] then begin
-    adr_13:=true;
-    kb_3:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_Y]) then adr_13:=false;
-    if not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_N]) then kb_3:=false;
-  end;
-  if keyboard[SDL_SCANCODE_Y] then begin
-    adr_13:=true;
-    kb_4:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_U]) then adr_13:=false;
-    if not(keyboard[SDL_SCANCODE_5]) and not(keyboard[SDL_SCANCODE_T]) and not(keyboard[SDL_SCANCODE_G]) and not(keyboard[SDL_SCANCODE_6]) and not(keyboard[SDL_SCANCODE_V]) and not(keyboard[SDL_SCANCODE_H]) and not(keyboard[SDL_SCANCODE_B]) then kb_4:=false;
-  end;
-  //adr_14 $40
-  if keyboard[SDL_SCANCODE_RETURN] then begin
-    adr_14:=true;
-    kb_0:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_H]) then adr_14:=false;
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_SPACE]) then kb_0:=false;
-  end;
-  if keyboard[SDL_SCANCODE_L] then begin
-    adr_14:=true;
-    kb_1:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_H]) then adr_14:=false;
-    if not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_LCTRL]) then kb_1:=false;
-  end;
-  if keyboard[SDL_SCANCODE_K] then begin
-    adr_14:=true;
-    kb_2:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_H]) then adr_14:=false;
-    if not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_M]) then kb_2:=false;
-  end;
-  if keyboard[SDL_SCANCODE_J] then begin
-    adr_14:=true;
-    kb_3:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_H]) then adr_14:=false;
-    if not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_N]) then kb_3:=false;
-  end;
-  if keyboard[SDL_SCANCODE_H] then begin
-    adr_14:=true;
-    kb_4:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_J]) then adr_14:=false;
-    if not(keyboard[SDL_SCANCODE_5]) and not(keyboard[SDL_SCANCODE_T]) and not(keyboard[SDL_SCANCODE_G]) and not(keyboard[SDL_SCANCODE_6]) and not(keyboard[SDL_SCANCODE_Y]) and not(keyboard[SDL_SCANCODE_V]) and not(keyboard[SDL_SCANCODE_B]) then kb_4:=false;
-  end;
-  //adr_9 $2
-  if keyboard[SDL_SCANCODE_A] then begin
-    adr_9:=true;
-    kb_0:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_G]) then adr_9:=false;
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_SPACE]) then kb_0:=false;
-  end;
-  if keyboard[SDL_SCANCODE_S] then begin
-    adr_9:=true;
-    kb_1:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_G]) then adr_9:=false;
-    if not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_LCTRL]) then kb_1:=false;
-  end;
-  if keyboard[SDL_SCANCODE_D] then begin
-    adr_9:=true;
-    kb_2:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_G]) then adr_9:=false;
-    if not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_M]) then kb_2:=false;
-  end;
-  if keyboard[SDL_SCANCODE_F] then begin
-    adr_9:=true;
-    kb_3:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_G]) then adr_9:=false;
-    if not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_N]) then kb_3:=false;
-  end;
-  if keyboard[SDL_SCANCODE_G] then begin
-    adr_9:=true;
-    kb_4:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_F]) then adr_9:=false;
-    if not(keyboard[SDL_SCANCODE_5]) and not(keyboard[SDL_SCANCODE_T]) and not(keyboard[SDL_SCANCODE_6]) and not(keyboard[SDL_SCANCODE_Y]) and not(keyboard[SDL_SCANCODE_V]) and not(keyboard[SDL_SCANCODE_H]) and not(keyboard[SDL_SCANCODE_B]) then kb_4:=false;
-  end;
-  //adr_8 $1
-  if keyboard[SDL_SCANCODE_LSHIFT] then begin
-    adr_8:=true;
-    kb_0:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_V]) then adr_8:=false;
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_SPACE]) then kb_0:=false;
-  end;
-  if keyboard[SDL_SCANCODE_Z] then begin
-    adr_8:=true;
-    kb_1:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_V]) then adr_8:=false;
-    if not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_L]) and not(keyboard[SDL_SCANCODE_LCTRL]) then kb_1:=false;
-  end;
-  if keyboard[SDL_SCANCODE_X] then begin
-    adr_8:=true;
-    kb_2:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_V]) then adr_8:=false;
-    if not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_K]) and not(keyboard[SDL_SCANCODE_M]) then kb_2:=false;
-  end;
-  if keyboard[SDL_SCANCODE_C] then begin
-    adr_8:=true;
-    kb_3:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_V]) then adr_8:=false;
-    if not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_J]) and not(keyboard[SDL_SCANCODE_N]) then kb_3:=false;
-  end;
-  if keyboard[SDL_SCANCODE_V] then begin
-    adr_8:=true;
-    kb_4:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_LSHIFT]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_C]) then adr_8:=false;
-    if not(keyboard[SDL_SCANCODE_5]) and not(keyboard[SDL_SCANCODE_T]) and not(keyboard[SDL_SCANCODE_G]) and not(keyboard[SDL_SCANCODE_6]) and not(keyboard[SDL_SCANCODE_Y]) and not(keyboard[SDL_SCANCODE_H]) and not(keyboard[SDL_SCANCODE_B]) then kb_4:=false;
-  end;
-  //adr_15 $80
-  if keyboard[SDL_SCANCODE_SPACE] then begin
-    adr_15:=true;
-    kb_0:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_LCTRL]) and not(keyboard[SDL_SCANCODE_M]) and not(keyboard[SDL_SCANCODE_N]) and not(keyboard[SDL_SCANCODE_B]) then adr_15:=false;
-    if not(keyboard[SDL_SCANCODE_1]) and not(keyboard[SDL_SCANCODE_Q]) and not(keyboard[SDL_SCANCODE_A]) and not(keyboard[SDL_SCANCODE_0]) and not(keyboard[SDL_SCANCODE_P]) and not(keyboard[SDL_SCANCODE_RETURN]) and not(keyboard[SDL_SCANCODE_LSHIFT]) then kb_0:=false;
-  end;
-  if keyboard[SDL_SCANCODE_LCTRL] then begin
-    adr_15:=true;
-    kb_1:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_SPACE]) and not(keyboard[SDL_SCANCODE_M]) and not(keyboard[SDL_SCANCODE_N]) and not(keyboard[SDL_SCANCODE_B]) then adr_15:=false;
-    if not(keyboard[SDL_SCANCODE_2]) and not(keyboard[SDL_SCANCODE_W]) and not(keyboard[SDL_SCANCODE_S]) and not(keyboard[SDL_SCANCODE_9]) and not(keyboard[SDL_SCANCODE_O]) and not(keyboard[SDL_SCANCODE_Z]) and not(keyboard[SDL_SCANCODE_L]) then kb_1:=false;
-  end;
-  if keyboard[SDL_SCANCODE_M] then begin
-    adr_15:=true;
-    kb_2:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_SPACE]) and not(keyboard[SDL_SCANCODE_LCTRL]) and not(keyboard[SDL_SCANCODE_N]) and not(keyboard[SDL_SCANCODE_B]) then adr_15:=false;
-    if not(keyboard[SDL_SCANCODE_3]) and not(keyboard[SDL_SCANCODE_E]) and not(keyboard[SDL_SCANCODE_D]) and not(keyboard[SDL_SCANCODE_8]) and not(keyboard[SDL_SCANCODE_I]) and not(keyboard[SDL_SCANCODE_X]) and not(keyboard[SDL_SCANCODE_K]) then kb_2:=false;
-  end;
-  if keyboard[SDL_SCANCODE_N] then begin
-    adr_15:=true;
-    kb_3:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_SPACE]) and not(keyboard[SDL_SCANCODE_LCTRL]) and not(keyboard[SDL_SCANCODE_M]) and not(keyboard[SDL_SCANCODE_B]) then adr_15:=false;
-    if not(keyboard[SDL_SCANCODE_4]) and not(keyboard[SDL_SCANCODE_R]) and not(keyboard[SDL_SCANCODE_F]) and not(keyboard[SDL_SCANCODE_7]) and not(keyboard[SDL_SCANCODE_U]) and not(keyboard[SDL_SCANCODE_C]) and not(keyboard[SDL_SCANCODE_J]) then kb_3:=false;
-  end;
-  if keyboard[SDL_SCANCODE_B] then begin
-    adr_15:=true;
-    kb_4:=true;
-  end else begin
-    if not(keyboard[SDL_SCANCODE_SPACE]) and not(keyboard[SDL_SCANCODE_LCTRL]) and not(keyboard[SDL_SCANCODE_M]) and not(keyboard[SDL_SCANCODE_N]) then adr_15:=false;
-    if not(keyboard[SDL_SCANCODE_5]) and not(keyboard[SDL_SCANCODE_T]) and not(keyboard[SDL_SCANCODE_G]) and not(keyboard[SDL_SCANCODE_6]) and not(keyboard[SDL_SCANCODE_Y]) and not(keyboard[SDL_SCANCODE_V]) and not(keyboard[SDL_SCANCODE_H]) then kb_4:=false;
-  end;
-  //otros
-  if keyboard[SDL_SCANCODE_BACKSPACE] then begin
-    adr_8:=true;
-    adr_12:=true;
-    kb_0:=true;
-  end;
-//Ahora lo convierto al teclado del spectrum...
-  key_spec[SDL_SCANCODE_1]:=kb_0 and adr_11;
-  key_spec[SDL_SCANCODE_2]:=kb_1 and adr_11;
-  key_spec[SDL_SCANCODE_3]:=kb_2 and adr_11;
-  key_spec[SDL_SCANCODE_4]:=kb_3 and adr_11;
-  key_spec[SDL_SCANCODE_5]:=kb_4 and adr_11;
-  key_spec[SDL_SCANCODE_0]:=kb_0 and adr_12;
-  key_spec[SDL_SCANCODE_9]:=kb_1 and adr_12;
-  key_spec[SDL_SCANCODE_8]:=kb_2 and adr_12;
-  key_spec[SDL_SCANCODE_7]:=kb_3 and adr_12;
-  key_spec[SDL_SCANCODE_6]:=kb_4 and adr_12;
-  key_spec[SDL_SCANCODE_Q]:=kb_0 and adr_10;
-  key_spec[SDL_SCANCODE_W]:=kb_1 and adr_10;
-  key_spec[SDL_SCANCODE_E]:=kb_2 and adr_10;
-  key_spec[SDL_SCANCODE_R]:=kb_3 and adr_10;
-  key_spec[SDL_SCANCODE_T]:=kb_4 and adr_10;
-  key_spec[SDL_SCANCODE_P]:=kb_0 and adr_13;
-  key_spec[SDL_SCANCODE_O]:=kb_1 and adr_13;
-  key_spec[SDL_SCANCODE_I]:=kb_2 and adr_13;
-  key_spec[SDL_SCANCODE_U]:=kb_3 and adr_13;
-  key_spec[SDL_SCANCODE_Y]:=kb_4 and adr_13;
-  key_spec[SDL_SCANCODE_RETURN]:=kb_0 and adr_14;
-  key_spec[SDL_SCANCODE_L]:=kb_1 and adr_14;
-  key_spec[SDL_SCANCODE_K]:=kb_2 and adr_14;
-  key_spec[SDL_SCANCODE_J]:=kb_3 and adr_14;
-  key_spec[SDL_SCANCODE_H]:=kb_4 and adr_14;
-  key_spec[SDL_SCANCODE_A]:=kb_0 and adr_9;
-  key_spec[SDL_SCANCODE_S]:=kb_1 and adr_9;
-  key_spec[SDL_SCANCODE_D]:=kb_2 and adr_9;
-  key_spec[SDL_SCANCODE_F]:=kb_3 and adr_9;
-  key_spec[SDL_SCANCODE_G]:=kb_4 and adr_9;
-  key_spec[SDL_SCANCODE_LSHIFT]:=kb_0 and adr_8;
-  key_spec[SDL_SCANCODE_Z]:=kb_1 and adr_8;
-  key_spec[SDL_SCANCODE_X]:=kb_2 and adr_8;
-  key_spec[SDL_SCANCODE_C]:=kb_3 and adr_8;
-  key_spec[SDL_SCANCODE_V]:=kb_4 and adr_8;
-  key_spec[SDL_SCANCODE_SPACE]:=kb_0 and adr_15;
-  key_spec[SDL_SCANCODE_LCTRL]:=kb_1 and adr_15;
-  key_spec[SDL_SCANCODE_M]:=kb_2 and adr_15;
-  key_spec[SDL_SCANCODE_N]:=kb_3 and adr_15;
-  key_spec[SDL_SCANCODE_B]:=kb_4 and adr_15;
 end;
 
 procedure eventos_spectrum;
@@ -582,57 +247,57 @@ if (event.mouse and (mouse.tipo<>0)) then begin
   end;
 end;
 if event.keyboard then begin
-  if ((keyboard[SDL_SCANCODE_F1]) and cinta_tzx.cargada) then begin
+  if ((keyboard[libSDL_SCANCODE_F1]) and cinta_tzx.cargada) then begin
     if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
       else tape_window1.fPlayCinta(nil);
   end;
-  if ((keyboard[SDL_SCANCODE_F5]) and (main_vars.tipo_maquina=2)) then begin
+  if ((keyboard[libSDL_SCANCODE_F5]) and (main_vars.tipo_maquina=2)) then begin
     clear_disk(0);
     change_caption(llamadas_maquina.caption);
   end;
   if false then teclado_matriz
     else copymemory(@key_spec[0],@keyboard[0],255);
-  if key_spec[SDL_SCANCODE_1] then key1_5:=(key1_5 And $FE) else key1_5:=(key1_5 or 1);
-  if key_spec[SDL_SCANCODE_2] then key1_5:=(key1_5 And $FD) else key1_5:=(key1_5 or 2);
-  if key_spec[SDL_SCANCODE_3] then key1_5:=key1_5 And $FB else key1_5:=key1_5 or 4;
-  if key_spec[SDL_SCANCODE_4] then key1_5:=key1_5 And $F7 else key1_5:=key1_5 or 8;
-  if key_spec[SDL_SCANCODE_5] then key1_5:=key1_5 And $EF else key1_5:=key1_5 or $10;
-  if key_spec[SDL_SCANCODE_0] then key6_0:=key6_0 And $FE else key6_0:=key6_0 or 1;
-  if key_spec[SDL_SCANCODE_9] then key6_0:=key6_0 And $FD else key6_0:=key6_0 or 2;
-  if key_spec[SDL_SCANCODE_8] then key6_0:=key6_0 And $FB else key6_0:=key6_0 or 4;
-  if key_spec[SDL_SCANCODE_7] then key6_0:=key6_0 And $F7 else key6_0:=key6_0 or 8;
-  if key_spec[SDL_SCANCODE_6] then key6_0:=key6_0 And $EF else key6_0:=key6_0 or $10;
-  if key_spec[SDL_SCANCODE_Q] then keyQ_T:=keyQ_T And $FE else keyQ_T:=keyQ_T or 1;
-  if key_spec[SDL_SCANCODE_W] then keyQ_T:=keyQ_T And $FD else keyQ_T:=keyQ_T or 2;
-  if key_spec[SDL_SCANCODE_E] then keyQ_T:=keyQ_T And $FB else keyQ_T:=keyQ_T or 4;
-  if key_spec[SDL_SCANCODE_R] then keyQ_T:=keyQ_T And $F7 else keyQ_T:=keyQ_T or 8;
-  if key_spec[SDL_SCANCODE_T] then keyQ_T:=keyQ_T And $EF else keyQ_T:=keyQ_T or $10;
-  if key_spec[SDL_SCANCODE_P] then keyY_P:=keyY_P And $FE else keyY_P:=keyY_P or 1;
-  if key_spec[SDL_SCANCODE_O] then keyY_P:=keyY_P And $FD else keyY_P:=keyY_P or 2;
-  if key_spec[SDL_SCANCODE_I] then keyY_P:=keyY_P And $FB else keyY_P:=keyY_P or 4;
-  if key_spec[SDL_SCANCODE_U] then keyY_P:=keyY_P And $F7 else keyY_P:=keyY_P or 8;
-  if key_spec[SDL_SCANCODE_Y] then keyY_P:=keyY_P And $EF else keyY_P:=keyY_P or $10;
-  if key_spec[SDL_SCANCODE_RETURN] then keyH_ENT:=keyH_ENT And $FE else keyH_ENT:=keyH_ENT or 1;
-  if key_spec[SDL_SCANCODE_L] then keyH_ENT:=keyH_ENT And $FD else keyH_ENT:=keyH_ENT or 2;
-  if key_spec[SDL_SCANCODE_K] then keyH_ENT:=keyH_ENT And $FB else keyH_ENT:=keyH_ENT or 4;
-  if key_spec[SDL_SCANCODE_J] then keyH_ENT:=keyH_ENT And $F7 else keyH_ENT:=keyH_ENT or 8;
-  if key_spec[SDL_SCANCODE_H] then keyH_ENT:=keyH_ENT And $EF else keyH_ENT:=keyH_ENT or $10;
-  if key_spec[SDL_SCANCODE_A] then keyA_G:=keyA_G And $FE else keyA_G:=keyA_G or 1;
-  if key_spec[SDL_SCANCODE_S] then keyA_G:=keyA_G And $FD else keyA_G:=keyA_G or 2;
-  if key_spec[SDL_SCANCODE_D] then keyA_G:=keyA_G And $FB else keyA_G:=keyA_G or 4;
-  if key_spec[SDL_SCANCODE_F] then keyA_G:=keyA_G And $F7 else keyA_G:=keyA_G or 8;
-  if key_spec[SDL_SCANCODE_G] then keyA_G:=keyA_G And $EF else keyA_G:=keyA_G or $10;
-  if key_spec[SDL_SCANCODE_LSHIFT] then keyCAPS_V:=(keyCAPS_V And $FE) else keyCAPS_V:=(keyCAPS_V or 1);
-  if key_spec[SDL_SCANCODE_Z] then keyCAPS_V:=keyCAPS_V And $FD else keyCAPS_V:=keyCAPS_V or 2;
-  if key_spec[SDL_SCANCODE_X] then keyCAPS_V:=keyCAPS_V And $FB else keyCAPS_V:=keyCAPS_V or 4;
-  if key_spec[SDL_SCANCODE_C] then keyCAPS_V:=keyCAPS_V And $F7 else keyCAPS_V:=keyCAPS_V or 8;
-  if key_spec[SDL_SCANCODE_V] then keyCAPS_V:=keyCAPS_V And $EF else keyCAPS_V:=keyCAPS_V or $10;
-  if key_spec[SDL_SCANCODE_SPACE] then keyB_SPC:=keyB_SPC And $FE else keyB_SPC:=keyB_SPC or 1;
-  if key_spec[SDL_SCANCODE_LCTRL] then keyB_SPC:=keyB_SPC And $FD else keyB_SPC:=keyB_SPC or 2;
-  if key_spec[SDL_SCANCODE_M] then keyB_SPC:=keyB_SPC And $FB else keyB_SPC:=keyB_SPC or 4;
-  if key_spec[SDL_SCANCODE_N] then keyB_SPC:=keyB_SPC And $F7 else keyB_SPC:=keyB_SPC or 8;
-  if key_spec[SDL_SCANCODE_B] then keyB_SPC:=keyB_SPC And $EF else keyB_SPC:=keyB_SPC or $10;
-  if key_spec[SDL_SCANCODE_BACKSPACE] then begin
+  if key_spec[libSDL_SCANCODE_1] then key1_5:=(key1_5 And $FE) else key1_5:=(key1_5 or 1);
+  if key_spec[libSDL_SCANCODE_2] then key1_5:=(key1_5 And $FD) else key1_5:=(key1_5 or 2);
+  if key_spec[libSDL_SCANCODE_3] then key1_5:=key1_5 And $FB else key1_5:=key1_5 or 4;
+  if key_spec[libSDL_SCANCODE_4] then key1_5:=key1_5 And $F7 else key1_5:=key1_5 or 8;
+  if key_spec[libSDL_SCANCODE_5] then key1_5:=key1_5 And $EF else key1_5:=key1_5 or $10;
+  if key_spec[libSDL_SCANCODE_0] then key6_0:=key6_0 And $FE else key6_0:=key6_0 or 1;
+  if key_spec[libSDL_SCANCODE_9] then key6_0:=key6_0 And $FD else key6_0:=key6_0 or 2;
+  if key_spec[libSDL_SCANCODE_8] then key6_0:=key6_0 And $FB else key6_0:=key6_0 or 4;
+  if key_spec[libSDL_SCANCODE_7] then key6_0:=key6_0 And $F7 else key6_0:=key6_0 or 8;
+  if key_spec[libSDL_SCANCODE_6] then key6_0:=key6_0 And $EF else key6_0:=key6_0 or $10;
+  if key_spec[libSDL_SCANCODE_Q] then keyQ_T:=keyQ_T And $FE else keyQ_T:=keyQ_T or 1;
+  if key_spec[libSDL_SCANCODE_W] then keyQ_T:=keyQ_T And $FD else keyQ_T:=keyQ_T or 2;
+  if key_spec[libSDL_SCANCODE_E] then keyQ_T:=keyQ_T And $FB else keyQ_T:=keyQ_T or 4;
+  if key_spec[libSDL_SCANCODE_R] then keyQ_T:=keyQ_T And $F7 else keyQ_T:=keyQ_T or 8;
+  if key_spec[libSDL_SCANCODE_T] then keyQ_T:=keyQ_T And $EF else keyQ_T:=keyQ_T or $10;
+  if key_spec[libSDL_SCANCODE_P] then keyY_P:=keyY_P And $FE else keyY_P:=keyY_P or 1;
+  if key_spec[libSDL_SCANCODE_O] then keyY_P:=keyY_P And $FD else keyY_P:=keyY_P or 2;
+  if key_spec[libSDL_SCANCODE_I] then keyY_P:=keyY_P And $FB else keyY_P:=keyY_P or 4;
+  if key_spec[libSDL_SCANCODE_U] then keyY_P:=keyY_P And $F7 else keyY_P:=keyY_P or 8;
+  if key_spec[libSDL_SCANCODE_Y] then keyY_P:=keyY_P And $EF else keyY_P:=keyY_P or $10;
+  if key_spec[libSDL_SCANCODE_RETURN] then keyH_ENT:=keyH_ENT And $FE else keyH_ENT:=keyH_ENT or 1;
+  if key_spec[libSDL_SCANCODE_L] then keyH_ENT:=keyH_ENT And $FD else keyH_ENT:=keyH_ENT or 2;
+  if key_spec[libSDL_SCANCODE_K] then keyH_ENT:=keyH_ENT And $FB else keyH_ENT:=keyH_ENT or 4;
+  if key_spec[libSDL_SCANCODE_J] then keyH_ENT:=keyH_ENT And $F7 else keyH_ENT:=keyH_ENT or 8;
+  if key_spec[libSDL_SCANCODE_H] then keyH_ENT:=keyH_ENT And $EF else keyH_ENT:=keyH_ENT or $10;
+  if key_spec[libSDL_SCANCODE_A] then keyA_G:=keyA_G And $FE else keyA_G:=keyA_G or 1;
+  if key_spec[libSDL_SCANCODE_S] then keyA_G:=keyA_G And $FD else keyA_G:=keyA_G or 2;
+  if key_spec[libSDL_SCANCODE_D] then keyA_G:=keyA_G And $FB else keyA_G:=keyA_G or 4;
+  if key_spec[libSDL_SCANCODE_F] then keyA_G:=keyA_G And $F7 else keyA_G:=keyA_G or 8;
+  if key_spec[libSDL_SCANCODE_G] then keyA_G:=keyA_G And $EF else keyA_G:=keyA_G or $10;
+  if key_spec[libSDL_SCANCODE_LSHIFT] then keyCAPS_V:=(keyCAPS_V And $FE) else keyCAPS_V:=(keyCAPS_V or 1);
+  if key_spec[libSDL_SCANCODE_Z] then keyCAPS_V:=keyCAPS_V And $FD else keyCAPS_V:=keyCAPS_V or 2;
+  if key_spec[libSDL_SCANCODE_X] then keyCAPS_V:=keyCAPS_V And $FB else keyCAPS_V:=keyCAPS_V or 4;
+  if key_spec[libSDL_SCANCODE_C] then keyCAPS_V:=keyCAPS_V And $F7 else keyCAPS_V:=keyCAPS_V or 8;
+  if key_spec[libSDL_SCANCODE_V] then keyCAPS_V:=keyCAPS_V And $EF else keyCAPS_V:=keyCAPS_V or $10;
+  if key_spec[libSDL_SCANCODE_SPACE] then keyB_SPC:=keyB_SPC And $FE else keyB_SPC:=keyB_SPC or 1;
+  if key_spec[libSDL_SCANCODE_LCTRL] then keyB_SPC:=keyB_SPC And $FD else keyB_SPC:=keyB_SPC or 2;
+  if key_spec[libSDL_SCANCODE_M] then keyB_SPC:=keyB_SPC And $FB else keyB_SPC:=keyB_SPC or 4;
+  if key_spec[libSDL_SCANCODE_N] then keyB_SPC:=keyB_SPC And $F7 else keyB_SPC:=keyB_SPC or 8;
+  if key_spec[libSDL_SCANCODE_B] then keyB_SPC:=keyB_SPC And $EF else keyB_SPC:=keyB_SPC or $10;
+  if key_spec[libSDL_SCANCODE_BACKSPACE] then begin
     key6_0:=key6_0 and $FE;
     keyCAPS_V:=keyCAPS_V and $FE;
   end;

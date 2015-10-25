@@ -1,7 +1,7 @@
 unit file_engine;
 
 interface
-uses sdl2,unzip2,
+uses lib_sdl2,unzip2,
      {$ifdef fpc}
      ziputils2,ZLibEx,
      {$IFDEF windows}windows,{$endif}
@@ -164,26 +164,26 @@ if fileexists(directory.Base+'dsp.ini') then begin
   f:=fich_ini.ReadInteger('sms','bios_enabled',0);
   file_data.sms_bios_enabled:=(f<>0);
   //Teclas
-  arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',SDL_SCANCODE_UP);
-  arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',SDL_SCANCODE_DOWN);
-  arcade_input.nleft[0]:=fich_ini.ReadInteger('keyboard','left_0',SDL_SCANCODE_LEFT);
-  arcade_input.nright[0]:=fich_ini.ReadInteger('keyboard','right_0',SDL_SCANCODE_RIGHT);
-  arcade_input.nbut0[0]:=fich_ini.ReadInteger('keyboard','but0_0',SDL_SCANCODE_LALT);
-  arcade_input.nbut1[0]:=fich_ini.ReadInteger('keyboard','but1_0',SDL_SCANCODE_LCTRL);
-  arcade_input.nbut2[0]:=fich_ini.ReadInteger('keyboard','but2_0',SDL_SCANCODE_LSHIFT);
-  arcade_input.nbut3[0]:=fich_ini.ReadInteger('keyboard','but3_0',SDL_SCANCODE_A);
-  arcade_input.nbut4[0]:=fich_ini.ReadInteger('keyboard','but4_0',SDL_SCANCODE_S);
-  arcade_input.nbut5[0]:=fich_ini.ReadInteger('keyboard','but5_0',SDL_SCANCODE_D);
+  arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',libSDL_SCANCODE_UP);
+  arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',libSDL_SCANCODE_DOWN);
+  arcade_input.nleft[0]:=fich_ini.ReadInteger('keyboard','left_0',libSDL_SCANCODE_LEFT);
+  arcade_input.nright[0]:=fich_ini.ReadInteger('keyboard','right_0',libSDL_SCANCODE_RIGHT);
+  arcade_input.nbut0[0]:=fich_ini.ReadInteger('keyboard','but0_0',libSDL_SCANCODE_LALT);
+  arcade_input.nbut1[0]:=fich_ini.ReadInteger('keyboard','but1_0',libSDL_SCANCODE_LCTRL);
+  arcade_input.nbut2[0]:=fich_ini.ReadInteger('keyboard','but2_0',libSDL_SCANCODE_LSHIFT);
+  arcade_input.nbut3[0]:=fich_ini.ReadInteger('keyboard','but3_0',libSDL_SCANCODE_A);
+  arcade_input.nbut4[0]:=fich_ini.ReadInteger('keyboard','but4_0',libSDL_SCANCODE_S);
+  arcade_input.nbut5[0]:=fich_ini.ReadInteger('keyboard','but5_0',libSDL_SCANCODE_D);
   arcade_input.jbut0[0]:=fich_ini.ReadInteger('keyboard','jbut0_0',0);
   arcade_input.jbut1[0]:=fich_ini.ReadInteger('keyboard','jbut1_0',1);
   arcade_input.jbut2[0]:=fich_ini.ReadInteger('keyboard','jbut2_0',2);
   arcade_input.jbut3[0]:=fich_ini.ReadInteger('keyboard','jbut3_0',3);
   arcade_input.jbut4[0]:=fich_ini.ReadInteger('keyboard','jbut4_0',4);
   arcade_input.jbut5[0]:=fich_ini.ReadInteger('keyboard','jbut5_0',5);
-  arcade_input.ncoin[0]:=fich_ini.ReadInteger('keyboard','coin_0',SDL_SCANCODE_5);
-  arcade_input.ncoin[1]:=fich_ini.ReadInteger('keyboard','coin_1',SDL_SCANCODE_6);
-  arcade_input.nstart[0]:=fich_ini.ReadInteger('keyboard','start_0',SDL_SCANCODE_1);
-  arcade_input.nstart[1]:=fich_ini.ReadInteger('keyboard','start_1',SDL_SCANCODE_2);
+  arcade_input.ncoin[0]:=fich_ini.ReadInteger('keyboard','coin_0',libSDL_SCANCODE_5);
+  arcade_input.ncoin[1]:=fich_ini.ReadInteger('keyboard','coin_1',libSDL_SCANCODE_6);
+  arcade_input.nstart[0]:=fich_ini.ReadInteger('keyboard','start_0',libSDL_SCANCODE_1);
+  arcade_input.nstart[1]:=fich_ini.ReadInteger('keyboard','start_1',libSDL_SCANCODE_2);
   arcade_input.nup[1]:=fich_ini.ReadInteger('keyboard','up_1',0);
   arcade_input.ndown[1]:=fich_ini.ReadInteger('keyboard','down_1',0);
   arcade_input.nleft[1]:=fich_ini.ReadInteger('keyboard','left_1',0);
@@ -262,26 +262,26 @@ end else begin
   file_data.sms_is_pal:=false;
   file_data.sms_bios_enabled:=true;
   //Teclas
-  arcade_input.nup[0]:=SDL_SCANCODE_UP;
-  arcade_input.ndown[0]:=SDL_SCANCODE_DOWN;
-  arcade_input.nleft[0]:=SDL_SCANCODE_LEFT;
-  arcade_input.nright[0]:=SDL_SCANCODE_RIGHT;
-  arcade_input.nbut0[0]:=SDL_SCANCODE_LALT;
-  arcade_input.nbut1[0]:=SDL_SCANCODE_LCTRL;
-  arcade_input.nbut2[0]:=SDL_SCANCODE_LSHIFT;
-  arcade_input.nbut3[0]:=SDL_SCANCODE_A;
-  arcade_input.nbut4[0]:=SDL_SCANCODE_S;
-  arcade_input.nbut5[0]:=SDL_SCANCODE_D;
+  arcade_input.nup[0]:=libSDL_SCANCODE_UP;
+  arcade_input.ndown[0]:=libSDL_SCANCODE_DOWN;
+  arcade_input.nleft[0]:=libSDL_SCANCODE_LEFT;
+  arcade_input.nright[0]:=libSDL_SCANCODE_RIGHT;
+  arcade_input.nbut0[0]:=libSDL_SCANCODE_LALT;
+  arcade_input.nbut1[0]:=libSDL_SCANCODE_LCTRL;
+  arcade_input.nbut2[0]:=libSDL_SCANCODE_LSHIFT;
+  arcade_input.nbut3[0]:=libSDL_SCANCODE_A;
+  arcade_input.nbut4[0]:=libSDL_SCANCODE_S;
+  arcade_input.nbut5[0]:=libSDL_SCANCODE_D;
   arcade_input.jbut0[0]:=0;
   arcade_input.jbut1[0]:=1;
   arcade_input.jbut2[0]:=2;
   arcade_input.jbut3[0]:=3;
   arcade_input.jbut4[0]:=4;
   arcade_input.jbut5[0]:=5;
-  arcade_input.ncoin[0]:=SDL_SCANCODE_5;
-  arcade_input.ncoin[1]:=SDL_SCANCODE_6;
-  arcade_input.nstart[0]:=SDL_SCANCODE_1;
-  arcade_input.nstart[1]:=SDL_SCANCODE_2;
+  arcade_input.ncoin[0]:=libSDL_SCANCODE_5;
+  arcade_input.ncoin[1]:=libSDL_SCANCODE_6;
+  arcade_input.nstart[0]:=libSDL_SCANCODE_1;
+  arcade_input.nstart[1]:=libSDL_SCANCODE_2;
   arcade_input.nup[1]:=0;
   arcade_input.ndown[1]:=0;
   arcade_input.nleft[1]:=0;

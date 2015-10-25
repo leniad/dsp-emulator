@@ -27,7 +27,7 @@ uses sysutils,main_engine,
   bioniccommando_hw,wwfsuperstars_hw,rainbowislands_hw,volfied_hw,
   operationwolf_hw,outrun_hw,taitosj_hw,vulgus_hw,ddragon3_hw,blockout_hw,
   foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw,freekick_hw,
-  boogiewings_hw,pinballaction_hw;
+  boogiewings_hw,pinballaction_hw,renegade_hw;
 
 type
   tgame_desc=record
@@ -40,7 +40,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=217;
+  games_cont=218;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum.zip';grid:0;company:'Sinclair'),
@@ -256,6 +256,7 @@ const
   (name:'Boogie Wings';year:'1992';snd:1;hi:false;zip:'boogwing.zip';grid:210;company:'Data East'),
   (name:'Free Kick';year:'1987';snd:1;hi:false;zip:'freekick.zip';grid:211;company:'Nihon System'),
   (name:'Pinball Action';year:'1985';snd:1;hi:false;zip:'pbaction.zip';grid:212;company:'Tehkan'),
+  (name:'Renegade';year:'1986';snd:1;hi:false;zip:'renegade.zip';grid:213;company:'Technos Japan'),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco.zip';grid:1001;company:'Coleco'),
@@ -489,6 +490,7 @@ case numero of
   210:principal1.CambiarMaquina(principal1.boogwins1);
   211:principal1.CambiarMaquina(principal1.freekick1);
   212:principal1.CambiarMaquina(principal1.pbaction1);
+  213:principal1.CambiarMaquina(principal1.renegade1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -713,6 +715,7 @@ principal1.gyruss1.checked:=false;
 principal1.boogwins1.checked:=false;
 principal1.freekick1.checked:=false;
 principal1.pbaction1.checked:=false;
+principal1.renegade1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -858,6 +861,7 @@ case tmaquina of
   210:Cargar_boogwins;
   211:Cargar_freekick;
   212:Cargar_pinballaction;
+  213:Cargar_renegade;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1720,6 +1724,10 @@ end;
 if sender=principal1.pbaction1 then begin
   tipo:=212;
   principal1.pbaction1.Checked:=true;
+end;
+if sender=principal1.renegade1 then begin
+  tipo:=213;
+  principal1.renegade1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

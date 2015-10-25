@@ -3,7 +3,7 @@ unit config;
 interface
 
 uses
-  sdl2,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  lib_sdl2,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls,ComCtrls,lenguaje,spectrum_misc,main_engine,
   sound_engine,z80pio,z80daisy,z80_sp,misc_functions;
 

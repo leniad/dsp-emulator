@@ -5,7 +5,7 @@
 interface
 
 uses
-  sdl2,Windows,SysUtils,Forms,graphics,uchild,Classes,Dialogs,StdCtrls,ExtCtrls,
+  lib_sdl2,Windows,SysUtils,Forms,graphics,uchild,Classes,Dialogs,StdCtrls,ExtCtrls,
   Buttons,Grids,ComCtrls,Menus,ImgList,Controls,messages,System.ImageList,
   //graphics
   jpeg,gifimg,pngimage,
@@ -347,6 +347,7 @@ type
     boogwins1: TMenuItem;
     pbaction1: TMenuItem;
     SegaMS1: TMenuItem;
+    Renegade1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -657,8 +658,8 @@ var
   r:integer;
   nombre:string;
   nombre2:ansistring;
-  rect2:Tsdl_rect;
-  temp_s:PSDL_Surface;
+  rect2:libsdl_rect;
+  temp_s:libsdlP_Surface;
   gif:tgifimage;
   png:TPngImage;
   JPG:TJPEGImage;

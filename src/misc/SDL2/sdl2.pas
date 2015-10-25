@@ -121,7 +121,42 @@ unit SDL2;
 {$I jedi.inc}
 
 interface
-uses dialogs{$IFDEF WINDOWS},windows{$endif}{$ifdef linux},X,XLib{$endif}{$ifndef windows},dynlibs{$endif};
+
+  {$IFDEF WINDOWS}
+    uses
+      Windows;
+  {$ENDIF}
+
+  {$IFDEF LINUX}
+    uses
+      X,
+      XLib;
+  {$ENDIF}
+
+const
+
+  {$IFDEF WINDOWS}
+    SDL_LibName = 'SDL2.dll';
+  {$ENDIF}
+
+  {$IFDEF UNIX}
+    {$IFDEF DARWIN}
+      SDL_LibName = 'libSDL2.dylib';
+    {$ELSE}
+      {$IFDEF FPC}
+        SDL_LibName = 'libSDL2.so';
+      {$ELSE}
+        SDL_LibName = 'libSDL2.so.0';
+      {$ENDIF}
+    {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF MACOS}
+    SDL_LibName = 'SDL2';
+    {$IFDEF FPC}
+      {$linklib libSDL2}
+    {$ENDIF}
+  {$ENDIF}
 
 {$I sdltype.inc}
 {$I sdlversion.inc}
@@ -153,136 +188,7 @@ uses dialogs{$IFDEF WINDOWS},windows{$endif}{$ifdef linux},X,XLib{$endif}{$ifnde
 {$I sdlevents.inc}
 {$I sdl.inc}
 
-var
-  sdl_dll_handle:int64;
-  SDL_Init:TSDL_Init;
-  SDL_WasInit:TSDL_WasInit;
-  SDL_Quit:TSDL_Quit;
-  SDL_LoadBMP_RW:TSDL_LoadBMP_RW;
-  SDL_CreateRGBSurface:TSDL_CreateRGBSurface;
-  SDL_UpperBlit:TSDL_UpperBlit;
-  SDL_FreeSurface:TSDL_FreeSurface;
-  SDL_SaveBMP_RW:TSDL_SaveBMP_RW;
-  SDL_SetColorKey:TSDL_SetColorKey;
-  SDL_JoystickUpdate:TSDL_JoystickUpdate;
-  SDL_JoystickGetAxis:TSDL_JoystickGetAxis;
-  SDL_NumJoysticks:TSDL_NumJoysticks;
-  SDL_JoystickName:TSDL_JoystickName;
-  SDL_JoystickNumButtons:TSDL_JoystickNumButtons;
-  SDL_JoystickOpen:TSDL_JoystickOpen;
-  SDL_JoystickClose:TSDL_JoystickClose;
-  SDL_JoystickGetButton:TSDL_JoystickGetButton;
-  SDL_EventState:TSDL_EventState;
-  SDL_PollEvent:TSDL_PollEvent;
-  SDL_GetCursor:TSDL_GetCursor;
-  SDL_CreateCursor:TSDL_CreateCursor;
-  SDL_SetCursor:TSDL_SetCursor;
-  SDL_ShowCursor:TSDL_ShowCursor;
-  SDL_DestroyWindow:TSDL_DestroyWindow;
-  SDL_VideoQuit:TSDL_VideoQuit;
-  SDL_SetWindowSize:TSDL_SetWindowSize;
-  SDL_GetWindowSurface:TSDL_GetWindowSurface;
-  SDL_CreateWindowFrom:TSDL_CreateWindowFrom;
-  SDL_CreateWindow:TSDL_CreateWindow;
-  SDL_UpdateWindowSurface:TSDL_UpdateWindowSurface;
-  SDL_RWFromFile:TSDL_RWFromFile;
-  SDL_GetRGB:TSDL_GetRGB;
-  SDL_MapRGB:TSDL_MapRGB;
-  SDL_GetKeyboardState:TSDL_GetKeyboardState;
-  SDL_SetHintWithPriority:TSDL_SetHintWithPriority;
-  SDL_SetHint:TSDL_SetHint;
-  {$ifndef windows}
-  SDL_SetError:TSDL_SetError;
-  SDL_GetError:TSDL_GetError;
-  SDL_GetTicks:TSDL_GetTicks;
-  SDL_SetWindowTitle:TSDL_SetWindowTitle;
-  {$endif}
-
-procedure Init_sdl_lib;
-procedure close_sdl_lib;
-
 implementation
-
-procedure Init_sdl_lib;
-begin
-{$ifdef darwin}
-sdl_dll_Handle:=LoadLibrary('libSDL2.dylib');
-{$endif}
-{$ifdef linux}
-sdl_dll_Handle:=LoadLibrary('libSDL2.so');
-if sdl_dll_Handle=0 then sdl_dll_Handle:=LoadLibrary('libSDL2.so.0');
-{$endif}
-{$ifdef windows}
-sdl_dll_Handle:=LoadLibrary('sdl2.dll');
-{$endif}
-if sdl_dll_Handle=0 then begin
-  MessageDlg('SDL2 library not found.'+chr(10)+chr(13)+'Please read the documentation!', mtError,[mbOk], 0);
-  halt(0);
-end;
-//sdl
-@SDL_Init:=GetProcAddress(sdl_dll_Handle,'SDL_Init');
-@SDL_WasInit:=GetProcAddress(sdl_dll_Handle,'SDL_WasInit');
-@SDL_Quit:=GetProcAddress(sdl_dll_Handle,'SDL_Quit');
-//surface
-@SDL_LoadBMP_RW:=GetProcAddress(sdl_dll_Handle,'SDL_LoadBMP_RW');
-@SDL_CreateRGBSurface:=GetProcAddress(sdl_dll_Handle,'SDL_CreateRGBSurface');
-@SDL_UpperBlit:=GetProcAddress(sdl_dll_Handle,'SDL_UpperBlit');
-@SDL_FreeSurface:=GetProcAddress(sdl_dll_Handle,'SDL_FreeSurface');
-@SDL_SaveBMP_RW:=GetProcAddress(sdl_dll_Handle,'SDL_SaveBMP_RW');
-@SDL_SetColorKey:=GetProcAddress(sdl_dll_Handle,'SDL_SetColorKey');
-//joystick
-@SDL_JoystickUpdate:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickUpdate');
-@SDL_JoystickGetAxis:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickGetAxis');
-@SDL_NumJoysticks:=GetProcAddress(sdl_dll_Handle,'SDL_NumJoysticks');
-@SDL_JoystickName:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickName');
-@SDL_JoystickNumButtons:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickNumButtons');
-@SDL_JoystickOpen:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickOpen');
-@SDL_JoystickClose:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickClose');
-@SDL_JoystickGetButton:=GetProcAddress(sdl_dll_Handle,'SDL_JoystickGetButton');
-//events
-@SDL_EventState:=GetProcAddress(sdl_dll_Handle,'SDL_EventState');
-@SDL_PollEvent:=GetProcAddress(sdl_dll_Handle,'SDL_PollEvent');
-//mouse
-@SDL_GetCursor:=GetProcAddress(sdl_dll_Handle,'SDL_GetCursor');
-@SDL_CreateCursor:=GetProcAddress(sdl_dll_Handle,'SDL_CreateCursor');
-@SDL_SetCursor:=GetProcAddress(sdl_dll_Handle,'SDL_SetCursor');
-@SDL_ShowCursor:=GetProcAddress(sdl_dll_Handle,'SDL_ShowCursor');
-//video
-@SDL_DestroyWindow:=GetProcAddress(sdl_dll_Handle,'SDL_DestroyWindow');
-@SDL_VideoQuit:=GetProcAddress(sdl_dll_Handle,'SDL_VideoQuit');
-@SDL_SetWindowSize:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowSize');
-@SDL_GetWindowSurface:=GetProcAddress(sdl_dll_Handle,'SDL_GetWindowSurface');
-@SDL_CreateWindowFrom:=GetProcAddress(sdl_dll_Handle,'SDL_CreateWindowFrom');
-@SDL_CreateWindow:=GetProcAddress(sdl_dll_Handle,'SDL_CreateWindow');
-@SDL_UpdateWindowSurface:=GetProcAddress(sdl_dll_Handle,'SDL_UpdateWindowSurface');
-//rwops
-@SDL_RWFromFile:=GetProcAddress(sdl_dll_Handle,'SDL_RWFromFile');
-//pixels
-@SDL_GetRGB:=GetProcAddress(sdl_dll_Handle,'SDL_GetRGB');
-@SDL_MapRGB:=GetProcAddress(sdl_dll_Handle,'SDL_MapRGB');
-//keyboard
-@SDL_GetKeyboardState:=GetProcAddress(sdl_dll_Handle,'SDL_GetKeyboardState');
-//hint
-@SDL_SetHintWithPriority:=GetProcAddress(sdl_dll_Handle,'SDL_SetHintWithPriority');
-@SDL_SetHint:=GetProcAddress(sdl_dll_Handle,'SDL_SetHint');
-{$ifndef windows}
-//error
-@SDL_SetError:=GetProcAddress(sdl_dll_Handle,'SDL_SetError');
-@SDL_GetError:=GetProcAddress(sdl_dll_Handle,'SDL_GetError');
-//timer
-@SDL_GetTicks:=GetProcAddress(sdl_dll_Handle,'SDL_GetTicks');
-//video
-@SDL_SetWindowTitle:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowTitle');
-{$endif}
-end;
-
-procedure close_sdl_lib;
-begin
-if sdl_dll_handle<>0 then begin
-   FreeLibrary(sdl_dll_Handle);
-   sdl_dll_handle:=0;
-end;
-end;
 
 //from "sdl_version.h"
 procedure SDL_VERSION(x: PSDL_Version);
@@ -312,10 +218,10 @@ end;
 {$IFDEF WINDOWS}
 //from "sdl_thread.h"
 
-{function SDL_CreateThread(fn: TSDL_ThreadFunction; name: PAnsiChar; data: Pointer): PSDL_Thread; overload;
+function SDL_CreateThread(fn: TSDL_ThreadFunction; name: PAnsiChar; data: Pointer): PSDL_Thread; overload;
 begin
   Result := SDL_CreateThread(fn,name,data,nil,nil);
-end;}
+end;
 
 {$ENDIF}
 
@@ -364,10 +270,10 @@ end;
 
 //from "sdl_audio.h"
 
-{function SDL_LoadWAV(_file: PAnsiChar; spec: PSDL_AudioSpec; audio_buf: PPUInt8; audio_len: PUInt32): PSDL_AudioSpec;
+function SDL_LoadWAV(_file: PAnsiChar; spec: PSDL_AudioSpec; audio_buf: PPUInt8; audio_len: PUInt32): PSDL_AudioSpec;
 begin
   Result := SDL_LoadWAV_RW(SDL_RWFromFile(_file, 'rb'), 1, spec, audio_buf, audio_len);
-end;}
+end;
   
 function SDL_AUDIO_BITSIZE(x: Cardinal): Cardinal;
 begin
@@ -438,10 +344,10 @@ begin
 end;
 
 //from "sdl_surface.h"
-{function SDL_LoadBMP(_file: PAnsiChar): PSDL_Surface;
+function SDL_LoadBMP(_file: PAnsiChar): PSDL_Surface;
 begin
-  Result:=SDL_LoadBMP_RW(SDL_RWFromFile(_file, 'rb'), 1);
-end;}
+  Result := SDL_LoadBMP_RW(SDL_RWFromFile(_file, 'rb'), 1);
+end;
 
 //from "sdl_video.h"
 function SDL_WindowPos_IsUndefined(X: Variant): Variant;

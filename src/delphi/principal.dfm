@@ -2097,6 +2097,11 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object Renegade1: TMenuItem
+            Caption = 'Renegade'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M68091: TMenuItem
           Caption = 'M6809'
@@ -2663,7 +2668,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010105000700300320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101050007003C0320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

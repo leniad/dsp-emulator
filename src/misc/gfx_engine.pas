@@ -3,7 +3,7 @@
 {$ifdef fpc}{$asmmode intel}{$endif}
 
 interface
-uses sdl2,{$IFDEF windows}windows,{$ENDIF}
+uses lib_sdl2,{$IFDEF windows}windows,{$ENDIF}
      pal_engine,vars_hide;
 
 const
@@ -854,7 +854,7 @@ end;
 
 procedure actualiza_gfx_sprite_size_pos(pos_x,pos_y:word;dest:byte;x_size,y_size,ipos_x,ipos_y:word);
 var
-  origen,destino:tsdl_rect;
+  origen,destino:libsdl_rect;
 begin
 origen.x:=ipos_x;
 origen.y:=ipos_y;
@@ -876,7 +876,7 @@ end;
 
 procedure actualiza_gfx_sprite_size(pos_x,pos_y:word;dest:byte;x_size,y_size:word);
 var
-  origen,destino:tsdl_rect;
+  origen,destino:libsdl_rect;
 begin
 origen.x:=0;
 origen.y:=0;
@@ -898,7 +898,7 @@ end;
 
 procedure actualiza_gfx_sprite(pos_x,pos_y:word;dest,ngfx:byte);
 var
-  origen,destino:tsdl_rect;
+  origen,destino:libsdl_rect;
 begin
 origen.x:=0;
 origen.y:=0;
@@ -920,7 +920,7 @@ end;
 
 procedure actualiza_gfx_sprite_over(pos_x,pos_y:word;dest,ngfx,src_over:byte;scr_x,scr_y:word);
 var
-  origen,destino:tsdl_rect;
+  origen,destino:libsdl_rect;
 begin
 origen.x:=0;
 origen.y:=0;

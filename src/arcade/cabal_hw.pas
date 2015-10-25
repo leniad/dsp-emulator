@@ -3,7 +3,7 @@ unit cabal_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,seibu_sound,
-     rom_engine,pal_engine,sound_engine,misc_functions;
+     rom_engine,pal_engine,sound_engine;
 
 procedure Cargar_cabal;
 procedure cabal_principal;
@@ -83,7 +83,6 @@ const
 			14*32, 12*32, 10*32,  8*32,  6*32,  4*32,  2*32,  0*32 );
 var
   memoria_temp:array[0..$7ffff] of byte;
-  f:word;
 begin
 iniciar_cabal:=false;
 iniciar_audio(false);
@@ -108,13 +107,8 @@ if not(cargar_roms(@memoria_temp,@cabal_sound,'cabal.zip',0)) then exit;
 decript_seibu_sound(@memoria_temp,@decrypt,@mem_snd);
 copymemory(@mem_snd[$8000],@memoria_temp[$8000],$8000);
 //adpcm
-init_seibu_adpcm(0);
-init_seibu_adpcm(1);
 if not(cargar_roms(@memoria_temp,@cabal_adpcm,'cabal.zip',0)) then exit;
-for f:=0 to $ffff do begin
-  seibu_adpcm[0].mem[f]:=BITSWAP8(memoria_temp[f],7,5,3,1,6,4,2,0);
-  seibu_adpcm[1].mem[f]:=BITSWAP8(memoria_temp[$10000+f],7,5,3,1,6,4,2,0);
-end;
+seibu_adpcm_init(@memoria_temp);
 //convertir chars
 if not(cargar_roms(@memoria_temp,@cabal_char,'cabal.zip')) then exit;
 init_gfx(0,8,8,$400);
@@ -145,6 +139,7 @@ begin
 main_m68000.free;
 snd_z80.free;
 ym2151_close(0);
+seibu_adpcm_close;
 close_audio;
 close_video;
 end;
@@ -154,8 +149,7 @@ begin
  main_m68000.reset;
  snd_z80.reset;
  YM2151_reset(0);
- seibu_adpcm_reset(0);
- seibu_adpcm_reset(1);
+ seibu_adpcm_reset;
  seibu_reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -351,8 +345,7 @@ end;
 procedure cabal_sound_act;
 begin
   ym2151_Update(0);
-  seibu_adpcm_update(0);
-  seibu_adpcm_update(1);
+  seibu_adpcm_update;
 end;
 
 procedure snd_irq(irqstate:byte);

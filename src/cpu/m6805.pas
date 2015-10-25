@@ -59,7 +59,7 @@ const
       0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0,  //70
       1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  //80
       0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1,  //90
-      3, 3, 0, 3, 3, 0, 3, 0, 0, 0, 0, 3, 0, 3, 3, 0,  //a0
+      3, 3, 0, 3, 3, 0, 3, 0, 3, 0, 0, 3, 0, 3, 3, 0,  //a0
       4, 4, 0, 0, 4, 0, 7, 4, 0, 4, 7, 7, 4, 4, 7, 4,  //b0
       8, 0, 0, 0, 0, 0, 8, 2, 8, 0, 8, 8, 2, 2, 8, 2,  //c0
       0, 5, 5, 0, 5, 0, 5, 5, 5, 5, 0, 5, 5, 0, 0, 0,  //d0
@@ -126,6 +126,7 @@ r.sp_mask:=$7f;
 r.sp_low:=$60;
 self.pedir_nmi:=CLEAR_LINE;
 self.nmi_state:=CLEAR_LINE;
+self.pedir_reset:=CLEAR_LINE;
 for f:=0 to 9 do self.pedir_irq[f]:=CLEAR_LINE;
 self.irq_pending:=false;
 end;
@@ -212,11 +213,18 @@ end;
 
 procedure cpu_m6805.run(maximo:single);
 var
-  instruccion,numero,tempb:byte;
+  instruccion,numero,tempb,old_reset:byte;
   posicion,tempw:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
+if self.pedir_reset<>CLEAR_LINE then begin
+  old_reset:=self.pedir_reset;
+  self.reset;
+  if self.pedir_reset=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
+  self.contador:=trunc(maximo);
+  exit;
+end;
 self.estados_demas:=0;
 if self.tipo_cpu=tipo_m68705 then begin
   if (self.irq_pending) then begin
@@ -530,7 +538,7 @@ case instruccion of
         r.cc.n:=(r.a and $80)<>0;
         self.putbyte(posicion,r.a);
       end;
-  $c8,$d8:begin //eora
+  $a8,$c8,$d8:begin //eora
         r.a:=r.a xor numero;
         r.cc.z:=(r.a=0);
         r.cc.n:=(r.a and $80)<>0;

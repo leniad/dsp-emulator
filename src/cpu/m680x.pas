@@ -482,7 +482,7 @@ end;
 
 procedure cpu_m6800.run(maximo:single);
 var
-  instruccion:byte;
+  instruccion,old_reset:byte;
   numero,tempb,tempb2:byte;
   posicion,tempw,tempw2,numerow:word;
   templ:dword;
@@ -490,8 +490,9 @@ begin
 self.contador:=0;
 while self.contador<maximo do begin
 if self.pedir_reset<>CLEAR_LINE then begin
+  old_reset:=self.pedir_reset;
   self.reset;
-  self.pedir_reset:=ASSERT_LINE;
+  if old_reset=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
   self.contador:=trunc(maximo);
   exit;
 end;

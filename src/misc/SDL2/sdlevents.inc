@@ -62,7 +62,7 @@ const
   SDL_JOYHATMOTION     = $602;  // Joystick hat position change
   SDL_JOYBUTTONDOWN    = $603;  // Joystick button pressed
   SDL_JOYBUTTONUP      = $604;  // Joystick button released
-  SDL_JOYDEVICEADDED   = $605;  // A new joystick has been inserted into the system
+  SDL_JOYDEVICEADDED   = $605;  // A new joystick has been inserted into the system 
   SDL_JOYDEVICEREMOVED = $606;  // An opened joystick has been removed 
 
   { Game controller events }
@@ -135,7 +135,7 @@ type
     type_: UInt32;        // SDL_KEYDOWN or SDL_KEYUP
     timestamp: UInt32;
     windowID: UInt32;     // The window with keyboard focus, if any
-    state: UInt8;         // SDL_PRESSED or SDL_RELEASED
+    state: UInt8;         // SDL_PRESSED or SDL_RELEASED 
     _repeat: UInt8;       // Non-zero if this is a key repeat
     padding2: UInt8;
     padding3: UInt8;
@@ -173,7 +173,7 @@ type
     type_: UInt32;                                          // SDL_TEXTINPUT 
     timestamp: UInt32;
     windowID: UInt32;                                       // The window with keyboard focus, if any
-    text: array[0..SDL_TEXTINPUTEVENT_TEXT_SIZE] of Char;   // The input text
+    text: array[0..SDL_TEXTINPUTEVENT_TEXT_SIZE] of Char;   // The input text 
   end;
 
   {**
@@ -585,7 +585,7 @@ type
    *  
    *  This should only be run in the thread that sets the video mode.
    *}
-//  procedure SDL_PumpEvents cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PumpEvents' {$ENDIF} {$ENDIF};
+  procedure SDL_PumpEvents cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PumpEvents' {$ENDIF} {$ENDIF};
 
 const
   SDL_ADDEVENT = 0;
@@ -594,9 +594,6 @@ const
 
 type
   TSDL_EventAction = Word;
-
-  TSDL_EventState=function(type_:UInt32;state:SInt32):UInt8;cdecl;
-  TSDL_PollEvent=function(event:PSDL_Event):SInt32;cdecl;
 
   {**
    *  Checks the event queue for messages and optionally returns them.
@@ -617,21 +614,21 @@ type
    *  This function is thread-safe.
    *}
 
-//  function SDL_PeepEvents(events: PSDL_Event; numevents: SInt32; action: TSDL_EventAction; minType: UInt32; maxType: UInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PeepEvents' {$ENDIF} {$ENDIF};
+  function SDL_PeepEvents(events: PSDL_Event; numevents: SInt32; action: TSDL_EventAction; minType: UInt32; maxType: UInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PeepEvents' {$ENDIF} {$ENDIF};
 
   {**
    *  Checks to see if certain event types are in the event queue.
    *}
 
-//  function SDL_HasEvent(type_: UInt32): TSDL_Bool  cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_HasEvent' {$ENDIF} {$ENDIF};
-//  function SDL_HasEvents(minType: UInt32; maxType: UInt32): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_HasEvents' {$ENDIF} {$ENDIF};
+  function SDL_HasEvent(type_: UInt32): TSDL_Bool  cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_HasEvent' {$ENDIF} {$ENDIF};
+  function SDL_HasEvents(minType: UInt32; maxType: UInt32): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_HasEvents' {$ENDIF} {$ENDIF};
 
   {**
    *  This function clears events from the event queue
    *}
 
-//  procedure SDL_FlushEvent(type_: UInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FlushEvent' {$ENDIF} {$ENDIF};
-//  procedure SDL_FlushEvents(minType: UInt32; maxType: UInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FlushEvents' {$ENDIF} {$ENDIF};
+  procedure SDL_FlushEvent(type_: UInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FlushEvent' {$ENDIF} {$ENDIF};
+  procedure SDL_FlushEvents(minType: UInt32; maxType: UInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FlushEvents' {$ENDIF} {$ENDIF};
 
   {**
    *  Polls for currently pending events.
@@ -642,18 +639,18 @@ type
    *               stored in that area.
    *}
 
-//  function SDL_PollEvent(event: PSDL_Event): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PollEvent' {$ENDIF} {$ENDIF};
+  function SDL_PollEvent(event: PSDL_Event): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PollEvent' {$ENDIF} {$ENDIF};
 
   {**
    *  Waits indefinitely for the next available event.
-   *
+   *  
    *  1, or 0 if there was an error while waiting for events.
-   *
-   *  event - If not nil, the next event is removed from the queue and
+   *   
+   *  event - If not nil, the next event is removed from the queue and 
    *  stored in that area.
    *}
 
-//  function SDL_WaitEvent(event: PSDL_Event): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_WaitEvent' {$ENDIF} {$ENDIF};
+  function SDL_WaitEvent(event: PSDL_Event): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_WaitEvent' {$ENDIF} {$ENDIF};
 
   {**
    *  Waits until the specified timeout (in milliseconds) for the next
@@ -665,16 +662,16 @@ type
    *  stored in that area.
    *}
  
-//  function SDL_WaitEventTimeout(event: PSDL_Event; timeout: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_WaitEventTimeout' {$ENDIF} {$ENDIF};
+  function SDL_WaitEventTimeout(event: PSDL_Event; timeout: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_WaitEventTimeout' {$ENDIF} {$ENDIF};
 
   {**
    *  Add an event to the event queue.
-   *
+   *  
    *  1 on success, 0 if the event was filtered, or -1 if the event queue
    *  was full or there was some other error.
    *}
 
-//  function SDL_PushEvent(event: PSDL_Event): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PumpEvents' {$ENDIF} {$ENDIF};
+  function SDL_PushEvent(event: PSDL_Event): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PumpEvents' {$ENDIF} {$ENDIF};
 
 type
   PSDL_EventFilter = ^TSDL_EventFilter;
@@ -705,33 +702,33 @@ type
    *  internal queue and be delivered to the application at the next event poll.
    *}
  
-//  procedure SDL_SetEventFilter(filter: TSDL_EventFilter; userdata: Pointer) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetEventFilter' {$ENDIF} {$ENDIF};
+  procedure SDL_SetEventFilter(filter: TSDL_EventFilter; userdata: Pointer) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetEventFilter' {$ENDIF} {$ENDIF};
 
   {**
    *  Return the current event filter - can be used to "chain" filters.
    *  If there is no event filter set, this function returns SDL_FALSE.
    *}
 
-//  function SDL_GetEventFilter(filter: PSDL_EventFilter; userdata: Pointer): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetEventFilter' {$ENDIF} {$ENDIF};
+  function SDL_GetEventFilter(filter: PSDL_EventFilter; userdata: Pointer): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetEventFilter' {$ENDIF} {$ENDIF};
 
   {**
    *  Add a function which is called when an event is added to the queue.
    *}
-
-//  procedure SDL_AddEventWatch(filter: TSDL_EventFilter; userdata: Pointer) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AddEventWatch' {$ENDIF} {$ENDIF};
+ 
+  procedure SDL_AddEventWatch(filter: TSDL_EventFilter; userdata: Pointer) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AddEventWatch' {$ENDIF} {$ENDIF};
 
   {**
    *  Remove an event watch function added with SDL_AddEventWatch()
    *}
  
-//  procedure SDL_DelEventWatch(filter: TSDL_EventFilter; userdata: Pointer) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_DelEventWatch' {$ENDIF} {$ENDIF};
+  procedure SDL_DelEventWatch(filter: TSDL_EventFilter; userdata: Pointer) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_DelEventWatch' {$ENDIF} {$ENDIF};
 
   {**
    *  Run the filter function on the current event queue, removing any
    *  events for which the filter returns 0.
    *}
 
-//  procedure SDL_FilterEvents(filter: TSDL_EventFilter; userdata: Pointer) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FilterEvents' {$ENDIF} {$ENDIF};
+  procedure SDL_FilterEvents(filter: TSDL_EventFilter; userdata: Pointer) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FilterEvents' {$ENDIF} {$ENDIF};
 
 const
 
@@ -750,7 +747,7 @@ const
    *     current processing state of the specified event.
    *}
 
-//  function SDL_EventState(type_: UInt32; state: SInt32): UInt8 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_EventState' {$ENDIF} {$ENDIF};
+  function SDL_EventState(type_: UInt32; state: SInt32): UInt8 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_EventState' {$ENDIF} {$ENDIF};
 
   function SDL_GetEventState(type_: UInt32): UInt8;
 
@@ -762,4 +759,4 @@ const
    *  returns (Uint32)-1
    *}
 
-//  function SDL_RegisterEvents(numevents: SInt32): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_RegisterEvents' {$ENDIF} {$ENDIF};
+  function SDL_RegisterEvents(numevents: SInt32): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_RegisterEvents' {$ENDIF} {$ENDIF};

@@ -2,7 +2,7 @@ unit nz80;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,z80daisy,timer_engine,dialogs,sysutils,vars_hide;
+     main_engine,z80daisy,timer_engine,dialogs,vars_hide;
 
 const
     paridad:array [0..255] of boolean=(
@@ -375,16 +375,7 @@ r.IFF1:=false;
 Case r.im of
         0:begin
             if self.daisy then MessageDlg('Mierda!!! Daisy chain en IM0!!', mtInformation,[mbOk], 0);
-            case self.im0 of  //hago la intruccion que viene del bus
-              $cf:r.pc:=$8;
-              $d7:r.pc:=$10;
-              $df:r.pc:=$18;
-              $e7:r.pc:=$20;
-              $ef:r.pc:=$28;
-              $f7:r.pc:=$30;
-              $ff:r.pc:=$38;
-              else MessageDlg('Mierda!!! IM0 desconocido...'+inttostr(self.im0), mtInformation,[mbOk], 0)
-            end;
+            r.pc:=self.im0 and $38;
             estados_t:=estados_t+13;
           end;
         1:begin

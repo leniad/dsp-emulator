@@ -1,7 +1,7 @@
 unit pal_engine;
 
 interface
-uses sdl2;
+uses lib_sdl2;
 
 const
     MAX_NETS=3;

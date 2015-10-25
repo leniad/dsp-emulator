@@ -24,44 +24,39 @@ const
 							SDL_INIT_GAMECONTROLLER;
   {$EXTERNALSYM SDL_INIT_EVERYTHING}
 
-type
-    TSDL_Init=function(flags:UInt32):SInt32; cdecl;
-    TSDL_WasInit=function(flags:UInt32):UInt32; cdecl;
-    TSDL_Quit=procedure;cdecl;
-
 {**
  *  This function initializes  the subsystems specified by flags
  *  Unless the SDL_INIT_NOPARACHUTE flag is set, it will install cleanup
  *  signal handlers for some commonly ignored fatal signals (like SIGSEGV).
  *}
 
-//function SDL_Init(flags: UInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_Init' {$ENDIF} {$ENDIF};
+function SDL_Init(flags: UInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_Init' {$ENDIF} {$ENDIF};
 
 {**
  *  This function initializes specific SDL subsystems
  *}
 
-//function SDL_InitSubSystem(flags: UInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_InitSubSystem' {$ENDIF} {$ENDIF};
+function SDL_InitSubSystem(flags: UInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_InitSubSystem' {$ENDIF} {$ENDIF};
 
 {**
  *  This function cleans up specific SDL subsystems
  *}
-
-//procedure SDL_QuitSubSystem(flags: UInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_QuitSubSystem' {$ENDIF} {$ENDIF};
+ 
+procedure SDL_QuitSubSystem(flags: UInt32) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_QuitSubSystem' {$ENDIF} {$ENDIF};
 
 {**
  *  This function returns a mask of the specified subsystems which have
  *  previously been initialized.
- *
+ *  
  *  If flags is 0, it returns a mask of all initialized subsystems.
  *}
-
-//function SDL_WasInit(flags: UInt32): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_WasInit' {$ENDIF} {$ENDIF};
+ 
+function SDL_WasInit(flags: UInt32): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_WasInit' {$ENDIF} {$ENDIF};
 
 {**
  *  This function cleans up all initialized subsystems. You should
  *  call it upon all exit conditions.
  *}
-
-//procedure SDL_Quit() cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_Quit' {$ENDIF} {$ENDIF};
+ 
+procedure SDL_Quit() cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_Quit' {$ENDIF} {$ENDIF};
 

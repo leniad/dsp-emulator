@@ -1,7 +1,7 @@
 unit controls_engine;
 
 interface
-uses sdl2,main_engine,timer_engine{$ifdef windows},windows{$endif};
+uses lib_sdl2,main_engine,timer_engine{$ifdef windows},windows{$endif};
 
 type
     def_mouse = record
@@ -52,14 +52,14 @@ const
         0,0,0,0,0,0,0,0);
 
 var
-    joystick_def:array[0..1] of psdl_joystick;
+    joystick_def:array[0..1] of libsdlp_joystick;
     raton:def_mouse;
     arcade_input:def_arcade;
     event:def_event;
     keyboard:array [0..255] of boolean;
     keystate:pbyte;
     marcade:def_marcade;
-    old_cursor:PSDL_cursor;
+    old_cursor:libsdlP_cursor;
     analog:def_analog;
 
 procedure evalue_controls;
@@ -195,7 +195,7 @@ begin
 if SDL_NumJoysticks=0 then exit;
 SDL_JoystickUpdate();
 case tevent of
-  SDL_JOYBUTTONDOWN,SDL_JOYBUTTONUP:begin
+  libSDL_JOYBUTTONDOWN,libSDL_JOYBUTTONUP:begin
     arcade_input.but0[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut0[player])<>0;
     arcade_input.but1[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut1[player])<>0;
     arcade_input.but2[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut2[player])<>0;
@@ -204,7 +204,7 @@ case tevent of
     arcade_input.but5[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut5[player])<>0;
     event.arcade:=true;
   end;
-  SDL_JOYAXISMOTION:begin
+  libSDL_JOYAXISMOTION:begin
     valor:=SDL_JoystickGetAxis(joystick_def[player],0)-arcade_input.joy_ax0_cent[player];
     if valor<>arcade_input.joy_ax0[player] then begin
       event.arcade:=true;
@@ -223,7 +223,7 @@ case tevent of
 end;
 end;
 
-procedure evaluar_raton(tevent:TSDL_Event);
+procedure evaluar_raton(tevent:libSDL_Event);
 var
   sc_mul:byte;
 function video_mult:byte;
@@ -237,24 +237,24 @@ end;
 begin
 event.mouse:=false;
 case tevent.type_ of
-  SDL_MOUSEMOTION:begin  //Movimiento
+  libSDL_MOUSEMOTION:begin  //Movimiento
     sc_mul:=video_mult;
     raton.x:=tevent.motion.x div sc_mul;
     raton.y:=tevent.motion.y div sc_mul;
     event.mouse:=true;
   end;
-  SDL_MOUSEBUTTONUP:begin  //Levantar boton
+  libSDL_MOUSEBUTTONUP:begin  //Levantar boton
     event.mouse:=true;
     case tevent.button.button of
-        SDL_BUTTON_LEFT:raton.button1:=false;
-        SDL_BUTTON_RIGHT:raton.button2:=false;
+        libSDL_BUTTON_LEFT:raton.button1:=false;
+        libSDL_BUTTON_RIGHT:raton.button2:=false;
     end;
   end;
-  SDL_MOUSEBUTTONDOWN:begin
+  libSDL_MOUSEBUTTONDOWN:begin
     event.mouse:=true;
     case tevent.button.button of
-        SDL_BUTTON_LEFT:raton.button1:=true;
-        SDL_BUTTON_RIGHT:raton.button2:=true;
+        libSDL_BUTTON_LEFT:raton.button1:=true;
+        libSDL_BUTTON_RIGHT:raton.button2:=true;
     end;
   end;
 end;
@@ -262,7 +262,7 @@ end;
 
 procedure evalue_controls;
 var
-  sdl_event:TSDL_Event;
+  sdl_event:libSDL_Event;
   f:word;
 procedure evalue_joy;
 begin
@@ -277,25 +277,25 @@ begin
   event.keyboard:=false;
   event.mouse:=false;
   //Primero las teclas independientes de los drivers
-  if ((keystate[SDL_SCANCODE_F2]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then principal1.fFast(nil);
-  if ((keystate[SDL_SCANCODE_F3]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then principal1.Reset1Click(nil);
-  if ((keystate[SDL_SCANCODE_F4]<>0) and not(main_screen.pantalla_completa) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then begin
+  if ((keystate[libSDL_SCANCODE_F2]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then principal1.fFast(nil);
+  if ((keystate[libSDL_SCANCODE_F3]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then principal1.Reset1Click(nil);
+  if ((keystate[libSDL_SCANCODE_F4]<>0) and not(main_screen.pantalla_completa) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then begin
       if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
   end;
-  if ((keystate[SDL_SCANCODE_F6]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then pasar_pantalla_completa;
-  if ((keystate[SDL_SCANCODE_F7]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then begin
+  if ((keystate[libSDL_SCANCODE_F6]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then pasar_pantalla_completa;
+  if ((keystate[libSDL_SCANCODE_F7]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then begin
     if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-01');
   end;
-  if ((keystate[SDL_SCANCODE_F8]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then begin
+  if ((keystate[libSDL_SCANCODE_F8]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then begin
     if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-02');
   end;
-  if ((keystate[SDL_SCANCODE_F9]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then begin
+  if ((keystate[libSDL_SCANCODE_F9]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then begin
     if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-01');
   end;
-  if ((keystate[SDL_SCANCODE_F10]<>0) and not(keystate[SDL_SCANCODE_RSHIFT]<>0)) then begin
+  if ((keystate[libSDL_SCANCODE_F10]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then begin
     if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-02');
   end;
-  if (keystate[SDL_SCANCODE_F11]<>0) then principal1.fSlow(nil);
+  if (keystate[libSDL_SCANCODE_F11]<>0) then principal1.fSlow(nil);
   //Arcade
   if event.earcade then begin
     evaluar_arcade_basic;

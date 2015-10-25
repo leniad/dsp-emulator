@@ -2,7 +2,7 @@ unit nes;
 
 interface
 
-uses sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
+uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,nes_ppu,controls_engine,sysutils,dialogs,misc_functions,
      sound_engine,file_engine,n2a03_sound,nes_mappers;
 
@@ -143,7 +143,7 @@ begin
   end;
   if event.keyboard then begin
     //Soft Reset
-    if keyboard[SDL_SCANCODE_f5] then begin
+    if keyboard[libSDL_SCANCODE_f5] then begin
       //Softreset
         temp_r:=main_m6502.get_internal_r;
         temp_r.p.int:=true;

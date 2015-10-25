@@ -84,14 +84,14 @@ r.IFF1:= False;
 Case r.im of
         0,1:begin
               r.pc:= $38; //13t
-              inc(self.contador,13);
+              self.contador:=self.contador+13;
             end;
         2:begin //19t
                 if self.daisy then posicion.l:=z80daisy_ack
                     else posicion.l:=self.im2_lo;
                 posicion.h:=r.i;
                 r.pc:=self.getbyte(posicion.w)+(self.getbyte(posicion.w+1) shl 8);
-                inc(self.contador,19);
+                self.contador:=self.contador+19;
         end;
 end;
 self.pedir_irq:=CLEAR_LINE;

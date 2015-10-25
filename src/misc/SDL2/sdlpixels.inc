@@ -386,14 +386,11 @@ type
     next: PSDL_PixelFormat;
   end;
 
-  TSDL_GetRGB=procedure(pixel:UInt32;const format:PSDL_PixelFormat;r:PUInt8;g:PUInt8;b:PUInt8);cdecl;
-  TSDL_MapRGB=function(const format:PSDL_PixelFormat;r:UInt8;g:UInt8;b:UInt8):UInt32;cdecl;
-
   {**
    *  Get the human readable name of a pixel format
    *}
 
-//function SDL_GetPixelFormatName(format: UInt32): PAnsiChar cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetPixelFormatName' {$ENDIF} {$ENDIF};
+function SDL_GetPixelFormatName(format: UInt32): PAnsiChar cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetPixelFormatName' {$ENDIF} {$ENDIF};
 
   {**
    *  Convert one of the enumerated pixel formats to a bpp and RGBA masks.
@@ -403,7 +400,7 @@ type
    *  SDL_MasksToPixelFormatEnum()
    *}
 
-//function SDL_PixelFormatEnumToMasks(format: UInt32; bpp: PInt; Rmask: PUInt32; Gmask: PUInt32; Bmask: PUInt32; Amask: PUInt32): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PixelFormatEnumToMasks' {$ENDIF} {$ENDIF};
+function SDL_PixelFormatEnumToMasks(format: UInt32; bpp: PInt; Rmask: PUInt32; Gmask: PUInt32; Bmask: PUInt32; Amask: PUInt32): TSDL_Bool cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_PixelFormatEnumToMasks' {$ENDIF} {$ENDIF};
 
   {**
    *  Convert a bpp and RGBA masks to an enumerated pixel format.
@@ -414,19 +411,19 @@ type
    *  SDL_PixelFormatEnumToMasks()
    *}
 
-//function SDL_MasksToPixelFormatEnum(bpp: SInt32; Rmask: UInt32; Gmask: UInt32; Bmask: UInt32; Amask: UInt32): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_MasksToPixelFormatEnum' {$ENDIF} {$ENDIF};
+function SDL_MasksToPixelFormatEnum(bpp: SInt32; Rmask: UInt32; Gmask: UInt32; Bmask: UInt32; Amask: UInt32): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_MasksToPixelFormatEnum' {$ENDIF} {$ENDIF};
 
   {**
    *  Create an SDL_PixelFormat structure from a pixel format enum.
    *}
 
-//function SDL_AllocFormat(pixel_format: UInt32): PSDL_PixelFormat cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AllocFormat' {$ENDIF} {$ENDIF};
+function SDL_AllocFormat(pixel_format: UInt32): PSDL_PixelFormat cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AllocFormat' {$ENDIF} {$ENDIF};
 
   {**
    *  Free an SDL_PixelFormat structure.
    *}
 
-//procedure SDL_FreeFormat(format: PSDL_PixelFormat) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FreeFormat' {$ENDIF} {$ENDIF};
+procedure SDL_FreeFormat(format: PSDL_PixelFormat) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FreeFormat' {$ENDIF} {$ENDIF};
 
   {**
    *  Create a palette structure with the specified number of color
@@ -435,17 +432,17 @@ type
    *  A new palette, or nil if there wasn't enough memory.
    *
    *  The palette entries are initialized to white.
-   *
+   *  
    *  SDL_FreePalette()
    *}
 
-//function SDL_AllocPalette(ncolors: SInt32): PSDL_Palette cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AllocPalette' {$ENDIF} {$ENDIF};
+function SDL_AllocPalette(ncolors: SInt32): PSDL_Palette cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_AllocPalette' {$ENDIF} {$ENDIF};
 
   {**
    *  Set the palette for a pixel format structure.
    *}
 
-//function SDL_SetPixelFormatPalette(format: PSDL_PixelFormat; palette: PSDL_Palette): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetPixelFormatPalette' {$ENDIF} {$ENDIF};
+function SDL_SetPixelFormatPalette(format: PSDL_PixelFormat; palette: PSDL_Palette): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetPixelFormatPalette' {$ENDIF} {$ENDIF};
 
   {**
    *  Set a range of colors in a palette.
@@ -458,7 +455,7 @@ type
    *  0 on success, or -1 if not all of the colors could be set.
    *}
 
-//function SDL_SetPaletteColors(palette: PSDL_Palette; const colors: PSDL_Color; firstcolor: SInt32; ncolors: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetPaletteColors' {$ENDIF} {$ENDIF};
+function SDL_SetPaletteColors(palette: PSDL_Palette; const colors: PSDL_Color; firstcolor: SInt32; ncolors: SInt32): SInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_SetPaletteColors' {$ENDIF} {$ENDIF};
 
   {**
    *  Free a palette created with SDL_AllocPalette().
@@ -466,7 +463,7 @@ type
    *  SDL_AllocPalette()
    *}
 
-//procedure SDL_FreePalette(palette: PSDL_Palette) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FreePalette' {$ENDIF} {$ENDIF};
+procedure SDL_FreePalette(palette: PSDL_Palette) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_FreePalette' {$ENDIF} {$ENDIF};
 
   {**
    *  Maps an RGB triple to an opaque pixel value for a given pixel format.
@@ -474,7 +471,7 @@ type
    *  SDL_MapRGBA
    *}
 
-//function SDL_MapRGB(const format: PSDL_PixelFormat; r: UInt8; g: UInt8; b: UInt8): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_MapRGB' {$ENDIF} {$ENDIF};
+function SDL_MapRGB(const format: PSDL_PixelFormat; r: UInt8; g: UInt8; b: UInt8): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_MapRGB' {$ENDIF} {$ENDIF};
 
   {**
    *  Maps an RGBA quadruple to a pixel value for a given pixel format.
@@ -482,7 +479,7 @@ type
    *  SDL_MapRGB
    *}
 
-//function SDL_MapRGBA(const format: PSDL_PixelFormat; r: UInt8; g: UInt8; b: UInt8; a: UInt8): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_MapRGBA' {$ENDIF} {$ENDIF};
+function SDL_MapRGBA(const format: PSDL_PixelFormat; r: UInt8; g: UInt8; b: UInt8; a: UInt8): UInt32 cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_MapRGBA' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the RGB components from a pixel of the specified format.
@@ -490,7 +487,7 @@ type
    *  SDL_GetRGBA
    *}
 
-//procedure SDL_GetRGB(pixel: UInt32; const format: PSDL_PixelFormat; r: PUInt8; g: PUInt8; b: PUInt8) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetRGB' {$ENDIF} {$ENDIF};
+procedure SDL_GetRGB(pixel: UInt32; const format: PSDL_PixelFormat; r: PUInt8; g: PUInt8; b: PUInt8) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetRGB' {$ENDIF} {$ENDIF};
 
   {**
    *  Get the RGBA components from a pixel of the specified format.
@@ -498,10 +495,10 @@ type
    *  SDL_GetRGB
    *}
 
-//procedure SDL_GetRGBA(pixel: UInt32; const format: PSDL_PixelFormat; r: PUInt8; g: PUInt8; b: PUInt8; a: PUInt8) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetRGBA' {$ENDIF} {$ENDIF};
+procedure SDL_GetRGBA(pixel: UInt32; const format: PSDL_PixelFormat; r: PUInt8; g: PUInt8; b: PUInt8; a: PUInt8) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_GetRGBA' {$ENDIF} {$ENDIF};
 
   {**
    *  Calculate a 256 entry gamma ramp for a gamma value.
    *}
 
-//procedure SDL_CalculateGammaRamp(gamma: Float; ramp: PUInt16) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CalculateGammaRamp' {$ENDIF} {$ENDIF};
+procedure SDL_CalculateGammaRamp(gamma: Float; ramp: PUInt16) cdecl; external SDL_LibName {$IFDEF DELPHI} {$IFDEF MACOS} name '_SDL_CalculateGammaRamp' {$ENDIF} {$ENDIF};

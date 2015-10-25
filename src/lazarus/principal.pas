@@ -7,7 +7,7 @@ unit principal;
 
 interface
 
-uses sdl2,{$IFDEF WINDOWS}windows,{$else}LCLType,{$endif}
+uses lib_sdl2,{$IFDEF WINDOWS}windows,{$else}LCLType,{$endif}
      Classes,SysUtils,FileUtil,LResources,Forms,Controls,
      Graphics,Dialogs,Menus,ExtCtrls,ComCtrls,StdCtrls,Grids,Buttons,
      //misc
@@ -177,6 +177,7 @@ type
     MenuItem28: TMenuItem;
     freekick1: TMenuItem;
     boogwins1: TMenuItem;
+    Renegade1: TMenuItem;
     SegaMS1: TMenuItem;
     pbaction1: TMenuItem;
     pirates1: TMenuItem;
@@ -424,8 +425,8 @@ var
   r:integer;
   nombre:string;
   nombre2:ansistring;
-  rect2:Tsdl_rect;
-  temp_s:PSDL_Surface;
+  rect2:libsdl_rect;
+  temp_s:libsdlp_Surface;
   gif:tgifimage;
   png:TPortableNetworkGraphic;
   JPG:TJPEGImage;

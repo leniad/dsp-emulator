@@ -1,7 +1,7 @@
 unit main_engine;
 
 interface
-uses sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
+uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      {$ifndef fpc}uchild,{$endif}
      controls,forms,sysutils,misc_functions,pal_engine,timer_engine,
      gfx_engine,sound_engine,arcade_config,vars_hide;
@@ -152,8 +152,8 @@ procedure copymemory(dest,source:pointer;size:integer);
 
 var
         //video
-        pantalla:array[0..max_pantalla] of PSDL_Surface;
-        window_render:pSDL_Window;
+        pantalla:array[0..max_pantalla] of libsdlP_Surface;
+        window_render:libsdlp_Window;
         punbuf:pword;
         main_screen:tmain_screen;
         //Misc
@@ -295,14 +295,14 @@ var
   f:word;
   handle_:integer;
 begin
-if SDL_WasInit(SDL_INIT_VIDEO)=0 then begin
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
   {$ifdef windows}
-  if (SDL_init(SDL_INIT_VIDEO or SDL_INIT_JOYSTICK or SDL_INIT_NOPARACHUTE)<0) then halt(0);
+  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE)<0) then halt(0);
   {$else}
-  if (SDL_init(SDL_INIT_VIDEO or SDL_INIT_JOYSTICK or SDL_INIT_NOPARACHUTE or SDL_INIT_AUDIO)<0) then halt(0);
+  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
   {$endif}
   keystate:=pbyte(SDL_GetKeyboardState(nil));
-  SDL_SetHintWithPriority(SDL_HINT_GRAB_KEYBOARD,'1',SDL_HINT_OVERRIDE);
+  SDL_SetHintWithPriority(libSDL_HINT_GRAB_KEYBOARD,'1',libSDL_HINT_OVERRIDE);
 end;
 //Puntero general del pixels
 getmem(punbuf,MAX_PUNBUF);
@@ -318,7 +318,7 @@ handle_:=principal1.panel4.Handle;
 if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
 {$else}
 principal1.groupbox4.visible:=false;
-if window_render=nil then window_render:=SDL_CreateWindow('',SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,x,y,0);
+if window_render=nil then window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,x,y,0);
 {$endif}
 {$endif}
 cambiar_video;
@@ -388,7 +388,7 @@ if not(main_screen.pantalla_completa) then begin
   main_screen.video_mode:=6;
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
-  window_render:=SDL_CreateWindow('',SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,SDL_WINDOW_FULLSCREEN);
+  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
   pantalla[0]:=SDL_GetWindowSurface(window_render);
   main_screen.pantalla_completa:=true;
 end else begin
@@ -409,7 +409,7 @@ end else begin
   window_render:=SDL_CreateWindowFrom(pointer(handle_));
   {$else}
   principal1.groupbox4.visible:=false;
-  window_render:=SDL_CreateWindow('',SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,0);
+  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,0);
   {$endif}
   {$endif}
   pantalla[0]:=SDL_GetWindowSurface(window_render);
@@ -439,7 +439,7 @@ end;
 
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
 var
-  origen:Tsdl_rect;
+  origen:libsdl_rect;
 begin
 origen.x:=o_x1;
 origen.y:=o_y1;
@@ -450,7 +450,7 @@ end;
 
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);inline;
 var
-  origen,destino:Tsdl_rect;
+  origen,destino:libsdl_rect;
 begin
 origen.x:=o_x1;
 origen.y:=o_y1;
@@ -469,7 +469,7 @@ end;
 
 procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
 var
-  origen,destino:Tsdl_rect;
+  origen,destino:libsdl_rect;
   y,x:word;
   porig,pdest:pword;
   orig_p,dest_p:word;
@@ -531,7 +531,7 @@ procedure actualiza_video;
 var
   punt,punt2,punt3,punt4:pword;
   f,i,h:word;
-  origen:Tsdl_rect;
+  origen:libsdl_rect;
 begin
 if main_screen.flip_main_screen then begin
   h:=0;
