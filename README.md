@@ -1,5 +1,7 @@
 ﻿# dsp-emulator
 DSP Emulator WIP status<br>
+<b>25/10/15 - DSP Emulator 0.16 WIP.</b> Added Renegade driver with sound.<br>
+<img src='http://img1.imagilive.com/1015/renegade.png'><br>
 <b>26/09/15 - DSP Emulator 0.16 WIP.</b> Sega Master System console added. About 99% of compatibility.<br>
 <img src='http://img1.imagilive.com/0915/sonic2.png'><img src='http://img1.imagilive.com/0915/zool.png'><br>
 <b>30/08/15 - DSP Emulator 0.16 WIP.</b> Important changes in snapshot system! Fixed Spectrum and Amstrad CPC snapshot load/save snapshots, more compatible.<br>
