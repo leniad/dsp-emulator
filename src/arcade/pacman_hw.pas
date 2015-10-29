@@ -21,6 +21,7 @@ procedure mspacman_putbyte(direccion:word;valor:byte);
 procedure pacman_qsave(nombre:string);
 procedure pacman_qload(nombre:string);
 
+implementation
 const
         //Pacman
         pacman_rom:array[0..4] of tipo_roms=(
@@ -56,8 +57,6 @@ var
  irq_vblank:boolean;
  rom_decode:array[0..$ffff] of byte;
  dec_enable:boolean;
-
-implementation
 
 procedure Cargar_Pacman;
 begin

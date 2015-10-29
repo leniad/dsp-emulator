@@ -1,5 +1,6 @@
 ﻿# dsp-emulator
 DSP Emulator WIP status<br>
+<b>29/10/15 - Released DSP Emulator 0.16 Final.</b> Added Win 32, Win 64, Linux 32 and Linux 64 binary. Added source. Read 'Whats New.txt' or visit wiki for more detailed info.<br>
 <b>25/10/15 - DSP Emulator 0.16 WIP.</b> Added Renegade driver with sound.<br>
 <img src='http://img1.imagilive.com/1015/renegade.png'><br>
 <b>26/09/15 - DSP Emulator 0.16 WIP.</b> Sega Master System console added. About 99% of compatibility.<br>

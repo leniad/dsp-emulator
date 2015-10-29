@@ -1,4 +1,4 @@
-﻿<h1>DSP Emulator v0.15ß2 by Leniad 2001-2015</h1><br>
+﻿<h1>DSP Emulator v0.16 by Leniad 2001-2015</h1><br>
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 Why pascal, and not C, C++, Java or any other language? Well, pascal it is powerful enough to handle my emulator (120fps the Spectrum driver with a Pentium CPU) and it is as good as many any other languages.<br>
@@ -18,7 +18,7 @@ The emulator includes (not in WIP or beta versions) inside the ZIP the ROMS for 
 IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS<br><br>
 <b>1.1-. Keys</b>
 <hr>
--General Keys:
+-General Keys:<br><pre>
     F2 --> Full speed/Normal Speed
     F3 --> Reset machine
     F6 --> Full screen
@@ -26,11 +26,11 @@ IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS<br><br>
     F8  --> Save quick Snapshot 2
     F9  --> Load quick Snapshot 1
     F10 --> Load quick Snapshot 2
-    F11 --> Changes emulation speed from 25%, 50%, 75% and 100%
+    F11 --> Changes emulation speed from 25%, 50%, 75% and 100%</pre><br>
 Since 0.14ß2 arcade drivers can save/load two quick snapshots<br>
 Since 0.15ß1 'Full Screen' works again<br>
 - Keys for both players are redefinable, and you can select an external joystick for any player and up to 6 buttons per player<br>
-By default keys are:
+By default keys are:<br><pre>
     Player 1 Up       --> Key 'Cursor UP'
     Player 1 Down     --> Key 'Cursor DOWN'
     Player 1 Left     --> Key 'Cursor LEFT'
@@ -40,13 +40,12 @@ By default keys are:
     Start player 1    --> Key '1'
     Start player 2    --> Key '2'
     Insert coin 1     --> Key '5'
-    Insert Coin 2     --> Key '6' 
+    Insert Coin 2     --> Key '6'</pre><br>
 Any other control is not defined. You can redefine it in the main configuration menu.<br>
-- Spectrum/Amstrad basic keys:<br>
+- Spectrum/Amstrad basic keys:<br><pre>
     F1 --> Play/Stop tape
     F4 --> Save snapshot
-    F5 --> Remove Disk
-
+    F5 --> Remove Disk</pre><br>
 <b>1.2-. Language Files</b>
 <hr>
 DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
@@ -80,11 +79,11 @@ In the main screen of the emulator you can press some buttons<br>
 <hr>
 You can configure<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROMS: You can change Spectrum ROM loading. Configure your favorite ROM or a stand alone file or 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name, for example 'SPECTRUM.ZIP' and the ROM inside the ZIP 'SPECTRUM.ROM')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;By default the ROM files are:
-     -Spectrum 16k/48k: 'SPECTRUM.ZIP' --> 'spectrum.rom' CRC: 0xDDEE531F
-     -Spectrum 128k: 'SPEC128.ZIP' --> '128-0.rom' CRC: 0xE76799D2 and '128-1.rom' CRC: 0xB96A36BE
-     -Spectrum +2: 'PLUS2.ZIP' --> 'plus2-0.rom' CRC: 0x5D2E8C66 and 'plus2-1.rom' CRC: 0x98B1320B
-     -Spectrum +2A/+3: 'PLUS3.ZIP' --> 'plus3-0.rom' CRC: 0x30C9F490 , 'plus3-1.rom' CRC: 0xA7916B3F , 'plus3-2.rom' CRC: 0xC9A0B748 and 'plus3-3.rom' CRC: 0xB88FD6E3
+&nbsp;&nbsp;&nbsp;&nbsp;By default the ROM files are:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Spectrum 16k/48k: 'SPECTRUM.ZIP' --> 'spectrum.rom' CRC: 0xDDEE531F<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Spectrum 128k: 'SPEC128.ZIP' --> '128-0.rom' CRC: 0xE76799D2 and '128-1.rom' CRC: 0xB96A36BE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Spectrum +2: 'PLUS2.ZIP' --> 'plus2-0.rom' CRC: 0x5D2E8C66 and 'plus2-1.rom' CRC: 0x98B1320B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Spectrum +2A/+3: 'PLUS3.ZIP' --> 'plus3-0.rom' CRC: 0x30C9F490 , 'plus3-1.rom' CRC: 0xA7916B3F , 'plus3-2.rom' CRC: 0xC9A0B748 and 'plus3-3.rom' CRC: 0xB88FD6E3<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Border: You can choose line by line emulation, pixel by pixel emulation (slowly but more exact) or disable border emulation (fastest).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Lens Lock: Enable/disable the Lenslok protection simulation<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Spectrum 48K issue: Choose Spectrum issue 2 or 3<br>
@@ -110,13 +109,14 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Audio: Spectrum beeper and in modern Spectrum revisions there is a AY-8912.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To do: Contented memory is not working correctly at 100%.<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;- To do:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Contented memory is not working correctly at 100%.<br><br>
 <b>Amstrad CPC 464,664 y 6128</b><br>
 <hr>
-&nbsp;&nbsp;&nbsp;&nbsp;- ROMS - By default the files are:
-     -CPC-464: 'CPC464.ZIP' --> 'cpc464.rom' CRC: 0x40852F25
-     -CPC-664: 'CPC664.ZIP' --> 'cpc664.rom' CRC: 0x9AB5A036 and 'amsdos.rom' CRC: 0x1FE22ECD
-     -CPC-6128: 'CPC6128.ZIP' --> 'cpc6128.rom' CRC: 0x9E827FE1 and 'amsdos.rom' CRC: 0x1FE22ECD
+&nbsp;&nbsp;&nbsp;&nbsp;- ROMS - By default the files are:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-CPC-464: 'CPC464.ZIP' --> 'cpc464.rom' CRC: 0x40852F25<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-CPC-664: 'CPC664.ZIP' --> 'cpc664.rom' CRC: 0x9AB5A036 and 'amsdos.rom' CRC: 0x1FE22ECD<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-CPC-6128: 'CPC6128.ZIP' --> 'cpc6128.rom' CRC: 0x9E827FE1 and 'amsdos.rom' CRC: 0x1FE22ECD<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Keyboard: Mapped the keys for each of the CPC. To press the '|' press left shift key and '><' next to the Z.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Emulation of pressing keys 'F1' to 'F10' you must press right Shift at the same time.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Joystick: Emulated with the redefinable keys or external joystick.<br>
@@ -133,10 +133,10 @@ Other features<br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- Cartridge: Supports '.nes' ROM format, compressed in ZIP format or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Keys: Use the redefined keys or external joystick<br>
-  'SELECT' uses coin 1 (by default is mapped as key '5')
-  'START' uses start player 1 (by default is mapped as the '1' key)
+&nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Sound: Support sound, only remains DPCM<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports 0,1,2,3,4,7,66 y 87<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports 0,1,2,3,4,7,9,12,66,67 (partial),68,71,87,93,94,180 and 185<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- To Do:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br>
@@ -145,11 +145,11 @@ Other features<br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROM: Not required, but if present are loaded and run as the original console.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The default ROMs names are:
-     -GameBoy: 'GAMEBOY.ZIP' --> 'dmg_boot.bin' CRC: 0x59C8598E
-     -GameBoy Color: 'GBCOLOR.ZIP' --> 'gbc_boot.1' CRC: 0x779EA374 and 'gbc_boot.2' CRC: 0xF741807D
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-GameBoy: 'GAMEBOY.ZIP' --> 'dmg_boot.bin' CRC: 0x59C8598E<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-GameBoy Color: 'GBCOLOR.ZIP' --> 'gbc_boot.1' CRC: 0x779EA374 and 'gbc_boot.2' CRC: 0xF741807D<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Keys: Use the redefined keys or the external joystick<br>
-  'SELECT' uses coin 1 (by default is mapped as key '5')<br>
-  'START' uses start player 1 (by default is mapped as the '1' key).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-Mappers supported are MBC0, MBC1 and MBC5.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- To do:<br>
@@ -160,27 +160,39 @@ Other features<br>
 <b>ColecoVision</b><br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROM: The ROM is needed for emulation<br>
-&nbsp;&nbsp;&nbsp;&nbsp;ROM file name is:
-     -Coleco: 'COLECO.ZIP' --> 'coleco.rom' CRC: 0x3AA93EF3
+&nbsp;&nbsp;&nbsp;&nbsp;ROM file name is:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Coleco: 'COLECO.ZIP' --> 'coleco.rom' CRC: 0x3AA93EF3<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Keys: Joystick is emulated with the redefinable keys or external joystick (the secondary joystick does not have keys assigned). Does not support (still) the special joysticks.<br>
-      The numbers on the keyboard from '1' to '0' emulate the number keys
-      Keys 'Q' and 'W' emulate the keys '*' and '#'
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The numbers on the keyboard from '1' to '0' emulate the number keys<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Keys 'Q' and 'W' emulate the keys '*' and '#'<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: It supports the standard game cartridges (not expansion cartridges) with 'ROM' and 'COL' file extension compressed or not<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshot: Records snapshots compressed with its own format. Also includes the ROM cartridge loaded, so they are independent and can be loaded without the ROM.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Sound: Support the sound AY-8912 chip<br><br>
 <b>Chip 8/Super Chip8</b><br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROM: Does not have. It's a simulation of a pseudo CPU.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keyboard the mapped keys are:
+&nbsp;&nbsp;&nbsp;&nbsp;- Keyboard the mapped keys are:<br><pre>
     Original    Real Keyboard
     1 2 3 A --> 1 2 3 4
     4 5 6 B --> Q W E R
     7 8 9 C --> A S D F
-    D 0 E F --> Z X C V
+    D 0 E F --> Z X C V</pre>
 &nbsp;&nbsp;&nbsp;&nbsp;- Sound: basic sound mono supported<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Video: Supports 64x32 format from Chip8, 64x64 from Chip8 Hires and 128x64 from SuperChip8<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Files: Supports '.CH8' y '.BIN' formats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- To do:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
+<b>Sega Master System</b><br>
+<hr>
+&nbsp;&nbsp;&nbsp;&nbsp;- ROM: It is not necessary for the emulation, but is recommended.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 'mpr-12808.ic2' --> CRC: 0x0072ED54<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Keys: Use the redefined keys or the external joystick<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Sound: Sound chip SN76496 implemented<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: Supports cartridges '.sms' and '.sg' (partialy), compressed or not.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Video: Supports all video special SMS video modes, and all the original. Supports NTSC and PAL.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- To do<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
 <b>2.3 Arcade</b><br>
 <hr>
@@ -195,7 +207,7 @@ Look at the arcade systems list to know which systems use samples.<br>
 Name                       | ROM          | Completed  | Notes
 ----------------------------------------------------------------------------------------------------------------------------------------
 Phoenix                    | PHOENIX.ZIP  |      99    | Phoenix Hardware
-                                                       | Preliminary analog sound, music (TMS36XX) and digital sound are OK
+                                                       | Preliminary analog sound
 Pleiads                    | PLEAIDS.ZIP  |      80    | Phoenix Hardware
                                                        | No sound
 Bombjack                   | BOMBJACK.ZIP |     100    |
@@ -217,7 +229,8 @@ Donkey Kong Junior         | DKONGJR.ZIP  |     100    | Donkey Kong Hardware
                            |              |            | Full sound using samples
 Donkey Kong 3              | DKONG3.ZIP   |     100    | Donkey Kong Hardware
 Black Tiger                | BLKTIGER.ZIP |     100    |
-Green Beret                | GBERET.ZIP   |     100    |
+Green Beret                | GBERET.ZIP   |     100    | Green Beret HW
+Mr. Goemon                 | MRGOEMON.ZIP |     100    | Green Beret HW
 Commando                   | COMMANDO.ZIP |     100    |
 Ghost'n'Goblins            | GNG.ZIP      |     100    |
 Mikie                      | MIKIE.ZIP    |     100    |
@@ -267,7 +280,7 @@ Prehistoric Isle in 1930   | PREHISLE.ZIP |     100    |
 Tiger Road                 | TIGEROAD.ZIP |     100    | Tiger Road Hardware
 F1 Dream                   | F1DREAM.ZIP  |     100    | Tiger Road Hardware
 Snow Bros                  | SNOWBROS.ZIP |     100    |
-Toki                       | TOKI.ZIP     |      95    | Some problems with sound, M68000 core bugs?
+Toki                       | TOKI.ZIP     |     100    |
 Contra                     | CONTRA.ZIP   |      99    | Some graphics bugs
 Mappy                      | MAPPY.ZIP    |     100    | Mappy Hardware
 Dig-Dug II                 | DIGDUG2.ZIP  |     100    | Mappy Hardware
@@ -280,8 +293,7 @@ Section Z                  | SECTIONZ.ZIP |     100    | Legendary Wings Hardwar
 Trojan                     | TROJAN.ZIP   |     100    | Legendary Wings Hardware
 Street Fighter             | SF.ZIP       |     100    |
 Galaga                     | GALAGA.ZIP   |     100    | Galaga Hardware
-DigDug                     | DIGDUG.ZIP   |      95    | Galaga Hardware
-                                                       | Problems with IO 53XX (dipswitch)
+DigDug                     | DIGDUG.ZIP   |     100    | Galaga Hardware
 Xain'd Sleena              | XSLEENA.ZIP  |     100    |
 Hard Head                  | HARDHEAD.ZIP |     100    | Suna Hardware
 Hard Head 2                | HARDHED2.ZIP |      10    | Basic driver
@@ -301,10 +313,9 @@ Gun.Smoke                  | GUNSMOKE.ZIP |     100    | Gun.Smoke Hardware
 Jail Break                 | JAILBREK.ZIP |     100    |
 Circus Charlie             | CIRCUSC.ZIP  |     100    |
 Iron Horse                 | IRONHORS.ZIP |     100    |
-R-Type                     | RTYPE.ZIP    |      90    | Irem M72 Hardware
-Hammerin' Harry            | HHARRY.ZIP   |      90    | Irem M72 Hardware
-                                                       | Palette problems
-R-Type 2                   | RTYPE2.ZIP   |      90    | Irem M72 Hardware
+R-Type                     | RTYPE.ZIP    |      95    | Irem M72 Hardware
+Hammerin' Harry            | HHARRY.ZIP   |      95    | Irem M72 Hardware
+R-Type 2                   | RTYPE2.ZIP   |      95    | Irem M72 Hardware
 Break Thru                 | BRKTHRU.ZIP  |     100    | Break Thru Hardware
 Darwin 4078                | DARWIN.ZIP   |     100    | Break Thru Hardware
 Super Real Darwin          | SRDARWIN.ZIP |     100    |
@@ -317,7 +328,7 @@ Super Glob                 | SUPRGLOB.ZIP |     100    | Epos Hardware
 Tiger Heli                 | TIGERH.ZIP   |     100    | Slap Fight Hardware
 Slap Fight                 | SLAPFIGH.ZIP |     100    | Slap Fight Hardware
 The Legend of Kage         | LKAGE.ZIP    |     100    |
-Cabal                      | CABAL.ZIP    |      95    | Bugs in M68000 core
+Cabal                      | CABAL.ZIP    |     100    |
 Ghouls and Ghosts          | GHOULS.ZIP   |     100    | Capcom Play System 1 - CPS1
 Final Fight                | FFIGHT.ZIP   |     100    | Capcom Play System 1 - CPS1
 The King of Dragons        | KOD.ZIP      |     100    | Capcom Play System 1 - CPS1
@@ -382,7 +393,7 @@ Jr. Pac-Man                | JRPACMAN.ZIP |     100    |
 Robocop                    | ROBOCOP.ZIP  |     100    | Deco0 Hardware
 Baddudes vs. DragonNinja   | BADDUDES.ZIP |     100    | Deco0 Hardware
 Hippodrome                 | HIPPODRM.ZIP |      95    | Deco0 Hardware
-                                                       | Some times the game resets, maybe Hu6280 bugs?
+                                                       | Some times the game resets, may be Hu6280 bugs?
 Tumble Pop                 | TUMBLEP.ZIP  |     100    |
 Funky Jet                  | FUNKYJET.ZIP |     100    |
 Super Burger Time          | SUPBTIME.ZIP |     100    |
@@ -390,14 +401,14 @@ Caveman Ninja              | CNINJA.ZIP   |     100    | Caveman Ninja Hardware
 Robocop 2                  | ROBOCOP2.ZIP |     100    | Caveman Ninja Hardware
 Diet Go Go                 | DIETGO.ZIP   |     100    |
 Act-Fancer Cybernetick     | 
-    Hyper Weapon           | ACTFANCR.ZIP |      95    | Bugs on Hu6280
+    Hyper Weapon           | ACTFANCR.ZIP |     100    |
 Arabian                    | ARABIAN.ZIP  |     100    |
 Pirate Ship Higemaru       | HIGEMARU.ZIP |     100    |
 Bagman                     | BAGMAN.ZIP   |      95    | Bagman Hardware
                                                        | Missing TSM 5110 sound
 Super Bagman               | SBAGMAN.ZIP  |      95    | Bagman Hardware
                                                        | Missing TSM 5110 sound
-Congo                      | CONGO.ZIP    |     100    | Zaxxon Hardware
+Congo Bongo                | CONGO.ZIP    |     100    | Zaxxon Hardware
 Zaxxon                     | ZAXXON.ZIP   |     100    | Zaxxon Hardware
 Kangaroo                   | KANGAROO.ZIP |     100    |
 Bionic Commando            | BIONICC.ZIP  |     100    |
@@ -405,16 +416,29 @@ WWF Super Stars            | WWFSSTAR.ZIP |     100    |
 Rainbow Islands            | RAINBOW.ZIP  |     100    | Rainbow Islands Hardware
 Rainbow Islands Extra      | RAINBOWE.ZIP |     100    | Rainbow Islands Hardware
 Volfied                    | VOLFIED.ZIP  |      99    | Small problems with sprites palette
-Operation Wolf             | OPWOLF.ZIP   |     100    | Use the mouse to move the gun sight
+Operation Wolf             | OPWOLF.ZIP   |     100    | Use the mouse to move the gun cross
+Outrun                     | OUTRUN.ZIP   |      10    | Basic Driver
 Jungle King                | JUNGLEK.ZIP  |     100    | Taito SJ Hardware
 Elevator Action            | ELEVATOR.ZIP |     100    | Taito SJ Hardware
 Vulgus                     | VULGUS.ZIP   |     100    |
 Double Dragon III:         |
     The Rosetta Stone      | DDRAGON3.ZIP |     100    |
 Block Out                  | BLOCKUOT.ZIP |     100    |
-Food Fight                 | FOODF.ZIP    |      90    | Starting POKEY emulation
+Food Fight                 | FOODF.ZIP    |     100    |
+Nemesis                    | NEMESIS.ZIP  |     100    | Nemesis HW
+TwinBee                    | TWINBEE.ZIP  |      80    | Nemesis HW
+                                                       | Sprites and video video problems
+Pirates                    | PIRATES.ZIP  |     100    | Pirates HW
+Genis Family               | GENIX.ZIP    |      95    | Pirates HW
+                                                       | Protection problems
+Juno First                 | JUNOFRST.ZIP |      90    | DAC missing
+Gyruss                     | GYRUSS.ZIP   |      90    | DAC missing
+Free Kick                  | FREEKICK.ZIP |     100    |
+Boogie Wings               | BOOGIEW.ZIP  |      20    | Basic driver
+Pinball Action             | PBACTION.ZIP |     100    |
+Renegade                   | RENEGADE.ZIP |     100    |
 -------------------------------------------------------------------------------------------------------------------------------------
-Total: 192</pre>
+Total: 202</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
 If you want to add another language, edit any file with the extension '.lng' in the 'LNG' directory, rename it with the name of the language and send it to me to add it to the next version.<br>
@@ -434,15 +458,16 @@ If you use part of the code of the emulator for any non commercial purpose, you 
 - And many pages from Internet, many documents ... and people who I forget, thank you all<br><br>
 <b>5-. Copyright</b><br>
 <hr>
-- The Coleco and Pooyan has been rewrited from the originals by Michael Franzen<br>
-- The CPS1 has been rewrited from the original by Tomas Walker<br>
-- All the drivers, the Z80 core, M6502 core, M6809 (HD6309) core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core, LR35902 core, M6805 core, MCS51 core,Hu6280 core and MB88XX core are writed by me, Leniad<br>
-- AY-3-8912 emulator is a conversion from Chris Cowley, but the original emulator come from MAME team<br>
-- SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255, OKI6295, UPD7759, Z80PIO, Z80CTC and pokey emulators are a conversion writed by me from MAME original<br>
-- TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME<br>
-- NEC765 emulator is a conversion writed and adapted by me, from MESS original<br>
-- GameBoy/GameBoy Color sound emulator is a conversion writed by me from MESS original<br>
-- NES sound emulator is a conversion writed by me from MAME original<br>
+- The Coleco and Pooyan has been rewrited from the originals by Michael Franzen.<br>
+- The CPS1 has been rewrited from the original by Tomas Walker.<br>
+- The source code for the Lensloc protection simulation comes from Simon Owen.<br>
+- All the drivers, the Z80 core, M6502 core, M6809 (HD6309) core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core, LR35902 core, M6805 core, MCS51 core,Hu6280 core and MB88XX core are writed by me, Leniad.<br>
+- AY-3-8912 emulator is a conversion from Chris Cowley, but the original emulator come from MAME team.<br>
+- SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255, OKI6295, UPD7759, Z80PIO, Z80CTC,pokey and Sega VDP emulators are a conversion writed by me from MAME original.<br>
+- TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME.<br>
+- NEC765 emulator is a conversion writed and adapted by me, from MESS original.<br>
+- GameBoy/GameBoy Color sound emulator is a conversion writed by me from MESS original.<br>
+- NES sound emulator is a conversion writed by me from MAME original.<br>
 All Spectrum, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad<br><br>
 <b>6-. Contact & Links</b><br>
 <hr>

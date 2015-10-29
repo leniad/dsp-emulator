@@ -13,7 +13,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="16"/>
-      <BuildNr Value="495"/>
+      <BuildNr Value="496"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.16"/>
     </VersionInfo>
@@ -58,7 +58,9 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <CursorPos X="10" Y="10"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="411"/>
+        <CursorPos X="22" Y="415"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -253,11 +255,10 @@
       </Unit29>
       <Unit30>
         <Filename Value="..\misc\main_engine.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="404"/>
         <CursorPos X="68" Y="412"/>
         <UsageCount Value="51"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit30>
       <Unit31>
@@ -277,7 +278,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="29"/>
-        <CursorPos X="15" Y="35"/>
+        <CursorPos X="31" Y="33"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit32>
@@ -287,9 +288,9 @@
         <ComponentName Value="FLoadRom"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="LoadRom"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="144"/>
-        <CursorPos X="10" Y="157"/>
+        <CursorPos X="58" Y="153"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit33>
@@ -300,8 +301,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="514"/>
-        <CursorPos Y="529"/>
+        <TopLine Value="615"/>
+        <CursorPos X="25" Y="748"/>
         <UsageCount Value="202"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit34>
@@ -312,8 +313,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="108"/>
-        <CursorPos X="45" Y="118"/>
+        <TopLine Value="401"/>
+        <CursorPos X="21" Y="437"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit35>
@@ -372,12 +373,10 @@
       <Unit43>
         <Filename Value="..\misc\sound_engine.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="170"/>
-        <CursorPos Y="175"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="275"/>
+        <CursorPos X="27" Y="142"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit43>
       <Unit44>
@@ -389,8 +388,8 @@
       <Unit45>
         <Filename Value="..\misc\file_engine.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="277"/>
-        <CursorPos X="30" Y="293"/>
+        <TopLine Value="653"/>
+        <CursorPos X="36" Y="660"/>
         <UsageCount Value="91"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit45>
@@ -401,8 +400,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="58"/>
-        <CursorPos Y="67"/>
+        <CursorPos Y="9"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit46>
@@ -413,8 +411,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="73"/>
-        <CursorPos X="20" Y="81"/>
+        <CursorPos Y="8"/>
         <UsageCount Value="221"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit47>
@@ -436,8 +433,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="80"/>
-        <CursorPos X="17" Y="89"/>
+        <TopLine Value="34"/>
         <UsageCount Value="224"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit49>
@@ -448,8 +444,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="149"/>
-        <CursorPos X="62" Y="164"/>
+        <CursorPos Y="10"/>
         <UsageCount Value="224"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit50>
@@ -479,9 +474,10 @@
         <Filename Value="arcade_config.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="config_arcade"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="105"/>
-        <CursorPos Y="107"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="34"/>
         <UsageCount Value="301"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit54>
@@ -506,8 +502,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="14"/>
-        <CursorPos X="18" Y="31"/>
+        <TopLine Value="43"/>
+        <CursorPos X="25" Y="51"/>
         <UsageCount Value="226"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit57>
@@ -955,7 +951,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="317"/>
         <CursorPos X="18" Y="319"/>
-        <UsageCount Value="63"/>
+        <UsageCount Value="64"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit119>
       <Unit120>
@@ -1003,9 +999,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="58"/>
-        <CursorPos X="5" Y="65"/>
-        <UsageCount Value="40"/>
+        <CursorPos Y="8"/>
+        <UsageCount Value="41"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit125>
       <Unit126>
@@ -1183,11 +1178,10 @@
       <Unit148>
         <Filename Value="..\misc\lib_sdl2.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="55"/>
         <CursorPos X="15" Y="63"/>
-        <UsageCount Value="35"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="36"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit148>
       <Unit149>
@@ -1302,128 +1296,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit163>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
-      <Position1>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="173" TopLine="161"/>
-      </Position1>
-      <Position2>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="174" TopLine="161"/>
-      </Position2>
-      <Position3>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="175" TopLine="161"/>
-      </Position3>
-      <Position4>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="172" TopLine="161"/>
-      </Position4>
-      <Position5>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="173" TopLine="161"/>
-      </Position5>
-      <Position6>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="174" TopLine="161"/>
-      </Position6>
-      <Position7>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="175" TopLine="161"/>
-      </Position7>
-      <Position8>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="172" TopLine="161"/>
-      </Position8>
-      <Position9>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="173" TopLine="161"/>
-      </Position9>
-      <Position10>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="174" TopLine="161"/>
-      </Position10>
-      <Position11>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="175" TopLine="161"/>
-      </Position11>
-      <Position12>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="172" TopLine="161"/>
-      </Position12>
-      <Position13>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="173" TopLine="161"/>
-      </Position13>
-      <Position14>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="174" TopLine="161"/>
-      </Position14>
-      <Position15>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="175" TopLine="161"/>
-      </Position15>
-      <Position16>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="172" TopLine="161"/>
-      </Position16>
-      <Position17>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="173" TopLine="161"/>
-      </Position17>
-      <Position18>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="174" TopLine="161"/>
-      </Position18>
-      <Position19>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="175" TopLine="161"/>
-      </Position19>
-      <Position20>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="172" TopLine="161"/>
-      </Position20>
-      <Position21>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="173" TopLine="161"/>
-      </Position21>
-      <Position22>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="174" TopLine="161"/>
-      </Position22>
-      <Position23>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="175" TopLine="161"/>
-      </Position23>
-      <Position24>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="172" TopLine="161"/>
-      </Position24>
-      <Position25>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="173" TopLine="161"/>
-      </Position25>
-      <Position26>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="174" TopLine="161"/>
-      </Position26>
-      <Position27>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="175" TopLine="161"/>
-      </Position27>
-      <Position28>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="172" TopLine="161"/>
-      </Position28>
-      <Position29>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="173" TopLine="161"/>
-      </Position29>
-      <Position30>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="174" TopLine="161"/>
-      </Position30>
-    </JumpHistory>
+    <JumpHistory HistoryIndex="-1"/>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
@@ -1433,7 +1306,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <Libraries Value="\usr\local\lib\;\usr\X11\lib\"/>
+      <Libraries Value="\usr\local\lib;\usr\X11\lib"/>
       <OtherUnitFiles Value="..\ordenadores;..\cpu\z80;..\arcade;..\snd;..\devices;..\misc;..\consolas;..\arcade\misc;..\cpu;zlibex;..\ordenadores\misc;..\misc\SDL2"/>
       <UnitOutputDirectory Value="obj"/>
     </SearchPaths>
@@ -1462,7 +1335,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <BreakPoints Count="3">
+    <BreakPoints Count="2">
       <Item1>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsGlobal"/>
@@ -1477,13 +1350,6 @@
         <Source Value="C:\lazarus\fpc\2.6.1\source\packages\paszlib\src\zuncompr.pas"/>
         <Line Value="49"/>
       </Item2>
-      <Item3>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="..\misc\sound_engine.pas"/>
-        <Line Value="142"/>
-      </Item3>
     </BreakPoints>
     <Exceptions Count="10">
       <Item1>

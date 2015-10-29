@@ -280,8 +280,9 @@ var
   instruccion,timming,arg,tempb:byte;
 begin
 if self.pedir_reset<>CLEAR_LINE then begin
+  tempb:=self.pedir_reset;
   self.reset;
-  self.pedir_reset:=ASSERT_LINE;
+  if tempb=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
   self.contador:=trunc(maximo);
   exit;
 end;

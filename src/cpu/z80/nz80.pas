@@ -425,10 +425,9 @@ irq_temp:=false;
 self.contador:=0;
 while self.contador<maximo do begin
 if self.pedir_reset<>CLEAR_LINE then begin
-  if self.pedir_reset<>ALREADY_RESET then begin
-    self.reset;
-    self.pedir_reset:=ALREADY_RESET;
-  end;
+  temp:=self.pedir_reset;
+  self.reset;
+  if temp=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
   self.contador:=trunc(maximo);
   exit;
 end;

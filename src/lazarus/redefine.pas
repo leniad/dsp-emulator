@@ -6,7 +6,7 @@ interface
 
 uses
   Classes,SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons,lenguaje,sdl2,main_engine;
+  StdCtrls, Buttons,lenguaje,lib_sdl2,main_engine;
 
 type
 
@@ -140,301 +140,301 @@ end;
 
 procedure Tredefine1.Button20Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_O;
+tecla_leida:=libSDL_SCANCODE_O;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button21Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_P;
+tecla_leida:=libSDL_SCANCODE_P;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button12Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_Q;
+tecla_leida:=libSDL_SCANCODE_Q;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button13Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_W;
+tecla_leida:=libSDL_SCANCODE_W;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button14Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_E;
+tecla_leida:=libSDL_SCANCODE_E;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button15Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_R;
+tecla_leida:=libSDL_SCANCODE_R;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button16Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_T;
+tecla_leida:=libSDL_SCANCODE_T;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button17Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_Y;
+tecla_leida:=libSDL_SCANCODE_Y;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button18Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_U;
+tecla_leida:=libSDL_SCANCODE_U;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button19Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_I;
+tecla_leida:=libSDL_SCANCODE_I;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button10Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_9;
+tecla_leida:=libSDL_SCANCODE_9;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button11Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_0;
+tecla_leida:=libSDL_SCANCODE_0;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button22Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_TAB;
+tecla_leida:=libSDL_SCANCODE_TAB;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button23Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_A;
+tecla_leida:=libSDL_SCANCODE_A;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button24Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_S;
+tecla_leida:=libSDL_SCANCODE_S;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button25Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_D;
+tecla_leida:=libSDL_SCANCODE_D;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button26Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_F;
+tecla_leida:=libSDL_SCANCODE_F;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button27Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_G;
+tecla_leida:=libSDL_SCANCODE_G;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button28Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_H;
+tecla_leida:=libSDL_SCANCODE_H;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button29Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_J;
+tecla_leida:=libSDL_SCANCODE_J;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button2Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_1;
+tecla_leida:=libSDL_SCANCODE_1;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button30Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_K;
+tecla_leida:=libSDL_SCANCODE_K;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button31Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_L;
+tecla_leida:=libSDL_SCANCODE_L;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button32Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_LSHIFT;
+tecla_leida:=libSDL_SCANCODE_LSHIFT;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button33Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_Z;
+tecla_leida:=libSDL_SCANCODE_Z;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button34Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_X;
+tecla_leida:=libSDL_SCANCODE_X;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button35Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_C;
+tecla_leida:=libSDL_SCANCODE_C;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button36Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_V;
+tecla_leida:=libSDL_SCANCODE_V;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button37Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_B;
+tecla_leida:=libSDL_SCANCODE_B;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button38Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_N;
+tecla_leida:=libSDL_SCANCODE_N;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button39Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_M;
+tecla_leida:=libSDL_SCANCODE_M;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button3Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_2;
+tecla_leida:=libSDL_SCANCODE_2;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button40Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_RSHIFT;
+tecla_leida:=libSDL_SCANCODE_RSHIFT;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button41Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_LCTRL;
+tecla_leida:=libSDL_SCANCODE_LCTRL;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button42Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_LALT;
+tecla_leida:=libSDL_SCANCODE_LALT;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button43Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_SPACE;
+tecla_leida:=libSDL_SCANCODE_SPACE;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button44Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_RALT;
+tecla_leida:=libSDL_SCANCODE_RALT;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button45Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_RCTRL;
+tecla_leida:=libSDL_SCANCODE_RCTRL;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button46Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_DOWN;
+tecla_leida:=libSDL_SCANCODE_DOWN;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button47Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_UP;
+tecla_leida:=libSDL_SCANCODE_UP;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button48Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_LEFT;
+tecla_leida:=libSDL_SCANCODE_LEFT;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button49Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_RIGHT;
+tecla_leida:=libSDL_SCANCODE_RIGHT;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button4Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_3;
+tecla_leida:=libSDL_SCANCODE_3;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button50Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_RETURN;
+tecla_leida:=libSDL_SCANCODE_RETURN;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button51Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_ESCAPE;
+tecla_leida:=libSDL_SCANCODE_ESCAPE;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button5Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_4;
+tecla_leida:=libSDL_SCANCODE_4;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button6Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_5;
+tecla_leida:=libSDL_SCANCODE_5;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button7Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_6;
+tecla_leida:=libSDL_SCANCODE_6;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button8Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_7;
+tecla_leida:=libSDL_SCANCODE_7;
 redefine1.close;
 end;
 
 procedure Tredefine1.Button9Click(Sender: TObject);
 begin
-tecla_leida:=SDL_SCANCODE_8;
+tecla_leida:=libSDL_SCANCODE_8;
 redefine1.close;
 end;
 

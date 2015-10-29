@@ -213,15 +213,15 @@ end;
 
 procedure cpu_m6805.run(maximo:single);
 var
-  instruccion,numero,tempb,old_reset:byte;
+  instruccion,numero,tempb:byte;
   posicion,tempw:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
 if self.pedir_reset<>CLEAR_LINE then begin
-  old_reset:=self.pedir_reset;
+  tempb:=self.pedir_reset;
   self.reset;
-  if self.pedir_reset=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
+  if tempb=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
   self.contador:=trunc(maximo);
   exit;
 end;

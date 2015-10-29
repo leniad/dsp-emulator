@@ -15,7 +15,7 @@ object redefine1: Tredefine1
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '1.4.0.2'
+  LCLVersion = '1.5'
   object Button1: TButton
     Left = 148
     Height = 25

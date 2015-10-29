@@ -5,7 +5,7 @@ unit joystick_calibration;
 interface
 
 uses
-  sdl2,Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  lib_sdl2,Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, ExtCtrls,controls_engine;
 
 type
@@ -37,7 +37,7 @@ implementation
 
 procedure bucle_joystick(numero:byte);
 var
-  sdl_event:TSDL_Event;
+  sdl_event:libSDL_Event;
 begin
 joy_calibration.label1.caption:=inttostr(arcade_input.joy_ax0_cent[numero]);
 joy_calibration.label2.caption:=inttostr(arcade_input.joy_ax1_cent[numero]);
@@ -48,7 +48,7 @@ while not(salir) do begin
     if salir then break;
   end;
   SDL_JoystickUpdate();
-  if sdl_event.type_=SDL_JOYAXISMOTION then begin
+  if sdl_event.type_=libSDL_JOYAXISMOTION then begin
     arcade_input.joy_ax0_cent[numero]:=SDL_JoystickGetAxis(joystick_def[numero],0);
     joy_calibration.label1.caption:=inttostr(arcade_input.joy_ax0_cent[numero]);
     arcade_input.joy_ax1_cent[numero]:=SDL_JoystickGetAxis(joystick_def[numero],1);
