@@ -14,6 +14,7 @@ procedure cerrar_pengo;
 function pengo_getbyte(direccion:word):byte;
 procedure pengo_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         pengo_rom:array[0..8] of tipo_roms=(
         (n:'ep1689c.8';l:$1000;p:0;crc:$f37066a8),(n:'ep1690b.7';l:$1000;p:$1000;crc:$baf48143),
@@ -29,8 +30,6 @@ var
  irq_enable:boolean;
  rom_opcode:array[0..$7fff] of byte;
  colortable_bank,gfx_bank,pal_bank:byte;
-
-implementation
 
 procedure Cargar_pengo;
 begin

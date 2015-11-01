@@ -19,6 +19,7 @@ procedure vulgus_snd_putbyte(direccion:word;valor:byte);
 procedure vulgus_sound_update;
 procedure vulgus_snd_irq;
 
+implementation
 const
         vulgus_rom:array[0..5] of tipo_roms=(
         (n:'vulgus.002';l:$2000;p:0;crc:$e49d6c5d),(n:'vulgus.003';l:$2000;p:$2000;crc:$51acef76),
@@ -41,8 +42,6 @@ const
 var
  scroll_x,scroll_y:word;
  sound_command,palette_bank:byte;
-
-implementation
 
 procedure Cargar_vulgus;
 begin

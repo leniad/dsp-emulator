@@ -241,7 +241,8 @@ uses
   config_sms in 'config_sms.pas' {SMSConfig},
   lib_sdl2 in '..\misc\lib_sdl2.pas',
   renegade_hw in '..\arcade\renegade_hw.pas',
-  generic_adpcm in '..\snd\generic_adpcm.pas';
+  generic_adpcm in '..\snd\generic_adpcm.pas',
+  tmnt_hw in '..\arcade\tmnt_hw.pas';
 
 {$R *.res}
 

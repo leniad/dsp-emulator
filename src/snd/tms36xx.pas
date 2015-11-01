@@ -3,6 +3,40 @@ unit tms36xx;
 interface
 uses sound_engine;
 
+type
+  TMS36XX_type=record
+	  samplerate:integer; 	// from Machine->sample_rate */
+	  basefreq:integer;		// chip's base frequency */
+	  octave:integer; 		// octave select of the TMS3615 */
+	  speed:integer;			// speed of the tune */
+	  tune_counter:integer;	// tune counter */
+	  note_counter:integer;	// note counter */
+	  voices:integer; 		// active voices */
+	  shift:integer;			// shift toggles between 0 and 6 to allow decaying voices */
+	  vol:array[0..12-1] of integer;		// (decaying) volume of harmonics notes */
+	  vol_counter:array[0..12-1] of integer;// volume adjustment counter */
+	  decay:array[0..12-1] of integer;		// volume adjustment rate - dervied from decay */
+	  counter:array[0..12-1] of integer;	// tone frequency counter */
+	  frequency:array[0..12-1] of integer;	// tone frequency */
+	  output:integer; 		// output signal bits */
+	  enable:integer; 		// mask which harmoics */
+	  tune_num:integer;		// tune currently playing */
+	  tune_ofs:integer;		// note currently playing */
+	  tune_max:integer;		// end of tune */
+    tsample:byte;
+  end;
+  ptms36xx=^tms36xx_type;
+
+var
+  tms_chip:ptms36xx;
+  tunes:array[0..4,0..(96*6)-1] of integer;
+
+procedure tms36xx_sound_update;
+procedure tms36xx_start(clock:integer;speed:extended;pdecay:pextended);
+procedure mm6221aa_tune_w(tune:integer);
+procedure tms36xx_close;
+
+implementation
 const
    VMIN=$0000;
    VMAX=$7fff;
@@ -235,47 +269,6 @@ const
 	A_1,	A_2,	Cx_3,	A_3,	Cx_4,	A_4,
 	Ax_1,	Ax_2,	D_3,	Ax_3,	D_4,	Ax_4,
 	B_1,	B_2,	Dx_3,	B_3,	Dx_4,	B_4);
-
-
-type
-
-  TMS36XX_type=record
-	  samplerate:integer; 	// from Machine->sample_rate */
-
-	  basefreq:integer;		// chip's base frequency */
-	  octave:integer; 		// octave select of the TMS3615 */
-
-	  speed:integer;			// speed of the tune */
-	  tune_counter:integer;	// tune counter */
-	  note_counter:integer;	// note counter */
-
-	  voices:integer; 		// active voices */
-	  shift:integer;			// shift toggles between 0 and 6 to allow decaying voices */
-	  vol:array[0..12-1] of integer;		// (decaying) volume of harmonics notes */
-	  vol_counter:array[0..12-1] of integer;// volume adjustment counter */
-	  decay:array[0..12-1] of integer;		// volume adjustment rate - dervied from decay */
-
-	  counter:array[0..12-1] of integer;	// tone frequency counter */
-	  frequency:array[0..12-1] of integer;	// tone frequency */
-	  output:integer; 		// output signal bits */
-	  enable:integer; 		// mask which harmoics */
-
-	  tune_num:integer;		// tune currently playing */
-	  tune_ofs:integer;		// note currently playing */
-	  tune_max:integer;		// end of tune */
-    tsample:byte;
-  end;
-  ptms36xx=^tms36xx_type;
-var
-  tms_chip:ptms36xx;
-  tunes:array[0..4,0..(96*6)-1] of integer;
-
-procedure tms36xx_sound_update;
-procedure tms36xx_start(clock:integer;speed:extended;pdecay:pextended);
-procedure mm6221aa_tune_w(tune:integer);
-procedure tms36xx_close;
-
-implementation
 
 function C(n:byte):integer;inline;
 var

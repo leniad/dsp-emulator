@@ -108,7 +108,7 @@ type
     tipo_effects_def=procedure(direccion,valor:byte);
 var
  colores_char:array[0..$ff] of byte;
- haz_nmi,hay_samples:boolean;
+ haz_nmi:boolean;
  npaleta,latch1,latch2,latch3:byte;
  sprite_bank,char_bank:word;
  audio_tunes:tipo_tunes_def;
@@ -206,8 +206,9 @@ case main_vars.tipo_maquina of
         //cargar roms
         if not(cargar_roms(@memoria[0],@dkong_rom[0],'dkong.zip',0)) then exit;
         //samples
-        hay_samples:=load_samples('dkong.zip',@dk_samples[0],cant_samples+1);
-        if hay_samples then main_z80.init_sound(dkong_sound_update);
+        if load_samples('dkong.zip',@dk_samples[0],cant_samples+1) then begin
+          main_z80.init_sound(dkong_sound_update);
+        end;
         audio_tunes:=dkong_tune_sound;
         audio_effects:=dkong_effects_sound;
         //convertir chars
@@ -240,8 +241,9 @@ case main_vars.tipo_maquina of
         copymemory(@memoria[$5000],@memoria_temp[$5000],$800);
         copymemory(@memoria[$1800],@memoria_temp[$5800],$800);
         //samples
-        hay_samples:=load_samples('dkongjr.zip',@dkjr_samples[0],cant_samples_jr+1);
-        if hay_samples then main_z80.init_sound(dkong_sound_update);
+        if load_samples('dkongjr.zip',@dkjr_samples[0],cant_samples_jr+1) then begin
+          main_z80.init_sound(dkong_sound_update);
+        end;
         audio_tunes:=dkongjr_tune_sound;
         audio_effects:=dkongjr_effects_sound;
         //convertir chars
@@ -317,7 +319,7 @@ begin
  case main_vars.tipo_maquina of
     15:begin
         marcade.in2:=0;
-        if hay_samples then reset_samples;
+        reset_samples;
         tune08:=0;
         tune09:=0;
         tune11:=0;
@@ -325,7 +327,7 @@ begin
        end;
    168:begin
         marcade.in2:=$40;
-        if hay_samples then reset_samples;
+        reset_samples;
         effect0:=0;
         effect1:=0;
         effect2:=0;
@@ -568,14 +570,14 @@ begin
 if direccion<$6000 then exit;
 memoria[direccion]:=valor;
 case direccion of
-        $7c00:if hay_samples then audio_tunes(valor);
+        $7c00:audio_tunes(valor);
         $7400..$77ff:gfx[0].buffer[direccion and $3ff]:=true;
         $7c80:if char_bank<>((valor and 1)*$100) then begin
                 fillchar(gfx[0].buffer[0],$400,1);
                 char_bank:=(valor and 1)*$100;
               end;
-        $7d00..$7d07:if hay_samples then audio_effects(direccion and 7,valor);
-        $7d80:if ((valor<>0) and hay_samples) then begin  //death
+        $7d00..$7d07:audio_effects(direccion and 7,valor);
+        $7d80:if (valor<>0) then begin  //death
                   stop_all_samples;
                   start_sample(0);
               end;

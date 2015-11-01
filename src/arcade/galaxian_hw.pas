@@ -150,7 +150,7 @@ var
   draw_stars:procedure;
   galaxian_update_video:procedure;
   //Variables globales
-  haz_nmi,stars_enable,hay_samples:boolean;
+  haz_nmi,stars_enable:boolean;
   stars_scrollpos:dword;
   stars_blinking,latch,port_b_latch:byte;
   stars:array[0..star_count-1] of tstars;
@@ -218,11 +218,11 @@ case direccion of
                     else memoria[$5800+(direccion and $ff)]:=valor;
                end;
   $6800..$6fff:case (direccion and $7) of
-                  $0:if ((valor<>0) and hay_samples) then start_sample(2);
-                  $1:if ((valor<>0) and hay_samples) then start_sample(3);
-                  $2:if ((valor<>0) and hay_samples) then start_sample(4);
-                  $3:if ((valor<>0) and hay_samples) then start_sample(1);
-                  $5:if ((valor<>0) and hay_samples) then start_sample(0);
+                  $0:if (valor<>0) then start_sample(2);
+                  $1:if (valor<>0) then start_sample(3);
+                  $2:if (valor<>0) then start_sample(4);
+                  $3:if (valor<>0) then start_sample(1);
+                  $5:if (valor<>0) then start_sample(0);
                 end;
   $7000..$77ff:case (direccion and $7) of
                   $1:haz_nmi:=((valor and 1)<>0);
@@ -261,7 +261,7 @@ end;
 
 procedure galaxian_despues_instruccion;
 begin
-if hay_samples then samples_update;
+  samples_update;
 end;
 
 //Jump Bug
@@ -450,11 +450,11 @@ case direccion of
                          end;
                end;
   $a800..$afff:case (direccion and $7) of
-                  $0:if ((valor<>0) and hay_samples) then start_sample(2);
-                  $1:if ((valor<>0) and hay_samples) then start_sample(3);
-                  $2:if ((valor<>0) and hay_samples) then start_sample(4);
-                  $3:if ((valor<>0) and hay_samples) then start_sample(1);
-                  $5:if ((valor<>0) and hay_samples) then start_sample(0);
+                  $0:if (valor<>0) then start_sample(2);
+                  $1:if (valor<>0) then start_sample(3);
+                  $2:if (valor<>0) then start_sample(4);
+                  $3:if (valor<>0) then start_sample(1);
+                  $5:if (valor<>0) then start_sample(0);
                 end;
   $b000..$b7ff:case (direccion and $7) of
                   $0:haz_nmi:=(valor and 1)<>0;
@@ -1171,7 +1171,7 @@ begin
        marcade.in0:=0;
        marcade.in1:=0;
        marcade.in2:=4;
-       if hay_samples then reset_samples;
+       reset_samples;
   end;
   48:begin
        marcade.in0:=0;
@@ -1183,7 +1183,7 @@ begin
        marcade.in0:=0;
        marcade.in1:=$80;
        marcade.in2:=0;
-       if hay_samples then reset_samples;
+       reset_samples;
   end;
   143:begin
         snd_z80.reset;
@@ -1300,8 +1300,9 @@ case main_vars.tipo_maquina of
       //cargar roms
       if not(cargar_roms(@memoria[0],@galaxian_rom[0],'galaxian.zip',0)) then exit;
       //cargar samples
-      hay_samples:=load_samples('galaxian.zip',@galaxian_samples[0],5);
-      if hay_samples then main_z80.init_sound(galaxian_despues_instruccion);
+      if load_samples('galaxian.zip',@galaxian_samples[0],5) then begin
+        main_z80.init_sound(galaxian_despues_instruccion);
+      end;
       //convertir chars &sprites
       if not(cargar_roms(@memoria_temp[0],@galaxian_char[0],'galaxian.zip',0)) then exit;
       convert_chars(256);
@@ -1339,8 +1340,9 @@ case main_vars.tipo_maquina of
           else ctemp1:=ctemp2;
 		    memoria[f]:=ctemp1;
       end;
-      hay_samples:=load_samples('mooncrst.zip',@mooncrst_samples[0],5);
-      if hay_samples then main_z80.init_sound(galaxian_despues_instruccion);
+      if load_samples('mooncrst.zip',@mooncrst_samples[0],5) then begin
+        main_z80.init_sound(galaxian_despues_instruccion);
+      end;
       //convertir chars & sprites
       if not(cargar_roms(@memoria_temp[0],@mooncrst_char[0],'mooncrst.zip',0)) then exit;
       convert_chars(512);

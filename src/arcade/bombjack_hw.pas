@@ -22,6 +22,7 @@ procedure bombjack_update_sound;
 procedure bombjack_qsave(nombre:string);
 procedure bombjack_qload(nombre:string);
 
+implementation
 const
         bombjack_rom:array[0..5] of tipo_roms=(
         (n:'09_j01b.bin';l:$2000;p:0;crc:$c668dc30),(n:'10_l01b.bin';l:$2000;p:$2000;crc:$52a1e5fb),
@@ -55,8 +56,6 @@ var
  memoria_fondo:array[0..$fff] of byte;
  numero_fondo,sound_latch:byte;
  fondo_activo,nmi_vblank:boolean;
-
-implementation
 
 procedure Cargar_bombjack;
 begin

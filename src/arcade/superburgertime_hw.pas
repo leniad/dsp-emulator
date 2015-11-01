@@ -14,6 +14,7 @@ procedure supbtime_principal;
 function supbtime_getword(direccion:dword):word;
 procedure supbtime_putword(direccion:dword;valor:word);
 
+implementation
 const
         supbtime_rom:array[0..2] of tipo_roms=(
         (n:'gk03';l:$20000;p:0;crc:$aeaeed61),(n:'gk04';l:$20000;p:$1;crc:$2bc5a4eb),());
@@ -26,8 +27,6 @@ const
 var
  rom:array[0..$1ffff] of word;
  ram:array[0..$1fff] of word;
-
-implementation
 
 procedure Cargar_supbtime;
 begin

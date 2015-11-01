@@ -17,6 +17,7 @@ procedure pirates_sound_update;
 //Genix
 function genix_getword(direccion:dword):word;
 
+implementation
 const
         //Pirates
         pirates_rom:array[0..2] of tipo_roms=(
@@ -44,10 +45,8 @@ var
  sound_rom:array[0..1,0..$3ffff] of byte;
  ram1:array[0..$7ffff] of word;
  ram2:array[0..$3fff] of word;
- sprite_ram:array[0..$3ff] of word;
+ sprite_ram:array[0..$7ff] of word;
  scroll_x:word;
-
-implementation
 
 procedure Cargar_pirates;
 begin
@@ -241,9 +240,9 @@ var
   flip_x,flip_y:boolean;
 begin
 for f:=0 to $1fd do begin
-    sx:=sprite_ram[5+(f*4)]-32;
 		sy:=sprite_ram[3+(f*4)];  // indeed...
 		if (sy and $8000)<>0 then exit;   // end-of-list marker */
+    sx:=sprite_ram[5+(f*4)]-32;
     atrib:=sprite_ram[6+(f*4)];
 		nchar:=atrib shr 2;
 		color:=sprite_ram[4+(f*4)] and $ff;
@@ -352,6 +351,7 @@ case direccion of
     $100000..$10ffff:pirates_getword:=ram1[(direccion and $ffff) shr 1];
     $300000:pirates_getword:=marcade.in1;
     $400000:pirates_getword:=marcade.in0;
+    $500000..$500fff:pirates_getword:=sprite_ram[(direccion and $fff) shr 1];
     $800000..$803fff:pirates_getword:=buffer_paleta[(direccion and $3fff) shr 1];
     $900000..$907fff:pirates_getword:=ram2[(direccion and $7fff) shr 1];
     $a00000:pirates_getword:=oki_6295_0.read;
@@ -377,9 +377,9 @@ begin
 if direccion<$100000 then exit;
 case direccion of
     $100000..$10ffff:ram1[(direccion and $ffff) shr 1]:=valor;
-    $500000..$5007ff:sprite_ram[(direccion and $7ff) shr 1]:=valor;
+    $500000..$500fff:sprite_ram[(direccion and $fff) shr 1]:=valor;
     $600000:begin
-              //eeprom
+              //eeprom missing
               copymemory(oki_6295_0.get_rom_addr,@sound_rom[(valor and $40) shr 6,0],$40000);
             end;
     $700000:scroll_x:=valor and $1ff;
@@ -399,7 +399,6 @@ case direccion of
 end;
 end;
 
-
 procedure pirates_sound_update;
 begin
   oki_6295_0.update;
@@ -410,17 +409,17 @@ begin
 case direccion of
     0..$fffff:genix_getword:=rom[direccion shr 1];
     $100000..$10ffff:case (direccion and $ffff) of
-                        $9e98:genix_getword:=4;
-                        $9e96:genix_getword:=0;
+                        $9e98:genix_getword:=4; //proteccion
+                        $9e99..$9e9b:genix_getword:=0; //proteccion
                         else genix_getword:=ram1[(direccion and $ffff) shr 1];
                      end;
     $300000:genix_getword:=marcade.in1;
     $400000:genix_getword:=marcade.in0;
+    $500000..$500fff:genix_getword:=sprite_ram[(direccion and $fff) shr 1];
     $800000..$803fff:genix_getword:=buffer_paleta[(direccion and $3fff) shr 1];
     $900000..$907fff:genix_getword:=ram2[(direccion and $7fff) shr 1];
     $a00000:genix_getword:=oki_6295_0.read;
 end;
 end;
-
 
 end.

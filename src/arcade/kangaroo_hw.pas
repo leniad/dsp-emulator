@@ -23,6 +23,7 @@ procedure kangaroo_sound_update;
 procedure kangaroo_qsave(nombre:string);
 procedure kangaroo_qload(nombre:string);
 
+implementation
 const
         kangaroo_rom:array[0..6] of tipo_roms=(
         (n:'tvg_75.0';l:$1000;p:0;crc:$0d18c581),(n:'tvg_76.1';l:$1000;p:$1000;crc:$5978d37a),
@@ -49,8 +50,6 @@ var
  video_ram:array[0..(256*64)-1] of dword;
  gfx_data:array[0..$3fff] of byte;
  punt:array[0..$1ffff] of word;
-
-implementation
 
 procedure Cargar_Kangaroo;
 begin

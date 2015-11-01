@@ -21,6 +21,7 @@ procedure prehisle_snd_outbyte(valor:byte;puerto:word);
 procedure prehisle_sound_update;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         prehisle_rom:array[0..2] of tipo_roms=(
         (n:'gt-e2.2h';l:$20000;p:0;crc:$7083245a),(n:'gt-e3.3h';l:$20000;p:$1;crc:$6d8cdf58),());
@@ -52,8 +53,6 @@ var
  video_ram,sprite_ram:array[0..$3ff] of word;
  invert_controls,sound_latch,vblank_val:byte;
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
-
-implementation
 
 procedure Cargar_prehisle;
 begin

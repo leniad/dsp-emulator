@@ -14,6 +14,7 @@ procedure timepilot_cerrar;
 function timepilot_getbyte(direccion:word):byte;
 procedure timepilot_putbyte(direccion:word;valor:byte);
 
+implementation
 const
     timepilot_rom:array[0..3] of tipo_roms=(
     (n:'tm1';l:$2000;p:0;crc:$1551f1b9),(n:'tm2';l:$2000;p:$2000;crc:$58636cb5),
@@ -29,8 +30,6 @@ const
 var
   scan_line,last:byte;
   nmi_enable:boolean;
-
-implementation
 
 procedure Cargar_timepilot;
 begin
@@ -58,6 +57,7 @@ timepilot_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
+screen_mod_scroll(2,0,0,255,0,0,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
@@ -137,7 +137,7 @@ close_audio;
 close_video;
 end;
 
-procedure update_video_timepilot;inline;
+procedure update_video_timepilot;
 var
     x,y,atrib:byte;
     f,nchar,color:word;

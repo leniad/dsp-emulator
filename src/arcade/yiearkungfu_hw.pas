@@ -19,6 +19,7 @@ procedure yiear_snd_nmi;
 procedure yiear_qsave(nombre:string);
 procedure yiear_qload(nombre:string);
 
+implementation
 const
         yiear_rom:array[0..2] of tipo_roms=(
         (n:'i08.10d';l:$4000;p:$8000;crc:$e2d7458b),(n:'i07.8d';l:$4000;p:$c000;crc:$7db7442e),());
@@ -46,8 +47,6 @@ const
 var
  pedir_irq,pedir_nmi:boolean;
  sound_latch:byte;
-
-implementation
 
 procedure Cargar_yiear;
 begin

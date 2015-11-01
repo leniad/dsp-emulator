@@ -21,6 +21,7 @@ procedure sound_instruccion;
 procedure ym2151_snd_irq(irqstate:byte);
 procedure snd_adpcm;
 
+implementation
 const
         rastan_rom:array[0..6] of tipo_roms=(
         (n:'b04-35.19';l:$10000;p:0;crc:$1c91dbb1),(n:'b04-37.07';l:$10000;p:$1;crc:$ecf20bdd),
@@ -36,16 +37,13 @@ const
         rastan_adpcm:tipo_roms=(n:'b04-20.76';l:$10000;p:0;crc:$fd1a34cc);
 
 var
- scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
+ scroll_x1,scroll_y1,scroll_x2,scroll_y2,adpcm_pos,adpcm_data:word;
  bank_sound:array[0..3,$0..$3fff] of byte;
  rom:array[0..$2ffff] of word;
  ram1,ram3:array[0..$1fff] of word;
  spritebank,sound_bank:byte;
  ram2:array [0..$7fff] of word;
  adpcm:array[0..$ffff] of byte;
- adpcm_pos,adpcm_data:word;
-
-implementation
 
 procedure Cargar_rastan;
 begin

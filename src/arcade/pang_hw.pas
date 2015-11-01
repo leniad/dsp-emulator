@@ -18,6 +18,7 @@ procedure pang_outbyte(valor:byte;puerto:word);
 //Sound
 procedure pang_sound_update;
 
+implementation
 const   //Pang
         pang_rom:array[0..2] of tipo_roms=(
         (n:'pang6.bin';l:$8000;p:0;crc:$68be52cd),(n:'pang7.bin';l:$20000;p:$10000;crc:$4a2e70f6),());
@@ -46,8 +47,6 @@ var
  obj_ram:array[0..$fff] of byte;
  vblank,irq_source:byte;
  pal_bank:word;
-
-implementation
 
 procedure Cargar_pang;
 begin

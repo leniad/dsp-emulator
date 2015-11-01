@@ -42,7 +42,7 @@ const
         (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'20k Only'),(dip_val:$10;dip_name:'30k Only'),(dip_val:$20;dip_name:'40k Only'),(dip_val:$30;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$80;dip_name:'Medium'),(dip_val:$40;dip_name:'Hard'),(dip_val:$c0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
- haz_nmi,hay_samples:boolean;
+ haz_nmi:boolean;
  gfx_bank,palette_bank,scroll_y,death_val,skid_val:byte;
 
 procedure Cargar_mario;
@@ -81,8 +81,9 @@ main_z80.change_ram_calls(mario_getbyte,mario_putbyte);
 //cargar roms
 if not(cargar_roms(@memoria[0],@mario_rom[0],'mario.zip',0)) then exit;
 //samples
-hay_samples:=load_samples('mario.zip',@mario_samples[0],num_samples+1);
-if hay_samples then main_z80.init_sound(mario_sound_update);
+if load_samples('mario.zip',@mario_samples[0],num_samples+1) then begin
+  main_z80.init_sound(mario_sound_update);
+end;
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@mario_char[0],'mario.zip',0)) then exit;
 init_gfx(0,8,8,512);
@@ -129,7 +130,7 @@ end;
 procedure reset_mario;
 begin
  main_z80.reset;
- if hay_samples then reset_samples;
+ reset_samples;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
@@ -228,11 +229,11 @@ if ((direccion<$6000) or (direccion>$efff)) then exit;
 memoria[direccion]:=valor;
 case direccion of
     $7400..$77ff:gfx[0].buffer[direccion and $3ff]:=true;
-    $7c00:if hay_samples then start_sample(0);
-    $7c80:if hay_samples then start_sample(1);
+    $7c00:start_sample(0);
+    $7c80:start_sample(1);
     $7d00:scroll_y:=valor+17;
     $7d80,$7e87:; //??
-    $7e00:if hay_samples then begin
+    $7e00:begin
             case (valor and $f) of
               1:start_sample(5); //pow
               2:start_sample(6); //tune sale vida
@@ -268,8 +269,7 @@ case direccion of
           end;
     $7e84:haz_nmi:=(valor and 1)<>0;
     $7e85:if (valor and 1)<>0 then copymemory(@memoria[$7000],@memoria[$6900],$400);
-    $7f00..$7f07:if hay_samples then begin
-                    case (direccion and 7) of
+    $7f00..$7f07:case (direccion and 7) of
                       0:begin  //death cuando pasa de 0 a 1 mordisco, cuando pasa de 1 a 0 muerte
                           if ((death_val=0) and ((valor and 1)=1)) then start_sample(3);
                           if ((death_val=1) and ((valor and 1)=0)) then start_sample(4);
@@ -285,7 +285,6 @@ case direccion of
                           if ((skid_val=1) and ((valor and 1)=0)) then start_sample(2);
                           skid_val:=valor and 1;
                         end;
-                    end;
                  end;
 end;
 end;

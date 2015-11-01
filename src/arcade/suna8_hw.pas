@@ -21,12 +21,13 @@ procedure hardhead_portbw(valor:byte);
 procedure hardhead_snd;
 procedure dac_sound;
 //Hard Head 2
-procedure hardhead2_principal; 
+procedure hardhead2_principal;
 function hardhead2_getbyte(direccion:word):byte;
 procedure hardhead2_putbyte(direccion:word;valor:byte);
 function hardhead2_snd_getbyte(direccion:word):byte;
-procedure hardhead2_snd_putbyte(direccion:word;valor:byte); 
+procedure hardhead2_snd_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         //Hard Head
         hardhead_rom:array[0..8] of tipo_roms=(
@@ -61,12 +62,9 @@ var
  sprite_bank:array[0..$3fff] of byte;
  banco_rom,banco_sprite,banco_ram,num_sample:byte;
  soundlatch,soundlatch2,protection_val,hardhead_ip:byte;
- rear_scroll,scroll_x:word;
- dac_pos,dac_count:word;
+ rear_scroll,scroll_x,dac_pos,dac_count:word;
  dac_play,haz_nmi:boolean;
  dac_timer,dac_tsample:byte;
-
-implementation
 
 procedure Cargar_suna_hw;
 begin

@@ -1,7 +1,8 @@
 unit ym_3812;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}fmopl,timer_engine,sound_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
+     fmopl,timer_engine,sound_engine;
 
 const
   MAX_YM3812=2-1;
@@ -31,7 +32,6 @@ procedure ym3812_timer1_0;
 procedure ym3812_timer2_0;
 procedure ym3812_timer1_1;
 procedure ym3812_timer2_1;
-
 
 implementation
 

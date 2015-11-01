@@ -27,6 +27,7 @@ procedure twincobr_dsp_addrsel_w(valor:word);
 procedure twincobr_dsp_w(valor:word);
 function twincobr_BIO_r:boolean;
 
+implementation
 const
         //Twin Cobra
         twincobr_rom:array[0..4] of tipo_roms=(
@@ -79,8 +80,6 @@ var
  txt_offs,bg_offs,fg_offs,bg_bank,fg_bank:word;
  main_ram_seg,dsp_addr_w:dword;
  txt_scroll_x,txt_scroll_y,bg_scroll_x,bg_scroll_y,fg_scroll_x,fg_scroll_y:word;
-
-implementation
 
 procedure Cargar_twincobra;
 begin

@@ -88,6 +88,7 @@ const
 	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
 begin
 iniciar_outrun:=false;
+if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. ¿Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 iniciar_audio(false);
 screen_init(1,512,256,true); //text
 screen_init(2,512,256,true);
@@ -395,12 +396,14 @@ end;
 
 procedure cerrar_outrun;
 begin
-main_m68000.free;
-snd_z80.free;
-close_ppi8255(0);
-YM2151_close(0);
-close_audio;
-close_video;
+if main_m68000<>nil then begin
+  main_m68000.free;
+  snd_z80.free;
+  close_ppi8255(0);
+  YM2151_close(0);
+  close_audio;
+  close_video;
+end;
 end;
 
 procedure reset_outrun;

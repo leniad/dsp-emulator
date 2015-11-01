@@ -861,7 +861,7 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.enabled:=false;
-if @llamadas_maquina.cerrar<>nil then llamadas_maquina.cerrar;
+if ((@llamadas_maquina.cerrar<>nil) and main_vars.driver_ok) then llamadas_maquina.cerrar;
 reset_dsp;
 main_vars.tipo_maquina:=tipo_new;
 cargar_maquina(main_vars.tipo_maquina);

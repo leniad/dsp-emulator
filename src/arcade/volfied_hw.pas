@@ -21,6 +21,7 @@ function volfied_dipa:byte;
 function volfied_dipb:byte;
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         volfied_rom:array[0..4] of tipo_roms=(
         (n:'c04-12-1.30';l:$10000;p:0;crc:$afb6a058),(n:'c04-08-1.10';l:$10000;p:$1;crc:$19f7e66b),
@@ -53,8 +54,6 @@ var
  rom2,ram2:array[0..$3ffff] of word;
  ram1,ram3:array[0..$1fff] of word;
  spritebank:byte;
-
-implementation
 
 procedure Cargar_volfied;
 begin

@@ -49,8 +49,12 @@ type
                 procedure getdata(instruccion,shift:byte;signext:boolean);
                 function ext_irq:byte;
         end;
-const
 
+var
+    main_tms32010:cpu_tms32010;
+
+implementation
+const
   ciclos_tms:array[0..$ff] of byte=(
     	 // 0 1 2 3 4 5 6 7 8 9 A B C D E F
           1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -69,11 +73,6 @@ const
           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
           0,0,0,0,2,2,2,0,2,2,2,2,2,2,2,2);
-
-var
-    main_tms32010:cpu_tms32010;
-
-implementation
 
 constructor cpu_tms32010.create(clock:dword;frames_div:word);
 begin

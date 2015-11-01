@@ -21,6 +21,7 @@ procedure sbasketb_sound_update;
 procedure sbasketb_qsave(nombre:string);
 procedure sbasketb_qload(nombre:string);
 
+implementation
 const
         sbasketb_rom:array[0..3] of tipo_roms=(
         (n:'405g05.14j';l:$2000;p:$6000;crc:$336dc0ab),(n:'405i03.11j';l:$4000;p:$8000;crc:$d33b82dd),
@@ -38,12 +39,9 @@ const
 
 var
  pedir_snd_irq,pedir_irq:boolean;
- frame,sound_latch,chip_latch:byte;
- scroll,sbasketb_palettebank,sprite_select:byte;
+ frame,sound_latch,chip_latch,scroll,sbasketb_palettebank,sprite_select:byte;
  mem_opcodes:array[0..$9fff] of byte;
  last_addr:word;
-
-implementation
 
 procedure Cargar_sbasketb;
 begin

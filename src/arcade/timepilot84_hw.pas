@@ -7,8 +7,8 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 procedure Cargar_tp84;
 procedure tp84_principal;
-function iniciar_tp84:boolean; 
-procedure reset_tp84; 
+function iniciar_tp84:boolean;
+procedure reset_tp84;
 procedure cerrar_tp84;
 //Main CPU
 function tp84_getbyte(direccion:word):byte;
@@ -19,7 +19,7 @@ function sound_getbyte(direccion:word):byte;
 procedure sound_putbyte(direccion:word;valor:byte);
 procedure sound_instruccion;
 
-
+implementation
 const
         tp84_rom:array[0..4] of tipo_roms=(
         (n:'388_f04.7j';l:$2000;p:$8000;crc:$605f61c7),(n:'388_05.8j';l:$2000;p:$a000;crc:$4b4629a4),
@@ -38,10 +38,7 @@ const
 
 var
  irq_enable:boolean;
- tp84_pal_bank,sound_latch,scroll_x,scroll_y:byte;
- linea:byte;
-
-implementation
+ tp84_pal_bank,sound_latch,scroll_x,scroll_y,linea:byte;
 
 procedure Cargar_tp84;
 begin

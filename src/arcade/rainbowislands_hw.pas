@@ -20,6 +20,7 @@ procedure sound_bank_rom(valor:byte);
 procedure sound_instruccion;
 procedure ym2151_snd_irq(irqstate:byte);
 
+implementation
 const
         rainbow_rom:array[0..6] of tipo_roms=(
         (n:'b22-10-1.19';l:$10000;p:0;crc:$e34a50ca),(n:'b22-11-1.20';l:$10000;p:$1;crc:$6a31a093),
@@ -29,13 +30,11 @@ const
         rainbow_sound:tipo_roms=(n:'b22-14.43';l:$10000;p:0;crc:$113c1a5b);
         rainbow_sprites1:tipo_roms=(n:'b22-02.5';l:$80000;p:0;crc:$1b87ecf0);
         rainbow_sprites2:array[0..2] of tipo_roms=(
-        (n:'b22-12.7';l:$10000;p:$80000;crc:$c22d94ac),(n:'b22-13.6';l:$10000;p:$80001;crc:$2fda099f),());
+        (n:'b22-12.7';l:$10000;p:$80000;crc:$67a76dc6),(n:'b22-13.6';l:$10000;p:$80001;crc:$2fda099f),());
         rainbowe_rom:array[0..6] of tipo_roms=(
         (n:'b39-01.19';l:$10000;p:0;crc:$50690880),(n:'b39-02.20';l:$10000;p:$1;crc:$4dead71f),
         (n:'b39-03.21';l:$10000;p:$20000;crc:$4a4cb785),(n:'b39-04.22';l:$10000;p:$20001;crc:$4caa53bd),
         (n:'b22-03.23';l:$20000;p:$40000;crc:$3ebb0fb8),(n:'b22-04.24';l:$20000;p:$40001;crc:$91625e7f),());
-        rainbowe_sprites2:array[0..2] of tipo_roms=(
-        (n:'b22-12.7';l:$10000;p:$80000;crc:$67a76dc6),(n:'b22-13.6';l:$10000;p:$80001;crc:$2fda099f),());
         //DIP
         rainbow_dip1:array [0..2] of def_dip=(
         (mask:$30;name:'Coin A';number:4;dip:((dip_val:$10;dip_name:'ModeA 2C-1C/ModeB 3C-1C'),(dip_val:$30;dip_name:'ModeAB 1C-1C'),(dip_val:$0;dip_name:'ModeA 2C-3C/ModeB 4C-1C'),(dip_val:$20;dip_name:'ModeA 1C-2C/ModeB 2C-1C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -55,8 +54,6 @@ var
  ram1,ram3:array[0..$1fff] of word;
  ram2:array [0..$7fff] of word;
  spritebank,sound_bank:byte;
-
-implementation
 
 procedure Cargar_rainbow;
 begin
@@ -150,7 +147,7 @@ case main_vars.tipo_maquina of
          convert_chars;
          //convertir sprites
          if not(cargar_roms(memoria_temp,@rainbow_sprites1,'rbislande.zip',1)) then exit;
-         if not(cargar_roms16b(memoria_temp,@rainbowe_sprites2[0],'rbislande.zip',0)) then exit;
+         if not(cargar_roms16b(memoria_temp,@rainbow_sprites2[0],'rbislande.zip',0)) then exit;
          convert_sprites;
       end;
 end;

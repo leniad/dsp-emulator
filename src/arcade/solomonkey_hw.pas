@@ -20,6 +20,7 @@ procedure solomon_snd_outbyte(valor:byte;puerto:word);
 procedure solomon_despues_instruccion;
 procedure solomon_snd_irq;
 
+implementation
 const
         solomon_rom:array[0..3] of tipo_roms=(
         (n:'6.3f';l:$4000;p:0;crc:$645eb0f3),(n:'7.3h';l:$8000;p:$4000;crc:$1bf5c482),
@@ -36,8 +37,6 @@ const
 var
  sound_latch:byte;
  nmi_enable:boolean;
-
-implementation
 
 procedure Cargar_solomon;
 begin

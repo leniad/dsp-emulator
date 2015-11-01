@@ -25,6 +25,7 @@ procedure vigilante_snd_irq;
 procedure snd_despues_instruccion;
 procedure ym2151_snd_irq(irqstate:byte);
 
+implementation
 const
         vigilante_rom:array[0..2] of tipo_roms=(
         (n:'g07_c03.bin';l:$8000;p:0;crc:$9dcca081),(n:'j07_c04.bin';l:$10000;p:$8000;crc:$e0159105),());
@@ -42,14 +43,10 @@ const
         (n:'f01_c07.bin';l:$10000;p:$20000;crc:$aae81695),());
 var
  rom_bank:array[0..3,0..$3FFF] of byte;
- banco_rom:word;
- sound_latch,rear_color:byte;
- rear_scroll,scroll_x:word;
+ banco_rom,sound_latch,rear_color:byte;
+ rear_scroll,scroll_x,sample_addr:word;
  rear_disable,rear_ch_color:boolean;
- sample_addr:word;
  mem_dac:array[0..$ffff] of byte;
-
-implementation
 
 procedure Cargar_vigilante;
 begin
@@ -84,9 +81,9 @@ iniciar_vigilante:=false;
 iniciar_audio(true);
 //Pantallas:  principal+char y sprites
 screen_init(1,512,256,true);
-screen_mod_scroll(1,512,256+128,511,0,0,0);
+screen_mod_scroll(1,512,256+128,511,0,0,255);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,256+128,511,0,0,0);
+screen_mod_scroll(2,512,256+128,511,0,0,255);
 screen_init(3,512,256,false,true);
 screen_mod_sprites(3,0,$200,0,$1ff);
 screen_init(4,512*4,256);

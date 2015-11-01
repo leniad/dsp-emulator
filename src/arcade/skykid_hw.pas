@@ -20,7 +20,7 @@ procedure out_port1(valor:byte);
 function in_port1:byte;
 function in_port2:byte;
 
-
+implementation
 const
         //Sky Kid
         skykid_rom:array[0..3] of tipo_roms=(
@@ -56,8 +56,6 @@ var
  rom_nbank,scroll_y,inputport_selected,priority:byte;
  scroll_x:word;
  irq_enable,irq_enable_mcu,screen_flip:boolean;
-
-implementation
 
 procedure Cargar_skykid;
 begin

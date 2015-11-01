@@ -6,10 +6,10 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      rom_engine,pal_engine,sound_engine;
 
 procedure Cargar_wardnerhw;
-procedure wardnerhw_principal; 
-procedure reset_wardnerhw; 
-procedure cerrar_wardnerhw; 
-function iniciar_wardnerhw:boolean; 
+procedure wardnerhw_principal;
+procedure reset_wardnerhw;
+procedure cerrar_wardnerhw;
+function iniciar_wardnerhw:boolean;
 //CPU
 function wardner_getbyte(direccion:word):byte;
 procedure wardner_putbyte(direccion:word;valor:byte);
@@ -17,18 +17,19 @@ function wardner_inbyte(puerto:word):byte;
 procedure wardner_outbyte(valor:byte;puerto:word);
 //SND
 function wardner_snd_getbyte(direccion:word):byte;
-procedure wardner_snd_putbyte(direccion:word;valor:byte); 
-function wardner_snd_inbyte(puerto:word):byte; 
-procedure wardner_snd_outbyte(valor:byte;puerto:word); 
+procedure wardner_snd_putbyte(direccion:word;valor:byte);
+function wardner_snd_inbyte(puerto:word):byte;
+procedure wardner_snd_outbyte(valor:byte;puerto:word);
 procedure snd_irq(irqstate:byte);
 procedure wardner_despues_instruccion;
 //MCU
-procedure wardner_dsp_bio_w(valor:word);  
-function wardner_dsp_r:word;  
-procedure wardner_dsp_addrsel_w(valor:word); 
-procedure wardner_dsp_w(valor:word); 
-function wardner_BIO_r:boolean; 
+procedure wardner_dsp_bio_w(valor:word);
+function wardner_dsp_r:word;
+procedure wardner_dsp_addrsel_w(valor:word);
+procedure wardner_dsp_w(valor:word);
+function wardner_BIO_r:boolean;
 
+implementation
 const
         wardner_rom:array[0..4] of tipo_roms=(
         (n:'wardner.17';l:$8000;p:0;crc:$c5dd56fd),(n:'b25-18.rom';l:$10000;p:$8000;crc:$9aab8ee2),
@@ -55,15 +56,12 @@ const
 var
  mem_rom:array[0..7,0..$7fff] of byte;
  rom_bank,vsync:byte;
- rom_ena,int_enable:boolean;
- wardner_dsp_BIO,dsp_execute:boolean;
+ rom_ena,int_enable,wardner_dsp_BIO,dsp_execute:boolean;
  txt_ram:array[0..$7ff] of word;
  bg_ram:array[0..$1fff] of word;
  fg_ram:array[0..$fff] of word;
  txt_offs,bg_offs,fg_offs,bg_bank,fg_bank,main_ram_seg,dsp_addr_w:word;
  txt_scroll_x,txt_scroll_y,bg_scroll_x,bg_scroll_y,fg_scroll_x,fg_scroll_y:word;
-
-implementation
 
 procedure Cargar_wardnerhw;
 begin

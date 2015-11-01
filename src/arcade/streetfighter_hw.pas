@@ -24,6 +24,7 @@ procedure sf_adpcm_instruccion;
 procedure ym2151_snd_irq(irqstate:byte);
 procedure sound_instruccion;
 
+implementation
 const
         sfighter_rom:array[0..6] of tipo_roms=(
         (n:'sfe-19';l:$10000;p:0;crc:$8346c3ca),(n:'sfe-22';l:$10000;p:$1;crc:$3a4bfaa8),
@@ -64,8 +65,6 @@ var
  bg_paint,fg_paint,bg_act,fg_act,char_act,sp_act:boolean;
  ram_tile_map1,ram_tile_map2:array[0..$1ffff] of byte;
  soundlatch,misc_bank:byte;
-
-implementation
 
 procedure Cargar_sfighter;
 begin

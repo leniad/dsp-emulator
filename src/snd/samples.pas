@@ -31,6 +31,7 @@ type
   ptipo_samples=^tipo_samples;
 var
   data_samples:ptipo_samples;
+  samples_loaded:boolean;
 
 function convert_wav(source:pbyte;var data:pword;source_long:dword;var long:dword):boolean;
 function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte):boolean;
@@ -205,6 +206,7 @@ procedure reset_samples;
 var
   f:byte;
 begin
+if data_samples=nil then exit;
 for f:=0 to data_samples.num_samples-1 do begin
   data_samples.audio[f].playing:=false;
   data_samples.audio[f].pos:=0;
@@ -229,6 +231,7 @@ end;
 
 procedure start_sample(num:byte);
 begin
+if data_samples=nil then exit;
 //Si no esta en marcha que comience
 if not(data_samples.audio[num].playing) then begin
   data_samples.audio[num].playing:=true;
@@ -241,6 +244,7 @@ end;
 
 procedure stop_sample(num:byte);
 begin
+if data_samples=nil then exit;
 if data_samples.audio[num].playing then begin
   data_samples.audio[num].playing:=false;
   data_samples.tsample_use[data_samples.audio[num].tsample]:=false;
@@ -249,13 +253,14 @@ end;
 
 function sample_status(num:byte):boolean;
 begin
-  sample_status:=data_samples.audio[num].playing;
+  if data_samples<>nil then sample_status:=data_samples.audio[num].playing;
 end;
 
 procedure stop_all_samples;
 var
   f:word;
 begin
+if data_samples=nil then exit;
 for f:=0 to (data_samples.num_samples-1) do begin
   if data_samples.audio[f].playing then begin
     data_samples.audio[f].playing:=false;
@@ -269,6 +274,7 @@ var
   f:word;
   ptemp:pword;
 begin
+if data_samples=nil then exit;
 for f:=0 to (data_samples.num_samples-1) do begin
  if data_samples.audio[f].playing then begin
     ptemp:=data_samples.audio[f].data;

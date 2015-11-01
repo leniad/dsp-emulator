@@ -3,6 +3,16 @@ unit phoenix_audio_digital;
 interface
 uses sound_engine;
 
+procedure phoenix_audio_reset;
+procedure phoenix_audio_update;
+procedure phoenix_audio_cerrar;
+procedure phoenix_audio_start;
+procedure phoenix_wsound_a(valor:byte);
+procedure phoenix_wsound_b(valor:byte);
+
+implementation
+uses principal,sysutils;
+
 type
   phoenix_voz=record
       frec:byte;
@@ -38,16 +48,6 @@ var
   sound_latch_a:byte;
   c24_state,c25_state:c_state;
   noise_state:n_state;
-
-procedure phoenix_audio_reset;
-procedure phoenix_audio_update;
-procedure phoenix_audio_cerrar;
-procedure phoenix_audio_start;
-procedure phoenix_wsound_a(valor:byte);
-procedure phoenix_wsound_b(valor:byte);
-
-implementation
-uses principal,sysutils;
 
 procedure phoenix_audio_reset;
 begin

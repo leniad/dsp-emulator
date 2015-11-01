@@ -19,6 +19,7 @@ procedure wwfsstar_snd_putbyte(direccion:word;valor:byte);
 procedure wwfsstar_sound_update;
 procedure ym2151_snd_irq(irqstate:byte);
 
+implementation
 const
         wwfsstar_rom:array[0..2] of tipo_roms=(
         (n:'24ac-0_j-1.34';l:$20000;p:0;crc:$ec8fd2c9),(n:'24ad-0_j-1.35';l:$20000;p:$1;crc:$54e614e4),());
@@ -51,8 +52,6 @@ var
  ram:array[0..$1fff] of word;
  sprite_ram:array[0..$1ff] of word;
  vblank,sound_latch:byte;
-
-implementation
 
 procedure Cargar_wwfsstar;
 begin

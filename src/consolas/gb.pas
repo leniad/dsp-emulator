@@ -33,6 +33,12 @@ procedure escribe_io(direccion,valor:byte);
 function leer_io_gbc(direccion:byte):byte;
 procedure escribe_io_gbc(direccion,valor:byte);
 
+var
+  ram_enable:boolean;
+
+implementation
+uses principal;
+
 const
   color_pal:array[0..3] of tcolor=((r:$ff;g:$ff;b:$ff),(r:$aa;g:$aa;b:$aa),(r:$55;g:$55;b:$55),(r:0;g:0;b:0));
   gb_rom:tipo_roms=(n:'dmg_boot.bin';l:$100;p:0;crc:$59c8598e);
@@ -47,17 +53,13 @@ var
  io_ram,sprt_ram,bg_prio:array[0..$ff] of byte;
  bios_rom:array[0..$8ff] of byte;
  bgc_pal,spc_pal:array[0..$1f] of word;
- enable_bios,rom_exist,ram_enable,colorgb,bgcolor_inc,spcolor_inc,lcd_ena,hdma_ena:boolean;
+ enable_bios,rom_exist,colorgb,bgcolor_inc,spcolor_inc,lcd_ena,hdma_ena:boolean;
  irq_ena,joystick,vram_nbank,wram_nbank,bgcolor_index,spcolor_index:byte;
  hdma_size,hdma_pos,dma_src,dma_dst:word;
  nombre_rom:string;
- hay_nvram:boolean;
+ hay_nvram,cartucho_cargado:boolean;
  gb_timer,sprites_time:byte;
  gameboy:tgameboy;
- cartucho_cargado:boolean;
-
-implementation
-uses principal;
 
 procedure Cargar_gb;
 begin

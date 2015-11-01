@@ -858,7 +858,7 @@ case tmaquina of
   206,207:Cargar_pirates;
   208:Cargar_junofrst;
   209:Cargar_gyruss;
-  210:Cargar_boogwins;
+  210:Cargar_boogwing;
   211:Cargar_freekick;
   212:Cargar_pinballaction;
   213:Cargar_renegade;

@@ -21,6 +21,7 @@ function snowbros_snd_inbyte(puerto:word):byte;
 procedure snowbros_snd_outbyte(valor:byte;puerto:word);
 procedure snd_irq(irqstate:byte);
 
+implementation
 const
         snowbros_rom:array[0..2] of tipo_roms=(
         (n:'sn6.bin';l:$20000;p:0;crc:$4899ddcf),(n:'sn5.bin';l:$20000;p:$1;crc:$ad310d3f),());
@@ -45,8 +46,6 @@ var
  rom:array[0..$1ffff] of word;
  ram:array[0..$1fff] of word;
  sound_latch:byte;
-
-implementation
 
 procedure Cargar_snowbros;
 begin

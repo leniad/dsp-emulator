@@ -36,6 +36,7 @@ function insectorx_portb_r:byte;
 //Sound
 procedure tnzs_sound_update;
 
+implementation
 const
         //The NewZealand Story
         tnzs_rom:tipo_roms=(n:'b53-24.1';l:$20000;p:0;crc:$d66824c6);
@@ -81,8 +82,6 @@ var
  sub_rom:array[0..3,0..$1fff] of byte;
  obj_control:array[0..3] of byte;
  flip_screen:boolean;
-
-implementation
 
 procedure Cargar_tnzs;
 begin

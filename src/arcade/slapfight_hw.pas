@@ -30,6 +30,7 @@ procedure mcu_sf_hw_putbyte(direccion:word;valor:byte);
 function mcu_tigerh_hw_getbyte(direccion:word):byte;
 procedure mcu_tigerh_hw_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         //Tiger Heli
         tigerh_rom:array[0..3] of tipo_roms=(
@@ -67,17 +68,13 @@ const
 
 var
  scroll_y:word;
- scroll_x,rom_bank,tiles_mask,sprite_mask:byte;
+ scroll_x,rom_bank,tiles_mask,sprite_mask,slapfight_status_state:byte;
  ena_irq:boolean;
  rom:array[0..1,0..$3fff] of byte;
- slapfight_status_state:byte;
  //mcu
  mcu_ram:array[0..$7ff] of byte;
- portc_in,portc_out,portb_out,portb_in,porta_in,porta_out:byte;
- ddra,ddrb,ddrc:byte;
+ portc_in,portc_out,portb_out,portb_in,porta_in,porta_out,ddra,ddrb,ddrc:byte;
  mcu_sent,from_main,main_sent,from_mcu:byte;
-
-implementation
 
 procedure Cargar_sf_hw;
 begin

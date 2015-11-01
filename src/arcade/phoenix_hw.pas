@@ -18,6 +18,7 @@ procedure phoenix_sound_update;
 procedure pleiads_principal;
 procedure pleiads_putbyte(direccion:word;valor:byte);
 
+implementation
 var
  banco_pal,scroll_y,banco:byte;
  mem_video:array[0..1,0..$fff] of byte;
@@ -56,8 +57,6 @@ const
         (mask:$0c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'3k 30k'),(dip_val:$4;dip_name:'4k 40k'),(dip_val:$8;dip_name:'5k 50k'),(dip_val:$c;dip_name:'6k 60k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Coinage';number:2;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-
-implementation
 
 procedure Cargar_Phoenix;
 begin

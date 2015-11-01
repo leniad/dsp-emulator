@@ -22,6 +22,7 @@ procedure sonson_snd_irq;
 procedure sonson_qsave(nombre:string);
 procedure sonson_qload(nombre:string);
 
+implementation
 const
         sonson_rom:array[0..3] of tipo_roms=(
         (n:'ss.01e';l:$4000;p:$4000;crc:$cd40cc54),(n:'ss.02e';l:$4000;p:$8000;crc:$c3476527),
@@ -52,8 +53,6 @@ const
 
 var
  soundlatch,last,scroll_x:byte;
-
-implementation
 
 procedure Cargar_sonson;
 begin

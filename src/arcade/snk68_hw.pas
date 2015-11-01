@@ -24,6 +24,7 @@ procedure snd_irq(irqstate:byte);
 function ikari3_getword(direccion:dword):word;
 procedure ikari3_putword(direccion:dword;valor:word);
 
+implementation
 const
         //POW
         pow_rom:array[0..2] of tipo_roms=(
@@ -99,8 +100,6 @@ var
  fg_tile_offset:word;
  is_pow,sprite_flip:boolean;
  update_video_nmk68:tipo_update_video;
-
-implementation
 
 procedure Cargar_snk68;
 begin

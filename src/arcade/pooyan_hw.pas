@@ -14,6 +14,7 @@ procedure cerrar_pooyan;
 function pooyan_getbyte(direccion:word):byte;
 procedure pooyan_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         pooyan_rom:array[0..4] of tipo_roms=(
         (n:'1.4a';l:$2000;p:0;crc:$bb319c63),(n:'2.5a';l:$2000;p:$2000;crc:$a1463d98),
@@ -41,8 +42,6 @@ const
 var
  nmi_vblank:boolean;
  last:byte;
-
-implementation
 
 procedure Cargar_pooyan;
 begin

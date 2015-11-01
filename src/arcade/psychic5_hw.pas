@@ -23,6 +23,7 @@ procedure snd_irq(irqstate:byte);
 procedure psychic5_qsave(nombre:string);
 procedure psychic5_qload(nombre:string);
 
+implementation
 const
         psychic5_rom:array[0..2] of tipo_roms=(
         (n:'p5d';l:$8000;p:0;crc:$90259249),(n:'p5e';l:$10000;p:$8000;crc:$72298f34),());
@@ -35,14 +36,10 @@ const
 
 var
  mem_rom:array[0..3,0..$3fff] of byte;
- banco_rom,banco_vram:byte;
+ banco_rom,banco_vram,sound_latch,bg_clip_mode,sy1,sy2,sx1:byte;
  bg_ram,char_ram,dummy_ram:array[0..$fff] of byte;
  io_ram:array[0..$fff] of byte;
  title_screen,paleta_gris:boolean;
- sound_latch:byte;
- bg_clip_mode,sy1,sy2,sx1:byte;
-
-implementation
 
 procedure Cargar_psychic5;
 begin

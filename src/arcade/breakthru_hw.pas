@@ -23,6 +23,7 @@ procedure brkthru_snd_putbyte(direccion:word;valor:byte);
 procedure brkthru_sound_update;
 procedure brkthru_snd_irq(irqstate:byte);
 
+implementation
 const
         //Break Thru
         brkthru_rom:array[0..4] of tipo_roms=(
@@ -63,8 +64,6 @@ var
  nmi_ena,old_val,old_val2:boolean;
  scroll_x:word;
  proc_update_video:tipo_update_video;
-
-implementation
 
 procedure Cargar_brkthru;
 begin

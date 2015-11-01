@@ -13,7 +13,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="16"/>
-      <BuildNr Value="496"/>
+      <BuildNr Value="502"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.16"/>
     </VersionInfo>
@@ -42,7 +42,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="164">
+    <Units Count="167">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -58,9 +58,8 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="411"/>
-        <CursorPos X="22" Y="415"/>
+        <TopLine Value="843"/>
+        <CursorPos X="61" Y="864"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -951,7 +950,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="317"/>
         <CursorPos X="18" Y="319"/>
-        <UsageCount Value="64"/>
+        <UsageCount Value="65"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit119>
       <Unit120>
@@ -1000,7 +999,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="8"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="42"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit125>
       <Unit126>
@@ -1181,7 +1180,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="55"/>
         <CursorPos X="15" Y="63"/>
-        <UsageCount Value="36"/>
+        <UsageCount Value="37"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit148>
       <Unit149>
@@ -1295,8 +1294,63 @@
         <UsageCount Value="12"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit163>
+      <Unit164>
+        <Filename Value="..\arcade\pirates_hw.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="342"/>
+        <CursorPos X="29" Y="355"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit164>
+      <Unit165>
+        <Filename Value="..\misc\rom_dat.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="4"/>
+        <CursorPos X="85" Y="32"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit165>
+      <Unit166>
+        <Filename Value="..\arcade\pacman_hw.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="54" Y="6"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit166>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="7" HistoryIndex="6">
+      <Position1>
+        <Filename Value="principal.pas"/>
+        <Caret Line="426" Column="41" TopLine="411"/>
+      </Position1>
+      <Position2>
+        <Filename Value="principal.pas"/>
+        <Caret Line="613" Column="33" TopLine="591"/>
+      </Position2>
+      <Position3>
+        <Filename Value="..\arcade\pirates_hw.pas"/>
+      </Position3>
+      <Position4>
+        <Filename Value="..\misc\rom_dat.pas"/>
+        <Caret Line="14" Column="9" TopLine="4"/>
+      </Position4>
+      <Position5>
+        <Filename Value="..\misc\rom_dat.pas"/>
+        <Caret Line="29" Column="112" TopLine="4"/>
+      </Position5>
+      <Position6>
+        <Filename Value="..\misc\rom_dat.pas"/>
+        <Caret Line="28" Column="120" TopLine="4"/>
+      </Position6>
+      <Position7>
+        <Filename Value="..\misc\rom_dat.pas"/>
+        <Caret Line="32" Column="83" TopLine="4"/>
+      </Position7>
+    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>

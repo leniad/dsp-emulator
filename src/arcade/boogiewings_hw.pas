@@ -4,39 +4,39 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,deco_104,
-     misc_functions;
+     misc_functions,dialogs;
 
-procedure Cargar_boogwins;
-function iniciar_boogwins:boolean;
-procedure reset_boogwins;
-procedure cerrar_boogwins;
-procedure boogwins_principal;
+procedure Cargar_boogwing;
+function iniciar_boogwing:boolean;
+procedure reset_boogwing;
+procedure cerrar_boogwing;
+procedure boogwing_principal;
 //Main CPU
-function boogwins_getword(direccion:dword):word;
-procedure boogwins_putword(direccion:dword;valor:word);
-function boogwins_bank_callback(bank:word):word;
+function boogwing_getword(direccion:dword):word;
+procedure boogwing_putword(direccion:dword;valor:word);
+function boogwing_bank_callback(bank:word):word;
 procedure sound_bank_rom(valor:byte);
 
 implementation
 const
-        boogwins_rom:array[0..4] of tipo_roms=(
+        boogwing_rom:array[0..4] of tipo_roms=(
         (n:'kn_00-2.2b';l:$40000;p:0;crc:$e38892b9),(n:'kn_02-2.2e';l:$40000;p:$1;crc:$8426efef),
         (n:'kn_01-2.4b';l:$40000;p:$80000;crc:$3ad4b54c),(n:'kn_03-2.4e';l:$40000;p:$80001;crc:$10b61f4a),());
-        boogwins_sound:tipo_roms=(n:'km06.18p';l:$10000;p:$0;crc:$3e8bc4e1);
-        boogwins_char1:array[0..2] of tipo_roms=(
+        boogwing_sound:tipo_roms=(n:'km06.18p';l:$10000;p:$0;crc:$3e8bc4e1);
+        boogwing_char1:array[0..2] of tipo_roms=(
         (n:'km05.9e';l:$10000;p:0;crc:$d10aef95),(n:'km04.8e';l:$10000;p:$1;crc:$329323a8),());
-        boogwins_char2:array[0..2] of tipo_roms=(
+        boogwing_char2:array[0..2] of tipo_roms=(
         (n:'mbd-01.9b';l:$100000;p:0;crc:$d7de4f4b),(n:'mbd-00.8b';l:$100000;p:$100000;crc:$adb20ba9),());
-        boogwins_char3:array[0..2] of tipo_roms=(
+        boogwing_char3:array[0..2] of tipo_roms=(
         (n:'mbd-03.13b';l:$100000;p:0;crc:$cf798f2c),(n:'mbd-04.14b';l:$100000;p:$100000;crc:$d9764d0b),());
-        boogwins_char4:tipo_roms=(n:'mbd-02.10e';l:$80000;p:0;crc:$b25aa721);
-        boogwins_sprites1:array[0..2] of tipo_roms=(
+        boogwing_char4:tipo_roms=(n:'mbd-02.10e';l:$80000;p:0;crc:$b25aa721);
+        boogwing_sprites1:array[0..2] of tipo_roms=(
         (n:'mbd-05.16b';l:$200000;p:1;crc:$1768c66a),(n:'mbd-06.17b';l:$200000;p:$0;crc:$7750847a),());
-        boogwins_sprites2:array[0..2] of tipo_roms=(
+        boogwing_sprites2:array[0..2] of tipo_roms=(
         (n:'mbd-07.18b';l:$200000;p:1;crc:$241faac1),(n:'mbd-08.19b';l:$200000;p:$0;crc:$f13b1e56),());
-        boogwins_oki1:tipo_roms=(n:'mbd-10.17p';l:$80000;p:0;crc:$f159f76a);
-        boogwins_oki2:tipo_roms=(n:'mbd-09.16p';l:$80000;p:0;crc:$f44f2f87);
-        boogwins_dip_a:array [0..7] of def_dip=(
+        boogwing_oki1:tipo_roms=(n:'mbd-10.17p';l:$80000;p:0;crc:$f159f76a);
+        boogwing_oki2:tipo_roms=(n:'mbd-09.16p';l:$80000;p:0;crc:$f44f2f87);
+        boogwing_dip_a:array [0..7] of def_dip=(
         (mask:$0007;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3 Coin - 1 Credit'),(dip_val:$1;dip_name:'2 Coin - 1 Credit'),(dip_val:$7;dip_name:'1 Coin - 1 Credit'),(dip_val:$6;dip_name:'1 Coin - 2 Credit'),(dip_val:$5;dip_name:'1 Coin - 3 Credit'),(dip_val:$4;dip_name:'1 Coin - 4 Credit'),(dip_val:$3;dip_name:'1 Coin - 5 Credit'),(dip_val:$2;dip_name:'1 Coin - 6 Credit'),(),(),(),(),(),(),(),())),
         (mask:$0038;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3 Coin - 1 Credit'),(dip_val:$8;dip_name:'2 Coin - 1 Credit'),(dip_val:$38;dip_name:'1 Coin - 1 Credit'),(dip_val:$30;dip_name:'1 Coin - 2 Credit'),(dip_val:$28;dip_name:'1 Coin - 3 Credit'),(dip_val:$20;dip_name:'1 Coin - 4 Credit'),(dip_val:$18;dip_name:'1 Coin - 5 Credit'),(dip_val:$10;dip_name:'1 Coin - 6 Credit'),(),(),(),(),(),(),(),())),
         (mask:$0040;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -50,17 +50,17 @@ var
  ram:array[0..$7fff] of word;
  oki1_mem,oki2_mem:pbyte;
 
-procedure Cargar_boogwins;
+procedure Cargar_boogwing;
 begin
-llamadas_maquina.bucle_general:=boogwins_principal;
-llamadas_maquina.iniciar:=iniciar_boogwins;
-llamadas_maquina.cerrar:=cerrar_boogwins;
-llamadas_maquina.reset:=reset_boogwins;
+llamadas_maquina.bucle_general:=boogwing_principal;
+llamadas_maquina.iniciar:=iniciar_boogwing;
+llamadas_maquina.cerrar:=cerrar_boogwing;
+llamadas_maquina.reset:=reset_boogwing;
 llamadas_maquina.fps_max:=58;
 end;
 
 //Inicio Normal
-function iniciar_boogwins:boolean;
+function iniciar_boogwing:boolean;
 const
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
   pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
@@ -76,31 +76,32 @@ var
   memoria_temp:pbyte;
   memoria_temp_rom:pword;
 begin
-iniciar_boogwins:=false;
+iniciar_boogwing:=false;
+if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. ¿Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 iniciar_audio(false);
 //Pantallas
-init_dec16ic(0,1,2,$0,$0,$f,$f,0,1,0,16,boogwins_bank_callback,boogwins_bank_callback);
+init_dec16ic(0,1,2,$0,$0,$f,$f,0,1,0,16,boogwing_bank_callback,boogwing_bank_callback);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
 main_m68000:=cpu_m68000.create(14000000,$100);
-main_m68000.change_ram16_calls(boogwins_getword,boogwins_putword);
+main_m68000.change_ram16_calls(boogwing_getword,boogwing_putword);
 //Sound CPU
 deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
 getmem(memoria_temp,$200000);
-getmem(memoria_temp_rom,$80000);
+getmem(memoria_temp_rom,$100000);
 //cargar roms
-if not(cargar_roms16w(memoria_temp_rom,@boogwins_rom[0],'boogwins.zip',0)) then exit;
+if not(cargar_roms16w(memoria_temp_rom,@boogwing_rom[0],'boogwing.zip',0)) then exit;
 deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode[0],@rom_data[0],$42ba,$0,$18,$100000);
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@boogwins_sound,'boogwins.zip',1)) then exit;
+if not(cargar_roms(@mem_snd[0],@boogwing_sound,'boogwing.zip',1)) then exit;
 //OKI rom
 getmem(oki1_mem,$80000);
-if not(cargar_roms(oki1_mem,@boogwins_oki1,'boogwins.zip',1)) then exit;
+if not(cargar_roms(oki1_mem,@boogwing_oki1,'boogwing.zip',1)) then exit;
 getmem(oki2_mem,$80000);
-if not(cargar_roms(oki2_mem,@boogwins_oki2,'boogwins.zip',1)) then exit;
+if not(cargar_roms(oki2_mem,@boogwing_oki2,'boogwing.zip',1)) then exit;
 //convertir chars
-//if not(cargar_roms16w(memoria_temp,@boogwins_char1,'boogwins.zip',1)) then exit;
+//if not(cargar_roms16w(memoria_temp,@boogwing_char1,'boogwing.zip',1)) then exit;
 deco56_decrypt_gfx(memoria_temp,$20000);
 init_gfx(0,8,8,$1000);
 gfx[0].trans[0]:=true;
@@ -111,7 +112,7 @@ gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*16,$2000*32*16+8,$2000*32*16+0,8,0);
 convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
 //Sprites
-//if not(cargar_roms16b(memoria_temp,@boogwins_sprites[0],'boogwins.zip',0)) then exit;
+//if not(cargar_roms16b(memoria_temp,@boogwing_sprites[0],'boogwing.zip',0)) then exit;
 init_gfx(2,16,16,$4000);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*32,24,8,16,0);
@@ -124,25 +125,28 @@ main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
 main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
 //Dip
 marcade.dswa:=$ffff;
-marcade.dswa_val:=@boogwins_dip_a;
+marcade.dswa_val:=@boogwing_dip_a;
 //final
 freemem(memoria_temp);
-reset_boogwins;
-iniciar_boogwins:=true;
+reset_boogwing;
+iniciar_boogwing:=true;
 end;
 
-procedure cerrar_boogwins;
+procedure cerrar_boogwing;
 begin
-main_m68000.free;
-main_deco104.free;
-close_dec16ic(0);
-freemem(oki1_mem);
-deco16_snd_simple_close;
-close_audio;
-close_video;
+if main_m68000<>nil then begin
+  main_m68000.free;
+  main_deco104.free;
+  close_dec16ic(0);
+  freemem(oki1_mem);
+  freemem(oki2_mem);
+  deco16_snd_simple_close;
+  close_audio;
+  close_video;
+end;
 end;
 
-procedure reset_boogwins;
+procedure reset_boogwing;
 begin
  main_m68000.reset;
  reset_dec16ic(0);
@@ -154,7 +158,7 @@ begin
  marcade.in1:=$7;
 end;
 
-procedure update_video_boogwins;inline;
+procedure update_video_boogwing;inline;
 begin
 update_pf_2(0,3,false);
 update_pf_1(0,3,true);
@@ -162,7 +166,7 @@ deco16_sprites;
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
-procedure eventos_boogwins;
+procedure eventos_boogwing;
 begin
 if event.arcade then begin
   //P1
@@ -189,7 +193,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure boogwins_principal;
+procedure boogwing_principal;
 var
   frame_m,frame_s:single;
   f:byte;
@@ -208,18 +212,18 @@ while EmuStatus=EsRuning do begin
    case f of
       247:begin
             main_m68000.irq[6]:=HOLD_LINE;
-            update_video_boogwins;
+            update_video_boogwing;
             marcade.in1:=marcade.in1 or $8;
           end;
       255:marcade.in1:=marcade.in1 and $7;
    end;
  end;
- eventos_boogwins;
+ eventos_boogwing;
  video_sync;
 end;
 end;
 
-function boogwins_protection_region_0_104_r(real_address:word):word;inline;
+function boogwing_protection_region_0_104_r(real_address:word):word;inline;
 var
   deco146_addr,data:word;
   cs:byte;
@@ -228,20 +232,20 @@ begin
 	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
 	cs:=0;
 	data:=main_deco104.read_data(deco146_addr,cs);
-	boogwins_protection_region_0_104_r:=data;
+	boogwing_protection_region_0_104_r:=data;
 end;
 
-function boogwins_getword(direccion:dword):word;
+function boogwing_getword(direccion:dword):word;
 begin
 case direccion of
-  $0..$7ffff:if main_m68000.opcode then boogwins_getword:=rom_opcode[direccion shr 1]
-                  else boogwins_getword:=rom_data[direccion shr 1];
-  $210000..$210fff:boogwins_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $212000..$212fff:boogwins_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff] shl 8);
-  $280000..$2807ff:boogwins_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
-  $300000..$300bff:boogwins_getword:=buffer_paleta[(direccion and $fff) shr 1];
-  $340000..$343fff:boogwins_getword:=boogwins_protection_region_0_104_r(direccion and $3fff);
-  $380000..$38ffff:boogwins_getword:=ram[(direccion and $ffff) shr 1];
+  $0..$7ffff:if main_m68000.opcode then boogwing_getword:=rom_opcode[direccion shr 1]
+                  else boogwing_getword:=rom_data[direccion shr 1];
+  $210000..$210fff:boogwing_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
+  $212000..$212fff:boogwing_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $280000..$2807ff:boogwing_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
+  $300000..$300bff:boogwing_getword:=buffer_paleta[(direccion and $fff) shr 1];
+  $340000..$343fff:boogwing_getword:=boogwing_protection_region_0_104_r(direccion and $3fff);
+  $380000..$38ffff:boogwing_getword:=ram[(direccion and $ffff) shr 1];
 end;
 end;
 
@@ -259,7 +263,7 @@ begin
   end;
 end;
 
-procedure boogwins_protection_region_0_104_w(real_address,data:word);inline;
+procedure boogwing_protection_region_0_104_w(real_address,data:word);inline;
 var
   deco146_addr:word;
   cs:byte;
@@ -270,7 +274,7 @@ begin
 	main_deco104.write_data(deco146_addr, data,cs);
 end;
 
-procedure boogwins_putword(direccion:dword;valor:word);
+procedure boogwing_putword(direccion:dword;valor:word);
 begin
 if direccion<$80000 then exit;
 case direccion of
@@ -293,14 +297,14 @@ case direccion of
                       buffer_paleta[(direccion and $fff) shr 1]:=valor;
                       cambiar_color((direccion and $fff) shr 2);
                    end;
-  $340000..$343fff:boogwins_protection_region_0_104_w(direccion and $3fff,valor);
+  $340000..$343fff:boogwing_protection_region_0_104_w(direccion and $3fff,valor);
   $380000..$38ffff:ram[(direccion and $ffff) shr 1]:=valor;
 end;
 end;
 
-function boogwins_bank_callback(bank:word):word;
+function boogwing_bank_callback(bank:word):word;
 begin
-  	boogwins_bank_callback:=((bank shr 4) and $7)*$1000;
+  	boogwing_bank_callback:=((bank shr 4) and $7)*$1000;
 end;
 
 procedure sound_bank_rom(valor:byte);

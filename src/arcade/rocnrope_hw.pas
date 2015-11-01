@@ -11,9 +11,10 @@ function iniciar_rocnrope:boolean;
 procedure reset_rocnrope;
 procedure cerrar_rocnrope;
 //main cpu
-function rocnrope_getbyte(direccion:word):byte;  
-procedure rocnrope_putbyte(direccion:word;valor:byte); 
+function rocnrope_getbyte(direccion:word):byte;
+procedure rocnrope_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         rocnrope_rom:array[0..5] of tipo_roms=(
         (n:'rr1.1h';l:$2000;p:$6000;crc:$83093134),(n:'rr2.2h';l:$2000;p:$8000;crc:$75af8697),
@@ -33,8 +34,6 @@ const
 var
  pedir_irq:boolean;
  mem_opcodes:array[0..$9fff] of byte;
-
-implementation
 
 procedure Cargar_rocnrope;
 begin

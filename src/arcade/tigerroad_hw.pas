@@ -19,6 +19,7 @@ procedure tigeroad_snd_putbyte(direccion:word;valor:byte);
 procedure snd_irq(irqstate:byte);
 procedure tigeroad_sound_update;
 
+implementation
 const
         //Tiger Road
         tigeroad_rom:array[0..2] of tipo_roms=(
@@ -58,8 +59,6 @@ var
  fondo_rom:array[0..$7fff] of byte;
  pintar_fondo:boolean;
  fondo_bank,sound_latch:byte;
-
-implementation
 
 procedure Cargar_tigeroad;
 begin

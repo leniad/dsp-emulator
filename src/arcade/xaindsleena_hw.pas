@@ -25,6 +25,7 @@ procedure snd_irq(irqstate:byte);
 function mcu_xain_hw_getbyte(direccion:word):byte;
 procedure mcu_xain_hw_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         xain_rom:array[0..2] of tipo_roms=(
         (n:'p9-08.ic66';l:$8000;p:$0;crc:$5179ae3f),(n:'pa-09.ic65';l:$8000;p:$8000;crc:$10a7c800),());
@@ -71,8 +72,6 @@ var
  port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
  ddr_a,ddr_b,ddr_c,from_main,from_mcu:byte;
  mcu_accept,mcu_ready:boolean;
-
-implementation
 
 procedure Cargar_xain;
 begin

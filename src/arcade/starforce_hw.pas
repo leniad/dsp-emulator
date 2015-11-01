@@ -24,6 +24,7 @@ function pio_read_porta:byte;
 //PIO+CTC INT
 procedure pio_int_main(state:byte);
 
+implementation
 const
         starforce_rom:array[0..2] of tipo_roms=(
         (n:'starforc.3';l:$4000;p:0;crc:$8ba27691),(n:'starforc.2';l:$4000;p:$4000;crc:$0fc4d2d6),());
@@ -58,8 +59,6 @@ const
 var
  x1,x2,x3:word;
  y1,y2,y3,sound_latch:byte;
-
-implementation
 
 procedure Cargar_starforce;
 begin

@@ -14,6 +14,7 @@ procedure tumblep_principal;
 function tumblep_getword(direccion:dword):word;
 procedure tumblep_putword(direccion:dword;valor:word);
 
+implementation
 const
         tumblep_rom:array[0..2] of tipo_roms=(
         (n:'hl00-1.f12';l:$40000;p:0;crc:$fd697c1b),(n:'hl01-1.f13';l:$40000;p:$1;crc:$d5a62a3f),());
@@ -26,8 +27,6 @@ const
 var
  rom:array[0..$3ffff] of word;
  ram:array[0..$1fff] of word;
-
-implementation
 
 procedure Cargar_tumblep;
 begin

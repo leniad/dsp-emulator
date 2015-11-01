@@ -23,6 +23,7 @@ procedure popeye_portbw(valor:byte);
 procedure popeye_qsave(nombre:string);
 procedure popeye_qload(nombre:string);
 
+implementation
 const
         popeye_rom:array[0..4] of tipo_roms=(
         (n:'tpp2-c_f.7a';l:$2000;p:0;crc:$9af7c821),(n:'tpp2-c_f.7b';l:$2000;p:$2000;crc:$c3704958),
@@ -51,8 +52,6 @@ var
   popeye_mem_pal:array[0..$1f] of byte;
   fondo_write:array[0..$1fff] of boolean;
   scroll_x:word;
-
-implementation
 
 procedure Cargar_popeye;
 begin

@@ -25,6 +25,7 @@ procedure sw_putbyte(direccion:word;valor:byte);
 function sw_snd_getbyte(direccion:word):byte;
 procedure sw_snd_putbyte(direccion:word;valor:byte);
 
+implementation
 const
         //Rygar
         rygar_rom:array[0..3] of tipo_roms=(
@@ -81,15 +82,10 @@ const
 var
  mem_adpcm:array[0..$7fff] of byte;
  bank_rom:array[0..$1f,0..$7ff] of byte;
- adpcm_end,adpcm_pos,adpcm_data:word;
- nbank_rom:byte;
- scroll_x1,scroll_x2:word;
- scroll_y1,scroll_y2:byte;
- soundlatch,tipo_video:byte;
+ adpcm_end,adpcm_pos,adpcm_data,scroll_x1,scroll_x2:word;
+ nbank_rom,scroll_y1,scroll_y2,soundlatch,tipo_video:byte;
  bg_ram,fg_ram:array[0..$3ff] of byte;
  txt_ram:array[0..$7ff] of byte;
-
-implementation
 
 procedure Cargar_tecmo;
 begin

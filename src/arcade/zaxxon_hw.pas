@@ -29,6 +29,7 @@ procedure ppi8255_zaxxon_wportb(valor:byte);
 procedure ppi8255_zaxxon_wportc(valor:byte);
 procedure zaxxon_sound_update;
 
+implementation
 const
         //Congo
         congo_rom:array[0..4] of tipo_roms=(
@@ -91,7 +92,7 @@ const
         (mask:$f0;name:'Coin A';number:16;dip:((dip_val:$f0;dip_name:'4C 1C'),(dip_val:$70;dip_name:'3C 1C'),(dip_val:$b0;dip_name:'2C 1C'),(dip_val:$60;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$a0;dip_name:'2C/1C 3C/2C 4C/3C'),(dip_val:$30;dip_name:'1C 1C'),(dip_val:$20;dip_name:'1C/1C 5C/6C'),(dip_val:$c0;dip_name:'1C/1C 4C/5C'),(dip_val:$40;dip_name:'1C/1C 2C/3C'),(dip_val:$d0;dip_name:'1C 2C'),(dip_val:$80;dip_name:'1C/2C 5C/11C'),(dip_val:$00;dip_name:'1C/2C 4C/9C'),(dip_val:$50;dip_name:'1C 3C'),(dip_val:$90;dip_name:'1C 4C'),(dip_val:$10;dip_name:'1C 5C'),(dip_val:$60;dip_name:'1C 6C'))),());
 
 var
- irq_vblank,bg_enable,hay_samples:boolean;
+ irq_vblank,bg_enable:boolean;
  congo_color_bank,congo_fg_bank,pal_offset,fg_color,bg_color,bg_position:word;
  sound_latch:byte;
  pal_src:array[0..$ff] of byte;
@@ -99,8 +100,6 @@ var
  bg_mem_color:array[0..511,0..31] of byte;
  congo_sprite,coin_enable,coin_status,sound_state:array[0..2] of byte;
  coin_press:array[0..1] of byte;
-
-implementation
 
 procedure Cargar_zaxxon;
 begin
@@ -220,7 +219,7 @@ case main_vars.tipo_maquina of
         init_timer(snd_z80.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,true);
         init_ppi8255(0,ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
         //Samples
-        hay_samples:=load_samples('congo.zip',@congo_samples[0],num_samples_congo+1);
+        load_samples('congo.zip',@congo_samples[0],num_samples_congo+1);
         snd_z80.init_sound(congo_sound_update);
         sn_76496_0:=sn76496_chip.Create(4000000);
         sn_76496_1:=sn76496_chip.Create(1000000);
@@ -251,8 +250,9 @@ case main_vars.tipo_maquina of
         main_z80.change_ram_calls(zaxxon_getbyte,zaxxon_putbyte);
         init_ppi8255(0,nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
         //Samples
-        hay_samples:=load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon+1);
-        main_z80.init_sound(zaxxon_sound_update);
+        if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon+1) then begin
+          main_z80.init_sound(zaxxon_sound_update);
+        end;
         //cargar roms
         if not(cargar_roms(@memoria[0],@zaxxon_rom[0],'zaxxon.zip',0)) then exit;
         if not(cargar_roms(@memoria_temp[0],@zaxxon_char[0],'zaxxon.zip',0)) then exit;
@@ -302,7 +302,7 @@ begin
   sn_76496_0.reset;
   sn_76496_1.reset;
  end;
- if hay_samples then reset_samples;
+ reset_samples;
  reset_ppi8255(0);
  reset_audio;
  irq_vblank:=false;
@@ -603,7 +603,7 @@ procedure congo_sound_update;
 begin
   sn_76496_0.update;
   sn_76496_1.update;
-  if hay_samples then samples_update;
+  samples_update;
 end;
 
 procedure congo_sound_irq;
@@ -844,7 +844,7 @@ end;
 
 procedure zaxxon_sound_update;
 begin
-  if hay_samples then samples_update;
+  samples_update;
 end;
 
 end.

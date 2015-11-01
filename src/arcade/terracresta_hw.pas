@@ -24,6 +24,7 @@ procedure terracre_snd_timer;
 procedure terracre_qsave(nombre:string);
 procedure terracre_qload(nombre:string);
 
+implementation
 const
         terracre_rom:array[0..8] of tipo_roms=(
         (n:'1a_4b.rom';l:$4000;p:1;crc:$76f17479),(n:'1a_4d.rom';l:$4000;p:$0;crc:$8119f06e),
@@ -64,8 +65,6 @@ var
  spritebuffer:array[0..$ff] of word;
  spritebank:array[0..$ff] of byte;
  sound_latch:byte;
-
-implementation
 
 procedure Cargar_terracre;
 begin

@@ -144,14 +144,14 @@ Other features<br>
 <b>GameBoy/Gameboy Color</b><br>
 <hr>
 &nbsp;&nbsp;&nbsp;&nbsp;- ROM: Not required, but if present are loaded and run as the original console.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The default ROMs names are:
+&nbsp;&nbsp;&nbsp;&nbsp;The default ROMs names are:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-GameBoy: 'GAMEBOY.ZIP' --> 'dmg_boot.bin' CRC: 0x59C8598E<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-GameBoy Color: 'GBCOLOR.ZIP' --> 'gbc_boot.1' CRC: 0x779EA374 and 'gbc_boot.2' CRC: 0xF741807D<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Keys: Use the redefined keys or the external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key).<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-Mappers supported are MBC0, MBC1 and MBC5.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-Mappers supported are MBC0, MBC1 and MBC5<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- To do:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Audio problems, do not work fine with high frequencies<br>
@@ -437,7 +437,7 @@ Free Kick                  | FREEKICK.ZIP |     100    |
 Boogie Wings               | BOOGIEW.ZIP  |      20    | Basic driver
 Pinball Action             | PBACTION.ZIP |     100    |
 Renegade                   | RENEGADE.ZIP |     100    |
--------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
 Total: 202</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
