@@ -25,8 +25,7 @@ type
       end;
       snd_okim6295=class(snd_chip_class)
             constructor Create(num:byte;clock:dword;pin7:byte;amp:single=1);
-            procedure Free;
-            destructor Destroy;
+            destructor free;
           public
             procedure reset;
             function read:byte;
@@ -124,15 +123,12 @@ begin
   self.reset;
 end;
 
-destructor snd_okim6295.Destroy;
+destructor snd_okim6295.free;
 begin
+if self.rom<>nil then begin
   freemem(self.rom);
   self.rom:=nil;
 end;
-
-procedure snd_okim6295.free;
-begin
-if self.rom<>nil then Destroy;
 end;
 
 function snd_okim6295.get_rom_addr:pbyte;

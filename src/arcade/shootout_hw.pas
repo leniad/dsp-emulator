@@ -70,7 +70,7 @@ iniciar_video(256,240);
 main_m6502:=cpu_m6502.create(2000000,256,TCPU_M6502);
 main_m6502.change_ram_calls(getbyte_shootout,putbyte_shootout);
 //sound CPU
-snd_m6502:=cpu_m6502.create(1000000,256,TCPU_M6502);
+snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
 snd_m6502.change_ram_calls(getbyte_snd_shootout,putbyte_snd_shootout);
 snd_m6502.init_sound(shootout_sound_update);
 //Sound Chip
@@ -153,18 +153,18 @@ end;
 
 procedure sprites(prioridad:byte);
 var
-  f:word;
-  nchar,x,y,atrib:word;
+  f,atrib:byte;
+  nchar,x,y:word;
 begin
 { 76543210
   xxx-----    bank
   ---x----    vertical size
-  ----x---    priority
+  ----x---    y
   -----x--    horizontal flip
   ------x-    flicker
   -------x    enable}
 bflicker:=not(bflicker);
-for f:=$7f downto 0 do begin
+for f:=0 to $7e do begin
  atrib:=memoria[$1801+(f*4)];
  if (((atrib and 1)=0) or ((atrib and 8)<>prioridad)) then continue;
  if (bflicker or ((atrib and $2)=0)) then begin
@@ -172,7 +172,8 @@ for f:=$7f downto 0 do begin
     x:=(240-memoria[$1802+(f*4)]) and $ff;
     y:=(240-memoria[$1800+(f*4)]) and $ff;
     if (atrib and $10)<>0 then begin //tamaño doble
-      put_gfx_sprite(nchar and $7fe,64,(atrib and $4)<>0,false,1);
+      nchar:=nchar and $7fe;
+      put_gfx_sprite(nchar,64,(atrib and $4)<>0,false,1);
       actualiza_gfx_sprite(x,y-16,3,1);
       nchar:=nchar+1;
     end;

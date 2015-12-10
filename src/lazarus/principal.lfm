@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 538
+  Left = 279
   Height = 355
-  Top = 249
+  Top = 202
   Width = 340
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -2856,6 +2856,10 @@ object principal1: Tprincipal1
           end
           object outrun1: TMenuItem
             Caption = 'Outrun'
+            OnClick = CambiarMaquina
+          end
+          object TMNT1: TMenuItem
+            Caption = 'TMNT'
             OnClick = CambiarMaquina
           end
         end

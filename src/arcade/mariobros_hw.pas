@@ -81,9 +81,7 @@ main_z80.change_ram_calls(mario_getbyte,mario_putbyte);
 //cargar roms
 if not(cargar_roms(@memoria[0],@mario_rom[0],'mario.zip',0)) then exit;
 //samples
-if load_samples('mario.zip',@mario_samples[0],num_samples+1) then begin
-  main_z80.init_sound(mario_sound_update);
-end;
+if load_samples('mario.zip',@mario_samples[0],num_samples+1) then main_z80.init_sound(mario_sound_update);
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@mario_char[0],'mario.zip',0)) then exit;
 init_gfx(0,8,8,512);

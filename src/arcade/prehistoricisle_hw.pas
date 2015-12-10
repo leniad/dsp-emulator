@@ -96,7 +96,7 @@ snd_z80.change_io_calls(prehisle_snd_inbyte,prehisle_snd_outbyte);
 snd_z80.init_sound(prehisle_sound_update);
 //Sound Chips
 ym3812_init(0,4000000,snd_irq);
-upd7759_0:=upd7759_chip.create(640000,2);
+upd7759_0:=upd7759_chip.create(640000,0.9);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@prehisle_rom[0],'prehisle.zip',0)) then exit;
 //cargar sonido

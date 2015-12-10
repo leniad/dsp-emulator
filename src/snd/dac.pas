@@ -6,8 +6,7 @@ uses {$ifdef windows}windows,{$else}main_engine,{$ENDIF}sound_engine;
 type
   dac_chip=class(snd_chip_class)
       constructor Create(amp:single=1);
-      procedure Free;
-      destructor Destroy;
+      destructor free;
     public
       procedure update;
       procedure reset;
@@ -33,13 +32,8 @@ begin
   self.reset;
 end;
 
-destructor dac_chip.Destroy;
+destructor dac_chip.free;
 begin
-end;
-
-procedure dac_chip.Free;
-begin
-self.Destroy;
 end;
 
 function dac_chip.save_snapshot(data:pbyte):word;

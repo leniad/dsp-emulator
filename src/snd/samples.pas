@@ -35,6 +35,7 @@ var
 
 function convert_wav(source:pbyte;var data:pword;source_long:dword;var long:dword):boolean;
 function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte):boolean;
+function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean):boolean;
 procedure start_sample(num:byte);
 procedure samples_update;
 procedure stop_sample(num:byte);
@@ -154,6 +155,37 @@ while not(salir) do begin
   end;
   if longitud>source_long then salir:=true;
 end;
+end;
+
+function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean):boolean;
+var
+  f,sample_pos:byte;
+begin
+load_samples_raw:=false;
+//Inicializo los samples
+if data_samples=nil then begin
+  getmem(data_samples,sizeof(tipo_samples));
+  data_samples.num_samples:=1;
+  sample_pos:=0;
+end else begin
+  sample_pos:=data_samples.num_samples;
+  data_samples.num_samples:=data_samples.num_samples+1;
+end;
+//Inicializo el sample
+getmem(data_samples.audio[sample_pos],sizeof(tipo_audio));
+data_samples.audio[sample_pos].pos:=0;
+data_samples.audio[sample_pos].playing:=false;
+getmem(data_samples.audio[sample_pos].data,longitud*2);
+//cargar datos sample
+data_samples.audio[sample_pos].long:=longitud;
+data_samples.audio[sample_pos].restart:=restart;
+data_samples.audio[sample_pos].loop:=loop;
+copymemory(data_samples.audio[sample_pos].data,sample_data,longitud*2);
+for f:=0 to MAX_CHANNELS do begin
+  data_samples.tsample_reserved[f]:=init_channel;
+  data_samples.tsample_use[f]:=false;
+end;
+load_samples_raw:=true;
 end;
 
 function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte):boolean;
@@ -281,7 +313,7 @@ for f:=0 to (data_samples.num_samples-1) do begin
     inc(ptemp,data_samples.audio[f].pos);
     data_samples.audio[f].pos:=data_samples.audio[f].pos+1;
     tsample[data_samples.audio[f].tsample,sound_status.posicion_sonido]:=smallint(ptemp^);
-    if data_samples.audio[f].pos>=data_samples.audio[f].long then begin
+    if data_samples.audio[f].pos=data_samples.audio[f].long then begin
       if data_samples.audio[f].loop then begin
         data_samples.audio[f].pos:=0;
       end else begin

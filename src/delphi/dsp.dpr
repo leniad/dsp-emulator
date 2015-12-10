@@ -242,7 +242,9 @@ uses
   lib_sdl2 in '..\misc\lib_sdl2.pas',
   renegade_hw in '..\arcade\renegade_hw.pas',
   generic_adpcm in '..\snd\generic_adpcm.pas',
-  tmnt_hw in '..\arcade\tmnt_hw.pas';
+  tmnt_hw in '..\arcade\tmnt_hw.pas',
+  k052109 in '..\arcade\misc\k052109.pas',
+  k051960 in '..\arcade\misc\k051960.pas';
 
 {$R *.res}
 

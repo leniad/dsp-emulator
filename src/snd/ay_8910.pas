@@ -6,8 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,main_engine;
 type
   ay8910_chip=class(snd_chip_class)
         constructor create(clock:integer;amp:single;internal:boolean=false);
-        procedure Free;
-        destructor Destroy;
+        destructor free;
       public
         procedure Write(v:byte);
         procedure Control(v:byte);
@@ -114,13 +113,8 @@ begin
   For i := 0 To 13 do self.AYWriteReg(i,0);
 end;
 
-destructor ay8910_chip.destroy;
+destructor ay8910_chip.free;
 begin
-end;
-
-procedure ay8910_chip.free;
-begin
-self.Destroy;
 end;
 
 function ay8910_chip.save_snapshot(data:pbyte):word;

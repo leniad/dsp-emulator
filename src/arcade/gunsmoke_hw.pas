@@ -305,7 +305,7 @@ iniciar_audio(false);
 screen_init(3,256,256,true);
 case main_vars.tipo_maquina of
   80:begin
-      screen_init(1,256,256,false,true);
+      screen_init(1,256,512,false,true);
       screen_init(2,256,512);
       screen_mod_scroll(2,256,256,255,512,256,511);
      end;

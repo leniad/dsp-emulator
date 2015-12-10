@@ -296,6 +296,7 @@ begin
 case direccion of
   0..$3fff,$8000..$8fff:rastan_snd_getbyte:=mem_snd[direccion];
   $4000..$7fff:rastan_snd_getbyte:=bank_sound[sound_bank,direccion and $3fff];
+  $9000:rastan_snd_getbyte:=$ff;
   $9001:rastan_snd_getbyte:=YM2151_status_port_read(0);
   $a001:rastan_snd_getbyte:=taitosound_slave_comm_r;
 end;

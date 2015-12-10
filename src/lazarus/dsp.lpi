@@ -13,7 +13,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="16"/>
-      <BuildNr Value="502"/>
+      <BuildNr Value="503"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.16"/>
     </VersionInfo>
@@ -58,8 +58,9 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="843"/>
-        <CursorPos X="61" Y="864"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="844"/>
+        <CursorPos X="61" Y="865"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -651,8 +652,11 @@
       </Unit79>
       <Unit80>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="-1"/>
-        <UsageCount Value="9"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="480"/>
+        <CursorPos X="44" Y="495"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit80>
       <Unit81>
@@ -1305,24 +1309,22 @@
       </Unit164>
       <Unit165>
         <Filename Value="..\misc\rom_dat.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="4"/>
         <CursorPos X="85" Y="32"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit165>
       <Unit166>
         <Filename Value="..\arcade\pacman_hw.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="2"/>
         <CursorPos X="54" Y="6"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit166>
     </Units>
-    <JumpHistory Count="7" HistoryIndex="6">
+    <JumpHistory Count="5" HistoryIndex="4">
       <Position1>
         <Filename Value="principal.pas"/>
         <Caret Line="426" Column="41" TopLine="411"/>
@@ -1335,21 +1337,12 @@
         <Filename Value="..\arcade\pirates_hw.pas"/>
       </Position3>
       <Position4>
-        <Filename Value="..\misc\rom_dat.pas"/>
-        <Caret Line="14" Column="9" TopLine="4"/>
+        <Filename Value="..\misc\init_games.pas"/>
       </Position4>
       <Position5>
-        <Filename Value="..\misc\rom_dat.pas"/>
-        <Caret Line="29" Column="112" TopLine="4"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="864" Column="61" TopLine="843"/>
       </Position5>
-      <Position6>
-        <Filename Value="..\misc\rom_dat.pas"/>
-        <Caret Line="28" Column="120" TopLine="4"/>
-      </Position6>
-      <Position7>
-        <Filename Value="..\misc\rom_dat.pas"/>
-        <Caret Line="32" Column="83" TopLine="4"/>
-      </Position7>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

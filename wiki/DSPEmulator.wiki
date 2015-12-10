@@ -205,7 +205,7 @@ Look at the arcade systems list to know which systems use samples.<br>
 <b>2.3.2 Emulated Systems</b><hr><br>
 <pre>
 Name                       | ROM          | Completed  | Notes
-----------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
 Phoenix                    | PHOENIX.ZIP  |      99    | Phoenix Hardware
                                                        | Preliminary analog sound
 Pleiads                    | PLEAIDS.ZIP  |      80    | Phoenix Hardware
@@ -365,8 +365,7 @@ Ark Area                   | ARKAREA.ZIP  |     100    | UPL Hardware
 Mutant Night               | MNIGHT.ZIP   |     100    | UPL Hardware
 Sky Kid                    | SKYKID.ZIP   |     100    | Sky Kid Hardware
 Dragon Buster              | DRGNBSTR.ZIP |     100    | Sky Kid Hardware
-Rolling Thunder            | RTHUNDER.ZIP |      95    | Namco System 86
-                                                       | Missing ADPCM sound
+Rolling Thunder            | RTHUNDER.ZIP |     100    | Namco System 86
 Hopping Mappy              | HOPMAPPY.ZIP |     100    | Namco System 86
 Sky Kid Deluxe             | SKYKIDDX.ZIP |     100    | Namco System 86
 Roc'n Rope                 | ROCNROPE.ZIP |     100    |
@@ -392,13 +391,13 @@ Flying Shark               | FSHARK.ZIP   |     100    | Twin Cobra Hardware
 Jr. Pac-Man                | JRPACMAN.ZIP |     100    |
 Robocop                    | ROBOCOP.ZIP  |     100    | Deco0 Hardware
 Baddudes vs. DragonNinja   | BADDUDES.ZIP |     100    | Deco0 Hardware
-Hippodrome                 | HIPPODRM.ZIP |      95    | Deco0 Hardware
-                                                       | Some times the game resets, may be Hu6280 bugs?
+Hippodrome                 | HIPPODRM.ZIP |     100    | Deco0 Hardware
 Tumble Pop                 | TUMBLEP.ZIP  |     100    |
 Funky Jet                  | FUNKYJET.ZIP |     100    |
 Super Burger Time          | SUPBTIME.ZIP |     100    |
 Caveman Ninja              | CNINJA.ZIP   |     100    | Caveman Ninja Hardware
-Robocop 2                  | ROBOCOP2.ZIP |     100    | Caveman Ninja Hardware
+Robocop 2                  | ROBOCOP2.ZIP |      95    | Caveman Ninja Hardware
+                                                       | Some graphics problems
 Diet Go Go                 | DIETGO.ZIP   |     100    |
 Act-Fancer Cybernetick     | 
     Hyper Weapon           | ACTFANCR.ZIP |     100    |
@@ -415,7 +414,7 @@ Bionic Commando            | BIONICC.ZIP  |     100    |
 WWF Super Stars            | WWFSSTAR.ZIP |     100    |
 Rainbow Islands            | RAINBOW.ZIP  |     100    | Rainbow Islands Hardware
 Rainbow Islands Extra      | RAINBOWE.ZIP |     100    | Rainbow Islands Hardware
-Volfied                    | VOLFIED.ZIP  |      99    | Small problems with sprites palette
+Volfied                    | VOLFIED.ZIP  |     100    |
 Operation Wolf             | OPWOLF.ZIP   |     100    | Use the mouse to move the gun cross
 Outrun                     | OUTRUN.ZIP   |      10    | Basic Driver
 Jungle King                | JUNGLEK.ZIP  |     100    | Taito SJ Hardware
@@ -429,15 +428,14 @@ Nemesis                    | NEMESIS.ZIP  |     100    | Nemesis HW
 TwinBee                    | TWINBEE.ZIP  |      80    | Nemesis HW
                                                        | Sprites and video video problems
 Pirates                    | PIRATES.ZIP  |     100    | Pirates HW
-Genis Family               | GENIX.ZIP    |      95    | Pirates HW
-                                                       | Protection problems
+Genis Family               | GENIX.ZIP    |     100    | Pirates HW
 Juno First                 | JUNOFRST.ZIP |      90    | DAC missing
 Gyruss                     | GYRUSS.ZIP   |      90    | DAC missing
 Free Kick                  | FREEKICK.ZIP |     100    |
 Boogie Wings               | BOOGIEW.ZIP  |      20    | Basic driver
 Pinball Action             | PBACTION.ZIP |     100    |
 Renegade                   | RENEGADE.ZIP |     100    |
----------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------
 Total: 202</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>

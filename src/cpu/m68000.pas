@@ -48,14 +48,14 @@ type
         preg_m68000=^reg_m68000;
         cpu_m68000=class(cpu_class)
             constructor create(clock:dword;frames_div:word);
-            procedure free;
-            destructor destroy;
+            destructor free;
           public
             getword_:tgetword;
             putword_:tputword;
             halt:boolean;
             irq:array[0..7] of byte;
             access_8bits:boolean;
+            r:preg_m68000;
             procedure reset;
             procedure run(maximo:single);
             function get_internal_r:preg_m68000;
@@ -63,7 +63,7 @@ type
             function save_snapshot(data:pbyte):word;
             procedure load_snapshot(data:pbyte);
           private
-            r:preg_m68000;
+            //r:preg_m68000;
             ea:dword;
             prefetch:boolean;
             temp:dparejas;
@@ -134,15 +134,12 @@ self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_m68000.Destroy;
+destructor cpu_m68000.free;
 begin
-freemem(self.r);
-self.r:=nil;
+if Self.r<>nil then begin
+  freemem(self.r);
+  self.r:=nil;
 end;
-
-procedure cpu_m68000.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 function cpu_m68000.getword(addr:dword):word;
@@ -292,8 +289,11 @@ var
   tempw:word;
 begin
 tempw:=self.getword(addr);
-if (addr and 1)<>0 then self.putword(addr,(tempw and $ff00) or val)
-  else self.putword(addr,(tempw and $ff) or (val shl 8));
+if (addr and 1)<>0 then begin
+  self.access_8bits:=true;
+  self.putword(addr,(tempw and $ff00) or val);
+  self.access_8bits:=false;
+end else self.putword(addr,(tempw and $ff) or (val shl 8));
 end;
 
 function cpu_m68000.leerdir_b(dir:byte):byte;
@@ -949,6 +949,14 @@ end;
 if self.halt then begin
   self.contador:=trunc(maximo);
   exit;
+end;
+if r.pc.l=$17ae then begin
+  r.pc.l:=0;
+  r.pc.l:=$17ae;
+end;
+if r.pc.l=$17dc then begin
+  r.pc.l:=0;
+  r.pc.l:=$17dc;
 end;
 self.opcode:=true;
 instruccion:=self.getword(r.pc.l);

@@ -177,6 +177,7 @@ type
     MenuItem28: TMenuItem;
     freekick1: TMenuItem;
     boogwins1: TMenuItem;
+    TMNT1: TMenuItem;
     Renegade1: TMenuItem;
     SegaMS1: TMenuItem;
     pbaction1: TMenuItem;

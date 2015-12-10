@@ -43,7 +43,7 @@ const
 
 type
   upd7759_chip=class(snd_chip_class)
-       constructor create(clock:integer;amp:byte);
+       constructor create(clock:integer;amp:single);
        procedure Free;
        destructor Destroy;
     public
@@ -97,7 +97,7 @@ var
 
 implementation
 
-constructor upd7759_chip.create(clock:integer;amp:byte);
+constructor upd7759_chip.create(clock:integer;amp:single);
 begin
 	// compute the stepping rate based on the chip's clock speed */
 	self.step:=4*FRAC_ONE;

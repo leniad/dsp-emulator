@@ -80,8 +80,7 @@ VLM5030_speed_table:array[0..8-1] of integer=(
 type
   vlm5030_chip=class(snd_chip_class)
         constructor Create(clock:integer;rom_size:dword;amplificador:byte);
-        procedure Free;
-        destructor Destroy;
+        destructor free;
       public
         procedure reset;
         procedure update;
@@ -161,15 +160,12 @@ begin
   self.out_:=0;
 end;
 
-destructor vlm5030_chip.Destroy;
+destructor vlm5030_chip.free;
 begin
-  freemem(self.rom);
-  self.rom:=nil;
-end;
-
-procedure vlm5030_chip.free;
-begin
-  if self.rom<>nil then self.Destroy;
+  if self.rom<>nil then begin
+    freemem(self.rom);
+    self.rom:=nil;
+  end;
 end;
 
 function vlm5030_chip.get_rom_addr;
