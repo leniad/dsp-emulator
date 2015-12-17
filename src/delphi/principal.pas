@@ -348,7 +348,9 @@ type
     pbaction1: TMenuItem;
     SegaMS1: TMenuItem;
     Renegade1: TMenuItem;
+    tmnthw1: TMenuItem;
     tmnt1: TMenuItem;
+    ssriders1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

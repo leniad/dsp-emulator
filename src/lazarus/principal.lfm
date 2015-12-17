@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 279
+  Left = 1043
   Height = 355
-  Top = 202
+  Top = 182
   Width = 340
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.4.2.0'
+  LCLVersion = '1.6.0.1'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -2858,9 +2858,16 @@ object principal1: Tprincipal1
             Caption = 'Outrun'
             OnClick = CambiarMaquina
           end
-          object TMNT1: TMenuItem
-            Caption = 'TMNT'
-            OnClick = CambiarMaquina
+          object TMNT_hw: TMenuItem
+            Caption = 'TMNT HW'
+            object TMNT1: TMenuItem
+              Caption = 'Teenage Mutant Ninja Turtles'
+              OnClick = CambiarMaquina
+            end
+            object ssriders1: TMenuItem
+              Caption = 'Sunset Riders'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object MenuItem11: TMenuItem

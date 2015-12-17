@@ -244,7 +244,11 @@ uses
   generic_adpcm in '..\snd\generic_adpcm.pas',
   tmnt_hw in '..\arcade\tmnt_hw.pas',
   k052109 in '..\arcade\misc\k052109.pas',
-  k051960 in '..\arcade\misc\k051960.pas';
+  k051960 in '..\arcade\misc\k051960.pas',
+  k053244_k053245 in '..\arcade\misc\k053244_k053245.pas',
+  k053260 in '..\snd\k053260.pas',
+  eepromser in '..\devices\eepromser.pas',
+  k053251 in '..\arcade\misc\k053251.pas';
 
 {$R *.res}
 

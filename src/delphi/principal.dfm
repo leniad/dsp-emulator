@@ -2587,9 +2587,16 @@ object principal1: Tprincipal1
             Caption = 'Boogie Wings'
             OnClick = CambiarMaquina
           end
-          object tmnt1: TMenuItem
-            Caption = 'TMNT '
-            OnClick = CambiarMaquina
+          object tmnthw1: TMenuItem
+            Caption = 'TMNT HW'
+            object tmnt1: TMenuItem
+              Caption = 'Teenage Mutant Ninja Turtles'
+              OnClick = CambiarMaquina
+            end
+            object ssriders1: TMenuItem
+              Caption = 'Sunset Riders'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object NEC1: TMenuItem
@@ -2672,7 +2679,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010105000700400320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000700440320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

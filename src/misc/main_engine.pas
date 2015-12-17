@@ -20,8 +20,8 @@ const
         max_pant_visible=19;
 
         CLEAR_LINE=0;
-        HOLD_LINE=1;
-        ASSERT_LINE=2;
+        ASSERT_LINE=1;
+        HOLD_LINE=2;
         PULSE_LINE=3;
         ALREADY_RESET=4;
         IRQ_DELAY=5;

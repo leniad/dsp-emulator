@@ -9,8 +9,7 @@ const
 type
      eeprom_class=class
         constructor create(address_bits,data_bits:byte;cmd_read,cmd_write,cmd_erase:string;cmd_lock:string='';cmd_unlock:string='';enable_multi_read:boolean=false;reset_delay:byte=0);
-        procedure free;
-        destructor destroy;
+        destructor free;
      public
         procedure set_cs_line(state:byte);
         procedure set_clock_line(state:byte);
@@ -74,12 +73,7 @@ fillchar(self.addrspace[0],$100*2,0);
 if read_file_size(self.nombre,f) then read_file(self.nombre,@self.addrspace,f);
 end;
 
-procedure eeprom_class.free;
-begin
-self.destroy;
-end;
-
-destructor eeprom_class.destroy;
+destructor eeprom_class.free;
 var
   size:dword;
 begin

@@ -15,8 +15,12 @@ type
         scroll_tipo:array[1..2] of byte;
         function word_r(direccion:word):word;
         procedure word_w(direccion,valor:word;access:boolean);
-        procedure updatetile;
+        function read(direccion:word):byte;
+        procedure write(direccion:word;val:byte);
+        procedure update_scroll;
+        procedure draw_tiles;
         procedure reset;
+        function is_irq_enabled:boolean;
     protected
         ram:array[0..$5fff] of byte;
         tileflip_enable,romsubbank,scrollctrl:byte;
@@ -26,8 +30,6 @@ type
         char_rom:pbyte;
         char_size:dword;
         k052109_cb:t_k052109_cb;
-        function read(direccion:word):byte;
-        procedure write(direccion:word;val:byte);
         procedure update_all_tile(layer:byte);
         procedure calc_scroll_1;
         procedure calc_scroll_2;
@@ -183,6 +185,11 @@ if access then self.write(direccion+$2000,valor and $ff)
   else self.write(direccion,valor shr 8);
 end;
 
+function k052109_chip.is_irq_enabled:boolean;
+begin
+  is_irq_enabled:=self.irq_enabled;
+end;
+
 procedure k052109_chip.update_all_tile(layer:byte);
 var
   f,pos_x,pos_y,nchar,color,bank:word;
@@ -204,6 +211,8 @@ for f:=0 to $7ff do begin
 	color:=(color and $f3) or ((bank and $03) shl 2);
 	bank:=bank shr 2;
 	self.k052109_cb(layer,bank,nchar,color,flags,priority);
+  flip_x:=(flags and 1)<>0;
+  flip_y:=(flags and 2)<>0;
 	// if the callback set flip X but it is not enabled, turn it off */
 	if ((self.tileflip_enable and 1)=0) then flip_x:=false;
 	// if flip Y is enabled and the attribute but is set, turn it on */
@@ -214,34 +223,26 @@ end;
 end;
 
 procedure k052109_chip.calc_scroll_1;
+var
+  xscroll,yscroll,offs:word;
 begin
 if ((self.scrollctrl and $03)=$02) then begin
-		//UINT8 *scrollram = &m_ram[0x1a00];
-
-		//m_tilemap[1]->set_scroll_rows(256);
-		//m_tilemap[1]->set_scroll_cols(1);
-		//yscroll = m_ram[0x180c];
-		//m_tilemap[1]->set_scrolly(0, yscroll);
-		//for (offs = 0; offs < 256; offs++)
-		{
-			xscroll = scrollram[2 * (offs & 0xfff8) + 0] + 256 * scrollram[2 * (offs & 0xfff8) + 1];
-			xscroll -= 6;
-			m_tilemap[1]->set_scrollx((offs + yscroll) & 0xff, xscroll);
-		}
+    yscroll:=self.ram[$180c];
+		self.scroll_y[1,0]:=yscroll;
+		for offs:=0 to $ff do begin
+			xscroll:=self.ram[$1a00+(2*(offs and $fff8))]+256*self.ram[$1a00+(2*(offs and $fff8)+1)];
+			xscroll:=xscroll-6;
+      self.scroll_x[1,(offs+yscroll) and $ff]:=xscroll;
+		end;
     self.scroll_tipo[1]:=0;
 	end else if ((self.scrollctrl and $03)=$03) then begin
-		//UINT8 *scrollram = &m_ram[0x1a00];
-
-		//m_tilemap[1]->set_scroll_rows(256);
-		//m_tilemap[1]->set_scroll_cols(1);
-		//yscroll = m_ram[0x180c];
-		//m_tilemap[1]->set_scrolly(0, yscroll);
-		//for (offs = 0; offs < 256; offs++)
-		{
-			xscroll = scrollram[2 * offs + 0] + 256 * scrollram[2 * offs + 1];
-			xscroll -= 6;
-			m_tilemap[1]->set_scrollx((offs + yscroll) & 0xff, xscroll);
-		}
+		yscroll:=self.ram[$180c];
+		self.scroll_y[1,0]:=yscroll;
+		for offs:=0 to $ff do begin
+			xscroll:=self.ram[$1a00+(2*offs)]+256*self.ram[$1a00+(2*offs+1)];
+			xscroll:=xscroll-6;
+      self.scroll_x[1,(offs+yscroll) and $ff]:=xscroll;
+		end;
     self.scroll_tipo[1]:=1;
 	end else if ((self.scrollctrl and $04)=$04) then begin
 		//UINT8 *scrollram = &m_ram[0x1800];
@@ -265,34 +266,26 @@ if ((self.scrollctrl and $03)=$02) then begin
 end;
 
 procedure k052109_chip.calc_scroll_2;
+var
+  xscroll,yscroll,offs:word;
 begin
 if ((self.scrollctrl and $18)=$10) then begin
-		//UINT8 *scrollram = &m_ram[0x3a00];
-
-		//m_tilemap[2]->set_scroll_rows(256);
-		//m_tilemap[2]->set_scroll_cols(1);
-		//yscroll = m_ram[0x380c];
-		//m_tilemap[2]->set_scrolly(0, yscroll);
-		//for (offs = 0; offs < 256; offs++)
-		{
-			xscroll = scrollram[2 * (offs & 0xfff8) + 0] + 256 * scrollram[2 * (offs & 0xfff8) + 1];
-			xscroll -= 6;
-			m_tilemap[2]->set_scrollx((offs + yscroll) & 0xff, xscroll);
-		}
+    yscroll:=self.ram[$380c];
+		self.scroll_y[2,0]:=yscroll;
+		for offs:=0 to $ff do begin
+			xscroll:=self.ram[$3a00+(2*(offs and $fff8))]+256*self.ram[$3a00+(2*(offs and $fff8)+1)];
+			xscroll:=xscroll-6;
+      self.scroll_x[2,(offs+yscroll) and $ff]:=xscroll;
+		end;
     self.scroll_tipo[2]:=0;
 	end else if ((self.scrollctrl and $18)=$18) then begin
-		//UINT8 *scrollram = &m_ram[0x3a00];
-
-		//m_tilemap[2]->set_scroll_rows(256);
-		//m_tilemap[2]->set_scroll_cols(1);
-		//yscroll = m_ram[0x380c];
-		//m_tilemap[2]->set_scrolly(0, yscroll);
-		//for (offs = 0; offs < 256; offs++)
-		{
-			xscroll = scrollram[2 * offs + 0] + 256 * scrollram[2 * offs + 1];
-			xscroll -= 6;
-			m_tilemap[2]->set_scrollx((offs + yscroll) & 0xff, xscroll);
-		}
+    yscroll:=self.ram[$380c];
+		self.scroll_y[2,0]:=yscroll;
+		for offs:=0 to $ff do begin
+			xscroll:=self.ram[$3a00+(2*offs)]+256*self.ram[$3a00+(2*offs+1)];
+			xscroll:=xscroll-6;
+      self.scroll_x[2,(offs+yscroll) and $ff]:=xscroll;
+		end;
     self.scroll_tipo[2]:=1;
 	end else if ((self.scrollctrl and $20)=$20) then begin
 		//UINT8 *scrollram = &m_ram[0x3800];
@@ -315,11 +308,15 @@ if ((self.scrollctrl and $18)=$10) then begin
 	end;
 end;
 
-procedure k052109_chip.updatetile;
+procedure k052109_chip.draw_tiles;
 begin
   self.update_all_tile(0);
   self.update_all_tile(1);
   self.update_all_tile(2);
+end;
+
+procedure k052109_chip.update_scroll;
+begin
   self.calc_scroll_1;
   self.calc_scroll_2;
 end;

@@ -1115,8 +1115,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 $01:begin  //movep.l re 14/02/15
                       self.contador:=self.contador+24;
                       tempw:=self.getword(r.pc.l);
-                      if (tempw and $8000)<>0 then MessageDlg('Mierda! movep bchg>$8000', mtInformation,[mbOk], 0);
-                      templ:=r.a[orig].l+tempw;
+                      templ:=r.a[orig].l+smallint(tempw);
                       r.pc.l:=r.pc.l+2;
                       self.putbyte(templ,r.d[dest].h1);
                       self.putbyte(templ+2,r.d[dest].l1);

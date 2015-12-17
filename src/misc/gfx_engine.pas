@@ -48,6 +48,7 @@ procedure put_gfx_sprite(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte);
 procedure put_gfx_sprite_diff(nchar,color:word;flipx,flipy:boolean;ngfx:byte;x_diff,y_diff:word);
 procedure put_gfx_sprite_mask(nchar,color:word;flipx,flipy:boolean;ngfx:byte;trans,mask:word);
 procedure put_gfx_sprite_mask_diff(nchar,color:word;flipx,flipy:boolean;ngfx,trans,mask,x_diff,y_diff:byte);
+procedure put_gfx_sprite_zoom(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte;zx,zy:single);
 //Sprites Update
 procedure actualiza_gfx_sprite(pos_x,pos_y:word;dest,ngfx:byte);
 procedure actualiza_gfx_sprite_over(pos_x,pos_y:word;dest,ngfx,src_over:byte;scr_x,scr_y:word);
@@ -848,6 +849,69 @@ end else begin
     end;
     if flipy then putpixel(0+x_diff,((gfx[ngfx].y-1)-y)+y_diff,gfx[ngfx].x,punbuf,pant_sprites)
       else putpixel(0+x_diff,y+y_diff,gfx[ngfx].x,punbuf,pant_sprites);
+  end;
+end;
+end;
+
+procedure put_gfx_sprite_zoom(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte;zx,zy:single);
+var
+        x,y:byte;
+        temp:pword;
+        pos,post:pbyte;
+begin
+pos:=gfx[ngfx].datos;
+inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
+if flipx then begin
+  if flipy then begin
+    for y:=0 to (gfx[ngfx].y-1) do begin
+      post:=pos;
+      inc(post,(y*gfx[ngfx].x)+gfx[ngfx].x-1);
+      temp:=punbuf;
+      for x:=0 to (gfx[ngfx].x-1) do begin
+        if not(gfx[ngfx].trans[post^]) then temp^:=paleta[gfx[ngfx].colores[post^+color]]
+          else temp^:=paleta[max_colores];
+        dec(post);
+        inc(temp);
+      end;
+      putpixel_gfx_int(0,(gfx[ngfx].y-1)-y,gfx[ngfx].x,pant_sprites);
+    end;
+  end else begin
+    for y:=0 to (gfx[ngfx].y-1) do begin
+      post:=pos;
+      inc(post,(y*gfx[ngfx].x)+gfx[ngfx].x-1);
+      temp:=punbuf;
+      for x:=0 to (gfx[ngfx].x-1) do begin
+        if not(gfx[ngfx].trans[post^]) then temp^:=paleta[gfx[ngfx].colores[post^+color]]
+          else temp^:=paleta[max_colores];
+        dec(post);
+        inc(temp);
+      end;
+      putpixel_gfx_int(0,y,gfx[ngfx].x,pant_sprites);
+    end;
+  end;
+end else begin
+  if flipy then begin
+    for y:=(gfx[ngfx].y-1) downto 0 do begin
+      temp:=punbuf;
+      for x:=0 to (gfx[ngfx].x-1) do begin
+        if not(gfx[ngfx].trans[pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
+          else temp^:=paleta[max_colores];
+        inc(temp);
+        inc(pos);
+      end;
+      putpixel_gfx_int(0,y,gfx[ngfx].x,pant_sprites);
+    end;
+  end else begin
+    for y:=0 to (gfx[ngfx].y-1) do begin
+      temp:=punbuf;
+      for x:=0 to (gfx[ngfx].x-1) do begin
+        if not(gfx[ngfx].trans[pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
+          else temp^:=paleta[max_colores];
+        inc(temp);
+        inc(pos);
+      end;
+      putpixel_gfx_int(0,y,gfx[ngfx].x,pant_sprites);
+    end;
   end;
 end;
 end;
