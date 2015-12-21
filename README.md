@@ -1,5 +1,9 @@
 ﻿# dsp-emulator
 DSP Emulator WIP status<br>
+<b>22/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot both WIP updated.</b><br>
+- Added Konami ADPCM K053260 and K007232 chips<br>
+- Sunset Riders: Fixed protection, added controls, finished audio and video<br>
+- Implemented zoomed sprites, added to Teenage Mutant Ninja Turtles, Sunset Riders and Nemesis<br>
 <b>17/12/15 - DSP Emulator 0.16b1 source WIP update. Win32 WIP snapshot updated too.</b><br>
 <img src='http://img1.imagilive.com/1215/ssriders1.png'><img src='http://img1.imagilive.com/1215/ssriders2.png'><br>
 <b>10/12/15 - DSP Emulator 0.16b1 source WIP update and Win32 WIP snapshot.</b><br>

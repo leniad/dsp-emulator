@@ -25,7 +25,7 @@ type
              num_samples:byte;
              audio:array[0..MAX_SAMPLES] of ptipo_audio;
              tsample_use:array[0..MAX_CHANNELS] of boolean;
-             tsample_reserved:array[0..MAX_CHANNELS] of byte;
+             tsample_reserved:array[0..MAX_CHANNELS] of integer;
         end;
   pnom_sample=^tipo_nombre_samples;
   ptipo_samples=^tipo_samples;
@@ -159,7 +159,7 @@ end;
 
 function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean):boolean;
 var
-  f,sample_pos:byte;
+  sample_pos:byte;
 begin
 load_samples_raw:=false;
 //Inicializo los samples
@@ -181,9 +181,10 @@ data_samples.audio[sample_pos].long:=longitud;
 data_samples.audio[sample_pos].restart:=restart;
 data_samples.audio[sample_pos].loop:=loop;
 copymemory(data_samples.audio[sample_pos].data,sample_data,longitud*2);
-for f:=0 to MAX_CHANNELS do begin
-  data_samples.tsample_reserved[f]:=init_channel;
-  data_samples.tsample_use[f]:=false;
+//Inicializar solo el sample
+if ((data_samples.num_samples-1)<=MAX_CHANNELS) then begin
+  data_samples.tsample_reserved[data_samples.num_samples-1]:=init_channel;
+  data_samples.tsample_use[data_samples.num_samples-1]:=false;
 end;
 load_samples_raw:=true;
 end;
@@ -227,7 +228,10 @@ repeat
 until nsamples=num_samples;
 freemem(ptemp);
 data_samples.num_samples:=num_samples;
-for f:=0 to MAX_CHANNELS do begin
+//Inicializar solor los necesarios...
+for f:=0 to MAX_CHANNELS do data_samples.tsample_reserved[f]:=-1;
+if (nsamples-1)>MAX_CHANNELS then nsamples:=MAX_CHANNELS;
+for f:=0 to (nsamples-1) do begin
   data_samples.tsample_reserved[f]:=init_channel;
   data_samples.tsample_use[f]:=false;
 end;
@@ -251,9 +255,9 @@ var
   f:byte;
 begin
   for f:=0 to MAX_CHANNELS do begin
-      if not(data_samples.tsample_use[f]) then begin
+      if (not(data_samples.tsample_use[f]) and (data_samples.tsample_reserved[f]<>-1)) then begin
         data_samples.tsample_use[f]:=true;
-        first_sample_free:=data_samples.tsample_reserved[f];
+        first_sample_free:=f;
         exit;
       end;
   end;

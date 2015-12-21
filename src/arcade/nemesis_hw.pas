@@ -3,7 +3,7 @@ unit nemesis_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     sound_engine,ay_8910;
+     sound_engine,ay_8910,k007232;
 
 procedure Cargar_nemesis;
 function iniciar_nemesis:boolean;
@@ -255,6 +255,7 @@ var
   f,pri,idx,num_gfx:byte;
   zoom,nchar,size,sx,sy,color,atrib,atrib2:word;
   flipx,flipy:boolean;
+  zx:single;
 begin
 {  16 bytes per sprite, in memory from 56000-56fff
 	 *
@@ -276,22 +277,22 @@ for pri:=$ff downto 0 do begin  //prioridad
     atrib2:=sprite_ram[(f*8)+3];
     if (((sprite_ram[(f*8)+2] and $ff00)=0) and ((atrib2 and $ff00)<>$ff00)) then nchar:=atrib2+((atrib and $c0) shl 2)
     else nchar:=(atrib2 and $ff)+((atrib and $c0) shl 2);
-    if ((zoom<>$ff) or (nchar<>0)) then begin
+    if ((zoom<>$ff) and (nchar<>0)) then begin
       size:=sprite_ram[(f*8)+1];
       zoom:=zoom+((size and $c0) shl 2);
       sx:=(sprite_ram[(f*8)+5] and $ff)+((atrib and $1) shl 8);
       sy:=sprite_ram[(f*8)+6] and $ff;
       color:=(atrib and $1e) shl 3;
-      flipx:=(size{sprite_ram[(f*8)+1]} and $01)<>0;
+      flipx:=(size and $01)<>0;
       flipy:=(atrib and $20)<>0;
       idx:=(size shr 3) and 7;
       nchar:=nchar*8*16 div (sprite_data[idx].width*sprite_data[idx].height);
       num_gfx:=sprite_data[idx].char_type;
       if recalc_char[num_gfx] then char_calc(num_gfx);
       if (zoom<>0) then begin
-        zoom:=((1 shl 16)*$80 div zoom)+$02ab;
-        put_gfx_sprite(nchar and sprite_data[idx].mask,color,flipx,flipy,num_gfx);
-        actualiza_gfx_sprite(sx,sy,9,num_gfx);
+        zx:=$80/zoom;
+        put_gfx_sprite_zoom(nchar and sprite_data[idx].mask,color,flipx,flipy,num_gfx,zx,zx);
+        actualiza_gfx_sprite_zoom(sx,sy,9,num_gfx,zx,zx);
       end;
     end;
   end;

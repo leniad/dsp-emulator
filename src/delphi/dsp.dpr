@@ -248,7 +248,8 @@ uses
   k053244_k053245 in '..\arcade\misc\k053244_k053245.pas',
   k053260 in '..\snd\k053260.pas',
   eepromser in '..\devices\eepromser.pas',
-  k053251 in '..\arcade\misc\k053251.pas';
+  k053251 in '..\arcade\misc\k053251.pas',
+  k007232 in '..\snd\k007232.pas';
 
 {$R *.res}
 

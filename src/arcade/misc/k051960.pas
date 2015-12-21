@@ -140,26 +140,17 @@ end;
 procedure k051960_chip.draw_sprites(min_priority,max_priority:integer);
 const
   NUM_SPRITES=128;
-  { sprites can be grouped up to 8x8. The draw order is
-		     0  1  4  5 16 17 20 21
-		     2  3  6  7 18 19 22 23
-		     8  9 12 13 24 25 28 29
-		    10 11 14 15 26 27 30 31
-		    32 33 36 37 48 49 52 53
-		    34 35 38 39 50 51 54 55
-		    40 41 44 45 56 57 60 61
-		    42 43 46 47 58 59 62 63 }
 		xoffset:array[0..7] of byte=(0,1,4,5,16,17,20,21);
 		yoffset:array[0..7] of byte=(0,2,8,10,32,34,40,42);
 		width:array[0..7] of byte=(1,2,1,2,4,2,4,8);
 		height:array[0..7] of byte=(1,1,2,2,2,4,4,8);
 var
-  drawmode_table:array[0..255] of byte;
   sortedlist:array[0..(NUM_SPRITES)-1] of integer;
-  offs,pri_code:integer;
-  ox,oy,size,w,h,x,y,zoomx,zoomy,sx,sy,zw,zh:integer;
-  c,nchar,color,pri,shadow:word;
+  offs:integer;
+  size,w,h,x,y,pri_code:byte;
+  c,nchar,color,pri,shadow,zoom_x,zoom_y,ox,oy,sx,sy:word;
   flipx,flipy:boolean;
+  zx,zy:single;
 begin
 	//memset(drawmode_table, DRAWMODE_SOURCE, sizeof(drawmode_table));
 	//drawmode_table[0] = DRAWMODE_NONE;
@@ -190,81 +181,40 @@ begin
 		if (h>=4) then nchar:=nchar and $fff7;
 		if (w>=8) then nchar:=nchar and $ffef;
 		if (h>=8) then nchar:=nchar and $ffdf;
-		ox:=(256*self.ram[offs+6]+self.ram[offs+7]) and $01ff;
-		oy:=256-((256*self.ram[offs+4]+self.ram[offs+5]) and $01ff);
+		ox:=(256*self.ram[offs+6]+self.ram[offs+7]) and $1ff;
+		oy:=256-((256*self.ram[offs+4]+self.ram[offs+5]) and $1ff);
 		flipx:=(self.ram[offs+6] and $02)<>0;
 		flipy:=(self.ram[offs+4] and $02)<>0;
-		zoomx:=(self.ram[offs+6] and $fc) shr 2;
-		zoomy:=(self.ram[offs+4] and $fc) shr 2;
-		zoomx:=$10000 div 128*(128-zoomx);
-		zoomy:=$10000 div 128*(128-zoomy);
+		zoom_x:=(self.ram[offs+6] and $fc) shr 2;
+    zx:=($100-zoom_x)/$100;
+		zoom_y:=(self.ram[offs+4] and $fc) shr 2;
+    zy:=($100-zoom_y)/$100;
 		if self.spriteflip then begin
-			ox:=512-((zoomx*w) shr 12)-ox;
-			oy:=256-((zoomy*h) shr 12)-oy;
+			ox:=512-round(zx*w*16)-ox;
+			oy:=256-round(zy*h*16)-oy;
 			flipx:=not flipx;
 			flipy:=not flipy;
     end;
 		//drawmode_table[m_gfx[0]->granularity() - 1] = shadow ? DRAWMODE_SHADOW : DRAWMODE_SOURCE;
-		if ((zoomx=$10000) and (zoomy=$10000)) then begin
-			for y:=0 to (h-1) do begin
-				sy:=oy+16*y;
+    for y:=0 to (h-1) do begin
+        sy:=oy+round(zy*y*16);
 				for x:=0 to (w-1) do begin
 					c:=nchar;
-					sx:=ox+16*x;
+					sx:=ox+round(zx*x*16);
 					if flipx then c:=c+xoffset[w-1-x]
 					  else c:=c+xoffset[x];
 					if flipy then c:=c+yoffset[h-1-y]
 					  else c:=c+yoffset[y];
-          put_gfx_sprite(c,color shl 4,flipx,flipy,1);
-          actualiza_gfx_sprite(sx and $1ff,sy and $1ff,self.pant,1);
-					{if (max_priority=-1) then
-						m_gfx[0]->prio_transtable(bitmap,cliprect,
-								c,color,
-								flipx,flipy,
-								sx & 0x1ff,sy,
-								priority_bitmap,pri,
-								drawmode_table);
-					else
-						m_gfx[0]->transtable(bitmap,cliprect,
-								c,color,
-								flipx,flipy,
-								sx & 0x1ff,sy,
-								drawmode_table);}
-				end;
-			end;
-		end	else begin
-			for y:=0 to (h-1) do begin
-				sy:=oy+((zoomy*y+(1 shl 11)) shr 12);
-				zh:=(oy+((zoomy*(y+1)+(1 shl 11)) shr 12))-sy;
-				for x:=0 to (w-1) do begin
-					c:=nchar;
-					sx:=ox+((zoomx*x+(1 shl 11)) shr 12);
-					zw:=(ox+((zoomx*(x+1)+(1 shl 11)) shr 12))-sx;
-					if flipx then c:=c+xoffset[w-1-x]
-					  else c:=c+xoffset[x];
-					if flipy then c:=c+yoffset[h-1-y]
-					  else c:=c+yoffset[y];
-          put_gfx_sprite(c,color shl 4,flipx,flipy,1);
-          actualiza_gfx_sprite(sx and $1ff,sy and $1ff,self.pant,1);
-					{if (max_priority == -1)
-						m_gfx[0]->prio_zoom_transtable(bitmap,cliprect,
-								c,color,
-								flipx,flipy,
-								sx & 0x1ff,sy,
-								(zw << 16) / 16,(zh << 16) / 16,
-								priority_bitmap,pri,
-								drawmode_table);
-					else
-						m_gfx[0]->zoom_transtable(bitmap,cliprect,
-								c,color,
-								flipx,flipy,
-								sx & 0x1ff,sy,
-								(zw << 16) / 16,(zh << 16) / 16,
-								drawmode_table);}
+          if ((zx=1) and (zy=1)) then begin
+            put_gfx_sprite(c,color shl 4,flipx,flipy,1);
+            actualiza_gfx_sprite(sx,sy,self.pant,1);
+          end else begin
+            put_gfx_sprite_zoom(c,color shl 4,flipx,flipy,1,zx,zy);
+            actualiza_gfx_sprite_zoom(sx,sy,self.pant,1,zx,zy);
+          end;
 				end;
 			end;
 		end;
-	end;
 end;
 
 end.

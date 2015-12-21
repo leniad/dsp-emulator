@@ -17,10 +17,11 @@ type
         procedure word_w(direccion,valor:word;access:boolean);
         function read(direccion:word):byte;
         procedure write(direccion:word;val:byte);
-        procedure update_scroll;
         procedure draw_tiles;
         procedure reset;
         function is_irq_enabled:boolean;
+        procedure clean_video_buffer;
+        procedure clean_video_buffer_layer(layer:byte);
     protected
         ram:array[0..$5fff] of byte;
         tileflip_enable,romsubbank,scrollctrl:byte;
@@ -30,6 +31,7 @@ type
         char_rom:pbyte;
         char_size:dword;
         k052109_cb:t_k052109_cb;
+        video_buffer:array[0..2,0..$7ff] of boolean;
         procedure update_all_tile(layer:byte);
         procedure calc_scroll_1;
         procedure calc_scroll_2;
@@ -64,6 +66,18 @@ destructor k052109_chip.free;
 begin
 end;
 
+procedure k052109_chip.clean_video_buffer;
+var
+  f:byte;
+begin
+for f:=0 to 2 do fillchar(self.video_buffer[f,0],$800,1);
+end;
+
+procedure k052109_chip.clean_video_buffer_layer(layer:byte);
+begin
+fillchar(self.video_buffer[layer,0],$800,1);
+end;
+
 procedure k052109_chip.reset;
 var
   f:byte;
@@ -78,6 +92,7 @@ begin
 		self.charrombank[f]:=0;
 		self.charrombank_2[f]:=0;
 	end;
+  clean_video_buffer;
 end;
 
 function k052109_chip.read(direccion:word):byte;
@@ -105,13 +120,13 @@ end;
 
 procedure k052109_chip.write(direccion:word;val:byte);
 var
-  dirty:byte;
+  bank,dirty:byte;
   i:word;
 begin
 if ((direccion and $1fff)<$1800) then begin // tilemap RAM */
 		if (direccion>=$4000) then self.has_extra_video_ram:=true;  // kludge for X-Men */
 		self.ram[direccion]:=val;
-		//m_tilemap[(offset & 0x1800) >> 11]->mark_tile_dirty(offset & 0x7ff);
+    self.video_buffer[(direccion and $1800) shr 11,direccion and $7ff]:=true;
 end	else begin   // control registers
 		self.ram[direccion]:=val;
     case direccion of
@@ -124,25 +139,19 @@ end	else begin   // control registers
 			        if (dirty<>0) then begin
 				        self.charrombank[0]:=val and $0f;
 				        self.charrombank[1]:=(val shr 4) and $0f;
-				        //for i:=0 to $17ff do begin
-				        //	int bank = (m_ram[i]&0x0c) >> 2;
-				        //	if ((bank == 0 && (dirty & 1)) || (bank == 1 && (dirty & 2)))
-                    {
-						        m_tilemap[(i & 0x1800) >> 11]->mark_tile_dirty(i & 0x7ff);
-					          }
-                //end;
-			        end;
+                for i:=0 to $17ff do begin
+				        	  bank:=(self.ram[i] and $0c) shr 2;
+				          	if (((bank=0) and ((dirty and 1)<>0)) or ((bank=1) and ((dirty and 2)<>0))) then
+                      self.video_buffer[(direccion and $1800) shr 11,direccion and $7ff]:=true;
+			          end;
+              end;
             end;
       $1e00,$3e00:self.romsubbank:=val; // Surprise Attack uses offset 0x3e00
       $1e80:begin
-			          //m_tilemap[0]->set_flip((data & 1) ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
-			          //m_tilemap[1]->set_flip((data & 1) ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
-			          //m_tilemap[2]->set_flip((data & 1) ? (TILEMAP_FLIPY | TILEMAP_FLIPX) : 0);
+                main_screen.flip_main_screen:=(val and 1)<>00;
 			          if (self.tileflip_enable<>((val and $06) shr 1)) then begin
-				          self.tileflip_enable:= ((val and $06) shr 1);
-				          //m_tilemap[0]->mark_all_dirty();
-				          //m_tilemap[1]->mark_all_dirty();
-				          //m_tilemap[2]->mark_all_dirty();
+				          self.tileflip_enable:=((val and $06) shr 1);
+                  clean_video_buffer;
 			          end;
             end;
       $1f00:begin
@@ -152,12 +161,11 @@ end	else begin   // control registers
 			          if (dirty<>0) then begin
 				          self.charrombank[2]:=val and $0f;
 				          self.charrombank[3]:=(val shr 4) and $0f;
-				          //for (i = 0; i < 0x1800; i++)
-				          {
-					          int bank = (m_ram[i] & 0x0c) >> 2;
-					          if ((bank == 2 && (dirty & 1)) || (bank == 3 && (dirty & 2)))
-						        m_tilemap[(i & 0x1800) >> 11]->mark_tile_dirty(i & 0x7ff);
-				          }
+                  for i:=0 to $17ff do begin
+				        	  bank:=(self.ram[i] and $0c) shr 2;
+				          	if (((bank=2) and ((dirty and 1)<>0)) or ((bank=3) and ((dirty and 2)<>0))) then
+                      self.video_buffer[(direccion and $1800) shr 11,direccion and $7ff]:=true;
+			            end;
 			          end;
             end;
       $3d80:begin // Surprise Attack uses offset 0x3d80 in rom test
@@ -195,30 +203,30 @@ var
   f,pos_x,pos_y,nchar,color,bank:word;
   flip_x,flip_y:boolean;
   flags,priority:word;
-const
-  video_const:array[0..2,0..2] of word=(
-  (0,$2000,$4000),($800,$2800,$4800),($1000,$3000,$5000));
 begin
 for f:=0 to $7ff do begin
   pos_x:=f mod 64;
   pos_y:=f div 64;
-	nchar:=self.ram[f+video_const[layer,1]]+256*self.ram[f+video_const[layer,2]];
-	color:=self.ram[f+video_const[layer,0]];
-	flags:=0;
-	priority:=0;
-	bank:=self.charrombank[(color and $0c) shr 2];
-	if self.has_extra_video_ram then bank:=(color and $0c) shr 2; // kludge for X-Men */
-	color:=(color and $f3) or ((bank and $03) shl 2);
-	bank:=bank shr 2;
-	self.k052109_cb(layer,bank,nchar,color,flags,priority);
-  flip_x:=(flags and 1)<>0;
-  flip_y:=(flags and 2)<>0;
-	// if the callback set flip X but it is not enabled, turn it off */
-	if ((self.tileflip_enable and 1)=0) then flip_x:=false;
-	// if flip Y is enabled and the attribute but is set, turn it on */
-	if (((color and $02)<>0) and ((self.tileflip_enable and 2)<>0)) then flip_y:=true;
-  put_gfx_trans_flip(pos_x*8,pos_y*8,nchar,color shl 4,self.pant[layer],0,flip_x,flip_y);
-	//tileinfo.category = priority;
+  if video_buffer[layer,f] then begin
+	  nchar:=self.ram[$2000+f+($800*layer)]+256*self.ram[$4000+f+($800*layer)];
+	  color:=self.ram[f+($800*layer)];
+	  flags:=0;
+	  priority:=0;
+	  bank:=self.charrombank[(color and $0c) shr 2];
+	  if self.has_extra_video_ram then bank:=(color and $0c) shr 2; // kludge for X-Men */
+	  color:=(color and $f3) or ((bank and $03) shl 2);
+	  bank:=bank shr 2;
+	  self.k052109_cb(layer,bank,nchar,color,flags,priority);
+    flip_x:=(flags and 1)<>0;
+    flip_y:=(flags and 2)<>0;
+	  // if the callback set flip X but it is not enabled, turn it off */
+	  if ((self.tileflip_enable and 1)=0) then flip_x:=false;
+	  // if flip Y is enabled and the attribute but is set, turn it on */
+	  if (((color and $02)<>0) and ((self.tileflip_enable and 2)<>0)) then flip_y:=true;
+    put_gfx_trans_flip(pos_x*8,pos_y*8,nchar,color shl 4,self.pant[layer],0,flip_x,flip_y);
+	  //tileinfo.category = priority;
+    video_buffer[layer,f]:=false;
+  end;
 end;
 end;
 
@@ -245,18 +253,12 @@ if ((self.scrollctrl and $03)=$02) then begin
 		end;
     self.scroll_tipo[1]:=1;
 	end else if ((self.scrollctrl and $04)=$04) then begin
-		//UINT8 *scrollram = &m_ram[0x1800];
-
-		//m_tilemap[1]->set_scroll_rows(1);
-		//m_tilemap[1]->set_scroll_cols(512);
-		//xscroll = m_ram[0x1a00] + 256 * m_ram[0x1a01];
-		//xscroll -= 6;
-		//m_tilemap[1]->set_scrollx(0, xscroll);
-		//for (offs = 0; offs < 512; offs++)
-		{
-			yscroll = scrollram[offs / 8];
-			m_tilemap[1]->set_scrolly((offs + xscroll) & 0x1ff, yscroll);
-		}
+		xscroll:=(self.ram[$1a00]+256*self.ram[$1a01])-6;
+    self.scroll_x[1,0]:=xscroll;
+		for offs:=0 to 511 do begin
+			yscroll:=self.ram[$1800+(offs div 8)];
+      self.scroll_y[1,(offs+xscroll) and $1ff]:=yscroll;
+		end;
     self.scroll_tipo[1]:=2;
 	end else begin
     self.scroll_x[1,0]:=(self.ram[$1a00]+(self.ram[$1a01] shl 8))-6;
@@ -288,18 +290,12 @@ if ((self.scrollctrl and $18)=$10) then begin
 		end;
     self.scroll_tipo[2]:=1;
 	end else if ((self.scrollctrl and $20)=$20) then begin
-		//UINT8 *scrollram = &m_ram[0x3800];
-
-		//m_tilemap[2]->set_scroll_rows(1);
-		//m_tilemap[2]->set_scroll_cols(512);
-		//xscroll = m_ram[0x3a00] + 256 * m_ram[0x3a01];
-		//xscroll -= 6;
-		//m_tilemap[2]->set_scrollx(0, xscroll);
-		//for (offs = 0; offs < 512; offs++)
-		{
-			yscroll = scrollram[offs / 8];
-			m_tilemap[2]->set_scrolly((offs + xscroll) & 0x1ff, yscroll);
-		}
+    xscroll:=(self.ram[$3a00]+256*self.ram[$3a01])-6;
+    self.scroll_x[2,0]:=xscroll;
+		for offs:=0 to 511 do begin
+			yscroll:=self.ram[$3800+(offs div 8)];
+      self.scroll_y[2,(offs+xscroll) and $1ff]:=yscroll;
+		end;
     self.scroll_tipo[2]:=2;
 	end else begin
     self.scroll_x[2,0]:=(self.ram[$3a00]+(self.ram[$3a01] shl 8))-6;
@@ -310,15 +306,11 @@ end;
 
 procedure k052109_chip.draw_tiles;
 begin
+  self.calc_scroll_1;
+  self.calc_scroll_2;
   self.update_all_tile(0);
   self.update_all_tile(1);
   self.update_all_tile(2);
-end;
-
-procedure k052109_chip.update_scroll;
-begin
-  self.calc_scroll_1;
-  self.calc_scroll_2;
 end;
 
 end.

@@ -6,7 +6,7 @@ uses {$ifdef fpc}
      {$else}
      {$ifdef windows}windows,mmsystem,{$endif}
      {$endif}
-     timer_engine;
+     timer_engine,dialogs;
 
 const
         max_audio_buffer=$f;
@@ -286,6 +286,7 @@ end;
 function init_channel:byte;
 begin
   sound_status.canales_usados:=sound_status.canales_usados+1;
+  if sound_status.canales_usados>max_canales then MessageDlg('Utilizados mas canales de sonido de los disponibles!!', mtInformation,[mbOk], 0);
   init_channel:=sound_status.canales_usados;
 end;
 

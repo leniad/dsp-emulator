@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine,upd7759,ym_2151,k052109,k051960,
-     misc_functions,samples,k053244_k053245,k053260,k053251,eepromser;
+     misc_functions,samples,k053244_k053245,k053260,k053251,eepromser,k007232;
 
 procedure Cargar_tmnt;
 function iniciar_tmnt:boolean;
@@ -19,6 +19,7 @@ procedure tmnt_snd_putbyte(direccion:word;valor:byte);
 procedure tmnt_sound_update;
 procedure tmnt_cb(layer,bank:word;var code:word;var color:word;var flags:word;var priority:word);
 procedure tmnt_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
+procedure tmnt_k007232_cb(valor:byte);
 //SSriders
 procedure ssriders_principal;
 function ssriders_getword(direccion:dword):word;
@@ -44,6 +45,7 @@ const
         (n:'963a30.g7';l:$100;p:0;crc:$abd82680),(n:'963a31.g19';l:$100;p:$100;crc:$f8004a1c),());
         tmnt_upd:tipo_roms=(n:'963a27.d18';l:$20000;p:0;crc:$2dfd674b);
         tmnt_title:tipo_roms=(n:'963a25.d5';l:$80000;p:0;crc:$fca078c7);
+        tmnt_k007232:tipo_roms=(n:'963a26.c13';l:$20000;p:0;crc:$e2ac3063);
         //Sunset Riders
         ssriders_rom:array[0..4] of tipo_roms=(
         (n:'064eac02.8e';l:$40000;p:0;crc:$5a5425f4),(n:'064eac03.8g';l:$40000;p:$1;crc:$093c00fb),
@@ -56,24 +58,21 @@ const
         ssriders_eeprom:tipo_roms=(n:'ssriders_eac.nv';l:$80;p:0;crc:$f6d641a7);
         ssriders_k053260:tipo_roms=(n:'064e06.1d';l:$100000;p:0;crc:$59810df9);
         //DIP
-        tmnt_dip:array [0..10] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$c;dip_name:'20k then every 60k'),(dip_val:$8;dip_name:'30k then every 70k'),(dip_val:$4;dip_name:'40k then every 80k'),(dip_val:$0;dip_name:'50k then every 90k'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$10;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$300;name:'Coin A';number:4;dip:((dip_val:$100;dip_name:'2 Coin - 1 Credit '),(dip_val:$300;dip_name:'1 Coin - 1 Credit'),(dip_val:$200;dip_name:'1 Coin - 2 Credit'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c00;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3 Coin - 1 Credit '),(dip_val:$400;dip_name:'2 Coin - 3 Credit'),(dip_val:$c00;dip_name:'1 Coin - 3 Credit'),(dip_val:$800;dip_name:'1 Coin - 6 Credit'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$1000;name:'Difficulty';number:2;dip:((dip_val:$1000;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2000;name:'Flip Screen';number:2;dip:((dip_val:$2000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4000;name:'Complete Invulnerability';number:2;dip:((dip_val:$4000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8000;name:'Base Ship Invulnerability';number:2;dip:((dip_val:$8000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        tmnt_dip_a:array [0..1] of def_dip=(
+        (mask:$f;name:'Coinage';number:16;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'2C 3C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'))),());
+        tmnt_dip_b:array [0..3] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        tmnt_dip_c:array [0..1] of def_dip=(
+        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom:array[0..$5ffff] of word;
  ram:array[0..$1fff] of word;
  ram2:array[0..$3f] of word;
  sprite_ram:array[0..$1fff] of word;
- char_rom,sprite_rom:pbyte;
+ char_rom,sprite_rom,k007232_rom,k053260_rom:pbyte;
  sound_latch,sound_latch2,sprite_colorbase,last_snd,sprites_pri,toggle:byte;
  layer_colorbase:array[0..2] of byte;
  irq5_mask:boolean;
@@ -190,7 +189,6 @@ end;
 
 begin
 iniciar_tmnt:=false;
-iniciar_audio(false);
 //Pantallas para el K052109
 screen_init(1,512,256,true);
 screen_init(2,512,256,true);
@@ -201,6 +199,7 @@ screen_init(4,1024,1024,false,true);
 case main_vars.tipo_maquina of
   214:begin //TMNT
         iniciar_video(320,224);
+        iniciar_audio(false); //Sonido mono
         //cargar roms
         if not(cargar_roms16w(@rom[0],@tmnt_rom[0],'tmnt.zip',0)) then exit;
         //cargar sonido
@@ -215,6 +214,9 @@ case main_vars.tipo_maquina of
         //Sound Chips
         YM2151_Init(0,3579545,nil,nil);
         upd7759_0:=upd7759_chip.create(640000,0.6);
+        getmem(k007232_rom,$20000);
+        if not(cargar_roms(k007232_rom,@tmnt_k007232,'tmnt.zip',1)) then exit;
+        k007232_0:=k007232_chip.create(3579545,k007232_rom,$20000,0.20,tmnt_k007232_cb);
         if not(cargar_roms(upd7759_0.get_rom_addr,@tmnt_upd,'tmnt.zip',1)) then exit;
         getmem(ptemp,$80000);
         getmem(ptempw,$80000*3);
@@ -261,11 +263,16 @@ case main_vars.tipo_maquina of
         layer_colorbase[2]:=40;
         sprite_colorbase:=16;
         //DIP
-        marcade.dswa:=$ffdf;
-        marcade.dswa_val:=@tmnt_dip;
+        marcade.dswa:=$ff;
+        marcade.dswa_val:=@tmnt_dip_a;
+        marcade.dswb:=$5e;
+        marcade.dswb_val:=@tmnt_dip_b;
+        marcade.dswc:=$ff;
+        marcade.dswc_val:=@tmnt_dip_c;
   end;
   215:begin //Sunset Riders
         iniciar_video(288,224);
+        iniciar_audio(true); //Sonido stereo
         //cargar roms
         if not(cargar_roms16w(@rom[0],@ssriders_rom[0],'ssriders.zip',0)) then exit;
         //cargar sonido
@@ -279,6 +286,9 @@ case main_vars.tipo_maquina of
         snd_z80.init_sound(ssriders_sound_update);
         //Sound Chips
         YM2151_Init(0,3579545,nil,nil);
+        getmem(k053260_rom,$100000);
+        if not(cargar_roms(k053260_rom,@ssriders_k053260,'ssriders.zip',1)) then exit;
+        k053260_0:=tk053260_chip.create(3579545,k053260_rom,$100000,0.70);
         //Iniciar video
         getmem(char_rom,$100000);
         if not(cargar_roms32b(char_rom,@ssriders_char,'ssriders.zip',0)) then exit;
@@ -287,13 +297,12 @@ case main_vars.tipo_maquina of
         getmem(sprite_rom,$200000);
         if not(cargar_roms32b(sprite_rom,@ssriders_sprites,'ssriders.zip',0)) then exit;
         k053245_init(sprite_rom,$200000,ssriders_sprite_cb);
+        //Prioridades
+        k053251_0:=k053251_chip.create;
         //eeprom
         eepromser_init(ER5911,8);
         if not(cargar_roms(@mem_temp[0],@ssriders_eeprom,'ssriders.zip',1)) then exit;
         eepromser_load_data(@mem_temp[0],$80);
-        //DIP
-        marcade.dswa:=$ffdf;
-        marcade.dswa_val:=@tmnt_dip;
   end;
 end;
 //final
@@ -312,8 +321,16 @@ case main_vars.tipo_maquina of
         close_samples;
         k051960_0.free;
         upd7759_0.free;
+        k007232_0.free;
+        freemem(k007232_rom);
       end;
-  215:;
+  215:begin
+        //k053245_0.free;
+        k053251_0.free;
+        k053260_0.free;
+        freemem(k053260_rom);
+        //eeprom free
+      end;
 end;
 freemem(char_rom);
 freemem(sprite_rom);
@@ -337,7 +354,8 @@ begin
       end;
   215:begin
         k053245_reset;
-        k053251_reset;
+        k053251_0.reset;
+        k053260_0.reset;
         eepromser_reset;
       end;
  end;
@@ -365,7 +383,13 @@ begin
 	color:=sprite_colorbase+(color and $0f);
 end;
 
-procedure draw_layer(layer:byte);
+procedure tmnt_k007232_cb(valor:byte);
+begin
+  k007232_0.set_volume(0,(valor shr 4)*$11,0);
+	k007232_0.set_volume(1,0,(valor and $0f)*$11);
+end;
+
+procedure draw_layer(layer:byte);inline;
 var
   f:word;
 begin
@@ -374,14 +398,14 @@ case layer of
   1:begin
       case k052109_0.scroll_tipo[1] of
         0,1:for f:=0 to $ff do scroll__x_part(2,4,k052109_0.scroll_x[1,f],k052109_0.scroll_y[1,0],f,1);
-        2:;
+        2:for f:=0 to $1ff do scroll__y_part(2,4,k052109_0.scroll_y[1,f],k052109_0.scroll_x[1,0],f,1);
         3:scroll_x_y(2,4,k052109_0.scroll_x[1,0],k052109_0.scroll_y[1,0]);
       end;
     end;
   2:begin
       case k052109_0.scroll_tipo[2] of
         0,1:for f:=0 to $ff do scroll__x_part(3,4,k052109_0.scroll_x[2,f],k052109_0.scroll_y[2,0],f,1);
-        2:;
+        2:for f:=0 to $1ff do scroll__y_part(3,4,k052109_0.scroll_y[2,f],k052109_0.scroll_x[2,0],f,1);
         3:scroll_x_y(3,4,k052109_0.scroll_x[2,0],k052109_0.scroll_y[2,0]);
       end;
     end;
@@ -390,7 +414,6 @@ end;
 
 procedure update_video_tmnt;
 begin
-k052109_0.update_scroll;
 k052109_0.draw_tiles;
 fill_full_screen(4,0);
 draw_layer(2);
@@ -464,10 +487,10 @@ case direccion of
     $0a0002:tmnt_getword:=marcade.in1; //p1
     $0a0004:tmnt_getword:=marcade.in2; //p2
     $0a0006:tmnt_getword:=$ff; //p3
-    $0a0010:tmnt_getword:=$ff; //dsw1
-    $0a0012:tmnt_getword:=$5e; //dsw2
+    $0a0010:tmnt_getword:=marcade.dswa;
+    $0a0012:tmnt_getword:=marcade.dswb;
     $0a0014:tmnt_getword:=$ff; //p4
-    $0a0018:tmnt_getword:=$ff; //dsw3
+    $0a0018:tmnt_getword:=marcade.dswc;
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
                         tmnt_getword:=k052109_0.word_r(((direccion and $3000) shr 1) or (direccion and $07ff));
@@ -478,7 +501,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(pos:word);
+procedure cambiar_color_tmnt(pos:word);inline;
 var
   color:tcolor;
   data:word;
@@ -488,10 +511,7 @@ begin
   color.g:=pal5bit(data shr 5);
   color.r:=pal5bit(data);
   set_pal_color(color,@paleta[pos shr 1]);
-  {case pos of
-    $100..$1ff:buffer_color[$10+((pos shr 4) and $f)]:=true;
-    $200..$2ff:buffer_color[(pos shr 4) and $f]:=true;
-  end; }
+  k052109_0.clean_video_buffer;
 end;
 
 procedure tmnt_putword(direccion:dword;valor:word);
@@ -501,7 +521,7 @@ case direccion of
     $060000..$063fff:ram[(direccion and $3fff) shr 1]:=valor;
     $080000..$080fff:if buffer_paleta[(direccion and $fff) shr 1]<>(valor and $ff) then begin
                         buffer_paleta[(direccion and $fff) shr 1]:=valor and $ff;
-                        cambiar_color((direccion and $fff) shr 1);
+                        cambiar_color_tmnt((direccion and $fff) shr 1);
                    end;
     $0a0000:begin
               if ((last_snd=8) and ((valor and 8)=0)) then snd_z80.pedir_irq:=HOLD_LINE;
@@ -530,7 +550,7 @@ case direccion of
   0..$87ff:tmnt_snd_getbyte:=mem_snd[direccion];
   $9000:tmnt_snd_getbyte:=sound_latch2;
   $a000:tmnt_snd_getbyte:=sound_latch;
-  $b000..$b00d:tmnt_snd_getbyte:=0;
+  $b000..$b00d:tmnt_snd_getbyte:=k007232_0.read(direccion and $f);
   $c001:tmnt_snd_getbyte:=YM2151_status_port_read(0);
   $f000:tmnt_snd_getbyte:=upd7759_0.busy_r;
 end;
@@ -548,7 +568,7 @@ case direccion of
             else stop_sample(0);
 	        sound_latch2:=valor;
         end;
-  $b000..$b00d:;
+  $b000..$b00d:k007232_0.write(direccion and $f,valor);
   $c000:YM2151_register_port_write(0,valor);
   $c001:YM2151_data_port_write(0,valor);
   $d000:upd7759_0.port_w(valor);
@@ -560,6 +580,7 @@ procedure tmnt_sound_update;
 begin
   ym2151_Update(0);
   upd7759_0.update;
+  k007232_0.update;
   samples_update;
 end;
 
@@ -594,25 +615,36 @@ end;
 
 procedure update_video_ssriders;
 var
-  bg_colorbase:byte;
+  bg_colorbase,tmp:byte;
   sorted_layer:array[0..2] of byte;
 begin
 //Ordenar
 sorted_layer[0]:=0;
-layerpri[0]:=k053251_get_priority(K053251_CI2);
+layerpri[0]:=k053251_0.get_priority(K053251_CI2);
 sorted_layer[1]:=1;
-layerpri[1]:=k053251_get_priority(K053251_CI4);
+layerpri[1]:=k053251_0.get_priority(K053251_CI4);
 sorted_layer[2]:=2;
-layerpri[2]:=k053251_get_priority(K053251_CI3);
+layerpri[2]:=k053251_0.get_priority(K053251_CI3);
 konami_sortlayers3(@sorted_layer,@layerpri);
-bg_colorbase:=k053251_get_palette_index(K053251_CI0);
-sprite_colorbase:=k053251_get_palette_index(K053251_CI1);
-layer_colorbase[0]:=k053251_get_palette_index(K053251_CI2);
-layer_colorbase[1]:=k053251_get_palette_index(K053251_CI4);
-layer_colorbase[2]:=k053251_get_palette_index(K053251_CI3);
-k052109_0.update_scroll;
-fill_full_screen(4,bg_colorbase*16);
+bg_colorbase:=k053251_0.get_palette_index(K053251_CI0);
+sprite_colorbase:=k053251_0.get_palette_index(K053251_CI1);
+layer_colorbase[0]:=k053251_0.get_palette_index(K053251_CI2);
+if k053251_0.dirty_tmap[K053251_CI2] then begin
+  k052109_0.clean_video_buffer_layer(0);
+  k053251_0.dirty_tmap[K053251_CI2]:=false;
+end;
+layer_colorbase[1]:=k053251_0.get_palette_index(K053251_CI4);
+if k053251_0.dirty_tmap[K053251_CI4] then begin
+  k052109_0.clean_video_buffer_layer(1);
+  k053251_0.dirty_tmap[K053251_CI4]:=false;
+end;
+layer_colorbase[2]:=k053251_0.get_palette_index(K053251_CI3);
+if k053251_0.dirty_tmap[K053251_CI3] then begin
+  k052109_0.clean_video_buffer_layer(2);
+  k053251_0.dirty_tmap[K053251_CI3]:=false;
+end;
 k052109_0.draw_tiles;
+fill_full_screen(4,bg_colorbase*16);
 k05324x_sprites_draw(3);
 draw_layer(sorted_layer[0]);
 k05324x_sprites_draw(2);
@@ -620,7 +652,6 @@ draw_layer(sorted_layer[1]);
 k05324x_sprites_draw(1);
 draw_layer(sorted_layer[2]);
 k05324x_sprites_draw(0);
-actualiza_trozo(0,0,512,256,1,0,0,512,256,4);
 actualiza_trozo_final(112,16,288,224,4);
 end;
 
@@ -652,7 +683,8 @@ end;
 
 function ssriders_protection_r:word;
 var
-  data,cmd:word;
+  data:integer;
+  cmd:word;
 begin
 	data:=ram[$1a0a shr 1];
 	cmd:=ram[$18fc shr 1];
@@ -662,18 +694,16 @@ begin
 			// data is always == 0x75c */
 			ssriders_protection_r:=$0064;
     end;
-		$6003:begin // start of level */
-			ssriders_protection_r:=data and $000f;
-    end;
+		$6003:ssriders_protection_r:=data and $000f; // start of level */
 		$6004:ssriders_protection_r:=data and $001f;
 		$6000:ssriders_protection_r:=data and $0001;
 		$0000:ssriders_protection_r:=data and $00ff;
 		$6007:ssriders_protection_r:=data and $00ff;
 		$8abc:begin
 			// collision table */
-			data:=data-ram[$1818 shr 1];
-			data:=((data div 8-4) and $1f)*$40;
-			data:=data+((ram[$1cb0 shr 1]+256*k052109_0.read($1a01)+k052109_0.read($1a00)-6) div 8+12) and $3f;
+			data:=-ram[$1818 shr 1];
+			data:=(((data div 8)-4) and $1f)*$40;
+			data:=data+((((ram[$1cb0 shr 1]+256*k052109_0.read($1a01)+k052109_0.read($1a00)-6) div 8)+12) and $3f);
 			ssriders_protection_r:=data;
     end;
 		else ssriders_protection_r:=$ffff;
@@ -697,10 +727,10 @@ case direccion of
                         end;
                      end;
     $1c0000:ssriders_getword:=marcade.in1; //p1
-    $1c0002:ssriders_getword:=marcade.in0; //p2
+    $1c0002:ssriders_getword:=marcade.in2; //p2
     $1c0004:ssriders_getword:=$ff; //p3
     $1c0006:ssriders_getword:=$ff; //p4
-    $1c0100:ssriders_getword:=$ff; //coin
+    $1c0100:ssriders_getword:=marcade.in0; //coin
     $1c0102:begin
               res:=$f8+er5911_do_read+(er5911_ready_read shl 1); //eeprom
               //falta vblank en bit 8
@@ -714,7 +744,7 @@ case direccion of
                         direccion:=((direccion and $1f) shr 1) and $fe; ///* handle mirror address
                         ssriders_getword:=k053244_read(direccion+1)+(k053244_read(direccion) shl 8);
                       end;
-    $5c0600..$5c0603:ssriders_getword:=k053260_main_read((direccion and 3) shr 1); //k053260
+    $5c0600..$5c0603:ssriders_getword:=k053260_0.main_read((direccion and 3) shr 1); //k053260
     $600000..$603fff:ssriders_getword:=k052109_0.word_r((direccion and $3fff) shr 1);
 end;
 end;
@@ -725,13 +755,13 @@ var
   i,f:byte;
 begin
 	if (direccion=1) then begin
-		// create sprite priority attributes */
+		//create sprite priority attributes */
 		hardware_pri:=1;
     logical_pri:=1;
-		for f:=1 to 9 do begin//; logical_pri < 0x100; logical_pri <<= 1)
+		for f:=1 to 8 do begin//; logical_pri < 0x100; logical_pri <<= 1)
 			for i:=0 to 127 do begin
 				if (sprite_ram[(6+128*i) shr 1] shr 8)=logical_pri then begin
-					k053245_word_w(8*i,hardware_pri,0);
+					k053245_lsb_w(8*i,hardware_pri);
 					hardware_pri:=hardware_pri+1;
 				end;
 			end;
@@ -740,7 +770,7 @@ begin
 	end;
 end;
 
-procedure cambiar_color2(pos,valor:word);
+procedure cambiar_color_ssriders(pos,valor:word);inline;
 var
   color:tcolor;
 begin
@@ -748,10 +778,7 @@ begin
   color.g:=pal5bit(valor shr 5);
   color.r:=pal5bit(valor);
   set_pal_color(color,@paleta[pos]);
-  {case pos of
-    $100..$1ff:buffer_color[$10+((pos shr 4) and $f)]:=true;
-    $200..$2ff:buffer_color[(pos shr 4) and $f]:=true;
-  end; }
+  k052109_0.clean_video_buffer;
 end;
 
 procedure ssriders_putword(direccion:dword;valor:word);
@@ -761,14 +788,14 @@ case direccion of
     $104000..$107fff:ram[(direccion and $3fff) shr 1]:=valor;
     $140000..$140fff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                         buffer_paleta[(direccion and $fff) shr 1]:=valor;
-                        cambiar_color2((direccion and $fff) shr 1,valor);
+                        cambiar_color_ssriders((direccion and $fff) shr 1,valor);
                    end;
     $180000..$183fff:begin //k053245
                         direccion:=(direccion and $3fff) shr 1;
                         sprite_ram[direccion]:=valor;
 	                      if (direccion and $0031)=0 then begin
                           direccion:=((direccion and $000e) shr 1) or ((direccion and $1fc0) shr 3);
-		                      k053245_word_w(direccion,valor,2);
+		                      k053245_word_w(direccion,valor);
                         end;
                      end;
     $1c0200:begin// eeprom
@@ -791,9 +818,9 @@ case direccion of
                         if main_m68000.access_8bits then k053244_write(direccion+1,valor and $ff)
                           else k053244_write(direccion,valor shr 8);
                      end;
-    $5c0600..$5c0603:k053260_main_write((direccion and 3) shr 1,valor); //k053260
+    $5c0600..$5c0603:k053260_0.main_write((direccion and 3) shr 1,valor); //k053260
     $5c0604:snd_z80.pedir_irq:=HOLD_LINE; //sound
-    $5c0700..$5c071f:k053251_lsb_w((direccion and $1f) shr 1,valor); //k053251
+    $5c0700..$5c071f:k053251_0.lsb_w((direccion and $1f) shr 1,valor); //k053251
     $600000..$603fff:k052109_0.word_w((direccion and $3fff) shr 1,valor,main_m68000.access_8bits);
   end;
 end;
@@ -803,7 +830,7 @@ begin
 case direccion of
   0..$f7ff:ssriders_snd_getbyte:=mem_snd[direccion];
   $f801:ssriders_snd_getbyte:=YM2151_status_port_read(0);
-  $fa00..$fa2f:ssriders_snd_getbyte:=k053260_read(direccion and $3f); //k053260
+  $fa00..$fa2f:ssriders_snd_getbyte:=k053260_0.read(direccion and $3f); //k053260
 end;
 end;
 
@@ -814,7 +841,7 @@ case direccion of
   $f000..$f7ff:mem_snd[direccion]:=valor;
   $f800:YM2151_register_port_write(0,valor);
   $f801:YM2151_data_port_write(0,valor);
-  $fa00..$fa2f:k053260_write(direccion and $3f,valor); //k053260
+  $fa00..$fa2f:k053260_0.write(direccion and $3f,valor); //k053260
   $fc00:snd_z80.pedir_nmi:=HOLD_LINE;
 end;
 end;
@@ -822,6 +849,7 @@ end;
 procedure ssriders_sound_update;
 begin
   ym2151_Update(0);
+  k053260_0.update;
 end;
 
 end.

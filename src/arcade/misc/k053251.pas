@@ -8,82 +8,97 @@ const
 		K053251_CI3=3;
 		K053251_CI4=4;
 
-procedure k053251_reset;
-procedure k053251_lsb_w(direccion,valor:word);
-function k053251_get_priority(ci:byte):byte;
-function k053251_get_palette_index(ci:byte):byte;
+type
+    k053251_chip=class
+        constructor Create();
+        destructor free;
+    public
+        dirty_tmap:array[0..4] of boolean;
+        procedure reset;
+        procedure lsb_w(direccion,valor:word);
+        function get_priority(ci:byte):byte;
+        function get_palette_index(ci:byte):byte;
+    private
+        ram:array[0..$f] of byte;
+        palette_index:array[0..4] of byte;
+        procedure write(direccion:word;valor:byte);
+        procedure reset_indexes;
+    end;
+
+var
+  k053251_0:k053251_chip;
 
 implementation
-var
-  tilemaps_set:byte;
-  k053251_ram:array[0..$f] of byte;
-  dirty_tmap:array[0..4] of boolean;
-  palette_index:array[0..4] of byte;
 
-procedure reset_indexes;
+constructor k053251_chip.Create();
 begin
-	palette_index[0]:=32*((k053251_ram[9] shr 0) and 3);
-	palette_index[1]:=32*((k053251_ram[9] shr 2) and 3);
-	palette_index[2]:=32*((k053251_ram[9] shr 4) and 3);
-	palette_index[3]:=16*((k053251_ram[10] shr 0) and 7);
-	palette_index[4]:=16*((k053251_ram[10] shr 3) and 7);
 end;
 
-procedure k053251_reset;
+destructor k053251_chip.free;
+begin
+end;
+
+procedure k053251_chip.reset_indexes;
+begin
+	self.palette_index[0]:=32*((self.ram[9] shr 0) and 3);
+	self.palette_index[1]:=32*((self.ram[9] shr 2) and 3);
+	self.palette_index[2]:=32*((self.ram[9] shr 4) and 3);
+	self.palette_index[3]:=16*((self.ram[10] shr 0) and 7);
+	self.palette_index[4]:=16*((self.ram[10] shr 3) and 7);
+end;
+
+procedure k053251_chip.reset;
 var
   f:byte;
 begin
-	tilemaps_set:=0;
-	for f:=0 to $f do k053251_ram[f]:=0;
-	for f:=0 to 4 do dirty_tmap[f]:=false;
-	reset_indexes();
+	for f:=0 to $f do self.ram[f]:=0;
+	for f:=0 to 4 do self.dirty_tmap[f]:=false;
+	self.reset_indexes();
 end;
 
-procedure write(direccion:word;valor:byte);
+procedure k053251_chip.write(direccion:word;valor:byte);
 var
   i,newind:byte;
 begin
 	valor:=valor and $3f;
-	if (k053251_ram[direccion]<>valor) then begin
-		k053251_ram[direccion]:=valor;
+	if (self.ram[direccion]<>valor) then begin
+    self.ram[direccion]:=valor;
     case direccion of
       9:begin // palette base index */
           for i:=0 to 2 do begin
 				    newind:=32*((valor shr (2*i)) and 3);
-				    if (palette_index[i]<>newind) then begin
-					    palette_index[i]:=newind;
-					    dirty_tmap[i]:=true;
+				    if (self.palette_index[i]<>newind) then begin
+					    self.palette_index[i]:=newind;
+					    self.dirty_tmap[i]:=true;
 				    end;
 			    end;
-          //if (!m_tilemaps_set) then space.machine().tilemap().mark_all_dirty();
       end;
       10:begin // palette base index */
           for i:=0 to 1 do begin
 				    newind:=16*((valor shr (3*i)) and 7);
-				    if (palette_index[3+i]<>newind) then begin
-					    palette_index[3+i]:=newind;
-					    dirty_tmap[3+i]:=true;
+				    if (self.palette_index[3+i]<>newind) then begin
+					    self.palette_index[3+i]:=newind;
+					    self.dirty_tmap[3+i]:=true;
 				    end;
 			    end;
-			    //if (!m_tilemaps_set) then space.machine().tilemap().mark_all_dirty();
          end;
     end;
 	end;
 end;
 
-procedure k053251_lsb_w(direccion,valor:word);
+procedure k053251_chip.lsb_w(direccion,valor:word);
 begin
-	write(direccion,valor and $ff);
+	self.write(direccion,valor and $ff);
 end;
 
-function k053251_get_priority(ci:byte):byte;
+function k053251_chip.get_priority(ci:byte):byte;
 begin
-	k053251_get_priority:=k053251_ram[ci];
+	get_priority:=self.ram[ci];
 end;
 
-function k053251_get_palette_index(ci:byte):byte;
+function k053251_chip.get_palette_index(ci:byte):byte;
 begin
-	k053251_get_palette_index:=palette_index[ci];
+	get_palette_index:=self.palette_index[ci];
 end;
 
 end.

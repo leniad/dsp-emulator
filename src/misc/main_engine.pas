@@ -18,6 +18,7 @@ const
         pant_rot=22;
         pant_temp=23;
         max_pant_visible=19;
+        MAX_PANT_SPRITES=256;
 
         CLEAR_LINE=0;
         ASSERT_LINE=1;
@@ -154,7 +155,7 @@ var
         //video
         pantalla:array[0..max_pantalla] of libsdlP_Surface;
         window_render:libsdlp_Window;
-        punbuf:pword;
+        punbuf,tpunbuf:pword;
         main_screen:tmain_screen;
         //Misc
         llamadas_maquina:tllamadas_globales;
@@ -306,6 +307,7 @@ if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
 end;
 //Puntero general del pixels
 getmem(punbuf,MAX_PUNBUF);
+getmem(tpunbuf,MAX_PUNBUF);
 //creo la pantalla general
 p_final[0].x:=x;
 p_final[0].y:=y;
@@ -324,7 +326,7 @@ if window_render=nil then window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UN
 cambiar_video;
 pantalla[pant_temp]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0);
 //Creo la pantalla de los sprites
-pantalla[pant_sprites]:=SDL_CreateRGBSurface(0,64,64,16,0,0,0,0);
+pantalla[pant_sprites]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,16,0,0,0,0);
 SDL_Setcolorkey(pantalla[pant_sprites],1,set_trans_color);
 paleta[max_colores]:=set_trans_color;
 //Pantallas restantes
@@ -434,7 +436,9 @@ for f:=0 to max_pantalla do begin
   fillchar(p_final[f],sizeof(tpantalla),0);
 end;
 if punbuf<>nil then freemem(punbuf);
+if tpunbuf<>nil then freemem(tpunbuf);
 punbuf:=nil;
+tpunbuf:=nil;
 end;
 
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
