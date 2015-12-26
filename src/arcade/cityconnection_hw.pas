@@ -294,7 +294,7 @@ begin
   tmp_color:=buffer_paleta[dir+1];
   color.b:=pal4bit(tmp_color shr 4);
   pos:=dir shr 1;
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   case pos of
     256..511:cambia_fondo:=true;
     512..639:fillchar(gfx[0].buffer[0],$1000,1);

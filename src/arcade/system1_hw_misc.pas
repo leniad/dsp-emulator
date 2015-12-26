@@ -482,7 +482,7 @@ begin
   color.r:=pal3bit(valor shr 0);
   color.g:=pal3bit(valor shr 3);
 	color.b:=pal2bit(valor shr 6);
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
 end;
 
 procedure system1_putbyte(direccion:word;valor:byte);

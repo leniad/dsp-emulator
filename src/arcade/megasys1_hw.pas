@@ -646,7 +646,7 @@ while EmuStatus=EsRuning do begin
           update_video_megasys1;
           main_m68000.irq[2]:=HOLD_LINE;
         end;
-    255:main_m68000.irq[1]:=HOLD_LINE;
+    15:main_m68000.irq[1]:=HOLD_LINE;
    end;
  end;
  eventos_megasys1;
@@ -685,7 +685,7 @@ begin
   color.r:=pal5bit(r);
   color.g:=pal5bit(g);
   color.b:=pal5bit(b);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     0..$ff:buffer_color[numero shr 4]:=true;
     $100..$1ff:buffer_color[((numero shr 4) and $f)+$10]:=true;

@@ -77,7 +77,7 @@ begin
   bit0:=(valor shr 6) and $01;
   bit1:=(valor shr 7) and $01;
   color.b:=combine_2_weights(@weights_b[0],bit0,bit1);
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
 end;
 
 function iniciar_ms:boolean;

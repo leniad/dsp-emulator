@@ -13,8 +13,12 @@ type
         scroll_x:array[1..2,0..$ff] of word;
         scroll_y:array[1..2,0..$1ff] of byte;
         scroll_tipo:array[1..2] of byte;
+        function read_msb(direccion:word):byte;
+        function read_lsb(direccion:word):byte;
         function word_r(direccion:word):word;
-        procedure word_w(direccion,valor:word;access:boolean);
+        procedure word_w(direccion,valor:word);
+        procedure write_msb(direccion:word;valor:byte);
+        procedure write_lsb(direccion:word;valor:byte);
         function read(direccion:word):byte;
         procedure write(direccion:word;val:byte);
         procedure draw_tiles;
@@ -182,15 +186,35 @@ end	else begin   // control registers
 end;
 end;
 
-function k052109_chip.word_r(direccion:word):word;
+function k052109_chip.read_msb(direccion:word):byte;
 begin
-	word_r:=self.read(direccion+$2000) or (self.read(direccion) shl 8);
+  read_msb:=self.read(direccion+$2000);
 end;
 
-procedure k052109_chip.word_w(direccion,valor:word;access:boolean);
+function k052109_chip.read_lsb(direccion:word):byte;
 begin
-if access then self.write(direccion+$2000,valor and $ff)
-  else self.write(direccion,valor shr 8);
+  read_lsb:=self.read(direccion);
+end;
+
+function k052109_chip.word_r(direccion:word):word;
+begin
+word_r:=self.read(direccion+$2000)+self.read(direccion) shl 8;
+end;
+
+procedure k052109_chip.word_w(direccion,valor:word);
+begin
+self.write(direccion+$2000,valor and $ff);
+self.write(direccion,valor shr 8);
+end;
+
+procedure k052109_chip.write_msb(direccion:word;valor:byte);
+begin
+  self.write(direccion+$2000,valor)
+end;
+
+procedure k052109_chip.write_lsb(direccion:word;valor:byte);
+begin
+  self.write(direccion,valor);
 end;
 
 function k052109_chip.is_irq_enabled:boolean;

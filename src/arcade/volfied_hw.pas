@@ -242,7 +242,7 @@ begin
   color.b:=pal5bit(tmp_color shr 10);
   color.g:=pal5bit(tmp_color shr 5);
   color.r:=pal5bit(tmp_color);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
 end;
 
 procedure volfied_putword(direccion:dword;valor:word);

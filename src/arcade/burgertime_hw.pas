@@ -291,7 +291,7 @@ valor:=not(buffer_paleta[ncolor]);
 color.r:=$21*(valor and 1)+$47*((valor shr 1) and 1)+$97*((valor shr 2) and 1);
 color.g:=$21*((valor shr 3) and 1)+$47*((valor shr 4) and 1)+$97*((valor shr 5) and 1);
 color.b:=0+$47*((valor shr 6) and 1)+$97*((valor shr 7) and 1);
-set_pal_color(color,@paleta[ncolor]);
+set_pal_color(color,ncolor);
 if ncolor<8 then fillchar(gfx[0].buffer[0],$400,1);
 end;
 

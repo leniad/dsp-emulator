@@ -256,7 +256,7 @@ begin
   color.b:=buffer_paleta[(numero shl 1)] and $ff;
   color.g:=buffer_paleta[(numero shl 1)+1] shr 8;
   color.r:=buffer_paleta[(numero shl 1)+1] and $ff;
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     $000..$0ff:deco16ic_chip[0].dec16ic_buffer_color[1,(numero shr 4) and $f]:=true;
     $100..$1ff:deco16ic_chip[0].dec16ic_buffer_color[2,(numero shr 4) and $f]:=true;

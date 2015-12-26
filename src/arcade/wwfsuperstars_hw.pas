@@ -287,7 +287,7 @@ begin
   color.b:=pal4bit(data shr 8);
   color.g:=pal4bit(data shr 4);
   color.r:=pal4bit(data);
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   case pos of
     $000..$0ff:buffer_color[pos shr 4]:=true;
     $100..$1ff:buffer_color[((pos shr 4) and $7)+$10]:=true;

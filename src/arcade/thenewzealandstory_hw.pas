@@ -428,7 +428,7 @@ begin
   color.r:=pal5bit(tmp_color shr 10);
   color.g:=pal5bit(tmp_color shr 5);
   color.b:=pal5bit(tmp_color);
-  set_pal_color(color,@paleta[(dir and $3ff) shr 1]);
+  set_pal_color(color,(dir and $3ff) shr 1);
 end;
 
 procedure tnzs_misc_putbyte(direccion:word;valor:byte);

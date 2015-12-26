@@ -50,7 +50,7 @@ var
  sprite_ram:array[0..$3ff] of word;
  sound_rom:array[0..1,0..$7fff] of byte;
  decrypt:array[0..$1fff] of byte;
- snd_bank,irq1,irq2:byte;
+ snd_bank:byte;
  scroll_x2_tmp,scroll_x1,scroll_y1,scroll_y2:word;
  scroll_x2:array[0..$ff] of word;
  prioridad_pant:boolean;
@@ -306,7 +306,7 @@ begin
   color.b:=pal4bit(tmp_color shr 8);
   color.g:=pal4bit(tmp_color shr 4);
   color.r:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     256..511:buffer_color[(numero shr 4) and $f]:=true;
     512..767:buffer_color[((numero shr 4) and $f)+$10]:=true;

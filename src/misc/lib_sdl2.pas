@@ -42,9 +42,11 @@ type
     TSDL_RWFromFile=function(const _file:PAnsiChar;const mode:PAnsiChar):PSDL_RWops;cdecl;
     TSDL_GetRGB=procedure(pixel:UInt32;const format:PSDL_PixelFormat;r:PUInt8;g:PUInt8;b:PUInt8);cdecl;
     TSDL_MapRGB=function(const format:PSDL_PixelFormat;r:UInt8;g:UInt8;b:UInt8):UInt32;cdecl;
+    TSDL_MapRGBA=function(const format:PSDL_PixelFormat;r:UInt8;g:UInt8;b:UInt8;a:Uint8):UInt32;cdecl;
     TSDL_GetKeyboardState=function(numkeys:PInt):PUInt8;cdecl;
-    TSDL_SetHintWithPriority=function (const name:PChar;const value:PChar;priority:SDL_HintPriority):boolean; cdecl;
+    TSDL_SetHintWithPriority=function (const name:PChar;const value:PChar;priority:SDL_HintPriority):boolean;cdecl;
     TSDL_SetHint=function (const name:PChar;const value:PChar):boolean; cdecl;
+    TSDL_SetSurfaceBlendMode=function (surface: PSDL_Surface; blendMode: TSDL_BlendMode):SInt32;cdecl;
     {$ifndef windows}
     TSDL_SetError=function(const fmt:PAnsiChar):SInt32;cdecl;
     TSDL_GetError=function:PAnsiChar;cdecl;
@@ -155,6 +157,8 @@ const
   libSDL_WINDOWPOS_UNDEFINED=SDL_WINDOWPOS_UNDEFINED;
   libSDL_WINDOW_FULLSCREEN=SDL_WINDOW_FULLSCREEN;
 
+  libSDL_BLENDMODE_BLEND=SDL_BLENDMODE_BLEND;
+
 var
   sdl_dll_handle:int64;
   SDL_Init:TSDL_Init;
@@ -190,9 +194,11 @@ var
   SDL_RWFromFile:TSDL_RWFromFile;
   SDL_GetRGB:TSDL_GetRGB;
   SDL_MapRGB:TSDL_MapRGB;
+  SDL_MapRGBA:TSDL_MapRGBA;
   SDL_GetKeyboardState:TSDL_GetKeyboardState;
   SDL_SetHintWithPriority:TSDL_SetHintWithPriority;
   SDL_SetHint:TSDL_SetHint;
+  SDL_SetSurfaceBlendMode:TSDL_SetSurfaceBlendMode;
   {$ifndef windows}
   SDL_SetError:TSDL_SetError;
   SDL_GetError:TSDL_GetError;
@@ -210,6 +216,7 @@ sdl_dll_Handle:=LoadLibrary('libSDL2.dylib');
 {$ifdef linux}
 sdl_dll_Handle:=LoadLibrary('libSDL2.so');
 if sdl_dll_Handle=0 then sdl_dll_Handle:=LoadLibrary('libSDL2.so.0');
+if sdl_dll_Handle=0 then sdl_dll_Handle:=LoadLibrary('libSDL2-2.0.so.0');
 {$endif}
 {$ifdef windows}
 sdl_dll_Handle:=LoadLibrary('sdl2.dll');
@@ -254,11 +261,13 @@ end;
 @SDL_CreateWindowFrom:=GetProcAddress(sdl_dll_Handle,'SDL_CreateWindowFrom');
 @SDL_CreateWindow:=GetProcAddress(sdl_dll_Handle,'SDL_CreateWindow');
 @SDL_UpdateWindowSurface:=GetProcAddress(sdl_dll_Handle,'SDL_UpdateWindowSurface');
+@SDL_SetSurfaceBlendMode:=GetProcAddress(sdl_dll_Handle,'SDL_SetSurfaceBlendMode');
 //rwops
 @SDL_RWFromFile:=GetProcAddress(sdl_dll_Handle,'SDL_RWFromFile');
 //pixels
 @SDL_GetRGB:=GetProcAddress(sdl_dll_Handle,'SDL_GetRGB');
 @SDL_MapRGB:=GetProcAddress(sdl_dll_Handle,'SDL_MapRGB');
+@SDL_MapRGBA:=GetProcAddress(sdl_dll_Handle,'SDL_MapRGBA');
 //keyboard
 @SDL_GetKeyboardState:=GetProcAddress(sdl_dll_Handle,'SDL_GetKeyboardState');
 //hint

@@ -302,7 +302,7 @@ begin
   color.g:=pal4bit(tmp_color);
   tmp_color:=buffer_paleta[1+dir];
   color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,@paleta[dir shr 1]);
+  set_pal_color(color,dir shr 1);
 end;
 
 function bublbobl_getbyte(direccion:word):byte;

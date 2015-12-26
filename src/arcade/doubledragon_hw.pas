@@ -423,7 +423,7 @@ begin
   color.g:=pal4bit(tmp_color shr 4);
   tmp_color:=buffer_paleta[pos+$200];
   color.b:=pal4bit(tmp_color);
-  set_pal_color(color,addr(paleta[pos]));
+  set_pal_color(color,pos);
   case pos of
     0..127:buffer_color[pos shr 4]:=true;
     256..383:buffer_color[((pos shr 4) and $7)+8]:=true;

@@ -723,7 +723,7 @@ for page:=0 to 5 do begin
         color.r:=(((palette shr 8) and $f)*$11*bright) div $2d;
         color.g:=(((palette shr 4) and $f)*$11*bright) div $2d;
         color.b:=(((palette shr 0) and $f)*$11*bright) div $2d;
-        set_pal_color(color,@paleta[($200*page)+offset]);
+        set_pal_color(color,($200*page)+offset);
         if page<4 then buffer_color[(offset shr 4)+((page-1)*$20)]:=true;
       end;
       pos_buf:=pos_buf+1;

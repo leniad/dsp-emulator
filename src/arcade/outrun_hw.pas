@@ -565,9 +565,9 @@ begin
   color3.g:=s16_info.hilight[g];
   color3.b:=s16_info.hilight[b];
   //Poner colores
-  set_pal_color(color1,addr(paleta[direccion]));
-  set_pal_color(color2,addr(paleta[direccion+1*s16_info.entries]));
-  set_pal_color(color3,addr(paleta[direccion+2*s16_info.entries]));
+  set_pal_color(color1,direccion);
+  set_pal_color(color2,direccion+1*s16_info.entries);
+  set_pal_color(color3,direccion+2*s16_info.entries);
   buffer_color[(direccion shr 3) and $7]:=true;
   buffer_color[(direccion shr 3) and $7f]:=true;
 end;

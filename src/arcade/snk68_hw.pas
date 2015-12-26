@@ -453,7 +453,7 @@ begin
   color.r:=pal5bit(((tmp_color shr 7) and $1e) or ((tmp_color shr 14) and $01));
   color.g:=pal5bit(((tmp_color shr 3) and $1e) or ((tmp_color shr 13) and $01));
   color.b:=pal5bit(((tmp_color shl 1) and $1e) or ((tmp_color shr 12) and $01));
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   buffer_color[(numero shr 4) and $7]:=true;
 end;
 

@@ -184,16 +184,18 @@ var
 begin
 out1:=0;
 out2:=0;
-for f:=0 to (self.posicion-1) do begin
-  out1:=out1+self.buffer[0,f];
-  out2:=out2+self.buffer[1,f];
+if self.posicion<>0 then begin
+   for f:=0 to (self.posicion-1) do begin
+       out1:=out1+self.buffer[0,f];
+       out2:=out2+self.buffer[1,f];
+   end;
+   out1:=round(out1/self.posicion);
+   out2:=round(out2/self.posicion);
+   if out1<-32767 then out1:=-32767
+      else if out1>32767 then out1:=32767;
+   if out2<-32767 then out2:=-32767
+      else if out2>32767 then out2:=32767;
 end;
-out1:=round(out1/self.posicion);
-out2:=round(out2/self.posicion);
-if out1<-32767 then out1:=-32767
-  else if out1>32767 then out1:=32767;
-if out2<-32767 then out2:=-32767
-  else if out2>32767 then out2:=32767;
 //Channel 1
 tsample[self.tsample_num,sound_status.posicion_sonido]:=round(out1*self.amp);
 if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=round(out1*self.amp);

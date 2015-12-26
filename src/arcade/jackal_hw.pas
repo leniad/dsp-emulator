@@ -338,7 +338,7 @@ begin
   color.g:=pal5bit(data shr 5);
   color.b:=pal5bit(data shr 10);
   dir:=dir shr 1;
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   case dir of
     256..511:fillchar(gfx[0].buffer[0],$400,1);
   end;

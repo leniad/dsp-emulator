@@ -358,7 +358,7 @@ begin
 	c:= (data shr 2) and $0c;
 	if (c<>0) then c:=c or i;
 	color.b:=c*$11;
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     0..63:buffer_color[numero shr 3]:=true;
     64..127:buffer_color[((numero shr 3) and $7)+$18]:=true;

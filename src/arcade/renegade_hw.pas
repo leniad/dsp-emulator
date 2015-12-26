@@ -57,12 +57,11 @@ const
 var
   rom_mem:array[0..1,0..$3fff] of byte;
   mcu_mem:array[0..$7ff] of byte;
-  adpcm_rom:array[0..$17fff] of byte;
   rom_bank,sound_latch:byte;
   scroll_x:word;
   port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
   ddr_a,ddr_b,ddr_c,from_main,from_mcu:byte;
-  main_sent,mcu_sent,playing_adpcm:boolean;
+  main_sent,mcu_sent:boolean;
   scroll_comp:integer;
 
 procedure Cargar_renegade;
@@ -195,7 +194,6 @@ from_main:=0;
 from_mcu:=0;
 main_sent:=false;
 mcu_sent:=false;
-playing_adpcm:=false;
 scroll_comp:=-256;
 end;
 
@@ -349,7 +347,7 @@ begin
   color.r:=pal4bit(tmp_color);
   tmp_color:=buffer_paleta[dir+$100];
   color.b:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   case dir of
     $0..$1f:buffer_color[dir shr 3]:=true;
     $c0..$ff:buffer_color[((dir shr 3) and 7)+4]:=true;

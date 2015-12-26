@@ -249,7 +249,7 @@ begin
   tmp_color:=buffer_paleta[dir+1];
   color.b:=pal4bit(tmp_color);
   dir:=dir shr 1;
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   case dir of
     $000..$0ff:bac06_pf.buffer_color[2,dir shr 4]:=true;
     $100..$1ff:bac06_pf.buffer_color[1,(dir shr 4) and $f]:=true;

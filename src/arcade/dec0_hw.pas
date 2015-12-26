@@ -474,7 +474,7 @@ begin
   color.r:=buffer_paleta[numero] and $ff;
   color.g:=buffer_paleta[numero] shr 8;
   color.b:=buffer_paleta[$400+numero] and $ff;
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     $000..$0ff:bac06_pf.buffer_color[1,numero shr 4]:=true;
     $200..$2ff:bac06_pf.buffer_color[2,(numero shr 4) and $f]:=true;

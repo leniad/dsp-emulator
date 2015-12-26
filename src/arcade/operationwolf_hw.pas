@@ -275,7 +275,7 @@ begin
   color.r:=pal4bit(tmp_color shr 8);
   color.g:=pal4bit(tmp_color shr 4);
   color.b:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   buffer_color[(numero shr 4) and $7f]:=true;
 end;
 

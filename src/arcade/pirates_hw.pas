@@ -368,7 +368,7 @@ begin
 	color.g:=pal5bit((data shr 5) and $1f);
 	// blue component */
 	color.b:=pal5bit(data);
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   buffer_color[pos shr 4]:=true;
 end;
 

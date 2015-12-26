@@ -3,7 +3,7 @@ unit nemesis_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     sound_engine,ay_8910,k007232;
+     sound_engine,ay_8910;
 
 procedure Cargar_nemesis;
 function iniciar_nemesis:boolean;
@@ -441,7 +441,7 @@ begin
 	bit4:=(tmp_color shr 13) and 1;
 	bit5:=(tmp_color shr 14) and 1;
   color.b:=8*bit1+17*bit2+33*bit3+67*bit4+130*bit5;
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   buffer_color[numero shr 4]:=true;
 end;
 

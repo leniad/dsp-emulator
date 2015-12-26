@@ -429,7 +429,7 @@ begin
   color.g:=pal4bit(tmp_color);
   tmp_color:=buffer_paleta[dir+$400];
   color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   case dir of
     $0..$7f:buffer_color[((dir shr 4) and $7)+$10]:=true;
     $200..$23f:buffer_color[(dir shr 2) and $f]:=true;
@@ -604,7 +604,7 @@ begin
   color.g:=pal4bit(tmp_color);
   tmp_color:=buffer_paleta[dir+$400];
   color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   case dir of
     $0..$7f:pintar_image:=true;
     $100..$17f:buffer_color[((dir shr 4) and $7)+$10]:=true;

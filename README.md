@@ -1,9 +1,14 @@
 ﻿# dsp-emulator
 DSP Emulator WIP status<br>
+<b>26/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot updated again.</b><br>
+<pre>- GFX Engine: Implemented alpha color sprites and palette
+- K0052109: Implemented video buffers, more speed
+- K051960 and K05324X: Implemented shadow sprites (alpha color)
+- Added Service functions pressing F1 (impremented in TMNT and Ghost'n Goblins drivers so far)</pre><br>
 <b>22/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot both WIP updated.</b><br>
-- Added Konami ADPCM K053260 and K007232 chips<br>
+<pre>- Added Konami ADPCM K053260 and K007232 chips<br>
 - Sunset Riders: Fixed protection, added controls, finished audio and video<br>
-- Implemented zoomed sprites, added to Teenage Mutant Ninja Turtles, Sunset Riders and Nemesis<br>
+- Implemented zoomed sprites, added to Teenage Mutant Ninja Turtles, Sunset Riders and Nemesis</pre><br>
 <b>17/12/15 - DSP Emulator 0.16b1 source WIP update. Win32 WIP snapshot updated too.</b><br>
 <img src='http://img1.imagilive.com/1215/ssriders1.png'><img src='http://img1.imagilive.com/1215/ssriders2.png'><br>
 <b>10/12/15 - DSP Emulator 0.16b1 source WIP update and Win32 WIP snapshot.</b><br>

@@ -17,6 +17,7 @@ const
         pant_doble=21;
         pant_rot=22;
         pant_temp=23;
+        pant_sprites_alpha=24;
         max_pant_visible=19;
         MAX_PANT_SPRITES=256;
 
@@ -70,7 +71,7 @@ type
             frames_sec,tipo_maquina:word;
             idioma:integer;
             vactual:byte;
-            driver_ok,auto_exec,show_crc_error,lenguaje_ok,center_screen,x11:boolean;
+            service1,driver_ok,auto_exec,show_crc_error,lenguaje_ok,center_screen,x11:boolean;
         end;
         TDirectory=Record
             Base:string;
@@ -129,7 +130,7 @@ type
         TEmuStatus=(EsPause, EsRuning, EsStoped);
 
 //Video
-procedure iniciar_video(x,y:word);
+procedure iniciar_video(x,y:word;alpha:boolean=false);
 procedure close_video;
 procedure cambiar_video;
 procedure pasar_pantalla_completa;
@@ -156,6 +157,7 @@ var
         pantalla:array[0..max_pantalla] of libsdlP_Surface;
         window_render:libsdlp_Window;
         punbuf,tpunbuf:pword;
+        punbuf_alpha,tpunbuf_alpha:pdword;
         main_screen:tmain_screen;
         //Misc
         llamadas_maquina:tllamadas_globales;
@@ -291,7 +293,7 @@ if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
 pantalla[0]:=SDL_GetWindowSurface(window_render);
 end;
 
-procedure iniciar_video(x,y:word);
+procedure iniciar_video(x,y:word;alpha:boolean=false);
 var
   f:word;
   handle_:integer;
@@ -326,6 +328,11 @@ if window_render=nil then window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UN
 cambiar_video;
 pantalla[pant_temp]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0);
 //Creo la pantalla de los sprites
+if alpha then begin
+  pantalla[pant_sprites_alpha]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,32,$ff,$ff00,$ff0000,$ff000000);
+  getmem(punbuf_alpha,MAX_PUNBUF*2);
+  getmem(tpunbuf_alpha,MAX_PUNBUF*2);
+end;
 pantalla[pant_sprites]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,16,0,0,0,0);
 SDL_Setcolorkey(pantalla[pant_sprites],1,set_trans_color);
 paleta[max_colores]:=set_trans_color;
@@ -437,8 +444,12 @@ for f:=0 to max_pantalla do begin
 end;
 if punbuf<>nil then freemem(punbuf);
 if tpunbuf<>nil then freemem(tpunbuf);
+if punbuf_alpha<>nil then freemem(punbuf_alpha);
+if tpunbuf_alpha<>nil then freemem(tpunbuf_alpha);
 punbuf:=nil;
 tpunbuf:=nil;
+punbuf_alpha:=nil;
+tpunbuf_alpha:=nil;
 end;
 
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
@@ -732,6 +743,7 @@ llamadas_maquina.bucle_general:=nil;
 llamadas_maquina.fps_max:=60;
 main_vars.vactual:=0;
 main_vars.mensaje_general:='';
+main_vars.service1:=false;
 sound_status.canales_usados:=-1;
 principal1.timer1.Enabled:=false;
 main_screen.rot90_screen:=false;

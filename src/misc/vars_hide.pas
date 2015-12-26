@@ -44,7 +44,7 @@ type
   pdparejas=^dparejas;
 
 const
-  max_pantalla=23;
+  max_pantalla=24;
 
 var
   p_final:array[0..max_pantalla] of tpantalla;

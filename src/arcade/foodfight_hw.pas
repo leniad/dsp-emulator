@@ -254,7 +254,7 @@ begin
 		bit0:=(data shr 6) and $01;
 		bit1:=(data shr 7) and $01;
 		color.b:=combine_2_weights(@bweights[0], bit0, bit1);
-    set_pal_color(color,@paleta[pos]);
+    set_pal_color(color,pos);
     if pos<64 then buffer_color[pos]:=true;
 end;
 

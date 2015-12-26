@@ -305,7 +305,7 @@ begin
   tmp_color:=buffer_paleta[dir+$200];
   color.g:=pal4bit(tmp_color shr 4);
   color.b:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   if dir<$100 then buffer_color[dir shr 4]:=true;
 end;
 

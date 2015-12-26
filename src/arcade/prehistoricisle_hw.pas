@@ -315,7 +315,7 @@ begin
   color.r:=pal4bit(tmp_color shr 12);
   color.g:=pal4bit(tmp_color shr 8);
   color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     0..255:buffer_color[numero shr 4]:=true;
     512..767:buffer_color[((numero shr 4) and $f)+$20]:=true;

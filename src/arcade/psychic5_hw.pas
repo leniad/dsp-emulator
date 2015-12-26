@@ -343,7 +343,7 @@ color.b:=pal4bit(valor shr 4);
 //a:=(val shl 4) or val;
 //jal_blend_table[pos]:=a;
 pos:=pos shr 1;
-set_pal_color(color,@paleta[pos]);
+set_pal_color(color,pos);
 case pos of
   $200..$2ff:buffer_color[(pos shr 4) and $f]:=true;
   $100..$1ff:begin
@@ -362,7 +362,7 @@ case pos of
       ib:=(ib shl 4) or ib;
       //UINT32 result = jal_blend_func(MAKE_RGB(val,val,val), MAKE_RGB(ir, ig, ib), jal_blend_table[0xff]) ;
     end;}
-    set_pal_color(color_g,@paleta[pos+512]);
+    set_pal_color(color_g,pos+512);
     buffer_color[((pos shr 4) and $f)+$10]:=true;
     end
 end;

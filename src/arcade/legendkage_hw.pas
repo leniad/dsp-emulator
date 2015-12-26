@@ -343,7 +343,7 @@ begin
   color.g:=pal4bit(tmp_color shr 4);
   color.b:=pal4bit(tmp_color);
   pos:=pos shr 1;
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   case pos of
     $110..$11f:fillchar(gfx[0].buffer[0],$400,1);
     $200..$2ff:fillchar(gfx[0].buffer[$800],$400,1);

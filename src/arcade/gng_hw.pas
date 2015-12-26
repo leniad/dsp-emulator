@@ -232,6 +232,7 @@ end;
 
 procedure eventos_gng;
 begin
+if main_vars.service1 then marcade.dswa:=(marcade.dswa and $bf) else marcade.dswa:=(marcade.dswa or $40);
 if event.arcade then begin
   //P1
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
@@ -291,7 +292,7 @@ begin
   color.g:=pal4bit(tmp_color);
   tmp_color:=buffer_paleta[$100+pos];
   color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   case pos of
     0..$3f:buffer_color[(pos shr 3)+$10]:=true;
     $80..$ff:buffer_color[(pos shr 2) and $f]:=true;

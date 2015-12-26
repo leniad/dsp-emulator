@@ -343,7 +343,7 @@ begin
   color.g:=pal5bit(data shr 5);
   color.b:=pal5bit(data shr 10);
   dir:=dir shr 1;
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   buffer_color[dir shl 4]:=true;
 end;
 

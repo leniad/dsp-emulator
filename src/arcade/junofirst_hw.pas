@@ -258,7 +258,7 @@ case direccion of
                 color.r:=pal3bit(valor shr 0);
                 color.g:=pal3bit(valor shr 3);
                 color.b:=pal2bit(valor shr 6);
-                set_pal_color(color,@paleta[direccion and $f]);
+                set_pal_color(color,direccion and $f);
                end;
   $8030:begin
             irq_enable:=(valor and 1)<>0;

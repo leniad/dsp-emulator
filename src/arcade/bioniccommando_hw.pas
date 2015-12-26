@@ -331,7 +331,7 @@ begin
     color.g:=color.g*($07+bright) div $0e;
     color.b:=color.b*($07+bright) div $0e;
   end;
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   case pos of
     0..63:buffer_color[(pos shr 4)+$40]:=true;
     256..319:buffer_color[((pos shr 4) and $3)+$44]:=true;

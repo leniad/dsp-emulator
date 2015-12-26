@@ -277,6 +277,7 @@ begin
   event.keyboard:=false;
   event.mouse:=false;
   //Primero las teclas independientes de los drivers
+  if ((keystate[libSDL_SCANCODE_F1]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then main_vars.service1:=not(main_vars.service1);
   if ((keystate[libSDL_SCANCODE_F2]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then principal1.fFast(nil);
   if ((keystate[libSDL_SCANCODE_F3]<>0) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then principal1.Reset1Click(nil);
   if ((keystate[libSDL_SCANCODE_F4]<>0) and not(main_screen.pantalla_completa) and not(keystate[libSDL_SCANCODE_RSHIFT]<>0)) then begin

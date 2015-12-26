@@ -280,7 +280,7 @@ begin
   color.b:=pal4bit(tmp_color shr 8);
   color.g:=pal4bit(tmp_color shr 4);
   color.r:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     0..$ff:buffer_color[numero shr 2]:=true;
     512..767:buffer_color[((numero shl 4) and $f)+$40]:=true;

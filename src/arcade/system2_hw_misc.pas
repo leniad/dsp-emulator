@@ -268,7 +268,7 @@ begin
   bit2:=(val shr 2) and $01;
   bit3:=(val shr 3) and $01;
   color.b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
 end;
 
 procedure system2_putbyte(direccion:word;valor:byte);

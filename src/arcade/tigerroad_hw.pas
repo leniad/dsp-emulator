@@ -312,7 +312,7 @@ begin
   color.r:=pal4bit(tmp_color shr 8);
   color.g:=pal4bit(tmp_color shr 4);
   color.b:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     0..$ff:pintar_fondo:=true;
     512..575:buffer_color[(numero shr 2) and $f]:=true;

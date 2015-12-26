@@ -250,7 +250,7 @@ begin
 	bit2:=(data shr 10) and $01;
 	bit3:=(data shr 11) and $01;
 	color.b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   fillchar(video_ram_buff,$20000,1);
 end;
 

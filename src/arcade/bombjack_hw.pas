@@ -284,7 +284,7 @@ begin
   tmp_color:=buffer_paleta[dir+1];
   color.b:=pal4bit(tmp_color);
   dir:=dir shr 1;
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   buffer_color[(dir shr 3) and $f]:=true;
 end;
 

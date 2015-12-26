@@ -504,7 +504,7 @@ begin
   tmp_color:=buffer_paleta[pos+1];
   color.b:=pal4bit(tmp_color shr 4);
   pos:=pos shr 1;
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   case pos of
     $0..$ff:buffer_color[pos shr 4]:=true;
     $200..$2ff:buffer_color[((pos shr 4) and $f)+$10]:=true;

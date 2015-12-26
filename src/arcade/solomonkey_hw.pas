@@ -257,7 +257,7 @@ begin
   tmp_color:=buffer_paleta[dir+1];
   color.b:=pal4bit(tmp_color);
   dir:=dir shr 1;
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   case dir of
     0..$7f:buffer_color[dir shr 4]:=true;
     $80..$ff:buffer_color[((dir shr 4) and $7)+8]:=true;

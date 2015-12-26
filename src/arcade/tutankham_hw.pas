@@ -194,7 +194,7 @@ case direccion of
                 color.r:=pal3bit(valor shr 0);
                 color.g:=pal3bit(valor shr 3);
                 color.b:=pal2bit(valor shr 6);
-                set_pal_color(color,@paleta[direccion and $f]);
+                set_pal_color(color,direccion and $f);
                end;
   $8100..$810f:scroll_y:=valor;
   $8200..$82ff:case (direccion and $7) of

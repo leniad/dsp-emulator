@@ -523,7 +523,7 @@ begin
 		val:=not(buffer_paleta[dir]);
 		bit2:=(val shr 0) and $01;
 		color.r:=combine_3_weights(@rweights,bit0,bit1,bit2);
-    set_pal_color(color,@paleta[dir shr 1]);
+    set_pal_color(color,dir shr 1);
 end;
 
 procedure taitosj_nomcu_putbyte(direccion:word;valor:byte);

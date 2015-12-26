@@ -15,10 +15,10 @@ type
     x,y:byte;
     datos:pbyte;
     colores:array[0..max_colores-1] of word;
-    trans:array[0..255] of boolean;
-    trans_alt:array[0..4,0..31] of boolean;
+    trans:array[0..$1f] of boolean;
+    alpha:array[0..$1f] of boolean;
+    trans_alt:array[0..4,0..$1f] of boolean;
     buffer:array[0..$7fff] of boolean;
-    //color_buffer:array[0..$1ff] of boolean;
     elements:dword;
   end;
   pgfx=^gfx_tipo;
@@ -49,12 +49,16 @@ procedure put_gfx_sprite_diff(nchar,color:word;flipx,flipy:boolean;ngfx:byte;x_d
 procedure put_gfx_sprite_mask(nchar,color:word;flipx,flipy:boolean;ngfx:byte;trans,mask:word);
 procedure put_gfx_sprite_mask_diff(nchar,color:word;flipx,flipy:boolean;ngfx,trans,mask,x_diff,y_diff:byte);
 procedure put_gfx_sprite_zoom(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte;zx,zy:single);
+procedure put_gfx_sprite_zoom_alpha(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte;zx,zy:single);
+procedure put_gfx_sprite_alpha(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte);
+procedure actualiza_gfx_sprite_zoom_alpha(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 //Sprites Update
 procedure actualiza_gfx_sprite(pos_x,pos_y:word;dest,ngfx:byte);
 procedure actualiza_gfx_sprite_over(pos_x,pos_y:word;dest,ngfx,src_over:byte;scr_x,scr_y:word);
 procedure actualiza_gfx_sprite_size(pos_x,pos_y:word;dest:byte;x_size,y_size:word);
 procedure actualiza_gfx_sprite_size_pos(pos_x,pos_y:word;dest:byte;x_size,y_size,ipos_x,ipos_y:word);
 procedure actualiza_gfx_sprite_zoom(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
+procedure actualiza_gfx_sprite_alpha(pos_x,pos_y:word;dest,ngfx:byte);
 //Scroll
 procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word);
 procedure scroll__x(porigen,pdestino:byte;scroll_x:word);
@@ -72,6 +76,38 @@ procedure fillword(dest:pword;cantidad:cardinal;valor:word);
 
 implementation
 uses main_engine;
+
+procedure copymemory_invw(dest,orig:pword;cant:dword);inline;
+var
+   temp,temp2:pword;
+   f:dword;
+begin
+if cant=0 then exit;
+temp:=dest;
+temp2:=orig;
+inc(temp2,cant-1);
+for f:=(cant-1) downto 0 do begin
+    temp^:=temp2^;
+    inc(temp);
+    dec(temp2);
+end;
+end;
+
+procedure copymemory_invw_32(dest,orig:pdword;cant:dword);inline;
+var
+   temp,temp2:pdword;
+   f:dword;
+begin
+if cant=0 then exit;
+temp:=dest;
+temp2:=orig;
+inc(temp2,cant-1);
+for f:=(cant-1) downto 0 do begin
+    temp^:=temp2^;
+    inc(temp);
+    dec(temp2);
+end;
+end;
 
 //GFX
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
@@ -98,6 +134,7 @@ begin
   gfx[num].elements:=num_elements;
   fillchar(gfx[num].buffer,$8000,1);
   fillchar(gfx[num].trans[0],$20,0);
+  fillchar(gfx[num].alpha[0],$20,0);
   for f:=0 to 4 do fillchar(gfx[num].trans_alt[f],$20,0);
   for f:=0 to max_colores-1 do gfx[num].colores[f]:=f;
   getmem(gfx[num].datos,num_elements*x_size*y_size);
@@ -314,8 +351,17 @@ var
    punt:pword;
 begin
 punt:=pantalla[sitio].pixels;
-inc(punt,((y*pantalla[sitio].pitch) shr 1)+x);
+inc(punt,(y*pantalla[sitio].w)+x);
 copymemory(punt,punbuf,cantidad shl 1);
+end;
+
+procedure putpixel_gfx_int_32(x,y,cantidad:word;sitio:byte);inline;
+var
+   punt:pdword;
+begin
+punt:=pantalla[sitio].pixels;
+inc(punt,(y*pantalla[sitio].w)+x);
+copymemory(punt,punbuf_alpha,cantidad shl 2);
 end;
 
 procedure put_gfx(pos_x,pos_y,nchar,color:word;screen,ngfx:byte);
@@ -450,50 +496,41 @@ end;
 
 procedure put_gfx_mask_flip(pos_x,pos_y,nchar,color:word;screen,ngfx,trans,mask:byte;flipx,flipy:boolean);
 var
-  x,y:byte;
+  x,y,py,cant_x,punto:byte;
   temp:pword;
-  pos,post:pbyte;
-  punto,def_y:word;
+  pos:pbyte;
+  direccion:integer;
 begin
 pos:=gfx[ngfx].datos;
-inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
-if flipx then begin
-  for y:=0 to (gfx[ngfx].y-1) do begin
-    post:=pos;
-    inc(post,(y*gfx[ngfx].x)+gfx[ngfx].x-1);
-    temp:=punbuf;
-    for x:=0 to (gfx[ngfx].x-1) do begin
-      punto:=gfx[ngfx].colores[post^+color];
-      if (punto and mask)<>trans then temp^:=paleta[punto]
-        else temp^:=paleta[max_colores];
-      dec(post);
-      inc(temp);
-    end;
-    if flipy then def_y:=pos_y+(gfx[ngfx].y-1)-y
-      else def_y:=pos_y+y;
-    putpixel_gfx_int(pos_x,def_y,gfx[ngfx].x,screen);
-  end;
+cant_x:=gfx[ngfx].x;
+inc(pos,nchar*cant_x*gfx[ngfx].y);
+if flipy then begin
+  py:=gfx[ngfx].y-1;
+  direccion:=-1;
 end else begin
-  for y:=0 to (gfx[ngfx].y-1) do begin
-    temp:=punbuf;
-    for x:=0 to (gfx[ngfx].x-1) do begin
-      punto:=gfx[ngfx].colores[pos^+color];
-      if (punto and mask)<>trans then temp^:=paleta[punto]
-        else temp^:=paleta[max_colores];
-      inc(pos);
-      inc(temp);
-    end;
-    if flipy then def_y:=pos_y+(gfx[ngfx].y-1)-y
-      else def_y:=pos_y+y;
-    putpixel_gfx_int(pos_x,def_y,gfx[ngfx].x,screen);
-  end;
+  py:=0;
+  direccion:=1;
 end;
+for y:=0 to (gfx[ngfx].y-1) do begin
+  temp:=tpunbuf;
+  for x:=0 to (cant_x-1) do begin
+    punto:=gfx[ngfx].colores[pos^+color];
+    if (punto and mask)<>trans then temp^:=paleta[punto]
+      else temp^:=paleta[max_colores];
+    inc(pos);
+    inc(temp);
+  end;
+  if flipx then copymemory_invw(punbuf,tpunbuf,cant_x)
+     else copymemory(punbuf,tpunbuf,cant_x*2);
+  putpixel_gfx_int(pos_x,pos_y+py,cant_x,screen);
+  py:=py+direccion;
+  end;
 end;
 
 procedure put_gfx_flip(pos_x,pos_y,nchar,color:word;screen,ngfx:byte;flipx,flipy:boolean);
 var
-  x,y,f,py,cant_x:byte;
-  temp,temp2:pword;
+  x,y,py,cant_x:byte;
+  temp:pword;
   pos:pbyte;
   direccion:integer;
 begin
@@ -514,25 +551,17 @@ for y:=0 to (gfx[ngfx].y-1) do begin
     inc(pos);
     inc(temp);
   end;
-  if flipx then begin
-    temp:=punbuf;
-    temp2:=tpunbuf;
-    inc(temp2,cant_x-1);
-      for f:=cant_x-1 downto 0 do begin
-        temp^:=temp2^;
-        inc(temp);
-        dec(temp2);
-      end;
-  end else copymemory(punbuf,tpunbuf,cant_x*2);
-    putpixel_gfx_int(pos_x,pos_y+py,cant_x,screen);
+  if flipx then copymemory_invw(punbuf,tpunbuf,cant_x)
+     else copymemory(punbuf,tpunbuf,cant_x*2);
+  putpixel_gfx_int(pos_x,pos_y+py,cant_x,screen);
   py:=py+direccion;
-end;
+  end;
 end;
 
 procedure put_gfx_trans_flip(pos_x,pos_y,nchar:dword;color:word;screen,ngfx:byte;flipx,flipy:boolean);
 var
-  x,y,f,py,cant_x:byte;
-  temp,temp2:pword;
+  x,y,py,cant_x:byte;
+  temp:pword;
   pos:pbyte;
   direccion:integer;
 begin
@@ -540,7 +569,7 @@ pos:=gfx[ngfx].datos;
 cant_x:=gfx[ngfx].x;
 inc(pos,nchar*cant_x*gfx[ngfx].y);
 if flipy then begin
-  py:=gfx[ngfx].y;
+  py:=gfx[ngfx].y-1;
   direccion:=-1;
 end else begin
   py:=0;
@@ -554,16 +583,9 @@ for y:=0 to (gfx[ngfx].y-1) do begin
     inc(pos);
     inc(temp);
   end;
-  if flipx then begin
-    temp:=punbuf;
-    temp2:=tpunbuf;
-    inc(temp2,cant_x-1);
-      for f:=cant_x-1 downto 0 do begin
-        temp^:=temp2^;
-        inc(temp);
-        dec(temp2);
-      end;
-  end else copymemory(punbuf,tpunbuf,cant_x*2);
+  if flipx then
+    copymemory_invw(punbuf,tpunbuf,cant_x)
+     else copymemory(punbuf,tpunbuf,cant_x*2);
     putpixel_gfx_int(pos_x,pos_y+py,cant_x,screen);
   py:=py+direccion;
 end;
@@ -571,71 +593,40 @@ end;
 
 procedure put_gfx_trans_flip_alt(pos_x,pos_y,nchar:dword;color:word;screen,ngfx:byte;flipx,flipy:boolean;trans_index:byte);
 var
-  x,y:byte;
+  x,y,py,cant_x:byte;
   temp:pword;
-  pos,post:pbyte;
+  pos:pbyte;
+  direccion:integer;
 begin
 pos:=gfx[ngfx].datos;
-inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
-if flipx then begin
-  if flipy then begin
-    for y:=0 to (gfx[ngfx].y-1) do begin
-      post:=pos;
-      inc(post,(y*gfx[ngfx].x)+gfx[ngfx].x-1);
-      temp:=punbuf;
-      for x:=0 to (gfx[ngfx].x-1) do begin
-        if not(gfx[ngfx].trans_alt[trans_index][post^]) then temp^:=paleta[gfx[ngfx].colores[post^+color]]
-          else temp^:=paleta[max_colores];
-        dec(post);
-        inc(temp);
-      end;
-      putpixel_gfx_int(pos_x,pos_y+(gfx[ngfx].y-1)-y,gfx[ngfx].x,screen);
-    end;
-  end else begin
-    for y:=0 to (gfx[ngfx].y-1) do begin
-      post:=pos;
-      inc(post,(y*gfx[ngfx].x)+gfx[ngfx].x-1);
-      temp:=punbuf;
-      for x:=0 to (gfx[ngfx].x-1) do begin
-        if not(gfx[ngfx].trans_alt[trans_index][post^]) then temp^:=paleta[gfx[ngfx].colores[post^+color]]
-          else temp^:=paleta[max_colores];
-        dec(post);
-        inc(temp);
-      end;
-      putpixel_gfx_int(pos_x,pos_y+y,gfx[ngfx].x,screen);
-    end;
-  end;
+cant_x:=gfx[ngfx].x;
+inc(pos,nchar*cant_x*gfx[ngfx].y);
+if flipy then begin
+  py:=gfx[ngfx].y-1;
+  direccion:=-1;
 end else begin
-  if flipy then begin
-    for y:=(gfx[ngfx].y-1) downto 0 do begin
-      temp:=punbuf;
-      for x:=0 to (gfx[ngfx].x-1) do begin
-        if not(gfx[ngfx].trans_alt[trans_index][pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-          else temp^:=paleta[max_colores];
-        inc(pos);
-        inc(temp);
-      end;
-      putpixel_gfx_int(pos_x,pos_y+y,gfx[ngfx].x,screen);
-    end;
-  end else begin
-    for y:=0 to (gfx[ngfx].y-1) do begin
-      temp:=punbuf;
-      for x:=0 to (gfx[ngfx].x-1) do begin
-        if not(gfx[ngfx].trans_alt[trans_index][pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-          else temp^:=paleta[max_colores];
-        inc(pos);
-        inc(temp);
-      end;
-      putpixel_gfx_int(pos_x,pos_y+y,gfx[ngfx].x,screen);
-    end;
+  py:=0;
+  direccion:=1;
+end;
+for y:=0 to (gfx[ngfx].y-1) do begin
+  temp:=tpunbuf;
+  for x:=0 to (cant_x-1) do begin
+    if not(gfx[ngfx].trans_alt[trans_index][pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
+       else temp^:=paleta[max_colores];
+    inc(pos);
+    inc(temp);
   end;
+  if flipx then copymemory_invw(punbuf,tpunbuf,cant_x)
+     else copymemory(punbuf,tpunbuf,cant_x*2);
+    putpixel_gfx_int(pos_x,pos_y+py,cant_x,screen);
+  py:=py+direccion;
 end;
 end;
 
 procedure put_gfx_sprite(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte);
 var
-  x,y,f,pos_y,cant_x:byte;
-  temp,temp2:pword;
+  x,y,pos_y,cant_x:byte;
+  temp:pword;
   pos:pbyte;
   direccion:integer;
 begin
@@ -657,16 +648,8 @@ for y:=0 to (gfx[ngfx].y-1) do begin
     inc(temp);
     inc(pos);
   end;
-  if flipx then begin
-    temp:=punbuf;
-    temp2:=tpunbuf;
-    inc(temp2,cant_x-1);
-    for f:=cant_x-1 downto 0 do begin
-        temp^:=temp2^;
-        inc(temp);
-        dec(temp2);
-    end;
-  end else copymemory(punbuf,tpunbuf,cant_x*2);
+  if flipx then copymemory_invw(punbuf,tpunbuf,cant_x)
+     else copymemory(punbuf,tpunbuf,cant_x*2);
   putpixel_gfx_int(0,pos_y,cant_x,pant_sprites);
   pos_y:=pos_y+direccion;
 end;
@@ -790,9 +773,9 @@ end;
 
 procedure put_gfx_sprite_zoom(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte;zx,zy:single);
 var
-  x,y,f,pos_y,cant_x:byte;
-  temp,temp2:pword;
+  x,y,pos_y,cant_x:byte;
   pos:pbyte;
+  temp:pword;
   zoom_x,zoom_y:single;
   direccion:integer;
 begin
@@ -822,18 +805,90 @@ for y:=0 to (gfx[ngfx].y-1) do begin
       inc(pos);
   end;
   zoom_y:=zoom_y+zy;
-  if flipx then begin
-      temp:=punbuf;
-      temp2:=tpunbuf;
-      inc(temp2,cant_x-1);
-      for f:=cant_x-1 downto 0 do begin
-        temp^:=temp2^;
-        inc(temp);
-        dec(temp2);
-      end;
-  end else copymemory(punbuf,tpunbuf,cant_x*2);
+  if flipx then copymemory_invw(punbuf,tpunbuf,cant_x)
+     else copymemory(punbuf,tpunbuf,cant_x*2);
   while zoom_y>0 do begin
     putpixel_gfx_int(0,pos_y,cant_x,pant_sprites);
+    zoom_y:=zoom_y-1;
+    pos_y:=pos_y+direccion;
+  end;
+end;
+end;
+
+procedure put_gfx_sprite_alpha(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte);
+var
+  x,y,pos_y,cant_x:byte;
+  pos:pbyte;
+  direccion:integer;
+  temp:pdword;
+begin
+pos:=gfx[ngfx].datos;
+cant_x:=gfx[ngfx].x;
+inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
+if flipy then begin
+  pos_y:=gfx[ngfx].y-1;
+  direccion:=-1;
+end else begin
+  pos_y:=0;
+  direccion:=1;
+end;
+for y:=0 to (gfx[ngfx].y-1) do begin
+  temp:=tpunbuf_alpha;
+  for x:=0 to (cant_x-1) do begin
+    if not(gfx[ngfx].trans[pos^]) then begin
+      if gfx[ngfx].alpha[pos^] then temp^:=paleta_alpha[gfx[ngfx].colores[pos^+color]]
+        else temp^:=paleta32[gfx[ngfx].colores[pos^+color]];
+    end else temp^:=paleta32[max_colores];
+    inc(temp);
+    inc(pos);
+  end;
+  if flipx then copymemory_invw_32(punbuf_alpha,tpunbuf_alpha,cant_x)
+     else copymemory(punbuf_alpha,tpunbuf_alpha,cant_x*4);
+  putpixel_gfx_int_32(0,pos_y,cant_x,pant_sprites_alpha);
+  pos_y:=pos_y+direccion;
+end;
+end;
+
+procedure put_gfx_sprite_zoom_alpha(nchar:dword;color:word;flipx,flipy:boolean;ngfx:byte;zx,zy:single);
+var
+  x,y,pos_y,cant_x:byte;
+  pos:pbyte;
+  temp:pdword;
+  zoom_x,zoom_y:single;
+  direccion:integer;
+begin
+if ((zx<=0) and (zy<=0)) then exit;
+pos:=gfx[ngfx].datos;
+inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
+zoom_y:=0;
+cant_x:=round(gfx[ngfx].x*zx);
+if flipy then begin
+  pos_y:=round((gfx[ngfx].y-1)*zy);
+  direccion:=-1;
+end else begin
+  pos_y:=0;
+  direccion:=1;
+end;
+for y:=0 to (gfx[ngfx].y-1) do begin
+  temp:=tpunbuf_alpha;
+  zoom_x:=0;
+  for x:=0 to (gfx[ngfx].x-1) do begin
+      zoom_x:=zoom_x+zx;
+      while zoom_x>0 do begin
+        if not(gfx[ngfx].trans[pos^]) then begin
+          if gfx[ngfx].alpha[pos^] then temp^:=paleta_alpha[gfx[ngfx].colores[pos^+color]]
+            else temp^:=paleta32[gfx[ngfx].colores[pos^+color]];
+        end else temp^:=paleta32[max_colores];
+        inc(temp);
+        zoom_x:=zoom_x-1;
+      end;
+      inc(pos);
+  end;
+  zoom_y:=zoom_y+zy;
+  if flipx then copymemory_invw_32(punbuf_alpha,tpunbuf_alpha,cant_x)
+     else copymemory(punbuf_alpha,tpunbuf_alpha,cant_x*4);
+  while zoom_y>0 do begin
+    putpixel_gfx_int_32(0,pos_y,cant_x,pant_sprites_alpha);
     zoom_y:=zoom_y-1;
     pos_y:=pos_y+direccion;
   end;
@@ -951,6 +1006,51 @@ if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
   SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+end;
+end;
+
+procedure actualiza_gfx_sprite_alpha(pos_x,pos_y:word;dest,ngfx:byte);
+var
+  origen,destino:libsdl_rect;
+begin
+origen.x:=0;
+origen.y:=0;
+origen.w:=gfx[ngfx].x;
+origen.h:=gfx[ngfx].y;
+pos_x:=pos_x and p_final[dest].sprite_mask_x;
+pos_y:=pos_y and p_final[dest].sprite_mask_y;
+destino.w:=origen.w;
+destino.h:=origen.h;
+destino.x:=pos_x+ADD_SPRITE;
+destino.y:=pos_y+ADD_SPRITE;
+SDL_UpperBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
+  if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
+  if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
+  SDL_UpperBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+end;
+end;
+
+procedure actualiza_gfx_sprite_zoom_alpha(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
+var
+  origen,destino:libsdl_rect;
+begin
+if ((zx<=0) and (zy<=0)) then exit;
+origen.x:=0;
+origen.y:=0;
+origen.w:=round(gfx[ngfx].x*zx);
+origen.h:=round(gfx[ngfx].y*zy);
+pos_x:=pos_x and p_final[dest].sprite_mask_x;
+pos_y:=pos_y and p_final[dest].sprite_mask_y;
+destino.w:=origen.w;
+destino.h:=origen.h;
+destino.x:=pos_x+ADD_SPRITE;
+destino.y:=pos_y+ADD_SPRITE;
+SDL_UpperBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
+  if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
+  if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
+  SDL_UpperBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
 end;
 end;
 

@@ -779,17 +779,17 @@ begin
   color.r:=s16_info.normal[r];
   color.g:=s16_info.normal[g];
   color.b:=s16_info.normal[b];
-  set_pal_color(color,@paleta[direccion]);
+  set_pal_color(color,direccion);
   //shadow
   color.r:=s16_info.shadow[r];
   color.g:=s16_info.shadow[g];
   color.b:=s16_info.shadow[b];
-  set_pal_color(color,@paleta[direccion+$800]);
+  set_pal_color(color,direccion+$800);
   //hilight
   color.r:=s16_info.hilight[r];
   color.g:=s16_info.hilight[g];
   color.b:=s16_info.hilight[b];
-  set_pal_color(color,@paleta[direccion+$1000]);
+  set_pal_color(color,direccion+$1000);
   //Buffer
   buffer_color[(direccion shr 3) and $7f]:=true;
 end;

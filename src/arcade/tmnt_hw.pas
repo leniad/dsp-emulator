@@ -3,7 +3,7 @@ unit tmnt_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,sound_engine,timer_engine,upd7759,ym_2151,k052109,k051960,
+     pal_engine,sound_engine,upd7759,ym_2151,k052109,k051960,
      misc_functions,samples,k053244_k053245,k053260,k053251,eepromser,k007232;
 
 procedure Cargar_tmnt;
@@ -198,7 +198,7 @@ screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 case main_vars.tipo_maquina of
   214:begin //TMNT
-        iniciar_video(320,224);
+        iniciar_video(320,224,true);
         iniciar_audio(false); //Sonido mono
         //cargar roms
         if not(cargar_roms16w(@rom[0],@tmnt_rom[0],'tmnt.zip',0)) then exit;
@@ -271,7 +271,7 @@ case main_vars.tipo_maquina of
         marcade.dswc_val:=@tmnt_dip_c;
   end;
   215:begin //Sunset Riders
-        iniciar_video(288,224);
+        iniciar_video(288,224,true);
         iniciar_audio(true); //Sonido stereo
         //cargar roms
         if not(cargar_roms16w(@rom[0],@ssriders_rom[0],'ssriders.zip',0)) then exit;
@@ -445,7 +445,7 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
-  //SYSTEM
+  //COIN
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
 end;
@@ -493,7 +493,8 @@ case direccion of
     $0a0018:tmnt_getword:=marcade.dswc;
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        tmnt_getword:=k052109_0.word_r(((direccion and $3000) shr 1) or (direccion and $07ff));
+                        if main_m68000.access_8bits then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
+                            else tmnt_getword:=k052109_0.read_lsb(((direccion and $3000) shr 1) or (direccion and $07ff)) shl 8;
                      end;
     $140000..$140007:tmnt_getword:=k051960_0.k051937_read(direccion and 7);
 	  $140400..$1407ff:if main_m68000.access_8bits then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
@@ -510,7 +511,7 @@ begin
   color.b:=pal5bit(data shr 10);
   color.g:=pal5bit(data shr 5);
   color.r:=pal5bit(data);
-  set_pal_color(color,@paleta[pos shr 1]);
+  set_pal_color_alpha(color,pos shr 1);
   k052109_0.clean_video_buffer;
 end;
 
@@ -536,7 +537,8 @@ case direccion of
     $0c0000:sprites_pri:=(valor and $0c) shr 2; //prioridad
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        k052109_0.word_w(((direccion and $3000) shr 1) or (direccion and $07ff),valor,main_m68000.access_8bits);
+                        if main_m68000.access_8bits then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
+                          else k052109_0.write_lsb(((direccion and $3000) shr 1) or (direccion and $07ff),valor shr 8)
                      end;
     $140000..$140007:k051960_0.k051937_write((direccion and $7),valor);
 	  $140400..$1407ff:if main_m68000.access_8bits then k051960_0.write((direccion and $3ff)+1,valor and $ff)
@@ -615,7 +617,7 @@ end;
 
 procedure update_video_ssriders;
 var
-  bg_colorbase,tmp:byte;
+  bg_colorbase:byte;
   sorted_layer:array[0..2] of byte;
 begin
 //Ordenar
@@ -732,7 +734,7 @@ case direccion of
     $1c0006:ssriders_getword:=$ff; //p4
     $1c0100:ssriders_getword:=marcade.in0; //coin
     $1c0102:begin
-              res:=$f8+er5911_do_read+(er5911_ready_read shl 1); //eeprom
+              res:=(byte(not(main_vars.service1)) shl 7)+$78+er5911_do_read+(er5911_ready_read shl 1); //eeprom
               //falta vblank en bit 8
 	            toggle:=toggle xor $04;
 	            ssriders_getword:=res xor toggle;
@@ -745,7 +747,8 @@ case direccion of
                         ssriders_getword:=k053244_read(direccion+1)+(k053244_read(direccion) shl 8);
                       end;
     $5c0600..$5c0603:ssriders_getword:=k053260_0.main_read((direccion and 3) shr 1); //k053260
-    $600000..$603fff:ssriders_getword:=k052109_0.word_r((direccion and $3fff) shr 1);
+    $600000..$603fff:if main_m68000.access_8bits then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
+                        else ssriders_getword:=k052109_0.read_lsb((direccion and $3fff) shr 1) shl 8;
 end;
 end;
 
@@ -777,7 +780,7 @@ begin
   color.b:=pal5bit(valor shr 10);
   color.g:=pal5bit(valor shr 5);
   color.r:=pal5bit(valor);
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color_alpha(color,pos);
   k052109_0.clean_video_buffer;
 end;
 
@@ -821,7 +824,8 @@ case direccion of
     $5c0600..$5c0603:k053260_0.main_write((direccion and 3) shr 1,valor); //k053260
     $5c0604:snd_z80.pedir_irq:=HOLD_LINE; //sound
     $5c0700..$5c071f:k053251_0.lsb_w((direccion and $1f) shr 1,valor); //k053251
-    $600000..$603fff:k052109_0.word_w((direccion and $3fff) shr 1,valor,main_m68000.access_8bits);
+    $600000..$603fff:if main_m68000.access_8bits then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
+                        else k052109_0.write_lsb((direccion and $3fff) shr 1,valor shr 8);
   end;
 end;
 

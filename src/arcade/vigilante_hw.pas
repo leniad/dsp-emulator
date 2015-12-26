@@ -169,11 +169,11 @@ if not(rear_disable) then begin
 		ccolor.r:=(memoria[$cc00+16*rear_color+i] shl 3) and $FF;
 		ccolor.g:=(memoria[$cd00+16*rear_color+i] shl 3) and $FF;
 		ccolor.b:=(memoria[$ce00+16*rear_color+i] shl 3) and $FF;
-    set_pal_color(ccolor,@paleta[512+i]);
+    set_pal_color(ccolor,512+i);
 		ccolor.r:=(memoria[$cc00+16*rear_color+32+i] shl 3) and $FF;
 		ccolor.g:=(memoria[$cd00+16*rear_color+32+i] shl 3) and $FF;
 		ccolor.b:=(memoria[$ce00+16*rear_color+32+i] shl 3) and $FF;
-    set_pal_color(ccolor,@paleta[512+i+16]);
+    set_pal_color(ccolor,512+i+16);
 	end;
   nchar:=0;
   for c:=0 to 2 do begin
@@ -280,7 +280,7 @@ begin
 	color.r:=(buffer_paleta[pos+$000]) shl 3;
 	color.g:=(buffer_paleta[pos+$100]) shl 3;
 	color.b:=(buffer_paleta[pos+$200]) shl 3;
-  set_pal_color(color,@paleta[(bank shr 2)+pos2]);
+  set_pal_color(color,(bank shr 2)+pos2);
   case (bank shr 2)+pos2 of
     $100..$1ff:buffer_color[(((bank shr 2)+pos2) shr 4) and $f]:=true;
   end;

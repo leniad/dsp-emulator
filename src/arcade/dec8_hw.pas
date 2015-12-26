@@ -312,7 +312,7 @@ begin
   color.g:=pal4bit(tmp_color shr 4);
   tmp_color:=buffer_paleta[dir+$100];
   color.b:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   buffer_color[(dir shr 4) and $f]:=true;
 end;
 

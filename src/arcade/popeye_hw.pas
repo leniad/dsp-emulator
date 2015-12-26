@@ -134,7 +134,7 @@ for f:=0 to 15 do begin
 		ctemp2:=(memoria_temp[ctemp4+$20] shr 6) and $01;
 		ctemp3:=(memoria_temp[ctemp4+$20] shr 7) and $01;
 		colores.b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-    set_pal_color(colores,@paleta[16+(2*f)+1]);
+    set_pal_color(colores,16+(2*f)+1);
 end;
 //Poner la paleta sprites
 for f:=0 to $FF do begin
@@ -153,7 +153,7 @@ for f:=0 to $FF do begin
 		ctemp2:=(memoria_temp[$140+f] shr 2) and $01;
 		ctemp3:=(memoria_temp[$140+f] shr 3) and $01;
 		colores.b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-    set_pal_color(colores,@paleta[48+f]);
+    set_pal_color(colores,48+f);
 end;
 //DIP
 marcade.dswa:=$5f;
@@ -186,7 +186,7 @@ begin
 		ctemp1:=(ctemp4 shr 6) and $01;
 		ctemp2:=(ctemp4 shr 7) and $01;
 		colores.b:=$31*ctemp1+$47*ctemp2;
-    set_pal_color(colores,@paleta[f]);
+    set_pal_color(colores,f);
    end;
    fillchar(fondo_write[0],$2000,1);
 end;

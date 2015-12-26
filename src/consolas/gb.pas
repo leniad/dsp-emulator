@@ -634,24 +634,24 @@ case direccion of
       end;
   $47:begin
         bg_pal:=valor;
-        set_pal_color(color_pal[(valor shr 0) and $3],@paleta[0]);
-        set_pal_color(color_pal[(valor shr 2) and $3],@paleta[1]);
-        set_pal_color(color_pal[(valor shr 4) and $3],@paleta[2]);
-        set_pal_color(color_pal[(valor shr 6) and $3],@paleta[3]);
+        set_pal_color(color_pal[(valor shr 0) and $3],0);
+        set_pal_color(color_pal[(valor shr 2) and $3],1);
+        set_pal_color(color_pal[(valor shr 4) and $3],2);
+        set_pal_color(color_pal[(valor shr 6) and $3],3);
       end;
   $48:begin //sprt0
         sprt0_pal:=valor;
-        set_pal_color(color_pal[(valor shr 0) and $3],@paleta[4]);
-        set_pal_color(color_pal[(valor shr 2) and $3],@paleta[5]);
-        set_pal_color(color_pal[(valor shr 4) and $3],@paleta[6]);
-        set_pal_color(color_pal[(valor shr 6) and $3],@paleta[7]);
+        set_pal_color(color_pal[(valor shr 0) and $3],4);
+        set_pal_color(color_pal[(valor shr 2) and $3],5);
+        set_pal_color(color_pal[(valor shr 4) and $3],6);
+        set_pal_color(color_pal[(valor shr 6) and $3],7);
       end;
   $49:begin
         sprt1_pal:=valor;
-        set_pal_color(color_pal[(valor shr 0) and $3],@paleta[8]);
-        set_pal_color(color_pal[(valor shr 2) and $3],@paleta[9]);
-        set_pal_color(color_pal[(valor shr 4) and $3],@paleta[10]);
-        set_pal_color(color_pal[(valor shr 6) and $3],@paleta[11]);
+        set_pal_color(color_pal[(valor shr 0) and $3],8);
+        set_pal_color(color_pal[(valor shr 2) and $3],9);
+        set_pal_color(color_pal[(valor shr 4) and $3],10);
+        set_pal_color(color_pal[(valor shr 6) and $3],11);
       end;
   $4a:window_y:=valor;
   $4b:window_x:=valor;

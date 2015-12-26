@@ -288,7 +288,7 @@ begin
   tmp_color:=buffer_paleta[pos];
   color.g:=pal4bit(tmp_color shr 4);
   color.b:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[pos shr 1]);
+  set_pal_color(color,pos shr 1);
   buffer_color[(pos shr 5) and $7f]:=true;
 end;
 

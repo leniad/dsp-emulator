@@ -401,7 +401,7 @@ begin
   color.g:=pal4bit(tmp_color);
   tmp_color:=buffer_paleta[dir+1];
   color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,@paleta[(dir and $1ff) shr 1]);
+  set_pal_color(color,(dir and $1ff) shr 1);
 end;
 
 procedure hardhead_putbyte(direccion:word;valor:byte);

@@ -272,7 +272,7 @@ begin
   color.g:=pal4bit(tmp_color shr 4);
   color.r:=pal4bit(tmp_color);
   dir:=dir shr 1;
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   case dir of
     0..127:buffer_color[dir shr 3]:=true;
     128..255:buffer_color[((dir shr 4) and $7)+$10]:=true;

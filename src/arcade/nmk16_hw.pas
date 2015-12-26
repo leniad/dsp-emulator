@@ -418,7 +418,7 @@ begin
   color.r:=pal5bit(tmp_color shr 11) or ((tmp_color shr 3) and $01);
   color.g:=pal5bit(tmp_color shr 7) or ((tmp_color shr 2) and $01);
   color.b:=pal5bit(tmp_color shr 3) or ((tmp_color shr 1) and $01);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   if (numero<$100) then buffer_color[(numero shr 4) and $f]:=true;
 end;
 

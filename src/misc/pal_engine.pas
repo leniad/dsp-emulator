@@ -1,7 +1,7 @@
 unit pal_engine;
 
 interface
-uses lib_sdl2;
+uses {$IFDEF windows}windows,{$ENDIF}lib_sdl2;
 
 const
     MAX_NETS=3;
@@ -16,6 +16,7 @@ type
   tpaleta=array[0..max_colores] of tcolor;
 var
   paleta,buffer_paleta:array[0..max_colores] of word;
+  paleta32,paleta_alpha:array[0..max_colores] of dword;
   buffer_color:array[0..max_colores] of boolean;
 
 procedure compute_resistor_weights(
@@ -34,7 +35,8 @@ function pal4bit(bits:byte):byte;
 function pal5bit(bits:byte):byte;
 //Palette functions
 procedure set_pal(ppaleta:tpaleta;total_colors:word);
-procedure set_pal_color(pcolor:tcolor;ppaleta:pword);
+procedure set_pal_color(pcolor:tcolor;pal_pos:word);
+procedure set_pal_color_alpha(pcolor:tcolor;pal_pos:word);
 
 implementation
 uses main_engine;
@@ -280,9 +282,16 @@ for colors:=0 to total_colors-1 do
         paleta[colors]:=SDL_MapRGB(pantalla[pant_sprites].format, ppaleta[colors].r, ppaleta[colors].g, ppaleta[colors].b);
 end;
 
-procedure set_pal_color(pcolor:tcolor;ppaleta:pword);inline;
+procedure set_pal_color(pcolor:tcolor;pal_pos:word);inline;
 begin
-ppaleta^:=SDL_MapRGB(pantalla[pant_sprites].format, pcolor.r, pcolor.g, pcolor.b);
+paleta[pal_pos]:=SDL_MapRGB(pantalla[pant_sprites].format, pcolor.r, pcolor.g, pcolor.b);
+end;
+
+procedure set_pal_color_alpha(pcolor:tcolor;pal_pos:word);inline;
+begin
+paleta[pal_pos]:=SDL_MapRGB(pantalla[pant_sprites].format, pcolor.r, pcolor.g, pcolor.b);
+paleta32[pal_pos]:=SDL_MapRGBA(pantalla[pant_sprites_alpha].format, pcolor.r, pcolor.g, pcolor.b,$ff);
+paleta_alpha[pal_pos]:=SDL_MapRGBA(pantalla[pant_sprites_alpha].format, pcolor.r, pcolor.g, pcolor.b,$80);
 end;
 
 end.

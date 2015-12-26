@@ -60,6 +60,7 @@ begin
   gfx_set_desc_data(4,0,8*128,24,16,8,0);
   convert_gfx(1,0,spr_rom,@ps_x[0],@ps_y[0],false,false);
   gfx[1].trans[0]:=true;
+  gfx[1].alpha[$f]:=true;
 end;
 
 destructor k051960_chip.free;
@@ -152,8 +153,6 @@ var
   flipx,flipy:boolean;
   zx,zy:single;
 begin
-	//memset(drawmode_table, DRAWMODE_SOURCE, sizeof(drawmode_table));
-	//drawmode_table[0] = DRAWMODE_NONE;
 	for offs:=0 to (NUM_SPRITES-1) do sortedlist[offs]:=-1;
 	// prebuild a sorted table */
 	for offs:=0 to $7f do begin
@@ -195,7 +194,6 @@ begin
 			flipx:=not flipx;
 			flipy:=not flipy;
     end;
-		//drawmode_table[m_gfx[0]->granularity() - 1] = shadow ? DRAWMODE_SHADOW : DRAWMODE_SOURCE;
     for y:=0 to (h-1) do begin
         sy:=oy+round(zy*y*16);
 				for x:=0 to (w-1) do begin
@@ -205,12 +203,22 @@ begin
 					  else c:=c+xoffset[x];
 					if flipy then c:=c+yoffset[h-1-y]
 					  else c:=c+yoffset[y];
-          if ((zx=1) and (zy=1)) then begin
-            put_gfx_sprite(c,color shl 4,flipx,flipy,1);
-            actualiza_gfx_sprite(sx,sy,self.pant,1);
+          if (shadow<>0) then begin
+            if ((zx=1) and (zy=1)) then begin
+              put_gfx_sprite_alpha(c,color shl 4,flipx,flipy,1);
+              actualiza_gfx_sprite_alpha(sx,sy,self.pant,1);
+            end else begin
+              put_gfx_sprite_zoom_alpha(c,color shl 4,flipx,flipy,1,zx,zy);
+              actualiza_gfx_sprite_zoom_alpha(sx,sy,self.pant,1,zx,zy);
+            end;
           end else begin
-            put_gfx_sprite_zoom(c,color shl 4,flipx,flipy,1,zx,zy);
-            actualiza_gfx_sprite_zoom(sx,sy,self.pant,1,zx,zy);
+            if ((zx=1) and (zy=1)) then begin
+              put_gfx_sprite(c,color shl 4,flipx,flipy,1);
+              actualiza_gfx_sprite(sx,sy,self.pant,1);
+            end else begin
+              put_gfx_sprite_zoom(c,color shl 4,flipx,flipy,1,zx,zy);
+              actualiza_gfx_sprite_zoom(sx,sy,self.pant,1,zx,zy);
+            end;
           end;
 				end;
 			end;

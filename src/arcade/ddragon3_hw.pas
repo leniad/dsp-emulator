@@ -313,7 +313,7 @@ begin
   color.b:=pal5bit(data shr 10);
   color.g:=pal5bit(data shr 5);
   color.r:=pal5bit(data);
-  set_pal_color(color,@paleta[pos]);
+  set_pal_color(color,pos);
   case pos of
     $100..$1ff:buffer_color[$10+((pos shr 4) and $f)]:=true;
     $200..$2ff:buffer_color[(pos shr 4) and $f]:=true;

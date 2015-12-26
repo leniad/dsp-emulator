@@ -174,14 +174,15 @@ end;
 
 procedure eventos_mario;
 begin
+if main_vars.service1 then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
 if event.arcade then begin
-  //marcade.in0
+  //P1
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $Fe);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.but0[0] then marcade.in0:=marcade.in0 or $10 else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
-  //marcade.in1
+  //P2
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $Fe);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
   if arcade_input.but0[1] then marcade.in1:=marcade.in1 or $10 else marcade.in1:=(marcade.in1 and $ef);

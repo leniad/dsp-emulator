@@ -1,7 +1,7 @@
 unit k053244_k053245;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}gfx_engine;
 
 type
   t_k053245_cb=procedure(var code:word;var color:word;var priority:word);
@@ -43,6 +43,7 @@ begin
   gfx_set_desc_data(4,0,8*128,24,16,8,0);
   convert_gfx(1,0,spr_rom,@ps_x[0],@ps_y[0],false,false);
   gfx[1].trans[0]:=true;
+  gfx[1].alpha[$f]:=true;
 end;
 
 procedure k053245_reset;
@@ -104,21 +105,16 @@ const
 var
 	sortedlist:array[0..(NUM_SPRITES-1)] of integer;
   size,w,h,x,y:byte;
-	pri_code,i,code,color,pri,spriteoffsX,spriteoffsY,c,ox,oy,sx,sy,zoom_x,zoom_y:word;
+	pri_code,code,color,pri,spriteoffsX,spriteoffsY,c,ox,oy,sx,sy,zoom_x,zoom_y:word;
   //flipscreenX,flipscreenY,
-  flipx,flipy,mirrorx,mirrory,fx,fy:boolean;
-	drawmode_table:array[0..255] of byte;
-  offs,shadow:integer;
+  flipx,flipy,mirrorx,mirrory,fx,fy,shadow:boolean;
+  offs:integer;
   zx,zy:single;
 begin
-
-	//memset(drawmode_table, DRAWMODE_SOURCE, sizeof(drawmode_table));
-	//drawmode_table[0] = DRAWMODE_NONE;
 	//flipscreenX:=(k053244_regs[5] and $01)<>0;
 	//flipscreenY:=(k053244_regs[5] and $02)<>0;
 	spriteoffsX:=(k053244_regs[0] shl 8) or k053244_regs[1];
 	spriteoffsY:=(k053244_regs[2] shl 8) or k053244_regs[3];
-
 	for offs:=0 to (NUM_SPRITES-1) do sortedlist[offs]:=-1;
 	// prebuild a sorted table */
 	for offs:=0 to $ff do begin
@@ -161,11 +157,10 @@ begin
 		mirrorx:=(buffer_ram[offs+6] and $0100)<>0;
 		if mirrorx then flipx:=false; // documented and confirmed
 		mirrory:=(buffer_ram[offs+6] and $0200)<>0;
-		shadow:=buffer_ram[offs+6] and $0080;
+		shadow:=(buffer_ram[offs+6] and $0080)<>0;
 		// the coordinates given are for the *center* of the sprite */
 		ox:=ox-(round(zx*w*16) shr 1);
 		oy:=oy-(round(zy*h*16) shr 1);
-		//drawmode_table[m_gfx[0]->granularity() - 1] = shadow ? DRAWMODE_SHADOW : DRAWMODE_SOURCE;
 		for y:=0 to (h-1) do begin
 			sy:=(oy+(round(zy*y*16))) and $3ff;
 			for x:=0 to (w-1) do begin
@@ -203,12 +198,22 @@ begin
 				/* in a 64 entries window, wrapping around at the edges. The animation */
 				/* at the end of the saloon level in Sunset Riders breaks otherwise.}
 				c:=(c and $3f) or (code and not($3f));
-				if ((zx=1) and (zy=1)) then begin
-          put_gfx_sprite(c and $3fff,color shl 4,fx,fy,1);
-          actualiza_gfx_sprite(sx,sy,4,1);
-				end else begin
-          put_gfx_sprite_zoom(c and $3fff,color shl 4,fx,fy,1,zx,zy);
-          actualiza_gfx_sprite_zoom(sx,sy,4,1,zx,zy);
+        if shadow then begin //alpha
+          if ((zx=1) and (zy=1)) then begin
+            put_gfx_sprite_alpha(c and $3fff,color shl 4,fx,fy,1);
+            actualiza_gfx_sprite_alpha(sx,sy,4,1);
+				  end else begin
+            put_gfx_sprite_zoom_alpha(c and $3fff,color shl 4,fx,fy,1,zx,zy);
+            actualiza_gfx_sprite_zoom_alpha(sx,sy,4,1,zx,zy);
+          end;
+        end else begin
+				  if ((zx=1) and (zy=1)) then begin
+            put_gfx_sprite(c and $3fff,color shl 4,fx,fy,1);
+            actualiza_gfx_sprite(sx,sy,4,1);
+				  end else begin
+            put_gfx_sprite_zoom(c and $3fff,color shl 4,fx,fy,1,zx,zy);
+            actualiza_gfx_sprite_zoom(sx,sy,4,1,zx,zy);
+          end;
         end;
       end;
     end;

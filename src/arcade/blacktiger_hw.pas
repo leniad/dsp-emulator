@@ -272,14 +272,14 @@ actualiza_trozo_final(0,16,256,224,4);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_blktiger;inline;
+procedure eventos_blktiger;
 begin
 if event.arcade then begin
   //SYS
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P1
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
@@ -353,7 +353,7 @@ begin
   color.g:=pal4bit(tmp_color);
   tmp_color:=buffer_paleta[dir+$400];
   color.b:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[dir]);
+  set_pal_color(color,dir);
   case dir of
     $0..$ff:buffer_color[(dir shr 4)+$20]:=true;
     $300..$37f:buffer_color[(dir shr 2) and $1f]:=true;

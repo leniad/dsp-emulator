@@ -379,7 +379,7 @@ begin
   color.r:=pal5bit(palette1[num]);
   color.g:=pal5bit(palette1[num+$400]);
   color.b:=pal5bit(palette1[num+$800]);
-  set_pal_color(color,@paleta[num shr 1]);
+  set_pal_color(color,num shr 1);
 end;
 
 procedure cambiar_color2(num:word);
@@ -390,7 +390,7 @@ begin
   color.g:=pal5bit(palette2[num+$400]);
   color.b:=pal5bit(palette2[num+$800]);
   num:=num shr 1;
-  set_pal_color(color,@paleta[num+$100]);
+  set_pal_color(color,num+$100);
   buffer_color[(num shr 4) and $f]:=true;
 end;
 

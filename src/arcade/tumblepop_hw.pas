@@ -202,7 +202,7 @@ begin
   color.b:=pal4bit(tmp_color shr 8);
   color.g:=pal4bit(tmp_color shr 4);
   color.r:=pal4bit(tmp_color);
-  set_pal_color(color,@paleta[numero]);
+  set_pal_color(color,numero);
   case numero of
     $100..$1ff:deco16ic_chip[0].dec16ic_buffer_color[1,(numero shr 4) and $f]:=true;
     $200..$2ff:deco16ic_chip[0].dec16ic_buffer_color[2,(numero shr 4) and $f]:=true;
