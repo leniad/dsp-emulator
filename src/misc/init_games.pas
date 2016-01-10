@@ -27,7 +27,7 @@ uses sysutils,main_engine,
   bioniccommando_hw,wwfsuperstars_hw,rainbowislands_hw,volfied_hw,
   operationwolf_hw,outrun_hw,taitosj_hw,vulgus_hw,ddragon3_hw,blockout_hw,
   foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw,freekick_hw,
-  boogiewings_hw,pinballaction_hw,renegade_hw,tmnt_hw;
+  boogiewings_hw,pinballaction_hw,renegade_hw,tmnt_hw,gradius3_hw;
 
 type
   tgame_desc=record
@@ -40,7 +40,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=220;
+  games_cont=221;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum.zip';grid:0;company:'Sinclair'),
@@ -259,6 +259,7 @@ const
   (name:'Renegade';year:'1986';snd:1;hi:false;zip:'renegade.zip';grid:213;company:'Technos Japan'),
   (name:'Teenage Mutant Ninja Turtles';year:'1989';snd:1;hi:false;zip:'tmnt.zip';grid:214;company:'Konami'),
   (name:'Sunset Riders';year:'1991';snd:1;hi:false;zip:'ssriders.zip';grid:215;company:'Konami'),
+  (name:'Gradius III';year:'1991';snd:1;hi:false;zip:'gradius3.zip';grid:216;company:'Konami'),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco.zip';grid:1001;company:'Coleco'),
@@ -495,6 +496,7 @@ case numero of
   213:principal1.CambiarMaquina(principal1.renegade1);
   214:principal1.CambiarMaquina(principal1.tmnt1);
   215:principal1.CambiarMaquina(principal1.ssriders1);
+  216:principal1.CambiarMaquina(principal1.gradius31);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -722,6 +724,7 @@ principal1.pbaction1.checked:=false;
 principal1.renegade1.checked:=false;
 principal1.tmnt1.checked:=false;
 principal1.ssriders1.checked:=false;
+principal1.gradius31.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -869,6 +872,7 @@ case tmaquina of
   212:Cargar_pinballaction;
   213:Cargar_renegade;
   214,215:Cargar_tmnt;
+  216:Cargar_gradius3;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1743,6 +1747,10 @@ end;
 if sender=principal1.ssriders1 then begin
   tipo:=215;
   principal1.ssriders1.Checked:=true;
+end;
+if sender=principal1.gradius31 then begin
+  tipo:=216;
+  principal1.gradius31.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

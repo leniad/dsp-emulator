@@ -174,32 +174,19 @@ case main_vars.tipo_maquina of
      end;
 end;
 iniciar_video(x,y);
-case main_vars.tipo_maquina of
-  59,60:begin
-        //Main CPU
-        main_z80:=cpu_z80.create(6000000,256);
-        main_z80.change_ram_calls(lwings_getbyte,lwings_putbyte);
-        //Sound CPU
-        snd_z80:=cpu_z80.create(4000000,256);
-        snd_z80.init_sound(lwings_sound_update);
-        init_timer(snd_z80.numero_cpu,4000000/222,lwings_snd_irq,true);
-  end;
-  61:begin
-        //Main CPU
-        main_z80:=cpu_z80.create(3000000,256);
-        main_z80.change_ram_calls(lwings_getbyte,trojan_putbyte);
-        //Sound CPU
-        snd_z80:=cpu_z80.create(3000000,256);
-        snd_z80.init_sound(lwings_sound_update);
-        init_timer(snd_z80.numero_cpu,3000000/222,lwings_snd_irq,true);
-     end;
-end;
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.init_sound(lwings_sound_update);
+init_timer(snd_z80.numero_cpu,3000000/222,lwings_snd_irq,true);
 snd_z80.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(0,1500000,2);
 ym2203_1:=ym2203_chip.create(1,1500000,2);
 case main_vars.tipo_maquina of
   59:begin
+        //Main CPU
+        main_z80:=cpu_z80.create(6000000,256);
+        main_z80.change_ram_calls(lwings_getbyte,lwings_putbyte);
         if not(cargar_roms(@memoria_temp[0],@lwings_rom[0],'lwings.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
@@ -216,6 +203,9 @@ case main_vars.tipo_maquina of
         convert_tiles_lw;
      end;
   60:begin
+        //Main CPU
+        main_z80:=cpu_z80.create(6000000,256);
+        main_z80.change_ram_calls(lwings_getbyte,lwings_putbyte);
         if not(cargar_roms(@memoria_temp[0],@sectionz_rom[0],'sectionz.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
@@ -232,6 +222,9 @@ case main_vars.tipo_maquina of
         convert_tiles_lw;
       end;
   61:begin
+        //Main CPU
+        main_z80:=cpu_z80.create(3000000,256);
+        main_z80.change_ram_calls(lwings_getbyte,trojan_putbyte);
         //ADPCM Z80
         sub_z80:=cpu_z80.create(3000000,256);
         sub_z80.change_ram_calls(trojan_misc_getbyte,trojan_misc_putbyte);
@@ -410,12 +403,13 @@ end;
 function lwings_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$c000..$efff:lwings_getbyte:=memoria[direccion];
   $8000..$bfff:lwings_getbyte:=mem_rom[bank,direccion and $3fff];
+  $f000..$f7ff:lwings_getbyte:=buffer_paleta[direccion and $7ff];
   $f808:lwings_getbyte:=marcade.in0;
   $f809:lwings_getbyte:=marcade.in1;
   $f80a:lwings_getbyte:=marcade.in2;
   $f80b..$f80c:lwings_getbyte:=$ff;
-  else lwings_getbyte:=memoria[direccion];
 end;
 end;
 
@@ -439,10 +433,16 @@ end;
 procedure lwings_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-    $e000..$e7ff:gfx[0].buffer[direccion and $3ff]:=true;
-    $e800..$efff:gfx[2].buffer[direccion and $3ff]:=true;
+    $c000..$dfff:memoria[direccion]:=valor;
+    $e000..$e7ff:begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $e800..$efff:begin
+                    gfx[2].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
     $f000..$f7ff:if buffer_paleta[direccion and $7ff]<>valor then begin
                     buffer_paleta[direccion and $7ff]:=valor;
                     cambiar_color(direccion and $3ff);
@@ -462,19 +462,21 @@ end;
 //Sound CPU
 function lwings_snd_getbyte(direccion:word):byte;
 begin
-if direccion=$c800 then lwings_snd_getbyte:=sound_command
- else lwings_snd_getbyte:=mem_snd[direccion];
+case direccion of
+  0..$7fff,$c000..$c7ff:lwings_snd_getbyte:=mem_snd[direccion];
+  $c800:lwings_snd_getbyte:=sound_command;
+end;
 end;
 
 procedure lwings_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
-        $e000:ym2203_0.Control(valor);
-        $e001:ym2203_0.Write_Reg(valor);
-        $e002:ym2203_1.Control(valor);
-        $e003:ym2203_1.Write_Reg(valor);
+  $c000..$c7ff:mem_snd[direccion]:=valor;
+  $e000:ym2203_0.Control(valor);
+  $e001:ym2203_0.Write_Reg(valor);
+  $e002:ym2203_1.Control(valor);
+  $e003:ym2203_1.Write_Reg(valor);
 end;
 end;
 
@@ -615,10 +617,16 @@ end;
 procedure trojan_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-    $e000..$e7ff:gfx[0].buffer[direccion and $3ff]:=true;
-    $e800..$efff:gfx[2].buffer[direccion and $3ff]:=true;
+    $c000..$dfff:memoria[direccion]:=valor;
+    $e000..$e7ff:begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $e800..$efff:begin
+                    gfx[2].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                    end;
     $f000..$f7ff:if buffer_paleta[direccion and $7ff]<>valor then begin
                     buffer_paleta[direccion and $7ff]:=valor;
                     cambiar_color(direccion and $3ff);

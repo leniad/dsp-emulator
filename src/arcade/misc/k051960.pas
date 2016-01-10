@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine;
 type
   t_k051960_cb=procedure(var code:word;var color:word;var pri:word;var shadow:word);
   k051960_chip=class
-      constructor create(pant:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb);
+      constructor create(pant:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb;tipo:byte=0);
       destructor free;
     public
       procedure reset;
@@ -45,20 +45,32 @@ begin
 	self.spriterombank[2]:=0;
 end;
 
-constructor k051960_chip.create(pant:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb);
+constructor k051960_chip.create(pant:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb;tipo:byte=0);
 const
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 		8*32+0, 8*32+1, 8*32+2, 8*32+3, 8*32+4, 8*32+5, 8*32+6, 8*32+7);
   ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 		16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32);
+  ps_x_gra3:array[0..15] of dword=(2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4,
+		32*8+2*4, 32*8+3*4, 32*8+0*4, 32*8+1*4, 32*8+6*4, 32*8+7*4, 32*8+4*4, 32*8+5*4);
+  ps_y_gra3:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+		64*8+0*32, 64*8+1*32, 64*8+2*32, 64*8+3*32, 64*8+4*32, 64*8+5*32, 64*8+6*32, 64*8+7*32);
 begin
   self.sprite_rom:=spr_rom;
   self.sprite_size:=spr_size;
   self.k051960_cb:=call_back;
   self.pant:=pant;
   init_gfx(1,16,16,sprite_size div 128);
-  gfx_set_desc_data(4,0,8*128,24,16,8,0);
-  convert_gfx(1,0,spr_rom,@ps_x[0],@ps_y[0],false,false);
+  case tipo of
+    0:begin
+        gfx_set_desc_data(4,0,8*128,24,16,8,0);
+        convert_gfx(1,0,spr_rom,@ps_x[0],@ps_y[0],false,false);
+      end;
+    1:begin
+        gfx_set_desc_data(4,0,8*128,0,1,2,3);
+        convert_gfx(1,0,spr_rom,@ps_x_gra3[0],@ps_y_gra3[0],false,false);
+      end;
+  end;
   gfx[1].trans[0]:=true;
   gfx[1].alpha[$f]:=true;
 end;
@@ -153,14 +165,9 @@ var
   flipx,flipy:boolean;
   zx,zy:single;
 begin
-	for offs:=0 to (NUM_SPRITES-1) do sortedlist[offs]:=-1;
-	// prebuild a sorted table */
-	for offs:=0 to $7f do begin
-		if (self.ram[offs*8] and $80)<>0 then begin
-			if (max_priority=-1) then sortedlist[(self.ram[offs*8] and $7f) xor $7f]:=offs*8 // draw front to back when using priority buffer */
-			else sortedlist[self.ram[offs*8] and $7f]:=offs*8;
-		end;
-	end;
+  for offs:=0 to (NUM_SPRITES)-1 do sortedlist[offs]:=-1;
+	for offs:=0 to (NUM_SPRITES)-1 do
+		if (self.ram[offs*8] and $80)<>0 then sortedlist[self.ram[offs*8] and $7f]:=offs*8;
 	for pri_code:=0 to (NUM_SPRITES-1) do begin
 		offs:=sortedlist[pri_code];
 		if (offs=-1) then continue;
@@ -169,8 +176,11 @@ begin
 		pri:=0;
 		shadow:=color and $80;
 		self.k051960_cb(nchar,color,pri,shadow);
-		if (max_priority<>-1) then
+		if (max_priority<>-1) then begin //Prioridad por llamada
 			if ((pri<min_priority) or (pri>max_priority)) then continue;
+    end else begin //Prioridad por funcion
+      if pri<>min_priority then continue;
+    end;
 		size:=(self.ram[offs+1] and $e0) shr 5;
 		w:=width[size];
 		h:=height[size];

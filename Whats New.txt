@@ -1,5 +1,50 @@
 What's New!!! DSP Emulator
 
+DSP 0.16b1 10/01/16
+**********
+- General
+    + Control Engine
+        - Added the service function, pressing F1 (Implemented in some drivers)
+    + GFX Engine
+        - Added functions for sprites with zoom and alpha blend
+        - Started the optimization of sprites and chars functions
+    + Samples Engine
+        - Added checks for doing nothing if no samples have been loaded, eliminated local checks on drivers
+        - Added a function to create a sample from memory
+        - Fixed bug that did not release internal buffers
+        - Now only initializes the internal buffer with the number of total samples, with a maximum of 6
+        - Simplified the conversion of WAV to sample
+    + M68000
+        - Modified the read/write byte mode to check the wich part of the word is accesed, the hi or the low part
+        - Enhanced 'movep.l re' opcode
+    + Konami Video
+        - K051960: Added driver for sprites chip
+        - K052109: Added driver for tiles chip
+        - K05324X: Added driver for sprites chip
+        - K053251: Added driver for priority chip
+    + Konami Sound
+        - K007232: Added driver for digital audio chip
+        - K053260: Added driver for digital audio chip
+- Rainbow Island
+    + Fixed sprites ROM CRC
+- Time pilot
+    + Fixed sprites
+- Mikie
+    + Fixed sprites
+- Vigilante
+    + Fixed sprites
+- Pirates HW
+    + More sprite RAM (fix 3854 coins bug)
+    + Genix Family
+        - Fixed protection
+- Nemesis HW
+    + Added zoom sprites
+- TMNT
+    + Teenage Mutant Ninja Turtles: Added driver with sound
+    + Sunset Riders: Added driver with sound
+- Gradius III
+    + Added driver with sound
+
 DSP 0.16 27/10/15
 ********
 - General

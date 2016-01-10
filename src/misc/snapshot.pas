@@ -431,7 +431,10 @@ begin
 abrir_szx:=false;
 getmem(szx_header,sizeof(tszx_header));
 copymemory(szx_header,data,8);inc(data,8);longitud:=8;
-if (szx_header.magic<>'ZXST') then exit;
+if (szx_header.magic<>'ZXST') then begin
+  freemem(szx_header);
+  exit;
+end;
 case szx_header.tipo_maquina of
   0:spectrum_change_model(5);
   1:spectrum_change_model(0);
@@ -441,6 +444,7 @@ case szx_header.tipo_maquina of
   5:spectrum_change_model(2);
     else begin
       MessageDlg('Modelo no de Spectrum soportado.'+chr(10)+chr(13)+'Spectrum model not supported.', mtInformation,[mbOk], 0);
+      freemem(szx_header);
       exit;
     end;
 end;
@@ -514,7 +518,11 @@ while longitud<>long do begin
     if (szx_ramp.flags and 1)<>0 then begin //Pagina RAM comprimida
       getmem(ram_sp,$4000);
       Decompress_zlib(pointer(@szx_ramp.data[0]),szx_block.longitud-3,pointer(ram_sp),temp_long);
-      if temp_long<>16384 then exit;
+      if temp_long<>16384 then begin
+        freemem(szx_header);
+        freemem(szx_ramp);
+        exit;
+      end;
     end else ram_sp:=@szx_ramp.data[0]; //Sin comprimir
     case szx_header.tipo_maquina of
       1:case szx_ramp.numero of
@@ -855,7 +863,10 @@ if (z80_regs.pc=0) then begin  //version 2 o 3
                   getmem(puntero,$4000);
                   if es_dsp then Decompress_zlib(pointer(@z80_ram.datos[0]),$4000,pointer(puntero),contador)
                     else descomprimir_z80(puntero,@z80_ram.datos[0],contador);
-                  if contador<>$4000 then exit;
+                  if contador<>$4000 then begin
+                    freemem(puntero);
+                    exit;
+                  end;
                   copymemory(@z80_ram.datos[0],puntero,$4000);
                   freemem(puntero);
                 end; //Si no esta comprimida copio directamente los datos...
@@ -1263,7 +1274,10 @@ abrir_sna_cpc:=false;
 getmem(cpc_sna,sizeof(tcpc_sna));
 copymemory(cpc_sna,data,$100);
 inc(data,$100);
-if (cpc_sna.magic)<>'MV - SNA' then exit;
+if (cpc_sna.magic)<>'MV - SNA' then begin
+  freemem(cpc_sna);
+  exit;
+end;
 main_z80_reg:=main_z80.get_internal_r;
 main_z80_reg.f.s:=(cpc_sna.flags and $80)<>0;
 main_z80_reg.f.z:=(cpc_sna.flags and $40)<>0;
@@ -1449,7 +1463,10 @@ abrir_coleco_snapshot:=false;
 getmem(coleco_header,sizeof(tcoleco_header));
 copymemory(coleco_header,data,10);
 //Todos las cabeceras tienen 10bytes
-if coleco_header.magic<>'CLSN' then exit;
+if coleco_header.magic<>'CLSN' then begin
+  freemem(coleco_header);
+  exit;
+end;
 reset_coleco;
 if ((coleco_header.version<>1) and (coleco_header.version<>2) and (coleco_header.version<>$1002) and (coleco_header.version<>$220)) then begin
    freemem(coleco_header);

@@ -73,9 +73,9 @@ var
  ram2:array[0..$3f] of word;
  sprite_ram:array[0..$1fff] of word;
  char_rom,sprite_rom,k007232_rom,k053260_rom:pbyte;
- sound_latch,sound_latch2,sprite_colorbase,last_snd,sprites_pri,toggle:byte;
+ sound_latch,sound_latch2,sprite_colorbase,last_snd,toggle:byte;
  layer_colorbase:array[0..2] of byte;
- irq5_mask:boolean;
+ irq5_mask,sprites_pri:boolean;
  layerpri:array[0..2] of byte;
 
 procedure Cargar_tmnt;
@@ -367,7 +367,7 @@ begin
  sound_latch2:=0;
  irq5_mask:=false;
  last_snd:=0;
- sprites_pri:=0;
+ sprites_pri:=false;
  toggle:=0;
 end;
 
@@ -417,9 +417,9 @@ begin
 k052109_0.draw_tiles;
 fill_full_screen(4,0);
 draw_layer(2);
-if (sprites_pri and 1)=1 then k051960_0.draw_sprites(0,0);
+if sprites_pri then k051960_0.draw_sprites(0,0);
 draw_layer(1);
-if (sprites_pri and 1)=0 then k051960_0.draw_sprites(0,0);
+if not(sprites_pri) then k051960_0.draw_sprites(0,0);
 draw_layer(0);
 actualiza_trozo_final(96,16,320,224,4);
 end;
@@ -493,11 +493,11 @@ case direccion of
     $0a0018:tmnt_getword:=marcade.dswc;
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        if main_m68000.access_8bits then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
+                        if main_m68000.access_8bits_hi_dir then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
                             else tmnt_getword:=k052109_0.read_lsb(((direccion and $3000) shr 1) or (direccion and $07ff)) shl 8;
                      end;
     $140000..$140007:tmnt_getword:=k051960_0.k051937_read(direccion and 7);
-	  $140400..$1407ff:if main_m68000.access_8bits then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
+	  $140400..$1407ff:if main_m68000.access_8bits_hi_dir then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
                           else tmnt_getword:=k051960_0.read(direccion and $3ff) shl 8;
 end;
 end;
@@ -534,14 +534,14 @@ case direccion of
                 else k052109_0.rmrd_line:=CLEAR_LINE;
             end;
     $0a0008:sound_latch:=valor and $ff;
-    $0c0000:sprites_pri:=(valor and $0c) shr 2; //prioridad
+    $0c0000:sprites_pri:=((valor and $0c) shr 2)<>0; //prioridad
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        if main_m68000.access_8bits then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
+                        if main_m68000.access_8bits_hi_dir then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
                           else k052109_0.write_lsb(((direccion and $3000) shr 1) or (direccion and $07ff),valor shr 8)
                      end;
     $140000..$140007:k051960_0.k051937_write((direccion and $7),valor);
-	  $140400..$1407ff:if main_m68000.access_8bits then k051960_0.write((direccion and $3ff)+1,valor and $ff)
+	  $140400..$1407ff:if main_m68000.access_8bits_hi_dir then k051960_0.write((direccion and $3ff)+1,valor and $ff)
                         else k051960_0.write(direccion and $3ff,valor shr 8)
   end;
 end;
@@ -747,7 +747,7 @@ case direccion of
                         ssriders_getword:=k053244_read(direccion+1)+(k053244_read(direccion) shl 8);
                       end;
     $5c0600..$5c0603:ssriders_getword:=k053260_0.main_read((direccion and 3) shr 1); //k053260
-    $600000..$603fff:if main_m68000.access_8bits then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
+    $600000..$603fff:if main_m68000.access_8bits_hi_dir then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
                         else ssriders_getword:=k052109_0.read_lsb((direccion and $3fff) shr 1) shl 8;
 end;
 end;
@@ -818,13 +818,13 @@ case direccion of
     $1c0800..$1c0803:ssriders_protection_w((direccion and $3) shr 1); //proteccion
     $5a0000..$5a001f:begin  //k053244
                         direccion:=((direccion and $1f) shr 1) and $fe;   // handle mirror address
-                        if main_m68000.access_8bits then k053244_write(direccion+1,valor and $ff)
+                        if main_m68000.access_8bits_hi_dir then k053244_write(direccion+1,valor and $ff)
                           else k053244_write(direccion,valor shr 8);
                      end;
     $5c0600..$5c0603:k053260_0.main_write((direccion and 3) shr 1,valor); //k053260
     $5c0604:snd_z80.pedir_irq:=HOLD_LINE; //sound
     $5c0700..$5c071f:k053251_0.lsb_w((direccion and $1f) shr 1,valor); //k053251
-    $600000..$603fff:if main_m68000.access_8bits then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
+    $600000..$603fff:if main_m68000.access_8bits_hi_dir then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
                         else k052109_0.write_lsb((direccion and $3fff) shr 1,valor shr 8);
   end;
 end;

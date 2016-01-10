@@ -262,7 +262,7 @@ case direccion of
   $380002:opwolf_getword:=$7f;
   $3a0000:opwolf_getword:=raton.x+15;  //mouse x
   $3a0002:opwolf_getword:=raton.y;  //mouse y
-  $3e0002:if main_m68000.access_8bits then opwolf_getword:=taitosound_comm_r;
+  $3e0002:if main_m68000.access_8bits_hi_dir then opwolf_getword:=taitosound_comm_r;
   $c00000..$c0ffff:opwolf_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:opwolf_getword:=ram3[(direccion and $3fff) shr 1];
 end;

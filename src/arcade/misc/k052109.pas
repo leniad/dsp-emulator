@@ -10,6 +10,7 @@ type
         destructor free;
     public
         rmrd_line:byte;
+        recalc_char:boolean;
         scroll_x:array[1..2,0..$ff] of word;
         scroll_y:array[1..2,0..$1ff] of byte;
         scroll_tipo:array[1..2] of byte;
@@ -33,9 +34,10 @@ type
         pant:array[0..2] of byte;
         irq_enabled,has_extra_video_ram:boolean;
         char_rom:pbyte;
-        char_size:dword;
+        char_size,char_mask:dword;
         k052109_cb:t_k052109_cb;
         video_buffer:array[0..2,0..$7ff] of boolean;
+        procedure recalc_chars;
         procedure update_all_tile(layer:byte);
         procedure calc_scroll_1;
         procedure calc_scroll_2;
@@ -56,14 +58,15 @@ begin
   self.pant[1]:=pant2;
   self.pant[2]:=pant3;
   self.k052109_cb:=call_back;
-  if (rom<>nil) then begin
-		self.char_rom:=rom;
-		self.char_size:=rom_size;
-	end;
-  init_gfx(0,8,8,char_size div 32);
+  self.recalc_char:=false;
+  self.char_rom:=rom;
+  self.char_size:=rom_size;
+  self.char_mask:=(rom_size div 32)-1;
+  init_gfx(0,8,8,rom_size div 32);
   gfx_set_desc_data(4,0,8*32,24,16,8,0);
   convert_gfx(0,0,rom,@pc_x[0],@pc_y[0],false,false);
   gfx[0].trans[0]:=true;
+  gfx[0].elements:=rom_size div 32;
 end;
 
 destructor k052109_chip.free;
@@ -152,7 +155,7 @@ end	else begin   // control registers
             end;
       $1e00,$3e00:self.romsubbank:=val; // Surprise Attack uses offset 0x3e00
       $1e80:begin
-                main_screen.flip_main_screen:=(val and 1)<>00;
+                main_screen.flip_main_screen:=(val and 1)<>0;
 			          if (self.tileflip_enable<>((val and $06) shr 1)) then begin
 				          self.tileflip_enable:=((val and $06) shr 1);
                   clean_video_buffer;
@@ -225,7 +228,7 @@ end;
 procedure k052109_chip.update_all_tile(layer:byte);
 var
   f,pos_x,pos_y,nchar,color,bank:word;
-  flip_x,flip_y:boolean;
+  flip_x,flip_y,old_flip_y:boolean;
   flags,priority:word;
 begin
 for f:=0 to $7ff do begin
@@ -240,14 +243,15 @@ for f:=0 to $7ff do begin
 	  if self.has_extra_video_ram then bank:=(color and $0c) shr 2; // kludge for X-Men */
 	  color:=(color and $f3) or ((bank and $03) shl 2);
 	  bank:=bank shr 2;
+    old_flip_y:=(color and $02)<>0;
 	  self.k052109_cb(layer,bank,nchar,color,flags,priority);
-    flip_x:=(flags and 1)<>0;
-    flip_y:=(flags and 2)<>0;
 	  // if the callback set flip X but it is not enabled, turn it off */
-	  if ((self.tileflip_enable and 1)=0) then flip_x:=false;
+	  if ((self.tileflip_enable and 1)=0) then flip_x:=false
+      else flip_x:=(flags and 1)<>0;
 	  // if flip Y is enabled and the attribute but is set, turn it on */
-	  if (((color and $02)<>0) and ((self.tileflip_enable and 2)<>0)) then flip_y:=true;
-    put_gfx_trans_flip(pos_x*8,pos_y*8,nchar,color shl 4,self.pant[layer],0,flip_x,flip_y);
+	  if (old_flip_y and ((self.tileflip_enable and 2)<>0)) then flip_y:=true
+      else flip_y:=(flags and 2)<>0;
+    put_gfx_trans_flip(pos_x*8,pos_y*8,nchar and self.char_mask,color shl 4,self.pant[layer],0,flip_x,flip_y);
 	  //tileinfo.category = priority;
     video_buffer[layer,f]:=false;
   end;
@@ -328,8 +332,20 @@ if ((self.scrollctrl and $18)=$10) then begin
 	end;
 end;
 
+procedure k052109_chip.recalc_chars;
+const
+  pc_x_ram:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+  pc_y_ram:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+begin
+  self.recalc_char:=false;
+  gfx_set_desc_data(4,0,8*32,0,1,2,3);
+  convert_gfx(0,0,self.char_rom,@pc_x_ram[0],@pc_y_ram[0],false,false);
+  self.clean_video_buffer;
+end;
+
 procedure k052109_chip.draw_tiles;
 begin
+  if self.recalc_char then recalc_chars;
   self.calc_scroll_1;
   self.calc_scroll_2;
   self.update_all_tile(0);

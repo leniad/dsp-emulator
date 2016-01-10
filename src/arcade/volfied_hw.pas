@@ -229,7 +229,7 @@ case direccion of
   $400000..$47ffff:volfied_getword:=ram2[(direccion and $7ffff) shr 1];
   $500000..$503fff:volfied_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $d00000:volfied_getword:=$60;
-  $e00002:if main_m68000.access_8bits then volfied_getword:=taitosound_comm_r;
+  $e00002:if main_m68000.access_8bits_hi_dir then volfied_getword:=taitosound_comm_r;
   $f00000..$f007ff:volfied_getword:=volfied_cchip_ram_r(direccion and $7ff);
 	$f00802:volfied_getword:=volfied_cchip_ctrl_r;
 end;

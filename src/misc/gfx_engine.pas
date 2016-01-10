@@ -144,13 +144,10 @@ function GetBit(bit_nbr:dword;buffer:pbyte):byte;inline;
 var
   oct_nbr:dword;
   bit_n:byte;
-  pos:pbyte;
 begin
 oct_nbr:=bit_nbr shr 3;
 bit_n:=bit_nbr and 7;
-pos:=buffer;
-inc(pos,oct_nbr);
-getbit:=((pos^ shr (7-bit_n)) and 1);
+getbit:=((buffer[oct_nbr] shr (7-bit_n)) and 1);
 end;
 
 procedure Rotatel(n:word;ngfx:pgfx;increment:dword);
@@ -198,7 +195,6 @@ var
   n,elements:dword;
   oct,b0,o,i,bit_pixel:byte;
   SpriteNbr,ind:dword;
-  pos:pbyte;
   temp_cx,temp_cy:pdword;
   ngfx:pgfx;
 begin
@@ -219,9 +215,7 @@ for n:=0 to elements do begin
       b0:=GetBit(des_gfx.pos_planos[bit_pixel]+Cy^+Cx^+SpriteNbr,SpriteRom);
       oct:=oct or (b0 shl (des_gfx.bit_pixel-1-bit_pixel));
      end;
-     pos:=ngfx.datos;
-     inc(pos,ind+increment);
-     pos^:=oct;
+     ngfx.datos[ind+increment]:=oct;
      ind:=ind+1;
      inc(cx);
     end;  //del i

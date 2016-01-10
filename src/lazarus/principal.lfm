@@ -2869,6 +2869,10 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object Gradius31: TMenuItem
+            Caption = 'Gradius III'
+            OnClick = CambiarMaquina
+          end
         end
         object MenuItem11: TMenuItem
           Caption = '80x86'

@@ -46,89 +46,111 @@ function sample_status(num:byte):boolean;
 
 implementation
 
+type
+  theader=packed record
+    magic1:array[0..3] of ansichar;
+    size:dword;
+    magic2:array[0..3] of ansichar;
+  end;
+  tchunk_info=packed record
+    name:array[0..3] of ansichar;
+    size:dword;
+  end;
+  tfmt_info=packed record
+    audio_format:word;
+    num_channles:word;
+    sample_rate:dword;
+    byte_rate:dword;
+    block_aling:word;
+    bits_per_sample:word;
+  end;
+
 function convert_wav(source:pbyte;var data:pword;source_long:dword;var long:dword):boolean;
 var
-  cadena:string;
   h:integer;
-  ltemp,f,longitud,lsamples,total_size:dword;
+  f,longitud:dword;
   salir,fmt,datos,loop:boolean;
-  temp2,ncanales,nbits,temp,temp_w:word;
+  temp,temp_w:word;
   data2:pword;
   lsamples_m,lsamples_loop:single;
+  header:^theader;
+  chunk:^tchunk_info;
+  fmt_info:^tfmt_info;
+  ptemp:pbyte;
 begin
 convert_wav:=false;
-cadena:='';
 longitud:=0;
 loop:=false;
-for temp:=0 to 3 do begin
-  cadena:=cadena+chr(source^);
-  inc(source);inc(longitud);
+ptemp:=source;
+getmem(header,sizeof(theader));
+copymemory(header,ptemp,12);
+inc(ptemp,12);
+inc(longitud,12);
+if header.magic1<>'RIFF' then begin
+  freemem(header);
+  exit;
 end;
-inc(source,4);inc(longitud,4);
-for temp:=0 to 3 do begin
-  cadena:=cadena+chr(source^);
-  inc(source);inc(longitud);
+if header.magic2<>'WAVE' then begin
+  freemem(header);
+  exit;
 end;
-if cadena<>'RIFFWAVE' then exit;
+freemem(header);
+getmem(chunk,sizeof(tchunk_info));
 fmt:=false;
 datos:=false;
 salir:=false;
 while not(salir) do begin
-  cadena:='';
-  for temp:=0 to 3 do begin
-    cadena:=cadena+chr(source^);
-    inc(source);inc(longitud);
-  end;
-  if cadena='fmt ' then begin
-    copymemory(@total_size,source,4);
-    inc(source,4);inc(longitud,4);
+  copymemory(chunk,ptemp,8);
+  inc(ptemp,8);
+  inc(longitud,8);
+  if chunk.name='fmt ' then begin
+    getmem(fmt_info,sizeof(tfmt_info));
+    copymemory(fmt_info,ptemp,16);
+    inc(ptemp,chunk.size);
+    inc(longitud,chunk.size);
     //Tipo de compresion
-    copymemory(@temp2,source,2);
-    inc(source,2);inc(longitud,2);
-    if temp2<>1 then exit; //Solo soporto PCM!
+    if fmt_info.audio_format<>1 then begin //Solo soporto PCM!
+      freemem(chunk);
+      freemem(fmt_info);
+      exit;
+    end;
     //Numero de canales
-    copymemory(@ncanales,source,2);
-    if ((ncanales<>1) and (ncanales<>2)) then exit;
-    inc(source,2);inc(longitud,2);
+    if ((fmt_info.num_channles<>1) and (fmt_info.num_channles<>2)) then begin
+      freemem(chunk);
+      freemem(fmt_info);
+      exit;
+    end;
     //Samples seg.
-    copymemory(@lsamples,source,4);
-    inc(source,4);inc(longitud,4);
-    lsamples_m:=44100/lsamples;
+    lsamples_m:=44100/fmt_info.sample_rate;
     lsamples_loop:=lsamples_m;
-    //Me salto 'Average bytes seg' y 'Bloq align'
-    inc(source,6);inc(longitud,6);
-    //Bits por sample (8 o 16)
-    copymemory(@nbits,source,2);
-    inc(source,2);inc(longitud,2);
-    inc(source,total_size-16);inc(longitud,total_size-16);
     fmt:=true;
   end;
-  if cadena='data' then begin
-    if not(fmt) then exit;
-    //Longitud en samples
-    copymemory(@ltemp,source,4);
-    inc(source,4);inc(longitud,4);
+  if chunk.name='data' then begin
+    if not(fmt) then begin
+      freemem(chunk);
+      freemem(fmt_info);
+      exit;
+    end;
     //Y ahora resampleado a 44100, 16bits, mono
-    if (nbits=16) then ltemp:=ltemp shr 1;
-    if (ncanales=2) then ltemp:=ltemp shr 1;
-    long:=round(ltemp*lsamples_m)+1;
+    if (fmt_info.bits_per_sample=16) then chunk.size:=chunk.size shr 1;
+    if (fmt_info.num_channles=2) then chunk.size:=chunk.size shr 1;
+    long:=round(chunk.size*lsamples_m)+1;
     getmem(data,long*2);
     data2:=data;
-    for f:=0 to (ltemp-1) do begin
-      if nbits=8 then begin
-        temp:=byte(source^-128) shl 8;
-        inc(source);inc(longitud);
-        if ncanales=2 then begin
-          temp:=(temp+(byte(source^-128) shl 8)) shr 1;
-          inc(source);
+    for f:=0 to (chunk.size-1) do begin
+      if fmt_info.bits_per_sample=8 then begin
+        temp:=byte(ptemp^-128) shl 8;
+        inc(ptemp);inc(longitud);
+        if fmt_info.num_channles=2 then begin
+          temp:=(temp+(byte(ptemp^-128) shl 8)) shr 1;
+          inc(ptemp);
         end;
       end else begin
-        copymemory(@temp_w,source,2);
-        inc(source,2);inc(longitud,2);
-        temp:=temp_w;
-        if ncanales=2 then begin
-          copymemory(@temp_w,source,2);
-          inc(source,2);
+        copymemory(@temp,ptemp,2);
+        inc(ptemp,2);inc(longitud,2);
+        if fmt_info.num_channles=2 then begin
+          copymemory(@temp_w,ptemp,2);
+          inc(ptemp,2);
           temp:=(temp+temp_w) shr 1;
         end;
       end;
@@ -143,11 +165,10 @@ while not(salir) do begin
     end;
     datos:=true;
   end;
-  if ((cadena='fact') or (cadena='list') or (cadena='cue') or (cadena='plst') or (cadena='labl') or (cadena='ltxt') or (cadena='smpl') or (cadena='note') or (cadena='inst')) then begin
+  if ((chunk.name='fact') or (chunk.name='list') or (chunk.name='cue') or (chunk.name='plst') or (chunk.name='labl') or (chunk.name='ltxt') or (chunk.name='smpl') or (chunk.name='note') or (chunk.name='inst')) then begin
     //Longitud
-    copymemory(@ltemp,source,4);
-    inc(source,4);inc(longitud,4);
-    inc(data,ltemp);inc(longitud,ltemp);
+    inc(ptemp,chunk.size);
+    inc(longitud,chunk.size);
   end;
   if (fmt and datos) then begin
     salir:=true;
@@ -155,6 +176,8 @@ while not(salir) do begin
   end;
   if longitud>source_long then salir:=true;
 end;
+freemem(chunk);
+freemem(fmt_info);
 end;
 
 function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean):boolean;

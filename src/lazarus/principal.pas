@@ -177,6 +177,7 @@ type
     MenuItem28: TMenuItem;
     freekick1: TMenuItem;
     boogwins1: TMenuItem;
+    Gradius31: TMenuItem;
     ssriders1: TMenuItem;
     TMNT1: TMenuItem;
     TMNT_hw: TMenuItem;

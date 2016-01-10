@@ -37,8 +37,7 @@ const
 var
  mem_rom:array[0..3,0..$3fff] of byte;
  banco_rom,banco_vram,sound_latch,bg_clip_mode,sy1,sy2,sx1:byte;
- bg_ram,char_ram,dummy_ram:array[0..$fff] of byte;
- io_ram:array[0..$fff] of byte;
+ bg_ram,char_ram,dummy_ram,io_ram:array[0..$fff] of byte;
  title_screen,paleta_gris:boolean;
 
 procedure Cargar_psychic5;
@@ -214,26 +213,23 @@ if (io_ram[$30c] and 1)<>0 then begin  //fondo activo?
 end else fill_full_screen(4,0);
 //sprites
 if not(title_screen) then begin
- for f:=0 to $44 do begin
-    attr:=memoria[$f20d+(f shl 4)];
+ for f:=0 to $5f do begin
+    attr:=memoria[$f20d+(f*16)];
     flip_x:=(attr and $20) shr 5;
-    spr1:=0 xor flip_x;
-    spr2:=1 xor flip_x;
-    spr3:=2 xor flip_x;
-    spr4:=3 xor flip_x;
-    nchar:=memoria[$f20e+(f shl 4)]+((attr and $c0) shl 2);
-    color:=(memoria[$f20f+(f shl 4)] and $f) shl 4;
-    x:=memoria[$f20b+(f shl 4)]+((attr and 4) shl 6);
-    y:=(256-(memoria[$f20c+(f shl 4)]+16))+((attr and 1) shl 8);
+    nchar:=memoria[$f20e+(f*16)]+((attr and $c0) shl 2);
+    color:=(memoria[$f20f+(f*16)] and $f) shl 4;
+    x:=memoria[$f20b+(f*16)]+((attr and 4) shl 6);
+    y:=(256-(memoria[$f20c+(f*16)]+16))+((attr and 1) shl 8);
     if (attr and 8)<>0 then begin //Sprites grandes
-      put_gfx_sprite(nchar+spr1,color,(attr and $20)<>0,(attr and $10)<>0,1);
-      actualiza_gfx_sprite(x,y,4,1);
-      put_gfx_sprite(nchar+spr2,color,(attr and $20)<>0,(attr and $10)<>0,1);
-      actualiza_gfx_sprite(x+16,y,4,1);
-      put_gfx_sprite(nchar+spr3,color,(attr and $20)<>0,(attr and $10)<>0,1);
-      actualiza_gfx_sprite(x,y-16,4,1);
-      put_gfx_sprite(nchar+spr4,color,(attr and $20)<>0,(attr and $10)<>0,1);
-      actualiza_gfx_sprite(x+16,y-16,4,1);
+      spr1:=0 xor flip_x;
+      spr2:=1 xor flip_x;
+      spr3:=2 xor flip_x;
+      spr4:=3 xor flip_x;
+      put_gfx_sprite_diff(nchar+spr1,color,(attr and $20)<>0,(attr and $10)<>0,1,0,16);
+      put_gfx_sprite_diff(nchar+spr2,color,(attr and $20)<>0,(attr and $10)<>0,1,16,16);
+      put_gfx_sprite_diff(nchar+spr3,color,(attr and $20)<>0,(attr and $10)<>0,1,0,0);
+      put_gfx_sprite_diff(nchar+spr4,color,(attr and $20)<>0,(attr and $10)<>0,1,16,0);
+      actualiza_gfx_sprite_size(x,y-16,4,32,32);
     end else begin
       put_gfx_sprite(nchar,color,(attr and $20)<>0,(attr and $10)<>0,1);
       actualiza_gfx_sprite(x,y,4,1);
@@ -412,39 +408,41 @@ end;
 function psychic5_getbyte(direccion:word):byte;
 begin
 case direccion of
+ 0..$7fff,$e000..$efff,$f200..$ffff:psychic5_getbyte:=memoria[direccion];
  $8000..$bfff:psychic5_getbyte:=mem_rom[banco_rom,direccion and $3fff];
  $c000..$dfff:psychic5_getbyte:=ram_paginada_r(direccion and $1fff);
  $f002:psychic5_getbyte:=banco_rom;
  $f003:psychic5_getbyte:=banco_vram;
- else psychic5_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure psychic5_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $c000..$dfff:ram_paginada_w(direccion and $1fff,valor);
-        $f000:sound_latch:=valor;
-        $f002:banco_rom:=valor and $3;
-        $f003:banco_vram:=valor;
-        $f005:title_screen:=(valor<>0);
+  $c000..$dfff:ram_paginada_w(direccion and $1fff,valor);
+  $e000..$efff,$f200..$ffff:memoria[direccion]:=valor;
+  $f000:sound_latch:=valor;
+  $f002:banco_rom:=valor and $3;
+  $f003:banco_vram:=valor;
+  $f005:title_screen:=(valor<>0);
 end;
 end;
 
 function psychic5_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$c000..$c7ff:psychic5_snd_getbyte:=mem_snd[direccion];
   $e000:psychic5_snd_getbyte:=sound_latch;
-  else psychic5_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure psychic5_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
+case direccion of
+  $c000..$c7ff:mem_snd[direccion]:=valor;
+end;
 end;
 
 procedure psychic5_outbyte(valor:byte;puerto:word);

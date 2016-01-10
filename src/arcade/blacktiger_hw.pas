@@ -60,13 +60,8 @@ const
 var
  scroll_ram:array[0..$3FFF] of byte;
  memoria_rom:array [0..$F,$0..$3FFF] of byte;
- banco_rom,soundlatch:byte;
- scroll_x,scroll_y:word;
- scroll_bank:word;
- mask_x,mask_y,shl_row:byte;
- mask_sx,mask_sy:word;
- i8751_latch,z80_latch:byte;
- timer_hs:byte;
+ banco_rom,soundlatch,i8751_latch,z80_latch,timer_hs,mask_x,mask_y,shl_row:byte;
+ mask_sx,mask_sy,scroll_x,scroll_y,scroll_bank:word;
  bg_on,ch_on,spr_on:boolean;
 
 procedure Cargar_blktiger;

@@ -288,7 +288,7 @@ case direccion of
   $200000..$203fff:rainbow_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $390000..$390002:rainbow_getword:=marcade.dswa;
   $3b0000..$3b0002:rainbow_getword:=marcade.dswb;
-  $3e0002:if main_m68000.access_8bits then rainbow_getword:=taitosound_comm_r;
+  $3e0002:if main_m68000.access_8bits_hi_dir then rainbow_getword:=taitosound_comm_r;
   $800000..$8007ff:rainbow_getword:=rbisland_cchip_ram_r(direccion and $7ff);
 	$800802:rainbow_getword:=rbisland_cchip_ctrl_r;
   $c00000..$c0ffff:rainbow_getword:=ram2[(direccion and $ffff) shr 1];

@@ -2598,6 +2598,10 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object Gradius31: TMenuItem
+            Caption = 'Gradius III'
+            OnClick = CambiarMaquina
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'
@@ -2679,7 +2683,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010105000700480320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101050007004C0320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

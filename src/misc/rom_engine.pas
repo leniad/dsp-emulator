@@ -19,6 +19,7 @@ function cargar_roms(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantida
 function cargar_roms16b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 function cargar_roms16w(sitio:pword;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 function cargar_roms32b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+function cargar_roms32b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 function cargar_roms_skip(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms,skip:byte):boolean;
 function cargar_roms_swap_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 function cargar_roms_skip_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms,skip:byte):boolean;
@@ -198,6 +199,35 @@ repeat
     freemem(mem_temp);
 until ((troms.n='') or (f=cantidad_roms));
 cargar_roms32b:=true;
+end;
+
+function cargar_roms32b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+var
+  f:byte;
+  ptemp,ptemp2,mem_temp:pbyte;
+  troms:ptipo_roms;
+  h:dword;
+begin
+cargar_roms32b_b:=false;
+troms:=ctipo_roms;
+f:=0;
+repeat
+    getmem(mem_temp,troms.l);
+    ptemp2:=mem_temp;
+    ptemp:=sitio;
+    inc(ptemp,troms.p);
+    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
+      if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
+    for h:=0 to (troms.l-1) do begin
+      ptemp^:=ptemp2^;
+      inc(ptemp,4);
+      inc(ptemp2);
+    end;
+    inc(troms);
+    inc(f);
+    freemem(mem_temp);
+until ((troms.n='') or (f=cantidad_roms));
+cargar_roms32b_b:=true;
 end;
 
 

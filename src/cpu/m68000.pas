@@ -54,7 +54,7 @@ type
             putword_:tputword;
             halt:boolean;
             irq:array[0..7] of byte;
-            access_8bits:boolean;
+            access_8bits_hi_dir,access_8bits_lo_dir:boolean;
             r:preg_m68000;
             procedure reset;
             procedure run(maximo:single);
@@ -89,7 +89,7 @@ type
         end;
 
 var
-    main_m68000,snd_m68000:cpu_m68000;
+    main_m68000,snd_m68000,sub_m68000:cpu_m68000;
 
 implementation
 const
@@ -183,7 +183,8 @@ for f:=0 to 7 do self.irq[f]:=CLEAR_LINE;
 self.pedir_halt:=CLEAR_LINE;
 self.pedir_reset:=CLEAR_LINE;
 self.halt:=false;
-self.access_8bits:=false;
+self.access_8bits_hi_dir:=false;
+self.access_8bits_lo_dir:=false;
 end;
 
 procedure cpu_m68000.poner_band(pila:word);
@@ -274,13 +275,15 @@ var
   tempw:word;
 begin
 if (addr and 1)<>0 then begin
-  self.access_8bits:=true;
+  self.access_8bits_hi_dir:=true;
   tempw:=self.getword(addr);
   getbyte:=tempw and $ff;
-  self.access_8bits:=false;
+  self.access_8bits_hi_dir:=false;
 end else begin
+  self.access_8bits_lo_dir:=true;
   tempw:=self.getword(addr);
   getbyte:=tempw shr 8;
+  self.access_8bits_lo_dir:=false;
 end;
 end;
 
@@ -290,10 +293,14 @@ var
 begin
 tempw:=self.getword(addr);
 if (addr and 1)<>0 then begin
-  self.access_8bits:=true;
+  self.access_8bits_hi_dir:=true;
   self.putword(addr,(tempw and $ff00) or val);
-  self.access_8bits:=false;
-end else self.putword(addr,(tempw and $ff) or (val shl 8));
+  self.access_8bits_hi_dir:=false;
+end else begin
+  self.access_8bits_lo_dir:=true;
+  self.putword(addr,(tempw and $ff) or (val shl 8));
+  self.access_8bits_lo_dir:=false;
+end;
 end;
 
 function cpu_m68000.leerdir_b(dir:byte):byte;
@@ -949,14 +956,6 @@ end;
 if self.halt then begin
   self.contador:=trunc(maximo);
   exit;
-end;
-if r.pc.l=$17ae then begin
-  r.pc.l:=0;
-  r.pc.l:=$17ae;
-end;
-if r.pc.l=$17dc then begin
-  r.pc.l:=0;
-  r.pc.l:=$17dc;
 end;
 self.opcode:=true;
 instruccion:=self.getword(r.pc.l);

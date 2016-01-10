@@ -139,6 +139,7 @@ llamadas_maquina.iniciar:=iniciar_megasys1;
 llamadas_maquina.bucle_general:=megasys1_principal;
 llamadas_maquina.cerrar:=cerrar_megasys1;
 llamadas_maquina.reset:=reset_megasys1;
+llamadas_maquina.fps_max:=56.18;
 end;
 
 procedure decript_phantasm(dest,source:pword);
@@ -441,10 +442,6 @@ begin
  sprite_bank:=0;
  active_layer:=$ff;
  sprites_split:=false;
- fillchar(ram,$10000,0);
- fillchar(ram_snd,$20000,0);
- fillchar(vregs_ram,$400,0);
- fillchar(obj_ram,$2000,0);
  for f:=0 to 2 do begin
   layer_scr[f].scroll_x:=0;
   layer_scr[f].scroll_y:=0;
