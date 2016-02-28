@@ -1,5 +1,10 @@
 ﻿# dsp-emulator
 DSP Emulator status<br>
+<b>28/02/16 - DSP Emulator 0.16b2 source and Win32 updated.</b><br><pre>
+-Lazarus: New sound engine, better sound. Some problems with stereo sounds (Using SDL2 v2.0.4)
+-Samples: Fixes resample of no standar frequencies.
+-ROM Engine: New export data system, now you can export ROM data in ClearMame Pro format to manage ROMs used. Finished about 50%. (Configure DSP --> ROM --> Export ROM Data)
+</pre><br>
 <b>10/01/16 - DSP Emulator 0.16b1 Final version. Updated source, Windows 32/64 and Linux 32/64 binaries.</b><br>
 <img src='http://s10.postimg.org/dqoip41vd/gradius3.png'><br>
 <b>26/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot updated again.</b><br><pre>

@@ -1,4 +1,4 @@
-﻿<h1>DSP Emulator v0.16 by Leniad 2001-2015</h1><br>
+﻿<h1>DSP Emulator v0.16b1 by Leniad 2001-2016</h1><br>
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 Why pascal, and not C, C++, Java or any other language? Well, pascal it is powerful enough to handle my emulator (120fps the Spectrum driver with a Pentium CPU) and it is as good as many any other languages.<br>
@@ -19,6 +19,7 @@ IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS<br><br>
 <b>1.1-. Keys</b>
 <hr>
 -General Keys:<br><pre>
+    F1 --> Service key
     F2 --> Full speed/Normal Speed
     F3 --> Reset machine
     F6 --> Full screen
@@ -355,7 +356,7 @@ Alien Syndrome             | ALIENSYN.ZIP |      95    | Sega System 16A
                                                        | Falta sonido PCM
 Wonder Boy III             | WB3.ZIP      |      95    | Sega System 16A
                                                        | Falta sonido PCM
-Time Pilot '84             | TP84.ZIP     |      99    | Missing RC filters
+Time Pilot '84             | TP84.ZIP     |     100    |
 Tutankham                  | TUTANKHM.ZIP |     100    |
 Pang                       | PANG.ZIP     |      95    | Missing YM2413
 Super Pang                 | SPANG.ZIP    |      95    | Missing YM2413
@@ -435,8 +436,12 @@ Free Kick                  | FREEKICK.ZIP |     100    |
 Boogie Wings               | BOOGIEW.ZIP  |      20    | Basic driver
 Pinball Action             | PBACTION.ZIP |     100    |
 Renegade                   | RENEGADE.ZIP |     100    |
+Teenage Mutant Ninja       |
+   Turtles                 | TMNT.ZIP     |     100    | TMNT HW
+Sunset Riders              | SSRIDERS.ZIP |     100    | TMNT HW
+Gradius III                | GRADIUS3.ZIP |     100    |
 -------------------------------------------------------------------------------------------------------------------------------------
-Total: 202</pre>
+Total: 206</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
 If you want to add another language, edit any file with the extension '.lng' in the 'LNG' directory, rename it with the name of the language and send it to me to add it to the next version.<br>
