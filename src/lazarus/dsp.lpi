@@ -14,7 +14,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="16"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="518"/>
+      <BuildNr Value="522"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.16"/>
     </VersionInfo>
@@ -59,9 +59,8 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="357"/>
-        <CursorPos X="45" Y="381"/>
+        <TopLine Value="744"/>
+        <CursorPos X="43" Y="746"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -256,21 +255,19 @@
       </Unit29>
       <Unit30>
         <Filename Value="..\misc\main_engine.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="403"/>
         <CursorPos X="39" Y="411"/>
         <UsageCount Value="62"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit30>
       <Unit31>
         <Filename Value="..\misc\controls_engine.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="267"/>
         <CursorPos Y="280"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit31>
       <Unit32>
@@ -376,10 +373,12 @@
       <Unit43>
         <Filename Value="..\misc\sound_engine.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="77"/>
-        <CursorPos X="16" Y="85"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="209"/>
+        <CursorPos X="24" Y="226"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit43>
       <Unit44>
@@ -656,11 +655,10 @@
       </Unit79>
       <Unit80>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="487"/>
         <CursorPos X="44" Y="499"/>
         <UsageCount Value="15"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit80>
       <Unit81>
@@ -695,10 +693,11 @@
       </Unit84>
       <Unit85>
         <Filename Value="..\ordenadores\misc\spectrum_misc.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="556"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="553"/>
         <CursorPos X="41" Y="565"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit85>
       <Unit86>
@@ -747,7 +746,8 @@
       <Unit92>
         <Filename Value="..\misc\gfx_engine.pas"/>
         <EditorIndex Value="-1"/>
-        <CursorPos Y="4"/>
+        <TopLine Value="896"/>
+        <CursorPos X="16" Y="910"/>
         <UsageCount Value="16"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit92>
@@ -776,11 +776,10 @@
       </Unit95>
       <Unit96>
         <Filename Value="..\arcade\blacktiger_hw.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="269"/>
         <CursorPos Y="329"/>
         <UsageCount Value="14"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit96>
       <Unit97>
@@ -877,11 +876,10 @@
       </Unit108>
       <Unit109>
         <Filename Value="..\arcade\gng_hw.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="225"/>
         <CursorPos X="41" Y="235"/>
         <UsageCount Value="14"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit109>
       <Unit110>
@@ -959,7 +957,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="317"/>
         <CursorPos X="18" Y="319"/>
-        <UsageCount Value="87"/>
+        <UsageCount Value="90"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit119>
       <Unit120>
@@ -1009,7 +1007,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="8"/>
-        <UsageCount Value="64"/>
+        <UsageCount Value="67"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit125>
       <Unit126>
@@ -1187,9 +1185,9 @@
         <Filename Value="..\misc\lib_sdl2.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="211"/>
-        <CursorPos X="23" Y="216"/>
-        <UsageCount Value="59"/>
+        <TopLine Value="275"/>
+        <CursorPos X="48" Y="295"/>
+        <UsageCount Value="62"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit148>
@@ -1337,11 +1335,10 @@
       </Unit167>
       <Unit168>
         <Filename Value="..\arcade\tmnt_hw.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="15"/>
         <CursorPos X="15" Y="30"/>
         <UsageCount Value="14"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit168>
       <Unit169>
@@ -1402,132 +1399,133 @@
       </Unit176>
       <Unit177>
         <Filename Value="..\snd\k053260.pas"/>
-        <EditorIndex Value="8"/>
-        <TopLine Value="178"/>
-        <CursorPos X="20" Y="187"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="359"/>
+        <CursorPos X="5" Y="384"/>
         <UsageCount Value="14"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit177>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="..\misc\lib_sdl2.pas"/>
-        <Caret Line="216" Column="23" TopLine="211"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="19" Column="11" TopLine="11"/>
       </Position1>
       <Position2>
-        <Filename Value="..\misc\controls_engine.pas"/>
-        <Caret Line="286" Column="100" TopLine="278"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="23" Column="22" TopLine="10"/>
       </Position2>
       <Position3>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="135" Column="34" TopLine="126"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="43" Column="61" TopLine="24"/>
       </Position3>
       <Position4>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="390" Column="8" TopLine="387"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="226" Column="63" TopLine="203"/>
       </Position4>
       <Position5>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="159" Column="9" TopLine="150"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="288" Column="5" TopLine="264"/>
       </Position5>
       <Position6>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="73" Column="13" TopLine="66"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="118" TopLine="118"/>
       </Position6>
       <Position7>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="135" Column="34" TopLine="119"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="9" Column="28"/>
       </Position7>
       <Position8>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="389" TopLine="373"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="226" Column="9" TopLine="206"/>
       </Position8>
       <Position9>
-        <Filename Value="..\misc\main_engine.pas"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="134" Column="24" TopLine="121"/>
       </Position9>
       <Position10>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="68" Column="19" TopLine="64"/>
+        <Filename Value="..\ordenadores\misc\spectrum_misc.pas"/>
+        <Caret Line="565" Column="41" TopLine="553"/>
       </Position10>
       <Position11>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="162" Column="9" TopLine="146"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="4" Column="18"/>
       </Position11>
       <Position12>
-        <Filename Value="..\misc\main_engine.pas"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="276" Column="3" TopLine="257"/>
       </Position12>
       <Position13>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="68" Column="19" TopLine="52"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="5" Column="38"/>
       </Position13>
       <Position14>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="162" Column="29" TopLine="146"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="153" Column="4" TopLine="141"/>
       </Position14>
       <Position15>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="201" Column="15" TopLine="185"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="134" Column="15" TopLine="121"/>
       </Position15>
       <Position16>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="260" Column="15" TopLine="245"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="136" Column="29" TopLine="121"/>
       </Position16>
       <Position17>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="285" Column="13" TopLine="270"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="225" TopLine="206"/>
       </Position17>
       <Position18>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="675" Column="32" TopLine="659"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="218" Column="22" TopLine="211"/>
       </Position18>
       <Position19>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="698" Column="32" TopLine="680"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="381" Column="45" TopLine="357"/>
       </Position19>
       <Position20>
-        <Filename Value="..\arcade\tmnt_hw.pas"/>
-        <Caret Line="452" Column="37" TopLine="445"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="691" Column="17" TopLine="691"/>
       </Position20>
       <Position21>
-        <Filename Value="..\snd\k053260.pas"/>
-        <Caret Line="200" Column="5" TopLine="193"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="834" Column="17" TopLine="828"/>
       </Position21>
       <Position22>
-        <Filename Value="..\misc\main_engine.pas"/>
-        <Caret Line="735" Column="26" TopLine="722"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="218" Column="21" TopLine="202"/>
       </Position22>
       <Position23>
-        <Filename Value="..\arcade\tmnt_hw.pas"/>
-        <Caret Line="451" Column="17" TopLine="439"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="834" Column="17" TopLine="828"/>
       </Position23>
       <Position24>
-        <Filename Value="..\misc\controls_engine.pas"/>
-        <Caret Line="301" Column="17" TopLine="292"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="810" Column="25" TopLine="804"/>
       </Position24>
       <Position25>
-        <Filename Value="..\misc\controls_engine.pas"/>
-        <Caret Line="129" Column="22" TopLine="122"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="720" Column="25" TopLine="713"/>
       </Position25>
       <Position26>
-        <Filename Value="..\arcade\blacktiger_hw.pas"/>
-        <Caret Line="277" Column="15" TopLine="274"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="742" TopLine="731"/>
       </Position26>
       <Position27>
-        <Filename Value="..\arcade\tmnt_hw.pas"/>
-        <Caret Line="488" Column="54" TopLine="485"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="761" Column="25" TopLine="745"/>
       </Position27>
       <Position28>
-        <Filename Value="..\misc\init_games.pas"/>
-        <Caret Column="44"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="754" Column="9" TopLine="744"/>
       </Position28>
       <Position29>
-        <Filename Value="principal.pas"/>
-        <Caret Line="380" Column="45" TopLine="216"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="227" TopLine="212"/>
       </Position29>
       <Position30>
-        <Filename Value="..\misc\init_games.pas"/>
-        <Caret Line="499" Column="44" TopLine="486"/>
+        <Filename Value="..\misc\sound_engine.pas"/>
+        <Caret Line="226" TopLine="208"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

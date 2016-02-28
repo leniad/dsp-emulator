@@ -75,7 +75,7 @@ constructor tk053260_chip.create(clock:dword;rom:pbyte;size:dword;amp:single);
 var
   f:byte;
 begin
-  for f:=0 to 3 do voice[f]:=tKDSC_Voice.create(rom,size);
+  for f:=0 to 3 do self.voice[f]:=tKDSC_Voice.create(rom,size);
   self.ntimer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/CLOCKS_PER_SAMPLE),internal_update_k053260,true);
   self.tsample_num:=init_channel;
   self.tsample_num2:=init_channel;
@@ -108,7 +108,7 @@ end;
 
 procedure tk053260_chip.main_write(direccion,valor:byte);
 begin
-  portdata[direccion and 1]:=valor;
+  self.portdata[direccion and 1]:=valor;
 end;
 
 function tk053260_chip.read(direccion:byte):byte;
@@ -203,8 +203,10 @@ if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonid
 tsample[self.tsample_num2,sound_status.posicion_sonido]:=round(out2*self.amp);
 if sound_status.stereo then tsample[self.tsample_num2,sound_status.posicion_sonido+1]:=round(out2*self.amp);
 self.posicion:=0;
-fillchar(self.buffer[0,0],sizeof(integer)*5,0);
-fillchar(self.buffer[1,0],sizeof(integer)*5,0);
+for f:=0 to 4 do begin
+  self.buffer[0,f]:=0;
+  self.buffer[1,f]:=0;
+end;
 end;
 
 procedure internal_update_k053260;

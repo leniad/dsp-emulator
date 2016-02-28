@@ -250,7 +250,8 @@ uses
   eepromser in '..\devices\eepromser.pas',
   k053251 in '..\arcade\misc\k053251.pas',
   k007232 in '..\snd\k007232.pas',
-  gradius3_hw in '..\arcade\gradius3_hw.pas';
+  gradius3_hw in '..\arcade\gradius3_hw.pas',
+  rom_export in '..\misc\rom_export.pas';
 
 {$R *.res}
 

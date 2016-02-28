@@ -66,7 +66,6 @@ begin
   gfx_set_desc_data(4,0,8*32,24,16,8,0);
   convert_gfx(0,0,rom,@pc_x[0],@pc_y[0],false,false);
   gfx[0].trans[0]:=true;
-  gfx[0].elements:=rom_size div 32;
 end;
 
 destructor k052109_chip.free;
@@ -227,9 +226,8 @@ end;
 
 procedure k052109_chip.update_all_tile(layer:byte);
 var
-  f,pos_x,pos_y,nchar,color,bank:word;
+  f,pos_x,pos_y,nchar,color,bank,flags,priority:word;
   flip_x,flip_y,old_flip_y:boolean;
-  flags,priority:word;
 begin
 for f:=0 to $7ff do begin
   pos_x:=f mod 64;

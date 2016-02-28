@@ -17,8 +17,7 @@ type
 
   cpu_deco_146=class
       constructor create;
-      procedure free;
-      destructor destroy;
+      destructor free;
     public
       procedure set_interface_scramble(a9,a8,a7,a6,a5,a4,a3,a2,a1,a0:byte);
       procedure set_interface_scramble_reverse;
@@ -1086,13 +1085,8 @@ begin
   copymemory(@self.internal_ram,@deco_146ram,sizeof(deco_146ram));
 end;
 
-destructor cpu_deco_146.Destroy;
+destructor cpu_deco_146.Free;
 begin
-end;
-
-procedure cpu_deco_146.Free;
-begin
-self.destroy;
 end;
 
 procedure cpu_deco_146.reset;
@@ -1165,7 +1159,6 @@ begin
 	end;
 	reorder:=temp;
 end;
-
 
 function cpu_deco_146.read_data_getloc(address:word;var location:integer):word;
 var

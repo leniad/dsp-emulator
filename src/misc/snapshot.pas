@@ -1258,7 +1258,7 @@ case main_vars.tipo_maquina of
   7:if not(cargar_roms(@memoria_temp[0],@cpc464_rom,'cpc464.zip',1)) then exit;
   8:begin
       if not(cargar_roms(@cpc_mem[10,0],@ams_rom,'cpc664.zip',1)) then exit;
-      if not(cargar_roms(@memoria_temp[0],@cpc646_rom,'cpc664.zip',1)) then exit;
+      if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip',1)) then exit;
   end;
   9:begin
       if not(cargar_roms(@cpc_mem[10,0],@ams_rom,'cpc6128.zip',1)) then exit;

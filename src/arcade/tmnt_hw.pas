@@ -674,7 +674,7 @@ while EmuStatus=EsRuning do begin
   snd_z80.run(frame_s);
   frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
   case f of
-    21:if f=21 then update_video_ssriders;
+    21:update_video_ssriders;
     239:if k052109_0.is_irq_enabled then main_m68000.irq[4]:=HOLD_LINE;
   end;
  end;

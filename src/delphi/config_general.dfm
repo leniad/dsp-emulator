@@ -68,10 +68,6 @@ object MConfig: TMConfig
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Misc'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox3: TGroupBox
         Left = 6
         Top = 13
@@ -1031,6 +1027,19 @@ object MConfig: TMConfig
         Caption = '2'
         TabOrder = 3
         OnClick = Button6Click
+      end
+    end
+    object ROM: TTabSheet
+      Caption = 'ROM'
+      ImageIndex = 4
+      object BitBtn21: TBitBtn
+        Left = 40
+        Top = 32
+        Width = 121
+        Height = 49
+        Caption = 'Export ROM data'
+        TabOrder = 0
+        OnClick = BitBtn21Click
       end
     end
   end

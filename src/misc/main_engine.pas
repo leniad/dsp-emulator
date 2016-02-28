@@ -8,9 +8,9 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
 
 const
         {$ifndef fpc}
-        dsp_version='0.16ß1';
+        dsp_version='0.16ß2WIP';
         {$else}
-        dsp_version='0.16b1';
+        dsp_version='0.16b2WIP';
         {$endif}
 
         pant_sprites=20;
@@ -299,11 +299,7 @@ var
   handle_:integer;
 begin
 if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
-  {$ifdef windows}
-  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE)<0) then halt(0);
-  {$else}
   if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
-  {$endif}
   keystate:=pbyte(SDL_GetKeyboardState(nil));
   SDL_SetHintWithPriority(libSDL_HINT_GRAB_KEYBOARD,'1',libSDL_HINT_OVERRIDE);
 end;

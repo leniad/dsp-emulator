@@ -716,6 +716,8 @@ EmuStatus:=EsRuning;
 timer1.Enabled:=true;
 BitBtn3.Enabled:=false;
 BitBtn4.Enabled:=true;
+SDL_PauseAudio(0);
+SDL_ClearQueuedAudio(1);
 {$ifdef windows}
 if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$else}
@@ -755,6 +757,7 @@ if addr(llamadas_maquina.reset)<>nil then llamadas_maquina.reset;
 {$ifdef windows}
 if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
 {$endif}
+SDL_ClearQueuedAudio(1);
 end;
 
 procedure Tprincipal1.CambiaAudio(Sender: TObject);
@@ -830,6 +833,8 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 BitBtn3.Enabled:=true;
 BitBtn4.Enabled:=false;
+SDL_ClearQueuedAudio(1);
+SDL_PauseAudio(1);
 end;
 
 procedure Tprincipal1.Salir1Click(Sender: TObject);

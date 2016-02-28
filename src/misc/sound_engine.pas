@@ -1,12 +1,7 @@
 unit sound_engine;
 
 interface
-uses {$ifdef fpc}
-     {$ifndef windows}lib_sdl2,SDL2_mixer,{$else}windows,mmsystem,{$endif}
-     {$else}
-     {$ifdef windows}windows,mmsystem,{$endif}
-     {$endif}
-     timer_engine,dialogs;
+uses {$ifdef windows}windows,{$endif}{$ifndef fpc}mmsystem,{$endif}lib_sdl2,timer_engine,dialogs;
 
 const
         max_audio_buffer=$f;
@@ -17,7 +12,7 @@ const
 type
         tipo_sonido=record
           posicion_sonido:word;
-          {$ifdef windows}
+          {$ifndef fpc}
           audio:array[0..max_canales-1] of HWAVEOUT;
           {$endif}
           cpu_clock:dword;
@@ -42,10 +37,10 @@ var
         sound_status:tipo_sonido;
         update_sound_proc:exec_type;
         sound_engine_timer:byte;
-        {$ifdef windows}
+        {$ifndef fpc}
         cab_audio:array[0..max_canales-1,0..max_audio_buffer-1] of wavehdr;
         {$else}
-        chunks:array[0..max_canales-1,0..max_audio_buffer-1] of tmix_chunk;
+        sample_final:array[0..long_max_audio-1] of smallint;
         {$endif}
 
 function iniciar_audio(stereo_sound:boolean):boolean;
@@ -65,7 +60,7 @@ begin
   get_sample_num:=self.tsample_num;
 end;
 
-{$ifdef windows}
+{$ifndef fpc}
 function iniciar_audio(stereo_sound:boolean):boolean;
 var
   format:TWaveFormatEx;
@@ -85,14 +80,11 @@ end;
 fillchar(Format,SizeOf(TWaveFormatEx),0);
 Format.wFormatTag:=WAVE_FORMAT_PCM;
 Format.nChannels:=canales;
+Format.nSamplesPerSec:=44100;
 case sound_status.calidad_audio of
   0:Format.nSamplesPerSec:=11025;
   1:Format.nSamplesPerSec:=22050;
-  3:begin
-      sound_status.hay_sonido:=false;
-      Format.nSamplesPerSec:=44100;
-    end;
-  else Format.nSamplesPerSec:=44100;
+  3:sound_status.hay_sonido:=false;
 end;
 Format.wBitsPerSample:=16;
 Format.nBlockAlign:=Format.nChannels*(Format.wBitsPerSample div 8);
@@ -133,11 +125,11 @@ for j:=0 to max_canales-1 do begin
 end;
 end;
 {$else}
-//Funciones de Linux
 function iniciar_audio(stereo_sound:boolean):boolean;
 var
-  audio_rate,audio_format,audio_channels:integer;
-  f,g,canales:byte;
+  wanted,have:libsdl_AudioSpec;
+  canales:byte;
+  audio_rate:dword;
 begin
 iniciar_audio:=false;
 sound_status.hay_tsonido:=false;
@@ -151,46 +143,31 @@ end else begin
     canales:=1;
 end;
 sound_status.long_sample:=round(FREQ_BASE_AUDIO/llamadas_maquina.fps_max)*canales;
+audio_rate:=44100;
 case sound_status.calidad_audio of
   0:audio_rate:=11025;
   1:audio_rate:=22050;
-  3:begin
-      audio_rate:=44100;
-      sound_status.hay_sonido:=false;
-    end;
-    else audio_rate:=44100;
+  3:sound_status.hay_sonido:=false;
 end;
-audio_format:=libAUDIO_S16;
-audio_channels:=canales;
-sound_status.sample_final:=(trunc(audio_rate/llamadas_maquina.fps_max)+1)*canales;
-//audio_buffers:=sound_status.sample_final;
-if (Mix_OpenAudio(audio_rate, audio_format, audio_channels,sound_status.sample_final)<>0) then exit;
-//preparar canales
-if (mix_allocatechannels(max_canales)=0) then exit;
-for g:=0 to max_canales-1 do begin
-    for f:=0 to max_audio_buffer-1 do begin
-          chunks[g,f].allocated:=1;
-          getmem(chunks[g,f].abuf,sound_status.sample_final*2);
-          chunks[g,f].alen:=sound_status.sample_final*2;
-          chunks[g,f].volume:=128;
-    end;
-end;
+sound_status.sample_final:=round(audio_rate/llamadas_maquina.fps_max)*canales;
+fillchar(wanted,sizeof(libsdl_AudioSpec),0);
+wanted.freq:=audio_rate;
+wanted.format:=libAUDIO_S16;
+wanted.channels:=canales;
+wanted.samples:=sound_status.sample_final;
+//wanted.size:=sound_status.sample_final*2;
+wanted.callback:=nil;//sound_call_back;
+if (SDL_OpenAudio(@wanted,@have)<>0) then exit;
+SDL_PauseAudio(0);
+SDL_ClearQueuedAudio(1);
 sound_status.hay_tsonido:=true;
 reset_audio;
 iniciar_audio:=true;
 end;
 
 procedure close_audio;
-var
-   f,g:byte;
 begin
-if not(sound_status.hay_tsonido) then exit;
-for g:=0 to max_canales-1 do
-    for f:=0 to max_audio_buffer-1 do if chunks[g,f].abuf<>nil then begin
-      freemem(chunks[g,f].abuf);
-      chunks[g,f].abuf:=nil;
-    end;
-mix_closeaudio();
+SDL_CloseAudio;
 end;
 {$endif}
 
@@ -235,16 +212,21 @@ for f:=0 to sound_status.canales_usados do begin
     2:;
   end;
   if @sound_status.filter_call[f]<>nil then sound_status.filter_call[f](f);
-  {$ifdef windows}
+  {$ifndef fpc}
   copymemory(cab_audio[f][sound_status.num_buffer].lpData,@tsample[f],sound_status.sample_final*2);
   waveOutWrite(sound_status.audio[f],@cab_audio[f][sound_status.num_buffer],sizeof(WAVEHDR));
   {$else}
-  copymemory(chunks[f,sound_status.num_buffer].abuf,@tsample[f],sound_status.sample_final*2);
-  mix_playchannel(f,@chunks[f,sound_status.num_buffer],-1);
+  for h:=0 to (sound_status.sample_final-1) do sample_final[h]:=sample_final[h]+tsample[f,h];
   {$endif}
   fillchar(tsample[f],long_max_audio,0);
 end;
 end;
+{$ifdef fpc}
+if main_screen.rapido then SDL_ClearQueuedAudio(1);
+for h:=0 to (sound_status.sample_final-1) do sample_final[h]:=sample_final[h] div (sound_status.canales_usados+1);
+SDL_QueueAudio(1,@sample_final[0],sound_status.long_sample*2);
+fillchar(sample_final[0],long_max_audio,0);
+{$endif}
 sound_status.num_buffer:=sound_status.num_buffer+1;
 if sound_status.num_buffer=max_audio_buffer then sound_status.num_buffer:=0;
 sound_status.posicion_sonido:=0;
@@ -289,5 +271,15 @@ begin
   if sound_status.canales_usados>max_canales then MessageDlg('Utilizados mas canales de sonido de los disponibles!!', mtInformation,[mbOk], 0);
   init_channel:=sound_status.canales_usados;
 end;
+
+{$ifdef fpc}
+procedure sound_call_back(userdata:Pointer;stream:libSDL_puint8;len:Integer);
+begin
+if len>0 then begin
+  copymemory(stream,@sample_final[0],len);
+end;
+fillchar(sample_final[0],long_max_audio,0);
+end;
+{$endif}
 
 end.

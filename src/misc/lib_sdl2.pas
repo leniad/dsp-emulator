@@ -53,6 +53,14 @@ type
     TSDL_GetTicks=function:UInt32;cdecl;
     TSDL_SetWindowTitle=procedure(window:PSDL_Window;const title:PAnsiChar);cdecl;
     {$endif}
+    //Audio
+    TSDL_OpenAudio=function(desired:PSDL_AudioSpec;obtained:PSDL_AudioSpec):Integer;cdecl;
+    TSDL_CloseAudio=procedure;cdecl;
+    TSDL_QueueAudio=function (dev:TSDL_AudioDeviceID;const data:pointer;len:Uint32):Integer;cdecl;
+    TSDL_PauseAudio=procedure (pause_on: Integer);cdecl;
+    TSDL_MixAudio=procedure (dst:PUInt8;src:PUInt8;len:UInt32;volume:Integer);cdecl;
+    TSDL_ClearQueuedAudio=procedure (dev:TSDL_AudioDeviceID);cdecl;
+    TSDL_GetQueuedAudioSize=function (dev:TSDL_AudioDeviceID):UInt32;cdecl;
 
     libsdl_rect=Tsdl_rect;
     libsdlp_Surface=psdl_surface;
@@ -60,9 +68,13 @@ type
     libsdlP_cursor=PSDL_cursor;
     libSDL_Event=TSDL_Event;
     libsdlP_Window =PSDL_Window;
+    libsdlP_AudioSpec=PSDL_AudioSpec;
+    libsdl_AudioSpec=TSDL_AudioSpec;
+    libSDL_AudioCallback=TSDL_AudioCallback;
+    libSDL_puint8=PUint8;
 
 const
-  libAUDIO_S16= $8010;
+  libAUDIO_S16=$8010;
   libSDL_JOYBUTTONDOWN=SDL_JOYBUTTONDOWN;
   libSDL_JOYBUTTONUP=SDL_JOYBUTTONUP;
   libSDL_JOYAXISMOTION=SDL_JOYAXISMOTION;
@@ -205,6 +217,14 @@ var
   SDL_GetTicks:TSDL_GetTicks;
   SDL_SetWindowTitle:TSDL_SetWindowTitle;
   {$endif}
+  //Audio
+  SDL_OpenAudio:TSDL_OpenAudio;
+  SDL_CloseAudio:TSDL_CloseAudio;
+  SDL_QueueAudio:TSDL_QueueAudio;
+  SDL_PauseAudio:TSDL_PauseAudio;
+  SDL_MixAudio:TSDL_MixAudio;
+  SDL_ClearQueuedAudio:TSDL_ClearQueuedAudio;
+  SDL_GetQueuedAudioSize:TSDL_GetQueuedAudioSize;
 
 implementation
 
@@ -282,6 +302,14 @@ end;
 //video
 @SDL_SetWindowTitle:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowTitle');
 {$endif}
+//Audio
+@SDL_OpenAudio:=GetProcAddress(sdl_dll_Handle,'SDL_OpenAudio');
+@SDL_CloseAudio:=GetProcAddress(sdl_dll_Handle,'SDL_CloseAudio');
+@SDL_QueueAudio:=GetProcAddress(sdl_dll_Handle,'SDL_QueueAudio');
+@SDL_PauseAudio:=GetProcAddress(sdl_dll_Handle,'SDL_PauseAudio');
+@SDL_MixAudio:=GetProcAddress(sdl_dll_Handle,'SDL_MixAudio');
+@SDL_ClearQueuedAudio:=GetProcAddress(sdl_dll_Handle,'SDL_ClearQueuedAudio');
+@SDL_GetQueuedAudioSize:=GetProcAddress(sdl_dll_Handle,'SDL_GetQueuedAudioSize');
 end;
 
 procedure close_sdl_lib;

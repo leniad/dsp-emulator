@@ -13,7 +13,7 @@ const
   pantalla_alto=312;
   cpc6128_rom:tipo_roms=(n:'cpc6128.rom';l:$8000;p:0;crc:$9e827fe1);
   cpc464_rom:tipo_roms=(n:'cpc464.rom';l:$8000;p:0;crc:$40852f25);
-  cpc646_rom:tipo_roms=(n:'cpc664.rom';l:$8000;p:0;crc:$9ab5a036);
+  cpc664_rom:tipo_roms=(n:'cpc664.rom';l:$8000;p:0;crc:$9ab5a036);
   ams_rom:tipo_roms=(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd);
 
 type
@@ -274,7 +274,7 @@ case main_vars.tipo_maquina of
     end;
   8:begin
       if not(cargar_roms(@cpc_mem[10,0],@ams_rom,'cpc664.zip')) then exit;
-      if not(cargar_roms(@memoria_temp[0],@cpc646_rom,'cpc664.zip')) then exit;
+      if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip')) then exit;
   end;
   9:begin
       if not(cargar_roms(@cpc_mem[10,0],@ams_rom,'cpc6128.zip')) then exit;

@@ -5,7 +5,7 @@ interface
 uses
   lib_sdl2,Messages,SysUtils,Variants,Classes,Graphics,Controls,Forms,Dialogs,
   StdCtrls,ExtCtrls,lenguaje,main_engine,ComCtrls,Buttons,controls_engine,
-  sound_engine,SHLOBJ;
+  sound_engine,SHLOBJ,rom_export;
 
 type
   TMConfig = class(TForm)
@@ -119,6 +119,8 @@ type
     CheckBox3: TCheckBox;
     Button7: TButton;
     Button8: TButton;
+    ROM: TTabSheet;
+    BitBtn21: TBitBtn;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -158,6 +160,7 @@ type
     procedure Button6Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
+    procedure BitBtn21Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -1064,6 +1067,11 @@ begin
   arcade_input.jbut4[1]:=combobox13.ItemIndex;
   arcade_input.jbut5[1]:=combobox14.ItemIndex;
   close;
+end;
+
+procedure TMConfig.BitBtn21Click(Sender: TObject);
+begin
+export_roms;
 end;
 
 end.

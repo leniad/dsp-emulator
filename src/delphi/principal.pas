@@ -411,8 +411,8 @@ end;
 
 procedure Tprincipal1.FormCreate(Sender: TObject);
 begin
-//SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
-//SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
+SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
+SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
 Init_sdl_lib;
 status_bitmap:=TBitmap.Create;
 EmuStatus:=EsStoped;

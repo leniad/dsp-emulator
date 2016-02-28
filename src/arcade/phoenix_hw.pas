@@ -35,11 +35,6 @@ const
         (n:'b1-ic39.3b';l:$800;p:0;crc:$53413e8f),(n:'b2-ic40.4b';l:$800;p:$800;crc:$0be2ba91),());
         phoenix_pal:array[0..2] of tipo_roms=(
         (n:'mmi6301.ic40';l:$100;p:0;crc:$79350b25),(n:'mmi6301.ic41';l:$100;p:$100;crc:$e176b768),());
-        //Dip
-        phoenix_dip_a:array [0..3] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$0c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'3k 30k'),(dip_val:$4;dip_name:'4k 40k'),(dip_val:$8;dip_name:'5k 50k'),(dip_val:$c;dip_name:'6k 60k'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$10;name:'Coinage';number:2;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Pleiads
         pleiads_rom:array[0..8] of tipo_roms=(
         (n:'ic47.r1';l:$800;p:0;crc:$960212c8),(n:'ic48.r2';l:$800;p:$800;crc:$b254217c),
@@ -52,6 +47,11 @@ const
         (n:'ic39.bin';l:$800;p:0;crc:$85866607),(n:'ic40.bin';l:$800;p:$800;crc:$a841d511),());
         pleiads_pal:array[0..2] of tipo_roms=(
         (n:'7611-5.33';l:$100;p:0;crc:$e38eeb83),(n:'7611-5.26';l:$100;p:$100;crc:$7a1bcb1e),());
+        //Dip
+        phoenix_dip_a:array [0..3] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'3k 30k'),(dip_val:$4;dip_name:'4k 40k'),(dip_val:$8;dip_name:'5k 50k'),(dip_val:$c;dip_name:'6k 60k'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Coinage';number:2;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         pleiads_dip_a:array [0..4] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$0c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'3k 30k'),(dip_val:$4;dip_name:'4k 40k'),(dip_val:$8;dip_name:'5k 50k'),(dip_val:$c;dip_name:'6k 60k'),(),(),(),(),(),(),(),(),(),(),(),())),

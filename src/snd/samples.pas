@@ -69,7 +69,7 @@ function convert_wav(source:pbyte;var data:pword;source_long:dword;var long:dwor
 var
   h:integer;
   f,longitud:dword;
-  salir,fmt,datos,loop:boolean;
+  salir,fmt,datos:boolean;
   temp,temp_w:word;
   data2:pword;
   lsamples_m,lsamples_loop:single;
@@ -80,7 +80,6 @@ var
 begin
 convert_wav:=false;
 longitud:=0;
-loop:=false;
 ptemp:=source;
 getmem(header,sizeof(theader));
 copymemory(header,ptemp,12);
@@ -157,11 +156,8 @@ while not(salir) do begin
      for h:=0 to (trunc(lsamples_loop)-1) do begin
         data2^:=temp;
         inc(data2);
-        loop:=true;
      end;
-     if loop then lsamples_loop:=lsamples_loop-round(lsamples_m);
-     lsamples_loop:=lsamples_loop+lsamples_m;
-     loop:=false;
+     lsamples_loop:=(lsamples_loop-trunc(lsamples_loop))+lsamples_m;
     end;
     datos:=true;
   end;
