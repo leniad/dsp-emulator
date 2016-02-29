@@ -132,6 +132,51 @@ object FLoadRom: TFLoadRom
     Visible = False
     OnClick = RomListClick
     OnDblClick = RomListDblClick
+    ColWidths = (
+      120
+      120)
+    RowHeights = (
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15
+      15)
   end
   object BitBtn3: TBitBtn
     Left = 305

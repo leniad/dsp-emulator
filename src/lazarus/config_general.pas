@@ -6,7 +6,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ComCtrls, ExtCtrls, StdCtrls, Buttons, EditBtn, lib_sdl2, controls_engine,
-  main_engine, lenguaje, sound_engine;
+  main_engine, lenguaje, sound_engine,rom_export;
 
 type
 
@@ -41,6 +41,7 @@ type
     Button6: TButton;
     Button7: TButton;
     Button8: TButton;
+    Button9: TButton;
     CheckBox1: TCheckBox;
     CheckBox2: TCheckBox;
     CheckBox3: TCheckBox;
@@ -116,6 +117,7 @@ type
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
     TabSheet4: TTabSheet;
+    TabSheet5: TTabSheet;
     procedure BitBtn10Click(Sender: TObject);
     procedure BitBtn11Click(Sender: TObject);
     procedure BitBtn12Click(Sender: TObject);
@@ -144,6 +146,7 @@ type
     procedure Button6Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
+    procedure Button9Click(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure RadioButton1Click(Sender: TObject);
@@ -520,6 +523,11 @@ procedure TMConfig.Button8Click(Sender: TObject);
 begin
 joy_calibration.show;
 bucle_joystick(1);
+end;
+
+procedure TMConfig.Button9Click(Sender: TObject);
+begin
+export_roms;
 end;
 
 procedure TMConfig.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);

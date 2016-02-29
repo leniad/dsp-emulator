@@ -3,8 +3,7 @@ unit gradius3_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,sound_engine,ym_2151,k052109,k051960,
-     misc_functions,k053251,eepromser,k007232;
+     pal_engine,sound_engine,ym_2151,k052109,k051960,k007232;
 
 procedure Cargar_gradius3;
 function iniciar_gradius3:boolean;
@@ -66,7 +65,6 @@ var
  sound_latch,sprite_colorbase,irqB_mask:byte;
  layer_colorbase:array[0..2] of byte;
  irqA_mask,priority:boolean;
- layerpri:array[0..2] of byte;
 
 procedure Cargar_gradius3;
 begin

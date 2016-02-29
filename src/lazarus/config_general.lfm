@@ -17,7 +17,7 @@ object MConfig: TMConfig
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.5'
+  LCLVersion = '1.6.0.1'
   object Button1: TButton
     Left = 53
     Height = 41
@@ -947,13 +947,13 @@ object MConfig: TMConfig
     end
     object TabSheet4: TTabSheet
       Caption = 'Main Keys'
-      ClientHeight = 325
-      ClientWidth = 395
+      ClientHeight = 367
+      ClientWidth = 391
       object Label21: TLabel
         Left = 60
-        Height = 14
+        Height = 13
         Top = 40
-        Width = 36
+        Width = 35
         Caption = 'COIN 1'
         ParentColor = False
       end
@@ -968,9 +968,9 @@ object MConfig: TMConfig
       end
       object Label22: TLabel
         Left = 148
-        Height = 14
+        Height = 13
         Top = 40
-        Width = 36
+        Width = 35
         Caption = 'COIN 2'
         ParentColor = False
       end
@@ -985,9 +985,9 @@ object MConfig: TMConfig
       end
       object Label24: TLabel
         Left = 128
-        Height = 14
+        Height = 13
         Top = 96
-        Width = 75
+        Width = 74
         Caption = 'Player 2 START'
         ParentColor = False
       end
@@ -1011,11 +1011,25 @@ object MConfig: TMConfig
       end
       object Label23: TLabel
         Left = 40
-        Height = 14
+        Height = 13
         Top = 96
-        Width = 75
+        Width = 74
         Caption = 'Player 1 START'
         ParentColor = False
+      end
+    end
+    object TabSheet5: TTabSheet
+      Caption = 'ROM'
+      ClientHeight = 367
+      ClientWidth = 391
+      object Button9: TButton
+        Left = 35
+        Height = 39
+        Top = 33
+        Width = 102
+        Caption = 'Export ROM data'
+        OnClick = Button9Click
+        TabOrder = 0
       end
     end
   end

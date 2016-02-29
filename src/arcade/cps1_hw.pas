@@ -199,7 +199,7 @@ const
         (n:'kr_18.11c';l:$20000;p:0;crc:$da69d15f),(n:'kr_19.12c';l:$20000;p:$20000;crc:$bfc654e9),());
         //Street Fighter II': Champion Edition
         sf2ce_rom1:array[0..3] of tipo_roms=(
-        (n:'s92e_23a.8f';l:$80000;p:$00000;crc:$0aaa1a3a),(n:'s92_22a.7f';l:$80000;p:$80000;crc:$2bbe15ed),
+        (n:'s92e_23b.8f';l:$80000;p:$00000;crc:$0aaa1a3a),(n:'s92_22b.7f';l:$80000;p:$80000;crc:$2bbe15ed),
         (n:'s92_21a.6f';l:$80000;p:$100000;crc:$925a7877),());
         sf2ce_sound:tipo_roms=(n:'s92_09.11a';l:$10000;p:0;crc:$08f6b60e);
         sf2ce_gfx1:array[0..12] of tipo_roms=(

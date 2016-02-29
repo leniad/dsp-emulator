@@ -58,7 +58,7 @@ FLoadRom.label5.caption:=sound_tipo[games_desc[orden_games[Floadrom.RomList.Sele
 FLoadRom.label9.caption:=games_desc[orden_games[Floadrom.RomList.Selection.Top]].company;
 if games_desc[orden_games[Floadrom.RomList.Selection.Top]].hi then FLoadRom.label6.caption:='YES'
       else FLoadRom.label6.caption:='NO';
-dir:=ChangeFileExt(games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip, '.png');
+dir:=games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip+'.png';
 if FileExists(Directory.Preview+dir) then Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+dir)
       else Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+'preview.png');
 end;
@@ -94,7 +94,7 @@ with RomList do begin
     end;
     Cells[0,f]:=games_desc[orden_games[f]].name;
     if games_desc[orden_games[f]].zip='' then cells[1,f]:='N/A'
-      else if fileexists(Directory.Arcade_roms+games_desc[orden_games[f]].zip) then cells[1,f]:='YES'
+      else if fileexists(Directory.Arcade_roms+games_desc[orden_games[f]].zip+'.zip') then cells[1,f]:='YES'
         else cells[1,f]:='NO';
   end;
 end;

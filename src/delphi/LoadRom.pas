@@ -59,7 +59,7 @@ case games_desc[orden_games[Floadrom.RomList.Selection.Top]].grid of
   1000:dir:='nes.png';
   1002:dir:='gb.png';
   1003:dir:='chip8.png';
-  else dir:=ChangeFileExt(games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip,'.png');
+  else dir:=games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip+'.png';
 end;
 if FileExists(Directory.Preview+dir) then Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+dir)
       else Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+'preview.png');
@@ -133,7 +133,7 @@ with RomList do begin
     end;
     Cells[0,f]:=games_desc[orden_games[f]].name;
     if games_desc[orden_games[f]].zip='' then cells[1,f]:='N/A'
-      else if fileexists(Directory.Arcade_roms+games_desc[orden_games[f]].zip) then cells[1,f]:='YES'
+      else if fileexists(Directory.Arcade_roms+games_desc[orden_games[f]].zip+'.zip') then cells[1,f]:='YES'
         else cells[1,f]:='NO';
   end;
 end;

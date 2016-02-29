@@ -38,15 +38,13 @@ const
         (n:'456-d03.14a';l:$8000;p:$20000;crc:$8cefb25f),(n:'456-d07.14c';l:$8000;p:$20001;crc:$d50b82cb),
         (n:'456-d04.15a';l:$8000;p:$30000;crc:$9ca75592),(n:'456-d08.15c';l:$8000;p:$30001;crc:$03c0b7f5),());
         nemesis_sound:tipo_roms=(n:'456-d09.9c';l:$4000;p:0;crc:$26bf9636);
-        nemesis_k005289:array[0..2] of tipo_roms=(
-        (n:'400-a01.fse';l:$100;p:$0;crc:$002ccf39),(n:'400-a02.fse';l:$100;p:$100;crc:$feafca05),());
+        rom_k005289:array[0..2] of tipo_roms=(
+        (n:'400-a01.fse';l:$100;p:$0;crc:$5827b1e8),(n:'400-a02.fse';l:$100;p:$100;crc:$2f44f970),());
         gx400_bios:array[0..2] of tipo_roms=(
         (n:'400-a06.15l';l:$8000;p:0;crc:$b99d8cff),(n:'400-a04.10l';l:$8000;p:$1;crc:$d02c9552),());
         twinbee_rom:array[0..2] of tipo_roms=(
         (n:'412-a07.17l';l:$20000;p:$0;crc:$d93c5499),(n:'412-a05.12l';l:$20000;p:$1;crc:$2b357069),());
         twinbee_sound:tipo_roms=(n:'400-e03.5l';l:$2000;p:0;crc:$a5a8e57d);
-        twinbee_k005289:array[0..2] of tipo_roms=(
-        (n:'400-a01.fse';l:$100;p:$0;crc:$5827b1e8),(n:'400-a02.fse';l:$100;p:$100;crc:$2f44f970),());
         //Graficos
         pc_x:array[0..7] of dword=(0*4,1*4,2*4,3*4,4*4,5*4,6*4,7*4);
         pc_y:array[0..7] of dword=(0*4*8,1*4*8,2*4*8,3*4*8,4*4*8,5*4*8,6*4*8,7*4*8);

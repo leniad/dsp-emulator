@@ -19,7 +19,8 @@ procedure pang_outbyte(valor:byte;puerto:word);
 procedure pang_sound_update;
 
 implementation
-const   //Pang
+const
+        //Pang
         pang_rom:array[0..2] of tipo_roms=(
         (n:'pang6.bin';l:$8000;p:0;crc:$68be52cd),(n:'pang7.bin';l:$20000;p:$10000;crc:$4a2e70f6),());
         pang_oki:tipo_roms=(n:'bb1.bin';l:$20000;p:0;crc:$c52e5b8e);

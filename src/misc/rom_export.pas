@@ -1,24 +1,54 @@
 unit rom_export;
 
 interface
-uses rom_engine,dialogs,main_engine,sysutils;
+uses rom_engine,dialogs,main_engine,sysutils,lenguaje;
+
+type
+  tsample_file=record
+    nombre:string;
+  end;
+  ptsample_file=^tsample_file;
 
 procedure export_roms;
 
-implementation
-
-type
-  trom_data=record
-      name:string;
-      description:string;
-      year:string;
-      manufacturer:string;
-      rom:ptipo_roms;
-  end;
-
 const
-        TOTAL_ROMS=100  -1;
-
+        //Samples
+        asteroid_samples:array[0..3] of tsample_file=(
+        (nombre:'explode1.wav'),(nombre:'explode2.wav'),(nombre:'explode3.wav'),());
+        congo_samples:array[0..5] of tsample_file=(
+        (nombre:'gorilla.wav'),(nombre:'bass.wav'),(nombre:'congal.wav'),(nombre:'congah.wav'),(nombre:'rim.wav'),());
+        zaxxon_samples:array[0..12] of tsample_file=(
+        (nombre:'03.wav'),(nombre:'02.wav'),(nombre:'01.wav'),
+        (nombre:'00.wav'),(nombre:'11.wav'),(nombre:'10.wav'),
+        (nombre:'08.wav'),(nombre:'23.wav'),(nombre:'21.wav'),
+        (nombre:'20.wav'),(nombre:'05.wav'),(nombre:'04.wav'),());
+        dkong_samples:array[0..25] of tsample_file=(
+        (nombre:'death.wav'),(nombre:'tune01.wav'),(nombre:'tune02.wav'),
+        (nombre:'tune03.wav'),(nombre:'tune04.wav'),
+        (nombre:'tune05.wav'),(nombre:'tune06.wav'),(nombre:'tune07.wav'),
+        (nombre:'tune08_1.wav'),(nombre:'tune08_2.wav'),
+        (nombre:'tune09_1.wav'),(nombre:'tune09_2.wav'),
+        (nombre:'tune11_1.wav'),(nombre:'tune11_2.wav'),
+        (nombre:'tune12.wav'),(nombre:'tune13.wav'),(nombre:'tune14.wav'),(nombre:'tune15.wav'),
+        (nombre:'ef01_1.wav'),(nombre:'ef01_2.wav'),(nombre:'ef02.wav'),
+        (nombre:'ef03.wav'),(nombre:'ef04.wav'),(nombre:'ef05.wav'),(nombre:'ef06.wav'),());
+        dkjr_samples:array[0..22] of tsample_file=(
+        (nombre:'death.wav'),(nombre:'tune01.wav'),
+        (nombre:'tune02.wav'),(nombre:'tune03.wav'),(nombre:'tune04.wav'),
+        (nombre:'tune05.wav'),(nombre:'tune06.wav'),(nombre:'tune07.wav'),
+        (nombre:'tune08.wav'),(nombre:'tune09.wav'),(nombre:'tune10.wav'),
+        (nombre:'tune11.wav'),(nombre:'tune12.wav'),(nombre:'tune13.wav'),
+        (nombre:'tune14.wav'),(nombre:'ef01.wav'),(nombre:'ef02.wav'),(nombre:'ef03.wav'),
+        (nombre:'ef04.wav'),(nombre:'ef05.wav'),(nombre:'ef06.wav'),(nombre:'ef07.wav'),());
+        mario_samples:array[0..29] of tsample_file=(
+        (nombre:'mario_run.wav'),(nombre:'luigi_run.wav'),(nombre:'skid.wav'),(nombre:'bite_death.wav'),(nombre:'death.wav'),
+        (nombre:'tune1.wav'),(nombre:'tune2.wav'),(nombre:'tune3.wav'),(nombre:'tune4.wav'),(nombre:'tune5.wav'),(nombre:'tune6.wav'),
+        (nombre:'tune7.wav'),(nombre:'tune8.wav'),(nombre:'tune9.wav'),(nombre:'tune10.wav'),(nombre:'tune11.wav'),(nombre:'tune12.wav'),
+        (nombre:'tune13.wav'),(nombre:'tune14.wav'),(nombre:'tune15.wav'),(nombre:'tune16.wav'),(nombre:'tune17.wav'),(nombre:'tune18.wav'),(nombre:'tune19.wav'),
+        (nombre:'coin.wav'),(nombre:'insert_coin.wav'),(nombre:'turtle.wav'),(nombre:'crab.wav'),(nombre:'fly.wav'),());
+        galaxian_samples:array[0..5] of tsample_file=(
+        (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'back1.wav'),(nombre:'back2.wav'),(nombre:'back3.wav'),());
+        rallyx_samples:array[0..1] of tsample_file=((nombre:'bang.wav'),());
         //Ordenadores
         spectrum:array[0..1] of tipo_roms=(
         (n:'spectrum.rom';l:$4000;p:0;crc:$ddee531f),());
@@ -32,6 +62,12 @@ const
         cpc464:array[0..1] of tipo_roms=((n:'cpc464.rom';l:$8000;p:0;crc:$40852f25),());
         cpc664:array[0..2] of tipo_roms=((n:'cpc664.rom';l:$8000;p:0;crc:$9ab5a036),(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd),());
         cpc6128:array[0..2] of tipo_roms=((n:'cpc6128.rom';l:$8000;p:0;crc:$9e827fe1),(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd),());
+        //Consolas
+        coleco_:array[0..1] of tipo_roms=((n:'coleco.rom';l:$2000;p:0;crc:$3aa93ef3),());
+        gameboy:array[0..1] of tipo_roms=((n:'dmg_boot.bin';l:$100;p:0;crc:$59c8598e),());
+        gbcolor:array[0..2] of tipo_roms=(
+        (n:'gbc_boot.1';l:$100;p:0;crc:$779ea374),(n:'gbc_boot.2';l:$700;p:$200;crc:$f741807d),());
+        sms_:array[0..1] of tipo_roms=((n:'mpr-12808.ic2';l:$2000;p:0;crc:$0072ed54),());
         //Pacman
         pacman:array[0..9] of tipo_roms=(
         (n:'pacman.6e';l:$1000;p:0;crc:$c1e6ab10),(n:'pacman.6f';l:$1000;p:$1000;crc:$1a6fb2d4),
@@ -834,7 +870,7 @@ const
         (n:'hrd-hd3';l:$10000;p:$20000;crc:$3353b2c7),(n:'hrd-hd4';l:$10000;p:$30000;crc:$dbc1f9c1),
         (n:'hrd-hd5';l:$10000;p:$40000;crc:$f738c0af),(n:'hrd-hd6';l:$10000;p:$50000;crc:$bf90d3ca),
         (n:'hrd-hd7';l:$10000;p:$60000;crc:$992ce8cb),(n:'hrd-hd8';l:$10000;p:$70000;crc:$359597a4),
-        (n:'hrd-hd15';l:$8000;p:0;crc:$bcbd88c3),(n:'hrd-hd14';l:$8000;p:0;crc:$79a3be51),());
+        (n:'hrd-hd15';l:$10000;p:0;crc:$bcbd88c3),(n:'hrd-hd14';l:$8000;p:0;crc:$79a3be51),());
         //Saboten Bombers
         sabotenb:array[0..7] of tipo_roms=(
         (n:'ic76.sb1';l:$40000;p:0;crc:$b2b0b2cf),(n:'ic75.sb2';l:$40000;p:$1;crc:$367e87b7),
@@ -917,122 +953,1204 @@ const
         (n:'h01_ee08.bin';l:$4000;p:0;crc:$96a65c1d),
         (n:'a03_ee06.bin';l:$4000;p:0;crc:$6039bdd1),(n:'a02_ee05.bin';l:$4000;p:$4000;crc:$b32d8252),
         (n:'c01_ee07.bin';l:$4000;p:0;crc:$3625a68d),(n:'h04_ee09.bin';l:$2000;p:$4000;crc:$6057c907),());
+        //Gun Smoke
+        gunsmoke:array[0..30] of tipo_roms=(
+        (n:'09n_gs03.bin';l:$8000;p:0;crc:$40a06cef),(n:'10n_gs04.bin';l:$8000;p:$8000;crc:$8d4b423f),
+        (n:'12n_gs05.bin';l:$8000;p:$10000;crc:$2b5667fb),(n:'14h_gs02.bin';l:$8000;p:0;crc:$cd7a2c38),
+        (n:'03b_g-01.bin';l:$100;p:0;crc:$02f55589),(n:'04b_g-02.bin';l:$100;p:$100;crc:$e1e36dd9),
+        (n:'05b_g-03.bin';l:$100;p:$200;crc:$989399c0),(n:'09d_g-04.bin';l:$100;p:$300;crc:$906612b5),
+        (n:'14a_g-06.bin';l:$100;p:$400;crc:$4a9da18b),(n:'15a_g-07.bin';l:$100;p:$500;crc:$cb9394fc),
+        (n:'09f_g-09.bin';l:$100;p:$600;crc:$3cee181e),(n:'08f_g-08.bin';l:$100;p:$700;crc:$ef91cdd2),
+        (n:'11f_gs01.bin';l:$4000;p:0;crc:$b61ece9b),
+        (n:'06n_gs22.bin';l:$8000;p:0;crc:$dc9c508c),(n:'04n_gs21.bin';l:$8000;p:$8000;crc:$68883749),
+        (n:'03n_gs20.bin';l:$8000;p:$10000;crc:$0be932ed),(n:'01n_gs19.bin';l:$8000;p:$18000;crc:$63072f93),
+        (n:'06l_gs18.bin';l:$8000;p:$20000;crc:$f69a3c7c),(n:'04l_gs17.bin';l:$8000;p:$28000;crc:$4e98562a),
+        (n:'03l_gs16.bin';l:$8000;p:$30000;crc:$0d99c3b3),(n:'01l_gs15.bin';l:$8000;p:$38000;crc:$7f14270e),
+        (n:'06c_gs13.bin';l:$8000;p:0;crc:$f6769fc5),(n:'05c_gs12.bin';l:$8000;p:$8000;crc:$d997b78c),
+        (n:'04c_gs11.bin';l:$8000;p:$10000;crc:$125ba58e),(n:'02c_gs10.bin';l:$8000;p:$18000;crc:$f469c13c),
+        (n:'06a_gs09.bin';l:$8000;p:$20000;crc:$539f182d),(n:'05a_gs08.bin';l:$8000;p:$28000;crc:$e87e526d),
+        (n:'04a_gs07.bin';l:$8000;p:$30000;crc:$4382c0d2),(n:'02a_gs06.bin';l:$8000;p:$38000;crc:$4cafe7a6),
+        (n:'11c_gs14.bin';l:$8000;p:0;crc:$0af4f7eb),());
+        //1943
+        hw1943:array[0..35] of tipo_roms=(
+        (n:'bmu01c.12d';l:$8000;p:0;crc:$c686cc5c),(n:'bmu02c.13d';l:$10000;p:$8000;crc:$d8880a41),
+        (n:'bmu03c.14d';l:$10000;p:$18000;crc:$3f0ee26c),(n:'bm04.5h';l:$8000;p:0;crc:$ee2bd2d7),
+        (n:'bm1.12a';l:$100;p:0;crc:$74421f18),(n:'bm2.13a';l:$100;p:$100;crc:$ac27541f),
+        (n:'bm3.14a';l:$100;p:$200;crc:$251fb6ff),(n:'bm5.7f';l:$100;p:$300;crc:$206713d0),
+        (n:'bm10.7l';l:$100;p:$400;crc:$33c2491c),(n:'bm9.6l';l:$100;p:$500;crc:$aeea4af7),
+        (n:'bm12.12m';l:$100;p:$600;crc:$c18aa136),(n:'bm11.12l';l:$100;p:$700;crc:$405aae37),
+        (n:'bm8.8c';l:$100;p:$800;crc:$c2010a9e),(n:'bm7.7c';l:$100;p:$900;crc:$b56f30c3),
+        (n:'bm05.4k';l:$8000;p:0;crc:$46cb9d3d),
+        (n:'bm06.10a';l:$8000;p:0;crc:$97acc8af),(n:'bm07.11a';l:$8000;p:$8000;crc:$d78f7197),
+        (n:'bm08.12a';l:$8000;p:$10000;crc:$1a626608),(n:'bm09.14a';l:$8000;p:$18000;crc:$92408400),
+        (n:'bm10.10c';l:$8000;p:$20000;crc:$8438a44a),(n:'bm11.11c';l:$8000;p:$28000;crc:$6c69351d),
+        (n:'bm12.12c';l:$8000;p:$30000;crc:$5e7efdb7),(n:'bm13.14c';l:$8000;p:$38000;crc:$1143829a),
+        (n:'bm15.10f';l:$8000;p:0;crc:$6b1a0443),(n:'bm16.11f';l:$8000;p:$8000;crc:$23c908c2),
+        (n:'bm17.12f';l:$8000;p:$10000;crc:$46bcdd07),(n:'bm18.14f';l:$8000;p:$18000;crc:$e6ae7ba0),
+        (n:'bm19.10j';l:$8000;p:$20000;crc:$868ababc),(n:'bm20.11j';l:$8000;p:$28000;crc:$0917e5d4),
+        (n:'bm21.12j';l:$8000;p:$30000;crc:$9bfb0d89),(n:'bm22.14j';l:$8000;p:$38000;crc:$04f3c274),
+        (n:'bm24.14k';l:$8000;p:0;crc:$11134036),(n:'bm25.14l';l:$8000;p:$8000;crc:$092cf9c1),
+        (n:'bm14.5f';l:$8000;p:0;crc:$4d3c6401),(n:'bm23.8k';l:$8000;p:$8000;crc:$a52aecbd),());
+        //1943 kai
+        hw1943kai:array[0..35] of tipo_roms=(
+        (n:'bmk01.12d';l:$8000;p:0;crc:$7d2211db),(n:'bmk02.13d';l:$10000;p:$8000;crc:$2ebbc8c5),
+        (n:'bmk03.14d';l:$10000;p:$18000;crc:$475a6ac5),(n:'bmk04.5h';l:$8000;p:0;crc:$25f37957),
+        (n:'bmk1.12a';l:$100;p:0;crc:$e001ea33),(n:'bmk2.13a';l:$100;p:$100;crc:$af34d91a),
+        (n:'bmk3.14a';l:$100;p:$200;crc:$43e9f6ef),(n:'bmk5.7f';l:$100;p:$300;crc:$41878934),
+        (n:'bmk10.7l';l:$100;p:$400;crc:$de44b748),(n:'bmk9.6l';l:$100;p:$500;crc:$59ea57c0),
+        (n:'bmk12.12m';l:$100;p:$600;crc:$8765f8b0),(n:'bmk11.12l';l:$100;p:$700;crc:$87a8854e),
+        (n:'bmk8.8c';l:$100;p:$800;crc:$dad17e2d),(n:'bmk7.7c';l:$100;p:$900;crc:$76307f8d),
+        (n:'bmk05.4k';l:$8000;p:0;crc:$884a8692),
+        (n:'bmk06.10a';l:$8000;p:0;crc:$5f7e38b3),(n:'bmk07.11a';l:$8000;p:$8000;crc:$ff3751fd),
+        (n:'bmk08.12a';l:$8000;p:$10000;crc:$159d51bd),(n:'bmk09.14a';l:$8000;p:$18000;crc:$8683e3d2),
+        (n:'bmk10.10c';l:$8000;p:$20000;crc:$1e0d9571),(n:'bmk11.11c';l:$8000;p:$28000;crc:$f1fc5ee1),
+        (n:'bmk12.12c';l:$8000;p:$30000;crc:$0f50c001),(n:'bmk13.14c';l:$8000;p:$38000;crc:$fd1acf8e),
+        (n:'bmk15.10f';l:$8000;p:0;crc:$6b1a0443),(n:'bmk16.11f';l:$8000;p:$8000;crc:$9416fe0d),
+        (n:'bmk17.12f';l:$8000;p:$10000;crc:$3d5acab9),(n:'bmk18.14f';l:$8000;p:$18000;crc:$7b62da1d),
+        (n:'bmk19.10j';l:$8000;p:$20000;crc:$868ababc),(n:'bmk20.11j';l:$8000;p:$28000;crc:$b90364c1),
+        (n:'bmk21.12j';l:$8000;p:$30000;crc:$8c7fe74a),(n:'bmk22.14j';l:$8000;p:$38000;crc:$d5ef8a0e),
+        (n:'bmk24.14k';l:$8000;p:0;crc:$bf186ef2),(n:'bmk25.14l';l:$8000;p:$8000;crc:$a755faf1),
+        (n:'bmk14.5f';l:$8000;p:0;crc:$cf0f5a53),(n:'bmk23.8k';l:$8000;p:$8000;crc:$17f77ef9),());
+        hw1942:array[0..23] of tipo_roms=(
+        (n:'srb-03.m3';l:$4000;p:0;crc:$d9dafcc3),(n:'srb-04.m4';l:$4000;p:$4000;crc:$da0cf924),
+        (n:'srb-05.m5';l:$4000;p:$8000;crc:$d102911c),(n:'srb-06.m6';l:$2000;p:$c000;crc:$466f8248),
+        (n:'srb-07.m7';l:$4000;p:$10000;crc:$0d31038c),(n:'sr-01.c11';l:$4000;p:0;crc:$bd87f06b),
+        (n:'sb-5.e8';l:$100;p:0;crc:$93ab8153),(n:'sb-6.e9';l:$100;p:$100;crc:$8ab44f7d),
+        (n:'sb-7.e10';l:$100;p:$200;crc:$f4ade9a4),(n:'sb-0.f1';l:$100;p:$300;crc:$6047d91b),
+        (n:'sb-4.d6';l:$100;p:$400;crc:$4858968d),(n:'sb-8.k3';l:$100;p:$500;crc:$f6fad943),
+        (n:'sr-02.f2';l:$2000;p:0;crc:$6ebca191),
+        (n:'sr-08.a1';l:$2000;p:0;crc:$3884d9eb),(n:'sr-09.a2';l:$2000;p:$2000;crc:$999cf6e0),
+        (n:'sr-10.a3';l:$2000;p:$4000;crc:$8edb273a),(n:'sr-11.a4';l:$2000;p:$6000;crc:$3a2726c3),
+        (n:'sr-12.a5';l:$2000;p:$8000;crc:$1bd3d8bb),(n:'sr-13.a6';l:$2000;p:$a000;crc:$658f02c4),
+        (n:'sr-14.l1';l:$4000;p:0;crc:$2528bec6),(n:'sr-15.l2';l:$4000;p:$4000;crc:$f89287aa),
+        (n:'sr-16.n1';l:$4000;p:$8000;crc:$024418f8),(n:'sr-17.n2';l:$4000;p:$c000;crc:$e2c7e489),());
+        jailbrek:array[0..13] of tipo_roms=(
+        (n:'507p03.11d';l:$4000;p:$8000;crc:$a0b88dfd),(n:'507p02.9d';l:$4000;p:$c000;crc:$444b7d8e),
+        (n:'507l08.4f';l:$4000;p:0;crc:$e3b7a226),(n:'507j09.5f';l:$4000;p:$4000;crc:$504f0912),
+        (n:'507j04.3e';l:$4000;p:0;crc:$0d269524),(n:'507j05.4e';l:$4000;p:$4000;crc:$27d4f6f4),
+        (n:'507j06.5e';l:$4000;p:$8000;crc:$717485cb),(n:'507j07.3f';l:$4000;p:$c000;crc:$e933086f),
+        (n:'507j10.1f';l:$20;p:0;crc:$f1909605),(n:'507j11.2f';l:$20;p:$20;crc:$f70bb122),
+        (n:'507j13.7f';l:$100;p:$40;crc:$d4fe5c97),(n:'507j12.6f';l:$100;p:$140;crc:$0266c7db),
+        (n:'507l01.8c';l:$4000;p:$0;crc:$0c8a3605),());
+        circusc:array[0..18] of tipo_roms=(
+        (n:'380_s05.3h';l:$2000;p:$6000;crc:$48feafcf),(n:'380_r04.4h';l:$2000;p:$8000;crc:$c283b887),
+        (n:'380_r03.5h';l:$2000;p:$a000;crc:$e90c0e86),(n:'380_q02.6h';l:$2000;p:$c000;crc:$4d847dc6),
+        (n:'380_q01.7h';l:$2000;p:$e000;crc:$18c20adf),
+        (n:'380_l14.5c';l:$2000;p:0;crc:$607df0fb),(n:'380_l15.7c';l:$2000;p:$2000;crc:$a6ad30e1),
+        (n:'380_j12.4a';l:$2000;p:0;crc:$56e5b408),(n:'380_j13.5a';l:$2000;p:$2000;crc:$5aca0193),
+        (n:'380_j06.11e';l:$2000;p:0;crc:$df0405c6),(n:'380_j07.12e';l:$2000;p:$2000;crc:$23dfe3a6),
+        (n:'380_j08.13e';l:$2000;p:$4000;crc:$3ba95390),(n:'380_j09.14e';l:$2000;p:$6000;crc:$a9fba85a),
+        (n:'380_j10.15e';l:$2000;p:$8000;crc:$0532347e),(n:'380_j11.16e';l:$2000;p:$a000;crc:$e1725d24),
+        (n:'380_j18.2a';l:$20;p:0;crc:$10dd4eaa),(n:'380_j17.7b';l:$100;p:$20;crc:$13989357),
+        (n:'380_j16.10c';l:$100;p:$120;crc:$c244f2aa),());
+        ironhors:array[0..12] of tipo_roms=(
+        (n:'13c_h03.bin';l:$8000;p:$4000;crc:$24539af1),(n:'12c_h02.bin';l:$4000;p:$c000;crc:$fab07f86),
+        (n:'10c_h01.bin';l:$4000;p:0;crc:$2b17930f),
+        (n:'08f_h06.bin';l:$8000;p:0;crc:$f21d8c93),(n:'07f_h05.bin';l:$8000;p:$1;crc:$60107859),
+        (n:'09f_h07.bin';l:$8000;p:$10000;crc:$c761ec73),(n:'06f_h04.bin';l:$8000;p:$10001;crc:$c1486f61),
+        (n:'03f_h08.bin';l:$100;p:0;crc:$9f6ddf83),(n:'04f_h09.bin';l:$100;p:$100;crc:$e6773825),
+        (n:'05f_h10.bin';l:$100;p:$200;crc:$30a57860),(n:'10f_h12.bin';l:$100;p:$300;crc:$5eb33e73),
+        (n:'10f_h11.bin';l:$100;p:$400;crc:$a63e37d8),());
+        //Rtype
+        rtype:array[0..24] of tipo_roms=(
+        (n:'rt_r-h0-b.1b';l:$10000;p:1;crc:$591c7754),(n:'rt_r-l0-b.3b';l:$10000;p:$0;crc:$a1928df0),
+        (n:'rt_r-h1-b.1c';l:$10000;p:$20001;crc:$a9d71eca),(n:'rt_r-l1-b.3c';l:$10000;p:$20000;crc:$0df3573d),
+        (n:'rt_b-a0.3c';l:$8000;p:0;crc:$4e212fb0),(n:'rt_b-a1.3d';l:$8000;p:$8000;crc:$8a65bdff),
+        (n:'rt_b-a2.3a';l:$8000;p:$10000;crc:$5a4ae5b9),(n:'rt_b-a3.3e';l:$8000;p:$18000;crc:$73327606),
+        (n:'rt_b-b0.3j';l:$8000;p:0;crc:$a7b17491),(n:'rt_b-b1.3k';l:$8000;p:$8000;crc:$b9709686),
+        (n:'rt_b-b2.3h';l:$8000;p:$10000;crc:$433b229a),(n:'rt_b-b3.3f';l:$8000;p:$18000;crc:$ad89b072),
+        (n:'rt_r-00.1h';l:$10000;p:0;crc:$dad53bc0),(n:'rt_r-01.1j';l:$8000;p:$10000;crc:$5e441e7f),
+        (n:'rt_r-01.1j';l:$8000;p:$18000;crc:$5e441e7f),(n:'rt_r-10.1k';l:$10000;p:$20000;crc:$d6a66298),
+        (n:'rt_r-11.1l';l:$8000;p:$30000;crc:$791df4f8),(n:'rt_r-11.1l';l:$8000;p:$38000;crc:$791df4f8),
+        (n:'rt_r-20.3h';l:$10000;p:$40000;crc:$fc247c8a),(n:'rt_r-21.3j';l:$8000;p:$50000;crc:$ed793841),
+        (n:'rt_r-21.3j';l:$8000;p:$58000;crc:$ed793841),(n:'rt_r-30.3k';l:$10000;p:$60000;crc:$eb02a1cb),
+        (n:'rt_r-31.3l';l:$8000;p:$70000;crc:$8558355d),(n:'rt_r-31.3l';l:$8000;p:$78000;crc:$8558355d),());
+        //Hammering Harry
+        hharry:array[0..14] of tipo_roms=(
+        (n:'a-h0-v.rom';l:$20000;p:1;crc:$c52802a5),(n:'a-l0-v.rom';l:$20000;p:$0;crc:$f463074c),
+        (n:'a-h1-0.rom';l:$10000;p:$60001;crc:$3ae21335),(n:'a-l1-0.rom';l:$10000;p:$60000;crc:$bc6ac5f9),
+        (n:'hh_a0.rom';l:$20000;p:0;crc:$c577ba5f),(n:'hh_a1.rom';l:$20000;p:$20000;crc:$429d12ab),
+        (n:'hh_a2.rom';l:$20000;p:$40000;crc:$b5b163b0),(n:'hh_a3.rom';l:$20000;p:$60000;crc:$8ef566a1),
+        (n:'hh_00.rom';l:$20000;p:0;crc:$ec5127ef),(n:'hh_10.rom';l:$20000;p:$20000;crc:$def65294),
+        (n:'hh_20.rom';l:$20000;p:$40000;crc:$bb0d6ad4),(n:'hh_30.rom';l:$20000;p:$60000;crc:$4351044e),
+        (n:'a-sp-0.rom';l:$10000;p:0;crc:$80e210e7),(n:'a-v0-0.rom';l:$20000;p:0;crc:$faaacaff),());
+        //R-Type 2
+        rtype2:array[0..18] of tipo_roms=(
+        (n:'rt2-a-h0-d.54';l:$20000;p:1;crc:$d8ece6f4),(n:'rt2-a-l0-d.60';l:$20000;p:$0;crc:$32cfb2e4),
+        (n:'rt2-a-h1-d.53';l:$20000;p:$40001;crc:$4f6e9b15),(n:'rt2-a-l1-d.59';l:$20000;p:$40000;crc:$0fd123bf),
+        (n:'ic50.7s';l:$20000;p:0;crc:$f3f8736e),(n:'ic51.7u';l:$20000;p:$20000;crc:$b4c543af),
+        (n:'ic56.8s';l:$20000;p:$40000;crc:$4cb80d66),(n:'ic57.8u';l:$20000;p:$60000;crc:$bee128e0),
+        (n:'ic65.9r';l:$20000;p:$80000;crc:$2dc9c71a),(n:'ic66.9u';l:$20000;p:$a0000;crc:$7533c428),
+        (n:'ic63.9m';l:$20000;p:$c0000;crc:$a6ad67f2),(n:'ic64.9p';l:$20000;p:$e0000;crc:$3686d555),
+        (n:'ic31.6l';l:$20000;p:0;crc:$2cd8f913),(n:'ic21.4l';l:$20000;p:$20000;crc:$5033066d),
+        (n:'ic32.6m';l:$20000;p:$40000;crc:$ec3a0450),(n:'ic22.4m';l:$20000;p:$60000;crc:$db6176fc),
+        (n:'ic17.4f';l:$10000;p:0;crc:$73ffecb4),(n:'ic14.4c';l:$20000;p:0;crc:$637172d5),());
+        //Break Thru
+        brkthru:array[0..14] of tipo_roms=(
+        (n:'brkthru.1';l:$4000;p:$0;crc:$cfb4265f),(n:'brkthru.2';l:$8000;p:$4000;crc:$fa8246d9),
+        (n:'brkthru.4';l:$8000;p:$c000;crc:$8cabf252),(n:'brkthru.3';l:$8000;p:$14000;crc:$2f2c40c2),
+        (n:'brkthru.5';l:$8000;p:$8000;crc:$c309435f),(n:'brkthru.12';l:$2000;p:0;crc:$58c0b29b),
+        (n:'brkthru.9';l:$8000;p:0;crc:$f54e50a7),(n:'brkthru.10';l:$8000;p:$8000;crc:$fd156945),
+        (n:'brkthru.11';l:$8000;p:$10000;crc:$c152a99b),
+        (n:'brkthru.7';l:$8000;p:0;crc:$920cc56a),(n:'brkthru.6';l:$8000;p:$8000;crc:$fd3cee40),
+        (n:'brkthru.8';l:$8000;p:$10000;crc:$f67ee64e),
+        (n:'brkthru.13';l:$100;p:0;crc:$aae44269),(n:'brkthru.14';l:$100;p:$100;crc:$f2d4822a),());
+        //Darwin
+        darwin:array[0..14] of tipo_roms=(
+        (n:'darw_04.rom';l:$4000;p:$0;crc:$0eabf21c),(n:'darw_05.rom';l:$8000;p:$4000;crc:$e771f864),
+        (n:'darw_07.rom';l:$8000;p:$c000;crc:$97ac052c),(n:'darw_06.rom';l:$8000;p:$14000;crc:$2a9fb208),
+        (n:'darw_08.rom';l:$8000;p:$8000;crc:$6b580d58),(n:'darw_09.rom';l:$2000;p:0;crc:$067b4cf5),
+        (n:'darw_10.rom';l:$8000;p:0;crc:$487a014c),(n:'darw_11.rom';l:$8000;p:$8000;crc:$548ce2d1),
+        (n:'darw_12.rom';l:$8000;p:$10000;crc:$faba5fef),
+        (n:'darw_03.rom';l:$8000;p:0;crc:$57d0350d),(n:'darw_02.rom';l:$8000;p:$8000;crc:$559a71ab),
+        (n:'darw_01.rom';l:$8000;p:$10000;crc:$15a16973),
+        (n:'df.12';l:$100;p:0;crc:$89b952ef),(n:'df.13';l:$100;p:$100;crc:$d595e91d),());
+        srdarwin:array[0..12] of tipo_roms=(
+        (n:'dy01-e.b14';l:$10000;p:$0;crc:$176e9299),(n:'dy00.b16';l:$10000;p:$10000;crc:$2bf6b461),
+        (n:'dy05.b6';l:$4000;p:$0000;crc:$8780e8a3),
+        (n:'dy03.b4';l:$10000;p:$0000;crc:$44f2a4f9),(n:'dy02.b5';l:$10000;p:$10000;crc:$522d9a9e),
+        (n:'dy04.d7';l:$8000;p:$8000;crc:$2ae3591c),
+        (n:'dy07.h16';l:$8000;p:$0000;crc:$97eaba60),(n:'dy06.h14';l:$8000;p:$8000;crc:$c279541b),
+        (n:'dy09.k13';l:$8000;p:$10000;crc:$d30d1745),(n:'dy08.k11';l:$8000;p:$18000;crc:$71d645fd),
+        (n:'dy11.k16';l:$8000;p:$20000;crc:$fd9ccc5b),(n:'dy10.k14';l:$8000;p:$28000;crc:$88770ab8),());
+        //Double Dragon
+        ddragon:array[0..21] of tipo_roms=(
+        (n:'21j-1-5.26';l:$8000;p:$0;crc:$ae714964),(n:'21j-2-3.25';l:$8000;p:$8000;crc:$5779705e),
+        (n:'21j-3.24';l:$8000;p:$10000;crc:$dbf24897),(n:'21j-4-1.23';l:$8000;p:$18000;crc:$6c9f46fa),
+        (n:'63701.bin';l:$4000;p:$c000;crc:$f5232d03),(n:'21j-0-1';l:$8000;p:$8000;crc:$9efa95bb),
+        (n:'21j-5';l:$8000;p:0;crc:$7a8b8db4),
+        (n:'21j-8';l:$10000;p:0;crc:$7c435887),(n:'21j-9';l:$10000;p:$10000;crc:$c6640aed),
+        (n:'21j-i';l:$10000;p:$20000;crc:$5effb0a0),(n:'21j-j';l:$10000;p:$30000;crc:$5fb42e7c),
+        (n:'21j-a';l:$10000;p:0;crc:$574face3),(n:'21j-b';l:$10000;p:$10000;crc:$40507a76),
+        (n:'21j-c';l:$10000;p:$20000;crc:$bb0bc76f),(n:'21j-d';l:$10000;p:$30000;crc:$cb4f231b),
+        (n:'21j-e';l:$10000;p:$40000;crc:$a0a0c261),(n:'21j-f';l:$10000;p:$50000;crc:$6ba152f6),
+        (n:'21j-g';l:$10000;p:$60000;crc:$3220a0b6),(n:'21j-h';l:$10000;p:$70000;crc:$65c7517d),
+        (n:'21j-6';l:$10000;p:0;crc:$34755de3),(n:'21j-7';l:$10000;p:$10000;crc:$904de6f8),());
+        //Double Dragon II
+        ddragon2:array[0..17] of tipo_roms=(
+        (n:'26a9-04.bin';l:$8000;p:$0;crc:$f2cfc649),(n:'26aa-03.bin';l:$8000;p:$8000;crc:$44dd5d4b),
+        (n:'26ab-0.bin';l:$8000;p:$10000;crc:$49ddddcd),(n:'26ac-0e.63';l:$8000;p:$18000;crc:$57acad2c),
+        (n:'26ae-0.bin';l:$10000;p:$0;crc:$ea437867),(n:'26ad-0.bin';l:$8000;p:$0;crc:$75e36cd6),
+        (n:'26a8-0e.19';l:$10000;p:0;crc:$4e80cd36),
+        (n:'26j4-0.bin';l:$20000;p:0;crc:$a8c93e76),(n:'26j5-0.bin';l:$20000;p:$20000;crc:$ee555237),
+        (n:'26j0-0.bin';l:$20000;p:0;crc:$db309c84),(n:'26j1-0.bin';l:$20000;p:$20000;crc:$c3081e0c),
+        (n:'26af-0.bin';l:$20000;p:$40000;crc:$3a615aad),(n:'26j2-0.bin';l:$20000;p:$60000;crc:$589564ae),
+        (n:'26j3-0.bin';l:$20000;p:$80000;crc:$daf040d6),(n:'26a10-0.bin';l:$20000;p:$a0000;crc:$6d16d889),
+        (n:'26j6-0.bin';l:$20000;p:0;crc:$a84b2a29),(n:'26j7-0.bin';l:$20000;p:$20000;crc:$bc6a48d5),());
+        mrdo:array[0..13] of tipo_roms=(
+        (n:'a4-01.bin';l:$2000;p:0;crc:$03dcfba2),(n:'c4-02.bin';l:$2000;p:$2000;crc:$0ecdd39c),
+        (n:'e4-03.bin';l:$2000;p:$4000;crc:$358f5dc2),(n:'f4-04.bin';l:$2000;p:$6000;crc:$f4190cfc),
+        (n:'u02--2.bin';l:$20;p:0;crc:$238a65d7),(n:'t02--3.bin';l:$20;p:$20;crc:$ae263dc0),
+        (n:'f10--1.bin';l:$20;p:$40;crc:$16ee4ca2),
+        (n:'s8-09.bin';l:$1000;p:0;crc:$aa80c5b6),(n:'u8-10.bin';l:$1000;p:$1000;crc:$d20ec85b),
+        (n:'r8-08.bin';l:$1000;p:0;crc:$dbdc9ffa),(n:'n8-07.bin';l:$1000;p:$1000;crc:$4b9973db),
+        (n:'h5-05.bin';l:$1000;p:0;crc:$e1218cc5),(n:'k5-06.bin';l:$1000;p:$1000;crc:$b1f68b04),());
+        //The Glob
+        theglob:array[0..9] of tipo_roms=(
+        (n:'globu10.bin';l:$1000;p:0;crc:$08fdb495),(n:'globu9.bin';l:$1000;p:$1000;crc:$827cd56c),
+        (n:'globu8.bin';l:$1000;p:$2000;crc:$d1219966),(n:'globu7.bin';l:$1000;p:$3000;crc:$b1649da7),
+        (n:'globu6.bin';l:$1000;p:$4000;crc:$b3457e67),(n:'globu5.bin';l:$1000;p:$5000;crc:$89d582cd),
+        (n:'globu4.bin';l:$1000;p:$6000;crc:$7ee9fdeb),(n:'globu11.bin';l:$800;p:$7000;crc:$9e05dee3),
+        (n:'82s123.u66';l:$20;p:0;crc:$f4f6ddc5),());
+        //Super Glob
+        suprglob:array[0..8] of tipo_roms=(
+        (n:'u10';l:$1000;p:0;crc:$c0141324),(n:'u9';l:$1000;p:$1000;crc:$58be8128),
+        (n:'u8';l:$1000;p:$2000;crc:$6d088c16),(n:'u7';l:$1000;p:$3000;crc:$b2768203),
+        (n:'u6';l:$1000;p:$4000;crc:$976c8f46),(n:'u5';l:$1000;p:$5000;crc:$340f5290),
+        (n:'u4';l:$1000;p:$6000;crc:$173bd589),(n:'u11';l:$800;p:$7000;crc:$d45b740d),());
+        //Tiger Heli
+        tigerh:array[0..18] of tipo_roms=(
+        (n:'0.4';l:$4000;p:0;crc:$4be73246),(n:'1.4';l:$4000;p:$4000;crc:$aad04867),
+        (n:'2.4';l:$4000;p:$8000;crc:$4843f15c),(n:'a47_03.12d';l:$2000;p:0;crc:$d105260f),
+        (n:'a47_14.6a';l:$800;p:0;crc:$4042489f),
+        (n:'82s129.12q';l:$100;p:0;crc:$2c69350d),(n:'82s129.12m';l:$100;p:$100;crc:$7142e972),
+        (n:'82s129.12n';l:$100;p:$200;crc:$25f273f2),
+        (n:'a47_05.6f';l:$2000;p:0;crc:$c5325b49),(n:'a47_04.6g';l:$2000;p:$2000;crc:$cd59628e),
+        (n:'a47_13.8j';l:$4000;p:0;crc:$739a7e7e),(n:'a47_12.6j';l:$4000;p:$4000;crc:$c064ecdb),
+        (n:'a47_11.8h';l:$4000;p:$8000;crc:$744fae9b),(n:'a47_10.6h';l:$4000;p:$c000;crc:$e1cf844e),
+        (n:'a47_09.4m';l:$4000;p:0;crc:$31fae8a8),(n:'a47_08.6m';l:$4000;p:$4000;crc:$e539af2b),
+        (n:'a47_07.6n';l:$4000;p:$8000;crc:$02fdd429),(n:'a47_06.6p';l:$4000;p:$c000;crc:$11fbcc8c),());
+        //Slap Fight
+        slapfigh:array[0..17] of tipo_roms=(
+        (n:'a77_00.8p';l:$8000;p:0;crc:$674c0e0f),(n:'a77_01.8n';l:$8000;p:$8000;crc:$3c42e4a7),
+        (n:'a77_02.12d';l:$2000;p:0;crc:$87f4705a),(n:'a77_13.6a';l:$800;p:0;crc:$a70c81d9),
+        (n:'21_82s129.12q';l:$100;p:0;crc:$a0efaf99),(n:'20_82s129.12m';l:$100;p:$100;crc:$a56d57e5),
+        (n:'19_82s129.12n';l:$100;p:$200;crc:$5cbf9fbf),
+        (n:'a77_04.6f';l:$2000;p:0;crc:$2ac7b943),(n:'a77_03.6g';l:$2000;p:$2000;crc:$33cadc93),
+        (n:'a77_12.8j';l:$8000;p:0;crc:$8545d397),(n:'a77_11.7j';l:$8000;p:$8000;crc:$b1b7b925),
+        (n:'a77_10.8h';l:$8000;p:$10000;crc:$422d946b),(n:'a77_09.7h';l:$8000;p:$18000;crc:$587113ae),
+        (n:'a77_08.6k';l:$8000;p:0;crc:$b6358305),(n:'a77_07.6m';l:$8000;p:$8000;crc:$e92d9d60),
+        (n:'a77_06.6n';l:$8000;p:$10000;crc:$5faeeea3),(n:'a77_05.6p';l:$8000;p:$18000;crc:$974e2ea9),());
+        lkage:array[0..9] of tipo_roms=(
+        (n:'a54-01-2.37';l:$8000;p:0;crc:$60fd9734),(n:'a54-02-2.38';l:$8000;p:$8000;crc:$878a25ce),
+        (n:'a54-04.54';l:$8000;p:0;crc:$541faf9a),(n:'a54-09.53';l:$800;p:0;crc:$0e8b8846),
+        (n:'a54-03.51';l:$4000;p:0;crc:$493e76d8),
+        (n:'a54-05-1.84';l:$4000;p:0;crc:$0033c06a),(n:'a54-06-1.85';l:$4000;p:$4000;crc:$9f04d9ad),
+        (n:'a54-07-1.86';l:$4000;p:$8000;crc:$b20561a4),(n:'a54-08-1.87';l:$4000;p:$c000;crc:$3ff3b230),());
+        cabal:array[0..25] of tipo_roms=(
+        (n:'13.7h';l:$10000;p:0;crc:$00abbe0c),(n:'11.6h';l:$10000;p:$1;crc:$44736281),
+        (n:'12.7j';l:$10000;p:$20000;crc:$d763a47c),(n:'10.6j';l:$10000;p:$20001;crc:$96d5e8af),
+        (n:'5-6s';l:$4000;p:0;crc:$6a76955a),
+        (n:'sp_rom1.bin';l:$10000;p:0;crc:$34d3cac8),(n:'sp_rom2.bin';l:$10000;p:$1;crc:$4e49c28e),
+        (n:'sp_rom3.bin';l:$10000;p:$20000;crc:$7065e840),(n:'sp_rom4.bin';l:$10000;p:$20001;crc:$6a0e739d),
+        (n:'sp_rom5.bin';l:$10000;p:$40000;crc:$0e1ec30e),(n:'sp_rom6.bin';l:$10000;p:$40001;crc:$581a50c1),
+        (n:'sp_rom7.bin';l:$10000;p:$60000;crc:$55c44764),(n:'sp_rom8.bin';l:$10000;p:$60001;crc:$702735c9),
+        (n:'bg_rom1.bin';l:$10000;p:0;crc:$1023319b),(n:'bg_rom2.bin';l:$10000;p:$1;crc:$3b6d2b09),
+        (n:'bg_rom3.bin';l:$10000;p:$20000;crc:$420b0801),(n:'bg_rom4.bin';l:$10000;p:$20001;crc:$77bc7a60),
+        (n:'bg_rom5.bin';l:$10000;p:$40000;crc:$543fcb37),(n:'bg_rom6.bin';l:$10000;p:$40001;crc:$0bc50075),
+        (n:'bg_rom7.bin';l:$10000;p:$60000;crc:$d28d921e),(n:'bg_rom8.bin';l:$10000;p:$60001;crc:$67e4fe47),
+        (n:'4-3n';l:$2000;p:0;crc:$4038eff2),(n:'3-3p';l:$8000;p:$8000;crc:$d9defcbf),
+        (n:'2-1s';l:$10000;p:0;crc:$850406b4),(n:'1-1u';l:$10000;p:$10000;crc:$8b3e0789),());
+        //Ghouls and ghosts
+        ghouls:array[0..26] of tipo_roms=(
+        (n:'dme_29.10h';l:$20000;p:0;crc:$166a58a2),(n:'dme_30.10j';l:$20000;p:$1;crc:$7ac8407a),
+        (n:'dme_27.9h';l:$20000;p:$40000;crc:$f734b2be),(n:'dme_28.9j';l:$20000;p:$40001;crc:$03d3e714),
+        (n:'dm-17.7j';l:$80000;p:$80000;crc:$3ea1b0f2),(n:'dm_26.10a';l:$10000;p:0;crc:$3692f6e5),
+        (n:'dm-05.3a';l:$80000;p:0;crc:$0ba9c0b0),(n:'dm-07.3f';l:$80000;p:2;crc:$5d760ab9),
+        (n:'dm-06.3c';l:$80000;p:4;crc:$4ba90b59),(n:'dm-08.3g';l:$80000;p:6;crc:$4bdee9de),
+        (n:'09.4a';l:$10000;p:$200000;crc:$ae24bb19),(n:'18.7a';l:$10000;p:$200001;crc:$d34e271a),
+        (n:'13.4e';l:$10000;p:$200002;crc:$3f70dd37),(n:'22.7e';l:$10000;p:$200003;crc:$7e69e2e6),
+        (n:'11.4c';l:$10000;p:$200004;crc:$37c9b6c6),(n:'20.7c';l:$10000;p:$200005;crc:$2f1345b4),
+        (n:'15.4g';l:$10000;p:$200006;crc:$3c2a212a),(n:'24.7g';l:$10000;p:$200007;crc:$889aac05),
+        (n:'10.4b';l:$10000;p:$280000;crc:$bcc0f28c),(n:'19.7b';l:$10000;p:$280001;crc:$2a40166a),
+        (n:'14.4f';l:$10000;p:$280002;crc:$20f85c03),(n:'23.7f';l:$10000;p:$280003;crc:$8426144b),
+        (n:'12.4d';l:$10000;p:$280004;crc:$da088d61),(n:'21.7d';l:$10000;p:$280005;crc:$17e11df0),
+        (n:'16.4h';l:$10000;p:$280006;crc:$f187ba1c),(n:'25.7h';l:$10000;p:$280007;crc:$29f79c78),());
+        //Final Fight
+        ffight:array[0..12] of tipo_roms=(
+        (n:'ff_36.11f';l:$20000;p:0;crc:$f9a5ce83),(n:'ff_42.11h';l:$20000;p:$1;crc:$65f11215),
+        (n:'ff_37.12f';l:$20000;p:$40000;crc:$e1033784),(n:'ffe_43.12h';l:$20000;p:$40001;crc:$995e968a),
+        (n:'ff-32m.8h';l:$80000;p:$80000;crc:$c747696e),(n:'ff_09.12b';l:$10000;p:0;crc:$b8367eb5),
+        (n:'ff-5m.7a';l:$80000;p:0;crc:$9c284108),(n:'ff-7m.9a';l:$80000;p:2;crc:$a7584dfb),
+        (n:'ff-1m.3a';l:$80000;p:4;crc:$0b605e44),(n:'ff-3m.5a';l:$80000;p:6;crc:$52291cd2),
+        (n:'ff_18.11c';l:$20000;p:0;crc:$375c66e7),(n:'ff_19.12c';l:$20000;p:$20000;crc:$1ef137f9),());
+        //King of Dragons
+        kod:array[0..19] of tipo_roms=(
+        (n:'kde_30.11e';l:$20000;p:$00000;crc:$c7414fd4),(n:'kde_37.11f';l:$20000;p:$00001;crc:$a5bf40d2),
+        (n:'kde_31.12e';l:$20000;p:$40000;crc:$1fffc7bd),(n:'kde_38.12f';l:$20000;p:$40001;crc:$89e57a82),
+        (n:'kde_28.9e'; l:$20000;p:$80000;crc:$9367bcd9),(n:'kde_35.9f'; l:$20000;p:$80001;crc:$4ca6a48a),
+        (n:'kde_29.10e';l:$20000;p:$c0000;crc:$6a0ba878),(n:'kde_36.10f';l:$20000;p:$c0001;crc:$b509b39d),
+        (n:'kd_9.12a';l:$10000;p:0;crc:$bac6ec26),
+        (n:'kd-5m.4a';l:$80000;p:$000000;crc:$e45b8701),(n:'kd-7m.6a';l:$80000;p:$000002;crc:$a7750322),
+        (n:'kd-1m.3a';l:$80000;p:$000004;crc:$5f74bf78),(n:'kd-3m.5a';l:$80000;p:$000006;crc:$5e5303bf),
+        (n:'kd-6m.4c';l:$80000;p:$200000;crc:$113358f3),(n:'kd-8m.6c';l:$80000;p:$200002;crc:$38853c44),
+        (n:'kd-2m.3c';l:$80000;p:$200004;crc:$9ef36604),(n:'kd-4m.5c';l:$80000;p:$200006;crc:$402b9b4f),
+        (n:'kd_18.11c';l:$20000;p:0;crc:$69ecb2c8),(n:'kd_19.12c';l:$20000;p:$20000;crc:$02d851c1),());
+        //Street Fighter 2
+        sf2:array[0..23] of tipo_roms=(
+        (n:'sf2e_30g.11e';l:$20000;p:$00000;crc:$fe39ee33),(n:'sf2e_37g.11f';l:$20000;p:$00001;crc:$fb92cd74),
+        (n:'sf2e_31g.12e';l:$20000;p:$40000;crc:$69a0a301),(n:'sf2e_38g.12f';l:$20000;p:$40001;crc:$5e22db70),
+        (n:'sf2e_28g.9e' ;l:$20000;p:$80000;crc:$8bf9f1e5),(n:'sf2e_35g.9f'; l:$20000;p:$80001;crc:$626ef934),
+        (n:'sf2_29b.10e' ;l:$20000;p:$c0000;crc:$bb4af315),(n:'sf2_36b.10f'; l:$20000;p:$c0001;crc:$c02a13eb),
+        (n:'sf2_09.12a';l:$10000;p:0;crc:$a4823a1b),
+        (n:'sf2-5m.4a';l:$80000;p:$000000;crc:$22c9cc8e),(n:'sf2-7m.6a';l:$80000;p:$000002;crc:$57213be8),
+        (n:'sf2-1m.3a';l:$80000;p:$000004;crc:$ba529b4f),(n:'sf2-3m.5a';l:$80000;p:$000006;crc:$4b1b33a8),
+        (n:'sf2-6m.4c';l:$80000;p:$200000;crc:$2c7e2229),(n:'sf2-8m.6c';l:$80000;p:$200002;crc:$b5548f17),
+        (n:'sf2-2m.3c';l:$80000;p:$200004;crc:$14b84312),(n:'sf2-4m.5c';l:$80000;p:$200006;crc:$5e9cd89a),
+        (n:'sf2-13m.4d';l:$80000;p:$400000;crc:$994bfa58),(n:'sf2-15m.6d';l:$80000;p:$400002;crc:$3e66ad9d),
+        (n:'sf2-9m.3d';l:$80000;p:$400004;crc:$c1befaa8),(n:'sf2-11m.5d';l:$80000;p:$400006;crc:$0627c831),
+        (n:'sf2_18.11c';l:$20000;p:0;crc:$7f162009),(n:'sf2_19.12c';l:$20000;p:$20000;crc:$beade53f),());
+        //Strider
+        strider:array[0..16] of tipo_roms=(
+        (n:'30.11f';l:$20000;p:$00000;crc:$da997474),(n:'35.11h';l:$20000;p:$00001;crc:$5463aaa3),
+        (n:'31.12f';l:$20000;p:$40000;crc:$d20786db),(n:'36.12h';l:$20000;p:$40001;crc:$21aa2863),
+        (n:'st-14.8h';l:$80000;p:$80000;crc:$9b3cfc08),(n:'09.12b';l:$10000;p:0;crc:$2ed403bc),
+        (n:'st-2.8a';l:$80000;p:$000000;crc:$4eee9aea),(n:'st-11.10a';l:$80000;p:$000002;crc:$2d7f21e4),
+        (n:'st-5.4a';l:$80000;p:$000004;crc:$7705aa46),(n:'st-9.6a';l:$80000;p:$000006;crc:$5b18b722),
+        (n:'st-1.7a';l:$80000;p:$200000;crc:$005f000b),(n:'st-10.9a';l:$80000;p:$200002;crc:$b9441519),
+        (n:'st-4.3a';l:$80000;p:$200004;crc:$b7d04e8b),(n:'st-8.5a';l:$80000;p:$200006;crc:$6b4713b4),
+        (n:'18.11c';l:$20000;p:0;crc:$4386bc80),(n:'19.12c';l:$20000;p:$20000;crc:$444536d7),());
+        //3 Wonder
+        wonder3:array[0..19] of tipo_roms=(
+        (n:'rte_30a.11f';l:$20000;p:$00000;crc:$ef5b8b33),(n:'rte_35a.11h';l:$20000;p:$00001;crc:$7d705529),
+        (n:'rte_31a.12f';l:$20000;p:$40000;crc:$32835e5e),(n:'rte_36a.12h';l:$20000;p:$40001;crc:$7637975f),
+        (n:'rt_28a.9f' ;l:$20000;p:$80000;crc:$054137c8),(n:'rt_33a.9h'; l:$20000;p:$80001;crc:$7264cb1b),
+        (n:'rte_29a.10f' ;l:$20000;p:$c0000;crc:$cddaa919),(n:'rte_34a.10h'; l:$20000;p:$c0001;crc:$ed52e7e5),
+        (n:'rt_9.12b';l:$10000;p:0;crc:$abfca165),
+        (n:'rt-5m.7a';l:$80000;p:$000000;crc:$86aef804),(n:'rt-7m.9a';l:$80000;p:$000002;crc:$4f057110),
+        (n:'rt-1m.3a';l:$80000;p:$000004;crc:$902489d0),(n:'rt-3m.5a';l:$80000;p:$000006;crc:$e35ce720),
+        (n:'rt-6m.8a';l:$80000;p:$200000;crc:$13cb0e7c),(n:'rt-8m.10a';l:$80000;p:$200002;crc:$1f055014),
+        (n:'rt-2m.4a';l:$80000;p:$200004;crc:$e9a034f4),(n:'rt-4m.6a';l:$80000;p:$200006;crc:$df0eea8b),
+        (n:'rt_18.11c';l:$20000;p:0;crc:$26b211ab),(n:'rt_19.12c';l:$20000;p:$20000;crc:$dbe64ad0),());
+        //Captain Commando
+        captcomm:array[0..15] of tipo_roms=(
+        (n:'cce_23d.8f';l:$80000;p:$00000;crc:$42c814c5),(n:'cc_22d.7f';l:$80000;p:$80000;crc:$0fd34195),
+        (n:'cc_24d.9e';l:$20000;p:$100000;crc:$3a794f25),(n:'cc_28d.9f';l:$20000;p:$100001;crc:$fc3c2906),
+        (n:'cc_09.11a';l:$10000;p:0;crc:$698e8b58),
+        (n:'cc-5m.3a';l:$80000;p:$000000;crc:$7261d8ba),(n:'cc-7m.5a';l:$80000;p:$000002;crc:$6a60f949),
+        (n:'cc-1m.4a';l:$80000;p:$000004;crc:$00637302),(n:'cc-3m.6a';l:$80000;p:$000006;crc:$cc87cf61),
+        (n:'cc-6m.7a';l:$80000;p:$200000;crc:$28718bed),(n:'cc-8m.9a';l:$80000;p:$200002;crc:$d4acc53a),
+        (n:'cc-2m.8a';l:$80000;p:$200004;crc:$0c69f151),(n:'cc-4m.10a';l:$80000;p:$200006;crc:$1f9ebb97),
+        (n:'cc_18.11c';l:$20000;p:0;crc:$6de2c2db),(n:'cc_19.12c';l:$20000;p:$20000;crc:$b99091ae),());
+        //Knights of the round
+        knights:array[0..13] of tipo_roms=(
+        (n:'kr_23e.8f';l:$80000;p:$00000;crc:$1b3997eb),(n:'kr_22.7f';l:$80000;p:$80000;crc:$d0b671a9),
+        (n:'kr_09.11a';l:$10000;p:0;crc:$5e44d9ee),
+        (n:'kr-5m.3a';l:$80000;p:$000000;crc:$9e36c1a4),(n:'kr-7m.5a';l:$80000;p:$000002;crc:$c5832cae),
+        (n:'kr-1m.4a';l:$80000;p:$000004;crc:$f095be2d),(n:'kr-3m.6a';l:$80000;p:$000006;crc:$179dfd96),
+        (n:'kr-6m.7a';l:$80000;p:$200000;crc:$1f4298d2),(n:'kr-8m.9a';l:$80000;p:$200002;crc:$37fa8751),
+        (n:'kr-2m.8a';l:$80000;p:$200004;crc:$0200bc3d),(n:'kr-4m.10a';l:$80000;p:$200006;crc:$0bb2b4e7),
+        (n:'kr_18.11c';l:$20000;p:0;crc:$da69d15f),(n:'kr_19.12c';l:$20000;p:$20000;crc:$bfc654e9),());
+        //Street Fighter II': Champion Edition
+        sf2ce:array[0..18] of tipo_roms=(
+        (n:'s92e_23b.8f';l:$80000;p:$00000;crc:$0aaa1a3a),(n:'s92_22b.7f';l:$80000;p:$80000;crc:$2bbe15ed),
+        (n:'s92_21a.6f';l:$80000;p:$100000;crc:$925a7877),(n:'s92_09.11a';l:$10000;p:0;crc:$08f6b60e),
+        (n:'s92-1m.3a';l:$80000;p:$000000;crc:$03b0d852),(n:'s92-3m.5a';l:$80000;p:$000002;crc:$840289ec),
+        (n:'s92-2m.4a';l:$80000;p:$000004;crc:$cdb5f027),(n:'s92-4m.6a';l:$80000;p:$000006;crc:$e2799472),
+        (n:'s92-5m.7a';l:$80000;p:$200000;crc:$ba8a2761),(n:'s92-7m.9a';l:$80000;p:$200002;crc:$e584bfb5),
+        (n:'s92-6m.8a';l:$80000;p:$200004;crc:$21e3f87d),(n:'s92-8m.10a';l:$80000;p:$200006;crc:$befc47df),
+        (n:'s92-10m.3c';l:$80000;p:$400000;crc:$960687d5),(n:'s92-12m.5c';l:$80000;p:$400002;crc:$978ecd18),
+        (n:'s92-11m.4c';l:$80000;p:$400004;crc:$d6ec9a0a),(n:'s92-13m.6c';l:$80000;p:$400006;crc:$ed2c67f6),
+        (n:'s92_18.11c';l:$20000;p:0;crc:$7f162009),(n:'s92_19.12c';l:$20000;p:$20000;crc:$beade53f),());
+         //Cadillacs and Dinosaurs
+        dino:array[0..16] of tipo_roms=(
+        (n:'cde_23a.8f';l:$80000;p:$00000;crc:$8f4e585e),(n:'cde_22a.7f';l:$80000;p:$80000;crc:$9278aa12),
+        (n:'cde_21a.6f';l:$80000;p:$100000;crc:$66d23de2),(n:'cd_q.5k';l:$20000;p:0;crc:$605fdb0b),
+        (n:'cd-1m.3a';l:$80000;p:$000000;crc:$8da4f917),(n:'cd-3m.5a';l:$80000;p:$000002;crc:$6c40f603),
+        (n:'cd-2m.4a';l:$80000;p:$000004;crc:$09c8fc2d),(n:'cd-4m.6a';l:$80000;p:$000006;crc:$637ff38f),
+        (n:'cd-5m.7a';l:$80000;p:$200000;crc:$470befee),(n:'cd-7m.9a';l:$80000;p:$200002;crc:$22bfb7a3),
+        (n:'cd-6m.8a';l:$80000;p:$200004;crc:$e7599ac4),(n:'cd-8m.10a';l:$80000;p:$200006;crc:$211b4b15),
+        (n:'cd-q1.1k';l:$80000;p:$00000;crc:$60927775),(n:'cd-q2.2k';l:$80000;p:$80000;crc:$770f4c47),
+        (n:'cd-q3.3k';l:$80000;p:$100000;crc:$2f273ffc),(n:'cd-q4.4k';l:$80000;p:$180000;crc:$2c67821d),());
+        //The Punisher
+        punisher:array[0..22] of tipo_roms=(
+        (n:'pse_26.11e';l:$20000;p:$000000;crc:$389a99d2),(n:'pse_30.11f';l:$20000;p:$000001;crc:$68fb06ac),
+        (n:'pse_27.12e';l:$20000;p:$040000;crc:$3eb181c3),(n:'pse_31.12f';l:$20000;p:$040001;crc:$37108e7b),
+        (n:'pse_24.9e';l:$20000;p:$080000;crc:$0f434414),(n:'pse_28.9f';l:$20000;p:$080001;crc:$b732345d),
+        (n:'pse_25.10e';l:$20000;p:$0c0000;crc:$b77102e2),(n:'pse_29.10f';l:$20000;p:$0c0001;crc:$ec037bce),
+        (n:'ps_21.6f';l:$80000;p:$100000;crc:$8affa5a9),(n:'ps_q.5k';l:$20000;p:0;crc:$49ff4446),
+        (n:'ps-1m.3a';l:$80000;p:$000000;crc:$77b7ccab),(n:'ps-3m.5a';l:$80000;p:$000002;crc:$0122720b),
+        (n:'ps-2m.4a';l:$80000;p:$000004;crc:$64fa58d4),(n:'ps-4m.6a';l:$80000;p:$000006;crc:$60da42c8),
+        (n:'ps-5m.7a';l:$80000;p:$200000;crc:$c54ea839),(n:'ps-7m.9a';l:$80000;p:$200002;crc:$04c5acbd),
+        (n:'ps-6m.8a';l:$80000;p:$200004;crc:$a544f4cc),(n:'ps-8m.10a';l:$80000;p:$200006;crc:$8f02f436),
+        (n:'ps-q1.1k';l:$80000;p:$00000;crc:$31fd8726),(n:'ps-q2.2k';l:$80000;p:$80000;crc:$980a9eef),
+        (n:'ps-q3.3k';l:$80000;p:$100000;crc:$0dd44491),(n:'ps-q4.4k';l:$80000;p:$180000;crc:$bed42f03),());
+        //Shinobi
+        shinobi:array[0..16] of tipo_roms=(
+        (n:'epr-12010.43';l:$10000;p:0;crc:$7df7f4a2),(n:'epr-12008.26';l:$10000;p:$1;crc:$f5ae64cd),
+        (n:'epr-12011.42';l:$10000;p:$20000;crc:$9d46e707),(n:'epr-12009.25';l:$10000;p:$20001;crc:$7961d07e),
+        (n:'epr-11267.12';l:$8000;p:0;crc:$dd50b745),
+        (n:'epr-11264.95';l:$10000;p:0;crc:$46627e7d),(n:'epr-11265.94';l:$10000;p:$10000;crc:$87d0f321),
+        (n:'epr-11266.93';l:$10000;p:$20000;crc:$efb4af87),
+        (n:'epr-11290.10';l:$10000;p:1;crc:$611f413a),(n:'epr-11294.11';l:$10000;p:$0;crc:$5eb00fc1),
+        (n:'epr-11291.17';l:$10000;p:$20001;crc:$3c0797c0),(n:'epr-11295.18';l:$10000;p:$20000;crc:$25307ef8),
+        (n:'epr-11292.23';l:$10000;p:$40001;crc:$c29ac34e),(n:'epr-11296.24';l:$10000;p:$40000;crc:$04a437f8),
+        (n:'epr-11293.29';l:$10000;p:$60001;crc:$41f41063),(n:'epr-11297.30';l:$10000;p:$60000;crc:$b6e1fd72),());
+        //Alex Kidd
+        alexkidd:array[0..16] of tipo_roms=(
+        (n:'epr-10447.43';l:$10000;p:0;crc:$29e87f71),(n:'epr-10445.26';l:$10000;p:$1;crc:$25ce5b6f),
+        (n:'epr-10448.42';l:$10000;p:$20000;crc:$05baedb5),(n:'epr-10446.25';l:$10000;p:$20001;crc:$cd61d23c),
+        (n:'epr-10434.12';l:$8000;p:0;crc:$77141cce),
+        (n:'epr-10431.95';l:$8000;p:0;crc:$a7962c39),(n:'epr-10432.94';l:$8000;p:$8000;crc:$db8cd24e),
+        (n:'epr-10433.93';l:$8000;p:$10000;crc:$e163c8c2),
+        (n:'epr-10437.10';l:$8000;p:1;crc:$522f7618),(n:'epr-10441.11';l:$8000;p:$0;crc:$74e3a35c),
+        (n:'epr-10438.17';l:$8000;p:$10001;crc:$738a6362),(n:'epr-10442.18';l:$8000;p:$10000;crc:$86cb9c14),
+        (n:'epr-10439.23';l:$8000;p:$20001;crc:$b391aca7),(n:'epr-10443.24';l:$8000;p:$20000;crc:$95d32635),
+        (n:'epr-10440.29';l:$8000;p:$30001;crc:$23939508),(n:'epr-10444.30';l:$8000;p:$30000;crc:$82115823),());
+        //Fantasy Zone
+        fantzone:array[0..16] of tipo_roms=(
+        (n:'epr-7385a.43';l:$8000;p:0;crc:$4091af42),(n:'epr-7382a.26';l:$8000;p:$1;crc:$77d67bfd),
+        (n:'epr-7386a.42';l:$8000;p:$10000;crc:$b0a67cd0),(n:'epr-7383a.25';l:$8000;p:$10001;crc:$5f79b2a9),
+        (n:'epr-7387.41';l:$8000;p:$20000;crc:$0acd335d),(n:'epr-7384.24';l:$8000;p:$20001;crc:$fd909341),
+        (n:'epr-7535a.12';l:$8000;p:0;crc:$bc1374fa),
+        (n:'epr-7388.95';l:$8000;p:0;crc:$8eb02f6b),(n:'epr-7389.94';l:$8000;p:$8000;crc:$2f4f71b8),
+        (n:'epr-7390.93';l:$8000;p:$10000;crc:$d90609c6),
+        (n:'epr-7392.10';l:$8000;p:1;crc:$5bb7c8b6),(n:'epr-7396.11';l:$8000;p:$0;crc:$74ae4b57),
+        (n:'epr-7393.17';l:$8000;p:$10001;crc:$14fc7e82),(n:'epr-7397.18';l:$8000;p:$10000;crc:$e05a1e25),
+        (n:'epr-7394.23';l:$8000;p:$20001;crc:$531ca13f),(n:'epr-7398.24';l:$8000;p:$20000;crc:$68807b49),());
+        //Alien Syndrome
+        aliensyn:array[0..19] of tipo_roms=(
+        (n:'epr-10804.43';l:$8000;p:0;crc:$23f78b83),(n:'epr-10802.26';l:$8000;p:$1;crc:$996768bd),
+        (n:'epr-10805.42';l:$8000;p:$10000;crc:$53d7fe50),(n:'epr-10803.25';l:$8000;p:$10001;crc:$0536dd33),
+        (n:'epr-10732.41';l:$8000;p:$20000;crc:$c5712bfc),(n:'epr-10729.24';l:$8000;p:$20001;crc:$3e520e30),
+        (n:'317-0037.key';l:$2000;p:0;crc:$49e882e5),(n:'epr-10705.12';l:$8000;p:0;crc:$777b749e),
+        (n:'epr-10739.95';l:$10000;p:0;crc:$a29ec207),(n:'epr-10740.94';l:$10000;p:$10000;crc:$47f93015),
+        (n:'epr-10741.93';l:$10000;p:$20000;crc:$4970739c),
+        (n:'epr-10709.10';l:$10000;p:1;crc:$addf0a90),(n:'epr-10713.11';l:$10000;p:$0;crc:$ececde3a),
+        (n:'epr-10710.17';l:$10000;p:$20001;crc:$992369eb),(n:'epr-10714.18';l:$10000;p:$20000;crc:$91bf42fb),
+        (n:'epr-10711.23';l:$10000;p:$40001;crc:$29166ef6),(n:'epr-10715.24';l:$10000;p:$40000;crc:$a7c57384),
+        (n:'epr-10712.29';l:$10000;p:$60001;crc:$876ad019),(n:'epr-10716.30';l:$10000;p:$60000;crc:$40ba1d48),());
+        //WB3
+        wb3:array[0..17] of tipo_roms=(
+        (n:'epr-12120.43';l:$10000;p:0;crc:$cbd8c99b),(n:'epr-12118.26';l:$10000;p:$1;crc:$e9a3280c),
+        (n:'epr-12121.42';l:$10000;p:$20000;crc:$5e44c0a9),(n:'epr-12119.25';l:$10000;p:$20001;crc:$01ed3ef9),
+        (n:'317-0086.key';l:$2000;p:0;crc:$ec480b80),(n:'epr-12089.12';l:$8000;p:0;crc:$8321eb0b),
+        (n:'epr-12086.95';l:$10000;p:0;crc:$45b949df),(n:'epr-12087.94';l:$10000;p:$10000;crc:$6f0396b7),
+        (n:'epr-12088.83';l:$10000;p:$20000;crc:$ba8c0749),
+        (n:'epr-12090.10';l:$10000;p:1;crc:$aeeecfca),(n:'epr-12094.11';l:$10000;p:$0;crc:$615e4927),
+        (n:'epr-12091.17';l:$10000;p:$20001;crc:$8409a243),(n:'epr-12095.18';l:$10000;p:$20000;crc:$e774ec2c),
+        (n:'epr-12092.23';l:$10000;p:$40001;crc:$5c2f0d90),(n:'epr-12096.24';l:$10000;p:$40000;crc:$0cd59d6e),
+        (n:'epr-12093.29';l:$10000;p:$60001;crc:$4891e7bb),(n:'epr-12097.30';l:$10000;p:$60000;crc:$e645902c),());
+        //Tetris
+        tetris:array[0..9] of tipo_roms=(
+        (n:'epr-12201.rom';l:$8000;p:0;crc:$338e9b51),(n:'epr-12200.rom';l:$8000;p:$1;crc:$fb058779),
+        (n:'317-0093.key';l:$2000;p:0;crc:$e0064442),(n:'epr-12205.rom';l:$8000;p:0;crc:$6695dc99),
+        (n:'epr-12202.rom';l:$10000;p:0;crc:$2f7da741),(n:'epr-12203.rom';l:$10000;p:$10000;crc:$a6e58ec5),
+        (n:'epr-12204.rom';l:$10000;p:$20000;crc:$0ae98e23),
+        (n:'epr-12169.b1';l:$8000;p:1;crc:$dacc6165),(n:'epr-12170.b5';l:$8000;p:$0;crc:$87354e42),());
+        tp84:array[0..17] of tipo_roms=(
+        (n:'388_f04.7j';l:$2000;p:$8000;crc:$605f61c7),(n:'388_05.8j';l:$2000;p:$a000;crc:$4b4629a4),
+        (n:'388_f06.9j';l:$2000;p:$c000;crc:$dbd5333b),(n:'388_07.10j';l:$2000;p:$e000;crc:$a45237c4),
+        (n:'388_f08.10d';l:$2000;p:$e000;crc:$36462ff1),
+        (n:'388d14.2c';l:$100;p:0;crc:$d737eaba),(n:'388d15.2d';l:$100;p:$100;crc:$2f6a9a2a),
+        (n:'388d16.1e';l:$100;p:$200;crc:$2e21329b),(n:'388d18.1f';l:$100;p:$300;crc:$61d2d398),
+        (n:'388j17.16c';l:$100;p:$400;crc:$13c4e198),
+        (n:'388_h02.2j';l:$2000;p:0;crc:$05c7508f),(n:'388_d01.1j';l:$2000;p:$2000;crc:$498d90b7),
+        (n:'388_e09.12a';l:$2000;p:$0;crc:$cd682f30),(n:'388_e10.13a';l:$2000;p:$2000;crc:$888d4bd6),
+        (n:'388_e11.14a';l:$2000;p:$4000;crc:$9a220b39),(n:'388_e12.15a';l:$2000;p:$6000;crc:$fac98397),
+        (n:'388j13.6a';l:$2000;p:$0;crc:$c44414da),());
+        tutankhm:array[0..17] of tipo_roms=(
+        (n:'m1.1h';l:$1000;p:$0;crc:$da18679f),(n:'m2.2h';l:$1000;p:$1000;crc:$a0f02c85),
+        (n:'3j.3h';l:$1000;p:$2000;crc:$ea03a1ab),(n:'m4.4h';l:$1000;p:$3000;crc:$bd06fad0),
+        (n:'m5.5h';l:$1000;p:$4000;crc:$bf9fd9b0),(n:'j6.6h';l:$1000;p:$5000;crc:$fe079c5b),
+        (n:'c1.1i';l:$1000;p:$6000;crc:$7eb59b21),(n:'c2.2i';l:$1000;p:$7000;crc:$6615eff3),
+        (n:'c3.3i';l:$1000;p:$8000;crc:$a10d4444),(n:'c4.4i';l:$1000;p:$9000;crc:$58cd143c),
+        (n:'c5.5i';l:$1000;p:$a000;crc:$d7e7ae95),(n:'c6.6i';l:$1000;p:$b000;crc:$91f62b82),
+        (n:'c7.7i';l:$1000;p:$c000;crc:$afd0a81f),(n:'c8.8i';l:$1000;p:$d000;crc:$dabb609b),
+        (n:'c9.9i';l:$1000;p:$e000;crc:$8ea9c6a6),
+        (n:'s1.7a';l:$1000;p:0;crc:$b52d01fa),(n:'s2.8a';l:$1000;p:$1000;crc:$9db5c0ce),());
+        //Pang
+        pang:array[0..9] of tipo_roms=(
+        (n:'pang6.bin';l:$8000;p:0;crc:$68be52cd),(n:'pang7.bin';l:$20000;p:$10000;crc:$4a2e70f6),
+        (n:'bb1.bin';l:$20000;p:0;crc:$c52e5b8e),
+        (n:'bb10.bin';l:$20000;p:0;crc:$fdba4f6e),(n:'bb9.bin';l:$20000;p:$20000;crc:$39f47a63),
+        (n:'pang_09.bin';l:$20000;p:0;crc:$3a5883f5),(n:'bb3.bin';l:$20000;p:$20000;crc:$79a8ed08),
+        (n:'pang_11.bin';l:$20000;p:$80000;crc:$166a16ae),(n:'bb5.bin';l:$20000;p:$a0000;crc:$2fb3db6c),());
+        //Super Pang
+        spang:array[0..11] of tipo_roms=(
+        (n:'spe_06.rom';l:$8000;p:0;crc:$1af106fb),(n:'spe_07.rom';l:$20000;p:$10000;crc:$208b5f54),
+        (n:'spe_08.rom';l:$20000;p:$30000;crc:$2bc03ade),(n:'spe_01.rom';l:$20000;p:0;crc:$2d19c133),
+        (n:'spj10_2k.bin';l:$20000;p:0;crc:$eedd0ade),(n:'spj09_1k.bin';l:$20000;p:$20000;crc:$04b41b75),
+        (n:'spe_02.rom';l:$20000;p:0;crc:$63c9dfd2),(n:'03.f2';l:$20000;p:$20000;crc:$3ae28bc1),
+        (n:'spe_04.rom';l:$20000;p:$80000;crc:$9d7b225b),(n:'05.g2';l:$20000;p:$a0000;crc:$4a060884),
+        (n:'eeprom-spang.bin';l:$80;p:0;crc:$deae1291),());
+        //Ninja Kid II
+        ninjakd2:array[0..12] of tipo_roms=(
+        (n:'nk2_01.rom';l:$8000;p:0;crc:$3cdbb906),(n:'nk2_02.rom';l:$8000;p:$8000;crc:$b5ce9a1a),
+        (n:'nk2_03.rom';l:$8000;p:$10000;crc:$ad275654),(n:'nk2_04.rom';l:$8000;p:$18000;crc:$e7692a77),
+        (n:'nk2_05.rom';l:$8000;p:$20000;crc:$5dac9426),(n:'nk2_06.rom';l:$10000;p:0;crc:$d3a18a79),
+        (n:'nk2_12.rom';l:$8000;p:0;crc:$db5657a9),
+        (n:'nk2_08.rom';l:$10000;p:0;crc:$1b79c50a),(n:'nk2_07.rom';l:$10000;p:$10000;crc:$0be5cd13),
+        (n:'nk2_11.rom';l:$10000;p:0;crc:$41a714b3),(n:'nk2_10.rom';l:$10000;p:$10000;crc:$c913c4ab),
+        (n:'ninjakd2.key';l:$2000;p:0;crc:$ec25318f),());
+        //Ark Area
+        arkarea:array[0..13] of tipo_roms=(
+        (n:'arkarea.008';l:$8000;p:0;crc:$1ce1b5b9),(n:'arkarea.009';l:$8000;p:$8000;crc:$db1c81d1),
+        (n:'arkarea.010';l:$8000;p:$10000;crc:$5a460dae),(n:'arkarea.011';l:$8000;p:$18000;crc:$63f022c9),
+        (n:'arkarea.012';l:$8000;p:$20000;crc:$3c4c65d5),(n:'arkarea.013';l:$8000;p:0;crc:$2d409d58),
+        (n:'arkarea.004';l:$8000;p:0;crc:$69e36af2),
+        (n:'arkarea.007';l:$10000;p:0;crc:$d5684a27),(n:'arkarea.006';l:$10000;p:$10000;crc:$2c0567d6),
+        (n:'arkarea.005';l:$10000;p:$20000;crc:$9886004d),
+        (n:'arkarea.003';l:$10000;p:0;crc:$6f45a308),(n:'arkarea.002';l:$10000;p:$10000;crc:$051d3482),
+        (n:'arkarea.001';l:$10000;p:$20000;crc:$09d11ab7),());
+        //Mutant Night
+        mnight:array[0..13] of tipo_roms=(
+        (n:'mn6-j19.bin';l:$8000;p:0;crc:$56678d14),(n:'mn5-j17.bin';l:$8000;p:$8000;crc:$2a73f88e),
+        (n:'mn4-j16.bin';l:$8000;p:$10000;crc:$c5e42bb4),(n:'mn3-j14.bin';l:$8000;p:$18000;crc:$df6a4f7a),
+        (n:'mn2-j12.bin';l:$8000;p:$20000;crc:$9c391d1b),(n:'mn1-j7.bin';l:$10000;p:0;crc:$a0782a31),
+        (n:'mn10-b10.bin';l:$8000;p:0;crc:$37b8221f),
+        (n:'mn7-e11.bin';l:$10000;p:0;crc:$4883059c),(n:'mn8-e12.bin';l:$10000;p:$10000;crc:$02b91445),
+        (n:'mn9-e14.bin';l:$10000;p:$20000;crc:$9f08d160),
+        (n:'mn11-b20.bin';l:$10000;p:0;crc:$4d37e0f4),(n:'mn12-b22.bin';l:$10000;p:$10000;crc:$b22cbbd3),
+        (n:'mn13-b23.bin';l:$10000;p:$20000;crc:$65714070),());
+        //Sky Kid
+        skykid:array[0..14] of tipo_roms=(
+        (n:'sk2_2.6c';l:$4000;p:$0;crc:$ea8a5822),(n:'sk1-1c.6b';l:$4000;p:$4000;crc:$7abe6c6c),
+        (n:'sk1_3.6d';l:$4000;p:$8000;crc:$314b8765),(n:'sk1_6.6l';l:$2000;p:0;crc:$58b731b9),
+        (n:'sk1_5.7e';l:$2000;p:0;crc:$c33a498e),
+        (n:'sk1_8.10n';l:$4000;p:0;crc:$44bb7375),(n:'sk1_7.10m';l:$4000;p:$4000;crc:$3454671d),
+        (n:'sk2_4.3c';l:$2000;p:$8000;crc:$a460d0e0),(n:'cus63-63a1.mcu';l:$1000;p:$f000;crc:$6ef08fb3),
+        (n:'sk1-1.2n';l:$100;p:$0;crc:$0218e726),(n:'sk1-2.2p';l:$100;p:$100;crc:$fc0d5b85),
+        (n:'sk1-3.2r';l:$100;p:$200;crc:$d06b620b),(n:'sk1-4.5n';l:$200;p:$300;crc:$c697ac72),
+        (n:'sk1-5.6n';l:$200;p:$500;crc:$161514a4),());
+        //Dragon Buster
+        drgnbstr:array[0..14] of tipo_roms=(
+        (n:'db1_2b.6c';l:$4000;p:$0;crc:$0f11cd17),(n:'db1_1.6b';l:$4000;p:$4000;crc:$1c7c1821),
+        (n:'db1_3.6d';l:$4000;p:$8000;crc:$6da169ae),(n:'db1_6.6l';l:$2000;p:0;crc:$c080b66c),
+        (n:'db1_5.7e';l:$2000;p:0;crc:$28129aed),
+        (n:'db1_8.10n';l:$4000;p:0;crc:$11942c61),(n:'db1_7.10m';l:$4000;p:$4000;crc:$cc130fe2),
+        (n:'db1_4.3c';l:$2000;p:$8000;crc:$8a0b1fc1),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),
+        (n:'db1-1.2n';l:$100;p:$0;crc:$3f8cce97),(n:'db1-2.2p';l:$100;p:$100;crc:$afe32436),
+        (n:'db1-3.2r';l:$100;p:$200;crc:$c95ff576),(n:'db1-4.5n';l:$200;p:$300;crc:$b2180c21),
+        (n:'db1-5.6n';l:$200;p:$500;crc:$5e2b3f74),());
+        //Rolling Thunder
+        rthunder:array[0..28] of tipo_roms=(
+        (n:'rt3_1b.9c';l:$8000;p:$8000;crc:$7d252a1b),
+        (n:'rt1_17.f1';l:$10000;p:0;crc:$766af455),(n:'rt1_18.h1';l:$10000;p:$10000;crc:$3f9f2f5d),
+        (n:'rt3_19.k1';l:$10000;p:$20000;crc:$c16675e9),(n:'rt3_20.m1';l:$10000;p:$30000;crc:$c470681b),
+        (n:'rt3_2b.12c';l:$8000;p:$0;crc:$a7ea46ee),(n:'rt3_3.12d';l:$8000;p:$8000;crc:$a13f601c),
+        (n:'rt1_7.7r';l:$10000;p:0;crc:$a85efa39),(n:'rt1_8.7s';l:$8000;p:$10000;crc:$f7a95820),
+        (n:'rt1_5.4r';l:$8000;p:0;crc:$d0fc470b),(n:'rt1_6.4s';l:$4000;p:$8000;crc:$6b57edb2),
+        (n:'rt1_9.12h';l:$10000;p:0;crc:$8e070561),(n:'rt1_10.12k';l:$10000;p:$10000;crc:$cb8fb607),
+        (n:'rt1_11.12l';l:$10000;p:$20000;crc:$2bdf5ed9),(n:'rt1_12.12m';l:$10000;p:$30000;crc:$e6c6c7dc),
+        (n:'rt1_13.12p';l:$10000;p:$40000;crc:$489686d7),(n:'rt1_14.12r';l:$10000;p:$50000;crc:$689e56a8),
+        (n:'rt1_15.12t';l:$10000;p:$60000;crc:$1d8bf2ca),(n:'rt1_16.12u';l:$10000;p:$70000;crc:$1bbcf37b),
+        (n:'rt3_4.6b';l:$8000;p:$4000;crc:$00cf293f),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),
+        (n:'rt1-1.3r';l:$200;p:$0;crc:$8ef3bb9d),(n:'rt1-2.3s';l:$200;p:$200;crc:$6510a8f2),
+        (n:'rt1-3.4v';l:$800;p:$400;crc:$95c7d944),(n:'rt1-4.5v';l:$800;p:$c00;crc:$1391fec9),
+        (n:'rt1-5.6u';l:$20;p:$1400;crc:$e4130804),
+        (n:'rt1_21.f3';l:$10000;p:$0;crc:$454968f3),(n:'rt2_22.h3';l:$10000;p:$20000;crc:$fe963e72),());
+        //Hopping Mappy
+        hopmappy:array[0..12] of tipo_roms=(
+        (n:'hm1_1.9c';l:$8000;p:$8000;crc:$1a83914e),(n:'hm1_2.12c';l:$4000;p:$c000;crc:$c46cda65),
+        (n:'hm1_6.7r';l:$4000;p:$0;crc:$fd0e8887),(n:'hm1_5.4r';l:$4000;p:$0;crc:$9c4f31ae),
+        (n:'hm1_4.12h';l:$8000;p:$0;crc:$78719c52),
+        (n:'hm1_3.6b';l:$2000;p:$8000;crc:$6496e1db),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),
+        (n:'hm1-1.3r';l:$200;p:$0;crc:$cc801088),(n:'hm1-2.3s';l:$200;p:$200;crc:$a1cb71c5),
+        (n:'hm1-3.4v';l:$800;p:$400;crc:$e362d613),(n:'hm1-4.5v';l:$800;p:$c00;crc:$678252b4),
+        (n:'hm1-5.6u';l:$20;p:$1400;crc:$475bf500),());
+        //Sky Kid Deluxe
+        skykiddx:array[0..16] of tipo_roms=(
+        (n:'sk3_1b.9c';l:$8000;p:$0;crc:$767b3514),(n:'sk3_2.9d';l:$8000;p:$8000;crc:$74b8f8e2),
+        (n:'sk3_3.12c';l:$8000;p:$8000;crc:$6d1084c4),
+        (n:'sk3_9.7r';l:$8000;p:$0;crc:$48675b17),(n:'sk3_10.7s';l:$4000;p:$8000;crc:$7418465a),
+        (n:'sk3_7.4r';l:$8000;p:$0;crc:$4036b735),(n:'sk3_8.4s';l:$4000;p:$8000;crc:$044bfd21),
+        (n:'sk3_5.12h';l:$8000;p:$0;crc:$5c7d4399),(n:'sk3_6.12k';l:$8000;p:$8000;crc:$c908a3b2),
+        (n:'sk3_4.6b';l:$4000;p:$8000;crc:$e6cae2d6),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),
+        (n:'sk3-1.3r';l:$200;p:$0;crc:$9e81dedd),(n:'sk3-2.3s';l:$200;p:$200;crc:$cbfec4dd),
+        (n:'sk3-3.4v';l:$800;p:$400;crc:$81714109),(n:'sk3-4.5v';l:$800;p:$c00;crc:$1bf25acc),
+        (n:'sk3-5.6u';l:$20;p:$1400;crc:$e4130804),());
+        rocnrope:array[0..16] of tipo_roms=(
+        (n:'rr1.1h';l:$2000;p:$6000;crc:$83093134),(n:'rr2.2h';l:$2000;p:$8000;crc:$75af8697),
+        (n:'rr3.3h';l:$2000;p:$a000;crc:$b21372b1),(n:'rr4.4h';l:$2000;p:$c000;crc:$7acb2a05),
+        (n:'rnr_h5.vid';l:$2000;p:$e000;crc:$150a6264),
+        (n:'rnr_7a.snd';l:$1000;p:0;crc:$75d2c4e2),(n:'rnr_8a.snd';l:$1000;p:$1000;crc:$ca4325ae),
+        (n:'rnr_a11.vid';l:$2000;p:0;crc:$afdaba5e),(n:'rnr_a12.vid';l:$2000;p:$2000;crc:$054cafeb),
+        (n:'rnr_a9.vid';l:$2000;p:$4000;crc:$9d2166b2),(n:'rnr_a10.vid';l:$2000;p:$6000;crc:$aff6e22f),
+        (n:'rnr_h12.vid';l:$2000;p:0;crc:$e2114539),(n:'rnr_h11.vid';l:$2000;p:$2000;crc:$169a8f3f),
+        (n:'a17_prom.bin';l:$20;p:0;crc:$22ad2c3e),(n:'b16_prom.bin';l:$100;p:$20;crc:$750a9677),
+        (n:'rocnrope.pr3';l:$100;p:$120;crc:$b5c75a27),());
+        repulse:array[0..20] of tipo_roms=(
+        (n:'repulse.b5';l:$2000;p:0;crc:$fb2b7c9d),(n:'repulse.b6';l:$2000;p:$2000;crc:$99129918),
+        (n:'7.j4';l:$2000;p:$4000;crc:$57a8e900),
+        (n:'1.f2';l:$2000;p:0;crc:$c485c621),(n:'2.h2';l:$2000;p:$2000;crc:$b3c6a886),
+        (n:'3.j2';l:$2000;p:$4000;crc:$197e314c),(n:'repulse.b4';l:$2000;p:$6000;crc:$86b267f3),
+        (n:'repulse.a11';l:$1000;p:0;crc:$8e1de90a),
+        (n:'15.9h';l:$2000;p:0;crc:$c9213469),(n:'16.10h';l:$2000;p:$2000;crc:$7de5d39e),
+        (n:'17.11h';l:$2000;p:$4000;crc:$0ba5f72c),
+        (n:'8.6a';l:$4000;p:0;crc:$0e9f757e),(n:'9.7a';l:$4000;p:$4000;crc:$f7d2e650),
+        (n:'10.8a';l:$4000;p:$8000;crc:$e717baf4),(n:'11.9a';l:$4000;p:$c000;crc:$04b2250b),
+        (n:'12.10a';l:$4000;p:$10000;crc:$d110e140),(n:'13.11a';l:$4000;p:$14000;crc:$8fdc713c),
+        (n:'b.1j';l:$100;p:0;crc:$3ea35431),(n:'g.1h';l:$100;p:$100;crc:$acd7a69e),
+        (n:'r.1f';l:$100;p:$200;crc:$b7f48b41),());
+        //The NewZealand Story
+        tnzs:array[0..11] of tipo_roms=(
+        (n:'b53-24.1';l:$20000;p:0;crc:$d66824c6),(n:'b53-25.3';l:$10000;p:0;crc:$d6ac4e71),
+        (n:'b53-26.34';l:$10000;p:0;crc:$cfd5649c),
+        (n:'b53-16.8';l:$20000;p:0;crc:$c3519c2a),(n:'b53-17.7';l:$20000;p:$20000;crc:$2bf199e8),
+        (n:'b53-18.6';l:$20000;p:$40000;crc:$92f35ed9),(n:'b53-19.5';l:$20000;p:$60000;crc:$edbb9581),
+        (n:'b53-22.4';l:$20000;p:$80000;crc:$59d2aef6),(n:'b53-23.3';l:$20000;p:$a0000;crc:$74acfb9b),
+        (n:'b53-20.2';l:$20000;p:$c0000;crc:$095d0dc0),(n:'b53-21.1';l:$20000;p:$e0000;crc:$9800c54d),());
+        //Insector X
+        insectx:array[0..4] of tipo_roms=(
+        (n:'b97-03.u32';l:$20000;p:0;crc:$18eef387),(n:'b97-07.u38';l:$10000;p:0;crc:$324b28c9),
+        (n:'b97-01.u1';l:$80000;p:0;crc:$d00294b1),(n:'b97-02.u2';l:$80000;p:$80000;crc:$db5a7434),());
+        pacland:array[0..19] of tipo_roms=(
+        (n:'pl5_01b.8b';l:$4000;p:$0;crc:$b0ea7631),(n:'pl5_02.8d';l:$4000;p:$4000;crc:$d903e84e),
+        (n:'pl1_3.8e';l:$4000;p:$8000;crc:$aa9fa739),(n:'pl1_4.8f';l:$4000;p:$c000;crc:$2b895a90),
+        (n:'pl1_5.8h';l:$4000;p:$10000;crc:$7af66200),(n:'pl3_6.8j';l:$4000;p:$14000;crc:$2ffe3319),
+        (n:'pl2_12.6n';l:$2000;p:0;crc:$a63c8726),(n:'pl4_13.6t';l:$2000;p:0;crc:$3ae582fd),
+        (n:'pl1-9.6f';l:$4000;p:0;crc:$f5d5962b),(n:'pl1-8.6e';l:$4000;p:$4000;crc:$a2ebfa4a),
+        (n:'pl1-10.7e';l:$4000;p:$8000;crc:$c7cf1904),(n:'pl1-11.7f';l:$4000;p:$c000;crc:$6621361a),
+        (n:'pl1_7.3e';l:$2000;p:$8000;crc:$8c5becae),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),
+        (n:'pl1-2.1t';l:$400;p:$0;crc:$472885de),(n:'pl1-1.1r';l:$400;p:$400;crc:$a78ebdaf),
+        (n:'pl1-5.5t';l:$400;p:$800;crc:$4b7ee712),(n:'pl1-4.4n';l:$400;p:$c00;crc:$3a7be418),
+        (n:'pl1-3.6l';l:$400;p:$1000;crc:$80558da8),());
+        mario:array[0..13] of tipo_roms=(
+        (n:'tma1-c-7f_f.7f';l:$2000;p:0;crc:$c0c6e014),(n:'tma1-c-7e_f.7e';l:$2000;p:$2000;crc:$94fb60d6),
+        (n:'tma1-c-7d_f.7d';l:$2000;p:$4000;crc:$dcceb6c1),(n:'tma1-c-7c_f.7c';l:$1000;p:$f000;crc:$4a63d96b),
+        (n:'tma1-c-4p_1.4p';l:$200;p:0;crc:$8187d286),
+        (n:'tma1-v-3f.3f';l:$1000;p:0;crc:$28b0c42c),(n:'tma1-v-3j.3j';l:$1000;p:$1000;crc:$0c8cc04d),
+        (n:'tma1-v-7m.7m';l:$1000;p:0;crc:$22b7372e),(n:'tma1-v-7n.7n';l:$1000;p:$1000;crc:$4f3a1f47),
+        (n:'tma1-v-7p.7p';l:$1000;p:$2000;crc:$56be6ccd),(n:'tma1-v-7s.7s';l:$1000;p:$3000;crc:$56f1d613),
+        (n:'tma1-v-7t.7t';l:$1000;p:$4000;crc:$641f0008),(n:'tma1-v-7u.7u';l:$1000;p:$5000;crc:$7baf5309),());
+        solomon:array[0..12] of tipo_roms=(
+        (n:'6.3f';l:$4000;p:0;crc:$645eb0f3),(n:'7.3h';l:$8000;p:$4000;crc:$1bf5c482),
+        (n:'8.3jk';l:$8000;p:$c000;crc:$0a6cdefc),(n:'1.3jk';l:$4000;p:0;crc:$fa6e562e),
+        (n:'12.3t';l:$8000;p:$0;crc:$b371291c),(n:'11.3r';l:$8000;p:$8000;crc:$6f94d2af),
+        (n:'2.5lm';l:$4000;p:0;crc:$80fa2be3),(n:'3.6lm';l:$4000;p:$4000;crc:$236106b4),
+        (n:'4.7lm';l:$4000;p:$8000;crc:$088fe5d9),(n:'5.8lm';l:$4000;p:$c000;crc:$8366232a),
+        (n:'10.3p';l:$8000;p:$0;crc:$8310c2a1),(n:'9.3m';l:$8000;p:$8000;crc:$ab7e6c42),());
+        combatsc:array[0..12] of tipo_roms=(
+        (n:'611g01.rom';l:$10000;p:$0;crc:$857ffffe),(n:'611g02.rom';l:$20000;p:$10000;crc:$9ba05327),
+        (n:'611g06.h14';l:$100;p:0;crc:$f916129a),(n:'611g05.h15';l:$100;p:$100;crc:$207a7b07),
+        (n:'611g10.h6';l:$100;p:$200;crc:$f916129a),(n:'611g09.h7';l:$100;p:$300;crc:$207a7b07),
+        (n:'611g07.rom';l:$40000;p:0;crc:$73b38720),(n:'611g08.rom';l:$40000;p:$1;crc:$46e7d28c),
+        (n:'611g11.rom';l:$40000;p:0;crc:$69687538),(n:'611g12.rom';l:$40000;p:$1;crc:$9c6bf898),
+        (n:'611g03.rom';l:$8000;p:$0;crc:$2a544db5),(n:'611g04.rom';l:$20000;p:0;crc:$2987e158),());
+        hvyunit:array[0..13] of tipo_roms=(
+        (n:'b73_10.5c';l:$20000;p:0;crc:$ca52210f),(n:'b73_11.5p';l:$10000;p:0;crc:$cb451695),
+        (n:'b73_12.7e';l:$10000;p:0;crc:$d1d24fab),(n:'mermaid.bin';l:$e00;p:0;crc:$88c5dd27),
+        (n:'b73_08.2f';l:$80000;p:0;crc:$f83dd808),(n:'b73_07.2c';l:$10000;p:$100000;crc:$5cffa42c),
+        (n:'b73_06.2b';l:$10000;p:$120000;crc:$a98e4aea),(n:'b73_01.1b';l:$10000;p:$140000;crc:$3a8a4489),
+        (n:'b73_02.1c';l:$10000;p:$160000;crc:$025c536c),(n:'b73_03.1d';l:$10000;p:$180000;crc:$ec6020cf),
+        (n:'b73_04.1f';l:$10000;p:$1a0000;crc:$f7badbb2),(n:'b73_05.1h';l:$10000;p:$1c0000;crc:$b8e829d2),
+        (n:'b73_09.2p';l:$80000;p:0;crc:$537c647f),());
+        //POW
+        pow:array[0..22] of tipo_roms=(
+        (n:'dg1ver1.j14';l:$20000;p:0;crc:$8e71a8af),(n:'dg2ver1.l14';l:$20000;p:$1;crc:$4287affc),
+        (n:'dg9.l25';l:$8000;p:0;crc:$df864a08),(n:'dg10.m25';l:$8000;p:$8000;crc:$9e470d53),
+        (n:'dg8.e25';l:$10000;p:0;crc:$d1d61da3),(n:'dg7.d20';l:$10000;p:0;crc:$aba9a9d3),
+        (n:'snk880.11a';l:$20000;p:$0;crc:$e70fd906),(n:'snk880.15a';l:$20000;p:$1;crc:$7a90e957),
+        (n:'snk880.12a';l:$20000;p:$40000;crc:$628b1aed),(n:'snk880.16a';l:$20000;p:$40001;crc:$e40a6c13),
+        (n:'snk880.13a';l:$20000;p:$80000;crc:$19dc8868),(n:'snk880.17a';l:$20000;p:$80001;crc:$c7931cc2),
+        (n:'snk880.14a';l:$20000;p:$c0000;crc:$47cd498b),(n:'snk880.18a';l:$20000;p:$c0001;crc:$eed72232),
+        (n:'snk880.19a';l:$20000;p:$100000;crc:$1775b8dd),(n:'snk880.23a';l:$20000;p:$100001;crc:$adb6ad68),
+        (n:'snk880.20a';l:$20000;p:$140000;crc:$f8e752ec),(n:'snk880.24a';l:$20000;p:$140001;crc:$dd41865a),
+        (n:'snk880.21a';l:$20000;p:$180000;crc:$27e9fffe),(n:'snk880.25a';l:$20000;p:$180001;crc:$055759ad),
+        (n:'snk880.22a';l:$20000;p:$1c0000;crc:$aa9c00d8),(n:'snk880.26a';l:$20000;p:$1c0001;crc:$9bc261c5),());
+        //Street Smart
+        streetsm:array[0..12] of tipo_roms=(
+        (n:'s2-1ver2.14h';l:$20000;p:0;crc:$655f4773),(n:'s2-2ver2.14k';l:$20000;p:$1;crc:$efae4823),
+        (n:'s2-9.25l';l:$8000;p:0;crc:$09b6ac67),(n:'s2-10.25m';l:$8000;p:$8000;crc:$89e4ee6f),
+        (n:'s2-5.16c';l:$10000;p:0;crc:$ca4b171e),(n:'s2-6.18d';l:$20000;p:0;crc:$47db1605),
+        (n:'stsmart.900';l:$80000;p:$0;crc:$a8279a7e),(n:'stsmart.902';l:$80000;p:$80000;crc:$2f021aa1),
+        (n:'stsmart.904';l:$80000;p:$100000;crc:$167346f7),
+        (n:'stsmart.901';l:$80000;p:$200000;crc:$c305af12),(n:'stsmart.903';l:$80000;p:$280000;crc:$73c16d35),
+        (n:'stsmart.905';l:$80000;p:$300000;crc:$a5beb4e2),());
+        //Ikari 3
+        ikari3:array[0..28] of tipo_roms=(
+        (n:'ik3-2-ver1.c10';l:$20000;p:0;crc:$1bae8023),(n:'ik3-3-ver1.c9';l:$20000;p:$1;crc:$10e38b66),
+        (n:'ik3-7.bin';l:$8000;p:0;crc:$0b4804df),(n:'ik3-8.bin';l:$8000;p:$8000;crc:$10ab4e50),
+        (n:'ik3-5.bin';l:$10000;p:0;crc:$ce6706fc),(n:'ik3-6.bin';l:$20000;p:0;crc:$59d256a4),
+        (n:'ik3-23.bin';l:$20000;p:$000000;crc:$d0fd5c77),(n:'ik3-13.bin';l:$20000;p:$000001;crc:$9a56bd32),
+        (n:'ik3-22.bin';l:$20000;p:$040000;crc:$4878d883),(n:'ik3-12.bin';l:$20000;p:$040001;crc:$0ce6a10a),
+        (n:'ik3-21.bin';l:$20000;p:$080000;crc:$50d0fbf0),(n:'ik3-11.bin';l:$20000;p:$080001;crc:$e4e2be43),
+        (n:'ik3-20.bin';l:$20000;p:$0c0000;crc:$9a851efc),(n:'ik3-10.bin';l:$20000;p:$0c0001;crc:$ac222372),
+        (n:'ik3-19.bin';l:$20000;p:$100000;crc:$4ebdba89),(n:'ik3-9.bin';l:$20000;p:$100001;crc:$c33971c2),
+        (n:'ik3-14.bin';l:$20000;p:$200000;crc:$453bea77),(n:'ik3-24.bin';l:$20000;p:$200001;crc:$e9b26d68),
+        (n:'ik3-15.bin';l:$20000;p:$240000;crc:$781a81fc),(n:'ik3-25.bin';l:$20000;p:$240001;crc:$073b03f1),
+        (n:'ik3-16.bin';l:$20000;p:$280000;crc:$80ba400b),(n:'ik3-26.bin';l:$20000;p:$280001;crc:$9c613561),
+        (n:'ik3-17.bin';l:$20000;p:$2c0000;crc:$0cc3ce4a),(n:'ik3-27.bin';l:$20000;p:$2c0001;crc:$16dd227e),
+        (n:'ik3-18.bin';l:$20000;p:$300000;crc:$ba106245),(n:'ik3-28.bin';l:$20000;p:$300001;crc:$711715ae),
+        (n:'ik3-1.c8';l:$10000;p:0;crc:$47e4d256),(n:'ik3-4.c12';l:$10000;p:$1;crc:$a43af6b5),());
+        //Search and Rescue
+        searchar:array[0..14] of tipo_roms=(
+        (n:'bhw.2';l:$20000;p:0;crc:$e1430138),(n:'bhw.3';l:$20000;p:$1;crc:$ee1f9374),
+        (n:'bh.7';l:$8000;p:0;crc:$b0f1b049),(n:'bh.8';l:$8000;p:$8000;crc:$174ddba7),
+        (n:'bh.5';l:$10000;p:0;crc:$53e2fa76),(n:'bh.v1';l:$20000;p:0;crc:$07a6114b),
+        (n:'bh.c1';l:$80000;p:$000000;crc:$1fb8f0ae),(n:'bh.c3';l:$80000;p:$080000;crc:$fd8bc407),
+        (n:'bh.c5';l:$80000;p:$100000;crc:$1d30acc3),
+        (n:'bh.c2';l:$80000;p:$200000;crc:$7c803767),(n:'bh.c4';l:$80000;p:$280000;crc:$eede7c43),
+        (n:'bh.c6';l:$80000;p:$300000;crc:$9f785cd9),
+        (n:'bhw.1';l:$20000;p:0;crc:$62b60066),(n:'bhw.4';l:$20000;p:$1;crc:$16d8525c),());
+        //P47
+        p47:array[0..20] of tipo_roms=(
+        (n:'p47us3.bin';l:$20000;p:0;crc:$022e58b8),(n:'p47us1.bin';l:$20000;p:$1;crc:$ed926bd8),
+        (n:'p47j_9.bin';l:$10000;p:0;crc:$ffcf318e),(n:'p47j_19.bin';l:$10000;p:$1;crc:$adb8c12e),
+        (n:'p47j_5.bin';l:$20000;p:0;crc:$fe65b65c),(n:'p47j_6.bin';l:$20000;p:$20000;crc:$e191d2d2),
+        (n:'p47j_7.bin';l:$20000;p:$40000;crc:$f77723b7),
+        (n:'p47j_23.bin';l:$20000;p:0;crc:$6e9bc864),(n:'p47j_23.bin';l:$20000;p:$20000;crc:$6e9bc864),
+        (n:'p47j_12.bin';l:$20000;p:$40000;crc:$5268395f),(n:'p47us16.bin';l:$10000;p:0;crc:$5a682c8f),
+        (n:'p47j_27.bin';l:$20000;p:0;crc:$9e2bde8e),(n:'p47j_18.bin';l:$20000;p:$20000;crc:$29d8f676),
+        (n:'p47j_26.bin';l:$20000;p:$40000;crc:$4d07581a),(n:'p47j_26.bin';l:$20000;p:$60000;crc:$4d07581a),
+        (n:'p47j_20.bin';l:$20000;p:0;crc:$2ed53624),(n:'p47j_21.bin';l:$20000;p:$20000;crc:$6f56b56d),
+        (n:'p47j_10.bin';l:$20000;p:0;crc:$b9d79c1e),(n:'p47j_11.bin';l:$20000;p:$20000;crc:$fa0d1887),
+        (n:'p-47.14m';l:$200;p:0;crc:$1d877538),());
+        //Rod-Land
+        rodland:array[0..13] of tipo_roms=(
+        (n:'rl_02.rom';l:$20000;p:0;crc:$c7e00593),(n:'rl_01.rom';l:$20000;p:$1;crc:$2e748ca1),
+        (n:'rl_03.rom';l:$10000;p:$40000;crc:$62fdf6d7),(n:'rl_04.rom';l:$10000;p:$40001;crc:$44163c86),
+        (n:'rl_05.rom';l:$10000;p:0;crc:$c1617c28),(n:'rl_06.rom';l:$10000;p:$1;crc:$663392b2),
+        (n:'rl_23.rom';l:$80000;p:0;crc:$ac60e771),(n:'rl_18.rom';l:$80000;p:0;crc:$f3b30ca6),
+        (n:'rl_19.bin';l:$20000;p:0;crc:$124d7e8f),(n:'rl_14.rom';l:$80000;p:0;crc:$08d01bf4),
+        (n:'rl_10.rom';l:$40000;p:0;crc:$e1d1cd99),(n:'rl_08.rom';l:$40000;p:0;crc:$8a49d3a7),
+        (n:'rl.bin';l:$200;p:0;crc:$8914e72d),());
+        //saint dragon
+        stdragon:array[0..22] of tipo_roms=(
+        (n:'jsd-02.bin';l:$20000;p:0;crc:$cc29ab19),(n:'jsd-01.bin';l:$20000;p:$1;crc:$67429a57),
+        (n:'jsd-05.bin';l:$10000;p:0;crc:$8c04feaa),(n:'jsd-06.bin';l:$10000;p:$1;crc:$0bb62f3a),
+        (n:'jsd-11.bin';l:$20000;p:0;crc:$2783b7b1),(n:'jsd-12.bin';l:$20000;p:$20000;crc:$89466ab7),
+        (n:'jsd-13.bin';l:$20000;p:$40000;crc:$9896ae82),(n:'jsd-14.bin';l:$20000;p:$60000;crc:$7e8da371),
+        (n:'jsd-15.bin';l:$20000;p:0;crc:$e296bf59),(n:'jsd-16.bin';l:$20000;p:$20000;crc:$d8919c06),
+        (n:'jsd-17.bin';l:$20000;p:$40000;crc:$4f7ad563),(n:'jsd-18.bin';l:$20000;p:$60000;crc:$1f4da822),
+        (n:'jsd-19.bin';l:$10000;p:0;crc:$25ce807d),
+        (n:'jsd-20.bin';l:$20000;p:0;crc:$2c6e93bb),(n:'jsd-21.bin';l:$20000;p:$20000;crc:$864bcc61),
+        (n:'jsd-22.bin';l:$20000;p:$40000;crc:$44fe2547),(n:'jsd-23.bin';l:$20000;p:$60000;crc:$6b010e1a),
+        (n:'jsd-09.bin';l:$20000;p:0;crc:$e366bc5a),(n:'jsd-10.bin';l:$20000;p:$20000;crc:$4a8f4fe6),
+        (n:'jsd-07.bin';l:$20000;p:0;crc:$6a48e979),(n:'jsd-08.bin';l:$20000;p:$20000;crc:$40704962),
+        (n:'prom.14m';l:$200;p:0;crc:$1d877538),());
+        timeplt:array[0..11] of tipo_roms=(
+        (n:'tm1';l:$2000;p:0;crc:$1551f1b9),(n:'tm2';l:$2000;p:$2000;crc:$58636cb5),
+        (n:'tm3';l:$2000;p:$4000;crc:$ff4e0d83),(n:'tm6';l:$2000;p:0;crc:$c2507f40),
+        (n:'tm4';l:$2000;p:0;crc:$7e437c3e),(n:'tm5';l:$2000;p:$2000;crc:$e8ca87b9),
+        (n:'timeplt.b4';l:$20;p:0;crc:$34c91839),(n:'timeplt.b5';l:$20;p:$20;crc:$463b2b07),
+        (n:'timeplt.e9';l:$100;p:$40;crc:$4bbb2150),(n:'timeplt.e12';l:$100;p:$140;crc:$f7b7663e),
+        (n:'tm7';l:$1000;p:0;crc:$d66da813),());
+        pengo:array[0..13] of tipo_roms=(
+        (n:'ep1689c.8';l:$1000;p:0;crc:$f37066a8),(n:'ep1690b.7';l:$1000;p:$1000;crc:$baf48143),
+        (n:'ep1691b.15';l:$1000;p:$2000;crc:$adf0eba0),(n:'ep1692b.14';l:$1000;p:$3000;crc:$a086d60f),
+        (n:'ep1693b.21';l:$1000;p:$4000;crc:$b72084ec),(n:'ep1694b.20';l:$1000;p:$5000;crc:$94194a89),
+        (n:'ep5118b.32';l:$1000;p:$6000;crc:$af7b12c4),(n:'ep5119c.31';l:$1000;p:$7000;crc:$933950fe),
+        (n:'pr1633.78';l:$20;p:0;crc:$3a5844ec),(n:'pr1634.88';l:$400;p:$20;crc:$766b139b),
+        (n:'pr1635.51';l:$100;p:0;crc:$c29dea27),
+        (n:'ep1640.92';l:$2000;p:$0;crc:$d7eec6cd),(n:'ep1695.105';l:$2000;p:$4000;crc:$5bfd26e9),());
+        //Twin Cobra
+        twincobr:array[0..22] of tipo_roms=(
+        (n:'b30-01';l:$10000;p:0;crc:$07f64d13),(n:'b30-03';l:$10000;p:$1;crc:$41be6978),
+        (n:'tc15';l:$8000;p:$20000;crc:$3a646618),(n:'tc13';l:$8000;p:$20001;crc:$d7d1e317),
+        (n:'tc12';l:$8000;p:0;crc:$e37b3c44),
+        (n:'tc11';l:$4000;p:0;crc:$0a254133),(n:'tc03';l:$4000;p:$4000;crc:$e9e2d4b1),
+        (n:'tc04';l:$4000;p:$8000;crc:$a599d845),
+        (n:'tc20';l:$10000;p:0;crc:$cb4092b8),(n:'tc19';l:$10000;p:$10000;crc:$9cb8675e),
+        (n:'tc18';l:$10000;p:$20000;crc:$806fb374),(n:'tc17';l:$10000;p:$30000;crc:$4264bff8),
+        (n:'tc01';l:$10000;p:0;crc:$15b3991d),(n:'tc02';l:$10000;p:$10000;crc:$d9e2e55d),
+        (n:'tc06';l:$10000;p:$20000;crc:$13daeac8),(n:'tc05';l:$10000;p:$30000;crc:$8cc79357),
+        (n:'tc07';l:$8000;p:0;crc:$b5d48389),(n:'tc08';l:$8000;p:$8000;crc:$97f20fdc),
+        (n:'tc09';l:$8000;p:$10000;crc:$170c01db),(n:'tc10';l:$8000;p:$18000;crc:$44f5accd),
+        (n:'dsp_22.bin';l:$800;p:0;crc:$79389a71),(n:'dsp_21.bin';l:$800;p:$1;crc:$2d135376),());
+        //Flying Shark
+        fshark:array[0..26] of tipo_roms=(
+        (n:'b02_18-1.m8';l:$10000;p:0;crc:$04739e02),(n:'b02_17-1.p8';l:$10000;p:$1;crc:$fd6ef7a8),
+        (n:'b02_16.l5';l:$8000;p:0;crc:$cdd1a153),
+        (n:'b02_07-1.h11';l:$4000;p:0;crc:$e669f80e),(n:'b02_06-1.h10';l:$4000;p:$4000;crc:$5e53ae47),
+        (n:'b02_05-1.h8';l:$4000;p:$8000;crc:$a8b05bd0),
+        (n:'b02_01.d15';l:$10000;p:0;crc:$2234b424),(n:'b02_02.d16';l:$10000;p:$10000;crc:$30d4c9a8),
+        (n:'b02_03.d17';l:$10000;p:$20000;crc:$64f3d88f),(n:'b02_04.d20';l:$10000;p:$30000;crc:$3b23a9fc),
+        (n:'b02_12.h20';l:$8000;p:0;crc:$733b9997),(n:'b02_15.h24';l:$8000;p:$8000;crc:$8b70ef32),
+        (n:'b02_14.h23';l:$8000;p:$10000;crc:$f711ba7d),(n:'b02_13.h21';l:$8000;p:$18000;crc:$62532cd3),
+        (n:'b02_08.h13';l:$8000;p:0;crc:$ef0cf49c),(n:'b02_11.h18';l:$8000;p:$8000;crc:$f5799422),
+        (n:'b02_10.h16';l:$8000;p:$10000;crc:$4bd099ff),(n:'b02_09.h15';l:$8000;p:$18000;crc:$230f1582),
+        (n:'82s137-1.mcu';l:$400;p:0;crc:$cc5b3f53),(n:'82s137-2.mcu';l:$400;p:$400;crc:$47351d55),
+        (n:'82s137-3.mcu';l:$400;p:$800;crc:$70b537b9),(n:'82s137-4.mcu';l:$400;p:$c00;crc:$6edb2de8),
+        (n:'82s137-5.mcu';l:$400;p:$1000;crc:$f35b978a),(n:'82s137-6.mcu';l:$400;p:$1400;crc:$0459e51b),
+        (n:'82s137-7.mcu';l:$400;p:$1800;crc:$cbf3184b),(n:'82s137-8.mcu';l:$400;p:$1c00;crc:$8246a05c),());
+        //JR. Pac-man
+        jrpacman:array[0..11] of tipo_roms=(
+        (n:'jrp8d.bin';l:$2000;p:0;crc:$e3fa972e),(n:'jrp8e.bin';l:$2000;p:$2000;crc:$ec889e94),
+        (n:'jrp8h.bin';l:$2000;p:$8000;crc:$35f1fc6e),(n:'jrp8j.bin';l:$2000;p:$a000;crc:$9737099e),
+        (n:'jrp8k.bin';l:$2000;p:$c000;crc:$5252dd97),
+        (n:'jrprom.9e';l:$100;p:$0;crc:$029d35c4),(n:'jrprom.9f';l:$100;p:$100;crc:$eee34a79),
+        (n:'jrprom.9p';l:$100;p:$200;crc:$9f6ea9d8),
+        (n:'jrp2c.bin';l:$2000;p:0;crc:$0527ff9b),(n:'jrp2e.bin';l:$2000;p:$2000;crc:$73477193),
+        (n:'jrprom.7p';l:$100;p:0;crc:$a9cc86bf),());
+        //Robocop
+        robocop:array[0..25] of tipo_roms=(
+        (n:'ep05-4.11c';l:$10000;p:0;crc:$29c35379),(n:'ep01-4.11b';l:$10000;p:$1;crc:$77507c69),
+        (n:'ep04-3';l:$10000;p:$20000;crc:$39181778),(n:'ep00-3';l:$10000;p:$20001;crc:$e128541f),
+        (n:'en_24_mb7124e.a2';l:$200;p:$0;crc:$b8e2ca98),
+        (n:'ep23';l:$10000;p:0;crc:$a77e4ab1),(n:'ep22';l:$10000;p:$10000;crc:$9fbd6903),
+        (n:'ep03-3';l:$8000;p:$8000;crc:$5b164b24),(n:'ep02';l:$10000;p:0;crc:$711ce46f),
+        (n:'ep20';l:$10000;p:0;crc:$1d8d38b8),(n:'ep21';l:$10000;p:$10000;crc:$187929b2),
+        (n:'ep18';l:$10000;p:$20000;crc:$b6580b5e),(n:'ep19';l:$10000;p:$30000;crc:$9bad01c7),
+        (n:'ep14';l:$8000;p:0;crc:$ca56ceda),(n:'ep15';l:$8000;p:$8000;crc:$a945269c),
+        (n:'ep16';l:$8000;p:$10000;crc:$e7fa4d58),(n:'ep17';l:$8000;p:$18000;crc:$84aae89d),
+        (n:'ep07';l:$10000;p:$00000;crc:$495d75cf),(n:'ep06';l:$8000;p:$10000;crc:$a2ae32e2),
+        (n:'ep11';l:$10000;p:$20000;crc:$62fa425a),(n:'ep10';l:$8000;p:$30000;crc:$cce3bd95),
+        (n:'ep09';l:$10000;p:$40000;crc:$11bed656),(n:'ep08';l:$8000;p:$50000;crc:$c45c7b4c),
+        (n:'ep13';l:$10000;p:$60000;crc:$8fca9f28),(n:'ep12';l:$8000;p:$70000;crc:$3cd1d0c3),());
+        //Baddudes
+        baddudes:array[0..22] of tipo_roms=(
+        (n:'ei04-1.3c';l:$10000;p:0;crc:$4bf158a7),(n:'ei01-1.3a';l:$10000;p:$1;crc:$74f5110c),
+        (n:'ei06.6c';l:$10000;p:$40000;crc:$3ff8da57),(n:'ei03.6a';l:$10000;p:$40001;crc:$f8f2bd94),
+        (n:'ei25.15j';l:$8000;p:0;crc:$bcf59a69),(n:'ei26.16j';l:$8000;p:$8000;crc:$9aff67b8),
+        (n:'ei07.8a';l:$8000;p:$8000;crc:$9fb1ef4b),(n:'ei08.2c';l:$10000;p:0;crc:$3c87463e),
+        (n:'ei18.14d';l:$10000;p:0;crc:$05cfc3e5),(n:'ei20.17d';l:$10000;p:$10000;crc:$e11e988f),
+        (n:'ei22.14f';l:$10000;p:$20000;crc:$b893d880),(n:'ei24.17f';l:$10000;p:$30000;crc:$6f226dda),
+        (n:'ei30.9j';l:$10000;p:$20000;crc:$982da0d1),(n:'ei28.9f';l:$10000;p:$30000;crc:$f01ebb3b),
+        (n:'ei15.16c';l:$10000;p:$00000;crc:$a38a7d30),(n:'ei16.17c';l:$8000;p:$10000;crc:$17e42633),
+        (n:'ei11.16a';l:$10000;p:$20000;crc:$3a77326c),(n:'ei12.17a';l:$8000;p:$30000;crc:$fea2a134),
+        (n:'ei13.13c';l:$10000;p:$40000;crc:$e5ae2751),(n:'ei14.14c';l:$8000;p:$50000;crc:$e83c760a),
+        (n:'ei09.13a';l:$10000;p:$60000;crc:$6901e628),(n:'ei10.14a';l:$8000;p:$70000;crc:$eeee8a1a),());
+        //Hippodrome
+        hippodrm:array[0..25] of tipo_roms=(
+        (n:'ew02';l:$10000;p:0;crc:$df0d7dc6),(n:'ew01';l:$10000;p:$1;crc:$d5670aa7),
+        (n:'ew05';l:$10000;p:$20000;crc:$c76d65ec),(n:'ew00';l:$10000;p:$20001;crc:$e9b427a6),
+        (n:'ew08';l:$10000;p:$0;crc:$53010534),
+        (n:'ew14';l:$10000;p:0;crc:$71ca593d),(n:'ew13';l:$10000;p:$10000;crc:$86be5fa7),
+        (n:'ew04';l:$8000;p:$8000;crc:$9871b98d),(n:'ew03';l:$10000;p:0;crc:$b606924d),
+        (n:'ew19';l:$8000;p:0;crc:$6b80d7a3),(n:'ew18';l:$8000;p:$8000;crc:$78d3d764),
+        (n:'ew20';l:$8000;p:$10000;crc:$ce9f5de3),(n:'ew21';l:$8000;p:$18000;crc:$487a7ba2),
+        (n:'ew24';l:$8000;p:0;crc:$4e1bc2a4),(n:'ew25';l:$8000;p:$8000;crc:$9eb47dfb),
+        (n:'ew23';l:$8000;p:$10000;crc:$9ecf479e),(n:'ew22';l:$8000;p:$18000;crc:$e55669aa),
+        (n:'ew15';l:$10000;p:$00000;crc:$95423914),(n:'ew16';l:$10000;p:$10000;crc:$96233177),
+        (n:'ew10';l:$10000;p:$20000;crc:$4c25dfe8),(n:'ew11';l:$10000;p:$30000;crc:$f2e007fc),
+        (n:'ew06';l:$10000;p:$40000;crc:$e4bb8199),(n:'ew07';l:$10000;p:$50000;crc:$470b6989),
+        (n:'ew17';l:$10000;p:$60000;crc:$8c97c757),(n:'ew12';l:$10000;p:$70000;crc:$a2d244bc),());
+        tumblep:array[0..7] of tipo_roms=(
+        (n:'hl00-1.f12';l:$40000;p:0;crc:$fd697c1b),(n:'hl01-1.f13';l:$40000;p:$1;crc:$d5a62a3f),
+        (n:'hl02-.f16';l:$10000;p:$0;crc:$a5cab888),(n:'map-02.rom';l:$80000;p:0;crc:$dfceaa26),
+        (n:'hl03-.j15';l:$20000;p:0;crc:$01b81da0),
+        (n:'map-01.rom';l:$80000;p:0;crc:$e81ffa09),(n:'map-00.rom';l:$80000;p:$1;crc:$8c879cfe),());
+        funkyjet:array[0..7] of tipo_roms=(
+        (n:'jk00.12f';l:$40000;p:0;crc:$712089c1),(n:'jk01.13f';l:$40000;p:$1;crc:$be3920d7),
+        (n:'jk02.16f';l:$10000;p:$0;crc:$748c0bd8),(n:'mat02';l:$80000;p:0;crc:$e4b94c7e),
+        (n:'jk03.15h';l:$20000;p:0;crc:$69a0eaf7),
+        (n:'mat01';l:$80000;p:0;crc:$24093a8d),(n:'mat00';l:$80000;p:$80000;crc:$fbda0228),());
+        supbtime:array[0..7] of tipo_roms=(
+        (n:'gk03';l:$20000;p:0;crc:$aeaeed61),(n:'gk04';l:$20000;p:$1;crc:$2bc5a4eb),
+        (n:'gc06.bin';l:$10000;p:$0;crc:$e0e6c0f4),(n:'mae02.bin';l:$80000;p:0;crc:$a715cca0),
+        (n:'gc05.bin';l:$20000;p:0;crc:$2f2246ff),
+        (n:'mae00.bin';l:$80000;p:1;crc:$30043094),(n:'mae01.bin';l:$80000;p:$0;crc:$434af3fb),());
+        //Caveman Ninja
+        cninja:array[0..18] of tipo_roms=(
+        (n:'gn-02-3.1k';l:$20000;p:0;crc:$39aea12a),(n:'gn-05-2.3k';l:$20000;p:$1;crc:$0f4360ef),
+        (n:'gn-01-2.1j';l:$20000;p:$40000;crc:$f740ef7e),(n:'gn-04-2.3j';l:$20000;p:$40001;crc:$c98fcb62),
+        (n:'gn-00.rom';l:$20000;p:$80000;crc:$0b110b16),(n:'gn-03.rom';l:$20000;p:$80001;crc:$1e28e697),
+        (n:'gl-07.rom';l:$10000;p:$0;crc:$ca8bef96),
+        (n:'gl-09.rom';l:$10000;p:$0;crc:$5a2d4752),(n:'gl-08.rom';l:$10000;p:1;crc:$33a2b400),
+        (n:'mag-02.rom';l:$80000;p:$0;crc:$de89c69a),
+        (n:'mag-00.rom';l:$80000;p:$0;crc:$a8f05d33),(n:'mag-01.rom';l:$80000;p:$80000;crc:$5b399eed),
+        (n:'mag-07.rom';l:$80000;p:0;crc:$08eb5264),(n:'gl-06.rom';l:$20000;p:0;crc:$d92e519d),
+        (n:'mag-03.rom';l:$80000;p:0;crc:$2220eb9f),(n:'mag-05.rom';l:$80000;p:$1;crc:$56a53254),
+        (n:'mag-04.rom';l:$80000;p:$100000;crc:$144b94cc),(n:'mag-06.rom';l:$80000;p:$100001;crc:$82d44749),());
+        //Robocop 2
+        robocop2:array[0..24] of tipo_roms=(
+        (n:'gq-03.k1';l:$20000;p:0;crc:$a7e90c28),(n:'gq-07.k3';l:$20000;p:$1;crc:$d2287ec1),
+        (n:'gq-02.j1';l:$20000;p:$40000;crc:$6777b8a0),(n:'gq-06.j3';l:$20000;p:$40001;crc:$e11e27b5),
+        (n:'go-01-1.h1';l:$20000;p:$80000;crc:$ab5356c0),(n:'go-05-1.h3';l:$20000;p:$80001;crc:$ce21bda5),
+        (n:'go-00.f1';l:$20000;p:$c0000;crc:$a93369ea),(n:'go-04.f3';l:$20000;p:$c0001;crc:$ee2f6ad9),
+        (n:'gp10-1.y6';l:$10000;p:1;crc:$d25d719c),(n:'gp11-1.z6';l:$10000;p:0;crc:$030ded47),
+        (n:'gp-09.k13';l:$10000;p:$0;crc:$4a4e0f8d),(n:'gp-08.j13';l:$20000;p:0;crc:$365183b1),
+        (n:'mah-11.f13';l:$80000;p:0;crc:$642bc692),
+        (n:'mah-04.z4';l:$80000;p:$0;crc:$9b6ca18c),(n:'mah-03.y4';l:$80000;p:$80000;crc:$37894ddc),
+        (n:'mah-01.z1';l:$80000;p:0;crc:$26e0dfff),(n:'mah-00.y1';l:$80000;p:$80000;crc:$7bd69e41),
+        (n:'mah-02.a1';l:$80000;p:$100000;crc:$328a247d),
+        (n:'mah-05.y9';l:$80000;p:$000000;crc:$6773e613),(n:'mah-08.y12';l:$80000;p:$000001;crc:$88d310a5),
+        (n:'mah-06.z9';l:$80000;p:$100000;crc:$27a8808a),(n:'mah-09.z12';l:$80000;p:$100001;crc:$a58c43a7),
+        (n:'mah-07.a9';l:$80000;p:$200000;crc:$526f4190),(n:'mah-10.a12';l:$80000;p:$200001;crc:$14b770da),());
+        dietgo:array[0..7] of tipo_roms=(
+        (n:'jy00-2.h4';l:$40000;p:1;crc:$014dcf62),(n:'jy01-2.h5';l:$40000;p:$0;crc:$793ebd83),
+        (n:'jy02.m14';l:$10000;p:$0;crc:$4e3492a5),(n:'may00';l:$100000;p:0;crc:$234d1f8d),
+        (n:'may03';l:$80000;p:0;crc:$b6e42bae),
+        (n:'may01';l:$100000;p:0;crc:$2da57d04),(n:'may02';l:$100000;p:$1;crc:$3a66a713),());
+        //arabian
+        arabian:array[0..9] of tipo_roms=(
+        (n:'ic1rev2.87';l:$2000;p:0;crc:$5e1c98b8),(n:'ic2rev2.88';l:$2000;p:$2000;crc:$092f587e),
+        (n:'ic3rev2.89';l:$2000;p:$4000;crc:$15145f23),(n:'ic4rev2.90';l:$2000;p:$6000;crc:$32b77b44),
+        (n:'tvg-91.ic84';l:$2000;p:0;crc:$c4637822),(n:'tvg-92.ic85';l:$2000;p:$2000;crc:$f7c6866d),
+        (n:'tvg-93.ic86';l:$2000;p:$4000;crc:$71acd48d),(n:'tvg-94.ic87';l:$2000;p:$6000;crc:$82160b9a),
+        (n:'sun-8212.ic3';l:$800;p:0;crc:$8869611e),());
+        higemaru:array[0..10] of tipo_roms=(
+        (n:'hg4.p12';l:$2000;p:0;crc:$dc67a7f9),(n:'hg5.m12';l:$2000;p:$2000;crc:$f65a4b68),
+        (n:'hg6.p11';l:$2000;p:$4000;crc:$5f5296aa),(n:'hg7.m11';l:$2000;p:$6000;crc:$dc5d455d),
+        (n:'hgb3.l6';l:$20;p:0;crc:$629cebd8),(n:'hgb5.m4';l:$100;p:$20;crc:$dbaa4443),
+        (n:'hgb1.h7';l:$100;p:$120;crc:$07c607ce),(n:'hg3.m1';l:$2000;p:0;crc:$b37b88c8),
+        (n:'hg1.c14';l:$2000;p:0;crc:$ef4c2f5d),(n:'hg2.e14';l:$2000;p:$2000;crc:$9133f804),());
+        //bagman
+        bagman:array[0..12] of tipo_roms=(
+        (n:'e9_b05.bin';l:$1000;p:0;crc:$e0156191),(n:'f9_b06.bin';l:$1000;p:$1000;crc:$7b758982),
+        (n:'f9_b07.bin';l:$1000;p:$2000;crc:$302a077b),(n:'k9_b08.bin';l:$1000;p:$3000;crc:$f04293cb),
+        (n:'m9_b09s.bin';l:$1000;p:$4000;crc:$68e83e4f),(n:'n9_b10.bin';l:$1000;p:$5000;crc:$1d6579f7),
+        (n:'p3.bin';l:$20;p:0;crc:$2a855523),(n:'r3.bin';l:$20;p:$20;crc:$ae6f1019),
+        (n:'e1_b02.bin';l:$1000;p:0;crc:$4a0a6b55),(n:'j1_b04.bin';l:$1000;p:$1000;crc:$c680ef04),
+        (n:'c1_b01.bin';l:$1000;p:0;crc:$705193b2),(n:'f1_b03s.bin';l:$1000;p:$1000;crc:$dba1eda7),());
+        //Super Bagman
+        sbagman:array[0..16] of tipo_roms=(
+        (n:'5.9e';l:$1000;p:0;crc:$1b1d6b0a),(n:'6.9f';l:$1000;p:$1000;crc:$ac49cb82),
+        (n:'7.9j';l:$1000;p:$2000;crc:$9a1c778d),(n:'8.9k';l:$1000;p:$3000;crc:$b94fbb73),
+        (n:'9.9m';l:$1000;p:$4000;crc:$601f34ba),(n:'10.9n';l:$1000;p:$5000;crc:$5f750918),
+        (n:'13.8d';l:$1000;p:$6000;crc:$944a4453),(n:'14.8f';l:$1000;p:$7000;crc:$83b10139),
+        (n:'15.8j';l:$1000;p:$8000;crc:$fe924879),(n:'16.8k';l:$1000;p:$9000;crc:$b77eb1f5),
+        (n:'p3.bin';l:$20;p:0;crc:$2a855523),(n:'r3.bin';l:$20;p:$20;crc:$ae6f1019),
+        (n:'2.1e';l:$1000;p:0;crc:$f4d3d4e6),(n:'4.1j';l:$1000;p:$1000;crc:$2c6a510d),
+        (n:'1.1c';l:$1000;p:0;crc:$a046ff44),(n:'3.1f';l:$1000;p:$1000;crc:$a4422da4),());
+        //Congo
+        congo:array[0..19] of tipo_roms=(
+        (n:'congo_rev_c_rom1.u21';l:$2000;p:0;crc:$09355b5b),(n:'congo_rev_c_rom2a.u22';l:$2000;p:$2000;crc:$1c5e30ae),
+        (n:'congo_rev_c_rom3.u23';l:$2000;p:$4000;crc:$5ee1132c),(n:'congo_rev_c_rom4.u24';l:$2000;p:$6000;crc:$5332b9bf),
+        (n:'mr019.u87';l:$100;p:0;crc:$b788d8ae),(n:'mr019.u87';l:$100;p:$100;crc:$b788d8ae),
+        (n:'tip_top_rom_5.u76';l:$1000;p:0;crc:$7bf6ba2b),
+        (n:'tip_top_rom_8.u93';l:$2000;p:0;crc:$db99a619),(n:'tip_top_rom_9.u94';l:$2000;p:$2000;crc:$93e2309e),
+        (n:'tip_top_rom_10.u95';l:$2000;p:$4000;crc:$f27a9407),
+        (n:'tip_top_rom_12.u78';l:$2000;p:0;crc:$15e3377a),(n:'tip_top_rom_13.u79';l:$2000;p:$2000;crc:$1d1321c8),
+        (n:'tip_top_rom_11.u77';l:$2000;p:$4000;crc:$73e2709f),(n:'tip_top_rom_14.u104';l:$2000;p:$6000;crc:$bf9169fe),
+        (n:'tip_top_rom_16.u106';l:$2000;p:$8000;crc:$cb6d5775),(n:'tip_top_rom_15.u105';l:$2000;p:$a000;crc:$7b15a7a4),
+        (n:'tip_top_rom_17.u19';l:$2000;p:0;crc:$5024e673),
+        (n:'congo6.u57';l:$2000;p:0;crc:$d637f02b),(n:'congo7.u58';l:$2000;p:$2000;crc:$80927943),());
+        //Zaxxon
+        zaxxon:array[0..18] of tipo_roms=(
+        (n:'zaxxon3.u27';l:$2000;p:0;crc:$6e2b4a30),(n:'zaxxon2.u28';l:$2000;p:$2000;crc:$1c9ea398),
+        (n:'zaxxon1.u29';l:$1000;p:$4000;crc:$1c123ef9),
+        (n:'zaxxon.u98';l:$100;p:0;crc:$6cc6695b),(n:'zaxxon.u72';l:$100;p:$100;crc:$deaa21f7),
+        (n:'zaxxon14.u68';l:$800;p:0;crc:$07bf8c52),(n:'zaxxon15.u69';l:$800;p:$800;crc:$c215edcb),
+        (n:'zaxxon6.u113';l:$2000;p:0;crc:$6e07bb68),(n:'zaxxon5.u112';l:$2000;p:$2000;crc:$0a5bce6a),
+        (n:'zaxxon4.u111';l:$2000;p:$4000;crc:$a5bf1465),
+        (n:'zaxxon11.u77';l:$2000;p:0;crc:$eaf0dd4b),(n:'zaxxon12.u78';l:$2000;p:$2000;crc:$1c5369c7),
+        (n:'zaxxon13.u79';l:$2000;p:$4000;crc:$ab4e8a9a),(n:'tip_top_rom_17.u19';l:$2000;p:0;crc:$5024e673),
+        (n:'zaxxon8.u91';l:$2000;p:0;crc:$28d65063),(n:'zaxxon7.u90';l:$2000;p:$2000;crc:$6284c200),
+        (n:'zaxxon10.u93';l:$2000;p:$4000;crc:$a95e61fd),(n:'zaxxon9.u92';l:$2000;p:$6000;crc:$7e42691f),());
+        kangaroo:array[0..11] of tipo_roms=(
+        (n:'tvg_75.0';l:$1000;p:0;crc:$0d18c581),(n:'tvg_76.1';l:$1000;p:$1000;crc:$5978d37a),
+        (n:'tvg_77.2';l:$1000;p:$2000;crc:$522d1097),(n:'tvg_78.3';l:$1000;p:$3000;crc:$063da970),
+        (n:'tvg_79.4';l:$1000;p:$4000;crc:$9e5cf8ca),(n:'tvg_80.5';l:$1000;p:$5000;crc:$2fc18049),
+        (n:'tvg_83.v0';l:$1000;p:0;crc:$c0446ca6),(n:'tvg_85.v2';l:$1000;p:$1000;crc:$72c52695),
+        (n:'tvg_84.v1';l:$1000;p:$2000;crc:$e4cb26c2),(n:'tvg_86.v3';l:$1000;p:$3000;crc:$9e6a599f),
+        (n:'tvg_81.8';l:$1000;p:0;crc:$fb449bfd),());
+        bionicc:array[0..24] of tipo_roms=(
+        (n:'tse_02.1a';l:$10000;p:0;crc:$e4aeefaa),(n:'tse_04.1b';l:$10000;p:$1;crc:$d0c8ec75),
+        (n:'tse_03.2a';l:$10000;p:$20000;crc:$b2ac0a45),(n:'tse_05.2b';l:$10000;p:$20001;crc:$a79cb406),
+        (n:'tsu_08.8l';l:$8000;p:0;crc:$9bf0b7a2),(n:'ts_01b.4e';l:$8000;p:0;crc:$a9a6cafa),
+        (n:'tsu_07.5l';l:$8000;p:0;crc:$9469efa4),(n:'tsu_06.4l';l:$8000;p:$8000;crc:$40bf0eb4),
+        (n:'ts_12.17f';l:$8000;p:0;crc:$e4b4619e),(n:'ts_11.15f';l:$8000;p:$8000;crc:$ab30237a),
+        (n:'ts_17.17g';l:$8000;p:$10000;crc:$deb657e4),(n:'ts_16.15g';l:$8000;p:$18000;crc:$d363b5f9),
+        (n:'ts_13.18f';l:$8000;p:$20000;crc:$a8f5a004),(n:'ts_18.18g';l:$8000;p:$28000;crc:$3b36948c),
+        (n:'ts_23.18j';l:$8000;p:$30000;crc:$bbfbe58a),(n:'ts_24.18k';l:$8000;p:$38000;crc:$f156e564),
+        (n:'tse_10.13f';l:$8000;p:0;crc:$d28eeacc),(n:'tsu_09.11f';l:$8000;p:$8000;crc:$6a049292),
+        (n:'tse_15.13g';l:$8000;p:$10000;crc:$9b5593c0),(n:'tsu_14.11g';l:$8000;p:$18000;crc:$46b2ad83),
+        (n:'tse_20.13j';l:$8000;p:$20000;crc:$b03db778),(n:'tsu_19.11j';l:$8000;p:$28000;crc:$b5c82722),
+        (n:'tse_22.17j';l:$8000;p:$30000;crc:$d4dedeb3),(n:'tsu_21.15j';l:$8000;p:$38000;crc:$98777006),());
+        wwfsstar:array[0..14] of tipo_roms=(
+        (n:'24ac-0_j-1.34';l:$20000;p:0;crc:$ec8fd2c9),(n:'24ad-0_j-1.35';l:$20000;p:$1;crc:$54e614e4),
+        (n:'24ab-0.12';l:$8000;p:0;crc:$1e44f8aa),
+        (n:'24a9-0.46';l:$20000;p:0;crc:$703ff08f),(n:'24j8-0.45';l:$20000;p:$20000;crc:$61138487),
+        (n:'24aa-0_j.58';l:$20000;p:0;crc:$b9201b36),
+        (n:'c951.114';l:$80000;p:0;crc:$fa76d1f0),(n:'24j4-0.115';l:$40000;p:$80000;crc:$c4a589a3),
+        (n:'24j5-0.116';l:$40000;p:$0c0000;crc:$d6bca436),(n:'c950.117';l:$80000;p:$100000;crc:$cca5703d),
+        (n:'24j2-0.118';l:$40000;p:$180000;crc:$dc1b7600),(n:'24j3-0.119';l:$40000;p:$1c0000;crc:$3ba12d43),
+        (n:'24j7-0.113';l:$40000;p:0;crc:$e0a1909e),(n:'24j6-0.112';l:$40000;p:$40000;crc:$77932ef8),());
+        rbisland:array[0..11] of tipo_roms=(
+        (n:'b22-10-1.19';l:$10000;p:0;crc:$e34a50ca),(n:'b22-11-1.20';l:$10000;p:$1;crc:$6a31a093),
+        (n:'b22-08-1.21';l:$10000;p:$20000;crc:$15d6e17a),(n:'b22-09-1.22';l:$10000;p:$20001;crc:$454e66bc),
+        (n:'b22-03.23';l:$20000;p:$40000;crc:$3ebb0fb8),(n:'b22-04.24';l:$20000;p:$40001;crc:$91625e7f),
+        (n:'b22-01.2';l:$80000;p:0;crc:$b76c9168),(n:'b22-14.43';l:$10000;p:0;crc:$113c1a5b),
+        (n:'b22-02.5';l:$80000;p:0;crc:$1b87ecf0),
+        (n:'b22-12.7';l:$10000;p:$80000;crc:$67a76dc6),(n:'b22-13.6';l:$10000;p:$80001;crc:$2fda099f),());
+        rbislande:array[0..11] of tipo_roms=(
+        (n:'b39-01.19';l:$10000;p:0;crc:$50690880),(n:'b39-02.20';l:$10000;p:$1;crc:$4dead71f),
+        (n:'b39-03.21';l:$10000;p:$20000;crc:$4a4cb785),(n:'b39-04.22';l:$10000;p:$20001;crc:$4caa53bd),
+        (n:'b22-03.23';l:$20000;p:$40000;crc:$3ebb0fb8),(n:'b22-04.24';l:$20000;p:$40001;crc:$91625e7f),
+        (n:'b22-01.2';l:$80000;p:0;crc:$b76c9168),(n:'b22-14.43';l:$10000;p:0;crc:$113c1a5b),
+        (n:'b22-02.5';l:$80000;p:0;crc:$1b87ecf0),
+        (n:'b22-12.7';l:$10000;p:$80000;crc:$67a76dc6),(n:'b22-13.6';l:$10000;p:$80001;crc:$2fda099f),());
+        volfied:array[0..17] of tipo_roms=(
+        (n:'c04-12-1.30';l:$10000;p:0;crc:$afb6a058),(n:'c04-08-1.10';l:$10000;p:$1;crc:$19f7e66b),
+        (n:'c04-11-1.29';l:$10000;p:$20000;crc:$1aaf6e9b),(n:'c04-25-1.9';l:$10000;p:$20001;crc:$b39e04f9),
+        (n:'c04-20.7';l:$20000;p:$0;crc:$0aea651f),(n:'c04-22.9';l:$20000;p:$1;crc:$f405d465),
+        (n:'c04-19.6';l:$20000;p:$40000;crc:$231493ae),(n:'c04-21.8';l:$20000;p:$40001;crc:$8598d38e),
+        (n:'c04-06.71';l:$8000;p:0;crc:$b70106b2),
+        (n:'c04-16.2';l:$20000;p:$0;crc:$8c2476ef),(n:'c04-18.4';l:$20000;p:$1;crc:$7665212c),
+        (n:'c04-15.1';l:$20000;p:$40000;crc:$7c50b978),(n:'c04-17.3';l:$20000;p:$40001;crc:$c62fdeb8),
+        (n:'c04-10.15';l:$10000;p:$80000;crc:$429b6b49),(n:'c04-09.14';l:$10000;p:$80001;crc:$c78cf057),
+        (n:'c04-10.15';l:$10000;p:$a0000;crc:$429b6b49),(n:'c04-09.14';l:$10000;p:$a0001;crc:$c78cf057),());
+        opwolf:array[0..8] of tipo_roms=(
+        (n:'b20-05-02.40';l:$10000;p:0;crc:$3ffbfe3a),(n:'b20-03-02.30';l:$10000;p:$1;crc:$fdabd8a5),
+        (n:'b20-04.39';l:$10000;p:$20000;crc:$216b4838),(n:'b20-20.29';l:$10000;p:$20001;crc:$d244431a),
+        (n:'b20-07.10';l:$10000;p:0;crc:$45c7ace3),(n:'b20-13.13';l:$80000;p:0;crc:$f6acdab1),
+        (n:'b20-14.72';l:$80000;p:0;crc:$89f889e5),(n:'b20-08.21';l:$80000;p:0;crc:$f3e19c64),());
+        //Outrun
+        outrun:array[0..23] of tipo_roms=(
+        (n:'epr-10380b.133';l:$10000;p:0;crc:$1f6cadad),(n:'epr-10382b.118';l:$10000;p:$1;crc:$c4c3fa1a),
+        (n:'epr-10381b.132';l:$10000;p:$20000;crc:$be8c412b),(n:'epr-10383b.117';l:$10000;p:$20001;crc:$10a2014a),
+        (n:'epr-10327a.76';l:$10000;p:0;crc:$e28a5baf),(n:'epr-10329a.58';l:$10000;p:$1;crc:$da131c81),
+        (n:'epr-10328a.75';l:$10000;p:$20000;crc:$d5ec5e5d),(n:'epr-10330a.57';l:$10000;p:$20001;crc:$ba9ec82a),
+        (n:'epr-10187.88';l:$8000;p:0;crc:$a10abaa9),
+        (n:'opr-10268.99';l:$8000;p:0;crc:$95344b04),(n:'opr-10232.102';l:$8000;p:$8000;crc:$776ba1eb),
+        (n:'opr-10267.100';l:$8000;p:$10000;crc:$a85bb823),(n:'opr-10231.103';l:$8000;p:$18000;crc:$8908bcbf),
+        (n:'opr-10266.101';l:$8000;p:$20000;crc:$9f6f1a74),(n:'opr-10230.104';l:$8000;p:$28000;crc:$686f5e50),
+        (n:'epr-11290.10';l:$10000;p:1;crc:$611f413a),(n:'epr-11294.11';l:$10000;p:$0;crc:$5eb00fc1),
+        (n:'epr-11291.17';l:$10000;p:$20001;crc:$3c0797c0),(n:'epr-11295.18';l:$10000;p:$20000;crc:$25307ef8),
+        (n:'epr-11292.23';l:$10000;p:$40001;crc:$c29ac34e),(n:'epr-11296.24';l:$10000;p:$40000;crc:$04a437f8),
+        (n:'epr-11293.29';l:$10000;p:$60001;crc:$41f41063),(n:'epr-11297.30';l:$10000;p:$60000;crc:$b6e1fd72),());
+        //Elevator Action
+        elevator:array[0..20] of tipo_roms=(
+        (n:'ea-ic69.bin';l:$1000;p:0;crc:$24e277ef),(n:'ea-ic68.bin';l:$1000;p:$1000;crc:$13702e39),
+        (n:'ea-ic67.bin';l:$1000;p:$2000;crc:$46f52646),(n:'ea-ic66.bin';l:$1000;p:$3000;crc:$e22fe57e),
+        (n:'ea-ic65.bin';l:$1000;p:$4000;crc:$c10691d7),(n:'ea-ic64.bin';l:$1000;p:$5000;crc:$8913b293),
+        (n:'ea-ic55.bin';l:$1000;p:$6000;crc:$1cabda08),(n:'ea-ic54.bin';l:$1000;p:$7000;crc:$f4647b4f),
+        (n:'ea-ic70.bin';l:$1000;p:0;crc:$6d5f57cb),(n:'ea-ic71.bin';l:$1000;p:$1000;crc:$f0a769a1),
+        (n:'ba3.11';l:$800;p:0;crc:$9ce75afc),
+        (n:'ea-ic1.bin';l:$1000;p:0;crc:$bbbb3fba),(n:'ea-ic2.bin';l:$1000;p:$1000;crc:$639cc2fd),
+        (n:'ea-ic3.bin';l:$1000;p:$2000;crc:$61317eea),(n:'ea-ic4.bin';l:$1000;p:$3000;crc:$55446482),
+        (n:'ea-ic5.bin';l:$1000;p:$4000;crc:$77895c0f),(n:'ea-ic6.bin';l:$1000;p:$5000;crc:$9a1b6901),
+        (n:'ea-ic7.bin';l:$1000;p:$6000;crc:$839112ec),(n:'ea-ic8.bin';l:$1000;p:$7000;crc:$db7ff692),
+        (n:'eb16.22';l:$100;p:0;crc:$b833b5ea),());
+        //Jungle King
+        junglek:array[0..21] of tipo_roms=(
+        (n:'kn21-1.bin';l:$1000;p:0;crc:$45f55d30),(n:'kn22-1.bin';l:$1000;p:$1000;crc:$07cc9a21),
+        (n:'kn43.bin';l:$1000;p:$2000;crc:$a20e5a48),(n:'kn24.bin';l:$1000;p:$3000;crc:$19ea7f83),
+        (n:'kn25.bin';l:$1000;p:$4000;crc:$844365ea),(n:'kn46.bin';l:$1000;p:$5000;crc:$27a95fd5),
+        (n:'kn47.bin';l:$1000;p:$6000;crc:$5c3199e0),(n:'kn28.bin';l:$1000;p:$7000;crc:$194a2d09),
+        (n:'kn60.bin';l:$1000;p:$8000;crc:$1a9c0a26),
+        (n:'kn37.bin';l:$1000;p:0;crc:$dee7f5d4),(n:'kn38.bin';l:$1000;p:$1000;crc:$bffd3d21),
+        (n:'kn59-1.bin';l:$1000;p:$2000;crc:$cee485fc),
+        (n:'kn29.bin';l:$1000;p:0;crc:$8f83c290),(n:'kn30.bin';l:$1000;p:$1000;crc:$89fd19f1),
+        (n:'kn51.bin';l:$1000;p:$2000;crc:$70e8fc12),(n:'kn52.bin';l:$1000;p:$3000;crc:$bcbac1a3),
+        (n:'kn53.bin';l:$1000;p:$4000;crc:$b946c87d),(n:'kn34.bin';l:$1000;p:$5000;crc:$320db2e1),
+        (n:'kn55.bin';l:$1000;p:$6000;crc:$70aef58f),(n:'kn56.bin';l:$1000;p:$7000;crc:$932eb667),
+        (n:'eb16.22';l:$100;p:0;crc:$b833b5ea),());
+        vulgus:array[0..23] of tipo_roms=(
+        (n:'vulgus.002';l:$2000;p:0;crc:$e49d6c5d),(n:'vulgus.003';l:$2000;p:$2000;crc:$51acef76),
+        (n:'vulgus.004';l:$2000;p:$4000;crc:$489e7f60),(n:'vulgus.005';l:$2000;p:$6000;crc:$de3a24a8),
+        (n:'1-8n.bin';l:$2000;p:$8000;crc:$6ca5ca41),(n:'1-11c.bin';l:$2000;p:0;crc:$3bd2acf4),
+        (n:'e8.bin';l:$100;p:0;crc:$06a83606),(n:'e9.bin';l:$100;p:$100;crc:$beacf13c),
+        (n:'e10.bin';l:$100;p:$200;crc:$de1fb621),(n:'d1.bin';l:$100;p:$300;crc:$7179080d),
+        (n:'j2.bin';l:$100;p:$400;crc:$d0842029),(n:'c9.bin';l:$100;p:$500;crc:$7a1f0bd6),
+        (n:'1-3d.bin';l:$2000;p:0;crc:$8bc5d7a5),
+        (n:'2-2n.bin';l:$2000;p:0;crc:$6db1b10d),(n:'2-3n.bin';l:$2000;p:$2000;crc:$5d8c34ec),
+        (n:'2-4n.bin';l:$2000;p:$4000;crc:$0071a2e3),(n:'2-5n.bin';l:$2000;p:$6000;crc:$4023a1ec),
+        (n:'2-2a.bin';l:$2000;p:0;crc:$e10aaca1),(n:'2-3a.bin';l:$2000;p:$2000;crc:$8da520da),
+        (n:'2-4a.bin';l:$2000;p:$4000;crc:$206a13f1),(n:'2-5a.bin';l:$2000;p:$6000;crc:$b6d81984),
+        (n:'2-6a.bin';l:$2000;p:$8000;crc:$5a26b38f),(n:'2-7a.bin';l:$2000;p:$a000;crc:$1e1ca773),());
+        ddragon3:array[0..16] of tipo_roms=(
+        (n:'30a14-0.ic78';l:$40000;p:1;crc:$f42fe016),(n:'30a15-0.ic79';l:$20000;p:$0;crc:$ad50e92c),
+        (n:'30a13-0.ic43';l:$10000;p:0;crc:$1e974d9b),(n:'30j-8.ic73';l:$80000;p:0;crc:$c3ad40f3),
+        (n:'30j-3.ic9';l:$80000;p:0;crc:$b3151871),(n:'30a12-0.ic8';l:$10000;p:$80000;crc:$20d64bea),
+        (n:'30j-2.ic11';l:$80000;p:$100000;crc:$41c6fb08),(n:'30a11-0.ic10';l:$10000;p:$180000;crc:$785d71b0),
+        (n:'30j-1.ic13';l:$80000;p:$200000;crc:$67a6f114),(n:'30a10-0.ic12';l:$10000;p:$280000;crc:$15e43d12),
+        (n:'30j-0.ic15';l:$80000;p:$300000;crc:$f15dafbe),(n:'30a9-0.ic14';l:$10000;p:$380000;crc:$5a47e7a4),
+        (n:'30j-7.ic4';l:$40000;p:0;crc:$89d58d32),(n:'30j-6.ic5';l:$40000;p:$1;crc:$9bf1538e),
+        (n:'30j-5.ic6';l:$40000;p:$80000;crc:$8f671a62),(n:'30j-4.ic7';l:$40000;p:$80001;crc:$0f74ea1c),());
+        blockout:array[0..4] of tipo_roms=(
+        (n:'bo29a0-2.bin';l:$20000;p:0;crc:$b0103427),(n:'bo29a1-2.bin';l:$20000;p:$1;crc:$5984d5a2),
+        (n:'bo29e3-0.bin';l:$8000;p:0;crc:$3ea01f78),(n:'bo29e2-0.bin';l:$20000;p:0;crc:$15c5a99d),());
+        foodf:array[0..11] of tipo_roms=(
+        (n:'136020-301.8c';l:$2000;p:1;crc:$dfc3d5a8),(n:'136020-302.9c';l:$2000;p:$0;crc:$ef92dc5c),
+        (n:'136020-303.8d';l:$2000;p:$4001;crc:$64b93076),(n:'136020-204.9d';l:$2000;p:$4000;crc:$ea596480),
+        (n:'136020-305.8e';l:$2000;p:$8001;crc:$e6cff1b1),(n:'136020-306.9e';l:$2000;p:$8000;crc:$95159a3e),
+        (n:'136020-307.8f';l:$2000;p:$c001;crc:$17828dbb),(n:'136020-208.9f';l:$2000;p:$c000;crc:$608690c9),
+        (n:'136020-109.6lm';l:$2000;p:0;crc:$c13c90eb),
+        (n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),(n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf),());
+        nemesis:array[0..11] of tipo_roms=(
+        (n:'456-d01.12a';l:$8000;p:0;crc:$35ff1aaa),(n:'456-d05.12c';l:$8000;p:$1;crc:$23155faa),
+        (n:'456-d02.13a';l:$8000;p:$10000;crc:$ac0cf163),(n:'456-d06.13c';l:$8000;p:$10001;crc:$023f22a9),
+        (n:'456-d03.14a';l:$8000;p:$20000;crc:$8cefb25f),(n:'456-d07.14c';l:$8000;p:$20001;crc:$d50b82cb),
+        (n:'456-d04.15a';l:$8000;p:$30000;crc:$9ca75592),(n:'456-d08.15c';l:$8000;p:$30001;crc:$03c0b7f5),
+        (n:'456-d09.9c';l:$4000;p:0;crc:$26bf9636),
+        (n:'400-a01.fse';l:$100;p:$0;crc:$5827b1e8),(n:'400-a02.fse';l:$100;p:$100;crc:$2f44f970),());
+        twinbee:array[0..7] of tipo_roms=(
+        (n:'400-a06.15l';l:$8000;p:0;crc:$b99d8cff),(n:'400-a04.10l';l:$8000;p:$1;crc:$d02c9552),
+        (n:'412-a07.17l';l:$20000;p:$0;crc:$d93c5499),(n:'412-a05.12l';l:$20000;p:$1;crc:$2b357069),
+        (n:'400-e03.5l';l:$2000;p:0;crc:$a5a8e57d),
+        (n:'400-a01.fse';l:$100;p:$0;crc:$5827b1e8),(n:'400-a02.fse';l:$100;p:$100;crc:$2f44f970),());
+        //Pirates
+        pirates:array[0..11] of tipo_roms=(
+        (n:'r_449b.bin';l:$80000;p:0;crc:$224aeeda),(n:'l_5c1e.bin';l:$80000;p:$1;crc:$46740204),
+        (n:'p4_4d48.bin';l:$80000;p:0;crc:$89fda216),(n:'p2_5d74.bin';l:$80000;p:$80000;crc:$40e069b4),
+        (n:'p1_7b30.bin';l:$80000;p:$100000;crc:$26d78518),(n:'p8_9f4f.bin';l:$80000;p:$180000;crc:$f31696ea),
+        (n:'s1_6e89.bin';l:$80000;p:0;crc:$c78a276f),(n:'s2_6df3.bin';l:$80000;p:$80000;crc:$9f0bad96),
+        (n:'s4_fdcc.bin';l:$80000;p:$100000;crc:$8916ddb5),(n:'s8_4b7c.bin';l:$80000;p:$180000;crc:$1c41bd2c),
+        (n:'s89_49d4.bin';l:$80000;p:0;crc:$63a739ec),());
+        //Genix Family
+        genix:array[0..11] of tipo_roms=(
+        (n:'1.15';l:$80000;p:0;crc:$d26abfb0),(n:'2.16';l:$80000;p:$1;crc:$a14a25b4),
+        (n:'7.34';l:$40000;p:0;crc:$58da8aac),(n:'9.35';l:$40000;p:$80000;crc:$96bad9a8),
+        (n:'8.48';l:$40000;p:$100000;crc:$0ddc58b6),(n:'10.49';l:$40000;p:$180000;crc:$2be308c5),
+        (n:'6.69';l:$40000;p:0;crc:$b8422af7),(n:'5.70';l:$40000;p:$80000;crc:$e46125c5),
+        (n:'4.71';l:$40000;p:$100000;crc:$7a8ed21b),(n:'3.72';l:$40000;p:$180000;crc:$f78bd6ca),
+        (n:'0.31';l:$80000;p:0;crc:$80d087bc),());
+        junofrst:array[0..14] of tipo_roms=(
+        (n:'jfa_b9.bin';l:$2000;p:$a000;crc:$f5a7ab9d),(n:'jfb_b10.bin';l:$2000;p:$c000;crc:$f20626e0),
+        (n:'jfc_a10.bin';l:$2000;p:$e000;crc:$1e7744a7),
+        (n:'jfc1_a4.bin';l:$2000;p:$0;crc:$03ccbf1d),(n:'jfc2_a5.bin';l:$2000;p:$2000;crc:$cb372372),
+        (n:'jfc3_a6.bin';l:$2000;p:$4000;crc:$879d194b),(n:'jfc4_a7.bin';l:$2000;p:$6000;crc:$f28af80b),
+        (n:'jfc5_a8.bin';l:$2000;p:$8000;crc:$0539f328),(n:'jfc6_a9.bin';l:$2000;p:$a000;crc:$1da2ad6e),
+        (n:'jfs1_j3.bin';l:$1000;p:0;crc:$235a2893),(n:'jfs2_p4.bin';l:$1000;p:0;crc:$d0fa5d5f),
+        (n:'jfs3_c7.bin';l:$2000;p:$0;crc:$aeacf6db),(n:'jfs4_d7.bin';l:$2000;p:$2000;crc:$206d954c),
+        (n:'jfs5_e7.bin';l:$2000;p:$4000;crc:$1eb87a6e),());
+        gyruss:array[0..15] of tipo_roms=(
+        (n:'gyrussk.1';l:$2000;p:0;crc:$c673b43d),(n:'gyrussk.2';l:$2000;p:$2000;crc:$a4ec03e4),
+        (n:'gyrussk.3';l:$2000;p:$4000;crc:$27454a98),(n:'gyrussk.9';l:$2000;p:$e000;crc:$822bf27e),
+        (n:'gyrussk.1a';l:$2000;p:0;crc:$f4ae1c17),(n:'gyrussk.2a';l:$2000;p:$2000;crc:$ba498115),
+        (n:'gyrussk.3a';l:$1000;p:$0;crc:$3f9b5dea),(n:'gyrussk.4';l:$2000;p:$0;crc:$27d8329b),
+        (n:'gyrussk.6';l:$2000;p:0;crc:$c949db10),(n:'gyrussk.5';l:$2000;p:$2000;crc:$4f22411a),
+        (n:'gyrussk.8';l:$2000;p:$4000;crc:$47cd1fbc),(n:'gyrussk.7';l:$2000;p:$6000;crc:$8e8d388c),
+        (n:'gyrussk.pr3';l:$20;p:0;crc:$98782db3),(n:'gyrussk.pr1';l:$100;p:$20;crc:$7ed057de),
+        (n:'gyrussk.pr2';l:$100;p:$120;crc:$de823a81),());
+        boogwing:array[0..18] of tipo_roms=(
+        (n:'kn_00-2.2b';l:$40000;p:0;crc:$e38892b9),(n:'kn_02-2.2e';l:$40000;p:$1;crc:$8426efef),
+        (n:'kn_01-2.4b';l:$40000;p:$80000;crc:$3ad4b54c),(n:'kn_03-2.4e';l:$40000;p:$80001;crc:$10b61f4a),
+        (n:'km06.18p';l:$10000;p:$0;crc:$3e8bc4e1),
+        (n:'km05.9e';l:$10000;p:0;crc:$d10aef95),(n:'km04.8e';l:$10000;p:$1;crc:$329323a8),
+        (n:'mbd-01.9b';l:$100000;p:0;crc:$d7de4f4b),(n:'mbd-00.8b';l:$100000;p:$100000;crc:$adb20ba9),
+        (n:'mbd-03.13b';l:$100000;p:0;crc:$cf798f2c),(n:'mbd-04.14b';l:$100000;p:$100000;crc:$d9764d0b),
+        (n:'mbd-02.10e';l:$80000;p:0;crc:$b25aa721),
+        (n:'mbd-05.16b';l:$200000;p:1;crc:$1768c66a),(n:'mbd-06.17b';l:$200000;p:$0;crc:$7750847a),
+        (n:'mbd-07.18b';l:$200000;p:1;crc:$241faac1),(n:'mbd-08.19b';l:$200000;p:$0;crc:$f13b1e56),
+        (n:'mbd-10.17p';l:$80000;p:0;crc:$f159f76a),(n:'mbd-09.16p';l:$80000;p:0;crc:$f44f2f87),());
+        //Freekick
+        freekick:array[0..14] of tipo_roms=(
+        (n:'ns6201-a_1987.10_free_kick.cpu';l:$d000;p:0;crc:$6d172850),(n:'11.1e';l:$8000;p:0;crc:$a6030ba9),
+        (n:'24s10n.8j';l:$100;p:0;crc:$53a6bc21),(n:'24s10n.7j';l:$100;p:$100;crc:$38dd97d8),
+        (n:'24s10n.8k';l:$100;p:$200;crc:$18e66087),(n:'24s10n.7k';l:$100;p:$300;crc:$bc21797a),
+        (n:'24s10n.8h';l:$100;p:$400;crc:$8aac5fd0),(n:'24s10n.7h';l:$100;p:$500;crc:$a507f941),
+        (n:'12.1h';l:$4000;p:0;crc:$fb82e486),(n:'13.1j';l:$4000;p:$4000;crc:$3ad78ee2),
+        (n:'14.1l';l:$4000;p:$8000;crc:$0185695f),
+        (n:'15.1m';l:$4000;p:0;crc:$0fa7c13c),(n:'16.1p';l:$4000;p:$4000;crc:$2b996e89),
+        (n:'17.1r';l:$4000;p:$8000;crc:$e7894def),());
+        pbaction:array[0..14] of tipo_roms=(
+        (n:'b-p7.bin';l:$4000;p:0;crc:$8d6dcaae),(n:'b-n7.bin';l:$4000;p:$4000;crc:$d54d5402),
+        (n:'b-l7.bin';l:$2000;p:$8000;crc:$e7412d68),(n:'a-e3.bin';l:$2000;p:0;crc:$0e53a91f),
+        (n:'a-s6.bin';l:$2000;p:0;crc:$9a74a8e1),(n:'a-s7.bin';l:$2000;p:$2000;crc:$5ca6ad3c),
+        (n:'a-s8.bin';l:$2000;p:$4000;crc:$9f00b757),
+        (n:'b-c7.bin';l:$2000;p:0;crc:$d1795ef5),(n:'b-d7.bin';l:$2000;p:$2000;crc:$f28df203),
+        (n:'b-f7.bin';l:$2000;p:$4000;crc:$af6e9817),
+        (n:'a-j5.bin';l:$4000;p:0;crc:$21efe866),(n:'a-j6.bin';l:$4000;p:$4000;crc:$7f984c80),
+        (n:'a-j7.bin';l:$4000;p:$8000;crc:$df69e51b),(n:'a-j8.bin';l:$4000;p:$c000;crc:$0094cb8b),());
+        renegade:array[0..26] of tipo_roms=(
+        (n:'nb-5.ic51';l:$8000;p:$0;crc:$ba683ddf),(n:'na-5.ic52';l:$8000;p:$8000;crc:$de7e7df4),
+        (n:'nc-5.bin';l:$8000;p:$0;crc:$9adfaa5d),(n:'n0-5.ic13';l:$8000;p:$8000;crc:$3587de3b),
+        (n:'nz-5.ic97';l:$800;p:$0;crc:$32e47560),
+        (n:'n1-5.ic1';l:$8000;p:$0;crc:$4a9f47f3),(n:'n6-5.ic28';l:$8000;p:$8000;crc:$d62a0aa8),
+        (n:'n7-5.ic27';l:$8000;p:$10000;crc:$7ca5a532),(n:'n2-5.ic14';l:$8000;p:$18000;crc:$8d2e7982),
+        (n:'n8-5.ic26';l:$8000;p:$20000;crc:$0dba31d3),(n:'n9-5.ic25';l:$8000;p:$28000;crc:$5b621b6a),
+        (n:'nh-5.bin';l:$8000;p:$0;crc:$dcd7857c),(n:'nd-5.bin';l:$8000;p:$8000;crc:$2de1717c),
+        (n:'nj-5.bin';l:$8000;p:$10000;crc:$0f96a18e),(n:'nn-5.bin';l:$8000;p:$18000;crc:$1bf15787),
+        (n:'ne-5.bin';l:$8000;p:$20000;crc:$924c7388),(n:'nk-5.bin';l:$8000;p:$28000;crc:$69499a94),
+        (n:'ni-5.bin';l:$8000;p:$30000;crc:$6f597ed2),(n:'nf-5.bin';l:$8000;p:$38000;crc:$0efc8d45),
+        (n:'nl-5.bin';l:$8000;p:$40000;crc:$14778336),(n:'no-5.bin';l:$8000;p:$48000;crc:$147dd23b),
+        (n:'ng-5.bin';l:$8000;p:$50000;crc:$a8ee3720),(n:'nm-5.bin';l:$8000;p:$58000;crc:$c100258e),
+        (n:'n5-5.ic31';l:$8000;p:$0;crc:$7ee43a3c),(n:'n4-5.ic32';l:$8000;p:$10000;crc:$6557564c),
+        (n:'n3-5.ic33';l:$8000;p:$18000;crc:$78fd6190),());
+        //TMNT
+        tmnt:array[0..16] of tipo_roms=(
+        (n:'963-x23.j17';l:$20000;p:0;crc:$a9549004),(n:'963-x24.k17';l:$20000;p:$1;crc:$e5cc9067),
+        (n:'963-x21.j15';l:$10000;p:$40000;crc:$5789cf92),(n:'963-x22.k15';l:$10000;p:$40001;crc:$0a74e277),
+        (n:'963e20.g13';l:$8000;p:0;crc:$1692a6d6),
+        (n:'963a28.h27';l:$80000;p:0;crc:$db4769a8),(n:'963a29.k27';l:$80000;p:$2;crc:$8069cd2e),
+        (n:'963a17.h4';l:$80000;p:0;crc:$b5239a44),(n:'963a15.k4';l:$80000;p:$2;crc:$1f324eed),
+        (n:'963a18.h6';l:$80000;p:$100000;crc:$dd51adef),(n:'963a16.k6';l:$80000;p:$100002;crc:$d4bd9984),
+        (n:'963a30.g7';l:$100;p:0;crc:$abd82680),(n:'963a31.g19';l:$100;p:$100;crc:$f8004a1c),
+        (n:'963a27.d18';l:$20000;p:0;crc:$2dfd674b),(n:'963a25.d5';l:$80000;p:0;crc:$fca078c7),
+        (n:'963a26.c13';l:$20000;p:0;crc:$e2ac3063),());
+        //Sunset Riders
+        ssriders:array[0..11] of tipo_roms=(
+        (n:'064eac02.8e';l:$40000;p:0;crc:$5a5425f4),(n:'064eac03.8g';l:$40000;p:$1;crc:$093c00fb),
+        (n:'064eab04.10e';l:$20000;p:$80000;crc:$ef2315bd),(n:'064eab05.10g';l:$20000;p:$80001;crc:$51d6fbc4),
+        (n:'064e01.2f';l:$10000;p:0;crc:$44b9bc52),
+        (n:'064e12.16k';l:$80000;p:0;crc:$e2bdc619),(n:'064e11.12k';l:$80000;p:$2;crc:$2d8ca8b0),
+        (n:'064e09.7l';l:$100000;p:0;crc:$4160c372),(n:'064e07.3l';l:$100000;p:$2;crc:$64dd673c),
+        (n:'ssriders_eac.nv';l:$80;p:0;crc:$f6d641a7),(n:'064e06.1d';l:$100000;p:0;crc:$59810df9),());
+        //gradius3
+        gradius3:array[0..24] of tipo_roms=(
+        (n:'945_r13.f15';l:$20000;p:0;crc:$cffd103f),(n:'945_r12.e15';l:$20000;p:$1;crc:$0b968ef6),
+        (n:'945_m09.r17';l:$20000;p:0;crc:$b4a6df25),(n:'945_m08.n17';l:$20000;p:$1;crc:$74e981d2),
+        (n:'945_l06b.r11';l:$20000;p:$40000;crc:$83772304),(n:'945_l06a.n11';l:$20000;p:$40001;crc:$e1fd75b6),
+        (n:'945_l07c.r15';l:$20000;p:$80000;crc:$c1e399b6),(n:'945_l07a.n15';l:$20000;p:$80001;crc:$96222d04),
+        (n:'945_l07d.r13';l:$20000;p:$c0000;crc:$4c16d4bd),(n:'945_l07b.n13';l:$20000;p:$c0001;crc:$5e209d01),
+        (n:'945_r05.d9';l:$10000;p:0;crc:$c8c45365),
+        (n:'945_a02.l3';l:$80000;p:0;crc:$4dfffd74),(n:'945_a01.h3';l:$80000;p:2;crc:$339d6dd2),
+        (n:'945_l04a.k6';l:$20000;p:$100000;crc:$884e21ee),(n:'945_l04c.m6';l:$20000;p:$100001;crc:$45bcd921),
+        (n:'945_l03a.e6';l:$20000;p:$100002;crc:$a67ef087),(n:'945_l03c.h6';l:$20000;p:$100003;crc:$a56be17a),
+        (n:'945_l04b.k8';l:$20000;p:$180000;crc:$843bc67d),(n:'945_l04d.m8';l:$20000;p:$180001;crc:$0a98d08e),
+        (n:'945_l03b.e8';l:$20000;p:$180002;crc:$933e68b9),(n:'945_l03d.h8';l:$20000;p:$180003;crc:$f375e87b),
+        (n:'945_a10.b15';l:$40000;p:0;crc:$1d083e10),(n:'945_l11a.c18';l:$20000;p:$40000;crc:$6043f4eb),
+        (n:'945_l11b.c20';l:$20000;p:$60000;crc:$89ea3baf),());
 
-        roms_data:array[0..TOTAL_ROMS] of trom_data=(
-        (name:'spectrum';description:'Spectrum 16K/48K';rom:@spectrum),
-        (name:'spec128';description:'Spectrum 128K';rom:@spec128),
-        (name:'plus2';description:'Spectrum +2';rom:@spec_plus2),
-        (name:'plus3';description:'Spectrum +2A/+3';rom:@plus3),
-        (name:'cpc464';description:'Amstrad CPC 464';rom:@cpc464),
-        (name:'cpc664';description:'Amstrad CPC 664';rom:@cpc664),
-        (name:'cpc6128';description:'Amstrad CPC 6128';rom:@cpc6128),
-        (name:'pacman';description:'Pacman';rom:@pacman),
-        (name:'mspacman';description:'Ms-Pacman';rom:@mspacman),
-        (name:'phoenix';description:'Phoenix';rom:@phoenix),
-        (name:'pleiads';description:'Pleiads';rom:@pleiads),
-        (name:'mystston';description:'Mysterious Stones';rom:@mystston),
-        (name:'bombjack';description:'Bomb Jack';rom:@bombjack),
-        (name:'galaxian';description:'Galaxian';rom:@galaxian),
-        (name:'jumpbug';description:'Jump Bug';rom:@jumpbug),
-        (name:'mooncrst';description:'Moon Cresta';rom:@mooncrst),
-        (name:'scramble';description:'Scramble';rom:@scramble),
-        (name:'scobra';description:'Super Cobra';rom:@scobra),
-        (name:'frogger';description:'Frogger';rom:@frogger),
-        (name:'amidar';description:'Amidar';rom:@amidar),
-        (name:'dkong';description:'Donkey Kong';rom:@dkong),
-        (name:'dkongjr';description:'Donkey Kong Jr.';rom:@dkongjr),
-        (name:'dkong3';description:'Donkey Kong 3';rom:@dkong3),
-        (name:'blktiger';description:'Black Tiger';rom:@blktiger),
-        (name:'gberet';description:'Green Beret';rom:@gberet),
-        (name:'mrgoemon';description:'Mr. Goemon';rom:@mrgoemon),
-        (name:'commando';description:'Commando';rom:@commando),
-        (name:'gng';description:'Ghost''n Goblins';rom:@gng),
-        (name:'mikie';description:'Mikie';rom:@mikie),
-        (name:'shaolins';description:'Shaolin''s Road';rom:@shaolins),
-        (name:'yiear';description:'Yie Ar Kung-Fu';rom:@yiear),
-        (name:'asteroid';description:'Asteroids';rom:@asteroid),
-        (name:'sonson';description:'Sonson';rom:@sonson),
-        (name:'starforc';description:'Star Force';rom:@starforc),
-        (name:'rygar';description:'Rygar';rom:@rygar),
-        (name:'silkworm';description:'Silkworm';rom:@silkworm),
-        (name:'pitfall2';description:'Pitfall II';rom:@pitfall2),
-        (name:'teddybb';description:'Teddy Boy Blues';rom:@teddybb),
-        (name:'wboy';description:'Wonder Boy';rom:@wboy),
-        (name:'mrviking';description:'Mr Viking';rom:@mrviking),
-        (name:'seganinj';description:'Sega Ninja';rom:@seganinj),
-        (name:'upndown';description:'Up''n Down';rom:@upndown),
-        (name:'flicky';description:'Flicky';rom:@flicky),
-        (name:'wbml';description:'Wonder Boy in Monster Land';rom:@wbml),
-        (name:'choplift';description:'Choplifter';rom:@choplift),
-        (name:'pooyan';description:'Pooyan';rom:@pooyan),
-        (name:'jungler';description:'Jungler';rom:@jungler),
-        (name:'rallyx';description:'Rally X';rom:@rallyx),
-        (name:'nrallyx';description:'New Rally X';rom:@nrallyx),
-        (name:'citycon';description:'City Connection';rom:@citycon),
-        (name:'btime';description:'Burger Time';rom:@btime),
-        (name:'exprraid';description:'Express Raider';rom:@exprraid),
-        (name:'sbasketb';description:'Super Basketball';rom:@sbasketb),
-        (name:'ladybug';description:'Lady Bug';rom:@ladybug),
-        (name:'snapjack';description:'Snapjack';rom:@snapjack),
-        (name:'cavenger';description:'Cosmic Avenger';rom:@cavenger),
-        (name:'tehkanwc';description:'Tehkan World Cup';rom:@tehkanwc),
-        (name:'popeye';description:'Popeye';rom:@popeye),
-        (name:'psychic5';description:'Psychic 5';rom:@psychic5),
-        (name:'terracre';description:'Terra Cresta';rom:@terracre),
-        (name:'kungfum';description:'Kung-Fu Master';rom:@kungfum),
-        (name:'spelunkr';description:'Spelunker';rom:@spelunkr),
-        (name:'spelunk2';description:'Spelunker II';rom:@spelunk2),
-        (name:'ldrun';description:'Lode Runner';rom:@ldrun),
-        (name:'ldrun2';description:'Lode Runner II';rom:@ldrun2),
-        (name:'shootout';description:'Shoot Out';rom:@shootout),
-        (name:'vigilant';description:'Vigilante';rom:@vigilant),
-        (name:'jackal';description:'Jackal';rom:@jackal),
-        (name:'bublbobl';description:'Bubble Bobble';rom:@bublbobl),
-        (name:'prehisle';description:'Prehistoric Isle in 1930';rom:@prehisle),
-        (name:'tigeroad';description:'Tiger Road';rom:@tigeroad),
-        (name:'f1dream';description:'F1 Dream';rom:@f1dream),
-        (name:'snowbros';description:'Snowbros';rom:@snowbros),
-        (name:'toki';description:'Toki';rom:@toki),
-        (name:'contra';description:'Contra';rom:@contra),
-        (name:'mappy';description:'Mappy';rom:@mappy),
-        (name:'digdug2';description:'Dig Dug II';rom:@digdug2),
-        (name:'superpac';description:'Super Pacman';rom:@spacman),
-        (name:'todruaga';description:'The Tower of Druaga';rom:@todruaga),
-        (name:'motos';description:'Motos';rom:@motos),
-        (name:'rastan';description:'Rastan';rom:@rastan),
-        (name:'lwings';description:'Legendary Wings';rom:@lwings),
-        (name:'sectionz';description:'Section Z';rom:@sectionz),
-        (name:'trojan';description:'Trojan';rom:@trojan),
-        (name:'sf';description:'Street Fighter';rom:@sfighter),
-        (name:'galaga';description:'Galaga';rom:@galaga),
-        (name:'digdug';description:'Dig Dug';rom:@digdug),
-        (name:'xsleena';description:'Xain''d Sleena';rom:@xsleena),
-        (name:'hardhead';description:'Hard Head';rom:@hardhead),
-        (name:'hardhea2';description:'Hard Head 2';rom:@hardhea2),
-        (name:'sabotenb';description:'Saboten Bombers';rom:@sabotenb),
-        (name:'bjtwin';description:'Bomb Jack Twin';rom:@bjtwin),
-        (name:'kncljoe';description:'Knuckle Joe';rom:@kncljoe),
-        (name:'wardner';description:'Wardner';rom:@wardner),
-        (name:'bigkarnk';description:'Big Karnak';rom:@bigkarnk),
-        (name:'thoop';description:'Thunder Hoop';rom:@thoop),
-        (name:'squash';description:'Squash';rom:@squash),
-        (name:'biomtoy';description:'Biomechanical Toy';rom:@biomtoy),
-        (name:'exedexes';description:'Exed Exes';rom:@exedexes),
-        (name:'actfancr';description:'Act-Fancer Cybernetick Hyper Weapon';rom:@actfancer));
-
+implementation
+uses principal,init_games;
 
 procedure export_roms;
 var
   fichero:textfile;
   f:word;
-  rom_data:trom_data;
+  rom_data:tgame_desc;
   rom_file:ptipo_roms;
+  sample_file:ptsample_file;
+  nombre_fichero:string;
 begin
+principal1.saveDialog1.Filter:='DAT File (*.dat)|*.dat';
+principal1.saveDialog1.FileName:='dsp_roms_dat.dat';
+if not(principal1.savedialog1.execute) then exit;
+nombre_fichero:=principal1.saveDialog1.FileName;
+if FileExists(nombre_fichero) then begin                                         //Respuesta 'NO' es 7
+  if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
+end;
 {$I-}
-assignfile(fichero,'dsp_roms_dat.dat');
+assignfile(fichero,nombre_fichero);
 rewrite(fichero);
 if ioresult<>0 then begin
-  MessageDlg('Cannot write file: "dsp_roms_dat.dat"',mtError,[mbOk], 0);
+  MessageDlg('Cannot write file: "'+nombre_fichero+'"',mtError,[mbOk], 0);
   exit;
 end;
 writeln(fichero,'<?xml version="1.0"?>');
@@ -1044,26 +2162,40 @@ writeln(fichero,'    <name>DSP Emulator</name>');
 writeln(fichero,'    <description>DSP Emulator '+dsp_version+'</description>');
 writeln(fichero,'    <category>EMULATION</category>');
 writeln(fichero,'    <version>'+dsp_version+'</version>');
-writeln(fichero,'    <date>-not specified-</date>');
+writeln(fichero,'    <date>'+DateToStr(date)+'</date>');
 writeln(fichero,'    <author>Leniad</author>');
 writeln(fichero,'    <email>leniad2@hotmail.com</email>');
 writeln(fichero,'    <homepage>http://www.github.com/leniad/</homepage>');
-writeln(fichero,'    <url>-not specified-</url>');
-writeln(fichero,'    <comment>-not specified-</comment>');
+writeln(fichero,'    <url>--</url>');
+writeln(fichero,'    <comment>--</comment>');
 writeln(fichero,'    <clrmamepro/>');
 writeln(fichero,'  </header>');
-for f:=0 to TOTAL_ROMS do begin
-  rom_data:=roms_data[f];
-  writeln(fichero,'  <game name="'+rom_data.name+'">');
-  writeln(fichero,'   <description>'+rom_data.description+'</description>');
-  writeln(fichero,'   <year>'+rom_data.year+'</year>');
-  writeln(fichero,'   <manufacturer>'+rom_data.manufacturer+'</manufacturer>');
-  rom_file:=rom_data.rom;
-  repeat
-    writeln(fichero,'   <rom name="'+rom_file.n+'" size="'+inttostr(rom_file.l)+'" crc="'+inttohex(rom_file.crc,8)+'"/>');
-    inc(rom_file);
-  until rom_file.n='';
-  writeln(fichero,'   </game>');
+for f:=1 to games_cont do begin
+  rom_data:=games_desc[f];
+  if rom_data.zip<>'' then begin
+    if ((rom_data.grid=5) or (rom_data.grid=3)) then continue;
+    writeln(fichero,'  <game name="'+rom_data.zip+'">');
+    case rom_data.grid of
+      0:writeln(fichero,'   <description>Spectrum 16K/48K</description>');
+      2:writeln(fichero,'   <description>Spectrum +2A/+3</description>');
+      else writeln(fichero,'   <description>'+rom_data.name+'</description>');
+    end;
+    writeln(fichero,'   <year>'+rom_data.year+'</year>');
+    writeln(fichero,'   <manufacturer>'+rom_data.company+'</manufacturer>');
+    rom_file:=rom_data.rom;
+    repeat
+      writeln(fichero,'   <rom name="'+rom_file.n+'" size="'+inttostr(rom_file.l)+'" crc="'+inttohex(rom_file.crc,8)+'"/>');
+      inc(rom_file);
+    until rom_file.n='';
+    if rom_data.samples<>nil then begin
+      sample_file:=rom_data.samples;
+      repeat
+        writeln(fichero,'   <sample name="'+sample_file.nombre+'"/>');
+        inc(sample_file);
+      until sample_file.nombre='';
+    end;
+    writeln(fichero,'   </game>');
+  end;
 end;
 writeln(fichero,'</datafile>');
 close(fichero);

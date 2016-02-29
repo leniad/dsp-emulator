@@ -16,7 +16,7 @@ object FLoadRom: TFLoadRom
   Font.Quality = fqDraft
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '1.3'
+  LCLVersion = '1.6.0.1'
   object GroupBox1: TGroupBox
     Left = 261
     Height = 311

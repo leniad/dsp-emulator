@@ -1,5 +1,10 @@
 ﻿# dsp-emulator
 DSP Emulator status<br>
+<b>29/02/16 - DSP Emulator 0.16b2 source and Win32 updated.</b><br><pre>
+-ROM Engine: ROM and samples file info export finished. Now you can use your favorite ROM manager.
+-Small ROMs definition fixes in some drivers
+-Uploaded Languaje files and sound samples used by DSP, I forgot to do it when I do de google project migration.
+</pre><br>
 <b>28/02/16 - DSP Emulator 0.16b2 source and Win32 updated.</b><br><pre>
 -Lazarus: New sound engine, better sound. Some problems with stereo sounds (Using SDL2 v2.0.4)
 -Samples: Fixes resample of no standar frequencies.
