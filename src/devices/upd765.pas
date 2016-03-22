@@ -95,23 +95,57 @@ while (index_count<>2) do begin
 	end;
 end;
 
-procedure read_sector;
+function saltar_sector:boolean;
 begin
-if not(buscar_sector) then begin
-  st0:=st0 or $40;
-  st1:=st1 or $4;
-  GetRes7;
-  exit;
+if ((FDCCommand[0] and $20)<>0) then begin
+  if ((FDCCommand[0] and $1f)=$6) then begin
+    if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)<>0) then begin
+      saltar_sector:=TRUE;
+      exit;
+    end;
+  end else begin
+    if ((FDCCommand[0] and $1f)=$c) then begin
+      if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)=0) then begin
+        saltar_sector:=true;
+        exit;
+			end;
+		end;
+  end;
+end;
+saltar_sector:=FALSE;
+end;
+
+procedure read_sector;
+var
+  salir:boolean;
+begin
+salir:=false;
+while not(salir) do begin
+  if buscar_sector then begin
+    if saltar_sector then begin
+      if (FDCCommand[4]=FDCCommand[6]) then begin
+        st1:=st1 and $7f;
+        GetRes7;
+        exit;
+      end;
+      FDCCommand[4]:=FDCCommand[4]+1;
+    end else salir:=true;
+  end else begin
+    st0:=st0 or $40;
+    st1:=st1 or $4;
+    GetRes7;
+    exit;
+  end;
 end;
 ExecCmdPhase:=TRUE;
 if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].multi then begin
-  dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].pos_multi:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].pos_multi+1;
-  if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].pos_multi>=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].cont_multi then dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].pos_multi:=0;
-  FDCDataPointer:=0;
-  FDCDataLength:=1 shl (FDCCommand[5]+7);//dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].data_length;
+  if (dsk[FDCCurrDrv].cont_multi>=(dsk[FDCCurrDrv].max_multi-1)) then dsk[FDCCurrDrv].cont_multi:=0
+     else inc(dsk[FDCCurrDrv].cont_multi);
+  FDCDataPointer:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].posicion_data+(dsk[FDCCurrDrv].cont_multi*(1 shl (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size+7)));
+  FDCDataLength:=1 shl (FDCCommand[5]+7);
 end else begin
   FDCDataPointer:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].posicion_data;
-  FDCDataLength:=1 shl (FDCCommand[5]+7);//dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].data_length;
+  FDCDataLength:=1 shl (FDCCommand[5]+7);//1 shl (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size+7);  //1 shl (FDCCommand[5]+7);
 end;
 if FDCCommand[5]=0 then begin
   FDCDataLength:=FDCCommand[8];
@@ -125,8 +159,8 @@ end;
 
 procedure read_track;
 begin
-FDCDataLength:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].track_lenght;
-FDCDataPointer:=0;
+FDCDataLength:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_read_track].data_length;
+FDCDataPointer:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_read_track].posicion_data;
 FDCCounter:=0;
 ExecCmdPhase:=TRUE;
 StatusRegister:=$F0;
@@ -150,42 +184,6 @@ test:=not(track>(dsk[FDCCurrDrv].DiskHeader.nbof_tracks-1));
 if test then dsk[FDCCurrDrv].track_actual:=track
   else dsk[FDCCurrDrv].track_actual:=dsk[FDCCurrDrv].DiskHeader.nbof_tracks;
 seek_track:=test;
-end;
-
-procedure siguiente_sector;
-begin
-if ((FDCCommand[0] and $1f)=$6) then begin //read data
-  if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)<>0) then begin //el sector esta borrado?
-    if ((FDCCommand[0] and $20)=0) then begin //hay que leerlo
-      st1:=st1 or $20;
-    end else begin //debo avanzar al siguiente, este esta borrado, y no quiere leerlo
-      if (FDCCommand[4]=FDCCommand[6]) then begin
-        st0:=(st0 and $3f) or $40;
-        GetRes7;
-      end else begin
-        FDCCommand[4]:=FDCCommand[4]+1;
-        read_sector;
-        siguiente_sector;
-      end;
-    end;
-  end;
-end;
-if ((FDCCommand[0] and $1f)=12) then begin //read data
-  if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)=0) then begin //el sector esta borrado?
-    if ((FDCCommand[0] and $20)=0) then begin //hay que leerlo
-      st1:=st1 or $20;
-    end else begin //debo avanzar al siguiente, este esta borrado, y no quiere leerlo
-      if (FDCCommand[4]=FDCCommand[6]) then begin
-        st0:=(st0 and $3f) or $40;
-        GetRes7;
-      end else begin
-        FDCCommand[4]:=FDCCommand[4]+1;
-        read_sector;
-        siguiente_sector;
-      end;
-    end;
-  end;
-end;
 end;
 
 procedure FDCExecWriteCommand;
@@ -257,10 +255,7 @@ case (FDCCommand[0] and $1f) of
           if not(dsk[FDCCurrDrv].abierto) then begin
             st0:=st0 or $48;
             getres7;
-          end else begin
-            read_sector;
-            siguiente_sector;
-          end;
+          end else read_sector;
         end;
      7:begin // Recalibrate
       st0:=$20;
@@ -296,7 +291,7 @@ case (FDCCommand[0] and $1f) of
       st1:=0;
       st2:=0;
       fdc_get_drive;
-      if not(dsk[FDCCurrDrv].abierto) then begin // or (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector=0)) then begin
+      if not(dsk[FDCCurrDrv].abierto) then begin
         st0:=$48;
         getres7;
         FDCResult[3]:=dsk[FDCCurrDrv].track_actual;
@@ -304,6 +299,7 @@ case (FDCCommand[0] and $1f) of
         FDCResult[5]:=0;
         FDCResult[6]:=0;
       end else begin
+          //Esto es fundamental, por ejemplo para 'Tintin on the Moon'
           if (dsk[FDCCurrDrv].sector_actual+1)>dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector then begin
             dsk[FDCCurrDrv].sector_actual:=0;
             getres7;
@@ -326,20 +322,44 @@ case (FDCCommand[0] and $1f) of
       ExecCmdPhase:=FALSE;
       end;
       else begin
-      FDCResCounter:=1;
-      FDCResPointer:=0;
-      st0:=$80 or st0;
-      if ExecCmdPhase then begin  //Hacer timeout para la proteccion Hexagon
-        st1:=st1 or $10;
-        st0:=(st0 and $3f) or $40;
-        StatusRegister:=$80;
-      end;
-      FDCResult[0]:=st0;
-      ExecCmdPhase:=FALSE;
-      ResultPhase:=TRUE;
-      seektrack:=true;
+        FDCResCounter:=1;
+        FDCResPointer:=0;
+        st0:=$80 or st0;
+        if ExecCmdPhase then begin  //Hacer timeout para la proteccion Hexagon
+          st1:=st1 or $10;
+          st0:=(st0 and $3f) or $40;
+          StatusRegister:=$80;
+        end;
+        FDCResult[0]:=st0;
+        ExecCmdPhase:=FALSE;
+        ResultPhase:=TRUE;
+        seektrack:=true;
       end;
    end;
+end;
+
+function read_data_stop:boolean;
+begin
+read_data_stop:=false;
+if ((FDCCommand[0] and $20)=0) then begin
+		if ((FDCCommand[0] and $1f)=$06) then begin
+			if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)<>0) then begin
+				st2:=st2 or $40; //NEC765_ST2_CONTROL_MARK;
+        read_data_stop:=true;
+			end;
+		end else begin
+		if ((FDCCommand[0] and $1f)=$0c) then begin
+			if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)=0) then begin
+				st2:=st2 or $40; //NEC765_ST2_CONTROL_MARK;
+        read_data_stop:=true;
+			end;
+    end;
+	end;
+end;
+if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status1 and $20)<>0) then begin
+  st1:=st1 or $20;
+  read_data_stop:=true;
+end;
 end;
 
 function FDCExecReadCommand:byte;
@@ -373,37 +393,38 @@ begin
        end;
       end;
      6,12:begin
-          if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].multi then
-            ret:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].data_multi[dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].pos_multi]
-            else ret:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[fdccurrdrv].track_actual].data;
+          ret:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[fdccurrdrv].track_actual].data;
           if ret=nil then begin
-            st0:=$c0;
-            st1:=$20;
+            st0:=$40+$80;
+            st1:=0+$20;
             st2:=$1;
             GetRes7;
             exit;
           end;
-          inc(ret,fdcdatapointer);
-          if ((fdcdatapointer>dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[fdccurrdrv].track_actual].track_lenght) and (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[fdccurrdrv].track_actual].sector_size<>8)) then begin
-            st0:=(st0 and $3f) or $40;
-            st1:=st1 or 4 or 2;
+          if FDCCounter>=(1 shl (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size+7)) then begin
+            //Para la emulacion de speedlock en Amstrad...
+            st0:=$40+$80;
+            st1:=$4+dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status1;
+            st2:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2;
             GetRes7;
+            exit;
           end else begin
+            inc(ret,fdcdatapointer);
             FDCExecReadCommand:=ret^;
-            inc(FDCDataPointer);
-            inc(FDCCounter);
-            if (FDCCounter=FDCDataLength) then begin
-              if (FDCCommand[4]=FDCCommand[6]) then begin
-                st0:=(st0 and $3f) or $40;
-                GetRes7;
-              end else begin
-                FDCCommand[4]:=FDCCommand[4]+1;
-                read_sector;
-                siguiente_sector;
-              end;
-              principal1.Image1.visible:=false;
-              principal1.Image1.Refresh;
+          end;
+          inc(FDCDataPointer);
+          inc(FDCCounter);
+          if (FDCCounter=FDCDataLength) then begin
+            if ((FDCCommand[4]=FDCCommand[6]) or read_data_stop) then begin
+              st0:=st0 or $40;
+              GetRes7;
+            end else begin
+              inc(FDCCommand[4]);
+              read_sector;
+              exit;
             end;
+            principal1.Image1.visible:=false;
+            principal1.Image1.Refresh;
           end;
       end;
    end;
@@ -448,7 +469,6 @@ begin
     FDCCounter:=0;
     Contador_status:=0;
     contador_read_status:=0;
-    dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].pos_multi:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].cont_multi;
 end;
 
 procedure WriteFDCData(value:byte);
@@ -499,7 +519,7 @@ if contador_status>$10 then begin
     end else StatusRegister:=$50;
     SeekTrack:=FALSE;
   end else begin
-    StatusRegister:=$F0;
+    StatusRegister:=$f0;
     st0:=(st0 and $3f) or $40;
     st1:=st1 or $10;
     seektrack:=true;
@@ -511,5 +531,6 @@ if contador_status>$10 then begin
 end;
 ReadFDCStatus:=StatusRegister;
 end;
+
 
 end.

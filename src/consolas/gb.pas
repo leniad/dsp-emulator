@@ -64,12 +64,12 @@ var
 procedure Cargar_gb;
 begin
 principal1.Panel2.Visible:=true;
-principal1.BitBtn9.visible:=false;
 principal1.BitBtn10.Glyph:=nil;
 principal1.BitBtn10.Enabled:=true;
 principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
 principal1.BitBtn10.visible:=true;
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+principal1.BitBtn8.visible:=false;
 llamadas_maquina.iniciar:=iniciar_gb;
 llamadas_maquina.bucle_general:=gb_principal;
 llamadas_maquina.cerrar:=cerrar_gb;

@@ -99,6 +99,7 @@ type
             amstrad_tap:string;
             amstrad_disk:string;
             amstrad_snap:string;
+            amstrad_rom:string;
             //Misc
             Preview:String;
             lenguaje:string;
@@ -298,11 +299,8 @@ var
   f:word;
   handle_:integer;
 begin
-if SDL_WasInit(libSDL_INIT_VIDEO)=0 then begin
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
   if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
-  keystate:=pbyte(SDL_GetKeyboardState(nil));
-  SDL_SetHintWithPriority(libSDL_HINT_GRAB_KEYBOARD,'1',libSDL_HINT_OVERRIDE);
-end;
 //Puntero general del pixels
 getmem(punbuf,MAX_PUNBUF);
 getmem(tpunbuf,MAX_PUNBUF);
@@ -334,7 +332,7 @@ SDL_Setcolorkey(pantalla[pant_sprites],1,set_trans_color);
 paleta[max_colores]:=set_trans_color;
 //Pantallas restantes
 for f:=1 to max_pant_visible do
-  if p_final[f].x<>0 then begin                  //Añado 32 por la derecha y 32 por la izquierda
+  if p_final[f].x<>0 then begin
     if p_final[f].final_mix then begin
       if p_final[f].sprite_end_x=0 then p_final[f].sprite_end_x:=p_final[f].x;
       if p_final[f].sprite_mask_x=0 then p_final[f].sprite_mask_x:=p_final[f].x-1;

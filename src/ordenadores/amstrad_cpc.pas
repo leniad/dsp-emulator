@@ -4,16 +4,22 @@ interface
 uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,controls_engine,ay_8910,sysutils,gfx_engine,upd765,cargar_dsk,forms,
      dialogs,rom_engine,misc_functions,main_engine,pal_engine,sound_engine,
-     tape_window,file_engine,ppi8255,lenguaje,disk_file_format;
+     tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc;
 
 const
   ram_banks:array[0..7,0..3] of byte=(
         (0,1,2,3),(0,1,2,7),(4,5,6,7),(0,3,2,7),
         (0,4,2,3),(0,5,2,3),(0,6,2,3),(0,7,2,3));
   pantalla_alto=312;
-  cpc6128_rom:tipo_roms=(n:'cpc6128.rom';l:$8000;p:0;crc:$9e827fe1);
   cpc464_rom:tipo_roms=(n:'cpc464.rom';l:$8000;p:0;crc:$40852f25);
+  cpc464f_rom:tipo_roms=(n:'cpc464f.rom';l:$8000;p:0;crc:$17893d60);
+  cpc464sp_rom:tipo_roms=(n:'cpc464sp.rom';l:$8000;p:0;crc:$338daf2d);
+  cpc464d_rom:tipo_roms=(n:'cpc464d.rom';l:$8000;p:0;crc:$260e45c3);
   cpc664_rom:tipo_roms=(n:'cpc664.rom';l:$8000;p:0;crc:$9ab5a036);
+  cpc6128_rom:tipo_roms=(n:'cpc6128.rom';l:$8000;p:0;crc:$9e827fe1);
+  cpc6128f_rom:tipo_roms=(n:'cpc6128f.rom';l:$8000;p:0;crc:$1574923b);
+  cpc6128sp_rom:tipo_roms=(n:'cpc6128sp.rom';l:$8000;p:0;crc:$2fa2e7d6);
+  cpc6128d_rom:tipo_roms=(n:'cpc6128d.rom';l:$8000;p:0;crc:$4704685a);
   ams_rom:tipo_roms=(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd);
 
 type
@@ -35,7 +41,7 @@ type
               lines_count,lines_sync,rom_selected:byte;
               rom_low,rom_high:boolean;
               marco:array[0..3] of byte;
-              marco_latch:byte;
+              marco_latch,cpc_model:byte;
            end;
   tcpc_ppi=packed record
               port_a_read_latch,port_a_write_latch:byte;
@@ -46,9 +52,12 @@ type
            end;
 
 var
-    cpc_mem:array[0..10,0..$3fff] of byte;
+    cpc_mem:array[0..7,0..$3fff] of byte;
+    cpc_rom:array[0..15,0..$3fff] of byte;
+    cpc_rom_slot:array[0..15] of string;
+    cpc_low_rom:array[0..$3fff] of byte;
     cpc_crt:^tcpc_crt;
-    cpc_ga:^tcpc_ga;
+    cpc_ga:tcpc_ga;
     cpc_ppi:^tcpc_ppi;
 
 procedure Cargar_amstrad_CPC;
@@ -56,6 +65,8 @@ function iniciar_cpc:boolean;
 procedure cpc_main;
 procedure cpc_close;
 procedure cpc_reset;
+procedure cpc_config_call;
+procedure cpc_load_roms;
 //Tape/Disk
 function amstrad_tapes:boolean;
 procedure amstrad_despues_instruccion(estados_t:word);
@@ -84,35 +95,36 @@ procedure port_c_write(valor:byte);
 implementation
 uses principal,tap_tzx,snapshot;
 const
-  TO1=7; //8??
+  TO1=7;
+  TO2=13;
   z80_op:array[0..$ff] of byte=(
   //0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-    4, 12,  8,  8,  4,  4,  8,  4,  4, 12,  8,  8,  4,  4,  8,  4,  //0*
-   12, 12,  8,  8,  4,  4,  8,  4, 12, 12,  8,  8,  4,  4,  8,  4,  //10*
-    8, 12, 20,  8,  4,  4,  8,  4,  8, 12, 20,  8,  4,  4,  8,  4,  //20*
-    8, 12, 16,  8, 12, 12, 12,  4,  8, 12, 16,  8,  4,  4,  8,  4,  //30*
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //40*
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //50*
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //60*
-    8,  8,  8,  8,  8,  8,  4,  8,  4,  4,  4,  4,  4,  4,  8,  4,  //70*
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //80*
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //90*
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //A0*
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //B0*
-    8, 12, 12, 12, 12, 16,  8, 16,  8, 12, 12,  0, 12, 20,  8, 16,  //C0*
-    8, 12, 12, 12, 12, 20,  8, 16,  8,  4, 12, 12, 12,  0,  8, 16,  //D0*
-    8, 12, 12, 24, 12, 16,TO1, 20,  8,  4, 12,  4, 12,  0,  8, 16,  //E0
-    8, 12, 12,  4, 12, 16,  8, 16,  8,  8, 12,  4, 12,  0,  8, 16); //F0
+    4, 12,  8,  8,  4,  4,  8,  4,  4, 12,  8,  8,  4,  4,  8,  4,  //0
+   12, 12,  8,  8,  4,  4,  8,  4, 16, 12,  8,  8,  4,  4,  8,  4,  //10
+    8, 12, 20,  8,  4,  4,  8,  4,  8, 12, 20,  8,  4,  4,  8,  4,  //20
+    8, 12,TO2,  8, 12, 12, 12,  4,  8, 12, 16,  8,  4,  4,TO1,  4,  //30
+    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //40
+    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //50
+    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //60
+    8,  8,  8,  8,  8,  8,  4,  8,  4,  4,  4,  4,  4,  4,  8,  4,  //70
+    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //80
+    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //90
+    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //A0
+    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //B0
+    8, 12, 12, 12, 12, 12,  8, 12,  8, 12, 12,  0, 12, 20,  8, 12,  //C0
+    8, 12, 12, 12, 12, 12,  8, 12,  8,  4, 12, 12, 12,  0,  8, 12,  //D0*
+    8, 12, 12, 20, 12, 12,TO1, 12,  8,  4, 12,  4, 12,  0,  8, 12,  //E0
+    8, 12, 12,  4, 12, 12,  8, 12,  8,  8, 12,  4, 12,  0,  8, 12); //F0
 
   z80_op_cb:array[0..$ff] of byte=(
 		8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //0
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //10
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //20
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //30
-    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //40
-    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //50
-    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //60
-    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //70
+    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //40
+    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //50
+    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //60
+    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //70
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //80
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
@@ -124,42 +136,41 @@ const
   TE1=12; //16??
 
   z80_op_ed:array[0..$ff] of byte=(
-  //0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-		8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, //30
-   16, 16, 16, 24,  8, 16,  8, 12, 16, 16, 16, 24,  8, 16,  8, 12, //40
-   16, 16, 16, 24,  8, 16,  8, 12, 16, 16, 16, 24,  8, 16,  8, 12, //50
-   16, 16, 16, 24,  8, 16,  8, 20, 16, 16, 16, 24,  8, 16,  8, 20, //60
-   16, 16, 16, 24,  8, 16,  8,  8,TE1, 16, 16, 24,  8, 16,  8,  8, //70
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, //80
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8, //90
-   20, 20, 20, 20,  8,  8,  8,  8, 20, 20, 20, 20,  8,  8,  8,  8, //a0
-   20, 20, 20, 20,  8,  8,  8,  8, 20, 20, 20, 20,  8,  8,  8,  8, //b0
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,
-    8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8);
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //00
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //10
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //20
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //30
+       12,12,16,20, 8,16, 8,12,12,12,16,20, 8,16, 8,12,  //40
+       12,12,16,20, 8,16, 8,12,12,12,16,20, 8,16, 8,12,  //50
+       12,12,16,20, 8,16, 8,20,12,12,16,20, 8,16, 8,20,
+       12,12,16,20, 8,16, 8, 8,12,12,16,20, 8,16, 8, 8,  //70
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //90
+       16,16,16,16, 8, 8, 8, 8,16,16,16,16, 8, 8, 8, 8,  //a0
+       16,16,16,16, 8, 8, 8, 8,16,16,16,16, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
+        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8);
 
   z80_op_dd:array[0..$ff] of byte=(
-  //0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-		8, 16, 12, 12,  8,  8, 12,  8,  8, 16, 12, 12,  8,  8, 12,  8,  //0
-   16, 16, 12, 12,  8,  8, 12,  8, 16, 16, 12, 12,  8,  8, 12,  8,  //1
-   12, 16, 24, 12,  8,  8, 12,  8, 12, 16, 24, 12,  8,  8, 12,  8,  //2
-   12, 16, 20, 12, 24, 24, 24,  8, 12, 16, 20, 12,  8,  8, 12,  8,  //3
-    8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,  //4
-    8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,  //5
-    8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,  //6
-   20, 20, 20, 20, 20, 20,  8, 20,  8,  8,  8,  8,  8,  8, 20,  8,  //7
-    8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,  //8
-    8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,  //9
-    8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,  //a
-    8,  8,  8,  8,  8,  8, 20,  8,  8,  8,  8,  8,  8,  8, 20,  8,  //b
-   12, 16, 16, 16, 16, 20, 12, 20, 12, 16, 16,  0, 16, 24, 12, 20,  //c
-   12, 16, 16, 12, 16, 20, 12, 20, 12,  8, 16, 16, 16,  8, 12, 20,  //d
-   12, 20, 16, 28, 16, 20, 12, 20, 12,  8, 16,  8, 16,  8, 12, 20,  //e
-   12, 16, 16,  8, 16, 20, 12, 20, 12, 12, 16,  8, 16,  8, 12, 20); //f
+   //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+	   8,16,12,12, 8, 8,12, 8, 8,16,12,12, 8, 8,12, 8,
+    12,16,12,12, 8, 8,12, 8,16,16,12,12, 8, 8,12, 8,
+	  12,16,20,12, 8, 8,12, 8,12,16,20,12, 8, 8,12, 8,
+	  12,16,20,12,24,24,20, 8,12,16,20,12, 8, 8,12, 8,
+	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+    20,20,20,20,20,20, 8,20, 8, 8, 8, 8, 8, 8,20, 8,
+	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+    12,16,16,16,16,16,12,16,12,16,16, 0,16,21,12,16, // cb -> cc_xycb */
+    12,16,16,16,16,16,12,16,12, 8,16,16,16, 4,12,16, // dd -> cc_xy again */
+    12,16,16,24,16,16,12,16,12, 8,16, 8,16, 4,12,16, // ed -> cc_ed */
+    12,16,16, 8,16,16,12,16,12,12,16, 8,16, 4,12,16); //F0
   z80_op_ddcb:array[0..$ff] of byte=(
 	 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
    28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
@@ -222,24 +233,95 @@ llamadas_maquina.cerrar:=cpc_close;
 llamadas_maquina.cintas:=amstrad_tapes;
 llamadas_maquina.cartuchos:=amstrad_loaddisk;
 llamadas_maquina.grabar_snapshot:=grabar_amstrad;
+llamadas_maquina.configurar:=cpc_config_call;
+end;
+
+procedure cpc_load_roms;
+var
+  f:byte;
+  memoria_temp:array[0..$7fff] of byte;
+  tempb:boolean;
+  long:integer;
+begin
+case main_vars.tipo_maquina of
+  7:begin
+      tempb:=false;
+      case cpc_ga.cpc_model of
+        0:tempb:=true;
+        1:if not(cargar_roms(@memoria_temp[0],@cpc464f_rom,'cpc464.zip')) then begin
+            MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+        end;
+        2:if not(cargar_roms(@memoria_temp[0],@cpc464sp_rom,'cpc464.zip')) then begin
+            MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+        end;
+        3:if not(cargar_roms(@memoria_temp[0],@cpc464d_rom,'cpc464.zip')) then begin
+            MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+        end;
+      end;
+      if tempb then if not(cargar_roms(@memoria_temp[0],@cpc464_rom,'cpc464.zip')) then exit;
+      fillchar(cpc_rom[7,0],$4000,0);
+    end;
+  8:begin
+      if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc664.zip')) then exit;
+      if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip')) then exit;
+      cpc_ga.cpc_model:=0;
+  end;
+  9:begin
+      if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
+      tempb:=false;
+      case cpc_ga.cpc_model of
+        0:tempb:=true;
+        1:if not(cargar_roms(@memoria_temp[0],@cpc6128f_rom,'cpc6128.zip')) then begin
+            MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+          end;
+        2:if not(cargar_roms(@memoria_temp[0],@cpc6128sp_rom,'cpc6128.zip')) then begin
+            MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+          end;
+        3:if not(cargar_roms(@memoria_temp[0],@cpc6128d_rom,'cpc6128.zip')) then begin
+            MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+          end;
+      end;
+      if tempb then if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
+  end;
+end;
+copymemory(@cpc_low_rom[0],@memoria_temp[0],$4000);
+copymemory(@cpc_rom[0,0],@memoria_temp[$4000],$4000);
+for f:=1 to 6 do begin
+  if cpc_rom_slot[f]<>'' then read_file(cpc_rom_slot[f],@cpc_rom[f,0],long)
+    else fillchar(cpc_rom[f,0],$4000,0);
+end;
 end;
 
 function iniciar_cpc:boolean;
 var
   f:byte;
   colores:tpaleta;
-  memoria_temp:array[0..$7fff] of byte;
 begin
 //Lateral
 principal1.Panel2.Visible:=true;
 //Botones Lateral
+principal1.BitBtn1.visible:=true;
 principal1.BitBtn9.visible:=true;
 principal1.BitBtn11.visible:=true;
 principal1.BitBtn10.visible:=true;
 principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
 principal1.BitBtn9.enabled:=true;
+principal1.BitBtn1.enabled:=true;
 principal1.BitBtn11.enabled:=true;
+principal1.BitBtn8.visible:=false;
 if main_vars.tipo_maquina<>7 then principal1.BitBtn10.enabled:=true;
 iniciar_cpc:=false;
 iniciar_audio(false);
@@ -247,7 +329,6 @@ screen_init(1,pantalla_largo,pantalla_alto);
 iniciar_video(pantalla_largo,pantalla_alto);
 //Inicializar dispositivos
 getmem(cpc_crt,sizeof(tcpc_crt));
-getmem(cpc_ga,sizeof(tcpc_ga));
 getmem(cpc_ppi,sizeof(tcpc_ppi));
 for f:=0 to 31 do begin
   colores[f].r:=cpc_paleta[f] shr 16;
@@ -267,22 +348,7 @@ tape_sound_channel:=init_channel;
 ay8910_0:=ay8910_chip.create(1000000,1);
 ay8910_0.change_io_calls(cpc_porta_read,cpc_porta_read,nil,nil);
 init_ppi8255(0,port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
-case main_vars.tipo_maquina of
-  7:begin
-      if not(cargar_roms(@memoria_temp[0],@cpc464_rom,'cpc464.zip')) then exit;
-      fillchar(cpc_mem[10,0],$4000,0);
-    end;
-  8:begin
-      if not(cargar_roms(@cpc_mem[10,0],@ams_rom,'cpc664.zip')) then exit;
-      if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip')) then exit;
-  end;
-  9:begin
-      if not(cargar_roms(@cpc_mem[10,0],@ams_rom,'cpc6128.zip')) then exit;
-      if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
-  end;
-end;
-copymemory(@cpc_mem[8,0],@memoria_temp[0],$4000);
-copymemory(@cpc_mem[9,0],@memoria_temp[$4000],$4000);
+cpc_load_roms;
 cpc_reset;
 iniciar_cpc:=true;
 end;
@@ -290,7 +356,6 @@ end;
 procedure cpc_close;
 begin
 freemem(cpc_crt);
-freemem(cpc_ga);
 freemem(cpc_ppi);
 main_z80.free;
 close_ppi8255(0);
@@ -302,6 +367,8 @@ close_video;
 end;
 
 procedure cpc_reset;
+var
+  tempb:byte;
 begin
   main_z80.reset;
   ay8910_0.reset;
@@ -313,7 +380,9 @@ begin
   cinta_tzx.value:=0;
   ResetFDC;
   //Init GA
-  fillchar(cpc_ga^,sizeof(tcpc_ga),0);
+  tempb:=cpc_ga.cpc_model;
+  fillchar(cpc_ga,sizeof(tcpc_ga),0);
+  cpc_ga.cpc_model:=tempb;
   cpc_ga.rom_low:=true;
   copymemory(@cpc_ga.marco[0],@ram_banks[0,0],4);
   //CRT
@@ -329,21 +398,21 @@ procedure eventos_cpc;
 begin
 if event.keyboard then begin
 //Line 0
-  if keyboard[libSDL_SCANCODE_UP] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fe) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $1);
-  if keyboard[libSDL_SCANCODE_RIGHT] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fd) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $2);
-  if keyboard[libSDL_SCANCODE_DOWN] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fb) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $4);
-  if (keyboard[libSDL_SCANCODE_f9] and keyboard[libSDL_SCANCODE_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $f7) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $8);
-  if (keyboard[libSDL_SCANCODE_f6] and keyboard[libSDL_SCANCODE_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $ef) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $10);
-  if (keyboard[libSDL_SCANCODE_f3] and keyboard[libSDL_SCANCODE_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $df) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $20);
-  if keyboard[libSDL_SCANCODE_HOME] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $bf) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $40);
-{F Dot}
+  if keyboard[KEYBOARD_UP] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fe) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $1);
+  if keyboard[KEYBOARD_RIGHT] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fd) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $2);
+  if keyboard[KEYBOARD_DOWN] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fb) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $4);
+  if (keyboard[KEYBOARD_f9] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $f7) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $8);
+  if (keyboard[KEYBOARD_f6] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $ef) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $10);
+  if (keyboard[KEYBOARD_f3] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $df) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $20);
+  if keyboard[KEYBOARD_HOME] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $bf) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $40);
+  //F Dot
 //Line 1
-  if keyboard[libSDL_SCANCODE_LEFT] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fe) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or 1);
-  if keyboard[libSDL_SCANCODE_INSERT] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fd) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or 2);
-  if (keyboard[libSDL_SCANCODE_f7] and keyboard[libSDL_SCANCODE_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fb) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $4);
-  if (keyboard[libSDL_SCANCODE_f8] and keyboard[libSDL_SCANCODE_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $f7) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $8);
-  if keyboard[libSDL_SCANCODE_f5] then begin
-    if (keyboard[libSDL_SCANCODE_RSHIFT]) then begin
+  if keyboard[KEYBOARD_LEFT] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fe) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or 1);
+  if keyboard[KEYBOARD_LALT] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fd) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or 2);
+  if (keyboard[KEYBOARD_f7] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fb) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $4);
+  if (keyboard[KEYBOARD_f8] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $f7) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $8);
+  if keyboard[KEYBOARD_f5] then begin
+    if (keyboard[KEYBOARD_RSHIFT]) then begin
         cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $ef);
     end else begin
         clear_disk(0);
@@ -352,8 +421,8 @@ if event.keyboard then begin
   end else begin
         cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $10)
   end;
-  if keyboard[libSDL_SCANCODE_f1] then begin
-    if keyboard[libSDL_SCANCODE_RSHIFT] then begin
+  if keyboard[KEYBOARD_f1] then begin
+    if keyboard[KEYBOARD_RSHIFT] then begin
       cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $df);
     end else begin
       if cinta_tzx.cargada then begin
@@ -364,74 +433,75 @@ if event.keyboard then begin
   end else begin
     cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $20);
   end;
-  if (keyboard[libSDL_SCANCODE_f2] and keyboard[libSDL_SCANCODE_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $bf) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $40);
-  if (keyboard[libSDL_SCANCODE_f10] and keyboard[libSDL_SCANCODE_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $7f) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $80);
+  if (keyboard[KEYBOARD_f2] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $bf) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $40);
+  if (keyboard[KEYBOARD_f10] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $7f) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $80);
 //Line 2
-  if keyboard[libSDL_SCANCODE_DELETE] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fe) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 1);
-{[}
-  if keyboard[libSDL_SCANCODE_RETURN] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fb) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 4);
-{]}
-  if (keyboard[libSDL_SCANCODE_f4] and keyboard[libSDL_SCANCODE_RSHIFT])then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $ef) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $10);
-  if keyboard[libSDL_SCANCODE_LSHIFT] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $df) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $20);
-{\} if keyboard[libSDL_SCANCODE_EQUALS] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $bf) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $40);
-  if keyboard[libSDL_SCANCODE_LCTRL] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $7f) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $80);
+  if keyboard[KEYBOARD_FILA0_T0] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fe) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 1);
+  if keyboard[KEYBOARD_FILA1_T2] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fd) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 2);
+  if keyboard[KEYBOARD_RETURN] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fb) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 4);
+  if keyboard[KEYBOARD_FILA2_T3] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $f7) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 8);
+  if (keyboard[KEYBOARD_f4] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $ef) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $10);
+  if (keyboard[KEYBOARD_LSHIFT] or keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $df) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $20);
+  if keyboard[KEYBOARD_FILA3_T3] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $bf) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $40);
+  if keyboard[KEYBOARD_LCTRL] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $7f) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $80);
 //Line 3
-{^}
-{-} if keyboard[libSDL_SCANCODE_SLASH] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $fd) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or 2);
-{|} if keyboard[libSDL_SCANCODE_NONUSBACKSLASH] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $fb) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or 4);
-  if keyboard[libSDL_SCANCODE_p] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $f7) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or 8);
-{;} if keyboard[libSDL_SCANCODE_APOSTROPHE] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $ef) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $10);
-{:} if keyboard[libSDL_SCANCODE_BACKSLASH] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $df) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $20);
-{/} if keyboard[libSDL_SCANCODE_MINUS] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $bf) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $40);
-{.} if keyboard[libSDL_SCANCODE_PERIOD] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $7f) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $80);
+  if keyboard[KEYBOARD_FILA0_T2] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $fe) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or 1);
+  if keyboard[KEYBOARD_FILA0_T1] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $fd) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or 2);
+  if keyboard[KEYBOARD_FILA1_T1] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $fb) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or 4);
+  if keyboard[KEYBOARD_p] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $f7) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or 8);
+  if keyboard[KEYBOARD_FILA2_T2] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $ef) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $10);
+  if keyboard[KEYBOARD_FILA2_T1] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $df) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $20);
+  if keyboard[KEYBOARD_FILA3_T2] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $bf) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $40);
+  if keyboard[KEYBOARD_FILA3_T1] then cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] and $7f) else cpc_ppi.keyb_val[3]:=(cpc_ppi.keyb_val[3] or $80);
 //Line 4
-  if keyboard[libSDL_SCANCODE_0] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fe) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 1);
-  if keyboard[libSDL_SCANCODE_9] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fd) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 2);
-  if keyboard[libSDL_SCANCODE_o] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fb) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 4);
-  if keyboard[libSDL_SCANCODE_i] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $f7) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 8);
-  if keyboard[libSDL_SCANCODE_l] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $ef) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $10);
-  if keyboard[libSDL_SCANCODE_k] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $df) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $20);
-  if keyboard[libSDL_SCANCODE_m] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $bf) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $40);
-  if keyboard[libSDL_SCANCODE_comma] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $7f) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $80);
+  if keyboard[KEYBOARD_0] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fe) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 1);
+  if keyboard[KEYBOARD_9] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fd) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 2);
+  if keyboard[KEYBOARD_o] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $fb) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 4);
+  if keyboard[KEYBOARD_i] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $f7) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or 8);
+  if keyboard[KEYBOARD_l] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $ef) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $10);
+  if keyboard[KEYBOARD_k] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $df) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $20);
+  if keyboard[KEYBOARD_m] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $bf) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $40);
+  if keyboard[KEYBOARD_FILA3_T0] then cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] and $7f) else cpc_ppi.keyb_val[4]:=(cpc_ppi.keyb_val[4] or $80);
 //Line 5
-  if keyboard[libSDL_SCANCODE_8] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fe) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 1);
-  if keyboard[libSDL_SCANCODE_7] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fd) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 2);
-  if keyboard[libSDL_SCANCODE_u] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fb) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 4);
-  if keyboard[libSDL_SCANCODE_y] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $f7) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 8);
-  if keyboard[libSDL_SCANCODE_h] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $ef) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $10);
-  if keyboard[libSDL_SCANCODE_j] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $df) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $20);
-  if keyboard[libSDL_SCANCODE_n] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $bf) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $40);
-  if keyboard[libSDL_SCANCODE_space] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $7f) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $80);
+  if keyboard[KEYBOARD_8] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fe) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 1);
+  if keyboard[KEYBOARD_7] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fd) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 2);
+  if keyboard[KEYBOARD_u] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $fb) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 4);
+  if keyboard[KEYBOARD_y] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $f7) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or 8);
+  if keyboard[KEYBOARD_h] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $ef) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $10);
+  if keyboard[KEYBOARD_j] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $df) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $20);
+  if keyboard[KEYBOARD_n] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $bf) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $40);
+  if keyboard[KEYBOARD_space] then cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] and $7f) else cpc_ppi.keyb_val[5]:=(cpc_ppi.keyb_val[5] or $80);
 //Line 6
-  if keyboard[libSDL_SCANCODE_6] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fe) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 1);
-  if keyboard[libSDL_SCANCODE_5] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fd) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 2);
-  if keyboard[libSDL_SCANCODE_r] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fb) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 4);
-  if keyboard[libSDL_SCANCODE_t] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $f7) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 8);
-  if keyboard[libSDL_SCANCODE_g] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $ef) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $10);
-  if keyboard[libSDL_SCANCODE_f] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $df) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $20);
-  if keyboard[libSDL_SCANCODE_b] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $bf) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $40);
-  if keyboard[libSDL_SCANCODE_v] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $7f) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $80);
+  if keyboard[KEYBOARD_6] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fe) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 1);
+  if keyboard[KEYBOARD_5] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fd) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 2);
+  if keyboard[KEYBOARD_r] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fb) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 4);
+  if keyboard[KEYBOARD_t] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $f7) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 8);
+  if keyboard[KEYBOARD_g] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $ef) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $10);
+  if keyboard[KEYBOARD_f] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $df) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $20);
+  if keyboard[KEYBOARD_b] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $bf) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $40);
+  if keyboard[KEYBOARD_v] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $7f) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $80);
 //Line 7
-  if keyboard[libSDL_SCANCODE_4] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fe) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 1);
-  if keyboard[libSDL_SCANCODE_3] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fd) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 2);
-  if keyboard[libSDL_SCANCODE_e] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fb) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 4);
-  if keyboard[libSDL_SCANCODE_w] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $f7) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 8);
-  if keyboard[libSDL_SCANCODE_s] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $ef) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $10);
-  if keyboard[libSDL_SCANCODE_d] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $df) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $20);
-  if keyboard[libSDL_SCANCODE_c] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $bf) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $40);
-  if keyboard[libSDL_SCANCODE_x] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $7f) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $80);
+  if keyboard[KEYBOARD_4] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fe) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 1);
+  if keyboard[KEYBOARD_3] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fd) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 2);
+  if keyboard[KEYBOARD_e] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $fb) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 4);
+  if keyboard[KEYBOARD_w] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $f7) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or 8);
+  if keyboard[KEYBOARD_s] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $ef) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $10);
+  if keyboard[KEYBOARD_d] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $df) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $20);
+  if keyboard[KEYBOARD_c] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $bf) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $40);
+  if keyboard[KEYBOARD_x] then cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] and $7f) else cpc_ppi.keyb_val[7]:=(cpc_ppi.keyb_val[7] or $80);
 //Line 8
-  if keyboard[libSDL_SCANCODE_1] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fe) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 1);
-  if keyboard[libSDL_SCANCODE_2] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fd) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 2);
-  if keyboard[libSDL_SCANCODE_escape] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fb) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 4);
-  if keyboard[libSDL_SCANCODE_q] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $f7) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 8);
-  if keyboard[libSDL_SCANCODE_tab] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $ef) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $10);
-  if keyboard[libSDL_SCANCODE_a] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $df) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $20);
-  if keyboard[libSDL_SCANCODE_CAPSLOCK] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $bf) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $40);
-  if keyboard[libSDL_SCANCODE_z] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $7f) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $80);
+  if keyboard[KEYBOARD_1] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fe) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 1);
+  if keyboard[KEYBOARD_2] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fd) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 2);
+  if keyboard[KEYBOARD_escape] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $fb) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 4);
+  if keyboard[KEYBOARD_q] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $f7) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or 8);
+  if keyboard[KEYBOARD_tab] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $ef) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $10);
+  if keyboard[KEYBOARD_a] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $df) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $20);
+  if keyboard[KEYBOARD_CAPSLOCK] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $bf) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $40);
+  if keyboard[KEYBOARD_z] then cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] and $7f) else cpc_ppi.keyb_val[8]:=(cpc_ppi.keyb_val[8] or $80);
 //Line 9
   //JOY UP,JOY DOWN,JOY LEFT,JOY RIGHT,FIRE1,FIRE2 --> Arcade
-  if keyboard[libSDL_SCANCODE_BACKSPACE] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $7f) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $80);
+  if keyboard[KEYBOARD_BACKSPACE] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $7f) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $80);
+
 end;
 if event.arcade then begin
   //P1
@@ -635,11 +705,11 @@ end;
 function cpc_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$3fff:if cpc_ga.rom_low then cpc_getbyte:=cpc_mem[8,direccion]
+  0..$3fff:if cpc_ga.rom_low then cpc_getbyte:=cpc_low_rom[direccion]
             else cpc_getbyte:=cpc_mem[cpc_ga.marco[0],direccion];
   $4000..$7fff:cpc_getbyte:=cpc_mem[cpc_ga.marco[1],direccion and $3fff];
   $8000..$bfff:cpc_getbyte:=cpc_mem[cpc_ga.marco[2],direccion and $3fff];
-  $c000..$ffff:if cpc_ga.rom_high then cpc_getbyte:=cpc_mem[cpc_ga.rom_selected,direccion and $3fff]
+  $c000..$ffff:if cpc_ga.rom_high then cpc_getbyte:=cpc_rom[cpc_ga.rom_selected,direccion and $3fff]
                 else cpc_getbyte:=cpc_mem[cpc_ga.marco[3],direccion and $3fff];
 end;
 end;
@@ -716,12 +786,7 @@ procedure cpc_outbyte(valor:byte;puerto:word);
 begin
 if (puerto and $8000)=0 then write_ga(valor);
 if (puerto and $4000)=0 then write_crtc(puerto,valor);
-if (puerto and $2000)=0 then begin
-    case valor of
-      7:cpc_ga.rom_selected:=10;
-      else cpc_ga.rom_selected:=9;
-    end;
-end;
+if (puerto and $2000)=0 then cpc_ga.rom_selected:=valor and $f;
 if (puerto and $1000)=0 then exit; //printer
 if (puerto and $0800)=0 then ppi8255_w(0,(puerto and $300) shr 8,valor);
 if (puerto and $0581)=$101 then WriteFDCData(valor);
@@ -937,6 +1002,12 @@ if principal1.savedialog1.execute then begin
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end;
 Directory.amstrad_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
+end;
+
+procedure cpc_config_call;
+begin
+  configcpc.show;
+  while configcpc.Showing do application.ProcessMessages;
 end;
 
 end.

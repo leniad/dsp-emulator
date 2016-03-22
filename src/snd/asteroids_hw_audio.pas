@@ -1,11 +1,11 @@
 unit asteroids_hw_audio;
 
 interface
-uses sound_engine;
+uses sound_engine,samples;
 
 procedure asteroid_sound_update(hay_samples:boolean);
 procedure asteroid_sound_init;
-procedure asteroid_explode_w(data:byte);
+procedure asteroid_explode_w(data:byte;hay_samples:boolean);
 procedure asteroid_thump_w(data:byte);
 procedure asteroid_sounds_w(offset,data:byte);
 
@@ -51,7 +51,6 @@ var
   //Life
   counter_lif, out_lif:integer;
   tsample_as:byte;
-
 
 function EXP_ast(charge,n:integer):integer;inline;
 begin
@@ -195,7 +194,6 @@ begin
 	saucer:=0;
 end;
 
-
 function saucerfire:integer;inline;
 const
   C38_CHARGE_TIME=VMAX;
@@ -335,16 +333,17 @@ end;
 
 procedure asteroid_sound_update(hay_samples:boolean);
 var
-  sum:smallint;
+  sum:integer;
 begin
-		sum:=0;
-		if hay_samples then sum:=sum+round(explosion/7);
-		sum:=sum+round(thrust/7);
-		sum:=sum+round(thump / 7);
-		sum:=sum+round(saucer / 7);
-		sum:=sum+round(saucerfire / 7);
-		sum:=sum+round(shipfire / 7);
-		sum:=sum+round(life/7);
+     sum:=trunc(thrust/7);
+     sum:=sum+trunc(thump/7);
+     sum:=sum+trunc(saucer/7);
+     sum:=sum+trunc(saucerfire/7);
+     sum:=sum+trunc(shipfire/7);
+     sum:=sum+trunc(life/7);
+     if not(hay_samples) then sum:=sum+trunc(explosion/7);
+    if sum>32767 then sum:=32767
+       else if sum<-32767 then sum:=-32767;
     tsample[tsample_as,sound_status.posicion_sonido]:=sum;
 end;
 
@@ -371,7 +370,7 @@ begin
           else r0:=r0+1.0/5600;
         r0:=1.0/r0;
         r1:=1.0/r1;
-        vol_explosion[i]:=round( VMAX * r0 / (r0 + r1));
+        vol_explosion[i]:=trunc( VMAX * r0 / (r0 + r1));
     end;
 end;
 
@@ -380,15 +379,22 @@ var
   i:integer;
 begin
     for i:=0 to $7fff do
-		  discharge[$7fff-i]:=round($7fff/exp(1.0*i/4096));
+		  discharge[$7fff-i]:=trunc($7fff/exp(1.0*i/4096));
 	  // initialize explosion volume lookup table */
-	  explosion_init;
+    explosion_init;
     tsample_as:=init_channel;
 end;
 
-procedure asteroid_explode_w(data:byte);
+procedure asteroid_explode_w(data:byte;hay_samples:boolean);
 begin
-	if (data<>explosion_latch) then explosion_latch:=data;
+if hay_samples then begin
+  if (data and $3c)<>0 then
+    case (data shr 6) of
+      0,1:start_sample(0);
+      2:start_sample(1);
+      3:start_sample(2);
+    end;
+end else if (data<>explosion_latch) then explosion_latch:=data;
 end;
 
 procedure asteroid_thump_w(data:byte);
@@ -416,8 +422,8 @@ end;
 procedure asteroid_sounds_w(offset,data:byte);
 begin
 	data:=data and $80;
-    if (data=sound_latch[offset]) then exit;
+  if (data=sound_latch[offset]) then exit;
 	sound_latch[offset]:=data;
 end;
 
-end.
+end.

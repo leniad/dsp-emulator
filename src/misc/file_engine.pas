@@ -1,7 +1,7 @@
 unit file_engine;
 
 interface
-uses lib_sdl2,unzip2,
+uses unzip2,
      {$ifdef fpc}
      ziputils2,ZLibEx,
      {$IFDEF windows}windows,{$endif}
@@ -45,7 +45,7 @@ var
   file_data:tfile_data;
 
 implementation
-uses spectrum_misc,principal;
+uses spectrum_misc,principal,amstrad_cpc;
 
 //Hi-score
 procedure save_hi(nombre:string;posicion:pbyte;longitud:dword);
@@ -104,10 +104,11 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.spectrum_tap:=fich_ini.readString('dir','dir_tap',directory.Base+'tap'+main_vars.cadena_dir);
   Directory.spectrum_snap:=fich_ini.readString('dir','dir_save',directory.Base+'save'+main_vars.cadena_dir);
   Directory.spectrum_image:=fich_ini.readString('dir','dir_gif',directory.Base+'gif'+main_vars.cadena_dir);
+  Directory.spectrum_disk:=fich_ini.readString('dir','dir_dsk',directory.Base+'dsk'+main_vars.cadena_dir);
   Directory.amstrad_tap:=fich_ini.readString('dir','ams_tap',directory.Base+'tap'+main_vars.cadena_dir);
   Directory.amstrad_disk:=fich_ini.readString('dir','ams_dsk',directory.Base+'dsk'+main_vars.cadena_dir);
   Directory.amstrad_snap:=fich_ini.readString('dir','ams_snap',directory.Base+'snap'+main_vars.cadena_dir);
-  Directory.spectrum_disk:=fich_ini.readString('dir','dir_dsk',directory.Base+'dsk'+main_vars.cadena_dir);
+  Directory.amstrad_rom:=fich_ini.readString('dir','Amstrad_ROM_dir',directory.Base+'ROM'+main_vars.cadena_dir);
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir);
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
   if main_vars.idioma>max_idiomas then main_vars.idioma:=1;
@@ -158,48 +159,53 @@ if fileexists(directory.Base+'dsp.ini') then begin
   beeper_oversample:=fich_ini.ReadInteger('spectrum','beeper_oversample',1);
   f:=fich_ini.ReadInteger('spectrum','ulaplus',0);
   ulaplus.enabled:=(f=1);
+  //Configuracion CPC
+  for f:=1 to 6 do begin
+    cpc_rom_slot[f]:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
+  end;
+  cpc_ga.cpc_model:=fich_ini.ReadInteger('cpc','cpcmodel',0);
   //Configuracion SMS
   f:=fich_ini.ReadInteger('sms','is_pal',1);
   file_data.sms_is_pal:=(f<>0);
   f:=fich_ini.ReadInteger('sms','bios_enabled',0);
   file_data.sms_bios_enabled:=(f<>0);
   //Teclas
-  arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',libSDL_SCANCODE_UP);
-  arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',libSDL_SCANCODE_DOWN);
-  arcade_input.nleft[0]:=fich_ini.ReadInteger('keyboard','left_0',libSDL_SCANCODE_LEFT);
-  arcade_input.nright[0]:=fich_ini.ReadInteger('keyboard','right_0',libSDL_SCANCODE_RIGHT);
-  arcade_input.nbut0[0]:=fich_ini.ReadInteger('keyboard','but0_0',libSDL_SCANCODE_LALT);
-  arcade_input.nbut1[0]:=fich_ini.ReadInteger('keyboard','but1_0',libSDL_SCANCODE_LCTRL);
-  arcade_input.nbut2[0]:=fich_ini.ReadInteger('keyboard','but2_0',libSDL_SCANCODE_LSHIFT);
-  arcade_input.nbut3[0]:=fich_ini.ReadInteger('keyboard','but3_0',libSDL_SCANCODE_A);
-  arcade_input.nbut4[0]:=fich_ini.ReadInteger('keyboard','but4_0',libSDL_SCANCODE_S);
-  arcade_input.nbut5[0]:=fich_ini.ReadInteger('keyboard','but5_0',libSDL_SCANCODE_D);
-  arcade_input.jbut0[0]:=fich_ini.ReadInteger('keyboard','jbut0_0',0);
-  arcade_input.jbut1[0]:=fich_ini.ReadInteger('keyboard','jbut1_0',1);
-  arcade_input.jbut2[0]:=fich_ini.ReadInteger('keyboard','jbut2_0',2);
-  arcade_input.jbut3[0]:=fich_ini.ReadInteger('keyboard','jbut3_0',3);
-  arcade_input.jbut4[0]:=fich_ini.ReadInteger('keyboard','jbut4_0',4);
-  arcade_input.jbut5[0]:=fich_ini.ReadInteger('keyboard','jbut5_0',5);
-  arcade_input.ncoin[0]:=fich_ini.ReadInteger('keyboard','coin_0',libSDL_SCANCODE_5);
-  arcade_input.ncoin[1]:=fich_ini.ReadInteger('keyboard','coin_1',libSDL_SCANCODE_6);
-  arcade_input.nstart[0]:=fich_ini.ReadInteger('keyboard','start_0',libSDL_SCANCODE_1);
-  arcade_input.nstart[1]:=fich_ini.ReadInteger('keyboard','start_1',libSDL_SCANCODE_2);
-  arcade_input.nup[1]:=fich_ini.ReadInteger('keyboard','up_1',0);
-  arcade_input.ndown[1]:=fich_ini.ReadInteger('keyboard','down_1',0);
-  arcade_input.nleft[1]:=fich_ini.ReadInteger('keyboard','left_1',0);
-  arcade_input.nright[1]:=fich_ini.ReadInteger('keyboard','right_1',0);
-  arcade_input.nbut0[1]:=fich_ini.ReadInteger('keyboard','but0_1',0);
-  arcade_input.nbut1[1]:=fich_ini.ReadInteger('keyboard','but1_1',0);
-  arcade_input.nbut2[1]:=fich_ini.ReadInteger('keyboard','but2_1',0);
-  arcade_input.nbut3[1]:=fich_ini.ReadInteger('keyboard','but3_1',0);
-  arcade_input.nbut4[1]:=fich_ini.ReadInteger('keyboard','but4_1',0);
-  arcade_input.nbut5[1]:=fich_ini.ReadInteger('keyboard','but5_1',0);
-  arcade_input.jbut0[1]:=fich_ini.ReadInteger('keyboard','jbut0_1',0);
-  arcade_input.jbut1[1]:=fich_ini.ReadInteger('keyboard','jbut1_1',1);
-  arcade_input.jbut2[1]:=fich_ini.ReadInteger('keyboard','jbut2_1',2);
-  arcade_input.jbut3[1]:=fich_ini.ReadInteger('keyboard','jbut3_1',3);
-  arcade_input.jbut4[1]:=fich_ini.ReadInteger('keyboard','jbut4_1',4);
-  arcade_input.jbut5[1]:=fich_ini.ReadInteger('keyboard','jbut5_1',5);
+  arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',KEYBOARD_UP) and $ff;
+  arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
+  arcade_input.nleft[0]:=fich_ini.ReadInteger('keyboard','left_0',KEYBOARD_LEFT) and $ff;
+  arcade_input.nright[0]:=fich_ini.ReadInteger('keyboard','right_0',KEYBOARD_RIGHT) and $ff;
+  arcade_input.nbut0[0]:=fich_ini.ReadInteger('keyboard','but0_0',KEYBOARD_LALT) and $ff;
+  arcade_input.nbut1[0]:=fich_ini.ReadInteger('keyboard','but1_0',KEYBOARD_LCTRL) and $ff;
+  arcade_input.nbut2[0]:=fich_ini.ReadInteger('keyboard','but2_0',KEYBOARD_LSHIFT) and $ff;
+  arcade_input.nbut3[0]:=fich_ini.ReadInteger('keyboard','but3_0',KEYBOARD_A) and $ff;
+  arcade_input.nbut4[0]:=fich_ini.ReadInteger('keyboard','but4_0',KEYBOARD_S) and $ff;
+  arcade_input.nbut5[0]:=fich_ini.ReadInteger('keyboard','but5_0',KEYBOARD_D) and $ff;
+  arcade_input.jbut0[0]:=fich_ini.ReadInteger('keyboard','jbut0_0',0) and $ff;
+  arcade_input.jbut1[0]:=fich_ini.ReadInteger('keyboard','jbut1_0',1) and $ff;
+  arcade_input.jbut2[0]:=fich_ini.ReadInteger('keyboard','jbut2_0',2) and $ff;
+  arcade_input.jbut3[0]:=fich_ini.ReadInteger('keyboard','jbut3_0',3) and $ff;
+  arcade_input.jbut4[0]:=fich_ini.ReadInteger('keyboard','jbut4_0',4) and $ff;
+  arcade_input.jbut5[0]:=fich_ini.ReadInteger('keyboard','jbut5_0',5) and $ff;
+  arcade_input.ncoin[0]:=fich_ini.ReadInteger('keyboard','coin_0',KEYBOARD_5) and $ff;
+  arcade_input.ncoin[1]:=fich_ini.ReadInteger('keyboard','coin_1',KEYBOARD_6) and $ff;
+  arcade_input.nstart[0]:=fich_ini.ReadInteger('keyboard','start_0',KEYBOARD_1) and $ff;
+  arcade_input.nstart[1]:=fich_ini.ReadInteger('keyboard','start_1',KEYBOARD_2) and $ff;
+  arcade_input.nup[1]:=fich_ini.ReadInteger('keyboard','up_1',KEYBOARD_NONE) and $ff;
+  arcade_input.ndown[1]:=fich_ini.ReadInteger('keyboard','down_1',KEYBOARD_NONE) and $ff;
+  arcade_input.nleft[1]:=fich_ini.ReadInteger('keyboard','left_1',KEYBOARD_NONE) and $ff;
+  arcade_input.nright[1]:=fich_ini.ReadInteger('keyboard','right_1',KEYBOARD_NONE) and $ff;
+  arcade_input.nbut0[1]:=fich_ini.ReadInteger('keyboard','but0_1',KEYBOARD_NONE) and $ff;
+  arcade_input.nbut1[1]:=fich_ini.ReadInteger('keyboard','but1_1',KEYBOARD_NONE) and $ff;
+  arcade_input.nbut2[1]:=fich_ini.ReadInteger('keyboard','but2_1',KEYBOARD_NONE) and $ff;
+  arcade_input.nbut3[1]:=fich_ini.ReadInteger('keyboard','but3_1',KEYBOARD_NONE) and $ff;
+  arcade_input.nbut4[1]:=fich_ini.ReadInteger('keyboard','but4_1',KEYBOARD_NONE) and $ff;
+  arcade_input.nbut5[1]:=fich_ini.ReadInteger('keyboard','but5_1',KEYBOARD_NONE) and $ff;
+  arcade_input.jbut0[1]:=fich_ini.ReadInteger('keyboard','jbut0_1',0) and $ff;
+  arcade_input.jbut1[1]:=fich_ini.ReadInteger('keyboard','jbut1_1',1) and $ff;
+  arcade_input.jbut2[1]:=fich_ini.ReadInteger('keyboard','jbut2_1',2) and $ff;
+  arcade_input.jbut3[1]:=fich_ini.ReadInteger('keyboard','jbut3_1',3) and $ff;
+  arcade_input.jbut4[1]:=fich_ini.ReadInteger('keyboard','jbut4_1',4) and $ff;
+  arcade_input.jbut5[1]:=fich_ini.ReadInteger('keyboard','jbut5_1',5) and $ff;
   //tipo y numero joystick
   f:=fich_ini.ReadInteger('keyboard','use_keyb_0',0);
   arcade_input.use_key[0]:=(f=0);
@@ -208,10 +214,12 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.num_joystick[0]:=fich_ini.ReadInteger('keyboard','num_joy_0',0);
   arcade_input.num_joystick[1]:=fich_ini.ReadInteger('keyboard','num_joy_1',0);
   //Joystick calibration
-  arcade_input.joy_ax0_cent[0]:=fich_ini.ReadInteger('keyboard','joy_ax0_cent_0',0);
-  arcade_input.joy_ax1_cent[0]:=fich_ini.ReadInteger('keyboard','joy_ax1_cent_0',0);
-  arcade_input.joy_ax0_cent[1]:=fich_ini.ReadInteger('keyboard','joy_ax0_cent_1',0);
-  arcade_input.joy_ax1_cent[1]:=fich_ini.ReadInteger('keyboard','joy_ax1_cent_1',0);
+  for f:=0 to NUM_PLAYERS do begin
+    arcade_input.joy_left[f]:=fich_ini.ReadInteger('keyboard','joy_left_'+inttostr(f),0);
+    arcade_input.joy_right[f]:=fich_ini.ReadInteger('keyboard','joy_right_'+inttostr(f),0);
+    arcade_input.joy_up[f]:=fich_ini.ReadInteger('keyboard','joy_up_'+inttostr(f),0);
+    arcade_input.joy_down[f]:=fich_ini.ReadInteger('keyboard','joy_down_'+inttostr(f),0);
+  end;
   //Cerrar fichero
   fich_ini.free;
 end else begin
@@ -238,6 +246,7 @@ end else begin
   Directory.amstrad_tap:=directory.base+'tap'+main_vars.cadena_dir;
   Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
   Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
+  Directory.amstrad_rom:=directory.base+'roms'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
   sound_status.calidad_audio:=1;
@@ -258,40 +267,43 @@ end else begin
   mouse.tipo:=0;
   beeper_oversample:=1;
   ulaplus.enabled:=true;
+  //Configuracion CPC
+  for f:=1 to 6 do cpc_rom_slot[f]:='';
+  cpc_ga.cpc_model:=0;
   //Configuracion basica SMS
   file_data.sms_is_pal:=false;
   file_data.sms_bios_enabled:=true;
   //Teclas
-  arcade_input.nup[0]:=libSDL_SCANCODE_UP;
-  arcade_input.ndown[0]:=libSDL_SCANCODE_DOWN;
-  arcade_input.nleft[0]:=libSDL_SCANCODE_LEFT;
-  arcade_input.nright[0]:=libSDL_SCANCODE_RIGHT;
-  arcade_input.nbut0[0]:=libSDL_SCANCODE_LALT;
-  arcade_input.nbut1[0]:=libSDL_SCANCODE_LCTRL;
-  arcade_input.nbut2[0]:=libSDL_SCANCODE_LSHIFT;
-  arcade_input.nbut3[0]:=libSDL_SCANCODE_A;
-  arcade_input.nbut4[0]:=libSDL_SCANCODE_S;
-  arcade_input.nbut5[0]:=libSDL_SCANCODE_D;
+  arcade_input.nup[0]:=KEYBOARD_UP;
+  arcade_input.ndown[0]:=KEYBOARD_DOWN;
+  arcade_input.nleft[0]:=KEYBOARD_LEFT;
+  arcade_input.nright[0]:=KEYBOARD_RIGHT;
+  arcade_input.nbut0[0]:=KEYBOARD_LALT;
+  arcade_input.nbut1[0]:=KEYBOARD_LCTRL;
+  arcade_input.nbut2[0]:=KEYBOARD_LSHIFT;
+  arcade_input.nbut3[0]:=KEYBOARD_A;
+  arcade_input.nbut4[0]:=KEYBOARD_S;
+  arcade_input.nbut5[0]:=KEYBOARD_D;
   arcade_input.jbut0[0]:=0;
   arcade_input.jbut1[0]:=1;
   arcade_input.jbut2[0]:=2;
   arcade_input.jbut3[0]:=3;
   arcade_input.jbut4[0]:=4;
   arcade_input.jbut5[0]:=5;
-  arcade_input.ncoin[0]:=libSDL_SCANCODE_5;
-  arcade_input.ncoin[1]:=libSDL_SCANCODE_6;
-  arcade_input.nstart[0]:=libSDL_SCANCODE_1;
-  arcade_input.nstart[1]:=libSDL_SCANCODE_2;
-  arcade_input.nup[1]:=0;
-  arcade_input.ndown[1]:=0;
-  arcade_input.nleft[1]:=0;
-  arcade_input.nright[1]:=0;
-  arcade_input.nbut0[1]:=0;
-  arcade_input.nbut1[1]:=0;
-  arcade_input.nbut2[1]:=0;
-  arcade_input.nbut3[1]:=0;
-  arcade_input.nbut4[1]:=0;
-  arcade_input.nbut5[1]:=0;
+  arcade_input.ncoin[0]:=KEYBOARD_5;
+  arcade_input.ncoin[1]:=KEYBOARD_6;
+  arcade_input.nstart[0]:=KEYBOARD_1;
+  arcade_input.nstart[1]:=KEYBOARD_2;
+  arcade_input.nup[1]:=KEYBOARD_NONE;
+  arcade_input.ndown[1]:=KEYBOARD_NONE;
+  arcade_input.nleft[1]:=KEYBOARD_NONE;
+  arcade_input.nright[1]:=KEYBOARD_NONE;
+  arcade_input.nbut0[1]:=KEYBOARD_NONE;
+  arcade_input.nbut1[1]:=KEYBOARD_NONE;
+  arcade_input.nbut2[1]:=KEYBOARD_NONE;
+  arcade_input.nbut3[1]:=KEYBOARD_NONE;
+  arcade_input.nbut4[1]:=KEYBOARD_NONE;
+  arcade_input.nbut5[1]:=KEYBOARD_NONE;
   arcade_input.jbut0[1]:=0;
   arcade_input.jbut1[1]:=1;
   arcade_input.jbut2[1]:=2;
@@ -303,10 +315,12 @@ end else begin
   arcade_input.num_joystick[0]:=0;
   arcade_input.num_joystick[1]:=0;
   //Joystick calibration
-  arcade_input.joy_ax0_cent[0]:=0;
-  arcade_input.joy_ax1_cent[0]:=0;
-  arcade_input.joy_ax0_cent[1]:=0;
-  arcade_input.joy_ax1_cent[1]:=0;
+  for f:=0 to NUM_PLAYERS do begin
+    arcade_input.joy_left[f]:=0;
+    arcade_input.joy_right[f]:=0;
+    arcade_input.joy_up[f]:=0;
+    arcade_input.joy_down[f]:=0;
+  end;
 end;
 if ((directory.Nes='') or (directory.nes[length(directory.nes)]<>main_vars.cadena_dir)) then Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
 if ((Directory.GameBoy='') or (directory.gameboy[length(directory.gameboy)]<>main_vars.cadena_dir)) then Directory.GameBoy:=directory.base+'gameboy'+main_vars.cadena_dir;
@@ -331,6 +345,7 @@ if ((Directory.spectrum_disk='') or (directory.spectrum_disk[length(directory.sp
 if ((Directory.amstrad_tap='') or (directory.amstrad_tap[length(directory.amstrad_tap)]<>main_vars.cadena_dir)) then Directory.amstrad_tap:=directory.base+'tap'+main_vars.cadena_dir;
 if ((Directory.amstrad_disk='') or (directory.amstrad_disk[length(directory.amstrad_disk)]<>main_vars.cadena_dir)) then Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
 if ((Directory.amstrad_snap='') or (directory.amstrad_snap[length(directory.amstrad_snap)]<>main_vars.cadena_dir)) then Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
+if ((Directory.amstrad_rom='') or (directory.amstrad_rom[length(directory.amstrad_rom)]<>main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
 end;
 
 procedure file_ini_save;
@@ -368,21 +383,17 @@ fich_ini.Writestring('dir','dir_dsk',Directory.spectrum_disk);
 fich_ini.Writestring('dir','ams_tap',Directory.amstrad_tap);
 fich_ini.Writestring('dir','ams_dsk',Directory.amstrad_disk);
 fich_ini.Writestring('dir','ams_snap',Directory.amstrad_snap);
+fich_ini.Writestring('dir','ams_rom',Directory.amstrad_rom);
 //Config general
 fich_ini.WriteInteger('dsp','sonido',sound_status.calidad_audio);
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
 fich_ini.WriteInteger('dsp','maquina',main_vars.tipo_maquina);
-if main_vars.auto_exec then f:=1 else f:=0;
-fich_ini.WriteInteger('dsp','auto_exec',f);
-if main_vars.show_crc_error then f:=1 else f:=0;
-fich_ini.WriteInteger('dsp','show_crc_error',f);
-if main_vars.center_screen then f:=1 else f:=0;
-fich_ini.WriteInteger('dsp','center_screen',f);
-if main_vars.x11 then f:=1 else f:=0;
-fich_ini.WriteInteger('dsp','x11',f);
+fich_ini.WriteInteger('dsp','auto_exec',byte(main_vars.auto_exec));
+fich_ini.WriteInteger('dsp','show_crc_error',byte(main_vars.show_crc_error));
+fich_ini.WriteInteger('dsp','center_screen',byte(main_vars.center_screen));
+fich_ini.WriteInteger('dsp','x11',byte(main_vars.x11));
 //Config Spectrum
-f:=byte(issue2);
-fich_ini.WriteInteger('spectrum','issue',f);
+fich_ini.WriteInteger('spectrum','issue',byte(issue2));
 if jkempston then f:=0;
 if jcursor then f:=1;
 if jsinclair1 then f:=2;
@@ -390,20 +401,19 @@ if jsinclair2 then f:=3;
 fich_ini.WriteInteger('spectrum','joystick',f);
 fich_ini.WriteInteger('spectrum','border',borde.tipo);
 fich_ini.WriteInteger('spectrum','tipo_mouse',mouse.tipo);
-f:=byte(beeper_filter);
-fich_ini.WriteInteger('spectrum','beepfilter',f);
+fich_ini.WriteInteger('spectrum','beepfilter',byte(beeper_filter));
 f:=byte(audio_load);
 if main_vars.tipo_maquina=255 then f:=0;
 fich_ini.WriteInteger('spectrum','audioload',f);
 fich_ini.WriteInteger('spectrum','audio_128k',audio_128k);
 fich_ini.WriteInteger('spectrum','beeper_oversample',beeper_oversample);
-f:=byte(ulaplus.enabled);
-fich_ini.WriteInteger('spectrum','ulaplus',f);
+fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
+//Configuracion CPC
+for f:=1 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom_slot[f]);
+fich_ini.WriteInteger('cpc','cpcmodel',cpc_ga.cpc_model);
 //Config SMS
-f:=byte(file_data.sms_is_pal);
-fich_ini.WriteInteger('sms','is_pal',f);
-f:=byte(file_data.sms_bios_enabled);
-fich_ini.WriteInteger('sms','bios_enabled',f);
+fich_ini.WriteInteger('sms','is_pal',byte(file_data.sms_is_pal));
+fich_ini.WriteInteger('sms','bios_enabled',byte(file_data.sms_bios_enabled));
 //Teclas P1
 fich_ini.WriteInteger('keyboard','up_0',arcade_input.nup[0]);
 fich_ini.WriteInteger('keyboard','down_0',arcade_input.ndown[0]);
@@ -444,17 +454,17 @@ fich_ini.WriteInteger('keyboard','jbut3_1',arcade_input.jbut3[1]);
 fich_ini.WriteInteger('keyboard','jbut4_1',arcade_input.jbut4[1]);
 fich_ini.WriteInteger('keyboard','jbut5_1',arcade_input.jbut5[1]);
 //tipo y numero joystick
-if arcade_input.use_key[0] then f:=0 else f:=1;
-fich_ini.WriteInteger('keyboard','use_keyb_0',f);
-if arcade_input.use_key[1] then f:=0 else f:=1;
-fich_ini.WriteInteger('keyboard','use_keyb_1',f);
+fich_ini.WriteInteger('keyboard','use_keyb_0',byte(not(arcade_input.use_key[0])));
+fich_ini.WriteInteger('keyboard','use_keyb_1',byte(not(arcade_input.use_key[1])));
 fich_ini.WriteInteger('keyboard','num_joy_0',arcade_input.num_joystick[0]);
 fich_ini.WriteInteger('keyboard','num_joy_1',arcade_input.num_joystick[1]);
 //Joystick calibration
-fich_ini.WriteInteger('keyboard','joy_ax0_cent_0',arcade_input.joy_ax0_cent[0]);
-fich_ini.WriteInteger('keyboard','joy_ax1_cent_0',arcade_input.joy_ax1_cent[0]);
-fich_ini.WriteInteger('keyboard','joy_ax0_cent_1',arcade_input.joy_ax0_cent[1]);
-fich_ini.WriteInteger('keyboard','joy_ax1_cent_1',arcade_input.joy_ax1_cent[1]);
+for f:=0 to NUM_PLAYERS do begin
+  fich_ini.WriteInteger('keyboard','joy_up_'+inttostr(f),arcade_input.joy_up[f]);
+  fich_ini.WriteInteger('keyboard','joy_down_'+inttostr(f),arcade_input.joy_down[f]);
+  fich_ini.WriteInteger('keyboard','joy_left_'+inttostr(f),arcade_input.joy_left[f]);
+  fich_ini.WriteInteger('keyboard','joy_right_'+inttostr(f),arcade_input.joy_right[f]);
+end;
 //Cerrar
 fich_ini.Free;
 end;

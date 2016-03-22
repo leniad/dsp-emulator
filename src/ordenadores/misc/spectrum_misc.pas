@@ -247,59 +247,120 @@ if (event.mouse and (mouse.tipo<>0)) then begin
   end;
 end;
 if event.keyboard then begin
-  if ((keyboard[libSDL_SCANCODE_F1]) and cinta_tzx.cargada) then begin
+  if ((keyboard[KEYBOARD_F1]) and cinta_tzx.cargada) then begin
     if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
       else tape_window1.fPlayCinta(nil);
   end;
-  if ((keyboard[libSDL_SCANCODE_F5]) and (main_vars.tipo_maquina=2)) then begin
+  if ((keyboard[KEYBOARD_F5]) and (main_vars.tipo_maquina=2)) then begin
     clear_disk(0);
     change_caption(llamadas_maquina.caption);
   end;
   if false then teclado_matriz
-    else copymemory(@key_spec[0],@keyboard[0],255);
-  if key_spec[libSDL_SCANCODE_1] then key1_5:=(key1_5 And $FE) else key1_5:=(key1_5 or 1);
-  if key_spec[libSDL_SCANCODE_2] then key1_5:=(key1_5 And $FD) else key1_5:=(key1_5 or 2);
-  if key_spec[libSDL_SCANCODE_3] then key1_5:=key1_5 And $FB else key1_5:=key1_5 or 4;
-  if key_spec[libSDL_SCANCODE_4] then key1_5:=key1_5 And $F7 else key1_5:=key1_5 or 8;
-  if key_spec[libSDL_SCANCODE_5] then key1_5:=key1_5 And $EF else key1_5:=key1_5 or $10;
-  if key_spec[libSDL_SCANCODE_0] then key6_0:=key6_0 And $FE else key6_0:=key6_0 or 1;
-  if key_spec[libSDL_SCANCODE_9] then key6_0:=key6_0 And $FD else key6_0:=key6_0 or 2;
-  if key_spec[libSDL_SCANCODE_8] then key6_0:=key6_0 And $FB else key6_0:=key6_0 or 4;
-  if key_spec[libSDL_SCANCODE_7] then key6_0:=key6_0 And $F7 else key6_0:=key6_0 or 8;
-  if key_spec[libSDL_SCANCODE_6] then key6_0:=key6_0 And $EF else key6_0:=key6_0 or $10;
-  if key_spec[libSDL_SCANCODE_Q] then keyQ_T:=keyQ_T And $FE else keyQ_T:=keyQ_T or 1;
-  if key_spec[libSDL_SCANCODE_W] then keyQ_T:=keyQ_T And $FD else keyQ_T:=keyQ_T or 2;
-  if key_spec[libSDL_SCANCODE_E] then keyQ_T:=keyQ_T And $FB else keyQ_T:=keyQ_T or 4;
-  if key_spec[libSDL_SCANCODE_R] then keyQ_T:=keyQ_T And $F7 else keyQ_T:=keyQ_T or 8;
-  if key_spec[libSDL_SCANCODE_T] then keyQ_T:=keyQ_T And $EF else keyQ_T:=keyQ_T or $10;
-  if key_spec[libSDL_SCANCODE_P] then keyY_P:=keyY_P And $FE else keyY_P:=keyY_P or 1;
-  if key_spec[libSDL_SCANCODE_O] then keyY_P:=keyY_P And $FD else keyY_P:=keyY_P or 2;
-  if key_spec[libSDL_SCANCODE_I] then keyY_P:=keyY_P And $FB else keyY_P:=keyY_P or 4;
-  if key_spec[libSDL_SCANCODE_U] then keyY_P:=keyY_P And $F7 else keyY_P:=keyY_P or 8;
-  if key_spec[libSDL_SCANCODE_Y] then keyY_P:=keyY_P And $EF else keyY_P:=keyY_P or $10;
-  if key_spec[libSDL_SCANCODE_RETURN] then keyH_ENT:=keyH_ENT And $FE else keyH_ENT:=keyH_ENT or 1;
-  if key_spec[libSDL_SCANCODE_L] then keyH_ENT:=keyH_ENT And $FD else keyH_ENT:=keyH_ENT or 2;
-  if key_spec[libSDL_SCANCODE_K] then keyH_ENT:=keyH_ENT And $FB else keyH_ENT:=keyH_ENT or 4;
-  if key_spec[libSDL_SCANCODE_J] then keyH_ENT:=keyH_ENT And $F7 else keyH_ENT:=keyH_ENT or 8;
-  if key_spec[libSDL_SCANCODE_H] then keyH_ENT:=keyH_ENT And $EF else keyH_ENT:=keyH_ENT or $10;
-  if key_spec[libSDL_SCANCODE_A] then keyA_G:=keyA_G And $FE else keyA_G:=keyA_G or 1;
-  if key_spec[libSDL_SCANCODE_S] then keyA_G:=keyA_G And $FD else keyA_G:=keyA_G or 2;
-  if key_spec[libSDL_SCANCODE_D] then keyA_G:=keyA_G And $FB else keyA_G:=keyA_G or 4;
-  if key_spec[libSDL_SCANCODE_F] then keyA_G:=keyA_G And $F7 else keyA_G:=keyA_G or 8;
-  if key_spec[libSDL_SCANCODE_G] then keyA_G:=keyA_G And $EF else keyA_G:=keyA_G or $10;
-  if key_spec[libSDL_SCANCODE_LSHIFT] then keyCAPS_V:=(keyCAPS_V And $FE) else keyCAPS_V:=(keyCAPS_V or 1);
-  if key_spec[libSDL_SCANCODE_Z] then keyCAPS_V:=keyCAPS_V And $FD else keyCAPS_V:=keyCAPS_V or 2;
-  if key_spec[libSDL_SCANCODE_X] then keyCAPS_V:=keyCAPS_V And $FB else keyCAPS_V:=keyCAPS_V or 4;
-  if key_spec[libSDL_SCANCODE_C] then keyCAPS_V:=keyCAPS_V And $F7 else keyCAPS_V:=keyCAPS_V or 8;
-  if key_spec[libSDL_SCANCODE_V] then keyCAPS_V:=keyCAPS_V And $EF else keyCAPS_V:=keyCAPS_V or $10;
-  if key_spec[libSDL_SCANCODE_SPACE] then keyB_SPC:=keyB_SPC And $FE else keyB_SPC:=keyB_SPC or 1;
-  if key_spec[libSDL_SCANCODE_LCTRL] then keyB_SPC:=keyB_SPC And $FD else keyB_SPC:=keyB_SPC or 2;
-  if key_spec[libSDL_SCANCODE_M] then keyB_SPC:=keyB_SPC And $FB else keyB_SPC:=keyB_SPC or 4;
-  if key_spec[libSDL_SCANCODE_N] then keyB_SPC:=keyB_SPC And $F7 else keyB_SPC:=keyB_SPC or 8;
-  if key_spec[libSDL_SCANCODE_B] then keyB_SPC:=keyB_SPC And $EF else keyB_SPC:=keyB_SPC or $10;
-  if key_spec[libSDL_SCANCODE_BACKSPACE] then begin
+    else copymemory(@key_spec[0],@keyboard[0],256);
+  if key_spec[KEYBOARD_1] then key1_5:=(key1_5 And $FE) else key1_5:=(key1_5 or 1);
+  if key_spec[KEYBOARD_2] then key1_5:=(key1_5 And $FD) else key1_5:=(key1_5 or 2);
+  if key_spec[KEYBOARD_3] then key1_5:=key1_5 And $FB else key1_5:=key1_5 or 4;
+  if key_spec[KEYBOARD_4] then key1_5:=key1_5 And $F7 else key1_5:=key1_5 or 8;
+  if key_spec[KEYBOARD_5] then key1_5:=key1_5 And $EF else key1_5:=key1_5 or $10;
+  if key_spec[KEYBOARD_0] then key6_0:=key6_0 And $FE else key6_0:=key6_0 or 1;
+  if key_spec[KEYBOARD_9] then key6_0:=key6_0 And $FD else key6_0:=key6_0 or 2;
+  if key_spec[KEYBOARD_8] then key6_0:=key6_0 And $FB else key6_0:=key6_0 or 4;
+  if key_spec[KEYBOARD_7] then key6_0:=key6_0 And $F7 else key6_0:=key6_0 or 8;
+  if key_spec[KEYBOARD_6] then key6_0:=key6_0 And $EF else key6_0:=key6_0 or $10;
+  if key_spec[KEYBOARD_Q] then keyQ_T:=keyQ_T And $FE else keyQ_T:=keyQ_T or 1;
+  if key_spec[KEYBOARD_W] then keyQ_T:=keyQ_T And $FD else keyQ_T:=keyQ_T or 2;
+  if key_spec[KEYBOARD_E] then keyQ_T:=keyQ_T And $FB else keyQ_T:=keyQ_T or 4;
+  if key_spec[KEYBOARD_R] then keyQ_T:=keyQ_T And $F7 else keyQ_T:=keyQ_T or 8;
+  if key_spec[KEYBOARD_T] then keyQ_T:=keyQ_T And $EF else keyQ_T:=keyQ_T or $10;
+  if key_spec[KEYBOARD_P] then keyY_P:=keyY_P And $FE else keyY_P:=keyY_P or 1;
+  if key_spec[KEYBOARD_O] then keyY_P:=keyY_P And $FD else keyY_P:=keyY_P or 2;
+  if key_spec[KEYBOARD_I] then keyY_P:=keyY_P And $FB else keyY_P:=keyY_P or 4;
+  if key_spec[KEYBOARD_U] then keyY_P:=keyY_P And $F7 else keyY_P:=keyY_P or 8;
+  if key_spec[KEYBOARD_Y] then keyY_P:=keyY_P And $EF else keyY_P:=keyY_P or $10;
+  if key_spec[KEYBOARD_RETURN] then keyH_ENT:=keyH_ENT And $FE else keyH_ENT:=keyH_ENT or 1;
+  if key_spec[KEYBOARD_L] then keyH_ENT:=keyH_ENT And $FD else keyH_ENT:=keyH_ENT or 2;
+  if key_spec[KEYBOARD_K] then keyH_ENT:=keyH_ENT And $FB else keyH_ENT:=keyH_ENT or 4;
+  if key_spec[KEYBOARD_J] then keyH_ENT:=keyH_ENT And $F7 else keyH_ENT:=keyH_ENT or 8;
+  if key_spec[KEYBOARD_H] then keyH_ENT:=keyH_ENT And $EF else keyH_ENT:=keyH_ENT or $10;
+  if key_spec[KEYBOARD_A] then keyA_G:=keyA_G And $FE else keyA_G:=keyA_G or 1;
+  if key_spec[KEYBOARD_S] then keyA_G:=keyA_G And $FD else keyA_G:=keyA_G or 2;
+  if key_spec[KEYBOARD_D] then keyA_G:=keyA_G And $FB else keyA_G:=keyA_G or 4;
+  if key_spec[KEYBOARD_F] then keyA_G:=keyA_G And $F7 else keyA_G:=keyA_G or 8;
+  if key_spec[KEYBOARD_G] then keyA_G:=keyA_G And $EF else keyA_G:=keyA_G or $10;
+  if (key_spec[KEYBOARD_LCTRL] or key_spec[KEYBOARD_RCTRL]) then keyCAPS_V:=(keyCAPS_V And $FE) else keyCAPS_V:=(keyCAPS_V or 1);
+  if key_spec[KEYBOARD_Z] then keyCAPS_V:=keyCAPS_V And $FD else keyCAPS_V:=keyCAPS_V or 2;
+  if key_spec[KEYBOARD_X] then keyCAPS_V:=keyCAPS_V And $FB else keyCAPS_V:=keyCAPS_V or 4;
+  if key_spec[KEYBOARD_C] then keyCAPS_V:=keyCAPS_V And $F7 else keyCAPS_V:=keyCAPS_V or 8;
+  if key_spec[KEYBOARD_V] then keyCAPS_V:=keyCAPS_V And $EF else keyCAPS_V:=keyCAPS_V or $10;
+  if key_spec[KEYBOARD_SPACE] then keyB_SPC:=keyB_SPC And $FE else keyB_SPC:=keyB_SPC or 1;
+  if (key_spec[KEYBOARD_LSHIFT] or key_spec[KEYBOARD_RSHIFT]) then keyB_SPC:=keyB_SPC And $FD else keyB_SPC:=keyB_SPC or 2;
+  if key_spec[KEYBOARD_M] then keyB_SPC:=keyB_SPC And $FB else keyB_SPC:=keyB_SPC or 4;
+  if key_spec[KEYBOARD_N] then keyB_SPC:=keyB_SPC And $F7 else keyB_SPC:=keyB_SPC or 8;
+  if key_spec[KEYBOARD_B] then keyB_SPC:=keyB_SPC And $EF else keyB_SPC:=keyB_SPC or $10;
+  //Teclas del Spectrum +  y siguientes
+  if key_spec[KEYBOARD_FILA2_T2] then begin //CAPS+1 Edit
+    key1_5:=(key1_5 And $FE);
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_capslock] then begin //CAPS+2
+    key1_5:=key1_5 And $FD;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_FILA0_T1] then begin //CAPS+3 True Video
+    key1_5:=key1_5 And $FB;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_FILA0_T2] then begin //CAPS+4 Inv Video
+    key1_5:=key1_5 And $F7;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_LEFT] then begin //CAPS+5
+    key1_5:=key1_5 And $EF;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_DOWN] then begin //CAPS+6
+    key6_0:=key6_0 And $EF;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_UP] then begin //CAPS+7
+    key6_0:=key6_0 And $F7;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_RIGHT] then begin //CAPS+8
+    key6_0:=key6_0 And $FB;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_FILA0_T0] then begin //CAPS+9 Graphics
+    key6_0:=key6_0 And $FD;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_BACKSPACE] then begin //CAPS+0
     key6_0:=key6_0 and $FE;
     keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_escape] then begin //CAPS+SPACE Break
+    keyB_SPC:=keyB_SPC And $FE;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_tab] then begin //CAPS+SHIFT Extended Mode
+    keyB_SPC:=keyB_SPC And $FD;
+    keyCAPS_V:=keyCAPS_V and $FE;
+  end;
+  if key_spec[KEYBOARD_FILA3_T0] then begin // "
+    keyB_SPC:=keyB_SPC And $FD;
+    keyY_P:=keyY_P And $FE;
+  end;
+  if key_spec[KEYBOARD_FILA3_T3] then begin // ;
+    keyB_SPC:=keyB_SPC And $FD;
+    keyY_P:=keyY_P And $FD;
+  end;
+  if key_spec[KEYBOARD_FILA3_T2] then begin // .
+    keyB_SPC:=keyB_SPC And $FD;
+    keyB_SPC:=keyB_SPC And $FB;
+  end;
+  if key_spec[KEYBOARD_FILA3_T1] then begin // ,
+    keyB_SPC:=keyB_SPC And $FD;
+    keyB_SPC:=keyB_SPC And $F7;
   end;
 end;
 if event.arcade then begin
@@ -354,13 +415,16 @@ end else borde.borde_spectrum:=borde_normal;
 //Lateral
 principal1.Panel2.Visible:=true;
 //Botones Lateral
+principal1.bitbtn1.visible:=true;
 principal1.BitBtn9.visible:=true;
+principal1.BitBtn8.visible:=false;
 principal1.BitBtn10.visible:=true;
 principal1.BitBtn11.visible:=true;
 principal1.BitBtn12.visible:=true;
 principal1.BitBtn14.visible:=true;
 principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
+principal1.BitBtn1.enabled:=true;
 principal1.BitBtn9.enabled:=true;
 if (main_vars.tipo_maquina=2) then principal1.BitBtn10.enabled:=true;
 principal1.BitBtn11.enabled:=true;

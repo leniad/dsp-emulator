@@ -1,7 +1,7 @@
 object load_spec: Tload_spec
-  Left = 389
+  Left = 380
   Height = 471
-  Top = 220
+  Top = 160
   Width = 611
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
@@ -16,7 +16,7 @@ object load_spec: Tload_spec
   Font.Quality = fqDraft
   OnKeyUp = FileListBox1KeyUp
   OnShow = FormShow
-  LCLVersion = '1.4.0.2'
+  LCLVersion = '1.7'
   object FileListBox1: TFileListBox
     Left = 24
     Height = 410

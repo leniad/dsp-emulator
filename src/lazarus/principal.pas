@@ -20,6 +20,7 @@ type
 
   { Tprincipal1 }
   Tprincipal1 = class(TForm)
+    BitBtn1: TBitBtn;
     BitBtn10: TBitBtn;
     BitBtn11: TBitBtn;
     BitBtn12: TBitBtn;
@@ -394,9 +395,6 @@ type
     procedure Timer4Timer(Sender: TObject);
   private
     { private declarations }
-    {$ifdef windows}
-    procedure WndProc(var Message : TMessage); override;
-    {$endif}
   public
     { public declarations }
   end;
@@ -415,14 +413,6 @@ var
   status_bitmap:tbitmap;
 
 { Tprincipal1 }
-{$ifdef windows}
-//Para evitar que cuando se pulsa ALT se vaya al menu añado esta funcion...
-procedure Tprincipal1.WndProc(var Message : TMessage);
-begin
-if ((Message.Msg=WM_SYSCOMMAND) and (Message.WParam=SC_KEYMENU)) then exit;
-inherited WndProc(Message);
-end;
-{$endif}
 
 procedure Tprincipal1.fSaveGIF(Sender: TObject);
 var
@@ -582,12 +572,11 @@ begin
 {$ifdef windows}
 //SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
 //SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
-Init_sdl_lib;
 main_vars.cadena_dir:='\';
 {$else}
 main_vars.cadena_dir:='/';
-Init_sdl_lib;
 {$endif}
+Init_sdl_lib;
 status_bitmap:=TBitmap.Create;
 EmuStatus:=EsStoped;
 directory.Base:=extractfiledir(application.ExeName)+main_vars.cadena_dir;

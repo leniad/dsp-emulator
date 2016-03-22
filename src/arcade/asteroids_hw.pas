@@ -42,6 +42,7 @@ llamadas_maquina.iniciar:=iniciar_as;
 llamadas_maquina.bucle_general:=principal_as;
 llamadas_maquina.cerrar:=cerrar_as;
 llamadas_maquina.reset:=reset_as;
+llamadas_maquina.fps_max:=12096000/4096/12/4;
 end;
 
 function iniciar_as:boolean;
@@ -54,26 +55,22 @@ iniciar_audio(false);
 screen_init(1,400,400);
 iniciar_video(400,320);
 //Main CPU
-fillchar(memoria[0],$10000,0);
 main_m6502:=cpu_m6502.create(1512000,300,TCPU_M6502);
 main_m6502.change_ram_calls(getbyte_as,putbyte_as);
 main_m6502.init_sound(as_sound);
 asteroid_sound_init;
 //Timers
-init_timer(0,6144,as_snd_nmi,true);
+init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);
 //cargar roms
 if not(cargar_roms(@memoria[0],@as_rom[0],'asteroid.zip',0)) then exit;
 //samples
 hay_samples:=load_samples('asteroid.zip',@as_samples[0],3);
 //poner la paleta
-for f:=0 to 14 do begin
-  colores[f].r:=16*f;
-  colores[f].g:=16*f;
-  colores[f].b:=16*f;
+for f:=0 to 15 do begin
+  colores[f].r:=17*f;
+  colores[f].g:=17*f;
+  colores[f].b:=17*f;
 end;
-colores[15].r:=255;
-colores[15].g:=255;
-colores[15].b:=255;
 set_pal(colores,16);
 //dip
 marcade.dswa:=$84;
@@ -94,7 +91,7 @@ end;
 procedure reset_as;
 begin
 main_m6502.reset;
-if hay_samples then reset_samples;
+reset_samples;
 marcade.in0:=0;
 marcade.in1:=0;
 x_actual:=0;
@@ -275,16 +272,6 @@ case direccion of
 end;
 end;
 
-procedure asteroid_explode_sam(data:byte);inline;
-begin
-if (data and $3c)<>0 then
-  case (data shr 6) of
-    0,1:start_sample(0);
-    2:start_sample(1);
-    3:start_sample(2);
-  end;
-end;
-
 procedure putbyte_as(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7FFF;
@@ -296,8 +283,7 @@ case direccion of
                   dibujar:=true;
                end;
   $3200:invertir_ram:=(valor and 4) shr 2;
-  $3600:if hay_samples then asteroid_explode_sam(valor)
-          else asteroid_explode_w(valor);
+  $3600:asteroid_explode_w(valor,hay_samples);
   $3a00:asteroid_thump_w(valor);
   $3c00..$3c05:asteroid_sounds_w(direccion and $7,valor);
     else memoria[direccion]:=valor;

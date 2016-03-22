@@ -735,17 +735,20 @@ principal1.GameBoy1.Checked:=false;
 principal1.chip81.checked:=false;
 principal1.segams1.checked:=false;
 //Resto
+principal1.BitBtn1.visible:=false;
 principal1.BitBtn9.visible:=false;
 principal1.BitBtn10.visible:=false;
 principal1.BitBtn11.visible:=false;
 principal1.BitBtn12.visible:=false;
 principal1.BitBtn14.visible:=false;
+principal1.BitBtn1.enabled:=false;
 principal1.BitBtn9.enabled:=false;
 principal1.BitBtn10.enabled:=false;
 principal1.BitBtn11.enabled:=false;
 principal1.BitBtn12.enabled:=false;
 principal1.BitBtn14.enabled:=false;
 principal1.Panel2.Visible:=false;
+principal1.BitBtn8.visible:=true;
 end;
 
 procedure cargar_maquina(tmaquina:word);

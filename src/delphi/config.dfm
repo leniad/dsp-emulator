@@ -45,7 +45,7 @@ object ConfigSP: TConfigSP
         Top = 16
         Width = 41
         Height = 25
-        Caption = '...'
+        Caption = 'Open'
         TabOrder = 1
         OnClick = Button3Click
         OnKeyUp = FormKeyUp

@@ -7,7 +7,7 @@ unit coleco;
          La memoria no hay que iniciarla a 0... sino hay juegos que fallan!
 }
 interface
-uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,lenguaje,main_engine,controls_engine,tms99xx,sn_76496,sysutils,dialogs,
      rom_engine,misc_functions,sound_engine,file_engine;
 
@@ -41,7 +41,6 @@ var
 procedure Cargar_coleco;
 begin
 principal1.Panel2.Visible:=true;
-principal1.BitBtn9.visible:=false;
 principal1.BitBtn10.Enabled:=true;
 principal1.BitBtn10.Glyph:=nil;
 principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
@@ -49,8 +48,7 @@ principal1.BitBtn10.visible:=true;
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 principal1.BitBtn11.visible:=true;
 principal1.BitBtn11.Enabled:=true;
-principal1.BitBtn12.visible:=false;
-principal1.BitBtn14.visible:=false;
+principal1.BitBtn8.visible:=false;
 llamadas_maquina.iniciar:=iniciar_coleco;
 llamadas_maquina.bucle_general:=coleco_principal;
 llamadas_maquina.cerrar:=cerrar_coleco;
@@ -129,31 +127,31 @@ if event.arcade then begin
 end;
 if event.keyboard then begin
    //P1
-   if keyboard[libSDL_SCANCODE_0] then keypad[0]:=(keypad[0] and $fffe) else keypad[0]:=(keypad[0] or $0001);
-   if keyboard[libSDL_SCANCODE_1] then keypad[0]:=(keypad[0] and $fffd) else keypad[0]:=(keypad[0] or $0002);
-   if keyboard[libSDL_SCANCODE_2] then keypad[0]:=(keypad[0] and $fffb) else keypad[0]:=(keypad[0] or $0004);
-   if keyboard[libSDL_SCANCODE_3] then keypad[0]:=(keypad[0] and $fff7) else keypad[0]:=(keypad[0] or $0008);
-   if keyboard[libSDL_SCANCODE_4] then keypad[0]:=(keypad[0] and $ffef) else keypad[0]:=(keypad[0] or $0010);
-   if keyboard[libSDL_SCANCODE_5] then keypad[0]:=(keypad[0] and $ffdf) else keypad[0]:=(keypad[0] or $0020);
-   if keyboard[libSDL_SCANCODE_6] then keypad[0]:=(keypad[0] and $ffbf) else keypad[0]:=(keypad[0] or $0040);
-   if keyboard[libSDL_SCANCODE_7] then keypad[0]:=(keypad[0] and $ff7f) else keypad[0]:=(keypad[0] or $0080);
-   if keyboard[libSDL_SCANCODE_8] then keypad[0]:=(keypad[0] and $feff) else keypad[0]:=(keypad[0] or $0100);
-   if keyboard[libSDL_SCANCODE_9] then keypad[0]:=(keypad[0] and $fdff) else keypad[0]:=(keypad[0] or $0200);
-   if keyboard[libSDL_SCANCODE_A] then keypad[0]:=(keypad[0] and $fbff) else keypad[0]:=(keypad[0] or $0400);
-   if keyboard[libSDL_SCANCODE_S] then keypad[0]:=(keypad[0] and $f7ff) else keypad[0]:=(keypad[0] or $0800);
+   if keyboard[KEYBOARD_0] then keypad[0]:=(keypad[0] and $fffe) else keypad[0]:=(keypad[0] or $0001);
+   if keyboard[KEYBOARD_1] then keypad[0]:=(keypad[0] and $fffd) else keypad[0]:=(keypad[0] or $0002);
+   if keyboard[KEYBOARD_2] then keypad[0]:=(keypad[0] and $fffb) else keypad[0]:=(keypad[0] or $0004);
+   if keyboard[KEYBOARD_3] then keypad[0]:=(keypad[0] and $fff7) else keypad[0]:=(keypad[0] or $0008);
+   if keyboard[KEYBOARD_4] then keypad[0]:=(keypad[0] and $ffef) else keypad[0]:=(keypad[0] or $0010);
+   if keyboard[KEYBOARD_5] then keypad[0]:=(keypad[0] and $ffdf) else keypad[0]:=(keypad[0] or $0020);
+   if keyboard[KEYBOARD_6] then keypad[0]:=(keypad[0] and $ffbf) else keypad[0]:=(keypad[0] or $0040);
+   if keyboard[KEYBOARD_7] then keypad[0]:=(keypad[0] and $ff7f) else keypad[0]:=(keypad[0] or $0080);
+   if keyboard[KEYBOARD_8] then keypad[0]:=(keypad[0] and $feff) else keypad[0]:=(keypad[0] or $0100);
+   if keyboard[KEYBOARD_9] then keypad[0]:=(keypad[0] and $fdff) else keypad[0]:=(keypad[0] or $0200);
+   if keyboard[KEYBOARD_A] then keypad[0]:=(keypad[0] and $fbff) else keypad[0]:=(keypad[0] or $0400);
+   if keyboard[KEYBOARD_S] then keypad[0]:=(keypad[0] and $f7ff) else keypad[0]:=(keypad[0] or $0800);
    //P2
-   if keyboard[libSDL_SCANCODE_P] then keypad[1]:=(keypad[1] and $fffe) else keypad[1]:=(keypad[1] or $0001);
-   if keyboard[libSDL_SCANCODE_Q] then keypad[1]:=(keypad[1] and $fffd) else keypad[1]:=(keypad[1] or $0002);
-   if keyboard[libSDL_SCANCODE_W] then keypad[1]:=(keypad[1] and $fffb) else keypad[1]:=(keypad[1] or $0004);
-   if keyboard[libSDL_SCANCODE_E] then keypad[1]:=(keypad[1] and $fff7) else keypad[1]:=(keypad[1] or $0008);
-   if keyboard[libSDL_SCANCODE_R] then keypad[1]:=(keypad[1] and $ffef) else keypad[1]:=(keypad[1] or $0010);
-   if keyboard[libSDL_SCANCODE_T] then keypad[1]:=(keypad[1] and $ffdf) else keypad[1]:=(keypad[1] or $0020);
-   if keyboard[libSDL_SCANCODE_Y] then keypad[1]:=(keypad[1] and $ffbf) else keypad[1]:=(keypad[1] or $0040);
-   if keyboard[libSDL_SCANCODE_U] then keypad[1]:=(keypad[1] and $ff7f) else keypad[1]:=(keypad[1] or $0080);
-   if keyboard[libSDL_SCANCODE_I] then keypad[1]:=(keypad[1] and $feff) else keypad[1]:=(keypad[1] or $0100);
-   if keyboard[libSDL_SCANCODE_O] then keypad[1]:=(keypad[1] and $fdff) else keypad[1]:=(keypad[1] or $0200);
-   if keyboard[libSDL_SCANCODE_Z] then keypad[1]:=(keypad[1] and $fbff) else keypad[1]:=(keypad[1] or $0400);
-   if keyboard[libSDL_SCANCODE_X] then keypad[1]:=(keypad[1] and $f7ff) else keypad[1]:=(keypad[1] or $0800);
+   if keyboard[KEYBOARD_P] then keypad[1]:=(keypad[1] and $fffe) else keypad[1]:=(keypad[1] or $0001);
+   if keyboard[KEYBOARD_Q] then keypad[1]:=(keypad[1] and $fffd) else keypad[1]:=(keypad[1] or $0002);
+   if keyboard[KEYBOARD_W] then keypad[1]:=(keypad[1] and $fffb) else keypad[1]:=(keypad[1] or $0004);
+   if keyboard[KEYBOARD_E] then keypad[1]:=(keypad[1] and $fff7) else keypad[1]:=(keypad[1] or $0008);
+   if keyboard[KEYBOARD_R] then keypad[1]:=(keypad[1] and $ffef) else keypad[1]:=(keypad[1] or $0010);
+   if keyboard[KEYBOARD_T] then keypad[1]:=(keypad[1] and $ffdf) else keypad[1]:=(keypad[1] or $0020);
+   if keyboard[KEYBOARD_Y] then keypad[1]:=(keypad[1] and $ffbf) else keypad[1]:=(keypad[1] or $0040);
+   if keyboard[KEYBOARD_U] then keypad[1]:=(keypad[1] and $ff7f) else keypad[1]:=(keypad[1] or $0080);
+   if keyboard[KEYBOARD_I] then keypad[1]:=(keypad[1] and $feff) else keypad[1]:=(keypad[1] or $0100);
+   if keyboard[KEYBOARD_O] then keypad[1]:=(keypad[1] and $fdff) else keypad[1]:=(keypad[1] or $0200);
+   if keyboard[KEYBOARD_Z] then keypad[1]:=(keypad[1] and $fbff) else keypad[1]:=(keypad[1] or $0400);
+   if keyboard[KEYBOARD_X] then keypad[1]:=(keypad[1] and $f7ff) else keypad[1]:=(keypad[1] or $0800);
 end;
 end;
 

@@ -251,7 +251,8 @@ uses
   k053251 in '..\arcade\misc\k053251.pas',
   k007232 in '..\snd\k007232.pas',
   gradius3_hw in '..\arcade\gradius3_hw.pas',
-  rom_export in '..\misc\rom_export.pas';
+  rom_export in '..\misc\rom_export.pas',
+  config_cpc in 'config_cpc.pas' {ConfigCPC};
 
 {$R *.res}
 
@@ -271,5 +272,6 @@ begin
   Application.CreateForm(Tconfig_arcade, config_arcade);
   Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(TSMSConfig, SMSConfig);
+  Application.CreateForm(TConfigCPC, ConfigCPC);
   Application.Run;
 end.

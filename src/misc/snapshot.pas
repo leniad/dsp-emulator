@@ -1208,8 +1208,7 @@ cpc_sna.ram_config:=cpc_ga.marco_latch;
 cpc_sna.crt_index:=cpc_crt.reg;
 copymemory(@cpc_sna.crt_regs,@cpc_crt.regs[0],18);
 //ROM
-if cpc_ga.rom_selected=9 then cpc_sna.rom_config:=0
-  else cpc_sna.rom_config:=7;
+cpc_sna.rom_config:=cpc_ga.rom_selected;
 //PIA a,b,c,control
 cpc_sna.ppi_a:=cpc_ppi.port_a_read_latch;
 cpc_sna.ppi_c:=cpc_ppi.port_c_write_latch;
@@ -1249,26 +1248,6 @@ var
   f:byte;
   main_z80_reg:npreg_z80;
   cpc_sna:^tcpc_sna;
-
-procedure init_rom_amstrad;
-var
-  memoria_temp:array[0..$7fff] of byte;
-begin
-case main_vars.tipo_maquina of
-  7:if not(cargar_roms(@memoria_temp[0],@cpc464_rom,'cpc464.zip',1)) then exit;
-  8:begin
-      if not(cargar_roms(@cpc_mem[10,0],@ams_rom,'cpc664.zip',1)) then exit;
-      if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip',1)) then exit;
-  end;
-  9:begin
-      if not(cargar_roms(@cpc_mem[10,0],@ams_rom,'cpc6128.zip',1)) then exit;
-      if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip',1)) then exit;
-  end;
-end;
-copymemory(@cpc_mem[8,0],@memoria_temp[0],$4000);
-copymemory(@cpc_mem[9,0],@memoria_temp[$4000],$4000);
-end;
-
 begin
 abrir_sna_cpc:=false;
 getmem(cpc_sna,sizeof(tcpc_sna));
@@ -1314,6 +1293,7 @@ main_z80_reg.de2.w:=cpc_sna.de2;
 main_z80_reg.hl2.w:=cpc_sna.hl2;
 //GA
 cpc_ga.pen:=cpc_sna.ga_pen;
+cpc_ga.cpc_model:=0;
 copymemory(@cpc_ga.pal[0],@cpc_sna.ga_pal[0],17);
 write_ga($80+(cpc_sna.ga_conf and $3f));
 //RAM
@@ -1357,7 +1337,7 @@ case cpc_sna.version of
                  llamadas_maquina.caption:='Amstrad CPC 6128';
            end;
       end;
-      init_rom_amstrad;
+      cpc_load_roms;
     end;
   2,3:begin
       case cpc_sna.hw_type of
@@ -1375,7 +1355,7 @@ case cpc_sna.version of
         end;
         else exit; //Modelo no soportado
       end;
-      init_rom_amstrad;
+      cpc_load_roms;
       if cpc_sna.version=3 then begin
         cpc_ga.lines_sync:=cpc_sna.ga_lines_sync;
         cpc_ga.lines_count:=cpc_sna.ga_lines_count;

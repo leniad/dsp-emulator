@@ -30,6 +30,7 @@ type
 var
   joy_calibration: Tjoy_calibration;
   salir:boolean;
+  cent_x,cent_y,max_x,max_y:integer;
 
 procedure bucle_joystick(numero:byte);
 
@@ -38,23 +39,34 @@ implementation
 procedure bucle_joystick(numero:byte);
 var
   sdl_event:libSDL_Event;
+  tempi,temp_x,temp_y:integer;
 begin
-joy_calibration.label1.caption:=inttostr(arcade_input.joy_ax0_cent[numero]);
-joy_calibration.label2.caption:=inttostr(arcade_input.joy_ax1_cent[numero]);
+joy_calibration.label1.caption:=inttostr(cent_x);
+joy_calibration.label2.caption:=inttostr(cent_y);
 salir:=false;
 while not(salir) do begin
   while SDL_PollEvent(@sdl_event)=0 do begin
     application.ProcessMessages;
     if salir then break;
   end;
-  SDL_JoystickUpdate();
+  SDL_JoystickUpdate;
   if sdl_event.type_=libSDL_JOYAXISMOTION then begin
-    arcade_input.joy_ax0_cent[numero]:=SDL_JoystickGetAxis(joystick_def[numero],0);
-    joy_calibration.label1.caption:=inttostr(arcade_input.joy_ax0_cent[numero]);
-    arcade_input.joy_ax1_cent[numero]:=SDL_JoystickGetAxis(joystick_def[numero],1);
-    joy_calibration.label2.caption:=inttostr(arcade_input.joy_ax1_cent[numero]);
+    tempi:=SDL_JoystickGetAxis(joystick_def[numero],0);
+    if abs(tempi)>abs(max_x) then max_x:=tempi;
+    cent_x:=tempi;
+    joy_calibration.label1.caption:=inttostr(tempi);
+    tempi:=SDL_JoystickGetAxis(joystick_def[numero],1);
+    if abs(tempi)>abs(max_y) then max_y:=tempi;
+    cent_y:=tempi;
+    joy_calibration.label2.caption:=inttostr(tempi);
   end;
 end;
+temp_x:=(abs(max_x)-abs(cent_x)) div 2;
+temp_y:=(abs(max_y)-abs(cent_y)) div 2;
+arcade_input.joy_left[numero]:=cent_x-abs(temp_x);
+arcade_input.joy_right[numero]:=cent_x+abs(temp_x);
+arcade_input.joy_up[numero]:=cent_y-abs(temp_y);
+arcade_input.joy_down[numero]:=cent_y+abs(temp_y);
 joy_calibration.close;
 end;
 

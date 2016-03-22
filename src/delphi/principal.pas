@@ -352,6 +352,7 @@ type
     tmnt1: TMenuItem;
     ssriders1: TMenuItem;
     Gradius31: TMenuItem;
+    BitBtn1: TBitBtn;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -504,6 +505,7 @@ if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.ini
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
   principal1.timer1.Enabled:=false;
+  principal1.BitBtn1.Enabled:=false;
   principal1.BitBtn2.Enabled:=false;
   principal1.BitBtn3.Enabled:=false;
   principal1.BitBtn4.Enabled:=false;

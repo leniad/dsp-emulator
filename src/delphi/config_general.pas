@@ -206,63 +206,64 @@ end;
 function nombre_tecla(num:word):string;
 begin
   case num of
-    libSDL_SCANCODE_ESCAPE:nombre_tecla:='ESC';
-    libSDL_SCANCODE_CAPSLOCK:nombre_tecla:='CAPSLOCK';
-    libSDL_SCANCODE_TAB:nombre_tecla:='TAB';
-    libSDL_SCANCODE_SLASH:nombre_tecla:='SLASH';
-    //libSDL_SCANCODE_QUOTE:nombre_tecla:='QUOTE';
-    libSDL_SCANCODE_SEMICOLON:nombre_tecla:='SEMICOLON';
-    libSDL_SCANCODE_BACKSLASH:nombre_tecla:='DELETE';
-    //libSDL_SCANCODE_LESS:nombre_tecla:='LESS';
-    libSDL_SCANCODE_HOME:nombre_tecla:='HOME';
-    libSDL_SCANCODE_RIGHT:nombre_tecla:='RIGHT';
-    libSDL_SCANCODE_LEFT:nombre_tecla:='LEFT';
-    libSDL_SCANCODE_DOWN:nombre_tecla:='DOWN';
-    libSDL_SCANCODE_UP:nombre_tecla:='UP';
-    libSDL_SCANCODE_RALT:nombre_tecla:='RIGHT'+chr(10)+chr(13)+'ALT';
-    libSDL_SCANCODE_LALT:nombre_tecla:='LEFT'+chr(10)+chr(13)+'ALT';
-    libSDL_SCANCODE_RSHIFT:nombre_tecla:='RIGHT'+chr(10)+chr(13)+'SHIFT';
-    libSDL_SCANCODE_LSHIFT:nombre_tecla:='LEFT'+chr(10)+chr(13)+'SHIFT';
-    libSDL_SCANCODE_RCTRL:nombre_tecla:='RIGHT'+chr(10)+chr(13)+'CONTROL';
-    libSDL_SCANCODE_LCTRL:nombre_tecla:='LEFT'+chr(10)+chr(13)+'CONTROL';
-    libSDL_SCANCODE_RETURN:nombre_tecla:='ENTER';
-    libSDL_SCANCODE_SPACE:nombre_tecla:='SPACE';
-    libSDL_SCANCODE_A:nombre_tecla:='A';
-    libSDL_SCANCODE_B:nombre_tecla:='B';
-    libSDL_SCANCODE_C:nombre_tecla:='C';
-    libSDL_SCANCODE_D:nombre_tecla:='D';
-    libSDL_SCANCODE_E:nombre_tecla:='E';
-    libSDL_SCANCODE_F:nombre_tecla:='F';
-    libSDL_SCANCODE_G:nombre_tecla:='G';
-    libSDL_SCANCODE_H:nombre_tecla:='H';
-    libSDL_SCANCODE_I:nombre_tecla:='I';
-    libSDL_SCANCODE_J:nombre_tecla:='J';
-    libSDL_SCANCODE_K:nombre_tecla:='K';
-    libSDL_SCANCODE_L:nombre_tecla:='L';
-    libSDL_SCANCODE_M:nombre_tecla:='M';
-    libSDL_SCANCODE_N:nombre_tecla:='N';
-    libSDL_SCANCODE_O:nombre_tecla:='O';
-    libSDL_SCANCODE_P:nombre_tecla:='P';
-    libSDL_SCANCODE_Q:nombre_tecla:='Q';
-    libSDL_SCANCODE_R:nombre_tecla:='R';
-    libSDL_SCANCODE_S:nombre_tecla:='S';
-    libSDL_SCANCODE_T:nombre_tecla:='T';
-    libSDL_SCANCODE_U:nombre_tecla:='U';
-    libSDL_SCANCODE_V:nombre_tecla:='V';
-    libSDL_SCANCODE_W:nombre_tecla:='W';
-    libSDL_SCANCODE_X:nombre_tecla:='X';
-    libSDL_SCANCODE_Y:nombre_tecla:='Y';
-    libSDL_SCANCODE_Z:nombre_tecla:='Z';
-    libSDL_SCANCODE_1:nombre_tecla:='1';
-    libSDL_SCANCODE_2:nombre_tecla:='2';
-    libSDL_SCANCODE_3:nombre_tecla:='3';
-    libSDL_SCANCODE_4:nombre_tecla:='4';
-    libSDL_SCANCODE_5:nombre_tecla:='5';
-    libSDL_SCANCODE_6:nombre_tecla:='6';
-    libSDL_SCANCODE_7:nombre_tecla:='7';
-    libSDL_SCANCODE_8:nombre_tecla:='8';
-    libSDL_SCANCODE_9:nombre_tecla:='9';
-    libSDL_SCANCODE_0:nombre_tecla:='0';
+    KEYBOARD_ESCAPE:nombre_tecla:='ESC';
+    KEYBOARD_CAPSLOCK:nombre_tecla:='CAPSLOCK';
+    KEYBOARD_TAB:nombre_tecla:='TAB';
+    //KEYBOARD_SLASH:nombre_tecla:='SLASH';
+    //KEYBOARD_QUOTE:nombre_tecla:='QUOTE';
+    //KEYBOARD_SEMICOLON:nombre_tecla:='SEMICOLON';
+    //KEYBOARD_BACKSLASH:nombre_tecla:='DELETE';
+    //KEYBOARD_LESS:nombre_tecla:='LESS';
+    KEYBOARD_HOME:nombre_tecla:='HOME';
+    KEYBOARD_RIGHT:nombre_tecla:='RIGHT';
+    KEYBOARD_LEFT:nombre_tecla:='LEFT';
+    KEYBOARD_DOWN:nombre_tecla:='DOWN';
+    KEYBOARD_UP:nombre_tecla:='UP';
+    KEYBOARD_RALT:nombre_tecla:='RIGHT'+chr(10)+chr(13)+'ALT';
+    KEYBOARD_LALT:nombre_tecla:='LEFT'+chr(10)+chr(13)+'ALT';
+    KEYBOARD_RSHIFT:nombre_tecla:='RIGHT'+chr(10)+chr(13)+'SHIFT';
+    KEYBOARD_LSHIFT:nombre_tecla:='LEFT'+chr(10)+chr(13)+'SHIFT';
+    KEYBOARD_RCTRL:nombre_tecla:='RIGHT'+chr(10)+chr(13)+'CONTROL';
+    KEYBOARD_LCTRL:nombre_tecla:='LEFT'+chr(10)+chr(13)+'CONTROL';
+    KEYBOARD_RETURN:nombre_tecla:='ENTER';
+    KEYBOARD_SPACE:nombre_tecla:='SPACE';
+    KEYBOARD_A:nombre_tecla:='A';
+    KEYBOARD_B:nombre_tecla:='B';
+    KEYBOARD_C:nombre_tecla:='C';
+    KEYBOARD_D:nombre_tecla:='D';
+    KEYBOARD_E:nombre_tecla:='E';
+    KEYBOARD_F:nombre_tecla:='F';
+    KEYBOARD_G:nombre_tecla:='G';
+    KEYBOARD_H:nombre_tecla:='H';
+    KEYBOARD_I:nombre_tecla:='I';
+    KEYBOARD_J:nombre_tecla:='J';
+    KEYBOARD_K:nombre_tecla:='K';
+    KEYBOARD_L:nombre_tecla:='L';
+    KEYBOARD_M:nombre_tecla:='M';
+    KEYBOARD_N:nombre_tecla:='N';
+    KEYBOARD_O:nombre_tecla:='O';
+    KEYBOARD_P:nombre_tecla:='P';
+    KEYBOARD_Q:nombre_tecla:='Q';
+    KEYBOARD_R:nombre_tecla:='R';
+    KEYBOARD_S:nombre_tecla:='S';
+    KEYBOARD_T:nombre_tecla:='T';
+    KEYBOARD_U:nombre_tecla:='U';
+    KEYBOARD_V:nombre_tecla:='V';
+    KEYBOARD_W:nombre_tecla:='W';
+    KEYBOARD_X:nombre_tecla:='X';
+    KEYBOARD_Y:nombre_tecla:='Y';
+    KEYBOARD_Z:nombre_tecla:='Z';
+    KEYBOARD_1:nombre_tecla:='1';
+    KEYBOARD_2:nombre_tecla:='2';
+    KEYBOARD_3:nombre_tecla:='3';
+    KEYBOARD_4:nombre_tecla:='4';
+    KEYBOARD_5:nombre_tecla:='5';
+    KEYBOARD_6:nombre_tecla:='6';
+    KEYBOARD_7:nombre_tecla:='7';
+    KEYBOARD_8:nombre_tecla:='8';
+    KEYBOARD_9:nombre_tecla:='9';
+    KEYBOARD_0:nombre_tecla:='0';
+    KEYBOARD_NONE:nombre_tecla:='N/D';
     else nombre_tecla:='N/D';
   end;
 end;
@@ -271,13 +272,8 @@ procedure TMConfig.BitBtn10Click(Sender: TObject);
 begin
   redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
-    if tecla_leida=$FFFE then begin
-      bitbtn10.Caption:='N/D';
-      arcade_input.nbut1[0]:=$ffff;
-    end else begin
       bitbtn10.Caption:=nombre_tecla(tecla_leida);
       arcade_input.nbut1[0]:=tecla_leida;
-    end;
   end;
 end;
 
@@ -285,13 +281,8 @@ procedure TMConfig.BitBtn11Click(Sender: TObject);
 begin
   redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
-    if tecla_leida=$FFFE then begin
-      bitbtn11.Caption:='N/D';
-      arcade_input.nbut2[0]:=$ffff;
-    end else begin
-      bitbtn11.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nbut2[0]:=tecla_leida;
-    end;
+    bitbtn11.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut2[0]:=tecla_leida;
   end;
 end;
 
@@ -299,13 +290,8 @@ PROCEDURE TMConfig.BitBtn12Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn12.Caption:='N/D';
-      arcade_input.nbut0[1]:=$ffff;
-    end else begin
-      bitbtn12.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nbut0[1] := tecla_leida;
-    end;
+    bitbtn12.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nbut0[1] := tecla_leida;
   END;
 END;
 
@@ -313,13 +299,8 @@ PROCEDURE TMConfig.BitBtn13Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn13.Caption:='N/D';
-      arcade_input.nbut1[1]:=$ffff;
-    end else begin
-      bitbtn13.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nbut1[1] := tecla_leida;
-    end;
+    bitbtn13.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nbut1[1] := tecla_leida;
   END;
 END;
 
@@ -327,13 +308,8 @@ PROCEDURE TMConfig.BitBtn14Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn14.Caption:='N/D';
-      arcade_input.nbut2[1]:=$ffff;
-    end else begin
-      bitbtn14.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nbut2[1] := tecla_leida;
-    end;
+    bitbtn14.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nbut2[1] := tecla_leida;
   END;
 END;
 
@@ -341,13 +317,8 @@ procedure TMConfig.BitBtn15Click(Sender: TObject);
 begin
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn16.Caption:='N/D';
-      arcade_input.nbut4[0]:=$ffff;
-    end else begin
-      bitbtn16.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nbut4[0] := tecla_leida;
-    end;
+    bitbtn15.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nbut4[0] := tecla_leida;
   END;
 end;
 
@@ -355,13 +326,8 @@ procedure TMConfig.BitBtn16Click(Sender: TObject);
 begin
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn15.Caption:='N/D';
-      arcade_input.nbut5[0]:=$ffff;
-    end else begin
-      bitbtn15.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nbut5[0] := tecla_leida;
-    end;
+    bitbtn16.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nbut5[0] := tecla_leida;
   END;
 end;
 
@@ -369,13 +335,8 @@ procedure TMConfig.BitBtn17Click(Sender: TObject);
 begin
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn17.Caption:='N/D';
-      arcade_input.nbut3[0]:=$ffff;
-    end else begin
-      bitbtn17.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nbut3[0] := tecla_leida;
-    end;
+    bitbtn17.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nbut3[0] := tecla_leida;
   END;
 end;
 
@@ -383,13 +344,8 @@ procedure TMConfig.BitBtn18Click(Sender: TObject);
 begin
 redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn18.Caption:='N/D';
-      arcade_input.nbut3[1]:=$ffff;
-    end else begin
-      bitbtn18.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nbut3[1] := tecla_leida;
-    end;
+    bitbtn18.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nbut3[1] := tecla_leida;
   END;
 end;
 
@@ -397,13 +353,8 @@ procedure TMConfig.BitBtn19Click(Sender: TObject);
 begin
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn19.Caption:='N/D';
-      arcade_input.nbut4[1]:=$ffff;
-    end else begin
-      bitbtn19.Caption:= nombre_tecla(tecla_leida);
-      arcade_input.nbut4[1]:=tecla_leida;
-    end;
+    bitbtn19.Caption:= nombre_tecla(tecla_leida);
+    arcade_input.nbut4[1]:=tecla_leida;
   END;
 end;
 
@@ -411,13 +362,8 @@ PROCEDURE TMConfig.BitBtn1Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn1.Caption:='N/D';
-      arcade_input.nleft[0]:=$ffff;
-    end else begin
-      bitbtn1.Caption:= nombre_tecla(tecla_leida);
-      arcade_input.nleft[0]:= tecla_leida;
-    end;
+    bitbtn1.Caption:= nombre_tecla(tecla_leida);
+    arcade_input.nleft[0]:= tecla_leida;
   end;
 end;
 
@@ -437,6 +383,10 @@ var
   ptemp:pbyte;
   cadena:string;
 begin
+  if nombre=nil then begin
+    extract_joy_name:='None';
+    exit;
+  end;
   ptemp:=pbyte(nombre);
   cadena:='';
   while ptemp^<>0 do begin
@@ -497,7 +447,7 @@ begin
   D4.Text:=Directory.Arcade_roms;
   D5.Text:=Directory.Arcade_hi;
   //Componer todas las entradas
-  if SDL_NumJoysticks=0 then begin
+  if event.num_joysticks=0 then begin
     radiobutton1.Checked:=true;
     radiobutton2.Checked:=false;
     radiobutton2.enabled:=false;
@@ -623,7 +573,7 @@ begin
     end;
     combobox1.Clear;
     combobox2.Clear;
-    for f:=0 to (SDL_NumJoysticks()-1) do begin
+    for f:=0 to (event.num_joysticks-1) do begin
       combobox1.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f])));
       combobox2.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f])));
     end;
@@ -819,13 +769,8 @@ procedure TMConfig.Button3Click(Sender: TObject);
 begin
   redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
-    if tecla_leida=$FFFE then begin
-      bitbtn3.Caption:='N/D';
-      arcade_input.ncoin[0]:=$ffff;
-    end else begin
-      button3.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.ncoin[0]:=tecla_leida;
-    end;
+    button3.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.ncoin[0]:=tecla_leida;
   end;
 end;
 
@@ -833,13 +778,8 @@ procedure TMConfig.Button4Click(Sender: TObject);
 begin
   redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
-    if tecla_leida=$FFFE then begin
-      bitbtn4.Caption:='N/D';
-      arcade_input.ncoin[1]:=$ffff;
-    end else begin
-      button4.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.ncoin[1]:=tecla_leida;
-    end;
+    button4.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.ncoin[1]:=tecla_leida;
   end;
 end;
 
@@ -847,13 +787,8 @@ procedure TMConfig.Button5Click(Sender: TObject);
 begin
   redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
-    if tecla_leida=$FFFE then begin
-      bitbtn5.Caption:='N/D';
-      arcade_input.nstart[0]:=$ffff;
-    end else begin
-      button5.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nstart[0]:=tecla_leida;
-    end;
+    button5.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nstart[0]:=tecla_leida;
   end;
 end;
 
@@ -861,13 +796,8 @@ procedure TMConfig.Button6Click(Sender: TObject);
 begin
   redefine1.showmodal;
   if tecla_leida<>$FFFF then begin
-    if tecla_leida=$FFFE then begin
-      bitbtn6.Caption:='N/D';
-      arcade_input.nstart[1]:=$ffff;
-    end else begin
-      button6.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nstart[1]:=tecla_leida;
-    end;
+    button6.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nstart[1]:=tecla_leida;
   end;
 end;
 
@@ -887,13 +817,8 @@ procedure TMConfig.BitBtn20Click(Sender: TObject);
 begin
 redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn20.Caption:='N/D';
-      arcade_input.nbut5[1]:=$ffff;
-    end else begin
-      bitbtn20.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nbut5[1] := tecla_leida;
-    end;
+    bitbtn20.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nbut5[1] := tecla_leida;
   END;
 end;
 
@@ -901,13 +826,8 @@ PROCEDURE TMConfig.BitBtn2Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn2.Caption:='N/D';
-      arcade_input.nright[0]:=$ffff;
-    end else begin
-      bitbtn2.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nright[0] := tecla_leida;
-    end;
+    bitbtn2.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nright[0] := tecla_leida;
   END;
 END;
 
@@ -915,13 +835,8 @@ PROCEDURE TMConfig.BitBtn3Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn3.Caption:='N/D';
-      arcade_input.ndown[0]:=$ffff;
-    end else begin
-      bitbtn3.Caption := nombre_tecla(tecla_leida);
-      arcade_input.ndown[0] := tecla_leida;
-    end;
+    bitbtn3.Caption := nombre_tecla(tecla_leida);
+    arcade_input.ndown[0] := tecla_leida;
   END;
 END;
 
@@ -929,13 +844,8 @@ PROCEDURE TMConfig.BitBtn4Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn4.Caption:='N/D';
-      arcade_input.nup[0]:=$ffff;
-    end else begin
-      bitbtn4.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nup[0] := tecla_leida;
-    end;
+    bitbtn4.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nup[0] := tecla_leida;
   END;
 END;
 
@@ -943,13 +853,8 @@ PROCEDURE TMConfig.BitBtn5Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn5.Caption:='N/D';
-      arcade_input.nup[1]:=$ffff;
-    end else begin
-      bitbtn5.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nup[1]:=tecla_leida;
-    end;
+    bitbtn5.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nup[1]:=tecla_leida;
   END;
 END;
 
@@ -957,13 +862,8 @@ PROCEDURE TMConfig.BitBtn6Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn6.Caption:='N/D';
-      arcade_input.nleft[1]:=$ffff;
-    end else begin
-      bitbtn6.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nleft[1]:=tecla_leida;
-    end;
+    bitbtn6.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nleft[1]:=tecla_leida;
   END;
 END;
 
@@ -971,13 +871,8 @@ PROCEDURE TMConfig.BitBtn7Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida <> $FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn7.Caption:='N/D';
-      arcade_input.nright[1]:=$ffff;
-    end else begin
-      bitbtn7.Caption := nombre_tecla(tecla_leida);
-      arcade_input.nright[1] := tecla_leida;
-    end;
+    bitbtn7.Caption := nombre_tecla(tecla_leida);
+    arcade_input.nright[1] := tecla_leida;
   END;
 END;
 
@@ -985,13 +880,8 @@ PROCEDURE TMConfig.BitBtn8Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn8.Caption:='N/D';
-      arcade_input.ndown[1]:=$ffff;
-    end else begin
-      bitbtn8.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.ndown[1]:=tecla_leida;
-    end;
+    bitbtn8.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.ndown[1]:=tecla_leida;
   END;
 END;
 
@@ -999,13 +889,8 @@ PROCEDURE TMConfig.BitBtn9Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
   IF tecla_leida<>$FFFF THEN BEGIN
-    if tecla_leida=$FFFE then begin
-      bitbtn9.Caption:='N/D';
-      arcade_input.nbut0[0]:=$ffff;
-    end else begin
-      bitbtn9.Caption:=nombre_tecla(tecla_leida);
-      arcade_input.nbut0[0]:=tecla_leida;
-    end;
+    bitbtn9.Caption:=nombre_tecla(tecla_leida);
+    arcade_input.nbut0[0]:=tecla_leida;
   END;
 END;
 

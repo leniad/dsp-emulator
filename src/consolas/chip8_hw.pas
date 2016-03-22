@@ -1,7 +1,7 @@
 unit chip8_hw;
 
 interface
-uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sysutils,dialogs,
      sound_engine,file_engine,pal_engine,gfx_engine,misc_functions;
 
@@ -62,7 +62,6 @@ var
 procedure Cargar_chip8;
 begin
 principal1.Panel2.Visible:=true;
-principal1.BitBtn9.visible:=false;
 principal1.BitBtn10.Enabled:=true;
 principal1.BitBtn10.Glyph:=nil;
 principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
@@ -70,8 +69,7 @@ principal1.BitBtn10.visible:=true;
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 principal1.BitBtn11.visible:=true;
 principal1.BitBtn11.Enabled:=true;
-principal1.BitBtn12.visible:=false;
-principal1.BitBtn14.visible:=false;
+principal1.BitBtn8.visible:=false;
 llamadas_maquina.iniciar:=iniciar_chip8;
 llamadas_maquina.bucle_general:=chip8_principal;
 llamadas_maquina.cerrar:=cerrar_chip8;
@@ -368,22 +366,22 @@ end;
 procedure eventos_chip8;
 begin
   if event.keyboard then begin
-    key[0]:=keyboard[libSDL_SCANCODE_X];
-    key[1]:=keyboard[libSDL_SCANCODE_1];
-    key[2]:=keyboard[libSDL_SCANCODE_2];
-    key[3]:=keyboard[libSDL_SCANCODE_3];
-    key[4]:=keyboard[libSDL_SCANCODE_Q];
-    key[5]:=keyboard[libSDL_SCANCODE_W];
-    key[6]:=keyboard[libSDL_SCANCODE_E];
-    key[7]:=keyboard[libSDL_SCANCODE_A];
-    key[8]:=keyboard[libSDL_SCANCODE_S];
-    key[9]:=keyboard[libSDL_SCANCODE_D];
-    key[$a]:=keyboard[libSDL_SCANCODE_Z];
-    key[$b]:=keyboard[libSDL_SCANCODE_C];
-    key[$c]:=keyboard[libSDL_SCANCODE_4];
-    key[$d]:=keyboard[libSDL_SCANCODE_R];
-    key[$e]:=keyboard[libSDL_SCANCODE_F];
-    key[$f]:=keyboard[libSDL_SCANCODE_V];
+    key[0]:=keyboard[KEYBOARD_X];
+    key[1]:=keyboard[KEYBOARD_1];
+    key[2]:=keyboard[KEYBOARD_2];
+    key[3]:=keyboard[KEYBOARD_3];
+    key[4]:=keyboard[KEYBOARD_Q];
+    key[5]:=keyboard[KEYBOARD_W];
+    key[6]:=keyboard[KEYBOARD_E];
+    key[7]:=keyboard[KEYBOARD_A];
+    key[8]:=keyboard[KEYBOARD_S];
+    key[9]:=keyboard[KEYBOARD_D];
+    key[$a]:=keyboard[KEYBOARD_Z];
+    key[$b]:=keyboard[KEYBOARD_C];
+    key[$c]:=keyboard[KEYBOARD_4];
+    key[$d]:=keyboard[KEYBOARD_R];
+    key[$e]:=keyboard[KEYBOARD_F];
+    key[$f]:=keyboard[KEYBOARD_V];
   end;
 end;
 

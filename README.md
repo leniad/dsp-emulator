@@ -1,28 +1,51 @@
 ﻿# dsp-emulator
 DSP Emulator status<br>
-<b>29/02/16 - DSP Emulator 0.16b2 source and Win32 updated.</b><br><pre>
+<b>22/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
+- Added to download some preview images
+- General
+    + Added a new button to configure dip switches the arcade drivers
+    + Added a new button to configure computers and consoles
+    + Controls engine
+        - Rewrited engine, both the keyboard and joystick
+        - Rewrited joystick calibration system
+    + DSK file engine
+        - Rewrited file openning, improves stability
+        - Fixed double-sided images loading
+        - Fixed emulation of weak sectors
+        - Fixed calculating the length of a track
+        - Fixed the order of the tracks
+    + upd765 device
+        - Fixed reading a sector ID (Corrects 'Tintin on the moon' Spectrum +3)
+        - Fixed handling weak sectors (Corrects SpeedLock +3 protection)
+        - Fixed attempt to read beyond the length of a sector (Corrects SpeedLock Amstrad CPC protection)
+- Amstrad CPC
+    + New menu to change options
+        - Choose ROM versions: English, French, Spanish or Danish
+        - Map ROMs in spaces 1 to 6 of CPC
+    + Keys mapped all the CPC in a position similar to the original
+    + Modified the timings Z80
+- Asteroids
+    + Fixed sound samples
+    + Small fixes and cleaning</pre><br>
+<b>29/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
 -ROM Engine: ROM and samples file info export finished. Now you can use your favorite ROM manager.
 -Small ROMs definition fixes in some drivers
--Uploaded Languaje files and sound samples used by DSP, I forgot to do it when I do de google project migration.
-</pre><br>
-<b>28/02/16 - DSP Emulator 0.16b2 source and Win32 updated.</b><br><pre>
+-Uploaded Languaje files and sound samples used by DSP, I forgot to do it when I do de google project migration.</pre><br>
+<b>28/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
 -Lazarus: New sound engine, better sound. Some problems with stereo sounds (Using SDL2 v2.0.4)
 -Samples: Fixes resample of no standar frequencies.
--ROM Engine: New export data system, now you can export ROM data in ClearMame Pro format to manage ROMs used. Finished about 50%. (Configure DSP --> ROM --> Export ROM Data)
-</pre><br>
+-ROM Engine: New export data system, now you can export ROM data in ClearMame Pro format to manage ROMs used. Finished about 50%. (Configure DSP --> ROM --> Export ROM Data)</pre><br>
 <b>10/01/16 - DSP Emulator 0.16b1 Final version. Updated source, Windows 32/64 and Linux 32/64 binaries.</b><br>
 <img src='http://s10.postimg.org/dqoip41vd/gradius3.png'><br>
 <b>26/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot updated again.</b><br><pre>
 - GFX Engine: Implemented alpha color sprites and palette
 - K0052109: Implemented video buffers, more speed
 - K051960 and K05324X: Implemented shadow sprites (alpha color)
-- Added Service functions pressing F1 (impremented in TMNT and Ghost'n Goblins drivers so far)
-</pre><br>
+- Added Service functions pressing F1 (impremented in TMNT and Ghost'n Goblins drivers so far)</pre><br>
 <b>22/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot both WIP updated.</b><br><pre>
 - Added Konami ADPCM K053260 and K007232 chips
 - Sunset Riders: Fixed protection, added controls, finished audio and video
-- Implemented zoomed sprites, added to Teenage Mutant Ninja Turtles, Sunset Riders and Nemesis
-</pre><br>
+- Implemented zoomed sprites, added to Teenage Mutant Ninja Turtles, Sunset Riders and Nemesis</pre><br>
 <b>17/12/15 - DSP Emulator 0.16b1 source WIP update. Win32 WIP snapshot updated too.</b><br>
 <img src='http://img1.imagilive.com/1215/ssriders1.png'><img src='http://img1.imagilive.com/1215/ssriders2.png'><br>
 <b>10/12/15 - DSP Emulator 0.16b1 source WIP update and Win32 WIP snapshot.</b><br>

@@ -5,7 +5,7 @@ uses {$IFDEF windows}windows,{$ENDIF}{$ifdef fpc}crc,{$else}
      {$IFDEF windows}pngimage,{$ENDIF}{$endif}sysutils,forms,controls;
 
 type
-  TSistema = (StNes,StColecovision,STGb,StChip8,StAmstrad,StROM,StSMS);
+  TSistema=(StNes,StColecovision,STGb,StChip8,StAmstrad,StAmstradROM,StROM,StSMS);
 
 function extension_fichero(nombre:string):string;
 procedure fix_screen_pos(width,height:word);
@@ -243,6 +243,10 @@ case Sistema of
        end;
   StROM:begin
          principal1.opendialog1.InitialDir:=Directory.Arcade_roms;
+         principal1.OpenDialog1.Filter:='ROM Files (*.rom;*.zip)|*.rom;*.zip';
+       end;
+  StAmstradROM:begin
+         principal1.opendialog1.InitialDir:=Directory.Amstrad_rom;
          principal1.OpenDialog1.Filter:='ROM Files (*.rom;*.zip)|*.rom;*.zip';
        end;
 end;

@@ -499,10 +499,6 @@ object MConfig: TMConfig
     object TabSheet3: TTabSheet
       Caption = 'Input'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 7
         Top = 13
@@ -1032,6 +1028,10 @@ object MConfig: TMConfig
     object ROM: TTabSheet
       Caption = 'ROM'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object BitBtn21: TBitBtn
         Left = 40
         Top = 32
