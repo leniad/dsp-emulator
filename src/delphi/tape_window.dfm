@@ -121,11 +121,12 @@ object tape_window1: Ttape_window1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00}
       TabOrder = 0
+      TabStop = False
       OnClick = fplaycinta
     end
     object BitBtn2: TBitBtn
       Left = 92
-      Top = 4
+      Top = 5
       Width = 37
       Height = 37
       Glyph.Data = {
@@ -192,6 +193,7 @@ object tape_window1: Ttape_window1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00}
       TabOrder = 1
+      TabStop = False
       OnClick = fstopcinta
     end
     object BitBtn3: TBitBtn
@@ -299,6 +301,7 @@ object tape_window1: Ttape_window1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
       TabOrder = 2
+      TabStop = False
       OnClick = cerrar_cinta
     end
     object BitBtn9: TBitBtn
@@ -430,6 +433,15 @@ object tape_window1: Ttape_window1
     ParentFont = False
     ScrollBars = ssNone
     TabOrder = 1
+    ColWidths = (
+      94
+      94
+      94)
+    RowHeights = (
+      15
+      15
+      15
+      15)
   end
   object StringGrid1: TStringGrid
     Left = 15
@@ -458,6 +470,14 @@ object tape_window1: Ttape_window1
     ShowHint = True
     TabOrder = 2
     OnClick = StringGrid1Click
+    ColWidths = (
+      94
+      94
+      94)
+    RowHeights = (
+      15
+      15
+      15)
   end
   object Edit1: TEdit
     Left = 15

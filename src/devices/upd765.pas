@@ -145,7 +145,7 @@ if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actu
   FDCDataLength:=1 shl (FDCCommand[5]+7);
 end else begin
   FDCDataPointer:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].posicion_data;
-  FDCDataLength:=1 shl (FDCCommand[5]+7);//1 shl (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size+7);  //1 shl (FDCCommand[5]+7);
+  FDCDataLength:=1 shl (FDCCommand[5]+7);
 end;
 if FDCCommand[5]=0 then begin
   FDCDataLength:=FDCCommand[8];
@@ -396,16 +396,17 @@ begin
           ret:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[fdccurrdrv].track_actual].data;
           if ret=nil then begin
             st0:=$40+$80;
-            st1:=0+$20;
+            st1:=$20;
             st2:=$1;
             GetRes7;
+            statusregister:=$d0+$20;
             exit;
           end;
           if FDCCounter>=(1 shl (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size+7)) then begin
-            //Para la emulacion de speedlock en Amstrad...
-            st0:=$40+$80;
-            st1:=$4+dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status1;
-            st2:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2;
+            //Para la emulacion de speedlock en Amstrad y de algunos de titus...
+            st0:=$40;
+            st1:=$4;
+            st2:=0;
             GetRes7;
             exit;
           end else begin

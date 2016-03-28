@@ -87,7 +87,7 @@ object load_spec: Tload_spec
     object Label3: TLabel
       Left = 79
       Top = 11
-      Width = 150
+      Width = 179
       Height = 13
       AutoSize = False
     end

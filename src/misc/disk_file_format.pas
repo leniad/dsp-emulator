@@ -1,7 +1,7 @@
 unit disk_file_format;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ipf_disk;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ipf_disk,misc_functions;
 
 function dsk_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
 function ipf_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
@@ -99,8 +99,9 @@ var
   dsk_header:^tdsk_header;
   dsk_track:^tdsk_track;
   dsk_sector:^tdsk_sector;
-  f,side_count,track_count,sector_count:byte;
-  longi,track_long,long_temp:dword;
+  f,side_count,track_count:byte;
+  longi,track_long,long_temp,tempdw:dword;
+  sector_count:integer;
 begin
    dsk_format:=false;
    if datos=nil then exit;
@@ -202,10 +203,13 @@ begin
               if dsk_track.magic='Track-Info' then begin
                  salir:=true;
               end else begin
-                 track_long:=track_long+1;
-                 long_temp:=long_temp+1;
-                 if long_temp=longi_ini then salir:=true;
-                 inc(ptemp);
+                 if long_temp=longi_ini then begin
+                  salir:=true
+                 end else begin
+                  track_long:=track_long+1;
+                  long_temp:=long_temp+1;
+                  inc(ptemp);
+                end;
               end;
            end;
            if dsk[DrvNum].DiskHeader.track_size_table[side_count,track_count]<>0 then begin
@@ -224,66 +228,75 @@ begin
              track_count:=track_count+1;
            end;
    end; //del while
-   //Comprobar SpeedLock +3
-   if (main_vars.tipo_maquina=2) then begin
-    puntero:=dsk[drvnum].Tracks[0,0].data;
-    cadena2:='SPEEDLOCK';
-    cadena:='';
-    for h:=0 to (dsk[drvnum].Tracks[0,0].sector[0].data_length-1) do begin
-      cadena:=cadena+char(puntero^);
-      inc(puntero);
-    end;
-    sp3_presente:=pos(cadena2,cadena)<>0;
-    if ((sp3_presente) and not(hay_multi)) then begin
-      main_vars.mensaje_general:='SpeedLock +3 Simulated';
-      dsk[drvnum].Tracks[0,0].sector[1].multi:=true;
-      dsk[drvnum].cont_multi:=3;
-      dsk[drvnum].max_multi:=3;
-      //Ahora reago todos los datos
-      getmem(ptemp3,dsk[drvnum].Tracks[0,0].track_lenght);
-      ptemp:=ptemp3;
-      //Guardo los viejos
-      copymemory(ptemp,dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].track_lenght);
-      //Libero los datos antiguos
-      freemem(dsk[drvnum].Tracks[0,0].data);
-      dsk[drvnum].Tracks[0,0].data:=nil;
-      //Creo los nuevos
-      getmem(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].track_lenght+(dsk[drvnum].Tracks[0,0].sector[1].data_length*2));
-      //Muevo el primer sector
-      cont:=0;
-      ptemp2:=dsk[drvnum].Tracks[0,0].data;
-      copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-      inc(ptemp,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-      inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-      inc(cont,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-      //Arreglo el segundo
-      //Lo copio, pero dejo el puntero a los datos para copiar los 256 primeros bytes
-      copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-      inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-      inc(cont,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-      for f:=0 to 1 do begin
-        //Copio los 256 primeros datos
-        copymemory(ptemp2,ptemp,256);
-        inc(ptemp2,256);
-        //Me invento el resto
-        for h:=0 to 255 do begin
-          ptemp2^:=random(256);
-          inc(ptemp2);
+   case main_vars.tipo_maquina of
+    8,9:begin  //Comprobar algunas protecciones para poder parchearlas...
+          tempdw:=calc_crc(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+          case tempdw of
+            $8c817e25,$4b616c83:dsk[drvnum].Tracks[0,40].sector[6].sector_size:=2; //Titus the fox
+            $57a3276f:dsk[drvnum].Tracks[0,39].sector[10].sector_size:=0; //Prehistorik
+            $f05fe06e:dsk[drvnum].Tracks[0,39].sector[0].sector_size:=2; //Prehistorik alt
+          end;
         end;
+   2:begin  //Comprobar SpeedLock +3
+      puntero:=dsk[drvnum].Tracks[0,0].data;
+      cadena2:='SPEEDLOCK';
+      cadena:='';
+      for h:=0 to (dsk[drvnum].Tracks[0,0].sector[0].data_length-1) do begin
+        cadena:=cadena+char(puntero^);
+        inc(puntero);
+      end;
+      sp3_presente:=pos(cadena2,cadena)<>0;
+      if ((sp3_presente) and not(hay_multi)) then begin
+        //main_vars.mensaje_general:='SpeedLock +3 Simulated';
+        dsk[drvnum].Tracks[0,0].sector[1].multi:=true;
+        dsk[drvnum].cont_multi:=3;
+        dsk[drvnum].max_multi:=3;
+        //Ahora reago todos los datos
+        getmem(ptemp3,dsk[drvnum].Tracks[0,0].track_lenght);
+        ptemp:=ptemp3;
+        //Guardo los viejos
+        copymemory(ptemp,dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].track_lenght);
+        //Libero los datos antiguos
+        freemem(dsk[drvnum].Tracks[0,0].data);
+        dsk[drvnum].Tracks[0,0].data:=nil;
+        //Creo los nuevos
+        getmem(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].track_lenght+(dsk[drvnum].Tracks[0,0].sector[1].data_length*2));
+        //Muevo el primer sector
+        cont:=0;
+        ptemp2:=dsk[drvnum].Tracks[0,0].data;
+        copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+        inc(ptemp,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+        inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+        inc(cont,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+        //Arreglo el segundo
+        //Lo copio, pero dejo el puntero a los datos para copiar los 256 primeros bytes
+        copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[1].data_length);
+        inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[1].data_length);
         inc(cont,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-      end;
-      //Paso al sector 2
-      inc(ptemp,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-      //Y los ultimos sectores arreglando la pos relativa dentro del track
-      for f:=2 to (dsk[drvnum].Tracks[0,0].number_sector-1) do begin
-        dsk[drvnum].Tracks[0,0].sector[f].posicion_data:=cont;
-        copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[f].data_length);
-        inc(ptemp,dsk[drvnum].Tracks[0,0].sector[f].data_length);
-        inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[f].data_length);
-        inc(cont,dsk[drvnum].Tracks[0,0].sector[f].data_length);
-      end;
-      freemem(ptemp3);
-    end else main_vars.mensaje_general:='';
+        for f:=0 to 1 do begin
+          //Copio los 256 primeros datos
+          copymemory(ptemp2,ptemp,256);
+          inc(ptemp2,256);
+          //Me invento el resto
+          for h:=0 to 255 do begin
+            ptemp2^:=random(256);
+            inc(ptemp2);
+          end;
+          inc(cont,dsk[drvnum].Tracks[0,0].sector[1].data_length);
+        end;
+        //Paso al sector 2
+        inc(ptemp,dsk[drvnum].Tracks[0,0].sector[1].data_length);
+        //Y los ultimos sectores arreglando la pos relativa dentro del track
+        for f:=2 to (dsk[drvnum].Tracks[0,0].number_sector-1) do begin
+          dsk[drvnum].Tracks[0,0].sector[f].posicion_data:=cont;
+          copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[f].data_length);
+          inc(ptemp,dsk[drvnum].Tracks[0,0].sector[f].data_length);
+          inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[f].data_length);
+          inc(cont,dsk[drvnum].Tracks[0,0].sector[f].data_length);
+        end;
+        freemem(ptemp3);
+      end else main_vars.mensaje_general:='';
+    end;
    end;
    dsk[drvnum].abierto:=true;
    dsk_format:=true;

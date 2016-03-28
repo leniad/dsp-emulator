@@ -774,13 +774,16 @@ if sender<>nil then nuevo:=Tmenuitem(sender).tag
     main_screen.video_mode:=255;
   end;
 if main_screen.video_mode<>nuevo then main_screen.video_mode:=nuevo;
-main_screen.pantalla_completa:=(main_screen.video_mode=6);
 if main_vars.driver_ok then begin
-  cambiar_video;
-  if main_vars.tipo_maquina<7 then begin
-    fillchar(buffer_video[0],6144,1);
-    fillchar(borde.buffer[0],78000,$80);
-  end;
+    if nuevo=6 then begin
+      pasar_pantalla_completa;
+    end else begin
+      cambiar_video;
+      if main_vars.tipo_maquina<7 then begin
+        fillchar(buffer_video[0],6144,1);
+        fillchar(borde.buffer[0],78000,$80);
+      end;
+    end;
 end;
 end;
 

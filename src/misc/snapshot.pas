@@ -5,6 +5,21 @@ uses {$IFDEF windows}windows,{$ENDIF}
      sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,forms,file_engine,
      init_games,rom_engine,ppi8255,tms99xx,pal_engine,sn_76496;
 
+type
+  tszx_header=packed record
+    magic:array[0..3] of ansichar;
+    major_version,minor_version,tipo_maquina,flags:byte;
+  end;
+  tszx_block=packed record
+    name:array[0..3] of ansichar;
+    longitud:dword;
+  end;
+  tszx_ramp=packed record
+    flags:word;
+    numero:byte;
+    data:array[0..$3fff] of byte;
+  end;
+
 //Spectrum
 function abrir_sna(datos:pbyte;long:integer):boolean;
 function grabar_sna(nombre:string):boolean;
@@ -377,14 +392,6 @@ end;
 
 //Spectrum .SZX
 type
-  tszx_header=packed record
-    magic:array[0..3] of ansichar;
-    major_version,minor_version,tipo_maquina,flags:byte;
-  end;
-  tszx_block=packed record
-    name:array[0..3] of ansichar;
-    longitud:dword;
-  end;
   tszx_regs=packed record
     a,flags:byte;
     bc,de,hl:word;
@@ -398,11 +405,6 @@ type
   tszx_spcr=packed record
     borde,reg_7ffd,reg_1ffd,reg_eff7,reg_fe:byte;
     reserved1,reserved2,reserved3,reserved14:byte;
-  end;
-  tszx_ramp=packed record
-    flags:word;
-    numero:byte;
-    data:array[0..$3fff] of byte;
   end;
   tszx_ay=packed record
     flags,reg_fffd:byte;
@@ -606,7 +608,7 @@ szx_block.name:='CRTR';
 szx_block.longitud:=36;
 szx_crtr.creator:='DSP Emulator                    ';
 szx_crtr.major_version:=$0001;
-szx_crtr.minor_version:=$0600;
+szx_crtr.minor_version:=$0602;
 copymemory(ptemp,szx_block,8);inc(ptemp,8);longitud:=longitud+8;
 copymemory(ptemp,szx_crtr,36);inc(ptemp,36);longitud:=longitud+36;
 freemem(szx_crtr);

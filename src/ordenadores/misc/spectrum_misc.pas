@@ -652,7 +652,7 @@ end;
 function spectrum_mensaje:string;
 begin
 if cinta_tzx.play_tape then
-  spectrum_mensaje:='    '+leng[main_vars.idioma].mensajes[1]+': '+inttostr(datos_totales);
+  spectrum_mensaje:='    '+leng[main_vars.idioma].mensajes[1]+': '+inttostr(datos_totales_tzx);
 end;
 
 procedure spectrum_config;

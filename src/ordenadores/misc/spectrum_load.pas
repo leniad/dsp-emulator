@@ -46,6 +46,12 @@ if (load_spec.filelistbox1.Count=0) then ultima_posicion:=-1
 end;
 end;
 
+type
+  ttape_version=packed record
+            major:byte;
+            minor:byte;
+           end;
+
 procedure spectrum_load_click;
 var
   g:integer;
@@ -54,7 +60,16 @@ var
   t1,t2,t3,t4,t5:integer;
   hay_imagen,salida,hay_scr:boolean;
   temp,temp2,temp3,datos_scr:pbyte;
-  cadena,nombre_file:string;
+  nombre_file:string;
+  tzx_header:^ttzx_header;
+  pzx_header:^tpzx_header;
+  pzx_data:^tpzx_data;
+  tape_version:^ttape_version;
+  szx_header:^tszx_header;
+  szx_block:^tszx_block;
+  szx_ramp:^tszx_ramp;
+  tap_header:^ttap_header;
+  csw_header:^tcsw_header;
 begin
 load_spec.label3.Caption:='';
 load_spec.label4.Caption:='';
@@ -97,7 +112,6 @@ if extension='ZIP' then begin
     extension:=extension_fichero(nombre_file);
     if ((extension='TAP') or (extension='TZX') or (extension='PZX') or (extension='CSW') or (extension='WAV') or (extension='DSP') or (extension='SZX') or (extension='ZX') or (extension='Z80') or (extension='SP') or (extension='SNA')) then begin
       load_file_from_zip(nombre,nombre_file,datos,t1,t2,true);
-      if ((extension='CSW') or (extension='WAV')) then load_spec.label3.Caption:=extension+' Spectrum AudioFile';
       nombre:=nombre_file;
       break;
     end;
@@ -129,10 +143,12 @@ temp:=datos;
 temp2:=nil;
 nombre:=extractfilename(nombre);
 if extension='SZX' then begin
-  load_spec.label3.Caption:='SZX Spectrum Snapshot';
-  g:=0;
-  inc(temp,6);inc(g,6);
-  case temp^ of
+  getmem(szx_header,sizeof(tszx_header));
+  copymemory(szx_header,temp,8);
+  inc(temp,8);g:=8;
+  if szx_header.minor_version<10 then load_spec.label3.Caption:='SZX Spectrum Snapshot v'+inttostr(szx_header.major_version)+'.0'+inttostr(szx_header.minor_version)
+    else load_spec.label3.Caption:='SZX Spectrum Snapshot v'+inttostr(szx_header.major_version)+'.'+inttostr(szx_header.minor_version);
+  case szx_header.tipo_maquina of
     0:load_spec.label4.Caption:='Spectrum 16K';
     1:load_spec.label4.Caption:='Spectrum 48K';
     2:load_spec.label4.Caption:='Spectrum 128K';
@@ -140,55 +156,61 @@ if extension='SZX' then begin
     4:load_spec.label4.Caption:='Spectrum +2A';
     5:load_spec.label4.Caption:='Spectrum +3';
   end;
-  inc(temp,2);inc(g,2);
+  freemem(szx_header);
+  getmem(szx_block,sizeof(tszx_block));
   while (not(hay_imagen) and (g<file_size)) do begin
-    cadena:='';
-    for f:=0 to 3 do begin
-      cadena:=cadena+chr(temp^);
-      inc(temp);inc(g);
-    end;
-    copymemory(@lbloque,temp,4);
-    inc(temp,4);inc(g,4);
-    if cadena='RAMP' then begin
-      long_bloque:=0;
-      copymemory(@long_bloque,temp,2);
-      inc(temp,2);
-      pagina:=temp^;
-      inc(temp);
-      getmem(temp2,16384);
-      if long_bloque=1 then Decompress_zlib(temp,lbloque-3,pointer(temp2),t2);
-      if pagina=5 then begin
-        hay_imagen:=true;
-        temp:=temp2;
+    copymemory(szx_block,temp,8);
+    inc(temp,8);inc(g,8);
+    if szx_block.name='RAMP' then begin
+      getmem(szx_ramp,sizeof(tszx_ramp));
+      copymemory(szx_ramp,temp,szx_block.longitud);
+      if szx_ramp.numero=5 then begin
+        if (szx_ramp.flags and 1)<>0 then begin //Pagina RAM comprimida
+          getmem(temp2,$4000);
+          Decompress_zlib(pointer(@szx_ramp.data[0]),szx_block.longitud-3,pointer(temp2),t2);
+          hay_imagen:=true;
+          temp:=temp2;
+        end else begin //Sin comprimir
+          temp:=@szx_ramp.data[0];
+          hay_imagen:=true;
+        end;
       end else begin
-        inc(temp,lbloque-3);
-        inc(g,lbloque);
-        freemem(temp2);
+        inc(temp,szx_block.longitud);
+        inc(g,szx_block.longitud);
       end;
+      freemem(szx_ramp);
     end else begin
-      inc(temp,lbloque);
-      inc(g,lbloque);
+      inc(temp,szx_block.longitud);
+      inc(g,szx_block.longitud);
     end;
   end;
+  freemem(szx_block);
 end;
+//TAP
 if extension='TAP' then begin
   load_spec.label3.Caption:='TAP Spectrum Tape';
+  getmem(tap_header,sizeof(ttap_header));
   g:=0;
   while (not(hay_imagen) and (g<file_size)) do begin
-    long_bloque:=0;
-    copymemory(@long_bloque,temp,2);
-    inc(g,long_bloque+2);
-    if long_bloque>6911 then begin
+    copymemory(tap_header,temp,20);
+    if tap_header.size>6911 then begin
       hay_imagen:=true;
-      inc(temp,3);
-      break;
+      inc(temp,3);  //Para llegar a los datos, le sumo el tamaño y el flag
+    end else begin
+      inc(temp,tap_header.size+2);
+      g:=g+tap_header.size+2;
     end;
-    inc(temp,long_bloque+2);
   end;
+  freemem(tap_header);
 end;
+//TZX
 if extension='TZX' then begin
-  load_spec.label3.Caption:='TZX Spectrum Tape';
+  getmem(tzx_header,sizeof(ttzx_header));
+  copymemory(tzx_header,temp,10);
   inc(temp,10);
+  if tzx_header.minor<10 then load_spec.label3.Caption:='TZX Spectrum Tape v'+inttostr(tzx_header.major)+'.0'+inttostr(tzx_header.minor)
+    else load_spec.label3.Caption:='TZX Spectrum Tape v'+inttostr(tzx_header.major)+'.'+inttostr(tzx_header.minor);
+  freemem(tzx_header);
   g:=0;
   salida:=false;
   while (not(hay_imagen) and (g<file_size)) do begin
@@ -272,40 +294,36 @@ if extension='TZX' then begin
   end;
 end;
 if extension='PZX' then begin
-  load_spec.label3.Caption:='PZX Spectrum Tape';
-  g:=0;
-  inc(temp,4);inc(g,4);
-  copymemory(@long_bloque,temp,4);
-  inc(temp,4);inc(g,4);
-  inc(temp,long_bloque);inc(g,long_bloque);
+  getmem(pzx_header,sizeof(tpzx_header));
+  copymemory(pzx_header,temp,8);
+  inc(temp,8);
+  getmem(tape_version,sizeof(ttape_version));
+  copymemory(tape_version,temp,2);
+  inc(temp,pzx_header.size);g:=pzx_header.size+8;
+  if tape_version.minor<10 then load_spec.label3.Caption:='PZX Spectrum Tape v'+inttostr(tape_version.major)+'.0'+inttostr(tape_version.minor)
+    else load_spec.label3.Caption:='PZX Spectrum Tape v'+inttostr(tape_version.major)+'.'+inttostr(tape_version.minor);
+  freemem(tape_version);
   while (not(hay_imagen) and (g<file_size)) do begin
-    cadena:='';
-    for f:=0 to 3 do begin
-      cadena:=cadena+chr(temp^);
-      inc(temp);inc(g);
-    end;
-    copymemory(@long_bloque,temp,4);
-    inc(temp,4);inc(g,4);
+    copymemory(pzx_header,temp,8);
+    inc(temp,8);inc(g,8);
     temp3:=temp;
-    inc(temp,long_bloque);inc(g,long_bloque);
-    if cadena='DATA' then begin
-      copymemory(@lbloque,temp3,4);
-      inc(temp3,4);
-      lbloque:=lbloque and $7FFFFFFF;
-      inc(temp3,2);
-      t1:=temp3^;
-      inc(temp3);  //cantidad para formar la longitud del 0
-      t2:=temp3^;
-      inc(temp3);  //cantidad para formar la longitud del 1
-      inc(temp3,t1*2);
-      inc(temp3,t2*2);
-      if (lbloque div 8)>6911 then begin
+    inc(temp,pzx_header.size);inc(g,pzx_header.size);
+    if pzx_header.name='DATA' then begin
+      getmem(pzx_data,sizeof(tpzx_data));
+      copymemory(pzx_data,temp3,8);
+      inc(temp3,8);
+      pzx_data.bit_count:=(pzx_data.bit_count and $7FFFFFFF) div 8;
+      inc(temp3,2*pzx_data.p0);
+      inc(temp3,2*pzx_data.p1);
+      if pzx_data.bit_count>6911 then begin
             hay_imagen:=true;
             temp:=temp3;
             inc(temp);
       end;
+      freemem(pzx_data);
     end;
   end;
+  freemem(pzx_header);
 end;
 if ((extension='Z80') or (extension='DSP')) then begin
   if extension='Z80' then load_spec.label3.Caption:='Z80 Spectrum Snapshot'
@@ -319,13 +337,13 @@ if ((extension='Z80') or (extension='DSP')) then begin
     copymemory(@g,temp,2);
     inc(temp,4);
     case temp^ of
-      0,1:load_spec.label4.Caption:='Spectrum 48K';  //Modo 48k
-      3:if g=23 then load_spec.label4.Caption:='Spectrum 128K'
-          else load_spec.label4.Caption:='Spectrum 48K';
-      4,5,6:load_spec.label4.Caption:='Spectrum 128K';  //Modo 128K
-      7,8:load_spec.label4.Caption:='Spectrum +3';  //Modo +3
-      12:load_spec.label4.Caption:='Spectrum +2A'; //Modo +2A
-      13:load_spec.label4.Caption:='Spectrum +2'; //Modo +2
+      0,1:load_spec.label4.Caption:='Spectrum 48K v3.0';  //Modo 48k
+      3:if g=23 then load_spec.label4.Caption:='Spectrum 128K v2.0'
+          else load_spec.label4.Caption:='Spectrum 48K v3.0';
+      4,5,6:load_spec.label4.Caption:='Spectrum 128K v3.0';  //Modo 128K
+      7,8:load_spec.label4.Caption:='Spectrum +3 v3.0';  //Modo +3
+      12:load_spec.label4.Caption:='Spectrum +2A v3.0'; //Modo +2A
+      13:load_spec.label4.Caption:='Spectrum +2 v3,0'; //Modo +2
     end;
     inc(temp,g-2);
     f:=0;
@@ -345,7 +363,7 @@ if ((extension='Z80') or (extension='DSP')) then begin
         else inc(temp,g);
     end;
   end else begin
-    load_spec.label4.Caption:='Spectrum 48K';
+    load_spec.label4.Caption:='Spectrum 48K v1.0';
     getmem(temp2,49192);
     g:=file_size-34;
     descomprimir_z80(temp2,temp,g);
@@ -372,16 +390,28 @@ if extension='ZX' then begin
   inc(temp,132);
   hay_imagen:=true;
 end;
+if extension='CSW' then begin
+  getmem(csw_header,sizeof(tcsw_header));
+  copymemory(csw_header,temp,25);
+  if csw_header.minor<10 then load_spec.label3.Caption:='Compressed Square Wave v'+inttostr(csw_header.major)+'.0'+inttostr(csw_header.minor)
+    else load_spec.label3.Caption:='Compressed Square Wave v'+inttostr(csw_header.major)+'.'+inttostr(csw_header.minor);
+  load_spec.label4.caption:=' ';
+  hay_imagen:=false;
+  freemem(csw_header);
+end;
+if extension='WAV' then begin
+  load_spec.label3.Caption:='WAV Spectrum AudioFile';
+  load_spec.label4.caption:=' ';
+  hay_imagen:=false;
+end;
+//Hay una imagen SCR, dejo todo lo demas y me quedo con la imagen
 if hay_scr then begin
   temp:=datos_scr;
   hay_imagen:=true;
 end;
 //mostrar imagen si hay...
-if hay_imagen then begin
-  spec_a_pantalla(temp,load_spec.image1.picture.Bitmap);
-end else begin
-  load_spec.image1.picture:=nil;
-end;
+if hay_imagen then spec_a_pantalla(temp,load_spec.image1.picture.Bitmap)
+  else load_spec.image1.picture:=nil;
 if temp2<>nil then freemem(temp2);
 if datos_scr<>nil then freemem(datos_scr);
 end;
@@ -393,10 +423,10 @@ begin
 rom_crc:=calc_crc(spec_rom.datos_rom,spec_rom.rom_size);
 case rom_crc of
    $7BCD642C:begin  //Knight Lore, solo puede ser Spectrum 48k
-                   spectrum_change_model(0);
-                   interface2.hay_if2:=true;
-                   interface2.cargado:=false;
-                   copymemory(@interface2.rom[0],spec_rom.datos_rom,$8000);
+                spectrum_change_model(0);
+                interface2.hay_if2:=true;
+                interface2.cargado:=false;
+                copymemory(@interface2.rom[0],spec_rom.datos_rom,$8000);
              end;
    else begin
           //Si el modelo no es Sepctrum 16k o 48k, hay que cambiarlo...
@@ -443,8 +473,7 @@ if extension='WAV' then begin
   resultado:=abrir_wav(datos,file_size);
   cinta:=true;
 end;
-if extension='Z80' then resultado:=abrir_z80(datos,file_size,false);
-if extension='DSP' then resultado:=abrir_z80(datos,file_size,true);
+if ((extension='Z80') or (extension='DSP')) then resultado:=abrir_z80(datos,file_size,extension='DSP');
 if extension='SNA' then resultado:=abrir_sna(datos,file_size);
 if extension='SP' then resultado:=abrir_sp(datos,file_size);
 if extension='ZX' then resultado:=abrir_zx(datos,file_size);
