@@ -26,12 +26,12 @@ uses principal,main_engine;
 
 procedure fix_screen_pos(width,height:word);
 begin
-{$ifndef windows}
+{$ifdef fpc}
 principal1.BorderStyle:=bsSizeable;
 {$endif}
 if width<>0 then principal1.ClientWidth:=width;
 if height<>0 then principal1.ClientHeight:=height;
-{$ifndef windows}
+{$ifdef fpc}
 principal1.BorderStyle:=bsSingle;
 {$endif}
 //arreglar la barra del fondo

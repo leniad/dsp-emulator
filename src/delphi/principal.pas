@@ -442,7 +442,7 @@ EmuStatus:=EsRuning;
 timer1.Enabled:=true;
 BitBtn3.Enabled:=false;
 BitBtn4.Enabled:=true;
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+Windows.SetFocus(child.Handle);
 if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
 end;
 
@@ -450,17 +450,18 @@ procedure Tprincipal1.CambiarMaquina(Sender:TObject);
 var
   tipo:word;
 begin
-Panel1.Visible:=true;
 todos_false;
 tipo:=tipo_cambio_maquina(sender);
-if main_vars.tipo_maquina=tipo then exit;
-if tipo>9 then begin
-  if tape_window1.Showing then tape_window1.close;
-  if lenslock1.Showing then lenslock1.close;
+if main_vars.tipo_maquina<>tipo then begin
+  menus_false(tipo);
+  if tipo>9 then begin
+    if tape_window1.Showing then tape_window1.close;
+    if lenslock1.Showing then lenslock1.close;
+  end;
+  if main_vars.driver_ok then EmuStatus:=EsPause;
+  tipo_new:=tipo;
+  timer3.Enabled:=true;
 end;
-if main_vars.driver_ok then EmuStatus:=EsPause;
-tipo_new:=tipo;
-timer3.Enabled:=true;
 end;
 
 procedure Tprincipal1.Timer1Timer(Sender: TObject);
@@ -520,11 +521,6 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn19.Enabled:=false;
 end else begin
   principal1.timer1.Enabled:=true;
-  principal1.BitBtn2.Enabled:=true;
-  principal1.BitBtn5.Enabled:=true;
-  principal1.BitBtn6.Enabled:=true;
-  principal1.BitBtn19.Enabled:=true;
-  principal1.BitBtn8.Enabled:=true;
   QueryPerformanceCounter(Int64((@cont_sincroniza)^));
   if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
   principal1.ejecutar1click(nil);
@@ -544,26 +540,27 @@ procedure Tprincipal1.CambiaAudio(Sender: TObject);
 var
   tmp_audio:byte;
 begin
-if not(sound_status.hay_tsonido) then exit;
-if sender<>nil then tmp_audio:= Tmenuitem(sender).Tag
-  else begin
-  tmp_audio:=sound_status.calidad_audio;
-  sound_status.calidad_audio:=255;
-end;
-if tmp_audio<>sound_status.calidad_audio then begin
-  sound_status.calidad_audio:=tmp_audio;
-  if sound_status.calidad_audio=3 then begin
+if sound_status.hay_tsonido then begin
+  if sender<>nil then tmp_audio:= Tmenuitem(sender).Tag
+    else begin
+      tmp_audio:=sound_status.calidad_audio;
+      sound_status.calidad_audio:=255;
+    end;
+  if tmp_audio<>sound_status.calidad_audio then begin
+    sound_status.calidad_audio:=tmp_audio;
+    if sound_status.calidad_audio=3 then begin
       SinSonido1.Checked:=true;
       sound_status.hay_sonido:=false;
-  end;
-  if sound_status.calidad_audio<>3 then begin
-    sound_status.hay_sonido:=true;
-    close_audio;
-    if sound_status.stereo then iniciar_audio(true)
-      else iniciar_audio(false);
+    end;
+    if sound_status.calidad_audio<>3 then begin
+      sound_status.hay_sonido:=true;
+      close_audio;
+      if sound_status.stereo then iniciar_audio(true)
+        else iniciar_audio(false);
+    end;
   end;
 end;
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.Reset1Click(Sender: TObject);
@@ -571,7 +568,7 @@ begin
 main_screen.flip_main_screen:=false;
 ulaplus.activa:=false;
 if @llamadas_maquina.reset<>nil then llamadas_maquina.reset;
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
@@ -602,6 +599,7 @@ if main_vars.idioma<>tmp_idioma then begin
   main_vars.idioma:=tmp_idioma;
   cambiar_idioma(main_vars.idioma);
 end;
+if child<>nil then Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
@@ -611,6 +609,7 @@ EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 FLoadRom.Show;
 while FLoadRom.Showing do application.ProcessMessages;
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -687,7 +686,10 @@ if Savedialog1.execute then begin
   end;
   if FileExists(nombre) then begin
     r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
-    if r=IDNO then exit;
+    if r=IDNO then begin
+      Windows.SetFocus(child.Handle);
+      exit;
+    end;
     deletefile(nombre);
   end;
   Directory.spectrum_image:=extractfiledir(savedialog1.FileName)+main_vars.cadena_dir;
@@ -785,6 +787,7 @@ if main_vars.driver_ok then begin
       end;
     end;
 end;
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.fLoadCartucho(Sender: TObject);
@@ -810,7 +813,7 @@ end;
 procedure Tprincipal1.fConfigurar(Sender: TObject);
 begin
 if (@llamadas_maquina.configurar=nil) then begin
-    if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+    Windows.SetFocus(child.Handle);
     exit;
 end;
 timer1.Enabled:=false;

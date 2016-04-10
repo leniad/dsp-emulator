@@ -30,6 +30,7 @@ procedure file_ini_save;
 function read_file_size(nombre_file:string;var longitud:integer):boolean;
 function read_file(nombre_file:string;donde:pbyte;var longitud:integer):boolean;
 function write_file(nombre_file:string;donde:pbyte;longitud:integer):boolean;
+function file_name_only(cadena:string):string;
 //Parte ZIP
 function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
 function find_first_file_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
@@ -127,17 +128,12 @@ if fileexists(directory.Base+'dsp.ini') then begin
   if ((main_screen.video_mode<1) or (main_screen.video_mode>5)) then main_screen.video_mode:=1;
   main_screen.pantalla_completa:=false;
   main_vars.tipo_maquina:=fich_ini.ReadInteger('dsp','maquina',0);
-  f:=fich_ini.ReadInteger('dsp','auto_exec',0);
-  main_vars.auto_exec:=(f=1);
-  f:=fich_ini.ReadInteger('dsp','show_crc_error',1);
-  main_vars.show_crc_error:=(f=1);
-  f:=fich_ini.ReadInteger('dsp','center_screen',1);
-  main_vars.center_screen:=(f=1);
-  f:=fich_ini.ReadInteger('dsp','x11',0);
-  main_vars.x11:=(f=1);
+  main_vars.auto_exec:=(fich_ini.ReadInteger('dsp','auto_exec',0)=1);
+  main_vars.show_crc_error:=(fich_ini.ReadInteger('dsp','show_crc_error',1)=1);
+  main_vars.center_screen:=(fich_ini.ReadInteger('dsp','center_screen',1)=1);
+  main_vars.x11:=(fich_ini.ReadInteger('dsp','x11',0)=1);
   //configuracion spectrum
-  f:=fich_ini.ReadInteger('spectrum','issue',0);
-  issue2:=(f=0);
+  issue2:=(fich_ini.ReadInteger('spectrum','issue',0)=0);
   f:=fich_ini.ReadInteger('spectrum','joystick',0);
   jkempston:=false;
   jcursor:=false;
@@ -151,24 +147,18 @@ if fileexists(directory.Base+'dsp.ini') then begin
   end;
   borde.tipo:=fich_ini.ReadInteger('spectrum','border',0);
   mouse.tipo:=fich_ini.ReadInteger('spectrum','tipo_mouse',0);
-  f:=fich_ini.ReadInteger('spectrum','beepfilter',0);
-  beeper_filter:=(f=1);
-  f:=fich_ini.ReadInteger('spectrum','audioload',0);
-  audio_load:=(f=1);
+  beeper_filter:=(fich_ini.ReadInteger('spectrum','beepfilter',0)=1);
+  audio_load:=(fich_ini.ReadInteger('spectrum','audioload',0)=1);
   audio_128k:=fich_ini.ReadInteger('spectrum','audio_128k',0);
   beeper_oversample:=fich_ini.ReadInteger('spectrum','beeper_oversample',1);
-  f:=fich_ini.ReadInteger('spectrum','ulaplus',0);
-  ulaplus.enabled:=(f=1);
+  ulaplus.enabled:=(fich_ini.ReadInteger('spectrum','ulaplus',0)=1);
   //Configuracion CPC
-  for f:=1 to 6 do begin
-    cpc_rom_slot[f]:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
-  end;
+  for f:=0 to 6 do cpc_rom_slot[f]:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
   cpc_ga.cpc_model:=fich_ini.ReadInteger('cpc','cpcmodel',0);
+  cpc_ga.ram_exp:=fich_ini.ReadInteger('cpc','cpcramexp',0);
   //Configuracion SMS
-  f:=fich_ini.ReadInteger('sms','is_pal',1);
-  file_data.sms_is_pal:=(f<>0);
-  f:=fich_ini.ReadInteger('sms','bios_enabled',0);
-  file_data.sms_bios_enabled:=(f<>0);
+  file_data.sms_is_pal:=(fich_ini.ReadInteger('sms','is_pal',1)=1);
+  file_data.sms_bios_enabled:=(fich_ini.ReadInteger('sms','bios_enabled',0)=1);
   //Teclas
   arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',KEYBOARD_UP) and $ff;
   arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
@@ -207,10 +197,8 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.jbut4[1]:=fich_ini.ReadInteger('keyboard','jbut4_1',4) and $ff;
   arcade_input.jbut5[1]:=fich_ini.ReadInteger('keyboard','jbut5_1',5) and $ff;
   //tipo y numero joystick
-  f:=fich_ini.ReadInteger('keyboard','use_keyb_0',0);
-  arcade_input.use_key[0]:=(f=0);
-  f:=fich_ini.ReadInteger('keyboard','use_keyb_1',0);
-  arcade_input.use_key[1]:=(f=0);
+  arcade_input.use_key[0]:=(fich_ini.ReadInteger('keyboard','use_keyb_0',0)=0);
+  arcade_input.use_key[1]:=(fich_ini.ReadInteger('keyboard','use_keyb_1',0)=0);
   arcade_input.num_joystick[0]:=fich_ini.ReadInteger('keyboard','num_joy_0',0);
   arcade_input.num_joystick[1]:=fich_ini.ReadInteger('keyboard','num_joy_1',0);
   //Joystick calibration
@@ -268,8 +256,9 @@ end else begin
   beeper_oversample:=1;
   ulaplus.enabled:=true;
   //Configuracion CPC
-  for f:=1 to 6 do cpc_rom_slot[f]:='';
+  for f:=0 to 6 do cpc_rom_slot[f]:='';
   cpc_ga.cpc_model:=0;
+  cpc_ga.ram_exp:=0;
   //Configuracion basica SMS
   file_data.sms_is_pal:=false;
   file_data.sms_bios_enabled:=true;
@@ -409,8 +398,9 @@ fich_ini.WriteInteger('spectrum','audio_128k',audio_128k);
 fich_ini.WriteInteger('spectrum','beeper_oversample',beeper_oversample);
 fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
 //Configuracion CPC
-for f:=1 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom_slot[f]);
+for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom_slot[f]);
 fich_ini.WriteInteger('cpc','cpcmodel',cpc_ga.cpc_model);
+fich_ini.WriteInteger('cpc','cpcramexp',cpc_ga.ram_exp);
 //Config SMS
 fich_ini.WriteInteger('sms','is_pal',byte(file_data.sms_is_pal));
 fich_ini.WriteInteger('sms','bios_enabled',byte(file_data.sms_bios_enabled));
@@ -468,6 +458,22 @@ end;
 //Cerrar
 fich_ini.Free;
 end;
+
+function file_name_only(cadena:string):string;
+var
+  f:word;
+  cadena2:string;
+begin
+for f:=length(cadena) downto 1 do begin
+  if cadena[f]=main_vars.cadena_dir then begin
+    cadena2:=copy(cadena,f+1,length(cadena)-f);
+    break;
+  end;
+end;
+if cadena2='' then cadena2:=cadena;
+file_name_only:=cadena2;
+end;
+
 
 function read_file_size(nombre_file:string;var longitud:integer):boolean;
 var

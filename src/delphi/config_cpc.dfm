@@ -4,7 +4,7 @@ object ConfigCPC: TConfigCPC
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config CPC'
-  ClientHeight = 404
+  ClientHeight = 420
   ClientWidth = 457
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -13,19 +13,21 @@ object ConfigCPC: TConfigCPC
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesktopCenter
+  OnKeyUp = FormKeyUp
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
-    Width = 153
-    Height = 121
-    Caption = 'CPC Type'
+    Width = 313
+    Height = 143
+    Caption = 'CPC Low ROM'
     TabOrder = 0
     object RadioButton1: TRadioButton
       Left = 16
-      Top = 16
+      Top = 13
       Width = 121
       Height = 25
       Caption = 'UK'
@@ -33,7 +35,7 @@ object ConfigCPC: TConfigCPC
     end
     object RadioButton2: TRadioButton
       Left = 16
-      Top = 40
+      Top = 33
       Width = 121
       Height = 25
       Caption = 'French'
@@ -41,7 +43,7 @@ object ConfigCPC: TConfigCPC
     end
     object RadioButton3: TRadioButton
       Left = 16
-      Top = 64
+      Top = 56
       Width = 121
       Height = 25
       Caption = 'Spanish'
@@ -49,19 +51,43 @@ object ConfigCPC: TConfigCPC
     end
     object RadioButton4: TRadioButton
       Left = 16
-      Top = 88
+      Top = 78
       Width = 121
       Height = 25
       Caption = 'Danish'
       TabOrder = 3
     end
+    object RadioButton8: TRadioButton
+      Left = 16
+      Top = 99
+      Width = 121
+      Height = 25
+      Caption = 'Other'
+      TabOrder = 4
+    end
+    object Edit7: TEdit
+      Left = 8
+      Top = 119
+      Width = 265
+      Height = 21
+      TabOrder = 5
+    end
+    object Button15: TButton
+      Left = 277
+      Top = 115
+      Width = 33
+      Height = 25
+      Caption = 'Open'
+      TabOrder = 6
+      OnClick = Button15Click
+    end
   end
   object GroupBox2: TGroupBox
-    Left = 10
-    Top = 135
+    Left = 8
+    Top = 157
     Width = 439
     Height = 194
-    Caption = 'ROMS'
+    Caption = 'ROM Slots'
     TabOrder = 1
     object Label1: TLabel
       Left = 13
@@ -257,8 +283,8 @@ object ConfigCPC: TConfigCPC
     end
   end
   object Button13: TButton
-    Left = 56
-    Top = 347
+    Left = 61
+    Top = 357
     Width = 105
     Height = 49
     Caption = 'OK'
@@ -266,12 +292,69 @@ object ConfigCPC: TConfigCPC
     OnClick = Button13Click
   end
   object Button14: TButton
-    Left = 255
-    Top = 347
+    Left = 271
+    Top = 357
     Width = 105
     Height = 49
     Caption = 'CANCEL'
     TabOrder = 3
     OnClick = Button14Click
+  end
+  object GroupBox7: TGroupBox
+    Left = 335
+    Top = 87
+    Width = 107
+    Height = 64
+    Caption = 'LensLok'
+    TabOrder = 4
+    object RadioButton12: TRadioButton
+      Left = 13
+      Top = 17
+      Width = 71
+      Height = 17
+      Caption = 'Enabled'
+      TabOrder = 0
+    end
+    object RadioButton13: TRadioButton
+      Left = 13
+      Top = 38
+      Width = 72
+      Height = 17
+      Caption = 'Disabled'
+      TabOrder = 1
+    end
+  end
+  object GroupBox3: TGroupBox
+    Left = 335
+    Top = 8
+    Width = 107
+    Height = 77
+    Caption = 'RAM Expansion'
+    TabOrder = 5
+    object RadioButton5: TRadioButton
+      Left = 16
+      Top = 17
+      Width = 113
+      Height = 17
+      Caption = 'Disabled'
+      TabOrder = 0
+    end
+    object RadioButton6: TRadioButton
+      Left = 16
+      Top = 38
+      Width = 113
+      Height = 16
+      Caption = '512Kb'
+      TabOrder = 1
+    end
+    object RadioButton7: TRadioButton
+      Left = 16
+      Top = 56
+      Width = 112
+      Height = 17
+      Caption = '4Mb'
+      Enabled = False
+      TabOrder = 2
+    end
   end
 end

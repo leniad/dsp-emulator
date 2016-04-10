@@ -50,6 +50,7 @@ const
   KEYBOARD_HOME=74;
   KEYBOARD_END=77;
   KEYBOARD_CAPSLOCK=57;
+  KEYBOARD_AVPAG=78;
   //Modificadores
   KEYBOARD_LCTRL=224;
   KEYBOARD_LSHIFT=225;
@@ -90,6 +91,19 @@ const
   KEYBOARD_F10=67;
   KEYBOARD_F11=68;
   KEYBOARD_F12=69;
+  //Teclado Numerico
+  KEYBOARD_NRETURN=88;
+  KEYBOARD_N1=89;
+  KEYBOARD_N2=90;
+  KEYBOARD_N3=91;
+  KEYBOARD_N4=92;
+  KEYBOARD_N5=93;
+  KEYBOARD_N6=94;
+  KEYBOARD_N7=95;
+  KEYBOARD_N8=96;
+  KEYBOARD_N9=97;
+  KEYBOARD_N0=98;
+  KEYBOARD_NDOT=99;
   //Reservada la ultima para indicar que no hay tecla
   KEYBOARD_NONE=255;
 
@@ -346,6 +360,7 @@ begin
   event.keyboard:=false;
   event.mouse:=false;
   //Rellenar el teclado interno
+  //principal1.statusbar1.panels[2].text:=inttostr(sdl_event.key.keysym.scancode);
   for f:=0 to $ff do
       if keyboard[f]<>(keystate[f]<>0) then begin
         event.keyboard:=true;
@@ -354,25 +369,17 @@ begin
       end;
   //Las teclas independientes de los drivers
   if event.keyboard then begin
-     if (keyboard[KEYBOARD_F1] and not(keyboard[KEYBOARD_RSHIFT])) then main_vars.service1:=not(main_vars.service1);
-     if (keyboard[KEYBOARD_F2] and not(keyboard[KEYBOARD_RSHIFT])) then principal1.fFast(nil);
-     if (keyboard[KEYBOARD_F3] and not(keyboard[KEYBOARD_RSHIFT])) then principal1.Reset1Click(nil);
-     if (keyboard[KEYBOARD_F4] and not(main_screen.pantalla_completa) and not(keyboard[KEYBOARD_RSHIFT])) then begin
+     if keyboard[KEYBOARD_F1] then main_vars.service1:=not(main_vars.service1);
+     if keyboard[KEYBOARD_F2] then principal1.fFast(nil);
+     if keyboard[KEYBOARD_F3] then principal1.Reset1Click(nil);
+     if (keyboard[KEYBOARD_F4] and not(main_screen.pantalla_completa)) then begin
         if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
      end;
-     if (keyboard[KEYBOARD_F6] and not(keyboard[KEYBOARD_RSHIFT])) then pasar_pantalla_completa;
-     if (keyboard[KEYBOARD_F7] and not(keyboard[KEYBOARD_RSHIFT])) then begin
-        if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-01');
-     end;
-     if (keyboard[KEYBOARD_F8] and not(keyboard[KEYBOARD_RSHIFT])) then begin
-        if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-02');
-     end;
-     if (keyboard[KEYBOARD_F9] and not(keyboard[KEYBOARD_RSHIFT])) then begin
-        if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-01');
-     end;
-     if (keyboard[KEYBOARD_F10] and not(keyboard[KEYBOARD_RSHIFT])) then begin
-        if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-02');
-     end;
+     if keyboard[KEYBOARD_F6] then pasar_pantalla_completa;
+     if keyboard[KEYBOARD_F7] then if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-01');
+     if keyboard[KEYBOARD_F8] then if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-02');
+     if keyboard[KEYBOARD_F9] then if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-01');
+     if keyboard[KEYBOARD_F10] then if @llamadas_maquina.load_qsnap<>nil then llamadas_maquina.load_qsnap('-02');
      if keyboard[KEYBOARD_F11] then principal1.fSlow(nil);
   end;
   //Arcade

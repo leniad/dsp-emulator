@@ -470,6 +470,7 @@ object tape_window1: Ttape_window1
     ShowHint = True
     TabOrder = 2
     OnClick = StringGrid1Click
+    OnDblClick = StringGrid1DblClick
     ColWidths = (
       94
       94

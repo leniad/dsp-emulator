@@ -376,7 +376,7 @@ Case r.im of
         0:begin
             if self.daisy then MessageDlg('Mierda!!! Daisy chain en IM0!!', mtInformation,[mbOk], 0);
             r.pc:=self.im0 and $38;
-            estados_t:=estados_t+13;
+            estados_t:=estados_t+12;
           end;
         1:begin
             r.pc:=$38;

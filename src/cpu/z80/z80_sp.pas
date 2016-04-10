@@ -82,8 +82,12 @@ self.putbyte(r.sp,r.pc and $ff);
 r.IFF2:= false;
 r.IFF1:= False;
 Case r.im of
-        0,1:begin
-              r.pc:= $38; //13t
+        0:begin //12t
+              r.pc:= $38;
+              self.contador:=self.contador+12;
+            end;
+        1:begin //13t
+              r.pc:= $38;
               self.contador:=self.contador+13;
             end;
         2:begin //19t

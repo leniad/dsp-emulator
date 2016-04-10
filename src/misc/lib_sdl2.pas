@@ -47,11 +47,12 @@ type
     TSDL_SetHintWithPriority=function (const name:PChar;const value:PChar;priority:SDL_HintPriority):boolean;cdecl;
     TSDL_SetHint=function (const name:PChar;const value:PChar):boolean; cdecl;
     TSDL_SetSurfaceBlendMode=function (surface: PSDL_Surface; blendMode: TSDL_BlendMode):SInt32;cdecl;
-    {$ifndef windows}
+    {$ifdef fpc}
     TSDL_SetError=function(const fmt:PAnsiChar):SInt32;cdecl;
     TSDL_GetError=function:PAnsiChar;cdecl;
     TSDL_GetTicks=function:UInt32;cdecl;
     TSDL_SetWindowTitle=procedure(window:PSDL_Window;const title:PAnsiChar);cdecl;
+    TSDL_RaiseWindow=procedure (window: PSDL_Window) cdecl;
     {$endif}
     //Audio
     TSDL_OpenAudio=function(desired:PSDL_AudioSpec;obtained:PSDL_AudioSpec):Integer;cdecl;
@@ -72,6 +73,7 @@ type
     libsdl_AudioSpec=TSDL_AudioSpec;
     libSDL_AudioCallback=TSDL_AudioCallback;
     libSDL_puint8=PUint8;
+    libsdl_SysWMinfo=TSDL_SysWMinfo;
 
 const
   libAUDIO_S16=$8010;
@@ -137,11 +139,12 @@ var
   SDL_SetHintWithPriority:TSDL_SetHintWithPriority;
   SDL_SetHint:TSDL_SetHint;
   SDL_SetSurfaceBlendMode:TSDL_SetSurfaceBlendMode;
-  {$ifndef windows}
+  {$ifdef fpc}
   SDL_SetError:TSDL_SetError;
   SDL_GetError:TSDL_GetError;
   SDL_GetTicks:TSDL_GetTicks;
   SDL_SetWindowTitle:TSDL_SetWindowTitle;
+  SDL_RaiseWindow:TSDL_RaiseWindow;
   {$endif}
   //Audio
   SDL_OpenAudio:TSDL_OpenAudio;
@@ -219,7 +222,7 @@ end;
 //hint
 @SDL_SetHintWithPriority:=GetProcAddress(sdl_dll_Handle,'SDL_SetHintWithPriority');
 @SDL_SetHint:=GetProcAddress(sdl_dll_Handle,'SDL_SetHint');
-{$ifndef windows}
+{$ifdef fpc}
 //error
 @SDL_SetError:=GetProcAddress(sdl_dll_Handle,'SDL_SetError');
 @SDL_GetError:=GetProcAddress(sdl_dll_Handle,'SDL_GetError');
@@ -227,6 +230,7 @@ end;
 @SDL_GetTicks:=GetProcAddress(sdl_dll_Handle,'SDL_GetTicks');
 //video
 @SDL_SetWindowTitle:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowTitle');
+@SDL_RaiseWindow:=GetProcAddress(sdl_dll_Handle,'SDL_RaiseWindow');
 {$endif}
 //Audio
 @SDL_OpenAudio:=GetProcAddress(sdl_dll_Handle,'SDL_OpenAudio');

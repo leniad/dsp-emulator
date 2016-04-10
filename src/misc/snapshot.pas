@@ -1130,7 +1130,8 @@ end;
 type
   tcpc_sna=packed record
       magic:array[0..7] of ansichar;
-      unused1:array[0..7] of byte;
+      cpc_model:byte; // <-- Esto es mio!
+      unused1:array[0..6] of byte;
       version,flags,a:byte;
       bc,de,hl:word;
       r,i,iff1,iff2:byte;
@@ -1166,6 +1167,7 @@ ptemp:=pdatos;
 getmem(cpc_sna,sizeof(tcpc_sna));
 fillchar(cpc_sna^,sizeof(tcpc_sna),0);
 cpc_sna.magic:='MV - SNA';
+cpc_sna.cpc_model:=cpc_ga.cpc_model+1;
 cpc_sna.version:=3;
 if main_z80_reg.f.s then cpc_sna.flags:=cpc_sna.flags or $80;
 if main_z80_reg.f.z then cpc_sna.flags:=cpc_sna.flags or $40;
@@ -1259,6 +1261,7 @@ if (cpc_sna.magic)<>'MV - SNA' then begin
   freemem(cpc_sna);
   exit;
 end;
+if cpc_sna.cpc_model<>0 then cpc_ga.cpc_model:=cpc_sna.cpc_model-1;
 main_z80_reg:=main_z80.get_internal_r;
 main_z80_reg.f.s:=(cpc_sna.flags and $80)<>0;
 main_z80_reg.f.z:=(cpc_sna.flags and $40)<>0;
@@ -1295,9 +1298,8 @@ main_z80_reg.de2.w:=cpc_sna.de2;
 main_z80_reg.hl2.w:=cpc_sna.hl2;
 //GA
 cpc_ga.pen:=cpc_sna.ga_pen;
-cpc_ga.cpc_model:=0;
 copymemory(@cpc_ga.pal[0],@cpc_sna.ga_pal[0],17);
-write_ga($80+(cpc_sna.ga_conf and $3f));
+write_ga(0,$80+(cpc_sna.ga_conf and $3f));
 //RAM
 copymemory(@cpc_ga.marco[0],@ram_banks[(cpc_sna.ram_config and 7),0],4);
 //CRT
@@ -1377,7 +1379,6 @@ type
       version:word;
       unused:array[0..3] of byte;
   end;
-
   tcoleco_block=packed record
       nombre:array[0..3] of ansichar;
       longitud:dword;

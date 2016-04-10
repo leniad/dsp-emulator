@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,z80_sp,misc_functions,graphics,controls_engine,dialogs,lenguaje,
      sysutils,rom_engine,main_engine,gfx_engine,extctrls,pal_engine,
-     sound_engine,z80pio;
+     sound_engine,z80pio,file_engine;
 
 var
     rom_cambiada_48:boolean=false;
@@ -60,9 +60,12 @@ if not(spec_comun) then exit;
 spec_z80.change_retraso_call(spec48_retraso_memoria,spec48_retraso_puerto);
 spec_z80.change_ram_calls(spec48_getbyte,spec48_putbyte);
 spec_z80.change_io_calls(spec48_inbyte,spec48_outbyte);
-cadena:=solo_nombre(changefileext(extractfilename(Directory.spectrum_48),''));
+cadena:=file_name_only(changefileext(extractfilename(Directory.spectrum_48),''));
 if extension_fichero(Directory.spectrum_48)='ZIP' then rom_cargada:=carga_rom_zip(Directory.spectrum_48,cadena+'.ROM',@memoria[0],$4000,0,false)
-  else rom_cargada:=carga_rom_sp(Directory.spectrum_48,@memoria[0],$4000);
+  else begin
+    rom_cargada:=read_file(Directory.spectrum_48,@memoria[0],pos);
+    if pos<>$4000 then rom_cargada:=false;
+  end;
 if not(rom_cargada) then begin
   MessageDlg(leng[main_vars.idioma].errores[0]+' "'+Directory.spectrum_48+'"', mtError,[mbOk], 0);
   exit;
@@ -217,7 +220,7 @@ while EmuStatus=EsRuning do begin
     spec_z80.contador:=spec_z80.contador-224;
   end;
   spec_z80.pedir_irq:=IRQ_DELAY;
-  spectrum_irq_pos:=spec_z80.contador;
+  spectrum_irq_pos:=0;
   flash:=(flash+1) and $f;
   if flash=0 then haz_flash:=not(haz_flash);
   if mouse.tipo=1 then evalua_gunstick;
@@ -227,55 +230,33 @@ end;
 end;
 
 procedure spec48_retraso_memoria(direccion:word);
-var
-  estados:byte;
 begin
-case direccion of
-  $4000..$7fff:estados:=retraso[linea*224+spec_z80.contador];
-    else estados:=0;
-end;
-spec_z80.contador:=spec_z80.contador+estados;
+if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+retraso[linea*224+spec_z80.contador];
 end;
 
 procedure spec48_retraso_puerto(puerto:word);
 var
-  estados,estados_f:byte;
+  estados:byte;
   posicion:dword;
 begin
 posicion:=linea*224+spec_z80.contador;
-case puerto of
-  $4000..$7fff:begin
-                 if (puerto and 1)<>0 then begin //ultimo bit 1
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados_f+estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados_f+estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    estados_f:=estados_f+estados;
-                 end else begin //ultimo bit 0
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados;
-                    //
-                    estados:=retraso[posicion]+3;
-                    estados_f:=estados_f+estados;
-                 end;
-               end;
-  else begin
-          if (puerto and 1)<>0 then estados_f:=4 //ultimo bit 1
-            else estados_f:=1+retraso[posicion+1]+3; //ultimo bit 0
-       end;
+if (puerto and $c000)=$4000 then begin //Contenida
+    if (puerto and 1)<>0 then begin //ultimo bit 1
+       estados:=retraso[posicion]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+    end else begin //ultimo bit 0
+      estados:=retraso[posicion]+1;
+      estados:=estados+retraso[posicion+estados]+3;
+    end;
+end else begin
+    if (puerto and 1)<>0 then estados:=4 //ultimo bit 1
+       else estados:=1+retraso[posicion+1]+3; //ultimo bit 0
 end;
-spec_z80.contador:=spec_z80.contador+estados_f;
+spec_z80.contador:=spec_z80.contador+estados;
 end;
+
 
 function spec48_getbyte(direccion:word):byte;
 begin

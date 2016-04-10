@@ -4,8 +4,8 @@ object lenslock1: Tlenslock1
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'LensLock'
-  ClientHeight = 151
-  ClientWidth = 172
+  ClientHeight = 193
+  ClientWidth = 166
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,35 +19,47 @@ object lenslock1: Tlenslock1
   PixelsPerInch = 96
   TextHeight = 13
   object BitBtn1: TBitBtn
-    Left = 27
-    Top = 113
+    Left = 17
+    Top = 153
     Width = 43
     Height = 25
     Caption = 'Show'
     TabOrder = 0
+    TabStop = False
     OnClick = BitBtn1Click
   end
   object GroupBox2: TGroupBox
-    Left = 16
+    Left = 8
     Top = 8
-    Width = 137
+    Width = 145
     Height = 89
     Caption = 'LensLok'
     TabOrder = 1
     object Image1: TImage
-      Left = 3
-      Top = 16
-      Width = 130
-      Height = 60
+      Left = 9
+      Top = 19
+      Width = 127
+      Height = 57
     end
   end
   object BitBtn18: TBitBtn
-    Left = 96
-    Top = 113
+    Left = 101
+    Top = 153
     Width = 43
     Height = 25
     Caption = 'Close'
     TabOrder = 2
+    TabStop = False
     OnClick = close_button
+  end
+  object ComboBox1: TComboBox
+    Left = 8
+    Top = 112
+    Width = 137
+    Height = 21
+    TabOrder = 3
+    TabStop = False
+    Text = 'ComboBox1'
+    OnChange = ComboBox1Change
   end
 end

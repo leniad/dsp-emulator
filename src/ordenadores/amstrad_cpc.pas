@@ -21,6 +21,8 @@ const
   cpc6128sp_rom:tipo_roms=(n:'cpc6128sp.rom';l:$8000;p:0;crc:$2fa2e7d6);
   cpc6128d_rom:tipo_roms=(n:'cpc6128d.rom';l:$8000;p:0;crc:$4704685a);
   ams_rom:tipo_roms=(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd);
+  CANTIDAD_MEMORIA=1;
+  CANTIDAD_MEMORIA_MASK=7;
 
 type
   tcpc_crt=packed record
@@ -41,7 +43,7 @@ type
               lines_count,lines_sync,rom_selected:byte;
               rom_low,rom_high:boolean;
               marco:array[0..3] of byte;
-              marco_latch,cpc_model:byte;
+              marco_latch,cpc_model,ram_exp:byte;
            end;
   tcpc_ppi=packed record
               port_a_read_latch,port_a_write_latch:byte;
@@ -52,7 +54,7 @@ type
            end;
 
 var
-    cpc_mem:array[0..7,0..$3fff] of byte;
+    cpc_mem:array[0..((8+(64*CANTIDAD_MEMORIA))-1),0..$3fff] of byte;
     cpc_rom:array[0..15,0..$3fff] of byte;
     cpc_rom_slot:array[0..15] of string;
     cpc_low_rom:array[0..$3fff] of byte;
@@ -81,7 +83,7 @@ function cpc_porta_read:byte;
 function amstrad_raised_z80:byte;
 procedure amstrad_sound_update;
 //GA
-procedure write_ga(val:byte);
+procedure write_ga(puerto:word;val:byte);
 //CRT
 procedure write_crtc(port:word;val:byte);
 procedure cpc_calcular_dir_scr;
@@ -100,7 +102,7 @@ const
   z80_op:array[0..$ff] of byte=(
   //0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
     4, 12,  8,  8,  4,  4,  8,  4,  4, 12,  8,  8,  4,  4,  8,  4,  //0
-   12, 12,  8,  8,  4,  4,  8,  4, 16, 12,  8,  8,  4,  4,  8,  4,  //10
+   12, 12,  8,  8,  4,  4,  8,  4, 12, 12,  8,  8,  4,  4,  8,  4,  //10
     8, 12, 20,  8,  4,  4,  8,  4,  8, 12, 20,  8,  4,  4,  8,  4,  //20
     8, 12,TO2,  8, 12, 12, 12,  4,  8, 12, 16,  8,  4,  4,TO1,  4,  //30
     4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //40
@@ -111,20 +113,20 @@ const
     4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //90
     4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //A0
     4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //B0
-    8, 12, 12, 12, 12, 12,  8, 12,  8, 12, 12,  0, 12, 20,  8, 12,  //C0
-    8, 12, 12, 12, 12, 12,  8, 12,  8,  4, 12, 12, 12,  0,  8, 12,  //D0*
-    8, 12, 12, 20, 12, 12,TO1, 12,  8,  4, 12,  4, 12,  0,  8, 12,  //E0
-    8, 12, 12,  4, 12, 12,  8, 12,  8,  8, 12,  4, 12,  0,  8, 12); //F0
+    8, 12, 12, 12, 12, 16,  8, 16,  8, 12, 12,  0, 12, 20,  8, 16,  //C0
+    8, 12, 12,  8, 12, 16,  8, 16,  8,  4, 12, 12, 12,  0,  8, 16,  //D0*
+    8, 12, 12, 24, 12, 16,TO1, 16,  8,  4, 12,  4, 12,  0,  8, 16,  //E0
+    8, 12, 12,  4, 12, 16,  8, 16,  8,  8, 12,  4, 12,  0,  8, 16); //F0
 
   z80_op_cb:array[0..$ff] of byte=(
-		8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //0
+    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //0
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //10
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //20
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //30
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //40
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //50
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //60
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //70
+    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //40
+    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //50
+    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //60
+    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //70
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //80
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
@@ -133,46 +135,44 @@ const
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
     8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8);
-  TE1=12; //16??
-
-  z80_op_ed:array[0..$ff] of byte=(
+    T1=12; //16
+    z80_op_ed:array[0..$ff] of byte=(
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //00
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //10
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //20
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //30
-       12,12,16,20, 8,16, 8,12,12,12,16,20, 8,16, 8,12,  //40
-       12,12,16,20, 8,16, 8,12,12,12,16,20, 8,16, 8,12,  //50
-       12,12,16,20, 8,16, 8,20,12,12,16,20, 8,16, 8,20,
-       12,12,16,20, 8,16, 8, 8,12,12,16,20, 8,16, 8, 8,  //70
+       16,12,16,24, 8,16, 8,12,12,16,16,24, 8,16, 8,12,  //40
+       16,12,16,24, 8,16, 8,12,12,16,16,24, 8,16, 8,12,  //50
+       16,12,16,24, 8,16, 8,20,12,16,16,24, 8,16, 8,20,
+       16,12,16,24, 8,16, 8, 8,12,T1,16,24, 8,16, 8, 8,  //70
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //90
-       16,16,16,16, 8, 8, 8, 8,16,16,16,16, 8, 8, 8, 8,  //a0
-       16,16,16,16, 8, 8, 8, 8,16,16,16,16, 8, 8, 8, 8,
+       20,16,20,16, 8, 8, 8, 8,20,16,20,16, 8, 8, 8, 8,  //a0
+       20,16,20,16, 8, 8, 8, 8,20,16,20,16, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8);
-
   z80_op_dd:array[0..$ff] of byte=(
    //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-	   8,16,12,12, 8, 8,12, 8, 8,16,12,12, 8, 8,12, 8,
-    12,16,12,12, 8, 8,12, 8,16,16,12,12, 8, 8,12, 8,
-	  12,16,20,12, 8, 8,12, 8,12,16,20,12, 8, 8,12, 8,
-	  12,16,20,12,24,24,20, 8,12,16,20,12, 8, 8,12, 8,
-	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+     8,16,12,12, 8, 8,12, 8, 8,16,12,12, 8, 8,12, 8,
+    16,16,12,12, 8, 8,12, 8,16,16,12,12, 8, 8,12, 8,
+    12,16,24,12, 8, 8,12, 8,12,16,24,12, 8, 8,12, 8,
+    12,16,20,12,24,24,24, 8,12,16,20,12, 8, 8,12, 8,
+     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
     20,20,20,20,20,20, 8,20, 8, 8, 8, 8, 8, 8,20, 8,
-	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-	   8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-    12,16,16,16,16,16,12,16,12,16,16, 0,16,21,12,16, // cb -> cc_xycb */
-    12,16,16,16,16,16,12,16,12, 8,16,16,16, 4,12,16, // dd -> cc_xy again */
-    12,16,16,24,16,16,12,16,12, 8,16, 8,16, 4,12,16, // ed -> cc_ed */
-    12,16,16, 8,16,16,12,16,12,12,16, 8,16, 4,12,16); //F0
+     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
+    12,16,16,16,16,20,12,20,12,16,16, 0,16,24,12,20, // cb -> cc_xycb */
+    12,16,16,12,16,20,12,20,12, 8,16,16,16, 8,12,20, // dd -> cc_xy again */
+    12,16,16,28,16,20,12,20,12, 8,16, 8,16, 8,12,20, // ed -> cc_ed */
+    12,16,16, 8,16,20,12,20,12,12,16, 8,16, 8,12,20); //F0
   z80_op_ddcb:array[0..$ff] of byte=(
-	 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
    28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
    28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
    28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
@@ -202,7 +202,7 @@ const
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //80
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //90
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //a0
-    4,  4,  4,  4,  0,  0,  0,  0,  4,  4,  4,  4,  0,  0,  0,  0, //b0
+    4,  8,  4,  4,  0,  0,  0,  0,  4,  8,  4,  4,  0,  0,  0,  0, //b0
     8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0, //c0
     8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0, //d0
     8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0, //e0
@@ -242,9 +242,24 @@ var
   memoria_temp:array[0..$7fff] of byte;
   tempb:boolean;
   long:integer;
+  cadena:string;
 begin
-case main_vars.tipo_maquina of
-  7:begin
+if cpc_ga.cpc_model=4 then begin
+  cadena:=file_name_only(changefileext(extractfilename(cpc_rom_slot[0]),''));
+  if extension_fichero(cpc_rom_slot[0])='ZIP' then tempb:=carga_rom_zip(cpc_rom_slot[0],cadena+'.ROM',@memoria_temp[0],$4000,0,false)
+    else begin
+      tempb:=read_file(cpc_rom_slot[0],@memoria_temp[0],long);
+      if long<>$4000 then tempb:=false;
+    end;
+  if not(tempb) then begin
+    MessageDlg('ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+    cpc_ga.cpc_model:=0;
+    if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
+  end;
+  if main_vars.tipo_maquina<>7 then if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
+end else begin
+  case main_vars.tipo_maquina of
+    7:begin
       tempb:=false;
       case cpc_ga.cpc_model of
         0:tempb:=true;
@@ -267,12 +282,12 @@ case main_vars.tipo_maquina of
       if tempb then if not(cargar_roms(@memoria_temp[0],@cpc464_rom,'cpc464.zip')) then exit;
       fillchar(cpc_rom[7,0],$4000,0);
     end;
-  8:begin
+    8:begin
       if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc664.zip')) then exit;
       if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip')) then exit;
       cpc_ga.cpc_model:=0;
-  end;
-  9:begin
+    end;
+    9:begin
       if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
       tempb:=false;
       case cpc_ga.cpc_model of
@@ -294,13 +309,25 @@ case main_vars.tipo_maquina of
           end;
       end;
       if tempb then if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
+    end;
   end;
 end;
 copymemory(@cpc_low_rom[0],@memoria_temp[0],$4000);
 copymemory(@cpc_rom[0,0],@memoria_temp[$4000],$4000);
+//Cargar las roms de los slots, comprimidas o no...
 for f:=1 to 6 do begin
-  if cpc_rom_slot[f]<>'' then read_file(cpc_rom_slot[f],@cpc_rom[f,0],long)
-    else fillchar(cpc_rom[f,0],$4000,0);
+  if cpc_rom_slot[f]<>'' then begin
+    cadena:=file_name_only(changefileext(extractfilename(cpc_rom_slot[f]),''));
+    if extension_fichero(cpc_rom_slot[f])='ZIP' then tempb:=carga_rom_zip(cpc_rom_slot[f],cadena+'.ROM',@cpc_rom[f,0],$4000,0,false)
+      else begin
+        tempb:=read_file(cpc_rom_slot[f],@cpc_rom[f,0],long);
+        if long<>$4000 then tempb:=false;
+      end;
+    if not(tempb) then begin
+      MessageDlg('Error loading ROM on slot '+inttostr(f)+'...', mtInformation,[mbOk], 0);
+      fillchar(cpc_rom[f,0],$4000,0);
+    end;
+  end else fillchar(cpc_rom[f,0],$4000,0);
 end;
 end;
 
@@ -309,20 +336,8 @@ var
   f:byte;
   colores:tpaleta;
 begin
-//Lateral
-principal1.Panel2.Visible:=true;
-//Botones Lateral
-principal1.BitBtn1.visible:=true;
-principal1.BitBtn9.visible:=true;
-principal1.BitBtn11.visible:=true;
-principal1.BitBtn10.visible:=true;
 principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
-principal1.BitBtn9.enabled:=true;
-principal1.BitBtn1.enabled:=true;
-principal1.BitBtn11.enabled:=true;
-principal1.BitBtn8.visible:=false;
-if main_vars.tipo_maquina<>7 then principal1.BitBtn10.enabled:=true;
 iniciar_cpc:=false;
 iniciar_audio(false);
 screen_init(1,pantalla_largo,pantalla_alto);
@@ -367,8 +382,6 @@ close_video;
 end;
 
 procedure cpc_reset;
-var
-  tempb:byte;
 begin
   main_z80.reset;
   ay8910_0.reset;
@@ -380,11 +393,20 @@ begin
   cinta_tzx.value:=0;
   ResetFDC;
   //Init GA
-  tempb:=cpc_ga.cpc_model;
-  fillchar(cpc_ga,sizeof(tcpc_ga),0);
-  cpc_ga.cpc_model:=tempb;
+  cpc_ga.pen:=0;
+  cpc_ga.video_mode:=0;
+  cpc_ga.video_mode_new:=0;
+  cpc_ga.video_change:=false;
+  //cpc_ga.dktronics no lo toco
+  fillchar(cpc_ga.pal[0],16,0);
+  cpc_ga.lines_count:=0;
+  cpc_ga.lines_sync:=0;
+  cpc_ga.rom_selected:=0;
   cpc_ga.rom_low:=true;
+  cpc_ga.rom_high:=false;
   copymemory(@cpc_ga.marco[0],@ram_banks[0,0],4);
+  cpc_ga.marco_latch:=0;
+  //cpc_ga.cpc_model; no lo toco
   //CRT
   fillchar(cpc_crt^,sizeof(tcpc_crt),0);
   cpc_crt.char_altura:=1;
@@ -401,46 +423,36 @@ if event.keyboard then begin
   if keyboard[KEYBOARD_UP] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fe) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $1);
   if keyboard[KEYBOARD_RIGHT] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fd) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $2);
   if keyboard[KEYBOARD_DOWN] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fb) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $4);
-  if (keyboard[KEYBOARD_f9] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $f7) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $8);
-  if (keyboard[KEYBOARD_f6] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $ef) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $10);
-  if (keyboard[KEYBOARD_f3] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $df) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $20);
+  if keyboard[KEYBOARD_N9] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $f7) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $8);
+  if keyboard[KEYBOARD_N6] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $ef) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $10);
+  if keyboard[KEYBOARD_N3] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $df) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $20);
   if keyboard[KEYBOARD_HOME] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $bf) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $40);
-  //F Dot
+  if keyboard[KEYBOARD_NDOT] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $7f) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $80);
 //Line 1
   if keyboard[KEYBOARD_LEFT] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fe) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or 1);
   if keyboard[KEYBOARD_LALT] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fd) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or 2);
-  if (keyboard[KEYBOARD_f7] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fb) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $4);
-  if (keyboard[KEYBOARD_f8] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $f7) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $8);
-  if keyboard[KEYBOARD_f5] then begin
-    if (keyboard[KEYBOARD_RSHIFT]) then begin
-        cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $ef);
-    end else begin
-        clear_disk(0);
-        change_caption(llamadas_maquina.caption);
-      end;
-  end else begin
-        cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $10)
+  if keyboard[KEYBOARD_N7] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $fb) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $4);
+  if keyboard[KEYBOARD_N8] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $f7) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $8);
+  if keyboard[KEYBOARD_F5] then begin
+    clear_disk(0);
+    change_caption(llamadas_maquina.caption);
   end;
-  if keyboard[KEYBOARD_f1] then begin
-    if keyboard[KEYBOARD_RSHIFT] then begin
-      cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $df);
-    end else begin
+  if keyboard[KEYBOARD_N5] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $ef) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $10);
+  if keyboard[KEYBOARD_F1] then begin
       if cinta_tzx.cargada then begin
         if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
           else tape_window1.fPlayCinta(nil);
       end;
-    end;
-  end else begin
-    cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $20);
   end;
-  if (keyboard[KEYBOARD_f2] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $bf) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $40);
-  if (keyboard[KEYBOARD_f10] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $7f) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $80);
+  if keyboard[KEYBOARD_N1] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $df) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $20);
+  if keyboard[KEYBOARD_N2] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $bf) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $40);
+  if keyboard[KEYBOARD_N0] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $7f) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $80);
 //Line 2
   if keyboard[KEYBOARD_FILA0_T0] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fe) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 1);
   if keyboard[KEYBOARD_FILA1_T2] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fd) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 2);
-  if keyboard[KEYBOARD_RETURN] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fb) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 4);
+  if (keyboard[KEYBOARD_RETURN] or keyboard[KEYBOARD_NRETURN]) then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $fb) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 4);
   if keyboard[KEYBOARD_FILA2_T3] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $f7) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or 8);
-  if (keyboard[KEYBOARD_f4] and keyboard[KEYBOARD_RSHIFT])then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $ef) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $10);
+  if keyboard[KEYBOARD_N4] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $ef) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $10);
   if (keyboard[KEYBOARD_LSHIFT] or keyboard[KEYBOARD_RSHIFT]) then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $df) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $20);
   if keyboard[KEYBOARD_FILA3_T3] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $bf) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $40);
   if keyboard[KEYBOARD_LCTRL] then cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] and $7f) else cpc_ppi.keyb_val[2]:=(cpc_ppi.keyb_val[2] or $80);
@@ -719,9 +731,21 @@ begin
 cpc_mem[cpc_ga.marco[direccion shr 14],direccion and $3fff]:=valor;
 end;
 
-procedure write_ga(val:byte);
+procedure write_ga(puerto:word;val:byte);
+var
+  f:byte;
 begin
-  case (val shr 6) of
+{if cpc_ga.ram_exp=2 then begin
+  if (puerto and $7800)=$7800 then begin
+    copymemory(@cpc_ga.marco[0],@ram_banks[(val and 7),0],4);
+    for f:=0 to 3 do begin
+      if cpc_ga.marco[f]>3 then cpc_ga.marco[f]:=(4-cpc_ga.marco[f])+(((val shr 3) and 7)*4)+(((7-((puerto shr 8) and 7)) and CANTIDAD_MEMORIA_MASK)*32)+8;
+    end;
+    cpc_ga.marco_latch:=val and 7;
+    exit;
+  end;
+end;}
+case (val shr 6) of
           $0:if (val and $10)=0 then cpc_ga.pen:=val and 15 //Select pen
                 else cpc_ga.pen:=$10; //Border
           $1:cpc_ga.pal[cpc_ga.pen]:=val and 31;    //Change pen colour
@@ -735,12 +759,25 @@ begin
                    main_z80.pedir_irq:=CLEAR_LINE;
                 end;
             end;
-          //C6128 RAM Bank only
-          $3:begin
-                if main_vars.tipo_maquina=9 then copymemory(@cpc_ga.marco[0],@ram_banks[(val and 7),0],4);
-                cpc_ga.marco_latch:=val and 7;
-             end;
-        end;
+          3:if cpc_ga.ram_exp=1 then begin //Dk'tronics RAM expansion
+              {Como funciona...
+              Los bits 7 y 6 son 1 siempre (para indicar la funcion de mapeo de memoria
+              Los bits 5,4 y 3 indican el banco de 64K interno de la expansion
+                Bancos 0,1,2 y 3 RAM expansion
+                Bancos 4,5,6 y 7 SDISC
+              El bit 2 --> ??????
+              Los bits 1 y 0 indican el marco que hay que aplicar (del estandar del CPC). Dentro del
+                marco los numeros 0,1,2 y 3 son la memoria del CPC y los 4,5,6 y 7 son la memoria expandida}
+              copymemory(@cpc_ga.marco[0],@ram_banks[(val and 7),0],4);
+              for f:=0 to 3 do begin
+                if cpc_ga.marco[f]>3 then cpc_ga.marco[f]:=(4-cpc_ga.marco[f])+(((val shr 3) and 7)*4)+8;
+              end;
+              cpc_ga.marco_latch:=val and 7;
+            end else begin //C6128 RAM Bank only
+              if main_vars.tipo_maquina=9 then copymemory(@cpc_ga.marco[0],@ram_banks[(val and 7),0],4);
+              cpc_ga.marco_latch:=val and 7;
+            end;
+  end;
 end;
 
 procedure cpc_calc_crt;
@@ -784,12 +821,12 @@ end;
 
 procedure cpc_outbyte(valor:byte;puerto:word);
 begin
-if (puerto and $8000)=0 then write_ga(valor);
-if (puerto and $4000)=0 then write_crtc(puerto,valor);
-if (puerto and $2000)=0 then cpc_ga.rom_selected:=valor and $f;
-if (puerto and $1000)=0 then exit; //printer
-if (puerto and $0800)=0 then ppi8255_w(0,(puerto and $300) shr 8,valor);
-if (puerto and $0581)=$101 then WriteFDCData(valor);
+if (puerto and $c000)=$4000 then write_ga(puerto,valor)
+  else if (puerto and $4000)=0 then write_crtc(puerto,valor)
+    else if (puerto and $2000)=0 then cpc_ga.rom_selected:=valor and $f
+      else if (puerto and $1000)=0 then exit //printer
+        else if (puerto and $0800)=0 then ppi8255_w(0,(puerto and $300) shr 8,valor)
+          else if (puerto and $0581)=$101 then WriteFDCData(valor);
 end;
 
 function read_crtc(port:word):byte;inline;
@@ -807,14 +844,14 @@ var
   res:byte;
 begin
 res:=$FF;
-if (puerto and $4000)=0 then res:=read_crtc(puerto);
-if (puerto and $0800)=0 then res:=ppi8255_r(0,(puerto and $300) shr 8);
-if (puerto and $0480)=$0 then begin
-  case (puerto and $101) of
-    $100:res:=ReadFDCStatus;
-    $101:res:=ReadFDCData;
-  end;
-end;
+if (puerto and $4000)=0 then res:=read_crtc(puerto)
+  else if (puerto and $0800)=0 then res:=ppi8255_r(0,(puerto and $300) shr 8)
+    else if (puerto and $0480)=$0 then begin
+      case (puerto and $101) of
+        $100:res:=ReadFDCStatus;
+        $101:res:=ReadFDCData;
+      end;
+    end;
 cpc_inbyte:=res;
 end;
 

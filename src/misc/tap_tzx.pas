@@ -630,28 +630,28 @@ lenslok.indice:=255;
 while cinta_tzx.datos_tzx[indice].tipo_bloque<>$fe do begin
   case cinta_tzx.datos_tzx[indice].crc32 of
    $92DC40D8:sd_1:=true; //Camelot Warriors con SD1
-   $45169147,$ead7b3a9:begin
+   $45169147,$ead7b3a9:begin //TT RACER
               lenslok.indice:=6;
-              lenslok.activo:=true;
-              break;  //TT RACER
-             end;
-   $8B28031E:begin
-              lenslok.indice:=5;
-              lenslok.activo:=true;
-              break;  //TOMAHAWK
-             end;
-   $D6F54F87:begin
-              lenslok.indice:=1;
-              lenslok.activo:=true;
-              break;    //ART STUDIO
-             end;
-   $FAA60847,$DC38C227:begin
-              lenslok.indice:=2;  //ELITE
               lenslok.activo:=true;
               break;
              end;
-   $F278B4A0,$1B81DD6D:begin
-              lenslok.indice:=0;  //ACE
+   $8B28031E,$881bd3e1:begin  //TOMAHAWK Spectrum & Amstrad
+              lenslok.indice:=5;
+              lenslok.activo:=true;
+              break;
+             end;
+   $D6F54F87:begin //ART STUDIO
+              lenslok.indice:=1;
+              lenslok.activo:=true;
+              break;
+             end;
+   $FAA60847,$DC38C227:begin //ELITE
+              lenslok.indice:=2;
+              lenslok.activo:=true;
+              break;
+             end;
+   $F278B4A0,$1B81DD6D:begin //ACE
+              lenslok.indice:=0;
               lenslok.activo:=true;
               break;
              end;
@@ -661,6 +661,7 @@ indice:=indice+1;
 end;
 tape_window1.label2.caption:='';
 if lenslok.activo then begin
+  lenslock1.combobox1.ItemIndex:=lenslok.indice;
   lenslock1.Show;
   tape_window1.label2.caption:='LensLok Protection Active';
 end;

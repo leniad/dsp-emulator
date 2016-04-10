@@ -56,7 +56,7 @@ var
   dsk:array[0..1] of DskImg;
 
 implementation
-uses principal,sysutils;
+uses principal,sysutils,lenslock;
 
 type
   tdsk_header=packed record
@@ -235,7 +235,20 @@ begin
             $8c817e25,$4b616c83:dsk[drvnum].Tracks[0,40].sector[6].sector_size:=2; //Titus the fox
             $57a3276f:dsk[drvnum].Tracks[0,39].sector[10].sector_size:=0; //Prehistorik
             $f05fe06e:dsk[drvnum].Tracks[0,39].sector[0].sector_size:=2; //Prehistorik alt
+            $31388451:begin // Tomahawk
+                        lenslok.indice:=5;
+                        lenslock1.Show;
+                      end;
+            $23a68c26:begin //Graphic Adventure Creator
+                        lenslok.indice:=7;
+                        lenslock1.Show;
+                      end;
+            $4c23dda4:begin // Art Studio
+                        lenslok.indice:=1;
+                        lenslock1.Show;
+                      end;
           end;
+          if lenslock1.Showing then lenslock1.combobox1.ItemIndex:=lenslok.indice;
         end;
    2:begin  //Comprobar SpeedLock +3
       puntero:=dsk[drvnum].Tracks[0,0].data;

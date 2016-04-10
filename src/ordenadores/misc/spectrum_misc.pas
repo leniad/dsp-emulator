@@ -123,8 +123,6 @@ procedure reset_misc;
 procedure spectrum_despues_instruccion(estados_t:byte);
 procedure evalua_gunstick;
 procedure spec_a_pantalla(posicion_memoria:pbyte;imagen1:Tbitmap);
-function solo_nombre(cadena:string):string;
-function carga_rom_sp(nombre:string;posicion:pointer;longitud:integer):boolean;
 //AMX Mouse
 procedure pio_int_main(state:byte);
 function pio_read_porta:byte;
@@ -412,28 +410,12 @@ if borde.tipo=2 then begin
     1,2,3,4:borde.borde_spectrum:=borde_128_full;
   end;
 end else borde.borde_spectrum:=borde_normal;
-//Lateral
-principal1.Panel2.Visible:=true;
-//Botones Lateral
-principal1.bitbtn1.visible:=true;
-principal1.BitBtn9.visible:=true;
-principal1.BitBtn8.visible:=false;
-principal1.BitBtn10.visible:=true;
-principal1.BitBtn11.visible:=true;
-principal1.BitBtn12.visible:=true;
-principal1.BitBtn14.visible:=true;
 principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
-principal1.BitBtn1.enabled:=true;
-principal1.BitBtn9.enabled:=true;
-if (main_vars.tipo_maquina=2) then principal1.BitBtn10.enabled:=true;
-principal1.BitBtn11.enabled:=true;
-principal1.BitBtn12.enabled:=true;
-principal1.BitBtn14.enabled:=true;
-//Tape Stop and Fastload enabled
-fastload:=true;
 principal1.BitBtn14.Glyph:=nil;
 principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph);
+//Tape Stop and Fastload enabled
+fastload:=true;
 cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
@@ -727,40 +709,6 @@ end;
 function pio_read_portb:byte;
 begin
   pio_read_portb:=mouse.data_b;
-end;
-
-function solo_nombre(cadena:string):string;
-var
-  f:word;
-  cadena2:string;
-begin
-for f:=length(cadena) downto 1 do begin
-  if cadena[f]=main_vars.cadena_dir then begin
-    cadena2:=copy(cadena,f+1,length(cadena)-f);
-    break;
-  end;
-end;
-if cadena2='' then cadena2:=cadena;
-solo_nombre:=cadena2;
-end;
-
-//Esta funcion es exclusiva del Spectrum 48K, el resto carga siempre de ZIP
-function carga_rom_sp(nombre:string;posicion:pointer;longitud:integer):boolean;
-var
-  fichero:file of byte;
-  l,long_total:integer;
-begin
-carga_rom_sp:=false;
-if not(FileExists(nombre)) then exit;
-{$I-}
-assignfile(fichero,nombre);
-reset(fichero);
-long_total:=filesize(fichero);
-blockread(fichero,posicion^,longitud,l);
-closefile(fichero);
-if (l<>long_total) then exit;
-carga_rom_sp:=true;
-{$I+}
 end;
 
 end.

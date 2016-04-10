@@ -242,7 +242,7 @@ while EmuStatus=EsRuning do begin
     spec_z80.contador:=spec_z80.contador-228;
   end;
   spec_z80.pedir_irq:=IRQ_DELAY;
-  spectrum_irq_pos:=spec_z80.contador;
+  spectrum_irq_pos:=0;
   flash:=(flash+1) and $f;
   if flash=0 then haz_flash:=not(haz_flash);
   if mouse.tipo=1 then evalua_gunstick;
@@ -254,79 +254,38 @@ end;
 procedure spec128_retraso_memoria(direccion:word);
 var
   estados:byte;
+  posicion:dword;
 begin
 estados:=0;
-case direccion of
-  $4000..$7fff:estados:=retraso[linea*228+spec_z80.contador];
-  $c000..$ffff:if ((marco[3] and 1)<>0) then estados:=retraso[linea*228+spec_z80.contador];
+posicion:=linea*228+spec_z80.contador;
+case (direccion and $c000) of
+  $4000:estados:=retraso[posicion];
+  $c000:if ((marco[3] and 1)<>0) then estados:=retraso[posicion];
 end;
 spec_z80.contador:=spec_z80.contador+estados;
 end;
 
 procedure spec128_retraso_puerto(puerto:word);
 var
-  estados,estados_f:byte;
+  estados:byte;
   posicion:dword;
 begin
 posicion:=linea*228+spec_z80.contador;
-case puerto of
-  $4000..$7fff:if (puerto and 1)<>0 then begin //ultimo bit 1
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados_f+estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados_f+estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    estados_f:=estados_f+estados;
-                 end else begin //ultimo bit 0
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados;
-                    //
-                    estados:=retraso[posicion]+3;
-                    estados_f:=estados_f+estados;
-                 end;
-  $c000..$ffff:if (marco[3] and 1)<>0 then begin
-                 if (puerto and 1)<>0 then begin //ultimo bit 1
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados_f+estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados_f+estados;
-                    //
-                    estados:=retraso[posicion]+1;
-                    estados_f:=estados_f+estados;
-                 end else begin //ultimo bit 0
-                    estados:=retraso[posicion]+1;
-                    posicion:=posicion+estados;
-                    estados_f:=estados;
-                    //
-                    estados:=retraso[posicion]+3;
-                    estados_f:=estados_f+estados;
-                 end;
-               end else begin
-                  if (puerto and 1)<>0 then estados_f:=4 //ultimo bit 1
-                    else estados_f:=1+retraso[posicion+1]+3; //ultimo bit 0
-               end
-      else begin
-          if (puerto and 1)<>0 then estados_f:=4 //ultimo bit 1
-            else estados_f:=1+retraso[posicion+1]+3; //ultimo bit 0
-      end;
+if (puerto and $c000)=$4000 then begin //Contenida
+    if (puerto and 1)<>0 then begin //ultimo bit 1
+       estados:=retraso[posicion]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+    end else begin //ultimo bit 0
+      estados:=retraso[posicion]+1;
+      estados:=estados+retraso[posicion+estados]+3;
+    end;
+end else begin
+    if (puerto and 1)<>0 then estados:=4 //ultimo bit 1
+       else estados:=1+retraso[posicion+1]+3; //ultimo bit 0
 end;
-spec_z80.contador:=spec_z80.contador+estados_f;
+spec_z80.contador:=spec_z80.contador+estados;
 end;
 
 function spec128_getbyte(direccion:word):byte;

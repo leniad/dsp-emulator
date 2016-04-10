@@ -1,8 +1,8 @@
 object principal1: Tprincipal1
-  Left = 882
+  Left = 233
   Height = 355
-  Top = 171
-  Width = 340
+  Top = 200
+  Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
   ActiveControl = Panel1
@@ -10,7 +10,7 @@ object principal1: Tprincipal1
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
   ClientHeight = 335
-  ClientWidth = 340
+  ClientWidth = 341
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
   Font.Height = -11
@@ -26,10 +26,10 @@ object principal1: Tprincipal1
     Left = 0
     Height = 33
     Top = 0
-    Width = 340
+    Width = 341
     Align = alTop
     ClientHeight = 33
-    ClientWidth = 340
+    ClientWidth = 341
     TabOrder = 0
     object BitBtn2: TBitBtn
       Left = 5
@@ -103,6 +103,8 @@ object principal1: Tprincipal1
       }
       Layout = blGlyphTop
       OnClick = Reset1Click
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 0
       TabStop = False
     end
@@ -178,6 +180,8 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       OnClick = Ejecutar1Click
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 1
       TabStop = False
     end
@@ -252,6 +256,8 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       OnClick = Pausa1Click
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 2
       TabStop = False
     end
@@ -326,6 +332,8 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       OnClick = fSlow
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 3
       TabStop = False
     end
@@ -400,6 +408,8 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       OnClick = fFast
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 4
       TabStop = False
     end
@@ -474,6 +484,8 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       OnClick = fConfigurar_general
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 5
       TabStop = False
     end
@@ -481,7 +493,7 @@ object principal1: Tprincipal1
       Left = 231
       Height = 29
       Hint = 'Save Image'
-      Top = 1
+      Top = 0
       Width = 29
       Glyph.Data = {
         EE070000424DEE070000000000003600000028000000190000001A0000000100
@@ -550,6 +562,8 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00
       }
       OnClick = fSaveGIF
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 6
       TabStop = False
     end
@@ -617,14 +631,16 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFF0000
       }
       OnClick = BitBtn8Click
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 7
       TabStop = False
     end
     object BitBtn13: TBitBtn
-      Left = 303
+      Left = 304
       Height = 29
       Hint = 'Change Driver'
-      Top = 1
+      Top = 0
       Width = 29
       Glyph.Data = {
         56080000424D560800000000000036000000280000001A0000001A0000000100
@@ -696,6 +712,8 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000
       }
       OnClick = LstRomsClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 8
       TabStop = False
     end
@@ -1075,7 +1093,7 @@ object principal1: Tprincipal1
     end
   end
   object Panel2: TPanel
-    Left = 291
+    Left = 292
     Height = 283
     Top = 33
     Width = 49
@@ -1193,11 +1211,13 @@ object principal1: Tprincipal1
       }
       Layout = blGlyphTop
       OnClick = fLoadCinta
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 0
       TabStop = False
     end
     object BitBtn10: TBitBtn
-      Left = 5
+      Left = 6
       Height = 41
       Hint = 'Open Disk'
       Top = 92
@@ -1304,6 +1324,8 @@ object principal1: Tprincipal1
       }
       Layout = blGlyphTop
       OnClick = fLoadCartucho
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 1
       TabStop = False
     end
@@ -1415,11 +1437,13 @@ object principal1: Tprincipal1
       }
       Layout = blGlyphTop
       OnClick = fSaveSnapShot
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 2
       TabStop = False
     end
     object BitBtn12: TBitBtn
-      Left = 5
+      Left = 6
       Height = 41
       Hint = 'Poke Memory'
       Top = 184
@@ -1524,6 +1548,9 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
+      OnClick = BitBtn12Click
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 3
       TabStop = False
     end
@@ -1634,11 +1661,13 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
       OnClick = BitBtn14Click
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 4
       TabStop = False
     end
     object BitBtn1: TBitBtn
-      Left = 5
+      Left = 6
       Height = 41
       Hint = 'Config'
       Top = 3
@@ -1723,55 +1752,23 @@ object principal1: Tprincipal1
         F500
       }
       OnClick = BitBtn8Click
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 5
       TabStop = False
-    end
-  end
-  object GroupBox4: TGroupBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Owner
-    Left = 4
-    Height = 252
-    Top = 36
-    Width = 228
-    Anchors = []
-    BorderSpacing.Left = 2
-    BorderSpacing.Top = 34
-    BorderSpacing.Bottom = 2
-    BorderSpacing.Around = 2
-    ClientHeight = 234
-    ClientWidth = 224
-    Font.CharSet = ANSI_CHARSET
-    Font.Color = clBlack
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Pitch = fpVariable
-    Font.Quality = fqDraft
-    ParentFont = False
-    TabOrder = 3
-    object Panel4: TPanel
-      AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = GroupBox4
-      Left = 3
-      Height = 142
-      Top = 44
-      Width = 201
-      Anchors = [akLeft]
-      BorderSpacing.Around = 3
-      TabOrder = 0
     end
   end
   object Panel5: TPanel
     Left = 0
     Height = 19
     Top = 316
-    Width = 340
+    Width = 341
     Align = alBottom
     ClientHeight = 19
-    ClientWidth = 340
-    TabOrder = 4
+    ClientWidth = 341
+    TabOrder = 3
     object Image1: TImage
-      Left = 315
+      Left = 316
       Height = 19
       Top = 0
       Width = 25
@@ -1967,7 +1964,7 @@ object principal1: Tprincipal1
           OnClick = CambiarVideo
         end
       end
-      object Config1: TMenuItem
+      object Configuracion1: TMenuItem
         Caption = 'Configuracion'
         OnClick = fConfigurar_general
       end

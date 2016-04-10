@@ -25,6 +25,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure BitBtn9Click(Sender: TObject);
     procedure StringGrid1Click(Sender: TObject);
+    procedure StringGrid1DblClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -33,7 +34,6 @@ type
 
 var
   tape_window1: Ttape_window1;
-  tape_bitmap:tbitmap;
 
 implementation
 uses principal,tap_tzx,main_engine;
@@ -44,7 +44,7 @@ procedure Ttape_window1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 cinta_tzx.play_tape:=false;
 vaciar_cintas;
-Tape_bitmap.Destroy;
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Ttape_window1.FormShow(Sender: TObject);
@@ -52,7 +52,6 @@ begin
 //Hacer que no se solape con la principal
 tape_window1.Left:=SCREEN_DIF+principal1.Left+principal1.Width;
 tape_window1.top:=principal1.top;
-Tape_Bitmap:=TBitmap.Create;
 //Varios
 stringgrid1.ColWidths[0]:=stringgrid1.Width-100;
 stringgrid1.ColWidths[1]:=100;
@@ -83,7 +82,7 @@ cinta_tzx.play_tape:=true;
 cinta_tzx.estados:=0;
 BitBtn1.Enabled:=false;
 BitBtn2.Enabled:=true;
-//if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Ttape_window1.fstopcinta(Sender: TObject); //stop
@@ -93,17 +92,20 @@ tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
 main_vars.mensaje_general:='';
 main_screen.rapido:=false;
-//if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+Windows.SetFocus(child.Handle);
 end;
 
 procedure Ttape_window1.StringGrid1Click(Sender: TObject);
 begin
-if cinta_tzx.cargada then begin
-  cinta_tzx.grupo:=false;
-  cinta_tzx.indice_cinta:=cinta_tzx.indice_select[tape_window1.stringgrid1.Selection.Top];
-  siguiente_bloque_tzx;
+cinta_tzx.grupo:=false;
+cinta_tzx.indice_cinta:=cinta_tzx.indice_select[tape_window1.stringgrid1.Selection.Top];
+siguiente_bloque_tzx;
+Windows.SetFocus(child.Handle);
 end;
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+
+procedure Ttape_window1.StringGrid1DblClick(Sender: TObject);
+begin
+tape_window1.StringGrid1Click(nil);
 end;
 
 procedure Ttape_window1.BitBtn9Click(Sender: TObject);
@@ -111,9 +113,8 @@ begin
 principal1.fLoadCinta(nil);
 end;
 
-procedure Ttape_window1.cerrar_cinta(Sender: TObject); //clean
+procedure Ttape_window1.cerrar_cinta(Sender: TObject);
 begin
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 close;
 end;
 

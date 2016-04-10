@@ -91,7 +91,7 @@ copymemory(@memoria_3[9,0],@mem_temp[$4000],$4000);
 copymemory(@memoria_3[10,0],@mem_temp[$8000],$4000);
 copymemory(@memoria_3[11,0],@mem_temp[$c000],$4000);
 fillchar(retraso[0],71000,0);
-f:=14362+24;
+f:=14364;
 for h:=0 to 191 do begin
   copymemory(@retraso[f],@cmem3[0],128);
   inc(f,228);
@@ -127,18 +127,41 @@ end;
 
 procedure spec3_retraso_memoria(direccion:word);
 var
-  temp:byte;
+  estados:byte;
+  posicion:dword;
 begin
-  temp:=marco[direccion shr 14];
-  if ((temp<4) or (temp>7)) then exit;
-  temp:=retraso[linea*228+spec_z80.contador];
-  spec_z80.contador:=spec_z80.contador+temp;
+estados:=0;
+posicion:=linea*228+spec_z80.contador;
+case (direccion and $c000) of
+  $4000:estados:=retraso[posicion];
+  $c000:if (marco[3]>3) then estados:=retraso[posicion];
+end;
+spec_z80.contador:=spec_z80.contador+estados;
 end;
 
 procedure spec3_retraso_puerto(puerto:word);
+var
+  estados:byte;
+  posicion:dword;
 begin
-spec_z80.contador:=spec_z80.contador+4;
+posicion:=linea*228+spec_z80.contador;
+if (puerto and $c000)=$4000 then begin //Contenida
+    if (puerto and 1)<>0 then begin //ultimo bit 1
+       estados:=retraso[posicion]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+       estados:=estados+retraso[posicion+estados]+1;
+    end else begin //ultimo bit 0
+      estados:=retraso[posicion]+1;
+      estados:=estados+retraso[posicion+estados]+3;
+    end;
+end else begin
+    if (puerto and 1)<>0 then estados:=4 //ultimo bit 1
+       else estados:=1+retraso[posicion+1]+3; //ultimo bit 0
 end;
+spec_z80.contador:=spec_z80.contador+estados;
+end;
+
 
 procedure spectrum3_main;
 begin
@@ -151,7 +174,7 @@ while EmuStatus=EsRuning do begin
     spec_z80.contador:=spec_z80.contador-228;
   end;
   spec_z80.pedir_irq:=IRQ_DELAY;
-  spectrum_irq_pos:=spec_z80.contador;
+  spectrum_irq_pos:=0;
   flash:=(flash+1) and $f;
   if flash=0 then haz_flash:=not(haz_flash);
   if mouse.tipo=1 then evalua_gunstick;
@@ -334,4 +357,4 @@ temp2:=direccion and $3fff;
 spec3_getbyte:=memoria_3[marco[temp],temp2];
 end;
 
-end.
+end.

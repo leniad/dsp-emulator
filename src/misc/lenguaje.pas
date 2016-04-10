@@ -1,13 +1,13 @@
 unit lenguaje;
 
 interface
-uses {$ifndef windows}LCLType,{$endif}
-     sysutils,forms,dialogs,main_engine;
+uses {$ifndef windows}LCLType,{$endif}sysutils,forms,dialogs,main_engine;
 
 const
-      max_idiomas=6;
-      idiomas:array [0..max_idiomas] of string=
-        ('espanol.lng','english.lng','catala.lng','francais.lng','german.lng','brazil.lng','italian.lng');
+      MAX_IDIOMAS=7-1;
+      idiomas:array [0..MAX_IDIOMAS] of string=
+        ('espanol.lng','english.lng','catala.lng','francais.lng','german.lng',
+        'brazil.lng','italian.lng');
 type
         tlenguaje=record
           archivo:array[0..4] of string;
@@ -19,11 +19,11 @@ type
           avisos:array[0..5] of string;
           mensajes:array[0..9] of string;
           varios:array[0..2] of string;
-          hints:array[0..17] of string;
+          hints:array[0..19] of string;
         end;
 
 var
-  leng:array[0..max_idiomas] of tlenguaje;
+  leng:array[0..MAX_IDIOMAS] of tlenguaje;
 
 function leer_idioma:boolean;
 procedure cambiar_idioma(idioma:byte);
@@ -61,6 +61,7 @@ principal1.opciones1.caption:=leng[idioma].opciones[0];
 principal1.audio1.caption:=leng[idioma].opciones[1];
 principal1.video1.caption:=leng[idioma].opciones[2];
 principal1.sinsonido1.caption:=leng[idioma].opciones[3];
+principal1.configuracion1.caption:=leng[idioma].opciones[4];
 //Maquina
 principal1.emulacion1.caption:=leng[idioma].maquina[0];
 principal1.ordenadores8bits1.caption:=leng[idioma].maquina[1];
@@ -78,12 +79,14 @@ principal1.BitBtn4.Hint:=leng[idioma].hints[2];
 principal1.BitBtn5.Hint:=leng[idioma].hints[3];
 principal1.BitBtn6.Hint:=leng[idioma].hints[4];
 principal1.btncfg.Hint:=leng[idioma].hints[5];
-//principal1.BitBtn8.Hint:=leng[idioma].hints[6];
+principal1.bitbtn19.Hint:=leng[idioma].hints[11];
+principal1.BitBtn8.Hint:=leng[idioma].hints[18];
+principal1.BitBtn13.Hint:=leng[idioma].hints[19];
+principal1.BitBtn1.Hint:=leng[idioma].hints[6];
 principal1.BitBtn9.Hint:=leng[idioma].hints[7];
 principal1.BitBtn10.Hint:=leng[idioma].hints[8];
 principal1.BitBtn11.Hint:=leng[idioma].hints[9];
 principal1.BitBtn12.Hint:=leng[idioma].hints[10];
-principal1.BitBtn19.Hint:=leng[idioma].hints[11];
 principal1.BitBtn14.Hint:=leng[idioma].hints[12];
 end;
 
@@ -153,31 +156,31 @@ readln(fichero,cadena);leng[posicion].mensajes[6]:=cadena; //atencion
 readln(fichero,cadena);leng[posicion].mensajes[7]:=cadena; //cargar
 readln(fichero,cadena);leng[posicion].mensajes[8]:=cadena; //cancelar
 //errores
-readln(fichero,cadena);leng[posicion].errores[0]:=cadena;
-readln(fichero,cadena);leng[posicion].errores[1]:=cadena;
+readln(fichero,cadena);leng[posicion].errores[0]:=cadena; //ERROR: No se puede encontrar la ROM
+readln(fichero,cadena);leng[posicion].errores[1]:=cadena; //dentro del fichero
 //hints
-readln(fichero,cadena);leng[posicion].hints[0]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[1]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[2]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[3]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[4]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[5]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[6]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[7]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[8]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[9]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[10]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[11]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[12]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[13]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[14]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[15]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[16]:=cadena;
-readln(fichero,cadena);leng[posicion].hints[17]:=cadena;
-//Avisos
-readln(fichero,cadena);leng[posicion].avisos [3]:=cadena; //'No Internet connection!';
-readln(fichero,cadena);leng[posicion].avisos [4]:=cadena; //'No need to update DSP';
-readln(fichero,cadena);leng[posicion].avisos [5]:=cadena; //'New version of DSP!!';
+readln(fichero,cadena);leng[posicion].hints[0]:=cadena; //Reset
+readln(fichero,cadena);leng[posicion].hints[1]:=cadena; //Ejecutar emulacion
+readln(fichero,cadena);leng[posicion].hints[2]:=cadena; //Pausar emulacion
+readln(fichero,cadena);leng[posicion].hints[3]:=cadena; //Velocidad emulacion 25%, 50%, 75% o 100%
+readln(fichero,cadena);leng[posicion].hints[4]:=cadena; //Velocidad maxima
+readln(fichero,cadena);leng[posicion].hints[5]:=cadena; //Configurar DSP
+readln(fichero,cadena);leng[posicion].hints[6]:=cadena; //Configurar ordenador/consola
+readln(fichero,cadena);leng[posicion].hints[7]:=cadena; //Cargar Cinta/Snapshot
+readln(fichero,cadena);leng[posicion].hints[8]:=cadena; //Cargar Disco
+readln(fichero,cadena);leng[posicion].hints[9]:=cadena; //Guardar Snapshot
+readln(fichero,cadena);leng[posicion].hints[10]:=cadena; //Poke Memoria
+readln(fichero,cadena);leng[posicion].hints[11]:=cadena; //Guardar Imagen
+readln(fichero,cadena);leng[posicion].hints[12]:=cadena; //FlashLoad ON/OFF
+readln(fichero,cadena);leng[posicion].hints[13]:=cadena; //Play cassette virtual
+readln(fichero,cadena);leng[posicion].hints[14]:=cadena; //Stop cassette virtual
+readln(fichero,cadena);leng[posicion].hints[15]:=cadena; //Cerrar cassette virtual
+readln(fichero,cadena);leng[posicion].hints[16]:=cadena; //Nombre cassette virtual
+readln(fichero,cadena);leng[posicion].hints[17]:=cadena; //Contenido del cassette virtual
+readln(fichero,cadena);leng[posicion].hints[18]:=cadena; //Configurar dipswitch
+readln(fichero,cadena);leng[posicion].hints[19]:=cadena; //Cambiar driver
+//Nuevos...
+readln(fichero,cadena);leng[posicion].opciones[4]:=cadena; //Configuracion
 close(fichero);
 leer_fichero_idioma:=true;
 end;
@@ -187,7 +190,7 @@ var
   f:byte;
 begin
 leer_idioma:=false;
-for f:=0 to max_idiomas do begin
+for f:=0 to MAX_IDIOMAS do begin
   if not(leer_fichero_idioma(Directory.lenguaje+idiomas[f],f)) then begin
     MessageDlg('Aviso: Faltan el ficheros de idioma.'+chr(13)+chr(10)+'Warning: Missing lenguaje files.', mtWarning,[mbOk], 0);
     principal1.idioma1.enabled:=false;

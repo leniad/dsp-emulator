@@ -1,23 +1,23 @@
 object configcpc: Tconfigcpc
-  Left = 663
-  Height = 429
-  Top = 157
+  Left = 287
+  Height = 452
+  Top = 146
   Width = 499
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config CPC'
-  ClientHeight = 429
+  ClientHeight = 452
   ClientWidth = 499
   OnShow = FormShow
   LCLVersion = '1.6.0.1'
   object GroupBox1: TGroupBox
     Left = 20
-    Height = 115
-    Top = 13
-    Width = 148
-    Caption = 'CPC Type'
-    ClientHeight = 95
-    ClientWidth = 144
+    Height = 163
+    Top = 8
+    Width = 340
+    Caption = 'CPC Low ROM'
+    ClientHeight = 143
+    ClientWidth = 336
     TabOrder = 0
     object RadioButton1: TRadioButton
       Left = 21
@@ -51,62 +51,86 @@ object configcpc: Tconfigcpc
       Caption = 'Danish'
       TabOrder = 3
     end
+    object RadioButton8: TRadioButton
+      Left = 21
+      Height = 19
+      Top = 91
+      Width = 50
+      Caption = 'Other'
+      TabOrder = 4
+    end
+    object Edit7: TEdit
+      Left = 8
+      Height = 23
+      Top = 112
+      Width = 281
+      TabOrder = 5
+    end
+    object Button15: TButton
+      Left = 296
+      Height = 25
+      Top = 112
+      Width = 33
+      Caption = 'Open'
+      OnClick = Button15Click
+      TabOrder = 6
+    end
   end
   object GroupBox2: TGroupBox
-    Left = 16
-    Height = 214
-    Top = 136
-    Width = 456
-    Caption = 'ROMS'
-    ClientHeight = 194
-    ClientWidth = 452
+    Left = 20
+    Height = 198
+    Top = 184
+    Width = 460
+    Caption = 'ROM Slots'
+    ClientHeight = 178
+    ClientWidth = 456
     TabOrder = 1
     object Edit1: TEdit
       Left = 56
       Height = 23
-      Top = 19
+      Top = 8
       Width = 297
       TabOrder = 0
     end
     object Edit2: TEdit
       Left = 56
       Height = 23
-      Top = 48
+      Top = 37
       Width = 297
       TabOrder = 1
     end
     object Edit3: TEdit
       Left = 56
       Height = 23
-      Top = 75
+      Top = 64
       Width = 297
       TabOrder = 2
     end
     object Edit4: TEdit
       Left = 56
       Height = 23
-      Top = 100
+      Top = 89
       Width = 297
       TabOrder = 3
     end
     object Edit5: TEdit
       Left = 56
       Height = 23
-      Top = 128
+      Top = 117
       Width = 297
       TabOrder = 4
     end
     object Edit6: TEdit
       Left = 56
       Height = 23
-      Top = 154
+      Top = 143
       Width = 297
       TabOrder = 5
     end
     object Button1: TButton
       Left = 356
       Height = 25
-      Top = 19
+      Top = 8
       Width = 33
       Caption = 'Open'
       OnClick = Button1Click
@@ -115,7 +139,7 @@ object configcpc: Tconfigcpc
     object Button2: TButton
       Left = 395
       Height = 25
-      Top = 19
+      Top = 8
       Width = 33
       Caption = 'Clear'
       OnClick = Button2Click
@@ -124,7 +148,7 @@ object configcpc: Tconfigcpc
     object Button3: TButton
       Left = 356
       Height = 25
-      Top = 46
+      Top = 35
       Width = 33
       Caption = 'Open'
       OnClick = Button3Click
@@ -133,7 +157,7 @@ object configcpc: Tconfigcpc
     object Button4: TButton
       Left = 395
       Height = 25
-      Top = 46
+      Top = 35
       Width = 33
       Caption = 'Clear'
       OnClick = Button4Click
@@ -142,7 +166,7 @@ object configcpc: Tconfigcpc
     object Button5: TButton
       Left = 356
       Height = 25
-      Top = 73
+      Top = 62
       Width = 33
       Caption = 'Open'
       OnClick = Button5Click
@@ -151,7 +175,7 @@ object configcpc: Tconfigcpc
     object Button6: TButton
       Left = 395
       Height = 25
-      Top = 73
+      Top = 62
       Width = 33
       Caption = 'Clear'
       OnClick = Button6Click
@@ -160,7 +184,7 @@ object configcpc: Tconfigcpc
     object Button8: TButton
       Left = 395
       Height = 25
-      Top = 100
+      Top = 89
       Width = 33
       Caption = 'Clear'
       OnClick = Button8Click
@@ -169,7 +193,7 @@ object configcpc: Tconfigcpc
     object Button7: TButton
       Left = 356
       Height = 25
-      Top = 100
+      Top = 89
       Width = 33
       Caption = 'Open'
       OnClick = Button7Click
@@ -178,7 +202,7 @@ object configcpc: Tconfigcpc
     object Button9: TButton
       Left = 356
       Height = 25
-      Top = 127
+      Top = 116
       Width = 33
       Caption = 'Open'
       OnClick = Button9Click
@@ -187,7 +211,7 @@ object configcpc: Tconfigcpc
     object Button10: TButton
       Left = 395
       Height = 25
-      Top = 127
+      Top = 116
       Width = 33
       Caption = 'Clear'
       OnClick = Button10Click
@@ -196,7 +220,7 @@ object configcpc: Tconfigcpc
     object Button12: TButton
       Left = 395
       Height = 25
-      Top = 154
+      Top = 143
       Width = 33
       Caption = 'Clear'
       OnClick = Button12Click
@@ -205,7 +229,7 @@ object configcpc: Tconfigcpc
     object Button11: TButton
       Left = 356
       Height = 25
-      Top = 154
+      Top = 143
       Width = 33
       Caption = 'Open'
       OnClick = Button11Click
@@ -214,7 +238,7 @@ object configcpc: Tconfigcpc
     object Label1: TLabel
       Left = 13
       Height = 15
-      Top = 24
+      Top = 13
       Width = 36
       Caption = 'SLOT 1'
       ParentColor = False
@@ -222,7 +246,7 @@ object configcpc: Tconfigcpc
     object Label2: TLabel
       Left = 13
       Height = 15
-      Top = 51
+      Top = 40
       Width = 36
       Caption = 'SLOT 2'
       ParentColor = False
@@ -230,7 +254,7 @@ object configcpc: Tconfigcpc
     object Label3: TLabel
       Left = 13
       Height = 15
-      Top = 80
+      Top = 69
       Width = 36
       Caption = 'SLOT 3'
       ParentColor = False
@@ -238,7 +262,7 @@ object configcpc: Tconfigcpc
     object Label4: TLabel
       Left = 13
       Height = 15
-      Top = 105
+      Top = 94
       Width = 36
       Caption = 'SLOT 4'
       ParentColor = False
@@ -246,7 +270,7 @@ object configcpc: Tconfigcpc
     object Label5: TLabel
       Left = 13
       Height = 15
-      Top = 132
+      Top = 121
       Width = 36
       Caption = 'SLOT 5'
       ParentColor = False
@@ -254,28 +278,88 @@ object configcpc: Tconfigcpc
     object Label6: TLabel
       Left = 13
       Height = 15
-      Top = 159
+      Top = 148
       Width = 36
       Caption = 'SLOT 6'
       ParentColor = False
     end
   end
   object Button13: TButton
-    Left = 88
+    Left = 96
     Height = 49
-    Top = 368
+    Top = 392
     Width = 105
     Caption = 'OK'
     OnClick = Button13Click
     TabOrder = 2
   end
   object Button14: TButton
-    Left = 287
+    Left = 280
     Height = 49
-    Top = 368
+    Top = 392
     Width = 105
     Caption = 'CANCEL'
     OnClick = Button14Click
     TabOrder = 3
+  end
+  object GroupBox7: TGroupBox
+    Left = 371
+    Height = 66
+    Top = 105
+    Width = 109
+    Caption = 'LensLok'
+    ClientHeight = 46
+    ClientWidth = 105
+    TabOrder = 4
+    object RadioButton12: TRadioButton
+      Left = 8
+      Height = 19
+      Top = 1
+      Width = 62
+      Caption = 'Enabled'
+      TabOrder = 0
+    end
+    object RadioButton13: TRadioButton
+      Left = 8
+      Height = 19
+      Top = 22
+      Width = 65
+      Caption = 'Disabled'
+      TabOrder = 1
+    end
+  end
+  object GroupBox3: TGroupBox
+    Left = 371
+    Height = 96
+    Top = 8
+    Width = 109
+    Caption = 'RAM Expansion'
+    ClientHeight = 76
+    ClientWidth = 105
+    TabOrder = 5
+    object RadioButton5: TRadioButton
+      Left = 13
+      Height = 19
+      Top = 6
+      Width = 49
+      Caption = 'None'
+      TabOrder = 0
+    end
+    object RadioButton6: TRadioButton
+      Left = 13
+      Height = 19
+      Top = 27
+      Width = 52
+      Caption = '512Kb'
+      TabOrder = 1
+    end
+    object RadioButton7: TRadioButton
+      Left = 13
+      Height = 19
+      Top = 48
+      Width = 44
+      Caption = '1Mb'
+      TabOrder = 2
+    end
   end
 end

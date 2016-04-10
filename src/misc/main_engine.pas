@@ -7,12 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,sound_engine,arcade_config,vars_hide;
 
 const
-        {$ifndef fpc}
-        dsp_version='0.16ß2WIP';
-        {$else}
-        dsp_version='0.16b2WIP';
-        {$endif}
-
+        dsp_version='0.16b2';
         pant_sprites=20;
         pant_doble=21;
         pant_rot=22;
@@ -166,7 +161,7 @@ var
         Directory:TDirectory;
         //CPU
         cpu_quantity:byte;
-        {$ifdef windows}
+        {$ifndef fpc}
         cont_sincroniza,cont_micro:int64;
         valor_sync:single;
         {$else}
@@ -208,16 +203,18 @@ case main_vars.tipo_maquina of
              principal1.Panel2.height:=49;
              principal1.Panel2.Align:=alLeft;
              principal1.Panel2.Anchors:=[akTop,akLeft,akRight];
+             principal1.BitBtn1.top:=4;
+             principal1.BitBtn1.left:=22;
              principal1.BitBtn9.top:=4;
-             principal1.BitBtn9.left:=24;
+             principal1.BitBtn9.left:=64;
              principal1.BitBtn10.top:=4;
-             principal1.BitBtn10.left:=66;
+             principal1.BitBtn10.left:=106;
              principal1.BitBtn11.top:=4;
-             principal1.BitBtn11.left:=111;
+             principal1.BitBtn11.left:=151;
              principal1.BitBtn12.top:=4;
-             principal1.BitBtn12.left:=159;
+             principal1.BitBtn12.left:=199;
              principal1.BitBtn14.top:=4;
-             principal1.BitBtn14.left:=206;
+             principal1.BitBtn14.left:=246;
           end;
      else fix_screen_pos(350,70);
 end;
@@ -245,43 +242,26 @@ end;
 //Si el video el *2 necesito una temporal
 if pantalla[pant_doble]<>nil then SDL_FreeSurface(pantalla[pant_doble]);
 pantalla[pant_doble]:=SDL_CreateRGBSurface(0,x,y,16,0,0,0,0);
-{$ifndef windows}
+{$ifdef fpc}
 //En linux uso la pantalla de SDL...
 uses_sdl_window;
-{$else}
-{$ifdef fpc}
-principal1.panel4.Width:=x;
-principal1.panel4.Height:=y;
-principal1.GroupBox4.Width:=x+15;
-principal1.GroupBox4.Height:=y+25;
-x:=principal1.GroupBox4.width;
 {$else}
 child.clientWidth:=x;
 child.clientHeight:=y;
 x:=child.width;
-{$endif}
 case main_vars.tipo_maquina of
   10..999:begin
-       if x<260 then x:=260;
-        x:=x+10;
-       end;
+               if x<260 then x:=260;
+               x:=x+10;
+          end;
     else begin
-      if x<260 then x:=260;
-      x:=x+60;
-  end;
+              if x<260 then x:=260;
+              x:=x+60;
+         end;
 end;
-{$ifdef fpc}
-fix_screen_pos(x,principal1.groupbox4.height+60);
-if principal1.Panel2.visible then x:=x-60;
-principal1.groupbox4.Left:=((x-principal1.groupbox4.width) div 2)+3;
-principal1.groupbox4.top:=36;
-principal1.panel4.top:=0;
-principal1.Panel4.Left:=5;
-{$else}
 fix_screen_pos(x,child.height+60);
 if principal1.Panel2.visible then x:=x-60;
 child.Left:=(x-child.width) div 2;
-{$endif}
 {$endif}
 //pongo el nombre de la maquina...
 change_caption(llamadas_maquina.caption);
@@ -297,7 +277,9 @@ end;
 procedure iniciar_video(x,y:word;alpha:boolean=false);
 var
   f:word;
+  {$ifndef fpc}
   handle_:integer;
+  {$endif}
 begin
 if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
   if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
@@ -311,13 +293,7 @@ p_final[0].y:=y;
 handle_:=child.Handle;
 if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
 {$else}
-{$ifdef windows}
-handle_:=principal1.panel4.Handle;
-if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
-{$else}
-principal1.groupbox4.visible:=false;
 if window_render=nil then window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,x,y,0);
-{$endif}
 {$endif}
 cambiar_video;
 pantalla[pant_temp]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0);
@@ -405,15 +381,7 @@ end else begin
   handle_:=child.Handle;
   window_render:=SDL_CreateWindowFrom(pointer(handle_));
   {$else}
-  {$ifdef windows}
-  principal1.panel4.visible:=false;
-  principal1.panel4.visible:=true;
-  handle_:=principal1.panel4.Handle;
-  window_render:=SDL_CreateWindowFrom(pointer(handle_));
-  {$else}
-  principal1.groupbox4.visible:=false;
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,0);
-  {$endif}
   {$endif}
   pantalla[0]:=SDL_GetWindowSurface(window_render);
   cambiar_video;
@@ -663,15 +631,11 @@ begin
 {$IFnDEF fpc}
 child.Caption:=nombre;
 {$Else}
-{$ifndef windows}
 SDL_SetWindowTitle(window_render,pointer(nombre));
-{$Else}
-principal1.GroupBox4.Caption:=nombre;
 {$endif}
-{$ENDIF}
 end;
 
-{$ifdef windows}
+{$ifndef fpc}
 procedure video_sync;
 var
         l2:int64;
@@ -690,10 +654,12 @@ end;
 QueryPerformanceCounter(Int64((@cont_sincroniza)^));
 end;
 {$else}
+{$ifndef windows}
 procedure copymemory(dest,source:pointer;size:integer);inline;
 begin
 move(source^,dest^,size);
 end;
+{$endif}
 
 procedure video_sync;inline;
 var

@@ -1,21 +1,18 @@
-﻿<h1>DSP Emulator v0.16b1 by Leniad 2001-2016</h1><br>
+﻿<h1>DSP Emulator v0.16b2 by Leniad 2001-2016</h1><br>
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
-Why pascal, and not C, C++, Java or any other language? Well, pascal it is powerful enough to handle my emulator (120fps the Spectrum driver with a Pentium CPU) and it is as good as many any other languages.<br>
-Since version 0.9ß3 portability has begun to Lazarus/Free Pascal, so there is a Linux 32/64bits version available.<br>
-Since version 0.14ß3 there is a Mac OSX WIP version.<br><br>
-<b>1-. Emulation</b>
+Since version 0.9b3 has ported to Lazarus/Free Pascal, so there is a Linux 32/64bits version available.<br>
+Since version 0.14b3 there is a Mac OSX 32bits WIP version.<br><br>
+<b>1-. Emulator</b>
 <hr>
-- Can handle ZIP format. You can load ROMS, tapes, snapshots or disks from a ZIP files.<br>
+- Can natively handle ZIP format. You can load ROMS, tapes, snapshots or disks from a ZIP files.<br>
 - Needed libraries<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Windows<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The library 'SDL2.DLL' is essential. You can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The library 'CAPSImg.dll' is optional and it's needed to open disk images IPF. (Not working)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- The library 'SDL2.DLL' is essential. You can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- The library 'CAPSImg.dll' is optional and it's needed to open disk images IPF. (Not working)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Linux and OSX<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The libraries 'SDL2' and 'SDL2 Mixer' are needed, if cannot be loaded the emulator warns and can not start the emulation. Each OS has its own installation<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The libraries 'CAPSImg' (IPF images) and 'Zlib' (Snapshots) are optional, emulation can start without them, but there are features that are not available if can not be found<br>
-The emulator includes (not in WIP or beta versions) inside the ZIP the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco<br>
-IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The library 'Zlib' (Snapshots) is also optional, emulation can start without it, but there are features that are not available if the file can not be found.<br><br>
+The emulator includes inside the ZIP (not in WIP) the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco.<br><br>
+<b>IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS</b><br><br>
 <b>1.1-. Keys</b>
 <hr>
 -General Keys:<br><pre>
@@ -28,10 +25,10 @@ IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS<br><br>
     F9  --> Load quick Snapshot 1
     F10 --> Load quick Snapshot 2
     F11 --> Changes emulation speed from 25%, 50%, 75% and 100%</pre><br>
-Since 0.14ß2 arcade drivers can save/load two quick snapshots<br>
-Since 0.15ß1 'Full Screen' works again<br>
+Since 0.14b2 some arcade drivers can save/load two quick snapshots<br>
+Since 0.15b1 'Full Screen' works again<br><br>
 - Keys for both players are redefinable, and you can select an external joystick for any player and up to 6 buttons per player<br>
-By default keys are:<br><pre>
+By default keys are<br><pre>
     Player 1 Up       --> Key 'Cursor UP'
     Player 1 Down     --> Key 'Cursor DOWN'
     Player 1 Left     --> Key 'Cursor LEFT'
@@ -42,15 +39,14 @@ By default keys are:<br><pre>
     Start player 2    --> Key '2'
     Insert coin 1     --> Key '5'
     Insert Coin 2     --> Key '6'</pre><br>
-Any other control is not defined. You can redefine it in the main configuration menu.<br>
+Any other control is not defined. You can redefine it in the main configuration menu.<br><br>
 - Spectrum/Amstrad basic keys:<br><pre>
     F1 --> Play/Stop tape
     F4 --> Save snapshot
     F5 --> Remove Disk</pre><br>
 <b>1.2-. Language Files</b>
 <hr>
-DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
-You can select 'Castellano', 'Catalan', 'English', 'German', 'French', 'Brazilian' or 'Italian'.<br>
+DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button. You can select 'Castellano', 'Catalan', 'English', 'German', 'French', 'Brazilian' or 'Italian'.<br>
 If the language files are not present, you receive a warning and the emulator will be in Spanish and you can not change the language.<br><br>
 <b>1.3-. Configuration</b>
 <hr>
@@ -64,145 +60,146 @@ In the main screen of the emulator you can press some buttons<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Default directories<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Redefine all keys or use external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Load last driver/use driver list<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show or not the ROMs CRC errors<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Center or not the main screen when the driver is changed<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Configure active driver: There are systems that can be configured with more options that belongs to the driver it self (like Spectrum)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;In arcade drivers, since version 0.12ß4, the dipswitches can be modified to set game options.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Show game list: Since version 0.9 there is allowed boot DSP with a list of games, which shows the games, computers and consoles available. Further information on the availability of ROMS for each system, distribution year, company, etc.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;In general configuration you can choose this way of booting (show a game list), or the old way (run the last driver loaded).<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Save Pictures: Since DSP 0.2wipb5 you can save GIF files from Spectrum emulation.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Since 0.7ß2 version you can also save JPG and PNG formats from all drivers.<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show the ROMs CRC errors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Center the main screen when the driver is changed<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Since version 0.16b2 configuration of drivers has changed as follows:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- When the running driver is an arcade, there is a button for change the dip switches<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- When the driver wich is running is a computer/console, there is a button to change its specific configuration<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Show game list:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Since version 0.9 the emulator can start whith a list of drivers, which shows the arcade games, computers and consoles available and further information: availability of the ROMS for each system, distribution year, company, etc.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- In general configuration you can choose this way of booting (show a game list), or the old way (run the last driver loaded)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Save Pictures: Since 0.7b2 version you can save GIF, JPG or PNG from all drivers (arcade, computer or console)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Export ROMs/samples information: Since 0.16b2 version ROMs/samples information can be exported in .DAT (Clearmame) format to check if any is missing, defective, etc.<br><br>
 <b>2-. Drivers</b><br>
 <hr>
 <b>2.1 Computers</b><br>
 <hr>
-<b>Spectrum</b><br>
+<br><b>Spectrum 16K, 48K, 128K, +2 and +2A/+3</b><br>
 <hr>
-You can configure<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- ROMS: You can change Spectrum ROM loading. Configure your favorite ROM or a stand alone file or 'ZIP' format (the name of the ROM inside the ZIP must be the same of ZIP name, for example 'SPECTRUM.ZIP' and the ROM inside the ZIP 'SPECTRUM.ROM')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;By default the ROM files are:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Spectrum 16k/48k: 'SPECTRUM.ZIP' --> 'spectrum.rom' CRC: 0xDDEE531F<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Spectrum 128k: 'SPEC128.ZIP' --> '128-0.rom' CRC: 0xE76799D2 and '128-1.rom' CRC: 0xB96A36BE<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Spectrum +2: 'PLUS2.ZIP' --> 'plus2-0.rom' CRC: 0x5D2E8C66 and 'plus2-1.rom' CRC: 0x98B1320B<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Spectrum +2A/+3: 'PLUS3.ZIP' --> 'plus3-0.rom' CRC: 0x30C9F490 , 'plus3-1.rom' CRC: 0xA7916B3F , 'plus3-2.rom' CRC: 0xC9A0B748 and 'plus3-3.rom' CRC: 0xB88FD6E3<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Border: You can choose line by line emulation, pixel by pixel emulation (slowly but more exact) or disable border emulation (fastest).<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Lens Lock: Enable/disable the Lenslok protection simulation<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Spectrum 48K issue: Choose Spectrum issue 2 or 3<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Joystick: Joystick is emulated with the redefinable keys or external joystick<br>
-&nbsp;&nbsp;&nbsp;&nbsp;You can choose joystick type<br>
+- ROMS: You can change Spectrum ROM loading. Configure your favorite ROM or a ZIP file (the name of the ROM inside the ZIP must be the same of ZIP name, for example 'SPECTRUM.ZIP' and the ROM inside the ZIP 'SPECTRUM.ROM')<br>
+- Border: You can choose line by line emulation, pixel by pixel emulation (slowly but more exact) or disable border emulation (fastest).<br>
+- LensLok: The window showing the protection is automatically activated when detecting a tape/disc having this protection, also automatically selects the appropriate game. You can force the display/hide the LensLok protection window, also within the window you can select the game if is not detected correctly.<br>
+- Spectrum 48K issue: Choose Spectrum issue 2 or 3<br>
+- Joystick: Joystick is emulated with the redefinable keys or external joystick.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;You can choose joystick type:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Kempston<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Cursor<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Sinclair 1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Sinclair 2<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Gunstick/Lightgun: The mouse is used as Gunstick, and left button is used as fire<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- AMX Mouse/Kempston Mouse: Use the mouse and the buttons<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- ULA+: Enable/disable ULA+ extended colors. Supported since 0.9ß3 version<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- AY8912 sound: Set the type of sound channels. Supports mono, stereo ABC channels and stereo ACB channels<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Tape loading sound: Enable/disable the sound of the tape when loading<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Speaker filter: Enable/disable filter to reduce the noise in speaker emulation.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Speaker oversample: Quality of speaker emulation.<br>
+- Gunstick/Lightgun: The mouse is used as Gunstick, and left button is used as fire.<br>
+- AMX Mouse/Kempston Mouse: Use the mouse and the buttons.<br>
+- ULA+: Enable/disable ULA+ extended colors. Supported since 0.9b3 version.<br>
+- AY8912 sound: Set the type of channels sound: mono, stereo ABC or stereo ACB<br>
+- Tape loading sound: Enable/disable the sound of the tape when loading.<br>
+- Speaker filter: Enable/disable filter to reduce the noise in speaker emulation.<br>
+- Speaker oversample: Quality of speaker emulation<br><br>
 Other features<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keyboard: Fully working keyboard emulation, and LShift and LControl working as Capshift and SimbolShift.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Virtual Tapes: Can load ZIP, TAP, TZX, PZX, WAV and CSW. Fully working spectrum load schemes (bleepload, alkatraz, original rom...). <br>
-&nbsp;&nbsp;&nbsp;&nbsp;With the mouse you can move inside virtual tape and select the start position. Tape begin to play when detects - LOAD "" - and stop when reaches the final.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;If inside the ZIP file there is a ROM file, emulator load first ROM file and then loads then virtual tape.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Audio: Spectrum beeper and in modern Spectrum revisions there is a AY-8912.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To do:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Contented memory is not working correctly at 100%.<br><br>
-<b>Amstrad CPC 464,664 y 6128</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Keyboard: Corresponds with the PC keyboard keys, also set some special keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Simbol Shift: Shift key (left or right)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Caps Shift: Control key (left or right)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Keys on extended models, mapped according to its function<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="pc_spectrum.jpg"><img src="pc_spectrum.jpg" width="25%" height="25%"></a><br>
+- Virtual Tapes: Can load ZIP, TAP, TZX, PZX, WAV and CSW. Fully working spectrum load schemes (bleepload, alkatraz, original rom...). <br>
+&nbsp;With the mouse you can move inside virtual tape and select the start position. Tape begin to play when detects - LOAD "" - and stop when reaches the final.<br>
+&nbsp;If inside the ZIP file there is a ROM file, emulator load first ROM file and then loads then virtual tape.<br>
+&nbsp;Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
+- Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
+- Audio: Spectrum beeper and in modern Spectrum revisions there is a AY-8912.<br>
+- Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
+- To do:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Contented IO is not working at 100%.<br><br>
+<b>Amstrad CPC 464,664 and 6128</b><br>
 <hr>
-&nbsp;&nbsp;&nbsp;&nbsp;- ROMS - By default the files are:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-CPC-464: 'CPC464.ZIP' --> 'cpc464.rom' CRC: 0x40852F25<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-CPC-664: 'CPC664.ZIP' --> 'cpc664.rom' CRC: 0x9AB5A036 and 'amsdos.rom' CRC: 0x1FE22ECD<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-CPC-6128: 'CPC6128.ZIP' --> 'cpc6128.rom' CRC: 0x9E827FE1 and 'amsdos.rom' CRC: 0x1FE22ECD<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keyboard: Mapped the keys for each of the CPC. To press the '|' press left shift key and '><' next to the Z.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;Emulation of pressing keys 'F1' to 'F10' you must press right Shift at the same time.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Joystick: Emulated with the redefinable keys or external joystick.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Virtual Tape: you can load ZIP, CDT, WAV and CSW. Are working the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Sound: All version have the AY-8912 chip<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots: Support load/save 'SNA' format<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To do<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Some disk protections are not working (a few left)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Some video effect are missing (M6845 chip)<br><br>
+- ROMs: The following options exists:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- On CPC models 464 and 6128 you can choose the lower ROM corresponding to various regions (UK, French, Spanish or Danish), also on all models you can choose to load a low ROM different from the Amstrad original<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- There are 6 slots available to load additional ROMs<br>
+- RAM: You can configure the following memory extensions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Dk'tronics compatible: 512Kb of extra RAM<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Extension of 4Mb (not working at the moment)<br>
+- LensLok: The window showing the protection is automatically activated when detecting a tape/disc having this protection, also automatically selects the appropriate game. You can force the display/hide the LensLok protection window, also within the window you can select the game if is not detected correctly.<br>
+- Keyboard: Mapped all keys in a similar position than the CPC. Special cases:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- F0..F9 CPC function keys are emulated using the numbers on the PC keypad<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- The shift key on the CPC: Mapped on both shift keys (left or right) on the PC keyboard<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- The 'point' button next to the function in the CPC is also mapped into the 'point' PC keypad<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- The 'Enter' key on the numeric keypad PC works also as 'Enter' in the emulation CPC<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="pc_cpc.png"><img src="pc_cpc.png" width="25%" height="25%"></a><br>
+- Joystick: Emulated with the redefinable keys or external joystick.<br>
+- Virtual Tape: you can load ZIP, CDT, WAV and CSW. Work the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
+- Sound: All version have the AY-8912 chip<br>
+- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
+- Snapshots: Support load/save 'SNA' format<br>
+- To do:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Some disk protections are not working (a few left)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Some video effect are missing (M6845 chip)<br><br>
 <b>2.2 Consoles</b><br>
 <hr>
 <b>NES</b><br>
 <hr>
-&nbsp;&nbsp;&nbsp;&nbsp;- Cartridge: Supports '.nes' ROM format, compressed in ZIP format or not.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keys: Use the redefined keys or external joystick<br>
+- Cartridge: Supports '.nes' ROM format, compressed or not.<br>
+- Keys: Use the redefined keys or external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Sound: Support sound, only remains DPCM<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports 0,1,2,3,4,7,9,12,66,67 (partial),68,71,87,93,94,180 and 185<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To Do:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Video Timings<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key).<br>
+- Sound: Support sound<br>
+- Mappers: Supports 0,1,2,3,4,7,9,12,66,67 (partial),68,71,87,93,94,180 and 185<br>
+- To Do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Video Timings<br><br>
 <b>GameBoy/Gameboy Color</b><br>
 <hr>
-&nbsp;&nbsp;&nbsp;&nbsp;- ROM: Not required, but if present are loaded and run as the original console.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;The default ROMs names are:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-GameBoy: 'GAMEBOY.ZIP' --> 'dmg_boot.bin' CRC: 0x59C8598E<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-GameBoy Color: 'GBCOLOR.ZIP' --> 'gbc_boot.1' CRC: 0x779EA374 and 'gbc_boot.2' CRC: 0xF741807D<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keys: Use the redefined keys or the external joystick<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not<br>
-&nbsp;&nbsp;&nbsp;&nbsp;-Mappers supported are MBC0, MBC1 and MBC5<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To do:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Audio problems, do not work fine with high frequencies<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Video Timings<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br><br>
+- ROMs: Not required, but if present are loaded and run as the original console.<br>
+- Keys: Use the redefined keys or the external joystick<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key).<br>
+- Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not.<br>
+- Mappers supported are MBC0, MBC1 and MBC5.<br>
+- To Do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Audio problems, do not work fine with high frequencies<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Video Timings<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br><br>
 <b>ColecoVision</b><br>
 <hr>
-&nbsp;&nbsp;&nbsp;&nbsp;- ROM: The ROM is needed for emulation<br>
-&nbsp;&nbsp;&nbsp;&nbsp;ROM file name is:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-Coleco: 'COLECO.ZIP' --> 'coleco.rom' CRC: 0x3AA93EF3<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keys: Joystick is emulated with the redefinable keys or external joystick (the secondary joystick does not have keys assigned). Does not support (still) the special joysticks.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The numbers on the keyboard from '1' to '0' emulate the number keys<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Keys 'Q' and 'W' emulate the keys '*' and '#'<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: It supports the standard game cartridges (not expansion cartridges) with 'ROM' and 'COL' file extension compressed or not<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Snapshot: Records snapshots compressed with its own format. Also includes the ROM cartridge loaded, so they are independent and can be loaded without the ROM.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Sound: Support the sound AY-8912 chip<br><br>
+- ROM: The ROM is needed for emulation<br>
+- Keys: Joystick is emulated with the redefinable keys or external joystick (the secondary joystick does not have keys assigned). Does not support (still) the special joysticks.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The numbers on the keyboard from '1' to '0' emulate the number keys.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Keys 'Q' and 'W' emulate the keys '*' and '#'<br>
+- Cartridges: It supports the standard game cartridges (not expansion cartridges) with 'ROM' and 'COL' file extension compressed or not<br>
+- Sound: Support the sound AY-8912 chip<br>
+- Snapshot: Load/save snapshots with my own format. When the snapshot is loaded includes the ROM cartridge, so they are independent and can be loaded without the original cartridge.<br><br>
 <b>Chip 8/Super Chip8</b><br>
 <hr>
-&nbsp;&nbsp;&nbsp;&nbsp;- ROM: Does not have. It's a simulation of a pseudo CPU.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keyboard the mapped keys are:<br><pre>
+- ROM: Does not have. It's a simulation of a pseudo CPU.<br>
+- Keyboard: Mapped the system keys<br><pre>
     Original    Real Keyboard
     1 2 3 A --> 1 2 3 4
     4 5 6 B --> Q W E R
     7 8 9 C --> A S D F
     D 0 E F --> Z X C V</pre>
-&nbsp;&nbsp;&nbsp;&nbsp;- Sound: basic sound mono supported<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Video: Supports 64x32 format from Chip8, 64x64 from Chip8 Hires and 128x64 from SuperChip8<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Files: Supports '.CH8' y '.BIN' formats<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To do:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
+- Sound: basic sound mono supported<br>
+- Video: Supports 64x32 format from Chip8, 64x64 from Chip8 Hires and 128x64 from SuperChip8<br>
+- Files: Supports '.CH8' y '.BIN' formats<br>
+- To do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
 <b>Sega Master System</b><br>
 <hr>
-&nbsp;&nbsp;&nbsp;&nbsp;- ROM: It is not necessary for the emulation, but is recommended.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- 'mpr-12808.ic2' --> CRC: 0x0072ED54<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keys: Use the redefined keys or the external joystick<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Sound: Sound chip SN76496 implemented<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Cartridges: Supports cartridges '.sms' and '.sg' (partialy), compressed or not.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Video: Supports all video special SMS video modes, and all the original. Supports NTSC and PAL.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- To do<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
+- ROM: It is not necessary for the emulation, but is recommended.<br>
+- Keys: Use the redefined keys or the external joystick<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key).<br>
+- Sound: Sound chip SN76496 implemented<br>
+- Cartridges: Supports cartridges '.sms' and '.sg' (partialy), compressed or not.<br>
+- Video: Supports all video special SMS video modes, and all the original. Supports NTSC and PAL.<br>
+- To do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
 <b>2.3 Arcade</b><br>
 <hr>
 <b>2.3.1 Samples</b><hr>
 Some games, given the difficulty of emulating old sound systems, uses 'samples'. Such files are portions of digitized sound, played instead of emulating the sound system.<br>
 Currently only some drivers use wholly or partly this system.<br>
-If you want the emulator to use the samples, put the sample files with the same name as the ROM in a folder named 'samples'.<br>
-Look at the arcade systems list to know which systems use samples.<br>
-<br>
+If you want the emulator to use the samples, put the compressed sample files with the same name as the ROM in a folder named 'samples'.<br>
+You can download all the samples from the emulator page<br>
+Look at the arcade systems list to know which systems use samples.<br><br>
 <b>2.3.2 Emulated Systems</b><hr><br>
 <pre>
 Name                       | ROM          | Completed  | Notes
@@ -449,16 +446,17 @@ If you make any improvements to any driver, processor, main code, etc. or add dr
 If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)<br><br>
 <b>4-. Acknowledgments</b><br>
 <hr>
-- First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria)<br>
-- Chris Cowley, author of VBSpec, from where I've pick a lot of information about Spectrum. In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME<br>
-- Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to trace errors in my emulator Z80<br>
+- First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).<br>
+- Chris Cowley, author of VBSpec, from where I've pick a lot of information about Spectrum. In addition I've also got the part of the AY-3-8912 of its emulator, which is an excellent conversion that comes with MAME.<br>
+- Raul Gomez Sanchez author of the R80, one of the best Spectrum emulators for DOS, which use your debugger to trace errors in my emulator Z80.<br>
 - World of Spectrum, they have many tapes, snapshots, in addition many technical information, including the format TZX, DSK, Z80, etc.<br>
-- javi[@]fsmail.net that helped me in a moment of desperation with directSound<br>
-- Thanks to Michael Franzen, who sent me drivers for Pooyan, Coleco, System1, Chip8 and many others to be included in DSP<br>
-- Thanks to Tom Walker, he sent me his driver CPS1 where I got and understood a lot of information<br>
-- sremulador for begin the rewriting of NES driver<br>
-- Thanks to Martijn from Revival Studios for the info about Chip8<br>
-- And many pages from Internet, many documents ... and people who I forget, thank you all<br><br>
+- javi[@]fsmail.net that helped me in a moment of desperation with directSound.<br>
+- Michael Franzen, who sent me drivers for Pooyan, Coleco, System1, Chip8 and many others to be included in DSP.<br>
+- Tom Walker, he sent me his driver CPS1 where I got and understood a lot of information.<br>
+- sremulador, for begin the rewriting of NES driver<br>
+- Martijn, from Revival Studios for the info about Chip8<br>
+- greatxerox, for his time and emulation tests on the CPC (and other bugs)<br>
+- And many pages from Internet, many documents ... and people who I forget, thank you all.<br><br>
 <b>5-. Copyright</b><br>
 <hr>
 - The Coleco and Pooyan has been rewrited from the originals by Michael Franzen.<br>
@@ -466,24 +464,21 @@ If you use part of the code of the emulator for any non commercial purpose, you 
 - The source code for the Lensloc protection simulation comes from Simon Owen.<br>
 - All the drivers, the Z80 core, M6502 core, M6809 (HD6309) core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core, LR35902 core, M6805 core, MCS51 core,Hu6280 core and MB88XX core are writed by me, Leniad.<br>
 - AY-3-8912 emulator is a conversion from Chris Cowley, but the original emulator come from MAME team.<br>
-- SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255, OKI6295, UPD7759, Z80PIO, Z80CTC,pokey and Sega VDP emulators are a conversion writed by me from MAME original.<br>
+- SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255, OKI6295, UPD7759, Z80PIO, Z80CTC, NES sound emulator, pokey and Sega VDP emulators are a conversion writed by me from MAME original.<br>
 - TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME.<br>
 - NEC765 emulator is a conversion writed and adapted by me, from MESS original.<br>
 - GameBoy/GameBoy Color sound emulator is a conversion writed by me from MESS original.<br>
-- NES sound emulator is a conversion writed by me from MAME original.<br>
-All Spectrum, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad<br><br>
+All Spectrum, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.<br><br>
 <b>6-. Contact & Links</b><br>
 <hr>
 If you want to contact me to send me some feedback or anything, just use leniad2[@]hotmail.com<br>
-You can download the source, official version and WIP versions from https://github.com/leniad/dsp-emulator<br>
-<br>
+You can download the official version and WIP versions from GitHub page https://github.com/leniad/dsp-emulator<br><br>
 If you want info...<br>
 www.mamedev.org<br>
 www.aarongiles.com<br>
 www.emulatronia.com<br>
-www.emulation9.com<br>
-<br>
+www.emulation9.com<br><br>
 if you want spectrum tapes, snapshot, info...<br>
 www.worldofspectrum.org<br>
-http://trastero.speccy.org<br>
-http://spa2.speccy.org<br>
+trastero.speccy.org<br>
+spa2.speccy.org<br>

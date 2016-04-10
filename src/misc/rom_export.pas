@@ -59,9 +59,9 @@ const
         plus3:array[0..4] of tipo_roms=(
         (n:'plus3-0.rom';l:$4000;p:0;crc:$30c9f490),(n:'plus3-1.rom';l:$4000;p:$4000;crc:$a7916b3f),
         (n:'plus3-2.rom';l:$4000;p:$8000;crc:$c9a0b748),(n:'plus3-3.rom';l:$4000;p:$c000;crc:$b88fd6e3),());
-        cpc464:array[0..1] of tipo_roms=((n:'cpc464.rom';l:$8000;p:0;crc:$40852f25),());
+        cpc464:array[0..4] of tipo_roms=((n:'cpc464.rom';l:$8000;p:0;crc:$40852f25),(n:'cpc464f.rom';l:$8000;p:0;crc:$17893d60),(n:'cpc464sp.rom';l:$8000;p:0;crc:$338daf2d),(n:'cpc464d.rom';l:$8000;p:0;crc:$260e45c3),());
         cpc664:array[0..2] of tipo_roms=((n:'cpc664.rom';l:$8000;p:0;crc:$9ab5a036),(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd),());
-        cpc6128:array[0..2] of tipo_roms=((n:'cpc6128.rom';l:$8000;p:0;crc:$9e827fe1),(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd),());
+        cpc6128:array[0..5] of tipo_roms=((n:'cpc6128.rom';l:$8000;p:0;crc:$9e827fe1),(n:'cpc6128f.rom';l:$8000;p:0;crc:$1574923b),(n:'cpc6128sp.rom';l:$8000;p:0;crc:$2fa2e7d6),(n:'cpc6128d.rom';l:$8000;p:0;crc:$4704685a),(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd),());
         //Consolas
         coleco_:array[0..1] of tipo_roms=((n:'coleco.rom';l:$2000;p:0;crc:$3aa93ef3),());
         gameboy:array[0..1] of tipo_roms=((n:'dmg_boot.bin';l:$100;p:0;crc:$59c8598e),());

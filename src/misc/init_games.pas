@@ -275,6 +275,7 @@ var
 
 procedure load_game(numero:word);
 procedure todos_false;
+procedure menus_false(driver:word);
 procedure cargar_maquina(tmaquina:word);
 function tipo_cambio_maquina(sender:TObject):word;
 
@@ -734,21 +735,66 @@ principal1.colecovision1.Checked:=false;
 principal1.GameBoy1.Checked:=false;
 principal1.chip81.checked:=false;
 principal1.segams1.checked:=false;
-//Resto
-principal1.BitBtn1.visible:=false;
-principal1.BitBtn9.visible:=false;
-principal1.BitBtn10.visible:=false;
-principal1.BitBtn11.visible:=false;
-principal1.BitBtn12.visible:=false;
-principal1.BitBtn14.visible:=false;
-principal1.BitBtn1.enabled:=false;
-principal1.BitBtn9.enabled:=false;
-principal1.BitBtn10.enabled:=false;
-principal1.BitBtn11.enabled:=false;
-principal1.BitBtn12.enabled:=false;
-principal1.BitBtn14.enabled:=false;
-principal1.Panel2.Visible:=false;
-principal1.BitBtn8.visible:=true;
+end;
+
+procedure menus_false(driver:word);
+begin
+principal1.BitBtn1.visible:=false; //Configurar ordenador/consola
+principal1.BitBtn10.visible:=false; //Disco
+principal1.BitBtn11.visible:=false; //Save Snapshot
+principal1.BitBtn9.visible:=false; //Load Snapshot
+principal1.BitBtn12.visible:=false; //Poke
+principal1.BitBtn14.visible:=false; //Fast
+principal1.BitBtn8.visible:=false; //Config arcade
+principal1.Panel2.visible:=false; //Lateral
+principal1.BitBtn2.Enabled:=true;
+principal1.BitBtn3.Enabled:=true;
+principal1.BitBtn4.Enabled:=true;
+principal1.BitBtn5.Enabled:=true;
+principal1.BitBtn6.Enabled:=true;
+principal1.BitBtn8.Enabled:=true;
+principal1.BitBtn19.Enabled:=true;
+principal1.BitBtn1.Enabled:=true;
+principal1.BitBtn9.Enabled:=true;
+principal1.BitBtn10.Enabled:=true;
+principal1.BitBtn11.Enabled:=true;
+principal1.BitBtn12.Enabled:=true;
+principal1.BitBtn14.Enabled:=true;
+case driver of
+  0..6:begin
+          principal1.Panel2.visible:=true;
+          principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
+          principal1.BitBtn10.visible:=true;  //Disco
+          principal1.BitBtn10.enabled:=(driver=2);
+          principal1.BitBtn11.visible:=true; //Save Snapshot
+          principal1.BitBtn9.visible:=true; //Load Snapshot
+          principal1.BitBtn12.visible:=true; //Poke
+          principal1.BitBtn14.visible:=true; //Fast
+       end;
+  7..9:begin  //Amstrad CPC
+          principal1.Panel2.visible:=true;
+          principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
+          principal1.BitBtn10.visible:=true; //Disco
+          principal1.BitBtn10.enabled:=(driver<>7); //Disco
+          principal1.BitBtn11.visible:=true; //Save Snapshot
+          principal1.BitBtn9.visible:=true; //Load Snapshot
+       end;
+  10..999:principal1.BitBtn8.visible:=true;  //Arcade
+  1000,1002,1003:begin //NES y Gameboy
+          principal1.Panel2.visible:=true;
+          principal1.BitBtn10.visible:=true; //Disco
+       end;
+  1001:begin //Coleco y Chip8
+          principal1.Panel2.visible:=true;
+          principal1.BitBtn10.visible:=true; //Disco
+          principal1.BitBtn11.visible:=true; //Load Snapshot
+       end;
+  1004:begin //SMS
+          principal1.Panel2.visible:=true;
+          principal1.BitBtn10.visible:=true; //Disco
+          principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
+       end;
+end;
 end;
 
 procedure cargar_maquina(tmaquina:word);

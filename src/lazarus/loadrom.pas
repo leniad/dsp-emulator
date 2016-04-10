@@ -148,11 +148,7 @@ procedure TFLoadRom.BitBtn1Click(Sender: TObject);
 begin
 if main_vars.tipo_maquina=255 then exit;
 floadrom.close;
-{$ifdef windows}
-if not(main_screen.pantalla_completa) then windows.SetFocus(principal1.Panel4.Handle);
-{$else}
-//SDL_WM_GrabInput(SDL_GRAB_ON);
-{$endif}
+//setfocus
 EmuStatus:=EmuStatusTemp;
 principal1.timer1.Enabled:=true;
 end;
