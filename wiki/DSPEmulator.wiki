@@ -214,229 +214,229 @@ Mysterious Stones          ¡ MYSTSTON.ZIP ¡     100    ¡
 Frogger                    ¡ FROGGER.ZIP  ¡     100    ¡ Galaxian Hardware
 Galaxian                   ¡ GALAXIAN.ZIP ¡      95    ¡ Galaxian Hardware
                                                        ¡ Partial sound with samples
-Jump Bug                   ! JUMPBUG.ZIP  !     100    ! Galaxian Hardware
-Moon Cresta                ! MOONCRST.ZIP !      90    ! Galaxian Hardware
-                                                       ! No sound
-Scramble                   ! SCRAMBLE.ZIP !     100    ! Galaxian Hardware
-Super Cobra                ! SCOBRA.ZIP   !     100    ! Galaxian Hardware
-Amidar                     ! AMIDAR.ZIP   !     100    ! Galaxian Hardware
-Donkey Kong                ! DKONG.ZIP    !     100    ! Donkey Kong Hardware
-                           !              !            ! Full sound using samples
-Donkey Kong Junior         ! DKONGJR.ZIP  !     100    ! Donkey Kong Hardware
-                           !              !            ! Full sound using samples
-Donkey Kong 3              ! DKONG3.ZIP   !     100    ! Donkey Kong Hardware
-Black Tiger                ! BLKTIGER.ZIP !     100    !
-Green Beret                ! GBERET.ZIP   !     100    ! Green Beret HW
-Mr. Goemon                 ! MRGOEMON.ZIP !     100    ! Green Beret HW
-Commando                   ! COMMANDO.ZIP !     100    !
-Ghost'n'Goblins            ! GNG.ZIP      !     100    !
-Mikie                      ! MIKIE.ZIP    !     100    !
-Shaolin's Road             ! SHAOLIN.ZIP  !     100    !
-Yie Ar Kung-Fu             ! YIEAR.ZIP    !     100    !
-Son Son                    ! SONSON.ZIP   !     100    !
-Asteroids                  ! ASTEROID.ZIP !     100    ! Analog sound and samples
-Star Force                 ! STARFORC.ZIP !     100    ! 
-Rygar                      ! RYGAR.ZIP    !     100    ! Tecmo Hardware
-Silk Worm                  ! SILKWORM.ZIP !     100    ! Tecmo Hardware
-Pitfall II                 ! PITFALL2.ZIP !     100    ! Sega System 1
-Teddy Boy Blues            ! TEDDYBB.ZIP  !     100    ! Sega System 1
-Wonder Boy                 ! WBOY.ZIP     !     100    ! Sega System 1
-Wonder Boy in Monster Land ! WBML.ZIP     !     100    ! Sega System 2
-Choplifter                 ! CHOPLIFT.ZIP !     100    ! Sega System 2
-Mister Viking              ! MRVIKING.ZIP !     100    ! Sega System 1
-Sega Ninja                 ! SEGANINJ.ZIP !     100    ! Sega System 1
-Up'n Down                  ! UPNDOWN.ZIP  !     100    | Sega System 1
-Flicky                     | FLICKY.ZIP   |     100    | Sega System 1
-Pooyan                     | POOYAN.ZIP   |     100    |
-Jungler                    | JUNGLER.ZIP  |     100    | Rally X Hardware 
-Rally X                    | RALLYX.ZIP   |     100    | Rally X Hardware
-                                                       | Explosion sound uses samples
-New Rally X                | NRALLYX.ZIP  |     100    | Rally X Hardware
-                                                       | Explosion sound uses samples
-City Connection            | CITYCON.ZIP  |     100    |
-Burger Time                | BTIME.ZIP    |     100    |
-Express Raider             | EXPRRAID.ZIP |     100    |
-Super Basketball           | SBASKETB.ZIP |     100    |
-Lady Bug                   | LADYBUG.ZIP  |     100    | Lady Bug Hardware
-Snap Jack                  | SNAPJACK.ZIP |     100    | Lady Bug Hardware
-Cosmic Avenger             | CAVENGER.ZIP |     100    | Lady Bug Hardware
-Tehkan World Cup           | TEHKANWC.ZIP |     100    |
-Popeye                     | POPEYE.ZIP   |     100    |
-Psychic 5                  | PSYCHIC5.ZIP |      96    | Missing Alpha render (background and sprites) and colour intensity
-Kung-Fu Master             | KUNGFUM.ZIP  |     100    | Irem M62 Hardware
-Spelunker                  | SPELUNKR.ZIP |     100    | Irem M62 Hardware
-Spelunker II               | SPELUNK2.ZIP |     100    | Irem M62 Hardware
-Lode Runner                | LODERUN.ZIP  |     100    | Irem M62 Hardware
-Lode Runner II             | LODERUN2.ZIP |     100    | Irem M62 Hardware
-Terra Cresta               | TERRACRE.ZIP |     100    |
-Shoot Out!                 | SHOOTOUT.ZIP |     100    |
-Vigilante                  | VIGILANT.ZIP |     100    |
-Jackal                     | JACKAL.ZIP   |     100    |
-Bubble Bobble              | BUBLBOBL.ZIP |     100    |
-Prehistoric Isle in 1930   | PREHISLE.ZIP |     100    |
-Tiger Road                 | TIGEROAD.ZIP |     100    | Tiger Road Hardware
-F1 Dream                   | F1DREAM.ZIP  |     100    | Tiger Road Hardware
-Snow Bros                  | SNOWBROS.ZIP |     100    |
-Toki                       | TOKI.ZIP     |     100    |
-Contra                     | CONTRA.ZIP   |      99    | Some graphics bugs
-Mappy                      | MAPPY.ZIP    |     100    | Mappy Hardware
-Dig-Dug II                 | DIGDUG2.ZIP  |     100    | Mappy Hardware
-Super Pacman               | SUPERPAC.ZIP |     100    | Mappy Hardware
-The Tower of Druaga        | TODRUAGA.ZIP |     100    | Mappy Hardware
-Motos                      | MOTOS.ZIP    |     100    | Mappy Hardware
-Rastan                     | RASTAN.ZIP   |     100    |
-Legendary Wings            | LWINGS.ZIP   |     100    | Legendary Wings Hardware
-Section Z                  | SECTIONZ.ZIP |     100    | Legendary Wings Hardware
-Trojan                     | TROJAN.ZIP   |     100    | Legendary Wings Hardware
-Street Fighter             | SF.ZIP       |     100    |
-Galaga                     | GALAGA.ZIP   |     100    | Galaga Hardware
-DigDug                     | DIGDUG.ZIP   |     100    | Galaga Hardware
-Xain'd Sleena              | XSLEENA.ZIP  |     100    |
-Hard Head                  | HARDHEAD.ZIP |     100    | Suna Hardware
-Hard Head 2                | HARDHED2.ZIP |      10    | Basic driver
-Saboten Bombers            | SABOTENB.ZIP |     100    | NMK 16 Hardware
-Bomb Jack Twin             | BJTWIN.ZIP   |     100    | NMK 16 Hardware
-Knuckle Joe                | KNCLJOE.ZIP  |     100    |
-Wardner                    | WARDNER.ZIP  |     100    |
-Big Karnak                 | BIGKARNC.ZIP |     100    | Gaelco Hardware
-Thunder Hoop               | THOOP.ZIP    |     100    | Gaelco Hardware
-Squash                     | SQUASH.ZIP   |     100    | Gaelco Hardware
-Biomechanical Toy          | BIOMTOY.ZIP  |     100    | Gaelco Hardware
-Exed Exes                  | EXEDEXES.ZIP |     100    |
-Gun.Smoke                  | GUNSMOKE.ZIP |     100    | Gun.Smoke Hardware
-1943: The Battle of Midway | 1943.ZIP     |     100    | Gun.Smoke Hardware
-1943 Kai: Midway Kaisen    | 1943KAI.ZIP  |     100    | Gun.Smoke Hardware
-1942                       | 1942.ZIP     |     100    |
-Jail Break                 | JAILBREK.ZIP |     100    |
-Circus Charlie             | CIRCUSC.ZIP  |     100    |
-Iron Horse                 | IRONHORS.ZIP |     100    |
-R-Type                     | RTYPE.ZIP    |      95    | Irem M72 Hardware
-Hammerin' Harry            | HHARRY.ZIP   |      95    | Irem M72 Hardware
-R-Type 2                   | RTYPE2.ZIP   |      95    | Irem M72 Hardware
-Break Thru                 | BRKTHRU.ZIP  |     100    | Break Thru Hardware
-Darwin 4078                | DARWIN.ZIP   |     100    | Break Thru Hardware
-Super Real Darwin          | SRDARWIN.ZIP |     100    |
-Double Dragon              | DDRAGON.ZIP  |     100    | Double Dragon Hardware
-Double Dragon II -         | 
-  The Revenge              | DDRAGON2.ZIP |     100    | Double Dragon Hardware
-Mr. Do!                    | MRDO.ZIP     |     100    |
-The Glob                   | THEGLOB.ZIP  |     100    | Epos Hardware
-Super Glob                 | SUPRGLOB.ZIP |     100    | Epos Hardware
-Tiger Heli                 | TIGERH.ZIP   |     100    | Slap Fight Hardware
-Slap Fight                 | SLAPFIGH.ZIP |     100    | Slap Fight Hardware
-The Legend of Kage         | LKAGE.ZIP    |     100    |
-Cabal                      | CABAL.ZIP    |     100    |
-Ghouls and Ghosts          | GHOULS.ZIP   |     100    | Capcom Play System 1 - CPS1
-Final Fight                | FFIGHT.ZIP   |     100    | Capcom Play System 1 - CPS1
-The King of Dragons        | KOD.ZIP      |     100    | Capcom Play System 1 - CPS1
-                                                       | Missing third player controls
-Street Fighter II          |
-   The World Warrior       | SF2.ZIP      |      95    | Capcom Play System 1 - CPS1
-                                                       | Missing some controls and scroll row
-Strider                    | STRIDER.ZIP  |     100    | Capcom Play System 1 - CPS1
-Three Wonders              | 3WONDERS.ZIP |     100    | Capcom Play System 1 - CPS1
-Captain Commando           | CCOMANDO.ZIP |     100    | Capcom Play System 1 - CPS1
-Knights of the Round       | KNIGHTS.ZIP  |     100    | Capcom Play System 1 - CPS1
-Street Fighter II'         |
-   Champion Edition        | SF2CE.ZIP    |      95    | Capcom Play System 1 - CPS1
-                                                       | Missing some controls and scroll row
-Cadillacs and Dinosaurs    | DINO.ZIP     |     100    | Capcom Play System 1 - CPS1
-The Punisher               | PUNISHER.ZIP |     100    | Capcom Play System 1 - CPS1
-Shinobi                    | SHINOBI.ZIP  |      95    | Sega System 16A
-                                                       | Missing PCM Sound
-Alex Kidd                  | ALEXKIDD.ZIP |      95    | Sega System 16A
-                                                       | Missing PCM Sound
-Fantasy Zone               | FANTZONE.ZIP |      95    | Sega System 16A
-                                                       | Missing PCM Sound
-Alien Syndrome             | ALIENSYN.ZIP |      95    | Sega System 16A
-                                                       | Falta sonido PCM
-Wonder Boy III             | WB3.ZIP      |      95    | Sega System 16A
-                                                       | Falta sonido PCM
-Time Pilot '84             | TP84.ZIP     |     100    |
-Tutankham                  | TUTANKHM.ZIP |     100    |
-Pang                       | PANG.ZIP     |      95    | Missing YM2413
-Super Pang                 | SPANG.ZIP    |      95    | Missing YM2413
-Ninja Kid II               | NINJAKD2.ZIP |      95    | UPL Hardware
-                                                       | No PCM sound
-Ark Area                   | ARKAREA.ZIP  |     100    | UPL Hardware
-Mutant Night               | MNIGHT.ZIP   |     100    | UPL Hardware
-Sky Kid                    | SKYKID.ZIP   |     100    | Sky Kid Hardware
-Dragon Buster              | DRGNBSTR.ZIP |     100    | Sky Kid Hardware
-Rolling Thunder            | RTHUNDER.ZIP |     100    | Namco System 86
-Hopping Mappy              | HOPMAPPY.ZIP |     100    | Namco System 86
-Sky Kid Deluxe             | SKYKIDDX.ZIP |     100    | Namco System 86
-Roc'n Rope                 | ROCNROPE.ZIP |     100    |
-Repulse                    | REPULSE.ZIP  |     100    |
-The NewZealand Story       | TNZS.ZIP     |     100    | The NewZealand Story Hardware
-Insector X                 | INSECTX.ZIP  |     100    | The NewZealand Story Hardware
-Pacland                    | PACLAND.ZIP  |     100    |
-Mario Bros.                | MARIO.ZIP    |     100    | Full sound using samples
-Solomon Key                | SOLOMON.ZIP  |     100    |
-Combat School              | COMBATSC.ZIP |      95    | Minimal graphics problems
-Heavy Unit                 | HVYUNIT.ZIP  |     100    |
-P.O.W. - Prisoners of War  | POW.ZIP      |     100    | SNK 68K Hardware
-Street Smart               | STREETSM.ZIP |     100    | SNK 68K Hardware
-Ikari III - The Rescue     | IKARI3.ZIP   |     100    | SNK 68K Hardware
-Search and Rescue          | SEARCHAR.ZIP |     100    | SNK 68K Hardware
-P47 - Phantom Fighter      | P47.ZIP      |     100    | Jaleco Megasystem
-Rodland                    | RODLAND.ZIP  |     100    | Jaleco Megasystem
-Saint Dragon               | STDRAGON.ZIP |     100    | Jaleco Megasystem
-Time Pilot                 | TIMEPLT.ZIP  |     100    |
-Pengo                      | PENGO.ZIP    |     100    |
-Twin Cobra                 | TWINCOBR.ZIP |     100    | Twin Cobra Hardware
-Flying Shark               | FSHARK.ZIP   |     100    | Twin Cobra Hardware
-Jr. Pac-Man                | JRPACMAN.ZIP |     100    |
-Robocop                    | ROBOCOP.ZIP  |     100    | Deco0 Hardware
-Baddudes vs. DragonNinja   | BADDUDES.ZIP |     100    | Deco0 Hardware
-Hippodrome                 | HIPPODRM.ZIP |     100    | Deco0 Hardware
-Tumble Pop                 | TUMBLEP.ZIP  |     100    |
-Funky Jet                  | FUNKYJET.ZIP |     100    |
-Super Burger Time          | SUPBTIME.ZIP |     100    |
-Caveman Ninja              | CNINJA.ZIP   |     100    | Caveman Ninja Hardware
-Robocop 2                  | ROBOCOP2.ZIP |      95    | Caveman Ninja Hardware
-                                                       | Some graphics problems
-Diet Go Go                 | DIETGO.ZIP   |     100    |
-Act-Fancer Cybernetick     | 
-    Hyper Weapon           | ACTFANCR.ZIP |     100    |
-Arabian                    | ARABIAN.ZIP  |     100    |
-Pirate Ship Higemaru       | HIGEMARU.ZIP |     100    |
-Bagman                     | BAGMAN.ZIP   |      95    | Bagman Hardware
-                                                       | Missing TSM 5110 sound
-Super Bagman               | SBAGMAN.ZIP  |      95    | Bagman Hardware
-                                                       | Missing TSM 5110 sound
-Congo Bongo                | CONGO.ZIP    |     100    | Zaxxon Hardware
-Zaxxon                     | ZAXXON.ZIP   |     100    | Zaxxon Hardware
-Kangaroo                   | KANGAROO.ZIP |     100    |
-Bionic Commando            | BIONICC.ZIP  |     100    |
-WWF Super Stars            | WWFSSTAR.ZIP |     100    |
-Rainbow Islands            | RAINBOW.ZIP  |     100    | Rainbow Islands Hardware
-Rainbow Islands Extra      | RAINBOWE.ZIP |     100    | Rainbow Islands Hardware
-Volfied                    | VOLFIED.ZIP  |     100    |
-Operation Wolf             | OPWOLF.ZIP   |     100    | Use the mouse to move the gun cross
-Outrun                     | OUTRUN.ZIP   |      10    | Basic Driver
-Jungle King                | JUNGLEK.ZIP  |     100    | Taito SJ Hardware
-Elevator Action            | ELEVATOR.ZIP |     100    | Taito SJ Hardware
-Vulgus                     | VULGUS.ZIP   |     100    |
-Double Dragon III:         |
-    The Rosetta Stone      | DDRAGON3.ZIP |     100    |
-Block Out                  | BLOCKUOT.ZIP |     100    |
-Food Fight                 | FOODF.ZIP    |     100    |
-Nemesis                    | NEMESIS.ZIP  |     100    | Nemesis HW
-TwinBee                    | TWINBEE.ZIP  |      80    | Nemesis HW
-                                                       | Sprites and video video problems
-Pirates                    | PIRATES.ZIP  |     100    | Pirates HW
-Genis Family               | GENIX.ZIP    |     100    | Pirates HW
-Juno First                 | JUNOFRST.ZIP |      90    | DAC missing
-Gyruss                     | GYRUSS.ZIP   |      90    | DAC missing
-Free Kick                  | FREEKICK.ZIP |     100    |
-Boogie Wings               | BOOGIEW.ZIP  |      20    | Basic driver
-Pinball Action             | PBACTION.ZIP |     100    |
-Renegade                   | RENEGADE.ZIP |     100    |
-Teenage Mutant Ninja       |
-   Turtles                 | TMNT.ZIP     |     100    | TMNT HW
-Sunset Riders              | SSRIDERS.ZIP |     100    | TMNT HW
-Gradius III                | GRADIUS3.ZIP |     100    |
----------------------------------------------------------------------------------------------------------------------------
+Jump Bug                   ¡ JUMPBUG.ZIP  ¡     100    ¡ Galaxian Hardware
+Moon Cresta                ¡ MOONCRST.ZIP ¡      90    ¡ Galaxian Hardware
+                                                       ¡ No sound
+Scramble                   ¡ SCRAMBLE.ZIP ¡     100    ¡ Galaxian Hardware
+Super Cobra                ¡ SCOBRA.ZIP   ¡     100    ¡ Galaxian Hardware
+Amidar                     ¡ AMIDAR.ZIP   ¡     100    ¡ Galaxian Hardware
+Donkey Kong                ¡ DKONG.ZIP    ¡     100    ¡ Donkey Kong Hardware
+                           ¡              ¡            ¡ Full sound using samples
+Donkey Kong Junior         ¡ DKONGJR.ZIP  ¡     100    ¡ Donkey Kong Hardware
+                           ¡              ¡            ¡ Full sound using samples
+Donkey Kong 3              ¡ DKONG3.ZIP   ¡     100    ¡ Donkey Kong Hardware
+Black Tiger                ¡ BLKTIGER.ZIP ¡     100    ¡
+Green Beret                ¡ GBERET.ZIP   ¡     100    ¡ Green Beret HW
+Mr. Goemon                 ¡ MRGOEMON.ZIP ¡     100    ¡ Green Beret HW
+Commando                   ¡ COMMANDO.ZIP ¡     100    ¡
+Ghost'n'Goblins            ¡ GNG.ZIP      ¡     100    ¡
+Mikie                      ¡ MIKIE.ZIP    ¡     100    ¡
+Shaolin's Road             ¡ SHAOLIN.ZIP  ¡     100    ¡
+Yie Ar Kung-Fu             ¡ YIEAR.ZIP    ¡     100    ¡
+Son Son                    ¡ SONSON.ZIP   ¡     100    ¡
+Asteroids                  ¡ ASTEROID.ZIP ¡     100    ¡ Analog sound and samples
+Star Force                 ¡ STARFORC.ZIP ¡     100    ¡ 
+Rygar                      ¡ RYGAR.ZIP    ¡     100    ¡ Tecmo Hardware
+Silk Worm                  ¡ SILKWORM.ZIP ¡     100    ¡ Tecmo Hardware
+Pitfall II                 ¡ PITFALL2.ZIP ¡     100    ¡ Sega System 1
+Teddy Boy Blues            ¡ TEDDYBB.ZIP  ¡     100    ¡ Sega System 1
+Wonder Boy                 ¡ WBOY.ZIP     ¡     100    ¡ Sega System 1
+Wonder Boy in Monster Land ¡ WBML.ZIP     ¡     100    ¡ Sega System 2
+Choplifter                 ¡ CHOPLIFT.ZIP ¡     100    ¡ Sega System 2
+Mister Viking              ¡ MRVIKING.ZIP ¡     100    ¡ Sega System 1
+Sega Ninja                 ¡ SEGANINJ.ZIP ¡     100    ¡ Sega System 1
+Up'n Down                  ¡ UPNDOWN.ZIP  ¡     100    ¡ Sega System 1
+Flicky                     ¡ FLICKY.ZIP   ¡     100    ¡ Sega System 1
+Pooyan                     ¡ POOYAN.ZIP   ¡     100    ¡
+Jungler                    ¡ JUNGLER.ZIP  ¡     100    ¡ Rally X Hardware 
+Rally X                    ¡ RALLYX.ZIP   ¡     100    ¡ Rally X Hardware
+                                                       ¡ Explosion sound uses samples
+New Rally X                ¡ NRALLYX.ZIP  ¡     100    ¡ Rally X Hardware
+                                                       ¡ Explosion sound uses samples
+City Connection            ¡ CITYCON.ZIP  ¡     100    ¡
+Burger Time                ¡ BTIME.ZIP    ¡     100    ¡
+Express Raider             ¡ EXPRRAID.ZIP ¡     100    ¡
+Super Basketball           ¡ SBASKETB.ZIP ¡     100    ¡
+Lady Bug                   ¡ LADYBUG.ZIP  ¡     100    ¡ Lady Bug Hardware
+Snap Jack                  ¡ SNAPJACK.ZIP ¡     100    ¡ Lady Bug Hardware
+Cosmic Avenger             ¡ CAVENGER.ZIP ¡     100    ¡ Lady Bug Hardware
+Tehkan World Cup           ¡ TEHKANWC.ZIP ¡     100    ¡
+Popeye                     ¡ POPEYE.ZIP   ¡     100    ¡
+Psychic 5                  ¡ PSYCHIC5.ZIP ¡      96    ¡ Missing Alpha render (background and sprites) and colour intensity
+Kung-Fu Master             ¡ KUNGFUM.ZIP  ¡     100    ¡ Irem M62 Hardware
+Spelunker                  ¡ SPELUNKR.ZIP ¡     100    ¡ Irem M62 Hardware
+Spelunker II               ¡ SPELUNK2.ZIP ¡     100    ¡ Irem M62 Hardware
+Lode Runner                ¡ LODERUN.ZIP  ¡     100    ¡ Irem M62 Hardware
+Lode Runner II             ¡ LODERUN2.ZIP ¡     100    ¡ Irem M62 Hardware
+Terra Cresta               ¡ TERRACRE.ZIP ¡     100    ¡
+Shoot Out!                 ¡ SHOOTOUT.ZIP ¡     100    ¡
+Vigilante                  ¡ VIGILANT.ZIP ¡     100    ¡
+Jackal                     ¡ JACKAL.ZIP   ¡     100    ¡
+Bubble Bobble              ¡ BUBLBOBL.ZIP ¡     100    ¡
+Prehistoric Isle in 1930   ¡ PREHISLE.ZIP ¡     100    ¡
+Tiger Road                 ¡ TIGEROAD.ZIP ¡     100    ¡ Tiger Road Hardware
+F1 Dream                   ¡ F1DREAM.ZIP  ¡     100    ¡ Tiger Road Hardware
+Snow Bros                  ¡ SNOWBROS.ZIP ¡     100    ¡
+Toki                       ¡ TOKI.ZIP     ¡     100    ¡
+Contra                     ¡ CONTRA.ZIP   ¡      99    ¡ Some graphics bugs
+Mappy                      ¡ MAPPY.ZIP    ¡     100    ¡ Mappy Hardware
+Dig-Dug II                 ¡ DIGDUG2.ZIP  ¡     100    ¡ Mappy Hardware
+Super Pacman               ¡ SUPERPAC.ZIP ¡     100    ¡ Mappy Hardware
+The Tower of Druaga        ¡ TODRUAGA.ZIP ¡     100    ¡ Mappy Hardware
+Motos                      ¡ MOTOS.ZIP    ¡     100    ¡ Mappy Hardware
+Rastan                     ¡ RASTAN.ZIP   ¡     100    ¡
+Legendary Wings            ¡ LWINGS.ZIP   ¡     100    ¡ Legendary Wings Hardware
+Section Z                  ¡ SECTIONZ.ZIP ¡     100    ¡ Legendary Wings Hardware
+Trojan                     ¡ TROJAN.ZIP   ¡     100    ¡ Legendary Wings Hardware
+Street Fighter             ¡ SF.ZIP       ¡     100    ¡
+Galaga                     ¡ GALAGA.ZIP   ¡     100    ¡ Galaga Hardware
+DigDug                     ¡ DIGDUG.ZIP   ¡     100    ¡ Galaga Hardware
+Xain'd Sleena              ¡ XSLEENA.ZIP  ¡     100    ¡
+Hard Head                  ¡ HARDHEAD.ZIP ¡     100    ¡ Suna Hardware
+Hard Head 2                ¡ HARDHED2.ZIP ¡      10    ¡ Basic driver
+Saboten Bombers            ¡ SABOTENB.ZIP ¡     100    ¡ NMK 16 Hardware
+Bomb Jack Twin             ¡ BJTWIN.ZIP   ¡     100    ¡ NMK 16 Hardware
+Knuckle Joe                ¡ KNCLJOE.ZIP  ¡     100    ¡
+Wardner                    ¡ WARDNER.ZIP  ¡     100    ¡
+Big Karnak                 ¡ BIGKARNC.ZIP ¡     100    ¡ Gaelco Hardware
+Thunder Hoop               ¡ THOOP.ZIP    ¡     100    ¡ Gaelco Hardware
+Squash                     ¡ SQUASH.ZIP   ¡     100    ¡ Gaelco Hardware
+Biomechanical Toy          ¡ BIOMTOY.ZIP  ¡     100    ¡ Gaelco Hardware
+Exed Exes                  ¡ EXEDEXES.ZIP ¡     100    ¡
+Gun.Smoke                  ¡ GUNSMOKE.ZIP ¡     100    ¡ Gun.Smoke Hardware
+1943: The Battle of Midway ¡ 1943.ZIP     ¡     100    ¡ Gun.Smoke Hardware
+1943 Kai: Midway Kaisen    ¡ 1943KAI.ZIP  ¡     100    ¡ Gun.Smoke Hardware
+1942                       ¡ 1942.ZIP     ¡     100    ¡
+Jail Break                 ¡ JAILBREK.ZIP ¡     100    ¡
+Circus Charlie             ¡ CIRCUSC.ZIP  ¡     100    ¡
+Iron Horse                 ¡ IRONHORS.ZIP ¡     100    ¡
+R-Type                     ¡ RTYPE.ZIP    ¡      95    ¡ Irem M72 Hardware
+Hammerin' Harry            ¡ HHARRY.ZIP   ¡      95    ¡ Irem M72 Hardware
+R-Type 2                   ¡ RTYPE2.ZIP   ¡      95    ¡ Irem M72 Hardware
+Break Thru                 ¡ BRKTHRU.ZIP  ¡     100    ¡ Break Thru Hardware
+Darwin 4078                ¡ DARWIN.ZIP   ¡     100    ¡ Break Thru Hardware
+Super Real Darwin          ¡ SRDARWIN.ZIP ¡     100    ¡
+Double Dragon              ¡ DDRAGON.ZIP  ¡     100    ¡ Double Dragon Hardware
+Double Dragon II -         ¡ 
+  The Revenge              ¡ DDRAGON2.ZIP ¡     100    ¡ Double Dragon Hardware
+Mr. Do!                    ¡ MRDO.ZIP     ¡     100    ¡
+The Glob                   ¡ THEGLOB.ZIP  ¡     100    ¡ Epos Hardware
+Super Glob                 ¡ SUPRGLOB.ZIP ¡     100    ¡ Epos Hardware
+Tiger Heli                 ¡ TIGERH.ZIP   ¡     100    ¡ Slap Fight Hardware
+Slap Fight                 ¡ SLAPFIGH.ZIP ¡     100    ¡ Slap Fight Hardware
+The Legend of Kage         ¡ LKAGE.ZIP    ¡     100    ¡
+Cabal                      ¡ CABAL.ZIP    ¡     100    ¡
+Ghouls and Ghosts          ¡ GHOULS.ZIP   ¡     100    ¡ Capcom Play System 1 - CPS1
+Final Fight                ¡ FFIGHT.ZIP   ¡     100    ¡ Capcom Play System 1 - CPS1
+The King of Dragons        ¡ KOD.ZIP      ¡     100    ¡ Capcom Play System 1 - CPS1
+                                                       ¡ Missing third player controls
+Street Fighter II          ¡
+   The World Warrior       ¡ SF2.ZIP      ¡      95    ¡ Capcom Play System 1 - CPS1
+                                                       ¡ Missing some controls and scroll row
+Strider                    ¡ STRIDER.ZIP  ¡     100    ¡ Capcom Play System 1 - CPS1
+Three Wonders              ¡ 3WONDERS.ZIP ¡     100    ¡ Capcom Play System 1 - CPS1
+Captain Commando           ¡ CCOMANDO.ZIP ¡     100    ¡ Capcom Play System 1 - CPS1
+Knights of the Round       ¡ KNIGHTS.ZIP  ¡     100    ¡ Capcom Play System 1 - CPS1
+Street Fighter II'         ¡
+   Champion Edition        ¡ SF2CE.ZIP    ¡      95    ¡ Capcom Play System 1 - CPS1
+                                                       ¡ Missing some controls and scroll row
+Cadillacs and Dinosaurs    ¡ DINO.ZIP     ¡     100    ¡ Capcom Play System 1 - CPS1
+The Punisher               ¡ PUNISHER.ZIP ¡     100    ¡ Capcom Play System 1 - CPS1
+Shinobi                    ¡ SHINOBI.ZIP  ¡      95    ¡ Sega System 16A
+                                                       ¡ Missing PCM Sound
+Alex Kidd                  ¡ ALEXKIDD.ZIP ¡      95    ¡ Sega System 16A
+                                                       ¡ Missing PCM Sound
+Fantasy Zone               ¡ FANTZONE.ZIP ¡      95    ¡ Sega System 16A
+                                                       ¡ Missing PCM Sound
+Alien Syndrome             ¡ ALIENSYN.ZIP ¡      95    ¡ Sega System 16A
+                                                       ¡ Missing PCM Sound
+Wonder Boy III             ¡ WB3.ZIP      ¡      95    ¡ Sega System 16A
+                                                       ¡ Missing PCM Sound
+Time Pilot '84             ¡ TP84.ZIP     ¡     100    ¡
+Tutankham                  ¡ TUTANKHM.ZIP ¡     100    ¡
+Pang                       ¡ PANG.ZIP     ¡      95    ¡ Missing YM2413
+Super Pang                 ¡ SPANG.ZIP    ¡      95    ¡ Missing YM2413
+Ninja Kid II               ¡ NINJAKD2.ZIP ¡      95    ¡ UPL Hardware
+                                                       ¡ No PCM sound
+Ark Area                   ¡ ARKAREA.ZIP  ¡     100    ¡ UPL Hardware
+Mutant Night               ¡ MNIGHT.ZIP   ¡     100    ¡ UPL Hardware
+Sky Kid                    ¡ SKYKID.ZIP   ¡     100    ¡ Sky Kid Hardware
+Dragon Buster              ¡ DRGNBSTR.ZIP ¡     100    ¡ Sky Kid Hardware
+Rolling Thunder            ¡ RTHUNDER.ZIP ¡     100    ¡ Namco System 86
+Hopping Mappy              ¡ HOPMAPPY.ZIP ¡     100    ¡ Namco System 86
+Sky Kid Deluxe             ¡ SKYKIDDX.ZIP ¡     100    ¡ Namco System 86
+Roc'n Rope                 ¡ ROCNROPE.ZIP ¡     100    ¡
+Repulse                    ¡ REPULSE.ZIP  ¡     100    ¡
+The NewZealand Story       ¡ TNZS.ZIP     ¡     100    ¡ The NewZealand Story Hardware
+Insector X                 ¡ INSECTX.ZIP  ¡     100    ¡ The NewZealand Story Hardware
+Pacland                    ¡ PACLAND.ZIP  ¡     100    ¡
+Mario Bros.                ¡ MARIO.ZIP    ¡     100    ¡ Full sound using samples
+Solomon Key                ¡ SOLOMON.ZIP  ¡     100    ¡
+Combat School              ¡ COMBATSC.ZIP ¡      95    ¡ Minimal graphics problems
+Heavy Unit                 ¡ HVYUNIT.ZIP  ¡     100    ¡
+P.O.W. - Prisoners of War  ¡ POW.ZIP      ¡     100    ¡ SNK 68K Hardware
+Street Smart               ¡ STREETSM.ZIP ¡     100    ¡ SNK 68K Hardware
+Ikari III - The Rescue     ¡ IKARI3.ZIP   ¡     100    ¡ SNK 68K Hardware
+Search and Rescue          ¡ SEARCHAR.ZIP ¡     100    ¡ SNK 68K Hardware
+P47 - Phantom Fighter      ¡ P47.ZIP      ¡     100    ¡ Jaleco Megasystem
+Rodland                    ¡ RODLAND.ZIP  ¡     100    ¡ Jaleco Megasystem
+Saint Dragon               ¡ STDRAGON.ZIP ¡     100    ¡ Jaleco Megasystem
+Time Pilot                 ¡ TIMEPLT.ZIP  ¡     100    ¡
+Pengo                      ¡ PENGO.ZIP    ¡     100    ¡
+Twin Cobra                 ¡ TWINCOBR.ZIP ¡     100    ¡ Twin Cobra Hardware
+Flying Shark               ¡ FSHARK.ZIP   ¡     100    ¡ Twin Cobra Hardware
+Jr. Pac-Man                ¡ JRPACMAN.ZIP ¡     100    ¡
+Robocop                    ¡ ROBOCOP.ZIP  ¡     100    ¡ Deco0 Hardware
+Baddudes vs. DragonNinja   ¡ BADDUDES.ZIP ¡     100    ¡ Deco0 Hardware
+Hippodrome                 ¡ HIPPODRM.ZIP ¡     100    ¡ Deco0 Hardware
+Tumble Pop                 ¡ TUMBLEP.ZIP  ¡     100    ¡
+Funky Jet                  ¡ FUNKYJET.ZIP ¡     100    ¡
+Super Burger Time          ¡ SUPBTIME.ZIP ¡     100    ¡
+Caveman Ninja              ¡ CNINJA.ZIP   ¡     100    ¡ Caveman Ninja Hardware
+Robocop 2                  ¡ ROBOCOP2.ZIP ¡      95    ¡ Caveman Ninja Hardware
+                                                       ¡ Some graphics problems
+Diet Go Go                 ¡ DIETGO.ZIP   ¡     100    ¡
+Act-Fancer Cybernetick     ¡ 
+    Hyper Weapon           ¡ ACTFANCR.ZIP ¡     100    ¡
+Arabian                    ¡ ARABIAN.ZIP  ¡     100    ¡
+Pirate Ship Higemaru       ¡ HIGEMARU.ZIP ¡     100    ¡
+Bagman                     ¡ BAGMAN.ZIP   ¡      95    ¡ Bagman Hardware
+                                                       ¡ Missing TSM 5110 sound
+Super Bagman               ¡ SBAGMAN.ZIP  ¡      95    ¡ Bagman Hardware
+                                                       ¡ Missing TSM 5110 sound
+Congo Bongo                ¡ CONGO.ZIP    ¡     100    ¡ Zaxxon Hardware
+Zaxxon                     ¡ ZAXXON.ZIP   ¡     100    ¡ Zaxxon Hardware
+Kangaroo                   ¡ KANGAROO.ZIP ¡     100    ¡
+Bionic Commando            ¡ BIONICC.ZIP  ¡     100    ¡
+WWF Super Stars            ¡ WWFSSTAR.ZIP ¡     100    ¡
+Rainbow Islands            ¡ RAINBOW.ZIP  ¡     100    ¡ Rainbow Islands Hardware
+Rainbow Islands Extra      ¡ RAINBOWE.ZIP ¡     100    ¡ Rainbow Islands Hardware
+Volfied                    ¡ VOLFIED.ZIP  ¡     100    ¡
+Operation Wolf             ¡ OPWOLF.ZIP   ¡     100    ¡ Use the mouse to move the gun cross
+Outrun                     ¡ OUTRUN.ZIP   ¡      10    ¡ Basic Driver
+Jungle King                ¡ JUNGLEK.ZIP  ¡     100    ¡ Taito SJ Hardware
+Elevator Action            ¡ ELEVATOR.ZIP ¡     100    ¡ Taito SJ Hardware
+Vulgus                     ¡ VULGUS.ZIP   ¡     100    ¡
+Double Dragon III:         ¡
+    The Rosetta Stone      ¡ DDRAGON3.ZIP ¡     100    ¡
+Block Out                  ¡ BLOCKUOT.ZIP ¡     100    ¡
+Food Fight                 ¡ FOODF.ZIP    ¡     100    ¡
+Nemesis                    ¡ NEMESIS.ZIP  ¡     100    ¡ Nemesis HW
+TwinBee                    ¡ TWINBEE.ZIP  ¡      80    ¡ Nemesis HW
+                                                       ¡ Sprites and video video problems
+Pirates                    ¡ PIRATES.ZIP  ¡     100    ¡ Pirates HW
+Genis Family               ¡ GENIX.ZIP    ¡     100    ¡ Pirates HW
+Juno First                 ¡ JUNOFRST.ZIP ¡      90    ¡ DAC missing
+Gyruss                     ¡ GYRUSS.ZIP   ¡      90    ¡ DAC missing
+Free Kick                  ¡ FREEKICK.ZIP ¡     100    ¡
+Boogie Wings               ¡ BOOGIEW.ZIP  ¡      20    ¡ Basic driver
+Pinball Action             ¡ PBACTION.ZIP ¡     100    ¡
+Renegade                   ¡ RENEGADE.ZIP ¡     100    ¡
+Teenage Mutant Ninja       ¡
+   Turtles                 ¡ TMNT.ZIP     ¡     100    ¡ TMNT HW
+Sunset Riders              ¡ SSRIDERS.ZIP ¡     100    ¡ TMNT HW
+Gradius III                ¡ GRADIUS3.ZIP ¡     100    ¡
+¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨
 Total: 206</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
