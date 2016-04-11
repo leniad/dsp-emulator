@@ -122,7 +122,7 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The shift key on the CPC: Mapped on both shift keys (left or right) on the PC keyboard<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The 'point' button next to the function in the CPC is also mapped into the 'point' PC keypad<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The 'Enter' key on the numeric keypad PC works also as 'Enter' in the emulation CPC<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="pc_cpc.png" img src="pc_cpc.png" width="25%" height="25%"></a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_cpc.png" width="25%" height="25%"></img><br>
 - Joystick: Emulated with the redefinable keys or external joystick.<br>
 - Virtual Tape: you can load ZIP, CDT, WAV and CSW. Work the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
 - Sound: All version have the AY-8912 chip<br>
