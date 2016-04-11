@@ -1,5 +1,4 @@
-﻿# dsp-emulator
-DSP Emulator status<br>
+﻿# DSP Emulator status<br>
 <b>10/04/16 - DSP Emulator 0.16b2 FINAL released. Source, Win32/64 and Linux 32/64 available.</b><br>
 So much updates and enhancements, and at last a ROM/Samples information export. Please read the documentation or the wiki (Spectrum and Amstrad CPC have keyboard changes).<br>
 Many thanks to greatxerox and Davide.<br>
