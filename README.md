@@ -4,10 +4,10 @@ DSP Emulator status<br>
 So much updates and enhancements, and at last a ROM/Samples information export. Please read the documentation or the wiki (Spectrum and Amstrad CPC have keyboard changes).<br>
 Many thanks to greatxerox and Davide.<br>
 <b>29/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
-Added to download SDL library 2.0.4 for Windows 32/64 bits. You can also download from http://www.libsdl.org
-DSK file engine
+-Added to download SDL library 2.0.4 for Windows 32/64 bits. You can also download from http://www.libsdl.org
+-DSK file engine
     - Added patches to fix the some Titus protections in Amstrad CPC
-Tape file engine
+-Tape file engine
     - General cleaning
     - CSW format: File opening rewrited, improves stability.
     - TAP format: Standardized opening files through data structures
@@ -19,36 +19,36 @@ Tape file engine
 Spectrum
     + Mapped some missing special keys</pre><br>
 <b>22/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
-Added to download some preview images
-General
-    + Added a new button to configure dip switches the arcade drivers
-    + Added a new button to configure computers and consoles
-    + Controls engine
-        - Rewrited engine, both the keyboard and joystick
-        - Rewrited joystick calibration system
-    + DSK file engine
-        - Rewrited file openning, improves stability
-        - Fixed double-sided images loading
-        - Fixed emulation of weak sectors
-        - Fixed calculating the length of a track
-        - Fixed the order of the tracks
-    + upd765 device
-        - Fixed reading a sector ID (Corrects 'Tintin on the moon' Spectrum +3)
-        - Fixed handling weak sectors (Corrects SpeedLock +3 protection)
-        - Fixed attempt to read beyond the length of a sector (Corrects SpeedLock Amstrad CPC protection)
-- Amstrad CPC
-    + New menu to change options
-        - Choose ROM versions: English, French, Spanish or Danish
-        - Map ROMs in spaces 1 to 6 of CPC
-    + Keys mapped all the CPC in a position similar to the original
-    + Modified the timings Z80
-- Asteroids
-    + Fixed sound samples
-    + Small fixes and cleaning</pre><br>
+-Added to download some preview images
+-General
+    +Added a new button to configure dip switches the arcade drivers
+    +Added a new button to configure computers and consoles
+    +Controls engine
+        -Rewrited engine, both the keyboard and joystick
+        -Rewrited joystick calibration system
+    +DSK file engine
+        -Rewrited file openning, improves stability
+        -Fixed double-sided images loading
+        -Fixed emulation of weak sectors
+        -Fixed calculating the length of a track
+        -Fixed the order of the tracks
+    +upd765 chip
+        -Fixed reading a sector ID (Corrects 'Tintin on the moon' Spectrum +3)
+        -Fixed handling weak sectors (Corrects SpeedLock +3 protection)
+        -Fixed attempt to read beyond the length of a sector (Corrects SpeedLock Amstrad CPC protection)
+-Amstrad CPC
+    +New menu to change options
+        -Choose ROM versions: English, French, Spanish or Danish
+        -Map ROMs in spaces 1 to 6 of CPC
+    +Keys mapped all the CPC in a position similar to the original
+    +Modified the timings Z80
+-Asteroids
+    +Fixed sound samples
+    +Small fixes and cleaning</pre><br>
 <b>29/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
-ROM Engine: ROM and samples file info export finished. Now you can use your favorite ROM manager.
-Small ROMs definition fixes in some drivers
-Uploaded Languaje files and sound samples used by DSP, I forgot to do it when I do de google project migration.</pre><br>
+-ROM Engine: ROM and samples file info export finished. Now you can use your favorite ROM manager.
+-Small ROMs definition fixes in some drivers
+-Uploaded Languaje files and sound samples used by DSP, I forgot to do it when I do de google project migration.</pre><br>
 <b>28/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
 -Lazarus: New sound engine, better sound. Some problems with stereo sounds (Using SDL2 v2.0.4)
 -Samples: Fixes resample of no standar frequencies.
