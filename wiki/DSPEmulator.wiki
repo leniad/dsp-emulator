@@ -98,7 +98,15 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Simbol Shift: Shift key (left or right)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Caps Shift: Control key (left or right)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Keys on extended models, mapped according to its function<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_spectrum.jpg" width="25%" height="25%"><br>
+
+<pre>
+    Original    Real Keyboard
+    1 2 3 A   ------  1 2 3 4
+    4 5 6 B     Q W E R
+    7 8 9 C     A S D F
+    D 0 E F     Z X C V</pre>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_spectrum.jpg" width="25%" height="25%"></img><br>
 - Virtual Tapes: Can load ZIP, TAP, TZX, PZX, WAV and CSW. Fully working spectrum load schemes (bleepload, alkatraz, original rom...). <br>
 &nbsp;With the mouse you can move inside virtual tape and select the start position. Tape begin to play when detects - LOAD "" - and stop when reaches the final.<br>
 &nbsp;If inside the ZIP file there is a ROM file, emulator load first ROM file and then loads then virtual tape.<br>
