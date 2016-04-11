@@ -16,7 +16,7 @@ Many thanks to greatxerox and Davide.<br><br>
           -Corrected data block
           -Properly implemented very large pulses
 -Spectrum
-    + Mapped some missing special keys</pre><br><br>
+    + Mapped some missing special keys</pre><br>
 <b>22/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -Added to download some preview images
 -General
@@ -43,7 +43,7 @@ Many thanks to greatxerox and Davide.<br><br>
     +Modified the timings Z80
 -Asteroids
     +Fixed sound samples
-    +Small fixes and cleaning</pre>
+    +Small fixes and cleaning</pre><br>
 <b>29/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -ROM Engine: ROM and samples file info export finished. Now you can use your favorite ROM manager.
 -Small ROMs definition fixes in some drivers
