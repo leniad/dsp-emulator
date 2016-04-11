@@ -1,7 +1,7 @@
 ﻿# DSP Emulator status<br>
 <b>10/04/16 - DSP Emulator 0.16b2 FINAL released. Source, Win32/64 and Linux 32/64 available.</b><br>
 So much updates and enhancements, and at last a ROM/Samples information export. Please read the documentation or the wiki (Spectrum and Amstrad CPC have keyboard changes).<br>
-Many thanks to greatxerox and Davide.<br>
+Many thanks to greatxerox and Davide.<br><br>
 <b>29/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -Added to download SDL library 2.0.4 for Windows 32/64 bits. You can also download from http://www.libsdl.org
 -DSK file engine
@@ -47,18 +47,18 @@ Many thanks to greatxerox and Davide.<br>
 <b>29/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -ROM Engine: ROM and samples file info export finished. Now you can use your favorite ROM manager.
 -Small ROMs definition fixes in some drivers
--Uploaded Languaje files and sound samples used by DSP, I forgot to do it when I do de google project migration.</pre><br>
+-Uploaded Languaje files and sound samples used by DSP, I forgot to do it when I do de google project migration.</pre>
 <b>28/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -Lazarus: New sound engine, better sound. Some problems with stereo sounds (Using SDL2 v2.0.4)
 -Samples: Fixes resample of no standar frequencies.
 -ROM Engine: New export data system, now you can export ROM data in ClearMame Pro format to manage ROMs used. Finished about 50%. (Configure DSP --> ROM --> Export ROM Data)</pre><br>
 <b>10/01/16 - DSP Emulator 0.16b1 Final version. Updated source, Windows 32/64 and Linux 32/64 binaries.</b><br>
-<img src='http://s10.postimg.org/dqoip41vd/gradius3.png'></img><br>
+<img src='http://s10.postimg.org/dqoip41vd/gradius3.png'></img><br><br>
 <b>26/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot updated again.</b><br><pre>
 -GFX Engine: Implemented alpha color sprites and palette
 -K0052109: Implemented video buffers, more speed
 -K051960 and K05324X: Implemented shadow sprites (alpha color)
--Added Service functions pressing F1 (impremented in TMNT and Ghost'n Goblins drivers so far)</pre><br>
+-Added Service functions pressing F1 (impremented in TMNT and Ghost'n Goblins drivers so far)</pre>
 <b>22/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot both WIP updated.</b><br><pre>
 -Added Konami ADPCM K053260 and K007232 chips
 -Sunset Riders: Fixed protection, added controls, finished audio and video
