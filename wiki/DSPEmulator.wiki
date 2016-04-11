@@ -1,4 +1,4 @@
-﻿<h1>DSP Emulator v0.16b2 by Leniad 2001-2016</h1><br>
+<h1>DSP Emulator v0.16b2 by Leniad 2001-2016</h1><br>
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 Since version 0.9b3 has ported to Lazarus/Free Pascal, so there is a Linux 32/64bits version available.<br>
@@ -108,6 +108,14 @@ Other features<br>
 - Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
 - To do:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Contented IO is not working at 100%.<br><br>
+
+<pre>
+    Original    Real Keyboard
+    1 2 3 A   ------  1 2 3 4
+    4 5 6 B     Q W E R
+    7 8 9 C     A S D F
+    D 0 E F     Z X C V</pre>
+
 <b>Amstrad CPC 464,664 and 6128</b><br>
 <hr>
 - ROMs: The following options exists:<br>
@@ -133,6 +141,15 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Some video effect are missing (M6845 chip)<br><br>
 <b>2.2 Consoles</b><br>
 <hr>
+
+<pre>
+    Original    Real Keyboard
+    1 2 3 A   ------  1 2 3 4
+    4 5 6 B     Q W E R
+    7 8 9 C     A S D F
+    D 0 E F     Z X C V</pre>
+    
+    
 <b>NES</b><br>
 <hr>
 - Cartridge: Supports '.nes' ROM format, compressed or not.<br>
@@ -158,6 +175,15 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Audio problems, do not work fine with high frequencies<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Video Timings<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Add more mappers<br><br>
+
+<pre>
+    Original    Real Keyboard
+    1 2 3 A   ------  1 2 3 4
+    4 5 6 B     Q W E R
+    7 8 9 C     A S D F
+    D 0 E F     Z X C V</pre>
+    
+    
 <b>ColecoVision</b><br>
 <hr>
 - ROM: The ROM is needed for emulation<br>
@@ -172,7 +198,7 @@ Other features<br>
 - ROM: Does not have. It's a simulation of a pseudo CPU.<br>
 - Keyboard: Mapped the system keys<br><pre>
     Original    Real Keyboard
-    1 2 3 A     1 2 3 4
+    1 2 3 A   ------  1 2 3 4
     4 5 6 B     Q W E R
     7 8 9 C     A S D F
     D 0 E F     Z X C V</pre>
