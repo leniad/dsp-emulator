@@ -214,38 +214,38 @@ Mysterious Stones          ¡ MYSTSTON.ZIP ¡     100    ¡
 Frogger                    ¡ FROGGER.ZIP  ¡     100    ¡ Galaxian Hardware
 Galaxian                   ¡ GALAXIAN.ZIP ¡      95    ¡ Galaxian Hardware
                                                        ¡ Partial sound with samples
-Jump Bug                   | JUMPBUG.ZIP  |     100    | Galaxian Hardware
-Moon Cresta                | MOONCRST.ZIP |      90    | Galaxian Hardware
-                                                       | No sound
-Scramble                   | SCRAMBLE.ZIP |     100    | Galaxian Hardware
-Super Cobra                | SCOBRA.ZIP   |     100    | Galaxian Hardware
-Amidar                     | AMIDAR.ZIP   |     100    | Galaxian Hardware
-Donkey Kong                | DKONG.ZIP    |     100    | Donkey Kong Hardware
-                           |              |            | Full sound using samples
-Donkey Kong Junior         | DKONGJR.ZIP  |     100    | Donkey Kong Hardware
-                           |              |            | Full sound using samples
-Donkey Kong 3              | DKONG3.ZIP   |     100    | Donkey Kong Hardware
-Black Tiger                | BLKTIGER.ZIP |     100    |
-Green Beret                | GBERET.ZIP   |     100    | Green Beret HW
-Mr. Goemon                 | MRGOEMON.ZIP |     100    | Green Beret HW
-Commando                   | COMMANDO.ZIP |     100    |
-Ghost'n'Goblins            | GNG.ZIP      |     100    |
-Mikie                      | MIKIE.ZIP    |     100    |
-Shaolin's Road             | SHAOLIN.ZIP  |     100    |
-Yie Ar Kung-Fu             | YIEAR.ZIP    |     100    |
-Son Son                    | SONSON.ZIP   |     100    |
-Asteroids                  | ASTEROID.ZIP |     100    | Analog sound and samples
-Star Force                 | STARFORC.ZIP |     100    | 
-Rygar                      | RYGAR.ZIP    |     100    | Tecmo Hardware
-Silk Worm                  | SILKWORM.ZIP |     100    | Tecmo Hardware
-Pitfall II                 | PITFALL2.ZIP |     100    | Sega System 1
-Teddy Boy Blues            | TEDDYBB.ZIP  |     100    | Sega System 1
-Wonder Boy                 | WBOY.ZIP     |     100    | Sega System 1
-Wonder Boy in Monster Land | WBML.ZIP     |     100    | Sega System 2
-Choplifter                 | CHOPLIFT.ZIP |     100    | Sega System 2
-Mister Viking              | MRVIKING.ZIP |     100    | Sega System 1
-Sega Ninja                 | SEGANINJ.ZIP |     100    | Sega System 1
-Up'n Down                  | UPNDOWN.ZIP  |     100    | Sega System 1
+Jump Bug                   ! JUMPBUG.ZIP  !     100    ! Galaxian Hardware
+Moon Cresta                ! MOONCRST.ZIP !      90    ! Galaxian Hardware
+                                                       ! No sound
+Scramble                   ! SCRAMBLE.ZIP !     100    ! Galaxian Hardware
+Super Cobra                ! SCOBRA.ZIP   !     100    ! Galaxian Hardware
+Amidar                     ! AMIDAR.ZIP   !     100    ! Galaxian Hardware
+Donkey Kong                ! DKONG.ZIP    !     100    ! Donkey Kong Hardware
+                           !              !            ! Full sound using samples
+Donkey Kong Junior         ! DKONGJR.ZIP  !     100    ! Donkey Kong Hardware
+                           !              !            ! Full sound using samples
+Donkey Kong 3              ! DKONG3.ZIP   !     100    ! Donkey Kong Hardware
+Black Tiger                ! BLKTIGER.ZIP !     100    !
+Green Beret                ! GBERET.ZIP   !     100    ! Green Beret HW
+Mr. Goemon                 ! MRGOEMON.ZIP !     100    ! Green Beret HW
+Commando                   ! COMMANDO.ZIP !     100    !
+Ghost'n'Goblins            ! GNG.ZIP      !     100    !
+Mikie                      ! MIKIE.ZIP    !     100    !
+Shaolin's Road             ! SHAOLIN.ZIP  !     100    !
+Yie Ar Kung-Fu             ! YIEAR.ZIP    !     100    !
+Son Son                    ! SONSON.ZIP   !     100    !
+Asteroids                  ! ASTEROID.ZIP !     100    ! Analog sound and samples
+Star Force                 ! STARFORC.ZIP !     100    ! 
+Rygar                      ! RYGAR.ZIP    !     100    ! Tecmo Hardware
+Silk Worm                  ! SILKWORM.ZIP !     100    ! Tecmo Hardware
+Pitfall II                 ! PITFALL2.ZIP !     100    ! Sega System 1
+Teddy Boy Blues            ! TEDDYBB.ZIP  !     100    ! Sega System 1
+Wonder Boy                 ! WBOY.ZIP     !     100    ! Sega System 1
+Wonder Boy in Monster Land ! WBML.ZIP     !     100    ! Sega System 2
+Choplifter                 ! CHOPLIFT.ZIP !     100    ! Sega System 2
+Mister Viking              ! MRVIKING.ZIP !     100    ! Sega System 1
+Sega Ninja                 ! SEGANINJ.ZIP !     100    ! Sega System 1
+Up'n Down                  ! UPNDOWN.ZIP  !     100    | Sega System 1
 Flicky                     | FLICKY.ZIP   |     100    | Sega System 1
 Pooyan                     | POOYAN.ZIP   |     100    |
 Jungler                    | JUNGLER.ZIP  |     100    | Rally X Hardware 
