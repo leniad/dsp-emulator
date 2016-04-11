@@ -200,10 +200,9 @@ Currently only some drivers use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the compressed sample files with the same name as the ROM in a folder named 'samples'.<br>
 You can download all the samples from the emulator page<br>
 Look at the arcade systems list to know which systems use samples.<br><br>
-<b>2.3.2 Emulated Systems</b><hr><br>
-<pre>
+<b>2.3.2 Emulated Systems</b><hr><br><pre>
 Name                       | ROM          | Completed  | Notes
--------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------
 Phoenix                    | PHOENIX.ZIP  |      99    | Phoenix Hardware
                                                        | Preliminary analog sound
 Pleiads                    | PLEAIDS.ZIP  |      80    | Phoenix Hardware
@@ -437,7 +436,7 @@ Teenage Mutant Ninja       |
    Turtles                 | TMNT.ZIP     |     100    | TMNT HW
 Sunset Riders              | SSRIDERS.ZIP |     100    | TMNT HW
 Gradius III                | GRADIUS3.ZIP |     100    |
--------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------
 Total: 206</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
