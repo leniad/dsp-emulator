@@ -6,17 +6,17 @@ Many thanks to greatxerox and Davide.<br>
 <b>29/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
 -Added to download SDL library 2.0.4 for Windows 32/64 bits. You can also download from http://www.libsdl.org
 -DSK file engine
-    - Added patches to fix the some Titus protections in Amstrad CPC
+    +Added patches to fix the some Titus protections in Amstrad CPC
 -Tape file engine
-    - General cleaning
-    - CSW format: File opening rewrited, improves stability.
-    - TAP format: Standardized opening files through data structures
-    - TZX format: Standardized opening files through data structures
-    - PZX format
-          - Standardized opening files through data structures
-          - Corrected data block
-          - Properly implemented very large pulses
-Spectrum
+    +General cleaning
+    +CSW format: File opening rewrited, improves stability.
+    +TAP format: Standardized opening files through data structures
+    +TZX format: Standardized opening files through data structures
+    +PZX format
+          -Standardized opening files through data structures
+          -Corrected data block
+          -Properly implemented very large pulses
+-Spectrum
     + Mapped some missing special keys</pre><br>
 <b>22/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><br><pre>
 -Added to download some preview images
