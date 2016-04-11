@@ -172,10 +172,10 @@ Other features<br>
 - ROM: Does not have. It's a simulation of a pseudo CPU.<br>
 - Keyboard: Mapped the system keys<br><pre>
     Original    Real Keyboard
-    1 2 3 A --> 1 2 3 4
-    4 5 6 B --> Q W E R
-    7 8 9 C --> A S D F
-    D 0 E F --> Z X C V</pre>
+    1 2 3 A     1 2 3 4
+    4 5 6 B     Q W E R
+    7 8 9 C     A S D F
+    D 0 E F     Z X C V</pre>
 - Sound: basic sound mono supported<br>
 - Video: Supports 64x32 format from Chip8, 64x64 from Chip8 Hires and 128x64 from SuperChip8<br>
 - Files: Supports '.CH8' y '.BIN' formats<br>
