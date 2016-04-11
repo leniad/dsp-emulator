@@ -201,7 +201,7 @@ If you want the emulator to use the samples, put the compressed sample files wit
 You can download all the samples from the emulator page<br>
 Look at the arcade systems list to know which systems use samples.<br><br>
 <b>2.3.2 Emulated Systems</b><hr><br><pre>
-Name                       ! ROM          ! Completed  ! Notes
+Name|ROM|Completed|Notes
 ----------------------------------------------------------------------------------------------------------------------------
 Phoenix                    | PHOENIX.ZIP  |      99    | Phoenix Hardware
                                                        | Preliminary analog sound
