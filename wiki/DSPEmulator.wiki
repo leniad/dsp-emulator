@@ -202,18 +202,18 @@ You can download all the samples from the emulator page<br>
 Look at the arcade systems list to know which systems use samples.<br><br>
 <b>2.3.2 Emulated Systems</b><hr><br><pre>
 
- Name                         ROM            Completed    Notes
- ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨
- Phoenix                    ¡ PHOENIX.ZIP  ¡      99    ¡ Phoenix Hardware
-                                                     ¡ Preliminary analog sound
- Pleiads                    ¡ PLEAIDS.ZIP  ¡      80    ¡ Phoenix Hardware
-                                                     ¡ No sound
- Bombjack                   ¡ BOMBJACK.ZIP ¡     100    ¡
- Pac-man                    ¡ PACMAN.ZIP   ¡     100    ¡ Pac-man Hardware
- Ms. Pac-man                ¡ MSPACMAN.ZIP ¡     100    ¡ Pac-man Hardware
- Mysterious Stones          ¡ MYSTSTON.ZIP ¡     100    ¡
- Frogger                    ¡ FROGGER.ZIP  ¡     100    ¡ Galaxian Hardware
- Galaxian                   ¡ GALAXIAN.ZIP ¡      95    ¡ Galaxian Hardware
+    Name                         ROM            Completed    Notes
+    ¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨
+    Phoenix                    ¡ PHOENIX.ZIP  ¡      99    ¡ Phoenix Hardware
+                                                           ¡ Preliminary analog sound
+    Pleiads                    ¡ PLEAIDS.ZIP  ¡      80    ¡ Phoenix Hardware
+                                                           ¡ No sound
+    Bombjack                   ¡ BOMBJACK.ZIP ¡     100    ¡
+    Pac-man                    ¡ PACMAN.ZIP   ¡     100    ¡ Pac-man Hardware
+    Ms. Pac-man                ¡ MSPACMAN.ZIP ¡     100    ¡ Pac-man Hardware
+    Mysterious Stones          ¡ MYSTSTON.ZIP ¡     100    ¡
+    Frogger                    ¡ FROGGER.ZIP  ¡     100    ¡ Galaxian Hardware
+    Galaxian                   ¡ GALAXIAN.ZIP ¡      95    ¡ Galaxian Hardware
                                                         ¡ Partial sound with samples
  Jump Bug                   ¡ JUMPBUG.ZIP  ¡     100    ¡ Galaxian Hardware
  Moon Cresta                ¡ MOONCRST.ZIP ¡      90    ¡ Galaxian Hardware
