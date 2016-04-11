@@ -16,7 +16,7 @@ Many thanks to greatxerox and Davide.<br><br>
           -Corrected data block
           -Properly implemented very large pulses
 -Spectrum
-    + Mapped some missing special keys</pre><br>
+    + Mapped some missing special keys</pre>
 <b>22/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -Added to download some preview images
 -General
@@ -43,7 +43,7 @@ Many thanks to greatxerox and Davide.<br><br>
     +Modified the timings Z80
 -Asteroids
     +Fixed sound samples
-    +Small fixes and cleaning</pre><br>
+    +Small fixes and cleaning</pre>
 <b>29/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -ROM Engine: ROM and samples file info export finished. Now you can use your favorite ROM manager.
 -Small ROMs definition fixes in some drivers
@@ -51,7 +51,7 @@ Many thanks to greatxerox and Davide.<br><br>
 <b>28/02/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -Lazarus: New sound engine, better sound. Some problems with stereo sounds (Using SDL2 v2.0.4)
 -Samples: Fixes resample of no standar frequencies.
--ROM Engine: New export data system, now you can export ROM data in ClearMame Pro format to manage ROMs used. Finished about 50%. (Configure DSP --> ROM --> Export ROM Data)</pre><br>
+-ROM Engine: New export data system, now you can export ROM data in ClearMame Pro format to manage ROMs used. Finished about 50%. (Configure DSP --> ROM --> Export ROM Data)</pre>
 <b>10/01/16 - DSP Emulator 0.16b1 Final version. Updated source, Windows 32/64 and Linux 32/64 binaries.</b><br>
 <img src='http://s10.postimg.org/dqoip41vd/gradius3.png'></img><br><br>
 <b>26/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot updated again.</b><br><pre>
@@ -62,18 +62,18 @@ Many thanks to greatxerox and Davide.<br><br>
 <b>22/12/15 - DSP Emulator 0.16b1 source and Win32 snapshot both WIP updated.</b><br><pre>
 -Added Konami ADPCM K053260 and K007232 chips
 -Sunset Riders: Fixed protection, added controls, finished audio and video
--Implemented zoomed sprites, added to Teenage Mutant Ninja Turtles, Sunset Riders and Nemesis</pre><br>
+-Implemented zoomed sprites, added to Teenage Mutant Ninja Turtles, Sunset Riders and Nemesis</pre>
 <b>17/12/15 - DSP Emulator 0.16b1 source WIP update. Win32 WIP snapshot updated too.</b><br>
-<img src='http://img1.imagilive.com/1215/ssriders1.png'></img><img src='http://img1.imagilive.com/1215/ssriders2.png'></img><br>
+<img src='http://img1.imagilive.com/1215/ssriders1.png'></img><img src='http://img1.imagilive.com/1215/ssriders2.png'></img><br><br>
 <b>10/12/15 - DSP Emulator 0.16b1 source WIP update and Win32 WIP snapshot.</b><br>
-<img src='http://img1.imagilive.com/1215/tmnt1.png'></img><img src='http://img1.imagilive.com/1215/tmnt2.png'></img><br>
-<b>01/11/15 - DSP Emulator 0.16b1 source WIP update and Win32 WIP snapshot.</b><br>
-<b>29/10/15 - Released DSP Emulator 0.16 Final.</b> Added Win 32, Win 64, Linux 32 and Linux 64 binary. Added source. Read 'Whats New.txt' or visit wiki for more detailed info.<br>
+<img src='http://img1.imagilive.com/1215/tmnt1.png'></img><img src='http://img1.imagilive.com/1215/tmnt2.png'></img><br><br>
+<b>01/11/15 - DSP Emulator 0.16b1 source WIP update and Win32 WIP snapshot.</b><br><br>
+<b>29/10/15 - Released DSP Emulator 0.16 Final.</b> Added Win 32, Win 64, Linux 32 and Linux 64 binary. Added source. Read 'Whats New.txt' or visit wiki for more detailed info.<br><br>
 <b>25/10/15 - DSP Emulator 0.16 WIP.</b> Added Renegade driver with sound.<br>
-<img src='http://img1.imagilive.com/1015/renegade.png'></img><br>
+<img src='http://img1.imagilive.com/1015/renegade.png'></img><br><br>
 <b>26/09/15 - DSP Emulator 0.16 WIP.</b> Sega Master System console added. About 99% of compatibility.<br>
-<img src='http://img1.imagilive.com/0915/sonic2.png'></img><img src='http://img1.imagilive.com/0915/zool.png'></img><br>
-<b>30/08/15 - DSP Emulator 0.16 WIP.</b> Important changes in snapshot system! Fixed Spectrum and Amstrad CPC snapshot load/save snapshots, more compatible.<br>
+<img src='http://img1.imagilive.com/0915/sonic2.png'></img><img src='http://img1.imagilive.com/0915/zool.png'></img><br><br>
+<b>30/08/15 - DSP Emulator 0.16 WIP.</b> Important changes in snapshot system! Fixed Spectrum and Amstrad CPC snapshot load/save snapshots, more compatible.<br><br>
 <b>10/08/15 - DSP Emulator 0.15b3 Final.</b> Please read the docs for more info. Many fixes and enhances.<br>
 <b>31/05/15</b> - Added Free Kick driver..<br>
 <img src='http://img1.imagilive.com/0515/freekick.png'></img><br>
