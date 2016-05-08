@@ -1,4 +1,4 @@
-﻿<h1>DSP Emulator v0.16b2 by Leniad 2001-2016</h1><br>
+<h1>DSP Emulator v0.16b2 by Leniad 2001-2016</h1><br>
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 Since version 0.9b3 has ported to Lazarus/Free Pascal, so there is a Linux 32/64bits version available.<br>
@@ -480,4 +480,8 @@ www.emulation9.com<br><br>
 if you want spectrum tapes, snapshot, info...<br>
 www.worldofspectrum.org<br>
 trastero.speccy.org<br>
+<<<<<<< HEAD
 spa2.speccy.org
+=======
+spa2.speccy.org
+>>>>>>> origin/master
