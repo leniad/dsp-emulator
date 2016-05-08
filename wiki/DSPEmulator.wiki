@@ -480,8 +480,4 @@ www.emulation9.com<br><br>
 if you want spectrum tapes, snapshot, info...<br>
 www.worldofspectrum.org<br>
 trastero.speccy.org<br>
-<<<<<<< HEAD
 spa2.speccy.org
-=======
-spa2.speccy.org
->>>>>>> origin/master
