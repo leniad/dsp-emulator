@@ -98,9 +98,9 @@ snd_z80.init_sound(bb_sound_update);
 main_m6800:=cpu_m6800.create(4000000,264,CPU_M6801);
 main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,3000000);
+ym2203_0:=ym2203_chip.create(0,3000000,0.25,0.25);
 ym2203_0.change_irq_calls(snd_irq);
-ym3812_init(0,3000000,nil);
+ym3812_0:=ym3812_chip.create(0,3000000,0.5);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@bublbobl_rom[0],'bublbobl.zip',0)) then exit;
 //poner las roms y los bancos de rom
@@ -138,7 +138,7 @@ sub_z80.free;
 snd_z80.free;
 main_m6800.Free;
 ym2203_0.Free;
-ym3812_close(0);
+ym3812_0.free;
 close_audio;
 close_video;
 end;
@@ -150,7 +150,7 @@ begin
  snd_z80.reset;
  main_m6800.reset;
  ym2203_0.reset;
- YM3812_Reset(0);
+ YM3812_0.reset;
  reset_audio;
  banco_rom:=0;
  sound_nmi:=false;
@@ -264,8 +264,8 @@ begin
   case direccion of
     $9000:bbsnd_getbyte:=ym2203_0.read_status;
     $9001:bbsnd_getbyte:=ym2203_0.read_reg;
-    $a000:bbsnd_getbyte:=yM3812_status_port(0);
-    $a001:bbsnd_getbyte:=ym3812_read_port(0);
+    $a000:bbsnd_getbyte:=ym3812_0.status;
+    $a001:bbsnd_getbyte:=ym3812_0.read;
     $b000:bbsnd_getbyte:=sound_latch;
     else bbsnd_getbyte:=mem_snd[direccion];
   end;
@@ -278,8 +278,8 @@ mem_snd[direccion]:=valor;
 case direccion of
   $9000:ym2203_0.control(valor);
   $9001:ym2203_0.write_reg(valor);
-  $a000:YM3812_control_port(0,valor);
-  $a001:YM3812_write_port(0,valor);
+  $a000:YM3812_0.control(valor);
+  $a001:YM3812_0.write(valor);
   $b000:sound_stat:=valor;
   $b001:begin
           sound_nmi:=true;
@@ -362,7 +362,7 @@ end;
 procedure bb_sound_update;
 begin
   ym2203_0.Update;
-  YM3812_Update(0);
+  YM3812_0.update;
 end;
 
 procedure snd_irq(irqstate:byte);

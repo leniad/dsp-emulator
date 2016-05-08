@@ -2126,6 +2126,14 @@ const
         (n:'945_l03b.e8';l:$20000;p:$180002;crc:$933e68b9),(n:'945_l03d.h8';l:$20000;p:$180003;crc:$f375e87b),
         (n:'945_a10.b15';l:$40000;p:0;crc:$1d083e10),(n:'945_l11a.c18';l:$20000;p:$40000;crc:$6043f4eb),
         (n:'945_l11b.c20';l:$20000;p:$60000;crc:$89ea3baf),());
+        //Space Invaders
+        spaceinv:array[0..4] of tipo_roms=(
+        (n:'invaders.h';l:$800;p:0;crc:$734f5ad8),(n:'invaders.g';l:$800;p:$800;crc:$6bfaca4a),
+        (n:'invaders.f';l:$800;p:$1000;crc:$0ccead96),(n:'invaders.e';l:$800;p:$1800;crc:$14e538b0),());
+        centipede:array[0..6] of tipo_roms=(
+        (n:'136001-407.d1';l:$800;p:$2000;crc:$c4d995eb),(n:'136001-408.e1';l:$800;p:$2800;crc:$bcdebe1b),
+        (n:'136001-409.fh1';l:$800;p:$3000;crc:$66d7b04a),(n:'136001-410.j1';l:$800;p:$3800;crc:$33ce4640),
+        (n:'136001-211.f7';l:$800;p:0;crc:$880acfb9),(n:'136001-212.hj7';l:$800;p:$800;crc:$b1397029),());
 
 implementation
 uses principal,init_games;

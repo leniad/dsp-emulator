@@ -831,7 +831,9 @@ begin
     end;
   end;
   // reload timer */
-  ym3812_timer_handler(num,c,OPL.TimerBase*OPL.T[c]);
+  if num=0 then ym3812_0.timer_handler(c,OPL.TimerBase*OPL.T[c])
+     else ym3812_1.timer_handler(c,OPL.TimerBase*OPL.T[c]);
+  //ym3812_timer_handler(num,c,OPL.TimerBase*OPL.T[c]);
 end;
 
 // write a value v to register r on OPL chip */
@@ -869,14 +871,18 @@ begin
                   if st2<>0 then period:=(OPL.TimerBase*OPL.T[1])
                     else period:=0;
                   OPL.st[1]:=st2;
-                  ym3812_timer_handler(num,1,period);
+                  if num=0 then ym3812_0.timer_handler(1,period)
+                     else ym3812_1.timer_handler(1,period);
+                  //ym3812_timer_handler(num,1,period);
               end;
               // timer 1
               if (OPL.st[0]<>st1) then begin
                   if st1<>0 then period:=(OPL.TimerBase*OPL.T[0])
                     else period:=0;
                   OPL.st[0]:=st1;
-                  ym3812_timer_handler(num,0,period);
+                  if num=0 then ym3812_0.timer_handler(0,period)
+                     else ym3812_1.timer_handler(0,period);
+                  //ym3812_timer_handler(num,0,period);
               end;
             end;
 		    $08:OPL.mode:= v;	// MODE,DELTA-T control 2 : CSM,NOTESEL,x,x,smpl,da/ad,64k,rom */

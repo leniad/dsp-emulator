@@ -83,7 +83,8 @@ pandora.mask_nchar:=$fff;
 pandora.color_offset:=0;
 pandora.clear_screen:=true;
 //Sound Chips
-ym3812_init(0,3000000,snd_irq);
+ym3812_0:=ym3812_chip.create(0,3000000);
+ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@snowbros_rom[0],'snowbros.zip',0)) then exit;
 //cargar sonido
@@ -108,7 +109,7 @@ procedure cerrar_snowbros;
 begin
 main_m68000.free;
 snd_z80.free;
-ym3812_close(0);
+ym3812_0.free;
 close_audio;
 close_video;
 end;
@@ -118,7 +119,7 @@ begin
  main_m68000.reset;
  snd_z80.reset;
  pandora_reset;
- ym3812_reset(0);
+ ym3812_0.reset;
  reset_audio;
  marcade.in0:=$ff00;
  marcade.in1:=$7f00;
@@ -245,7 +246,7 @@ end;
 function snowbros_snd_inbyte(puerto:word):byte;
 begin
   case (puerto and $ff) of
-    $2:snowbros_snd_inbyte:=ym3812_status_port(0);
+    $2:snowbros_snd_inbyte:=ym3812_0.status;
     $4:snowbros_snd_inbyte:=sound_latch;
   end;
 end;
@@ -253,15 +254,15 @@ end;
 procedure snowbros_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-  $2:ym3812_control_port(0,valor);
-  $3:ym3812_write_port(0,valor);
+  $2:ym3812_0.control(valor);
+  $3:ym3812_0.write(valor);
   $4:sound_latch:=valor;
 end;
 end;
 
 procedure snowbros_sound_act;
 begin
-  ym3812_Update(0);
+  ym3812_0.update;
 end;
 
 procedure snd_irq(irqstate:byte);

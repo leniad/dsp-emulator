@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, ExtCtrls, Buttons, Grids,lenguaje,lib_sdl2;
+  StdCtrls, ExtCtrls, Buttons, Grids,lenguaje;
 
 type
 

@@ -50,8 +50,7 @@ type
   npreg_z80=^nreg_z80;
   cpu_z80=class(cpu_class)
           constructor create(clock:dword;frames_div:word);
-          procedure free;
-          destructor destroy;
+          destructor free;
         public
           daisy,halt:boolean;
           pedir_irq,pedir_nmi,im2_lo,im0:byte;
@@ -69,6 +68,7 @@ type
           r:npreg_z80;
           after_ei:boolean;
           nmi_state:byte;
+          z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
           raised_z80:type_raised;
           in_port:cpu_inport_full;
           out_port:cpu_outport_full;
@@ -203,9 +203,6 @@ const
 	      6, 0, 0, 0, 7, 0, 0, 2, 6, 0, 0, 0, 7, 0, 0, 2,
 	      6, 0, 0, 0, 7, 0, 0, 2, 6, 0, 0, 0, 7, 0, 0, 2);
 
-var
-  z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
-
 constructor cpu_z80.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(nreg_z80));
@@ -228,23 +225,17 @@ end;
 
 procedure cpu_z80.change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
 begin
-if z80t_set<>nil then copymemory(@z80t[0],@z80t_set[0],$100);
-if z80t_cb_set<>nil then copymemory(@z80t_cb[0],@z80t_cb_set[0],$100);
-if z80t_dd_set<>nil then copymemory(@z80t_dd[0],@z80t_dd_set[0],$100);
-if z80t_ddcb_set<>nil then copymemory(@z80t_ddcb[0],@z80t_ddcb_set[0],$100);
-if z80t_ed_set<>nil then copymemory(@z80t_ed[0],@z80t_ed_set[0],$100);
-if z80t_ex_set<>nil then copymemory(@z80t_ex[0],@z80t_ex_set[0],$100);
+if z80t_set<>nil then copymemory(@self.z80t[0],@z80t_set[0],$100);
+if z80t_cb_set<>nil then copymemory(@self.z80t_cb[0],@z80t_cb_set[0],$100);
+if z80t_dd_set<>nil then copymemory(@self.z80t_dd[0],@z80t_dd_set[0],$100);
+if z80t_ddcb_set<>nil then copymemory(@self.z80t_ddcb[0],@z80t_ddcb_set[0],$100);
+if z80t_ed_set<>nil then copymemory(@self.z80t_ed[0],@z80t_ed_set[0],$100);
+if z80t_ex_set<>nil then copymemory(@self.z80t_ex[0],@z80t_ex_set[0],$100);
 end;
 
-destructor cpu_z80.Destroy;
+destructor cpu_z80.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_z80.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 procedure cpu_z80.reset;
@@ -420,10 +411,12 @@ var
  ban_temp:band_z80;
  irq_temp:boolean;
  cantidad_t:word;
+ pestados:integer;
 begin
 irq_temp:=false;
 self.contador:=0;
 while self.contador<maximo do begin
+pestados:=self.contador;
 if self.pedir_reset<>CLEAR_LINE then begin
   temp:=self.pedir_reset;
   self.reset;
@@ -431,8 +424,8 @@ if self.pedir_reset<>CLEAR_LINE then begin
   self.contador:=trunc(maximo);
   exit;
 end;
-self.estados_demas:=0;
 r.ppc:=r.pc;
+self.estados_demas:=0;
 if not(self.after_ei) then begin
   if self.pedir_nmi<>CLEAR_LINE then self.estados_demas:=self.call_nmi
   else begin
@@ -445,13 +438,13 @@ if self.pedir_halt<>CLEAR_LINE then begin
   self.contador:=trunc(maximo);
   exit;
 end;
-if not(self.halt) then begin
-  self.opcode:=true;
-  instruccion:=self.getbyte(r.pc);
-  self.opcode:=false;
-  r.pc:=r.pc+1;
-  r.r:=((r.r+1) and $7f) or (r.r and $80);
-  case instruccion of
+if self.halt then r.pc:=r.pc-1;
+self.opcode:=true;
+instruccion:=self.getbyte(r.pc);
+self.opcode:=false;
+r.pc:=r.pc+1;
+r.r:=((r.r+1) and $7f) or (r.r and $80);
+case instruccion of
         $00,$40,$49,$52,$5b,$64,$6d,$7f:{nop};
         $01:begin {ld BC,nn}
                 r.bc.l:=self.getbyte(r.pc);
@@ -507,7 +500,7 @@ if not(self.halt) then begin
                 if r.bc.h<>0 then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
             end;
         $11:begin {ld DE,nn}
@@ -562,7 +555,7 @@ if not(self.halt) then begin
                 if not(r.f.z) then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
             end;
         $21:begin {ld HL,nn}
@@ -608,7 +601,7 @@ if not(self.halt) then begin
                 if r.f.z then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
             end;
         $29:add_16(self.r,@r.hl,r.hl.w); {add HL,HL}
@@ -638,7 +631,7 @@ if not(self.halt) then begin
                 if not(r.f.c) then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
             end;
         $31:begin {ld SP,nn}
@@ -679,7 +672,7 @@ if not(self.halt) then begin
                 if r.f.c then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
             end;
         $39:add_16(self.r,@r.hl,r.sp); {add HL,SP}
@@ -843,7 +836,7 @@ if not(self.halt) then begin
         $bf:cp_a(self.r,r.a); {cp A}
         $c0:if not(r.f.z) then begin {ret NZ}
                 r.pc:=self.pop_sp;
-                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $c1:r.bc.w:=self.pop_sp;  {pop BC}
         $c2:if not(r.f.z) then begin {jp NZ,nn}
@@ -863,7 +856,7 @@ if not(self.halt) then begin
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
              end;
         $c5:self.push_sp(r.bc.w);  {push BC}
@@ -878,7 +871,7 @@ if not(self.halt) then begin
              end;
         $c8:if r.f.z then begin {ret Z}
                 r.pc:=self.pop_sp;
-                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $c9:r.pc:=pop_sp;  {ret}
         $ca:if r.f.z then begin {jp Z,nn}
@@ -894,7 +887,7 @@ if not(self.halt) then begin
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
              end;
         $cd:begin   {call nn}
@@ -915,7 +908,7 @@ if not(self.halt) then begin
              end;
         $d0:if not(r.f.c) then begin {ret NC}
                 r.pc:=pop_sp;
-                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $d1:r.de.w:=pop_sp;  {pop DE}
         $d2:if not(r.f.c) then begin {jp NC,nn}
@@ -936,7 +929,7 @@ if not(self.halt) then begin
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
              end;
         $d5:self.push_sp(r.de.w);  {push DE}
@@ -951,7 +944,7 @@ if not(self.halt) then begin
              end;
         $d8:if r.f.c then begin {ret C}
                 r.pc:=pop_sp;
-                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $d9:begin {exx}
                 posicion:=r.bc;
@@ -983,7 +976,7 @@ if not(self.halt) then begin
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
              end;
         $dd:self.estados_demas:=self.estados_demas+self.exec_dd_fd(true);
@@ -998,7 +991,7 @@ if not(self.halt) then begin
              end;
         $e0:if not(r.f.p_v) then begin {ret PO}
                 r.pc:=self.pop_sp;
-                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $e1:r.hl.w:=pop_sp;  {pop HL}
         $e2:if not(r.f.p_v) then begin {jp PO,nn}
@@ -1018,7 +1011,7 @@ if not(self.halt) then begin
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
              end;
         $e5:self.push_sp(r.hl.w);  {push HL}
@@ -1033,7 +1026,7 @@ if not(self.halt) then begin
              end;
         $e8:if r.f.p_v then begin {ret PE}
                 r.pc:=pop_sp;
-                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $e9:r.pc:=r.hl.w; {jp (HL)}
         $ea:if r.f.p_v then begin {jp PE,nn}
@@ -1053,7 +1046,7 @@ if not(self.halt) then begin
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
              end;
         $ed:self.estados_demas:=self.estados_demas+exec_ed;
@@ -1068,7 +1061,7 @@ if not(self.halt) then begin
              end;
         $f0:if not(r.f.s) then begin {ret NP}
                 r.pc:=self.pop_sp;
-                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $f1:begin  {pop AF}
                 posicion.w:=pop_sp;
@@ -1098,7 +1091,7 @@ if not(self.halt) then begin
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
              end;
         $f5:begin  {push AF}
@@ -1125,7 +1118,7 @@ if not(self.halt) then begin
              end;
         $f8:if r.f.s then begin {ret M}
                 r.pc:=self.pop_sp;
-                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $f9:r.sp:=r.hl.w; {ld SP,HL}
         $fa:if r.f.s then begin {jp M,nn}
@@ -1145,7 +1138,7 @@ if not(self.halt) then begin
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
              end;
         $fd:self.estados_demas:=self.estados_demas+self.exec_dd_fd(false);
@@ -1158,16 +1151,11 @@ if not(self.halt) then begin
                 self.push_sp(r.pc);
                 r.pc:=$38;
              end;
-  end; {del case}
-  cantidad_t:=z80t[instruccion]+self.estados_demas;
-  if @self.despues_instruccion<>nil then self.despues_instruccion(cantidad_t);
-  self.contador:=self.contador+cantidad_t;
-  update_timer(cantidad_t,self.numero_cpu);
-end else begin
-  if @self.despues_instruccion<>nil then self.despues_instruccion(4);
-  self.contador:=self.contador+4;
-  update_timer(4,self.numero_cpu);
-end;
+end; {del case}
+cantidad_t:=self.z80t[instruccion]+self.estados_demas;
+if @self.despues_instruccion<>nil then self.despues_instruccion(cantidad_t);
+self.contador:=self.contador+cantidad_t;
+update_timer(self.contador-pestados,self.numero_cpu);
 end; {del while}
 end;
 
@@ -1518,7 +1506,7 @@ case instruccion of
              end;
         $ff:r.a:=r.a or $80; {set 7,A}
 end;
-exec_cb:=z80t_cb[instruccion];
+exec_cb:=self.z80t_cb[instruccion];
 end;
 
 function cpu_z80.exec_dd_fd(tipo:boolean):byte;
@@ -1806,7 +1794,7 @@ case instruccion of
         $f9:r.sp:=registro^.w; {ld SP,IX}
         else r.pc:=r.pc-1;
 end;
-exec_dd_fd:=z80t_dd[instruccion]+estados_dd_cb;
+exec_dd_fd:=self.z80t_dd[instruccion]+estados_dd_cb;
 end;
 
 function cpu_z80.exec_dd_cb(tipo:boolean):byte;
@@ -2703,7 +2691,7 @@ case instruccion of
                  self.putbyte(temp2,r.a);
             end;
 end;
-exec_dd_cb:=z80t_ddcb[instruccion];
+exec_dd_cb:=self.z80t_ddcb[instruccion];
 end;
 
 function cpu_z80.exec_ed:byte;
@@ -3096,7 +3084,7 @@ case instruccion of
                  r.bc.w:=r.bc.w-1;
                  if (r.bc.w<>0) then begin
                         r.pc:=r.pc-2;
-                        estados_demas:=z80t_ex[instruccion];
+                        estados_demas:=self.z80t_ex[instruccion];
                  end;
                  r.f.p_v:=(r.bc.w<>0);
                  r.f.n:=false;
@@ -3119,7 +3107,7 @@ case instruccion of
                 r.f.bit5:=((temp-((temp3 and 16) shr 4)) and 2)<>0;
                 r.f.bit3:=((temp-((temp3 shr 4) and 1)) and 8)<>0;
                 If (r.f.p_v and not(r.f.z)) then begin
-                  estados_demas:=z80t_ex[instruccion];
+                  estados_demas:=self.z80t_ex[instruccion];
                   r.pc:=r.pc-2;
                 end;
             end;
@@ -3140,7 +3128,7 @@ case instruccion of
                 r.f.s:=(r.bc.h and $80)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=z80t_ex[instruccion];
+                  estados_demas:=self.z80t_ex[instruccion];
                 end;
            end;
         $b3:begin //otir añadido el dia 18-09-04
@@ -3159,7 +3147,7 @@ case instruccion of
                 r.f.z:=(r.bc.h and $80)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=z80t_ex[instruccion];
+                  estados_demas:=self.z80t_ex[instruccion];
                 end;
             end;
         { $b4..$b7:nop*2}
@@ -3176,7 +3164,7 @@ case instruccion of
                 r.f.bit3:=((r.a+temp) and $8)<>0;
                 if (r.bc.w<>0) then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=z80t_ex[instruccion];
+                  estados_demas:=self.z80t_ex[instruccion];
                 end;
              end;
         $b9:begin   {cpdr}
@@ -3194,7 +3182,7 @@ case instruccion of
                  r.f.bit3:=((temp-((temp3 shr 4) and 1)) and 8)<>0;
                  if r.f.p_v and not(r.f.z) then begin
                      r.pc:=r.pc-2;
-                     estados_demas:=z80t_ex[instruccion];
+                     estados_demas:=self.z80t_ex[instruccion];
                  end;
              end;
         $ba:begin  //indr  >16t<
@@ -3212,7 +3200,7 @@ case instruccion of
                  r.f.bit3:=(r.bc.h and 8)<>0;
                  r.f.s:=(r.bc.h and $80)<>0;
                  if (r.bc.h<>0) then begin
-                        estados_demas:=z80t_ex[instruccion];
+                        estados_demas:=self.z80t_ex[instruccion];
                         dec(r.pc,2);
                  end;
                  r.hl.w:=r.hl.w-1;
@@ -3232,12 +3220,12 @@ case instruccion of
                 r.f.bit3:=(r.bc.h and 8)<>0;
                 r.f.s:=(r.bc.h and $80)<>0;
                 if (r.bc.h<>0) then begin
-                    estados_demas:=z80t_ex[instruccion];
+                    estados_demas:=self.z80t_ex[instruccion];
                     dec(r.pc,2);
                 end;
             end;
 end;
-exec_ed:=z80t_ed[instruccion]+estados_demas;
+exec_ed:=self.z80t_ed[instruccion]+estados_demas;
 end;
 
 end.

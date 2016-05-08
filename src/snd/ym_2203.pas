@@ -6,9 +6,8 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 type
   ym2203_chip=class(snd_chip_class)
-       constructor create(num:byte;clock:dword;ay_amp:byte=1);
-       procedure Free;
-       destructor Destroy;
+       constructor create(num:byte;clock:dword;amp:single=1;ay_amp:single=1);
+       destructor free;
     public
        procedure reset;
        procedure update;
@@ -45,8 +44,9 @@ procedure ym2203_1_init_timer_b(count:single);
 
 implementation
 
-constructor ym2203_chip.create(num:byte;clock:dword;ay_amp:byte);
+constructor ym2203_chip.create(num:byte;clock:dword;amp:single;ay_amp:single);
 begin
+  self.amp:=amp;
   //El PSG
   self.ay8910_int:=ay8910_chip.create(clock,ay_amp,true);
   //Inicializo el OPN
@@ -86,17 +86,12 @@ begin
   self.opn.ST.IRQ_Handler:=irq_handler;
 end;
 
-destructor ym2203_chip.Destroy;
+destructor ym2203_chip.free;
 begin
 //Cierro el OPN
 opn_close(self.OPN);
 self.OPN:=nil;
 self.ay8910_int.Free;
-end;
-
-procedure ym2203_chip.Free;
-begin
-  self.Destroy;
 end;
 
 procedure ym2203_chip.Reset;
@@ -256,6 +251,7 @@ begin
   copymemory(@self.opn.c2,temp,4);inc(temp,4);
   copymemory(@self.opn.mem,temp,4);
 end;
+
 procedure ym2203_chip.reset_channels(chan:byte);
 var
   c,s:byte;
@@ -320,10 +316,10 @@ begin
     chan_calc(OPN,cch[2],0);
     // buffering */
     lt:=self.ay8910_int.update_internal^;
-    lt:=lt+out_fm[0]+out_fm[1]+out_fm[2];
+    lt:=lt+trunc((out_fm[0]+out_fm[1]+out_fm[2])*self.amp);
     if lt>$7fff then lt:=$7fff
       else if lt<-$7fff then lt:=-$7fff;
-    tsample[self.tsample_num,sound_status.posicion_sonido]:=lt div 2;
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
     INTERNAL_TIMER_A(self.OPN.ST,self.OPN.p_ch[2]);
     INTERNAL_TIMER_B(self.OPN.ST,1)
 end;

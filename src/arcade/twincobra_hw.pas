@@ -19,7 +19,7 @@ procedure twincobr_snd_putbyte(direccion:word;valor:byte);
 function twincobr_snd_inbyte(puerto:word):byte;
 procedure twincobr_snd_outbyte(valor:byte;puerto:word);
 procedure snd_irq(irqstate:byte);
-procedure twincobr_despues_instruccion;
+procedure twincobr_update_sound;
 //MCU
 procedure twincobr_dsp_bio_w(valor:word);
 function twincobr_dsp_r:word;
@@ -144,12 +144,13 @@ main_m68000.change_ram16_calls(twincobr_getword,twincobr_putword);
 snd_z80:=cpu_z80.create(3500000,286);
 snd_z80.change_ram_calls(twincobr_snd_getbyte,twincobr_snd_putbyte);
 snd_z80.change_io_calls(twincobr_snd_inbyte,twincobr_snd_outbyte);
-snd_z80.init_sound(twincobr_despues_instruccion);
+snd_z80.init_sound(twincobr_update_sound);
 //TMS MCU
 main_tms32010:=cpu_tms32010.create(14000000,286);
 main_tms32010.change_io_calls(twincobr_BIO_r,nil,twincobr_dsp_r,nil,nil,nil,nil,nil,nil,twincobr_dsp_addrsel_w,twincobr_dsp_w,nil,twincobr_dsp_bio_w,nil,nil,nil,nil);
 //Sound Chips
-YM3812_Init(0,3500000,snd_irq);
+ym3812_0:=ym3812_chip.create(0,3500000);
+ym3812_0.change_irq_calls(snd_irq);
 case main_vars.tipo_maquina of
     146:begin
           //cargar roms
@@ -215,7 +216,7 @@ begin
 main_m68000.free;
 snd_z80.free;
 main_tms32010.free;
-ym3812_close(0);
+ym3812_0.free;
 close_audio;
 close_video;
 end;
@@ -225,7 +226,7 @@ begin
  main_m68000.reset;
  snd_z80.reset;
  main_tms32010.reset;
- YM3812_Reset(0);
+ ym3812_0.reset;
  reset_audio;
  txt_scroll_y:=457;
  txt_scroll_x:=226;
@@ -446,7 +447,7 @@ end;
 function twincobr_snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  0:twincobr_snd_inbyte:=YM3812_status_port(0);
+  0:twincobr_snd_inbyte:=ym3812_0.status;
   $10:twincobr_snd_inbyte:=marcade.in2;
   $20,$30:twincobr_snd_inbyte:=0;
   $40:twincobr_snd_inbyte:=dswa and $ff;
@@ -457,8 +458,8 @@ end;
 procedure twincobr_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-  $0:ym3812_control_port(0,valor);
-  $1:ym3812_write_port(0,valor);
+  $0:ym3812_0.control(valor);
+  $1:ym3812_0.write(valor);
 end;
 end;
 
@@ -576,9 +577,9 @@ case direccion of
 end;
 end;
 
-procedure twincobr_despues_instruccion;
+procedure twincobr_update_sound;
 begin
-  YM3812_Update(0);
+  ym3812_0.update;
 end;
 
 end.

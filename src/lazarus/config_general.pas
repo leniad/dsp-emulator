@@ -60,14 +60,15 @@ type
     ComboBox7: TComboBox;
     ComboBox8: TComboBox;
     ComboBox9: TComboBox;
-    DirectoryEdit1: TDirectoryEdit;
-    DirectoryEdit2: TDirectoryEdit;
-    DirectoryEdit3: TDirectoryEdit;
-    DirectoryEdit4: TDirectoryEdit;
-    DirectoryEdit5: TDirectoryEdit;
+    D1: TDirectoryEdit;
+    D2: TDirectoryEdit;
+    D3: TDirectoryEdit;
+    D4: TDirectoryEdit;
+    D5: TDirectoryEdit;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox6: TGroupBox;
+    GroupBox7: TGroupBox;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
@@ -103,6 +104,8 @@ type
     RadioButton19: TRadioButton;
     RadioButton2: TRadioButton;
     RadioButton20: TRadioButton;
+    RadioButton21: TRadioButton;
+    RadioButton22: TRadioButton;
     RadioButton3: TRadioButton;
     RadioButton4: TRadioButton;
     RadioButton5: TRadioButton;
@@ -147,9 +150,12 @@ type
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure Button9Click(Sender: TObject);
+    procedure ComboBox1Change(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure RadioButton1Click(Sender: TObject);
+    procedure RadioButton21Change(Sender: TObject);
+    procedure RadioButton22Change(Sender: TObject);
     procedure RadioButton2Click(Sender: TObject);
     procedure RadioButton3Click(Sender: TObject);
     procedure RadioButton4Click(Sender: TObject);
@@ -416,11 +422,11 @@ procedure TMConfig.Button1Click(Sender: TObject);
 var
   tmp_var:byte;
 begin
-  Directory.Nes:=directoryedit1.Directory+main_vars.cadena_dir;
-  Directory.GameBoy:=directoryedit2.Directory+main_vars.cadena_dir;
-  Directory.ColecoVision:=directoryedit3.Directory+main_vars.cadena_dir;
-  Directory.Arcade_roms:=directoryedit4.Directory+main_vars.cadena_dir;
-  Directory.Arcade_hi:=directoryedit5.Directory+main_vars.cadena_dir;
+  Directory.Nes:=D1.Directory+main_vars.cadena_dir;
+  Directory.GameBoy:=D2.Directory+main_vars.cadena_dir;
+  Directory.ColecoVision:=D3.Directory+main_vars.cadena_dir;
+  Directory.Arcade_roms:=D4.Directory+main_vars.cadena_dir;
+  Directory.Arcade_hi:=D5.Directory+main_vars.cadena_dir;
   if radiobutton5.Checked then tmp_var:=0
     else if radiobutton6.Checked then tmp_var:=1
       else if radiobutton7.Checked then tmp_var:=2
@@ -531,6 +537,19 @@ begin
 export_roms;
 end;
 
+procedure TMConfig.ComboBox1Change(Sender: TObject);
+begin
+  arcade_input.num_joystick[0]:=combobox1.ItemIndex;
+  if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
+      radiobutton21.Enabled:=true;
+      radiobutton22.Enabled:=true;
+  end else begin
+      radiobutton21.Enabled:=false;
+      radiobutton22.Enabled:=true;
+      radiobutton22.Checked:=true;
+  end;
+end;
+
 procedure TMConfig.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case key of
@@ -573,48 +592,56 @@ begin
 end;
 
 begin
-  RadioGroup1.Caption:=leng[main_vars.idioma].archivo[1];
+  radiogroup1.Caption:=leng[main_vars.idioma].archivo[1];
   button2.Caption:=leng[main_vars.idioma].mensajes[8];
-//idioma
+  //idioma
   case main_vars.idioma of
-     0:radiobutton5.Checked:=true;
-     1:radiobutton6.Checked:=true;
-     2:radiobutton7.Checked:=true;
-     3:radiobutton8.Checked:=true;
-     4:radiobutton9.Checked:=true;
-     5:radiobutton10.Checked:=true;
-     6:radiobutton11.Checked:=true;
+    0:radiobutton5.Checked:=true;
+    1:radiobutton6.Checked:=true;
+    2:radiobutton7.Checked:=true;
+    3:radiobutton8.Checked:=true;
+    4:radiobutton9.Checked:=true;
+    5:radiobutton10.Checked:=true;
+    6:radiobutton11.Checked:=true;
   end;
-//audio
-  radiobutton15.caption:=leng[main_vars.idioma].opciones[3];
+  if not(main_vars.lenguaje_ok) then begin
+    radiogroup1.Enabled:=false;
+    radiobutton5.Enabled:=false;
+    radiobutton6.Enabled:=false;
+    radiobutton7.Enabled:=false;
+    radiobutton8.Enabled:=false;
+    radiobutton9.Enabled:=false;
+    radiobutton10.Enabled:=false;
+    radiobutton11.Enabled:=false;
+  end;
+  //audio
+  radiobutton15.Caption := leng[main_vars.idioma].opciones[3];
   case sound_status.calidad_audio of
-     0:radiobutton12.Checked:=true;
-     1:radiobutton13.Checked:=true;
-     2:radiobutton14.Checked:=true;
-     3:radiobutton15.Checked:=true;
+    0:radiobutton12.Checked:=true;
+    1:radiobutton13.Checked:=true;
+    2:radiobutton14.Checked:=true;
+    3:radiobutton15.Checked:=true;
   end;
-//video
+  //video
   case main_screen.video_mode of
-     1:radiobutton16.Checked:=true;
-     2:radiobutton17.Checked:=true;
-     3:radiobutton18.Checked:=true;
-     4:radiobutton19.Checked:=true;
-     5:radiobutton20.Checked:=true;
+    1:radiobutton16.Checked:=true;
+    2:radiobutton17.Checked:=true;
+    3:radiobutton18.Checked:=true;
+    4:radiobutton19.Checked:=true;
+    5:radiobutton20.Checked:=true;
   end;
-  //Inicio
+  //Autoload
   checkbox2.Checked:=main_vars.auto_exec;
   //Mostar errores CRC
   checkbox1.Checked:=main_vars.show_crc_error;
-  //Centrar pantalla
+  //Centrar Pantalla
   checkbox3.Checked:=main_vars.center_screen;
-  //Usar X11 MAC OSX
-  checkbox4.Checked:=main_vars.x11;
   //Diretorios
-  directoryedit1.Directory:=delete_last_char(Directory.Nes);
-  directoryedit2.Directory:=delete_last_char(Directory.GameBoy);
-  directoryedit3.Directory:=delete_last_char(Directory.ColecoVision);
-  directoryedit4.Directory:=delete_last_char(Directory.Arcade_roms);
-  directoryedit5.Directory:=delete_last_char(Directory.Arcade_hi);
+  D1.Text:=Directory.Nes;
+  D2.Text:=Directory.GameBoy;
+  D3.Text:=Directory.ColecoVision;
+  D4.Text:=Directory.Arcade_roms;
+  D5.Text:=Directory.Arcade_hi;
   //Componer todas las entradas
   if event.num_joysticks=0 then begin
     radiobutton1.Checked:=true;
@@ -655,6 +682,10 @@ begin
     combobox12.Visible:=false;
     combobox13.Visible:=false;
     combobox14.Visible:=false;
+    radiobutton21.enabled:=false;
+    radiobutton22.enabled:=false;
+    //radiobutton23.enabled:=false;
+    //radiobutton24.enabled:=false;
   end else begin
     radiobutton2.enabled:=true;
     if arcade_input.use_key[0] then begin
@@ -677,6 +708,8 @@ begin
       combobox9.Visible:=false;
       combobox10.Visible:=false;
       combobox11.Visible:=false;
+      radiobutton21.enabled:=false;
+      radiobutton22.enabled:=false;
     end else begin
       radiobutton1.Checked:=false;
       radiobutton2.Checked:=true;
@@ -697,6 +730,15 @@ begin
       combobox9.Visible:=true;
       combobox10.Visible:=true;
       combobox11.Visible:=true;
+      bitbtn7.enabled:=true;
+      if SDL_JoystickNumHats(joystick_def[0])<>0 then begin
+        radiobutton21.Enabled:=true;
+        radiobutton22.Enabled:=true;
+      end else begin
+        radiobutton21.Enabled:=false;
+        radiobutton22.Enabled:=true;
+        radiobutton22.Checked:=true;
+      end;
     end;
     radiobutton4.enabled:=true;
     if arcade_input.use_key[1] then begin
@@ -719,6 +761,8 @@ begin
       combobox12.Visible:=false;
       combobox13.Visible:=false;
       combobox14.Visible:=false;
+      //radiobutton23.enabled:=false;
+      //radiobutton24.enabled:=false;
     end else begin
       radiobutton3.Checked:=false;
       radiobutton4.Checked:=true;
@@ -739,6 +783,15 @@ begin
       combobox12.Visible:=true;
       combobox13.Visible:=true;
       combobox14.Visible:=true;
+      bitbtn8.enabled:=true;
+      {if SDL_JoystickNumHats(joystick_def[1])<>0 then begin
+        radiobutton23.Enabled:=true;
+        radiobutton24.Enabled:=true;
+      end else begin
+        radiobutton23.Enabled:=false;
+        radiobutton24.Enabled:=true;
+        radiobutton24.Checked:=true;
+      end;}
     end;
     combobox1.Clear;
     combobox2.Clear;
@@ -762,7 +815,7 @@ begin
     combobox12.Clear;
     combobox13.Clear;
     combobox14.Clear;
-    for f:=0 to (SDL_joysticknumbuttons(joystick_def[0])-1) do begin
+    for f:=0 to (sdl_joysticknumbuttons(joystick_def[0])-1) do begin
       combobox3.Items.Add('But '+inttostr(f));
       combobox4.Items.Add('But '+inttostr(f));
       combobox5.Items.Add('But '+inttostr(f));
@@ -770,7 +823,7 @@ begin
       combobox10.Items.Add('But '+inttostr(f));
       combobox11.Items.Add('But '+inttostr(f));
     end;
-    for f:=0 to (SDL_joysticknumbuttons(joystick_def[1])-1) do begin
+    for f:=0 to (sdl_joysticknumbuttons(joystick_def[1])-1) do begin
       combobox6.Items.Add('But ' + inttostr(f));
       combobox7.Items.Add('But ' + inttostr(f));
       combobox8.Items.Add('But ' + inttostr(f));
@@ -813,7 +866,7 @@ begin
   bitbtn18.Caption:=nombre_tecla(arcade_input.nbut3[1]);
   bitbtn19.Caption:=nombre_tecla(arcade_input.nbut4[1]);
   bitbtn20.Caption:=nombre_tecla(arcade_input.nbut5[1]);
-  //Misc buttons
+  //Misc Keys
   button3.Caption:=nombre_tecla(arcade_input.ncoin[0]);
   button4.Caption:=nombre_tecla(arcade_input.ncoin[1]);
   button5.Caption:=nombre_tecla(arcade_input.nstart[0]);
@@ -832,6 +885,7 @@ begin
   bitbtn15.visible:=true;
   bitbtn16.visible:=true;
   bitbtn17.visible:=true;
+  combobox1.enabled:=false;
   combobox3.Visible:=false;
   combobox4.Visible:=false;
   combobox5.Visible:=false;
@@ -839,6 +893,18 @@ begin
   combobox10.Visible:=false;
   combobox11.Visible:=false;
   button7.Enabled:=false;
+  radiobutton21.Enabled:=false;
+  radiobutton22.Enabled:=false;
+end;
+
+procedure TMConfig.RadioButton21Change(Sender: TObject);
+begin
+  bitbtn7.Enabled:=false;
+end;
+
+procedure TMConfig.RadioButton22Change(Sender: TObject);
+begin
+  bitbtn7.Enabled:=true;
 end;
 
 procedure TMConfig.RadioButton2Click(Sender: TObject);
@@ -853,6 +919,7 @@ begin
   bitbtn15.visible:=false;
   bitbtn16.visible:=false;
   bitbtn17.visible:=false;
+  combobox1.enabled:=true;
   combobox3.Visible:=true;
   combobox4.Visible:=true;
   combobox5.Visible:=true;
@@ -860,6 +927,14 @@ begin
   combobox10.Visible:=true;
   combobox11.Visible:=true;
   button7.Enabled:=true;
+  if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
+    radiobutton21.Enabled:=true;
+    radiobutton22.Enabled:=true;
+  end else begin
+    radiobutton21.Enabled:=false;
+    radiobutton22.Enabled:=true;
+    radiobutton22.Checked:=true;
+  end;
 end;
 
 procedure TMConfig.RadioButton3Click(Sender: TObject);

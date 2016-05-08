@@ -389,7 +389,7 @@ loaddata_qsnapshot(data);
 main_z80.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
-sn_76496_0.save_snapshot(data);
+sn_76496_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[$c000]);
 loaddata_qsnapshot(@scroll_lineas[0]);

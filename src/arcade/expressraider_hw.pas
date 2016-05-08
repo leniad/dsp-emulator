@@ -90,8 +90,9 @@ snd_m6809:=cpu_m6809.Create(1500000,262);
 snd_m6809.change_ram_calls(getbyte_snd_expraid,putbyte_snd_expraid);
 snd_m6809.init_sound(expraid_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,1500000,2);
-ym3812_init(0,3000000,snd_irq);
+ym2203_0:=ym2203_chip.create(0,1500000,0.3,0.3);
+ym3812_0:=ym3812_chip.create(0,3000000,0.6);
+ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 if not(cargar_roms(@memoria,@expraid_rom,'exprraid.zip',0)) then exit;
 //cargar roms audio
@@ -147,7 +148,7 @@ begin
 main_m6502.free;
 snd_m6809.Free;
 YM2203_0.Free;
-YM3812_close(0);
+YM3812_0.free;
 close_audio;
 close_video;
 end;
@@ -157,7 +158,7 @@ begin
 main_m6502.reset;
 snd_m6809.reset;
 YM2203_0.Reset;
-YM3812_reset(0);
+YM3812_0.reset;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;
@@ -342,7 +343,7 @@ begin
     0..$1fff,$8000..$ffff:getbyte_snd_expraid:=mem_snd[direccion];
     $2000:getbyte_snd_expraid:=ym2203_0.read_status;
     $2001:getbyte_snd_expraid:=ym2203_0.Read_Reg;
-    $4000:getbyte_snd_expraid:=ym3812_status_port(0);
+    $4000:getbyte_snd_expraid:=ym3812_0.status;
     $6000:begin
             getbyte_snd_expraid:=sound_latch;
             snd_m6809.clear_nmi;
@@ -357,15 +358,15 @@ case direccion of
   0..$1fff:mem_snd[direccion]:=valor;
   $2000:ym2203_0.control(valor);
   $2001:ym2203_0.write_reg(valor);
-  $4000:ym3812_control_port(0,valor);
-  $4001:ym3812_write_port(0,valor);
+  $4000:ym3812_0.control(valor);
+  $4001:ym3812_0.write(valor);
 end;
 end;
 
 procedure expraid_sound_update;
 begin
   ym2203_0.Update;
-  ym3812_Update(0);
+  ym3812_0.update;
 end;
 
 procedure snd_irq(irqstate:byte);

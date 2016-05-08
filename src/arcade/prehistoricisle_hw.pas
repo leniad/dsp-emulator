@@ -95,7 +95,8 @@ snd_z80.change_ram_calls(prehisle_snd_getbyte,prehisle_snd_putbyte);
 snd_z80.change_io_calls(prehisle_snd_inbyte,prehisle_snd_outbyte);
 snd_z80.init_sound(prehisle_sound_update);
 //Sound Chips
-ym3812_init(0,4000000,snd_irq);
+ym3812_0:=ym3812_chip.create(0,4000000);
+ym3812_0.change_irq_calls(snd_irq);
 upd7759_0:=upd7759_chip.create(640000,0.9);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@prehisle_rom[0],'prehisle.zip',0)) then exit;
@@ -141,7 +142,7 @@ procedure cerrar_prehisle;
 begin
 main_m68000.free;
 snd_z80.free;
-ym3812_close(0);
+ym3812_0.free;
 upd7759_0.Free;
 close_audio;
 close_video;
@@ -151,7 +152,7 @@ procedure reset_prehisle;
 begin
  main_m68000.reset;
  snd_z80.reset;
- ym3812_reset(0);
+ ym3812_0.reset;
  upd7759_0.reset;
  reset_audio;
  marcade.in0:=$ff;
@@ -381,14 +382,14 @@ end;
 
 function prehisle_snd_inbyte(puerto:word):byte;
 begin
-if (puerto and $ff)=0 then prehisle_snd_inbyte:=ym3812_status_port(0);
+if (puerto and $ff)=0 then prehisle_snd_inbyte:=ym3812_0.status;
 end;
 
 procedure prehisle_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-  $00:ym3812_control_port(0,valor);
-  $20:ym3812_write_port(0,valor);
+  $00:ym3812_0.control(valor);
+  $20:ym3812_0.write(valor);
   $40:begin
         upd7759_0.port_w(valor);
       	upd7759_0.start_w(0);
@@ -400,7 +401,7 @@ end;
 
 procedure prehisle_sound_update;
 begin
-  YM3812_Update(0);
+  ym3812_0.update;
   upd7759_0.update;
 end;
 

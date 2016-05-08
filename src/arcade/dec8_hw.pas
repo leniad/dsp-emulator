@@ -81,7 +81,8 @@ snd_m6502.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
 snd_m6502.init_sound(dec8_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(0,1500000,2);
-ym3812_init(0,3000000,snd_irq);
+ym3812_0:=ym3812_chip.create(0,3000000);
+ym3812_0.change_irq_calls(snd_irq);
 //cargar roms y ponerlas en su sitio
 if not(cargar_roms(@memoria_temp[0],@srd_rom[0],'srdarwin.zip',0)) then exit;
 copymemory(@rom[4,0],@memoria_temp[0],$4000);
@@ -127,7 +128,7 @@ begin
 main_m6809.Free;
 snd_m6502.free;
 ym2203_0.Free;
-ym3812_close(0);
+ym3812_0.free;
 close_audio;
 close_video;
 end;
@@ -137,7 +138,7 @@ begin
 main_m6809.reset;
 snd_m6502.reset;
 ym2203_0.reset;
-ym3812_reset(0);
+ym3812_0.reset;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;
@@ -358,7 +359,7 @@ begin
   case direccion of
     $2000:getbyte_snd_dec8:=ym2203_0.read_status;
     $2001:getbyte_snd_dec8:=ym2203_0.Read_Reg;
-    $4000:getbyte_snd_dec8:=ym3812_status_port(0);
+    $4000:getbyte_snd_dec8:=ym3812_0.status;
     $6000:getbyte_snd_dec8:=sound_latch;
     $8000..$ffff:if snd_m6502.opcode then getbyte_snd_dec8:=snd_dec[direccion and $7fff]
                     else getbyte_snd_dec8:=mem_snd[direccion];
@@ -373,15 +374,15 @@ mem_snd[direccion]:=valor;
 case direccion of
   $2000:ym2203_0.control(valor);
   $2001:ym2203_0.write_reg(valor);
-  $4000:ym3812_control_port(0,valor);
-  $4001:ym3812_write_port(0,valor);
+  $4000:ym3812_0.control(valor);
+  $4001:ym3812_0.write(valor);
 end;
 end;
 
 procedure dec8_sound_update;
 begin
   ym2203_0.Update;
-  ym3812_Update(0);
+  ym3812_0.update;
 end;
 
 procedure snd_irq(irqstate:byte);

@@ -25,8 +25,7 @@ type
      preg_mb88xx=^reg_mb88xx;
      cpu_mb88xx=class(cpu_class)
           constructor Create(clock:dword;frames_div:word);
-          procedure Free;
-          destructor Destroy;
+          destructor free;
         public
           port_k,port_p_r:cpu_inport_call;
           port_o,port_p_w:cpu_outport_call;
@@ -97,15 +96,9 @@ self.port_r_w:=nil;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_mb88xx.Destroy;
+destructor cpu_mb88xx.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_mb88xx.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 function cpu_mb88xx.get_rom_addr:pbyte;

@@ -25,8 +25,7 @@ type
         preg_hd6309=^reg_hd6309;
         cpu_hd6309=class(cpu_class)
                 constructor create(clock:dword;frames_div:word);
-                procedure free;
-                destructor destroy;
+                destructor free;
             public
                 pedir_nmi,pedir_firq,pedir_irq,nmi_state:byte;
                 procedure reset;
@@ -205,15 +204,9 @@ self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_hd6309.Destroy;
+destructor cpu_hd6309.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_hd6309.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 procedure cpu_hd6309.reset;

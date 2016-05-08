@@ -16,8 +16,7 @@ const
 type
   MSM5205_chip=class(snd_chip_class)
         constructor create(num:byte;clock:dword;select:byte;amp:single;snd_timer_call:exec_type);
-        procedure Free;
-        destructor Destroy;
+        destructor free;
       public
         procedure reset;
         procedure reset_w(reset_data:byte);
@@ -106,13 +105,8 @@ begin
 	self.reset;
 end;
 
-destructor MSM5205_chip.Destroy;
+destructor MSM5205_chip.free;
 begin
-end;
-
-procedure MSM5205_chip.free;
-begin
-self.Destroy;
 end;
 
 procedure MSM5205_chip.reset;

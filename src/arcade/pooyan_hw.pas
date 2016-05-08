@@ -74,11 +74,8 @@ iniciar_video(224,256);
 //Main CPU
 main_z80:=cpu_z80.create(3072000,256);
 main_z80.change_ram_calls(pooyan_getbyte,pooyan_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(1789772,256);
-snd_z80.change_ram_calls(konamisnd_getbyte,konamisnd_putbyte);
 //Sound Chip
-konamisnd_init(4,snd_z80.numero_cpu,TWO_AY8910,snd_z80.clock,nil);
+konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,256);
 //cargar roms
 if not(cargar_roms(@memoria[0],@pooyan_rom[0],'pooyan.zip',0)) then exit;
 //cargar sonido
@@ -120,8 +117,7 @@ end;
 procedure cerrar_pooyan;
 begin
 main_z80.free;
-snd_z80.free;
-konamisnd_close;
+konamisnd_0.free;
 close_audio;
 close_video;
 end;
@@ -129,9 +125,8 @@ end;
 procedure reset_pooyan;
 begin
  main_z80.reset;
- snd_z80.reset;
  reset_audio;
- konamisnd_reset;
+ konamisnd_0.reset;
  nmi_vblank:=false;
  last:=0;
  marcade.in0:=$FF;
@@ -203,16 +198,13 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    konami_sound.frame:=f;
     //Main CPU
     main_z80.run(frame_m);
     frame_m:=frame_m+main_z80.tframes-main_z80.contador;
     //SND CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    konamisnd_0.run(f);
     if f=239 then begin
       if nmi_vblank then main_z80.pedir_nmi:=ASSERT_LINE;
       update_video_pooyan;
@@ -256,13 +248,13 @@ case direccion of
                end;
     $a000..$bfff:case (direccion and $3ff) of
                   $0..$7f,$200..$27f:; //WatchDog
-                  $100..$17f,$300..$37f:konami_sound.sound_latch:=valor;
+                  $100..$17f,$300..$37f:konamisnd_0.sound_latch:=valor;
                   $180,$380:begin
                               nmi_vblank:=valor<>0;
                               if not(nmi_vblank) then main_z80.clear_nmi;
                             end;
                   $181,$381:begin
-                              if ((last=0) and (valor<>0)) then snd_z80.pedir_irq:=HOLD_LINE;
+                              if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
                               last:=valor;
                             end;
                   $187,$387:main_screen.flip_main_screen:=(valor and 1)=0;

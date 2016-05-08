@@ -17,8 +17,7 @@ type
         preg_mcs51=^reg_mcs51;
         cpu_mcs51=class(cpu_class)
                 constructor create(clock:dword;frames_div:word);
-                procedure free;
-                destructor destroy;
+                destructor free;
             public
                 pedir_irq0,pedir_irq1:byte;
                 procedure run(maximo:single);
@@ -128,15 +127,9 @@ self.out_port3:=nil;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_mcs51.Destroy;
+destructor cpu_mcs51.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_mcs51.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 procedure cpu_mcs51.change_io_calls(in_port0,in_port1,in_port2,in_port3:cpu_inport_call;out_port0,out_port1,out_port2,out_port3:cpu_outport_call);

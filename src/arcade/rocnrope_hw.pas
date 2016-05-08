@@ -69,11 +69,8 @@ iniciar_video(224,256);
 //Main CPU
 main_m6809:=cpu_m6809.Create(1536000,$100);
 main_m6809.change_ram_calls(rocnrope_getbyte,rocnrope_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(1789772,$100);
-snd_z80.change_ram_calls(konamisnd_getbyte,konamisnd_putbyte);
 //Sound Chip
-konamisnd_init(4,snd_z80.numero_cpu,TWO_AY8910,snd_z80.clock,nil);
+konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
 //cargar roms y desencriptarlas
 if not(cargar_roms(@memoria[0],@rocnrope_rom[0],'rocnrope.zip',0)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
@@ -125,8 +122,7 @@ end;
 procedure cerrar_rocnrope;
 begin
 main_m6809.Free;
-snd_z80.free;
-konamisnd_close;
+konamisnd_0.free;
 close_audio;
 close_video;
 end;
@@ -134,8 +130,7 @@ end;
 procedure reset_rocnrope;
 begin
  main_m6809.reset;
- snd_z80.reset;
- konamisnd_reset;
+ konamisnd_0.reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -200,21 +195,18 @@ end;
 
 procedure rocnrope_principal;
 var
-  frame_m,frame_s:single;
+  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    konami_sound.frame:=f;
     //main
     main_m6809.run(frame_m);
     frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    konamisnd_0.run(f);
     if f=239 then begin
       update_video_rocnrope;
       if pedir_irq then main_m6809.pedir_irq:=HOLD_LINE;
@@ -244,9 +236,9 @@ procedure rocnrope_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   $4800..$4fff:gfx[0].buffer[direccion and $3ff]:=true;
-  $8081:if valor<>0 then snd_z80.pedir_irq:=HOLD_LINE;
+  $8081:if valor<>0 then konamisnd_0.pedir_irq:=HOLD_LINE;
   $8087:pedir_irq:=(valor and $1)<>0;
-  $8100:konami_sound.sound_latch:=valor;
+  $8100:konamisnd_0.sound_latch:=valor;
   $8182..$818d:memoria[$fff2+(direccion-$8182)]:=valor;
 end;
 if direccion<$6000 then memoria[direccion]:=valor;

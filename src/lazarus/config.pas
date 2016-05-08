@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, ComCtrls,sdl2,spectrum_misc,sound_engine,main_engine,lenguaje;
+  StdCtrls, ComCtrls,spectrum_misc,sound_engine,main_engine,lenguaje,lib_sdl2;
 
 type
 

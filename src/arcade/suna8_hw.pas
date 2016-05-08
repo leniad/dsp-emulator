@@ -116,7 +116,7 @@ case main_vars.tipo_maquina of
         snd_z80.init_sound(snd_despues_instruccion);
         init_timer(snd_z80.numero_cpu,3000000/(60*4),hardhead_snd,true);
         //sound chips
-        ym3812_init(0,3000000,nil,1);
+        ym3812_0:=ym3812_chip.create(0,3000000);
         ay8910_0:=ay8910_chip.create(2000000,2);
         ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
         //Y para el DAC
@@ -153,7 +153,7 @@ case main_vars.tipo_maquina of
         snd_z80.change_ram_calls(hardhead2_snd_getbyte,hardhead2_snd_putbyte);
         snd_z80.init_sound(snd_despues_instruccion);
         //sound chips
-        ym3812_init(0,3000000,nil);
+        ym3812_0:=ym3812_chip.create(0,3000000);
         ay8910_0:=ay8910_chip.create(2000000,2);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@hardhead2_rom[0],'hardhea2.zip',0)) then exit;
@@ -201,7 +201,7 @@ procedure cerrar_suna_hw;
 begin
 main_z80.free;
 snd_z80.free;
-ym3812_close(0);
+ym3812_0.free;
 ay8910_0.free;
 close_audio;
 close_video;
@@ -212,7 +212,7 @@ begin
  main_z80.reset;
  snd_z80.reset;
  ay8910_0.reset;
- ym3812_reset(0);
+ ym3812_0.reset;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -424,7 +424,7 @@ end;
 function hardhead_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $c800:hardhead_snd_getbyte:=ym3812_status_port(0);
+  $c800:hardhead_snd_getbyte:=ym3812_0.status;
   $d800:hardhead_snd_getbyte:=soundlatch;
   else hardhead_snd_getbyte:=mem_snd[direccion];
 end;
@@ -435,8 +435,8 @@ begin
 if direccion<$8000 then exit;
 mem_snd[direccion]:=valor;
 case direccion of
-  $a000:ym3812_control_port(0,valor);
-  $a001:ym3812_write_port(0,valor);
+  $a000:ym3812_0.control(valor);
+  $a001:ym3812_0.write(valor);
   $a002:ay8910_0.Control(valor);
   $a003:ay8910_0.Write(valor);
   $d000:soundlatch2:=valor;
@@ -445,7 +445,7 @@ end;
 
 procedure snd_despues_instruccion;
 begin
-  YM3812_Update(0);
+  ym3812_0.update;
   ay8910_0.update;
   if dac_play then tsample[dac_tsample,sound_status.posicion_sonido]:=suna_dac[dac_pos];
 end;
@@ -662,4 +662,4 @@ case direccion of
 end;
 end;
 
-end.
+end.

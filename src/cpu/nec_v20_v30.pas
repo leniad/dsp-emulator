@@ -31,8 +31,7 @@ type
         preg_nec=^reg_nec;
         cpu_nec=class(cpu_class)
             constructor create(clock:dword;frames_div:word;tipo:byte);
-            procedure free;
-            destructor destroy;
+            destructor free;
           public
             pedir_irq:boolean;
             vect_req:byte;
@@ -172,16 +171,11 @@ self.outword:=nil;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_nec.Destroy;
+destructor cpu_nec.free;
 begin
 freemem(self.r);
-self.r:=nil;
 end;
 
-procedure cpu_nec.Free;
-begin
-  if Self.r<>nil then Destroy;
-end;
 procedure cpu_nec.reset;
 begin
 r.ip:=0;

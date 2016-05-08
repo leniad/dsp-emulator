@@ -59,10 +59,10 @@ var
 
 procedure convert_gfx_system2;
 begin
-init_gfx(0,8,8,4096);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,0,$8000*8,$10000*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  init_gfx(0,8,8,4096);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(3,0,8*8,0,$8000*8,$10000*8);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 end;
 
 begin
@@ -72,9 +72,10 @@ iniciar_audio(false);
 screen_init(1,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,260);
+main_z80:=cpu_z80.create(20000000,260);
 main_z80.change_ram_calls(system2_getbyte,system2_putbyte);
 main_z80.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
+main_z80.change_timmings(@z80_op,@z80_cb,@z80_xy,@z80_xycb,@z80_ed,@z80_ex);
 //Sound CPU
 snd_z80:=cpu_z80.create(4000000,260);
 snd_z80.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);

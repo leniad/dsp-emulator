@@ -95,7 +95,7 @@ const
         (n:'epr-12093.29';l:$10000;p:$60001;crc:$4891e7bb),(n:'epr-12097.30';l:$10000;p:$60000;crc:$e645902c),());
         //Tetris
         tetris_rom:array[0..2] of tipo_roms=(
-        (n:'epr-12201.rom';l:$8000;p:0;crc:$338e9b51),(n:'epr-12200.rom';l:$8000;p:$1;crc:$fb058779),());
+        (n:'xepr12201.rom';l:$8000;p:1;crc:$343c0670),(n:'xepr12200.rom';l:$8000;p:$0;crc:$0b694740),());
         tetris_key:tipo_roms=(n:'317-0093.key';l:$2000;p:0;crc:$e0064442);
         tetris_sound:tipo_roms=(n:'epr-12205.rom';l:$8000;p:0;crc:$6695dc99);
         tetris_tiles:array[0..3] of tipo_roms=(
@@ -344,10 +344,10 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@mem_snd[0],@tetris_sound,'tetris.zip')) then exit;
         //convertir tiles
         if not(cargar_roms(@memoria_temp[0],@tetris_tiles[0],'tetris.zip',0)) then exit;
-        convert_chars(1);
+        convert_chars(2);
         //Cargar ROM de los sprites
         if not(cargar_roms16b(@sprite_rom[0],@tetris_sprites[0],'tetris.zip',0)) then exit;
-        s16_info.s_banks:=2;
+        s16_info.s_banks:=1;
         marcade.dswb:=$30;
         marcade.dswb_val:=@tetris_dip_b;
   end;

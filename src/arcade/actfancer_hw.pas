@@ -82,9 +82,10 @@ snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
 snd_m6502.change_ram_calls(actfancer_snd_getbyte,actfancer_snd_putbyte);
 snd_m6502.init_sound(actfancer_sound_update);
 //Sound Chips
-ym3812_init(0,3000000,snd_irq);
-ym2203_0:=ym2203_chip.create(0,1500000);
-oki_6295_0:=snd_okim6295.Create(0,1000000,OKIM6295_PIN7_HIGH);
+ym3812_0:=ym3812_chip.create(0,3000000,0.9);
+ym3812_0.change_irq_calls(snd_irq);
+ym2203_0:=ym2203_chip.create(0,15000000,0.5,0.9);
+oki_6295_0:=snd_okim6295.Create(0,1000000,OKIM6295_PIN7_HIGH,0.85);
 case main_vars.tipo_maquina of
   165:begin  //Act Fancer
         //cargar roms
@@ -122,7 +123,7 @@ procedure cerrar_actfancer;
 begin
 main_h6280.Free;
 snd_m6502.free;
-ym3812_close(0);
+ym3812_0.free;
 YM2203_0.Free;
 oki_6295_0.Free;
 deco_bac06_close(0);
@@ -134,7 +135,7 @@ procedure reset_actfancer;
 begin
  main_h6280.reset;
  snd_m6502.reset;
- ym3812_reset(0);
+ ym3812_0.reset;
  ym2203_0.reset;
  oki_6295_0.reset;
  deco_bac06_reset(0);
@@ -325,15 +326,15 @@ case direccion of
   0..$7ff:mem_snd[direccion]:=valor;
   $800:ym2203_0.Control(valor);
   $801:ym2203_0.Write_Reg(valor);
-  $1000:ym3812_control_port(0,valor);
-  $1001:ym3812_write_port(0,valor);
+  $1000:ym3812_0.control(valor);
+  $1001:ym3812_0.write(valor);
   $3800:oki_6295_0.write(valor);
 end;
 end;
 
 procedure actfancer_sound_update;
 begin
-  YM3812_Update(0);
+  ym3812_0.update;
   ym2203_0.Update;
   oki_6295_0.update;
 end;

@@ -150,7 +150,8 @@ snd_z80:=cpu_z80.create(4000000,$100);
 snd_z80.init_sound(snd_sound_play);
 //Sound Chip
 msm_5205_0:=MSM5205_chip.create(0,400000,MSM5205_S48_4B,0.5,snd_adpcm);
-ym3812_init(0,4000000,snd_irq,6);
+ym3812_0:=ym3812_chip.create(0,4000000);
+ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 case main_vars.tipo_maquina of
   26:begin
@@ -225,7 +226,7 @@ begin
 main_z80.free;
 snd_z80.free;
 msm_5205_0.Free;
-ym3812_close(0);
+ym3812_0.free;
 close_audio;
 close_video;
 end;
@@ -234,7 +235,7 @@ procedure reset_tecmo;
 begin
  main_z80.reset;
  snd_z80.reset;
- ym3812_reset(0);
+ ym3812_0.reset;
  msm_5205_0.reset;
  reset_audio;
  adpcm_end:=0;
@@ -489,8 +490,8 @@ begin
 if direccion<$4000 then exit;
   case direccion of
      $4000..$47ff:mem_snd[direccion]:=valor;
-     $8000:ym3812_control_port(0,valor);
-     $8001:ym3812_write_port(0,valor);
+     $8000:ym3812_0.control(valor);
+     $8001:ym3812_0.write(valor);
      $c000:begin
               adpcm_pos:=(valor shl 8);
               msm_5205_0.reset_w(0);
@@ -573,8 +574,8 @@ begin
 if direccion<$8000 then exit;
   case direccion of
      $8000..$87ff:mem_snd[direccion]:=valor;
-     $a000:ym3812_control_port(0,valor);
-     $a001:ym3812_write_port(0,valor);
+     $a000:ym3812_0.control(valor);
+     $a001:ym3812_0.write(valor);
      $c000:begin
               adpcm_pos:=(valor shl 8);
               msm_5205_0.reset_w(0);
@@ -593,7 +594,7 @@ end;
 
 procedure snd_sound_play;
 begin
-  YM3812_Update(0);
+  YM3812_0.update;
 end;
 
 procedure snd_adpcm;

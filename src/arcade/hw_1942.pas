@@ -379,9 +379,9 @@ loaddata_qsnapshot(data);
 snd_z80.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
-ay8910_0.save_snapshot(data);
+ay8910_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-ay8910_1.save_snapshot(data);
+ay8910_1.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[$c000]);
 loaddata_qsnapshot(@mem_snd[$4000]);

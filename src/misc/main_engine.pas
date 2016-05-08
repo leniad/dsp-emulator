@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,sound_engine,arcade_config,vars_hide;
 
 const
-        dsp_version='0.16b2';
+        dsp_version='0.16b3WIP';
         pant_sprites=20;
         pant_doble=21;
         pant_rot=22;
@@ -359,8 +359,10 @@ begin
 end;
 
 procedure pasar_pantalla_completa;
+{$ifndef fpc}
 var
   handle_:integer;
+{$endif}
 begin
 if not(main_screen.pantalla_completa) then begin
   main_screen.old_video_mode:=main_screen.video_mode;
@@ -638,8 +640,12 @@ end;
 {$ifndef fpc}
 procedure video_sync;
 var
-        l2:int64;
-        res:single;
+  l2:int64;
+  res:single;
+procedure nop_asm;
+asm
+  nop;
+end;
 begin
 main_vars.frames_sec:=main_vars.frames_sec+1;
 actualiza_video;
@@ -650,6 +656,7 @@ res:=(l2-cont_sincroniza);
 while (res<valor_sync) do begin
   QueryPerformanceCounter(Int64((@l2)^));
   res:=(l2-cont_sincroniza);
+  nop_asm;
 end;
 QueryPerformanceCounter(Int64((@cont_sincroniza)^));
 end;
@@ -671,7 +678,12 @@ actualiza_video;
 evalue_controls;
 if main_screen.rapido then exit;
 res:=0;
-while res<valor_sync do res:=sdl_getticks()-cont_sincroniza;
+while res<valor_sync do begin
+  res:=sdl_getticks()-cont_sincroniza;
+  asm
+    nop;
+  end;
+end;
 valor_sync:=cont_micro-(res-valor_sync);
 cont_sincroniza:=sdl_getticks();
 end;

@@ -21,7 +21,7 @@ procedure wardner_snd_putbyte(direccion:word;valor:byte);
 function wardner_snd_inbyte(puerto:word):byte;
 procedure wardner_snd_outbyte(valor:byte;puerto:word);
 procedure snd_irq(irqstate:byte);
-procedure wardner_despues_instruccion;
+procedure wardner_sound_update;
 //MCU
 procedure wardner_dsp_bio_w(valor:word);
 function wardner_dsp_r:word;
@@ -103,12 +103,13 @@ main_z80.change_io_calls(wardner_inbyte,wardner_outbyte);
 snd_z80:=cpu_z80.create(3500000,286);
 snd_z80.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
 snd_z80.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
-snd_z80.init_sound(wardner_despues_instruccion);
+snd_z80.init_sound(wardner_sound_update);
 //TMS MCU
 main_tms32010:=cpu_tms32010.create(14000000,286);
 main_tms32010.change_io_calls(wardner_BIO_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
 //Sound Chips
-YM3812_Init(0,3500000,snd_irq);
+ym3812_0:=ym3812_chip.create(0,3500000);
+ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@wardner_rom[0],'wardner.zip',0)) then exit;
 //Mover las ROMS a su sitio
@@ -161,7 +162,7 @@ begin
 main_z80.free;
 snd_z80.free;
 main_tms32010.free;
-ym3812_close(0);
+ym3812_0.free;
 close_audio;
 close_video;
 end;
@@ -171,7 +172,7 @@ begin
  main_z80.reset;
  snd_z80.reset;
  main_tms32010.reset;
- YM3812_Reset(0);
+ ym3812_0.reset;
  reset_audio;
  txt_scroll_x:=457;
  txt_scroll_y:=226;
@@ -396,15 +397,15 @@ end;
 function wardner_snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  0:wardner_snd_inbyte:=YM3812_status_port(0);
+  0:wardner_snd_inbyte:=ym3812_0.status;
 end;
 end;
 
 procedure wardner_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-  $0:ym3812_control_port(0,valor);
-  $1:ym3812_write_port(0,valor);
+  $0:ym3812_0.control(valor);
+  $1:ym3812_0.write(valor);
 end;
 end;
 
@@ -548,9 +549,9 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure wardner_despues_instruccion;
+procedure wardner_sound_update;
 begin
-  YM3812_Update(0);
+  ym3812_0.update;
 end;
 
 end.

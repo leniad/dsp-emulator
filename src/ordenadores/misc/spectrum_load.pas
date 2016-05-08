@@ -55,8 +55,8 @@ type
 procedure spectrum_load_click;
 var
   g:integer;
-  long_bloque,lbloque:dword;
-  f,h,i,pagina:byte;
+  long_bloque:dword;
+  f,h,i:byte;
   t1,t2,t3,t4,t5:integer;
   hay_imagen,salida,hay_scr:boolean;
   temp,temp2,temp3,datos_scr:pbyte;

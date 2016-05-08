@@ -102,7 +102,8 @@ snd_m6809.init_sound(renegade_sound_update);
 main_m6805:=cpu_m6805.create(3000000,256,tipo_m68705);
 main_m6805.change_ram_calls(renegade_mcu_getbyte,renegade_mcu_putbyte);
 //Sound Chip
-ym3812_init(0,3000000,snd_irq);
+ym3812_0:=ym3812_chip.create(0,3000000);
+ym3812_0.change_irq_calls(snd_irq);
 gen_adpcm_init(0,8000,$20000);
 //cargar roms
 if not(cargar_roms(@memoria_temp,@renegade_rom,'renegade.zip',0)) then exit;
@@ -163,7 +164,7 @@ begin
 main_m6502.free;
 snd_m6809.Free;
 main_m6805.Free;
-YM3812_close(0);
+ym3812_0.free;
 gen_adpcm_close(0);
 close_audio;
 close_video;
@@ -174,7 +175,7 @@ begin
 main_m6502.reset;
 snd_m6809.reset;
 main_m6805.reset;
-YM3812_reset(0);
+ym3812_0.reset;
 gen_adpcm_reset(0);
 marcade.in0:=$ff;
 marcade.in1:=$ff;
@@ -400,7 +401,7 @@ begin
   case direccion of
     0..$fff,$8000..$ffff:getbyte_snd_renegade:=mem_snd[direccion];
     $1000:getbyte_snd_renegade:=sound_latch;
-    $2800:getbyte_snd_renegade:=ym3812_status_port(0);
+    $2800:getbyte_snd_renegade:=ym3812_0.status;
   end;
 end;
 
@@ -425,8 +426,8 @@ case direccion of
                 gen_adpcm_timer(0,true);
 	          end;
   end;
-  $2800:ym3812_control_port(0,valor);
-  $2801:ym3812_write_port(0,valor);
+  $2800:ym3812_0.control(valor);
+  $2801:ym3812_0.write(valor);
 end;
 end;
 
@@ -474,7 +475,7 @@ end;
 
 procedure renegade_sound_update;
 begin
-  ym3812_Update(0);
+  ym3812_0.update;
   gen_adpcm_update(0);
 end;
 

@@ -17,8 +17,7 @@ type
         preg_h6280=^reg_h6280;
         cpu_h6280=class(cpu_class)
             constructor create(clock:dword;frames_div:word);
-            destructor Destroy;
-            procedure Free;
+            destructor free;
           public
             getbyte:tgetbyte16;
             putbyte:tputbyte16;
@@ -40,8 +39,8 @@ type
             function translated(addr:word):dword;
             procedure pon_pila(temp:byte);
             function dame_pila:byte;
-            function pull:byte;
-            procedure push(valor:byte);
+            function pull:byte;
+            procedure push(valor:byte);
             procedure DO_INTERRUPT(vector:word);
             procedure CHECK_AND_TAKE_IRQ_LINES;
         end;
@@ -98,15 +97,9 @@ self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_h6280.Destroy;
+destructor cpu_h6280.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_h6280.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 procedure cpu_h6280.change_ram_calls(getbyte:tgetbyte16;putbyte:tputbyte16);
@@ -194,7 +187,7 @@ begin
   r.p.z:=(temp and 2)<>0;
   r.p.c:=(temp and 1)<>0;
 end;
-
+
 function cpu_h6280.dame_pila:byte;
 var
   temp:byte;
@@ -211,11 +204,11 @@ begin
   dame_pila:=temp;
 end;
 
-function cpu_h6280.pull:byte;
-begin
-  r.sp:=r.sp+1;
-  pull:=self.getbyte((r.m[1] shl 13) or $100 or r.sp);
-end;
+function cpu_h6280.pull:byte;
+begin
+  r.sp:=r.sp+1;
+  pull:=self.getbyte((r.m[1] shl 13) or $100 or r.sp);
+end;
 
 procedure cpu_h6280.push(valor:byte);
 begin

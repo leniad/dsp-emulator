@@ -169,8 +169,8 @@ case main_vars.tipo_maquina of
       snd_m6809.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
       snd_m6809.init_sound(bigk_sound_update);
       //Sound Chips
-      ym3812_init(0,3580000,nil);
-      oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH,2);
+      ym3812_0:=ym3812_chip.create(0,3580000);
+      oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH,1);
       //Cargar ADPCM ROMS
       if not(cargar_roms(oki_6295_0.get_rom_addr,@bigkarnak_adpcm,'bigkarnk.zip',1)) then exit;
       //cargar roms
@@ -324,7 +324,7 @@ procedure cerrar_gaelco_hw;
 begin
 main_m68000.free;
 if main_vars.tipo_maquina=78 then begin
-  ym3812_close(0);
+  ym3812_0.free;
   snd_m6809.Free;
 end;
 oki_6295_0.Free;
@@ -337,7 +337,7 @@ begin
  main_m68000.reset;
  if main_vars.tipo_maquina=78 then begin
   snd_m6809.reset;
-  YM3812_Reset(0);
+  ym3812_0.reset;
  end;
  oki_6295_0.reset;
  reset_audio;
@@ -595,7 +595,7 @@ function bigk_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
   $800,$801:bigk_snd_getbyte:=oki_6295_0.read;
-  $a00:bigk_snd_getbyte:=ym3812_status_port(0);
+  $a00:bigk_snd_getbyte:=ym3812_0.status;
   $b00:bigk_snd_getbyte:=sound_latch;
     else bigk_snd_getbyte:=mem_snd[direccion];
 end;
@@ -607,15 +607,15 @@ if direccion>$bff then exit;
 mem_snd[direccion]:=valor;
 case direccion of
     $800,$801:oki_6295_0.write(valor);
-    $a00:ym3812_control_port(0,valor);
-    $a01:ym3812_write_port(0,valor);
+    $a00:ym3812_0.control(valor);
+    $a01:ym3812_0.write(valor);
 end;
 end;
 
 //Sonido
 procedure bigk_sound_update;
 begin
-  ym3812_Update(0);
+  ym3812_0.update;
   oki_6295_0.update;
 end;
 

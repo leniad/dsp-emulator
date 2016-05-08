@@ -17,8 +17,7 @@ type
   preg_lr=^reg_lr;
   cpu_lr=class(cpu_class)
         constructor Create(clock:dword;frames_div:word);
-        procedure Free;
-        destructor Destroy;
+        destructor free;
       public
         speed:byte;
         ime,pedir_irq,change_speed:boolean;
@@ -103,15 +102,9 @@ self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_lr.Destroy;
+destructor cpu_lr.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_lr.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 procedure cpu_lr.reset;

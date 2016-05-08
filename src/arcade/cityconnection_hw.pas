@@ -414,7 +414,7 @@ snd_m6809.load_snapshot(data);
 loaddata_qsnapshot(data);
 ym2203_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-AY8910_0.save_snapshot(data);
+AY8910_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[0]);
 loaddata_qsnapshot(@mem_snd[0]);

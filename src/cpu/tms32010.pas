@@ -22,8 +22,7 @@ type
         type_bio=function:boolean;
         cpu_tms32010=class(cpu_class)
                 constructor create(clock:dword;frames_div:word);
-                procedure free;
-                destructor destroy;
+                destructor free;
             public
                 pedir_int,pedir_halt:byte;
                 procedure run(maximo:single);
@@ -101,15 +100,9 @@ self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_tms32010.Destroy;
+destructor cpu_tms32010.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_tms32010.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 procedure cpu_tms32010.reset;

@@ -28,8 +28,8 @@ const
         (n:'tma1-v-7m.7m';l:$1000;p:0;crc:$22b7372e),(n:'tma1-v-7n.7n';l:$1000;p:$1000;crc:$4f3a1f47),
         (n:'tma1-v-7p.7p';l:$1000;p:$2000;crc:$56be6ccd),(n:'tma1-v-7s.7s';l:$1000;p:$3000;crc:$56f1d613),
         (n:'tma1-v-7t.7t';l:$1000;p:$4000;crc:$641f0008),(n:'tma1-v-7u.7u';l:$1000;p:$5000;crc:$7baf5309),());
-        num_samples=28;
-        mario_samples:array[0..num_samples] of tipo_nombre_samples=(
+        num_samples=29;
+        mario_samples:array[0..(num_samples-1)] of tipo_nombre_samples=(
         (nombre:'mario_run.wav';restart:true),(nombre:'luigi_run.wav';restart:true),(nombre:'skid.wav';restart:true),(nombre:'bite_death.wav'),(nombre:'death.wav'),
         (nombre:'tune1.wav';restart:true),(nombre:'tune2.wav';restart:true),(nombre:'tune3.wav';restart:true),(nombre:'tune4.wav';restart:true),(nombre:'tune5.wav';restart:true),(nombre:'tune6.wav';restart:true),
         (nombre:'tune7.wav'),(nombre:'tune8.wav';restart:true),(nombre:'tune9.wav';restart:true),(nombre:'tune10.wav';restart:true),(nombre:'tune11.wav';restart:true),(nombre:'tune12.wav';restart:true),
@@ -81,7 +81,7 @@ main_z80.change_ram_calls(mario_getbyte,mario_putbyte);
 //cargar roms
 if not(cargar_roms(@memoria[0],@mario_rom[0],'mario.zip',0)) then exit;
 //samples
-if load_samples('mario.zip',@mario_samples[0],num_samples+1) then main_z80.init_sound(mario_sound_update);
+if load_samples('mario.zip',@mario_samples[0],num_samples) then main_z80.init_sound(mario_sound_update);
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@mario_char[0],'mario.zip',0)) then exit;
 init_gfx(0,8,8,512);

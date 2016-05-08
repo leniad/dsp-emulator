@@ -272,14 +272,4 @@ begin
   init_channel:=sound_status.canales_usados;
 end;
 
-{$ifdef fpc}
-procedure sound_call_back(userdata:Pointer;stream:libSDL_puint8;len:Integer);
-begin
-if len>0 then begin
-  copymemory(stream,@sample_final[0],len);
-end;
-fillchar(sample_final[0],long_max_audio,0);
-end;
-{$endif}
-
 end.

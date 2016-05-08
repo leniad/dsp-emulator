@@ -278,6 +278,12 @@ if event.arcade then begin
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
+  //P2
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $Fb);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $F7);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   //SYSTEM
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $80) else marcade.in2:=(marcade.in2 and $7f);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $20) else marcade.in2:=(marcade.in2 and $df);
@@ -315,7 +321,11 @@ end;
 function popeye_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0000..$8fff,$a000..$a7ff,$c000..$dfff:popeye_getbyte:=memoria[direccion];
+  $0000..$8bff,$8c04..$8fff,$a000..$a7ff,$c000..$dfff:popeye_getbyte:=memoria[direccion];
+  $8c00:popeye_getbyte:=scroll_x and $ff;
+  $8c01:popeye_getbyte:=scroll_y;
+  $8c02:popeye_getbyte:=scroll_x shr 8;
+  $8c03:popeye_getbyte:=palette_bank;
   $e000:popeye_getbyte:=((prot1 shl prot_shift) or (prot0 shr (8-prot_shift))) and $ff;
   $e001:popeye_getbyte:=0;
 end;
@@ -324,8 +334,8 @@ end;
 procedure popeye_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+  $8000..$8bff,$8c04..$8fff:memoria[direccion]:=valor;
   $8c00:scroll_x:=(scroll_x and $ff00) or valor;
   $8c01:scroll_y:=valor;
   $8c02:scroll_x:=(scroll_x and $ff) or (valor shl 8);
@@ -333,8 +343,14 @@ case direccion of
           palette_bank:=valor;
           cambiar_paleta((valor shr 3) and 1);
         end;
-  $a000..$a7ff:gfx[0].buffer[direccion and $3ff]:=true;
-  $c000..$dfff:fondo_write[direccion and $1fff]:=true;
+  $a000..$a7ff:begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $c000..$dfff:begin
+                  fondo_write[direccion and $1fff]:=true;
+                  memoria[direccion]:=valor;
+               end;
   $e000:prot_shift:=valor and $07;
   $e001:begin
           prot0:=prot1;
@@ -347,7 +363,7 @@ function popeye_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
    0:popeye_inbyte:=marcade.in0;
-   1:popeye_inbyte:=0;
+   1:popeye_inbyte:=marcade.in1;
    2:popeye_inbyte:=marcade.in2 or (field xor $10);
    3:popeye_inbyte:=ay8910_0.read;
 end;
@@ -419,7 +435,7 @@ loaddata_qsnapshot(data);
 main_z80.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
-ay8910_0.save_snapshot(data);
+ay8910_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[$8000]);
 //MISC

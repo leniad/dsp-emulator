@@ -150,6 +150,7 @@ type
         x,y:array[0..NUM_PLAYERS] of integer;
         delta,mid_val,max_val,min_val:integer;
         return_center:boolean;
+        reset_center:boolean;
     end;
 
 var
@@ -168,7 +169,7 @@ procedure init_controls(evalue_mouse,evalue_keyboard,evalue_joystick,evalue_arca
 procedure open_joystick(player:byte);
 procedure close_joystick(num:byte);
 //Analog
-procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean);
+procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;reset_center:boolean=false);
 procedure analog_read;
 
 implementation
@@ -416,7 +417,7 @@ begin
   if event.ejoystick then evalue_joy;
 end;
 
-procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean);
+procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;reset_center:boolean=false);
 var
    f:byte;
 begin
@@ -430,6 +431,7 @@ for f:=0 to NUM_PLAYERS do begin
     analog.y[f]:=mid_val;
 end;
 analog.return_center:=return_center;
+analog.reset_center:=reset_center;
 end;
 
 procedure analog_read;
@@ -459,6 +461,9 @@ for f:=0 to NUM_PLAYERS do begin
   if arcade_input.right[f] then analog.x[f]:=analog.x[f]-analog.delta;
   if analog.x[f]>analog.max_val then analog.x[f]:=analog.max_val;
   if analog.x[f]<analog.min_val then analog.x[f]:=analog.min_val;
+  if analog.reset_center then begin
+    if (not(arcade_input.left[f]) and not(arcade_input.right[f])) then analog.x[f]:=analog.mid_val;
+  end;
   if analog.return_center then begin
     if not(arcade_input.left[f]) then begin
       if analog.x[f]>analog.mid_val then begin

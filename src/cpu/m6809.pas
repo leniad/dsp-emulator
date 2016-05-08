@@ -18,8 +18,7 @@ type
         preg_m6809=^reg_m6809;
         cpu_m6809=class(cpu_class)
             constructor create(clock:dword;frames_div:word);
-            procedure free;
-            destructor destroy;
+            destructor free;
           public
             //IRQ's
             pedir_nmi,pedir_firq,pedir_irq,nmi_state:byte;
@@ -162,15 +161,9 @@ self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_m6809.Destroy;
+destructor cpu_m6809.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_m6809.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 function cpu_m6809.save_snapshot(data:pbyte):word;

@@ -102,8 +102,8 @@ snd_z80.init_sound(gng_sound_update);
 //IRQ Sound CPU
 init_timer(snd_z80.numero_cpu,3000000/(4*60),gng_snd_irq,true);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,1500000,4);
-ym2203_1:=ym2203_chip.create(1,1500000,4);
+ym2203_0:=ym2203_chip.create(0,1500000,0.2);
+ym2203_1:=ym2203_chip.create(1,1500000,0.2);
 //cargar roms
 if not(cargar_roms(@memoria_temp,@gng_rom,'gng.zip',0)) then exit;
 //Pongo las ROMs en su banco
@@ -315,10 +315,16 @@ end;
 procedure gng_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $2000..$27ff:gfx[0].buffer[direccion and $3ff]:=true;
-  $2800..$2fff:gfx[2].buffer[direccion and $3ff]:=true;
+  0..$1fff:memoria[direccion]:=valor;
+  $2000..$27ff:begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $2800..$2fff:begin
+                  gfx[2].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
   $3800..$39ff:if buffer_paleta[direccion and $1ff]<>valor then begin
                   buffer_paleta[direccion and $1ff]:=valor;
                   cambiar_color(direccion and $ff);

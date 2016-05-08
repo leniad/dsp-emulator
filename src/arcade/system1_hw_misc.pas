@@ -179,7 +179,6 @@ const
 var
   memoria_temp:array[0..$ffff] of byte;
   x,y:word;
-
 procedure convert_gfx_system1;
 begin
   init_gfx(0,8,8,2048);
@@ -207,9 +206,9 @@ end;
 screen_init(1,256,256,false,true);
 iniciar_video(x,y);
 //Main CPU
-if main_vars.tipo_maquina=27 then main_z80:=cpu_z80.create(3600000,260)
-  else main_z80:=cpu_z80.create(4000000,260);
+main_z80:=cpu_z80.create(19300000,260);
 main_z80.change_ram_calls(system1_getbyte,system1_putbyte);
+main_z80.change_timmings(@z80_op,@z80_cb,@z80_xy,@z80_xycb,@z80_ed,@z80_ex);
 //Sound CPU
 snd_z80:=cpu_z80.create(4000000,260);
 snd_z80.init_sound(system1_sound_update);

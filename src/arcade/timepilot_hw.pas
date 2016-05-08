@@ -63,11 +63,8 @@ iniciar_video(224,256);
 //Main CPU
 main_z80:=cpu_z80.create(3072000,256);
 main_z80.change_ram_calls(timepilot_getbyte,timepilot_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(1789772,256);
-snd_z80.change_ram_calls(konamisnd_getbyte,konamisnd_putbyte);
 //Sound Chip
-konamisnd_init(2,snd_z80.numero_cpu,TWO_AY8910,snd_z80.clock,nil);
+konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,256);
 //Cargar las roms...
 if not(cargar_roms(@memoria[0],@timepilot_rom[0],'timeplt.zip',0)) then exit;
 //roms de sonido
@@ -119,8 +116,7 @@ end;
 procedure timepilot_reset;
 begin
 main_z80.reset;
-snd_z80.reset;
-konamisnd_reset;
+konamisnd_0.reset;
 reset_audio;
 nmi_enable:=false;
 marcade.in0:=$ff;
@@ -131,8 +127,7 @@ end;
 procedure timepilot_cerrar;
 begin
 main_z80.free;
-snd_z80.free;
-konamisnd_close;
+konamisnd_0.free;
 close_audio;
 close_video;
 end;
@@ -187,18 +182,17 @@ end;
 
 procedure timepilot_principal;
 var
-  frame_m,frame_s:single;
+  frame_m:single;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
 while EmuStatus=EsRuning do begin
   for scan_line:=0 to $ff do begin
-    konami_sound.frame:=scan_line;
+    //Main
     main_z80.run(frame_m);
     frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    //Sound
+    konamisnd_0.run(scan_line);
     if (scan_line=244) then if nmi_enable then main_z80.pedir_nmi:=ASSERT_LINE;
   end;
   update_video_timepilot;
@@ -240,7 +234,7 @@ case direccion of
                 $400..$7ff:memoria[$b400+(direccion and $ff)]:=valor;
                end;
     $c000..$cfff:case (direccion and $3ff) of
-                $000..$0ff:konami_sound.sound_latch:=valor;
+                $000..$0ff:konamisnd_0.sound_latch:=valor;
                 $300..$3ff:case (direccion and $f) of
                     $0..$1:begin
                               nmi_enable:=(valor and 1)<>0;
@@ -248,7 +242,7 @@ case direccion of
                            end;
                     $02:main_screen.flip_main_screen:=(valor and $1)=0;
                     $04:begin
-                        if ((last=0) and (valor<>0)) then snd_z80.pedir_irq:=HOLD_LINE;
+                        if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
                         last:=valor;
                      end;
                 end;

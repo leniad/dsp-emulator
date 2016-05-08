@@ -17,8 +17,7 @@ type
         preg_m6502=^reg_m6502;
         cpu_m6502=class(cpu_class)
             constructor Create(clock:dword;frames_div:word;cpu_type:byte);
-            procedure Free;
-            destructor Destroy;
+            destructor Free;
           public
             after_ei:boolean;
             pedir_nmi,pedir_irq,nmi_state:byte;
@@ -117,14 +116,9 @@ self.in_port1:=nil;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_m6502.Destroy;
+destructor cpu_m6502.Free;
 begin
 freemem(self.r);
-end;
-
-procedure cpu_m6502.Free;
-begin
-  self.Destroy;
 end;
 
 procedure cpu_m6502.change_io_calls(in_port0,in_port1:cpu_inport_call);

@@ -97,7 +97,8 @@ snd_z80:=cpu_z80.create(3579545,256);
 snd_z80.change_ram_calls(toki_snd_getbyte,toki_snd_putbyte);
 snd_z80.init_sound(toki_sound_update);
 //Sound Chips
-ym3812_init(0,3579545,snd_irq);
+ym3812_0:=ym3812_chip.create(0,3579545);
+ym3812_0.change_irq_calls(snd_irq);
 oki_6295_0:=snd_okim6295.Create(0,1000000,OKIM6295_PIN7_HIGH,0.40);
 if not(cargar_roms(@memoria_temp2[0],@toki_adpcm,'toki.zip',1)) then exit;
 ptemp:=oki_6295_0.get_rom_addr;
@@ -147,7 +148,7 @@ procedure cerrar_toki;
 begin
 main_m68000.free;
 snd_z80.free;
-ym3812_close(0);
+ym3812_0.free;
 oki_6295_0.Free;
 close_audio;
 close_video;
@@ -157,7 +158,7 @@ procedure reset_toki;
 begin
  main_m68000.reset;
  snd_z80.reset;
- YM3812_Reset(0);
+ ym3812_0.Reset;
  oki_6295_0.reset;
  seibu_reset;
  reset_audio;
@@ -363,7 +364,7 @@ case direccion of
   0..$1fff:if snd_z80.opcode then toki_snd_getbyte:=decrypt[direccion]
               else toki_snd_getbyte:=mem_snd[direccion];
   $2000..$27ff:toki_snd_getbyte:=mem_snd[direccion];
-  $4008:toki_snd_getbyte:=YM3812_status_port(0);
+  $4008:toki_snd_getbyte:=ym3812_0.status;
   $4010:toki_snd_getbyte:=sound_latch[0];
   $4011:toki_snd_getbyte:=sound_latch[1];
   $4012:if sub2main_pending then toki_snd_getbyte:=1
@@ -387,8 +388,8 @@ case direccion of
   $4002:;
   $4003:seibu_update_irq_lines(RST18_CLEAR);
   $4007:snd_bank:=valor and 1;
-  $4008:ym3812_control_port(0,valor);
-  $4009:ym3812_write_port(0,valor);
+  $4008:ym3812_0.control(valor);
+  $4009:ym3812_0.write(valor);
   $4018:sub2main[0]:=valor;
   $4019:sub2main[1]:=valor;
   $6000:oki_6295_0.write(valor);
@@ -397,7 +398,7 @@ end;
 
 procedure toki_sound_update;
 begin
-  ym3812_Update(0);
+  ym3812_0.update;
   oki_6295_0.update;
 end;
 

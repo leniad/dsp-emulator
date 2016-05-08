@@ -135,21 +135,18 @@ end;
 
 procedure jungler_principal;
 var
-  frame_m,frame_s:single;
+  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-      konami_sound.frame:=f;
       //Main CPU
       main_z80.run(frame_m);
       frame_m:=frame_m+main_z80.tframes-main_z80.contador;
       //Sound CPU
-      snd_z80.run(frame_s);
-      frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+      konamisnd_0.run(f);
       if f=239 then begin
         if hacer_int then main_z80.pedir_nmi:=PULSE_LINE;
         update_video_jungler;
@@ -181,9 +178,9 @@ case direccion of
     $8400..$87ff:gfx[0].buffer[direccion and $3ff]:=true;
     $8800..$8bff:gfx[2].buffer[direccion and $3ff]:=true;
     $8c00..$8fff:gfx[0].buffer[direccion and $3ff]:=true;
-    $a100:konami_sound.sound_latch:=valor;
+    $a100:konamisnd_0.sound_latch:=valor;
     $a180:begin
-              if ((last=0) and (valor<>0)) then snd_z80.pedir_irq:=HOLD_LINE;
+              if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
               last:=valor;
           end;
     $a181:hacer_int:=valor<>0;
@@ -354,10 +351,8 @@ end;
 procedure cerrar_rallyxh;
 begin
 main_z80.free;
-if main_vars.tipo_maquina=29 then begin
-  konamisnd_close;
-  snd_z80.free;
-end else close_samples;
+if main_vars.tipo_maquina=29 then konamisnd_0.free
+   else close_samples;
 close_audio;
 close_video;
 end;
@@ -368,8 +363,7 @@ begin
  case main_vars.tipo_maquina of
   29:begin
         marcade.in2:=$FF;
-        snd_z80.reset;
-        konamisnd_reset;
+        konamisnd_0.reset;
   end;
   50,70:begin
         marcade.in2:=$cb;
@@ -460,11 +454,8 @@ main_z80:=cpu_z80.create(3072000,$100);
 case main_vars.tipo_maquina of
   29:begin //jungler
         main_z80.change_ram_calls(jungler_getbyte,jungler_putbyte);
-        //Audio CPU
-        snd_z80:=cpu_z80.create(1789772,$100);
-        snd_z80.change_ram_calls(konamisnd_getbyte,konamisnd_putbyte);
         //Sound Chip
-        konamisnd_init(1,snd_z80.numero_cpu,1,snd_z80.clock,nil);
+        konamisnd_0:=konamisnd_chip.create(1,TIPO_JUNGLER,1789772,$100);
         //cargar roms
         if not(cargar_roms(@memoria[0],@jungler_rom[0],'jungler.zip',0)) then exit;
         //cargar sonido

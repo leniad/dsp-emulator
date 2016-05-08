@@ -267,8 +267,9 @@ snd_z80.change_ram_calls(pow_snd_getbyte,pow_snd_putbyte);
 snd_z80.change_io_calls(pow_snd_inbyte,pow_snd_outbyte);
 snd_z80.init_sound(snk68_sound_update);
 //Sound Chips
-ym3812_init(0,4000000,snd_irq);
-upd7759_0:=upd7759_chip.create(640000,1);
+ym3812_0:=ym3812_chip.create(0,4000000);
+ym3812_0.change_irq_calls(snd_irq);
+upd7759_0:=upd7759_chip.create(640000,0.5);
 case main_vars.tipo_maquina of
   136:begin //POW
         main_m68000.change_ram16_calls(pow_getword,pow_putword);
@@ -353,7 +354,7 @@ procedure cerrar_snk68;
 begin
 main_m68000.free;
 snd_z80.free;
-ym3812_close(0);
+ym3812_0.free;
 upd7759_0.Free;
 close_audio;
 close_video;
@@ -363,7 +364,7 @@ procedure reset_snk68;
 begin
  main_m68000.reset;
  snd_z80.reset;
- ym3812_reset(0);
+ ym3812_0.reset;
  upd7759_0.reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -505,14 +506,14 @@ end;
 
 function pow_snd_inbyte(puerto:word):byte;
 begin
-if (puerto and $ff)=0 then pow_snd_inbyte:=ym3812_status_port(0);
+if (puerto and $ff)=0 then pow_snd_inbyte:=ym3812_0.status;
 end;
 
 procedure pow_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-  $00:ym3812_control_port(0,valor);
-  $20:ym3812_write_port(0,valor);
+  $00:ym3812_0.control(valor);
+  $20:ym3812_0.write(valor);
   $40:begin
         upd7759_0.port_w(valor);
       	upd7759_0.start_w(0);
@@ -524,7 +525,7 @@ end;
 
 procedure snk68_sound_update;
 begin
-  YM3812_Update(0);
+  YM3812_0.update;
   upd7759_0.update;
 end;
 

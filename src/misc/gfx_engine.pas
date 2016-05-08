@@ -164,7 +164,7 @@ copymemory(@src[0],pos,long);
 x:=0;
 for cojo_la_x:=(ngfx.x-1) downto 0 do
   for y:=0 to (ngfx.y-1) do begin
-    t[x]:=src[cojo_la_x+(ngfx.y*y)];
+    t[x]:=src[cojo_la_x+(ngfx.x*y)];
     x:=x+1;
   end;
 copymemory(pos,@t[0],long);

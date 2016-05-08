@@ -178,6 +178,8 @@ type
     freekick1: TMenuItem;
     boogwins1: TMenuItem;
     Gradius31: TMenuItem;
+    centipede1: TMenuItem;
+    spaceinvaders1: TMenuItem;
     ssriders1: TMenuItem;
     TMNT1: TMenuItem;
     TMNT_hw: TMenuItem;

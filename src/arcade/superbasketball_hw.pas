@@ -354,9 +354,9 @@ snd_z80.load_snapshot(data);
 loaddata_qsnapshot(data);
 sn_76496_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-vlm5030_0.save_snapshot(data);
+vlm5030_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-dac_0.save_snapshot(data);
+dac_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[0]);
 loaddata_qsnapshot(@mem_snd[$2000]);

@@ -2162,6 +2162,11 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object SpaceInvaders1: TMenuItem
+            Caption = 'Space Invaders'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2193,6 +2198,11 @@ object principal1: Tprincipal1
           end
           object Renegade1: TMenuItem
             Caption = 'Renegade'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
+          object Centipede1: TMenuItem
+            Caption = 'Centipede'
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
@@ -2777,7 +2787,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C0101050007007C0320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000700840320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

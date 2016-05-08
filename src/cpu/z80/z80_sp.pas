@@ -120,12 +120,12 @@ if not(self.after_ei) then begin
   if self.daisy then irq_temp:=z80daisy_state;
   if (irq_temp or (self.pedir_irq<>CLEAR_LINE)) then self.call_irq;
 end else self.after_ei:=false;
-if not(self.halt) then begin
-  self.retraso(r.pc);inc(self.contador,4);
-  instruccion:=self.getbyte(r.pc);
-  r.pc:=r.pc+1;
-  r.r:=((r.r+1) and $7f) or (r.r and $80);
-  case instruccion of
+if self.halt then r.pc:=r.pc-1;
+self.retraso(r.pc);inc(self.contador,4);
+instruccion:=self.getbyte(r.pc);
+r.pc:=r.pc+1;
+r.r:=((r.r+1) and $7f) or (r.r and $80);
+case instruccion of
         $00,$40,$49,$52,$5b,$64,$6d,$7f:{nop >4t<};
         $01:begin {ld BC,nn >10t<}
                 r.bc.l:=spec_getbyte(r.pc);
@@ -741,7 +741,7 @@ if not(self.halt) then begin
         $d8:begin {ret C >5t o 11t<}
               inc(self.contador);
               if r.f.c then begin
-                  self.retraso(r.sp);inc(self.contador,3); 
+                  self.retraso(r.sp);inc(self.contador,3);
                   self.retraso(r.sp+1);inc(self.contador,3); 
                   r.pc:=pop_sp;
               end;
@@ -797,7 +797,7 @@ if not(self.halt) then begin
         $e0:begin {ret PO >5t o 11t<}
               inc(self.contador);
               if not(r.f.p_v) then begin
-                  self.retraso(r.sp);inc(self.contador,3); 
+                  self.retraso(r.sp);inc(self.contador,3);
                   self.retraso(r.sp+1);inc(self.contador,3); 
                   r.pc:=pop_sp;
               end;
@@ -849,7 +849,7 @@ if not(self.halt) then begin
              end;
         $e7:begin  {rst 20H >11t<}
                 inc(self.contador);
-                self.retraso(r.sp-1);inc(self.contador,3); 
+                self.retraso(r.sp-1);inc(self.contador,3);
                 self.retraso(r.sp-2);inc(self.contador,3); 
                 push_sp(r.pc);
                 r.pc:=$20;
@@ -909,7 +909,7 @@ if not(self.halt) then begin
              end;
         $f1:begin  {pop AF >10t<}
                 self.retraso(r.sp);inc(self.contador,3); 
-                self.retraso(r.sp+1);inc(self.contador,3); 
+                self.retraso(r.sp+1);inc(self.contador,3);
                 posicion.w:=pop_sp;
                 r.a:=posicion.h;
                 r.f.s:=(posicion.l and 128)<>0;
@@ -1022,10 +1022,6 @@ if not(self.halt) then begin
   end; {del case}
   cantidad_t:=self.contador-pcontador;
   spectrum_despues_instruccion(cantidad_t);
-end else begin
-  self.contador:=self.contador+4;
-  spectrum_despues_instruccion(4);
-end;
 end; {del while}
 end;
 

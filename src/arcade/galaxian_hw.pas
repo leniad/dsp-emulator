@@ -3,8 +3,8 @@ unit galaxian_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,ay_8910,controls_engine,gfx_engine,timer_engine,samples,
-     rom_engine,file_engine,pal_engine,sound_engine,ppi8255,konami_snd,
-     misc_functions;
+     rom_engine,file_engine,pal_engine,sound_engine,ppi8255,misc_functions,
+     konami_snd;
 
 //funciones generales
 procedure Cargar_hgalaxian;
@@ -28,30 +28,19 @@ procedure jumpbug_blinking;
 function mooncrst_getbyte(direccion:word):byte;
 procedure mooncrst_putbyte(direccion:word;valor:byte);
 //Scramble
-procedure scramble_principal;
 function scramble_getbyte(direccion:word):byte;
 procedure scramble_putbyte(direccion:word;valor:byte);
-function scramblesound_getbyte(direccion:word):byte;
-procedure scramblesound_putbyte(direccion:word;valor:byte);
-function scramblesound_inbyte(puerto:word):byte;
-procedure scramblesound_outbyte(valor:byte;puerto:word);
-procedure scramble_despues_instruccion;
 function scramble_port_1_c_read:byte;
 procedure scramble_port_1_a_write(valor:byte);
 procedure scramble_port_1_b_write(valor:byte);
 procedure scramble_port_1_c_write(valor:byte);
-function scramble_ay_porta:byte;
-function scramble_ay_portb:byte;
 //Super Cobra
 function scobra_getbyte(direccion:word):byte;
 procedure scobra_putbyte(direccion:word;valor:byte);
 //Frogger
+procedure frogger_principal;
 function frogger_getbyte(direccion:word):byte;
 procedure frogger_putbyte(direccion:word;valor:byte);
-function frogger_sound_getbyte(direccion:word):byte;
-procedure frogger_sound_putbyte(direccion:word;valor:byte);
-function frogger_sound_inbyte(puerto:word):byte;
-procedure frogger_sound_outbyte(valor:byte;puerto:word);
 procedure frogger_port_1_a_write(valor:byte);
 procedure frogger_port_1_b_write(valor:byte);
 //Amidar
@@ -60,6 +49,8 @@ procedure amidar_putbyte(direccion:word;valor:byte);
 function port_1_c_read:byte;
 
 implementation
+uses principal,sysutils;
+
 type
   tstars=record
           x,y,color:word;
@@ -73,8 +64,10 @@ const
         galaxian_char:array[0..2] of tipo_roms=(
         (n:'1h.bin';l:$800;p:0;crc:$39fb43a4),(n:'1k.bin';l:$800;p:$800;crc:$7e3f56a2),());
         galaxian_pal:tipo_roms=(n:'6l.bpr';l:$20;p:0;crc:$c3ac9467);
-        galaxian_samples:array[0..4] of tipo_nombre_samples=(
-        (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'back1.wav'),(nombre:'back2.wav'),(nombre:'back3.wav'));
+        galaxian_num_samples=9;
+        galaxian_samples:array[0..(galaxian_num_samples-1)] of tipo_nombre_samples=(
+        (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'back1.wav'),(nombre:'back2.wav'),(nombre:'back3.wav'),
+        (nombre:'kill.wav';restart:true),(nombre:'coin.wav'),(nombre:'music.wav'),(nombre:'extra.wav'));
         //Jump Bug
         jumpbug_rom:array[0..7] of tipo_roms=(
         (n:'jb1';l:$1000;p:0;crc:$415aa1b7),(n:'jb2';l:$1000;p:$1000;crc:$b1c27510),
@@ -149,10 +142,12 @@ var
   calc_sprite:function(direccion:byte):word;
   draw_stars:procedure;
   galaxian_update_video:procedure;
+  sound1_pos,sound2_pos,sound3_pos,sound4_pos,sound_pos:byte;
+  sound_data:array[0..3] of byte;
   //Variables globales
   haz_nmi,stars_enable:boolean;
   stars_scrollpos:dword;
-  stars_blinking,latch,port_b_latch:byte;
+  stars_blinking,latch,port_b_latch,local_frame:byte;
   stars:array[0..star_count-1] of tstars;
   videoram_mem:array[0..$3ff] of byte;
   sprite_mem,disparo_mem:array[0..$1f] of byte;
@@ -218,12 +213,12 @@ case direccion of
                     else memoria[$5800+(direccion and $ff)]:=valor;
                end;
   $6800..$6fff:case (direccion and $7) of
-                  $0:if (valor<>0) then start_sample(2);
-                  $1:if (valor<>0) then start_sample(3);
-                  $2:if (valor<>0) then start_sample(4);
-                  $3:if (valor<>0) then start_sample(1);
-                  $5:if (valor<>0) then start_sample(0);
-                end;
+                  0:if (valor<>0) then start_sample(2);
+                  1:if (valor<>0) then start_sample(3);
+                  2:if (valor<>0) then start_sample(4);
+                  3:if (valor<>0) then start_sample(1);
+                  5:if (valor<>0) then start_sample(0);
+               end;
   $7000..$77ff:case (direccion and $7) of
                   $1:haz_nmi:=((valor and 1)<>0);
                   $4:begin
@@ -231,6 +226,22 @@ case direccion of
                        if not(stars_enable) then stars_scrollpos:=0;
                     end;
                end;
+  $7800:begin //case valor of
+            sound_data[sound_pos]:=valor;
+            case valor of
+              0:sound4_pos:=sound_pos;
+              4:sound2_pos:=sound_pos;
+              142:sound1_pos:=sound_pos;
+              208:sound3_pos:=sound_pos;
+              255:exit;
+            end;
+            sound_pos:=(sound_pos+1) and 3;
+            if ((sound_data[sound1_pos]=142) and (sound_data[(sound1_pos+1) and 3]=128) and (sound_data[(sound1_pos+2) and 3]=112) and (sound_data[(sound1_pos+3) and 3]=104)) then start_sample(5);
+            if ((sound_data[sound2_pos]=4) and (sound_data[(sound2_pos+1) and 3]=8) and (sound_data[(sound2_pos+2) and 3]=12) and (sound_data[(sound2_pos+3) and 3]=16)) then start_sample(6);
+            if ((sound_data[sound3_pos]=208) and (sound_data[(sound3_pos+1) and 3]=205) and (sound_data[(sound3_pos+2) and 3]=199) and (sound_data[(sound3_pos+3) and 3]=192)) then start_sample(7);
+            if ((sound_data[sound4_pos]=0) and (sound_data[(sound4_pos+1) and 3]=28) and (sound_data[(sound4_pos+2) and 3]=64) and (sound_data[(sound4_pos+3) and 3]=85)) then start_sample(8);
+            principal1.statusbar1.panels[2].text:=inttostr(valor);
+        end;
 end;
 end;
 
@@ -254,7 +265,7 @@ for f:=0 to star_count-1 do begin
 		y:=(stars[f].y+((stars_scrollpos+stars[f].x) shr 9)) and $ff;
 		if ((y and $01) xor ((x shr 3) and $01))<>0 then begin
       color:=paleta[stars[f].color];
-      putpixel(y,x,1,@color,1);
+      putpixel(y+ADD_SPRITE,x,1,@color,1);
 		end;
  end;
 end;
@@ -397,7 +408,7 @@ for f:=0 to STAR_COUNT-1 do begin
 			// no stars in the status area */
 			if ((x>=240) and (main_vars.tipo_maquina=48)) then continue;
       color:=paleta[stars[f].color];
-      putpixel(y,x,1,@color,1);
+      putpixel(y+ADD_SPRITE,x,1,@color,1);
 		end;
 end;
 end;
@@ -579,7 +590,7 @@ end;
 
 procedure scramble_port_1_a_write(valor:byte);
 begin
-  latch:=valor;
+  konamisnd_0.sound_latch:=valor;
 end;
 
 procedure scramble_port_1_b_write(valor:byte);
@@ -587,9 +598,9 @@ var
   old:byte;
 begin
   old:=port_b_latch;
-	port_b_latch:=valor;
-	if (((old and $08)<>0) and ((not(valor and $08))<>0)) then snd_z80.pedir_irq:=HOLD_LINE;
-	//device->machine().sound().system_mute(data & 0x10);
+  port_b_latch:=valor;
+  if (((old and $08)<>0) and ((not(valor and $08))<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
+  //device->machine().sound().system_mute(data & 0x10);
 end;
 
 procedure scramble_port_1_c_write(valor:byte);
@@ -602,76 +613,6 @@ begin
 		$319:scramble_prot:=$4f;
 		$5c9:scramble_prot:=$6f;
 	end;
-end;
-
-function scramblesound_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$2fff:scramblesound_getbyte:=mem_snd[direccion];
-  $8000..$8fff,$a000..$afff,$c000..$cfff,$e000..$efff:scramblesound_getbyte:=mem_snd[$8000+(direccion and $3ff)];
-end;
-end;
-
-procedure scramblesound_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$3000 then exit;
-case direccion of
-  $8000..$8fff,$a000..$afff,$c000..$cfff,$e000..$efff:mem_snd[$8000+(direccion and $3ff)]:=valor;
-end;
-end;
-
-function scramblesound_inbyte(puerto:word):byte;
-var
-  res:byte;
-begin
-res:=$ff;
-if (puerto and $20)<>0 then res:=res and ay8910_1.Read;
-if (puerto and $80)<>0 then res:=res and ay8910_0.Read;
-scramblesound_inbyte:=res;
-end;
-
-procedure scramblesound_outbyte(valor:byte;puerto:word);
-begin
-if (puerto and $10)<>0 then begin
-    ay8910_1.Control(valor);
-end else begin
-    if (puerto and $20)<>0 then ay8910_1.Write(valor);
-end;
-if (puerto and $40)<>0 then begin
-		ay8910_0.Control(valor);
-end else begin
-  if (puerto and $80)<>0 then ay8910_0.Write(valor);
-end;
-end;
-
-function scramble_ay_porta:byte;
-begin
-  scramble_ay_porta:=latch;
-end;
-
-function scramble_ay_portb:byte;
-var
-  cycles:dword;
-  hibit:byte;
-begin
-  cycles:=((snd_z80.contador+(konami_sound.frame*256))*4) mod (16*16*2*8*5*2);
-	hibit:=0;
-	// separate the high bit from the others */
-	if (cycles>=(16*16*2*8*5)) then begin
-		hibit:=1;
-		cycles:=cycles-(16*16*2*8*5);
-	end;
-	scramble_ay_portb:=(hibit shl 7) or	// B7 is the output of the final divide-by-2 counter */
-		   (BIT_n(cycles,14) shl 6) or // B6 is the high bit of the divide-by-5 counter */
-		   (BIT_n(cycles,13) shl 5) or // B5 is the 2nd highest bit of the divide-by-5 counter */
-		   (BIT_n(cycles,11) shl 4) or // B4 is the high bit of the divide-by-8 counter */
-		   $0e;
-end;
-
-procedure scramble_despues_instruccion;
-begin
-  ay8910_0.update;
-  ay8910_1.update;
 end;
 
 function scobra_getbyte(direccion:word):byte;
@@ -802,33 +743,15 @@ case direccion of
 end;
 end;
 
-function frogger_sound_getbyte(direccion:word):byte;
+procedure frogger_port_1_a_write(valor:byte);
 begin
-case (direccion and $7fff) of
-  0..$1fff:frogger_sound_getbyte:=mem_snd[direccion];
-  $4000..$5fff:frogger_sound_getbyte:=mem_snd[$4000+(direccion and $3ff)];
-end;
+  konamisnd_0.sound_latch:=valor;
 end;
 
-procedure frogger_sound_putbyte(direccion:word;valor:byte);
+procedure frogger_port_1_b_write(valor:byte);
 begin
-if direccion<$2000 then exit;
-case (direccion and $7fff) of
-  $4000..$5fff:mem_snd[$4000+(direccion and $3ff)]:=valor;
-end;
-end;
-
-function frogger_sound_inbyte(puerto:word):byte;
-begin
-  if (puerto and $ff)=$40 then frogger_sound_inbyte:=($ff and ay8910_0.Read);
-end;
-
-procedure frogger_sound_outbyte(valor:byte;puerto:word);
-begin
-  case (puerto and $ff) of
-    $40:ay8910_0.Write(valor);
-    $80:ay8910_0.Control(valor);
-end;
+  if ((port_b_latch=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
+  port_b_latch:=valor;
 end;
 
 procedure frogger_hi_score;
@@ -838,22 +761,6 @@ if ((memoria[$83f1]=$63) and (memoria[$83f2]=$04)) then begin
     copymemory(@memoria[$83ef],@memoria[$83f1],2);
     timer[timer_hs_frogger].enabled:=false;
 end;
-end;
-
-function frogger_clock(valor:byte):byte;
-begin
-  frogger_clock:=BITSWAP8(valor,7,6,3,4,5,2,1,0);
-end;
-
-procedure frogger_port_1_a_write(valor:byte);
-begin
-  konami_sound.sound_latch:=valor;
-end;
-
-procedure frogger_port_1_b_write(valor:byte);
-begin
-  if ((port_b_latch=0) and (valor<>0)) then snd_z80.pedir_irq:=HOLD_LINE;
-  port_b_latch:=valor;
 end;
 
 //amidar
@@ -1029,7 +936,7 @@ procedure Cargar_hgalaxian;
 begin
 case main_vars.tipo_maquina of
   14:begin
-      llamadas_maquina.bucle_general:=scramble_principal;
+      llamadas_maquina.bucle_general:=frogger_principal;
       eventos_hardware_galaxian:=eventos_frogger;
       calc_nchar:=galaxian_calc_nchar; //no usado
       calc_sprite:=galaxian_calc_sprite;  //no usado
@@ -1061,7 +968,7 @@ case main_vars.tipo_maquina of
       galaxian_update_video:=update_video_hgalaxian;
   end;
   143..145:begin
-      llamadas_maquina.bucle_general:=scramble_principal;
+      llamadas_maquina.bucle_general:=frogger_principal;
       eventos_hardware_galaxian:=eventos_scramble;
       calc_nchar:=galaxian_calc_nchar;
       calc_sprite:=galaxian_calc_sprite;
@@ -1075,23 +982,19 @@ llamadas_maquina.reset:=reset_hgalaxian;
 llamadas_maquina.fps_max:=60.6060606060;
 end;
 
-procedure scramble_principal;
+procedure frogger_principal;
 var
-  frame_m,frame_s:single;
-  f:byte;
+  frame_m:single;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
 while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
-    konami_sound.frame:=f;
+  for local_frame:=0 to $ff do begin
     main_z80.run(frame_m);
     frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    //SND CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    if f=248 then begin
+    //SND
+    konamisnd_0.run(local_frame);
+    if local_frame=248 then begin
       if haz_nmi then main_z80.pedir_nmi:=PULSE_LINE;
       if stars_enable then stars_scrollpos:=stars_scrollpos+1;
       galaxian_update_video;
@@ -1130,19 +1033,16 @@ main_z80.free;
 case main_vars.tipo_maquina of
   14:begin
         save_hi('frogger.hi',@memoria[$83f1],10);
-        konamisnd_close;
-        snd_z80.free;
+        konamisnd_0.free;
         close_ppi8255(0);
         close_ppi8255(1);
      end;
   47,49:close_samples;
   48:ay8910_0.Free;
   143,144,145:begin
-        ay8910_0.Free;
-        ay8910_1.Free;
+        konamisnd_0.free;
         close_ppi8255(0);
         close_ppi8255(1);
-        snd_z80.free;
       end;
 end;
 close_audio;
@@ -1159,8 +1059,7 @@ begin
  scramble_background:=false;
  case main_vars.tipo_maquina of
   14:begin
-       snd_z80.reset;
-       konamisnd_reset;
+       konamisnd_0.reset;
        reset_ppi8255(0);
        reset_ppi8255(1);
        marcade.in0:=$FF;
@@ -1172,6 +1071,11 @@ begin
        marcade.in1:=0;
        marcade.in2:=4;
        reset_samples;
+       sound1_pos:=0;
+       sound2_pos:=0;
+       sound3_pos:=0;
+       sound4_pos:=0;
+       sound_pos:=0;
   end;
   48:begin
        marcade.in0:=0;
@@ -1186,9 +1090,7 @@ begin
        reset_samples;
   end;
   143:begin
-        snd_z80.reset;
-        ay8910_0.reset;
-        ay8910_1.reset;
+        konamisnd_0.reset;
         marcade.in0:=$ff;
         marcade.in1:=$fc;
         marcade.in2:=$f1;
@@ -1200,9 +1102,7 @@ begin
         port_b_latch:=0;
       end;
   144:begin
-        snd_z80.reset;
-        ay8910_0.reset;
-        ay8910_1.reset;
+        konamisnd_0.reset;
         marcade.in0:=$ff;
         marcade.in1:=$fd;
         marcade.in2:=$f2;
@@ -1212,9 +1112,7 @@ begin
         port_b_latch:=0;
       end;
   145:begin
-        snd_z80.reset;
-        ay8910_0.reset;
-        ay8910_1.reset;
+        konamisnd_0.reset;
         marcade.in0:=$ff;
         marcade.in1:=$ff;
         marcade.in2:=$f1;
@@ -1270,12 +1168,8 @@ case main_vars.tipo_maquina of
   14:begin  //frogger
       //Main CPU
       main_z80.change_ram_calls(frogger_getbyte,frogger_putbyte);
-      //Sound CPU
-      snd_z80:=cpu_z80.create(1789750,256);
-      snd_z80.change_ram_calls(frogger_sound_getbyte,frogger_sound_putbyte);
-      snd_z80.change_io_calls(frogger_sound_inbyte,frogger_sound_outbyte);
-      //Sound Chip
-      konamisnd_init(2,snd_z80.numero_cpu,ONE_AY8910,snd_z80.clock,frogger_clock);
+      //Sound
+      konamisnd_0:=konamisnd_chip.create(1,TIPO_FROGGER,1789750,256);
       //Hi-Score
       timer_hs_frogger:=init_timer(main_z80.numero_cpu,10000,frogger_hi_score,true);
       //PPI 8255
@@ -1294,15 +1188,13 @@ case main_vars.tipo_maquina of
       convert_sprt(64);
       if not(cargar_roms(@memoria_temp[$0],@frogger_pal,'frogger.zip',1)) then exit;
   end;
-  47:begin  //galaxyan
+  47:begin  //galaxian
       //funciones Z80
       main_z80.change_ram_calls(galaxian_getbyte,galaxian_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@galaxian_rom[0],'galaxian.zip',0)) then exit;
       //cargar samples
-      if load_samples('galaxian.zip',@galaxian_samples[0],5) then begin
-        main_z80.init_sound(galaxian_despues_instruccion);
-      end;
+      if load_samples('galaxian.zip',@galaxian_samples[0],galaxian_num_samples) then main_z80.init_sound(galaxian_despues_instruccion);
       //convertir chars &sprites
       if not(cargar_roms(@memoria_temp[0],@galaxian_char[0],'galaxian.zip',0)) then exit;
       convert_chars(256);
@@ -1340,9 +1232,7 @@ case main_vars.tipo_maquina of
           else ctemp1:=ctemp2;
 		    memoria[f]:=ctemp1;
       end;
-      if load_samples('mooncrst.zip',@mooncrst_samples[0],5) then begin
-        main_z80.init_sound(galaxian_despues_instruccion);
-      end;
+      if load_samples('mooncrst.zip',@mooncrst_samples[0],5) then main_z80.init_sound(galaxian_despues_instruccion);
       //convertir chars & sprites
       if not(cargar_roms(@memoria_temp[0],@mooncrst_char[0],'mooncrst.zip',0)) then exit;
       convert_chars(512);
@@ -1352,15 +1242,8 @@ case main_vars.tipo_maquina of
   143:begin  //scramble
       //Main CPU
       main_z80.change_ram_calls(scramble_getbyte,scramble_putbyte);
-      //Sound CPU
-      snd_z80:=cpu_z80.create(1789750,256);
-      snd_z80.change_ram_calls(scramblesound_getbyte,scramblesound_putbyte);
-      snd_z80.change_io_calls(scramblesound_inbyte,scramblesound_outbyte);
-      snd_z80.init_sound(scramble_despues_instruccion);
-      //Sound Chip
-      ay8910_0:=ay8910_chip.create(1789750,1);
-      ay8910_0.change_io_calls(scramble_ay_porta,scramble_ay_portb,nil,nil);
-      ay8910_1:=ay8910_chip.create(1789750,1);
+      //Sound
+      konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
       //PPI 8255
       init_ppi8255(0,port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
       init_ppi8255(1,nil,nil,scramble_port_1_c_read,scramble_port_1_a_write,scramble_port_1_b_write,scramble_port_1_c_write);
@@ -1377,15 +1260,8 @@ case main_vars.tipo_maquina of
   144:begin  //super cobra
       //Main CPU
       main_z80.change_ram_calls(scobra_getbyte,scobra_putbyte);
-      //Sound CPU
-      snd_z80:=cpu_z80.create(1789750,256);
-      snd_z80.change_ram_calls(scramblesound_getbyte,scramblesound_putbyte);
-      snd_z80.change_io_calls(scramblesound_inbyte,scramblesound_outbyte);
-      snd_z80.init_sound(scramble_despues_instruccion);
-      //Sound Chip
-      ay8910_0:=ay8910_chip.create(1789750,1);
-      ay8910_0.change_io_calls(scramble_ay_porta,scramble_ay_portb,nil,nil);
-      ay8910_1:=ay8910_chip.create(1789750,1);
+      //Sound
+      konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
       //PPI 8255
       init_ppi8255(0,port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
       init_ppi8255(1,nil,nil,nil,scramble_port_1_a_write,scramble_port_1_b_write,nil);
@@ -1402,15 +1278,8 @@ case main_vars.tipo_maquina of
   145:begin  //amidar
       //Main CPU
       main_z80.change_ram_calls(amidar_getbyte,amidar_putbyte);
-      //Sound CPU
-      snd_z80:=cpu_z80.create(1789750,256);
-      snd_z80.change_ram_calls(scramblesound_getbyte,scramblesound_putbyte);
-      snd_z80.change_io_calls(scramblesound_inbyte,scramblesound_outbyte);
-      snd_z80.init_sound(scramble_despues_instruccion);
-      //Sound Chip
-      ay8910_0:=ay8910_chip.create(1789750,1);
-      ay8910_0.change_io_calls(scramble_ay_porta,scramble_ay_portb,nil,nil);
-      ay8910_1:=ay8910_chip.create(1789750,1);
+      //Sound
+      konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
       //PPI 8255
       init_ppi8255(0,port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
       init_ppi8255(1,nil,nil,port_1_c_read,scramble_port_1_a_write,scramble_port_1_b_write,nil);

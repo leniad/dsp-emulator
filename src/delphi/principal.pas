@@ -353,6 +353,8 @@ type
     ssriders1: TMenuItem;
     Gradius31: TMenuItem;
     BitBtn1: TBitBtn;
+    SpaceInvaders1: TMenuItem;
+    Centipede1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

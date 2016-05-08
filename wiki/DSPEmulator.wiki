@@ -98,7 +98,7 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Simbol Shift: Shift key (left or right)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Caps Shift: Control key (left or right)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Keys on extended models, mapped according to its function<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="pc_spectrum.jpg"><img src="pc_spectrum.jpg" width="25%" height="25%"></a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_spectrum.jpg" width="25%" height="25%"></img><br>
 - Virtual Tapes: Can load ZIP, TAP, TZX, PZX, WAV and CSW. Fully working spectrum load schemes (bleepload, alkatraz, original rom...). <br>
 &nbsp;With the mouse you can move inside virtual tape and select the start position. Tape begin to play when detects - LOAD "" - and stop when reaches the final.<br>
 &nbsp;If inside the ZIP file there is a ROM file, emulator load first ROM file and then loads then virtual tape.<br>
@@ -122,7 +122,7 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The shift key on the CPC: Mapped on both shift keys (left or right) on the PC keyboard<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The 'point' button next to the function in the CPC is also mapped into the 'point' PC keypad<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The 'Enter' key on the numeric keypad PC works also as 'Enter' in the emulation CPC<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="pc_cpc.png"><img src="pc_cpc.png" width="25%" height="25%"></a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_cpc.png" width="25%" height="25%"></img><br>
 - Joystick: Emulated with the redefinable keys or external joystick.<br>
 - Virtual Tape: you can load ZIP, CDT, WAV and CSW. Work the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
 - Sound: All version have the AY-8912 chip<br>
@@ -172,10 +172,10 @@ Other features<br>
 - ROM: Does not have. It's a simulation of a pseudo CPU.<br>
 - Keyboard: Mapped the system keys<br><pre>
     Original    Real Keyboard
-    1 2 3 A --> 1 2 3 4
-    4 5 6 B --> Q W E R
-    7 8 9 C --> A S D F
-    D 0 E F --> Z X C V</pre>
+    1 2 3 A     1 2 3 4
+    4 5 6 B     Q W E R
+    7 8 9 C     A S D F
+    D 0 E F     Z X C V</pre>
 - Sound: basic sound mono supported<br>
 - Video: Supports 64x32 format from Chip8, 64x64 from Chip8 Hires and 128x64 from SuperChip8<br>
 - Files: Supports '.CH8' y '.BIN' formats<br>
@@ -200,10 +200,9 @@ Currently only some drivers use wholly or partly this system.<br>
 If you want the emulator to use the samples, put the compressed sample files with the same name as the ROM in a folder named 'samples'.<br>
 You can download all the samples from the emulator page<br>
 Look at the arcade systems list to know which systems use samples.<br><br>
-<b>2.3.2 Emulated Systems</b><hr><br>
-<pre>
-Name                       | ROM          | Completed  | Notes
--------------------------------------------------------------------------------------------------------------------------------------
+<b>2.3.2 Emulated Systems</b><hr><br><pre>
+Name                         ROM            Completed    Notes
+-----------------------------------------------------------------------------------------------------------------
 Phoenix                    | PHOENIX.ZIP  |      99    | Phoenix Hardware
                                                        | Preliminary analog sound
 Pleiads                    | PLEAIDS.ZIP  |      80    | Phoenix Hardware
@@ -350,9 +349,9 @@ Alex Kidd                  | ALEXKIDD.ZIP |      95    | Sega System 16A
 Fantasy Zone               | FANTZONE.ZIP |      95    | Sega System 16A
                                                        | Missing PCM Sound
 Alien Syndrome             | ALIENSYN.ZIP |      95    | Sega System 16A
-                                                       | Falta sonido PCM
+                                                       | Missing PCM Sound
 Wonder Boy III             | WB3.ZIP      |      95    | Sega System 16A
-                                                       | Falta sonido PCM
+                                                       | Missing PCM Sound
 Time Pilot '84             | TP84.ZIP     |     100    |
 Tutankham                  | TUTANKHM.ZIP |     100    |
 Pang                       | PANG.ZIP     |      95    | Missing YM2413
@@ -437,7 +436,7 @@ Teenage Mutant Ninja       |
    Turtles                 | TMNT.ZIP     |     100    | TMNT HW
 Sunset Riders              | SSRIDERS.ZIP |     100    | TMNT HW
 Gradius III                | GRADIUS3.ZIP |     100    |
--------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
 Total: 206</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
@@ -481,4 +480,4 @@ www.emulation9.com<br><br>
 if you want spectrum tapes, snapshot, info...<br>
 www.worldofspectrum.org<br>
 trastero.speccy.org<br>
-spa2.speccy.org<br>
+spa2.speccy.org

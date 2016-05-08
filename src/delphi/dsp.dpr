@@ -223,7 +223,6 @@ uses
   ddragon3_hw in '..\arcade\ddragon3_hw.pas',
   blockout_hw in '..\arcade\blockout_hw.pas',
   foodfight_hw in '..\arcade\foodfight_hw.pas',
-  sdl2 in '..\misc\SDL2\sdl2.pas',
   pokey in '..\snd\pokey.pas',
   disk_file_format in '..\misc\disk_file_format.pas',
   ipf_disk in '..\misc\ipf_disk.pas',
@@ -252,7 +251,9 @@ uses
   k007232 in '..\snd\k007232.pas',
   gradius3_hw in '..\arcade\gradius3_hw.pas',
   rom_export in '..\misc\rom_export.pas',
-  config_cpc in 'config_cpc.pas' {ConfigCPC};
+  config_cpc in 'config_cpc.pas' {ConfigCPC},
+  spaceinvaders_hw in '..\arcade\spaceinvaders_hw.pas',
+  centipede_hw in '..\arcade\centipede_hw.pas';
 
 {$R *.res}
 

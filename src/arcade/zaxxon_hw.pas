@@ -48,8 +48,8 @@ const
         congo_sound:tipo_roms=(n:'tip_top_rom_17.u19';l:$2000;p:0;crc:$5024e673);
         congo_tilemap:array[0..2] of tipo_roms=(
         (n:'congo6.u57';l:$2000;p:0;crc:$d637f02b),(n:'congo7.u58';l:$2000;p:$2000;crc:$80927943),());
-        num_samples_congo=4;
-        congo_samples:array[0..num_samples_congo] of tipo_nombre_samples=(
+        num_samples_congo=5;
+        congo_samples:array[0..(num_samples_congo-1)] of tipo_nombre_samples=(
         (nombre:'gorilla.wav';restart:true),(nombre:'bass.wav'),(nombre:'congal.wav'),(nombre:'congah.wav'),(nombre:'rim.wav'));
         congo_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'10000'),(dip_val:$1;dip_name:'20000'),(dip_val:$2;dip_name:'30000'),(dip_val:$0;dip_name:'40000'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -75,8 +75,8 @@ const
         zaxxon_tilemap:array[0..4] of tipo_roms=(
         (n:'zaxxon8.u91';l:$2000;p:0;crc:$28d65063),(n:'zaxxon7.u90';l:$2000;p:$2000;crc:$6284c200),
         (n:'zaxxon10.u93';l:$2000;p:$4000;crc:$a95e61fd),(n:'zaxxon9.u92';l:$2000;p:$6000;crc:$7e42691f),());
-        num_samples_zaxxon=11;
-        zaxxon_samples:array[0..num_samples_zaxxon] of tipo_nombre_samples=(
+        num_samples_zaxxon=12;
+        zaxxon_samples:array[0..(num_samples_zaxxon-1)] of tipo_nombre_samples=(
         (nombre:'03.wav';restart:false),(nombre:'02.wav';restart:true),(nombre:'01.wav';restart:true),
         (nombre:'00.wav';restart:true),(nombre:'11.wav';restart:true),(nombre:'10.wav';restart:true),
         (nombre:'08.wav';restart:true),(nombre:'23.wav';restart:true),(nombre:'21.wav';restart:true),
@@ -219,7 +219,7 @@ case main_vars.tipo_maquina of
         init_timer(snd_z80.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,true);
         init_ppi8255(0,ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
         //Samples
-        load_samples('congo.zip',@congo_samples[0],num_samples_congo+1);
+        load_samples('congo.zip',@congo_samples[0],num_samples_congo);
         snd_z80.init_sound(congo_sound_update);
         sn_76496_0:=sn76496_chip.Create(4000000);
         sn_76496_1:=sn76496_chip.Create(1000000);
@@ -250,7 +250,7 @@ case main_vars.tipo_maquina of
         main_z80.change_ram_calls(zaxxon_getbyte,zaxxon_putbyte);
         init_ppi8255(0,nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
         //Samples
-        if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon+1) then begin
+        if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon) then begin
           main_z80.init_sound(zaxxon_sound_update);
         end;
         //cargar roms

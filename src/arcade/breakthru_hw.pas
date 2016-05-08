@@ -272,8 +272,9 @@ snd_m6809:=cpu_m6809.Create(1500000,272);
 snd_m6809.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
 snd_m6809.init_sound(brkthru_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,1500000,4);
-ym3812_init(0,3000000,brkthru_snd_irq);
+ym2203_0:=ym2203_chip.create(0,1500000,0.5,0.1);
+ym3812_0:=ym3812_chip.create(0,3000000);
+ym3812_0.change_irq_calls(brkthru_snd_irq);
 case main_vars.tipo_maquina of
   89:begin
         main_m6809.change_ram_calls(brkthru_getbyte,brkthru_putbyte);
@@ -346,7 +347,7 @@ begin
 main_m6809.Free;
 snd_m6809.Free;
 ym2203_0.Free;
-ym3812_close(0);
+ym3812_0.free;
 close_audio;
 close_video;
 end;
@@ -356,7 +357,7 @@ begin
  main_m6809.reset;
  snd_m6809.reset;
  ym2203_0.reset;
- ym3812_reset(0);
+ ym3812_0.reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -516,10 +517,10 @@ begin
 if direccion>$7fff then exit;
 case direccion of
   $0..$1fff:mem_snd[direccion]:=valor;
-  $2000:YM3812_control_port(0,valor);
-	$2001:YM3812_write_port(0,valor);
-	$6000:ym2203_0.control(valor);
-	$6001:ym2203_0.write_reg(valor);
+  $2000:ym3812_0.control(valor);
+  $2001:ym3812_0.write(valor);
+  $6000:ym2203_0.control(valor);
+  $6001:ym2203_0.write_reg(valor);
 end;
 end;
 
@@ -532,7 +533,7 @@ end;
 procedure brkthru_sound_update;
 begin
   YM2203_0.Update;
-  YM3812_Update(0);
+  YM3812_0.update;
 end;
 
 end.

@@ -4,30 +4,28 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      fmopl,timer_engine,sound_engine;
 
-const
-  MAX_YM3812=2-1;
-
 type
-  YM3812_f=record
-     OPL:pfm_opl;
-     tsample:byte;
-     timer1,timer2:byte;
-     amp:byte;
-  end;
-  pYM3812_f=^YM3812_f;
   IRQ_Handler=procedure (irqstate:byte);
+  ym3812_chip=class(snd_chip_class)
+     constructor create(num:byte;clock:dword;amp:single=1);
+     destructor free;
+  public
+     procedure reset;
+     procedure update;
+     procedure control(data:byte);
+     procedure write(data:byte);
+     function status:byte;
+     function read:byte;
+     procedure timer_handler(timer_num:byte;period:single);
+     procedure change_irq_calls(irq_func:IRQ_Handler);
+  private
+     OPL:pfm_opl;
+     num,timer1,timer2:byte;
+     procedure init_timers;
+  end;
 var
-  FM3812:array[0..MAX_YM3812] of pYM3812_f;
+  ym3812_0,ym3812_1:ym3812_chip;
 
-procedure YM3812_Update(num:byte);
-procedure YM3812_Init(num:byte;clock:dword;irq_func:IRQ_Handler;amp:byte=1);
-procedure YM3812_Reset(num:byte);
-procedure YM3812_Close(num:byte);
-procedure YM3812_control_port(num,data:byte);
-procedure YM3812_write_port(num,data:byte);
-function YM3812_status_port(num:byte):integer;
-function YM3812_read_port(num:byte):integer;
-procedure ym3812_timer_handler(num,timer_num:byte;period:single);
 procedure ym3812_timer1_0;
 procedure ym3812_timer2_0;
 procedure ym3812_timer1_1;
@@ -35,152 +33,142 @@ procedure ym3812_timer2_1;
 
 implementation
 
-procedure ym3812_init_timers(num:byte);
+procedure ym3812_chip.init_timers;
 begin
   //Timers
-  case num of
+  case self.num of
     0:begin
-        FM3812[num].timer1:=init_timer(sound_status.cpu_num,1,ym3812_timer1_0,false);
-        FM3812[num].timer2:=init_timer(sound_status.cpu_num,1,ym3812_timer2_0,false);
+        self.timer1:=init_timer(sound_status.cpu_num,1,ym3812_timer1_0,false);
+        self.timer2:=init_timer(sound_status.cpu_num,1,ym3812_timer2_0,false);
       end;
     1:begin
-        FM3812[num].timer1:=init_timer(sound_status.cpu_num,1,ym3812_timer1_1,false);
-        FM3812[num].timer2:=init_timer(sound_status.cpu_num,1,ym3812_timer2_1,false);
+        self.timer1:=init_timer(sound_status.cpu_num,1,ym3812_timer1_1,false);
+        self.timer2:=init_timer(sound_status.cpu_num,1,ym3812_timer2_1,false);
       end;
   end;
 end;
 
-procedure YM3812_Init(num:byte;clock:dword;irq_func:IRQ_Handler;amp:byte=1);
+constructor ym3812_chip.create(num:byte;clock:dword;amp:single=1);
 var
   rate:integer;
 begin
+  self.num:=num;
   rate:=round(clock/72);
-	// emulator create */
-  if FM3812[num]=nil then begin
-    getmem(FM3812[num],sizeof(ym3812_f));
-    fillchar(FM3812[num]^,SizeOf(ym3812_f),0);
-  end;
-  FM3812[num].OPL:=OPLCreate(sound_status.cpu_clock,clock,rate);
-  YM3812_Reset(num);
-  fm3812[num].OPL.type_:=OPL_TYPE_WAVESEL;
-  FM3812[num].tsample:=init_channel;
-  FM3812[num].OPL.IRQ_Handler:=irq_func;
-  FM3812[num].amp:=amp;
-  ym3812_init_timers(num);
+  // emulator create */
+  self.OPL:=OPLCreate(sound_status.cpu_clock,clock,rate);
+  self.reset;
+  self.OPL.type_:=OPL_TYPE_WAVESEL;
+  self.tsample_num:=init_channel;
+  self.amp:=amp;
+  self.init_timers;
 end;
 
-procedure YM3812_close(num:byte);
-var
-  OPL:pfm_opl;
+destructor ym3812_chip.free;
 begin
-	OPL:=FM3812[num].OPL;
-	OPLClose(OPL);
-  freemem(FM3812[num]);
-  FM3812[num]:=nil;
+  OPLClose(self.OPL);
 end;
 
-procedure YM3812_Reset(num:byte);
-var
-  OPL:pfm_opl;
+procedure ym3812_chip.change_irq_calls(irq_func:IRQ_Handler);
 begin
-	OPL:=FM3812[num].OPL;
-	OPLResetChip(num,OPL);
+  self.OPL.IRQ_Handler:=irq_func;
 end;
 
-procedure YM3812_Update(num:byte);
+procedure ym3812_chip.reset;
+begin
+OPLResetChip(self.num,self.OPL);
+end;
+
+procedure ym3812_chip.update;
 var
-	OPL:pFM_OPL;
   lt:integer;
 begin
-  OPL:=FM3812[num].OPL;
   // rhythm slots */
-  SLOT7_1:=OPL.P_CH[7].SLOT[SLOT1];
-  SLOT7_2:=OPL.P_CH[7].SLOT[SLOT2];
-  SLOT8_1:=OPL.P_CH[8].SLOT[SLOT1];
-  SLOT8_2:=OPL.P_CH[8].SLOT[SLOT2];
+  SLOT7_1:=self.OPL.P_CH[7].SLOT[SLOT1];
+  SLOT7_2:=self.OPL.P_CH[7].SLOT[SLOT2];
+  SLOT8_1:=self.OPL.P_CH[8].SLOT[SLOT1];
+  SLOT8_2:=self.OPL.P_CH[8].SLOT[SLOT2];
 
-  OPL.output:=0;
-	advance_lfo(OPL);
+  self.OPL.output:=0;
+  advance_lfo(self.OPL);
   // FM part */
-  OPL_CALC_CH(OPL,OPL.P_CH[0]);
-  OPL_CALC_CH(OPL,OPL.P_CH[1]);
-  OPL_CALC_CH(OPL,OPL.P_CH[2]);
-  OPL_CALC_CH(OPL,OPL.P_CH[3]);
-  OPL_CALC_CH(OPL,OPL.P_CH[4]);
-  OPL_CALC_CH(OPL,OPL.P_CH[5]);
-  if (OPL.rhythm and $20)=0 then begin
-			OPL_CALC_CH(OPL,OPL.P_CH[6]);
-			OPL_CALC_CH(OPL,OPL.P_CH[7]);
-			OPL_CALC_CH(OPL,OPL.P_CH[8]);
+  OPL_CALC_CH(self.OPL,self.OPL.P_CH[0]);
+  OPL_CALC_CH(self.OPL,self.OPL.P_CH[1]);
+  OPL_CALC_CH(self.OPL,self.OPL.P_CH[2]);
+  OPL_CALC_CH(self.OPL,self.OPL.P_CH[3]);
+  OPL_CALC_CH(self.OPL,self.OPL.P_CH[4]);
+  OPL_CALC_CH(self.OPL,self.OPL.P_CH[5]);
+  if (self.OPL.rhythm and $20)=0 then begin
+     OPL_CALC_CH(self.OPL,self.OPL.P_CH[6]);
+     OPL_CALC_CH(self.OPL,self.OPL.P_CH[7]);
+     OPL_CALC_CH(self.OPL,self.OPL.P_CH[8]);
   end else begin		// Rhythm part */
-			OPL_CALC_RH(OPL,OPL.noise_rng and 1);
+      OPL_CALC_RH(self.OPL,self.OPL.noise_rng and 1);
   end;
-  lt:=(OPL.output div 2)*FM3812[num].amp;
+  lt:=trunc(self.OPL.output*self.amp);
   //lt:=lt shr FINAL_SH;
   // limit check */
   if lt>$7fff then lt:=$7fff;
   if lt<-$7fff then lt:=-$7fff;
-  tsample[FM3812[num].tsample,sound_status.posicion_sonido]:=lt;
-  if sound_status.stereo then tsample[FM3812[num].tsample,sound_status.posicion_sonido+1]:=lt;
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
+  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=lt;
   // store to sound buffer */
-  advance(OPL);
+  advance(self.OPL);
 end;
 
-procedure YM3812_control_port(num,data:byte);
+procedure ym3812_chip.control(data:byte);
 begin
-  FM3812[num].OPL.address:=data;
+  self.OPL.address:=data;
 end;
 
-procedure YM3812_write_port(num,data:byte);
+procedure ym3812_chip.write(data:byte);
 begin
-		OPLWriteReg(num,FM3812[num].OPL,FM3812[num].OPL.address,data);
+  OPLWriteReg(self.num,self.OPL,self.OPL.address,data);
 end;
 
-function YM3812_status_port(num:byte):integer;
+function ym3812_chip.status:byte;
 begin
-	YM3812_status_port:=(FM3812[num].OPL.status and (FM3812[num].OPL.statusmask or $80)) or $06 ;
+  status:=(self.OPL.status and (self.OPL.statusmask or $80)) or $06 ;
 end;
 
-function YM3812_read_port(num:byte):integer;
+function ym3812_chip.read:byte;
 begin
-	YM3812_read_port:=$ff;
+  read:=$ff;
 end;
 
-procedure ym3812_timer_handler(num,timer_num:byte;period:single);
+procedure ym3812_chip.timer_handler(timer_num:byte;period:single);
 begin
   case timer_num of
-    0:if period=0 then timer[FM3812[num].timer1].enabled:=false
+    0:if period=0 then timer[self.timer1].enabled:=false
         else begin
-          timer[FM3812[num].timer1].time_final:=period;
-          timer[FM3812[num].timer1].enabled:=true;
+          timer[self.timer1].time_final:=period;
+          timer[self.timer1].enabled:=true;
         end;
-    1:if period=0 then timer[FM3812[num].timer2].enabled:=false
+    1:if period=0 then timer[self.timer2].enabled:=false
         else begin
-          timer[FM3812[num].timer2].time_final:=period;
-          timer[FM3812[num].timer2].enabled:=true;
+          timer[self.timer2].time_final:=period;
+          timer[self.timer2].enabled:=true;
         end;
   end;
 end;
 
 procedure ym3812_timer1_0;
 begin
-  OPLTimerOver(0,FM3812[0].OPL,0);
+  OPLTimerOver(0,ym3812_0.OPL,0);
 end;
 
 procedure ym3812_timer2_0;
 begin
-  OPLTimerOver(0,FM3812[0].OPL,1);
+  OPLTimerOver(0,ym3812_0.OPL,1);
 end;
 
 procedure ym3812_timer1_1;
 begin
-  OPLTimerOver(1,FM3812[1].OPL,0);
+  OPLTimerOver(1,ym3812_1.OPL,0);
 end;
 
 procedure ym3812_timer2_1;
 begin
-  OPLTimerOver(1,FM3812[1].OPL,1);
+  OPLTimerOver(1,ym3812_1.OPL,1);
 end;
-
 
 end.

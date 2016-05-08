@@ -56,11 +56,8 @@ iniciar_video(224,256);
 //Main CPU
 main_m6809:=cpu_m6809.Create(1536000,$100);
 main_m6809.change_ram_calls(tutankham_getbyte,tutankham_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(1789772,$100);
-snd_z80.change_ram_calls(konamisnd_getbyte,konamisnd_putbyte);
 //Sound Chip
-konamisnd_init(4,snd_z80.numero_cpu,1,snd_z80.clock,nil);
+konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@tutan_rom[0],'tutankhm.zip',0)) then exit;
 copymemory(@memoria[$a000],@memoria_temp[0],$6000);
@@ -75,8 +72,7 @@ end;
 procedure cerrar_tutankham;
 begin
 main_m6809.Free;
-snd_z80.free;
-konamisnd_close;
+konamisnd_0.free;
 close_audio;
 close_video;
 end;
@@ -84,9 +80,8 @@ end;
 procedure reset_tutankham;
 begin
  main_m6809.reset;
- snd_z80.reset;
  reset_audio;
- konamisnd_reset;
+ konamisnd_0.reset;
  marcade.in0:=$fF;
  marcade.in1:=$FF;
  marcade.in2:=$FF;
@@ -142,23 +137,20 @@ end;
 
 procedure tutankham_principal;
 var
-  frame_m,frame_s:single;
+  frame_m:single;
   f:byte;
   irq_req:boolean;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
 irq_req:=false;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    konami_sound.frame:=f;
     //Main CPU
     main_m6809.run(frame_m);
     frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    konamisnd_0.run(f);
     if f=239 then begin
       if (irq_req and irq_enable) then main_m6809.pedir_irq:=ASSERT_LINE;
       update_video_tutankham;
@@ -208,8 +200,8 @@ case direccion of
                       else xorx:=255;  //La x esta invertida...
                end;
   $8300..$83ff:rom_nbank:=valor and $f;
-  $8600..$86ff:snd_z80.pedir_irq:=HOLD_LINE;
-  $8700..$87ff:konami_sound.sound_latch:=valor;
+  $8600..$86ff:konamisnd_0.pedir_irq:=HOLD_LINE;
+  $8700..$87ff:konamisnd_0.sound_latch:=valor;
 end;
 end;
 

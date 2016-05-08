@@ -23,8 +23,7 @@ type
         preg_m6800=^reg_m6800;
         cpu_m6800=class(cpu_class)
               constructor create(clock:dword;frames_div:word;tipo_cpu:byte);
-              destructor Destroy;
-              procedure Free;
+              destructor Free;
             public
               pedir_nmi,pedir_irq,nmi_state:byte;
               procedure run(maximo:single);
@@ -166,15 +165,9 @@ self.in_port4:=nil;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_m6800.Destroy;
+destructor cpu_m6800.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_m6800.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 procedure cpu_m6800.reset;
