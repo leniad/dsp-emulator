@@ -1,4 +1,4 @@
-#DSP Emulator status<br>
+﻿#DSP Emulator status<br>
 <b>15/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary.</b><br><pre>
 -General
     +YM3812: Added chip YM3526
