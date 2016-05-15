@@ -98,9 +98,9 @@ snd_z80.init_sound(bb_sound_update);
 main_m6800:=cpu_m6800.create(4000000,264,CPU_M6801);
 main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,3000000,0.25,0.25);
+ym2203_0:=ym2203_chip.create(3000000,0.25,0.25);
 ym2203_0.change_irq_calls(snd_irq);
-ym3812_0:=ym3812_chip.create(0,3000000,0.5);
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,0.5);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@bublbobl_rom[0],'bublbobl.zip',0)) then exit;
 //poner las roms y los bancos de rom

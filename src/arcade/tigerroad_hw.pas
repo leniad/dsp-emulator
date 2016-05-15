@@ -134,9 +134,9 @@ snd_z80:=cpu_z80.create(3579545,$100);
 snd_z80.change_ram_calls(tigeroad_snd_getbyte,tigeroad_snd_putbyte);
 snd_z80.init_sound(tigeroad_sound_update);
 //sound chips
-ym2203_0:=ym2203_chip.create(0,3579545);
+ym2203_0:=ym2203_chip.create(3579545);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(1,3579545);
+ym2203_1:=ym2203_chip.create(3579545);
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   52:begin

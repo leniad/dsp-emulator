@@ -144,8 +144,8 @@ case main_vars.tipo_maquina of
         snd_m6809.init_sound(ddragon_sound_update);
         //Sound Chips
         YM2151_Init(0,3579545,nil,ym2151_snd_irq);
-        msm_5205_0:=MSM5205_chip.create(0,375000,MSM5205_S48_4B,1,snd_adpcm0);
-        msm_5205_1:=MSM5205_chip.create(1,375000,MSM5205_S48_4B,1,snd_adpcm1);
+        msm_5205_0:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,snd_adpcm0);
+        msm_5205_1:=MSM5205_chip.create(375000,MSM5205_S48_4B,1,snd_adpcm1);
         //Main roms
         if not(cargar_roms(@memoria_temp[0],@ddragon_rom[0],'ddragon.zip',0)) then exit;
         //Pongo las ROMs en su banco
@@ -181,7 +181,7 @@ case main_vars.tipo_maquina of
         snd_z80.init_sound(dd2_sound_update);
         //Sound Chips
         YM2151_Init(0,3579545,nil,ym2151_snd_irq_dd2);
-        oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH);
+        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@ddragon2_adpcm[0],'ddragon2.zip',0)) then exit;
         //Main roms

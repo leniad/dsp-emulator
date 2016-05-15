@@ -74,7 +74,7 @@ snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
 snd_m6502.change_ram_calls(getbyte_snd_shootout,putbyte_snd_shootout);
 snd_m6502.init_sound(shootout_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,1500000);
+ym2203_0:=ym2203_chip.create(1500000);
 ym2203_0.change_irq_calls(snd_irq);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@shootout_rom[0],'shootout.zip',0)) then exit;

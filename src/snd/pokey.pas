@@ -118,8 +118,7 @@ type
 
   pokey_channel=class
       constructor create;
-      procedure Free;
-      destructor Destroy;
+      destructor free;
     private
       INTMask:byte;
       AUDF:byte;           // AUDFx (D200, D202, D204, D206) */
@@ -137,8 +136,7 @@ type
 
   pokey_chip=class(snd_chip_class)
         constructor Create(num:byte;clock:dword);
-        procedure Free;
-        destructor Destroy;
+        destructor free;
         procedure update;
         procedure reset;
       public
@@ -282,12 +280,7 @@ constructor pokey_channel.create;
 begin
 end;
 
-procedure pokey_channel.Free;
-begin
-self.Destroy;
-end;
-
-destructor pokey_channel.Destroy;
+destructor pokey_channel.free;
 begin
 end;
 
@@ -516,18 +509,11 @@ begin
 	self.tsample_num:=init_channel;
 end;
 
-destructor pokey_chip.Destroy;
+destructor pokey_chip.free;
 var
   i:byte;
 begin
-for i:=0 to (POKEY_CHANNELS-1) do begin
-    self.channel[i].free;
-end;
-end;
-
-procedure pokey_chip.Free;
-begin
-  self.Destroy;
+for i:=0 to (POKEY_CHANNELS-1) do self.channel[i].free;
 end;
 
 function pokey_chip.read(offset:word):byte;

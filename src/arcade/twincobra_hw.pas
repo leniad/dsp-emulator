@@ -149,7 +149,7 @@ snd_z80.init_sound(twincobr_update_sound);
 main_tms32010:=cpu_tms32010.create(14000000,286);
 main_tms32010.change_io_calls(twincobr_BIO_r,nil,twincobr_dsp_r,nil,nil,nil,nil,nil,nil,twincobr_dsp_addrsel_w,twincobr_dsp_w,nil,twincobr_dsp_bio_w,nil,nil,nil,nil);
 //Sound Chips
-ym3812_0:=ym3812_chip.create(0,3500000);
+ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
 ym3812_0.change_irq_calls(snd_irq);
 case main_vars.tipo_maquina of
     146:begin

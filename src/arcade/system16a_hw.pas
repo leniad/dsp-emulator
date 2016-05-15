@@ -218,7 +218,8 @@ snd_z80.change_ram_calls(system16a_snd_getbyte,system16a_snd_putbyte);
 snd_z80.change_io_calls(system16a_snd_inbyte,system16a_snd_outbyte);
 snd_z80.init_sound(system16a_sound_act);
 //PPI 825
-init_ppi8255(0,nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
+pia8255_0:=pia8255_chip.create;
+pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
 //Timers
 YM2151_Init(0,4000000,nil,ym2151_snd_irq);
 //DIP
@@ -597,7 +598,7 @@ procedure cerrar_system16a;
 begin
 main_m68000.free;
 snd_z80.free;
-close_ppi8255(0);
+pia8255_0.free;
 YM2151_close(0);
 close_audio;
 close_video;
@@ -610,7 +611,7 @@ begin
  main_m68000.reset;
  snd_z80.reset;
  YM2151_reset(0);
- reset_ppi8255(0);
+ pia8255_0.reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -652,7 +653,7 @@ var
   res:word;
 begin
 case (direccion and $3000) of
-	$0000:res:=ppi8255_r(0,(direccion shr 1) and 3);
+	$0000:res:=pia8255_0.read((direccion shr 1) and 3);
 	$1000:case (direccion and 7) of
           0,1:res:=marcade.in0; //SERVICE
           2,3:res:=marcade.in1; //P1
@@ -808,7 +809,7 @@ end;
 procedure standard_io_w(direccion,valor:word);inline;
 begin
 case (direccion and $3000) of
-		$0:ppi8255_w(0,(direccion shr 1) and $3,valor and $ff);
+		$0:pia8255_0.write((direccion shr 1) and $3,valor and $ff);
 end;
 end;
 
@@ -861,7 +862,7 @@ res:=$ff;
 case direccion of
   $0..$7fff,$f800..$ffff:res:=mem_snd[direccion];
   $e800:begin
-          ppi8255_set_port(0,2,0);
+          pia8255_0.set_port(2,0);
           res:=sound_latch;
         end;
 end;
@@ -881,7 +882,7 @@ res:=$ff;
 case (puerto and $ff) of
   $00..$3f:if (puerto and 1)<>0 then res:=YM2151_status_port_read(0);
   $c0..$ff:begin
-              ppi8255_set_port(0,2,0);
+              pia8255_0.set_port(2,0);
               res:=sound_latch;
            end;
 end;

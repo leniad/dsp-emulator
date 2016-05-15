@@ -187,9 +187,9 @@ snd_z80.change_ram_calls(ninjakid2_snd_getbyte,ninjakid2_snd_putbyte);
 snd_z80.change_io_calls(ninjakid2_snd_inbyte,ninjakid2_snd_outbyte);
 snd_z80.init_sound(ninjakid2_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(0,1500000,2);
+ym2203_0:=ym2203_chip.create(1500000,2);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(1,1500000,2);
+ym2203_1:=ym2203_chip.create(1500000,2);
 case main_vars.tipo_maquina of
   120:begin
         update_background:=bg_ninjakid2;

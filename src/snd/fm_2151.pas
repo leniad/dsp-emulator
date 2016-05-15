@@ -8,18 +8,18 @@ type
   YM2151Operator=record
 	  phase:dword;					// accumulated operator phase */
 	  freq:dword;					// operator frequency count */
-	  dt1:integer;					// current DT1 (detune 1 phase inc/decrement) value */
+	  dt1:longint;					// current DT1 (detune 1 phase inc/decrement) value */
 	  mul:dword;					// frequency count multiply */
 	  dt1_i:dword;					// DT1 index * 32 */
 	  dt2:dword;					// current DT2 (detune 2) value */
 	  connect:pinteger;				// operator output 'direction' */
 	// only M1 (operator 0) is filled with this data: */
 	  mem_connect:pinteger;			// where to put the delayed sample (MEM) */
-	  mem_value:integer;				// delayed sample (MEM) value */
+	  mem_value:longint;				// delayed sample (MEM) value */
 	// channel specific data; note: each operator number 0 contains channel specific data */
 	  fb_shift:dword;				// feedback shift value for operators 0 in each channel */
-	  fb_out_curr:integer;			// operator feedback value (used only by operators 0) */
-	  fb_out_prev:integer;			// previous feedback value (used only by operators 0) */
+	  fb_out_curr:longint;			// operator feedback value (used only by operators 0) */
+	  fb_out_prev:longint;			// previous feedback value (used only by operators 0) */
 	  kc:dword;						// channel KC (copied to all operators) */
 	  kc_i:dword;					// just for speedup */
 	  pms:dword;					// channel PMS */
@@ -30,7 +30,7 @@ type
 	  eg_sh_ar:byte;				//  (attack state) */
 	  eg_sel_ar:byte;				//  (attack state) */
 	  tl:dword;						// Total attenuation Level */
-	  volume:integer;					// current envelope attenuation level */
+	  volume:longint;					// current envelope attenuation level */
 	  eg_sh_d1r:byte;				//  (decay state) */
 	  eg_sel_d1r:byte;				//  (decay state) */
 	  d1l:dword;					// envelope switches to sustain state after reaching this level */
@@ -69,7 +69,7 @@ type
 	  amd:byte;					// LFO Amplitude Modulation Depth   */
 	  pmd:smallint;					// LFO Phase Modulation Depth       */
 	  lfa:dword;					// LFO current AM output            */
-	  lfp:integer;					// LFO current PM output            */
+	  lfp:longint;					// LFO current PM output            */
 	  test:byte;					// TEST register */
 	  ct:byte;						// output control pins (bit1-CT2, bit0-CT1) */
 	  noise:dword;					// noise enable/period register (bit 7 - noise enable, bits 4-0 - noise period */
@@ -108,7 +108,7 @@ type
 
 	{  Frequency deltas for DT1. These deltas alter operator frequency
     *   after it has been taken from frequency-deltas table.}
-	  dt1_freq:array[0..(8*32)-1] of integer;			// 8 DT1 levels, 32 KC values */
+	  dt1_freq:array[0..(8*32)-1] of longint;			// 8 DT1 levels, 32 KC values */
 	  noise_tab:array[0..31] of dword;			// 17bit Noise Generator periods */
 	  IRQ_Handler:procedure (irqstate:byte);
 	  porthandler:procedure (valor:byte);		// port write function handler */
@@ -992,9 +992,9 @@ end;
 function op_calc1(OP:pYM2151Operator;env:dword;pm:integer):integer;
 var
 	p:dword;
-	i:integer;
+	i:longint;
 begin
-	i:=(integer(OP.phase) and not(FREQ_MASK))+pm;
+	i:=(OP.phase and not(FREQ_MASK))+pm;
 	p:=(env shl 3)+sin_tab[sshr(i,FREQ_SH) and SIN_MASK];
 	if (p>=TL_TAB_LEN) then op_calc1:=0
 	  else op_calc1:=tl_tab[p];
@@ -1010,7 +1010,7 @@ var
 	op,op2,op3,op4:pYM2151Operator;
   env,AM:dword;
   chip:pYM2151;
-  _out:integer;
+  _out:longint;
 begin
   chip:=FM2151[num];
   AM:=0;
@@ -1062,7 +1062,7 @@ var
 	op,op2,op3,op4:pYM2151Operator;
 	env,AM,noiseout:dword;
   chip:pYM2151;
-  _out,h:integer;
+  _out,h:longint;
 begin
   chip:=FM2151[num];
   AM:=0;
@@ -1183,7 +1183,7 @@ var
 	a,p:integer;
   chip:pYM2151;
   j:dword;
-  mod_ind:integer;
+  mod_ind:longint;
   kc_channel:dword;
   n_op:byte;
 begin

@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 237
+  Left = 302
   Height = 355
-  Top = 204
+  Top = 180
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.6.0.1'
+  LCLVersion = '1.7'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -2467,6 +2467,7 @@ object principal1: Tprincipal1
           end
           object pbaction1: TMenuItem
             Caption = 'Pinball Action'
+            OnClick = CambiarMaquina
           end
           object spaceinvaders1: TMenuItem
             Caption = 'Space Invaders'
@@ -2976,6 +2977,17 @@ object principal1: Tprincipal1
           object Gradius31: TMenuItem
             Caption = 'Gradius III'
             OnClick = CambiarMaquina
+          end
+          object MenuItem29: TMenuItem
+            Caption = 'Karnov HW'
+            object karnov1: TMenuItem
+              Caption = 'Karnov'
+              OnClick = CambiarMaquina
+            end
+            object chelnov1: TMenuItem
+              Caption = 'Chelnov'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object MenuItem11: TMenuItem

@@ -115,7 +115,7 @@ snd_z80.change_ram_calls(terracre_snd_getbyte,terracre_snd_putbyte);
 snd_z80.change_io_calls(terracre_snd_inbyte,terracre_snd_outbyte);
 snd_z80.init_sound(terracre_sound_update);
 //Sound Chips
-YM2203_0:=ym2203_chip.create(0,4000000,2);
+YM2203_0:=ym2203_chip.create(4000000,2);
 dac_0:=dac_chip.Create(0.5);
 dac_1:=dac_chip.Create(0.5);
 init_timer(snd_z80.numero_cpu,4000000/128/57.444853,terracre_snd_timer,true);

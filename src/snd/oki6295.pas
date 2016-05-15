@@ -24,7 +24,7 @@ type
 	        volume:dword;			// output volume
       end;
       snd_okim6295=class(snd_chip_class)
-            constructor Create(num:byte;clock:dword;pin7:byte;amp:single=1);
+            constructor Create(clock:dword;pin7:byte;amp:single=1);
             destructor free;
           public
             procedure reset;
@@ -80,6 +80,7 @@ const
 var
     //lookup table for the precomputed difference */
     diff_lookup:array[0..(49*16)-1] of single;
+    chips_total:integer=-1;
 
 procedure compute_tables;inline;
 const
@@ -106,15 +107,16 @@ begin
   end;
 end;
 
-constructor snd_okim6295.Create(num:byte;clock:dword;pin7:byte;amp:single=1);
+constructor snd_okim6295.Create(clock:dword;pin7:byte;amp:single=1);
 begin
+  chips_total:=chips_total+1;
   getmem(self.rom,$40000);
 	compute_tables;
 	self.bank_installed:=false;
   self.tsample_num:=init_channel;
   self.amp:=amp;
   self.clock:=clock;
-  case num of
+  case chips_total of
       0:self.ntimer:=init_timer(sound_status.cpu_num,1,internal_update_oki6295_0,true);
       1:self.ntimer:=init_timer(sound_status.cpu_num,1,internal_update_oki6295_1,true);
   end;
@@ -125,10 +127,8 @@ end;
 
 destructor snd_okim6295.free;
 begin
-if self.rom<>nil then begin
-  freemem(self.rom);
-  self.rom:=nil;
-end;
+freemem(self.rom);
+chips_total:=chips_total-1;
 end;
 
 function snd_okim6295.get_rom_addr:pbyte;

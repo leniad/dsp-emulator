@@ -21,8 +21,7 @@ type
         preg_m6805=^reg_m6805;
         cpu_m6805=class(cpu_class)
             constructor create(clock:dword;frames_div:word;tipo_cpu:byte);
-            destructor Destroy;
-            procedure Free;
+            destructor free;
           public
             pedir_nmi,nmi_state:byte;
             pedir_irq:array[0..9] of byte;
@@ -96,15 +95,9 @@ self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
 cpu_quantity:=cpu_quantity+1;
 end;
 
-destructor cpu_m6805.Destroy;
+destructor cpu_m6805.free;
 begin
 freemem(self.r);
-self.r:=nil;
-end;
-
-procedure cpu_m6805.Free;
-begin
-  if Self.r<>nil then Destroy;
 end;
 
 procedure cpu_m6805.reset;

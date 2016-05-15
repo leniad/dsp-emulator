@@ -75,7 +75,7 @@ snd_z80.change_ram_calls(ironhorse_snd_getbyte,ironhorse_snd_putbyte);
 snd_z80.change_io_calls(ironhorse_snd_inbyte,ironhorse_snd_outbyte);
 snd_z80.init_sound(ironhorse_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,3072000);
+ym2203_0:=ym2203_chip.create(3072000);
 //cargar roms
 if not(cargar_roms(@memoria[0],@ironhorse_rom[0],'ironhors.zip',0)) then exit;
 //roms sonido

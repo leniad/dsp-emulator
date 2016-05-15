@@ -84,7 +84,7 @@ snd_z80:=cpu_z80.create(4000000,256);
 snd_z80.change_ram_calls(volfied_snd_getbyte,volfied_snd_putbyte);
 snd_z80.init_sound(volfied_update_sound);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(0,4000000,4);
+ym2203_0:=ym2203_chip.create(4000000,4);
 ym2203_0.change_io_calls(volfied_dipa,volfied_dipb,nil,nil);
 ym2203_0.change_irq_calls(snd_irq);
 //MCU

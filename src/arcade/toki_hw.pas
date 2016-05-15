@@ -97,9 +97,9 @@ snd_z80:=cpu_z80.create(3579545,256);
 snd_z80.change_ram_calls(toki_snd_getbyte,toki_snd_putbyte);
 snd_z80.init_sound(toki_sound_update);
 //Sound Chips
-ym3812_0:=ym3812_chip.create(0,3579545);
+ym3812_0:=ym3812_chip.create(YM3812_FM,3579545);
 ym3812_0.change_irq_calls(snd_irq);
-oki_6295_0:=snd_okim6295.Create(0,1000000,OKIM6295_PIN7_HIGH,0.40);
+oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.40);
 if not(cargar_roms(@memoria_temp2[0],@toki_adpcm,'toki.zip',1)) then exit;
 ptemp:=oki_6295_0.get_rom_addr;
 for f:=0 to $1ffff do begin

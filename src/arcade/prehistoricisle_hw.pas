@@ -95,7 +95,7 @@ snd_z80.change_ram_calls(prehisle_snd_getbyte,prehisle_snd_putbyte);
 snd_z80.change_io_calls(prehisle_snd_inbyte,prehisle_snd_outbyte);
 snd_z80.init_sound(prehisle_sound_update);
 //Sound Chips
-ym3812_0:=ym3812_chip.create(0,4000000);
+ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
 ym3812_0.change_irq_calls(snd_irq);
 upd7759_0:=upd7759_chip.create(640000,0.9);
 //cargar roms

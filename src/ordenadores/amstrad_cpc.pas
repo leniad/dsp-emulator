@@ -362,7 +362,8 @@ tape_sound_channel:=init_channel;
 //por lo que hay programas que usan el B!!! (Bestial Warrior por ejemplo)
 ay8910_0:=ay8910_chip.create(1000000,1);
 ay8910_0.change_io_calls(cpc_porta_read,cpc_porta_read,nil,nil);
-init_ppi8255(0,port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
+pia8255_0:=pia8255_chip.create;
+pia8255_0.change_ports(port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
 cpc_load_roms;
 cpc_reset;
 iniciar_cpc:=true;
@@ -373,7 +374,7 @@ begin
 freemem(cpc_crt);
 freemem(cpc_ppi);
 main_z80.free;
-close_ppi8255(0);
+pia8255_0.free;
 ay8910_0.free;
 clear_disk(0);
 clear_disk(1);
@@ -385,7 +386,7 @@ procedure cpc_reset;
 begin
   main_z80.reset;
   ay8910_0.reset;
-  reset_ppi8255(0);
+  pia8255_0.reset;
   reset_audio;
   if cinta_tzx.cargada then cinta_tzx.play_once:=false;
   if not(dsk[0].abierto) then change_caption(llamadas_maquina.caption)
@@ -825,7 +826,7 @@ if (puerto and $c000)=$4000 then write_ga(puerto,valor)
   else if (puerto and $4000)=0 then write_crtc(puerto,valor)
     else if (puerto and $2000)=0 then cpc_ga.rom_selected:=valor and $f
       else if (puerto and $1000)=0 then exit //printer
-        else if (puerto and $0800)=0 then ppi8255_w(0,(puerto and $300) shr 8,valor)
+        else if (puerto and $0800)=0 then pia8255_0.write((puerto and $300) shr 8,valor)
           else if (puerto and $0581)=$101 then WriteFDCData(valor);
 end;
 
@@ -845,7 +846,7 @@ var
 begin
 res:=$FF;
 if (puerto and $4000)=0 then res:=read_crtc(puerto)
-  else if (puerto and $0800)=0 then res:=ppi8255_r(0,(puerto and $300) shr 8)
+  else if (puerto and $0800)=0 then res:=pia8255_0.read((puerto and $300) shr 8)
     else if (puerto and $0480)=$0 then begin
       case (puerto and $101) of
         $100:res:=ReadFDCStatus;

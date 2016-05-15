@@ -454,8 +454,6 @@ case direccion of
                     end;
               end;
           end else sram_enable:=false;
-
-
         end;
 end;
 end;

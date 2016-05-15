@@ -90,8 +90,8 @@ snd_m6809:=cpu_m6809.Create(1500000,262);
 snd_m6809.change_ram_calls(getbyte_snd_expraid,putbyte_snd_expraid);
 snd_m6809.init_sound(expraid_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,1500000,0.3,0.3);
-ym3812_0:=ym3812_chip.create(0,3000000,0.6);
+ym2203_0:=ym2203_chip.create(1500000,0.3,0.3);
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,0.6);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 if not(cargar_roms(@memoria,@expraid_rom,'exprraid.zip',0)) then exit;

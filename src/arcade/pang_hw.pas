@@ -103,7 +103,7 @@ main_z80.init_sound(pang_sound_update);
 eeprom_0:=eeprom_class.create(6,16,'0110','0101','0111');
 //Sound Chips
 //YM2413  --> Falta!
-oki_6295_0:=snd_okim6295.Create(0,1000000,OKIM6295_PIN7_HIGH,2);
+oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,2);
 getmem(ptemp,$100000);
 getmem(mem_temp2,$50000);
 getmem(mem_temp3,$50000);

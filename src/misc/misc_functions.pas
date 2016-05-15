@@ -2,7 +2,7 @@ unit misc_functions;
 
 interface
 uses {$IFDEF windows}windows,{$ENDIF}{$ifdef fpc}crc,{$else}
-     {$IFDEF windows}pngimage,{$ENDIF}{$endif}sysutils,forms,controls;
+     {$IFDEF windows}vcl.imaging.pngimage,{$ENDIF}{$endif}sysutils,vcl.forms,vcl.controls;
 
 type
   TSistema=(StNes,StColecovision,STGb,StChip8,StAmstrad,StAmstradROM,StROM,StSMS);

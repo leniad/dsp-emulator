@@ -1216,7 +1216,7 @@ cpc_sna.rom_config:=cpc_ga.rom_selected;
 //PIA a,b,c,control
 cpc_sna.ppi_a:=cpc_ppi.port_a_read_latch;
 cpc_sna.ppi_c:=cpc_ppi.port_c_write_latch;
-cpc_sna.ppi_control:=pia_8255[0].control;
+cpc_sna.ppi_control:=pia8255_0.read(3);
 //AY
 cpc_sna.ay_control:=ay8910_0.get_control;
 for f:=0 to $f do cpc_sna.ay_regs[f]:=ay8910_0.get_reg(f);
@@ -1646,8 +1646,7 @@ inc(ptemp2,10);
 comprimido:=sn_76496_0.save_snapshot(ptemp2);
 coleco_block.longitud:=comprimido;
 copymemory(ptemp,coleco_block,10);
-inc(ptemp,10);inc(longitud,10);
-inc(ptemp,comprimido);inc(longitud,comprimido);
+longitud:=longitud+10+comprimido;
 //Final
 freemem(coleco_header);
 freemem(coleco_block);

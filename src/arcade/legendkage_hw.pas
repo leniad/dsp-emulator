@@ -89,9 +89,9 @@ snd_z80.init_sound(lk_hw_sound_update);
 main_m6805:=cpu_m6805.create(3000000,$100,tipo_m68705);
 main_m6805.change_ram_calls(mcu_lk_hw_getbyte,mcu_lk_hw_putbyte);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(0,4000000);
+ym2203_0:=ym2203_chip.create(4000000);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(1,4000000);
+ym2203_1:=ym2203_chip.create(4000000);
 //cargar roms
 if not(cargar_roms(@memoria[0],@lk_rom[0],'lkage.zip',0)) then exit;
 //cargar roms snd

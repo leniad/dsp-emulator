@@ -2,7 +2,7 @@ unit nz80;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,z80daisy,timer_engine,dialogs,vars_hide;
+     main_engine,z80daisy,timer_engine,vcl.dialogs,vars_hide;
 
 const
     paridad:array [0..255] of boolean=(

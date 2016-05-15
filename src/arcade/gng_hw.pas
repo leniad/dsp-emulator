@@ -102,8 +102,8 @@ snd_z80.init_sound(gng_sound_update);
 //IRQ Sound CPU
 init_timer(snd_z80.numero_cpu,3000000/(4*60),gng_snd_irq,true);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,1500000,0.2);
-ym2203_1:=ym2203_chip.create(1,1500000,0.2);
+ym2203_0:=ym2203_chip.create(1500000,0.2);
+ym2203_1:=ym2203_chip.create(1500000,0.2);
 //cargar roms
 if not(cargar_roms(@memoria_temp,@gng_rom,'gng.zip',0)) then exit;
 //Pongo las ROMs en su banco

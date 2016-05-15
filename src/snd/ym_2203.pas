@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 type
   ym2203_chip=class(snd_chip_class)
-       constructor create(num:byte;clock:dword;amp:single=1;ay_amp:single=1);
+       constructor create(clock:dword;amp:single=1;ay_amp:single=1);
        destructor free;
     public
        procedure reset;
@@ -43,9 +43,12 @@ procedure ym2203_1_init_timer_a(count:single);
 procedure ym2203_1_init_timer_b(count:single);
 
 implementation
+var
+  chips_total:integer=-1;
 
-constructor ym2203_chip.create(num:byte;clock:dword;amp:single;ay_amp:single);
+constructor ym2203_chip.create(clock:dword;amp:single;ay_amp:single);
 begin
+  chips_total:=chips_total+1;
   self.amp:=amp;
   //El PSG
   self.ay8910_int:=ay8910_chip.create(clock,ay_amp,true);
@@ -58,8 +61,8 @@ begin
   self.tsample_num:=init_channel;
   self.opn.ST.IRQ_Handler:=nil;
   self.timer_adjust:=sound_status.cpu_clock/self.OPN.ST.clock;
-  self.chip_number:=num;
-  case num of
+  self.chip_number:=chips_total;
+  case chips_total of
     0:begin
         self.timer1:=init_timer(sound_status.cpu_num,1,ym2203_0_timer1,false);
         self.timer2:=init_timer(sound_status.cpu_num,1,ym2203_0_timer2,false);
@@ -92,6 +95,7 @@ begin
 opn_close(self.OPN);
 self.OPN:=nil;
 self.ay8910_int.Free;
+chips_total:=chips_total-1;
 end;
 
 procedure ym2203_chip.Reset;

@@ -83,9 +83,6 @@ uses amstrad_cpc,lenslock;
 {$R *.dfm}
 
 procedure TConfigCPC.Button13Click(Sender: TObject);
-var
-  f:byte;
-  long:integer;
 begin
 if radiobutton1.Checked then cpc_ga.cpc_model:=0
   else if radiobutton2.Checked then cpc_ga.cpc_model:=1

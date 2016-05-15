@@ -169,8 +169,8 @@ case main_vars.tipo_maquina of
       snd_m6809.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
       snd_m6809.init_sound(bigk_sound_update);
       //Sound Chips
-      ym3812_0:=ym3812_chip.create(0,3580000);
-      oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH,1);
+      ym3812_0:=ym3812_chip.create(YM3812_FM,3580000);
+      oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1);
       //Cargar ADPCM ROMS
       if not(cargar_roms(oki_6295_0.get_rom_addr,@bigkarnak_adpcm,'bigkarnk.zip',1)) then exit;
       //cargar roms
@@ -200,7 +200,7 @@ case main_vars.tipo_maquina of
         main_m68000.change_ram16_calls(thoop_getword,thoop_putword);
         main_m68000.init_sound(thoop_sound_update);
         //Sound Chips
-        oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH,2);
+        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS
         getmem(memoria_temp,$400000);
         if not(cargar_roms(memoria_temp,@thoop_adpcm,'thoop.zip',1)) then exit;
@@ -241,7 +241,7 @@ case main_vars.tipo_maquina of
         main_m68000.change_ram16_calls(thoop_getword,thoop_putword);
         main_m68000.init_sound(thoop_sound_update);
         //Sound Chips
-        oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH,2);
+        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS
         getmem(memoria_temp,$400000);
         if not(cargar_roms(memoria_temp,@squash_adpcm,'squash.zip',1)) then exit;
@@ -280,7 +280,7 @@ case main_vars.tipo_maquina of
         main_m68000.change_ram16_calls(thoop_getword,biomtoy_putword);
         main_m68000.init_sound(thoop_sound_update);
         //Sound Chips
-        oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH,2);
+        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS
         getmem(memoria_temp,$400000);
         if not(cargar_roms(memoria_temp,@biomtoy_adpcm,'biomtoy.zip',0)) then exit;

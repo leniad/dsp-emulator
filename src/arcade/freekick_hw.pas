@@ -107,8 +107,10 @@ case main_vars.tipo_maquina of
         //analog
         init_analog(main_z80.numero_cpu,main_z80.clock,30,15,$ff,$FFFF,0,false);
         //PPI
-        init_ppi8255(0,nil,nil,ppi0_c_read,ppi0_a_write,ppi0_b_write,nil);
-        init_ppi8255(1,ppi1_a_read,ppi1_b_read,ppi1_c_read,nil,nil,nil);
+        pia8255_0:=pia8255_chip.create;
+        pia8255_0.change_ports(nil,nil,ppi0_c_read,ppi0_a_write,ppi0_b_write,nil);
+        pia8255_1:=pia8255_chip.create;
+        pia8255_1.change_ports(ppi1_a_read,ppi1_b_read,ppi1_c_read,nil,nil,nil);
         //cargar roms
         if not(cargar_roms(@memoria[0],@freekick_rom,'freekick.zip')) then exit;
         //snd rom
@@ -169,8 +171,8 @@ sn_76496_0.Free;
 sn_76496_1.Free;
 sn_76496_2.Free;
 sn_76496_3.Free;
-close_ppi8255(0);
-close_ppi8255(1);
+pia8255_0.free;
+pia8255_1.free;
 close_audio;
 close_video;
 end;
@@ -182,8 +184,8 @@ begin
  sn_76496_1.reset;
  sn_76496_2.reset;
  sn_76496_3.reset;
- reset_ppi8255(0);
- reset_ppi8255(1);
+ pia8255_0.reset;
+ pia8255_1.reset;
  reset_audio;
  snd_rom_addr:=0;
  spinner:=false;
@@ -272,8 +274,8 @@ function freekick_getbyte(direccion:word):byte;
 begin
 case direccion of
   $0000..$e8ff:freekick_getbyte:=memoria[direccion];
-  $ec00..$ec03:freekick_getbyte:=ppi8255_r(0,direccion and $3);
-  $f000..$f003:freekick_getbyte:=ppi8255_r(1,direccion and $3);
+  $ec00..$ec03:freekick_getbyte:=pia8255_0.read(direccion and $3);
+  $f000..$f003:freekick_getbyte:=pia8255_1.read(direccion and $3);
   $f800:freekick_getbyte:=marcade.in0;
   $f801:freekick_getbyte:=marcade.in1;
   $f802:freekick_getbyte:=0;
@@ -291,8 +293,8 @@ case direccion of
                         gfx[0].buffer[direccion and $3ff]:=true;
                         memoria[direccion]:=valor;
                      end;
-        $ec00..$ec03:ppi8255_w(0,direccion and $3,valor);
-        $f000..$f003:ppi8255_w(1,direccion and $3,valor);
+        $ec00..$ec03:pia8255_0.write(direccion and $3,valor);
+        $f000..$f003:pia8255_1.write(direccion and $3,valor);
         $f804:nmi_enable:=(valor and 1)<>0;
         $f806:spinner:=(valor and 1)=0;
         $fc00:sn_76496_0.Write(valor);

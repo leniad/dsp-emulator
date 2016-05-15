@@ -83,7 +83,7 @@ pandora.mask_nchar:=$fff;
 pandora.color_offset:=0;
 pandora.clear_screen:=true;
 //Sound Chips
-ym3812_0:=ym3812_chip.create(0,3000000);
+ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@snowbros_rom[0],'snowbros.zip',0)) then exit;

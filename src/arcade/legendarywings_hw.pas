@@ -180,8 +180,8 @@ snd_z80.init_sound(lwings_sound_update);
 init_timer(snd_z80.numero_cpu,3000000/222,lwings_snd_irq,true);
 snd_z80.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(0,1500000,2);
-ym2203_1:=ym2203_chip.create(1,1500000,2);
+ym2203_0:=ym2203_chip.create(1500000,0.20,0.10);
+ym2203_1:=ym2203_chip.create(1500000,0.20,0.10);
 case main_vars.tipo_maquina of
   59:begin
         //Main CPU
@@ -229,7 +229,7 @@ case main_vars.tipo_maquina of
         sub_z80:=cpu_z80.create(3000000,256);
         sub_z80.change_ram_calls(trojan_misc_getbyte,trojan_misc_putbyte);
         sub_z80.change_io_calls(trojan_inbyte,trojan_outbyte);
-        msm_5205_0:=MSM5205_chip.create(0,445000,MSM5205_SEX_4B,2,nil);
+        msm_5205_0:=MSM5205_chip.create(445000,MSM5205_SEX_4B,0.50,nil);
         init_timer(sub_z80.numero_cpu,3000000/4000,trojan_adpcm_instruccion,true);
         //Graficos
         if not(cargar_roms(@memoria_temp[0],@trojan_rom[0],'trojan.zip',0)) then exit;

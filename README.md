@@ -1,41 +1,47 @@
-<<<<<<< HEAD
-﻿# dsp-emulator
-DSP Emulator status<br>
+#DSP Emulator status<br>
+<b>15/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary.</b><br><pre>
+-General
+    +YM3812: Added chip YM3526
+    +PIA 8255
+        -Converted to classes
+        -Device driver clean
+-Karnov HW
+    +Karnov: Added driver with sound
+    +Chelnov: Added driver with sound
+</pre><br>
+<img src='http://img1.imagilive.com/0516/karnov.png'><img src='http://img1.imagilive.com/0516/chelnov.png'><br>
 <b>08/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary.</b><br><pre>
-- General
-    + Fixed snapshots loading in some drivers
-    + Fixed value and type of the amplifier in some sound chips
-    + Cleaning some CPUs
-    + Completely eliminated references to the 'SDL2.pas' unit and improved the 'lib_sdl2.pas' to be independent
-    + GFX: fixed left rotate of the nonsquare graphics
-    + Z80
-        - Removed the special case of HALT opcode
-        - Fixed possible loose of timings after the execution of an opcode
-    + YM3812: Converted to classes
-    + Konami Sound
-        - Converted to classes
-        - Integrated Z80 sound CPU
-        - Integrated Frogger and Scramble sound driver
-        - Improved and corrected some drivers
-        - Separated into four types 'Time Pilot', 'Jungler', 'Frogger' and 'scamble'
-    + Updated 'Galaxians' samples and added 'Space Invaders' samples
-- Sega System 1
-    + Added custom Z80 timings
-- Popeye
-    + Added 2nd player controls
-    + Driver cleaning
-- Galaxian HW
-    + Galaxian: Added several sounds (samples)
-    + Fixed stars background
-- Space Invaders
-    + Added driver with sound (samples)
-- Centipede
-    + Added driver with sound
+-General
+    +Fixed snapshots loading in some drivers
+    +Fixed value and type of the amplifier in some sound chips
+    +Cleaning some CPUs
+    +Completely eliminated references to the 'SDL2.pas' unit and improved the 'lib_sdl2.pas' to be independent
+    +GFX: fixed left rotate of the nonsquare graphics
+    +Z80
+        -Removed the special case of HALT opcode
+        -Fixed possible loose of timings after the execution of an opcode
+    +YM3812: Converted to classes
+    +Konami Sound
+        -Converted to classes
+        -Integrated Z80 sound CPU
+        -Integrated Frogger and Scramble sound driver
+        -Improved and corrected some drivers
+        -Separated into four types 'Time Pilot', 'Jungler', 'Frogger' and 'scamble'
+    +Updated 'Galaxians' samples and added 'Space Invaders' samples
+-Sega System 1
+    +Added custom Z80 timings
+-Popeye
+    +Added 2nd player controls
+    +Driver cleaning
+-Galaxian HW
+    +Galaxian: Added several sounds (samples)
+    +Fixed stars background
+-Space Invaders
+    +Added driver with sound (samples)
+-Centipede
+    +Added driver with sound
 </pre><br>
 <img src='http://img1.imagilive.com/0516/spaceinvaders.png'><img src='http://img1.imagilive.com/0516/centipede.png'><br>
-=======
-﻿# DSP Emulator status<br>
->>>>>>> origin/master
 <b>10/04/16 - DSP Emulator 0.16b2 FINAL released. Source, Win32/64 and Linux 32/64 available.</b><br>
 So much updates and enhancements, and at last a ROM/Samples information export. Please read the documentation or the wiki (Spectrum and Amstrad CPC have keyboard changes).<br>
 Many thanks to greatxerox and Davide.<br><br>

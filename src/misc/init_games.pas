@@ -28,7 +28,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   operationwolf_hw,outrun_hw,taitosj_hw,vulgus_hw,ddragon3_hw,blockout_hw,
   foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw,freekick_hw,
   boogiewings_hw,pinballaction_hw,renegade_hw,tmnt_hw,gradius3_hw,
-  spaceinvaders_hw,centipede_hw;
+  spaceinvaders_hw,centipede_hw,karnov_hw;
 
 type
   tgame_desc=record
@@ -43,7 +43,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=224;
+  games_cont=226;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -265,6 +265,8 @@ const
   (name:'Gradius III';year:'1991';snd:1;hi:false;zip:'gradius3';grid:216;company:'Konami';rom:@gradius3),
   (name:'Space Invaders';year:'1978';snd:2;hi:false;zip:'invaders';grid:217;company:'Taito';rom:@spaceinv),
   (name:'Centipede';year:'1980';snd:1;hi:false;zip:'centiped';grid:218;company:'Atari';rom:@centipede),
+  (name:'Karnov';year:'1987';snd:1;hi:false;zip:'karnov';grid:219;company:'Data East';rom:@karnov),
+  (name:'Chelnov';year:'1987';snd:1;hi:false;zip:'chelnov';grid:220;company:'Data East';rom:@chelnov),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -506,6 +508,8 @@ case numero of
   216:principal1.CambiarMaquina(principal1.gradius31);
   217:principal1.CambiarMaquina(principal1.SpaceInvaders1);
   218:principal1.CambiarMaquina(principal1.Centipede1);
+  219:principal1.CambiarMaquina(principal1.Karnov1);
+  220:principal1.CambiarMaquina(principal1.chelnov1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -736,6 +740,8 @@ principal1.ssriders1.checked:=false;
 principal1.gradius31.checked:=false;
 principal1.SpaceInvaders1.Checked:=false;
 principal1.centipede1.checked:=false;
+principal1.karnov1.checked:=false;
+principal1.chelnov1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -934,6 +940,7 @@ case tmaquina of
   216:Cargar_gradius3;
   217:Cargar_spaceinv;
   218:Cargar_centipede;
+  219,220:Cargar_karnov;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1820,6 +1827,14 @@ end;
 if sender=principal1.centipede1 then begin
   tipo:=218;
   principal1.centipede1.Checked:=true;
+end;
+if sender=principal1.karnov1 then begin
+  tipo:=219;
+  principal1.karnov1.Checked:=true;
+end;
+if sender=principal1.chelnov1 then begin
+  tipo:=220;
+  principal1.chelnov1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

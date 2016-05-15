@@ -68,7 +68,7 @@ snd_z80.change_ram_calls(blockout_snd_getbyte,blockout_snd_putbyte);
 snd_z80.init_sound(blockout_sound_update);
 //Sound Chips
 YM2151_Init(0,3579545,nil,ym2151_snd_irq);
-oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH);
+oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
 if not(cargar_roms(oki_6295_0.get_rom_addr,@blockout_oki,'blockout.zip',1)) then exit;
 //cargar roms
 if not(cargar_roms16w(@rom[0],@blockout_rom[0],'blockout.zip',0)) then exit;

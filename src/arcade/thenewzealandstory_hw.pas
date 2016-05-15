@@ -133,7 +133,7 @@ case main_vars.tipo_maquina of
         snd_z80.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
         snd_z80.init_sound(tnzs_sound_update);
         //Sound Chips
-        ym2203_0:=ym2203_chip.create(0,3000000,2);
+        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_irq_calls(snd_irq);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@tnzs_rom,'tnzs.zip',1)) then exit;
@@ -165,7 +165,7 @@ case main_vars.tipo_maquina of
         sub_z80.init_sound(tnzs_sound_update);
         sub_z80.change_ram_calls(insectorx_misc_getbyte,insectorx_misc_putbyte);
         //Sound Chips
-        ym2203_0:=ym2203_chip.create(0,3000000,2);
+        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@insectorx_rom,'insectx.zip',1)) then exit;

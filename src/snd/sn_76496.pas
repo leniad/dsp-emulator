@@ -1,15 +1,13 @@
 unit sn_76496;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
-     sound_engine;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine;
 
 type
 
  SN76496_chip=class(snd_chip_class)
       constructor Create(clock:dword);
-      procedure Free;
-      destructor Destroy;
+      destructor free;
     public
       procedure Write(data:byte);
       procedure update;
@@ -50,13 +48,8 @@ begin
   self.reset;
 end;
 
-destructor sn76496_chip.Destroy;
+destructor sn76496_chip.free;
 begin
-end;
-
-procedure sn76496_chip.Free;
-begin
-self.destroy;
 end;
 
 type
@@ -70,7 +63,6 @@ type
         RNG:cardinal;
         NoiseFB:integer;
     end;
-
 
 function sn76496_chip.save_snapshot(data:pbyte):word;
 var

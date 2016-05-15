@@ -1,7 +1,7 @@
 ﻿unit upd765;
 
 interface
-uses sysutils,{$IFDEF WINDOWS}windows,{$ENDIF}dialogs;
+uses sysutils,{$IFDEF WINDOWS}windows,{$ENDIF}vcl.dialogs;
 
 var
   FloppyMotor:byte;

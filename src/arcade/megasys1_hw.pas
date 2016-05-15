@@ -315,8 +315,8 @@ snd_m68000:=cpu_m68000.create(7000000,$100);
 snd_m68000.change_ram16_calls(megasys1_snd_a_getword,megasys1_snd_a_putword);
 snd_m68000.init_sound(megasys1_sound_update);
 //Sound Chips
-oki_6295_0:=snd_okim6295.Create(0,4000000,OKIM6295_PIN7_HIGH);
-oki_6295_1:=snd_okim6295.Create(1,4000000,OKIM6295_PIN7_HIGH);
+oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
+oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
 YM2151_Init(0,3500000,nil,snd_irq);
 case main_vars.tipo_maquina of
   138:begin //P-47

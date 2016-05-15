@@ -1,7 +1,7 @@
 unit lenguaje;
 
 interface
-uses {$ifndef windows}LCLType,{$endif}sysutils,forms,dialogs,main_engine;
+uses {$ifndef windows}LCLType,{$endif}sysutils,vcl.forms,vcl.dialogs,main_engine;
 
 const
       MAX_IDIOMAS=7-1;
@@ -53,7 +53,7 @@ end;
 //Archivo
 principal1.archivo1.caption:=leng[idioma].archivo[0];
 principal1.idioma1.caption:=leng[idioma].archivo[1];
-principal1.LstRoms.Caption:=leng[idioma].archivo[4];
+principal1.LstRoms.caption:=leng[idioma].archivo[4];
 principal1.salir1.caption:=leng[idioma].archivo[2];
 principal1.acercade1.caption:=leng[idioma].archivo[3];
 //Opciones

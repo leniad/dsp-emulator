@@ -44,8 +44,7 @@ const
 type
   upd7759_chip=class(snd_chip_class)
        constructor create(clock:integer;amp:single);
-       procedure Free;
-       destructor Destroy;
+       destructor free;
     public
        procedure update;
        procedure reset;
@@ -117,15 +116,9 @@ begin
 	self.reset;
 end;
 
-destructor upd7759_chip.Destroy;
+destructor upd7759_chip.free;
 begin
 freemem(self.rom);
-self.rom:=nil;
-end;
-
-procedure upd7759_chip.Free;
-begin
-  if self.rom<>nil then self.Destroy;
 end;
 
 procedure upd7759_chip.reset;

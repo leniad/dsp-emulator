@@ -169,7 +169,7 @@ iniciar_video(288,224);
 main_m68000:=cpu_m68000.create(16000000,256);
 main_m68000.init_sound(pirates_sound_update);
 //sound
-oki_6295_0:=snd_okim6295.Create(0,1333333,OKIM6295_PIN7_LOW);
+oki_6295_0:=snd_okim6295.Create(1333333,OKIM6295_PIN7_LOW);
 getmem(ptempb,$200000);
 getmem(ptempb2,$200000);
 case main_vars.tipo_maquina of

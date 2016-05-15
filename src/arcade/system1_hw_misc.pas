@@ -208,7 +208,7 @@ iniciar_video(x,y);
 //Main CPU
 main_z80:=cpu_z80.create(19300000,260);
 main_z80.change_ram_calls(system1_getbyte,system1_putbyte);
-main_z80.change_timmings(@z80_op,@z80_cb,@z80_xy,@z80_xycb,@z80_ed,@z80_ex);
+main_z80.change_timmings(@z80_op,@z80_cb,@z80_dd,@z80_ddcb,@z80_ed,@z80_ex);
 //Sound CPU
 snd_z80:=cpu_z80.create(4000000,260);
 snd_z80.init_sound(system1_sound_update);
@@ -306,7 +306,8 @@ case main_vars.tipo_maquina of
       if not(cargar_roms(@lookup_memory[0],@mrviking_video_prom,'mrviking.zip',1)) then exit;
       dip_b:=$fc;
       //PPI 8255
-      init_ppi8255(0,nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
+      pia8255_0:=pia8255_chip.create;
+      pia8255_0.change_ports(nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
      end;
   153:begin  //Sega Ninja
       sprite_num_banks:=2;
@@ -352,7 +353,8 @@ case main_vars.tipo_maquina of
       if not(cargar_roms(@lookup_memory[0],@upndown_video_prom,'upndown.zip',1)) then exit;
       dip_b:=$fe;
       //PPI 8255
-      init_ppi8255(0,nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
+      pia8255_0:=pia8255_chip.create;
+      pia8255_0.change_ports(nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
      end;
   155:begin  //Flicky
       sprite_num_banks:=1;
@@ -388,7 +390,7 @@ procedure reset_system1;
 begin
 case main_vars.tipo_maquina of
   27,35,36,153,155:z80pio_reset(0);
-  152,154:reset_ppi8255(0);
+  152,154:pia8255_0.reset;
 end;
 sn_76496_0.reset;
 sn_76496_1.reset;

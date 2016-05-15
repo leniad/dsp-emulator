@@ -381,7 +381,7 @@ case main_vars.tipo_maquina of
              snd_z80.init_sound(cps1_sound_update);
              //Sound chips
              YM2151_Init(0,3579545,nil,cps1_ym2151_snd_irq);
-             oki_6295_0:=snd_okim6295.Create(0,1000000,OKIM6295_PIN7_HIGH,0.50);
+             oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.50);
            end;
   112,113:begin  //Qsound
            iniciar_audio(true);

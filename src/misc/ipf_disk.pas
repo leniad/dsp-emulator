@@ -1,7 +1,7 @@
 unit ipf_disk;
 
 interface
-uses dialogs{$ifdef windows},windows{$else},dynlibs{$endif};
+uses vcl.dialogs{$ifdef windows},windows{$else},dynlibs{$endif};
 
 const
   CAPS_MTRS=5;

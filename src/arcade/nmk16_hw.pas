@@ -205,8 +205,8 @@ main_m68000:=cpu_m68000.create(10000000,$100);
 main_m68000.change_ram16_calls(sbombers_getword,sbombers_putword);
 main_m68000.init_sound(nmk16_update_sound);
 //Sound Chips
-oki_6295_0:=snd_okim6295.Create(0,16000000 div 4,OKIM6295_PIN7_LOW);
-oki_6295_1:=snd_okim6295.Create(1,16000000 div 4,OKIM6295_PIN7_LOW);
+oki_6295_0:=snd_okim6295.Create(16000000 div 4,OKIM6295_PIN7_LOW);
+oki_6295_1:=snd_okim6295.Create(16000000 div 4,OKIM6295_PIN7_LOW);
 //Cargar ADPCM ROMS
 getmem(adpcm_rom[0],$100000);
 getmem(adpcm_rom[1],$100000);

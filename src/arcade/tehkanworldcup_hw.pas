@@ -103,11 +103,11 @@ snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
 snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
 snd_z80.init_sound(tehkanwc_sound_update);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1536000,1);
+ay8910_0:=ay8910_chip.create(1536000,0.50);
 ay8910_0.change_io_calls(nil,nil,tehkan_porta_write,tehkan_portb_write);
-ay8910_1:=ay8910_chip.create(1536000,1);
+ay8910_1:=ay8910_chip.create(1536000,0.50);
 ay8910_1.change_io_calls(tehkan_porta_read,tehkan_portb_read,nil,nil);
-msm_5205_0:=MSM5205_chip.create(0,384000,MSM5205_S96_4B,0.45,msm5205_sound);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.45,msm5205_sound);
 //cargar roms
 if not(cargar_roms(@memoria,@tehkanwc_rom,'tehkanwc.zip',0)) then exit;
 //cargar cpu 2

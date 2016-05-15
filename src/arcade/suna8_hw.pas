@@ -116,7 +116,7 @@ case main_vars.tipo_maquina of
         snd_z80.init_sound(snd_despues_instruccion);
         init_timer(snd_z80.numero_cpu,3000000/(60*4),hardhead_snd,true);
         //sound chips
-        ym3812_0:=ym3812_chip.create(0,3000000);
+        ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
         ay8910_0:=ay8910_chip.create(2000000,2);
         ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
         //Y para el DAC
@@ -153,7 +153,7 @@ case main_vars.tipo_maquina of
         snd_z80.change_ram_calls(hardhead2_snd_getbyte,hardhead2_snd_putbyte);
         snd_z80.init_sound(snd_despues_instruccion);
         //sound chips
-        ym3812_0:=ym3812_chip.create(0,3000000);
+        ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
         ay8910_0:=ay8910_chip.create(2000000,2);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@hardhead2_rom[0],'hardhea2.zip',0)) then exit;

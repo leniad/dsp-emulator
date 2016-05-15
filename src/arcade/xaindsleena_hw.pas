@@ -118,9 +118,9 @@ snd_m6809.init_sound(xain_sound_update);
 main_m6805:=cpu_m6805.create(3000000,272,tipo_m68705);
 main_m6805.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,3000000);
+ym2203_0:=ym2203_chip.create(3000000);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(1,3000000);
+ym2203_1:=ym2203_chip.create(3000000);
 //Main roms
 if not(cargar_roms(@memoria_temp[0],@xain_rom[0],'xsleena.zip',0)) then exit;
 //Pongo las ROMs en su banco

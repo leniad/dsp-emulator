@@ -2,7 +2,7 @@ unit Rom_engine;
 
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
-     sysutils,dialogs,file_engine,main_engine;
+     sysutils,vcl.dialogs,file_engine,main_engine;
 
 type
   tipo_roms=record

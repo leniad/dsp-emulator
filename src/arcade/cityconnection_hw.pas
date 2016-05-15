@@ -91,7 +91,7 @@ snd_m6809:=cpu_m6809.Create(640000,$100);
 snd_m6809.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
 snd_m6809.init_sound(citycon_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,1250000,2);
+ym2203_0:=ym2203_chip.create(1250000,2);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
 AY8910_0:=ay8910_chip.create(1250000,2);
 //cargar roms

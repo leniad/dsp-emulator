@@ -12,8 +12,7 @@ const
   type
     vdp_chip=class
       constructor create(pant:byte;irq_call:irq_type);
-      procedure Free;
-      destructor Destroy;
+      destructor free;
       public
         is_pal:boolean;
         hpos,hpos_temp,port_3f:byte;
@@ -98,14 +97,9 @@ begin
   end;
 end;
 
-destructor vdp_chip.destroy;
+destructor vdp_chip.free;
 begin
 self.tms.free;
-end;
-
-procedure vdp_chip.free;
-begin
-self.Destroy;
 end;
 
 constructor vdp_chip.create(pant:byte;irq_call:irq_type);

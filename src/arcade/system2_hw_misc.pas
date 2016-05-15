@@ -75,13 +75,14 @@ iniciar_video(256,224);
 main_z80:=cpu_z80.create(20000000,260);
 main_z80.change_ram_calls(system2_getbyte,system2_putbyte);
 main_z80.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
-main_z80.change_timmings(@z80_op,@z80_cb,@z80_xy,@z80_xycb,@z80_ed,@z80_ex);
+main_z80.change_timmings(@z80_op,@z80_cb,@z80_dd,@z80_ddcb,@z80_ed,@z80_ex);
 //Sound CPU
 snd_z80:=cpu_z80.create(4000000,260);
 snd_z80.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
 snd_z80.init_sound(system1_sound_update);
 //PPI 8255
-init_ppi8255(0,nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
+pia8255_0:=pia8255_chip.create;
+pia8255_0.change_ports(nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(2000000);
 sn_76496_1:=sn76496_chip.Create(4000000);
@@ -155,7 +156,7 @@ end;
 
 procedure reset_system2;
 begin
-reset_ppi8255(0);
+pia8255_0.reset;
 sn_76496_0.reset;
 sn_76496_1.reset;
 main_z80.reset;

@@ -240,7 +240,7 @@ case direccion of
             if ((sound_data[sound2_pos]=4) and (sound_data[(sound2_pos+1) and 3]=8) and (sound_data[(sound2_pos+2) and 3]=12) and (sound_data[(sound2_pos+3) and 3]=16)) then start_sample(6);
             if ((sound_data[sound3_pos]=208) and (sound_data[(sound3_pos+1) and 3]=205) and (sound_data[(sound3_pos+2) and 3]=199) and (sound_data[(sound3_pos+3) and 3]=192)) then start_sample(7);
             if ((sound_data[sound4_pos]=0) and (sound_data[(sound4_pos+1) and 3]=28) and (sound_data[(sound4_pos+2) and 3]=64) and (sound_data[(sound4_pos+3) and 3]=85)) then start_sample(8);
-            principal1.statusbar1.panels[2].text:=inttostr(valor);
+            //principal1.statusbar1.panels[2].text:=inttostr(valor);
         end;
 end;
 end;
@@ -522,8 +522,8 @@ var
   res:byte;
 begin
 	res:=$ff;
-	if (direccion and $0100)<>0 then res:=res and (ppi8255_r(0,direccion and 3));
-	if (direccion and $0200)<>0 then res:=res and (ppi8255_r(1,direccion and 3));
+	if (direccion and $0100)<>0 then res:=res and pia8255_0.read(direccion and 3);
+	if (direccion and $0200)<>0 then res:=res and pia8255_1.read(direccion and 3);
 	scramble_ppi8255_r:=res;
 end;
 
@@ -545,8 +545,8 @@ end;
 
 procedure scramble_ppi8255_w(direccion:word;valor:byte);
 begin
-  if (direccion and $0100)<>0 then ppi8255_w(0,direccion and 3,valor);
-	if (direccion and $0200)<>0 then ppi8255_w(1,direccion and 3,valor);
+  if (direccion and $0100)<>0 then pia8255_0.write(direccion and 3,valor);
+	if (direccion and $0200)<>0 then pia8255_1.write(direccion and 3,valor);
 end;
 
 procedure scramble_putbyte(direccion:word;valor:byte);
@@ -627,8 +627,8 @@ case direccion of
                 $60..$7f:scobra_getbyte:=disparo_mem[direccion and $1f];
                   else scobra_getbyte:=memoria[$9000+(direccion and $ff)];
                end;
-  $9800..$9fff,$d800..$dfff:scobra_getbyte:=ppi8255_r(0,direccion and 3);
-  $a000..$a7ff,$e000..$e7ff:scobra_getbyte:=ppi8255_r(1,direccion and 3);
+  $9800..$9fff,$d800..$dfff:scobra_getbyte:=pia8255_0.read(direccion and 3);
+  $a000..$a7ff,$e000..$e7ff:scobra_getbyte:=pia8255_1.read(direccion and 3);
     else scobra_getbyte:=$ff;
 end;
 end;
@@ -655,8 +655,8 @@ case direccion of
                     $60..$7f:disparo_mem[direccion and $1f]:=valor;
                       else memoria[$9000+(direccion and $ff)]:=valor;
                end;
-  $9800..$9fff,$d800..$dfff:ppi8255_w(0,direccion and 3,valor);
-  $a000..$a7ff,$e000..$e7ff:ppi8255_w(1,direccion and 3,valor);
+  $9800..$9fff,$d800..$dfff:pia8255_0.write(direccion and 3,valor);
+  $a000..$a7ff,$e000..$e7ff:pia8255_1.write(direccion and 3,valor);
   $a800..$afff,$e800..$efff:case (direccion and $7) of
                   1:haz_nmi:=(valor and 1)<>0;
                   3:;//scramble_background:=((valor and 1)<>0);
@@ -688,8 +688,8 @@ var
 begin
 	// the decoding here is very simplistic, and you can address both simultaneously
 	res:=$ff;
-	if (direccion and $1000)<>0 then res:=res and (ppi8255_r(1,(direccion shr 1) and 3));
-	if (direccion and $2000)<>0 then res:=res and (ppi8255_r(0,(direccion shr 1) and 3));
+	if (direccion and $1000)<>0 then res:=res and pia8255_1.read((direccion shr 1) and 3);
+	if (direccion and $2000)<>0 then res:=res and pia8255_0.read((direccion shr 1) and 3);
 	frogger_ppi8255_r:=res;
 end;
 
@@ -711,8 +711,8 @@ end;
 
 procedure frogger_ppi8255_w(direccion:word;valor:byte);
 begin
-  if (direccion and $1000)<>0 then ppi8255_w(1,(direccion shr 1) and 3,valor);
-	if (direccion and $2000)<>0 then ppi8255_w(0,(direccion shr 1) and 3,valor);
+  if (direccion and $1000)<>0 then pia8255_1.write((direccion shr 1) and 3,valor);
+	if (direccion and $2000)<>0 then pia8255_0.write((direccion shr 1) and 3,valor);
 end;
 
 procedure frogger_putbyte(direccion:word;valor:byte);
@@ -793,8 +793,8 @@ case direccion of
                               $60..$7f:amidar_getbyte:=disparo_mem[direccion and $1f];
                                  else amidar_getbyte:=memoria[$9800+(direccion and $ff)];
                             end;
-  $b000..$b7ff,$f000..$f7ff:amidar_getbyte:=ppi8255_r(0,(direccion shr 4) and 3);
-  $b800..$bfff,$f800..$ffff:amidar_getbyte:=ppi8255_r(1,(direccion shr 4) and 3);
+  $b000..$b7ff,$f000..$f7ff:amidar_getbyte:=pia8255_0.read((direccion shr 4) and 3);
+  $b800..$bfff,$f800..$ffff:amidar_getbyte:=pia8255_1.read((direccion shr 4) and 3);
     else amidar_getbyte:=$ff;
 end;
 end;
@@ -824,8 +824,8 @@ case direccion of
         $a000..$a7ff,$e000..$e7ff:case (direccion and $3f) of
                                     8:haz_nmi:=(valor and 1)<>0;
                                   end;
-        $b000..$b7ff,$f000..$f7ff:ppi8255_w(0,(direccion shr 4) and 3,valor);
-        $b800..$bfff,$f800..$ffff:ppi8255_w(1,(direccion shr 4) and 3,valor);
+        $b000..$b7ff,$f000..$f7ff:pia8255_0.write((direccion shr 4) and 3,valor);
+        $b800..$bfff,$f800..$ffff:pia8255_1.write((direccion shr 4) and 3,valor);
 end;
 end;
 
@@ -1034,15 +1034,15 @@ case main_vars.tipo_maquina of
   14:begin
         save_hi('frogger.hi',@memoria[$83f1],10);
         konamisnd_0.free;
-        close_ppi8255(0);
-        close_ppi8255(1);
+        pia8255_0.free;
+        pia8255_1.free;
      end;
   47,49:close_samples;
   48:ay8910_0.Free;
   143,144,145:begin
         konamisnd_0.free;
-        close_ppi8255(0);
-        close_ppi8255(1);
+        pia8255_0.free;
+        pia8255_1.free;
       end;
 end;
 close_audio;
@@ -1060,8 +1060,8 @@ begin
  case main_vars.tipo_maquina of
   14:begin
        konamisnd_0.reset;
-       reset_ppi8255(0);
-       reset_ppi8255(1);
+       pia8255_0.reset;
+       pia8255_1.reset;
        marcade.in0:=$FF;
        marcade.in1:=$FC;
        marcade.in2:=$F1;
@@ -1096,8 +1096,8 @@ begin
         marcade.in2:=$f1;
         scramble_prot:=0;
         scramble_prot_state:=0;
-        reset_ppi8255(0);
-        reset_ppi8255(1);
+        pia8255_0.reset;
+        pia8255_1.reset;
         latch:=0;
         port_b_latch:=0;
       end;
@@ -1106,8 +1106,8 @@ begin
         marcade.in0:=$ff;
         marcade.in1:=$fd;
         marcade.in2:=$f2;
-        reset_ppi8255(0);
-        reset_ppi8255(1);
+        pia8255_0.reset;
+        pia8255_1.reset;
         latch:=0;
         port_b_latch:=0;
       end;
@@ -1116,8 +1116,8 @@ begin
         marcade.in0:=$ff;
         marcade.in1:=$ff;
         marcade.in2:=$f1;
-        reset_ppi8255(0);
-        reset_ppi8255(1);
+        pia8255_0.reset;
+        pia8255_1.reset;
         latch:=0;
         port_b_latch:=0;
       end;
@@ -1173,8 +1173,10 @@ case main_vars.tipo_maquina of
       //Hi-Score
       timer_hs_frogger:=init_timer(main_z80.numero_cpu,10000,frogger_hi_score,true);
       //PPI 8255
-      init_ppi8255(0,port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
-      init_ppi8255(1,nil,nil,nil,frogger_port_1_a_write,frogger_port_1_b_write,nil);
+      pia8255_0:=pia8255_chip.create;
+      pia8255_0.change_ports(port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
+      pia8255_1:=pia8255_chip.create;
+      pia8255_1.change_ports(nil,nil,nil,frogger_port_1_a_write,frogger_port_1_b_write,nil);
       //cargar roms
       if not(cargar_roms(@memoria[0],@frogger_rom[0],'frogger.zip',0)) then exit;
       if not(cargar_roms(@mem_snd[0],@frogger_sound[0],'frogger.zip',0)) then exit;
@@ -1245,8 +1247,10 @@ case main_vars.tipo_maquina of
       //Sound
       konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
       //PPI 8255
-      init_ppi8255(0,port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
-      init_ppi8255(1,nil,nil,scramble_port_1_c_read,scramble_port_1_a_write,scramble_port_1_b_write,scramble_port_1_c_write);
+      pia8255_0:=pia8255_chip.create;
+      pia8255_0.change_ports(port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
+      pia8255_1:=pia8255_chip.create;
+      pia8255_1.change_ports(nil,nil,scramble_port_1_c_read,scramble_port_1_a_write,scramble_port_1_b_write,scramble_port_1_c_write);
       init_timer(0,3072000*(0.693*(100000+2*10000)*0.00001),jumpbug_blinking,true);
       //cargar roms
       if not(cargar_roms(@memoria[0],@scramble_rom[0],'scramble.zip',0)) then exit;
@@ -1263,8 +1267,10 @@ case main_vars.tipo_maquina of
       //Sound
       konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
       //PPI 8255
-      init_ppi8255(0,port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
-      init_ppi8255(1,nil,nil,nil,scramble_port_1_a_write,scramble_port_1_b_write,nil);
+      pia8255_0:=pia8255_chip.create;
+      pia8255_0.change_ports(port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
+      pia8255_1:=pia8255_chip.create;
+      pia8255_1.change_ports(nil,nil,nil,scramble_port_1_a_write,scramble_port_1_b_write,nil);
       init_timer(0,3072000*(0.693*(100000+2*10000)*0.00001),jumpbug_blinking,true);
       //cargar roms
       if not(cargar_roms(@memoria[0],@scobra_rom[0],'scobra.zip',0)) then exit;
@@ -1281,8 +1287,10 @@ case main_vars.tipo_maquina of
       //Sound
       konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
       //PPI 8255
-      init_ppi8255(0,port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
-      init_ppi8255(1,nil,nil,port_1_c_read,scramble_port_1_a_write,scramble_port_1_b_write,nil);
+      pia8255_0:=pia8255_chip.create;
+      pia8255_0.change_ports(port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
+      pia8255_1:=pia8255_chip.create;
+      pia8255_1.change_ports(nil,nil,port_1_c_read,scramble_port_1_a_write,scramble_port_1_b_write,nil);
       //cargar roms
       if not(cargar_roms(@memoria[0],@amidar_rom[0],'amidar.zip',0)) then exit;
       if not(cargar_roms(@mem_snd[0],@amidar_sound[0],'amidar.zip',0)) then exit;

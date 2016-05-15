@@ -82,8 +82,8 @@ snd_z80.init_sound(opwolf_sound_update);
 opwolf_init_cchip(main_m68000.numero_cpu);
 //Sound Chips
 YM2151_Init(0,4000000,sound_bank_rom,ym2151_snd_irq);
-msm_5205_0:=MSM5205_chip.create(0,384000,MSM5205_S48_4B,1,snd_adpcm_0);
-msm_5205_1:=MSM5205_chip.create(1,384000,MSM5205_S48_4B,1,snd_adpcm_1);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@opwolf_rom[0],'opwolf.zip',0)) then exit;
 //cargar sonido+ponerlas en su banco+adpcm

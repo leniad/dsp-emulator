@@ -2,7 +2,7 @@ unit spectrum_128k;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ay_8910,z80_sp,sysutils,
-     controls_engine,dialogs,rom_engine,pal_engine,sound_engine,z80pio,
+     controls_engine,vcl.dialogs,rom_engine,pal_engine,sound_engine,z80pio,
      gfx_engine;
 
 const

@@ -15,7 +15,7 @@ const
 
 type
   MSM5205_chip=class(snd_chip_class)
-        constructor create(num:byte;clock:dword;select:byte;amp:single;snd_timer_call:exec_type);
+        constructor create(clock:dword;select:byte;amp:single;snd_timer_call:exec_type);
         destructor free;
       public
         procedure reset;
@@ -52,6 +52,7 @@ function msm5205_clock(val:integer;var step:integer;signal:integer):integer;
 implementation
 var
   diff_lookup:array[0..(49*16)-1] of integer;
+  chips_total:integer=-1;
 
 const
   index_shift:array[0..7] of integer=(-1, -1, -1, -1, 2, 4, 6, 8);
@@ -82,16 +83,17 @@ begin
 	end;
 end;
 
-constructor MSM5205_chip.Create(num:byte;clock:dword;select:byte;amp:single;snd_timer_call:exec_type);
+constructor MSM5205_chip.Create(clock:dword;select:byte;amp:single;snd_timer_call:exec_type);
 begin
+  chips_total:=chips_total+1;
   self.prescaler:=$ff;
-	self.num:=num;
+	self.num:=chips_total;
   self.amp:=amp;
 	self.clock:=clock;
   self.select:=select;
   self.tsample_:=init_channel;
   self.external_call:=snd_timer_call;
-  case num of
+  case chips_total of
     0:begin
         self.timer_:=init_timer(sound_status.cpu_num,1,msm5205_internal_update_0,false);
         init_timer(sound_status.cpu_num,sound_status.cpu_clock/freq_base_audio,msm5205_final_update_0,true);
@@ -107,6 +109,7 @@ end;
 
 destructor MSM5205_chip.free;
 begin
+chips_total:=chips_total-1;
 end;
 
 procedure MSM5205_chip.reset;
@@ -211,13 +214,13 @@ end;
 
 procedure msm5205_final_update_0;
 begin
-  tsample[msm_5205_0.tsample_,sound_status.posicion_sonido]:=round((msm_5205_0.signal shl 4)*msm_5205_0.amp);
+  tsample[msm_5205_0.tsample_,sound_status.posicion_sonido]:=trunc((msm_5205_0.signal shl 4)*msm_5205_0.amp);
   if sound_status.stereo then tsample[msm_5205_0.tsample_,sound_status.posicion_sonido+1]:=round((msm_5205_0.signal shl 4)*msm_5205_0.amp);
 end;
 
 procedure msm5205_final_update_1;
 begin
-  tsample[msm_5205_1.tsample_,sound_status.posicion_sonido]:=round((msm_5205_1.signal shl 4)*msm_5205_1.amp);
+  tsample[msm_5205_1.tsample_,sound_status.posicion_sonido]:=trunc((msm_5205_1.signal shl 4)*msm_5205_1.amp);
   if sound_status.stereo then tsample[msm_5205_1.tsample_,sound_status.posicion_sonido+1]:=round((msm_5205_1.signal shl 4)*msm_5205_1.amp);
 end;
 

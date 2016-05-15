@@ -95,7 +95,7 @@ snd_z80:=cpu_z80.create(3579545,$100);
 snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
 snd_z80.init_sound(combatsc_sound_update);
 //Audio chips
-ym2203_0:=ym2203_chip.create(0,3000000,4);
+ym2203_0:=ym2203_chip.create(3000000,4);
 upd7759_0:=upd7759_chip.create(640000,2);
 if not(cargar_roms(upd7759_0.get_rom_addr,@combatsc_upd,'combatsc.zip')) then exit;
 //cargar roms

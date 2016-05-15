@@ -272,8 +272,8 @@ snd_m6809:=cpu_m6809.Create(1500000,272);
 snd_m6809.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
 snd_m6809.init_sound(brkthru_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,1500000,0.5,0.1);
-ym3812_0:=ym3812_chip.create(0,3000000);
+ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(brkthru_snd_irq);
 case main_vars.tipo_maquina of
   89:begin

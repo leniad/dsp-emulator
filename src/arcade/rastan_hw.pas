@@ -81,7 +81,7 @@ snd_z80:=cpu_z80.create(4000000,256);
 snd_z80.change_ram_calls(rastan_snd_getbyte,rastan_snd_putbyte);
 snd_z80.init_sound(sound_instruccion);
 //Sound Chips
-msm_5205_0:=MSM5205_chip.create(0,384000,MSM5205_S48_4B,1,snd_adpcm);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm);
 YM2151_Init(0,4000000,sound_bank_rom,ym2151_snd_irq);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@rastan_rom[0],'rastan.zip',0)) then exit;

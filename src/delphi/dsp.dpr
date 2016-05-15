@@ -253,7 +253,8 @@ uses
   rom_export in '..\misc\rom_export.pas',
   config_cpc in 'config_cpc.pas' {ConfigCPC},
   spaceinvaders_hw in '..\arcade\spaceinvaders_hw.pas',
-  centipede_hw in '..\arcade\centipede_hw.pas';
+  centipede_hw in '..\arcade\centipede_hw.pas',
+  karnov_hw in '..\arcade\karnov_hw.pas';
 
 {$R *.res}
 

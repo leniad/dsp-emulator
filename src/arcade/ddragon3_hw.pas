@@ -95,7 +95,7 @@ snd_z80.change_ram_calls(ddragon3_snd_getbyte,ddragon3_snd_putbyte);
 snd_z80.init_sound(ddragon3_sound_update);
 //Sound Chips
 YM2151_Init(0,3579545,nil,ym2151_snd_irq);
-oki_6295_0:=snd_okim6295.Create(0,1056000,OKIM6295_PIN7_HIGH);
+oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
 //Cargar ADPCM ROMS
 if not(cargar_roms(@mem_oki,@ddragon3_oki,'ddragon3.zip')) then exit;
 copymemory(oki_6295_0.get_rom_addr,@mem_oki,$40000);

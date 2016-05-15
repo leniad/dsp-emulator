@@ -102,7 +102,7 @@ snd_m6809.init_sound(renegade_sound_update);
 main_m6805:=cpu_m6805.create(3000000,256,tipo_m68705);
 main_m6805.change_ram_calls(renegade_mcu_getbyte,renegade_mcu_putbyte);
 //Sound Chip
-ym3812_0:=ym3812_chip.create(0,3000000);
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
 gen_adpcm_init(0,8000,$20000);
 //cargar roms

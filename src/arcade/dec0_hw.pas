@@ -253,10 +253,10 @@ snd_m6502:=cpu_m6502.create(1500000,264,TCPU_M6502);
 snd_m6502.change_ram_calls(dec0_snd_getbyte,dec0_snd_putbyte);
 snd_m6502.init_sound(dec0_sound_update);
 //Sound Chips
-ym3812_0:=ym3812_chip.create(0,3000000);
+ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
-ym2203_0:=ym2203_chip.create(0,1500000);
-oki_6295_0:=snd_okim6295.Create(0,1000000,OKIM6295_PIN7_HIGH);
+ym2203_0:=ym2203_chip.create(1500000);
+oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH);
 case main_vars.tipo_maquina of
   156:begin  //Robocop
         deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$fff,$7ff,$3ff,1,1,1);

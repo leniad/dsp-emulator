@@ -227,31 +227,6 @@ end;
 end;
 
 //Scroll functions
-procedure scroll_x_y2(porigen,pdestino:byte;scroll_x,scroll_y:word);
-var
-  long_x,long_x2,long_y,long_y2:word;
-begin
-scroll_x:=scroll_x and p_final[porigen].scroll.mask_x;
-scroll_y:=scroll_y and p_final[porigen].scroll.mask_y;
-if ((scroll_x+p_final[porigen].scroll.max_x)>=p_final[porigen].scroll.long_x) then begin
-  long_x:=p_final[porigen].scroll.long_x-scroll_x;
-  long_x2:=p_final[porigen].scroll.max_x-long_x;
-  actualiza_trozo(0,scroll_y,long_x2,p_final[porigen].scroll.max_y,porigen,long_x,0,long_x2,p_final[porigen].scroll.max_y,pdestino);
-end else begin
-  long_x:=p_final[porigen].scroll.max_x;
-end;
-if ((scroll_y+p_final[porigen].scroll.max_y)>=p_final[porigen].scroll.long_y) then begin
-  long_y:=p_final[porigen].scroll.long_y-scroll_y;
-  long_y2:=p_final[porigen].scroll.max_y-long_y;
-  actualiza_trozo(scroll_x,0,long_x,long_y2,porigen,0,long_y,long_x,long_y2,pdestino);
-end else begin
-  long_y:=p_final[porigen].scroll.max_y;
-end;
-actualiza_trozo(scroll_x,scroll_y,long_x,long_y,porigen,0,0,long_x,long_y,pdestino);
-if ((long_x<p_final[porigen].scroll.max_x) and (long_y<p_final[porigen].scroll.max_y)) then
-  actualiza_trozo(0,0,p_final[porigen].scroll.max_x-long_x,p_final[porigen].scroll.max_y-long_y,porigen,long_x,long_y,p_final[porigen].scroll.max_x-long_x,p_final[porigen].scroll.max_y-long_y,pdestino);
-end;
-
 procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word);
 var
   long_x,long_y,long_x2,long_y2:word;
@@ -438,7 +413,7 @@ asm
     push edi
     push eax
     push ecx
-    mov edi,eax   //poner destino
+    mov edi,dest   //poner destino
     mov ax,valor            // Get the fill word.
     mov ecx,cantidad    // Get the size.
     cld                     // Clear the direction flag.

@@ -108,8 +108,8 @@ sub_z80.change_io_calls(sf_misc_inbyte,sf_misc_outbyte);
 init_timer(sub_z80.numero_cpu,3579545/8000,sf_adpcm_instruccion,true);
 //Sound Chips
 YM2151_Init(0,3579545,nil,ym2151_snd_irq);
-msm_5205_0:=MSM5205_chip.create(0,384000,MSM5205_SEX_4B,2,nil);
-msm_5205_1:=MSM5205_chip.create(1,384000,MSM5205_SEX_4B,2,nil);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@sfighter_rom[0],'sf.zip',0)) then exit;
 //Sound CPUs

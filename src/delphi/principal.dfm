@@ -2706,6 +2706,17 @@ object principal1: Tprincipal1
             Caption = 'Gradius III'
             OnClick = CambiarMaquina
           end
+          object KarnovHW1: TMenuItem
+            Caption = 'Karnov HW'
+            object Karnov1: TMenuItem
+              Caption = 'Karnov'
+              OnClick = CambiarMaquina
+            end
+            object Chelnov1: TMenuItem
+              Caption = 'Chelnov'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'
@@ -2787,7 +2798,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010105000700840320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101050007008C0320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -325,8 +325,8 @@ snd_z80.change_ram_calls(gunsmoke_snd_getbyte,gunsmoke_snd_putbyte);
 init_timer(snd_z80.numero_cpu,3000000/(60*4),gunsmoke_snd_irq,true);
 snd_z80.init_sound(gunsmoke_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(0,1500000,2);
-ym2203_1:=ym2203_chip.create(1,1500000,2);
+ym2203_0:=ym2203_chip.create(1500000,2);
+ym2203_1:=ym2203_chip.create(1500000,2);
 case main_vars.tipo_maquina of
   80:begin
        //video

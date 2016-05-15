@@ -15,7 +15,7 @@ unit tap_tzx;
 
 interface
 
-uses nz80,z80_sp,{$IFDEF WINDOWS}windows,{$ENDIF}grids,dialogs,main_engine,spectrum_misc,
+uses nz80,z80_sp,{$IFDEF WINDOWS}windows,{$ENDIF}vcl.grids,vcl.dialogs,main_engine,spectrum_misc,
      sysutils,lenguaje,misc_functions,tape_window,file_engine,
      lenslock,samples;
 

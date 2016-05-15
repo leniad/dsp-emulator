@@ -1,87 +1,204 @@
 unit ppi8255;
 
 interface
-uses dialogs,sysutils;
 
 type
-  read_port_8255=function:byte;
-  write_port_8255=procedure (valor:byte);
-  tpia8255=record
-    control:byte;
-		m_group_a_mode:byte;
-	  m_group_b_mode:byte;
-	  m_port_a_dir:byte;
-	  m_port_b_dir:byte;
-	  m_port_ch_dir:byte;
-	  m_port_cl_dir:byte;
-	  m_obf_a:byte;
-    m_ibf_a:byte;
-	  m_obf_b:byte;
-    m_ibf_b:byte;
-	  m_inte_a:byte;
-    m_inte_b:byte;
-    m_inte_1:byte;
-    m_inte_2:byte;
-    m_control:byte;
-	  m_in_mask,m_out_mask,m_read,m_latch,m_output:array[0..2] of byte;
-    read_port:array[0..2] of read_port_8255;
-    write_port:array[0..2] of write_port_8255;
+  tread_port_8255=function:byte;
+  twrite_port_8255=procedure(valor:byte);
+  pia8255_chip=class
+      constructor create;
+      destructor free;
+    public
+      procedure reset;
+      procedure change_ports(pread_port_a,pread_port_b,pread_port_c:tread_port_8255;pwrite_port_a,pwrite_port_b,pwrite_port_c:twrite_port_8255);
+      function read(port:byte):byte;
+      procedure write(port,data:byte);
+      function get_port(port:byte):byte;
+      procedure set_port(port,data:byte);
+    private
+		  group_a_mode,group_b_mode:byte;
+	    port_a_dir,port_b_dir,port_ch_dir,port_cl_dir:boolean;
+	    obf_a,obf_b:boolean;
+      ibf_a,ibf_b:boolean;
+	    inte_a,inte_b:boolean;
+      inte_1,inte_2:boolean;
+      control:byte;
+	    in_mask,out_mask,read_val,latch,output_val:array[0..2] of byte;
+      read_call:array[0..2] of tread_port_8255;
+      write_call:array[0..2] of twrite_port_8255;
+      procedure get_handshake_signals(val:pbyte);
+      procedure set_mode(data:byte;call_handlers:boolean);
+      procedure write_port(port:byte);
+      function read_port(port:byte):byte;
+      procedure input(port,data:byte);
   end;
-  ptpia8255=^tpia8255;
 
 var
-  pia_8255:array[0..1] of ptpia8255;
-
-procedure reset_ppi8255(num:byte);
-procedure close_ppi8255(num:byte);
-procedure init_ppi8255(num:byte;pread_port_a,pread_port_b,pread_port_c:read_port_8255;pwrite_port_a,pwrite_port_b,pwrite_port_c:write_port_8255);
-function ppi8255_r(num,port:byte):byte;
-procedure ppi8255_w(num,port,data:byte);
-function ppi8255_get_port(num,port:byte):byte;
-procedure ppi8255_set_port(num,port,data:byte);
+  pia8255_0,pia8255_1:pia8255_chip;
 
 implementation
 
-procedure ppi8255_get_handshake_signals(num:byte;val:pbyte);
+constructor pia8255_chip.create;
+begin
+end;
+
+destructor pia8255_chip.free;
+begin
+end;
+
+procedure pia8255_chip.change_ports(pread_port_a,pread_port_b,pread_port_c:tread_port_8255;pwrite_port_a,pwrite_port_b,pwrite_port_c:twrite_port_8255);
+begin
+  self.read_call[0]:=pread_port_a;
+  self.read_call[1]:=pread_port_b;
+  self.read_call[2]:=pread_port_c;
+  self.write_call[0]:=pwrite_port_a;
+  self.write_call[1]:=pwrite_port_b;
+  self.write_call[2]:=pwrite_port_c;
+end;
+
+procedure pia8255_chip.reset;
 var
-  pia:ptpia8255;
+  f:byte;
+begin
+  self.group_a_mode:=0;
+	self.group_b_mode:=0;
+	self.port_a_dir:=false;
+	self.port_b_dir:=false;
+	self.port_ch_dir:=false;
+	self.port_cl_dir:=false;
+	self.obf_a:=false;
+  self.ibf_a:=false;
+	self.obf_b:=false;
+  self.ibf_b:=false;
+	self.inte_a:=false;
+  self.inte_b:=false;
+  self.inte_1:=false;
+  self.inte_2:=false;
+	for f:=0 to 2 do begin
+		self.in_mask[f]:=0;
+    self.out_mask[f]:=0;
+    self.read_val[f]:=0;
+    self.latch[f]:=0;
+    self.output_val[f]:=0;
+	end;
+	self.set_mode($9b,false);
+end;
+
+procedure pia8255_chip.set_mode(data:byte;call_handlers:boolean);
+var
+  f:byte;
+begin
+	// parse out mode
+	self.group_a_mode:=(data shr 5) and 3;
+	self.group_b_mode:=(data shr 2) and 1;
+	self.port_a_dir:=(data and $10)<>0;
+	self.port_b_dir:=(data and 2)<>0;
+	self.port_ch_dir:=(data and 8)<>0;
+	self.port_cl_dir:=(data and 1)<>0;
+	// normalize group_a_mode
+	if (self.group_a_mode=3) then self.group_a_mode:=2;
+	// Port A direction
+	if (self.group_a_mode=2) then begin
+		self.in_mask[0]:=$FF;
+		self.out_mask[0]:=$FF;	//bidirectional
+	end else begin
+		if self.port_a_dir then begin
+			self.in_mask[0]:=$FF;
+			self.out_mask[0]:=0;	// input
+		end else begin
+			self.in_mask[0]:=0;
+			self.out_mask[0]:=$FF;	// output
+		end;
+	end;
+	// Port B direction
+	if self.port_b_dir then begin
+		self.in_mask[1]:=$FF;
+		self.out_mask[1]:=0;	// input
+	end else begin
+		self.in_mask[1]:=0;
+		self.out_mask[1]:=$FF;	// output
+	end;
+	// Port C upper direction */
+	if self.port_ch_dir then begin
+		self.in_mask[2]:=$F0;
+		self.out_mask[2]:=0;	// input
+	end else begin
+		self.in_mask[2]:=0;
+		self.out_mask[2]:=$F0;	// output
+	end;
+	// Port C lower direction
+	if self.port_cl_dir then self.in_mask[2]:=self.in_mask[2] or $0F	// input
+	  else self.out_mask[2]:=self.out_mask[2] or $0F;	// output
+	// now depending on the group modes, certain Port C lines may be replaced
+  //   * with varying control signals
+	case self.group_a_mode of
+		0:;	// Group A mode 0 no changes
+		1:begin	// Group A mode 1 bits 5-3 are reserved by Group A mode 1
+			  self.in_mask[2]:=self.in_mask[2] and $c7;
+			  self.out_mask[2]:=self.out_mask[2] and $c7;
+			end;
+		2:begin // Group A mode 2 bits 7-3 are reserved by Group A mode 2
+			  self.in_mask[2]:=self.in_mask[2] and $07;
+			  self.out_mask[2]:=self.out_mask[2] and $07;
+			end;
+	end;
+	case self.group_b_mode of
+		0:;	// Group B mode 0 no changes
+    1:begin	// Group B mode 1 bits 2-0 are reserved by Group B mode 1
+			  self.in_mask[2]:=self.in_mask[2] and $F8;
+			  self.out_mask[2]:=self.out_mask[2] and $F8;
+			end;
+	end;
+	// KT: 25-Dec-99 - 8255 resets latches when mode set
+	self.latch[0]:=0;
+  self.latch[1]:=0;
+  self.latch[2]:=0;
+	if call_handlers then for f:=0 to 2 do self.write_port(f);
+	// reset flip-flops
+	self.obf_a:=false;
+  self.ibf_a:=false;
+	self.obf_b:=false;
+  self.ibf_b:=false;
+	self.inte_a:=false;
+  self.inte_b:=false;
+  self.inte_1:=false;
+  self.inte_2:=false;
+	// store control word
+	self.control:=data;
+end;
+
+procedure pia8255_chip.get_handshake_signals(val:pbyte);
+var
   handshake,mask:byte;
 begin
-  pia:=pia_8255[num];
-	handshake:=$00;
-	mask:=$00;
-	// group A */
-	if (pia.m_group_a_mode=1) then begin
-		if (pia.m_port_a_dir<>0) then begin
-			if (pia.m_ibf_a)<>0 then handshake:=handshake or $20
-        else handshake:=handshake or $0;
-      if ((pia.m_ibf_a<>0) and (pia.m_inte_a<>0)) then handshake:=handshake or $08;
+	handshake:=0;
+	mask:=0;
+	// group A
+	if (self.group_a_mode=1) then begin
+		if self.port_a_dir then begin
+			if self.ibf_a then handshake:=handshake or $20;
+      if (self.ibf_a and self.inte_a) then handshake:=handshake or $8;
 			mask:=mask or $28;
 		end	else begin
-      if (pia.m_obf_a=0) then handshake:=handshake or $80
-        else handshake:=handshake or $0;
-      if ((pia.m_obf_a<>0) and (pia.m_inte_a<>0)) then handshake:=handshake or $08
-        else handshake:=handshake or $0;
+      if not(self.obf_a) then handshake:=handshake or $80;
+      if (self.obf_a and self.inte_a) then handshake:=handshake or $8;
 			mask:=mask or $88;
 		end;
-	end else if (pia.m_group_a_mode=2) then begin
-    if (pia.m_obf_a<>0) then handshake:=handshake or $0
-      else handshake:=handshake or $80;
-    if (pia.m_ibf_a<>0) then handshake:=handshake or $20
-      else handshake:=handshake or $0;
-    if (((pia.m_obf_a<>0) and (pia.m_inte_1<>0)) or ((pia.m_ibf_a<>0) and (pia.m_inte_2<>0))) then handshake:=handshake or $08
-      else handshake:=handshake or $0;
+	end else if (self.group_a_mode=2) then begin
+    if not(self.obf_a) then handshake:=handshake or $80;
+    if self.ibf_a then handshake:=handshake or $20;
+    if ((self.obf_a and self.inte_1) or (self.ibf_a and self.inte_2)) then handshake:=handshake or $8;
 		mask:=mask or $a8;
 	end;
-	// group B */
-	if (pia.m_group_b_mode=1) then begin
-		if (pia.m_port_b_dir<>0) then begin
-      if (pia.m_ibf_b<>0) then handshake:=handshake or $02;
-      if ((pia.m_ibf_b<>0) and (pia.m_inte_b<>0)) then handshake:=handshake or $01;
+	// group B
+	if (self.group_b_mode=1) then begin
+		if self.port_b_dir then begin
+      if self.ibf_b then handshake:=handshake or $02;
+      if (self.ibf_b and self.inte_b) then handshake:=handshake or $01;
 			mask:=mask or $03;
 		end else begin
-      if (pia.m_obf_b=0) then handshake:=handshake or $02;
-      if ((pia.m_obf_b<>0) and (pia.m_inte_b<>0)) then handshake:=handshake or $01;
+      if not(self.obf_b) then handshake:=handshake or $02;
+      if (self.obf_b and self.inte_b) then handshake:=handshake or $01;
 			mask:=mask or $03;
 		end;
 	end;
@@ -89,302 +206,141 @@ begin
 	val^:=val^ or (handshake and mask);
 end;
 
-procedure ppi8255_write_port(num,port:byte);
+procedure pia8255_chip.write_port(port:byte);
 var
-  pia:ptpia8255;
   write_data:byte;
 begin
-  pia:=pia_8255[num];
-	write_data:=pia.m_latch[port] and pia.m_out_mask[port];
-	write_data:=write_data or ($FF and not(pia.m_out_mask[port]));
-	// write out special port 2 signals */
-	if (port=2) then ppi8255_get_handshake_signals(num,@write_data);
-	pia.m_output[port]:=write_data;
-	if @pia.write_port[port]<>nil then pia.write_port[port](write_data);
+	write_data:=self.latch[port] and self.out_mask[port];
+	write_data:=write_data or ($FF and not(self.out_mask[port]));
+	// write out special port 2 signals
+	if (port=2) then self.get_handshake_signals(@write_data);
+	self.output_val[port]:=write_data;
+	if @self.write_call[port]<>nil then self.write_call[port](write_data);
 end;
 
-procedure ppi8255_input(num,port,data:byte);
+function pia8255_chip.read(port:byte):byte;
 var
-  pia:ptpia8255;
-  changed:boolean;
-begin
-  pia:=pia_8255[num];
-	changed:=false;
-	pia.m_read[port]:=data;
-	// port C is special */
-	if (port=2) then begin
-		if (((pia.m_group_a_mode=1) and (pia.m_port_a_dir=0)) or (pia.m_group_a_mode=2)) then begin
-			// is !ACKA asserted? */
-			if ((pia.m_obf_a<>0) and ((not(data and $40))<>0)) then begin
-				pia.m_obf_a:=0;
-				changed:=true;
-			end;
-		end;
-		if (((pia.m_group_a_mode=1) and (pia.m_port_a_dir=1)) or (pia.m_group_a_mode=2)) then begin
-			// is !STBA asserted? */
-			if ((pia.m_ibf_a=0) and ((not(data and $10))<>0)) then begin
-				pia.m_ibf_a:=1;
-				changed:=true;
-			end;
-		end;
-		if ((pia.m_group_b_mode=1) and (pia.m_port_b_dir=0)) then begin
-			// is !ACKB asserted? */
-			if ((pia.m_obf_b<>0) and ((not(data and $04))<>0)) then begin
-				pia.m_obf_b:=0;
-				changed:=true;
-			end;
-		end;
-
-		if ((pia.m_group_b_mode=1) and (pia.m_port_b_dir=1)) then begin
-			// is !STBB asserted? */
-			if ((pia.m_ibf_b=0) and ((not(data and $04))<>0)) then begin
-				pia.m_ibf_b:=1;
-				changed:=true;
-			end;
-		end;
-		if changed then begin
-			ppi8255_write_port(num,2);
-		end;
-	end;  //del if port2
-end;
-
-function ppi8255_read_port(num,port:byte):byte;
-var
-  pia:ptpia8255;
   res:byte;
 begin
-  pia:=pia_8255[num];
-	res:=$00;
-	if (pia.m_in_mask[port]<>0) then begin
-    if @pia.read_port[port]<>nil then ppi8255_input(num,port,pia.read_port[port]);
-		res:=res or (pia.m_read[port] and pia.m_in_mask[port]);
-	end;
-	res:=res or (pia.m_latch[port] and pia.m_out_mask[port]);
-	case port of
-	  0:pia.m_ibf_a:=0; // clear input buffer full flag */
-    1:pia.m_ibf_b:=0; // clear input buffer full flag */
-	  2:ppi8255_get_handshake_signals(num,@res); // read special port 2 signals
-	end;
-  ppi8255_read_port:=res;
-end;
-
-procedure set_mode(num,data:byte;call_handlers:boolean);
-var
-  pia:ptpia8255;
-  f:byte;
-begin
-  pia:=pia_8255[num];
-	// parse out mode */
-	pia.m_group_a_mode:=(data shr 5) and 3;
-	pia.m_group_b_mode:=(data shr 2) and 1;
-	pia.m_port_a_dir:=(data shr 4) and 1;
-	pia.m_port_b_dir:=(data shr 1) and 1;
-	pia.m_port_ch_dir:=(data shr 3) and 1;
-	pia.m_port_cl_dir:=(data shr 0) and 1;
-	// normalize group_a_mode */
-	if (pia.m_group_a_mode=3) then pia.m_group_a_mode:=2;
-	// Port A direction */
-	if (pia.m_group_a_mode=2) then begin
-		pia.m_in_mask[0]:=$FF;
-		pia.m_out_mask[0]:=$FF;	//bidirectional */
-	end else begin
-		if (pia.m_port_a_dir<>0) then begin
-			pia.m_in_mask[0]:=$FF;
-			pia.m_out_mask[0]:=$00;	// input */
-		end else begin
-			pia.m_in_mask[0]:=$00;
-			pia.m_out_mask[0]:=$FF;	// output */
-		end;
-	end;
-	// Port B direction */
-	if (pia.m_port_b_dir<>0) then begin
-		pia.m_in_mask[1]:=$FF;
-		pia.m_out_mask[1]:=$00;	// input */
-	end else begin
-		pia.m_in_mask[1]:=$00;
-		pia.m_out_mask[1]:=$FF;	// output */
-	end;
-	// Port C upper direction */
-	if (pia.m_port_ch_dir<>0) then begin
-		pia.m_in_mask[2]:=$F0;
-		pia.m_out_mask[2]:=$00;	// input */
-	end else begin
-		pia.m_in_mask[2]:=$00;
-		pia.m_out_mask[2]:=$F0;	// output */
-	end;
-	// Port C lower direction */
-	if (pia.m_port_cl_dir<>0) then pia.m_in_mask[2]:=pia.m_in_mask[2] or $0F	// input */
-	  else pia.m_out_mask[2]:=pia.m_out_mask[2] or $0F;	// output */
-	// now depending on the group modes, certain Port C lines may be replaced
-  //   * with varying control signals
-	case pia.m_group_a_mode of
-		0:;	// Group A mode 0 no changes */
-		1:begin	// Group A mode 1 bits 5-3 are reserved by Group A mode 1
-			  pia.m_in_mask[2]:=pia.m_in_mask[2] and $c7;
-			  pia.m_out_mask[2]:=pia.m_out_mask[2] and $c7;
-			end;
-		2:begin // Group A mode 2 bits 7-3 are reserved by Group A mode 2
-			  pia.m_in_mask[2]:=pia.m_in_mask[2] and $07;
-			  pia.m_out_mask[2]:=pia.m_out_mask[2] and $07;
-			end;
-	end;
-	case pia.m_group_b_mode of
-		0:;	// Group B mode 0 no changes */
-    1:begin	// Group B mode 1 bits 2-0 are reserved by Group B mode 1 */
-			  pia.m_in_mask[2]:=pia.m_in_mask[2] and $F8;
-			  pia.m_out_mask[2]:=pia.m_out_mask[2] and $F8;
-			end;
-	end;
-	// KT: 25-Dec-99 - 8255 resets latches when mode set */
-	pia.m_latch[0]:=0;
-  pia.m_latch[1]:=0;
-  pia.m_latch[2]:=0;
-	if call_handlers then
-		for f:=0 to 2 do ppi8255_write_port(num,f);
-	// reset flip-flops */
-	pia.m_obf_a:=0;
-  pia.m_ibf_a:=0;
-	pia.m_obf_b:=0;
-  pia.m_ibf_b:=0;
-	pia.m_inte_a:=0;
-  pia.m_inte_b:=0;
-  pia.m_inte_1:=0;
-  pia.m_inte_2:=0;
-	// store control word */
-	pia.m_control:=data;
-end;
-
-procedure reset_ppi8255(num:byte);
-var
-  pia:ptpia8255;
-  f:byte;
-begin
-  pia:=pia_8255[num];
-  pia.m_group_a_mode:=0;
-	pia.m_group_b_mode:=0;
-	pia.m_port_a_dir:=0;
-	pia.m_port_b_dir:=0;
-	pia.m_port_ch_dir:=0;
-	pia.m_port_cl_dir:=0;
-	pia.m_obf_a:=0;
-  pia.m_ibf_a:=0;
-	pia.m_obf_b:=0;
-  pia.m_ibf_b:=0;
-	pia.m_inte_a:=0;
-  pia.m_inte_b:=0;
-  pia.m_inte_1:=0;
-  pia.m_inte_2:=0;
-	for f:=0 to 2 do begin
-		pia.m_in_mask[f]:=0;
-    pia.m_out_mask[f]:=0;
-    pia.m_read[f]:=0;
-    pia.m_latch[f]:=0;
-    pia.m_output[f]:=0;
-	end;
-	set_mode(num,$9b,false);
-end;
-
-procedure close_ppi8255(num:byte);
-var
-  pia:ptpia8255;
-begin
- if pia_8255[num]=nil then exit;
- pia:=pia_8255[num];
- pia.read_port[0]:=nil;
- pia.read_port[1]:=nil;
- pia.read_port[2]:=nil;
- pia.write_port[0]:=nil;
- pia.write_port[1]:=nil;
- pia.write_port[2]:=nil;
- freemem(pia_8255[num]);
- pia_8255[num]:=nil;
-end;
-
-procedure init_ppi8255(num:byte;pread_port_a,pread_port_b,pread_port_c:read_port_8255;pwrite_port_a,pwrite_port_b,pwrite_port_c:write_port_8255);
-var
-  pia:ptpia8255;
-begin
-  getmem(pia_8255[num],sizeof(tpia8255));
-  pia:=pia_8255[num];
-  fillchar(pia^,sizeof(tpia8255),0);
-  pia.read_port[0]:=pread_port_a;
-  pia.read_port[1]:=pread_port_b;
-  pia.read_port[2]:=pread_port_c;
-  pia.write_port[0]:=pwrite_port_a;
-  pia.write_port[1]:=pwrite_port_b;
-  pia.write_port[2]:=pwrite_port_c;
-end;
-
-function ppi8255_r(num,port:byte):byte;
-var
-  pia:ptpia8255;
-  res:byte;
-begin
-  pia:=pia_8255[num];
 	res:=0;
   port:=port and $3;
 	case port of
-		0,1,2:res:=ppi8255_read_port(num,port); // Port A,B,C read */
-		3:res:=pia.m_control; // Control word */
+		0,1,2:res:=self.read_port(port); // Port A,B,C read
+		3:res:=self.control; // Control word
 	end;
-  ppi8255_r:=res;
+  read:=res;
 end;
 
-procedure ppi8255_w(num,port,data:byte);
+function pia8255_chip.read_port(port:byte):byte;
 var
-  pia:ptpia8255;
+  res:byte;
+begin
+	res:=$00;
+	if (self.in_mask[port]<>0) then begin
+    if @self.read_call[port]<>nil then self.input(port,self.read_call[port]);
+		res:=res or (self.read_val[port] and self.in_mask[port]);
+	end;
+	res:=res or (self.latch[port] and self.out_mask[port]);
+	case port of
+	  0:self.ibf_a:=false; // clear input buffer full flag
+    1:self.ibf_b:=false; // clear input buffer full flag
+	  2:self.get_handshake_signals(@res); // read special port 2 signals
+	end;
+  read_port:=res;
+end;
+
+procedure pia8255_chip.input(port,data:byte);
+var
+  changed:boolean;
+begin
+	changed:=false;
+	self.read_val[port]:=data;
+	// port C is special
+	if (port=2) then begin
+		if (((self.group_a_mode=1) and not(self.port_a_dir)) or (self.group_a_mode=2)) then begin
+			// is !ACKA asserted?
+			if (self.obf_a and ((not(data and $40))<>0)) then begin
+				self.obf_a:=false;
+				changed:=true;
+			end;
+		end;
+		if (((self.group_a_mode=1) and self.port_a_dir) or (self.group_a_mode=2)) then begin
+			// is !STBA asserted?
+			if (not(self.ibf_a) and ((not(data and $10))<>0)) then begin
+				self.ibf_a:=true;
+				changed:=true;
+			end;
+		end;
+		if ((self.group_b_mode=1) and not(self.port_b_dir)) then begin
+			// is !ACKB asserted?
+			if (self.obf_b and ((not(data and $04))<>0)) then begin
+				self.obf_b:=false;
+				changed:=true;
+			end;
+		end;
+		if ((self.group_b_mode=1) and self.port_b_dir) then begin
+			// is !STBB asserted?
+			if (not(self.ibf_b) and ((not(data and $04))<>0)) then begin
+				self.ibf_b:=true;
+				changed:=true;
+			end;
+		end;
+		if changed then self.write_port(2);
+	end;  //del if port2
+end;
+
+procedure pia8255_chip.write(port,data:byte);
+var
   bit:byte;
 begin
-  pia:=pia_8255[num];
 	port:=port mod 4;
 	case port of
 		0,1,2:begin // Port A,B,C write
-			  pia.m_latch[port]:=data;
-			  ppi8255_write_port(num,port);
+			  self.latch[port]:=data;
+			  self.write_port(port);
 			  case port of
-				0:if ((pia.m_port_a_dir=0) and (pia.m_group_a_mode<>0)) then begin
-						pia.m_obf_a:=1;
-						ppi8255_write_port(num,2);
+				0:if (not(self.port_a_dir) and (self.group_a_mode<>0)) then begin
+						self.obf_a:=true;
+						self.write_port(2);
 					end;
-				1:if ((pia.m_port_b_dir=0) and (pia.m_group_b_mode<>0)) then begin
-						pia.m_obf_b:=1;
-						ppi8255_write_port(num,2);
+				1:if (not(self.port_b_dir) and (self.group_b_mode<>0)) then begin
+						self.obf_b:=true;
+						self.write_port(2);
 					end;
         end;
       end;
-		3:begin // Control word */
-      pia.control:=data;
+		3:begin // Control word
 			if (data and $80)<>0 then begin
-				set_mode(num,data and $7f,true);
+				self.set_mode(data and $7f,true);
 			end else begin
-				// bit set/reset */
+				// bit set/reset
 				bit:=(data shr 1) and $07;
-				if (data and 1)<>0 then pia.m_latch[2]:=pia.m_latch[2] or (1 shl bit)	// set bit */
-				  else pia.m_latch[2]:=pia.m_latch[2] and (not(1 shl bit));	// reset bit */
-				if (pia.m_group_b_mode=1) then
-					if (bit=2) then pia.m_inte_b:=data and 1;
-				if (pia.m_group_a_mode=1) then begin
-					if ((bit=4) and (pia.m_port_a_dir<>0)) then pia.m_inte_a:=data and 1;
-					if ((bit=6) and (pia.m_port_a_dir=0)) then pia.m_inte_a:=data and 1;
+				if (data and 1)<>0 then self.latch[2]:=self.latch[2] or (1 shl bit)	// set bit
+				  else self.latch[2]:=self.latch[2] and (not(1 shl bit));	// reset bit
+				if (self.group_b_mode=1) then
+					if (bit=2) then self.inte_b:=(data and 1)<>0;
+				if (self.group_a_mode=1) then begin
+					if ((bit=4) and self.port_a_dir) then self.inte_a:=(data and 1)<>0;
+					if ((bit=6) and not(self.port_a_dir)) then self.inte_a:=(data and 1)<>0;
 				end;
-				if (pia.m_group_a_mode=2) then begin
-					if (bit=4) then pia.m_inte_2:=data and 1;
-					if (bit=6) then pia.m_inte_1:=data and 1;
+				if (self.group_a_mode=2) then begin
+					if (bit=4) then self.inte_2:=(data and 1)<>0;
+					if (bit=6) then self.inte_1:=(data and 1)<>0;
         end;
-				ppi8255_write_port(num,2);
+				self.write_port(2);
 			end;
     end;
 	end;  //del case
 end;
 
-function ppi8255_get_port(num,port:byte):byte;
+function pia8255_chip.get_port(port:byte):byte;
 begin
-  ppi8255_get_port:=pia_8255[num].m_output[port];
+  get_port:=self.output_val[port];
 end;
 
-procedure ppi8255_set_port(num,port,data:byte);
+procedure pia8255_chip.set_port(port,data:byte);
 begin
-  ppi8255_input(num,port,data);
+  self.input(port,data);
 end;
 
 end.

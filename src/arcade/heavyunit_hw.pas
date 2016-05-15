@@ -105,7 +105,7 @@ pandora.mask_nchar:=$3fff;
 pandora.color_offset:=$100;
 pandora.clear_screen:=false;
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,3000000);
+ym2203_0:=ym2203_chip.create(3000000);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@hvyunit_cpu1,'hvyunit.zip',1)) then exit;
 for f:=0 to 7 do copymemory(@rom_cpu1[f,0],@memoria_temp[f*$4000],$4000);

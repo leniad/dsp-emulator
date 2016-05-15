@@ -1,13 +1,12 @@
 unit ym_3812;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     fmopl,timer_engine,sound_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}fmopl,timer_engine,sound_engine;
 
 type
   IRQ_Handler=procedure (irqstate:byte);
   ym3812_chip=class(snd_chip_class)
-     constructor create(num:byte;clock:dword;amp:single=1);
+     constructor create(type_:byte;clock:dword;amp:single=1);
      destructor free;
   public
      procedure reset;
@@ -23,6 +22,9 @@ type
      num,timer1,timer2:byte;
      procedure init_timers;
   end;
+const
+  YM3812_FM=0;
+  YM3526_FM=1;
 var
   ym3812_0,ym3812_1:ym3812_chip;
 
@@ -32,6 +34,8 @@ procedure ym3812_timer1_1;
 procedure ym3812_timer2_1;
 
 implementation
+var
+  chips_total:integer=-1;
 
 procedure ym3812_chip.init_timers;
 begin
@@ -48,16 +52,20 @@ begin
   end;
 end;
 
-constructor ym3812_chip.create(num:byte;clock:dword;amp:single=1);
+constructor ym3812_chip.create(type_:byte;clock:dword;amp:single=1);
 var
   rate:integer;
 begin
-  self.num:=num;
+  chips_total:=chips_total+1;
+  self.num:=chips_total;
   rate:=round(clock/72);
   // emulator create */
   self.OPL:=OPLCreate(sound_status.cpu_clock,clock,rate);
   self.reset;
-  self.OPL.type_:=OPL_TYPE_WAVESEL;
+  case type_ of
+    YM3812_FM:self.OPL.type_:=OPL_TYPE_WAVESEL;
+    YM3526_FM:self.OPL.type_:=0;
+  end;
   self.tsample_num:=init_channel;
   self.amp:=amp;
   self.init_timers;
@@ -66,6 +74,7 @@ end;
 destructor ym3812_chip.free;
 begin
   OPLClose(self.OPL);
+  chips_total:=chips_total-1;
 end;
 
 procedure ym3812_chip.change_irq_calls(irq_func:IRQ_Handler);

@@ -440,8 +440,8 @@ snd_m6800.change_ram_calls(snd_getbyte,snd_putbyte);
 snd_m6800.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 snd_m6800.init_sound(irem_m62_play_sound);
 //sound chips
-msm_5205_0:=MSM5205_chip.create(0,384000,MSM5205_S96_4B,1,adpcm_int);
-msm_5205_1:=MSM5205_chip.create(1,384000,MSM5205_SEX_4B,1,nil);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
 ay8910_0:=ay8910_chip.create(3579545 div 4,1);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
 ay8910_1:=ay8910_chip.create(3579545 div 4,1);

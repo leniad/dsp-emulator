@@ -179,6 +179,9 @@ type
     boogwins1: TMenuItem;
     Gradius31: TMenuItem;
     centipede1: TMenuItem;
+    MenuItem29: TMenuItem;
+    karnov1: TMenuItem;
+    chelnov1: TMenuItem;
     spaceinvaders1: TMenuItem;
     ssriders1: TMenuItem;
     TMNT1: TMenuItem;
@@ -618,15 +621,8 @@ if sender<>nil then nuevo:=Tmenuitem(sender).tag
   end;
 if main_screen.video_mode<>nuevo then main_screen.video_mode:=nuevo;
 if main_vars.driver_ok then begin
-   if nuevo=6 then begin
-      pasar_pantalla_completa;
-    end else begin
-      cambiar_video;
-      if main_vars.tipo_maquina<7 then begin
-        fillchar(buffer_video[0],6144,1);
-        fillchar(borde.buffer[0],78000,$80);
-      end;
-    end;
+   if nuevo=6 then pasar_pantalla_completa
+      else cambiar_video;
 end;
 sync_all;
 end;
@@ -703,7 +699,7 @@ procedure Tprincipal1.fSlow(Sender: TObject);
 begin
 main_vars.vactual:=(main_vars.vactual+1) and 3;
 valor_sync:=1000/(llamadas_maquina.fps_max/(main_vars.vactual+1));
-if not(main_screen.pantalla_completa) then sdl_raisewindow(window_render);
+//if not(main_screen.pantalla_completa) then sdl_raisewindow(window_render);
 cont_sincroniza:=sdl_getticks();
 cont_micro:=valor_sync;
 SDL_ClearQueuedAudio(1);

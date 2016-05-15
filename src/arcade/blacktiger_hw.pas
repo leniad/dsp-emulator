@@ -109,9 +109,9 @@ snd_z80.init_sound(blktiger_sound_update);
 main_mcs51:=cpu_mcs51.create(6000000,256);
 main_mcs51.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(0,3579545);
+ym2203_0:=ym2203_chip.create(3579545);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(1,3579545);
+ym2203_1:=ym2203_chip.create(3579545);
 //Timers
 timer_hs:=init_timer(main_z80.numero_cpu,10000,blk_hi_score,true);
 //cargar roms

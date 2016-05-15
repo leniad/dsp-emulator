@@ -193,7 +193,7 @@ end;
 
 procedure pooyan_principal;
 var
-  frame_m,frame_s:single;
+  frame_m:single;
   f:byte;
 begin
 init_controls(false,false,false,true);

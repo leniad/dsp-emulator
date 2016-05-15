@@ -355,6 +355,9 @@ type
     BitBtn1: TBitBtn;
     SpaceInvaders1: TMenuItem;
     Centipede1: TMenuItem;
+    KarnovHW1: TMenuItem;
+    Karnov1: TMenuItem;
+    Chelnov1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

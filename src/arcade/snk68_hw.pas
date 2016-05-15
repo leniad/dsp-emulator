@@ -267,7 +267,7 @@ snd_z80.change_ram_calls(pow_snd_getbyte,pow_snd_putbyte);
 snd_z80.change_io_calls(pow_snd_inbyte,pow_snd_outbyte);
 snd_z80.init_sound(snk68_sound_update);
 //Sound Chips
-ym3812_0:=ym3812_chip.create(0,4000000);
+ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
 ym3812_0.change_irq_calls(snd_irq);
 upd7759_0:=upd7759_chip.create(640000,0.5);
 case main_vars.tipo_maquina of

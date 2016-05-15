@@ -217,7 +217,8 @@ case main_vars.tipo_maquina of
         snd_z80:=cpu_z80.create(4000000,264);
         snd_z80.change_ram_calls(snd_congo_getbyte,snd_congo_putbyte);
         init_timer(snd_z80.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,true);
-        init_ppi8255(0,ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
+        pia8255_0:=pia8255_chip.create;
+        pia8255_0.change_ports(ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
         //Samples
         load_samples('congo.zip',@congo_samples[0],num_samples_congo);
         snd_z80.init_sound(congo_sound_update);
@@ -248,7 +249,8 @@ case main_vars.tipo_maquina of
      end;
   188:begin  //Zaxxon
         main_z80.change_ram_calls(zaxxon_getbyte,zaxxon_putbyte);
-        init_ppi8255(0,nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
+        pia8255_0:=pia8255_chip.create;
+        pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
         //Samples
         if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon) then begin
           main_z80.init_sound(zaxxon_sound_update);
@@ -288,7 +290,7 @@ if main_vars.tipo_maquina=175 then begin
   sn_76496_0.Free;
   sn_76496_1.Free;
 end;
-close_ppi8255(0);
+pia8255_0.free;
 close_samples;
 close_audio;
 close_video;
@@ -303,7 +305,7 @@ begin
   sn_76496_1.reset;
  end;
  reset_samples;
- reset_ppi8255(0);
+ pia8255_0.reset;
  reset_audio;
  irq_vblank:=false;
  marcade.in0:=0;
@@ -546,7 +548,7 @@ begin
 case direccion of
   $0..$1fff:snd_congo_getbyte:=mem_snd[direccion];
   $4000..$5fff:snd_congo_getbyte:=mem_snd[$4000+(direccion and $7ff)];
-  $8000..$9fff:snd_congo_getbyte:=ppi8255_r(0,direccion and $3);
+  $8000..$9fff:snd_congo_getbyte:=pia8255_0.read(direccion and $3);
 end;
 end;
 
@@ -557,7 +559,7 @@ mem_snd[direccion]:=valor;
 case direccion of
   $4000..$5fff:mem_snd[$4000+(direccion and $7ff)]:=valor;
   $6000..$7fff:sn_76496_0.Write(valor);
-  $8000..$9fff:ppi8255_w(0,direccion and $3,valor);
+  $8000..$9fff:pia8255_0.write(direccion and $3,valor);
   $a000..$bfff:sn_76496_1.Write(valor);
 end;
 end;
@@ -739,7 +741,7 @@ case direccion of
                     $100:zaxxon_getbyte:=marcade.in2+coin_status[0]+coin_status[1]; //SW100
                  end;
     $e000..$ffff:case (direccion and $ff) of
-                    $3c..$3f:zaxxon_getbyte:=ppi8255_r(0,direccion and $3);
+                    $3c..$3f:zaxxon_getbyte:=pia8255_0.read(direccion and $3);
                  end;
 end;
 end;
@@ -763,7 +765,7 @@ case direccion of
                     6:main_screen.flip_main_screen:=(valor and 1)=0; //zaxxon_flipscreen_w
                  end;
     $e000..$ffff:case (direccion and $ff) of
-                    $3c..$3f:ppi8255_w(0,direccion and $3,valor); //ppi
+                    $3c..$3f:pia8255_0.write(direccion and $3,valor); //ppi
                     $f0:begin //int_enable_w
                           irq_vblank:=(valor and 1)<>0;
                           if not(irq_vblank) then main_z80.pedir_irq:=CLEAR_LINE;

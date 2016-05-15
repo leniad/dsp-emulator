@@ -707,9 +707,11 @@ var
   err:    longint;
   uMagic: longint;
   lSeek:  longint;
+  {$ifndef fpc}
   ptemp,ptemp2:pbyte;
   ptemp3:pwidechar;
   h:integer;
+  {$endif}
 var
   uSizeRead: longint;
 begin

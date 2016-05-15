@@ -8,7 +8,7 @@ uses unzip2,
      {$else}
      {$IFDEF windows}windows,Zlib,{$ENDIF}
      {$endif}
-     sysutils,dialogs,lenguaje,misc_functions,sound_engine,inifiles,main_engine,
+     sysutils,vcl.dialogs,lenguaje,misc_functions,sound_engine,inifiles,main_engine,
      controls_engine;
 
 type
