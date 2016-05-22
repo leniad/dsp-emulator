@@ -313,8 +313,6 @@ begin
     if mapper_sms.max=0 then mapper_sms.max:=1;
     EmuStatusTemp:=EsRuning;
     principal1.timer1.Enabled:=true;
-    principal1.BitBtn3.Enabled:=false;
-    principal1.BitBtn4.Enabled:=true;
     exit;
   end;
   abrir_sms:=false;
@@ -359,8 +357,6 @@ begin
     end;
     EmuStatusTemp:=EsRuning;
     principal1.timer1.Enabled:=true;
-    principal1.BitBtn3.Enabled:=false;
-    principal1.BitBtn4.Enabled:=true;
   end else MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
   Directory.sms:=ExtractFilePath(romfile);
   freemem(datos);

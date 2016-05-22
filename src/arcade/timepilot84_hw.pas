@@ -273,8 +273,8 @@ while EmuStatus=EsRuning do begin
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if linea=239 then begin
         if irq_enable then begin
-          main_m6809.pedir_irq:=HOLD_LINE;
-          misc_m6809.pedir_irq:=HOLD_LINE;
+          main_m6809.change_irq(HOLD_LINE);
+          misc_m6809.change_irq(HOLD_LINE);
         end;
         update_video_tp84;
     end;

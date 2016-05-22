@@ -94,7 +94,7 @@ const
 
 var
  snd_int,main_int:boolean;
- scroll_x,mux,io_timer0,io_timer1:byte;
+ scroll_x,mux,io_timer0,io_timer1,sprite_mask:byte;
  update_video_proc:tipo_update_video;
 
 procedure Cargar_mappyhw;
@@ -115,7 +115,7 @@ begin
 for f:=0 to $3f do begin
   if (memoria[$2781+(f*2)] and $2)=0 then begin
     atrib:=memoria[$2780+(f*2)];
-    nchar:=memoria[$1780+(f*2)];
+    nchar:=memoria[$1780+(f*2)] and sprite_mask;
     color:=memoria[$1781+(f*2)] shl 4;
     x:=memoria[$1f80+(f*2)]+1;
     y:=memoria[$1f81+(f*2)]+$100*(memoria[$2781+(f*2)] and 1)-40;
@@ -447,6 +447,7 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(cargar_roms(@memoria_temp[0],@mappy_sprites[0],'mappy.zip',0)) then exit;
       set_sprites(1,0);
+      sprite_mask:=$7f;
       //Color lookup
       if not(cargar_roms(@memoria_temp[0],@mappy_proms[0],'mappy.zip',0)) then exit;
       set_color_lookup(0,$100);
@@ -468,6 +469,7 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(cargar_roms(@memoria_temp[0],@dd2_sprites[0],'digdug2.zip',0)) then exit;
       set_sprites(2,0);
+      sprite_mask:=$ff;
       //Color lookup
       if not(cargar_roms(@memoria_temp[0],@dd2_proms[0],'digdug2.zip',0)) then exit;
       set_color_lookup(0,$100);
@@ -489,6 +491,7 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(cargar_roms(@memoria_temp[0],@spacman_sprites,'superpac.zip')) then exit;
       set_sprites(1,1);
+      sprite_mask:=$7f;
       //Color lookup
       if not(cargar_roms(@memoria_temp[0],@spacman_proms[0],'superpac.zip',0)) then exit;
       set_color_lookup(1,$100);
@@ -510,6 +513,7 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(cargar_roms(@memoria_temp[0],@todruaga_sprites[0],'todruaga.zip',0)) then exit;
       set_sprites(1,0);
+      sprite_mask:=$7f;
       //Color lookup
       if not(cargar_roms(@memoria_temp[0],@todruaga_proms[0],'todruaga.zip',0)) then exit;
       set_color_lookup(0,$400);
@@ -531,6 +535,7 @@ case  main_vars.tipo_maquina of
       //Sprites
       if not(cargar_roms(@memoria_temp[0],@motos_sprites[0],'motos.zip',0)) then exit;
       set_sprites(2,0);
+      sprite_mask:=$ff;
       //Color lookup
       if not(cargar_roms(@memoria_temp[0],@motos_proms[0],'motos.zip',0)) then exit;
       set_color_lookup(0,$100);
@@ -595,8 +600,8 @@ while EmuStatus=EsRuning do begin
     snd_m6809.run(frame_s);
     frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
     if f=223 then begin
-      if main_int then main_m6809.pedir_irq:=ASSERT_LINE;
-      if snd_int then snd_m6809.pedir_irq:=ASSERT_LINE;
+      if main_int then main_m6809.change_irq(ASSERT_LINE);
+      if snd_int then snd_m6809.change_irq(ASSERT_LINE);
       update_video_proc;
     end;
   end;
@@ -626,11 +631,11 @@ begin
 case (direccion and $0e) of
   $00:begin
         snd_int:=(direccion and 1)<>0;
-        if not(snd_int) then snd_m6809.pedir_irq:=CLEAR_LINE;
+        if not(snd_int) then snd_m6809.change_irq(CLEAR_LINE);
       end;
   $02:begin
         main_int:=(direccion and 1)<>0;
-        if not(main_int) then main_m6809.pedir_irq:=CLEAR_LINE;
+        if not(main_int) then main_m6809.change_irq(CLEAR_LINE);
       end;
   $04:main_screen.flip_main_screen:=(direccion and 1)<>0;
   $06:namco_sound.enabled:=(direccion and 1)<>0;

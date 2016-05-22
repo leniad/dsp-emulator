@@ -152,7 +152,7 @@ while EmuStatus=EsRuning do begin
     //Sound CPU
     konamisnd_0.run(f);
     if f=239 then begin
-      if (irq_req and irq_enable) then main_m6809.pedir_irq:=ASSERT_LINE;
+      if (irq_req and irq_enable) then main_m6809.change_irq(ASSERT_LINE);
       update_video_tutankham;
     end;
   end;
@@ -192,7 +192,7 @@ case direccion of
   $8200..$82ff:case (direccion and $7) of
                   0:begin
                       irq_enable:=(valor and 1)<>0;
-                      if not(irq_enable) then main_m6809.pedir_irq:=CLEAR_LINE;
+                      if not(irq_enable) then main_m6809.change_irq(CLEAR_LINE);
                     end;
                   6:if (valor and 1)<>0 then xory:=255
                       else xory:=0;

@@ -32,7 +32,6 @@ type
     BitBtn19: TBitBtn;
     BitBtn2: TBitBtn;
     BitBtn3: TBitBtn;
-    BitBtn4: TBitBtn;
     BitBtn5: TBitBtn;
     BitBtn6: TBitBtn;
     BitBtn8: TBitBtn;
@@ -384,7 +383,6 @@ type
     procedure CambiaAudio(Sender: TObject);
     procedure fLoadCartucho(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
-    procedure Pausa1Click(Sender: TObject);
     procedure Salir1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
@@ -686,13 +684,23 @@ end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
-EmuStatus:=EsRuning;
-timer1.Enabled:=true;
-BitBtn3.Enabled:=false;
-BitBtn4.Enabled:=true;
-SDL_PauseAudio(0);
-sync_all;
-if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
+BitBtn3.Enabled:=true;
+if emustatus=EsRuning then begin
+   principal1.BitBtn3.Glyph:=nil;
+   principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
+   timer1.Enabled:=false;
+   EmuStatus:=EsPause;
+   SDL_ClearQueuedAudio(1);
+   SDL_PauseAudio(1);
+end else begin
+   principal1.BitBtn3.Glyph:=nil;
+   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
+   EmuStatus:=EsRuning;
+   timer1.Enabled:=true;
+   SDL_PauseAudio(0);
+   sync_all;
+   if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
+end;
 end;
 
 procedure Tprincipal1.fSlow(Sender: TObject);
@@ -766,17 +774,6 @@ while FLoadRom.Showing do application.ProcessMessages;
 sync_all;
 end;
 
-procedure Tprincipal1.Pausa1Click(Sender: TObject);
-begin
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-BitBtn3.Enabled:=true;
-BitBtn4.Enabled:=false;
-SDL_ClearQueuedAudio(1);
-SDL_PauseAudio(1);
-//focus
-end;
-
 procedure Tprincipal1.Salir1Click(Sender: TObject);
 begin
 close;
@@ -823,7 +820,6 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn1.Enabled:=false;
   principal1.BitBtn2.Enabled:=false;
   principal1.BitBtn3.Enabled:=false;
-  principal1.BitBtn4.Enabled:=false;
   principal1.BitBtn5.Enabled:=false;
   principal1.BitBtn6.Enabled:=false;
   principal1.BitBtn8.Enabled:=false;

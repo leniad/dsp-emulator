@@ -227,7 +227,7 @@ while EmuStatus=EsRuning do begin
     snd_m6809.run(frame_s);
     frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
     if f=247 then begin
-      main_m6809.pedir_irq:=HOLD_LINE;
+      main_m6809.change_irq(HOLD_LINE);
       update_video_sonson;
     end;
   end;
@@ -261,7 +261,7 @@ case direccion of
   $3010:soundlatch:=valor;
   $3018:main_screen.flip_main_screen:=(valor and 1)<>1;
   $3019:begin
-          if ((last=0) and ((valor and 1)=1)) then snd_m6809.pedir_firq:=HOLD_LINE;
+          if ((last=0) and ((valor and 1)=1)) then snd_m6809.change_firq(HOLD_LINE);
           last:=valor and 1;
         end;
 end;
@@ -289,7 +289,7 @@ end;
 
 procedure sonson_snd_irq;
 begin
-  snd_m6809.pedir_irq:=HOLD_LINE;
+  snd_m6809.change_irq(HOLD_LINE);
 end;
 
 procedure sonson_sound_update;

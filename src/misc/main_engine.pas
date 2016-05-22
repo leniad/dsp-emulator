@@ -3,7 +3,7 @@ unit main_engine;
 interface
 uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      {$ifndef fpc}uchild,{$endif}
-     vcl.controls,vcl.forms,sysutils,misc_functions,pal_engine,timer_engine,
+     controls,forms,sysutils,misc_functions,pal_engine,timer_engine,
      gfx_engine,sound_engine,arcade_config,vars_hide;
 
 const

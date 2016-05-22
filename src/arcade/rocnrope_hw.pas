@@ -209,7 +209,7 @@ while EmuStatus=EsRuning do begin
     konamisnd_0.run(f);
     if f=239 then begin
       update_video_rocnrope;
-      if pedir_irq then main_m6809.pedir_irq:=HOLD_LINE;
+      if pedir_irq then main_m6809.change_irq(HOLD_LINE);
     end;
   end;
   eventos_rocnrope;

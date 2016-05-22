@@ -3,7 +3,7 @@
 interface
 
 uses
-  Classes,SysUtils,vcl.dialogs{$IFDEF WINDOWS},windows{$else},dynlibs,xlib{$endif};
+  Classes,SysUtils,dialogs{$IFDEF WINDOWS},windows{$else},dynlibs,xlib{$endif};
 
 procedure Init_sdl_lib;
 procedure close_sdl_lib;

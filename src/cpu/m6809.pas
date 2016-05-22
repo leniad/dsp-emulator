@@ -1,4 +1,4 @@
-unit m6809;
+﻿unit m6809;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
@@ -8,12 +8,13 @@ type
         band_m6809=record
                 e,f,h,i,n,z,v,c:boolean;
         end;
+        pband_m6809=^band_m6809;
         reg_m6809=record
                 d:parejas680X;
-                pc,u,s,x,y:word;
+                old_pc,pc,u,s,x,y:word;
                 dp:byte;
                 cc:band_m6809;
-                cwai,sync,pila_init:boolean;
+                cwai,pila_init:boolean;
         end;
         preg_m6809=^reg_m6809;
         cpu_m6809=class(cpu_class)
@@ -21,15 +22,17 @@ type
             destructor free;
           public
             //IRQ's
-            pedir_nmi,pedir_firq,pedir_irq,nmi_state:byte;
             procedure reset;
             procedure run(maximo:single);
-            procedure clear_nmi;
+            procedure change_irq(estado:byte);
+            procedure change_firq(estado:byte);
+            procedure change_nmi(estado:byte);
             function save_snapshot(data:pbyte):word;
             procedure load_snapshot(data:pbyte);
           private
             //Registros
             r:preg_m6809;
+            pedir_nmi,pedir_firq,pedir_irq,nmi_state:byte;
             //Llamadas a RAM
             procedure putword(direccion:word;valor:word);
             function getword(direccion:word):word;
@@ -57,27 +60,27 @@ implementation
 
 const
     estados_t:array[0..255] of byte=(
-      //0 1 2 3 4 5 6 7 8 9 a b c d e f
-      6,0,0,6,6,0,6,6,6,6,6,0,6,6,3,6,    //00
-      0,0,2,4,0,0,5,9,0,2,3,0,3,2,8,6,    //10
-      3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,    //20
-      4,4,4,4,5,5,5,5,0,5,3,6,20,11,0,19, //30
-      2,0,0,2,2,0,2,2,2,2,2,0,2,2,0,2,    //40
-      2,0,0,2,2,0,2,2,2,2,2,0,2,2,0,2,    //50
-      6,0,0,6,6,0,6,6,6,6,6,0,6,6,3,6,    //60
-      7,0,0,7,7,0,7,7,7,7,7,0,7,7,4,7,    //70
-      2,2,2,4,2,2,2,2,2,2,2,2,4,7,3,0,    //80
-      4,4,4,6,4,4,4,4,4,4,4,4,6,7,5,5,    //90
-      4,4,4,6,4,4,4,4,4,4,4,4,6,7,5,5,    //A0
-      5,5,5,7,5,5,5,5,5,5,5,5,7,8,6,6,    //B0
-      2,2,2,4,2,2,2,2,2,2,2,2,3,0,3,3,    //C0
-      4,4,4,6,4,4,4,4,4,4,4,4,5,5,5,5,    //D0
-      4,4,4,6,4,4,4,4,4,4,4,4,5,5,5,5,    //E0
-      5,5,5,7,5,5,5,5,5,5,5,5,6,6,6,6);   //F0
+    //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+      6, 0, 0, 6, 6, 0, 6, 6, 6, 6, 6, 0, 6, 3, 3, 6,  // 0 Direct 2T MODO EA *
+      0, 0, 2, 4, 0, 0, 4, 9, 0, 2, 3, 0, 3, 2, 8, 6,  // 10 *
+      3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 3,  // 20 Branch *
+      2, 2, 2, 2, 5, 4, 5, 4, 0, 4, 3, 4,16,11, 0, 0,  // 30 *
+      2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 1, 0, 1, 2, 0, 1,  // 40 reg A MODO A *
+      2, 0, 0, 2, 2, 0, 2, 2, 2, 2, 1, 0, 1, 2, 0, 1,  // 50 reg B MODO B *
+      4, 0, 0, 4, 4, 0, 4, 4, 4, 4, 4, 0, 4, 4, 1, 4,  // 60 Indexed MODO EA *
+      7, 0, 0, 7, 7, 0, 7, 7, 7, 7, 7, 0, 7, 7, 4, 7,  // 70 Extended 3T MODO EA *
+      2, 2, 2, 5, 2, 2, 2, 0, 2, 2, 2, 2, 5, 7, 4, 0,  // 80 MODO IMM *
+      4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 4, 7, 7, 6, 6,  // 90 Direct 2T MODO EA *
+      2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 3, 5, 3, 3,  // A0 Indexed MODO EA *
+      5, 5, 5, 8, 5, 5, 5, 5, 5, 5, 5, 5, 8, 8, 7, 7,  // B0 Extended 3T MODO EA *
+      2, 2, 2, 5, 2, 2, 2, 0, 2, 2, 2, 2, 4, 0, 4, 0,  // C0 MODO IMM *
+      4, 4, 4, 7, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6,  // D0 Direct 2T MODO EA
+      2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3,  // E0 Indexed MODO EA
+      5, 5, 5, 8, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7); // F0 Extended 3T MODO EA}
 
-    paginacion:array[0..255] of byte=(
+    paginacion:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-        1,$f, 0, 1, 1,$f, 1, 1, 1, 1, 1,$f, 1, 1, 1, 1,  //00
+        1,$f,$f, 1, 1,$f, 1, 1, 1, 1, 1,$f, 1, 1, 1, 1,  //00
         0, 0, 0, 0,$f,$f, 3, 3,$f, 0, 2,$f, 2, 0, 2, 2,  //10
         2, 2, 2, 2, 2, 2, 2, 2,$f,$f, 2, 2, 2, 2, 2, 2,  //20
         4, 4, 4, 4, 2, 2, 2, 2,$f, 0, 0, 0, 2, 0,$f,$f,  //30
@@ -94,59 +97,40 @@ const
         6, 6, 6, 9, 6, 6, 6, 4, 6, 6, 6, 6, 9, 4, 9, 4,  //e0
         7, 7, 7,$a, 7, 7, 7, 3, 7, 7, 7, 7,$a, 3,$a, 3); //f0
 
-    estados_t_ea:array[0..255] of byte=(
-      //0 1 2 3 4 5 6 7 8 9 a b c d e f
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-        2,3,2,3,0,1,1,0,1,4,0,4,1,5,0,5,
-        5,6,5,6,3,4,4,0,4,7,0,7,4,8,0,8,
-        2,3,2,3,0,1,1,0,1,4,0,4,1,5,0,5,
-        5,6,5,6,3,4,4,0,4,7,0,7,4,8,0,8,
-        2,3,2,3,0,1,1,0,1,4,0,4,1,5,0,3,
-        5,6,5,6,3,4,4,0,4,7,0,7,4,8,0,8,
-        2,3,2,3,0,1,1,0,1,4,0,4,1,5,0,5,
-        4,6,5,6,3,4,4,0,4,7,0,7,4,8,0,8);
-
     m6809t_1X:array[0..255] of byte=(
-      //0 1 2 3 4 5 6 7 8 9 a b c d e f
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //00
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //10
-        0,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,  //20
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20, //30
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //40
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //50
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //60
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //70
-        0,0,0,5,0,0,0,0,0,0,0,0,5,0,4,4,  //80
-        0,0,0,7,0,0,0,0,0,0,0,0,7,0,6,6,  //90
-        0,0,0,7,0,0,0,0,0,0,0,0,7,0,6,6,  //a0
-        0,0,0,8,0,0,0,0,0,0,0,0,8,0,7,7,  //b0
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,  //c0
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,  //d0
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,6,  //e0
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,7); //f0
+      //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  Instrucciones $10 (+1)
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10
+        0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 0, 0, // 20
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 40
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70
+        0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 4, 0, // 80
+        0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 6, 6, // 90
+        0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 4, 4, // a0
+        0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 7, 7, // b0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, // c0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, // d0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, // e0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7);// f0
 
     pag_1X:array[0..255] of byte=(
       //0 1 2 3 4 5 6 7 8 9 a b c d e f
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //00
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //10
-        0,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,  //20
+        0,0,3,3,3,3,3,3,0,0,3,3,3,3,0,0,  //20
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //30
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //40
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //50
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //60
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //70
-        0,0,0,3,0,0,0,0,0,0,0,0,3,0,3,3,  //80
+        0,0,0,3,0,0,0,0,0,0,0,0,3,0,3,0,  //80
         0,0,0,5,0,0,0,0,0,0,0,0,5,0,5,1,  //90
         0,0,0,6,0,0,0,0,0,0,0,0,6,0,6,4,  //a0
         0,0,0,7,0,0,0,0,0,0,0,0,7,0,7,3,  //b0
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,  //c0
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,  //c0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,1,  //d0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,4,  //e0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,3); //f0
@@ -238,26 +222,35 @@ procedure cpu_m6809.reset;
 begin
 self.opcode:=false;
 r.pc:=self.getword($FFFE);
-r.d.w:=0;
-r.x:=0;
-r.y:=0;
+r.dp:=0;
 self.contador:=0;
-r.u:=0;
-r.s:=0;
 pon_pila(self.r,$50);
 self.pedir_nmi:=CLEAR_LINE;
 self.pedir_irq:=CLEAR_LINE;
 self.pedir_firq:=CLEAR_LINE;
 self.nmi_state:=CLEAR_LINE;
 r.cwai:=false;
-r.sync:=false;
 r.pila_init:=false;
 end;
 
-procedure cpu_m6809.clear_nmi;
+procedure cpu_m6809.change_nmi(estado:byte);
 begin
+if estado=CLEAR_LINE then begin
   self.pedir_nmi:=CLEAR_LINE;
   self.nmi_state:=CLEAR_LINE;
+end else begin
+  self.pedir_nmi:=estado;
+end;
+end;
+
+procedure cpu_m6809.change_irq(estado:byte);
+begin
+  self.pedir_irq:=estado;
+end;
+
+procedure cpu_m6809.change_firq(estado:byte);
+begin
+  self.pedir_firq:=estado;
 end;
 
 procedure cpu_m6809.push_s(reg:byte);
@@ -323,9 +316,9 @@ begin
 call_nmi:=0;
 if self.nmi_state<>CLEAR_LINE then exit;
 if not(r.pila_init) then exit;
-if r.cwai then begin
+if r.cwai then begin  //Si el estado es cwai, ya he metido en la pila todo...
   r.cwai:=false;
-  call_nmi:=7;
+  call_nmi:=6;
 end else begin
   self.push_sw(r.pc);
   self.push_sw(r.u);
@@ -349,7 +342,7 @@ function cpu_m6809.call_irq:byte;
 begin
 if r.cwai then begin
   r.cwai:=false;
-  call_irq:=7;
+  call_irq:=6;
 end else begin
   self.push_sw(r.pc);
   self.push_sw(r.u);
@@ -371,7 +364,7 @@ function cpu_m6809.call_firq:byte;
 begin
 if r.cwai then begin
   r.cwai:=false;
-  call_firq:=7;
+  call_firq:=6;
 end else begin
   r.cc.e:=false;
   self.push_sw(r.pc);
@@ -390,7 +383,7 @@ var
   origen:pparejas;
   direccion,temp2:word;
 begin
-iindexed:=self.getbyte(r.pc);
+iindexed:=self.getbyte(r.pc); //Hay que añadir 1 estado por cojer un byte...
 r.pc:=r.pc+1;
 case (iindexed and $60) of
   $00:origen:=@r.x;
@@ -403,53 +396,76 @@ if (iindexed and $80)<>0 then begin
       0:begin  //reg+
           direccion:=origen.w;
           origen.w:=origen.w+1;
+          self.estados_demas:=self.estados_demas+3+1;
       end;
       1:begin  //reg++
           direccion:=origen.w;
           origen.w:=origen.w+2;
+          self.estados_demas:=self.estados_demas+4+1;
       end;
       2:begin  //-reg
           origen.w:=origen.w-1;
           direccion:=origen.w;
+          self.estados_demas:=self.estados_demas+3+1;
       end;
       3:begin //--reg
           origen.w:=origen.w-2;
           direccion:=origen.w;
+          self.estados_demas:=self.estados_demas+4+1;
       end;
-      4:direccion:=origen.w;  // =
-      5:direccion:=origen.w+shortint(r.d.b);  //reg + r.d.b
-      6:direccion:=origen.w+shortint(r.d.a);  // reg + r.d.a
+      4:begin // =
+          direccion:=origen.w;
+          self.estados_demas:=self.estados_demas+1+1;
+        end;
+      5:begin //reg + r.d.b
+          direccion:=origen.w+shortint(r.d.b);
+          self.estados_demas:=self.estados_demas+2+1;
+        end;
+      6:begin // reg + r.d.a
+          direccion:=origen.w+shortint(r.d.a);
+          self.estados_demas:=self.estados_demas+2+1;
+        end;
       7:MessageDlg('Indexed 7 desconocido. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
       8:begin  //reg + deplazamiento 8bits
           temp:=self.getbyte(r.pc);
           r.pc:=r.pc+1;
           direccion:=origen.w+shortint(temp);
+          self.estados_demas:=self.estados_demas+2+1;
       end;
       9:begin  //reg + deplazamiento 16bits
           temp2:=self.getword(r.pc);
           r.pc:=r.pc+2;
           direccion:=origen.w+smallint(temp2);
+          self.estados_demas:=self.estados_demas+5+1;
       end;
       $a:MessageDlg('Indexed $a desconocido. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
-      $b:direccion:=origen.w+smallint(r.d.w); //reg + r.d.w
+      $b:begin //reg + r.d.w
+          direccion:=origen.w+smallint(r.d.w);
+          self.estados_demas:=self.estados_demas+5+1;
+         end;
       $c:MessageDlg('Indexed $c desconocido. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
       $d:begin  //pc + desplazamiento 16 bits
           temp2:=self.getword(r.pc);
           r.pc:=r.pc+2;
           direccion:=r.pc+temp2;
+          self.estados_demas:=self.estados_demas+6+1;
       end;
-      $f:begin
+      $f:begin  //pc
           direccion:=self.getword(r.pc);
           r.pc:=r.pc+2;
+          self.estados_demas:=self.estados_demas+3+1;
       end
   end;
-  if (iindexed and $10)<>0 then direccion:=self.getword(direccion);
+  if (iindexed and $10)<>0 then begin
+     direccion:=self.getword(direccion);
+     self.estados_demas:=self.estados_demas+2;
+  end;
 end else begin
-  temp:=iindexed and $1f;
-  if (temp and $10)=0 then direccion:=origen.w+(temp and $f)
-    else direccion:=origen.w-(16-(temp and $f));
+  temp:=iindexed and $f;
+  if (iindexed and $10)=0 then direccion:=origen.w+temp
+    else direccion:=origen.w-(16-temp);
+  self.estados_demas:=self.estados_demas+2+1;
 end;
-self.estados_demas:=estados_t_ea[iindexed];
 get_indexed:=direccion;
 end;
 
@@ -546,6 +562,9 @@ case (valor and 15) of
 end;
 end;
 
+//Functions
+{$I m6809.inc}
+
 procedure cpu_m6809.run(maximo:single);
 var
     instruccion,temp,temp2,numero,instruccion2,cf:byte;
@@ -562,12 +581,12 @@ if self.pedir_reset<>CLEAR_LINE then begin
   self.contador:=trunc(maximo);
   exit;
 end;
+self.r.old_pc:=self.r.pc;
 self.estados_demas:=0;
-if ((self.pedir_firq<>CLEAR_LINE) or (self.pedir_irq<>CLEAR_LINE) or (self.pedir_nmi<>CLEAR_LINE)) then r.sync:=false;
 if self.pedir_nmi<>CLEAR_LINE then self.estados_demas:=self.call_nmi
   else if ((self.pedir_firq<>CLEAR_LINE) and not(r.cc.f)) then self.estados_demas:=self.call_firq
        else if ((self.pedir_irq<>CLEAR_LINE) and not(r.cc.i)) then self.estados_demas:=self.call_irq;
-if (r.cwai or r.sync) then begin
+if r.cwai then begin
   self.contador:=trunc(maximo);
   exit;
 end;
@@ -577,8 +596,8 @@ r.pc:=r.pc+1;
 self.opcode:=false;
 //tipo de paginacion
 case paginacion[instruccion] of
-    0:; //implicito
-    1:begin //direct page
+    0:; //implicito 0T
+    1:begin //DIRECT  2T
         posicion.h:=r.dp;
         posicion.l:=self.getbyte(r.pc);
         r.pc:=r.pc+1;
@@ -587,20 +606,18 @@ case paginacion[instruccion] of
         numero:=self.getbyte(r.pc);
         r.pc:=r.pc+1;
       end;
-    3:begin  //extendido
+    3:begin  //EXTENDED 3T
          posicion.w:=self.getword(r.pc);
          r.pc:=r.pc+2;
       end;
-    4:posicion.w:=self.get_indexed;
+    4:posicion.w:=self.get_indexed; //INDEXED Los estados T son variables
     5:begin //direct page indirecto byte
         posicion.h:=r.dp;
         posicion.l:=self.getbyte(r.pc);
         r.pc:=r.pc+1;
         numero:=self.getbyte(posicion.w);
       end;
-    6:begin //indexado indirecto byte
-        numero:=self.getbyte(get_indexed);
-    end;
+    6:numero:=self.getbyte(get_indexed); //indexado indirecto byte
     7:begin  //extendido indirecto byte
          posicion.w:=self.getword(r.pc);
          r.pc:=r.pc+2;
@@ -612,102 +629,54 @@ case paginacion[instruccion] of
         r.pc:=r.pc+1;
         posicion.w:=self.getword(posicion.w);
       end;
-    9:begin //indexado indirecto word
-        posicion.w:=self.getword(get_indexed);
-      end;
+    9:posicion.w:=self.getword(get_indexed); //indexado indirecto word
     $a:begin  //extendido indirecto word
          posicion.w:=self.getword(r.pc);
          r.pc:=r.pc+2;
          posicion.w:=self.getword(posicion.w);
       end;
-    else MessageDlg('Num CPU'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0)
+    else MessageDlg('Num CPU'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' OLD_PC='+inttohex(self.r.old_pc,10), mtInformation,[mbOk], 0)
 end;
 case instruccion of
-      $0,$60,$70:begin  //neg
+      $0,$60,$70:begin  //neg 4T
             temp:=self.getbyte(posicion.w);
-            tempw:=-temp;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=(((0 xor temp xor tempw xor (tempw shr 1)) and $80))<>0;
-            self.putbyte(posicion.w,tempw);
+            self.putbyte(posicion.w,m680x_neg(temp,@r.cc));
       end;
-      $2:; //ilegal!
-      $3,$63,$73:begin  //com
-            temp:=not(self.getbyte(posicion.w));
-            r.cc.v:=false;
-            r.cc.c:=true;
-            r.cc.n:=(temp and $80)<>0;
-            r.cc.z:=(temp=0);
-            self.putbyte(posicion.w,temp);
-      end;
-      $4,$64,$74:begin  //lsr
+      $3,$63,$73:begin  //com 4T
             temp:=self.getbyte(posicion.w);
-            r.cc.c:=(temp and $1)<>0;
-            temp:=temp shr 1;
-            r.cc.z:=(temp=0);
-            r.cc.n:=false;
-            self.putbyte(posicion.w,temp);
+            self.putbyte(posicion.w,m680x_com(temp,@r.cc));
       end;
-      $6,$66,$76:begin  //ror
+      $4,$64,$74:begin  //lsr 4T
             temp:=self.getbyte(posicion.w);
-            if r.cc.c then temp2:=(temp shr 1) or $80
-              else temp2:=temp shr 1;
-            r.cc.c:=(temp and $1)<>0;
-            r.cc.n:=(temp2 and $80)<>0;
-            r.cc.z:=(temp2=0);
-            self.putbyte(posicion.w,temp2);
+            self.putbyte(posicion.w,m680x_lsr(temp,@r.cc));
       end;
-      $7,$67,$77:begin  //asr
+      $6,$66,$76:begin  //ror 4T
             temp:=self.getbyte(posicion.w);
-            temp2:=(temp and $80) or (temp shr 1);
-            r.cc.c:=(temp and $1)<>0;
-            r.cc.n:=(temp2 and $80)<>0;
-            r.cc.z:=(temp2=0);
-            self.putbyte(posicion.w,temp2);
+            self.putbyte(posicion.w,m680x_ror(temp,@r.cc));
       end;
-      $8,$68,$78:begin  //asl
+      $7,$67,$77:begin  //asr 4T
             temp:=self.getbyte(posicion.w);
-            tempw:=temp shl 1;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=((temp xor temp xor tempw xor (tempw shr 1)) and $80)<>0;
-            self.putbyte(posicion.w,tempw);
+            self.putbyte(posicion.w,m680x_asr(temp,@r.cc));
       end;
-      $9,$69,$79:begin  //rol
+      $8,$68,$78:begin  //asl 4T
             temp:=self.getbyte(posicion.w);
-            if r.cc.c then tempw:=(temp shl 1) or 1
-              else tempw:=(temp shl 1);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=((temp xor temp xor tempw xor (tempw shr 1)) and $80)<>0;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            self.putbyte(posicion.w,tempw);
+            self.putbyte(posicion.w,m680x_asl(temp,@r.cc));
       end;
-      $a,$6a,$7a:begin  //dec
-            temp:=self.getbyte(posicion.w)-1;
-            r.cc.z:=(temp=0);
-            r.cc.n:=(temp and $80)<>0;
-            r.cc.v:=(temp=$7f);
-            self.putbyte(posicion.w,temp);
-      end;
-      $c,$6c,$7c:begin  //inc
-            temp:=self.getbyte(posicion.w)+1;
-            r.cc.z:=(temp=0);
-            r.cc.n:=(temp and $80)<>0;
-            r.cc.v:=(temp=$80);
-            self.putbyte(posicion.w,temp);
-      end;
-      $d,$6d,$7d:begin //tst
+      $9,$69,$79:begin  //rol 4T
             temp:=self.getbyte(posicion.w);
-            r.cc.v:=false;
-            r.cc.n:=(temp and $80)<>0;
-            r.cc.z:=(temp=0);
+            self.putbyte(posicion.w,m680x_rol(temp,@r.cc));
       end;
-      $e,$6e,$7e:r.pc:=posicion.w;  //jmp
-      $f,$6f,$7f:begin //clr
-          //self.getbyte(posicion.w);
+      $a,$6a,$7a:begin  //dec 4T
+            temp:=self.getbyte(posicion.w);
+            self.putbyte(posicion.w,m680x_dec(temp,@r.cc));
+      end;
+      $c,$6c,$7c:begin  //inc 4T
+            temp:=self.getbyte(posicion.w);
+            self.putbyte(posicion.w,m680x_inc(temp,@r.cc));
+      end;
+      $d,$6d,$7d:m680x_tst(self.getbyte(posicion.w),@r.cc); //tst 3T
+      $e,$6e,$7e:r.pc:=posicion.w;  //jmp 1T
+      $f,$6f,$7f:begin //clr 4T
           self.putbyte(posicion.w,0);
           r.cc.n:=false;
           r.cc.v:=false;
@@ -747,79 +716,53 @@ case instruccion of
             case instruccion2 of
               $22:if not(r.cc.c or r.cc.z) then begin //lbhi
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
               $23:if (r.cc.c or r.cc.z) then begin //bls
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
               $24:if not(r.cc.c) then begin //lbcc
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
               $25:if r.cc.c then begin //lbcs
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
               $26:if not(r.cc.z) then begin //lbne
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
               $27:if r.cc.z then begin //lbeq
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
               $2a:if not(r.cc.n) then begin //lbpl
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
               $2b:if r.cc.n then begin //bmi
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
               $2c:if not(r.cc.n xor r.cc.v) then begin //bge
                     r.pc:=r.pc+smallint(posicion.w);
-                    self.contador:=self.contador+1;
+                    self.estados_demas:=self.estados_demas+1;
                   end;
-              $83,$93,$a3,$b3:begin  //cmpd
-                                templ:=r.d.w-posicion.w;
-                                r.cc.c:=(templ and $10000)<>0;
-                                r.cc.n:=(templ and $8000)<>0;
-                                r.cc.z:=((templ and $ffff)=0);
-                                r.cc.v:=((r.d.w xor posicion.w xor templ xor (templ shr 1)) and $8000)<>0;
-                              end;
-              $8c,$9c,$ac,$bc:begin  //CMPY
-                                templ:=r.y-posicion.w;
-                                r.cc.c:=(templ and $10000)<>0;
-                                r.cc.n:=(templ and $8000)<>0;
-                                r.cc.z:=((templ and $ffff)=0);
-                                r.cc.v:=((r.y xor posicion.w xor templ xor (templ shr 1)) and $8000)<>0;
-                              end;
-              $8e,$9e,$ae,$be:begin  //LDY
-                    r.y:=posicion.w;
-                    r.cc.n:=(r.y and $8000)<>0;
-                    r.cc.z:=(r.y=0);
-                    r.cc.v:=false;
+              $2d:if (r.cc.n xor r.cc.v) then begin //bnge
+                    r.pc:=r.pc+smallint(posicion.w);
+                    self.estados_demas:=self.estados_demas+1;
                   end;
-              $9f,$af,$bf:begin //STY
-                    r.cc.n:=(r.y and $8000)<>0;
-                    r.cc.z:=(r.y=0);
-                    r.cc.v:=false;
-                    self.putword(posicion.w,r.y);
-                  end;
+              $83,$93,$a3,$b3:m680x_sub16(r.d.w,posicion.w,@r.cc);  //cmpd
+              $8c,$9c,$ac,$bc:m680x_sub16(r.y,posicion.w,@r.cc);  //cmpy
+              $8e,$9e,$ae,$be:r.y:=m680x_ld_st16(posicion.w,@r.cc);  //LDY
+                  $9f,$af,$bf:self.putword(posicion.w,m680x_ld_st16(r.y,@r.cc)); //STY
               $ce,$de,$ee,$fe:begin  //LDS
-                    r.s:=posicion.w;
-                    r.cc.n:=(r.s and $8000)<>0;
-                    r.cc.z:=(r.s=0);
-                    r.cc.v:=false;
+                    r.s:=m680x_ld_st16(posicion.w,@r.cc);
                     r.pila_init:=true;
                   end;
-              $df,$ef,$ff:begin //sts
-                    r.cc.n:=(r.s and $8000)<>0;
-                    r.cc.z:=(r.s=0);
-                    r.cc.v:=false;
-                    self.putword(posicion.w,r.s);
-                end
+                  $df,$ef,$ff:self.putword(posicion.w,m680x_ld_st16(r.s,@r.cc)); //sts
             end;
             self.estados_demas:=self.estados_demas+m6809t_1X[instruccion2];
           end;
@@ -854,39 +797,24 @@ case instruccion of
                   end;
             end;
             case instruccion2 of
-              $83,$93,$a3,$b3:begin  //cmpu
-                                templ:=r.u-posicion.w;
-                                r.cc.c:=(templ and $10000)<>0;
-                                r.cc.n:=(templ and $8000)<>0;
-                                r.cc.z:=((templ and $ffff)=0);
-                                r.cc.v:=((r.u xor posicion.w xor templ xor (templ shr 1)) and $8000)<>0;
-                              end;
-              $8c:begin //cmps
-                    templ:=r.s-posicion.w;
-                    r.cc.c:=(templ and $10000)<>0;
-                    r.cc.n:=(templ and $8000)<>0;
-                    r.cc.z:=((templ and $ffff)=0);
-                    r.cc.v:=((r.s xor posicion.w xor templ xor (templ shr 1)) and $8000)<>0;
-                  end;
+              $3c,$3d:MessageDlg('Num CPU'+inttostr(self.numero_cpu)+'Intento de cambiar a HD6309!!. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
+              $83,$93,$a3,$b3:m680x_sub16(r.u,posicion.w,@r.cc);  //cmpu
+              $8c:m680x_sub16(r.s,posicion.w,@r.cc); //cmps
             end;
             self.estados_demas:=self.estados_demas+m6809t_1X[instruccion2];
           end;
-      $12:; //nop
-      $13:begin //sync
-            r.sync:=true;
-            self.contador:=trunc(maximo);
-            exit;
-          end;
-      $16:begin //lbra
+      $12:; //nop 2T
+      $13:if ((self.pedir_firq=CLEAR_LINE) and (self.pedir_irq=CLEAR_LINE) and (self.pedir_nmi=CLEAR_LINE)) then r.pc:=r.pc-1; //sync 4T
+      $16:begin //lbra 5T
             r.pc:=r.pc+smallint(posicion.w);
             self.contador:=self.contador+1;
           end;
-      $17:begin  //lbsr
+      $17:begin  //lbsr 9T
             self.push_sw(r.pc);
             r.pc:=r.pc+smallint(posicion.w);
             self.contador:=self.contador+1;
       end;
-      $19:begin //daa
+      $19:begin //daa 2T
             cf:=0;
             temp:=r.d.a and $f0;
             temp2:=r.d.a and $0f;
@@ -900,47 +828,47 @@ case instruccion of
             r.cc.c:=r.cc.c or ((tempw and $100)<>0);
 	          r.d.a:=tempw;
           end;
-      $1a:begin //orcc
+      $1a:begin //orcc 3T
             temp:=dame_pila(self.r) or numero;
             pon_pila(self.r,temp);
           end;
-      $1c:begin //andcc
+      $1c:begin //andcc  3T
             temp:=dame_pila(self.r) and numero;
             pon_pila(self.r,temp);
           end;
-      $1d:begin //sex
+      $1d:begin //sex 2T
             if (r.d.b and $80)<>0 then r.d.a:=$ff
               else r.d.a:=0;
             r.cc.n:=(r.d.w and $8000)<>0;
             r.cc.z:=(r.d.w=0);
       end;
-      $1e:trf_ex(self.r,numero); //exg
-      $1f:trf(self.r,numero); //trf
-      $20:r.pc:=r.pc+shortint(numero); //bra
-      $21:; //brn
-      $22:if not(r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bhi
-      $23:if (r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero); //bls
-      $24:if not(r.cc.c) then r.pc:=r.pc+shortint(numero);  //bcc
-      $25:if r.cc.c then r.pc:=r.pc+shortint(numero); //bcs
-      $26:if not(r.cc.z) then r.pc:=r.pc+shortint(numero); //bne
-      $27:if r.cc.z then r.pc:=r.pc+shortint(numero); //beq
-      $2a:if not(r.cc.n) then r.pc:=r.pc+shortint(numero); //bpl
-      $2b:if r.cc.n then r.pc:=r.pc+shortint(numero); //bmi
-      $2c:if not(r.cc.n xor r.cc.v) then r.pc:=r.pc+shortint(numero);//bge
-      $2d:if (r.cc.n xor r.cc.v) then r.pc:=r.pc+shortint(numero);//blt
-      $2e:if not((r.cc.n xor r.cc.v) or r.cc.z) then r.pc:=r.pc+shortint(numero); //bgt
-      $2f:if ((r.cc.n xor r.cc.v) or r.cc.z) then r.pc:=r.pc+shortint(numero); //ble
-      $30:begin //leax
+      $1e:trf_ex(self.r,numero); //exg 8T
+      $1f:trf(self.r,numero); //trf 4T
+      $20:r.pc:=r.pc+shortint(numero); //bra 3T
+      $21:; //brn 3T
+      $22:if not(r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bhi 3T
+      $23:if (r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero); //bls 3T
+      $24:if not(r.cc.c) then r.pc:=r.pc+shortint(numero);  //bcc 3T
+      $25:if r.cc.c then r.pc:=r.pc+shortint(numero); //bcs 3T
+      $26:if not(r.cc.z) then r.pc:=r.pc+shortint(numero); //bne 3T
+      $27:if r.cc.z then r.pc:=r.pc+shortint(numero); //beq 3T
+      $2a:if not(r.cc.n) then r.pc:=r.pc+shortint(numero); //bpl 3T
+      $2b:if r.cc.n then r.pc:=r.pc+shortint(numero); //bmi 3T
+      $2c:if not(r.cc.n xor r.cc.v) then r.pc:=r.pc+shortint(numero);//bge 3T
+      $2d:if (r.cc.n xor r.cc.v) then r.pc:=r.pc+shortint(numero);//blt 3T
+      $2e:if not((r.cc.n xor r.cc.v) or r.cc.z) then r.pc:=r.pc+shortint(numero); //bgt 3T
+      $2f:if ((r.cc.n xor r.cc.v) or r.cc.z) then r.pc:=r.pc+shortint(numero); //ble 3T
+      $30:begin //leax 2T
             r.x:=posicion.w;
             r.cc.z:=(r.x=0);
           end;
-      $31:begin //leay
+      $31:begin //leay 2T
             r.y:=posicion.w;
             r.cc.z:=(r.y=0);
           end;
-      $32:r.s:=posicion.w; //leas
-      $33:r.u:=posicion.w; //leau
-      $34:begin //pshs
+      $32:r.s:=posicion.w; //leas 2T
+      $33:r.u:=posicion.w; //leau 2T
+      $34:begin //pshs 5T
             if (numero and $80)<>0 then begin
               self.push_sw(r.pc);
               self.estados_demas:=self.estados_demas+2;
@@ -974,7 +902,7 @@ case instruccion of
               self.estados_demas:=self.estados_demas+1;
             end;
       end;
-      $35:begin //puls
+      $35:begin //puls 4T
             if (numero and $1)<>0 then begin
               pon_pila(self.r,self.pop_s);
               self.estados_demas:=self.estados_demas+1;
@@ -1008,7 +936,7 @@ case instruccion of
               self.estados_demas:=self.estados_demas+2;
             end;
       end;
-      $36:begin //pshu
+      $36:begin //pshu 5T
             if (numero and $80)<>0 then begin
               self.push_uw(r.pc);
               self.estados_demas:=self.estados_demas+2;
@@ -1042,7 +970,7 @@ case instruccion of
               self.estados_demas:=self.estados_demas+1;
             end;
       end;
-      $37:begin //pulu
+      $37:begin //pulu 4T
             if (numero and $1)<>0 then begin
               pon_pila(self.r,self.pop_u);
               self.estados_demas:=self.estados_demas+1;
@@ -1076,11 +1004,11 @@ case instruccion of
               self.estados_demas:=self.estados_demas+2;
             end;
       end;
-      $39:r.pc:=self.pop_sw; //rts
-      $3a:r.x:=r.x+r.d.b;  //abx
-      $3b:begin  //rti
+      $39:r.pc:=self.pop_sw; //rts 4T
+      $3a:r.x:=r.x+r.d.b;  //abx 3T
+      $3b:begin  //rti 4T
           pon_pila(self.r,self.pop_s);
-          if r.cc.e then begin
+          if r.cc.e then begin //13 T
             self.estados_demas:=self.estados_demas+9;
             r.d.a:=self.pop_s;
             r.d.b:=self.pop_s;
@@ -1091,7 +1019,7 @@ case instruccion of
           end;
           r.pc:=self.pop_sw;
       end;
-      $3c:begin //cwai
+      $3c:begin //cwai 16T
           pon_pila(self.r,dame_pila(self.r) and numero);
           r.cc.e:=true;
           self.push_sw(r.pc);
@@ -1104,392 +1032,84 @@ case instruccion of
           self.push_s(dame_pila(self.r));
           r.cwai:=true;
       end;
-      $3d:begin  //mul
+      $3d:begin  //mul 11T
           r.d.w:=r.d.a*r.d.b;
           r.cc.c:=(r.d.w and $80)<>0;
           r.cc.z:=(r.d.w=0);
       end;
-      $40:begin //nega
-            tempw:=-r.d.a;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=(((0 xor r.d.a xor tempw xor (tempw shr 1)) and $80))<>0;
-            r.d.a:=tempw;
-          end;
-      $43:begin  //coma
-            r.d.a:=not(r.d.a);
-            r.cc.v:=false;
-            r.cc.c:=true;
-            r.cc.n:=(r.d.a and $80)<>0;
-            r.cc.z:=(r.d.a=0);
-          end;
-      $44:begin //lsra
-            r.cc.c:=(r.d.a and $1)<>0;
-            temp:=r.d.a shr 1;
-            r.cc.z:=(temp=0);
-            r.cc.n:=false;
-            r.d.a:=temp;
-          end;
-      $46:begin //rora
-            if r.cc.c then temp:=(r.d.a shr 1) or $80
-              else temp:=r.d.a shr 1;
-            r.cc.c:=(r.d.a and $1)<>0;
-            r.cc.n:=(temp and $80)<>0;
-            r.cc.z:=(temp=0);
-            r.d.a:=temp;
-          end;
-      $47:begin //asra
-            temp:=(r.d.a and $80) or (r.d.a shr 1);
-            r.cc.c:=(r.d.a and $1)<>0;
-            r.cc.n:=(temp and $80)<>0;
-            r.cc.z:=(temp=0);
-            r.d.a:=temp;
-          end;
-      $48:begin //asla
-            tempw:=r.d.a shl 1;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=((r.d.a xor r.d.a xor tempw xor (tempw shr 1)) and $80)<>0;
-            r.d.a:=tempw;
-          end;
-      $49:begin  //rola
-            if r.cc.c then tempw:=(r.d.a shl 1) or 1
-              else tempw:=(r.d.a shl 1);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=((r.d.a xor r.d.a xor tempw xor (tempw shr 1)) and $80)<>0;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.d.a:=tempw;
-          end;
-      $4a:begin //deca
-            r.d.a:=r.d.a-1;
-            r.cc.z:=(r.d.a=0);
-            r.cc.n:=(r.d.a and $80)<>0;
-            r.cc.v:=(r.d.a=$7f);
-          end;
-      $4c:begin //inca
-            r.d.a:=r.d.a+1;
-            r.cc.z:=(r.d.a=0);
-            r.cc.n:=(r.d.a and $80)<>0;
-            r.cc.v:=(r.d.a=$80);
-          end;
-      $4d:begin //tsta
-            r.cc.v:=false;
-            r.cc.n:=(r.d.a and $80)<>0;
-            r.cc.z:=(r.d.a=0);
-          end;
-      $4f:begin //clra
+      $40:r.d.a:=m680x_neg(r.d.a,@r.cc); //nega 2T
+      $43:r.d.a:=m680x_com(r.d.a,@r.cc);  //coma 2T
+      $44:r.d.a:=m680x_lsr(r.d.a,@r.cc); //lsra 2T
+      $46:r.d.a:=m680x_ror(r.d.a,@r.cc); //rora 2T
+      $47:r.d.a:=m680x_asr(r.d.a,@r.cc); //asra 2T
+      $48:r.d.a:=m680x_asl(r.d.a,@r.cc); //asla 2T
+      $49:r.d.a:=m680x_rol(r.d.a,@r.cc);  //rola 2T
+      $4a:r.d.a:=m680x_dec(r.d.a,@r.cc); //deca 2T
+      $4c:r.d.a:=m680x_inc(r.d.a,@r.cc); //inca 2T
+      $4d:m680x_tst(r.d.a,@r.cc); //tsta 2T
+      $4f:begin //clra 2T
             r.d.a:=0;
             r.cc.z:=true;
             r.cc.n:=false;
             r.cc.v:=false;
             r.cc.c:=false;
           end;
-      $50:begin  //negb
-            tempw:=-r.d.b;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=(((0 xor r.d.b xor tempw xor (tempw shr 1)) and $80))<>0;
-            r.d.b:=tempw;
-          end;
-      $53:begin  //comb
-            r.d.b:=not(r.d.b);
-            r.cc.v:=false;
-            r.cc.c:=true;
-            r.cc.n:=(r.d.b and $80)<>0;
-            r.cc.z:=(r.d.b=0);
-          end;
-      $54:begin   //lsrb
-            r.cc.c:=(r.d.b and $1)<>0;
-            temp:=r.d.b shr 1;
-            r.cc.z:=(temp=0);
-            r.cc.n:=false;
-            r.d.b:=temp;
-          end;
-      $56:begin  //rorb
-            if r.cc.c then temp:=(r.d.b shr 1) or $80
-              else temp:=r.d.b shr 1;
-            r.cc.c:=(r.d.b and $1)<>0;
-            r.cc.n:=(temp and $80)<>0;
-            r.cc.z:=(temp=0);
-            r.d.b:=temp;
-          end;
-      $57:begin  //asrb
-            temp:=(r.d.b and $80) or (r.d.b shr 1);
-            r.cc.c:=(r.d.b and $1)<>0;
-            r.cc.n:=(temp and $80)<>0;
-            r.cc.z:=(temp=0);
-            r.d.b:=temp;
-          end;
-      $58:begin  //aslb
-            tempw:=r.d.b shl 1;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=((r.d.b xor r.d.b xor tempw xor (tempw shr 1)) and $80)<>0;
-            r.d.b:=tempw;
-          end;
-      $59:begin  //rolb
-            if r.cc.c then tempw:=(r.d.b shl 1) or 1
-              else tempw:=(r.d.b shl 1);
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.v:=((r.d.b xor r.d.b xor tempw xor (tempw shr 1)) and $80)<>0;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.d.b:=tempw;
-          end;
-      $5a:begin  //decb
-            r.d.b:=r.d.b-1;
-            r.cc.z:=(r.d.b=0);
-            r.cc.n:=(r.d.b and $80)<>0;
-            r.cc.v:=(r.d.b=$7f);
-          end;
-      $5c:begin  //incb
-            r.d.b:=r.d.b+1;
-            r.cc.z:=(r.d.b=0);
-            r.cc.n:=(r.d.b and $80)<>0;
-            r.cc.v:=(r.d.b=$80);
-          end;
-      $5d:begin //tstb
-           r.cc.v:=false;
-           r.cc.n:=(r.d.b and $80)<>0;
-           r.cc.z:=(r.d.b=0);
-      end;
-      $5f:begin //clrb
+      $50:r.d.b:=m680x_neg(r.d.b,@r.cc);  //negb 2T
+      $53:r.d.b:=m680x_com(r.d.b,@r.cc);  //comb 2T
+      $54:r.d.b:=m680x_lsr(r.d.b,@r.cc);   //lsrb 2T
+      $56:r.d.b:=m680x_ror(r.d.b,@r.cc); //rorb 2T
+      $57:r.d.b:=m680x_asr(r.d.b,@r.cc);  //asrb 2T
+      $58:r.d.b:=m680x_asl(r.d.b,@r.cc);  //aslb 2T
+      $59:r.d.b:=m680x_rol(r.d.b,@r.cc);  //rolb 2T
+      $5a:r.d.b:=m680x_dec(r.d.b,@r.cc);  //decb 2T
+      $5c:r.d.b:=m680x_inc(r.d.b,@r.cc);  //incb 2T
+      $5d:m680x_tst(r.d.b,@r.cc); //tstb 2T
+      $5f:begin //clrb 2T
             r.d.b:=0;
             r.cc.z:=true;
             r.cc.n:=false;
             r.cc.v:=false;
             r.cc.c:=false;
           end;
-      $80,$90,$a0,$b0:begin   //suba
-            tempw:=r.d.a-numero;
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.cc.v:=(((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-            r.d.a:=tempw;
-          end;
-      $81,$91,$a1,$b1:begin  //cmpa
-            tempw:=r.d.a-numero;
-            r.cc.c:=(tempw and $100)<>0;
-            r.cc.n:=(tempw and $80)<>0;
-            r.cc.z:=((tempw and $ff)=0);
-            r.cc.v:=(((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-          end;
-      $82,$92,$a2,$b2:begin  //sbca
-                          if r.cc.c then tempw:=r.d.a-numero-1
-                            else tempw:=r.d.a-numero;
-                          r.cc.c:=(tempw and $100)<>0;
-                          r.cc.n:=(tempw and $80)<>0;
-                          r.cc.z:=((tempw and $ff)=0);
-                          r.cc.v:=(((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-                          r.d.a:=tempw;
-                      end;
-      $83,$93,$a3,$b3:begin //subd
-                          templ:=r.d.w-posicion.w;
-                          r.cc.c:=(templ and $10000)<>0;
-                          r.cc.n:=(templ and $8000)<>0;
-                          r.cc.z:=((templ and $ffff)=0);
-                          r.cc.v:=((r.d.w xor posicion.w xor templ xor (templ shr 1)) and $8000)<>0;
-                          r.d.w:=templ;
-                      end;
-      $84,$94,$a4,$b4:begin  //anda
-                        r.d.a:=r.d.a and numero;
-                        r.cc.n:=(r.d.a and $80)<>0;
-                        r.cc.z:=(r.d.a=0);
-                        r.cc.v:=false;
-                      end;
-      $85,$95,$a5,$b5:begin  //bita
-                        temp:=r.d.a and numero;
-                        r.cc.n:=(temp and $80)<>0;
-                        r.cc.z:=(temp=0);
-                        r.cc.v:=false;
-                      end;
-      $86,$96,$a6,$b6:begin  //lda
-            r.d.a:=numero;
-            r.cc.v:=false;
-            r.cc.n:=(r.d.a and $80)<>0;
-            r.cc.z:=(r.d.a=0);
-          end;
-      $97,$a7,$b7:begin  //sta
-            r.cc.n:=(r.d.a and $80)<>0;
-            r.cc.z:=(r.d.a=0);
-            r.cc.v:=false;
-            self.putbyte(posicion.w,r.d.a);
-          end;
-      $88,$98,$a8,$b8:begin //eora
-                        r.d.a:=r.d.a xor numero;
-                        r.cc.n:=(r.d.a and $80)<>0;
-                        r.cc.z:=(r.d.a=0);
-                        r.cc.v:=false;
-                      end;
-      $89,$99,$a9,$b9:begin  //adca
-                        if r.cc.c then tempw:=r.d.a+numero+1
-                          else tempw:=r.d.a+numero;
-                        r.cc.c:=(tempw and $100)<>0;
-                        r.cc.h:=((r.d.a xor numero xor tempw) and $10)<>0;
-                        r.cc.n:=(tempw and $80)<>0;
-                        r.cc.z:=((tempw and $ff)=0);
-                        r.cc.v:=(((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-                        r.d.a:=tempw;
-                      end;
-      $8a,$9a,$aa,$ba:begin  //ora
-                          r.d.a:=r.d.a or numero;
-                          r.cc.n:=(r.d.a and $80)<>0;
-                          r.cc.z:=(r.d.a=0);
-                          r.cc.v:=false;
-                      end;
-      $8b,$9b,$ab,$bb:begin  //adda
-                        tempw:=r.d.a+numero;
-                        r.cc.c:=(tempw and $100)<>0;
-                        r.cc.h:=((r.d.a xor numero xor tempw) and $10)<>0;
-                        r.cc.n:=(tempw and $80)<>0;
-                        r.cc.z:=((tempw and $ff)=0);
-                        r.cc.v:=(((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-                        r.d.a:=tempw;
-                      end;
-      $8c,$9c,$ac,$bc:begin   //cmpx
-                        templ:=r.x-posicion.w;
-                        r.cc.c:=(templ and $10000)<>0;
-                        r.cc.n:=(templ and $8000)<>0;
-                        r.cc.z:=((templ and $ffff)=0);
-                        r.cc.v:=((r.x xor posicion.w xor templ xor (templ shr 1)) and $8000)<>0;
-                      end;
-      $8d:begin  //bsr
+      $80,$90,$a0,$b0:r.d.a:=m680x_sub8(r.d.a,numero,@r.cc);   //suba 1T
+      $81,$91,$a1,$b1:m680x_sub8(r.d.a,numero,@r.cc);  //cmpa 1T
+      $82,$92,$a2,$b2:r.d.a:=m680x_sbc(r.d.a,numero,@r.cc);  //sbca 1T
+      $83,$93,$a3,$b3:r.d.w:=m680x_sub16(r.d.w,posicion.w,@r.cc); //subd 2T
+      $84,$94,$a4,$b4:r.d.a:=m680x_and(r.d.a,numero,@r.cc);  //anda 1T
+      $85,$95,$a5,$b5:m680x_and(r.d.a,numero,@r.cc);  //bita 1T
+      $86,$96,$a6,$b6:r.d.a:=m680x_ld_st8(numero,@r.cc);  //lda 1T
+          $97,$a7,$b7:self.putbyte(posicion.w,m680x_ld_st8(r.d.a,@r.cc));  //sta 1T
+      $88,$98,$a8,$b8:r.d.a:=m680x_eor(r.d.a,numero,@r.cc); //eora 1T
+      $89,$99,$a9,$b9:r.d.a:=m680x_adc(r.d.a,numero,@r.cc);  //adca 1T
+      $8a,$9a,$aa,$ba:r.d.a:=m680x_or(r.d.a,numero,@r.cc);  //ora 1T
+      $8b,$9b,$ab,$bb:r.d.a:=m680x_add8(r.d.a,numero,@r.cc);  //adda 1T
+      $8c,$9c,$ac,$bc:m680x_sub16(r.x,posicion.w,@r.cc);   //cmpx 2T
+      $8d:begin  //bsr 7T
             self.push_sw(r.pc);
             r.pc:=r.pc+shortint(numero);
       end;
-      $9d,$ad,$bd:begin //jsr
+          $9d,$ad,$bd:begin //jsr 5T
             self.push_sw(r.pc);
             r.pc:=posicion.w;
       end;
-      $8e,$9e,$ae,$be:begin  //ldx
-            r.x:=posicion.w;
-            r.cc.n:=(r.x and $8000)<>0;
-            r.cc.z:=(r.x=0);
-            r.cc.v:=false;
-          end;
-      $9f,$af,$bf:begin //stx
-            r.cc.n:=(r.x and $8000)<>0;
-            r.cc.z:=(r.x=0);
-            r.cc.v:=false;
-            self.putword(posicion.w,r.x);
-      end;
-      $c0,$d0,$e0,$f0:begin  //subb
-                          tempw:=r.d.b-numero;
-                          r.cc.c:=(tempw and $100)<>0;
-                          r.cc.n:=(tempw and $80)<>0;
-                          r.cc.z:=((tempw and $ff)=0);
-                          r.cc.v:=(((r.d.b xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-                          r.d.b:=tempw;
-                      end;
-      $c1,$d1,$e1,$f1:begin //cmpb
-                          tempw:=r.d.b-numero;
-                          r.cc.c:=(tempw and $100)<>0;
-                          r.cc.n:=(tempw and $80)<>0;
-                          r.cc.z:=((tempw and $ff)=0);
-                          r.cc.v:=(((r.d.b xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-                      end;
-      $c2,$d2,$e2,$f2:begin //sbcb
-                          if r.cc.c then tempw:=r.d.b-numero-1
-                            else tempw:=r.d.b-numero;
-                          r.cc.c:=(tempw and $100)<>0;
-                          r.cc.n:=(tempw and $80)<>0;
-                          r.cc.z:=((tempw and $ff)=0);
-                          r.cc.v:=(((r.d.b xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-                          r.d.b:=tempw;
-                      end;
-      $c3,$d3,$e3,$f3:begin  //addd
-                        templ:=r.d.w+posicion.w;
-                        r.cc.c:=(templ and $10000)<>0;
-                        r.cc.n:=(templ and $8000)<>0;
-                        r.cc.z:=((templ and $ffff)=0);
-                        r.cc.v:=((r.d.w xor posicion.w xor templ xor (templ shr 1)) and $8000)<>0;
-                        r.d.w:=templ;
-                      end;
-      $c4,$d4,$e4,$f4:begin  //andb
-                          r.d.b:=r.d.b and numero;
-                          r.cc.n:=(r.d.b and $80)<>0;
-                          r.cc.z:=(r.d.b=0);
-                          r.cc.v:=false;
-                      end;
-      $c5,$d5,$e5,$f5:begin  //bitb
-                        temp:=r.d.b and numero;
-                        r.cc.n:=(temp and $80)<>0;
-                        r.cc.z:=(temp=0);
-                        r.cc.v:=false;
-                      end;
-      $c6,$d6,$e6,$f6:begin //ldb
-            r.d.b:=numero;
-            r.cc.n:=(r.d.b and $80)<>0;
-            r.cc.z:=(r.d.b=0);
-            r.cc.v:=false;
-          end;
-      $d7,$e7,$f7:begin  //stb
-            r.cc.n:=(r.d.b and $80)<>0;
-            r.cc.z:=(r.d.b=0);
-            r.cc.v:=false;
-            self.putbyte(posicion.w,r.d.b);
-      end;
-      $c8,$d8,$e8,$f8:begin  //eorb
-                          r.d.b:=r.d.b xor numero;
-                          r.cc.n:=(r.d.b and $80)<>0;
-                          r.cc.z:=(r.d.b=0);
-                          r.cc.v:=false;
-                      end;
-      $c9,$d9,$e9,$f9:begin  //adcb
-                          if r.cc.c then tempw:=r.d.b+numero+1
-                            else tempw:=r.d.b+numero;
-                          r.cc.c:=(tempw and $100)<>0;
-                          r.cc.h:=((r.d.b xor numero xor tempw) and $10)<>0;
-                          r.cc.n:=(tempw and $80)<>0;
-                          r.cc.z:=((tempw and $ff)=0);
-                          r.cc.v:=(((r.d.b xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-                          r.d.b:=tempw;
-                      end;
-      $ca,$da,$ea,$fa:begin  //orb
-                          r.d.b:=r.d.b or numero;
-                          r.cc.n:=(r.d.b and $80)<>0;
-                          r.cc.z:=(r.d.b=0);
-                          r.cc.v:=false;
-                      end;
-      $cb,$db,$eb,$fb:begin  //addb
-                         tempw:=r.d.b+numero;
-                         r.cc.c:=(tempw and $100)<>0;
-                         r.cc.h:=((r.d.b xor numero xor tempw) and $10)<>0;
-                         r.cc.n:=(tempw and $80)<>0;
-                         r.cc.z:=((tempw and $ff)=0);
-                         r.cc.v:=(((r.d.b xor numero xor tempw xor (tempw shr 1)) and $80))<>0;
-                         r.d.b:=tempw;
-                      end;
-      $cc,$dc,$ec,$fc:begin  //ldd
-            r.d.w:=posicion.w;
-            r.cc.n:=(r.d.w and $8000)<>0;
-            r.cc.z:=(r.d.w=0);
-            r.cc.v:=false;
-          end;
-      $dd,$ed,$fd:begin  //std
-            r.cc.n:=(r.d.w and $8000)<>0;
-            r.cc.z:=(r.d.w=0);
-            r.cc.v:=false;
-            self.putword(posicion.w,r.d.w);
-      end;
-      $ce,$de,$ee,$fe:begin  //ldu
-            r.u:=posicion.w;
-            r.cc.n:=(r.u and $8000)<>0;
-            r.cc.z:=(r.u=0);
-            r.cc.v:=false;
-          end;
-      $df,$ef,$ff:begin //sdu
-            r.cc.n:=(r.u and $8000)<>0;
-            r.cc.z:=(r.u=0);
-            r.cc.v:=false;
-            self.putword(posicion.w,r.u);
-      end;
+      $8e,$9e,$ae,$be:r.x:=m680x_ld_st16(posicion.w,@r.cc);  //ldx 2T
+          $9f,$af,$bf:self.putword(posicion.w,m680x_ld_st16(r.x,@r.cc)); //stx 2T
+      $c0,$d0,$e0,$f0:r.d.b:=m680x_sub8(r.d.b,numero,@r.cc);  //subb 1T
+      $c1,$d1,$e1,$f1:m680x_sub8(r.d.b,numero,@r.cc); //cmpb 1T
+      $c2,$d2,$e2,$f2:r.d.b:=m680x_sbc(r.d.b,numero,@r.cc); //sbcb 1T
+      $c3,$d3,$e3,$f3:r.d.w:=m680x_add16(r.d.w,posicion.w,@r.cc);  //addd 2T
+      $c4,$d4,$e4,$f4:r.d.b:=m680x_and(r.d.b,numero,@r.cc);  //andb 1T
+      $c5,$d5,$e5,$f5:m680x_and(r.d.b,numero,@r.cc);  //bitb 1T
+      $c6,$d6,$e6,$f6:r.d.b:=m680x_ld_st8(numero,@r.cc); //ldb 1T
+          $d7,$e7,$f7:self.putbyte(posicion.w,m680x_ld_st8(r.d.b,@r.cc));  //stb 1T
+      $c8,$d8,$e8,$f8:r.d.b:=m680x_eor(r.d.b,numero,@r.cc);  //eorb 1T
+      $c9,$d9,$e9,$f9:r.d.b:=m680x_adc(r.d.b,numero,@r.cc);  //adcb 1T
+      $ca,$da,$ea,$fa:r.d.b:=m680x_or(r.d.b,numero,@r.cc);  //orb 1T
+      $cb,$db,$eb,$fb:r.d.b:=m680x_add8(r.d.b,numero,@r.cc);  //addb 1T
+      $cc,$dc,$ec,$fc:r.d.w:=m680x_ld_st16(posicion.w,@r.cc);  //ldd 2T
+          $dd,$ed,$fd:self.putword(posicion.w,m680x_ld_st16(r.d.w,@r.cc));  //std 2T
+      $ce,$de,$ee,$fe:r.u:=m680x_ld_st16(posicion.w,@r.cc);  //ldu 2t
+          $df,$ef,$ff:self.putword(posicion.w,m680x_ld_st16(r.u,@r.cc)); //sdu 2T
 end; //del case!!
 tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;

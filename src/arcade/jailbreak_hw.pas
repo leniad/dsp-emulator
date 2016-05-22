@@ -223,7 +223,7 @@ while EmuStatus=EsRuning do begin
       main_m6809.run(frame);
       frame:=frame+main_m6809.tframes-main_m6809.contador;
       if f=239 then begin
-        if pedir_irq then main_m6809.pedir_irq:=HOLD_LINE;
+        if pedir_irq then main_m6809.change_irq(HOLD_LINE);
         update_video_jailbreak;
       end;
   end;
@@ -273,7 +273,7 @@ end;
 
 procedure jailbreak_snd_nmi;
 begin
-  if pedir_nmi then main_m6809.pedir_nmi:=PULSE_LINE;
+  if pedir_nmi then main_m6809.change_nmi(PULSE_LINE);
 end;
 
 procedure jailbreak_sound;

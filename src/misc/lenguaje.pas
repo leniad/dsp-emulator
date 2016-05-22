@@ -1,7 +1,7 @@
 unit lenguaje;
 
 interface
-uses {$ifndef windows}LCLType,{$endif}sysutils,vcl.forms,vcl.dialogs,main_engine;
+uses {$ifndef windows}LCLType,{$endif}sysutils,forms,dialogs,main_engine;
 
 const
       MAX_IDIOMAS=7-1;
@@ -75,7 +75,6 @@ principal1.pausa1.caption:=leng[idioma].accion[3];
 //Hints
 principal1.BitBtn2.Hint:=leng[idioma].hints[0];
 principal1.BitBtn3.Hint:=leng[idioma].hints[1];
-principal1.BitBtn4.Hint:=leng[idioma].hints[2];
 principal1.BitBtn5.Hint:=leng[idioma].hints[3];
 principal1.BitBtn6.Hint:=leng[idioma].hints[4];
 principal1.btncfg.Hint:=leng[idioma].hints[5];
@@ -200,4 +199,4 @@ end;
 leer_idioma:=true;
 end;
 
-end.
+end.

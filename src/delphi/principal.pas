@@ -64,7 +64,6 @@ type
     Panel1: TPanel;
     BitBtn2: TBitBtn;
     BitBtn3: TBitBtn;
-    BitBtn4: TBitBtn;
     BitBtn5: TBitBtn;
     BitBtn6: TBitBtn;
     btncfg: TBitBtn;
@@ -363,7 +362,6 @@ type
     procedure Timer1Timer(Sender: TObject);
     procedure CambiarMaquina(Sender: TObject);
     procedure CambiaAudio(Sender: TObject);
-    procedure Pausa1Click(Sender: TObject);
     procedure Reset1Click(Sender: TObject);
     procedure Acercade1Click(Sender: TObject);
     procedure Salir1Click(Sender: TObject);
@@ -433,22 +431,22 @@ principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
 end;
 
-procedure Tprincipal1.Pausa1Click(Sender: TObject);
-begin
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-BitBtn3.Enabled:=true;
-BitBtn4.Enabled:=false;
-end;
-
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
-EmuStatus:=EsRuning;
-timer1.Enabled:=true;
-BitBtn3.Enabled:=false;
-BitBtn4.Enabled:=true;
-Windows.SetFocus(child.Handle);
-if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
+BitBtn3.Enabled:=true;
+if EmuStatus=EsRuning then begin //Pausa
+  timer1.Enabled:=false;
+  EmuStatus:=EsPause;
+  principal1.BitBtn3.Glyph:=nil;
+  principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
+end else begin //Play
+  EmuStatus:=EsRuning;
+  timer1.Enabled:=true;
+  Windows.SetFocus(child.Handle);
+  principal1.BitBtn3.Glyph:=nil;
+  principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
+  if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
+end;
 end;
 
 procedure Tprincipal1.CambiarMaquina(Sender:TObject);
@@ -514,7 +512,6 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn1.Enabled:=false;
   principal1.BitBtn2.Enabled:=false;
   principal1.BitBtn3.Enabled:=false;
-  principal1.BitBtn4.Enabled:=false;
   principal1.BitBtn5.Enabled:=false;
   principal1.BitBtn6.Enabled:=false;
   principal1.BitBtn8.Enabled:=false;

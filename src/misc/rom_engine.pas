@@ -2,7 +2,7 @@ unit Rom_engine;
 
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
-     sysutils,vcl.dialogs,file_engine,main_engine;
+     sysutils,dialogs,file_engine,main_engine;
 
 type
   tipo_roms=record
@@ -293,4 +293,4 @@ until ((troms.n='') or (f=cantidad_roms));
 cargar_roms_skip_word:=true;
 end;
 
-end.
+end.

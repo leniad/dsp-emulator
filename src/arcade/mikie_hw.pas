@@ -234,7 +234,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if video_line=239 then begin
-      main_m6809.pedir_irq:=HOLD_LINE;
+      main_m6809.change_irq(HOLD_LINE);
       update_video_mikie;
     end;
   end;

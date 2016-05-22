@@ -1,7 +1,7 @@
 unit timer_engine;
 
 interface
-uses vcl.dialogs;
+uses dialogs;
 
 const
   MAX_TIMERS=14;

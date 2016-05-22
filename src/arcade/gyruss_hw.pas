@@ -284,7 +284,7 @@ while EmuStatus=EsRuning do begin
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if (scan_line=239) then begin
       if main_nmi then main_z80.pedir_nmi:=ASSERT_LINE;
-      if sub_irq then misc_m6809.pedir_irq:=ASSERT_LINE;
+      if sub_irq then misc_m6809.change_irq(ASSERT_LINE);
       update_video_gyruss;
     end;
   end;
@@ -342,7 +342,7 @@ if direccion>$dfff then exit;
 case direccion of
   $2000:begin
             sub_irq:=(valor and 1)<>0;
-            if not(sub_irq) then misc_m6809.pedir_irq:=CLEAR_LINE;
+            if not(sub_irq) then misc_m6809.change_irq(CLEAR_LINE);
         end;
   $4000..$47ff:mem_misc[direccion]:=valor;
   $6000..$67ff:memoria[$a000+(direccion and $7ff)]:=valor;

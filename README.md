@@ -1,4 +1,23 @@
 ﻿#DSP Emulator status<br>
+<b>22/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary.</b><br><pre>
+-General
+    +Unified into a single button Play/Pause functions
+    +M6809
+        -Cleaning and unified opcodes
+        -Enhanced timings
+        -Fixed 'sync' opcode
+        -Added $102d opcode (Fix video in 'Combat School' and 'Contra')
+        -Modified and simplified IRQs calls
+    +HD6309
+        -Total CPU cleaning
+        -Added an internal M6809 for compatibility mode
+    +KONAMI CPU
+        -Writing started
+-Mappy HW
+    +Fixed sprites: added a mask for the sprites size
+-Juno First
+    +Fixed driver initialisation
+</pre><br>
 <b>15/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary.</b><br><pre>
 -General
     +YM3812: Added chip YM3526

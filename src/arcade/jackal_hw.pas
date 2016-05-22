@@ -268,8 +268,8 @@ while EmuStatus=EsRuning do begin
     frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
     if f=239 then begin
       if irq_enable then begin
-        main_m6809.pedir_irq:=HOLD_LINE;
-        snd_m6809.pedir_nmi:=PULSE_LINE;
+        main_m6809.change_irq(HOLD_LINE);
+        snd_m6809.change_nmi(PULSE_LINE);
       end;
       update_video_jackal;
     end;

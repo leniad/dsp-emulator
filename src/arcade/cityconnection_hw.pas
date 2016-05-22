@@ -260,7 +260,7 @@ while EmuStatus=EsRuning do begin
     snd_m6809.run(frame_s);
     frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
     if f=239 then begin
-      main_m6809.pedir_irq:=ASSERT_LINE;
+      main_m6809.change_irq(ASSERT_LINE);
       update_video_citycon;
     end;
   end;
@@ -277,7 +277,7 @@ begin
                 else citycon_getbyte:=marcade.in0;
         $3001:citycon_getbyte:=marcade.dswa+marcade.in1;
         $3002:citycon_getbyte:=marcade.dswb;
-        $3007:main_m6809.pedir_irq:=CLEAR_LINE;
+        $3007:main_m6809.change_irq(CLEAR_LINE);
         $3800..$3cff:citycon_getbyte:=buffer_paleta[direccion and $7ff];
   end;
 end;

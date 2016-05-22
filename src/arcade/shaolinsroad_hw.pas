@@ -219,10 +219,10 @@ while EmuStatus=EsRuning do begin
     main_m6809.run(trunc(frame));
     frame:=frame+main_m6809.tframes-main_m6809.contador;
     if f=239 then begin
-      main_m6809.pedir_irq:=HOLD_LINE;
+      main_m6809.change_irq(HOLD_LINE);
       update_video_shaolin;
     end else begin
-      if (((f and $1f)=0) and pedir_nmi) then main_m6809.pedir_nmi:=PULSE_LINE;
+      if (((f and $1f)=0) and pedir_nmi) then main_m6809.change_nmi(PULSE_LINE);
     end;
   end;
   eventos_shaolin;

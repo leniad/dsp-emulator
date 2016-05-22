@@ -2,7 +2,7 @@ unit misc_functions;
 
 interface
 uses {$IFDEF windows}windows,{$ENDIF}{$ifdef fpc}crc,{$else}
-     {$IFDEF windows}vcl.imaging.pngimage,{$ENDIF}{$endif}sysutils,vcl.forms,vcl.controls;
+     {$IFDEF windows}vcl.imaging.pngimage,{$ENDIF}{$endif}sysutils,forms,controls;
 
 type
   TSistema=(StNes,StColecovision,STGb,StChip8,StAmstrad,StAmstradROM,StROM,StSMS);
@@ -41,15 +41,14 @@ principal1.Image1.top:=principal1.statusbar1.top;
 principal1.statusbar1.Panels[0].Width:=60;
 principal1.statusbar1.Panels[1].Width:=125;
 //botones
-principal1.BitBtn2.left:=(principal1.statusbar1.width div 2)-123; //3
-principal1.BitBtn3.left:=(principal1.statusbar1.width div 2)-92;
-principal1.BitBtn4.left:=(principal1.statusbar1.width div 2)-64;  //3
-principal1.BitBtn5.left:=(principal1.statusbar1.width div 2)-32;
-principal1.BitBtn6.left:=(principal1.statusbar1.width div 2)-4; //3
-principal1.btncfg.left:=(principal1.statusbar1.width div 2)+29;
-principal1.BitBtn8.left:=(principal1.statusbar1.width div 2)+57;
-principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+85;  //3
-principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+116;
+principal1.BitBtn2.left:=(principal1.statusbar1.width div 2)-107; //3
+principal1.BitBtn3.left:=(principal1.statusbar1.width div 2)-79;
+principal1.BitBtn5.left:=(principal1.statusbar1.width div 2)-47;
+principal1.BitBtn6.left:=(principal1.statusbar1.width div 2)-19; //3
+principal1.btncfg.left:=(principal1.statusbar1.width div 2)+14;
+principal1.BitBtn8.left:=(principal1.statusbar1.width div 2)+42;
+principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+70;  //3
+principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+101;
 end;
 
 function bit(data:dword;bitpos:byte):boolean;inline;

@@ -376,7 +376,7 @@ case direccion of
   $3801:scroll_x:=(scroll_x and $ff) or (valor shl 8);
   $3802:begin
           sound_latch:=valor;
-          snd_m6809.pedir_irq:=HOLD_LINE;
+          snd_m6809.change_irq(HOLD_LINE);
         end;
   $3803:begin
           if ((valor and 1)=0) then begin
@@ -481,8 +481,8 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6809.pedir_firq:=ASSERT_LINE
-    else snd_m6809.pedir_firq:=CLEAR_LINE;
+  if (irqstate<>0) then snd_m6809.change_firq(ASSERT_LINE)
+    else snd_m6809.change_firq(CLEAR_LINE);
 end;
 
 end.

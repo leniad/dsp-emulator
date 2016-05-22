@@ -528,8 +528,8 @@ while EmuStatus=EsRuning do begin
     frame_mcu:=frame_mcu+main_m6800.tframes-main_m6800.contador;
     if f=239 then begin
         update_video_system86;
-        if irq_enable then main_m6809.pedir_irq:=ASSERT_LINE;
-        if irq_sub_enable then snd_m6809.pedir_irq:=ASSERT_LINE;
+        if irq_enable then main_m6809.change_irq(ASSERT_LINE);
+        if irq_sub_enable then snd_m6809.change_irq(ASSERT_LINE);
         main_m6800.pedir_irq:=HOLD_LINE;
         if copy_sprites then copy_sprites_hw;
     end;
@@ -556,7 +556,7 @@ case direccion of
   $2000..$3fff:if memoria[direccion]<>valor then gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
   $4000..$43ff:namcos1_cus30_w(direccion and $3ff,valor);
   $5ff2:copy_sprites:=true;
-  $8400:main_m6809.pedir_irq:=CLEAR_LINE;
+  $8400:main_m6809.change_irq(CLEAR_LINE);
   $8800..$8fff:tile_bank:=bit_n(direccion,10);
   $9000:begin
           prior[0]:=(valor and $e) shr 1;
@@ -603,7 +603,7 @@ case direccion of
                  end;
                  exit;
                end;
-  $8400:main_m6809.pedir_irq:=CLEAR_LINE;
+  $8400:main_m6809.change_irq(CLEAR_LINE);
   $8800..$8fff:tile_bank:=bit_n(direccion,10);
   $9000:begin
           prior[0]:=(valor and $e) shr 1;
@@ -660,7 +660,7 @@ case direccion of
                   memoria[$2000+(direccion and $1fff)]:=valor;
                   gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
                end;
-  $8800:snd_m6809.pedir_irq:=CLEAR_LINE;
+  $8800:snd_m6809.change_irq(CLEAR_LINE);
   $d803:rom_sub_nbank:=valor and $3;
 end;
 end;
@@ -708,7 +708,7 @@ case direccion of
                   memoria[direccion]:=valor;
                   if direccion=$5ff2 then copy_sprites:=true;
                end;
-  $9400:snd_m6809.pedir_irq:=CLEAR_LINE;
+  $9400:snd_m6809.change_irq(CLEAR_LINE);
 end;
 end;
 

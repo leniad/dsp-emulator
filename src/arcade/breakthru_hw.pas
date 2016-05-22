@@ -386,13 +386,13 @@ if event.arcade then begin
   //misc
   if (arcade_input.coin[0] and not(old_val)) then begin
       marcade.in2:=(marcade.in2 and $df);
-      main_m6809.pedir_irq:=HOLD_LINE;
+      main_m6809.change_irq(HOLD_LINE);
   end else begin
       marcade.in2:=(marcade.in2 or $20);
   end;
   if (arcade_input.coin[1] and not(old_val2)) then begin
       marcade.in2:=(marcade.in2 and $bf);
-      main_m6809.pedir_irq:=HOLD_LINE;
+      main_m6809.change_irq(HOLD_LINE);
   end else begin
       marcade.in2:=(marcade.in2 or $40);
   end;
@@ -418,7 +418,7 @@ while EmuStatus=EsRuning do begin
     snd_m6809.run(frame_s);
     frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
     if f=247 then begin
-      if nmi_ena then main_m6809.pedir_nmi:=PULSE_LINE;
+      if nmi_ena then main_m6809.change_nmi(PULSE_LINE);
       proc_update_video;
     end;
   end;
@@ -459,7 +459,7 @@ case direccion of
           end;
     $1802:begin
             sound_latch:=valor;
-            snd_m6809.pedir_nmi:=PULSE_LINE;
+            snd_m6809.change_nmi(PULSE_LINE);
           end;
     $1803:nmi_ena:=((valor and 1)=0);
 end;
@@ -495,7 +495,7 @@ case direccion of
           end;
     $802:begin
             sound_latch:=valor;
-            snd_m6809.pedir_nmi:=PULSE_LINE;
+            snd_m6809.change_nmi(PULSE_LINE);
           end;
     $803:nmi_ena:=(valor and 1)<>0;
     $1000..$13ff:gfx[0].buffer[direccion and $3ff]:=true;
@@ -526,8 +526,8 @@ end;
 
 procedure brkthru_snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6809.pedir_irq:=ASSERT_LINE
-    else snd_m6809.pedir_irq:=CLEAR_LINE;
+  if (irqstate<>0) then snd_m6809.change_irq(ASSERT_LINE)
+    else snd_m6809.change_irq(CLEAR_LINE);
 end;
 
 procedure brkthru_sound_update;

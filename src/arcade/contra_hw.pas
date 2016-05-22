@@ -257,7 +257,7 @@ while EmuStatus=EsRuning do begin
     snd_m6809.run(frame_s);
     frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
     if f=239 then begin
-      if (K007121_chip[0].control[$07] and $2)<>0 then main_hd6309.pedir_irq:=HOLD_LINE;
+      if (K007121_chip[0].control[$07] and $2)<>0 then main_hd6309.change_irq(HOLD_LINE);
       update_video_contra;
     end;
   end;
@@ -307,7 +307,7 @@ case direccion of
             K007121_chip[0].control[direccion]:=valor;
             fillchar(gfx[0].buffer[$400],$400,1);
          end;
-  $1a:snd_m6809.pedir_irq:=HOLD_LINE;
+  $1a:snd_m6809.change_irq(HOLD_LINE);
   $1c:sound_latch:=valor;
   $60..$67:begin
               if K007121_chip[1].control[direccion and $7]<>valor then begin

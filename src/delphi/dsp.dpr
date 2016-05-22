@@ -254,7 +254,8 @@ uses
   config_cpc in 'config_cpc.pas' {ConfigCPC},
   spaceinvaders_hw in '..\arcade\spaceinvaders_hw.pas',
   centipede_hw in '..\arcade\centipede_hw.pas',
-  karnov_hw in '..\arcade\karnov_hw.pas';
+  karnov_hw in '..\arcade\karnov_hw.pas',
+  konami in '..\cpu\konami.pas';
 
 {$R *.res}
 

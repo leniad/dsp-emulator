@@ -368,7 +368,7 @@ while EmuStatus=EsRuning do begin
     main_m6800.run(frame_mcu);
     frame_mcu:=frame_mcu+main_m6800.tframes-main_m6800.contador;
     if f=239 then begin
-      if irq_enable then main_m6809.pedir_irq:=ASSERT_LINE;
+      if irq_enable then main_m6809.change_irq(ASSERT_LINE);
       if irq_enable_mcu then main_m6800.pedir_irq:=ASSERT_LINE;
       update_video_pacland;
     end;
@@ -412,7 +412,7 @@ case direccion of
   $6800..$6bff:namcos1_cus30_w(direccion and $3ff,valor);
   $7000..$7fff:begin
                    irq_enable:=not(BIT((direccion and $fff),11));
-                   if not(irq_enable) then main_m6809.pedir_irq:=CLEAR_LINE;
+                   if not(irq_enable) then main_m6809.change_irq(CLEAR_LINE);
                end;
   $8000..$8fff:if not(BIT((direccion and $fff),11)) then main_m6800.reset;
 end;

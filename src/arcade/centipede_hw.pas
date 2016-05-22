@@ -124,10 +124,6 @@ begin
  marcade.in2:=$ff;
 end;
 
-procedure draw_sprites(prio:byte);
-begin
-end;
-
 procedure update_video_centipede;
 var
   f,color:word;

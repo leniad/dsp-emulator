@@ -585,7 +585,7 @@ case direccion of
     //70000a..70003b:;
     $70000e:begin
             sound_latch:=valor and $ff;
-            snd_m6809.pedir_firq:=HOLD_LINE;
+            snd_m6809.change_firq(HOLD_LINE);
           end;
     $ff8000..$ffffff:main_ram[(direccion and $7fff) shr 1]:=valor;
   end;

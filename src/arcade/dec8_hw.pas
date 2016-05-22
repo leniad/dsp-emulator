@@ -80,7 +80,7 @@ snd_m6502:=cpu_m6502.create(1500000,264,TCPU_M6502);
 snd_m6502.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
 snd_m6502.init_sound(dec8_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(1500000,2);
+ym2203_0:=ym2203_chip.create(1500000);
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms y ponerlas en su sitio
@@ -249,7 +249,7 @@ while EmuStatus=EsRuning do begin
    frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
    case f of
       247:begin
-            main_m6809.pedir_nmi:=PULSE_LINE;
+            main_m6809.change_nmi(PULSE_LINE);
             update_video_dec8;
             vblank_val:=0;
       end;

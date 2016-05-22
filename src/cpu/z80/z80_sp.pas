@@ -30,7 +30,7 @@ var
   spec_z80:cpu_z80_sp;
 
 implementation
-uses vcl.dialogs,spectrum_misc,sysutils;
+uses dialogs,spectrum_misc,sysutils;
 
 procedure cpu_z80_sp.change_retraso_call(retraso:tretraso;retraso_puerto:tretraso_puerto);
 begin

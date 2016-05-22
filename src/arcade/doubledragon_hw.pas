@@ -401,12 +401,12 @@ while EmuStatus=EsRuning do begin
       $8:vblank:=0;
       $f8:begin
             update_video_ddragon;
-            main_hd6309.pedir_nmi:=ASSERT_LINE;
-            main_hd6309.pedir_firq:=ASSERT_LINE;
+            main_hd6309.change_nmi(ASSERT_LINE);
+            main_hd6309.change_firq(ASSERT_LINE);
             vblank:=8;
           end;
     end;
-    if ((ddragon_scanline[f] and $f)=8) then main_hd6309.pedir_firq:=ASSERT_LINE;
+    if ((ddragon_scanline[f] and $f)=8) then main_hd6309.change_firq(ASSERT_LINE);
   end;
   eventos_ddragon;
   video_sync;
@@ -450,20 +450,20 @@ begin
         $3803:ddragon_getbyte:=$ff;
         $3804:ddragon_getbyte:=$ff;
         $380b:begin
-                main_hd6309.clear_nmi;
+                main_hd6309.change_nmi(CLEAR_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $380c:begin
-                main_hd6309.pedir_firq:=CLEAR_LINE;
+                main_hd6309.change_firq(CLEAR_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $380d:begin
-                main_hd6309.pedir_irq:=CLEAR_LINE;
+                main_hd6309.change_irq(CLEAR_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $380e:begin
                 soundlatch:=$ff;
-                snd_m6809.pedir_irq:=ASSERT_LINE;
+                snd_m6809.change_irq(ASSERT_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $380f:begin
@@ -500,12 +500,12 @@ case direccion of
               end;
         $3809:scroll_x:=(scroll_x and $100) or valor;
         $380a:scroll_y:=(scroll_y and $100) or valor;
-        $380b:main_hd6309.clear_nmi;
-        $380c:main_hd6309.pedir_firq:=CLEAR_LINE;
-        $380d:main_hd6309.pedir_irq:=CLEAR_LINE;
+        $380b:main_hd6309.change_nmi(CLEAR_LINE);
+        $380c:main_hd6309.change_firq(CLEAR_LINE);
+        $380d:main_hd6309.change_irq(CLEAR_LINE);
         $380e:begin
                 soundlatch:=valor;
-                snd_m6809.pedir_irq:=ASSERT_LINE;
+                snd_m6809.change_irq(ASSERT_LINE);
               end;
         $380f:main_m6800.pedir_nmi:=ASSERT_LINE;
 end;
@@ -527,7 +527,7 @@ mem_misc[direccion]:=valor;
 case direccion of
   $0..$1f:if (direccion=$17) then begin
               if (valor and 1)=0 then main_m6800.clear_nmi;
-		          if (((valor and 2)<>0) and ((dd_sub_port and $2)<>0)) then main_hd6309.pedir_irq:=ASSERT_LINE;
+		          if (((valor and 2)<>0) and ((dd_sub_port and $2)<>0)) then main_hd6309.change_irq(ASSERT_LINE);
               dd_sub_port:=valor;
         	end;
   $8000..$81ff:common_ram[direccion and $1ff]:=valor;
@@ -539,7 +539,7 @@ begin
 case direccion of
   $1000:begin
           ddragon_snd_getbyte:=soundlatch;
-          snd_m6809.pedir_irq:=CLEAR_LINE;
+          snd_m6809.change_irq(CLEAR_LINE);
         end;
   $1800:ddragon_snd_getbyte:=adpcm_idle[0]+(adpcm_idle[1] shl 1);
   $2801:ddragon_snd_getbyte:=YM2151_status_port_read(0);
@@ -578,8 +578,8 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_m6809.pedir_firq:=ASSERT_LINE
-    else snd_m6809.pedir_firq:=CLEAR_LINE;
+  if (irqstate=1) then snd_m6809.change_firq(ASSERT_LINE)
+    else snd_m6809.change_firq(CLEAR_LINE);
 end;
 
 procedure snd_adpcm0;
@@ -645,12 +645,12 @@ while EmuStatus=EsRuning do begin
       $8:vblank:=0;
       $f8:begin
             update_video_ddragon;
-            main_hd6309.pedir_nmi:=ASSERT_LINE;
-            main_hd6309.pedir_firq:=ASSERT_LINE;
+            main_hd6309.change_nmi(ASSERT_LINE);
+            main_hd6309.change_firq(ASSERT_LINE);
             vblank:=8;
           end;
     end;
-    if ((ddragon_scanline[f] and $f)=8) then main_hd6309.pedir_firq:=ASSERT_LINE;
+    if ((ddragon_scanline[f] and $f)=8) then main_hd6309.change_firq(ASSERT_LINE);
   end;
   eventos_ddragon;
   video_sync;
@@ -671,15 +671,15 @@ begin
         $3803:ddragon2_getbyte:=$ff;
         $3804:ddragon2_getbyte:=$ff;
         $380b:begin
-                main_hd6309.clear_nmi;
+                main_hd6309.change_nmi(CLEAR_LINE);
                 ddragon2_getbyte:=$ff;
               end;
         $380c:begin
-                main_hd6309.pedir_firq:=CLEAR_LINE;
+                main_hd6309.change_firq(CLEAR_LINE);
                 ddragon2_getbyte:=$ff;
               end;
         $380d:begin
-                main_hd6309.pedir_irq:=CLEAR_LINE;
+                main_hd6309.change_irq(CLEAR_LINE);
                 ddragon2_getbyte:=$ff;
               end;
         $380e:begin
@@ -718,9 +718,9 @@ case direccion of
               end;
         $3809:scroll_x:=(scroll_x and $100) or valor;
         $380a:scroll_y:=(scroll_y and $100) or valor;
-        $380b:main_hd6309.clear_nmi;
-        $380c:main_hd6309.pedir_firq:=CLEAR_LINE;
-        $380d:main_hd6309.pedir_irq:=CLEAR_LINE;
+        $380b:main_hd6309.change_nmi(CLEAR_LINE);
+        $380c:main_hd6309.change_firq(CLEAR_LINE);
+        $380d:main_hd6309.change_irq(CLEAR_LINE);
         $380e:begin
                 soundlatch:=valor;
                 snd_z80.pedir_nmi:=ASSERT_LINE;
@@ -748,7 +748,7 @@ mem_misc[direccion]:=valor;
 case direccion of
   $c000..$c3ff:common_ram[direccion and $3ff]:=valor;
   $d000:sub_z80.clear_nmi;
-	$e000:main_hd6309.pedir_irq:=ASSERT_LINE;
+	$e000:main_hd6309.change_irq(ASSERT_LINE);
 end;
 end;
 

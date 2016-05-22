@@ -141,11 +141,7 @@ end;
 samples_beeper:=llamadas_maquina.velocidad_cpu/(44100*beeper_oversample);
 if necesita_reset then begin
   main_vars.driver_ok:=llamadas_maquina.iniciar;
-  if not(main_vars.driver_ok) then begin
-    principal1.Pausa1click(nil);
-    principal1.BitBtn3.Enabled:=false;
-    principal1.BitBtn4.Enabled:=false;
-  end;
+  if not(main_vars.driver_ok) then principal1.Ejecutar1click(nil);
 end;
 ulaplus.enabled:=radiobutton23.checked;
 close;

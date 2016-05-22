@@ -241,9 +241,9 @@ while EmuStatus=EsRuning do begin
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=240 then begin
       update_video_ironhorse;
-      if pedir_firq then main_m6809.pedir_firq:=HOLD_LINE;
+      if pedir_firq then main_m6809.change_firq(HOLD_LINE);
     end;
-    if ((((f+16) mod 64)=0) and pedir_nmi) then main_m6809.pedir_nmi:=PULSE_LINE;
+    if ((((f+16) mod 64)=0) and pedir_nmi) then main_m6809.change_nmi(PULSE_LINE);
   end;
   eventos_ironhorse;
   video_sync;

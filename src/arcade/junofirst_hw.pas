@@ -62,7 +62,7 @@ end;
 function iniciar_junofrst:boolean;
 var
   f:byte;
-  memoria_temp,memoria_temp_bank:array[0..$bfff] of byte;
+  memoria_temp,memoria_temp_bank:array[0..$ffff] of byte;
 begin
 iniciar_junofrst:=false;
 iniciar_audio(false);
@@ -195,7 +195,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if frame=239 then begin
-      if (irq_req and irq_enable) then main_m6809.pedir_irq:=ASSERT_LINE;
+      if (irq_req and irq_enable) then main_m6809.change_irq(ASSERT_LINE);
       update_video_junofrst;
     end;
   end;
@@ -262,7 +262,7 @@ case direccion of
                end;
   $8030:begin
             irq_enable:=(valor and 1)<>0;
-            if not(irq_enable) then main_m6809.pedir_irq:=CLEAR_LINE;
+            if not(irq_enable) then main_m6809.change_irq(CLEAR_LINE);
         end;
   $8031:; //Coin counter...
   $8033:scroll_y:=valor;

@@ -412,11 +412,11 @@ while EmuStatus=EsRuning do begin
       $f7:vblank:=$20;
       $f8:begin
             update_video_xain;
-            main_m6809.pedir_nmi:=ASSERT_LINE;
-            main_m6809.pedir_firq:=ASSERT_LINE;
+            main_m6809.change_nmi(ASSERT_LINE);
+            main_m6809.change_firq(ASSERT_LINE);
           end;
     end;
-    if ((xain_scanline[f] and $f)=8) then main_m6809.pedir_firq:=ASSERT_LINE;
+    if ((xain_scanline[f] and $f)=8) then main_m6809.change_firq(ASSERT_LINE);
   end;
   eventos_xain;
   video_sync;
@@ -542,12 +542,12 @@ case direccion of
         $3a07:scroll_y_p0:=(scroll_y_p0 and $ff) or ((valor and 1) shl 8);
         $3a08:begin
                 soundlatch:=valor;
-                snd_m6809.pedir_irq:=HOLD_LINE;
+                snd_m6809.change_irq(HOLD_LINE);
               end;
-        $3a09:main_m6809.clear_nmi;
-        $3a0a:main_m6809.pedir_firq:=CLEAR_LINE;
-        $3a0b:main_m6809.pedir_irq:=CLEAR_LINE;
-        $3a0c:misc_m6809.pedir_irq:=ASSERT_LINE;
+        $3a09:main_m6809.change_nmi(CLEAR_LINE);
+        $3a0a:main_m6809.change_firq(CLEAR_LINE);
+        $3a0b:main_m6809.change_irq(CLEAR_LINE);
+        $3a0c:misc_m6809.change_irq(ASSERT_LINE);
         $3a0d:main_screen.flip_main_screen:=(valor and $1)<>0;
         $3a0e:begin
                 from_main:=valor;
@@ -584,8 +584,8 @@ begin
 if direccion>$3fff then exit;
 case direccion of
   0..$1fff:memoria[direccion]:=valor;
-  $2000:main_m6809.pedir_irq:=ASSERT_LINE;
-  $2800:misc_m6809.pedir_irq:=CLEAR_LINE;
+  $2000:main_m6809.change_irq(ASSERT_LINE);
+  $2800:misc_m6809.change_irq(CLEAR_LINE);
   $3000:banco_sub:=valor and 1;
 end;
 end;
@@ -612,8 +612,8 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_m6809.pedir_firq:=ASSERT_LINE
-    else snd_m6809.pedir_firq:=CLEAR_LINE;
+  if (irqstate=1) then snd_m6809.change_firq(ASSERT_LINE)
+    else snd_m6809.change_firq(CLEAR_LINE);
 end;
 
 procedure xain_sound_update;

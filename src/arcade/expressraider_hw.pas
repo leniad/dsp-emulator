@@ -315,7 +315,7 @@ case direccion of
   $2000:main_m6502.clear_nmi;
   $2001:begin
            sound_latch:=valor;
-           snd_m6809.pedir_nmi:=ASSERT_LINE;
+           snd_m6809.change_nmi(ASSERT_LINE);
         end;
   $2800..$2803:if bg_tiles[direccion and $3]<>(valor and $3f) then begin
                 bg_tiles[direccion and $3]:=valor and $3f;
@@ -346,7 +346,7 @@ begin
     $4000:getbyte_snd_expraid:=ym3812_0.status;
     $6000:begin
             getbyte_snd_expraid:=sound_latch;
-            snd_m6809.clear_nmi;
+            snd_m6809.change_nmi(CLEAR_LINE);
           end;
   end;
 end;
@@ -371,8 +371,8 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6809.pedir_irq:=ASSERT_LINE
-    else snd_m6809.pedir_irq:=CLEAR_LINE;
+  if (irqstate<>0) then snd_m6809.change_irq(ASSERT_LINE)
+    else snd_m6809.change_irq(CLEAR_LINE);
 end;
 
 end.
