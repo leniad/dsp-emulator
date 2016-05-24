@@ -357,6 +357,8 @@ type
     KarnovHW1: TMenuItem;
     Karnov1: TMenuItem;
     Chelnov1: TMenuItem;
+    KonamiCPU1: TMenuItem;
+    Aliens1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

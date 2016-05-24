@@ -255,7 +255,8 @@ uses
   spaceinvaders_hw in '..\arcade\spaceinvaders_hw.pas',
   centipede_hw in '..\arcade\centipede_hw.pas',
   karnov_hw in '..\arcade\karnov_hw.pas',
-  konami in '..\cpu\konami.pas';
+  konami in '..\cpu\konami.pas',
+  aliens_hw in '..\arcade\aliens_hw.pas';
 
 {$R *.res}
 

@@ -15,6 +15,7 @@ type
       function k051937_read(direccion:word):byte;
       procedure k051937_write(direccion:word;valor:byte);
       procedure draw_sprites(min_priority,max_priority:integer);
+      function is_irq_enabled:boolean;
     private
       ram:array[0..$3ff] of byte;
       counter,pant:byte;
@@ -70,6 +71,10 @@ begin
         gfx_set_desc_data(4,0,8*128,0,1,2,3);
         convert_gfx(1,0,spr_rom,@ps_x_gra3[0],@ps_y_gra3[0],false,false);
       end;
+    2:begin
+        gfx_set_desc_data(4,0,8*128,0,8,16,24);
+        convert_gfx(1,0,spr_rom,@ps_x[0],@ps_y[0],false,false);
+      end;
   end;
   gfx[1].trans[0]:=true;
   gfx[1].alpha[$f]:=true;
@@ -77,6 +82,11 @@ end;
 
 destructor k051960_chip.free;
 begin
+end;
+
+function k051960_chip.is_irq_enabled:boolean;
+begin
+  is_irq_enabled:=self.irq_enabled;
 end;
 
 function k051960_chip.fetchromdata(direccion:word):byte;
@@ -172,7 +182,7 @@ begin
 		offs:=sortedlist[pri_code];
 		if (offs=-1) then continue;
 		nchar:=self.ram[offs+2]+((self.ram[offs+1] and $1f) shl 8);
-		color:=self.ram[offs+3] and $ff;
+		color:=self.ram[offs+3];
 		pri:=0;
 		shadow:=color and $80;
 		self.k051960_cb(nchar,color,pri,shadow);

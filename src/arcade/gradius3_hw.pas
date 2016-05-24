@@ -18,7 +18,7 @@ procedure gradius3_putword_sub(direccion:dword;valor:word);
 function gradius3_snd_getbyte(direccion:word):byte;
 procedure gradius3_snd_putbyte(direccion:word;valor:byte);
 procedure gradius3_sound_update;
-procedure gradius3_cb(layer,bank:word;var code:word;var color:word;var flags:word;var priority:word);
+procedure gradius3_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 procedure gradius3_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
 procedure gradius3_k007232_cb(valor:byte);
 
@@ -160,7 +160,7 @@ begin
  irqB_mask:=0;
 end;
 
-procedure gradius3_cb(layer,bank:word;var code:word;var color:word;var flags:word;var priority:word);
+procedure gradius3_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
 code:=code or (((color and $01) shl 8) or ((color and $1c) shl 7));
 color:=layer_colorbase[layer]+((color and $e0) shr 5);

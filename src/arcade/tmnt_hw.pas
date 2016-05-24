@@ -17,7 +17,7 @@ procedure tmnt_putword(direccion:dword;valor:word);
 function tmnt_snd_getbyte(direccion:word):byte;
 procedure tmnt_snd_putbyte(direccion:word;valor:byte);
 procedure tmnt_sound_update;
-procedure tmnt_cb(layer,bank:word;var code:word;var color:word;var flags:word;var priority:word);
+procedure tmnt_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 procedure tmnt_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
 procedure tmnt_k007232_cb(valor:byte);
 //SSriders
@@ -371,7 +371,7 @@ begin
  toggle:=0;
 end;
 
-procedure tmnt_cb(layer,bank:word;var code:word;var color:word;var flags:word;var priority:word);
+procedure tmnt_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
 code:=code or ((color and $03) shl 8) or ((color and $10) shl 6) or ((color and $0c) shl 9) or (bank shl 13);
 color:=layer_colorbase[layer]+((color and $e0) shr 5);

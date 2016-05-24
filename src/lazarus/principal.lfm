@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 450
+  Left = 399
   Height = 355
-  Top = 226
+  Top = 175
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.6.0.1'
+  LCLVersion = '1.7'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -2518,6 +2518,13 @@ object principal1: Tprincipal1
           end
           object Contra1: TMenuItem
             Caption = 'Contra'
+            OnClick = CambiarMaquina
+          end
+        end
+        object MenuItem30: TMenuItem
+          Caption = 'Konami CPU'
+          object aliens1: TMenuItem
+            Caption = 'Aliens'
             OnClick = CambiarMaquina
           end
         end

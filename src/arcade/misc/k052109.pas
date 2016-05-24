@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,gfx_engine;
 
 type
-  t_k052109_cb=procedure(layer,bank:word;var code:word;var color:word;var flags:word;var priority:word);
+  t_k052109_cb=procedure(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
   k052109_chip=class
         constructor create(pant1,pant2,pant3:byte;call_back:t_k052109_cb;rom:pbyte;rom_size:dword);
         destructor free;
@@ -27,6 +27,8 @@ type
         function is_irq_enabled:boolean;
         procedure clean_video_buffer;
         procedure clean_video_buffer_layer(layer:byte);
+        procedure set_rmrd_line(state:byte);
+        function get_rmrd_line:byte;
     protected
         ram:array[0..$5fff] of byte;
         tileflip_enable,romsubbank,scrollctrl:byte;
@@ -103,7 +105,8 @@ end;
 
 function k052109_chip.read(direccion:word):byte;
 var
-  code,color,flags,priority,bank,addr:word;
+  color,flags,priority,bank,addr:word;
+  code:dword;
 begin
 	if (self.rmrd_line=CLEAR_LINE) then begin
 		read:=self.ram[direccion];
@@ -224,10 +227,21 @@ begin
   is_irq_enabled:=self.irq_enabled;
 end;
 
+procedure k052109_chip.set_rmrd_line(state:byte);
+begin
+     self.rmrd_line:=state;
+end;
+
+function k052109_chip.get_rmrd_line:byte;
+begin
+     get_rmrd_line:=self.rmrd_line;
+end;
+
 procedure k052109_chip.update_all_tile(layer:byte);
 var
-  f,pos_x,pos_y,nchar,color,bank,flags,priority:word;
+  f,pos_x,pos_y,bank,flags,priority,color:word;
   flip_x,flip_y,old_flip_y:boolean;
+  nchar:dword;
 begin
 for f:=0 to $7ff do begin
   pos_x:=f mod 64;

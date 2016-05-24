@@ -2252,6 +2252,14 @@ object principal1: Tprincipal1
             OnClick = CambiarMaquina
           end
         end
+        object KonamiCPU1: TMenuItem
+          Caption = 'Konami CPU'
+          GroupIndex = 1
+          object Aliens1: TMenuItem
+            Caption = 'Aliens'
+            OnClick = CambiarMaquina
+          end
+        end
         object M680001: TMenuItem
           Caption = 'M68000'
           GroupIndex = 1
@@ -2660,7 +2668,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807A00320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807A40320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

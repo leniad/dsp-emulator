@@ -1,4 +1,13 @@
 ﻿#DSP Emulator status<br>
+<b>24/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary.</b><br><pre>
+-General
+    +KONAMI CPU
+        -Almost finished
+-Aliens
+    -Added driver with sound
+    -Small problem with sprite priorities
+</pre><br>
+<img src='http://img1.imagilive.com/0516/aliens1.png'><img src='http://img1.imagilive.com/0516/aliens2.png'><br>
 <b>22/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary.</b><br><pre>
 -General
     +Unified into a single button Play/Pause functions

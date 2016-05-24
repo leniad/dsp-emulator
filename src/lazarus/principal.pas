@@ -181,6 +181,8 @@ type
     MenuItem29: TMenuItem;
     karnov1: TMenuItem;
     chelnov1: TMenuItem;
+    MenuItem30: TMenuItem;
+    aliens1: TMenuItem;
     spaceinvaders1: TMenuItem;
     ssriders1: TMenuItem;
     TMNT1: TMenuItem;

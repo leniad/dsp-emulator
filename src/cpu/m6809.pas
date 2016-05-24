@@ -61,7 +61,7 @@ implementation
 const
     estados_t:array[0..255] of byte=(
     //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-      6, 0, 0, 6, 6, 0, 6, 6, 6, 6, 6, 0, 6, 3, 3, 6,  // 0 Direct 2T MODO EA *
+      6, 0, 6, 6, 6, 0, 6, 6, 6, 6, 6, 0, 6, 3, 3, 6,  // 0 Direct 2T MODO EA *
       0, 0, 2, 4, 0, 0, 4, 9, 0, 2, 3, 0, 3, 2, 8, 6,  // 10 *
       3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 3, 3, 3, 3, 3, 3,  // 20 Branch *
       2, 2, 2, 2, 5, 4, 5, 4, 0, 4, 3, 4,16,11, 0, 0,  // 30 *
@@ -78,9 +78,9 @@ const
       2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3,  // E0 Indexed MODO EA
       5, 5, 5, 8, 5, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7); // F0 Extended 3T MODO EA}
 
-    paginacion:array[0..255] of byte=(
+    paginacion:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-        1,$f,$f, 1, 1,$f, 1, 1, 1, 1, 1,$f, 1, 1, 1, 1,  //00
+        1,$f, 1, 1, 1,$f, 1, 1, 1, 1, 1,$f, 1, 1, 1, 1,  //00
         0, 0, 0, 0,$f,$f, 3, 3,$f, 0, 2,$f, 2, 0, 2, 2,  //10
         2, 2, 2, 2, 2, 2, 2, 2,$f,$f, 2, 2, 2, 2, 2, 2,  //20
         4, 4, 4, 4, 2, 2, 2, 2,$f, 0, 0, 0, 2, 0,$f,$f,  //30
@@ -638,42 +638,15 @@ case paginacion[instruccion] of
     else MessageDlg('Num CPU'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' OLD_PC='+inttohex(self.r.old_pc,10), mtInformation,[mbOk], 0)
 end;
 case instruccion of
-      $0,$60,$70:begin  //neg 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_neg(temp,@r.cc));
-      end;
-      $3,$63,$73:begin  //com 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_com(temp,@r.cc));
-      end;
-      $4,$64,$74:begin  //lsr 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_lsr(temp,@r.cc));
-      end;
-      $6,$66,$76:begin  //ror 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_ror(temp,@r.cc));
-      end;
-      $7,$67,$77:begin  //asr 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_asr(temp,@r.cc));
-      end;
-      $8,$68,$78:begin  //asl 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_asl(temp,@r.cc));
-      end;
-      $9,$69,$79:begin  //rol 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_rol(temp,@r.cc));
-      end;
-      $a,$6a,$7a:begin  //dec 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_dec(temp,@r.cc));
-      end;
-      $c,$6c,$7c:begin  //inc 4T
-            temp:=self.getbyte(posicion.w);
-            self.putbyte(posicion.w,m680x_inc(temp,@r.cc));
-      end;
+      $0,$60,$70:self.putbyte(posicion.w,m680x_neg(self.getbyte(posicion.w),@r.cc)); //neg 4T
+      $2,$3,$63,$73:self.putbyte(posicion.w,m680x_com(self.getbyte(posicion.w),@r.cc)); //com 4T ($2 es ilegal!!)
+      $4,$64,$74:self.putbyte(posicion.w,m680x_lsr(self.getbyte(posicion.w),@r.cc)); //lsr 4T
+      $6,$66,$76:self.putbyte(posicion.w,m680x_ror(self.getbyte(posicion.w),@r.cc)); //ror 4T
+      $7,$67,$77:self.putbyte(posicion.w,m680x_asr(self.getbyte(posicion.w),@r.cc)); //asr 4T
+      $8,$68,$78:self.putbyte(posicion.w,m680x_asl(self.getbyte(posicion.w),@r.cc)); //asl 4T
+      $9,$69,$79:self.putbyte(posicion.w,m680x_rol(self.getbyte(posicion.w),@r.cc)); //rol 4T
+      $a,$6a,$7a:self.putbyte(posicion.w,m680x_dec(self.getbyte(posicion.w),@r.cc)); //dec 4T
+      $c,$6c,$7c:self.putbyte(posicion.w,m680x_inc(self.getbyte(posicion.w),@r.cc)); //inc 4T
       $d,$6d,$7d:m680x_tst(self.getbyte(posicion.w),@r.cc); //tst 3T
       $e,$6e,$7e:r.pc:=posicion.w;  //jmp 1T
       $f,$6f,$7f:begin //clr 4T
@@ -746,11 +719,11 @@ case instruccion of
                     r.pc:=r.pc+smallint(posicion.w);
                     self.estados_demas:=self.estados_demas+1;
                   end;
-              $2c:if not(r.cc.n xor r.cc.v) then begin //bge
+              $2c:if (not(r.cc.n)=not(r.cc.v)) then begin //bge
                     r.pc:=r.pc+smallint(posicion.w);
                     self.estados_demas:=self.estados_demas+1;
                   end;
-              $2d:if (r.cc.n xor r.cc.v) then begin //bnge
+              $2d:if not(not(r.cc.n)=not(r.cc.v)) then begin //bnge
                     r.pc:=r.pc+smallint(posicion.w);
                     self.estados_demas:=self.estados_demas+1;
                   end;
@@ -854,10 +827,10 @@ case instruccion of
       $27:if r.cc.z then r.pc:=r.pc+shortint(numero); //beq 3T
       $2a:if not(r.cc.n) then r.pc:=r.pc+shortint(numero); //bpl 3T
       $2b:if r.cc.n then r.pc:=r.pc+shortint(numero); //bmi 3T
-      $2c:if not(r.cc.n xor r.cc.v) then r.pc:=r.pc+shortint(numero);//bge 3T
-      $2d:if (r.cc.n xor r.cc.v) then r.pc:=r.pc+shortint(numero);//blt 3T
-      $2e:if not((r.cc.n xor r.cc.v) or r.cc.z) then r.pc:=r.pc+shortint(numero); //bgt 3T
-      $2f:if ((r.cc.n xor r.cc.v) or r.cc.z) then r.pc:=r.pc+shortint(numero); //ble 3T
+      $2c:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//bge 3T
+      $2d:if not(not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//blt 3T
+      $2e:if ((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //bgt 3T
+      $2f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //ble 3T
       $30:begin //leax 2T
             r.x:=posicion.w;
             r.cc.z:=(r.x=0);

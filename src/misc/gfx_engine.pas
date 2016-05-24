@@ -150,7 +150,7 @@ bit_n:=bit_nbr and 7;
 getbit:=((buffer[oct_nbr] shr (7-bit_n)) and 1);
 end;
 
-procedure Rotatel(n:word;ngfx:pgfx;increment:dword);
+procedure Rotatel(n:dword;ngfx:pgfx;increment:dword);
 var
   y,cojo_la_x:byte;
   src,t:array[0..((ADD_SPRITE*ADD_SPRITE)-1)] of byte;
@@ -170,7 +170,7 @@ for cojo_la_x:=(ngfx.x-1) downto 0 do
 copymemory(pos,@t[0],long);
 end;
 
-procedure Rotater(n:word;ngfx:pgfx;increment:dword);
+procedure Rotater(n:dword;ngfx:pgfx;increment:dword);
 var
   cojo_la_y,y_final:byte;
   src,t:array[0..((ADD_SPRITE*ADD_SPRITE)-1)] of byte;

@@ -1,4 +1,3 @@
-
 function m680x_neg(valor:byte;cc:pband_m6809):byte;inline;
 var
   tempw:word;
@@ -27,10 +26,10 @@ function m680x_lsr(valor:byte;cc:pband_m6809):byte;
 var
   temp:byte;
 begin
-cc.c:=(valor and $1)<>0;
 temp:=valor shr 1;
 cc.z:=(temp=0);
 cc.n:=false;
+cc.c:=(valor and $1)<>0;
 m680x_lsr:=temp;
 end;
 
@@ -84,24 +83,24 @@ end;
 
 function m680x_dec(valor:byte;cc:pband_m6809):byte;
 var
-  temp:byte;
+  tempw:word;
 begin
-temp:=valor-1;
-cc.z:=(temp=0);
-cc.n:=(temp and $80)<>0;
-cc.v:=((valor xor 1 xor temp xor (temp shr 1)) and $80)<>0;
-m680x_dec:=temp;
+tempw:=valor-1;
+cc.z:=((tempw and $ff)=0);
+cc.n:=(tempw and $80)<>0;
+cc.v:=((valor xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_dec:=tempw;
 end;
 
 function m680x_inc(valor:byte;cc:pband_m6809):byte;
 var
-  temp:byte;
+  tempw:word;
 begin
-temp:=valor+1;
-cc.z:=(temp=0);
-cc.n:=(temp and $80)<>0;
-cc.v:=((valor xor 1 xor temp xor (temp shr 1)) and $80)<>0;
-m680x_inc:=temp;
+tempw:=valor+1;
+cc.z:=((tempw and $ff)=0);
+cc.n:=(tempw and $80)<>0;
+cc.v:=((valor xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_inc:=tempw;
 end;
 
 procedure m680x_tst(valor:byte;cc:pband_m6809);
@@ -259,4 +258,109 @@ cc.n:=(tempw and $80)<>0;
 cc.z:=((tempw and $ff)=0);
 cc.v:=(((valor1 xor valor2 xor tempw xor (tempw shr 1)) and $80))<>0;
 hd6309_add8:=tempw;
+end;
+
+//KONAMI
+function m680x_abs(valor:byte;cc:pband_m6809):byte;
+var
+  tempw:word;
+begin
+tempw:=word(shortint(valor));
+cc.c:=(tempw and $80)<>0;
+cc.v:=((0 xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
+cc.n:=(tempw and $80)<>0;
+cc.z:=(tempw and $ff)=0;
+m680x_abs:=abs(shortint(valor));
+end;
+
+function m680x_neg16(valor:word;cc:pband_m6809):word;
+var
+  templ:dword;
+begin
+templ:=-valor;
+cc.n:=(templ and $8000)<>0;
+cc.z:=(templ and $ffff)=0;
+cc.c:=(templ and $10000)<>0;
+cc.v:=((0 xor valor xor templ xor (templ shr 1)) and $8000)<>0;
+m680x_neg16:=templ;
+end;
+
+function m680x_inc16(valor:word;cc:pband_m6809):word;
+var
+  templ:dword;
+begin
+templ:=valor+1;
+cc.c:=(templ and $10000)<>0;
+cc.z:=((templ and $ffff)=0);
+cc.n:=(templ and $8000)<>0;
+cc.v:=((valor xor 1 xor templ xor (templ shr 1)) and $8000)<>0;
+m680x_inc16:=templ;
+end;
+
+function m680x_dec16(valor:word;cc:pband_m6809):word;
+var
+  templ:dword;
+begin
+templ:=valor-1;
+cc.c:=(templ and $10000)<>0;
+cc.z:=((templ and $ffff)=0);
+cc.n:=(templ and $8000)<>0;
+cc.v:=((valor xor 1 xor templ xor (templ shr 1)) and $8000)<>0;
+m680x_dec16:=templ;
+end;
+
+procedure m680x_tst16(valor:word;cc:pband_m6809);
+begin
+cc.v:=((0 xor valor xor valor xor (valor shr 1)) and $8000)<>0;
+cc.n:=(valor and $8000)<>0;
+cc.z:=(valor=0);
+end;
+
+function m680x_lsrd(valor:word;numero:byte;cc:pband_m6809):word;
+var
+   tempw:word;
+begin
+if (numero<>0) then begin
+   if (valor and (1 shl numero))<>0 then cc.c:=true
+      else cc.c:=false;
+   tempw:=valor shr numero;
+   cc.n:=(tempw and $8000)<>0;
+   cc.z:=(tempw=0);
+end;
+m680x_lsrd:=tempw;
+end;
+
+function m680x_lsr16(valor:word;cc:pband_m6809):word;
+var
+   tempw:word;
+begin
+tempw:=valor shr 1;
+cc.n:=false;
+cc.z:=(tempw=0);
+cc.c:=(valor and 1)<>0;
+m680x_lsr16:=tempw;
+end;
+
+function m680x_asl16(valor:word;cc:pband_m6809):word;
+var
+  templ:dword;
+begin
+templ:=valor shl 1;
+cc.n:=(templ and $8000)<>0;
+cc.z:=(templ and $ffff)=0;
+cc.c:=(templ and $10000)<>0;
+cc.v:=((valor xor valor xor templ xor (templ shr 1)) and $8000)<>0;
+m680x_asl16:=templ;
+end;
+
+function m680x_abs16(valor:word;cc:pband_m6809):word;
+var
+  templ:dword;
+begin
+templ:=dword(smallint(valor));
+cc.c:=(templ and $8000)<>0;
+cc.v:=((0 xor valor xor templ xor (templ shr 1)) and $8000)<>0;
+cc.n:=(templ and $8000)<>0;
+cc.z:=(templ and $ffff)=0;
+m680x_abs16:=abs(smallint(valor));
 end;
