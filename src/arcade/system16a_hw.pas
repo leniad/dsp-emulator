@@ -596,12 +596,7 @@ end;
 
 procedure cerrar_system16a;
 begin
-main_m68000.free;
-snd_z80.free;
-pia8255_0.free;
 YM2151_close(0);
-close_audio;
-close_video;
 end;
 
 procedure reset_system16a;

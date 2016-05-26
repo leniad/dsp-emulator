@@ -415,13 +415,7 @@ end;
 
 procedure cerrar_megasys1;
 begin
-main_m68000.free;
-snd_m68000.free;
 ym2151_close(0);
-oki_6295_0.Free;
-oki_6295_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_megasys1;

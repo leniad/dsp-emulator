@@ -126,11 +126,7 @@ end;
 
 procedure deco16_snd_double_close;
 begin
-main_h6280.Free;
-ym2203_0.Free;
 YM2151_close(0);
-oki_6295_0.Free;
-oki_6295_1.Free;
 end;
 
 function deco16_double_snd_getbyte(direccion:dword):byte;
@@ -190,9 +186,7 @@ end;
 
 procedure deco16_snd_simple_close;
 begin
-  main_h6280.Free;
   YM2151_close(0);
-  oki_6295_0.Free;
 end;
 
 function deco16_simple_snd_getbyte(direccion:dword):byte;

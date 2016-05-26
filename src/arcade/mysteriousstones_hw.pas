@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_MS;
 procedure principal_ms;
 function iniciar_ms:boolean;
-procedure cerrar_ms;
 procedure reset_ms;
 //Main CPU
 function getbyte_ms(direccion:word):byte;
@@ -52,7 +51,6 @@ procedure Cargar_MS;
 begin
 llamadas_maquina.iniciar:=iniciar_ms;
 llamadas_maquina.bucle_general:=principal_ms;
-llamadas_maquina.cerrar:=cerrar_ms;
 llamadas_maquina.reset:=reset_ms;
 llamadas_maquina.fps_max:=((12000000/256)/3)/272;
 end;
@@ -147,15 +145,6 @@ marcade.dswb_val:=@ms_dip_b;
 //final
 reset_ms;
 iniciar_ms:=true;
-end;
-
-procedure cerrar_ms;
-begin
-main_m6502.free;
-ay8910_0.Free;
-ay8910_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_ms;

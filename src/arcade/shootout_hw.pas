@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_shootout;
 procedure principal_shootout;
 function iniciar_shootout:boolean;
-procedure cerrar_shootout;
 procedure reset_shootout;
 //Main CPU
 function getbyte_shootout(direccion:word):byte;
@@ -41,7 +40,6 @@ procedure Cargar_shootout;
 begin
 llamadas_maquina.iniciar:=iniciar_shootout;
 llamadas_maquina.bucle_general:=principal_shootout;
-llamadas_maquina.cerrar:=cerrar_shootout;
 llamadas_maquina.reset:=reset_shootout;
 end;
 
@@ -125,15 +123,6 @@ set_pal(colores,256);
 //final
 reset_shootout;
 iniciar_shootout:=true;
-end;
-
-procedure cerrar_shootout;
-begin
-main_m6502.free;
-snd_m6502.free;
-ym2203_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_shootout;

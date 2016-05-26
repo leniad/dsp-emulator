@@ -9,7 +9,6 @@ procedure Cargar_kyugo_hw;
 procedure kyugo_hw_principal;
 function iniciar_kyugo_hw:boolean;
 procedure reset_kyugo_hw;
-procedure cerrar_kyugo_hw;
 //Main CPU
 function kyugo_getbyte(direccion:word):byte;
 procedure kyugo_putbyte(direccion:word;valor:byte);
@@ -54,7 +53,6 @@ procedure Cargar_kyugo_hw;
 begin
 llamadas_maquina.iniciar:=iniciar_kyugo_hw;
 llamadas_maquina.bucle_general:=kyugo_hw_principal;
-llamadas_maquina.cerrar:=cerrar_kyugo_hw;
 llamadas_maquina.reset:=reset_kyugo_hw;
 end;
 
@@ -137,16 +135,6 @@ end;
 set_pal(colores,$100);
 reset_kyugo_hw;
 iniciar_kyugo_hw:=true;
-end;
-
-procedure cerrar_kyugo_hw;
-begin
-main_z80.free;
-snd_z80.free;
-ay8910_0.Free;
-ay8910_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_kyugo_hw;

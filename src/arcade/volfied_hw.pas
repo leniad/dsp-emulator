@@ -9,7 +9,6 @@ procedure Cargar_volfied;
 procedure volfied_principal;
 function iniciar_volfied:boolean;
 procedure reset_volfied;
-procedure cerrar_volfied;
 //Main CPU
 function volfied_getword(direccion:dword):word;
 procedure volfied_putword(direccion:dword;valor:word);
@@ -59,7 +58,6 @@ procedure Cargar_volfied;
 begin
 llamadas_maquina.iniciar:=iniciar_volfied;
 llamadas_maquina.bucle_general:=volfied_principal;
-llamadas_maquina.cerrar:=cerrar_volfied;
 llamadas_maquina.reset:=reset_volfied;
 end;
 
@@ -110,15 +108,6 @@ marcade.dswb_val:=@volfied_dip2;
 //final
 reset_volfied;
 iniciar_volfied:=true;
-end;
-
-procedure cerrar_volfied;
-begin
-main_m68000.free;
-snd_z80.free;
-ym2203_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_volfied;

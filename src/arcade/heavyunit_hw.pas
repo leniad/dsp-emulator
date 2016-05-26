@@ -9,7 +9,6 @@ procedure Cargar_hvyunit;
 procedure hvyunit_principal;
 function iniciar_hvyunit:boolean;
 procedure reset_hvyunit;
-procedure cerrar_hvyunit;
 //Main CPU
 function hvyunit_getbyte(direccion:word):byte;
 procedure hvyunit_putbyte(direccion:word;valor:byte);
@@ -62,7 +61,6 @@ procedure Cargar_hvyunit;
 begin
 llamadas_maquina.iniciar:=iniciar_hvyunit;
 llamadas_maquina.bucle_general:=hvyunit_principal;
-llamadas_maquina.cerrar:=cerrar_hvyunit;
 llamadas_maquina.reset:=reset_hvyunit;
 llamadas_maquina.fps_max:=58;
 end;
@@ -133,17 +131,6 @@ freemem(ptemp);
 //reset
 reset_hvyunit;
 iniciar_hvyunit:=true;
-end;
-
-procedure cerrar_hvyunit;
-begin
-main_z80.free;
-sub_z80.free;
-snd_z80.free;
-main_mcs51.free;
-ym2203_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_hvyunit;

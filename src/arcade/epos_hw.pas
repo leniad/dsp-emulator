@@ -6,9 +6,8 @@ uses nz80,main_engine,controls_engine,gfx_engine,ay_8910,
 
 //Principal
 procedure Cargar_epos_hw;
-procedure epos_hw_principal; 
-procedure reset_epos_hw; 
-procedure cerrar_epos_hw; 
+procedure epos_hw_principal;
+procedure reset_epos_hw;
 function iniciar_epos_hw:boolean; 
 //Main CPU
 function epos_getbyte(direccion:word):byte;  
@@ -41,7 +40,6 @@ procedure Cargar_epos_hw;
 begin
 llamadas_maquina.iniciar:=iniciar_epos_hw;
 llamadas_maquina.bucle_general:=epos_hw_principal;
-llamadas_maquina.cerrar:=cerrar_epos_hw;
 llamadas_maquina.reset:=reset_epos_hw;
 end;
 
@@ -95,14 +93,6 @@ set_pal(colores,$20);
 //final
 reset_epos_hw;
 iniciar_epos_hw:=true;
-end;
-
-procedure cerrar_epos_hw;
-begin
-main_z80.free;
-ay8910_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_epos_hw;

@@ -113,11 +113,7 @@ end;
 
 procedure cerrar_contra;
 begin
-main_hd6309.free;
-snd_m6809.Free;
 ym2151_close(0);
-close_audio;
-close_video;
 end;
 
 procedure reset_contra;

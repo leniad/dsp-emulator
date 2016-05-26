@@ -9,7 +9,6 @@ procedure Cargar_vulgus;
 procedure vulgus_principal;
 function iniciar_vulgus:boolean;
 procedure reset_vulgus;
-procedure cerrar_vulgus;
 //Main CPU
 function vulgus_getbyte(direccion:word):byte;
 procedure vulgus_putbyte(direccion:word;valor:byte);
@@ -47,7 +46,6 @@ procedure Cargar_vulgus;
 begin
 llamadas_maquina.iniciar:=iniciar_vulgus;
 llamadas_maquina.bucle_general:=vulgus_principal;
-llamadas_maquina.cerrar:=cerrar_vulgus;
 llamadas_maquina.reset:=reset_vulgus;
 llamadas_maquina.fps_max:=59.59;
 end;
@@ -143,16 +141,6 @@ end;
 //final
 reset_vulgus;
 iniciar_vulgus:=true;
-end;
-
-procedure cerrar_vulgus;
-begin
-main_z80.free;
-snd_z80.free;
-ay8910_0.Free;
-ay8910_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_vulgus;

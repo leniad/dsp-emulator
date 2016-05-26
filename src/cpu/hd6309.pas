@@ -2,7 +2,7 @@ unit hd6309;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,timer_engine,m6809,vars_hide;
+     main_engine,dialogs,m6809;
 
 type
         //MD_EM	$01	 Execution mode

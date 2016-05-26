@@ -9,7 +9,6 @@ procedure Cargar_gunsmokehw;
 procedure gunsmokehw_principal;
 function iniciar_gunsmokehw:boolean;
 procedure reset_gunsmokehw;
-procedure cerrar_gunsmokehw;
 //gun smoke
 function gunsmoke_getbyte(direccion:word):byte;
 procedure gunsmoke_putbyte(direccion:word;valor:byte);
@@ -111,7 +110,6 @@ procedure Cargar_gunsmokehw;
 begin
 llamadas_maquina.iniciar:=iniciar_gunsmokehw;
 llamadas_maquina.bucle_general:=gunsmokehw_principal;
-llamadas_maquina.cerrar:=cerrar_gunsmokehw;
 llamadas_maquina.reset:=reset_gunsmokehw;
 end;
 
@@ -445,16 +443,6 @@ end;
 //final
 reset_gunsmokehw;
 iniciar_gunsmokehw:=true;
-end;
-
-procedure cerrar_gunsmokehw;
-begin
-main_z80.free;
-snd_z80.free;
-YM2203_0.Free;
-YM2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_gunsmokehw;

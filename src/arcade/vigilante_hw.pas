@@ -133,12 +133,7 @@ end;
 
 procedure cerrar_vigilante;
 begin
-main_z80.free;
-snd_z80.free;
 ym2151_close(0);
-dac_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_vigilante;

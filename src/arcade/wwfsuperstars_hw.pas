@@ -128,12 +128,7 @@ end;
 
 procedure cerrar_wwfsstar;
 begin
-main_m68000.free;
-snd_z80.free;
 YM2151_close(0);
-oki_6295_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_wwfsstar;

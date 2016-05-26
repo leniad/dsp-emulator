@@ -161,13 +161,7 @@ end;
 
 procedure cerrar_renegade;
 begin
-main_m6502.free;
-snd_m6809.Free;
-main_m6805.Free;
-ym3812_0.free;
 gen_adpcm_close(0);
-close_audio;
-close_video;
 end;
 
 procedure reset_renegade;

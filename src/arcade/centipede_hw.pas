@@ -108,10 +108,6 @@ end;
 procedure cerrar_centipede;
 begin
 write_file(Directory.Arcade_nvram+'centiped.nv',@nvram[0],$40);
-main_m6502.free;
-pokey_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_centipede;

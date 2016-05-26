@@ -9,7 +9,6 @@ procedure Cargar_shaolin;
 procedure shaolin_principal;
 function iniciar_shaolin:boolean;
 procedure reset_shaolin;
-procedure cerrar_shaolin;
 //Main CPU
 function shaolin_getbyte(direccion:word):byte;
 procedure shaolin_putbyte(direccion:word;valor:byte);
@@ -53,7 +52,6 @@ procedure Cargar_shaolin;
 begin
 llamadas_maquina.iniciar:=iniciar_shaolin;
 llamadas_maquina.bucle_general:=shaolin_principal;
-llamadas_maquina.cerrar:=cerrar_shaolin;
 llamadas_maquina.reset:=reset_shaolin;
 llamadas_maquina.save_qsnap:=shaolin_qsave;
 llamadas_maquina.load_qsnap:=shaolin_qload;
@@ -127,15 +125,6 @@ marcade.dswc_val:=@shaolin_dip_c;
 //final
 reset_shaolin;
 iniciar_shaolin:=true;
-end;
-
-procedure cerrar_shaolin;
-begin
-main_m6809.Free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_shaolin;

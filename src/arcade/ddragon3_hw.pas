@@ -127,12 +127,7 @@ end;
 
 procedure cerrar_ddragon3;
 begin
-main_m68000.free;
-snd_z80.free;
 YM2151_close(0);
-oki_6295_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_ddragon3;

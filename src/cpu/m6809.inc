@@ -323,11 +323,28 @@ begin
 if (numero<>0) then begin
    if (valor and (1 shl numero))<>0 then cc.c:=true
       else cc.c:=false;
-   tempw:=valor shr numero;
+   if numero<16 then tempw:=valor shr numero
+      else tempw:=0;
    cc.n:=(tempw and $8000)<>0;
    cc.z:=(tempw=0);
 end;
 m680x_lsrd:=tempw;
+end;
+
+function m680x_asld(valor:word;numero:byte;cc:pband_m6809):word;
+var
+   tempw:word;
+begin
+if (numero<>0) then begin  //asld
+   if (valor and ($10000 shr numero))<>0 then cc.c:=true
+      else cc.c:=false;
+   if numero<16 then tempw:=valor shl numero
+      else tempw:=0;
+   cc.n:=(valor and $8000)<>0;
+   cc.z:=(valor=0);
+   cc.v:=((0 xor valor xor valor xor (valor shr 1)) and $8000)<>0;
+end;
+m680x_asld:=tempw;
 end;
 
 function m680x_lsr16(valor:word;cc:pband_m6809):word;
@@ -364,3 +381,20 @@ cc.n:=(templ and $8000)<>0;
 cc.z:=(templ and $ffff)=0;
 m680x_abs16:=abs(smallint(valor));
 end;
+
+function m680x_asrd(valor:word;numero:byte;cc:pband_m6809):word;
+var
+   tempw:word;
+begin
+if (numero<>0) then begin
+   if (valor and (1 shl numero))<>0 then cc.c:=true
+      else cc.c:=false;
+   if numero<16 then tempw:=valor shr numero
+      else if (smallint(valor)<0) then tempw:=$ffff
+           else tempw:=0;
+   cc.n:=(tempw and $8000)<>0;
+   cc.z:=(tempw=0);
+end;
+m680x_asrd:=tempw;
+end;
+

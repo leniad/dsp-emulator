@@ -9,7 +9,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_exedexes_hw;
 procedure exedexes_hw_principal;
 procedure reset_exedexes_hw;
-procedure cerrar_exedexes_hw;
 function iniciar_exedexes_hw:boolean;
 //Main CPU
 function exedexes_getbyte(direccion:word):byte;
@@ -49,7 +48,6 @@ procedure Cargar_exedexes_hw;
 begin
 llamadas_maquina.iniciar:=iniciar_exedexes_hw;
 llamadas_maquina.bucle_general:=exedexes_hw_principal;
-llamadas_maquina.cerrar:=cerrar_exedexes_hw;
 llamadas_maquina.reset:=reset_exedexes_hw;
 end;
 
@@ -176,17 +174,6 @@ poner_fg;
 //final
 reset_exedexes_hw;
 iniciar_exedexes_hw:=true;
-end;
-
-procedure cerrar_exedexes_hw;
-begin
-main_z80.free;
-snd_z80.free;
-AY8910_0.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_exedexes_hw;

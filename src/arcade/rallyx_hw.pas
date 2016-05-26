@@ -350,11 +350,7 @@ end;
 
 procedure cerrar_rallyxh;
 begin
-main_z80.free;
-if main_vars.tipo_maquina=29 then konamisnd_0.free
-   else close_samples;
-close_audio;
-close_video;
+if main_vars.tipo_maquina<>29 then close_samples;
 end;
 
 procedure reset_rallyxh;

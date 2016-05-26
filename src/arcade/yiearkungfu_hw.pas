@@ -9,7 +9,6 @@ procedure Cargar_yiear;
 procedure yiear_principal;
 function iniciar_yiear:boolean;
 procedure reset_yiear;
-procedure cerrar_yiear;
 //Main CPU
 function yiear_getbyte(direccion:word):byte;
 procedure yiear_putbyte(direccion:word;valor:byte);
@@ -52,7 +51,6 @@ procedure Cargar_yiear;
 begin
 llamadas_maquina.iniciar:=iniciar_yiear;
 llamadas_maquina.bucle_general:=yiear_principal;
-llamadas_maquina.cerrar:=cerrar_yiear;
 llamadas_maquina.reset:=reset_yiear;
 llamadas_maquina.fps_max:=60.58;
 llamadas_maquina.save_qsnap:=yiear_qsave;
@@ -130,15 +128,6 @@ marcade.dswc_val:=@yiear_dip_c;
 //final
 reset_yiear;
 iniciar_yiear:=true;
-end;
-
-procedure cerrar_yiear;
-begin
-main_m6809.Free;
-sn_76496_0.Free;
-vlm5030_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_yiear;

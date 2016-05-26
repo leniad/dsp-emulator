@@ -9,7 +9,6 @@ procedure Cargar_skykid;
 procedure skykid_principal;
 function iniciar_skykid:boolean;
 procedure reset_skykid;
-procedure cerrar_skykid;
 //Main CPU
 function skykid_getbyte(direccion:word):byte;
 procedure skykid_putbyte(direccion:word;valor:byte);
@@ -61,7 +60,6 @@ procedure Cargar_skykid;
 begin
 llamadas_maquina.iniciar:=iniciar_skykid;
 llamadas_maquina.bucle_general:=skykid_principal;
-llamadas_maquina.cerrar:=cerrar_skykid;
 llamadas_maquina.reset:=reset_skykid;
 llamadas_maquina.fps_max:=60.60606060606060;
 end;
@@ -184,14 +182,6 @@ end;
 //final
 reset_skykid;
 iniciar_skykid:=true;
-end;
-
-procedure cerrar_skykid;
-begin
-main_m6809.Free;
-main_m6800.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_skykid;

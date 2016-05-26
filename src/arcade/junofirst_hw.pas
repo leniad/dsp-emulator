@@ -9,7 +9,6 @@ procedure Cargar_junofrst;
 procedure junofrst_principal;
 function iniciar_junofrst:boolean;
 procedure reset_junofrst;
-procedure cerrar_junofrst;
 //Main CPU
 function junofrst_getbyte(direccion:word):byte;
 procedure junofrst_putbyte(direccion:word;valor:byte);
@@ -55,7 +54,6 @@ procedure Cargar_junofrst;
 begin
 llamadas_maquina.iniciar:=iniciar_junofrst;
 llamadas_maquina.bucle_general:=junofrst_principal;
-llamadas_maquina.cerrar:=cerrar_junofrst;
 llamadas_maquina.reset:=reset_junofrst;
 end;
 
@@ -99,15 +97,6 @@ marcade.dswb_val:=@junofrst_dip_b;
 //final
 reset_junofrst;
 iniciar_junofrst:=true;
-end;
-
-procedure cerrar_junofrst;
-begin
-main_m6809.Free;
-snd_z80.free;
-ay8910_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_junofrst;

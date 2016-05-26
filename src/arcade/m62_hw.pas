@@ -7,7 +7,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 procedure Cargar_irem_m62;
 procedure reset_irem_m62;
-procedure cerrar_irem_m62;
 function iniciar_irem_m62:boolean;
 procedure irem_m62_principal;
 //Kung-Fu Master
@@ -178,7 +177,6 @@ procedure Cargar_irem_m62;
 begin
 llamadas_maquina.iniciar:=iniciar_irem_m62;
 llamadas_maquina.bucle_general:=irem_m62_principal;
-llamadas_maquina.cerrar:=cerrar_irem_m62;
 llamadas_maquina.reset:=reset_irem_m62;
 llamadas_maquina.fps_max:=55;
 end;
@@ -586,18 +584,6 @@ end;
 //final
 reset_irem_m62;
 iniciar_irem_m62:=true;
-end;
-
-procedure cerrar_irem_m62;
-begin
-main_z80.free;
-snd_m6800.Free;
-ay8910_0.Free;
-ay8910_1.Free;
-msm_5205_0.Free;
-msm_5205_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_irem_m62;

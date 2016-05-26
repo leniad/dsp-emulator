@@ -312,13 +312,8 @@ end;
 
 procedure cerrar_system86;
 begin
-main_m6809.Free;
-snd_m6809.free;
-main_m6800.Free;
 YM2151_Close(0);
 if main_vars.tipo_maquina=124 then namco_63701x_close;
-close_audio;
-close_video;
 end;
 
 procedure reset_system86;

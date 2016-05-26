@@ -9,7 +9,6 @@ procedure Cargar_gyruss;
 procedure gyruss_principal;
 function gyruss_iniciar:boolean;
 procedure gyruss_reset;
-procedure gyruss_cerrar;
 //Main CPU
 function gyruss_getbyte(direccion:word):byte;
 procedure gyruss_putbyte(direccion:word;valor:byte);
@@ -63,7 +62,6 @@ procedure Cargar_gyruss;
 begin
 llamadas_maquina.iniciar:=gyruss_iniciar;
 llamadas_maquina.bucle_general:=gyruss_principal;
-llamadas_maquina.cerrar:=gyruss_cerrar;
 llamadas_maquina.reset:=gyruss_reset;
 llamadas_maquina.fps_max:=60.606060606060606060;
 end;
@@ -186,20 +184,6 @@ sound_latch:=0;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;
-end;
-
-procedure gyruss_cerrar;
-begin
-main_z80.free;
-misc_m6809.free;
-snd_z80.free;
-ay8910_0.free;
-ay8910_1.free;
-ay8910_2.free;
-ay8910_3.free;
-ay8910_4.free;
-close_audio;
-close_video;
 end;
 
 procedure update_video_gyruss;inline;

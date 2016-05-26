@@ -9,7 +9,6 @@ procedure Cargar_solomon;
 procedure solomon_principal;
 function iniciar_solomon:boolean;
 procedure reset_solomon;
-procedure cerrar_solomon;
 //Main CPU
 function solomon_getbyte(direccion:word):byte;
 procedure solomon_putbyte(direccion:word;valor:byte);
@@ -42,7 +41,6 @@ procedure Cargar_solomon;
 begin
 llamadas_maquina.iniciar:=iniciar_solomon;
 llamadas_maquina.bucle_general:=solomon_principal;
-llamadas_maquina.cerrar:=cerrar_solomon;
 llamadas_maquina.reset:=reset_solomon;
 end;
 
@@ -104,17 +102,6 @@ convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //final
 reset_solomon;
 iniciar_solomon:=true;
-end;
-
-procedure cerrar_solomon;
-begin
-main_z80.free;
-snd_z80.free;
-ay8910_0.Free;
-ay8910_1.Free;
-ay8910_2.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_solomon;

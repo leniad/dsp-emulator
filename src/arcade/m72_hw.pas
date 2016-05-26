@@ -253,14 +253,7 @@ end;
 
 procedure cerrar_irem_m72;
 begin
-main_nec.free;
-snd_z80.free;
 YM2151_Close(0);
-case main_vars.tipo_maquina of
-  190,191:dac_0.Free;
-end;
-close_audio;
-close_video;
 end;
 
 procedure reset_irem_m72;

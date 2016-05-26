@@ -9,7 +9,6 @@ procedure Cargar_terracre;
 procedure terracre_principal;
 function iniciar_terracre:boolean;
 procedure reset_terracre;
-procedure cerrar_terracre;
 //Main CPU
 function terracre_getword(direccion:dword):word;
 procedure terracre_putword(direccion:dword;valor:word);
@@ -70,7 +69,6 @@ procedure Cargar_terracre;
 begin
 llamadas_maquina.iniciar:=iniciar_terracre;
 llamadas_maquina.bucle_general:=terracre_principal;
-llamadas_maquina.cerrar:=cerrar_terracre;
 llamadas_maquina.reset:=reset_terracre;
 llamadas_maquina.save_qsnap:=terracre_qsave;
 llamadas_maquina.load_qsnap:=terracre_qload;
@@ -162,17 +160,6 @@ marcade.dswa_val:=@terracre_dip;
 //final
 reset_terracre;
 iniciar_terracre:=true;
-end;
-
-procedure cerrar_terracre;
-begin
-main_m68000.free;
-snd_z80.free;
-YM2203_0.free;
-dac_0.Free;
-dac_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_terracre;

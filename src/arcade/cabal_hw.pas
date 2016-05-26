@@ -136,12 +136,8 @@ end;
 
 procedure cerrar_cabal;
 begin
-main_m68000.free;
-snd_z80.free;
 ym2151_close(0);
 seibu_adpcm_close;
-close_audio;
-close_video;
 end;
 
 procedure reset_cabal;

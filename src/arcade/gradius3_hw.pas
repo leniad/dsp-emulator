@@ -129,17 +129,11 @@ end;
 
 procedure cerrar_gradius3;
 begin
-main_m68000.free;
-sub_m68000.free;
-snd_z80.free;
 YM2151_close(0);
-k052109_0.Free;
-k051960_0.free;
-k007232_0.free;
-freemem(k007232_rom);
-freemem(sprite_rom);
-close_audio;
-close_video;
+if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
 end;
 
 procedure reset_gradius3;
@@ -190,29 +184,6 @@ begin
 	k007232_0.set_volume(1,0,(valor and $0f)*$11);
 end;
 
-procedure draw_layer(layer:byte);inline;
-var
-  f:word;
-begin
-case layer of
-  0:actualiza_trozo(0,0,512,256,1,0,0,512,256,4); //Esta es fija
-  1:begin
-      case k052109_0.scroll_tipo[1] of
-        0,1:for f:=0 to $ff do scroll__x_part(2,4,k052109_0.scroll_x[1,f],k052109_0.scroll_y[1,0],f,1);
-        2:for f:=0 to $1ff do scroll__y_part(2,4,k052109_0.scroll_y[1,f],k052109_0.scroll_x[1,0],f,1);
-        3:scroll_x_y(2,4,k052109_0.scroll_x[1,0],k052109_0.scroll_y[1,0]);
-      end;
-    end;
-  2:begin
-      case k052109_0.scroll_tipo[2] of
-        0,1:for f:=0 to $ff do scroll__x_part(3,4,k052109_0.scroll_x[2,f],k052109_0.scroll_y[2,0],f,1);
-        2:for f:=0 to $1ff do scroll__y_part(3,4,k052109_0.scroll_y[2,f],k052109_0.scroll_x[2,0],f,1);
-        3:scroll_x_y(3,4,k052109_0.scroll_x[2,0],k052109_0.scroll_y[2,0]);
-      end;
-    end;
-end;
-end;
-
 procedure update_video_gradius3;
 begin
 k052109_0.write($1d80,$10);
@@ -222,24 +193,24 @@ fill_full_screen(4,0);
 if priority then begin
   k051960_0.draw_sprites(6,-1);
   k051960_0.draw_sprites(5,-1);
-  draw_layer(0);
+  k052109_0.draw_layer(0,4);
   k051960_0.draw_sprites(4,-1);
   k051960_0.draw_sprites(3,-1);
-  draw_layer(1);
+  k052109_0.draw_layer(1,4);
   k051960_0.draw_sprites(2,-1);
   k051960_0.draw_sprites(1,-1);
-  draw_layer(2);
+  k052109_0.draw_layer(2,4);
   k051960_0.draw_sprites(0,-1);
 end else begin
   k051960_0.draw_sprites(6,-1);
   k051960_0.draw_sprites(5,-1);
-  draw_layer(1);
+  k052109_0.draw_layer(1,4);
   k051960_0.draw_sprites(4,-1);
   k051960_0.draw_sprites(3,-1);
-  draw_layer(2);
+  k052109_0.draw_layer(2,4);
   k051960_0.draw_sprites(2,-1);
   k051960_0.draw_sprites(1,-1);
-  draw_layer(0);
+  k052109_0.draw_layer(0,4);
   k051960_0.draw_sprites(0,-1);
 end;
 actualiza_trozo_final(96,16,320,224,4);

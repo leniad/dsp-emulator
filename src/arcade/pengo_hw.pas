@@ -9,7 +9,6 @@ procedure Cargar_pengo;
 procedure pengo_principal;
 function iniciar_pengo:boolean;
 procedure reset_pengo;
-procedure cerrar_pengo;
 //Main CPU
 function pengo_getbyte(direccion:word):byte;
 procedure pengo_putbyte(direccion:word;valor:byte);
@@ -35,7 +34,6 @@ procedure Cargar_pengo;
 begin
 llamadas_maquina.iniciar:=iniciar_pengo;
 llamadas_maquina.bucle_general:=pengo_principal;
-llamadas_maquina.cerrar:=cerrar_pengo;
 llamadas_maquina.reset:=reset_pengo;
 llamadas_maquina.fps_max:=60.6060606060;
 end;
@@ -116,13 +114,6 @@ end;
 //final
 reset_pengo;
 iniciar_pengo:=true;
-end;
-
-procedure cerrar_pengo;
-begin
-main_z80.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_pengo;

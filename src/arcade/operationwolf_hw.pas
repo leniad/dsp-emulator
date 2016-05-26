@@ -116,13 +116,7 @@ end;
 
 procedure cerrar_opwolf;
 begin
-main_m68000.free;
-snd_z80.free;
 YM2151_close(0);
-msm_5205_0.free;
-msm_5205_1.Free;
-close_audio;
-close_video;
 sdl_setcursor(old_cursor);
 sdl_showcursor(0);
 end;

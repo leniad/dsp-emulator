@@ -9,7 +9,6 @@ procedure Cargar_commando;
 procedure commando_principal;
 function iniciar_commando:boolean;
 procedure reset_commando;
-procedure cerrar_commando;
 //Main CPU
 function commando_getbyte(direccion:word):byte;
 procedure commando_putbyte(direccion:word;valor:byte);
@@ -58,7 +57,6 @@ procedure Cargar_commando;
 begin
 llamadas_maquina.iniciar:=iniciar_commando;
 llamadas_maquina.bucle_general:=commando_principal;
-llamadas_maquina.cerrar:=cerrar_commando;
 llamadas_maquina.reset:=reset_commando;
 end;
 
@@ -143,16 +141,6 @@ marcade.dswb_val:=@commando_dip_b;
 //final
 reset_commando;
 iniciar_commando:=true;
-end;
-
-procedure cerrar_commando;
-begin
-main_z80.free;
-snd_z80.free;
-YM2203_0.Free;
-YM2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_commando;

@@ -168,15 +168,8 @@ end;
 
 procedure cerrar_starforce;
 begin
-main_z80.free;
-snd_z80.free;
 z80pio_close(0);
 z80ctc_close(0);
-sn_76496_0.Free;
-sn_76496_1.Free;
-sn_76496_2.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_starforce;

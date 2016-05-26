@@ -12,7 +12,6 @@ type
   tpantalla=record
                 x:word;  //ancho
                 y:word;  //alto
-                x_real,y_real:word; //tamaño real en caso de rotacion
                 trans:boolean;  //¿es transparente?
                 final_mix:boolean;
                 sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word;
@@ -24,17 +23,17 @@ type
     long_sprites:dword;
     banks:byte;
   end;
-  Parejas = record
+  parejas = record
           case byte of
              0: (l, h: byte);
              1: (w: word);
           end;
-  Parejas680X = record
+  pparejas=^parejas;
+  parejas680X = record
           case byte of
              0: (b, a: byte);
              1: (w: word);
         end;
-  pparejas=^parejas;
   DParejas = record
           case byte of
              0: (l0,h0,l1,h1: byte);

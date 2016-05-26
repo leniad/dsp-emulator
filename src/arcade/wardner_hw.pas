@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_wardnerhw;
 procedure wardnerhw_principal;
 procedure reset_wardnerhw;
-procedure cerrar_wardnerhw;
 function iniciar_wardnerhw:boolean;
 //CPU
 function wardner_getbyte(direccion:word):byte;
@@ -67,7 +66,6 @@ procedure Cargar_wardnerhw;
 begin
 llamadas_maquina.iniciar:=iniciar_wardnerhw;
 llamadas_maquina.bucle_general:=wardnerhw_principal;
-llamadas_maquina.cerrar:=cerrar_wardnerhw;
 llamadas_maquina.reset:=reset_wardnerhw;
 llamadas_maquina.fps_max:=(14000000/2)/(446*286);
 end;
@@ -155,16 +153,6 @@ convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //final
 reset_wardnerhw;
 iniciar_wardnerhw:=true;
-end;
-
-procedure cerrar_wardnerhw;
-begin
-main_z80.free;
-snd_z80.free;
-main_tms32010.free;
-ym3812_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_wardnerhw;

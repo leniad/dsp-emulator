@@ -6,10 +6,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      rom_engine,pal_engine,sound_engine;
 
 procedure Cargar_xain;
-procedure xain_principal; 
-function iniciar_xain:boolean; 
+procedure xain_principal;
+function iniciar_xain:boolean;
 procedure reset_xain;
-procedure cerrar_xain; 
 //CPU
 function xain_getbyte(direccion:word):byte;
 procedure xain_putbyte(direccion:word;valor:byte);
@@ -77,7 +76,6 @@ procedure Cargar_xain;
 begin
 llamadas_maquina.iniciar:=iniciar_xain;
 llamadas_maquina.bucle_general:=xain_principal;
-llamadas_maquina.cerrar:=cerrar_xain;
 llamadas_maquina.reset:=reset_xain;
 llamadas_maquina.fps_max:=6000000/384/272;
 end;
@@ -168,18 +166,6 @@ marcade.dswb_val:=@xain_dip_b;
 //final
 reset_xain;
 iniciar_xain:=true;
-end;
-
-procedure cerrar_xain;
-begin
-main_m6809.Free;
-misc_m6809.free;
-snd_m6809.Free;
-main_m6805.Free;
-YM2203_0.Free;
-YM2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_xain;

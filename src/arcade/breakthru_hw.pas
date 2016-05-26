@@ -10,7 +10,6 @@ procedure Cargar_brkthru;
 procedure brkthru_principal;
 function iniciar_brkthru:boolean;
 procedure reset_brkthru;
-procedure cerrar_brkthru;
 //cpu Break Thru
 function brkthru_getbyte(direccion:word):byte;
 procedure brkthru_putbyte(direccion:word;valor:byte);
@@ -69,7 +68,6 @@ procedure Cargar_brkthru;
 begin
 llamadas_maquina.iniciar:=iniciar_brkthru;
 llamadas_maquina.bucle_general:=brkthru_principal;
-llamadas_maquina.cerrar:=cerrar_brkthru;
 llamadas_maquina.reset:=reset_brkthru;
 llamadas_maquina.fps_max:=57.444885;
 end;
@@ -340,16 +338,6 @@ set_pal(colores,$100);
 //final
 reset_brkthru;
 iniciar_brkthru:=true;
-end;
-
-procedure cerrar_brkthru; 
-begin
-main_m6809.Free;
-snd_m6809.Free;
-ym2203_0.Free;
-ym3812_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_brkthru;

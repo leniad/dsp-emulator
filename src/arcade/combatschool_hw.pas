@@ -9,7 +9,6 @@ procedure Cargar_combatsc;
 procedure combatsc_principal;
 function iniciar_combatsc:boolean;
 procedure reset_combatsc;
-procedure cerrar_combatsc;
 //Main CPU
 function combatsc_getbyte(direccion:word):byte;
 procedure combatsc_putbyte(direccion:word;valor:byte);
@@ -44,7 +43,6 @@ procedure Cargar_combatsc;
 begin
 llamadas_maquina.iniciar:=iniciar_combatsc;
 llamadas_maquina.bucle_general:=combatsc_principal;
-llamadas_maquina.cerrar:=cerrar_combatsc;
 llamadas_maquina.reset:=reset_combatsc;
 end;
 
@@ -122,16 +120,6 @@ if not(cargar_roms(@memoria_temp[0],@combatsc_proms,'combatsc.zip',0)) then exit
 clut_combatsc;
 reset_combatsc;
 iniciar_combatsc:=true;
-end;
-
-procedure cerrar_combatsc;
-begin
-main_hd6309.free;
-snd_z80.free;
-ym2203_0.free;
-upd7759_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_combatsc;

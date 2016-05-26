@@ -2,14 +2,13 @@ unit tutankham_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m6809,nz80,main_engine,controls_engine,gfx_engine,rom_engine,
+     m6809,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,konami_snd,sound_engine;
 
 procedure Cargar_tutankham;
 procedure tutankham_principal;
 function iniciar_tutankham:boolean;
 procedure reset_tutankham;
-procedure cerrar_tutankham;
 //Main CPU
 function tutankham_getbyte(direccion:word):byte;
 procedure tutankham_putbyte(direccion:word;valor:byte);
@@ -39,7 +38,6 @@ procedure Cargar_tutankham;
 begin
 llamadas_maquina.iniciar:=iniciar_tutankham;
 llamadas_maquina.bucle_general:=tutankham_principal;
-llamadas_maquina.cerrar:=cerrar_tutankham;
 llamadas_maquina.reset:=reset_tutankham;
 end;
 
@@ -67,14 +65,6 @@ if not(cargar_roms(@mem_snd[0],@tutan_sound[0],'tutankhm.zip',0)) then exit;
 //final
 reset_tutankham;
 iniciar_tutankham:=true;
-end;
-
-procedure cerrar_tutankham;
-begin
-main_m6809.Free;
-konamisnd_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_tutankham;

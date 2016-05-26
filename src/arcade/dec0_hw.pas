@@ -352,15 +352,7 @@ end;
 
 procedure cerrar_dec0;
 begin
-main_m68000.free;
-snd_m6502.free;
-if main_vars.tipo_maquina<>157 then main_h6280.Free;
-ym3812_0.free;
-YM2203_0.Free;
-oki_6295_0.Free;
 deco_bac06_close(0);
-close_audio;
-close_video;
 end;
 
 procedure reset_dec0;

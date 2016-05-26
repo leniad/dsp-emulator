@@ -9,7 +9,6 @@ procedure Cargar_tehkanwc;
 procedure tehkanwc_principal;
 function iniciar_tehkanwc:boolean;
 procedure reset_tehkanwc;
-procedure cerrar_tehkanwc;
 //Main CPU
 function tehkanwc_getbyte(direccion:word):byte;
 procedure tehkanwc_putbyte(direccion:word;valor:byte);
@@ -66,7 +65,6 @@ procedure Cargar_tehkanwc;
 begin
 llamadas_maquina.iniciar:=iniciar_tehkanwc;
 llamadas_maquina.bucle_general:=tehkanwc_principal;
-llamadas_maquina.cerrar:=cerrar_tehkanwc;
 llamadas_maquina.reset:=reset_tehkanwc;
 end;
 
@@ -142,18 +140,6 @@ marcade.dswc:=$f;
 marcade.dswc_val:=@tehkanwc_dipc;
 reset_tehkanwc;
 iniciar_tehkanwc:=true;
-end;
-
-procedure cerrar_tehkanwc;
-begin
-main_z80.free;
-sub_z80.free;
-snd_z80.free;
-ay8910_0.Free;
-ay8910_1.Free;
-msm_5205_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_tehkanwc;

@@ -94,9 +94,6 @@ end;
 
 destructor konamisnd_chip.free;
 begin
-snd_z80.free;
-ay8910_0.Free;
-ay8910_1.Free;
 end;
 
 procedure konamisnd_chip.reset;

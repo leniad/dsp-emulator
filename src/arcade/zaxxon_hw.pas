@@ -284,16 +284,7 @@ end;
 
 procedure cerrar_zaxxon;
 begin
-main_z80.free;
-if main_vars.tipo_maquina=175 then begin
-  snd_z80.free;
-  sn_76496_0.Free;
-  sn_76496_1.Free;
-end;
-pia8255_0.free;
 close_samples;
-close_audio;
-close_video;
 end;
 
 procedure reset_zaxxon;

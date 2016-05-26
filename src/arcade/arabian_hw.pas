@@ -8,7 +8,6 @@ procedure Cargar_arabian;
 procedure arabian_principal;
 function iniciar_arabian:boolean;
 procedure reset_arabian;
-procedure cerrar_arabian;
 //Main CPU
 function arabian_getbyte(direccion:word):byte;
 procedure arabian_putbyte(direccion:word;valor:byte);
@@ -57,7 +56,6 @@ procedure Cargar_arabian;
 begin
 llamadas_maquina.iniciar:=iniciar_arabian;
 llamadas_maquina.bucle_general:=arabian_principal;
-llamadas_maquina.cerrar:=cerrar_arabian;
 llamadas_maquina.reset:=reset_arabian;
 end;
 
@@ -207,15 +205,6 @@ begin
  marcade.in1:=0;
  marcade.in2:=0;
  marcade.in3:=0;
-end;
-
-procedure cerrar_arabian;
-begin
-main_z80.free;
-main_mb88xx.free;
-ay8910_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure update_video_arabian;inline;

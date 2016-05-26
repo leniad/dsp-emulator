@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_sf_hw;
 function iniciar_sf_hw:boolean;
 procedure reset_sf_hw;
-procedure cerrar_sf_hw;
 //Slap Fight
 procedure sf_hw_principal;
 function sf_getbyte(direccion:word):byte;
@@ -80,7 +79,6 @@ procedure Cargar_sf_hw;
 begin
 llamadas_maquina.bucle_general:=sf_hw_principal;
 llamadas_maquina.iniciar:=iniciar_sf_hw;
-llamadas_maquina.cerrar:=cerrar_sf_hw;
 llamadas_maquina.reset:=reset_sf_hw;
 end;
 
@@ -219,17 +217,6 @@ end;
 set_pal(colores,$100);
 reset_sf_hw;
 iniciar_sf_hw:=true;
-end;
-
-procedure cerrar_sf_hw;
-begin
-main_z80.free;
-snd_z80.free;
-main_m6805.Free;
-ay8910_0.Free;
-ay8910_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_sf_hw;

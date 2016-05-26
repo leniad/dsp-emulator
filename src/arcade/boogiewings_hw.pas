@@ -134,16 +134,12 @@ end;
 
 procedure cerrar_boogwing;
 begin
-if main_m68000<>nil then begin
-  main_m68000.free;
-  main_deco104.free;
-  close_dec16ic(0);
-  freemem(oki1_mem);
-  freemem(oki2_mem);
-  deco16_snd_simple_close;
-  close_audio;
-  close_video;
-end;
+close_dec16ic(0);
+if oki1_mem<>nil then freemem(oki1_mem);
+if oki2_mem<>nil then freemem(oki2_mem);
+oki1_mem:=nil;
+oki2_mem:=nil;
+deco16_snd_simple_close;
 end;
 
 procedure reset_boogwing;

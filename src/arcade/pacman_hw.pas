@@ -9,7 +9,6 @@ procedure Cargar_Pacman;
 procedure pacman_principal;
 function iniciar_pacman:boolean;
 procedure reset_pacman;
-procedure cerrar_pacman;
 //Pacman
 function pacman_getbyte(direccion:word):byte;
 procedure pacman_putbyte(direccion:word;valor:byte);
@@ -62,7 +61,6 @@ procedure Cargar_Pacman;
 begin
 llamadas_maquina.iniciar:=iniciar_pacman;
 llamadas_maquina.bucle_general:=pacman_principal;
-llamadas_maquina.cerrar:=cerrar_pacman;
 llamadas_maquina.reset:=reset_pacman;
 llamadas_maquina.fps_max:=60.6060606060;
 llamadas_maquina.save_qsnap:=pacman_qsave;
@@ -131,13 +129,6 @@ if event.arcade then begin
     end
   end;
 end;
-end;
-
-procedure cerrar_pacman;
-begin
-main_z80.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_pacman;

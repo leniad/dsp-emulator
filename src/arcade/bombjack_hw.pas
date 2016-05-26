@@ -9,7 +9,6 @@ procedure Cargar_bombjack;
 procedure bombjack_principal;
 function bombjack_iniciar:boolean;
 procedure bombjack_reset;
-procedure bombjack_cerrar;
 //Main CPU
 function bombjack_getbyte(direccion:word):byte;
 procedure bombjack_putbyte(direccion:word;valor:byte);
@@ -61,7 +60,6 @@ procedure Cargar_bombjack;
 begin
 llamadas_maquina.iniciar:=bombjack_iniciar;
 llamadas_maquina.bucle_general:=bombjack_principal;
-llamadas_maquina.cerrar:=bombjack_cerrar;
 llamadas_maquina.reset:=bombjack_reset;
 llamadas_maquina.save_qsnap:=bombjack_qsave;
 llamadas_maquina.load_qsnap:=bombjack_qload;
@@ -140,17 +138,6 @@ marcade.dswb_val:=@bombjack_dipb;
 //final
 bombjack_reset;
 bombjack_iniciar:=true;
-end;
-
-procedure bombjack_cerrar;
-begin
-main_z80.free;
-snd_z80.free;
-ay8910_0.free;
-ay8910_1.free;
-ay8910_2.free;
-close_audio;
-close_video;
 end;
 
 procedure bombjack_reset;

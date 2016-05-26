@@ -7,7 +7,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 procedure Cargar_knjoe;
 procedure reset_knjoe;
-procedure cerrar_knjoe;
 function iniciar_knjoe:boolean;
 procedure knjoe_principal;
 function knjoe_getbyte(direccion:word):byte;
@@ -51,7 +50,6 @@ procedure Cargar_knjoe;
 begin
 llamadas_maquina.iniciar:=iniciar_knjoe;
 llamadas_maquina.bucle_general:=knjoe_principal;
-llamadas_maquina.cerrar:=cerrar_knjoe;
 llamadas_maquina.reset:=reset_knjoe;
 llamadas_maquina.fps_max:=55;
 end;
@@ -145,17 +143,6 @@ end;
 //final
 reset_knjoe;
 iniciar_knjoe:=true;
-end;
-
-procedure cerrar_knjoe;
-begin
-main_z80.free;
-snd_m6800.Free;
-ay8910_0.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_knjoe;

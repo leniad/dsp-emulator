@@ -3,7 +3,7 @@ unit snapshot;
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
      sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,forms,file_engine,
-     init_games,rom_engine,ppi8255,tms99xx,pal_engine,sn_76496;
+     init_games,ppi8255,tms99xx,pal_engine,sn_76496;
 
 type
   tszx_header=packed record

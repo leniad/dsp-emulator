@@ -9,7 +9,6 @@ procedure Cargar_ladybug;
 procedure ladybug_principal;
 function iniciar_ladybug:boolean;
 procedure reset_ladybug;
-procedure cerrar_ladybug;
 //Main CPU
 function ladybug_getbyte(direccion:word):byte;
 procedure ladybug_putbyte(direccion:word;valor:byte);
@@ -84,7 +83,6 @@ procedure Cargar_ladybug;
 begin
 llamadas_maquina.iniciar:=iniciar_ladybug;
 llamadas_maquina.bucle_general:=ladybug_principal;
-llamadas_maquina.cerrar:=cerrar_ladybug;
 llamadas_maquina.reset:=reset_ladybug;
 end;
 
@@ -112,14 +110,8 @@ iniciar_audio(false);
 screen_init(1,256,256,false,true);
 screen_init(2,256,256,true);
 screen_mod_scroll(2,0,0,0,256,256,255);
-case main_vars.tipo_maquina of
-  34:iniciar_video(192,240);
-  200,201:begin
-        screen_0_mod_real(256,256);
-        iniciar_video(240,192);
-        main_screen.rot90_screen:=true;
-      end;
-end;
+if main_vars.tipo_maquina<>34 then main_screen.rot90_screen:=true;
+iniciar_video(192,240);
 //Main CPU
 main_z80:=cpu_z80.create(4000000,256);
 main_z80.change_ram_calls(ladybug_getbyte,ladybug_putbyte);
@@ -242,15 +234,6 @@ end;
 //final
 reset_ladybug;
 iniciar_ladybug:=true;
-end;
-
-procedure cerrar_ladybug;
-begin
-main_z80.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_ladybug;

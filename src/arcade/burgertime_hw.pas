@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_btime;
 procedure principal_btime;
 function iniciar_btime:boolean;
-procedure cerrar_btime;
 procedure reset_btime;
 //Main CPU
 function getbyte_btime(direccion:word):byte;
@@ -55,7 +54,6 @@ procedure Cargar_btime;
 begin
 llamadas_maquina.iniciar:=iniciar_btime;
 llamadas_maquina.bucle_general:=principal_btime;
-llamadas_maquina.cerrar:=cerrar_btime;
 llamadas_maquina.reset:=reset_btime;
 llamadas_maquina.fps_max:=57.444853;
 end;
@@ -117,16 +115,6 @@ marcade.dswb_val:=@btime_dip_b;
 //final
 reset_btime;
 iniciar_btime:=true;
-end;
-
-procedure cerrar_btime;
-begin
-main_m6502.destroy;
-snd_m6502.destroy;
-AY8910_0.Free;
-AY8910_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_btime;

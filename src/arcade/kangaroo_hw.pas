@@ -9,7 +9,6 @@ procedure Cargar_kangaroo;
 procedure kangaroo_principal;
 function iniciar_kangaroo:boolean;
 procedure reset_kangaroo;
-procedure cerrar_kangaroo;
 //Main CPU
 function kangaroo_getbyte(direccion:word):byte;
 procedure kangaroo_putbyte(direccion:word;valor:byte);
@@ -55,7 +54,6 @@ procedure Cargar_Kangaroo;
 begin
 llamadas_maquina.iniciar:=iniciar_kangaroo;
 llamadas_maquina.bucle_general:=kangaroo_principal;
-llamadas_maquina.cerrar:=cerrar_kangaroo;
 llamadas_maquina.reset:=reset_kangaroo;
 llamadas_maquina.fps_max:=60.096154;
 llamadas_maquina.save_qsnap:=kangaroo_qsave;
@@ -101,15 +99,6 @@ marcade.dswb_val:=@kangaroo_dipb;
 //final
 reset_kangaroo;
 iniciar_kangaroo:=true;
-end;
-
-procedure cerrar_kangaroo;
-begin
-main_z80.free;
-snd_z80.free;
-ay8910_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_kangaroo;

@@ -9,7 +9,6 @@ procedure Cargar_timepilot;
 procedure timepilot_principal;
 function timepilot_iniciar:boolean;
 procedure timepilot_reset;
-procedure timepilot_cerrar;
 //Main CPU
 function timepilot_getbyte(direccion:word):byte;
 procedure timepilot_putbyte(direccion:word;valor:byte);
@@ -35,7 +34,6 @@ procedure Cargar_timepilot;
 begin
 llamadas_maquina.iniciar:=timepilot_iniciar;
 llamadas_maquina.bucle_general:=timepilot_principal;
-llamadas_maquina.cerrar:=timepilot_cerrar;
 llamadas_maquina.reset:=timepilot_reset;
 end;
 
@@ -122,14 +120,6 @@ nmi_enable:=false;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$ff;
-end;
-
-procedure timepilot_cerrar;
-begin
-main_z80.free;
-konamisnd_0.free;
-close_audio;
-close_video;
 end;
 
 procedure update_video_timepilot;

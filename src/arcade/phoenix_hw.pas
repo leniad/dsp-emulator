@@ -155,14 +155,8 @@ end;
 
 procedure phoenix_cerrar;
 begin
-main_z80.free;
 tms36xx_close;
-case main_vars.tipo_maquina of
-  11:phoenix_audio_cerrar;
-  202:;
-end;
-close_audio;
-close_video;
+if main_vars.tipo_maquina=11 then phoenix_audio_cerrar;
 end;
 
 procedure phoenix_reset;

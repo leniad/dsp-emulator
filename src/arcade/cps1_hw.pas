@@ -1028,20 +1028,10 @@ end;
 
 procedure cerrar_cps1;
 begin
-main_m68000.free;
-snd_z80.free;
-close_audio;
 case main_vars.tipo_maquina of
-  103..111:begin
-             YM2151_close(0);
-             oki_6295_0.Free;
-           end;
-  112..113:begin
-              qsound_close;
-              eeprom_0.free;
-           end;
+  103..111:YM2151_close(0);
+  112..113:qsound_close;
 end;
-close_video;
 end;
 
 procedure reset_cps1;

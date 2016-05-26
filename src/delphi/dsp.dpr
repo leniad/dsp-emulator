@@ -256,7 +256,9 @@ uses
   centipede_hw in '..\arcade\centipede_hw.pas',
   karnov_hw in '..\arcade\karnov_hw.pas',
   konami in '..\cpu\konami.pas',
-  aliens_hw in '..\arcade\aliens_hw.pas';
+  aliens_hw in '..\arcade\aliens_hw.pas',
+  thunderx_hw in '..\arcade\thunderx_hw.pas',
+  device_functions in '..\misc\device_functions.pas';
 
 {$R *.res}
 

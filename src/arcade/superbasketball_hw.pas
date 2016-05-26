@@ -9,7 +9,6 @@ procedure Cargar_sbasketb;
 procedure sbasketb_principal;
 function iniciar_sbasketb:boolean;
 procedure reset_sbasketb;
-procedure cerrar_sbasketb;
 //Main CPU
 function sbasketb_getbyte(direccion:word):byte;
 procedure sbasketb_putbyte(direccion:word;valor:byte);
@@ -47,7 +46,6 @@ procedure Cargar_sbasketb;
 begin
 llamadas_maquina.iniciar:=iniciar_sbasketb;
 llamadas_maquina.bucle_general:=sbasketb_principal;
-llamadas_maquina.cerrar:=cerrar_sbasketb;
 llamadas_maquina.reset:=reset_sbasketb;
 llamadas_maquina.save_qsnap:=sbasketb_qsave;
 llamadas_maquina.load_qsnap:=sbasketb_qload;
@@ -116,17 +114,6 @@ end;
 //final
 reset_sbasketb;
 iniciar_sbasketb:=true;
-end;
-
-procedure cerrar_sbasketb;
-begin
-main_m6809.Free;
-snd_z80.free;
-sn_76496_0.Free;
-vlm5030_0.free;
-dac_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_sbasketb;

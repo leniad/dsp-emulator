@@ -9,7 +9,6 @@ procedure Cargar_pooyan;
 procedure pooyan_principal;
 function iniciar_pooyan:boolean;
 procedure reset_pooyan;
-procedure cerrar_pooyan;
 //Main CPU
 function pooyan_getbyte(direccion:word):byte;
 procedure pooyan_putbyte(direccion:word;valor:byte);
@@ -47,7 +46,6 @@ procedure Cargar_pooyan;
 begin
 llamadas_maquina.iniciar:=iniciar_pooyan;
 llamadas_maquina.bucle_general:=pooyan_principal;
-llamadas_maquina.cerrar:=cerrar_pooyan;
 llamadas_maquina.reset:=reset_pooyan;
 end;
 
@@ -112,14 +110,6 @@ marcade.dswb_val:=@pooyan_dip_b;
 //final
 reset_pooyan;
 iniciar_pooyan:=true;
-end;
-
-procedure cerrar_pooyan;
-begin
-main_z80.free;
-konamisnd_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_pooyan;

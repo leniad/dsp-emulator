@@ -9,7 +9,6 @@ procedure Cargar_higemaru;
 procedure higemaru_principal;
 function iniciar_higemaru:boolean;
 procedure reset_higemaru;
-procedure cerrar_higemaru;
 //Main CPU
 function higemaru_getbyte(direccion:word):byte;
 procedure higemaru_putbyte(direccion:word;valor:byte);
@@ -31,7 +30,6 @@ procedure Cargar_higemaru;
 begin
 llamadas_maquina.iniciar:=iniciar_higemaru;
 llamadas_maquina.bucle_general:=higemaru_principal;
-llamadas_maquina.cerrar:=cerrar_higemaru;
 llamadas_maquina.reset:=reset_higemaru;
 end;
 
@@ -88,15 +86,6 @@ for f:=0 to $ff do gfx[1].colores[f]:=(memoria_temp[f+$120] and $f) or $10;
 //final
 reset_higemaru;
 iniciar_higemaru:=true;
-end;
-
-procedure cerrar_higemaru;
-begin
-main_z80.free;
-ay8910_0.free;
-ay8910_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_higemaru;

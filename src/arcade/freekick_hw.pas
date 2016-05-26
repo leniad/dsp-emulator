@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_freekick;
 procedure freekick_principal;
 procedure reset_freekick;
-procedure cerrar_freekick;
 //Main CPU
 function freekick_getbyte(direccion:word):byte;
 procedure freekick_putbyte(direccion:word;valor:byte);
@@ -65,7 +64,6 @@ procedure Cargar_freekick;
 begin
 llamadas_maquina.iniciar:=iniciar_freekick;
 llamadas_maquina.bucle_general:=freekick_principal;
-llamadas_maquina.cerrar:=cerrar_freekick;
 llamadas_maquina.reset:=reset_freekick;
 llamadas_maquina.fps_max:=59.410646;
 end;
@@ -162,19 +160,6 @@ set_pal(colores,$200);
 //final
 reset_freekick;
 iniciar_freekick:=true;
-end;
-
-procedure cerrar_freekick;
-begin
-main_z80.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-sn_76496_2.Free;
-sn_76496_3.Free;
-pia8255_0.free;
-pia8255_1.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_freekick;

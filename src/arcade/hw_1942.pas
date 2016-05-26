@@ -9,7 +9,6 @@ procedure Cargar_hw1942;
 procedure hw1942_principal;
 function iniciar_hw1942:boolean;
 procedure reset_hw1942;
-procedure cerrar_hw1942;
 //Main CPU
 function hw1942_getbyte(direccion:word):byte;
 procedure hw1942_putbyte(direccion:word;valor:byte);
@@ -51,7 +50,6 @@ procedure Cargar_hw1942;
 begin
 llamadas_maquina.iniciar:=iniciar_hw1942;
 llamadas_maquina.bucle_general:=hw1942_principal;
-llamadas_maquina.cerrar:=cerrar_hw1942;
 llamadas_maquina.reset:=reset_hw1942;
 llamadas_maquina.save_qsnap:=hw1942_qsave;
 llamadas_maquina.load_qsnap:=hw1942_qload;
@@ -136,16 +134,6 @@ end;
 //final
 reset_hw1942;
 iniciar_hw1942:=true;
-end;
-
-procedure cerrar_hw1942;
-begin
-main_z80.free;
-snd_z80.free;
-ay8910_0.free;
-ay8910_1.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_hw1942;

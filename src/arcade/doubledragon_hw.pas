@@ -216,23 +216,7 @@ end;
 
 procedure cerrar_ddragon;
 begin
-main_hd6309.free;
 ym2151_close(0);
-case main_vars.tipo_maquina of
-  92:begin
-      msm_5205_0.Free;
-      msm_5205_1.Free;
-      snd_m6809.Free;
-      main_m6800.Free;
-    end;
-  96:begin
-      sub_z80.free;
-      snd_z80.free;
-      oki_6295_0.Free;
-     end;
-end;
-close_audio;
-close_video;
 end;
 
 procedure reset_ddragon;

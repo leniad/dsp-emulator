@@ -121,14 +121,7 @@ end;
 
 procedure cerrar_actfancer;
 begin
-main_h6280.Free;
-snd_m6502.free;
-ym3812_0.free;
-YM2203_0.Free;
-oki_6295_0.Free;
 deco_bac06_close(0);
-close_audio;
-close_video;
 end;
 
 procedure reset_actfancer;

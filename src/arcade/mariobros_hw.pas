@@ -119,10 +119,7 @@ end;
 
 procedure cerrar_mario;
 begin
-main_z80.free;
 close_samples;
-close_audio;
-close_video;
 end;
 
 procedure reset_mario;

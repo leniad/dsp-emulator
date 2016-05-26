@@ -113,12 +113,7 @@ end;
 
 procedure cerrar_rastan;
 begin
-main_m68000.free;
-snd_z80.free;
 YM2151_close(0);
-msm_5205_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_rastan;

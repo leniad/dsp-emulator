@@ -9,7 +9,6 @@ procedure Cargar_hlwings;
 procedure lwings_principal;
 function iniciar_lwings:boolean;
 procedure reset_lwings;
-procedure cerrar_lwings;
 //Legendary Wings
 function lwings_getbyte(direccion:word):byte;
 procedure lwings_putbyte(direccion:word;valor:byte);
@@ -95,13 +94,12 @@ case main_vars.tipo_maquina of
   61:llamadas_maquina.bucle_general:=trojan_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_lwings;
-llamadas_maquina.cerrar:=cerrar_lwings;
 llamadas_maquina.reset:=reset_lwings;
 end;
 
 function iniciar_lwings:boolean;
 var
-      f,x,y:word;
+      f:word;
       memoria_temp:array[0..$3ffff] of byte;
 const
     pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
@@ -144,28 +142,14 @@ iniciar_audio(false);
 //chars 3
 //tiles 4  pri 1
 screen_init(1,512,512,false,true);
+screen_init(2,512,512);
+screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 case main_vars.tipo_maquina of
-  59:begin
-      x:=240;
-      y:=256;
-      screen_0_mod_real(256,256);
-      screen_init(2,512,512);
-      screen_mod_scroll(2,512,256,511,512,256,511);
-      main_screen.rol90_screen:=true;
-     end;
-  60:begin
-      x:=256;
-      y:=240;
-      screen_init(2,512,512);
-      screen_mod_scroll(2,512,256,511,512,256,511);
-     end;
+  59:main_screen.rol90_screen:=true;
   61:begin
-      x:=256;
-      y:=240;
-      //La pantallas 2 y 4 son transparentes
+      //La pantallas 2 (la cambio) y 4 son transparentes
       screen_init(2,512,512,true);
-      screen_mod_scroll(2,512,256,511,512,256,511);
       screen_init(4,512,512,true);
       screen_mod_scroll(4,512,256,511,512,256,511);
       //La pantalla 5 es el fondo
@@ -173,7 +157,7 @@ case main_vars.tipo_maquina of
       screen_mod_scroll(5,512,256,511,256,256,255);
      end;
 end;
-iniciar_video(x,y);
+iniciar_video(256,240);
 //Sound CPU
 snd_z80:=cpu_z80.create(3000000,256);
 snd_z80.init_sound(lwings_sound_update);
@@ -265,20 +249,6 @@ end;
 //final
 reset_lwings;
 iniciar_lwings:=true;
-end;
-
-procedure cerrar_lwings;
-begin
-main_z80.free;
-snd_z80.free;
-YM2203_0.Free;
-YM2203_1.Free;
-if main_vars.tipo_maquina=61 then begin
-  msm_5205_0.Free;
-  sub_z80.free;
-end;
-close_audio;
-close_video;
 end;
 
 procedure reset_lwings;

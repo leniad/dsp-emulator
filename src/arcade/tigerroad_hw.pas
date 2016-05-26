@@ -9,7 +9,6 @@ procedure Cargar_tigeroad;
 procedure tigeroad_principal;
 function iniciar_tigeroad:boolean;
 procedure reset_tigeroad;
-procedure cerrar_tigeroad;
 //Main CPU
 function tigeroad_getword(direccion:dword):word;
 procedure tigeroad_putword(direccion:dword;valor:word);
@@ -64,7 +63,6 @@ procedure Cargar_tigeroad;
 begin
 llamadas_maquina.iniciar:=iniciar_tigeroad;
 llamadas_maquina.bucle_general:=tigeroad_principal;
-llamadas_maquina.cerrar:=cerrar_tigeroad;
 llamadas_maquina.reset:=reset_tigeroad;
 llamadas_maquina.fps_max:=60.08;
 end;
@@ -176,16 +174,6 @@ end;
 freemem(memoria_temp);
 reset_tigeroad;
 iniciar_tigeroad:=true;
-end;
-
-procedure cerrar_tigeroad;
-begin
-main_m68000.free;
-snd_z80.free;
-ym2203_0.Free;
-ym2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_tigeroad;

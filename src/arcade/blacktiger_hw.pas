@@ -158,13 +158,6 @@ end;
 procedure cerrar_blktiger;
 begin
 save_hi('blktiger.hi',@memoria[$e200],80);
-main_z80.free;
-snd_z80.free;
-main_mcs51.free;
-ym2203_0.Free;
-ym2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_blktiger;

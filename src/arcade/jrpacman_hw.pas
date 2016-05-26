@@ -9,7 +9,6 @@ procedure Cargar_jrPacman;
 procedure jrpacman_principal;
 function iniciar_jrpacman:boolean;
 procedure reset_jrpacman;
-procedure cerrar_jrpacman;
 //Pacman
 function jrpacman_getbyte(direccion:word):byte;
 procedure jrpacman_putbyte(direccion:word;valor:byte);
@@ -64,7 +63,6 @@ procedure Cargar_JrPacman;
 begin
 llamadas_maquina.iniciar:=iniciar_jrpacman;
 llamadas_maquina.bucle_general:=jrpacman_principal;
-llamadas_maquina.cerrar:=cerrar_jrpacman;
 llamadas_maquina.reset:=reset_jrpacman;
 llamadas_maquina.fps_max:=60.6060606060;
 end;
@@ -154,13 +152,6 @@ end;
 //final
 reset_jrpacman;
 iniciar_jrpacman:=true;
-end;
-
-procedure cerrar_jrpacman;
-begin
-main_z80.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_jrpacman;

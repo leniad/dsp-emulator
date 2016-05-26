@@ -123,13 +123,10 @@ end;
 
 procedure cerrar_dietgo;
 begin
-main_m68000.free;
-main_deco104.free;
 close_dec16ic(0);
-freemem(oki1_mem);
+if oki1_mem<>nil then freemem(oki1_mem);
+oki1_mem:=nil;
 deco16_snd_simple_close;
-close_audio;
-close_video;
 end;
 
 procedure reset_dietgo;

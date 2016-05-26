@@ -9,7 +9,6 @@ procedure Cargar_mrdo;
 procedure mrdo_principal;
 function iniciar_mrdo:boolean;
 procedure reset_mrdo;
-procedure cerrar_mrdo;
 //Main CPU
 function mrdo_getbyte(direccion:word):byte;
 procedure mrdo_putbyte(direccion:word;valor:byte);
@@ -36,7 +35,6 @@ procedure Cargar_mrdo;
 begin
 llamadas_maquina.iniciar:=iniciar_mrdo;
 llamadas_maquina.bucle_general:=mrdo_principal;
-llamadas_maquina.cerrar:=cerrar_mrdo;
 llamadas_maquina.reset:=reset_mrdo;
 llamadas_maquina.fps_max:=59.94323742;
 end;
@@ -146,15 +144,6 @@ calc_paleta;
 //final
 reset_mrdo;
 iniciar_mrdo:=true;
-end;
-
-procedure cerrar_mrdo;
-begin
-main_z80.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_mrdo;

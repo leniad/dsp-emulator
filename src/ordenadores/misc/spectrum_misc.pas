@@ -505,11 +505,6 @@ end;
 
 procedure spec_cerrar_comun;
 begin
-spec_z80.free;
-spec_z80:=nil;
-if ((main_vars.tipo_maquina<>0) and (main_vars.tipo_maquina<>5)) then ay8910_0.free;
-close_audio;
-close_video;
 sdl_setcursor(old_cursor);
 rom_cambiada_48:=false;
 if main_vars.tipo_maquina=2 then begin

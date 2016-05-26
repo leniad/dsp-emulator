@@ -9,7 +9,6 @@ procedure Cargar_tecmo;
 procedure tecmo_principal;
 function iniciar_tecmo:boolean;
 procedure reset_tecmo;
-procedure cerrar_tecmo;
 //Sound
 procedure snd_sound_play;
 procedure snd_adpcm;
@@ -91,7 +90,6 @@ procedure Cargar_tecmo;
 begin
 llamadas_maquina.iniciar:=iniciar_tecmo;
 llamadas_maquina.bucle_general:=tecmo_principal;
-llamadas_maquina.cerrar:=cerrar_tecmo;
 llamadas_maquina.reset:=reset_tecmo;
 end;
 
@@ -219,16 +217,6 @@ case main_vars.tipo_maquina of
 end;
 reset_tecmo;
 iniciar_tecmo:=true;
-end;
-
-procedure cerrar_tecmo;
-begin
-main_z80.free;
-snd_z80.free;
-msm_5205_0.Free;
-ym3812_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_tecmo;

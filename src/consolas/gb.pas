@@ -516,10 +516,7 @@ end;
 procedure cerrar_gb;
 begin
 if hay_nvram then write_file(nombre_rom,@ram_bank[0,0],$2000);
-main_lr.Free;
-close_audio;
 gameboy_sound_close;
-close_video;
 end;
 
 function leer_io(direccion:byte):byte;

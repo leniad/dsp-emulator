@@ -380,7 +380,7 @@ end;
 function cpu_m6809.get_indexed:word;
 var
   iindexed,temp:byte;
-  origen:pparejas;
+  origen:pword;
   direccion,temp2:word;
 begin
 iindexed:=self.getbyte(r.pc); //Hay que añadir 1 estado por cojer un byte...
@@ -394,53 +394,53 @@ end;
 if (iindexed and $80)<>0 then begin
   case (iindexed and $f) of
       0:begin  //reg+
-          direccion:=origen.w;
-          origen.w:=origen.w+1;
+          direccion:=origen^;
+          origen^:=origen^+1;
           self.estados_demas:=self.estados_demas+3+1;
       end;
       1:begin  //reg++
-          direccion:=origen.w;
-          origen.w:=origen.w+2;
+          direccion:=origen^;
+          origen^:=origen^+2;
           self.estados_demas:=self.estados_demas+4+1;
       end;
       2:begin  //-reg
-          origen.w:=origen.w-1;
-          direccion:=origen.w;
+          origen^:=origen^-1;
+          direccion:=origen^;
           self.estados_demas:=self.estados_demas+3+1;
       end;
       3:begin //--reg
-          origen.w:=origen.w-2;
-          direccion:=origen.w;
+          origen^:=origen^-2;
+          direccion:=origen^;
           self.estados_demas:=self.estados_demas+4+1;
       end;
       4:begin // =
-          direccion:=origen.w;
+          direccion:=origen^;
           self.estados_demas:=self.estados_demas+1+1;
         end;
       5:begin //reg + r.d.b
-          direccion:=origen.w+shortint(r.d.b);
+          direccion:=origen^+shortint(r.d.b);
           self.estados_demas:=self.estados_demas+2+1;
         end;
       6:begin // reg + r.d.a
-          direccion:=origen.w+shortint(r.d.a);
+          direccion:=origen^+shortint(r.d.a);
           self.estados_demas:=self.estados_demas+2+1;
         end;
       7:MessageDlg('Indexed 7 desconocido. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
       8:begin  //reg + deplazamiento 8bits
           temp:=self.getbyte(r.pc);
           r.pc:=r.pc+1;
-          direccion:=origen.w+shortint(temp);
+          direccion:=origen^+shortint(temp);
           self.estados_demas:=self.estados_demas+2+1;
       end;
       9:begin  //reg + deplazamiento 16bits
           temp2:=self.getword(r.pc);
           r.pc:=r.pc+2;
-          direccion:=origen.w+smallint(temp2);
+          direccion:=origen^+smallint(temp2);
           self.estados_demas:=self.estados_demas+5+1;
       end;
       $a:MessageDlg('Indexed $a desconocido. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
       $b:begin //reg + r.d.w
-          direccion:=origen.w+smallint(r.d.w);
+          direccion:=origen^+smallint(r.d.w);
           self.estados_demas:=self.estados_demas+5+1;
          end;
       $c:MessageDlg('Indexed $c desconocido. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
@@ -462,8 +462,8 @@ if (iindexed and $80)<>0 then begin
   end;
 end else begin
   temp:=iindexed and $f;
-  if (iindexed and $10)=0 then direccion:=origen.w+temp
-    else direccion:=origen.w-(16-temp);
+  if (iindexed and $10)=0 then direccion:=origen^+temp
+    else direccion:=origen^-(16-temp);
   self.estados_demas:=self.estados_demas+2+1;
 end;
 get_indexed:=direccion;
@@ -568,9 +568,7 @@ end;
 procedure cpu_m6809.run(maximo:single);
 var
     instruccion,temp,temp2,numero,instruccion2,cf:byte;
-    tempw:word;
-    templ:dword;
-    posicion:parejas;
+    tempw,posicion:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
@@ -598,8 +596,7 @@ self.opcode:=false;
 case paginacion[instruccion] of
     0:; //implicito 0T
     1:begin //DIRECT  2T
-        posicion.h:=r.dp;
-        posicion.l:=self.getbyte(r.pc);
+        posicion:=(r.dp shl 8)+self.getbyte(r.pc);
         r.pc:=r.pc+1;
       end;
     2:begin  //inmediato byte
@@ -607,50 +604,48 @@ case paginacion[instruccion] of
         r.pc:=r.pc+1;
       end;
     3:begin  //EXTENDED 3T
-         posicion.w:=self.getword(r.pc);
+         posicion:=self.getword(r.pc);
          r.pc:=r.pc+2;
       end;
-    4:posicion.w:=self.get_indexed; //INDEXED Los estados T son variables
+    4:posicion:=self.get_indexed; //INDEXED Los estados T son variables
     5:begin //direct page indirecto byte
-        posicion.h:=r.dp;
-        posicion.l:=self.getbyte(r.pc);
+        posicion:=(r.dp shl 8)+self.getbyte(r.pc);
         r.pc:=r.pc+1;
-        numero:=self.getbyte(posicion.w);
+        numero:=self.getbyte(posicion);
       end;
     6:numero:=self.getbyte(get_indexed); //indexado indirecto byte
     7:begin  //extendido indirecto byte
-         posicion.w:=self.getword(r.pc);
+         posicion:=self.getword(r.pc);
          r.pc:=r.pc+2;
-         numero:=self.getbyte(posicion.w);
+         numero:=self.getbyte(posicion);
       end;
     8:begin //direct page indirecto word
-        posicion.h:=r.dp;
-        posicion.l:=self.getbyte(r.pc);
+        posicion:=(r.dp shl 8)+self.getbyte(r.pc);
         r.pc:=r.pc+1;
-        posicion.w:=self.getword(posicion.w);
+        posicion:=self.getword(posicion);
       end;
-    9:posicion.w:=self.getword(get_indexed); //indexado indirecto word
+    9:posicion:=self.getword(get_indexed); //indexado indirecto word
     $a:begin  //extendido indirecto word
-         posicion.w:=self.getword(r.pc);
+         posicion:=self.getword(r.pc);
          r.pc:=r.pc+2;
-         posicion.w:=self.getword(posicion.w);
+         posicion:=self.getword(posicion);
       end;
     else MessageDlg('Num CPU'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' OLD_PC='+inttohex(self.r.old_pc,10), mtInformation,[mbOk], 0)
 end;
 case instruccion of
-      $0,$60,$70:self.putbyte(posicion.w,m680x_neg(self.getbyte(posicion.w),@r.cc)); //neg 4T
-      $2,$3,$63,$73:self.putbyte(posicion.w,m680x_com(self.getbyte(posicion.w),@r.cc)); //com 4T ($2 es ilegal!!)
-      $4,$64,$74:self.putbyte(posicion.w,m680x_lsr(self.getbyte(posicion.w),@r.cc)); //lsr 4T
-      $6,$66,$76:self.putbyte(posicion.w,m680x_ror(self.getbyte(posicion.w),@r.cc)); //ror 4T
-      $7,$67,$77:self.putbyte(posicion.w,m680x_asr(self.getbyte(posicion.w),@r.cc)); //asr 4T
-      $8,$68,$78:self.putbyte(posicion.w,m680x_asl(self.getbyte(posicion.w),@r.cc)); //asl 4T
-      $9,$69,$79:self.putbyte(posicion.w,m680x_rol(self.getbyte(posicion.w),@r.cc)); //rol 4T
-      $a,$6a,$7a:self.putbyte(posicion.w,m680x_dec(self.getbyte(posicion.w),@r.cc)); //dec 4T
-      $c,$6c,$7c:self.putbyte(posicion.w,m680x_inc(self.getbyte(posicion.w),@r.cc)); //inc 4T
-      $d,$6d,$7d:m680x_tst(self.getbyte(posicion.w),@r.cc); //tst 3T
-      $e,$6e,$7e:r.pc:=posicion.w;  //jmp 1T
+      $0,$60,$70:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc)); //neg 4T
+      $2,$3,$63,$73:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T ($2 es ilegal!!)
+      $4,$64,$74:self.putbyte(posicion,m680x_lsr(self.getbyte(posicion),@r.cc)); //lsr 4T
+      $6,$66,$76:self.putbyte(posicion,m680x_ror(self.getbyte(posicion),@r.cc)); //ror 4T
+      $7,$67,$77:self.putbyte(posicion,m680x_asr(self.getbyte(posicion),@r.cc)); //asr 4T
+      $8,$68,$78:self.putbyte(posicion,m680x_asl(self.getbyte(posicion),@r.cc)); //asl 4T
+      $9,$69,$79:self.putbyte(posicion,m680x_rol(self.getbyte(posicion),@r.cc)); //rol 4T
+      $a,$6a,$7a:self.putbyte(posicion,m680x_dec(self.getbyte(posicion),@r.cc)); //dec 4T
+      $c,$6c,$7c:self.putbyte(posicion,m680x_inc(self.getbyte(posicion),@r.cc)); //inc 4T
+      $d,$6d,$7d:m680x_tst(self.getbyte(posicion),@r.cc); //tst 3T
+      $e,$6e,$7e:r.pc:=posicion;  //jmp 1T
       $f,$6f,$7f:begin //clr 4T
-          self.putbyte(posicion.w,0);
+          self.putbyte(posicion,0);
           r.cc.n:=false;
           r.cc.v:=false;
           r.cc.c:=false;
@@ -664,78 +659,76 @@ case instruccion of
             case pag_1X[instruccion2] of
                 0:MessageDlg('Num CPU '+inttostr(self.numero_cpu)+' instruccion $10: '+inttohex(instruccion2,2)+' desconocida. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
                 1:begin //direct page
-                    posicion.h:=r.dp;
-                    posicion.l:=self.getbyte(r.pc);
+                    posicion:=(r.dp shl 8)+self.getbyte(r.pc);
                     r.pc:=r.pc+1;
                   end;
                 3:begin  //extendido
-                     posicion.w:=self.getword(r.pc);
+                     posicion:=self.getword(r.pc);
                      r.pc:=r.pc+2;
                   end;
-                4:posicion.w:=self.get_indexed;
+                4:posicion:=self.get_indexed;
                 5:begin //direct page word
-                    posicion.h:=r.dp;
-                    posicion.l:=self.getbyte(r.pc);
+                    posicion:=(r.dp shl 8)+self.getbyte(r.pc);
                     r.pc:=r.pc+1;
-                    posicion.w:=self.getword(posicion.w);
+                    posicion:=self.getword(posicion);
                   end;
-                6:posicion.w:=self.getword(self.get_indexed); //indexado word
+                6:posicion:=self.getword(self.get_indexed); //indexado word
                 7:begin  //extendido word
-                     posicion.w:=self.getword(r.pc);
+                     posicion:=self.getword(r.pc);
                      r.pc:=r.pc+2;
-                     posicion.w:=self.getword(posicion.w);
+                     posicion:=self.getword(posicion);
                   end;
             end;
             case instruccion2 of
               $22:if not(r.cc.c or r.cc.z) then begin //lbhi
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $23:if (r.cc.c or r.cc.z) then begin //bls
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $24:if not(r.cc.c) then begin //lbcc
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $25:if r.cc.c then begin //lbcs
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $26:if not(r.cc.z) then begin //lbne
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $27:if r.cc.z then begin //lbeq
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $2a:if not(r.cc.n) then begin //lbpl
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $2b:if r.cc.n then begin //bmi
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $2c:if (not(r.cc.n)=not(r.cc.v)) then begin //bge
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
               $2d:if not(not(r.cc.n)=not(r.cc.v)) then begin //bnge
-                    r.pc:=r.pc+smallint(posicion.w);
+                    r.pc:=r.pc+smallint(posicion);
                     self.estados_demas:=self.estados_demas+1;
                   end;
-              $83,$93,$a3,$b3:m680x_sub16(r.d.w,posicion.w,@r.cc);  //cmpd
-              $8c,$9c,$ac,$bc:m680x_sub16(r.y,posicion.w,@r.cc);  //cmpy
-              $8e,$9e,$ae,$be:r.y:=m680x_ld_st16(posicion.w,@r.cc);  //LDY
-                  $9f,$af,$bf:self.putword(posicion.w,m680x_ld_st16(r.y,@r.cc)); //STY
+              $83,$93,$a3,$b3:m680x_sub16(r.d.w,posicion,@r.cc);  //cmpd
+              $8c,$9c,$ac,$bc:m680x_sub16(r.y,posicion,@r.cc);  //cmpy
+              $8e,$9e,$ae,$be:r.y:=m680x_ld_st16(posicion,@r.cc);  //LDY
+                  $9f,$af,$bf:self.putword(posicion,m680x_ld_st16(r.y,@r.cc)); //STY
               $ce,$de,$ee,$fe:begin  //LDS
-                    r.s:=m680x_ld_st16(posicion.w,@r.cc);
+                    r.s:=m680x_ld_st16(posicion,@r.cc);
                     r.pila_init:=true;
                   end;
-                  $df,$ef,$ff:self.putword(posicion.w,m680x_ld_st16(r.s,@r.cc)); //sts
+                  $df,$ef,$ff:self.putword(posicion,m680x_ld_st16(r.s,@r.cc)); //sts
             end;
             self.estados_demas:=self.estados_demas+m6809t_1X[instruccion2];
           end;
@@ -747,46 +740,43 @@ case instruccion of
             case pag_1X[instruccion2] of
                 0:MessageDlg('Instruccion $11: '+inttohex(instruccion2,2)+' desconocida. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
                 1:begin //direct page
-                    posicion.h:=r.dp;
-                    posicion.l:=self.getbyte(r.pc);
+                    posicion:=(r.dp shl 8)+self.getbyte(r.pc);
                     r.pc:=r.pc+1;
                   end;
                 3:begin  //extendido
-                     posicion.w:=self.getword(r.pc);
+                     posicion:=self.getword(r.pc);
                      r.pc:=r.pc+2;
                   end;
-                4:posicion.w:=self.get_indexed;
+                4:posicion:=self.get_indexed;
                 5:begin //direct page word
-                    posicion.h:=r.dp;
-                    posicion.l:=self.getbyte(r.pc);
+                    posicion:=(r.dp shl 8)+self.getbyte(r.pc);
                     r.pc:=r.pc+1;
-                    posicion.w:=self.getword(posicion.w);
+                    posicion:=self.getword(posicion);
                   end;
-                6:posicion.w:=self.getword(self.get_indexed); //indexado word
+                6:posicion:=self.getword(self.get_indexed); //indexado word
                 7:begin  //extendido word
-                     posicion.w:=self.getword(r.pc);
+                     posicion:=self.getword(r.pc);
                      r.pc:=r.pc+2;
-                     posicion.w:=self.getword(posicion.w);
+                     posicion:=self.getword(posicion);
                   end;
             end;
             case instruccion2 of
               $3c,$3d:MessageDlg('Num CPU'+inttostr(self.numero_cpu)+'Intento de cambiar a HD6309!!. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
-              $83,$93,$a3,$b3:m680x_sub16(r.u,posicion.w,@r.cc);  //cmpu
-              $8c:m680x_sub16(r.s,posicion.w,@r.cc); //cmps
+              $83,$93,$a3,$b3:m680x_sub16(r.u,posicion,@r.cc);  //cmpu
+              $8c:m680x_sub16(r.s,posicion,@r.cc); //cmps
             end;
             self.estados_demas:=self.estados_demas+m6809t_1X[instruccion2];
           end;
       $12:; //nop 2T
       $13:if ((self.pedir_firq=CLEAR_LINE) and (self.pedir_irq=CLEAR_LINE) and (self.pedir_nmi=CLEAR_LINE)) then r.pc:=r.pc-1; //sync 4T
       $16:begin //lbra 5T
-            r.pc:=r.pc+smallint(posicion.w);
-            self.contador:=self.contador+1;
+            r.pc:=r.pc+smallint(posicion);
+            self.estados_demas:=self.estados_demas+1;
           end;
       $17:begin  //lbsr 9T
             self.push_sw(r.pc);
-            r.pc:=r.pc+smallint(posicion.w);
-            self.contador:=self.contador+1;
-      end;
+            r.pc:=r.pc+smallint(posicion);
+          end;
       $19:begin //daa 2T
             cf:=0;
             temp:=r.d.a and $f0;
@@ -832,15 +822,15 @@ case instruccion of
       $2e:if ((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //bgt 3T
       $2f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //ble 3T
       $30:begin //leax 2T
-            r.x:=posicion.w;
+            r.x:=posicion;
             r.cc.z:=(r.x=0);
           end;
       $31:begin //leay 2T
-            r.y:=posicion.w;
+            r.y:=posicion;
             r.cc.z:=(r.y=0);
           end;
-      $32:r.s:=posicion.w; //leas 2T
-      $33:r.u:=posicion.w; //leau 2T
+      $32:r.s:=posicion; //leas 2T
+      $33:r.u:=posicion; //leau 2T
       $34:begin //pshs 5T
             if (numero and $80)<>0 then begin
               self.push_sw(r.pc);
@@ -1047,42 +1037,42 @@ case instruccion of
       $80,$90,$a0,$b0:r.d.a:=m680x_sub8(r.d.a,numero,@r.cc);   //suba 1T
       $81,$91,$a1,$b1:m680x_sub8(r.d.a,numero,@r.cc);  //cmpa 1T
       $82,$92,$a2,$b2:r.d.a:=m680x_sbc(r.d.a,numero,@r.cc);  //sbca 1T
-      $83,$93,$a3,$b3:r.d.w:=m680x_sub16(r.d.w,posicion.w,@r.cc); //subd 2T
+      $83,$93,$a3,$b3:r.d.w:=m680x_sub16(r.d.w,posicion,@r.cc); //subd 2T
       $84,$94,$a4,$b4:r.d.a:=m680x_and(r.d.a,numero,@r.cc);  //anda 1T
       $85,$95,$a5,$b5:m680x_and(r.d.a,numero,@r.cc);  //bita 1T
       $86,$96,$a6,$b6:r.d.a:=m680x_ld_st8(numero,@r.cc);  //lda 1T
-          $97,$a7,$b7:self.putbyte(posicion.w,m680x_ld_st8(r.d.a,@r.cc));  //sta 1T
+          $97,$a7,$b7:self.putbyte(posicion,m680x_ld_st8(r.d.a,@r.cc));  //sta 1T
       $88,$98,$a8,$b8:r.d.a:=m680x_eor(r.d.a,numero,@r.cc); //eora 1T
       $89,$99,$a9,$b9:r.d.a:=m680x_adc(r.d.a,numero,@r.cc);  //adca 1T
       $8a,$9a,$aa,$ba:r.d.a:=m680x_or(r.d.a,numero,@r.cc);  //ora 1T
       $8b,$9b,$ab,$bb:r.d.a:=m680x_add8(r.d.a,numero,@r.cc);  //adda 1T
-      $8c,$9c,$ac,$bc:m680x_sub16(r.x,posicion.w,@r.cc);   //cmpx 2T
+      $8c,$9c,$ac,$bc:m680x_sub16(r.x,posicion,@r.cc);   //cmpx 2T
       $8d:begin  //bsr 7T
             self.push_sw(r.pc);
             r.pc:=r.pc+shortint(numero);
       end;
           $9d,$ad,$bd:begin //jsr 5T
             self.push_sw(r.pc);
-            r.pc:=posicion.w;
+            r.pc:=posicion;
       end;
-      $8e,$9e,$ae,$be:r.x:=m680x_ld_st16(posicion.w,@r.cc);  //ldx 2T
-          $9f,$af,$bf:self.putword(posicion.w,m680x_ld_st16(r.x,@r.cc)); //stx 2T
+      $8e,$9e,$ae,$be:r.x:=m680x_ld_st16(posicion,@r.cc);  //ldx 2T
+          $9f,$af,$bf:self.putword(posicion,m680x_ld_st16(r.x,@r.cc)); //stx 2T
       $c0,$d0,$e0,$f0:r.d.b:=m680x_sub8(r.d.b,numero,@r.cc);  //subb 1T
       $c1,$d1,$e1,$f1:m680x_sub8(r.d.b,numero,@r.cc); //cmpb 1T
       $c2,$d2,$e2,$f2:r.d.b:=m680x_sbc(r.d.b,numero,@r.cc); //sbcb 1T
-      $c3,$d3,$e3,$f3:r.d.w:=m680x_add16(r.d.w,posicion.w,@r.cc);  //addd 2T
+      $c3,$d3,$e3,$f3:r.d.w:=m680x_add16(r.d.w,posicion,@r.cc);  //addd 2T
       $c4,$d4,$e4,$f4:r.d.b:=m680x_and(r.d.b,numero,@r.cc);  //andb 1T
       $c5,$d5,$e5,$f5:m680x_and(r.d.b,numero,@r.cc);  //bitb 1T
       $c6,$d6,$e6,$f6:r.d.b:=m680x_ld_st8(numero,@r.cc); //ldb 1T
-          $d7,$e7,$f7:self.putbyte(posicion.w,m680x_ld_st8(r.d.b,@r.cc));  //stb 1T
+          $d7,$e7,$f7:self.putbyte(posicion,m680x_ld_st8(r.d.b,@r.cc));  //stb 1T
       $c8,$d8,$e8,$f8:r.d.b:=m680x_eor(r.d.b,numero,@r.cc);  //eorb 1T
       $c9,$d9,$e9,$f9:r.d.b:=m680x_adc(r.d.b,numero,@r.cc);  //adcb 1T
       $ca,$da,$ea,$fa:r.d.b:=m680x_or(r.d.b,numero,@r.cc);  //orb 1T
       $cb,$db,$eb,$fb:r.d.b:=m680x_add8(r.d.b,numero,@r.cc);  //addb 1T
-      $cc,$dc,$ec,$fc:r.d.w:=m680x_ld_st16(posicion.w,@r.cc);  //ldd 2T
-          $dd,$ed,$fd:self.putword(posicion.w,m680x_ld_st16(r.d.w,@r.cc));  //std 2T
-      $ce,$de,$ee,$fe:r.u:=m680x_ld_st16(posicion.w,@r.cc);  //ldu 2t
-          $df,$ef,$ff:self.putword(posicion.w,m680x_ld_st16(r.u,@r.cc)); //sdu 2T
+      $cc,$dc,$ec,$fc:r.d.w:=m680x_ld_st16(posicion,@r.cc);  //ldd 2T
+          $dd,$ed,$fd:self.putword(posicion,m680x_ld_st16(r.d.w,@r.cc));  //std 2T
+      $ce,$de,$ee,$fe:r.u:=m680x_ld_st16(posicion,@r.cc);  //ldu 2t
+          $df,$ef,$ff:self.putword(posicion,m680x_ld_st16(r.u,@r.cc)); //sdu 2T
 end; //del case!!
 tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;

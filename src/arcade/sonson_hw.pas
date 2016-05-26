@@ -9,7 +9,6 @@ procedure Cargar_sonson;
 procedure sonson_principal;
 function iniciar_sonson:boolean;
 procedure reset_sonson;
-procedure cerrar_sonson;
 //Main CPU
 function sonson_getbyte(direccion:word):byte;
 procedure sonson_putbyte(direccion:word;valor:byte);
@@ -58,7 +57,6 @@ procedure Cargar_sonson;
 begin
 llamadas_maquina.iniciar:=iniciar_sonson;
 llamadas_maquina.bucle_general:=sonson_principal;
-llamadas_maquina.cerrar:=cerrar_sonson;
 llamadas_maquina.reset:=reset_sonson;
 llamadas_maquina.save_qsnap:=sonson_qsave;
 llamadas_maquina.load_qsnap:=sonson_qload;
@@ -131,16 +129,6 @@ marcade.dswb_val:=@sonson_dip_b;
 //final
 reset_sonson;
 iniciar_sonson:=true;
-end;
-
-procedure cerrar_sonson;
-begin
-main_m6809.Free;
-snd_m6809.Free;
-AY8910_0.Free;
-AY8910_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_sonson;

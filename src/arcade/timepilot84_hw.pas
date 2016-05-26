@@ -9,7 +9,6 @@ procedure Cargar_tp84;
 procedure tp84_principal;
 function iniciar_tp84:boolean;
 procedure reset_tp84;
-procedure cerrar_tp84;
 //Main CPU
 function tp84_getbyte(direccion:word):byte;
 procedure tp84_putbyte(direccion:word;valor:byte);
@@ -44,7 +43,6 @@ procedure Cargar_tp84;
 begin
 llamadas_maquina.iniciar:=iniciar_tp84;
 llamadas_maquina.bucle_general:=tp84_principal;
-llamadas_maquina.cerrar:=cerrar_tp84;
 llamadas_maquina.reset:=reset_tp84;
 end;
 
@@ -140,18 +138,6 @@ end;
 //final
 reset_tp84;
 iniciar_tp84:=true;
-end;
-
-procedure cerrar_tp84;
-begin
-main_m6809.Free;
-misc_m6809.free;
-snd_z80.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-sn_76496_2.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_tp84;

@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_tnzs;
 function iniciar_tnzs:boolean;
 procedure reset_tnzs;
-procedure cerrar_tnzs;
 //TNZS
 procedure tnzs_principal;
 //Main CPU
@@ -93,7 +92,6 @@ case main_vars.tipo_maquina of
   130:llamadas_maquina.bucle_general:=insectorx_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_tnzs;
-llamadas_maquina.cerrar:=cerrar_tnzs;
 llamadas_maquina.reset:=reset_tnzs;
 end;
 
@@ -192,16 +190,6 @@ end;
 //final
 reset_tnzs;
 iniciar_tnzs:=true;
-end;
-
-procedure cerrar_tnzs;
-begin
-main_z80.free;
-sub_z80.free;
-if main_vars.tipo_maquina=129 then snd_z80.free;
-YM2203_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_tnzs;

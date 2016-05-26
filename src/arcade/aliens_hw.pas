@@ -123,17 +123,13 @@ end;
 
 procedure cerrar_aliens;
 begin
-main_konami.free;
-snd_z80.free;
 YM2151_close(0);
-k052109_0.Free;
-k051960_0.free;
-k007232_0.free;
-freemem(k007232_rom);
-freemem(sprite_rom);
-freemem(tiles_rom);
-close_audio;
-close_video;
+if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+tiles_rom:=nil;
 end;
 
 procedure reset_aliens;
@@ -208,13 +204,13 @@ begin
 k052109_0.draw_tiles;
 fill_full_screen(4,layer_colorbase[1]*16);
 k051960_0.draw_sprites(7,-1);
-draw_layer(1); //A
+k052109_0.draw_layer(1,4); //A
 k051960_0.draw_sprites(6,-1);
 k051960_0.draw_sprites(2,-1);
-draw_layer(2); //B
+k052109_0.draw_layer(2,4); //B
 k051960_0.draw_sprites(4,-1);
 k051960_0.draw_sprites(3,-1);
-draw_layer(0); //F
+k052109_0.draw_layer(0,4); //F
 k051960_0.draw_sprites(0,-1);
 actualiza_trozo_final(112,16,288,224,4);
 end;

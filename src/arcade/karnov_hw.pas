@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_karnov;
 function iniciar_karnov:boolean;
 procedure reset_karnov;
-procedure cerrar_karnov;
 procedure karnov_principal;
 //Main CPU
 function karnov_getword(direccion:dword):word;
@@ -90,7 +89,6 @@ procedure Cargar_karnov;
 begin
 llamadas_maquina.bucle_general:=karnov_principal;
 llamadas_maquina.iniciar:=iniciar_karnov;
-llamadas_maquina.cerrar:=cerrar_karnov;
 llamadas_maquina.reset:=reset_karnov;
 end;
 
@@ -347,16 +345,6 @@ set_pal(colores,$400);
 //final
 reset_karnov;
 iniciar_karnov:=true;
-end;
-
-procedure cerrar_karnov;
-begin
-main_m68000.free;
-snd_m6502.free;
-ym3812_0.free;
-YM2203_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_karnov;

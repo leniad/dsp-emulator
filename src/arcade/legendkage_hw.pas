@@ -6,10 +6,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      rom_engine,pal_engine,sound_engine;
 
 procedure Cargar_lk_hw;
-procedure lk_hw_principal; 
-function iniciar_lk_hw:boolean; 
-procedure reset_lk_hw; 
-procedure cerrar_lk_hw; 
+procedure lk_hw_principal;
+function iniciar_lk_hw:boolean;
+procedure reset_lk_hw;
 //Main CPU
 function lk_getbyte(direccion:word):byte;
 procedure lk_putbyte(direccion:word;valor:byte);
@@ -51,7 +50,6 @@ procedure Cargar_lk_hw;
 begin
 llamadas_maquina.iniciar:=iniciar_lk_hw;
 llamadas_maquina.bucle_general:=lk_hw_principal;
-llamadas_maquina.cerrar:=cerrar_lk_hw;
 llamadas_maquina.reset:=reset_lk_hw;
 end;
 
@@ -113,17 +111,6 @@ gfx_set_desc_data(4,0,32*8,$200*32*8*1,$200*32*8*0,$200*32*8*3,$200*32*8*2);
 convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 reset_lk_hw;
 iniciar_lk_hw:=true;
-end;
-
-procedure cerrar_lk_hw;
-begin
-main_z80.free;
-snd_z80.free;
-main_m6805.Free;
-ym2203_0.Free;
-ym2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_lk_hw;

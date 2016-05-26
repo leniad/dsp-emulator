@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_gng;
 procedure gng_principal;
 procedure reset_gng;
-procedure cerrar_gng;
 function iniciar_gng:boolean;
 //Main CPU
 function gng_getbyte(direccion:word):byte;
@@ -57,7 +56,6 @@ procedure Cargar_Gng;
 begin
 llamadas_maquina.iniciar:=iniciar_gng;
 llamadas_maquina.bucle_general:=gng_principal;
-llamadas_maquina.cerrar:=cerrar_gng;
 llamadas_maquina.reset:=reset_gng;
 llamadas_maquina.fps_max:=59.59;
 llamadas_maquina.save_qsnap:=gng_qsave;
@@ -150,16 +148,6 @@ marcade.dswb_val:=@gng_dip_b;
 //final
 reset_gng;
 iniciar_gng:=true;
-end;
-
-procedure cerrar_gng;
-begin
-main_m6809.Free;
-snd_z80.free;
-YM2203_0.Free;
-YM2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_gng;

@@ -113,11 +113,7 @@ end;
 
 procedure cerrar_jackal;
 begin
-main_m6809.Free;
-snd_m6809.Free;
 ym2151_close(0);
-close_audio;
-close_video;
 end;
 
 procedure reset_jackal;

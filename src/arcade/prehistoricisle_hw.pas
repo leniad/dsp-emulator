@@ -9,7 +9,6 @@ procedure Cargar_prehisle;
 procedure prehisle_principal;
 function iniciar_prehisle:boolean;
 procedure reset_prehisle;
-procedure cerrar_prehisle;
 //Main CPU
 function prehisle_getword(direccion:dword):word;
 procedure prehisle_putword(direccion:dword;valor:word);
@@ -58,7 +57,6 @@ procedure Cargar_prehisle;
 begin
 llamadas_maquina.iniciar:=iniciar_prehisle;
 llamadas_maquina.bucle_general:=prehisle_principal;
-llamadas_maquina.cerrar:=cerrar_prehisle;
 llamadas_maquina.reset:=reset_prehisle;
 end;
 
@@ -136,16 +134,6 @@ marcade.dswb_val:=@prehisle_dip_b;
 freemem(memoria_temp);
 reset_prehisle;
 iniciar_prehisle:=true;
-end;
-
-procedure cerrar_prehisle;
-begin
-main_m68000.free;
-snd_z80.free;
-ym3812_0.free;
-upd7759_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_prehisle;

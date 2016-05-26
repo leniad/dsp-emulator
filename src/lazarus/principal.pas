@@ -183,6 +183,10 @@ type
     chelnov1: TMenuItem;
     MenuItem30: TMenuItem;
     aliens1: TMenuItem;
+    MenuItem31: TMenuItem;
+    gbusters1: TMenuItem;
+    thunderx1: TMenuItem;
+    scontra1: TMenuItem;
     spaceinvaders1: TMenuItem;
     ssriders1: TMenuItem;
     TMNT1: TMenuItem;
@@ -600,6 +604,7 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
 if ((addr(llamadas_maquina.cerrar)<>nil) and main_vars.driver_ok) then llamadas_maquina.cerrar;
+dsp_reset;
 file_ini_save;
 if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
 if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);

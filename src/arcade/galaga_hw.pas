@@ -243,12 +243,7 @@ end;
 
 procedure cerrar_galagahw;
 begin
-main_z80.free;
-snd_z80.free;
-sub_z80.free;
 if main_vars.tipo_maquina=167 then namco_53xx_close;
-close_audio;
-close_video;
 end;
 
 procedure draw_sprites_galaga;

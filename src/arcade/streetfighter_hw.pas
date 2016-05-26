@@ -154,14 +154,7 @@ end;
 
 procedure cerrar_sfighter;
 begin
-main_m68000.free;
-snd_z80.free;
-sub_z80.free;
 ym2151_close(0);
-msm_5205_0.Free;
-msm_5205_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_sfighter;

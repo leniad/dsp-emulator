@@ -200,10 +200,6 @@ case main_vars.tipo_maquina of
   214:begin //TMNT
         iniciar_video(320,224,true);
         iniciar_audio(false); //Sonido mono
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@tmnt_rom[0],'tmnt.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@tmnt_sound,'tmnt.zip',1)) then exit;
         //Main CPU
         main_m68000:=cpu_m68000.create(8000000,256);
         main_m68000.change_ram16_calls(tmnt_getword,tmnt_putword);
@@ -211,6 +207,10 @@ case main_vars.tipo_maquina of
         snd_z80:=cpu_z80.create(3579545,256);
         snd_z80.change_ram_calls(tmnt_snd_getbyte,tmnt_snd_putbyte);
         snd_z80.init_sound(tmnt_sound_update);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@tmnt_rom[0],'tmnt.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@tmnt_sound,'tmnt.zip',1)) then exit;
         //Sound Chips
         YM2151_Init(0,3579545,nil,nil);
         upd7759_0:=upd7759_chip.create(640000,0.6);
@@ -273,10 +273,6 @@ case main_vars.tipo_maquina of
   215:begin //Sunset Riders
         iniciar_video(288,224,true);
         iniciar_audio(true); //Sonido stereo
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@ssriders_rom[0],'ssriders.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@ssriders_sound,'ssriders.zip',1)) then exit;
         //Main CPU
         main_m68000:=cpu_m68000.create(16000000,256);
         main_m68000.change_ram16_calls(ssriders_getword,ssriders_putword);
@@ -284,6 +280,10 @@ case main_vars.tipo_maquina of
         snd_z80:=cpu_z80.create(8000000,256);
         snd_z80.change_ram_calls(ssriders_snd_getbyte,ssriders_snd_putbyte);
         snd_z80.init_sound(ssriders_sound_update);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@ssriders_rom[0],'ssriders.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@ssriders_sound,'ssriders.zip',1)) then exit;
         //Sound Chips
         YM2151_Init(0,3579545,nil,nil);
         getmem(k053260_rom,$100000);
@@ -312,30 +312,24 @@ end;
 
 procedure cerrar_tmnt;
 begin
-main_m68000.free;
-snd_z80.free;
 YM2151_close(0);
-k052109_0.Free;
 case main_vars.tipo_maquina of
   214:begin
         close_samples;
-        k051960_0.free;
-        upd7759_0.free;
-        k007232_0.free;
-        freemem(k007232_rom);
+        if k007232_rom<>nil then freemem(k007232_rom);
       end;
   215:begin
         //k053245_0.free;
-        k053251_0.free;
-        k053260_0.free;
-        freemem(k053260_rom);
+        if k053260_rom<>nil then freemem(k053260_rom);
         //eeprom free
       end;
 end;
-freemem(char_rom);
-freemem(sprite_rom);
-close_audio;
-close_video;
+if char_rom<>nil then freemem(char_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+char_rom:=nil;
+sprite_rom:=nil;
+k053260_rom:=nil;
+k007232_rom:=nil;
 end;
 
 procedure reset_tmnt;
@@ -389,38 +383,15 @@ begin
 	k007232_0.set_volume(1,0,(valor and $0f)*$11);
 end;
 
-procedure draw_layer(layer:byte);inline;
-var
-  f:word;
-begin
-case layer of
-  0:actualiza_trozo(0,0,512,256,1,0,0,512,256,4); //Esta es fija
-  1:begin
-      case k052109_0.scroll_tipo[1] of
-        0,1:for f:=0 to $ff do scroll__x_part(2,4,k052109_0.scroll_x[1,f],k052109_0.scroll_y[1,0],f,1);
-        2:for f:=0 to $1ff do scroll__y_part(2,4,k052109_0.scroll_y[1,f],k052109_0.scroll_x[1,0],f,1);
-        3:scroll_x_y(2,4,k052109_0.scroll_x[1,0],k052109_0.scroll_y[1,0]);
-      end;
-    end;
-  2:begin
-      case k052109_0.scroll_tipo[2] of
-        0,1:for f:=0 to $ff do scroll__x_part(3,4,k052109_0.scroll_x[2,f],k052109_0.scroll_y[2,0],f,1);
-        2:for f:=0 to $1ff do scroll__y_part(3,4,k052109_0.scroll_y[2,f],k052109_0.scroll_x[2,0],f,1);
-        3:scroll_x_y(3,4,k052109_0.scroll_x[2,0],k052109_0.scroll_y[2,0]);
-      end;
-    end;
-end;
-end;
-
 procedure update_video_tmnt;
 begin
 k052109_0.draw_tiles;
 fill_full_screen(4,0);
-draw_layer(2);
+k052109_0.draw_layer(2,4);
 if sprites_pri then k051960_0.draw_sprites(0,0);
-draw_layer(1);
+k052109_0.draw_layer(1,4);
 if not(sprites_pri) then k051960_0.draw_sprites(0,0);
-draw_layer(0);
+k052109_0.draw_layer(0,4);
 actualiza_trozo_final(96,16,320,224,4);
 end;
 
@@ -648,11 +619,11 @@ end;
 k052109_0.draw_tiles;
 fill_full_screen(4,bg_colorbase*16);
 k05324x_sprites_draw(3);
-draw_layer(sorted_layer[0]);
+k052109_0.draw_layer(sorted_layer[0],4);
 k05324x_sprites_draw(2);
-draw_layer(sorted_layer[1]);
+k052109_0.draw_layer(sorted_layer[1],4);
 k05324x_sprites_draw(1);
-draw_layer(sorted_layer[2]);
+k052109_0.draw_layer(sorted_layer[2],4);
 k05324x_sprites_draw(0);
 actualiza_trozo_final(112,16,288,224,4);
 end;

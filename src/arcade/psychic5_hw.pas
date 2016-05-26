@@ -9,7 +9,6 @@ procedure Cargar_psychic5;
 procedure psychic5_principal;
 function iniciar_psychic5:boolean;
 procedure reset_psychic5;
-procedure cerrar_psychic5;
 //Main CPU
 function psychic5_getbyte(direccion:word):byte;
 procedure psychic5_putbyte(direccion:word;valor:byte);
@@ -44,7 +43,6 @@ procedure Cargar_psychic5;
 begin
 llamadas_maquina.iniciar:=iniciar_psychic5;
 llamadas_maquina.bucle_general:=psychic5_principal;
-llamadas_maquina.cerrar:=cerrar_psychic5;
 llamadas_maquina.reset:=reset_psychic5;
 llamadas_maquina.fps_max:=53.8;
 llamadas_maquina.save_qsnap:=psychic5_qsave;
@@ -111,16 +109,6 @@ convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //final
 reset_psychic5;
 iniciar_psychic5:=true;
-end;
-
-procedure cerrar_psychic5;
-begin
-main_z80.free;
-snd_z80.free;
-YM2203_0.Free;
-YM2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_psychic5;

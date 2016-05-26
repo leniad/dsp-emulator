@@ -112,12 +112,6 @@ end;
 procedure cerrar_foodf;
 begin
 write_file(Directory.Arcade_nvram+'foodf.nv',@nvram[0],$200);
-main_m68000.free;
-pokey_0.Free;
-pokey_1.Free;
-pokey_2.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_foodf;

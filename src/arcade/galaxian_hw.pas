@@ -1029,24 +1029,10 @@ end;
 
 procedure cerrar_hgalaxian;
 begin
-main_z80.free;
 case main_vars.tipo_maquina of
-  14:begin
-        save_hi('frogger.hi',@memoria[$83f1],10);
-        konamisnd_0.free;
-        pia8255_0.free;
-        pia8255_1.free;
-     end;
+  14:save_hi('frogger.hi',@memoria[$83f1],10);
   47,49:close_samples;
-  48:ay8910_0.Free;
-  143,144,145:begin
-        konamisnd_0.free;
-        pia8255_0.free;
-        pia8255_1.free;
-      end;
 end;
-close_audio;
-close_video;
 end;
 
 procedure reset_hgalaxian;

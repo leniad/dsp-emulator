@@ -9,7 +9,6 @@ procedure Cargar_pinballaction;
 procedure pinballaction_principal;
 function iniciar_pinballaction:boolean;
 procedure reset_pinballaction;
-procedure cerrar_pinballaction;
 //Main CPU
 function pinballaction_getbyte(direccion:word):byte;
 procedure pinballaction_putbyte(direccion:word;valor:byte);
@@ -57,7 +56,6 @@ procedure Cargar_pinballaction;
 begin
 llamadas_maquina.iniciar:=iniciar_pinballaction;
 llamadas_maquina.bucle_general:=pinballaction_principal;
-llamadas_maquina.cerrar:=cerrar_pinballaction;
 llamadas_maquina.reset:=reset_pinballaction;
 end;
 
@@ -134,17 +132,6 @@ marcade.dswb:=$0;
 marcade.dswb_val:=@pinballaction_dipb;
 reset_pinballaction;
 iniciar_pinballaction:=true;
-end;
-
-procedure cerrar_pinballaction;
-begin
-main_z80.free;
-snd_z80.free;
-ay8910_0.Free;
-ay8910_1.Free;
-ay8910_2.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_pinballaction;

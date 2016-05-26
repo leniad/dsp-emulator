@@ -9,7 +9,6 @@ procedure Cargar_popeye;
 procedure popeye_principal;
 function iniciar_popeye:boolean;
 procedure reset_popeye;
-procedure cerrar_popeye;
 //Main CPU
 function popeye_getbyte(direccion:word):byte;
 procedure popeye_putbyte(direccion:word;valor:byte);
@@ -57,7 +56,6 @@ procedure Cargar_popeye;
 begin
 llamadas_maquina.iniciar:=iniciar_popeye;
 llamadas_maquina.bucle_general:=popeye_principal;
-llamadas_maquina.cerrar:=cerrar_popeye;
 llamadas_maquina.reset:=reset_popeye;
 llamadas_maquina.save_qsnap:=popeye_qsave;
 llamadas_maquina.load_qsnap:=popeye_qload;
@@ -209,14 +207,6 @@ begin
  field:=0;
  cambiar_paleta(0);
  fillchar(fondo_write[0],$2000,1);
-end;
-
-procedure cerrar_popeye;
-begin
-main_z80.free;
-ay8910_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure update_video_popeye;inline;

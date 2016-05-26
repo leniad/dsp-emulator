@@ -9,7 +9,6 @@ procedure Cargar_mikie;
 procedure mikie_principal;
 function iniciar_mikie:boolean;
 procedure reset_mikie;
-procedure cerrar_mikie;
 //Main CPU
 function mikie_getbyte(direccion:word):byte;
 procedure mikie_putbyte(direccion:word;valor:byte);
@@ -45,7 +44,6 @@ procedure Cargar_mikie;
 begin
 llamadas_maquina.iniciar:=iniciar_mikie;
 llamadas_maquina.bucle_general:=mikie_principal;
-llamadas_maquina.cerrar:=cerrar_mikie;
 llamadas_maquina.reset:=reset_mikie;
 llamadas_maquina.save_qsnap:=mikie_qsave;
 llamadas_maquina.load_qsnap:=mikie_qload;
@@ -139,16 +137,6 @@ end;
 //final
 reset_mikie;
 iniciar_mikie:=true;
-end;
-
-procedure cerrar_mikie;
-begin
-main_m6809.Free;
-snd_z80.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_mikie;

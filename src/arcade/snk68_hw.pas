@@ -9,7 +9,6 @@ procedure Cargar_snk68;
 procedure snk68_principal;
 function iniciar_snk68:boolean;
 procedure reset_snk68;
-procedure cerrar_snk68;
 //Main CPU
 function pow_getword(direccion:dword):word;
 procedure pow_putword(direccion:dword;valor:word);
@@ -105,7 +104,6 @@ procedure Cargar_snk68;
 begin
 llamadas_maquina.iniciar:=iniciar_snk68;
 llamadas_maquina.bucle_general:=snk68_principal;
-llamadas_maquina.cerrar:=cerrar_snk68;
 llamadas_maquina.reset:=reset_snk68;
 llamadas_maquina.fps_max:=59.185606;
 end;
@@ -224,7 +222,6 @@ const
 		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 );
 var
   memoria_temp:pbyte;
-  x,y:word;
 
 procedure convert_chars;
 begin
@@ -246,18 +243,10 @@ begin
 iniciar_snk68:=false;
 iniciar_audio(false);
 //Pantallas:  principal+char y sprites
-if main_vars.tipo_maquina=150 then begin
-  x:=224;
-  y:=256;
-  screen_0_mod_real(256,256);
-  main_screen.rot90_screen:=true;
-end else begin
-  x:=256;
-  y:=224;
-end;
+if main_vars.tipo_maquina=150 then main_screen.rot90_screen:=true;
 screen_init(1,256,256,true);
 screen_init(2,512,512,false,true);
-iniciar_video(x,y);
+iniciar_video(256,224);
 //Main CPU
 getmem(memoria_temp,$400000);
 main_m68000:=cpu_m68000.create(9000000,264);
@@ -348,16 +337,6 @@ end;
 freemem(memoria_temp);
 reset_snk68;
 iniciar_snk68:=true;
-end;
-
-procedure cerrar_snk68;
-begin
-main_m68000.free;
-snd_z80.free;
-ym3812_0.free;
-upd7759_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_snk68;

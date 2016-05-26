@@ -10,9 +10,8 @@ type
 
 //General
 procedure Cargar_mappyhw;
-function iniciar_mappyhw:boolean; 
+function iniciar_mappyhw:boolean;
 procedure reset_mappyhw;
-procedure cerrar_mappyhw; 
 procedure mappy_principal; 
 //Mappy & DigDug2
 function mappy_getbyte(direccion:word):byte;  
@@ -101,7 +100,6 @@ procedure Cargar_mappyhw;
 begin
 llamadas_maquina.bucle_general:=mappy_principal;
 llamadas_maquina.iniciar:=iniciar_mappyhw;
-llamadas_maquina.cerrar:=cerrar_mappyhw;
 llamadas_maquina.reset:=reset_mappyhw;
 llamadas_maquina.fps_max:=60.6060606060;
 end;
@@ -543,14 +541,6 @@ case  main_vars.tipo_maquina of
 end;
 reset_mappyhw;
 iniciar_mappyhw:=true;
-end;
-
-procedure cerrar_mappyhw;
-begin
-main_m6809.Free;
-snd_m6809.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_mappyhw; 

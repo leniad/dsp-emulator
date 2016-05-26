@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_nemesis;
 function iniciar_nemesis:boolean;
 procedure reset_nemesis;
-procedure cerrar_nemesis;
 procedure sound_instruccion;
 function ay0_porta_read:byte;
 //Nemesis
@@ -118,7 +117,6 @@ case main_vars.tipo_maquina of
   204:llamadas_maquina.bucle_general:=nemesis_principal;
   205:llamadas_maquina.bucle_general:=gx400_principal;
 end;
-llamadas_maquina.cerrar:=cerrar_nemesis;
 llamadas_maquina.reset:=reset_nemesis;
 llamadas_maquina.fps_max:=60.60606060606060;
 end;
@@ -139,6 +137,7 @@ end;
 screen_init(9,512,256,false,true);
 screen_mod_sprites(9,1024,256,1023,255);
 //screen_init(9,512,512,false,true);
+if main_vars.tipo_maquina=205 then main_screen.rot90_screen:=true;
 iniciar_video(256,224);
 //Main CPU
 main_m68000:=cpu_m68000.create(18432000 div 2,256);
@@ -179,16 +178,6 @@ for f:=0 to 7 do gfx[f].trans[0]:=true;
 //final
 reset_nemesis;
 iniciar_nemesis:=true;
-end;
-
-procedure cerrar_nemesis;
-begin
-main_m68000.free;
-snd_z80.free;
-ay8910_0.Free;
-ay8910_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_nemesis;

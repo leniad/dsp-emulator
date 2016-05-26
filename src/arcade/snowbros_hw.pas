@@ -9,7 +9,6 @@ procedure Cargar_snowbros;
 procedure snowbros_principal;
 function iniciar_snowbros:boolean;
 procedure reset_snowbros;
-procedure cerrar_snowbros;
 //Main CPU
 function snowbros_getword(direccion:dword):word;
 procedure snowbros_putword(direccion:dword;valor:word);
@@ -51,7 +50,6 @@ procedure Cargar_snowbros;
 begin
 llamadas_maquina.iniciar:=iniciar_snowbros;
 llamadas_maquina.bucle_general:=snowbros_principal;
-llamadas_maquina.cerrar:=cerrar_snowbros;
 llamadas_maquina.reset:=reset_snowbros;
 llamadas_maquina.fps_max:=57.5;
 end;
@@ -103,15 +101,6 @@ marcade.dswb_val:=@snowbros_dip_b;
 //final
 reset_snowbros;
 iniciar_snowbros:=true;
-end;
-
-procedure cerrar_snowbros;
-begin
-main_m68000.free;
-snd_z80.free;
-ym3812_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_snowbros;

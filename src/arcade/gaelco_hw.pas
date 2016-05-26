@@ -9,7 +9,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_gaelco_hw;
 function iniciar_gaelco_hw:boolean;
 procedure reset_gaelco_hw;
-procedure cerrar_gaelco_hw;
 //Big Karnak
 procedure bigk_principal;
 function bigk_getword(direccion:dword):word;
@@ -118,7 +117,6 @@ case main_vars.tipo_maquina of
   101,173,174:llamadas_maquina.bucle_general:=thoop_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_gaelco_hw;
-llamadas_maquina.cerrar:=cerrar_gaelco_hw;
 llamadas_maquina.reset:=reset_gaelco_hw;
 end;
 
@@ -318,18 +316,6 @@ end;
 //final
 reset_gaelco_hw;
 iniciar_gaelco_hw:=true;
-end;
-
-procedure cerrar_gaelco_hw;
-begin
-main_m68000.free;
-if main_vars.tipo_maquina=78 then begin
-  ym3812_0.free;
-  snd_m6809.Free;
-end;
-oki_6295_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_gaelco_hw;

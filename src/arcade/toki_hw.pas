@@ -9,7 +9,6 @@ procedure Cargar_toki;
 procedure toki_principal;
 function iniciar_toki:boolean;
 procedure reset_toki;
-procedure cerrar_toki;
 //Main CPU
 function toki_getword(direccion:dword):word;
 procedure toki_putword(direccion:dword;valor:word);
@@ -59,7 +58,6 @@ procedure Cargar_toki;
 begin
 llamadas_maquina.iniciar:=iniciar_toki;
 llamadas_maquina.bucle_general:=toki_principal;
-llamadas_maquina.cerrar:=cerrar_toki;
 llamadas_maquina.reset:=reset_toki;
 llamadas_maquina.fps_max:=59.61;
 end;
@@ -142,16 +140,6 @@ marcade.dswa_val:=@toki_dip;
 freemem(memoria_temp);
 reset_toki;
 iniciar_toki:=true;
-end;
-
-procedure cerrar_toki;
-begin
-main_m68000.free;
-snd_z80.free;
-ym3812_0.free;
-oki_6295_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_toki;

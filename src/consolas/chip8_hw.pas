@@ -9,7 +9,6 @@ procedure Cargar_chip8;
 procedure chip8_principal;
 function iniciar_chip8:boolean;
 procedure reset_chip8;
-procedure cerrar_chip8;
 function abrir_chip8:boolean;
 
 implementation
@@ -66,7 +65,6 @@ principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 llamadas_maquina.iniciar:=iniciar_chip8;
 llamadas_maquina.bucle_general:=chip8_principal;
-llamadas_maquina.cerrar:=cerrar_chip8;
 llamadas_maquina.reset:=reset_chip8;
 llamadas_maquina.cartuchos:=abrir_chip8;
 //llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;
@@ -86,12 +84,6 @@ colores[1].r:=$ff;colores[1].g:=$ff;colores[1].b:=$ff;
 set_pal(colores,2);
 reset_chip8;
 iniciar_chip8:=abrir_chip8;
-end;
-
-procedure cerrar_chip8;
-begin
-close_audio;
-close_video;
 end;
 
 procedure change_screen(mode:byte);inline;

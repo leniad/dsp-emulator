@@ -8,8 +8,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_pacland;
 procedure pacland_principal;
 function iniciar_pacland:boolean;
-procedure reset_pacland; 
-procedure cerrar_pacland;
+procedure reset_pacland;
 //Main CPU
 function pacland_getbyte(direccion:word):byte;
 procedure pacland_putbyte(direccion:word;valor:byte);
@@ -48,7 +47,6 @@ procedure Cargar_pacland;
 begin
 llamadas_maquina.iniciar:=iniciar_pacland;
 llamadas_maquina.bucle_general:=pacland_principal;
-llamadas_maquina.cerrar:=cerrar_pacland;
 llamadas_maquina.reset:=reset_pacland;
 llamadas_maquina.fps_max:=60.60606060606060;
 end;
@@ -147,14 +145,6 @@ end;
 //final
 reset_pacland;
 iniciar_pacland:=true;
-end;
-
-procedure cerrar_pacland;
-begin
-main_m6809.Free;
-main_m6800.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_pacland;

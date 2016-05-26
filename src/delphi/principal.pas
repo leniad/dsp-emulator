@@ -359,6 +359,10 @@ type
     Chelnov1: TMenuItem;
     KonamiCPU1: TMenuItem;
     Aliens1: TMenuItem;
+    hunderCrossHW1: TMenuItem;
+    scontra1: TMenuItem;
+    gbusters1: TMenuItem;
+    thunderx1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -622,6 +626,7 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
 if ((@llamadas_maquina.cerrar<>nil) and main_vars.driver_ok) then llamadas_maquina.cerrar;
+reset_dsp;
 file_ini_save;
 if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
 if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);

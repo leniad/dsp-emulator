@@ -9,7 +9,6 @@ procedure Cargar_bagman;
 procedure bagman_principal;
 function iniciar_bagman:boolean;
 procedure reset_bagman;
-procedure cerrar_bagman;
 //main CPU
 function bagman_getbyte(direccion:word):byte;
 procedure bagman_putbyte(direccion:word;valor:byte);
@@ -62,7 +61,6 @@ procedure Cargar_bagman;
 begin
 llamadas_maquina.iniciar:=iniciar_bagman;
 llamadas_maquina.bucle_general:=bagman_principal;
-llamadas_maquina.cerrar:=cerrar_bagman;
 llamadas_maquina.reset:=reset_bagman;
 llamadas_maquina.fps_max:=60.6060606060;
 end;
@@ -178,14 +176,6 @@ marcade.dswa_val:=@bagman_dip;
 //final
 reset_bagman;
 iniciar_bagman:=true;
-end;
-
-procedure cerrar_bagman;
-begin
-main_z80.free;
-ay8910_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_bagman;

@@ -902,7 +902,7 @@ begin
 	init_tables();
 	FM2151[num].clock:=clock;
 	//rate = clock/64;*/
-	FM2151[num].sampfreq:=freq_base_audio;	// avoid division by 0 in init_chip_tables() */
+	FM2151[num].sampfreq:=freq_base_audio;	// avoid division by 0 in init_chip_tables()
 	init_chip_tables(FM2151[num]);
 	FM2151[num].lfo_timer_add:=trunc((1 shl LFO_SH)*(clock/64.0)/FM2151[num].sampfreq);
 	FM2151[num].eg_timer_add:=trunc((1 shl EG_SH)*(clock/64.0)/FM2151[num].sampfreq);

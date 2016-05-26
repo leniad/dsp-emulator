@@ -102,12 +102,11 @@ end;
 procedure nes_cerrar;
 begin
   if sram_present then write_file(cart_name,@memoria[$6000],$2000);
-  main_m6502.free;
   close_n2a03_sound(0);
-  freemem(mapper_nes);
-  freemem(ppu_nes);
-  close_audio;
-  close_video;
+  if mapper_nes<>nil then freemem(mapper_nes);
+  if ppu_nes<>nil then freemem(ppu_nes);
+  mapper_nes:=nil;
+  ppu_nes:=nil;
 end;
 
 procedure eventos_nes;

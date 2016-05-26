@@ -112,12 +112,8 @@ end;
 
 procedure cerrar_funkyjet;
 begin
-main_m68000.free;
-main_deco146.free;
 close_dec16ic(0);
 deco16_snd_simple_close;
-close_audio;
-close_video;
 end;
 
 procedure reset_funkyjet;

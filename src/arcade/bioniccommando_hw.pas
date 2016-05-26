@@ -147,11 +147,7 @@ end;
 
 procedure cerrar_bionicc;
 begin
-main_m68000.free;
-snd_z80.free;
 YM2151_close(0);
-close_audio;
-close_video;
 end;
 
 procedure reset_bionicc;

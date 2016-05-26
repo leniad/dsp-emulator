@@ -10,7 +10,6 @@ procedure taitosj_nomcu_principal;
 procedure taitosj_mcu_principal;
 function taitosj_iniciar:boolean;
 procedure taitosj_reset;
-procedure taitosj_cerrar;
 //Main CPU
 function taitosj_nomcu_getbyte(direccion:word):byte;
 procedure taitosj_nomcu_putbyte(direccion:word;valor:byte);
@@ -116,7 +115,6 @@ case main_vars.tipo_maquina of
   185:llamadas_maquina.bucle_general:=taitosj_mcu_principal;
   189:llamadas_maquina.bucle_general:=taitosj_nomcu_principal;
 end;
-llamadas_maquina.cerrar:=taitosj_cerrar;
 llamadas_maquina.reset:=taitosj_reset;
 end;
 
@@ -255,20 +253,6 @@ begin
   //sprites
   gfx_set_desc_data(3,0,32*8,128*16*16,64*16*16,0);
   convert_gfx(3,0,@memoria[$a800],@ps_x[0],@ps_y[0],false,false);
-end;
-
-procedure taitosj_cerrar;
-begin
-main_z80.free;
-snd_z80.free;
-if main_vars.tipo_maquina=185 then main_m6805.free;
-ay8910_0.free;
-ay8910_1.free;
-ay8910_2.free;
-ay8910_3.free;
-dac_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure taitosj_reset;

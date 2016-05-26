@@ -9,7 +9,6 @@ function iniciar_citycon:boolean;
 procedure Cargar_citycon;
 procedure citycon_principal;
 procedure reset_citycon;
-procedure cerrar_citycon;
 //Main CPU
 function citycon_getbyte(direccion:word):byte;
 procedure citycon_putbyte(direccion:word;valor:byte);
@@ -57,7 +56,6 @@ procedure Cargar_citycon;
 begin
 llamadas_maquina.iniciar:=iniciar_citycon;
 llamadas_maquina.bucle_general:=citycon_principal;
-llamadas_maquina.cerrar:=cerrar_citycon;
 llamadas_maquina.reset:=reset_citycon;
 llamadas_maquina.save_qsnap:=citycon_qsave;
 llamadas_maquina.load_qsnap:=citycon_qload;
@@ -128,16 +126,6 @@ marcade.dswb_val:=@citycon_dip_b;
 //final
 reset_citycon;
 iniciar_citycon:=true;
-end;
-
-procedure cerrar_citycon;
-begin
-main_m6809.Free;
-snd_m6809.Free;
-YM2203_0.Free;
-ay8910_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_citycon;

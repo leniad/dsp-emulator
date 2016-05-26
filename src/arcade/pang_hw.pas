@@ -9,7 +9,6 @@ procedure Cargar_pang;
 procedure pang_principal;
 function iniciar_pang:boolean;
 procedure reset_pang;
-procedure cerrar_pang;
 //CPU
 function pang_getbyte(direccion:word):byte;
 procedure pang_putbyte(direccion:word;valor:byte);
@@ -53,7 +52,6 @@ procedure Cargar_pang;
 begin
 llamadas_maquina.iniciar:=iniciar_pang;
 llamadas_maquina.bucle_general:=pang_principal;
-llamadas_maquina.cerrar:=cerrar_pang;
 llamadas_maquina.reset:=reset_pang;
 llamadas_maquina.fps_max:=57.42;
 end;
@@ -169,15 +167,6 @@ begin
  pal_bank:=0;
  vblank:=0;
  irq_source:=0;
-end;
-
-procedure cerrar_pang;
-begin
-main_z80.free;
-oki_6295_0.Free;
-eeprom_0.free;
-close_audio;
-close_video;
 end;
 
 procedure update_video_pang;inline;

@@ -23,7 +23,7 @@ type
       romoffset:word;
       spriterombank:array[0..2] of byte;
       sprite_rom:pbyte;
-      sprite_size:dword;
+      sprite_size,sprite_mask:dword;
       k051960_cb:t_k051960_cb;
       function fetchromdata(direccion:word):byte;
     end;
@@ -59,6 +59,7 @@ const
 begin
   self.sprite_rom:=spr_rom;
   self.sprite_size:=spr_size;
+  self.sprite_mask:=(spr_size div 128)-1;
   self.k051960_cb:=call_back;
   self.pant:=pant;
   init_gfx(1,16,16,sprite_size div 128);
@@ -225,18 +226,18 @@ begin
 					  else c:=c+yoffset[y];
           if (shadow<>0) then begin
             if ((zx=1) and (zy=1)) then begin
-              put_gfx_sprite_alpha(c,color shl 4,flipx,flipy,1);
+              put_gfx_sprite_alpha(c and self.sprite_mask,color shl 4,flipx,flipy,1);
               actualiza_gfx_sprite_alpha(sx,sy,self.pant,1);
             end else begin
-              put_gfx_sprite_zoom_alpha(c,color shl 4,flipx,flipy,1,zx,zy);
+              put_gfx_sprite_zoom_alpha(c and self.sprite_mask,color shl 4,flipx,flipy,1,zx,zy);
               actualiza_gfx_sprite_zoom_alpha(sx,sy,self.pant,1,zx,zy);
             end;
           end else begin
             if ((zx=1) and (zy=1)) then begin
-              put_gfx_sprite(c,color shl 4,flipx,flipy,1);
+              put_gfx_sprite(c and self.sprite_mask,color shl 4,flipx,flipy,1);
               actualiza_gfx_sprite(sx,sy,self.pant,1);
             end else begin
-              put_gfx_sprite_zoom(c,color shl 4,flipx,flipy,1,zx,zy);
+              put_gfx_sprite_zoom(c and self.sprite_mask,color shl 4,flipx,flipy,1,zx,zy);
               actualiza_gfx_sprite_zoom(sx,sy,self.pant,1,zx,zy);
             end;
           end;

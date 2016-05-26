@@ -81,7 +81,6 @@ function iniciar_nmk16:boolean;
 var
       mem_char:pbyte;
       memoria_temp:array[0..$ffff] of byte;
-      x,y:word;
 const
   pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
   pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
@@ -185,21 +184,10 @@ begin
 iniciar_nmk16:=false;
 iniciar_audio(false);
 //Pantallas:  principal+char y sprites
-case main_vars.tipo_maquina of
-  69:begin
-       x:=384;
-       y:=224;
-     end;
-  71:begin
-       x:=224;
-       y:=384;
-       screen_0_mod_real(512,512);
-       main_screen.rol90_screen:=true;
-     end;
-end;
+if main_vars.tipo_maquina=71 then main_screen.rol90_screen:=true;
 screen_init(1,512,512);
 screen_init(2,512,512,false,true);
-iniciar_video(x,y);
+iniciar_video(384,224);
 //Main CPU
 main_m68000:=cpu_m68000.create(10000000,$100);
 main_m68000.change_ram16_calls(sbombers_getword,sbombers_putword);
@@ -262,13 +250,10 @@ end;
 
 procedure cerrar_nmk16;
 begin
-main_m68000.free;
-oki_6295_0.Free;
-oki_6295_1.Free;
-close_audio;
-freemem(adpcm_rom[0]);
-freemem(adpcm_rom[1]);
-close_video;
+if adpcm_rom[0]<>nil then freemem(adpcm_rom[0]);
+if adpcm_rom[1]<>nil then freemem(adpcm_rom[1]);
+adpcm_rom[0]:=nil;
+adpcm_rom[1]:=nil;
 end;
 
 procedure reset_nmk16;

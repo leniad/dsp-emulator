@@ -2259,6 +2259,21 @@ object principal1: Tprincipal1
             Caption = 'Aliens'
             OnClick = CambiarMaquina
           end
+          object hunderCrossHW1: TMenuItem
+            Caption = 'Thunder Cross HW'
+            object scontra1: TMenuItem
+              Caption = 'Super Contra'
+              OnClick = CambiarMaquina
+            end
+            object gbusters1: TMenuItem
+              Caption = 'Gang Busters'
+              OnClick = CambiarMaquina
+            end
+            object thunderx1: TMenuItem
+              Caption = 'Thunder Cross'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object M680001: TMenuItem
           Caption = 'M68000'
@@ -2668,7 +2683,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807A40320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807AC0320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

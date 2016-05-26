@@ -15,7 +15,6 @@ procedure Cargar_coleco;
 procedure coleco_principal;
 function iniciar_coleco:boolean;
 procedure reset_coleco;
-procedure cerrar_coleco;
 procedure coleco_sound_update;
 //Snapshot
 function abrir_coleco:boolean;
@@ -45,7 +44,6 @@ principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 llamadas_maquina.iniciar:=iniciar_coleco;
 llamadas_maquina.bucle_general:=coleco_principal;
-llamadas_maquina.cerrar:=cerrar_coleco;
 llamadas_maquina.reset:=reset_coleco;
 llamadas_maquina.cartuchos:=abrir_coleco;
 llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;;
@@ -72,15 +70,6 @@ if not(cargar_roms(@memoria[0],@coleco_bios,'coleco.zip',1)) then exit;
 //final
 reset_coleco;
 iniciar_coleco:=true;
-end;
-
-procedure cerrar_coleco;
-begin
-main_z80.free;
-sn_76496_0.Free;
-tms_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_coleco;

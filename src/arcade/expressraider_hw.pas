@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_expraid;
 procedure principal_expraid;
 function iniciar_expraid:boolean;
-procedure cerrar_expraid;
 procedure reset_expraid;
 //Main CPU
 function getbyte_expraid(direccion:word):byte;
@@ -49,7 +48,6 @@ procedure Cargar_expraid;
 begin
 llamadas_maquina.iniciar:=iniciar_expraid;
 llamadas_maquina.bucle_general:=principal_expraid;
-llamadas_maquina.cerrar:=cerrar_expraid;
 llamadas_maquina.reset:=reset_expraid;
 llamadas_maquina.fps_max:=59.637405;
 end;
@@ -141,16 +139,6 @@ set_pal(colores,256);
 //final
 reset_expraid;
 iniciar_expraid:=true;
-end;
-
-procedure cerrar_expraid;
-begin
-main_m6502.free;
-snd_m6809.Free;
-YM2203_0.Free;
-YM3812_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_expraid;

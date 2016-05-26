@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_twincobra;
 procedure twincobra_principal;
 procedure reset_twincobra;
-procedure cerrar_twincobra;
 function iniciar_twincobra:boolean;
 //Main CPU
 function twincobr_getword(direccion:dword):word;
@@ -85,7 +84,6 @@ procedure Cargar_twincobra;
 begin
 llamadas_maquina.iniciar:=iniciar_twincobra;
 llamadas_maquina.bucle_general:=twincobra_principal;
-llamadas_maquina.cerrar:=cerrar_twincobra;
 llamadas_maquina.reset:=reset_twincobra;
 llamadas_maquina.fps_max:=(28000000/4)/(446*286);
 end;
@@ -209,16 +207,6 @@ end;
 //final
 reset_twincobra;
 iniciar_twincobra:=true;
-end;
-
-procedure cerrar_twincobra;
-begin
-main_m68000.free;
-snd_z80.free;
-main_tms32010.free;
-ym3812_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_twincobra;

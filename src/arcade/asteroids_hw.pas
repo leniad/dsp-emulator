@@ -82,10 +82,7 @@ end;
 
 procedure cerrar_as;
 begin
-main_m6502.free;
 close_samples;
-close_audio;
-close_video;
 end;
 
 procedure reset_as;

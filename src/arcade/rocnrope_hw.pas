@@ -2,14 +2,13 @@ unit rocnrope_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m6809,nz80,main_engine,controls_engine,gfx_engine,rom_engine,
+     m6809,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,konami_decrypt,konami_snd,sound_engine;
 
 procedure Cargar_rocnrope;
 procedure rocnrope_principal;
 function iniciar_rocnrope:boolean;
 procedure reset_rocnrope;
-procedure cerrar_rocnrope;
 //main cpu
 function rocnrope_getbyte(direccion:word):byte;
 procedure rocnrope_putbyte(direccion:word;valor:byte);
@@ -39,7 +38,6 @@ procedure Cargar_rocnrope;
 begin
 llamadas_maquina.iniciar:=iniciar_rocnrope;
 llamadas_maquina.bucle_general:=rocnrope_principal;
-llamadas_maquina.cerrar:=cerrar_rocnrope;
 llamadas_maquina.reset:=reset_rocnrope;
 end;
 
@@ -117,14 +115,6 @@ end;
 //final
 reset_rocnrope;
 iniciar_rocnrope:=true;
-end;
-
-procedure cerrar_rocnrope;
-begin
-main_m6809.Free;
-konamisnd_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_rocnrope;

@@ -178,7 +178,6 @@ const
   pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
 var
   memoria_temp:array[0..$ffff] of byte;
-  x,y:word;
 procedure convert_gfx_system1;
 begin
   init_gfx(0,8,8,2048);
@@ -189,22 +188,15 @@ end;
 begin
 iniciar_system1:=false;
 iniciar_audio(false);
-//Pantallas: principal+char y sprites
+//Pantallas
+screen_init(1,256,256,false,true);
 case main_vars.tipo_maquina of
   152,154:begin
-      x:=224;
-      y:=240;
-      screen_0_mod_real(256,256);
-      main_screen.rol90_screen:=true;
-  end
-    else begin
-      x:=256;
-      y:=224;
-    end;
+             main_screen.rol90_screen:=true;
+             iniciar_video(240,224);
+          end;
+  else iniciar_video(256,224);
 end;
-//Fondo normal y encima
-screen_init(1,256,256,false,true);
-iniciar_video(x,y);
 //Main CPU
 main_z80:=cpu_z80.create(19300000,260);
 main_z80.change_ram_calls(system1_getbyte,system1_putbyte);

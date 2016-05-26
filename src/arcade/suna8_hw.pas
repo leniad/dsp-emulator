@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_suna_hw;
 function iniciar_suna_hw:boolean;
 procedure reset_suna_hw;
-procedure cerrar_suna_hw;
 //Hard Head
 procedure hardhead_principal;
 function hardhead_getbyte(direccion:word):byte;
@@ -73,7 +72,6 @@ case main_vars.tipo_maquina of
   68:llamadas_maquina.bucle_general:=hardhead2_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_suna_hw;
-llamadas_maquina.cerrar:=cerrar_suna_hw;
 llamadas_maquina.reset:=reset_suna_hw;
 end;
 
@@ -195,16 +193,6 @@ end;
 //final
 reset_suna_hw;
 iniciar_suna_hw:=true;
-end;
-
-procedure cerrar_suna_hw;
-begin
-main_z80.free;
-snd_z80.free;
-ym3812_0.free;
-ay8910_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_suna_hw;

@@ -10,7 +10,6 @@ procedure Cargar_jailbreak;
 procedure jailbreak_principal;
 function iniciar_jailbreak:boolean;
 procedure reset_jailbreak;
-procedure cerrar_jailbreak;
 //cpu
 function jailbreak_getbyte(direccion:word):byte;
 procedure jailbreak_putbyte(direccion:word;valor:byte);
@@ -53,7 +52,6 @@ procedure Cargar_jailbreak;
 begin
 llamadas_maquina.iniciar:=iniciar_jailbreak;
 llamadas_maquina.bucle_general:=jailbreak_principal;
-llamadas_maquina.cerrar:=cerrar_jailbreak;
 llamadas_maquina.reset:=reset_jailbreak;
 llamadas_maquina.fps_max:=60.606060606060;
 end;
@@ -130,15 +128,6 @@ marcade.dswc_val:=@jailbreak_dip_c;
 //final
 reset_jailbreak;
 iniciar_jailbreak:=true;
-end;
-
-procedure cerrar_jailbreak;
-begin
-main_m6809.Free;
-sn_76496_0.Free;
-vlm5030_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_jailbreak;

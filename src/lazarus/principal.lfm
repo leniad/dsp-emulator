@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.7'
+  LCLVersion = '1.6.0.1'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -2526,6 +2526,21 @@ object principal1: Tprincipal1
           object aliens1: TMenuItem
             Caption = 'Aliens'
             OnClick = CambiarMaquina
+          end
+          object MenuItem31: TMenuItem
+            Caption = 'Thunder Cross HW'
+            object scontra1: TMenuItem
+              Caption = 'Super Contra'
+              OnClick = CambiarMaquina
+            end
+            object gbusters1: TMenuItem
+              Caption = 'Gang Busters'
+              OnClick = CambiarMaquina
+            end
+            object thunderx1: TMenuItem
+              Caption = 'Thunder Cross'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object M680001: TMenuItem

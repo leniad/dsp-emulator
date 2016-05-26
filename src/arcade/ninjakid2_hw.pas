@@ -9,7 +9,6 @@ procedure Cargar_ninjakid2;
 procedure ninjakid2_principal;
 function iniciar_ninjakid2:boolean;
 procedure reset_ninjakid2;
-procedure cerrar_ninjakid2;
 //Main CPU
 function ninjakid2_getbyte(direccion:word):byte;
 procedure ninjakid2_putbyte(direccion:word;valor:byte);
@@ -82,7 +81,6 @@ procedure Cargar_ninjakid2;
 begin
 llamadas_maquina.iniciar:=iniciar_ninjakid2;
 llamadas_maquina.bucle_general:=ninjakid2_principal;
-llamadas_maquina.cerrar:=cerrar_ninjakid2;
 llamadas_maquina.reset:=reset_ninjakid2;
 llamadas_maquina.fps_max:=59.61;
 end;
@@ -260,16 +258,6 @@ gfx[2].trans[15]:=true;
 //final
 reset_ninjakid2;
 iniciar_ninjakid2:=true;
-end;
-
-procedure cerrar_ninjakid2;
-begin
-main_z80.free;
-snd_z80.free;
-YM2203_0.Free;
-YM2203_1.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_ninjakid2;

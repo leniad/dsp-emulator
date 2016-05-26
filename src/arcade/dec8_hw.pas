@@ -8,7 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_dec8;
 procedure principal_dec8;
 function iniciar_dec8:boolean;
-procedure cerrar_dec8;
 procedure reset_dec8;
 //Main CPU
 function getbyte_dec8(direccion:word):byte;
@@ -43,7 +42,6 @@ procedure Cargar_dec8;
 begin
 llamadas_maquina.iniciar:=iniciar_dec8;
 llamadas_maquina.bucle_general:=principal_dec8;
-llamadas_maquina.cerrar:=cerrar_dec8;
 llamadas_maquina.reset:=reset_dec8;
 llamadas_maquina.fps_max:=57.444583;
 end;
@@ -121,16 +119,6 @@ convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //final
 reset_dec8;
 iniciar_dec8:=true;
-end;
-
-procedure cerrar_dec8;
-begin
-main_m6809.Free;
-snd_m6502.free;
-ym2203_0.Free;
-ym3812_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_dec8;

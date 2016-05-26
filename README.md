@@ -1,4 +1,16 @@
 ﻿#DSP Emulator status<br>
+<b>26/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary updated.</b><br><pre>
+-General
+    +GFX: Fixed and enhanced the final screen rotation
+    +Improved how is closed the drivers, CPU, video, etc. Fixed bugs and removed some problems when the driver is not initialized and changed an other
+    +K007232: Fixed sound
+-Thunder Cross HW
+    +Super Contra: Added driver with sound
+    +Gang Busters: Added driver with sound
+    +Thunder Cross: Added driver with sound
+</pre><br>
+<img src='http://img1.imagilive.com/0516/super_contra.png'><img src='http://img1.imagilive.com/0516/gang_busters.png'><br>
+<img src='http://img1.imagilive.com/0516/thunder_cross.png'><br>
 <b>24/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary.</b><br><pre>
 -General
     +KONAMI CPU

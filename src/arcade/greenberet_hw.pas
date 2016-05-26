@@ -177,10 +177,6 @@ end;
 procedure cerrar_gberet;
 begin
 if main_vars.tipo_maquina=17 then save_hi('gberet.hi',@memoria[$d900],60);
-main_z80.free;
-sn_76496_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_gberet;

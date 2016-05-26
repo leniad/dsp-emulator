@@ -10,7 +10,6 @@ procedure Cargar_ironhorse;
 procedure ironhorse_principal;
 function iniciar_ironhorse:boolean;
 procedure reset_ironhorse;
-procedure cerrar_ironhorse;
 //cpu
 function ironhorse_getbyte(direccion:word):byte;
 procedure ironhorse_putbyte(direccion:word;valor:byte);
@@ -44,7 +43,6 @@ procedure Cargar_ironhorse;
 begin
 llamadas_maquina.iniciar:=iniciar_ironhorse;
 llamadas_maquina.bucle_general:=ironhorse_principal;
-llamadas_maquina.cerrar:=cerrar_ironhorse;
 llamadas_maquina.reset:=reset_ironhorse;
 llamadas_maquina.fps_max:=30;
 end;
@@ -105,15 +103,6 @@ end;
 //final
 reset_ironhorse;
 iniciar_ironhorse:=true;
-end;
-
-procedure cerrar_ironhorse; 
-begin
-main_m6809.Free;
-snd_z80.free;
-ym2203_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_ironhorse;

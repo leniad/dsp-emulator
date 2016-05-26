@@ -371,15 +371,12 @@ end;
 
 procedure cpc_close;
 begin
-freemem(cpc_crt);
-freemem(cpc_ppi);
-main_z80.free;
-pia8255_0.free;
-ay8910_0.free;
+if cpc_crt<>nil then freemem(cpc_crt);
+if cpc_ppi<>nil then freemem(cpc_ppi);
 clear_disk(0);
 clear_disk(1);
-close_audio;
-close_video;
+cpc_crt:=nil;
+cpc_ppi:=nil;
 end;
 
 procedure cpc_reset;

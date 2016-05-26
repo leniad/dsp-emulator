@@ -173,16 +173,9 @@ end;
 
 procedure cerrar_system1;
 begin
-main_z80.free;
-snd_z80.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
 case main_vars.tipo_maquina of
   27,35,36,153,155:z80pio_close(0);
-  37,151,152,154:pia8255_0.free;
 end;
-close_audio;
-close_video;
 end;
 
 procedure draw_sprites;inline;

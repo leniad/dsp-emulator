@@ -1,16 +1,15 @@
-unit main_engine;
+﻿unit main_engine;
 
 interface
 uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      {$ifndef fpc}uchild,{$endif}
      controls,forms,sysutils,misc_functions,pal_engine,timer_engine,
-     gfx_engine,sound_engine,arcade_config,vars_hide;
+     gfx_engine,sound_engine,arcade_config,vars_hide,device_functions;
 
 const
         dsp_version='0.16b3WIP';
         pant_sprites=20;
         pant_doble=21;
-        pant_rot=22;
         pant_temp=23;
         pant_sprites_alpha=24;
         max_pant_visible=19;
@@ -133,7 +132,6 @@ procedure pasar_pantalla_completa;
 procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false);
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
 procedure screen_mod_sprites(num:byte;sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word);
-procedure screen_0_mod_real(x_real,y_real:word);
 //Update final screen
 //procedure actualiza_trozo_principal(x1,y1,x2,y2:word);
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);
@@ -287,8 +285,13 @@ if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
 getmem(punbuf,MAX_PUNBUF);
 getmem(tpunbuf,MAX_PUNBUF);
 //creo la pantalla general
-p_final[0].x:=x;
-p_final[0].y:=y;
+if main_screen.rot90_screen or main_screen.rol90_screen then begin
+    p_final[0].x:=y;
+    p_final[0].y:=x;
+end else begin
+    p_final[0].x:=x;
+    p_final[0].y:=y;
+end;
 {$ifndef fpc}
 handle_:=child.Handle;
 if window_render=nil then window_render:=SDL_CreateWindowFrom(pointer(handle_));
@@ -316,12 +319,11 @@ for f:=1 to max_pant_visible do
       if p_final[f].sprite_mask_y=0 then p_final[f].sprite_mask_y:=p_final[f].y-1;
       p_final[f].x:=p_final[f].x+(ADD_SPRITE*2);
       p_final[f].y:=p_final[f].y+(ADD_SPRITE*2);
-      pantalla[pant_rot]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,16,0,0,0,0);
     end;
     pantalla[f]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,16,0,0,0,0);
     //Y si son transparentes las creo
     if p_final[f].trans then SDL_Setcolorkey(pantalla[f],1,set_trans_color);
-  end;
+end;
 sdl_showcursor(0);
 end;
 
@@ -350,12 +352,6 @@ begin
   p_final[num].sprite_end_y:=sprite_end_y;
   p_final[num].sprite_mask_x:=sprite_mask_x;
   p_final[num].sprite_mask_y:=sprite_mask_y;
-end;
-
-procedure screen_0_mod_real(x_real,y_real:word);
-begin
-  p_final[0].x_real:=x_real;
-  p_final[0].y_real:=y_real;
 end;
 
 procedure pasar_pantalla_completa;
@@ -451,59 +447,59 @@ var
   origen,destino:libsdl_rect;
   y,x:word;
   porig,pdest:pword;
-  orig_p,dest_p:word;
+  orig_p,dest_p:dword;
 begin
 if main_screen.rot90_screen then begin
-  orig_p:=pantalla[sitio].pitch shr 1;
-  dest_p:=pantalla[pant_rot].pitch shr 1;
-  for y:=0 to (p_final[0].x_real+(ADD_SPRITE-1)) do begin
-    porig:=pantalla[sitio].pixels;
-    inc(porig,y*orig_p);
-    pdest:=pantalla[pant_rot].pixels;
-    inc(pdest,p_final[0].x_real+((ADD_SPRITE*2)-1)-y);
-    for x:=0 to (p_final[0].y_real+((ADD_SPRITE*2)-1)) do begin
+  //Muevo desde la normal a la final rotada
+  orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
+  dest_p:=pantalla[pant_temp].pitch shr 1; //Cantidad de bytes por fila
+  for y:=0 to (o_y2-1) do begin
+    //Origen
+    porig:=pantalla[sitio].pixels; //Apunto a los pixels
+    inc(porig,((y+o_y1+ADD_SPRITE)*orig_p)+o_x1+ADD_SPRITE); //Muevo el puntero al primer punto de la linea y le añado el recorte
+    //Destino
+    pdest:=pantalla[pant_temp].pixels; //Apunto a los pixels
+    inc(pdest,dest_p-(y+1));  //Muevo el cursor al ultimo punto de la columna
+    for x:=0 to (o_x2-1) do begin
+      //Pongo el pixel
       pdest^:=porig^;
+      //Avanzo en la fila de origen
       inc(porig);
+      //Avanzo la columna de origen
       inc(pdest,dest_p);
     end;
   end;
-  sitio:=pant_rot;
-  origen.y:=o_x1+ADD_SPRITE;
-  origen.x:=o_y1+ADD_SPRITE;
-  origen.h:=o_x2;
-  origen.w:=o_y2;
-end else begin
-if main_screen.rol90_screen then begin
-  orig_p:=pantalla[sitio].pitch shr 1;
-  dest_p:=pantalla[pant_rot].pitch shr 1;
-  for y:=0 to (p_final[0].x_real+(ADD_SPRITE-1)) do begin
-    porig:=pantalla[sitio].pixels;
-    inc(porig,y*orig_p);
-    pdest:=pantalla[pant_rot].pixels;
-    inc(pdest,(p_final[0].x_real+((ADD_SPRITE*2)-1))*dest_p+y);
-    for x:=0 to (p_final[0].y_real+((ADD_SPRITE*2)-1)) do begin
-      pdest^:=porig^;
-      inc(porig);
-      dec(pdest,dest_p);
-    end;
-  end;
-  sitio:=pant_rot;
-  origen.y:=o_x1+ADD_SPRITE;
-  origen.x:=o_y1+ADD_SPRITE;
-  origen.h:=o_x2;
-  origen.w:=o_y2;
-end else begin
-  origen.x:=o_x1+ADD_SPRITE;
-  origen.y:=o_y1+ADD_SPRITE;
-  origen.w:=o_x2;
-  origen.h:=o_y2;
-end;
-end;
-destino.x:=0;
-destino.y:=0;
-destino.w:=pantalla[pant_temp].w;
-destino.h:=pantalla[pant_temp].h;
-SDL_UpperBlit(pantalla[sitio],@origen,pantalla[pant_temp],@destino);
+end else if main_screen.rol90_screen then begin
+             //Muevo desde la normal a la final rotada
+             orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
+             dest_p:=pantalla[pant_temp].pitch shr 1; //Cantidad de bytes por fila
+             for y:=0 to (o_y2-1) do begin
+                 //Origen
+                 porig:=pantalla[sitio].pixels; //Apunto a los pixels
+                 inc(porig,((y+o_y1+ADD_SPRITE)*orig_p)+o_x1+ADD_SPRITE); //Muevo el puntero al primer punto de la linea y le añado el recorte
+                 //Destino
+                 pdest:=pantalla[pant_temp].pixels; //Apunto a los pixels
+                 inc(pdest,(dest_p*(pantalla[pant_temp].h-1))+y);  //Muevo el cursor al ultimo punto de la columna
+                 for x:=0 to (o_x2-1) do begin
+                     //Pongo el pixel
+                     pdest^:=porig^;
+                     //Avanzo en la fila de origen
+                     inc(porig);
+                     //Avanzo la columna de origen
+                     dec(pdest,dest_p);
+                 end;
+             end;
+         end else begin
+           origen.x:=o_x1+ADD_SPRITE;
+           origen.y:=o_y1+ADD_SPRITE;
+           origen.w:=o_x2;
+           origen.h:=o_y2;
+           destino.x:=0;
+           destino.y:=0;
+           destino.w:=pantalla[pant_temp].w;
+           destino.h:=pantalla[pant_temp].h;
+           SDL_UpperBlit(pantalla[sitio],@origen,pantalla[pant_temp],@destino);
+         end;
 end;
 
 procedure actualiza_video;
@@ -722,6 +718,7 @@ main_screen.rot90_screen:=false;
 main_screen.rol90_screen:=false;
 main_screen.flip_main_screen:=false;
 main_screen.rapido:=false;
+close_all_devices;
 reset_timer;
 marcade.dswa_val:=nil;
 marcade.dswb_val:=nil;
@@ -729,6 +726,8 @@ marcade.dswc_val:=nil;
 {$ifndef windows}
 cont_sincroniza:=sdl_getticks();
 {$endif}
+close_audio;
+close_video;
 end;
 
 end.

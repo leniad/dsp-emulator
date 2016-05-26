@@ -9,7 +9,6 @@ procedure Cargar_bublbobl;
 procedure bublbobl_principal;
 function iniciar_bublbobl:boolean;
 procedure reset_bublbobl;
-procedure cerrar_bublbobl;
 //Main CPU
 function bublbobl_getbyte(direccion:word):byte;
 procedure bublbobl_putbyte(direccion:word;valor:byte);
@@ -66,7 +65,6 @@ procedure Cargar_bublbobl;
 begin
 llamadas_maquina.iniciar:=iniciar_bublbobl;
 llamadas_maquina.bucle_general:=bublbobl_principal;
-llamadas_maquina.cerrar:=cerrar_bublbobl;
 llamadas_maquina.reset:=reset_bublbobl;
 llamadas_maquina.fps_max:=59.185606;
 end;
@@ -129,18 +127,6 @@ marcade.dswb_val:=@bublbobl_dip_b;
 //final
 reset_bublbobl;
 iniciar_bublbobl:=true;
-end;
-
-procedure cerrar_bublbobl;
-begin
-main_z80.free;
-sub_z80.free;
-snd_z80.free;
-main_m6800.Free;
-ym2203_0.Free;
-ym3812_0.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_bublbobl;

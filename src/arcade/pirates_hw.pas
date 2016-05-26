@@ -9,7 +9,6 @@ procedure Cargar_pirates;
 procedure pirates_principal;
 function iniciar_pirates:boolean;
 procedure reset_pirates;
-procedure cerrar_pirates;
 //Pirates
 function pirates_getword(direccion:dword):word;
 procedure pirates_putword(direccion:dword;valor:word);
@@ -52,7 +51,6 @@ procedure Cargar_pirates;
 begin
 llamadas_maquina.iniciar:=iniciar_pirates;
 llamadas_maquina.bucle_general:=pirates_principal;
-llamadas_maquina.cerrar:=cerrar_pirates;
 llamadas_maquina.reset:=reset_pirates;
 end;
 
@@ -215,14 +213,6 @@ freemem(ptempb2);
 //final
 reset_pirates;
 iniciar_pirates:=true;
-end;
-
-procedure cerrar_pirates;
-begin
-main_m68000.free;
-oki_6295_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_pirates;

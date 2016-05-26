@@ -217,7 +217,6 @@ end;
 //Namco 53XX
 procedure namco_53xx_close;
 begin
-  main_mb88xx.Free;
 end;
 
 procedure run_namco_53xx;

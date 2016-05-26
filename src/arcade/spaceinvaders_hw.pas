@@ -9,7 +9,6 @@ procedure Cargar_spaceinv;
 procedure spaceinv_principal;
 function iniciar_spaceinv:boolean;
 procedure reset_spaceinv;
-procedure cerrar_spaceinv;
 function spaceinv_getbyte(direccion:word):byte;
 procedure spaceinv_putbyte(direccion:word;valor:byte);
 function spaceinv_inbyte(puerto:word):byte;
@@ -43,7 +42,6 @@ procedure Cargar_spaceinv;
 begin
 llamadas_maquina.iniciar:=iniciar_spaceinv;
 llamadas_maquina.bucle_general:=spaceinv_principal;
-llamadas_maquina.cerrar:=cerrar_spaceinv;
 llamadas_maquina.reset:=reset_spaceinv;
 llamadas_maquina.fps_max:=59.541985;
 llamadas_maquina.save_qsnap:=spaceinv_qsave;
@@ -86,13 +84,6 @@ set_pal(colores,4);
 //final
 reset_spaceinv;
 iniciar_spaceinv:=true;
-end;
-
-procedure cerrar_spaceinv;
-begin
-main_z80.free;
-close_audio;
-close_video;
 end;
 
 procedure reset_spaceinv;

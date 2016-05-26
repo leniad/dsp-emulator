@@ -295,18 +295,13 @@ end;
 
 procedure cerrar_dkong;
 begin
-main_z80.free;
 case main_vars.tipo_maquina of
   15,168:close_samples;
   169:begin
         close_n2a03_sound(0);
         close_n2a03_sound(1);
-        main_m6502.free;
-        snd_m6502.free;
       end;
 end;
-close_audio;
-close_video;
 end;
 
 procedure reset_dkong;

@@ -5,6 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 const
    KDAC_A_PCM_MAX=2;
+
 type
   tk007232_call_back=procedure (valor:byte);
   k007232_chip=class(snd_chip_class)
@@ -13,14 +14,14 @@ type
     public
         procedure update;
         procedure set_volume(channel,volumeA,volumeB:byte);
-        procedure write(direccion:word;valor:byte);
-        function read(direccion:word):byte;
-        procedure set_bank(chABank,chBBank:byte);
+        procedure write(direccion,valor:byte);
+        function read(direccion:byte):byte;
+        procedure set_bank(banka,bankb:byte);
     private
-        vol:array[0..KDAC_A_PCM_MAX-1,0..1] of byte; // volume for the left and right channel */
+        vol:array[0..KDAC_A_PCM_MAX-1,0..1] of byte; // volume for the left and right channel
 	      address,start,step,bank:array[0..KDAC_A_PCM_MAX-1] of dword;
 	      play:array[0..KDAC_A_PCM_MAX-1] of boolean;
-	      wreg:array[0..$f] of byte; //write data */
+	      wreg:array[0..$f] of byte; //write data
 	      pcmlimit:dword;
 	      ntimer:byte;
 	      fncode:array[0..$1ff] of dword;
@@ -73,66 +74,62 @@ destructor k007232_chip.free;
 begin
 end;
 
-procedure k007232_chip.write(direccion:word;valor:byte);
+procedure k007232_chip.write(direccion,valor:byte);
 var
   r,idx:word;
   v,reg_port:byte;
 begin
 	r:=direccion;
 	v:=valor;
-	self.wreg[r]:=v;          // stock write data */
-	if (r=$0c) then begin
-	  // external port, usually volume control */
-	  if (@self.call_back<>nil) then self.call_back(v);
-	  exit;
-	end else if (r=$0d) then begin
-	            // loopflag. */
-	            exit;
-	         end else begin
-	                  reg_port:=0;
-	                  if (r>=$06) then begin
-		                  reg_port:=1;
-		                  r:=r-$06;
-	                  end;
-	                  case r of
-	                  	  $00,01:begin
-	                  				    //*** address step ****/
-	                  		        idx:=((((self.wreg[reg_port*$06+$01]) shl 8) and $0100) or ((self.wreg[reg_port*$06+$00]) and $00ff));
-	                  		        self.step[reg_port]:=self.fncode[idx];
-	                             end;
-	                  	  $02,$03,$04:;
-	                  	  05:begin
-	                  				//*** start address ****/
-	                  		    self.start[reg_port]:=(((self.wreg[reg_port*$06+$04] shl 16) and $00010000) or
-	                  		                          ((self.wreg[reg_port*$06+$03] shl 8) and $0000ff00) or
-	                  		                          ((self.wreg[reg_port*$06+$02]) and $000000ff) or self.bank[reg_port]);
-	                  		    if (self.start[reg_port]<self.pcmlimit) then begin
-	                  	          self.play[reg_port]:=true;
-	                  	          self.address[reg_port]:=0;
-	                  		    end;
-	                  		   end;
+	self.wreg[r]:=v; //store write data
+  case r  of
+	  $c:if (@self.call_back<>nil) then self.call_back(v); // external port, usually volume control
+	  $d:; // loopflag.
+    else begin
+          if (r>=$06) then begin
+            reg_port:=1;
+            r:=r-$06;
+          end else reg_port:=0;
+          case r of
+            0,1:begin //*** address step ****
+                    idx:=((self.wreg[reg_port*6+1] shl 8) and $100) or self.wreg[reg_port*6];
+                    self.step[reg_port]:=self.fncode[idx];
+                end;
+            2,3,4:;
+            5:begin  //*** start address ****
+                    self.start[reg_port]:=((self.wreg[reg_port*6+4] and 1) shl 16) or
+                                          (self.wreg[reg_port*6+3] shl 8) or
+                                          self.wreg[reg_port*6+2] or
+                                          self.bank[reg_port];
+                    if (self.start[reg_port]<self.pcmlimit) then begin
+                        self.play[reg_port]:=true;
+                        self.address[reg_port]:=0;
                     end;
-           end;
+            end;
+          end;
+    end;
+  end;
 end;
 
-function k007232_chip.read(direccion:word):byte;
+function k007232_chip.read(direccion:byte):byte;
 var
-  r:word;
+  r:byte;
   ch:byte;
 begin
-	r:=direccion;
-	ch:=0;
-	if ((r=$0005) or (r=$000b)) then begin
-	  ch:=r div $0006;
-	  r:=ch*$0006;
-	  self.start[ch]:=(((self.wreg[r+$04] shl 16) and $00010000) or
-		                ((self.wreg[r+$03] shl 8) and $0000ff00) or
-		                ((self.wreg[r+$02]) and $000000ff) or self.bank[ch]);
+r:=direccion;
+ch:=0;
+if ((r=$5) or (r=$b)) then begin
+	  ch:=r div 6;
+	  r:=ch*6;
+	  self.start[ch]:=((self.wreg[r+4] and 1) shl 16) or
+		                (self.wreg[r+3] shl 8)  or
+		                (self.wreg[r+2]) or
+                    self.bank[ch];
 	  if (self.start[ch]<self.pcmlimit) then begin
 		  self.play[ch]:=true;
 		  self.address[ch]:=0;
 	  end;
-  end;
+end;
 read:=0;
 end;
 
@@ -142,10 +139,10 @@ begin
 	self.vol[channel,1]:=volumeB;
 end;
 
-procedure k007232_chip.set_bank(chABank,chBBank:byte);
+procedure k007232_chip.set_bank(banka,bankb:byte);
 begin
-	self.bank[0]:=chABank shl 17;
-	self.bank[1]:=chBBank shl 17;
+	self.bank[0]:=banka shl 17;
+	self.bank[1]:=bankb shl 17;
 end;
 
 procedure k007232_chip.internal_update;
@@ -154,39 +151,37 @@ var
   addr,old_addr:dword;
   volA,volB:word;
 begin
-	for f:=0 to (KDAC_A_PCM_MAX-1) do begin
-		if self.play[f] then begin
-		  //*** PCM setup ****/
-		  addr:=self.start[f]+((self.address[f] shr BASE_SHIFT) and $000fffff);
-		  volA:=self.vol[f,0]*2;
-		  volB:=self.vol[f,1]*2;
-			old_addr:=addr;
-			addr:=self.start[f]+((self.address[f] shr BASE_SHIFT) and $000fffff);
-			while (old_addr<=addr) do begin
-  			if (((self.rom[old_addr] and $80)<>0) or (old_addr>=self.pcmlimit)) then begin
-		  		// end of sample */
-			  	if (self.wreg[$0d] and (1 shl f))<>0 then begin
-			  	  // loop to the beginning */
-	  			  self.start[f]:=((self.wreg[f*$06+$04] shl 16) and $00010000) or
-                           ((self.wreg[f*$06+$03] shl 8) and $0000ff00) or
-	 			  	               ((self.wreg[f*$06+$02]) and $000000ff) or self.bank[f];
-	  			  addr:=self.start[f];
-		  		  self.address[f]:=0;
-			  	  old_addr:=addr; // skip loop */
-		  	  end else begin
-			  	  // stop sample */
-		  		  self.play[f]:=false;
-			    end;
-          break;
-        end;
-        old_addr:=old_addr+1;
-		  end;
-			if not(self.play[f]) then break;
-			self.address[f]:=self.address[f]+self.step[f];
-			self.out1:=((self.rom[addr] and $7f)-$40)*volA;
-			self.out2:=((self.rom[addr] and $7f)-$40)*volB;
+self.out1:=0;
+self.out2:=0;
+for f:=0 to (KDAC_A_PCM_MAX-1) do begin
+    if self.play[f] then begin
+       //*** PCM setup ****/
+       addr:=self.start[f]+((self.address[f] shr BASE_SHIFT) and $fffff);
+       volA:=self.vol[f,0]*2;
+       volB:=self.vol[f,1]*2;
+       old_addr:=addr;
+       addr:=self.start[f]+((self.address[f] shr BASE_SHIFT) and $fffff);
+       while (old_addr<=addr) do begin
+             if (((self.rom[old_addr] and $80)<>0) or (old_addr>=self.pcmlimit)) then begin // end of sample
+		if (self.wreg[$d] and (1 shl f))<>0 then begin // loop to the beginning
+	  	   self.start[f]:=((self.wreg[f*6+4] and 1) shl 16) or
+                                  (self.wreg[f*6+3] shl 8) or
+	 			  (self.wreg[f*6+2]) or
+                                  self.bank[f];
+	  	   addr:=self.start[f];
+		   self.address[f]:=0;
+		   old_addr:=addr; // skip loop
+		end else self.play[f]:=false; // stop sample
+                break;
+             end;
+             old_addr:=old_addr+1;
+       end;
+       if not(self.play[f]) then break;
+       self.address[f]:=self.address[f]+self.step[f];
+       self.out1:=self.out1+(((self.rom[addr] and $7f)-$40)*volA);
+       self.out2:=self.out2+(((self.rom[addr] and $7f)-$40)*volB);
     end;
-  end;
+end;
 end;
 
 procedure internal_update_k007232_0;

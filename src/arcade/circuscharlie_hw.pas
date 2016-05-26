@@ -7,10 +7,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 //main
 procedure Cargar_circusc;
-procedure circusc_principal; 
-function iniciar_circusc:boolean; 
-procedure reset_circusc; 
-procedure cerrar_circusc; 
+procedure circusc_principal;
+function iniciar_circusc:boolean;
+procedure reset_circusc;
 //cpu
 function circusc_getbyte(direccion:word):byte;
 procedure circusc_putbyte(direccion:word;valor:byte);
@@ -57,7 +56,6 @@ procedure Cargar_circusc;
 begin
 llamadas_maquina.iniciar:=iniciar_circusc;
 llamadas_maquina.bucle_general:=circusc_principal;
-llamadas_maquina.cerrar:=cerrar_circusc;
 llamadas_maquina.reset:=reset_circusc;
 end;
 
@@ -140,17 +138,6 @@ marcade.dswb_val:=@circusc_dip_b;
 //final
 reset_circusc;
 iniciar_circusc:=true;
-end;
-
-procedure cerrar_circusc;
-begin
-main_m6809.Free;
-snd_z80.free;
-sn_76496_0.Free;
-sn_76496_1.Free;
-dac_0.Free;
-close_audio;
-close_video;
 end;
 
 procedure reset_circusc;

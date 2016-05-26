@@ -332,17 +332,11 @@ end;
 
 procedure cerrar_cninja;
 begin
-main_m68000.free;
-case main_vars.tipo_maquina of
-  162:main_deco104.free;
-  163:main_deco146.free;
- end;
 close_dec16ic(0);
 close_dec16ic(1);
 deco16_snd_double_close;
-close_audio;
-close_video;
-freemem(oki2_mem);
+if oki2_mem<>nil then freemem(oki2_mem);
+oki2_mem:=nil;
 end;
 
 procedure reset_cninja;

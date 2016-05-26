@@ -104,12 +104,8 @@ procedure cerrar_sms;
 begin
 file_data.sms_is_pal:=vdp_0.is_pal;
 file_data.sms_bios_enabled:=mapper_sms.bios_enabled;
-main_z80.free;
-sn_76496_0.Free;
-vdp_0.Free;
-freemem(mapper_sms);
-close_audio;
-close_video;
+if mapper_sms<>nil then freemem(mapper_sms);
+mapper_sms:=nil;
 end;
 
 procedure reset_sms;

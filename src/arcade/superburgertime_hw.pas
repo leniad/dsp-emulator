@@ -98,11 +98,8 @@ end;
 
 procedure cerrar_supbtime;
 begin
-main_m68000.free;
 close_dec16ic(0);
 deco16_snd_simple_close;
-close_audio;
-close_video;
 end;
 
 procedure reset_supbtime;
