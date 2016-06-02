@@ -86,8 +86,8 @@ x:=127;
 y:=54;
 case main_vars.tipo_maquina of
   0,5:spec_a_pantalla(@memoria[$4000],imagen1);
-  1,4:spec_a_pantalla(@memoria_128k[pantalla_128k,0],imagen1);
-  2,3:spec_a_pantalla(@memoria_3[pantalla_128k,0],imagen1);
+  1,4:spec_a_pantalla(@memoria_128k[var_spectrum.pantalla_128k,0],imagen1);
+  2,3:spec_a_pantalla(@memoria_3[var_spectrum.pantalla_128k,0],imagen1);
   7,8,9:begin
           cargar_bmp;
           x:=200;

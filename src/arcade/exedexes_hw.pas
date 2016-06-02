@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,sn_76496,ay_8910,
      rom_engine,pal_engine,sound_engine,timer_engine;
 
-//Principal
-procedure Cargar_exedexes_hw;
-procedure exedexes_hw_principal;
-procedure reset_exedexes_hw;
-function iniciar_exedexes_hw:boolean;
-//Main CPU
-function exedexes_getbyte(direccion:word):byte;
-procedure exedexes_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function exedexes_snd_getbyte(direccion:word):byte;
-procedure exedexes_snd_putbyte(direccion:word;valor:byte);
-procedure exedexes_snd_irq;
-procedure exedexes_sound;
+procedure cargar_exedexes_hw;
 
 implementation
 const
@@ -43,156 +31,6 @@ var
  scroll_x,scroll_y,scroll_bg:word;
  sound_command:byte;
  sc2on,sc1on,objon,chon:boolean;
-
-procedure Cargar_exedexes_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_exedexes_hw;
-llamadas_maquina.bucle_general:=exedexes_hw_principal;
-llamadas_maquina.reset:=reset_exedexes_hw;
-end;
-
-function iniciar_exedexes_hw:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      memoria_temp:array[0..$7fff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
-    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-    pt_x:array[0..31] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-			64*8+0, 64*8+1, 64*8+2, 64*8+3, 65*8+0, 65*8+1, 65*8+2, 65*8+3,
-			128*8+0, 128*8+1, 128*8+2, 128*8+3, 129*8+0, 129*8+1, 129*8+2, 129*8+3,
-			192*8+0, 192*8+1, 192*8+2, 192*8+3, 193*8+0, 193*8+1, 193*8+2, 193*8+3);
-    pt_y:array[0..31] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16,
-			16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16,
-			24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16);
-procedure poner_bg;
-var
-  f:word;
-  x,y,atrib,pos:word;
-  nchar,color:word;
-  flipx,flipy:boolean;
-begin
-for f:=0 to $fff do begin
-  x:=f div 64;
-  y:=f mod 64;
-  pos:=((y*32 and $e0) shr 5) + ((x*32 and $e0) shr 2) + ((y*32 and $3f00) shr 1);
-  atrib:=memoria_temp[pos+$4000];
-	nchar:=atrib and $3f;
-	color:=(memoria_temp[pos+(8*8)+$4000]) shl 2;
-  flipx:=(atrib and $40)<>0;
-  flipy:=(atrib and $80)<>0;
-  put_gfx_flip(x*32,(63-y)*32,nchar,color,1,1,flipx,flipy);
-end;
-end;
-procedure poner_fg;
-var
-  f:word;
-  x,y,pos:word;
-  nchar:word;
-begin
-for f:=0 to $1fff do begin
-  x:=f div 128;
-  y:=f mod 128;
-  pos:=((y*16 and $f0) shr 4)+(x*16 and $f0)+(y*16 and $700)+((x*16 and $700) shl 3);
-	nchar:=memoria_temp[pos];
-  put_gfx_trans(x*16,(127-y)*16,nchar,0,2,2);
-end;
-end;
-begin
-iniciar_exedexes_hw:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,2048,2048);
-screen_mod_scroll(1,2048,256,2047,2048,256,2047);
-screen_init(2,2048,2048,true);
-screen_mod_scroll(2,2048,256,2047,2048,256,2047);
-screen_init(3,256,256,true);
-screen_init(4,256,512,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(exedexes_getbyte,exedexes_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(exedexes_snd_getbyte,exedexes_snd_putbyte);
-snd_z80.init_sound(exedexes_sound);
-//Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,1);
-sn_76496_0:=sn76496_chip.Create(3000000);
-sn_76496_1:=sn76496_chip.Create(3000000);
-init_timer(snd_z80.numero_cpu,3000000/(4*60),exedexes_snd_irq,true);
-//cargar roms
-if not(cargar_roms(@memoria[0],@exedexes_rom[0],'exedexes.zip',0)) then exit;
-//cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@exedexes_snd_rom,'exedexes.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@exedexes_char,'exedexes.zip')) then exit;
-init_gfx(0,8,8,512);
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//tiles 32x32
-if not(cargar_roms(@memoria_temp[0],@exedexes_tiles1,'exedexes.zip')) then exit;
-init_gfx(1,32,32,64);
-gfx_set_desc_data(2,0,256*8,0,4);
-convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
-//tiles 16x16
-if not(cargar_roms(@memoria_temp[0],@exedexes_tiles2[0],'exedexes.zip',0)) then exit;
-init_gfx(2,16,16,256);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@exedexes_sprites[0],'exedexes.zip',0)) then exit;
-init_gfx(3,16,16,256);
-gfx[3].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//poner la paleta y clut
-if not(cargar_roms(@memoria_temp[0],@exedexes_pal[0],'exedexes.zip',0)) then exit;
-for f:=0 to $ff do begin
-    colores[f].r:=pal4bit(memoria_temp[f]);
-    colores[f].g:=pal4bit(memoria_temp[f+$100]);
-    colores[f].b:=pal4bit(memoria_temp[f+$200]);
-end;
-set_pal(colores,256);
-for f:=0 to $ff do begin
-  gfx[0].colores[f]:=memoria_temp[$300+f]+$c0;
-  gfx[1].colores[f]:=memoria_temp[$400+f];
-  gfx[2].colores[f]:=memoria_temp[$500+f]+$40;
-  gfx[3].colores[f]:=memoria_temp[$600+f]+(memoria_temp[$700+f] shl  4)+$80;
-end;
-//El fondo es fijo, no cambia lo pongo despues de la paleta
-if not(cargar_roms(@memoria_temp[0],@exedexes_tilesbg_pos[0],'exedexes.zip',0)) then exit;
-poner_bg;
-poner_fg;
-//final
-reset_exedexes_hw;
-iniciar_exedexes_hw:=true;
-end;
-
-procedure reset_exedexes_hw;
-begin
- main_z80.reset;
- snd_z80.reset;
- AY8910_0.reset;
- sn_76496_0.reset;
- sn_76496_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$ff;
- scroll_x:=0;
- scroll_y:=0;
- sc2on:=true;
- sc1on:=true;
- objon:=true;
-end;
 
 procedure draw_sprites(pri:byte);inline;
 var
@@ -364,6 +202,157 @@ begin
   ay8910_0.update;
   sn_76496_0.Update;
   sn_76496_1.Update;
+end;
+
+//Main
+procedure reset_exedexes_hw;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ AY8910_0.reset;
+ sn_76496_0.reset;
+ sn_76496_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$ff;
+ scroll_x:=0;
+ scroll_y:=0;
+ sc2on:=true;
+ sc1on:=true;
+ objon:=true;
+end;
+
+function iniciar_exedexes_hw:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      memoria_temp:array[0..$7fff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
+    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
+    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+    pt_x:array[0..31] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			64*8+0, 64*8+1, 64*8+2, 64*8+3, 65*8+0, 65*8+1, 65*8+2, 65*8+3,
+			128*8+0, 128*8+1, 128*8+2, 128*8+3, 129*8+0, 129*8+1, 129*8+2, 129*8+3,
+			192*8+0, 192*8+1, 192*8+2, 192*8+3, 193*8+0, 193*8+1, 193*8+2, 193*8+3);
+    pt_y:array[0..31] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16,
+			16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16,
+			24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16);
+procedure poner_bg;
+var
+  f:word;
+  x,y,atrib,pos:word;
+  nchar,color:word;
+  flipx,flipy:boolean;
+begin
+for f:=0 to $fff do begin
+  x:=f div 64;
+  y:=f mod 64;
+  pos:=((y*32 and $e0) shr 5) + ((x*32 and $e0) shr 2) + ((y*32 and $3f00) shr 1);
+  atrib:=memoria_temp[pos+$4000];
+	nchar:=atrib and $3f;
+	color:=(memoria_temp[pos+(8*8)+$4000]) shl 2;
+  flipx:=(atrib and $40)<>0;
+  flipy:=(atrib and $80)<>0;
+  put_gfx_flip(x*32,(63-y)*32,nchar,color,1,1,flipx,flipy);
+end;
+end;
+procedure poner_fg;
+var
+  f:word;
+  x,y,pos:word;
+  nchar:word;
+begin
+for f:=0 to $1fff do begin
+  x:=f div 128;
+  y:=f mod 128;
+  pos:=((y*16 and $f0) shr 4)+(x*16 and $f0)+(y*16 and $700)+((x*16 and $700) shl 3);
+	nchar:=memoria_temp[pos];
+  put_gfx_trans(x*16,(127-y)*16,nchar,0,2,2);
+end;
+end;
+begin
+iniciar_exedexes_hw:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,2048,2048);
+screen_mod_scroll(1,2048,256,2047,2048,256,2047);
+screen_init(2,2048,2048,true);
+screen_mod_scroll(2,2048,256,2047,2048,256,2047);
+screen_init(3,256,256,true);
+screen_init(4,256,512,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,256);
+main_z80.change_ram_calls(exedexes_getbyte,exedexes_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.change_ram_calls(exedexes_snd_getbyte,exedexes_snd_putbyte);
+snd_z80.init_sound(exedexes_sound);
+//Sound Chips
+AY8910_0:=ay8910_chip.create(1500000,1);
+sn_76496_0:=sn76496_chip.Create(3000000);
+sn_76496_1:=sn76496_chip.Create(3000000);
+init_timer(snd_z80.numero_cpu,3000000/(4*60),exedexes_snd_irq,true);
+//cargar roms
+if not(cargar_roms(@memoria[0],@exedexes_rom[0],'exedexes.zip',0)) then exit;
+//cargar ROMS sonido
+if not(cargar_roms(@mem_snd[0],@exedexes_snd_rom,'exedexes.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@exedexes_char,'exedexes.zip')) then exit;
+init_gfx(0,8,8,512);
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//tiles 32x32
+if not(cargar_roms(@memoria_temp[0],@exedexes_tiles1,'exedexes.zip')) then exit;
+init_gfx(1,32,32,64);
+gfx_set_desc_data(2,0,256*8,0,4);
+convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+//tiles 16x16
+if not(cargar_roms(@memoria_temp[0],@exedexes_tiles2[0],'exedexes.zip',0)) then exit;
+init_gfx(2,16,16,256);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@exedexes_sprites[0],'exedexes.zip',0)) then exit;
+init_gfx(3,16,16,256);
+gfx[3].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//poner la paleta y clut
+if not(cargar_roms(@memoria_temp[0],@exedexes_pal[0],'exedexes.zip',0)) then exit;
+for f:=0 to $ff do begin
+    colores[f].r:=pal4bit(memoria_temp[f]);
+    colores[f].g:=pal4bit(memoria_temp[f+$100]);
+    colores[f].b:=pal4bit(memoria_temp[f+$200]);
+end;
+set_pal(colores,256);
+for f:=0 to $ff do begin
+  gfx[0].colores[f]:=memoria_temp[$300+f]+$c0;
+  gfx[1].colores[f]:=memoria_temp[$400+f];
+  gfx[2].colores[f]:=memoria_temp[$500+f]+$40;
+  gfx[3].colores[f]:=memoria_temp[$600+f]+(memoria_temp[$700+f] shl  4)+$80;
+end;
+//El fondo es fijo, no cambia lo pongo despues de la paleta
+if not(cargar_roms(@memoria_temp[0],@exedexes_tilesbg_pos[0],'exedexes.zip',0)) then exit;
+poner_bg;
+poner_fg;
+//final
+reset_exedexes_hw;
+iniciar_exedexes_hw:=true;
+end;
+
+procedure Cargar_exedexes_hw;
+begin
+llamadas_maquina.iniciar:=iniciar_exedexes_hw;
+llamadas_maquina.bucle_general:=exedexes_hw_principal;
+llamadas_maquina.reset:=reset_exedexes_hw;
 end;
 
 end.

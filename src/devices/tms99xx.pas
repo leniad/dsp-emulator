@@ -10,8 +10,7 @@ uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
     irq_type=procedure(int:boolean);
     tms99xx_chip=class
         constructor create(pant:byte;irq_call:irq_type);
-        procedure Free;
-        destructor Destroy;
+        destructor free;
       public
         regs:array[0..$f] of byte;
         fgcolor,bgcolor,modo_video,status_reg,buffer:byte;
@@ -146,13 +145,8 @@ begin
   paleta[0]:=0;
 end;
 
-destructor tms99xx_chip.destroy;
+destructor tms99xx_chip.free;
 begin
-end;
-
-procedure tms99xx_chip.free;
-begin
-self.Destroy;
 end;
 
 constructor tms99xx_chip.create(pant:byte;irq_call:irq_type);

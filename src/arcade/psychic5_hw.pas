@@ -437,9 +437,9 @@ procedure psychic5_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $FF) of
   0:ym2203_0.control(valor);
-  1:ym2203_0.write_reg(valor);
+  1:ym2203_0.write(valor);
   $80:ym2203_1.control(valor);
-  $81:ym2203_1.write_reg(valor);
+  $81:ym2203_1.write(valor);
 end;
 end;
 

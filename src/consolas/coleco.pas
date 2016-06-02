@@ -11,19 +11,8 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,lenguaje,main_engine,controls_engine,tms99xx,sn_76496,sysutils,dialogs,
      rom_engine,misc_functions,sound_engine,file_engine;
 
-procedure Cargar_coleco;
-procedure coleco_principal;
-function iniciar_coleco:boolean;
+procedure cargar_coleco;
 procedure reset_coleco;
-procedure coleco_sound_update;
-//Snapshot
-function abrir_coleco:boolean;
-procedure coleco_grabar_snapshot;
-//CPU
-function coleco_getbyte(direccion:word):byte;
-procedure coleco_putbyte(direccion:word;valor:byte);
-function coleco_inbyte(puerto:word):byte;
-procedure coleco_outbyte(valor:byte;puerto:word);
 procedure coleco_interrupt(int:boolean);
 
 implementation
@@ -36,59 +25,6 @@ var
   joymode,last_nmi:boolean;
   joystick:array[0..1] of byte;
   keypad:array[0..1] of word;
-
-procedure Cargar_coleco;
-begin
-principal1.BitBtn10.Glyph:=nil;
-principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
-principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
-llamadas_maquina.iniciar:=iniciar_coleco;
-llamadas_maquina.bucle_general:=coleco_principal;
-llamadas_maquina.reset:=reset_coleco;
-llamadas_maquina.cartuchos:=abrir_coleco;
-llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;;
-llamadas_maquina.fps_max:=10738635/2/342/262;
-end;
-
-function iniciar_coleco:boolean;
-begin
-iniciar_coleco:=false;
-iniciar_audio(false);
-screen_init(1,284,243);
-iniciar_video(284,243);
-//Main CPU
-main_z80:=cpu_z80.create(3579545,262);
-main_z80.change_ram_calls(coleco_getbyte,coleco_putbyte);
-main_z80.change_io_calls(coleco_inbyte,coleco_outbyte);
-main_z80.init_sound(coleco_sound_update);
-//TMS
-tms_0:=tms99xx_chip.create(1,coleco_interrupt);
-//Chip Sonido
-sn_76496_0:=sn76496_chip.Create(3579545);
-//cargar roms
-if not(cargar_roms(@memoria[0],@coleco_bios,'coleco.zip',1)) then exit;
-//final
-reset_coleco;
-iniciar_coleco:=true;
-end;
-
-procedure reset_coleco;
-var
-  f:word;
-begin
- main_z80.reset;
- sn_76496_0.reset;
- tms_0.reset;
- reset_audio;
- //Importante o el juego 'The Yolk's on You' se para
- for f:=0 to $3ff do memoria[$6000+f]:=random(256);
- joymode:=false;
- last_nmi:=false;
- joystick[0]:=$ff;
- joystick[1]:=$ff;
- keypad[0]:=$ffff;
- keypad[1]:=$ffff;
-end;
 
 procedure eventos_coleco;
 begin
@@ -169,7 +105,7 @@ procedure coleco_putbyte(direccion:word;valor:byte);
 begin
 //Solo tiene $400 bytes de memoria RAM, hace mirror desde $6000 hasta la $7fff
 case direccion of
-  //$2000..$3fff:memoria[direccion]:=valor;
+  // $2000..$3fff:memoria[direccion]:=valor;
   $6000..$7fff:memoria[$6000+(direccion and $3ff)]:=valor;
 end;
 end;
@@ -220,13 +156,32 @@ end;
 
 procedure coleco_interrupt(int:boolean);
 begin
-  if (int and not(last_nmi)) then main_z80.pedir_nmi:=PULSE_LINE;
+  if (int and not(last_nmi)) then main_z80.change_nmi(PULSE_LINE);
   last_nmi:=int;
 end;
 
 procedure coleco_sound_update;
 begin
   sn_76496_0.update;
+end;
+
+//Main
+procedure reset_coleco;
+var
+  f:word;
+begin
+ main_z80.reset;
+ sn_76496_0.reset;
+ tms_0.reset;
+ reset_audio;
+ //Importante o el juego 'The Yolk's on You' se para
+ for f:=0 to $3ff do memoria[$6000+f]:=random(256);
+ joymode:=false;
+ last_nmi:=false;
+ joystick[0]:=$ff;
+ joystick[1]:=$ff;
+ keypad[0]:=$ffff;
+ keypad[1]:=$ffff;
 end;
 
 function abrir_cartucho(datos:pbyte;longitud:integer):boolean;
@@ -308,6 +263,41 @@ if principal1.savedialog1.execute then begin
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end else exit;
 Directory.coleco_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
+end;
+
+function iniciar_coleco:boolean;
+begin
+iniciar_coleco:=false;
+iniciar_audio(false);
+screen_init(1,284,243);
+iniciar_video(284,243);
+//Main CPU
+main_z80:=cpu_z80.create(3579545,262);
+main_z80.change_ram_calls(coleco_getbyte,coleco_putbyte);
+main_z80.change_io_calls(coleco_inbyte,coleco_outbyte);
+main_z80.init_sound(coleco_sound_update);
+//TMS
+tms_0:=tms99xx_chip.create(1,coleco_interrupt);
+//Chip Sonido
+sn_76496_0:=sn76496_chip.Create(3579545);
+//cargar roms
+if not(cargar_roms(@memoria[0],@coleco_bios,'coleco.zip',1)) then exit;
+//final
+reset_coleco;
+iniciar_coleco:=true;
+end;
+
+procedure Cargar_coleco;
+begin
+principal1.BitBtn10.Glyph:=nil;
+principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
+principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+llamadas_maquina.iniciar:=iniciar_coleco;
+llamadas_maquina.bucle_general:=coleco_principal;
+llamadas_maquina.reset:=reset_coleco;
+llamadas_maquina.cartuchos:=abrir_coleco;
+llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;
+llamadas_maquina.fps_max:=10738635/2/342/262;
 end;
 
 end.

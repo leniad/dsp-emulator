@@ -99,7 +99,6 @@ end;
 procedure cerrar_supbtime;
 begin
 close_dec16ic(0);
-deco16_snd_simple_close;
 end;
 
 procedure reset_supbtime;
@@ -238,4 +237,4 @@ case direccion of
 end;
 end;
 
-end.
+end.

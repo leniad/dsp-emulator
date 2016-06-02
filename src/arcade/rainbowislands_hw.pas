@@ -9,7 +9,6 @@ procedure Cargar_rainbow;
 procedure rainbow_principal;
 function iniciar_rainbow:boolean;
 procedure reset_rainbow;
-procedure cerrar_rainbow;
 //Main CPU
 function rainbow_getword(direccion:dword):word;
 procedure rainbow_putword(direccion:dword;valor:word);
@@ -59,7 +58,6 @@ procedure Cargar_rainbow;
 begin
 llamadas_maquina.iniciar:=iniciar_rainbow;
 llamadas_maquina.bucle_general:=rainbow_principal;
-llamadas_maquina.cerrar:=cerrar_rainbow;
 llamadas_maquina.reset:=reset_rainbow;
 end;
 
@@ -106,7 +104,9 @@ snd_z80:=cpu_z80.create(4000000,256);
 snd_z80.change_ram_calls(rainbow_snd_getbyte,rainbow_snd_putbyte);
 snd_z80.init_sound(sound_instruccion);
 //Sound Chips
-YM2151_Init(0,4000000,sound_bank_rom,ym2151_snd_irq);
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_port_func(sound_bank_rom);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
@@ -162,16 +162,11 @@ reset_rainbow;
 iniciar_rainbow:=true;
 end;
 
-procedure cerrar_rainbow;
-begin
-YM2151_close(0);
-end;
-
 procedure reset_rainbow;
 begin
  main_m68000.reset;
  snd_z80.reset;
- YM2151_reset(0);
+ ym2151_0.reset;
  taitosound_reset;
  reset_audio;
  marcade.in0:=$ff;
@@ -342,7 +337,7 @@ function rainbow_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
   $4000..$7fff:rainbow_snd_getbyte:=bank_sound[sound_bank,direccion and $3fff];
-  $9001:rainbow_snd_getbyte:=YM2151_status_port_read(0);
+  $9001:rainbow_snd_getbyte:=ym2151_0.status;
   $a001:rainbow_snd_getbyte:=taitosound_slave_comm_r;
   else rainbow_snd_getbyte:=mem_snd[direccion];
 end;
@@ -352,8 +347,8 @@ procedure rainbow_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
 case direccion of
-  $9000:YM2151_register_port_write(0,valor);
-  $9001:YM2151_data_port_write(0,valor);
+  $9000:ym2151_0.reg(valor);
+  $9001:ym2151_0.write(valor);
   $a000:taitosound_slave_port_w(valor);
   $a001:taitosound_slave_comm_w(valor);
     else mem_snd[direccion]:=valor;
@@ -367,13 +362,12 @@ end;
 
 procedure sound_instruccion;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 end.

@@ -5,28 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232,timer_engine;
 
-procedure Cargar_thunderx;
-function iniciar_thunderx:boolean;
-procedure reset_thunderx;
-procedure cerrar_thunderx;
-//Main
-procedure thunderx_principal;
-function thunderx_getbyte(direccion:word):byte;
-procedure thunderx_putbyte(direccion:word;valor:byte);
-procedure thunderx_bank(valor:byte);
-procedure thunderx_firq;
-//Sound
-function thunderx_snd_getbyte(direccion:word):byte;
-procedure thunderx_snd_putbyte(direccion:word;valor:byte);
-procedure thunderx_sound_update;
-function scontra_snd_getbyte(direccion:word):byte;
-procedure scontra_snd_putbyte(direccion:word;valor:byte);
-procedure scontra_sound_update;
-//Video
-procedure thunderx_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
-procedure gbusters_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
-procedure thunderx_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
-procedure scontra_k007232_cb(valor:byte);
+procedure cargar_thunderx;
 
 implementation
 
@@ -117,15 +96,6 @@ var
  ram_bank:array[0..2,0..$7ff] of byte;
  video_bank_call:tvideo_bank_func;
  call_function_1f98:tfunction_1f98;
-
-procedure Cargar_thunderx;
-begin
-llamadas_maquina.iniciar:=iniciar_thunderx;
-llamadas_maquina.cerrar:=cerrar_thunderx;
-llamadas_maquina.reset:=reset_thunderx;
-llamadas_maquina.bucle_general:=thunderx_principal;
-llamadas_maquina.fps_max:=59.185606;
-end;
 
 procedure scontra_videobank(valor:byte);
 begin
@@ -246,176 +216,6 @@ begin
      timer[thunderx_timer].enabled:=false;
 end;
 
-function iniciar_thunderx:boolean;
-var
-   temp_mem:array[0..$1ffff] of byte;
-   f:byte;
-begin
-iniciar_thunderx:=false;
-//Pantallas para el K052109
-screen_init(1,512,256,true);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
-screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
-screen_init(4,1024,1024,false,true);
-if main_vars.tipo_maquina<>224 then main_screen.rot90_screen:=true;
-iniciar_video(288,224,true);
-iniciar_audio(false);
-//Main CPU
-main_konami:=cpu_konami.create(3000000,256);
-main_konami.change_ram_calls(thunderx_getbyte,thunderx_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-case main_vars.tipo_maquina of
-     222:begin //Super contra
-            call_function_1f98:=scontra_1f98_call;
-            //cargar roms y ponerlas en su sitio...
-            if not(cargar_roms(@temp_mem[0],@scontra_rom[0],'scontra.zip',0)) then exit;
-            copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
-            for f:=0 to 3 do begin
-                copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
-                copymemory(@rom_bank[4+f,0],@temp_mem[f*$2000],$2000); //Estas son un mirror de las otras tres...
-            end;
-            for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
-            //cargar sonido
-            if not(cargar_roms(@mem_snd[0],@scontra_sound,'scontra.zip',1)) then exit;
-            //Sound CPU
-            snd_z80.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
-            snd_z80.init_sound(scontra_sound_update);
-            //Sound Chips
-            YM2151_Init(0,3579545,nil,nil);
-            getmem(k007232_rom,$80000);
-            if not(cargar_roms(k007232_rom,@scontra_k007232[0],'scontra.zip',0)) then exit;
-            k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,scontra_k007232_cb);
-            //Iniciar video
-            video_bank_call:=scontra_videobank;
-            getmem(tiles_rom,$100000);
-            if not(cargar_roms32b_b(tiles_rom,@scontra_tiles,'scontra.zip',0)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$100000);
-            getmem(sprite_rom,$100000);
-            if not(cargar_roms32b_b(sprite_rom,@scontra_sprites,'scontra.zip',0)) then exit;
-            k051960_0:=k051960_chip.create(4,sprite_rom,$100000,thunderx_sprite_cb,2);
-            //DIP
-            marcade.dswa:=$ff;
-            marcade.dswa_val:=@scontra_dip_a;
-            marcade.dswb:=$5a;
-            marcade.dswb_val:=@scontra_dip_b;
-            marcade.dswc:=$f7;
-            marcade.dswc_val:=@scontra_dip_c;
-     end;
-     223:begin //Gang Busters
-            main_konami.change_set_lines(thunderx_bank);
-            call_function_1f98:=scontra_1f98_call;
-            //cargar roms y ponerlas en su sitio...
-            if not(cargar_roms(@temp_mem[0],@gbusters_rom[0],'gbusters.zip',0)) then exit;
-            copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
-            for f:=0 to 3 do begin
-                copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
-                copymemory(@rom_bank[4+f,0],@temp_mem[f*$2000],$2000); //Estas son un mirror de las otras tres...
-            end;
-            for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
-            //cargar sonido
-            if not(cargar_roms(@mem_snd[0],@gbusters_sound,'gbusters.zip',1)) then exit;
-            //Sound CPU
-            snd_z80.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
-            snd_z80.init_sound(scontra_sound_update);
-            //Sound Chips
-            YM2151_Init(0,3579545,nil,nil);
-            getmem(k007232_rom,$40000);
-            if not(cargar_roms(k007232_rom,@gbusters_k007232,'gbusters.zip',1)) then exit;
-            k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,scontra_k007232_cb);
-            //Iniciar video
-            video_bank_call:=gbusters_videobank;
-            getmem(tiles_rom,$80000);
-            if not(cargar_roms32b(tiles_rom,@gbusters_tiles,'gbusters.zip',0)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,gbusters_cb,tiles_rom,$80000);
-            getmem(sprite_rom,$80000);
-            if not(cargar_roms32b(sprite_rom,@gbusters_sprites,'gbusters.zip',0)) then exit;
-            k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
-            //DIP
-            marcade.dswa:=$ff;
-            marcade.dswa_val:=@scontra_dip_a;
-            marcade.dswb:=$56;
-            marcade.dswb_val:=@gbusters_dip_b;
-            marcade.dswc:=$ff;
-            marcade.dswc_val:=@gbusters_dip_c;
-     end;
-     224:begin //Thunder Cross
-            main_konami.change_set_lines(thunderx_bank);
-            call_function_1f98:=thunderx_1f98_call;
-            //cargar roms y ponerlas en su sitio...
-            if not(cargar_roms(@temp_mem[0],@thunderx_rom[0],'thunderx.zip',0)) then exit;
-            copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
-            for f:=0 to 3 do begin
-                copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
-                copymemory(@rom_bank[4+f,0],@temp_mem[f*$2000],$2000); //Estas son un mirror de las otras tres...
-            end;
-            for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
-            //Despues de calular las colisiones hay que llamar a FIRQ, pero hay que retrasarla 100T o se cuelga...
-            thunderx_timer:=init_timer(main_konami.numero_cpu,100,thunderx_firq,false);
-            //cargar sonido
-            if not(cargar_roms(@mem_snd[0],@thunderx_sound,'thunderx.zip',1)) then exit;
-            //Sound CPU
-            snd_z80.change_ram_calls(thunderx_snd_getbyte,thunderx_snd_putbyte);
-            snd_z80.init_sound(thunderx_sound_update);
-            //Sound Chips
-            YM2151_Init(0,3579545,nil,nil);
-            //Iniciar video
-            video_bank_call:=thunderx_videobank;
-            getmem(tiles_rom,$80000);
-            if not(cargar_roms32b_b(tiles_rom,@thunderx_tiles,'thunderx.zip',0)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$80000);
-            getmem(sprite_rom,$80000);
-            if not(cargar_roms32b_b(sprite_rom,@thunderx_sprites,'thunderx.zip',0)) then exit;
-            k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
-            //DIP
-            marcade.dswa:=$ff;
-            marcade.dswa_val:=@scontra_dip_a;
-            marcade.dswb:=$7a;
-            marcade.dswb_val:=@thunderx_dip_b;
-            marcade.dswc:=$ff;
-            marcade.dswc_val:=@gbusters_dip_c;
-     end;
-end;
-layer_colorbase[0]:=48;
-layer_colorbase[1]:=0;
-layer_colorbase[2]:=16;
-sprite_colorbase:=32;
-//final
-reset_thunderx;
-iniciar_thunderx:=true;
-end;
-
-procedure cerrar_thunderx;
-begin
-YM2151_close(0);
-if main_vars.tipo_maquina<>224 then if k007232_rom<>nil then freemem(k007232_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-if tiles_rom<>nil then freemem(tiles_rom);
-k007232_rom:=nil;
-sprite_rom:=nil;
-tiles_rom:=nil;
-end;
-
-procedure reset_thunderx;
-begin
- main_konami.reset;
- snd_z80.reset;
- k052109_0.reset;
- YM2151_reset(0);
- k051960_0.reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
- sound_latch:=0;
- bank0_bank:=0;
- rom_bank1:=0;
- latch_1f98:=0;
- priority:=0;
-end;
-
 procedure thunderx_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
 code:=code or (((color and $1f) shl 8) or (bank shl 13));
@@ -514,10 +314,10 @@ while EmuStatus=EsRuning do begin
                     update_video_thunderx;
                     if k052109_0.is_irq_enabled then main_konami.change_irq(HOLD_LINE);
                   end;
-    end;
-    eventos_thunderx;
-    video_sync;
   end;
+  eventos_thunderx;
+  video_sync;
+end;
 end;
 
 //Main CPU
@@ -600,7 +400,7 @@ begin
 case direccion of
   0..$87ff:thunderx_snd_getbyte:=mem_snd[direccion];
   $a000:thunderx_snd_getbyte:=sound_latch;
-  $c001:thunderx_snd_getbyte:=YM2151_status_port_read(0);
+  $c001:thunderx_snd_getbyte:=ym2151_0.status;
 end;
 end;
 
@@ -609,14 +409,14 @@ begin
 if direccion<$8000 then exit;
 case direccion of
   $8000..$87ff:mem_snd[direccion]:=valor;
-  $c000:YM2151_register_port_write(0,valor);
-  $c001:YM2151_data_port_write(0,valor);
+  $c000:ym2151_0.reg(valor);
+  $c001:ym2151_0.write(valor);
 end;
 end;
 
 procedure thunderx_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 function scontra_snd_getbyte(direccion:word):byte;
@@ -625,7 +425,7 @@ case direccion of
   0..$87ff:scontra_snd_getbyte:=mem_snd[direccion];
   $a000:scontra_snd_getbyte:=sound_latch;
   $b000..$b00d:scontra_snd_getbyte:=k007232_0.read(direccion and $f);
-  $c001:scontra_snd_getbyte:=YM2151_status_port_read(0);
+  $c001:scontra_snd_getbyte:=ym2151_0.status;
 end;
 end;
 
@@ -635,16 +435,195 @@ if direccion<$8000 then exit;
 case direccion of
   $8000..$87ff:mem_snd[direccion]:=valor;
   $b000..$b00d:k007232_0.write(direccion and $f,valor);
-  $c000:YM2151_register_port_write(0,valor);
-  $c001:YM2151_data_port_write(0,valor);
+  $c000:ym2151_0.reg(valor);
+  $c001:ym2151_0.write(valor);
   $f000:k007232_0.set_bank(valor and $3,(valor shr 2) and $3);
 end;
 end;
 
 procedure scontra_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   k007232_0.update;
+end;
+
+//Main
+procedure reset_thunderx;
+begin
+ main_konami.reset;
+ snd_z80.reset;
+ k052109_0.reset;
+ ym2151_0.reset;
+ k051960_0.reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+ sound_latch:=0;
+ bank0_bank:=0;
+ rom_bank1:=0;
+ latch_1f98:=0;
+ priority:=0;
+end;
+
+function iniciar_thunderx:boolean;
+var
+   temp_mem:array[0..$1ffff] of byte;
+   f:byte;
+begin
+iniciar_thunderx:=false;
+//Pantallas para el K052109
+screen_init(1,512,256,true);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,512,511,256,256,255);
+screen_init(3,512,256,true);
+screen_mod_scroll(3,512,512,511,256,256,255);
+screen_init(4,1024,1024,false,true);
+if main_vars.tipo_maquina<>224 then main_screen.rot90_screen:=true;
+iniciar_video(288,224,true);
+iniciar_audio(false);
+//Main CPU
+main_konami:=cpu_konami.create(3000000,256);
+main_konami.change_ram_calls(thunderx_getbyte,thunderx_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+case main_vars.tipo_maquina of
+     222:begin //Super contra
+            call_function_1f98:=scontra_1f98_call;
+            //cargar roms y ponerlas en su sitio...
+            if not(cargar_roms(@temp_mem[0],@scontra_rom[0],'scontra.zip',0)) then exit;
+            copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
+            for f:=0 to 3 do begin
+                copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+                copymemory(@rom_bank[4+f,0],@temp_mem[f*$2000],$2000); //Estas son un mirror de las otras tres...
+            end;
+            for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+            //cargar sonido
+            if not(cargar_roms(@mem_snd[0],@scontra_sound,'scontra.zip',1)) then exit;
+            //Sound CPU
+            snd_z80.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
+            snd_z80.init_sound(scontra_sound_update);
+            //Sound Chips
+            ym2151_0:=ym2151_chip.create(3579545);
+            getmem(k007232_rom,$80000);
+            if not(cargar_roms(k007232_rom,@scontra_k007232[0],'scontra.zip',0)) then exit;
+            k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,scontra_k007232_cb);
+            //Iniciar video
+            video_bank_call:=scontra_videobank;
+            getmem(tiles_rom,$100000);
+            if not(cargar_roms32b_b(tiles_rom,@scontra_tiles,'scontra.zip',0)) then exit;
+            k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$100000);
+            getmem(sprite_rom,$100000);
+            if not(cargar_roms32b_b(sprite_rom,@scontra_sprites,'scontra.zip',0)) then exit;
+            k051960_0:=k051960_chip.create(4,sprite_rom,$100000,thunderx_sprite_cb,2);
+            //DIP
+            marcade.dswa:=$ff;
+            marcade.dswa_val:=@scontra_dip_a;
+            marcade.dswb:=$5a;
+            marcade.dswb_val:=@scontra_dip_b;
+            marcade.dswc:=$f7;
+            marcade.dswc_val:=@scontra_dip_c;
+     end;
+     223:begin //Gang Busters
+            main_konami.change_set_lines(thunderx_bank);
+            call_function_1f98:=scontra_1f98_call;
+            //cargar roms y ponerlas en su sitio...
+            if not(cargar_roms(@temp_mem[0],@gbusters_rom[0],'gbusters.zip',0)) then exit;
+            copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
+            for f:=0 to 3 do begin
+                copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+                copymemory(@rom_bank[4+f,0],@temp_mem[f*$2000],$2000); //Estas son un mirror de las otras tres...
+            end;
+            for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+            //cargar sonido
+            if not(cargar_roms(@mem_snd[0],@gbusters_sound,'gbusters.zip',1)) then exit;
+            //Sound CPU
+            snd_z80.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
+            snd_z80.init_sound(scontra_sound_update);
+            //Sound Chips
+            ym2151_0:=ym2151_chip.create(3579545);
+            getmem(k007232_rom,$40000);
+            if not(cargar_roms(k007232_rom,@gbusters_k007232,'gbusters.zip',1)) then exit;
+            k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,scontra_k007232_cb);
+            //Iniciar video
+            video_bank_call:=gbusters_videobank;
+            getmem(tiles_rom,$80000);
+            if not(cargar_roms32b(tiles_rom,@gbusters_tiles,'gbusters.zip',0)) then exit;
+            k052109_0:=k052109_chip.create(1,2,3,gbusters_cb,tiles_rom,$80000);
+            getmem(sprite_rom,$80000);
+            if not(cargar_roms32b(sprite_rom,@gbusters_sprites,'gbusters.zip',0)) then exit;
+            k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
+            //DIP
+            marcade.dswa:=$ff;
+            marcade.dswa_val:=@scontra_dip_a;
+            marcade.dswb:=$56;
+            marcade.dswb_val:=@gbusters_dip_b;
+            marcade.dswc:=$ff;
+            marcade.dswc_val:=@gbusters_dip_c;
+     end;
+     224:begin //Thunder Cross
+            main_konami.change_set_lines(thunderx_bank);
+            call_function_1f98:=thunderx_1f98_call;
+            //cargar roms y ponerlas en su sitio...
+            if not(cargar_roms(@temp_mem[0],@thunderx_rom[0],'thunderx.zip',0)) then exit;
+            copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
+            for f:=0 to 3 do begin
+                copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+                copymemory(@rom_bank[4+f,0],@temp_mem[f*$2000],$2000); //Estas son un mirror de las otras tres...
+            end;
+            for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+            //Despues de calcular las colisiones hay que llamar a FIRQ, pero hay que retrasarla 100T o se cuelga...
+            thunderx_timer:=init_timer(main_konami.numero_cpu,100,thunderx_firq,false);
+            //cargar sonido
+            if not(cargar_roms(@mem_snd[0],@thunderx_sound,'thunderx.zip',1)) then exit;
+            //Sound CPU
+            snd_z80.change_ram_calls(thunderx_snd_getbyte,thunderx_snd_putbyte);
+            snd_z80.init_sound(thunderx_sound_update);
+            //Sound Chips
+            ym2151_0:=ym2151_chip.create(3579545);
+            //Iniciar video
+            video_bank_call:=thunderx_videobank;
+            getmem(tiles_rom,$80000);
+            if not(cargar_roms32b_b(tiles_rom,@thunderx_tiles,'thunderx.zip',0)) then exit;
+            k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$80000);
+            getmem(sprite_rom,$80000);
+            if not(cargar_roms32b_b(sprite_rom,@thunderx_sprites,'thunderx.zip',0)) then exit;
+            k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
+            //DIP
+            marcade.dswa:=$ff;
+            marcade.dswa_val:=@scontra_dip_a;
+            marcade.dswb:=$7a;
+            marcade.dswb_val:=@thunderx_dip_b;
+            marcade.dswc:=$ff;
+            marcade.dswc_val:=@gbusters_dip_c;
+     end;
+end;
+layer_colorbase[0]:=48;
+layer_colorbase[1]:=0;
+layer_colorbase[2]:=16;
+sprite_colorbase:=32;
+//final
+reset_thunderx;
+iniciar_thunderx:=true;
+end;
+
+procedure cerrar_thunderx;
+begin
+if main_vars.tipo_maquina<>224 then if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+tiles_rom:=nil;
+end;
+
+procedure Cargar_thunderx;
+begin
+llamadas_maquina.iniciar:=iniciar_thunderx;
+llamadas_maquina.cerrar:=cerrar_thunderx;
+llamadas_maquina.reset:=reset_thunderx;
+llamadas_maquina.bucle_general:=thunderx_principal;
+llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

@@ -5,30 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,samples,rom_engine,
      pal_engine,sound_engine,n2a03_sound,m6502;
 
-procedure Cargar_dkong;
-procedure reset_dkong;
-procedure cerrar_dkong;
-function iniciar_dkong:boolean;
-//Donkey Kong & Donkey Kong jr.
-procedure dkong_principal;
-function dkong_getbyte(direccion:word):byte;
-procedure dkong_putbyte(direccion:word;valor:byte);
-procedure dkong_sound_update;
-//Donkey Kong sound
-procedure dkong_tune_sound(valor:byte);
-procedure dkong_effects_sound(direccion,valor:byte);
-//Donkey Kong Jr. sound
-procedure dkongjr_tune_sound(valor:byte);
-procedure dkongjr_effects_sound(direccion,valor:byte);
-//Donkey Kong 3
-procedure dkong3_principal;
-function dkong3_getbyte(direccion:word):byte;
-procedure dkong3_putbyte(direccion:word;valor:byte);
-procedure dkong3_sound_update;
-function dkong3_snd1_getbyte(direccion:word):byte;
-procedure dkong3_snd1_putbyte(direccion:word;valor:byte);
-function dkong3_snd2_getbyte(direccion:word):byte;
-procedure dkong3_snd2_putbyte(direccion:word;valor:byte);
+procedure cargar_dkong;
 
 implementation
 const
@@ -117,233 +94,6 @@ var
  tune01,tune08,tune09,tune11:byte;
  effect0,effect1,effect2:byte;
 
-procedure Cargar_dkong;
-begin
-llamadas_maquina.iniciar:=iniciar_dkong;
-llamadas_maquina.cerrar:=cerrar_dkong;
-llamadas_maquina.reset:=reset_dkong;
-llamadas_maquina.fps_max:=60.6060606060606060;
-case main_vars.tipo_maquina of
-  15,168:llamadas_maquina.bucle_general:=dkong_principal;
-  169:llamadas_maquina.bucle_general:=dkong3_principal;
-end;
-end;
-
-function iniciar_dkong:boolean;
-var
-  memoria_temp:array[0..$5fff] of byte;
-const
-      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      ps_dkong_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-		  	  64*16*16+0, 64*16*16+1, 64*16*16+2, 64*16*16+3, 64*16*16+4, 64*16*16+5, 64*16*16+6, 64*16*16+7);
-      ps_dkong3_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-		  	  128*16*16+0, 128*16*16+1, 128*16*16+2, 128*16*16+3, 128*16*16+4, 128*16*16+5, 128*16*16+6, 128*16*16+7);
-      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-    			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-
-procedure dkong_char_load(num_char:word);
-begin
-  init_gfx(0,8,8,num_char);
-  gfx_set_desc_data(2,0,8*8,num_char*8*8,0);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-end;
-procedure dkong_sprites_load(num_spr:word);
-begin
-  init_gfx(1,16,16,num_spr);
-  gfx[1].trans[0]:=true;
-  gfx_set_desc_data(2,0,16*8,num_spr*16*16,0);
-  case main_vars.tipo_maquina of
-    15,168:convert_gfx(1,0,@memoria_temp[0],@ps_dkong_x[0],@ps_y[0],true,false);
-    169:convert_gfx(1,0,@memoria_temp[0],@ps_dkong3_x[0],@ps_y[0],true,false);
-  end;
-end;
-procedure pal_dkong;
-var
-  ctemp1,ctemp2:byte;
-  colores:tpaleta;
-  f:word;
-begin
-for f:=0 to 255 do begin
-  ctemp1:=memoria_temp[f+$100];
-  ctemp2:=memoria_temp[f];
-  colores[f].r:=not(($21*((ctemp1 shr 1) and 1))+($47*((ctemp1 shr 2) and 1))+($97*((ctemp1 shr 3) and 1)));
-  colores[f].g:=not(($21*((ctemp2 shr 2) and 1))+($47*((ctemp2 shr 3) and 1))+($97*(ctemp1 and 1)));
-  colores[f].b:=not(($55*(ctemp2 and 1))+($aa*((ctemp2 shr 1) and 1)));
-end;
-set_pal(colores,256);
-copymemory(@colores_char[0],@memoria_temp[$200],$100);
-end;
-procedure pal_dkong3;
-var
-  ctemp1,ctemp2:byte;
-  colores:tpaleta;
-  f:word;
-begin
-for f:=0 to 255 do begin
-  ctemp1:=memoria_temp[f];
-  ctemp2:=memoria_temp[f+$200];
-  colores[f].r:=not($0e*((ctemp1 shr 4) and 1)+$1f*((ctemp1 shr 5) and 1)+$43*((ctemp1 shr 6) and 1)+$8f*((ctemp1 shr 7) and 1));
-  colores[f].g:=not($0e*((ctemp1 shr 0) and 1)+$1f*((ctemp1 shr 1) and 1)+$43*((ctemp1 shr 2) and 1)+$8f*((ctemp1 shr 3) and 1));
-  colores[f].b:=not($0e*((ctemp2 shr 0) and 1)+$1f*((ctemp2 shr 1) and 1)+$43*((ctemp2 shr 2) and 1)+$8f*((ctemp2 shr 3) and 1));
-end;
-set_pal(colores,256);
-copymemory(@colores_char[0],@memoria_temp[$400],$100);
-end;
-
-begin
-iniciar_dkong:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_init(2,256,256,false,true);
-iniciar_video(224,256);
-case main_vars.tipo_maquina of
-  15:begin //Donkey Kong
-        //Main CPU
-        main_z80:=cpu_z80.create(3072000,264);
-        main_z80.change_ram_calls(dkong_getbyte,dkong_putbyte);
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@dkong_rom[0],'dkong.zip',0)) then exit;
-        //samples
-        if load_samples('dkong.zip',@dk_samples[0],num_samples) then main_z80.init_sound(dkong_sound_update);
-        audio_tunes:=dkong_tune_sound;
-        audio_effects:=dkong_effects_sound;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@dkong_char[0],'dkong.zip',0)) then exit;
-        dkong_char_load($100);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@dkong_sprites[0],'dkong.zip',0)) then exit;
-        dkong_sprites_load($80);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@dkong_pal[0],'dkong.zip',0)) then exit;
-        pal_dkong;
-        //DIP
-        marcade.dswa:=$80;
-        marcade.dswa_val:=@dk_dip_a;
-     end;
- 168:begin //Donkey Kong Jr.
-        //Main CPU
-        main_z80:=cpu_z80.create(3072000,264);
-        main_z80.change_ram_calls(dkong_getbyte,dkong_putbyte);
-        //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@dkongjr_rom[0],'dkongjr.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$1000);
-        copymemory(@memoria[$3000],@memoria_temp[$1000],$1000);
-        copymemory(@memoria[$2000],@memoria_temp[$2000],$800);
-        copymemory(@memoria[$4800],@memoria_temp[$2800],$800);
-        copymemory(@memoria[$1000],@memoria_temp[$3000],$800);
-        copymemory(@memoria[$5800],@memoria_temp[$3800],$800);
-        copymemory(@memoria[$4000],@memoria_temp[$4000],$800);
-        copymemory(@memoria[$2800],@memoria_temp[$4800],$800);
-        copymemory(@memoria[$5000],@memoria_temp[$5000],$800);
-        copymemory(@memoria[$1800],@memoria_temp[$5800],$800);
-        //samples
-        if load_samples('dkongjr.zip',@dkjr_samples[0],num_samples_jr) then main_z80.init_sound(dkong_sound_update);
-        audio_tunes:=dkongjr_tune_sound;
-        audio_effects:=dkongjr_effects_sound;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@dkongjr_char[0],'dkongjr.zip',0)) then exit;
-        dkong_char_load($200);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@dkongjr_sprites[0],'dkongjr.zip',0)) then exit;
-        dkong_sprites_load($80);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@dkongjr_pal[0],'dkongjr.zip',0)) then exit;
-        pal_dkong;
-        //DIP
-        marcade.dswa:=$80;
-        marcade.dswa_val:=@dk_dip_a;
-     end;
- 169:begin //Donkey Kong 3
-        //Main CPU
-        main_z80:=cpu_z80.create(4000000,264);
-        main_z80.change_ram_calls(dkong3_getbyte,dkong3_putbyte);
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@dkong3_rom[0],'dkong3.zip',0)) then exit;
-        //sound 1
-        if not(cargar_roms(@mem_snd[0],@dkong3_snd1,'dkong3.zip')) then exit;
-        main_m6502:=cpu_m6502.create(1789772,264,TCPU_M6502);
-        main_m6502.change_ram_calls(dkong3_snd1_getbyte,dkong3_snd1_putbyte);
-        main_m6502.init_sound(dkong3_sound_update);
-        init_n2a03_sound(0,nil,nil);
-        //sound 2
-        if not(cargar_roms(@mem_misc[0],@dkong3_snd2,'dkong3.zip')) then exit;
-        snd_m6502:=cpu_m6502.create(1789772,264,TCPU_M6502);
-        snd_m6502.change_ram_calls(dkong3_snd2_getbyte,dkong3_snd2_putbyte);
-        init_n2a03_sound(1,nil,nil);
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@dkong3_char[0],'dkong3.zip',0)) then exit;
-        dkong_char_load($200);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@dkong3_sprites[0],'dkong3.zip',0)) then exit;
-        dkong_sprites_load($100);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@dkong3_pal[0],'dkong3.zip',0)) then exit;
-        pal_dkong3;
-        //DIP
-        marcade.dswa:=$0;
-        marcade.dswa_val:=@dk3_dip_a;
-        marcade.dswb:=$0;
-        marcade.dswb_val:=@dk3_dip_b;
-     end;
-end;
-//final
-reset_dkong;
-iniciar_dkong:=true;
-end;
-
-procedure cerrar_dkong;
-begin
-case main_vars.tipo_maquina of
-  15,168:close_samples;
-  169:begin
-        close_n2a03_sound(0);
-        close_n2a03_sound(1);
-      end;
-end;
-end;
-
-procedure reset_dkong;
-begin
- main_z80.reset;
- case main_vars.tipo_maquina of
-    15:begin
-        marcade.in2:=0;
-        reset_samples;
-        tune08:=0;
-        tune09:=0;
-        tune11:=0;
-        effect0:=0;
-       end;
-   168:begin
-        marcade.in2:=$40;
-        reset_samples;
-        effect0:=0;
-        effect1:=0;
-        effect2:=0;
-       end;
-   169:begin
-        marcade.in2:=0;
-        main_m6502.reset;
-        snd_m6502.reset;
-        reset_n2a03_sound(0);
-        reset_n2a03_sound(1);
-        latch1:=0;
-        latch2:=0;
-        latch3:=0;
-       end;
- end;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- haz_nmi:=false;
- npaleta:=0;
- sprite_bank:=0;
- char_bank:=0;
-end;
-
 procedure update_video_dkong;inline;
 var
   f,color,nchar:word;
@@ -408,7 +158,7 @@ while EmuStatus=EsRuning do begin
     main_z80.run(frame);
     frame:=frame+main_z80.tframes-main_z80.contador;
     if f=239 then begin
-      if haz_nmi then main_z80.pedir_nmi:=PULSE_LINE;
+      if haz_nmi then main_z80.change_nmi(PULSE_LINE);
       update_video_dkong;
     end;
   end;
@@ -637,9 +387,9 @@ while EmuStatus=EsRuning do begin
     frame_s2:=frame_s2+snd_m6502.tframes-snd_m6502.contador;
     if f=239 then begin
       if haz_nmi then begin
-        main_z80.pedir_nmi:=PULSE_LINE;
-        main_m6502.pedir_nmi:=PULSE_LINE;
-        snd_m6502.pedir_nmi:=PULSE_LINE;
+        main_z80.change_nmi(PULSE_LINE);
+        main_m6502.change_nmi(PULSE_LINE);
+        snd_m6502.change_nmi(PULSE_LINE);
       end;
       update_video_dkong;
     end;
@@ -738,6 +488,232 @@ procedure dkong3_sound_update;
 begin
   n2a03_sound_update(0);
   n2a03_sound_update(1);
+end;
+
+//Main
+procedure reset_dkong;
+begin
+ main_z80.reset;
+ case main_vars.tipo_maquina of
+    15:begin
+        marcade.in2:=0;
+        reset_samples;
+       end;
+   168:begin
+        marcade.in2:=$40;
+        reset_samples;
+       end;
+   169:begin
+        marcade.in2:=0;
+        main_m6502.reset;
+        snd_m6502.reset;
+        reset_n2a03_sound(0);
+        reset_n2a03_sound(1);
+       end;
+ end;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ haz_nmi:=false;
+ npaleta:=0;
+ sprite_bank:=0;
+ char_bank:=0;
+ tune08:=0;
+ tune09:=0;
+ tune11:=0;
+ effect0:=0;
+ effect1:=0;
+ effect2:=0;
+ latch1:=0;
+ latch2:=0;
+ latch3:=0;
+end;
+
+function iniciar_dkong:boolean;
+var
+  memoria_temp:array[0..$5fff] of byte;
+const
+      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+      ps_dkong_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+		  	  64*16*16+0, 64*16*16+1, 64*16*16+2, 64*16*16+3, 64*16*16+4, 64*16*16+5, 64*16*16+6, 64*16*16+7);
+      ps_dkong3_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+		  	  128*16*16+0, 128*16*16+1, 128*16*16+2, 128*16*16+3, 128*16*16+4, 128*16*16+5, 128*16*16+6, 128*16*16+7);
+      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+    			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+
+procedure dkong_char_load(num_char:word);
+begin
+  init_gfx(0,8,8,num_char);
+  gfx_set_desc_data(2,0,8*8,num_char*8*8,0);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+end;
+procedure dkong_sprites_load(num_spr:word);
+begin
+  init_gfx(1,16,16,num_spr);
+  gfx[1].trans[0]:=true;
+  gfx_set_desc_data(2,0,16*8,num_spr*16*16,0);
+  case main_vars.tipo_maquina of
+    15,168:convert_gfx(1,0,@memoria_temp[0],@ps_dkong_x[0],@ps_y[0],true,false);
+    169:convert_gfx(1,0,@memoria_temp[0],@ps_dkong3_x[0],@ps_y[0],true,false);
+  end;
+end;
+procedure pal_dkong;
+var
+  ctemp1,ctemp2:byte;
+  colores:tpaleta;
+  f:word;
+begin
+for f:=0 to 255 do begin
+  ctemp1:=memoria_temp[f+$100];
+  ctemp2:=memoria_temp[f];
+  colores[f].r:=not(($21*((ctemp1 shr 1) and 1))+($47*((ctemp1 shr 2) and 1))+($97*((ctemp1 shr 3) and 1)));
+  colores[f].g:=not(($21*((ctemp2 shr 2) and 1))+($47*((ctemp2 shr 3) and 1))+($97*(ctemp1 and 1)));
+  colores[f].b:=not(($55*(ctemp2 and 1))+($aa*((ctemp2 shr 1) and 1)));
+end;
+set_pal(colores,256);
+copymemory(@colores_char[0],@memoria_temp[$200],$100);
+end;
+procedure pal_dkong3;
+var
+  ctemp1,ctemp2:byte;
+  colores:tpaleta;
+  f:word;
+begin
+for f:=0 to 255 do begin
+  ctemp1:=memoria_temp[f];
+  ctemp2:=memoria_temp[f+$200];
+  colores[f].r:=not($0e*((ctemp1 shr 4) and 1)+$1f*((ctemp1 shr 5) and 1)+$43*((ctemp1 shr 6) and 1)+$8f*((ctemp1 shr 7) and 1));
+  colores[f].g:=not($0e*((ctemp1 shr 0) and 1)+$1f*((ctemp1 shr 1) and 1)+$43*((ctemp1 shr 2) and 1)+$8f*((ctemp1 shr 3) and 1));
+  colores[f].b:=not($0e*((ctemp2 shr 0) and 1)+$1f*((ctemp2 shr 1) and 1)+$43*((ctemp2 shr 2) and 1)+$8f*((ctemp2 shr 3) and 1));
+end;
+set_pal(colores,256);
+copymemory(@colores_char[0],@memoria_temp[$400],$100);
+end;
+
+begin
+iniciar_dkong:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256);
+screen_init(2,256,256,false,true);
+iniciar_video(224,256);
+case main_vars.tipo_maquina of
+  15:begin //Donkey Kong
+        //Main CPU
+        main_z80:=cpu_z80.create(3072000,264);
+        main_z80.change_ram_calls(dkong_getbyte,dkong_putbyte);
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@dkong_rom[0],'dkong.zip',0)) then exit;
+        //samples
+        if load_samples('dkong.zip',@dk_samples[0],num_samples) then main_z80.init_sound(dkong_sound_update);
+        audio_tunes:=dkong_tune_sound;
+        audio_effects:=dkong_effects_sound;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@dkong_char[0],'dkong.zip',0)) then exit;
+        dkong_char_load($100);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@dkong_sprites[0],'dkong.zip',0)) then exit;
+        dkong_sprites_load($80);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@dkong_pal[0],'dkong.zip',0)) then exit;
+        pal_dkong;
+        //DIP
+        marcade.dswa:=$80;
+        marcade.dswa_val:=@dk_dip_a;
+     end;
+ 168:begin //Donkey Kong Jr.
+        //Main CPU
+        main_z80:=cpu_z80.create(3072000,264);
+        main_z80.change_ram_calls(dkong_getbyte,dkong_putbyte);
+        //cargar roms
+        if not(cargar_roms(@memoria_temp[0],@dkongjr_rom[0],'dkongjr.zip',0)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$1000);
+        copymemory(@memoria[$3000],@memoria_temp[$1000],$1000);
+        copymemory(@memoria[$2000],@memoria_temp[$2000],$800);
+        copymemory(@memoria[$4800],@memoria_temp[$2800],$800);
+        copymemory(@memoria[$1000],@memoria_temp[$3000],$800);
+        copymemory(@memoria[$5800],@memoria_temp[$3800],$800);
+        copymemory(@memoria[$4000],@memoria_temp[$4000],$800);
+        copymemory(@memoria[$2800],@memoria_temp[$4800],$800);
+        copymemory(@memoria[$5000],@memoria_temp[$5000],$800);
+        copymemory(@memoria[$1800],@memoria_temp[$5800],$800);
+        //samples
+        if load_samples('dkongjr.zip',@dkjr_samples[0],num_samples_jr) then main_z80.init_sound(dkong_sound_update);
+        audio_tunes:=dkongjr_tune_sound;
+        audio_effects:=dkongjr_effects_sound;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@dkongjr_char[0],'dkongjr.zip',0)) then exit;
+        dkong_char_load($200);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@dkongjr_sprites[0],'dkongjr.zip',0)) then exit;
+        dkong_sprites_load($80);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@dkongjr_pal[0],'dkongjr.zip',0)) then exit;
+        pal_dkong;
+        //DIP
+        marcade.dswa:=$80;
+        marcade.dswa_val:=@dk_dip_a;
+     end;
+ 169:begin //Donkey Kong 3
+        //Main CPU
+        main_z80:=cpu_z80.create(4000000,264);
+        main_z80.change_ram_calls(dkong3_getbyte,dkong3_putbyte);
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@dkong3_rom[0],'dkong3.zip',0)) then exit;
+        //sound 1
+        if not(cargar_roms(@mem_snd[0],@dkong3_snd1,'dkong3.zip')) then exit;
+        main_m6502:=cpu_m6502.create(1789772,264,TCPU_M6502);
+        main_m6502.change_ram_calls(dkong3_snd1_getbyte,dkong3_snd1_putbyte);
+        main_m6502.init_sound(dkong3_sound_update);
+        init_n2a03_sound(0,nil,nil);
+        //sound 2
+        if not(cargar_roms(@mem_misc[0],@dkong3_snd2,'dkong3.zip')) then exit;
+        snd_m6502:=cpu_m6502.create(1789772,264,TCPU_M6502);
+        snd_m6502.change_ram_calls(dkong3_snd2_getbyte,dkong3_snd2_putbyte);
+        init_n2a03_sound(1,nil,nil);
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@dkong3_char[0],'dkong3.zip',0)) then exit;
+        dkong_char_load($200);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@dkong3_sprites[0],'dkong3.zip',0)) then exit;
+        dkong_sprites_load($100);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@dkong3_pal[0],'dkong3.zip',0)) then exit;
+        pal_dkong3;
+        //DIP
+        marcade.dswa:=$0;
+        marcade.dswa_val:=@dk3_dip_a;
+        marcade.dswb:=$0;
+        marcade.dswb_val:=@dk3_dip_b;
+     end;
+end;
+//final
+reset_dkong;
+iniciar_dkong:=true;
+end;
+
+procedure cerrar_dkong;
+begin
+case main_vars.tipo_maquina of
+  169:begin
+        close_n2a03_sound(0);
+        close_n2a03_sound(1);
+      end;
+end;
+end;
+
+procedure Cargar_dkong;
+begin
+llamadas_maquina.iniciar:=iniciar_dkong;
+llamadas_maquina.cerrar:=cerrar_dkong;
+llamadas_maquina.reset:=reset_dkong;
+llamadas_maquina.fps_max:=60.6060606060606060;
+case main_vars.tipo_maquina of
+  15,168:llamadas_maquina.bucle_general:=dkong_principal;
+  169:llamadas_maquina.bucle_general:=dkong3_principal;
+end;
 end;
 
 end.

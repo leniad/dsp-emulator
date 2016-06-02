@@ -290,13 +290,13 @@ procedure ironhorse_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   0:ym2203_0.Control(valor);
-  1:ym2203_0.Write_Reg(valor);
+  1:ym2203_0.Write(valor);
 end;
 end;
 
 function ironhorse_snd_inbyte(puerto:word):byte;
 begin
-  if (puerto and $ff)=0 then ironhorse_snd_inbyte:=ym2203_0.Read_Status;
+  if (puerto and $ff)=0 then ironhorse_snd_inbyte:=ym2203_0.status;
 end;
 
 procedure ironhorse_snd_putbyte(direccion:word;valor:byte);

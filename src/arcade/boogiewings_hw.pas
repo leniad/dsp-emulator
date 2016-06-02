@@ -139,7 +139,6 @@ if oki1_mem<>nil then freemem(oki1_mem);
 if oki2_mem<>nil then freemem(oki2_mem);
 oki1_mem:=nil;
 oki2_mem:=nil;
-deco16_snd_simple_close;
 end;
 
 procedure reset_boogwing;

@@ -339,7 +339,7 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   //SYS
-  if arcade_input.coin[0] then main_z80.pedir_nmi:=ASSERT_LINE else main_z80.clear_nmi;
+  if arcade_input.coin[0] then main_z80.change_nmi(ASSERT_LINE) else main_z80.change_nmi(CLEAR_LINE);
   if arcade_input.coin[1] then main_z80.pedir_irq:=HOLD_LINE;
 end;
 end;

@@ -2,37 +2,10 @@ unit heavyunit_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,mcs51,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,kaneco_pandora,misc_functions,ym_2203,sound_engine;
+     nz80,mcs51,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
+     kaneco_pandora,misc_functions,ym_2203,sound_engine;
 
-procedure Cargar_hvyunit;
-procedure hvyunit_principal;
-function iniciar_hvyunit:boolean;
-procedure reset_hvyunit;
-//Main CPU
-function hvyunit_getbyte(direccion:word):byte;
-procedure hvyunit_putbyte(direccion:word;valor:byte);
-procedure hvyunit_outbyte(valor:byte;puerto:word);
-//Sub CPU
-function hvyunit_misc_getbyte(direccion:word):byte;
-procedure hvyunit_misc_putbyte(direccion:word;valor:byte);
-function hvyunit_misc_inbyte(puerto:word):byte;
-procedure hvyunit_misc_outbyte(valor:byte;puerto:word);
-//Sound CPU
-function snd_getbyte(direccion:word):byte;
-procedure snd_putbyte(direccion:word;valor:byte);
-function snd_inbyte(puerto:word):byte;
-procedure snd_outbyte(valor:byte;puerto:word);
-procedure hvyunit_sound_update;
-//MCU
-procedure mcu_out_port0(valor:byte);
-function mcu_in_port0:byte;
-procedure mcu_out_port1(valor:byte);
-function mcu_in_port1:byte;
-procedure mcu_out_port2(valor:byte);
-function mcu_in_port2:byte;
-procedure mcu_out_port3(valor:byte);
-function mcu_in_port3:byte;
+procedure cargar_hvyunit;
 
 implementation
 const
@@ -56,110 +29,6 @@ var
  mermaid_to_z80_full,data_to_z80:byte;
  data_to_mermaid,z80_to_mermaid_full,mermaid_int0_l:byte;
  mermaid_p:array[0..3] of byte;
-
-procedure Cargar_hvyunit;
-begin
-llamadas_maquina.iniciar:=iniciar_hvyunit;
-llamadas_maquina.bucle_general:=hvyunit_principal;
-llamadas_maquina.reset:=reset_hvyunit;
-llamadas_maquina.fps_max:=58;
-end;
-
-function iniciar_hvyunit:boolean;
-const
-  pg_x:array[0..15] of dword=(0*4,1*4,2*4,3*4,4*4,5*4,6*4,7*4,
-		8*32+0*4,8*32+1*4,8*32+2*4,8*32+3*4,8*32+4*4,8*32+5*4,8*32+6*4,8*32+7*4);
-  pg_y:array[0..15] of dword=(0*32,1*32,2*32,3*32,4*32,5*32,6*32,7*32,
-   16*32+0*32,16*32+1*32,16*32+2*32,16*32+3*32,16*32+4*32,16*32+5*32,16*32+6*32,16*32+7*32);
-var
-  memoria_temp:array[0..$1ffff] of byte;
-  ptemp:pbyte;
-  f:word;
-begin
-iniciar_hvyunit:=false;
-iniciar_audio(false);
-screen_init(1,512,512);
-screen_mod_scroll(1,512,256,511,512,256,511);
-screen_init(2,512,512,false,true);
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(6000000,$100);
-main_z80.change_ram_calls(hvyunit_getbyte,hvyunit_putbyte);
-main_z80.change_io_calls(nil,hvyunit_outbyte);
-//Misc CPU
-sub_z80:=cpu_z80.create(6000000,$100);
-sub_z80.change_ram_calls(hvyunit_misc_getbyte,hvyunit_misc_putbyte);
-sub_z80.change_io_calls(hvyunit_misc_inbyte,hvyunit_misc_outbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(6000000,$100);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
-snd_z80.init_sound(hvyunit_sound_update);
-//mcu cpu
-main_mcs51:=cpu_mcs51.create(6000000,$100);
-main_mcs51.change_io_calls(mcu_in_port0,mcu_in_port1,mcu_in_port2,mcu_in_port3,mcu_out_port0,mcu_out_port1,mcu_out_port2,mcu_out_port3);
-//pandora
-pandora.mask_nchar:=$3fff;
-pandora.color_offset:=$100;
-pandora.clear_screen:=false;
-//Sound Chip
-ym2203_0:=ym2203_chip.create(3000000);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@hvyunit_cpu1,'hvyunit.zip',1)) then exit;
-for f:=0 to 7 do copymemory(@rom_cpu1[f,0],@memoria_temp[f*$4000],$4000);
-//cargar cpu 2
-if not(cargar_roms(@memoria_temp[0],@hvyunit_cpu2,'hvyunit.zip',1)) then exit;
-for f:=0 to 3 do copymemory(@rom_cpu2[f,0],@memoria_temp[f*$4000],$4000);
-//cargar sonido
-if not(cargar_roms(@memoria_temp[0],@hvyunit_sound,'hvyunit.zip',1)) then exit;
-for f:=0 to 3 do copymemory(@rom_cpu3[f,0],@memoria_temp[f*$4000],$4000);
-//cargar mermaid
-if not(cargar_roms(main_mcs51.get_rom_addr,@hvyunit_memaid,'hvyunit.zip',1)) then exit;
-//convertir chars
-getmem(ptemp,$200000);
-if not(cargar_roms(ptemp,@hvyunit_gfx0[0],'hvyunit.zip',0)) then exit;
-init_gfx(0,16,16,$4000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,4*8*32,0,1,2,3);
-convert_gfx(0,0,ptemp,@pg_x[0],@pg_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(ptemp,@hvyunit_gfx1,'hvyunit.zip',1)) then exit;
-init_gfx(1,16,16,$1000);
-gfx[1].trans[0]:=true;
-convert_gfx(1,0,ptemp,@pg_x[0],@pg_y[0],false,false);
-freemem(ptemp);
-//reset
-reset_hvyunit;
-iniciar_hvyunit:=true;
-end;
-
-procedure reset_hvyunit;
-begin
- main_z80.reset;
- main_z80.im2_lo:=$ff;
- sub_z80.reset;
- snd_z80.reset;
- main_mcs51.reset;
- pandora_reset;
- ym2203_0.reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
- sound_latch:=0;
- nrom_cpu1:=0;
- nrom_cpu2:=0;
- nrom_cpu3:=0;
- scroll_port:=0;
- scroll_x:=0;
- scroll_y:=0;
- //mermaid
- mermaid_to_z80_full:=0;
- data_to_z80:=0;
- data_to_mermaid:=0;
- z80_to_mermaid_full:=0;
- mermaid_int0_l:=1;
-end;
 
 procedure update_video_hvyunit;inline;
 var
@@ -253,7 +122,6 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-//Main CPU
 function hvyunit_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -278,7 +146,7 @@ procedure hvyunit_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   0,1:nrom_cpu1:=valor and $7;
-  2:sub_z80.pedir_nmi:=PULSE_LINE;
+  2:sub_z80.change_nmi(PULSE_LINE);
 end;
 end;
 
@@ -296,7 +164,6 @@ begin
   if dir<$100 then buffer_color[dir shr 4]:=true;
 end;
 
-//Sub CPU
 function hvyunit_misc_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -345,21 +212,20 @@ case (puerto and $ff) of
       scroll_port:=valor;
      end;
   $2:begin
-      snd_z80.pedir_nmi:=PULSE_LINE;
+      snd_z80.change_nmi(PULSE_LINE);
       sound_latch:=valor;
      end;
   $4:begin
       data_to_mermaid:=valor;
 	    z80_to_mermaid_full:=1;
 	    mermaid_int0_l:=0;
-      main_mcs51.pedir_irq0:=ASSERT_LINE;
+      main_mcs51.change_irq0(ASSERT_LINE);
      end;
   $6:scroll_y:=valor;
   $8:scroll_x:=valor;
 end;
 end;
 
-//Sound CPU
 function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -379,8 +245,8 @@ end;
 function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $2:snd_inbyte:=ym2203_0.Read_Status;
-  $3:snd_inbyte:=ym2203_0.Read_Reg;
+  $2:snd_inbyte:=ym2203_0.status;
+  $3:snd_inbyte:=ym2203_0.Read;
   $4:snd_inbyte:=sound_latch;
 end;
 end;
@@ -390,11 +256,10 @@ begin
 case (puerto and $ff) of
     $0:nrom_cpu3:=valor and $3;
     $2:ym2203_0.Control(valor);
-    $3:ym2203_0.Write_Reg(valor);
+    $3:ym2203_0.Write(valor);
 end;
 end;
 
-//MCU
 function mcu_in_port0:byte;
 begin
   mcu_in_port0:=0;
@@ -423,7 +288,7 @@ procedure mcu_out_port1(valor:byte);
 begin
   if (valor=$ff) then begin
 		mermaid_int0_l:=1;
-    main_mcs51.clear_irq(0);
+    main_mcs51.change_irq0(CLEAR_LINE);
 	end;
 	mermaid_p[1]:=valor;
 end;
@@ -469,10 +334,114 @@ begin
     else sub_z80.pedir_reset:=ASSERT_LINE;
 end;
 
-//sound
 procedure hvyunit_sound_update;
 begin
   ym2203_0.Update;
+end;
+
+//Main
+procedure reset_hvyunit;
+begin
+ main_z80.reset;
+ main_z80.im2_lo:=$ff;
+ sub_z80.reset;
+ snd_z80.reset;
+ main_mcs51.reset;
+ pandora_reset;
+ ym2203_0.reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+ sound_latch:=0;
+ nrom_cpu1:=0;
+ nrom_cpu2:=0;
+ nrom_cpu3:=0;
+ scroll_port:=0;
+ scroll_x:=0;
+ scroll_y:=0;
+ //mermaid
+ mermaid_to_z80_full:=0;
+ data_to_z80:=0;
+ data_to_mermaid:=0;
+ z80_to_mermaid_full:=0;
+ mermaid_int0_l:=1;
+end;
+
+function iniciar_hvyunit:boolean;
+const
+  pg_x:array[0..15] of dword=(0*4,1*4,2*4,3*4,4*4,5*4,6*4,7*4,
+		8*32+0*4,8*32+1*4,8*32+2*4,8*32+3*4,8*32+4*4,8*32+5*4,8*32+6*4,8*32+7*4);
+  pg_y:array[0..15] of dword=(0*32,1*32,2*32,3*32,4*32,5*32,6*32,7*32,
+   16*32+0*32,16*32+1*32,16*32+2*32,16*32+3*32,16*32+4*32,16*32+5*32,16*32+6*32,16*32+7*32);
+var
+  memoria_temp:array[0..$1ffff] of byte;
+  ptemp:pbyte;
+  f:word;
+begin
+iniciar_hvyunit:=false;
+iniciar_audio(false);
+screen_init(1,512,512);
+screen_mod_scroll(1,512,256,511,512,256,511);
+screen_init(2,512,512,false,true);
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(6000000,$100);
+main_z80.change_ram_calls(hvyunit_getbyte,hvyunit_putbyte);
+main_z80.change_io_calls(nil,hvyunit_outbyte);
+//Misc CPU
+sub_z80:=cpu_z80.create(6000000,$100);
+sub_z80.change_ram_calls(hvyunit_misc_getbyte,hvyunit_misc_putbyte);
+sub_z80.change_io_calls(hvyunit_misc_inbyte,hvyunit_misc_outbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(6000000,$100);
+snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
+snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
+snd_z80.init_sound(hvyunit_sound_update);
+//mcu cpu
+main_mcs51:=cpu_mcs51.create(6000000,$100);
+main_mcs51.change_io_calls(mcu_in_port0,mcu_in_port1,mcu_in_port2,mcu_in_port3,mcu_out_port0,mcu_out_port1,mcu_out_port2,mcu_out_port3);
+//pandora
+pandora.mask_nchar:=$3fff;
+pandora.color_offset:=$100;
+pandora.clear_screen:=false;
+//Sound Chip
+ym2203_0:=ym2203_chip.create(3000000);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@hvyunit_cpu1,'hvyunit.zip',1)) then exit;
+for f:=0 to 7 do copymemory(@rom_cpu1[f,0],@memoria_temp[f*$4000],$4000);
+//cargar cpu 2
+if not(cargar_roms(@memoria_temp[0],@hvyunit_cpu2,'hvyunit.zip',1)) then exit;
+for f:=0 to 3 do copymemory(@rom_cpu2[f,0],@memoria_temp[f*$4000],$4000);
+//cargar sonido
+if not(cargar_roms(@memoria_temp[0],@hvyunit_sound,'hvyunit.zip',1)) then exit;
+for f:=0 to 3 do copymemory(@rom_cpu3[f,0],@memoria_temp[f*$4000],$4000);
+//cargar mermaid
+if not(cargar_roms(main_mcs51.get_rom_addr,@hvyunit_memaid,'hvyunit.zip',1)) then exit;
+//convertir chars
+getmem(ptemp,$200000);
+if not(cargar_roms(ptemp,@hvyunit_gfx0[0],'hvyunit.zip',0)) then exit;
+init_gfx(0,16,16,$4000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,4*8*32,0,1,2,3);
+convert_gfx(0,0,ptemp,@pg_x[0],@pg_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(ptemp,@hvyunit_gfx1,'hvyunit.zip',1)) then exit;
+init_gfx(1,16,16,$1000);
+gfx[1].trans[0]:=true;
+convert_gfx(1,0,ptemp,@pg_x[0],@pg_y[0],false,false);
+freemem(ptemp);
+//reset
+reset_hvyunit;
+iniciar_hvyunit:=true;
+end;
+
+procedure Cargar_hvyunit;
+begin
+llamadas_maquina.iniciar:=iniciar_hvyunit;
+llamadas_maquina.bucle_general:=hvyunit_principal;
+llamadas_maquina.reset:=reset_hvyunit;
+llamadas_maquina.fps_max:=58;
 end;
 
 end.

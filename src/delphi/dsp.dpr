@@ -217,8 +217,6 @@ uses
   taitosj_hw in '..\arcade\taitosj_hw.pas',
   fd1089 in '..\devices\fd1089.pas',
   vars_hide in '..\misc\vars_hide.pas',
-  deco_146 in '..\arcade\misc\deco_146.pas',
-  deco_104 in '..\arcade\misc\deco_104.pas',
   vulgus_hw in '..\arcade\vulgus_hw.pas',
   ddragon3_hw in '..\arcade\ddragon3_hw.pas',
   blockout_hw in '..\arcade\blockout_hw.pas',
@@ -242,13 +240,7 @@ uses
   renegade_hw in '..\arcade\renegade_hw.pas',
   generic_adpcm in '..\snd\generic_adpcm.pas',
   tmnt_hw in '..\arcade\tmnt_hw.pas',
-  k052109 in '..\arcade\misc\k052109.pas',
-  k051960 in '..\arcade\misc\k051960.pas',
-  k053244_k053245 in '..\arcade\misc\k053244_k053245.pas',
-  k053260 in '..\snd\k053260.pas',
   eepromser in '..\devices\eepromser.pas',
-  k053251 in '..\arcade\misc\k053251.pas',
-  k007232 in '..\snd\k007232.pas',
   gradius3_hw in '..\arcade\gradius3_hw.pas',
   rom_export in '..\misc\rom_export.pas',
   config_cpc in 'config_cpc.pas' {ConfigCPC},
@@ -258,7 +250,17 @@ uses
   konami in '..\cpu\konami.pas',
   aliens_hw in '..\arcade\aliens_hw.pas',
   thunderx_hw in '..\arcade\thunderx_hw.pas',
-  device_functions in '..\misc\device_functions.pas';
+  device_functions in '..\misc\device_functions.pas',
+  simpsons_hw in '..\arcade\simpsons_hw.pas',
+  deco_104 in '..\devices\deco_104.pas',
+  deco_146 in '..\devices\deco_146.pas',
+  k051960 in '..\devices\k051960.pas',
+  k052109 in '..\devices\k052109.pas',
+  k053244_k053245 in '..\devices\k053244_k053245.pas',
+  k053246_k053247_k055673 in '..\devices\k053246_k053247_k055673.pas',
+  k053251 in '..\devices\k053251.pas',
+  k007232 in '..\snd\k007232.pas',
+  k053260 in '..\snd\k053260.pas';
 
 {$R *.res}
 

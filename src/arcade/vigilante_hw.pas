@@ -8,8 +8,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure Cargar_vigilante;
 procedure vigilante_principal; 
 function iniciar_vigilante:boolean; 
-procedure reset_vigilante; 
-procedure cerrar_vigilante;
+procedure reset_vigilante;
 //Main CPU
 function vigilante_getbyte(direccion:word):byte;
 procedure vigilante_putbyte(direccion:word;valor:byte);
@@ -52,7 +51,6 @@ procedure Cargar_vigilante;
 begin
 llamadas_maquina.iniciar:=iniciar_vigilante;
 llamadas_maquina.bucle_general:=vigilante_principal;
-llamadas_maquina.cerrar:=cerrar_vigilante;
 llamadas_maquina.reset:=reset_vigilante;
 llamadas_maquina.fps_max:=55;
 end;
@@ -100,7 +98,8 @@ snd_z80.init_sound(snd_despues_instruccion);
 init_timer(snd_z80.numero_cpu,3579645/(128*55),vigilante_snd_irq,true);
 //sound chips
 dac_0:=dac_chip.Create;
-ym2151_init(0,3579645,nil,ym2151_snd_irq);
+ym2151_0:=ym2151_chip.create(3579645);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms y rom en bancos
 if not(cargar_roms(@memoria_temp[0],@vigilante_rom[0],'vigilant.zip',0)) then exit;
 copymemory(@memoria[0],@memoria_temp[0],$8000);
@@ -131,16 +130,11 @@ reset_vigilante;
 iniciar_vigilante:=true;
 end;
 
-procedure cerrar_vigilante;
-begin
-ym2151_close(0);
-end;
-
 procedure reset_vigilante;
 begin
  main_z80.reset;
  snd_z80.reset;
- ym2151_reset(0);
+ ym2151_0.reset;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -359,7 +353,7 @@ end;
 function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $1:snd_inbyte:=YM2151_status_port_read(0);
+  $1:snd_inbyte:=ym2151_0.status;
   $80:snd_inbyte:=sound_latch;
   $84:snd_inbyte:=mem_dac[sample_addr];
 end;
@@ -368,8 +362,8 @@ end;
 procedure snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-  0:YM2151_register_port_write(0,valor);
-  1:YM2151_data_port_write(0,valor);
+  0:ym2151_0.reg(valor);
+  1:ym2151_0.write(valor);
   $80:sample_addr:=(sample_addr and $ff00) or valor;
   $81:sample_addr:=(sample_addr and $ff) or (valor shl 8);
   $82:begin
@@ -387,12 +381,12 @@ end;
 
 procedure vigilante_snd_irq;
 begin
-  snd_z80.pedir_nmi:=PULSE_LINE;
+  snd_z80.change_nmi(PULSE_LINE);
 end;
 
 procedure snd_despues_instruccion;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   dac_0.update;
 end;
 

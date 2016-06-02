@@ -5,21 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,ym_2203,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine,qsnapshot;
 
-procedure Cargar_gng;
-procedure gng_principal;
-procedure reset_gng;
-function iniciar_gng:boolean;
-//Main CPU
-function gng_getbyte(direccion:word):byte;
-procedure gng_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function sound_getbyte(direccion:word):byte;
-procedure sound_putbyte(direccion:word;valor:byte);
-procedure gng_sound_update;
-procedure gng_snd_irq;
-//Save/load
-procedure gng_qsave(nombre:string);
-procedure gng_qload(nombre:string);
+procedure cargar_gng;
 
 implementation
 const
@@ -51,120 +37,6 @@ var
  memoria_rom:array[0..4,0..$1FFF] of byte;
  banco,soundlatch:byte;
  scroll_x,scroll_y:word;
-
-procedure Cargar_Gng;
-begin
-llamadas_maquina.iniciar:=iniciar_gng;
-llamadas_maquina.bucle_general:=gng_principal;
-llamadas_maquina.reset:=reset_gng;
-llamadas_maquina.fps_max:=59.59;
-llamadas_maquina.save_qsnap:=gng_qsave;
-llamadas_maquina.load_qsnap:=gng_qload;
-end;
-
-function iniciar_gng:boolean;
-var
-  colores:tpaleta;
-  f:word;
-  memoria_temp:array[0..$1ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3 );
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
-    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_gng:=false;
-iniciar_audio(false);
-//Background
-screen_init(1,512,512);
-screen_mod_scroll(1,512,256,511,512,256,511);
-//Foreground
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,256,256,true); //Chars
-screen_init(4,512,256,false,true); //Final
-iniciar_video(256,224);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1500000,256);
-main_m6809.change_ram_calls(gng_getbyte,gng_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
-snd_z80.init_sound(gng_sound_update);
-//IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3000000/(4*60),gng_snd_irq,true);
-//Sound Chip
-ym2203_0:=ym2203_chip.create(1500000,0.2);
-ym2203_1:=ym2203_chip.create(1500000,0.2);
-//cargar roms
-if not(cargar_roms(@memoria_temp,@gng_rom,'gng.zip',0)) then exit;
-//Pongo las ROMs en su banco
-copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
-for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2000);
-copymemory(@memoria[$6000],@memoria_temp[$6000],$2000);
-copymemory(@memoria_rom[4,0],@memoria_temp[$4000],$2000);
-//Cargar Sound
-if not(cargar_roms(@mem_snd,@gng_sound,'gng.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp,@gng_char,'gng.zip')) then exit;
-init_gfx(0,8,8,1024);
-gfx[0].trans[3]:=true;
-gfx[0].trans_alt[0,3]:=true;
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
-//sprites
-if not(cargar_roms(@memoria_temp,@gng_sprites,'gng.zip',0)) then exit;
-init_gfx(1,16,16,1024);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
-convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
-//tiles
-if not(cargar_roms(@memoria_temp,@gng_tiles,'gng.zip',0)) then exit;
-init_gfx(2,16,16,1024);
-gfx[2].trans[0]:=true;
-gfx[2].trans[6]:=true;
-gfx[2].trans_alt[0,0]:=true;
-gfx[2].trans_alt[0,6]:=true;
-gfx_set_desc_data(3,0,32*8,$10000*8,$8000*8,0);
-convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
-//Poner colores aleatorios hasta que inicie la paleta
-for f:=0 to 255 do begin
-  colores[f].r:=random(256);
-  colores[f].g:=random(256);
-  colores[f].b:=random(256);
-end;
-set_pal(colores,256);
-//Dip
-marcade.dswa:=$df;
-marcade.dswb:=$7b;
-marcade.dswa_val:=@gng_dip_a;
-marcade.dswb_val:=@gng_dip_b;
-//final
-reset_gng;
-iniciar_gng:=true;
-end;
-
-procedure reset_gng;
-begin
- main_m6809.reset;
- snd_z80.reset;
- ym2203_0.reset;
- ym2203_1.reset;
- reset_audio;
- banco:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- soundlatch:=0;
- scroll_x:=0;
- scroll_y:=0;
-end;
 
 procedure update_video_gng;
 var
@@ -341,9 +213,9 @@ if direccion<$8000 then exit;
 case direccion of
   $c000..$c7ff:mem_snd[direccion]:=valor;
   $e000:ym2203_0.Control(valor);
-  $e001:ym2203_0.Write_Reg(valor);
+  $e001:ym2203_0.Write(valor);
   $e002:ym2203_1.Control(valor);
-  $e003:ym2203_1.Write_Reg(valor);
+  $e003:ym2203_1.Write(valor);
 end;
 end;
 
@@ -426,6 +298,121 @@ freemem(data);
 close_qsnapshot;
 //END
 for f:=0 to $ff do cambiar_color(f);
+end;
+
+//Main
+procedure reset_gng;
+begin
+ main_m6809.reset;
+ snd_z80.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
+ reset_audio;
+ banco:=0;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ soundlatch:=0;
+ scroll_x:=0;
+ scroll_y:=0;
+end;
+
+function iniciar_gng:boolean;
+var
+  colores:tpaleta;
+  f:word;
+  memoria_temp:array[0..$1ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3 );
+    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
+    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
+    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_gng:=false;
+iniciar_audio(false);
+//Background
+screen_init(1,512,512);
+screen_mod_scroll(1,512,256,511,512,256,511);
+//Foreground
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,256,256,true); //Chars
+screen_init(4,512,256,false,true); //Final
+iniciar_video(256,224);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1500000,256);
+main_m6809.change_ram_calls(gng_getbyte,gng_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
+snd_z80.init_sound(gng_sound_update);
+//IRQ Sound CPU
+init_timer(snd_z80.numero_cpu,3000000/(4*60),gng_snd_irq,true);
+//Sound Chip
+ym2203_0:=ym2203_chip.create(1500000,0.2);
+ym2203_1:=ym2203_chip.create(1500000,0.2);
+//cargar roms
+if not(cargar_roms(@memoria_temp,@gng_rom,'gng.zip',0)) then exit;
+//Pongo las ROMs en su banco
+copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
+for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2000);
+copymemory(@memoria[$6000],@memoria_temp[$6000],$2000);
+copymemory(@memoria_rom[4,0],@memoria_temp[$4000],$2000);
+//Cargar Sound
+if not(cargar_roms(@mem_snd,@gng_sound,'gng.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp,@gng_char,'gng.zip')) then exit;
+init_gfx(0,8,8,1024);
+gfx[0].trans[3]:=true;
+gfx[0].trans_alt[0,3]:=true;
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+//sprites
+if not(cargar_roms(@memoria_temp,@gng_sprites,'gng.zip',0)) then exit;
+init_gfx(1,16,16,1024);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
+//tiles
+if not(cargar_roms(@memoria_temp,@gng_tiles,'gng.zip',0)) then exit;
+init_gfx(2,16,16,1024);
+gfx[2].trans[0]:=true;
+gfx[2].trans[6]:=true;
+gfx[2].trans_alt[0,0]:=true;
+gfx[2].trans_alt[0,6]:=true;
+gfx_set_desc_data(3,0,32*8,$10000*8,$8000*8,0);
+convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
+//Poner colores aleatorios hasta que inicie la paleta
+for f:=0 to 255 do begin
+  colores[f].r:=random(256);
+  colores[f].g:=random(256);
+  colores[f].b:=random(256);
+end;
+set_pal(colores,256);
+//Dip
+marcade.dswa:=$df;
+marcade.dswb:=$7b;
+marcade.dswa_val:=@gng_dip_a;
+marcade.dswb_val:=@gng_dip_b;
+//final
+reset_gng;
+iniciar_gng:=true;
+end;
+
+procedure cargar_gng;
+begin
+llamadas_maquina.iniciar:=iniciar_gng;
+llamadas_maquina.bucle_general:=gng_principal;
+llamadas_maquina.reset:=reset_gng;
+llamadas_maquina.fps_max:=59.59;
+llamadas_maquina.save_qsnap:=gng_qsave;
+llamadas_maquina.load_qsnap:=gng_qload;
 end;
 
 end.

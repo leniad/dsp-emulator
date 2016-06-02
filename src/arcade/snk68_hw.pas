@@ -447,7 +447,7 @@ case direccion of
                    end;
     $80000:begin
           sound_latch:=valor shr 8;
-          snd_z80.pedir_nmi:=PULSE_LINE;
+          snd_z80.change_nmi(PULSE_LINE);
          end;
     $c0000:begin
             fg_tile_offset:=(valor and $70) shl 4;
@@ -510,8 +510,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 //Ikari 3
@@ -544,7 +543,7 @@ case direccion of
                    end;
     $80000:begin
              sound_latch:=valor shr 8;
-             snd_z80.pedir_nmi:=PULSE_LINE;
+             snd_z80.change_nmi(PULSE_LINE);
          end;
     $80006:if (valor=7) then protection:=$ff
             else protection:=0;

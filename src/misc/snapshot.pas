@@ -113,9 +113,9 @@ if ((long-27)>$c000) then begin
         spec_z80_reg.sp:=sna_regs.sp;
         ay8910_0.reset;
         spec128_outbyte(sna_regs_128k.reg_7ffd,$7ffd);
-        copymemory(@memoria_128k[marco[3],0],ptemp,16384);
+        copymemory(@memoria_128k[var_spectrum.marco[3],0],ptemp,16384);
         for f:=0 to 7 do
-           if ((f<>2) and (f<>5) and (f<>marco[3])) then begin
+           if ((f<>2) and (f<>5) and (f<>var_spectrum.marco[3])) then begin
                 copymemory(@memoria_128k[f,0],datos,16384);
                 inc(datos,16384);
            end;
@@ -239,16 +239,16 @@ case main_vars.tipo_maquina of
              copymemory(ptemp,sna_regs,27);inc(ptemp,27);
              copymemory(ptemp,@memoria_128k[5,0],16384);inc(ptemp,$4000);
              copymemory(ptemp,@memoria_128k[2,0],16384);inc(ptemp,$4000);
-             copymemory(ptemp,@memoria_128k[marco[3],0],$4000);inc(ptemp,$4000);
+             copymemory(ptemp,@memoria_128k[var_spectrum.marco[3],0],$4000);inc(ptemp,$4000);
              getmem(sna_regs_128k,sizeof(tsna_regs_128k));
              sna_regs_128k.pc:=spec_z80_reg.pc;
-             sna_regs_128k.reg_7ffd:=old_7ffd;
+             sna_regs_128k.reg_7ffd:=var_spectrum.old_7ffd;
              sna_regs_128k.trdos:=0;
              copymemory(ptemp,sna_regs_128k,4);inc(ptemp,4);
              longitud:=27+$4000*3+4;
              freemem(sna_regs_128k);
              for temp:=0 to 7 do
-                if ((temp<>2) and (temp<>5) and (temp<>marco[3])) then begin
+                if ((temp<>2) and (temp<>5) and (temp<>var_spectrum.marco[3])) then begin
                    copymemory(ptemp,@memoria_128k[temp,0],$4000);
                    inc(ptemp,$4000);
                    longitud:=longitud+$4000;
@@ -383,7 +383,7 @@ spec48_outbyte(sp_regs.borde_color,$fe);
 spec_z80_reg.iff1:=(sp_regs.misc and 1)<>0;
 spec_z80_reg.iff2:=(sp_regs.misc and 4)<>0;
 //interrupt --> bit 5
-haz_flash:=(sp_regs.misc and $20)<>0;
+var_spectrum.haz_flash:=(sp_regs.misc and $20)<>0;
 if (sp_regs.misc and 8)<>0 then spec_z80_reg.im:=0
   else spec_z80_reg.im:=((sp_regs.misc and 2) shr 1)+1;
 freemem(sp_regs);
@@ -492,7 +492,7 @@ while longitud<>long do begin
     spec_z80_reg.im:=szx_regs.im;
     spec_z80.halt:=(szx_regs.misc=2);
     //opppssss!!!
-    if szx_regs.estados_t_irq<40 then spectrum_irq_pos:=szx_regs.estados_t_irq;
+    if szx_regs.estados_t_irq<40 then var_spectrum.irq_pos:=szx_regs.estados_t_irq;
     if szx_regs.estados_t<71000 then spec_z80.contador:=szx_regs.estados_t;
     freemem(szx_regs);
   end;
@@ -652,7 +652,7 @@ szx_regs.iff1:=byte(spec_z80_reg.iff1);
 szx_regs.iff2:=byte(spec_z80_reg.iff2);
 szx_regs.im:=spec_z80_reg.im;
 szx_regs.estados_t:=spec_z80.contador;
-szx_regs.estados_t_irq:=spectrum_irq_pos;
+szx_regs.estados_t_irq:=var_spectrum.irq_pos;
 szx_regs.misc:=byte(spec_z80.halt) shl 1;
 copymemory(ptemp,szx_block,8);inc(ptemp,8);longitud:=longitud+8;
 copymemory(ptemp,szx_regs,37);inc(ptemp,37);longitud:=longitud+37;
@@ -662,7 +662,7 @@ szx_block.name:='SPCR';
 szx_block.longitud:=8;
 getmem(szx_spcr,sizeof(tszx_spcr));
 szx_spcr.borde:=borde.color;
-szx_spcr.reg_7ffd:=old_7ffd;
+szx_spcr.reg_7ffd:=var_spectrum.old_7ffd;
 szx_spcr.reg_1ffd:=old_1ffd;
 copymemory(ptemp,szx_block,8);inc(ptemp,8);longitud:=longitud+8;
 copymemory(ptemp,szx_spcr,8);inc(ptemp,8);longitud:=longitud+8;
@@ -936,7 +936,7 @@ spec_z80_reg.ix.w:=z80_regs.ix;
 spec_z80_reg.iff1:=(z80_regs.iff1<>0);
 spec_z80_reg.iff2:=(z80_regs.iff2<>0);
 spec_z80_reg.im:=z80_regs.misc2 and 3;
-issue2:=(z80_regs.misc2 and 4)<>0;
+var_spectrum.issue2:=(z80_regs.misc2 and 4)<>0;
 freemem(z80_regs);
 abrir_z80:=true;
 end;
@@ -1051,20 +1051,20 @@ z80_regs.iy:=spec_z80_reg.iy.w;
 z80_regs.ix:=spec_z80_reg.ix.w;
 z80_regs.iff1:=byte(spec_z80_reg.iff1);
 z80_regs.iff2:=byte(spec_z80_reg.iff2);
-z80_regs.misc2:=spec_z80_reg.im or (byte(issue2) shl 2);
+z80_regs.misc2:=spec_z80_reg.im or (byte(var_spectrum.issue2) shl 2);
 z80_ext.long:=55; //Grabo snapshot version 3
 z80_ext.pc:=spec_z80_reg.pc;
 case main_vars.tipo_maquina of
   0,5:z80_ext.hw_mode:=0;
   1,4:begin
       z80_ext.hw_mode:=4;
-      z80_ext.reg_7ffd:=old_7ffd;
+      z80_ext.reg_7ffd:=var_spectrum.old_7ffd;
       z80_ext.reg_fffd:=ay8910_0.get_control;
       for f:=0 to 15 do z80_ext.ay_regs[f]:=ay8910_0.get_reg(f);
     end;
   2,3:begin
       z80_ext.hw_mode:=7;
-      z80_ext.reg_7ffd:=old_7ffd;
+      z80_ext.reg_7ffd:=var_spectrum.old_7ffd;
       z80_ext.reg_fffd:=ay8910_0.get_control;
       z80_ext.reg_1ffd:=old_1ffd;
       for f:=0 to 15 do z80_ext.ay_regs[f]:=ay8910_0.get_reg(f);
@@ -1488,7 +1488,7 @@ while longitud<long do begin
           main_z80_reg.iff2:=z80_v1.iff2;
           main_z80.halt:=z80_v1.halt;
           main_z80.pedir_irq:=z80_v1.pedir_irq;
-          main_z80.pedir_nmi:=z80_v1.pedir_nmi;
+          main_z80.change_nmi(z80_v1.pedir_nmi);
           {main_z80.nmi_state:=(ptemp^<>0);}
           main_z80_reg.a:=z80_v1.a;
           main_z80_reg.a2:=z80_v1.a2;
@@ -1527,7 +1527,7 @@ while longitud<long do begin
           copymemory(z80_v2_ext,ptemp,9);
           main_z80.halt:=z80_v2_ext.halt;
           main_z80.pedir_irq:=z80_v2_ext.pedir_irq;
-          main_z80.pedir_nmi:=z80_v2_ext.pedir_nmi;
+          main_z80.change_nmi(z80_v2_ext.pedir_nmi);
           main_z80.contador:=z80_v2_ext.contador;
           main_z80.im2_lo:=z80_v2_ext.im2_lo;
           main_z80.im0:=z80_v2_ext.im0;

@@ -541,7 +541,7 @@ end;
 
 procedure system1_pio_porta_nmi(state:boolean);
 begin
-  snd_z80.pedir_nmi:=PULSE_LINE;
+  snd_z80.change_nmi(PULSE_LINE);
 end;
 
 procedure system1_pio_portb_write(valor:byte);

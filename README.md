@@ -1,4 +1,19 @@
 ﻿#DSP Emulator status<br>
+<b>02/06/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary updated.</b><br><pre>
+-General
+    +Begin a general driver cleaning
+    +Z80: Added opcode function calls in class
+    +YM2151: Converted the driver to class
+-Rally X HW
+    +Cleaned and corrected the driver (memory, video, etc. )
+    +Jungler: Simplified the video, removed manual rotation
+-Arabian
+    +Fixed video
+-Blockout
+    +Fixed video
+-The Simpsons
+     +Added driver with sound, no sprites and many graphics problems
+</pre><br>
 <b>26/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary updated.</b><br><pre>
 -General
     +GFX: Fixed and enhanced the final screen rotation

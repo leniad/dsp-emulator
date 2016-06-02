@@ -5,31 +5,12 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,mcs51,main_engine,controls_engine,ym_2203,gfx_engine,timer_engine,
      rom_engine,file_engine,pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_blktiger;
-procedure blktiger_principal;
-function iniciar_blktiger:boolean;
-procedure reset_blktiger;
-procedure cerrar_blktiger;
-//Main CPU
-function blktiger_getbyte(direccion:word):byte;
-procedure blktiger_putbyte(direccion:word;valor:byte);
-function blktiger_inbyte(puerto:word):byte;
-procedure blktiger_outbyte(valor:byte;puerto:word);
-procedure blk_hi_score;
-//Sound CPU
-function blksnd_getbyte(direccion:word):byte;
-procedure blksnd_putbyte(direccion:word;valor:byte);
-procedure snd_irq(irqstate:byte);
-procedure blktiger_sound_update;
-//MCU
-procedure out_port0(valor:byte);
-function in_port0:byte;
-//Save/load
-procedure blktiger_qsave(nombre:string);
-procedure blktiger_qload(nombre:string);
+// {$define speed_debug}
+
+procedure cargar_blktiger;
 
 implementation
-//uses principal,sysutils;
+{$ifdef speed_debug}uses principal,sysutils;{$endif}
 const
         blktiger_rom:array[0..5] of tipo_roms=(
         (n:'bdu-01a.5e';l:$8000;p:0;crc:$a8f98f22),(n:'bdu-02a.6e';l:$10000;p:$8000;crc:$7bef96e8),
@@ -63,128 +44,6 @@ var
  banco_rom,soundlatch,i8751_latch,z80_latch,timer_hs,mask_x,mask_y,shl_row:byte;
  mask_sx,mask_sy,scroll_x,scroll_y,scroll_bank:word;
  bg_on,ch_on,spr_on:boolean;
-
-procedure Cargar_blktiger;
-begin
-llamadas_maquina.iniciar:=iniciar_blktiger;
-llamadas_maquina.bucle_general:=blktiger_principal;
-llamadas_maquina.cerrar:=cerrar_blktiger;
-llamadas_maquina.reset:=reset_blktiger;
-llamadas_maquina.save_qsnap:=blktiger_qsave;
-llamadas_maquina.load_qsnap:=blktiger_qload;
-end;
-
-function iniciar_blktiger:boolean;
-var
-  f:word;
-  memoria_temp:array[0..$47fff] of byte;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-			16*16+0, 16*16+1, 16*16+2, 16*16+3, 16*16+8+0, 16*16+8+1, 16*16+8+2, 16*16+8+3);
-  ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-begin
-iniciar_blktiger:=false;
-iniciar_audio(false);
-//Background
-screen_init(1,272,272,true);
-screen_mod_scroll(1,272,256,255,272,256,255);
-//Foreground
-screen_init(2,272,272,true);
-screen_mod_scroll(2,272,256,255,272,256,255);
-screen_init(3,256,256,true); //Chars
-screen_init(4,512,256,false,true); //Final
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(6000000,256);
-main_z80.change_ram_calls(blktiger_getbyte,blktiger_putbyte);
-main_z80.change_io_calls(blktiger_inbyte,blktiger_outbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(blksnd_getbyte,blksnd_putbyte);
-snd_z80.init_sound(blktiger_sound_update);
-//MCU
-main_mcs51:=cpu_mcs51.create(6000000,256);
-main_mcs51.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
-//Sound Chip
-ym2203_0:=ym2203_chip.create(3579545);
-ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(3579545);
-//Timers
-timer_hs:=init_timer(main_z80.numero_cpu,10000,blk_hi_score,true);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@blktiger_rom[0],'blktiger.zip',0)) then exit;
-//poner las roms y los bancos de rom
-copymemory(@memoria[0],@memoria_temp[0],$8000);
-for f:=0 to 15 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//sonido
-if not(cargar_roms(@mem_snd[0],@blktiger_snd,'blktiger.zip')) then exit;
-//MCU ROM
-if not(cargar_roms(main_mcs51.get_rom_addr,@blktiger_mcu,'blktiger.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@blktiger_char,'blktiger.zip')) then exit;
-init_gfx(0,8,8,2048);
-gfx[0].trans[3]:=true;
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@blktiger_sprites[0],'blktiger.zip',0)) then exit;
-init_gfx(1,16,16,$800);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,32*16,$800*32*16+4,$800*32*16+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//tiles
-if not(cargar_roms(@memoria_temp[0],@blktiger_tiles[0],'blktiger.zip',0)) then exit;
-init_gfx(2,16,16,$800);
-gfx[2].trans[15]:=true;
-gfx[2].trans_alt[0,15]:=true;
-for f:=4 to 15 do gfx[2].trans_alt[1,f]:=true;
-for f:=8 to 15 do gfx[2].trans_alt[2,f]:=true;
-for f:=12 to 15 do gfx[2].trans_alt[3,f]:=true;
-gfx_set_desc_data(4,0,32*16,$800*32*16+4,$800*32*16+0,4,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$6f;
-marcade.dswa_val:=@blktiger_dip_a;
-marcade.dswb_val:=@blktiger_dip_b;
-//final
-reset_blktiger;
-iniciar_blktiger:=true;
-end;
-
-procedure cerrar_blktiger;
-begin
-save_hi('blktiger.hi',@memoria[$e200],80);
-end;
-
-procedure reset_blktiger;
-begin
- main_z80.reset;
- snd_z80.reset;
- main_mcs51.reset;
- ym2203_0.reset;
- ym2203_1.reset;
- reset_audio;
- banco_rom:=0;
- soundlatch:=0;
- scroll_bank:=0;
- scroll_x:=0;
- scroll_y:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- mask_x:=$70;
- mask_y:=$30;
- shl_row:=7;
- i8751_latch:=0;
- z80_latch:=0;
- bg_on:=true;
- ch_on:=true;
- spr_on:=true;
-end;
 
 procedure update_video_blktiger;inline;
 const
@@ -289,14 +148,14 @@ procedure blktiger_principal;
 var
   frame_m,frame_s,frame_mcu:single;
   f:byte;
-  //cont1,cont2:int64;
+  {$ifdef speed_debug}cont1,cont2:int64;{$endif}
 begin
 init_controls(false,false,false,true);
 frame_m:=main_z80.tframes;
 frame_s:=snd_z80.tframes;
 frame_mcu:=main_mcs51.tframes;
 while EmuStatus=EsRuning do begin
-  //QueryPerformanceCounter(Int64((@cont1)^));
+  {$ifdef speed_debug}QueryPerformanceCounter(Int64((@cont1)^));{$endif}
   for f:=0 to $ff do begin
     //Main CPU
     main_z80.run(frame_m);
@@ -314,8 +173,8 @@ while EmuStatus=EsRuning do begin
     end;
   end;
   eventos_blktiger;
-  //QueryPerformanceCounter(Int64((@cont2)^));
-  //form1.statusbar1.panels[2].text:=inttostr(cont2-cont1);
+  {$ifdef speed_debug}QueryPerformanceCounter(Int64((@cont2)^));
+  principal1.statusbar1.panels[2].text:=inttostr(cont2-cont1);{$endif}
   video_sync;
 end;
 end;
@@ -392,7 +251,7 @@ case (puerto and $FF) of
     end;
   7:begin
       z80_latch:=valor;
-      main_mcs51.pedir_irq1:=ASSERT_LINE;
+      main_mcs51.change_irq1(ASSERT_LINE);
     end;
   8:if ((scroll_x and $ff)<>valor) then begin
       if abs((scroll_x and mask_sx)-(valor and mask_sx))>15 then fillchar(gfx[2].buffer[0],$2000,1);
@@ -416,7 +275,7 @@ case (puerto and $FF) of
       spr_on:=(valor and $4)=0;
      end;
   $d:scroll_bank:=(valor and 3) shl 12;
-  $e:if ((valor and 1)=1) then begin
+  $e:if ((valor and 1)<>0) then begin
         mask_x:=$70;
         mask_y:=$30;
         shl_row:=7;
@@ -437,10 +296,10 @@ begin
   case direccion of
     0..$7fff,$c000..$c7ff:blksnd_getbyte:=mem_snd[direccion];
     $c800:blksnd_getbyte:=soundlatch;
-    $e000:blksnd_getbyte:=ym2203_0.Read_Status;
-    $e001:blksnd_getbyte:=ym2203_0.Read_Reg;
-    $e002:blksnd_getbyte:=ym2203_1.Read_Status;
-    $e003:blksnd_getbyte:=ym2203_1.Read_Reg;
+    $e000:blksnd_getbyte:=ym2203_0.status;
+    $e001:blksnd_getbyte:=ym2203_0.read;
+    $e002:blksnd_getbyte:=ym2203_1.status;
+    $e003:blksnd_getbyte:=ym2203_1.read;
   end;
 end;
 
@@ -450,9 +309,9 @@ if direccion<$8000 then exit;
 case direccion of
   $c000..$c7ff:mem_snd[direccion]:=valor;
   $e000:ym2203_0.Control(valor);
-  $e001:ym2203_0.Write_Reg(valor);
+  $e001:ym2203_0.write(valor);
   $e002:ym2203_1.Control(valor);
-  $e003:ym2203_1.Write_Reg(valor);
+  $e003:ym2203_1.write(valor);
 end;
 end;
 
@@ -463,7 +322,7 @@ end;
 
 function in_port0:byte;
 begin
-  main_mcs51.clear_irq(1);
+  main_mcs51.change_irq1(CLEAR_LINE);
   in_port0:=z80_latch;
 end;
 
@@ -475,8 +334,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 procedure blk_hi_score;
@@ -587,6 +445,129 @@ freemem(data);
 close_qsnapshot;
 //END
 for f:=0 to $3ff do cambiar_color(f);
+end;
+
+//Main
+procedure reset_blktiger;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ main_mcs51.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
+ reset_audio;
+ banco_rom:=0;
+ soundlatch:=0;
+ scroll_bank:=0;
+ scroll_x:=0;
+ scroll_y:=0;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ mask_x:=$70;
+ mask_y:=$30;
+ shl_row:=7;
+ i8751_latch:=0;
+ z80_latch:=0;
+ bg_on:=true;
+ ch_on:=true;
+ spr_on:=true;
+end;
+
+function iniciar_blktiger:boolean;
+var
+  f:word;
+  memoria_temp:array[0..$47fff] of byte;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			16*16+0, 16*16+1, 16*16+2, 16*16+3, 16*16+8+0, 16*16+8+1, 16*16+8+2, 16*16+8+3);
+  ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+begin
+iniciar_blktiger:=false;
+iniciar_audio(false);
+//Background
+screen_init(1,272,272,true);
+screen_mod_scroll(1,272,256,255,272,256,255);
+//Foreground
+screen_init(2,272,272,true);
+screen_mod_scroll(2,272,256,255,272,256,255);
+screen_init(3,256,256,true); //Chars
+screen_init(4,512,256,false,true); //Final
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(6000000,256);
+main_z80.change_ram_calls(blktiger_getbyte,blktiger_putbyte);
+main_z80.change_io_calls(blktiger_inbyte,blktiger_outbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(blksnd_getbyte,blksnd_putbyte);
+snd_z80.init_sound(blktiger_sound_update);
+//MCU
+main_mcs51:=cpu_mcs51.create(6000000,256);
+main_mcs51.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
+//Sound Chip
+ym2203_0:=ym2203_chip.create(3579545);
+ym2203_0.change_irq_calls(snd_irq);
+ym2203_1:=ym2203_chip.create(3579545);
+//Timers
+timer_hs:=init_timer(main_z80.numero_cpu,10000,blk_hi_score,true);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@blktiger_rom[0],'blktiger.zip',0)) then exit;
+//poner las roms y los bancos de rom
+copymemory(@memoria[0],@memoria_temp[0],$8000);
+for f:=0 to 15 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+//sonido
+if not(cargar_roms(@mem_snd[0],@blktiger_snd,'blktiger.zip')) then exit;
+//MCU ROM
+if not(cargar_roms(main_mcs51.get_rom_addr,@blktiger_mcu,'blktiger.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@blktiger_char,'blktiger.zip')) then exit;
+init_gfx(0,8,8,2048);
+gfx[0].trans[3]:=true;
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@blktiger_sprites[0],'blktiger.zip',0)) then exit;
+init_gfx(1,16,16,$800);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,32*16,$800*32*16+4,$800*32*16+0,4,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//tiles
+if not(cargar_roms(@memoria_temp[0],@blktiger_tiles[0],'blktiger.zip',0)) then exit;
+init_gfx(2,16,16,$800);
+gfx[2].trans[15]:=true;
+gfx[2].trans_alt[0,15]:=true;
+for f:=4 to 15 do gfx[2].trans_alt[1,f]:=true;
+for f:=8 to 15 do gfx[2].trans_alt[2,f]:=true;
+for f:=12 to 15 do gfx[2].trans_alt[3,f]:=true;
+gfx_set_desc_data(4,0,32*16,$800*32*16+4,$800*32*16+0,4,0);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$6f;
+marcade.dswa_val:=@blktiger_dip_a;
+marcade.dswb_val:=@blktiger_dip_b;
+//final
+reset_blktiger;
+iniciar_blktiger:=true;
+end;
+
+procedure cerrar_blktiger;
+begin
+save_hi('blktiger.hi',@memoria[$e200],80);
+end;
+
+procedure cargar_blktiger;
+begin
+llamadas_maquina.iniciar:=iniciar_blktiger;
+llamadas_maquina.bucle_general:=blktiger_principal;
+llamadas_maquina.cerrar:=cerrar_blktiger;
+llamadas_maquina.reset:=reset_blktiger;
+llamadas_maquina.save_qsnap:=blktiger_qsave;
+llamadas_maquina.load_qsnap:=blktiger_qload;
 end;
 
 end.

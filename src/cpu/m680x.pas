@@ -25,16 +25,17 @@ type
               constructor create(clock:dword;frames_div:word;tipo_cpu:byte);
               destructor Free;
             public
-              pedir_nmi,pedir_irq,nmi_state:byte;
               procedure run(maximo:single);
               procedure reset;
-              procedure clear_nmi;
+              procedure change_nmi(state:byte);
+              procedure change_irq(state:byte);
               procedure change_io_calls(in_port1,in_port2,in_port3,in_port4:cpu_inport_call;out_port1,out_port2,out_port3,out_port4:cpu_outport_call);
               //M6803
               function m6803_internal_reg_r(direccion:word):byte;
               procedure m6803_internal_reg_w(direccion:word;valor:byte);
             private
               r:preg_m6800;
+              pedir_nmi,pedir_irq,nmi_state:byte;
               in_port1,in_port2,in_port3,in_port4:cpu_inport_call;
               out_port1,out_port2,out_port3,out_port4:cpu_outport_call;
               port1_ddr,port2_ddr,port3_ddr,port4_ddr:byte;
@@ -467,10 +468,17 @@ begin
   self.timer_next:=self.ocd.l;
 end;
 
-procedure cpu_m6800.clear_nmi;
+procedure cpu_m6800.change_nmi(state:byte);
 begin
+if state=CLEAR_LINE then begin
   self.pedir_nmi:=CLEAR_LINE;
   self.nmi_state:=CLEAR_LINE;
+end else self.pedir_nmi:=state;
+end;
+
+procedure cpu_m6800.change_irq(state:byte);
+begin
+     self.pedir_irq:=state;
 end;
 
 procedure cpu_m6800.run(maximo:single);

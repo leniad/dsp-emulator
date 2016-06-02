@@ -561,7 +561,7 @@ case direccion of
                         2:copymemory(@buffer_sprites[0],@sprite_ram_bac06[0],$800);
                         4:begin
                             sound_latch:=valor and $ff;
-                            snd_m6502.pedir_nmi:=PULSE_LINE;
+                            snd_m6502.change_nmi(PULSE_LINE);
                           end;
                         6:dec0_i8751_write(valor);
                         $e:i8751_return:=0;
@@ -600,7 +600,7 @@ if direccion>$7fff then exit;
 case direccion of
   $0000..$05ff:mem_snd[direccion]:=valor;
   $0800:ym2203_0.Control(valor);
-  $0801:ym2203_0.Write_Reg(valor);
+  $0801:ym2203_0.Write(valor);
   $1000:ym3812_0.control(valor);
   $1001:ym3812_0.write(valor);
   $3800:oki_6295_0.write(valor);
@@ -616,8 +616,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6502.pedir_irq:=ASSERT_LINE
-    else snd_m6502.pedir_irq:=CLEAR_LINE;
+  snd_m6502.change_irq(irqstate);
 end;
 
 //Robocop

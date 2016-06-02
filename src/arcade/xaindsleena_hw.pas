@@ -5,24 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m6805,ym_2203,main_engine,controls_engine,gfx_engine,
      rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_xain;
-procedure xain_principal;
-function iniciar_xain:boolean;
-procedure reset_xain;
-//CPU
-function xain_getbyte(direccion:word):byte;
-procedure xain_putbyte(direccion:word;valor:byte);
-//Sub CPU
-function xain_sub_getbyte(direccion:word):byte;
-procedure xain_sub_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function xain_snd_getbyte(direccion:word):byte;
-procedure xain_snd_putbyte(direccion:word;valor:byte);
-procedure xain_sound_update;
-procedure snd_irq(irqstate:byte);
-//MCU CPU
-function mcu_xain_hw_getbyte(direccion:word):byte;
-procedure mcu_xain_hw_putbyte(direccion:word;valor:byte);
+procedure cargar_xain;
 
 implementation
 const
@@ -71,138 +54,6 @@ var
  port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
  ddr_a,ddr_b,ddr_c,from_main,from_mcu:byte;
  mcu_accept,mcu_ready:boolean;
-
-procedure Cargar_xain;
-begin
-llamadas_maquina.iniciar:=iniciar_xain;
-llamadas_maquina.bucle_general:=xain_principal;
-llamadas_maquina.reset:=reset_xain;
-llamadas_maquina.fps_max:=6000000/384/272;
-end;
-
-function iniciar_xain:boolean;
-var
-  f:word;
-  memoria_temp:array[0..$3ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(1,0,8*8+1,8*8+0,16*8+1,16*8+0,24*8+1,24*8+0);
-    pc_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
-    ps_x:array[0..15] of dword=(3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
-	  32*8+3,32*8+2 ,32*8+1 ,32*8+0 ,48*8+3 ,48*8+2 ,48*8+1 ,48*8+0);
-    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-	  8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_xain:=false;
-iniciar_audio(false);
-screen_init(1,256,256,true);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,512,512,true);
-screen_mod_scroll(3,512,256,511,512,256,511);
-screen_init(4,512,512,false,true);
-screen_mod_sprites(4,256,256,$ff,$ff);
-iniciar_video(256,240);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1500000,272);
-main_m6809.change_ram_calls(xain_getbyte,xain_putbyte);
-//Sub CPU
-misc_m6809:=cpu_m6809.Create(1500000,272);
-misc_m6809.change_ram_calls(xain_sub_getbyte,xain_sub_putbyte);
-//Sound CPU
-snd_m6809:=cpu_m6809.Create(1500000,272);
-snd_m6809.change_ram_calls(xain_snd_getbyte,xain_snd_putbyte);
-snd_m6809.init_sound(xain_sound_update);
-//MCU CPU
-main_m6805:=cpu_m6805.create(3000000,272,tipo_m68705);
-main_m6805.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
-//Sound Chip
-ym2203_0:=ym2203_chip.create(3000000);
-ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(3000000);
-//Main roms
-if not(cargar_roms(@memoria_temp[0],@xain_rom[0],'xsleena.zip',0)) then exit;
-//Pongo las ROMs en su banco
-copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
-for f:=0 to 1 do copymemory(@main_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//Sub roms
-if not(cargar_roms(@memoria_temp[0],@xain_sub[0],'xsleena.zip',0)) then exit;
-//Pongo las ROMs en su banco
-copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
-for f:=0 to 1 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//Cargar Sound
-if not(cargar_roms(@mem_snd[0],@xain_snd,'xsleena.zip')) then exit;
-//Cargar MCU
-if not(cargar_roms(@mcu_mem[0],@xain_mcu,'xsleena.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@xain_char,'xsleena.zip')) then exit;
-init_gfx(0,8,8,$400);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,2,4,6);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@xain_sprites[0],'xsleena.zip',0)) then exit;
-init_gfx(1,16,16,$800);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,$8000*4*8+0,$8000*4*8+4,0,4);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//convertir tiles1
-if not(cargar_roms(@memoria_temp[0],@xain_tiles1[0],'xsleena.zip',0)) then exit;
-init_gfx(2,16,16,$800);
-gfx[2].trans[0]:=true;
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//convertir tiles2
-if not(cargar_roms(@memoria_temp[0],@xain_tiles2[0],'xsleena.zip',0)) then exit;
-init_gfx(3,16,16,$800);
-gfx[3].trans[0]:=true;
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//iniciar scanlines
-for f:=8 to $ff do xain_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
-for f:=$e8 to $ff do xain_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF
-//DIP
-marcade.dswa:=$3f;
-marcade.dswb:=$ff;
-marcade.dswa_val:=@xain_dip_a;
-marcade.dswb_val:=@xain_dip_b;
-//final
-reset_xain;
-iniciar_xain:=true;
-end;
-
-procedure reset_xain;
-begin
- main_m6809.reset;
- misc_m6809.reset;
- snd_m6809.reset;
- main_m6805.reset;
- ym2203_0.reset;
- ym2203_1.reset;
- reset_audio;
- banco_main:=0;
- banco_sub:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- soundlatch:=0;
- vblank:=0;
- xain_pri:=0;
- scroll_x_p1:=0;
- scroll_y_p1:=0;
- scroll_x_p0:=0;
- scroll_y_p0:=0;
- //mcu
- port_a_in:=0;
- port_a_out:=0;
- ddr_a:=0;
- port_b_in:=0;
- port_b_out:=0;
- ddr_b:=0;
- port_c_in:=0;
- port_c_out:=0;
- ddr_c:=0;
- mcu_accept:=true;
- mcu_ready:=true;
- from_main:=0;
- from_mcu:=0;
-end;
 
 procedure update_video_xain;
 procedure chars(trans:boolean);inline;
@@ -412,7 +263,7 @@ end;
 //MCU
 function mcu_status_r:byte;inline;
 begin
-	mcu_status_r:=(byte(mcu_ready) shl 3) or (byte(mcu_accept) shl 4);
+   mcu_status_r:=(byte(mcu_ready) shl 3) or (byte(mcu_accept) shl 4);
 end;
 
 function mcu_xain_hw_getbyte(direccion:word):byte;
@@ -472,7 +323,7 @@ begin
                 mcu_ready:=true;
                 xain_getbyte:=from_mcu;
               end;
-        $3a05:xain_getbyte:=vblank or $c7 or mcu_status_r; //VBlank
+        $3a05:xain_getbyte:=$c7+mcu_status_r+vblank; //VBlank
         $3a06:begin
                 mcu_ready:=true;
 	              mcu_accept:=true;
@@ -590,9 +441,9 @@ if direccion>$4000 then exit;
 case direccion of
   0..$7ff:mem_snd[direccion]:=valor;
   $2800:ym2203_0.Control(valor);
-  $2801:ym2203_0.Write_Reg(valor);
+  $2801:ym2203_0.Write(valor);
   $3000:ym2203_1.Control(valor);
-  $3001:ym2203_1.Write_Reg(valor);
+  $3001:ym2203_1.Write(valor);
 end;
 end;
 
@@ -606,6 +457,139 @@ procedure xain_sound_update;
 begin
   ym2203_0.Update;
   ym2203_1.Update;
+end;
+
+//Main
+procedure reset_xain;
+begin
+ main_m6809.reset;
+ misc_m6809.reset;
+ snd_m6809.reset;
+ main_m6805.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
+ reset_audio;
+ banco_main:=0;
+ banco_sub:=0;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ soundlatch:=0;
+ vblank:=0;
+ xain_pri:=0;
+ scroll_x_p1:=0;
+ scroll_y_p1:=0;
+ scroll_x_p0:=0;
+ scroll_y_p0:=0;
+ //mcu
+ port_a_in:=0;
+ port_a_out:=0;
+ ddr_a:=0;
+ port_b_in:=0;
+ port_b_out:=0;
+ ddr_b:=0;
+ port_c_in:=0;
+ port_c_out:=0;
+ ddr_c:=0;
+ mcu_accept:=true;
+ mcu_ready:=true;
+ from_main:=0;
+ from_mcu:=0;
+end;
+
+function iniciar_xain:boolean;
+var
+  f:word;
+  memoria_temp:array[0..$3ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(1,0,8*8+1,8*8+0,16*8+1,16*8+0,24*8+1,24*8+0);
+    pc_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
+    ps_x:array[0..15] of dword=(3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
+	  32*8+3,32*8+2 ,32*8+1 ,32*8+0 ,48*8+3 ,48*8+2 ,48*8+1 ,48*8+0);
+    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+	  8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_xain:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,512,512,true);
+screen_mod_scroll(3,512,256,511,512,256,511);
+screen_init(4,512,512,false,true);
+screen_mod_sprites(4,256,256,$ff,$ff);
+iniciar_video(256,240);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1500000,272);
+main_m6809.change_ram_calls(xain_getbyte,xain_putbyte);
+//Sub CPU
+misc_m6809:=cpu_m6809.Create(1500000,272);
+misc_m6809.change_ram_calls(xain_sub_getbyte,xain_sub_putbyte);
+//Sound CPU
+snd_m6809:=cpu_m6809.Create(1500000,272);
+snd_m6809.change_ram_calls(xain_snd_getbyte,xain_snd_putbyte);
+snd_m6809.init_sound(xain_sound_update);
+//MCU CPU
+main_m6805:=cpu_m6805.create(3000000,272,tipo_m68705);
+main_m6805.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
+//Sound Chip
+ym2203_0:=ym2203_chip.create(3000000);
+ym2203_0.change_irq_calls(snd_irq);
+ym2203_1:=ym2203_chip.create(3000000);
+//Main roms
+if not(cargar_roms(@memoria_temp[0],@xain_rom[0],'xsleena.zip',0)) then exit;
+//Pongo las ROMs en su banco
+copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
+for f:=0 to 1 do copymemory(@main_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+//Sub roms
+if not(cargar_roms(@memoria_temp[0],@xain_sub[0],'xsleena.zip',0)) then exit;
+//Pongo las ROMs en su banco
+copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
+for f:=0 to 1 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+//Cargar Sound
+if not(cargar_roms(@mem_snd[0],@xain_snd,'xsleena.zip')) then exit;
+//Cargar MCU
+if not(cargar_roms(@mcu_mem[0],@xain_mcu,'xsleena.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@xain_char,'xsleena.zip')) then exit;
+init_gfx(0,8,8,$400);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,2,4,6);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@xain_sprites[0],'xsleena.zip',0)) then exit;
+init_gfx(1,16,16,$800);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,$8000*4*8+0,$8000*4*8+4,0,4);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//convertir tiles1
+if not(cargar_roms(@memoria_temp[0],@xain_tiles1[0],'xsleena.zip',0)) then exit;
+init_gfx(2,16,16,$800);
+gfx[2].trans[0]:=true;
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//convertir tiles2
+if not(cargar_roms(@memoria_temp[0],@xain_tiles2[0],'xsleena.zip',0)) then exit;
+init_gfx(3,16,16,$800);
+gfx[3].trans[0]:=true;
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//iniciar scanlines
+for f:=8 to $ff do xain_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
+for f:=$e8 to $ff do xain_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF
+//DIP
+marcade.dswa:=$3f;
+marcade.dswb:=$ff;
+marcade.dswa_val:=@xain_dip_a;
+marcade.dswb_val:=@xain_dip_b;
+//final
+reset_xain;
+iniciar_xain:=true;
+end;
+
+procedure Cargar_xain;
+begin
+llamadas_maquina.iniciar:=iniciar_xain;
+llamadas_maquina.bucle_general:=xain_principal;
+llamadas_maquina.reset:=reset_xain;
+llamadas_maquina.fps_max:=6000000/384/272;
 end;
 
 end.

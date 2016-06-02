@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,ym_2203,ym_3812,gfx_engine,
      rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_expraid;
-procedure principal_expraid;
-function iniciar_expraid:boolean;
-procedure reset_expraid;
-//Main CPU
-function getbyte_expraid(direccion:word):byte;
-procedure putbyte_expraid(direccion:word;valor:byte);
-function get_io_expraid:byte;
-//Sound CPU
-function getbyte_snd_expraid(direccion:word):byte;
-procedure putbyte_snd_expraid(direccion:word;valor:byte);
-procedure expraid_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_expraid;
 
 implementation
 const
@@ -44,12 +32,226 @@ var
   bg_tiles_cam:array[0..3] of boolean;
   old_val,old_val2:boolean;
 
-procedure Cargar_expraid;
+procedure update_video_expraid;inline;
+var
+  f,i,nchar,color,atrib:word;
+  x,y,pos_ini:word;
+  rest_scroll:word;
 begin
-llamadas_maquina.iniciar:=iniciar_expraid;
-llamadas_maquina.bucle_general:=principal_expraid;
-llamadas_maquina.reset:=reset_expraid;
-llamadas_maquina.fps_max:=59.637405;
+//Background
+for i:=0 to 3 do begin
+ if bg_tiles_cam[i] then begin
+  pos_ini:=bg_tiles[i]*$100;
+  for f:=0 to $ff do begin
+    x:=(f mod 16)*16;
+    y:=(f div 16)*16;
+    if i>1 then y:=y+256;
+    x:=x+(256*(i and 1));
+    atrib:=mem_tiles[$4000+pos_ini+f];
+    nchar:=mem_tiles[pos_ini+f]+((atrib and $03) shl 8);
+    color:=atrib and $18;
+    put_gfx_flip(x,y,nchar,color,2,2,(atrib and 4)<>0,false);
+    if (atrib and $80)<>0 then put_gfx_trans_flip(x,y,nchar,color,4,2,(atrib and 4)<>0,false)
+      else put_gfx_block_trans(x,y,4,16,16);
+  end;
+  bg_tiles_cam[i]:=false;
+ end;
+end;
+//Para acelerar las cosas (creo)
+rest_scroll:=256-scroll_y;
+//Express Rider divide en dos la pantalla vertical, con dos scrolls
+//diferentes, en total 512x256 y otra de 512x256
+actualiza_trozo(scroll_x,scroll_y,256,rest_scroll,2,0,0,256,rest_scroll,1);
+actualiza_trozo(scroll_x2,256,256,scroll_y,2,0,rest_scroll,256,scroll_y,1);
+//Sprites
+for f:=0 to $7f do begin
+    x:=((248-memoria[$602+(f*4)]) and $ff)-8;
+    y:=memoria[$600+(f*4)];
+    nchar:=memoria[$603+(f*4)]+((memoria[$601+(f*4)] and $e0) shl 3);
+    color:=((memoria[$601+(f*4)] and $03) + ((memoria[$601+(f*4)] and $08) shr 1)) shl 3;
+    put_gfx_sprite(nchar,64+color,(memoria[$601+(f*4)] and 4)<>0,false,1);
+    actualiza_gfx_sprite(x,y,1,1);
+    if (memoria[$601+(f*4)] and $10)<>0 then begin
+        put_gfx_sprite(nchar+1,64+color,(memoria[$601+(f*4)] and 4)<>0,false,1);
+        actualiza_gfx_sprite(x,y+16,1,1);
+    end;
+end;
+//Prioridad del fondo
+actualiza_trozo(scroll_x,scroll_y,256,rest_scroll,4,0,0,256,rest_scroll,1);
+actualiza_trozo(scroll_x2,256,256,scroll_y,4,0,rest_scroll,256,scroll_y,1);
+//Foreground
+for f:=0 to $3ff do begin
+  if gfx[0].buffer[f] then begin
+    x:=f mod 32;
+    y:=f div 32;
+    nchar:=memoria[$800+f]+((memoria[$c00+f] and $07) shl 8);
+    color:=(memoria[$c00+f] and $10) shr 2;
+    put_gfx_trans(x*8,y*8,nchar,128+color,6,0);
+    gfx[0].buffer[f]:=false;
+ end;
+end;
+actualiza_trozo(0,0,256,256,6,0,0,256,256,1);
+actualiza_trozo_final(8,8,240,240,1);
+end;
+
+procedure eventos_expraid;
+begin
+if event.arcade then begin
+  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or 1;
+  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $fd else marcade.in0:=marcade.in0 or 2;
+  if arcade_input.up[0] then marcade.in0:=marcade.in0 and $fb else marcade.in0:=marcade.in0 or 4;
+  if arcade_input.down[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or 8;
+  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
+  if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
+  if (arcade_input.coin[0] and not(old_val)) then begin
+      marcade.in2:=(marcade.in2 and $bf);
+      main_m6502.change_nmi(ASSERT_LINE);
+  end else begin
+      marcade.in2:=(marcade.in2 or $40);
+  end;
+  if (arcade_input.coin[1] and not(old_val2)) then begin
+      marcade.in2:=(marcade.in2 and $7f);
+      main_m6502.change_nmi(ASSERT_LINE);
+  end else begin
+      marcade.in2:=(marcade.in2 or $80);
+  end;
+  old_val:=arcade_input.coin[0];
+  old_val2:=arcade_input.coin[1];
+  if arcade_input.start[0] then marcade.in0:=marcade.in0 and $bf else marcade.in0:=marcade.in0 or $40;
+  if arcade_input.start[1] then marcade.in0:=marcade.in0 and $7f else marcade.in0:=marcade.in0 or $80;
+end;
+end;
+
+procedure principal_expraid;
+var
+  frame_m,frame_s:single;
+  f:word;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_m6502.tframes;
+frame_s:=snd_m6809.tframes;
+while EmuStatus=EsRuning do begin
+ for f:=0 to 261 do begin
+   main_m6502.run(frame_m);
+   frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
+   //Sound
+   snd_m6809.run(frame_s);
+   frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+   case f of
+      7:vb:=0;
+      247:begin
+            update_video_expraid;
+            vb:=$2;
+          end;
+   end;
+ end;
+ eventos_expraid;
+ video_sync;
+end;
+end;
+
+function getbyte_expraid(direccion:word):byte;
+begin
+case direccion of
+   0..$fff,$4000..$ffff:getbyte_expraid:=memoria[direccion];
+   $1800:getbyte_expraid:=$bf;
+   $1801:getbyte_expraid:=marcade.in0;
+   $1802:getbyte_expraid:=marcade.in2;
+   $1803:getbyte_expraid:=$ff;
+   $2800:getbyte_expraid:=prot_val;
+   $2801:getbyte_expraid:=$2;
+end;
+end;
+
+procedure putbyte_expraid(direccion:word;valor:byte);
+begin
+if direccion>$3fff then exit;
+case direccion of
+  0..$7ff:memoria[direccion]:=valor;
+  $800..$fff:begin
+                gfx[0].buffer[direccion and $3ff]:=true;
+                memoria[direccion]:=valor;
+             end;
+  $2000:main_m6502.change_nmi(CLEAR_LINE);
+  $2001:begin
+           sound_latch:=valor;
+           snd_m6809.change_nmi(ASSERT_LINE);
+        end;
+  $2800..$2803:if bg_tiles[direccion and $3]<>(valor and $3f) then begin
+                bg_tiles[direccion and $3]:=valor and $3f;
+                bg_tiles_cam[direccion and $3]:=true;
+               end;
+  $2804:scroll_y:=valor;
+  $2805:scroll_x:=valor;
+  $2806:scroll_x2:=valor;
+  $2807:case valor of
+          $20,$60:;
+          $80:prot_val:=prot_val+1;
+          $90:prot_val:=0;
+        end;
+end;
+end;
+
+function get_io_expraid:byte;
+begin
+  get_io_expraid:=vb;
+end;
+
+function getbyte_snd_expraid(direccion:word):byte;
+begin
+  case direccion of
+    0..$1fff,$8000..$ffff:getbyte_snd_expraid:=mem_snd[direccion];
+    $2000:getbyte_snd_expraid:=ym2203_0.status;
+    $2001:getbyte_snd_expraid:=ym2203_0.Read;
+    $4000:getbyte_snd_expraid:=ym3812_0.status;
+    $6000:begin
+            getbyte_snd_expraid:=sound_latch;
+            snd_m6809.change_nmi(CLEAR_LINE);
+          end;
+  end;
+end;
+
+procedure putbyte_snd_expraid(direccion:word;valor:byte);
+begin
+if direccion>$7fff then exit;
+case direccion of
+  0..$1fff:mem_snd[direccion]:=valor;
+  $2000:ym2203_0.control(valor);
+  $2001:ym2203_0.write(valor);
+  $4000:ym3812_0.control(valor);
+  $4001:ym3812_0.write(valor);
+end;
+end;
+
+procedure expraid_sound_update;
+begin
+  ym2203_0.Update;
+  ym3812_0.update;
+end;
+
+procedure snd_irq(irqstate:byte);
+begin
+  snd_m6809.change_irq(irqstate);
+end;
+
+//Main
+procedure reset_expraid;
+begin
+main_m6502.reset;
+snd_m6809.reset;
+YM2203_0.Reset;
+YM3812_0.reset;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$ff;
+vb:=0;
+prot_val:=0;
+sound_latch:=0;
+old_val:=false;
+old_val2:=false;
+scroll_x:=0;
+scroll_y:=0;
+scroll_x2:=0;
 end;
 
 function iniciar_expraid:boolean;
@@ -141,226 +343,12 @@ reset_expraid;
 iniciar_expraid:=true;
 end;
 
-procedure reset_expraid;
+procedure Cargar_expraid;
 begin
-main_m6502.reset;
-snd_m6809.reset;
-YM2203_0.Reset;
-YM3812_0.reset;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-vb:=0;
-prot_val:=0;
-sound_latch:=0;
-old_val:=false;
-old_val2:=false;
-scroll_x:=0;
-scroll_y:=0;
-scroll_x2:=0;
-end;
-
-procedure update_video_expraid;inline;
-var
-  f,i,nchar,color,atrib:word;
-  x,y,pos_ini:word;
-  rest_scroll:word;
-begin
-//Background
-for i:=0 to 3 do begin
- if bg_tiles_cam[i] then begin
-  pos_ini:=bg_tiles[i]*$100;
-  for f:=0 to $ff do begin
-    x:=(f mod 16)*16;
-    y:=(f div 16)*16;
-    if i>1 then y:=y+256;
-    x:=x+(256*(i and 1));
-    atrib:=mem_tiles[$4000+pos_ini+f];
-    nchar:=mem_tiles[pos_ini+f]+((atrib and $03) shl 8);
-    color:=atrib and $18;
-    put_gfx_flip(x,y,nchar,color,2,2,(atrib and 4)<>0,false);
-    if (atrib and $80)<>0 then put_gfx_trans_flip(x,y,nchar,color,4,2,(atrib and 4)<>0,false)
-      else put_gfx_block_trans(x,y,4,16,16);
-  end;
-  bg_tiles_cam[i]:=false;
- end;
-end;
-//Para acelerar las cosas (creo)
-rest_scroll:=256-scroll_y;
-//Express Rider divide en dos la pantalla vertical, con dos scrolls
-//diferentes, en total 512x256 y otra de 512x256
-actualiza_trozo(scroll_x,scroll_y,256,rest_scroll,2,0,0,256,rest_scroll,1);
-actualiza_trozo(scroll_x2,256,256,scroll_y,2,0,rest_scroll,256,scroll_y,1);
-//Sprites
-for f:=0 to $7f do begin
-    x:=((248-memoria[$602+(f*4)]) and $ff)-8;
-    y:=memoria[$600+(f*4)];
-    nchar:=memoria[$603+(f*4)]+((memoria[$601+(f*4)] and $e0) shl 3);
-    color:=((memoria[$601+(f*4)] and $03) + ((memoria[$601+(f*4)] and $08) shr 1)) shl 3;
-    put_gfx_sprite(nchar,64+color,(memoria[$601+(f*4)] and 4)<>0,false,1);
-    actualiza_gfx_sprite(x,y,1,1);
-    if (memoria[$601+(f*4)] and $10)<>0 then begin
-        put_gfx_sprite(nchar+1,64+color,(memoria[$601+(f*4)] and 4)<>0,false,1);
-        actualiza_gfx_sprite(x,y+16,1,1);
-    end;
-end;
-//Prioridad del fondo
-actualiza_trozo(scroll_x,scroll_y,256,rest_scroll,4,0,0,256,rest_scroll,1);
-actualiza_trozo(scroll_x2,256,256,scroll_y,4,0,rest_scroll,256,scroll_y,1);
-//Foreground
-for f:=0 to $3ff do begin
-  if gfx[0].buffer[f] then begin
-    x:=f mod 32;
-    y:=f div 32;
-    nchar:=memoria[$800+f]+((memoria[$c00+f] and $07) shl 8);
-    color:=(memoria[$c00+f] and $10) shr 2;
-    put_gfx_trans(x*8,y*8,nchar,128+color,6,0);
-    gfx[0].buffer[f]:=false;
- end;
-end;
-actualiza_trozo(0,0,256,256,6,0,0,256,256,1);
-actualiza_trozo_final(8,8,240,240,1);
-end;
-
-procedure eventos_expraid;
-begin
-if event.arcade then begin
-  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or 1;
-  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $fd else marcade.in0:=marcade.in0 or 2;
-  if arcade_input.up[0] then marcade.in0:=marcade.in0 and $fb else marcade.in0:=marcade.in0 or 4;
-  if arcade_input.down[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or 8;
-  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
-  if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
-  if (arcade_input.coin[0] and not(old_val)) then begin
-      marcade.in2:=(marcade.in2 and $bf);
-      main_m6502.pedir_nmi:=ASSERT_LINE;;
-  end else begin
-      marcade.in2:=(marcade.in2 or $40);
-  end;
-  if (arcade_input.coin[1] and not(old_val2)) then begin
-      marcade.in2:=(marcade.in2 and $7f);
-      main_m6502.pedir_nmi:=ASSERT_LINE;
-  end else begin
-      marcade.in2:=(marcade.in2 or $80);
-  end;
-  old_val:=arcade_input.coin[0];
-  old_val2:=arcade_input.coin[1];
-  if arcade_input.start[0] then marcade.in0:=marcade.in0 and $bf else marcade.in0:=marcade.in0 or $40;
-  if arcade_input.start[1] then marcade.in0:=marcade.in0 and $7f else marcade.in0:=marcade.in0 or $80;
-end;
-end;
-
-procedure principal_expraid;
-var
-  frame_m,frame_s:single;
-  f:word;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_m6502.tframes;
-frame_s:=snd_m6809.tframes;
-while EmuStatus=EsRuning do begin
- for f:=0 to 261 do begin
-   main_m6502.run(frame_m);
-   frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
-   //Sound
-   snd_m6809.run(frame_s);
-   frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
-   case f of
-      7:vb:=0;
-      247:begin
-            update_video_expraid;
-            vb:=$2;
-          end;
-   end;
- end;
- eventos_expraid;
- video_sync;
-end;
-end;
-
-function getbyte_expraid(direccion:word):byte;
-begin
-case direccion of
-   0..$fff,$4000..$ffff:getbyte_expraid:=memoria[direccion];
-   $1800:getbyte_expraid:=$bf;
-   $1801:getbyte_expraid:=marcade.in0;
-   $1802:getbyte_expraid:=marcade.in2;
-   $1803:getbyte_expraid:=$ff;
-   $2800:getbyte_expraid:=prot_val;
-   $2801:getbyte_expraid:=$2;
-end;
-end;
-
-procedure putbyte_expraid(direccion:word;valor:byte);
-begin
-if direccion>$3fff then exit;
-case direccion of
-  0..$7ff:memoria[direccion]:=valor;
-  $800..$fff:begin
-                gfx[0].buffer[direccion and $3ff]:=true;
-                memoria[direccion]:=valor;
-             end;
-  $2000:main_m6502.clear_nmi;
-  $2001:begin
-           sound_latch:=valor;
-           snd_m6809.change_nmi(ASSERT_LINE);
-        end;
-  $2800..$2803:if bg_tiles[direccion and $3]<>(valor and $3f) then begin
-                bg_tiles[direccion and $3]:=valor and $3f;
-                bg_tiles_cam[direccion and $3]:=true;
-               end;
-  $2804:scroll_y:=valor;
-  $2805:scroll_x:=valor;
-  $2806:scroll_x2:=valor;
-  $2807:case valor of
-          $20,$60:;
-          $80:prot_val:=prot_val+1;
-          $90:prot_val:=0;
-        end;
-end;
-end;
-
-function get_io_expraid:byte;
-begin
-  get_io_expraid:=vb;
-end;
-
-function getbyte_snd_expraid(direccion:word):byte;
-begin
-  case direccion of
-    0..$1fff,$8000..$ffff:getbyte_snd_expraid:=mem_snd[direccion];
-    $2000:getbyte_snd_expraid:=ym2203_0.read_status;
-    $2001:getbyte_snd_expraid:=ym2203_0.Read_Reg;
-    $4000:getbyte_snd_expraid:=ym3812_0.status;
-    $6000:begin
-            getbyte_snd_expraid:=sound_latch;
-            snd_m6809.change_nmi(CLEAR_LINE);
-          end;
-  end;
-end;
-
-procedure putbyte_snd_expraid(direccion:word;valor:byte);
-begin
-if direccion>$7fff then exit;
-case direccion of
-  0..$1fff:mem_snd[direccion]:=valor;
-  $2000:ym2203_0.control(valor);
-  $2001:ym2203_0.write_reg(valor);
-  $4000:ym3812_0.control(valor);
-  $4001:ym3812_0.write(valor);
-end;
-end;
-
-procedure expraid_sound_update;
-begin
-  ym2203_0.Update;
-  ym3812_0.update;
-end;
-
-procedure snd_irq(irqstate:byte);
-begin
-  if (irqstate<>0) then snd_m6809.change_irq(ASSERT_LINE)
-    else snd_m6809.change_irq(CLEAR_LINE);
+llamadas_maquina.iniciar:=iniciar_expraid;
+llamadas_maquina.bucle_general:=principal_expraid;
+llamadas_maquina.reset:=reset_expraid;
+llamadas_maquina.fps_max:=59.637405;
 end;
 
 end.

@@ -263,7 +263,7 @@ case direccion of
     $d000:scroll_x:=(scroll_x and $ff00) or valor;
     $d001:scroll_x:=(scroll_x and $00ff) or ((valor and 1) shl 8);
     $d800:if ((valor and $80)=0) then sound_command:=valor and $7f
-          	else snd_m6800.pedir_irq:=ASSERT_LINE;
+          	else snd_m6800.change_irq(ASSERT_LINE);
     $d801:begin
             if tile_bank<>(valor and $10) then begin
               tile_bank:=valor and $10;
@@ -284,7 +284,7 @@ case direccion of
   $0..$1f:snd_getbyte:=snd_m6800.m6803_internal_reg_r(direccion);
   $80..$ff,$2000..$7fff:snd_getbyte:=mem_snd[direccion];
 end;
-end;
+end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
@@ -293,7 +293,7 @@ if direccion>$1fff then exit;
 case direccion of
   $0..$1f:snd_m6800.m6803_internal_reg_w(direccion,valor);
   $80..$ff:mem_snd[direccion]:=valor;
-  $1000..$1fff:snd_m6800.pedir_irq:=CLEAR_LINE;
+  $1000..$1fff:snd_m6800.change_irq(CLEAR_LINE);
 end;
 end;
 
@@ -343,7 +343,7 @@ end;
 
 procedure knjoe_snd_nmi;
 begin
-  snd_m6800.pedir_nmi:=PULSE_LINE;
+  snd_m6800.change_nmi(PULSE_LINE);
 end;
 
 end.

@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ym_3812,ym_2203,oki6295,m6502,sound_engine,hu6280,deco_bac06;
 
-procedure Cargar_actfancer;
-function iniciar_actfancer:boolean;
-procedure reset_actfancer;
-procedure cerrar_actfancer;
-procedure actfancer_principal;
-//Main CPU
-function actfancer_getbyte(direccion:dword):byte;
-procedure actfancer_putbyte(direccion:dword;valor:byte);
-//Sound CPU
-function actfancer_snd_getbyte(direccion:word):byte;
-procedure actfancer_snd_putbyte(direccion:word;valor:byte);
-procedure actfancer_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_actfancer;
 
 implementation
 const
@@ -41,15 +29,219 @@ const
 var
  rom:array[0..$2ffff] of byte;
  ram:array[0..$3fff] of byte;
- sound_latch,vblank_val:byte;
+ sound_latch:byte;
 
-procedure Cargar_actfancer;
+procedure update_video_actfancer;inline;
 begin
-llamadas_maquina.bucle_general:=actfancer_principal;
-llamadas_maquina.iniciar:=iniciar_actfancer;
-llamadas_maquina.cerrar:=cerrar_actfancer;
-llamadas_maquina.reset:=reset_actfancer;
-llamadas_maquina.fps_max:=60;
+update_pf(1,1,false,false);
+update_pf(2,0,true,false);
+show_pf(1,3);
+sprites_deco_bac06(0,0,2,3);
+show_pf(2,3);
+actualiza_trozo_final(0,8,256,240,3);
+end;
+
+procedure eventos_actfancer;
+begin
+if event.arcade then begin
+  //P1
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P2
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $Fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
+  //SYSTEM
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+end;
+end;
+
+procedure actfancer_principal;
+var
+  frame_m,frame_s:single;
+  f:byte;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_h6280.tframes;
+frame_s:=snd_m6502.tframes;
+while EmuStatus=EsRuning do begin
+ for f:=0 to $ff do begin
+   //Main
+   main_h6280.run(trunc(frame_m));
+   frame_m:=frame_m+main_h6280.tframes-main_h6280.contador;
+   //Sound
+   snd_m6502.run(frame_s);
+   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
+   case f of
+      247:begin
+            main_h6280.set_irq_line(0,HOLD_LINE);
+            update_video_actfancer;
+            marcade.in1:=marcade.in1 or $80;
+          end;
+      255:marcade.in1:=marcade.in1 and $7f;
+   end;
+ end;
+ eventos_actfancer;
+ video_sync;
+end;
+end;
+
+function actfancer_getbyte(direccion:dword):byte;
+var
+  tempw:word;
+begin
+case direccion of
+  $000000..$02ffff:actfancer_getbyte:=rom[direccion];
+  $062000..$063fff:begin
+                      tempw:=bac06_pf.data[1,(direccion and $1fff) shr 1];
+                      if (direccion and 1)<>0 then actfancer_getbyte:=tempw shr 8
+                        else actfancer_getbyte:=tempw;
+                   end;
+  $072000..$0727ff:begin
+                      tempw:=bac06_pf.data[2,(direccion and $7ff) shr 1];
+                      if (direccion and 1)<>0 then actfancer_getbyte:=tempw shr 8
+                        else actfancer_getbyte:=tempw;
+                   end;
+  $100000..$1007ff:actfancer_getbyte:=sprite_ram_bac06[(direccion xor 1) and $7ff];
+  $120000..$1205ff:actfancer_getbyte:=buffer_paleta[direccion and $7ff];
+  $130000:actfancer_getbyte:=marcade.in0;
+  $130001:actfancer_getbyte:=marcade.in2;
+  $130002:actfancer_getbyte:=$ff;
+  $130003:actfancer_getbyte:=$ff;
+  $140000:actfancer_getbyte:=marcade.in1;
+  $1f0000..$1f3fff:actfancer_getbyte:=ram[direccion and $3fff];
+end;
+end;
+
+procedure cambiar_color(dir:word);inline;
+var
+  tmp_color:byte;
+  color:tcolor;
+begin
+  tmp_color:=buffer_paleta[dir];
+  color.r:=pal4bit(tmp_color);
+  color.g:=pal4bit(tmp_color shr 4);
+  tmp_color:=buffer_paleta[dir+1];
+  color.b:=pal4bit(tmp_color);
+  dir:=dir shr 1;
+  set_pal_color(color,dir);
+  case dir of
+    $000..$0ff:bac06_pf.buffer_color[2,dir shr 4]:=true;
+    $100..$1ff:bac06_pf.buffer_color[1,(dir shr 4) and $f]:=true;
+  end;
+end;
+
+procedure actfancer_putbyte(direccion:dword;valor:byte);
+var
+  tempw:word;
+begin
+if direccion<$30000 then exit;
+case direccion of
+  $060000..$060007:begin
+                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_0[1,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_pf.control_0[1,(direccion and 7) shr 1] and $ff00) or valor;
+                      change_control0(1,(direccion and 7) shr 1,tempw);
+                   end;
+  $060010..$06001f:begin
+                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_1[1,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_pf.control_1[1,(direccion and 7) shr 1] and $ff00) or valor;
+                      change_control1(1,(direccion and 7) shr 1,tempw);
+                   end;
+  $062000..$063fff:begin
+                      if (direccion and 1)<>0 then tempw:=(bac06_pf.data[1,(direccion and $1fff) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_pf.data[1,(direccion and $1fff) shr 1] and $ff00) or valor;
+                      bac06_pf.data[1,(direccion and $1fff) shr 1]:=tempw;
+                      gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
+                   end;
+  $070000..$070007:begin
+                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_0[2,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_pf.control_0[2,(direccion and 7) shr 1] and $ff00) or valor;
+                      change_control0(2,(direccion and 7) shr 1,tempw);
+                   end;
+  $070010..$07001f:begin
+                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_1[2,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_pf.control_1[2,(direccion and 7) shr 1] and $ff00) or valor;
+                      change_control1(2,(direccion and 7) shr 1,tempw);
+                   end;
+  $072000..$0727ff:begin
+                      if (direccion and 1)<>0 then tempw:=(bac06_pf.data[2,(direccion and $7ff) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_pf.data[2,(direccion and $7ff) shr 1] and $ff00) or valor;
+                      bac06_pf.data[2,(direccion and $7ff) shr 1]:=tempw;
+                      gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
+                   end;
+  $100000..$1007ff:sprite_ram_bac06[(direccion xor 1) and $7ff]:=valor;
+  $110000:copymemory(@buffer_sprites[0],@sprite_ram_bac06[0],$800);
+  $120000..$1205ff:if buffer_paleta[direccion and $7ff]<>valor then begin
+                      buffer_paleta[direccion and $7ff]:=valor;
+                      cambiar_color((direccion and $7fe));
+                   end;
+  $150000:begin
+              sound_latch:=valor;
+              snd_m6502.change_nmi(PULSE_LINE);
+          end;
+  $160000:;
+  $1f0000..$1f3fff:ram[direccion and $3fff]:=valor;
+end;
+end;
+
+function actfancer_snd_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $3000:actfancer_snd_getbyte:=sound_latch;
+  $3800:actfancer_snd_getbyte:=oki_6295_0.read;
+  0..$7ff,$4000..$ffff:actfancer_snd_getbyte:=mem_snd[direccion];
+end;
+end;
+
+procedure actfancer_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion>$3fff then exit;
+case direccion of
+  0..$7ff:mem_snd[direccion]:=valor;
+  $800:ym2203_0.Control(valor);
+  $801:ym2203_0.Write(valor);
+  $1000:ym3812_0.control(valor);
+  $1001:ym3812_0.write(valor);
+  $3800:oki_6295_0.write(valor);
+end;
+end;
+
+procedure actfancer_sound_update;
+begin
+  ym3812_0.update;
+  ym2203_0.Update;
+  oki_6295_0.update;
+end;
+
+procedure snd_irq(irqstate:byte);
+begin
+  snd_m6502.change_irq(irqstate);
+end;
+
+//Main
+procedure reset_actfancer;
+begin
+ main_h6280.reset;
+ snd_m6502.reset;
+ ym3812_0.reset;
+ ym2203_0.reset;
+ oki_6295_0.reset;
+ deco_bac06_reset(0);
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$7F;
+ marcade.in2:=$FF;
+ sound_latch:=0;
 end;
 
 function iniciar_actfancer:boolean;
@@ -124,218 +316,13 @@ begin
 deco_bac06_close(0);
 end;
 
-procedure reset_actfancer;
+procedure Cargar_actfancer;
 begin
- main_h6280.reset;
- snd_m6502.reset;
- ym3812_0.reset;
- ym2203_0.reset;
- oki_6295_0.reset;
- deco_bac06_reset(0);
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$7F;
- marcade.in2:=$FF;
- sound_latch:=0;
- vblank_val:=0;
-end;
-
-procedure update_video_actfancer;inline;
-begin
-update_pf(1,1,false,false);
-update_pf(2,0,true,false);
-show_pf(1,3);
-sprites_deco_bac06(0,0,2,3);
-show_pf(2,3);
-actualiza_trozo_final(0,8,256,240,3);
-end;
-
-procedure eventos_actfancer;
-begin
-if event.arcade then begin
-  //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
-  //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $Fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
-  //SYSTEM
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-end;
-end;
-
-procedure actfancer_principal;
-var
-  frame_m,frame_s:single;
-  f:byte;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_h6280.tframes;
-frame_s:=snd_m6502.tframes;
-while EmuStatus=EsRuning do begin
- for f:=0 to $ff do begin
-   //Main
-   main_h6280.run(trunc(frame_m));
-   frame_m:=frame_m+main_h6280.tframes-main_h6280.contador;
-   //Sound
-   snd_m6502.run(frame_s);
-   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
-   case f of
-      247:begin
-            main_h6280.set_irq_line(0,HOLD_LINE);
-            update_video_actfancer;
-            vblank_val:=$80;
-          end;
-      255:vblank_val:=0;
-   end;
- end;
- eventos_actfancer;
- video_sync;
-end;
-end;
-
-function actfancer_getbyte(direccion:dword):byte;
-var
-  tempw:word;
-begin
-case direccion of
-  $000000..$02ffff:actfancer_getbyte:=rom[direccion];
-  $062000..$063fff:begin
-                      tempw:=bac06_pf.data[1,(direccion and $1fff) shr 1];
-                      if (direccion and 1)<>0 then actfancer_getbyte:=tempw shr 8
-                        else actfancer_getbyte:=tempw;
-                   end;
-  $072000..$0727ff:begin
-                      tempw:=bac06_pf.data[2,(direccion and $7ff) shr 1];
-                      if (direccion and 1)<>0 then actfancer_getbyte:=tempw shr 8
-                        else actfancer_getbyte:=tempw;
-                   end;
-  $100000..$1007ff:actfancer_getbyte:=sprite_ram_bac06[(direccion xor 1) and $7ff];
-  $120000..$1205ff:actfancer_getbyte:=buffer_paleta[direccion and $7ff];
-  $130000:actfancer_getbyte:=marcade.in0;
-  $130001:actfancer_getbyte:=marcade.in2;
-  $130002:actfancer_getbyte:=$ff;
-  $130003:actfancer_getbyte:=$ff;
-  $140000:actfancer_getbyte:=marcade.in1+vblank_val;
-  $1f0000..$1f3fff:actfancer_getbyte:=ram[direccion and $3fff];
-end;
-end;
-
-procedure cambiar_color(dir:word);inline;
-var
-  tmp_color:byte;
-  color:tcolor;
-begin
-  tmp_color:=buffer_paleta[dir];
-  color.r:=pal4bit(tmp_color);
-  color.g:=pal4bit(tmp_color shr 4);
-  tmp_color:=buffer_paleta[dir+1];
-  color.b:=pal4bit(tmp_color);
-  dir:=dir shr 1;
-  set_pal_color(color,dir);
-  case dir of
-    $000..$0ff:bac06_pf.buffer_color[2,dir shr 4]:=true;
-    $100..$1ff:bac06_pf.buffer_color[1,(dir shr 4) and $f]:=true;
-  end;
-end;
-
-procedure actfancer_putbyte(direccion:dword;valor:byte);
-var
-  tempw:word;
-begin
-if direccion<$30000 then exit;
-case direccion of
-  $060000..$060007:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_0[1,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_0[1,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control0(1,(direccion and 7) shr 1,tempw);
-                   end;
-  $060010..$06001f:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_1[1,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_1[1,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control1(1,(direccion and 7) shr 1,tempw);
-                   end;
-  $062000..$063fff:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.data[1,(direccion and $1fff) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.data[1,(direccion and $1fff) shr 1] and $ff00) or valor;
-                      bac06_pf.data[1,(direccion and $1fff) shr 1]:=tempw;
-                      gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
-                   end;
-  $070000..$070007:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_0[2,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_0[2,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control0(2,(direccion and 7) shr 1,tempw);
-                   end;
-  $070010..$07001f:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_1[2,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_1[2,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control1(2,(direccion and 7) shr 1,tempw);
-                   end;
-  $072000..$0727ff:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.data[2,(direccion and $7ff) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.data[2,(direccion and $7ff) shr 1] and $ff00) or valor;
-                      bac06_pf.data[2,(direccion and $7ff) shr 1]:=tempw;
-                      gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-                   end;
-  $100000..$1007ff:sprite_ram_bac06[(direccion xor 1) and $7ff]:=valor;
-  $110000:copymemory(@buffer_sprites[0],@sprite_ram_bac06[0],$800);
-  $120000..$1205ff:if buffer_paleta[direccion and $7ff]<>valor then begin
-                      buffer_paleta[direccion and $7ff]:=valor;
-                      cambiar_color((direccion and $7fe));
-                   end;
-  $150000:begin
-              sound_latch:=valor;
-              snd_m6502.pedir_nmi:=PULSE_LINE;
-          end;
-  $160000:;
-  $1f0000..$1f3fff:ram[direccion and $3fff]:=valor;
-end;
-end;
-
-function actfancer_snd_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $3000:actfancer_snd_getbyte:=sound_latch;
-  $3800:actfancer_snd_getbyte:=oki_6295_0.read;
-  0..$7ff,$4000..$ffff:actfancer_snd_getbyte:=mem_snd[direccion];
-end;
-end;
-
-procedure actfancer_snd_putbyte(direccion:word;valor:byte);
-begin
-if direccion>$3fff then exit;
-case direccion of
-  0..$7ff:mem_snd[direccion]:=valor;
-  $800:ym2203_0.Control(valor);
-  $801:ym2203_0.Write_Reg(valor);
-  $1000:ym3812_0.control(valor);
-  $1001:ym3812_0.write(valor);
-  $3800:oki_6295_0.write(valor);
-end;
-end;
-
-procedure actfancer_sound_update;
-begin
-  ym3812_0.update;
-  ym2203_0.Update;
-  oki_6295_0.update;
-end;
-
-procedure snd_irq(irqstate:byte);
-begin
-  if irqstate<>0 then snd_m6502.pedir_irq:=ASSERT_LINE
-    else snd_m6502.pedir_irq:=CLEAR_LINE;
+llamadas_maquina.bucle_general:=actfancer_principal;
+llamadas_maquina.iniciar:=iniciar_actfancer;
+llamadas_maquina.cerrar:=cerrar_actfancer;
+llamadas_maquina.reset:=reset_actfancer;
+llamadas_maquina.fps_max:=60;
 end;
 
 end.

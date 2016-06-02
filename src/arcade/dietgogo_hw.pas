@@ -126,7 +126,6 @@ begin
 close_dec16ic(0);
 if oki1_mem<>nil then freemem(oki1_mem);
 oki1_mem:=nil;
-deco16_snd_simple_close;
 end;
 
 procedure reset_dietgo;
@@ -208,14 +207,13 @@ end;
 
 function dietgo_protection_region_0_104_r(real_address:word):word;inline;
 var
-  deco146_addr,data:word;
+  deco146_addr:word;
   cs:byte;
 begin
-	//int real_address = 0 + (offset *2);
-	deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
-	cs:=0;
-	data:=main_deco104.read_data(deco146_addr,cs);
-	dietgo_protection_region_0_104_r:=data;
+   //int real_address = 0 + (offset *2);
+   deco146_addr:=BITSWAP32(real_address,31,30,29,28,27,26,25,24,23,22,21,20,19,18, 13,12,11,17,16,15,14,    10,9,8, 7,6,5,4, 3,2,1,0) and $7fff;
+   cs:=0;
+   dietgo_protection_region_0_104_r:=main_deco104.read_data(deco146_addr,cs);
 end;
 
 function dietgo_getword(direccion:dword):word;

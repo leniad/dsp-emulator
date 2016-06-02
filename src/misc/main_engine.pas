@@ -27,6 +27,8 @@ const
 
         MAX_PUNBUF=768;
 
+        SCREEN_DIF=20;
+
 type
         tgetbyte=function (direccion:word):byte;
         tputbyte=procedure (direccion:word;valor:byte);
@@ -664,7 +666,7 @@ move(source^,dest^,size);
 end;
 {$endif}
 
-procedure video_sync;inline;
+procedure video_sync;
 var
   res:dword;
 begin

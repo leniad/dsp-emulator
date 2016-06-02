@@ -5,14 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine;
 
-procedure Cargar_MS;
-procedure principal_ms;
-function iniciar_ms:boolean;
-procedure reset_ms;
-//Main CPU
-function getbyte_ms(direccion:word):byte;
-procedure putbyte_ms(direccion:word;valor:byte);
-procedure ms_sound_update;
+procedure cargar_ms;
 
 implementation
 const
@@ -41,19 +34,11 @@ const
         (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
-  scroll,soundlatch,last,char_color,vblank_val:byte;
+  scroll,soundlatch,last,char_color:byte;
   video_page:word;
   weights_rg:array[0..2] of single;
   weights_b:array[0..1] of single;
   ms_scanline:array[0..271] of word;
-
-procedure Cargar_MS;
-begin
-llamadas_maquina.iniciar:=iniciar_ms;
-llamadas_maquina.bucle_general:=principal_ms;
-llamadas_maquina.reset:=reset_ms;
-llamadas_maquina.fps_max:=((12000000/256)/3)/272;
-end;
 
 procedure cambiar_color(pos:byte);inline;
 var
@@ -76,6 +61,190 @@ begin
   bit1:=(valor shr 7) and $01;
   color.b:=combine_2_weights(@weights_b[0],bit0,bit1);
   set_pal_color(color,pos);
+end;
+
+procedure update_video_ms;inline;
+var
+  f,nchar,color:word;
+  x,y:word;
+  atrib:byte;
+begin
+for f:=0 to $1ff do begin
+  if gfx[2].buffer[f+video_page] then begin
+    x:=f mod 32;
+    y:=f div 32;
+    nchar:=((memoria[$1a00+video_page+f] and $1) shl 8)+memoria[$1800+f+video_page];
+    put_gfx_flip(x*16,y*16,nchar,16,1,2,(x and $10)<>0,false);
+    gfx[2].buffer[f+video_page]:=false;
+  end;
+end;
+scroll__x(1,2,scroll);
+//Sprites
+for f:=0 to $17 do begin
+  atrib:=memoria[$780+(f*4)];
+  if (atrib and 1)<>0 then begin
+    x:=240-memoria[$782+(f*4)];
+    y:=memoria[$783+(f*4)];
+    nchar:=memoria[$781+(f*4)]+((atrib and $10) shl 4);
+    color:=(atrib and $8) shl 1;
+    put_gfx_sprite(nchar,color,(atrib and 2)<>0,(atrib and 4)<>0,1);
+    actualiza_gfx_sprite(x and $ff,y,2,1);
+  end;
+end;
+for f:=0 to $3ff do begin
+  if gfx[0].buffer[f] then begin
+    x:=f mod 32;
+    y:=f div 32;
+    nchar:=((memoria[$1400+f] and $07) shl 8)+memoria[$1000+f];
+    put_gfx_trans(x*8,y*8,nchar,24+(char_color shl 3),3,0);
+    gfx[0].buffer[f]:=false;
+  end;
+end;
+actualiza_trozo(0,0,256,256,3,0,0,256,256,2);
+actualiza_trozo_final(8,0,240,256,2);
+end;
+
+procedure eventos_ms;
+begin
+if event.arcade then begin
+  //P1
+  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or 1;
+  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $fd else marcade.in0:=marcade.in0 or 2;
+  if arcade_input.up[0] then marcade.in0:=marcade.in0 and $fb else marcade.in0:=marcade.in0 or 4;
+  if arcade_input.down[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or 8;
+  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
+  if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
+  if arcade_input.coin[0] then begin
+      marcade.in0:=(marcade.in0 and $bf);
+      main_m6502.change_nmi(ASSERT_LINE);
+  end else begin
+      marcade.in0:=(marcade.in0 or $40);
+      if arcade_input.coin[1] then begin
+          marcade.in0:=(marcade.in0 and $7f);
+          main_m6502.change_nmi(ASSERT_LINE);
+      end else begin
+          marcade.in0:=(marcade.in0 or $80);
+          main_m6502.change_nmi(CLEAR_LINE);
+      end;
+  end;
+  //P2
+  if arcade_input.right[1] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or 1;
+  if arcade_input.left[1] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or 2;
+  if arcade_input.up[1] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or 4;
+  if arcade_input.down[1] then marcade.in1:=marcade.in1 and $f7 else marcade.in1:=marcade.in1 or 8;
+  if arcade_input.but0[1] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
+  if arcade_input.but1[1] then marcade.in1:=marcade.in1 and $df else marcade.in1:=marcade.in1 or $20;
+  if arcade_input.start[0] then marcade.in1:=marcade.in1 and $bf else marcade.in1:=marcade.in1 or $40;
+  if arcade_input.start[1] then marcade.in1:=marcade.in1 and $7f else marcade.in1:=marcade.in1 or $80;
+end;
+end;
+
+procedure principal_ms;
+var
+  f:word;
+  frame:single;
+begin
+init_controls(false,false,false,true);
+frame:=main_m6502.tframes;
+while EmuStatus=EsRuning do begin
+ for f:=0 to 271 do begin
+    main_m6502.run(frame);
+    frame:=frame+main_m6502.tframes-main_m6502.contador;
+    //video
+    case ms_scanline[f] of
+      $8:marcade.dswb:=marcade.dswb and $7f;
+      $f8:begin
+            update_video_ms;
+            marcade.dswb:=marcade.dswb or $80;
+          end;
+    end;
+    if ((ms_scanline[f] and $f)=8) then main_m6502.change_irq(ASSERT_LINE);
+ end;
+ eventos_ms;
+ video_sync;
+end;
+end;
+
+function getbyte_ms(direccion:word):byte;
+begin
+case direccion of
+  0..$1fff,$4000..$ffff:getbyte_ms:=memoria[direccion];
+  $2000..$3fff:case (direccion and $7f) of
+                  $0..$f:getbyte_ms:=marcade.in0;
+                  $10..$1f:getbyte_ms:=marcade.in1;
+                  $20..$2f:getbyte_ms:=marcade.dswa;
+                  $30..$3f:getbyte_ms:=marcade.dswb;
+                  $60..$7f:getbyte_ms:=buffer_paleta[direccion and $1f];
+               end;
+end;
+end;
+
+procedure putbyte_ms(direccion:word;valor:byte);
+var
+  temp:byte;
+begin
+if direccion>$3fff then exit;
+case direccion of
+  0..$fff:memoria[direccion]:=valor;
+  $1000..$17ff:begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $1800..$1fff:begin
+                  gfx[2].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $2000..$3fff:case (direccion and $7f) of
+                $0..$f:begin
+                      temp:=((valor and $1) shl 1)+((valor and $2) shr 1);
+                      if char_color<>temp then begin
+                        fillchar(gfx[0].buffer[0],$400,1);
+                        char_color:=temp;
+                      end;
+                      video_page:=(valor and $4) shl 8;
+                    end;
+                $10..$1f:main_m6502.change_irq(CLEAR_LINE);
+                $20..$2f:scroll:=valor;
+                $30..$3f:soundlatch:=valor;
+                $40..$4f:begin
+                     if (((last and $20)=$20) and ((valor and $20)=0)) then begin
+                        if (last and $10)<>0 then ay8910_0.Control(soundlatch)
+                          else AY8910_0.write(soundlatch);
+                     end;
+                     if (((last and $80)=$80) and ((valor and $80)=0)) then begin
+                        if (last and $40)<>0 then AY8910_1.control(soundlatch)
+                          else AY8910_1.write(soundlatch);
+                     end;
+                     last:=valor;
+                  end;
+                $60..$7f:if buffer_paleta[direccion and $1f]<>valor then begin
+                          buffer_paleta[direccion and $1f]:=valor;
+                          cambiar_color(direccion and $1f);
+                          if (direccion and $1f)>=$10 then fillchar(gfx[2].buffer[0],$400,1);
+                         end;
+              end;
+      end;
+end;
+
+procedure ms_sound_update;
+begin
+  ay8910_0.update;
+  ay8910_1.update;
+end;
+
+//Main
+procedure reset_ms;
+begin
+main_m6502.reset;
+ay8910_0.reset;
+ay8910_1.reset;
+reset_audio;
+scroll:=0;
+last:=0;
+soundlatch:=0;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+char_color:=0;
 end;
 
 function iniciar_ms:boolean;
@@ -139,7 +308,7 @@ for f:=8 to $ff do ms_scanline[f-8]:=f; //08,09,0A,0B,...,FC,FD,FE,FF
 for f:=$e8 to $ff do ms_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE,FF
 //DIP
 marcade.dswa:=$fb;
-marcade.dswb:=$9f;
+marcade.dswb:=$1f;
 marcade.dswa_val:=@ms_dip_a;
 marcade.dswb_val:=@ms_dip_b;
 //final
@@ -147,188 +316,12 @@ reset_ms;
 iniciar_ms:=true;
 end;
 
-procedure reset_ms;
+procedure cargar_ms;
 begin
-main_m6502.reset;
-ay8910_0.reset;
-ay8910_1.reset;
-reset_audio;
-scroll:=0;
-last:=0;
-soundlatch:=0;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-char_color:=0;
-vblank_val:=0;
-end;
-
-procedure update_video_ms;inline;
-var
-  f,nchar,color:word;
-  x,y:word;
-  atrib:byte;
-begin
-for f:=0 to $1ff do begin
-  if gfx[2].buffer[f+video_page] then begin
-    x:=f mod 32;
-    y:=f div 32;
-    nchar:=((memoria[$1a00+video_page+f] and $1) shl 8)+memoria[$1800+f+video_page];
-    put_gfx_flip(x*16,y*16,nchar,16,1,2,(x and $10)<>0,false);
-    gfx[2].buffer[f+video_page]:=false;
-  end;
-end;
-scroll__x(1,2,scroll);
-//Sprites
-for f:=0 to $17 do begin
-  atrib:=memoria[$780+(f*4)];
-  if (atrib and 1)<>0 then begin
-    x:=240-memoria[$782+(f*4)];
-    y:=memoria[$783+(f*4)];
-    nchar:=memoria[$781+(f*4)]+((atrib and $10) shl 4);
-    color:=(atrib and $8) shl 1;
-    put_gfx_sprite(nchar,color,(atrib and 2)<>0,(atrib and 4)<>0,1);
-    actualiza_gfx_sprite(x and $ff,y,2,1);
-  end;
-end;
-for f:=0 to $3ff do begin
-  if gfx[0].buffer[f] then begin
-    x:=f mod 32;
-    y:=f div 32;
-    nchar:=((memoria[$1400+f] and $07) shl 8)+memoria[$1000+f];
-    put_gfx_trans(x*8,y*8,nchar,24+(char_color shl 3),3,0);
-    gfx[0].buffer[f]:=false;
-  end;
-end;
-actualiza_trozo(0,0,256,256,3,0,0,256,256,2);
-actualiza_trozo_final(8,0,240,256,2);
-end;
-
-procedure eventos_ms;
-begin
-if event.arcade then begin
-  //P1
-  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or 1;
-  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $fd else marcade.in0:=marcade.in0 or 2;
-  if arcade_input.up[0] then marcade.in0:=marcade.in0 and $fb else marcade.in0:=marcade.in0 or 4;
-  if arcade_input.down[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or 8;
-  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
-  if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
-  if arcade_input.coin[0] then begin
-      marcade.in0:=(marcade.in0 and $bf);
-      main_m6502.pedir_nmi:=ASSERT_LINE;
-  end else begin
-      marcade.in0:=(marcade.in0 or $40);
-      if arcade_input.coin[1] then begin
-          marcade.in0:=(marcade.in0 and $7f);
-          main_m6502.pedir_nmi:=ASSERT_LINE;
-      end else begin
-          marcade.in0:=(marcade.in0 or $80);
-          main_m6502.clear_nmi;
-      end;
-  end;
-  //P2
-  if arcade_input.right[1] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or 1;
-  if arcade_input.left[1] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or 2;
-  if arcade_input.up[1] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or 4;
-  if arcade_input.down[1] then marcade.in1:=marcade.in1 and $f7 else marcade.in1:=marcade.in1 or 8;
-  if arcade_input.but0[1] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
-  if arcade_input.but1[1] then marcade.in1:=marcade.in1 and $df else marcade.in1:=marcade.in1 or $20;
-  if arcade_input.start[0] then marcade.in1:=marcade.in1 and $bf else marcade.in1:=marcade.in1 or $40;
-  if arcade_input.start[1] then marcade.in1:=marcade.in1 and $7f else marcade.in1:=marcade.in1 or $80;
-end;
-end;
-
-procedure principal_ms;
-var
-  f:word;
-  frame:single;
-begin
-init_controls(false,false,false,true);
-frame:=main_m6502.tframes;
-while EmuStatus=EsRuning do begin
- for f:=0 to 271 do begin
-    main_m6502.run(frame);
-    frame:=frame+main_m6502.tframes-main_m6502.contador;
-    //video
-    case ms_scanline[f] of
-      $8:vblank_val:=0;
-      $f8:begin
-            update_video_ms;
-            vblank_val:=$80;
-          end;
-    end;
-    if ((ms_scanline[f] and $f)=8) then main_m6502.pedir_irq:=ASSERT_LINE;
- end;
- eventos_ms;
- video_sync;
-end;
-end;
-
-function getbyte_ms(direccion:word):byte;
-begin
-case direccion of
-  0..$1fff,$4000..$ffff:getbyte_ms:=memoria[direccion];
-  $2000..$3fff:case (direccion and $7f) of
-                  $0..$f:getbyte_ms:=marcade.in0;
-                  $10..$1f:getbyte_ms:=marcade.in1;
-                  $20..$2f:getbyte_ms:=marcade.dswa;
-                  $30..$3f:getbyte_ms:=marcade.dswb+vblank_val;
-                  $60..$7f:getbyte_ms:=buffer_paleta[direccion and $1f];
-               end;
-end;
-end;
-
-procedure putbyte_ms(direccion:word;valor:byte);
-var
-  temp:byte;
-begin
-if direccion>$3fff then exit;
-case direccion of
-  0..$fff:memoria[direccion]:=valor;
-  $1000..$17ff:begin
-                  gfx[0].buffer[direccion and $3ff]:=true;
-                  memoria[direccion]:=valor;
-               end;
-  $1800..$1fff:begin
-                  gfx[2].buffer[direccion and $3ff]:=true;
-                  memoria[direccion]:=valor;
-               end;
-  $2000..$3fff:case (direccion and $7f) of
-                $0..$f:begin
-                      temp:=((valor and $1) shl 1)+((valor and $2) shr 1);
-                      if char_color<>temp then begin
-                        fillchar(gfx[0].buffer[0],$400,1);
-                        char_color:=temp;
-                      end;
-                      video_page:=(valor and $4) shl 8;
-                    end;
-                $10..$1f:main_m6502.pedir_irq:=CLEAR_LINE;
-                $20..$2f:scroll:=valor;
-                $30..$3f:soundlatch:=valor;
-                $40..$4f:begin
-                     if (((last and $20)=$20) and ((valor and $20)=0)) then begin
-                        if (last and $10)<>0 then ay8910_0.Control(soundlatch)
-                          else AY8910_0.write(soundlatch);
-                     end;
-                     if (((last and $80)=$80) and ((valor and $80)=0)) then begin
-                        if (last and $40)<>0 then AY8910_1.control(soundlatch)
-                          else AY8910_1.write(soundlatch);
-                     end;
-                     last:=valor;
-                  end;
-                $60..$7f:if buffer_paleta[direccion and $1f]<>valor then begin
-                          buffer_paleta[direccion and $1f]:=valor;
-                          cambiar_color(direccion and $1f);
-                          if (direccion and $1f)>=$10 then fillchar(gfx[2].buffer[0],$400,1);
-                         end;
-              end;
-      end;
-end;
-
-procedure ms_sound_update;
-begin
-  ay8910_0.update;
-  ay8910_1.update;
+llamadas_maquina.iniciar:=iniciar_ms;
+llamadas_maquina.bucle_general:=principal_ms;
+llamadas_maquina.reset:=reset_ms;
+llamadas_maquina.fps_max:=((12000000/256)/3)/272;
 end;
 
 end.

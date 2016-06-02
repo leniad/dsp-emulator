@@ -35,7 +35,7 @@ implementation
 procedure Interrupt_Controller;
 begin
 	if (tc0140syt.nmi_req and tc0140syt.nmi_enabled) then begin
-    snd_z80.pedir_nmi:=PULSE_LINE;
+    snd_z80.change_nmi(PULSE_LINE);
 		tc0140syt.nmi_req:=false;
 	end;
 end;

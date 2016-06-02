@@ -199,7 +199,7 @@ begin
     mapper_nes.reload:=false;
   end else begin
     if ((count<>0) and (mapper_nes.reg[1]=0)) then
-        if mapper_nes.irq_ena then main_m6502.pedir_irq:=HOLD_LINE;
+        if mapper_nes.irq_ena then main_m6502.change_irq(HOLD_LINE);
   end;
 end;
 

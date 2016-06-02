@@ -5,15 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,file_engine,pokey;
 
-procedure Cargar_centipede;
-procedure centipede_principal;
-function iniciar_centipede:boolean;
-procedure reset_centipede;
-procedure cerrar_centipede;
-//Main CPU
-function centipede_getbyte(direccion:word):byte;
-procedure centipede_putbyte(direccion:word;valor:byte);
-procedure centipede_sound_update;
+procedure cargar_centipede;
 
 implementation
 
@@ -39,86 +31,6 @@ const
 
 var
  nvram,penmask:array[0..$3f] of byte;
-
-procedure Cargar_centipede;
-begin
-llamadas_maquina.iniciar:=iniciar_centipede;
-llamadas_maquina.bucle_general:=centipede_principal;
-llamadas_maquina.cerrar:=cerrar_centipede;
-llamadas_maquina.reset:=reset_centipede;
-end;
-
-function iniciar_centipede:boolean;
-var
-  memoria_temp:array[0..$fff] of byte;
-  longitud:integer;
-  f,mask:byte;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_centipede:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,256,256);
-screen_init(2,256,256,true,true);
-iniciar_video(240,256);
-//Main CPU
-main_m6502:=cpu_m6502.create(trunc(12096000/8),256,TCPU_M6502);
-main_m6502.change_ram_calls(centipede_getbyte,centipede_putbyte);
-main_m6502.init_sound(centipede_sound_update);
-//Sound Chips
-pokey_0:=pokey_chip.create(0,trunc(12096000/8));
-//cargar roms
-if not(cargar_roms(@memoria[0],@centipede_rom[0],'centiped.zip',0)) then exit;
-//convertir chars y sprites
-if not(cargar_roms(@memoria_temp[0],@centipede_chars,'centiped.zip',0)) then exit;
-init_gfx(0,8,8,$100);
-gfx_set_desc_data(2,0,8*8,$100*8*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-init_gfx(1,8,16,$80);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(2,0,16*8,$80*16*8,0);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@ps_y[0],false,true);
-gfx[1].x:=16;
-gfx[1].y:=8;
-//DIP
-marcade.dswa:=$54;
-marcade.dswa_val:=@centipede_dip_a;
-marcade.dswb:=$2;
-marcade.dswb_val:=@centipede_dip_b;
-marcade.dswc:=$0;
-marcade.dswc_val:=@centipede_dip_c;
-//NVRAM
-if read_file_size(Directory.Arcade_nvram+'centiped.nv',longitud) then read_file(Directory.Arcade_nvram+'centiped.nv',@nvram[0],longitud);
-//final
-for f:=0 to 63 do begin
-		mask:=1;
-		if (((f shr 0) and 3)=0) then mask:=mask or 2;
-		if (((f shr 2) and 3)=0) then mask:=mask or 4;
-		if (((f shr 4) and 3)=0) then mask:=mask or 8;
-		penmask[f]:=mask;
-end;
-reset_centipede;
-iniciar_centipede:=true;
-end;
-
-procedure cerrar_centipede;
-begin
-write_file(Directory.Arcade_nvram+'centiped.nv',@nvram[0],$40);
-end;
-
-procedure reset_centipede;
-begin
- main_m6502.reset;
- pokey_0.reset;
- reset_audio;
- marcade.in0:=$20;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
-end;
 
 procedure update_video_centipede;
 var
@@ -186,11 +98,11 @@ while EmuStatus=EsRuning do begin
     frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
     case f of
     0:marcade.in0:=marcade.in0 and $bf;
-    31,95,159,224:main_m6502.pedir_irq:=CLEAR_LINE;
-    47,111,175:main_m6502.pedir_irq:=ASSERT_LINE;
+    31,95,159,224:main_m6502.change_irq(CLEAR_LINE);
+    47,111,175:main_m6502.change_irq(ASSERT_LINE);
     239:begin
           update_video_centipede;
-          main_m6502.pedir_irq:=ASSERT_LINE;
+          main_m6502.change_irq(ASSERT_LINE);
           marcade.in0:=marcade.in0 or $40;
         end;
     end;
@@ -263,7 +175,7 @@ case direccion of
     $1400..$140f:cambiar_color(direccion and $f,valor);
     $1600..$163f:nvram[direccion and $3f]:=valor;
     $1680:; //nvram clock
-    $1800:main_m6502.pedir_irq:=CLEAR_LINE;
+    $1800:main_m6502.change_irq(CLEAR_LINE);
     $1c07:main_screen.flip_main_screen:=(valor and $80)<>0;
     $2000:; //watchdog
 end;
@@ -272,6 +184,87 @@ end;
 procedure centipede_sound_update;
 begin
 pokey_0.update;
+end;
+
+//Main
+procedure reset_centipede;
+begin
+ main_m6502.reset;
+ pokey_0.reset;
+ reset_audio;
+ marcade.in0:=$20;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+end;
+
+function iniciar_centipede:boolean;
+var
+  memoria_temp:array[0..$fff] of byte;
+  longitud:integer;
+  f,mask:byte;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_centipede:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,256,256);
+screen_init(2,256,256,true,true);
+iniciar_video(240,256);
+//Main CPU
+main_m6502:=cpu_m6502.create(trunc(12096000/8),256,TCPU_M6502);
+main_m6502.change_ram_calls(centipede_getbyte,centipede_putbyte);
+main_m6502.init_sound(centipede_sound_update);
+//Sound Chips
+pokey_0:=pokey_chip.create(0,trunc(12096000/8));
+//cargar roms
+if not(cargar_roms(@memoria[0],@centipede_rom[0],'centiped.zip',0)) then exit;
+//convertir chars y sprites
+if not(cargar_roms(@memoria_temp[0],@centipede_chars,'centiped.zip',0)) then exit;
+init_gfx(0,8,8,$100);
+gfx_set_desc_data(2,0,8*8,$100*8*8,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+init_gfx(1,8,16,$80);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(2,0,16*8,$80*16*8,0);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@ps_y[0],false,true);
+gfx[1].x:=16;
+gfx[1].y:=8;
+//DIP
+marcade.dswa:=$54;
+marcade.dswa_val:=@centipede_dip_a;
+marcade.dswb:=$2;
+marcade.dswb_val:=@centipede_dip_b;
+marcade.dswc:=$0;
+marcade.dswc_val:=@centipede_dip_c;
+//NVRAM
+if read_file_size(Directory.Arcade_nvram+'centiped.nv',longitud) then read_file(Directory.Arcade_nvram+'centiped.nv',@nvram[0],longitud);
+//final
+for f:=0 to 63 do begin
+		mask:=1;
+		if (((f shr 0) and 3)=0) then mask:=mask or 2;
+		if (((f shr 2) and 3)=0) then mask:=mask or 4;
+		if (((f shr 4) and 3)=0) then mask:=mask or 8;
+		penmask[f]:=mask;
+end;
+reset_centipede;
+iniciar_centipede:=true;
+end;
+
+procedure cerrar_centipede;
+begin
+write_file(Directory.Arcade_nvram+'centiped.nv',@nvram[0],$40);
+end;
+
+procedure Cargar_centipede;
+begin
+llamadas_maquina.iniciar:=iniciar_centipede;
+llamadas_maquina.bucle_general:=centipede_principal;
+llamadas_maquina.cerrar:=cerrar_centipede;
+llamadas_maquina.reset:=reset_centipede;
 end;
 
 end.

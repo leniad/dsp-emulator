@@ -544,7 +544,7 @@ case direccion of
       $a:gfx_pos:=(gfx_pos and $ff) or (valor shl 8);
       $b:begin
             soundlatch:=valor;
-	          if not(sndnmi_disable) then snd_z80.pedir_nmi:=PULSE_LINE;
+	          if not(sndnmi_disable) then snd_z80.change_nmi(PULSE_LINE);
          end;
       $e:rom_bank:=valor shr 7;
   end;
@@ -651,7 +651,7 @@ case direccion of
       $a:gfx_pos:=(gfx_pos and $00ff) or (valor shl 8);
       $b:begin
             soundlatch:=valor;
-	          if not(sndnmi_disable) then snd_z80.pedir_nmi:=PULSE_LINE;
+	          if not(sndnmi_disable) then snd_z80.change_nmi(PULSE_LINE);
          end;
       $e:rom_bank:=valor shr 7;
   end;

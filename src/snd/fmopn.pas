@@ -121,6 +121,8 @@ end;
   pfm_opn=^fm_opn;
 
 const
+  CLEAR_LINE=0;
+  ASSERT_LINE=1;
   //FMCONST
   M_PI=3.1415926535;
   // some globals */
@@ -603,7 +605,7 @@ begin
   if (ST.irq=0) {and ((ST.status and ST.irqmask)<>0)} then begin
 			ST.irq:=1;
 			// callback user interrupt handler (IRQ is OFF to ON) */
-      if (addr(ST.IRQ_Handler)<>nil) then ST.IRQ_Handler(1);
+      if (addr(ST.IRQ_Handler)<>nil) then ST.IRQ_Handler(ASSERT_LINE);
   end;
 end;
 
@@ -615,7 +617,7 @@ begin
 	 	if (ST.irq<>0) {and ((ST.status and ST.irqmask)=0) }then begin
 			ST.irq:=0;
 			// callback user interrupt handler (IRQ is ON to OFF) */
-      if (addr(ST.IRQ_Handler)<>nil) then ST.IRQ_Handler(0);
+      if (addr(ST.IRQ_Handler)<>nil) then ST.IRQ_Handler(CLEAR_LINE);
     end;
 end;
 

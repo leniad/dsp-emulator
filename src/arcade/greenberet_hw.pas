@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,timer_engine,
      rom_engine,file_engine,pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_gberet;
-procedure gberet_principal;
-procedure reset_gberet;
-procedure cerrar_gberet;
-//Main CPU
-function gberet_getbyte(direccion:word):byte;
-procedure gberet_putbyte(direccion:word;valor:byte);
-function iniciar_gberet:boolean;
-procedure gberet_sound_update;
-procedure gberet_hi_score;
-//Save/load
-procedure gberet_qsave(nombre:string);
-procedure gberet_qload(nombre:string);
+procedure cargar_gberet;
 
 implementation
 const
@@ -68,15 +56,228 @@ var
  banco_sprites:word;
  timer_hs:byte;
 
-procedure Cargar_gberet;
+procedure update_video_gberet;inline;
+var
+  f,x,y,color,nchar,atrib2:word;
+  atrib:byte;
 begin
-llamadas_maquina.iniciar:=iniciar_gberet;
-llamadas_maquina.bucle_general:=gberet_principal;
-llamadas_maquina.cerrar:=cerrar_gberet;
-llamadas_maquina.reset:=reset_gberet;
-llamadas_maquina.fps_max:=60.60606060;
-llamadas_maquina.save_qsnap:=gberet_qsave;
-llamadas_maquina.load_qsnap:=gberet_qload;
+for f:=$7ff downto 0 do begin
+  if gfx[0].buffer[f] then begin
+    x:=f mod 64;
+    y:=f div 64;
+    //Color RAM
+    //c000-c7ff --> Bits
+    // 0-3 --> Color
+    // 4 --> flip X
+    // 5 --> Flip Y
+    // 6 --> Numero Char
+    // 7 --> prioridad
+    atrib:=memoria[f+$c000];
+    color:=(atrib and $f) shl 4;
+    nchar:=memoria[f+$c800]+((atrib and $40) shl 2);
+    if (atrib and $80)<>0 then begin
+      put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $10)<>0,(atrib and $20)<>0);
+      put_gfx_block_trans(x*8,y*8,3,8,8);
+    end else begin
+      put_gfx_block(x*8,y*8,1,8,8,0);
+      put_gfx_mask_flip(x*8,y*8,nchar,color,3,0,0,$f,(atrib and $10)<>0,(atrib and $20)<>0);
+    end;
+    gfx[0].buffer[f]:=false;
+  end;
+end;
+//hacer el scroll independiente linea a linea
+for f:=0 to 31 do scroll__x_part(1,2,scroll_lineas[f],0,f*8,8);
+//sprites
+for f:=0 to $2f do begin
+  atrib2:=$d000+banco_sprites+(f*4);
+  atrib:=memoria[$1+atrib2];
+  nchar:=memoria[atrib2]+(atrib and $40) shl 2;
+  color:=(atrib and $f) shl 4;
+  x:=memoria[$2+atrib2]+(atrib and $80) shl 1;
+  y:=memoria[$3+atrib2];
+  put_gfx_sprite_mask(nchar,color,(atrib and $10)<>0,(atrib and $20)<>0,1,0,$f);
+  actualiza_gfx_sprite(x,y,2,1);
+end;
+for f:=0 to 31 do scroll__x_part(3,2,scroll_lineas[f],0,f*8,8);
+actualiza_trozo_final(8,16,240,224,2);
+end;
+
+procedure eventos_gberet;
+begin
+if event.arcade then begin
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+end;
+end;
+
+procedure gberet_principal;
+var
+  f,ticks_mask:byte;
+  frame_m:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to 255 do begin
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    if f=239 then update_video_gberet;
+    if (f and $f)=0 then begin //every 16 scanlines
+       ticks_mask:=not(interrupt_ticks) and (interrupt_ticks+1); // 0->1
+	     interrupt_ticks:=interrupt_ticks+1;
+	     // NMI on d0
+	     if (ticks_mask and interrupt_mask and 1)<>0 then main_z80.change_nmi(ASSERT_LINE);
+	     // IRQ on d4
+       if (ticks_mask and (interrupt_mask shl 2) and 8)<>0 then main_z80.pedir_irq:=ASSERT_LINE;
+	     if (ticks_mask and (interrupt_mask shl 2) and 16)<>0 then main_z80.pedir_irq:=ASSERT_LINE;
+    end;
+  end;
+  eventos_gberet;
+  video_sync;
+end;
+end;
+
+function gberet_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0000..$e03f:gberet_getbyte:=memoria[direccion];
+  $f200:gberet_getbyte:=marcade.dswb;
+  $f400:gberet_getbyte:=marcade.dswc;
+  $f600:gberet_getbyte:=marcade.dswa;
+  $f601:gberet_getbyte:=marcade.in1;
+  $f602:gberet_getbyte:=marcade.in0;
+  $f603:gberet_getbyte:=marcade.in2;
+  $f800..$ffff:gberet_getbyte:=memoria_rom[rom_bank,direccion and $7ff];
+end;
+end;
+
+procedure gberet_putbyte(direccion:word;valor:byte);
+var
+  ack_mask:byte;
+begin
+if ((direccion<$c000) or (direccion>$f7ff)) then exit;
+memoria[direccion]:=valor;
+case direccion of
+        $c000..$cfff:gfx[0].buffer[direccion and $7ff]:=true;
+        $e000..$e01f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $100) or valor;
+        $e020..$e03f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $ff) or ((valor and 1) shl 8);
+        $e043:banco_sprites:=(valor and 8) shl 5;
+        $e044:begin
+                // bits 0/1/2 = interrupt enable
+	              ack_mask:=not(valor) and interrupt_mask; // 1->0
+	              if (ack_mask and 1)<>0 then main_z80.change_nmi(CLEAR_LINE);
+                if (ack_mask and 6)<>0 then main_z80.pedir_irq:=CLEAR_LINE;
+	              interrupt_mask:=valor and 7;
+	              // bit 3 = flip screen
+                main_screen.flip_main_screen:=(valor and 8)<>0;
+              end;
+        $f000:rom_bank:=(valor and $e0) shr 5;
+        $f200:sound_latch:=valor;
+        $f400:sn_76496_0.Write(sound_latch);
+end;
+end;
+
+procedure gberet_sound_update;
+begin
+  sn_76496_0.update;
+end;
+
+procedure gberet_hi_score;
+begin
+if ((memoria[$db06]=3) and (memoria[$db07]=$30) and (memoria[$db08]=0) and (memoria[$db0b]=$1c)) then begin
+    load_hi('gberet.hi',@memoria[$d900],60);
+    copymemory(@memoria[$db06],@memoria[$d900],3);
+    timer[timer_hs].enabled:=false;
+end;
+end;
+
+procedure gberet_qsave(nombre:string);
+var
+  data:pbyte;
+  size:word;
+  buffer:array[0..5] of byte;
+begin
+case main_vars.tipo_maquina of
+  17:open_qsnapshot_save('gberet'+nombre);
+  203:open_qsnapshot_save('mrgoemon'+nombre);
+end;
+getmem(data,200);
+//CPU
+size:=main_z80.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND
+size:=sn_76496_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//MEM
+savedata_com_qsnapshot(@memoria[$c000],$4000);
+//MISC
+savedata_com_qsnapshot(@scroll_lineas[0],$20*2);
+buffer[0]:=interrupt_mask;
+buffer[1]:=interrupt_ticks;
+buffer[2]:=sound_latch;
+buffer[3]:=banco_sprites and $ff;
+buffer[4]:=banco_sprites shr 8;
+buffer[5]:=rom_bank;
+savedata_qsnapshot(@buffer[0],6);
+freemem(data);
+close_qsnapshot;
+end;
+
+procedure gberet_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..5] of byte;
+begin
+case main_vars.tipo_maquina of
+  17:if not(open_qsnapshot_load('gberet'+nombre)) then exit;
+  203:if not(open_qsnapshot_load('mrgoemon'+nombre)) then exit;
+end;
+getmem(data,200);
+//CPU
+loaddata_qsnapshot(data);
+main_z80.load_snapshot(data);
+//SND
+loaddata_qsnapshot(data);
+sn_76496_0.load_snapshot(data);
+//MEM
+loaddata_qsnapshot(@memoria[$c000]);
+loaddata_qsnapshot(@scroll_lineas[0]);
+loaddata_qsnapshot(@buffer[0]);
+//MISC
+interrupt_mask:=buffer[0];
+interrupt_ticks:=buffer[1];
+sound_latch:=buffer[2];
+banco_sprites:=buffer[3];
+banco_sprites:=banco_sprites or (buffer[4] shl 8);
+rom_bank:=buffer[5];
+freemem(data);
+close_qsnapshot;
+fillchar(gfx[0].buffer[0],$800,1);
+end;
+
+//Main
+procedure reset_gberet;
+begin
+ main_z80.reset;
+ sn_76496_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ banco_sprites:=0;
+ interrupt_mask:=0;
+ interrupt_ticks:=0;
+ sound_latch:=0;
+ fillchar(scroll_lineas[0],$20,0);
+ rom_bank:=0;
 end;
 
 function iniciar_gberet:boolean;
@@ -179,227 +380,15 @@ begin
 if main_vars.tipo_maquina=17 then save_hi('gberet.hi',@memoria[$d900],60);
 end;
 
-procedure reset_gberet;
+procedure cargar_gberet;
 begin
- main_z80.reset;
- sn_76496_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- banco_sprites:=0;
- interrupt_mask:=0;
- interrupt_ticks:=0;
- sound_latch:=0;
- fillchar(scroll_lineas[0],$20,0);
- rom_bank:=0;
-end;
-
-procedure update_video_gberet;inline;
-var
-  f,x,y,color,nchar,atrib2:word;
-  atrib:byte;
-begin
-for f:=$7ff downto 0 do begin
-  if gfx[0].buffer[f] then begin
-    x:=f mod 64;
-    y:=f div 64;
-    //Color RAM
-    //c000-c7ff --> Bits
-    // 0-3 --> Color
-    // 4 --> flip X
-    // 5 --> Flip Y
-    // 6 --> Numero Char
-    // 7 --> prioridad
-    atrib:=memoria[f+$c000];
-    color:=(atrib and $f) shl 4;
-    nchar:=memoria[f+$c800]+((atrib and $40) shl 2);
-    if (atrib and $80)<>0 then begin
-      put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $10)<>0,(atrib and $20)<>0);
-      put_gfx_block_trans(x*8,y*8,3,8,8);
-    end else begin
-      put_gfx_block(x*8,y*8,1,8,8,0);
-      put_gfx_mask_flip(x*8,y*8,nchar,color,3,0,0,$f,(atrib and $10)<>0,(atrib and $20)<>0);
-    end;
-    gfx[0].buffer[f]:=false;
-  end;
-end;
-//hacer el scroll independiente linea a linea
-for f:=0 to 31 do scroll__x_part(1,2,scroll_lineas[f],0,f*8,8);
-//sprites
-for f:=0 to $2f do begin
-  atrib2:=$d000+banco_sprites+(f*4);
-  atrib:=memoria[$1+atrib2];
-  nchar:=memoria[atrib2]+(atrib and $40) shl 2;
-  color:=(atrib and $f) shl 4;
-  x:=memoria[$2+atrib2]+(atrib and $80) shl 1;
-  y:=memoria[$3+atrib2];
-  put_gfx_sprite_mask(nchar,color,(atrib and $10)<>0,(atrib and $20)<>0,1,0,$f);
-  actualiza_gfx_sprite(x,y,2,1);
-end;
-for f:=0 to 31 do scroll__x_part(3,2,scroll_lineas[f],0,f*8,8);
-actualiza_trozo_final(8,16,240,224,2);
-end;
-
-procedure eventos_gberet;
-begin
-if event.arcade then begin
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-end;
-end;
-
-procedure gberet_principal;
-var
-  f,ticks_mask:byte;
-  frame_m:single;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to 255 do begin
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    if f=239 then update_video_gberet;
-    if (f and $f)=0 then begin //every 16 scanlines
-       ticks_mask:=not(interrupt_ticks) and (interrupt_ticks+1); // 0->1
-	     interrupt_ticks:=interrupt_ticks+1;
-	     // NMI on d0
-	     if (ticks_mask and interrupt_mask and 1)<>0 then main_z80.pedir_nmi:=ASSERT_LINE;
-	     // IRQ on d4
-       if (ticks_mask and (interrupt_mask shl 2) and 8)<>0 then main_z80.pedir_irq:=ASSERT_LINE;
-	     if (ticks_mask and (interrupt_mask shl 2) and 16)<>0 then main_z80.pedir_irq:=ASSERT_LINE;
-    end;
-  end;
-  eventos_gberet;
-  video_sync;
-end;
-end;
-
-function gberet_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $0000..$e03f:gberet_getbyte:=memoria[direccion];
-  $f200:gberet_getbyte:=marcade.dswb;
-  $f400:gberet_getbyte:=marcade.dswc;
-  $f600:gberet_getbyte:=marcade.dswa;
-  $f601:gberet_getbyte:=marcade.in1;
-  $f602:gberet_getbyte:=marcade.in0;
-  $f603:gberet_getbyte:=marcade.in2;
-  $f800..$ffff:gberet_getbyte:=memoria_rom[rom_bank,direccion and $7ff];
-end;
-end;
-
-procedure gberet_putbyte(direccion:word;valor:byte);
-var
-  ack_mask:byte;
-begin
-if ((direccion<$c000) or (direccion>$f7ff)) then exit;
-memoria[direccion]:=valor;
-case direccion of
-        $c000..$cfff:gfx[0].buffer[direccion and $7ff]:=true;
-        $e000..$e01f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $100) or valor;
-        $e020..$e03f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $ff) or ((valor and 1) shl 8);
-        $e043:banco_sprites:=(valor and 8) shl 5;
-        $e044:begin
-                // bits 0/1/2 = interrupt enable
-	              ack_mask:=not(valor) and interrupt_mask; // 1->0
-	              if (ack_mask and 1)<>0 then main_z80.clear_nmi;
-                if (ack_mask and 6)<>0 then main_z80.pedir_irq:=CLEAR_LINE;
-	              interrupt_mask:=valor and 7;
-	              // bit 3 = flip screen
-                main_screen.flip_main_screen:=(valor and 8)<>0;
-              end;
-        $f000:rom_bank:=(valor and $e0) shr 5;
-        $f200:sound_latch:=valor;
-        $f400:sn_76496_0.Write(sound_latch);
-end;
-end;
-
-procedure gberet_sound_update;
-begin
-  sn_76496_0.update;
-end;
-
-procedure gberet_hi_score;
-begin
-if ((memoria[$db06]=3) and (memoria[$db07]=$30) and (memoria[$db08]=0) and (memoria[$db0b]=$1c)) then begin
-    load_hi('gberet.hi',@memoria[$d900],60);
-    copymemory(@memoria[$db06],@memoria[$d900],3);
-    timer[timer_hs].enabled:=false;
-end;
-end;
-
-procedure gberet_qsave(nombre:string);
-var
-  data:pbyte;
-  size:word;
-  buffer:array[0..5] of byte;
-begin
-case main_vars.tipo_maquina of
-  17:open_qsnapshot_save('gberet'+nombre);
-  203:open_qsnapshot_save('mrgoemon'+nombre);
-end;
-getmem(data,200);
-//CPU
-size:=main_z80.save_snapshot(data);
-savedata_qsnapshot(data,size);
-//SND
-size:=sn_76496_0.save_snapshot(data);
-savedata_qsnapshot(data,size);
-//MEM
-savedata_com_qsnapshot(@memoria[$c000],$4000);
-//MISC
-savedata_com_qsnapshot(@scroll_lineas[0],$20*2);
-buffer[0]:=interrupt_mask;
-buffer[1]:=interrupt_ticks;
-buffer[2]:=sound_latch;
-buffer[3]:=banco_sprites and $ff;
-buffer[4]:=banco_sprites shr 8;
-buffer[5]:=rom_bank;
-savedata_qsnapshot(@buffer[0],6);
-freemem(data);
-close_qsnapshot;
-end;
-
-procedure gberet_qload(nombre:string);
-var
-  data:pbyte;
-  buffer:array[0..5] of byte;
-begin
-case main_vars.tipo_maquina of
-  17:if not(open_qsnapshot_load('gberet'+nombre)) then exit;
-  203:if not(open_qsnapshot_load('mrgoemon'+nombre)) then exit;
-end;
-getmem(data,200);
-//CPU
-loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
-//SND
-loaddata_qsnapshot(data);
-sn_76496_0.load_snapshot(data);
-//MEM
-loaddata_qsnapshot(@memoria[$c000]);
-loaddata_qsnapshot(@scroll_lineas[0]);
-loaddata_qsnapshot(@buffer[0]);
-//MISC
-interrupt_mask:=buffer[0];
-interrupt_ticks:=buffer[1];
-sound_latch:=buffer[2];
-banco_sprites:=buffer[3];
-banco_sprites:=banco_sprites or (buffer[4] shl 8);
-rom_bank:=buffer[5];
-freemem(data);
-close_qsnapshot;
-fillchar(gfx[0].buffer[0],$800,1);
+llamadas_maquina.iniciar:=iniciar_gberet;
+llamadas_maquina.bucle_general:=gberet_principal;
+llamadas_maquina.cerrar:=cerrar_gberet;
+llamadas_maquina.reset:=reset_gberet;
+llamadas_maquina.fps_max:=60.60606060;
+llamadas_maquina.save_qsnap:=gberet_qsave;
+llamadas_maquina.load_qsnap:=gberet_qload;
 end;
 
 end.

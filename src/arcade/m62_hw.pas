@@ -683,7 +683,7 @@ procedure kungfum_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   0:if ((valor and $80)=0) then sound_command:=valor and $7f
-    	else snd_m6800.pedir_irq:=ASSERT_LINE;
+    	else snd_m6800.change_irq(ASSERT_LINE);
 end;
 end;
 
@@ -798,7 +798,7 @@ const
 begin
 case (puerto and $ff) of
   0:if ((valor and $80)=0) then sound_command:=valor and $7f
-    	else snd_m6800.pedir_irq:=ASSERT_LINE;
+    	else snd_m6800.change_irq(ASSERT_LINE);
   $80..$81:begin
              bankcontrol[puerto and 1]:=valor;
 	           if ((puerto and 1)=0) then begin
@@ -827,7 +827,7 @@ mem_snd[direccion]:=valor;
 case direccion of
   $0..$1f:snd_m6800.m6803_internal_reg_w(direccion,valor);
   $0800..$8ff:case direccion and $3 of
-                  0:snd_m6800.pedir_irq:=CLEAR_LINE;
+                  0:snd_m6800.change_irq(CLEAR_LINE);
                   1:msm_5205_0.data_w(valor);
                   2:msm_5205_1.data_w(valor);
                end;
@@ -886,7 +886,7 @@ end;
 
 procedure adpcm_int;
 begin
-  snd_m6800.pedir_nmi:=PULSE_LINE;
+  snd_m6800.change_nmi(PULSE_LINE);
 end;
 
 procedure irem_m62_play_sound;

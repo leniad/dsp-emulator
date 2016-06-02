@@ -9,7 +9,6 @@ procedure Cargar_contra;
 procedure contra_principal;
 function iniciar_contra:boolean;
 procedure reset_contra;
-procedure cerrar_contra;
 //Main CPU
 function contra_getbyte(direccion:word):byte;
 procedure contra_putbyte(direccion:word;valor:byte);
@@ -39,7 +38,6 @@ procedure Cargar_contra;
 begin
 llamadas_maquina.iniciar:=iniciar_contra;
 llamadas_maquina.bucle_general:=contra_principal;
-llamadas_maquina.cerrar:=cerrar_contra;
 llamadas_maquina.reset:=reset_contra;
 end;
 
@@ -84,7 +82,7 @@ snd_m6809:=cpu_m6809.Create(24000000 div 8,$100);
 snd_m6809.change_ram_calls(sound_getbyte,sound_putbyte);
 snd_m6809.init_sound(contra_sound_update);
 //Audio chips
-ym2151_init(0,3579545,nil,nil);
+ym2151_0:=ym2151_chip.create(3579545);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@contra_rom[0],'contra.zip',0)) then exit;
 //Pongo las ROMs en su banco
@@ -111,11 +109,6 @@ reset_contra;
 iniciar_contra:=true;
 end;
 
-procedure cerrar_contra;
-begin
-ym2151_close(0);
-end;
-
 procedure reset_contra;
 begin
  main_hd6309.reset;
@@ -123,7 +116,7 @@ begin
  reset_audio;
  K007121_reset(0);
  K007121_reset(1);
- ym2151_reset(0);
+ ym2151_0.reset;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
  marcade.in2:=$ff;
@@ -334,7 +327,7 @@ function sound_getbyte(direccion:word):byte;
 begin
 case direccion of
   0:sound_getbyte:=sound_latch;
-  $2001:sound_getbyte:=ym2151_status_port_read(0);
+  $2001:sound_getbyte:=ym2151_0.status;
     else sound_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -344,14 +337,14 @@ begin
 if direccion>$7fff then exit;
 mem_snd[direccion]:=valor;
 case direccion of
-  $2000:ym2151_register_port_write(0,valor);
-  $2001:YM2151_data_port_write(0,valor);
+  $2000:ym2151_0.reg(valor);
+  $2001:YM2151_0.write(valor);
 end;
 end;
 
 procedure contra_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 end.

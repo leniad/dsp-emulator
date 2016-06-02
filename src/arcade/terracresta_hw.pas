@@ -334,7 +334,7 @@ procedure terracre_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   $0:ym2203_0.Control(valor);
-  $1:ym2203_0.Write_Reg(valor);
+  $1:ym2203_0.Write(valor);
   $2:dac_0.signed_data8_w(valor);
   $3:dac_1.signed_data8_w(valor);
 end;

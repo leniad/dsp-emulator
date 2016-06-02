@@ -1,14 +1,3 @@
-function m680x_neg(valor:byte;cc:pband_m6809):byte;inline;
-var
-  tempw:word;
-begin
-tempw:=-valor;
-cc.n:=(tempw and $80)<>0;
-cc.z:=(tempw and $ff)=0;
-cc.c:=(tempw and $100)<>0;
-cc.v:=((0 xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
-m680x_neg:=tempw;
-end;
 
 function m680x_com(valor:byte;cc:pband_m6809):byte;
 var
@@ -261,18 +250,6 @@ hd6309_add8:=tempw;
 end;
 
 //KONAMI
-function m680x_abs(valor:byte;cc:pband_m6809):byte;
-var
-  tempw:word;
-begin
-tempw:=word(shortint(valor));
-cc.c:=(tempw and $80)<>0;
-cc.v:=((0 xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
-cc.n:=(tempw and $80)<>0;
-cc.z:=(tempw and $ff)=0;
-m680x_abs:=abs(shortint(valor));
-end;
-
 function m680x_neg16(valor:word;cc:pband_m6809):word;
 var
   templ:dword;

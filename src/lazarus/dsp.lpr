@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, principal, acercade, LoadRom, config_general, redefine,
   cargar_dsk, tape_window, cargar_spec, lenslock, config, arcade_config, 
-  joystick_calibration, dac, config_sms, lib_sdl2, config_cpc, kaillera;
+  joystick_calibration, config_sms, config_cpc, k053246_k053247_k055673;
 
 {$IFDEF WINDOWS}
 {$IFDEF CPU32}

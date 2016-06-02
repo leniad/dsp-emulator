@@ -14,15 +14,13 @@ var
 procedure deco16_sprites;
 procedure deco16_sprites_pri(pri:byte);
 //Sound
-procedure deco16_snd_simple_init(cpu_clock,sound_clock:dword;sound_bank:porthandler);
+procedure deco16_snd_simple_init(cpu_clock,sound_clock:dword;sound_bank:cpu_outport_call);
 procedure deco16_snd_simple_reset;
-procedure deco16_snd_simple_close;
 function deco16_simple_snd_getbyte(direccion:dword):byte;
 procedure deco16_simple_snd_putbyte(direccion:dword;valor:byte);
 procedure deco16_simple_sound;
-procedure deco16_snd_double_init(cpu_clock,sound_clock:dword;sound_bank:porthandler);
+procedure deco16_snd_double_init(cpu_clock,sound_clock:dword;sound_bank:cpu_outport_call);
 procedure deco16_snd_double_reset;
-procedure deco16_snd_double_close;
 function deco16_double_snd_getbyte(direccion:dword):byte;
 procedure deco16_double_snd_putbyte(direccion:dword;valor:byte);
 procedure deco16_double_sound;
@@ -103,13 +101,15 @@ end;
 end;
 
 //Sound
-procedure deco16_snd_double_init(cpu_clock,sound_clock:dword;sound_bank:porthandler);
+procedure deco16_snd_double_init(cpu_clock,sound_clock:dword;sound_bank:cpu_outport_call);
 begin
 main_h6280:=cpu_h6280.create(cpu_clock,$100);
 main_h6280.change_ram_calls(deco16_double_snd_getbyte,deco16_double_snd_putbyte);
 main_h6280.init_sound(deco16_double_sound);
 ym2203_0:=ym2203_chip.create(sound_clock div 8);
-YM2151_Init(0,sound_clock div 9,sound_bank,deco16_snd_irq);
+ym2151_0:=ym2151_chip.create(sound_clock div 9);
+ym2151_0.change_port_func(sound_bank);
+ym2151_0.change_irq_func(deco16_snd_irq);
 oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH,2);
 oki_6295_1:=snd_okim6295.Create(sound_clock div 16,OKIM6295_PIN7_HIGH,2);
 end;
@@ -118,24 +118,19 @@ procedure deco16_snd_double_reset;
 begin
   main_h6280.reset;
   ym2203_0.reset;
-  YM2151_reset(0);
+  ym2151_0.reset;
   oki_6295_0.reset;
   oki_6295_1.reset;
   deco16_sound_latch:=0;
-end;
-
-procedure deco16_snd_double_close;
-begin
-YM2151_close(0);
 end;
 
 function deco16_double_snd_getbyte(direccion:dword):byte;
 begin
 case direccion of
   0..$ffff:deco16_double_snd_getbyte:=mem_snd[direccion];
-  $100000:deco16_double_snd_getbyte:=ym2203_0.Read_Status;
-  $100001:deco16_double_snd_getbyte:=ym2203_0.Read_Reg;
-  $110001:deco16_double_snd_getbyte:=YM2151_status_port_read(0);
+  $100000:deco16_double_snd_getbyte:=ym2203_0.status;
+  $100001:deco16_double_snd_getbyte:=ym2203_0.Read;
+  $110001:deco16_double_snd_getbyte:=ym2151_0.status;
   $120000..$120001:deco16_double_snd_getbyte:=oki_6295_0.read;
   $130000..$130001:deco16_double_snd_getbyte:=oki_6295_1.read;
   $140000..$140001:deco16_double_snd_getbyte:=deco16_sound_latch;
@@ -148,9 +143,9 @@ begin
 if direccion<$10000 then exit;
 case direccion of
   $100000:ym2203_0.Control(valor);
-  $100001:ym2203_0.Write_Reg(valor);
-  $110000:YM2151_register_port_write(0,valor);
-  $110001:YM2151_data_port_write(0,valor);
+  $100001:ym2203_0.Write(valor);
+  $110000:ym2151_0.reg(valor);
+  $110001:ym2151_0.write(valor);
   $120000..$120001:oki_6295_0.write(valor);
   $130000..$130001:oki_6295_1.write(valor);
   $1f0000..$1f1fff:snd_ram[direccion and $1fff]:=valor;
@@ -161,39 +156,36 @@ end;
 
 procedure deco16_double_sound;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   ym2203_0.Update;
   oki_6295_0.update;
   oki_6295_1.update;
 end;
 
-procedure deco16_snd_simple_init(cpu_clock,sound_clock:dword;sound_bank:porthandler);
+procedure deco16_snd_simple_init(cpu_clock,sound_clock:dword;sound_bank:cpu_outport_call);
 begin
   main_h6280:=cpu_h6280.create(cpu_clock,$100);
   main_h6280.change_ram_calls(deco16_simple_snd_getbyte,deco16_simple_snd_putbyte);
   main_h6280.init_sound(deco16_simple_sound);
-  YM2151_Init(0,sound_clock div 9,sound_bank,deco16_snd_irq);
+  ym2151_0:=ym2151_chip.create(sound_clock div 9);
+  ym2151_0.change_port_func(sound_bank);
+  ym2151_0.change_irq_func(deco16_snd_irq);
   oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH,2);
 end;
 
 procedure deco16_snd_simple_reset;
 begin
   main_h6280.reset;
-  YM2151_reset(0);
+  ym2151_0.reset;
   oki_6295_0.reset;
   deco16_sound_latch:=0;
-end;
-
-procedure deco16_snd_simple_close;
-begin
-  YM2151_close(0);
 end;
 
 function deco16_simple_snd_getbyte(direccion:dword):byte;
 begin
 case direccion of
   0..$ffff:deco16_simple_snd_getbyte:=mem_snd[direccion];
-  $110001:deco16_simple_snd_getbyte:=YM2151_status_port_read(0);
+  $110001:deco16_simple_snd_getbyte:=ym2151_0.status;
   $120000..$120001:deco16_simple_snd_getbyte:=oki_6295_0.read;
   $140000..$140001:deco16_simple_snd_getbyte:=deco16_sound_latch;
   $1f0000..$1f1fff:deco16_simple_snd_getbyte:=snd_ram[direccion and $1fff];
@@ -204,8 +196,8 @@ procedure deco16_simple_snd_putbyte(direccion:dword;valor:byte);
 begin
 if direccion<$10000 then exit;
 case direccion of
-  $110000:YM2151_register_port_write(0,valor);
-  $110001:YM2151_data_port_write(0,valor);
+  $110000:ym2151_0.reg(valor);
+  $110001:ym2151_0.write(valor);
   $120000..$120001:oki_6295_0.write(valor);
   $1f0000..$1f1fff:snd_ram[direccion and $1fff]:=valor;
   $1fec00..$1fec01:main_h6280.timer_w(direccion and $1,valor);
@@ -221,7 +213,7 @@ end;
 
 procedure deco16_simple_sound;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   oki_6295_0.update;
 end;
 

@@ -5,21 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_bombjack;
-procedure bombjack_principal;
-function bombjack_iniciar:boolean;
-procedure bombjack_reset;
-//Main CPU
-function bombjack_getbyte(direccion:word):byte;
-procedure bombjack_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function snd_getbyte(direccion:word):byte;
-procedure snd_putbyte(direccion:word;valor:byte);
-procedure snd_outbyte(valor:byte;puerto:word);
-procedure bombjack_update_sound;
-//Save/load
-procedure bombjack_qsave(nombre:string);
-procedure bombjack_qload(nombre:string);
+procedure cargar_bombjack;
 
 implementation
 const
@@ -55,107 +41,6 @@ var
  memoria_fondo:array[0..$fff] of byte;
  numero_fondo,sound_latch:byte;
  fondo_activo,nmi_vblank:boolean;
-
-procedure Cargar_bombjack;
-begin
-llamadas_maquina.iniciar:=bombjack_iniciar;
-llamadas_maquina.bucle_general:=bombjack_principal;
-llamadas_maquina.reset:=bombjack_reset;
-llamadas_maquina.save_qsnap:=bombjack_qsave;
-llamadas_maquina.load_qsnap:=bombjack_qload;
-end;
-
-function bombjack_iniciar:boolean;
-const
-      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
-      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
-      pt_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
-			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
-			40*8+0, 40*8+1, 40*8+2, 40*8+3, 40*8+4, 40*8+5, 40*8+6, 40*8+7);
-      pt_y:array[0..31] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
-			64*8, 65*8, 66*8, 67*8, 68*8, 69*8, 70*8, 71*8,
-			80*8, 81*8, 82*8, 83*8, 84*8, 85*8, 86*8, 87*8);
-var
-  memoria_temp:array[0..$5fff] of byte;
-begin
-bombjack_iniciar:=false;
-iniciar_audio(false);
-screen_init(1,256,256); //Fondo
-screen_init(2,256,256,true); //Chars
-screen_init(3,256,256,false,true); //Final
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(bombjack_getbyte,bombjack_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(nil,snd_outbyte);
-snd_z80.init_sound(bombjack_update_sound);
-//Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,1);
-ay8910_1:=ay8910_chip.create(1500000,1);
-ay8910_2:=ay8910_chip.create(1500000,1);
-//cargar roms
-if not(cargar_roms(@memoria[0],@bombjack_rom[0],'bombjack.zip',0)) then exit;
-//cargar roms sonido
-if not(cargar_roms(@mem_snd[0],@bombjack_sonido,'bombjack.zip')) then exit;
-//informacion adicional de las tiles
-if not(cargar_roms(@memoria_fondo[0],@bombjack_tiles,'bombjack.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@bombjack_char[0],'bombjack.zip',0)) then exit;
-init_gfx(0,8,8,512);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,0*8,512*8*8,512*2*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//convertir chars16
-if not(cargar_roms(@memoria_temp[0],@bombjack_char16[0],'bombjack.zip',0)) then exit;
-init_gfx(1,16,16,256);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(3,0,32*8,0,1024*8*8,1024*2*8*8);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@bombjack_sprites[0],'bombjack.zip',0)) then exit;
-init_gfx(2,16,16,128);
-gfx[2].trans[0]:=true;
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//sprites grandes
-init_gfx(3,32,32,32);
-gfx[3].trans[0]:=true;
-gfx_set_desc_data(3,0,128*8,0*8+$1000*8,1024*8*8+$1000*8,2*1024*8*8+$1000*8);
-convert_gfx(3,0,@memoria_temp[0],@pt_x[0],@pt_y[0],true,false);
-//DIP
-marcade.dswa:=$c0;
-marcade.dswa_val:=@bombjack_dipa;
-marcade.dswb:=$50;
-marcade.dswb_val:=@bombjack_dipb;
-//final
-bombjack_reset;
-bombjack_iniciar:=true;
-end;
-
-procedure bombjack_reset;
-begin
-main_z80.reset;
-snd_z80.reset;
-ay8910_0.reset;
-ay8910_1.reset;
-ay8910_2.reset;
-reset_audio;
-nmi_vblank:=false;
-fondo_activo:=false;
-sound_latch:=0;
-numero_fondo:=0;
-marcade.in0:=0;
-marcade.in1:=0;
-marcade.in2:=$f0;
-end;
 
 procedure update_video_bombjack;inline;   //330 - 444 fps
 var
@@ -238,9 +123,9 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=239 then begin
-      if nmi_vblank then main_z80.pedir_nmi:=PULSE_LINE;
+      if nmi_vblank then main_z80.change_nmi(PULSE_LINE);
       update_video_bombjack;
-      snd_z80.pedir_nmi:=PULSE_LINE;
+      snd_z80.change_nmi(PULSE_LINE);
     end;
   end;
   eventos_bombjack;
@@ -424,6 +309,108 @@ freemem(data);
 close_qsnapshot;
 for f:=0 to $7f do cambiar_color(f*2);
 if fondo_activo then cambia_fondo(numero_fondo*$200);
+end;
+
+//Main
+procedure bombjack_reset;
+begin
+main_z80.reset;
+snd_z80.reset;
+ay8910_0.reset;
+ay8910_1.reset;
+ay8910_2.reset;
+reset_audio;
+nmi_vblank:=false;
+fondo_activo:=false;
+sound_latch:=0;
+numero_fondo:=0;
+marcade.in0:=0;
+marcade.in1:=0;
+marcade.in2:=$f0;
+end;
+
+function bombjack_iniciar:boolean;
+const
+      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
+      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
+      pt_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
+			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
+			40*8+0, 40*8+1, 40*8+2, 40*8+3, 40*8+4, 40*8+5, 40*8+6, 40*8+7);
+      pt_y:array[0..31] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
+			64*8, 65*8, 66*8, 67*8, 68*8, 69*8, 70*8, 71*8,
+			80*8, 81*8, 82*8, 83*8, 84*8, 85*8, 86*8, 87*8);
+var
+  memoria_temp:array[0..$5fff] of byte;
+begin
+bombjack_iniciar:=false;
+iniciar_audio(false);
+screen_init(1,256,256); //Fondo
+screen_init(2,256,256,true); //Chars
+screen_init(3,256,256,false,true); //Final
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,256);
+main_z80.change_ram_calls(bombjack_getbyte,bombjack_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
+snd_z80.change_io_calls(nil,snd_outbyte);
+snd_z80.init_sound(bombjack_update_sound);
+//Sound Chip
+ay8910_0:=ay8910_chip.create(1500000,0.13);
+ay8910_1:=ay8910_chip.create(1500000,0.13);
+ay8910_2:=ay8910_chip.create(1500000,0.13);
+//cargar roms
+if not(cargar_roms(@memoria[0],@bombjack_rom[0],'bombjack.zip',0)) then exit;
+//cargar roms sonido
+if not(cargar_roms(@mem_snd[0],@bombjack_sonido,'bombjack.zip')) then exit;
+//informacion adicional de las tiles
+if not(cargar_roms(@memoria_fondo[0],@bombjack_tiles,'bombjack.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@bombjack_char[0],'bombjack.zip',0)) then exit;
+init_gfx(0,8,8,512);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,0*8,512*8*8,512*2*8*8);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//convertir chars16
+if not(cargar_roms(@memoria_temp[0],@bombjack_char16[0],'bombjack.zip',0)) then exit;
+init_gfx(1,16,16,256);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(3,0,32*8,0,1024*8*8,1024*2*8*8);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@bombjack_sprites[0],'bombjack.zip',0)) then exit;
+init_gfx(2,16,16,128);
+gfx[2].trans[0]:=true;
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//sprites grandes
+init_gfx(3,32,32,32);
+gfx[3].trans[0]:=true;
+gfx_set_desc_data(3,0,128*8,0*8+$1000*8,1024*8*8+$1000*8,2*1024*8*8+$1000*8);
+convert_gfx(3,0,@memoria_temp[0],@pt_x[0],@pt_y[0],true,false);
+//DIP
+marcade.dswa:=$c0;
+marcade.dswa_val:=@bombjack_dipa;
+marcade.dswb:=$50;
+marcade.dswb_val:=@bombjack_dipb;
+//final
+bombjack_reset;
+bombjack_iniciar:=true;
+end;
+
+procedure Cargar_bombjack;
+begin
+llamadas_maquina.iniciar:=bombjack_iniciar;
+llamadas_maquina.bucle_general:=bombjack_principal;
+llamadas_maquina.reset:=bombjack_reset;
+llamadas_maquina.save_qsnap:=bombjack_qsave;
+llamadas_maquina.load_qsnap:=bombjack_qload;
 end;
 
 end.

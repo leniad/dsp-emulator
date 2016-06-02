@@ -352,7 +352,7 @@ case direccion of
     $f0031..$f0045,$f0047..$f005f,$f0061..$f0069:;
     $f0070:begin
               sound_latch:=valor and $ff;
-              snd_z80.pedir_nmi:=PULSE_LINE;
+              snd_z80.change_nmi(PULSE_LINE);
            end;
 end;
 end;
@@ -395,8 +395,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 end.

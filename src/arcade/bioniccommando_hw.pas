@@ -5,11 +5,10 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,timer_engine;
 
-procedure Cargar_bionicc;
+procedure cargar_bionicc;
 procedure bionicc_principal;
 function iniciar_bionicc:boolean;
 procedure reset_bionicc;
-procedure cerrar_bionicc;
 //Main CPU
 function bionicc_getword(direccion:dword):word;
 procedure bionicc_putword(direccion:dword;valor:word);
@@ -56,117 +55,6 @@ var
  txt_ram:array[0..$7ff] of word;
  input:array[0..5] of byte;
  sprite_ram:array[0..$27f] of word;
-
-procedure Cargar_bionicc;
-begin
-llamadas_maquina.iniciar:=iniciar_bionicc;
-llamadas_maquina.bucle_general:=bionicc_principal;
-llamadas_maquina.cerrar:=cerrar_bionicc;
-llamadas_maquina.reset:=reset_bionicc;
-end;
-
-function iniciar_bionicc:boolean;
-var
-  memoria_temp:array[0..$3ffff] of byte;
-const
-  pc_x:array[0..7] of dword=(0,1,2,3,8,9,10,11);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 );
-  pf_x:array[0..15] of dword=(0,1,2,3, 8,9,10,11,
-		(8*4*8)+0,(8*4*8)+1,(8*4*8)+2,(8*4*8)+3,(8*4*8)+8,(8*4*8)+9,(8*4*8)+10,(8*4*8)+11);
-  pf_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-  ps_x:array[0..15] of dword=(0,1,2,3,4,5,6,7,
-		(16*8)+0,(16*8)+1,(16*8)+2,(16*8)+3,(16*8)+4,(16*8)+5,(16*8)+6,(16*8)+7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-          8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_bionicc:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,256,256,true);
-screen_init(3,512,512,false,true);
-screen_init(4,256+8,256+8);
-screen_mod_scroll(4,264,256,255,264,256,255);
-screen_init(5,256+16,256+16,true);
-screen_mod_scroll(5,272,256,255,272,256,255);
-screen_init(6,256+16,256+16,true);
-screen_mod_scroll(6,272,256,255,272,256,255);
-iniciar_video(256,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(12000000,256);
-main_m68000.change_ram16_calls(bionicc_getword,bionicc_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(bionicc_snd_getbyte,bionicc_snd_putbyte);
-snd_z80.init_sound(bionicc_sound_update);
-//IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3579545/(4*60),bionicc_snd_irq,true);
-//Sound Chips
-YM2151_Init(0,3579545,nil,nil);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@bionicc_rom[0],'bionicc.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@bionicc_sound,'bionicc.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@bionicc_char,'bionicc.zip',1)) then exit;
-init_gfx(0,8,8,1024);
-gfx[0].trans[3]:=true;
-gfx_set_desc_data(2,0,128,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir bg
-if not(cargar_roms(@memoria_temp[0],@bionicc_bg[0],'bionicc.zip',0)) then exit;
-init_gfx(1,8,8,2048);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,128,($8000*8)+4,$8000*8,4,0);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir fg
-if not(cargar_roms(@memoria_temp[0],@bionicc_fg[0],'bionicc.zip',0)) then exit;
-init_gfx(2,16,16,2048);
-gfx[2].trans_alt[0,15]:=true;
-gfx[2].trans_alt[1,1]:=true;
-gfx[2].trans_alt[1,2]:=true;
-gfx[2].trans_alt[1,3]:=true;
-gfx[2].trans_alt[1,4]:=true;
-gfx[2].trans_alt[1,5]:=true;
-gfx[2].trans_alt[1,15]:=true;
-gfx_set_desc_data(4,0,512,($20000*8)+4,$20000*8,4,0);
-convert_gfx(2,0,@memoria_temp[0],@pf_x[0],@pf_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@bionicc_sprites[0],'bionicc.zip',0)) then exit;
-init_gfx(3,16,16,2048);
-gfx[3].trans[15]:=true;
-gfx_set_desc_data(4,0,256,$30000*8,$20000*8,$10000*8,0);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//DIP
-marcade.dswa:=$dfff;
-marcade.dswa_val:=@bionicc_dip;
-//final
-reset_bionicc;
-iniciar_bionicc:=true;
-end;
-
-procedure cerrar_bionicc;
-begin
-YM2151_close(0);
-end;
-
-procedure reset_bionicc;
-var
-  f:byte;
-begin
- main_m68000.reset;
- snd_z80.reset;
- YM2151_reset(0);
- reset_audio;
- marcade.in0:=$F;
- marcade.in1:=$FF;
- for f:=0 to 7 do input[f]:=0;
- scroll_fg_x:=0;
- scroll_fg_y:=0;
- scroll_bg_x:=0;
- scroll_bg_y:=0;
- sound_latch:=0;
-end;
 
 procedure update_video_bionicc;inline;
 var
@@ -396,7 +284,7 @@ function bionicc_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$7fff,$c000..$c7ff:bionicc_snd_getbyte:=mem_snd[direccion];
-  $8001:bionicc_snd_getbyte:=YM2151_status_port_read(0);
+  $8001:bionicc_snd_getbyte:=ym2151_0.status;
   $a000:bionicc_snd_getbyte:=sound_latch;
 end;
 end;
@@ -405,20 +293,126 @@ procedure bionicc_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
 case direccion of
-  $8000:YM2151_register_port_write(0,valor);
-  $8001:YM2151_data_port_write(0,valor);
+  $8000:ym2151_0.reg(valor);
+  $8001:ym2151_0.write(valor);
   $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
 end;
 
 procedure bionicc_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure bionicc_snd_irq;
 begin
-  snd_z80.pedir_nmi:=PULSE_LINE;
+  snd_z80.change_nmi(PULSE_LINE);
+end;
+
+//Main
+procedure reset_bionicc;
+var
+  f:byte;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ reset_audio;
+ marcade.in0:=$F;
+ marcade.in1:=$FF;
+ for f:=0 to 7 do input[f]:=0;
+ scroll_fg_x:=0;
+ scroll_fg_y:=0;
+ scroll_bg_x:=0;
+ scroll_bg_y:=0;
+ sound_latch:=0;
+end;
+
+function iniciar_bionicc:boolean;
+var
+  memoria_temp:array[0..$3ffff] of byte;
+const
+  pc_x:array[0..7] of dword=(0,1,2,3,8,9,10,11);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 );
+  pf_x:array[0..15] of dword=(0,1,2,3, 8,9,10,11,
+		(8*4*8)+0,(8*4*8)+1,(8*4*8)+2,(8*4*8)+3,(8*4*8)+8,(8*4*8)+9,(8*4*8)+10,(8*4*8)+11);
+  pf_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+  ps_x:array[0..15] of dword=(0,1,2,3,4,5,6,7,
+		(16*8)+0,(16*8)+1,(16*8)+2,(16*8)+3,(16*8)+4,(16*8)+5,(16*8)+6,(16*8)+7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+          8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_bionicc:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,256,256,true);
+screen_init(3,512,512,false,true);
+screen_init(4,256+8,256+8);
+screen_mod_scroll(4,264,256,255,264,256,255);
+screen_init(5,256+16,256+16,true);
+screen_mod_scroll(5,272,256,255,272,256,255);
+screen_init(6,256+16,256+16,true);
+screen_mod_scroll(6,272,256,255,272,256,255);
+iniciar_video(256,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(12000000,256);
+main_m68000.change_ram16_calls(bionicc_getword,bionicc_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(bionicc_snd_getbyte,bionicc_snd_putbyte);
+snd_z80.init_sound(bionicc_sound_update);
+//IRQ Sound CPU
+init_timer(snd_z80.numero_cpu,3579545/(4*60),bionicc_snd_irq,true);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@bionicc_rom[0],'bionicc.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@bionicc_sound,'bionicc.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@bionicc_char,'bionicc.zip',1)) then exit;
+init_gfx(0,8,8,1024);
+gfx[0].trans[3]:=true;
+gfx_set_desc_data(2,0,128,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir bg
+if not(cargar_roms(@memoria_temp[0],@bionicc_bg[0],'bionicc.zip',0)) then exit;
+init_gfx(1,8,8,2048);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,128,($8000*8)+4,$8000*8,4,0);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir fg
+if not(cargar_roms(@memoria_temp[0],@bionicc_fg[0],'bionicc.zip',0)) then exit;
+init_gfx(2,16,16,2048);
+gfx[2].trans_alt[0,15]:=true;
+gfx[2].trans_alt[1,1]:=true;
+gfx[2].trans_alt[1,2]:=true;
+gfx[2].trans_alt[1,3]:=true;
+gfx[2].trans_alt[1,4]:=true;
+gfx[2].trans_alt[1,5]:=true;
+gfx[2].trans_alt[1,15]:=true;
+gfx_set_desc_data(4,0,512,($20000*8)+4,$20000*8,4,0);
+convert_gfx(2,0,@memoria_temp[0],@pf_x[0],@pf_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@bionicc_sprites[0],'bionicc.zip',0)) then exit;
+init_gfx(3,16,16,2048);
+gfx[3].trans[15]:=true;
+gfx_set_desc_data(4,0,256,$30000*8,$20000*8,$10000*8,0);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//DIP
+marcade.dswa:=$dfff;
+marcade.dswa_val:=@bionicc_dip;
+//final
+reset_bionicc;
+iniciar_bionicc:=true;
+end;
+
+procedure Cargar_bionicc;
+begin
+llamadas_maquina.iniciar:=iniciar_bionicc;
+llamadas_maquina.bucle_general:=bionicc_principal;
+llamadas_maquina.reset:=reset_bionicc;
 end;
 
 end.

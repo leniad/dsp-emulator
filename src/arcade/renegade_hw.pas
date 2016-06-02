@@ -293,10 +293,10 @@ while EmuStatus=EsRuning do begin
    main_m6805.run(frame_mcu);
    frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
    case f of
-      111:main_m6502.pedir_nmi:=PULSE_LINE;
+      111:main_m6502.change_nmi(PULSE_LINE);
       239:begin
             update_video_renegade;
-            main_m6502.pedir_irq:=HOLD_LINE;
+            main_m6502.change_irq(HOLD_LINE);
             marcade.dswb:=marcade.dswb and $bf;
           end;
       63:marcade.dswb:=marcade.dswb or $40;
@@ -475,8 +475,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6809.change_firq(ASSERT_LINE)
-    else snd_m6809.change_firq(CLEAR_LINE);
+  snd_m6809.change_firq(irqstate);
 end;
 
 end.

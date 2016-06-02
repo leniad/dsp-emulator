@@ -5,16 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,samples,rom_engine,
      pal_engine,sound_engine;
 
-procedure Cargar_mario;
-procedure mario_principal;
-function iniciar_mario:boolean;
-procedure reset_mario;
-procedure cerrar_mario;
-//Main CPU
-function mario_getbyte(direccion:word):byte;
-procedure mario_putbyte(direccion:word;valor:byte);
-//Sound
-procedure mario_sound_update;
+procedure cargar_mario;
 
 implementation
 const
@@ -44,98 +35,6 @@ const
 var
  haz_nmi:boolean;
  gfx_bank,palette_bank,scroll_y,death_val,skid_val:byte;
-
-procedure Cargar_mario;
-begin
-llamadas_maquina.iniciar:=iniciar_mario;
-llamadas_maquina.bucle_general:=mario_principal;
-llamadas_maquina.cerrar:=cerrar_mario;
-llamadas_maquina.reset:=reset_mario;
-llamadas_maquina.fps_max:=59.185606;
-end;
-
-function iniciar_mario:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      bit0,bit1,bit2:byte;
-      memoria_temp:array[0..$5fff] of byte;
-const
-      pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-      pc_y:array[0..7] of dword=(7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8);
-      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			256*16*8+0, 256*16*8+1, 256*16*8+2, 256*16*8+3, 256*16*8+4, 256*16*8+5, 256*16*8+6, 256*16*8+7);
-      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_mario:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_mod_scroll(1,0,0,0,256,256,255);
-screen_init(2,256,256,false,true);
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,264);
-main_z80.change_ram_calls(mario_getbyte,mario_putbyte);
-//cargar roms
-if not(cargar_roms(@memoria[0],@mario_rom[0],'mario.zip',0)) then exit;
-//samples
-if load_samples('mario.zip',@mario_samples[0],num_samples) then main_z80.init_sound(mario_sound_update);
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@mario_char[0],'mario.zip',0)) then exit;
-init_gfx(0,8,8,512);
-gfx_set_desc_data(2,0,8*8,512*8*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@mario_sprites[0],'mario.zip',0)) then exit;
-init_gfx(1,16,16,256);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(3,0,16*8,2*256*16*16,256*16*16,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//poner la paleta
-if not(cargar_roms(@memoria_temp[0],@mario_pal,'mario.zip')) then exit;
-for f:=0 to 511 do begin
-    bit0:=(memoria_temp[f] shr 5) and 1;
-    bit1:=(memoria_temp[f] shr 6) and 1;
-    bit2:=(memoria_temp[f] shr 7) and 1;
-    colores[f].r:=not($21*bit0+$47*bit1+$97*bit2);
-    bit0:=(memoria_temp[f] shr 2) and 1;
-    bit1:=(memoria_temp[f] shr 3) and 1;
-    bit2:=(memoria_temp[f] shr 4) and 1;
-    colores[f].g:=not($21*bit0+$47*bit1+$97*bit2);
-    bit0:=(memoria_temp[f] shr 0) and 1;
-    bit1:=(memoria_temp[f] shr 1) and 1;
-    colores[f].b:=not($55*bit0+$aa*bit1);
-end;
-set_pal(colores,512);
-//DIP
-marcade.dswa:=0;
-marcade.dswa_val:=@mario_dip_a;
-//final
-reset_mario;
-iniciar_mario:=true;
-end;
-
-procedure cerrar_mario;
-begin
-close_samples;
-end;
-
-procedure reset_mario;
-begin
- main_z80.reset;
- reset_samples;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- haz_nmi:=false;
- gfx_bank:=0;
- palette_bank:=0;
- scroll_y:=0;
- death_val:=0;
- skid_val:=0;
-end;
 
 procedure update_video_mario;inline;
 var
@@ -200,7 +99,7 @@ while EmuStatus=EsRuning do begin
     main_z80.run(frame);
     frame:=frame+main_z80.tframes-main_z80.contador;
     if f=239 then begin
-      if haz_nmi then main_z80.pedir_nmi:=PULSE_LINE;
+      if haz_nmi then main_z80.change_nmi(PULSE_LINE);
       update_video_mario;
     end;
   end;
@@ -288,6 +187,93 @@ end;
 procedure mario_sound_update;
 begin
   samples_update;
+end;
+
+//Main
+procedure reset_mario;
+begin
+ main_z80.reset;
+ reset_samples;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ haz_nmi:=false;
+ gfx_bank:=0;
+ palette_bank:=0;
+ scroll_y:=0;
+ death_val:=0;
+ skid_val:=0;
+end;
+
+function iniciar_mario:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      bit0,bit1,bit2:byte;
+      memoria_temp:array[0..$5fff] of byte;
+const
+      pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
+      pc_y:array[0..7] of dword=(7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8);
+      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			256*16*8+0, 256*16*8+1, 256*16*8+2, 256*16*8+3, 256*16*8+4, 256*16*8+5, 256*16*8+6, 256*16*8+7);
+      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_mario:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256);
+screen_mod_scroll(1,0,0,0,256,256,255);
+screen_init(2,256,256,false,true);
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,264);
+main_z80.change_ram_calls(mario_getbyte,mario_putbyte);
+//cargar roms
+if not(cargar_roms(@memoria[0],@mario_rom[0],'mario.zip',0)) then exit;
+//samples
+if load_samples('mario.zip',@mario_samples[0],num_samples) then main_z80.init_sound(mario_sound_update);
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@mario_char[0],'mario.zip',0)) then exit;
+init_gfx(0,8,8,512);
+gfx_set_desc_data(2,0,8*8,512*8*8,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@mario_sprites[0],'mario.zip',0)) then exit;
+init_gfx(1,16,16,256);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(3,0,16*8,2*256*16*16,256*16*16,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@mario_pal,'mario.zip')) then exit;
+for f:=0 to 511 do begin
+    bit0:=(memoria_temp[f] shr 5) and 1;
+    bit1:=(memoria_temp[f] shr 6) and 1;
+    bit2:=(memoria_temp[f] shr 7) and 1;
+    colores[f].r:=not($21*bit0+$47*bit1+$97*bit2);
+    bit0:=(memoria_temp[f] shr 2) and 1;
+    bit1:=(memoria_temp[f] shr 3) and 1;
+    bit2:=(memoria_temp[f] shr 4) and 1;
+    colores[f].g:=not($21*bit0+$47*bit1+$97*bit2);
+    bit0:=(memoria_temp[f] shr 0) and 1;
+    bit1:=(memoria_temp[f] shr 1) and 1;
+    colores[f].b:=not($55*bit0+$aa*bit1);
+end;
+set_pal(colores,512);
+//DIP
+marcade.dswa:=0;
+marcade.dswa_val:=@mario_dip_a;
+//final
+reset_mario;
+iniciar_mario:=true;
+end;
+
+procedure Cargar_mario;
+begin
+llamadas_maquina.iniciar:=iniciar_mario;
+llamadas_maquina.bucle_general:=mario_principal;
+llamadas_maquina.reset:=reset_mario;
+llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

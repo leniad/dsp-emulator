@@ -5,24 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232,misc_functions;
 
-procedure Cargar_aliens;
-function iniciar_aliens:boolean;
-procedure reset_aliens;
-procedure cerrar_aliens;
-//Main
-procedure aliens_principal;
-function aliens_getbyte(direccion:word):byte;
-procedure aliens_putbyte(direccion:word;valor:byte);
-procedure aliens_bank(valor:byte);
-//Sound
-function aliens_snd_getbyte(direccion:word):byte;
-procedure aliens_snd_putbyte(direccion:word;valor:byte);
-procedure aliens_sound_update;
-procedure aliens_snd_bankswitch(valor:byte);
-//Video
-procedure aliens_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
-procedure aliens_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
-procedure aliens_k007232_cb(valor:byte);
+procedure cargar_aliens;
 
 implementation
 const
@@ -55,98 +38,6 @@ var
  rom_bank:array[0..19,0..$1fff] of byte;
  ram_bank:array[0..1,0..$3ff] of byte;
 
-procedure Cargar_aliens;
-begin
-llamadas_maquina.iniciar:=iniciar_aliens;
-llamadas_maquina.cerrar:=cerrar_aliens;
-llamadas_maquina.reset:=reset_aliens;
-llamadas_maquina.bucle_general:=aliens_principal;
-llamadas_maquina.fps_max:=59.185606;
-end;
-
-function iniciar_aliens:boolean;
-var
-   temp_mem:array[0..$2ffff] of byte;
-   f:byte;
-begin
-iniciar_aliens:=false;
-//Pantallas para el K052109
-screen_init(1,512,256,true);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
-screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
-screen_init(4,1024,1024,false,true);
-iniciar_video(288,224,true);
-iniciar_audio(false);
-//cargar roms y ponerlas en su sitio...
-if not(cargar_roms(@temp_mem[0],@aliens_rom[0],'aliens.zip',0)) then exit;
-copymemory(@memoria[$8000],@temp_mem[$28000],$8000);
-for f:=0 to 19 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@aliens_sound,'aliens.zip',1)) then exit;
-//Main CPU
-main_konami:=cpu_konami.create(3000000,256);
-main_konami.change_ram_calls(aliens_getbyte,aliens_putbyte);
-main_konami.change_set_lines(aliens_bank);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(aliens_snd_getbyte,aliens_snd_putbyte);
-snd_z80.init_sound(aliens_sound_update);
-//Sound Chips
-YM2151_Init(0,3579545,aliens_snd_bankswitch,nil);
-getmem(k007232_rom,$40000);
-if not(cargar_roms(k007232_rom,@aliens_k007232,'aliens.zip',1)) then exit;
-k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,aliens_k007232_cb);
-//Iniciar video
-getmem(tiles_rom,$200000);
-if not(cargar_roms32b(tiles_rom,@aliens_tiles,'aliens.zip',0)) then exit;
-k052109_0:=k052109_chip.create(1,2,3,aliens_cb,tiles_rom,$200000);
-getmem(sprite_rom,$200000);
-if not(cargar_roms32b(sprite_rom,@aliens_sprites,'aliens.zip',0)) then exit;
-k051960_0:=k051960_chip.create(4,sprite_rom,$200000,aliens_sprite_cb,2);
-layer_colorbase[0]:=0;
-layer_colorbase[1]:=4;
-layer_colorbase[2]:=8;
-sprite_colorbase:=16;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswa_val:=@aliens_dip_a;
-marcade.dswb:=$5e;
-marcade.dswb_val:=@aliens_dip_b;
-marcade.dswc:=$ff;
-marcade.dswc_val:=@aliens_dip_c;
-//final
-reset_aliens;
-iniciar_aliens:=true;
-end;
-
-procedure cerrar_aliens;
-begin
-YM2151_close(0);
-if k007232_rom<>nil then freemem(k007232_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-if tiles_rom<>nil then freemem(tiles_rom);
-k007232_rom:=nil;
-sprite_rom:=nil;
-tiles_rom:=nil;
-end;
-
-procedure reset_aliens;
-begin
- main_konami.reset;
- snd_z80.reset;
- k052109_0.reset;
- YM2151_reset(0);
- k051960_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- sound_latch:=0;
- bank0_bank:=0;
- rom_bank1:=0;
-end;
-
 procedure aliens_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
 code:=code or (((color and $3f) shl 8) or (bank shl 14));
@@ -174,29 +65,6 @@ procedure aliens_k007232_cb(valor:byte);
 begin
   k007232_0.set_volume(0,(valor and $f)*$11,0);
   k007232_0.set_volume(1,0,(valor shr 4)*$11);
-end;
-
-procedure draw_layer(layer:byte);inline;
-var
-  f:word;
-begin
-case layer of
-  0:actualiza_trozo(0,0,512,256,1,0,0,512,256,4); //Esta es fija
-  1:begin
-      case k052109_0.scroll_tipo[1] of
-        0,1:for f:=0 to $ff do scroll__x_part(2,4,k052109_0.scroll_x[1,f],k052109_0.scroll_y[1,0],f,1);
-        2:for f:=0 to $1ff do scroll__y_part(2,4,k052109_0.scroll_y[1,f],k052109_0.scroll_x[1,0],f,1);
-        3:scroll_x_y(2,4,k052109_0.scroll_x[1,0],k052109_0.scroll_y[1,0]);
-      end;
-    end;
-  2:begin
-      case k052109_0.scroll_tipo[2] of
-        0,1:for f:=0 to $ff do scroll__x_part(3,4,k052109_0.scroll_x[2,f],k052109_0.scroll_y[2,0],f,1);
-        2:for f:=0 to $1ff do scroll__y_part(3,4,k052109_0.scroll_y[2,f],k052109_0.scroll_x[2,0],f,1);
-        3:scroll_x_y(3,4,k052109_0.scroll_x[2,0],k052109_0.scroll_y[2,0]);
-      end;
-    end;
-end;
 end;
 
 procedure update_video_aliens;
@@ -265,7 +133,6 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-//Main CPU
 function aliens_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -343,12 +210,11 @@ begin
      rom_bank1:=valor and $1f;
 end;
 
-//Audio CPU
 function aliens_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$87ff:aliens_snd_getbyte:=mem_snd[direccion];
-  $a001:aliens_snd_getbyte:=YM2151_status_port_read(0);
+  $a001:aliens_snd_getbyte:=ym2151_0.status;
   $c000:aliens_snd_getbyte:=sound_latch;
   $e000..$e00d:aliens_snd_getbyte:=k007232_0.read(direccion and $f);
 end;
@@ -359,8 +225,8 @@ begin
 if direccion<$8000 then exit;
 case direccion of
   $8000..$87ff:mem_snd[direccion]:=valor;
-  $a000:YM2151_register_port_write(0,valor);
-  $a001:YM2151_data_port_write(0,valor);
+  $a000:ym2151_0.reg(valor);
+  $a001:ym2151_0.write(valor);
   $e000..$e00d:k007232_0.write(direccion and $f,valor);
 end;
 end;
@@ -374,8 +240,101 @@ end;
 
 procedure aliens_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   k007232_0.update;
+end;
+
+//Main
+procedure reset_aliens;
+begin
+ main_konami.reset;
+ snd_z80.reset;
+ k052109_0.reset;
+ ym2151_0.reset;
+ k051960_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ sound_latch:=0;
+ bank0_bank:=0;
+ rom_bank1:=0;
+end;
+
+function iniciar_aliens:boolean;
+var
+   temp_mem:array[0..$2ffff] of byte;
+   f:byte;
+begin
+iniciar_aliens:=false;
+//Pantallas para el K052109
+screen_init(1,512,256,true);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,512,511,256,256,255);
+screen_init(3,512,256,true);
+screen_mod_scroll(3,512,512,511,256,256,255);
+screen_init(4,1024,1024,false,true);
+iniciar_video(288,224,true);
+iniciar_audio(false);
+//cargar roms y ponerlas en su sitio...
+if not(cargar_roms(@temp_mem[0],@aliens_rom[0],'aliens.zip',0)) then exit;
+copymemory(@memoria[$8000],@temp_mem[$28000],$8000);
+for f:=0 to 19 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@aliens_sound,'aliens.zip',1)) then exit;
+//Main CPU
+main_konami:=cpu_konami.create(3000000,256);
+main_konami.change_ram_calls(aliens_getbyte,aliens_putbyte);
+main_konami.change_set_lines(aliens_bank);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(aliens_snd_getbyte,aliens_snd_putbyte);
+snd_z80.init_sound(aliens_sound_update);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_port_func(aliens_snd_bankswitch);
+getmem(k007232_rom,$40000);
+if not(cargar_roms(k007232_rom,@aliens_k007232,'aliens.zip',1)) then exit;
+k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,aliens_k007232_cb);
+//Iniciar video
+getmem(tiles_rom,$200000);
+if not(cargar_roms32b(tiles_rom,@aliens_tiles,'aliens.zip',0)) then exit;
+k052109_0:=k052109_chip.create(1,2,3,aliens_cb,tiles_rom,$200000);
+getmem(sprite_rom,$200000);
+if not(cargar_roms32b(sprite_rom,@aliens_sprites,'aliens.zip',0)) then exit;
+k051960_0:=k051960_chip.create(4,sprite_rom,$200000,aliens_sprite_cb,2);
+layer_colorbase[0]:=0;
+layer_colorbase[1]:=4;
+layer_colorbase[2]:=8;
+sprite_colorbase:=16;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswa_val:=@aliens_dip_a;
+marcade.dswb:=$5e;
+marcade.dswb_val:=@aliens_dip_b;
+marcade.dswc:=$ff;
+marcade.dswc_val:=@aliens_dip_c;
+//final
+reset_aliens;
+iniciar_aliens:=true;
+end;
+
+procedure cerrar_aliens;
+begin
+if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+tiles_rom:=nil;
+end;
+
+procedure Cargar_aliens;
+begin
+llamadas_maquina.iniciar:=iniciar_aliens;
+llamadas_maquina.cerrar:=cerrar_aliens;
+llamadas_maquina.reset:=reset_aliens;
+llamadas_maquina.bucle_general:=aliens_principal;
+llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

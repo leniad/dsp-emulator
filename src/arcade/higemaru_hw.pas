@@ -5,14 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,pal_engine,
      sound_engine;
 
-procedure Cargar_higemaru;
-procedure higemaru_principal;
-function iniciar_higemaru:boolean;
-procedure reset_higemaru;
-//Main CPU
-function higemaru_getbyte(direccion:word):byte;
-procedure higemaru_putbyte(direccion:word;valor:byte);
-procedure higemaru_sound;
+procedure cargar_higemaru;
 
 implementation
 const
@@ -25,79 +18,6 @@ const
         higemaru_char:tipo_roms=(n:'hg3.m1';l:$2000;p:0;crc:$b37b88c8);
         higemaru_sprites:array[0..2] of tipo_roms=(
         (n:'hg1.c14';l:$2000;p:0;crc:$ef4c2f5d),(n:'hg2.e14';l:$2000;p:$2000;crc:$9133f804),());
-
-procedure Cargar_higemaru;
-begin
-llamadas_maquina.iniciar:=iniciar_higemaru;
-llamadas_maquina.bucle_general:=higemaru_principal;
-llamadas_maquina.reset:=reset_higemaru;
-end;
-
-function iniciar_higemaru:boolean;
-var
-  colores:tpaleta;
-  f:word;
-  memoria_temp:array[0..$3fff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
-    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-begin
-iniciar_higemaru:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_init(2,256,256,false,true);
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(3000000,256);
-main_z80.change_ram_calls(higemaru_getbyte,higemaru_putbyte);
-main_z80.init_sound(higemaru_sound);
-//Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
-//cargar ROMS
-if not(cargar_roms(@memoria[0],@higemaru_rom[0],'higemaru.zip',0)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@higemaru_char,'higemaru.zip',1)) then exit;
-init_gfx(0,8,8,$200);
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@higemaru_sprites[0],'higemaru.zip',0)) then exit;
-init_gfx(1,16,16,$80);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,64*8,$80*8*64+4,$80*8*64+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//poner la paleta
-if not(cargar_roms(@memoria_temp[0],@higemaru_pal[0],'higemaru.zip',0)) then exit;
-for f:=0 to $1f do begin
-  colores[f].r:=($21*((memoria_temp[f] shr 0) and 1))+($47*((memoria_temp[f] shr 1) and 1))+($97*((memoria_temp[f] shr 2) and 1));
-  colores[f].g:=($21*((memoria_temp[f] shr 3) and 1))+($47*((memoria_temp[f] shr 4) and 1))+($97*((memoria_temp[f] shr 5) and 1));
-  colores[f].b:=0+($47*((memoria_temp[f] shr 6) and 1))+($97*((memoria_temp[f] shr 7) and 1));
-end;
-set_pal(colores,32);
-//crear la tabla de colores
-for f:=0 to $7f do gfx[0].colores[f]:=memoria_temp[f+$20] and $f;
-for f:=0 to $ff do gfx[1].colores[f]:=(memoria_temp[f+$120] and $f) or $10;
-//final
-reset_higemaru;
-iniciar_higemaru:=true;
-end;
-
-procedure reset_higemaru;
-begin
- main_z80.reset;
- AY8910_0.reset;
- AY8910_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$ff;
-end;
 
 procedure update_video_higemaru;inline;
 var
@@ -209,6 +129,80 @@ procedure higemaru_sound;
 begin
   ay8910_0.update;
   ay8910_1.update;
+end;
+
+//Main
+procedure reset_higemaru;
+begin
+ main_z80.reset;
+ AY8910_0.reset;
+ AY8910_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$ff;
+end;
+
+function iniciar_higemaru:boolean;
+var
+  colores:tpaleta;
+  f:word;
+  memoria_temp:array[0..$3fff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
+    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
+    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+begin
+iniciar_higemaru:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256);
+screen_init(2,256,256,false,true);
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(3000000,256);
+main_z80.change_ram_calls(higemaru_getbyte,higemaru_putbyte);
+main_z80.init_sound(higemaru_sound);
+//Sound Chips
+AY8910_0:=ay8910_chip.create(1500000,1);
+AY8910_1:=ay8910_chip.create(1500000,1);
+//cargar ROMS
+if not(cargar_roms(@memoria[0],@higemaru_rom[0],'higemaru.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@higemaru_char,'higemaru.zip',1)) then exit;
+init_gfx(0,8,8,$200);
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@higemaru_sprites[0],'higemaru.zip',0)) then exit;
+init_gfx(1,16,16,$80);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,64*8,$80*8*64+4,$80*8*64+0,4,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@higemaru_pal[0],'higemaru.zip',0)) then exit;
+for f:=0 to $1f do begin
+  colores[f].r:=($21*((memoria_temp[f] shr 0) and 1))+($47*((memoria_temp[f] shr 1) and 1))+($97*((memoria_temp[f] shr 2) and 1));
+  colores[f].g:=($21*((memoria_temp[f] shr 3) and 1))+($47*((memoria_temp[f] shr 4) and 1))+($97*((memoria_temp[f] shr 5) and 1));
+  colores[f].b:=0+($47*((memoria_temp[f] shr 6) and 1))+($97*((memoria_temp[f] shr 7) and 1));
+end;
+set_pal(colores,32);
+//crear la tabla de colores
+for f:=0 to $7f do gfx[0].colores[f]:=memoria_temp[f+$20] and $f;
+for f:=0 to $ff do gfx[1].colores[f]:=(memoria_temp[f+$120] and $f) or $10;
+//final
+reset_higemaru;
+iniciar_higemaru:=true;
+end;
+
+procedure Cargar_higemaru;
+begin
+llamadas_maquina.iniciar:=iniciar_higemaru;
+llamadas_maquina.bucle_general:=higemaru_principal;
+llamadas_maquina.reset:=reset_higemaru;
 end;
 
 end.

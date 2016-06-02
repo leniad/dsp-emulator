@@ -12,11 +12,11 @@ type
         band_hd6309=record
                 md_em,md_fm,md_ii,md_dz:boolean;
         end;
-        Parejas_hd6309 = record
+        Parejas_hd6309=record
           case byte of
-             0: (b,a,f,e: byte);
-             1: (d,w:word);
-             2: (l:dword);
+             0:(b,a,f,e:byte);
+             1:(d,w:word);
+             2:(l:dword);
         end;
         reg_hd6309=record
                 q:parejas_hd6309;
@@ -146,25 +146,26 @@ end;
 
 procedure cpu_hd6309.change_irq(estado:byte);
 begin
-self.pedir_irq:=estado;
-self.internal_m6809.change_irq(estado);
+if r.cc2.md_em then self.pedir_irq:=estado
+   else self.internal_m6809.change_irq(estado);
 end;
 
 procedure cpu_hd6309.change_firq(estado:byte);
 begin
-self.pedir_firq:=estado;
-self.internal_m6809.change_firq(estado);
+if r.cc2.md_em then self.pedir_firq:=estado
+   else self.internal_m6809.change_firq(estado);
 end;
 
 procedure cpu_hd6309.change_nmi(estado:byte);
 begin
-if estado=CLEAR_LINE then begin
-  self.pedir_nmi:=CLEAR_LINE;
-  self.nmi_state:=CLEAR_LINE;
-end else begin
-  self.pedir_nmi:=estado;
-end;
-  self.internal_m6809.change_nmi(estado);
+if r.cc2.md_em then begin
+   if estado=CLEAR_LINE then begin
+      self.pedir_nmi:=CLEAR_LINE;
+      self.nmi_state:=CLEAR_LINE;
+   end else begin
+      self.pedir_nmi:=estado;
+   end;
+end else self.internal_m6809.change_nmi(estado);
 end;
 
 procedure cpu_hd6309.run(maximo:single);

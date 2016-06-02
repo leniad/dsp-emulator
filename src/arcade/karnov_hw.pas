@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ym_2203,ym_3812,m6502,sound_engine;
 
-procedure Cargar_karnov;
-function iniciar_karnov:boolean;
-procedure reset_karnov;
-procedure karnov_principal;
-//Main CPU
-function karnov_getword(direccion:dword):word;
-procedure karnov_putword(direccion:dword;valor:word);
-//Sound CPU
-function karnov_snd_getbyte(direccion:word):byte;
-procedure karnov_snd_putbyte(direccion:word;valor:byte);
-procedure karnov_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_karnov;
 
 implementation
 const
@@ -84,13 +73,6 @@ var
  i8751_command_queue,i8751_coin_pending,i8751_return,scroll_x,scroll_y:word;
  i8751_latch,i8751_needs_ack:boolean;
  i8751_write_proc:t_i8751_w;
-
-procedure Cargar_karnov;
-begin
-llamadas_maquina.bucle_general:=karnov_principal;
-llamadas_maquina.iniciar:=iniciar_karnov;
-llamadas_maquina.reset:=reset_karnov;
-end;
 
 procedure karnov_i8751_w(valor:word);
 begin
@@ -221,150 +203,6 @@ if ((valor and $f000)=$3000) then begin
 end;
 main_m68000.irq[6]:=HOLD_LINE;
 i8751_needs_ack:=true;
-end;
-
-function iniciar_karnov:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
-			0, 1, 2, 3, 4, 5, 6, 7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
-var
-  memoria_temp:array[0..$7ffff] of byte;
-  f:word;
-  ctemp1,ctemp2,ctemp3,ctemp4:byte;
-  colores:tpaleta;
-
-procedure convert_chars;
-begin
-init_gfx(0,8,8,$400);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,$6000*8,$4000*8,$2000*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-end;
-
-procedure convert_tiles(num_gfx,mul:byte);
-begin
-init_gfx(num_gfx,16,16,$800*mul);
-gfx[num_gfx].trans[0]:=true;
-gfx_set_desc_data(4,0,16*16,($30000*mul)*8,0,($10000*mul)*8,($20000*mul)*8);
-convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-end;
-
-begin
-iniciar_karnov:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,512,512,false,true);
-iniciar_video(256,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(karnov_getword,karnov_putword);
-//Sound CPU
-snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
-snd_m6502.change_ram_calls(karnov_snd_getbyte,karnov_snd_putbyte);
-snd_m6502.init_sound(karnov_sound_update);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
-ym3812_0.change_irq_calls(snd_irq);
-ym2203_0:=ym2203_chip.create(1500000,0.25,0.25);
-case main_vars.tipo_maquina of
-  219:begin  //Karnov
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@karnov_rom[0],'karnov.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@karnov_sound,'karnov.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@karnov_char,'karnov.zip',1)) then exit;
-        convert_chars;
-        //tiles
-        if not(cargar_roms(@memoria_temp[0],@karnov_tiles,'karnov.zip',0)) then exit;
-        convert_tiles(1,1);
-        //sprites
-        if not(cargar_roms(@memoria_temp[0],@karnov_sprites,'karnov.zip',0)) then exit;
-        convert_tiles(2,2);
-        //Paleta
-        if not(cargar_roms(@memoria_temp[0],@karnov_proms,'karnov.zip',0)) then exit;
-        //DIP
-        marcade.dswa:=$ffbf;
-        marcade.dswa_val:=@karnov_dip;
-        i8751_coin_mask:=$7;
-        i8751_write_proc:=karnov_i8751_w;
-      end;
-  220:begin  //Karnov
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@chelnov_rom[0],'chelnov.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@chelnov_sound,'chelnov.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@chelnov_char,'chelnov.zip',1)) then exit;
-        convert_chars;
-        //tiles
-        if not(cargar_roms(@memoria_temp[0],@chelnov_tiles,'chelnov.zip',0)) then exit;
-        convert_tiles(1,1);
-        //sprites
-        if not(cargar_roms(@memoria_temp[0],@chelnov_sprites,'chelnov.zip',0)) then exit;
-        convert_tiles(2,2);
-        //Paleta
-        if not(cargar_roms(@memoria_temp[0],@chelnov_proms,'chelnov.zip',0)) then exit;
-        //DIP
-        marcade.dswa:=$ff7f;
-        marcade.dswa_val:=@chelnov_dip;
-        i8751_coin_mask:=$e0;
-        rom[$062a shr 1]:=$4e71;  // hangs waiting on i8751 int
-        i8751_write_proc:=chelnov_i8751_w;
-      end;
-end;
-//poner la paleta
-for f:=0 to $3ff do begin
-    // red
-    ctemp1:=(memoria_temp[f] shr 0) and $01;
-    ctemp2:=(memoria_temp[f] shr 1) and $01;
-    ctemp3:=(memoria_temp[f] shr 2) and $01;
-    ctemp4:=(memoria_temp[f] shr 3) and $01;
-    colores[f].r:=$e*ctemp1+$1f*ctemp2+$43*ctemp3+$8f*ctemp4;
-    // green
-    ctemp1:=(memoria_temp[f] shr 4) and $01;
-    ctemp2:=(memoria_temp[f] shr 5) and $01;
-    ctemp3:=(memoria_temp[f] shr 6) and $01;
-    ctemp4:=(memoria_temp[f] shr 7) and $01;
-    colores[f].g:=$e*ctemp1+$1f*ctemp2+$43*ctemp3+$8f*ctemp4;
-    // blue
-    ctemp1:=(memoria_temp[f+$400] shr 0) and $01;
-    ctemp2:=(memoria_temp[f+$400] shr 1) and $01;
-    ctemp3:=(memoria_temp[f+$400] shr 2) and $01;
-    ctemp4:=(memoria_temp[f+$400] shr 3) and $01;
-    colores[f].b:=$e*ctemp1+$1f*ctemp2+$43*ctemp3+$8f*ctemp4;
-end;
-set_pal(colores,$400);
-//final
-reset_karnov;
-iniciar_karnov:=true;
-end;
-
-procedure reset_karnov;
-begin
- main_m68000.reset;
- snd_m6502.reset;
- ym3812_0.reset;
- ym2203_0.reset;
- reset_audio;
- marcade.in0:=$FFFF;
- marcade.in1:=$7f;
- if main_vars.tipo_maquina=219 then marcade.in2:=$7
-   else marcade.in2:=$e0;
- sound_latch:=0;
- i8751_latch:=false;
- i8751_return:=0;
- i8751_needs_ack:=false;
- i8751_coin_pending:=0;
- i8751_command_queue:=0;
- i8751_level:=0;
 end;
 
 procedure eventos_karnov;
@@ -560,7 +398,7 @@ case (direccion shl 1) of
        end;
      2:begin // SONREQ (Sound CPU byte)
           sound_latch:=valor and $ff;
-	        snd_m6502.pedir_nmi:=PULSE_LINE;
+	        snd_m6502.change_nmi(PULSE_LINE);
        end;
      4:copymemory(@sprite_ram2,@sprite_ram,$800*2); // DM (DMA to buffer spriteram)
      6:i8751_write_proc(valor); // SECREQ (Interrupt & Data to i8751)
@@ -617,7 +455,7 @@ if direccion>$7fff then exit;
 case direccion of
   $0..$5ff:mem_snd[direccion]:=valor;
   $1000:ym2203_0.Control(valor);
-  $1001:ym2203_0.Write_Reg(valor);
+  $1001:ym2203_0.Write(valor);
   $1800:ym3812_0.control(valor);
   $1801:ym3812_0.write(valor);
 end;
@@ -631,8 +469,160 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6502.pedir_irq:=ASSERT_LINE
-    else snd_m6502.pedir_irq:=CLEAR_LINE;
+  snd_m6502.change_irq(irqstate);
 end;
+
+//Main
+procedure reset_karnov;
+begin
+ main_m68000.reset;
+ snd_m6502.reset;
+ ym3812_0.reset;
+ ym2203_0.reset;
+ reset_audio;
+ marcade.in0:=$FFFF;
+ marcade.in1:=$7f;
+ if main_vars.tipo_maquina=219 then marcade.in2:=$7
+   else marcade.in2:=$e0;
+ sound_latch:=0;
+ i8751_latch:=false;
+ i8751_return:=0;
+ i8751_needs_ack:=false;
+ i8751_coin_pending:=0;
+ i8751_command_queue:=0;
+ i8751_level:=0;
+end;
+
+function iniciar_karnov:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
+			0, 1, 2, 3, 4, 5, 6, 7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
+var
+  memoria_temp:array[0..$7ffff] of byte;
+  f:word;
+  ctemp1,ctemp2,ctemp3,ctemp4:byte;
+  colores:tpaleta;
+
+procedure convert_chars;
+begin
+init_gfx(0,8,8,$400);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,$6000*8,$4000*8,$2000*8);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+end;
+
+procedure convert_tiles(num_gfx,mul:byte);
+begin
+init_gfx(num_gfx,16,16,$800*mul);
+gfx[num_gfx].trans[0]:=true;
+gfx_set_desc_data(4,0,16*16,($30000*mul)*8,0,($10000*mul)*8,($20000*mul)*8);
+convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+end;
+
+begin
+iniciar_karnov:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256,true);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,512,512,false,true);
+iniciar_video(256,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,256);
+main_m68000.change_ram16_calls(karnov_getword,karnov_putword);
+//Sound CPU
+snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
+snd_m6502.change_ram_calls(karnov_snd_getbyte,karnov_snd_putbyte);
+snd_m6502.init_sound(karnov_sound_update);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
+ym3812_0.change_irq_calls(snd_irq);
+ym2203_0:=ym2203_chip.create(1500000,0.25,0.25);
+case main_vars.tipo_maquina of
+  219:begin  //Karnov
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@karnov_rom[0],'karnov.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@karnov_sound,'karnov.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@karnov_char,'karnov.zip',1)) then exit;
+        convert_chars;
+        //tiles
+        if not(cargar_roms(@memoria_temp[0],@karnov_tiles,'karnov.zip',0)) then exit;
+        convert_tiles(1,1);
+        //sprites
+        if not(cargar_roms(@memoria_temp[0],@karnov_sprites,'karnov.zip',0)) then exit;
+        convert_tiles(2,2);
+        //Paleta
+        if not(cargar_roms(@memoria_temp[0],@karnov_proms,'karnov.zip',0)) then exit;
+        //DIP
+        marcade.dswa:=$ffbf;
+        marcade.dswa_val:=@karnov_dip;
+        i8751_coin_mask:=$7;
+        i8751_write_proc:=karnov_i8751_w;
+      end;
+  220:begin  //Karnov
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@chelnov_rom[0],'chelnov.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@chelnov_sound,'chelnov.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@chelnov_char,'chelnov.zip',1)) then exit;
+        convert_chars;
+        //tiles
+        if not(cargar_roms(@memoria_temp[0],@chelnov_tiles,'chelnov.zip',0)) then exit;
+        convert_tiles(1,1);
+        //sprites
+        if not(cargar_roms(@memoria_temp[0],@chelnov_sprites,'chelnov.zip',0)) then exit;
+        convert_tiles(2,2);
+        //Paleta
+        if not(cargar_roms(@memoria_temp[0],@chelnov_proms,'chelnov.zip',0)) then exit;
+        //DIP
+        marcade.dswa:=$ff7f;
+        marcade.dswa_val:=@chelnov_dip;
+        i8751_coin_mask:=$e0;
+        rom[$062a shr 1]:=$4e71;  // hangs waiting on i8751 int
+        i8751_write_proc:=chelnov_i8751_w;
+      end;
+end;
+//poner la paleta
+for f:=0 to $3ff do begin
+    // red
+    ctemp1:=(memoria_temp[f] shr 0) and $01;
+    ctemp2:=(memoria_temp[f] shr 1) and $01;
+    ctemp3:=(memoria_temp[f] shr 2) and $01;
+    ctemp4:=(memoria_temp[f] shr 3) and $01;
+    colores[f].r:=$e*ctemp1+$1f*ctemp2+$43*ctemp3+$8f*ctemp4;
+    // green
+    ctemp1:=(memoria_temp[f] shr 4) and $01;
+    ctemp2:=(memoria_temp[f] shr 5) and $01;
+    ctemp3:=(memoria_temp[f] shr 6) and $01;
+    ctemp4:=(memoria_temp[f] shr 7) and $01;
+    colores[f].g:=$e*ctemp1+$1f*ctemp2+$43*ctemp3+$8f*ctemp4;
+    // blue
+    ctemp1:=(memoria_temp[f+$400] shr 0) and $01;
+    ctemp2:=(memoria_temp[f+$400] shr 1) and $01;
+    ctemp3:=(memoria_temp[f+$400] shr 2) and $01;
+    ctemp4:=(memoria_temp[f+$400] shr 3) and $01;
+    colores[f].b:=$e*ctemp1+$1f*ctemp2+$43*ctemp3+$8f*ctemp4;
+end;
+set_pal(colores,$400);
+//final
+reset_karnov;
+iniciar_karnov:=true;
+end;
+
+procedure Cargar_karnov;
+begin
+llamadas_maquina.bucle_general:=karnov_principal;
+llamadas_maquina.iniciar:=iniciar_karnov;
+llamadas_maquina.reset:=reset_karnov;
+end;
+
 
 end.

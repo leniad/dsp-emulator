@@ -9,7 +9,6 @@ procedure Cargar_irem_m72;
 procedure irem_m72_principal;
 function iniciar_irem_m72:boolean;
 procedure reset_irem_m72;
-procedure cerrar_irem_m72;
 //RType
 function irem_m72_getbyte(direccion:dword):byte;
 procedure irem_m72_putbyte(direccion:dword;valor:byte);
@@ -116,7 +115,6 @@ var
 procedure Cargar_irem_m72;
 begin
 llamadas_maquina.iniciar:=iniciar_irem_m72;
-llamadas_maquina.cerrar:=cerrar_irem_m72;
 llamadas_maquina.reset:=reset_irem_m72;
 llamadas_maquina.fps_max:=55.017606;
 llamadas_maquina.bucle_general:=irem_m72_principal;
@@ -245,22 +243,18 @@ case main_vars.tipo_maquina of
     end;
 end;
 //Sound Chips
-YM2151_Init(0,3579545,nil,ym2151_snd_irq);
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 freemem(memoria_temp);
 reset_irem_m72;
 iniciar_irem_m72:=true;
-end;
-
-procedure cerrar_irem_m72;
-begin
-YM2151_Close(0);
 end;
 
 procedure reset_irem_m72;
 begin
  main_nec.reset;
  snd_z80.reset;
- YM2151_Reset(0);
+ ym2151_0.reset;
  case main_vars.tipo_maquina of
   190,191:dac_0.reset;
  end;
@@ -853,7 +847,7 @@ end;
 function irem_m72_snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $1:irem_m72_snd_inbyte:=YM2151_status_port_read(0);
+  $1:irem_m72_snd_inbyte:=ym2151_0.status;
   $2:irem_m72_snd_inbyte:=sound_latch;
 end;
 end;
@@ -861,8 +855,8 @@ end;
 procedure irem_m72_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-  $0:YM2151_register_port_write(0,valor);
-  $1:YM2151_data_port_write(0,valor);
+  $0:ym2151_0.reg(valor);
+  $1:ym2151_0.write(valor);
   $6:begin
       snd_irq_vector:=snd_irq_vector or $20;
       timer[timer_sound].enabled:=true;
@@ -873,7 +867,7 @@ end;
 function rtype2_snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $1:rtype2_snd_inbyte:=YM2151_status_port_read(0);
+  $1:rtype2_snd_inbyte:=ym2151_0.status;
   $80:rtype2_snd_inbyte:=sound_latch;
   $84:rtype2_snd_inbyte:=mem_dac[sample_addr];
 end;
@@ -882,8 +876,8 @@ end;
 procedure rtype2_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-  $0:YM2151_register_port_write(0,valor);
-  $1:YM2151_data_port_write(0,valor);
+  $0:ym2151_0.reg(valor);
+  $1:ym2151_0.write(valor);
   $80:begin
         sample_addr:=sample_addr shr 5;
         sample_addr:=(sample_addr and $ff00) or valor;
@@ -914,17 +908,17 @@ end;
 
 procedure rtype2_perodic_int;
 begin
-  snd_z80.pedir_nmi:=PULSE_LINE;
+  snd_z80.change_nmi(PULSE_LINE);
 end;
 
 procedure irem_m72_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure rtype2_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   dac_0.update;
 end;
 

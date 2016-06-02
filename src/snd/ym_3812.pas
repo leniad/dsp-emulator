@@ -1,10 +1,9 @@
 unit ym_3812;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}fmopl,timer_engine,sound_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}fmopl,timer_engine,sound_engine,main_engine;
 
 type
-  IRQ_Handler=procedure (irqstate:byte);
   ym3812_chip=class(snd_chip_class)
      constructor create(type_:byte;clock:dword;amp:single=1);
      destructor free;
@@ -16,7 +15,7 @@ type
      function status:byte;
      function read:byte;
      procedure timer_handler(timer_num:byte;period:single);
-     procedure change_irq_calls(irq_func:IRQ_Handler);
+     procedure change_irq_calls(irq_func:cpu_outport_call);
   private
      OPL:pfm_opl;
      num,timer1,timer2:byte;
@@ -77,7 +76,7 @@ begin
   chips_total:=chips_total-1;
 end;
 
-procedure ym3812_chip.change_irq_calls(irq_func:IRQ_Handler);
+procedure ym3812_chip.change_irq_calls(irq_func:cpu_outport_call);
 begin
   self.OPL.IRQ_Handler:=irq_func;
 end;

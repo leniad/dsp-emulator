@@ -964,7 +964,7 @@ main_lr.init_sound(gameboy_sound_update);
 init_timer(0,4194304/16384,gb_main_timer,true);
 gb_timer:=init_timer(0,4194304/4096,gb_prog_timer,false);
 //Sound Chips
-gameboy_sound_ini(44100);
+gameboy_sound_ini(freq_base_audio);
 //cargar roms
 hay_nvram:=false;
 //final

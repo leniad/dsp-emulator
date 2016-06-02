@@ -101,7 +101,7 @@ snd_z80:=cpu_z80.create(3579545,256);
 snd_z80.change_ram_calls(gradius3_snd_getbyte,gradius3_snd_putbyte);
 snd_z80.init_sound(gradius3_sound_update);
 //Sound Chips
-YM2151_Init(0,3579545,nil,nil);
+ym2151_0:=ym2151_chip.create(3579545);
 getmem(k007232_rom,$80000);
 if not(cargar_roms(k007232_rom,@gradius3_k007232,'gradius3.zip',0)) then exit;
 k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,gradius3_k007232_cb);
@@ -129,7 +129,6 @@ end;
 
 procedure cerrar_gradius3;
 begin
-YM2151_close(0);
 if k007232_rom<>nil then freemem(k007232_rom);
 if sprite_rom<>nil then freemem(sprite_rom);
 k007232_rom:=nil;
@@ -143,7 +142,7 @@ begin
  sub_m68000.pedir_halt:=ASSERT_LINE;
  snd_z80.reset;
  k052109_0.reset;
- YM2151_reset(0);
+ ym2151_0.reset;
  k051960_0.reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -383,7 +382,7 @@ case direccion of
   0..$efff,$f800..$ffff:gradius3_snd_getbyte:=mem_snd[direccion];
   $f010:gradius3_snd_getbyte:=sound_latch;
   $f020..$f02d:gradius3_snd_getbyte:=k007232_0.read(direccion and $f);
-  $f031:gradius3_snd_getbyte:=YM2151_status_port_read(0);
+  $f031:gradius3_snd_getbyte:=ym2151_0.status;
 end;
 end;
 
@@ -393,15 +392,15 @@ if direccion<$f000 then exit;
 case direccion of
   $f000:k007232_0.set_bank(valor and 3,(valor shr 2) and 3);
   $f020..$f02d:k007232_0.write(direccion and $f,valor);
-  $f030:YM2151_register_port_write(0,valor);
-  $f031:YM2151_data_port_write(0,valor);
+  $f030:ym2151_0.reg(valor);
+  $f031:ym2151_0.write(valor);
   $f800..$ffff:mem_snd[direccion]:=valor;
 end;
 end;
 
 procedure gradius3_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   k007232_0.update;
 end;
 

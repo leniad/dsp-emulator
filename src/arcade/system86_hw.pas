@@ -199,7 +199,7 @@ if main_vars.tipo_maquina<>124 then main_m6800.init_sound(sound_update)
   else main_m6800.init_sound(sound_update_adpcm);
 //Sound
 namco_sound_init(8,true);
-YM2151_Init(0,3579580,nil,nil,0.4);
+ym2151_0:=ym2151_chip.create(3579580,0.4);
 case main_vars.tipo_maquina of
     124:begin
             //cargar roms main CPU
@@ -312,7 +312,6 @@ end;
 
 procedure cerrar_system86;
 begin
-YM2151_Close(0);
 if main_vars.tipo_maquina=124 then namco_63701x_close;
 end;
 
@@ -324,7 +323,7 @@ begin
  snd_m6809.reset;
  main_m6800.reset;
  namco_sound_reset;
- YM2151_reset(0);
+ ym2151_0.reset;
  if main_vars.tipo_maquina=124 then namco_63701x_reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -525,7 +524,7 @@ while EmuStatus=EsRuning do begin
         update_video_system86;
         if irq_enable then main_m6809.change_irq(ASSERT_LINE);
         if irq_sub_enable then snd_m6809.change_irq(ASSERT_LINE);
-        main_m6800.pedir_irq:=HOLD_LINE;
+        main_m6800.change_irq(HOLD_LINE);
         if copy_sprites then copy_sprites_hw;
     end;
   end;
@@ -665,7 +664,7 @@ begin
 case direccion of
   $0..$1f:rthunder_mcu_getbyte:=main_m6800.m6803_internal_reg_r(direccion);
   $1000..$13ff:rthunder_mcu_getbyte:=namcos1_cus30_r(direccion and $3ff);
-  $2001:rthunder_mcu_getbyte:=YM2151_status_port_read(0);
+  $2001:rthunder_mcu_getbyte:=ym2151_0.status;
   $2020:rthunder_mcu_getbyte:=marcade.in0;
   $2021:rthunder_mcu_getbyte:=marcade.in1;
   $2030:rthunder_mcu_getbyte:=$ff;
@@ -679,8 +678,8 @@ begin
 case direccion of
   $0..$1f:main_m6800.m6803_internal_reg_w(direccion,valor);
   $1000..$13ff:namcos1_cus30_w(direccion and $3ff,valor);
-  $2000:YM2151_register_port_write(0,valor);
-  $2001:YM2151_data_port_write(0,valor);
+  $2000:ym2151_0.reg(valor);
+  $2001:ym2151_0.write(valor);
   $4000..$bfff,$f000..$ffff:exit;
 end;
 mem_snd[direccion]:=valor;
@@ -720,12 +719,12 @@ end;
 
 procedure sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure sound_update_adpcm;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   namco_63701x_update;
 end;
 

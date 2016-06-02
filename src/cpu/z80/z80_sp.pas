@@ -1,7 +1,7 @@
 unit z80_sp;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,nz80,z80daisy,vars_hide;
+uses main_engine,nz80,z80daisy,vars_hide;
 
 type
  tretraso=procedure(direccion:word);
@@ -11,7 +11,7 @@ type
       procedure run(maximo:integer);
       procedure change_retraso_call(retraso:tretraso;retraso_puerto:tretraso_puerto);
       function get_pc:word;
-    protected
+    private
       retraso:tretraso;
       retraso_puerto:tretraso_puerto;
       procedure call_irq;
@@ -71,7 +71,7 @@ end;
 
 procedure cpu_z80_sp.call_irq;
 var
-  posicion:parejas;
+  posicion:word;
 begin
 self.halt:=false;
 if not(r.iff1) then exit; //se esta ejecutando otra
@@ -91,18 +91,15 @@ Case r.im of
               self.contador:=self.contador+13;
             end;
         2:begin //19t
-                if self.daisy then posicion.l:=z80daisy_ack
-                    else posicion.l:=self.im2_lo;
-                posicion.h:=r.i;
-                r.pc:=self.getbyte(posicion.w)+(self.getbyte(posicion.w+1) shl 8);
+                if self.daisy then posicion:=z80daisy_ack
+                    else posicion:=self.im2_lo;
+                posicion:=posicion or (r.i shl 8);
+                r.pc:=self.getbyte(posicion)+(self.getbyte(posicion+1) shl 8);
                 self.contador:=self.contador+19;
         end;
 end;
 self.pedir_irq:=CLEAR_LINE;
 end;
-
-//Functions
-{$I z80.inc}
 
 procedure cpu_z80_sp.run(maximo:integer);
 var
@@ -137,8 +134,8 @@ case instruccion of
               inc(self.contador,2);
               inc(r.bc.w);
             end;
-        $04:inc_8(self.r,@r.bc.h); {inc B >4t<}
-        $05:dec_8(self.r,@r.bc.h); {dec B >4t<}
+        $04:inc_8(@r.bc.h); {inc B >4t<}
+        $05:dec_8(@r.bc.h); {dec B >4t<}
         $06:begin {ld B,n >7t<}
                 r.bc.h:=spec_getbyte(r.pc);
                 inc(r.pc);
@@ -161,15 +158,15 @@ case instruccion of
             end;
         $09:begin {add HL,BC >11t<}
                 inc(self.contador,7);
-                add_16(self.r,@r.hl,r.bc.w);
+                add_16(@r.hl.w,r.bc.w);
             end;
         $0a:r.a:=spec_getbyte(r.bc.w); {ld A,(BC) >7t<}
         $0b:begin {dec BC >6t<}
                 inc(self.contador,2);
                 dec(r.bc.w);
             end;
-        $0c:inc_8(self.r,@r.bc.l); {inc C >4t<}
-        $0d:dec_8(self.r,@r.bc.l); {dec C >4t<}
+        $0c:inc_8(@r.bc.l); {inc C >4t<}
+        $0d:dec_8(@r.bc.l); {dec C >4t<}
         $0e:begin {ld C,n >7t<}
                 r.bc.l:=spec_getbyte(r.pc);
                 inc(r.pc);
@@ -206,8 +203,8 @@ case instruccion of
                 inc(self.contador,2);
                 inc(r.de.w);
             end;
-        $14:inc_8(self.r,@r.de.h); {inc D >4t<}
-        $15:dec_8(self.r,@r.de.h); {dec D >4t<}
+        $14:inc_8(@r.de.h); {inc D >4t<}
+        $15:dec_8(@r.de.h); {dec D >4t<}
         $16:begin {ld D,n >7t<}
                 r.de.h:=spec_getbyte(r.pc);
                 inc(r.pc);
@@ -233,15 +230,15 @@ case instruccion of
             end;
         $19:begin  {add HL,DE >11t<}
                 inc(self.contador,7);
-                add_16(self.r,@r.hl,r.de.w);
+                add_16(@r.hl.w,r.de.w);
             end;
         $1a:r.a:=spec_getbyte(r.de.w); {ld A,(DE) >7t<}
         $1b:begin {dec DE >6t<}
                 inc(self.contador,2);
                 dec(r.de.w);
             end;
-        $1c:inc_8(self.r,@r.de.l); {inc E >4t<}
-        $1d:dec_8(self.r,@r.de.l); {dec E >4t<}
+        $1c:inc_8(@r.de.l); {inc E >4t<}
+        $1d:dec_8(@r.de.l); {dec E >4t<}
         $1e:begin {ld E,n >7t<}
                 r.de.l:=spec_getbyte(r.pc);
                 inc(r.pc);
@@ -283,8 +280,8 @@ case instruccion of
                 inc(self.contador,2);
                 inc(r.hl.w);
             end;
-        $24:inc_8(self.r,@r.hl.h); {inc H >4t<}
-        $25:dec_8(self.r,@r.hl.h); {dec H >4t<}
+        $24:inc_8(@r.hl.h); {inc H >4t<}
+        $25:dec_8(@r.hl.h); {dec H >4t<}
         $26:begin {ld H,n >7t<}
                 r.hl.h:=spec_getbyte(r.pc);
                 inc(r.pc);
@@ -322,7 +319,7 @@ case instruccion of
             end;
         $29:begin  {add HL,HL >11t<}
                 inc(self.contador,7);
-                add_16(self.r,@r.hl,r.hl.w);
+                add_16(@r.hl.w,r.hl.w);
             end;
         $2a:begin  {ld HL,(nn) >16t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -335,8 +332,8 @@ case instruccion of
                 inc(self.contador,2);
                 dec(r.hl.w);
             end;
-        $2c:inc_8(self.r,@r.hl.l); {inc L >4t<}
-        $2d:dec_8(self.r,@r.hl.l); {dec L >4t<}
+        $2c:inc_8(@r.hl.l); {inc L >4t<}
+        $2d:dec_8(@r.hl.l); {dec L >4t<}
         $2e:begin {ld L,n >7t<}
                 r.hl.l:=spec_getbyte(r.pc);
                 inc(r.pc);
@@ -377,13 +374,13 @@ case instruccion of
         $34:begin  {inc (HL) >11t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                inc_8(self.r,@temp);
+                inc_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
         $35:begin  {dec (HL) >11t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                dec_8(self.r,@temp);
+                dec_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
         $36:begin {ld (HL),n >10t<}
@@ -412,7 +409,7 @@ case instruccion of
             end;
         $39:begin {add HL,SP >11t<}
                 inc(self.contador,7);
-                add_16(self.r,@r.hl,r.sp);
+                add_16(@r.hl.w,r.sp);
             end;
         $3a:begin {ld A,(nn) >13<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -424,8 +421,8 @@ case instruccion of
               inc(self.contador,2);
               dec(r.sp);
            end;
-        $3c:inc_8(self.r,@r.a); {inc A >4t<}
-        $3d:dec_8(self.r,@r.a); {dec A >4t<}
+        $3c:inc_8(@r.a); {inc A >4t<}
+        $3d:dec_8(@r.a); {dec A >4t<}
         $3e:begin {ld A,n >7t<}
                 r.a:=spec_getbyte(r.pc);
                 inc(r.pc);
@@ -501,53 +498,53 @@ case instruccion of
         $7d:r.a:=r.hl.l; {ld A,L >4t<}
         $7e:r.a:=spec_getbyte(r.hl.w); {ld A,(HL) >7t<}
         {'$'7f: igual que el nop ld A,A}
-        $80:add_8(self.r,r.bc.h); {add A,B >4t<}
-        $81:add_8(self.r,r.bc.l); {add A,C >4t<}
-        $82:add_8(self.r,r.de.h); {add A,D >4t<}
-        $83:add_8(self.r,r.de.l); {add A,E >4t<}
-        $84:add_8(self.r,r.hl.h); {add A,H >4t<}
-        $85:add_8(self.r,r.hl.l); {add A,L >4t<}
-        $86:add_8(self.r,spec_getbyte(r.hl.w));  {add A,(HL) >7t<}
-        $87:add_8(self.r,r.a); {add A,A >4t<}
-        $88:adc_8(self.r,r.bc.h); {adc A,B >4t<}
-        $89:adc_8(self.r,r.bc.l); {adc A,C >4t<}
-        $8a:adc_8(self.r,r.de.h); {adc A,D >4t<}
-        $8b:adc_8(self.r,r.de.l); {adc A,E >4t<}
-        $8c:adc_8(self.r,r.hl.h); {adc A,H >4t<}
-        $8d:adc_8(self.r,r.hl.l); {adc A,L >4t<}
-        $8e:adc_8(self.r,spec_getbyte(r.hl.w)); {adc A,(HL) >7t<}
-        $8f:adc_8(self.r,r.a); {adc A,A >4t<}
-        $90:sub_8(self.r,r.bc.h); {sub B >4t<}
-        $91:sub_8(self.r,r.bc.l); {sub C >4t<}
-        $92:sub_8(self.r,r.de.h); {sub D >4t<}
-        $93:sub_8(self.r,r.de.l); {sub E >4t<}
-        $94:sub_8(self.r,r.hl.h); {sub H >4t<}
-        $95:sub_8(self.r,r.hl.l); {sub L >4t<}
-        $96:sub_8(self.r,spec_getbyte(r.hl.w)); {sub (HL) >4t<}
-        $97:sub_8(self.r,r.a); {sub A  >4t<}
-        $98:sbc_8(self.r,r.bc.h); {sbc A,B >4t<}
-        $99:sbc_8(self.r,r.bc.l); {sbc A,C >4t<}
-        $9a:sbc_8(self.r,r.de.h); {sbc A,D >4t<}
-        $9b:sbc_8(self.r,r.de.l); {sbc A,E >4t<}
-        $9c:sbc_8(self.r,r.hl.h); {sbc A,H >4t<}
-        $9d:sbc_8(self.r,r.hl.l); {sbc A,L >4t<}
-        $9e:sbc_8(self.r,spec_getbyte(r.hl.w)); {sbc A,(HL) >7t<}
-        $9f:sbc_8(self.r,r.a); {sbc A,A >4t<}
-        $a0:and_a(self.r,r.bc.h);  {and A,B >4t<}
-        $a1:and_a(self.r,r.bc.l);  {and A,C >4t<}
-        $a2:and_a(self.r,r.de.h);  {and A,D >4t<}
-        $a3:and_a(self.r,r.de.l); {and A,E >4t<}
-        $a4:and_a(self.r,r.hl.h); {and A,H >4t<}
-        $a5:and_a(self.r,r.hl.l); {and A,L >4t<}
-        $a6:and_a(self.r,spec_getbyte(r.hl.w)); {and A,(HL) >7t<}
-        $a7:and_a(self.r,r.a); {and A,A >4t<}
-        $a8:xor_a(self.r,r.bc.h); {xor A,B >4t<}
-        $a9:xor_a(self.r,r.bc.l); {xor A,C >4t<}
-        $aa:xor_a(self.r,r.de.h); {xor A,D >4t<}
-        $ab:xor_a(self.r,r.de.l); {xor A,E >4t<}
-        $ac:xor_a(self.r,r.hl.h); {xor A,H >4t<}
-        $ad:xor_a(self.r,r.hl.l); {xor A,L >4t<}
-        $ae:xor_a(self.r,spec_getbyte(r.hl.w)); {xor A,(HL) >7t<}
+        $80:add_8(r.bc.h); {add A,B >4t<}
+        $81:add_8(r.bc.l); {add A,C >4t<}
+        $82:add_8(r.de.h); {add A,D >4t<}
+        $83:add_8(r.de.l); {add A,E >4t<}
+        $84:add_8(r.hl.h); {add A,H >4t<}
+        $85:add_8(r.hl.l); {add A,L >4t<}
+        $86:add_8(spec_getbyte(r.hl.w));  {add A,(HL) >7t<}
+        $87:add_8(r.a); {add A,A >4t<}
+        $88:adc_8(r.bc.h); {adc A,B >4t<}
+        $89:adc_8(r.bc.l); {adc A,C >4t<}
+        $8a:adc_8(r.de.h); {adc A,D >4t<}
+        $8b:adc_8(r.de.l); {adc A,E >4t<}
+        $8c:adc_8(r.hl.h); {adc A,H >4t<}
+        $8d:adc_8(r.hl.l); {adc A,L >4t<}
+        $8e:adc_8(spec_getbyte(r.hl.w)); {adc A,(HL) >7t<}
+        $8f:adc_8(r.a); {adc A,A >4t<}
+        $90:sub_8(r.bc.h); {sub B >4t<}
+        $91:sub_8(r.bc.l); {sub C >4t<}
+        $92:sub_8(r.de.h); {sub D >4t<}
+        $93:sub_8(r.de.l); {sub E >4t<}
+        $94:sub_8(r.hl.h); {sub H >4t<}
+        $95:sub_8(r.hl.l); {sub L >4t<}
+        $96:sub_8(spec_getbyte(r.hl.w)); {sub (HL) >4t<}
+        $97:sub_8(r.a); {sub A  >4t<}
+        $98:sbc_8(r.bc.h); {sbc A,B >4t<}
+        $99:sbc_8(r.bc.l); {sbc A,C >4t<}
+        $9a:sbc_8(r.de.h); {sbc A,D >4t<}
+        $9b:sbc_8(r.de.l); {sbc A,E >4t<}
+        $9c:sbc_8(r.hl.h); {sbc A,H >4t<}
+        $9d:sbc_8(r.hl.l); {sbc A,L >4t<}
+        $9e:sbc_8(spec_getbyte(r.hl.w)); {sbc A,(HL) >7t<}
+        $9f:sbc_8(r.a); {sbc A,A >4t<}
+        $a0:and_a(r.bc.h);  {and A,B >4t<}
+        $a1:and_a(r.bc.l);  {and A,C >4t<}
+        $a2:and_a(r.de.h);  {and A,D >4t<}
+        $a3:and_a(r.de.l); {and A,E >4t<}
+        $a4:and_a(r.hl.h); {and A,H >4t<}
+        $a5:and_a(r.hl.l); {and A,L >4t<}
+        $a6:and_a(spec_getbyte(r.hl.w)); {and A,(HL) >7t<}
+        $a7:and_a(r.a); {and A,A >4t<}
+        $a8:xor_a(r.bc.h); {xor A,B >4t<}
+        $a9:xor_a(r.bc.l); {xor A,C >4t<}
+        $aa:xor_a(r.de.h); {xor A,D >4t<}
+        $ab:xor_a(r.de.l); {xor A,E >4t<}
+        $ac:xor_a(r.hl.h); {xor A,H >4t<}
+        $ad:xor_a(r.hl.l); {xor A,L >4t<}
+        $ae:xor_a(spec_getbyte(r.hl.w)); {xor A,(HL) >7t<}
         $af:begin {xor A,A >4t<}
                 r.a:=0;
                 r.f.s:=false;
@@ -559,22 +556,22 @@ case instruccion of
                 r.f.n:=false;
                 r.f.c:=false;
              end;
-        $b0:or_a(self.r,r.bc.h); {or B >4t<}
-        $b1:or_a(self.r,r.bc.l); {or C >4t<}
-        $b2:or_a(self.r,r.de.h); {or D >4t<}
-        $b3:or_a(self.r,r.de.l); {or E >4t<}
-        $b4:or_a(self.r,r.hl.h); {or H >4t<}
-        $b5:or_a(self.r,r.hl.l); {or L >4t<}
-        $b6:or_a(self.r,spec_getbyte(r.hl.w));   {or (HL) >7t<}
-        $b7:or_a(self.r,r.a); {or A >4t<}
-        $b8:cp_a(self.r,r.bc.h); {cp B >4t<}
-        $b9:cp_a(self.r,r.bc.l); {cp C >4t<}
-        $ba:cp_a(self.r,r.de.h); {cp D >4t<}
-        $bb:cp_a(self.r,r.de.l); {cp E >4t<}
-        $bc:cp_a(self.r,r.hl.h); {cp H >4t<}
-        $bd:cp_a(self.r,r.hl.l); {cp L >4t<}
-        $be:cp_a(self.r,spec_getbyte(r.hl.w)); {cp (HL) >7t<}
-        $bf:cp_a(self.r,r.a); {cp A >4t<}
+        $b0:or_a(r.bc.h); {or B >4t<}
+        $b1:or_a(r.bc.l); {or C >4t<}
+        $b2:or_a(r.de.h); {or D >4t<}
+        $b3:or_a(r.de.l); {or E >4t<}
+        $b4:or_a(r.hl.h); {or H >4t<}
+        $b5:or_a(r.hl.l); {or L >4t<}
+        $b6:or_a(spec_getbyte(r.hl.w));   {or (HL) >7t<}
+        $b7:or_a(r.a); {or A >4t<}
+        $b8:cp_a(r.bc.h); {cp B >4t<}
+        $b9:cp_a(r.bc.l); {cp C >4t<}
+        $ba:cp_a(r.de.h); {cp D >4t<}
+        $bb:cp_a(r.de.l); {cp E >4t<}
+        $bc:cp_a(r.hl.h); {cp H >4t<}
+        $bd:cp_a(r.hl.l); {cp L >4t<}
+        $be:cp_a(spec_getbyte(r.hl.w)); {cp (HL) >7t<}
+        $bf:cp_a(r.a); {cp A >4t<}
         $c0:begin {ret NZ >5t o 10t<}
               inc(self.contador);
               if not(r.f.z) then begin
@@ -620,7 +617,7 @@ case instruccion of
         $c6:begin {add A,n >7t<}
                 temp:=spec_getbyte(r.pc);
                 inc(r.pc);
-                add_8(self.r,temp);
+                add_8(temp);
              end;
         $c7:begin  {rst 00H >11t<}
                 inc(self.contador);
@@ -674,7 +671,7 @@ case instruccion of
         $ce:begin   {adc A,n >7t<}
                 temp:=spec_getbyte(r.pc);
                 inc(r.pc);
-                adc_8(self.r,temp);
+                adc_8(temp);
              end;
         $cf:begin  {rst 08H >11t<}
                 inc(self.contador);
@@ -729,7 +726,7 @@ case instruccion of
         $d6:begin {sub n >7t<}
                 temp:=spec_getbyte(r.pc);
                 inc(r.pc);
-                sub_8(self.r,temp);
+                sub_8(temp);
              end;
         $d7:begin  {rst 10H >11t<}
                 inc(self.contador);
@@ -785,7 +782,7 @@ case instruccion of
         $de:begin {sbc A,n >7t<}
                 temp:=spec_getbyte(r.pc);
                 inc(r.pc);
-                sbc_8(self.r,temp);
+                sbc_8(temp);
             end;
         $df:begin  {rst 18H >11t<}
                 inc(self.contador);
@@ -845,7 +842,7 @@ case instruccion of
         $e6:begin {and A,n >7t<}
                 temp:=spec_getbyte(r.pc);
                 inc(r.pc);
-                and_a(self.r,temp);
+                and_a(temp);
              end;
         $e7:begin  {rst 20H >11t<}
                 inc(self.contador);
@@ -890,7 +887,7 @@ case instruccion of
         $ee:begin  {xor A,n >7t<}
                 temp:=spec_getbyte(r.pc);
                 inc(r.pc);
-                xor_a(self.r,temp);
+                xor_a(temp);
               end;
         $ef:begin  {rst 28H >11t<}
                 inc(self.contador);
@@ -962,7 +959,7 @@ case instruccion of
         $f6:begin {or n >7t<}
                 temp:=spec_getbyte(r.pc);
                 inc(r.pc);
-                or_a(self.r,temp);
+                or_a(temp);
              end;
         $f7:begin  {rst 30H >11t<}
                 inc(self.contador);
@@ -1010,7 +1007,7 @@ case instruccion of
         $fe:begin  {cp n >7t<}
                 temp:=spec_getbyte(r.pc);
                 inc(r.pc);
-                cp_a(self.r,temp);
+                cp_a(temp);
             end;
         $ff:begin  {rst 38H >11t<}
                 inc(self.contador);
@@ -1034,206 +1031,206 @@ instruccion:=self.getbyte(r.pc);
 inc(r.pc);
 r.r:=((r.r+1) and $7f) or (r.r and $80);
 case instruccion of
-        $00:rlc_8(self.r,@r.bc.h); {rlc B >8t<}
-        $01:rlc_8(self.r,@r.bc.l); {rlc C >8t<}
-        $02:rlc_8(self.r,@r.de.h); {rlc D >8t<}
-        $03:rlc_8(self.r,@r.de.l); {rlc E >8t<}
-        $04:rlc_8(self.r,@r.hl.h); {rlc H >8t<}
-        $05:rlc_8(self.r,@r.hl.l); {rlc L >8t<}
+        $00:rlc_8(@r.bc.h); {rlc B >8t<}
+        $01:rlc_8(@r.bc.l); {rlc C >8t<}
+        $02:rlc_8(@r.de.h); {rlc D >8t<}
+        $03:rlc_8(@r.de.l); {rlc E >8t<}
+        $04:rlc_8(@r.hl.h); {rlc H >8t<}
+        $05:rlc_8(@r.hl.l); {rlc L >8t<}
         $06:begin {rlc (HL) >15t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                rlc_8(self.r,@temp);
+                rlc_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
-        $07:rlc_8(self.r,@r.a); {rlc A >8t<}
-        $08:rrc_8(self.r,@r.bc.h); {rlc B >8t<}
-        $09:rrc_8(self.r,@r.bc.l); {rlc C >8t<}
-        $0a:rrc_8(self.r,@r.de.h); {rlc D >8t<}
-        $0b:rrc_8(self.r,@r.de.l); {rlc E >8t<}
-        $0c:rrc_8(self.r,@r.hl.h); {rlc H >8t<}
-        $0d:rrc_8(self.r,@r.hl.l); {rlc L >8t<}
+        $07:rlc_8(@r.a); {rlc A >8t<}
+        $08:rrc_8(@r.bc.h); {rlc B >8t<}
+        $09:rrc_8(@r.bc.l); {rlc C >8t<}
+        $0a:rrc_8(@r.de.h); {rlc D >8t<}
+        $0b:rrc_8(@r.de.l); {rlc E >8t<}
+        $0c:rrc_8(@r.hl.h); {rlc H >8t<}
+        $0d:rrc_8(@r.hl.l); {rlc L >8t<}
         $0e:begin {rlc (HL) >15t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                rrc_8(self.r,@temp);
+                rrc_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
-        $0f:rrc_8(self.r,@r.a); {rlc A >8t<}
-        $10:rl_8(self.r,@r.bc.h); {rl B >8t<}
-        $11:rl_8(self.r,@r.bc.l); {rl C >8t<}
-        $12:rl_8(self.r,@r.de.h); {rl D >8t<}
-        $13:rl_8(self.r,@r.de.l); {rl E >8t<}
-        $14:rl_8(self.r,@r.hl.h); {rl H >8t<}
-        $15:rl_8(self.r,@r.hl.l); {rl L >8t<}
+        $0f:rrc_8(@r.a); {rlc A >8t<}
+        $10:rl_8(@r.bc.h); {rl B >8t<}
+        $11:rl_8(@r.bc.l); {rl C >8t<}
+        $12:rl_8(@r.de.h); {rl D >8t<}
+        $13:rl_8(@r.de.l); {rl E >8t<}
+        $14:rl_8(@r.hl.h); {rl H >8t<}
+        $15:rl_8(@r.hl.l); {rl L >8t<}
         $16:begin {rl (HL) >15t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                rl_8(self.r,@temp);
+                rl_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
-        $17:rl_8(self.r,@r.a); {rl A >8t<}
-        $18:rr_8(self.r,@r.bc.h); {rr B >8t<}
-        $19:rr_8(self.r,@r.bc.l); {rr C >8t<}
-        $1a:rr_8(self.r,@r.de.h); {rr D >8t<}
-        $1b:rr_8(self.r,@r.de.l); {rr E >8t<}
-        $1c:rr_8(self.r,@r.hl.h); {rr H >8t<}
-        $1d:rr_8(self.r,@r.hl.l); {rr L >8t<}
+        $17:rl_8(@r.a); {rl A >8t<}
+        $18:rr_8(@r.bc.h); {rr B >8t<}
+        $19:rr_8(@r.bc.l); {rr C >8t<}
+        $1a:rr_8(@r.de.h); {rr D >8t<}
+        $1b:rr_8(@r.de.l); {rr E >8t<}
+        $1c:rr_8(@r.hl.h); {rr H >8t<}
+        $1d:rr_8(@r.hl.l); {rr L >8t<}
         $1e:begin {rr (HL) >15t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                rr_8(self.r,@temp);
+                rr_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
-        $1f:rr_8(self.r,@r.a); {rr A >8t<}
-        $20:sla_8(self.r,@r.bc.h); {sla B >8t<}
-        $21:sla_8(self.r,@r.bc.l); {sla C >8t<}
-        $22:sla_8(self.r,@r.de.h); {sla D >8t<}
-        $23:sla_8(self.r,@r.de.l); {sla E >8t<}
-        $24:sla_8(self.r,@r.hl.h); {sla H >8t<}
-        $25:sla_8(self.r,@r.hl.l); {sla L >8t<}
+        $1f:rr_8(@r.a); {rr A >8t<}
+        $20:sla_8(@r.bc.h); {sla B >8t<}
+        $21:sla_8(@r.bc.l); {sla C >8t<}
+        $22:sla_8(@r.de.h); {sla D >8t<}
+        $23:sla_8(@r.de.l); {sla E >8t<}
+        $24:sla_8(@r.hl.h); {sla H >8t<}
+        $25:sla_8(@r.hl.l); {sla L >8t<}
         $26:begin {sla (HL) >15t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                sla_8(self.r,@temp);
+                sla_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
-        $27:sla_8(self.r,@r.a); {sla A >8t<}
-        $28:sra_8(self.r,@r.bc.h); {sra B >8t<}
-        $29:sra_8(self.r,@r.bc.l); {sra C >8t<}
-        $2a:sra_8(self.r,@r.de.h); {sra D >8t<}
-        $2b:sra_8(self.r,@r.de.l); {sra E >8t<}
-        $2c:sra_8(self.r,@r.hl.h); {sra H >8t<}
-        $2d:sra_8(self.r,@r.hl.l); {sra L >8t<}
+        $27:sla_8(@r.a); {sla A >8t<}
+        $28:sra_8(@r.bc.h); {sra B >8t<}
+        $29:sra_8(@r.bc.l); {sra C >8t<}
+        $2a:sra_8(@r.de.h); {sra D >8t<}
+        $2b:sra_8(@r.de.l); {sra E >8t<}
+        $2c:sra_8(@r.hl.h); {sra H >8t<}
+        $2d:sra_8(@r.hl.l); {sra L >8t<}
         $2e:begin {sra (HL) >15t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                sra_8(self.r,@temp);
+                sra_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
-        $2f:sra_8(self.r,@r.a); {sra A >8t<}
-        $30:sll_8(self.r,@r.bc.h); {sll B >8t<}
-        $31:sll_8(self.r,@r.bc.l); {sll C >8t<}
-        $32:sll_8(self.r,@r.de.h); {sll D >8t<}
-        $33:sll_8(self.r,@r.de.l); {sll E >8t<}
-        $34:sll_8(self.r,@r.hl.h); {sll H >8t<}
-        $35:sll_8(self.r,@r.hl.l); {sll L >8t<}
+        $2f:sra_8(@r.a); {sra A >8t<}
+        $30:sll_8(@r.bc.h); {sll B >8t<}
+        $31:sll_8(@r.bc.l); {sll C >8t<}
+        $32:sll_8(@r.de.h); {sll D >8t<}
+        $33:sll_8(@r.de.l); {sll E >8t<}
+        $34:sll_8(@r.hl.h); {sll H >8t<}
+        $35:sll_8(@r.hl.l); {sll L >8t<}
         $36:begin  {sll (HL)}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                sll_8(self.r,@temp);
+                sll_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
-        $37:sll_8(self.r,@r.a); {sll a >8t<}
-        $38:srl_8(self.r,@r.bc.h); {srl B >8t<}
-        $39:srl_8(self.r,@r.bc.l); {srl C >8t<}
-        $3a:srl_8(self.r,@r.de.h); {srl D >8t<}
-        $3b:srl_8(self.r,@r.de.l); {srl E >8t<}
-        $3c:srl_8(self.r,@r.hl.h); {srl H >8t<}
-        $3d:srl_8(self.r,@r.hl.l); {srl L >8t<}
+        $37:sll_8(@r.a); {sll a >8t<}
+        $38:srl_8(@r.bc.h); {srl B >8t<}
+        $39:srl_8(@r.bc.l); {srl C >8t<}
+        $3a:srl_8(@r.de.h); {srl D >8t<}
+        $3b:srl_8(@r.de.l); {srl E >8t<}
+        $3c:srl_8(@r.hl.h); {srl H >8t<}
+        $3d:srl_8(@r.hl.l); {srl L >8t<}
         $3e:begin  {srl (HL) >15t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                srl_8(self.r,@temp);
+                srl_8(@temp);
                 spec_putbyte(r.hl.w,temp);
             end;
-        $3f:srl_8(self.r,@r.a); {srl a >8t<}
-        $40:bit_8(self.r,0,r.bc.h); {bit 0,B >8t<}
-        $41:bit_8(self.r,0,r.bc.l); {bit 0,C >8t<}
-        $42:bit_8(self.r,0,r.de.h); {bit 0,D >8t<}
-        $43:bit_8(self.r,0,r.de.l); {bit 0,E >8t<}
-        $44:bit_8(self.r,0,r.hl.h); {bit 0,H >8t<}
-        $45:bit_8(self.r,0,r.hl.l); {bit 0,L >8t<}
+        $3f:srl_8(@r.a); {srl a >8t<}
+        $40:bit_8(0,r.bc.h); {bit 0,B >8t<}
+        $41:bit_8(0,r.bc.l); {bit 0,C >8t<}
+        $42:bit_8(0,r.de.h); {bit 0,D >8t<}
+        $43:bit_8(0,r.de.l); {bit 0,E >8t<}
+        $44:bit_8(0,r.hl.h); {bit 0,H >8t<}
+        $45:bit_8(0,r.hl.l); {bit 0,L >8t<}
         $46:begin  {bit 0,(HL) >12t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                bit_8(self.r,0,temp)
+                bit_8(0,temp)
             end;
-        $47:bit_8(self.r,0,r.a); {bit 0,A >8t<}
-        $48:bit_8(self.r,1,r.bc.h); {bit 1,B >8t<}
-        $49:bit_8(self.r,1,r.bc.l); {bit 1,C >8t<}
-        $4a:bit_8(self.r,1,r.de.h); {bit 1,D >8t<}
-        $4b:bit_8(self.r,1,r.de.l); {bit 1,E >8t<}
-        $4c:bit_8(self.r,1,r.hl.h); {bit 1,H >8t<}
-        $4d:bit_8(self.r,1,r.hl.l); {bit 1,L >8t<}
+        $47:bit_8(0,r.a); {bit 0,A >8t<}
+        $48:bit_8(1,r.bc.h); {bit 1,B >8t<}
+        $49:bit_8(1,r.bc.l); {bit 1,C >8t<}
+        $4a:bit_8(1,r.de.h); {bit 1,D >8t<}
+        $4b:bit_8(1,r.de.l); {bit 1,E >8t<}
+        $4c:bit_8(1,r.hl.h); {bit 1,H >8t<}
+        $4d:bit_8(1,r.hl.l); {bit 1,L >8t<}
         $4e:begin  {bit 1,(HL) >12t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                bit_8(self.r,1,temp)
+                bit_8(1,temp)
             end;
-        $4f:bit_8(self.r,1,r.a); {bit 1,A >8t<}
-        $50:bit_8(self.r,2,r.bc.h); {bit 2,B >8t<}
-        $51:bit_8(self.r,2,r.bc.l); {bit 2,C >8t<}
-        $52:bit_8(self.r,2,r.de.h); {bit 2,D >8t<}
-        $53:bit_8(self.r,2,r.de.l);  {bit 2,E >8t<}
-        $54:bit_8(self.r,2,r.hl.h);  {bit 2,H >8t<}
-        $55:bit_8(self.r,2,r.hl.l);  {bit 2,L >8t<}
+        $4f:bit_8(1,r.a); {bit 1,A >8t<}
+        $50:bit_8(2,r.bc.h); {bit 2,B >8t<}
+        $51:bit_8(2,r.bc.l); {bit 2,C >8t<}
+        $52:bit_8(2,r.de.h); {bit 2,D >8t<}
+        $53:bit_8(2,r.de.l);  {bit 2,E >8t<}
+        $54:bit_8(2,r.hl.h);  {bit 2,H >8t<}
+        $55:bit_8(2,r.hl.l);  {bit 2,L >8t<}
         $56:begin  {bit 2,(HL) >12t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                bit_8(self.r,2,temp)
+                bit_8(2,temp)
             end;
-        $57:bit_8(self.r,2,r.a); {bit 2,A >8t<}
-        $58:bit_8(self.r,3,r.bc.h); {bit 3,B >8t<}
-        $59:bit_8(self.r,3,r.bc.l); {bit 3,C >8t<}
-        $5a:bit_8(self.r,3,r.de.h); {bit 3,D >8t<}
-        $5b:bit_8(self.r,3,r.de.l); {bit 3,E >8t<}
-        $5c:bit_8(self.r,3,r.hl.h); {bit 3,H >8t<}
-        $5d:bit_8(self.r,3,r.hl.l); {bit 3,L >8t<}
+        $57:bit_8(2,r.a); {bit 2,A >8t<}
+        $58:bit_8(3,r.bc.h); {bit 3,B >8t<}
+        $59:bit_8(3,r.bc.l); {bit 3,C >8t<}
+        $5a:bit_8(3,r.de.h); {bit 3,D >8t<}
+        $5b:bit_8(3,r.de.l); {bit 3,E >8t<}
+        $5c:bit_8(3,r.hl.h); {bit 3,H >8t<}
+        $5d:bit_8(3,r.hl.l); {bit 3,L >8t<}
         $5e:begin  {bit 3,(HL) >12t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                bit_8(self.r,3,temp)
+                bit_8(3,temp)
             end;
-        $5f:bit_8(self.r,3,r.a); {bit 3,A >8t<}
-        $60:bit_8(self.r,4,r.bc.h); {bit 4,B >8t<}
-        $61:bit_8(self.r,4,r.bc.l); {bit 4,C >8t<}
-        $62:bit_8(self.r,4,r.de.h); {bit 4,D >8t<}
-        $63:bit_8(self.r,4,r.de.l); {bit 4,E >8t<}
-        $64:bit_8(self.r,4,r.hl.h); {bit 4,H >8t<}
-        $65:bit_8(self.r,4,r.hl.l); {bit 4,L >8t<}
+        $5f:bit_8(3,r.a); {bit 3,A >8t<}
+        $60:bit_8(4,r.bc.h); {bit 4,B >8t<}
+        $61:bit_8(4,r.bc.l); {bit 4,C >8t<}
+        $62:bit_8(4,r.de.h); {bit 4,D >8t<}
+        $63:bit_8(4,r.de.l); {bit 4,E >8t<}
+        $64:bit_8(4,r.hl.h); {bit 4,H >8t<}
+        $65:bit_8(4,r.hl.l); {bit 4,L >8t<}
         $66:begin  {bit 4,(HL) >12t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                bit_8(self.r,4,temp)
+                bit_8(4,temp)
             end;
-        $67:bit_8(self.r,4,r.a); {bit 4,A >8t<}
-        $68:bit_8(self.r,5,r.bc.h); {bit 5,B >8t<}
-        $69:bit_8(self.r,5,r.bc.l); {bit 5,C >8t<}
-        $6a:bit_8(self.r,5,r.de.h); {bit 5,D >8t<}
-        $6b:bit_8(self.r,5,r.de.l); {bit 5,E >8t<}
-        $6c:bit_8(self.r,5,r.hl.h); {bit 5,H >8t<}
-        $6d:bit_8(self.r,5,r.hl.l); {bit 5,L >8t<}
+        $67:bit_8(4,r.a); {bit 4,A >8t<}
+        $68:bit_8(5,r.bc.h); {bit 5,B >8t<}
+        $69:bit_8(5,r.bc.l); {bit 5,C >8t<}
+        $6a:bit_8(5,r.de.h); {bit 5,D >8t<}
+        $6b:bit_8(5,r.de.l); {bit 5,E >8t<}
+        $6c:bit_8(5,r.hl.h); {bit 5,H >8t<}
+        $6d:bit_8(5,r.hl.l); {bit 5,L >8t<}
         $6e:begin  {bit 5,(HL) >12t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                bit_8(self.r,5,temp)
+                bit_8(5,temp)
             end;
-        $6f:bit_8(self.r,5,r.a); {bit 5,A >8t<}
-        $70:bit_8(self.r,6,r.bc.h); {bit 6,B >8t<}
-        $71:bit_8(self.r,6,r.bc.l); {bit 6,C >8t<}
-        $72:bit_8(self.r,6,r.de.h); {bit 6,D >8t<}
-        $73:bit_8(self.r,6,r.de.l); {bit 6,E >8t<}
-        $74:bit_8(self.r,6,r.hl.h); {bit 6,H >8t<}
-        $75:bit_8(self.r,6,r.hl.l); {bit 6,L >8t<}
+        $6f:bit_8(5,r.a); {bit 5,A >8t<}
+        $70:bit_8(6,r.bc.h); {bit 6,B >8t<}
+        $71:bit_8(6,r.bc.l); {bit 6,C >8t<}
+        $72:bit_8(6,r.de.h); {bit 6,D >8t<}
+        $73:bit_8(6,r.de.l); {bit 6,E >8t<}
+        $74:bit_8(6,r.hl.h); {bit 6,H >8t<}
+        $75:bit_8(6,r.hl.l); {bit 6,L >8t<}
         $76:begin  {bit 6,(HL) >12t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                bit_8(self.r,6,temp)
+                bit_8(6,temp)
             end;
-        $77:bit_8(self.r,6,r.a);  {bit 6,A >8t<}
-        $78:bit_7(self.r,r.bc.h); {bit 7,B >8t<}
-        $79:bit_7(self.r,r.bc.l); {bit 7,C >8t<}
-        $7a:bit_7(self.r,r.de.h); {bit 7,D >8t<}
-        $7b:bit_7(self.r,r.de.l); {bit 7,E >8t<}
-        $7c:bit_7(self.r,r.hl.h); {bit 7,H >8t<}
-        $7d:bit_7(self.r,r.hl.l); {bit 7,L >8t<}
+        $77:bit_8(6,r.a);  {bit 6,A >8t<}
+        $78:bit_7(r.bc.h); {bit 7,B >8t<}
+        $79:bit_7(r.bc.l); {bit 7,C >8t<}
+        $7a:bit_7(r.de.h); {bit 7,D >8t<}
+        $7b:bit_7(r.de.l); {bit 7,E >8t<}
+        $7c:bit_7(r.hl.h); {bit 7,H >8t<}
+        $7d:bit_7(r.hl.l); {bit 7,L >8t<}
         $7e:begin  {bit 7,(HL) >12t<}
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);inc(self.contador);
-                bit_7(self.r,temp)
+                bit_7(temp)
             end;
-        $7f:bit_7(self.r,r.a); {bit 7,A >8t<}
+        $7f:bit_7(r.a); {bit 7,A >8t<}
         $80:r.bc.h:=(r.bc.h and $fe); {res 0,B >8t<}
         $81:r.bc.l:=(r.bc.l and $fe); {res 0,C >8t<}
         $82:r.de.h:=(r.de.h and $fe); {res 0,D >8t<}
@@ -1445,11 +1442,11 @@ r.r:=((r.r+1) and $7f) or (r.r and $80);
 case instruccion of
         $09:begin  {add IX,BC >15t<}
               inc(self.contador,7);
-              add_16(self.r,registro,r.bc.w);
+              add_16(@registro.w,r.bc.w);
             end;
         $19:begin  {add IX,DE >15t<}
               inc(self.contador,7);
-              add_16(self.r,registro,r.de.w);
+              add_16(@registro.w,r.de.w);
             end;
         $21:begin {ld IX,nn >14t<}
                 registro.l:=spec_getbyte(r.pc);
@@ -1469,13 +1466,13 @@ case instruccion of
             end;
         $24:begin  {inc IXh >9t<}
                 temp:=registro.h;
-                inc_8(self.r,@temp);
+                inc_8(@temp);
                 registro.h:=temp;
                 inc(self.contador);
             end;
         $25:begin {dec IXh >9t<}
                 temp:=registro.h;
-                dec_8(self.r,@temp);
+                dec_8(@temp);
                 registro.h:=temp;
                 inc(self.contador);
             end;
@@ -1485,7 +1482,7 @@ case instruccion of
             end;
         $29:begin {add IX,IX >15t<}
                 inc(self.contador,7);
-                add_16(self.r,registro,registro.w);
+                add_16(@registro.w,registro.w);
             end;
         $2a:begin {ld (IX,(nn) >20t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -1500,13 +1497,13 @@ case instruccion of
             end;
         $2c:begin  {inc IXl >9t<}
                 temp:=registro.l;
-                inc_8(self.r,@temp);
+                inc_8(@temp);
                 registro.l:=temp;
                 inc(self.contador);
             end;
         $2d:begin  {dec IXl >9t<}
                 temp:=registro.l;
-                dec_8(self.r,@temp);
+                dec_8(@temp);
                 registro.l:=temp;
                 inc(self.contador);
             end;
@@ -1524,7 +1521,7 @@ case instruccion of
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                inc_8(self.r,@temp);
+                inc_8(@temp);
                 spec_putbyte(temp2,temp);
             end;
         $35:begin {dec (IX+d) >23t<}
@@ -1537,7 +1534,7 @@ case instruccion of
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                dec_8(self.r,@temp);
+                dec_8(@temp);
                 spec_putbyte(temp2,temp);
            end;
         $36:begin {ld (IX+d),n >19t<}
@@ -1551,7 +1548,7 @@ case instruccion of
             end;
         $39:begin {add IX,SP >15t<}
                 inc(self.contador,7);
-                add_16(self.r,registro,r.sp);
+                add_16(@registro.w,r.sp);
             end;
         $44:begin  {ld B,IXh >9t<}
                 r.bc.h:=registro^.h;
@@ -1784,11 +1781,11 @@ case instruccion of
                 r.a:=spec_getbyte(temp2);
             end;
         $84:begin   {add A,IXh >9t<}
-              add_8(self.r,registro.h);
-              inc(self.contador); 
+              add_8(registro.h);
+              inc(self.contador);
             end;
         $85:begin   {add A,IXl >9t<}
-              add_8(self.r,registro.l);
+              add_8(registro.l);
               inc(self.contador); 
             end;
         $86:begin {add A,(IX+d) >19t<}
@@ -1800,14 +1797,14 @@ case instruccion of
                 self.retraso(r.pc);inc(self.contador);
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
-                add_8(self.r,temp);
+                add_8(temp);
             end;
         $8c:begin   {adc A,IXh >9t<}
-                adc_8(self.r,registro^.h);
+                adc_8(registro^.h);
                 inc(self.contador);
             end;
         $8d:begin   {adc A,IXl >9t<}
-                adc_8(self.r,registro^.l);
+                adc_8(registro^.l);
                 inc(self.contador); 
             end;
         $8e:begin {adc A,(IX+d) >19t<}
@@ -1819,14 +1816,14 @@ case instruccion of
                 self.retraso(r.pc);inc(self.contador); 
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
-                adc_8(self.r,temp);
+                adc_8(temp);
         end;
         $94:begin  {sub IXh >9t<}
-                sub_8(self.r,registro^.h);
+                sub_8(registro^.h);
                 inc(self.contador);
             end;
         $95:begin  {sub IXh >9t<}
-                sub_8(self.r,registro^.l);
+                sub_8(registro^.l);
                 inc(self.contador);
             end;
         $96:begin {sub (IX+d) >19t<}
@@ -1838,14 +1835,14 @@ case instruccion of
                 self.retraso(r.pc);inc(self.contador);
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
-                sub_8(self.r,temp);
+                sub_8(temp);
         end;
         $9c:begin  {sbc IXh >9t<}
-                sbc_8(self.r,registro^.h);
+                sbc_8(registro^.h);
                 inc(self.contador);
             end;
         $9d:begin  {sbc IXl >9t<}
-                sbc_8(self.r,registro^.l);
+                sbc_8(registro^.l);
                 inc(self.contador); 
             end;
         $9e:begin {sbc (IX+d) >19t<}
@@ -1857,14 +1854,14 @@ case instruccion of
                 self.retraso(r.pc);inc(self.contador);
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
-                sbc_8(self.r,temp);
+                sbc_8(temp);
         end;
         $a4:begin  {and IXh >9t<}
-                and_a(self.r,registro^.h);
+                and_a(registro^.h);
                 inc(self.contador);
             end;
         $a5:begin  {and IXl >9t<}
-                and_a(self.r,registro^.l);
+                and_a(registro^.l);
                 inc(self.contador);
             end;
         $a6:begin {and A,(IX+d) >19t<}
@@ -1876,14 +1873,14 @@ case instruccion of
                 self.retraso(r.pc);inc(self.contador); 
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
-                and_a(self.r,temp);
+                and_a(temp);
         end;
         $ac:begin  {xor IXh >9t<}
-                xor_a(self.r,registro^.h);
+                xor_a(registro^.h);
                 inc(self.contador);
             end;
         $ad:begin  {xor IXl >9t<}
-                xor_a(self.r,registro^.l);
+                xor_a(registro^.l);
                 inc(self.contador); 
             end;
         $ae:begin {xor A,(IX+d) >19t<}
@@ -1895,14 +1892,14 @@ case instruccion of
                 self.retraso(r.pc);inc(self.contador); 
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
-                xor_a(self.r,temp);
+                xor_a(temp);
               end;
         $b4:begin   {or IXh >9t<}
-                or_a(self.r,registro^.h);
+                or_a(registro^.h);
                 inc(self.contador);
             end;
         $b5:begin   {or IXl >9t<}
-                or_a(self.r,registro^.l);
+                or_a(registro^.l);
                 inc(self.contador);
             end;
         $b6:begin  {or (IX+d) >19t<}
@@ -1914,14 +1911,14 @@ case instruccion of
                  self.retraso(r.pc);inc(self.contador); 
                  inc(r.pc);
                  temp:=spec_getbyte(temp2);
-                 or_a(self.r,temp);
+                 or_a(temp);
              end;
         $bc:begin  {cp IXh >9t<}
-                cp_a(self.r,registro^.h);
+                cp_a(registro^.h);
                 inc(self.contador);
             end;
         $bd:begin  {cp IXl >9t<}
-                cp_a(self.r,registro^.l);
+                cp_a(registro^.l);
                 inc(self.contador);
             end;
         $be:begin {cp (IX+d) >19t<}
@@ -1933,7 +1930,7 @@ case instruccion of
                 self.retraso(r.pc);inc(self.contador); 
                 inc(r.pc);
                 temp:=spec_getbyte(temp2);
-                cp_a(self.r,temp);
+                cp_a(temp);
         end;
         $cb:self.exec_dd_cb_sp(tipo);
         $e1:begin
@@ -1987,440 +1984,440 @@ case instruccion of
         $00:begin {ld B,rlc (IX+d) >23t<}
                 r.bc.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@r.bc.h);
+                rlc_8(@r.bc.h);
                 spec_putbyte(temp2,r.bc.h);
             end;
         $01:begin {ld C,rlc (IX+d) >23t<}
                 r.bc.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@r.bc.l);
+                rlc_8(@r.bc.l);
                 spec_putbyte(temp2,r.bc.l);
             end;
         $02:begin {ld D,rlc (IX+d) >23t<}
                 r.de.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@r.de.h);
+                rlc_8(@r.de.h);
                 spec_putbyte(temp2,r.de.h);
             end;
         $03:begin {ld E,rlc (IX+d) >23t<}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@r.de.l);
+                rlc_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $04:begin {ld H,rlc (IX+d) >23t<}
                 r.hl.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@r.hl.h);
+                rlc_8(@r.hl.h);
                 spec_putbyte(temp2,r.hl.h);
             end;
         $05:begin {ld L,rlc (IX+d) >23t<}
                 r.hl.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@r.hl.l);
+                rlc_8(@r.hl.l);
                 spec_putbyte(temp2,r.hl.l);
             end;
         $06:begin {rlc (IX+d) >23t<}
                 tempb:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@tempb);
+                rlc_8(@tempb);
                 spec_putbyte(temp2,tempb);
             end;
         $07:begin {ld A,rlc (IX+d) >23t<}
                 r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@r.a);
+                rlc_8(@r.a);
                 spec_putbyte(temp2,r.a);
             end;
         $08:begin {ld B,rrc (IX+d) >23t<}
                 r.bc.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rrc_8(self.r,@r.bc.h);
+                rrc_8(@r.bc.h);
                 spec_putbyte(temp2,r.bc.h);
             end;
         $09:begin {ld C,rrc (IX+d) >23t<}
                 r.bc.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rrc_8(self.r,@r.bc.l);
+                rrc_8(@r.bc.l);
                 spec_putbyte(temp2,r.bc.l);
             end;
         $0a:begin {ld D,rrc (IX+d) >23t<}
                 r.de.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rrc_8(self.r,@r.de.h);
+                rrc_8(@r.de.h);
                 spec_putbyte(temp2,r.de.h);
             end;
         $0b:begin {ld E,rrc (IX+d) >23t<}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rrc_8(self.r,@r.de.l);
+                rrc_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $0c:begin {ld H,rrc (IX+d) >23t<}
                 r.hl.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rrc_8(self.r,@r.hl.h);
+                rrc_8(@r.hl.h);
                 spec_putbyte(temp2,r.hl.h);
             end;
         $0d:begin {ld L,rlc (IX+d) >23t<}
                 r.hl.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rrc_8(self.r,@r.hl.l);
+                rrc_8(@r.hl.l);
                 spec_putbyte(temp2,r.hl.l);
             end;
         $0e:begin   {rrc (IX+d)}
                 tempb:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rrc_8(self.r,@tempb);
+                rrc_8(@tempb);
                 spec_putbyte(temp2,tempb);
             end;
         $0f:begin {ld A,rrc (IX+d)}
                 r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rrc_8(self.r,@r.a);
+                rrc_8(@r.a);
                 spec_putbyte(temp2,r.a);
             end;
         $10:begin {ld B,rl (IX+d)}
                 r.bc.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rl_8(self.r,@r.bc.h);
+                rl_8(@r.bc.h);
                 spec_putbyte(temp2,r.bc.h);
             end;
         $11:begin {ld C,rl (IX+d)}
                 r.bc.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rl_8(self.r,@r.bc.l);
+                rl_8(@r.bc.l);
                 spec_putbyte(temp2,r.bc.l);
             end;
         $12:begin {ld D,rl (IX+d)}
                 r.de.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rl_8(self.r,@r.de.h);
+                rl_8(@r.de.h);
                 spec_putbyte(temp2,r.de.h);
             end;
         $13:begin {ld E,rl (IX+d)}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rl_8(self.r,@r.de.l);
+                rl_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $14:begin {ld H,rl (IX+d)}
                 r.hl.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rl_8(self.r,@r.hl.h);
+                rl_8(@r.hl.h);
                 spec_putbyte(temp2,r.hl.h);
             end;
         $15:begin {ld L,rlc (IX+d)}
                 r.hl.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rl_8(self.r,@r.hl.l);
+                rl_8(@r.hl.l);
                 spec_putbyte(temp2,r.hl.l);
             end;
         $16:begin {rl (IX+d)}
                 tempb:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rl_8(self.r,@tempb);
+                rl_8(@tempb);
                 spec_putbyte(temp2,tempb);
             end;
         $17:begin {ld A,rl (IX+d)}
                 r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rl_8(self.r,@r.a);
+                rl_8(@r.a);
                 spec_putbyte(temp2,r.a);
             end;
         $18:begin {ld B,rr (IX+d)}
                 r.bc.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rr_8(self.r,@r.bc.h);
+                rr_8(@r.bc.h);
                 spec_putbyte(temp2,r.bc.h);
             end;
         $19:begin {ld C,rr (IX+d)}
                 r.bc.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rr_8(self.r,@r.bc.l);
+                rr_8(@r.bc.l);
                 spec_putbyte(temp2,r.bc.l);
             end;
         $1a:begin {ld D,rr (IX+d)}
                 r.de.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rr_8(self.r,@r.de.h);
+                rr_8(@r.de.h);
                 spec_putbyte(temp2,r.de.h);
             end;
         $1b:begin {ld E,rr (IX+d)}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rr_8(self.r,@r.de.l);
+                rr_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $1c:begin {ld H,rr (IX+d)}
                 r.hl.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rr_8(self.r,@r.hl.h);
+                rr_8(@r.hl.h);
                 spec_putbyte(temp2,r.hl.h);
             end;
         $1d:begin {ld L,rr (IX+d)}
                 r.hl.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rr_8(self.r,@r.hl.l);
+                rr_8(@r.hl.l);
                 spec_putbyte(temp2,r.hl.l);
             end;
         $1e:begin  {rr (IX+d)}
                 tempb:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rr_8(self.r,@tempb);
+                rr_8(@tempb);
                 spec_putbyte(temp2,tempb);
             end;
         $1f:begin {ld A,rr (IX+d)}
                 r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rr_8(self.r,@r.a);
+                rr_8(@r.a);
                 spec_putbyte(temp2,r.a);
             end;
         $20:begin {ld B,sla (IX+d)}
                 r.bc.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(self.r,@r.bc.h);
+                sla_8(@r.bc.h);
                 spec_putbyte(temp2,r.bc.h);
             end;
         $21:begin {ld C,sla (IX+d)}
                 r.bc.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(self.r,@r.bc.l);
+                sla_8(@r.bc.l);
                 spec_putbyte(temp2,r.bc.l);
             end;
         $22:begin {ld D,sla (IX+d)}
                 r.de.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(self.r,@r.de.h);
+                sla_8(@r.de.h);
                 spec_putbyte(temp2,r.de.h);
             end;
         $23:begin {ld E,sla (IX+d)}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                rlc_8(self.r,@r.de.l);
+                rlc_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $24:begin {ld H,sla (IX+d)}
                 r.hl.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(self.r,@r.hl.h);
+                sla_8(@r.hl.h);
                 spec_putbyte(temp2,r.hl.h);
             end;
         $25:begin {ld L,sla (IX+d)}
                 r.hl.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(self.r,@r.hl.l);
+                sla_8(@r.hl.l);
                 spec_putbyte(temp2,r.hl.l);
             end;
         $26:begin  {sla (IX+d)}
                 tempb:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(self.r,@tempb);
+                sla_8(@tempb);
                 spec_putbyte(temp2,tempb);
             end;
         $27:begin {ld A,sla (IX+d)}
                 r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sla_8(self.r,@r.a);
+                sla_8(@r.a);
                 spec_putbyte(temp2,r.a);
             end;
         $28:begin {ld B,sra (IX+d)}
                 r.bc.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sra_8(self.r,@r.bc.h);
+                sra_8(@r.bc.h);
                 spec_putbyte(temp2,r.bc.h);
             end;
         $29:begin {ld C,sra (IX+d)}
                 r.bc.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sra_8(self.r,@r.bc.l);
+                sra_8(@r.bc.l);
                 spec_putbyte(temp2,r.bc.l);
             end;
         $2a:begin {ld D,sra (IX+d)}
                 r.de.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sra_8(self.r,@r.de.h);
+                sra_8(@r.de.h);
                 spec_putbyte(temp2,r.de.h);
             end;
         $2b:begin {ld E,sra (IX+d)}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sra_8(self.r,@r.de.l);
+                sra_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $2c:begin {ld H,sra (IX+d)}
                 r.hl.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sra_8(self.r,@r.hl.h);
+                sra_8(@r.hl.h);
                 spec_putbyte(temp2,r.hl.h);
             end;
         $2d:begin {ld L,sra (IX+d)}
                 r.hl.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sra_8(self.r,@r.hl.l);
+                sra_8(@r.hl.l);
                 spec_putbyte(temp2,r.hl.l);
             end;
         $2e:begin  {sra (IX+d)}
                 tempb:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sra_8(self.r,@tempb);
+                sra_8(@tempb);
                 spec_putbyte(temp2,tempb);
             end;
         $2f:begin {ld A,sra (IX+d)}
                 r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sra_8(self.r,@r.a);
+                sra_8(@r.a);
                 spec_putbyte(temp2,r.a);
             end;
         $30:begin {ld B,sll (IX+d)}
                 r.bc.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sll_8(self.r,@r.bc.h);
+                sll_8(@r.bc.h);
                 spec_putbyte(temp2,r.bc.h);
             end;
         $31:begin {ld C,sll (IX+d)}
                 r.bc.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sll_8(self.r,@r.bc.l);
+                sll_8(@r.bc.l);
                 spec_putbyte(temp2,r.bc.l);
             end;
         $32:begin {ld D,sll (IX+d)}
                 r.de.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sll_8(self.r,@r.de.h);
+                sll_8(@r.de.h);
                 spec_putbyte(temp2,r.de.h);
             end;
         $33:begin {ld E,sll (IX+d)}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sll_8(self.r,@r.de.l);
+                sll_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $34:begin {ld H,sll (IX+d)}
                 r.hl.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sll_8(self.r,@r.hl.h);
+                sll_8(@r.hl.h);
                 spec_putbyte(temp2,r.hl.h);
             end;
         $35:begin {ld L,sll (IX+d)}
                 r.hl.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sll_8(self.r,@r.hl.l);
+                sll_8(@r.hl.l);
                 spec_putbyte(temp2,r.hl.l);
             end;
         $36:begin {sll (IX+d)}
                 tempb:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sll_8(self.r,@tempb);
+                sll_8(@tempb);
                 spec_putbyte(temp2,tempb);
             end;
         $37:begin {ld A,sll (IX+d)}
                 r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                sll_8(self.r,@r.a);
+                sll_8(@r.a);
                 spec_putbyte(temp2,r.a);
             end;
         $38:begin {ld B,srl (IX+d)}
                 r.bc.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                srl_8(self.r,@r.bc.h);
+                srl_8(@r.bc.h);
                 spec_putbyte(temp2,r.bc.h);
             end;
         $39:begin {ld C,srl (IX+d)}
                 r.bc.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                srl_8(self.r,@r.bc.l);
+                srl_8(@r.bc.l);
                 spec_putbyte(temp2,r.bc.l);
             end;
         $3a:begin {ld D,srl (IX+d)}
                 r.de.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                srl_8(self.r,@r.de.h);
+                srl_8(@r.de.h);
                 spec_putbyte(temp2,r.de.h);
             end;
         $3b:begin {ld E,srl (IX+d)}
                 r.de.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                srl_8(self.r,@r.de.l);
+                srl_8(@r.de.l);
                 spec_putbyte(temp2,r.de.l);
             end;
         $3c:begin {ld H,srl (IX+d)}
                 r.hl.h:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                srl_8(self.r,@r.hl.h);
+                srl_8(@r.hl.h);
                 spec_putbyte(temp2,r.hl.h);
             end;
         $3d:begin {ld L,srl (IX+d)}
                 r.hl.l:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                srl_8(self.r,@r.hl.l);
+                srl_8(@r.hl.l);
                 spec_putbyte(temp2,r.hl.l);
             end;
         $3e:begin  {srl (IX+d)}
                 tempb:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                srl_8(self.r,@tempb);
+                srl_8(@tempb);
                 spec_putbyte(temp2,tempb);
             end;
         $3f:begin {ld A,srl (IX+d)}
                 r.a:=spec_getbyte(temp2);
                 self.retraso(temp2);inc(self.contador);
-                srl_8(self.r,@r.a);
+                srl_8(@r.a);
                 spec_putbyte(temp2,r.a);
             end;
         $40..$47:begin {bit 0,(IX+d)}
                  tempb:=spec_getbyte(temp2);
                  self.retraso(temp2);inc(self.contador);
-                 bit_8(self.r,0,tempb);
+                 bit_8(0,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $48..$4f:begin {bit 1,(IX+d)}
                  tempb:=spec_getbyte(temp2);
                  self.retraso(temp2);inc(self.contador);
-                 bit_8(self.r,1,tempb);
+                 bit_8(1,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $50..$57:begin {bit 2,(IX+d)}
                  tempb:=spec_getbyte(temp2);
                  self.retraso(temp2);inc(self.contador);
-                 bit_8(self.r,2,tempb);
+                 bit_8(2,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $58..$5f:begin {bit 3,(IX+d)}
                  tempb:=spec_getbyte(temp2);
                  self.retraso(temp2);inc(self.contador);
-                 bit_8(self.r,3,tempb);
+                 bit_8(3,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $60..$67:begin {bit 4,(IX+d)}
                  tempb:=spec_getbyte(temp2);
                  self.retraso(temp2);inc(self.contador);
-                 bit_8(self.r,4,tempb);
+                 bit_8(4,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $68..$6f:begin {bit 5,(IX+d)}
                  tempb:=spec_getbyte(temp2);
                  self.retraso(temp2);inc(self.contador);
-                 bit_8(self.r,5,tempb);
+                 bit_8(5,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $70..$77:begin {bit 6,(IX+d)}
                  tempb:=spec_getbyte(temp2);
                  self.retraso(temp2);inc(self.contador);
-                 bit_8(self.r,6,tempb);
+                 bit_8(6,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $78..$7f:begin {bit 7,(IX+d)}
                  tempb:=spec_getbyte(temp2);
                  self.retraso(temp2);inc(self.contador);
-                 bit_7(self.r,tempb);
+                 bit_7(tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
@@ -3092,7 +3089,7 @@ case instruccion of
         $41:spec_outbyte(r.bc.h,r.bc.w); {out (C),B >12t<}
         $42:begin  {sbc HL,BC >15t<}
               inc(self.contador,7);
-              sbc_16(self.r,@r.hl,r.bc.w);
+              sbc_16(@r.hl.w,r.bc.w);
             end;
         $43:begin {ld (nn),BC >20t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -3104,7 +3101,7 @@ case instruccion of
         $44,$4c,$54,$5c,$64,$6c,$74,$7c:begin  {neg >8t<}
                 temp:=r.a;
                 r.a:=0;
-                sub_8(self.r,temp);
+                sub_8(temp);
             end;
         $45,$55,$65,$75:begin  {retn >12t<}
                 self.retraso(r.sp);inc(self.contador,3);
@@ -3130,7 +3127,7 @@ case instruccion of
         $49:spec_outbyte(r.bc.l,r.bc.w); {out (C),C >12t<}
         $4a:begin  {adc HL,BC >15t<}
               inc(self.contador,7);
-              adc_16(self.r,@r.hl,r.bc.w);
+              adc_16(@r.hl.w,r.bc.w);
             end;
         $4b:begin  {ld BC,(nn) >20t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -3165,7 +3162,7 @@ case instruccion of
         $51:spec_outbyte(r.de.h,r.bc.w); {out (C),D >12t<}
         $52:begin {sbc HL,DE >15t<}
               inc(self.contador,7);
-              sbc_16(self.r,@r.hl,r.de.w);
+              sbc_16(@r.hl.w,r.de.w);
             end;
         $53:begin {ld (nn),DE >20t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -3201,7 +3198,7 @@ case instruccion of
         $59:spec_outbyte(r.de.l,r.bc.w); {out (C),E >12t<}
         $5a:begin {adc HL,DE >15t<}
               inc(self.contador,7);
-              adc_16(self.r,@r.hl,r.de.w);
+              adc_16(@r.hl.w,r.de.w);
             end;
         $5b:begin  {ld DE,(nn) >20t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -3237,7 +3234,7 @@ case instruccion of
         $61:spec_outbyte(r.hl.h,r.bc.w); {out (C),H >12t<}
         $62:begin  {sbc HL,HL >15t<}
                 inc(self.contador,7);
-                sbc_16(self.r,@r.hl,r.hl.w);
+                sbc_16(@r.hl.w,r.hl.w);
             end;
         $63:begin {ld (nn),HL >20t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -3280,7 +3277,7 @@ case instruccion of
         $69:spec_outbyte(r.hl.l,r.bc.w); {out (C),L >12t<}
         $6a:begin  {adc HL,HL >15t<}
                 inc(self.contador,7);
-                adc_16(self.r,@r.hl,r.hl.w);
+                adc_16(@r.hl.w,r.hl.w);
             end;
         $6b:begin  {ld HL,(nn) >20t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -3323,7 +3320,7 @@ case instruccion of
         $71:spec_outbyte(0,r.bc.w); {out (C),0 >12t<}
         $72:begin  {sbc HL,SP >15t<}
               inc(self.contador,7);
-              sbc_16(self.r,@r.hl,r.sp);
+              sbc_16(@r.hl.w,r.sp);
             end;
         $73:begin {ld (nn),SP >20t<}
                 posicion.l:=spec_getbyte(r.pc);
@@ -3349,7 +3346,7 @@ case instruccion of
         $79:spec_outbyte(r.a,r.bc.w); {out (C),A >12t<}
         $7a:begin  {adc HL,SP >15t<}
               inc(self.contador,7);
-              adc_16(self.r,@r.hl,r.sp);
+              adc_16(@r.hl.w,r.sp);
             end;
         $7b:begin  {ld SP,(nn) >20t<}
                 posicion.l:=spec_getbyte(r.pc);

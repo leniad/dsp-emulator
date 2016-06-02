@@ -23,13 +23,13 @@ type
             constructor create(clock:dword;frames_div:word;tipo_cpu:byte);
             destructor free;
           public
-            pedir_nmi,nmi_state:byte;
-            pedir_irq:array[0..9] of byte;
             procedure run(maximo:single);
             procedure reset;
             procedure irq_request(irq,valor:byte);
           private
             r:preg_m6805;
+            pedir_irq:array[0..9] of byte;
+            pedir_nmi,nmi_state:byte;
             irq_pending:boolean;
             tipo_cpu:byte;
             function dame_pila:byte;

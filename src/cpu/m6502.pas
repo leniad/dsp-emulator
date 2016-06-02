@@ -20,16 +20,18 @@ type
             destructor Free;
           public
             after_ei:boolean;
-            pedir_nmi,pedir_irq,nmi_state:byte;
             tipo_cpu:byte;
             procedure reset;
             procedure run(maximo:single);
-            procedure clear_nmi;
             procedure change_io_calls(in_port0,in_port1:cpu_inport_call);
             function get_internal_r:preg_m6502;
+            procedure change_nmi(estado:byte);
+            procedure change_irq(estado:byte);
           private
             //Internal Regs
             r:preg_m6502;
+            //IRQ
+            pedir_nmi,nmi_state,pedir_irq:byte;
             //RAM calls/IO Calls
             in_port0,in_port1:cpu_inport_call;
             read_dummy:boolean;
@@ -184,10 +186,17 @@ self.nmi_state:=CLEAR_LINE;
 self.pedir_reset:=CLEAR_LINE;
 end;
 
-procedure cpu_m6502.clear_nmi;
+procedure cpu_m6502.change_nmi(estado:byte);
 begin
+if estado=CLEAR_LINE then begin
   self.pedir_nmi:=CLEAR_LINE;
   self.nmi_state:=CLEAR_LINE;
+end else self.pedir_nmi:=estado;
+end;
+
+procedure cpu_m6502.change_irq(estado:byte);
+begin
+  self.pedir_irq:=estado;
 end;
 
 function cpu_m6502.call_nmi:byte;

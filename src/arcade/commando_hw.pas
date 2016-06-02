@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,misc_functions,
      rom_engine,pal_engine,sound_engine,timer_engine;
 
-procedure Cargar_commando;
-procedure commando_principal;
-function iniciar_commando:boolean;
-procedure reset_commando;
-//Main CPU
-function commando_getbyte(direccion:word):byte;
-procedure commando_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function commando_snd_getbyte(direccion:word):byte;
-procedure commando_snd_putbyte(direccion:word;valor:byte);
-procedure commando_sound_update;
-procedure commando_snd_irq;
+procedure cargar_commando;
 
 implementation
 const
@@ -52,112 +41,6 @@ var
  memoria_dec:array[0..$bfff] of byte;
  scroll_x,scroll_y:word;
  sound_command:byte;
-
-procedure Cargar_commando;
-begin
-llamadas_maquina.iniciar:=iniciar_commando;
-llamadas_maquina.bucle_general:=commando_principal;
-llamadas_maquina.reset:=reset_commando;
-end;
-
-function iniciar_commando:boolean;
-var
-  colores:tpaleta;
-  f:word;
-  memoria_temp:array[0..$17fff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
-    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_commando:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512,false,true);
-screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,256,256,true);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(commando_getbyte,commando_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(commando_snd_getbyte,commando_snd_putbyte);
-snd_z80.init_sound(commando_sound_update);
-//IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3000000/(4*60),commando_snd_irq,true);
-//Sound Chips
-YM2203_0:=ym2203_chip.create(1500000,2);
-YM2203_1:=ym2203_chip.create(1500000,2);
-//cargar y desencriptar las ROMS
-if not(cargar_roms(@memoria[0],@commando_rom[0],'commando.zip',0)) then exit;
-memoria_dec[0]:=memoria[0];
-for f:=1 to $bfff do memoria_dec[f]:=bitswap8(memoria[f],3,2,1,4,7,6,5,0);
-//cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@commando_snd_rom,'commando.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@commando_char,'commando.zip')) then exit;
-init_gfx(0,8,8,1024);
-gfx[0].trans[3]:=true;
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@commando_sprites[0],'commando.zip',0)) then exit;
-init_gfx(1,16,16,768);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//tiles
-if not(cargar_roms(@memoria_temp[0],@commando_tiles[0],'commando.zip',0)) then exit;
-init_gfx(2,16,16,1024);
-gfx_set_desc_data(3,0,32*8,0,$8000*8,$8000*8*2);
-convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
-//poner la paleta
-if not(cargar_roms(@memoria_temp[0],@commando_pal[0],'commando.zip',0)) then exit;
-for f:=0 to 255 do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,256);
-//crear la tabla de colores
-for f:=0 to 63 do begin
-  gfx[1].colores[f]:=f+128;
-  gfx[0].colores[f]:=f+192;
-end;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$1f;
-marcade.dswa_val:=@commando_dip_a;
-marcade.dswb_val:=@commando_dip_b;
-//final
-reset_commando;
-iniciar_commando:=true;
-end;
-
-procedure reset_commando;
-begin
- main_z80.reset;
- main_z80.im0:=$d7;  //rst 10
- snd_z80.reset;
- YM2203_0.reset;
- YM2203_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- scroll_x:=0;
- scroll_y:=0;
- sound_command:=0;
-end;
 
 procedure update_video_commando;inline;
 var
@@ -304,9 +187,9 @@ if direccion<$4000 then exit;
 case direccion of
   $4000..$47ff:mem_snd[direccion]:=valor;
   $8000:ym2203_0.Control(valor);
-  $8001:ym2203_0.Write_Reg(valor);
+  $8001:ym2203_0.Write(valor);
   $8002:ym2203_1.Control(valor);
-  $8003:ym2203_1.Write_Reg(valor);
+  $8003:ym2203_1.Write(valor);
 end;
 end;
 
@@ -319,6 +202,113 @@ end;
 procedure commando_snd_irq;
 begin
   snd_z80.pedir_irq:=HOLD_LINE;
+end;
+
+//Main
+procedure reset_commando;
+begin
+ main_z80.reset;
+ main_z80.im0:=$d7;  //rst 10
+ snd_z80.reset;
+ YM2203_0.reset;
+ YM2203_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ scroll_x:=0;
+ scroll_y:=0;
+ sound_command:=0;
+end;
+
+function iniciar_commando:boolean;
+var
+  colores:tpaleta;
+  f:word;
+  memoria_temp:array[0..$17fff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
+    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
+    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
+    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_commando:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,512,512,false,true);
+screen_init(2,512,512);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,256,256,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,256);
+main_z80.change_ram_calls(commando_getbyte,commando_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.change_ram_calls(commando_snd_getbyte,commando_snd_putbyte);
+snd_z80.init_sound(commando_sound_update);
+//IRQ Sound CPU
+init_timer(snd_z80.numero_cpu,3000000/(4*60),commando_snd_irq,true);
+//Sound Chips
+YM2203_0:=ym2203_chip.create(1500000,2);
+YM2203_1:=ym2203_chip.create(1500000,2);
+//cargar y desencriptar las ROMS
+if not(cargar_roms(@memoria[0],@commando_rom[0],'commando.zip',0)) then exit;
+memoria_dec[0]:=memoria[0];
+for f:=1 to $bfff do memoria_dec[f]:=bitswap8(memoria[f],3,2,1,4,7,6,5,0);
+//cargar ROMS sonido
+if not(cargar_roms(@mem_snd[0],@commando_snd_rom,'commando.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@commando_char,'commando.zip')) then exit;
+init_gfx(0,8,8,1024);
+gfx[0].trans[3]:=true;
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@commando_sprites[0],'commando.zip',0)) then exit;
+init_gfx(1,16,16,768);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//tiles
+if not(cargar_roms(@memoria_temp[0],@commando_tiles[0],'commando.zip',0)) then exit;
+init_gfx(2,16,16,1024);
+gfx_set_desc_data(3,0,32*8,0,$8000*8,$8000*8*2);
+convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@commando_pal[0],'commando.zip',0)) then exit;
+for f:=0 to 255 do begin
+  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
+  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+set_pal(colores,256);
+//crear la tabla de colores
+for f:=0 to 63 do begin
+  gfx[1].colores[f]:=f+128;
+  gfx[0].colores[f]:=f+192;
+end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$1f;
+marcade.dswa_val:=@commando_dip_a;
+marcade.dswb_val:=@commando_dip_b;
+//final
+reset_commando;
+iniciar_commando:=true;
+end;
+
+procedure Cargar_commando;
+begin
+llamadas_maquina.iniciar:=iniciar_commando;
+llamadas_maquina.bucle_general:=commando_principal;
+llamadas_maquina.reset:=reset_commando;
 end;
 
 end.

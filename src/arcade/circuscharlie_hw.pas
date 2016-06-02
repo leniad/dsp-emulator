@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,sn_76496,gfx_engine,dac,rom_engine,
      pal_engine,konami_decrypt,sound_engine;
 
-//main
-procedure Cargar_circusc;
-procedure circusc_principal;
-function iniciar_circusc:boolean;
-procedure reset_circusc;
-//cpu
-function circusc_getbyte(direccion:word):byte;
-procedure circusc_putbyte(direccion:word;valor:byte);
-//snd cpu
-function circusc_snd_getbyte(direccion:word):byte;  
-procedure circusc_snd_putbyte(direccion:word;valor:byte); 
-procedure circusc_sound; 
+procedure cargar_circusc;
 
 implementation
 const
@@ -51,111 +40,6 @@ var
  mem_opcodes:array[0..$9fff] of byte;
  sound_latch,scroll_x,linea:byte;
  spritebank:word;
-
-procedure Cargar_circusc;
-begin
-llamadas_maquina.iniciar:=iniciar_circusc;
-llamadas_maquina.bucle_general:=circusc_principal;
-llamadas_maquina.reset:=reset_circusc;
-end;
-
-function iniciar_circusc:boolean;
-var
-  colores:tpaleta;
-  bit0,bit1,bit2:byte;
-  f:word;
-  memoria_temp:array[0..$ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-    ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
-			8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4);
-    ps_y:array[0..15] of dword=(0*4*16, 1*4*16, 2*4*16, 3*4*16, 4*4*16, 5*4*16, 6*4*16, 7*4*16,
-			8*4*16, 9*4*16, 10*4*16, 11*4*16, 12*4*16, 13*4*16, 14*4*16, 15*4*16);
-begin
-iniciar_circusc:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,0,0,0);
-screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,0,0,0);
-screen_init(3,256,256,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_m6809:=cpu_m6809.Create(2048000,$100);
-main_m6809.change_ram_calls(circusc_getbyte,circusc_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,$100);
-snd_z80.change_ram_calls(circusc_snd_getbyte,circusc_snd_putbyte);
-snd_z80.init_sound(circusc_sound);
-//Sound Chip
-sn_76496_0:=sn76496_chip.Create(1789772);
-sn_76496_1:=sn76496_chip.Create(1789772);
-dac_0:=dac_chip.Create;
-//cargar roms y desencriptarlas
-if not(cargar_roms(@memoria[0],@circusc_rom[0],'circusc.zip',0)) then exit;
-konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
-//roms sonido
-if not(cargar_roms(@mem_snd[0],@circusc_snd[0],'circusc.zip',0)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@circusc_char[0],'circusc.zip',0)) then exit;
-init_gfx(0,8,8,512);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@circusc_sprites[0],'circusc.zip',0)) then exit;
-init_gfx(1,16,16,384);
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//paleta
-if not(cargar_roms(@memoria_temp[0],@circusc_pal[0],'circusc.zip',0)) then exit;
-for f:=0 to $1f do begin
-    bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
-		colores[f].r:=$21*bit0+$47*bit1+$97*bit2;
-		bit0:=(memoria_temp[f] shr 3) and $01;
-		bit1:=(memoria_temp[f] shr 4) and $01;
-		bit2:=(memoria_temp[f] shr 5) and $01;
-		colores[f].g:=$21*bit0+$47*bit1+$97*bit2;
-		bit0:=0;
-		bit1:=(memoria_temp[f] shr 6) and $01;
-		bit2:=(memoria_temp[f] shr 7) and $01;
-		colores[f].b:=$21*bit0+$47*bit1+$97*bit2;
-end;
-set_pal(colores,32);
-for f:=0 to $ff do begin
-  gfx[0].colores[f]:=(memoria_temp[$20+f] and $f)+$10;  //chars
-  gfx[1].colores[f]:=memoria_temp[$120+f] and $f;  //sprites
-end;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$4b;
-marcade.dswa_val:=@circusc_dip_a;
-marcade.dswb_val:=@circusc_dip_b;
-//final
-reset_circusc;
-iniciar_circusc:=true;
-end;
-
-procedure reset_circusc;
-begin
- main_m6809.reset;
- snd_z80.reset;
- sn_76496_0.reset;
- sn_76496_1.reset;
- dac_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- pedir_irq:=false;
- sound_latch:=0;
- scroll_x:=0;
- spritebank:=$3800;
-end;
 
 procedure update_video_circusc;inline;
 var
@@ -305,6 +189,112 @@ begin
   sn_76496_0.Update;
   sn_76496_1.Update;
   dac_0.update;
+end;
+
+//Main
+procedure reset_circusc;
+begin
+ main_m6809.reset;
+ snd_z80.reset;
+ sn_76496_0.reset;
+ sn_76496_1.reset;
+ dac_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ pedir_irq:=false;
+ sound_latch:=0;
+ scroll_x:=0;
+ spritebank:=$3800;
+end;
+
+function iniciar_circusc:boolean;
+var
+  colores:tpaleta;
+  bit0,bit1,bit2:byte;
+  f:word;
+  memoria_temp:array[0..$ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+    ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
+			8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4);
+    ps_y:array[0..15] of dword=(0*4*16, 1*4*16, 2*4*16, 3*4*16, 4*4*16, 5*4*16, 6*4*16, 7*4*16,
+			8*4*16, 9*4*16, 10*4*16, 11*4*16, 12*4*16, 13*4*16, 14*4*16, 15*4*16);
+begin
+iniciar_circusc:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256,true);
+screen_mod_scroll(1,256,256,255,0,0,0);
+screen_init(2,256,256);
+screen_mod_scroll(2,256,256,255,0,0,0);
+screen_init(3,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_m6809:=cpu_m6809.Create(2048000,$100);
+main_m6809.change_ram_calls(circusc_getbyte,circusc_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,$100);
+snd_z80.change_ram_calls(circusc_snd_getbyte,circusc_snd_putbyte);
+snd_z80.init_sound(circusc_sound);
+//Sound Chip
+sn_76496_0:=sn76496_chip.Create(1789772);
+sn_76496_1:=sn76496_chip.Create(1789772);
+dac_0:=dac_chip.Create;
+//cargar roms y desencriptarlas
+if not(cargar_roms(@memoria[0],@circusc_rom[0],'circusc.zip',0)) then exit;
+konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
+//roms sonido
+if not(cargar_roms(@mem_snd[0],@circusc_snd[0],'circusc.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@circusc_char[0],'circusc.zip',0)) then exit;
+init_gfx(0,8,8,512);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@circusc_sprites[0],'circusc.zip',0)) then exit;
+init_gfx(1,16,16,384);
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//paleta
+if not(cargar_roms(@memoria_temp[0],@circusc_pal[0],'circusc.zip',0)) then exit;
+for f:=0 to $1f do begin
+    bit0:=(memoria_temp[f] shr 0) and $01;
+		bit1:=(memoria_temp[f] shr 1) and $01;
+		bit2:=(memoria_temp[f] shr 2) and $01;
+		colores[f].r:=$21*bit0+$47*bit1+$97*bit2;
+		bit0:=(memoria_temp[f] shr 3) and $01;
+		bit1:=(memoria_temp[f] shr 4) and $01;
+		bit2:=(memoria_temp[f] shr 5) and $01;
+		colores[f].g:=$21*bit0+$47*bit1+$97*bit2;
+		bit0:=0;
+		bit1:=(memoria_temp[f] shr 6) and $01;
+		bit2:=(memoria_temp[f] shr 7) and $01;
+		colores[f].b:=$21*bit0+$47*bit1+$97*bit2;
+end;
+set_pal(colores,32);
+for f:=0 to $ff do begin
+  gfx[0].colores[f]:=(memoria_temp[$20+f] and $f)+$10;  //chars
+  gfx[1].colores[f]:=memoria_temp[$120+f] and $f;  //sprites
+end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$4b;
+marcade.dswa_val:=@circusc_dip_a;
+marcade.dswb_val:=@circusc_dip_b;
+//final
+reset_circusc;
+iniciar_circusc:=true;
+end;
+
+procedure Cargar_circusc;
+begin
+llamadas_maquina.iniciar:=iniciar_circusc;
+llamadas_maquina.bucle_general:=circusc_principal;
+llamadas_maquina.reset:=reset_circusc;
 end;
 
 end.

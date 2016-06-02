@@ -5,25 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_3812,m6809,
      oki6295,gaelco_hw_decrypt,rom_engine,pal_engine,sound_engine;
 
-//Principal
-procedure Cargar_gaelco_hw;
-function iniciar_gaelco_hw:boolean;
-procedure reset_gaelco_hw;
-//Big Karnak
-procedure bigk_principal;
-function bigk_getword(direccion:dword):word;
-procedure bigk_putword(direccion:dword;valor:word);
-function bigk_snd_getbyte(direccion:word):byte;
-procedure bigk_snd_putbyte(direccion:word;valor:byte);
-//Thunder Hoop
-procedure thoop_principal;
-function thoop_getword(direccion:dword):word;
-procedure thoop_putword(direccion:dword;valor:word);
-//Biomechanical Toy
-procedure biomtoy_putword(direccion:dword;valor:word);
-//Sound
-procedure bigk_sound_update;
-procedure thoop_sound_update;
+procedure cargar_gaelco_hw;
 
 implementation
 const
@@ -109,232 +91,6 @@ var
  main_ram:array[0..$7fff] of word;
  sound_latch,gaelco_dec_val:byte;
  oki_rom:array[0..$c,0..$ffff] of byte;
-
-procedure Cargar_gaelco_hw;
-begin
-case main_vars.tipo_maquina of
-  78:llamadas_maquina.bucle_general:=bigk_principal;
-  101,173,174:llamadas_maquina.bucle_general:=thoop_principal;
-end;
-llamadas_maquina.iniciar:=iniciar_gaelco_hw;
-llamadas_maquina.reset:=reset_gaelco_hw;
-end;
-
-function iniciar_gaelco_hw:boolean;
-var
-      ptemp,ptemp2,ptemp3,memoria_temp:pbyte;
-      f,pants:byte;
-const
-  ps_x:array[0..7] of dword=(0,1,2,3,4,5,6,7);
-  ps_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
-  pt_x:array[0..15] of dword=(0,1,2,3,4,5,6,7, 16*8+0,16*8+1,16*8+2,16*8+3,16*8+4,16*8+5,16*8+6,16*8+7);
-  pt_y:array[0..15] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8, 8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8);
-procedure convert_sprites;
-begin
-  init_gfx(0,8,8,$20000);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(4,0,8*8,0*$100000*8,1*$100000*8,2*$100000*8,3*$100000*8);
-  convert_gfx(0,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-end;
-procedure convert_tiles;
-begin
-  init_gfx(1,16,16,$8000);
-  gfx_set_desc_data(4,0,32*8,0*$100000*8,1*$100000*8,2*$100000*8,3*$100000*8);
-  convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
-end;
-begin
-iniciar_gaelco_hw:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-if main_vars.tipo_maquina=78 then pants:=16
-  else pants:=8;
-for f:=1 to pants do begin
-  screen_init(f,336,272,true);
-  screen_mod_scroll(f,336,336,511,272,272,511);
-end;
-//Final
-screen_init(17,512,256,false,true);
-screen_mod_sprites(17,0,512,0,$1ff);
-iniciar_video(320,240);
-marcade.dswa:=$00ff;
-case main_vars.tipo_maquina of
-  78:begin  //Big Karnak
-      //Main CPU
-      main_m68000:=cpu_m68000.create(10000000,$200);
-      main_m68000.change_ram16_calls(bigk_getword,bigk_putword);
-      //Sound CPU
-      snd_m6809:=cpu_m6809.Create(2216750,$200);
-      snd_m6809.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
-      snd_m6809.init_sound(bigk_sound_update);
-      //Sound Chips
-      ym3812_0:=ym3812_chip.create(YM3812_FM,3580000);
-      oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1);
-      //Cargar ADPCM ROMS
-      if not(cargar_roms(oki_6295_0.get_rom_addr,@bigkarnak_adpcm,'bigkarnk.zip',1)) then exit;
-      //cargar roms
-      if not(cargar_roms16w(@rom[0],@bigkarnak_rom[0],'bigkarnk.zip',0)) then exit;
-      //cargar sonido
-      if not(cargar_roms(@mem_snd[0],@bigkarnak_sound,'bigkarnk.zip',1)) then exit;
-      //convertir chars
-      getmem(memoria_temp,$400000);
-      //Sprites
-      if not(cargar_roms(memoria_temp,@bigkarnak_gfx[0],'bigkarnk.zip',0)) then exit;
-      convert_sprites;
-      //Tiles
-      convert_tiles;
-      gfx[1].trans_alt[0,0]:=true;
-      gfx[1].trans_alt[1,0]:=true;
-      for f:=8 to 15 do gfx[1].trans_alt[1,f]:=true;
-      freemem(memoria_temp);
-      marcade.dswb:=$00ce;
-      marcade.dswc:=$00ff;
-      marcade.dswa_val:=@gaelco_dip;
-      marcade.dswb_val:=@bigkarnak_dsw_2;
-      marcade.dswc_val:=@bigkarnak_dsw_3;
-  end;
-  101:begin  //Thunder Hoop
-        //Main CPU
-        main_m68000:=cpu_m68000.create(12000000,$200);
-        main_m68000.change_ram16_calls(thoop_getword,thoop_putword);
-        main_m68000.init_sound(thoop_sound_update);
-        //Sound Chips
-        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
-        //Cargar ADPCM ROMS
-        getmem(memoria_temp,$400000);
-        if not(cargar_roms(memoria_temp,@thoop_adpcm,'thoop.zip',1)) then exit;
-        copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
-        ptemp2:=memoria_temp;
-        for f:=0 to $f do begin
-           copymemory(@oki_rom[f,0],ptemp2,$10000);
-           inc(ptemp2,$10000);
-        end;
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@thoop_rom[0],'thoop.zip',0)) then exit;
-        //convertir chars
-        getmem(ptemp,$400000);
-        //Sprites
-        if not(cargar_roms(ptemp,@thoop_gfx[0],'thoop.zip',0)) then exit;
-        //Ordenar los GFX
-        ptemp3:=ptemp;
-        for f:=3 downto 0 do begin
-          ptemp2:=memoria_temp;inc(ptemp2,$100000*f);copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
-          ptemp2:=memoria_temp;inc(ptemp2,($100000*f)+$80000);copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
-          ptemp2:=memoria_temp;inc(ptemp2,($100000*f)+$40000);copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
-          ptemp2:=memoria_temp;inc(ptemp2,($100000*f)+$c0000);copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
-        end;
-        freemem(ptemp);
-        convert_sprites;
-        //Tiles
-        convert_tiles;
-        gfx[1].trans[0]:=true;
-        freemem(memoria_temp);
-        gaelco_dec_val:=$e;
-        marcade.dswb:=$00cf;
-        marcade.dswa_val:=@thoop_dsw_1;
-        marcade.dswb_val:=@thoop_dsw_2;
-      end;
-      173:begin  //Squash
-        //Main CPU
-        main_m68000:=cpu_m68000.create(12000000,$200);
-        main_m68000.change_ram16_calls(thoop_getword,thoop_putword);
-        main_m68000.init_sound(thoop_sound_update);
-        //Sound Chips
-        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
-        //Cargar ADPCM ROMS
-        getmem(memoria_temp,$400000);
-        if not(cargar_roms(memoria_temp,@squash_adpcm,'squash.zip',1)) then exit;
-        copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
-        ptemp2:=memoria_temp;
-        for f:=0 to $7 do begin
-           copymemory(@oki_rom[f,0],ptemp2,$10000);
-           inc(ptemp2,$10000);
-        end;
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@squash_rom[0],'squash.zip',0)) then exit;
-        //convertir chars
-        getmem(ptemp,$400000);
-        //Sprites
-        if not(cargar_roms(ptemp,@squash_gfx[0],'squash.zip',0)) then exit;
-        //Ordenar los GFX
-        ptemp3:=ptemp;
-        for f:=3 downto 0 do begin
-          ptemp2:=memoria_temp;inc(ptemp2,$100000*f);copymemory(ptemp2,ptemp3,$80000);
-          ptemp2:=memoria_temp;inc(ptemp2,($100000*f)+$80000);copymemory(ptemp2,ptemp3,$80000);inc(ptemp3,$80000);
-        end;
-        freemem(ptemp);
-        convert_sprites;
-        //Tiles
-        convert_tiles;
-        gfx[1].trans[0]:=true;
-        freemem(memoria_temp);
-        gaelco_dec_val:=$f;
-        marcade.dswb:=$00df;
-        marcade.dswa_val:=@squash_dsw_1;
-        marcade.dswb_val:=@squash_dsw_2;
-      end;
-      174:begin  //Biomechanical Toy
-        //Main CPU
-        main_m68000:=cpu_m68000.create(12000000,$200);
-        main_m68000.change_ram16_calls(thoop_getword,biomtoy_putword);
-        main_m68000.init_sound(thoop_sound_update);
-        //Sound Chips
-        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
-        //Cargar ADPCM ROMS
-        getmem(memoria_temp,$400000);
-        if not(cargar_roms(memoria_temp,@biomtoy_adpcm,'biomtoy.zip',0)) then exit;
-        copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
-        ptemp2:=memoria_temp;
-        for f:=0 to $f do begin
-           copymemory(@oki_rom[f,0],ptemp2,$10000);
-           inc(ptemp2,$10000);
-        end;
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@biomtoy_rom[0],'biomtoy.zip',0)) then exit;
-        //convertir chars
-        getmem(ptemp,$400000);
-        //Sprites
-        if not(cargar_roms(ptemp,@biomtoy_gfx[0],'biomtoy.zip',0)) then exit;
-        //Ordenar los GFX
-        ptemp3:=ptemp; //orig
-        for f:=0 to 3 do begin
-          ptemp2:=memoria_temp;inc(ptemp2,$040000+(f*$100000));copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
-          ptemp2:=memoria_temp;inc(ptemp2,$0c0000+(f*$100000));copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
-          ptemp2:=memoria_temp;inc(ptemp2,$000000+(f*$100000));copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
-          ptemp2:=memoria_temp;inc(ptemp2,$080000+(f*$100000));copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
-        end;
-        freemem(ptemp);
-        convert_sprites;
-        //Tiles
-        convert_tiles;
-        gfx[1].trans[0]:=true;
-        freemem(memoria_temp);
-        marcade.dswb:=$00fb;
-        marcade.dswa_val:=@gaelco_dip;
-        marcade.dswb_val:=@biomtoy_dsw_2;
-      end;
-end;
-//final
-reset_gaelco_hw;
-iniciar_gaelco_hw:=true;
-end;
-
-procedure reset_gaelco_hw;
-begin
- main_m68000.reset;
- if main_vars.tipo_maquina=78 then begin
-  snd_m6809.reset;
-  ym3812_0.reset;
- end;
- oki_6295_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- scroll_x0:=1;
- scroll_y0:=1;
- scroll_x1:=1;
- scroll_y1:=1;
- sound_latch:=0;
-end;
 
 procedure draw_sprites_bk(pri:byte);inline;
 var
@@ -846,6 +602,233 @@ end;
 procedure thoop_sound_update;
 begin
   oki_6295_0.update;
+end;
+
+//Main
+procedure reset_gaelco_hw;
+begin
+ main_m68000.reset;
+ if main_vars.tipo_maquina=78 then begin
+  snd_m6809.reset;
+  ym3812_0.reset;
+ end;
+ oki_6295_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ scroll_x0:=1;
+ scroll_y0:=1;
+ scroll_x1:=1;
+ scroll_y1:=1;
+ sound_latch:=0;
+end;
+
+function iniciar_gaelco_hw:boolean;
+var
+      ptemp,ptemp2,ptemp3,memoria_temp:pbyte;
+      f,pants:byte;
+const
+  ps_x:array[0..7] of dword=(0,1,2,3,4,5,6,7);
+  ps_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
+  pt_x:array[0..15] of dword=(0,1,2,3,4,5,6,7, 16*8+0,16*8+1,16*8+2,16*8+3,16*8+4,16*8+5,16*8+6,16*8+7);
+  pt_y:array[0..15] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8, 8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8);
+procedure convert_sprites;
+begin
+  init_gfx(0,8,8,$20000);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(4,0,8*8,0*$100000*8,1*$100000*8,2*$100000*8,3*$100000*8);
+  convert_gfx(0,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+end;
+procedure convert_tiles;
+begin
+  init_gfx(1,16,16,$8000);
+  gfx_set_desc_data(4,0,32*8,0*$100000*8,1*$100000*8,2*$100000*8,3*$100000*8);
+  convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+end;
+begin
+iniciar_gaelco_hw:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+if main_vars.tipo_maquina=78 then pants:=16
+  else pants:=8;
+for f:=1 to pants do begin
+  screen_init(f,336,272,true);
+  screen_mod_scroll(f,336,336,511,272,272,511);
+end;
+//Final
+screen_init(17,512,256,false,true);
+screen_mod_sprites(17,0,512,0,$1ff);
+iniciar_video(320,240);
+marcade.dswa:=$00ff;
+case main_vars.tipo_maquina of
+  78:begin  //Big Karnak
+      //Main CPU
+      main_m68000:=cpu_m68000.create(10000000,$200);
+      main_m68000.change_ram16_calls(bigk_getword,bigk_putword);
+      //Sound CPU
+      snd_m6809:=cpu_m6809.Create(2216750,$200);
+      snd_m6809.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
+      snd_m6809.init_sound(bigk_sound_update);
+      //Sound Chips
+      ym3812_0:=ym3812_chip.create(YM3812_FM,3580000);
+      oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1);
+      //Cargar ADPCM ROMS
+      if not(cargar_roms(oki_6295_0.get_rom_addr,@bigkarnak_adpcm,'bigkarnk.zip',1)) then exit;
+      //cargar roms
+      if not(cargar_roms16w(@rom[0],@bigkarnak_rom[0],'bigkarnk.zip',0)) then exit;
+      //cargar sonido
+      if not(cargar_roms(@mem_snd[0],@bigkarnak_sound,'bigkarnk.zip',1)) then exit;
+      //convertir chars
+      getmem(memoria_temp,$400000);
+      //Sprites
+      if not(cargar_roms(memoria_temp,@bigkarnak_gfx[0],'bigkarnk.zip',0)) then exit;
+      convert_sprites;
+      //Tiles
+      convert_tiles;
+      gfx[1].trans_alt[0,0]:=true;
+      gfx[1].trans_alt[1,0]:=true;
+      for f:=8 to 15 do gfx[1].trans_alt[1,f]:=true;
+      freemem(memoria_temp);
+      marcade.dswb:=$00ce;
+      marcade.dswc:=$00ff;
+      marcade.dswa_val:=@gaelco_dip;
+      marcade.dswb_val:=@bigkarnak_dsw_2;
+      marcade.dswc_val:=@bigkarnak_dsw_3;
+  end;
+  101:begin  //Thunder Hoop
+        //Main CPU
+        main_m68000:=cpu_m68000.create(12000000,$200);
+        main_m68000.change_ram16_calls(thoop_getword,thoop_putword);
+        main_m68000.init_sound(thoop_sound_update);
+        //Sound Chips
+        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
+        //Cargar ADPCM ROMS
+        getmem(memoria_temp,$400000);
+        if not(cargar_roms(memoria_temp,@thoop_adpcm,'thoop.zip',1)) then exit;
+        copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
+        ptemp2:=memoria_temp;
+        for f:=0 to $f do begin
+           copymemory(@oki_rom[f,0],ptemp2,$10000);
+           inc(ptemp2,$10000);
+        end;
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@thoop_rom[0],'thoop.zip',0)) then exit;
+        //convertir chars
+        getmem(ptemp,$400000);
+        //Sprites
+        if not(cargar_roms(ptemp,@thoop_gfx[0],'thoop.zip',0)) then exit;
+        //Ordenar los GFX
+        ptemp3:=ptemp;
+        for f:=3 downto 0 do begin
+          ptemp2:=memoria_temp;inc(ptemp2,$100000*f);copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
+          ptemp2:=memoria_temp;inc(ptemp2,($100000*f)+$80000);copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
+          ptemp2:=memoria_temp;inc(ptemp2,($100000*f)+$40000);copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
+          ptemp2:=memoria_temp;inc(ptemp2,($100000*f)+$c0000);copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
+        end;
+        freemem(ptemp);
+        convert_sprites;
+        //Tiles
+        convert_tiles;
+        gfx[1].trans[0]:=true;
+        freemem(memoria_temp);
+        gaelco_dec_val:=$e;
+        marcade.dswb:=$00cf;
+        marcade.dswa_val:=@thoop_dsw_1;
+        marcade.dswb_val:=@thoop_dsw_2;
+      end;
+      173:begin  //Squash
+        //Main CPU
+        main_m68000:=cpu_m68000.create(12000000,$200);
+        main_m68000.change_ram16_calls(thoop_getword,thoop_putword);
+        main_m68000.init_sound(thoop_sound_update);
+        //Sound Chips
+        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
+        //Cargar ADPCM ROMS
+        getmem(memoria_temp,$400000);
+        if not(cargar_roms(memoria_temp,@squash_adpcm,'squash.zip',1)) then exit;
+        copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
+        ptemp2:=memoria_temp;
+        for f:=0 to $7 do begin
+           copymemory(@oki_rom[f,0],ptemp2,$10000);
+           inc(ptemp2,$10000);
+        end;
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@squash_rom[0],'squash.zip',0)) then exit;
+        //convertir chars
+        getmem(ptemp,$400000);
+        //Sprites
+        if not(cargar_roms(ptemp,@squash_gfx[0],'squash.zip',0)) then exit;
+        //Ordenar los GFX
+        ptemp3:=ptemp;
+        for f:=3 downto 0 do begin
+          ptemp2:=memoria_temp;inc(ptemp2,$100000*f);copymemory(ptemp2,ptemp3,$80000);
+          ptemp2:=memoria_temp;inc(ptemp2,($100000*f)+$80000);copymemory(ptemp2,ptemp3,$80000);inc(ptemp3,$80000);
+        end;
+        freemem(ptemp);
+        convert_sprites;
+        //Tiles
+        convert_tiles;
+        gfx[1].trans[0]:=true;
+        freemem(memoria_temp);
+        gaelco_dec_val:=$f;
+        marcade.dswb:=$00df;
+        marcade.dswa_val:=@squash_dsw_1;
+        marcade.dswb_val:=@squash_dsw_2;
+      end;
+      174:begin  //Biomechanical Toy
+        //Main CPU
+        main_m68000:=cpu_m68000.create(12000000,$200);
+        main_m68000.change_ram16_calls(thoop_getword,biomtoy_putword);
+        main_m68000.init_sound(thoop_sound_update);
+        //Sound Chips
+        oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
+        //Cargar ADPCM ROMS
+        getmem(memoria_temp,$400000);
+        if not(cargar_roms(memoria_temp,@biomtoy_adpcm,'biomtoy.zip',0)) then exit;
+        copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
+        ptemp2:=memoria_temp;
+        for f:=0 to $f do begin
+           copymemory(@oki_rom[f,0],ptemp2,$10000);
+           inc(ptemp2,$10000);
+        end;
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@biomtoy_rom[0],'biomtoy.zip',0)) then exit;
+        //convertir chars
+        getmem(ptemp,$400000);
+        //Sprites
+        if not(cargar_roms(ptemp,@biomtoy_gfx[0],'biomtoy.zip',0)) then exit;
+        //Ordenar los GFX
+        ptemp3:=ptemp; //orig
+        for f:=0 to 3 do begin
+          ptemp2:=memoria_temp;inc(ptemp2,$040000+(f*$100000));copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
+          ptemp2:=memoria_temp;inc(ptemp2,$0c0000+(f*$100000));copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
+          ptemp2:=memoria_temp;inc(ptemp2,$000000+(f*$100000));copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
+          ptemp2:=memoria_temp;inc(ptemp2,$080000+(f*$100000));copymemory(ptemp2,ptemp3,$40000);inc(ptemp3,$40000);
+        end;
+        freemem(ptemp);
+        convert_sprites;
+        //Tiles
+        convert_tiles;
+        gfx[1].trans[0]:=true;
+        freemem(memoria_temp);
+        marcade.dswb:=$00fb;
+        marcade.dswa_val:=@gaelco_dip;
+        marcade.dswb_val:=@biomtoy_dsw_2;
+      end;
+end;
+//final
+reset_gaelco_hw;
+iniciar_gaelco_hw:=true;
+end;
+
+procedure Cargar_gaelco_hw;
+begin
+case main_vars.tipo_maquina of
+  78:llamadas_maquina.bucle_general:=bigk_principal;
+  101,173,174:llamadas_maquina.bucle_general:=thoop_principal;
+end;
+llamadas_maquina.iniciar:=iniciar_gaelco_hw;
+llamadas_maquina.reset:=reset_gaelco_hw;
 end;
 
 end.

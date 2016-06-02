@@ -5,29 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,sn_76496,timer_engine,ppi8255,samples;
 
-procedure Cargar_zaxxon;
-function iniciar_zaxxon:boolean;
-procedure reset_zaxxon;
-procedure cerrar_zaxxon;
-//Congo
-procedure congo_principal;
-function congo_getbyte(direccion:word):byte;
-procedure congo_putbyte(direccion:word;valor:byte);
-function ppi8255_congo_rporta:byte;
-procedure ppi8255_congo_wportb(valor:byte);
-procedure ppi8255_congo_wportc(valor:byte);
-procedure congo_sound_irq;
-function snd_congo_getbyte(direccion:word):byte;
-procedure snd_congo_putbyte(direccion:word;valor:byte);
-procedure congo_sound_update;
-//Zaxxon
-procedure zaxxon_principal;
-function zaxxon_getbyte(direccion:word):byte;
-procedure zaxxon_putbyte(direccion:word;valor:byte);
-procedure ppi8255_zaxxon_wporta(valor:byte);
-procedure ppi8255_zaxxon_wportb(valor:byte);
-procedure ppi8255_zaxxon_wportc(valor:byte);
-procedure zaxxon_sound_update;
+procedure cargar_zaxxon;
 
 implementation
 const
@@ -100,220 +78,6 @@ var
  bg_mem_color:array[0..511,0..31] of byte;
  congo_sprite,coin_enable,coin_status,sound_state:array[0..2] of byte;
  coin_press:array[0..1] of byte;
-
-procedure Cargar_zaxxon;
-begin
-llamadas_maquina.iniciar:=iniciar_zaxxon;
-case main_vars.tipo_maquina of
-  175:llamadas_maquina.bucle_general:=congo_principal;
-  188:llamadas_maquina.bucle_general:=zaxxon_principal;
-end;
-llamadas_maquina.cerrar:=cerrar_zaxxon;
-llamadas_maquina.reset:=reset_zaxxon;
-llamadas_maquina.fps_max:=59.999408;
-end;
-
-function iniciar_zaxxon:boolean;
-var
-  memoria_temp:array[0..$ffff] of byte;
-const
-  ps_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
-			24*8+0, 24*8+1, 24*8+2, 24*8+3, 24*8+4, 24*8+5, 24*8+6, 24*8+7);
-  ps_y:array[0..31] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8,
-			64*8, 65*8, 66*8, 67*8, 68*8, 69*8, 70*8, 71*8,
-			96*8, 97*8, 98*8, 99*8, 100*8, 101*8, 102*8, 103*8);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  resistances:array[0..2] of integer=(1000,470,220);
-procedure conv_chars;
-begin
-  init_gfx(0,8,8,256);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(2,0,8*8,256*8*8,0);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-end;
-procedure conv_background;
-begin
-  init_gfx(1,8,8,1024);
-  gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
-  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-end;
-procedure conv_static_background(size:word);
-var
-  f,sx,sy,nchar:word;
-  atrib,x,y:byte;
-  pos:pbyte;
-begin
-for f:=0 to (size-1) do begin
-  sx:=((size shr 5)-1)-(f shr 5);
-  sy:=f and $1f;
-  atrib:=memoria_temp[f+size];
-  bg_mem_color[sx,sy]:=(atrib and $f0) shr 1;
-  nchar:=memoria_temp[f]+((atrib and $3)*256);
-  pos:=gfx[1].datos;
-  inc(pos,nchar*8*8);
-  for y:=0 to 7 do begin
-    for x:=0 to 7 do begin
-      bg_mem[sx*8+x,sy*8+y]:=pos^;
-      inc(pos);
-    end;
-  end;
-end;
-end;
-procedure conv_sprites(size:word);
-begin
-  init_gfx(2,32,32,size);
-  gfx[2].trans[0]:=true;
-  gfx_set_desc_data(3,0,128*8,2*size*128*8,128*size*8,0);
-  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-end;
-procedure convert_palette(size:word);
-var
-  colores:tpaleta;
-  f:word;
-  bit0,bit1,bit2:byte;
-  rweights,gweights,bweights:array[0..2] of single;
-begin
-compute_resistor_weights(0,	255, -1.0,
-			3,@resistances[0],@rweights[0],470,0,
-			3,@resistances[0],@gweights[0],470,0,
-			2,@resistances[1],@bweights[0],470,0);
-for f:=0 to (size-1) do begin
-		// red component */
-		bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
-		colores[f].r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
-		// green component */
-		bit0:=(memoria_temp[f] shr 3) and $01;
-		bit1:=(memoria_temp[f] shr 4) and $01;
-		bit2:=(memoria_temp[f] shr 5) and $01;
-		colores[f].g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
-		// blue component */
-		bit0:=(memoria_temp[f] shr 6) and $01;
-		bit1:=(memoria_temp[f] shr 7) and $01;
-		colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
-end;
-set_pal(colores,size);
-copymemory(@pal_src[0],@memoria_temp[$100],$100);
-end;
-begin
-iniciar_zaxxon:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,256,256,false,true);
-screen_init(3,256,256);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(3041250,264);
-case main_vars.tipo_maquina of
-  175:begin  //Congo
-        main_z80.change_ram_calls(congo_getbyte,congo_putbyte);
-        //Sound
-        snd_z80:=cpu_z80.create(4000000,264);
-        snd_z80.change_ram_calls(snd_congo_getbyte,snd_congo_putbyte);
-        init_timer(snd_z80.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,true);
-        pia8255_0:=pia8255_chip.create;
-        pia8255_0.change_ports(ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
-        //Samples
-        load_samples('congo.zip',@congo_samples[0],num_samples_congo);
-        snd_z80.init_sound(congo_sound_update);
-        sn_76496_0:=sn76496_chip.Create(4000000);
-        sn_76496_1:=sn76496_chip.Create(1000000);
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@congo_rom[0],'congo.zip',0)) then exit;
-        //cargar sonido & iniciar_sonido
-        if not(cargar_roms(@mem_snd[0],@congo_sound,'congo.zip')) then exit;
-        if not(cargar_roms(@memoria_temp[0],@congo_char,'congo.zip')) then exit;
-        conv_chars;
-        if not(cargar_roms(@memoria_temp[0],@congo_bg[0],'congo.zip',0)) then exit;
-        conv_background;
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@congo_sprites[0],'congo.zip',0)) then exit;
-        conv_sprites($80);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@congo_pal[0],'congo.zip',0)) then exit;
-        convert_palette($200);
-        //backgroud
-        if not(cargar_roms(@memoria_temp[0],@congo_tilemap[0],'congo.zip',0)) then exit;
-        conv_static_background($2000);
-        //DIP
-        marcade.dswa:=$77;
-        marcade.dswa_val:=@congo_dip_a;
-        marcade.dswb:=$33;
-        marcade.dswb_val:=@zaxxon_dip_b;
-     end;
-  188:begin  //Zaxxon
-        main_z80.change_ram_calls(zaxxon_getbyte,zaxxon_putbyte);
-        pia8255_0:=pia8255_chip.create;
-        pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
-        //Samples
-        if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon) then begin
-          main_z80.init_sound(zaxxon_sound_update);
-        end;
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@zaxxon_rom[0],'zaxxon.zip',0)) then exit;
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_char[0],'zaxxon.zip',0)) then exit;
-        conv_chars;
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_bg[0],'zaxxon.zip',0)) then exit;
-        conv_background;
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_sprites[0],'zaxxon.zip',0)) then exit;
-        conv_sprites($40);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_pal[0],'zaxxon.zip',0)) then exit;
-        convert_palette($100);
-        //Background
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_tilemap[0],'zaxxon.zip',0)) then exit;
-        conv_static_background($4000);
-        //DIP
-        marcade.dswa:=$7f;
-        marcade.dswa_val:=@zaxxon_dip_a;
-        marcade.dswb:=$33;
-        marcade.dswb_val:=@zaxxon_dip_b;
-     end;
-end;
-//final
-reset_zaxxon;
-iniciar_zaxxon:=true;
-end;
-
-procedure cerrar_zaxxon;
-begin
-close_samples;
-end;
-
-procedure reset_zaxxon;
-begin
- main_z80.reset;
- if main_vars.tipo_maquina=175 then begin
-  snd_z80.reset;
-  sn_76496_0.reset;
-  sn_76496_1.reset;
- end;
- reset_samples;
- pia8255_0.reset;
- reset_audio;
- irq_vblank:=false;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- congo_fg_bank:=0;
- congo_color_bank:=0;
- pal_offset:=0;
- fg_color:=0;
- bg_enable:=false;
- bg_position:=0;
- fillchar(congo_sprite[0],3,0);
- fillchar(coin_enable[0],3,0);
- fillchar(coin_status[0],3,0);
- fillchar(coin_press[0],2,0);
- sound_latch:=0;
-end;
 
 procedure update_video_congo;
 var
@@ -838,6 +602,215 @@ end;
 procedure zaxxon_sound_update;
 begin
   samples_update;
+end;
+
+//Main
+procedure reset_zaxxon;
+begin
+ main_z80.reset;
+ if main_vars.tipo_maquina=175 then begin
+  snd_z80.reset;
+  sn_76496_0.reset;
+  sn_76496_1.reset;
+ end;
+ reset_samples;
+ pia8255_0.reset;
+ reset_audio;
+ irq_vblank:=false;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ congo_fg_bank:=0;
+ congo_color_bank:=0;
+ pal_offset:=0;
+ fg_color:=0;
+ bg_enable:=false;
+ bg_position:=0;
+ fillchar(congo_sprite[0],3,0);
+ fillchar(coin_enable[0],3,0);
+ fillchar(coin_status[0],3,0);
+ fillchar(coin_press[0],2,0);
+ sound_latch:=0;
+end;
+
+function iniciar_zaxxon:boolean;
+var
+  memoria_temp:array[0..$ffff] of byte;
+const
+  ps_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
+			24*8+0, 24*8+1, 24*8+2, 24*8+3, 24*8+4, 24*8+5, 24*8+6, 24*8+7);
+  ps_y:array[0..31] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8,
+			64*8, 65*8, 66*8, 67*8, 68*8, 69*8, 70*8, 71*8,
+			96*8, 97*8, 98*8, 99*8, 100*8, 101*8, 102*8, 103*8);
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  resistances:array[0..2] of integer=(1000,470,220);
+procedure conv_chars;
+begin
+  init_gfx(0,8,8,256);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(2,0,8*8,256*8*8,0);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+end;
+procedure conv_background;
+begin
+  init_gfx(1,8,8,1024);
+  gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
+  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+end;
+procedure conv_static_background(size:word);
+var
+  f,sx,sy,nchar:word;
+  atrib,x,y:byte;
+  pos:pbyte;
+begin
+for f:=0 to (size-1) do begin
+  sx:=((size shr 5)-1)-(f shr 5);
+  sy:=f and $1f;
+  atrib:=memoria_temp[f+size];
+  bg_mem_color[sx,sy]:=(atrib and $f0) shr 1;
+  nchar:=memoria_temp[f]+((atrib and $3)*256);
+  pos:=gfx[1].datos;
+  inc(pos,nchar*8*8);
+  for y:=0 to 7 do begin
+    for x:=0 to 7 do begin
+      bg_mem[sx*8+x,sy*8+y]:=pos^;
+      inc(pos);
+    end;
+  end;
+end;
+end;
+procedure conv_sprites(size:word);
+begin
+  init_gfx(2,32,32,size);
+  gfx[2].trans[0]:=true;
+  gfx_set_desc_data(3,0,128*8,2*size*128*8,128*size*8,0);
+  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+end;
+procedure convert_palette(size:word);
+var
+  colores:tpaleta;
+  f:word;
+  bit0,bit1,bit2:byte;
+  rweights,gweights,bweights:array[0..2] of single;
+begin
+compute_resistor_weights(0,	255, -1.0,
+			3,@resistances[0],@rweights[0],470,0,
+			3,@resistances[0],@gweights[0],470,0,
+			2,@resistances[1],@bweights[0],470,0);
+for f:=0 to (size-1) do begin
+		// red component */
+		bit0:=(memoria_temp[f] shr 0) and $01;
+		bit1:=(memoria_temp[f] shr 1) and $01;
+		bit2:=(memoria_temp[f] shr 2) and $01;
+		colores[f].r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
+		// green component */
+		bit0:=(memoria_temp[f] shr 3) and $01;
+		bit1:=(memoria_temp[f] shr 4) and $01;
+		bit2:=(memoria_temp[f] shr 5) and $01;
+		colores[f].g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
+		// blue component */
+		bit0:=(memoria_temp[f] shr 6) and $01;
+		bit1:=(memoria_temp[f] shr 7) and $01;
+		colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
+end;
+set_pal(colores,size);
+copymemory(@pal_src[0],@memoria_temp[$100],$100);
+end;
+begin
+iniciar_zaxxon:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256,true);
+screen_init(2,256,256,false,true);
+screen_init(3,256,256);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(3041250,264);
+case main_vars.tipo_maquina of
+  175:begin  //Congo
+        main_z80.change_ram_calls(congo_getbyte,congo_putbyte);
+        //Sound
+        snd_z80:=cpu_z80.create(4000000,264);
+        snd_z80.change_ram_calls(snd_congo_getbyte,snd_congo_putbyte);
+        init_timer(snd_z80.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,true);
+        pia8255_0:=pia8255_chip.create;
+        pia8255_0.change_ports(ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
+        //Samples
+        load_samples('congo.zip',@congo_samples[0],num_samples_congo);
+        snd_z80.init_sound(congo_sound_update);
+        sn_76496_0:=sn76496_chip.Create(4000000);
+        sn_76496_1:=sn76496_chip.Create(1000000);
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@congo_rom[0],'congo.zip',0)) then exit;
+        //cargar sonido & iniciar_sonido
+        if not(cargar_roms(@mem_snd[0],@congo_sound,'congo.zip')) then exit;
+        if not(cargar_roms(@memoria_temp[0],@congo_char,'congo.zip')) then exit;
+        conv_chars;
+        if not(cargar_roms(@memoria_temp[0],@congo_bg[0],'congo.zip',0)) then exit;
+        conv_background;
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@congo_sprites[0],'congo.zip',0)) then exit;
+        conv_sprites($80);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@congo_pal[0],'congo.zip',0)) then exit;
+        convert_palette($200);
+        //backgroud
+        if not(cargar_roms(@memoria_temp[0],@congo_tilemap[0],'congo.zip',0)) then exit;
+        conv_static_background($2000);
+        //DIP
+        marcade.dswa:=$77;
+        marcade.dswa_val:=@congo_dip_a;
+        marcade.dswb:=$33;
+        marcade.dswb_val:=@zaxxon_dip_b;
+     end;
+  188:begin  //Zaxxon
+        main_z80.change_ram_calls(zaxxon_getbyte,zaxxon_putbyte);
+        pia8255_0:=pia8255_chip.create;
+        pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
+        //Samples
+        if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon) then begin
+          main_z80.init_sound(zaxxon_sound_update);
+        end;
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@zaxxon_rom[0],'zaxxon.zip',0)) then exit;
+        if not(cargar_roms(@memoria_temp[0],@zaxxon_char[0],'zaxxon.zip',0)) then exit;
+        conv_chars;
+        if not(cargar_roms(@memoria_temp[0],@zaxxon_bg[0],'zaxxon.zip',0)) then exit;
+        conv_background;
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@zaxxon_sprites[0],'zaxxon.zip',0)) then exit;
+        conv_sprites($40);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@zaxxon_pal[0],'zaxxon.zip',0)) then exit;
+        convert_palette($100);
+        //Background
+        if not(cargar_roms(@memoria_temp[0],@zaxxon_tilemap[0],'zaxxon.zip',0)) then exit;
+        conv_static_background($4000);
+        //DIP
+        marcade.dswa:=$7f;
+        marcade.dswa_val:=@zaxxon_dip_a;
+        marcade.dswb:=$33;
+        marcade.dswb_val:=@zaxxon_dip_b;
+     end;
+end;
+//final
+reset_zaxxon;
+iniciar_zaxxon:=true;
+end;
+
+procedure Cargar_zaxxon;
+begin
+llamadas_maquina.iniciar:=iniciar_zaxxon;
+case main_vars.tipo_maquina of
+  175:llamadas_maquina.bucle_general:=congo_principal;
+  188:llamadas_maquina.bucle_general:=zaxxon_principal;
+end;
+llamadas_maquina.reset:=reset_zaxxon;
+llamadas_maquina.fps_max:=59.999408;
 end;
 
 end.

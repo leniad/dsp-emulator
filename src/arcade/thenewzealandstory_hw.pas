@@ -455,8 +455,8 @@ end;
 function tnzs_snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $0:tnzs_snd_inbyte:=ym2203_0.Read_Status;
-  $1:tnzs_snd_inbyte:=ym2203_0.Read_Reg;
+  $0:tnzs_snd_inbyte:=ym2203_0.status;
+  $1:tnzs_snd_inbyte:=ym2203_0.Read;
   $2:tnzs_snd_inbyte:=sound_latch;
 end;
 end;
@@ -465,14 +465,13 @@ procedure tnzs_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   $0:ym2203_0.Control(valor);
-  $1:ym2203_0.Write_Reg(valor);
+  $1:ym2203_0.Write(valor);
 end;
 end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_z80.pedir_nmi:=ASSERT_LINE
-    else snd_z80.clear_nmi;
+  snd_z80.change_nmi(irqstate);
 end;
 
 //Insector X
@@ -576,8 +575,8 @@ begin
   case direccion of
     0..$7fff,$d000..$dfff:insectorx_misc_getbyte:=mem_misc[direccion];
     $8000..$9fff:insectorx_misc_getbyte:=sub_rom[misc_bank,direccion and $1fff];
-    $b000:insectorx_misc_getbyte:=ym2203_0.Read_Status;
-    $b001:insectorx_misc_getbyte:=ym2203_0.Read_Reg;
+    $b000:insectorx_misc_getbyte:=ym2203_0.status;
+    $b001:insectorx_misc_getbyte:=ym2203_0.Read;
     $c000:insectorx_misc_getbyte:=marcade.in0;
     $c001:insectorx_misc_getbyte:=marcade.in1;
     $c002:insectorx_misc_getbyte:=marcade.in2;
@@ -592,7 +591,7 @@ if direccion<$a000 then exit;
 case direccion of
   $a000:misc_bank:=valor and $3;
   $b000:ym2203_0.Control(valor);
-  $b001:ym2203_0.Write_Reg(valor);
+  $b001:ym2203_0.Write(valor);
   $d000..$dfff:mem_misc[direccion]:=valor;
   $e000..$efff:memoria[direccion]:=valor;
 end;

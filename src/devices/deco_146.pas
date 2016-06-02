@@ -28,14 +28,15 @@ type
       procedure write_data(address,data:word;var csflags:byte);
     protected
       internal_ram:array[0..$3ff] of ram_type;
+      bankswitch_swap_read_address,xor_port,mask_port,soundlatch_port,configregion:byte;
+      magic_read_address_xor:word;
+	    magic_read_address_xor_enabled:boolean;
+    private
       external_addrswap:array[0..9] of byte;
       region_selects:array[0..5] of byte;
 	    current_rambank,m_latchflag:byte;
 	    m_nand,m_xor,m_latchaddr,m_latchdata:word;
       rambank0,rambank1:array[0..$7f] of word;
-      bankswitch_swap_read_address,xor_port,mask_port,soundlatch_port,configregion:byte;
-	    magic_read_address_xor:word;
-	    magic_read_address_xor_enabled:boolean;
       procedure write_protport(address,data:word);
       function read_data_getloc(address:word;var location:integer):word;
       function read_protport(address:word):word;

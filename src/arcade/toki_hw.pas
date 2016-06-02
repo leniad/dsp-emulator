@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_3812,oki6295,
      seibu_sound,rom_engine,pal_engine,sound_engine,misc_functions;
 
-procedure Cargar_toki;
-procedure toki_principal;
-function iniciar_toki:boolean;
-procedure reset_toki;
-//Main CPU
-function toki_getword(direccion:dword):word;
-procedure toki_putword(direccion:dword;valor:word);
-//Sound CPU
-function toki_snd_getbyte(direccion:word):byte;
-procedure toki_snd_putbyte(direccion:word;valor:byte);
-procedure toki_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_toki;
 
 implementation
 const
@@ -53,113 +42,6 @@ var
  scroll_x2_tmp,scroll_x1,scroll_y1,scroll_y2:word;
  scroll_x2:array[0..$ff] of word;
  prioridad_pant:boolean;
-
-procedure Cargar_toki;
-begin
-llamadas_maquina.iniciar:=iniciar_toki;
-llamadas_maquina.bucle_general:=toki_principal;
-llamadas_maquina.reset:=reset_toki;
-llamadas_maquina.fps_max:=59.61;
-end;
-
-function iniciar_toki:boolean; 
-const
-  pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  ps_x:array[0..15] of dword=(3, 2, 1, 0, 16+3, 16+2, 16+1, 16+0,
-			64*8+3, 64*8+2, 64*8+1, 64*8+0, 64*8+16+3, 64*8+16+2, 64*8+16+1, 64*8+16+0);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-			8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32);
-var
-   memoria_temp,ptemp:pbyte;
-   f:dword;
-   memoria_temp2:array[0..$1ffff] of byte;
-begin
-iniciar_toki:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,256,256,false,true);
-screen_mod_sprites(3,512,512,$1ff,$1ff);
-screen_init(4,512,512,true);
-screen_mod_scroll(4,512,256,511,512,256,511);
-iniciar_video(256,224);
-getmem(memoria_temp,$100000);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(toki_getword,toki_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(toki_snd_getbyte,toki_snd_putbyte);
-snd_z80.init_sound(toki_sound_update);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,3579545);
-ym3812_0.change_irq_calls(snd_irq);
-oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.40);
-if not(cargar_roms(@memoria_temp2[0],@toki_adpcm,'toki.zip',1)) then exit;
-ptemp:=oki_6295_0.get_rom_addr;
-for f:=0 to $1ffff do begin
-  ptemp^:=memoria_temp2[BITSWAP24(f,23,22,21,20,19,18,17,16,13,14,15,12,11,10,9,8,7,6,5,4,3,2,1,0)];
-  inc(ptemp);
-end;
-//cargar roms
-if not(cargar_roms16w(@rom[0],@toki_rom[0],'toki.zip',0)) then exit;
-//cargar sonido, desencriptar y poner bancos
-if not(cargar_roms(memoria_temp,@toki_sound,'toki.zip',0)) then exit;
-decript_seibu_sound(memoria_temp,@decrypt[0],@mem_snd[0]);
-ptemp:=memoria_temp;
-inc(ptemp,$10000);copymemory(@sound_rom[0,0],ptemp,$8000);
-inc(ptemp,$8000);copymemory(@sound_rom[1,0],ptemp,$8000);
-//convertir chars
-if not(cargar_roms(memoria_temp,@toki_char,'toki.zip',0)) then exit;
-init_gfx(0,8,8,4096);
-gfx[0].trans[15]:=true;
-gfx_set_desc_data(4,0,16*8,4096*16*8+0,4096*16*8+4,0,4);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-//sprites
-if not(cargar_roms(memoria_temp,@toki_sprites,'toki.zip',0)) then exit;
-init_gfx(1,16,16,8192);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,128*8,2*4,3*4,0*4,1*4);
-convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//tiles
-if not(cargar_roms(memoria_temp,@toki_tiles1,'toki.zip',1)) then exit;
-init_gfx(2,16,16,4096);
-gfx[2].trans[15]:=true;
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-if not(cargar_roms(memoria_temp,@toki_tiles2,'toki.zip',1)) then exit;
-init_gfx(3,16,16,4096);
-gfx[3].trans[15]:=true;
-convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//DIP
-marcade.dswa:=$ffdf;
-marcade.dswa_val:=@toki_dip;
-//final
-freemem(memoria_temp);
-reset_toki;
-iniciar_toki:=true;
-end;
-
-procedure reset_toki;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym3812_0.Reset;
- oki_6295_0.reset;
- seibu_reset;
- reset_audio;
- marcade.in0:=$FFFF;
- marcade.in1:=$FF;
- marcade.in2:=0;
- scroll_x1:=0;
- scroll_y1:=0;
- scroll_x2_tmp:=0;
- fillchar(scroll_x2,$100,0);
- scroll_y2:=0;
- snd_bank:=0;
-end;
 
 procedure update_video_toki;
 var
@@ -394,6 +276,114 @@ procedure snd_irq(irqstate:byte);
 begin
   if irqstate=0 then seibu_update_irq_lines(RST10_CLEAR)
     else seibu_update_irq_lines(RST10_ASSERT);
+end;
+
+//Main
+procedure reset_toki;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym3812_0.Reset;
+ oki_6295_0.reset;
+ seibu_reset;
+ reset_audio;
+ marcade.in0:=$FFFF;
+ marcade.in1:=$FF;
+ marcade.in2:=0;
+ scroll_x1:=0;
+ scroll_y1:=0;
+ scroll_x2_tmp:=0;
+ fillchar(scroll_x2,$100,0);
+ scroll_y2:=0;
+ snd_bank:=0;
+end;
+
+function iniciar_toki:boolean;
+const
+  pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  ps_x:array[0..15] of dword=(3, 2, 1, 0, 16+3, 16+2, 16+1, 16+0,
+			64*8+3, 64*8+2, 64*8+1, 64*8+0, 64*8+16+3, 64*8+16+2, 64*8+16+1, 64*8+16+0);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32);
+var
+   memoria_temp,ptemp:pbyte;
+   f:dword;
+   memoria_temp2:array[0..$1ffff] of byte;
+begin
+iniciar_toki:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256,true);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,256,256,false,true);
+screen_mod_sprites(3,512,512,$1ff,$1ff);
+screen_init(4,512,512,true);
+screen_mod_scroll(4,512,256,511,512,256,511);
+iniciar_video(256,224);
+getmem(memoria_temp,$100000);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,256);
+main_m68000.change_ram16_calls(toki_getword,toki_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(toki_snd_getbyte,toki_snd_putbyte);
+snd_z80.init_sound(toki_sound_update);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3812_FM,3579545);
+ym3812_0.change_irq_calls(snd_irq);
+oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.40);
+if not(cargar_roms(@memoria_temp2[0],@toki_adpcm,'toki.zip',1)) then exit;
+ptemp:=oki_6295_0.get_rom_addr;
+for f:=0 to $1ffff do begin
+  ptemp^:=memoria_temp2[BITSWAP24(f,23,22,21,20,19,18,17,16,13,14,15,12,11,10,9,8,7,6,5,4,3,2,1,0)];
+  inc(ptemp);
+end;
+//cargar roms
+if not(cargar_roms16w(@rom[0],@toki_rom[0],'toki.zip',0)) then exit;
+//cargar sonido, desencriptar y poner bancos
+if not(cargar_roms(memoria_temp,@toki_sound,'toki.zip',0)) then exit;
+decript_seibu_sound(memoria_temp,@decrypt[0],@mem_snd[0]);
+ptemp:=memoria_temp;
+inc(ptemp,$10000);copymemory(@sound_rom[0,0],ptemp,$8000);
+inc(ptemp,$8000);copymemory(@sound_rom[1,0],ptemp,$8000);
+//convertir chars
+if not(cargar_roms(memoria_temp,@toki_char,'toki.zip',0)) then exit;
+init_gfx(0,8,8,4096);
+gfx[0].trans[15]:=true;
+gfx_set_desc_data(4,0,16*8,4096*16*8+0,4096*16*8+4,0,4);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+//sprites
+if not(cargar_roms(memoria_temp,@toki_sprites,'toki.zip',0)) then exit;
+init_gfx(1,16,16,8192);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,128*8,2*4,3*4,0*4,1*4);
+convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//tiles
+if not(cargar_roms(memoria_temp,@toki_tiles1,'toki.zip',1)) then exit;
+init_gfx(2,16,16,4096);
+gfx[2].trans[15]:=true;
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+if not(cargar_roms(memoria_temp,@toki_tiles2,'toki.zip',1)) then exit;
+init_gfx(3,16,16,4096);
+gfx[3].trans[15]:=true;
+convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//DIP
+marcade.dswa:=$ffdf;
+marcade.dswa_val:=@toki_dip;
+//final
+freemem(memoria_temp);
+reset_toki;
+iniciar_toki:=true;
+end;
+
+procedure Cargar_toki;
+begin
+llamadas_maquina.iniciar:=iniciar_toki;
+llamadas_maquina.bucle_general:=toki_principal;
+llamadas_maquina.reset:=reset_toki;
+llamadas_maquina.fps_max:=59.61;
 end;
 
 end.

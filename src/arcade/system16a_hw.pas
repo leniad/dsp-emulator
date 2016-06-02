@@ -5,23 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ppi8255,sound_engine,ym_2151,fd1089;
 
-procedure Cargar_system16a;
-procedure system16a_principal;
-function system16a_getword(direccion:dword):word;
-function system16a_getword_fd1089(direccion:dword):word;
-procedure system16a_putword(direccion:dword;valor:word);
-function iniciar_system16a:boolean;
-procedure reset_system16a;
-procedure cerrar_system16a;
-function system16a_snd_getbyte(direccion:word):byte;
-procedure system16a_snd_putbyte(direccion:word;valor:byte);
-procedure system16a_sound_act;
-function system16a_snd_inbyte(puerto:word):byte;
-procedure system16a_snd_outbyte(valor:byte;puerto:word);
-procedure ppi8255_wporta(valor:byte);
-procedure ppi8255_wportb(valor:byte);
-procedure ppi8255_wportc(valor:byte);
-procedure ym2151_snd_irq(irqstate:byte);
+procedure cargar_system16a;
 
 implementation
 const
@@ -161,221 +145,6 @@ var
  s16_screen:array[0..7] of byte;
  screen_enabled:boolean;
  sound_latch:byte;
-
-procedure Cargar_system16a;
-begin
-llamadas_maquina.iniciar:=iniciar_system16a;
-llamadas_maquina.bucle_general:=system16a_principal;
-llamadas_maquina.cerrar:=cerrar_system16a;
-llamadas_maquina.reset:=reset_system16a;
-end;
-
-function iniciar_system16a:boolean;
-var
-  f:word;
-  memoria_temp:array[0..$7ffff] of byte;
-  weights:array[0..1,0..5] of single;
-  i0,i1,i2,i3,i4:integer;
-const
-  resistances_normal:array[0..5] of integer=(900, 2000, 1000, 1000 div 2,1000 div 4, 0);
-	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
-
-procedure convert_chars(n:byte);
-const
-  pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
-  pt_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-begin
-init_gfx(0,8,8,n*$1000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,n*$10000*8,n*$8000*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
-end;
-
-begin
-iniciar_system16a:=false;
-iniciar_audio(false);
-//text
-screen_init(1,512,256,true);
-screen_init(2,512,256,true);
-//Background
-screen_init(3,1024,512);
-screen_mod_scroll(3,1024,512,1023,512,256,511);
-screen_init(4,1024,512,true);
-screen_mod_scroll(4,1024,512,1023,512,256,511);
-//Foreground
-screen_init(5,1024,512,true);
-screen_mod_scroll(5,1024,512,1023,512,256,511);
-screen_init(6,1024,512,true);
-screen_mod_scroll(6,1024,512,1023,512,256,511);
-//Final
-screen_init(7,512,256,false,true);
-iniciar_video(320,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,262);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,262);
-snd_z80.change_ram_calls(system16a_snd_getbyte,system16a_snd_putbyte);
-snd_z80.change_io_calls(system16a_snd_inbyte,system16a_snd_outbyte);
-snd_z80.init_sound(system16a_sound_act);
-//PPI 825
-pia8255_0:=pia8255_chip.create;
-pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
-//Timers
-YM2151_Init(0,4000000,nil,ym2151_snd_irq);
-//DIP
-marcade.dswa:=$ff;
-marcade.dswa_val:=@system16a_dip_a;
-case main_vars.tipo_maquina of
-  114:begin  //Shinobi
-        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@shinobi_rom[0],'shinobi.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@shinobi_sound,'shinobi.zip')) then exit;
-        //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@shinobi_tiles[0],'shinobi.zip',0)) then exit;
-        convert_chars(2);
-        //Cargar ROM de los sprites y recolocarlos
-        if not(cargar_roms16b(@memoria_temp[0],@shinobi_sprites[0],'shinobi.zip',0)) then exit;
-        for f:=0 to 7 do begin
-          copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
-          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
-          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
-          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
-          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
-          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
-          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
-          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
-        end;
-        s16_info.s_banks:=8;
-        marcade.dswb:=$fc;
-        marcade.dswb_val:=@shinobi_dip_b;
-  end;
-  115:begin //Alex Kid
-        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@alexkid_rom[0],'alexkidd.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@alexkid_sound,'alexkidd.zip')) then exit;
-        //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@alexkid_tiles[0],'alexkidd.zip',0)) then exit;
-        convert_chars(1);
-        //Cargar ROM de los sprites
-        if not(cargar_roms16b(@sprite_rom[0],@alexkid_sprites[0],'alexkidd.zip',0)) then exit;
-        s16_info.s_banks:=4;
-        marcade.dswb:=$fc;
-        marcade.dswb_val:=@alexkidd_dip_b;
-  end;
-  116:begin //Fantasy Zone
-        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@fantzone_rom[0],'fantzone.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@fantzone_sound,'fantzone.zip')) then exit;
-        //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@fantzone_tiles[0],'fantzone.zip',0)) then exit;
-        convert_chars(1);
-        //Cargar ROM de los sprites
-        if not(cargar_roms16b(@sprite_rom[0],@fantzone_sprites[0],'fantzone.zip',0)) then exit;
-        s16_info.s_banks:=4;
-        marcade.dswb:=$fc;
-        marcade.dswb_val:=@fantzone_dip_b;
-  end;
-  186:begin //Alien Syndrome
-        main_m68000.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
-        //cargar roms
-        if not(cargar_roms16w(@memoria_temp[0],@alien_rom[0],'aliensyn.zip',0)) then exit;
-        //Decode fd1089
-        if not(cargar_roms(@fd1089_key[0],@alien_key,'aliensyn.zip')) then exit;
-        fd1089_decrypt($40000,@memoria_temp[0],@rom[0],@rom_data[0],@fd1089_key[0],fd_typeB);
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@alien_sound,'aliensyn.zip')) then exit;
-        //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@alien_tiles[0],'aliensyn.zip',0)) then exit;
-        convert_chars(2);
-        //Cargar ROM de los sprites y recolocarlos
-        if not(cargar_roms16b(@memoria_temp[0],@alien_sprites[0],'aliensyn.zip',0)) then exit;
-        for f:=0 to 7 do begin
-          copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
-          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
-          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
-          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
-          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
-          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
-          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
-          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
-        end;
-        s16_info.s_banks:=8;
-        marcade.dswb:=$fd;
-        marcade.dswb_val:=@aliensynd_dip_b;
-  end;
-  187:begin //WB3
-        main_m68000.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
-        //cargar roms
-        if not(cargar_roms16w(@memoria_temp[0],@wb3_rom[0],'wb3.zip',0)) then exit;
-        //Decode fd1089
-        if not(cargar_roms(@fd1089_key[0],@wb3_key,'wb3.zip',1)) then exit;
-        fd1089_decrypt($40000,@memoria_temp[0],@rom[0],@rom_data[0],@fd1089_key[0],fd_typeA);
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@wb3_sound,'wb3.zip')) then exit;
-        //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@wb3_tiles[0],'wb3.zip',0)) then exit;
-        convert_chars(2);
-        //Cargar ROM de los sprites y recolocarlos
-        if not(cargar_roms16b(@memoria_temp[0],@wb3_sprites[0],'wb3.zip',0)) then exit;
-        for f:=0 to 7 do begin
-          copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
-          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
-          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
-          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
-          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
-          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
-          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
-          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
-        end;
-        s16_info.s_banks:=8;
-        marcade.dswb:=$7c;
-        marcade.dswb_val:=@wb3_dip_b;
-  end;
-  198:begin //Tetris
-        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@tetris_rom[0],'tetris.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@tetris_sound,'tetris.zip')) then exit;
-        //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@tetris_tiles[0],'tetris.zip',0)) then exit;
-        convert_chars(2);
-        //Cargar ROM de los sprites
-        if not(cargar_roms16b(@sprite_rom[0],@tetris_sprites[0],'tetris.zip',0)) then exit;
-        s16_info.s_banks:=1;
-        marcade.dswb:=$30;
-        marcade.dswb_val:=@tetris_dip_b;
-  end;
-end;
-//poner la paleta
-compute_resistor_weights(0,255,-1.0,
-  6,@resistances_normal[0],@weights[0],0,0,
-  0,nil,nil,0,0,
-  0,nil,nil,0,0);
-compute_resistor_weights(0,255,-1.0,
-  6,@resistances_sh[0],@weights[1],0,0,
-  0,nil,nil,0,0,
-  0,nil,nil,0,0);
-for f:=0 to 31 do begin
-  i4:=(f shr 4) and 1;
-  i3:=(f shr 3) and 1;
-  i2:=(f shr 2) and 1;
-  i1:=(f shr 1) and 1;
-  i0:=(f shr 0) and 1;
-  s16_info.normal[f]:=combine_6_weights(@weights[0],i0,i1,i2,i3,i4,0);
-  s16_info.shadow[f]:=combine_6_weights(@weights[1],i0,i1,i2,i3,i4,0);
-  s16_info.hilight[f]:=combine_6_weights(@weights[1],i0,i1,i2,i3,i4,1);
-end;
-//final
-reset_system16a;
-iniciar_system16a:=true;
-end;
 
 //Cada sprite 16bytes (8 words)
 //parte alta byte 0
@@ -592,29 +361,6 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
 end;
-end;
-
-procedure cerrar_system16a;
-begin
-YM2151_close(0);
-end;
-
-procedure reset_system16a;
-var
-  f:byte;
-begin
- main_m68000.reset;
- snd_z80.reset;
- YM2151_reset(0);
- pia8255_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- for f:=0 to $f do sprite_bank[f]:=f;
- screen_enabled:=true;
- fillchar(tile_buffer[0],$800*8,1);
- sound_latch:=0;
 end;
 
 procedure system16a_principal;
@@ -875,7 +621,7 @@ var
 begin
 res:=$ff;
 case (puerto and $ff) of
-  $00..$3f:if (puerto and 1)<>0 then res:=YM2151_status_port_read(0);
+  $00..$3f:if (puerto and 1)<>0 then res:=ym2151_0.status;
   $c0..$ff:begin
               pia8255_0.set_port(2,0);
               res:=sound_latch;
@@ -888,8 +634,8 @@ procedure system16a_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   $00..$3f:case (puerto and 1) of
-              0:YM2151_register_port_write(0,valor);
-              1:YM2151_data_port_write(0,valor);
+              0:ym2151_0.reg(valor);
+              1:ym2151_0.write(valor);
            end;
 end;
 end;
@@ -906,17 +652,251 @@ end;
 
 procedure ppi8255_wportc(valor:byte);
 begin
-if (valor and $80)<>0 then snd_z80.clear_nmi
-  else snd_z80.pedir_nmi:=ASSERT_LINE;
+if (valor and $80)<>0 then snd_z80.change_nmi(CLEAR_LINE)
+  else snd_z80.change_nmi(ASSERT_LINE);
 end;
 
 procedure system16a_sound_act;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
+end;
+
+//Main
+procedure reset_system16a;
+var
+  f:byte;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ pia8255_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ for f:=0 to $f do sprite_bank[f]:=f;
+ screen_enabled:=true;
+ fillchar(tile_buffer[0],$800*8,1);
+ sound_latch:=0;
+end;
+
+function iniciar_system16a:boolean;
+var
+  f:word;
+  memoria_temp:array[0..$7ffff] of byte;
+  weights:array[0..1,0..5] of single;
+  i0,i1,i2,i3,i4:integer;
+const
+  resistances_normal:array[0..5] of integer=(900, 2000, 1000, 1000 div 2,1000 div 4, 0);
+	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
+
+procedure convert_chars(n:byte);
+const
+  pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
+  pt_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+begin
+init_gfx(0,8,8,n*$1000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,n*$10000*8,n*$8000*8,0);
+convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+end;
+
+begin
+iniciar_system16a:=false;
+iniciar_audio(false);
+//text
+screen_init(1,512,256,true);
+screen_init(2,512,256,true);
+//Background
+screen_init(3,1024,512);
+screen_mod_scroll(3,1024,512,1023,512,256,511);
+screen_init(4,1024,512,true);
+screen_mod_scroll(4,1024,512,1023,512,256,511);
+//Foreground
+screen_init(5,1024,512,true);
+screen_mod_scroll(5,1024,512,1023,512,256,511);
+screen_init(6,1024,512,true);
+screen_mod_scroll(6,1024,512,1023,512,256,511);
+//Final
+screen_init(7,512,256,false,true);
+iniciar_video(320,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,262);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,262);
+snd_z80.change_ram_calls(system16a_snd_getbyte,system16a_snd_putbyte);
+snd_z80.change_io_calls(system16a_snd_inbyte,system16a_snd_outbyte);
+snd_z80.init_sound(system16a_sound_act);
+//PPI 825
+pia8255_0:=pia8255_chip.create;
+pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
+//Timers
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+//DIP
+marcade.dswa:=$ff;
+marcade.dswa_val:=@system16a_dip_a;
+case main_vars.tipo_maquina of
+  114:begin  //Shinobi
+        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@shinobi_rom[0],'shinobi.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@shinobi_sound,'shinobi.zip')) then exit;
+        //convertir tiles
+        if not(cargar_roms(@memoria_temp[0],@shinobi_tiles[0],'shinobi.zip',0)) then exit;
+        convert_chars(2);
+        //Cargar ROM de los sprites y recolocarlos
+        if not(cargar_roms16b(@memoria_temp[0],@shinobi_sprites[0],'shinobi.zip',0)) then exit;
+        for f:=0 to 7 do begin
+          copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
+          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
+          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
+          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
+          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
+          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
+          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
+          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
+        end;
+        s16_info.s_banks:=8;
+        marcade.dswb:=$fc;
+        marcade.dswb_val:=@shinobi_dip_b;
+  end;
+  115:begin //Alex Kid
+        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@alexkid_rom[0],'alexkidd.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@alexkid_sound,'alexkidd.zip')) then exit;
+        //convertir tiles
+        if not(cargar_roms(@memoria_temp[0],@alexkid_tiles[0],'alexkidd.zip',0)) then exit;
+        convert_chars(1);
+        //Cargar ROM de los sprites
+        if not(cargar_roms16b(@sprite_rom[0],@alexkid_sprites[0],'alexkidd.zip',0)) then exit;
+        s16_info.s_banks:=4;
+        marcade.dswb:=$fc;
+        marcade.dswb_val:=@alexkidd_dip_b;
+  end;
+  116:begin //Fantasy Zone
+        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@fantzone_rom[0],'fantzone.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@fantzone_sound,'fantzone.zip')) then exit;
+        //convertir tiles
+        if not(cargar_roms(@memoria_temp[0],@fantzone_tiles[0],'fantzone.zip',0)) then exit;
+        convert_chars(1);
+        //Cargar ROM de los sprites
+        if not(cargar_roms16b(@sprite_rom[0],@fantzone_sprites[0],'fantzone.zip',0)) then exit;
+        s16_info.s_banks:=4;
+        marcade.dswb:=$fc;
+        marcade.dswb_val:=@fantzone_dip_b;
+  end;
+  186:begin //Alien Syndrome
+        main_m68000.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
+        //cargar roms
+        if not(cargar_roms16w(@memoria_temp[0],@alien_rom[0],'aliensyn.zip',0)) then exit;
+        //Decode fd1089
+        if not(cargar_roms(@fd1089_key[0],@alien_key,'aliensyn.zip')) then exit;
+        fd1089_decrypt($40000,@memoria_temp[0],@rom[0],@rom_data[0],@fd1089_key[0],fd_typeB);
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@alien_sound,'aliensyn.zip')) then exit;
+        //convertir tiles
+        if not(cargar_roms(@memoria_temp[0],@alien_tiles[0],'aliensyn.zip',0)) then exit;
+        convert_chars(2);
+        //Cargar ROM de los sprites y recolocarlos
+        if not(cargar_roms16b(@memoria_temp[0],@alien_sprites[0],'aliensyn.zip',0)) then exit;
+        for f:=0 to 7 do begin
+          copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
+          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
+          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
+          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
+          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
+          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
+          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
+          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
+        end;
+        s16_info.s_banks:=8;
+        marcade.dswb:=$fd;
+        marcade.dswb_val:=@aliensynd_dip_b;
+  end;
+  187:begin //WB3
+        main_m68000.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
+        //cargar roms
+        if not(cargar_roms16w(@memoria_temp[0],@wb3_rom[0],'wb3.zip',0)) then exit;
+        //Decode fd1089
+        if not(cargar_roms(@fd1089_key[0],@wb3_key,'wb3.zip',1)) then exit;
+        fd1089_decrypt($40000,@memoria_temp[0],@rom[0],@rom_data[0],@fd1089_key[0],fd_typeA);
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@wb3_sound,'wb3.zip')) then exit;
+        //convertir tiles
+        if not(cargar_roms(@memoria_temp[0],@wb3_tiles[0],'wb3.zip',0)) then exit;
+        convert_chars(2);
+        //Cargar ROM de los sprites y recolocarlos
+        if not(cargar_roms16b(@memoria_temp[0],@wb3_sprites[0],'wb3.zip',0)) then exit;
+        for f:=0 to 7 do begin
+          copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
+          copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
+          copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
+          copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
+          copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
+          copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
+          copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
+          copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
+        end;
+        s16_info.s_banks:=8;
+        marcade.dswb:=$7c;
+        marcade.dswb_val:=@wb3_dip_b;
+  end;
+  198:begin //Tetris
+        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@tetris_rom[0],'tetris.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@tetris_sound,'tetris.zip')) then exit;
+        //convertir tiles
+        if not(cargar_roms(@memoria_temp[0],@tetris_tiles[0],'tetris.zip',0)) then exit;
+        convert_chars(2);
+        //Cargar ROM de los sprites
+        if not(cargar_roms16b(@sprite_rom[0],@tetris_sprites[0],'tetris.zip',0)) then exit;
+        s16_info.s_banks:=1;
+        marcade.dswb:=$30;
+        marcade.dswb_val:=@tetris_dip_b;
+  end;
+end;
+//poner la paleta
+compute_resistor_weights(0,255,-1.0,
+  6,@resistances_normal[0],@weights[0],0,0,
+  0,nil,nil,0,0,
+  0,nil,nil,0,0);
+compute_resistor_weights(0,255,-1.0,
+  6,@resistances_sh[0],@weights[1],0,0,
+  0,nil,nil,0,0,
+  0,nil,nil,0,0);
+for f:=0 to 31 do begin
+  i4:=(f shr 4) and 1;
+  i3:=(f shr 3) and 1;
+  i2:=(f shr 2) and 1;
+  i1:=(f shr 1) and 1;
+  i0:=(f shr 0) and 1;
+  s16_info.normal[f]:=combine_6_weights(@weights[0],i0,i1,i2,i3,i4,0);
+  s16_info.shadow[f]:=combine_6_weights(@weights[1],i0,i1,i2,i3,i4,0);
+  s16_info.hilight[f]:=combine_6_weights(@weights[1],i0,i1,i2,i3,i4,1);
+end;
+//final
+reset_system16a;
+iniciar_system16a:=true;
+end;
+
+procedure Cargar_system16a;
+begin
+llamadas_maquina.iniciar:=iniciar_system16a;
+llamadas_maquina.bucle_general:=system16a_principal;
+llamadas_maquina.reset:=reset_system16a;
 end;
 
 end.

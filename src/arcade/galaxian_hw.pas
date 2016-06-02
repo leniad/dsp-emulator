@@ -6,47 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      rom_engine,file_engine,pal_engine,sound_engine,ppi8255,misc_functions,
      konami_snd;
 
-//funciones generales
-procedure Cargar_hgalaxian;
-procedure hgalaxian_principal;
-function iniciar_hgalaxian:boolean;
-procedure reset_hgalaxian;
-procedure cerrar_hgalaxian;
-function port_0_a_read:byte;
-function port_0_b_read:byte;
-function port_0_c_read:byte;
-//Galaxian
-function galaxian_getbyte(direccion:word):byte;
-procedure galaxian_putbyte(direccion:word;valor:byte);
-procedure galaxian_despues_instruccion;
-//Jump Bug
-function jumpbug_getbyte(direccion:word):byte;
-procedure jumpbug_putbyte(direccion:word;valor:byte);
-procedure jumpbug_despues_instruccion;
-procedure jumpbug_blinking;
-//Moon Cresta
-function mooncrst_getbyte(direccion:word):byte;
-procedure mooncrst_putbyte(direccion:word;valor:byte);
-//Scramble
-function scramble_getbyte(direccion:word):byte;
-procedure scramble_putbyte(direccion:word;valor:byte);
-function scramble_port_1_c_read:byte;
-procedure scramble_port_1_a_write(valor:byte);
-procedure scramble_port_1_b_write(valor:byte);
-procedure scramble_port_1_c_write(valor:byte);
-//Super Cobra
-function scobra_getbyte(direccion:word):byte;
-procedure scobra_putbyte(direccion:word;valor:byte);
-//Frogger
-procedure frogger_principal;
-function frogger_getbyte(direccion:word):byte;
-procedure frogger_putbyte(direccion:word;valor:byte);
-procedure frogger_port_1_a_write(valor:byte);
-procedure frogger_port_1_b_write(valor:byte);
-//Amidar
-function amidar_getbyte(direccion:word):byte;
-procedure amidar_putbyte(direccion:word;valor:byte);
-function port_1_c_read:byte;
+procedure cargar_hgalaxian;
 
 implementation
 uses principal,sysutils;
@@ -932,56 +892,6 @@ actualiza_trozo(0,0,256,24,2,0,0,256,24,1);
 actualiza_trozo_final(16,0,224,256,1);
 end;
 
-procedure Cargar_hgalaxian;
-begin
-case main_vars.tipo_maquina of
-  14:begin
-      llamadas_maquina.bucle_general:=frogger_principal;
-      eventos_hardware_galaxian:=eventos_frogger;
-      calc_nchar:=galaxian_calc_nchar; //no usado
-      calc_sprite:=galaxian_calc_sprite;  //no usado
-      draw_stars:=stars_galaxian;  //no usado
-      galaxian_update_video:=update_video_frogger;
-     end;
-  47:begin
-      llamadas_maquina.bucle_general:=hgalaxian_principal;
-      eventos_hardware_galaxian:=eventos_galaxian;
-      calc_nchar:=galaxian_calc_nchar;
-      calc_sprite:=galaxian_calc_sprite;
-      draw_stars:=stars_galaxian;
-      galaxian_update_video:=update_video_hgalaxian;
-     end;
-  48:begin
-      llamadas_maquina.bucle_general:=hgalaxian_principal;
-      eventos_hardware_galaxian:=eventos_jumpbug;
-      calc_nchar:=jumpbug_calc_nchar;
-      calc_sprite:=jumpbug_calc_sprite;
-      draw_stars:=stars_jumpbug;
-      galaxian_update_video:=update_video_hgalaxian;
-  end;
-  49:begin
-      llamadas_maquina.bucle_general:=hgalaxian_principal;
-      eventos_hardware_galaxian:=eventos_galaxian;
-      calc_nchar:=mooncrst_calc_nchar;
-      calc_sprite:=mooncrst_calc_sprite;
-      draw_stars:=stars_galaxian;
-      galaxian_update_video:=update_video_hgalaxian;
-  end;
-  143..145:begin
-      llamadas_maquina.bucle_general:=frogger_principal;
-      eventos_hardware_galaxian:=eventos_scramble;
-      calc_nchar:=galaxian_calc_nchar;
-      calc_sprite:=galaxian_calc_sprite;
-      draw_stars:=stars_jumpbug;
-      galaxian_update_video:=update_video_hgalaxian;
-  end;
-end;
-llamadas_maquina.iniciar:=iniciar_hgalaxian;
-llamadas_maquina.cerrar:=cerrar_hgalaxian;
-llamadas_maquina.reset:=reset_hgalaxian;
-llamadas_maquina.fps_max:=60.6060606060;
-end;
-
 procedure frogger_principal;
 var
   frame_m:single;
@@ -995,7 +905,7 @@ while EmuStatus=EsRuning do begin
     //SND
     konamisnd_0.run(local_frame);
     if local_frame=248 then begin
-      if haz_nmi then main_z80.pedir_nmi:=PULSE_LINE;
+      if haz_nmi then main_z80.change_nmi(PULSE_LINE);
       if stars_enable then stars_scrollpos:=stars_scrollpos+1;
       galaxian_update_video;
     end;
@@ -1017,7 +927,7 @@ while EmuStatus=EsRuning do begin
     main_z80.run(frame);
     frame:=frame+main_z80.tframes-main_z80.contador;
     if f=248 then begin
-      if haz_nmi then main_z80.pedir_nmi:=PULSE_LINE;
+      if haz_nmi then main_z80.change_nmi(PULSE_LINE);
       if stars_enable then stars_scrollpos:=stars_scrollpos+1;
       update_video_hgalaxian;  //el general, no hace falta la funcion
     end;
@@ -1027,14 +937,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cerrar_hgalaxian;
-begin
-case main_vars.tipo_maquina of
-  14:save_hi('frogger.hi',@memoria[$83f1],10);
-  47,49:close_samples;
-end;
-end;
-
+//Main
 procedure reset_hgalaxian;
 begin
  main_z80.reset;
@@ -1043,6 +946,15 @@ begin
  haz_nmi:=false;
  stars_enable:=false;
  scramble_background:=false;
+ latch:=0;
+ port_b_latch:=0;
+ sound1_pos:=0;
+ sound2_pos:=0;
+ sound3_pos:=0;
+ sound4_pos:=0;
+ sound_pos:=0;
+ scramble_prot:=0;
+ scramble_prot_state:=0;
  case main_vars.tipo_maquina of
   14:begin
        konamisnd_0.reset;
@@ -1057,11 +969,6 @@ begin
        marcade.in1:=0;
        marcade.in2:=4;
        reset_samples;
-       sound1_pos:=0;
-       sound2_pos:=0;
-       sound3_pos:=0;
-       sound4_pos:=0;
-       sound_pos:=0;
   end;
   48:begin
        marcade.in0:=0;
@@ -1080,12 +987,8 @@ begin
         marcade.in0:=$ff;
         marcade.in1:=$fc;
         marcade.in2:=$f1;
-        scramble_prot:=0;
-        scramble_prot_state:=0;
         pia8255_0.reset;
         pia8255_1.reset;
-        latch:=0;
-        port_b_latch:=0;
       end;
   144:begin
         konamisnd_0.reset;
@@ -1094,8 +997,6 @@ begin
         marcade.in2:=$f2;
         pia8255_0.reset;
         pia8255_1.reset;
-        latch:=0;
-        port_b_latch:=0;
       end;
   145:begin
         konamisnd_0.reset;
@@ -1104,8 +1005,6 @@ begin
         marcade.in2:=$f1;
         pia8255_0.reset;
         pia8255_1.reset;
-        latch:=0;
-        port_b_latch:=0;
       end;
  end;
 end;
@@ -1355,6 +1254,61 @@ end;
 //final
 reset_hgalaxian;
 iniciar_hgalaxian:=true;
+end;
+
+procedure cerrar_hgalaxian;
+begin
+if main_vars.tipo_maquina=14 then save_hi('frogger.hi',@memoria[$83f1],10);
+end;
+
+procedure Cargar_hgalaxian;
+begin
+case main_vars.tipo_maquina of
+  14:begin
+      llamadas_maquina.bucle_general:=frogger_principal;
+      eventos_hardware_galaxian:=eventos_frogger;
+      calc_nchar:=galaxian_calc_nchar; //no usado
+      calc_sprite:=galaxian_calc_sprite;  //no usado
+      draw_stars:=stars_galaxian;  //no usado
+      galaxian_update_video:=update_video_frogger;
+     end;
+  47:begin
+      llamadas_maquina.bucle_general:=hgalaxian_principal;
+      eventos_hardware_galaxian:=eventos_galaxian;
+      calc_nchar:=galaxian_calc_nchar;
+      calc_sprite:=galaxian_calc_sprite;
+      draw_stars:=stars_galaxian;
+      galaxian_update_video:=update_video_hgalaxian;
+     end;
+  48:begin
+      llamadas_maquina.bucle_general:=hgalaxian_principal;
+      eventos_hardware_galaxian:=eventos_jumpbug;
+      calc_nchar:=jumpbug_calc_nchar;
+      calc_sprite:=jumpbug_calc_sprite;
+      draw_stars:=stars_jumpbug;
+      galaxian_update_video:=update_video_hgalaxian;
+  end;
+  49:begin
+      llamadas_maquina.bucle_general:=hgalaxian_principal;
+      eventos_hardware_galaxian:=eventos_galaxian;
+      calc_nchar:=mooncrst_calc_nchar;
+      calc_sprite:=mooncrst_calc_sprite;
+      draw_stars:=stars_galaxian;
+      galaxian_update_video:=update_video_hgalaxian;
+  end;
+  143..145:begin
+      llamadas_maquina.bucle_general:=frogger_principal;
+      eventos_hardware_galaxian:=eventos_scramble;
+      calc_nchar:=galaxian_calc_nchar;
+      calc_sprite:=galaxian_calc_sprite;
+      draw_stars:=stars_jumpbug;
+      galaxian_update_video:=update_video_hgalaxian;
+  end;
+end;
+llamadas_maquina.iniciar:=iniciar_hgalaxian;
+llamadas_maquina.cerrar:=cerrar_hgalaxian;
+llamadas_maquina.reset:=reset_hgalaxian;
+llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

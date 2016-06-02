@@ -6,38 +6,21 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 type
         tset_lines=procedure (valor:byte);
-        cpu_konami=class(cpu_class)
-            constructor create(clock:dword;frames_div:word);
-            destructor free;
+        cpu_konami=class(cpu_m6809)
           public
-            //IRQ's
-            procedure reset;
             procedure run(maximo:single);
-            procedure change_irq(estado:byte);
-            procedure change_firq(estado:byte);
             procedure change_set_lines(tset_lines_call:tset_lines);
           private
-            //Registros
-            r:preg_m6809;
-            pedir_firq,pedir_irq:byte;
             set_lines_call:tset_lines;
-            //Llamadas a RAM
-            procedure putword(direccion:word;valor:word);
-            function getword(direccion:word):word;
             //Llamadas IRQ
             function call_irq:byte;
             function call_firq:byte;
             //Misc Func
             function get_indexed:word;
-            //Push & pop
-            procedure push_s(reg:byte);
-            function pop_s:byte;
-            procedure push_sw(reg:word);
-            function pop_sw:word;
-            procedure push_u(reg:byte);
-            function pop_u:byte;
-            procedure push_uw(reg:word);
-            function pop_uw:word;
+            procedure trf(valor:byte);
+            procedure trf_ex(valor:byte);
+            //opcodes
+            procedure abs8(valor:pbyte);
         end;
 
 var
@@ -59,9 +42,9 @@ const
       1, 1, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 4,  // 80
       2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 4,  // 90
       2, 2, 4, 2, 0, 0, 2, 0, 1, 5, 7, 9, 3, 3, 2, 0,  // A0
-      3, 2, 2,11,21,10, 0, 0, 2, 0, 0, 0, 2, 0, 2, 0,  // B0
-      0, 0, 2, 2, 2, 2, 0, 2, 0, 2, 2, 2, 2, 2, 2, 0,  // C0
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // D0
+      3, 2, 2,11,21,10, 1, 0, 2, 0, 0, 0, 2, 0, 2, 0,  // B0
+      0, 0, 2, 2, 2, 2, 0, 2, 0, 2, 2, 2, 2, 2, 2, 1,  // C0
+      1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // D0
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // E0
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0); // F0
 
@@ -84,146 +67,21 @@ const
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,  //e0
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f); //f0
 
-constructor cpu_konami.create(clock:dword;frames_div:word);
-begin
-getmem(self.r,sizeof(reg_m6809));
-fillchar(self.r^,sizeof(reg_m6809),0);
-self.numero_cpu:=cpu_quantity;
-self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
-cpu_quantity:=cpu_quantity+1;
-end;
-
-destructor cpu_konami.free;
-begin
-freemem(self.r);
-end;
-
-procedure cpu_konami.putword(direccion:word;valor:word);
-begin
-self.putbyte(direccion,valor shr 8);
-self.putbyte(direccion+1,valor and $FF);
-end;
-
-function cpu_konami.getword(direccion:word):word;
+procedure cpu_konami.abs8(valor:pbyte);
 var
-  valor:word;
+  tempw:word;
 begin
-valor:=self.getbyte(direccion) shl 8;
-getword:=valor+(self.getbyte(direccion+1));
+tempw:=word(shortint(valor^));
+r.cc.c:=(tempw and $80)<>0;
+r.cc.v:=((0 xor valor^ xor tempw xor (tempw shr 1)) and $80)<>0;
+r.cc.n:=(tempw and $80)<>0;
+r.cc.z:=(tempw and $ff)=0;
+valor^:=abs(shortint(valor^));
 end;
 
 procedure cpu_konami.change_set_lines(tset_lines_call:tset_lines);
 begin
      self.set_lines_call:=tset_lines_call;
-end;
-
-function dame_pila(r:preg_m6809):byte;inline;
-var
-  temp:byte;
-begin
-  temp:=0;
-  if r.cc.e then temp:=temp or $80;
-  if r.cc.f then temp:=temp or $40;
-  if r.cc.h then temp:=temp or $20;
-  if r.cc.i then temp:=temp or $10;
-  if r.cc.n then temp:=temp or 8;
-  if r.cc.z then temp:=temp or 4;
-  if r.cc.v then temp:=temp or 2;
-  if r.cc.c then temp:=temp or 1;
-  dame_pila:=temp;
-end;
-
-procedure pon_pila(r:preg_m6809;valor:byte);inline;
-begin
-  r.cc.e:=(valor and $80)<>0;
-  r.cc.f:=(valor and $40)<>0;
-  r.cc.h:=(valor and $20)<>0;
-  r.cc.i:=(valor and $10)<>0;
-  r.cc.n:=(valor and 8)<>0;
-  r.cc.z:=(valor and 4)<>0;
-  r.cc.v:=(valor and 2)<>0;
-  r.cc.c:=(valor and 1)<>0;
-end;
-
-procedure cpu_konami.reset;
-begin
-self.opcode:=false;
-r.pc:=self.getword($FFFE);
-r.dp:=0;
-self.contador:=0;
-pon_pila(self.r,$50);
-self.pedir_irq:=CLEAR_LINE;
-self.pedir_firq:=CLEAR_LINE;
-r.pila_init:=false;
-end;
-
-procedure cpu_konami.change_irq(estado:byte);
-begin
-  self.pedir_irq:=estado;
-end;
-
-procedure cpu_konami.change_firq(estado:byte);
-begin
-  self.pedir_firq:=estado;
-end;
-
-procedure cpu_konami.push_s(reg:byte);
-begin
-r.s:=r.s-1;
-self.putbyte(r.s,reg);
-end;
-
-function cpu_konami.pop_s:byte;
-begin
-pop_s:=self.getbyte(r.s);
-r.s:=r.s+1;
-end;
-
-procedure cpu_konami.push_sw(reg:word);
-begin
-r.s:=r.s-2;
-self.putbyte(r.s+1,reg and $FF);
-self.putbyte(r.s,(reg shr 8));
-end;
-
-function cpu_konami.pop_sw:word;
-var
-  temp:word;
-begin
-temp:=self.getbyte(r.s) shl 8;
-temp:=temp or self.getbyte(r.s+1);
-r.s:=r.s+2;
-pop_sw:=temp;
-end;
-
-procedure cpu_konami.push_u(reg:byte);
-begin
-r.u:=r.u-1;
-self.putbyte(r.u,reg);
-end;
-
-function cpu_konami.pop_u:byte;
-begin
-pop_u:=self.getbyte(r.u);
-r.u:=r.u+1;
-end;
-
-procedure cpu_konami.push_uw(reg:word);
-begin
-r.u:=r.u-2;
-self.putbyte(r.u+1,reg and $FF);
-self.putbyte(r.u,(reg shr 8));
-end;
-
-function cpu_konami.pop_uw:word;
-var
-  temp:word;
-begin
-temp:=self.getbyte(r.u) shl 8;
-temp:=temp or self.getbyte(r.u+1);
-r.u:=r.u+2;
-pop_uw:=temp;
 end;
 
 function cpu_konami.call_irq:byte;
@@ -236,7 +94,7 @@ self.push_s(r.dp);
 self.push_s(r.d.b);
 self.push_s(r.d.a);
 r.cc.e:=true;
-self.push_s(dame_pila(self.r));
+self.push_s(self.dame_pila);
 call_irq:=19;
 r.pc:=self.getword($FFF8);
 r.cc.i:=true;
@@ -247,7 +105,7 @@ function cpu_konami.call_firq:byte;
 begin
 r.cc.e:=false;
 self.push_sw(r.pc);
-self.push_s(dame_pila(self.r));
+self.push_s(self.dame_pila);
 call_firq:=10;
 r.cc.f:=true;
 r.cc.i:=true;
@@ -255,7 +113,7 @@ r.pc:=self.getword($FFF6);
 if self.pedir_firq=HOLD_LINE then self.pedir_firq:=CLEAR_LINE;
 end;
 
-procedure trf(r:preg_m6809;valor:byte);
+procedure cpu_konami.trf(valor:byte);
 var
   temp:word;
 begin
@@ -277,7 +135,7 @@ case ((valor shr 4) and 7) of
 end;
 end;
 
-procedure trf_ex(r:preg_m6809;valor:byte);
+procedure cpu_konami.trf_ex(valor:byte);
 var
   temp1,temp2:word;
 begin
@@ -483,7 +341,7 @@ case instruccion of
               self.estados_demas:=self.estados_demas+1;
             end;
             if (numero and $1)<>0 then begin
-              self.push_s(dame_pila(self.r));
+              self.push_s(self.dame_pila);
               self.estados_demas:=self.estados_demas+1;
             end;
      end;
@@ -517,13 +375,13 @@ case instruccion of
               self.estados_demas:=self.estados_demas+1;
             end;
             if (numero and $1)<>0 then begin
-              self.push_u(dame_pila(self.r));
+              self.push_u(self.dame_pila);
               self.estados_demas:=self.estados_demas+1;
             end;
       end;
      $0e:begin //puls 4T
             if (numero and $1)<>0 then begin
-              pon_pila(self.r,self.pop_s);
+              self.pon_pila(self.pop_s);
               self.estados_demas:=self.estados_demas+1;
             end;
             if (numero and $2)<>0 then begin
@@ -557,7 +415,7 @@ case instruccion of
      end;
      $0f:begin //pulu 4T
             if (numero and $1)<>0 then begin
-              pon_pila(self.r,self.pop_u);
+              self.pon_pila(self.pop_u);
               self.estados_demas:=self.estados_demas+1;
             end;
             if (numero and $2)<>0 then begin
@@ -613,15 +471,15 @@ case instruccion of
      $3a:self.putbyte(posicion,m680x_ld_st8(r.d.a,@r.cc));  //sta 1T
      $3b:self.putbyte(posicion,m680x_ld_st8(r.d.b,@r.cc));  //stb 1T
      $3c:begin //andcc  3T
-            tempb:=dame_pila(self.r) and numero;
-            pon_pila(self.r,tempb);
+            tempb:=self.dame_pila and numero;
+            self.pon_pila(tempb);
          end;
      $3d:begin //orcc 3T
-            tempb:=dame_pila(self.r) or numero;
-            pon_pila(self.r,tempb);
+            tempb:=self.dame_pila or numero;
+            self.pon_pila(tempb);
          end;
-     $3e:trf_ex(self.r,numero); //exg 8T
-     $3f:trf(self.r,numero); //trf 4T
+     $3e:self.trf_ex(numero); //exg 8T
+     $3f:self.trf(numero); //trf 4T
      $40,$41:r.d.w:=m680x_ld_st16(posicion,@r.cc);  //ldd 2T
      $42,$43:r.x:=m680x_ld_st16(posicion,@r.cc);  //ldx 2T
      $44,$45:r.y:=m680x_ld_st16(posicion,@r.cc);  //ldy 2T
@@ -646,7 +504,7 @@ case instruccion of
      $65:if not(r.cc.n) then r.pc:=r.pc+shortint(numero); //bpl 3T
      $66:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//bge 3T
      $67:if ((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //bgt 3T
-     $68:r.pc:=r.pc++smallint(posicion); //lbra 3T
+     $68:r.pc:=r.pc+smallint(posicion); //lbra 3T
      $69:if not(r.cc.c or r.cc.z) then r.pc:=r.pc+smallint(posicion);  //lbhi 3T
      $6a:if not(r.cc.c) then r.pc:=r.pc+smallint(posicion);  //lbcc 3T
      $6b:if not(r.cc.z) then r.pc:=r.pc+smallint(posicion); //lbne 3T
@@ -691,9 +549,13 @@ case instruccion of
      $83:r.d.a:=m680x_com(r.d.a,@r.cc); //coma 2T
      $84:r.d.b:=m680x_com(r.d.b,@r.cc); //comb 2T
      $85:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T
-     $86:r.d.a:=m680x_neg(r.d.a,@r.cc); //nega 2T
-     $87:r.d.b:=m680x_neg(r.d.b,@r.cc); //negb 2T
-     $88:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc)); //neg 4T
+     $86:self.neg(@r.d.a); //nega 2T
+     $87:self.neg(@r.d.b); //negb 2T
+     $88:begin  //neg 4T
+          tempb:=self.getbyte(posicion);
+          self.neg(@tempb);
+          self.putbyte(posicion,tempb);
+         end;
      $89:r.d.a:=m680x_inc(r.d.a,@r.cc); //inca 2T
      $8a:r.d.b:=m680x_inc(r.d.b,@r.cc); //incb 2T
      $8b:self.putbyte(posicion,m680x_inc(self.getbyte(posicion),@r.cc)); //inc 4T
@@ -717,7 +579,7 @@ case instruccion of
      $9d:r.d.b:=m680x_asl(r.d.b,@r.cc); //aslb 2T
      $9e:self.putbyte(posicion,m680x_asl(self.getbyte(posicion),@r.cc)); //asl 4T
      $9f:begin  //rti 4T
-          pon_pila(self.r,self.pop_s);
+          self.pon_pila(self.pop_s);
           if r.cc.e then begin //13 T
             self.estados_demas:=self.estados_demas+9;
             r.d.a:=self.pop_s;
@@ -748,11 +610,19 @@ case instruccion of
             r.pc:=r.pc+smallint(posicion);
       end;
      $ac:begin //decbjnz
-          r.d.b:=m680x_dec(r.d.b,@r.cc);
+          tempw:=r.d.b-1;
+          r.cc.z:=((tempw and $ff)=0);
+          r.cc.n:=(templ and $80)<>0;
+          r.cc.v:=((r.d.b xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+          r.d.b:=tempw;
           if not(r.cc.z) then r.pc:=r.pc+shortint(numero);
          end;
      $ad:begin //decxjnz
-          r.x:=m680x_dec16(r.x,@r.cc);
+          templ:=r.x-1;
+          r.cc.z:=((templ and $ffff)=0);
+          r.cc.n:=(templ and $8000)<>0;
+          r.cc.v:=((r.x xor 1 xor templ xor (templ shr 1)) and $8000)<>0;
+          r.x:=templ;
           if not(r.cc.z) then r.pc:=r.pc+shortint(numero);
          end;
      $b0:r.x:=r.x+r.d.b;  //abx 3T
@@ -760,15 +630,15 @@ case instruccion of
             cf:=0;
             tempb:=r.d.a and $f0;
             tempb2:=r.d.a and $0f;
-	    if ((tempb2>$09) or r.cc.h) then cf:=cf or $06;
-	    if ((tempb>$80) and (tempb2>$09)) then cf:=cf or $60;
-	    if ((tempb>$90) or r.cc.c) then cf:=cf or $60;
-	    tempw:=cf+r.d.a;
-	    r.cc.v:=false;
+	          if ((tempb2>$09) or r.cc.h) then cf:=cf or $06;
+	          if ((tempb>$80) and (tempb2>$09)) then cf:=cf or $60;
+	          if ((tempb>$90) or r.cc.c) then cf:=cf or $60;
+	          tempw:=cf+r.d.a;
+	          r.cc.v:=false;
             r.cc.n:=(tempw and $80)<>0;
             r.cc.z:=((tempw and $ff)=0);
             r.cc.c:=r.cc.c or ((tempw and $100)<>0);
-	    r.d.a:=tempw;
+	          r.d.a:=tempw;
           end;
      $b2:begin //sex 2T
           if (r.d.b and $80)<>0 then r.d.a:=$ff
@@ -785,7 +655,7 @@ case instruccion of
           templ:=r.x*r.y;
           r.x:=templ shr 16;
           r.y:=templ and $ffff;
-          r.cc.z:=(templ=0);
+          r.cc.z:=(templ and $ffff)=0;
           r.cc.c:=(templ and $8000)<>0;
          end;
      $b5:begin //divx 10
@@ -802,12 +672,12 @@ case instruccion of
           r.cc.z:=(tempw=0);
          end;
      $b6:while (r.u<>0) do begin //bmove
-            tempb:=self.getbyte(r.y);
-            r.y:=r.y+1;
-            self.putbyte(r.x,tempb);
-            r.x:=r.x+1;
-            r.u:=r.u-1;
-            self.estados_demas:=self.estados_demas+3;
+              tempb:=self.getbyte(r.y);
+              r.y:=r.y+1;
+              self.putbyte(r.x,tempb);
+              r.x:=r.x+1;
+              r.u:=r.u-1;
+              self.estados_demas:=self.estados_demas+2;
          end;
      $b8:r.d.w:=m680x_lsrd(r.d.w,numero,@r.cc);  //lsrd
      $bc:r.d.w:=m680x_asrd(r.d.w,numero,@r.cc);  //asrd
@@ -832,8 +702,8 @@ case instruccion of
      $c9:self.putword(posicion,m680x_dec16(self.getword(posicion),@r.cc)); //dec16
      $ca:m680x_tst16(r.d.w,@r.cc); //tstd
      $cb:m680x_tst16(self.getword(posicion),@r.cc);
-     $cc:r.d.a:=m680x_abs(r.d.a,@r.cc); //absa
-     $cd:r.d.b:=m680x_abs(r.d.b,@r.cc); //absb
+     $cc:self.abs8(@r.d.a); //absa
+     $cd:self.abs8(@r.d.b); //absb
      $ce:r.d.w:=m680x_abs16(r.d.w,@r.cc); //absd
      $cf:while (r.u<>0) do begin //bset
             self.putbyte(r.x,r.d.a);

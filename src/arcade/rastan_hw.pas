@@ -9,7 +9,6 @@ procedure Cargar_rastan;
 procedure rastan_principal;
 function iniciar_rastan:boolean;
 procedure reset_rastan;
-procedure cerrar_rastan;
 //Main CPU
 function rastan_getword(direccion:dword):word;
 procedure rastan_putword(direccion:dword;valor:word);
@@ -49,7 +48,6 @@ procedure Cargar_rastan;
 begin
 llamadas_maquina.iniciar:=iniciar_rastan;
 llamadas_maquina.bucle_general:=rastan_principal;
-llamadas_maquina.cerrar:=cerrar_rastan;
 llamadas_maquina.reset:=reset_rastan;
 end;
 
@@ -82,7 +80,9 @@ snd_z80.change_ram_calls(rastan_snd_getbyte,rastan_snd_putbyte);
 snd_z80.init_sound(sound_instruccion);
 //Sound Chips
 msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm);
-YM2151_Init(0,4000000,sound_bank_rom,ym2151_snd_irq);
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_port_func(sound_bank_rom);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@rastan_rom[0],'rastan.zip',0)) then exit;
 //rom[$05FF9F]:=$fa;  //Cheeeeeeeeat
@@ -111,16 +111,11 @@ reset_rastan;
 iniciar_rastan:=true;
 end;
 
-procedure cerrar_rastan;
-begin
-YM2151_close(0);
-end;
-
 procedure reset_rastan;
 begin
  main_m68000.reset;
  snd_z80.reset;
- YM2151_reset(0);
+ YM2151_0.reset;
  msm_5205_0.reset;
  taitosound_reset;
  reset_audio;
@@ -291,7 +286,7 @@ begin
 case direccion of
   0..$3fff,$8000..$8fff:rastan_snd_getbyte:=mem_snd[direccion];
   $4000..$7fff:rastan_snd_getbyte:=bank_sound[sound_bank,direccion and $3fff];
-  $9001:rastan_snd_getbyte:=YM2151_status_port_read(0);
+  $9001:rastan_snd_getbyte:=ym2151_0.status;
   $a001:rastan_snd_getbyte:=taitosound_slave_comm_r;
 end;
 end;
@@ -301,8 +296,8 @@ begin
 if direccion<$8000 then exit;
 case direccion of
   $8000..$8fff:mem_snd[direccion]:=valor;
-  $9000:YM2151_register_port_write(0,valor);
-  $9001:YM2151_data_port_write(0,valor);
+  $9000:ym2151_0.reg(valor);
+  $9001:ym2151_0.write(valor);
   $a000:taitosound_slave_port_w(valor);
   $a001:taitosound_slave_comm_w(valor);
   $b000:adpcm_pos:=(adpcm_pos and $00ff) or (valor shl 8);
@@ -321,7 +316,7 @@ end;
 
 procedure sound_instruccion;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);

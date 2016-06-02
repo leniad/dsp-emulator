@@ -30,7 +30,7 @@ type
         procedure set_rmrd_line(state:byte);
         function get_rmrd_line:byte;
         procedure draw_layer(layer,final_screen:byte);
-    protected
+    private
         ram:array[0..$5fff] of byte;
         tileflip_enable,romsubbank,scrollctrl:byte;
         charrombank,charrombank_2:array[0..3] of byte;

@@ -593,7 +593,7 @@ while EmuStatus=EsRuning do begin
     239:begin
           update_video_nemesis;
           if (irq_on and screen_par) then main_m68000.irq[1]:=HOLD_LINE;
-          snd_z80.pedir_nmi:=PULSE_LINE;
+          snd_z80.change_nmi(PULSE_LINE);
         end;
     255:if irq2_on then main_m68000.irq[2]:=HOLD_LINE;
   end;

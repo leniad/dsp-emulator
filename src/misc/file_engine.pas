@@ -133,24 +133,14 @@ if fileexists(directory.Base+'dsp.ini') then begin
   main_vars.center_screen:=(fich_ini.ReadInteger('dsp','center_screen',1)=1);
   main_vars.x11:=(fich_ini.ReadInteger('dsp','x11',0)=1);
   //configuracion spectrum
-  issue2:=(fich_ini.ReadInteger('spectrum','issue',0)=0);
-  f:=fich_ini.ReadInteger('spectrum','joystick',0);
-  jkempston:=false;
-  jcursor:=false;
-  jsinclair1:=false;
-  jsinclair2:=false;
-  case f of
-    0:jkempston:=true;
-    1:jcursor:=true;
-    2:jsinclair1:=true;
-    3:jsinclair2:=true;
-  end;
+  var_spectrum.issue2:=(fich_ini.ReadInteger('spectrum','issue',0)=0);
+  var_spectrum.tipo_joy:=fich_ini.ReadInteger('spectrum','joystick',0);
   borde.tipo:=fich_ini.ReadInteger('spectrum','border',0);
   mouse.tipo:=fich_ini.ReadInteger('spectrum','tipo_mouse',0);
-  beeper_filter:=(fich_ini.ReadInteger('spectrum','beepfilter',0)=1);
-  audio_load:=(fich_ini.ReadInteger('spectrum','audioload',0)=1);
-  audio_128k:=fich_ini.ReadInteger('spectrum','audio_128k',0);
-  beeper_oversample:=fich_ini.ReadInteger('spectrum','beeper_oversample',1);
+  var_spectrum.beeper_filter:=(fich_ini.ReadInteger('spectrum','beepfilter',0)=1);
+  var_spectrum.audio_load:=(fich_ini.ReadInteger('spectrum','audioload',0)=1);
+  var_spectrum.audio_128k:=fich_ini.ReadInteger('spectrum','audio_128k',0);
+  var_spectrum.beeper_oversample:=fich_ini.ReadInteger('spectrum','beeper_oversample',1);
   ulaplus.enabled:=(fich_ini.ReadInteger('spectrum','ulaplus',0)=1);
   //Configuracion CPC
   for f:=0 to 6 do cpc_rom_slot[f]:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
@@ -243,17 +233,14 @@ end else begin
   main_vars.center_screen:=true;
   main_vars.x11:=false;
   //configuracion basica spectrum
-  audio_128k:=0;
-  beeper_filter:=false;
-  audio_load:=true;
-  issue2:=true;
-  jkempston:=true;
-  jcursor:=false;
-  jsinclair1:=false;
-  jsinclair2:=false;
+  var_spectrum.audio_128k:=0;
+  var_spectrum.beeper_filter:=false;
+  var_spectrum.audio_load:=true;
+  var_spectrum.issue2:=true;
+  var_spectrum.tipo_joy:=JKEMPSTON;
   borde.tipo:=1;
   mouse.tipo:=0;
-  beeper_oversample:=1;
+  var_spectrum.beeper_oversample:=1;
   ulaplus.enabled:=true;
   //Configuracion CPC
   for f:=0 to 6 do cpc_rom_slot[f]:='';
@@ -382,20 +369,16 @@ fich_ini.WriteInteger('dsp','show_crc_error',byte(main_vars.show_crc_error));
 fich_ini.WriteInteger('dsp','center_screen',byte(main_vars.center_screen));
 fich_ini.WriteInteger('dsp','x11',byte(main_vars.x11));
 //Config Spectrum
-fich_ini.WriteInteger('spectrum','issue',byte(issue2));
-if jkempston then f:=0;
-if jcursor then f:=1;
-if jsinclair1 then f:=2;
-if jsinclair2 then f:=3;
-fich_ini.WriteInteger('spectrum','joystick',f);
+fich_ini.WriteInteger('spectrum','issue',byte(var_spectrum.issue2));
+fich_ini.WriteInteger('spectrum','joystick',var_spectrum.tipo_joy);
 fich_ini.WriteInteger('spectrum','border',borde.tipo);
 fich_ini.WriteInteger('spectrum','tipo_mouse',mouse.tipo);
-fich_ini.WriteInteger('spectrum','beepfilter',byte(beeper_filter));
-f:=byte(audio_load);
+fich_ini.WriteInteger('spectrum','beepfilter',byte(var_spectrum.beeper_filter));
+f:=byte(var_spectrum.audio_load);
 if main_vars.tipo_maquina=255 then f:=0;
 fich_ini.WriteInteger('spectrum','audioload',f);
-fich_ini.WriteInteger('spectrum','audio_128k',audio_128k);
-fich_ini.WriteInteger('spectrum','beeper_oversample',beeper_oversample);
+fich_ini.WriteInteger('spectrum','audio_128k',var_spectrum.audio_128k);
+fich_ini.WriteInteger('spectrum','beeper_oversample',var_spectrum.beeper_oversample);
 fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
 //Configuracion CPC
 for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom_slot[f]);

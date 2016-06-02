@@ -593,10 +593,10 @@ end;
 function ninjakid2_snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $00:ninjakid2_snd_inbyte:=ym2203_0.Read_Status;
-  $01:ninjakid2_snd_inbyte:=ym2203_0.Read_Reg;
-  $80:ninjakid2_snd_inbyte:=ym2203_1.Read_Status;
-  $81:ninjakid2_snd_inbyte:=ym2203_1.Read_Reg;
+  $00:ninjakid2_snd_inbyte:=ym2203_0.status;
+  $01:ninjakid2_snd_inbyte:=ym2203_0.Read;
+  $80:ninjakid2_snd_inbyte:=ym2203_1.status;
+  $81:ninjakid2_snd_inbyte:=ym2203_1.Read;
 end;
 end;
 
@@ -604,16 +604,15 @@ procedure ninjakid2_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   $00:ym2203_0.Control(valor);
-  $01:ym2203_0.Write_Reg(valor);
+  $01:ym2203_0.Write(valor);
   $80:ym2203_1.Control(valor);
-  $81:ym2203_1.Write_Reg(valor);
+  $81:ym2203_1.Write(valor);
 end;
 end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 procedure ninjakid2_sound_update;

@@ -261,8 +261,8 @@ begin
 case direccion of
   $0..$87ff:volfied_snd_getbyte:=mem_snd[direccion];
   $8801:volfied_snd_getbyte:=taitosound_slave_comm_r;
-  $9000:volfied_snd_getbyte:=ym2203_0.Read_Status;
-  $9001:volfied_snd_getbyte:=ym2203_0.Read_Reg;
+  $9000:volfied_snd_getbyte:=ym2203_0.status;
+  $9001:volfied_snd_getbyte:=ym2203_0.Read;
 end;
 end;
 
@@ -274,7 +274,7 @@ case direccion of
   $8800:taitosound_slave_port_w(valor);
   $8801:taitosound_slave_comm_w(valor);
   $9000:ym2203_0.Control(valor);
-  $9001:ym2203_0.Write_Reg(valor);
+  $9001:ym2203_0.Write(valor);
 end;
 end;
 
@@ -295,8 +295,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 end.

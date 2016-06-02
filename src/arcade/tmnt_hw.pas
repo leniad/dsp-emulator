@@ -6,28 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      pal_engine,sound_engine,upd7759,ym_2151,k052109,k051960,
      misc_functions,samples,k053244_k053245,k053260,k053251,eepromser,k007232;
 
-procedure Cargar_tmnt;
-function iniciar_tmnt:boolean;
-procedure reset_tmnt;
-procedure cerrar_tmnt;
-//TMNT
-procedure tmnt_principal;
-function tmnt_getword(direccion:dword):word;
-procedure tmnt_putword(direccion:dword;valor:word);
-function tmnt_snd_getbyte(direccion:word):byte;
-procedure tmnt_snd_putbyte(direccion:word;valor:byte);
-procedure tmnt_sound_update;
-procedure tmnt_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
-procedure tmnt_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
-procedure tmnt_k007232_cb(valor:byte);
-//SSriders
-procedure ssriders_principal;
-function ssriders_getword(direccion:dword):word;
-procedure ssriders_putword(direccion:dword;valor:word);
-function ssriders_snd_getbyte(direccion:word):byte;
-procedure ssriders_snd_putbyte(direccion:word;valor:byte);
-procedure ssriders_sound_update;
-procedure ssriders_sprite_cb(var code:word;var color:word;var priority:word);
+procedure cargar_tmnt;
 
 implementation
 const
@@ -74,296 +53,8 @@ var
  sprite_ram:array[0..$1fff] of word;
  char_rom,sprite_rom,k007232_rom,k053260_rom:pbyte;
  sound_latch,sound_latch2,sprite_colorbase,last_snd,toggle:byte;
- layer_colorbase:array[0..2] of byte;
+ layer_colorbase,layerpri:array[0..2] of byte;
  irq5_mask,sprites_pri:boolean;
- layerpri:array[0..2] of byte;
-
-procedure Cargar_tmnt;
-begin
-llamadas_maquina.iniciar:=iniciar_tmnt;
-llamadas_maquina.cerrar:=cerrar_tmnt;
-llamadas_maquina.reset:=reset_tmnt;
-case main_vars.tipo_maquina of
-  214:llamadas_maquina.bucle_general:=tmnt_principal;
-  215:llamadas_maquina.bucle_general:=ssriders_principal;
-end;
-end;
-
-function iniciar_tmnt:boolean;
-var
-  f,tempdw:dword;
-  mem_temp:array[0..$1ff] of byte;
-  ptemp:pbyte;
-  ptempw:pword;
-procedure desencriptar_sprites;
-var
-  len,a,b:dword;
-  entry,i:byte;
-  bits:array[0..31] of byte;
-  temp:pbyte;
-const
-  CA0=0;
-  CA1=1;
-  CA2=2;
-  CA3=3;
-  CA4=4;
-  CA5=5;
-  CA6=6;
-  CA7=7;
-  CA8=8;
-  CA9=9;
-		// following table derived from the schematics. It indicates, for each of the */
-		// 9 low bits of the sprite line address, which bit to pick it from. */
-		// For example, when the PROM contains 4, which applies to 4x2 sprites, */
-		// bit OA1 comes from CA5, OA2 from CA0, and so on. */
-	bit_pick_table:array[0..9,0..7] of byte=(
-			//0(1x1) 1(2x1) 2(1x2) 3(2x2) 4(4x2) 5(2x4) 6(4x4) 7(8x8) */
-			( CA3,   CA3,   CA3,   CA3,   CA3,   CA3,   CA3,   CA3 ),   // CA3 */
-			( CA0,   CA0,   CA5,   CA5,   CA5,   CA5,   CA5,   CA5 ),   // OA1 */
-			( CA1,   CA1,   CA0,   CA0,   CA0,   CA7,   CA7,   CA7 ),   // OA2 */
-			( CA2,   CA2,   CA1,   CA1,   CA1,   CA0,   CA0,   CA9 ),   // OA3 */
-			( CA4,   CA4,   CA2,   CA2,   CA2,   CA1,   CA1,   CA0 ),   // OA4 */
-			( CA5,   CA6,   CA4,   CA4,   CA4,   CA2,   CA2,   CA1 ),   // OA5 */
-			( CA6,   CA5,   CA6,   CA6,   CA6,   CA4,   CA4,   CA2 ),   // OA6 */
-			( CA7,   CA7,   CA7,   CA7,   CA8,   CA6,   CA6,   CA4 ),   // OA7 */
-			( CA8,   CA8,   CA8,   CA8,   CA7,   CA8,   CA8,   CA6 ),   // OA8 */
-			( CA9,   CA9,   CA9,   CA9,   CA9,   CA9,   CA9,   CA8 ));  // OA9 */
-begin
-	// unscramble the sprite ROM address lines
-	len:=$200000 div 4;
-	getmem(temp,$200000);
-  copymemory(temp,sprite_rom,$200000);
-	for a:=0 to (len-1) do begin
-		// pick the correct entry in the PROM (top 8 bits of the address) */
-		entry:=mem_temp[(A and $7f800) shr 11] and 7;
-		// the bits to scramble are the low 10 ones */
-		for i:=0 to 9 do bits[i]:=(A shr i) and $1;
-		B:=A and $7fc00;
-		for i:=0 to 9 do B:=b or (bits[bit_pick_table[i][entry]] shl i);
-    sprite_rom[a*4]:=temp[b*4];
-    sprite_rom[(a*4)+1]:=temp[(b*4)+1];
-    sprite_rom[(a*4)+2]:=temp[(b*4)+2];
-    sprite_rom[(a*4)+3]:=temp[(b*4)+3];
-	end;
-  freemem(temp);
-end;
-
-function decode_sample(orig:pbyte;dest:pword):dword;
-var
-  i:dword;
-  val:word;
-  expo,cont1,cont2:byte;
-  ptemp:pword;
-  pos:dword;
-begin
-	//  Sound sample for TMNT.D05 is stored in the following mode (ym3012 format):
-	//  Bit 15-13:  Exponent (2 ^ x)
-	//  Bit 12-3 :  Sound data (10 bit)
-	//  (Sound info courtesy of Dave <dave@finalburn.com>)
-  //El original viene a 20Khz, lo convierto a 44Khz
-  pos:=0;
-  cont2:=0;
-	for i:=0 to $3ffff do begin
-		val:=orig[2*i]+orig[2*i+1]*256;
-		expo:=val shr 13;
-		val:=(val shr 3) and $3ff; // 10 bit, Max Amplitude 0x400 */
-		val:=val-$200;                   // Centralize value */
-		val:=val shl (expo-3);
-    for cont1:=0 to 1 do begin
-      ptemp:=dest;
-      inc(ptemp,pos);
-		  ptemp^:=val;
-      pos:=pos+1;
-    end;
-    cont2:=cont2+1;
-    if cont2=5 then begin
-      cont2:=0;
-      ptemp:=dest;
-      inc(ptemp,pos);
-		  ptemp^:=val;
-      pos:=pos+1;
-    end;
-  end;
-  decode_sample:=pos;
-end;
-
-begin
-iniciar_tmnt:=false;
-//Pantallas para el K052109
-screen_init(1,512,256,true);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
-screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
-screen_init(4,1024,1024,false,true);
-case main_vars.tipo_maquina of
-  214:begin //TMNT
-        iniciar_video(320,224,true);
-        iniciar_audio(false); //Sonido mono
-        //Main CPU
-        main_m68000:=cpu_m68000.create(8000000,256);
-        main_m68000.change_ram16_calls(tmnt_getword,tmnt_putword);
-        //Sound CPU
-        snd_z80:=cpu_z80.create(3579545,256);
-        snd_z80.change_ram_calls(tmnt_snd_getbyte,tmnt_snd_putbyte);
-        snd_z80.init_sound(tmnt_sound_update);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@tmnt_rom[0],'tmnt.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@tmnt_sound,'tmnt.zip',1)) then exit;
-        //Sound Chips
-        YM2151_Init(0,3579545,nil,nil);
-        upd7759_0:=upd7759_chip.create(640000,0.6);
-        getmem(k007232_rom,$20000);
-        if not(cargar_roms(k007232_rom,@tmnt_k007232,'tmnt.zip',1)) then exit;
-        k007232_0:=k007232_chip.create(3579545,k007232_rom,$20000,0.20,tmnt_k007232_cb);
-        if not(cargar_roms(upd7759_0.get_rom_addr,@tmnt_upd,'tmnt.zip',1)) then exit;
-        getmem(ptemp,$80000);
-        getmem(ptempw,$80000*3);
-        if not(cargar_roms(ptemp,@tmnt_title,'tmnt.zip',1)) then exit;
-        load_samples_raw(ptempw,decode_sample(ptemp,ptempw),false,false);
-        freemem(ptemp);
-        freemem(ptempw);
-        //Iniciar video
-        getmem(char_rom,$100000);
-        if not(cargar_roms32b(char_rom,@tmnt_char,'tmnt.zip',0)) then exit;
-        //Ordenar
-        for f:=0 to $3FFFF do begin
-          tempdw:=char_rom[(f*4)+0];
-          tempdw:=tempdw or (char_rom[(f*4)+1] shl 8);
-          tempdw:=tempdw or (char_rom[(f*4)+2] shl 16);
-          tempdw:=tempdw or (char_rom[(f*4)+3] shl 24);
-          tempdw:=BITSWAP32(tempdw,31,27,23,19,15,11,7,3,30,26,22,18,14,10,6,2,29,25,21,17,13,9,5,1,28,24,20,16,12,8,4,0);
-          char_rom[(f*4)+0]:=tempdw and $ff;
-          char_rom[(f*4)+1]:=(tempdw shr 8) and $ff;
-          char_rom[(f*4)+2]:=(tempdw shr 16) and $ff;
-          char_rom[(f*4)+3]:=(tempdw shr 24) and $ff;
-        end;
-        k052109_0:=k052109_chip.create(1,2,3,tmnt_cb,char_rom,$100000);
-        //Init sprites
-        getmem(sprite_rom,$200000);
-        if not(cargar_roms32b(sprite_rom,@tmnt_sprites,'tmnt.zip',0)) then exit;
-        if not(cargar_roms(@mem_temp[0],@tmnt_prom,'tmnt.zip',0)) then exit;
-        //Ordenar
-        for f:=0 to $7FFFF do begin
-          tempdw:=sprite_rom[(f*4)+0];
-          tempdw:=tempdw or (sprite_rom[(f*4)+1] shl 8);
-          tempdw:=tempdw or (sprite_rom[(f*4)+2] shl 16);
-          tempdw:=tempdw or (sprite_rom[(f*4)+3] shl 24);
-          tempdw:=BITSWAP32(tempdw,31,27,23,19,15,11,7,3,30,26,22,18,14,10,6,2,29,25,21,17,13,9,5,1,28,24,20,16,12,8,4,0);
-          sprite_rom[(f*4)+0]:=tempdw and $ff;
-          sprite_rom[(f*4)+1]:=(tempdw shr 8) and $ff;
-          sprite_rom[(f*4)+2]:=(tempdw shr 16) and $ff;
-          sprite_rom[(f*4)+3]:=(tempdw shr 24) and $ff;
-        end;
-        desencriptar_sprites;
-        k051960_0:=k051960_chip.create(4,sprite_rom,$200000,tmnt_sprite_cb);
-        layer_colorbase[0]:=0;
-        layer_colorbase[1]:=32;
-        layer_colorbase[2]:=40;
-        sprite_colorbase:=16;
-        //DIP
-        marcade.dswa:=$ff;
-        marcade.dswa_val:=@tmnt_dip_a;
-        marcade.dswb:=$5e;
-        marcade.dswb_val:=@tmnt_dip_b;
-        marcade.dswc:=$ff;
-        marcade.dswc_val:=@tmnt_dip_c;
-  end;
-  215:begin //Sunset Riders
-        iniciar_video(288,224,true);
-        iniciar_audio(true); //Sonido stereo
-        //Main CPU
-        main_m68000:=cpu_m68000.create(16000000,256);
-        main_m68000.change_ram16_calls(ssriders_getword,ssriders_putword);
-        //Sound CPU
-        snd_z80:=cpu_z80.create(8000000,256);
-        snd_z80.change_ram_calls(ssriders_snd_getbyte,ssriders_snd_putbyte);
-        snd_z80.init_sound(ssriders_sound_update);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@ssriders_rom[0],'ssriders.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@ssriders_sound,'ssriders.zip',1)) then exit;
-        //Sound Chips
-        YM2151_Init(0,3579545,nil,nil);
-        getmem(k053260_rom,$100000);
-        if not(cargar_roms(k053260_rom,@ssriders_k053260,'ssriders.zip',1)) then exit;
-        k053260_0:=tk053260_chip.create(3579545,k053260_rom,$100000,0.70);
-        //Iniciar video
-        getmem(char_rom,$100000);
-        if not(cargar_roms32b(char_rom,@ssriders_char,'ssriders.zip',0)) then exit;
-        k052109_0:=k052109_chip.create(1,2,3,tmnt_cb,char_rom,$100000);
-        //Init sprites
-        getmem(sprite_rom,$200000);
-        if not(cargar_roms32b(sprite_rom,@ssriders_sprites,'ssriders.zip',0)) then exit;
-        k053245_init(sprite_rom,$200000,ssriders_sprite_cb);
-        //Prioridades
-        k053251_0:=k053251_chip.create;
-        //eeprom
-        eepromser_init(ER5911,8);
-        if not(cargar_roms(@mem_temp[0],@ssriders_eeprom,'ssriders.zip',1)) then exit;
-        eepromser_load_data(@mem_temp[0],$80);
-  end;
-end;
-//final
-reset_tmnt;
-iniciar_tmnt:=true;
-end;
-
-procedure cerrar_tmnt;
-begin
-YM2151_close(0);
-case main_vars.tipo_maquina of
-  214:begin
-        close_samples;
-        if k007232_rom<>nil then freemem(k007232_rom);
-      end;
-  215:begin
-        //k053245_0.free;
-        if k053260_rom<>nil then freemem(k053260_rom);
-        //eeprom free
-      end;
-end;
-if char_rom<>nil then freemem(char_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-char_rom:=nil;
-sprite_rom:=nil;
-k053260_rom:=nil;
-k007232_rom:=nil;
-end;
-
-procedure reset_tmnt;
-begin
- main_m68000.reset;
- snd_z80.reset;
- k052109_0.reset;
- YM2151_reset(0);
- case main_vars.tipo_maquina of
-  214:begin
-        k051960_0.reset;
-        upd7759_0.reset;
-        upd7759_0.start_w(0);
-        upd7759_0.reset_w(1);
-        reset_samples;
-      end;
-  215:begin
-        k053245_reset;
-        k053251_0.reset;
-        k053260_0.reset;
-        eepromser_reset;
-      end;
- end;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- sound_latch:=0;
- sound_latch2:=0;
- irq5_mask:=false;
- last_snd:=0;
- sprites_pri:=false;
- toggle:=0;
-end;
 
 procedure tmnt_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
@@ -524,7 +215,7 @@ case direccion of
   $9000:tmnt_snd_getbyte:=sound_latch2;
   $a000:tmnt_snd_getbyte:=sound_latch;
   $b000..$b00d:tmnt_snd_getbyte:=k007232_0.read(direccion and $f);
-  $c001:tmnt_snd_getbyte:=YM2151_status_port_read(0);
+  $c001:tmnt_snd_getbyte:=ym2151_0.status;
   $f000:tmnt_snd_getbyte:=upd7759_0.busy_r;
 end;
 end;
@@ -542,8 +233,8 @@ case direccion of
 	        sound_latch2:=valor;
         end;
   $b000..$b00d:k007232_0.write(direccion and $f,valor);
-  $c000:YM2151_register_port_write(0,valor);
-  $c001:YM2151_data_port_write(0,valor);
+  $c000:ym2151_0.reg(valor);
+  $c001:ym2151_0.write(valor);
   $d000:upd7759_0.port_w(valor);
   $e000:upd7759_0.start_w(valor and 1);
 end;
@@ -551,26 +242,10 @@ end;
 
 procedure tmnt_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   upd7759_0.update;
   k007232_0.update;
   samples_update;
-end;
-
-procedure konami_sortlayers3(layer,pri:pbyte);
-procedure SWAP(a,b:byte);
-var
-  t:byte;
-begin
-	if (pri[a]<pri[b]) then begin
-		t:=pri[a];pri[a]:=pri[b];pri[b]:=t;
-		t:=layer[a];layer[a]:=layer[b];layer[b]:=t;
-	end;
-end;
-begin
-	SWAP(0,1);
-	SWAP(0,2);
-	SWAP(1,2);
 end;
 
 //Sunset riders
@@ -804,7 +479,7 @@ function ssriders_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$f7ff:ssriders_snd_getbyte:=mem_snd[direccion];
-  $f801:ssriders_snd_getbyte:=YM2151_status_port_read(0);
+  $f801:ssriders_snd_getbyte:=ym2151_0.status;
   $fa00..$fa2f:ssriders_snd_getbyte:=k053260_0.read(direccion and $3f); //k053260
 end;
 end;
@@ -814,17 +489,301 @@ begin
 if direccion<$f000 then exit;
 case direccion of
   $f000..$f7ff:mem_snd[direccion]:=valor;
-  $f800:YM2151_register_port_write(0,valor);
-  $f801:YM2151_data_port_write(0,valor);
+  $f800:ym2151_0.reg(valor);
+  $f801:ym2151_0.write(valor);
   $fa00..$fa2f:k053260_0.write(direccion and $3f,valor); //k053260
-  $fc00:snd_z80.pedir_nmi:=HOLD_LINE;
+  $fc00:snd_z80.change_nmi(HOLD_LINE);
 end;
 end;
 
 procedure ssriders_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   k053260_0.update;
+end;
+
+//Main
+procedure reset_tmnt;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ k052109_0.reset;
+ ym2151_0.reset;
+ case main_vars.tipo_maquina of
+  214:begin
+        k051960_0.reset;
+        upd7759_0.reset;
+        upd7759_0.start_w(0);
+        upd7759_0.reset_w(1);
+        reset_samples;
+      end;
+  215:begin
+        k053245_reset;
+        k053251_0.reset;
+        k053260_0.reset;
+        eepromser_reset;
+      end;
+ end;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ sound_latch:=0;
+ sound_latch2:=0;
+ irq5_mask:=false;
+ last_snd:=0;
+ sprites_pri:=false;
+ toggle:=0;
+end;
+
+function iniciar_tmnt:boolean;
+var
+  f,tempdw:dword;
+  mem_temp:array[0..$1ff] of byte;
+  ptemp:pbyte;
+  ptempw:pword;
+procedure desencriptar_sprites;
+var
+  len,a,b:dword;
+  entry,i:byte;
+  bits:array[0..31] of byte;
+  temp:pbyte;
+const
+  CA0=0;
+  CA1=1;
+  CA2=2;
+  CA3=3;
+  CA4=4;
+  CA5=5;
+  CA6=6;
+  CA7=7;
+  CA8=8;
+  CA9=9;
+		// following table derived from the schematics. It indicates, for each of the */
+		// 9 low bits of the sprite line address, which bit to pick it from. */
+		// For example, when the PROM contains 4, which applies to 4x2 sprites, */
+		// bit OA1 comes from CA5, OA2 from CA0, and so on. */
+	bit_pick_table:array[0..9,0..7] of byte=(
+			//0(1x1) 1(2x1) 2(1x2) 3(2x2) 4(4x2) 5(2x4) 6(4x4) 7(8x8) */
+			( CA3,   CA3,   CA3,   CA3,   CA3,   CA3,   CA3,   CA3 ),   // CA3 */
+			( CA0,   CA0,   CA5,   CA5,   CA5,   CA5,   CA5,   CA5 ),   // OA1 */
+			( CA1,   CA1,   CA0,   CA0,   CA0,   CA7,   CA7,   CA7 ),   // OA2 */
+			( CA2,   CA2,   CA1,   CA1,   CA1,   CA0,   CA0,   CA9 ),   // OA3 */
+			( CA4,   CA4,   CA2,   CA2,   CA2,   CA1,   CA1,   CA0 ),   // OA4 */
+			( CA5,   CA6,   CA4,   CA4,   CA4,   CA2,   CA2,   CA1 ),   // OA5 */
+			( CA6,   CA5,   CA6,   CA6,   CA6,   CA4,   CA4,   CA2 ),   // OA6 */
+			( CA7,   CA7,   CA7,   CA7,   CA8,   CA6,   CA6,   CA4 ),   // OA7 */
+			( CA8,   CA8,   CA8,   CA8,   CA7,   CA8,   CA8,   CA6 ),   // OA8 */
+			( CA9,   CA9,   CA9,   CA9,   CA9,   CA9,   CA9,   CA8 ));  // OA9 */
+begin
+	// unscramble the sprite ROM address lines
+	len:=$200000 div 4;
+	getmem(temp,$200000);
+  copymemory(temp,sprite_rom,$200000);
+	for a:=0 to (len-1) do begin
+		// pick the correct entry in the PROM (top 8 bits of the address) */
+		entry:=mem_temp[(A and $7f800) shr 11] and 7;
+		// the bits to scramble are the low 10 ones */
+		for i:=0 to 9 do bits[i]:=(A shr i) and $1;
+		B:=A and $7fc00;
+		for i:=0 to 9 do B:=b or (bits[bit_pick_table[i][entry]] shl i);
+    sprite_rom[a*4]:=temp[b*4];
+    sprite_rom[(a*4)+1]:=temp[(b*4)+1];
+    sprite_rom[(a*4)+2]:=temp[(b*4)+2];
+    sprite_rom[(a*4)+3]:=temp[(b*4)+3];
+	end;
+  freemem(temp);
+end;
+
+function decode_sample(orig:pbyte;dest:pword):dword;
+var
+  i:dword;
+  val:word;
+  expo,cont1,cont2:byte;
+  ptemp:pword;
+  pos:dword;
+begin
+	//  Sound sample for TMNT.D05 is stored in the following mode (ym3012 format):
+	//  Bit 15-13:  Exponent (2 ^ x)
+	//  Bit 12-3 :  Sound data (10 bit)
+	//  (Sound info courtesy of Dave <dave@finalburn.com>)
+  //El original viene a 20Khz, lo convierto a 44Khz
+  pos:=0;
+  cont2:=0;
+	for i:=0 to $3ffff do begin
+		val:=orig[2*i]+orig[2*i+1]*256;
+		expo:=val shr 13;
+		val:=(val shr 3) and $3ff; // 10 bit, Max Amplitude 0x400 */
+		val:=val-$200;                   // Centralize value */
+		val:=val shl (expo-3);
+    for cont1:=0 to 1 do begin
+      ptemp:=dest;
+      inc(ptemp,pos);
+		  ptemp^:=val;
+      pos:=pos+1;
+    end;
+    cont2:=cont2+1;
+    if cont2=5 then begin
+      cont2:=0;
+      ptemp:=dest;
+      inc(ptemp,pos);
+		  ptemp^:=val;
+      pos:=pos+1;
+    end;
+  end;
+  decode_sample:=pos;
+end;
+
+begin
+iniciar_tmnt:=false;
+//Pantallas para el K052109
+screen_init(1,512,256,true);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,512,511,256,256,255);
+screen_init(3,512,256,true);
+screen_mod_scroll(3,512,512,511,256,256,255);
+screen_init(4,1024,1024,false,true);
+case main_vars.tipo_maquina of
+  214:begin //TMNT
+        iniciar_video(320,224,true);
+        iniciar_audio(false); //Sonido mono
+        //Main CPU
+        main_m68000:=cpu_m68000.create(8000000,256);
+        main_m68000.change_ram16_calls(tmnt_getword,tmnt_putword);
+        //Sound CPU
+        snd_z80:=cpu_z80.create(3579545,256);
+        snd_z80.change_ram_calls(tmnt_snd_getbyte,tmnt_snd_putbyte);
+        snd_z80.init_sound(tmnt_sound_update);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@tmnt_rom[0],'tmnt.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@tmnt_sound,'tmnt.zip',1)) then exit;
+        //Sound Chips
+        ym2151_0:=ym2151_chip.create(3579545);
+        upd7759_0:=upd7759_chip.create(640000,0.6);
+        getmem(k007232_rom,$20000);
+        if not(cargar_roms(k007232_rom,@tmnt_k007232,'tmnt.zip',1)) then exit;
+        k007232_0:=k007232_chip.create(3579545,k007232_rom,$20000,0.20,tmnt_k007232_cb);
+        if not(cargar_roms(upd7759_0.get_rom_addr,@tmnt_upd,'tmnt.zip',1)) then exit;
+        getmem(ptemp,$80000);
+        getmem(ptempw,$80000*3);
+        if not(cargar_roms(ptemp,@tmnt_title,'tmnt.zip',1)) then exit;
+        load_samples_raw(ptempw,decode_sample(ptemp,ptempw),false,false);
+        freemem(ptemp);
+        freemem(ptempw);
+        //Iniciar video
+        getmem(char_rom,$100000);
+        if not(cargar_roms32b(char_rom,@tmnt_char,'tmnt.zip',0)) then exit;
+        //Ordenar
+        for f:=0 to $3FFFF do begin
+          tempdw:=char_rom[(f*4)+0];
+          tempdw:=tempdw or (char_rom[(f*4)+1] shl 8);
+          tempdw:=tempdw or (char_rom[(f*4)+2] shl 16);
+          tempdw:=tempdw or (char_rom[(f*4)+3] shl 24);
+          tempdw:=BITSWAP32(tempdw,31,27,23,19,15,11,7,3,30,26,22,18,14,10,6,2,29,25,21,17,13,9,5,1,28,24,20,16,12,8,4,0);
+          char_rom[(f*4)+0]:=tempdw and $ff;
+          char_rom[(f*4)+1]:=(tempdw shr 8) and $ff;
+          char_rom[(f*4)+2]:=(tempdw shr 16) and $ff;
+          char_rom[(f*4)+3]:=(tempdw shr 24) and $ff;
+        end;
+        k052109_0:=k052109_chip.create(1,2,3,tmnt_cb,char_rom,$100000);
+        //Init sprites
+        getmem(sprite_rom,$200000);
+        if not(cargar_roms32b(sprite_rom,@tmnt_sprites,'tmnt.zip',0)) then exit;
+        if not(cargar_roms(@mem_temp[0],@tmnt_prom,'tmnt.zip',0)) then exit;
+        //Ordenar
+        for f:=0 to $7FFFF do begin
+          tempdw:=sprite_rom[(f*4)+0];
+          tempdw:=tempdw or (sprite_rom[(f*4)+1] shl 8);
+          tempdw:=tempdw or (sprite_rom[(f*4)+2] shl 16);
+          tempdw:=tempdw or (sprite_rom[(f*4)+3] shl 24);
+          tempdw:=BITSWAP32(tempdw,31,27,23,19,15,11,7,3,30,26,22,18,14,10,6,2,29,25,21,17,13,9,5,1,28,24,20,16,12,8,4,0);
+          sprite_rom[(f*4)+0]:=tempdw and $ff;
+          sprite_rom[(f*4)+1]:=(tempdw shr 8) and $ff;
+          sprite_rom[(f*4)+2]:=(tempdw shr 16) and $ff;
+          sprite_rom[(f*4)+3]:=(tempdw shr 24) and $ff;
+        end;
+        desencriptar_sprites;
+        k051960_0:=k051960_chip.create(4,sprite_rom,$200000,tmnt_sprite_cb);
+        layer_colorbase[0]:=0;
+        layer_colorbase[1]:=32;
+        layer_colorbase[2]:=40;
+        sprite_colorbase:=16;
+        //DIP
+        marcade.dswa:=$ff;
+        marcade.dswa_val:=@tmnt_dip_a;
+        marcade.dswb:=$5e;
+        marcade.dswb_val:=@tmnt_dip_b;
+        marcade.dswc:=$ff;
+        marcade.dswc_val:=@tmnt_dip_c;
+  end;
+  215:begin //Sunset Riders
+        iniciar_video(288,224,true);
+        iniciar_audio(true); //Sonido stereo
+        //Main CPU
+        main_m68000:=cpu_m68000.create(16000000,256);
+        main_m68000.change_ram16_calls(ssriders_getword,ssriders_putword);
+        //Sound CPU
+        snd_z80:=cpu_z80.create(8000000,256);
+        snd_z80.change_ram_calls(ssriders_snd_getbyte,ssriders_snd_putbyte);
+        snd_z80.init_sound(ssriders_sound_update);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@ssriders_rom[0],'ssriders.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@ssriders_sound,'ssriders.zip',1)) then exit;
+        //Sound Chips
+        ym2151_0:=ym2151_chip.create(3579545);
+        getmem(k053260_rom,$100000);
+        if not(cargar_roms(k053260_rom,@ssriders_k053260,'ssriders.zip',1)) then exit;
+        k053260_0:=tk053260_chip.create(3579545,k053260_rom,$100000,0.70);
+        //Iniciar video
+        getmem(char_rom,$100000);
+        if not(cargar_roms32b(char_rom,@ssriders_char,'ssriders.zip',0)) then exit;
+        k052109_0:=k052109_chip.create(1,2,3,tmnt_cb,char_rom,$100000);
+        //Init sprites
+        getmem(sprite_rom,$200000);
+        if not(cargar_roms32b(sprite_rom,@ssriders_sprites,'ssriders.zip',0)) then exit;
+        k053245_init(sprite_rom,$200000,ssriders_sprite_cb);
+        //Prioridades
+        k053251_0:=k053251_chip.create;
+        //eeprom
+        eepromser_init(ER5911,8);
+        if not(cargar_roms(@mem_temp[0],@ssriders_eeprom,'ssriders.zip',1)) then exit;
+        eepromser_load_data(@mem_temp[0],$80);
+  end;
+end;
+//final
+reset_tmnt;
+iniciar_tmnt:=true;
+end;
+
+procedure cerrar_tmnt;
+begin
+case main_vars.tipo_maquina of
+  214:if k007232_rom<>nil then freemem(k007232_rom);
+  215:begin
+        //k053245_0.free;
+        if k053260_rom<>nil then freemem(k053260_rom);
+        //eeprom free
+      end;
+end;
+if char_rom<>nil then freemem(char_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+char_rom:=nil;
+sprite_rom:=nil;
+k053260_rom:=nil;
+k007232_rom:=nil;
+end;
+
+procedure Cargar_tmnt;
+begin
+llamadas_maquina.iniciar:=iniciar_tmnt;
+llamadas_maquina.cerrar:=cerrar_tmnt;
+llamadas_maquina.reset:=reset_tmnt;
+case main_vars.tipo_maquina of
+  214:llamadas_maquina.bucle_general:=tmnt_principal;
+  215:llamadas_maquina.bucle_general:=ssriders_principal;
+end;
 end;
 
 end.

@@ -458,7 +458,7 @@ case direccion of
     $f805:scroll_y2:=valor;
     $f806:begin
             soundlatch:=valor;
-            snd_z80.pedir_nmi:=ASSERT_LINE;
+            snd_z80.change_nmi(ASSERT_LINE);
           end;
     $f807:main_screen.flip_main_screen:=(valor and $1)<>0;
     $f808:nbank_rom:=(valor and $f8) shr 3;
@@ -486,7 +486,7 @@ if direccion<$4000 then exit;
            end;
      $d000:adpcm_end:=((valor+1) shl 8);
      //$e000:volumen
-     $f000:snd_z80.clear_nmi;
+     $f000:snd_z80.change_nmi(CLEAR_LINE);
   end;
 end;
 
@@ -542,7 +542,7 @@ case direccion of
     $f805:scroll_y2:=valor;
     $f806:begin
             soundlatch:=valor;
-            snd_z80.pedir_nmi:=ASSERT_LINE;
+            snd_z80.change_nmi(ASSERT_LINE);
           end;
     $f807:main_screen.flip_main_screen:=(valor and $1)<>0;
     $f808:nbank_rom:=(valor and $f8) shr 3;
@@ -570,14 +570,13 @@ if direccion<$8000 then exit;
            end;
      $c400:adpcm_end:=((valor+1) shl 8);
      //$c800:volumen
-     $cc00:snd_z80.clear_nmi;
+     $cc00:snd_z80.change_nmi(CLEAR_LINE);
   end;
 end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 procedure snd_sound_play;

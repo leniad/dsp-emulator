@@ -5,17 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,misc_functions,m6502;
 
-procedure Cargar_btime;
-procedure principal_btime;
-function iniciar_btime:boolean;
-procedure reset_btime;
-//Main CPU
-function getbyte_btime(direccion:word):byte;
-procedure putbyte_btime(direccion:word;valor:byte);
-//Sound CPU
-function getbyte_snd_btime(direccion:word):byte;
-procedure putbyte_snd_btime(direccion:word;valor:byte);
-procedure btime_sound_update;
+procedure cargar_btime;
 
 implementation
 const
@@ -49,89 +39,6 @@ var
   sound_latch,haz_vb,scroll_bg:byte;
   video_ram,color_ram:array[0..$3ff] of byte;
   mem_tiles:array[0..$7ff] of byte;
-
-procedure Cargar_btime;
-begin
-llamadas_maquina.iniciar:=iniciar_btime;
-llamadas_maquina.bucle_general:=principal_btime;
-llamadas_maquina.reset:=reset_btime;
-llamadas_maquina.fps_max:=57.444853;
-end;
-
-function iniciar_btime:boolean;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
-			0, 1, 2, 3, 4, 5, 6, 7);
-    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-var
-    memoria_temp:array[0..$5fff] of byte;
-begin
-iniciar_btime:=false;
-iniciar_audio(false);
-screen_init(1,256,256); //Fondo
-screen_init(2,256,256,true); //Chars
-screen_init(3,256,256,false,true); //Final
-iniciar_video(240,240);
-//Main CPU
-main_m6502:=cpu_m6502.create(1500000,272,TCPU_M6502);
-main_m6502.change_ram_calls(getbyte_btime,putbyte_btime);
-//Sound CPU
-snd_m6502:=cpu_m6502.create(500000,272,TCPU_M6502);
-snd_m6502.change_ram_calls(getbyte_snd_btime,putbyte_snd_btime);
-snd_m6502.init_sound(btime_sound_update);
-//Sound Chip
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
-//cargar roms
-if not(cargar_roms(@memoria[0],@btime_rom[0],'btime.zip',0)) then exit;
-copymemory(@memoria_dec[0],@memoria[0],$10000);
-//cargar roms audio
-if not(cargar_roms(@mem_snd[0],@btime_snd,'btime.zip',1)) then exit;
-//Cargar chars
-if not(cargar_roms(@memoria_temp[0],@btime_char[0],'btime.zip',0)) then exit;
-init_gfx(0,8,8,1024);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//sprites
-init_gfx(1,16,16,256);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(3,0,32*8,2*256*16*16,256*16*16,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//Cargar tiles
-if not(cargar_roms(@memoria_temp[0],@btime_tiles[0],'btime.zip',0)) then exit;
-init_gfx(2,16,16,64);
-gfx_set_desc_data(3,0,32*8,2*64*16*16,64*16*16,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-if not(cargar_roms(@mem_tiles[0],@btime_tiles_mem,'btime.zip',1)) then exit;
-//DIP
-marcade.dswa:=$3f;
-marcade.dswb:=$eb;
-marcade.dswa_val:=@btime_dip_a;
-marcade.dswb_val:=@btime_dip_b;
-//final
-reset_btime;
-iniciar_btime:=true;
-end;
-
-procedure reset_btime;
-begin
-main_m6502.reset;
-snd_m6502.reset;
-AY8910_0.reset;
-AY8910_1.reset;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$3f;
-haz_vb:=0;
-sound_latch:=0;
-haz_nmi:=false;
-bg_cambiado:=true;
-scroll_bg:=$10;
-end;
 
 procedure update_video_btime;inline;
 const
@@ -195,15 +102,15 @@ if event.arcade then begin
   //SYS
   if arcade_input.coin[0] then begin
       marcade.in2:=(marcade.in2 or $40);
-      main_m6502.pedir_nmi:=ASSERT_LINE;
+      main_m6502.change_nmi(ASSERT_LINE);
   end else begin
       marcade.in2:=(marcade.in2 and $bf);
       if arcade_input.coin[1] then begin
           marcade.in2:=(marcade.in2 or $80);
-          main_m6502.pedir_nmi:=ASSERT_LINE;
+          main_m6502.change_nmi(ASSERT_LINE);
       end else begin
           marcade.in2:=(marcade.in2 and $7f);
-          main_m6502.clear_nmi;
+          main_m6502.change_nmi(CLEAR_LINE);
       end;
   end;
   if arcade_input.start[0] then marcade.in2:=marcade.in2 and $fe else marcade.in2:=marcade.in2 or $1;
@@ -227,8 +134,8 @@ while EmuStatus=EsRuning do begin
   //Sound CPU
   snd_m6502.run(frame_s);
   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
-  if (((f and 8)<>0) and haz_nmi) then snd_m6502.pedir_nmi:=ASSERT_LINE
-    else snd_m6502.clear_nmi;
+  if (((f and 8)<>0) and haz_nmi) then snd_m6502.change_nmi(ASSERT_LINE)
+    else snd_m6502.change_nmi(CLEAR_LINE);
   case f of
     247:begin
           haz_vb:=$80;
@@ -325,7 +232,7 @@ case direccion of
   $4002:main_screen.flip_main_screen:=(valor and 1)<>0;
   $4003:begin
           sound_latch:=valor;
-          snd_m6502.pedir_irq:=ASSERT_LINE;
+          snd_m6502.change_irq(ASSERT_LINE);
         end;
   $4004:if scroll_bg<>valor then begin
           scroll_bg:=valor;
@@ -343,7 +250,7 @@ case direccion of
   0..$1fff:getbyte_snd_btime:=mem_snd[direccion and $3ff];
   $a000..$bfff:begin
                   getbyte_snd_btime:=sound_latch;
-                  snd_m6502.pedir_irq:=CLEAR_LINE;
+                  snd_m6502.change_irq(CLEAR_LINE);
                end;
    $e000..$ffff:getbyte_snd_btime:=mem_snd[$e000+(direccion and $fff)];
 end;
@@ -366,6 +273,90 @@ procedure btime_sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
+end;
+
+//Main
+procedure reset_btime;
+begin
+main_m6502.reset;
+snd_m6502.reset;
+AY8910_0.reset;
+AY8910_1.reset;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$3f;
+haz_vb:=0;
+sound_latch:=0;
+haz_nmi:=false;
+bg_cambiado:=true;
+scroll_bg:=$10;
+end;
+
+function iniciar_btime:boolean;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
+			0, 1, 2, 3, 4, 5, 6, 7);
+    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+var
+    memoria_temp:array[0..$5fff] of byte;
+begin
+iniciar_btime:=false;
+iniciar_audio(false);
+screen_init(1,256,256); //Fondo
+screen_init(2,256,256,true); //Chars
+screen_init(3,256,256,false,true); //Final
+iniciar_video(240,240);
+//Main CPU
+main_m6502:=cpu_m6502.create(1500000,272,TCPU_M6502);
+main_m6502.change_ram_calls(getbyte_btime,putbyte_btime);
+//Sound CPU
+snd_m6502:=cpu_m6502.create(500000,272,TCPU_M6502);
+snd_m6502.change_ram_calls(getbyte_snd_btime,putbyte_snd_btime);
+snd_m6502.init_sound(btime_sound_update);
+//Sound Chip
+AY8910_0:=ay8910_chip.create(1500000,1);
+AY8910_1:=ay8910_chip.create(1500000,1);
+//cargar roms
+if not(cargar_roms(@memoria[0],@btime_rom[0],'btime.zip',0)) then exit;
+copymemory(@memoria_dec[0],@memoria[0],$10000);
+//cargar roms audio
+if not(cargar_roms(@mem_snd[0],@btime_snd,'btime.zip',1)) then exit;
+//Cargar chars
+if not(cargar_roms(@memoria_temp[0],@btime_char[0],'btime.zip',0)) then exit;
+init_gfx(0,8,8,1024);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//sprites
+init_gfx(1,16,16,256);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(3,0,32*8,2*256*16*16,256*16*16,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//Cargar tiles
+if not(cargar_roms(@memoria_temp[0],@btime_tiles[0],'btime.zip',0)) then exit;
+init_gfx(2,16,16,64);
+gfx_set_desc_data(3,0,32*8,2*64*16*16,64*16*16,0);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+if not(cargar_roms(@mem_tiles[0],@btime_tiles_mem,'btime.zip',1)) then exit;
+//DIP
+marcade.dswa:=$3f;
+marcade.dswb:=$eb;
+marcade.dswa_val:=@btime_dip_a;
+marcade.dswb_val:=@btime_dip_b;
+//final
+reset_btime;
+iniciar_btime:=true;
+end;
+
+procedure Cargar_btime;
+begin
+llamadas_maquina.iniciar:=iniciar_btime;
+llamadas_maquina.bucle_general:=principal_btime;
+llamadas_maquina.reset:=reset_btime;
+llamadas_maquina.fps_max:=57.444853;
 end;
 
 end.

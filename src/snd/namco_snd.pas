@@ -6,6 +6,9 @@ uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
 
 const
   max_voices=8;
+  CONST_RE96=round(96000000/freq_base_audio);
+  CONST_RE24=round(24000000/freq_base_audio);
+
 type
   nvoice=record
             volume:byte;
@@ -74,7 +77,7 @@ begin
     f:=f or ((namco_sound.registros_namco[$12+base] and $F) shl 8);
     f:=f or ((namco_sound.registros_namco[$11+base] and $F) shl 4);
     if numero_voz=0 then f:=f or(namco_sound.registros_namco[$10] and $F);
-    voice[numero_voz].frecuencia:=f*2177; //resample -> (96Mhz/44100)
+    voice[numero_voz].frecuencia:=f*CONST_RE96; //resample -> (96Mhz/44100)
     if ((voice[numero_voz].frecuencia=0) or (voice[numero_voz].volume=0)) then begin
         voice[numero_voz].activa:=false;
         voice[numero_voz].dentro_onda:=0;
@@ -95,7 +98,7 @@ begin
     f:=namco_sound.registros_namco[$1+base];
     f:=f or (namco_sound.registros_namco[$2+base] shl 8);
     f:=f or ((namco_sound.registros_namco[$3+base] and $f) shl 16);
-    voice[numero_voz].frecuencia:=f*544;  //resample -> (24Mhz/44100)
+    voice[numero_voz].frecuencia:=f*CONST_RE24;  //resample -> (24Mhz/44100)
     if ((voice[numero_voz].frecuencia=0) and (voice[numero_voz].volume=0)) then begin
         voice[numero_voz].activa:=false;
         voice[numero_voz].dentro_onda:=0;

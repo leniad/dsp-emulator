@@ -3,7 +3,7 @@ unit system1_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      system1_hw_misc,system2_hw_misc,nz80,main_engine,gfx_engine,sn_76496,
-     controls_engine,pal_engine,sound_engine,ppi8255,z80pio;
+     controls_engine,pal_engine,ppi8255,z80pio;
 
 procedure Cargar_system1;
 procedure cerrar_system1;
@@ -437,8 +437,8 @@ end;
 
 procedure system1_port_c_write(valor:byte);
 begin //sound_controlw
-  if (valor and $80)<>0 then snd_z80.clear_nmi
-    else snd_z80.pedir_nmi:=ASSERT_LINE;
+  if (valor and $80)<>0 then snd_z80.change_nmi(CLEAR_LINE)
+    else snd_z80.change_nmi(ASSERT_LINE);
   bg_ram_bank:=(valor shr 1) and $3;
 end;
 

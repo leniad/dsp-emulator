@@ -247,7 +247,7 @@ while EmuStatus=EsRuning do begin
     frame_m:=frame_m+main_z80.tframes-main_z80.contador;
     if f=239 then begin
       update_video_freekick;
-      if nmi_enable then main_z80.pedir_nmi:=PULSE_LINE;
+      if nmi_enable then main_z80.change_nmi(PULSE_LINE);
     end;
   end;
   eventos_freekick;

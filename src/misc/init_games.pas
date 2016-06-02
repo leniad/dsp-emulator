@@ -28,7 +28,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   operationwolf_hw,outrun_hw,taitosj_hw,vulgus_hw,ddragon3_hw,blockout_hw,
   foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw,freekick_hw,
   boogiewings_hw,pinballaction_hw,renegade_hw,tmnt_hw,gradius3_hw,
-  spaceinvaders_hw,centipede_hw,karnov_hw,aliens_hw,thunderx_hw;
+  spaceinvaders_hw,centipede_hw,karnov_hw,aliens_hw,thunderx_hw,simpsons_hw;
 
 type
   tgame_desc=record
@@ -43,7 +43,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=230;
+  games_cont=231;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -271,6 +271,7 @@ const
   (name:'Super Contra';year:'1988';snd:1;hi:false;zip:'scontra';grid:222;company:'Konami';rom:@scontra),
   (name:'Gang Busters';year:'1988';snd:1;hi:false;zip:'gbusters';grid:223;company:'Konami';rom:@gbusters),
   (name:'Thunder Cross';year:'1988';snd:1;hi:false;zip:'thunderx';grid:224;company:'Konami';rom:@thunderx),
+  (name:'The Simpsons';year:'1991';snd:1;hi:false;zip:'simpsons';grid:225;company:'Konami';rom:@simpsons),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -518,6 +519,7 @@ case numero of
   222:principal1.CambiarMaquina(principal1.scontra1);
   223:principal1.CambiarMaquina(principal1.gbusters1);
   224:principal1.CambiarMaquina(principal1.thunderx1);
+  225:principal1.CambiarMaquina(principal1.simpsons1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -754,6 +756,7 @@ principal1.aliens1.checked:=false;
 principal1.scontra1.checked:=false;
 principal1.gbusters1.checked:=false;
 principal1.thunderx1.checked:=false;
+principal1.simpsons1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -954,6 +957,7 @@ case tmaquina of
   219,220:Cargar_karnov;
   221:Cargar_aliens;
   222,223,224:Cargar_thunderx;
+  225:cargar_simpsons;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1864,6 +1868,10 @@ end;
 if sender=principal1.thunderx1 then begin
   tipo:=224;
   principal1.thunderx1.Checked:=true;
+end;
+if sender=principal1.simpsons1 then begin
+  tipo:=225;
+  principal1.simpsons1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

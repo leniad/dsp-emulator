@@ -2274,6 +2274,10 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object simpsons1: TMenuItem
+            Caption = 'The Simpsons'
+            OnClick = CambiarMaquina
+          end
         end
         object M680001: TMenuItem
           Caption = 'M68000'
@@ -2639,7 +2643,7 @@ object principal1: Tprincipal1
           OnClick = CambiarMaquina
         end
         object GameBoy1: TMenuItem
-          Caption = 'GameBoy'
+          Caption = 'GameBoy/GameBoy Color'
           OnClick = CambiarMaquina
         end
         object Colecovision1: TMenuItem
@@ -2683,7 +2687,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807AC0320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807B80320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

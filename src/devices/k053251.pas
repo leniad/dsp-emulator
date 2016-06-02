@@ -18,17 +18,35 @@ type
         procedure lsb_w(direccion,valor:word);
         function get_priority(ci:byte):byte;
         function get_palette_index(ci:byte):byte;
+        procedure write(direccion:word;valor:byte);
     private
         ram:array[0..$f] of byte;
         palette_index:array[0..4] of byte;
-        procedure write(direccion:word;valor:byte);
         procedure reset_indexes;
     end;
 
 var
   k053251_0:k053251_chip;
 
+procedure konami_sortlayers3(layer,pri:pbyte);
+
 implementation
+
+procedure konami_sortlayers3(layer,pri:pbyte);
+procedure SWAP(a,b:byte);
+var
+  t:byte;
+begin
+	if (pri[a]<pri[b]) then begin
+		t:=pri[a];pri[a]:=pri[b];pri[b]:=t;
+		t:=layer[a];layer[a]:=layer[b];layer[b]:=t;
+	end;
+end;
+begin
+	SWAP(0,1);
+	SWAP(0,2);
+	SWAP(1,2);
+end;
 
 constructor k053251_chip.Create();
 begin

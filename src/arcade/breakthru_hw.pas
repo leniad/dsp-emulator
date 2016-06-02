@@ -496,7 +496,7 @@ begin
 case direccion of
   $0..$1fff,$8000..$ffff:brkthru_snd_getbyte:=mem_snd[direccion];
   $4000:brkthru_snd_getbyte:=sound_latch;
-  $6000:brkthru_snd_getbyte:=ym2203_0.read_status;
+  $6000:brkthru_snd_getbyte:=ym2203_0.status;
 end;
 end;
 
@@ -508,14 +508,13 @@ case direccion of
   $2000:ym3812_0.control(valor);
   $2001:ym3812_0.write(valor);
   $6000:ym2203_0.control(valor);
-  $6001:ym2203_0.write_reg(valor);
+  $6001:ym2203_0.write(valor);
 end;
 end;
 
 procedure brkthru_snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6809.change_irq(ASSERT_LINE)
-    else snd_m6809.change_irq(CLEAR_LINE);
+  snd_m6809.change_irq(irqstate);
 end;
 
 procedure brkthru_sound_update;

@@ -9,7 +9,6 @@ procedure Cargar_jackal;
 procedure jackal_principal;
 function iniciar_jackal:boolean;
 procedure reset_jackal;
-procedure cerrar_jackal;
 //Main CPU
 function jackal_getbyte(direccion:word):byte;
 procedure jackal_putbyte(direccion:word;valor:byte);
@@ -43,7 +42,6 @@ procedure Cargar_jackal;
 begin
 llamadas_maquina.iniciar:=iniciar_jackal;
 llamadas_maquina.bucle_general:=jackal_principal;
-llamadas_maquina.cerrar:=cerrar_jackal;
 llamadas_maquina.reset:=reset_jackal;
 end;
 
@@ -74,7 +72,7 @@ snd_m6809:=cpu_m6809.Create(1536000,256);
 snd_m6809.change_ram_calls(sound_getbyte,sound_putbyte);
 snd_m6809.init_sound(sound_instruccion);
 //Audio chips
-ym2151_init(0,3579545,nil,nil);
+ym2151_0:=ym2151_Chip.create(3579545);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@jackal_rom[0],'jackal.zip',0)) then exit;
 //Pongo las ROMs en su banco
@@ -111,16 +109,11 @@ reset_jackal;
 iniciar_jackal:=true;
 end;
 
-procedure cerrar_jackal;
-begin
-ym2151_close(0);
-end;
-
 procedure reset_jackal;
 begin
  main_m6809.reset;
  snd_m6809.reset;
- ym2151_reset(0);
+ ym2151_0.reset;
  reset_audio;
  marcade.in0:=$3F;
  marcade.in1:=$FF;
@@ -318,7 +311,7 @@ end;
 function sound_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $2001:sound_getbyte:=ym2151_status_port_read(0);
+  $2001:sound_getbyte:=ym2151_0.status;
   $6060..$7fff:sound_getbyte:=memoria[direccion and $1fff];
   else sound_getbyte:=mem_snd[direccion];
 end;
@@ -345,8 +338,8 @@ begin
 if direccion>$7fff then exit;
 mem_snd[direccion]:=valor;
 case direccion of
-  $2000:ym2151_register_port_write(0,valor);
-  $2001:YM2151_data_port_write(0,valor);
+  $2000:ym2151_0.reg(valor);
+  $2001:ym2151_0.write(valor);
   $4000..$43ff:if buffer_paleta[direccion and $3ff]<>valor then begin
                   buffer_paleta[direccion and $3ff]:=valor;
                   cambiar_color(direccion and $3fe);
@@ -357,7 +350,7 @@ end;
 
 procedure sound_instruccion;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 end.

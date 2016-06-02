@@ -394,7 +394,7 @@ while EmuStatus=EsRuning do begin
     sub_z80.run(frame_s2);
     frame_s2:=frame_s2+sub_z80.tframes-sub_z80.contador;
     if (f=scanline) then begin
-        if sub2_nmi then sub_z80.pedir_nmi:=PULSE_LINE;
+        if sub2_nmi then sub_z80.change_nmi(PULSE_LINE);
         scanline:=scanline+128;
 	      if (scanline>=272) then scanline:=63;
     end;
@@ -628,7 +628,7 @@ while EmuStatus=EsRuning do begin
   //IO's
   run_namco_53xx;
   if (f=scanline) then begin
-    if sub2_nmi then sub_z80.pedir_nmi:=PULSE_LINE;
+    if sub2_nmi then sub_z80.change_nmi(PULSE_LINE);
     scanline:=scanline+128;
 	  if (scanline>=272) then scanline:=63;
   end;
@@ -728,7 +728,7 @@ end;
 //Namco IO
 procedure namco_06xx_nmi;
 begin
-  main_z80.pedir_nmi:=PULSE_LINE;
+  main_z80.change_nmi(PULSE_LINE);
 end;
 
 function namco_51xx_io0:byte;

@@ -9,7 +9,6 @@ procedure Cargar_wwfsstar;
 procedure wwfsstar_principal;
 function iniciar_wwfsstar:boolean;
 procedure reset_wwfsstar;
-procedure cerrar_wwfsstar;
 //Main CPU
 function wwfsstar_getword(direccion:dword):word;
 procedure wwfsstar_putword(direccion:dword;valor:word);
@@ -57,7 +56,6 @@ procedure Cargar_wwfsstar;
 begin
 llamadas_maquina.iniciar:=iniciar_wwfsstar;
 llamadas_maquina.bucle_general:=wwfsstar_principal;
-llamadas_maquina.cerrar:=cerrar_wwfsstar;
 llamadas_maquina.reset:=reset_wwfsstar;
 llamadas_maquina.fps_max:=57.444853;
 end;
@@ -89,7 +87,8 @@ snd_z80:=cpu_z80.create(3579545,272);
 snd_z80.change_ram_calls(wwfsstar_snd_getbyte,wwfsstar_snd_putbyte);
 snd_z80.init_sound(wwfsstar_sound_update);
 //Sound Chips
-YM2151_Init(0,3579545,nil,ym2151_snd_irq);
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
 //Cargar ADPCM ROMS
 if not(cargar_roms(oki_6295_0.get_rom_addr,@wwfsstar_oki[0],'wwfsstar.zip',0)) then exit;
@@ -126,16 +125,11 @@ reset_wwfsstar;
 iniciar_wwfsstar:=true;
 end;
 
-procedure cerrar_wwfsstar;
-begin
-YM2151_close(0);
-end;
-
 procedure reset_wwfsstar;
 begin
  main_m68000.reset;
  snd_z80.reset;
- YM2151_reset(0);
+ ym2151_0.reset;
  oki_6295_0.reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -311,7 +305,7 @@ case direccion of
     $180004:scroll_x:=valor and $1ff;
     $180006:scroll_y:=valor and $1ff;
     $180008:begin
-              snd_z80.pedir_nmi:=PULSE_LINE;
+              snd_z80.change_nmi(PULSE_LINE);
               sound_latch:=valor and $ff;
             end;
     $18000a:main_screen.flip_main_screen:=(valor and 1)<>0;
@@ -322,7 +316,7 @@ end;
 function wwfsstar_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-    $8801:wwfsstar_snd_getbyte:=YM2151_status_port_read(0);
+    $8801:wwfsstar_snd_getbyte:=ym2151_0.status;
     $9800:wwfsstar_snd_getbyte:=oki_6295_0.read;
     $a000:wwfsstar_snd_getbyte:=sound_latch;
     else wwfsstar_snd_getbyte:=mem_snd[direccion];
@@ -334,21 +328,20 @@ begin
 if direccion<$8000 then exit;
 mem_snd[direccion]:=valor;
 case direccion of
-  $8800:YM2151_register_port_write(0,valor);
-  $8801:YM2151_data_port_write(0,valor);
+  $8800:ym2151_0.reg(valor);
+  $8801:ym2151_0.write(valor);
   $9800:oki_6295_0.write(valor);
 end;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 procedure wwfsstar_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   oki_6295_0.update;
 end;
 

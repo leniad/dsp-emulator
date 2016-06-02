@@ -63,8 +63,8 @@ end;
 
 function iniciar_citycon:boolean;
 var
-      f:word;
-      memoria_temp:array[0..$17fff] of byte;
+  f:word;
+  memoria_temp:array[0..$17fff] of byte;
 const
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3 );
   pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
@@ -89,9 +89,9 @@ snd_m6809:=cpu_m6809.Create(640000,$100);
 snd_m6809.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
 snd_m6809.init_sound(citycon_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(1250000,2);
+ym2203_0:=ym2203_chip.create(1250000,0.4,0.2);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
-AY8910_0:=ay8910_chip.create(1250000,2);
+AY8910_0:=ay8910_chip.create(1250000,0.40);
 //cargar roms
 if not(cargar_roms(@memoria[0],@citycon_rom[0],'citycon.zip',0)) then exit;
 //Cargar Sound
@@ -292,10 +292,16 @@ end;
 procedure citycon_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $1000..$1fff:gfx[0].buffer[direccion and $fff]:=true;
-  $2000..$20ff:lines_color_look[direccion and $ff]:=valor;
+  0..$fff,$2800..$28ff:memoria[direccion]:=valor;
+  $1000..$1fff:begin
+                gfx[0].buffer[direccion and $fff]:=true;
+                memoria[direccion]:=valor;
+               end;
+  $2000..$20ff:begin
+                lines_color_look[direccion and $ff]:=valor;
+                memoria[direccion]:=valor;
+               end;
   $3000:begin
           if fondo<>(valor shr 4) then begin
             fondo:=valor shr 4;
@@ -318,19 +324,20 @@ function scitycon_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$fff,$8000..$ffff:scitycon_getbyte:=mem_snd[direccion];
-  $6001:scitycon_getbyte:=ym2203_0.Read_Reg;
+  $6000:scitycon_getbyte:=ym2203_0.status;
+  $6001:scitycon_getbyte:=ym2203_0.Read;
 end;
 end;
 
 procedure scitycon_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$7fff then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  0..$fff:mem_snd[direccion]:=valor;
   $4000:ay8910_0.Control(valor);
   $4001:ay8910_0.Write(valor);
   $6000:ym2203_0.Control(valor);
-  $6001:ym2203_0.Write_Reg(valor);
+  $6001:ym2203_0.Write(valor);
 end;
 end;
 

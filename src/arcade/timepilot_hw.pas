@@ -183,7 +183,7 @@ while EmuStatus=EsRuning do begin
     frame_m:=frame_m+main_z80.tframes-main_z80.contador;
     //Sound
     konamisnd_0.run(scan_line);
-    if (scan_line=244) then if nmi_enable then main_z80.pedir_nmi:=ASSERT_LINE;
+    if (scan_line=244) then if nmi_enable then main_z80.change_nmi(ASSERT_LINE);
   end;
   update_video_timepilot;
   eventos_timepilot;
@@ -228,7 +228,7 @@ case direccion of
                 $300..$3ff:case (direccion and $f) of
                     $0..$1:begin
                               nmi_enable:=(valor and 1)<>0;
-	                            if not(nmi_enable) then main_z80.clear_nmi;
+	                            if not(nmi_enable) then main_z80.change_nmi(CLEAR_LINE);
                            end;
                     $02:main_screen.flip_main_screen:=(valor and $1)=0;
                     $04:begin

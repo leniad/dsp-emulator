@@ -120,7 +120,7 @@ while not(salir) do begin
       exit;
     end;
     //Samples seg.
-    lsamples_m:=44100/fmt_info.sample_rate;
+    lsamples_m:=freq_base_audio/fmt_info.sample_rate;
     lsamples_loop:=lsamples_m;
     fmt:=true;
   end;

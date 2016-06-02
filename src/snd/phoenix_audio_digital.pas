@@ -182,8 +182,8 @@ var
   vc24,vc25,sum,n:integer;
   level,frequency,temp:extended;
 begin
-	vc24:=update_c24(44100);
-	vc25:=update_c25(44100);
+	vc24:=update_c24(freq_base_audio);
+	vc25:=update_c25(freq_base_audio);
 	sum:=0;
    { * The voltage levels are added and control I(CE) of transistor TR1
      * (NPN) which then controls the noise clock frequency (linearily?).
@@ -224,7 +224,7 @@ begin
 for numero_voz:=0 to 1 do begin
   if phoenix_sound[numero_voz].activa then begin
     offset:=phoenix_sound[numero_voz].dentro_onda;
-    offset_step:=(44100 div (16-phoenix_sound[numero_voz].frec));
+    offset_step:=(freq_base_audio div (16-phoenix_sound[numero_voz].frec));
     for i:=0 to (sound_status.long_sample-1) do begin
       offset:=offset+offset_step;
       tsample[phoenix_sound[numero_voz].tsample,i]:=phoenix_wave[(offset shr 16) and $1f]*($20*(3-phoenix_sound[numero_voz].vol));
@@ -233,7 +233,7 @@ for numero_voz:=0 to 1 do begin
   end;
 end;
 for i:=0 to (sound_status.long_sample-1) do begin
-    sum:=noise(44100) div 2;
+    sum:=noise(freq_base_audio) div 2;
     if sum>32767 then sum:=32767
       else if sum<-32768 then sum:=-32768;
     tsample[noise_state.tsample,i]:=sum;

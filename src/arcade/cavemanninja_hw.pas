@@ -6,21 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco16ic,deco_common,deco_104,deco_146,
      misc_functions;
 
-procedure Cargar_cninja;
-function iniciar_cninja:boolean;
-procedure reset_cninja;
-procedure cerrar_cninja;
-procedure cninja_principal;
-//Caveman Ninja
-function cninja_getword(direccion:dword):word;
-procedure cninja_putword(direccion:dword;valor:word);
-function cninja_video_bank(bank:word):word;
-//Robocop 2
-function robocop2_getword(direccion:dword):word;
-procedure robocop2_putword(direccion:dword;valor:word);
-function robocop2_video_bank(bank:word):word;
-//sound
-procedure sound_bank_rom(valor:byte);
+procedure cargar_cninja;
 
 implementation
 const
@@ -94,15 +80,6 @@ var
  prioridad:word;
  proc_update_video:tipo_update_video;
 
-procedure Cargar_cninja;
-begin
-llamadas_maquina.bucle_general:=cninja_principal;
-llamadas_maquina.iniciar:=iniciar_cninja;
-llamadas_maquina.cerrar:=cerrar_cninja;
-llamadas_maquina.reset:=reset_cninja;
-llamadas_maquina.fps_max:=58;
-end;
-
 procedure update_video_cninja;
 begin
 //fill_full_screen(5,$300);
@@ -137,224 +114,6 @@ end;
 deco16_sprites_pri($00);
 update_pf_1(0,5,true);
 actualiza_trozo_final(0,8,320,240,5);
-end;
-
-//Inicio Normal
-function iniciar_cninja:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  pt_x:array[0..15] of dword=(32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
-		0, 1, 2, 3, 4, 5, 6, 7);
-  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-  ps_x:array[0..15] of dword=(64*8+0, 64*8+1, 64*8+2, 64*8+3, 64*8+4, 64*8+5, 64*8+6, 64*8+7,
-		0, 1, 2, 3, 4, 5, 6, 7);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-			8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32);
-var
-  memoria_temp,memoria_temp2,ptemp,ptemp2:pbyte;
-  tempw:word;
-procedure cninja_convert_chars(num:word);
-begin
-  init_gfx(0,8,8,num);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(4,0,16*8,num*16*8+8,num*16*8+0,8,0);
-  convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-end;
-procedure cninja_convert_tiles(ngfx:byte;num:word);
-begin
-  init_gfx(ngfx,16,16,num);
-  gfx[ngfx].trans[0]:=true;
-  gfx_set_desc_data(4,0,64*8,num*64*8+8,num*64*8+0,8,0);
-  convert_gfx(ngfx,0,memoria_temp2,@pt_x[0],@pt_y[0],false,false);
-end;
-procedure cninja_convert_sprites(num:dword);
-begin
-  init_gfx(3,16,16,num);
-  gfx[3].trans[0]:=true;
-  gfx_set_desc_data(4,0,128*8,16,0,24,8);
-  convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-end;
-begin
-iniciar_cninja:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-case main_vars.tipo_maquina of
-  162:begin
-        tempw:=256;
-        init_dec16ic(0,1,2,$000,$000,$f,$f,0,1,0,16,nil,nil);
-        init_dec16ic(1,3,4,$000,$200,$f,$f,0,2,0,48,cninja_video_bank,cninja_video_bank);
-        deco16_global_x_size:=240;
-      end;
-  163:begin
-        tempw:=320;
-        init_dec16ic(0,1,2,$000,$000,$f,$f,0,1,0,16,nil,robocop2_video_bank);
-        init_dec16ic(1,3,4,$000,$200,$f,$f,0,2,0,48,robocop2_video_bank,robocop2_video_bank);
-        deco16_global_x_size:=304;
-      end;
-end;
-screen_init(5,512,512,false,true);
-iniciar_video(tempw,240);
-//Sound CPU
-deco16_sprite_color_add:=$300;
-deco16_snd_double_init(32220000 div 8,32220000,sound_bank_rom);
-getmem(memoria_temp,$300000);
-getmem(oki2_mem,$80000);
-case main_vars.tipo_maquina of
-  162:begin //Caveman Ninja
-        deco16_sprite_mask:=$3fff;
-        //Main CPU
-        main_m68000:=cpu_m68000.create(12000000,$100);
-        main_m68000.change_ram16_calls(cninja_getword,cninja_putword);
-        proc_update_video:=update_video_cninja;
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@cninja_rom[0],'cninja.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@cninja_sound,'cninja.zip')) then exit;
-        //OKIs rom
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@cninja_oki1,'cninja.zip')) then exit;
-        if not(cargar_roms(oki2_mem,@cninja_oki2,'cninja.zip')) then exit;
-        //convertir chars
-        if not(cargar_roms16b(memoria_temp,@cninja_chars[0],'cninja.zip',0)) then exit;
-        cninja_convert_chars($1000);
-        //Tiles
-        getmem(memoria_temp2,$100000);
-        if not(cargar_roms(memoria_temp2,@cninja_tiles1,'cninja.zip')) then exit;
-        cninja_convert_tiles(1,$1000);
-        if not(cargar_roms(memoria_temp,@cninja_tiles2[0],'cninja.zip',0)) then exit;
-        //ordenar
-        ptemp:=memoria_temp2;
-        ptemp2:=memoria_temp;
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        inc(ptemp,$80000);
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        ptemp:=memoria_temp2;
-        inc(ptemp,$40000);
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        inc(ptemp,$80000);
-        copymemory(ptemp,ptemp2,$40000);
-        cninja_convert_tiles(2,$2000);
-        freemem(memoria_temp2);
-        //Sprites
-        if not(cargar_roms16b(memoria_temp,@cninja_sprites[0],'cninja.zip',0)) then exit;
-        cninja_convert_sprites($4000);
-        //Proteccion deco104
-        main_deco104:=cpu_deco_104.create;
-        main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
-        //Dip
-        marcade.dswa:=$7fff;
-        marcade.dswa_val:=@cninja_dip_a;
-  end;
-  163:begin //Robocop 2
-        deco16_sprite_mask:=$7fff;
-        //Main CPU
-        main_m68000:=cpu_m68000.create(14000000,$100);
-        main_m68000.change_ram16_calls(robocop2_getword,robocop2_putword);
-        proc_update_video:=update_video_robocop2;
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@robocop2_rom[0],'robocop2.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@robocop2_sound,'robocop2.zip')) then exit;
-        //OKIs rom
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@robocop2_oki1,'robocop2.zip')) then exit;
-        if not(cargar_roms(oki2_mem,@robocop2_oki2,'robocop2.zip')) then exit;
-        //convertir chars
-        if not(cargar_roms16b(memoria_temp,@robocop2_char[0],'robocop2.zip',0)) then exit;
-        cninja_convert_chars($1000);
-        //Tiles
-        if not(cargar_roms(memoria_temp,@robocop2_tiles1[0],'robocop2.zip',0)) then exit;
-        getmem(memoria_temp2,$180000);
-        ptemp:=memoria_temp2;
-        ptemp2:=memoria_temp;
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        inc(ptemp,$80000);
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        ptemp:=memoria_temp2;
-        inc(ptemp,$40000);
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        inc(ptemp,$80000);
-        copymemory(ptemp,ptemp2,$40000);
-        cninja_convert_tiles(1,$2000);
-        //Tiles 2
-        if not(cargar_roms(memoria_temp,@robocop2_tiles2[0],'robocop2.zip',0)) then exit;
-        ptemp:=memoria_temp2;
-        ptemp2:=memoria_temp;
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp,$c0000);
-        inc(ptemp2,$40000);
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        ptemp:=memoria_temp2;
-        inc(ptemp,$40000);
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        inc(ptemp,$c0000);
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        ptemp:=memoria_temp2;
-        inc(ptemp,$80000);
-        copymemory(ptemp,ptemp2,$40000);
-        inc(ptemp2,$40000);
-        inc(ptemp,$c0000);
-        copymemory(ptemp,ptemp2,$40000);
-        cninja_convert_tiles(2,$3000);
-        //Tiles 8bbp
-        init_gfx(4,16,16,$1000);
-        gfx[4].trans[0]:=true;
-        gfx_set_desc_data(8,0,64*8,$100000*8+8,$100000*8,$40000*8+8,$40000*8,$c0000*8+8,$c0000*8,8,0);
-        convert_gfx(4,0,memoria_temp2,@pt_x[0],@pt_y[0],false,false);
-        freemem(memoria_temp2);
-        //Sprites
-        if not(cargar_roms16b(memoria_temp,@robocop2_sprites[0],'robocop2.zip',0)) then exit;
-        cninja_convert_sprites($6000);
-        //Proteccion deco146
-        main_deco146:=cpu_deco_146.create;
-        main_deco146.SET_USE_MAGIC_ADDRESS_XOR;
-        //Dip
-        marcade.dswa:=$7fbf;
-        marcade.dswa_val:=@robocop2_dip_a;
-        marcade.dswb:=$ff;
-        marcade.dswb_val:=@robocop2_dip_b;
-  end;
-end;
-//final
-freemem(memoria_temp);
-reset_cninja;
-iniciar_cninja:=true;
-end;
-
-procedure cerrar_cninja;
-begin
-close_dec16ic(0);
-close_dec16ic(1);
-deco16_snd_double_close;
-if oki2_mem<>nil then freemem(oki2_mem);
-oki2_mem:=nil;
-end;
-
-procedure reset_cninja;
-begin
- main_m68000.reset;
- reset_dec16ic(0);
- reset_dec16ic(1);
- case main_vars.tipo_maquina of
-  162:main_deco104.reset;
-  163:main_deco146.reset;
- end;
- deco16_snd_double_reset;
- copymemory(oki_6295_1.get_rom_addr,oki2_mem,$40000);
- reset_audio;
- marcade.in0:=$FFFF;
- marcade.in1:=$F7;
- irq_mask:=0;
- irq_line:=0;
 end;
 
 procedure eventos_cninja;inline;
@@ -665,4 +424,230 @@ begin
   	robocop2_video_bank:=(bank and $30) shl 8;
 end;
 
-end.
+//Main
+procedure reset_cninja;
+begin
+ main_m68000.reset;
+ reset_dec16ic(0);
+ reset_dec16ic(1);
+ case main_vars.tipo_maquina of
+  162:main_deco104.reset;
+  163:main_deco146.reset;
+ end;
+ deco16_snd_double_reset;
+ copymemory(oki_6295_1.get_rom_addr,oki2_mem,$40000);
+ reset_audio;
+ marcade.in0:=$FFFF;
+ marcade.in1:=$F7;
+ irq_mask:=0;
+ irq_line:=0;
+end;
+
+function iniciar_cninja:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  pt_x:array[0..15] of dword=(32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
+		0, 1, 2, 3, 4, 5, 6, 7);
+  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+  ps_x:array[0..15] of dword=(64*8+0, 64*8+1, 64*8+2, 64*8+3, 64*8+4, 64*8+5, 64*8+6, 64*8+7,
+		0, 1, 2, 3, 4, 5, 6, 7);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32);
+var
+  memoria_temp,memoria_temp2,ptemp,ptemp2:pbyte;
+  tempw:word;
+procedure cninja_convert_chars(num:word);
+begin
+  init_gfx(0,8,8,num);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(4,0,16*8,num*16*8+8,num*16*8+0,8,0);
+  convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+end;
+procedure cninja_convert_tiles(ngfx:byte;num:word);
+begin
+  init_gfx(ngfx,16,16,num);
+  gfx[ngfx].trans[0]:=true;
+  gfx_set_desc_data(4,0,64*8,num*64*8+8,num*64*8+0,8,0);
+  convert_gfx(ngfx,0,memoria_temp2,@pt_x[0],@pt_y[0],false,false);
+end;
+procedure cninja_convert_sprites(num:dword);
+begin
+  init_gfx(3,16,16,num);
+  gfx[3].trans[0]:=true;
+  gfx_set_desc_data(4,0,128*8,16,0,24,8);
+  convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+end;
+begin
+iniciar_cninja:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+case main_vars.tipo_maquina of
+  162:begin
+        tempw:=256;
+        init_dec16ic(0,1,2,$000,$000,$f,$f,0,1,0,16,nil,nil);
+        init_dec16ic(1,3,4,$000,$200,$f,$f,0,2,0,48,cninja_video_bank,cninja_video_bank);
+        deco16_global_x_size:=240;
+      end;
+  163:begin
+        tempw:=320;
+        init_dec16ic(0,1,2,$000,$000,$f,$f,0,1,0,16,nil,robocop2_video_bank);
+        init_dec16ic(1,3,4,$000,$200,$f,$f,0,2,0,48,robocop2_video_bank,robocop2_video_bank);
+        deco16_global_x_size:=304;
+      end;
+end;
+screen_init(5,512,512,false,true);
+iniciar_video(tempw,240);
+//Sound CPU
+deco16_sprite_color_add:=$300;
+deco16_snd_double_init(32220000 div 8,32220000,sound_bank_rom);
+getmem(memoria_temp,$300000);
+getmem(oki2_mem,$80000);
+case main_vars.tipo_maquina of
+  162:begin //Caveman Ninja
+        deco16_sprite_mask:=$3fff;
+        //Main CPU
+        main_m68000:=cpu_m68000.create(12000000,$100);
+        main_m68000.change_ram16_calls(cninja_getword,cninja_putword);
+        proc_update_video:=update_video_cninja;
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@cninja_rom[0],'cninja.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@cninja_sound,'cninja.zip')) then exit;
+        //OKIs rom
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@cninja_oki1,'cninja.zip')) then exit;
+        if not(cargar_roms(oki2_mem,@cninja_oki2,'cninja.zip')) then exit;
+        //convertir chars
+        if not(cargar_roms16b(memoria_temp,@cninja_chars[0],'cninja.zip',0)) then exit;
+        cninja_convert_chars($1000);
+        //Tiles
+        getmem(memoria_temp2,$100000);
+        if not(cargar_roms(memoria_temp2,@cninja_tiles1,'cninja.zip')) then exit;
+        cninja_convert_tiles(1,$1000);
+        if not(cargar_roms(memoria_temp,@cninja_tiles2[0],'cninja.zip',0)) then exit;
+        //ordenar
+        ptemp:=memoria_temp2;
+        ptemp2:=memoria_temp;
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        inc(ptemp,$80000);
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        ptemp:=memoria_temp2;
+        inc(ptemp,$40000);
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        inc(ptemp,$80000);
+        copymemory(ptemp,ptemp2,$40000);
+        cninja_convert_tiles(2,$2000);
+        freemem(memoria_temp2);
+        //Sprites
+        if not(cargar_roms16b(memoria_temp,@cninja_sprites[0],'cninja.zip',0)) then exit;
+        cninja_convert_sprites($4000);
+        //Proteccion deco104
+        main_deco104:=cpu_deco_104.create;
+        main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
+        //Dip
+        marcade.dswa:=$7fff;
+        marcade.dswa_val:=@cninja_dip_a;
+  end;
+  163:begin //Robocop 2
+        deco16_sprite_mask:=$7fff;
+        //Main CPU
+        main_m68000:=cpu_m68000.create(14000000,$100);
+        main_m68000.change_ram16_calls(robocop2_getword,robocop2_putword);
+        proc_update_video:=update_video_robocop2;
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@robocop2_rom[0],'robocop2.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@robocop2_sound,'robocop2.zip')) then exit;
+        //OKIs rom
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@robocop2_oki1,'robocop2.zip')) then exit;
+        if not(cargar_roms(oki2_mem,@robocop2_oki2,'robocop2.zip')) then exit;
+        //convertir chars
+        if not(cargar_roms16b(memoria_temp,@robocop2_char[0],'robocop2.zip',0)) then exit;
+        cninja_convert_chars($1000);
+        //Tiles
+        if not(cargar_roms(memoria_temp,@robocop2_tiles1[0],'robocop2.zip',0)) then exit;
+        getmem(memoria_temp2,$180000);
+        ptemp:=memoria_temp2;
+        ptemp2:=memoria_temp;
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        inc(ptemp,$80000);
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        ptemp:=memoria_temp2;
+        inc(ptemp,$40000);
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        inc(ptemp,$80000);
+        copymemory(ptemp,ptemp2,$40000);
+        cninja_convert_tiles(1,$2000);
+        //Tiles 2
+        if not(cargar_roms(memoria_temp,@robocop2_tiles2[0],'robocop2.zip',0)) then exit;
+        ptemp:=memoria_temp2;
+        ptemp2:=memoria_temp;
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp,$c0000);
+        inc(ptemp2,$40000);
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        ptemp:=memoria_temp2;
+        inc(ptemp,$40000);
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        inc(ptemp,$c0000);
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        ptemp:=memoria_temp2;
+        inc(ptemp,$80000);
+        copymemory(ptemp,ptemp2,$40000);
+        inc(ptemp2,$40000);
+        inc(ptemp,$c0000);
+        copymemory(ptemp,ptemp2,$40000);
+        cninja_convert_tiles(2,$3000);
+        //Tiles 8bbp
+        init_gfx(4,16,16,$1000);
+        gfx[4].trans[0]:=true;
+        gfx_set_desc_data(8,0,64*8,$100000*8+8,$100000*8,$40000*8+8,$40000*8,$c0000*8+8,$c0000*8,8,0);
+        convert_gfx(4,0,memoria_temp2,@pt_x[0],@pt_y[0],false,false);
+        freemem(memoria_temp2);
+        //Sprites
+        if not(cargar_roms16b(memoria_temp,@robocop2_sprites[0],'robocop2.zip',0)) then exit;
+        cninja_convert_sprites($6000);
+        //Proteccion deco146
+        main_deco146:=cpu_deco_146.create;
+        main_deco146.SET_USE_MAGIC_ADDRESS_XOR;
+        //Dip
+        marcade.dswa:=$7fbf;
+        marcade.dswa_val:=@robocop2_dip_a;
+        marcade.dswb:=$ff;
+        marcade.dswb_val:=@robocop2_dip_b;
+  end;
+end;
+//final
+freemem(memoria_temp);
+reset_cninja;
+iniciar_cninja:=true;
+end;
+
+procedure cerrar_cninja;
+begin
+close_dec16ic(0);
+close_dec16ic(1);
+if oki2_mem<>nil then freemem(oki2_mem);
+oki2_mem:=nil;
+end;
+
+procedure Cargar_cninja;
+begin
+llamadas_maquina.bucle_general:=cninja_principal;
+llamadas_maquina.iniciar:=iniciar_cninja;
+llamadas_maquina.cerrar:=cerrar_cninja;
+llamadas_maquina.reset:=reset_cninja;
+llamadas_maquina.fps_max:=58;
+end;
+
+end.

@@ -329,7 +329,7 @@ case direccion of
   $1806:scroll_x:=(scroll_x and $f00) or valor;
   $2000:begin
         sound_latch:=valor;
-        snd_m6502.pedir_nmi:=PULSE_LINE;
+        snd_m6502.change_nmi(PULSE_LINE);
         end;
   $2800..$288f:if buffer_paleta[direccion and $ff]<>valor then begin
           buffer_paleta[direccion and $ff]:=valor;
@@ -345,8 +345,8 @@ end;
 function getbyte_snd_dec8(direccion:word):byte;
 begin
   case direccion of
-    $2000:getbyte_snd_dec8:=ym2203_0.read_status;
-    $2001:getbyte_snd_dec8:=ym2203_0.Read_Reg;
+    $2000:getbyte_snd_dec8:=ym2203_0.status;
+    $2001:getbyte_snd_dec8:=ym2203_0.Read;
     $4000:getbyte_snd_dec8:=ym3812_0.status;
     $6000:getbyte_snd_dec8:=sound_latch;
     $8000..$ffff:if snd_m6502.opcode then getbyte_snd_dec8:=snd_dec[direccion and $7fff]
@@ -361,7 +361,7 @@ if direccion>$7fff then exit;
 mem_snd[direccion]:=valor;
 case direccion of
   $2000:ym2203_0.control(valor);
-  $2001:ym2203_0.write_reg(valor);
+  $2001:ym2203_0.write(valor);
   $4000:ym3812_0.control(valor);
   $4001:ym3812_0.write(valor);
 end;
@@ -375,8 +375,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6502.pedir_irq:=ASSERT_LINE
-    else snd_m6502.pedir_irq:=CLEAR_LINE;
+  snd_m6502.change_irq(irqstate);
 end;
 
 end.

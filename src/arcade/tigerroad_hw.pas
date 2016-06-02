@@ -380,8 +380,10 @@ function tigeroad_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
    0..$7fff,$c000..$c7ff:tigeroad_snd_getbyte:=mem_snd[direccion];
-   $8000:tigeroad_snd_getbyte:=ym2203_0.Read_Status;
-   $a000:tigeroad_snd_getbyte:=ym2203_1.Read_Status;
+   $8000:tigeroad_snd_getbyte:=ym2203_0.status;
+   $8001:tigeroad_snd_getbyte:=ym2203_0.read;
+   $a000:tigeroad_snd_getbyte:=ym2203_1.status;
+   $a001:tigeroad_snd_getbyte:=ym2203_1.read;
    $e000:tigeroad_snd_getbyte:=sound_latch;
 end;
 end;
@@ -391,9 +393,9 @@ begin
 if direccion<$8000 then exit;
 case direccion of
   $8000:ym2203_0.Control(valor);
-  $8001:ym2203_0.Write_Reg(valor);
+  $8001:ym2203_0.Write(valor);
   $a000:ym2203_1.Control(valor);
-  $a001:ym2203_1.Write_Reg(valor);
+  $a001:ym2203_1.Write(valor);
   $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
 end;

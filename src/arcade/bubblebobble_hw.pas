@@ -5,24 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ym_2203,ym_3812,
      m680x,rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_bublbobl;
-procedure bublbobl_principal;
-function iniciar_bublbobl:boolean;
-procedure reset_bublbobl;
-//Main CPU
-function bublbobl_getbyte(direccion:word):byte;
-procedure bublbobl_putbyte(direccion:word;valor:byte);
-//Sub CPU
-function bb_misc_getbyte(direccion:word):byte;
-procedure bb_misc_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function bbsnd_getbyte(direccion:word):byte;
-procedure bbsnd_putbyte(direccion:word;valor:byte);
-procedure bb_sound_update;
-procedure snd_irq(irqstate:byte);
-//MCU CPU
-function mcu_getbyte(direccion:word):byte;
-procedure mcu_putbyte(direccion:word;valor:byte);
+procedure cargar_bublbobl;
 
 implementation
 const
@@ -60,95 +43,6 @@ var
  sound_nmi,pending_nmi,video_enable:boolean;
  ddr1,ddr2,ddr3,ddr4:byte;
  port1_in,port1_out,port2_in,port2_out,port3_in,port3_out,port4_in,port4_out:byte;
-
-procedure Cargar_bublbobl;
-begin
-llamadas_maquina.iniciar:=iniciar_bublbobl;
-llamadas_maquina.bucle_general:=bublbobl_principal;
-llamadas_maquina.reset:=reset_bublbobl;
-llamadas_maquina.fps_max:=59.185606;
-end;
-
-function iniciar_bublbobl:boolean;
-var
-  f:dword;
-  memoria_temp:array[0..$7ffff] of byte;
-const
-  pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-begin
-iniciar_bublbobl:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,256,false,true);
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(6000000,264);
-main_z80.change_ram_calls(bublbobl_getbyte,bublbobl_putbyte);
-//Second CPU
-sub_z80:=cpu_z80.create(6000000,264);
-sub_z80.change_ram_calls(bb_misc_getbyte,bb_misc_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3000000,264);
-snd_z80.change_ram_calls(bbsnd_getbyte,bbsnd_putbyte);
-snd_z80.init_sound(bb_sound_update);
-//MCU
-main_m6800:=cpu_m6800.create(4000000,264,CPU_M6801);
-main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
-//Sound Chip
-ym2203_0:=ym2203_chip.create(3000000,0.25,0.25);
-ym2203_0.change_irq_calls(snd_irq);
-ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,0.5);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@bublbobl_rom[0],'bublbobl.zip',0)) then exit;
-//poner las roms y los bancos de rom
-copymemory(@memoria[0],@memoria_temp[0],$8000);
-for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//Segunda CPU
-if not(cargar_roms(@mem_misc[0],@bublbobl_rom2,'bublbobl.zip',1)) then exit;
-//MCU
-if not(cargar_roms(@mem_mcu[0],@bublbobl_mcu_rom,'bublbobl.zip',1)) then exit;
-//sonido
-if not(cargar_roms(@mem_snd[0],@bublbobl_snd,'bublbobl.zip',1)) then exit;
-//proms video
-if not(cargar_roms(@mem_prom[0],@bublbobl_prom,'bublbobl.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@bublbobl_chars,'bublbobl.zip',0)) then exit;
-for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]); //invertir las roms
-init_gfx(0,8,8,$4000);
-gfx[0].trans[15]:=true;
-gfx_set_desc_data(4,0,16*8,0,4,$4000*16*8+0,$4000*16*8+4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//DIP
-marcade.dswa:=$fe;
-marcade.dswb:=$ff;
-marcade.dswa_val:=@bublbobl_dip_a;
-marcade.dswb_val:=@bublbobl_dip_b;
-//final
-reset_bublbobl;
-iniciar_bublbobl:=true;
-end;
-
-procedure reset_bublbobl;
-begin
- main_z80.reset;
- sub_z80.reset;
- snd_z80.reset;
- main_m6800.reset;
- ym2203_0.reset;
- YM3812_0.reset;
- reset_audio;
- banco_rom:=0;
- sound_nmi:=false;
- pending_nmi:=false;
- sound_stat:=0;
- marcade.in0:=$b3;
- marcade.in1:=$FF;
- marcade.in2:=$ff;
- sound_latch:=0;
- ddr1:=0;ddr2:=0;ddr3:=0;ddr4:=0;
- port1_in:=0;port1_out:=0;port2_in:=0;port2_out:=0;port3_in:=0;port3_out:=0;port4_in:=0;port4_out:=0;
-end;
 
 procedure update_video_bublbobl;inline;
 var
@@ -236,7 +130,7 @@ while EmuStatus=EsRuning do begin
   frame_mcu:=frame_mcu+main_m6800.tframes-main_m6800.contador;
   if f=239 then begin
     sub_z80.pedir_irq:=HOLD_LINE;
-    main_m6800.pedir_irq:=HOLD_LINE;
+    main_m6800.change_irq(HOLD_LINE);
     update_video_bublbobl;
   end;
  end;
@@ -248,8 +142,8 @@ end;
 function bbsnd_getbyte(direccion:word):byte;
 begin
   case direccion of
-    $9000:bbsnd_getbyte:=ym2203_0.read_status;
-    $9001:bbsnd_getbyte:=ym2203_0.read_reg;
+    $9000:bbsnd_getbyte:=ym2203_0.status;
+    $9001:bbsnd_getbyte:=ym2203_0.read;
     $a000:bbsnd_getbyte:=ym3812_0.status;
     $a001:bbsnd_getbyte:=ym3812_0.read;
     $b000:bbsnd_getbyte:=sound_latch;
@@ -263,7 +157,7 @@ if direccion<$8000 then exit;
 mem_snd[direccion]:=valor;
 case direccion of
   $9000:ym2203_0.control(valor);
-  $9001:ym2203_0.write_reg(valor);
+  $9001:ym2203_0.write(valor);
   $a000:YM3812_0.control(valor);
   $a001:YM3812_0.write(valor);
   $b000:sound_stat:=valor;
@@ -271,7 +165,7 @@ case direccion of
           sound_nmi:=true;
           if pending_nmi then begin
               pending_nmi:=false;
-              snd_z80.pedir_nmi:=PULSE_LINE;
+              snd_z80.change_nmi(PULSE_LINE);
           end;
         end;
   $b002:sound_nmi:=false;
@@ -310,7 +204,7 @@ case direccion of
                         cambiar_color(direccion and $1fe);
                      end;
         $fa00:begin
-                if sound_nmi then snd_z80.pedir_nmi:=PULSE_LINE
+                if sound_nmi then snd_z80.change_nmi(PULSE_LINE)
                   else pending_nmi:=true;
                 sound_latch:=valor;
               end;
@@ -416,6 +310,96 @@ case direccion of
   $6:port3_out:=valor;
   $7:port4_out:=valor;
 end;
+end;
+
+//Main
+procedure reset_bublbobl;
+begin
+ main_z80.reset;
+ sub_z80.reset;
+ snd_z80.reset;
+ main_m6800.reset;
+ ym2203_0.reset;
+ YM3812_0.reset;
+ reset_audio;
+ banco_rom:=0;
+ sound_nmi:=false;
+ pending_nmi:=false;
+ sound_stat:=0;
+ marcade.in0:=$b3;
+ marcade.in1:=$FF;
+ marcade.in2:=$ff;
+ sound_latch:=0;
+ ddr1:=0;ddr2:=0;ddr3:=0;ddr4:=0;
+ port1_in:=0;port1_out:=0;port2_in:=0;port2_out:=0;port3_in:=0;port3_out:=0;port4_in:=0;port4_out:=0;
+end;
+
+function iniciar_bublbobl:boolean;
+var
+  f:dword;
+  memoria_temp:array[0..$7ffff] of byte;
+const
+  pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+begin
+iniciar_bublbobl:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,512,256,false,true);
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(6000000,264);
+main_z80.change_ram_calls(bublbobl_getbyte,bublbobl_putbyte);
+//Second CPU
+sub_z80:=cpu_z80.create(6000000,264);
+sub_z80.change_ram_calls(bb_misc_getbyte,bb_misc_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,264);
+snd_z80.change_ram_calls(bbsnd_getbyte,bbsnd_putbyte);
+snd_z80.init_sound(bb_sound_update);
+//MCU
+main_m6800:=cpu_m6800.create(4000000,264,CPU_M6801);
+main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
+//Sound Chip
+ym2203_0:=ym2203_chip.create(3000000,0.25,0.25);
+ym2203_0.change_irq_calls(snd_irq);
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,0.5);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@bublbobl_rom[0],'bublbobl.zip',0)) then exit;
+//poner las roms y los bancos de rom
+copymemory(@memoria[0],@memoria_temp[0],$8000);
+for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+//Segunda CPU
+if not(cargar_roms(@mem_misc[0],@bublbobl_rom2,'bublbobl.zip',1)) then exit;
+//MCU
+if not(cargar_roms(@mem_mcu[0],@bublbobl_mcu_rom,'bublbobl.zip',1)) then exit;
+//sonido
+if not(cargar_roms(@mem_snd[0],@bublbobl_snd,'bublbobl.zip',1)) then exit;
+//proms video
+if not(cargar_roms(@mem_prom[0],@bublbobl_prom,'bublbobl.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@bublbobl_chars,'bublbobl.zip',0)) then exit;
+for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]); //invertir las roms
+init_gfx(0,8,8,$4000);
+gfx[0].trans[15]:=true;
+gfx_set_desc_data(4,0,16*8,0,4,$4000*16*8+0,$4000*16*8+4);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//DIP
+marcade.dswa:=$fe;
+marcade.dswb:=$ff;
+marcade.dswa_val:=@bublbobl_dip_a;
+marcade.dswb_val:=@bublbobl_dip_b;
+//final
+reset_bublbobl;
+iniciar_bublbobl:=true;
+end;
+
+procedure Cargar_bublbobl;
+begin
+llamadas_maquina.iniciar:=iniciar_bublbobl;
+llamadas_maquina.bucle_general:=bublbobl_principal;
+llamadas_maquina.reset:=reset_bublbobl;
+llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

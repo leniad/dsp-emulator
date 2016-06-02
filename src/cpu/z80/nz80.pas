@@ -53,10 +53,10 @@ type
           destructor free;
         public
           daisy,halt:boolean;
-          pedir_irq,pedir_nmi,im2_lo,im0:byte;
+          pedir_irq,im2_lo,im0:byte;
           procedure reset;
           procedure run(maximo:single);
-          procedure clear_nmi;
+          procedure change_nmi(state:byte);
           procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
           procedure change_io_calls(in_port:cpu_inport_full;out_port:cpu_outport_full);
           procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised);
@@ -67,12 +67,40 @@ type
         protected
           r:npreg_z80;
           after_ei:boolean;
-          nmi_state:byte;
-          z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
-          raised_z80:type_raised;
           in_port:cpu_inport_full;
           out_port:cpu_outport_full;
           despues_instruccion:tdespues_instruccion;
+          //pila
+          procedure push_sp(reg:word);
+          function pop_sp:word;
+          //opcodes
+          procedure and_a(valor:byte);
+          procedure or_a(valor:byte);
+          procedure xor_a(valor:byte);
+          procedure cp_a(valor:byte);
+          procedure sra_8(reg:pbyte);
+          procedure sla_8(reg:pbyte);
+          procedure sll_8(reg:pbyte);
+          procedure srl_8(reg:pbyte);
+          procedure rlc_8(reg:pbyte);
+          procedure rr_8(reg:pbyte);
+          procedure rrc_8(reg:pbyte);
+          procedure rl_8(reg:pbyte);
+          procedure dec_8(reg:pbyte);
+          procedure inc_8(reg:pbyte);
+          procedure add_8(valor:byte);
+          procedure adc_8(valor:byte);
+          procedure sub_8(valor:byte);
+          procedure sbc_8(valor:byte);
+          procedure bit_8(bit,valor:byte);
+          procedure bit_7(valor:byte);
+          procedure add_16(reg:pword;valor:word);
+          procedure adc_16(reg:pword;valor:word);
+          procedure sbc_16(reg:pword;valor:word);
+        private
+          nmi_state,pedir_nmi:byte;
+          z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
+          raised_z80:type_raised;
           function call_nmi:byte;
           function call_irq:byte;
           //resto de opcodes
@@ -80,9 +108,6 @@ type
           function exec_dd_fd(tipo:boolean):byte;
           function exec_dd_cb(tipo:boolean):byte;
           function exec_ed:byte;
-          {pila}
-          procedure push_sp(reg:word);
-          function pop_sp:word;
         end;
 
 var
@@ -203,6 +228,329 @@ const
 	      6, 0, 0, 0, 7, 0, 0, 2, 6, 0, 0, 0, 7, 0, 0, 2,
 	      6, 0, 0, 0, 7, 0, 0, 2, 6, 0, 0, 0, 7, 0, 0, 2);
 
+
+procedure cpu_z80.and_a(valor:byte);
+begin
+ r.a:=r.a and valor;
+ r.f.s:=(r.a and $80)<>0; {modificar signo}
+ r.f.z:=(r.a=0); {modificar si es zero}
+ r.f.bit5:=(r.a and $20) <> 0;
+ r.f.h:=true; {bit de signo nibble}
+ r.f.bit3:=(r.a and 8) <> 0;
+ r.f.p_v:=paridad[r.a]; {modificar si paridad}
+ r.f.n:=false; {la bandera de suma}
+ r.f.c:=false; {modificar carry}
+end;
+
+procedure cpu_z80.or_a(valor:byte);
+begin
+ r.a:=r.a or valor;
+ r.f.s:=(r.a and $80) <> 0; {modificar signo}
+ r.f.z:=(r.a=0); {modificar si es zero}
+ r.f.bit5:=(r.a and $20) <> 0;
+ r.f.h:=false; {bit de signo nibble}
+ r.f.bit3:=(r.a and 8) <> 0;
+ r.f.p_v:=paridad[r.a]; {modificar si paridad}
+ r.f.n:=false; {la bandera de suma}
+ r.f.c:=false; {modificar carry}
+end;
+
+procedure cpu_z80.xor_a(valor:byte);
+begin
+ r.a:=r.a xor valor;
+ r.f.s:=(r.a and $80)<>0; {modificar signo}
+ r.f.z:=(r.a=0); {modificar si es zero}
+ r.f.bit5:=(r.a and $20) <> 0;
+ r.f.h:= false; {bit de signo nibble}
+ r.f.bit3:=(r.a and 8) <> 0 ;
+ r.f.p_v:=paridad[r.a]; {modificar si paridad}
+ r.f.n:=false; {la bandera de suma}
+ r.f.c:=false; {modificar carry}
+end;
+
+procedure cpu_z80.cp_a(valor:byte);
+var
+  temp:byte;
+begin
+ temp:=r.a-valor;
+ r.f.s:=(temp and $80) <>0; {modificar signo}
+ r.f.z:=(temp=0); {modificar si es zero}
+ r.f.bit5:=(valor and $20)<>0;
+ r.f.h:=(((r.a and $0F) - (valor and $0F)) and $10) <> 0;
+ r.f.bit3:=(valor and 8)<>0;
+ r.f.p_v:=((r.a xor valor) and (r.a xor temp) and $80) <>0; {desbordamiento}
+ r.f.n:=true; {la bandera de resta}
+ r.f.c:=(r.a-valor)<0;  {carry}
+end;
+
+procedure cpu_z80.sra_8(reg:pbyte);
+begin
+ r.f.c:=(reg^ and $1)<>0;
+ reg^:=(reg^ shr 1) or (reg^ and $80);
+ r.f.h:=false;
+ r.f.n:=false;
+ r.f.p_v:=paridad[reg^];
+ r.f.s:=(reg^ and $80)<>0;
+ r.f.z:=(reg^=0);
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+end;
+
+procedure cpu_z80.sla_8(reg:pbyte);
+begin
+ r.f.c:=(reg^ and $80)<>0;
+ reg^:=reg^ shl 1;
+ r.f.h:=false;
+ r.f.n:=false;
+ r.f.p_v:=paridad[reg^];
+ r.f.s:=(reg^ and $80)<>0;
+ r.f.z:=(reg^=0);
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+end;
+
+procedure cpu_z80.sll_8(reg:pbyte);
+begin
+ r.f.c:=(reg^ and $80)<>0;
+ reg^:=(reg^ shl 1) or 1;
+ r.f.h:=false;
+ r.f.n:=false;
+ r.f.p_v:=paridad[reg^];
+ r.f.s:=(reg^ and $80)<>0;
+ r.f.z:=(reg^=0);
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+end;
+
+procedure cpu_z80.srl_8(reg:pbyte);
+begin
+ r.f.h:=false;
+ r.f.n:=false;
+ r.f.c:=(reg^ and 1)<>0;
+ reg^:=reg^ shr 1;
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+ r.f.p_v:=paridad[reg^];
+ r.f.z:=(reg^=0);
+ r.f.s:=(reg^ and $80)<>0;
+end;
+
+procedure cpu_z80.rlc_8(reg:pbyte);
+begin
+ r.f.c:=(reg^ and $80)<>0;
+ if r.f.c then reg^:=((reg^ shl 1) or 1) else reg^:=reg^ shl 1;
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+ r.f.p_v:=paridad[reg^];
+ r.f.h:=false;
+ r.f.n:=false;
+ r.f.z:=(reg^=0);
+ r.f.s:=(reg^ and $80)<>0;
+end;
+
+procedure cpu_z80.rr_8(reg:pbyte);
+begin
+ r.f.n:=r.f.c;
+ r.f.c:=(reg^ and 1)<>0;
+ if r.f.n then reg^:=((reg^ shr 1) or $80) else reg^:=(reg^ shr 1);
+ r.f.h:=false;
+ r.f.n:=false;
+ r.f.p_v:=paridad[reg^];
+ r.f.s:=(reg^ and $80)<>0;
+ r.f.z:=(reg^=0);
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+end;
+
+procedure cpu_z80.rrc_8(reg:pbyte);
+begin
+ r.f.c:=(reg^ and $1)<>0;
+ if r.f.c then reg^:=((reg^ shr 1) or $80) else reg^:=(reg^ shr 1);
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+ r.f.p_v:=paridad[reg^];
+ r.f.h:=false;
+ r.f.n:=false;
+ r.f.z:=(reg^=0);
+ r.f.s:=(reg^ and $80)<>0;
+end;
+
+procedure cpu_z80.rl_8(reg:pbyte);
+begin
+ r.f.n:=r.f.c;
+ r.f.c:=(reg^ and $80)<>0;
+ if r.f.n then reg^:=((reg^ shl 1) or 1) else reg^:=reg^ shl 1;
+ r.f.h:=false;
+ r.f.n:=false;
+ r.f.p_v:=paridad[reg^];
+ r.f.s:=(reg^ and $80)<>0;
+ r.f.z:=(reg^=0);
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+end;
+
+procedure cpu_z80.dec_8(reg:pbyte);
+begin
+ r.f.h:=(((reg^ and $0F)-1) and $10)<>0; {bit de signo nibble}
+ r.f.p_v:=(reg^=$80); {desbordamiento}
+ reg^:=reg^-1;
+ r.f.s:= (reg^ and $80)<>0; {modificar signo}
+ r.f.z:=(reg^=0); {modificar si es zero}
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+ r.f.n:=true; {la bandera de resta}
+end;
+
+procedure cpu_z80.inc_8(reg:pbyte);
+begin
+ r.f.h:=(((reg^ and $0F)+1) and $10) <> 0; {bit de signo nibble}
+ r.f.p_v:=(reg^=$7f); {desbordamiento}
+ reg^:=reg^+1;
+ r.f.s:=(reg^ and $80)<>0; {modificar signo}
+ r.f.z:=(reg^=0); {modificar si es zero}
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
+ r.f.n:=false; {la bandera de suma}
+end;
+
+procedure cpu_z80.add_8(valor:byte);
+var
+  temp:byte;
+begin
+ temp:=r.a+valor;
+ r.f.p_v:=(((r.a Xor (Not (valor))) And $0ffff) And (r.a Xor temp) And $80) <> 0;
+ r.f.h :=(((r.a And 15) + (valor And 15)) And 16) <> 0;
+ r.f.s:= (temp and $80) <>0;
+ r.f.z:=(temp=0);
+ r.f.bit5:=(temp and $20) <>0;
+ r.f.bit3:=(temp and 8) <>0;
+ r.f.n:=false;
+ r.f.c:=((r.a+valor) and $100)<>0;
+ r.a:=temp;
+end;
+
+procedure cpu_z80.adc_8(valor:byte);
+var
+  carry,temp:byte;
+begin
+ if r.f.c then carry:=1 else carry:=0;
+ temp:=r.a+valor+carry;
+ r.f.p_v:=(((r.a Xor (Not valor)) And $0ffff) And ((r.a Xor temp) And 128)) <> 0;
+ r.f.h :=(((r.a And 15) + (valor And 15) + carry) And 16) <> 0;
+ r.f.s:= (temp and $80) <>0; {modificar signo}
+ r.f.z:=(temp=0); {modificar si es zero}
+ r.f.bit5:=(temp and 32) <>0;
+ r.f.bit3:=(temp and 8) <>0;
+ r.f.n:=false; {la bandera de suma}
+ r.f.c:=((r.a+valor+carry) and $100)<>0;       {modificar carry}
+ r.a:=temp;
+end;
+
+procedure cpu_z80.sub_8(valor:byte);
+var
+  temp,temp2:integer;
+begin
+ temp2:=r.a-valor;
+ temp:=temp2 and $FF;
+ r.f.h:=(((r.a and $0f) - (valor and $0f)) and $10) <> 0;
+ r.f.p_v:=(((r.a xor valor) and (r.a xor temp)) and 128) <>0; {desbordamiento}
+ r.f.s:= (temp and $80) <>0; {modificar signo}
+ r.f.z:=(temp=0); {modificar si es zero}
+ r.f.bit5:=(temp and 32) <>0;
+ r.f.bit3:=(temp and 8) <> 0;
+ r.f.n:=true; {la bandera de resta}
+ r.f.c:=(temp2 and $100)<>0;  {carry}
+ r.a:=temp;
+end;
+
+procedure cpu_z80.sbc_8(valor:byte);
+var
+  carry,temp:byte;
+begin
+ if r.f.c then carry:=1 else carry:=0;
+ temp:=r.a-valor-carry;
+ r.f.h:=(((r.a and $0f) - (valor and $0f) - carry) and $10) <> 0;
+ r.f.p_v:=(((r.a xor valor) and (r.a xor temp)) and $80) <>0; {desbordamiento}
+ r.f.s:= (temp and $80) <>0; {modificar signo}
+ r.f.z:=(temp=0); {modificar si es zero}
+ r.f.bit5:=(temp and $20) <>0;
+ r.f.bit3:=(temp and 8) <>0;
+ r.f.n:=true; {la bandera de resta}
+ r.f.c:=((r.a-valor-carry) and $100)<>0;       {modificar carry}
+ r.a:=temp;
+end;
+
+procedure cpu_z80.bit_8(bit,valor:byte);
+begin
+r.f.h:=true;
+r.f.n:=false;
+r.f.s:=false;
+r.f.z:=not((valor and (1 shl bit))<>0);
+r.f.p_v:=r.f.z;
+r.f.bit5:=(valor and $20)<>0;
+r.f.bit3:=(valor and 8)<>0;
+end;
+
+procedure cpu_z80.bit_7(valor:byte);
+begin
+r.f.z:=not((valor and $80)<>0);
+r.f.h:=true;
+r.f.n:=false;
+r.f.p_v:=r.f.z;
+r.f.s:=(valor and $80)<>0;
+r.f.bit5:=(valor and $20)<>0;
+r.f.bit3:=(valor and 8)<>0;
+end;
+
+procedure cpu_z80.add_16(reg:pword;valor:word);
+var
+  temp:word;
+begin
+  temp:=reg^+valor;
+  r.f.bit3:=(temp And $800)<>0;
+  r.f.bit5:=(temp And $2000)<>0;
+  r.f.c:=((reg^+valor) And $10000)<>0;
+  r.f.h:=(((reg^ And $0FFF)+(valor And $0FFF)) And $1000)<>0;
+  r.f.n:=False;
+  reg^:=temp;
+end;
+
+procedure cpu_z80.adc_16(reg:pword;valor:word);
+var
+  temp:word;
+  carry:byte;
+begin
+ if r.f.c then carry:=1 else carry:=0;
+ temp:=reg^+valor+carry;
+ r.f.p_v:=((reg^ Xor ((Not valor) And $0FFFF)) And (reg^ Xor temp) And $8000) <> 0;
+ r.f.h:=(((reg^ And $0FFF) + (valor And $0FFF) + carry) And $1000) <> 0;
+ r.f.s:=(temp and $8000)<>0;
+ r.f.z:=(temp=0);
+ r.f.bit5:=(temp and $2000)<>0;
+ r.f.bit3:=(temp and $800)<>0;
+ r.f.n:=false;
+ r.f.c:=((reg^+valor+carry) and $10000)<>0;
+ reg^:=temp;
+end;
+
+procedure cpu_z80.sbc_16(reg:pword;valor:word);
+var
+  carry:byte;
+  temp:word;
+begin
+if r.f.c Then carry:=1 else carry:=0;
+temp:=reg^-valor-carry;
+r.f.s:=(temp And $8000) <> 0;
+r.f.bit3:=(temp And $800) <> 0;
+r.f.bit5:=(temp And $2000) <> 0;
+r.f.z:=(temp = 0);
+r.f.c:=((reg^-valor-carry) And $10000) <> 0;
+r.f.P_V:=((reg^ Xor valor) And (reg^ Xor temp) And $8000) <> 0;
+r.f.h:= (((reg^ And $0FFF)-(valor And $0FFF)-carry) And $1000) <> 0;
+r.f.n:=True;
+reg^:=temp;
+end;
+
 constructor cpu_z80.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(nreg_z80));
@@ -315,10 +663,12 @@ begin
   self.im0:=temp^;
 end;
 
-procedure cpu_z80.clear_nmi;
+procedure cpu_z80.change_nmi(state:byte);
 begin
+if state=CLEAR_LINE then begin
   self.pedir_nmi:=CLEAR_LINE;
   self.nmi_state:=CLEAR_LINE;
+end else self.pedir_nmi:=state;
 end;
 
 procedure cpu_z80.change_io_calls(in_port:cpu_inport_full;out_port:cpu_outport_full);
@@ -350,7 +700,7 @@ end;
 
 function cpu_z80.call_irq:byte;
 var
-  posicion:parejas;
+  posicion:word;
   estados_t:byte;
 begin
 call_irq:=0;
@@ -374,18 +724,15 @@ Case r.im of
             estados_t:=estados_t+13;
         end;
         2:begin
-            if self.daisy then posicion.l:=z80daisy_ack
-              else posicion.l:=self.im2_lo;
-            posicion.h:=r.i;
-            r.pc:=self.getbyte(posicion.w)+(self.getbyte(posicion.w+1) shl 8);
+            if self.daisy then posicion:=z80daisy_ack
+              else posicion:=self.im2_lo;
+            posicion:=posicion or (r.i shl 8);
+            r.pc:=self.getbyte(posicion)+(self.getbyte(posicion+1) shl 8);
             estados_t:=estados_t+19;
         end;
 end; {del case}
 call_irq:=estados_t;
 end;
-
-//Functions
-{$I z80.inc}
 
 procedure cpu_z80.push_sp(reg:word);
 begin
@@ -453,8 +800,8 @@ case instruccion of
             end;
         $02:self.putbyte(r.bc.w,r.a);{ld (BC),A}
         $03:r.bc.w:=r.bc.w+1;  {inc BC}
-        $04:inc_8(self.r,@r.bc.h); {inc B}
-        $05:dec_8(self.r,@r.bc.h); {dec B}
+        $04:inc_8(@r.bc.h); {inc B}
+        $05:dec_8(@r.bc.h); {dec B}
         $06:begin {ld B,n}
                 r.bc.h:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
@@ -476,11 +823,11 @@ case instruccion of
                 r.a:=r.a2;
                 r.a2:=temp;
             end;
-        $09:add_16(self.r,@r.hl,r.bc.w); {add HL,BC}
+        $09:add_16(@r.hl.w,r.bc.w); {add HL,BC}
         $0a:r.a:=self.getbyte(r.bc.w); {ld A,(BC)}
         $0b:r.bc.w:=r.bc.w-1;  {dec BC}
-        $0c:inc_8(self.r,@r.bc.l); {inc C}
-        $0d:dec_8(self.r,@r.bc.l); {dec C}
+        $0c:inc_8(@r.bc.l); {inc C}
+        $0d:dec_8(@r.bc.l); {dec C}
         $0e:begin {ld C,n}
                 r.bc.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
@@ -510,8 +857,8 @@ case instruccion of
             end;
         $12:self.putbyte(r.de.w,r.a);  {ld (DE),A}
         $13:r.de.w:=r.de.w+1;  {inc DE}
-        $14:inc_8(self.r,@r.de.h); {inc D}
-        $15:dec_8(self.r,@r.de.h); {dec D}
+        $14:inc_8(@r.de.h); {inc D}
+        $15:dec_8(@r.de.h); {dec D}
         $16:begin {ld D,n}
                 r.de.h:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
@@ -531,11 +878,11 @@ case instruccion of
                 r.pc:=r.pc+1;
                 r.pc:=r.pc+shortint(temp);
             end;
-        $19:add_16(self.r,@r.hl,r.de.w); {add HL,DE}
+        $19:add_16(@r.hl.w,r.de.w); {add HL,DE}
         $1a:r.a:=self.getbyte(r.de.w); {ld A,(DE)}
         $1b:r.de.w:=r.de.w-1;  {dec DE}
-        $1c:inc_8(self.r,@r.de.l); {inc E}
-        $1d:dec_8(self.r,@r.de.l); {dec E}
+        $1c:inc_8(@r.de.l); {inc E}
+        $1d:dec_8(@r.de.l); {dec E}
         $1e:begin {ld E,n}
                 r.de.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
@@ -571,8 +918,8 @@ case instruccion of
                 self.putbyte(posicion.w+1,r.hl.h);
             end;
         $23:r.hl.w:=r.hl.w+1;  {inc HL}
-        $24:inc_8(self.r,@r.hl.h); {inc H}
-        $25:dec_8(self.r,@r.hl.h); {dec H}
+        $24:inc_8(@r.hl.h); {inc H}
+        $25:dec_8(@r.hl.h); {dec H}
         $26:begin {ld H,n}
                 r.hl.h:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
@@ -604,7 +951,7 @@ case instruccion of
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
             end;
-        $29:add_16(self.r,@r.hl,r.hl.w); {add HL,HL}
+        $29:add_16(@r.hl.w,r.hl.w); {add HL,HL}
         $2a:begin  {ld HL,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -613,8 +960,8 @@ case instruccion of
                 r.hl.h:=self.getbyte(posicion.w+1);
             end;
         $2b:r.hl.w:=r.hl.w-1;  {dec HL}
-        $2c:inc_8(self.r,@r.hl.l); {inc L}
-        $2d:dec_8(self.r,@r.hl.l); {dec L}
+        $2c:inc_8(@r.hl.l); {inc L}
+        $2d:dec_8(@r.hl.l); {dec L}
         $2e:begin {ld L,n}
                 r.hl.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
@@ -647,12 +994,12 @@ case instruccion of
         $33:r.sp:=r.sp+1;  {inc SP}
         $34:begin  {inc (HL)}
                 temp:=self.getbyte(r.hl.w);
-                inc_8(self.r,@temp);
+                inc_8(@temp);
                 self.putbyte(r.hl.w,temp);
             end;
         $35:begin  {dec (HL)}
                 temp:=self.getbyte(r.hl.w);
-                dec_8(self.r,@temp);
+                dec_8(@temp);
                 self.putbyte(r.hl.w,temp);
             end;
         $36:begin {ld (HL),n}
@@ -675,7 +1022,7 @@ case instruccion of
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
             end;
-        $39:add_16(self.r,@r.hl,r.sp); {add HL,SP}
+        $39:add_16(@r.hl.w,r.sp); {add HL,SP}
         $3a:begin {ld A,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -683,8 +1030,8 @@ case instruccion of
                 r.a:=self.getbyte(posicion.w);
             end;
         $3b:r.sp:=r.sp-1;  {dec SP}
-        $3c:inc_8(self.r,@r.a); {inc A}
-        $3d:dec_8(self.r,@r.a); {dec A}
+        $3c:inc_8(@r.a); {inc A}
+        $3d:dec_8(@r.a); {dec A}
         $3e:begin {ld A,n}
                 r.a:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
@@ -760,53 +1107,53 @@ case instruccion of
         $7d:r.a:=r.hl.l; {ld A,L}
         $7e:r.a:=self.getbyte(r.hl.w); {ld A,(HL)}
         {'$'7f: igual que el nop ld A,A}
-        $80:add_8(self.r,r.bc.h); {add A,B}
-        $81:add_8(self.r,r.bc.l); {add A,C}
-        $82:add_8(self.r,r.de.h); {add A,D}
-        $83:add_8(self.r,r.de.l); {add A,E}
-        $84:add_8(self.r,r.hl.h); {add A,H}
-        $85:add_8(self.r,r.hl.l); {add A,L}
-        $86:add_8(self.r,self.getbyte(r.hl.w));  {add A,(HL)}
-        $87:add_8(self.r,r.a); {add A,A}
-        $88:adc_8(self.r,r.bc.h); {adc A,B}
-        $89:adc_8(self.r,r.bc.l); {adc A,C}
-        $8a:adc_8(self.r,r.de.h); {adc A,D}
-        $8b:adc_8(self.r,r.de.l); {adc A,E}
-        $8c:adc_8(self.r,r.hl.h); {adc A,H}
-        $8d:adc_8(self.r,r.hl.l); {adc A,L}
-        $8e:adc_8(self.r,self.getbyte(r.hl.w)); {adc A,(HL)}
-        $8f:adc_8(self.r,r.a); {adc A,A}
-        $90:sub_8(self.r,r.bc.h); {sub B}
-        $91:sub_8(self.r,r.bc.l); {sub C}
-        $92:sub_8(self.r,r.de.h); {sub D}
-        $93:sub_8(self.r,r.de.l); {sub E}
-        $94:sub_8(self.r,r.hl.h); {sub H}
-        $95:sub_8(self.r,r.hl.l); {sub L}
-        $96:sub_8(self.r,self.getbyte(r.hl.w));  {sub (HL)}
-        $97:sub_8(self.r,r.a); {sub A}
-        $98:sbc_8(self.r,r.bc.h); {sbc A,B}
-        $99:sbc_8(self.r,r.bc.l); {sbc A,C}
-        $9a:sbc_8(self.r,r.de.h); {sbc A,D}
-        $9b:sbc_8(self.r,r.de.l); {sbc A,E}
-        $9c:sbc_8(self.r,r.hl.h); {sbc A,H}
-        $9d:sbc_8(self.r,r.hl.l); {sbc A,L}
-        $9e:sbc_8(self.r,self.getbyte(r.hl.w)); {sbc A,(HL)}
-        $9f:sbc_8(self.r,r.a); {sbc A,A}
-        $a0:and_a(self.r,r.bc.h);  {and A,B}
-        $a1:and_a(self.r,r.bc.l);  {and A,C}
-        $a2:and_a(self.r,r.de.h);  {and A,D}
-        $a3:and_a(self.r,r.de.l); {and A,E}
-        $a4:and_a(self.r,r.hl.h); {and A,H}
-        $a5:and_a(self.r,r.hl.l); {and A,L}
-        $a6:and_a(self.r,self.getbyte(r.hl.w)); {and A,(HL)}
-        $a7:and_a(self.r,r.a); {and A,A}
-        $a8:xor_a(self.r,r.bc.h); {xor A,B}
-        $a9:xor_a(self.r,r.bc.l); {xor A,C}
-        $aa:xor_a(self.r,r.de.h); {xor A,D}
-        $ab:xor_a(self.r,r.de.l); {xor A,E}
-        $ac:xor_a(self.r,r.hl.h); {xor A,H}
-        $ad:xor_a(self.r,r.hl.l); {xor A,L}
-        $ae:xor_a(self.r,self.getbyte(r.hl.w)); {xor A,(HL)}
+        $80:add_8(r.bc.h); {add A,B}
+        $81:add_8(r.bc.l); {add A,C}
+        $82:add_8(r.de.h); {add A,D}
+        $83:add_8(r.de.l); {add A,E}
+        $84:add_8(r.hl.h); {add A,H}
+        $85:add_8(r.hl.l); {add A,L}
+        $86:add_8(self.getbyte(r.hl.w));  {add A,(HL)}
+        $87:add_8(r.a); {add A,A}
+        $88:adc_8(r.bc.h); {adc A,B}
+        $89:adc_8(r.bc.l); {adc A,C}
+        $8a:adc_8(r.de.h); {adc A,D}
+        $8b:adc_8(r.de.l); {adc A,E}
+        $8c:adc_8(r.hl.h); {adc A,H}
+        $8d:adc_8(r.hl.l); {adc A,L}
+        $8e:adc_8(self.getbyte(r.hl.w)); {adc A,(HL)}
+        $8f:adc_8(r.a); {adc A,A}
+        $90:sub_8(r.bc.h); {sub B}
+        $91:sub_8(r.bc.l); {sub C}
+        $92:sub_8(r.de.h); {sub D}
+        $93:sub_8(r.de.l); {sub E}
+        $94:sub_8(r.hl.h); {sub H}
+        $95:sub_8(r.hl.l); {sub L}
+        $96:sub_8(self.getbyte(r.hl.w));  {sub (HL)}
+        $97:sub_8(r.a); {sub A}
+        $98:sbc_8(r.bc.h); {sbc A,B}
+        $99:sbc_8(r.bc.l); {sbc A,C}
+        $9a:sbc_8(r.de.h); {sbc A,D}
+        $9b:sbc_8(r.de.l); {sbc A,E}
+        $9c:sbc_8(r.hl.h); {sbc A,H}
+        $9d:sbc_8(r.hl.l); {sbc A,L}
+        $9e:sbc_8(self.getbyte(r.hl.w)); {sbc A,(HL)}
+        $9f:sbc_8(r.a); {sbc A,A}
+        $a0:and_a(r.bc.h);  {and A,B}
+        $a1:and_a(r.bc.l);  {and A,C}
+        $a2:and_a(r.de.h);  {and A,D}
+        $a3:and_a(r.de.l); {and A,E}
+        $a4:and_a(r.hl.h); {and A,H}
+        $a5:and_a(r.hl.l); {and A,L}
+        $a6:and_a(self.getbyte(r.hl.w)); {and A,(HL)}
+        $a7:and_a(r.a); {and A,A}
+        $a8:xor_a(r.bc.h); {xor A,B}
+        $a9:xor_a(r.bc.l); {xor A,C}
+        $aa:xor_a(r.de.h); {xor A,D}
+        $ab:xor_a(r.de.l); {xor A,E}
+        $ac:xor_a(r.hl.h); {xor A,H}
+        $ad:xor_a(r.hl.l); {xor A,L}
+        $ae:xor_a(self.getbyte(r.hl.w)); {xor A,(HL)}
         $af:begin {xor A,A}
                 r.a:=0;
                 r.f.s:=false;
@@ -818,22 +1165,22 @@ case instruccion of
                 r.f.n:=false;
                 r.f.c:=false;
              end;
-        $b0:or_a(self.r,r.bc.h); {or B}
-        $b1:or_a(self.r,r.bc.l); {or C}
-        $b2:or_a(self.r,r.de.h); {or D}
-        $b3:or_a(self.r,r.de.l); {or E}
-        $b4:or_a(self.r,r.hl.h); {or H}
-        $b5:or_a(self.r,r.hl.l); {or L}
-        $b6:or_a(self.r,self.getbyte(r.hl.w));   {or (HL)}
-        $b7:or_a(self.r,r.a); {or A}
-        $b8:cp_a(self.r,r.bc.h); {cp B}
-        $b9:cp_a(self.r,r.bc.l); {cp C}
-        $ba:cp_a(self.r,r.de.h); {cp D}
-        $bb:cp_a(self.r,r.de.l); {cp E}
-        $bc:cp_a(self.r,r.hl.h); {cp H}
-        $bd:cp_a(self.r,r.hl.l); {cp L}
-        $be:cp_a(self.r,self.getbyte(r.hl.w)); {cp (HL)}
-        $bf:cp_a(self.r,r.a); {cp A}
+        $b0:or_a(r.bc.h); {or B}
+        $b1:or_a(r.bc.l); {or C}
+        $b2:or_a(r.de.h); {or D}
+        $b3:or_a(r.de.l); {or E}
+        $b4:or_a(r.hl.h); {or H}
+        $b5:or_a(r.hl.l); {or L}
+        $b6:or_a(self.getbyte(r.hl.w));   {or (HL)}
+        $b7:or_a(r.a); {or A}
+        $b8:cp_a(r.bc.h); {cp B}
+        $b9:cp_a(r.bc.l); {cp C}
+        $ba:cp_a(r.de.h); {cp D}
+        $bb:cp_a(r.de.l); {cp E}
+        $bc:cp_a(r.hl.h); {cp H}
+        $bd:cp_a(r.hl.l); {cp L}
+        $be:cp_a(self.getbyte(r.hl.w)); {cp (HL)}
+        $bf:cp_a(r.a); {cp A}
         $c0:if not(r.f.z) then begin {ret NZ}
                 r.pc:=self.pop_sp;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
@@ -863,7 +1210,7 @@ case instruccion of
         $c6:begin {add A,n}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                add_8(self.r,temp);
+                add_8(temp);
              end;
         $c7:begin  {rst 00H}
                 self.push_sp(r.pc);
@@ -900,7 +1247,7 @@ case instruccion of
         $ce:begin   {adc A,n}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                adc_8(self.r,temp);
+                adc_8(temp);
              end;
         $cf:begin  {rst 08H}
                 self.push_sp(r.pc);
@@ -936,7 +1283,7 @@ case instruccion of
         $d6:begin {sub n}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                sub_8(self.r,temp);
+                sub_8(temp);
              end;
         $d7:begin  {rst 10H}
                 self.push_sp(r.pc);
@@ -983,7 +1330,7 @@ case instruccion of
         $de:begin {sbc A,n}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                sbc_8(self.r,temp);
+                sbc_8(temp);
             end;
         $df:begin  {rst 18H}
                 self.push_sp(r.pc);
@@ -1018,7 +1365,7 @@ case instruccion of
         $e6:begin {and A,n}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                and_a(self.r,temp);
+                and_a(temp);
              end;
         $e7:begin  {rst 20H}
                 self.push_sp(r.pc);
@@ -1053,7 +1400,7 @@ case instruccion of
         $ee:begin  {xor A,n}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                xor_a(self.r,temp);
+                xor_a(temp);
               end;
         $ef:begin  {rst 28H}
                 self.push_sp(r.pc);
@@ -1110,7 +1457,7 @@ case instruccion of
         $f6:begin {or n}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                or_a(self.r,temp);
+                or_a(temp);
              end;
         $f7:begin  {rst 30H}
                 self.push_sp(r.pc);
@@ -1145,7 +1492,7 @@ case instruccion of
         $fe:begin  {cp n}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
-                cp_a(self.r,temp);
+                cp_a(temp);
             end;
         $ff:begin  {rst 38H}
                 self.push_sp(r.pc);
@@ -1169,166 +1516,166 @@ self.opcode:=false;
 r.pc:=r.pc+1;
 r.r:=((r.r+1) and $7f) or (r.r and $80);
 case instruccion of
-        $00:rlc_8(self.r,@r.bc.h); {rlc B}
-        $01:rlc_8(self.r,@r.bc.l); {rlc C}
-        $02:rlc_8(self.r,@r.de.h); {rlc D}
-        $03:rlc_8(self.r,@r.de.l); {rlc E}
-        $04:rlc_8(self.r,@r.hl.h); {rlc H}
-        $05:rlc_8(self.r,@r.hl.l); {rlc L}
+        $00:rlc_8(@r.bc.h); {rlc B}
+        $01:rlc_8(@r.bc.l); {rlc C}
+        $02:rlc_8(@r.de.h); {rlc D}
+        $03:rlc_8(@r.de.l); {rlc E}
+        $04:rlc_8(@r.hl.h); {rlc H}
+        $05:rlc_8(@r.hl.l); {rlc L}
         $06:begin
                 temp:=self.getbyte(r.hl.w);
-                rlc_8(self.r,@temp); {rlc (HL)}
+                rlc_8(@temp); {rlc (HL)}
                 self.putbyte(r.hl.w,temp);
             end;
-        $07:rlc_8(self.r,@r.a); {rlc A}
-        $08:rrc_8(self.r,@r.bc.h); {rlc B}
-        $09:rrc_8(self.r,@r.bc.l); {rlc C}
-        $0a:rrc_8(self.r,@r.de.h); {rlc D}
-        $0b:rrc_8(self.r,@r.de.l); {rlc E}
-        $0c:rrc_8(self.r,@r.hl.h); {rlc H}
-        $0d:rrc_8(self.r,@r.hl.l); {rlc L}
+        $07:rlc_8(@r.a); {rlc A}
+        $08:rrc_8(@r.bc.h); {rlc B}
+        $09:rrc_8(@r.bc.l); {rlc C}
+        $0a:rrc_8(@r.de.h); {rlc D}
+        $0b:rrc_8(@r.de.l); {rlc E}
+        $0c:rrc_8(@r.hl.h); {rlc H}
+        $0d:rrc_8(@r.hl.l); {rlc L}
         $0e:begin
                 temp:=self.getbyte(r.hl.w);
-                rrc_8(self.r,@temp); {rlc (HL)}
+                rrc_8(@temp); {rlc (HL)}
                 self.putbyte(r.hl.w,temp);
             end;
-        $0f:rrc_8(self.r,@r.a); {rlc A}
-        $10:rl_8(self.r,@r.bc.h); {rl B}
-        $11:rl_8(self.r,@r.bc.l); {rl C}
-        $12:rl_8(self.r,@r.de.h); {rl D}
-        $13:rl_8(self.r,@r.de.l); {rl E}
-        $14:rl_8(self.r,@r.hl.h); {rl H}
-        $15:rl_8(self.r,@r.hl.l); {rl L}
+        $0f:rrc_8(@r.a); {rlc A}
+        $10:rl_8(@r.bc.h); {rl B}
+        $11:rl_8(@r.bc.l); {rl C}
+        $12:rl_8(@r.de.h); {rl D}
+        $13:rl_8(@r.de.l); {rl E}
+        $14:rl_8(@r.hl.h); {rl H}
+        $15:rl_8(@r.hl.l); {rl L}
         $16:begin
                 temp:=self.getbyte(r.hl.w);
-                rl_8(self.r,@temp); {rl (HL)}
+                rl_8(@temp); {rl (HL)}
                 self.putbyte(r.hl.w,temp);
             end;
-        $17:rl_8(self.r,@r.a); {rl A}
-        $18:rr_8(self.r,@r.bc.h); {rr B}
-        $19:rr_8(self.r,@r.bc.l); {rr C}
-        $1a:rr_8(self.r,@r.de.h); {rr D}
-        $1b:rr_8(self.r,@r.de.l); {rr E}
-        $1c:rr_8(self.r,@r.hl.h); {rr H}
-        $1d:rr_8(self.r,@r.hl.l); {rr L}
+        $17:rl_8(@r.a); {rl A}
+        $18:rr_8(@r.bc.h); {rr B}
+        $19:rr_8(@r.bc.l); {rr C}
+        $1a:rr_8(@r.de.h); {rr D}
+        $1b:rr_8(@r.de.l); {rr E}
+        $1c:rr_8(@r.hl.h); {rr H}
+        $1d:rr_8(@r.hl.l); {rr L}
         $1e:begin
                 temp:=self.getbyte(r.hl.w);
-                rr_8(self.r,@temp); {rr (HL)}
+                rr_8(@temp); {rr (HL)}
                 self.putbyte(r.hl.w,temp);
             end;
-        $1f:rr_8(self.r,@r.a); {rr A}
-        $20:sla_8(self.r,@r.bc.h); {sla B}
-        $21:sla_8(self.r,@r.bc.l); {sla C}
-        $22:sla_8(self.r,@r.de.h); {sla D}
-        $23:sla_8(self.r,@r.de.l); {sla E}
-        $24:sla_8(self.r,@r.hl.h); {sla H}
-        $25:sla_8(self.r,@r.hl.l); {sla L}
+        $1f:rr_8(@r.a); {rr A}
+        $20:sla_8(@r.bc.h); {sla B}
+        $21:sla_8(@r.bc.l); {sla C}
+        $22:sla_8(@r.de.h); {sla D}
+        $23:sla_8(@r.de.l); {sla E}
+        $24:sla_8(@r.hl.h); {sla H}
+        $25:sla_8(@r.hl.l); {sla L}
         $26:begin
                 temp:=self.getbyte(r.hl.w);
-                sla_8(self.r,@temp); {sla (HL)}
+                sla_8(@temp); {sla (HL)}
                 self.putbyte(r.hl.w,temp);
             end;
-        $27:sla_8(self.r,@r.a); {sla A}
-        $28:sra_8(self.r,@r.bc.h); {sra B}
-        $29:sra_8(self.r,@r.bc.l); {sra C}
-        $2a:sra_8(self.r,@r.de.h); {sra D}
-        $2b:sra_8(self.r,@r.de.l); {sra E}
-        $2c:sra_8(self.r,@r.hl.h); {sra H}
-        $2d:sra_8(self.r,@r.hl.l); {sra L}
+        $27:sla_8(@r.a); {sla A}
+        $28:sra_8(@r.bc.h); {sra B}
+        $29:sra_8(@r.bc.l); {sra C}
+        $2a:sra_8(@r.de.h); {sra D}
+        $2b:sra_8(@r.de.l); {sra E}
+        $2c:sra_8(@r.hl.h); {sra H}
+        $2d:sra_8(@r.hl.l); {sra L}
         $2e:begin
                 temp:=self.getbyte(r.hl.w);
-                sra_8(self.r,@temp); {sra (HL)}
+                sra_8(@temp); {sra (HL)}
                 self.putbyte(r.hl.w,temp);
             end;
-        $2f:sra_8(self.r,@r.a); {sra A}
-        $30:sll_8(self.r,@r.bc.h); {sll B}
-        $31:sll_8(self.r,@r.bc.l); {sll C}
-        $32:sll_8(self.r,@r.de.h); {sll D}
-        $33:sll_8(self.r,@r.de.l); {sll E}
-        $34:sll_8(self.r,@r.hl.h); {sll H}
-        $35:sll_8(self.r,@r.hl.l); {sll L}
+        $2f:sra_8(@r.a); {sra A}
+        $30:sll_8(@r.bc.h); {sll B}
+        $31:sll_8(@r.bc.l); {sll C}
+        $32:sll_8(@r.de.h); {sll D}
+        $33:sll_8(@r.de.l); {sll E}
+        $34:sll_8(@r.hl.h); {sll H}
+        $35:sll_8(@r.hl.l); {sll L}
         $36:begin  {sll (HL)}
                 temp:=self.getbyte(r.hl.w);
-                sll_8(self.r,@temp);
+                sll_8(@temp);
                 self.putbyte(r.hl.w,temp);
             end;
-        $37:sll_8(self.r,@r.a); {sll a}
-        $38:srl_8(self.r,@r.bc.h); {srl B}
-        $39:srl_8(self.r,@r.bc.l); {srl C}
-        $3a:srl_8(self.r,@r.de.h); {srl D}
-        $3b:srl_8(self.r,@r.de.l); {srl E}
-        $3c:srl_8(self.r,@r.hl.h); {srl H}
-        $3d:srl_8(self.r,@r.hl.l); {srl L}
+        $37:sll_8(@r.a); {sll a}
+        $38:srl_8(@r.bc.h); {srl B}
+        $39:srl_8(@r.bc.l); {srl C}
+        $3a:srl_8(@r.de.h); {srl D}
+        $3b:srl_8(@r.de.l); {srl E}
+        $3c:srl_8(@r.hl.h); {srl H}
+        $3d:srl_8(@r.hl.l); {srl L}
         $3e:begin  {srl (HL)}
                 temp:=self.getbyte(r.hl.w);
-                srl_8(self.r,@temp);
+                srl_8(@temp);
                 self.putbyte(r.hl.w,temp);
             end;
-        $3f:srl_8(self.r,@r.a); {srl a}
-        $40:bit_8(self.r,0,r.bc.h);  {bit 0,B}
-        $41:bit_8(self.r,0,r.bc.l);  {bit 0,C}
-        $42:bit_8(self.r,0,r.de.h);  {bit 0,D}
-        $43:bit_8(self.r,0,r.de.l);  {bit 0,E}
-        $44:bit_8(self.r,0,r.hl.h);  {bit 0,H}
-        $45:bit_8(self.r,0,r.hl.l);  {bit 0,L}
-        $46:bit_8(self.r,0,self.getbyte(r.hl.w)); {bit 0,(HL)}
-        $47:bit_8(self.r,0,r.a);  {bit 0,A}
-        $48:bit_8(self.r,1,r.bc.h);  {bit 1,B}
-        $49:bit_8(self.r,1,r.bc.l);  {bit 1,C}
-        $4a:bit_8(self.r,1,r.de.h);  {bit 1,D}
-        $4b:bit_8(self.r,1,r.de.l);  {bit 1,E}
-        $4c:bit_8(self.r,1,r.hl.h);  {bit 1,H}
-        $4d:bit_8(self.r,1,r.hl.l);  {bit 1,L}
-        $4e:bit_8(self.r,1,self.getbyte(r.hl.w));  {bit 1,(HL)}
-        $4f:bit_8(self.r,1,r.a);  {bit 1,A}
-        $50:bit_8(self.r,2,r.bc.h);  {bit 2,B}
-        $51:bit_8(self.r,2,r.bc.l);  {bit 2,C}
-        $52:bit_8(self.r,2,r.de.h);  {bit 2,D}
-        $53:bit_8(self.r,2,r.de.l);  {bit 2,E}
-        $54:bit_8(self.r,2,r.hl.h);  {bit 2,H}
-        $55:bit_8(self.r,2,r.hl.l);  {bit 2,L}
-        $56:bit_8(self.r,2,self.getbyte(r.hl.w));  {bit 2,(HL)}
-        $57:bit_8(self.r,2,r.a);  {bit 2,A}
-        $58:bit_8(self.r,3,r.bc.h);  {bit 3,B}
-        $59:bit_8(self.r,3,r.bc.l);  {bit 3,C}
-        $5a:bit_8(self.r,3,r.de.h);  {bit 3,D}
-        $5b:bit_8(self.r,3,r.de.l);  {bit 3,E}
-        $5c:bit_8(self.r,3,r.hl.h);  {bit 3,H}
-        $5d:bit_8(self.r,3,r.hl.l);  {bit 3,L}
-        $5e:bit_8(self.r,3,self.getbyte(r.hl.w));  {bit 3,(HL)}
-        $5f:bit_8(self.r,3,r.a);  {bit 3,A}
-        $60:bit_8(self.r,4,r.bc.h);  {bit 4,B}
-        $61:bit_8(self.r,4,r.bc.l);  {bit 4,C}
-        $62:bit_8(self.r,4,r.de.h);  {bit 4,D}
-        $63:bit_8(self.r,4,r.de.l);  {bit 4,E}
-        $64:bit_8(self.r,4,r.hl.h);  {bit 4,H}
-        $65:bit_8(self.r,4,r.hl.l);  {bit 4,L}
-        $66:bit_8(self.r,4,self.getbyte(r.hl.w)); {bit 4,(HL)}
-        $67:bit_8(self.r,4,r.a);  {bit 4,A}
-        $68:bit_8(self.r,5,r.bc.h);  {bit 5,B}
-        $69:bit_8(self.r,5,r.bc.l);  {bit 5,C}
-        $6a:bit_8(self.r,5,r.de.h);  {bit 5,D}
-        $6b:bit_8(self.r,5,r.de.l);  {bit 5,E}
-        $6c:bit_8(self.r,5,r.hl.h);  {bit 5,H}
-        $6d:bit_8(self.r,5,r.hl.l);  {bit 5,L}
-        $6e:bit_8(self.r,5,self.getbyte(r.hl.w)); {bit 5,(HL)}
-        $6f:bit_8(self.r,5,r.a);  {bit 5,A}
-        $70:bit_8(self.r,6,r.bc.h);  {bit 6,B}
-        $71:bit_8(self.r,6,r.bc.l);  {bit 6,C}
-        $72:bit_8(self.r,6,r.de.h);  {bit 6,D}
-        $73:bit_8(self.r,6,r.de.l);  {bit 6,E}
-        $74:bit_8(self.r,6,r.hl.h);  {bit 6,H}
-        $75:bit_8(self.r,6,r.hl.l);  {bit 6,L}
-        $76:bit_8(self.r,6,self.getbyte(r.hl.w)); {bit 6,(HL)}
-        $77:bit_8(self.r,6,r.a);  {bit 6,A}
-        $78:bit_7(self.r,r.bc.h);  {bit 7,B}
-        $79:bit_7(self.r,r.bc.l);  {bit 7,C}
-        $7a:bit_7(self.r,r.de.h);  {bit 7,D}
-        $7b:bit_7(self.r,r.de.l);  {bit 7,E}
-        $7c:bit_7(self.r,r.hl.h);  {bit 7,H}
-        $7d:bit_7(self.r,r.hl.l);  {bit 7,L}
-        $7e:bit_7(self.r,self.getbyte(r.hl.w));  {bit 7,(HL)}
-        $7f:bit_7(self.r,r.a);  {bit 7,A}
+        $3f:srl_8(@r.a); {srl a}
+        $40:bit_8(0,r.bc.h);  {bit 0,B}
+        $41:bit_8(0,r.bc.l);  {bit 0,C}
+        $42:bit_8(0,r.de.h);  {bit 0,D}
+        $43:bit_8(0,r.de.l);  {bit 0,E}
+        $44:bit_8(0,r.hl.h);  {bit 0,H}
+        $45:bit_8(0,r.hl.l);  {bit 0,L}
+        $46:bit_8(0,self.getbyte(r.hl.w)); {bit 0,(HL)}
+        $47:bit_8(0,r.a);  {bit 0,A}
+        $48:bit_8(1,r.bc.h);  {bit 1,B}
+        $49:bit_8(1,r.bc.l);  {bit 1,C}
+        $4a:bit_8(1,r.de.h);  {bit 1,D}
+        $4b:bit_8(1,r.de.l);  {bit 1,E}
+        $4c:bit_8(1,r.hl.h);  {bit 1,H}
+        $4d:bit_8(1,r.hl.l);  {bit 1,L}
+        $4e:bit_8(1,self.getbyte(r.hl.w));  {bit 1,(HL)}
+        $4f:bit_8(1,r.a);  {bit 1,A}
+        $50:bit_8(2,r.bc.h);  {bit 2,B}
+        $51:bit_8(2,r.bc.l);  {bit 2,C}
+        $52:bit_8(2,r.de.h);  {bit 2,D}
+        $53:bit_8(2,r.de.l);  {bit 2,E}
+        $54:bit_8(2,r.hl.h);  {bit 2,H}
+        $55:bit_8(2,r.hl.l);  {bit 2,L}
+        $56:bit_8(2,self.getbyte(r.hl.w));  {bit 2,(HL)}
+        $57:bit_8(2,r.a);  {bit 2,A}
+        $58:bit_8(3,r.bc.h);  {bit 3,B}
+        $59:bit_8(3,r.bc.l);  {bit 3,C}
+        $5a:bit_8(3,r.de.h);  {bit 3,D}
+        $5b:bit_8(3,r.de.l);  {bit 3,E}
+        $5c:bit_8(3,r.hl.h);  {bit 3,H}
+        $5d:bit_8(3,r.hl.l);  {bit 3,L}
+        $5e:bit_8(3,self.getbyte(r.hl.w));  {bit 3,(HL)}
+        $5f:bit_8(3,r.a);  {bit 3,A}
+        $60:bit_8(4,r.bc.h);  {bit 4,B}
+        $61:bit_8(4,r.bc.l);  {bit 4,C}
+        $62:bit_8(4,r.de.h);  {bit 4,D}
+        $63:bit_8(4,r.de.l);  {bit 4,E}
+        $64:bit_8(4,r.hl.h);  {bit 4,H}
+        $65:bit_8(4,r.hl.l);  {bit 4,L}
+        $66:bit_8(4,self.getbyte(r.hl.w)); {bit 4,(HL)}
+        $67:bit_8(4,r.a);  {bit 4,A}
+        $68:bit_8(5,r.bc.h);  {bit 5,B}
+        $69:bit_8(5,r.bc.l);  {bit 5,C}
+        $6a:bit_8(5,r.de.h);  {bit 5,D}
+        $6b:bit_8(5,r.de.l);  {bit 5,E}
+        $6c:bit_8(5,r.hl.h);  {bit 5,H}
+        $6d:bit_8(5,r.hl.l);  {bit 5,L}
+        $6e:bit_8(5,self.getbyte(r.hl.w)); {bit 5,(HL)}
+        $6f:bit_8(5,r.a);  {bit 5,A}
+        $70:bit_8(6,r.bc.h);  {bit 6,B}
+        $71:bit_8(6,r.bc.l);  {bit 6,C}
+        $72:bit_8(6,r.de.h);  {bit 6,D}
+        $73:bit_8(6,r.de.l);  {bit 6,E}
+        $74:bit_8(6,r.hl.h);  {bit 6,H}
+        $75:bit_8(6,r.hl.l);  {bit 6,L}
+        $76:bit_8(6,self.getbyte(r.hl.w)); {bit 6,(HL)}
+        $77:bit_8(6,r.a);  {bit 6,A}
+        $78:bit_7(r.bc.h);  {bit 7,B}
+        $79:bit_7(r.bc.l);  {bit 7,C}
+        $7a:bit_7(r.de.h);  {bit 7,D}
+        $7b:bit_7(r.de.l);  {bit 7,E}
+        $7c:bit_7(r.hl.h);  {bit 7,H}
+        $7d:bit_7(r.hl.l);  {bit 7,L}
+        $7e:bit_7(self.getbyte(r.hl.w));  {bit 7,(HL)}
+        $7f:bit_7(r.a);  {bit 7,A}
         $80:r.bc.h:=(r.bc.h and $fe); {res 0,B}
         $81:r.bc.l:=(r.bc.l and $fe); {res 0,C}
         $82:r.de.h:=(r.de.h and $fe); {res 0,D}
@@ -1526,8 +1873,8 @@ self.opcode:=false;
 r.pc:=r.pc+1;
 r.r:=((r.r+1) and $7f) or (r.r and $80);
 case instruccion of
-        $09:add_16(self.r,registro,r.bc.w); {add IX,BC}
-        $19:add_16(self.r,registro,r.de.w); {add IX,DE}
+        $09:add_16(@registro.w,r.bc.w); {add IX,BC}
+        $19:add_16(@registro.w,r.de.w); {add IX,DE}
         $21:begin {ld IX,nn}
                 registro.h:=self.getbyte(r.pc+1);
                 registro.l:=self.getbyte(r.pc);
@@ -1543,19 +1890,19 @@ case instruccion of
         $23:registro.w:=registro.w+1; {inc IX}
         $24:begin  {inc IXh}
                 temp:=registro.h;
-                inc_8(self.r,@temp);
+                inc_8(@temp);
                 registro.h:=temp;
             end;
         $25:begin {dec IXh}
                 temp:=registro^.h;
-                dec_8(self.r,@temp);
+                dec_8(@temp);
                 registro^.h:=temp;
             end;
         $26:begin  {ld IXh,n}
                 registro^.h:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
             end;
-        $29:add_16(self.r,registro,registro^.w); {add IX,IX}
+        $29:add_16(@registro.w,registro.w); {add IX,IX}
         $2a:begin {ld (IX,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -1566,12 +1913,12 @@ case instruccion of
         $2b:registro^.w:=registro^.w-1; {dec IX}
         $2c:begin  {inc IXl}
                 temp:=registro^.l;
-                inc_8(self.r,@temp);
+                inc_8(@temp);
                 registro^.l:=temp;
             end;
         $2d:begin  {dec IXl}
                 temp:=registro^.l;
-                dec_8(self.r,@temp);
+                dec_8(@temp);
                 registro^.l:=temp;
             end;
         $2e:begin  {ld IXl,n}
@@ -1583,7 +1930,7 @@ case instruccion of
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                inc_8(self.r,@temp);
+                inc_8(@temp);
                 self.putbyte(temp2,temp);
             end;
         $35:begin {dec (IX+d)}
@@ -1591,7 +1938,7 @@ case instruccion of
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                dec_8(self.r,@temp);
+                dec_8(@temp);
                 self.putbyte(temp2,temp);
            end;
         $36:begin {ld (IX+d),n}
@@ -1601,7 +1948,7 @@ case instruccion of
                 r.pc:=r.pc+2;
                 self.putbyte(temp2,temp);
             end;
-        $39:add_16(self.r,registro,r.sp); {add IX,SP}
+        $39:add_16(@registro.w,r.sp); {add IX,SP}
         $44:r.bc.h:=registro^.h; {ld B,IXh}
         $45:r.bc.h:=registro^.l; {ld B,IXl}
         $46:begin {ld B,(IX+d)}
@@ -1710,77 +2057,77 @@ case instruccion of
                 temp2:=temp2+shortint(temp);
                 r.a:=self.getbyte(temp2);
             end;
-        $84:add_8(self.r,registro^.h);  {add A,IXh}
-        $85:add_8(self.r,registro^.l);  {add A,IXl}
+        $84:add_8(registro^.h);  {add A,IXh}
+        $85:add_8(registro^.l);  {add A,IXl}
         $86:begin {add A,(IX+d)}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                add_8(self.r,temp);
+                add_8(temp);
             end;
-        $8c:adc_8(self.r,registro^.h);  {adc A,IXh}
-        $8d:adc_8(self.r,registro^.l);  {adc A,IXl}
+        $8c:adc_8(registro^.h);  {adc A,IXh}
+        $8d:adc_8(registro^.l);  {adc A,IXl}
         $8e:begin {adc A,(IX+d)}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                adc_8(self.r,temp);
+                adc_8(temp);
         end;
-        $94:sub_8(self.r,registro^.h); {sub IXh}
-        $95:sub_8(self.r,registro^.l); {sub IXh}
+        $94:sub_8(registro^.h); {sub IXh}
+        $95:sub_8(registro^.l); {sub IXh}
         $96:begin {sub (IX+d)}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                sub_8(self.r,temp);
+                sub_8(temp);
         end;
-        $9c:sbc_8(self.r,registro^.h); {sbc IXh}
-        $9d:sbc_8(self.r,registro^.l); {sbc IXl}
+        $9c:sbc_8(registro^.h); {sbc IXh}
+        $9d:sbc_8(registro^.l); {sbc IXl}
         $9e:begin {sbc (IX+d)}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                sbc_8(self.r,temp);
+                sbc_8(temp);
         end;
-        $a4:and_a(self.r,registro^.h); {and IXh}
-        $a5:and_a(self.r,registro^.l); {and IXl}
+        $a4:and_a(registro^.h); {and IXh}
+        $a5:and_a(registro^.l); {and IXl}
         $a6:begin {and A,(IX+d)}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                and_a(self.r,temp);
+                and_a(temp);
         end;
-        $ac:xor_a(self.r,registro^.h); {xor IXh}
-        $ad:xor_a(self.r,registro^.l); {xor IXl}
+        $ac:xor_a(registro^.h); {xor IXh}
+        $ad:xor_a(registro^.l); {xor IXl}
         $ae:begin {xor A,(IX+d)}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                xor_a(self.r,temp);
+                xor_a(temp);
               end;
-        $b4:or_a(self.r,registro^.h);  {or IXh}
-        $b5:or_a(self.r,registro^.l);  {or IXl}
+        $b4:or_a(registro^.h);  {or IXh}
+        $b5:or_a(registro^.l);  {or IXl}
         $b6:begin  {or (IX+d)}
                  temp:=self.getbyte(r.pc);
                  r.pc:=r.pc+1;
                  temp2:=temp2+shortint(temp);
                  temp:=self.getbyte(temp2);
-                 or_a(self.r,temp);
+                 or_a(temp);
              end;
-        $bc:cp_a(self.r,registro^.h); {cp IXh}
-        $bd:cp_a(self.r,registro^.l); {cp IXl}
+        $bc:cp_a(registro^.h); {cp IXh}
+        $bd:cp_a(registro^.l); {cp IXl}
         $be:begin {cp (IX+d)}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(temp2);
-                cp_a(self.r,temp);
+                cp_a(temp);
         end;
         $cb:estados_dd_cb:=self.exec_dd_cb(tipo);
         $e1:registro.w:=self.pop_sp;  {pop IX}
@@ -1811,369 +2158,369 @@ r.pc:=r.pc+2;
 case instruccion of
         $00:begin {ld B,rlc (IX+d) >23t<}
                 r.bc.h:=self.getbyte(temp2);
-                rlc_8(self.r,@r.bc.h);
+                rlc_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $01:begin {ld C,rlc (IX+d) >23t<}
                 r.bc.l:=self.getbyte(temp2);
-                rlc_8(self.r,@r.bc.l);
+                rlc_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $02:begin {ld D,rlc (IX+d) >23t<}
                 r.de.h:=self.getbyte(temp2);
-                rlc_8(self.r,@r.de.h);
+                rlc_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $03:begin {ld E,rlc (IX+d) >23t<}
                 r.de.l:=self.getbyte(temp2);
-                rlc_8(self.r,@r.de.l);
+                rlc_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $04:begin {ld H,rlc (IX+d) >23t<}
                 r.hl.h:=self.getbyte(temp2);
-                rlc_8(self.r,@r.hl.h);
+                rlc_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $05:begin {ld L,rlc (IX+d) >23t<}
                 r.hl.l:=self.getbyte(temp2);
-                rlc_8(self.r,@r.hl.l);
+                rlc_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $06:begin {rlc (IX+d) >23t<}
                 tempb:=self.getbyte(temp2);
-                rlc_8(self.r,@tempb);
+                rlc_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $07:begin {ld A,rlc (IX+d) >23t<}
                 r.a:=self.getbyte(temp2);
-                rlc_8(self.r,@r.a);
+                rlc_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $08:begin {ld B,rrc (IX+d) >23t<}
                 r.bc.h:=self.getbyte(temp2);
-                rrc_8(self.r,@r.bc.h);
+                rrc_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $09:begin {ld C,rrc (IX+d) >23t<}
                 r.bc.l:=self.getbyte(temp2);
-                rrc_8(self.r,@r.bc.l);
+                rrc_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $0a:begin {ld D,rrc (IX+d) >23t<}
                 r.de.h:=self.getbyte(temp2);
-                rrc_8(self.r,@r.de.h);
+                rrc_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $0b:begin {ld E,rrc (IX+d) >23t<}
                 r.de.l:=self.getbyte(temp2);
-                rrc_8(self.r,@r.de.l);
+                rrc_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $0c:begin {ld H,rrc (IX+d) >23t<}
                 r.hl.h:=self.getbyte(temp2);
-                rrc_8(self.r,@r.hl.h);
+                rrc_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $0d:begin {ld L,rlc (IX+d) >23t<}
                 r.hl.l:=self.getbyte(temp2);
-                rrc_8(self.r,@r.hl.l);
+                rrc_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $0e:begin   {rrc (IX+d)}
                 tempb:=self.getbyte(temp2);
-                rrc_8(self.r,@tempb);
+                rrc_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $0f:begin {ld A,rrc (IX+d)}
                 r.a:=self.getbyte(temp2);
-                rrc_8(self.r,@r.a);
+                rrc_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $10:begin {ld B,rl (IX+d)}
                 r.bc.h:=self.getbyte(temp2);
-                rl_8(self.r,@r.bc.h);
+                rl_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $11:begin {ld C,rl (IX+d)}
                 r.bc.l:=self.getbyte(temp2);
-                rl_8(self.r,@r.bc.l);
+                rl_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $12:begin {ld D,rl (IX+d)}
                 r.de.h:=self.getbyte(temp2);
-                rl_8(self.r,@r.de.h);
+                rl_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $13:begin {ld E,rl (IX+d)}
                 r.de.l:=self.getbyte(temp2);
-                rl_8(self.r,@r.de.l);
+                rl_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $14:begin {ld H,rl (IX+d)}
                 r.hl.h:=self.getbyte(temp2);
-                rl_8(self.r,@r.hl.h);
+                rl_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $15:begin {ld L,rlc (IX+d)}
                 r.hl.l:=self.getbyte(temp2);
-                rl_8(self.r,@r.hl.l);
+                rl_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $16:begin {rl (IX+d)}
                 tempb:=self.getbyte(temp2);
-                rl_8(self.r,@tempb);
+                rl_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $17:begin {ld A,rl (IX+d)}
                 r.a:=self.getbyte(temp2);
-                rl_8(self.r,@r.a);
+                rl_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $18:begin {ld B,rr (IX+d)}
                 r.bc.h:=self.getbyte(temp2);
-                rr_8(self.r,@r.bc.h);
+                rr_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $19:begin {ld C,rr (IX+d)}
                 r.bc.l:=self.getbyte(temp2);
-                rr_8(self.r,@r.bc.l);
+                rr_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $1a:begin {ld D,rr (IX+d)}
                 r.de.h:=self.getbyte(temp2);
-                rr_8(self.r,@r.de.h);
+                rr_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $1b:begin {ld E,rr (IX+d)}
                 r.de.l:=self.getbyte(temp2);
-                rr_8(self.r,@r.de.l);
+                rr_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $1c:begin {ld H,rr (IX+d)}
                 r.hl.h:=self.getbyte(temp2);
-                rr_8(self.r,@r.hl.h);
+                rr_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $1d:begin {ld L,rr (IX+d)}
                 r.hl.l:=self.getbyte(temp2);
-                rr_8(self.r,@r.hl.l);
+                rr_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $1e:begin  {rr (IX+d)}
                 tempb:=self.getbyte(temp2);
-                rr_8(self.r,@tempb);
+                rr_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $1f:begin {ld A,rr (IX+d)}
                 r.a:=self.getbyte(temp2);
-                rr_8(self.r,@r.a);
+                rr_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $20:begin {ld B,sla (IX+d)}
                 r.bc.h:=self.getbyte(temp2);
-                sla_8(self.r,@r.bc.h);
+                sla_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $21:begin {ld C,sla (IX+d)}
                 r.bc.l:=self.getbyte(temp2);
-                sla_8(self.r,@r.bc.l);
+                sla_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $22:begin {ld D,sla (IX+d)}
                 r.de.h:=self.getbyte(temp2);
-                sla_8(self.r,@r.de.h);
+                sla_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $23:begin {ld E,sla (IX+d)}
                 r.de.l:=self.getbyte(temp2);
-                rlc_8(self.r,@r.de.l);
+                rlc_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $24:begin {ld H,sla (IX+d)}
                 r.hl.h:=self.getbyte(temp2);
-                sla_8(self.r,@r.hl.h);
+                sla_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $25:begin {ld L,sla (IX+d)}
                 r.hl.l:=self.getbyte(temp2);
-                sla_8(self.r,@r.hl.l);
+                sla_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $26:begin  {sla (IX+d)}
                 tempb:=self.getbyte(temp2);
-                sla_8(self.r,@tempb);
+                sla_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $27:begin {ld A,sla (IX+d)}
                 r.a:=self.getbyte(temp2);
-                sla_8(self.r,@r.a);
+                sla_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $28:begin {ld B,sra (IX+d)}
                 r.bc.h:=self.getbyte(temp2);
-                sra_8(self.r,@r.bc.h);
+                sra_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $29:begin {ld C,sra (IX+d)}
                 r.bc.l:=self.getbyte(temp2);
-                sra_8(self.r,@r.bc.l);
+                sra_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $2a:begin {ld D,sra (IX+d)}
                 r.de.h:=self.getbyte(temp2);
-                sra_8(self.r,@r.de.h);
+                sra_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $2b:begin {ld E,sra (IX+d)}
                 r.de.l:=self.getbyte(temp2);
-                sra_8(self.r,@r.de.l);
+                sra_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $2c:begin {ld H,sra (IX+d)}
                 r.hl.h:=self.getbyte(temp2);
-                sra_8(self.r,@r.hl.h);
+                sra_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $2d:begin {ld L,sra (IX+d)}
                 r.hl.l:=self.getbyte(temp2);
-                sra_8(self.r,@r.hl.l);
+                sra_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $2e:begin  {sra (IX+d)}
                 tempb:=self.getbyte(temp2);
-                sra_8(self.r,@tempb);
+                sra_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $2f:begin {ld A,sra (IX+d)}
                 r.a:=self.getbyte(temp2);
-                sra_8(self.r,@r.a);
+                sra_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $30:begin {ld B,sll (IX+d)}
                 r.bc.h:=self.getbyte(temp2);
-                sll_8(self.r,@r.bc.h);
+                sll_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $31:begin {ld C,sll (IX+d)}
                 r.bc.l:=self.getbyte(temp2);
-                sll_8(self.r,@r.bc.l);
+                sll_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $32:begin {ld D,sll (IX+d)}
                 r.de.h:=self.getbyte(temp2);
-                sll_8(self.r,@r.de.h);
+                sll_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $33:begin {ld E,sll (IX+d)}
                 r.de.l:=self.getbyte(temp2);
-                sll_8(self.r,@r.de.l);
+                sll_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $34:begin {ld H,sll (IX+d)}
                 r.hl.h:=self.getbyte(temp2);
-                sll_8(self.r,@r.hl.h);
+                sll_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $35:begin {ld L,sll (IX+d)}
                 r.hl.l:=self.getbyte(temp2);
-                sll_8(self.r,@r.hl.l);
+                sll_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $36:begin {sll (IX+d)}
                 tempb:=self.getbyte(temp2);
-                sll_8(self.r,@tempb);
+                sll_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $37:begin {ld A,sll (IX+d)}
                 r.a:=self.getbyte(temp2);
-                sll_8(self.r,@r.a);
+                sll_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $38:begin {ld B,srl (IX+d)}
                 r.bc.h:=self.getbyte(temp2);
-                srl_8(self.r,@r.bc.h);
+                srl_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $39:begin {ld C,srl (IX+d)}
                 r.bc.l:=self.getbyte(temp2);
-                srl_8(self.r,@r.bc.l);
+                srl_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $3a:begin {ld D,srl (IX+d)}
                 r.de.h:=self.getbyte(temp2);
-                srl_8(self.r,@r.de.h);
+                srl_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $3b:begin {ld E,srl (IX+d)}
                 r.de.l:=self.getbyte(temp2);
-                srl_8(self.r,@r.de.l);
+                srl_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $3c:begin {ld H,srl (IX+d)}
                 r.hl.h:=self.getbyte(temp2);
-                srl_8(self.r,@r.hl.h);
+                srl_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $3d:begin {ld L,srl (IX+d)}
                 r.hl.l:=self.getbyte(temp2);
-                srl_8(self.r,@r.hl.l);
+                srl_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $3e:begin  {srl (IX+d)}
                 tempb:=self.getbyte(temp2);
-                srl_8(self.r,@tempb);
+                srl_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $3f:begin {ld A,srl (IX+d)}
                 r.a:=self.getbyte(temp2);
-                srl_8(self.r,@r.a);
+                srl_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $40..$47:begin {bit 0,(IX+d)}
                  tempb:=self.getbyte(temp2);
-                 bit_8(self.r,0,tempb);
+                 bit_8(0,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $48..$4f:begin {bit 1,(IX+d)}
                  tempb:=self.getbyte(temp2);
-                 bit_8(self.r,1,tempb);
+                 bit_8(1,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $50..$57:begin {bit 2,(IX+d)}
                  tempb:=self.getbyte(temp2);
-                 bit_8(self.r,2,tempb);
+                 bit_8(2,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $58..$5f:begin {bit 3,(IX+d)}
                  tempb:=self.getbyte(temp2);
-                 bit_8(self.r,3,tempb);
+                 bit_8(3,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $60..$67:begin {bit 4,(IX+d)}
                  tempb:=self.getbyte(temp2);
-                 bit_8(self.r,4,tempb);
+                 bit_8(4,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $68..$6f:begin {bit 5,(IX+d)}
                  tempb:=self.getbyte(temp2);
-                 bit_8(self.r,5,tempb);
+                 bit_8(5,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $70..$77:begin {bit 6,(IX+d)}
                  tempb:=self.getbyte(temp2);
-                 bit_8(self.r,6,tempb);
+                 bit_8(6,tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
         $78..$7f:begin {bit 7,(IX+d)}
                  tempb:=self.getbyte(temp2);
-                 bit_7(self.r,tempb);
+                 bit_7(tempb);
                  r.f.bit5:=(temp2 and $2000)<>0;
                  r.f.bit3:=(temp2 and $800)<>0;
             end;
@@ -2721,7 +3068,7 @@ case instruccion of
                 r.f.h:=false;
             end;
         $41:if @self.out_port<>nil then self.out_port(r.bc.h,r.bc.w); {out (C),B}
-        $42:sbc_16(self.r,@r.hl,r.bc.w); {sbc HL,BC}
+        $42:sbc_16(@r.hl.w,r.bc.w); {sbc HL,BC}
         $43:begin {ld (nn),BC}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -2732,7 +3079,7 @@ case instruccion of
         $44,$4c,$54,$5c,$64,$6c,$74,$7c:begin  {neg}
                 temp:=r.a;
                 r.a:=0;
-                sub_8(self.r,temp);
+                sub_8(temp);
             end;
         $45,$55,$65,$75:begin  {retn}
                 r.pc:=pop_sp;
@@ -2752,7 +3099,7 @@ case instruccion of
                 r.f.h:=false;
             end;
         $49:if @self.out_port<>nil then self.out_port(r.bc.l,r.bc.w); {out (C),C}
-        $4a:adc_16(self.r,@r.hl,r.bc.w); {adc HL,BC}
+        $4a:adc_16(@r.hl.w,r.bc.w); {adc HL,BC}
         $4b:begin  {ld BC,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -2780,7 +3127,7 @@ case instruccion of
                 r.f.h:=false;
             end;
         $51:if @self.out_port<>nil then self.out_port(r.de.h,r.bc.w); {out (C),D}
-        $52:sbc_16(self.r,@r.hl,r.de.w); {sbc HL,DE}
+        $52:sbc_16(@r.hl.w,r.de.w); {sbc HL,DE}
         $53:begin {ld (nn),DE}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -2813,7 +3160,7 @@ case instruccion of
                 r.f.h:=false;
             end;
         $59:if @self.out_port<>nil then self.out_port(r.de.l,r.bc.w); {out (C),E}
-        $5a:adc_16(self.r,@r.hl,r.de.w); {adc HL,DE}
+        $5a:adc_16(@r.hl.w,r.de.w); {adc HL,DE}
         $5b:begin  {ld DE,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -2846,7 +3193,7 @@ case instruccion of
                 r.f.h:=false;
             end;
         $61:if @self.out_port<>nil then self.out_port(r.hl.h,r.bc.w); {out (C),H}
-        $62:sbc_16(self.r,@r.hl,r.hl.w); {sbc HL,HL}
+        $62:sbc_16(@r.hl.w,r.hl.w); {sbc HL,HL}
         $63:begin {ld (nn),HL}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -2883,7 +3230,7 @@ case instruccion of
                 r.f.h:=false;
              end;
         $69:if @self.out_port<>nil then self.out_port(r.hl.l,r.bc.w); {out (C),L}
-        $6a:adc_16(self.r,@r.hl,r.hl.w); {adc HL,HL}
+        $6a:adc_16(@r.hl.w,r.hl.w); {adc HL,HL}
         $6b:begin  {ld HL,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -2920,7 +3267,7 @@ case instruccion of
                 r.f.h:=false;
             end;
         $71:if @self.out_port<>nil then self.out_port(0,r.bc.w); {out (C),0}
-        $72:sbc_16(self.r,@r.hl,r.sp); {sbc HL,SP}
+        $72:sbc_16(@r.hl.w,r.sp); {sbc HL,SP}
         $73:begin {ld (nn),SP}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
@@ -2944,7 +3291,7 @@ case instruccion of
                 r.f.h:=false;
             end;
         $79:if @self.out_port<>nil then self.out_port(r.a,r.bc.w); {out (C),A}
-        $7a:adc_16(self.r,@r.hl,r.sp); {adc HL,SP}
+        $7a:adc_16(@r.hl.w,r.sp); {adc HL,SP}
         $7b:begin  {ld SP,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);

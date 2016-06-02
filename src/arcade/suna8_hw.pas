@@ -591,7 +591,7 @@ while EmuStatus=EsRuning do begin
   main_z80.run(frame_m);
   frame_m:=frame_m+main_z80.tframes-main_z80.contador;
   if f=0 then main_z80.pedir_irq:=HOLD_LINE
-    else main_z80.pedir_nmi:=PULSE_LINE;
+    else main_z80.change_nmi(PULSE_LINE);
   //Sound CPU
   snd_z80.run(frame_s);
   frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;

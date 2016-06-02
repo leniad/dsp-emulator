@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,seibu_sound,
      rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_cabal;
-procedure cabal_principal;
-function iniciar_cabal:boolean;
-procedure reset_cabal;
-procedure cerrar_cabal;
-//Main CPU
-function cabal_getword(direccion:dword):word;
-procedure cabal_putword(direccion:dword;valor:word);
-//Sound CPU
-function cabal_snd_getbyte(direccion:word):byte;
-procedure cabal_snd_putbyte(direccion:word;valor:byte);
-procedure cabal_sound_act;
-procedure snd_irq(irqstate:byte);
+procedure cargar_cabal;
 
 implementation
 const
@@ -59,100 +47,6 @@ var
  main_ram:array[0..$7fff] of word;
  bg_ram:array[0..$1ff] of word;
  fg_ram:array[0..$3ff] of word;
-
-procedure Cargar_cabal;
-begin
-llamadas_maquina.iniciar:=iniciar_cabal;
-llamadas_maquina.bucle_general:=cabal_principal;
-llamadas_maquina.cerrar:=cerrar_cabal;
-llamadas_maquina.reset:=reset_cabal;
-llamadas_maquina.fps_max:=59.60;
-end;
-
-function iniciar_cabal:boolean;
-const
-  pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  pt_x:array[0..15] of dword=(3, 2, 1, 0, 16+3, 16+2, 16+1, 16+0,
-			32*16+3, 32*16+2, 32*16+1, 32*16+0, 33*16+3, 33*16+2, 33*16+1, 33*16+0);
-  pt_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-			8*32, 9*32, 10*32,  11*32,  12*32,  13*32, 14*32,  15*32 );
-  ps_x:array[0..15] of dword=(3, 2, 1, 0, 16+3, 16+2, 16+1, 16+0,
-			32+3, 32+2, 32+1, 32+0, 48+3, 48+2, 48+1, 48+0);
-  ps_y:array[0..15] of dword=(30*32, 28*32, 26*32, 24*32, 22*32, 20*32, 18*32, 16*32,
-			14*32, 12*32, 10*32,  8*32,  6*32,  4*32,  2*32,  0*32 );
-var
-  memoria_temp:array[0..$7ffff] of byte;
-begin
-iniciar_cabal:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,256,256,true);
-screen_init(3,512,256,false,true);
-iniciar_video(256,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(cabal_getword,cabal_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(cabal_snd_getbyte,cabal_snd_putbyte);
-snd_z80.init_sound(cabal_sound_act);
-//Sound Chips
-YM2151_Init(0,3579545,nil,snd_irq);
-//cargar roms
-if not(cargar_roms16w(@rom,@cabal_rom,'cabal.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@memoria_temp,@cabal_sound,'cabal.zip',0)) then exit;
-decript_seibu_sound(@memoria_temp,@decrypt,@mem_snd);
-copymemory(@mem_snd[$8000],@memoria_temp[$8000],$8000);
-//adpcm
-if not(cargar_roms(@memoria_temp,@cabal_adpcm,'cabal.zip',0)) then exit;
-seibu_adpcm_init(@memoria_temp);
-//convertir chars
-if not(cargar_roms(@memoria_temp,@cabal_char,'cabal.zip')) then exit;
-init_gfx(0,8,8,$400);
-gfx[0].trans[3]:=true;
-gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
-//sprites
-if not(cargar_roms16b(@memoria_temp,@cabal_sprites,'cabal.zip',0)) then exit;
-init_gfx(1,16,16,$1000);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
-convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
-//tiles
-if not(cargar_roms16b(@memoria_temp,@cabal_tiles,'cabal.zip',0)) then exit;
-init_gfx(2,16,16,$1000);
-gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
-convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
-//Dip
-marcade.dswa:=$efff;
-marcade.dswa_val:=@cabal_dip_a;
-//final
-reset_cabal;
-iniciar_cabal:=true;
-end;
-
-procedure cerrar_cabal;
-begin
-ym2151_close(0);
-seibu_adpcm_close;
-end;
-
-procedure reset_cabal;
-begin
- main_m68000.reset;
- snd_z80.reset;
- YM2151_reset(0);
- seibu_adpcm_reset;
- seibu_reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$fc;
- marcade.in3:=$ff;
-end;
 
 procedure update_video_cabal;inline;
 var
@@ -312,7 +206,7 @@ case direccion of
   0..$1fff:if snd_z80.opcode then cabal_snd_getbyte:=decrypt[direccion]
               else cabal_snd_getbyte:=mem_snd[direccion];
   $2000..$27ff,$8000..$ffff:cabal_snd_getbyte:=mem_snd[direccion];
-  $4009:cabal_snd_getbyte:=YM2151_status_port_read(0);
+  $4009:cabal_snd_getbyte:=ym2151_0.status;
   $4010:cabal_snd_getbyte:=sound_latch[0];
   $4011:cabal_snd_getbyte:=sound_latch[1];
   $4012:cabal_snd_getbyte:=byte(sub2main_pending);
@@ -328,8 +222,8 @@ case direccion of
   $4001,$4002:;
   $4003:seibu_update_irq_lines(RST18_CLEAR);
   $4005,$4006:seibu_adpcm_adr_w(0,(direccion and 1) xor 1,valor);
-  $4008:YM2151_register_port_write(0,valor);
-  $4009:YM2151_data_port_write(0,valor);
+  $4008:ym2151_0.reg(valor);
+  $4009:ym2151_0.write(valor);
   $4018:sub2main[0]:=valor;
   $4019:sub2main[1]:=valor;
   $401a:seibu_adpcm_ctl_w(0,valor);
@@ -340,7 +234,7 @@ end;
 
 procedure cabal_sound_act;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   seibu_adpcm_update;
 end;
 
@@ -348,6 +242,101 @@ procedure snd_irq(irqstate:byte);
 begin
   if irqstate=1 then seibu_update_irq_lines(RST10_ASSERT)
     else seibu_update_irq_lines(RST10_CLEAR);
+end;
+
+//Main
+procedure reset_cabal;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ seibu_adpcm_reset;
+ seibu_reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$fc;
+ marcade.in3:=$ff;
+end;
+
+function iniciar_cabal:boolean;
+const
+  pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  pt_x:array[0..15] of dword=(3, 2, 1, 0, 16+3, 16+2, 16+1, 16+0,
+			32*16+3, 32*16+2, 32*16+1, 32*16+0, 33*16+3, 33*16+2, 33*16+1, 33*16+0);
+  pt_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			8*32, 9*32, 10*32,  11*32,  12*32,  13*32, 14*32,  15*32 );
+  ps_x:array[0..15] of dword=(3, 2, 1, 0, 16+3, 16+2, 16+1, 16+0,
+			32+3, 32+2, 32+1, 32+0, 48+3, 48+2, 48+1, 48+0);
+  ps_y:array[0..15] of dword=(30*32, 28*32, 26*32, 24*32, 22*32, 20*32, 18*32, 16*32,
+			14*32, 12*32, 10*32,  8*32,  6*32,  4*32,  2*32,  0*32 );
+var
+  memoria_temp:array[0..$7ffff] of byte;
+begin
+iniciar_cabal:=false;
+iniciar_audio(false);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,256,true);
+screen_init(2,256,256,true);
+screen_init(3,512,256,false,true);
+iniciar_video(256,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,256);
+main_m68000.change_ram16_calls(cabal_getword,cabal_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(cabal_snd_getbyte,cabal_snd_putbyte);
+snd_z80.init_sound(cabal_sound_act);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(snd_irq);
+//cargar roms
+if not(cargar_roms16w(@rom,@cabal_rom,'cabal.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@memoria_temp,@cabal_sound,'cabal.zip',0)) then exit;
+decript_seibu_sound(@memoria_temp,@decrypt,@mem_snd);
+copymemory(@mem_snd[$8000],@memoria_temp[$8000],$8000);
+//adpcm
+if not(cargar_roms(@memoria_temp,@cabal_adpcm,'cabal.zip',0)) then exit;
+seibu_adpcm_init(@memoria_temp);
+//convertir chars
+if not(cargar_roms(@memoria_temp,@cabal_char,'cabal.zip')) then exit;
+init_gfx(0,8,8,$400);
+gfx[0].trans[3]:=true;
+gfx_set_desc_data(2,0,16*8,0,4);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+//sprites
+if not(cargar_roms16b(@memoria_temp,@cabal_sprites,'cabal.zip',0)) then exit;
+init_gfx(1,16,16,$1000);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
+//tiles
+if not(cargar_roms16b(@memoria_temp,@cabal_tiles,'cabal.zip',0)) then exit;
+init_gfx(2,16,16,$1000);
+gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
+convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
+//Dip
+marcade.dswa:=$efff;
+marcade.dswa_val:=@cabal_dip_a;
+//final
+reset_cabal;
+iniciar_cabal:=true;
+end;
+
+procedure cerrar_cabal;
+begin
+seibu_adpcm_close;
+end;
+
+procedure Cargar_cabal;
+begin
+llamadas_maquina.iniciar:=iniciar_cabal;
+llamadas_maquina.bucle_general:=cabal_principal;
+llamadas_maquina.cerrar:=cerrar_cabal;
+llamadas_maquina.reset:=reset_cabal;
+llamadas_maquina.fps_max:=59.60;
 end;
 
 end.

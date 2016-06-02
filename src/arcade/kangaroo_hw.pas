@@ -104,7 +104,7 @@ end;
 procedure reset_kangaroo;
 begin
  main_z80.reset;
- main_z80.pedir_nmi:=PULSE_LINE;
+ main_z80.change_nmi(PULSE_LINE);
  snd_z80.reset;
  ay8910_0.reset;
  reset_audio;

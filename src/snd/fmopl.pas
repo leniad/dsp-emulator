@@ -4,6 +4,9 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}math;
 
 const
+CLEAR_LINE=0;
+ASSERT_LINE=1;
+
 M_PI=3.1415926535;
 FREQ_SH=16;  // 16.16 fixed point (frequency calculations) */
 EG_SH=16;  // 16.16 fixed point (EG timing)              */
@@ -618,7 +621,7 @@ begin
 			// IRQ on */
 			OPL.status:=OPL.status or $80;
 			// callback user interrupt handler (IRQ is OFF to ON) */
-			 if (@OPL.IRQ_Handler<>nil) then OPL.IRQ_Handler(1);
+			 if (@OPL.IRQ_Handler<>nil) then OPL.IRQ_Handler(ASSERT_LINE);
 		end;
 	end;
 end;
@@ -631,7 +634,7 @@ begin
 		if (OPL.status and OPL.statusmask)=0 then begin
 			OPL.status:=OPL.status and $7f;
 			// callback user interrupt handler (IRQ is ON to OFF) */
-			if (@OPL.IRQ_Handler<>nil) then OPL.IRQ_Handler(0);
+			if (@OPL.IRQ_Handler<>nil) then OPL.IRQ_Handler(CLEAR_LINE);
 	 	end;
 	end;
 end;

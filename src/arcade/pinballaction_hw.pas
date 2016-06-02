@@ -239,7 +239,7 @@ while EmuStatus=EsRuning do begin
   snd_z80.run(frame_s);
   frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
   if f=240 then begin
-     if nmi_mask then main_z80.pedir_nmi:=PULSE_LINE;
+     if nmi_mask then main_z80.change_nmi(PULSE_LINE);
      update_video_pinballaction;
   end;
  end;

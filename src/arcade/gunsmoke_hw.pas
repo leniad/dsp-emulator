@@ -529,9 +529,9 @@ if direccion<$8000 then exit;
 mem_snd[direccion]:=valor;
 case direccion of
   $e000:ym2203_0.Control(valor);
-  $e001:ym2203_0.Write_Reg(valor);
+  $e001:ym2203_0.Write(valor);
   $e002:ym2203_1.Control(valor);
-  $e003:ym2203_1.Write_Reg(valor);
+  $e003:ym2203_1.Write(valor);
 end;
 end;
 

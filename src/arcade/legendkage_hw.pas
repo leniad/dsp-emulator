@@ -375,7 +375,7 @@ case direccion of
             fillchar(gfx[0].buffer[0],$c00,1);
           end;
   $f060:begin
-          if snd_nmi then snd_z80.pedir_nmi:=PULSE_LINE
+          if snd_nmi then snd_z80.change_nmi(PULSE_LINE)
             else pending_nmi:=true;
           sound_cmd:=valor;
         end;
@@ -407,10 +407,10 @@ end;
 function snd_lk_hw_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $9000:snd_lk_hw_getbyte:=ym2203_0.read_status;
-  $9001:snd_lk_hw_getbyte:=ym2203_0.read_reg;
-  $a000:snd_lk_hw_getbyte:=ym2203_1.read_status;
-  $a001:snd_lk_hw_getbyte:=ym2203_1.read_reg;
+  $9000:snd_lk_hw_getbyte:=ym2203_0.status;
+  $9001:snd_lk_hw_getbyte:=ym2203_0.read;
+  $a000:snd_lk_hw_getbyte:=ym2203_1.status;
+  $a001:snd_lk_hw_getbyte:=ym2203_1.read;
   $b000:snd_lk_hw_getbyte:=sound_cmd;
     else snd_lk_hw_getbyte:=mem_snd[direccion];
 end;
@@ -422,14 +422,14 @@ if (direccion<$8000) then exit;
 mem_snd[direccion]:=valor;
 case direccion of
   $9000:ym2203_0.control(valor);
-  $9001:ym2203_0.write_reg(valor);
+  $9001:ym2203_0.write(valor);
   $a000:ym2203_1.control(valor);
-  $a001:ym2203_1.write_reg(valor);
+  $a001:ym2203_1.write(valor);
   $b001:begin
           snd_nmi:=true;
           if pending_nmi then begin
               pending_nmi:=false;
-              snd_z80.pedir_nmi:=PULSE_LINE;
+              snd_z80.change_nmi(PULSE_LINE);
           end;
         end;
   $b002:snd_nmi:=false;
@@ -480,8 +480,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 procedure lk_hw_sound_update;

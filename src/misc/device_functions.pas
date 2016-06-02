@@ -8,7 +8,8 @@ implementation
 uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496,
      ay_8910,ym_3812,ym_2203,m6809,vlm_5030,m6502,pokey,m6805,sega_vdp,deco_104,
      deco_146,tms99xx,lr35902,mcs51,m680x,konami_snd,ppi8255,oki6295,dac,msm5205,
-     mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp;
+     mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,
+     k053246_k053247_k055673,ym_2151,samples;
 
 procedure close_all_devices;
 begin
@@ -209,6 +210,15 @@ if msm_5205_1<>nil then begin
   msm_5205_1.free;
   msm_5205_1:=nil;
 end;
+if ym2151_0<>nil then begin
+  ym2151_0.free;
+  ym2151_0:=nil;
+end;
+if ym2151_1<>nil then begin
+  ym2151_1.free;
+  ym2151_1:=nil;
+end;
+close_samples;
 //Konami chips
 if k052109_0<>nil then begin
   k052109_0.free;
@@ -229,6 +239,10 @@ end;
 if k053260_0<>nil then begin
   k053260_0.free;
   k053260_0:=nil;
+end;
+if k053246_0<>nil then begin
+  k053246_0.free;
+  k053246_0:=nil;
 end;
 //misc
 if vdp_0<>nil then begin

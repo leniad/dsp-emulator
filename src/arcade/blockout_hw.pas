@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,oki6295;
 
-procedure Cargar_blockout;
-procedure blockout_principal;
-function iniciar_blockout:boolean;
-procedure reset_blockout;
-procedure cerrar_blockout;
-//Main CPU
-function blockout_getword(direccion:dword):word;
-procedure blockout_putword(direccion:dword;valor:word);
-//Sound CPU
-function blockout_snd_getbyte(direccion:word):byte;
-procedure blockout_snd_putbyte(direccion:word;valor:byte);
-procedure blockout_sound_update;
-procedure ym2151_snd_irq(irqstate:byte);
+procedure cargar_blockout;
 
 implementation
 const
@@ -42,66 +30,6 @@ var
  video_ram_buff:array[0..$1ffff] of boolean;
  fvideo_ram:array[0..$7fff] of byte;
  sound_latch:byte;
-
-procedure Cargar_blockout;
-begin
-llamadas_maquina.iniciar:=iniciar_blockout;
-llamadas_maquina.bucle_general:=blockout_principal;
-llamadas_maquina.cerrar:=cerrar_blockout;
-llamadas_maquina.reset:=reset_blockout;
-end;
-
-function iniciar_blockout:boolean;
-begin
-iniciar_blockout:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,320,256);
-screen_init(2,320,256,true);
-iniciar_video(320,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(blockout_getword,blockout_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(blockout_snd_getbyte,blockout_snd_putbyte);
-snd_z80.init_sound(blockout_sound_update);
-//Sound Chips
-YM2151_Init(0,3579545,nil,ym2151_snd_irq);
-oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
-if not(cargar_roms(oki_6295_0.get_rom_addr,@blockout_oki,'blockout.zip',1)) then exit;
-//cargar roms
-if not(cargar_roms16w(@rom[0],@blockout_rom[0],'blockout.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@blockout_sound,'blockout.zip')) then exit;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswa_val:=@blockout_dipa;
-marcade.dswb:=$ff;
-marcade.dswb_val:=@blockout_dipb;
-//final
-reset_blockout;
-iniciar_blockout:=true;
-end;
-
-procedure cerrar_blockout;
-begin
-YM2151_close(0);
-end;
-
-procedure reset_blockout;
-begin
- main_m68000.reset;
- snd_z80.reset;
- YM2151_reset(0);
- oki_6295_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in1:=$FF;
- sound_latch:=0;
- fillchar(video_ram_buff,$20000,1);
-end;
 
 procedure update_video_blockout;
 var
@@ -141,8 +69,9 @@ for y:=0 to $ff do begin
       end;
   end;
 end;
-actualiza_trozo_simple(0,8,320,240,1);
-actualiza_trozo_simple(0,8,320,240,2);
+actualiza_trozo(0,0,320,256,1,0,0,320,256,3);
+actualiza_trozo(0,0,320,256,2,0,0,320,256,3);
+actualiza_trozo_final(0,8,320,240,3);
 end;
 
 procedure eventos_blockout;inline;
@@ -257,7 +186,7 @@ case direccion of
     $100012:main_m68000.irq[5]:=CLEAR_LINE;
     $100014:begin
               sound_latch:=valor and $ff;
-              snd_z80.pedir_nmi:=PULSE_LINE;
+              snd_z80.change_nmi(PULSE_LINE);
             end;
     $180000..$1bffff:begin
                         video_ram[(direccion and $3ffff) shr 1]:=valor;
@@ -282,7 +211,7 @@ function blockout_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$87ff:blockout_snd_getbyte:=mem_snd[direccion];
-  $8801:blockout_snd_getbyte:=YM2151_status_port_read(0);
+  $8801:blockout_snd_getbyte:=ym2151_0.status;
   $9800:blockout_snd_getbyte:=oki_6295_0.read;
   $a000:blockout_snd_getbyte:=sound_latch;
 end;
@@ -293,22 +222,78 @@ begin
 if direccion<$8000 then exit;
 case direccion of
   $8000..$87ff:mem_snd[direccion]:=valor;
-  $8800:YM2151_register_port_write(0,valor);
-  $8801:YM2151_data_port_write(0,valor);
+  $8800:ym2151_0.reg(valor);
+  $8801:ym2151_0.write(valor);
   $9800:oki_6295_0.write(valor);
 end;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 procedure blockout_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   oki_6295_0.update;
+end;
+
+//Main
+procedure reset_blockout;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ oki_6295_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in1:=$FF;
+ sound_latch:=0;
+ fillchar(video_ram_buff,$20000,1);
+end;
+
+function iniciar_blockout:boolean;
+begin
+iniciar_blockout:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,320,256);
+screen_init(2,320,256,true);
+screen_init(3,320,256,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,256);
+main_m68000.change_ram16_calls(blockout_getword,blockout_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(blockout_snd_getbyte,blockout_snd_putbyte);
+snd_z80.init_sound(blockout_sound_update);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
+if not(cargar_roms(oki_6295_0.get_rom_addr,@blockout_oki,'blockout.zip',1)) then exit;
+//cargar roms
+if not(cargar_roms16w(@rom[0],@blockout_rom[0],'blockout.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@blockout_sound,'blockout.zip')) then exit;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswa_val:=@blockout_dipa;
+marcade.dswb:=$ff;
+marcade.dswb_val:=@blockout_dipb;
+//final
+reset_blockout;
+iniciar_blockout:=true;
+end;
+
+procedure Cargar_blockout;
+begin
+llamadas_maquina.iniciar:=iniciar_blockout;
+llamadas_maquina.bucle_general:=blockout_principal;
+llamadas_maquina.reset:=reset_blockout;
 end;
 
 end.

@@ -83,9 +83,9 @@ end;
 
 procedure TConfigSP.FormShow(Sender: TObject);
 begin
-TrackBar1.Position:=beeper_oversample;
+TrackBar1.Position:=var_spectrum.beeper_oversample;
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then begin
-    if issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
+    if var_spectrum.issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
     groupbox8.Enabled:=false;
     radiobutton14.Enabled:=false;
     radiobutton15.Enabled:=false;
@@ -103,10 +103,10 @@ end else begin
     radiobutton16.Enabled:=true;
 end;
   //Las otras opciones
-  if jkempston then radiobutton3.checked:=true;
-  if jcursor then radiobutton4.checked:=true;
-  if jsinclair1 then radiobutton5.checked:=true;
-  if jsinclair2 then radiobutton6.checked:=true;
+  if var_spectrum.tipo_joy=JKEMPSTON then radiobutton3.checked:=true
+    else if var_spectrum.tipo_joy=JCURSOR then radiobutton4.checked:=true
+      else if var_spectrum.tipo_joy=JSINCLAIR1 then radiobutton5.checked:=true
+        else if var_spectrum.tipo_joy=JSINCLAIR2 then radiobutton6.checked:=true;
   if ulaplus.enabled then radiobutton23.Checked:=true
     else radiobutton24.Checked:=true;
   //emulacion del borde
@@ -123,10 +123,10 @@ end;
      3:radiobutton20.Checked:=true;
   end;
   //Filtro Beeper
-  if beeper_filter then radiobutton17.Checked:=true
+  if var_spectrum.beeper_filter then radiobutton17.Checked:=true
     else radiobutton18.Checked:=true;
   //Audio load
-  if audio_load then radiobutton21.Checked:=true
+  if var_spectrum.audio_load then radiobutton21.Checked:=true
     else radiobutton22.Checked:=true;
   case main_vars.tipo_maquina of
     0,5:edit1.Text:=Directory.spectrum_48;
@@ -140,7 +140,7 @@ end;
   if lenslok.activo then radiobutton12.Checked:=true
     else radiobutton13.Checked:=true;
   //Audio 128K
-  case audio_128k of
+  case var_spectrum.audio_128k of
     0:radiobutton14.Checked:=true;
     1:radiobutton15.Checked:=true;
     2:radiobutton16.Checked:=true;
@@ -164,11 +164,11 @@ var
 begin
 necesita_reset:=false;
 with ConfigSP do begin
-  issue2:=radiobutton1.Checked;
-  jkempston:=radiobutton3.Checked;
-  jcursor:=radiobutton4.Checked;
-  jsinclair1:=radiobutton5.Checked;
-  jsinclair2:=radiobutton6.Checked;
+  var_spectrum.issue2:=radiobutton1.Checked;
+  if radiobutton3.Checked then var_spectrum.tipo_joy:=JKEMPSTON
+    else if radiobutton4.Checked then var_spectrum.tipo_joy:=JCURSOR
+      else if radiobutton5.Checked then var_spectrum.tipo_joy:=JSINCLAIR1
+        else if radiobutton6.Checked then var_spectrum.tipo_joy:=JSINCLAIR2;
   if radiobutton7.checked then borde.tipo:=0;
   if RadioButton8.Checked then begin
     borde.tipo:=1;
@@ -182,12 +182,12 @@ with ConfigSP do begin
       1,2,3,4:borde.borde_spectrum:=borde_128_full;
     end;
   end;
-  beeper_filter:=radiobutton17.Checked;
-  audio_load:=radiobutton21.Checked;
-  if radiobutton10.Checked then mouse.tipo:=0;
-  if radiobutton11.Checked then mouse.tipo:=1;
-  if radiobutton19.Checked then mouse.tipo:=2;
-  if radiobutton20.Checked then mouse.tipo:=3;
+  var_spectrum.beeper_filter:=radiobutton17.Checked;
+  var_spectrum.audio_load:=radiobutton21.Checked;
+  if radiobutton10.Checked then mouse.tipo:=MNONE
+    else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
+      else if radiobutton19.Checked then mouse.tipo:=MKEMPSTON
+        else if radiobutton20.Checked then mouse.tipo:=MAMX;
   if (mouse.tipo<>0) then sdl_showcursor(1)
     else sdl_showcursor(0);
   if mouse.tipo=3 then begin
@@ -201,10 +201,10 @@ with ConfigSP do begin
   if RadioButton14.Checked then new_audio:=0;
   if RadioButton15.Checked then new_audio:=1;
   if RadioButton16.Checked then new_audio:=2;
-  if new_audio<>audio_128k then begin
-    audio_128k:=new_audio;
+  if new_audio<>var_spectrum.audio_128k then begin
+    var_spectrum.audio_128k:=new_audio;
     close_audio;
-    case audio_128k of
+    case var_spectrum.audio_128k of
       0:iniciar_audio(false);
       1,2:iniciar_audio(true);
     end;
@@ -224,9 +224,9 @@ with ConfigSP do begin
         necesita_reset:=true;
         end;
   end;
-  beeper_oversample:=trackbar1.Position;
+  var_spectrum.beeper_oversample:=trackbar1.Position;
 end;
-samples_beeper:=llamadas_maquina.velocidad_cpu/(44100*beeper_oversample);
+var_spectrum.samples_beeper:=llamadas_maquina.velocidad_cpu/(freq_base_audio*var_spectrum.beeper_oversample);
 if necesita_reset then begin
   main_vars.driver_ok:=llamadas_maquina.iniciar;
   if not(main_vars.driver_ok) then begin

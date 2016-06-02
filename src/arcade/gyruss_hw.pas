@@ -267,7 +267,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if (scan_line=239) then begin
-      if main_nmi then main_z80.pedir_nmi:=ASSERT_LINE;
+      if main_nmi then main_z80.change_nmi(ASSERT_LINE);
       if sub_irq then misc_m6809.change_irq(ASSERT_LINE);
       update_video_gyruss;
     end;
@@ -303,7 +303,7 @@ case direccion of
     $c100:sound_latch:=valor;
     $c180:begin
             main_nmi:=(valor and 1)<>0;
-            if not(main_nmi) then main_z80.clear_nmi;
+            if not(main_nmi) then main_z80.change_nmi(CLEAR_LINE);
           end;
     $c185:main_screen.flip_main_screen:=(valor and $1)<>0;
 end;

@@ -298,7 +298,7 @@ while EmuStatus=EsRuning do begin
           update_video_popeye;
           main_z80_reg:=main_z80.get_internal_r;
           if (main_z80_reg.i and 1)<>0 then begin
-            main_z80.pedir_nmi:=PULSE_LINE;
+            main_z80.change_nmi(PULSE_LINE);
             field:=field xor $10;
           end;
       end;

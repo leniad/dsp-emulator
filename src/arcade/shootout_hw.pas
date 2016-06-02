@@ -219,11 +219,11 @@ if event.arcade then begin
   if (arcade_input.coin[0] and not(old_val)) then begin
       marcade.in2:=marcade.in2 and $bf;
       marcade.in1:=marcade.in1 and $7f;
-      main_m6502.pedir_nmi:=ASSERT_LINE;
+      main_m6502.change_nmi(ASSERT_LINE);
   end else begin
       marcade.in2:=(marcade.in2 or $40);
       marcade.in1:=(marcade.in1 or $80);
-      main_m6502.clear_nmi;
+      main_m6502.change_nmi(CLEAR_LINE);
   end;
   old_val:=arcade_input.coin[0];
   if arcade_input.start[0] then marcade.in0:=marcade.in0 and $bf else marcade.in0:=marcade.in0 or $40;
@@ -281,7 +281,7 @@ case direccion of
   $1000:banco:=valor and $f;
   $1003:begin
           sound_latch:=valor;
-          snd_m6502.pedir_nmi:=PULSE_LINE;
+          snd_m6502.change_nmi(PULSE_LINE);
         end;
   $2000..$27ff:begin
                   gfx[0].buffer[direccion and $3ff]:=true;
@@ -298,7 +298,8 @@ function getbyte_snd_shootout(direccion:word):byte;
 begin
 case direccion of
   0..$7ff,$c000..$ffff:getbyte_snd_shootout:=mem_snd[direccion];
-  $4000:getbyte_snd_shootout:=ym2203_0.read_status;
+  $4000:getbyte_snd_shootout:=ym2203_0.status;
+  $4001:getbyte_snd_shootout:=ym2203_0.read;
   $a000:getbyte_snd_shootout:=sound_latch;
 end;
 end;
@@ -309,7 +310,7 @@ if direccion>$bfff then exit;
 case direccion of
   0..$7ff:mem_snd[direccion]:=valor;
   $4000:ym2203_0.control(valor);
-  $4001:ym2203_0.write_reg(valor);
+  $4001:ym2203_0.write(valor);
 end;
 end;
 
@@ -320,8 +321,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_m6502.pedir_irq:=ASSERT_LINE
-    else snd_m6502.pedir_irq:=CLEAR_LINE;
+  snd_m6502.change_irq(irqstate);
 end;
 
 end.

@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 399
+  Left = 1016
   Height = 355
-  Top = 175
+  Top = 341
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.6.0.1'
+  LCLVersion = '1.7'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -2542,6 +2542,10 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object simpsons1: TMenuItem
+            Caption = 'The Simpsons'
+            OnClick = CambiarMaquina
+          end
         end
         object M680001: TMenuItem
           Caption = 'M68000'
@@ -2904,7 +2908,7 @@ object principal1: Tprincipal1
           OnClick = CambiarMaquina
         end
         object GameBoy1: TMenuItem
-          Caption = 'GameBoy'
+          Caption = 'GameBoy/GameBoy Color'
           OnClick = CambiarMaquina
         end
         object Colecovision1: TMenuItem

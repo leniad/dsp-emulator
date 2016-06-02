@@ -11,7 +11,6 @@ function outrun_getword(direccion:dword):word;
 procedure outrun_putword(direccion:dword;valor:word);
 function iniciar_outrun:boolean;
 procedure reset_outrun;
-procedure cerrar_outrun;
 function outrun_snd_getbyte(direccion:word):byte;
 procedure outrun_snd_putbyte(direccion:word;valor:byte);
 procedure outrun_sound_act;
@@ -71,7 +70,6 @@ procedure Cargar_outrun;
 begin
 llamadas_maquina.iniciar:=iniciar_outrun;
 llamadas_maquina.bucle_general:=outrun_principal;
-llamadas_maquina.cerrar:=cerrar_outrun;
 llamadas_maquina.reset:=reset_outrun;
 end;
 
@@ -117,7 +115,8 @@ snd_z80.init_sound(outrun_sound_act);
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
 //Timers
-YM2151_Init(0,4000000,nil,ym2151_snd_irq);
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@outrun_rom[0],'outrun.zip',0)) then exit;
 //cargar sonido
@@ -395,18 +394,13 @@ if event.arcade then begin
 end;
 end;
 
-procedure cerrar_outrun;
-begin
-YM2151_close(0);
-end;
-
 procedure reset_outrun;
 var
   f:byte;
 begin
  main_m68000.reset;
  snd_z80.reset;
- YM2151_reset(0);
+ ym2151_0.reset;
  pia8255_0.reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -655,7 +649,7 @@ var
 begin
 res:=$ff;
 case (puerto and $ff) of
-  $00..$3f:if (puerto and 1)<>0 then res:=YM2151_status_port_read(0);
+  $00..$3f:if (puerto and 1)<>0 then res:=ym2151_0.status;
   $c0..$ff:begin
               pia8255_0.set_port(2,0);
               res:=sound_latch;
@@ -668,8 +662,8 @@ procedure outrun_snd_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   $00..$3f:case (puerto and 1) of
-              0:YM2151_register_port_write(0,valor);
-              1:YM2151_data_port_write(0,valor);
+              0:ym2151_0.reg(valor);
+              1:ym2151_0.write(valor);
            end;
 end;
 end;
@@ -686,13 +680,13 @@ end;
 
 procedure ppi8255_wportc(valor:byte);
 begin
-if (valor and $80)<>0 then snd_z80.clear_nmi
-  else snd_z80.pedir_nmi:=ASSERT_LINE;
+if (valor and $80)<>0 then snd_z80.change_nmi(CLEAR_LINE)
+  else snd_z80.change_nmi(ASSERT_LINE);
 end;
 
 procedure outrun_sound_act;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);

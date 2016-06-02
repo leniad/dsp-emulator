@@ -5,20 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      misc_functions,pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_Pacman;
-procedure pacman_principal;
-function iniciar_pacman:boolean;
-procedure reset_pacman;
-//Pacman
-function pacman_getbyte(direccion:word):byte;
-procedure pacman_putbyte(direccion:word;valor:byte);
-procedure pacman_outbyte(valor:byte;puerto:word);
-//MS Pacman
-function mspacman_getbyte(direccion:word):byte;
-procedure mspacman_putbyte(direccion:word;valor:byte);
-//Save/load
-procedure pacman_qsave(nombre:string);
-procedure pacman_qload(nombre:string);
+procedure cargar_pacman;
 
 implementation
 const
@@ -56,16 +43,6 @@ var
  irq_vblank:boolean;
  rom_decode:array[0..$ffff] of byte;
  dec_enable:boolean;
-
-procedure Cargar_Pacman;
-begin
-llamadas_maquina.iniciar:=iniciar_pacman;
-llamadas_maquina.bucle_general:=pacman_principal;
-llamadas_maquina.reset:=reset_pacman;
-llamadas_maquina.fps_max:=60.6060606060;
-llamadas_maquina.save_qsnap:=pacman_qsave;
-llamadas_maquina.load_qsnap:=pacman_qload;
-end;
 
 procedure update_video_pacman;inline;
 var
@@ -131,6 +108,168 @@ if event.arcade then begin
 end;
 end;
 
+procedure pacman_principal;
+var
+  frame:single;
+  f:word;
+begin
+init_controls(false,false,false,true);
+frame:=main_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to 263 do begin
+    main_z80.run(frame);
+    frame:=frame+main_z80.tframes-main_z80.contador;
+    if f=223 then begin
+      if irq_vblank then main_z80.pedir_irq:=HOLD_LINE;
+      update_video_pacman;
+    end;
+  end;
+  if sound_status.hay_sonido then begin
+      namco_playsound;
+      play_sonido;
+  end;
+  eventos_pacman;
+  video_sync;
+end;
+end;
+
+function pacman_getbyte(direccion:word):byte;
+begin
+direccion:=direccion and $7FFF;
+case direccion of
+        0..$3fff:pacman_getbyte:=memoria[direccion];
+        $4000..$47ff,$6000..$67ff:pacman_getbyte:=memoria[(direccion and $7ff)+$4000];
+        $4800..$4bff,$6800..$6bff:pacman_getbyte:=$bf;
+        $4c00..$4fff,$6c00..$6fff:pacman_getbyte:=memoria[(direccion and $3ff)+$4c00];
+        $5000..$5fff,$7000..$7fff:case (direccion and $ff) of
+                        $00..$3f:pacman_getbyte:=marcade.in0;
+                        $40..$7f:pacman_getbyte:=marcade.in1;
+                        $80..$bf:pacman_getbyte:=marcade.dswa;
+                        $c0..$ff:pacman_getbyte:=$0;
+                     end;
+end;
+end;
+
+procedure pacman_putbyte(direccion:word;valor:byte);
+begin
+direccion:=direccion and $7FFF;
+case direccion of
+        $4000..$47ff,$6000..$67ff:begin
+                        memoria[(direccion and $7ff)+$4000]:=valor;
+                        gfx[0].buffer[direccion and $3ff]:=true;
+                     end;
+        $4c00..$4fff,$6c00..$6fff:memoria[(direccion and $3ff)+$4c00]:=valor;
+        $5000..$5fff,$7000..$7fff:case (direccion and $ff) of
+                        0:irq_vblank:=valor<>0;
+                        1:namco_sound.enabled:=valor<>0;
+                        $40..$5f:namco_sound.registros_namco[direccion and $1f]:=valor;
+                        $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
+                     end;
+end;
+end;
+
+procedure pacman_outbyte(valor:byte;puerto:word);
+begin
+if (puerto and $FF)=0 then main_z80.im2_lo:=valor;
+end;
+
+//MS Pacman
+function mspacman_getbyte(direccion:word):byte;
+begin
+case direccion of
+        $38..$3f,$3b0..$3b7,$1600..$1607,$2120..$2127,$3ff0..$3ff7,$8000..$8007,$97f0..$97f7:dec_enable:=false;
+        $3ff8..$3fff:dec_enable:=true;
+end;
+case direccion of
+        $0..$3fff,$8000..$bfff:if dec_enable then mspacman_getbyte:=rom_decode[direccion]
+            else mspacman_getbyte:=memoria[direccion and $3fff];
+        $4000..$47ff,$6000..$67ff,$c000..$c7ff,$e000..$e7ff:mspacman_getbyte:=memoria[(direccion and $7ff)+$4000];
+        $4800..$4bff,$6800..$6bff,$c800..$cbff,$e800..$ebff:mspacman_getbyte:=$bf;
+        $4c00..$4fff,$6c00..$6fff,$cc00..$cfff,$ec00..$efff:mspacman_getbyte:=memoria[(direccion and $3ff)+$4c00];
+        $5000..$5fff,$7000..$7fff,$d000..$dfff,$f000..$ffff:case (direccion and $ff) of
+                        $00..$3f:mspacman_getbyte:=marcade.in0;
+                        $40..$7f:mspacman_getbyte:=marcade.in1;
+                        $80..$bf:mspacman_getbyte:=marcade.dswa;
+                        $c0..$ff:mspacman_getbyte:=0;
+                     end;
+end;
+end;
+
+procedure mspacman_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+        $38..$3f,$3b0..$3b7,$1600..$1607,$2120..$2127,$3ff0..$3ff7,$8000..$8007,$97f0..$97f7:dec_enable:=false;
+        $3ff8..$3fff:dec_enable:=true;
+        $4000..$47ff,$6000..$67ff,$c000..$c7ff,$e000..$e7ff:begin
+          memoria[(direccion and $7ff)+$4000]:=valor;
+          gfx[0].buffer[direccion and $3ff]:=true;
+        end;
+        $4c00..$4fff,$6c00..$6fff,$cc00..$cfff,$ec00..$efff:memoria[(direccion and $3ff)+$4c00]:=valor;
+        $5000..$5fff,$7000..$7fff,$d000..$dfff,$f000..$ffff:case (direccion and $ff) of
+                  0:irq_vblank:=valor<>0;
+                  1:namco_sound.enabled:=valor<>0;
+                  $40..$5f:namco_sound.registros_namco[direccion and $1f]:=valor;
+                  $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
+        end;
+end;
+end;
+
+procedure pacman_qsave(nombre:string);
+var
+  data:pbyte;
+  size:word;
+  buffer:array[0..1] of byte;
+begin
+if main_vars.tipo_maquina=10 then open_qsnapshot_save('pacman'+nombre)
+  else open_qsnapshot_save('mspacman'+nombre);
+getmem(data,2000);
+//CPU
+size:=main_z80.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND
+size:=namco_sound_save_snapshot(data);
+savedata_qsnapshot(data,size);
+//MEM
+savedata_com_qsnapshot(@memoria[$4000],$4000);
+if main_vars.tipo_maquina=88 then savedata_com_qsnapshot(@memoria[$c000],$4000);
+//MISC
+buffer[0]:=byte(irq_vblank);
+buffer[1]:=byte(dec_enable);
+savedata_qsnapshot(@buffer[0],2);
+freemem(data);
+close_qsnapshot;
+end;
+
+procedure pacman_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..1] of byte;
+begin
+if main_vars.tipo_maquina=10 then begin
+  if not(open_qsnapshot_load('pacman'+nombre)) then exit;
+end else begin
+  if not(open_qsnapshot_load('mspacman'+nombre)) then exit;
+end;
+getmem(data,2000);
+//CPU
+loaddata_qsnapshot(data);
+main_z80.load_snapshot(data);
+//SND
+loaddata_qsnapshot(data);
+namco_sound_load_snapshot(data);
+//MEM
+loaddata_qsnapshot(@memoria[$4000]);
+if main_vars.tipo_maquina=88 then loaddata_qsnapshot(@memoria[$c000]);
+//MISC
+loaddata_qsnapshot(@buffer[0]);
+irq_vblank:=buffer[0]<>0;
+dec_enable:=buffer[1]<>0;
+freemem(data);
+close_qsnapshot;
+fillchar(gfx[0].buffer[0],$400,1);
+end;
+
+//Main
 procedure reset_pacman;
 begin
  main_z80.reset;
@@ -314,165 +453,14 @@ reset_pacman;
 iniciar_pacman:=true;
 end;
 
-procedure pacman_principal;
-var
-  frame:single;
-  f:word;
+procedure cargar_pacman;
 begin
-init_controls(false,false,false,true);
-frame:=main_z80.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to 263 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
-    if f=223 then begin
-      if irq_vblank then main_z80.pedir_irq:=HOLD_LINE;
-      update_video_pacman;
-    end;
-  end;
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
-  eventos_pacman;
-  video_sync;
-end;
-end;
-
-function pacman_getbyte(direccion:word):byte;
-begin
-direccion:=direccion and $7FFF;
-case direccion of
-        0..$3fff:pacman_getbyte:=memoria[direccion];
-        $4000..$47ff,$6000..$67ff:pacman_getbyte:=memoria[(direccion and $7ff)+$4000];
-        $4800..$4bff,$6800..$6bff:pacman_getbyte:=$bf;
-        $4c00..$4fff,$6c00..$6fff:pacman_getbyte:=memoria[(direccion and $3ff)+$4c00];
-        $5000..$5fff,$7000..$7fff:case (direccion and $ff) of
-                        $00..$3f:pacman_getbyte:=marcade.in0;
-                        $40..$7f:pacman_getbyte:=marcade.in1;
-                        $80..$bf:pacman_getbyte:=marcade.dswa;
-                        $c0..$ff:pacman_getbyte:=$0;
-                     end;
-end;
-end;
-
-procedure pacman_putbyte(direccion:word;valor:byte);
-begin
-direccion:=direccion and $7FFF;
-case direccion of
-        $4000..$47ff,$6000..$67ff:begin
-                        memoria[(direccion and $7ff)+$4000]:=valor;
-                        gfx[0].buffer[direccion and $3ff]:=true;
-                     end;
-        $4c00..$4fff,$6c00..$6fff:memoria[(direccion and $3ff)+$4c00]:=valor;
-        $5000..$5fff,$7000..$7fff:case (direccion and $ff) of
-                        0:irq_vblank:=valor<>0;
-                        1:namco_sound.enabled:=valor<>0;
-                        $40..$5f:namco_sound.registros_namco[direccion and $1f]:=valor;
-                        $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
-                     end;
-end;
-end;
-
-procedure pacman_outbyte(valor:byte;puerto:word);
-begin
-if (puerto and $FF)=0 then main_z80.im2_lo:=valor;
-end;
-
-//MS Pacman
-function mspacman_getbyte(direccion:word):byte;
-begin
-case direccion of
-        $38..$3f,$3b0..$3b7,$1600..$1607,$2120..$2127,$3ff0..$3ff7,$8000..$8007,$97f0..$97f7:dec_enable:=false;
-        $3ff8..$3fff:dec_enable:=true;
-end;
-case direccion of
-        $0..$3fff,$8000..$bfff:if dec_enable then mspacman_getbyte:=rom_decode[direccion]
-            else mspacman_getbyte:=memoria[direccion and $3fff];
-        $4000..$47ff,$6000..$67ff,$c000..$c7ff,$e000..$e7ff:mspacman_getbyte:=memoria[(direccion and $7ff)+$4000];
-        $4800..$4bff,$6800..$6bff,$c800..$cbff,$e800..$ebff:mspacman_getbyte:=$bf;
-        $4c00..$4fff,$6c00..$6fff,$cc00..$cfff,$ec00..$efff:mspacman_getbyte:=memoria[(direccion and $3ff)+$4c00];
-        $5000..$5fff,$7000..$7fff,$d000..$dfff,$f000..$ffff:case (direccion and $ff) of
-                        $00..$3f:mspacman_getbyte:=marcade.in0;
-                        $40..$7f:mspacman_getbyte:=marcade.in1;
-                        $80..$bf:mspacman_getbyte:=marcade.dswa;
-                        $c0..$ff:mspacman_getbyte:=0;
-                     end;
-end;
-end;
-
-procedure mspacman_putbyte(direccion:word;valor:byte);
-begin
-case direccion of
-        $38..$3f,$3b0..$3b7,$1600..$1607,$2120..$2127,$3ff0..$3ff7,$8000..$8007,$97f0..$97f7:dec_enable:=false;
-        $3ff8..$3fff:dec_enable:=true;
-        $4000..$47ff,$6000..$67ff,$c000..$c7ff,$e000..$e7ff:begin
-          memoria[(direccion and $7ff)+$4000]:=valor;
-          gfx[0].buffer[direccion and $3ff]:=true;
-        end;
-        $4c00..$4fff,$6c00..$6fff,$cc00..$cfff,$ec00..$efff:memoria[(direccion and $3ff)+$4c00]:=valor;
-        $5000..$5fff,$7000..$7fff,$d000..$dfff,$f000..$ffff:case (direccion and $ff) of
-                  0:irq_vblank:=valor<>0;
-                  1:namco_sound.enabled:=valor<>0;
-                  $40..$5f:namco_sound.registros_namco[direccion and $1f]:=valor;
-                  $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
-        end;
-end;
-end;
-
-procedure pacman_qsave(nombre:string);
-var
-  data:pbyte;
-  size:word;
-  buffer:array[0..1] of byte;
-begin
-if main_vars.tipo_maquina=10 then open_qsnapshot_save('pacman'+nombre)
-  else open_qsnapshot_save('mspacman'+nombre);
-getmem(data,2000);
-//CPU
-size:=main_z80.save_snapshot(data);
-savedata_qsnapshot(data,size);
-//SND
-size:=namco_sound_save_snapshot(data);
-savedata_qsnapshot(data,size);
-//MEM
-savedata_com_qsnapshot(@memoria[$4000],$4000);
-if main_vars.tipo_maquina=88 then savedata_com_qsnapshot(@memoria[$c000],$4000);
-//MISC
-buffer[0]:=byte(irq_vblank);
-buffer[1]:=byte(dec_enable);
-savedata_qsnapshot(@buffer[0],2);
-freemem(data);
-close_qsnapshot;
-end;
-
-procedure pacman_qload(nombre:string);
-var
-  data:pbyte;
-  buffer:array[0..1] of byte;
-begin
-if main_vars.tipo_maquina=10 then begin
-  if not(open_qsnapshot_load('pacman'+nombre)) then exit;
-end else begin
-  if not(open_qsnapshot_load('mspacman'+nombre)) then exit;
-end;
-getmem(data,2000);
-//CPU
-loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
-//SND
-loaddata_qsnapshot(data);
-namco_sound_load_snapshot(data);
-//MEM
-loaddata_qsnapshot(@memoria[$4000]);
-if main_vars.tipo_maquina=88 then loaddata_qsnapshot(@memoria[$c000]);
-//MISC
-loaddata_qsnapshot(@buffer[0]);
-irq_vblank:=buffer[0]<>0;
-dec_enable:=buffer[1]<>0;
-freemem(data);
-close_qsnapshot;
-fillchar(gfx[0].buffer[0],$400,1);
+llamadas_maquina.iniciar:=iniciar_pacman;
+llamadas_maquina.bucle_general:=pacman_principal;
+llamadas_maquina.reset:=reset_pacman;
+llamadas_maquina.fps_max:=60.6060606060;
+llamadas_maquina.save_qsnap:=pacman_qsave;
+llamadas_maquina.load_qsnap:=pacman_qload;
 end;
 
 end.

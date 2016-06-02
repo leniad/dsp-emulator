@@ -92,7 +92,7 @@ type
         procedure update_vcu(pin:byte);
         function save_snapshot(data:pbyte):word;
         procedure load_snapshot(data:pbyte);
-      protected
+      private
     	  rom:pbyte;
     	  address_mask:integer;
     	  address:word;

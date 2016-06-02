@@ -1,7 +1,7 @@
 object ConfigSP: TConfigSP
-  Left = 305
+  Left = 719
   Height = 435
-  Top = 169
+  Top = 160
   Width = 525
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
@@ -16,7 +16,7 @@ object ConfigSP: TConfigSP
   Font.Quality = fqDraft
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '1.1'
+  LCLVersion = '1.7'
   object GroupBox1: TGroupBox
     Left = 16
     Height = 374

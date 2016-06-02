@@ -368,7 +368,7 @@ begin
 		// decay of first voice */
 		tms_chip.vol_counter[voice]:=tms_chip.vol_counter[voice]-tms_chip.decay[voice];
 		while (tms_chip.vol_counter[voice]<= 0 ) do begin
-			tms_chip.vol_counter[voice]:=tms_chip.vol_counter[voice]+44100;//samplerate;
+			tms_chip.vol_counter[voice]:=tms_chip.vol_counter[voice]+freq_base_audio;//samplerate;
       tms_chip.vol[voice]:=tms_chip.vol[voice]-1;
 			if( tms_chip.vol[voice]<= VMIN ) then begin
 				tms_chip.frequency[voice]:= 0;
@@ -397,7 +397,7 @@ begin
 		// first note */
 		tms_chip.counter[voice]:=tms_chip.counter[voice]-tms_chip.frequency[voice];
 		while (tms_chip.counter[voice]<=0) do begin
-			tms_chip.counter[voice]:=tms_chip.counter[voice]+44100;//= samplerate;
+			tms_chip.counter[voice]:=tms_chip.counter[voice]+freq_base_audio;//= samplerate;
 			tms_chip.output:=tms_chip.output xor (1 shl voice);
 		end;
 		if (tms_chip.output and tms_chip.enable and (1 shl voice)) <>0 then tone:=tms_chip.vol[voice];
@@ -419,8 +419,8 @@ begin
   // musical note timing */
   tms_chip.tune_counter:=tms_chip.tune_counter-tms_chip.speed;
   if (tms_chip.tune_counter <= 0 ) then begin
-    n:=trunc((-tms_chip.tune_counter/44100)+1);
-    tms_chip.tune_counter:=tms_chip.tune_counter+(n*44100);//samplerate;
+    n:=trunc((-tms_chip.tune_counter/freq_base_audio)+1);
+    tms_chip.tune_counter:=tms_chip.tune_counter+(n*freq_base_audio);//samplerate;
     tms_chip.note_counter:=tms_chip.note_counter-n;
     if (tms_chip.note_counter<=0) then begin
       tms_chip.note_counter:=tms_chip.note_counter+VMAX;

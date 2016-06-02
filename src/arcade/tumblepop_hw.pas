@@ -100,7 +100,6 @@ end;
 procedure cerrar_tumblep;
 begin
 close_dec16ic(0);
-deco16_snd_simple_close;
 end;
 
 procedure reset_tumblep;

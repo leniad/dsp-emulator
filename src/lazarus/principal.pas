@@ -185,6 +185,7 @@ type
     aliens1: TMenuItem;
     MenuItem31: TMenuItem;
     gbusters1: TMenuItem;
+    simpsons1: TMenuItem;
     thunderx1: TMenuItem;
     scontra1: TMenuItem;
     spaceinvaders1: TMenuItem;
@@ -411,11 +412,8 @@ type
 var
   principal1: Tprincipal1;
 
-const
-  SCREEN_DIF=20;
-
 implementation
-uses acercade,tap_tzx,spectrum_misc,lenslock,file_engine;
+uses tap_tzx,spectrum_misc,acercade,lenslock,file_engine;
 var
   //Misc Vars
   tipo_new:word;
@@ -604,7 +602,7 @@ timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
 if ((addr(llamadas_maquina.cerrar)<>nil) and main_vars.driver_ok) then llamadas_maquina.cerrar;
-dsp_reset;
+reset_dsp;
 file_ini_save;
 if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
 if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
@@ -650,9 +648,9 @@ end;
 
 procedure Tprincipal1.BitBtn14Click(Sender: TObject);
 begin
-fastload:=not(fastload);
+var_spectrum.fastload:=not(var_spectrum.fastload);
 BitBtn14.Glyph:=nil;
-if fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
+if var_spectrum.fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
   else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
 sync_all;
 end;
@@ -729,7 +727,6 @@ end;
 procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
 main_screen.flip_main_screen:=false;
-ulaplus.activa:=false;
 if addr(llamadas_maquina.reset)<>nil then llamadas_maquina.reset;
 sync_all;
 end;

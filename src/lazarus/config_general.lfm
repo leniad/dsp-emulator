@@ -17,7 +17,7 @@ object MConfig: TMConfig
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.6.0.1'
+  LCLVersion = '1.7'
   object Button1: TButton
     Left = 53
     Height = 41

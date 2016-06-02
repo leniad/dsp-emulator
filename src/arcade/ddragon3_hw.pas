@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,oki6295;
 
-procedure Cargar_ddragon3;
-procedure ddragon3_principal;
-function iniciar_ddragon3:boolean;
-procedure reset_ddragon3;
-procedure cerrar_ddragon3;
-//Main CPU
-function ddragon3_getword(direccion:dword):word;
-procedure ddragon3_putword(direccion:dword;valor:word);
-//Sound CPU
-function ddragon3_snd_getbyte(direccion:word):byte;
-procedure ddragon3_snd_putbyte(direccion:word;valor:byte);
-procedure ddragon3_sound_update;
-procedure ym2151_snd_irq(irqstate:byte);
+procedure cargar_ddragon3;
 
 implementation
 const
@@ -54,99 +42,6 @@ var
  ram:array[0..$1fff] of word;
  sprite_ram:array[0..$7ff] of word;
  sound_latch:byte;
-
-procedure Cargar_ddragon3;
-begin
-llamadas_maquina.iniciar:=iniciar_ddragon3;
-llamadas_maquina.bucle_general:=ddragon3_principal;
-llamadas_maquina.cerrar:=cerrar_ddragon3;
-llamadas_maquina.reset:=reset_ddragon3;
-llamadas_maquina.fps_max:=57.444853;
-end;
-
-function iniciar_ddragon3:boolean;
-var
-  memoria_temp:pbyte;
-const
-  pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7);
-  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			16*8, 16*9, 16*10, 16*11, 16*12, 16*13, 16*14, 16*15);
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-		16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_ddragon3:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,512,512,true);
-screen_mod_scroll(1,512,320,511,512,256,511);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,320,511,512,256,511);
-screen_init(3,512,512,false,true);
-iniciar_video(320,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,272);
-main_m68000.change_ram16_calls(ddragon3_getword,ddragon3_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,272);
-snd_z80.change_ram_calls(ddragon3_snd_getbyte,ddragon3_snd_putbyte);
-snd_z80.init_sound(ddragon3_sound_update);
-//Sound Chips
-YM2151_Init(0,3579545,nil,ym2151_snd_irq);
-oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
-//Cargar ADPCM ROMS
-if not(cargar_roms(@mem_oki,@ddragon3_oki,'ddragon3.zip')) then exit;
-copymemory(oki_6295_0.get_rom_addr,@mem_oki,$40000);
-//cargar roms
-if not(cargar_roms16w(@rom,@ddragon3_rom,'ddragon3.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd,@ddragon3_sound,'ddragon3.zip')) then exit;
-getmem(memoria_temp,$400000);
-//convertir background
-if not(cargar_roms16w(pword(memoria_temp),@ddragon3_bg,'ddragon3.zip',0)) then exit;
-init_gfx(0,16,16,$2000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,8,0,$80000*8+8,$80000*8+0);
-convert_gfx(0,0,memoria_temp,@pt_x,@pt_y,false,false);
-//convertir sprites
-if not(cargar_roms(memoria_temp,@ddragon3_sprites,'ddragon3.zip',0)) then exit;
-init_gfx(1,16,16,$8000);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,$100000*8,$100000*8*2,$100000*8*3);
-convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
-//DIP
-marcade.dswa:=$ffff;
-marcade.dswa_val:=@ddragon3_dip_a;
-//final
-freemem(memoria_temp);
-reset_ddragon3;
-iniciar_ddragon3:=true;
-end;
-
-procedure cerrar_ddragon3;
-begin
-YM2151_close(0);
-end;
-
-procedure reset_ddragon3;
-begin
- main_m68000.reset;
- snd_z80.reset;
- YM2151_reset(0);
- oki_6295_0.reset;
- reset_audio;
- marcade.in0:=$FFFF;
- marcade.in1:=$FFFF;
- bg_tilebase:=0;
- fg_scrollx:=0;
- fg_scrolly:=0;
- bg_scrollx:=0;
- bg_scrolly:=0;
- vreg:=0;
- sound_latch:=0;
-end;
 
 procedure draw_sprites;inline;
 var
@@ -342,7 +237,7 @@ case direccion of
                         0:vreg:=valor and $ff;
                         1:begin
                             sound_latch:=valor and $ff;
-                            snd_z80.pedir_nmi:=PULSE_LINE;
+                            snd_z80.change_nmi(PULSE_LINE);
                           end;
                         2,4:main_m68000.irq[6]:=CLEAR_LINE;
                         3:main_m68000.irq[5]:=CLEAR_LINE;
@@ -359,7 +254,7 @@ end;
 function ddragon3_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-    $c801:ddragon3_snd_getbyte:=YM2151_status_port_read(0);
+    $c801:ddragon3_snd_getbyte:=ym2151_0.status;
     $d800:ddragon3_snd_getbyte:=oki_6295_0.read;
     $e000:ddragon3_snd_getbyte:=sound_latch;
     else ddragon3_snd_getbyte:=mem_snd[direccion];
@@ -371,8 +266,8 @@ begin
 if direccion<$c000 then exit;
 mem_snd[direccion]:=valor;
 case direccion of
-  $c800:YM2151_register_port_write(0,valor);
-  $c801:YM2151_data_port_write(0,valor);
+  $c800:ym2151_0.reg(valor);
+  $c801:ym2151_0.write(valor);
   $d800:oki_6295_0.write(valor);
   $e800:copymemory(oki_6295_0.get_rom_addr,@mem_oki[(valor and 1)*$40000],$40000);
 end;
@@ -380,14 +275,102 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 procedure ddragon3_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   oki_6295_0.update;
+end;
+
+//Main
+procedure reset_ddragon3;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ oki_6295_0.reset;
+ reset_audio;
+ marcade.in0:=$FFFF;
+ marcade.in1:=$FFFF;
+ bg_tilebase:=0;
+ fg_scrollx:=0;
+ fg_scrolly:=0;
+ bg_scrollx:=0;
+ bg_scrolly:=0;
+ vreg:=0;
+ sound_latch:=0;
+end;
+
+function iniciar_ddragon3:boolean;
+var
+  memoria_temp:pbyte;
+const
+  pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7);
+  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			16*8, 16*9, 16*10, 16*11, 16*12, 16*13, 16*14, 16*15);
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+		16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_ddragon3:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,512,512,true);
+screen_mod_scroll(1,512,320,511,512,256,511);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,320,511,512,256,511);
+screen_init(3,512,512,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,272);
+main_m68000.change_ram16_calls(ddragon3_getword,ddragon3_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,272);
+snd_z80.change_ram_calls(ddragon3_snd_getbyte,ddragon3_snd_putbyte);
+snd_z80.init_sound(ddragon3_sound_update);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
+//Cargar ADPCM ROMS
+if not(cargar_roms(@mem_oki,@ddragon3_oki,'ddragon3.zip')) then exit;
+copymemory(oki_6295_0.get_rom_addr,@mem_oki,$40000);
+//cargar roms
+if not(cargar_roms16w(@rom,@ddragon3_rom,'ddragon3.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd,@ddragon3_sound,'ddragon3.zip')) then exit;
+getmem(memoria_temp,$400000);
+//convertir background
+if not(cargar_roms16w(pword(memoria_temp),@ddragon3_bg,'ddragon3.zip',0)) then exit;
+init_gfx(0,16,16,$2000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,8,0,$80000*8+8,$80000*8+0);
+convert_gfx(0,0,memoria_temp,@pt_x,@pt_y,false,false);
+//convertir sprites
+if not(cargar_roms(memoria_temp,@ddragon3_sprites,'ddragon3.zip',0)) then exit;
+init_gfx(1,16,16,$8000);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,$100000*8,$100000*8*2,$100000*8*3);
+convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
+//DIP
+marcade.dswa:=$ffff;
+marcade.dswa_val:=@ddragon3_dip_a;
+//final
+freemem(memoria_temp);
+reset_ddragon3;
+iniciar_ddragon3:=true;
+end;
+
+procedure Cargar_ddragon3;
+begin
+llamadas_maquina.iniciar:=iniciar_ddragon3;
+llamadas_maquina.bucle_general:=ddragon3_principal;
+llamadas_maquina.reset:=reset_ddragon3;
+llamadas_maquina.fps_max:=57.444853;
 end;
 
 end.

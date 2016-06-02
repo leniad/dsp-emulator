@@ -196,7 +196,7 @@ while EmuStatus=EsRuning do begin
     //SND CPU
     konamisnd_0.run(f);
     if f=239 then begin
-      if nmi_vblank then main_z80.pedir_nmi:=ASSERT_LINE;
+      if nmi_vblank then main_z80.change_nmi(ASSERT_LINE);
       update_video_pooyan;
     end;
   end;
@@ -241,7 +241,7 @@ case direccion of
                   $100..$17f,$300..$37f:konamisnd_0.sound_latch:=valor;
                   $180,$380:begin
                               nmi_vblank:=valor<>0;
-                              if not(nmi_vblank) then main_z80.clear_nmi;
+                              if not(nmi_vblank) then main_z80.change_nmi(CLEAR_LINE);
                             end;
                   $181,$381:begin
                               if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;

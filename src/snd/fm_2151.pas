@@ -137,6 +137,8 @@ procedure timer_b_exec_1;
 
 implementation
 const
+  CLEAR_LINE=0;
+  ASSERT_LINE=1;
   M_PI=3.1415926535;
 	MAXOUT=32767;
 	MINOUT=-32768;
@@ -715,13 +717,13 @@ begin
 				      chip.status:=chip.status and cardinal(not(1));
 				      oldstate:=chip.irqlinestate;
             	chip.irqlinestate:=chip.irqlinestate and not(1);
-	            if ((oldstate=1) and (addr(chip.IRQ_Handler)<>nil)) then chip.irq_handler(0);
+	            if ((oldstate=1) and (addr(chip.IRQ_Handler)<>nil)) then chip.irq_handler(CLEAR_LINE);
             end;
 			      if (v and $20)<>0 then begin	// reset timer B irq flag */
               chip.status:=chip.status and cardinal(not(2));
               oldstate:=chip.irqlinestate;
             	chip.irqlinestate:=chip.irqlinestate and not(2);
-	            if ((oldstate=2) and (addr(chip.IRQ_Handler)<>nil)) then chip.irq_handler(0);
+	            if ((oldstate=2) and (addr(chip.IRQ_Handler)<>nil)) then chip.irq_handler(CLEAR_LINE);
             end;
 			      if (v and $02)<>0 then begin	// load and start timer B */
 					    if not(timer[chip.timer_B].enabled) then begin
@@ -1392,7 +1394,7 @@ if (chip.irq_enable and $04)<>0 then begin
 		chip.status:=chip.status or 1;
 		oldstate:=chip.irqlinestate;
   	chip.irqlinestate:=chip.irqlinestate or 1;
-  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(1);
+  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(ASSERT_LINE);
 end;
 if (chip.irq_enable and $80)<>0 then
 		chip.csm_req:=2;		// request KEY ON / KEY OFF sequence */
@@ -1410,7 +1412,7 @@ if (chip.irq_enable and $08)<>0 then begin
 		chip.status:=chip.status or 2;
 		oldstate:=chip.irqlinestate;
   	chip.irqlinestate:=chip.irqlinestate or 2;
-  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(1);
+  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(ASSERT_LINE);
 end;
 end;
 
@@ -1426,7 +1428,7 @@ if (chip.irq_enable and $04)<>0 then begin
 		chip.status:=chip.status or 1;
 		oldstate:=chip.irqlinestate;
   	chip.irqlinestate:=chip.irqlinestate or 1;
-  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(1);
+  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(ASSERT_LINE);
 end;
 if (chip.irq_enable and $80)<>0 then
 		chip.csm_req:=2;		// request KEY ON / KEY OFF sequence */
@@ -1444,7 +1446,7 @@ if (chip.irq_enable and $08)<>0 then begin
 		chip.status:=chip.status or 2;
 		oldstate:=chip.irqlinestate;
   	chip.irqlinestate:=chip.irqlinestate or 2;
-  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(1);
+  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(ASSERT_LINE);
 end;
 end;
 

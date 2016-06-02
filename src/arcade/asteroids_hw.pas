@@ -4,17 +4,7 @@ interface
 uses asteroids_hw_audio,m6502,main_engine,controls_engine,gfx_engine,
      timer_engine,samples,rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_as;
-procedure principal_as;
-function iniciar_as:boolean;
-procedure cerrar_as;
-procedure reset_as;
-//Main CPU
-function getbyte_as(direccion:word):byte;
-procedure putbyte_as(direccion:word;valor:byte);
-//Sound
-procedure as_sound;
-procedure as_snd_nmi;
+procedure cargar_as;
 
 implementation
 const
@@ -35,67 +25,6 @@ var
   ram:array[0..1,0..$ff] of byte;
   x_actual,y_actual:integer;
   invertir_ram:byte;
-
-procedure Cargar_as;
-begin
-llamadas_maquina.iniciar:=iniciar_as;
-llamadas_maquina.bucle_general:=principal_as;
-llamadas_maquina.cerrar:=cerrar_as;
-llamadas_maquina.reset:=reset_as;
-llamadas_maquina.fps_max:=12096000/4096/12/4;
-end;
-
-function iniciar_as:boolean;
-var
-  colores:tpaleta;
-  f:byte;
-begin
-iniciar_as:=false;
-iniciar_audio(false);
-screen_init(1,400,400);
-iniciar_video(400,320);
-//Main CPU
-main_m6502:=cpu_m6502.create(1512000,300,TCPU_M6502);
-main_m6502.change_ram_calls(getbyte_as,putbyte_as);
-main_m6502.init_sound(as_sound);
-asteroid_sound_init;
-//Timers
-init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);
-//cargar roms
-if not(cargar_roms(@memoria[0],@as_rom[0],'asteroid.zip',0)) then exit;
-//samples
-hay_samples:=load_samples('asteroid.zip',@as_samples[0],3);
-//poner la paleta
-for f:=0 to 15 do begin
-  colores[f].r:=17*f;
-  colores[f].g:=17*f;
-  colores[f].b:=17*f;
-end;
-set_pal(colores,16);
-//dip
-marcade.dswa:=$84;
-marcade.dswa_val:=@asteroids_dip_a;
-//final
-reset_as;
-iniciar_as:=true;
-end;
-
-procedure cerrar_as;
-begin
-close_samples;
-end;
-
-procedure reset_as;
-begin
-main_m6502.reset;
-reset_samples;
-marcade.in0:=0;
-marcade.in1:=0;
-x_actual:=0;
-y_actual:=0;
-invertir_ram:=0;
-dibujar:=true;
-end;
 
 procedure update_video_as;inline;
 var
@@ -289,13 +218,69 @@ end;
 
 procedure as_snd_nmi;
 begin
-  main_m6502.pedir_nmi:=PULSE_LINE;
+  main_m6502.change_nmi(PULSE_LINE);
 end;
 
 procedure as_sound;
 begin
 asteroid_sound_update(hay_samples);
 if hay_samples then samples_update;
+end;
+
+//Main
+procedure reset_as;
+begin
+main_m6502.reset;
+reset_samples;
+marcade.in0:=0;
+marcade.in1:=0;
+x_actual:=0;
+y_actual:=0;
+invertir_ram:=0;
+dibujar:=true;
+end;
+
+function iniciar_as:boolean;
+var
+  colores:tpaleta;
+  f:byte;
+begin
+iniciar_as:=false;
+iniciar_audio(false);
+screen_init(1,400,400);
+iniciar_video(400,320);
+//Main CPU
+main_m6502:=cpu_m6502.create(1512000,300,TCPU_M6502);
+main_m6502.change_ram_calls(getbyte_as,putbyte_as);
+main_m6502.init_sound(as_sound);
+asteroid_sound_init;
+//Timers
+init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);
+//cargar roms
+if not(cargar_roms(@memoria[0],@as_rom[0],'asteroid.zip',0)) then exit;
+//samples
+hay_samples:=load_samples('asteroid.zip',@as_samples[0],3);
+//poner la paleta
+for f:=0 to 15 do begin
+  colores[f].r:=17*f;
+  colores[f].g:=17*f;
+  colores[f].b:=17*f;
+end;
+set_pal(colores,16);
+//dip
+marcade.dswa:=$84;
+marcade.dswa_val:=@asteroids_dip_a;
+//final
+reset_as;
+iniciar_as:=true;
+end;
+
+procedure cargar_as;
+begin
+llamadas_maquina.iniciar:=iniciar_as;
+llamadas_maquina.bucle_general:=principal_as;
+llamadas_maquina.reset:=reset_as;
+llamadas_maquina.fps_max:=12096000/4096/12/4;
 end;
 
 end.

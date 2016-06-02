@@ -9,7 +9,6 @@ procedure Cargar_sfighter;
 procedure sfighter_principal;
 function iniciar_sfighter:boolean;
 procedure reset_sfighter;
-procedure cerrar_sfighter;
 //Main CPU
 function sfighter_getword(direccion:dword):word;
 procedure sfighter_putword(direccion:dword;valor:word);
@@ -70,7 +69,6 @@ procedure Cargar_sfighter;
 begin
 llamadas_maquina.iniciar:=iniciar_sfighter;
 llamadas_maquina.bucle_general:=sfighter_principal;
-llamadas_maquina.cerrar:=cerrar_sfighter;
 llamadas_maquina.reset:=reset_sfighter;
 end;
 
@@ -107,7 +105,8 @@ sub_z80.change_ram_calls(sf_misc_getbyte,sf_misc_putbyte);
 sub_z80.change_io_calls(sf_misc_inbyte,sf_misc_outbyte);
 init_timer(sub_z80.numero_cpu,3579545/8000,sf_adpcm_instruccion,true);
 //Sound Chips
-YM2151_Init(0,3579545,nil,ym2151_snd_irq);
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
 msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
 //cargar roms
@@ -152,17 +151,12 @@ reset_sfighter;
 iniciar_sfighter:=true;
 end;
 
-procedure cerrar_sfighter;
-begin
-ym2151_close(0);
-end;
-
 procedure reset_sfighter;
 begin
  main_m68000.reset;
  snd_z80.reset;
  sub_z80.reset;
- YM2151_reset(0);
+ ym2151_0.reset;
  msm_5205_0.reset;
  msm_5205_1.reset;
  reset_audio;
@@ -413,7 +407,7 @@ case direccion of
             end;
     $c0001c:begin
               soundlatch:=valor and $ff;
-              snd_z80.pedir_nmi:=PULSE_LINE;
+              snd_z80.change_nmi(PULSE_LINE);
             end;
     $ff8000..$ffffff:begin
                         ram3[(direccion and $7fff)+1]:=valor and $ff;
@@ -427,7 +421,7 @@ function sf_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
   $c800:sf_snd_getbyte:=soundlatch;
-  $e001:sf_snd_getbyte:=YM2151_status_port_read(0);
+  $e001:sf_snd_getbyte:=ym2151_0.status;
   else sf_snd_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -436,8 +430,8 @@ procedure sf_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$7fff:exit;
-  $e000:YM2151_register_port_write(0,valor);
-  $e001:YM2151_data_port_write(0,valor);
+  $e000:ym2151_0.reg(valor);
+  $e001:ym2151_0.write(valor);
     else mem_snd[direccion]:=valor;
 end;
 end;
@@ -488,7 +482,7 @@ end;
 
 procedure sound_instruccion;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure sf_adpcm_instruccion;
@@ -496,4 +490,4 @@ begin
   sub_z80.pedir_irq:=HOLD_LINE;
 end;
 
-end.
+end.

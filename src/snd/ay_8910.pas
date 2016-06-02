@@ -35,7 +35,6 @@ type
         porta_write,portb_write:cpu_outport_call;
         procedure AYWriteReg(r,v:byte);
         function AYReadReg(r:byte):byte;
-        procedure resample;
   end;
 
 var
@@ -83,8 +82,7 @@ constructor ay8910_chip.create(clock:integer;amp:single;internal:boolean=false);
 begin
   init_table;
   self.clock:=clock;
-  {set clock}
-  self.resample;
+  self.UpdateStep:=trunc((STEP*freq_base_audio*8)/self.clock);
   self.porta_read:=nil;
   self.portb_read:=nil;
   self.porta_write:=nil;
@@ -346,15 +344,6 @@ end;
 function ay8910_chip.get_control:byte;
 begin
   get_control:=self.latch;
-end;
-
-procedure ay8910_chip.resample;
-var
-  temp:int64;
-begin
-  temp:=STEP*44100;
-  temp:=temp*8;
-  self.UpdateStep:=trunc(temp/self.clock);
 end;
 
 function ay8910_chip.update_internal:pinteger;

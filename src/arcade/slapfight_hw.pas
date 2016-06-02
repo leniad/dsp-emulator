@@ -541,7 +541,7 @@ end;
 
 procedure sf_sound_nmi;
 begin
-  snd_z80.pedir_nmi:=PULSE_LINE;
+  snd_z80.change_nmi(PULSE_LINE);
 end;
 
 end.

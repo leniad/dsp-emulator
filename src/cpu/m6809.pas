@@ -21,7 +21,6 @@ type
             constructor create(clock:dword;frames_div:word);
             destructor free;
           public
-            //IRQ's
             procedure reset;
             procedure run(maximo:single);
             procedure change_irq(estado:byte);
@@ -29,19 +28,12 @@ type
             procedure change_nmi(estado:byte);
             function save_snapshot(data:pbyte):word;
             procedure load_snapshot(data:pbyte);
-          private
-            //Registros
+          protected
             r:preg_m6809;
-            pedir_nmi,pedir_firq,pedir_irq,nmi_state:byte;
+            pedir_firq,pedir_irq:byte;
             //Llamadas a RAM
             procedure putword(direccion:word;valor:word);
             function getword(direccion:word):word;
-            //Llamadas IRQ
-            function call_nmi:byte;
-            function call_irq:byte;
-            function call_firq:byte;
-            //Misc Func
-            function get_indexed:word;
             //Push & pop
             procedure push_s(reg:byte);
             function pop_s:byte;
@@ -51,6 +43,21 @@ type
             function pop_u:byte;
             procedure push_uw(reg:word);
             function pop_uw:word;
+            //Pila
+            function dame_pila:byte;
+            procedure pon_pila(valor:byte);
+            //Opcodes
+            procedure neg(valor:pbyte);
+          private
+            pedir_nmi,nmi_state:byte;
+            //Llamadas IRQ
+            function call_nmi:byte;
+            function call_irq:byte;
+            function call_firq:byte;
+            //Misc Func
+            function get_indexed:word;
+            procedure trf(valor:byte);
+            procedure trf_ex(valor:byte);
         end;
 
 var
@@ -135,6 +142,18 @@ const
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,4,  //e0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,3); //f0
 
+procedure cpu_m6809.neg(valor:pbyte);
+var
+  tempw:word;
+begin
+tempw:=-valor^;
+r.cc.n:=(tempw and $80)<>0;
+r.cc.z:=(tempw and $ff)=0;
+r.cc.c:=(tempw and $100)<>0;
+r.cc.v:=((0 xor valor^ xor tempw xor (tempw shr 1)) and $80)<>0;
+valor^:=tempw;
+end;
+
 constructor cpu_m6809.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(reg_m6809));
@@ -190,7 +209,7 @@ valor:=self.getbyte(direccion) shl 8;
 getword:=valor+(self.getbyte(direccion+1));
 end;
 
-function dame_pila(r:preg_m6809):byte;inline;
+function cpu_m6809.dame_pila:byte;
 var
   temp:byte;
 begin
@@ -206,7 +225,7 @@ begin
   dame_pila:=temp;
 end;
 
-procedure pon_pila(r:preg_m6809;valor:byte);inline;
+procedure cpu_m6809.pon_pila(valor:byte);
 begin
   r.cc.e:=(valor and $80)<>0;
   r.cc.f:=(valor and $40)<>0;
@@ -224,7 +243,7 @@ self.opcode:=false;
 r.pc:=self.getword($FFFE);
 r.dp:=0;
 self.contador:=0;
-pon_pila(self.r,$50);
+self.pon_pila($50);
 self.pedir_nmi:=CLEAR_LINE;
 self.pedir_irq:=CLEAR_LINE;
 self.pedir_firq:=CLEAR_LINE;
@@ -328,7 +347,7 @@ end else begin
   self.push_s(r.d.b);
   self.push_s(r.d.a);
   r.cc.e:=true;
-  self.push_s(dame_pila(self.r));
+  self.push_s(self.dame_pila);
   call_nmi:=19;
 end;
 r.cc.i:=true;
@@ -352,7 +371,7 @@ end else begin
   self.push_s(r.d.b);
   self.push_s(r.d.a);
   r.cc.e:=true;
-  self.push_s(dame_pila(self.r));
+  self.push_s(self.dame_pila);
   call_irq:=19;
 end;
 r.pc:=self.getword($FFF8);
@@ -368,7 +387,7 @@ if r.cwai then begin
 end else begin
   r.cc.e:=false;
   self.push_sw(r.pc);
-  self.push_s(dame_pila(self.r));
+  self.push_s(self.dame_pila);
   call_firq:=10;
 end;
 r.cc.f:=true;
@@ -469,7 +488,7 @@ end;
 get_indexed:=direccion;
 end;
 
-procedure trf(r:preg_m6809;valor:byte);inline;
+procedure cpu_m6809.trf(valor:byte);
 var
   temp:word;
 begin
@@ -485,7 +504,7 @@ end else begin
     $5:temp:=r.pc; //pc
     $8:temp:=r.d.a; //a
     $9:temp:=r.d.b; //b
-    $a:temp:=dame_pila(r);  //cc
+    $a:temp:=self.dame_pila;  //cc
     $b:temp:=r.dp; //dp
   end;
 end;
@@ -498,12 +517,12 @@ case (valor and 15) of
     $5:r.pc:=temp; //pc
     $8:r.d.a:=temp; //a
     $9:r.d.b:=temp; //b
-    $a:pon_pila(r,temp);  //cc
+    $a:self.pon_pila(temp);  //cc
     $b:r.dp:=temp; //dp
 end;
 end;
 
-procedure trf_ex(r:preg_m6809;valor:byte);inline;
+procedure cpu_m6809.trf_ex(valor:byte);
 var
   temp1,temp2:word;
 begin
@@ -520,7 +539,7 @@ end else begin
     $5:temp1:=r.pc; //pc
     $8:temp1:=r.d.a; //a
     $9:temp1:=r.d.b; //b
-    $a:temp1:=dame_pila(r);  //cc
+    $a:temp1:=self.dame_pila;  //cc
     $b:temp1:=r.dp; //dp
   end;
   case (valor and 15) of
@@ -532,7 +551,7 @@ end else begin
     $5:temp2:=r.pc; //pc
     $8:temp2:=r.d.a; //a
     $9:temp2:=r.d.b; //b
-    $a:temp2:=dame_pila(r);  //cc
+    $a:temp2:=self.dame_pila;  //cc
     $b:temp2:=r.dp; //dp
   end;
 end;
@@ -545,7 +564,7 @@ case (valor shr 4) of
     $5:r.pc:=temp2; //pc
     $8:r.d.a:=temp2; //a
     $9:r.d.b:=temp2; //b
-    $a:pon_pila(r,temp2);  //cc
+    $a:self.pon_pila(temp2);  //cc
     $b:r.dp:=temp2; //dp
 end;
 case (valor and 15) of
@@ -557,7 +576,7 @@ case (valor and 15) of
     $5:r.pc:=temp1; //pc
     $8:r.d.a:=temp1; //a
     $9:r.d.b:=temp1; //b
-    $a:pon_pila(r,temp1);  //cc
+    $a:self.pon_pila(temp1);  //cc
     $b:r.dp:=temp1; //dp
 end;
 end;
@@ -633,7 +652,11 @@ case paginacion[instruccion] of
     else MessageDlg('Num CPU'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' OLD_PC='+inttohex(self.r.old_pc,10), mtInformation,[mbOk], 0)
 end;
 case instruccion of
-      $0,$60,$70:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc)); //neg 4T
+      $0,$60,$70:begin  //neg 4T
+                    temp:=self.getbyte(posicion);
+                    self.neg(@temp);
+                    self.putbyte(posicion,temp);
+                 end;
       $2,$3,$63,$73:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T ($2 es ilegal!!)
       $4,$64,$74:self.putbyte(posicion,m680x_lsr(self.getbyte(posicion),@r.cc)); //lsr 4T
       $6,$66,$76:self.putbyte(posicion,m680x_ror(self.getbyte(posicion),@r.cc)); //ror 4T
@@ -792,12 +815,12 @@ case instruccion of
 	          r.d.a:=tempw;
           end;
       $1a:begin //orcc 3T
-            temp:=dame_pila(self.r) or numero;
-            pon_pila(self.r,temp);
+            temp:=self.dame_pila or numero;
+            self.pon_pila(temp);
           end;
       $1c:begin //andcc  3T
-            temp:=dame_pila(self.r) and numero;
-            pon_pila(self.r,temp);
+            temp:=self.dame_pila and numero;
+            self.pon_pila(temp);
           end;
       $1d:begin //sex 2T
             if (r.d.b and $80)<>0 then r.d.a:=$ff
@@ -805,8 +828,8 @@ case instruccion of
             r.cc.n:=(r.d.w and $8000)<>0;
             r.cc.z:=(r.d.w=0);
       end;
-      $1e:trf_ex(self.r,numero); //exg 8T
-      $1f:trf(self.r,numero); //trf 4T
+      $1e:self.trf_ex(numero); //exg 8T
+      $1f:self.trf(numero); //trf 4T
       $20:r.pc:=r.pc+shortint(numero); //bra 3T
       $21:; //brn 3T
       $22:if not(r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bhi 3T
@@ -861,13 +884,13 @@ case instruccion of
               self.estados_demas:=self.estados_demas+1;
             end;
             if (numero and $1)<>0 then begin
-              self.push_s(dame_pila(self.r));
+              self.push_s(self.dame_pila);
               self.estados_demas:=self.estados_demas+1;
             end;
       end;
       $35:begin //puls 4T
             if (numero and $1)<>0 then begin
-              pon_pila(self.r,self.pop_s);
+              self.pon_pila(self.pop_s);
               self.estados_demas:=self.estados_demas+1;
             end;
             if (numero and $2)<>0 then begin
@@ -929,13 +952,13 @@ case instruccion of
               self.estados_demas:=self.estados_demas+1;
             end;
             if (numero and $1)<>0 then begin
-              self.push_u(dame_pila(self.r));
+              self.push_u(self.dame_pila);
               self.estados_demas:=self.estados_demas+1;
             end;
       end;
       $37:begin //pulu 4T
             if (numero and $1)<>0 then begin
-              pon_pila(self.r,self.pop_u);
+              self.pon_pila(self.pop_u);
               self.estados_demas:=self.estados_demas+1;
             end;
             if (numero and $2)<>0 then begin
@@ -970,7 +993,7 @@ case instruccion of
       $39:r.pc:=self.pop_sw; //rts 4T
       $3a:r.x:=r.x+r.d.b;  //abx 3T
       $3b:begin  //rti 4T
-          pon_pila(self.r,self.pop_s);
+          self.pon_pila(self.pop_s);
           if r.cc.e then begin //13 T
             self.estados_demas:=self.estados_demas+9;
             r.d.a:=self.pop_s;
@@ -983,7 +1006,7 @@ case instruccion of
           r.pc:=self.pop_sw;
       end;
       $3c:begin //cwai 16T
-          pon_pila(self.r,dame_pila(self.r) and numero);
+          self.pon_pila(self.dame_pila and numero);
           r.cc.e:=true;
           self.push_sw(r.pc);
           self.push_sw(r.u);
@@ -992,7 +1015,7 @@ case instruccion of
           self.push_s(r.dp);
           self.push_s(r.d.b);
           self.push_s(r.d.a);
-          self.push_s(dame_pila(self.r));
+          self.push_s(self.dame_pila);
           r.cwai:=true;
       end;
       $3d:begin  //mul 11T
@@ -1000,7 +1023,7 @@ case instruccion of
           r.cc.c:=(r.d.w and $80)<>0;
           r.cc.z:=(r.d.w=0);
       end;
-      $40:r.d.a:=m680x_neg(r.d.a,@r.cc); //nega 2T
+      $40:self.neg(@r.d.a); //nega 2T
       $43:r.d.a:=m680x_com(r.d.a,@r.cc);  //coma 2T
       $44:r.d.a:=m680x_lsr(r.d.a,@r.cc); //lsra 2T
       $46:r.d.a:=m680x_ror(r.d.a,@r.cc); //rora 2T
@@ -1017,7 +1040,7 @@ case instruccion of
             r.cc.v:=false;
             r.cc.c:=false;
           end;
-      $50:r.d.b:=m680x_neg(r.d.b,@r.cc);  //negb 2T
+      $50:self.neg(@r.d.b);  //negb 2T
       $53:r.d.b:=m680x_com(r.d.b,@r.cc);  //comb 2T
       $54:r.d.b:=m680x_lsr(r.d.b,@r.cc);   //lsrb 2T
       $56:r.d.b:=m680x_ror(r.d.b,@r.cc); //rorb 2T

@@ -19,16 +19,17 @@ type
                 constructor create(clock:dword;frames_div:word);
                 destructor free;
             public
-                pedir_irq0,pedir_irq1:byte;
                 procedure run(maximo:single);
                 procedure reset;
-                procedure clear_irq(num_irq:byte);
+                procedure change_irq0(state:byte);
+                procedure change_irq1(state:byte);
                 procedure change_io_calls(in_port0,in_port1,in_port2,in_port3:cpu_inport_call;out_port0,out_port1,out_port2,out_port3:cpu_outport_call);
                 function get_rom_addr:pbyte;
                 function save_snapshot(data:pbyte):word;
                 procedure load_snapshot(data:pbyte);
             private
                 r:preg_mcs51;
+                pedir_irq0,pedir_irq1:byte;
                 p0,p1,p2,p3:byte;
                 iram:array[0..3,0..7] of byte;
                 calc_parity,rwm:boolean;
@@ -209,18 +210,20 @@ begin
  set_bit:=(r and not(1 shl n)) or (v shl n);
 end;
 
-procedure cpu_mcs51.clear_irq(num_irq:byte);
+procedure cpu_mcs51.change_irq0(state:byte);
 begin
-case num_irq of
-  0:begin
-      self.ram[ADDR_TCON]:=self.ram[ADDR_TCON] and $fd;
-      self.pedir_irq0:=CLEAR_LINE;
-    end;
-  1:begin
+if state=CLEAR_LINE then begin
+   self.ram[ADDR_TCON]:=self.ram[ADDR_TCON] and $fd;
+   self.pedir_irq0:=CLEAR_LINE;
+end else self.pedir_irq0:=state;
+end;
+
+procedure cpu_mcs51.change_irq1(state:byte);
+begin
+if state=CLEAR_LINE then begin
       self.ram[ADDR_TCON]:=self.ram[ADDR_TCON] and $fb;
       self.pedir_irq1:=CLEAR_LINE;
-    end;
-end;
+end else self.pedir_irq1:=state;
 end;
 
 procedure cpu_mcs51.reset;

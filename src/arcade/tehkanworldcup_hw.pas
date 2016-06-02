@@ -323,7 +323,7 @@ case direccion of
     $f811:track1[1]:=valor;
     $f820:begin
             sound_latch:=valor;
-            snd_z80.pedir_nmi:=ASSERT_LINE;
+            snd_z80.change_nmi(ASSERT_LINE);
           end;
     $f840:if valor=0 then sub_z80.pedir_reset:=ASSERT_LINE
             else sub_z80.pedir_reset:=CLEAR_LINE;
@@ -362,7 +362,7 @@ if direccion<$4000 then exit;
 case direccion of
   $4000..$47ff:mem_snd[direccion]:=valor;
   $8001:msm_5205_0.reset_w((valor xor $1) and 1);
-  $8003:snd_z80.clear_nmi;
+  $8003:snd_z80.change_nmi(CLEAR_LINE);
   $c000:sound_latch2:=valor;
 end;
 end;

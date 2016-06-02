@@ -15,18 +15,7 @@ type
            line_counter:procedure;
            end;
 
-procedure Cargar_NES;
-function iniciar_nes:boolean;
-procedure nes_principal;
-procedure nes_cerrar;
-procedure nes_reset;
-function abrir_nes:boolean;
-//Main CPU
-function nes_getbyte(direccion:word):byte;
-procedure nes_putbyte(direccion:word;valor:byte);
-//Sound
-procedure nes_sound_update;
-procedure nes_irq(status:byte);
+procedure cargar_NES;
 
 var
   sram_enable:boolean;
@@ -51,63 +40,6 @@ var
   sram_present:boolean=false;
   cart_name:string;
   cartucho_cargado:boolean;
-
-procedure Cargar_nes;
-begin
-  principal1.BitBtn10.Glyph:=nil;
-  principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
-  principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
-  llamadas_maquina.iniciar:=iniciar_nes;
-  llamadas_maquina.bucle_general:=nes_principal;
-  llamadas_maquina.cerrar:=nes_cerrar;
-  llamadas_maquina.reset:=nes_reset;
-  llamadas_maquina.cartuchos:=abrir_nes;
-  llamadas_maquina.fps_max:=NTSC_refresh;
-  cartucho_cargado:=false;
-end;
-
-function iniciar_nes:boolean;
-begin
-  iniciar_audio(false);
-  screen_init(1,512,1,true);
-  screen_init(2,256,240);
-  iniciar_video(256,240);
-  main_m6502:=cpu_m6502.create(NTSC_clock,NTSC_lines+1,TCPU_NES);
-  main_m6502.change_ram_calls(nes_getbyte,nes_putbyte);
-  main_m6502.init_sound(nes_sound_update);
-  init_n2a03_sound(0,nes_getbyte,nes_irq);
-  getmem(mapper_nes,sizeof(tnes_mapper));
-  getmem(ppu_nes,sizeof(tnes_ppu));
-  nes_init_palette;
-  abrir_nes;
-  iniciar_nes:=true;
-end;
-
-procedure nes_reset;
-begin
-  fillchar(memoria[0],$800,0);
-  fillchar(memoria[$6000],$2000,0);
-  reset_audio;
-  main_m6502.reset;
-  reset_n2a03_sound(0);
-  reset_ppu;
-  joy1:=0;
-  joy2:=0;
-  joy1_read:=0;
-  joy2_read:=0;
-  open_bus:=$FF;
-  val_4016:=0;
-end;
-
-procedure nes_cerrar;
-begin
-  if sram_present then write_file(cart_name,@memoria[$6000],$2000);
-  close_n2a03_sound(0);
-  if mapper_nes<>nil then freemem(mapper_nes);
-  if ppu_nes<>nil then freemem(ppu_nes);
-  mapper_nes:=nil;
-  ppu_nes:=nil;
-end;
 
 procedure eventos_nes;
 var
@@ -186,7 +118,7 @@ begin
               end;
               ppu_nes.status:=ppu_nes.status or $80;
               if (ppu_nes.control1 and $80)<>0 then begin
-                 main_m6502.pedir_nmi:=PULSE_LINE;
+                 main_m6502.change_nmi(PULSE_LINE);
                  main_m6502.after_ei:=true;
               end;
               main_m6502.run(frame);
@@ -269,7 +201,7 @@ begin
         case (direccion and 7) of
             0:begin
                 if (((ppu_nes.status and $80)<>0) and ((ppu_nes.control1 and $80)=0) and ((valor and $80)<>0)) then begin
-                   main_m6502.pedir_nmi:=PULSE_LINE;
+                   main_m6502.change_nmi(PULSE_LINE);
                    main_m6502.after_ei:=true;
                 end;
                 ppu_nes.control1:=valor;
@@ -329,7 +261,24 @@ end;
 
 procedure nes_irq(status:byte);
 begin
-  main_m6502.pedir_irq:=status;
+  main_m6502.change_irq(status);
+end;
+
+//Main
+procedure nes_reset;
+begin
+  fillchar(memoria[0],$800,0);
+  fillchar(memoria[$6000],$2000,0);
+  reset_audio;
+  main_m6502.reset;
+  reset_n2a03_sound(0);
+  reset_ppu;
+  joy1:=0;
+  joy2:=0;
+  joy1_read:=0;
+  joy2_read:=0;
+  open_bus:=$FF;
+  val_4016:=0;
 end;
 
 procedure llamadas_mapper(mapper:word);
@@ -527,6 +476,47 @@ begin
     cartucho_cargado:=true;
   end else MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
   Directory.Nes:=ExtractFilePath(romfile);
+end;
+
+function iniciar_nes:boolean;
+begin
+  iniciar_audio(false);
+  screen_init(1,512,1,true);
+  screen_init(2,256,240);
+  iniciar_video(256,240);
+  main_m6502:=cpu_m6502.create(NTSC_clock,NTSC_lines+1,TCPU_NES);
+  main_m6502.change_ram_calls(nes_getbyte,nes_putbyte);
+  main_m6502.init_sound(nes_sound_update);
+  init_n2a03_sound(0,nes_getbyte,nes_irq);
+  getmem(mapper_nes,sizeof(tnes_mapper));
+  getmem(ppu_nes,sizeof(tnes_ppu));
+  nes_init_palette;
+  abrir_nes;
+  iniciar_nes:=true;
+end;
+
+procedure nes_cerrar;
+begin
+  if sram_present then write_file(cart_name,@memoria[$6000],$2000);
+  close_n2a03_sound(0);
+  if mapper_nes<>nil then freemem(mapper_nes);
+  if ppu_nes<>nil then freemem(ppu_nes);
+  mapper_nes:=nil;
+  ppu_nes:=nil;
+end;
+
+procedure Cargar_nes;
+begin
+  principal1.BitBtn10.Glyph:=nil;
+  principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
+  principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+  llamadas_maquina.iniciar:=iniciar_nes;
+  llamadas_maquina.bucle_general:=nes_principal;
+  llamadas_maquina.cerrar:=nes_cerrar;
+  llamadas_maquina.reset:=nes_reset;
+  llamadas_maquina.cartuchos:=abrir_nes;
+  llamadas_maquina.fps_max:=NTSC_refresh;
+  cartucho_cargado:=false;
 end;
 
 end.

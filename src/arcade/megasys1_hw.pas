@@ -9,7 +9,6 @@ procedure Cargar_megasys1;
 procedure megasys1_principal;
 function iniciar_megasys1:boolean;
 procedure reset_megasys1;
-procedure cerrar_megasys1;
 //Main CPU
 function megasys1_a_getword(direccion:dword):word;
 procedure megasys1_a_putword(direccion:dword;valor:word);
@@ -137,7 +136,6 @@ procedure Cargar_megasys1;
 begin
 llamadas_maquina.iniciar:=iniciar_megasys1;
 llamadas_maquina.bucle_general:=megasys1_principal;
-llamadas_maquina.cerrar:=cerrar_megasys1;
 llamadas_maquina.reset:=reset_megasys1;
 llamadas_maquina.fps_max:=56.18;
 end;
@@ -317,7 +315,8 @@ snd_m68000.init_sound(megasys1_sound_update);
 //Sound Chips
 oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
 oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
-YM2151_Init(0,3500000,nil,snd_irq);
+ym2151_0:=ym2151_chip.create(3500000);
+ym2151_0.change_irq_func(snd_irq);
 case main_vars.tipo_maquina of
   138:begin //P-47
         //cargar roms
@@ -413,18 +412,13 @@ reset_megasys1;
 iniciar_megasys1:=true;
 end;
 
-procedure cerrar_megasys1;
-begin
-ym2151_close(0);
-end;
-
 procedure reset_megasys1;
 var
   f:byte;
 begin
  main_m68000.reset;
  snd_m68000.reset;
- ym2151_reset(0);
+ ym2151_0.reset;
  oki_6295_0.reset;
  oki_6295_1.reset;
  reset_audio;
@@ -788,7 +782,7 @@ begin
 case direccion of
   0..$1ffff:megasys1_snd_a_getword:=rom_snd[direccion shr 1];
   $40000:megasys1_snd_a_getword:=sound_latch;
-  $80002:megasys1_snd_a_getword:=YM2151_status_port_read(0);
+  $80002:megasys1_snd_a_getword:=ym2151_0.status;
   $a0000:megasys1_snd_a_getword:=0;//oki_6295_0.read;
   $c0000:megasys1_snd_a_getword:=0;//oki_6295_1.read;
   $e0000..$fffff:megasys1_snd_a_getword:=ram_snd[(direccion and $1ffff) shr 1];
@@ -801,8 +795,8 @@ begin
 case direccion of
   0..$1ffff:exit;
   $60000:sound_latch2:=valor;
-  $80000:YM2151_register_port_write(0,valor);
-  $80002:YM2151_data_port_write(0,valor);
+  $80000:ym2151_0.reg(valor);
+  $80002:ym2151_0.write(valor);
   $a0000,$a0002:oki_6295_0.write(valor);
   $c0000,$c0002:oki_6295_1.write(valor);
   $e0000..$fffff:ram_snd[(direccion and $1ffff) shr 1]:=valor;
@@ -811,7 +805,7 @@ end;
 
 procedure megasys1_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
   oki_6295_0.update;
   oki_6295_1.update;
 end;

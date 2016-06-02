@@ -395,7 +395,7 @@ begin
 case direccion of
   $b000:sound_getbyte:=upd7759_0.busy_r;
   $d000:sound_getbyte:=sound_latch;
-  $e000:sound_getbyte:=ym2203_0.read_status;
+  $e000:sound_getbyte:=ym2203_0.status;
   else sound_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -409,7 +409,7 @@ case direccion of
     $a000:upd7759_0.port_w(valor);
     $c000:upd7759_0.reset_w(valor and 1);
     $e000:ym2203_0.Control(valor);
-    $e001:ym2203_0.Write_Reg(valor);
+    $e001:ym2203_0.Write(valor);
 end;
 end;
 

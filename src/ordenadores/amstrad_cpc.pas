@@ -62,36 +62,16 @@ var
     cpc_ga:tcpc_ga;
     cpc_ppi:^tcpc_ppi;
 
-procedure Cargar_amstrad_CPC;
-function iniciar_cpc:boolean;
-procedure cpc_main;
-procedure cpc_close;
-procedure cpc_reset;
-procedure cpc_config_call;
+procedure cargar_amstrad_CPC;
 procedure cpc_load_roms;
-//Tape/Disk
-function amstrad_tapes:boolean;
-procedure amstrad_despues_instruccion(estados_t:word);
-function amstrad_loaddisk:boolean;
-procedure grabar_amstrad;
-//Main CPU
-function cpc_getbyte(direccion:word):byte;
-procedure cpc_putbyte(direccion:word;valor:byte);
-function cpc_inbyte(puerto:word):byte;
-procedure cpc_outbyte(valor:byte;puerto:word);
-function cpc_porta_read:byte;
-function amstrad_raised_z80:byte;
-procedure amstrad_sound_update;
 //GA
 procedure write_ga(puerto:word;val:byte);
 //CRT
-procedure write_crtc(port:word;val:byte);
 procedure cpc_calcular_dir_scr;
 procedure cpc_calc_crt;
+//Main CPU
+procedure cpc_outbyte(valor:byte;puerto:word);
 //PPI 8255
-function port_a_read:byte;
-function port_b_read:byte;
-procedure port_a_write(valor:byte);
 procedure port_c_write(valor:byte);
 
 implementation
@@ -221,198 +201,6 @@ const
 
 var
    tape_sound_channel:byte;
-
-procedure Cargar_amstrad_CPC;
-begin
-llamadas_maquina.iniciar:=iniciar_cpc;
-llamadas_maquina.bucle_general:=cpc_main;
-llamadas_maquina.reset:=cpc_reset;
-llamadas_maquina.fps_max:=50.08;
-llamadas_maquina.velocidad_cpu:=4000000;
-llamadas_maquina.cerrar:=cpc_close;
-llamadas_maquina.cintas:=amstrad_tapes;
-llamadas_maquina.cartuchos:=amstrad_loaddisk;
-llamadas_maquina.grabar_snapshot:=grabar_amstrad;
-llamadas_maquina.configurar:=cpc_config_call;
-end;
-
-procedure cpc_load_roms;
-var
-  f:byte;
-  memoria_temp:array[0..$7fff] of byte;
-  tempb:boolean;
-  long:integer;
-  cadena:string;
-begin
-if cpc_ga.cpc_model=4 then begin
-  cadena:=file_name_only(changefileext(extractfilename(cpc_rom_slot[0]),''));
-  if extension_fichero(cpc_rom_slot[0])='ZIP' then tempb:=carga_rom_zip(cpc_rom_slot[0],cadena+'.ROM',@memoria_temp[0],$4000,0,false)
-    else begin
-      tempb:=read_file(cpc_rom_slot[0],@memoria_temp[0],long);
-      if long<>$4000 then tempb:=false;
-    end;
-  if not(tempb) then begin
-    MessageDlg('ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
-    cpc_ga.cpc_model:=0;
-    if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
-  end;
-  if main_vars.tipo_maquina<>7 then if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
-end else begin
-  case main_vars.tipo_maquina of
-    7:begin
-      tempb:=false;
-      case cpc_ga.cpc_model of
-        0:tempb:=true;
-        1:if not(cargar_roms(@memoria_temp[0],@cpc464f_rom,'cpc464.zip')) then begin
-            MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
-            cpc_ga.cpc_model:=0;
-            tempb:=true;
-        end;
-        2:if not(cargar_roms(@memoria_temp[0],@cpc464sp_rom,'cpc464.zip')) then begin
-            MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
-            cpc_ga.cpc_model:=0;
-            tempb:=true;
-        end;
-        3:if not(cargar_roms(@memoria_temp[0],@cpc464d_rom,'cpc464.zip')) then begin
-            MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
-            cpc_ga.cpc_model:=0;
-            tempb:=true;
-        end;
-      end;
-      if tempb then if not(cargar_roms(@memoria_temp[0],@cpc464_rom,'cpc464.zip')) then exit;
-      fillchar(cpc_rom[7,0],$4000,0);
-    end;
-    8:begin
-      if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc664.zip')) then exit;
-      if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip')) then exit;
-      cpc_ga.cpc_model:=0;
-    end;
-    9:begin
-      if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
-      tempb:=false;
-      case cpc_ga.cpc_model of
-        0:tempb:=true;
-        1:if not(cargar_roms(@memoria_temp[0],@cpc6128f_rom,'cpc6128.zip')) then begin
-            MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
-            cpc_ga.cpc_model:=0;
-            tempb:=true;
-          end;
-        2:if not(cargar_roms(@memoria_temp[0],@cpc6128sp_rom,'cpc6128.zip')) then begin
-            MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
-            cpc_ga.cpc_model:=0;
-            tempb:=true;
-          end;
-        3:if not(cargar_roms(@memoria_temp[0],@cpc6128d_rom,'cpc6128.zip')) then begin
-            MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
-            cpc_ga.cpc_model:=0;
-            tempb:=true;
-          end;
-      end;
-      if tempb then if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
-    end;
-  end;
-end;
-copymemory(@cpc_low_rom[0],@memoria_temp[0],$4000);
-copymemory(@cpc_rom[0,0],@memoria_temp[$4000],$4000);
-//Cargar las roms de los slots, comprimidas o no...
-for f:=1 to 6 do begin
-  if cpc_rom_slot[f]<>'' then begin
-    cadena:=file_name_only(changefileext(extractfilename(cpc_rom_slot[f]),''));
-    if extension_fichero(cpc_rom_slot[f])='ZIP' then tempb:=carga_rom_zip(cpc_rom_slot[f],cadena+'.ROM',@cpc_rom[f,0],$4000,0,false)
-      else begin
-        tempb:=read_file(cpc_rom_slot[f],@cpc_rom[f,0],long);
-        if long<>$4000 then tempb:=false;
-      end;
-    if not(tempb) then begin
-      MessageDlg('Error loading ROM on slot '+inttostr(f)+'...', mtInformation,[mbOk], 0);
-      fillchar(cpc_rom[f,0],$4000,0);
-    end;
-  end else fillchar(cpc_rom[f,0],$4000,0);
-end;
-end;
-
-function iniciar_cpc:boolean;
-var
-  f:byte;
-  colores:tpaleta;
-begin
-principal1.BitBtn10.Glyph:=nil;
-principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
-iniciar_cpc:=false;
-iniciar_audio(false);
-screen_init(1,pantalla_largo,pantalla_alto);
-iniciar_video(pantalla_largo,pantalla_alto);
-//Inicializar dispositivos
-getmem(cpc_crt,sizeof(tcpc_crt));
-getmem(cpc_ppi,sizeof(tcpc_ppi));
-for f:=0 to 31 do begin
-  colores[f].r:=cpc_paleta[f] shr 16;
-  colores[f].g:=(cpc_paleta[f] shr 8) and $FF;
-  colores[f].b:=cpc_paleta[f] and $FF;
-end;
-set_pal(colores,32);
-main_z80:=cpu_z80.create(4000000,pantalla_alto);
-main_z80.change_ram_calls(cpc_getbyte,cpc_putbyte);
-main_z80.change_io_calls(cpc_inbyte,cpc_outbyte);
-main_z80.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80);
-main_z80.change_timmings(@z80_op,@z80_op_cb,@z80_op_dd,@z80_op_ddcb,@z80_op_ed,@z80_op_ex);
-main_z80.init_sound(amstrad_sound_update);
-tape_sound_channel:=init_channel;
-//El CPC lee el teclado el puerto A del AY, pero el puerto B esta unido al A
-//por lo que hay programas que usan el B!!! (Bestial Warrior por ejemplo)
-ay8910_0:=ay8910_chip.create(1000000,1);
-ay8910_0.change_io_calls(cpc_porta_read,cpc_porta_read,nil,nil);
-pia8255_0:=pia8255_chip.create;
-pia8255_0.change_ports(port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
-cpc_load_roms;
-cpc_reset;
-iniciar_cpc:=true;
-end;
-
-procedure cpc_close;
-begin
-if cpc_crt<>nil then freemem(cpc_crt);
-if cpc_ppi<>nil then freemem(cpc_ppi);
-clear_disk(0);
-clear_disk(1);
-cpc_crt:=nil;
-cpc_ppi:=nil;
-end;
-
-procedure cpc_reset;
-begin
-  main_z80.reset;
-  ay8910_0.reset;
-  pia8255_0.reset;
-  reset_audio;
-  if cinta_tzx.cargada then cinta_tzx.play_once:=false;
-  if not(dsk[0].abierto) then change_caption(llamadas_maquina.caption)
-    else change_caption(llamadas_maquina.caption+' - DSK: '+dsk[0].imagename);
-  cinta_tzx.value:=0;
-  ResetFDC;
-  //Init GA
-  cpc_ga.pen:=0;
-  cpc_ga.video_mode:=0;
-  cpc_ga.video_mode_new:=0;
-  cpc_ga.video_change:=false;
-  //cpc_ga.dktronics no lo toco
-  fillchar(cpc_ga.pal[0],16,0);
-  cpc_ga.lines_count:=0;
-  cpc_ga.lines_sync:=0;
-  cpc_ga.rom_selected:=0;
-  cpc_ga.rom_low:=true;
-  cpc_ga.rom_high:=false;
-  copymemory(@cpc_ga.marco[0],@ram_banks[0,0],4);
-  cpc_ga.marco_latch:=0;
-  //cpc_ga.cpc_model; no lo toco
-  //CRT
-  fillchar(cpc_crt^,sizeof(tcpc_crt),0);
-  cpc_crt.char_altura:=1;
-  cpc_crt.lineas_total:=1;
-  //PPI
-  fillchar(cpc_ppi^,sizeof(tcpc_ppi),0);
-  fillchar(cpc_ppi.keyb_val[0],10,$FF);
-end;
 
 procedure eventos_cpc;
 begin
@@ -1043,6 +831,199 @@ procedure cpc_config_call;
 begin
   configcpc.show;
   while configcpc.Showing do application.ProcessMessages;
+end;
+
+//Main
+procedure cpc_reset;
+begin
+  main_z80.reset;
+  ay8910_0.reset;
+  pia8255_0.reset;
+  reset_audio;
+  if cinta_tzx.cargada then cinta_tzx.play_once:=false;
+  if not(dsk[0].abierto) then change_caption(llamadas_maquina.caption)
+    else change_caption(llamadas_maquina.caption+' - DSK: '+dsk[0].imagename);
+  cinta_tzx.value:=0;
+  ResetFDC;
+  //Init GA
+  cpc_ga.pen:=0;
+  cpc_ga.video_mode:=0;
+  cpc_ga.video_mode_new:=0;
+  cpc_ga.video_change:=false;
+  //cpc_ga.dktronics no lo toco
+  fillchar(cpc_ga.pal[0],16,0);
+  cpc_ga.lines_count:=0;
+  cpc_ga.lines_sync:=0;
+  cpc_ga.rom_selected:=0;
+  cpc_ga.rom_low:=true;
+  cpc_ga.rom_high:=false;
+  copymemory(@cpc_ga.marco[0],@ram_banks[0,0],4);
+  cpc_ga.marco_latch:=0;
+  //cpc_ga.cpc_model; no lo toco
+  //CRT
+  fillchar(cpc_crt^,sizeof(tcpc_crt),0);
+  cpc_crt.char_altura:=1;
+  cpc_crt.lineas_total:=1;
+  //PPI
+  fillchar(cpc_ppi^,sizeof(tcpc_ppi),0);
+  fillchar(cpc_ppi.keyb_val[0],10,$FF);
+end;
+
+procedure cpc_load_roms;
+var
+  f:byte;
+  memoria_temp:array[0..$7fff] of byte;
+  tempb:boolean;
+  long:integer;
+  cadena:string;
+begin
+if cpc_ga.cpc_model=4 then begin
+  cadena:=file_name_only(changefileext(extractfilename(cpc_rom_slot[0]),''));
+  if extension_fichero(cpc_rom_slot[0])='ZIP' then tempb:=carga_rom_zip(cpc_rom_slot[0],cadena+'.ROM',@memoria_temp[0],$4000,0,false)
+    else begin
+      tempb:=read_file(cpc_rom_slot[0],@memoria_temp[0],long);
+      if long<>$4000 then tempb:=false;
+    end;
+  if not(tempb) then begin
+    MessageDlg('ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+    cpc_ga.cpc_model:=0;
+    if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
+  end;
+  if main_vars.tipo_maquina<>7 then if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
+end else begin
+  case main_vars.tipo_maquina of
+    7:begin
+      tempb:=false;
+      case cpc_ga.cpc_model of
+        0:tempb:=true;
+        1:if not(cargar_roms(@memoria_temp[0],@cpc464f_rom,'cpc464.zip')) then begin
+            MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+        end;
+        2:if not(cargar_roms(@memoria_temp[0],@cpc464sp_rom,'cpc464.zip')) then begin
+            MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+        end;
+        3:if not(cargar_roms(@memoria_temp[0],@cpc464d_rom,'cpc464.zip')) then begin
+            MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+        end;
+      end;
+      if tempb then if not(cargar_roms(@memoria_temp[0],@cpc464_rom,'cpc464.zip')) then exit;
+      fillchar(cpc_rom[7,0],$4000,0);
+    end;
+    8:begin
+      if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc664.zip')) then exit;
+      if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip')) then exit;
+      cpc_ga.cpc_model:=0;
+    end;
+    9:begin
+      if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
+      tempb:=false;
+      case cpc_ga.cpc_model of
+        0:tempb:=true;
+        1:if not(cargar_roms(@memoria_temp[0],@cpc6128f_rom,'cpc6128.zip')) then begin
+            MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+          end;
+        2:if not(cargar_roms(@memoria_temp[0],@cpc6128sp_rom,'cpc6128.zip')) then begin
+            MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+          end;
+        3:if not(cargar_roms(@memoria_temp[0],@cpc6128d_rom,'cpc6128.zip')) then begin
+            MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
+            cpc_ga.cpc_model:=0;
+            tempb:=true;
+          end;
+      end;
+      if tempb then if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
+    end;
+  end;
+end;
+copymemory(@cpc_low_rom[0],@memoria_temp[0],$4000);
+copymemory(@cpc_rom[0,0],@memoria_temp[$4000],$4000);
+//Cargar las roms de los slots, comprimidas o no...
+for f:=1 to 6 do begin
+  if cpc_rom_slot[f]<>'' then begin
+    cadena:=file_name_only(changefileext(extractfilename(cpc_rom_slot[f]),''));
+    if extension_fichero(cpc_rom_slot[f])='ZIP' then tempb:=carga_rom_zip(cpc_rom_slot[f],cadena+'.ROM',@cpc_rom[f,0],$4000,0,false)
+      else begin
+        tempb:=read_file(cpc_rom_slot[f],@cpc_rom[f,0],long);
+        if long<>$4000 then tempb:=false;
+      end;
+    if not(tempb) then begin
+      MessageDlg('Error loading ROM on slot '+inttostr(f)+'...', mtInformation,[mbOk], 0);
+      fillchar(cpc_rom[f,0],$4000,0);
+    end;
+  end else fillchar(cpc_rom[f,0],$4000,0);
+end;
+end;
+
+function iniciar_cpc:boolean;
+var
+  f:byte;
+  colores:tpaleta;
+begin
+principal1.BitBtn10.Glyph:=nil;
+principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
+iniciar_cpc:=false;
+iniciar_audio(false);
+screen_init(1,pantalla_largo,pantalla_alto);
+iniciar_video(pantalla_largo,pantalla_alto);
+//Inicializar dispositivos
+getmem(cpc_crt,sizeof(tcpc_crt));
+getmem(cpc_ppi,sizeof(tcpc_ppi));
+for f:=0 to 31 do begin
+  colores[f].r:=cpc_paleta[f] shr 16;
+  colores[f].g:=(cpc_paleta[f] shr 8) and $FF;
+  colores[f].b:=cpc_paleta[f] and $FF;
+end;
+set_pal(colores,32);
+main_z80:=cpu_z80.create(4000000,pantalla_alto);
+main_z80.change_ram_calls(cpc_getbyte,cpc_putbyte);
+main_z80.change_io_calls(cpc_inbyte,cpc_outbyte);
+main_z80.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80);
+main_z80.change_timmings(@z80_op,@z80_op_cb,@z80_op_dd,@z80_op_ddcb,@z80_op_ed,@z80_op_ex);
+main_z80.init_sound(amstrad_sound_update);
+tape_sound_channel:=init_channel;
+//El CPC lee el teclado el puerto A del AY, pero el puerto B esta unido al A
+//por lo que hay programas que usan el B!!! (Bestial Warrior por ejemplo)
+ay8910_0:=ay8910_chip.create(1000000,1);
+ay8910_0.change_io_calls(cpc_porta_read,cpc_porta_read,nil,nil);
+pia8255_0:=pia8255_chip.create;
+pia8255_0.change_ports(port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
+cpc_load_roms;
+cpc_reset;
+iniciar_cpc:=true;
+end;
+
+procedure cpc_close;
+begin
+if cpc_crt<>nil then freemem(cpc_crt);
+if cpc_ppi<>nil then freemem(cpc_ppi);
+clear_disk(0);
+clear_disk(1);
+cpc_crt:=nil;
+cpc_ppi:=nil;
+end;
+
+procedure Cargar_amstrad_CPC;
+begin
+llamadas_maquina.iniciar:=iniciar_cpc;
+llamadas_maquina.bucle_general:=cpc_main;
+llamadas_maquina.reset:=cpc_reset;
+llamadas_maquina.fps_max:=50.08;
+llamadas_maquina.velocidad_cpu:=4000000;
+llamadas_maquina.cerrar:=cpc_close;
+llamadas_maquina.cintas:=amstrad_tapes;
+llamadas_maquina.cartuchos:=amstrad_loaddisk;
+llamadas_maquina.grabar_snapshot:=grabar_amstrad;
+llamadas_maquina.configurar:=cpc_config_call;
 end;
 
 end.

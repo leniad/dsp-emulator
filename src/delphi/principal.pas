@@ -1,4 +1,4 @@
-﻿unit principal;
+unit principal;
 
 //{$SetPeFlags $20}
 
@@ -363,6 +363,7 @@ type
     scontra1: TMenuItem;
     gbusters1: TMenuItem;
     thunderx1: TMenuItem;
+    simpsons1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -406,14 +407,11 @@ var
   //Status bitmap
   status_bitmap:tbitmap;
 
-const
-  SCREEN_DIF=20;
-
 implementation
 uses acercade,file_engine,poke_memoria,lenslock,spectrum_misc,tap_tzx;
 
 {$R *.dfm}
-//Para evitar que cuando se pulsa ALT se vaya al menu añado esta funcion...
+//Para evitar que cuando se pulsa ALT se vaya al menu a�ado esta funcion...
 procedure Tprincipal1.WndProc(var Message:TMessage);
 begin
 if not((Message.Msg=WM_SYSCOMMAND) and (Message.WParam=SC_KEYMENU)) then inherited WndProc(Message);
@@ -574,7 +572,6 @@ end;
 procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
 main_screen.flip_main_screen:=false;
-ulaplus.activa:=false;
 if @llamadas_maquina.reset<>nil then llamadas_maquina.reset;
 Windows.SetFocus(child.Handle);
 end;
@@ -754,9 +751,9 @@ end;
 
 procedure Tprincipal1.ffastload(Sender: TObject);
 begin
-fastload:=not(fastload);
+var_spectrum.fastload:=not(var_spectrum.fastload);
 BitBtn14.Glyph:=nil;
-if fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
+if var_spectrum.fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBtn14.Glyph)
   else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
@@ -791,7 +788,7 @@ if main_vars.driver_ok then begin
     end else begin
       cambiar_video;
       if main_vars.tipo_maquina<7 then begin
-        fillchar(buffer_video[0],6144,1);
+        fillchar(var_spectrum.buffer_video[0],6144,1);
         fillchar(borde.buffer[0],78000,$80);
       end;
     end;

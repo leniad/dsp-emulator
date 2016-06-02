@@ -209,7 +209,7 @@ case direccion of
     $400000:main_screen.flip_main_screen:=(valor and $8000)=0;
     $300000:begin
             sound_latch:=valor and $ff;
-            snd_z80.pedir_nmi:=PULSE_LINE;
+            snd_z80.change_nmi(PULSE_LINE);
           end;
     $600000..$6001ff:if buffer_paleta[(direccion and $1ff) shr 1]<>valor then begin
                       buffer_paleta[(direccion and $1ff) shr 1]:=valor;
@@ -256,8 +256,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate<>0) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 end.

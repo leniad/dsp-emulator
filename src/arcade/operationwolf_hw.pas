@@ -81,7 +81,9 @@ snd_z80.init_sound(opwolf_sound_update);
 //MCU
 opwolf_init_cchip(main_m68000.numero_cpu);
 //Sound Chips
-YM2151_Init(0,4000000,sound_bank_rom,ym2151_snd_irq);
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_port_func(sound_bank_rom);
+ym2151_0.change_irq_func(ym2151_snd_irq);
 msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
 msm_5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
 //cargar roms
@@ -116,7 +118,6 @@ end;
 
 procedure cerrar_opwolf;
 begin
-YM2151_close(0);
 sdl_setcursor(old_cursor);
 sdl_showcursor(0);
 end;
@@ -125,7 +126,7 @@ procedure reset_opwolf;
 begin
  main_m68000.reset;
  snd_z80.reset;
- YM2151_reset(0);
+ ym2151_0.reset;
  msm_5205_0.reset;
  msm_5205_1.reset;
  msm_5205_0.reset_w(1);
@@ -312,7 +313,7 @@ begin
 case direccion of
   $0..$3fff,$8000..$8fff:opwolf_snd_getbyte:=mem_snd[direccion];
   $4000..$7fff:opwolf_snd_getbyte:=bank_sound[sound_bank,direccion and $3fff];
-  $9001:opwolf_snd_getbyte:=YM2151_status_port_read(0);
+  $9001:opwolf_snd_getbyte:=ym2151_0.status;
   $a001:opwolf_snd_getbyte:=taitosound_slave_comm_r;
 end;
 end;
@@ -322,8 +323,8 @@ begin
 case direccion of
   0..$7fff:exit;
   $8000..$8fff:mem_snd[direccion]:=valor;
-  $9000:YM2151_register_port_write(0,valor);
-  $9001:YM2151_data_port_write(0,valor);
+  $9000:ym2151_0.reg(valor);
+  $9001:ym2151_0.write(valor);
   $a000:taitosound_slave_port_w(valor);
   $a001:taitosound_slave_comm_w(valor);
   $b000..$b006:begin
@@ -352,13 +353,12 @@ end;
 
 procedure opwolf_sound_update;
 begin
-  ym2151_Update(0);
+  ym2151_0.update;
 end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.pedir_irq:=irqstate;
 end;
 
 

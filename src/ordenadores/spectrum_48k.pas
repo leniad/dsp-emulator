@@ -42,8 +42,8 @@ llamadas_maquina.fps_max:=50;
 llamadas_maquina.cerrar:=spec_cerrar_comun;
 llamadas_maquina.configurar:=spectrum_config;
 llamadas_maquina.velocidad_cpu:=3500000;
-samples_audio:=llamadas_maquina.velocidad_cpu/44100;
-samples_beeper:=llamadas_maquina.velocidad_cpu/(44100*beeper_oversample);
+var_spectrum.samples_audio:=llamadas_maquina.velocidad_cpu/freq_base_audio;
+var_spectrum.samples_beeper:=llamadas_maquina.velocidad_cpu/(freq_base_audio*var_spectrum.beeper_oversample);
 interface2.hay_if2:=false;
 end;
 
@@ -71,25 +71,25 @@ if not(rom_cargada) then begin
   exit;
 end;
 iniciar_audio(false);
-fillchar(retraso[0],70000,0);
+fillchar(var_spectrum.retraso[0],70000,0);
 f:=14335;  //24 del borde
 for h:=0 to 191 do begin
-  copymemory(@retraso[f],@cmemory[0],128);
+  copymemory(@var_spectrum.retraso[f],@cmemory[0],128);
   inc(f,224);
 end;
 pos:=14335; //deberia ser 14338
-fillchar(ft_bus[0],70000*2,$ff);
+fillchar(var_spectrum.ft_bus[0],70000*2,$ff);
 for h:=0 to 191 do begin
   f:=$4000+((h mod $8)*$100);
   g:=$5800;
   for m:=0 to 15 do begin
-    ft_bus[pos]:=f; //4000
+    var_spectrum.ft_bus[pos]:=f; //4000
     inc(pos);inc(f);
-    ft_bus[pos]:=g; //5800
+    var_spectrum.ft_bus[pos]:=g; //5800
     inc(pos);inc(g);
-    ft_bus[pos]:=f; //4001
+    var_spectrum.ft_bus[pos]:=f; //4001
     inc(pos);inc(f);
-    ft_bus[pos]:=g; //5801
+    var_spectrum.ft_bus[pos]:=g; //5801
     inc(pos);inc(g);
     inc(pos,4);  //idle
   end;
@@ -123,8 +123,8 @@ for x:=0 to 31 do begin
   atrib:=memoria[$5800+pos_video];
   if ((spec_z80_reg.i>=$40) and (spec_z80_reg.i<=$7F)) then video:=memoria[$4000+tabla_scr[linea]+x+spec_z80_reg.r]
     else video:=memoria[$4000+tabla_scr[linea]+x];
-  if ((buffer_video[tabla_scr[linea]+x]) or (((atrib and $80)<>0)) and not(main_screen.rapido)) then begin
-    buffer_video[tabla_scr[linea]+x]:=false;
+  if ((var_spectrum.buffer_video[tabla_scr[linea]+x]) or (((atrib and $80)<>0)) and not(main_screen.rapido)) then begin
+    var_spectrum.buffer_video[tabla_scr[linea]+x]:=false;
     poner_linea:=true;
     pant_x:=48+(x shl 3);
     if (ulaplus.activa and ulaplus.enabled) then begin
@@ -135,7 +135,7 @@ for x:=0 to 31 do begin
       color2:=(atrib shr 3) and 7;
       color:=atrib and 7;
       if (atrib and 64)<>0 then begin color:=color+8;color2:=color2+8;end;
-      if (((atrib and 128)<>0) and haz_flash) then begin temp:=color;color:=color2;color2:=temp;end;
+      if (((atrib and 128)<>0) and var_spectrum.haz_flash) then begin temp:=color;color:=color2;color2:=temp;end;
     end;
     if not(poner_linea) then exit;
     ptemp:=punbuf;
@@ -220,10 +220,10 @@ while EmuStatus=EsRuning do begin
     spec_z80.contador:=spec_z80.contador-224;
   end;
   spec_z80.pedir_irq:=IRQ_DELAY;
-  spectrum_irq_pos:=0;
-  flash:=(flash+1) and $f;
-  if flash=0 then haz_flash:=not(haz_flash);
-  if mouse.tipo=1 then evalua_gunstick;
+  var_spectrum.irq_pos:=0;
+  var_spectrum.flash:=(var_spectrum.flash+1) and $f;
+  if var_spectrum.flash=0 then var_spectrum.haz_flash:=not(var_spectrum.haz_flash);
+  if mouse.tipo=MGUNSTICK then evalua_gunstick;
   eventos_spectrum;
   video_sync;
 end;
@@ -231,7 +231,7 @@ end;
 
 procedure spec48_retraso_memoria(direccion:word);
 begin
-if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+retraso[linea*224+spec_z80.contador];
+if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+var_spectrum.retraso[linea*224+spec_z80.contador];
 end;
 
 procedure spec48_retraso_puerto(puerto:word);
@@ -242,17 +242,17 @@ begin
 posicion:=linea*224+spec_z80.contador;
 if (puerto and $c000)=$4000 then begin //Contenida
     if (puerto and 1)<>0 then begin //ultimo bit 1
-       estados:=retraso[posicion]+1;
-       estados:=estados+retraso[posicion+estados]+1;
-       estados:=estados+retraso[posicion+estados]+1;
-       estados:=estados+retraso[posicion+estados]+1;
+       estados:=var_spectrum.retraso[posicion]+1;
+       estados:=estados+var_spectrum.retraso[posicion+estados]+1;
+       estados:=estados+var_spectrum.retraso[posicion+estados]+1;
+       estados:=estados+var_spectrum.retraso[posicion+estados]+1;
     end else begin //ultimo bit 0
-      estados:=retraso[posicion]+1;
-      estados:=estados+retraso[posicion+estados]+3;
+      estados:=var_spectrum.retraso[posicion]+1;
+      estados:=estados+var_spectrum.retraso[posicion+estados]+3;
     end;
 end else begin
     if (puerto and 1)<>0 then estados:=4 //ultimo bit 1
-       else estados:=1+retraso[posicion+1]+3; //ultimo bit 0
+       else estados:=1+var_spectrum.retraso[posicion+1]+3; //ultimo bit 0
 end;
 spec_z80.contador:=spec_z80.contador+estados;
 end;
@@ -273,11 +273,11 @@ if spec_16k then direccion:=direccion and $7fff;
 if ((memoria[direccion]=valor) or (direccion<$4000)) then exit; //Si es igual me salgo
 memoria[direccion]:=valor;
 case direccion of
-        $4000..$57ff:buffer_video[direccion and $1fff]:=true;
+        $4000..$57ff:var_spectrum.buffer_video[direccion and $1fff]:=true;
         $5800..$5aff:begin
                         temp:=((direccion and $3ff) shr 5) shl 3;
                         temp2:=direccion and $1F;
-                        for f:=0 to 7 do buffer_video[tabla_scr[temp+f]+temp2]:=true;
+                        for f:=0 to 7 do var_spectrum.buffer_video[tabla_scr[temp+f]+temp2]:=true;
                      end;
 end;
 end;
@@ -286,21 +286,21 @@ function spec48_inbyte(puerto:word):byte;
 var
   temp:byte;
 begin
-if (((puerto and $20)=$0) and jkempston and (mouse.tipo<>3)) then begin
-  spec48_inbyte:=kempston;
+if (((puerto and $20)=$0) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then begin
+  spec48_inbyte:=var_spectrum.kempston;
   exit;
 end;
 if (puerto and 1)=0 then begin
-  if sd_1 then temp:=$DF else temp:=$FF;
-  If (puerto And $8000)=0 Then temp:=temp And keyB_SPC;
-  If (puerto And $4000)=0 Then temp:=temp And keyH_ENT;
-  If (puerto And $2000)=0 Then temp:=temp And keyY_P;
-  If (puerto And $1000)=0 Then temp:=temp And key6_0;
-  If (puerto And $800)=0 Then temp:=temp And key1_5;
-  If (puerto And $400)=0 Then temp:=temp And keyQ_T;
-  If (puerto And $200)=0 Then temp:=temp And keyA_G;
-  If (puerto And $100)=0 Then temp:=temp and keyCAPS_V;
-  spec48_inbyte:=(temp and $bf) or cinta_tzx.value or altavoz;
+  if var_spectrum.sd_1 then temp:=$DF else temp:=$FF;
+  If (puerto And $8000)=0 Then temp:=temp And var_spectrum.keyB_SPC;
+  If (puerto And $4000)=0 Then temp:=temp And var_spectrum.keyH_ENT;
+  If (puerto And $2000)=0 Then temp:=temp And var_spectrum.keyY_P;
+  If (puerto And $1000)=0 Then temp:=temp And var_spectrum.key6_0;
+  If (puerto And $800)=0 Then temp:=temp And var_spectrum.key1_5;
+  If (puerto And $400)=0 Then temp:=temp And var_spectrum.keyQ_T;
+  If (puerto And $200)=0 Then temp:=temp And var_spectrum.keyA_G;
+  If (puerto And $100)=0 Then temp:=temp and var_spectrum.keyCAPS_V;
+  spec48_inbyte:=(temp and $bf) or cinta_tzx.value or var_spectrum.altavoz;
   exit;
 end;
 if ((puerto=$ff3b) and ulaplus.enabled) then begin
@@ -311,13 +311,13 @@ if ((puerto=$ff3b) and ulaplus.enabled) then begin
   end;
   exit;
 end;
-if mouse.tipo<>0 then begin
-  if mouse.tipo=3 then begin //AMX Mouse
+if mouse.tipo<>MNONE then begin
+  if mouse.tipo=MAMX then begin //AMX Mouse
     if (puerto and $80)<>0 then spec48_inbyte:=mouse.botones
         else spec48_inbyte:=z80pio_cd_ba_r(0,(puerto shr 5) and $3);
     exit;
   end;
-  if mouse.tipo=2 then begin //Kempston Mouse
+  if mouse.tipo=MKEMPSTON then begin //Kempston Mouse
     case puerto of
       $FADF:spec48_inbyte:=mouse.botones;
       $FBDF:spec48_inbyte:=mouse.x;
@@ -326,8 +326,8 @@ if mouse.tipo<>0 then begin
     exit;
   end;
 end;
-if ft_bus[linea*224+spec_z80.contador]=$ffff then spec48_inbyte:=$FF
-  else spec48_inbyte:=memoria[ft_bus[linea*224+spec_z80.contador]];
+if var_spectrum.ft_bus[linea*224+spec_z80.contador]=$ffff then spec48_inbyte:=$FF
+  else spec48_inbyte:=memoria[var_spectrum.ft_bus[linea*224+spec_z80.contador]];
 end;
 
 procedure spec48_outbyte(valor:byte;puerto:word);
@@ -341,7 +341,7 @@ if (puerto and 1)=0 then begin
     end;
   if (ulaplus.activa and ulaplus.enabled) then borde.color:=(valor and 7)+16
     else borde.color:=valor and 7;
-  altavoz:=(valor and $10) shl 2;
+  var_spectrum.altavoz:=(valor and $10) shl 2;
   //Aqui se puede ver la dependencia del puerto $FE del
   //altavoz y del ear (Issue 2 y 3). Lo que entra por el
   //altavoz,el ear o el mic afecta a el bit 6... por
@@ -350,7 +350,7 @@ if (puerto and 1)=0 then begin
   //correctamente, Rasputin no suena la musica y no
   //empieza al pulsar 0 --> Gracias Pera Putnik!!
   if not(cinta_tzx.play_tape) then begin
-    if issue2 then begin
+    if var_spectrum.issue2 then begin
       if (valor and $18)=0 then cinta_tzx.value:=0 else cinta_tzx.value:=$40;
     end else begin
       if (valor and $10)=0 then cinta_tzx.value:=0 else cinta_tzx.value:=$40;
@@ -364,7 +364,7 @@ if ((puerto=$bf3b) and ulaplus.enabled) then begin
   exit;
 end;
 if ((puerto=$ff3b) and ulaplus.enabled) then begin
-  fillchar(buffer_video[0],6144,1);
+  fillchar(var_spectrum.buffer_video[0],6144,1);
   fillchar(borde.buffer[0],78000,$80);
   case ulaplus.mode of
     0:begin
@@ -378,7 +378,7 @@ if ((puerto=$ff3b) and ulaplus.enabled) then begin
   end;
   exit;
 end;
-if mouse.tipo=3 then z80pio_cd_ba_w(0,(puerto shr 5) and 3,valor);
+if mouse.tipo=MAMX then z80pio_cd_ba_w(0,(puerto shr 5) and 3,valor);
 end;
 
 end.

@@ -15,8 +15,8 @@ unit tap_tzx;
 
 interface
 
-uses nz80,z80_sp,{$IFDEF WINDOWS}windows,{$ENDIF}grids,dialogs,main_engine,spectrum_misc,
-     sysutils,lenguaje,misc_functions,tape_window,file_engine,
+uses nz80,z80_sp,{$IFDEF WINDOWS}windows,{$ENDIF}grids,dialogs,main_engine,
+     spectrum_misc,sysutils,lenguaje,misc_functions,tape_window,file_engine,
      lenslock,samples;
 
 const
@@ -610,7 +610,7 @@ cinta_tzx.es_tap:=false;
 cinta_tzx.indice_cinta:=0;
 //for temp:=0 to (tape_window1.stringgrid1.RowCount-1) do tape_window1.StringGrid1.Cells[0,temp]:='';
 tape_window1.stringgrid1.RowCount:=1;
-sd_1:=false;
+var_spectrum.sd_1:=false;
 if lenslock1.Showing then lenslock1.Close;
 lenslok.activo:=false;
 main_vars.mensaje_general:='';
@@ -624,12 +624,12 @@ begin
 indice:=0;
 //comprobar LensLok
 tape_window1.label2.caption:='';
-sd_1:=false;
+var_spectrum.sd_1:=false;
 lenslok.activo:=false;
 lenslok.indice:=255;
 while cinta_tzx.datos_tzx[indice].tipo_bloque<>$fe do begin
   case cinta_tzx.datos_tzx[indice].crc32 of
-   $92DC40D8:sd_1:=true; //Camelot Warriors con SD1
+   $92DC40D8:var_spectrum.sd_1:=true; //Camelot Warriors con SD1
    $45169147,$ead7b3a9:begin //TT RACER
               lenslok.indice:=6;
               lenslok.activo:=true;
@@ -665,7 +665,7 @@ if lenslok.activo then begin
   lenslock1.Show;
   tape_window1.label2.caption:='LensLok Protection Active';
 end;
-if sd_1 then tape_window1.label2.caption:='SD1 Protection Active';
+if var_spectrum.sd_1 then tape_window1.label2.caption:='SD1 Protection Active';
 end;
 
 //Ficheros TAP

@@ -11,10 +11,10 @@ type
     public
        procedure reset;
        procedure update;
-       function read_status:byte;
-       function read_reg:byte;
+       function status:byte;
+       function read:byte;
        procedure control(data:byte);
-       procedure write_reg(data:byte);
+       procedure write(data:byte);
        procedure change_irq_calls(irq_handler:type_irq_handler);
        procedure change_io_calls(porta_read,portb_read:cpu_inport_call;porta_write,portb_write:cpu_outport_call);
        function save_snapshot(data:pbyte):word;
@@ -26,8 +26,7 @@ type
        timer1,timer2,chip_number:byte;
        ay8910_int:ay8910_chip;
        procedure reset_channels(chan:byte);
-       function read(port:byte):byte;
-       procedure write(port,data:byte);
+       procedure write_int(port,data:byte);
   end;
 
 var
@@ -50,10 +49,8 @@ constructor ym2203_chip.create(clock:dword;amp:single;ay_amp:single);
 begin
   chips_total:=chips_total+1;
   self.amp:=amp;
-  //El PSG
-  self.ay8910_int:=ay8910_chip.create(clock,ay_amp,true);
-  //Inicializo el OPN
-  self.OPN:=opn_init(4);
+  self.ay8910_int:=ay8910_chip.create(clock,ay_amp,true); //El PSG
+  self.OPN:=opn_init(4); //Inicializo el OPN
   //Inicializo el state
   self.OPN.type_:=TYPE_YM2203;
   self.OPN.ST.clock:=clock;
@@ -328,76 +325,61 @@ begin
     INTERNAL_TIMER_B(self.OPN.ST,1)
 end;
 
-procedure ym2203_chip.write(port,data:byte);
+procedure ym2203_chip.write_int(port,data:byte);
 var
   OPN:pfm_opn;
   addr:integer;
 begin
-		OPN:=self.OPN;
-		if ((port and 1)= 0 ) then begin
-			// address port */
-			OPN.ST.address:=data;
-			// Write register to SSG emurator */
-      if (data<16) then self.ay8910_int.Control(data);
-			// prescaler select : 2d,2e,2f  */
-		  if ((data>=$2d) and (data<=$2f)) then OPNPrescaler_w(OPN,data,1);
-		end else begin
-			// data port */
-			addr:=OPN.ST.address;
-      self.REGS[addr]:=data;
-			case (addr and $f0) of
-			  $00:begin	// 0x00-0x0f : SSG section */
-              // Write data to SSG emurator */
-              self.ay8910_int.Write(data);
+OPN:=self.OPN;
+if ((port and 1)=0) then begin // address port */
+   OPN.ST.address:=data;
+   // Write register to SSG emulator */
+   if (data<16) then self.ay8910_int.Control(data);
+   // prescaler select : 2d,2e,2f  */
+   if ((data>=$2d) and (data<=$2f)) then OPNPrescaler_w(OPN,data,1);
+end else begin // data port */
+   addr:=OPN.ST.address;
+   self.REGS[addr]:=data;
+   case (addr and $f0) of
+       $00:begin	// 0x00-0x0f : SSG section */
+              self.ay8910_int.Write(data); // Write data to SSG emulator */
+           end;
+       $20:begin	// 0x20-0x2f : Mode section */
+                //YM2203UpdateReq(n);
+		// write register */
+		OPNWriteMode(OPN,addr,data);
+           end;
+       else begin	// 0x30-0xff : OPN section */
+                //YM2203UpdateReq(n);
+		// write register */
+		OPNWriteReg(OPN,addr,data);
             end;
-			  $20:begin	// 0x20-0x2f : Mode section */
-				      //YM2203UpdateReq(n);
-				      // write register */
-				      OPNWriteMode(OPN,addr,data);
-				    end;
-			  else begin	// 0x30-0xff : OPN section */
-				      //YM2203UpdateReq(n);
-				      // write register */
-				      OPNWriteReg(OPN,addr,data);
-              end;
-		  end;
-    end;
+   end;
+end;
 end;
 
-function ym2203_chip.read(port:byte):byte;
+function ym2203_chip.status:byte;
+begin
+  status:=self.OPN.ST.status;
+end;
+
+function ym2203_chip.read:byte;
 var
-  adr,ret:byte;
+   ret:byte;
 begin
-ret:=0;
-if ((port and 1)=0 ) then begin
-  // status port */
-  ret:=self.OPN.ST.status;
-end else begin
-  //data port (ONLY SSG) */
-  adr:=self.OPN.ST.address;
-  if (adr<16) then ret:=self.ay8910_int.Read;
-end;
-Read:=ret;
-end;
-
-function ym2203_chip.read_status:byte;
-begin
-  read_status:=self.read(0);
-end;
-
-function ym2203_chip.read_reg:byte;
-begin
-  read_reg:=self.Read(1);
+if (self.OPN.ST.address<16) then ret:=self.ay8910_int.Read
+   else ret:=0;
+read:=ret;
 end;
 
 procedure ym2203_chip.control(data:byte);
 begin
-  self.write(0,data);
+  self.write_int(0,data);
 end;
 
-procedure ym2203_chip.write_reg(data:byte);
+procedure ym2203_chip.write(data:byte);
 begin
-  self.write(1,data);
+  self.write_int(1,data);
 end;
 
 procedure ym2203_0_timer1;

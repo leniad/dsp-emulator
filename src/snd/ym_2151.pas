@@ -1,66 +1,87 @@
 unit ym_2151;
 
 interface
-uses fm_2151,sound_engine{$ifdef windows},windows{$endif};
-type
-  IRQ_Handler=procedure (irqstate:byte);
-  porthandler=procedure (valor:byte);
+uses {$ifdef windows}windows,{$endif}fm_2151,sound_engine,main_engine;
 
-function YM2151_status_port_read(num:byte):byte;
-procedure YM2151_Init(num:byte;clock:dword;port_func:porthandler;irq_func:IRQ_Handler;amp:single=1);
-procedure YM2151_register_port_write(num,data:byte);
-procedure YM2151_data_port_write(num,data:byte);
-procedure YM2151_Reset(num:byte);
-procedure YM2151_Update(num:byte);
-procedure YM2151_Close(num:byte);
+type
+  ym2151_chip=class(snd_chip_class)
+       constructor create(clock:dword;amp:single=1);
+       destructor free;
+    public
+       procedure reset;
+       procedure update;
+       function status:byte;
+       procedure reg(data:byte);
+       procedure write(data:byte);
+       procedure change_port_func(port_func:cpu_outport_call);
+       procedure change_irq_func(irq_func:cpu_outport_call);
+    private
+       chip_number,lastreg:byte;
+  end;
+
+var
+   ym2151_0,ym2151_1:ym2151_chip;
 
 implementation
+var
+  chips_total:integer=-1;
 
-function YM2151_status_port_read(num:byte):byte;
+constructor ym2151_chip.create(clock:dword;amp:single=1);
 begin
-	YM2151_status_port_read:=YM_2151ReadStatus(num);
+  chips_total:=chips_total+1;
+  self.chip_number:=chips_total;
+  YM_2151Init(self.chip_number,clock);
+  self.tsample_num:=init_channel;
+  self.amp:=amp;
 end;
 
-procedure YM2151_register_port_write(num,data:byte);
+procedure ym2151_chip.change_port_func(port_func:cpu_outport_call);
 begin
-  FM2151[num].lastreg:=data;
+FM2151[self.chip_number].porthandler:=port_func;
 end;
 
-procedure YM2151_data_port_write(num,data:byte);
+procedure ym2151_chip.change_irq_func(irq_func:cpu_outport_call);
 begin
-	YM_2151WriteReg(num,FM2151[num].lastreg,data);
+FM2151[self.chip_number].IRQ_Handler:=irq_func;
 end;
 
-procedure YM2151_Init(num:byte;clock:dword;port_func:porthandler;irq_func:IRQ_Handler;amp:single=1);
+destructor ym2151_chip.free;
 begin
-  YM_2151Init(num,clock);
-  FM2151[num].porthandler:=port_func;
-  FM2151[num].tsample:=init_channel;
-  FM2151[num].IRQ_Handler:=irq_func;
-  FM2151[num].amp:=amp;
+  YM_2151Close(self.chip_number);
+  chips_total:=chips_total-1;
 end;
 
-procedure YM2151_Reset(num:byte);
+procedure ym2151_chip.reset;
 begin
-  YM_2151ResetChip(num);
+  YM_2151ResetChip(self.chip_number);
 end;
 
-procedure YM2151_Update(num:byte);
+function ym2151_chip.status:byte;
+begin
+     status:=YM_2151ReadStatus(self.chip_number);
+end;
+
+procedure ym2151_chip.reg(data:byte);
+begin
+  self.lastreg:=data;
+end;
+
+procedure ym2151_chip.write(data:byte);
+begin
+  YM_2151WriteReg(self.chip_number,self.lastreg,data);
+end;
+
+procedure ym2151_chip.update;
 var
   audio:pinteger;
 begin
-  audio:=YM_2151UpdateOne(num);
+  audio:=YM_2151UpdateOne(self.chip_number);
   if sound_status.stereo then begin
     inc(audio);
-    tsample[FM2151[num].tsample,sound_status.posicion_sonido]:=trunc(audio^*FM2151[num].amp);
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(audio^*self.amp);
     inc(audio);
-    tsample[FM2151[num].tsample,sound_status.posicion_sonido+1]:=trunc(audio^*FM2151[num].amp);
-  end else tsample[FM2151[num].tsample,sound_status.posicion_sonido]:=trunc(audio^*FM2151[num].amp);
+    tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(audio^*self.amp);
+  end else tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(audio^*self.amp);
 end;
 
-procedure YM2151_Close(num:byte);
-begin
-  YM_2151Close(num);
-end;
-
-end.
+end.
