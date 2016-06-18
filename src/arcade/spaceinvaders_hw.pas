@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
      samples,pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_spaceinv;
-procedure spaceinv_principal;
-function iniciar_spaceinv:boolean;
-procedure reset_spaceinv;
-function spaceinv_getbyte(direccion:word):byte;
-procedure spaceinv_putbyte(direccion:word;valor:byte);
-function spaceinv_inbyte(puerto:word):byte;
-procedure spaceinv_outbyte(valor:byte;puerto:word);
-procedure spaceinv_sound_update;
-//Save/load
-procedure spaceinv_qsave(nombre:string);
-procedure spaceinv_qload(nombre:string);
+procedure cargar_spaceinv;
 
 implementation
 
@@ -37,66 +26,6 @@ const
 var
   shift_data:word;
   shift_count,sound1,sound2:byte;
-
-procedure Cargar_spaceinv;
-begin
-llamadas_maquina.iniciar:=iniciar_spaceinv;
-llamadas_maquina.bucle_general:=spaceinv_principal;
-llamadas_maquina.reset:=reset_spaceinv;
-llamadas_maquina.fps_max:=59.541985;
-llamadas_maquina.save_qsnap:=spaceinv_qsave;
-llamadas_maquina.load_qsnap:=spaceinv_qload;
-end;
-
-function iniciar_spaceinv:boolean;
-var
-  colores:tpaleta;
-begin
-iniciar_spaceinv:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(1996800,262);
-main_z80.change_io_calls(spaceinv_inbyte,spaceinv_outbyte);
-main_z80.change_ram_calls(spaceinv_getbyte,spaceinv_putbyte);
-//cargar roms
-if not(cargar_roms(@memoria[0],@spaceinv_rom[0],'invaders.zip',0)) then exit;
-//Sound
-if (load_samples('invaders.zip',@spaceinv_samples[0],num_samples)) then main_z80.init_sound(spaceinv_sound_update);
-//DIP
-marcade.dswa:=0;
-marcade.dswa_val:=@spaceinv_dip;
-colores[0].r:=0;
-colores[0].g:=0;
-colores[0].b:=0;
-colores[1].r:=255;
-colores[1].g:=255;
-colores[1].b:=255;
-colores[2].r:=0;
-colores[2].g:=255;
-colores[2].b:=0;
-colores[3].r:=255;
-colores[3].g:=0;
-colores[3].b:=0;
-set_pal(colores,4);
-//final
-reset_spaceinv;
-iniciar_spaceinv:=true;
-end;
-
-procedure reset_spaceinv;
-begin
- main_z80.reset;
- reset_audio;
- shift_data:=0;
- shift_count:=0;
- sound1:=0;
- sound2:=0;
- marcade.in0:=0;
- marcade.in1:=$9;
-end;
 
 procedure update_video_spaceinv;
 var
@@ -159,11 +88,11 @@ while EmuStatus=EsRuning do begin
     case f of
     95:begin
           main_z80.im0:=$cf;
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
        end;
     223:begin
           main_z80.im0:=$d7;
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
           update_video_spaceinv;
         end;
     end;
@@ -275,6 +204,66 @@ sound1:=buffer[3];
 sound2:=buffer[4];
 freemem(data);
 close_qsnapshot;
+end;
+
+//Main
+procedure reset_spaceinv;
+begin
+ main_z80.reset;
+ reset_audio;
+ shift_data:=0;
+ shift_count:=0;
+ sound1:=0;
+ sound2:=0;
+ marcade.in0:=0;
+ marcade.in1:=$9;
+end;
+
+function iniciar_spaceinv:boolean;
+var
+  colores:tpaleta;
+begin
+iniciar_spaceinv:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(1996800,262);
+main_z80.change_io_calls(spaceinv_inbyte,spaceinv_outbyte);
+main_z80.change_ram_calls(spaceinv_getbyte,spaceinv_putbyte);
+//cargar roms
+if not(cargar_roms(@memoria[0],@spaceinv_rom[0],'invaders.zip',0)) then exit;
+//Sound
+if (load_samples('invaders.zip',@spaceinv_samples[0],num_samples)) then main_z80.init_sound(spaceinv_sound_update);
+//DIP
+marcade.dswa:=0;
+marcade.dswa_val:=@spaceinv_dip;
+colores[0].r:=0;
+colores[0].g:=0;
+colores[0].b:=0;
+colores[1].r:=255;
+colores[1].g:=255;
+colores[1].b:=255;
+colores[2].r:=0;
+colores[2].g:=255;
+colores[2].b:=0;
+colores[3].r:=255;
+colores[3].g:=0;
+colores[3].b:=0;
+set_pal(colores,4);
+//final
+reset_spaceinv;
+iniciar_spaceinv:=true;
+end;
+
+procedure Cargar_spaceinv;
+begin
+llamadas_maquina.iniciar:=iniciar_spaceinv;
+llamadas_maquina.bucle_general:=spaceinv_principal;
+llamadas_maquina.reset:=reset_spaceinv;
+llamadas_maquina.fps_max:=59.541985;
+llamadas_maquina.save_qsnap:=spaceinv_qsave;
+llamadas_maquina.load_qsnap:=spaceinv_qload;
 end;
 
 end.

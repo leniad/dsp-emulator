@@ -5,22 +5,22 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      system1_hw_misc,system2_hw_misc,nz80,main_engine,gfx_engine,sn_76496,
      controls_engine,pal_engine,ppi8255,z80pio;
 
-procedure Cargar_system1;
-procedure cerrar_system1;
-procedure eventos_system1;
+procedure cargar_system1;
+//Video
 procedure update_video_system1;
 procedure update_backgroud(screen:byte);
-//Main CPU
+//Events
+procedure eventos_system1;
+//PPI
 function system1_inbyte_ppi(puerto:word):byte;
 procedure system1_outbyte_ppi(valor:byte;puerto:word);
-//Sound CPU
-procedure system1_snd_putbyte(direccion:word;valor:byte);
 function system1_snd_getbyte_ppi(direccion:word):byte;
-procedure system1_sound_update;
-//PPI 8255
+procedure system1_snd_putbyte(direccion:word;valor:byte);
 procedure system1_port_a_write(valor:byte);
 procedure system1_port_b_write(valor:byte);
 procedure system1_port_c_write(valor:byte);
+//Sound
+procedure system1_sound_update;
 
 const
   z80_op:array[0..$ff] of byte=(
@@ -152,31 +152,6 @@ var
  dip_a,dip_b:byte;
 
 implementation
-
-procedure Cargar_system1;
-begin
-case main_vars.tipo_maquina of
-  27,35,36,152,153,154,155:begin
-        llamadas_maquina.iniciar:=iniciar_system1;
-        llamadas_maquina.bucle_general:=system1_principal;
-        llamadas_maquina.reset:=reset_system1;
-     end;
-  37,151:begin
-        llamadas_maquina.iniciar:=iniciar_system2;
-        llamadas_maquina.bucle_general:=system2_principal;
-        llamadas_maquina.reset:=reset_system2;
-     end;
-end;
-llamadas_maquina.cerrar:=cerrar_system1;
-llamadas_maquina.fps_max:=60.096154;
-end;
-
-procedure cerrar_system1;
-begin
-case main_vars.tipo_maquina of
-  27,35,36,153,155:z80pio_close(0);
-end;
-end;
 
 procedure draw_sprites;inline;
 var
@@ -375,16 +350,6 @@ end;
 end;
 
 //Sound CPU
-procedure system1_snd_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$8000 then exit;
-case direccion of
-  $8000..$9fff:mem_snd[(direccion and $7ff)+$8000]:=valor;
-  $a000..$bfff:sn_76496_0.Write(valor);
-  $c000..$dfff:sn_76496_1.Write(valor);
-end;
-end;
-
 function system1_snd_getbyte_ppi(direccion:word):byte;
 var
   port_c_val:byte;
@@ -398,6 +363,16 @@ case direccion of
                   pia8255_0.set_port(2,port_c_val and $bf);
                   pia8255_0.set_port(2,port_c_val or $40);
                end;
+end;
+end;
+
+procedure system1_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$8000 then exit;
+case direccion of
+  $8000..$9fff:mem_snd[(direccion and $7ff)+$8000]:=valor;
+  $a000..$bfff:sn_76496_0.Write(valor);
+  $c000..$dfff:sn_76496_1.Write(valor);
 end;
 end;
 
@@ -442,5 +417,30 @@ begin //sound_controlw
   bg_ram_bank:=(valor shr 1) and $3;
 end;
 
+//Main
+procedure cerrar_system1;
+begin
+case main_vars.tipo_maquina of
+  27,35,36,153,155:z80pio_close(0);
+end;
+end;
+
+procedure Cargar_system1;
+begin
+case main_vars.tipo_maquina of
+  27,35,36,152,153,154,155:begin
+        llamadas_maquina.iniciar:=iniciar_system1;
+        llamadas_maquina.bucle_general:=system1_principal;
+        llamadas_maquina.reset:=reset_system1;
+     end;
+  37,151:begin
+        llamadas_maquina.iniciar:=iniciar_system2;
+        llamadas_maquina.bucle_general:=system2_principal;
+        llamadas_maquina.reset:=reset_system2;
+     end;
+end;
+llamadas_maquina.cerrar:=cerrar_system1;
+llamadas_maquina.fps_max:=60.096154;
+end;
 
 end.

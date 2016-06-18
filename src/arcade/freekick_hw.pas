@@ -5,24 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      timer_engine,pal_engine,sound_engine,ppi8255;
 
-procedure Cargar_freekick;
-procedure freekick_principal;
-procedure reset_freekick;
-//Main CPU
-function freekick_getbyte(direccion:word):byte;
-procedure freekick_putbyte(direccion:word;valor:byte);
-function freekick_inbyte(puerto:word):byte;
-procedure freekick_outbyte(valor:byte;puerto:word);
-function iniciar_freekick:boolean;
-procedure freeckick_snd_irq;
-procedure freekick_sound_update;
-//PPI
-function ppi0_c_read:byte;
-procedure ppi0_a_write(valor:byte);
-procedure ppi0_b_write(valor:byte);
-function ppi1_a_read:byte;
-function ppi1_b_read:byte;
-function ppi1_c_read:byte;
+procedure cargar_freekick;
 
 implementation
 const
@@ -59,125 +42,6 @@ var
   snd_rom_addr:word;
   snd_rom:array[0..$7fff] of byte;
   freekick_ff:byte;
-
-procedure Cargar_freekick;
-begin
-llamadas_maquina.iniciar:=iniciar_freekick;
-llamadas_maquina.bucle_general:=freekick_principal;
-llamadas_maquina.reset:=reset_freekick;
-llamadas_maquina.fps_max:=59.410646;
-end;
-
-function iniciar_freekick:boolean;
-var
-  colores:tpaleta;
-  f:word;
-  bit0,bit1,bit2,bit3:byte;
-  memoria_temp:array[0..$ffff] of byte;
-const
-      pc_x:array[0..7] of dword=(0,1,2,3, 4,5,6,7);
-      pc_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
-      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-	128+0,128+1,128+2,128+3,128+4,128+5,128+6,128+7);
-      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-		8*8, 9*8, 10*8, 11*8,12*8,13*8,14*8,15*8);
-begin
-iniciar_freekick:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_init(2,256,256,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(3000000,263);
-main_z80.change_ram_calls(freekick_getbyte,freekick_putbyte);
-main_z80.change_io_calls(freekick_inbyte,freekick_outbyte);
-main_z80.init_sound(freekick_sound_update);
-//Sound Chips
-sn_76496_0:=sn76496_chip.Create(3000000);
-sn_76496_1:=sn76496_chip.Create(3000000);
-sn_76496_2:=sn76496_chip.Create(3000000);
-sn_76496_3:=sn76496_chip.Create(3000000);
-//IRQ Sound CPU
-init_timer(main_z80.numero_cpu,3000000/120,freeckick_snd_irq,true);
-case main_vars.tipo_maquina of
-  211:begin //Free Kick
-        //analog
-        init_analog(main_z80.numero_cpu,main_z80.clock,30,15,$ff,$FFFF,0,false);
-        //PPI
-        pia8255_0:=pia8255_chip.create;
-        pia8255_0.change_ports(nil,nil,ppi0_c_read,ppi0_a_write,ppi0_b_write,nil);
-        pia8255_1:=pia8255_chip.create;
-        pia8255_1.change_ports(ppi1_a_read,ppi1_b_read,ppi1_c_read,nil,nil,nil);
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@freekick_rom,'freekick.zip')) then exit;
-        //snd rom
-        if not(cargar_roms(@snd_rom[0],@freekick_sound_data,'freekick.zip')) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@freekick_chars[0],'freekick.zip',0)) then exit;
-        init_gfx(0,8,8,$800);
-        gfx_set_desc_data(3,0,8*8,$800*2*8*8,$800*1*8*8,$800*0*8*8);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@freekick_sprites[0],'freekick.zip',0)) then exit;
-        init_gfx(1,16,16,$200);
-        gfx[1].trans[0]:=true;
-        gfx_set_desc_data(3,0,16*16,$200*0*16*16,$200*2*16*16,$200*1*16*16);
-        convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@freekick_pal[0],'freekick.zip',0)) then exit;
-        //DIP
-        marcade.dswa:=$bf;
-        marcade.dswb:=$ff;
-        marcade.dswc:=$80;
-        marcade.dswa_val:=@freekick_dip_a;
-        marcade.dswb_val:=@freekick_dip_b;
-        marcade.dswc_val:=@freekick_dip_c;
-  end;
-end;
-//Poner colores aleatorios hasta que inicie la paleta
-for f:=0 to $1ff do begin
-		//red
-		bit0:=(memoria_temp[f] shr 0) and 1;
-		bit1:=(memoria_temp[f] shr 1) and 1;
-		bit2:=(memoria_temp[f] shr 2) and 1;
-		bit3:=(memoria_temp[f] shr 3) and 1;
-		colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-		//green
-		bit0:=(memoria_temp[f+$200] shr 0) and 1;
-		bit1:=(memoria_temp[f+$200] shr 1) and 1;
-		bit2:=(memoria_temp[f+$200] shr 2) and 1;
-		bit3:=(memoria_temp[f+$200] shr 3) and 1;
-		colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-		// blue
-		bit0:=(memoria_temp[f+$400] shr 0) and 1;
-		bit1:=(memoria_temp[f+$400] shr 1) and 1;
-		bit2:=(memoria_temp[f+$400] shr 2) and 1;
-		bit3:=(memoria_temp[f+$400] shr 3) and 1;
-		colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-end;
-set_pal(colores,$200);
-//final
-reset_freekick;
-iniciar_freekick:=true;
-end;
-
-procedure reset_freekick;
-begin
- main_z80.reset;
- sn_76496_0.reset;
- sn_76496_1.reset;
- sn_76496_2.reset;
- sn_76496_3.reset;
- pia8255_0.reset;
- pia8255_1.reset;
- reset_audio;
- snd_rom_addr:=0;
- spinner:=false;
- nmi_enable:=false;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- end;
 
 procedure update_video_freekick;inline;
 var
@@ -301,7 +165,7 @@ end;
 
 procedure freeckick_snd_irq;
 begin
-  main_z80.pedir_irq:=HOLD_LINE;
+  main_z80.change_irq(HOLD_LINE);
 end;
 
 function ppi0_c_read:byte;
@@ -334,13 +198,131 @@ begin
   ppi1_c_read:=marcade.dswc;
 end;
 
-
 procedure freekick_sound_update;
 begin
   sn_76496_0.update;
   sn_76496_1.update;
   sn_76496_2.update;
   sn_76496_3.update;
+end;
+
+//Main
+procedure reset_freekick;
+begin
+ main_z80.reset;
+ sn_76496_0.reset;
+ sn_76496_1.reset;
+ sn_76496_2.reset;
+ sn_76496_3.reset;
+ pia8255_0.reset;
+ pia8255_1.reset;
+ reset_audio;
+ snd_rom_addr:=0;
+ spinner:=false;
+ nmi_enable:=false;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+end;
+
+function iniciar_freekick:boolean;
+var
+  colores:tpaleta;
+  f:word;
+  bit0,bit1,bit2,bit3:byte;
+  memoria_temp:array[0..$ffff] of byte;
+const
+      pc_x:array[0..7] of dword=(0,1,2,3, 4,5,6,7);
+      pc_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
+      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+	128+0,128+1,128+2,128+3,128+4,128+5,128+6,128+7);
+      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		8*8, 9*8, 10*8, 11*8,12*8,13*8,14*8,15*8);
+begin
+iniciar_freekick:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_init(2,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(3000000,263);
+main_z80.change_ram_calls(freekick_getbyte,freekick_putbyte);
+main_z80.change_io_calls(freekick_inbyte,freekick_outbyte);
+main_z80.init_sound(freekick_sound_update);
+//Sound Chips
+sn_76496_0:=sn76496_chip.Create(3000000);
+sn_76496_1:=sn76496_chip.Create(3000000);
+sn_76496_2:=sn76496_chip.Create(3000000);
+sn_76496_3:=sn76496_chip.Create(3000000);
+//IRQ Sound CPU
+init_timer(main_z80.numero_cpu,3000000/120,freeckick_snd_irq,true);
+case main_vars.tipo_maquina of
+  211:begin //Free Kick
+        //analog
+        init_analog(main_z80.numero_cpu,main_z80.clock,30,15,$ff,$FFFF,0,false);
+        //PPI
+        pia8255_0:=pia8255_chip.create;
+        pia8255_0.change_ports(nil,nil,ppi0_c_read,ppi0_a_write,ppi0_b_write,nil);
+        pia8255_1:=pia8255_chip.create;
+        pia8255_1.change_ports(ppi1_a_read,ppi1_b_read,ppi1_c_read,nil,nil,nil);
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@freekick_rom,'freekick.zip')) then exit;
+        //snd rom
+        if not(cargar_roms(@snd_rom[0],@freekick_sound_data,'freekick.zip')) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@freekick_chars[0],'freekick.zip',0)) then exit;
+        init_gfx(0,8,8,$800);
+        gfx_set_desc_data(3,0,8*8,$800*2*8*8,$800*1*8*8,$800*0*8*8);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@freekick_sprites[0],'freekick.zip',0)) then exit;
+        init_gfx(1,16,16,$200);
+        gfx[1].trans[0]:=true;
+        gfx_set_desc_data(3,0,16*16,$200*0*16*16,$200*2*16*16,$200*1*16*16);
+        convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@freekick_pal[0],'freekick.zip',0)) then exit;
+        //DIP
+        marcade.dswa:=$bf;
+        marcade.dswb:=$ff;
+        marcade.dswc:=$80;
+        marcade.dswa_val:=@freekick_dip_a;
+        marcade.dswb_val:=@freekick_dip_b;
+        marcade.dswc_val:=@freekick_dip_c;
+  end;
+end;
+//Poner colores aleatorios hasta que inicie la paleta
+for f:=0 to $1ff do begin
+		//red
+		bit0:=(memoria_temp[f] shr 0) and 1;
+		bit1:=(memoria_temp[f] shr 1) and 1;
+		bit2:=(memoria_temp[f] shr 2) and 1;
+		bit3:=(memoria_temp[f] shr 3) and 1;
+		colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		//green
+		bit0:=(memoria_temp[f+$200] shr 0) and 1;
+		bit1:=(memoria_temp[f+$200] shr 1) and 1;
+		bit2:=(memoria_temp[f+$200] shr 2) and 1;
+		bit3:=(memoria_temp[f+$200] shr 3) and 1;
+		colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		// blue
+		bit0:=(memoria_temp[f+$400] shr 0) and 1;
+		bit1:=(memoria_temp[f+$400] shr 1) and 1;
+		bit2:=(memoria_temp[f+$400] shr 2) and 1;
+		bit3:=(memoria_temp[f+$400] shr 3) and 1;
+		colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+end;
+set_pal(colores,$200);
+//final
+reset_freekick;
+iniciar_freekick:=true;
+end;
+
+procedure Cargar_freekick;
+begin
+  llamadas_maquina.iniciar:=iniciar_freekick;
+  llamadas_maquina.bucle_general:=freekick_principal;
+  llamadas_maquina.reset:=reset_freekick;
+  llamadas_maquina.fps_max:=59.410646;
 end;
 
 end.

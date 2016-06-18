@@ -5,16 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,oki6295,misc_functions;
 
-procedure Cargar_pirates;
-procedure pirates_principal;
-function iniciar_pirates:boolean;
-procedure reset_pirates;
-//Pirates
-function pirates_getword(direccion:dword):word;
-procedure pirates_putword(direccion:dword;valor:word);
-procedure pirates_sound_update;
-//Genix
-function genix_getword(direccion:dword):word;
+procedure cargar_pirates;
 
 implementation
 const
@@ -46,183 +37,6 @@ var
  ram2:array[0..$3fff] of word;
  sprite_ram:array[0..$7ff] of word;
  scroll_x:word;
-
-procedure Cargar_pirates;
-begin
-llamadas_maquina.iniciar:=iniciar_pirates;
-llamadas_maquina.bucle_general:=pirates_principal;
-llamadas_maquina.reset:=reset_pirates;
-end;
-
-function iniciar_pirates:boolean;
-var
-  ptempw:pword;
-  ptempb,ptempb2:pbyte;
-procedure decr_and_load_oki;
-var
-  f,adrr:dword;
-  ptempb3,ptempb4:pbyte;
-begin
-  ptempb3:=ptempb;
-  for f:=0 to $7ffff do begin
-    adrr:=BITSWAP24(f,23,22,21,20,19,10,16,13,8,4,7,11,14,17,12,6,2,0,5,18,15,3,1,9);
-    ptempb4:=ptempb2;
-    inc(ptempb4,adrr);
-    ptempb4^:=BITSWAP8(ptempb3^,2,3,4,0,7,5,1,6);
-    inc(ptempb3);
-  end;
-  copymemory(@sound_rom[0,0],ptempb2,$40000);
-  ptempb3:=ptempb2;
-  inc(ptempb3,$40000);
-  copymemory(@sound_rom[1,0],ptempb3,$40000);
-end;
-procedure decr_and_load_rom;
-var
-  ptempw2:pword;
-  f,adrl,adrr:dword;
-  vl,vr:byte;
-begin
-  for f:=0 to $7ffff do begin
-    ptempw2:=ptempw;
-		adrl:=BITSWAP24(f,23,22,21,20,19,18,4,8,3,14,2,15,17,0,9,13,10,5,16,7,12,6,1,11);
-    inc(ptempw2,adrl);
-		vl:=BITSWAP8(ptempw2^ and $ff,4,2,7,1,6,5,0,3);
-    ptempw2:=ptempw;
-		adrr:=BITSWAP24(f,23,22,21,20,19,18,4,10,1,11,12,5,9,17,14,0,13,6,15,8,3,16,7,2);
-    inc(ptempw2,adrr);
-		vr:=BITSWAP8(ptempw2^ shr 8,1,4,7,0,3,5,6,2);
-		rom[f]:=(vr shl 8) or vl;
-  end;
-end;
-procedure decr_and_load_gfx;
-const
-  pt_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-  pt_y:array[0..7] of dword=(8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7);
-var
-  f,adrr:dword;
-  ptempb3,ptempb4:pbyte;
-begin
-  for f:=0 to $7ffff do begin
-		adrr:=BITSWAP24(f,23,22,21,20,19,18,10,2,5,9,7,13,16,14,11,4,1,6,12,17,3,0,15,8);
-    ptempb3:=ptempb2;inc(ptempb3,adrr);
-    ptempb4:=ptempb;inc(ptempb4,f);
-		ptempb3^:=BITSWAP8(ptempb4^,2,3,4,0,7,5,1,6);
-    ptempb3:=ptempb2;inc(ptempb3,adrr+$80000);
-    ptempb4:=ptempb;inc(ptempb4,f+$80000);
-		ptempb3^:= BITSWAP8(ptempb4^,4,2,7,1,6,5,0,3);
-    ptempb3:=ptempb2;inc(ptempb3,adrr+$100000);
-    ptempb4:=ptempb;inc(ptempb4,f+$100000);
-		ptempb3^:= BITSWAP8(ptempb4^,1,4,7,0,3,5,6,2);
-    ptempb3:=ptempb2;inc(ptempb3,adrr+$180000);
-    ptempb4:=ptempb;inc(ptempb4,f+$180000);
-		ptempb3^:= BITSWAP8(ptempb4^,2,3,4,0,7,5,1,6);
-end;
-init_gfx(0,8,8,$10000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,8*8,$180000*8,$100000*8,$80000*8,0);
-convert_gfx(0,0,ptempb2,@pt_x[0],@pt_y[0],false,false);
-end;
-procedure decr_and_load_sprites;
-const
-  ps_x:array[0..15] of dword=(7, 6, 5, 4, 3, 2, 1, 0,
-		                          15,14,13,12,11,10, 9, 8);
-  ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-                          		8*16, 9*16,10*16,11*16,12*16,13*16,14*16,15*16);
-var
-  f,adrr:dword;
-  ptempb3,ptempb4:pbyte;
-begin
-for f:=0 to $7ffff do begin
-		adrr:=BITSWAP24(f,23,22,21,20,19,18,17,5,12,14,8,3,0,7,9,16,4,2,6,11,13,1,10,15);
-    ptempb3:=ptempb2;inc(ptempb3,adrr);
-    ptempb4:=ptempb;inc(ptempb4,f);
-		ptempb3^:=BITSWAP8(ptempb4^,4,2,7,1,6,5,0,3);
-    ptempb3:=ptempb2;inc(ptempb3,adrr+$80000);
-    ptempb4:=ptempb;inc(ptempb4,f+$80000);
-		ptempb3^:= BITSWAP8(ptempb4^,1,4,7,0,3,5,6,2);
-    ptempb3:=ptempb2;inc(ptempb3,adrr+$100000);
-    ptempb4:=ptempb;inc(ptempb4,f+$100000);
-		ptempb3^:= BITSWAP8(ptempb4^,2,3,4,0,7,5,1,6);
-    ptempb3:=ptempb2;inc(ptempb3,adrr+$180000);
-    ptempb4:=ptempb;inc(ptempb4,f+$180000);
-		ptempb3^:= BITSWAP8(ptempb4^,4,2,7,1,6,5,0,3);
-end;
-init_gfx(1,16,16,$4000);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,16*16,$180000*8,$100000*8,$80000*8,0);
-convert_gfx(1,0,ptempb2,@ps_x[0],@ps_y[0],false,false);
-end;
-begin
-iniciar_pirates:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,288,256,true);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
-screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
-screen_init(4,512,256,false,true);
-iniciar_video(288,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(16000000,256);
-main_m68000.init_sound(pirates_sound_update);
-//sound
-oki_6295_0:=snd_okim6295.Create(1333333,OKIM6295_PIN7_LOW);
-getmem(ptempb,$200000);
-getmem(ptempb2,$200000);
-case main_vars.tipo_maquina of
-  206:begin //Pirates
-        main_m68000.change_ram16_calls(pirates_getword,pirates_putword);
-        //OKI snd
-        if not(cargar_roms(ptempb,@pirates_oki,'pirates.zip')) then exit;
-        decr_and_load_oki;
-        //cargar roms
-        getmem(ptempw,$100000);
-        if not(cargar_roms16w(ptempw,@pirates_rom[0],'pirates.zip',0)) then exit;
-        decr_and_load_rom;
-        freemem(ptempw);
-        //Protection patch
-        rom[$62c0 shr 1]:=$6006;
-        //cargar gfx
-        if not(cargar_roms(ptempb,@pirates_gfx[0],'pirates.zip',0)) then exit;
-        decr_and_load_gfx;
-        //sprites
-        if not(cargar_roms(ptempb,@pirates_sprites[0],'pirates.zip',0)) then exit;
-        decr_and_load_sprites;
-      end;
-  207:begin //Genix Family
-        main_m68000.change_ram16_calls(genix_getword,pirates_putword);
-        //OKI snd
-        if not(cargar_roms(ptempb,@genix_oki,'genix.zip')) then exit;
-        decr_and_load_oki;
-        //cargar roms
-        getmem(ptempw,$100000);
-        if not(cargar_roms16w(ptempw,@genix_rom[0],'genix.zip',0)) then exit;
-        decr_and_load_rom;
-        freemem(ptempw);
-        //cargar gfx
-        if not(cargar_roms(ptempb,@genix_gfx[0],'genix.zip',0)) then exit;
-        decr_and_load_gfx;
-        //sprites
-        if not(cargar_roms(ptempb,@genix_sprites[0],'genix.zip',0)) then exit;
-        decr_and_load_sprites;
-      end;
-end;
-freemem(ptempb);
-freemem(ptempb2);
-//final
-reset_pirates;
-iniciar_pirates:=true;
-end;
-
-procedure reset_pirates;
-begin
- main_m68000.reset;
- oki_6295_0.reset;
- reset_audio;
- marcade.in0:=$9f;
- marcade.in1:=$FFFF;
-end;
 
 procedure draw_sprites;
 var
@@ -410,6 +224,184 @@ case direccion of
     $900000..$907fff:genix_getword:=ram2[(direccion and $7fff) shr 1];
     $a00000:genix_getword:=oki_6295_0.read;
 end;
+end;
+
+//Main
+procedure reset_pirates;
+begin
+ main_m68000.reset;
+ oki_6295_0.reset;
+ reset_audio;
+ marcade.in0:=$9f;
+ marcade.in1:=$FFFF;
+end;
+
+function iniciar_pirates:boolean;
+var
+  ptempw:pword;
+  ptempb,ptempb2:pbyte;
+procedure decr_and_load_oki;
+var
+  f,adrr:dword;
+  ptempb3,ptempb4:pbyte;
+begin
+  ptempb3:=ptempb;
+  for f:=0 to $7ffff do begin
+    adrr:=BITSWAP24(f,23,22,21,20,19,10,16,13,8,4,7,11,14,17,12,6,2,0,5,18,15,3,1,9);
+    ptempb4:=ptempb2;
+    inc(ptempb4,adrr);
+    ptempb4^:=BITSWAP8(ptempb3^,2,3,4,0,7,5,1,6);
+    inc(ptempb3);
+  end;
+  copymemory(@sound_rom[0,0],ptempb2,$40000);
+  ptempb3:=ptempb2;
+  inc(ptempb3,$40000);
+  copymemory(@sound_rom[1,0],ptempb3,$40000);
+end;
+procedure decr_and_load_rom;
+var
+  ptempw2:pword;
+  f,adrl,adrr:dword;
+  vl,vr:byte;
+begin
+  for f:=0 to $7ffff do begin
+    ptempw2:=ptempw;
+		adrl:=BITSWAP24(f,23,22,21,20,19,18,4,8,3,14,2,15,17,0,9,13,10,5,16,7,12,6,1,11);
+    inc(ptempw2,adrl);
+		vl:=BITSWAP8(ptempw2^ and $ff,4,2,7,1,6,5,0,3);
+    ptempw2:=ptempw;
+		adrr:=BITSWAP24(f,23,22,21,20,19,18,4,10,1,11,12,5,9,17,14,0,13,6,15,8,3,16,7,2);
+    inc(ptempw2,adrr);
+		vr:=BITSWAP8(ptempw2^ shr 8,1,4,7,0,3,5,6,2);
+		rom[f]:=(vr shl 8) or vl;
+  end;
+end;
+procedure decr_and_load_gfx;
+const
+  pt_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
+  pt_y:array[0..7] of dword=(8*0, 8*1, 8*2, 8*3, 8*4, 8*5, 8*6, 8*7);
+var
+  f,adrr:dword;
+  ptempb3,ptempb4:pbyte;
+begin
+  for f:=0 to $7ffff do begin
+		adrr:=BITSWAP24(f,23,22,21,20,19,18,10,2,5,9,7,13,16,14,11,4,1,6,12,17,3,0,15,8);
+    ptempb3:=ptempb2;inc(ptempb3,adrr);
+    ptempb4:=ptempb;inc(ptempb4,f);
+		ptempb3^:=BITSWAP8(ptempb4^,2,3,4,0,7,5,1,6);
+    ptempb3:=ptempb2;inc(ptempb3,adrr+$80000);
+    ptempb4:=ptempb;inc(ptempb4,f+$80000);
+		ptempb3^:= BITSWAP8(ptempb4^,4,2,7,1,6,5,0,3);
+    ptempb3:=ptempb2;inc(ptempb3,adrr+$100000);
+    ptempb4:=ptempb;inc(ptempb4,f+$100000);
+		ptempb3^:= BITSWAP8(ptempb4^,1,4,7,0,3,5,6,2);
+    ptempb3:=ptempb2;inc(ptempb3,adrr+$180000);
+    ptempb4:=ptempb;inc(ptempb4,f+$180000);
+		ptempb3^:= BITSWAP8(ptempb4^,2,3,4,0,7,5,1,6);
+end;
+init_gfx(0,8,8,$10000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,8*8,$180000*8,$100000*8,$80000*8,0);
+convert_gfx(0,0,ptempb2,@pt_x[0],@pt_y[0],false,false);
+end;
+procedure decr_and_load_sprites;
+const
+  ps_x:array[0..15] of dword=(7, 6, 5, 4, 3, 2, 1, 0,
+		                          15,14,13,12,11,10, 9, 8);
+  ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+                          		8*16, 9*16,10*16,11*16,12*16,13*16,14*16,15*16);
+var
+  f,adrr:dword;
+  ptempb3,ptempb4:pbyte;
+begin
+for f:=0 to $7ffff do begin
+		adrr:=BITSWAP24(f,23,22,21,20,19,18,17,5,12,14,8,3,0,7,9,16,4,2,6,11,13,1,10,15);
+    ptempb3:=ptempb2;inc(ptempb3,adrr);
+    ptempb4:=ptempb;inc(ptempb4,f);
+		ptempb3^:=BITSWAP8(ptempb4^,4,2,7,1,6,5,0,3);
+    ptempb3:=ptempb2;inc(ptempb3,adrr+$80000);
+    ptempb4:=ptempb;inc(ptempb4,f+$80000);
+		ptempb3^:= BITSWAP8(ptempb4^,1,4,7,0,3,5,6,2);
+    ptempb3:=ptempb2;inc(ptempb3,adrr+$100000);
+    ptempb4:=ptempb;inc(ptempb4,f+$100000);
+		ptempb3^:= BITSWAP8(ptempb4^,2,3,4,0,7,5,1,6);
+    ptempb3:=ptempb2;inc(ptempb3,adrr+$180000);
+    ptempb4:=ptempb;inc(ptempb4,f+$180000);
+		ptempb3^:= BITSWAP8(ptempb4^,4,2,7,1,6,5,0,3);
+end;
+init_gfx(1,16,16,$4000);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,16*16,$180000*8,$100000*8,$80000*8,0);
+convert_gfx(1,0,ptempb2,@ps_x[0],@ps_y[0],false,false);
+end;
+begin
+iniciar_pirates:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,288,256,true);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,512,511,256,256,255);
+screen_init(3,512,256,true);
+screen_mod_scroll(3,512,512,511,256,256,255);
+screen_init(4,512,256,false,true);
+iniciar_video(288,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(16000000,256);
+main_m68000.init_sound(pirates_sound_update);
+//sound
+oki_6295_0:=snd_okim6295.Create(1333333,OKIM6295_PIN7_LOW);
+getmem(ptempb,$200000);
+getmem(ptempb2,$200000);
+case main_vars.tipo_maquina of
+  206:begin //Pirates
+        main_m68000.change_ram16_calls(pirates_getword,pirates_putword);
+        //OKI snd
+        if not(cargar_roms(ptempb,@pirates_oki,'pirates.zip')) then exit;
+        decr_and_load_oki;
+        //cargar roms
+        getmem(ptempw,$100000);
+        if not(cargar_roms16w(ptempw,@pirates_rom[0],'pirates.zip',0)) then exit;
+        decr_and_load_rom;
+        freemem(ptempw);
+        //Protection patch
+        rom[$62c0 shr 1]:=$6006;
+        //cargar gfx
+        if not(cargar_roms(ptempb,@pirates_gfx[0],'pirates.zip',0)) then exit;
+        decr_and_load_gfx;
+        //sprites
+        if not(cargar_roms(ptempb,@pirates_sprites[0],'pirates.zip',0)) then exit;
+        decr_and_load_sprites;
+      end;
+  207:begin //Genix Family
+        main_m68000.change_ram16_calls(genix_getword,pirates_putword);
+        //OKI snd
+        if not(cargar_roms(ptempb,@genix_oki,'genix.zip')) then exit;
+        decr_and_load_oki;
+        //cargar roms
+        getmem(ptempw,$100000);
+        if not(cargar_roms16w(ptempw,@genix_rom[0],'genix.zip',0)) then exit;
+        decr_and_load_rom;
+        freemem(ptempw);
+        //cargar gfx
+        if not(cargar_roms(ptempb,@genix_gfx[0],'genix.zip',0)) then exit;
+        decr_and_load_gfx;
+        //sprites
+        if not(cargar_roms(ptempb,@genix_sprites[0],'genix.zip',0)) then exit;
+        decr_and_load_sprites;
+      end;
+end;
+freemem(ptempb);
+freemem(ptempb2);
+//final
+reset_pirates;
+iniciar_pirates:=true;
+end;
+
+procedure Cargar_pirates;
+begin
+llamadas_maquina.iniciar:=iniciar_pirates;
+llamadas_maquina.bucle_general:=pirates_principal;
+llamadas_maquina.reset:=reset_pirates;
 end;
 
 end.

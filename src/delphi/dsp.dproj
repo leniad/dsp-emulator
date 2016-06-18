@@ -155,9 +155,9 @@
         <BRCC_Defines>WINDOWS;$(BRCC_Defines)</BRCC_Defines>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>508</VerInfo_Build>
+        <VerInfo_Build>525</VerInfo_Build>
         <VerInfo_Locale>3082</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Leniad;FileDescription=;FileVersion=0.16.3.508;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.16;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Leniad;FileDescription=;FileVersion=0.16.3.525;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.16;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
@@ -213,8 +213,8 @@
                     <Source Name="MainSource">dsp.dpr</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k230.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp230.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k240.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp240.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <ModelSupport>False</ModelSupport>
@@ -622,7 +622,7 @@
         <DCCReference Include="..\misc\init_games.pas"/>
         <DCCReference Include="..\misc\lenguaje.pas"/>
         <DCCReference Include="..\misc\snapshot.pas"/>
-        <DCCReference Include="..\misc\Tap_tzx.pas"/>
+        <DCCReference Include="..\misc\tap_tzx.pas"/>
         <DCCReference Include="..\misc\timer_engine.pas"/>
         <DCCReference Include="..\ordenadores\amstrad_cpc.pas"/>
         <DCCReference Include="..\ordenadores\misc\poke_spectrum.pas"/>
@@ -822,8 +822,6 @@
         <DCCReference Include="..\arcade\pirates_hw.pas"/>
         <DCCReference Include="..\arcade\junofirst_hw.pas"/>
         <DCCReference Include="..\arcade\gyruss_hw.pas"/>
-        <DCCReference Include="..\misc\unzip2.pas"/>
-        <DCCReference Include="..\misc\ziputils2.pas"/>
         <DCCReference Include="..\arcade\freekick_hw.pas"/>
         <DCCReference Include="..\arcade\boogiewings_hw.pas"/>
         <DCCReference Include="..\arcade\pinballaction_hw.pas"/>
@@ -861,6 +859,7 @@
         <DCCReference Include="..\devices\k053251.pas"/>
         <DCCReference Include="..\snd\k007232.pas"/>
         <DCCReference Include="..\snd\k053260.pas"/>
+        <DCCReference Include="..\cpu\cpu_misc.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

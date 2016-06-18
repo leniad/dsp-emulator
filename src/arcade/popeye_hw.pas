@@ -5,22 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,
      misc_functions,pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_popeye;
-procedure popeye_principal;
-function iniciar_popeye:boolean;
-procedure reset_popeye;
-//Main CPU
-function popeye_getbyte(direccion:word):byte;
-procedure popeye_putbyte(direccion:word;valor:byte);
-function popeye_inbyte(puerto:word):byte;
-procedure popeye_outbyte(valor:byte;puerto:word);
-//Sound
-procedure popeye_sound_update;
-function popeye_portar:byte;
-procedure popeye_portbw(valor:byte);
-//Save/load
-procedure popeye_qsave(nombre:string);
-procedure popeye_qload(nombre:string);
+procedure cargar_popeye;
 
 implementation
 const
@@ -52,117 +37,6 @@ var
   fondo_write:array[0..$1fff] of boolean;
   scroll_x:word;
 
-procedure Cargar_popeye;
-begin
-llamadas_maquina.iniciar:=iniciar_popeye;
-llamadas_maquina.bucle_general:=popeye_principal;
-llamadas_maquina.reset:=reset_popeye;
-llamadas_maquina.save_qsnap:=popeye_qsave;
-llamadas_maquina.load_qsnap:=popeye_qload;
-end;
-
-function iniciar_popeye:boolean;
-var
-  colores:tcolor;
-  f,pos:word;
-  ctemp1,ctemp2,ctemp3,ctemp4:byte;
-  memoria_temp:array[0..$7fff] of byte;
-const
-  ps_x:array[0..15] of dword=(7+($2000*8),6+($2000*8),5+($2000*8),4+($2000*8),
-     3+($2000*8),2+($2000*8),1+($2000*8),0+($2000*8),7,6,5,4,3,2,1,0);
-  ps_y:array[0..15] of dword=(15*8, 14*8, 13*8, 12*8, 11*8, 10*8, 9*8, 8*8,
-	  7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8 );
-  pc_x:array[0..15] of dword=(7,7, 6,6, 5,5, 4,4, 3,3, 2,2, 1,1, 0,0);
-  pc_y:array[0..15] of dword=(0*8,0*8, 1*8,1*8, 2*8,2*8, 3*8,3*8, 4*8,4*8, 5*8,5*8, 6*8,6*8, 7*8,7*8);
-begin
-iniciar_popeye:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,512,511);
-screen_init(2,512,512,true);
-screen_init(3,512,512,false,true);
-iniciar_video(512,448);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,512);
-main_z80.change_ram_calls(popeye_getbyte,popeye_putbyte);
-main_z80.change_io_calls(popeye_inbyte,popeye_outbyte);
-main_z80.init_sound(popeye_sound_update);
-//Audio chips
-ay8910_0:=ay8910_chip.create(2000000,1);
-ay8910_0.change_io_calls(popeye_portar,nil,nil,popeye_portbw);
-//cargar roms y decodificarlas
-if not(cargar_roms(@memoria_temp[0],@popeye_rom[0],'popeye.zip',0)) then exit;
-for f:=0 to $7fff do begin
-  pos:=bitswap16(f,15,14,13,12,11,10,8,7,6,3,9,5,4,2,1,0);
-  memoria[f]:=bitswap8(memoria_temp[pos xor $3f],3,4,2,5,1,6,0,7);
-end;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@popeye_char,'popeye.zip',1)) then exit;
-init_gfx(0,16,16,256);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(1,0,8*8,0);
-convert_gfx(0,0,@memoria_temp[$800],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@popeye_sprites[0],'popeye.zip',0)) then exit;
-init_gfx(1,16,16,512);
-gfx[1].trans[0]:=true;
-for f:=0 to 1 do begin
-  gfx_set_desc_data(2,2,16*8,(0+f*$1000)*8,($4000+f*$1000)*8);
-  convert_gfx(1,256*f*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-end;
-//poner la paleta chars
-if not(cargar_roms(@memoria_temp[0],@popeye_pal[0],'popeye.zip',0)) then exit;
-for f:=0 to $23f do memoria_temp[f]:=memoria_temp[f] xor $ff;
-copymemory(@popeye_mem_pal[0],@memoria_temp[0],$20);
-for f:=0 to 15 do begin
-		ctemp4:=f or ((f and 8) shl 1);	// address bits 3 and 4 are tied together */
-		// red component */
-		ctemp1:=(memoria_temp[ctemp4+$20] shr 0) and $01;
-		ctemp2:=(memoria_temp[ctemp4+$20] shr 1) and $01;
-		ctemp3:=(memoria_temp[ctemp4+$20] shr 2) and $01;
-		colores.r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-		// green component */
-		ctemp1:=(memoria_temp[ctemp4+$20] shr 3) and $01;
-		ctemp2:=(memoria_temp[ctemp4+$20] shr 4) and $01;
-		ctemp3:=(memoria_temp[ctemp4+$20] shr 5) and $01;
-		colores.g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-		// blue component */
-		ctemp1:=0;
-		ctemp2:=(memoria_temp[ctemp4+$20] shr 6) and $01;
-		ctemp3:=(memoria_temp[ctemp4+$20] shr 7) and $01;
-		colores.b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-    set_pal_color(colores,16+(2*f)+1);
-end;
-//Poner la paleta sprites
-for f:=0 to $FF do begin
-		// red component */
-		ctemp1:=(memoria_temp[$40+f] shr 0) and $01;
-		ctemp2:=(memoria_temp[$40+f] shr 1) and $01;
-		ctemp3:=(memoria_temp[$40+f] shr 2) and $01;
-		colores.r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-		// green component */
-		ctemp1:=(memoria_temp[$40+f] shr 3) and $01;
-		ctemp2:=(memoria_temp[$140+f] shr 0) and $01;
-		ctemp3:=(memoria_temp[$140+f] shr 1) and $01;
-		colores.g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-		// blue component */
-		ctemp1:=0;
-		ctemp2:=(memoria_temp[$140+f] shr 2) and $01;
-		ctemp3:=(memoria_temp[$140+f] shr 3) and $01;
-		colores.b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-    set_pal_color(colores,48+f);
-end;
-//DIP
-marcade.dswa:=$5f;
-marcade.dswb:=$3d;
-marcade.dswa_val:=@popeye_dip_a;
-marcade.dswb_val:=@popeye_dip_b;
-//final
-reset_popeye;
-iniciar_popeye:=true;
-end;
-
 procedure cambiar_paleta(valor:byte);inline;
 var
   f,ctemp1,ctemp2,ctemp3,ctemp4:byte;
@@ -187,26 +61,6 @@ begin
     set_pal_color(colores,f);
    end;
    fillchar(fondo_write[0],$2000,1);
-end;
-
-procedure reset_popeye;
-begin
- main_z80.reset;
- ay8910_0.reset;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- palette_bank:=0;
- prot0:=0;
- prot1:=0;
- prot_shift:=0;
- scroll_y:=0;
- dswbit:=0;
- scroll_x:=0;
- field:=0;
- cambiar_paleta(0);
- fillchar(fondo_write[0],$2000,1);
 end;
 
 procedure update_video_popeye;inline;
@@ -441,6 +295,137 @@ freemem(data);
 close_qsnapshot;
 fillchar(fondo_write[$0],$2000,1);
 fillchar(gfx[0].buffer[0],$400,1);
+end;
+
+//Main
+procedure reset_popeye;
+begin
+ main_z80.reset;
+ ay8910_0.reset;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ palette_bank:=0;
+ prot0:=0;
+ prot1:=0;
+ prot_shift:=0;
+ scroll_y:=0;
+ dswbit:=0;
+ scroll_x:=0;
+ field:=0;
+ cambiar_paleta(0);
+ fillchar(fondo_write[0],$2000,1);
+end;
+
+function iniciar_popeye:boolean;
+var
+  colores:tcolor;
+  f,pos:word;
+  ctemp1,ctemp2,ctemp3,ctemp4:byte;
+  memoria_temp:array[0..$7fff] of byte;
+const
+  ps_x:array[0..15] of dword=(7+($2000*8),6+($2000*8),5+($2000*8),4+($2000*8),
+     3+($2000*8),2+($2000*8),1+($2000*8),0+($2000*8),7,6,5,4,3,2,1,0);
+  ps_y:array[0..15] of dword=(15*8, 14*8, 13*8, 12*8, 11*8, 10*8, 9*8, 8*8,
+	  7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8 );
+  pc_x:array[0..15] of dword=(7,7, 6,6, 5,5, 4,4, 3,3, 2,2, 1,1, 0,0);
+  pc_y:array[0..15] of dword=(0*8,0*8, 1*8,1*8, 2*8,2*8, 3*8,3*8, 4*8,4*8, 5*8,5*8, 6*8,6*8, 7*8,7*8);
+begin
+iniciar_popeye:=false;
+iniciar_audio(false);
+screen_init(1,512,512);
+screen_mod_scroll(1,512,512,511,512,512,511);
+screen_init(2,512,512,true);
+screen_init(3,512,512,false,true);
+iniciar_video(512,448);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,512);
+main_z80.change_ram_calls(popeye_getbyte,popeye_putbyte);
+main_z80.change_io_calls(popeye_inbyte,popeye_outbyte);
+main_z80.init_sound(popeye_sound_update);
+//Audio chips
+ay8910_0:=ay8910_chip.create(2000000,1);
+ay8910_0.change_io_calls(popeye_portar,nil,nil,popeye_portbw);
+//cargar roms y decodificarlas
+if not(cargar_roms(@memoria_temp[0],@popeye_rom[0],'popeye.zip',0)) then exit;
+for f:=0 to $7fff do begin
+  pos:=bitswap16(f,15,14,13,12,11,10,8,7,6,3,9,5,4,2,1,0);
+  memoria[f]:=bitswap8(memoria_temp[pos xor $3f],3,4,2,5,1,6,0,7);
+end;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@popeye_char,'popeye.zip',1)) then exit;
+init_gfx(0,16,16,256);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(1,0,8*8,0);
+convert_gfx(0,0,@memoria_temp[$800],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@popeye_sprites[0],'popeye.zip',0)) then exit;
+init_gfx(1,16,16,512);
+gfx[1].trans[0]:=true;
+for f:=0 to 1 do begin
+  gfx_set_desc_data(2,2,16*8,(0+f*$1000)*8,($4000+f*$1000)*8);
+  convert_gfx(1,256*f*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+end;
+//poner la paleta chars
+if not(cargar_roms(@memoria_temp[0],@popeye_pal[0],'popeye.zip',0)) then exit;
+for f:=0 to $23f do memoria_temp[f]:=memoria_temp[f] xor $ff;
+copymemory(@popeye_mem_pal[0],@memoria_temp[0],$20);
+for f:=0 to 15 do begin
+		ctemp4:=f or ((f and 8) shl 1);	// address bits 3 and 4 are tied together */
+		// red component */
+		ctemp1:=(memoria_temp[ctemp4+$20] shr 0) and $01;
+		ctemp2:=(memoria_temp[ctemp4+$20] shr 1) and $01;
+		ctemp3:=(memoria_temp[ctemp4+$20] shr 2) and $01;
+		colores.r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+		// green component */
+		ctemp1:=(memoria_temp[ctemp4+$20] shr 3) and $01;
+		ctemp2:=(memoria_temp[ctemp4+$20] shr 4) and $01;
+		ctemp3:=(memoria_temp[ctemp4+$20] shr 5) and $01;
+		colores.g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+		// blue component */
+		ctemp1:=0;
+		ctemp2:=(memoria_temp[ctemp4+$20] shr 6) and $01;
+		ctemp3:=(memoria_temp[ctemp4+$20] shr 7) and $01;
+		colores.b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+    set_pal_color(colores,16+(2*f)+1);
+end;
+//Poner la paleta sprites
+for f:=0 to $FF do begin
+		// red component */
+		ctemp1:=(memoria_temp[$40+f] shr 0) and $01;
+		ctemp2:=(memoria_temp[$40+f] shr 1) and $01;
+		ctemp3:=(memoria_temp[$40+f] shr 2) and $01;
+		colores.r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+		// green component */
+		ctemp1:=(memoria_temp[$40+f] shr 3) and $01;
+		ctemp2:=(memoria_temp[$140+f] shr 0) and $01;
+		ctemp3:=(memoria_temp[$140+f] shr 1) and $01;
+		colores.g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+		// blue component */
+		ctemp1:=0;
+		ctemp2:=(memoria_temp[$140+f] shr 2) and $01;
+		ctemp3:=(memoria_temp[$140+f] shr 3) and $01;
+		colores.b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+    set_pal_color(colores,48+f);
+end;
+//DIP
+marcade.dswa:=$5f;
+marcade.dswb:=$3d;
+marcade.dswa_val:=@popeye_dip_a;
+marcade.dswb_val:=@popeye_dip_b;
+//final
+reset_popeye;
+iniciar_popeye:=true;
+end;
+
+procedure Cargar_popeye;
+begin
+llamadas_maquina.iniciar:=iniciar_popeye;
+llamadas_maquina.bucle_general:=popeye_principal;
+llamadas_maquina.reset:=reset_popeye;
+llamadas_maquina.save_qsnap:=popeye_qsave;
+llamadas_maquina.load_qsnap:=popeye_qload;
 end;
 
 end.

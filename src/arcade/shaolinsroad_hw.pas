@@ -5,17 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_shaolin;
-procedure shaolin_principal;
-function iniciar_shaolin:boolean;
-procedure reset_shaolin;
-//Main CPU
-function shaolin_getbyte(direccion:word):byte;
-procedure shaolin_putbyte(direccion:word;valor:byte);
-procedure shaolin_sound;
-//Save/load
-procedure shaolin_qsave(nombre:string);
-procedure shaolin_qload(nombre:string);
+procedure cargar_shaolin;
 
 implementation
 const
@@ -47,98 +37,6 @@ const
 var
  banco_pal,scroll:byte;
  pedir_nmi:boolean;
-
-procedure Cargar_shaolin;
-begin
-llamadas_maquina.iniciar:=iniciar_shaolin;
-llamadas_maquina.bucle_general:=shaolin_principal;
-llamadas_maquina.reset:=reset_shaolin;
-llamadas_maquina.save_qsnap:=shaolin_qsave;
-llamadas_maquina.load_qsnap:=shaolin_qload;
-end;
-
-function iniciar_shaolin:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      ctemp1,ctemp2,ctemp3:byte;
-      memoria_temp:array[0..$7fff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
-    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-begin
-iniciar_shaolin:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,0,0,0);
-screen_init(2,256,256,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(shaolin_getbyte,shaolin_putbyte);
-main_m6809.init_sound(shaolin_sound);
-//Sound Chip
-sn_76496_0:=sn76496_chip.Create(1536000);
-sn_76496_1:=sn76496_chip.Create(3072000);
-//cargar roms
-if not(cargar_roms(@memoria[0],@shaolin_rom[0],'shaolins.zip',0)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@shaolin_char[0],'shaolins.zip',0)) then exit;
-init_gfx(0,8,8,512);
-gfx_set_desc_data(4,0,16*8,512*16*8+4,512*16*8+0,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@shaolin_sprites[0],'shaolins.zip',0)) then exit;
-init_gfx(1,16,16,256);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,256*64*8+4,256*64*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//paleta
-if not(cargar_roms(@memoria_temp[0],@shaolin_pal[0],'shaolins.zip',0)) then exit;
-for f:=0 to 255 do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,256);
-//tabla_colores char & sprites
-ctemp1:=0;
-for ctemp2:=0 to 255 do begin
-	for ctemp3:=0 to 7 do begin
-		gfx[0].colores[ctemp2+ctemp3*256]:=(memoria_temp[ctemp1+$300] and $f)+32*ctemp3+16;
-    gfx[1].colores[ctemp2+ctemp3*256]:=(memoria_temp[ctemp1+$400] and $f)+32*ctemp3;
-  end;
-	ctemp1:=ctemp1+1;
-end;
-//DIP
-marcade.dswa:=$5a;
-marcade.dswb:=$0f;
-marcade.dswc:=$ff;
-marcade.dswa_val:=@shaolin_dip_a;
-marcade.dswb_val:=@shaolin_dip_b;
-marcade.dswc_val:=@shaolin_dip_c;
-//final
-reset_shaolin;
-iniciar_shaolin:=true;
-end;
-
-procedure reset_shaolin;
-begin
- main_m6809.reset;
- sn_76496_0.reset;
- sn_76496_1.reset;
- reset_audio;
- banco_pal:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- pedir_nmi:=false;
-end;
 
 procedure update_video_shaolin;inline;
 var
@@ -308,6 +206,98 @@ freemem(data);
 close_qsnapshot;
 //END
 fillchar(gfx[0].buffer[0],$400,1);
+end;
+
+//Main
+procedure reset_shaolin;
+begin
+ main_m6809.reset;
+ sn_76496_0.reset;
+ sn_76496_1.reset;
+ reset_audio;
+ banco_pal:=0;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ pedir_nmi:=false;
+end;
+
+function iniciar_shaolin:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      ctemp1,ctemp2,ctemp3:byte;
+      memoria_temp:array[0..$7fff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
+    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+begin
+iniciar_shaolin:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_mod_scroll(1,256,256,255,0,0,0);
+screen_init(2,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1536000,$100);
+main_m6809.change_ram_calls(shaolin_getbyte,shaolin_putbyte);
+main_m6809.init_sound(shaolin_sound);
+//Sound Chip
+sn_76496_0:=sn76496_chip.Create(1536000);
+sn_76496_1:=sn76496_chip.Create(3072000);
+//cargar roms
+if not(cargar_roms(@memoria[0],@shaolin_rom[0],'shaolins.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@shaolin_char[0],'shaolins.zip',0)) then exit;
+init_gfx(0,8,8,512);
+gfx_set_desc_data(4,0,16*8,512*16*8+4,512*16*8+0,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@shaolin_sprites[0],'shaolins.zip',0)) then exit;
+init_gfx(1,16,16,256);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,256*64*8+4,256*64*8+0,4,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//paleta
+if not(cargar_roms(@memoria_temp[0],@shaolin_pal[0],'shaolins.zip',0)) then exit;
+for f:=0 to 255 do begin
+  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
+  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+set_pal(colores,256);
+//tabla_colores char & sprites
+ctemp1:=0;
+for ctemp2:=0 to 255 do begin
+	for ctemp3:=0 to 7 do begin
+		gfx[0].colores[ctemp2+ctemp3*256]:=(memoria_temp[ctemp1+$300] and $f)+32*ctemp3+16;
+    gfx[1].colores[ctemp2+ctemp3*256]:=(memoria_temp[ctemp1+$400] and $f)+32*ctemp3;
+  end;
+	ctemp1:=ctemp1+1;
+end;
+//DIP
+marcade.dswa:=$5a;
+marcade.dswb:=$0f;
+marcade.dswc:=$ff;
+marcade.dswa_val:=@shaolin_dip_a;
+marcade.dswb_val:=@shaolin_dip_b;
+marcade.dswc_val:=@shaolin_dip_c;
+//final
+reset_shaolin;
+iniciar_shaolin:=true;
+end;
+
+procedure Cargar_shaolin;
+begin
+llamadas_maquina.iniciar:=iniciar_shaolin;
+llamadas_maquina.bucle_general:=shaolin_principal;
+llamadas_maquina.reset:=reset_shaolin;
+llamadas_maquina.save_qsnap:=shaolin_qsave;
+llamadas_maquina.load_qsnap:=shaolin_qload;
 end;
 
 end.

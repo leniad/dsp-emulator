@@ -2,7 +2,7 @@ unit m680x;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,sysutils,timer_engine,vars_hide;
+     main_engine,dialogs,sysutils,timer_engine,vars_hide,cpu_misc;
 
 const
   CPU_M6801=1;
@@ -27,15 +27,12 @@ type
             public
               procedure run(maximo:single);
               procedure reset;
-              procedure change_nmi(state:byte);
-              procedure change_irq(state:byte);
               procedure change_io_calls(in_port1,in_port2,in_port3,in_port4:cpu_inport_call;out_port1,out_port2,out_port3,out_port4:cpu_outport_call);
               //M6803
               function m6803_internal_reg_r(direccion:word):byte;
               procedure m6803_internal_reg_w(direccion:word;valor:byte);
             private
               r:preg_m6800;
-              pedir_nmi,pedir_irq,nmi_state:byte;
               in_port1,in_port2,in_port3,in_port4:cpu_inport_call;
               out_port1,out_port2,out_port3,out_port4:cpu_outport_call;
               port1_ddr,port2_ddr,port3_ddr,port4_ddr:byte;
@@ -57,6 +54,23 @@ type
               function call_int(dir:word):byte;
               procedure MODIFIED_counters;
               procedure check_timer_event;
+              //Opcodes
+              function neg8(valor:byte):byte;
+              function com8(valor:byte):byte;
+              function lsr8(valor:byte):byte;
+              function asl8(valor:byte):byte;
+              function rol8(valor:byte):byte;
+              function dec8(valor:byte):byte;
+              function inc8(valor:byte):byte;
+              procedure tst8(valor:byte);
+              function ror8(valor:byte):byte;
+              function sub8(valor1,valor2:byte):byte;
+              function sbc8(valor1,valor2:byte):byte;
+              function and8(valor1,valor2:byte):byte;
+              function eor8(valor1,valor2:byte):byte;
+              function adc8(valor1,valor2:byte):byte;
+              function or8(valor1,valor2:byte):byte;
+              function add8(valor1,valor2:byte):byte;
         end;
 
 var
@@ -64,6 +78,8 @@ var
 
 implementation
 const
+
+  //E8 95 E9
   direc_680x:array[0..$ff] of byte=(
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
      $f,$f,$f,$f, 0, 0, 0,$f, 0, 0,$f,$f, 0, 0, 0, 0,  //00
@@ -77,13 +93,13 @@ const
      $f, 1, 1, 8, 8,$f,$f,$f, 8,$f, 8,$f, 8, 8, 3, 3,  //70
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       1, 1, 1, 2, 1,$f, 1,$f, 1, 1, 1, 1, 2, 1, 2,$f,  //80
-      5, 5,$f,$a, 5,$f, 5,$b, 5,$f, 5, 5,$a,$f,$f,$f,  //90
+      5, 5,$f,$a, 5, 5, 5,$b, 5,$f, 5, 5,$a,$f,$f,$f,  //90
       6, 6,$f, 9, 6,$f, 6, 4,$f,$f, 6, 6,$f, 4, 9,$f,  //a0
      $f, 8,$f, 7,$f,$f, 8, 3,$f,$f, 8, 8,$f, 3,$f,$f,  //b0
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       1, 1,$f, 2, 1, 1, 1,$f, 1,$f, 1, 1, 2,$f, 2,$f,  //c0
      $f, 5,$f,$a, 5,$f, 5,$b,$f,$f, 5, 5,$a,$b,$a,$b,  //d0
-     $f, 4,$f, 9, 6,$f, 6, 4,$f,$f, 6, 6, 9, 4, 9,$f,  //e0
+     $f, 4,$f, 9, 6,$f, 6, 4, 4, 4, 6, 6, 9, 4, 9,$f,  //e0
      $f,$f,$f, 7,$f,$f, 8, 3,$f,$f,$f,$f, 7, 3, 7, 3); //f0
 
   ciclos_6803:array[0..$ff] of byte=(
@@ -142,6 +158,189 @@ const
   TCSR_OCF=$40;
   TCSR_ICF=$80;
 
+function cpu_m6800.neg8(valor:byte):byte;
+var
+  tempw:word;
+begin
+   tempw:=-valor;
+   r.cc.z:=((tempw and $ff)=0);
+   r.cc.n:=(tempw and $80)<>0;
+   r.cc.c:=(tempw and $100)<>0;
+   r.cc.v:=((0 xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
+   neg8:=tempw;
+end;
+
+function cpu_m6800.com8(valor:byte):byte;
+var
+  tempb:byte;
+begin
+   tempb:=not(valor);
+   r.cc.v:=false;
+   r.cc.c:=true;
+   r.cc.n:=(tempb and $80)<>0;
+   r.cc.z:=(tempb=0);
+   com8:=tempb;
+end;
+
+function cpu_m6800.lsr8(valor:byte):byte;
+var
+   tempb:byte;
+begin
+   tempb:=valor shr 1;
+   r.cc.n:=false;
+   r.cc.c:=(valor and 1)<>0;
+   r.cc.z:=(tempb=0);
+   lsr8:=tempb;
+end;
+
+function cpu_m6800.asl8(valor:byte):byte;
+var
+   tempw:word;
+begin
+   tempw:=valor shl 1;
+   r.cc.z:=((tempw and $ff)=0);
+   r.cc.c:=(tempw and $100)<>0;
+   r.cc.n:=(tempw and $80)<>0;
+   r.cc.v:=((valor xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
+   asl8:=tempw;
+end;
+
+function cpu_m6800.rol8(valor:byte):byte;
+var
+   tempw:word;
+begin
+   tempw:=(valor shl 1) or byte(r.cc.c);
+   r.cc.z:=((tempw and $ff)=0);
+   r.cc.c:=(tempw and $100)<>0;
+   r.cc.n:=(tempw and $80)<>0;
+   r.cc.v:=((valor xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
+   rol8:=tempw;
+end;
+
+function cpu_m6800.dec8(valor:byte):byte;
+var
+   tempb:byte;
+begin
+   tempb:=valor-1;
+   r.cc.z:=(tempb=0);
+   r.cc.n:=(tempb and $80)<>0;
+   r.cc.v:=(tempb=$7f);
+   dec8:=tempb;
+end;
+
+function cpu_m6800.inc8(valor:byte):byte;
+var
+   tempb:byte;
+begin
+   tempb:=valor+1;
+   r.cc.z:=(tempb=0);
+   r.cc.n:=(tempb and $80)<>0;
+   r.cc.v:=(tempb=$80);
+   inc8:=tempb;
+end;
+
+procedure cpu_m6800.tst8(valor:byte);
+begin
+   r.cc.v:=false;
+   r.cc.c:=false;
+   r.cc.z:=(valor=0);
+   r.cc.n:=(valor and $80)<>0;
+end;
+
+function cpu_m6800.ror8(valor:byte):byte;
+var
+   tempb:byte;
+begin
+   tempb:=(valor shr 1) or (byte(r.cc.c) shl 7);
+   r.cc.c:=(valor and $1)<>0;
+   r.cc.z:=(tempb=0);
+   r.cc.n:=(tempb and $80)<>0;
+   ror8:=tempb;
+end;
+
+function cpu_m6800.sub8(valor1,valor2:byte):byte;
+var
+   tempw:word;
+begin
+   tempw:=valor1-valor2;
+   r.cc.z:=((tempw and $ff)=0);
+   r.cc.n:=(tempw and $80)<>0;
+   r.cc.c:=(tempw and $100)<>0;
+   r.cc.v:=((valor1 xor valor2 xor tempw xor (tempw shr 1)) and $80)<>0;
+   sub8:=tempw;
+end;
+
+function cpu_m6800.sbc8(valor1,valor2:byte):byte;
+var
+   tempw:word;
+begin
+   tempw:=valor1-valor2-byte(r.cc.c);
+   r.cc.z:=((tempw and $ff)=0);
+   r.cc.n:=(tempw and $80)<>0;
+   r.cc.c:=(tempw and $100)<>0;
+   r.cc.v:=((valor1 xor valor2 xor tempw xor (tempw shr 1)) and $80)<>0;
+   sbc8:=tempw;
+end;
+
+function cpu_m6800.and8(valor1,valor2:byte):byte;
+var
+  tempb:byte;
+begin
+  tempb:=valor1 and valor2;
+  r.cc.v:=false;
+  r.cc.z:=(tempb=0);
+  r.cc.n:=(tempb and $80)<>0;
+  and8:=tempb;
+end;
+
+function cpu_m6800.eor8(valor1,valor2:byte):byte;
+var
+  tempb:byte;
+begin
+  tempb:=valor1 xor valor2;
+  r.cc.v:=false;
+  r.cc.z:=(tempb=0);
+  r.cc.n:=(tempb and $80)<>0;
+  eor8:=tempb;
+end;
+
+function cpu_m6800.adc8(valor1,valor2:byte):byte;
+var
+  tempw:word;
+begin
+  tempw:=valor1+valor2+byte(r.cc.c);
+  r.cc.n:=(tempw and $80)<>0;
+  r.cc.z:=((tempw and $ff)=0);
+  r.cc.c:=(tempw and $100)<>0;
+  r.cc.v:=((valor1 xor valor2 xor tempw xor (tempw shr 1)) and $80)<>0;
+  r.cc.h:=((valor1 xor valor2 xor tempw) and $10)<>0;
+  adc8:=tempw;
+end;
+
+function cpu_m6800.or8(valor1,valor2:byte):byte;
+var
+  tempb:byte;
+begin
+  tempb:=valor1 or valor2;
+  r.cc.v:=false;
+  r.cc.z:=(tempb=0);
+  r.cc.n:=(tempb and $80)<>0;
+  or8:=tempb;
+end;
+
+function cpu_m6800.add8(valor1,valor2:byte):byte;
+var
+  tempw:word;
+begin
+  tempw:=valor1+valor2;
+  r.cc.n:=(tempw and $80)<>0;
+  r.cc.z:=((tempw and $ff)=0);
+  r.cc.c:=(tempw and $100)<>0;
+  r.cc.v:=((valor1 xor valor2 xor tempw xor (tempw shr 1)) and $80)<>0;
+  r.cc.h:=((valor1 xor valor2 xor tempw) and $10)<>0;
+  add8:=tempw;
+end;
+
 constructor cpu_m6800.create(clock:dword;frames_div:word;tipo_cpu:byte);
 begin
 getmem(self.r,sizeof(reg_m6800));
@@ -184,10 +383,9 @@ r.cc.z:=false;
 r.cc.v:=false;
 r.cc.c:=false;
 r.cc.i:=true;
-self.pedir_nmi:=CLEAR_LINE;
-self.pedir_irq:=CLEAR_LINE;
-self.nmi_state:=CLEAR_LINE;
-self.pedir_reset:=CLEAR_LINE;
+self.change_nmi(CLEAR_LINE);
+self.change_irq(CLEAR_LINE);
+self.change_reset(CLEAR_LINE);
 r.wai:=false;
 self.port1_ddr:=0;
 self.port2_ddr:=0;
@@ -272,14 +470,12 @@ function cpu_m6800.coger_band:byte;
 var
   temp:byte;
 begin
-temp:=0;
-if r.cc.c then temp:=1;
-if r.cc.v then temp:=temp or 2;
-if r.cc.z then temp:=temp or 4;
-if r.cc.n then temp:=temp or 8;
-if r.cc.i then temp:=temp or $10;
-if r.cc.h then temp:=temp or $20;
-coger_band:=temp;
+temp:=byte(r.cc.c);
+temp:=temp or (byte(r.cc.v) shl 1);
+temp:=temp or (byte(r.cc.z) shl 2);
+temp:=temp or (byte(r.cc.n) shl 3);
+temp:=temp or (byte(r.cc.v) shl 4);;
+coger_band:=temp or (byte(r.cc.v) shl 5);;
 end;
 
 //OCI -> fff4
@@ -468,19 +664,6 @@ begin
   self.timer_next:=self.ocd.l;
 end;
 
-procedure cpu_m6800.change_nmi(state:byte);
-begin
-if state=CLEAR_LINE then begin
-  self.pedir_nmi:=CLEAR_LINE;
-  self.nmi_state:=CLEAR_LINE;
-end else self.pedir_nmi:=state;
-end;
-
-procedure cpu_m6800.change_irq(state:byte);
-begin
-     self.pedir_irq:=state;
-end;
-
 procedure cpu_m6800.run(maximo:single);
 var
   instruccion,numero,tempb,tempb2:byte;
@@ -591,7 +774,7 @@ case instruccion of
         r.cc.z:=(templ=0);
         r.cc.c:=(templ and $10000)<>0;
         r.cc.v:=((r.d.w xor r.d.w xor templ xor (templ shr 1)) and $8000)<>0;
-	      r.d.w:=templ;
+	r.d.w:=templ;
       end;
   $06:self.poner_band(r.d.a); //tap
   $08:begin  //inx
@@ -634,21 +817,19 @@ case instruccion of
        r.cc.z:=(r.d.a=0);
        r.cc.n:=(r.d.a and $80)<>0;
       end;
-  $18:begin //XGDX 63701 only
+  $18:begin //XGDX 63701
        tempw:=r.x;
        r.x:=r.d.w;
        r.d.w:=tempw;
       end;
   $19:begin //daa
-	     // UINT16 t
        tempb:=r.d.a and $f0;  //msn
        tempb2:=r.d.a and $f;  //lsn
        tempw:=0;  //cf
-	     if ((tempb2>$09) or r.cc.h) then tempw:=tempw or $06;
-	     if ((tempb>$80) and (tempb2>$09)) then tempw:=tempw or $60;
-	     if ((tempb>$90) or r.cc.c) then tempw:=tempw or $60;
-	     tempw2:=tempw+r.d.a;
-	     // keep carry from previous operation */
+       if ((tempb2>$09) or r.cc.h) then tempw:=tempw or $06;
+       if ((tempb>$80) and (tempb2>$09)) then tempw:=tempw or $60;
+       if ((tempb>$90) or r.cc.c) then tempw:=tempw or $60;
+       tempw2:=tempw+r.d.a;
        r.cc.z:=(tempw2 and $ff)=0;
        r.cc.n:=(tempw2 and $80)<>0;
        r.cc.c:=(tempw2 and $100)<>0;
@@ -694,62 +875,14 @@ case instruccion of
         r.d.w:=r.d.a*r.d.b;
         r.cc.c:=(r.d.w and $80)<>0;
       end;
-  $40:begin  //nega
-       tempw:=-r.d.a;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((0 xor r.d.a xor tempw xor (tempw shr 1)) and $80)<>0;
-       r.d.a:=tempw;
-      end;
-  $43:begin  //coma
-       r.d.a:=not(r.d.a);
-       r.cc.v:=false;
-       r.cc.c:=true;
-       r.cc.n:=(r.d.a and $80)<>0;
-       r.cc.z:=(r.d.a=0);
-      end;
-  $44:begin  //lsra
-        r.cc.n:=false;
-        r.cc.c:=(r.d.a and 1)<>0;
-        r.d.a:=r.d.a shr 1;
-        r.cc.z:=(r.d.a=0);
-      end;
-  $48:begin //asla
-        tempw:=r.d.a shl 1;
-        r.cc.z:=((tempw and $ff)=0);
-        r.cc.c:=(tempw and $100)<>0;
-        r.cc.n:=(tempw and $80)<>0;
-        r.cc.v:=((r.d.a xor r.d.a xor tempw xor (tempw shr 1)) and $80)<>0;
-        r.d.a:=tempw;
-      end;
-  $49:begin //rola
-        if r.cc.c then tempw:=(r.d.a shl 1) or 1
-          else tempw:=r.d.a shl 1;
-        r.cc.z:=((tempw and $ff)=0);
-        r.cc.c:=(tempw and $100)<>0;
-        r.cc.n:=(tempw and $80)<>0;
-        r.cc.v:=((r.d.a xor r.d.a xor tempw xor (tempw shr 1)) and $80)<>0;
-        r.d.a:=tempw;
-      end;
-  $4a:begin  //deca
-       r.d.a:=r.d.a-1;
-       r.cc.z:=(r.d.a=0);
-       r.cc.n:=(r.d.a and $80)<>0;
-       r.cc.v:=(r.d.a=$7f);
-      end;
-  $4c:begin  //inca
-       r.d.a:=r.d.a+1;
-       r.cc.z:=(r.d.a=0);
-       r.cc.n:=(r.d.a and $80)<>0;
-       r.cc.v:=(r.d.a=$80);
-      end;
-  $4d:begin  //tsta
-       r.cc.v:=false;
-       r.cc.c:=false;
-       r.cc.z:=(r.d.a=0);
-       r.cc.n:=(r.d.a and $80)<>0;
-      end;
+  $40:r.d.a:=self.neg8(r.d.a);  //nega
+  $43:r.d.a:=self.com8(r.d.a);  //coma
+  $44:r.d.a:=self.lsr8(r.d.a);  //lsra
+  $48:r.d.a:=self.asl8(r.d.a); //asla
+  $49:r.d.a:=self.rol8(r.d.a); //rola
+  $4a:r.d.a:=self.dec8(r.d.a);  //deca
+  $4c:r.d.a:=self.inc8(r.d.a);  //inca
+  $4d:self.tst8(r.d.a);  //tsta
   $4f:begin  //clra
        r.d.a:=0;
        r.cc.z:=true;
@@ -757,62 +890,14 @@ case instruccion of
        r.cc.v:=false;
        r.cc.c:=false;
       end;
-  $50:begin //negb
-       tempw:=-r.d.b;
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((0 xor r.d.b xor tempw xor (tempw shr 1)) and $80)<>0;
-	     r.d.b:=tempw;
-      end;
-  $53:begin  //comb
-       r.d.b:=not(r.d.b);
-       r.cc.v:=false;
-       r.cc.c:=true;
-       r.cc.n:=(r.d.b and $80)<>0;
-       r.cc.z:=(r.d.b=0);
-      end;
-  $54:begin  //lsrb
-       r.cc.c:=(r.d.b and $1)<>0;
-       r.cc.n:=false;
-       r.d.b:=r.d.b shr 1;
-       r.cc.z:=(r.d.b=0);
-      end;
-  $58:begin  //aslb
-       tempw:=r.d.b shl 1;
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.b xor r.d.b xor tempw xor (tempw shr 1)) and $80)<>0;
-       r.d.b:=tempw;
-      end;
-  $59:begin //rolb
-        if r.cc.c then tempw:=(r.d.b shl 1) or 1
-          else tempw:=r.d.b shl 1;
-        r.cc.z:=((tempw and $ff)=0);
-        r.cc.c:=(tempw and $100)<>0;
-        r.cc.n:=(tempw and $80)<>0;
-        r.cc.v:=((r.d.b xor r.d.b xor tempw xor (tempw shr 1)) and $80)<>0;
-        r.d.b:=tempw;
-      end;
-  $5a:begin  //decb
-       r.d.b:=r.d.b-1;
-       r.cc.z:=(r.d.b=0);
-       r.cc.n:=(r.d.b and $80)<>0;
-       r.cc.v:=(r.d.b=$7f);
-      end;
-  $5c:begin  //incb
-       r.d.b:=r.d.b+1;
-       r.cc.z:=(r.d.b=0);
-       r.cc.n:=(r.d.b and $80)<>0;
-       r.cc.v:=(r.d.b=$80);
-      end;
-  $5d:begin  //tstb
-       r.cc.v:=false;
-       r.cc.c:=false;
-       r.cc.z:=(r.d.b=0);
-       r.cc.n:=(r.d.b and $80)<>0;
-      end;
+  $50:r.d.b:=self.neg8(r.d.b); //negb
+  $53:r.d.b:=self.com8(r.d.b); //comb
+  $54:r.d.b:=self.lsr8(r.d.b); //lsrb
+  $58:r.d.b:=self.asl8(r.d.b); //aslb
+  $59:r.d.b:=self.rol8(r.d.b); //rolb
+  $5a:r.d.b:=self.dec8(r.d.b); //decb
+  $5c:r.d.b:=self.inc8(r.d.b); //incb
+  $5d:self.tst8(r.d.b);  //tstb
   $5f:begin  //clrb
        r.d.b:=0;
        r.cc.z:=true;
@@ -820,7 +905,7 @@ case instruccion of
        r.cc.v:=false;
        r.cc.c:=false;
       end;
-  $61:begin  //aim_ix /* HD63701YO only */
+  $61:begin  //aim_ix - HD63701YO
        tempw:=r.x+self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) and numero;
@@ -829,7 +914,7 @@ case instruccion of
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
       end;
-  $62:begin //OIM HD63701YO only */
+  $62:begin //OIM - HD63701YO
        tempw:=r.x+self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) or numero;
@@ -838,7 +923,7 @@ case instruccion of
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
       end;
-  $71:begin  //aim /* HD63701YO only */
+  $71:begin  //aim - HD63701YO
        tempw:=self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) and numero;
@@ -847,7 +932,7 @@ case instruccion of
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
       end;
-  $72:begin //oim 63701 only
+  $72:begin //oim - HD63701
        tempw:=self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) or numero;
@@ -857,45 +942,26 @@ case instruccion of
        self.putbyte(tempw,tempb);
       end;
   $73:begin //com
-       tempb:=not(numero);
-       r.cc.v:=false;
-       r.cc.z:=(tempb=0);
-       r.cc.n:=(tempb and $80)<>0;
-       r.cc.c:=true;
+       tempb:=self.com8(numero);
        self.putbyte(posicion,tempb);
       end;
   $64,$74:begin  //lsr
-       r.cc.n:=false;
-       r.cc.c:=(numero and 1)<>0;
-    	 numero:=numero shr 1;
-       r.cc.z:=(numero=0);
-       self.putbyte(posicion,numero);
+       tempb:=self.lsr8(numero);
+       self.putbyte(posicion,tempb);
       end;
-  $66:begin //ROR
-       if r.cc.c then tempb:=$80
-        else tempb:=0;
-       r.cc.c:=(numero and $1)<>0;
-	     tempb:=tempb+(numero shr 1);
-       r.cc.z:=(tempb=0);
-       r.cc.n:=(tempb and $80)<>0;
+  $66:begin //ror
+       tempb:=self.ror8(numero);
        self.putbyte(posicion,tempb);
       end;
   $78:begin //asl
-       tempw:=numero shl 1;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.v:=((numero xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-       self.putbyte(posicion,tempw);
-      end;
-  $6a,$7a:begin  //dec
-       tempb:=numero-1;
-       r.cc.z:=(tempb=0);
-       r.cc.n:=(tempb and $80)<>0;
-       r.cc.v:=(tempb=$80);
+       tempb:=self.asl8(numero);
        self.putbyte(posicion,tempb);
       end;
-  $6b:begin  // TIM HD63701YO only
+  $6a,$7a:begin  //dec
+       tempb:=self.dec8(numero);
+       self.putbyte(posicion,tempb);
+      end;
+  $6b:begin  // TIM HD63701YO
        tempw:=r.x+self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) and numero;
@@ -904,18 +970,10 @@ case instruccion of
        r.cc.n:=(tempb and $80)<>0;
       end;
   $6c,$7c:begin //inc
-       tempb:=numero+1;
-       r.cc.z:=(tempb=0);
-       r.cc.n:=(tempb and $80)<>0;
-       r.cc.v:=(tempb=$80);
+       tempb:=self.inc8(numero);
        self.putbyte(posicion,tempb);
       end;
-  $6d,$7d:begin  //tst
-       r.cc.v:=false;
-       r.cc.c:=false;
-       r.cc.z:=(numero=0);
-       r.cc.n:=(numero and $80)<>0;
-      end;
+  $6d,$7d:self.tst8(numero);  //tst
   $6e,$7e:r.pc:=posicion; //jmp
   $6f,$7f:begin //clr
        self.putbyte(posicion,0);
@@ -924,30 +982,9 @@ case instruccion of
        r.cc.v:=false;
        r.cc.c:=false;
       end;
-  $80,$90,$a0:begin  //suba
-       tempw:=r.d.a-numero;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-       r.d.a:=tempw;
-      end;
-  $81,$91,$a1,$b1:begin //cmpa
-       tempw:=r.d.a-numero;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-      end;
-  $82:begin  //sbac
-       if r.cc.c then tempw:=r.d.a-numero-1
-        else tempw:=r.d.a-numero;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-       r.d.a:=tempw;
-      end;
+  $80,$90,$a0:r.d.a:=self.sub8(r.d.a,numero);  //suba
+  $81,$91,$a1,$b1:self.sub8(r.d.a,numero); //cmpa
+  $82:r.d.a:=self.sbc8(r.d.a,numero);  //sbca
   $83,$93,$a3,$b3:begin //subd
        templ:=r.d.w-numerow;
        r.cc.z:=((templ and $ffff)=0);
@@ -956,12 +993,8 @@ case instruccion of
        r.cc.v:=((r.d.w xor numerow xor templ xor (templ shr 1)) and $8000)<>0;
        r.d.w:=templ;
       end;
-  $84,$94,$a4:begin //anda
-       r.d.a:=r.d.a and numero;
-       r.cc.v:=false;
-       r.cc.z:=(r.d.a=0);
-       r.cc.n:=(r.d.a and $80)<>0;
-      end;
+  $84,$94,$a4:r.d.a:=self.and8(r.d.a,numero); //anda
+  $95:self.and8(r.d.a,numero); //bita
   $86,$96,$a6,$b6:begin //lda
        r.d.a:=numero;
        r.cc.v:=false;
@@ -974,38 +1007,11 @@ case instruccion of
        r.cc.n:=(r.d.a and $80)<>0;
        self.putbyte(posicion,r.d.a);
       end;
-  $88,$98:begin  //eora
-       r.d.a:=r.d.a xor numero;
-       r.cc.v:=false;
-       r.cc.z:=(r.d.a=0);
-       r.cc.n:=(r.d.a and $80)<>0;
-      end;
-  $89:begin  //adca
-       if r.cc.c then tempw:=r.d.a+numero+1
-        else tempw:=r.d.a+numero;
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-       r.cc.h:=((r.d.a xor numero xor tempw) and $10)<>0;
-       r.d.a:=tempw;
-      end;
-  $8a,$9a,$aa,$ba:begin  //ora
-       r.d.a:=r.d.a or numero;
-       r.cc.v:=false;
-       r.cc.z:=(r.d.a=0);
-       r.cc.n:=(r.d.a and $80)<>0;
-      end;
-  $8b,$9b,$ab,$bb:begin  //adda
-       tempw:=r.d.a+numero;
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.a xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-       r.cc.h:=((r.d.a xor numero xor tempw) and $10)<>0;
-       r.d.a:=tempw;
-      end;
-  $8c,$9c:begin //cpx solo 6801/03
+  $88,$98:r.d.a:=self.eor8(r.d.a,numero);  //eora
+  $89:r.d.a:=self.adc8(r.d.a,numero);  //adca
+  $8a,$9a,$aa,$ba:r.d.a:=self.or8(r.d.a,numero);  //ora
+  $8b,$9b,$ab,$bb:r.d.a:=self.add8(r.d.a,numero);  //adda
+  $8c,$9c:begin //cpmx solo 6801/03
        templ:=r.x-numerow;
        r.cc.z:=((templ and $ffff)=0);
        r.cc.n:=(templ and $8000)<>0;
@@ -1026,21 +1032,8 @@ case instruccion of
        r.cc.z:=(numerow=0);
        r.cc.n:=(numerow and $8000)<>0;
       end;
-  $c0:begin //subb
-       tempw:=r.d.b-numero;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.b xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-       r.d.b:=tempw;
-      end;
-  $c1,$d1,$e1:begin //cmpb
-       tempw:=r.d.b-numero;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.b xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-      end;
+  $c0:r.d.b:=self.sub8(r.d.b,numero); //subb
+  $c1,$d1,$e1:self.sub8(r.d.b,numero); //cmpb
   $c3,$d3,$e3,$f3:begin  //addd
        templ:=r.d.w+numerow;
        r.cc.z:=((templ and $ffff)=0);
@@ -1049,18 +1042,8 @@ case instruccion of
        r.cc.v:=((r.d.w xor numerow xor templ xor (templ shr 1)) and $8000)<>0;
        r.d.w:=templ;
       end;
-  $c4,$d4,$e4:begin //andb
-       r.d.b:=r.d.b and numero;
-       r.cc.v:=false;
-       r.cc.z:=(r.d.b=0);
-       r.cc.n:=(r.d.b and $80)<>0;
-      end;
-  $c5:begin //bitb
-       tempb:=r.d.b and numero;
-       r.cc.v:=false;
-       r.cc.z:=(tempb=0);
-       r.cc.n:=(tempb and $80)<>0;
-      end;
+  $c4,$d4,$e4:r.d.b:=self.and8(r.d.b,numero); //andb
+  $c5:self.and8(r.d.b,numero); //bitb
   $c6,$d6,$e6,$f6:begin //ldb
        r.d.b:=numero;
        r.cc.v:=false;
@@ -1073,27 +1056,10 @@ case instruccion of
        r.cc.n:=(r.d.b and $80)<>0;
        self.putbyte(posicion,r.d.b);
       end;
-  $c8:begin  //eorb
-       r.d.b:=r.d.b xor numero;
-       r.cc.v:=false;
-       r.cc.z:=(r.d.b=0);
-       r.cc.n:=(r.d.b and $80)<>0;
-      end;
-  $ca,$da,$ea:begin  //orb
-       r.d.b:=r.d.b or numero;
-       r.cc.v:=false;
-       r.cc.z:=(r.d.b=0);
-       r.cc.n:=(r.d.b and $80)<>0;
-      end;
-  $cb,$db,$eb:begin //addb
-       tempw:=r.d.b+numero;
-       r.cc.n:=(tempw and $80)<>0;
-       r.cc.z:=((tempw and $ff)=0);
-       r.cc.c:=(tempw and $100)<>0;
-       r.cc.v:=((r.d.b xor numero xor tempw xor (tempw shr 1)) and $80)<>0;
-       r.cc.h:=((r.d.b xor numero xor tempw) and $10)<>0;
-       r.d.b:=tempw;
-      end;
+  $c8,$e8:r.d.b:=self.eor8(r.d.b,numero);  //eorb
+  $e9:r.d.b:=self.adc8(r.d.b,numero);  //adcb
+  $ca,$da,$ea:r.d.b:=self.or8(r.d.b,numero);  //orb
+  $cb,$db,$eb:r.d.b:=self.add8(r.d.b,numero); //addb
   $cc,$dc,$ec,$fc:begin  //ldd 6803 Only
        r.d.w:=numerow;
        r.cc.v:=false;

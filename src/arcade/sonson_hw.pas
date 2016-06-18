@@ -5,21 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,ay_8910,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine,qsnapshot;
 
-procedure Cargar_sonson;
-procedure sonson_principal;
-function iniciar_sonson:boolean;
-procedure reset_sonson;
-//Main CPU
-function sonson_getbyte(direccion:word):byte;
-procedure sonson_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function ssonson_getbyte(direccion:word):byte;
-procedure ssonson_putbyte(direccion:word;valor:byte);
-procedure sonson_sound_update;
-procedure sonson_snd_irq;
-//Save/load
-procedure sonson_qsave(nombre:string);
-procedure sonson_qload(nombre:string);
+procedure cargar_sonson;
 
 implementation
 const
@@ -52,99 +38,6 @@ const
 
 var
  soundlatch,last,scroll_x:byte;
-
-procedure Cargar_sonson;
-begin
-llamadas_maquina.iniciar:=iniciar_sonson;
-llamadas_maquina.bucle_general:=sonson_principal;
-llamadas_maquina.reset:=reset_sonson;
-llamadas_maquina.save_qsnap:=sonson_qsave;
-llamadas_maquina.load_qsnap:=sonson_qload;
-end;
-
-function iniciar_sonson:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      memoria_temp:array[0..$bfff] of byte;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_x:array[0..15] of dword=(8*16+7, 8*16+6, 8*16+5, 8*16+4, 8*16+3, 8*16+2, 8*16+1, 8*16+0,
-			7, 6, 5, 4, 3, 2, 1, 0);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_sonson:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,false,true);
-screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,0,0,0);
-iniciar_video(240,240);
-//Main CPU
-main_m6809:=cpu_m6809.Create(2000000,256);
-main_m6809.change_ram_calls(sonson_getbyte,sonson_putbyte);
-//Sound CPU
-snd_m6809:=cpu_m6809.Create(2000000,256);
-snd_m6809.change_ram_calls(ssonson_getbyte,ssonson_putbyte);
-snd_m6809.init_sound(sonson_sound_update);
-//IRQ Sound CPU
-init_timer(1,2000000/(4*60),sonson_snd_irq,true);
-//Sound Chip
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
-//cargar roms
-if not(cargar_roms(@memoria[0],@sonson_rom[0],'sonson.zip',0)) then exit;
-//Cargar Sound
-if not(cargar_roms(@mem_snd[0],@sonson_sonido,'sonson.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@sonson_char[0],'sonson.zip',0)) then exit;
-init_gfx(0,8,8,1024);
-gfx_set_desc_data(2,0,8*8,$2000*8,0*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@sonson_sprites[0],'sonson.zip',0)) then exit;
-init_gfx(1,16,16,512);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(3,0,32*8,$8000*8,$4000*8,0*8);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//colores
-if not(cargar_roms(@memoria_temp[0],@sonson_prom[0],'sonson.zip',0)) then exit;
-for f:=0 to 31 do begin
-  colores[f].r:=((memoria_temp[f+$20] and $f) shl 4) or (memoria_temp[f+$20] and $f);
-  colores[f].g:=((memoria_temp[f] and $f0) shr 4) or (memoria_temp[f] and $f0);
-  colores[f].b:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-end;
-set_pal(colores,32);
-for f:=0 to 255 do begin
-  gfx[0].colores[f]:=memoria_temp[$40+f];
-  gfx[1].colores[f]:=memoria_temp[$140+f]+16;
-end;
-//DIP
-marcade.dswa:=$df;
-marcade.dswb:=$cb;
-marcade.dswa_val:=@sonson_dip_a;
-marcade.dswb_val:=@sonson_dip_b;
-//final
-reset_sonson;
-iniciar_sonson:=true;
-end;
-
-procedure reset_sonson;
-begin
- main_m6809.reset;
- snd_m6809.reset;
- AY8910_0.reset;
- AY8910_1.reset;
- reset_audio;
- soundlatch:=0;
- last:=0;
- scroll_x:=0;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
-end;
 
 procedure update_video_sonson;inline;
 var
@@ -345,6 +238,99 @@ freemem(data);
 close_qsnapshot;
 //END
 fillchar(gfx[0].buffer[0],$400,1);
+end;
+
+//Main
+procedure reset_sonson;
+begin
+ main_m6809.reset;
+ snd_m6809.reset;
+ AY8910_0.reset;
+ AY8910_1.reset;
+ reset_audio;
+ soundlatch:=0;
+ last:=0;
+ scroll_x:=0;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+end;
+
+function iniciar_sonson:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      memoria_temp:array[0..$bfff] of byte;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..15] of dword=(8*16+7, 8*16+6, 8*16+5, 8*16+4, 8*16+3, 8*16+2, 8*16+1, 8*16+0,
+			7, 6, 5, 4, 3, 2, 1, 0);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_sonson:=false;
+iniciar_audio(false);
+screen_init(1,256,256,false,true);
+screen_init(2,256,256);
+screen_mod_scroll(2,256,256,255,0,0,0);
+iniciar_video(240,240);
+//Main CPU
+main_m6809:=cpu_m6809.Create(2000000,256);
+main_m6809.change_ram_calls(sonson_getbyte,sonson_putbyte);
+//Sound CPU
+snd_m6809:=cpu_m6809.Create(2000000,256);
+snd_m6809.change_ram_calls(ssonson_getbyte,ssonson_putbyte);
+snd_m6809.init_sound(sonson_sound_update);
+//IRQ Sound CPU
+init_timer(1,2000000/(4*60),sonson_snd_irq,true);
+//Sound Chip
+AY8910_0:=ay8910_chip.create(1500000,1);
+AY8910_1:=ay8910_chip.create(1500000,1);
+//cargar roms
+if not(cargar_roms(@memoria[0],@sonson_rom[0],'sonson.zip',0)) then exit;
+//Cargar Sound
+if not(cargar_roms(@mem_snd[0],@sonson_sonido,'sonson.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@sonson_char[0],'sonson.zip',0)) then exit;
+init_gfx(0,8,8,1024);
+gfx_set_desc_data(2,0,8*8,$2000*8,0*8);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@sonson_sprites[0],'sonson.zip',0)) then exit;
+init_gfx(1,16,16,512);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(3,0,32*8,$8000*8,$4000*8,0*8);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//colores
+if not(cargar_roms(@memoria_temp[0],@sonson_prom[0],'sonson.zip',0)) then exit;
+for f:=0 to 31 do begin
+  colores[f].r:=((memoria_temp[f+$20] and $f) shl 4) or (memoria_temp[f+$20] and $f);
+  colores[f].g:=((memoria_temp[f] and $f0) shr 4) or (memoria_temp[f] and $f0);
+  colores[f].b:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+end;
+set_pal(colores,32);
+for f:=0 to 255 do begin
+  gfx[0].colores[f]:=memoria_temp[$40+f];
+  gfx[1].colores[f]:=memoria_temp[$140+f]+16;
+end;
+//DIP
+marcade.dswa:=$df;
+marcade.dswb:=$cb;
+marcade.dswa_val:=@sonson_dip_a;
+marcade.dswb_val:=@sonson_dip_b;
+//final
+reset_sonson;
+iniciar_sonson:=true;
+end;
+
+procedure Cargar_sonson;
+begin
+llamadas_maquina.iniciar:=iniciar_sonson;
+llamadas_maquina.bucle_general:=sonson_principal;
+llamadas_maquina.reset:=reset_sonson;
+llamadas_maquina.save_qsnap:=sonson_qsave;
+llamadas_maquina.load_qsnap:=sonson_qload;
 end;
 
 end.

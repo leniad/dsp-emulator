@@ -5,21 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,timer_engine,ay_8910,
      rom_engine,pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_hw1942;
-procedure hw1942_principal;
-function iniciar_hw1942:boolean;
-procedure reset_hw1942;
-//Main CPU
-function hw1942_getbyte(direccion:word):byte;
-procedure hw1942_putbyte(direccion:word;valor:byte);
-//SND CPU
-function hw1942_snd_getbyte(direccion:word):byte;
-procedure hw1942_snd_putbyte(direccion:word;valor:byte);
-procedure hw1942_snd_irq;
-procedure hw1942_sound_update;
-//Save/load
-procedure hw1942_qsave(nombre:string);
-procedure hw1942_qload(nombre:string);
+procedure cargar_hw1942;
 
 implementation
 const
@@ -45,111 +31,6 @@ var
  memoria_rom:array[0..2,0..$3fff] of byte;
  scroll:word;
  sound_command,rom_bank,palette_bank:byte;
-
-procedure Cargar_hw1942;
-begin
-llamadas_maquina.iniciar:=iniciar_hw1942;
-llamadas_maquina.bucle_general:=hw1942_principal;
-llamadas_maquina.reset:=reset_hw1942;
-llamadas_maquina.save_qsnap:=hw1942_qsave;
-llamadas_maquina.load_qsnap:=hw1942_qload;
-end;
-
-function iniciar_hw1942:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      memoria_temp:array[0..$17fff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-			16*16+0, 16*16+1, 16*16+2, 16*16+3, 16*16+8+0, 16*16+8+1, 16*16+8+2, 16*16+8+3);
-    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_hw1942:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,512,false,true);
-screen_init(2,256,512);
-screen_mod_scroll(2,0,0,0,512,256,511);
-screen_init(3,256,256,true);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,$100);
-main_z80.change_ram_calls(hw1942_getbyte,hw1942_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3000000,$100);
-snd_z80.change_ram_calls(hw1942_snd_getbyte,hw1942_snd_putbyte);
-snd_z80.init_sound(hw1942_sound_update);
-//Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
-//IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3000000/(4*60),hw1942_snd_irq,true);
-//cargar roms y ponerlas en su sitio
-if not(cargar_roms(@memoria_temp[0],@hw1942_rom[0],'1942.zip',0)) then exit;
-copymemory(@memoria[0],@memoria_temp[0],$8000);
-for f:=0 to 2 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@hw1942_snd_rom,'1942.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@hw1942_char,'1942.zip',1)) then exit;
-init_gfx(0,8,8,$200);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@hw1942_sprites[0],'1942.zip',0)) then exit;
-init_gfx(1,16,16,$200);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,64*8,512*64*8+4,512*64*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//tiles
-if not(cargar_roms(@memoria_temp[0],@hw1942_tiles[0],'1942.zip',0)) then exit;
-init_gfx(2,16,16,$200);
-gfx_set_desc_data(3,0,32*8,0,$4000*8,$4000*8*2);
-convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
-//poner la paleta
-if not(cargar_roms(@memoria_temp[0],@hw1942_pal[0],'1942.zip',0)) then exit;
-for f:=0 to 255 do begin
-    colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-    colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-    colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,256);
-for f:=0 to $ff do begin
-  gfx[0].colores[f]:=memoria_temp[$300+f]+$80;  //chars
-  gfx[2].colores[f]:=memoria_temp[$400+f];  //tiles
-  gfx[2].colores[f+$100]:=memoria_temp[$400+f]+$10;
-  gfx[2].colores[f+$200]:=memoria_temp[$400+f]+$20;
-  gfx[2].colores[f+$300]:=memoria_temp[$400+f]+$30;
-  gfx[1].colores[f]:=memoria_temp[$500+f]+$40;  //sprites
-end;
-//final
-reset_hw1942;
-iniciar_hw1942:=true;
-end;
-
-procedure reset_hw1942;
-begin
- main_z80.reset;
- snd_z80.reset;
- ay8910_0.reset;
- ay8910_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- scroll:=0;
- rom_bank:=0;
- palette_bank:=0;
- sound_command:=0;
-end;
 
 procedure draw_sprites;inline;
 var
@@ -245,12 +126,12 @@ while EmuStatus=EsRuning do begin
     case f of
       239:begin //rst 10
           main_z80.im0:=$d7;
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
           update_video_hw1942;
         end;
       $ff:begin //rst 8
           main_z80.im0:=$cf;
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
         end;
     end;
   end;
@@ -281,8 +162,8 @@ case direccion of
         $c802:scroll:=valor or (scroll and $100);
         $c803:scroll:=((valor and $1) shl 8) or (scroll and $ff);
         $c804:begin
-                if (valor and $10)<>0 then snd_z80.pedir_reset:=ASSERT_LINE
-                  else snd_z80.pedir_reset:=CLEAR_LINE;
+                if (valor and $10)<>0 then snd_z80.change_reset(ASSERT_LINE)
+                  else snd_z80.change_reset(CLEAR_LINE);
                 main_screen.flip_main_screen:=(valor and $80)<>0;
               end;
         $c805:palette_bank:=valor;
@@ -312,7 +193,7 @@ end;
 
 procedure hw1942_snd_irq;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 procedure hw1942_sound_update;
@@ -381,6 +262,111 @@ rom_bank:=buffer[3];
 palette_bank:=buffer[4];
 freemem(data);
 close_qsnapshot;
+end;
+
+//Main
+procedure reset_hw1942;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ ay8910_0.reset;
+ ay8910_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ scroll:=0;
+ rom_bank:=0;
+ palette_bank:=0;
+ sound_command:=0;
+end;
+
+function iniciar_hw1942:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      memoria_temp:array[0..$17fff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
+    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			16*16+0, 16*16+1, 16*16+2, 16*16+3, 16*16+8+0, 16*16+8+1, 16*16+8+2, 16*16+8+3);
+    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
+    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_hw1942:=false;
+iniciar_audio(false);
+screen_init(1,256,512,false,true);
+screen_init(2,256,512);
+screen_mod_scroll(2,0,0,0,512,256,511);
+screen_init(3,256,256,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,$100);
+main_z80.change_ram_calls(hw1942_getbyte,hw1942_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,$100);
+snd_z80.change_ram_calls(hw1942_snd_getbyte,hw1942_snd_putbyte);
+snd_z80.init_sound(hw1942_sound_update);
+//Sound Chips
+AY8910_0:=ay8910_chip.create(1500000,1);
+AY8910_1:=ay8910_chip.create(1500000,1);
+//IRQ Sound CPU
+init_timer(snd_z80.numero_cpu,3000000/(4*60),hw1942_snd_irq,true);
+//cargar roms y ponerlas en su sitio
+if not(cargar_roms(@memoria_temp[0],@hw1942_rom[0],'1942.zip',0)) then exit;
+copymemory(@memoria[0],@memoria_temp[0],$8000);
+for f:=0 to 2 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+//cargar ROMS sonido
+if not(cargar_roms(@mem_snd[0],@hw1942_snd_rom,'1942.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@hw1942_char,'1942.zip',1)) then exit;
+init_gfx(0,8,8,$200);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@hw1942_sprites[0],'1942.zip',0)) then exit;
+init_gfx(1,16,16,$200);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,64*8,512*64*8+4,512*64*8+0,4,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//tiles
+if not(cargar_roms(@memoria_temp[0],@hw1942_tiles[0],'1942.zip',0)) then exit;
+init_gfx(2,16,16,$200);
+gfx_set_desc_data(3,0,32*8,0,$4000*8,$4000*8*2);
+convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@hw1942_pal[0],'1942.zip',0)) then exit;
+for f:=0 to 255 do begin
+    colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+    colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
+    colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+set_pal(colores,256);
+for f:=0 to $ff do begin
+  gfx[0].colores[f]:=memoria_temp[$300+f]+$80;  //chars
+  gfx[2].colores[f]:=memoria_temp[$400+f];  //tiles
+  gfx[2].colores[f+$100]:=memoria_temp[$400+f]+$10;
+  gfx[2].colores[f+$200]:=memoria_temp[$400+f]+$20;
+  gfx[2].colores[f+$300]:=memoria_temp[$400+f]+$30;
+  gfx[1].colores[f]:=memoria_temp[$500+f]+$40;  //sprites
+end;
+//final
+reset_hw1942;
+iniciar_hw1942:=true;
+end;
+
+procedure cargar_hw1942;
+begin
+llamadas_maquina.iniciar:=iniciar_hw1942;
+llamadas_maquina.bucle_general:=hw1942_principal;
+llamadas_maquina.reset:=reset_hw1942;
+llamadas_maquina.save_qsnap:=hw1942_qsave;
+llamadas_maquina.load_qsnap:=hw1942_qload;
 end;
 
 end.

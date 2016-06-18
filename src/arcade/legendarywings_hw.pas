@@ -5,25 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,msm5205,
      rom_engine,pal_engine,sound_engine,timer_engine;
 
-procedure Cargar_hlwings;
-procedure lwings_principal;
-function iniciar_lwings:boolean;
-procedure reset_lwings;
-//Legendary Wings
-function lwings_getbyte(direccion:word):byte;
-procedure lwings_putbyte(direccion:word;valor:byte);
-function lwings_snd_getbyte(direccion:word):byte;
-procedure lwings_snd_putbyte(direccion:word;valor:byte);
-procedure lwings_sound_update;
-procedure lwings_snd_irq;
-//Trojan
-procedure trojan_principal;
-function trojan_misc_getbyte(direccion:word):byte;
-procedure trojan_misc_putbyte(direccion:word;valor:byte);
-procedure trojan_putbyte(direccion:word;valor:byte);
-function trojan_inbyte(puerto:word):byte;
-procedure trojan_outbyte(valor:byte;puerto:word);
-procedure trojan_adpcm_instruccion;
+procedure cargar_hlwings;
 
 implementation
 const
@@ -87,14 +69,408 @@ var
  pintar_image:boolean;
  mem_adpcm:array[0..$3fff] of byte;
 
-procedure Cargar_hlwings;
+procedure eventos_lwings;
 begin
-case main_vars.tipo_maquina of
-  59,60:llamadas_maquina.bucle_general:=lwings_principal;
-  61:llamadas_maquina.bucle_general:=trojan_principal;
+if event.arcade then begin
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
-llamadas_maquina.iniciar:=iniciar_lwings;
-llamadas_maquina.reset:=reset_lwings;
+end;
+
+procedure update_video_lw;inline;
+var
+  f,color,nchar:word;
+  x,y:word;
+  attr:byte;
+begin
+for f:=$3ff downto 0 do begin
+  //tiles
+  attr:=memoria[$ec00+f];
+  color:=attr and $7;
+  if (gfx[2].buffer[f] or buffer_color[color+$10]) then begin
+      x:=f div 32;
+      y:=f mod 32;
+      nchar:=memoria[$e800+f]+((attr and $e0) shl 3);
+      put_gfx_flip(x*16,y*16,nchar,color shl 4,2,2,(attr and $8)<>0,(attr and $10)<>0);
+      gfx[2].buffer[f]:=false;
+  end;
+  //Chars
+  attr:=memoria[f+$e400];
+  color:=attr and $f;
+  if (gfx[0].buffer[f] or buffer_color[color]) then begin
+    x:=f mod 32;
+    y:=f div 32;
+    nchar:=memoria[f+$e000]+((attr and $c0) shl 2);
+    put_gfx_trans_flip(x*8,y*8,nchar,(color shl 2)+512,3,0,(attr and $20)<>0,(attr and $10)<>0);
+    gfx[0].buffer[f]:=false;
+  end;
+end;
+scroll_x_y(2,1,scroll_y,scroll_x);
+for f:=$7f downto 0 do begin
+    x:=(buffer_sprites[3+(f*4)]+((buffer_sprites[1+(f*4)] and $1) shl 8));
+    y:=buffer_sprites[2+(f*4)];
+    if (x or y)<>0 then begin
+      attr:=buffer_sprites[1+(f*4)];
+      nchar:=buffer_sprites[(f*4)]+((attr and $c0) shl 2);
+      color:=(attr and $38) shl 1;
+      put_gfx_sprite(nchar,color+384,(attr and $2)<>0,(attr and $4)<>0,1);
+      actualiza_gfx_sprite(x,y,1,1);
+    end;
+end;
+actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
+actualiza_trozo_final(0,8,256,240,1);
+fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+end;
+
+procedure lwings_principal;
+var
+  f:byte;
+  frame_m,frame_s:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+frame_s:=snd_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    //Main CPU
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    //Sound CPU
+    snd_z80.run(frame_s);
+    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    if f=247 then begin
+      if irq_ena then main_z80.change_irq(HOLD_LINE);
+      update_video_lw;
+      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
+    end;
+  end;
+  eventos_lwings;
+  video_sync;
+end;
+end;
+
+//Main CPU
+function lwings_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$7fff,$c000..$efff:lwings_getbyte:=memoria[direccion];
+  $8000..$bfff:lwings_getbyte:=mem_rom[bank,direccion and $3fff];
+  $f000..$f7ff:lwings_getbyte:=buffer_paleta[direccion and $7ff];
+  $f808:lwings_getbyte:=marcade.in0;
+  $f809:lwings_getbyte:=marcade.in1;
+  $f80a:lwings_getbyte:=marcade.in2;
+  $f80b..$f80c:lwings_getbyte:=$ff;
+end;
+end;
+
+procedure cambiar_color(dir:word);inline;
+var
+  tmp_color:byte;
+  color:tcolor;
+begin
+  tmp_color:=buffer_paleta[dir];
+  color.r:=pal4bit(tmp_color shr 4);
+  color.g:=pal4bit(tmp_color);
+  tmp_color:=buffer_paleta[dir+$400];
+  color.b:=pal4bit(tmp_color shr 4);
+  set_pal_color(color,dir);
+  case dir of
+    $0..$7f:buffer_color[((dir shr 4) and $7)+$10]:=true;
+    $200..$23f:buffer_color[(dir shr 2) and $f]:=true;
+  end;
+end;
+
+procedure lwings_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$c000 then exit;
+case direccion of
+    $c000..$dfff:memoria[direccion]:=valor;
+    $e000..$e7ff:begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $e800..$efff:begin
+                    gfx[2].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $f000..$f7ff:if buffer_paleta[direccion and $7ff]<>valor then begin
+                    buffer_paleta[direccion and $7ff]:=valor;
+                    cambiar_color(direccion and $3ff);
+                 end;
+    $f808:scroll_y:=(scroll_y and $100) or valor;
+    $f809:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
+    $f80a:scroll_x:=(scroll_x and $100) or valor;
+    $f80b:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
+    $f80c:sound_command:=valor;
+    $f80e:begin
+            bank:=(valor and $6) shr 1;
+            irq_ena:=(valor and $8)<>0;
+          end;
+end;
+end;
+
+//Sound CPU
+function lwings_snd_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$7fff,$c000..$c7ff:lwings_snd_getbyte:=mem_snd[direccion];
+  $c800:lwings_snd_getbyte:=sound_command;
+end;
+end;
+
+procedure lwings_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$8000 then exit;
+case direccion of
+  $c000..$c7ff:mem_snd[direccion]:=valor;
+  $e000:ym2203_0.Control(valor);
+  $e001:ym2203_0.Write(valor);
+  $e002:ym2203_1.Control(valor);
+  $e003:ym2203_1.Write(valor);
+end;
+end;
+
+procedure lwings_snd_irq;
+begin
+  snd_z80.change_irq(HOLD_LINE);
+end;
+
+procedure lwings_sound_update;
+begin
+  ym2203_0.Update;
+  ym2203_1.Update;
+end;
+
+//trojan
+procedure update_video_trojan;inline;
+var
+        f,color,nchar:word;
+        x,y:word;
+        attr:byte;
+        tile_index,offsy:word;
+begin
+//final 1  512x512 (por sprites)
+//tiles 2  512x512 pri 0
+//chars 3
+//tiles 4  pri 1
+//back 5
+if pintar_image then begin
+  offsy:=image*$20;
+  for y:=0 to $f do begin
+    offsy:=offsy and $7fff;
+    for x:=0 to $1f do begin
+      tile_index:=offsy+(2*x);
+      attr:=trojan_map[tile_index+1];
+      color:=(attr and $7) shl 4;
+      nchar:=trojan_map[tile_index]+((attr and $80) shl 1);
+      put_gfx_flip(x*16,y*16,nchar,color,5,3,(attr and $30)<>0,false);
+    end;
+    offsy:=offsy+$800;
+  end;
+  pintar_image:=false;
+end;
+scroll__x(5,1,scroll_x2);
+for f:=$3ff downto 0 do begin
+  //tiles
+  attr:=memoria[$ec00+f];
+  color:=attr and $7;
+  if (gfx[2].buffer[f] or buffer_color[color+$10]) then begin
+      x:=f div 32;
+      y:=f mod 32;
+      nchar:=memoria[$e800+f]+((attr and $e0) shl 3);
+      put_gfx_trans_flip(x*16,y*16,nchar,(color shl 4)+256,2,2,(attr and $10)<>0,false);
+      if (attr and $8)<>0 then put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,4,2,(attr and $10)<>0,false,0)
+        else put_gfx_block_trans(x*16,y*16,4,16,16);
+      gfx[2].buffer[f]:=false;
+  end;
+  //Chars
+  attr:=memoria[f+$e400];
+  color:=attr and $f;
+  if (gfx[0].buffer[f] or buffer_color[color]) then begin
+    x:=f mod 32;
+    y:=f div 32;
+    nchar:=memoria[f+$e000]+((attr and $c0) shl 2);
+    put_gfx_trans_flip(x*8,y*8,nchar,(color shl 2)+768,3,0,(attr and $20)<>0,(attr and $10)<>0);
+    gfx[0].buffer[f]:=false;
+  end;
+end;
+//Fondo con prioridad 0
+scroll_x_y(2,1,scroll_x,scroll_y);
+//sprites
+for f:=$5f downto 0 do begin
+    x:=(buffer_sprites[3+(f*4)]+((buffer_sprites[1+(f*4)] and $1) shl 8));
+    y:=buffer_sprites[2+(f*4)];
+    if (x or y)<>0 then begin
+      attr:=buffer_sprites[1+(f*4)];
+      nchar:=buffer_sprites[(f*4)]+((attr and $20) shl 4)+((attr and $40) shl 2)+((attr and $80) shl 3);
+      color:=(attr and $e) shl 3;
+      put_gfx_sprite(nchar,color+640,(attr and $10)<>0,true,1);
+      actualiza_gfx_sprite(x,y,1,1);
+    end;
+end;
+//Fondo con prioridad 1
+scroll_x_y(4,1,scroll_x,scroll_y);
+actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
+actualiza_trozo_final(0,8,256,240,1);
+fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+end;
+
+procedure trojan_principal;
+var
+  f:byte;
+  frame_m,frame_s,frame_ms:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+frame_s:=snd_z80.tframes;
+frame_ms:=sub_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    //Main Z80
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    //Sound Z80
+    snd_z80.run(frame_s);
+    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    //ADPCM Z80
+    sub_z80.run(frame_ms);
+    frame_ms:=frame_ms+sub_z80.tframes-sub_z80.contador;
+    if f=247 then begin
+      if irq_ena then main_z80.change_irq(HOLD_LINE);
+      update_video_trojan;
+      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
+    end;
+  end;
+  eventos_lwings;
+  video_sync;
+end;
+end;
+
+procedure cambiar_color_trojan(dir:word);inline;
+var
+  tmp_color:byte;
+  color:tcolor;
+begin
+  tmp_color:=buffer_paleta[dir];
+  color.r:=pal4bit(tmp_color shr 4);
+  color.g:=pal4bit(tmp_color);
+  tmp_color:=buffer_paleta[dir+$400];
+  color.b:=pal4bit(tmp_color shr 4);
+  set_pal_color(color,dir);
+  case dir of
+    $0..$7f:pintar_image:=true;
+    $100..$17f:buffer_color[((dir shr 4) and $7)+$10]:=true;
+    $300..$33f:buffer_color[(dir shr 2) and $f]:=true;
+  end;
+end;
+
+procedure trojan_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$c000 then exit;
+case direccion of
+    $c000..$dfff:memoria[direccion]:=valor;
+    $e000..$e7ff:begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $e800..$efff:begin
+                    gfx[2].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                    end;
+    $f000..$f7ff:if buffer_paleta[direccion and $7ff]<>valor then begin
+                    buffer_paleta[direccion and $7ff]:=valor;
+                    cambiar_color(direccion and $3ff);
+                 end;
+    $f800:scroll_x:=(scroll_x and $100) or valor;
+    $f801:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
+    $f802:scroll_y:=(scroll_y and $100) or valor;
+    $f803:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
+    $f804:scroll_x2:=valor;
+    $f805:if image<>valor then begin
+            image:=valor;
+            pintar_image:=true;
+          end;
+    $f80c:sound_command:=valor;
+    $f80d:sound_command2:=valor;
+    $f80e:begin
+            bank:=(valor and $6) shr 1;
+            irq_ena:=(valor and $8)<>0;
+          end;
+end;
+end;
+
+function trojan_inbyte(puerto:word):byte;
+begin
+case (puerto and $ff) of
+  $0:trojan_inbyte:=sound_command2;
+end;
+end;
+
+procedure trojan_outbyte(valor:byte;puerto:word);
+begin
+//ADPCM
+case (puerto and $ff) of
+  $1:begin
+        msm_5205_0.reset_w((valor shr 7) and 1);
+        msm_5205_0.data_w(valor);
+        msm_5205_0.vclk_w(1);
+	      msm_5205_0.vclk_w(0);
+     end;
+end;
+end;
+
+function trojan_misc_getbyte(direccion:word):byte;
+begin
+trojan_misc_getbyte:=mem_adpcm[direccion];
+end;
+
+procedure trojan_misc_putbyte(direccion:word;valor:byte);
+begin
+//Nada que hacer!!!
+end;
+
+procedure trojan_adpcm_instruccion;
+begin
+  sub_z80.change_irq(HOLD_LINE);
+end;
+
+//Main
+procedure reset_lwings;
+begin
+ main_z80.reset;
+ main_z80.im0:=$d7;  //rst 10
+ snd_z80.reset;
+ YM2203_0.reset;
+ YM2203_1.reset;
+ if main_vars.tipo_maquina=61 then begin
+  sub_z80.reset;
+  msm_5205_0.reset;
+ end;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ scroll_x:=0;
+ scroll_y:=0;
+ irq_ena:=true;
+ //trjoan
+ image:=$FF;
+ pintar_image:=true;
+ scroll_x2:=0;
 end;
 
 function iniciar_lwings:boolean;
@@ -136,7 +512,6 @@ end;
 begin
 iniciar_lwings:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 //final 1  512x512 (por sprites)
 //tiles 2  512x512 pri 0
 //chars 3
@@ -251,407 +626,14 @@ reset_lwings;
 iniciar_lwings:=true;
 end;
 
-procedure reset_lwings;
+procedure Cargar_hlwings;
 begin
- main_z80.reset;
- main_z80.im0:=$d7;  //rst 10
- snd_z80.reset;
- YM2203_0.reset;
- YM2203_1.reset;
- if main_vars.tipo_maquina=61 then begin
-  sub_z80.reset;
-  msm_5205_0.reset;
- end;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- scroll_x:=0;
- scroll_y:=0;
- irq_ena:=true;
- //trjoan
- image:=$FF;
- pintar_image:=true;
- scroll_x2:=0;
+case main_vars.tipo_maquina of
+  59,60:llamadas_maquina.bucle_general:=lwings_principal;
+  61:llamadas_maquina.bucle_general:=trojan_principal;
 end;
-
-procedure eventos_lwings;
-begin
-if event.arcade then begin
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
-end;
-end;
-
-procedure update_video_lw;inline;
-var
-  f,color,nchar:word;
-  x,y:word;
-  attr:byte;
-begin
-for f:=$3ff downto 0 do begin
-  //tiles
-  attr:=memoria[$ec00+f];
-  color:=attr and $7;
-  if (gfx[2].buffer[f] or buffer_color[color+$10]) then begin
-      x:=f div 32;
-      y:=f mod 32;
-      nchar:=memoria[$e800+f]+((attr and $e0) shl 3);
-      put_gfx_flip(x*16,y*16,nchar,color shl 4,2,2,(attr and $8)<>0,(attr and $10)<>0);
-      gfx[2].buffer[f]:=false;
-  end;
-  //Chars
-  attr:=memoria[f+$e400];
-  color:=attr and $f;
-  if (gfx[0].buffer[f] or buffer_color[color]) then begin
-    x:=f mod 32;
-    y:=f div 32;
-    nchar:=memoria[f+$e000]+((attr and $c0) shl 2);
-    put_gfx_trans_flip(x*8,y*8,nchar,(color shl 2)+512,3,0,(attr and $20)<>0,(attr and $10)<>0);
-    gfx[0].buffer[f]:=false;
-  end;
-end;
-scroll_x_y(2,1,scroll_y,scroll_x);
-for f:=$7f downto 0 do begin
-    x:=(buffer_sprites[3+(f*4)]+((buffer_sprites[1+(f*4)] and $1) shl 8));
-    y:=buffer_sprites[2+(f*4)];
-    if (x or y)<>0 then begin
-      attr:=buffer_sprites[1+(f*4)];
-      nchar:=buffer_sprites[(f*4)]+((attr and $c0) shl 2);
-      color:=(attr and $38) shl 1;
-      put_gfx_sprite(nchar,color+384,(attr and $2)<>0,(attr and $4)<>0,1);
-      actualiza_gfx_sprite(x,y,1,1);
-    end;
-end;
-actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
-actualiza_trozo_final(0,8,256,240,1);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
-end;
-
-procedure lwings_principal;
-var
-  f:byte;
-  frame_m,frame_s:single;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
-    //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    if f=247 then begin
-      if irq_ena then main_z80.pedir_irq:=HOLD_LINE;
-      update_video_lw;
-      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
-    end;
-  end;
-  eventos_lwings;
-  video_sync;
-end;
-end;
-
-//Main CPU
-function lwings_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$7fff,$c000..$efff:lwings_getbyte:=memoria[direccion];
-  $8000..$bfff:lwings_getbyte:=mem_rom[bank,direccion and $3fff];
-  $f000..$f7ff:lwings_getbyte:=buffer_paleta[direccion and $7ff];
-  $f808:lwings_getbyte:=marcade.in0;
-  $f809:lwings_getbyte:=marcade.in1;
-  $f80a:lwings_getbyte:=marcade.in2;
-  $f80b..$f80c:lwings_getbyte:=$ff;
-end;
-end;
-
-procedure cambiar_color(dir:word);inline;
-var
-  tmp_color:byte;
-  color:tcolor;
-begin
-  tmp_color:=buffer_paleta[dir];
-  color.r:=pal4bit(tmp_color shr 4);
-  color.g:=pal4bit(tmp_color);
-  tmp_color:=buffer_paleta[dir+$400];
-  color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,dir);
-  case dir of
-    $0..$7f:buffer_color[((dir shr 4) and $7)+$10]:=true;
-    $200..$23f:buffer_color[(dir shr 2) and $f]:=true;
-  end;
-end;
-
-procedure lwings_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$c000 then exit;
-case direccion of
-    $c000..$dfff:memoria[direccion]:=valor;
-    $e000..$e7ff:begin
-                    gfx[0].buffer[direccion and $3ff]:=true;
-                    memoria[direccion]:=valor;
-                 end;
-    $e800..$efff:begin
-                    gfx[2].buffer[direccion and $3ff]:=true;
-                    memoria[direccion]:=valor;
-                 end;
-    $f000..$f7ff:if buffer_paleta[direccion and $7ff]<>valor then begin
-                    buffer_paleta[direccion and $7ff]:=valor;
-                    cambiar_color(direccion and $3ff);
-                 end;
-    $f808:scroll_y:=(scroll_y and $100) or valor;
-    $f809:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
-    $f80a:scroll_x:=(scroll_x and $100) or valor;
-    $f80b:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
-    $f80c:sound_command:=valor;
-    $f80e:begin
-            bank:=(valor and $6) shr 1;
-            irq_ena:=(valor and $8)<>0;
-          end;
-end;
-end;
-
-//Sound CPU
-function lwings_snd_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$7fff,$c000..$c7ff:lwings_snd_getbyte:=mem_snd[direccion];
-  $c800:lwings_snd_getbyte:=sound_command;
-end;
-end;
-
-procedure lwings_snd_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$8000 then exit;
-case direccion of
-  $c000..$c7ff:mem_snd[direccion]:=valor;
-  $e000:ym2203_0.Control(valor);
-  $e001:ym2203_0.Write(valor);
-  $e002:ym2203_1.Control(valor);
-  $e003:ym2203_1.Write(valor);
-end;
-end;
-
-procedure lwings_snd_irq;
-begin
-  snd_z80.pedir_irq:=HOLD_LINE;
-end;
-
-procedure lwings_sound_update;
-begin
-  ym2203_0.Update;
-  ym2203_1.Update;
-end;
-
-//trojan
-procedure update_video_trojan;inline;
-var
-        f,color,nchar:word;
-        x,y:word;
-        attr:byte;
-        tile_index,offsy:word;
-begin
-//final 1  512x512 (por sprites)
-//tiles 2  512x512 pri 0
-//chars 3
-//tiles 4  pri 1
-//back 5
-if pintar_image then begin
-  offsy:=image*$20;
-  for y:=0 to $f do begin
-    offsy:=offsy and $7fff;
-    for x:=0 to $1f do begin
-      tile_index:=offsy+(2*x);
-      attr:=trojan_map[tile_index+1];
-      color:=(attr and $7) shl 4;
-      nchar:=trojan_map[tile_index]+((attr and $80) shl 1);
-      put_gfx_flip(x*16,y*16,nchar,color,5,3,(attr and $30)<>0,false);
-    end;
-    offsy:=offsy+$800;
-  end;
-  pintar_image:=false;
-end;
-scroll__x(5,1,scroll_x2);
-for f:=$3ff downto 0 do begin
-  //tiles
-  attr:=memoria[$ec00+f];
-  color:=attr and $7;
-  if (gfx[2].buffer[f] or buffer_color[color+$10]) then begin
-      x:=f div 32;
-      y:=f mod 32;
-      nchar:=memoria[$e800+f]+((attr and $e0) shl 3);
-      put_gfx_trans_flip(x*16,y*16,nchar,(color shl 4)+256,2,2,(attr and $10)<>0,false);
-      if (attr and $8)<>0 then put_gfx_trans_flip_alt(x*16,y*16,nchar,(color shl 4)+256,4,2,(attr and $10)<>0,false,0)
-        else put_gfx_block_trans(x*16,y*16,4,16,16);
-      gfx[2].buffer[f]:=false;
-  end;
-  //Chars
-  attr:=memoria[f+$e400];
-  color:=attr and $f;
-  if (gfx[0].buffer[f] or buffer_color[color]) then begin
-    x:=f mod 32;
-    y:=f div 32;
-    nchar:=memoria[f+$e000]+((attr and $c0) shl 2);
-    put_gfx_trans_flip(x*8,y*8,nchar,(color shl 2)+768,3,0,(attr and $20)<>0,(attr and $10)<>0);
-    gfx[0].buffer[f]:=false;
-  end;
-end;
-//Fondo con prioridad 0
-scroll_x_y(2,1,scroll_x,scroll_y);
-//sprites
-for f:=$5f downto 0 do begin
-    x:=(buffer_sprites[3+(f*4)]+((buffer_sprites[1+(f*4)] and $1) shl 8));
-    y:=buffer_sprites[2+(f*4)];
-    if (x or y)<>0 then begin
-      attr:=buffer_sprites[1+(f*4)];
-      nchar:=buffer_sprites[(f*4)]+((attr and $20) shl 4)+((attr and $40) shl 2)+((attr and $80) shl 3);
-      color:=(attr and $e) shl 3;
-      put_gfx_sprite(nchar,color+640,(attr and $10)<>0,true,1);
-      actualiza_gfx_sprite(x,y,1,1);
-    end;
-end;
-//Fondo con prioridad 1
-scroll_x_y(4,1,scroll_x,scroll_y);
-actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
-actualiza_trozo_final(0,8,256,240,1);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
-end;
-
-procedure trojan_principal;
-var
-  f:byte;
-  frame_m,frame_s,frame_ms:single;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_ms:=sub_z80.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
-    //Main Z80
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    //Sound Z80
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    //ADPCM Z80
-    sub_z80.run(frame_ms);
-    frame_ms:=frame_ms+sub_z80.tframes-sub_z80.contador;
-    if f=247 then begin
-      if irq_ena then main_z80.pedir_irq:=HOLD_LINE;
-      update_video_trojan;
-      copymemory(@buffer_sprites[0],@memoria[$de00],$200);
-    end;
-  end;
-  eventos_lwings;
-  video_sync;
-end;
-end;
-
-procedure cambiar_color_trojan(dir:word);inline;
-var
-  tmp_color:byte;
-  color:tcolor;
-begin
-  tmp_color:=buffer_paleta[dir];
-  color.r:=pal4bit(tmp_color shr 4);
-  color.g:=pal4bit(tmp_color);
-  tmp_color:=buffer_paleta[dir+$400];
-  color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,dir);
-  case dir of
-    $0..$7f:pintar_image:=true;
-    $100..$17f:buffer_color[((dir shr 4) and $7)+$10]:=true;
-    $300..$33f:buffer_color[(dir shr 2) and $f]:=true;
-  end;
-end;
-
-procedure trojan_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$c000 then exit;
-case direccion of
-    $c000..$dfff:memoria[direccion]:=valor;
-    $e000..$e7ff:begin
-                    gfx[0].buffer[direccion and $3ff]:=true;
-                    memoria[direccion]:=valor;
-                 end;
-    $e800..$efff:begin
-                    gfx[2].buffer[direccion and $3ff]:=true;
-                    memoria[direccion]:=valor;
-                    end;
-    $f000..$f7ff:if buffer_paleta[direccion and $7ff]<>valor then begin
-                    buffer_paleta[direccion and $7ff]:=valor;
-                    cambiar_color(direccion and $3ff);
-                 end;
-    $f800:scroll_x:=(scroll_x and $100) or valor;
-    $f801:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
-    $f802:scroll_y:=(scroll_y and $100) or valor;
-    $f803:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
-    $f804:scroll_x2:=valor;
-    $f805:if image<>valor then begin
-            image:=valor;
-            pintar_image:=true;
-          end;
-    $f80c:sound_command:=valor;
-    $f80d:sound_command2:=valor;
-    $f80e:begin
-            bank:=(valor and $6) shr 1;
-            irq_ena:=(valor and $8)<>0;
-          end;
-end;
-end;
-
-function trojan_inbyte(puerto:word):byte;
-begin
-case (puerto and $ff) of
-  $0:trojan_inbyte:=sound_command2;
-end;
-end;
-
-procedure trojan_outbyte(valor:byte;puerto:word);
-begin
-//ADPCM
-case (puerto and $ff) of
-  $1:begin
-        msm_5205_0.reset_w((valor shr 7) and 1);
-        msm_5205_0.data_w(valor);
-        msm_5205_0.vclk_w(1);
-	      msm_5205_0.vclk_w(0);
-     end;
-end;
-end;
-
-function trojan_misc_getbyte(direccion:word):byte;
-begin
-trojan_misc_getbyte:=mem_adpcm[direccion];
-end;
-
-procedure trojan_misc_putbyte(direccion:word;valor:byte);
-begin
-//Nada que hacer!!!
-end;
-
-procedure trojan_adpcm_instruccion;
-begin
-  sub_z80.pedir_irq:=HOLD_LINE;
+llamadas_maquina.iniciar:=iniciar_lwings;
+llamadas_maquina.reset:=reset_lwings;
 end;
 
 end.

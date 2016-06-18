@@ -5,21 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,timer_engine,rom_engine,
      pal_engine,sound_engine;
 
-procedure Cargar_gunsmokehw;
-procedure gunsmokehw_principal;
-function iniciar_gunsmokehw:boolean;
-procedure reset_gunsmokehw;
-//gun smoke
-function gunsmoke_getbyte(direccion:word):byte;
-procedure gunsmoke_putbyte(direccion:word;valor:byte);
-//1943
-function hw1943_getbyte(direccion:word):byte;
-procedure hw1943_putbyte(direccion:word;valor:byte);
-//sonido (general)
-function gunsmoke_snd_getbyte(direccion:word):byte;
-procedure gunsmoke_snd_putbyte(direccion:word;valor:byte);
-procedure gunsmoke_sound_update;
-procedure gunsmoke_snd_irq;
+procedure cargar_gunsmokehw;
 
 implementation
 const
@@ -105,13 +91,6 @@ var
  rom_mem:array[0..7,0..$3fff] of byte;
  tiles_pos:array[0..$ffff] of byte;
  drawvideo_gs_hw:procedure;
-
-procedure Cargar_gunsmokehw;
-begin
-llamadas_maquina.iniciar:=iniciar_gunsmokehw;
-llamadas_maquina.bucle_general:=gunsmokehw_principal;
-llamadas_maquina.reset:=reset_gunsmokehw;
-end;
 
 procedure draw_sprites(pri:boolean);inline;
 var
@@ -250,6 +229,215 @@ end;
 actualiza_trozo_final(16,0,224,256,1);
 end;
 
+procedure eventos_gunsmokehw;inline;
+begin
+if event.arcade then begin
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+end;
+end;
+
+procedure gunsmokehw_principal;
+var
+  f:byte;
+  frame_m,frame_s:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+frame_s:=snd_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    //Main CPU
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    //Sound CPU
+    snd_z80.run(frame_s);
+    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    if f=239 then begin
+      main_z80.change_irq(HOLD_LINE);
+      drawvideo_gs_hw;
+    end;
+  end;
+  eventos_gunsmokehw;
+  video_sync;
+end;
+end;
+
+function gunsmoke_snd_getbyte(direccion:word):byte;
+begin
+if direccion=$c800 then gunsmoke_snd_getbyte:=sound_command
+ else gunsmoke_snd_getbyte:=mem_snd[direccion];
+end;
+
+procedure gunsmoke_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$8000 then exit;
+mem_snd[direccion]:=valor;
+case direccion of
+  $e000:ym2203_0.Control(valor);
+  $e001:ym2203_0.Write(valor);
+  $e002:ym2203_1.Control(valor);
+  $e003:ym2203_1.Write(valor);
+end;
+end;
+
+function gunsmoke_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $8000..$bfff:gunsmoke_getbyte:=rom_mem[rom_bank,direccion and $3fff];
+  $c000:gunsmoke_getbyte:=marcade.in0;
+  $c001:gunsmoke_getbyte:=marcade.in1;
+  $c002:gunsmoke_getbyte:=$ff;
+  $c003:gunsmoke_getbyte:=$f7;
+  $c004:gunsmoke_getbyte:=$ff;
+  $c4c9:gunsmoke_getbyte:=$ff; //Proteccion 1???
+  $c4ca:gunsmoke_getbyte:=$00; //Proteccion 2???
+  $c4cb:gunsmoke_getbyte:=$00; //Proteccion 3???
+    else gunsmoke_getbyte:=memoria[direccion];
+end;
+end;
+
+procedure gunsmoke_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$c000 then exit;
+memoria[direccion]:=valor;
+case direccion of
+  $c800:sound_command:=valor;
+  $c804:begin
+          rom_bank:=(valor and $0c) shr 2;
+          chon:=(valor and $80)<>0;
+        end;
+  $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
+  $d800:if (scroll_y and $ff)<>valor then begin
+            if abs((scroll_y and $e0)-(valor and $e0))>31 then bgpaint:=true;
+            scroll_y:=(scroll_y and $ff00) or valor;
+        end;
+  $d801:if (scroll_y shr 8)<>valor then begin
+            scroll_y:=(scroll_y and $00ff) or (valor shl 8);
+            bgpaint:=true;
+        end;
+  $d802:if scroll_x<>valor then begin
+          scroll_x:=valor;
+          bgpaint:=true;
+        end;
+  $d803:;
+  $d806:begin
+            sprite3bank:=valor and $07;
+            bg1on:=(valor and $10)<>0;
+            objon:=(valor and $20)<>0;
+        end;
+end;
+end;
+
+function hw1943_getbyte(direccion:word):byte;
+var
+  main_z80_reg:npreg_z80;
+begin
+case direccion of
+  $8000..$bfff:hw1943_getbyte:=rom_mem[rom_bank,direccion and $3fff];
+  $c000:hw1943_getbyte:=marcade.in0;
+  $c001:hw1943_getbyte:=marcade.in1;
+  $c002:hw1943_getbyte:=marcade.in2;
+  $c003:hw1943_getbyte:=$f8;
+  $c004:hw1943_getbyte:=$ff;
+  $c007:begin
+          main_z80_reg:=main_z80.get_internal_r;
+          hw1943_getbyte:=main_z80_reg.bc.h;
+        end;
+    else hw1943_getbyte:=memoria[direccion];
+end;
+end;
+
+procedure hw1943_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$c000 then exit;
+memoria[direccion]:=valor;
+case direccion of
+        $c800:sound_command:=valor;
+        $c804:begin
+                chon:=(valor and $80)<>0;
+                rom_bank:=(valor shr 2) and $7;
+              end;
+        $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
+        $d800:if (scroll_y and $ff)<>valor then begin
+                if abs((scroll_y and $e0)-(valor and $e0))>31 then bgpaint:=true;
+                scroll_y:=(scroll_y and $ff00) or valor;
+              end;
+        $d801:if (scroll_y shr 8)<>valor then begin
+                scroll_y:=(scroll_y and $ff) or (valor shl 8);
+                bgpaint:=true;
+              end;
+        $d802:if scroll_x<>valor then begin
+                scroll_x:=valor;
+                bgpaint:=true;
+              end;
+        $d803:;
+        $d804:if (scroll_bg and $ff)<>valor then begin
+                if abs((scroll_bg and $e0)-(valor and $e0))>31 then bgpaint2:=true;
+                scroll_bg:=(scroll_bg and $ff00) or valor;
+              end;
+        $d805:if (scroll_bg shr 8)<>valor then begin
+                scroll_bg:=(scroll_bg and $ff) or (valor shl 8);
+                bgpaint2:=true;
+              end;
+        $d806:begin
+                bg1on:=(valor and $10)<>0;
+                bg2on:=(valor and $20)<>0;
+                objon:=(valor and $40)<>0;
+              end;
+end;
+end;
+
+procedure gunsmoke_snd_irq;
+begin
+  snd_z80.change_irq(HOLD_LINE);
+end;
+
+procedure gunsmoke_sound_update;
+begin
+  ym2203_0.Update;
+  ym2203_1.Update;
+end;
+
+//Main
+procedure reset_gunsmokehw;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ YM2203_0.reset;
+ YM2203_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$ff;
+ scroll_x:=1;
+ scroll_y:=0;
+ scroll_bg:=0;
+ bg2on:=true;
+ bg1on:=true;
+ objon:=true;
+ bgpaint:=true;
+ bgpaint2:=true;
+ rom_bank:=0;
+ sprite3bank:=0;
+ sound_command:=0;
+end;
+
 function iniciar_gunsmokehw:boolean;
 var
       f:word;
@@ -299,7 +487,6 @@ end;
 begin
 iniciar_gunsmokehw:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(3,256,256,true);
 case main_vars.tipo_maquina of
   80:begin
@@ -445,212 +632,11 @@ reset_gunsmokehw;
 iniciar_gunsmokehw:=true;
 end;
 
-procedure reset_gunsmokehw;
+procedure Cargar_gunsmokehw;
 begin
- main_z80.reset;
- snd_z80.reset;
- YM2203_0.reset;
- YM2203_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$ff;
- scroll_x:=1;
- scroll_y:=0;
- scroll_bg:=0;
- bg2on:=true;
- bg1on:=true;
- objon:=true;
- bgpaint:=true;
- bgpaint2:=true;
- rom_bank:=0;
- sprite3bank:=0;
- sound_command:=0;
-end;
-
-procedure eventos_gunsmokehw;inline;
-begin
-if event.arcade then begin
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
-end;
-end;
-
-procedure gunsmokehw_principal;
-var
-  f:byte;
-  frame_m,frame_s:single;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
-    //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    if f=239 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
-      drawvideo_gs_hw;
-    end;
-  end;
-  eventos_gunsmokehw;
-  video_sync;
-end;
-end;
-
-function gunsmoke_snd_getbyte(direccion:word):byte;
-begin
-if direccion=$c800 then gunsmoke_snd_getbyte:=sound_command
- else gunsmoke_snd_getbyte:=mem_snd[direccion];
-end;
-
-procedure gunsmoke_snd_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
-case direccion of
-  $e000:ym2203_0.Control(valor);
-  $e001:ym2203_0.Write(valor);
-  $e002:ym2203_1.Control(valor);
-  $e003:ym2203_1.Write(valor);
-end;
-end;
-
-function gunsmoke_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $8000..$bfff:gunsmoke_getbyte:=rom_mem[rom_bank,direccion and $3fff];
-  $c000:gunsmoke_getbyte:=marcade.in0;
-  $c001:gunsmoke_getbyte:=marcade.in1;
-  $c002:gunsmoke_getbyte:=$ff;
-  $c003:gunsmoke_getbyte:=$f7;
-  $c004:gunsmoke_getbyte:=$ff;
-  $c4c9:gunsmoke_getbyte:=$ff; //Proteccion 1???
-  $c4ca:gunsmoke_getbyte:=$00; //Proteccion 2???
-  $c4cb:gunsmoke_getbyte:=$00; //Proteccion 3???
-    else gunsmoke_getbyte:=memoria[direccion];
-end;
-end;
-
-procedure gunsmoke_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$c000 then exit;
-memoria[direccion]:=valor;
-case direccion of
-  $c800:sound_command:=valor;
-  $c804:begin
-          rom_bank:=(valor and $0c) shr 2;
-          chon:=(valor and $80)<>0;
-        end;
-  $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
-  $d800:if (scroll_y and $ff)<>valor then begin
-            if abs((scroll_y and $e0)-(valor and $e0))>31 then bgpaint:=true;
-            scroll_y:=(scroll_y and $ff00) or valor;
-        end;
-  $d801:if (scroll_y shr 8)<>valor then begin
-            scroll_y:=(scroll_y and $00ff) or (valor shl 8);
-            bgpaint:=true;
-        end;
-  $d802:if scroll_x<>valor then begin
-          scroll_x:=valor;
-          bgpaint:=true;
-        end;
-  $d803:;
-  $d806:begin
-            sprite3bank:=valor and $07;
-            bg1on:=(valor and $10)<>0;
-            objon:=(valor and $20)<>0;
-        end;
-end;
-end;
-
-function hw1943_getbyte(direccion:word):byte;
-var
-  main_z80_reg:npreg_z80;
-begin
-case direccion of
-  $8000..$bfff:hw1943_getbyte:=rom_mem[rom_bank,direccion and $3fff];
-  $c000:hw1943_getbyte:=marcade.in0;
-  $c001:hw1943_getbyte:=marcade.in1;
-  $c002:hw1943_getbyte:=marcade.in2;
-  $c003:hw1943_getbyte:=$f8;
-  $c004:hw1943_getbyte:=$ff;
-  $c007:begin
-          main_z80_reg:=main_z80.get_internal_r;
-          hw1943_getbyte:=main_z80_reg.bc.h;
-        end;
-    else hw1943_getbyte:=memoria[direccion];
-end;
-end;
-
-procedure hw1943_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$c000 then exit;
-memoria[direccion]:=valor;
-case direccion of
-        $c800:sound_command:=valor;
-        $c804:begin
-                chon:=(valor and $80)<>0;
-                rom_bank:=(valor shr 2) and $7;
-              end;
-        $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
-        $d800:if (scroll_y and $ff)<>valor then begin
-                if abs((scroll_y and $e0)-(valor and $e0))>31 then bgpaint:=true;
-                scroll_y:=(scroll_y and $ff00) or valor;
-              end;
-        $d801:if (scroll_y shr 8)<>valor then begin
-                scroll_y:=(scroll_y and $ff) or (valor shl 8);
-                bgpaint:=true;
-              end;
-        $d802:if scroll_x<>valor then begin
-                scroll_x:=valor;
-                bgpaint:=true;
-              end;
-        $d803:;
-        $d804:if (scroll_bg and $ff)<>valor then begin
-                if abs((scroll_bg and $e0)-(valor and $e0))>31 then bgpaint2:=true;
-                scroll_bg:=(scroll_bg and $ff00) or valor;
-              end;
-        $d805:if (scroll_bg shr 8)<>valor then begin
-                scroll_bg:=(scroll_bg and $ff) or (valor shl 8);
-                bgpaint2:=true;
-              end;
-        $d806:begin
-                bg1on:=(valor and $10)<>0;
-                bg2on:=(valor and $20)<>0;
-                objon:=(valor and $40)<>0;
-              end;
-end;
-end;
-
-procedure gunsmoke_snd_irq;
-begin
-  snd_z80.pedir_irq:=HOLD_LINE;
-end;
-
-procedure gunsmoke_sound_update;
-begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+llamadas_maquina.iniciar:=iniciar_gunsmokehw;
+llamadas_maquina.bucle_general:=gunsmokehw_principal;
+llamadas_maquina.reset:=reset_gunsmokehw;
 end;
 
 end.

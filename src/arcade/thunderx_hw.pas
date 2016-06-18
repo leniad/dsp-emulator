@@ -367,7 +367,7 @@ case direccion of
     $0..$3fff:case direccion of
                    $1f80:video_bank_call(valor);
                    $1f84:sound_latch:=valor;
-                   $1f88:snd_z80.pedir_irq:=HOLD_LINE;
+                   $1f88:snd_z80.change_irq(HOLD_LINE);
                    $1f98:call_function_1f98(valor);
                    else if ((direccion>=$3800) and (direccion<$3808)) then k051960_0.k051937_write(direccion-$3800,valor)
                            else if (direccion<$3c00) then k052109_0.write(direccion,valor)

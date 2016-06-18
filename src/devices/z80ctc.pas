@@ -1,7 +1,7 @@
 unit z80ctc;
 
 interface
-uses z80daisy,timer_engine,main_engine;
+uses z80daisy,timer_engine,main_engine,cpu_misc;
 
 const
   INTERRUPT			= $80;

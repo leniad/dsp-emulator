@@ -2,7 +2,7 @@ unit n2a03_sound;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,sound_engine,timer_engine;
+     cpu_misc,sound_engine,timer_engine,main_engine;
 
 const
   // GLOBAL CONSTANTS */

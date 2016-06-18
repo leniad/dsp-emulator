@@ -765,7 +765,7 @@ end;
 
 procedure cps1_ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure cps1_sound_update;
@@ -835,7 +835,7 @@ end;
 
 procedure cps1_qsnd_int;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 //Main

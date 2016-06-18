@@ -5,28 +5,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,msm5205,rom_engine,
      pal_engine,sound_engine;
 
-procedure Cargar_tehkanwc;
-procedure tehkanwc_principal;
-function iniciar_tehkanwc:boolean;
-procedure reset_tehkanwc;
-//Main CPU
-function tehkanwc_getbyte(direccion:word):byte;
-procedure tehkanwc_putbyte(direccion:word;valor:byte);
-//Sub CPU
-function tehkanwc_misc_getbyte(direccion:word):byte;
-procedure tehkanwc_misc_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function snd_getbyte(direccion:word):byte;
-procedure snd_putbyte(direccion:word;valor:byte);
-function snd_inbyte(puerto:word):byte;
-procedure snd_outbyte(valor:byte;puerto:word);
-procedure tehkanwc_sound_update;
-procedure tehkan_porta_write(valor:byte);
-procedure tehkan_portb_write(valor:byte);
-function tehkan_porta_read:byte;
-function tehkan_portb_read:byte;
-procedure msm5205_sound;
+procedure cargar_tehkanwc;
 
+implementation
 const
         tehkanwc_rom:array[0..3] of tipo_roms=(
         (n:'twc-1.bin';l:$4000;p:0;crc:$34d6d5ff),(n:'twc-2.bin';l:$4000;p:$4000;crc:$7017a221),
@@ -58,109 +39,6 @@ var
  sound_latch,sound_latch2,scroll_y:byte;
  track0,track1:array[0..1] of byte;
  mem_adpcm:array[0..$7fff] of byte;
-
-implementation
-
-procedure Cargar_tehkanwc;
-begin
-llamadas_maquina.iniciar:=iniciar_tehkanwc;
-llamadas_maquina.bucle_general:=tehkanwc_principal;
-llamadas_maquina.reset:=reset_tehkanwc;
-end;
-
-function iniciar_tehkanwc:boolean;
-const
-  ps_x:array[0..15] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4,
-			8*32+1*4, 8*32+0*4, 8*32+3*4, 8*32+2*4, 8*32+5*4, 8*32+4*4, 8*32+7*4, 8*32+6*4);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-			16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32);
-  pc_x:array[0..7] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4);
-  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-var
-  memoria_temp:array[0..$ffff] of byte;
-begin
-iniciar_tehkanwc:=false;
-iniciar_audio(false);
-screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,256,256,255);
-screen_init(2,512,256,false,true);
-screen_init(3,256,256,true);
-screen_init(4,256,256,true);
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(4608000,$200);
-main_z80.change_ram_calls(tehkanwc_getbyte,tehkanwc_putbyte);
-//Misc CPU
-sub_z80:=cpu_z80.create(4608000,$200);
-sub_z80.change_ram_calls(tehkanwc_misc_getbyte,tehkanwc_misc_putbyte);
-//analog
-init_analog(main_z80.numero_cpu,main_z80.clock,100,10,0,63,-63,true);
-//Sound CPU
-snd_z80:=cpu_z80.create(4608000,$200);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
-snd_z80.init_sound(tehkanwc_sound_update);
-//Sound Chip
-ay8910_0:=ay8910_chip.create(1536000,0.50);
-ay8910_0.change_io_calls(nil,nil,tehkan_porta_write,tehkan_portb_write);
-ay8910_1:=ay8910_chip.create(1536000,0.50);
-ay8910_1.change_io_calls(tehkan_porta_read,tehkan_portb_read,nil,nil);
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.45,msm5205_sound);
-//cargar roms
-if not(cargar_roms(@memoria,@tehkanwc_rom,'tehkanwc.zip',0)) then exit;
-//cargar cpu 2
-if not(cargar_roms(@mem_misc,@tehkanwc_cpu2,'tehkanwc.zip')) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd,@tehkanwc_sound,'tehkanwc.zip')) then exit;
-//Cargar ADPCM
-if not(cargar_roms(@mem_adpcm,@tehkanwc_adpcm,'tehkanwc.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp,@tehkanwc_chars,'tehkanwc.zip')) then exit;
-init_gfx(0,8,8,512);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp,@tehkanwc_sprites,'tehkanwc.zip',0)) then exit;
-init_gfx(1,16,16,512);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
-//tiles
-if not(cargar_roms(@memoria_temp,@tehkanwc_tiles,'tehkanwc.zip',0)) then exit;
-init_gfx(2,16,8,1024);
-gfx_set_desc_data(4,0,64*8,0,1,2,3);
-convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
-//DIP
-marcade.dswa:=$ff;
-marcade.dswa_val:=@tehkanwc_dipa;
-marcade.dswb:=$ff;
-marcade.dswb_val:=@tehkanwc_dipb;
-marcade.dswc:=$f;
-marcade.dswc_val:=@tehkanwc_dipc;
-reset_tehkanwc;
-iniciar_tehkanwc:=true;
-end;
-
-procedure reset_tehkanwc;
-begin
- main_z80.reset;
- sub_z80.reset;
- snd_z80.reset;
- ay8910_0.reset;
- ay8910_1.reset;
- msm_5205_0.reset;
- reset_audio;
- marcade.in0:=$20;
- marcade.in1:=$20;
- marcade.in2:=$f;
- adpcm_pos:=0;
- adpcm_data:=$100;
- scroll_x:=0;
- scroll_y:=0;
- sound_latch:=0;
- sound_latch2:=0;
-end;
 
 procedure update_video_tehkanwc;inline;
 var
@@ -247,9 +125,9 @@ while EmuStatus=EsRuning do begin
   snd_z80.run(frame_s);
   frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
   if f=479 then begin
-     main_z80.pedir_irq:=HOLD_LINE;
-     sub_z80.pedir_irq:=HOLD_LINE;
-     snd_z80.pedir_irq:=HOLD_LINE;
+     main_z80.change_irq(HOLD_LINE);
+     sub_z80.change_irq(HOLD_LINE);
+     snd_z80.change_irq(HOLD_LINE);
      update_video_tehkanwc;
   end;
  end;
@@ -325,8 +203,8 @@ case direccion of
             sound_latch:=valor;
             snd_z80.change_nmi(ASSERT_LINE);
           end;
-    $f840:if valor=0 then sub_z80.pedir_reset:=ASSERT_LINE
-            else sub_z80.pedir_reset:=CLEAR_LINE;
+    $f840:if valor=0 then sub_z80.change_reset(ASSERT_LINE)
+            else sub_z80.change_reset(CLEAR_LINE);
 end;
 end;
 
@@ -421,6 +299,108 @@ procedure tehkanwc_sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
+end;
+
+//Main
+procedure reset_tehkanwc;
+begin
+ main_z80.reset;
+ sub_z80.reset;
+ snd_z80.reset;
+ ay8910_0.reset;
+ ay8910_1.reset;
+ msm_5205_0.reset;
+ reset_audio;
+ marcade.in0:=$20;
+ marcade.in1:=$20;
+ marcade.in2:=$f;
+ adpcm_pos:=0;
+ adpcm_data:=$100;
+ scroll_x:=0;
+ scroll_y:=0;
+ sound_latch:=0;
+ sound_latch2:=0;
+end;
+
+function iniciar_tehkanwc:boolean;
+const
+  ps_x:array[0..15] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4,
+			8*32+1*4, 8*32+0*4, 8*32+3*4, 8*32+2*4, 8*32+5*4, 8*32+4*4, 8*32+7*4, 8*32+6*4);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32);
+  pc_x:array[0..7] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4);
+  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+var
+  memoria_temp:array[0..$ffff] of byte;
+begin
+iniciar_tehkanwc:=false;
+iniciar_audio(false);
+screen_init(1,512,256);
+screen_mod_scroll(1,512,256,511,256,256,255);
+screen_init(2,512,256,false,true);
+screen_init(3,256,256,true);
+screen_init(4,256,256,true);
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(4608000,$200);
+main_z80.change_ram_calls(tehkanwc_getbyte,tehkanwc_putbyte);
+//Misc CPU
+sub_z80:=cpu_z80.create(4608000,$200);
+sub_z80.change_ram_calls(tehkanwc_misc_getbyte,tehkanwc_misc_putbyte);
+//analog
+init_analog(main_z80.numero_cpu,main_z80.clock,100,10,0,63,-63,true);
+//Sound CPU
+snd_z80:=cpu_z80.create(4608000,$200);
+snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
+snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
+snd_z80.init_sound(tehkanwc_sound_update);
+//Sound Chip
+ay8910_0:=ay8910_chip.create(1536000,0.50);
+ay8910_0.change_io_calls(nil,nil,tehkan_porta_write,tehkan_portb_write);
+ay8910_1:=ay8910_chip.create(1536000,0.50);
+ay8910_1.change_io_calls(tehkan_porta_read,tehkan_portb_read,nil,nil);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.45,msm5205_sound);
+//cargar roms
+if not(cargar_roms(@memoria,@tehkanwc_rom,'tehkanwc.zip',0)) then exit;
+//cargar cpu 2
+if not(cargar_roms(@mem_misc,@tehkanwc_cpu2,'tehkanwc.zip')) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd,@tehkanwc_sound,'tehkanwc.zip')) then exit;
+//Cargar ADPCM
+if not(cargar_roms(@mem_adpcm,@tehkanwc_adpcm,'tehkanwc.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp,@tehkanwc_chars,'tehkanwc.zip')) then exit;
+init_gfx(0,8,8,512);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp,@tehkanwc_sprites,'tehkanwc.zip',0)) then exit;
+init_gfx(1,16,16,512);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
+//tiles
+if not(cargar_roms(@memoria_temp,@tehkanwc_tiles,'tehkanwc.zip',0)) then exit;
+init_gfx(2,16,8,1024);
+gfx_set_desc_data(4,0,64*8,0,1,2,3);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
+//DIP
+marcade.dswa:=$ff;
+marcade.dswa_val:=@tehkanwc_dipa;
+marcade.dswb:=$ff;
+marcade.dswb_val:=@tehkanwc_dipb;
+marcade.dswc:=$f;
+marcade.dswc_val:=@tehkanwc_dipc;
+reset_tehkanwc;
+iniciar_tehkanwc:=true;
+end;
+
+procedure Cargar_tehkanwc;
+begin
+llamadas_maquina.iniciar:=iniciar_tehkanwc;
+llamadas_maquina.bucle_general:=tehkanwc_principal;
+llamadas_maquina.reset:=reset_tehkanwc;
 end;
 
 end.

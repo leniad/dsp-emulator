@@ -5,21 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      dialogs,sysutils,pal_engine,ppi8255,sound_engine,ym_2151;
 
-procedure Cargar_outrun;
-procedure outrun_principal;
-function outrun_getword(direccion:dword):word;
-procedure outrun_putword(direccion:dword;valor:word);
-function iniciar_outrun:boolean;
-procedure reset_outrun;
-function outrun_snd_getbyte(direccion:word):byte;
-procedure outrun_snd_putbyte(direccion:word;valor:byte);
-procedure outrun_sound_act;
-function outrun_snd_inbyte(puerto:word):byte;
-procedure outrun_snd_outbyte(valor:byte;puerto:word);
-procedure ppi8255_wporta(valor:byte);
-procedure ppi8255_wportb(valor:byte);
-procedure ppi8255_wportc(valor:byte);
-procedure ym2151_snd_irq(irqstate:byte);
+procedure cargar_outrun;
 
 const
         //Outrun
@@ -65,106 +51,6 @@ var
  sound_latch:byte;
 
 implementation
-
-procedure Cargar_outrun;
-begin
-llamadas_maquina.iniciar:=iniciar_outrun;
-llamadas_maquina.bucle_general:=outrun_principal;
-llamadas_maquina.reset:=reset_outrun;
-end;
-
-function iniciar_outrun:boolean;
-var
-      f:word;
-      memoria_temp:array[0..$7ffff] of byte;
-      weights:array[0..1,0..5] of single;
-      i0,i1,i2,i3,i4:integer;
-const
-  pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
-  pt_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  resistances_normal:array[0..5] of integer=(900, 2000, 1000, 1000 div 2,1000 div 4, 0);
-	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
-begin
-iniciar_outrun:=false;
-if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. ¿Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
-iniciar_audio(false);
-screen_init(1,512,256,true); //text
-screen_init(2,512,256,true);
-//Background
-screen_init(3,1024,512);
-screen_mod_scroll(3,1024,512,1023,512,256,511);
-screen_init(4,1024,512,true);
-screen_mod_scroll(4,1024,512,1023,512,256,511);
-//Foreground
-screen_init(5,1024,512,true);
-screen_mod_scroll(5,1024,512,1023,512,256,511);
-screen_init(6,1024,512,true);
-screen_mod_scroll(6,1024,512,1023,512,256,511);
-//Final
-screen_init(7,512,256,false,true);
-iniciar_video(320,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,262);
-main_m68000.change_ram16_calls(outrun_getword,outrun_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,262);
-snd_z80.change_ram_calls(outrun_snd_getbyte,outrun_snd_putbyte);
-snd_z80.change_io_calls(outrun_snd_inbyte,outrun_snd_outbyte);
-snd_z80.init_sound(outrun_sound_act);
-//PPI 825
-pia8255_0:=pia8255_chip.create;
-pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
-//Timers
-ym2151_0:=ym2151_chip.create(4000000);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@outrun_rom[0],'outrun.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@outrun_sound,'outrun.zip',1)) then exit;
-//convertir tiles
-if not(cargar_roms(@memoria_temp[0],@outrun_tiles[0],'outrun.zip',0)) then exit;
-init_gfx(0,8,8,$2000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,$20000*8,$10000*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
-//Cargar ROM de los sprites y recolocarlos
-{if not(cargar_roms16b(@memoria_temp[0],@outrun_sprites[0],'outrun.zip',0)) then exit;
-for f:=0 to 7 do begin
-  copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
-  copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
-  copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
-  copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
-  copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
-  copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
-  copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
-  copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
-end;}
-s16_info.entries:=$800;
-s16_info.color_base:=$400;
-s16_info.s_banks:=8;
-//poner la paleta
-compute_resistor_weights(0,255,-1.0,
-  6,addr(resistances_normal[0]),addr(weights[0]),0,0,
-  0,nil,nil,0,0,
-  0,nil,nil,0,0);
-compute_resistor_weights(0,255,-1.0,
-  6,addr(resistances_sh[0]),addr(weights[1]),0,0,
-  0,nil,nil,0,0,
-  0,nil,nil,0,0);
-for f:=0 to 31 do begin
-  i4:=(f shr 4) and 1;
-  i3:=(f shr 3) and 1;
-  i2:=(f shr 2) and 1;
-  i1:=(f shr 1) and 1;
-  i0:=(f shr 0) and 1;
-  s16_info.normal[f]:=combine_6_weights(addr(weights[0]),i0,i1,i2,i3,i4,0);
-  s16_info.shadow[f]:=combine_6_weights(addr(weights[1]),i0,i1,i2,i3,i4,0);
-  s16_info.hilight[f]:=combine_6_weights(addr(weights[1]),i0,i1,i2,i3,i4,1);
-end;
-//final
-reset_outrun;
-iniciar_outrun:=true;
-end;
 
 procedure outrun_draw_pixel(x,y,pix,color:word);inline;
 var
@@ -392,24 +278,6 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
 end;
-end;
-
-procedure reset_outrun;
-var
-  f:byte;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym2151_0.reset;
- pia8255_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- for f:=0 to $f do sprite_bank[f]:=f;
- screen_enabled:=true;
- fillchar(tile_buffer[0],$800*8,1);
- sound_latch:=0;
 end;
 
 procedure outrun_principal;
@@ -691,6 +559,125 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
+end;
+
+//Main
+procedure reset_outrun;
+var
+  f:byte;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ pia8255_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ for f:=0 to $f do sprite_bank[f]:=f;
+ screen_enabled:=true;
+ fillchar(tile_buffer[0],$800*8,1);
+ sound_latch:=0;
+end;
+
+function iniciar_outrun:boolean;
+var
+      f:word;
+      memoria_temp:array[0..$7ffff] of byte;
+      weights:array[0..1,0..5] of single;
+      i0,i1,i2,i3,i4:integer;
+const
+  pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
+  pt_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  resistances_normal:array[0..5] of integer=(900, 2000, 1000, 1000 div 2,1000 div 4, 0);
+	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
+begin
+iniciar_outrun:=false;
+if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. ¿Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
+iniciar_audio(false);
+screen_init(1,512,256,true); //text
+screen_init(2,512,256,true);
+//Background
+screen_init(3,1024,512);
+screen_mod_scroll(3,1024,512,1023,512,256,511);
+screen_init(4,1024,512,true);
+screen_mod_scroll(4,1024,512,1023,512,256,511);
+//Foreground
+screen_init(5,1024,512,true);
+screen_mod_scroll(5,1024,512,1023,512,256,511);
+screen_init(6,1024,512,true);
+screen_mod_scroll(6,1024,512,1023,512,256,511);
+//Final
+screen_init(7,512,256,false,true);
+iniciar_video(320,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,262);
+main_m68000.change_ram16_calls(outrun_getword,outrun_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,262);
+snd_z80.change_ram_calls(outrun_snd_getbyte,outrun_snd_putbyte);
+snd_z80.change_io_calls(outrun_snd_inbyte,outrun_snd_outbyte);
+snd_z80.init_sound(outrun_sound_act);
+//PPI 825
+pia8255_0:=pia8255_chip.create;
+pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
+//Timers
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@outrun_rom[0],'outrun.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@outrun_sound,'outrun.zip',1)) then exit;
+//convertir tiles
+if not(cargar_roms(@memoria_temp[0],@outrun_tiles[0],'outrun.zip',0)) then exit;
+init_gfx(0,8,8,$2000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,$20000*8,$10000*8,0);
+convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+//Cargar ROM de los sprites y recolocarlos
+{if not(cargar_roms16b(@memoria_temp[0],@outrun_sprites[0],'outrun.zip',0)) then exit;
+for f:=0 to 7 do begin
+  copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
+  copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
+  copymemory(@sprite_rom[$10000],@memoria_temp[$20000],$10000);
+  copymemory(@sprite_rom[$50000],@memoria_temp[$30000],$10000);
+  copymemory(@sprite_rom[$20000],@memoria_temp[$40000],$10000);
+  copymemory(@sprite_rom[$60000],@memoria_temp[$50000],$10000);
+  copymemory(@sprite_rom[$30000],@memoria_temp[$60000],$10000);
+  copymemory(@sprite_rom[$70000],@memoria_temp[$70000],$10000);
+end;}
+s16_info.entries:=$800;
+s16_info.color_base:=$400;
+s16_info.s_banks:=8;
+//poner la paleta
+compute_resistor_weights(0,255,-1.0,
+  6,addr(resistances_normal[0]),addr(weights[0]),0,0,
+  0,nil,nil,0,0,
+  0,nil,nil,0,0);
+compute_resistor_weights(0,255,-1.0,
+  6,addr(resistances_sh[0]),addr(weights[1]),0,0,
+  0,nil,nil,0,0,
+  0,nil,nil,0,0);
+for f:=0 to 31 do begin
+  i4:=(f shr 4) and 1;
+  i3:=(f shr 3) and 1;
+  i2:=(f shr 2) and 1;
+  i1:=(f shr 1) and 1;
+  i0:=(f shr 0) and 1;
+  s16_info.normal[f]:=combine_6_weights(addr(weights[0]),i0,i1,i2,i3,i4,0);
+  s16_info.shadow[f]:=combine_6_weights(addr(weights[1]),i0,i1,i2,i3,i4,0);
+  s16_info.hilight[f]:=combine_6_weights(addr(weights[1]),i0,i1,i2,i3,i4,1);
+end;
+//final
+reset_outrun;
+iniciar_outrun:=true;
+end;
+
+procedure Cargar_outrun;
+begin
+llamadas_maquina.iniciar:=iniciar_outrun;
+llamadas_maquina.bucle_general:=outrun_principal;
+llamadas_maquina.reset:=reset_outrun;
 end;
 
 end.

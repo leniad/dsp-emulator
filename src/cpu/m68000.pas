@@ -30,7 +30,7 @@ unit m68000;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     sysutils,dialogs,main_engine,timer_engine,vars_hide;
+     sysutils,dialogs,cpu_misc,timer_engine,vars_hide,main_engine;
 
 type
         band_m68000=record
@@ -180,8 +180,8 @@ r.sp.wl:=self.getword(2);
 r.pc.wh:=self.getword(4);
 r.pc.wl:=self.getword(6);
 for f:=0 to 7 do self.irq[f]:=CLEAR_LINE;
-self.pedir_halt:=CLEAR_LINE;
-self.pedir_reset:=CLEAR_LINE;
+self.change_halt(CLEAR_LINE);
+self.change_reset(CLEAR_LINE);
 self.halt:=false;
 self.access_8bits_hi_dir:=false;
 self.access_8bits_lo_dir:=false;
@@ -221,16 +221,14 @@ function coger_band(r:preg_m68000):word;inline;
 var
   pila:word;
 begin
-pila:=0;
-if r.cc.t then pila:=$8000;
-if r.cc.s then pila:=pila or $2000;
+pila:=byte(r.cc.t) shl 15; // $8000
+pila:=pila or (byte(r.cc.s) shl 13); // $2000
 pila:=pila or (r.cc.im shl 8);
-if r.cc.x then pila:=pila or $10;
-if r.cc.n then pila:=pila or $8;
-if r.cc.z then pila:=pila or $4;
-if r.cc.v then pila:=pila or $2;
-if r.cc.c then pila:=pila or $1;
-coger_band:=pila;
+pila:=pila or (byte(r.cc.x) shl 4);
+pila:=pila or (byte(r.cc.n) shl 3);
+pila:=pila or (byte(r.cc.z) shl 2);
+pila:=pila or (byte(r.cc.v) shl 1);
+coger_band:=pila or byte(r.cc.c);
 end;
 
 function cpu_m68000.save_snapshot(data:pbyte):word;
@@ -2525,8 +2523,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                        self.contador:=self.contador+6;
                        tempb:=r.d[dest].l0;
                        tempb2:=r.d[orig].l0;
-                       if r.cc.x then tempw:=(tempb and $f)-(tempb2 and $f)-1
-                         else tempw:=(tempb and $f)-(tempb2 and $f);
+                       tempw:=(tempb and $f)-(tempb2 and $f)-byte(r.cc.x);
                        r.cc.v:=false;
                        if tempw>9 then tempw:=tempw-6;
                        tempw:=tempw+(tempb and $f0)-(tempb2 and $f0);
@@ -2561,8 +2558,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                           tempb2:=self.getbyte(r.a[orig].l);
                           r.a[dest].l:=r.a[dest].l-1;
                           tempb:=self.getbyte(r.a[dest].l);
-                          if r.cc.x then tempw:=(tempb and $f)-(tempb2 and $f)-1
-                            else tempw:=(tempb and $f)-(tempb2 and $f);
+                          tempw:=(tempb and $f)-(tempb2 and $f)-byte(r.cc.x);
                           r.cc.v:=false;
                           if tempw>9 then tempw:=tempw-6;
                           tempw:=tempw+(tempb and $f0)-(tempb2 and $f0);
@@ -2689,8 +2685,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                      self.contador:=self.contador+4;
                      tempb:=r.d[orig].l0;
                      tempb2:=r.d[dest].l0;
-                     if r.cc.x then tempw:=tempb2-tempb-1
-                        else tempw:=tempb2-tempb;
+                     tempw:=tempb2-tempb-byte(r.cc.x);
                      r.d[dest].l0:=tempw and $ff;
                      r.cc.n:=(tempw and $80)<>0;
                      r.cc.c:=(tempw and $100)<>0;
@@ -2719,8 +2714,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  $0:begin  // # subx.w rr
                      tempw:=r.d[orig].wl;
                      tempw2:=r.d[dest].wl;
-                     if r.cc.x then templ:=tempw2-tempw-1
-                        else templ:=tempw2-tempw;
+                     templ:=tempw2-tempw-byte(r.cc.x);
                      r.cc.n:=(templ and $8000)<>0;
                      r.cc.c:=(templ and $10000)<>0;
                      r.cc.x:=r.cc.c;
@@ -2751,8 +2745,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       self.contador:=self.contador+8;
                       templ:=r.d[orig].l;
                       templ2:=r.d[dest].l;
-                      if r.cc.x then templ3:=templ2-templ-1
-                         else templ3:=templ2-templ;
+                      templ3:=templ2-templ-byte(r.cc.x);
                       r.d[dest].l:=templ3;
                       r.cc.n:=((templ3 shr 24) and $80)<>0;
                       r.cc.z:=(templ3=0);
@@ -2965,8 +2958,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       self.contador:=self.contador+6;
                       tempb:=r.d[orig].l0;
                       tempb2:=r.d[dest].l0;
-                      if r.cc.x then tempw:=(tempb and $f)+(tempb2 and $f)+1
-                         else tempw:=(tempb and $f)+(tempb2 and $f);
+                      tempw:=(tempb and $f)+(tempb2 and $f)+byte(r.cc.x);
                       r.cc.v:=((not(tempw) and $80)<>0);
                       if (tempw>9) then tempw:=tempw+6;
                       tempw:=tempw+(tempb and $f0)+(tempb2 and $f0);
@@ -2996,8 +2988,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                                tempb:=self.getbyte(r.a[orig].l);
                                r.a[dest].l:=r.a[dest].l-1;
                                tempb2:=self.getbyte(r.a[dest].l);
-                               if r.cc.x then tempw:=(tempb and $f)+(tempb2 and $f)+1
-                                  else tempw:=(tempb and $f)+(tempb2 and $f);
+                               tempw:=(tempb and $f)+(tempb2 and $f)+byte(r.cc.x);
                                r.cc.v:=(not(tempw) and $80)<>0;
                                if (tempw>9) then tempw:=tempw+6;
        	                       tempw:=(tempw and $ff)+(tempb and $f0)+(tempb2 and $f0);
@@ -3121,8 +3112,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       self.contador:=self.contador+4;
                       tempb:=r.d[orig].l0;
                       tempb2:=r.d[dest].l0;
-                      if r.cc.x then tempw:=1+tempb+tempb2
-                        else tempw:=tempb+tempb2;
+                      tempw:=tempb+tempb2+byte(r.cc.x);
                       r.d[dest].l0:=tempw and $ff;
                       r.cc.n:=(tempw and $80)<>0;
                       r.cc.z:=((tempw and $ff)=0);
@@ -3165,8 +3155,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       self.contador:=self.contador+4;
                       tempw:=r.d[orig].wl;
                       tempw2:=r.d[dest].wl;
-                      if r.cc.x then templ:=1+tempw+tempw2
-                        else templ:=tempw+tempw2;
+                      templ:=tempw+tempw2+byte(r.cc.x);
                       r.d[dest].wl:=templ and $ffff;
                       r.cc.n:=(templ and $8000)<>0;
                       r.cc.z:=((templ and $ffff)=0);
@@ -3195,8 +3184,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                       self.contador:=self.contador+8;
                       templ:=r.d[orig].l;
                       templ2:=r.d[dest].l;
-                      if r.cc.x then templ3:=1+templ+templ2
-                        else templ3:=templ+templ2;
+                      templ3:=templ+templ2+byte(r.cc.x);
                       r.d[dest].l:=templ3;
                       r.cc.n:=((templ3 shr 24) and $80)<>0;
                       r.cc.z:=(templ3=0);
@@ -3276,8 +3264,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                $4:begin //roxr.w
                     self.contador:=self.contador+8;
                     tempw:=self.leerdir_w(dir);
-                    if r.cc.x then templ:=(tempw shr 1) or ((tempw and 1) shl 16) or $8000
-                      else templ:=(tempw shr 1) or ((tempw and 1) shl 16);
+                    templ:=(tempw shr 1) or ((tempw and 1) shl 16) or (byte(r.cc.x) shl 15);
                     self.ponerdir_w2(dir,templ and $ffff);
                     r.cc.n:=(templ and $8000)<>0;
                     r.cc.z:=(templ and $ffff)=0;
@@ -3327,8 +3314,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
            $02,$06:begin //roxr.b
                     self.contador:=self.contador+6;
-                    if r.cc.x then tempw:=r.d[orig].l0 or $100
-                      else tempw:=r.d[orig].l0;
+                    tempw:=r.d[orig].l0 or (byte(r.cc.x) shl 8);
                     for tempb2:=1 to tempb do
                       tempw:=(tempw shr 1) or ((tempw and 1) shl 8);
                     r.d[orig].l0:=tempw and $ff;
@@ -3374,8 +3360,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
          $0a,$0e:begin //roxr.w
                     self.contador:=self.contador+6;
-                    if r.cc.x then templ:=r.d[orig].wl or $10000
-                      else templ:=r.d[orig].wl;
+                    templ:=r.d[orig].wl or (byte(r.cc.x) shl 16);
                     for tempb2:=1 to tempb do
                       templ:=(templ shr 1) or ((templ and 1) shl 16);
                     r.d[orig].wl:=templ and $ffff;
@@ -3422,8 +3407,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
          $12,$16:begin  //roxr.l
                     self.contador:=self.contador+8;
-                    if r.cc.x then tempdl:=r.d[orig].l or $100000000
-                      else tempdl:=r.d[orig].l;
+                    tempdl:=r.d[orig].l or (byte(r.cc.x) shl 32);
                     for tempb2:=1 to tempb do
                       tempdl:=(tempdl shr 1) or ((tempdl and 1) shl 32);
                     r.d[orig].l:=tempdl and $FFFFFFFF;
@@ -3468,8 +3452,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
         $22,$26:begin //roxl.b
                     self.contador:=self.contador+6;
-                    if r.cc.x then tempw:=r.d[orig].l0 or $100
-                      else tempw:=r.d[orig].l0;
+                    tempw:=r.d[orig].l0 or (byte(r.cc.x) shl 8);
                     for tempb2:=1 to tempb do
                       tempw:=(tempw shl 1) or ((tempw and $100) shr 8);
                     r.cc.c:=(tempw and $100)<>0;
@@ -3515,8 +3498,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
          $2a,$2e:begin //roxl.w
                     self.contador:=self.contador+6;
-                    if r.cc.x then templ:=r.d[orig].wl or $10000
-                      else templ:=r.d[orig].wl;
+                    templ:=r.d[orig].wl or (byte(r.cc.x) shl 16);
                     for tempb2:=1 to tempb do
                       templ:=(templ shl 1) or ((templ and $10000) shr 16);
                     r.cc.c:=(templ and $10000)<>0;
@@ -3562,8 +3544,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
          $32:begin  //roxl.l
                     self.contador:=self.contador+8;
-                    if r.cc.x then tempdl:=r.d[orig].l or $100000000
-                      else tempdl:=r.d[orig].l;
+                    tempdl:=r.d[orig].l or (byte(r.cc.x) shl 32);
                     for tempb2:=1 to tempb do
                       tempdl:=(tempdl shl 1) or ((tempdl and $100000000) shr 32);
                     r.cc.c:=((tempdl shr 24) and $100)<>0;

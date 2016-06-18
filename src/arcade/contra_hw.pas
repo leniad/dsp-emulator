@@ -5,17 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      hd6309,m6809,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,konami_video,sound_engine;
 
-procedure Cargar_contra;
-procedure contra_principal;
-function iniciar_contra:boolean;
-procedure reset_contra;
-//Main CPU
-function contra_getbyte(direccion:word):byte;
-procedure contra_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function sound_getbyte(direccion:word):byte;
-procedure sound_putbyte(direccion:word;valor:byte);
-procedure contra_sound_update;
+procedure cargar_contra;
 
 implementation
 const
@@ -33,96 +23,6 @@ const
 var
  memoria_rom:array[0..$b,0..$1FFF] of byte;
  banco,sound_latch:byte;
-
-procedure Cargar_contra;
-begin
-llamadas_maquina.iniciar:=iniciar_contra;
-llamadas_maquina.bucle_general:=contra_principal;
-llamadas_maquina.reset:=reset_contra;
-end;
-
-function iniciar_contra:boolean;
-var
-  f:byte;
-  memoria_temp:array[0..$7ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28 );
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-procedure clut_contra;
-var
-  chip,pal,i,ctabentry,clut:byte;
-begin
-for chip:=0 to 1 do begin
-		for pal:=0 to 7 do begin
-			clut:=(chip shl 1) or (pal and 1);
-			for i:=0 to $ff do begin
-				if (((pal and $01)=0) and (memoria_temp[(clut shl 8) or i]=0)) then ctabentry:=0
-				  else ctabentry:=(pal shl 4) or (memoria_temp[(clut shl 8) or i] and $0f);
-        gfx[chip].colores[(pal shl 8) or i]:=ctabentry;
-			end;
-		end;
-end;
-end;
-begin
-iniciar_contra:=false;
-iniciar_audio(true);
-//Pantallas
-screen_init(1,256,256,true);
-screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,256,256,255);
-screen_init(3,256,256,true);
-screen_mod_scroll(3,256,256,255,256,256,255);
-screen_init(4,512,256,false,true);
-iniciar_video(224,280);
-//Main CPU
-main_hd6309:=cpu_hd6309.create(24000000 div 2,$100);
-main_hd6309.change_ram_calls(contra_getbyte,contra_putbyte);
-//Sound CPU
-snd_m6809:=cpu_m6809.Create(24000000 div 8,$100);
-snd_m6809.change_ram_calls(sound_getbyte,sound_putbyte);
-snd_m6809.init_sound(contra_sound_update);
-//Audio chips
-ym2151_0:=ym2151_chip.create(3579545);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@contra_rom[0],'contra.zip',0)) then exit;
-//Pongo las ROMs en su banco
-copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
-for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2000);
-for f:=0 to 3 do copymemory(@memoria_rom[8+f,0],@memoria_temp[0+(f*$2000)],$2000);
-//Cargar Sound
-if not(cargar_roms(@mem_snd[0],@contra_sound,'contra.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms16b(@memoria_temp[0],@contra_chars[0],'contra.zip',0)) then exit;
-init_gfx(0,8,8,$4000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//chars 2
-if not(cargar_roms16b(@memoria_temp[0],@contra_chars2[0],'contra.zip',0)) then exit;
-init_gfx(1,8,8,$4000);
-gfx[1].trans[0]:=true;
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//Color lookup
-if not(cargar_roms(@memoria_temp[0],@contra_proms,'contra.zip',0)) then exit;
-clut_contra;
-reset_contra;
-iniciar_contra:=true;
-end;
-
-procedure reset_contra;
-begin
- main_hd6309.reset;
- snd_m6809.reset;
- reset_audio;
- K007121_reset(0);
- K007121_reset(1);
- ym2151_0.reset;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$ff;
- banco:=0;
- sound_latch:=0;
-end;
 
 procedure draw_sprites(bank:byte);inline;
 var
@@ -345,6 +245,97 @@ end;
 procedure contra_sound_update;
 begin
   ym2151_0.update;
+end;
+
+//Main
+procedure reset_contra;
+begin
+ main_hd6309.reset;
+ snd_m6809.reset;
+ reset_audio;
+ K007121_reset(0);
+ K007121_reset(1);
+ ym2151_0.reset;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$ff;
+ banco:=0;
+ sound_latch:=0;
+end;
+
+function iniciar_contra:boolean;
+var
+  f:byte;
+  memoria_temp:array[0..$7ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28 );
+    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+procedure clut_contra;
+var
+  chip,pal,i,ctabentry,clut:byte;
+begin
+for chip:=0 to 1 do begin
+		for pal:=0 to 7 do begin
+			clut:=(chip shl 1) or (pal and 1);
+			for i:=0 to $ff do begin
+				if (((pal and $01)=0) and (memoria_temp[(clut shl 8) or i]=0)) then ctabentry:=0
+				  else ctabentry:=(pal shl 4) or (memoria_temp[(clut shl 8) or i] and $0f);
+        gfx[chip].colores[(pal shl 8) or i]:=ctabentry;
+			end;
+		end;
+end;
+end;
+begin
+iniciar_contra:=false;
+iniciar_audio(true);
+//Pantallas
+screen_init(1,256,256,true);
+screen_init(2,256,256);
+screen_mod_scroll(2,256,256,255,256,256,255);
+screen_init(3,256,256,true);
+screen_mod_scroll(3,256,256,255,256,256,255);
+screen_init(4,512,256,false,true);
+iniciar_video(224,280);
+//Main CPU
+main_hd6309:=cpu_hd6309.create(24000000 div 2,$100);
+main_hd6309.change_ram_calls(contra_getbyte,contra_putbyte);
+//Sound CPU
+snd_m6809:=cpu_m6809.Create(24000000 div 8,$100);
+snd_m6809.change_ram_calls(sound_getbyte,sound_putbyte);
+snd_m6809.init_sound(contra_sound_update);
+//Audio chips
+ym2151_0:=ym2151_chip.create(3579545);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@contra_rom[0],'contra.zip',0)) then exit;
+//Pongo las ROMs en su banco
+copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
+for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2000);
+for f:=0 to 3 do copymemory(@memoria_rom[8+f,0],@memoria_temp[0+(f*$2000)],$2000);
+//Cargar Sound
+if not(cargar_roms(@mem_snd[0],@contra_sound,'contra.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms16b(@memoria_temp[0],@contra_chars[0],'contra.zip',0)) then exit;
+init_gfx(0,8,8,$4000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//chars 2
+if not(cargar_roms16b(@memoria_temp[0],@contra_chars2[0],'contra.zip',0)) then exit;
+init_gfx(1,8,8,$4000);
+gfx[1].trans[0]:=true;
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//Color lookup
+if not(cargar_roms(@memoria_temp[0],@contra_proms,'contra.zip',0)) then exit;
+clut_contra;
+reset_contra;
+iniciar_contra:=true;
+end;
+
+procedure Cargar_contra;
+begin
+llamadas_maquina.iniciar:=iniciar_contra;
+llamadas_maquina.bucle_general:=contra_principal;
+llamadas_maquina.reset:=reset_contra;
 end;
 
 end.

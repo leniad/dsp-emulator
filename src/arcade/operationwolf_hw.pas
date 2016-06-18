@@ -5,22 +5,7 @@ uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,msm5205,
      taitosnd,rom_engine,pal_engine,sound_engine,opwolf_cchip;
 
-procedure Cargar_opwolf;
-procedure opwolf_principal;
-function iniciar_opwolf:boolean;
-procedure reset_opwolf;
-procedure cerrar_opwolf;
-//Main CPU
-function opwolf_getword(direccion:dword):word;
-procedure opwolf_putword(direccion:dword;valor:word);
-//Sound CPU
-function opwolf_snd_getbyte(direccion:word):byte;
-procedure opwolf_snd_putbyte(direccion:word;valor:byte);
-procedure sound_bank_rom(valor:byte);
-procedure opwolf_sound_update;
-procedure ym2151_snd_irq(irqstate:byte);
-procedure snd_adpcm_0;
-procedure snd_adpcm_1;
+procedure cargar_opwolf;
 
 var
  rom:array[0..$2ffff] of word;
@@ -45,113 +30,6 @@ var
  adpcm:array[0..$7ffff] of byte;
  adpcm_b,adpcm_c:array[0..5] of byte;
  adpcm_pos,adpcm_end,adpcm_data:array[0..1] of dword;
-
-procedure Cargar_opwolf;
-begin
-llamadas_maquina.iniciar:=iniciar_opwolf;
-llamadas_maquina.bucle_general:=opwolf_principal;
-llamadas_maquina.cerrar:=cerrar_opwolf;
-llamadas_maquina.reset:=reset_opwolf;
-end;
-
-function iniciar_opwolf:boolean;
-const
-  pc_x:array[0..7] of dword=(2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4);
-  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-  ps_x:array[0..15] of dword=(2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4, 10*4, 11*4, 8*4, 9*4, 14*4, 15*4, 12*4, 13*4);
-  ps_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
-var
-  memoria_temp:array[0..$7ffff] of byte;
-begin
-iniciar_opwolf:=false;
-iniciar_audio(true);
-screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,256,511);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
-screen_init(3,512,512,false,true);
-iniciar_video(320,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(opwolf_getword,opwolf_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,256);
-snd_z80.change_ram_calls(opwolf_snd_getbyte,opwolf_snd_putbyte);
-snd_z80.init_sound(opwolf_sound_update);
-//MCU
-opwolf_init_cchip(main_m68000.numero_cpu);
-//Sound Chips
-ym2151_0:=ym2151_chip.create(4000000);
-ym2151_0.change_port_func(sound_bank_rom);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
-msm_5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@opwolf_rom[0],'opwolf.zip',0)) then exit;
-//cargar sonido+ponerlas en su banco+adpcm
-if not(cargar_roms(@memoria_temp[0],@opwolf_sound,'opwolf.zip',1)) then exit;
-copymemory(@mem_snd[0],@memoria_temp[0],$4000);
-copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
-copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
-copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
-copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
-if not(cargar_roms(@adpcm[0],@opwolf_adpcm,'opwolf.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@opwolf_char,'opwolf.zip',1)) then exit;
-init_gfx(0,8,8,$4000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@opwolf_sprites,'opwolf.zip',1)) then exit;
-init_gfx(1,16,16,$1000);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//final
-old_cursor:=sdl_getcursor;
-sdl_setcursor(sdl_createcursor(@cdata,@cmask,16,16,7,7));
-sdl_showcursor(1);
-reset_opwolf;
-iniciar_opwolf:=true;
-end;
-
-procedure cerrar_opwolf;
-begin
-sdl_setcursor(old_cursor);
-sdl_showcursor(0);
-end;
-
-procedure reset_opwolf;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym2151_0.reset;
- msm_5205_0.reset;
- msm_5205_1.reset;
- msm_5205_0.reset_w(1);
- msm_5205_1.reset_w(1);
- taitosound_reset;
- opwolf_cchip_reset;
- reset_audio;
- marcade.in0:=$fc;
- marcade.in1:=$ff;
- sound_bank:=0;
- scroll_x1:=0;
- scroll_y1:=0;
- scroll_x2:=0;
- scroll_y2:=0;
- adpcm_b[0]:=0;
- adpcm_c[0]:=0;
- adpcm_b[1]:=0;
- adpcm_c[1]:=0;
- adpcm_pos[0]:=0;
- adpcm_pos[1]:=0;
- adpcm_end[0]:=0;
- adpcm_end[1]:=0;
- adpcm_data[0]:=$100;
- adpcm_data[1]:=$100;
-end;
 
 procedure update_video_opwolf;inline;
 var
@@ -358,7 +236,7 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 
@@ -386,6 +264,114 @@ if (adpcm_data[1] and $100)=0 then begin
 		adpcm_data[1]:=adpcm[adpcm_pos[1]];
 		msm_5205_1.data_w(adpcm_data[1] shr 4);
 	end;
+end;
+
+//Main
+procedure reset_opwolf;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ msm_5205_0.reset;
+ msm_5205_1.reset;
+ msm_5205_0.reset_w(1);
+ msm_5205_1.reset_w(1);
+ taitosound_reset;
+ opwolf_cchip_reset;
+ reset_audio;
+ marcade.in0:=$fc;
+ marcade.in1:=$ff;
+ sound_bank:=0;
+ scroll_x1:=0;
+ scroll_y1:=0;
+ scroll_x2:=0;
+ scroll_y2:=0;
+ adpcm_b[0]:=0;
+ adpcm_c[0]:=0;
+ adpcm_b[1]:=0;
+ adpcm_c[1]:=0;
+ adpcm_pos[0]:=0;
+ adpcm_pos[1]:=0;
+ adpcm_end[0]:=0;
+ adpcm_end[1]:=0;
+ adpcm_data[0]:=$100;
+ adpcm_data[1]:=$100;
+end;
+
+function iniciar_opwolf:boolean;
+const
+  pc_x:array[0..7] of dword=(2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4);
+  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+  ps_x:array[0..15] of dword=(2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4, 10*4, 11*4, 8*4, 9*4, 14*4, 15*4, 12*4, 13*4);
+  ps_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
+var
+  memoria_temp:array[0..$7ffff] of byte;
+begin
+iniciar_opwolf:=false;
+iniciar_audio(true);
+screen_init(1,512,512);
+screen_mod_scroll(1,512,512,511,512,256,511);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,512,511,512,256,511);
+screen_init(3,512,512,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(8000000,256);
+main_m68000.change_ram16_calls(opwolf_getword,opwolf_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,256);
+snd_z80.change_ram_calls(opwolf_snd_getbyte,opwolf_snd_putbyte);
+snd_z80.init_sound(opwolf_sound_update);
+//MCU
+opwolf_init_cchip(main_m68000.numero_cpu);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_port_func(sound_bank_rom);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@opwolf_rom[0],'opwolf.zip',0)) then exit;
+//cargar sonido+ponerlas en su banco+adpcm
+if not(cargar_roms(@memoria_temp[0],@opwolf_sound,'opwolf.zip',1)) then exit;
+copymemory(@mem_snd[0],@memoria_temp[0],$4000);
+copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
+copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
+copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
+copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
+if not(cargar_roms(@adpcm[0],@opwolf_adpcm,'opwolf.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@opwolf_char,'opwolf.zip',1)) then exit;
+init_gfx(0,8,8,$4000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@opwolf_sprites,'opwolf.zip',1)) then exit;
+init_gfx(1,16,16,$1000);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//final
+old_cursor:=sdl_getcursor;
+sdl_setcursor(sdl_createcursor(@cdata,@cmask,16,16,7,7));
+sdl_showcursor(1);
+reset_opwolf;
+iniciar_opwolf:=true;
+end;
+
+procedure cerrar_opwolf;
+begin
+sdl_setcursor(old_cursor);
+sdl_showcursor(0);
+end;
+
+procedure Cargar_opwolf;
+begin
+llamadas_maquina.iniciar:=iniciar_opwolf;
+llamadas_maquina.bucle_general:=opwolf_principal;
+llamadas_maquina.cerrar:=cerrar_opwolf;
+llamadas_maquina.reset:=reset_opwolf;
 end;
 
 end.

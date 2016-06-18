@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ym_2151,sound_engine,oki6295,misc_functions;
 
-procedure Cargar_megasys1;
-procedure megasys1_principal;
-function iniciar_megasys1:boolean;
-procedure reset_megasys1;
-//Main CPU
-function megasys1_a_getword(direccion:dword):word;
-procedure megasys1_a_putword(direccion:dword;valor:word);
-//Sound CPU
-function megasys1_snd_a_getword(direccion:dword):word;
-procedure megasys1_snd_a_putword(direccion:dword;valor:word);
-procedure megasys1_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_megasys1;
 
 implementation
 const
@@ -131,318 +120,6 @@ var
  sprite_bank:byte;
  sprites_split,mcu_hs:boolean;
  mcu_hs_ram:array[0..9] of word;
-
-procedure Cargar_megasys1;
-begin
-llamadas_maquina.iniciar:=iniciar_megasys1;
-llamadas_maquina.bucle_general:=megasys1_principal;
-llamadas_maquina.reset:=reset_megasys1;
-llamadas_maquina.fps_max:=56.18;
-end;
-
-procedure decript_phantasm(dest,source:pword);
-var
-  f:dword;
-  x,y:word;
-begin
-	for f:=0 to $1ffff do begin
-		x:=source^;
-    inc(source);
-		if (f<($8000 div 2)) then begin
-      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$e,$f,$0,$1,$8,$9,$a,$b,$c,$5,$6,$7,$2,$3,$4)
-        else y:=BITSWAP16(x,$f,$d,$b,$9,$7,$5,$3,$1,$e,$c,$a,$8,$6,$4,$2,$0);
-    end else if	(f<($10000 div 2)) then begin
-          y:=BITSWAP16(x,$0,$1,$2,$3,$4,$5,$6,$7,$b,$a,$9,$8,$f,$e,$d,$c);
-        end else if	(f<($18000 div 2)) then begin
-            if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$e,$f,$0,$1,$8,$9,$a,$b,$c,$5,$6,$7,$2,$3,$4)
-              else y:=BITSWAP16(x,$f,$d,$b,$9,$7,$5,$3,$1,$e,$c,$a,$8,$6,$4,$2,$0);
-          end	else if	(f<($20000 div 2)) then y:=BITSWAP16(x,$f,$d,$b,$9,$7,$5,$3,$1,$e,$c,$a,$8,$6,$4,$2,$0)
-            else y:=BITSWAP16(x,$0,$1,$2,$3,$4,$5,$6,$7,$b,$a,$9,$8,$f,$e,$d,$c);
-    dest^:=y;
-    inc(dest);
-  end;  //del for
-end;
-
-procedure decript_rodland(dest,source:pword);
-var
-  f:dword;
-  x,y:word;
-begin
-	for f:=0 to $1ffff do begin
-		x:=source^;
-    inc(source);
-		if (f<($8000 div 2)) then begin
-      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$0,$a,$9,$6,$e,$b,$f,$5,$c,$7,$2,$3,$8,$1,$4)
-        else y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c);
-    end else if	(f<($10000 div 2)) then begin
-      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$f,$d,$b,$9,$c,$e,$0,$7,$5,$3,$1,$8,$a,$2,$4,$6)
-        else y:=BITSWAP16(x,$4,$5,$1,$2,$e,$d,$3,$b,$a,$9,$6,$7,$0,$8,$f,$c);
-    end else if	(f<($18000 div 2)) then begin
-      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$0,$a,$9,$6,$e,$b,$f,$5,$c,$7,$2,$3,$8,$1,$4)
-        else y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c);
-    end	else if	(f<($20000 div 2)) then y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c)
-      else y:=BITSWAP16(x,$4,$5,$1,$2,$e,$d,$3,$b,$a,$9,$6,$7,$0,$8,$f,$c);
-    dest^:=y;
-    inc(dest);
-  end;  //del for
-end;
-
-function iniciar_megasys1:boolean;
-const
-  pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-  pc_y:array[0..7] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8);
-  ps_x:array[0..15] of dword=(8*8*4*0+0,8*8*4*0+4,8*8*4*0+8,8*8*4*0+12,8*8*4*0+16,8*8*4*0+20,8*8*4*0+24,8*8*4*0+28,
-		8*8*4*2+0,8*8*4*2+4,8*8*4*2+8,8*8*4*2+12,8*8*4*2+16,8*8*4*2+20,8*8*4*2+24,8*8*4*2+28);
-  ps_y:array[0..15] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8,
-		8*4*8, 9*4*8, 10*4*8, 11*4*8, 12*4*8, 13*4*8, 14*4*8, 15*4*8);
-var
-  memoria_temp:pbyte;
-  mem_prom:array[0..$1ff] of byte;
-  memoria_w,ptemp:pword;
-procedure convert_chars(ngfx:byte;num:dword);
-begin
-  init_gfx(ngfx,8,8,num);
-  gfx[ngfx].trans[15]:=true;
-  gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
-  convert_gfx(ngfx,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-end;
-procedure convert_sprites(ngfx:byte;num:dword);
-begin
-  init_gfx(ngfx,16,16,num);
-  gfx[ngfx].trans[15]:=true;
-  gfx_set_desc_data(4,0,16*16*4,0,1,2,3);
-  convert_gfx(ngfx,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-end;
-procedure convert_pri;
-var
-  pri_code,offset,enable_mask:byte;
-  layers_order:array[0..1] of integer; // 2 layers orders (split sprites on/off)
-  i,top,top_mask,result,opacity,layer,order,layer0,layer1:integer;
-begin
-for pri_code:=0 to $f do begin	// 16 priority codes
-		for offset:=0 to 1 do begin
-			enable_mask:=$f;	// start with every layer enabled
-			layers_order[offset]:=$fffff;
-			repeat
-				top:=mem_prom[pri_code*$20+offset+enable_mask*2] and 3;	// this must be the top layer
-				top_mask:=1 shl top;
-				result:=0;		// result of the feasibility check for this layer
-				for i:=0 to $f do begin	// every combination of opaque and transparent pens
-					opacity:=i and enable_mask;	// only consider active layers
-					layer:=mem_prom[pri_code*$20+offset+opacity*2];
-					if (opacity<>0) then begin
-						if (opacity and top_mask)<>0 then begin
-							if (layer<>top)	then result:=result or 1;	// error: opaque pens aren't always opaque!
-						end else begin
-							if (layer=top) then	result:=result or 2	// transparent pen is opaque
-							  else result:=result or 4;	// transparent pen is transparent
-						end;
-					end; //opacity
-				end; //del for i
-				//  note: 3210 means that layer 0 is the bottom layer
-        //  (the order is reversed in the hand-crafted data)
-				layers_order[offset]:=((layers_order[offset] shl 4) or top ) and $fffff;
-				enable_mask:=enable_mask and not(top_mask);
-				if (result and 1)<>0 then begin
-					layers_order[offset]:=$fffff;
-					break;
-				end;
-				if  ((result and 6)=6) then begin
-					layers_order[offset]:=$fffff;
-					break;
-				end;
-				if (result=2)	then enable_mask:=0; // totally opaque top layer
-			until (enable_mask=0);
-    end; //for  offset
-		// merge the two layers orders */
-		order:=$fffff;
-    i:=5;
-		while i>0 do begin // 5 layers to write
-			layer0:=layers_order[0] and $0f;
-			layer1:=layers_order[1] and $0f;
-			if (layer0<>3) then begin	// 0,1,2 or f
-				if (layer1=3) then begin
-					layer:=4;
-					layers_order[0]:=layers_order[0] shl 4;	// layer1 won't change next loop
-				end	else begin
-					layer:=layer0;
-					if (layer0<>layer1) then begin
-						order:=$fffff;
-						break;
-					end;
-				end;
-			end else begin // layer0 = 3;
-				if (layer1=3) then begin
-					layer:=$43;			// 4 must always be present
-					order:=order shl 4;
-					i:=i-1;					// 2 layers written at once
-				end else begin
-					layer:=3;
-					layers_order[1]:=layers_order[1] shl 4;	// layer1 won't change next loop
-				end;
-			end;
-			// reverse the order now */
-			order:=(order shl 4) or layer;
-			i:=i-1;		// layer written
-			layers_order[0]:=layers_order[0] shr 4;
-			layers_order[1]:=layers_order[1] shr 4;
-		end; // for i merging
-		prioridad[pri_code]:=order and $fffff;	// at last!
-end;	//del for pri_code
-end;
-begin
-iniciar_megasys1:=false;
-iniciar_audio(true);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512);
-screen_mod_scroll(1,512,256,511,512,256,511);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,512,512,true);
-screen_mod_scroll(3,512,256,511,512,256,511);
-screen_init(4,512,512,false,true);
-iniciar_video(256,224);
-//iniciar_video(512,512);
-//Main CPU
-getmem(memoria_temp,$100000);
-getmem(memoria_w,$60000);
-main_m68000:=cpu_m68000.create(6000000,$100);
-main_m68000.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
-//Sound CPU
-snd_m68000:=cpu_m68000.create(7000000,$100);
-snd_m68000.change_ram16_calls(megasys1_snd_a_getword,megasys1_snd_a_putword);
-snd_m68000.init_sound(megasys1_sound_update);
-//Sound Chips
-oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
-oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
-ym2151_0:=ym2151_chip.create(3500000);
-ym2151_0.change_irq_func(snd_irq);
-case main_vars.tipo_maquina of
-  138:begin //P-47
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@p47_rom,'p47.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms16w(@rom_snd[0],@p47_sound,'p47.zip',0)) then exit;
-        //OKI Sounds
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@p47_oki1,'p47.zip',0)) then exit;
-        if not(cargar_roms(oki_6295_1.get_rom_addr,@p47_oki2,'p47.zip',0)) then exit;
-        //scroll 0
-        if not(cargar_roms(memoria_temp,@p47_scr0,'p47.zip',0)) then exit;
-        convert_chars(0,$4000);
-        //scroll 1
-        if not(cargar_roms(memoria_temp,@p47_scr1,'p47.zip',0)) then exit;
-        convert_chars(1,$4000);
-        //scroll 2
-        if not(cargar_roms(memoria_temp,@p47_scr2,'p47.zip',1)) then exit;
-        convert_chars(2,$1000);
-        //Sprites
-        if not(cargar_roms(memoria_temp,@p47_sprites,'p47.zip',0)) then exit;
-        convert_sprites(3,$1000);
-        //Prioridades
-        if not(cargar_roms(@mem_prom[0],@p47_pri,'p47.zip',1)) then exit;
-        convert_pri;
-        //DIP
-        marcade.dswa:=$ffff;
-        marcade.dswa_val:=@p47_dip;
-      end;
-  139:begin  //Rodland
-        //cargar roms
-        if not(cargar_roms16w(memoria_w,@rodland_rom,'rodland.zip',0)) then exit;
-        decript_rodland(@rom[0],memoria_w);
-        ptemp:=memoria_w;
-        inc(ptemp,$20000);
-        copymemory(@rom[$20000],ptemp,$20000);
-        //cargar sonido
-        if not(cargar_roms16w(@rom_snd[0],@rodland_sound,'rodland.zip',0)) then exit;
-        //OKI Sounds
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@rodland_oki1,'rodland.zip')) then exit;
-        if not(cargar_roms(oki_6295_1.get_rom_addr,@rodland_oki2,'rodland.zip')) then exit;
-        //scroll 0 y ordenar
-        if not(cargar_roms(memoria_temp,@rodland_scr0,'rodland.zip')) then exit;
-        convert_chars(0,$4000);
-        //scroll 1
-        if not(cargar_roms(memoria_temp,@rodland_scr1,'rodland.zip')) then exit;
-        convert_chars(1,$4000);
-        //scroll 2
-        if not(cargar_roms(memoria_temp,@rodland_scr2,'rodland.zip')) then exit;
-        convert_chars(2,$1000);
-        //Sprites
-        if not(cargar_roms(memoria_temp,@rodland_sprites,'rodland.zip')) then exit;
-        convert_sprites(3,$1000);
-        //Prioridades
-        if not(cargar_roms(@mem_prom[0],@rodland_pri,'rodland.zip')) then exit;
-        convert_pri;
-        //DIP
-        marcade.dswa:=$bfff;
-        marcade.dswa_val:=@rodland_dip;
-      end;
-  140:begin //Saint Dragon
-        //cargar roms
-        if not(cargar_roms16w(memoria_w,@stdragon_rom[0],'stdragon.zip',0)) then exit;
-        decript_phantasm(@rom[0],memoria_w);
-        //rom[$00045e div 2]:=$0098;	// protection
-        //cargar sonido
-        if not(cargar_roms16w(@rom_snd[0],@stdragon_sound,'stdragon.zip',0)) then exit;
-        //OKI Sounds
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@stdragon_oki1,'stdragon.zip',0)) then exit;
-        if not(cargar_roms(oki_6295_1.get_rom_addr,@stdragon_oki2,'stdragon.zip',0)) then exit;
-        //scroll 0
-        if not(cargar_roms(memoria_temp,@stdragon_scr0,'stdragon.zip',0)) then exit;
-        convert_chars(0,$4000);
-        //scroll 1
-        if not(cargar_roms(memoria_temp,@stdragon_scr1,'stdragon.zip',0)) then exit;
-        convert_chars(1,$4000);
-        //scroll 2
-        if not(cargar_roms(memoria_temp,@stdragon_scr2,'stdragon.zip')) then exit;
-        convert_chars(2,$1000);
-        //Sprites
-        if not(cargar_roms(memoria_temp,@stdragon_sprites,'stdragon.zip',0)) then exit;
-        convert_sprites(3,$1000);
-        //Prioridades
-        if not(cargar_roms(@mem_prom[0],@stdragon_pri,'stdragon.zip')) then exit;
-        convert_pri;
-        marcade.dswa:=$ffbf;
-        marcade.dswa_val:=@stdragon_dip;
-      end;
-end;
-//final
-freemem(memoria_temp);
-freemem(memoria_w);
-reset_megasys1;
-iniciar_megasys1:=true;
-end;
-
-procedure reset_megasys1;
-var
-  f:byte;
-begin
- main_m68000.reset;
- snd_m68000.reset;
- ym2151_0.reset;
- oki_6295_0.reset;
- oki_6295_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$ff;
- sound_latch:=0;
- sound_latch2:=0;
- sprite_bank:=0;
- active_layer:=$ff;
- sprites_split:=false;
- for f:=0 to 2 do begin
-  layer_scr[f].scroll_x:=0;
-  layer_scr[f].scroll_y:=0;
-  layer_scr[f].es_8x8:=true;
-  layer_scr[f].filas:=16;
-  layer_scr[f].cols:=2;
-  layer_scr[f].info:=$ffff;
-  layer_scr[f].mask_x:=0;
-  layer_scr[f].mask_y:=0;
-  fillchar(layer_scr[f].scr_ram[0],$4000,0);
- end;
- mcu_hs:=false;
-end;
 
 procedure poner_sprites(pri:byte);inline;
 var
@@ -748,8 +425,8 @@ case direccion of
                                 layer_scr[1].scroll_y:=valor and layer_scr[1].mask_y;
                              end;
                         $20c:if layer_scr[1].info<>valor then cambiar_layer(1,valor);
-                        $300:if (valor and $10)<>0 then snd_m68000.pedir_reset:=ASSERT_LINE
-                                else snd_m68000.pedir_reset:=CLEAR_LINE;
+                        $300:if (valor and $10)<>0 then snd_m68000.change_reset(ASSERT_LINE)
+                                else snd_m68000.change_reset(CLEAR_LINE);
                         $308:begin
                                 sound_latch:=valor;
                                 snd_m68000.irq[4]:=HOLD_LINE;
@@ -813,6 +490,318 @@ end;
 procedure snd_irq(irqstate:byte);
 begin
   if irqstate=1 then snd_m68000.irq[4]:=HOLD_LINE;
+end;
+
+//Main
+procedure reset_megasys1;
+var
+  f:byte;
+begin
+ main_m68000.reset;
+ snd_m68000.reset;
+ ym2151_0.reset;
+ oki_6295_0.reset;
+ oki_6295_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$ff;
+ sound_latch:=0;
+ sound_latch2:=0;
+ sprite_bank:=0;
+ active_layer:=$ff;
+ sprites_split:=false;
+ for f:=0 to 2 do begin
+  layer_scr[f].scroll_x:=0;
+  layer_scr[f].scroll_y:=0;
+  layer_scr[f].es_8x8:=true;
+  layer_scr[f].filas:=16;
+  layer_scr[f].cols:=2;
+  layer_scr[f].info:=$ffff;
+  layer_scr[f].mask_x:=0;
+  layer_scr[f].mask_y:=0;
+  fillchar(layer_scr[f].scr_ram[0],$4000,0);
+ end;
+ mcu_hs:=false;
+end;
+
+procedure decript_phantasm(dest,source:pword);inline;
+var
+  f:dword;
+  x,y:word;
+begin
+	for f:=0 to $1ffff do begin
+		x:=source^;
+    inc(source);
+		if (f<($8000 div 2)) then begin
+      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$e,$f,$0,$1,$8,$9,$a,$b,$c,$5,$6,$7,$2,$3,$4)
+        else y:=BITSWAP16(x,$f,$d,$b,$9,$7,$5,$3,$1,$e,$c,$a,$8,$6,$4,$2,$0);
+    end else if	(f<($10000 div 2)) then begin
+          y:=BITSWAP16(x,$0,$1,$2,$3,$4,$5,$6,$7,$b,$a,$9,$8,$f,$e,$d,$c);
+        end else if	(f<($18000 div 2)) then begin
+            if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$e,$f,$0,$1,$8,$9,$a,$b,$c,$5,$6,$7,$2,$3,$4)
+              else y:=BITSWAP16(x,$f,$d,$b,$9,$7,$5,$3,$1,$e,$c,$a,$8,$6,$4,$2,$0);
+          end	else if	(f<($20000 div 2)) then y:=BITSWAP16(x,$f,$d,$b,$9,$7,$5,$3,$1,$e,$c,$a,$8,$6,$4,$2,$0)
+            else y:=BITSWAP16(x,$0,$1,$2,$3,$4,$5,$6,$7,$b,$a,$9,$8,$f,$e,$d,$c);
+    dest^:=y;
+    inc(dest);
+  end;  //del for
+end;
+
+procedure decript_rodland(dest,source:pword);inline;
+var
+  f:dword;
+  x,y:word;
+begin
+	for f:=0 to $1ffff do begin
+		x:=source^;
+    inc(source);
+		if (f<($8000 div 2)) then begin
+      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$0,$a,$9,$6,$e,$b,$f,$5,$c,$7,$2,$3,$8,$1,$4)
+        else y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c);
+    end else if	(f<($10000 div 2)) then begin
+      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$f,$d,$b,$9,$c,$e,$0,$7,$5,$3,$1,$8,$a,$2,$4,$6)
+        else y:=BITSWAP16(x,$4,$5,$1,$2,$e,$d,$3,$b,$a,$9,$6,$7,$0,$8,$f,$c);
+    end else if	(f<($18000 div 2)) then begin
+      if ((f or ($248 div 2))<>f) then y:=BITSWAP16(x,$d,$0,$a,$9,$6,$e,$b,$f,$5,$c,$7,$2,$3,$8,$1,$4)
+        else y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c);
+    end	else if	(f<($20000 div 2)) then y:=BITSWAP16(x,$4,$5,$6,$7,$0,$1,$2,$3,$b,$a,$9,$8,$f,$e,$d,$c)
+      else y:=BITSWAP16(x,$4,$5,$1,$2,$e,$d,$3,$b,$a,$9,$6,$7,$0,$8,$f,$c);
+    dest^:=y;
+    inc(dest);
+  end;  //del for
+end;
+
+function iniciar_megasys1:boolean;
+const
+  pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+  pc_y:array[0..7] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8);
+  ps_x:array[0..15] of dword=(8*8*4*0+0,8*8*4*0+4,8*8*4*0+8,8*8*4*0+12,8*8*4*0+16,8*8*4*0+20,8*8*4*0+24,8*8*4*0+28,
+		8*8*4*2+0,8*8*4*2+4,8*8*4*2+8,8*8*4*2+12,8*8*4*2+16,8*8*4*2+20,8*8*4*2+24,8*8*4*2+28);
+  ps_y:array[0..15] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8,
+		8*4*8, 9*4*8, 10*4*8, 11*4*8, 12*4*8, 13*4*8, 14*4*8, 15*4*8);
+var
+  memoria_temp:pbyte;
+  mem_prom:array[0..$1ff] of byte;
+  memoria_w,ptemp:pword;
+procedure convert_chars(ngfx:byte;num:dword);
+begin
+  init_gfx(ngfx,8,8,num);
+  gfx[ngfx].trans[15]:=true;
+  gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
+  convert_gfx(ngfx,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+end;
+procedure convert_sprites(ngfx:byte;num:dword);
+begin
+  init_gfx(ngfx,16,16,num);
+  gfx[ngfx].trans[15]:=true;
+  gfx_set_desc_data(4,0,16*16*4,0,1,2,3);
+  convert_gfx(ngfx,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+end;
+procedure convert_pri;
+var
+  pri_code,offset,enable_mask:byte;
+  layers_order:array[0..1] of integer; // 2 layers orders (split sprites on/off)
+  i,top,top_mask,result,opacity,layer,order,layer0,layer1:integer;
+begin
+for pri_code:=0 to $f do begin	// 16 priority codes
+		for offset:=0 to 1 do begin
+			enable_mask:=$f;	// start with every layer enabled
+			layers_order[offset]:=$fffff;
+			repeat
+				top:=mem_prom[pri_code*$20+offset+enable_mask*2] and 3;	// this must be the top layer
+				top_mask:=1 shl top;
+				result:=0;		// result of the feasibility check for this layer
+				for i:=0 to $f do begin	// every combination of opaque and transparent pens
+					opacity:=i and enable_mask;	// only consider active layers
+					layer:=mem_prom[pri_code*$20+offset+opacity*2];
+					if (opacity<>0) then begin
+						if (opacity and top_mask)<>0 then begin
+							if (layer<>top)	then result:=result or 1;	// error: opaque pens aren't always opaque!
+						end else begin
+							if (layer=top) then	result:=result or 2	// transparent pen is opaque
+							  else result:=result or 4;	// transparent pen is transparent
+						end;
+					end; //opacity
+				end; //del for i
+				//  note: 3210 means that layer 0 is the bottom layer
+        //  (the order is reversed in the hand-crafted data)
+				layers_order[offset]:=((layers_order[offset] shl 4) or top ) and $fffff;
+				enable_mask:=enable_mask and not(top_mask);
+				if (result and 1)<>0 then begin
+					layers_order[offset]:=$fffff;
+					break;
+				end;
+				if  ((result and 6)=6) then begin
+					layers_order[offset]:=$fffff;
+					break;
+				end;
+				if (result=2)	then enable_mask:=0; // totally opaque top layer
+			until (enable_mask=0);
+    end; //for  offset
+		// merge the two layers orders */
+		order:=$fffff;
+    i:=5;
+		while i>0 do begin // 5 layers to write
+			layer0:=layers_order[0] and $0f;
+			layer1:=layers_order[1] and $0f;
+			if (layer0<>3) then begin	// 0,1,2 or f
+				if (layer1=3) then begin
+					layer:=4;
+					layers_order[0]:=layers_order[0] shl 4;	// layer1 won't change next loop
+				end	else begin
+					layer:=layer0;
+					if (layer0<>layer1) then begin
+						order:=$fffff;
+						break;
+					end;
+				end;
+			end else begin // layer0 = 3;
+				if (layer1=3) then begin
+					layer:=$43;			// 4 must always be present
+					order:=order shl 4;
+					i:=i-1;					// 2 layers written at once
+				end else begin
+					layer:=3;
+					layers_order[1]:=layers_order[1] shl 4;	// layer1 won't change next loop
+				end;
+			end;
+			// reverse the order now */
+			order:=(order shl 4) or layer;
+			i:=i-1;		// layer written
+			layers_order[0]:=layers_order[0] shr 4;
+			layers_order[1]:=layers_order[1] shr 4;
+		end; // for i merging
+		prioridad[pri_code]:=order and $fffff;	// at last!
+end;	//del for pri_code
+end;
+begin
+iniciar_megasys1:=false;
+iniciar_audio(true);
+screen_init(1,512,512);
+screen_mod_scroll(1,512,256,511,512,256,511);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,512,512,true);
+screen_mod_scroll(3,512,256,511,512,256,511);
+screen_init(4,512,512,false,true);
+iniciar_video(256,224);
+//iniciar_video(512,512);
+//Main CPU
+getmem(memoria_temp,$100000);
+getmem(memoria_w,$60000);
+main_m68000:=cpu_m68000.create(6000000,$100);
+main_m68000.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
+//Sound CPU
+snd_m68000:=cpu_m68000.create(7000000,$100);
+snd_m68000.change_ram16_calls(megasys1_snd_a_getword,megasys1_snd_a_putword);
+snd_m68000.init_sound(megasys1_sound_update);
+//Sound Chips
+oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
+oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
+ym2151_0:=ym2151_chip.create(3500000);
+ym2151_0.change_irq_func(snd_irq);
+case main_vars.tipo_maquina of
+  138:begin //P-47
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@p47_rom,'p47.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms16w(@rom_snd[0],@p47_sound,'p47.zip',0)) then exit;
+        //OKI Sounds
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@p47_oki1,'p47.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_1.get_rom_addr,@p47_oki2,'p47.zip',0)) then exit;
+        //scroll 0
+        if not(cargar_roms(memoria_temp,@p47_scr0,'p47.zip',0)) then exit;
+        convert_chars(0,$4000);
+        //scroll 1
+        if not(cargar_roms(memoria_temp,@p47_scr1,'p47.zip',0)) then exit;
+        convert_chars(1,$4000);
+        //scroll 2
+        if not(cargar_roms(memoria_temp,@p47_scr2,'p47.zip',1)) then exit;
+        convert_chars(2,$1000);
+        //Sprites
+        if not(cargar_roms(memoria_temp,@p47_sprites,'p47.zip',0)) then exit;
+        convert_sprites(3,$1000);
+        //Prioridades
+        if not(cargar_roms(@mem_prom[0],@p47_pri,'p47.zip',1)) then exit;
+        convert_pri;
+        //DIP
+        marcade.dswa:=$ffff;
+        marcade.dswa_val:=@p47_dip;
+      end;
+  139:begin  //Rodland
+        //cargar roms
+        if not(cargar_roms16w(memoria_w,@rodland_rom,'rodland.zip',0)) then exit;
+        decript_rodland(@rom[0],memoria_w);
+        ptemp:=memoria_w;
+        inc(ptemp,$20000);
+        copymemory(@rom[$20000],ptemp,$20000);
+        //cargar sonido
+        if not(cargar_roms16w(@rom_snd[0],@rodland_sound,'rodland.zip',0)) then exit;
+        //OKI Sounds
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@rodland_oki1,'rodland.zip')) then exit;
+        if not(cargar_roms(oki_6295_1.get_rom_addr,@rodland_oki2,'rodland.zip')) then exit;
+        //scroll 0 y ordenar
+        if not(cargar_roms(memoria_temp,@rodland_scr0,'rodland.zip')) then exit;
+        convert_chars(0,$4000);
+        //scroll 1
+        if not(cargar_roms(memoria_temp,@rodland_scr1,'rodland.zip')) then exit;
+        convert_chars(1,$4000);
+        //scroll 2
+        if not(cargar_roms(memoria_temp,@rodland_scr2,'rodland.zip')) then exit;
+        convert_chars(2,$1000);
+        //Sprites
+        if not(cargar_roms(memoria_temp,@rodland_sprites,'rodland.zip')) then exit;
+        convert_sprites(3,$1000);
+        //Prioridades
+        if not(cargar_roms(@mem_prom[0],@rodland_pri,'rodland.zip')) then exit;
+        convert_pri;
+        //DIP
+        marcade.dswa:=$bfff;
+        marcade.dswa_val:=@rodland_dip;
+      end;
+  140:begin //Saint Dragon
+        //cargar roms
+        if not(cargar_roms16w(memoria_w,@stdragon_rom[0],'stdragon.zip',0)) then exit;
+        decript_phantasm(@rom[0],memoria_w);
+        //rom[$00045e div 2]:=$0098;	// protection
+        //cargar sonido
+        if not(cargar_roms16w(@rom_snd[0],@stdragon_sound,'stdragon.zip',0)) then exit;
+        //OKI Sounds
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@stdragon_oki1,'stdragon.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_1.get_rom_addr,@stdragon_oki2,'stdragon.zip',0)) then exit;
+        //scroll 0
+        if not(cargar_roms(memoria_temp,@stdragon_scr0,'stdragon.zip',0)) then exit;
+        convert_chars(0,$4000);
+        //scroll 1
+        if not(cargar_roms(memoria_temp,@stdragon_scr1,'stdragon.zip',0)) then exit;
+        convert_chars(1,$4000);
+        //scroll 2
+        if not(cargar_roms(memoria_temp,@stdragon_scr2,'stdragon.zip')) then exit;
+        convert_chars(2,$1000);
+        //Sprites
+        if not(cargar_roms(memoria_temp,@stdragon_sprites,'stdragon.zip',0)) then exit;
+        convert_sprites(3,$1000);
+        //Prioridades
+        if not(cargar_roms(@mem_prom[0],@stdragon_pri,'stdragon.zip')) then exit;
+        convert_pri;
+        marcade.dswa:=$ffbf;
+        marcade.dswa_val:=@stdragon_dip;
+      end;
+end;
+//final
+freemem(memoria_temp);
+freemem(memoria_w);
+reset_megasys1;
+iniciar_megasys1:=true;
+end;
+
+procedure Cargar_megasys1;
+begin
+llamadas_maquina.iniciar:=iniciar_megasys1;
+llamadas_maquina.bucle_general:=megasys1_principal;
+llamadas_maquina.reset:=reset_megasys1;
+llamadas_maquina.fps_max:=56.18;
 end;
 
 end.

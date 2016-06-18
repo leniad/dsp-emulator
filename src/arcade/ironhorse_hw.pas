@@ -6,19 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      rom_engine,pal_engine,sound_engine;
 
 //main
-procedure Cargar_ironhorse;
-procedure ironhorse_principal;
-function iniciar_ironhorse:boolean;
-procedure reset_ironhorse;
-//cpu
-function ironhorse_getbyte(direccion:word):byte;
-procedure ironhorse_putbyte(direccion:word;valor:byte);
-//snd cpu
-function ironhorse_snd_getbyte(direccion:word):byte;
-procedure ironhorse_snd_putbyte(direccion:word;valor:byte);
-procedure ironhorse_snd_outbyte(valor:byte;puerto:word);
-function ironhorse_snd_inbyte(puerto:word):byte;
-procedure ironhorse_sound_update;
+procedure cargar_ironhorse;
 
 implementation
 const
@@ -38,87 +26,6 @@ var
  sound_latch,charbank,palettebank:byte;
  spritebank:word;
  scroll_lineas:array[0..$1f] of byte;
-
-procedure Cargar_ironhorse;
-begin
-llamadas_maquina.iniciar:=iniciar_ironhorse;
-llamadas_maquina.bucle_general:=ironhorse_principal;
-llamadas_maquina.reset:=reset_ironhorse;
-llamadas_maquina.fps_max:=30;
-end;
-
-function iniciar_ironhorse:boolean; 
-var
-      colores:tpaleta;
-      valor,j:byte;
-      f,valor2:word;
-      memoria_temp:array[0..$1ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-begin
-iniciar_ironhorse:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,0,0,0);
-screen_init(2,256,256,false,true);
-iniciar_video(240,224);
-//Main CPU
-main_m6809:=cpu_m6809.Create(3072000,$100);
-main_m6809.change_ram_calls(ironhorse_getbyte,ironhorse_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3072000,$100);
-snd_z80.change_ram_calls(ironhorse_snd_getbyte,ironhorse_snd_putbyte);
-snd_z80.change_io_calls(ironhorse_snd_inbyte,ironhorse_snd_outbyte);
-snd_z80.init_sound(ironhorse_sound_update);
-//Sound Chip
-ym2203_0:=ym2203_chip.create(3072000);
-//cargar roms
-if not(cargar_roms(@memoria[0],@ironhorse_rom[0],'ironhors.zip',0)) then exit;
-//roms sonido
-if not(cargar_roms(@mem_snd[0],@ironhorse_snd,'ironhors.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms16b(@memoria_temp[0],@ironhorse_gfx[0],'ironhors.zip',0)) then exit;
-init_gfx(0,8,8,$1000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//paleta
-if not(cargar_roms(@memoria_temp[0],@ironhorse_pal[0],'ironhors.zip',0)) then exit;
-for f:=0 to $ff do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] shr 4);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,256);
-for f:=0 to $1ff do begin
-  for j:=0 to 7 do begin
-			valor:=(j shl 5) or ((not(f) and $100) shr 4) or (memoria_temp[f+$300] and $0f);
-      valor2:=((f and $100) shl 3) or (j shl 8) or (f and $ff);
-      gfx[0].colores[valor2]:=valor;  //chars
-      gfx[1].colores[valor2]:=valor;  //sprites
-  end;
-end;
-//final
-reset_ironhorse;
-iniciar_ironhorse:=true;
-end;
-
-procedure reset_ironhorse;
-begin
- main_m6809.reset;
- snd_z80.reset;
- ym2203_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- pedir_nmi:=false;
- charbank:=0;
- sound_latch:=0;
- spritebank:=$3800;
-end;
 
 procedure update_video_ironhorse;inline;
 var
@@ -271,7 +178,7 @@ case direccion of
      end;
   $20..$3f:scroll_lineas[direccion and $1f]:=valor;
   $800:sound_latch:=valor;
-  $900:snd_z80.pedir_irq:=HOLD_LINE;
+  $900:snd_z80.change_irq(HOLD_LINE);
   $a00:if palettebank<>(valor and $7) then begin
             palettebank:=valor and $7;
             fillchar(gfx[0].buffer[0],$400,1);
@@ -308,6 +215,87 @@ end;
 procedure ironhorse_sound_update;
 begin
   ym2203_0.Update;
+end;
+
+//Main
+procedure reset_ironhorse;
+begin
+ main_m6809.reset;
+ snd_z80.reset;
+ ym2203_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ pedir_nmi:=false;
+ charbank:=0;
+ sound_latch:=0;
+ spritebank:=$3800;
+end;
+
+function iniciar_ironhorse:boolean;
+var
+      colores:tpaleta;
+      valor,j:byte;
+      f,valor2:word;
+      memoria_temp:array[0..$1ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+begin
+iniciar_ironhorse:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_mod_scroll(1,256,256,255,0,0,0);
+screen_init(2,256,256,false,true);
+iniciar_video(240,224);
+//Main CPU
+main_m6809:=cpu_m6809.Create(3072000,$100);
+main_m6809.change_ram_calls(ironhorse_getbyte,ironhorse_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3072000,$100);
+snd_z80.change_ram_calls(ironhorse_snd_getbyte,ironhorse_snd_putbyte);
+snd_z80.change_io_calls(ironhorse_snd_inbyte,ironhorse_snd_outbyte);
+snd_z80.init_sound(ironhorse_sound_update);
+//Sound Chip
+ym2203_0:=ym2203_chip.create(3072000);
+//cargar roms
+if not(cargar_roms(@memoria[0],@ironhorse_rom[0],'ironhors.zip',0)) then exit;
+//roms sonido
+if not(cargar_roms(@mem_snd[0],@ironhorse_snd,'ironhors.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms16b(@memoria_temp[0],@ironhorse_gfx[0],'ironhors.zip',0)) then exit;
+init_gfx(0,8,8,$1000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//paleta
+if not(cargar_roms(@memoria_temp[0],@ironhorse_pal[0],'ironhors.zip',0)) then exit;
+for f:=0 to $ff do begin
+  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] shr 4);
+  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+set_pal(colores,256);
+for f:=0 to $1ff do begin
+  for j:=0 to 7 do begin
+			valor:=(j shl 5) or ((not(f) and $100) shr 4) or (memoria_temp[f+$300] and $0f);
+      valor2:=((f and $100) shl 3) or (j shl 8) or (f and $ff);
+      gfx[0].colores[valor2]:=valor;  //chars
+      gfx[1].colores[valor2]:=valor;  //sprites
+  end;
+end;
+//final
+reset_ironhorse;
+iniciar_ironhorse:=true;
+end;
+
+procedure Cargar_ironhorse;
+begin
+llamadas_maquina.iniciar:=iniciar_ironhorse;
+llamadas_maquina.bucle_general:=ironhorse_principal;
+llamadas_maquina.reset:=reset_ironhorse;
+llamadas_maquina.fps_max:=30;
 end;
 
 end.

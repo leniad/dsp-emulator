@@ -6,16 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,deco_104,
      misc_functions,dialogs;
 
-procedure Cargar_boogwing;
-function iniciar_boogwing:boolean;
-procedure reset_boogwing;
-procedure cerrar_boogwing;
-procedure boogwing_principal;
-//Main CPU
-function boogwing_getword(direccion:dword):word;
-procedure boogwing_putword(direccion:dword;valor:word);
-function boogwing_bank_callback(bank:word):word;
-procedure sound_bank_rom(valor:byte);
+procedure cargar_boogwing;
 
 implementation
 const
@@ -49,109 +40,6 @@ var
  rom_opcode,rom_data:array[0..$7ffff] of word;
  ram:array[0..$7fff] of word;
  oki1_mem,oki2_mem:pbyte;
-
-procedure Cargar_boogwing;
-begin
-llamadas_maquina.bucle_general:=boogwing_principal;
-llamadas_maquina.iniciar:=iniciar_boogwing;
-llamadas_maquina.cerrar:=cerrar_boogwing;
-llamadas_maquina.reset:=reset_boogwing;
-llamadas_maquina.fps_max:=58;
-end;
-
-//Inicio Normal
-function iniciar_boogwing:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  pt_x:array[0..15] of dword=(256,257,258,259,260,261,262,263,
-  0, 1, 2, 3, 4, 5, 6, 7);
-  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-  8*16,9*16,10*16,11*16,12*16,13*16,14*16,15*16);
-  ps_x:array[0..15] of dword=(512,513,514,515,516,517,518,519,
-   0, 1, 2, 3, 4, 5, 6, 7);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32 );
-var
-  memoria_temp:pbyte;
-  memoria_temp_rom:pword;
-begin
-iniciar_boogwing:=false;
-if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. ¿Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
-iniciar_audio(false);
-//Pantallas
-init_dec16ic(0,1,2,$0,$0,$f,$f,0,1,0,16,boogwing_bank_callback,boogwing_bank_callback);
-screen_init(3,512,512,false,true);
-iniciar_video(320,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(14000000,$100);
-main_m68000.change_ram16_calls(boogwing_getword,boogwing_putword);
-//Sound CPU
-deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
-getmem(memoria_temp,$200000);
-getmem(memoria_temp_rom,$100000);
-//cargar roms
-if not(cargar_roms16w(memoria_temp_rom,@boogwing_rom[0],'boogwing.zip',0)) then exit;
-deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode[0],@rom_data[0],$42ba,$0,$18,$100000);
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@boogwing_sound,'boogwing.zip',1)) then exit;
-//OKI rom
-getmem(oki1_mem,$80000);
-if not(cargar_roms(oki1_mem,@boogwing_oki1,'boogwing.zip',1)) then exit;
-getmem(oki2_mem,$80000);
-if not(cargar_roms(oki2_mem,@boogwing_oki2,'boogwing.zip',1)) then exit;
-//convertir chars
-//if not(cargar_roms16w(memoria_temp,@boogwing_char1,'boogwing.zip',1)) then exit;
-deco56_decrypt_gfx(memoria_temp,$20000);
-init_gfx(0,8,8,$1000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,16*8,$1000*16*8+8,$1000*16*8+0,8,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-init_gfx(1,16,16,$2000);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,32*16,$2000*32*16+8,$2000*32*16+0,8,0);
-convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
-//Sprites
-//if not(cargar_roms16b(memoria_temp,@boogwing_sprites[0],'boogwing.zip',0)) then exit;
-init_gfx(2,16,16,$4000);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(4,0,32*32,24,8,16,0);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-deco16_sprite_color_add:=$200;
-deco16_sprite_mask:=$3fff;
-//Proteccion deco104
-main_deco104:=cpu_deco_104.create;
-main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
-main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
-//Dip
-marcade.dswa:=$ffff;
-marcade.dswa_val:=@boogwing_dip_a;
-//final
-freemem(memoria_temp);
-reset_boogwing;
-iniciar_boogwing:=true;
-end;
-
-procedure cerrar_boogwing;
-begin
-close_dec16ic(0);
-if oki1_mem<>nil then freemem(oki1_mem);
-if oki2_mem<>nil then freemem(oki2_mem);
-oki1_mem:=nil;
-oki2_mem:=nil;
-end;
-
-procedure reset_boogwing;
-begin
- main_m68000.reset;
- reset_dec16ic(0);
- main_deco104.reset;
- copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
- deco16_snd_simple_reset;
- reset_audio;
- marcade.in0:=$FFFF;
- marcade.in1:=$7;
-end;
 
 procedure update_video_boogwing;inline;
 begin
@@ -311,5 +199,107 @@ begin
   copymemory(oki_6295_0.get_rom_addr,temp,$40000);
 end;
 
+//Main
+procedure reset_boogwing;
+begin
+ main_m68000.reset;
+ reset_dec16ic(0);
+ main_deco104.reset;
+ copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
+ deco16_snd_simple_reset;
+ reset_audio;
+ marcade.in0:=$FFFF;
+ marcade.in1:=$7;
+end;
+
+function iniciar_boogwing:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  pt_x:array[0..15] of dword=(256,257,258,259,260,261,262,263,
+  0, 1, 2, 3, 4, 5, 6, 7);
+  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+  8*16,9*16,10*16,11*16,12*16,13*16,14*16,15*16);
+  ps_x:array[0..15] of dword=(512,513,514,515,516,517,518,519,
+   0, 1, 2, 3, 4, 5, 6, 7);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32 );
+var
+  memoria_temp:pbyte;
+  memoria_temp_rom:pword;
+begin
+iniciar_boogwing:=false;
+if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. ¿Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
+iniciar_audio(false);
+//Pantallas
+init_dec16ic(0,1,2,$0,$0,$f,$f,0,1,0,16,boogwing_bank_callback,boogwing_bank_callback);
+screen_init(3,512,512,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(14000000,$100);
+main_m68000.change_ram16_calls(boogwing_getword,boogwing_putword);
+//Sound CPU
+deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
+getmem(memoria_temp,$200000);
+getmem(memoria_temp_rom,$100000);
+//cargar roms
+if not(cargar_roms16w(memoria_temp_rom,@boogwing_rom[0],'boogwing.zip',0)) then exit;
+deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode[0],@rom_data[0],$42ba,$0,$18,$100000);
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@boogwing_sound,'boogwing.zip',1)) then exit;
+//OKI rom
+getmem(oki1_mem,$80000);
+if not(cargar_roms(oki1_mem,@boogwing_oki1,'boogwing.zip',1)) then exit;
+getmem(oki2_mem,$80000);
+if not(cargar_roms(oki2_mem,@boogwing_oki2,'boogwing.zip',1)) then exit;
+//convertir chars
+//if not(cargar_roms16w(memoria_temp,@boogwing_char1,'boogwing.zip',1)) then exit;
+deco56_decrypt_gfx(memoria_temp,$20000);
+init_gfx(0,8,8,$1000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,16*8,$1000*16*8+8,$1000*16*8+0,8,0);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+init_gfx(1,16,16,$2000);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,32*16,$2000*32*16+8,$2000*32*16+0,8,0);
+convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+//Sprites
+//if not(cargar_roms16b(memoria_temp,@boogwing_sprites[0],'boogwing.zip',0)) then exit;
+init_gfx(2,16,16,$4000);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(4,0,32*32,24,8,16,0);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+deco16_sprite_color_add:=$200;
+deco16_sprite_mask:=$3fff;
+//Proteccion deco104
+main_deco104:=cpu_deco_104.create;
+main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
+main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
+//Dip
+marcade.dswa:=$ffff;
+marcade.dswa_val:=@boogwing_dip_a;
+//final
+freemem(memoria_temp);
+reset_boogwing;
+iniciar_boogwing:=true;
+end;
+
+procedure cerrar_boogwing;
+begin
+close_dec16ic(0);
+if oki1_mem<>nil then freemem(oki1_mem);
+if oki2_mem<>nil then freemem(oki2_mem);
+oki1_mem:=nil;
+oki2_mem:=nil;
+end;
+
+procedure Cargar_boogwing;
+begin
+llamadas_maquina.bucle_general:=boogwing_principal;
+llamadas_maquina.iniciar:=iniciar_boogwing;
+llamadas_maquina.cerrar:=cerrar_boogwing;
+llamadas_maquina.reset:=reset_boogwing;
+llamadas_maquina.fps_max:=58;
+end;
 
 end.

@@ -1,17 +1,17 @@
 unit z80pio;
 
 interface
-uses z80daisy,main_engine,misc_functions;
+uses z80daisy,misc_functions,main_engine;
 
 const
-	MODE_OUTPUT=0;
-	MODE_INPUT=1;
-	MODE_BIDIRECTIONAL=2;
-	MODE_BIT_CONTROL=3;
+  MODE_OUTPUT=0;
+  MODE_INPUT=1;
+  MODE_BIDIRECTIONAL=2;
+  MODE_BIT_CONTROL=3;
 
-	ANY=0;
-	IOR=1;
-	MASK=2;
+  ANY=0;
+  IOR=1;
+  MASK=2;
 
   ICW_ENABLE_INT=$80;
   ICW_AND_OR=$40;

@@ -13,25 +13,7 @@ type
             video_render:procedure;
   end;
 
-//Principal
-procedure Cargar_gb;
-procedure gb_principal;
-procedure reset_gb;
-procedure cerrar_gb;
-function iniciar_gb:boolean;
-function abrir_gb:boolean;
-//Funciones timers
-procedure gb_despues_instruccion(estados_t:word);
-procedure gb_main_timer;
-procedure gb_prog_timer;
-//CPU
-function gb_getbyte(direccion:word):byte;
-procedure gb_putbyte(direccion:word;valor:byte);
-//IO's
-function leer_io(direccion:byte):byte;
-procedure escribe_io(direccion,valor:byte);
-function leer_io_gbc(direccion:byte):byte;
-procedure escribe_io_gbc(direccion,valor:byte);
+procedure cargar_gb;
 
 var
   ram_enable:boolean;
@@ -60,20 +42,6 @@ var
  hay_nvram,cartucho_cargado:boolean;
  gb_timer,sprites_time:byte;
  gameboy:tgameboy;
-
-procedure Cargar_gb;
-begin
-principal1.BitBtn10.Glyph:=nil;
-principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
-principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
-llamadas_maquina.iniciar:=iniciar_gb;
-llamadas_maquina.bucle_general:=gb_principal;
-llamadas_maquina.cerrar:=cerrar_gb;
-llamadas_maquina.reset:=reset_gb;
-llamadas_maquina.fps_max:=59.727500569605832763727500569606;
-llamadas_maquina.cartuchos:=abrir_gb;
-cartucho_cargado:=false;
-end;
 
 procedure draw_sprites(pri:byte);
 var
@@ -623,7 +591,7 @@ case direccion of
             $ff00..$ffff:sprt_ram[f]:=io_ram[addrs and $ff];
           end;
         end;
-        main_lr.estados_demas:=main_lr.estados_demas+160;
+        main_lr.contador:=main_lr.contador+160;
       end;
   $47:begin
         bg_pal:=valor;
@@ -807,7 +775,7 @@ case direccion of
           end;
           sprt_ram[f]:=temp;
         end;
-        main_lr.estados_demas:=main_lr.estados_demas+(160 shr main_lr.speed);
+        main_lr.contador:=main_lr.contador+(160 shr main_lr.speed);
       end;
   $47:bg_pal:=valor;
   $48:sprt0_pal:=valor;
@@ -829,7 +797,7 @@ case direccion of
           hdma_pos:=0;
         end else begin
           dma_trans((valor+1)*$10);
-          main_lr.estados_demas:=main_lr.estados_demas+((valor+1)*8);
+          main_lr.contador:=main_lr.contador+((valor+1)*8);
         end;
       end;
   $56:;
@@ -865,110 +833,6 @@ case direccion of
       end;
 //  else io_ram[direccion]:=valor;//MessageDlg('IO desconocida escribe pos= '+inttohex(direccion and $ff,2)+' - '+inttohex(valor,2), mtInformation,[mbOk], 0);
 end;
-end;
-
-procedure reset_gb;
-var
-  lr_reg:reg_lr;
-begin
- main_lr.reset;
- reset_audio;
- gameboy_sound_reset;
- scroll_x:=0;
- scroll_y:=0;
- stat:=0;
- tmodulo:=0;
- mtimer:=0;
- prog_timer:=0;
- rom_mode:=false;
- ram_enable:=false;
- rom_nbank:=1;
- ram_nbank:=0;
- vram_nbank:=0;
- wram_nbank:=1;
- linea:=0;
- irq_ena:=0;
- marcade.in0:=$ff;
- joystick:=$ff;
- hdma_ena:=false;
- lcd_ena:=true;
- if not(rom_exist) then begin
-   enable_bios:=false;
-   lr_reg.pc:=$100;
-   lr_reg.sp:=$fffe;
-   lr_reg.f.z:=true;
-   lr_reg.f.n:=false;
-   if colorgb then begin
-     lr_reg.a:=$11;
-     lr_reg.f.h:=false;
-     lr_reg.f.c:=false;
-     lr_reg.BC.w:=$0;
-     lr_reg.DE.w:=$ff56;
-     lr_reg.HL.w:=$000d;
-   end else begin
-     lr_reg.a:=$01;
-     lr_reg.f.h:=true;
-     lr_reg.f.c:=true;
-     lr_reg.BC.w:=$0013;
-     lr_reg.DE.w:=$00D8;
-     lr_reg.HL.w:=$014D;
-     escribe_io(05,00);
-     escribe_io(06,00);
-     escribe_io(07,00);
-     escribe_io($10,$80);
-     escribe_io($11,$bf);
-     escribe_io($12,$f3);
-     escribe_io($14,$bf);
-     escribe_io($16,$3f);
-     escribe_io($17,$00);
-     escribe_io($19,$bf);
-     escribe_io($1a,$7f);
-     escribe_io($1b,$f);
-     escribe_io($1c,$9f);
-     escribe_io($1e,$bf);
-     escribe_io($20,$ff);
-     escribe_io($21,$00);
-     escribe_io($22,$00);
-     escribe_io($23,$bf);
-     escribe_io($24,$77);
-     escribe_io($25,$f3);
-     escribe_io($26,$f1);
-     escribe_io($40,$91);
-     escribe_io($42,$00);
-     escribe_io($43,$00);
-     escribe_io($45,$00);
-     escribe_io($47,$fc);
-     escribe_io($48,$ff);
-     escribe_io($49,$ff);
-     escribe_io($4a,$00);
-     escribe_io($4b,$00);
-     escribe_io($00,$00);
-   end;
-   main_lr.set_internal_r(@lr_reg);
-  end else enable_bios:=true;
-end;
-
-function iniciar_gb:boolean;
-begin
-iniciar_audio(true);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,1,true);
-screen_init(2,160,144);
-iniciar_video(160,144);
-//Main CPU
-main_lr:=cpu_lr.Create(4194304,154); //154 lineas, 456 estados t por linea
-main_lr.change_ram_calls(gb_getbyte,gb_putbyte);
-main_lr.change_despues_instruccion(gb_despues_instruccion);
-main_lr.init_sound(gameboy_sound_update);
-//Timers internos de la GB
-init_timer(0,4194304/16384,gb_main_timer,true);
-gb_timer:=init_timer(0,4194304/4096,gb_prog_timer,false);
-//Sound Chips
-gameboy_sound_ini(freq_base_audio);
-//cargar roms
-hay_nvram:=false;
-//final
-iniciar_gb:=abrir_gb;
 end;
 
 procedure gb_principal;
@@ -1058,7 +922,7 @@ procedure gb_despues_instruccion(estados_t:word);
 begin
 if hdma_ena then begin
     dma_trans($10);
-    main_lr.estados_demas:=main_lr.estados_demas+8;
+    main_lr.contador:=main_lr.contador+8;
     dma_src:=dma_src+$10;
     dma_dst:=dma_dst+$10;
     hdma_pos:=hdma_pos+1;
@@ -1088,6 +952,88 @@ end;
 procedure gb_main_timer;
 begin
   mtimer:=mtimer+1;
+end;
+
+//Main
+procedure reset_gb;
+var
+  lr_reg:reg_lr;
+begin
+ main_lr.reset;
+ reset_audio;
+ gameboy_sound_reset;
+ scroll_x:=0;
+ scroll_y:=0;
+ stat:=0;
+ tmodulo:=0;
+ mtimer:=0;
+ prog_timer:=0;
+ rom_mode:=false;
+ ram_enable:=false;
+ rom_nbank:=1;
+ ram_nbank:=0;
+ vram_nbank:=0;
+ wram_nbank:=1;
+ linea:=0;
+ irq_ena:=0;
+ marcade.in0:=$ff;
+ joystick:=$ff;
+ hdma_ena:=false;
+ lcd_ena:=true;
+ if not(rom_exist) then begin
+   enable_bios:=false;
+   lr_reg.pc:=$100;
+   lr_reg.sp:=$fffe;
+   lr_reg.f.z:=true;
+   lr_reg.f.n:=false;
+   if colorgb then begin
+     lr_reg.a:=$11;
+     lr_reg.f.h:=false;
+     lr_reg.f.c:=false;
+     lr_reg.BC.w:=$0;
+     lr_reg.DE.w:=$ff56;
+     lr_reg.HL.w:=$000d;
+   end else begin
+     lr_reg.a:=$01;
+     lr_reg.f.h:=true;
+     lr_reg.f.c:=true;
+     lr_reg.BC.w:=$0013;
+     lr_reg.DE.w:=$00D8;
+     lr_reg.HL.w:=$014D;
+     escribe_io(05,00);
+     escribe_io(06,00);
+     escribe_io(07,00);
+     escribe_io($10,$80);
+     escribe_io($11,$bf);
+     escribe_io($12,$f3);
+     escribe_io($14,$bf);
+     escribe_io($16,$3f);
+     escribe_io($17,$00);
+     escribe_io($19,$bf);
+     escribe_io($1a,$7f);
+     escribe_io($1b,$f);
+     escribe_io($1c,$9f);
+     escribe_io($1e,$bf);
+     escribe_io($20,$ff);
+     escribe_io($21,$00);
+     escribe_io($22,$00);
+     escribe_io($23,$bf);
+     escribe_io($24,$77);
+     escribe_io($25,$f3);
+     escribe_io($26,$f1);
+     escribe_io($40,$91);
+     escribe_io($42,$00);
+     escribe_io($43,$00);
+     escribe_io($45,$00);
+     escribe_io($47,$fc);
+     escribe_io($48,$ff);
+     escribe_io($49,$ff);
+     escribe_io($4a,$00);
+     escribe_io($4b,$00);
+     escribe_io($00,$00);
+   end;
+   main_lr.set_internal_r(@lr_reg);
+  end else enable_bios:=true;
 end;
 
 procedure gb_prog_timer;
@@ -1240,6 +1186,43 @@ begin
   cartucho_cargado:=true;
   freemem(datos);
   reset_gb;
+end;
+
+function iniciar_gb:boolean;
+begin
+iniciar_audio(true);
+//Pantallas:  principal+char y sprites
+screen_init(1,256,1,true);
+screen_init(2,160,144);
+iniciar_video(160,144);
+//Main CPU
+main_lr:=cpu_lr.Create(4194304,154); //154 lineas, 456 estados t por linea
+main_lr.change_ram_calls(gb_getbyte,gb_putbyte);
+main_lr.change_despues_instruccion(gb_despues_instruccion);
+main_lr.init_sound(gameboy_sound_update);
+//Timers internos de la GB
+init_timer(0,4194304/16384,gb_main_timer,true);
+gb_timer:=init_timer(0,4194304/4096,gb_prog_timer,false);
+//Sound Chips
+gameboy_sound_ini(freq_base_audio);
+//cargar roms
+hay_nvram:=false;
+//final
+iniciar_gb:=abrir_gb;
+end;
+
+procedure Cargar_gb;
+begin
+principal1.BitBtn10.Glyph:=nil;
+principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
+principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+llamadas_maquina.iniciar:=iniciar_gb;
+llamadas_maquina.bucle_general:=gb_principal;
+llamadas_maquina.cerrar:=cerrar_gb;
+llamadas_maquina.reset:=reset_gb;
+llamadas_maquina.fps_max:=59.727500569605832763727500569606;
+llamadas_maquina.cartuchos:=abrir_gb;
+cartucho_cargado:=false;
 end;
 
 end.

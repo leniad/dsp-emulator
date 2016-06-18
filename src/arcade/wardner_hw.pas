@@ -5,28 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms32010,ym_3812,
      rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_wardnerhw;
-procedure wardnerhw_principal;
-procedure reset_wardnerhw;
-function iniciar_wardnerhw:boolean;
-//CPU
-function wardner_getbyte(direccion:word):byte;
-procedure wardner_putbyte(direccion:word;valor:byte);
-function wardner_inbyte(puerto:word):byte;
-procedure wardner_outbyte(valor:byte;puerto:word);
-//SND
-function wardner_snd_getbyte(direccion:word):byte;
-procedure wardner_snd_putbyte(direccion:word;valor:byte);
-function wardner_snd_inbyte(puerto:word):byte;
-procedure wardner_snd_outbyte(valor:byte;puerto:word);
-procedure snd_irq(irqstate:byte);
-procedure wardner_sound_update;
-//MCU
-procedure wardner_dsp_bio_w(valor:word);
-function wardner_dsp_r:word;
-procedure wardner_dsp_addrsel_w(valor:word);
-procedure wardner_dsp_w(valor:word);
-function wardner_BIO_r:boolean;
+procedure cargar_wardnerhw;
 
 implementation
 const
@@ -54,136 +33,13 @@ const
 
 var
  mem_rom:array[0..7,0..$7fff] of byte;
- rom_bank,vsync:byte;
+ rom_bank:byte;
  rom_ena,int_enable,wardner_dsp_BIO,dsp_execute:boolean;
  txt_ram:array[0..$7ff] of word;
  bg_ram:array[0..$1fff] of word;
  fg_ram:array[0..$fff] of word;
  txt_offs,bg_offs,fg_offs,bg_bank,fg_bank,main_ram_seg,dsp_addr_w:word;
  txt_scroll_x,txt_scroll_y,bg_scroll_x,bg_scroll_y,fg_scroll_x,fg_scroll_y:word;
-
-procedure Cargar_wardnerhw;
-begin
-llamadas_maquina.iniciar:=iniciar_wardnerhw;
-llamadas_maquina.bucle_general:=wardnerhw_principal;
-llamadas_maquina.reset:=reset_wardnerhw;
-llamadas_maquina.fps_max:=(14000000/2)/(446*286);
-end;
-
-function iniciar_wardnerhw:boolean;
-var
-      f:word;
-      memoria_temp:array[0..$3ffff] of byte;
-      rom:array[0..$fff] of word;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-begin
-iniciar_wardnerhw:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,256,true);
-screen_mod_scroll(1,512,512,511,256,256,255);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
-screen_init(3,512,512);
-screen_mod_scroll(3,512,512,511,512,256,511);
-screen_init(4,512,512,false,true);
-iniciar_video(320,240);
-//Main CPU
-main_z80:=cpu_z80.create(24000000 div 4,286);
-main_z80.change_ram_calls(wardner_getbyte,wardner_putbyte);
-main_z80.change_io_calls(wardner_inbyte,wardner_outbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3500000,286);
-snd_z80.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
-snd_z80.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
-snd_z80.init_sound(wardner_sound_update);
-//TMS MCU
-main_tms32010:=cpu_tms32010.create(14000000,286);
-main_tms32010.change_io_calls(wardner_BIO_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
-ym3812_0.change_irq_calls(snd_irq);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@wardner_rom[0],'wardner.zip',0)) then exit;
-//Mover las ROMS a su sitio
-copymemory(@memoria,@memoria_temp[$0],$8000);
-for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
-copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
-//cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@wardner_snd_rom,'wardner.zip',1)) then exit;
-//cargar ROMS MCU y organizarlas
-if not(cargar_roms(@memoria_temp[0],@wardner_mcu_rom[0],'wardner.zip',0)) then exit;
-for f:=0 to $3ff do begin
-   rom[f]:=(((memoria_temp[f] and $f) shl 4+(memoria_temp[f+$400] and $f)) shl 8) or
-                    (memoria_temp[f+$800] and $f) shl 4+(memoria_temp[f+$c00] and $f);
-end;
-for f:=0 to $1ff do begin
-   //1024-2047
-   rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1200] and $f)) shl 8) or
-                        (memoria_temp[f+$1400] and $f) shl 4+(memoria_temp[f+$1600] and $f);
-end;
-copymemory(main_tms32010.get_rom_addr,@rom[0],$1000);
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@wardner_char[0],'wardner.zip',0)) then exit;
-init_gfx(0,8,8,2048);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,0*2048*8*8,1*2048*8*8,2*2048*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir tiles fg
-if not(cargar_roms(@memoria_temp[0],@wardner_fg_tiles[0],'wardner.zip',0)) then exit;
-init_gfx(1,8,8,4096);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,8*8,0*4096*8*8,1*4096*8*8,2*4096*8*8,3*4096*8*8);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir tiles bg
-if not(cargar_roms(@memoria_temp[0],@wardner_bg_tiles[0],'wardner.zip',0)) then exit;
-init_gfx(2,8,8,4096);
-convert_gfx(2,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir tiles sprites
-if not(cargar_roms(@memoria_temp[0],@wardner_sprites[0],'wardner.zip',0)) then exit;
-init_gfx(3,16,16,2048);
-gfx[3].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0*2048*32*8,1*2048*32*8,2*2048*32*8,3*2048*32*8);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//final
-reset_wardnerhw;
-iniciar_wardnerhw:=true;
-end;
-
-procedure reset_wardnerhw;
-begin
- main_z80.reset;
- snd_z80.reset;
- main_tms32010.reset;
- ym3812_0.reset;
- reset_audio;
- txt_scroll_x:=457;
- txt_scroll_y:=226;
- bg_scroll_x:=0;
- bg_scroll_y:=0;
- fg_scroll_x:=0;
- fg_scroll_y:=0;
- marcade.in0:=0;
- marcade.in1:=0;
- rom_bank:=0;
- rom_ena:=true;
- txt_offs:=0;
- bg_offs:=0;
- fg_offs:=0;
- bg_bank:=0;
- fg_bank:=0;
- int_enable:=false;
- vsync:=0;
- wardner_dsp_BIO:=false;
- dsp_execute:=false;
- main_ram_seg:=0;
- dsp_addr_w:=0;
-end;
 
 procedure draw_sprites(priority:word);inline;
 var
@@ -296,11 +152,11 @@ while EmuStatus=EsRuning do begin
     main_tms32010.run(frame_mcu);
     frame_mcu:=frame_mcu+main_tms32010.tframes-main_tms32010.contador;
     case f of
-      0:vsync:=0;
+      0:marcade.in0:=marcade.in0 and $7f;
       239:begin
-            vsync:=$80;
+            marcade.in0:=marcade.in0 or $80;
             if int_enable then begin
-                main_z80.pedir_irq:=HOLD_LINE;
+                main_z80.change_irq(HOLD_LINE);
                 int_enable:=false;
             end;
             update_video_wardner;
@@ -353,7 +209,7 @@ begin
 	end;
 	if (valor=0) then begin
 		if dsp_execute then begin
-      main_z80.pedir_halt:=CLEAR_LINE;
+      main_z80.change_halt(CLEAR_LINE);
 			dsp_execute:=false;
 		end;
 		wardner_dsp_BIO:=true;
@@ -399,7 +255,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 function wardner_getbyte(direccion:word):byte;
@@ -450,7 +306,7 @@ case (puerto and $ff) of
   $50:wardner_inbyte:=1;
   $52,$56:wardner_inbyte:=0;
   $54:wardner_inbyte:=marcade.in1;
-  $58:wardner_inbyte:=marcade.in0 or vsync;
+  $58:wardner_inbyte:=marcade.in0;
   $60:wardner_inbyte:=txt_ram[txt_offs] and $ff;
   $61:wardner_inbyte:=txt_ram[txt_offs] shr 8;
   $62:wardner_inbyte:=bg_ram[bg_offs+bg_bank] and $ff;
@@ -483,13 +339,13 @@ case (puerto and $ff) of
   $35:fg_offs:=(fg_offs and $00ff) or ((valor and $f) shl 8);
   $5a:case valor of
         $00:begin	// This means assert the INT line to the DSP */
-					    main_tms32010.pedir_halt:=CLEAR_LINE;
-              main_z80.pedir_halt:=ASSERT_LINE;
-              main_tms32010.pedir_int:=ASSERT_LINE;
-					 end;
-		    $01:begin	// This means inhibit the INT line to the DSP */
-              main_tms32010.pedir_int:=CLEAR_LINE;
-					    main_tms32010.pedir_halt:=ASSERT_LINE;
+	      main_tms32010.change_halt(CLEAR_LINE);
+              main_z80.change_halt(ASSERT_LINE);
+              main_tms32010.change_irq(ASSERT_LINE);
+	    end;
+	$01:begin	// This means inhibit the INT line to the DSP */
+              main_tms32010.change_irq(CLEAR_LINE);
+	      main_tms32010.change_halt(ASSERT_LINE);
             end;
       end;
   $5c:case valor of
@@ -539,6 +395,128 @@ end;
 procedure wardner_sound_update;
 begin
   ym3812_0.update;
+end;
+
+//Main
+procedure reset_wardnerhw;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ main_tms32010.reset;
+ ym3812_0.reset;
+ reset_audio;
+ txt_scroll_x:=457;
+ txt_scroll_y:=226;
+ bg_scroll_x:=0;
+ bg_scroll_y:=0;
+ fg_scroll_x:=0;
+ fg_scroll_y:=0;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ rom_bank:=0;
+ rom_ena:=true;
+ txt_offs:=0;
+ bg_offs:=0;
+ fg_offs:=0;
+ bg_bank:=0;
+ fg_bank:=0;
+ int_enable:=false;
+ wardner_dsp_BIO:=false;
+ dsp_execute:=false;
+ main_ram_seg:=0;
+ dsp_addr_w:=0;
+end;
+
+function iniciar_wardnerhw:boolean;
+var
+      f:word;
+      memoria_temp:array[0..$3ffff] of byte;
+      rom:array[0..$fff] of word;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+begin
+iniciar_wardnerhw:=false;
+iniciar_audio(false);
+screen_init(1,512,256,true);
+screen_mod_scroll(1,512,512,511,256,256,255);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,512,511,512,256,511);
+screen_init(3,512,512);
+screen_mod_scroll(3,512,512,511,512,256,511);
+screen_init(4,512,512,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_z80:=cpu_z80.create(24000000 div 4,286);
+main_z80.change_ram_calls(wardner_getbyte,wardner_putbyte);
+main_z80.change_io_calls(wardner_inbyte,wardner_outbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3500000,286);
+snd_z80.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
+snd_z80.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
+snd_z80.init_sound(wardner_sound_update);
+//TMS MCU
+main_tms32010:=cpu_tms32010.create(14000000,286);
+main_tms32010.change_io_calls(wardner_BIO_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
+ym3812_0.change_irq_calls(snd_irq);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@wardner_rom[0],'wardner.zip',0)) then exit;
+//Mover las ROMS a su sitio
+copymemory(@memoria,@memoria_temp[$0],$8000);
+for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
+copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
+//cargar ROMS sonido
+if not(cargar_roms(@mem_snd[0],@wardner_snd_rom,'wardner.zip',1)) then exit;
+//cargar ROMS MCU y organizarlas
+if not(cargar_roms(@memoria_temp[0],@wardner_mcu_rom[0],'wardner.zip',0)) then exit;
+for f:=0 to $3ff do begin
+   rom[f]:=(((memoria_temp[f] and $f) shl 4+(memoria_temp[f+$400] and $f)) shl 8) or
+                    (memoria_temp[f+$800] and $f) shl 4+(memoria_temp[f+$c00] and $f);
+end;
+for f:=0 to $1ff do begin
+   //1024-2047
+   rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1200] and $f)) shl 8) or
+                        (memoria_temp[f+$1400] and $f) shl 4+(memoria_temp[f+$1600] and $f);
+end;
+copymemory(main_tms32010.get_rom_addr,@rom[0],$1000);
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@wardner_char[0],'wardner.zip',0)) then exit;
+init_gfx(0,8,8,2048);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,0*2048*8*8,1*2048*8*8,2*2048*8*8);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir tiles fg
+if not(cargar_roms(@memoria_temp[0],@wardner_fg_tiles[0],'wardner.zip',0)) then exit;
+init_gfx(1,8,8,4096);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,8*8,0*4096*8*8,1*4096*8*8,2*4096*8*8,3*4096*8*8);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir tiles bg
+if not(cargar_roms(@memoria_temp[0],@wardner_bg_tiles[0],'wardner.zip',0)) then exit;
+init_gfx(2,8,8,4096);
+convert_gfx(2,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir tiles sprites
+if not(cargar_roms(@memoria_temp[0],@wardner_sprites[0],'wardner.zip',0)) then exit;
+init_gfx(3,16,16,2048);
+gfx[3].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0*2048*32*8,1*2048*32*8,2*2048*32*8,3*2048*32*8);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//final
+reset_wardnerhw;
+iniciar_wardnerhw:=true;
+end;
+
+procedure Cargar_wardnerhw;
+begin
+llamadas_maquina.iniciar:=iniciar_wardnerhw;
+llamadas_maquina.bucle_general:=wardnerhw_principal;
+llamadas_maquina.reset:=reset_wardnerhw;
+llamadas_maquina.fps_max:=(14000000/2)/(446*286);
 end;
 
 end.

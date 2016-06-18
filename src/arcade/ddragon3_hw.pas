@@ -275,7 +275,7 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure ddragon3_sound_update;

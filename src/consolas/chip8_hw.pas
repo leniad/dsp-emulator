@@ -5,11 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sysutils,dialogs,
      sound_engine,file_engine,pal_engine,gfx_engine,misc_functions;
 
-procedure Cargar_chip8;
-procedure chip8_principal;
-function iniciar_chip8:boolean;
-procedure reset_chip8;
-function abrir_chip8:boolean;
+procedure cargar_chip8;
 
 implementation
 uses principal;
@@ -57,34 +53,6 @@ var
   key:array[0..$f] of boolean;
   screen_val:array[0..127,0..63] of byte;
   stack:array[0..$f] of word;
-
-procedure Cargar_chip8;
-begin
-principal1.BitBtn10.Glyph:=nil;
-principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
-principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
-llamadas_maquina.iniciar:=iniciar_chip8;
-llamadas_maquina.bucle_general:=chip8_principal;
-llamadas_maquina.reset:=reset_chip8;
-llamadas_maquina.cartuchos:=abrir_chip8;
-//llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;
-end;
-
-function iniciar_chip8:boolean;
-var
-  colores:tpaleta;
-begin
-iniciar_audio(false);
-sound_channel:=init_channel;
-//screen
-screen_init(1,64*4,32*4);
-iniciar_video(64*4,32*4);
-colores[0].r:=0;colores[0].g:=0;colores[0].b:=0;
-colores[1].r:=$ff;colores[1].g:=$ff;colores[1].b:=$ff;
-set_pal(colores,2);
-reset_chip8;
-iniciar_chip8:=abrir_chip8;
-end;
 
 procedure change_screen(mode:byte);inline;
 begin
@@ -394,6 +362,8 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
+
+//Main
 function abrir_chip8:boolean;
 var
   extension,nombre_file,RomFile:string;
@@ -427,6 +397,34 @@ if not(OpenRom(StChip8,RomFile)) then exit;
   freemem(datos);
   directory.Chip8:=ExtractFilePath(romfile);
   abrir_chip8:=true;
+end;
+
+function iniciar_chip8:boolean;
+var
+  colores:tpaleta;
+begin
+iniciar_audio(false);
+sound_channel:=init_channel;
+//screen
+screen_init(1,64*4,32*4);
+iniciar_video(64*4,32*4);
+colores[0].r:=0;colores[0].g:=0;colores[0].b:=0;
+colores[1].r:=$ff;colores[1].g:=$ff;colores[1].b:=$ff;
+set_pal(colores,2);
+reset_chip8;
+iniciar_chip8:=abrir_chip8;
+end;
+
+procedure Cargar_chip8;
+begin
+principal1.BitBtn10.Glyph:=nil;
+principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
+principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+llamadas_maquina.iniciar:=iniciar_chip8;
+llamadas_maquina.bucle_general:=chip8_principal;
+llamadas_maquina.reset:=reset_chip8;
+llamadas_maquina.cartuchos:=abrir_chip8;
+//llamadas_maquina.grabar_snapshot:=coleco_grabar_snapshot;
 end;
 
 end.

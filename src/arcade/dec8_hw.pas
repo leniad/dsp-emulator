@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,ym_2203,ym_3812,gfx_engine,
      rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_dec8;
-procedure principal_dec8;
-function iniciar_dec8:boolean;
-procedure reset_dec8;
-//Main CPU
-function getbyte_dec8(direccion:word):byte;
-procedure putbyte_dec8(direccion:word;valor:byte);
-//Sound CPU
-function getbyte_snd_dec8(direccion:word):byte;
-procedure putbyte_snd_dec8(direccion:word;valor:byte);
-procedure dec8_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_dec8;
 
 implementation
 const
@@ -37,106 +26,6 @@ var
   old_val:boolean;
   rom:array[0..5,0..$3fff] of byte;
   snd_dec:array[0..$7fff] of byte;
-
-procedure Cargar_dec8;
-begin
-llamadas_maquina.iniciar:=iniciar_dec8;
-llamadas_maquina.bucle_general:=principal_dec8;
-llamadas_maquina.reset:=reset_dec8;
-llamadas_maquina.fps_max:=57.444583;
-end;
-
-function iniciar_dec8:boolean; 
-const
-    pc_x:array[0..7] of dword=($2000*8+0, $2000*8+1, $2000*8+2, $2000*8+3, 0, 1, 2, 3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    ps_x:array[0..15] of dword=(16*8, 1+(16*8), 2+(16*8), 3+(16*8), 4+(16*8), 5+(16*8), 6+(16*8), 7+(16*8),
-		0,1,2,3,4,5,6,7);
-    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8);
-    pt_x:array[0..15] of dword=(0, 1, 2, 3, 1024*8*8+0, 1024*8*8+1, 1024*8*8+2, 1024*8*8+3,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+1024*8*8+0, 16*8+1024*8*8+1, 16*8+1024*8*8+2, 16*8+1024*8*8+3);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-var
-  f:word;
-  memoria_temp,memoria_temp2:array[0..$3ffff] of byte;
-begin
-iniciar_dec8:=false;
-iniciar_audio(false);
-screen_init(1,256,256,true);
-screen_init(2,256,512);
-screen_mod_scroll(2,0,0,0,512,256,511);
-screen_init(3,256,512,true);
-screen_mod_scroll(3,0,0,0,512,256,511);
-screen_init(4,256,512,false,true);
-iniciar_video(240,256);
-//Main CPU
-main_m6809:=cpu_m6809.Create(2000000,264);
-main_m6809.change_ram_calls(getbyte_dec8,putbyte_dec8);
-//Sound CPU
-snd_m6502:=cpu_m6502.create(1500000,264,TCPU_M6502);
-snd_m6502.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
-snd_m6502.init_sound(dec8_sound_update);
-//Sound Chip
-ym2203_0:=ym2203_chip.create(1500000);
-ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-ym3812_0.change_irq_calls(snd_irq);
-//cargar roms y ponerlas en su sitio
-if not(cargar_roms(@memoria_temp[0],@srd_rom[0],'srdarwin.zip',0)) then exit;
-copymemory(@rom[4,0],@memoria_temp[0],$4000);
-copymemory(@rom[5,0],@memoria_temp[$4000],$4000);
-copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
-copymemory(@rom[0,0],@memoria_temp[$10000],$4000);
-copymemory(@rom[1,0],@memoria_temp[$14000],$4000);
-copymemory(@rom[2,0],@memoria_temp[$18000],$4000);
-copymemory(@rom[3,0],@memoria_temp[$1c000],$4000);
-//cargar roms audio y desencriptar
-if not(cargar_roms(@mem_snd[0],@srd_snd,'srdarwin.zip',1)) then exit;
-for f:=$8000 to $ffff do begin
-		snd_dec[f-$8000]:=(mem_snd[f] and $9f)+((mem_snd[f] and $20) shl 1)+((mem_snd[f] and $40) shr 1);
-end;
-//Cargar chars
-if not(cargar_roms(@memoria_temp[0],@srd_char,'srdarwin.zip',1)) then exit;
-init_gfx(0,8,8,$400);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(2,0,8*8,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//Cargar tiles y ponerlas en su sitio
-if not(cargar_roms(@memoria_temp[0],@srd_tiles[0],'srdarwin.zip',0)) then exit;
-for f:=0 to 3 do copymemory(@memoria_temp2[$10000*f],@memoria_temp[$4000*f],$4000);
-for f:=0 to 3 do copymemory(@memoria_temp2[$8000+($10000*f)],@memoria_temp[$10000+($4000*f)],$4000);
-init_gfx(1,16,16,$400);
-for f:=0 to 7 do gfx[1].trans[f]:=true;
-gfx_set_desc_data(4,4,32*8,$8000*8,$8000*8+4,0,4);
-for f:=0 to 3 do
-  convert_gfx(1,$100*f*16*16,@memoria_temp2[$10000*f],@pt_x[0],@pt_y[0],false,true);
-//Cargar sprites
-if not(cargar_roms(@memoria_temp[0],@srd_sprites[0],'srdarwin.zip',0)) then exit;
-init_gfx(2,16,16,$800);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(3,0,16*16,$10000*8,$20000*8,$0*8);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//final
-reset_dec8;
-iniciar_dec8:=true;
-end;
-
-procedure reset_dec8;
-begin
-main_m6809.reset;
-snd_m6502.reset;
-ym2203_0.reset;
-ym3812_0.reset;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-sound_latch:=0;
-old_val:=false;
-rom_bank:=0;
-i8751_return:=0;
-i8751_value:=0;
-scroll_x:=0;
-end;
 
 procedure draw_sprites(pri:byte);inline;
 var
@@ -376,6 +265,107 @@ end;
 procedure snd_irq(irqstate:byte);
 begin
   snd_m6502.change_irq(irqstate);
+end;
+
+//Main
+procedure reset_dec8;
+begin
+main_m6809.reset;
+snd_m6502.reset;
+ym2203_0.reset;
+ym3812_0.reset;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$ff;
+sound_latch:=0;
+old_val:=false;
+rom_bank:=0;
+i8751_return:=0;
+i8751_value:=0;
+scroll_x:=0;
+end;
+
+function iniciar_dec8:boolean;
+const
+    pc_x:array[0..7] of dword=($2000*8+0, $2000*8+1, $2000*8+2, $2000*8+3, 0, 1, 2, 3);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    ps_x:array[0..15] of dword=(16*8, 1+(16*8), 2+(16*8), 3+(16*8), 4+(16*8), 5+(16*8), 6+(16*8), 7+(16*8),
+		0,1,2,3,4,5,6,7);
+    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8);
+    pt_x:array[0..15] of dword=(0, 1, 2, 3, 1024*8*8+0, 1024*8*8+1, 1024*8*8+2, 1024*8*8+3,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+1024*8*8+0, 16*8+1024*8*8+1, 16*8+1024*8*8+2, 16*8+1024*8*8+3);
+    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+var
+  f:word;
+  memoria_temp,memoria_temp2:array[0..$3ffff] of byte;
+begin
+iniciar_dec8:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_init(2,256,512);
+screen_mod_scroll(2,0,0,0,512,256,511);
+screen_init(3,256,512,true);
+screen_mod_scroll(3,0,0,0,512,256,511);
+screen_init(4,256,512,false,true);
+iniciar_video(240,256);
+//Main CPU
+main_m6809:=cpu_m6809.Create(2000000,264);
+main_m6809.change_ram_calls(getbyte_dec8,putbyte_dec8);
+//Sound CPU
+snd_m6502:=cpu_m6502.create(1500000,264,TCPU_M6502);
+snd_m6502.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
+snd_m6502.init_sound(dec8_sound_update);
+//Sound Chip
+ym2203_0:=ym2203_chip.create(1500000);
+ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
+ym3812_0.change_irq_calls(snd_irq);
+//cargar roms y ponerlas en su sitio
+if not(cargar_roms(@memoria_temp[0],@srd_rom[0],'srdarwin.zip',0)) then exit;
+copymemory(@rom[4,0],@memoria_temp[0],$4000);
+copymemory(@rom[5,0],@memoria_temp[$4000],$4000);
+copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
+copymemory(@rom[0,0],@memoria_temp[$10000],$4000);
+copymemory(@rom[1,0],@memoria_temp[$14000],$4000);
+copymemory(@rom[2,0],@memoria_temp[$18000],$4000);
+copymemory(@rom[3,0],@memoria_temp[$1c000],$4000);
+//cargar roms audio y desencriptar
+if not(cargar_roms(@mem_snd[0],@srd_snd,'srdarwin.zip',1)) then exit;
+for f:=$8000 to $ffff do begin
+		snd_dec[f-$8000]:=(mem_snd[f] and $9f)+((mem_snd[f] and $20) shl 1)+((mem_snd[f] and $40) shr 1);
+end;
+//Cargar chars
+if not(cargar_roms(@memoria_temp[0],@srd_char,'srdarwin.zip',1)) then exit;
+init_gfx(0,8,8,$400);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(2,0,8*8,0,4);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//Cargar tiles y ponerlas en su sitio
+if not(cargar_roms(@memoria_temp[0],@srd_tiles[0],'srdarwin.zip',0)) then exit;
+for f:=0 to 3 do copymemory(@memoria_temp2[$10000*f],@memoria_temp[$4000*f],$4000);
+for f:=0 to 3 do copymemory(@memoria_temp2[$8000+($10000*f)],@memoria_temp[$10000+($4000*f)],$4000);
+init_gfx(1,16,16,$400);
+for f:=0 to 7 do gfx[1].trans[f]:=true;
+gfx_set_desc_data(4,4,32*8,$8000*8,$8000*8+4,0,4);
+for f:=0 to 3 do
+  convert_gfx(1,$100*f*16*16,@memoria_temp2[$10000*f],@pt_x[0],@pt_y[0],false,true);
+//Cargar sprites
+if not(cargar_roms(@memoria_temp[0],@srd_sprites[0],'srdarwin.zip',0)) then exit;
+init_gfx(2,16,16,$800);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(3,0,16*16,$10000*8,$20000*8,$0*8);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//final
+reset_dec8;
+iniciar_dec8:=true;
+end;
+
+procedure Cargar_dec8;
+begin
+llamadas_maquina.iniciar:=iniciar_dec8;
+llamadas_maquina.bucle_general:=principal_dec8;
+llamadas_maquina.reset:=reset_dec8;
+llamadas_maquina.fps_max:=57.444583;
 end;
 
 end.

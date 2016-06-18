@@ -5,20 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
      dac,rom_engine,pal_engine,konami_decrypt,sound_engine,qsnapshot;
 
-procedure Cargar_sbasketb;
-procedure sbasketb_principal;
-function iniciar_sbasketb:boolean;
-procedure reset_sbasketb;
-//Main CPU
-function sbasketb_getbyte(direccion:word):byte;
-procedure sbasketb_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function sbasketb_snd_getbyte(direccion:word):byte;
-procedure sbasketb_snd_putbyte(direccion:word;valor:byte);
-procedure sbasketb_sound_update;
-//Save/load
-procedure sbasketb_qsave(nombre:string);
-procedure sbasketb_qload(nombre:string);
+procedure cargar_sbasketb;
 
 implementation
 const
@@ -37,104 +24,10 @@ const
         sbasketb_snd:tipo_roms=(n:'405e13.7a';l:$2000;p:$0;crc:$1ec7458b);
 
 var
- pedir_snd_irq,pedir_irq:boolean;
+ pedir_snd_irq,irq_ena:boolean;
  frame,sound_latch,chip_latch,scroll,sbasketb_palettebank,sprite_select:byte;
  mem_opcodes:array[0..$9fff] of byte;
  last_addr:word;
-
-procedure Cargar_sbasketb;
-begin
-llamadas_maquina.iniciar:=iniciar_sbasketb;
-llamadas_maquina.bucle_general:=sbasketb_principal;
-llamadas_maquina.reset:=reset_sbasketb;
-llamadas_maquina.save_qsnap:=sbasketb_qsave;
-llamadas_maquina.load_qsnap:=sbasketb_qload;
-end;
-
-function iniciar_sbasketb:boolean;
-var
-      colores:tpaleta;
-      f,j:word;
-      memoria_temp:array[0..$bfff] of byte;
-const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8);
-    ps_x:array[0..15] of dword=(0*4, 1*4,  2*4,  3*4,  4*4,  5*4,  6*4,  7*4,
-			8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4);
-    ps_y:array[0..15] of dword=(0*4*16, 1*4*16,  2*4*16,  3*4*16,  4*4*16,  5*4*16,  6*4*16,  7*4*16,
-			8*4*16, 9*4*16, 10*4*16, 11*4*16, 12*4*16, 13*4*16, 14*4*16, 15*4*16);
-begin
-iniciar_sbasketb:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,0,0,0);
-screen_init(2,256,256,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1400000,$100);
-main_m6809.change_ram_calls(sbasketb_getbyte,sbasketb_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,$100);
-snd_z80.change_ram_calls(sbasketb_snd_getbyte,sbasketb_snd_putbyte);
-snd_z80.init_sound(sbasketb_sound_update);
-//Sound Chip
-sn_76496_0:=sn76496_chip.Create(1789772);
-vlm5030_0:=vlm5030_chip.Create(3579545,$2000,4);
-if not(cargar_roms(vlm5030_0.get_rom_addr,@sbasketb_vlm,'sbasketb.zip',1)) then exit;
-dac_0:=dac_chip.Create(0.80);
-//cargar roms
-if not(cargar_roms(@memoria[0],@sbasketb_rom[0],'sbasketb.zip',0)) then exit;
-konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
-//cargar snd roms
-if not(cargar_roms(@mem_snd[0],@sbasketb_snd,'sbasketb.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@sbasketb_char,'sbasketb.zip',1)) then exit;
-init_gfx(0,8,8,512);
-gfx_set_desc_data(4,0,8*4*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@sbasketb_sprites[0],'sbasketb.zip',0)) then exit;
-init_gfx(1,16,16,384);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,32*4*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//paleta
-if not(cargar_roms(@memoria_temp[0],@sbasketb_pal[0],'sbasketb.zip',0)) then exit;
-for f:=0 to $ff do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] shr 4);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,256);
-for f:=0 to 255 do begin
-    gfx[0].colores[f]:=(memoria_temp[$300+f] and $f) or $f0;
-		for j:=0 to 15 do gfx[1].colores[(j shl 8) or f]:=((j shl 4) or (memoria_temp[f + $400] and $0f));
-end;
-//final
-reset_sbasketb;
-iniciar_sbasketb:=true;
-end;
-
-procedure reset_sbasketb;
-begin
- main_m6809.reset;
- snd_z80.reset;
- vlm5030_0.reset;
- dac_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- pedir_snd_irq:=false;
- pedir_irq:=false;
- sound_latch:=0;
- chip_latch:=0;
- scroll:=0;
- sbasketb_palettebank:=0;
- sprite_select:=0;
- last_addr:=0;
-end;
 
 procedure update_video_sbasketb;inline;
 var
@@ -203,7 +96,7 @@ while EmuStatus=EsRuning do begin
       snd_z80.run(frame_s);
       frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
       if frame=239 then begin
-          if pedir_irq then main_m6809.change_irq(HOLD_LINE);
+          if irq_ena then main_m6809.change_irq(HOLD_LINE);
           update_video_sbasketb;
       end;
   end;
@@ -235,10 +128,10 @@ case direccion of
   $3000..$37ff:gfx[0].buffer[direccion and $3ff]:=true;
   $3c20:sbasketb_palettebank:=valor;
   $3c80:main_screen.flip_main_screen:=(valor and $1)<>0;
-  $3c81:pedir_irq:=(valor<>0);
+  $3c81:irq_ena:=(valor<>0);
   $3c85:sprite_select:=valor;
   $3d00:sound_latch:=valor;
-  $3d80:snd_z80.pedir_irq:=HOLD_LINE;
+  $3d80:snd_z80.change_irq(HOLD_LINE);
   $3f80:scroll:=256-valor;
 end;
 end;
@@ -312,7 +205,7 @@ savedata_com_qsnapshot(@memoria[0],$6000);
 savedata_com_qsnapshot(@mem_snd[$2000],$e000);
 //MISC
 buffer[0]:=byte(pedir_snd_irq);
-buffer[1]:=byte(pedir_irq);
+buffer[1]:=byte(irq_ena);
 buffer[2]:=sound_latch;
 buffer[3]:=chip_latch;
 buffer[4]:=scroll;
@@ -350,7 +243,7 @@ loaddata_qsnapshot(@mem_snd[$2000]);
 //MISC
 loaddata_qsnapshot(@buffer[0]);
 pedir_snd_irq:=buffer[0]<>0;
-pedir_irq:=buffer[1]<>0;
+irq_ena:=buffer[1]<>0;
 sound_latch:=buffer[2];
 chip_latch:=buffer[3];
 scroll:=buffer[4];
@@ -361,6 +254,100 @@ freemem(data);
 close_qsnapshot;
 //END
 fillchar(gfx[0].buffer[0],$400,1);
+end;
+
+//Main
+procedure reset_sbasketb;
+begin
+ main_m6809.reset;
+ snd_z80.reset;
+ vlm5030_0.reset;
+ dac_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ pedir_snd_irq:=false;
+ irq_ena:=false;
+ sound_latch:=0;
+ chip_latch:=0;
+ scroll:=0;
+ sbasketb_palettebank:=0;
+ sprite_select:=0;
+ last_addr:=0;
+end;
+
+function iniciar_sbasketb:boolean;
+var
+      colores:tpaleta;
+      f,j:word;
+      memoria_temp:array[0..$bfff] of byte;
+const
+    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+    pc_y:array[0..7] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8);
+    ps_x:array[0..15] of dword=(0*4, 1*4,  2*4,  3*4,  4*4,  5*4,  6*4,  7*4,
+			8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4);
+    ps_y:array[0..15] of dword=(0*4*16, 1*4*16,  2*4*16,  3*4*16,  4*4*16,  5*4*16,  6*4*16,  7*4*16,
+			8*4*16, 9*4*16, 10*4*16, 11*4*16, 12*4*16, 13*4*16, 14*4*16, 15*4*16);
+begin
+iniciar_sbasketb:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_mod_scroll(1,256,256,255,0,0,0);
+screen_init(2,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1400000,$100);
+main_m6809.change_ram_calls(sbasketb_getbyte,sbasketb_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,$100);
+snd_z80.change_ram_calls(sbasketb_snd_getbyte,sbasketb_snd_putbyte);
+snd_z80.init_sound(sbasketb_sound_update);
+//Sound Chip
+sn_76496_0:=sn76496_chip.Create(1789772);
+vlm5030_0:=vlm5030_chip.Create(3579545,$2000,4);
+if not(cargar_roms(vlm5030_0.get_rom_addr,@sbasketb_vlm,'sbasketb.zip',1)) then exit;
+dac_0:=dac_chip.Create(0.80);
+//cargar roms
+if not(cargar_roms(@memoria[0],@sbasketb_rom[0],'sbasketb.zip',0)) then exit;
+konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
+//cargar snd roms
+if not(cargar_roms(@mem_snd[0],@sbasketb_snd,'sbasketb.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@sbasketb_char,'sbasketb.zip',1)) then exit;
+init_gfx(0,8,8,512);
+gfx_set_desc_data(4,0,8*4*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@sbasketb_sprites[0],'sbasketb.zip',0)) then exit;
+init_gfx(1,16,16,384);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,32*4*8,0,1,2,3);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//paleta
+if not(cargar_roms(@memoria_temp[0],@sbasketb_pal[0],'sbasketb.zip',0)) then exit;
+for f:=0 to $ff do begin
+  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] shr 4);
+  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+set_pal(colores,256);
+for f:=0 to 255 do begin
+    gfx[0].colores[f]:=(memoria_temp[$300+f] and $f) or $f0;
+		for j:=0 to 15 do gfx[1].colores[(j shl 8) or f]:=((j shl 4) or (memoria_temp[f + $400] and $0f));
+end;
+//final
+reset_sbasketb;
+iniciar_sbasketb:=true;
+end;
+
+procedure Cargar_sbasketb;
+begin
+llamadas_maquina.iniciar:=iniciar_sbasketb;
+llamadas_maquina.bucle_general:=sbasketb_principal;
+llamadas_maquina.reset:=reset_sbasketb;
+llamadas_maquina.save_qsnap:=sbasketb_qsave;
+llamadas_maquina.load_qsnap:=sbasketb_qload;
 end;
 
 end.

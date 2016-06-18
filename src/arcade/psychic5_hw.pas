@@ -5,22 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,pal_engine,
      sound_engine,qsnapshot;
 
-procedure Cargar_psychic5;
-procedure psychic5_principal;
-function iniciar_psychic5:boolean;
-procedure reset_psychic5;
-//Main CPU
-function psychic5_getbyte(direccion:word):byte;
-procedure psychic5_putbyte(direccion:word;valor:byte);
-//Snd CPU
-function psychic5_snd_getbyte(direccion:word):byte;
-procedure psychic5_snd_putbyte(direccion:word;valor:byte);
-procedure psychic5_outbyte(valor:byte;puerto:word);
-procedure psychic5_sound_update;
-procedure snd_irq(irqstate:byte);
-//Save/load
-procedure psychic5_qsave(nombre:string);
-procedure psychic5_qload(nombre:string);
+procedure cargar_psychic5;
 
 implementation
 const
@@ -38,98 +23,6 @@ var
  banco_rom,banco_vram,sound_latch,bg_clip_mode,sy1,sy2,sx1:byte;
  bg_ram,char_ram,dummy_ram,io_ram:array[0..$fff] of byte;
  title_screen,paleta_gris:boolean;
-
-procedure Cargar_psychic5;
-begin
-llamadas_maquina.iniciar:=iniciar_psychic5;
-llamadas_maquina.bucle_general:=psychic5_principal;
-llamadas_maquina.reset:=reset_psychic5;
-llamadas_maquina.fps_max:=53.8;
-llamadas_maquina.save_qsnap:=psychic5_qsave;
-llamadas_maquina.load_qsnap:=psychic5_qload;
-end;
-
-function iniciar_psychic5:boolean;
-var
-      f:word;
-      memoria_temp:array[0..$1ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28);
-    pc_y:array[0..7] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8);
-    ps_x:array[0..15] of dword=(0, 4, 8, 12, 16, 20, 24, 28,
-        64*8, 64*8+4, 64*8+8, 64*8+12, 64*8+16, 64*8+20, 64*8+24, 64*8+28);
-    ps_y:array[0..15] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8, 32*8,
-        36*8, 40*8, 44*8, 48*8, 52*8, 56*8, 60*8);
-begin
-iniciar_psychic5:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,512,512,true);
-screen_init(3,512,1024);
-screen_mod_scroll(3,512,256,511,1024,256,1023);
-screen_init(4,256,256,false,true);
-screen_mod_sprites(4,512,0,$1ff,0);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(6000000,256);
-main_z80.change_ram_calls(psychic5_getbyte,psychic5_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(6000000,256);
-snd_z80.change_ram_calls(psychic5_snd_getbyte,psychic5_snd_putbyte);
-snd_z80.change_io_calls(nil,psychic5_outbyte);
-snd_z80.init_sound(psychic5_sound_update);
-//Sound Chips
-YM2203_0:=ym2203_chip.create(1500000,2);
-ym2203_0.change_irq_calls(snd_irq);
-YM2203_1:=ym2203_chip.create(1500000,2);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@psychic5_rom[0],'psychic5.zip',0)) then exit;
-//Poner las ROMS en sus bancos
-copymemory(@memoria[0],@memoria_temp[0],$8000);
-for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@psychic5_snd_rom,'psychic5.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@psychic5_char,'psychic5.zip',1)) then exit;
-init_gfx(0,8,8,1024);
-gfx[0].trans[15]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@psychic5_sprites[0],'psychic5.zip',0)) then exit;
-init_gfx(1,16,16,1024);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//convertir tiles
-if not(cargar_roms(@memoria_temp[0],@psychic5_tiles[0],'psychic5.zip',0)) then exit;
-init_gfx(2,16,16,1024);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//final
-reset_psychic5;
-iniciar_psychic5:=true;
-end;
-
-procedure reset_psychic5;
-begin
- main_z80.reset;
- snd_z80.reset;
- YM2203_0.reset;
- YM2203_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- banco_rom:=0;
- banco_vram:=0;
- paleta_gris:=false;
- sound_latch:=0;
- title_screen:=false;
- bg_clip_mode:=0;
- sy1:=0;
- sy2:=0;
- sx1:=0;
-end;
 
 procedure update_video_psychic5;inline;
 var
@@ -276,11 +169,11 @@ while EmuStatus=EsRuning do begin
     case f of
       0:begin //rst 10
           main_z80.im0:=$d7 ;
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
         end;
       $40:begin //rst 8
          main_z80.im0:=$cf;
-         main_z80.pedir_irq:=HOLD_LINE;
+         main_z80.change_irq(HOLD_LINE);
         end;
     end;
   end;
@@ -451,8 +344,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure psychic5_qsave(nombre:string);
@@ -537,6 +429,98 @@ freemem(data);
 close_qsnapshot;
 //END
 for f:=0 to $2ff do cambiar_color(f*2);
+end;
+
+//Main
+procedure reset_psychic5;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ YM2203_0.reset;
+ YM2203_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ banco_rom:=0;
+ banco_vram:=0;
+ paleta_gris:=false;
+ sound_latch:=0;
+ title_screen:=false;
+ bg_clip_mode:=0;
+ sy1:=0;
+ sy2:=0;
+ sx1:=0;
+end;
+
+function iniciar_psychic5:boolean;
+var
+      f:word;
+      memoria_temp:array[0..$1ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28);
+    pc_y:array[0..7] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8);
+    ps_x:array[0..15] of dword=(0, 4, 8, 12, 16, 20, 24, 28,
+        64*8, 64*8+4, 64*8+8, 64*8+12, 64*8+16, 64*8+20, 64*8+24, 64*8+28);
+    ps_y:array[0..15] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8, 32*8,
+        36*8, 40*8, 44*8, 48*8, 52*8, 56*8, 60*8);
+begin
+iniciar_psychic5:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_init(2,512,512,true);
+screen_init(3,512,1024);
+screen_mod_scroll(3,512,256,511,1024,256,1023);
+screen_init(4,256,256,false,true);
+screen_mod_sprites(4,512,0,$1ff,0);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(6000000,256);
+main_z80.change_ram_calls(psychic5_getbyte,psychic5_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(6000000,256);
+snd_z80.change_ram_calls(psychic5_snd_getbyte,psychic5_snd_putbyte);
+snd_z80.change_io_calls(nil,psychic5_outbyte);
+snd_z80.init_sound(psychic5_sound_update);
+//Sound Chips
+YM2203_0:=ym2203_chip.create(1500000,2);
+ym2203_0.change_irq_calls(snd_irq);
+YM2203_1:=ym2203_chip.create(1500000,2);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@psychic5_rom[0],'psychic5.zip',0)) then exit;
+//Poner las ROMS en sus bancos
+copymemory(@memoria[0],@memoria_temp[0],$8000);
+for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+//cargar ROMS sonido
+if not(cargar_roms(@mem_snd[0],@psychic5_snd_rom,'psychic5.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@psychic5_char,'psychic5.zip',1)) then exit;
+init_gfx(0,8,8,1024);
+gfx[0].trans[15]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@psychic5_sprites[0],'psychic5.zip',0)) then exit;
+init_gfx(1,16,16,1024);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//convertir tiles
+if not(cargar_roms(@memoria_temp[0],@psychic5_tiles[0],'psychic5.zip',0)) then exit;
+init_gfx(2,16,16,1024);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//final
+reset_psychic5;
+iniciar_psychic5:=true;
+end;
+
+procedure Cargar_psychic5;
+begin
+llamadas_maquina.iniciar:=iniciar_psychic5;
+llamadas_maquina.bucle_general:=psychic5_principal;
+llamadas_maquina.reset:=reset_psychic5;
+llamadas_maquina.fps_max:=53.8;
+llamadas_maquina.save_qsnap:=psychic5_qsave;
+llamadas_maquina.load_qsnap:=psychic5_qload;
 end;
 
 end.

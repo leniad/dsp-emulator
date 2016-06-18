@@ -2,7 +2,8 @@ unit ym_2203;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     fmopn,ay_8910,timer_engine,sound_engine,main_engine;
+     {$ifndef windows}main_engine,{$endif}
+     fmopn,ay_8910,timer_engine,sound_engine,cpu_misc;
 
 type
   ym2203_chip=class(snd_chip_class)

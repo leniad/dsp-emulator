@@ -193,7 +193,7 @@ case direccion of
                                end;
                          $5f8c:begin
                                     sound_latch:=valor;
-                                    snd_z80.pedir_irq:=HOLD_LINE;
+                                    snd_z80.change_irq(HOLD_LINE);
                                end;
                          else begin
                               direccion:=direccion and $3fff;

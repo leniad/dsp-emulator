@@ -221,7 +221,6 @@ const
 begin
 iniciar_mario:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256);
 screen_mod_scroll(1,0,0,0,256,256,255);
 screen_init(2,256,256,false,true);

@@ -2,7 +2,7 @@ unit hd6309;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,m6809;
+     main_engine,dialogs,cpu_misc,m6809;
 
 type
         //MD_EM	$01	 Execution mode
@@ -40,7 +40,6 @@ type
             private
                 r:preg_hd6309;
                 internal_m6809:cpu_m6809;
-                pedir_nmi,pedir_firq,pedir_irq,nmi_state:byte;
                 procedure putword(direccion:word;valor:word);
                 function getword(direccion:word):word;
                 function dame_pila:byte;
@@ -91,10 +90,9 @@ self.r.cc2.md_em:=false;
 self.r.cc2.md_fm:=false;
 self.r.cc2.md_ii:=false;
 self.r.cc2.md_dz:=false;
-self.pedir_nmi:=CLEAR_LINE;
-self.pedir_irq:=CLEAR_LINE;
-self.pedir_firq:=CLEAR_LINE;
-self.nmi_state:=CLEAR_LINE;
+self.change_nmi(CLEAR_LINE);
+self.change_irq(CLEAR_LINE);
+self.change_firq(CLEAR_LINE);
 r.cwai:=false;
 r.sync:=false;
 r.pila_init:=false;

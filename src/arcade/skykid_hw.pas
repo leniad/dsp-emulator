@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,misc_functions,sound_engine;
 
-procedure Cargar_skykid;
-procedure skykid_principal;
-function iniciar_skykid:boolean;
-procedure reset_skykid;
-//Main CPU
-function skykid_getbyte(direccion:word):byte;
-procedure skykid_putbyte(direccion:word;valor:byte);
-//MCU CPU
-function mcu_getbyte(direccion:word):byte;
-procedure mcu_putbyte(direccion:word;valor:byte);
-procedure out_port1(valor:byte);
-function in_port1:byte;
-function in_port2:byte;
+procedure cargar_skykid;
 
 implementation
 const
@@ -55,152 +43,6 @@ var
  rom_nbank,scroll_y,inputport_selected,priority:byte;
  scroll_x:word;
  irq_enable,irq_enable_mcu,screen_flip:boolean;
-
-procedure Cargar_skykid;
-begin
-llamadas_maquina.iniciar:=iniciar_skykid;
-llamadas_maquina.bucle_general:=skykid_principal;
-llamadas_maquina.reset:=reset_skykid;
-llamadas_maquina.fps_max:=60.60606060606060;
-end;
-
-function iniciar_skykid:boolean; 
-var
-  colores:tpaleta;
-  f:word;
-  memoria_temp:array[0..$ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 );
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
-    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-    pt_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3 );
-    pt_y:array[0..7] of dword=(0*8, 2*8, 4*8, 6*8, 8*8, 10*8, 12*8, 14*8);
-begin
-iniciar_skykid:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,288,224,true);
-screen_init(2,512,256);
-screen_mod_scroll(2,512,512,511,256,256,255);
-screen_init(3,512,256,false,true);
-iniciar_video(288,224);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1536000,224);
-main_m6809.change_ram_calls(skykid_getbyte,skykid_putbyte);
-//MCU CPU
-main_m6800:=cpu_m6800.create(6144000,224,cpu_hd63701);
-main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
-main_m6800.change_io_calls(in_port1,in_port2,nil,nil,out_port1,nil,nil,nil);
-case  main_vars.tipo_maquina of
-    123:begin
-          //cargar roms
-          if not(cargar_roms(@memoria_temp[0],@skykid_rom[0],'skykid.zip',0)) then exit;
-          //Pongo las ROMs en su banco
-          copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
-          for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-          //Cargar MCU
-          if not(cargar_roms(@mem_snd[0],@skykid_mcu[0],'skykid.zip',0)) then exit;
-          namco_sound_init(8,true);
-          //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@skykid_char,'skykid.zip',1)) then exit;
-          init_gfx(0,8,8,$200);
-          gfx[0].trans[0]:=true;
-          gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-          //sprites
-          fillchar(memoria_temp[0],$10000,0);
-          if not(cargar_roms(@memoria_temp[0],@skykid_sprites[0],'skykid.zip',0)) then exit;
-          // unpack the third sprite ROM
-          for f:=0 to $1fff do begin
-          		memoria_temp[f+$4000+$4000]:=memoria_temp[f+$4000];		// sprite set #1, plane 3
-          		memoria_temp[f+$6000+$4000]:=memoria_temp[f+$4000] shr 4;	// sprite set #2, plane 3
-          		memoria_temp[f+$4000]:=memoria_temp[f+$2000+$4000];		// sprite set #3, planes 1&2 (plane 3 is empty)
-          end;
-          init_gfx(1,16,16,$200);
-          gfx_set_desc_data(3,0,64*8,$200*64*8+4,0,4);
-          convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-          //tiles
-          if not(cargar_roms(@memoria_temp[0],@skykid_tiles,'skykid.zip')) then exit;
-          init_gfx(2,8,8,$200);
-          gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
-          //Paleta
-          if not(cargar_roms(@memoria_temp[0],@skykid_prom[0],'skykid.zip',0)) then exit;
-          screen_flip:=false;
-    end;
-    194:begin
-          //cargar roms
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_rom[0],'drgnbstr.zip',0)) then exit;
-          //Pongo las ROMs en su banco
-          copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
-          for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-          //Cargar MCU
-          if not(cargar_roms(@mem_snd[0],@drgnbstr_mcu[0],'drgnbstr.zip',0)) then exit;
-          namco_sound_init(8,true);
-          //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_char,'drgnbstr.zip')) then exit;
-          init_gfx(0,8,8,$200);
-          gfx[0].trans[0]:=true;
-          gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-          //sprites
-          fillchar(memoria_temp[0],$10000,0);
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_sprites[0],'drgnbstr.zip',0)) then exit;
-          // unpack the third sprite ROM
-          for f:=0 to $1fff do begin
-          		memoria_temp[f+$4000+$4000]:=memoria_temp[f+$4000];		// sprite set #1, plane 3
-          		memoria_temp[f+$6000+$4000]:=memoria_temp[f+$4000] shr 4;	// sprite set #2, plane 3
-          		memoria_temp[f+$4000]:=memoria_temp[f+$2000+$4000];		// sprite set #3, planes 1&2 (plane 3 is empty)
-          end;
-          init_gfx(1,16,16,$200);
-          gfx_set_desc_data(3,0,64*8,$200*64*8+4,0,4);
-          convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-          //tiles
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_tiles,'drgnbstr.zip')) then exit;
-          init_gfx(2,8,8,$200);
-          gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
-          //Paleta
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_prom[0],'drgnbstr.zip',0)) then exit;
-          screen_flip:=true;
-    end;
-end;
-for f:=0 to $ff do begin
-  colores[f].r:=(memoria_temp[f] and $f)+((memoria_temp[f] and $f) shl 4);
-  colores[f].g:=(memoria_temp[f+$100] and $f)+((memoria_temp[f+$100] and $f) shl 4);
-  colores[f].b:=(memoria_temp[f+$200] and $f)+((memoria_temp[f+$200] and $f) shl 4);
-end;
-set_pal(colores,$100);
-// tiles/sprites color table
-for f:=$0 to $3ff do begin
-  gfx[1].colores[f]:=memoria_temp[$300+f];
-  gfx[2].colores[f]:=memoria_temp[$300+f];
-end;
-//final
-reset_skykid;
-iniciar_skykid:=true;
-end;
-
-procedure reset_skykid;
-begin
- main_m6809.reset;
- main_m6800.reset;
- namco_sound_reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- marcade.in3:=$ff;
- rom_nbank:=0;
- irq_enable:=false;
- irq_enable_mcu:=false;
- scroll_y:=0;
- inputport_selected:=0;
- scroll_x:=0;
-end;
 
 procedure draw_sprites;inline;
 var
@@ -441,6 +283,152 @@ end;
 function in_port2:byte;
 begin
   in_port2:=$ff;
+end;
+
+//Main
+procedure reset_skykid;
+begin
+ main_m6809.reset;
+ main_m6800.reset;
+ namco_sound_reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ marcade.in3:=$ff;
+ rom_nbank:=0;
+ irq_enable:=false;
+ irq_enable_mcu:=false;
+ scroll_y:=0;
+ inputport_selected:=0;
+ scroll_x:=0;
+end;
+
+function iniciar_skykid:boolean;
+var
+  colores:tpaleta;
+  f:word;
+  memoria_temp:array[0..$ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 );
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
+    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+    pt_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3 );
+    pt_y:array[0..7] of dword=(0*8, 2*8, 4*8, 6*8, 8*8, 10*8, 12*8, 14*8);
+begin
+iniciar_skykid:=false;
+iniciar_audio(false);
+screen_init(1,288,224,true);
+screen_init(2,512,256);
+screen_mod_scroll(2,512,512,511,256,256,255);
+screen_init(3,512,256,false,true);
+iniciar_video(288,224);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1536000,224);
+main_m6809.change_ram_calls(skykid_getbyte,skykid_putbyte);
+//MCU CPU
+main_m6800:=cpu_m6800.create(6144000,224,cpu_hd63701);
+main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
+main_m6800.change_io_calls(in_port1,in_port2,nil,nil,out_port1,nil,nil,nil);
+case  main_vars.tipo_maquina of
+    123:begin
+          //cargar roms
+          if not(cargar_roms(@memoria_temp[0],@skykid_rom[0],'skykid.zip',0)) then exit;
+          //Pongo las ROMs en su banco
+          copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
+          for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+          //Cargar MCU
+          if not(cargar_roms(@mem_snd[0],@skykid_mcu[0],'skykid.zip',0)) then exit;
+          namco_sound_init(8,true);
+          //convertir chars
+          if not(cargar_roms(@memoria_temp[0],@skykid_char,'skykid.zip',1)) then exit;
+          init_gfx(0,8,8,$200);
+          gfx[0].trans[0]:=true;
+          gfx_set_desc_data(2,0,16*8,0,4);
+          convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+          //sprites
+          fillchar(memoria_temp[0],$10000,0);
+          if not(cargar_roms(@memoria_temp[0],@skykid_sprites[0],'skykid.zip',0)) then exit;
+          // unpack the third sprite ROM
+          for f:=0 to $1fff do begin
+          		memoria_temp[f+$4000+$4000]:=memoria_temp[f+$4000];		// sprite set #1, plane 3
+          		memoria_temp[f+$6000+$4000]:=memoria_temp[f+$4000] shr 4;	// sprite set #2, plane 3
+          		memoria_temp[f+$4000]:=memoria_temp[f+$2000+$4000];		// sprite set #3, planes 1&2 (plane 3 is empty)
+          end;
+          init_gfx(1,16,16,$200);
+          gfx_set_desc_data(3,0,64*8,$200*64*8+4,0,4);
+          convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+          //tiles
+          if not(cargar_roms(@memoria_temp[0],@skykid_tiles,'skykid.zip')) then exit;
+          init_gfx(2,8,8,$200);
+          gfx_set_desc_data(2,0,16*8,0,4);
+          convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+          //Paleta
+          if not(cargar_roms(@memoria_temp[0],@skykid_prom[0],'skykid.zip',0)) then exit;
+          screen_flip:=false;
+    end;
+    194:begin
+          //cargar roms
+          if not(cargar_roms(@memoria_temp[0],@drgnbstr_rom[0],'drgnbstr.zip',0)) then exit;
+          //Pongo las ROMs en su banco
+          copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
+          for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+          //Cargar MCU
+          if not(cargar_roms(@mem_snd[0],@drgnbstr_mcu[0],'drgnbstr.zip',0)) then exit;
+          namco_sound_init(8,true);
+          //convertir chars
+          if not(cargar_roms(@memoria_temp[0],@drgnbstr_char,'drgnbstr.zip')) then exit;
+          init_gfx(0,8,8,$200);
+          gfx[0].trans[0]:=true;
+          gfx_set_desc_data(2,0,16*8,0,4);
+          convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+          //sprites
+          fillchar(memoria_temp[0],$10000,0);
+          if not(cargar_roms(@memoria_temp[0],@drgnbstr_sprites[0],'drgnbstr.zip',0)) then exit;
+          // unpack the third sprite ROM
+          for f:=0 to $1fff do begin
+          		memoria_temp[f+$4000+$4000]:=memoria_temp[f+$4000];		// sprite set #1, plane 3
+          		memoria_temp[f+$6000+$4000]:=memoria_temp[f+$4000] shr 4;	// sprite set #2, plane 3
+          		memoria_temp[f+$4000]:=memoria_temp[f+$2000+$4000];		// sprite set #3, planes 1&2 (plane 3 is empty)
+          end;
+          init_gfx(1,16,16,$200);
+          gfx_set_desc_data(3,0,64*8,$200*64*8+4,0,4);
+          convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+          //tiles
+          if not(cargar_roms(@memoria_temp[0],@drgnbstr_tiles,'drgnbstr.zip')) then exit;
+          init_gfx(2,8,8,$200);
+          gfx_set_desc_data(2,0,16*8,0,4);
+          convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+          //Paleta
+          if not(cargar_roms(@memoria_temp[0],@drgnbstr_prom[0],'drgnbstr.zip',0)) then exit;
+          screen_flip:=true;
+    end;
+end;
+for f:=0 to $ff do begin
+  colores[f].r:=(memoria_temp[f] and $f)+((memoria_temp[f] and $f) shl 4);
+  colores[f].g:=(memoria_temp[f+$100] and $f)+((memoria_temp[f+$100] and $f) shl 4);
+  colores[f].b:=(memoria_temp[f+$200] and $f)+((memoria_temp[f+$200] and $f) shl 4);
+end;
+set_pal(colores,$100);
+// tiles/sprites color table
+for f:=$0 to $3ff do begin
+  gfx[1].colores[f]:=memoria_temp[$300+f];
+  gfx[2].colores[f]:=memoria_temp[$300+f];
+end;
+//final
+reset_skykid;
+iniciar_skykid:=true;
+end;
+
+procedure Cargar_skykid;
+begin
+llamadas_maquina.iniciar:=iniciar_skykid;
+llamadas_maquina.bucle_general:=skykid_principal;
+llamadas_maquina.reset:=reset_skykid;
+llamadas_maquina.fps_max:=60.60606060606060;
 end;
 
 end.

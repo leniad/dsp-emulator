@@ -5,35 +5,12 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,gfx_engine,namco_snd,namcoio_56xx_58xx,
      timer_engine,rom_engine,pal_engine,sound_engine;
 
+procedure cargar_mappyhw;
+
+implementation
 type
   tipo_update_video=procedure;
 
-//General
-procedure Cargar_mappyhw;
-function iniciar_mappyhw:boolean;
-procedure reset_mappyhw;
-procedure mappy_principal; 
-//Mappy & DigDug2
-function mappy_getbyte(direccion:word):byte;  
-procedure mappy_putbyte(direccion:word;valor:byte); 
-function sound_getbyte(direccion:word):byte;  
-procedure sound_putbyte(direccion:word;valor:byte); 
-//Super Pacman
-procedure spacman_putbyte(direccion:word;valor:byte); 
-//IO Chips
-function inport0_0:byte; 
-function inport0_1:byte; 
-function inport0_2:byte; 
-function inport0_3:byte; 
-function inport1_0:byte; 
-function inport1_1:byte; 
-function inport1_2:byte; 
-function inport1_3:byte; 
-procedure outport1_0(data:byte);
-procedure mappy_io0;
-procedure mappy_io1;
-
-implementation
 const
         //Mappy
         mappy_rom:array[0..3] of tipo_roms=(
@@ -95,14 +72,6 @@ var
  snd_int,main_int:boolean;
  scroll_x,mux,io_timer0,io_timer1,sprite_mask:byte;
  update_video_proc:tipo_update_video;
-
-procedure Cargar_mappyhw;
-begin
-llamadas_maquina.bucle_general:=mappy_principal;
-llamadas_maquina.iniciar:=iniciar_mappyhw;
-llamadas_maquina.reset:=reset_mappyhw;
-llamadas_maquina.fps_max:=60.6060606060;
-end;
 
 procedure draw_sprites_mappy;inline;
 var
@@ -347,6 +316,210 @@ actualiza_trozo(16,0,224,256,3,0,16,224,256,5);
 actualiza_trozo_final(0,0,224,288,5);
 end;
 
+procedure eventos_mappy;
+begin
+if event.arcade then begin
+  if arcade_input.up[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.right[0] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.left[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.but1[0] then marcade.in3:=(marcade.in3 and $fe) else marcade.in3:=(marcade.in3 or $1);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+end;
+end;
+
+procedure mappy_principal;
+var
+  f:word;
+  frame_m,frame_s:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_m6809.tframes;
+frame_s:=snd_m6809.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to 263 do begin
+    //Main CPU
+    main_m6809.run(frame_m);
+    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    //Sound CPU
+    snd_m6809.run(frame_s);
+    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+    if f=223 then begin
+      if main_int then main_m6809.change_irq(ASSERT_LINE);
+      if snd_int then snd_m6809.change_irq(ASSERT_LINE);
+      update_video_proc;
+    end;
+  end;
+  //Dar un poco de tiempo a las CPU's para hacer su trabajo con los IO's
+  if namco_chip[0].reset then timer[io_timer0].enabled:=true;
+  if namco_chip[1].reset then timer[io_timer1].enabled:=true;
+  if sound_status.hay_sonido then begin
+      namco_playsound;
+      play_sonido;
+  end;
+  eventos_mappy;
+  video_sync;
+end;
+end;
+
+function mappy_getbyte(direccion:word):byte;
+begin
+  case direccion of
+    $4800..$480f:mappy_getbyte:=namcoio_r(0,direccion and $f);
+    $4810..$481f:mappy_getbyte:=namcoio_r(1,direccion and $f);
+    else mappy_getbyte:=memoria[direccion];
+  end;
+end;
+
+procedure mappy_latch(direccion:word);inline;
+begin
+case (direccion and $0e) of
+  $00:begin
+        snd_int:=(direccion and 1)<>0;
+        if not(snd_int) then snd_m6809.change_irq(CLEAR_LINE);
+      end;
+  $02:begin
+        main_int:=(direccion and 1)<>0;
+        if not(main_int) then main_m6809.change_irq(CLEAR_LINE);
+      end;
+  $04:main_screen.flip_main_screen:=(direccion and 1)<>0;
+  $06:namco_sound.enabled:=(direccion and 1)<>0;
+  $08:begin
+        namco_io_reset(0,(direccion and 1)<>0);
+        namco_io_reset(1,(direccion and 1)<>0);
+      end;
+  $0a:if ((direccion and 1)<>0) then snd_m6809.change_reset(CLEAR_LINE)
+          else snd_m6809.change_reset(ASSERT_LINE);
+end;
+end;
+
+procedure mappy_putbyte(direccion:word;valor:byte); 
+begin
+if (direccion>$7fff) then exit;
+memoria[direccion]:=valor;
+case direccion of
+  $0..$fff:gfx[0].buffer[direccion and $7ff]:=true;
+  $3800..$3fff:scroll_x:=255-((direccion and $7ff) shr 3);
+  $4000..$403f:namco_sound.registros_namco[direccion and $3f]:=valor;
+  $4800..$480f:namcoio_w(0,direccion and $f,valor);
+  $4810..$481f:namcoio_w(1,direccion and $f,valor);
+  $5000..$500f:mappy_latch(direccion and $0f);
+end;
+end;
+
+function sound_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $40..$3ff:sound_getbyte:=memoria[$4000+direccion];
+  else sound_getbyte:=mem_snd[direccion];
+end;
+end;
+
+procedure sound_putbyte(direccion:word;valor:byte); 
+begin
+if direccion>$dfff then exit;
+mem_snd[direccion]:=valor;
+case direccion of
+   $0..$3f:begin
+            memoria[$4000+direccion]:=valor;
+            namco_sound.registros_namco[direccion and $3f]:=valor;
+           end;
+   $40..$3ff:memoria[$4000+direccion]:=valor;
+   $2000..$200f:mappy_latch(direccion and $0f);
+end;
+end;
+
+//Super Pacman
+procedure spacman_putbyte(direccion:word;valor:byte); 
+begin
+if (direccion>$7fff) then exit;
+memoria[direccion]:=valor;
+case direccion of
+  $0..$7ff:gfx[0].buffer[direccion and $3ff]:=true;
+  $4000..$403f:namco_sound.registros_namco[direccion and $3f]:=valor;
+  $4800..$480f:namcoio_w(0,direccion and $f,valor);
+  $4810..$481f:namcoio_w(1,direccion and $f,valor);
+  $5000..$500f:mappy_latch(direccion and $0f);
+end;
+end;
+
+//Funciones IO Chips
+function inport0_0:byte;
+begin
+  inport0_0:=marcade.in0;  //coins
+end;
+
+function inport0_1:byte;
+begin
+inport0_1:=marcade.in2; //p1
+end;
+
+function inport0_2:byte;
+begin
+inport0_2:=$0f; //p2
+end;
+
+function inport0_3:byte;
+begin
+inport0_3:=marcade.in1; //buttons
+end;
+
+function inport1_0:byte;
+begin
+inport1_0:=$ff shr (mux*4);  //dib_mux
+end;
+
+function inport1_1:byte;
+begin
+inport1_1:=$f; //dip a_l
+end;
+
+function inport1_2:byte;
+begin
+inport1_2:=$f; //dip a_h
+end;
+
+function inport1_3:byte;
+begin
+inport1_3:=marcade.in3; //dsw 0
+end;
+
+procedure outport1_0(data:byte);
+begin
+mux:=data and $1;
+end;
+
+procedure mappy_io0;
+begin
+namco_io_run(0);
+timer[io_timer0].enabled:=false;
+end;
+
+procedure mappy_io1;
+begin
+namco_io_run(1);
+timer[io_timer1].enabled:=false;
+end;
+
+//Main
+procedure reset_mappyhw;
+begin
+ main_m6809.reset;
+ snd_m6809.reset;
+ namco_sound_reset;
+ reset_audio;
+ namco_io_init(0);
+ namco_io_init(1);
+ marcade.in0:=$f;
+ marcade.in1:=$f;
+ marcade.in2:=$f;
+ marcade.in3:=$f;
+end;
+
 function iniciar_mappyhw:boolean;
 const
     pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
@@ -543,207 +716,12 @@ reset_mappyhw;
 iniciar_mappyhw:=true;
 end;
 
-procedure reset_mappyhw; 
+procedure Cargar_mappyhw;
 begin
- main_m6809.reset;
- snd_m6809.reset;
- namco_sound_reset;
- reset_audio;
- namco_io_init(0);
- namco_io_init(1);
- marcade.in0:=$f;
- marcade.in1:=$f;
- marcade.in2:=$f;
- marcade.in3:=$f;
-end;
-
-procedure eventos_mappy;
-begin
-if event.arcade then begin
-  if arcade_input.up[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.right[0] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.left[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but1[0] then marcade.in3:=(marcade.in3 and $fe) else marcade.in3:=(marcade.in3 or $1);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-end;
-end;
-
-procedure mappy_principal;
-var
-  f:word;
-  frame_m,frame_s:single;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_m6809.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to 263 do begin
-    //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
-    //Sound CPU
-    snd_m6809.run(frame_s);
-    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
-    if f=223 then begin
-      if main_int then main_m6809.change_irq(ASSERT_LINE);
-      if snd_int then snd_m6809.change_irq(ASSERT_LINE);
-      update_video_proc;
-    end;
-  end;
-  //Dar un poco de tiempo a las CPU's para hacer su trabajo con los IO's
-  if namco_chip[0].reset then timer[io_timer0].enabled:=true;
-  if namco_chip[1].reset then timer[io_timer1].enabled:=true;
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
-  eventos_mappy;
-  video_sync;
-end;
-end;
-
-function mappy_getbyte(direccion:word):byte;
-begin
-  case direccion of
-    $4800..$480f:mappy_getbyte:=namcoio_r(0,direccion and $f);
-    $4810..$481f:mappy_getbyte:=namcoio_r(1,direccion and $f);
-    else mappy_getbyte:=memoria[direccion];
-  end;
-end;
-
-procedure mappy_latch(direccion:word);inline;
-begin
-case (direccion and $0e) of
-  $00:begin
-        snd_int:=(direccion and 1)<>0;
-        if not(snd_int) then snd_m6809.change_irq(CLEAR_LINE);
-      end;
-  $02:begin
-        main_int:=(direccion and 1)<>0;
-        if not(main_int) then main_m6809.change_irq(CLEAR_LINE);
-      end;
-  $04:main_screen.flip_main_screen:=(direccion and 1)<>0;
-  $06:namco_sound.enabled:=(direccion and 1)<>0;
-  $08:begin
-        namco_io_reset(0,(direccion and 1)<>0);
-        namco_io_reset(1,(direccion and 1)<>0);
-      end;
-  $0a:if ((direccion and 1)<>0) then snd_m6809.pedir_reset:=CLEAR_LINE
-          else snd_m6809.pedir_reset:=ASSERT_LINE;
-end;
-end;
-
-procedure mappy_putbyte(direccion:word;valor:byte); 
-begin
-if (direccion>$7fff) then exit;
-memoria[direccion]:=valor;
-case direccion of
-  $0..$fff:gfx[0].buffer[direccion and $7ff]:=true;
-  $3800..$3fff:scroll_x:=255-((direccion and $7ff) shr 3);
-  $4000..$403f:namco_sound.registros_namco[direccion and $3f]:=valor;
-  $4800..$480f:namcoio_w(0,direccion and $f,valor);
-  $4810..$481f:namcoio_w(1,direccion and $f,valor);
-  $5000..$500f:mappy_latch(direccion and $0f);
-end;
-end;
-
-function sound_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $40..$3ff:sound_getbyte:=memoria[$4000+direccion];
-  else sound_getbyte:=mem_snd[direccion];
-end;
-end;
-
-procedure sound_putbyte(direccion:word;valor:byte); 
-begin
-if direccion>$dfff then exit;
-mem_snd[direccion]:=valor;
-case direccion of
-   $0..$3f:begin
-            memoria[$4000+direccion]:=valor;
-            namco_sound.registros_namco[direccion and $3f]:=valor;
-           end;
-   $40..$3ff:memoria[$4000+direccion]:=valor;
-   $2000..$200f:mappy_latch(direccion and $0f);
-end;
-end;
-
-//Super Pacman
-procedure spacman_putbyte(direccion:word;valor:byte); 
-begin
-if (direccion>$7fff) then exit;
-memoria[direccion]:=valor;
-case direccion of
-  $0..$7ff:gfx[0].buffer[direccion and $3ff]:=true;
-  $4000..$403f:namco_sound.registros_namco[direccion and $3f]:=valor;
-  $4800..$480f:namcoio_w(0,direccion and $f,valor);
-  $4810..$481f:namcoio_w(1,direccion and $f,valor);
-  $5000..$500f:mappy_latch(direccion and $0f);
-end;
-end;
-
-//Funciones IO Chips
-function inport0_0:byte;
-begin
-  inport0_0:=marcade.in0;  //coins
-end;
-
-function inport0_1:byte;
-begin
-inport0_1:=marcade.in2; //p1
-end;
-
-function inport0_2:byte;
-begin
-inport0_2:=$0f; //p2
-end;
-
-function inport0_3:byte;
-begin
-inport0_3:=marcade.in1; //buttons
-end;
-
-function inport1_0:byte;
-begin
-inport1_0:=$ff shr (mux*4);  //dib_mux
-end;
-
-function inport1_1:byte;
-begin
-inport1_1:=$f; //dip a_l
-end;
-
-function inport1_2:byte;
-begin
-inport1_2:=$f; //dip a_h
-end;
-
-function inport1_3:byte;
-begin
-inport1_3:=marcade.in3; //dsw 0
-end;
-
-procedure outport1_0(data:byte);
-begin
-mux:=data and $1;
-end;
-
-procedure mappy_io0;
-begin
-namco_io_run(0);
-timer[io_timer0].enabled:=false;
-end;
-
-procedure mappy_io1;
-begin
-namco_io_run(1);
-timer[io_timer1].enabled:=false;
+llamadas_maquina.bucle_general:=mappy_principal;
+llamadas_maquina.iniciar:=iniciar_mappyhw;
+llamadas_maquina.reset:=reset_mappyhw;
+llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

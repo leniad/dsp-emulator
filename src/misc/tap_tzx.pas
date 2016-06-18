@@ -15,7 +15,7 @@ unit tap_tzx;
 
 interface
 
-uses nz80,z80_sp,{$IFDEF WINDOWS}windows,{$ENDIF}grids,dialogs,main_engine,
+uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}grids,dialogs,main_engine,
      spectrum_misc,sysutils,lenguaje,misc_functions,tape_window,file_engine,
      lenslock,samples;
 
@@ -109,6 +109,7 @@ function abrir_wav(data:pbyte;long:integer):boolean;
 function abrir_pzx(data:pbyte;long:integer):boolean;
 
 implementation
+uses spectrum_48k,spectrum_128k,spectrum_3;
 
 const
   tabla_tzx:array[1..8] of byte=(128,64,32,16,8,4,2,1);
@@ -547,11 +548,10 @@ end;
 
 procedure play_cinta_tap(z80_val:npreg_z80);
 var
-        f:word;
-        checksum,dato:byte;
-        tam_bloque:word;
-        ptemp:Pbyte;
-        bt:band_z80;
+  checksum:byte;
+  f,tam_bloque:word;
+  ptemp:pbyte;
+  bt:band_z80;
 begin
 main_screen.rapido:=true;
 cinta_tzx.es_tap:=true;
@@ -561,12 +561,15 @@ inc(ptemp);
 if checksum=z80_val.a2 then begin
     if z80_val.de.w>cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque then tam_bloque:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque else tam_bloque:=z80_val.de.w;
     for f:=0 to (tam_bloque-1) do begin
-        dato:=ptemp^;
-        spec_z80.putbyte(z80_val.ix.w+f,dato);
-        checksum:=checksum xor dato;
+        case main_vars.tipo_maquina of
+          0,5:spec48_putbyte(z80_val.ix.w+f,ptemp^); //48k and 16k
+          1,4:spec128_putbyte(z80_val.ix.w+f,ptemp^); //128k and +2
+          2,3:spec3_putbyte(z80_val.ix.w+f,ptemp^); //+2A and +3
+        end;
+        checksum:=checksum xor ptemp^;
         inc(ptemp);
     end;
-    z80_val.f.c:=checksum=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].checksum;
+    z80_val.f.c:=(checksum=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].checksum);
     z80_val.ix.w:=z80_val.ix.w+tam_bloque;
     z80_val.de.w:=0;
 end;

@@ -36,7 +36,7 @@ const
         (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- pedir_irq:boolean;
+ irq_ena:boolean;
  mem_opcodes:array[0..$9fff] of byte;
  sound_latch,scroll_x,linea:byte;
  spritebank:word;
@@ -116,7 +116,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if linea=239 then begin
-      if pedir_irq then main_m6809.change_irq(HOLD_LINE);
+      if irq_ena then main_m6809.change_irq(HOLD_LINE);
       update_video_circusc;
     end;
   end;
@@ -149,12 +149,12 @@ memoria[direccion]:=valor;
 case direccion of
   $0..$3ff:case (direccion and $7) of
               0:main_screen.flip_main_screen:=(valor and 1)<>0;
-              1:pedir_irq:=(valor<>0);
+              1:irq_ena:=(valor<>0);
               5:if (valor and 1)<>0 then spritebank:=$3900
                   else spritebank:=$3800;
            end;
   $800..$bff:sound_latch:=valor;
-  $c00..$fff:snd_z80.pedir_irq:=HOLD_LINE;
+  $c00..$fff:snd_z80.change_irq(HOLD_LINE);
   $1c00..$1fff:scroll_x:=256-valor;
   $3000..$37ff:gfx[0].buffer[direccion and $3ff]:=true;
 end;
@@ -203,7 +203,7 @@ begin
  marcade.in0:=$FF;
  marcade.in1:=$FF;
  marcade.in2:=$FF;
- pedir_irq:=false;
+ irq_ena:=false;
  sound_latch:=0;
  scroll_x:=0;
  spritebank:=$3800;
@@ -225,7 +225,6 @@ const
 begin
 iniciar_circusc:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256,true);
 screen_mod_scroll(1,256,256,255,0,0,0);
 screen_init(2,256,256);

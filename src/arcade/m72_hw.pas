@@ -5,47 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,nec_v20_v30,main_engine,controls_engine,gfx_engine,ym_2151,
      rom_engine,pal_engine,sound_engine,timer_engine,dac;
 
-procedure Cargar_irem_m72;
-procedure irem_m72_principal;
-function iniciar_irem_m72:boolean;
-procedure reset_irem_m72;
-//RType
-function irem_m72_getbyte(direccion:dword):byte;
-procedure irem_m72_putbyte(direccion:dword;valor:byte);
-procedure irem_m72_outword(valor:word;puerto:word);
-function irem_m72_inword(puerto:word):word;
-procedure update_video_rtype;
-procedure paint_video_rtype(linea_o,linea_d:word);
-//Hammerin' Harry
-function hharry_getbyte(direccion:dword):byte;
-procedure hharry_putbyte(direccion:dword;valor:byte);
-procedure hharry_outword(valor:word;puerto:word);
-function hharry_inword(puerto:word):word;
-procedure hharry_outbyte(valor:byte;puerto:word);
-function hharry_inbyte(puerto:word):byte;
-procedure update_video_hharry;
-procedure paint_video_hharry(linea_o,linea_d:word);
-//RType2
-function rtype2_getbyte(direccion:dword):byte;
-procedure rtype2_putbyte(direccion:dword;valor:byte);
-procedure rtype2_outword(valor:word;puerto:word);
-function rtype2_inword(puerto:word):word;
-procedure rtype2_outbyte(valor:byte;puerto:word);
-function rtype2_inbyte(puerto:word):byte;
-procedure update_video_rtype2;
-procedure paint_video_rtype2(linea_o,linea_d:word);
-//Sound
-procedure sound_irq_ack;
-procedure ym2151_snd_irq(irqstate:byte);
-function irem_m72_snd_getbyte(direccion:word):byte;
-procedure irem_m72_snd_putbyte(direccion:word;valor:byte);
-function irem_m72_snd_inbyte(puerto:word):byte;
-procedure irem_m72_snd_outbyte(valor:byte;puerto:word);
-function rtype2_snd_inbyte(puerto:word):byte;
-procedure rtype2_snd_outbyte(valor:byte;puerto:word);
-procedure irem_m72_sound_update;
-procedure rtype2_sound_update;
-procedure rtype2_perodic_int;
+procedure cargar_irem_m72;
 
 implementation
 const
@@ -111,169 +71,6 @@ var
  //video
  update_video_irem_m72:tipo_update_video_m72;
  paint_video_irem_m72:tipo_paint_video_irem_m72;
-
-procedure Cargar_irem_m72;
-begin
-llamadas_maquina.iniciar:=iniciar_irem_m72;
-llamadas_maquina.reset:=reset_irem_m72;
-llamadas_maquina.fps_max:=55.017606;
-llamadas_maquina.bucle_general:=irem_m72_principal;
-end;
-
-function iniciar_irem_m72:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
-var
-  memoria_temp:pbyte;
-begin
-iniciar_irem_m72:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,256,511);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
-screen_init(3,512,512,true);
-screen_mod_scroll(3,512,512,511,512,256,511);
-screen_init(4,512,512,true);
-screen_mod_scroll(4,512,512,511,512,256,511);
-screen_init(5,1024,512,false,true);
-screen_init(6,384,256);
-iniciar_video(384,256);
-//iniciar_video(1024,512);
-//Main CPU
-main_nec:=cpu_nec.create(8000000,284,NEC_V30);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,284);
-snd_z80.change_ram_calls(irem_m72_snd_getbyte,irem_m72_snd_putbyte);
-timer_sound:=init_timer(snd_z80.numero_cpu,1,sound_irq_ack,true);
-getmem(memoria_temp,$100000);
-case main_vars.tipo_maquina of
-  87:begin //R-Type
-      //Main CPU
-      main_nec.change_ram_calls(irem_m72_getbyte,irem_m72_putbyte);
-      main_nec.change_io_calls16(irem_m72_inword,irem_m72_outword);
-      if not(cargar_roms16b(@rom[0],@rtype_rom[0],'rtype.zip',0)) then exit;
-      //Sound
-      snd_z80.change_io_calls(irem_m72_snd_inbyte,irem_m72_snd_outbyte);
-      snd_z80.init_sound(irem_m72_sound_update);
-      //video
-      update_video_irem_m72:=update_video_rtype;
-      paint_video_irem_m72:=paint_video_rtype;
-      //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@rtype_char[0],'rtype.zip',0)) then exit;
-      init_gfx(0,8,8,$1000);
-      gfx[0].trans[0]:=true;
-      gfx_set_desc_data(4,0,8*8,$18000*8,$10000*8,$8000*8,0*8);
-      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-      //chars 2
-      if not(cargar_roms(@memoria_temp[0],@rtype_char2[0],'rtype.zip',0)) then exit;
-      init_gfx(1,8,8,$1000);
-      gfx[1].trans[0]:=true;
-      convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-      //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@irem_m72_sprites[0],'rtype.zip',0)) then exit;
-      init_gfx(2,16,16,$1000);
-      gfx[2].trans[0]:=true;
-      gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
-      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-    end;
-  190:begin //Hammerin' Harry
-      //Main CPU
-      main_nec.change_ram_calls(hharry_getbyte,hharry_putbyte);
-      main_nec.change_io_calls16(hharry_inword,hharry_outword);
-      main_nec.change_io_calls(hharry_inbyte,hharry_outbyte);
-      if not(cargar_roms16b(@rom[0],@hharry_rom[0],'hharry.zip',0)) then exit;
-      //Sound
-      if not(cargar_roms(@mem_snd[0],@hharry_snd,'hharry.zip')) then exit;
-      snd_z80.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
-      init_timer(snd_z80.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
-      snd_z80.init_sound(rtype2_sound_update);
-      dac_0:=dac_chip.Create;
-      if not(cargar_roms(@mem_dac[0],@hharry_dac,'hharry.zip')) then exit;
-      //video
-      update_video_irem_m72:=update_video_hharry;
-      paint_video_irem_m72:=paint_video_hharry;
-      //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@hharry_char[0],'hharry.zip',0)) then exit;
-      init_gfx(0,8,8,$4000);
-      gfx[0].trans[0]:=true;
-      gfx_set_desc_data(4,0,8*8,$18000*8*4,$10000*8*4,$8000*8*4,0*8);
-      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-      //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@hharry_sprites[0],'hharry.zip',0)) then exit;
-      init_gfx(2,16,16,$1000);
-      gfx[2].trans[0]:=true;
-      gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
-      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-    end;
-    191:begin //R-Type 2
-      //Main CPU
-      main_nec.change_ram_calls(rtype2_getbyte,rtype2_putbyte);
-      main_nec.change_io_calls16(rtype2_inword,rtype2_outword);
-      main_nec.change_io_calls(rtype2_inbyte,rtype2_outbyte);
-      if not(cargar_roms16b(@rom[0],@rtype2_rom[0],'rtype2.zip',0)) then exit;
-      //Sound
-      if not(cargar_roms(@mem_snd[0],@rtype2_snd,'rtype2.zip')) then exit;
-      snd_z80.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
-      init_timer(snd_z80.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
-      snd_z80.init_sound(rtype2_sound_update);
-      dac_0:=dac_chip.Create;
-      if not(cargar_roms(@mem_dac[0],@rtype2_dac,'rtype2.zip')) then exit;
-      //video
-      update_video_irem_m72:=update_video_rtype2;
-      paint_video_irem_m72:=paint_video_rtype2;
-      //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@rtype2_char[0],'rtype2.zip',0)) then exit;
-      init_gfx(0,8,8,$8000);
-      gfx[0].trans[0]:=true;
-      gfx_set_desc_data(4,0,8*8,$18000*8*4*2,$10000*8*4*2,$8000*8*4*2,0*8);
-      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-      //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@rtype2_sprites[0],'rtype2.zip',0)) then exit;
-      init_gfx(2,16,16,$1000);
-      gfx[2].trans[0]:=true;
-      gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
-      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-    end;
-end;
-//Sound Chips
-ym2151_0:=ym2151_chip.create(3579545);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-freemem(memoria_temp);
-reset_irem_m72;
-iniciar_irem_m72:=true;
-end;
-
-procedure reset_irem_m72;
-begin
- main_nec.reset;
- snd_z80.reset;
- ym2151_0.reset;
- case main_vars.tipo_maquina of
-  190,191:dac_0.reset;
- end;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- scroll_x1:=0;
- scroll_x2:=0;
- scroll_y1:=0;
- scroll_y2:=0;
- snd_irq_vector:=$ff;
- sound_latch:=0;
- m72_raster_irq_position:=0;
- video_off:=true;
- sample_addr:=0;
- fillchar(irq_base[0],5,0);
- irq_pos:=0;
- timer[timer_sound].enabled:=false;
-end;
 
 procedure draw_sprites;
 var
@@ -417,12 +214,12 @@ while EmuStatus=EsRuning do begin
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if ((f<255) and (f=(m72_raster_irq_position-1))) then begin
       main_nec.vect_req:=irq_base[1]+2;
-      main_nec.pedir_irq:=true;
+      main_nec.change_irq(HOLD_LINE);
       if not(video_off) then paint_video_irem_m72(0,f);
     end;
     if f=255 then begin
       main_nec.vect_req:=irq_base[1];
-      main_nec.pedir_irq:=true;
+      main_nec.change_irq(HOLD_LINE);
       if not(video_off) then begin
         paint_video_irem_m72(m72_raster_irq_position and $ff,f);
         update_video_irem_m72;
@@ -488,8 +285,8 @@ case puerto of
       timer[timer_sound].enabled:=true;
     end;
   2:begin
-      if (valor and $10)=0 then snd_z80.pedir_reset:=ASSERT_LINE
-        else snd_z80.pedir_reset:=CLEAR_LINE;
+      if (valor and $10)=0 then snd_z80.change_reset(ASSERT_LINE)
+        else snd_z80.change_reset(CLEAR_LINE);
       video_off:=(valor and $08)<>0;
     end;
   4:begin //DMA
@@ -829,8 +626,8 @@ end;
 procedure sound_irq_ack;
 begin
 snd_z80.im0:=snd_irq_vector;
-if snd_irq_vector=$ff then snd_z80.pedir_irq:=CLEAR_LINE
-  else snd_z80.pedir_irq:=ASSERT_LINE;
+if snd_irq_vector=$ff then snd_z80.change_irq(CLEAR_LINE)
+  else snd_z80.change_irq(ASSERT_LINE);
 timer[timer_sound].enabled:=false;
 end;
 
@@ -922,5 +719,167 @@ begin
   dac_0.update;
 end;
 
+//Main
+procedure reset_irem_m72;
+begin
+ main_nec.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ case main_vars.tipo_maquina of
+  190,191:dac_0.reset;
+ end;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ scroll_x1:=0;
+ scroll_x2:=0;
+ scroll_y1:=0;
+ scroll_y2:=0;
+ snd_irq_vector:=$ff;
+ sound_latch:=0;
+ m72_raster_irq_position:=0;
+ video_off:=true;
+ sample_addr:=0;
+ fillchar(irq_base[0],5,0);
+ irq_pos:=0;
+ timer[timer_sound].enabled:=false;
+end;
+
+function iniciar_irem_m72:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
+var
+  memoria_temp:pbyte;
+begin
+iniciar_irem_m72:=false;
+iniciar_audio(false);
+screen_init(1,512,512);
+screen_mod_scroll(1,512,512,511,512,256,511);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,512,511,512,256,511);
+screen_init(3,512,512,true);
+screen_mod_scroll(3,512,512,511,512,256,511);
+screen_init(4,512,512,true);
+screen_mod_scroll(4,512,512,511,512,256,511);
+screen_init(5,1024,512,false,true);
+screen_init(6,384,256);
+iniciar_video(384,256);
+//iniciar_video(1024,512);
+//Main CPU
+main_nec:=cpu_nec.create(8000000,284,NEC_V30);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,284);
+snd_z80.change_ram_calls(irem_m72_snd_getbyte,irem_m72_snd_putbyte);
+timer_sound:=init_timer(snd_z80.numero_cpu,1,sound_irq_ack,true);
+getmem(memoria_temp,$100000);
+case main_vars.tipo_maquina of
+  87:begin //R-Type
+      //Main CPU
+      main_nec.change_ram_calls(irem_m72_getbyte,irem_m72_putbyte);
+      main_nec.change_io_calls16(irem_m72_inword,irem_m72_outword);
+      if not(cargar_roms16b(@rom[0],@rtype_rom[0],'rtype.zip',0)) then exit;
+      //Sound
+      snd_z80.change_io_calls(irem_m72_snd_inbyte,irem_m72_snd_outbyte);
+      snd_z80.init_sound(irem_m72_sound_update);
+      //video
+      update_video_irem_m72:=update_video_rtype;
+      paint_video_irem_m72:=paint_video_rtype;
+      //convertir chars
+      if not(cargar_roms(@memoria_temp[0],@rtype_char[0],'rtype.zip',0)) then exit;
+      init_gfx(0,8,8,$1000);
+      gfx[0].trans[0]:=true;
+      gfx_set_desc_data(4,0,8*8,$18000*8,$10000*8,$8000*8,0*8);
+      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+      //chars 2
+      if not(cargar_roms(@memoria_temp[0],@rtype_char2[0],'rtype.zip',0)) then exit;
+      init_gfx(1,8,8,$1000);
+      gfx[1].trans[0]:=true;
+      convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+      //convertir sprites
+      if not(cargar_roms(@memoria_temp[0],@irem_m72_sprites[0],'rtype.zip',0)) then exit;
+      init_gfx(2,16,16,$1000);
+      gfx[2].trans[0]:=true;
+      gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
+      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+    end;
+  190:begin //Hammerin' Harry
+      //Main CPU
+      main_nec.change_ram_calls(hharry_getbyte,hharry_putbyte);
+      main_nec.change_io_calls16(hharry_inword,hharry_outword);
+      main_nec.change_io_calls(hharry_inbyte,hharry_outbyte);
+      if not(cargar_roms16b(@rom[0],@hharry_rom[0],'hharry.zip',0)) then exit;
+      //Sound
+      if not(cargar_roms(@mem_snd[0],@hharry_snd,'hharry.zip')) then exit;
+      snd_z80.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
+      init_timer(snd_z80.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
+      snd_z80.init_sound(rtype2_sound_update);
+      dac_0:=dac_chip.Create;
+      if not(cargar_roms(@mem_dac[0],@hharry_dac,'hharry.zip')) then exit;
+      //video
+      update_video_irem_m72:=update_video_hharry;
+      paint_video_irem_m72:=paint_video_hharry;
+      //convertir chars
+      if not(cargar_roms(@memoria_temp[0],@hharry_char[0],'hharry.zip',0)) then exit;
+      init_gfx(0,8,8,$4000);
+      gfx[0].trans[0]:=true;
+      gfx_set_desc_data(4,0,8*8,$18000*8*4,$10000*8*4,$8000*8*4,0*8);
+      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+      //convertir sprites
+      if not(cargar_roms(@memoria_temp[0],@hharry_sprites[0],'hharry.zip',0)) then exit;
+      init_gfx(2,16,16,$1000);
+      gfx[2].trans[0]:=true;
+      gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
+      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+    end;
+    191:begin //R-Type 2
+      //Main CPU
+      main_nec.change_ram_calls(rtype2_getbyte,rtype2_putbyte);
+      main_nec.change_io_calls16(rtype2_inword,rtype2_outword);
+      main_nec.change_io_calls(rtype2_inbyte,rtype2_outbyte);
+      if not(cargar_roms16b(@rom[0],@rtype2_rom[0],'rtype2.zip',0)) then exit;
+      //Sound
+      if not(cargar_roms(@mem_snd[0],@rtype2_snd,'rtype2.zip')) then exit;
+      snd_z80.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
+      init_timer(snd_z80.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
+      snd_z80.init_sound(rtype2_sound_update);
+      dac_0:=dac_chip.Create;
+      if not(cargar_roms(@mem_dac[0],@rtype2_dac,'rtype2.zip')) then exit;
+      //video
+      update_video_irem_m72:=update_video_rtype2;
+      paint_video_irem_m72:=paint_video_rtype2;
+      //convertir chars
+      if not(cargar_roms(@memoria_temp[0],@rtype2_char[0],'rtype2.zip',0)) then exit;
+      init_gfx(0,8,8,$8000);
+      gfx[0].trans[0]:=true;
+      gfx_set_desc_data(4,0,8*8,$18000*8*4*2,$10000*8*4*2,$8000*8*4*2,0*8);
+      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+      //convertir sprites
+      if not(cargar_roms(@memoria_temp[0],@rtype2_sprites[0],'rtype2.zip',0)) then exit;
+      init_gfx(2,16,16,$1000);
+      gfx[2].trans[0]:=true;
+      gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
+      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+    end;
+end;
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+freemem(memoria_temp);
+reset_irem_m72;
+iniciar_irem_m72:=true;
+end;
+
+procedure Cargar_irem_m72;
+begin
+llamadas_maquina.iniciar:=iniciar_irem_m72;
+llamadas_maquina.reset:=reset_irem_m72;
+llamadas_maquina.fps_max:=55.017606;
+llamadas_maquina.bucle_general:=irem_m72_principal;
+end;
 
 end.

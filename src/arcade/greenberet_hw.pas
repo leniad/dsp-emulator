@@ -136,8 +136,8 @@ while EmuStatus=EsRuning do begin
 	     // NMI on d0
 	     if (ticks_mask and interrupt_mask and 1)<>0 then main_z80.change_nmi(ASSERT_LINE);
 	     // IRQ on d4
-       if (ticks_mask and (interrupt_mask shl 2) and 8)<>0 then main_z80.pedir_irq:=ASSERT_LINE;
-	     if (ticks_mask and (interrupt_mask shl 2) and 16)<>0 then main_z80.pedir_irq:=ASSERT_LINE;
+       if (ticks_mask and (interrupt_mask shl 2) and 8)<>0 then main_z80.change_irq(ASSERT_LINE);
+	     if (ticks_mask and (interrupt_mask shl 2) and 16)<>0 then main_z80.change_irq(ASSERT_LINE);
     end;
   end;
   eventos_gberet;
@@ -174,7 +174,7 @@ case direccion of
                 // bits 0/1/2 = interrupt enable
 	              ack_mask:=not(valor) and interrupt_mask; // 1->0
 	              if (ack_mask and 1)<>0 then main_z80.change_nmi(CLEAR_LINE);
-                if (ack_mask and 6)<>0 then main_z80.pedir_irq:=CLEAR_LINE;
+                if (ack_mask and 6)<>0 then main_z80.change_irq(CLEAR_LINE);
 	              interrupt_mask:=valor and 7;
 	              // bit 3 = flip screen
                 main_screen.flip_main_screen:=(valor and 8)<>0;
@@ -308,7 +308,6 @@ end;
 begin
 iniciar_gberet:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,512,256);
 screen_mod_scroll(1,512,256,511,0,0,0);
 screen_init(2,512,256,false,true);

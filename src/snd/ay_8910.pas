@@ -1,7 +1,7 @@
 unit ay_8910;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,main_engine;
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine,cpu_misc;
 
 type
   ay8910_chip=class(snd_chip_class)

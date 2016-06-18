@@ -5,38 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m680x,main_engine,controls_engine,ay_8910,gfx_engine,
      msm5205,rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_irem_m62;
-procedure reset_irem_m62;
-function iniciar_irem_m62:boolean;
-procedure irem_m62_principal;
-//Kung-Fu Master
-function kungfum_getbyte(direccion:word):byte;
-procedure kungfum_putbyte(direccion:word;valor:byte);
-function kungfum_inbyte(puerto:word):byte;
-procedure kungfum_outbyte(valor:byte;puerto:word);
-//Spelunker
-function spl_getbyte(direccion:word):byte;
-procedure spl_putbyte(direccion:word;valor:byte);
-//Spelunker II
-function spl2_getbyte(direccion:word):byte;
-procedure spl2_putbyte(direccion:word;valor:byte);
-//Lode Runner
-procedure ldrun_putbyte(direccion:word;valor:byte);
-//Lode Runner II
-function ldrun2_getbyte(direccion:word):byte;
-function ldrun2_inbyte(puerto:word):byte;
-procedure ldrun2_outbyte(valor:byte;puerto:word);
-//sound
-function snd_getbyte(direccion:word):byte;
-procedure snd_putbyte(direccion:word;valor:byte);
-procedure out_port1(valor:byte);
-procedure out_port2(valor:byte);
-function in_port1:byte;
-function in_port2:byte;
-function ay0_porta_r:byte;
-procedure ay0_portb_w(valor:byte);
-procedure irem_m62_play_sound;
-procedure adpcm_int; 
+procedure cargar_irem_m62;
 
 implementation
 const
@@ -173,14 +142,6 @@ var
  update_video_m62:tipo_update_video_m62;
  calc_nchar_sp:tipo_calc_nchar_spelunker;
 
-procedure Cargar_irem_m62;
-begin
-llamadas_maquina.iniciar:=iniciar_irem_m62;
-llamadas_maquina.bucle_general:=irem_m62_principal;
-llamadas_maquina.reset:=reset_irem_m62;
-llamadas_maquina.fps_max:=55;
-end;
-
 procedure draw_sprites(pos,col,col_mask,pri_mask,pri:byte);inline;
 var
   f,i,h,atrib:byte;
@@ -314,303 +275,6 @@ actualiza_trozo(0,0,384,256,3,64,128,384,256,2);
 actualiza_trozo_final(64,128,384,256,2);
 end;
 
-function iniciar_irem_m62:boolean;
-var
-      f,x:word;
-      memoria_temp:array[0..$1ffff] of byte;
-const
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-procedure cargar_paleta;
-var
-  colores:tpaleta;
-  f:byte;
-begin
-for f:=0 to $ff do begin
-    //Chars
-    colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-    colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-    colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-    //Sprites
-    colores[f+$100].r:=((memoria_temp[f+$300] and $f) shl 4) or (memoria_temp[f] and $f);
-    colores[f+$100].g:=((memoria_temp[f+$400] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-    colores[f+$100].b:=((memoria_temp[f+$500] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,512);
-end;
-procedure cargar_paleta_spl2;
-var
-  colores:tpaleta;
-  f:word;
-begin
-for f:=0 to $1ff do begin
-    //Chars
-    colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-    colores[f].g:=((memoria_temp[f] and $f0) shr 4) or (memoria_temp[f] and $f0);
-    colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-for f:=0 to $ff do begin
-    colores[f+$200].r:=((memoria_temp[f+$400] and $f) shl 4) or (memoria_temp[f+$400] and $f);
-    colores[f+$200].g:=((memoria_temp[f+$500] and $f) shl 4) or (memoria_temp[f+$500] and $f);
-    colores[f+$200].b:=((memoria_temp[f+$600] and $f) shl 4) or (memoria_temp[f+$600] and $f);
-end;
-set_pal(colores,768);
-end;
-procedure make_chars_spl;
-const
-    pc_spl_x:array[0..11] of dword=(0,1,2,3,
-		    $2000*8+0,$2000*8+1,$2000*8+2,$2000*8+3,
-    		$2000*8+4,$2000*8+5,$2000*8+6,$2000*8+7);
-var
-  mem_char:array[0..$bfff] of byte;
-begin
-  copymemory(@mem_char[$0000],@memoria_temp[$0000],$800);
-  copymemory(@mem_char[$2000],@memoria_temp[$0800],$800);
-  copymemory(@mem_char[$0800],@memoria_temp[$1000],$800);
-  copymemory(@mem_char[$2800],@memoria_temp[$1800],$800);
-  copymemory(@mem_char[$1000],@memoria_temp[$2000],$800);
-  copymemory(@mem_char[$3000],@memoria_temp[$2800],$800);
-  copymemory(@mem_char[$1800],@memoria_temp[$3000],$800);
-  copymemory(@mem_char[$3800],@memoria_temp[$3800],$800);
-  copymemory(@mem_char[$4000],@memoria_temp[$4000],$800);
-  copymemory(@mem_char[$6000],@memoria_temp[$4800],$800);
-  copymemory(@mem_char[$4800],@memoria_temp[$5000],$800);
-  copymemory(@mem_char[$6800],@memoria_temp[$5800],$800);
-  copymemory(@mem_char[$5000],@memoria_temp[$6000],$800);
-  copymemory(@mem_char[$7000],@memoria_temp[$6800],$800);
-  copymemory(@mem_char[$5800],@memoria_temp[$7000],$800);
-  copymemory(@mem_char[$7800],@memoria_temp[$7800],$800);
-  copymemory(@mem_char[$8000],@memoria_temp[$8000],$800);
-  copymemory(@mem_char[$a000],@memoria_temp[$8800],$800);
-  copymemory(@mem_char[$8800],@memoria_temp[$9000],$800);
-  copymemory(@mem_char[$a800],@memoria_temp[$9800],$800);
-  copymemory(@mem_char[$9000],@memoria_temp[$a000],$800);
-  copymemory(@mem_char[$b000],@memoria_temp[$a800],$800);
-  copymemory(@mem_char[$9800],@memoria_temp[$b000],$800);
-  copymemory(@mem_char[$b800],@memoria_temp[$b800],$800);
-  init_gfx(0,12,8,$200);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(3,0,8*8,0,$4000*8,2*$4000*8);
-  convert_gfx(0,0,@mem_char[0],@pc_spl_x[0],@pc_y[0],false,false);
-end;
-procedure make_chars(num:word;ngfx:byte);
-begin
-init_gfx(ngfx,8,8,num);
-gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
-convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-end;
-procedure make_sprites(num:word);
-begin
-  init_gfx(1,16,16,num);
-  gfx[1].trans[0]:=true;
-  gfx_set_desc_data(3,0,32*8,2*num*32*8,num*32*8,0);
-  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-end;
-
-begin
-iniciar_irem_m62:=false;
-fillchar(memoria_temp[0],$20000,0);
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512);
-screen_init(2,512,512,false,true);
-screen_init(3,512,512,true);
-case main_vars.tipo_maquina of
-  42:begin
-        x:=256;
-        screen_mod_scroll(1,512,256+128,511,0,0,0);
-        screen_mod_scroll(3,512,256+128,511,0,0,0);
-     end;
-  72,73:begin
-          x:=384;
-          screen_mod_scroll(1,512,384+128,511,512,256+128,511);
-        end;
-  74,75:x:=384;
-end;
-iniciar_video(x,256);
-//Sound CPU
-snd_m6800:=cpu_m6800.create(3579545,$100,CPU_M6803);
-snd_m6800.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_m6800.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
-snd_m6800.init_sound(irem_m62_play_sound);
-//sound chips
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
-msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
-ay8910_0:=ay8910_chip.create(3579545 div 4,1);
-ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
-ay8910_1:=ay8910_chip.create(3579545 div 4,1);
-marcade.dswa:=$ff;
-marcade.dswb:=$fd;
-case main_vars.tipo_maquina of
-  42:begin  //KungFu Master
-        //Main CPU
-        main_z80:=cpu_z80.create(3072000,$100);
-        main_z80.change_ram_calls(kungfum_getbyte,kungfum_putbyte);
-        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
-        //video
-        update_video_m62:=update_video_kungfum;
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@kungfum_rom[0],'kungfum.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@kungfum_sound[0],'kungfum.zip',0)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@kungfum_char[0],'kungfum.zip',0)) then exit;
-        make_chars(1024,0);
-        gfx[0].trans[0]:=true;
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@kungfum_sprites[0],'kungfum.zip',0)) then exit;
-        make_sprites(1024);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@kungfum_pal[0],'kungfum.zip',0)) then exit;
-        cargar_paleta;
-        copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
-        marcade.dswa_val:=@kungfum_dip_a;
-        marcade.dswb_val:=@kungfum_dip_b;
-     end;
-     72:begin  //Spelunker
-        //Main CPU
-        main_z80:=cpu_z80.create(4000000,$100);
-        main_z80.change_ram_calls(spl_getbyte,spl_putbyte);
-        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
-        //video
-        update_video_m62:=update_video_spelunker;
-        calc_nchar_sp:=calc_nchar_splunker;
-        sprites_sp:=1;
-        //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@spl_rom[0],'spelunkr.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
-        for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@spl_sound[0],'spelunkr.zip',0)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@spl_char[0],'spelunkr.zip',0)) then exit;
-        make_chars_spl;
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@spl_sprites[0],'spelunkr.zip',0)) then exit;
-        make_sprites($400);
-        //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@spl_tiles[0],'spelunkr.zip',0)) then exit;
-        make_chars(4096,2);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@spl_pal[0],'spelunkr.zip',0)) then exit;
-        cargar_paleta;
-        copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
-     end;
-     73:begin  //Spelunker II
-        //Main CPU
-        main_z80:=cpu_z80.create(4000000,$100);
-        main_z80.change_ram_calls(spl2_getbyte,spl2_putbyte);
-        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
-        //video
-        update_video_m62:=update_video_spelunker;
-        calc_nchar_sp:=calc_nchar_splunker2;
-        sprites_sp:=2;
-        //cargar roms y ponerlas en sus bancos (2)
-        if not(cargar_roms(@memoria_temp[0],@spl2_rom[0],'spelunk2.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
-        for f:=0 to 15 do copymemory(@mem_rom2[f,0],@memoria_temp[$8000+(f*$1000)],$1000);
-        for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$18000+(f*$1000)],$1000);
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@spl2_sound[0],'spelunk2.zip',0)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@spl2_char[0],'spelunk2.zip',0)) then exit;
-        make_chars_spl;
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@spl2_sprites[0],'spelunk2.zip',0)) then exit;
-        make_sprites($400);
-        //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@spl2_tiles[0],'spelunk2.zip',0)) then exit;
-        make_chars(4096,2);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@spl2_pal[0],'spelunk2.zip',0)) then exit;
-        cargar_paleta_spl2;
-        copymemory(@memoria_sprites[0],@memoria_temp[$700],$20);
-     end;
-     74:begin  //Lode Runner
-        //Main CPU
-        main_z80:=cpu_z80.create(4000000,$100);
-        main_z80.change_ram_calls(kungfum_getbyte,ldrun_putbyte);
-        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
-        //video
-        update_video_m62:=update_video_ldrun;
-        ldrun_color:=$0c;
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@ldrun_rom[0],'ldrun.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@ldrun_sound[0],'ldrun.zip',0)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@ldrun_char[0],'ldrun.zip',0)) then exit;
-        make_chars($400,0);
-        gfx[0].trans[0]:=true;
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@ldrun_sprites[0],'ldrun.zip',0)) then exit;
-        make_sprites($100);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@ldrun_pal[0],'ldrun.zip',0)) then exit;
-        cargar_paleta;
-        copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
-     end;
-     75:begin  //Lode Runner II
-        //Main CPU
-        main_z80:=cpu_z80.create(4000000,$100);
-        main_z80.change_ram_calls(ldrun2_getbyte,ldrun_putbyte);
-        main_z80.change_io_calls(ldrun2_inbyte,ldrun2_outbyte);
-        //video
-        update_video_m62:=update_video_ldrun;
-        ldrun_color:=$04;
-        //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@ldrun2_rom[0],'ldrun2.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
-        for f:=0 to 1 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@ldrun2_sound[0],'ldrun2.zip',0)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@ldrun2_char[0],'ldrun2.zip',0)) then exit;
-        make_chars($400,0);
-        gfx[0].trans[0]:=true;
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@ldrun2_sprites[0],'ldrun2.zip',0)) then exit;
-        make_sprites($200);
-        //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@ldrun2_pal[0],'ldrun2.zip',0)) then exit;
-        cargar_paleta;
-        copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
-     end;
-end;
-//final
-reset_irem_m62;
-iniciar_irem_m62:=true;
-end;
-
-procedure reset_irem_m62;
-begin
- main_z80.reset;
- snd_m6800.reset;
- reset_audio;
- ay8910_0.reset;
- ay8910_1.reset;
- msm_5205_0.reset;
- msm_5205_1.reset;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- rom_bank:=0;
- rom_bank2:=0;
- pal_bank:=0;
- sound_command:=0;
- val_port1:=0;
- val_port2:=0;
- scroll_x:=0;
- scroll_y:=0;
- ldrun2_banksw:=0;
- bankcontrol[0]:=0;
- bankcontrol[1]:=0;
-end;
-
 procedure eventos_irem_m62;
 begin
 if event.arcade then begin
@@ -644,7 +308,7 @@ while EmuStatus=EsRuning do begin
     snd_m6800.run(frame_s);
     frame_s:=frame_s+snd_m6800.tframes-snd_m6800.contador;
   end;
-  main_z80.pedir_irq:=HOLD_LINE;
+  main_z80.change_irq(HOLD_LINE);
   update_video_m62;
   eventos_irem_m62;
   video_sync;
@@ -894,5 +558,311 @@ begin
   ay8910_0.update;
   ay8910_1.update;
 end;
+
+//Main
+procedure reset_irem_m62;
+begin
+ main_z80.reset;
+ snd_m6800.reset;
+ reset_audio;
+ ay8910_0.reset;
+ ay8910_1.reset;
+ msm_5205_0.reset;
+ msm_5205_1.reset;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ rom_bank:=0;
+ rom_bank2:=0;
+ pal_bank:=0;
+ sound_command:=0;
+ val_port1:=0;
+ val_port2:=0;
+ scroll_x:=0;
+ scroll_y:=0;
+ ldrun2_banksw:=0;
+ bankcontrol[0]:=0;
+ bankcontrol[1]:=0;
+end;
+
+function iniciar_irem_m62:boolean;
+var
+      f,x:word;
+      memoria_temp:array[0..$1ffff] of byte;
+const
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+procedure cargar_paleta;
+var
+  colores:tpaleta;
+  f:byte;
+begin
+for f:=0 to $ff do begin
+    //Chars
+    colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+    colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
+    colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+    //Sprites
+    colores[f+$100].r:=((memoria_temp[f+$300] and $f) shl 4) or (memoria_temp[f] and $f);
+    colores[f+$100].g:=((memoria_temp[f+$400] and $f) shl 4) or (memoria_temp[f+$100] and $f);
+    colores[f+$100].b:=((memoria_temp[f+$500] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+set_pal(colores,512);
+end;
+procedure cargar_paleta_spl2;
+var
+  colores:tpaleta;
+  f:word;
+begin
+for f:=0 to $1ff do begin
+    //Chars
+    colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+    colores[f].g:=((memoria_temp[f] and $f0) shr 4) or (memoria_temp[f] and $f0);
+    colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+for f:=0 to $ff do begin
+    colores[f+$200].r:=((memoria_temp[f+$400] and $f) shl 4) or (memoria_temp[f+$400] and $f);
+    colores[f+$200].g:=((memoria_temp[f+$500] and $f) shl 4) or (memoria_temp[f+$500] and $f);
+    colores[f+$200].b:=((memoria_temp[f+$600] and $f) shl 4) or (memoria_temp[f+$600] and $f);
+end;
+set_pal(colores,768);
+end;
+procedure make_chars_spl;
+const
+    pc_spl_x:array[0..11] of dword=(0,1,2,3,
+		    $2000*8+0,$2000*8+1,$2000*8+2,$2000*8+3,
+    		$2000*8+4,$2000*8+5,$2000*8+6,$2000*8+7);
+var
+  mem_char:array[0..$bfff] of byte;
+begin
+  copymemory(@mem_char[$0000],@memoria_temp[$0000],$800);
+  copymemory(@mem_char[$2000],@memoria_temp[$0800],$800);
+  copymemory(@mem_char[$0800],@memoria_temp[$1000],$800);
+  copymemory(@mem_char[$2800],@memoria_temp[$1800],$800);
+  copymemory(@mem_char[$1000],@memoria_temp[$2000],$800);
+  copymemory(@mem_char[$3000],@memoria_temp[$2800],$800);
+  copymemory(@mem_char[$1800],@memoria_temp[$3000],$800);
+  copymemory(@mem_char[$3800],@memoria_temp[$3800],$800);
+  copymemory(@mem_char[$4000],@memoria_temp[$4000],$800);
+  copymemory(@mem_char[$6000],@memoria_temp[$4800],$800);
+  copymemory(@mem_char[$4800],@memoria_temp[$5000],$800);
+  copymemory(@mem_char[$6800],@memoria_temp[$5800],$800);
+  copymemory(@mem_char[$5000],@memoria_temp[$6000],$800);
+  copymemory(@mem_char[$7000],@memoria_temp[$6800],$800);
+  copymemory(@mem_char[$5800],@memoria_temp[$7000],$800);
+  copymemory(@mem_char[$7800],@memoria_temp[$7800],$800);
+  copymemory(@mem_char[$8000],@memoria_temp[$8000],$800);
+  copymemory(@mem_char[$a000],@memoria_temp[$8800],$800);
+  copymemory(@mem_char[$8800],@memoria_temp[$9000],$800);
+  copymemory(@mem_char[$a800],@memoria_temp[$9800],$800);
+  copymemory(@mem_char[$9000],@memoria_temp[$a000],$800);
+  copymemory(@mem_char[$b000],@memoria_temp[$a800],$800);
+  copymemory(@mem_char[$9800],@memoria_temp[$b000],$800);
+  copymemory(@mem_char[$b800],@memoria_temp[$b800],$800);
+  init_gfx(0,12,8,$200);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(3,0,8*8,0,$4000*8,2*$4000*8);
+  convert_gfx(0,0,@mem_char[0],@pc_spl_x[0],@pc_y[0],false,false);
+end;
+procedure make_chars(num:word;ngfx:byte);
+begin
+init_gfx(ngfx,8,8,num);
+gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
+convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+end;
+procedure make_sprites(num:word);
+begin
+  init_gfx(1,16,16,num);
+  gfx[1].trans[0]:=true;
+  gfx_set_desc_data(3,0,32*8,2*num*32*8,num*32*8,0);
+  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+end;
+
+begin
+iniciar_irem_m62:=false;
+fillchar(memoria_temp[0],$20000,0);
+iniciar_audio(false);
+screen_init(1,512,512);
+screen_init(2,512,512,false,true);
+screen_init(3,512,512,true);
+case main_vars.tipo_maquina of
+  42:begin
+        x:=256;
+        screen_mod_scroll(1,512,256+128,511,0,0,0);
+        screen_mod_scroll(3,512,256+128,511,0,0,0);
+     end;
+  72,73:begin
+          x:=384;
+          screen_mod_scroll(1,512,384+128,511,512,256+128,511);
+        end;
+  74,75:x:=384;
+end;
+iniciar_video(x,256);
+//Sound CPU
+snd_m6800:=cpu_m6800.create(3579545,$100,CPU_M6803);
+snd_m6800.change_ram_calls(snd_getbyte,snd_putbyte);
+snd_m6800.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
+snd_m6800.init_sound(irem_m62_play_sound);
+//sound chips
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
+ay8910_0:=ay8910_chip.create(3579545 div 4,1);
+ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
+ay8910_1:=ay8910_chip.create(3579545 div 4,1);
+marcade.dswa:=$ff;
+marcade.dswb:=$fd;
+case main_vars.tipo_maquina of
+  42:begin  //KungFu Master
+        //Main CPU
+        main_z80:=cpu_z80.create(3072000,$100);
+        main_z80.change_ram_calls(kungfum_getbyte,kungfum_putbyte);
+        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
+        //video
+        update_video_m62:=update_video_kungfum;
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@kungfum_rom[0],'kungfum.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@kungfum_sound[0],'kungfum.zip',0)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@kungfum_char[0],'kungfum.zip',0)) then exit;
+        make_chars(1024,0);
+        gfx[0].trans[0]:=true;
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@kungfum_sprites[0],'kungfum.zip',0)) then exit;
+        make_sprites(1024);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@kungfum_pal[0],'kungfum.zip',0)) then exit;
+        cargar_paleta;
+        copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
+        marcade.dswa_val:=@kungfum_dip_a;
+        marcade.dswb_val:=@kungfum_dip_b;
+     end;
+     72:begin  //Spelunker
+        //Main CPU
+        main_z80:=cpu_z80.create(4000000,$100);
+        main_z80.change_ram_calls(spl_getbyte,spl_putbyte);
+        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
+        //video
+        update_video_m62:=update_video_spelunker;
+        calc_nchar_sp:=calc_nchar_splunker;
+        sprites_sp:=1;
+        //cargar roms y ponerlas en sus bancos
+        if not(cargar_roms(@memoria_temp[0],@spl_rom[0],'spelunkr.zip',0)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@spl_sound[0],'spelunkr.zip',0)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@spl_char[0],'spelunkr.zip',0)) then exit;
+        make_chars_spl;
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@spl_sprites[0],'spelunkr.zip',0)) then exit;
+        make_sprites($400);
+        //convertir tiles
+        if not(cargar_roms(@memoria_temp[0],@spl_tiles[0],'spelunkr.zip',0)) then exit;
+        make_chars(4096,2);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@spl_pal[0],'spelunkr.zip',0)) then exit;
+        cargar_paleta;
+        copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
+     end;
+     73:begin  //Spelunker II
+        //Main CPU
+        main_z80:=cpu_z80.create(4000000,$100);
+        main_z80.change_ram_calls(spl2_getbyte,spl2_putbyte);
+        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
+        //video
+        update_video_m62:=update_video_spelunker;
+        calc_nchar_sp:=calc_nchar_splunker2;
+        sprites_sp:=2;
+        //cargar roms y ponerlas en sus bancos (2)
+        if not(cargar_roms(@memoria_temp[0],@spl2_rom[0],'spelunk2.zip',0)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        for f:=0 to 15 do copymemory(@mem_rom2[f,0],@memoria_temp[$8000+(f*$1000)],$1000);
+        for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$18000+(f*$1000)],$1000);
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@spl2_sound[0],'spelunk2.zip',0)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@spl2_char[0],'spelunk2.zip',0)) then exit;
+        make_chars_spl;
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@spl2_sprites[0],'spelunk2.zip',0)) then exit;
+        make_sprites($400);
+        //convertir tiles
+        if not(cargar_roms(@memoria_temp[0],@spl2_tiles[0],'spelunk2.zip',0)) then exit;
+        make_chars(4096,2);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@spl2_pal[0],'spelunk2.zip',0)) then exit;
+        cargar_paleta_spl2;
+        copymemory(@memoria_sprites[0],@memoria_temp[$700],$20);
+     end;
+     74:begin  //Lode Runner
+        //Main CPU
+        main_z80:=cpu_z80.create(4000000,$100);
+        main_z80.change_ram_calls(kungfum_getbyte,ldrun_putbyte);
+        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
+        //video
+        update_video_m62:=update_video_ldrun;
+        ldrun_color:=$0c;
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@ldrun_rom[0],'ldrun.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@ldrun_sound[0],'ldrun.zip',0)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@ldrun_char[0],'ldrun.zip',0)) then exit;
+        make_chars($400,0);
+        gfx[0].trans[0]:=true;
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@ldrun_sprites[0],'ldrun.zip',0)) then exit;
+        make_sprites($100);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@ldrun_pal[0],'ldrun.zip',0)) then exit;
+        cargar_paleta;
+        copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
+     end;
+     75:begin  //Lode Runner II
+        //Main CPU
+        main_z80:=cpu_z80.create(4000000,$100);
+        main_z80.change_ram_calls(ldrun2_getbyte,ldrun_putbyte);
+        main_z80.change_io_calls(ldrun2_inbyte,ldrun2_outbyte);
+        //video
+        update_video_m62:=update_video_ldrun;
+        ldrun_color:=$04;
+        //cargar roms y ponerlas en sus bancos
+        if not(cargar_roms(@memoria_temp[0],@ldrun2_rom[0],'ldrun2.zip',0)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        for f:=0 to 1 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@ldrun2_sound[0],'ldrun2.zip',0)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@ldrun2_char[0],'ldrun2.zip',0)) then exit;
+        make_chars($400,0);
+        gfx[0].trans[0]:=true;
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@ldrun2_sprites[0],'ldrun2.zip',0)) then exit;
+        make_sprites($200);
+        //poner la paleta
+        if not(cargar_roms(@memoria_temp[0],@ldrun2_pal[0],'ldrun2.zip',0)) then exit;
+        cargar_paleta;
+        copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
+     end;
+end;
+//final
+reset_irem_m62;
+iniciar_irem_m62:=true;
+end;
+
+procedure cargar_irem_m62;
+begin
+llamadas_maquina.iniciar:=iniciar_irem_m62;
+llamadas_maquina.bucle_general:=irem_m62_principal;
+llamadas_maquina.reset:=reset_irem_m62;
+llamadas_maquina.fps_max:=55;
+end;
+
 
 end.

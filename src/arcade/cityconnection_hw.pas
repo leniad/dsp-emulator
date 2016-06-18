@@ -5,22 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,ay_8910,ym_2203,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-function iniciar_citycon:boolean;
-procedure Cargar_citycon;
-procedure citycon_principal;
-procedure reset_citycon;
-//Main CPU
-function citycon_getbyte(direccion:word):byte;
-procedure citycon_putbyte(direccion:word;valor:byte);
-function citycon_porta:byte;
-function citycon_portb:byte;
-//SND CPU
-function scitycon_getbyte(direccion:word):byte;
-procedure scitycon_putbyte(direccion:word;valor:byte);
-procedure citycon_sound_update;
-//Save/load
-procedure citycon_qsave(nombre:string);
-procedure citycon_qload(nombre:string);
+procedure cargar_citycon;
 
 implementation
 const
@@ -51,100 +36,6 @@ var
  lines_color_look:array[0..$ff] of byte;
  memoria_fondo:array[0..$dfff] of byte;
  cambia_fondo:boolean;
-
-procedure Cargar_citycon;
-begin
-llamadas_maquina.iniciar:=iniciar_citycon;
-llamadas_maquina.bucle_general:=citycon_principal;
-llamadas_maquina.reset:=reset_citycon;
-llamadas_maquina.save_qsnap:=citycon_qsave;
-llamadas_maquina.load_qsnap:=citycon_qload;
-end;
-
-function iniciar_citycon:boolean;
-var
-  f:word;
-  memoria_temp:array[0..$17fff] of byte;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3 );
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_x:array[0..7] of dword=(0, 1, 2, 3, 128*16*8+0, 128*16*8+1, 128*16*8+2, 128*16*8+3);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-            8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_citycon:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,1024,256,true);
-screen_mod_scroll(1,1024,256,1023,0,0,0);
-screen_init(2,1024,256);
-screen_mod_scroll(2,1024,256,1023,0,0,0);
-screen_init(3,256,256,false,true);
-iniciar_video(240,224);
-//Main CPU
-main_m6809:=cpu_m6809.Create(2048000,$100);
-main_m6809.change_ram_calls(citycon_getbyte,citycon_putbyte);
-//Sound CPU
-snd_m6809:=cpu_m6809.Create(640000,$100);
-snd_m6809.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
-snd_m6809.init_sound(citycon_sound_update);
-//Sound Chip
-ym2203_0:=ym2203_chip.create(1250000,0.4,0.2);
-ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
-AY8910_0:=ay8910_chip.create(1250000,0.40);
-//cargar roms
-if not(cargar_roms(@memoria[0],@citycon_rom[0],'citycon.zip',0)) then exit;
-//Cargar Sound
-if not(cargar_roms(@mem_snd[0],@citycon_sonido,'citycon.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@citycon_char,'citycon.zip')) then exit;
-init_gfx(0,8,8,256);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(2,0,8*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//tiles
-if not(cargar_roms(@memoria_temp[0],@citycon_tiles[0],'citycon.zip',0)) then exit;
-init_gfx(1,8,8,3072);
-for f:=0 to $b do begin
-  gfx_set_desc_data(4,12,8*8,4+($1000*f*8),0+($1000*f*8),($c000+($1000*f))*8+4,($c000+($1000*f))*8+0);
-  convert_gfx(1,$100*8*8*f,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-end;
-if not(cargar_roms(@memoria_fondo[0],@citycon_fondo[0],'citycon.zip',0)) then exit;
-//sprites
-if not(cargar_roms(@memoria_temp[0],@citycon_sprites[0],'citycon.zip',0)) then exit;
-init_gfx(2,8,16,256);
-gfx[2].trans[0]:=true;
-for f:=0 to 1 do begin
-  gfx_set_desc_data(4,2,16*8,($1000*f*8)+4,($1000*f*8)+0,($2000+$1000*f)*8+4,($2000+$1000*f)*8+0);
-  convert_gfx(2,$80*16*8*f,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-end;
-//DIP
-marcade.dswa:=$0;
-marcade.dswb:=$80;
-marcade.dswa_val:=@citycon_dip_a;
-marcade.dswb_val:=@citycon_dip_b;
-//final
-reset_citycon;
-iniciar_citycon:=true;
-end;
-
-procedure reset_citycon;
-begin
- main_m6809.reset;
- snd_m6809.reset;
- YM2203_0.Reset;
- ay8910_0.reset;
- reset_audio;
- fillchar(lines_color_look[0],$100,0);
- marcade.in0:=$FF;
- marcade.in1:=$80;
- marcade.in2:=$FF;
- fondo:=0;
- soundlatch:=0;
- soundlatch2:=0;
- scroll_x:=0;
- cambia_fondo:=false;
-end;
 
 procedure cambiar_fondo;inline;
 var
@@ -426,6 +317,100 @@ freemem(data);
 close_qsnapshot;
 //END
 for f:=0 to 639 do cambiar_color(f*2);
+end;
+
+//Main
+procedure reset_citycon;
+begin
+ main_m6809.reset;
+ snd_m6809.reset;
+ YM2203_0.Reset;
+ ay8910_0.reset;
+ reset_audio;
+ fillchar(lines_color_look[0],$100,0);
+ marcade.in0:=$FF;
+ marcade.in1:=$80;
+ marcade.in2:=$FF;
+ fondo:=0;
+ soundlatch:=0;
+ soundlatch2:=0;
+ scroll_x:=0;
+ cambia_fondo:=false;
+end;
+
+function iniciar_citycon:boolean;
+var
+  f:word;
+  memoria_temp:array[0..$17fff] of byte;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3 );
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..7] of dword=(0, 1, 2, 3, 128*16*8+0, 128*16*8+1, 128*16*8+2, 128*16*8+3);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+            8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_citycon:=false;
+iniciar_audio(false);
+screen_init(1,1024,256,true);
+screen_mod_scroll(1,1024,256,1023,0,0,0);
+screen_init(2,1024,256);
+screen_mod_scroll(2,1024,256,1023,0,0,0);
+screen_init(3,256,256,false,true);
+iniciar_video(240,224);
+//Main CPU
+main_m6809:=cpu_m6809.Create(2048000,$100);
+main_m6809.change_ram_calls(citycon_getbyte,citycon_putbyte);
+//Sound CPU
+snd_m6809:=cpu_m6809.Create(640000,$100);
+snd_m6809.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
+snd_m6809.init_sound(citycon_sound_update);
+//Sound Chip
+ym2203_0:=ym2203_chip.create(1250000,0.4,0.2);
+ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
+AY8910_0:=ay8910_chip.create(1250000,0.40);
+//cargar roms
+if not(cargar_roms(@memoria[0],@citycon_rom[0],'citycon.zip',0)) then exit;
+//Cargar Sound
+if not(cargar_roms(@mem_snd[0],@citycon_sonido,'citycon.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@citycon_char,'citycon.zip')) then exit;
+init_gfx(0,8,8,256);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(2,0,8*8,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//tiles
+if not(cargar_roms(@memoria_temp[0],@citycon_tiles[0],'citycon.zip',0)) then exit;
+init_gfx(1,8,8,3072);
+for f:=0 to $b do begin
+  gfx_set_desc_data(4,12,8*8,4+($1000*f*8),0+($1000*f*8),($c000+($1000*f))*8+4,($c000+($1000*f))*8+0);
+  convert_gfx(1,$100*8*8*f,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+end;
+if not(cargar_roms(@memoria_fondo[0],@citycon_fondo[0],'citycon.zip',0)) then exit;
+//sprites
+if not(cargar_roms(@memoria_temp[0],@citycon_sprites[0],'citycon.zip',0)) then exit;
+init_gfx(2,8,16,256);
+gfx[2].trans[0]:=true;
+for f:=0 to 1 do begin
+  gfx_set_desc_data(4,2,16*8,($1000*f*8)+4,($1000*f*8)+0,($2000+$1000*f)*8+4,($2000+$1000*f)*8+0);
+  convert_gfx(2,$80*16*8*f,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+end;
+//DIP
+marcade.dswa:=$0;
+marcade.dswb:=$80;
+marcade.dswa_val:=@citycon_dip_a;
+marcade.dswb_val:=@citycon_dip_b;
+//final
+reset_citycon;
+iniciar_citycon:=true;
+end;
+
+procedure Cargar_citycon;
+begin
+llamadas_maquina.iniciar:=iniciar_citycon;
+llamadas_maquina.bucle_general:=citycon_principal;
+llamadas_maquina.reset:=reset_citycon;
+llamadas_maquina.save_qsnap:=citycon_qsave;
+llamadas_maquina.load_qsnap:=citycon_qload;
 end;
 
 end.

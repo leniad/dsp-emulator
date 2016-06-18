@@ -5,35 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,pal_engine,
      sound_engine;
 
-procedure Cargar_tnzs;
-function iniciar_tnzs:boolean;
-procedure reset_tnzs;
-//TNZS
-procedure tnzs_principal;
-//Main CPU
-function tnzs_getbyte(direccion:word):byte;
-procedure tnzs_putbyte(direccion:word;valor:byte);
-//Misc CPU
-function tnzs_misc_getbyte(direccion:word):byte;
-procedure tnzs_misc_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function tnzs_snd_getbyte(direccion:word):byte;
-procedure tnzs_snd_putbyte(direccion:word;valor:byte);
-function tnzs_snd_inbyte(puerto:word):byte;
-procedure tnzs_snd_outbyte(valor:byte;puerto:word);
-procedure snd_irq(irqstate:byte);
-//Insector X
-procedure insectorx_principal;
-//Main CPU
-function insectorx_getbyte(direccion:word):byte;
-procedure insectorx_putbyte(direccion:word;valor:byte);
-//Misc CPU
-function insectorx_misc_getbyte(direccion:word):byte;
-procedure insectorx_misc_putbyte(direccion:word;valor:byte);
-function insectorx_porta_r:byte;
-function insectorx_portb_r:byte;
-//Sound
-procedure tnzs_sound_update;
+procedure cargar_tnzs;
 
 implementation
 const
@@ -81,130 +53,6 @@ var
  sub_rom:array[0..3,0..$1fff] of byte;
  obj_control:array[0..3] of byte;
  flip_screen:boolean;
-
-procedure Cargar_tnzs;
-begin
-case main_vars.tipo_maquina of
-  129:begin
-        llamadas_maquina.fps_max:=59.15;
-        llamadas_maquina.bucle_general:=tnzs_principal;
-  end;
-  130:llamadas_maquina.bucle_general:=insectorx_principal;
-end;
-llamadas_maquina.iniciar:=iniciar_tnzs;
-llamadas_maquina.reset:=reset_tnzs;
-end;
-
-function iniciar_tnzs:boolean;
-var
-  f:word;
-  memoria_temp:array[0..$1ffff] of byte;
-  mem_temp:pbyte;
-const
-    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
-    pt2_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-      8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7);
-    pt2_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-      16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16);
-begin
-iniciar_tnzs:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,256,false,true);
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(6000000,$100);
-//Misc CPU
-sub_z80:=cpu_z80.create(6000000,$100);
-//Sound chip
-case main_vars.tipo_maquina of
-  129:begin   //TNZS
-        main_z80.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
-        //Misc CPU
-        sub_z80.change_ram_calls(tnzs_misc_getbyte,tnzs_misc_putbyte);
-        //Sound CPU
-        snd_z80:=cpu_z80.create(6000000,$100);
-        snd_z80.change_ram_calls(tnzs_snd_getbyte,tnzs_snd_putbyte);
-        snd_z80.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
-        snd_z80.init_sound(tnzs_sound_update);
-        //Sound Chips
-        ym2203_0:=ym2203_chip.create(3000000,2);
-        ym2203_0.change_irq_calls(snd_irq);
-        //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@tnzs_rom,'tnzs.zip',1)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
-        for f:=0 to 5 do copymemory(@main_rom[f+2,0],@memoria_temp[$8000+(f*$4000)],$4000);
-        //cargar ROMS misc
-        if not(cargar_roms(@memoria_temp[0],@tnzs_sub,'tnzs.zip',1)) then exit;
-        copymemory(@mem_misc[0],@memoria_temp[0],$8000);
-        for f:=0 to 3 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-        //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@tnzs_audio,'tnzs.zip',1)) then exit;
-        //convertir chars
-        getmem(mem_temp,$100000);
-        if not(cargar_roms(mem_temp,@tnzs_gfx[0],'tnzs.zip',0)) then exit;
-        init_gfx(0,16,16,$2000);
-        gfx[0].trans[0]:=true;
-        gfx_set_desc_data(4,0,32*8,$2000*32*8*3,$2000*32*8*2,$2000*32*8,0);
-        convert_gfx(0,0,mem_temp,@pt_x[0],@pt_y[0],false,false);
-        freemem(mem_temp);
-        marcade.dswa:=$fe;
-        marcade.dswb:=$ff;
-        marcade.dswa_val:=@tnzs_dip_a;
-        marcade.dswb_val:=@tnzs_dip_b;
-  end;
-  130:begin   //Insector X
-        //Main CPU
-        main_z80.change_ram_calls(insectorx_getbyte,insectorx_putbyte);
-        //Misc CPU
-        sub_z80.init_sound(tnzs_sound_update);
-        sub_z80.change_ram_calls(insectorx_misc_getbyte,insectorx_misc_putbyte);
-        //Sound Chips
-        ym2203_0:=ym2203_chip.create(3000000,2);
-        ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
-        //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@insectorx_rom,'insectx.zip',1)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
-        for f:=0 to 5 do copymemory(@main_rom[f+2,0],@memoria_temp[$8000+(f*$4000)],$4000);
-        //cargar ROMS misc
-        if not(cargar_roms(@memoria_temp[0],@insectorx_sub,'insectx.zip',1)) then exit;
-        copymemory(@mem_misc[0],@memoria_temp[0],$8000);
-        for f:=0 to 3 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-        //convertir chars
-        getmem(mem_temp,$100000);
-        if not(cargar_roms(mem_temp,@insectorx_gfx[0],'insectx.zip',0)) then exit;
-        init_gfx(0,16,16,$2000);
-        gfx[0].trans[0]:=true;
-        gfx_set_desc_data(4,0,64*8,8,0,$2000*64*8+8,$2000*64*8+0);
-        convert_gfx(0,0,mem_temp,@pt2_x[0],@pt2_y[0],false,false);
-        freemem(mem_temp);
-        marcade.dswa:=$fe;
-        marcade.dswb:=$ff;
-        marcade.dswa_val:=@insectorx_dip_a;
-        marcade.dswb_val:=@insectorx_dip_b;
-  end;
-end;
-//final
-reset_tnzs;
-iniciar_tnzs:=true;
-end;
-
-procedure reset_tnzs;
-begin
- main_z80.reset;
- sub_z80.reset;
- if main_vars.tipo_maquina=129 then snd_z80.reset;
- YM2203_0.reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
- main_bank:=0;
- misc_bank:=0;
-end;
 
 procedure update_background;inline;
 var
@@ -344,10 +192,10 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=239 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_tnzs;
     end;
-    if f=247 then sub_z80.pedir_irq:=HOLD_LINE;
+    if f=247 then sub_z80.change_irq(HOLD_LINE);
   end;
 	if (not(obj_control[1]) and $20)<>0 then begin
 		if (obj_control[1] and $40)<>0 then begin
@@ -385,8 +233,8 @@ case direccion of
                  end;
    $f400:bg_flag:=valor;
    $f600:begin
-          if (valor and $10)<>0 then sub_z80.pedir_reset:=CLEAR_LINE
-            else sub_z80.pedir_reset:=ASSERT_LINE;
+          if (valor and $10)<>0 then sub_z80.change_reset(CLEAR_LINE)
+            else sub_z80.change_reset(ASSERT_LINE);
 	        main_bank:=valor and $07;
         end;
    end;
@@ -426,7 +274,7 @@ case direccion of
   $a000:misc_bank:=valor and $3;
   $b004:begin
           sound_latch:=valor;
-          snd_z80.pedir_irq:=HOLD_LINE;
+          snd_z80.change_irq(HOLD_LINE);
         end;
   $d000..$dfff:mem_misc[direccion]:=valor;
   $e000..$efff:memoria[direccion]:=valor;
@@ -517,8 +365,8 @@ while EmuStatus=EsRuning do begin
     sub_z80.run(frame_misc);
     frame_misc:=frame_misc+sub_z80.tframes-sub_z80.contador;
     if f=239 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
-      sub_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
+      sub_z80.change_irq(HOLD_LINE);
       update_video_tnzs;
     end;
   end;
@@ -559,8 +407,8 @@ case direccion of
                  end;
    $f400:bg_flag:=valor;
    $f600:begin
-          if (valor and $10)<>0 then sub_z80.pedir_reset:=CLEAR_LINE
-            else sub_z80.pedir_reset:=ASSERT_LINE;
+          if (valor and $10)<>0 then sub_z80.change_reset(CLEAR_LINE)
+            else sub_z80.change_reset(ASSERT_LINE);
 	        main_bank:=valor and $07;
         end;
    $f800..$fbff:if buffer_paleta[direccion and $3ff]<>valor then begin
@@ -607,10 +455,133 @@ begin
   insectorx_portb_r:=marcade.dswb;
 end;
 
-//Sound
 procedure tnzs_sound_update;
 begin
   ym2203_0.Update;
+end;
+
+//Main
+procedure reset_tnzs;
+begin
+ main_z80.reset;
+ sub_z80.reset;
+ if main_vars.tipo_maquina=129 then snd_z80.reset;
+ YM2203_0.reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+ main_bank:=0;
+ misc_bank:=0;
+end;
+
+function iniciar_tnzs:boolean;
+var
+  f:word;
+  memoria_temp:array[0..$1ffff] of byte;
+  mem_temp:pbyte;
+const
+    pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
+    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
+    pt2_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+      8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7);
+    pt2_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+      16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16);
+begin
+iniciar_tnzs:=false;
+iniciar_audio(false);
+screen_init(1,512,256,false,true);
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(6000000,$100);
+//Misc CPU
+sub_z80:=cpu_z80.create(6000000,$100);
+//Sound chip
+case main_vars.tipo_maquina of
+  129:begin   //TNZS
+        main_z80.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
+        //Misc CPU
+        sub_z80.change_ram_calls(tnzs_misc_getbyte,tnzs_misc_putbyte);
+        //Sound CPU
+        snd_z80:=cpu_z80.create(6000000,$100);
+        snd_z80.change_ram_calls(tnzs_snd_getbyte,tnzs_snd_putbyte);
+        snd_z80.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
+        snd_z80.init_sound(tnzs_sound_update);
+        //Sound Chips
+        ym2203_0:=ym2203_chip.create(3000000,2);
+        ym2203_0.change_irq_calls(snd_irq);
+        //cargar roms
+        if not(cargar_roms(@memoria_temp[0],@tnzs_rom,'tnzs.zip',1)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        for f:=0 to 5 do copymemory(@main_rom[f+2,0],@memoria_temp[$8000+(f*$4000)],$4000);
+        //cargar ROMS misc
+        if not(cargar_roms(@memoria_temp[0],@tnzs_sub,'tnzs.zip',1)) then exit;
+        copymemory(@mem_misc[0],@memoria_temp[0],$8000);
+        for f:=0 to 3 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+        //cargar ROMS sonido
+        if not(cargar_roms(@mem_snd[0],@tnzs_audio,'tnzs.zip',1)) then exit;
+        //convertir chars
+        getmem(mem_temp,$100000);
+        if not(cargar_roms(mem_temp,@tnzs_gfx[0],'tnzs.zip',0)) then exit;
+        init_gfx(0,16,16,$2000);
+        gfx[0].trans[0]:=true;
+        gfx_set_desc_data(4,0,32*8,$2000*32*8*3,$2000*32*8*2,$2000*32*8,0);
+        convert_gfx(0,0,mem_temp,@pt_x[0],@pt_y[0],false,false);
+        freemem(mem_temp);
+        marcade.dswa:=$fe;
+        marcade.dswb:=$ff;
+        marcade.dswa_val:=@tnzs_dip_a;
+        marcade.dswb_val:=@tnzs_dip_b;
+  end;
+  130:begin   //Insector X
+        //Main CPU
+        main_z80.change_ram_calls(insectorx_getbyte,insectorx_putbyte);
+        //Misc CPU
+        sub_z80.init_sound(tnzs_sound_update);
+        sub_z80.change_ram_calls(insectorx_misc_getbyte,insectorx_misc_putbyte);
+        //Sound Chips
+        ym2203_0:=ym2203_chip.create(3000000,2);
+        ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
+        //cargar roms
+        if not(cargar_roms(@memoria_temp[0],@insectorx_rom,'insectx.zip',1)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        for f:=0 to 5 do copymemory(@main_rom[f+2,0],@memoria_temp[$8000+(f*$4000)],$4000);
+        //cargar ROMS misc
+        if not(cargar_roms(@memoria_temp[0],@insectorx_sub,'insectx.zip',1)) then exit;
+        copymemory(@mem_misc[0],@memoria_temp[0],$8000);
+        for f:=0 to 3 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+        //convertir chars
+        getmem(mem_temp,$100000);
+        if not(cargar_roms(mem_temp,@insectorx_gfx[0],'insectx.zip',0)) then exit;
+        init_gfx(0,16,16,$2000);
+        gfx[0].trans[0]:=true;
+        gfx_set_desc_data(4,0,64*8,8,0,$2000*64*8+8,$2000*64*8+0);
+        convert_gfx(0,0,mem_temp,@pt2_x[0],@pt2_y[0],false,false);
+        freemem(mem_temp);
+        marcade.dswa:=$fe;
+        marcade.dswb:=$ff;
+        marcade.dswa_val:=@insectorx_dip_a;
+        marcade.dswb_val:=@insectorx_dip_b;
+  end;
+end;
+//final
+reset_tnzs;
+iniciar_tnzs:=true;
+end;
+
+procedure Cargar_tnzs;
+begin
+case main_vars.tipo_maquina of
+  129:begin
+        llamadas_maquina.fps_max:=59.15;
+        llamadas_maquina.bucle_general:=tnzs_principal;
+  end;
+  130:llamadas_maquina.bucle_general:=insectorx_principal;
+end;
+llamadas_maquina.iniciar:=iniciar_tnzs;
+llamadas_maquina.reset:=reset_tnzs;
 end;
 
 end.

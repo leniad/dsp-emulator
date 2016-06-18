@@ -2,7 +2,7 @@
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,sysutils,timer_engine,vars_hide;
+     main_engine,dialogs,sysutils,timer_engine,vars_hide,cpu_misc;
 
 type
         band_m6809=record
@@ -23,14 +23,11 @@ type
           public
             procedure reset;
             procedure run(maximo:single);
-            procedure change_irq(estado:byte);
             procedure change_firq(estado:byte);
-            procedure change_nmi(estado:byte);
             function save_snapshot(data:pbyte):word;
             procedure load_snapshot(data:pbyte);
           protected
             r:preg_m6809;
-            pedir_firq,pedir_irq:byte;
             //Llamadas a RAM
             procedure putword(direccion:word;valor:word);
             function getword(direccion:word):word;
@@ -46,10 +43,7 @@ type
             //Pila
             function dame_pila:byte;
             procedure pon_pila(valor:byte);
-            //Opcodes
-            procedure neg(valor:pbyte);
           private
-            pedir_nmi,nmi_state:byte;
             //Llamadas IRQ
             function call_nmi:byte;
             function call_irq:byte;
@@ -142,18 +136,6 @@ const
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,4,  //e0
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,3); //f0
 
-procedure cpu_m6809.neg(valor:pbyte);
-var
-  tempw:word;
-begin
-tempw:=-valor^;
-r.cc.n:=(tempw and $80)<>0;
-r.cc.z:=(tempw and $ff)=0;
-r.cc.c:=(tempw and $100)<>0;
-r.cc.v:=((0 xor valor^ xor tempw xor (tempw shr 1)) and $80)<>0;
-valor^:=tempw;
-end;
-
 constructor cpu_m6809.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(reg_m6809));
@@ -213,16 +195,14 @@ function cpu_m6809.dame_pila:byte;
 var
   temp:byte;
 begin
-  temp:=0;
-  if r.cc.e then temp:=temp or $80;
-  if r.cc.f then temp:=temp or $40;
-  if r.cc.h then temp:=temp or $20;
-  if r.cc.i then temp:=temp or $10;
-  if r.cc.n then temp:=temp or 8;
-  if r.cc.z then temp:=temp or 4;
-  if r.cc.v then temp:=temp or 2;
-  if r.cc.c then temp:=temp or 1;
-  dame_pila:=temp;
+  temp:=byte(r.cc.e) shl 7;
+  temp:=temp or (byte(r.cc.f) shl 6);
+  temp:=temp or (byte(r.cc.h) shl 5);
+  temp:=temp or (byte(r.cc.i) shl 4);
+  temp:=temp or (byte(r.cc.n) shl 3);
+  temp:=temp or (byte(r.cc.z) shl 2);
+  temp:=temp or (byte(r.cc.v) shl 1);
+  dame_pila:=temp or byte(r.cc.c);
 end;
 
 procedure cpu_m6809.pon_pila(valor:byte);
@@ -244,27 +224,11 @@ r.pc:=self.getword($FFFE);
 r.dp:=0;
 self.contador:=0;
 self.pon_pila($50);
-self.pedir_nmi:=CLEAR_LINE;
-self.pedir_irq:=CLEAR_LINE;
-self.pedir_firq:=CLEAR_LINE;
-self.nmi_state:=CLEAR_LINE;
+self.change_nmi(CLEAR_LINE);
+self.change_irq(CLEAR_LINE);
+self.change_firq(CLEAR_LINE);
 r.cwai:=false;
 r.pila_init:=false;
-end;
-
-procedure cpu_m6809.change_nmi(estado:byte);
-begin
-if estado=CLEAR_LINE then begin
-  self.pedir_nmi:=CLEAR_LINE;
-  self.nmi_state:=CLEAR_LINE;
-end else begin
-  self.pedir_nmi:=estado;
-end;
-end;
-
-procedure cpu_m6809.change_irq(estado:byte);
-begin
-  self.pedir_irq:=estado;
 end;
 
 procedure cpu_m6809.change_firq(estado:byte);
@@ -581,7 +545,7 @@ case (valor and 15) of
 end;
 end;
 
-//Functions
+//Opcodes
 {$I m6809.inc}
 
 procedure cpu_m6809.run(maximo:single);
@@ -654,7 +618,7 @@ end;
 case instruccion of
       $0,$60,$70:begin  //neg 4T
                     temp:=self.getbyte(posicion);
-                    self.neg(@temp);
+                    m680x_neg(@temp,@r.cc);
                     self.putbyte(posicion,temp);
                  end;
       $2,$3,$63,$73:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T ($2 es ilegal!!)
@@ -663,8 +627,16 @@ case instruccion of
       $7,$67,$77:self.putbyte(posicion,m680x_asr(self.getbyte(posicion),@r.cc)); //asr 4T
       $8,$68,$78:self.putbyte(posicion,m680x_asl(self.getbyte(posicion),@r.cc)); //asl 4T
       $9,$69,$79:self.putbyte(posicion,m680x_rol(self.getbyte(posicion),@r.cc)); //rol 4T
-      $a,$6a,$7a:self.putbyte(posicion,m680x_dec(self.getbyte(posicion),@r.cc)); //dec 4T
-      $c,$6c,$7c:self.putbyte(posicion,m680x_inc(self.getbyte(posicion),@r.cc)); //inc 4T
+      $a,$6a,$7a:begin //dec 4T
+                    temp:=self.getbyte(posicion);
+                    m680x_dec(@temp,@r.cc);
+                    self.putbyte(posicion,temp);
+                 end;
+      $c,$6c,$7c:begin //inc 4T
+                    temp:=self.getbyte(posicion);
+                    m680x_inc(@temp,@r.cc);
+                    self.putbyte(posicion,temp);
+                 end;
       $d,$6d,$7d:m680x_tst(self.getbyte(posicion),@r.cc); //tst 3T
       $e,$6e,$7e:r.pc:=posicion;  //jmp 1T
       $f,$6f,$7f:begin //clr 4T
@@ -1023,15 +995,15 @@ case instruccion of
           r.cc.c:=(r.d.w and $80)<>0;
           r.cc.z:=(r.d.w=0);
       end;
-      $40:self.neg(@r.d.a); //nega 2T
+      $40:m680x_neg(@r.d.a,@r.cc); //nega 2T
       $43:r.d.a:=m680x_com(r.d.a,@r.cc);  //coma 2T
       $44:r.d.a:=m680x_lsr(r.d.a,@r.cc); //lsra 2T
       $46:r.d.a:=m680x_ror(r.d.a,@r.cc); //rora 2T
       $47:r.d.a:=m680x_asr(r.d.a,@r.cc); //asra 2T
       $48:r.d.a:=m680x_asl(r.d.a,@r.cc); //asla 2T
       $49:r.d.a:=m680x_rol(r.d.a,@r.cc);  //rola 2T
-      $4a:r.d.a:=m680x_dec(r.d.a,@r.cc); //deca 2T
-      $4c:r.d.a:=m680x_inc(r.d.a,@r.cc); //inca 2T
+      $4a:m680x_dec(@r.d.a,@r.cc); //deca 2T
+      $4c:m680x_inc(@r.d.a,@r.cc); //inca 2T
       $4d:m680x_tst(r.d.a,@r.cc); //tsta 2T
       $4f:begin //clra 2T
             r.d.a:=0;
@@ -1040,15 +1012,15 @@ case instruccion of
             r.cc.v:=false;
             r.cc.c:=false;
           end;
-      $50:self.neg(@r.d.b);  //negb 2T
+      $50:m680x_neg(@r.d.b,@r.cc);  //negb 2T
       $53:r.d.b:=m680x_com(r.d.b,@r.cc);  //comb 2T
       $54:r.d.b:=m680x_lsr(r.d.b,@r.cc);   //lsrb 2T
       $56:r.d.b:=m680x_ror(r.d.b,@r.cc); //rorb 2T
       $57:r.d.b:=m680x_asr(r.d.b,@r.cc);  //asrb 2T
       $58:r.d.b:=m680x_asl(r.d.b,@r.cc);  //aslb 2T
       $59:r.d.b:=m680x_rol(r.d.b,@r.cc);  //rolb 2T
-      $5a:r.d.b:=m680x_dec(r.d.b,@r.cc);  //decb 2T
-      $5c:r.d.b:=m680x_inc(r.d.b,@r.cc);  //incb 2T
+      $5a:m680x_dec(@r.d.b,@r.cc);  //decb 2T
+      $5c:m680x_inc(@r.d.b,@r.cc);  //incb 2T
       $5d:m680x_tst(r.d.b,@r.cc); //tstb 2T
       $5f:begin //clrb 2T
             r.d.b:=0;

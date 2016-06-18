@@ -5,16 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,file_engine,pokey;
 
-procedure Cargar_foodf;
-procedure foodf_principal;
-function iniciar_foodf:boolean;
-procedure reset_foodf;
-procedure cerrar_foodf;
-//Main CPU
-function foodf_getword(direccion:dword):word;
-procedure foodf_putword(direccion:dword;valor:word);
-procedure foodf_sound_update;
-function foodf_pot_r(pot:byte):byte;
+procedure cargar_foodf;
 
 implementation
 const
@@ -43,87 +34,6 @@ var
  rweights,gweights,bweights:array[0..2] of single;
  analog_data:array[0..7] of byte;
  analog_select:byte;
-
-procedure Cargar_foodf;
-begin
-llamadas_maquina.iniciar:=iniciar_foodf;
-llamadas_maquina.bucle_general:=foodf_principal;
-llamadas_maquina.cerrar:=cerrar_foodf;
-llamadas_maquina.reset:=reset_foodf;
-end;
-
-function iniciar_foodf:boolean;
-var
-  memoria_temp:array[0..$3ffff] of byte;
-  longitud:integer;
-const
-  pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
-  ps_x:array[0..15] of dword=(8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7, 0, 1, 2, 3, 4, 5, 6, 7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-  resistances:array[0..2] of integer=(1000,470,220);
-begin
-iniciar_foodf:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
-screen_init(2,256,256,false,true);
-iniciar_video(256,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(trunc(12096000/2),259);
-main_m68000.change_ram16_calls(foodf_getword,foodf_putword);
-main_m68000.init_sound(foodf_sound_update);
-//Init Analog
-init_analog(main_m68000.numero_cpu,main_m68000.clock,100,10,$7f,$ff,0,true);
-//Sound Chips
-pokey_0:=pokey_chip.create(0,trunc(12096000/2/10));
-pokey_0.change_pot(foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r);
-pokey_1:=pokey_chip.create(1,trunc(12096000/2/10));
-pokey_2:=pokey_chip.create(2,trunc(12096000/2/10));
-//cargar roms
-if not(cargar_roms16w(@rom[0],@foodf_rom[0],'foodf.zip',0)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@foodf_char,'foodf.zip')) then exit;
-init_gfx(0,8,8,$200);
-gfx_set_desc_data(2,0,8*16,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@foodf_sprites[0],'foodf.zip',0)) then exit;
-init_gfx(1,16,16,$100);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(2,0,8*32,$100*8*32,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//paleta
-compute_resistor_weights(0,	255, -1.0,
-			3,@resistances[0],@rweights[0],0,0,
-			3,@resistances[0],@gweights[0],0,0,
-			2,@resistances[1],@bweights[0],0,0);
-//DIP
-marcade.dswa:=$0;
-marcade.dswa_val:=@foodf_dip;
-//NVRAM
-if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Directory.Arcade_nvram+'foodf.nv',@nvram[0],longitud);
-//final
-reset_foodf;
-iniciar_foodf:=true;
-end;
-
-procedure cerrar_foodf;
-begin
-write_file(Directory.Arcade_nvram+'foodf.nv',@nvram[0],$200);
-end;
-
-procedure reset_foodf;
-begin
- main_m68000.reset;
- pokey_0.reset;
- pokey_1.reset;
- pokey_2.reset;
- reset_audio;
- marcade.in0:=$FF;
- analog_select:=0;
-end;
 
 procedure draw_sprites(prio:byte);
 var
@@ -291,6 +201,88 @@ begin
 pokey_0.update;
 pokey_1.update;
 pokey_2.update;
+end;
+
+//Main
+procedure reset_foodf;
+begin
+ main_m68000.reset;
+ pokey_0.reset;
+ pokey_1.reset;
+ pokey_2.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ analog_select:=0;
+end;
+
+function iniciar_foodf:boolean;
+var
+  memoria_temp:array[0..$3ffff] of byte;
+  longitud:integer;
+const
+  pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
+  ps_x:array[0..15] of dword=(8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7, 0, 1, 2, 3, 4, 5, 6, 7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+  resistances:array[0..2] of integer=(1000,470,220);
+begin
+iniciar_foodf:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,256,256,true);
+screen_mod_scroll(1,256,256,255,256,256,255);
+screen_init(2,256,256,false,true);
+iniciar_video(256,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(trunc(12096000/2),259);
+main_m68000.change_ram16_calls(foodf_getword,foodf_putword);
+main_m68000.init_sound(foodf_sound_update);
+//Init Analog
+init_analog(main_m68000.numero_cpu,main_m68000.clock,100,10,$7f,$ff,0,true);
+//Sound Chips
+pokey_0:=pokey_chip.create(0,trunc(12096000/2/10));
+pokey_0.change_pot(foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r);
+pokey_1:=pokey_chip.create(1,trunc(12096000/2/10));
+pokey_2:=pokey_chip.create(2,trunc(12096000/2/10));
+//cargar roms
+if not(cargar_roms16w(@rom[0],@foodf_rom[0],'foodf.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@foodf_char,'foodf.zip')) then exit;
+init_gfx(0,8,8,$200);
+gfx_set_desc_data(2,0,8*16,0,4);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@foodf_sprites[0],'foodf.zip',0)) then exit;
+init_gfx(1,16,16,$100);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(2,0,8*32,$100*8*32,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//paleta
+compute_resistor_weights(0,	255, -1.0,
+			3,@resistances[0],@rweights[0],0,0,
+			3,@resistances[0],@gweights[0],0,0,
+			2,@resistances[1],@bweights[0],0,0);
+//DIP
+marcade.dswa:=$0;
+marcade.dswa_val:=@foodf_dip;
+//NVRAM
+if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Directory.Arcade_nvram+'foodf.nv',@nvram[0],longitud);
+//final
+reset_foodf;
+iniciar_foodf:=true;
+end;
+
+procedure cerrar_foodf;
+begin
+write_file(Directory.Arcade_nvram+'foodf.nv',@nvram[0],$200);
+end;
+
+procedure Cargar_foodf;
+begin
+llamadas_maquina.iniciar:=iniciar_foodf;
+llamadas_maquina.bucle_general:=foodf_principal;
+llamadas_maquina.cerrar:=cerrar_foodf;
+llamadas_maquina.reset:=reset_foodf;
 end;
 
 end.

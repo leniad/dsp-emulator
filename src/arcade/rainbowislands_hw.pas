@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,
      taitosnd,rom_engine,pal_engine,sound_engine,rainbow_cchip;
 
-procedure Cargar_rainbow;
-procedure rainbow_principal;
-function iniciar_rainbow:boolean;
-procedure reset_rainbow;
-//Main CPU
-function rainbow_getword(direccion:dword):word;
-procedure rainbow_putword(direccion:dword;valor:word);
-//Sound CPU
-function rainbow_snd_getbyte(direccion:word):byte;
-procedure rainbow_snd_putbyte(direccion:word;valor:byte);
-procedure sound_bank_rom(valor:byte);
-procedure sound_instruccion;
-procedure ym2151_snd_irq(irqstate:byte);
+procedure cargar_rainbow;
 
 implementation
 const
@@ -53,131 +41,6 @@ var
  ram1,ram3:array[0..$1fff] of word;
  ram2:array [0..$7fff] of word;
  spritebank,sound_bank:byte;
-
-procedure Cargar_rainbow;
-begin
-llamadas_maquina.iniciar:=iniciar_rainbow;
-llamadas_maquina.bucle_general:=rainbow_principal;
-llamadas_maquina.reset:=reset_rainbow;
-end;
-
-function iniciar_rainbow:boolean;
-const
-  pc_x:array[0..7] of dword=(8, 12, 0, 4, 24, 28, 16, 20);
-  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-  ps_x:array[0..15] of dword=(8, 12, 0, 4, 24, 28, 16, 20, 40, 44, 32, 36, 56, 60, 48, 52);
-  ps_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
-			8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
-var
-  memoria_temp,ptemp:pbyte;
-procedure convert_chars;
-begin
-  init_gfx(0,8,8,$4000);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-end;
-
-procedure convert_sprites;
-begin
-  init_gfx(1,16,16,$1400);
-  gfx[1].trans[0]:=true;
-  gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-end;
-
-begin
-iniciar_rainbow:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,256,511);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
-screen_init(3,512,512,false,true);
-iniciar_video(320,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(rainbow_getword,rainbow_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,256);
-snd_z80.change_ram_calls(rainbow_snd_getbyte,rainbow_snd_putbyte);
-snd_z80.init_sound(sound_instruccion);
-//Sound Chips
-ym2151_0:=ym2151_chip.create(4000000);
-ym2151_0.change_port_func(sound_bank_rom);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-//cargar roms
-getmem(memoria_temp,$100000);
-case main_vars.tipo_maquina of
-  179:begin
-         //MCU
-         rbisland_init_cchip(main_m68000.numero_cpu,0);
-         if not(cargar_roms16w(@rom[0],@rainbow_rom[0],'rbisland.zip',0)) then exit;
-         //cargar sonido+ponerlas en su banco
-         ptemp:=memoria_temp;
-         if not(cargar_roms(memoria_temp,@rainbow_sound,'rbisland.zip',1)) then exit;
-         copymemory(@mem_snd[0],memoria_temp,$4000);
-         copymemory(@bank_sound[0,0],ptemp,$4000);inc(ptemp,$4000);
-         copymemory(@bank_sound[1,0],ptemp,$4000);inc(ptemp,$4000);
-         copymemory(@bank_sound[2,0],ptemp,$4000);inc(ptemp,$4000);
-         copymemory(@bank_sound[3,0],ptemp,$4000);
-         //convertir chars
-         if not(cargar_roms(memoria_temp,@rainbow_char,'rbisland.zip',1)) then exit;
-         convert_chars;
-         //convertir sprites
-         if not(cargar_roms(memoria_temp,@rainbow_sprites1,'rbisland.zip',1)) then exit;
-         if not(cargar_roms16b(memoria_temp,@rainbow_sprites2[0],'rbisland.zip',0)) then exit;
-         convert_sprites;
-      end;
-  180:begin
-         //MCU
-         rbisland_init_cchip(main_m68000.numero_cpu,1);
-         if not(cargar_roms16w(@rom[0],@rainbowe_rom[0],'rbislande.zip',0)) then exit;
-         //cargar sonido+ponerlas en su banco
-         ptemp:=memoria_temp;
-         if not(cargar_roms(memoria_temp,@rainbow_sound,'rbislande.zip',1)) then exit;
-         copymemory(@mem_snd[0],memoria_temp,$4000);
-         copymemory(@bank_sound[0,0],ptemp,$4000);inc(ptemp,$4000);
-         copymemory(@bank_sound[1,0],ptemp,$4000);inc(ptemp,$4000);
-         copymemory(@bank_sound[2,0],ptemp,$4000);inc(ptemp,$4000);
-         copymemory(@bank_sound[3,0],ptemp,$4000);
-         //convertir chars
-         if not(cargar_roms(memoria_temp,@rainbow_char,'rbislande.zip',1)) then exit;
-         convert_chars;
-         //convertir sprites
-         if not(cargar_roms(memoria_temp,@rainbow_sprites1,'rbislande.zip',1)) then exit;
-         if not(cargar_roms16b(memoria_temp,@rainbow_sprites2[0],'rbislande.zip',0)) then exit;
-         convert_sprites;
-      end;
-end;
-//DIP
-marcade.dswa:=$fe;
-marcade.dswa_val:=@rainbow_dip1;
-marcade.dswb:=$bf;
-marcade.dswb_val:=@rainbow_dip2;
-//final
-freemem(memoria_temp);
-reset_rainbow;
-iniciar_rainbow:=true;
-end;
-
-procedure reset_rainbow;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym2151_0.reset;
- taitosound_reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$fc;
- marcade.in2:=$ff;
- sound_bank:=0;
- scroll_x1:=0;
- scroll_y1:=0;
- scroll_x2:=0;
- scroll_y2:=0;
-end;
 
 procedure update_video_rainbow;inline;
 var
@@ -367,7 +230,132 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
+end;
+
+//Main
+procedure reset_rainbow;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ taitosound_reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$fc;
+ marcade.in2:=$ff;
+ sound_bank:=0;
+ scroll_x1:=0;
+ scroll_y1:=0;
+ scroll_x2:=0;
+ scroll_y2:=0;
+end;
+
+function iniciar_rainbow:boolean;
+const
+  pc_x:array[0..7] of dword=(8, 12, 0, 4, 24, 28, 16, 20);
+  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+  ps_x:array[0..15] of dword=(8, 12, 0, 4, 24, 28, 16, 20, 40, 44, 32, 36, 56, 60, 48, 52);
+  ps_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+			8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
+var
+  memoria_temp,ptemp:pbyte;
+procedure convert_chars;
+begin
+  init_gfx(0,8,8,$4000);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(4,0,32*8,0,1,2,3);
+  convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+end;
+
+procedure convert_sprites;
+begin
+  init_gfx(1,16,16,$1400);
+  gfx[1].trans[0]:=true;
+  gfx_set_desc_data(4,0,128*8,0,1,2,3);
+  convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+end;
+
+begin
+iniciar_rainbow:=false;
+iniciar_audio(false);
+screen_init(1,512,512);
+screen_mod_scroll(1,512,512,511,512,256,511);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,512,511,512,256,511);
+screen_init(3,512,512,false,true);
+iniciar_video(320,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(8000000,256);
+main_m68000.change_ram16_calls(rainbow_getword,rainbow_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,256);
+snd_z80.change_ram_calls(rainbow_snd_getbyte,rainbow_snd_putbyte);
+snd_z80.init_sound(sound_instruccion);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_port_func(sound_bank_rom);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+//cargar roms
+getmem(memoria_temp,$100000);
+case main_vars.tipo_maquina of
+  179:begin
+         //MCU
+         rbisland_init_cchip(main_m68000.numero_cpu,0);
+         if not(cargar_roms16w(@rom[0],@rainbow_rom[0],'rbisland.zip',0)) then exit;
+         //cargar sonido+ponerlas en su banco
+         ptemp:=memoria_temp;
+         if not(cargar_roms(memoria_temp,@rainbow_sound,'rbisland.zip',1)) then exit;
+         copymemory(@mem_snd[0],memoria_temp,$4000);
+         copymemory(@bank_sound[0,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[1,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[2,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[3,0],ptemp,$4000);
+         //convertir chars
+         if not(cargar_roms(memoria_temp,@rainbow_char,'rbisland.zip',1)) then exit;
+         convert_chars;
+         //convertir sprites
+         if not(cargar_roms(memoria_temp,@rainbow_sprites1,'rbisland.zip',1)) then exit;
+         if not(cargar_roms16b(memoria_temp,@rainbow_sprites2[0],'rbisland.zip',0)) then exit;
+         convert_sprites;
+      end;
+  180:begin
+         //MCU
+         rbisland_init_cchip(main_m68000.numero_cpu,1);
+         if not(cargar_roms16w(@rom[0],@rainbowe_rom[0],'rbislande.zip',0)) then exit;
+         //cargar sonido+ponerlas en su banco
+         ptemp:=memoria_temp;
+         if not(cargar_roms(memoria_temp,@rainbow_sound,'rbislande.zip',1)) then exit;
+         copymemory(@mem_snd[0],memoria_temp,$4000);
+         copymemory(@bank_sound[0,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[1,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[2,0],ptemp,$4000);inc(ptemp,$4000);
+         copymemory(@bank_sound[3,0],ptemp,$4000);
+         //convertir chars
+         if not(cargar_roms(memoria_temp,@rainbow_char,'rbislande.zip',1)) then exit;
+         convert_chars;
+         //convertir sprites
+         if not(cargar_roms(memoria_temp,@rainbow_sprites1,'rbislande.zip',1)) then exit;
+         if not(cargar_roms16b(memoria_temp,@rainbow_sprites2[0],'rbislande.zip',0)) then exit;
+         convert_sprites;
+      end;
+end;
+//DIP
+marcade.dswa:=$fe;
+marcade.dswa_val:=@rainbow_dip1;
+marcade.dswb:=$bf;
+marcade.dswb_val:=@rainbow_dip2;
+//final
+freemem(memoria_temp);
+reset_rainbow;
+iniciar_rainbow:=true;
+end;
+
+procedure Cargar_rainbow;
+begin
+llamadas_maquina.iniciar:=iniciar_rainbow;
+llamadas_maquina.bucle_general:=rainbow_principal;
+llamadas_maquina.reset:=reset_rainbow;
 end;
 
 end.

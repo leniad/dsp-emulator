@@ -5,26 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,timer_engine,ym_3812,ay_8910,
      rom_engine,misc_functions,pal_engine,sound_engine;
 
-procedure Cargar_suna_hw;
-function iniciar_suna_hw:boolean;
-procedure reset_suna_hw;
-//Hard Head
-procedure hardhead_principal;
-function hardhead_getbyte(direccion:word):byte;
-procedure hardhead_putbyte(direccion:word;valor:byte);
-function hardhead_snd_getbyte(direccion:word):byte;
-procedure hardhead_snd_putbyte(direccion:word;valor:byte);
-procedure snd_despues_instruccion;
-procedure hardhead_portaw(valor:byte);
-procedure hardhead_portbw(valor:byte);
-procedure hardhead_snd;
-procedure dac_sound;
-//Hard Head 2
-procedure hardhead2_principal;
-function hardhead2_getbyte(direccion:word):byte;
-procedure hardhead2_putbyte(direccion:word;valor:byte);
-function hardhead2_snd_getbyte(direccion:word):byte;
-procedure hardhead2_snd_putbyte(direccion:word;valor:byte);
+procedure cargar_suna_hw;
 
 implementation
 const
@@ -64,155 +45,6 @@ var
  rear_scroll,scroll_x,dac_pos,dac_count:word;
  dac_play,haz_nmi:boolean;
  dac_timer,dac_tsample:byte;
-
-procedure Cargar_suna_hw;
-begin
-case main_vars.tipo_maquina of
-  67:llamadas_maquina.bucle_general:=hardhead_principal;
-  68:llamadas_maquina.bucle_general:=hardhead2_principal;
-end;
-llamadas_maquina.iniciar:=iniciar_suna_hw;
-llamadas_maquina.reset:=reset_suna_hw;
-end;
-
-function iniciar_suna_hw:boolean;
-const
-  pc_x:array[0..7] of dword=(3,2,1,0,11,10,9,8);
-  pc_y:array[0..7] of dword=(0*16,1*16,2*16,3*16,4*16,5*16,6*16,7*16);
-  swaptable_hh:array[0..7] of byte=(1,1,0,1,1,1,1,0);
-  swaptable_lines_hh2:array[0..79] of byte=(
-			1,1,1,1,0,0,1,1,    0,0,0,0,0,0,0,0,	// 8000-ffff not used
-			1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-			1,1,0,0,0,0,0,0,1,1,0,0,1,1,0,0);
-  swaptable_hh2:array[0..31] of byte=(
-			1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,
-			1,1,0,1,1,1,1,1,1,1,1,1,0,1,0,0);
-	xortable_hh2:array[0..31] of byte=(
-			$04,$04,$00,$04,$00,$04,$00,$00,$04,$45,$00,$04,$00,$04,$00,$00,
-			$04,$45,$00,$04,$00,$04,$00,$00,$04,$04,$00,$04,$00,$04,$00,$00);
-var
-  f,addr:dword;
-  valor,table:byte;
-  mem_final:array[0..$4ffff] of byte;
-  memoria_temp:array[0..$7ffff] of byte;
-begin
-iniciar_suna_hw:=false;
-iniciar_audio(false);
-//Pantallas:  principal sprites
-screen_init(1,512,512,false,true);
-iniciar_video(256,224);
-case main_vars.tipo_maquina of
-  67:begin
-        //Main CPU
-        main_z80:=cpu_z80.create(6000000,256);
-        main_z80.change_ram_calls(hardhead_getbyte,hardhead_putbyte);
-        //Sound CPU
-        snd_z80:=cpu_z80.create(3000000,256);
-        snd_z80.change_ram_calls(hardhead_snd_getbyte,hardhead_snd_putbyte);
-        snd_z80.init_sound(snd_despues_instruccion);
-        init_timer(snd_z80.numero_cpu,3000000/(60*4),hardhead_snd,true);
-        //sound chips
-        ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(2000000,2);
-        ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
-        //Y para el DAC
-        dac_timer:=init_timer(snd_z80.numero_cpu,3000000/4000,dac_sound,false);
-        //cargar roms y rom en bancos
-        if not(cargar_roms(@memoria_temp[0],@hardhead_rom[0],'hardhead.zip',0)) then exit;
-        for f:=0 to $f do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-        //desencripto la rom principal
-        for f:=0 to $7fff do begin
-        		table:=((f and $0c00) shr 10) or ((f and $4000) shr 12);
-        		if (swaptable_hh[table])<>0 then memoria[f]:=BITSWAP8(memoria_temp[f],7,6,5,3,4,2,1,0) xor $58
-              else memoria[f]:=memoria_temp[f];
-        end;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@hardhead_sound,'hardhead.zip',1)) then exit;
-        if not(cargar_roms(@memoria_temp[0],@hardhead_dac,'hardhead.zip',1)) then exit;
-        //Convierto los samples a algo digno...
-        for f:=0 to $7fff do suna_dac[f]:=(memoria_temp[f] xor $80)*$100;
-        dac_tsample:=init_channel;
-        //convertir sprites e invertirlos, solo hay sprites!!
-        if not(cargar_roms(@memoria_temp[0],@hardhead_sprites[0],'hardhead.zip',0)) then exit;
-        for f:=0 to $3ffff do memoria_temp[f]:=not(memoria_temp[f]);
-        init_gfx(0,8,8,$2000);
-        gfx[0].trans[15]:=true;
-        gfx_set_desc_data(4,0,8*8*2,$20000*8+0,$20000*8+4,0,4);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-     end;
-     68:begin
-        //Main CPU
-        main_z80:=cpu_z80.create(6000000,2);
-        main_z80.change_ram_calls(hardhead2_getbyte,hardhead2_putbyte);
-        //Sound CPU
-        snd_z80:=cpu_z80.create(3000000,2);
-        snd_z80.change_ram_calls(hardhead2_snd_getbyte,hardhead2_snd_putbyte);
-        snd_z80.init_sound(snd_despues_instruccion);
-        //sound chips
-        ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(2000000,2);
-        //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@hardhead2_rom[0],'hardhea2.zip',0)) then exit;
-        //desencriptarlas
-        //Primero muevo los datos a su sitio
-        for f:=0 to $4ffff do begin
-            addr:=f;
-        		if (swaptable_lines_hh2[(f and $ff000) shr 12])<>0 then
-        			addr:=(addr and $f0000) or BITSWAP16(addr,15,14,13,12,11,10,9,8,6,7,5,4,3,2,1,0);
-        		mem_final[f]:=memoria_temp[addr];
-        end;
-        //Pongo los bancos ROM
-        for f:=0 to $f do copymemory(@rom_bank[f,0],@memoria_temp[$10000+(f*$4000)],$4000);
-        //Y ahora desencripto los opcodes
-        for f:=0 to $7fff do begin
-      		table:=(f and 1) or ((f and $400) shr 9) or ((f and $7000) shr 10);
-      		valor:=memoria_temp[f];
-      		valor:=BITSWAP8(valor,7,6,5,3,4,2,1,0) xor $41 xor xortable_hh2[table];
-      		if (swaptable_hh2[table])<>0 then valor:=BITSWAP8(valor,5,6,7,4,3,2,1,0);
-      		mem_opcodes[f]:=valor;
-        end;
-        //Y despues los datos
-        for f:=0 to $7fff do begin
-		      if (swaptable_hh2[(f and $7000) shr 12])<>0 then memoria[f]:=BITSWAP8(memoria_temp[f],5,6,7,4,3,2,1,0) xor $41
-            else memoria[f]:=memoria_temp[f];
-        end;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@hardhead2_sound,'hardhea2.zip',1)) then exit;
-        if not(cargar_roms(@suna_dac[0],@hardhead2_pcm,'hardhea2.zip',1)) then exit;
-        //convertir sprites e invertirlos, solo hay sprites!!
-        if not(cargar_roms(@memoria_temp[0],@hardhead2_sprites[0],'hardhea2.zip',0)) then exit;
-        for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]);
-        init_gfx(0,8,8,$4000);
-        gfx[0].trans[15]:=true;
-        gfx_set_desc_data(4,0,8*8*2,$40000*8+0,$40000*8+4,0,4);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-     end;
-end;
-//final
-reset_suna_hw;
-iniciar_suna_hw:=true;
-end;
-
-procedure reset_suna_hw;
-begin
- main_z80.reset;
- snd_z80.reset;
- ay8910_0.reset;
- ym3812_0.reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
- banco_rom:=0;
- soundlatch:=0;
- soundlatch2:=0;
- hardhead_ip:=0;
- num_sample:=0;
- dac_pos:=0;
- dac_play:=false;
-end;
 
 //Hard Head
 procedure update_video_hardhead;inline;
@@ -340,7 +172,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=239 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_hardhead;
     end;
  end;
@@ -440,7 +272,7 @@ end;
 
 procedure hardhead_snd;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 procedure hardhead_portaw(valor:byte);
@@ -590,12 +422,12 @@ while EmuStatus=EsRuning do begin
   //Main CPU
   main_z80.run(frame_m);
   frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-  if f=0 then main_z80.pedir_irq:=HOLD_LINE
+  if f=0 then main_z80.change_irq(HOLD_LINE)
     else main_z80.change_nmi(PULSE_LINE);
   //Sound CPU
   snd_z80.run(frame_s);
   frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
  end;
   update_video_hardhead2;
   eventos_suna_hw;
@@ -648,6 +480,154 @@ mem_snd[direccion]:=valor;
 case direccion of
   $f000:soundlatch2:=valor;
 end;
+end;
+
+//Main
+procedure reset_suna_hw;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ ay8910_0.reset;
+ ym3812_0.reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+ banco_rom:=0;
+ soundlatch:=0;
+ soundlatch2:=0;
+ hardhead_ip:=0;
+ num_sample:=0;
+ dac_pos:=0;
+ dac_play:=false;
+end;
+
+function iniciar_suna_hw:boolean;
+const
+  pc_x:array[0..7] of dword=(3,2,1,0,11,10,9,8);
+  pc_y:array[0..7] of dword=(0*16,1*16,2*16,3*16,4*16,5*16,6*16,7*16);
+  swaptable_hh:array[0..7] of byte=(1,1,0,1,1,1,1,0);
+  swaptable_lines_hh2:array[0..79] of byte=(
+			1,1,1,1,0,0,1,1,    0,0,0,0,0,0,0,0,	// 8000-ffff not used
+			1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			1,1,0,0,0,0,0,0,1,1,0,0,1,1,0,0);
+  swaptable_hh2:array[0..31] of byte=(
+			1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,
+			1,1,0,1,1,1,1,1,1,1,1,1,0,1,0,0);
+	xortable_hh2:array[0..31] of byte=(
+			$04,$04,$00,$04,$00,$04,$00,$00,$04,$45,$00,$04,$00,$04,$00,$00,
+			$04,$45,$00,$04,$00,$04,$00,$00,$04,$04,$00,$04,$00,$04,$00,$00);
+var
+  f,addr:dword;
+  valor,table:byte;
+  mem_final:array[0..$4ffff] of byte;
+  memoria_temp:array[0..$7ffff] of byte;
+begin
+iniciar_suna_hw:=false;
+iniciar_audio(false);
+screen_init(1,512,512,false,true);
+iniciar_video(256,224);
+case main_vars.tipo_maquina of
+  67:begin
+        //Main CPU
+        main_z80:=cpu_z80.create(6000000,256);
+        main_z80.change_ram_calls(hardhead_getbyte,hardhead_putbyte);
+        //Sound CPU
+        snd_z80:=cpu_z80.create(3000000,256);
+        snd_z80.change_ram_calls(hardhead_snd_getbyte,hardhead_snd_putbyte);
+        snd_z80.init_sound(snd_despues_instruccion);
+        init_timer(snd_z80.numero_cpu,3000000/(60*4),hardhead_snd,true);
+        //sound chips
+        ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
+        ay8910_0:=ay8910_chip.create(2000000,2);
+        ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
+        //Y para el DAC
+        dac_timer:=init_timer(snd_z80.numero_cpu,3000000/4000,dac_sound,false);
+        //cargar roms y rom en bancos
+        if not(cargar_roms(@memoria_temp[0],@hardhead_rom[0],'hardhead.zip',0)) then exit;
+        for f:=0 to $f do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+        for f:=0 to $7fff do begin
+        		table:=((f and $0c00) shr 10) or ((f and $4000) shr 12);
+        		if (swaptable_hh[table])<>0 then memoria[f]:=BITSWAP8(memoria_temp[f],7,6,5,3,4,2,1,0) xor $58
+              else memoria[f]:=memoria_temp[f];
+        end;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@hardhead_sound,'hardhead.zip',1)) then exit;
+        if not(cargar_roms(@memoria_temp[0],@hardhead_dac,'hardhead.zip',1)) then exit;
+        //Convierto los samples a algo digno...
+        for f:=0 to $7fff do suna_dac[f]:=(memoria_temp[f] xor $80)*$100;
+        dac_tsample:=init_channel;
+        //convertir sprites e invertirlos, solo hay sprites!!
+        if not(cargar_roms(@memoria_temp[0],@hardhead_sprites[0],'hardhead.zip',0)) then exit;
+        for f:=0 to $3ffff do memoria_temp[f]:=not(memoria_temp[f]);
+        init_gfx(0,8,8,$2000);
+        gfx[0].trans[15]:=true;
+        gfx_set_desc_data(4,0,8*8*2,$20000*8+0,$20000*8+4,0,4);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+     end;
+     68:begin
+        //Main CPU
+        main_z80:=cpu_z80.create(6000000,2);
+        main_z80.change_ram_calls(hardhead2_getbyte,hardhead2_putbyte);
+        //Sound CPU
+        snd_z80:=cpu_z80.create(3000000,2);
+        snd_z80.change_ram_calls(hardhead2_snd_getbyte,hardhead2_snd_putbyte);
+        snd_z80.init_sound(snd_despues_instruccion);
+        //sound chips
+        ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
+        ay8910_0:=ay8910_chip.create(2000000,2);
+        //cargar roms
+        if not(cargar_roms(@memoria_temp[0],@hardhead2_rom[0],'hardhea2.zip',0)) then exit;
+        //desencriptarlas
+        //Primero muevo los datos a su sitio
+        for f:=0 to $4ffff do begin
+            addr:=f;
+        		if (swaptable_lines_hh2[(f and $ff000) shr 12])<>0 then
+        			addr:=(addr and $f0000) or BITSWAP16(addr,15,14,13,12,11,10,9,8,6,7,5,4,3,2,1,0);
+        		mem_final[f]:=memoria_temp[addr];
+        end;
+        //Pongo los bancos ROM
+        for f:=0 to $f do copymemory(@rom_bank[f,0],@memoria_temp[$10000+(f*$4000)],$4000);
+        //Y ahora desencripto los opcodes
+        for f:=0 to $7fff do begin
+      		table:=(f and 1) or ((f and $400) shr 9) or ((f and $7000) shr 10);
+      		valor:=memoria_temp[f];
+      		valor:=BITSWAP8(valor,7,6,5,3,4,2,1,0) xor $41 xor xortable_hh2[table];
+      		if (swaptable_hh2[table])<>0 then valor:=BITSWAP8(valor,5,6,7,4,3,2,1,0);
+      		mem_opcodes[f]:=valor;
+        end;
+        //Y despues los datos
+        for f:=0 to $7fff do begin
+		      if (swaptable_hh2[(f and $7000) shr 12])<>0 then memoria[f]:=BITSWAP8(memoria_temp[f],5,6,7,4,3,2,1,0) xor $41
+            else memoria[f]:=memoria_temp[f];
+        end;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@hardhead2_sound,'hardhea2.zip',1)) then exit;
+        if not(cargar_roms(@suna_dac[0],@hardhead2_pcm,'hardhea2.zip',1)) then exit;
+        //convertir sprites e invertirlos, solo hay sprites!!
+        if not(cargar_roms(@memoria_temp[0],@hardhead2_sprites[0],'hardhea2.zip',0)) then exit;
+        for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]);
+        init_gfx(0,8,8,$4000);
+        gfx[0].trans[15]:=true;
+        gfx_set_desc_data(4,0,8*8*2,$40000*8+0,$40000*8+4,0,4);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+     end;
+end;
+//final
+reset_suna_hw;
+iniciar_suna_hw:=true;
+end;
+
+procedure Cargar_suna_hw;
+begin
+case main_vars.tipo_maquina of
+  67:llamadas_maquina.bucle_general:=hardhead_principal;
+  68:llamadas_maquina.bucle_general:=hardhead2_principal;
+end;
+llamadas_maquina.iniciar:=iniciar_suna_hw;
+llamadas_maquina.reset:=reset_suna_hw;
 end;
 
 end.

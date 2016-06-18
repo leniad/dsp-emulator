@@ -2,7 +2,7 @@ unit m6805;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     dialogs,sysutils,timer_engine,main_engine;
+     dialogs,sysutils,timer_engine,main_engine,cpu_misc;
 const
   tipo_m6805=0;
   tipo_m68705=1;
@@ -29,7 +29,6 @@ type
           private
             r:preg_m6805;
             pedir_irq:array[0..9] of byte;
-            pedir_nmi,nmi_state:byte;
             irq_pending:boolean;
             tipo_cpu:byte;
             function dame_pila:byte;
@@ -117,9 +116,8 @@ self.contador:=0;
 r.sp:=$7f;
 r.sp_mask:=$7f;
 r.sp_low:=$60;
-self.pedir_nmi:=CLEAR_LINE;
-self.nmi_state:=CLEAR_LINE;
-self.pedir_reset:=CLEAR_LINE;
+self.change_nmi(CLEAR_LINE);
+self.change_reset(CLEAR_LINE);
 for f:=0 to 9 do self.pedir_irq[f]:=CLEAR_LINE;
 self.irq_pending:=false;
 end;

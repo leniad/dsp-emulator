@@ -187,7 +187,7 @@ case direccion of
                         cambiar_color_tmnt((direccion and $fff) shr 1);
                    end;
     $0a0000:begin
-              if ((last_snd=8) and ((valor and 8)=0)) then snd_z80.pedir_irq:=HOLD_LINE;
+              if ((last_snd=8) and ((valor and 8)=0)) then snd_z80.change_irq(HOLD_LINE);
               last_snd:=valor and 8;
 		          // bit 5 = irq enable
 		          irq5_mask:=(valor and $20)<>0;
@@ -468,7 +468,7 @@ case direccion of
                           else k053244_write(direccion,valor shr 8);
                      end;
     $5c0600..$5c0603:k053260_0.main_write((direccion and 3) shr 1,valor); //k053260
-    $5c0604:snd_z80.pedir_irq:=HOLD_LINE; //sound
+    $5c0604:snd_z80.change_irq(HOLD_LINE); //sound
     $5c0700..$5c071f:k053251_0.lsb_w((direccion and $1f) shr 1,valor); //k053251
     $600000..$603fff:if main_m68000.access_8bits_hi_dir then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
                         else k052109_0.write_lsb((direccion and $3fff) shr 1,valor shr 8);

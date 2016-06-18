@@ -6,14 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,misc_functions,
      deco_146;
 
-procedure Cargar_funkyjet;
-function iniciar_funkyjet:boolean;
-procedure reset_funkyjet;
-procedure cerrar_funkyjet;
-procedure funkyjet_principal;
-//Main CPU
-function funkyjet_getword(direccion:dword):word;
-procedure funkyjet_putword(direccion:dword;valor:word);
+procedure cargar_funkyjet;
 
 implementation
 const
@@ -38,93 +31,6 @@ const
 var
  rom:array[0..$3ffff] of word;
  ram:array[0..$1fff] of word;
-
-procedure Cargar_funkyjet;
-begin
-llamadas_maquina.bucle_general:=funkyjet_principal;
-llamadas_maquina.iniciar:=iniciar_funkyjet;
-llamadas_maquina.cerrar:=cerrar_funkyjet;
-llamadas_maquina.reset:=reset_funkyjet;
-llamadas_maquina.fps_max:=58;
-end;
-
-//Inicio Normal
-function iniciar_funkyjet:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  pt_x:array[0..15] of dword=(32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
-			0, 1, 2, 3, 4, 5, 6, 7);
-  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-var
-  memoria_temp:pbyte;
-begin
-iniciar_funkyjet:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-init_dec16ic(0,1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
-screen_init(3,512,512,false,true);
-iniciar_video(320,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(14000000,$100);
-main_m68000.change_ram16_calls(funkyjet_getword,funkyjet_putword);
-//Sound CPU
-deco16_sprite_color_add:=0;
-deco16_sprite_mask:=$1fff;
-deco16_snd_simple_init(32220000 div 4,32220000,nil);
-getmem(memoria_temp,$100000);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@funkyjet_rom[0],'funkyjet.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@funkyjet_sound,'funkyjet.zip',1)) then exit;
-//OKI rom
-if not(cargar_roms(oki_6295_0.get_rom_addr,@funkyjet_oki,'funkyjet.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(memoria_temp,@funkyjet_char,'funkyjet.zip',1)) then exit;
-deco74_decrypt_gfx(memoria_temp,$80000);
-init_gfx(0,8,8,$4000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,16*8,$4000*16*8+8,$4000*16*8+0,8,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-//Tiles
-init_gfx(1,16,16,$1000);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,$1000*64*8+8,$1000*64*8+0,8,0);
-convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
-//Sprites
-if not(cargar_roms(memoria_temp,@funkyjet_sprites[0],'funkyjet.zip',0)) then exit;
-init_gfx(2,16,16,$2000);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,$2000*64*8+8,$2000*64*8+0,8,0);
-convert_gfx(2,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
-//Deco 146
-main_deco146:=cpu_deco_146.create;
-main_deco146.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
-//Dip
-marcade.dswa:=$ffff;
-marcade.dswa_val:=@funkyjet_dip_a;
-//final
-freemem(memoria_temp);
-reset_funkyjet;
-iniciar_funkyjet:=true;
-end;
-
-procedure cerrar_funkyjet;
-begin
-close_dec16ic(0);
-end;
-
-procedure reset_funkyjet;
-begin
- main_m68000.reset;
- main_deco146.reset;
- reset_dec16ic(0);
- deco16_snd_simple_reset;
- reset_audio;
- marcade.in0:=$ffff;
- marcade.in1:=$fff7;
-end;
 
 procedure update_video_funkyjet;inline;
 begin
@@ -267,6 +173,92 @@ case direccion of
   $340000..$340bff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $fff) shr 1]:=valor;
   $342000..$342bff:deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $fff) shr 1]:=valor;
 end;
+end;
+
+//Main
+procedure reset_funkyjet;
+begin
+ main_m68000.reset;
+ main_deco146.reset;
+ reset_dec16ic(0);
+ deco16_snd_simple_reset;
+ reset_audio;
+ marcade.in0:=$ffff;
+ marcade.in1:=$fff7;
+end;
+
+function iniciar_funkyjet:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  pt_x:array[0..15] of dword=(32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
+			0, 1, 2, 3, 4, 5, 6, 7);
+  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+var
+  memoria_temp:pbyte;
+begin
+iniciar_funkyjet:=false;
+iniciar_audio(false);
+init_dec16ic(0,1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
+screen_init(3,512,512,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(14000000,$100);
+main_m68000.change_ram16_calls(funkyjet_getword,funkyjet_putword);
+//Sound CPU
+deco16_sprite_color_add:=0;
+deco16_sprite_mask:=$1fff;
+deco16_snd_simple_init(32220000 div 4,32220000,nil);
+getmem(memoria_temp,$100000);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@funkyjet_rom[0],'funkyjet.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@funkyjet_sound,'funkyjet.zip',1)) then exit;
+//OKI rom
+if not(cargar_roms(oki_6295_0.get_rom_addr,@funkyjet_oki,'funkyjet.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(memoria_temp,@funkyjet_char,'funkyjet.zip',1)) then exit;
+deco74_decrypt_gfx(memoria_temp,$80000);
+init_gfx(0,8,8,$4000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,16*8,$4000*16*8+8,$4000*16*8+0,8,0);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+//Tiles
+init_gfx(1,16,16,$1000);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,$1000*64*8+8,$1000*64*8+0,8,0);
+convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+//Sprites
+if not(cargar_roms(memoria_temp,@funkyjet_sprites[0],'funkyjet.zip',0)) then exit;
+init_gfx(2,16,16,$2000);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,$2000*64*8+8,$2000*64*8+0,8,0);
+convert_gfx(2,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+//Deco 146
+main_deco146:=cpu_deco_146.create;
+main_deco146.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
+//Dip
+marcade.dswa:=$ffff;
+marcade.dswa_val:=@funkyjet_dip_a;
+//final
+freemem(memoria_temp);
+reset_funkyjet;
+iniciar_funkyjet:=true;
+end;
+
+procedure cerrar_funkyjet;
+begin
+close_dec16ic(0);
+end;
+
+procedure Cargar_funkyjet;
+begin
+llamadas_maquina.bucle_general:=funkyjet_principal;
+llamadas_maquina.iniciar:=iniciar_funkyjet;
+llamadas_maquina.cerrar:=cerrar_funkyjet;
+llamadas_maquina.reset:=reset_funkyjet;
+llamadas_maquina.fps_max:=58;
 end;
 
 end.

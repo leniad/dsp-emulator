@@ -5,23 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m6805,main_engine,controls_engine,gfx_engine,ym_2203,
      rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_lk_hw;
-procedure lk_hw_principal;
-function iniciar_lk_hw:boolean;
-procedure reset_lk_hw;
-//Main CPU
-function lk_getbyte(direccion:word):byte;
-procedure lk_putbyte(direccion:word;valor:byte);
-function lk_inbyte(puerto:word):byte;
-//Sound CPU
-function snd_lk_hw_getbyte(direccion:word):byte;
-procedure snd_lk_hw_putbyte(direccion:word;valor:byte);
-//MCU CPU
-function mcu_lk_hw_getbyte(direccion:word):byte;
-procedure mcu_lk_hw_putbyte(direccion:word;valor:byte);
-//Sound
-procedure lk_hw_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_lk_hw;
 
 implementation
 const
@@ -45,113 +29,6 @@ var
  port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
  ddr_a,ddr_b,ddr_c:byte;
  mcu_sent,from_main,main_sent,from_mcu:byte;
-
-procedure Cargar_lk_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_lk_hw;
-llamadas_maquina.bucle_general:=lk_hw_principal;
-llamadas_maquina.reset:=reset_lk_hw;
-end;
-
-function iniciar_lk_hw:boolean;
-var
-  memoria_temp:array[0..$ffff] of byte;
-const
-  pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_x:array[0..15] of dword=(7, 6, 5, 4, 3, 2, 1, 0,
-    64+7, 64+6, 64+5, 64+4, 64+3, 64+2, 64+1, 64+0);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-    128+0*8, 128+1*8, 128+2*8, 128+3*8, 128+4*8, 128+5*8, 128+6*8, 128+7*8);
-begin
-iniciar_lk_hw:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
-screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,256,256,255);
-screen_init(3,256,256,true);
-screen_mod_scroll(3,256,256,255,256,256,255);
-screen_init(4,256,256,false,true);
-iniciar_video(240,224);
-//Main CPU
-main_z80:=cpu_z80.create(6000000,$100);
-main_z80.change_ram_calls(lk_getbyte,lk_putbyte);
-main_z80.change_io_calls(lk_inbyte,nil);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,$100);
-snd_z80.change_ram_calls(snd_lk_hw_getbyte,snd_lk_hw_putbyte);
-snd_z80.init_sound(lk_hw_sound_update);
-//MCU CPU
-main_m6805:=cpu_m6805.create(3000000,$100,tipo_m68705);
-main_m6805.change_ram_calls(mcu_lk_hw_getbyte,mcu_lk_hw_putbyte);
-//Sound Chips
-ym2203_0:=ym2203_chip.create(4000000);
-ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(4000000);
-//cargar roms
-if not(cargar_roms(@memoria[0],@lk_rom[0],'lkage.zip',0)) then exit;
-//cargar roms snd
-if not(cargar_roms(@mem_snd[0],@lk_snd,'lkage.zip')) then exit;
-//cargar roms mcu
-if not(cargar_roms(@mcu_mem[0],@lk_mcu,'lkage.zip')) then exit;
-//cargar data
-if not(cargar_roms(@mem_data[0],@lk_data,'lkage.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@lk_char[0],'lkage.zip',0)) then exit;
-init_gfx(0,8,8,$800);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,8*8,$800*8*8*1,$800*8*8*0,$800*8*8*3,$800*8*8*2);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-init_gfx(1,16,16,$200);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,$200*32*8*1,$200*32*8*0,$200*32*8*3,$200*32*8*2);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-reset_lk_hw;
-iniciar_lk_hw:=true;
-end;
-
-procedure reset_lk_hw;
-begin
- main_z80.reset;
- snd_z80.reset;
- main_m6805.reset;
- ym2203_0.reset;
- ym2203_1.reset;
- reset_audio;
- scroll_txt_x:=0;
- scroll_fg_x:=0;
- scroll_bg_x:=0;
- scroll_txt_y:=0;
- scroll_fg_y:=0;
- scroll_bg_y:=0;
- marcade.in0:=$0b;
- marcade.in1:=$ff;
- snd_nmi:=false;
- pending_nmi:=false;
- sound_cmd:=0;
- color_bnk:=0;
- tipo_pant:=$f0;
- bg_bank:=0;
- fg_bank:=0;
- prioridad_fg:=false;
- //mcu
- port_a_in:=0;
- port_a_out:=0;
- ddr_a:=0;
- port_b_in:=0;
- port_b_out:=0;
- ddr_b:=0;
- port_c_in:=0;
- port_c_out:=0;
- ddr_c:=0;
- mcu_sent:=0;
- main_sent:=0;
- from_main:=0;
- from_mcu:=0;
-end;
 
 procedure draw_sprites(prio:byte);inline;
 var
@@ -280,7 +157,7 @@ while EmuStatus=EsRuning do begin
     main_m6805.run(frame_mcu);
     frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
     if f=239 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_lk_hw;
     end;
   end;
@@ -480,13 +357,120 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure lk_hw_sound_update;
 begin
   ym2203_0.Update;
   ym2203_1.Update;
+end;
+
+//Main
+procedure reset_lk_hw;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ main_m6805.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
+ reset_audio;
+ scroll_txt_x:=0;
+ scroll_fg_x:=0;
+ scroll_bg_x:=0;
+ scroll_txt_y:=0;
+ scroll_fg_y:=0;
+ scroll_bg_y:=0;
+ marcade.in0:=$0b;
+ marcade.in1:=$ff;
+ snd_nmi:=false;
+ pending_nmi:=false;
+ sound_cmd:=0;
+ color_bnk:=0;
+ tipo_pant:=$f0;
+ bg_bank:=0;
+ fg_bank:=0;
+ prioridad_fg:=false;
+ //mcu
+ port_a_in:=0;
+ port_a_out:=0;
+ ddr_a:=0;
+ port_b_in:=0;
+ port_b_out:=0;
+ ddr_b:=0;
+ port_c_in:=0;
+ port_c_out:=0;
+ ddr_c:=0;
+ mcu_sent:=0;
+ main_sent:=0;
+ from_main:=0;
+ from_mcu:=0;
+end;
+
+function iniciar_lk_hw:boolean;
+var
+  memoria_temp:array[0..$ffff] of byte;
+const
+  pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..15] of dword=(7, 6, 5, 4, 3, 2, 1, 0,
+    64+7, 64+6, 64+5, 64+4, 64+3, 64+2, 64+1, 64+0);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+    128+0*8, 128+1*8, 128+2*8, 128+3*8, 128+4*8, 128+5*8, 128+6*8, 128+7*8);
+begin
+iniciar_lk_hw:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_mod_scroll(1,256,256,255,256,256,255);
+screen_init(2,256,256);
+screen_mod_scroll(2,256,256,255,256,256,255);
+screen_init(3,256,256,true);
+screen_mod_scroll(3,256,256,255,256,256,255);
+screen_init(4,256,256,false,true);
+iniciar_video(240,224);
+//Main CPU
+main_z80:=cpu_z80.create(6000000,$100);
+main_z80.change_ram_calls(lk_getbyte,lk_putbyte);
+main_z80.change_io_calls(lk_inbyte,nil);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,$100);
+snd_z80.change_ram_calls(snd_lk_hw_getbyte,snd_lk_hw_putbyte);
+snd_z80.init_sound(lk_hw_sound_update);
+//MCU CPU
+main_m6805:=cpu_m6805.create(3000000,$100,tipo_m68705);
+main_m6805.change_ram_calls(mcu_lk_hw_getbyte,mcu_lk_hw_putbyte);
+//Sound Chips
+ym2203_0:=ym2203_chip.create(4000000);
+ym2203_0.change_irq_calls(snd_irq);
+ym2203_1:=ym2203_chip.create(4000000);
+//cargar roms
+if not(cargar_roms(@memoria[0],@lk_rom[0],'lkage.zip',0)) then exit;
+//cargar roms snd
+if not(cargar_roms(@mem_snd[0],@lk_snd,'lkage.zip')) then exit;
+//cargar roms mcu
+if not(cargar_roms(@mcu_mem[0],@lk_mcu,'lkage.zip')) then exit;
+//cargar data
+if not(cargar_roms(@mem_data[0],@lk_data,'lkage.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@lk_char[0],'lkage.zip',0)) then exit;
+init_gfx(0,8,8,$800);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,8*8,$800*8*8*1,$800*8*8*0,$800*8*8*3,$800*8*8*2);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+init_gfx(1,16,16,$200);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,$200*32*8*1,$200*32*8*0,$200*32*8*3,$200*32*8*2);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+reset_lk_hw;
+iniciar_lk_hw:=true;
+end;
+
+procedure Cargar_lk_hw;
+begin
+llamadas_maquina.iniciar:=iniciar_lk_hw;
+llamadas_maquina.bucle_general:=lk_hw_principal;
+llamadas_maquina.reset:=reset_lk_hw;
 end;
 
 end.

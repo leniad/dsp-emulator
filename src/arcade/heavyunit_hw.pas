@@ -106,13 +106,13 @@ while EmuStatus=EsRuning do begin
   case f of
     63:begin
         main_z80.im2_lo:=$ff;
-         main_z80.pedir_irq:=HOLD_LINE;
+         main_z80.change_irq(HOLD_LINE);
        end;
     239:begin
          main_z80.im2_lo:=$fd;
-         main_z80.pedir_irq:=HOLD_LINE;
-         sub_z80.pedir_irq:=HOLD_LINE;
-         snd_z80.pedir_irq:=HOLD_LINE;
+         main_z80.change_irq(HOLD_LINE);
+         sub_z80.change_irq(HOLD_LINE);
+         snd_z80.change_irq(HOLD_LINE);
          update_video_hvyunit;
         end;
   end;
@@ -330,8 +330,8 @@ end;
 procedure mcu_out_port3(valor:byte);
 begin
   mermaid_p[3]:=valor;
-  if (valor and $2)<>0 then sub_z80.pedir_reset:=CLEAR_LINE
-    else sub_z80.pedir_reset:=ASSERT_LINE;
+  if (valor and $2)<>0 then sub_z80.change_reset(CLEAR_LINE)
+    else sub_z80.change_reset(ASSERT_LINE);
 end;
 
 procedure hvyunit_sound_update;

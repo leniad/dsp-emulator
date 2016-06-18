@@ -6,17 +6,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      pal_engine,sound_engine,timer_engine;
 
 procedure cargar_bionicc;
-procedure bionicc_principal;
-function iniciar_bionicc:boolean;
-procedure reset_bionicc;
-//Main CPU
-function bionicc_getword(direccion:dword):word;
-procedure bionicc_putword(direccion:dword;valor:word);
-//Sound CPU
-function bionicc_snd_getbyte(direccion:word):byte;
-procedure bionicc_snd_putbyte(direccion:word;valor:byte);
-procedure bionicc_sound_update;
-procedure bionicc_snd_irq;
 
 implementation
 const

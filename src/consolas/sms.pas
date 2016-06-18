@@ -5,23 +5,7 @@ uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sega_vdp,sn_76496,sysutils,dialogs,
      rom_engine,misc_functions,sound_engine,file_engine,forms;
 
-procedure Cargar_sms;
-procedure sms_principal;
-function iniciar_sms:boolean;
-procedure reset_sms;
-procedure cerrar_sms;
-procedure sms_sound_update;
-procedure sms_configurar;
-//Snapshot
-function abrir_sms:boolean;
-procedure sms_grabar_snapshot;
-//CPU
-function sms_getbyte(direccion:word):byte;
-procedure sms_putbyte(direccion:word;valor:byte);
-function sms_inbyte(puerto:word):byte;
-procedure sms_outbyte(valor:byte;puerto:word);
-procedure sms_interrupt(int:boolean);
-procedure sms_hlines(estados:word);
+procedure cargar_sms;
 
 type
   tmapper_sms=record
@@ -46,82 +30,6 @@ const
 
 implementation
 uses principal,config_sms;
-
-procedure Cargar_sms;
-begin
-principal1.BitBtn10.Glyph:=nil;
-principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
-principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
-llamadas_maquina.iniciar:=iniciar_sms;
-llamadas_maquina.bucle_general:=sms_principal;
-llamadas_maquina.cerrar:=cerrar_sms;
-llamadas_maquina.reset:=reset_sms;
-llamadas_maquina.cartuchos:=abrir_sms;
-llamadas_maquina.grabar_snapshot:=sms_grabar_snapshot;
-if file_data.sms_is_pal then llamadas_maquina.fps_max:=FPS_PAL
-  else llamadas_maquina.fps_max:=FPS_NTSC;
-llamadas_maquina.configurar:=sms_configurar;
-end;
-
-function iniciar_sms:boolean;
-begin
-iniciar_sms:=false;
-iniciar_audio(false);
-if file_data.sms_is_pal then begin
-  screen_init(1,284,294);
-  iniciar_video(284,294);
-  main_z80:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
-end else begin
-  screen_init(1,284,243);
-  iniciar_video(284,243);
-  main_z80:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
-end;
-//Main CPU
-main_z80.change_ram_calls(sms_getbyte,sms_putbyte);
-main_z80.change_io_calls(sms_inbyte,sms_outbyte);
-main_z80.init_sound(sms_sound_update);
-//Mapper
-getmem(mapper_sms,sizeof(tmapper_sms));
-mapper_sms.bios_loaded:=carga_rom_zip(Directory.Arcade_roms+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
-if mapper_sms.bios_loaded then mapper_sms.bios_enabled:=file_data.sms_bios_enabled
-  else mapper_sms.bios_loaded:=false;
-//VDP
-vdp_0:=vdp_chip.create(1,sms_interrupt);
-if file_data.sms_is_pal then begin
-  vdp_0.set_pal_video;
-  sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
-end else begin
-  vdp_0.set_ntsc_video;
-  sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
-end;
-main_z80.change_misc_calls(sms_hlines,nil);
-//final
-abrir_sms;
-iniciar_sms:=true;
-end;
-
-procedure cerrar_sms;
-begin
-file_data.sms_is_pal:=vdp_0.is_pal;
-file_data.sms_bios_enabled:=mapper_sms.bios_enabled;
-if mapper_sms<>nil then freemem(mapper_sms);
-mapper_sms:=nil;
-end;
-
-procedure reset_sms;
-begin
- main_z80.reset;
- sn_76496_0.reset;
- vdp_0.reset;
- reset_audio;
- mapper_sms.slot2_ram:=false;
- mapper_sms.bios_show:=mapper_sms.bios_enabled;
- joy1:=$ff;
- joy2:=$ff;
- mapper_sms.slot0:=0;
- mapper_sms.slot1:=1 mod mapper_sms.max;
- mapper_sms.slot2:=2 mod mapper_sms.max;
-end;
 
 procedure eventos_sms;inline;
 begin
@@ -260,8 +168,8 @@ end;
 
 procedure sms_interrupt(int:boolean);
 begin
-  if int then main_z80.pedir_irq:=ASSERT_LINE
-     else main_z80.pedir_irq:=CLEAR_LINE;
+  if int then main_z80.change_irq(ASSERT_LINE)
+     else main_z80.change_irq(CLEAR_LINE);
 end;
 
 procedure sms_sound_update;
@@ -274,6 +182,7 @@ begin
   vdp_0.hlines(round(main_z80.contador));
 end;
 
+//Main
 procedure sms_configurar;
 begin
   SMSConfig.Show;
@@ -294,6 +203,21 @@ for f:=0 to (mapper_sms.max-1) do begin
       inc(ptemp,$4000);
 end;
 abrir_cartucho_sms:=true;
+end;
+
+procedure reset_sms;
+begin
+ main_z80.reset;
+ sn_76496_0.reset;
+ vdp_0.reset;
+ reset_audio;
+ mapper_sms.slot2_ram:=false;
+ mapper_sms.bios_show:=mapper_sms.bios_enabled;
+ joy1:=$ff;
+ joy2:=$ff;
+ mapper_sms.slot0:=0;
+ mapper_sms.slot1:=1 mod mapper_sms.max;
+ mapper_sms.slot2:=2 mod mapper_sms.max;
 end;
 
 function abrir_sms:boolean;
@@ -360,6 +284,67 @@ end;
 
 procedure sms_grabar_snapshot;
 begin
+end;
+
+function iniciar_sms:boolean;
+begin
+iniciar_sms:=false;
+iniciar_audio(false);
+if file_data.sms_is_pal then begin
+  screen_init(1,284,294);
+  iniciar_video(284,294);
+  main_z80:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
+end else begin
+  screen_init(1,284,243);
+  iniciar_video(284,243);
+  main_z80:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
+end;
+//Main CPU
+main_z80.change_ram_calls(sms_getbyte,sms_putbyte);
+main_z80.change_io_calls(sms_inbyte,sms_outbyte);
+main_z80.init_sound(sms_sound_update);
+//Mapper
+getmem(mapper_sms,sizeof(tmapper_sms));
+mapper_sms.bios_loaded:=carga_rom_zip(Directory.Arcade_roms+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
+if mapper_sms.bios_loaded then mapper_sms.bios_enabled:=file_data.sms_bios_enabled
+  else mapper_sms.bios_loaded:=false;
+//VDP
+vdp_0:=vdp_chip.create(1,sms_interrupt);
+if file_data.sms_is_pal then begin
+  vdp_0.set_pal_video;
+  sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);
+end else begin
+  vdp_0.set_ntsc_video;
+  sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
+end;
+main_z80.change_misc_calls(sms_hlines,nil);
+//final
+abrir_sms;
+iniciar_sms:=true;
+end;
+
+procedure cerrar_sms;
+begin
+file_data.sms_is_pal:=vdp_0.is_pal;
+file_data.sms_bios_enabled:=mapper_sms.bios_enabled;
+if mapper_sms<>nil then freemem(mapper_sms);
+mapper_sms:=nil;
+end;
+
+procedure Cargar_sms;
+begin
+principal1.BitBtn10.Glyph:=nil;
+principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
+principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
+llamadas_maquina.iniciar:=iniciar_sms;
+llamadas_maquina.bucle_general:=sms_principal;
+llamadas_maquina.cerrar:=cerrar_sms;
+llamadas_maquina.reset:=reset_sms;
+llamadas_maquina.cartuchos:=abrir_sms;
+llamadas_maquina.grabar_snapshot:=sms_grabar_snapshot;
+if file_data.sms_is_pal then llamadas_maquina.fps_max:=FPS_PAL
+  else llamadas_maquina.fps_max:=FPS_NTSC;
+llamadas_maquina.configurar:=sms_configurar;
 end;
 
 end.

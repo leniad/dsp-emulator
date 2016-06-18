@@ -5,32 +5,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,
      ym_2151,rom_engine,pal_engine,misc_functions,sound_engine;
 
-procedure Cargar_system86;
-procedure system86_principal;
-function iniciar_system86:boolean;
-procedure reset_system86;
-procedure cerrar_system86;
-//Main CPU
-function system86_getbyte(direccion:word):byte;
-procedure system86_putbyte(direccion:word;valor:byte);
-procedure rthunder_putbyte(direccion:word;valor:byte);
-//Sub CPU
-function rthunder_sub_getbyte(direccion:word):byte;
-procedure rthunder_sub_putbyte(direccion:word;valor:byte);
-function hopmappy_sub_getbyte(direccion:word):byte;
-procedure hopmappy_sub_putbyte(direccion:word;valor:byte);
-//MCU CPU
-function rthunder_mcu_getbyte(direccion:word):byte;
-procedure rthunder_mcu_putbyte(direccion:word;valor:byte);
-function in_port1:byte;
-function in_port2:byte;
-//Video
-procedure rthunder_video;
-procedure skykiddx_video;
-//Sound
-procedure sound_update;
-procedure sound_update_adpcm;
+procedure cargar_system86;
 
+implementation
 type
     tipo_update_video_system86=procedure;
 const
@@ -98,247 +75,6 @@ var
  mask_chars,mask_tiles:word;
  dip_2:byte;
  update_video_system86:tipo_update_video_system86;
-
-implementation
-
-procedure Cargar_system86;
-begin
-llamadas_maquina.iniciar:=iniciar_system86;
-llamadas_maquina.bucle_general:=system86_principal;
-llamadas_maquina.cerrar:=cerrar_system86;
-llamadas_maquina.reset:=reset_system86;
-llamadas_maquina.fps_max:=60.606060;
-end;
-
-function iniciar_system86:boolean; 
-var
-  colores:tpaleta;
-  f:word;
-  memoria_temp:array[0..$7ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    ps_x:array[0..31] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
- 			8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4,
-			16*64+0*4, 16*64+1*4, 16*64+2*4, 16*64+3*4, 16*64+4*4, 16*64+5*4, 16*64+6*4, 16*64+7*4,
-			16*64+8*4, 16*64+9*4, 16*64+10*4, 16*64+11*4, 16*64+12*4, 16*64+13*4, 16*64+14*4, 16*64+15*4);
-    ps_y:array[0..31] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
-			8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64,
-			32*64, 33*64, 34*64, 35*64, 36*64, 37*64, 38*64, 39*64,
-			40*64, 41*64, 42*64, 43*64, 44*64, 45*64, 46*64, 47*64);
-procedure convert_data(long:dword);
-var
-  size,i:dword;
-  dest1,dest2,mono:dword;
-  buffer:array[0..$1ffff] of byte;
-  data1,data2:byte;
-begin
-  size:=(long*2) div 3;
-	dest1:=0;
-	dest2:=0+(size div 2);
-  mono:=0+size;
-  copymemory(@buffer[0],@memoria_temp[0],size);
-  for i:=0 to ((size div 2)-1) do begin
-			data1:=buffer[i*2];
-			data2:=buffer[(i*2)+1];
-			memoria_temp[dest1]:=(data1 shl 4) or (data2 and $f);
-      dest1:=dest1+1;
-			memoria_temp[dest2]:=(data1 and $f0) or (data2 shr 4);
-      dest2:=dest2+1;
-      memoria_temp[mono]:=memoria_temp[mono] xor $ff;
-      mono:=mono+1;
-  end;
-end;
-procedure convert_chars(num:word);
-begin
-  mask_chars:=num-1;
-  init_gfx(0,8,8,num);
-  gfx[0].trans[7]:=true;
-  gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-end;
-procedure convert_tiles(num:word);
-begin
-  mask_tiles:=num-1;
-  init_gfx(1,8,8,num);
-  gfx[1].trans[7]:=true;
-  gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
-  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-end;
-procedure convert_sprites(num:word);
-begin
-  init_gfx(2,32,32,num);
-  gfx[2].trans[15]:=true;
-  gfx_set_desc_data(4,0,64*64,0,1,2,3);
-  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-  bank_sprites:=num div 8;
-end;
-begin
-iniciar_system86:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,256,true);
-screen_mod_scroll(1,512,512,511,256,256,255);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
-screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
-screen_init(4,512,256,true);
-screen_mod_scroll(4,512,512,511,256,256,255);
-screen_init(5,512,256,false,true);
-iniciar_video(288,224);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1536000,256);
-//Sub CPU
-snd_m6809:=cpu_m6809.Create(1536000,256);
-//MCU CPU
-main_m6800:=cpu_m6800.create(6144000,$100,cpu_hd63701);
-main_m6800.change_ram_calls(rthunder_mcu_getbyte,rthunder_mcu_putbyte);
-main_m6800.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
-if main_vars.tipo_maquina<>124 then main_m6800.init_sound(sound_update)
-  else main_m6800.init_sound(sound_update_adpcm);
-//Sound
-namco_sound_init(8,true);
-ym2151_0:=ym2151_chip.create(3579580,0.4);
-case main_vars.tipo_maquina of
-    124:begin
-            //cargar roms main CPU
-            if not(cargar_roms(@memoria[$0],@rthunder_rom,'rthunder.zip',1)) then exit;
-            main_m6809.change_ram_calls(system86_getbyte,rthunder_putbyte);
-            //Pongo las ROMs en su banco
-            if not(cargar_roms(@memoria_temp[0],@rthunder_rom_bank[0],'rthunder.zip',0)) then exit;
-            for f:=0 to $1f do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
-            //cargar roms sub CPU
-            if not(cargar_roms(@memoria_temp[0],@rthunder_sub_rom[0],'rthunder.zip',0)) then exit;
-            snd_m6809.change_ram_calls(rthunder_sub_getbyte,rthunder_sub_putbyte);
-            //Pongo las ROMs en su banco
-            copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
-            for f:=0 to $3 do copymemory(@rom_sub_bank[f,0],@memoria_temp[(f*$2000)+$8000],$2000);
-            //Cargar MCU
-            if not(cargar_roms(@mem_snd[0],@rthunder_mcu[0],'rthunder.zip',0)) then exit;
-            //Cargar ADPCM
-            namco_63701x_start(6000000);
-            if not(cargar_roms(namco_63701_rom,@rthunder_adpcm,'rthunder.zip',0)) then exit;
-            //convertir chars
-            if not(cargar_roms(@memoria_temp[0],@rthunder_chars[0],'rthunder.zip',0)) then exit;
-            convert_data($18000);
-            convert_chars($1000);
-            //tiles
-            if not(cargar_roms(@memoria_temp[0],@rthunder_tiles[0],'rthunder.zip',0)) then exit;
-            convert_data($c000);
-            convert_tiles($800);
-            //sprites
-            if not(cargar_roms(@memoria_temp[0],@rthunder_sprites[0],'rthunder.zip',0)) then exit;
-            convert_sprites($400);
-            //Paleta
-            if not(cargar_roms(@memoria_temp[0],@rthunder_prom[0],'rthunder.zip',0)) then exit;
-            dip_2:=$f9;
-            update_video_system86:=rthunder_video;
-    end;
-    125:begin
-            //cargar roms main CPU
-            if not(cargar_roms(@memoria[$0],@hopmappy_rom,'hopmappy.zip',1)) then exit;
-            main_m6809.change_ram_calls(system86_getbyte,system86_putbyte);
-            //cargar roms sub CPU
-            if not(cargar_roms(@mem_misc[0],@hopmappy_sub_rom,'hopmappy.zip',1)) then exit;
-            snd_m6809.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
-            //Cargar MCU
-            if not(cargar_roms(@mem_snd[0],@hopmappy_mcu[0],'hopmappy.zip',0)) then exit;
-            //convertir chars
-            fillchar(memoria_temp[0],$6000,0);
-            if not(cargar_roms(@memoria_temp[0],@hopmappy_chars,'hopmappy.zip',1)) then exit;
-            convert_data($6000);
-            init_gfx(0,8,8,$400);
-            convert_chars($400);
-            //tiles
-            fillchar(memoria_temp[0],$6000,0);
-            if not(cargar_roms(@memoria_temp[0],@hopmappy_tiles,'hopmappy.zip',1)) then exit;
-            convert_data($6000);
-            convert_tiles($400);
-            //sprites
-            if not(cargar_roms(@memoria_temp[0],@hopmappy_sprites,'hopmappy.zip',1)) then exit;
-            convert_sprites($200);
-            //Paleta
-            if not(cargar_roms(@memoria_temp[0],@hopmappy_prom[0],'hopmappy.zip',0)) then exit;
-            dip_2:=$ff;
-            update_video_system86:=rthunder_video;
-    end;
-    126:begin
-            //cargar roms main CPU
-            if not(cargar_roms(@memoria_temp[$0],@skykiddx_rom[0],'skykiddx.zip',0)) then exit;
-            copymemory(@memoria[$8000],@memoria_temp[0],$8000);
-            for f:=0 to 3 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-            main_m6809.change_ram_calls(system86_getbyte,system86_putbyte);
-            //cargar roms sub CPU
-            if not(cargar_roms(@mem_misc[0],@skykiddx_sub_rom,'skykiddx.zip',1)) then exit;
-            snd_m6809.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
-            //Cargar MCU
-            if not(cargar_roms(@mem_snd[0],@skykiddx_mcu[0],'skykiddx.zip',0)) then exit;
-            //convertir chars
-            if not(cargar_roms(@memoria_temp[0],@skykiddx_chars[0],'skykiddx.zip',0)) then exit;
-            convert_data($c000);
-            convert_chars($800);
-            //tiles
-            if not(cargar_roms(@memoria_temp[0],@skykiddx_tiles[0],'skykiddx.zip',0)) then exit;
-            convert_data($c000);
-            convert_tiles($800);
-            //sprites
-            if not(cargar_roms(@memoria_temp[0],@skykiddx_sprites[0],'skykiddx.zip',0)) then exit;
-            convert_sprites($200);
-            //Paleta
-            if not(cargar_roms(@memoria_temp[0],@skykiddx_prom[0],'skykiddx.zip',0)) then exit;
-            dip_2:=$ff;
-            update_video_system86:=skykiddx_video;
-    end;
-end;
-for f:=0 to $1ff do begin
-  colores[f].r:=((memoria_temp[f] shr 0) and $01)*$0e+((memoria_temp[f] shr 1) and $01)*$1f+((memoria_temp[f] shr 2) and $01)*$43+((memoria_temp[f] shr 3) and $01)*$8f;
-  colores[f].g:=((memoria_temp[f] shr 4) and $01)*$0e+((memoria_temp[f] shr 5) and $01)*$1f+((memoria_temp[f] shr 6) and $01)*$43+((memoria_temp[f] shr 7) and $01)*$8f;
-  colores[f].b:=((memoria_temp[f+$200] shr 0) and $01)*$0e+((memoria_temp[f+$200] shr 1) and $01)*$1f+((memoria_temp[f+$200] shr 2) and $01)*$43+((memoria_temp[f+$200] shr 3) and $01)*$8f;
-end;
-set_pal(colores,$200);
-// tiles/sprites color table
-for f:=$0 to $7ff do begin
-  gfx[0].colores[f]:=memoria_temp[$400+f];
-  gfx[1].colores[f]:=memoria_temp[$400+f];
-  gfx[2].colores[f]:=memoria_temp[$400+$800+f];
-end;
-//color prom used at run time
-copymemory(@nchar_prom[0],@memoria_temp[$1400],$20);
-//final
-reset_system86;
-iniciar_system86:=true;
-end;
-
-procedure cerrar_system86;
-begin
-if main_vars.tipo_maquina=124 then namco_63701x_close;
-end;
-
-procedure reset_system86;
-var
-  f:byte;
-begin
- main_m6809.reset;
- snd_m6809.reset;
- main_m6800.reset;
- namco_sound_reset;
- ym2151_0.reset;
- if main_vars.tipo_maquina=124 then namco_63701x_reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- rom_nbank:=0;
- rom_sub_nbank:=0;
- for f:=0 to 3 do scroll_y[f]:=0;
- for f:=0 to 3 do scroll_x[0]:=0;
- for f:=0 to 3 do prior[f]:=0;
- tile_bank:=0;
- copy_sprites:=false;
- irq_enable:=true;
- irq_sub_enable:=true;
-end;
 
 procedure draw_sprites(prior:byte;despx,despy:word);inline;
 var
@@ -726,6 +462,245 @@ procedure sound_update_adpcm;
 begin
   ym2151_0.update;
   namco_63701x_update;
+end;
+
+//Main
+procedure reset_system86;
+var
+  f:byte;
+begin
+ main_m6809.reset;
+ snd_m6809.reset;
+ main_m6800.reset;
+ namco_sound_reset;
+ ym2151_0.reset;
+ if main_vars.tipo_maquina=124 then namco_63701x_reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ rom_nbank:=0;
+ rom_sub_nbank:=0;
+ for f:=0 to 3 do scroll_y[f]:=0;
+ for f:=0 to 3 do scroll_x[0]:=0;
+ for f:=0 to 3 do prior[f]:=0;
+ tile_bank:=0;
+ copy_sprites:=false;
+ irq_enable:=true;
+ irq_sub_enable:=true;
+end;
+
+function iniciar_system86:boolean;
+var
+  colores:tpaleta;
+  f:word;
+  memoria_temp:array[0..$7ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    ps_x:array[0..31] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
+ 			8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4,
+			16*64+0*4, 16*64+1*4, 16*64+2*4, 16*64+3*4, 16*64+4*4, 16*64+5*4, 16*64+6*4, 16*64+7*4,
+			16*64+8*4, 16*64+9*4, 16*64+10*4, 16*64+11*4, 16*64+12*4, 16*64+13*4, 16*64+14*4, 16*64+15*4);
+    ps_y:array[0..31] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+			8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64,
+			32*64, 33*64, 34*64, 35*64, 36*64, 37*64, 38*64, 39*64,
+			40*64, 41*64, 42*64, 43*64, 44*64, 45*64, 46*64, 47*64);
+procedure convert_data(long:dword);
+var
+  size,i:dword;
+  dest1,dest2,mono:dword;
+  buffer:array[0..$1ffff] of byte;
+  data1,data2:byte;
+begin
+  size:=(long*2) div 3;
+	dest1:=0;
+	dest2:=0+(size div 2);
+  mono:=0+size;
+  copymemory(@buffer[0],@memoria_temp[0],size);
+  for i:=0 to ((size div 2)-1) do begin
+			data1:=buffer[i*2];
+			data2:=buffer[(i*2)+1];
+			memoria_temp[dest1]:=(data1 shl 4) or (data2 and $f);
+      dest1:=dest1+1;
+			memoria_temp[dest2]:=(data1 and $f0) or (data2 shr 4);
+      dest2:=dest2+1;
+      memoria_temp[mono]:=memoria_temp[mono] xor $ff;
+      mono:=mono+1;
+  end;
+end;
+procedure convert_chars(num:word);
+begin
+  mask_chars:=num-1;
+  init_gfx(0,8,8,num);
+  gfx[0].trans[7]:=true;
+  gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+end;
+procedure convert_tiles(num:word);
+begin
+  mask_tiles:=num-1;
+  init_gfx(1,8,8,num);
+  gfx[1].trans[7]:=true;
+  gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
+  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+end;
+procedure convert_sprites(num:word);
+begin
+  init_gfx(2,32,32,num);
+  gfx[2].trans[15]:=true;
+  gfx_set_desc_data(4,0,64*64,0,1,2,3);
+  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  bank_sprites:=num div 8;
+end;
+begin
+iniciar_system86:=false;
+iniciar_audio(false);
+screen_init(1,512,256,true);
+screen_mod_scroll(1,512,512,511,256,256,255);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,512,511,256,256,255);
+screen_init(3,512,256,true);
+screen_mod_scroll(3,512,512,511,256,256,255);
+screen_init(4,512,256,true);
+screen_mod_scroll(4,512,512,511,256,256,255);
+screen_init(5,512,256,false,true);
+iniciar_video(288,224);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1536000,256);
+//Sub CPU
+snd_m6809:=cpu_m6809.Create(1536000,256);
+//MCU CPU
+main_m6800:=cpu_m6800.create(6144000,$100,cpu_hd63701);
+main_m6800.change_ram_calls(rthunder_mcu_getbyte,rthunder_mcu_putbyte);
+main_m6800.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
+if main_vars.tipo_maquina<>124 then main_m6800.init_sound(sound_update)
+  else main_m6800.init_sound(sound_update_adpcm);
+//Sound
+namco_sound_init(8,true);
+ym2151_0:=ym2151_chip.create(3579580,0.4);
+case main_vars.tipo_maquina of
+    124:begin
+            //cargar roms main CPU
+            if not(cargar_roms(@memoria[$0],@rthunder_rom,'rthunder.zip',1)) then exit;
+            main_m6809.change_ram_calls(system86_getbyte,rthunder_putbyte);
+            //Pongo las ROMs en su banco
+            if not(cargar_roms(@memoria_temp[0],@rthunder_rom_bank[0],'rthunder.zip',0)) then exit;
+            for f:=0 to $1f do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
+            //cargar roms sub CPU
+            if not(cargar_roms(@memoria_temp[0],@rthunder_sub_rom[0],'rthunder.zip',0)) then exit;
+            snd_m6809.change_ram_calls(rthunder_sub_getbyte,rthunder_sub_putbyte);
+            //Pongo las ROMs en su banco
+            copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
+            for f:=0 to $3 do copymemory(@rom_sub_bank[f,0],@memoria_temp[(f*$2000)+$8000],$2000);
+            //Cargar MCU
+            if not(cargar_roms(@mem_snd[0],@rthunder_mcu[0],'rthunder.zip',0)) then exit;
+            //Cargar ADPCM
+            namco_63701x_start(6000000);
+            if not(cargar_roms(namco_63701_rom,@rthunder_adpcm,'rthunder.zip',0)) then exit;
+            //convertir chars
+            if not(cargar_roms(@memoria_temp[0],@rthunder_chars[0],'rthunder.zip',0)) then exit;
+            convert_data($18000);
+            convert_chars($1000);
+            //tiles
+            if not(cargar_roms(@memoria_temp[0],@rthunder_tiles[0],'rthunder.zip',0)) then exit;
+            convert_data($c000);
+            convert_tiles($800);
+            //sprites
+            if not(cargar_roms(@memoria_temp[0],@rthunder_sprites[0],'rthunder.zip',0)) then exit;
+            convert_sprites($400);
+            //Paleta
+            if not(cargar_roms(@memoria_temp[0],@rthunder_prom[0],'rthunder.zip',0)) then exit;
+            dip_2:=$f9;
+            update_video_system86:=rthunder_video;
+    end;
+    125:begin
+            //cargar roms main CPU
+            if not(cargar_roms(@memoria[$0],@hopmappy_rom,'hopmappy.zip',1)) then exit;
+            main_m6809.change_ram_calls(system86_getbyte,system86_putbyte);
+            //cargar roms sub CPU
+            if not(cargar_roms(@mem_misc[0],@hopmappy_sub_rom,'hopmappy.zip',1)) then exit;
+            snd_m6809.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
+            //Cargar MCU
+            if not(cargar_roms(@mem_snd[0],@hopmappy_mcu[0],'hopmappy.zip',0)) then exit;
+            //convertir chars
+            fillchar(memoria_temp[0],$6000,0);
+            if not(cargar_roms(@memoria_temp[0],@hopmappy_chars,'hopmappy.zip',1)) then exit;
+            convert_data($6000);
+            init_gfx(0,8,8,$400);
+            convert_chars($400);
+            //tiles
+            fillchar(memoria_temp[0],$6000,0);
+            if not(cargar_roms(@memoria_temp[0],@hopmappy_tiles,'hopmappy.zip',1)) then exit;
+            convert_data($6000);
+            convert_tiles($400);
+            //sprites
+            if not(cargar_roms(@memoria_temp[0],@hopmappy_sprites,'hopmappy.zip',1)) then exit;
+            convert_sprites($200);
+            //Paleta
+            if not(cargar_roms(@memoria_temp[0],@hopmappy_prom[0],'hopmappy.zip',0)) then exit;
+            dip_2:=$ff;
+            update_video_system86:=rthunder_video;
+    end;
+    126:begin
+            //cargar roms main CPU
+            if not(cargar_roms(@memoria_temp[$0],@skykiddx_rom[0],'skykiddx.zip',0)) then exit;
+            copymemory(@memoria[$8000],@memoria_temp[0],$8000);
+            for f:=0 to 3 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+            main_m6809.change_ram_calls(system86_getbyte,system86_putbyte);
+            //cargar roms sub CPU
+            if not(cargar_roms(@mem_misc[0],@skykiddx_sub_rom,'skykiddx.zip',1)) then exit;
+            snd_m6809.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
+            //Cargar MCU
+            if not(cargar_roms(@mem_snd[0],@skykiddx_mcu[0],'skykiddx.zip',0)) then exit;
+            //convertir chars
+            if not(cargar_roms(@memoria_temp[0],@skykiddx_chars[0],'skykiddx.zip',0)) then exit;
+            convert_data($c000);
+            convert_chars($800);
+            //tiles
+            if not(cargar_roms(@memoria_temp[0],@skykiddx_tiles[0],'skykiddx.zip',0)) then exit;
+            convert_data($c000);
+            convert_tiles($800);
+            //sprites
+            if not(cargar_roms(@memoria_temp[0],@skykiddx_sprites[0],'skykiddx.zip',0)) then exit;
+            convert_sprites($200);
+            //Paleta
+            if not(cargar_roms(@memoria_temp[0],@skykiddx_prom[0],'skykiddx.zip',0)) then exit;
+            dip_2:=$ff;
+            update_video_system86:=skykiddx_video;
+    end;
+end;
+for f:=0 to $1ff do begin
+  colores[f].r:=((memoria_temp[f] shr 0) and $01)*$0e+((memoria_temp[f] shr 1) and $01)*$1f+((memoria_temp[f] shr 2) and $01)*$43+((memoria_temp[f] shr 3) and $01)*$8f;
+  colores[f].g:=((memoria_temp[f] shr 4) and $01)*$0e+((memoria_temp[f] shr 5) and $01)*$1f+((memoria_temp[f] shr 6) and $01)*$43+((memoria_temp[f] shr 7) and $01)*$8f;
+  colores[f].b:=((memoria_temp[f+$200] shr 0) and $01)*$0e+((memoria_temp[f+$200] shr 1) and $01)*$1f+((memoria_temp[f+$200] shr 2) and $01)*$43+((memoria_temp[f+$200] shr 3) and $01)*$8f;
+end;
+set_pal(colores,$200);
+// tiles/sprites color table
+for f:=$0 to $7ff do begin
+  gfx[0].colores[f]:=memoria_temp[$400+f];
+  gfx[1].colores[f]:=memoria_temp[$400+f];
+  gfx[2].colores[f]:=memoria_temp[$400+$800+f];
+end;
+//color prom used at run time
+copymemory(@nchar_prom[0],@memoria_temp[$1400],$20);
+//final
+reset_system86;
+iniciar_system86:=true;
+end;
+
+procedure cerrar_system86;
+begin
+if main_vars.tipo_maquina=124 then namco_63701x_close;
+end;
+
+procedure Cargar_system86;
+begin
+llamadas_maquina.iniciar:=iniciar_system86;
+llamadas_maquina.bucle_general:=system86_principal;
+llamadas_maquina.cerrar:=cerrar_system86;
+llamadas_maquina.reset:=reset_system86;
+llamadas_maquina.fps_max:=60.606060;
 end;
 
 end.

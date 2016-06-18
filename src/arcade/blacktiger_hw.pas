@@ -168,7 +168,7 @@ while EmuStatus=EsRuning do begin
     frame_mcu:=frame_mcu+main_mcs51.tframes-main_mcs51.contador;
     if f=239 then begin
       update_video_blktiger;
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
     end;
   end;
@@ -246,8 +246,7 @@ case (puerto and $FF) of
   4:begin
       ch_on:=(valor and $80)=0;
       main_screen.flip_main_screen:=(valor and $40)<>0;
-      if ((valor and $20)<>0) then snd_z80.pedir_reset:=ASSERT_LINE
-        else snd_z80.pedir_reset:=CLEAR_LINE;
+      snd_z80.change_reset((valor and $20) shr 5);
     end;
   7:begin
       z80_latch:=valor;
@@ -334,7 +333,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure blk_hi_score;

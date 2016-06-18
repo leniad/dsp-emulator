@@ -1,15 +1,14 @@
 unit file_engine;
 
 interface
-uses unzip2,
+uses {$IFDEF windows}windows,{$endif}
      {$ifdef fpc}
-     ziputils2,ZLibEx,
-     {$IFDEF windows}windows,{$endif}
+     zipper,zdeflate,zinflate,zbase,ziputils,unzip2,
      {$else}
-     {$IFDEF windows}windows,Zlib,{$ENDIF}
+     Zlib,zip,
      {$endif}
-     sysutils,dialogs,lenguaje,misc_functions,sound_engine,inifiles,main_engine,
-     controls_engine;
+     sysutils,dialogs,lenguaje,sound_engine,inifiles,main_engine,
+     controls_engine,misc_functions;
 
 type
     tzip_find_files=record
@@ -33,7 +32,6 @@ function write_file(nombre_file:string;donde:pbyte;longitud:integer):boolean;
 function file_name_only(cadena:string):string;
 //Parte ZIP
 function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
-function find_first_file_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
 function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
 function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
 function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
@@ -449,7 +447,7 @@ var
 begin
 for f:=length(cadena) downto 1 do begin
   if cadena[f]=main_vars.cadena_dir then begin
-    cadena2:=copy(cadena,f+1,length(cadena)-f);
+    cadena2:=system.copy(cadena,f+1,length(cadena)-f);
     break;
   end;
 end;
@@ -523,270 +521,296 @@ end;
 //Parte ZIP
 function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
 var
-  zfile:unzFile;
-  zfile_info:unz_file_info_ptr;
-  zglobal_info:unz_global_info;
-  f,h:integer;
-  pfile_name,temp:pchar;
+  f:integer;
   extension,extension2:string;
+  res:boolean;
+{$ifndef fpc}
+  ZipFile:TZipFile;
+  buffer:Tbytes;
+{$else}
+  ZipFile:TUnZipper;
+{$endif}
 begin
-search_file_from_zip:=false;
+res:=false;
 //Si no existe el ZIP -> Error
-if not(FileExists(nombre_zip)) then begin
-  if warning then MessageDlg('ZIP File not found: '+'"'+nombre_zip+'"', mtError,[mbOk], 0);
-  exit;
-end;
-zfile:=unzOpen(pchar(nombre_zip));  //Abro el ZIP
-getmem(zfile_info,sizeof(unz_file_info));  //Creo la info del fichero
-unzGetGlobalInfo(zfile,zglobal_info); //Asignarle info global
-if unzGoToFirstFile(zfile)<>0 then exit;  //Buscar primer fichero
-for h:=1 to 25 {zglobal_info.number_entry} do begin //En lugar de buscar en todos los ficheros, solo busco en los 25 primeros... o se cuelga!!
-    unzOpenCurrentFile(zfile);  //Cojo el primer fichero
-    getmem(pfile_name,200);
-    unzGetCurrentFileInfo(zfile,zfile_info,pfile_name,200,nil,0,nil,0);  //Cojo la informacion del fichero
-    unzCloseCurrentFile(zfile);
-    temp:=pfile_name;
-    nombre_file:='';
-    for f:=1 to zfile_info.size_filename do begin
-        nombre_file:=nombre_file+temp^;
-        inc(temp);
-    end;
-    freemem(pfile_name);
-    longitud:=zfile_info.uncompressed_size;
-    crc:=zfile_info.crc;
-    //Hay algun wildcard?
-    if file_mask[1]='*' then begin
-       if file_mask='*.*' then begin
-          freemem(zfile_info);
-          search_file_from_zip:=true;
-          exit;
-       end;
-       extension:=extension_fichero(nombre_file);
-       extension2:=extension_fichero(file_mask);
-       if extension=extension2 then begin
-          freemem(zfile_info);
-          search_file_from_zip:=true;
-          exit;
-       end;
-    end else begin //Busca un fichero
-        if nombre_file=file_mask then begin
-          freemem(zfile_info);
-          search_file_from_zip:=true;
-          exit;
-       end;
-    end;
-    if unzGoToNextFile(zfile)<>0 then exit;
-end;
-if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-freemem(zfile_info);
-end;
-
-function find_first_file_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
-var
-  zfile:unzFile;
-  zfile_info:unz_file_info_ptr;
-  zglobal_info:unz_global_info;
-  f,h:integer;
-  pfile_name,temp:pchar;
-  extension,extension2:string;
-begin
-find_first_file_zip:=false;
-//Si no existe el ZIP -> Error
-if not(FileExists(nombre_zip)) then begin
-  if warning then MessageDlg('ZIP File not found: '+'"'+nombre_zip+'"', mtError,[mbOk], 0);
-  exit;
-end;
-zfile:=unzOpen(pchar(nombre_zip));  //Abro el ZIP
-getmem(zfile_info,sizeof(unz_file_info));  //Creo la info del fichero
-unzGetGlobalInfo(zfile,zglobal_info); //Asignarle info global
-if unzGoToFirstFile(zfile)<>0 then exit;  //Buscar primer fichero
-for h:=1 to zglobal_info.number_entry do begin
-    unzOpenCurrentFile(zfile);  //Cojo el primer fichero
-    getmem(pfile_name,200);
-    unzGetCurrentFileInfo(zfile,zfile_info,pfile_name,200,nil,0,nil,0);  //Cojo la informacion del fichero
-    unzCloseCurrentFile(zfile);
-    temp:=pfile_name;
-    nombre_file:='';
-    for f:=1 to zfile_info.size_filename do begin
-        nombre_file:=nombre_file+temp^;
-        inc(temp);
-    end;
-    freemem(pfile_name);
-    longitud:=zfile_info.uncompressed_size;
-    crc:=zfile_info.crc;
-    zip_find_files_data.posicion_dentro_zip:=h-1;
+if not(FileExists(nombre_zip)) then exit;
+{$ifndef fpc}
+  ZipFile:=TZipFile.Create;
+  ZipFile.Open(nombre_zip,zmRead);
+  for f:=0 to (ZipFile.FileCount-1) do begin
+    nombre_file:=ZipFile.FileNames[f];
+    longitud:=ZipFile.FileInfos[f].UncompressedSize;
+    crc:=ZipFile.FileInfos[f].CRC32;
+    zip_find_files_data.posicion_dentro_zip:=f;
     zip_find_files_data.nombre_zip:=nombre_zip;
     zip_find_files_data.file_mask:=file_mask;
-    //Hay algun wildcard?
     if file_mask[1]='*' then begin
        if file_mask='*.*' then begin
-          freemem(zfile_info);
-          find_first_file_zip:=true;
-          exit;
+          res:=true;
+          break;
        end;
        extension:=extension_fichero(nombre_file);
        extension2:=extension_fichero(file_mask);
        if extension=extension2 then begin
-          freemem(zfile_info);
-          find_first_file_zip:=true;
-          exit;
+          res:=true;
+          break;
        end;
-    end else begin //Busca un fichero
-        if nombre_file=file_mask then begin
-          freemem(zfile_info);
-          find_first_file_zip:=true;
-          exit;
+    end else begin
+      if lowercase(nombre_file)=lowercase(file_mask) then begin
+          res:=true;
+          break;
        end;
     end;
-    if unzGoToNextFile(zfile)<>0 then exit;
-end;
-if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-freemem(zfile_info);
+  end;
+  ZipFile.Close;
+  ZipFile.Free;
+{$else}
+  ZipFile:=TUnZipper.create;
+  ZipFile.FileName:=nombre_zip;
+  ZipFile.Examine;
+  for f:=0 to (ZipFile.Entries.Count-1) do begin
+    nombre_file:=ZipFile.Entries[f].ArchiveFileName;
+    longitud:=ZipFile.Entries[f].Size;
+    crc:=ZipFile.Entries[f].CRC32;
+    zip_find_files_data.posicion_dentro_zip:=f;
+    zip_find_files_data.nombre_zip:=nombre_zip;
+    zip_find_files_data.file_mask:=file_mask;
+    if file_mask[1]='*' then begin
+       if file_mask='*.*' then begin
+          res:=true;
+          break;
+       end;
+       extension:=extension_fichero(nombre_file);
+       extension2:=extension_fichero(file_mask);
+       if extension=extension2 then begin
+          res:=true;
+          break;
+       end;
+    end else begin
+      if lowercase(nombre_file)=lowercase(file_mask) then begin
+          res:=true;
+          break;
+       end;
+    end;
+  end;
+  ZipFile.Free;
+{$endif}
+search_file_from_zip:=res;
+if (warning and not(res)) then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
 end;
 
 function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
 var
-  zfile:unzFile;
-  zfile_info:unz_file_info_ptr;
-  zglobal_info:unz_global_info;
-  f,h:integer;
-  pfile_name,temp:pchar;
+  f:integer;
   extension,extension2:string;
+{$ifndef fpc}
+  ZipFile:TZipFile;
+{$else}
+  ZipFile:TUnZipper;
+{$endif}
 begin
 find_next_file_zip:=false;
-zfile:=unzOpen(pchar(zip_find_files_data.nombre_zip));  //Abro el ZIP (ya existe)
-getmem(zfile_info,sizeof(unz_file_info));  //Creo la info del fichero
-unzGetGlobalInfo(zfile,zglobal_info); //Asignarle info global
-if unzGoToFirstFile(zfile)<>0 then exit;  //Buscar primer fichero
-zip_find_files_data.posicion_dentro_zip:=zip_find_files_data.posicion_dentro_zip+1;
-//He llegado al final?
-if zip_find_files_data.posicion_dentro_zip>=zglobal_info.number_entry then begin
-  freemem(zfile_info);
-  exit;
-end;
-//Busco el siguiente
-for f:=1 to zip_find_files_data.posicion_dentro_zip do begin
-    if unzGoToNextFile(zfile)<>0 then begin
-       freemem(zfile_info);
-       exit;
-    end;
-end;
-for h:=zip_find_files_data.posicion_dentro_zip to zglobal_info.number_entry do begin
-    unzOpenCurrentFile(zfile);  //Cojo el primer fichero
-    getmem(pfile_name,200);
-    unzGetCurrentFileInfo(zfile,zfile_info,pfile_name,200,nil,0,nil,0);  //Cojo la informacion del fichero
-    unzCloseCurrentFile(zfile);
-    temp:=pfile_name;
-    nombre_file:='';
-    for f:=1 to zfile_info.size_filename do begin
-        nombre_file:=nombre_file+temp^;
-        inc(temp);
-    end;
-    freemem(pfile_name);
-    longitud:=zfile_info.uncompressed_size;
-    crc:=zfile_info.crc;
-    //Hay algun wildcard?
+{$ifndef fpc}
+  ZipFile:=TZipFile.Create;
+  ZipFile.Open(zip_find_files_data.nombre_zip,zmRead);
+  for f:=(zip_find_files_data.posicion_dentro_zip+1) to (ZipFile.FileCount-1) do begin
+    nombre_file:=ZipFile.FileNames[f];
+    longitud:=ZipFile.FileInfos[f].UncompressedSize;
+    crc:=ZipFile.FileInfos[f].CRC32;
+    zip_find_files_data.posicion_dentro_zip:=f;
     if zip_find_files_data.file_mask[1]='*' then begin
        if zip_find_files_data.file_mask='*.*' then begin
-          freemem(zfile_info);
           find_next_file_zip:=true;
-          exit;
+          break;
        end;
        extension:=extension_fichero(nombre_file);
        extension2:=extension_fichero(zip_find_files_data.file_mask);
        if extension=extension2 then begin
-          freemem(zfile_info);
           find_next_file_zip:=true;
-          exit;
+          break;
        end;
-    end else begin //Busca un fichero
-        if nombre_file=zip_find_files_data.file_mask then begin
-          freemem(zfile_info);
+    end else begin
+      if lowercase(nombre_file)=lowercase(zip_find_files_data.file_mask) then begin
           find_next_file_zip:=true;
-          exit;
+          break;
        end;
     end;
-    if unzGoToNextFile(zfile)<>0 then exit
-       else zip_find_files_data.posicion_dentro_zip:=zip_find_files_data.posicion_dentro_zip+1;
-end;
-//Existe...
-freemem(zfile_info);
+  end;
+  ZipFile.Close;
+  ZipFile.Free;
+{$else}
+  ZipFile:=TUnZipper.create;
+  ZipFile.FileName:=zip_find_files_data.nombre_zip;
+  ZipFile.Examine;
+  for f:=(zip_find_files_data.posicion_dentro_zip+1) to (ZipFile.Entries.Count-1) do begin
+    nombre_file:=ZipFile.Entries[f].ArchiveFileName;
+    longitud:=ZipFile.Entries[f].Size;
+    crc:=ZipFile.Entries[f].CRC32;
+    zip_find_files_data.posicion_dentro_zip:=f;
+    if zip_find_files_data.file_mask[1]='*' then begin
+       if zip_find_files_data.file_mask='*.*' then begin
+          find_next_file_zip:=true;
+          break;
+       end;
+       extension:=extension_fichero(nombre_file);
+       extension2:=extension_fichero(zip_find_files_data.file_mask);
+       if extension=extension2 then begin
+          find_next_file_zip:=true;
+          break;
+       end;
+    end else begin
+      if lowercase(nombre_file)=lowercase(zip_find_files_data.file_mask) then begin
+          find_next_file_zip:=true;
+          break;
+       end;
+    end;
+  end;
+  ZipFile.Free;
+{$endif}
 end;
 
 function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
 var
+  f:word;
+  find:boolean;
+{$ifndef fpc}
+  ZipFile:TZipFile;
+  buffer:Tbytes;
+{$else}
+  ZipFile:TUnZipper;
   zfile:unzFile;
-  zfile_info:unz_file_info_ptr;
-  res:longint;
+{$endif}
 begin
-load_file_from_zip:=false;
-//Si no existe el ZIP -> Error
-if not(FileExists(nombre_zip)) then begin
-  if warning then MessageDlg('ZIP File not found: '+'"'+nombre_zip+'"', mtError,[mbOk], 0);
-  exit;
-end;
-zfile:=unzOpen(pchar(nombre_zip));  //Abro el ZIP
-getmem(zfile_info,sizeof(unz_file_info));  //Creo la info del fichero
-res:=unzLocateFile(zfile,pchar(nombre_file),0);
-//No existe
-if res<>0 then begin
-   if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
-   freemem(zfile_info);
-   exit;
-end;
-unzOpenCurrentFile(zfile);
-unzGetCurrentFileInfo(zfile,zfile_info,nil,0,nil,0,nil,0);
-longitud:=zfile_info.uncompressed_size;
-crc:=zfile_info.crc;
-unzReadCurrentFile(zfile,donde,longitud);
-freemem(zfile_info);
+  load_file_from_zip:=false;
+  //Si no existe el ZIP -> Error
+  if not(FileExists(nombre_zip)) then exit;
+{$ifndef fpc}
+  ZipFile:=TZipFile.Create;
+  ZipFile.Open(nombre_zip,zmRead);
+  for f:=0 to (ZipFile.FileCount-1) do begin
+    if lowercase(ZipFile.FileNames[f])=lowercase(nombre_file) then begin
+      find:=true;
+      break;
+    end;
+  end;
+  if not(find) then begin
+    ZipFile.Close;
+    ZipFile.Free;
+    exit;
+  end;
+  longitud:=ZipFile.FileInfos[f].UncompressedSize;
+  SetLength(buffer,longitud);
+  ZipFile.Read(f,buffer);
+  copymemory(donde,@buffer[0],longitud);
+  SetLength(buffer,0);
+  ZipFile.Close;
+  ZipFile.Free;
+{$else}
+  ZipFile:=TUnZipper.create;
+  ZipFile.FileName:=nombre_zip;
+  ZipFile.Examine;
+  for f:=0 to (ZipFile.Entries.Count-1) do begin
+    if lowercase(ZipFile.Entries[f].ArchiveFileName)=lowercase(nombre_file) then begin
+      find:=true;
+      break;
+    end;
+  end;
+  if not(find) then begin
+    ZipFile.Free;
+    exit;
+  end;
+  zfile:=unzOpen(pchar(nombre_zip));
+  longitud:=ZipFile.Entries[f].Size;
+  unzLocateFile(zfile,pchar(ZipFile.Entries[f].ArchiveFileName),0);
+  unzOpenCurrentFile(zfile);
+  unzReadCurrentFile(zfile,pointer(donde),longitud);
+  unzClose(zfile);
+  ZipFile.Free;
+{$endif}
 load_file_from_zip:=true;
 end;
 
 function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
 var
-  zfile:unzFile;
-  zglobal_info:unz_global_info;
-  find:boolean;
   f:word;
-  zfile_info:unz_file_info_ptr;
+  find:boolean;
+{$ifndef fpc}
+  ZipFile:TZipFile;
+  buffer:Tbytes;
+{$else}
+  ZipFile:TUnZipper;
+  zfile:unzFile;
+{$endif}
 begin
-load_file_from_zip_crc:=false;
-//Si no existe el ZIP -> Error
-if not(FileExists(nombre_zip)) then exit;
-zfile:=unzOpen(pchar(nombre_zip));  //Abrir el ZIP
-unzGetGlobalInfo(zfile,zglobal_info); //Asignarle info global
-unzGoToFirstFile(zfile);  //Buscar primer fichero
-getmem(zfile_info,sizeof(unz_file_info)); //Crear info file
-find:=false;
-for f:=1 to zglobal_info.number_entry do begin
-  unzGetCurrentFileInfo(zfile,zfile_info,nil,0,nil,0,nil,0);
-  if zfile_info.crc=crc then begin
-    longitud:=zfile_info.uncompressed_size;
-    find:=true;
-    break;
+  load_file_from_zip_crc:=false;
+  //Si no existe el ZIP -> Error
+  if not(FileExists(nombre_zip)) then exit;
+{$ifndef fpc}
+  ZipFile:=TZipFile.Create;
+  ZipFile.Open(nombre_zip,zmRead);
+  for f:=0 to (ZipFile.FileCount-1) do begin
+    if ZipFile.FileInfos[f].CRC32=cardinal(crc) then begin
+      find:=true;
+      break;
+    end;
   end;
-  unzGoToNextFile(zfile);
-end;
-if not(find) then begin
-   freemem(zfile_info);
-   unzClose(zfile);
-   exit;
-end;
-unzOpenCurrentFile(zfile);
-unzReadCurrentFile(zfile,donde,longitud);
-unzCloseCurrentFile(zfile);
-unzClose(zfile);
-freemem(zfile_info);
-load_file_from_zip_crc:=true;
+  if not(find) then begin
+    ZipFile.Close;
+    ZipFile.Free;
+    exit;
+  end;
+  longitud:=ZipFile.FileInfos[f].UncompressedSize;
+  SetLength(buffer,longitud);
+  ZipFile.Read(f,buffer);
+  copymemory(donde,@buffer[0],longitud);
+  SetLength(buffer,0);
+  ZipFile.Close;
+  ZipFile.Free;
+{$else}
+  ZipFile:=TUnZipper.create;
+  ZipFile.FileName:=nombre_zip;
+  ZipFile.Examine;
+  for f:=0 to (ZipFile.Entries.Count-1) do begin
+    if ZipFile.Entries[f].CRC32=cardinal(crc) then begin
+      find:=true;
+      break;
+    end;
+  end;
+  if not(find) then begin
+    ZipFile.Free;
+    exit;
+  end;
+  zfile:=unzOpen(pchar(nombre_zip));
+  longitud:=ZipFile.Entries[f].Size;
+  unzLocateFile(zfile,pchar(ZipFile.Entries[f].ArchiveFileName),0);
+  unzOpenCurrentFile(zfile);
+  unzReadCurrentFile(zfile,pointer(donde),longitud);
+  unzClose(zfile);
+  ZipFile.Free;
+{$endif}
+  load_file_from_zip_crc:=true;
 end;
 
+//Funciones de zlib
 procedure compress_zlib(in_buffer:pointer;in_size:integer;out_buffer:pointer;var out_size:integer);
 var
   buffer:pointer;
+  {$ifdef fpc}stream:z_stream;{$endif}
 begin
+{$ifndef fpc}
   buffer:=nil;
   ZCompress(pointer(in_buffer),in_size,buffer,out_size,zcDefault);
+{$else}
+  getmem(buffer,$100000);
+  stream.next_in:=pbyte(in_buffer);
+  stream.avail_in:=cardinal(in_size);
+  stream.next_out:=buffer;
+  stream.avail_out:=$100000;
+  deflateInit(stream,Z_BEST_COMPRESSION);
+  deflate(stream,Z_FINISH);
+  deflateEnd(stream);
+  out_size:=stream.total_out;
+{$endif}
   copymemory(out_buffer,buffer,out_size);
   freemem(buffer);
 end;
@@ -794,9 +818,22 @@ end;
 procedure decompress_zlib(in_buffer:pointer;in_size:integer;var out_buffer:pointer;var out_size:integer);
 var
   buffer:pointer;
+  {$ifdef fpc}stream:z_stream;{$endif}
 begin
+{$ifndef fpc}
   buffer:=nil;
   ZDecompress(pointer(in_buffer),in_size,buffer,out_size);
+{$else}
+  getmem(buffer,$100000);
+  stream.next_in:=Pbyte(in_buffer);
+  stream.avail_in:=cardinal(in_size);
+  stream.next_out:=buffer;
+  stream.avail_out:=$100000;
+  inflateInit(stream);
+  inflate(stream,Z_FINISH);
+  inflateEnd(stream);
+  out_size:=stream.total_out;
+{$endif}
   if out_buffer=nil then getmem(out_buffer,out_size);
   copymemory(out_buffer,buffer,out_size);
   freemem(buffer);

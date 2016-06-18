@@ -227,7 +227,7 @@ end;
 
 procedure gng_snd_irq;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 procedure gng_qsave(nombre:string);

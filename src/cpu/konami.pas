@@ -549,19 +549,27 @@ case instruccion of
      $83:r.d.a:=m680x_com(r.d.a,@r.cc); //coma 2T
      $84:r.d.b:=m680x_com(r.d.b,@r.cc); //comb 2T
      $85:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T
-     $86:self.neg(@r.d.a); //nega 2T
-     $87:self.neg(@r.d.b); //negb 2T
+     $86:m680x_neg(@r.d.a,@r.cc); //nega 2T
+     $87:m680x_neg(@r.d.b,@r.cc); //negb 2T
      $88:begin  //neg 4T
           tempb:=self.getbyte(posicion);
-          self.neg(@tempb);
+          m680x_neg(@tempb,@r.cc);
           self.putbyte(posicion,tempb);
          end;
-     $89:r.d.a:=m680x_inc(r.d.a,@r.cc); //inca 2T
-     $8a:r.d.b:=m680x_inc(r.d.b,@r.cc); //incb 2T
-     $8b:self.putbyte(posicion,m680x_inc(self.getbyte(posicion),@r.cc)); //inc 4T
-     $8c:r.d.a:=m680x_dec(r.d.a,@r.cc); //deca 2T
-     $8d:r.d.b:=m680x_dec(r.d.b,@r.cc); //decb 2T
-     $8e:self.putbyte(posicion,m680x_dec(self.getbyte(posicion),@r.cc)); //dec 4T
+     $89:m680x_inc(@r.d.a,@r.cc); //inca 2T
+     $8a:m680x_inc(@r.d.b,@r.cc); //incb 2T
+     $8b:begin //inc 4T
+            tempb:=self.getbyte(posicion);
+            m680x_inc(@tempb,@r.cc);
+            self.putbyte(posicion,tempb);
+         end;
+     $8c:m680x_dec(@r.d.a,@r.cc); //deca 2T
+     $8d:m680x_dec(@r.d.b,@r.cc); //decb 2T
+     $8e:begin //dec 4T
+            tempb:=self.getbyte(posicion);
+            m680x_dec(@tempb,@r.cc);
+            self.putbyte(posicion,tempb);
+         end;
      $8f:r.pc:=self.pop_sw; //rts 4T
      $90:m680x_tst(r.d.a,@r.cc); //tsta 2T
      $91:m680x_tst(r.d.b,@r.cc); //tstb 2T

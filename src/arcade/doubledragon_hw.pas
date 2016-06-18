@@ -222,13 +222,13 @@ begin
     case direccion of
         $0..$fff,$1800..$1fff,$3000..$37ff:ddragon_getbyte:=memoria[direccion];
         $1000..$13ff:ddragon_getbyte:=buffer_paleta[direccion and $3ff];
-        $2000..$27ff:if ((main_m6800.pedir_halt<>CLEAR_LINE) or (main_m6800.pedir_reset<>CLEAR_LINE)) then ddragon_getbyte:=common_ram[direccion and $1ff]
+        $2000..$27ff:if ((main_m6800.get_halt<>CLEAR_LINE) or (main_m6800.get_reset<>CLEAR_LINE)) then ddragon_getbyte:=common_ram[direccion and $1ff]
                         else ddragon_getbyte:=$ff;
         $2800..$2fff:ddragon_getbyte:=buffer_sprites[direccion and $fff];
         $3800:ddragon_getbyte:=marcade.in0;
         $3801:ddragon_getbyte:=marcade.in1;
         $3802:begin
-                if ((main_m6800.pedir_halt<>CLEAR_LINE) or (main_m6800.pedir_reset<>CLEAR_LINE)) then busy:=$0
+                if ((main_m6800.get_halt<>CLEAR_LINE) or (main_m6800.get_reset<>CLEAR_LINE)) then busy:=$0
                   else busy:=$10;
                 ddragon_getbyte:=marcade.in2+busy+vblank;
               end;
@@ -270,17 +270,17 @@ case direccion of
                           cambiar_color(direccion and $1ff);
                      end;
         $1800..$1fff:gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-        $2000..$27ff:if ((main_m6800.pedir_halt<>CLEAR_LINE) or (main_m6800.pedir_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
+        $2000..$27ff:if ((main_m6800.get_halt<>CLEAR_LINE) or (main_m6800.get_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
         $2800..$2fff:buffer_sprites[direccion and $7ff]:=valor;
         $3000..$37ff:gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
         $3808:begin
                 scroll_x:=(scroll_x and $ff) or ((valor and $1) shl 8);
                 scroll_y:=(scroll_y and $ff) or ((valor and $2) shl 7);
                 main_screen.flip_main_screen:=(valor and 4)=0;
-                if (valor and $8)<>0 then main_m6800.pedir_reset:=CLEAR_LINE
-                  else main_m6800.pedir_reset:=ASSERT_LINE;
-                if (valor and $10)<>0 then main_m6800.pedir_halt:=ASSERT_LINE
-                  else main_m6800.pedir_halt:=CLEAR_LINE;
+                if (valor and $8)<>0 then main_m6800.change_reset(CLEAR_LINE)
+                  else main_m6800.change_reset(ASSERT_LINE);
+                if (valor and $10)<>0 then main_m6800.change_halt(ASSERT_LINE)
+                  else main_m6800.change_halt(CLEAR_LINE);
                 banco_rom:=(valor and $e0) shr 5;
               end;
         $3809:scroll_x:=(scroll_x and $100) or valor;
@@ -445,12 +445,12 @@ function ddragon2_getbyte(direccion:word):byte;
 begin
     case direccion of
         $0..$1fff,$3000..$37ff:ddragon2_getbyte:=memoria[direccion];
-        $2000..$27ff:if ((sub_z80.pedir_halt<>CLEAR_LINE) or (sub_z80.pedir_reset<>CLEAR_LINE)) then ddragon2_getbyte:=common_ram[direccion and $1ff]
+        $2000..$27ff:if ((sub_z80.get_halt<>CLEAR_LINE) or (sub_z80.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=common_ram[direccion and $1ff]
                         else ddragon2_getbyte:=$ff;
         $2800..$2fff:ddragon2_getbyte:=buffer_sprites[direccion and $7ff];
         $3800:ddragon2_getbyte:=marcade.in0;
         $3801:ddragon2_getbyte:=marcade.in1;
-        $3802:if ((sub_z80.pedir_halt<>CLEAR_LINE) or (sub_z80.pedir_reset<>CLEAR_LINE)) then ddragon2_getbyte:=marcade.in2+vblank
+        $3802:if ((sub_z80.get_halt<>CLEAR_LINE) or (sub_z80.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=marcade.in2+vblank
                   else ddragon2_getbyte:=marcade.in2+$10+vblank;
         $3803:ddragon2_getbyte:=$ff;
         $3804:ddragon2_getbyte:=$ff;
@@ -487,17 +487,17 @@ if direccion>$3fff then exit;
 memoria[direccion]:=valor;
 case direccion of
         $1800..$1fff:gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-        $2000..$27ff:if ((sub_z80.pedir_halt<>CLEAR_LINE) or (sub_z80.pedir_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
+        $2000..$27ff:if ((sub_z80.get_halt<>CLEAR_LINE) or (sub_z80.get_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
         $2800..$2fff:buffer_sprites[direccion and $7ff]:=valor;
         $3000..$37ff:gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
         $3808:begin
                 scroll_x:=(scroll_x and $ff) or ((valor and $1) shl 8);
                 scroll_y:=(scroll_y and $ff) or ((valor and $2) shl 7);
                 main_screen.flip_main_screen:=(valor and 4)=0;
-                if (valor and $8)<>0 then sub_z80.pedir_reset:=CLEAR_LINE
-                  else sub_z80.pedir_reset:=ASSERT_LINE;
-                if (valor and $10)<>0 then sub_z80.pedir_halt:=ASSERT_LINE
-                  else sub_z80.pedir_halt:=CLEAR_LINE;
+                if (valor and $8)<>0 then sub_z80.change_reset(CLEAR_LINE)
+                  else sub_z80.change_reset(ASSERT_LINE);
+                if (valor and $10)<>0 then sub_z80.change_halt(ASSERT_LINE)
+                  else sub_z80.change_halt(CLEAR_LINE);
                 banco_rom:=(valor and $e0) shr 5;
               end;
         $3809:scroll_x:=(scroll_x and $100) or valor;
@@ -562,7 +562,7 @@ end;
 
 procedure ym2151_snd_irq_dd2(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure dd2_sound_update;
@@ -639,7 +639,6 @@ end;
 begin
 iniciar_ddragon:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256,true);
 screen_init(2,512,512);
 screen_mod_scroll(2,512,256,511,512,256,511);

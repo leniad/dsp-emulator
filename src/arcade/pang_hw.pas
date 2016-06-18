@@ -5,17 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,kabuki_decript,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,oki6295,sound_engine,eeprom;
 
-procedure Cargar_pang;
-procedure pang_principal;
-function iniciar_pang:boolean;
-procedure reset_pang;
-//CPU
-function pang_getbyte(direccion:word):byte;
-procedure pang_putbyte(direccion:word;valor:byte);
-function pang_inbyte(puerto:word):byte;
-procedure pang_outbyte(valor:byte;puerto:word);
-//Sound
-procedure pang_sound_update;
+procedure cargar_pang;
 
 implementation
 const
@@ -48,12 +38,188 @@ var
  vblank,irq_source:byte;
  pal_bank:word;
 
-procedure Cargar_pang;
+procedure update_video_pang;inline;
+var
+  x,y,f,color,nchar:word;
+  atrib:byte;
 begin
-llamadas_maquina.iniciar:=iniciar_pang;
-llamadas_maquina.bucle_general:=pang_principal;
-llamadas_maquina.reset:=reset_pang;
-llamadas_maquina.fps_max:=57.42;
+fill_full_screen(2,0);
+for f:=$0 to $7ff do begin
+  atrib:=memoria[$c800+f];
+  color:=atrib and $7f;
+  if (gfx[0].buffer[f] or buffer_color[color]) then begin
+    x:=f and $3f;
+    y:=f shr 6;
+    nchar:=(memoria[$d000+(f*2)]+(memoria[$d001+(f*2)] shl 8)) and $7fff;
+    put_gfx_trans_flip(x*8,y*8,nchar,color shl 4,1,0,(atrib and $80)<>0,false);
+    gfx[0].buffer[f]:=false;
+  end;
+end;
+actualiza_trozo(0,0,512,256,1,0,0,512,256,2);
+for f:=$7d downto 0 do begin
+  atrib:=obj_ram[(f*$20)+1];
+  nchar:=obj_ram[f*$20]+((atrib and $e0) shl 3);
+  color:=(atrib and $f) shl 4;
+  x:=obj_ram[(f*$20)+3]+((atrib and $10) shl 4);
+  y:=((obj_ram[(f*$20)+2]+8) and $ff)-8;
+  put_gfx_sprite(nchar,color,false,false,1);
+  actualiza_gfx_sprite(x,y,2,1);
+end;
+actualiza_trozo_final(64,8,384,240,2);
+fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+end;
+
+procedure eventos_pang;
+begin
+if event.arcade then begin
+  //IN1
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  //IN2
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  //IN0
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+end;
+end;
+
+procedure pang_principal;
+var
+  frame_m:single;
+  f:byte;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    case f of
+      $ef:begin
+            main_z80.change_irq(HOLD_LINE);
+            irq_source:=1;
+          end;
+      $f7:vblank:=8;
+      $ff:begin
+          main_z80.change_irq(HOLD_LINE);
+          vblank:=0;
+          irq_source:=0;
+      end;
+    end;
+  end;
+  update_video_pang;
+  eventos_pang;
+  video_sync;
+end;
+end;
+
+function pang_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0..$7fff:if main_z80.opcode then pang_getbyte:=memoria[direccion]
+                 else pang_getbyte:=mem_dat[direccion];
+  $8000..$bfff:if main_z80.opcode then pang_getbyte:=mem_rom_op[rom_nbank,direccion and $3fff]
+                 else pang_getbyte:=mem_rom_dat[rom_nbank,direccion and $3fff];
+  $c000..$c7ff:pang_getbyte:=buffer_paleta[(direccion and $7ff)+pal_bank];
+  $d000..$dfff:if (video_bank<>0) then pang_getbyte:=obj_ram[direccion and $fff]
+                  else pang_getbyte:=memoria[direccion];
+  $c800..$cfff,$e000..$ffff:pang_getbyte:=memoria[direccion];
+end;
+end;
+
+procedure cambiar_color(pos:word);inline;
+var
+  tmp_color:byte;
+  color:tcolor;
+begin
+  tmp_color:=buffer_paleta[$1+pos];
+  color.r:=pal4bit(tmp_color);
+  tmp_color:=buffer_paleta[pos];
+  color.g:=pal4bit(tmp_color shr 4);
+  color.b:=pal4bit(tmp_color);
+  set_pal_color(color,pos shr 1);
+  buffer_color[(pos shr 5) and $7f]:=true;
+end;
+
+procedure pang_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$c000 then exit;
+case direccion of
+  $c000..$c7ff:if buffer_paleta[(direccion and $7ff)+pal_bank]<>valor then begin
+                  buffer_paleta[(direccion and $7ff)+pal_bank]:=valor;
+                  cambiar_color((direccion and $7fe)+pal_bank);
+               end;
+  $c800..$cfff:begin
+                  gfx[0].buffer[direccion and $7ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $d000..$dfff:if (video_bank<>0) then obj_ram[direccion and $fff]:=valor
+                else begin
+                        memoria[direccion]:=valor;
+                        gfx[0].buffer[(direccion and $fff) shr 1]:=true;
+                     end;
+  $e000..$ffff:memoria[direccion]:=valor;
+end;
+end;
+
+function pang_inbyte(puerto:word):byte;
+begin
+case (puerto and $ff) of
+  0:pang_inbyte:=marcade.in0;
+  1:pang_inbyte:=marcade.in1;
+  2:pang_inbyte:=marcade.in2;
+  5:pang_inbyte:=(eeprom_0.readbit shl 7) or vblank or 2 or irq_source;
+end;
+end;
+
+procedure pang_outbyte(valor:byte;puerto:word);
+begin
+case (puerto and $ff) of
+  $0:begin
+      main_screen.flip_main_screen:=(valor and $4)<>0;
+      pal_bank:=(valor and $20) shl 6;
+     end;
+  $2:rom_nbank:=valor and $f;
+  $5:oki_6295_0.write(valor);
+  $7:video_bank:=valor;
+  $8:if valor<>0 then eeprom_0.set_cs_line(CLEAR_LINE)
+      else eeprom_0.set_cs_line(ASSERT_LINE);   //eeprom_cs_w
+  $10:if (valor<>0) then eeprom_0.set_clock_line(CLEAR_LINE)
+      else eeprom_0.set_clock_line(ASSERT_LINE);  //eeprom_clock_w
+  $18:eeprom_0.write_bit(valor);  //eeprom_serial_w
+end;
+end;
+
+procedure pang_sound_update;
+begin
+  oki_6295_0.update;
+end;
+
+//Main
+procedure reset_pang;
+begin
+ main_z80.reset;
+ reset_audio;
+ oki_6295_0.reset;
+ eeprom_0.reset;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ rom_nbank:=0;
+ video_bank:=0;
+ pal_bank:=0;
+ vblank:=0;
+ irq_source:=0;
 end;
 
 function iniciar_pang:boolean;
@@ -153,187 +319,12 @@ reset_pang;
 iniciar_pang:=true;
 end;
 
-procedure reset_pang;
+procedure Cargar_pang;
 begin
- main_z80.reset;
- reset_audio;
- oki_6295_0.reset;
- eeprom_0.reset;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- rom_nbank:=0;
- video_bank:=0;
- pal_bank:=0;
- vblank:=0;
- irq_source:=0;
-end;
-
-procedure update_video_pang;inline;
-var
-  x,y,f,color,nchar:word;
-  atrib:byte;
-begin
-fill_full_screen(2,0);
-for f:=$0 to $7ff do begin
-  atrib:=memoria[$c800+f];
-  color:=atrib and $7f;
-  if (gfx[0].buffer[f] or buffer_color[color]) then begin
-    x:=f and $3f;
-    y:=f shr 6;
-    nchar:=(memoria[$d000+(f*2)]+(memoria[$d001+(f*2)] shl 8)) and $7fff;
-    put_gfx_trans_flip(x*8,y*8,nchar,color shl 4,1,0,(atrib and $80)<>0,false);
-    gfx[0].buffer[f]:=false;
-  end;
-end;
-actualiza_trozo(0,0,512,256,1,0,0,512,256,2);
-for f:=$7d downto 0 do begin
-  atrib:=obj_ram[(f*$20)+1];
-  nchar:=obj_ram[f*$20]+((atrib and $e0) shl 3);
-  color:=(atrib and $f) shl 4;
-  x:=obj_ram[(f*$20)+3]+((atrib and $10) shl 4);
-  y:=((obj_ram[(f*$20)+2]+8) and $ff)-8;
-  put_gfx_sprite(nchar,color,false,false,1);
-  actualiza_gfx_sprite(x,y,2,1);
-end;
-actualiza_trozo_final(64,8,384,240,2);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
-end;
-
-procedure eventos_pang;
-begin
-if event.arcade then begin
-  //IN1
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  //IN2
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  //IN0
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
-end;
-end;
-
-procedure pang_principal;
-var
-  frame_m:single;
-  f:byte;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    case f of
-      $ef:begin
-            main_z80.pedir_irq:=HOLD_LINE;
-            irq_source:=1;
-          end;
-      $f7:vblank:=8;
-      $ff:begin
-          main_z80.pedir_irq:=HOLD_LINE;
-          vblank:=0;
-          irq_source:=0;
-      end;
-    end;
-  end;
-  update_video_pang;
-  eventos_pang;
-  video_sync;
-end;
-end;
-
-function pang_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $0..$7fff:if main_z80.opcode then pang_getbyte:=memoria[direccion]
-                 else pang_getbyte:=mem_dat[direccion];
-  $8000..$bfff:if main_z80.opcode then pang_getbyte:=mem_rom_op[rom_nbank,direccion and $3fff]
-                 else pang_getbyte:=mem_rom_dat[rom_nbank,direccion and $3fff];
-  $c000..$c7ff:pang_getbyte:=buffer_paleta[(direccion and $7ff)+pal_bank];
-  $d000..$dfff:if (video_bank<>0) then pang_getbyte:=obj_ram[direccion and $fff]
-                  else pang_getbyte:=memoria[direccion];
-  $c800..$cfff,$e000..$ffff:pang_getbyte:=memoria[direccion];
-end;
-end;
-
-procedure cambiar_color(pos:word);inline;
-var
-  tmp_color:byte;
-  color:tcolor;
-begin
-  tmp_color:=buffer_paleta[$1+pos];
-  color.r:=pal4bit(tmp_color);
-  tmp_color:=buffer_paleta[pos];
-  color.g:=pal4bit(tmp_color shr 4);
-  color.b:=pal4bit(tmp_color);
-  set_pal_color(color,pos shr 1);
-  buffer_color[(pos shr 5) and $7f]:=true;
-end;
-
-procedure pang_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$c000 then exit;
-case direccion of
-  $c000..$c7ff:if buffer_paleta[(direccion and $7ff)+pal_bank]<>valor then begin
-                  buffer_paleta[(direccion and $7ff)+pal_bank]:=valor;
-                  cambiar_color((direccion and $7fe)+pal_bank);
-               end;
-  $c800..$cfff:begin
-                  gfx[0].buffer[direccion and $7ff]:=true;
-                  memoria[direccion]:=valor;
-               end;
-  $d000..$dfff:if (video_bank<>0) then obj_ram[direccion and $fff]:=valor
-                else begin
-                        memoria[direccion]:=valor;
-                        gfx[0].buffer[(direccion and $fff) shr 1]:=true;
-                     end;
-  $e000..$ffff:memoria[direccion]:=valor;
-end;
-end;
-
-function pang_inbyte(puerto:word):byte;
-begin
-case (puerto and $ff) of
-  0:pang_inbyte:=marcade.in0;
-  1:pang_inbyte:=marcade.in1;
-  2:pang_inbyte:=marcade.in2;
-  5:pang_inbyte:=(eeprom_0.readbit shl 7) or vblank or 2 or irq_source;
-end;
-end;
-
-procedure pang_outbyte(valor:byte;puerto:word);
-begin
-case (puerto and $ff) of
-  $0:begin
-      main_screen.flip_main_screen:=(valor and $4)<>0;
-      pal_bank:=(valor and $20) shl 6;
-     end;
-  $2:rom_nbank:=valor and $f;
-  $5:oki_6295_0.write(valor);
-  $7:video_bank:=valor;
-  $8:if valor<>0 then eeprom_0.set_cs_line(CLEAR_LINE)
-      else eeprom_0.set_cs_line(ASSERT_LINE);   //eeprom_cs_w
-  $10:if (valor<>0) then eeprom_0.set_clock_line(CLEAR_LINE)
-      else eeprom_0.set_clock_line(ASSERT_LINE);  //eeprom_clock_w
-  $18:eeprom_0.write_bit(valor);  //eeprom_serial_w
-end;
-end;
-
-procedure pang_sound_update;
-begin
-  oki_6295_0.update;
+llamadas_maquina.iniciar:=iniciar_pang;
+llamadas_maquina.bucle_general:=pang_principal;
+llamadas_maquina.reset:=reset_pang;
+llamadas_maquina.fps_max:=57.42;
 end;
 
 end.

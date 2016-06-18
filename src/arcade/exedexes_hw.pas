@@ -123,12 +123,12 @@ while EmuStatus=EsRuning do begin
     case f of
       239:begin
           main_z80.im0:=$d7;  //rst 10
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
           update_video_exedexes;
         end;
       255:begin
           main_z80.im0:=$cf;  //rst 8
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
         end;
     end;
   end;
@@ -194,7 +194,7 @@ end;
 
 procedure exedexes_snd_irq;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 procedure exedexes_sound;
@@ -279,7 +279,6 @@ end;
 begin
 iniciar_exedexes_hw:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,2048,2048);
 screen_mod_scroll(1,2048,256,2047,2048,256,2047);
 screen_init(2,2048,2048,true);

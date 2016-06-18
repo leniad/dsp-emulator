@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
      timer_engine,rom_engine,pal_engine,sound_engine,qsnapshot;
 
-procedure Cargar_yiear;
-procedure yiear_principal;
-function iniciar_yiear:boolean;
-procedure reset_yiear;
-//Main CPU
-function yiear_getbyte(direccion:word):byte;
-procedure yiear_putbyte(direccion:word;valor:byte);
-procedure yiear_sound_update;
-procedure yiear_snd_nmi;
-//Save/load
-procedure yiear_qsave(nombre:string);
-procedure yiear_qload(nombre:string);
+procedure cargar_yiear;
 
 implementation
 const
@@ -44,105 +33,8 @@ const
         (mask:$2;name:'Upright Controls';number:2;dip:((dip_val:$2;dip_name:'Single'),(dip_val:$0;dip_name:'Dual'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- pedir_irq,pedir_nmi:boolean;
+ irq_ena,nmi_ena:boolean;
  sound_latch:byte;
-
-procedure Cargar_yiear;
-begin
-llamadas_maquina.iniciar:=iniciar_yiear;
-llamadas_maquina.bucle_general:=yiear_principal;
-llamadas_maquina.reset:=reset_yiear;
-llamadas_maquina.fps_max:=60.58;
-llamadas_maquina.save_qsnap:=yiear_qsave;
-llamadas_maquina.load_qsnap:=yiear_qload;
-end;
-
-function iniciar_yiear:boolean;
-var
-      colores:tpaleta;
-      f,ctemp1,ctemp2,ctemp3:byte;
-      memoria_temp:array[0..$ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    ps_x:array[0..15] of dword=(0*8*8+0, 0*8*8+1, 0*8*8+2, 0*8*8+3, 1*8*8+0, 1*8*8+1, 1*8*8+2, 1*8*8+3,
-	  2*8*8+0, 2*8*8+1, 2*8*8+2, 2*8*8+3, 3*8*8+0, 3*8*8+1, 3*8*8+2, 3*8*8+3);
-    ps_y:array[0..15] of dword=(0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
-	  32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-begin
-iniciar_yiear:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_init(2,256,256,false,true);
-screen_mod_sprites(2,256,256,$ff,$ff);
-iniciar_video(256,224);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(yiear_getbyte,yiear_putbyte);
-main_m6809.init_sound(yiear_sound_update);
-//Sound Chip
-sn_76496_0:=sn76496_chip.Create(1536000);
-//cargar rom sonido
-vlm5030_0:=vlm5030_chip.Create(3579545,$2000,2);
-if not(cargar_roms(vlm5030_0.get_rom_addr,@yiear_vlm,'yiear.zip')) then exit;
-//NMI sonido
-init_timer(main_m6809.numero_cpu,1536000/480,yiear_snd_nmi,true);
-//cargar roms
-if not(cargar_roms(@memoria[0],@yiear_rom[0],'yiear.zip',0)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@yiear_char[0],'yiear.zip',0)) then exit;
-init_gfx(0,8,8,512);
-gfx_set_desc_data(4,0,16*8,4,0,$2000*8+4,$2000*8+0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@yiear_sprites[0],'yiear.zip',0)) then exit;
-init_gfx(1,16,16,512);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,4,0,$8000*8+4,$8000*8+0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//paleta
-if not(cargar_roms(@memoria_temp[0],@yiear_pal,'yiear.zip')) then exit;
-for f:=0 to 31 do begin
-  ctemp1:=memoria_temp[f] and 1;
-  ctemp2:=(memoria_temp[f] shr 1) and 1;
-  ctemp3:=(memoria_temp[f] shr 2) and 1;
-  colores[f].r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-  ctemp1:=(memoria_temp[f] shr 3) and 1;
-  ctemp2:=(memoria_temp[f] shr 4) and 1;
-  ctemp3:=(memoria_temp[f] shr 5) and 1;
-  colores[f].g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-  ctemp1:=0;
-  ctemp2:=(memoria_temp[f] shr 6) and 1;
-  ctemp3:=(memoria_temp[f] shr 7) and 1;
-  colores[f].b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-end;
-set_pal(colores,32);
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$5b;
-marcade.dswc:=$ff;
-marcade.dswa_val:=@yiear_dip_a;
-marcade.dswb_val:=@yiear_dip_b;
-marcade.dswc_val:=@yiear_dip_c;
-//final
-reset_yiear;
-iniciar_yiear:=true;
-end;
-
-procedure reset_yiear;
-begin
- main_m6809.reset;
- sn_76496_0.reset;
- vlm5030_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- pedir_irq:=false;
- pedir_nmi:=false;
- sound_latch:=0;
-end;
 
 procedure update_video_yiear;inline;
 var
@@ -209,7 +101,7 @@ while EmuStatus=EsRuning do begin
     main_m6809.run(frame);
     frame:=frame+main_m6809.tframes-main_m6809.contador;
     if f=239 then begin
-      if pedir_irq then main_m6809.change_irq(HOLD_LINE);
+      if irq_ena then main_m6809.change_irq(HOLD_LINE);
       update_video_yiear;
     end;
   end;
@@ -238,8 +130,8 @@ if direccion>$7fff then exit;
 memoria[direccion]:=valor;
 case direccion of
   $4000:begin
-          pedir_irq:=(valor and $4)<>0;
-          pedir_nmi:=(valor and $2)<>0;
+          irq_ena:=(valor and $4)<>0;
+          nmi_ena:=(valor and $2)<>0;
           main_screen.flip_main_screen:=(valor and $1)<>0;
         end;
   $4800:sound_latch:=valor;
@@ -255,7 +147,7 @@ end;
 
 procedure yiear_snd_nmi;
 begin
-  if pedir_nmi then main_m6809.change_nmi(PULSE_LINE);
+  if nmi_ena then main_m6809.change_nmi(PULSE_LINE);
 end;
 
 procedure yiear_sound_update;
@@ -283,8 +175,8 @@ savedata_qsnapshot(data,size);
 //MEM
 savedata_com_qsnapshot(@memoria[$0],$8000);
 //MISC
-buffer[0]:=byte(pedir_irq);
-buffer[1]:=byte(pedir_nmi);
+buffer[0]:=byte(irq_ena);
+buffer[1]:=byte(nmi_ena);
 buffer[2]:=sound_latch;
 savedata_qsnapshot(@buffer[0],3);
 freemem(data);
@@ -310,13 +202,110 @@ vlm5030_0.load_snapshot(data);
 loaddata_qsnapshot(@memoria[0]);
 //MISC
 loaddata_qsnapshot(@buffer[0]);
-pedir_irq:=buffer[0]<>0;
-pedir_nmi:=buffer[1]<>0;
+irq_ena:=buffer[0]<>0;
+nmi_ena:=buffer[1]<>0;
 sound_latch:=buffer[2];
 freemem(data);
 close_qsnapshot;
 //END
 fillchar(gfx[0].buffer[0],$400,1);
+end;
+
+//Main
+procedure reset_yiear;
+begin
+ main_m6809.reset;
+ sn_76496_0.reset;
+ vlm5030_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ irq_ena:=false;
+ nmi_ena:=false;
+ sound_latch:=0;
+end;
+
+function iniciar_yiear:boolean;
+var
+      colores:tpaleta;
+      f,ctemp1,ctemp2,ctemp3:byte;
+      memoria_temp:array[0..$ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    ps_x:array[0..15] of dword=(0*8*8+0, 0*8*8+1, 0*8*8+2, 0*8*8+3, 1*8*8+0, 1*8*8+1, 1*8*8+2, 1*8*8+3,
+	  2*8*8+0, 2*8*8+1, 2*8*8+2, 2*8*8+3, 3*8*8+0, 3*8*8+1, 3*8*8+2, 3*8*8+3);
+    ps_y:array[0..15] of dword=(0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
+	  32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+begin
+iniciar_yiear:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_init(2,256,256,false,true);
+screen_mod_sprites(2,256,256,$ff,$ff);
+iniciar_video(256,224);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1536000,$100);
+main_m6809.change_ram_calls(yiear_getbyte,yiear_putbyte);
+main_m6809.init_sound(yiear_sound_update);
+//Sound Chip
+sn_76496_0:=sn76496_chip.Create(1536000);
+//cargar rom sonido
+vlm5030_0:=vlm5030_chip.Create(3579545,$2000,2);
+if not(cargar_roms(vlm5030_0.get_rom_addr,@yiear_vlm,'yiear.zip')) then exit;
+//NMI sonido
+init_timer(main_m6809.numero_cpu,1536000/480,yiear_snd_nmi,true);
+//cargar roms
+if not(cargar_roms(@memoria[0],@yiear_rom[0],'yiear.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@yiear_char[0],'yiear.zip',0)) then exit;
+init_gfx(0,8,8,512);
+gfx_set_desc_data(4,0,16*8,4,0,$2000*8+4,$2000*8+0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@yiear_sprites[0],'yiear.zip',0)) then exit;
+init_gfx(1,16,16,512);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,4,0,$8000*8+4,$8000*8+0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//paleta
+if not(cargar_roms(@memoria_temp[0],@yiear_pal,'yiear.zip')) then exit;
+for f:=0 to 31 do begin
+  ctemp1:=memoria_temp[f] and 1;
+  ctemp2:=(memoria_temp[f] shr 1) and 1;
+  ctemp3:=(memoria_temp[f] shr 2) and 1;
+  colores[f].r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+  ctemp1:=(memoria_temp[f] shr 3) and 1;
+  ctemp2:=(memoria_temp[f] shr 4) and 1;
+  ctemp3:=(memoria_temp[f] shr 5) and 1;
+  colores[f].g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+  ctemp1:=0;
+  ctemp2:=(memoria_temp[f] shr 6) and 1;
+  ctemp3:=(memoria_temp[f] shr 7) and 1;
+  colores[f].b:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
+end;
+set_pal(colores,32);
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$5b;
+marcade.dswc:=$ff;
+marcade.dswa_val:=@yiear_dip_a;
+marcade.dswb_val:=@yiear_dip_b;
+marcade.dswc_val:=@yiear_dip_c;
+//final
+reset_yiear;
+iniciar_yiear:=true;
+end;
+
+procedure Cargar_yiear;
+begin
+llamadas_maquina.iniciar:=iniciar_yiear;
+llamadas_maquina.bucle_general:=yiear_principal;
+llamadas_maquina.reset:=reset_yiear;
+llamadas_maquina.fps_max:=60.58;
+llamadas_maquina.save_qsnap:=yiear_qsave;
+llamadas_maquina.load_qsnap:=yiear_qload;
 end;
 
 end.

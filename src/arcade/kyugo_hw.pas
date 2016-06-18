@@ -5,24 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,
      pal_engine,sound_engine,timer_engine;
 
-procedure Cargar_kyugo_hw;
-procedure kyugo_hw_principal;
-function iniciar_kyugo_hw:boolean;
-procedure reset_kyugo_hw;
-//Main CPU
-function kyugo_getbyte(direccion:word):byte;
-procedure kyugo_putbyte(direccion:word;valor:byte);
-procedure kyugo_outbyte(valor:byte;puerto:word);
-//Sound CPU
-function snd_kyugo_hw_getbyte(direccion:word):byte;
-procedure snd_kyugo_hw_putbyte(direccion:word;valor:byte);
-function snd_kyugo_inbyte(puerto:word):byte;
-procedure snd_kyugo_outbyte(valor:byte;puerto:word);
-//Sound
-function kyugo_porta_r:byte;
-function kyugo_portb_r:byte;
-procedure kyugo_hw_despues_instruccion;
-procedure kyugo_snd_irq;
+procedure cargar_kyugo_hw;
 
 implementation
 const
@@ -48,112 +31,6 @@ var
   scroll_x:word;
   scroll_y,fg_color,bg_pal_bank:byte;
   nmi_enable:boolean;
-
-procedure Cargar_kyugo_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_kyugo_hw;
-llamadas_maquina.bucle_general:=kyugo_hw_principal;
-llamadas_maquina.reset:=reset_kyugo_hw;
-end;
-
-function iniciar_kyugo_hw:boolean; 
-var
-  memoria_temp:array[0..$17fff] of byte;
-  colores:tpaleta;
-  f,bit0,bit1,bit2,bit3:byte;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  ps_x:array[0..15] of dword=(0,1,2,3,4,5,6,7,
-	  8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
-  ps_y:array[0..15] of dword=(0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
-	  16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
-begin
-iniciar_kyugo_hw:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,512,true);
-screen_init(2,256,512);
-screen_mod_scroll(2,256,256,255,512,512,511);
-screen_init(3,256,512,false,true);
-iniciar_video(224,288);
-//Main CPU
-main_z80:=cpu_z80.create(3072000,256);
-main_z80.change_ram_calls(kyugo_getbyte,kyugo_putbyte);
-main_z80.change_io_calls(nil,kyugo_outbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3072000,256);
-snd_z80.change_ram_calls(snd_kyugo_hw_getbyte,snd_kyugo_hw_putbyte);
-snd_z80.change_io_calls(snd_kyugo_inbyte,snd_kyugo_outbyte);
-snd_z80.init_sound(kyugo_hw_despues_instruccion);
-init_timer(snd_z80.numero_cpu,3072000/(60*4),kyugo_snd_irq,true);
-//Sound Chip
-ay8910_0:=ay8910_chip.create(1536000,1);
-ay8910_0.change_io_calls(kyugo_porta_r,kyugo_portb_r,nil,nil);
-ay8910_1:=ay8910_chip.create(1536000,1);
-//cargar roms
-if not(cargar_roms(@memoria[0],@repulse_rom[0],'repulse.zip',0)) then exit;
-//cargar roms snd
-if not(cargar_roms(@mem_snd[0],@repulse_snd[0],'repulse.zip',0)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@repulse_char,'repulse.zip',1)) then exit;
-init_gfx(0,8,8,$100);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(2,0,8*8*2,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//convertir tiles
-if not(cargar_roms(@memoria_temp[0],@repulse_tiles[0],'repulse.zip',0)) then exit;
-init_gfx(1,8,8,$400);
-gfx_set_desc_data(3,0,8*8,0,$400*8*8,$400*8*8*2);
-convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pc_y[0],true,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@repulse_sprites[0],'repulse.zip',0)) then exit;
-init_gfx(2,16,16,$400);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(3,0,16*16,0,$400*16*16,$400*16*16*2);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//paleta
-if not(cargar_roms(@memoria_temp[0],@repulse_prom[0],'repulse.zip',0)) then exit;
-for f:=0 to $ff do begin
-  bit0:=(memoria_temp[f] shr 0) and 1;
-  bit1:=(memoria_temp[f] shr 1) and 1;
-  bit2:=(memoria_temp[f] shr 2) and 1;
-  bit3:=(memoria_temp[f] shr 3) and 1;
-  colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  bit0:=(memoria_temp[f+$100] shr 0) and 1;
-  bit1:=(memoria_temp[f+$100] shr 1) and 1;
-  bit2:=(memoria_temp[f+$100] shr 2) and 1;
-  bit3:=(memoria_temp[f+$100] shr 3) and 1;
-  colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  bit0:=(memoria_temp[f+$200] shr 0) and 1;
-  bit1:=(memoria_temp[f+$200] shr 1) and 1;
-  bit2:=(memoria_temp[f+$200] shr 2) and 1;
-  bit3:=(memoria_temp[f+$200] shr 3) and 1;
-  colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-end;
-set_pal(colores,$100);
-reset_kyugo_hw;
-iniciar_kyugo_hw:=true;
-end;
-
-procedure reset_kyugo_hw;
-begin
- main_z80.reset;
- snd_z80.reset;
- AY8910_0.reset;
- AY8910_1.reset;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- scroll_x:=0;
- scroll_y:=0;
- fg_color:=0;
- bg_pal_bank:=0;
- nmi_enable:=false;
- snd_z80.pedir_halt:=ASSERT_LINE;
-end;
 
 procedure draw_sprites;inline;
 var
@@ -260,18 +137,24 @@ end;
 function kyugo_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $9800..$9fff:kyugo_getbyte:=memoria[direccion] or $f0;
-  else kyugo_getbyte:=memoria[direccion];
+  0..$a7ff,$f000..$f7ff:kyugo_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure kyugo_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-    $8000..$8fff:gfx[1].buffer[direccion and $7ff]:=true;
-    $9000..$97ff:gfx[0].buffer[direccion and $7ff]:=true;
+    $8000..$8fff:begin
+                    gfx[1].buffer[direccion and $7ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $9000..$97ff:begin
+                    gfx[0].buffer[direccion and $7ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
+    $9800..$9fff:memoria[direccion]:=valor or $f0;
+    $a000..$a7ff,$f000..$f7ff:memoria[direccion]:=valor;
     $a800:scroll_x:=(scroll_x and $100) or valor;
     $b000:begin
             scroll_x:=(scroll_x and $ff) or ((valor and $1) shl 8);
@@ -293,8 +176,8 @@ begin
   case (puerto and $7) of
     0:nmi_enable:=(valor and 1)<>0;
     1:main_screen.flip_main_screen:=(valor<>0);
-    2:if (valor<>0) then snd_z80.pedir_halt:=CLEAR_LINE
-        else snd_z80.pedir_halt:=ASSERT_LINE;
+    2:if (valor<>0) then snd_z80.change_halt(CLEAR_LINE)
+        else snd_z80.change_halt(ASSERT_LINE);
   end;
 end;
 
@@ -302,18 +185,17 @@ end;
 function snd_kyugo_hw_getbyte(direccion:word):byte;
 begin
 case direccion of
+   0..$7fff:snd_kyugo_hw_getbyte:=mem_snd[direccion];
    $a000..$a7ff:snd_kyugo_hw_getbyte:=memoria[direccion+$5000];
    $c000:snd_kyugo_hw_getbyte:=marcade.in2;
    $c040:snd_kyugo_hw_getbyte:=marcade.in1;
    $c080:snd_kyugo_hw_getbyte:=marcade.in0;
-    else snd_kyugo_hw_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure snd_kyugo_hw_putbyte(direccion:word;valor:byte);
 begin
 if (direccion<$8000) then exit;
-mem_snd[direccion]:=valor;
 case direccion of
   $a000..$a7ff:memoria[direccion+$5000]:=valor;
 end;
@@ -321,9 +203,7 @@ end;
 
 function snd_kyugo_inbyte(puerto:word):byte;
 begin
-  case (puerto and $ff) of
-    $02:snd_kyugo_inbyte:=ay8910_0.read;
-  end;
+  if (puerto and $ff)=2 then snd_kyugo_inbyte:=ay8910_0.read;
 end;
 
 procedure snd_kyugo_outbyte(valor:byte;puerto:word);
@@ -348,13 +228,119 @@ end;
 
 procedure kyugo_snd_irq;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 procedure kyugo_hw_despues_instruccion;
 begin
   ay8910_0.update;
   ay8910_1.update;
+end;
+
+//Main
+procedure reset_kyugo_hw;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ AY8910_0.reset;
+ AY8910_1.reset;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ scroll_x:=0;
+ scroll_y:=0;
+ fg_color:=0;
+ bg_pal_bank:=0;
+ nmi_enable:=false;
+ snd_z80.change_halt(ASSERT_LINE);
+end;
+
+function iniciar_kyugo_hw:boolean;
+var
+  memoria_temp:array[0..$17fff] of byte;
+  colores:tpaleta;
+  f,bit0,bit1,bit2,bit3:byte;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  ps_x:array[0..15] of dword=(0,1,2,3,4,5,6,7,
+	  8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
+  ps_y:array[0..15] of dword=(0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
+	  16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
+begin
+iniciar_kyugo_hw:=false;
+iniciar_audio(false);
+screen_init(1,256,512,true);
+screen_init(2,256,512);
+screen_mod_scroll(2,256,256,255,512,512,511);
+screen_init(3,256,512,false,true);
+iniciar_video(224,288);
+//Main CPU
+main_z80:=cpu_z80.create(3072000,256);
+main_z80.change_ram_calls(kyugo_getbyte,kyugo_putbyte);
+main_z80.change_io_calls(nil,kyugo_outbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3072000,256);
+snd_z80.change_ram_calls(snd_kyugo_hw_getbyte,snd_kyugo_hw_putbyte);
+snd_z80.change_io_calls(snd_kyugo_inbyte,snd_kyugo_outbyte);
+snd_z80.init_sound(kyugo_hw_despues_instruccion);
+init_timer(snd_z80.numero_cpu,3072000/(60*4),kyugo_snd_irq,true);
+//Sound Chip
+ay8910_0:=ay8910_chip.create(1536000,1);
+ay8910_0.change_io_calls(kyugo_porta_r,kyugo_portb_r,nil,nil);
+ay8910_1:=ay8910_chip.create(1536000,1);
+//cargar roms
+if not(cargar_roms(@memoria[0],@repulse_rom[0],'repulse.zip',0)) then exit;
+//cargar roms snd
+if not(cargar_roms(@mem_snd[0],@repulse_snd[0],'repulse.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@repulse_char,'repulse.zip',1)) then exit;
+init_gfx(0,8,8,$100);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(2,0,8*8*2,0,4);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//convertir tiles
+if not(cargar_roms(@memoria_temp[0],@repulse_tiles[0],'repulse.zip',0)) then exit;
+init_gfx(1,8,8,$400);
+gfx_set_desc_data(3,0,8*8,0,$400*8*8,$400*8*8*2);
+convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pc_y[0],true,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@repulse_sprites[0],'repulse.zip',0)) then exit;
+init_gfx(2,16,16,$400);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(3,0,16*16,0,$400*16*16,$400*16*16*2);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//paleta
+if not(cargar_roms(@memoria_temp[0],@repulse_prom[0],'repulse.zip',0)) then exit;
+for f:=0 to $ff do begin
+  bit0:=(memoria_temp[f] shr 0) and 1;
+  bit1:=(memoria_temp[f] shr 1) and 1;
+  bit2:=(memoria_temp[f] shr 2) and 1;
+  bit3:=(memoria_temp[f] shr 3) and 1;
+  colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  bit0:=(memoria_temp[f+$100] shr 0) and 1;
+  bit1:=(memoria_temp[f+$100] shr 1) and 1;
+  bit2:=(memoria_temp[f+$100] shr 2) and 1;
+  bit3:=(memoria_temp[f+$100] shr 3) and 1;
+  colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  bit0:=(memoria_temp[f+$200] shr 0) and 1;
+  bit1:=(memoria_temp[f+$200] shr 1) and 1;
+  bit2:=(memoria_temp[f+$200] shr 2) and 1;
+  bit3:=(memoria_temp[f+$200] shr 3) and 1;
+  colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+end;
+set_pal(colores,$100);
+reset_kyugo_hw;
+iniciar_kyugo_hw:=true;
+end;
+
+procedure Cargar_kyugo_hw;
+begin
+llamadas_maquina.iniciar:=iniciar_kyugo_hw;
+llamadas_maquina.bucle_general:=kyugo_hw_principal;
+llamadas_maquina.reset:=reset_kyugo_hw;
 end;
 
 end.

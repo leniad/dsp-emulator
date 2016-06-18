@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,nz80,ym_2203,rom_engine,
      pal_engine,sound_engine,misc_functions;
 
-procedure Cargar_tigeroad;
-procedure tigeroad_principal;
-function iniciar_tigeroad:boolean;
-procedure reset_tigeroad;
-//Main CPU
-function tigeroad_getword(direccion:dword):word;
-procedure tigeroad_putword(direccion:dword;valor:word);
-//Sound CPU
-function tigeroad_snd_getbyte(direccion:word):byte;
-procedure tigeroad_snd_putbyte(direccion:word;valor:byte);
-procedure snd_irq(irqstate:byte);
-procedure tigeroad_sound_update;
+procedure cargar_tigeroad;
 
 implementation
 const
@@ -58,141 +47,6 @@ var
  fondo_rom:array[0..$7fff] of byte;
  pintar_fondo:boolean;
  fondo_bank,sound_latch:byte;
-
-procedure Cargar_tigeroad;
-begin
-llamadas_maquina.iniciar:=iniciar_tigeroad;
-llamadas_maquina.bucle_general:=tigeroad_principal;
-llamadas_maquina.reset:=reset_tigeroad;
-llamadas_maquina.fps_max:=60.08;
-end;
-
-function iniciar_tigeroad:boolean;
-var
-  memoria_temp:pbyte;
-const
-  pb_x:array[0..31] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-		64*8+0, 64*8+1, 64*8+2, 64*8+3, 64*8+8+0, 64*8+8+1, 64*8+8+2, 64*8+8+3,
-		2*64*8+0, 2*64*8+1, 2*64*8+2, 2*64*8+3, 2*64*8+8+0, 2*64*8+8+1, 2*64*8+8+2, 2*64*8+8+3,
-		3*64*8+0, 3*64*8+1, 3*64*8+2, 3*64*8+3, 3*64*8+8+0, 3*64*8+8+1, 3*64*8+8+2, 3*64*8+8+3);
-  pb_y:array[0..31] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16,
-		16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16,
-		24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 );
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7 );
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
-
-procedure tiger_road_chars;
-begin
-init_gfx(0,8,8,$800);
-gfx[0].trans[3]:=true;
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-end;
-
-procedure tiger_road_tiles(nchars:word);
-var
-  f:byte;
-begin
-init_gfx(1,32,32,nchars);
-for f:=0 to 8 do gfx[1].trans[f]:=true;
-gfx_set_desc_data(4,0,256*8,nchars*256*8+4,nchars*256*8+0,4,0);
-convert_gfx(1,0,memoria_temp,@pb_x[0],@pb_y[0],false,false);
-end;
-
-procedure tiger_road_sprites(nchars:word);
-begin
-init_gfx(2,16,16,nchars);
-gfx[2].trans[15]:=true;
-gfx_set_desc_data(4,0,32*8,nchars*32*8*3,nchars*32*8*2,nchars*32*8*1,nchars*32*8*0);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-end;
-
-begin
-iniciar_tigeroad:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,288,288);
-screen_mod_scroll(2,288,256,255,288,256,255);
-screen_init(3,256,256,false,true);
-screen_mod_sprites(3,512,512,$1ff,$1ff);
-screen_init(4,288,288,true);
-screen_mod_scroll(4,288,256,255,288,256,255);
-iniciar_video(256,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,$100);
-main_m68000.change_ram16_calls(tigeroad_getword,tigeroad_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,$100);
-snd_z80.change_ram_calls(tigeroad_snd_getbyte,tigeroad_snd_putbyte);
-snd_z80.init_sound(tigeroad_sound_update);
-//sound chips
-ym2203_0:=ym2203_chip.create(3579545);
-ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(3579545);
-getmem(memoria_temp,$100000);
-case main_vars.tipo_maquina of
-  52:begin
-        if not(cargar_roms16w(@rom[0],@tigeroad_rom[0],'tigeroad.zip',0)) then exit;
-        if not(cargar_roms(@mem_snd[0],@tigeroad_sound,'tigeroad.zip')) then exit;
-        //convertir chars
-        if not(cargar_roms(memoria_temp,@tigeroad_char,'tigeroad.zip')) then exit;
-        tiger_road_chars;
-        //background
-        mask_sprite:=$fff;
-        mask_back:=$7ff;
-        if not(cargar_roms(@fondo_rom[0],@tigeroad_fondo_rom,'tigeroad.zip')) then exit;
-        if not(cargar_roms(memoria_temp,@tigeroad_fondo,'tigeroad.zip',0)) then exit;
-        tiger_road_tiles($800);
-        //sprites
-        if not(cargar_roms(memoria_temp,@tigeroad_sprites,'tigeroad.zip',0)) then exit;
-        tiger_road_sprites($1000);
-     end;
-  53:begin
-        if not(cargar_roms16w(@rom[0],@f1dream_rom[0],'f1dream.zip',0)) then exit;
-        if not(cargar_roms(@mem_snd[0],@f1dream_sound,'f1dream.zip')) then exit;
-        //convertir chars
-        if not(cargar_roms(memoria_temp,@f1dream_char,'f1dream.zip')) then exit;
-        tiger_road_chars;
-        //background
-        mask_sprite:=$7ff;
-        mask_back:=$3ff;
-        if not(cargar_roms(@fondo_rom[0],@f1dream_fondo_rom,'f1dream.zip')) then exit;
-        if not(cargar_roms(memoria_temp,@f1dream_fondo,'f1dream.zip',0)) then exit;
-        tiger_road_tiles($300);
-        //sprites
-        if not(cargar_roms(memoria_temp,@f1dream_sprites,'f1dream.zip',0)) then exit;
-        tiger_road_sprites($800);
-     end;
-end;
-//final
-freemem(memoria_temp);
-reset_tigeroad;
-iniciar_tigeroad:=true;
-end;
-
-procedure reset_tigeroad;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym2203_0.reset;
- ym2203_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- if main_vars.tipo_maquina=52 then marcade.in2:=$fb
-  else marcade.in2:=$bb;
- scroll_x:=0;
- scroll_y:=0;
- pintar_fondo:=true;
- fondo_bank:=0;
- sound_latch:=0;
-end;
 
 procedure draw_fondo;inline;
 var
@@ -402,14 +256,148 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure tigeroad_sound_update;
 begin
   ym2203_0.Update;
   ym2203_1.Update;
+end;
+
+//Main
+procedure reset_tigeroad;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2203_0.reset;
+ ym2203_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ if main_vars.tipo_maquina=52 then marcade.in2:=$fb
+  else marcade.in2:=$bb;
+ scroll_x:=0;
+ scroll_y:=0;
+ pintar_fondo:=true;
+ fondo_bank:=0;
+ sound_latch:=0;
+end;
+
+function iniciar_tigeroad:boolean;
+var
+  memoria_temp:pbyte;
+const
+  pb_x:array[0..31] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+		64*8+0, 64*8+1, 64*8+2, 64*8+3, 64*8+8+0, 64*8+8+1, 64*8+8+2, 64*8+8+3,
+		2*64*8+0, 2*64*8+1, 2*64*8+2, 2*64*8+3, 2*64*8+8+0, 2*64*8+8+1, 2*64*8+8+2, 2*64*8+8+3,
+		3*64*8+0, 3*64*8+1, 3*64*8+2, 3*64*8+3, 3*64*8+8+0, 3*64*8+8+1, 3*64*8+8+2, 3*64*8+8+3);
+  pb_y:array[0..31] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16,
+		16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16,
+		24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16);
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 );
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7 );
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
+
+procedure tiger_road_chars;
+begin
+init_gfx(0,8,8,$800);
+gfx[0].trans[3]:=true;
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+end;
+
+procedure tiger_road_tiles(nchars:word);
+var
+  f:byte;
+begin
+init_gfx(1,32,32,nchars);
+for f:=0 to 8 do gfx[1].trans[f]:=true;
+gfx_set_desc_data(4,0,256*8,nchars*256*8+4,nchars*256*8+0,4,0);
+convert_gfx(1,0,memoria_temp,@pb_x[0],@pb_y[0],false,false);
+end;
+
+procedure tiger_road_sprites(nchars:word);
+begin
+init_gfx(2,16,16,nchars);
+gfx[2].trans[15]:=true;
+gfx_set_desc_data(4,0,32*8,nchars*32*8*3,nchars*32*8*2,nchars*32*8*1,nchars*32*8*0);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+end;
+
+begin
+iniciar_tigeroad:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_init(2,288,288);
+screen_mod_scroll(2,288,256,255,288,256,255);
+screen_init(3,256,256,false,true);
+screen_mod_sprites(3,512,512,$1ff,$1ff);
+screen_init(4,288,288,true);
+screen_mod_scroll(4,288,256,255,288,256,255);
+iniciar_video(256,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,$100);
+main_m68000.change_ram16_calls(tigeroad_getword,tigeroad_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,$100);
+snd_z80.change_ram_calls(tigeroad_snd_getbyte,tigeroad_snd_putbyte);
+snd_z80.init_sound(tigeroad_sound_update);
+//sound chips
+ym2203_0:=ym2203_chip.create(3579545);
+ym2203_0.change_irq_calls(snd_irq);
+ym2203_1:=ym2203_chip.create(3579545);
+getmem(memoria_temp,$100000);
+case main_vars.tipo_maquina of
+  52:begin
+        if not(cargar_roms16w(@rom[0],@tigeroad_rom[0],'tigeroad.zip',0)) then exit;
+        if not(cargar_roms(@mem_snd[0],@tigeroad_sound,'tigeroad.zip')) then exit;
+        //convertir chars
+        if not(cargar_roms(memoria_temp,@tigeroad_char,'tigeroad.zip')) then exit;
+        tiger_road_chars;
+        //background
+        mask_sprite:=$fff;
+        mask_back:=$7ff;
+        if not(cargar_roms(@fondo_rom[0],@tigeroad_fondo_rom,'tigeroad.zip')) then exit;
+        if not(cargar_roms(memoria_temp,@tigeroad_fondo,'tigeroad.zip',0)) then exit;
+        tiger_road_tiles($800);
+        //sprites
+        if not(cargar_roms(memoria_temp,@tigeroad_sprites,'tigeroad.zip',0)) then exit;
+        tiger_road_sprites($1000);
+     end;
+  53:begin
+        if not(cargar_roms16w(@rom[0],@f1dream_rom[0],'f1dream.zip',0)) then exit;
+        if not(cargar_roms(@mem_snd[0],@f1dream_sound,'f1dream.zip')) then exit;
+        //convertir chars
+        if not(cargar_roms(memoria_temp,@f1dream_char,'f1dream.zip')) then exit;
+        tiger_road_chars;
+        //background
+        mask_sprite:=$7ff;
+        mask_back:=$3ff;
+        if not(cargar_roms(@fondo_rom[0],@f1dream_fondo_rom,'f1dream.zip')) then exit;
+        if not(cargar_roms(memoria_temp,@f1dream_fondo,'f1dream.zip',0)) then exit;
+        tiger_road_tiles($300);
+        //sprites
+        if not(cargar_roms(memoria_temp,@f1dream_sprites,'f1dream.zip',0)) then exit;
+        tiger_road_sprites($800);
+     end;
+end;
+//final
+freemem(memoria_temp);
+reset_tigeroad;
+iniciar_tigeroad:=true;
+end;
+
+procedure Cargar_tigeroad;
+begin
+llamadas_maquina.iniciar:=iniciar_tigeroad;
+llamadas_maquina.bucle_general:=tigeroad_principal;
+llamadas_maquina.reset:=reset_tigeroad;
+llamadas_maquina.fps_max:=60.08;
 end;
 
 end.

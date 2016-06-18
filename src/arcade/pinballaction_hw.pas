@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,
      pal_engine,sound_engine,timer_engine;
 
-procedure Cargar_pinballaction;
-procedure pinballaction_principal;
-function iniciar_pinballaction:boolean;
-procedure reset_pinballaction;
-//Main CPU
-function pinballaction_getbyte(direccion:word):byte;
-procedure pinballaction_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function snd_getbyte(direccion:word):byte;
-procedure snd_putbyte(direccion:word;valor:byte);
-procedure snd_outbyte(valor:byte;puerto:word);
-procedure pbaction_sound_irq;
-procedure pinballaction_sound_update;
+procedure cargar_pinballaction;
 
 const
         pinballaction_rom:array[0..3] of tipo_roms=(
@@ -51,104 +39,6 @@ var
  nmi_mask:boolean;
 
 implementation
-
-procedure Cargar_pinballaction;
-begin
-llamadas_maquina.iniciar:=iniciar_pinballaction;
-llamadas_maquina.bucle_general:=pinballaction_principal;
-llamadas_maquina.reset:=reset_pinballaction;
-end;
-
-function iniciar_pinballaction:boolean;
-const
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			64, 65, 66, 67, 68, 69, 70, 71);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			128+(8*0), 128+(8*1), 128+(8*2), 128+(8*3), 128+(8*4), 128+(8*5), 128+(8*6), 128+(8*7));
-  psd_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-      64, 65, 66, 67, 68, 69, 70, 71,
-      256,257,258,259,260,261,262,263,
-      320,321,322,323,324,325,326,327);
-  psd_y:array[0..31] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			128+(8*0), 128+(8*1), 128+(8*2), 128+(8*3), 128+(8*4), 128+(8*5), 128+(8*6), 128+(8*7),
-      512+(8*0), 512+(8*1), 512+(8*2), 512+(8*3), 512+(8*4), 512+(8*5), 512+(8*6), 512+(8*7),
-      640+(8*0), 640+(8*1), 640+(8*2), 640+(8*3), 640+(8*4), 640+(8*5), 640+(8*6), 640+(8*7));
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-var
-  memoria_temp:array[0..$ffff] of byte;
-begin
-iniciar_pinballaction:=false;
-iniciar_audio(false);
-screen_init(1,256,256);
-screen_mod_scroll(1,0,0,0,256,256,255);
-screen_init(2,256,256,true);
-screen_mod_scroll(2,0,0,0,256,256,255);
-screen_init(3,256,256,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,$100);
-main_z80.change_ram_calls(pinballaction_getbyte,pinballaction_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3072000,$100);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(nil,snd_outbyte);
-snd_z80.init_sound(pinballaction_sound_update);
-init_timer(snd_z80.numero_cpu,3072000/(2*60),pbaction_sound_irq,true);
-//Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,1);
-ay8910_1:=ay8910_chip.create(1500000,1);
-ay8910_2:=ay8910_chip.create(1500000,1);
-//cargar roms
-if not(cargar_roms(@memoria,@pinballaction_rom,'pbaction.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd,@pinballaction_sound,'pbaction.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp,@pinballaction_chars,'pbaction.zip',0)) then exit;
-init_gfx(0,8,8,$400);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,$400*0*8*8,$400*1*8*8,$400*2*8*8);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
-//tiles
-if not(cargar_roms(@memoria_temp,@pinballaction_tiles,'pbaction.zip',0)) then exit;
-init_gfx(1,8,8,$800);
-gfx_set_desc_data(4,0,8*8,$800*0*8*8,$800*1*8*8,$800*2*8*8,$800*3*8*8);
-convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,true,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp,@pinballaction_sprites,'pbaction.zip',0)) then exit;
-init_gfx(2,16,16,$100);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(3,0,32*8,$100*0*8*32,$100*1*8*32,$100*2*8*32);
-convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
-//convertir sprites double
-init_gfx(3,32,32,$20);
-gfx[3].trans[0]:=true;
-gfx_set_desc_data(3,0,128*8,$40*0*8*128,$40*1*8*128,$40*2*8*128);
-convert_gfx(3,0,@memoria_temp[$1000],@psd_x,@psd_y,true,false);
-//DIP
-marcade.dswa:=$40;
-marcade.dswa_val:=@pinballaction_dipa;
-marcade.dswb:=$0;
-marcade.dswb_val:=@pinballaction_dipb;
-reset_pinballaction;
-iniciar_pinballaction:=true;
-end;
-
-procedure reset_pinballaction;
-begin
- main_z80.reset;
- snd_z80.reset;
- ay8910_0.reset;
- ay8910_1.reset;
- ay8910_2.reset;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- scroll_y:=0;
- sound_latch:=0;
- nmi_mask:=false;
-end;
 
 procedure update_video_pinballaction;
 var
@@ -301,7 +191,7 @@ case direccion of
     $e606:scroll_y:=valor-3;
     $e800:begin
             sound_latch:=valor;
-            snd_z80.pedir_irq:=HOLD_LINE;
+            snd_z80.change_irq(HOLD_LINE);
             snd_z80.im2_lo:=0;
           end;
 end;
@@ -337,7 +227,7 @@ end;
 
 procedure pbaction_sound_irq;
 begin
-snd_z80.pedir_irq:=HOLD_LINE;
+snd_z80.change_irq(HOLD_LINE);
 snd_z80.im2_lo:=2;
 end;
 
@@ -346,6 +236,105 @@ begin
   ay8910_0.update;
   ay8910_1.update;
   ay8910_2.update;
+end;
+
+//Main
+procedure reset_pinballaction;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ ay8910_0.reset;
+ ay8910_1.reset;
+ ay8910_2.reset;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ scroll_y:=0;
+ sound_latch:=0;
+ nmi_mask:=false;
+end;
+
+function iniciar_pinballaction:boolean;
+const
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			64, 65, 66, 67, 68, 69, 70, 71);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			128+(8*0), 128+(8*1), 128+(8*2), 128+(8*3), 128+(8*4), 128+(8*5), 128+(8*6), 128+(8*7));
+  psd_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+      64, 65, 66, 67, 68, 69, 70, 71,
+      256,257,258,259,260,261,262,263,
+      320,321,322,323,324,325,326,327);
+  psd_y:array[0..31] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			128+(8*0), 128+(8*1), 128+(8*2), 128+(8*3), 128+(8*4), 128+(8*5), 128+(8*6), 128+(8*7),
+      512+(8*0), 512+(8*1), 512+(8*2), 512+(8*3), 512+(8*4), 512+(8*5), 512+(8*6), 512+(8*7),
+      640+(8*0), 640+(8*1), 640+(8*2), 640+(8*3), 640+(8*4), 640+(8*5), 640+(8*6), 640+(8*7));
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+var
+  memoria_temp:array[0..$ffff] of byte;
+begin
+iniciar_pinballaction:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_mod_scroll(1,0,0,0,256,256,255);
+screen_init(2,256,256,true);
+screen_mod_scroll(2,0,0,0,256,256,255);
+screen_init(3,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,$100);
+main_z80.change_ram_calls(pinballaction_getbyte,pinballaction_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3072000,$100);
+snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
+snd_z80.change_io_calls(nil,snd_outbyte);
+snd_z80.init_sound(pinballaction_sound_update);
+init_timer(snd_z80.numero_cpu,3072000/(2*60),pbaction_sound_irq,true);
+//Sound Chip
+ay8910_0:=ay8910_chip.create(1500000,1);
+ay8910_1:=ay8910_chip.create(1500000,1);
+ay8910_2:=ay8910_chip.create(1500000,1);
+//cargar roms
+if not(cargar_roms(@memoria,@pinballaction_rom,'pbaction.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd,@pinballaction_sound,'pbaction.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp,@pinballaction_chars,'pbaction.zip',0)) then exit;
+init_gfx(0,8,8,$400);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,$400*0*8*8,$400*1*8*8,$400*2*8*8);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
+//tiles
+if not(cargar_roms(@memoria_temp,@pinballaction_tiles,'pbaction.zip',0)) then exit;
+init_gfx(1,8,8,$800);
+gfx_set_desc_data(4,0,8*8,$800*0*8*8,$800*1*8*8,$800*2*8*8,$800*3*8*8);
+convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,true,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp,@pinballaction_sprites,'pbaction.zip',0)) then exit;
+init_gfx(2,16,16,$100);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(3,0,32*8,$100*0*8*32,$100*1*8*32,$100*2*8*32);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
+//convertir sprites double
+init_gfx(3,32,32,$20);
+gfx[3].trans[0]:=true;
+gfx_set_desc_data(3,0,128*8,$40*0*8*128,$40*1*8*128,$40*2*8*128);
+convert_gfx(3,0,@memoria_temp[$1000],@psd_x,@psd_y,true,false);
+//DIP
+marcade.dswa:=$40;
+marcade.dswa_val:=@pinballaction_dipa;
+marcade.dswb:=$0;
+marcade.dswb_val:=@pinballaction_dipb;
+reset_pinballaction;
+iniciar_pinballaction:=true;
+end;
+
+procedure Cargar_pinballaction;
+begin
+llamadas_maquina.iniciar:=iniciar_pinballaction;
+llamadas_maquina.bucle_general:=pinballaction_principal;
+llamadas_maquina.reset:=reset_pinballaction;
 end;
 
 end.

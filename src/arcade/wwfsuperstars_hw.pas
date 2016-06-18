@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,oki6295;
 
-procedure Cargar_wwfsstar;
-procedure wwfsstar_principal;
-function iniciar_wwfsstar:boolean;
-procedure reset_wwfsstar;
-//Main CPU
-function wwfsstar_getword(direccion:dword):word;
-procedure wwfsstar_putword(direccion:dword;valor:word);
-//Sound CPU
-function wwfsstar_snd_getbyte(direccion:word):byte;
-procedure wwfsstar_snd_putbyte(direccion:word;valor:byte);
-procedure wwfsstar_sound_update;
-procedure ym2151_snd_irq(irqstate:byte);
+procedure cargar_wwfsstar;
 
 implementation
 const
@@ -51,95 +40,6 @@ var
  ram:array[0..$1fff] of word;
  sprite_ram:array[0..$1ff] of word;
  vblank,sound_latch:byte;
-
-procedure Cargar_wwfsstar;
-begin
-llamadas_maquina.iniciar:=iniciar_wwfsstar;
-llamadas_maquina.bucle_general:=wwfsstar_principal;
-llamadas_maquina.reset:=reset_wwfsstar;
-llamadas_maquina.fps_max:=57.444853;
-end;
-
-function iniciar_wwfsstar:boolean;
-var
-  memoria_temp:pbyte;
-const
-  pc_x:array[0..7] of dword=(1, 0, 8*8+1, 8*8+0, 16*8+1, 16*8+0, 24*8+1, 24*8+0);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_x:array[0..15] of dword=(3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
-          32*8+3, 32*8+2, 32*8+1, 32*8+0, 48*8+3, 48*8+2, 48*8+1, 48*8+0);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-          8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-begin
-iniciar_wwfsstar:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,512,512,false,true);
-screen_init(3,512,512);
-screen_mod_scroll(3,512,256,511,512,256,511);
-iniciar_video(256,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,272);
-main_m68000.change_ram16_calls(wwfsstar_getword,wwfsstar_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,272);
-snd_z80.change_ram_calls(wwfsstar_snd_getbyte,wwfsstar_snd_putbyte);
-snd_z80.init_sound(wwfsstar_sound_update);
-//Sound Chips
-ym2151_0:=ym2151_chip.create(3579545);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
-//Cargar ADPCM ROMS
-if not(cargar_roms(oki_6295_0.get_rom_addr,@wwfsstar_oki[0],'wwfsstar.zip',0)) then exit;
-//cargar roms
-if not(cargar_roms16w(@rom[0],@wwfsstar_rom[0],'wwfsstar.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@wwfsstar_sound,'wwfsstar.zip',1)) then exit;
-getmem(memoria_temp,$200000);
-//convertir chars
-if not(cargar_roms(memoria_temp,@wwfsstar_char,'wwfsstar.zip',1)) then exit;
-init_gfx(0,8,8,$1000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,2,4,6);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-//convertir background
-if not(cargar_roms(memoria_temp,@wwfsstar_bg[0],'wwfsstar.zip',0)) then exit;
-init_gfx(1,16,16,$1000);
-gfx_set_desc_data(4,0,64*8,$40000*8+0,$40000*8+4,0,4);
-convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(memoria_temp,@wwfsstar_sprites[0],'wwfsstar.zip',0)) then exit;
-init_gfx(2,16,16,$4000);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,$100000*8+0,$100000*8+4,0,4);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//DIP
-marcade.dswa:=$ff;
-marcade.dswa_val:=@wwfsstar_dip_a;
-marcade.dswb:=$ff;
-marcade.dswb_val:=@wwfsstar_dip_b;
-//final
-freemem(memoria_temp);
-reset_wwfsstar;
-iniciar_wwfsstar:=true;
-end;
-
-procedure reset_wwfsstar;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym2151_0.reset;
- oki_6295_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FE;
- scroll_x:=0;
- scroll_y:=0;
- sound_latch:=0;
- vblank:=0;
-end;
 
 procedure update_video_wwfsstar;inline;
 var
@@ -336,13 +236,102 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure wwfsstar_sound_update;
 begin
   ym2151_0.update;
   oki_6295_0.update;
+end;
+
+//Main
+procedure reset_wwfsstar;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ oki_6295_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FE;
+ scroll_x:=0;
+ scroll_y:=0;
+ sound_latch:=0;
+ vblank:=0;
+end;
+
+function iniciar_wwfsstar:boolean;
+var
+  memoria_temp:pbyte;
+const
+  pc_x:array[0..7] of dword=(1, 0, 8*8+1, 8*8+0, 16*8+1, 16*8+0, 24*8+1, 24*8+0);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..15] of dword=(3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
+          32*8+3, 32*8+2, 32*8+1, 32*8+0, 48*8+3, 48*8+2, 48*8+1, 48*8+0);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+          8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+begin
+iniciar_wwfsstar:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_init(2,512,512,false,true);
+screen_init(3,512,512);
+screen_mod_scroll(3,512,256,511,512,256,511);
+iniciar_video(256,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,272);
+main_m68000.change_ram16_calls(wwfsstar_getword,wwfsstar_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,272);
+snd_z80.change_ram_calls(wwfsstar_snd_getbyte,wwfsstar_snd_putbyte);
+snd_z80.init_sound(wwfsstar_sound_update);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
+//Cargar ADPCM ROMS
+if not(cargar_roms(oki_6295_0.get_rom_addr,@wwfsstar_oki[0],'wwfsstar.zip',0)) then exit;
+//cargar roms
+if not(cargar_roms16w(@rom[0],@wwfsstar_rom[0],'wwfsstar.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@wwfsstar_sound,'wwfsstar.zip',1)) then exit;
+getmem(memoria_temp,$200000);
+//convertir chars
+if not(cargar_roms(memoria_temp,@wwfsstar_char,'wwfsstar.zip',1)) then exit;
+init_gfx(0,8,8,$1000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,2,4,6);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+//convertir background
+if not(cargar_roms(memoria_temp,@wwfsstar_bg[0],'wwfsstar.zip',0)) then exit;
+init_gfx(1,16,16,$1000);
+gfx_set_desc_data(4,0,64*8,$40000*8+0,$40000*8+4,0,4);
+convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(memoria_temp,@wwfsstar_sprites[0],'wwfsstar.zip',0)) then exit;
+init_gfx(2,16,16,$4000);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,$100000*8+0,$100000*8+4,0,4);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//DIP
+marcade.dswa:=$ff;
+marcade.dswa_val:=@wwfsstar_dip_a;
+marcade.dswb:=$ff;
+marcade.dswb_val:=@wwfsstar_dip_b;
+//final
+freemem(memoria_temp);
+reset_wwfsstar;
+iniciar_wwfsstar:=true;
+end;
+
+procedure Cargar_wwfsstar;
+begin
+llamadas_maquina.iniciar:=iniciar_wwfsstar;
+llamadas_maquina.bucle_general:=wwfsstar_principal;
+llamadas_maquina.reset:=reset_wwfsstar;
+llamadas_maquina.fps_max:=57.444853;
 end;
 
 end.

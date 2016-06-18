@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,misc_functions,sound_engine;
 
-procedure Cargar_pacland;
-procedure pacland_principal;
-function iniciar_pacland:boolean;
-procedure reset_pacland;
-//Main CPU
-function pacland_getbyte(direccion:word):byte;
-procedure pacland_putbyte(direccion:word;valor:byte);
-//MCU CPU
-function mcu_getbyte(direccion:word):byte;
-procedure mcu_putbyte(direccion:word;valor:byte);
-function in_port1:byte;
-function in_port2:byte;
+procedure cargar_pacland;
 
 implementation
 const
@@ -42,14 +31,6 @@ var
  rom_nbank,palette_bank:byte;
  scroll_x1,scroll_x2:word;
  irq_enable,irq_enable_mcu:boolean;
-
-procedure Cargar_pacland;
-begin
-llamadas_maquina.iniciar:=iniciar_pacland;
-llamadas_maquina.bucle_general:=pacland_principal;
-llamadas_maquina.reset:=reset_pacland;
-llamadas_maquina.fps_max:=60.60606060606060;
-end;
 
 procedure cambiar_paleta;inline;
 var
@@ -77,91 +58,6 @@ for f:=0 to $ff do begin
   colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
 end;
 set_pal(colores,$100);
-end;
-
-function iniciar_pacland:boolean;
-var
-  f:word;
-  memoria_temp:array[0..$17fff] of byte;
-const
-    pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 );
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
-    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-begin
-iniciar_pacland:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,256,true);
-screen_mod_scroll(1,512,512,511,0,0,0);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,0,0,0);
-screen_init(3,512,256,false,true);
-screen_init(4,512,256,true);
-screen_mod_scroll(4,512,512,511,0,0,0);
-iniciar_video(288,224);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1536000,256);
-main_m6809.change_ram_calls(pacland_getbyte,pacland_putbyte);
-//MCU CPU
-main_m6800:=cpu_m6800.create(6144000,$100,cpu_hd63701);
-main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
-main_m6800.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@pacland_rom[0],'pacland.zip',0)) then exit;
-//Pongo las ROMs en su banco
-copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
-for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-//Cargar MCU
-if not(cargar_roms(@mem_snd[0],@pacland_mcu[0],'pacland.zip',0)) then exit;
-namco_sound_init(8,true);
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@pacland_char,'pacland.zip',1)) then exit;
-init_gfx(0,8,8,$200);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//tiles
-if not(cargar_roms(@memoria_temp[0],@pacland_tiles,'pacland.zip',1)) then exit;
-init_gfx(1,8,8,$200);
-gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@pacland_sprites[0],'pacland.zip',0)) then exit;
-init_gfx(2,16,16,$200);
-gfx_set_desc_data(4,0,64*8,0,4,$200*64*8+0,$200*64*8+4);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//Paleta
-if not(cargar_roms(@memoria_temp[0],@pacland_prom[0],'pacland.zip',0)) then exit;
-copymemory(@pal_proms[0],@memoria_temp[0],$800);
-// tiles/sprites color table
-for f:=$0 to $3ff do begin
-  gfx[0].colores[f]:=memoria_temp[$800+f];
-  gfx[1].colores[f]:=memoria_temp[$c00+f];
-  gfx[2].colores[f]:=memoria_temp[$1000+f];
-end;
-//final
-reset_pacland;
-iniciar_pacland:=true;
-end;
-
-procedure reset_pacland;
-begin
- main_m6809.reset;
- main_m6800.reset;
- namco_sound_reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- rom_nbank:=0;
- irq_enable:=false;
- irq_enable_mcu:=false;
- scroll_x1:=0;
- scroll_x2:=0;
- palette_bank:=0;
- cambiar_paleta;
 end;
 
 procedure put_sprite_pacland(nchar,color:word;flipx,flipy:boolean;pri:byte);inline;
@@ -444,5 +340,99 @@ function in_port2:byte;
 begin
   in_port2:=$ff;
 end;
+
+//Main
+procedure reset_pacland;
+begin
+ main_m6809.reset;
+ main_m6800.reset;
+ namco_sound_reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ rom_nbank:=0;
+ irq_enable:=false;
+ irq_enable_mcu:=false;
+ scroll_x1:=0;
+ scroll_x2:=0;
+ palette_bank:=0;
+ cambiar_paleta;
+end;
+
+function iniciar_pacland:boolean;
+var
+  f:word;
+  memoria_temp:array[0..$17fff] of byte;
+const
+    pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 );
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
+    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+begin
+iniciar_pacland:=false;
+iniciar_audio(false);
+screen_init(1,512,256,true);
+screen_mod_scroll(1,512,512,511,0,0,0);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,512,511,0,0,0);
+screen_init(3,512,256,false,true);
+screen_init(4,512,256,true);
+screen_mod_scroll(4,512,512,511,0,0,0);
+iniciar_video(288,224);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1536000,256);
+main_m6809.change_ram_calls(pacland_getbyte,pacland_putbyte);
+//MCU CPU
+main_m6800:=cpu_m6800.create(6144000,$100,cpu_hd63701);
+main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
+main_m6800.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@pacland_rom[0],'pacland.zip',0)) then exit;
+//Pongo las ROMs en su banco
+copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
+for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+//Cargar MCU
+if not(cargar_roms(@mem_snd[0],@pacland_mcu[0],'pacland.zip',0)) then exit;
+namco_sound_init(8,true);
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@pacland_char,'pacland.zip',1)) then exit;
+init_gfx(0,8,8,$200);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(2,0,16*8,0,4);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//tiles
+if not(cargar_roms(@memoria_temp[0],@pacland_tiles,'pacland.zip',1)) then exit;
+init_gfx(1,8,8,$200);
+gfx_set_desc_data(2,0,16*8,0,4);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@pacland_sprites[0],'pacland.zip',0)) then exit;
+init_gfx(2,16,16,$200);
+gfx_set_desc_data(4,0,64*8,0,4,$200*64*8+0,$200*64*8+4);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//Paleta
+if not(cargar_roms(@memoria_temp[0],@pacland_prom[0],'pacland.zip',0)) then exit;
+copymemory(@pal_proms[0],@memoria_temp[0],$800);
+// tiles/sprites color table
+for f:=$0 to $3ff do begin
+  gfx[0].colores[f]:=memoria_temp[$800+f];
+  gfx[1].colores[f]:=memoria_temp[$c00+f];
+  gfx[2].colores[f]:=memoria_temp[$1000+f];
+end;
+//final
+reset_pacland;
+iniciar_pacland:=true;
+end;
+
+procedure Cargar_pacland;
+begin
+llamadas_maquina.iniciar:=iniciar_pacland;
+llamadas_maquina.bucle_general:=pacland_principal;
+llamadas_maquina.reset:=reset_pacland;
+llamadas_maquina.fps_max:=60.60606060606060;
+end;
+
 
 end.

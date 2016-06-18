@@ -6,21 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      pal_engine,sound_engine;
 
 //main
-procedure Cargar_brkthru;
-procedure brkthru_principal;
-function iniciar_brkthru:boolean;
-procedure reset_brkthru;
-//cpu Break Thru
-function brkthru_getbyte(direccion:word):byte;
-procedure brkthru_putbyte(direccion:word;valor:byte);
-//cpu Darwin
-function darwin_getbyte(direccion:word):byte;
-procedure darwin_putbyte(direccion:word;valor:byte);
-//snd cpu
-function brkthru_snd_getbyte(direccion:word):byte;
-procedure brkthru_snd_putbyte(direccion:word;valor:byte);
-procedure brkthru_sound_update;
-procedure brkthru_snd_irq(irqstate:byte);
+procedure cargar_brkthru;
 
 implementation
 const
@@ -63,14 +49,6 @@ var
  nmi_ena,old_val,old_val2:boolean;
  scroll_x:word;
  proc_update_video:tipo_update_video;
-
-procedure Cargar_brkthru;
-begin
-llamadas_maquina.iniciar:=iniciar_brkthru;
-llamadas_maquina.bucle_general:=brkthru_principal;
-llamadas_maquina.reset:=reset_brkthru;
-llamadas_maquina.fps_max:=57.444885;
-end;
 
 procedure draw_sprites(prio:byte;invert:boolean);inline;
 var
@@ -191,172 +169,6 @@ for f:=0 to $3ff do begin
 end;
 actualiza_trozo(0,0,256,256,1,0,0,256,256,4);
 actualiza_trozo_final(8,8,240,240,4);
-end;
-
-function iniciar_brkthru:boolean; 
-var
-      colores:tpaleta;
-      bit0,bit1,bit2,bit3:byte;
-      f:word;
-      memoria_temp:array[0..$1ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3, 0, 1, 2, 3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
-			0, 1, 2, 3, 4, 5, 6, 7);
-    ps_y:array[0..15] of dword=( 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
-    pt_x:array[0..15] of dword=(0, 1, 2, 3, 1024*8*8+0, 1024*8*8+1, 1024*8*8+2, 1024*8*8+3,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+1024*8*8+0, 16*8+1024*8*8+1, 16*8+1024*8*8+2, 16*8+1024*8*8+3);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-
-procedure convert_chars(invert:boolean);
-begin
-  init_gfx(0,8,8,$100);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(3,0,8*8,512*8*8+4,0,4);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,invert);
-end;
-procedure convert_tiles(invert:boolean);
-var
-  memoria_temp2:array[0..$1ffff] of byte;
-  f:byte;
-begin
-  copymemory(@memoria_temp2[0],@memoria_temp[0],$4000);	// bitplanes 1,2 for bank 1,2 */
-  copymemory(@memoria_temp2[$8000],@memoria_temp[$4000],$4000);  // bitplanes 1,2 for bank 3,4 */
-  copymemory(@memoria_temp2[$10000],@memoria_temp[$8000],$4000); // bitplanes 1,2 for bank 5,6 */
-  copymemory(@memoria_temp2[$18000],@memoria_temp[$c000],$4000); // bitplanes 1,2 for bank 7,8 */
-  copymemory(@memoria_temp2[$4000],@memoria_temp[$10000],$1000); // bitplane 3 for bank 1,2 */
-  copymemory(@memoria_temp2[$6000],@memoria_temp[$11000],$1000);
-  copymemory(@memoria_temp2[$c000],@memoria_temp[$12000],$1000); // bitplane 3 for bank 3,4 */
-  copymemory(@memoria_temp2[$e000],@memoria_temp[$13000],$1000);
-  copymemory(@memoria_temp2[$14000],@memoria_temp[$14000],$1000);  // bitplane 3 for bank 5,6 */
-  copymemory(@memoria_temp2[$16000],@memoria_temp[$15000],$1000);
-  copymemory(@memoria_temp2[$1c000],@memoria_temp[$16000],$1000); // bitplane 3 for bank 7,8 */
-  copymemory(@memoria_temp2[$1e000],@memoria_temp[$17000],$1000);
-  init_gfx(1,16,16,$400);
-  gfx[1].trans[0]:=true;
-  for f:=0 to 3 do begin
-    gfx_set_desc_data(3,8,32*8,$4000*8+4,0,4);
-    convert_gfx(1,(f*2)*16*16*$80,@memoria_temp2[$8000*f],@pt_x[0],@pt_y[0],false,invert);
-    gfx_set_desc_data(3,8,32*8,$3000*8+0,0,4);
-    convert_gfx(1,((f*2)+1)*16*16*$80,@memoria_temp2[($8000*f)+$1000],@pt_x[0],@pt_y[0],false,invert);
-  end;
-end;
-procedure convert_sprt(invert:boolean);
-begin
-  init_gfx(2,16,16,$400);
-  gfx[2].trans[0]:=true;
-  gfx_set_desc_data(3,0,32*8,2*1024*32*8,1024*32*8,0);
-  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,invert);
-end;
-
-begin
-iniciar_brkthru:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,512,512,true);
-screen_mod_scroll(3,512,256,511,512,256,511);
-screen_init(4,512,512,false,true);
-iniciar_video(240,240);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1500000,272);
-//Sound CPU
-snd_m6809:=cpu_m6809.Create(1500000,272);
-snd_m6809.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
-snd_m6809.init_sound(brkthru_sound_update);
-//Sound Chip
-ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
-ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
-ym3812_0.change_irq_calls(brkthru_snd_irq);
-case main_vars.tipo_maquina of
-  89:begin
-        main_m6809.change_ram_calls(brkthru_getbyte,brkthru_putbyte);
-        proc_update_video:=update_video_brkthru;
-        //cargar roms y ponerlas en su sitio
-        if not(cargar_roms(@memoria_temp[0],@brkthru_rom[0],'brkthru.zip',0)) then exit;
-        copymemory(@memoria[$4000],@memoria_temp[0],$c000);
-        for f:=0 to 7 do copymemory(@rom[f,0],@memoria_temp[$c000+(f*$2000)],$2000);
-        //roms sonido
-        if not(cargar_roms(@mem_snd[0],@brkthru_snd,'brkthru.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@brkthru_char,'brkthru.zip',1)) then exit;
-        convert_chars(false);
-        //convertir tiles y organizar
-        if not(cargar_roms(@memoria_temp[0],@brkthru_tiles[0],'brkthru.zip',0)) then exit;
-        convert_tiles(false);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@brkthru_sprites[0],'brkthru.zip',0)) then exit;
-        convert_sprt(false);
-        //paleta
-        if not(cargar_roms(@memoria_temp[0],@brkthru_pal[0],'brkthru.zip',0)) then exit;
-     end;
-  90:begin
-        main_m6809.change_ram_calls(darwin_getbyte,darwin_putbyte);
-        proc_update_video:=update_video_darwin;
-        //cargar roms y ponerlas en su sitio
-        if not(cargar_roms(@memoria_temp[0],@darwin_rom[0],'darwin.zip',0)) then exit;
-        copymemory(@memoria[$4000],@memoria_temp[0],$c000);
-        for f:=0 to 7 do copymemory(@rom[f,0],@memoria_temp[$c000+(f*$2000)],$2000);
-        //roms sonido
-        if not(cargar_roms(@mem_snd[0],@darwin_snd,'darwin.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@darwin_char,'darwin.zip',1)) then exit;
-        convert_chars(true);
-        //convertir tiles y organizar
-        if not(cargar_roms(@memoria_temp[0],@darwin_tiles[0],'darwin.zip',0)) then exit;
-        convert_tiles(true);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@darwin_sprites[0],'darwin.zip',0)) then exit;
-        convert_sprt(true);
-        //paleta
-        if not(cargar_roms(@memoria_temp[0],@darwin_pal[0],'darwin.zip',0)) then exit;
-     end;
-end;
-for f:=0 to $ff do begin
-    bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
-    bit3:=(memoria_temp[f] shr 3) and $01;
-		colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-		bit0:=(memoria_temp[f] shr 4) and $01;
-		bit1:=(memoria_temp[f] shr 5) and $01;
-		bit2:=(memoria_temp[f] shr 6) and $01;
-    bit3:=(memoria_temp[f] shr 7) and $01;
-		colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-		bit0:=(memoria_temp[f+$100] shr 0) and $01;
-		bit1:=(memoria_temp[f+$100] shr 1) and $01;
-		bit2:=(memoria_temp[f+$100] shr 2) and $01;
-    bit3:=(memoria_temp[f+$100] shr 3) and $01;
-		colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-end;
-set_pal(colores,$100);
-//final
-reset_brkthru;
-iniciar_brkthru:=true;
-end;
-
-procedure reset_brkthru;
-begin
- main_m6809.reset;
- snd_m6809.reset;
- ym2203_0.reset;
- ym3812_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- rom_bank:=0;
- scroll_x:=0;
- old_val:=false;
- old_val2:=false;
- sound_latch:=0;
- bg_color:=0;
- nmi_ena:=true;
 end;
 
 procedure eventos_brkthru;
@@ -522,5 +334,180 @@ begin
   YM2203_0.Update;
   YM3812_0.update;
 end;
+
+//Main
+procedure reset_brkthru;
+begin
+ main_m6809.reset;
+ snd_m6809.reset;
+ ym2203_0.reset;
+ ym3812_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ rom_bank:=0;
+ scroll_x:=0;
+ old_val:=false;
+ old_val2:=false;
+ sound_latch:=0;
+ bg_color:=0;
+ nmi_ena:=true;
+end;
+
+function iniciar_brkthru:boolean;
+var
+      colores:tpaleta;
+      bit0,bit1,bit2,bit3:byte;
+      f:word;
+      memoria_temp:array[0..$1ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3, 0, 1, 2, 3);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
+			0, 1, 2, 3, 4, 5, 6, 7);
+    ps_y:array[0..15] of dword=( 0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
+    pt_x:array[0..15] of dword=(0, 1, 2, 3, 1024*8*8+0, 1024*8*8+1, 1024*8*8+2, 1024*8*8+3,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+1024*8*8+0, 16*8+1024*8*8+1, 16*8+1024*8*8+2, 16*8+1024*8*8+3);
+    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+
+procedure convert_chars(invert:boolean);
+begin
+  init_gfx(0,8,8,$100);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(3,0,8*8,512*8*8+4,0,4);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,invert);
+end;
+procedure convert_tiles(invert:boolean);
+var
+  memoria_temp2:array[0..$1ffff] of byte;
+  f:byte;
+begin
+  copymemory(@memoria_temp2[0],@memoria_temp[0],$4000);	// bitplanes 1,2 for bank 1,2 */
+  copymemory(@memoria_temp2[$8000],@memoria_temp[$4000],$4000);  // bitplanes 1,2 for bank 3,4 */
+  copymemory(@memoria_temp2[$10000],@memoria_temp[$8000],$4000); // bitplanes 1,2 for bank 5,6 */
+  copymemory(@memoria_temp2[$18000],@memoria_temp[$c000],$4000); // bitplanes 1,2 for bank 7,8 */
+  copymemory(@memoria_temp2[$4000],@memoria_temp[$10000],$1000); // bitplane 3 for bank 1,2 */
+  copymemory(@memoria_temp2[$6000],@memoria_temp[$11000],$1000);
+  copymemory(@memoria_temp2[$c000],@memoria_temp[$12000],$1000); // bitplane 3 for bank 3,4 */
+  copymemory(@memoria_temp2[$e000],@memoria_temp[$13000],$1000);
+  copymemory(@memoria_temp2[$14000],@memoria_temp[$14000],$1000);  // bitplane 3 for bank 5,6 */
+  copymemory(@memoria_temp2[$16000],@memoria_temp[$15000],$1000);
+  copymemory(@memoria_temp2[$1c000],@memoria_temp[$16000],$1000); // bitplane 3 for bank 7,8 */
+  copymemory(@memoria_temp2[$1e000],@memoria_temp[$17000],$1000);
+  init_gfx(1,16,16,$400);
+  gfx[1].trans[0]:=true;
+  for f:=0 to 3 do begin
+    gfx_set_desc_data(3,8,32*8,$4000*8+4,0,4);
+    convert_gfx(1,(f*2)*16*16*$80,@memoria_temp2[$8000*f],@pt_x[0],@pt_y[0],false,invert);
+    gfx_set_desc_data(3,8,32*8,$3000*8+0,0,4);
+    convert_gfx(1,((f*2)+1)*16*16*$80,@memoria_temp2[($8000*f)+$1000],@pt_x[0],@pt_y[0],false,invert);
+  end;
+end;
+procedure convert_sprt(invert:boolean);
+begin
+  init_gfx(2,16,16,$400);
+  gfx[2].trans[0]:=true;
+  gfx_set_desc_data(3,0,32*8,2*1024*32*8,1024*32*8,0);
+  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,invert);
+end;
+
+begin
+iniciar_brkthru:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_init(2,512,512);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,512,512,true);
+screen_mod_scroll(3,512,256,511,512,256,511);
+screen_init(4,512,512,false,true);
+iniciar_video(240,240);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1500000,272);
+//Sound CPU
+snd_m6809:=cpu_m6809.Create(1500000,272);
+snd_m6809.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
+snd_m6809.init_sound(brkthru_sound_update);
+//Sound Chip
+ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
+ym3812_0.change_irq_calls(brkthru_snd_irq);
+case main_vars.tipo_maquina of
+  89:begin
+        main_m6809.change_ram_calls(brkthru_getbyte,brkthru_putbyte);
+        proc_update_video:=update_video_brkthru;
+        //cargar roms y ponerlas en su sitio
+        if not(cargar_roms(@memoria_temp[0],@brkthru_rom[0],'brkthru.zip',0)) then exit;
+        copymemory(@memoria[$4000],@memoria_temp[0],$c000);
+        for f:=0 to 7 do copymemory(@rom[f,0],@memoria_temp[$c000+(f*$2000)],$2000);
+        //roms sonido
+        if not(cargar_roms(@mem_snd[0],@brkthru_snd,'brkthru.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@brkthru_char,'brkthru.zip',1)) then exit;
+        convert_chars(false);
+        //convertir tiles y organizar
+        if not(cargar_roms(@memoria_temp[0],@brkthru_tiles[0],'brkthru.zip',0)) then exit;
+        convert_tiles(false);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@brkthru_sprites[0],'brkthru.zip',0)) then exit;
+        convert_sprt(false);
+        //paleta
+        if not(cargar_roms(@memoria_temp[0],@brkthru_pal[0],'brkthru.zip',0)) then exit;
+     end;
+  90:begin
+        main_m6809.change_ram_calls(darwin_getbyte,darwin_putbyte);
+        proc_update_video:=update_video_darwin;
+        //cargar roms y ponerlas en su sitio
+        if not(cargar_roms(@memoria_temp[0],@darwin_rom[0],'darwin.zip',0)) then exit;
+        copymemory(@memoria[$4000],@memoria_temp[0],$c000);
+        for f:=0 to 7 do copymemory(@rom[f,0],@memoria_temp[$c000+(f*$2000)],$2000);
+        //roms sonido
+        if not(cargar_roms(@mem_snd[0],@darwin_snd,'darwin.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@darwin_char,'darwin.zip',1)) then exit;
+        convert_chars(true);
+        //convertir tiles y organizar
+        if not(cargar_roms(@memoria_temp[0],@darwin_tiles[0],'darwin.zip',0)) then exit;
+        convert_tiles(true);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@darwin_sprites[0],'darwin.zip',0)) then exit;
+        convert_sprt(true);
+        //paleta
+        if not(cargar_roms(@memoria_temp[0],@darwin_pal[0],'darwin.zip',0)) then exit;
+     end;
+end;
+for f:=0 to $ff do begin
+    bit0:=(memoria_temp[f] shr 0) and $01;
+		bit1:=(memoria_temp[f] shr 1) and $01;
+		bit2:=(memoria_temp[f] shr 2) and $01;
+    bit3:=(memoria_temp[f] shr 3) and $01;
+		colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		bit0:=(memoria_temp[f] shr 4) and $01;
+		bit1:=(memoria_temp[f] shr 5) and $01;
+		bit2:=(memoria_temp[f] shr 6) and $01;
+    bit3:=(memoria_temp[f] shr 7) and $01;
+		colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		bit0:=(memoria_temp[f+$100] shr 0) and $01;
+		bit1:=(memoria_temp[f+$100] shr 1) and $01;
+		bit2:=(memoria_temp[f+$100] shr 2) and $01;
+    bit3:=(memoria_temp[f+$100] shr 3) and $01;
+		colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+end;
+set_pal(colores,$100);
+//final
+reset_brkthru;
+iniciar_brkthru:=true;
+end;
+
+procedure Cargar_brkthru;
+begin
+llamadas_maquina.iniciar:=iniciar_brkthru;
+llamadas_maquina.bucle_general:=brkthru_principal;
+llamadas_maquina.reset:=reset_brkthru;
+llamadas_maquina.fps_max:=57.444885;
+end;
+
 
 end.

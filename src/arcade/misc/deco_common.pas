@@ -2,7 +2,7 @@ unit deco_common;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine,ym_2203,ym_2151,oki6295,hu6280,
-     main_engine;
+     cpu_misc,main_engine;
 
 var
  deco_sprite_ram:array[0..$3ff] of word;

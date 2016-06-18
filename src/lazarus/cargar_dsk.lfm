@@ -1,7 +1,7 @@
 object load_dsk: Tload_dsk
-  Left = 462
+  Left = 340
   Height = 407
-  Top = 233
+  Top = 234
   Width = 568
   BorderIcons = []
   BorderStyle = bsSingle
@@ -15,7 +15,7 @@ object load_dsk: Tload_dsk
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '1.4.0.2'
+  LCLVersion = '1.7'
   object GroupBox1: TGroupBox
     Left = 288
     Height = 192

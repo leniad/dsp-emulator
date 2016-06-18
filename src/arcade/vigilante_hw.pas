@@ -5,24 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,dac,ym_2151,rom_engine,
      pal_engine,sound_engine,timer_engine;
 
-procedure Cargar_vigilante;
-procedure vigilante_principal; 
-function iniciar_vigilante:boolean; 
-procedure reset_vigilante;
-//Main CPU
-function vigilante_getbyte(direccion:word):byte;
-procedure vigilante_putbyte(direccion:word;valor:byte);
-function vigilante_inbyte(puerto:word):byte;
-procedure vigilante_outbyte(valor:byte;puerto:word);
-//Sound CPU
-function snd_getbyte(direccion:word):byte;
-procedure snd_putbyte(direccion:word;valor:byte);
-function snd_inbyte(puerto:word):byte;
-procedure snd_outbyte(valor:byte;puerto:word);
-procedure vigilante_snd_irq;
-//Sound
-procedure snd_despues_instruccion;
-procedure ym2151_snd_irq(irqstate:byte);
+procedure cargar_vigilante;
 
 implementation
 const
@@ -46,103 +29,6 @@ var
  rear_scroll,scroll_x,sample_addr:word;
  rear_disable,rear_ch_color:boolean;
  mem_dac:array[0..$ffff] of byte;
-
-procedure Cargar_vigilante;
-begin
-llamadas_maquina.iniciar:=iniciar_vigilante;
-llamadas_maquina.bucle_general:=vigilante_principal;
-llamadas_maquina.reset:=reset_vigilante;
-llamadas_maquina.fps_max:=55;
-end;
-
-function iniciar_vigilante:boolean;
-const
-  ps_x:array[0..15] of dword=($00*8+0,$00*8+1,$00*8+2,$00*8+3,
-		                          $10*8+0,$10*8+1,$10*8+2,$10*8+3,
-		                          $20*8+0,$20*8+1,$20*8+2,$20*8+3,
-		                          $30*8+0,$30*8+1,$30*8+2,$30*8+3);
-  ps_y:array[0..15] of dword=($00*8,$01*8,$02*8,$03*8,
-                          		$04*8,$05*8,$06*8,$07*8,
-                          		$08*8,$09*8,$0A*8,$0B*8,
-                           		$0C*8,$0D*8,$0E*8,$0F*8);
-  pt_x:array[0..31] of dword=(0*8+1, 0*8,  1*8+1, 1*8, 2*8+1, 2*8, 3*8+1, 3*8, 4*8+1, 4*8, 5*8+1, 5*8,
-	6*8+1, 6*8, 7*8+1, 7*8, 8*8+1, 8*8, 9*8+1, 9*8, 10*8+1, 10*8, 11*8+1, 11*8,
-	12*8+1, 12*8, 13*8+1, 13*8, 14*8+1, 14*8, 15*8+1, 15*8);
-  pt_y:array[0..0] of dword=(0);
-  pc_x:array[0..7] of dword=(0,1,2,3, 64+0,64+1,64+2,64+3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-var
-  f:word;
-  memoria_temp:array[0..$7ffff] of byte;
-begin
-iniciar_vigilante:=false;
-iniciar_audio(true);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,256,true);
-screen_mod_scroll(1,512,256+128,511,0,0,255);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,256+128,511,0,0,255);
-screen_init(3,512,256,false,true);
-screen_mod_sprites(3,0,$200,0,$1ff);
-screen_init(4,512*4,256);
-iniciar_video(256,256);
-//Main CPU
-main_z80:=cpu_z80.create(3579645,256);
-main_z80.change_ram_calls(vigilante_getbyte,vigilante_putbyte);
-main_z80.change_io_calls(vigilante_inbyte,vigilante_outbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579645,256);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
-snd_z80.init_sound(snd_despues_instruccion);
-init_timer(snd_z80.numero_cpu,3579645/(128*55),vigilante_snd_irq,true);
-//sound chips
-dac_0:=dac_chip.Create;
-ym2151_0:=ym2151_chip.create(3579645);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-//cargar roms y rom en bancos
-if not(cargar_roms(@memoria_temp[0],@vigilante_rom[0],'vigilant.zip',0)) then exit;
-copymemory(@memoria[0],@memoria_temp[0],$8000);
-for f:=0 to 3 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@vigilante_sound,'vigilant.zip',1)) then exit;
-if not(cargar_roms(@mem_dac[0],@vigilante_dac,'vigilant.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@vigilante_chars[0],'vigilant.zip',0)) then exit;
-init_gfx(0,8,8,4096);
-gfx[0].trans[0]:=true;
-for f:=0 to 7 do gfx[0].trans_alt[1,f]:=true;
-gfx_set_desc_data(4,0,128,64*1024*8,(64*1024*8)+4,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@vigilante_sprites[0],'vigilant.zip',0)) then exit;
-init_gfx(1,16,16,4096);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,$40*8,$40000*8,$40000*8+4,0,4);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@vigilante_tiles[0],'vigilant.zip',0)) then exit;
-init_gfx(2,32,1,3*512*8);
-gfx_set_desc_data(4,0,16*8,0,2,4,6);
-convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
-//final
-reset_vigilante;
-iniciar_vigilante:=true;
-end;
-
-procedure reset_vigilante;
-begin
- main_z80.reset;
- snd_z80.reset;
- ym2151_0.reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
- banco_rom:=0;
- rear_ch_color:=true;
- sample_addr:=0;
-end;
 
 procedure update_video_vigilante;inline;
 var
@@ -250,7 +136,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
   end;
-  main_z80.pedir_irq:=HOLD_LINE;
+  main_z80.change_irq(HOLD_LINE);
   update_video_vigilante;
   eventos_vigilante;
   video_sync;
@@ -305,8 +191,8 @@ begin
     2:snd_z80.im0:=snd_z80.im0 or $10; //Clear YM2151
     3:snd_z80.im0:=snd_z80.im0 and $ef; //Set YM2151
   end;
-  if (snd_z80.im0<>$ff) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  if (snd_z80.im0<>$ff) then snd_z80.change_irq(ASSERT_LINE)
+    else snd_z80.change_irq(CLEAR_LINE);
 end;
 
 function vigilante_inbyte(puerto:word):byte;
@@ -388,6 +274,103 @@ procedure snd_despues_instruccion;
 begin
   ym2151_0.update;
   dac_0.update;
+end;
+
+//Main
+procedure reset_vigilante;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ ym2151_0.reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+ banco_rom:=0;
+ rear_ch_color:=true;
+ sample_addr:=0;
+end;
+
+function iniciar_vigilante:boolean;
+const
+  ps_x:array[0..15] of dword=($00*8+0,$00*8+1,$00*8+2,$00*8+3,
+		                          $10*8+0,$10*8+1,$10*8+2,$10*8+3,
+		                          $20*8+0,$20*8+1,$20*8+2,$20*8+3,
+		                          $30*8+0,$30*8+1,$30*8+2,$30*8+3);
+  ps_y:array[0..15] of dword=($00*8,$01*8,$02*8,$03*8,
+                          		$04*8,$05*8,$06*8,$07*8,
+                          		$08*8,$09*8,$0A*8,$0B*8,
+                           		$0C*8,$0D*8,$0E*8,$0F*8);
+  pt_x:array[0..31] of dword=(0*8+1, 0*8,  1*8+1, 1*8, 2*8+1, 2*8, 3*8+1, 3*8, 4*8+1, 4*8, 5*8+1, 5*8,
+	6*8+1, 6*8, 7*8+1, 7*8, 8*8+1, 8*8, 9*8+1, 9*8, 10*8+1, 10*8, 11*8+1, 11*8,
+	12*8+1, 12*8, 13*8+1, 13*8, 14*8+1, 14*8, 15*8+1, 15*8);
+  pt_y:array[0..0] of dword=(0);
+  pc_x:array[0..7] of dword=(0,1,2,3, 64+0,64+1,64+2,64+3);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+var
+  f:word;
+  memoria_temp:array[0..$7ffff] of byte;
+begin
+iniciar_vigilante:=false;
+iniciar_audio(true);
+screen_init(1,512,256,true);
+screen_mod_scroll(1,512,256+128,511,0,0,255);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,256+128,511,0,0,255);
+screen_init(3,512,256,false,true);
+screen_mod_sprites(3,0,$200,0,$1ff);
+screen_init(4,512*4,256);
+iniciar_video(256,256);
+//Main CPU
+main_z80:=cpu_z80.create(3579645,256);
+main_z80.change_ram_calls(vigilante_getbyte,vigilante_putbyte);
+main_z80.change_io_calls(vigilante_inbyte,vigilante_outbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579645,256);
+snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
+snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
+snd_z80.init_sound(snd_despues_instruccion);
+init_timer(snd_z80.numero_cpu,3579645/(128*55),vigilante_snd_irq,true);
+//sound chips
+dac_0:=dac_chip.Create;
+ym2151_0:=ym2151_chip.create(3579645);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+//cargar roms y rom en bancos
+if not(cargar_roms(@memoria_temp[0],@vigilante_rom[0],'vigilant.zip',0)) then exit;
+copymemory(@memoria[0],@memoria_temp[0],$8000);
+for f:=0 to 3 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@vigilante_sound,'vigilant.zip',1)) then exit;
+if not(cargar_roms(@mem_dac[0],@vigilante_dac,'vigilant.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@vigilante_chars[0],'vigilant.zip',0)) then exit;
+init_gfx(0,8,8,4096);
+gfx[0].trans[0]:=true;
+for f:=0 to 7 do gfx[0].trans_alt[1,f]:=true;
+gfx_set_desc_data(4,0,128,64*1024*8,(64*1024*8)+4,0,4);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@vigilante_sprites[0],'vigilant.zip',0)) then exit;
+init_gfx(1,16,16,4096);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,$40*8,$40000*8,$40000*8+4,0,4);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@vigilante_tiles[0],'vigilant.zip',0)) then exit;
+init_gfx(2,32,1,3*512*8);
+gfx_set_desc_data(4,0,16*8,0,2,4,6);
+convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+//final
+reset_vigilante;
+iniciar_vigilante:=true;
+end;
+
+procedure Cargar_vigilante;
+begin
+llamadas_maquina.iniciar:=iniciar_vigilante;
+llamadas_maquina.bucle_general:=vigilante_principal;
+llamadas_maquina.reset:=reset_vigilante;
+llamadas_maquina.fps_max:=55;
 end;
 
 end.

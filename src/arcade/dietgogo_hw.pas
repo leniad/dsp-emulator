@@ -6,16 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,deco_104,
      misc_functions;
 
-procedure Cargar_dietgo;
-function iniciar_dietgo:boolean;
-procedure reset_dietgo;
-procedure cerrar_dietgo;
-procedure dietgo_principal;
-//Main CPU
-function dietgo_getword(direccion:dword):word;
-procedure dietgo_putword(direccion:dword;valor:word);
-function dietgo_bank_callback(bank:word):word;
-procedure sound_bank_rom(valor:byte);
+procedure cargar_dietgo;
 
 implementation
 const
@@ -39,106 +30,6 @@ var
  rom_opcode,rom_data:array[0..$3ffff] of word;
  ram:array[0..$7fff] of word;
  oki1_mem:pbyte;
-
-procedure Cargar_dietgo;
-begin
-llamadas_maquina.bucle_general:=dietgo_principal;
-llamadas_maquina.iniciar:=iniciar_dietgo;
-llamadas_maquina.cerrar:=cerrar_dietgo;
-llamadas_maquina.reset:=reset_dietgo;
-llamadas_maquina.fps_max:=58;
-end;
-
-//Inicio Normal
-function iniciar_dietgo:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  pt_x:array[0..15] of dword=(256,257,258,259,260,261,262,263,
-  0, 1, 2, 3, 4, 5, 6, 7);
-  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-  8*16,9*16,10*16,11*16,12*16,13*16,14*16,15*16);
-  ps_x:array[0..15] of dword=(512,513,514,515,516,517,518,519,
-   0, 1, 2, 3, 4, 5, 6, 7);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32 );
-var
-  memoria_temp:pbyte;
-  memoria_temp_rom:pword;
-begin
-iniciar_dietgo:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-init_dec16ic(0,1,2,$0,$0,$f,$f,0,1,0,16,dietgo_bank_callback,dietgo_bank_callback);
-screen_init(3,512,512,false,true);
-iniciar_video(320,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(14000000,$100);
-main_m68000.change_ram16_calls(dietgo_getword,dietgo_putword);
-//Sound CPU
-deco16_sprite_color_add:=$200;
-deco16_sprite_mask:=$3fff;
-deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
-getmem(memoria_temp,$200000);
-getmem(memoria_temp_rom,$80000);
-//cargar roms
-if not(cargar_roms16w(memoria_temp_rom,@dietgo_rom[0],'dietgo.zip',0)) then exit;
-deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode[0],@rom_data[0],$e9ba,$01,$19,$80000);
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@dietgo_sound,'dietgo.zip',1)) then exit;
-//OKI rom
-getmem(oki1_mem,$80000);
-if not(cargar_roms(oki1_mem,@dietgo_oki,'dietgo.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(memoria_temp,@dietgo_char,'dietgo.zip',1)) then exit;
-deco56_decrypt_gfx(memoria_temp,$100000);
-init_gfx(0,8,8,$8000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,16*8,$8000*16*8+8,$8000*16*8+0,8,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-//Tiles
-init_gfx(1,16,16,$2000);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,32*16,$2000*32*16+8,$2000*32*16+0,8,0);
-convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
-//Sprites
-if not(cargar_roms16b(memoria_temp,@dietgo_sprites[0],'dietgo.zip',0)) then exit;
-init_gfx(2,16,16,$4000);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(4,0,32*32,24,8,16,0);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//Proteccion deco104
-main_deco104:=cpu_deco_104.create;
-main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
-main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
-//Dip
-marcade.dswa:=$ffff;
-marcade.dswa_val:=@dietgo_dip_a;
-//final
-freemem(memoria_temp_rom);
-freemem(memoria_temp);
-reset_dietgo;
-iniciar_dietgo:=true;
-end;
-
-procedure cerrar_dietgo;
-begin
-close_dec16ic(0);
-if oki1_mem<>nil then freemem(oki1_mem);
-oki1_mem:=nil;
-end;
-
-procedure reset_dietgo;
-begin
- main_m68000.reset;
- reset_dec16ic(0);
- main_deco104.reset;
- copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
- deco16_snd_simple_reset;
- reset_audio;
- marcade.in0:=$FFFF;
- marcade.in1:=$7;
-end;
 
 procedure update_video_dietgo;inline;
 begin
@@ -297,5 +188,103 @@ begin
   copymemory(oki_6295_0.get_rom_addr,temp,$40000);
 end;
 
+//Main
+procedure reset_dietgo;
+begin
+ main_m68000.reset;
+ reset_dec16ic(0);
+ main_deco104.reset;
+ copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
+ deco16_snd_simple_reset;
+ reset_audio;
+ marcade.in0:=$FFFF;
+ marcade.in1:=$7;
+end;
+
+function iniciar_dietgo:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  pt_x:array[0..15] of dword=(256,257,258,259,260,261,262,263,
+  0, 1, 2, 3, 4, 5, 6, 7);
+  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+  8*16,9*16,10*16,11*16,12*16,13*16,14*16,15*16);
+  ps_x:array[0..15] of dword=(512,513,514,515,516,517,518,519,
+   0, 1, 2, 3, 4, 5, 6, 7);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32 );
+var
+  memoria_temp:pbyte;
+  memoria_temp_rom:pword;
+begin
+iniciar_dietgo:=false;
+iniciar_audio(false);
+init_dec16ic(0,1,2,$0,$0,$f,$f,0,1,0,16,dietgo_bank_callback,dietgo_bank_callback);
+screen_init(3,512,512,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(14000000,$100);
+main_m68000.change_ram16_calls(dietgo_getword,dietgo_putword);
+//Sound CPU
+deco16_sprite_color_add:=$200;
+deco16_sprite_mask:=$3fff;
+deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
+getmem(memoria_temp,$200000);
+getmem(memoria_temp_rom,$80000);
+//cargar roms
+if not(cargar_roms16w(memoria_temp_rom,@dietgo_rom[0],'dietgo.zip',0)) then exit;
+deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode[0],@rom_data[0],$e9ba,$01,$19,$80000);
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@dietgo_sound,'dietgo.zip',1)) then exit;
+//OKI rom
+getmem(oki1_mem,$80000);
+if not(cargar_roms(oki1_mem,@dietgo_oki,'dietgo.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(memoria_temp,@dietgo_char,'dietgo.zip',1)) then exit;
+deco56_decrypt_gfx(memoria_temp,$100000);
+init_gfx(0,8,8,$8000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,16*8,$8000*16*8+8,$8000*16*8+0,8,0);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+//Tiles
+init_gfx(1,16,16,$2000);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,32*16,$2000*32*16+8,$2000*32*16+0,8,0);
+convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+//Sprites
+if not(cargar_roms16b(memoria_temp,@dietgo_sprites[0],'dietgo.zip',0)) then exit;
+init_gfx(2,16,16,$4000);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(4,0,32*32,24,8,16,0);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//Proteccion deco104
+main_deco104:=cpu_deco_104.create;
+main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
+main_deco104.SET_USE_MAGIC_ADDRESS_XOR;
+//Dip
+marcade.dswa:=$ffff;
+marcade.dswa_val:=@dietgo_dip_a;
+//final
+freemem(memoria_temp_rom);
+freemem(memoria_temp);
+reset_dietgo;
+iniciar_dietgo:=true;
+end;
+
+procedure cerrar_dietgo;
+begin
+close_dec16ic(0);
+if oki1_mem<>nil then freemem(oki1_mem);
+oki1_mem:=nil;
+end;
+
+procedure Cargar_dietgo;
+begin
+llamadas_maquina.bucle_general:=dietgo_principal;
+llamadas_maquina.iniciar:=iniciar_dietgo;
+llamadas_maquina.cerrar:=cerrar_dietgo;
+llamadas_maquina.reset:=reset_dietgo;
+llamadas_maquina.fps_max:=58;
+end;
 
 end.

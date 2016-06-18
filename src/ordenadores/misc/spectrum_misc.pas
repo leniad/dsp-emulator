@@ -578,7 +578,7 @@ var
 begin
 //Longitud de la IRQ probado con el Soldier of Fortune
 var_spectrum.irq_pos:=var_spectrum.irq_pos+estados_t;
-if ((var_spectrum.irq_pos>31) and (spec_z80.pedir_irq<>CLEAR_LINE)) then spec_z80.pedir_irq:=CLEAR_LINE;
+if ((var_spectrum.irq_pos>31) and (spec_z80.get_irq<>CLEAR_LINE)) then spec_z80.change_irq(CLEAR_LINE);
 if sound_status.hay_sonido then begin
   var_spectrum.testados_sonido:=var_spectrum.testados_sonido+estados_t;
   var_spectrum.testados_sonido_beeper:=var_spectrum.testados_sonido_beeper+estados_t;

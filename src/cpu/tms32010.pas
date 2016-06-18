@@ -2,7 +2,7 @@ unit tms32010;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,sysutils,vars_hide;
+     main_engine,dialogs,sysutils,vars_hide,cpu_misc;
 
 type
         band_tms32010=record
@@ -24,7 +24,6 @@ type
                 constructor create(clock:dword;frames_div:word);
                 destructor free;
             public
-                pedir_int,pedir_halt:byte;
                 procedure run(maximo:single);
                 procedure reset;
                 procedure change_io_calls(in_bio:type_bio;in_port0,in_port1,in_port2,in_port3,in_port4,in_port5,in_port6,in_port7:cpu_inport_call16;out_port0,out_port1,out_port2,out_port3,out_port4,out_port5,out_port6,out_port7:cpu_outport_call16);
@@ -114,8 +113,8 @@ r.sp[0]:=0;
 r.sp[1]:=0;
 r.sp[2]:=0;
 r.sp[3]:=0;
-self.pedir_int:=CLEAR_LINE;
-self.pedir_halt:=CLEAR_LINE;
+self.change_irq(CLEAR_LINE);
+self.change_halt(CLEAR_LINE);
 r.str.arp_reg:=0;
 end;
 
@@ -248,7 +247,7 @@ var
 begin
 ret:=0;
 if not(r.str.int) then begin
-    self.pedir_int:=CLEAR_LINE;
+    self.change_irq(CLEAR_LINE);
     r.str.int:=true;
 		self.push_stack(r.pc.w);
 		r.pc.w:=$0002;
@@ -269,7 +268,7 @@ if self.pedir_halt<>CLEAR_LINE then begin
 end;
 self.estados_demas:=0;
 //comprobar irq's
-if (self.pedir_int<>CLEAR_LINE) then begin
+if (self.pedir_irq<>CLEAR_LINE) then begin
   if ((instruccion.h<>$6d) and ((instruccion.h and $e0)<>$80) and (instruccion.w<>$7f82)) then self.estados_demas:=self.ext_irq;
 end;
 self.opcode:=true;

@@ -56,7 +56,7 @@ uses
   init_games in '..\misc\init_games.pas',
   lenguaje in '..\misc\lenguaje.pas',
   snapshot in '..\misc\snapshot.pas',
-  Tap_tzx in '..\misc\Tap_tzx.pas',
+  tap_tzx in '..\misc\tap_tzx.pas',
   timer_engine in '..\misc\timer_engine.pas',
   amstrad_cpc in '..\ordenadores\amstrad_cpc.pas',
   poke_spectrum in '..\ordenadores\misc\poke_spectrum.pas',
@@ -228,8 +228,6 @@ uses
   pirates_hw in '..\arcade\pirates_hw.pas',
   junofirst_hw in '..\arcade\junofirst_hw.pas',
   gyruss_hw in '..\arcade\gyruss_hw.pas',
-  unzip2 in '..\misc\unzip2.pas',
-  ziputils2 in '..\misc\ziputils2.pas',
   freekick_hw in '..\arcade\freekick_hw.pas',
   boogiewings_hw in '..\arcade\boogiewings_hw.pas',
   pinballaction_hw in '..\arcade\pinballaction_hw.pas',
@@ -260,7 +258,8 @@ uses
   k053246_k053247_k055673 in '..\devices\k053246_k053247_k055673.pas',
   k053251 in '..\devices\k053251.pas',
   k007232 in '..\snd\k007232.pas',
-  k053260 in '..\snd\k053260.pas';
+  k053260 in '..\snd\k053260.pas',
+  cpu_misc in '..\cpu\cpu_misc.pas';
 
 {$R *.res}
 

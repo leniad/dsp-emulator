@@ -257,7 +257,6 @@ var
 begin
 iniciar_actfancer:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,2048,1024,true);
 screen_mod_scroll(1,2048,256,2047,1024,256,1023);
 screen_init(2,1024,1024,true);

@@ -120,7 +120,7 @@ while EmuStatus=EsRuning do begin
     main_z80.run(frame);
     frame:=frame+main_z80.tframes-main_z80.contador;
     if f=223 then begin
-      if irq_vblank then main_z80.pedir_irq:=HOLD_LINE;
+      if irq_vblank then main_z80.change_irq(HOLD_LINE);
       update_video_pacman;
     end;
   end;
@@ -362,7 +362,6 @@ end;
 begin
 iniciar_pacman:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,224,288);
 screen_init(2,256,288,false,true);
 screen_mod_sprites(2,0,512,0,$1ff);

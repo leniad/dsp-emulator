@@ -421,7 +421,6 @@ var
   status_bitmap:tbitmap;
 
 { Tprincipal1 }
-
 procedure sync_all;inline;
 begin
 if window_render<>nil then begin

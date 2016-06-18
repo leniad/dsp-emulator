@@ -648,7 +648,6 @@ end;
 begin
 iniciar_gaelco_hw:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 if main_vars.tipo_maquina=78 then pants:=16
   else pants:=8;
 for f:=1 to pants do begin

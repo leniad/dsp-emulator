@@ -5,22 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,ay_8910,pal_engine,
      sound_engine,qsnapshot;
 
-procedure Cargar_kangaroo;
-procedure kangaroo_principal;
-function iniciar_kangaroo:boolean;
-procedure reset_kangaroo;
-//Main CPU
-function kangaroo_getbyte(direccion:word):byte;
-procedure kangaroo_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function kangaroo_snd_getbyte(direccion:word):byte;
-procedure kangaroo_snd_putbyte(direccion:word;valor:byte);
-function kangaroo_snd_inbyte(puerto:word):byte;
-procedure kangaroo_snd_outbyte(valor:byte;puerto:word);
-procedure kangaroo_sound_update;
-//Save/load
-procedure kangaroo_qsave(nombre:string);
-procedure kangaroo_qload(nombre:string);
+procedure cargar_kangaroo;
 
 implementation
 const
@@ -50,74 +35,6 @@ var
  gfx_data:array[0..$3fff] of byte;
  punt:array[0..$1ffff] of word;
 
-procedure Cargar_Kangaroo;
-begin
-llamadas_maquina.iniciar:=iniciar_kangaroo;
-llamadas_maquina.bucle_general:=kangaroo_principal;
-llamadas_maquina.reset:=reset_kangaroo;
-llamadas_maquina.fps_max:=60.096154;
-llamadas_maquina.save_qsnap:=kangaroo_qsave;
-llamadas_maquina.load_qsnap:=kangaroo_qload;
-end;
-
-function iniciar_kangaroo:boolean;
-var
-      colores:tpaleta;
-      f:word;
-begin
-iniciar_kangaroo:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,512);
-iniciar_video(240,512);
-//Main CPU
-main_z80:=cpu_z80.create(2500000,260);
-main_z80.change_ram_calls(kangaroo_getbyte,kangaroo_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(1250000,260);
-snd_z80.change_ram_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
-snd_z80.change_io_calls(kangaroo_snd_inbyte,kangaroo_snd_outbyte);
-snd_z80.init_sound(kangaroo_sound_update);
-//Sound chip
-ay8910_0:=ay8910_chip.create(1250000,1);
-//cargar roms
-if not(cargar_roms(@memoria[0],@kangaroo_rom[0],'kangaroo.zip',0)) then exit;
-//cargar roms snd
-if not(cargar_roms(@mem_snd[0],@kangaroo_sound,'kangaroo.zip',1)) then exit;
-//cargar gfx
-if not(cargar_roms(@gfx_data[0],@kangaroo_gfx[0],'kangaroo.zip',0)) then exit;
-for f:=0 to 7 do begin
-  colores[f].r:=pal1bit(f shr 2);
-  colores[f].g:=pal1bit(f shr 1);
-  colores[f].b:=pal1bit(f shr 0);
-end;
-set_pal(colores,8);
-marcade.dswa:=$0;
-marcade.dswa_val:=@kangaroo_dipa;
-marcade.dswb:=$0;
-marcade.dswb_val:=@kangaroo_dipb;
-//final
-reset_kangaroo;
-iniciar_kangaroo:=true;
-end;
-
-procedure reset_kangaroo;
-begin
- main_z80.reset;
- main_z80.change_nmi(PULSE_LINE);
- snd_z80.reset;
- ay8910_0.reset;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- sound_latch:=0;
- fillchar(video_control[0],$10,0);
- fillchar(video_ram[0],256*64*4,0);
- mcu_clock:=0;
- rom_bank:=0;
-end;
-
 procedure update_video_kangaroo;
 var
   x,y,scrolly,scrollx,maska,maskb,xora,xorb:byte;
@@ -130,9 +47,9 @@ begin
 	maska:=(video_control[10] and $28) shr 3;
 	maskb:=(video_control[10] and $07);
 	if (video_control[9] and $20)<>0 then xora:=$ff
-    else xora:=$00;
+    else xora:=0;
 	if (video_control[9] and $10)<>0 then xorb:=$ff
-    else xorb:=$00;
+    else xorb:=0;
 	enaa:=(video_control[9] and $08)<>0;
 	enab:=(video_control[9] and $04)<>0;
 	pria:=(not(video_control[9]) and $02)<>0;
@@ -207,8 +124,8 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=247 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
-      snd_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
+      snd_z80.change_irq(HOLD_LINE);
       update_video_kangaroo;
     end;
   end;
@@ -401,6 +318,74 @@ loaddata_qsnapshot(@video_control[0]);
 loaddata_qsnapshot(@video_ram[0]);
 freemem(data);
 close_qsnapshot;
+end;
+
+//Main
+procedure reset_kangaroo;
+begin
+ main_z80.reset;
+ main_z80.change_nmi(PULSE_LINE);
+ snd_z80.reset;
+ ay8910_0.reset;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ sound_latch:=0;
+ fillchar(video_control[0],$10,0);
+ fillchar(video_ram[0],256*64*4,0);
+ mcu_clock:=0;
+ rom_bank:=0;
+end;
+
+function iniciar_kangaroo:boolean;
+var
+      colores:tpaleta;
+      f:word;
+begin
+iniciar_kangaroo:=false;
+iniciar_audio(false);
+screen_init(1,256,512);
+iniciar_video(240,512);
+//Main CPU
+main_z80:=cpu_z80.create(2500000,260);
+main_z80.change_ram_calls(kangaroo_getbyte,kangaroo_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(1250000,260);
+snd_z80.change_ram_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
+snd_z80.change_io_calls(kangaroo_snd_inbyte,kangaroo_snd_outbyte);
+snd_z80.init_sound(kangaroo_sound_update);
+//Sound chip
+ay8910_0:=ay8910_chip.create(1250000,1);
+//cargar roms
+if not(cargar_roms(@memoria[0],@kangaroo_rom[0],'kangaroo.zip',0)) then exit;
+//cargar roms snd
+if not(cargar_roms(@mem_snd[0],@kangaroo_sound,'kangaroo.zip',1)) then exit;
+//cargar gfx
+if not(cargar_roms(@gfx_data[0],@kangaroo_gfx[0],'kangaroo.zip',0)) then exit;
+for f:=0 to 7 do begin
+  colores[f].r:=pal1bit(f shr 2);
+  colores[f].g:=pal1bit(f shr 1);
+  colores[f].b:=pal1bit(f shr 0);
+end;
+set_pal(colores,8);
+marcade.dswa:=$0;
+marcade.dswa_val:=@kangaroo_dipa;
+marcade.dswb:=$0;
+marcade.dswb_val:=@kangaroo_dipb;
+//final
+reset_kangaroo;
+iniciar_kangaroo:=true;
+end;
+
+procedure Cargar_Kangaroo;
+begin
+llamadas_maquina.iniciar:=iniciar_kangaroo;
+llamadas_maquina.bucle_general:=kangaroo_principal;
+llamadas_maquina.reset:=reset_kangaroo;
+llamadas_maquina.fps_max:=60.096154;
+llamadas_maquina.save_qsnap:=kangaroo_qsave;
+llamadas_maquina.load_qsnap:=kangaroo_qload;
 end;
 
 end.

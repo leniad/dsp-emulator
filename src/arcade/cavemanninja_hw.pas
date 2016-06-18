@@ -482,7 +482,6 @@ end;
 begin
 iniciar_cninja:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 case main_vars.tipo_maquina of
   162:begin
         tempw:=256;

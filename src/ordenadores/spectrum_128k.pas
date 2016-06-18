@@ -241,7 +241,7 @@ while EmuStatus=EsRuning do begin
     video_128k(linea,@memoria_128k[var_spectrum.pantalla_128k,0]);
     spec_z80.contador:=spec_z80.contador-228;
   end;
-  spec_z80.pedir_irq:=IRQ_DELAY;
+  spec_z80.change_irq(IRQ_DELAY);
   var_spectrum.irq_pos:=0;
   var_spectrum.flash:=(var_spectrum.flash+1) and $f;
   if var_spectrum.flash=0 then var_spectrum.haz_flash:=not(var_spectrum.haz_flash);

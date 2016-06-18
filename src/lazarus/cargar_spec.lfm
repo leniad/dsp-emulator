@@ -1,7 +1,7 @@
 object load_spec: Tload_spec
-  Left = 380
+  Left = 263
   Height = 471
-  Top = 160
+  Top = 161
   Width = 611
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle

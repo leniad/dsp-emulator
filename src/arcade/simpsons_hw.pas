@@ -6,23 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      pal_engine,sound_engine,ym_2151,k052109,k053260,eepromser,timer_engine,
      k053251,k053246_k053247_k055673;
 
-procedure Cargar_simpsons;
-function iniciar_simpsons:boolean;
-procedure reset_simpsons;
-procedure cerrar_simpsons;
-//Main
-procedure simpsons_principal;
-function simpsons_getbyte(direccion:word):byte;
-procedure simpsons_putbyte(direccion:word;valor:byte);
-procedure simpsons_bank(valor:byte);
-//Sound
-function simpsons_snd_getbyte(direccion:word):byte;
-procedure simpsons_snd_putbyte(direccion:word;valor:byte);
-procedure simpsons_sound_update;
-procedure simpsons_nmi;
-//Video
-procedure simpsons_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
-procedure simpsons_sprites_firq;
+procedure cargar_simpsons;
 
 implementation
 const
@@ -57,91 +41,6 @@ var
  sound_rom_bank:array[0..7,0..$3fff] of byte;
  firq_enabled:boolean;
  sprite_ram:array[0..$7ff] of word;
-
-procedure Cargar_simpsons;
-begin
-llamadas_maquina.iniciar:=iniciar_simpsons;
-llamadas_maquina.cerrar:=cerrar_simpsons;
-llamadas_maquina.reset:=reset_simpsons;
-llamadas_maquina.bucle_general:=simpsons_principal;
-llamadas_maquina.fps_max:=59.185606;
-end;
-
-function iniciar_simpsons:boolean;
-var
-   temp_mem:array[0..$7ffff] of byte;
-   f:byte;
-begin
-iniciar_simpsons:=false;
-//Pantallas para el K052109
-screen_init(1,512,256,true);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
-screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
-screen_init(4,1024,1024,false,true);
-iniciar_video(288,224,true);
-iniciar_audio(false);
-//cargar roms y ponerlas en su sitio...
-if not(cargar_roms(@temp_mem[0],@simpsons_rom[0],'simpsons.zip',0)) then exit;
-copymemory(@memoria[$8000],@temp_mem[$78000],$8000);
-for f:=0 to $3f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
-//cargar sonido
-if not(cargar_roms(@temp_mem[0],@simpsons_sound,'simpsons.zip',1)) then exit;
-copymemory(@mem_snd[0],@temp_mem[0],$8000);
-copymemory(@sound_rom_bank[0,0],@temp_mem[$8000],$4000); //?????
-copymemory(@sound_rom_bank[1,0],@temp_mem[$8000],$4000);
-copymemory(@sound_rom_bank[2,0],@temp_mem[$8000],$4000);
-for f:=3 to 7 do copymemory(@sound_rom_bank[f,0],@temp_mem[$c000+((f-3)*$4000)],$4000);
-//Main CPU
-main_konami:=cpu_konami.create(3000000,256);
-main_konami.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
-main_konami.change_set_lines(simpsons_bank);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(simpsons_snd_getbyte,simpsons_snd_putbyte);
-snd_z80.init_sound(simpsons_sound_update);
-snd_timer:=init_timer(main_konami.numero_cpu,25,simpsons_nmi,false);
-//Sound Chips
-ym2151_0:=ym2151_chip.create(3579545);
-getmem(k053260_rom,$140000);
-if not(cargar_roms(k053260_rom,@simpsons_k053260,'simpsons.zip',0)) then exit;
-k053260_0:=tk053260_chip.create(3579545,k053260_rom,$140000,0.70);
-//eeprom
-eepromser_init(ER5911,8);
-if not(cargar_roms(@temp_mem[0],@simpsons_eeprom,'simpsons.zip',1)) then exit;
-eepromser_load_data(@temp_mem[0],$80);
-//Prioridades
-k053251_0:=k053251_chip.create;
-//Iniciar video
-getmem(tiles_rom,$100000);
-if not(cargar_roms32b(tiles_rom,@simpsons_tiles,'simpsons.zip',0)) then exit;
-k052109_0:=k052109_chip.create(1,2,3,simpsons_cb,tiles_rom,$100000);
-getmem(sprite_rom,$400000);
-if not(cargar_roms32b(sprite_rom,@simpsons_sprites,'simpsons.zip',0)) then exit;
-k053246_0:=k053246_chip.create(4,nil,sprite_rom,$400000);
-sprite_timer:=init_timer(main_konami.numero_cpu,30,simpsons_sprites_firq,false);
-//DIP
-marcade.dswa:=$ff;
-marcade.dswa_val:=@aliens_dip_a;
-marcade.dswb:=$5e;
-marcade.dswb_val:=@aliens_dip_b;
-marcade.dswc:=$ff;
-marcade.dswc_val:=@aliens_dip_c;
-//final
-reset_simpsons;
-iniciar_simpsons:=true;
-end;
-
-procedure cerrar_simpsons;
-begin
-if sprite_rom<>nil then freemem(sprite_rom);
-if tiles_rom<>nil then freemem(tiles_rom);
-if k053260_rom<>nil then freemem(k053260_rom);
-sprite_rom:=nil;
-tiles_rom:=nil;
-k053260_rom:=nil;
-end;
 
 procedure reset_simpsons;
 begin
@@ -268,7 +167,7 @@ case direccion of
                    $1f93:simpsons_getbyte:=$ff; //p4
                    $1fc4:begin
                             simpsons_getbyte:=0;
-                            snd_z80.pedir_irq:=HOLD_LINE;
+                            snd_z80.change_irq(HOLD_LINE);
                          end;
                    $1fc6..$1fc7:simpsons_getbyte:=k053260_0.main_read(direccion and $1);
                    $1fc8..$1fc9:simpsons_getbyte:=k053246_0.read(direccion and 1);
@@ -385,6 +284,92 @@ procedure simpsons_sound_update;
 begin
   ym2151_0.update;
   k053260_0.update;
+end;
+
+//Main
+procedure cerrar_simpsons;
+begin
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+if k053260_rom<>nil then freemem(k053260_rom);
+sprite_rom:=nil;
+tiles_rom:=nil;
+k053260_rom:=nil;
+end;
+
+function iniciar_simpsons:boolean;
+var
+   temp_mem:array[0..$7ffff] of byte;
+   f:byte;
+begin
+iniciar_simpsons:=false;
+//Pantallas para el K052109
+screen_init(1,512,256,true);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,512,511,256,256,255);
+screen_init(3,512,256,true);
+screen_mod_scroll(3,512,512,511,256,256,255);
+screen_init(4,1024,1024,false,true);
+iniciar_video(288,224,true);
+iniciar_audio(false);
+//cargar roms y ponerlas en su sitio...
+if not(cargar_roms(@temp_mem[0],@simpsons_rom[0],'simpsons.zip',0)) then exit;
+copymemory(@memoria[$8000],@temp_mem[$78000],$8000);
+for f:=0 to $3f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
+//cargar sonido
+if not(cargar_roms(@temp_mem[0],@simpsons_sound,'simpsons.zip',1)) then exit;
+copymemory(@mem_snd[0],@temp_mem[0],$8000);
+copymemory(@sound_rom_bank[0,0],@temp_mem[$8000],$4000); //?????
+copymemory(@sound_rom_bank[1,0],@temp_mem[$8000],$4000);
+copymemory(@sound_rom_bank[2,0],@temp_mem[$8000],$4000);
+for f:=3 to 7 do copymemory(@sound_rom_bank[f,0],@temp_mem[$c000+((f-3)*$4000)],$4000);
+//Main CPU
+main_konami:=cpu_konami.create(3000000,256);
+main_konami.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
+main_konami.change_set_lines(simpsons_bank);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(simpsons_snd_getbyte,simpsons_snd_putbyte);
+snd_z80.init_sound(simpsons_sound_update);
+snd_timer:=init_timer(main_konami.numero_cpu,25,simpsons_nmi,false);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+getmem(k053260_rom,$140000);
+if not(cargar_roms(k053260_rom,@simpsons_k053260,'simpsons.zip',0)) then exit;
+k053260_0:=tk053260_chip.create(3579545,k053260_rom,$140000,0.70);
+//eeprom
+eepromser_init(ER5911,8);
+if not(cargar_roms(@temp_mem[0],@simpsons_eeprom,'simpsons.zip',1)) then exit;
+eepromser_load_data(@temp_mem[0],$80);
+//Prioridades
+k053251_0:=k053251_chip.create;
+//Iniciar video
+getmem(tiles_rom,$100000);
+if not(cargar_roms32b(tiles_rom,@simpsons_tiles,'simpsons.zip',0)) then exit;
+k052109_0:=k052109_chip.create(1,2,3,simpsons_cb,tiles_rom,$100000);
+getmem(sprite_rom,$400000);
+if not(cargar_roms32b(sprite_rom,@simpsons_sprites,'simpsons.zip',0)) then exit;
+k053246_0:=k053246_chip.create(4,nil,sprite_rom,$400000);
+sprite_timer:=init_timer(main_konami.numero_cpu,30,simpsons_sprites_firq,false);
+//DIP
+marcade.dswa:=$ff;
+marcade.dswa_val:=@aliens_dip_a;
+marcade.dswb:=$5e;
+marcade.dswb_val:=@aliens_dip_b;
+marcade.dswc:=$ff;
+marcade.dswc_val:=@aliens_dip_c;
+//final
+reset_simpsons;
+iniciar_simpsons:=true;
+end;
+
+procedure Cargar_simpsons;
+begin
+llamadas_maquina.iniciar:=iniciar_simpsons;
+llamadas_maquina.cerrar:=cerrar_simpsons;
+llamadas_maquina.reset:=reset_simpsons;
+llamadas_maquina.bucle_general:=simpsons_principal;
+llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

@@ -82,7 +82,7 @@ while EmuStatus=EsRuning do begin
     main_mb88xx.run(frame_s);
     frame_s:=frame_s+main_mb88xx.tframes-main_mb88xx.contador;
     if f=244 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_arabian;
     end;
   end;
@@ -209,8 +209,8 @@ begin
 //reset mcu + irq mcu
 if (valor and $20)=0 then main_mb88xx.set_irq_line(ASSERT_LINE)
   else main_mb88xx.set_irq_line(CLEAR_LINE);
-if (valor and $10)<>0 then main_mb88xx.pedir_reset:=CLEAR_LINE
-  else main_mb88xx.pedir_reset:=ASSERT_LINE;
+if (valor and $10)<>0 then main_mb88xx.change_reset(CLEAR_LINE)
+  else main_mb88xx.change_reset(ASSERT_LINE);
 end;
 
 procedure arabian_sound_update;
@@ -401,7 +401,6 @@ end;
 begin
 iniciar_arabian:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256);
 iniciar_video(234,256);
 //Main CPU

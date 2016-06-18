@@ -5,23 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2203,dac,rom_engine,
      pal_engine,sound_engine,qsnapshot,timer_engine;
 
-procedure Cargar_terracre;
-procedure terracre_principal;
-function iniciar_terracre:boolean;
-procedure reset_terracre;
-//Main CPU
-function terracre_getword(direccion:dword):word;
-procedure terracre_putword(direccion:dword;valor:word);
-//Sound CPU
-function terracre_snd_getbyte(direccion:word):byte;
-procedure terracre_snd_putbyte(direccion:word;valor:byte);
-procedure terracre_sound_update;
-function terracre_snd_inbyte(puerto:word):byte;
-procedure terracre_snd_outbyte(valor:byte;puerto:word);
-procedure terracre_snd_timer;
-//Save/load
-procedure terracre_qsave(nombre:string);
-procedure terracre_qload(nombre:string);
+procedure cargar_terracre;
 
 implementation
 const
@@ -64,120 +48,6 @@ var
  spritebuffer:array[0..$ff] of word;
  spritebank:array[0..$ff] of byte;
  sound_latch:byte;
-
-procedure Cargar_terracre;
-begin
-llamadas_maquina.iniciar:=iniciar_terracre;
-llamadas_maquina.bucle_general:=terracre_principal;
-llamadas_maquina.reset:=reset_terracre;
-llamadas_maquina.save_qsnap:=terracre_qsave;
-llamadas_maquina.load_qsnap:=terracre_qload;
-llamadas_maquina.fps_max:=57.444853;
-end;
-
-function iniciar_terracre:boolean;
-var
-      colores:tpaleta;
-      f,j:word;
-      memoria_temp:array[0..$ffff] of byte;
-const
-  pf_x:array[0..15] of dword=(4, 0, 12, 8, 20, 16, 28, 24,
-		32+4, 32+0, 32+12, 32+8, 32+20, 32+16, 32+28, 32+24);
-  pf_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
-		8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
-  pc_x:array[0..7] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4);
-  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-  ps_x:array[0..15] of dword=(4, 0, 4+$8000*8, 0+$8000*8, 12, 8, 12+$8000*8, 8+$8000*8,
-		20, 16, 20+$8000*8, 16+$8000*8, 28, 24, 28+$8000*8, 24+$8000*8);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-          8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32);
-begin
-iniciar_terracre:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,1024);
-screen_mod_scroll(1,512,256,511,1024,256,1023);
-screen_init(2,256,256,true);
-screen_init(3,256,512,false,true);
-iniciar_video(224,256);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@terracre_rom[0],'terracre.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@terracre_sound[0],'terracre.zip',0)) then exit;
-//Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(terracre_getword,terracre_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,256);
-snd_z80.change_ram_calls(terracre_snd_getbyte,terracre_snd_putbyte);
-snd_z80.change_io_calls(terracre_snd_inbyte,terracre_snd_outbyte);
-snd_z80.init_sound(terracre_sound_update);
-//Sound Chips
-YM2203_0:=ym2203_chip.create(4000000,2);
-dac_0:=dac_chip.Create(0.5);
-dac_1:=dac_chip.Create(0.5);
-init_timer(snd_z80.numero_cpu,4000000/128/57.444853,terracre_snd_timer,true);
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@terracre_char,'terracre.zip')) then exit;
-init_gfx(0,8,8,256);
-gfx[0].trans[15]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//convertir fondo
-if not(cargar_roms(@memoria_temp[0],@terracre_fondo[0],'terracre.zip',0)) then exit;
-init_gfx(1,16,16,512);
-gfx_set_desc_data(4,0,64*16,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@pf_x[0],@pf_y[0],false,true);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@terracre_sprites[0],'terracre.zip',0)) then exit;
-init_gfx(2,16,16,512);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(4,0,32*16,0,1,2,3);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//poner la paleta
-if not(cargar_roms(@memoria_temp[0],@terracre_pal[0],'terracre.zip',0)) then exit;
-copymemory(@spritebank[0],@memoria_temp[$400],$100);
-for f:=0 to 255 do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,256);
-//color lookup de fondo
-for f:=0 to 255 do
-		if (f and 8)<>0 then gfx[1].colores[f]:=192+(f and $0f)+((f and $c0) shr 2)
-		  else gfx[1].colores[f]:=192+(f and $0f)+((f and $30) shr 0);
-//color lookup de sprites
-for f:=0 to $ff do begin
-		for j:=0 to $f do begin
-			if (f and $8)<>0 then gfx[2].colores[f+j*$100]:=$80+((j and $0c) shl 2)+(memoria_temp[$300+f] and $0f)
-			  else gfx[2].colores[f+j*$100]:=$80+((j and $03) shl 4)+(memoria_temp[$300+f] and $0f);
-    end;
-end;
-//DIP
-marcade.dswa:=$ffdf;
-marcade.dswa_val:=@terracre_dip;
-//final
-reset_terracre;
-iniciar_terracre:=true;
-end;
-
-procedure reset_terracre;
-begin
- main_m68000.reset;
- snd_z80.reset;
- YM2203_0.reset;
- dac_0.reset;
- dac_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- scroll_x:=0;
- scroll_y:=0;
- sound_latch:=0;
- nmi_vblank:=false;
-end;
 
 procedure update_video_terracre;
 var
@@ -349,7 +219,7 @@ end;
 
 procedure terracre_snd_timer;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 procedure terracre_qsave(nombre:string);
@@ -422,6 +292,120 @@ close_qsnapshot;
 //END
 fillchar(gfx[0].buffer[0],$400,1);
 fillchar(gfx[1].buffer[0],$800,1);
+end;
+
+//Main
+procedure reset_terracre;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ YM2203_0.reset;
+ dac_0.reset;
+ dac_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ scroll_x:=0;
+ scroll_y:=0;
+ sound_latch:=0;
+ nmi_vblank:=false;
+end;
+
+function iniciar_terracre:boolean;
+var
+      colores:tpaleta;
+      f,j:word;
+      memoria_temp:array[0..$ffff] of byte;
+const
+  pf_x:array[0..15] of dword=(4, 0, 12, 8, 20, 16, 28, 24,
+		32+4, 32+0, 32+12, 32+8, 32+20, 32+16, 32+28, 32+24);
+  pf_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
+		8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
+  pc_x:array[0..7] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4);
+  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+  ps_x:array[0..15] of dword=(4, 0, 4+$8000*8, 0+$8000*8, 12, 8, 12+$8000*8, 8+$8000*8,
+		20, 16, 20+$8000*8, 16+$8000*8, 28, 24, 28+$8000*8, 24+$8000*8);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+          8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32);
+begin
+iniciar_terracre:=false;
+iniciar_audio(false);
+screen_init(1,512,1024);
+screen_mod_scroll(1,512,256,511,1024,256,1023);
+screen_init(2,256,256,true);
+screen_init(3,256,512,false,true);
+iniciar_video(224,256);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@terracre_rom[0],'terracre.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@terracre_sound[0],'terracre.zip',0)) then exit;
+//Main CPU
+main_m68000:=cpu_m68000.create(8000000,256);
+main_m68000.change_ram16_calls(terracre_getword,terracre_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,256);
+snd_z80.change_ram_calls(terracre_snd_getbyte,terracre_snd_putbyte);
+snd_z80.change_io_calls(terracre_snd_inbyte,terracre_snd_outbyte);
+snd_z80.init_sound(terracre_sound_update);
+//Sound Chips
+YM2203_0:=ym2203_chip.create(4000000,2);
+dac_0:=dac_chip.Create(0.5);
+dac_1:=dac_chip.Create(0.5);
+init_timer(snd_z80.numero_cpu,4000000/128/57.444853,terracre_snd_timer,true);
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@terracre_char,'terracre.zip')) then exit;
+init_gfx(0,8,8,256);
+gfx[0].trans[15]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//convertir fondo
+if not(cargar_roms(@memoria_temp[0],@terracre_fondo[0],'terracre.zip',0)) then exit;
+init_gfx(1,16,16,512);
+gfx_set_desc_data(4,0,64*16,0,1,2,3);
+convert_gfx(1,0,@memoria_temp[0],@pf_x[0],@pf_y[0],false,true);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@terracre_sprites[0],'terracre.zip',0)) then exit;
+init_gfx(2,16,16,512);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(4,0,32*16,0,1,2,3);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@terracre_pal[0],'terracre.zip',0)) then exit;
+copymemory(@spritebank[0],@memoria_temp[$400],$100);
+for f:=0 to 255 do begin
+  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
+  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+end;
+set_pal(colores,256);
+//color lookup de fondo
+for f:=0 to 255 do
+		if (f and 8)<>0 then gfx[1].colores[f]:=192+(f and $0f)+((f and $c0) shr 2)
+		  else gfx[1].colores[f]:=192+(f and $0f)+((f and $30) shr 0);
+//color lookup de sprites
+for f:=0 to $ff do begin
+		for j:=0 to $f do begin
+			if (f and $8)<>0 then gfx[2].colores[f+j*$100]:=$80+((j and $0c) shl 2)+(memoria_temp[$300+f] and $0f)
+			  else gfx[2].colores[f+j*$100]:=$80+((j and $03) shl 4)+(memoria_temp[$300+f] and $0f);
+    end;
+end;
+//DIP
+marcade.dswa:=$ffdf;
+marcade.dswa_val:=@terracre_dip;
+//final
+reset_terracre;
+iniciar_terracre:=true;
+end;
+
+procedure Cargar_terracre;
+begin
+llamadas_maquina.iniciar:=iniciar_terracre;
+llamadas_maquina.bucle_general:=terracre_principal;
+llamadas_maquina.reset:=reset_terracre;
+llamadas_maquina.save_qsnap:=terracre_qsave;
+llamadas_maquina.load_qsnap:=terracre_qload;
+llamadas_maquina.fps_max:=57.444853;
 end;
 
 end.

@@ -32,7 +32,7 @@ uses
   {$else}
   zLib,windows,
   {$endif}
-  ziputils2;
+  ziputils;
 
 const
   UNZ_OK    = (0);

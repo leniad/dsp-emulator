@@ -5,22 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,
      pal_engine,mc8123,sound_engine;
 
-procedure Cargar_ninjakid2;
-procedure ninjakid2_principal;
-function iniciar_ninjakid2:boolean;
-procedure reset_ninjakid2;
-//Main CPU
-function ninjakid2_getbyte(direccion:word):byte;
-procedure ninjakid2_putbyte(direccion:word;valor:byte);
-function aarea_getbyte(direccion:word):byte;
-procedure aarea_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function ninjakid2_snd_getbyte(direccion:word):byte;
-procedure ninjakid2_snd_putbyte(direccion:word;valor:byte);
-function ninjakid2_snd_inbyte(puerto:word):byte;
-procedure ninjakid2_snd_outbyte(valor:byte;puerto:word);
-procedure ninjakid2_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_ninjakid2;
 
 implementation
 const
@@ -77,14 +62,6 @@ var
   pant_sprites_tmp:array[0..$3ffff] of byte;
   update_background:tipo_update_background;
 
-procedure Cargar_ninjakid2;
-begin
-llamadas_maquina.iniciar:=iniciar_ninjakid2;
-llamadas_maquina.bucle_general:=ninjakid2_principal;
-llamadas_maquina.reset:=reset_ninjakid2;
-llamadas_maquina.fps_max:=59.61;
-end;
-
 procedure bg_ninjakid2;
 var
   f,color,nchar:word;
@@ -120,163 +97,6 @@ for f:=0 to $3ff do begin
       gfx[1].buffer[f]:=false;
     end;
 end;
-end;
-
-function iniciar_ninjakid2:boolean;
-var
-  f:byte;
-  memoria_temp:array[0..$2ffff] of byte;
-  mem_key:array[0..$1fff] of byte;
-const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-    pt_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
-			32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
-    pt_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-			64*8+0*32, 64*8+1*32, 64*8+2*32, 64*8+3*32, 64*8+4*32, 64*8+5*32, 64*8+6*32, 64*8+7*32);
-procedure lineswap_gfx_roms(length:dword;src:pbyte;bit:byte);
-var
-  ptemp,ptemp2,ptemp3:pbyte;
-  f,pos,mask:dword;
-begin
-  getmem(ptemp,length);
-	mask:=(1 shl (bit+1))-1;
-	for f:=0 to (length-1) do begin
-		pos:=(f and not(mask)) or ((f shl 1) and mask) or ((f shr bit) and 1);
-    ptemp2:=ptemp;
-    inc(ptemp2,pos);
-    ptemp3:=src;
-    inc(ptemp3,f);
-    ptemp2^:=ptemp3^;
-	end;
-  copymemory(src,ptemp,length);
-	freemem(ptemp);
-end;
-procedure extract_char;
-begin
-  lineswap_gfx_roms($8000,@memoria_temp[0],13);
-  init_gfx(0,8,8,$400);
-  gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-end;
-procedure extract_gr2(size:dword;num:byte;size_gr:word);
-begin
-  lineswap_gfx_roms(size,@memoria_temp[0],14);
-  init_gfx(num,16,16,size_gr);
-  gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(num,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
-end;
-begin
-iniciar_ninjakid2:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_init(2,512,512);
-screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,512,256,false,true);
-//Sprites
-screen_init(4,512,256,true);
-iniciar_video(256,192);
-//Main CPU
-main_z80:=cpu_z80.create(6000000,256);
-//Sound CPU
-snd_z80:=cpu_z80.create(5000000,256);
-snd_z80.change_ram_calls(ninjakid2_snd_getbyte,ninjakid2_snd_putbyte);
-snd_z80.change_io_calls(ninjakid2_snd_inbyte,ninjakid2_snd_outbyte);
-snd_z80.init_sound(ninjakid2_sound_update);
-//Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,2);
-ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(1500000,2);
-case main_vars.tipo_maquina of
-  120:begin
-        update_background:=bg_ninjakid2;
-        main_z80.change_ram_calls(ninjakid2_getbyte,ninjakid2_putbyte);
-        //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@ninjakid2_rom[0],'ninjakd2.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
-        for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
-        //cargar ROMS sonido y desencriptar
-        if not(cargar_roms(@mem_snd[0],@ninjakid2_snd_rom,'ninjakd2.zip',1)) then exit;
-        if not(cargar_roms(@mem_key[0],@ninjakid2_snd_key,'ninjakd2.zip',1)) then exit;
-        mc8123_decrypt_rom(@mem_key[0],@mem_snd[0],@mem_snd_opc[0],0);
-        //convertir fg
-        if not(cargar_roms(@memoria_temp[0],@ninjakid2_fgtiles,'ninjakd2.zip',1)) then exit;
-        extract_char;
-        //convertir bg
-        if not(cargar_roms(@memoria_temp[0],@ninjakid2_bgtiles[0],'ninjakd2.zip',0)) then exit;
-        extract_gr2($20000,1,$400);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@ninjakid2_sprites[0],'ninjakd2.zip',0)) then exit;
-        extract_gr2($20000,2,$400);
-  end;
-  121:begin
-        update_background:=bg_arkarea;
-        marcade.in3:=$ef;
-        main_z80.change_ram_calls(aarea_getbyte,aarea_putbyte);
-        //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@aarea_rom[0],'arkarea.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
-        for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
-        //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@aarea_snd_rom,'arkarea.zip',1)) then exit;
-        copymemory(@mem_snd_opc[0],@mem_snd[0],$8000);
-        //convertir fg
-        if not(cargar_roms(@memoria_temp[0],@aarea_fgtiles,'arkarea.zip',1)) then exit;
-        extract_char;
-        //convertir bg
-        if not(cargar_roms(@memoria_temp[0],@aarea_bgtiles[0],'arkarea.zip',0)) then exit;
-        extract_gr2($30000,1,$600);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@aarea_sprites[0],'arkarea.zip',0)) then exit;
-        extract_gr2($30000,2,$600);
-      end;
-  122:begin
-        update_background:=bg_arkarea;
-        marcade.in3:=$cf;
-        main_z80.change_ram_calls(aarea_getbyte,aarea_putbyte);
-        //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@mnight_rom[0],'mnight.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
-        for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
-        //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@mnight_snd_rom,'mnight.zip',1)) then exit;
-        copymemory(@mem_snd_opc[0],@mem_snd[0],$8000);
-        //convertir fg
-        if not(cargar_roms(@memoria_temp[0],@mnight_fgtiles,'mnight.zip',1)) then exit;
-        extract_char;
-        //convertir bg
-        if not(cargar_roms(@memoria_temp[0],@mnight_bgtiles[0],'mnight.zip',0)) then exit;
-        extract_gr2($30000,1,$600);
-        //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@mnight_sprites[0],'mnight.zip',0)) then exit;
-        extract_gr2($30000,2,$600);
-      end;
-end;
-gfx[0].trans[15]:=true;
-gfx[2].trans[15]:=true;
-//final
-reset_ninjakid2;
-iniciar_ninjakid2:=true;
-end;
-
-procedure reset_ninjakid2;
-begin
- main_z80.reset;
- main_z80.im0:=$d7;  //rst 10
- snd_z80.reset;
- YM2203_0.reset;
- YM2203_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- rom_nbank:=0;
- bg_enable:=false;
- sprite_overdraw:=false;
- sound_latch:=0;
- scroll_x:=0;
- scroll_y:=0;
 end;
 
 procedure put_gfx_sprite_nkid2(nchar:dword;color:word;flipx,flipy:boolean;pos_x,pos_y:word);inline;
@@ -458,7 +278,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=223 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_ninjakid2;
     end;
   end;
@@ -612,13 +432,178 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure ninjakid2_sound_update;
 begin
   ym2203_0.Update;
   ym2203_1.Update;
+end;
+
+//Main
+procedure reset_ninjakid2;
+begin
+ main_z80.reset;
+ main_z80.im0:=$d7;  //rst 10
+ snd_z80.reset;
+ YM2203_0.reset;
+ YM2203_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ rom_nbank:=0;
+ bg_enable:=false;
+ sprite_overdraw:=false;
+ sound_latch:=0;
+ scroll_x:=0;
+ scroll_y:=0;
+end;
+
+function iniciar_ninjakid2:boolean;
+var
+  f:byte;
+  memoria_temp:array[0..$2ffff] of byte;
+  mem_key:array[0..$1fff] of byte;
+const
+    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+    pt_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
+			32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
+    pt_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			64*8+0*32, 64*8+1*32, 64*8+2*32, 64*8+3*32, 64*8+4*32, 64*8+5*32, 64*8+6*32, 64*8+7*32);
+procedure lineswap_gfx_roms(length:dword;src:pbyte;bit:byte);
+var
+  ptemp,ptemp2,ptemp3:pbyte;
+  f,pos,mask:dword;
+begin
+  getmem(ptemp,length);
+	mask:=(1 shl (bit+1))-1;
+	for f:=0 to (length-1) do begin
+		pos:=(f and not(mask)) or ((f shl 1) and mask) or ((f shr bit) and 1);
+    ptemp2:=ptemp;
+    inc(ptemp2,pos);
+    ptemp3:=src;
+    inc(ptemp3,f);
+    ptemp2^:=ptemp3^;
+	end;
+  copymemory(src,ptemp,length);
+	freemem(ptemp);
+end;
+procedure extract_char;
+begin
+  lineswap_gfx_roms($8000,@memoria_temp[0],13);
+  init_gfx(0,8,8,$400);
+  gfx_set_desc_data(4,0,32*8,0,1,2,3);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+end;
+procedure extract_gr2(size:dword;num:byte;size_gr:word);
+begin
+  lineswap_gfx_roms(size,@memoria_temp[0],14);
+  init_gfx(num,16,16,size_gr);
+  gfx_set_desc_data(4,0,128*8,0,1,2,3);
+  convert_gfx(num,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+end;
+begin
+iniciar_ninjakid2:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_init(2,512,512);
+screen_mod_scroll(2,512,256,511,512,256,511);
+screen_init(3,512,256,false,true);
+//Sprites
+screen_init(4,512,256,true);
+iniciar_video(256,192);
+//Main CPU
+main_z80:=cpu_z80.create(6000000,256);
+//Sound CPU
+snd_z80:=cpu_z80.create(5000000,256);
+snd_z80.change_ram_calls(ninjakid2_snd_getbyte,ninjakid2_snd_putbyte);
+snd_z80.change_io_calls(ninjakid2_snd_inbyte,ninjakid2_snd_outbyte);
+snd_z80.init_sound(ninjakid2_sound_update);
+//Sound Chips
+ym2203_0:=ym2203_chip.create(1500000,2);
+ym2203_0.change_irq_calls(snd_irq);
+ym2203_1:=ym2203_chip.create(1500000,2);
+case main_vars.tipo_maquina of
+  120:begin
+        update_background:=bg_ninjakid2;
+        main_z80.change_ram_calls(ninjakid2_getbyte,ninjakid2_putbyte);
+        //cargar roms y ponerlas en sus bancos
+        if not(cargar_roms(@memoria_temp[0],@ninjakid2_rom[0],'ninjakd2.zip',0)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
+        //cargar ROMS sonido y desencriptar
+        if not(cargar_roms(@mem_snd[0],@ninjakid2_snd_rom,'ninjakd2.zip',1)) then exit;
+        if not(cargar_roms(@mem_key[0],@ninjakid2_snd_key,'ninjakd2.zip',1)) then exit;
+        mc8123_decrypt_rom(@mem_key[0],@mem_snd[0],@mem_snd_opc[0],0);
+        //convertir fg
+        if not(cargar_roms(@memoria_temp[0],@ninjakid2_fgtiles,'ninjakd2.zip',1)) then exit;
+        extract_char;
+        //convertir bg
+        if not(cargar_roms(@memoria_temp[0],@ninjakid2_bgtiles[0],'ninjakd2.zip',0)) then exit;
+        extract_gr2($20000,1,$400);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@ninjakid2_sprites[0],'ninjakd2.zip',0)) then exit;
+        extract_gr2($20000,2,$400);
+  end;
+  121:begin
+        update_background:=bg_arkarea;
+        marcade.in3:=$ef;
+        main_z80.change_ram_calls(aarea_getbyte,aarea_putbyte);
+        //cargar roms y ponerlas en sus bancos
+        if not(cargar_roms(@memoria_temp[0],@aarea_rom[0],'arkarea.zip',0)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
+        //cargar ROMS sonido
+        if not(cargar_roms(@mem_snd[0],@aarea_snd_rom,'arkarea.zip',1)) then exit;
+        copymemory(@mem_snd_opc[0],@mem_snd[0],$8000);
+        //convertir fg
+        if not(cargar_roms(@memoria_temp[0],@aarea_fgtiles,'arkarea.zip',1)) then exit;
+        extract_char;
+        //convertir bg
+        if not(cargar_roms(@memoria_temp[0],@aarea_bgtiles[0],'arkarea.zip',0)) then exit;
+        extract_gr2($30000,1,$600);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@aarea_sprites[0],'arkarea.zip',0)) then exit;
+        extract_gr2($30000,2,$600);
+      end;
+  122:begin
+        update_background:=bg_arkarea;
+        marcade.in3:=$cf;
+        main_z80.change_ram_calls(aarea_getbyte,aarea_putbyte);
+        //cargar roms y ponerlas en sus bancos
+        if not(cargar_roms(@memoria_temp[0],@mnight_rom[0],'mnight.zip',0)) then exit;
+        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
+        //cargar ROMS sonido
+        if not(cargar_roms(@mem_snd[0],@mnight_snd_rom,'mnight.zip',1)) then exit;
+        copymemory(@mem_snd_opc[0],@mem_snd[0],$8000);
+        //convertir fg
+        if not(cargar_roms(@memoria_temp[0],@mnight_fgtiles,'mnight.zip',1)) then exit;
+        extract_char;
+        //convertir bg
+        if not(cargar_roms(@memoria_temp[0],@mnight_bgtiles[0],'mnight.zip',0)) then exit;
+        extract_gr2($30000,1,$600);
+        //convertir sprites
+        if not(cargar_roms(@memoria_temp[0],@mnight_sprites[0],'mnight.zip',0)) then exit;
+        extract_gr2($30000,2,$600);
+      end;
+end;
+gfx[0].trans[15]:=true;
+gfx[2].trans[15]:=true;
+//final
+reset_ninjakid2;
+iniciar_ninjakid2:=true;
+end;
+
+procedure Cargar_ninjakid2;
+begin
+llamadas_maquina.iniciar:=iniciar_ninjakid2;
+llamadas_maquina.bucle_general:=ninjakid2_principal;
+llamadas_maquina.reset:=reset_ninjakid2;
+llamadas_maquina.fps_max:=59.61;
 end;
 
 end.

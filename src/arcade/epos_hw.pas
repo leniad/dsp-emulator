@@ -4,17 +4,7 @@ interface
 uses nz80,main_engine,controls_engine,gfx_engine,ay_8910,
      rom_engine,pal_engine,sound_engine;
 
-//Principal
-procedure Cargar_epos_hw;
-procedure epos_hw_principal;
-procedure reset_epos_hw;
-function iniciar_epos_hw:boolean; 
-//Main CPU
-function epos_getbyte(direccion:word):byte;  
-procedure epos_putbyte(direccion:word;valor:byte); 
-function epos_inbyte(puerto:word):byte; 
-procedure epos_outbyte(valor:byte;puerto:word); 
-procedure epos_despues_instruccion; 
+procedure cargar_epos_hw;
 
 implementation
 const
@@ -35,75 +25,6 @@ const
 var
  palette:byte;
  buffer:array[0..$7fff] of boolean;
-
-procedure Cargar_epos_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_epos_hw;
-llamadas_maquina.bucle_general:=epos_hw_principal;
-llamadas_maquina.reset:=reset_epos_hw;
-end;
-
-function iniciar_epos_hw:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      memoria_temp:array[0..$1f] of byte;
-      bit0,bit1,bit2:byte;
-begin
-iniciar_epos_hw:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,241,272);
-iniciar_video(236,272);
-//Main CPU
-main_z80:=cpu_z80.create(2750000,241);
-main_z80.change_ram_calls(epos_getbyte,epos_putbyte);
-main_z80.change_io_calls(epos_inbyte,epos_outbyte);
-main_z80.init_sound(epos_despues_instruccion);
-//Sound Chips
-AY8910_0:=ay8910_chip.create(2750000,1);
-case main_vars.tipo_maquina of
-  94:begin
-      //cargar roms
-      if not(cargar_roms(@memoria[0],@theglob_rom[0],'theglob.zip',0)) then exit;
-      //poner la paleta y clut
-      if not(cargar_roms(@memoria_temp[0],@theglob_pal,'theglob.zip')) then exit;
-  end;
-  95:begin
-      //cargar roms
-      if not(cargar_roms(@memoria[0],@superglob_rom[0],'suprglob.zip',0)) then exit;
-      //poner la paleta y clut
-      if not(cargar_roms(@memoria_temp[0],@theglob_pal,'suprglob.zip')) then exit;
-  end;
-end;
-for f:=0 to $1f do begin
-		bit0:= (memoria_temp[f] shr 7) and $01;
-		bit1:= (memoria_temp[f] shr 6) and $01;
-		bit2:= (memoria_temp[f] shr 5) and $01;
-		colores[f].r:=$92*bit0+$4a*bit1+$23*bit2;
-		bit0:= (memoria_temp[f] shr 4) and $01;
-		bit1:= (memoria_temp[f] shr 3) and $01;
-		bit2:= (memoria_temp[f] shr 2) and $01;
-		colores[f].g:=$92*bit0+$4a*bit1+$23*bit2;
-		bit0:= (memoria_temp[f] shr 1) and $01;
-		bit1:= (memoria_temp[f] shr 0) and $01;
-		colores[f].b:=$ad*bit0+$52*bit1;
-end;
-set_pal(colores,$20);
-//final
-reset_epos_hw;
-iniciar_epos_hw:=true;
-end;
-
-procedure reset_epos_hw;
-begin
- main_z80.reset;
- AY8910_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$be;
- palette:=0;
-end;
 
 procedure update_video_epos;inline;
 var
@@ -156,7 +77,7 @@ while EmuStatus=EsRuning do begin
     main_z80.run(frame);
     frame:=frame+main_z80.tframes-main_z80.contador;
     if f=235 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_epos;
     end;
   end;
@@ -201,6 +122,75 @@ end;
 procedure epos_despues_instruccion;
 begin
   ay8910_0.update;
+end;
+
+//Main
+procedure reset_epos_hw;
+begin
+ main_z80.reset;
+ AY8910_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$be;
+ palette:=0;
+end;
+
+function iniciar_epos_hw:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      memoria_temp:array[0..$1f] of byte;
+      bit0,bit1,bit2:byte;
+begin
+iniciar_epos_hw:=false;
+iniciar_audio(false);
+screen_init(1,241,272);
+iniciar_video(236,272);
+//Main CPU
+main_z80:=cpu_z80.create(2750000,241);
+main_z80.change_ram_calls(epos_getbyte,epos_putbyte);
+main_z80.change_io_calls(epos_inbyte,epos_outbyte);
+main_z80.init_sound(epos_despues_instruccion);
+//Sound Chips
+AY8910_0:=ay8910_chip.create(2750000,1);
+case main_vars.tipo_maquina of
+  94:begin
+      //cargar roms
+      if not(cargar_roms(@memoria[0],@theglob_rom[0],'theglob.zip',0)) then exit;
+      //poner la paleta y clut
+      if not(cargar_roms(@memoria_temp[0],@theglob_pal,'theglob.zip')) then exit;
+  end;
+  95:begin
+      //cargar roms
+      if not(cargar_roms(@memoria[0],@superglob_rom[0],'suprglob.zip',0)) then exit;
+      //poner la paleta y clut
+      if not(cargar_roms(@memoria_temp[0],@theglob_pal,'suprglob.zip')) then exit;
+  end;
+end;
+for f:=0 to $1f do begin
+		bit0:= (memoria_temp[f] shr 7) and $01;
+		bit1:= (memoria_temp[f] shr 6) and $01;
+		bit2:= (memoria_temp[f] shr 5) and $01;
+		colores[f].r:=$92*bit0+$4a*bit1+$23*bit2;
+		bit0:= (memoria_temp[f] shr 4) and $01;
+		bit1:= (memoria_temp[f] shr 3) and $01;
+		bit2:= (memoria_temp[f] shr 2) and $01;
+		colores[f].g:=$92*bit0+$4a*bit1+$23*bit2;
+		bit0:= (memoria_temp[f] shr 1) and $01;
+		bit1:= (memoria_temp[f] shr 0) and $01;
+		colores[f].b:=$ad*bit0+$52*bit1;
+end;
+set_pal(colores,$20);
+//final
+reset_epos_hw;
+iniciar_epos_hw:=true;
+end;
+
+procedure Cargar_epos_hw;
+begin
+llamadas_maquina.iniciar:=iniciar_epos_hw;
+llamadas_maquina.bucle_general:=epos_hw_principal;
+llamadas_maquina.reset:=reset_epos_hw;
 end;
 
 end.

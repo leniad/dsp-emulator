@@ -5,13 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      konami_snd,sound_engine;
 
-procedure Cargar_pooyan;
-procedure pooyan_principal;
-function iniciar_pooyan:boolean;
-procedure reset_pooyan;
-//Main CPU
-function pooyan_getbyte(direccion:word):byte;
-procedure pooyan_putbyte(direccion:word;valor:byte);
+procedure cargar_pooyan;
 
 implementation
 const
@@ -41,88 +35,6 @@ const
 var
  nmi_vblank:boolean;
  last:byte;
-
-procedure Cargar_pooyan;
-begin
-llamadas_maquina.iniciar:=iniciar_pooyan;
-llamadas_maquina.bucle_general:=pooyan_principal;
-llamadas_maquina.reset:=reset_pooyan;
-end;
-
-function iniciar_pooyan:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      ctemp1:byte;
-      memoria_temp:array[0..$1fff] of byte;
-const
-  ps_x:array[0..15] of dword=(0, 1, 2, 3,  8*8+0, 8*8+1, 8*8+2, 8*8+3,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3,  24*8+0, 24*8+1, 24*8+2, 24*8+3);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-begin
-iniciar_pooyan:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_init(2,256,256,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(3072000,256);
-main_z80.change_ram_calls(pooyan_getbyte,pooyan_putbyte);
-//Sound Chip
-konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,256);
-//cargar roms
-if not(cargar_roms(@memoria[0],@pooyan_rom[0],'pooyan.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@pooyan_sound[0],'pooyan.zip',0)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@pooyan_char[0],'pooyan.zip',0)) then exit;
-init_gfx(0,8,8,256);
-gfx_set_desc_data(4,0,16*8,$1000*8+4,$1000*8+0,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@pooyan_sprites[0],'pooyan.zip',0)) then exit;
-init_gfx(1,16,16,64);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,$1000*8+4,$1000*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//poner la paleta
-if not(cargar_roms(@memoria_temp[0],@pooyan_pal[0],'pooyan.zip',0)) then exit;
-for f:=0 to 31 do begin
-    ctemp1:=memoria_temp[f];
-    colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
-    colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
-    colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
-end;
-set_pal(colores,32);
-for f:=0 to $ff do begin
-  gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
-  gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;
-end;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7b;
-marcade.dswa_val:=@pooyan_dip_a;
-marcade.dswb_val:=@pooyan_dip_b;
-//final
-reset_pooyan;
-iniciar_pooyan:=true;
-end;
-
-procedure reset_pooyan;
-begin
- main_z80.reset;
- reset_audio;
- konamisnd_0.reset;
- nmi_vblank:=false;
- last:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
-end;
 
 procedure update_video_pooyan;inline;
 var
@@ -250,6 +162,88 @@ case direccion of
                   $187,$387:main_screen.flip_main_screen:=(valor and 1)=0;
                end;
 end;
+end;
+
+//Main
+procedure reset_pooyan;
+begin
+ main_z80.reset;
+ reset_audio;
+ konamisnd_0.reset;
+ nmi_vblank:=false;
+ last:=0;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+end;
+
+function iniciar_pooyan:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      ctemp1:byte;
+      memoria_temp:array[0..$1fff] of byte;
+const
+  ps_x:array[0..15] of dword=(0, 1, 2, 3,  8*8+0, 8*8+1, 8*8+2, 8*8+3,
+			16*8+0, 16*8+1, 16*8+2, 16*8+3,  24*8+0, 24*8+1, 24*8+2, 24*8+3);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+begin
+iniciar_pooyan:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_init(2,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(3072000,256);
+main_z80.change_ram_calls(pooyan_getbyte,pooyan_putbyte);
+//Sound Chip
+konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,256);
+//cargar roms
+if not(cargar_roms(@memoria[0],@pooyan_rom[0],'pooyan.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@pooyan_sound[0],'pooyan.zip',0)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@pooyan_char[0],'pooyan.zip',0)) then exit;
+init_gfx(0,8,8,256);
+gfx_set_desc_data(4,0,16*8,$1000*8+4,$1000*8+0,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@pooyan_sprites[0],'pooyan.zip',0)) then exit;
+init_gfx(1,16,16,64);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,$1000*8+4,$1000*8+0,4,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@pooyan_pal[0],'pooyan.zip',0)) then exit;
+for f:=0 to 31 do begin
+    ctemp1:=memoria_temp[f];
+    colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
+    colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
+    colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
+end;
+set_pal(colores,32);
+for f:=0 to $ff do begin
+  gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
+  gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;
+end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$7b;
+marcade.dswa_val:=@pooyan_dip_a;
+marcade.dswb_val:=@pooyan_dip_b;
+//final
+reset_pooyan;
+iniciar_pooyan:=true;
+end;
+
+procedure Cargar_pooyan;
+begin
+llamadas_maquina.iniciar:=iniciar_pooyan;
+llamadas_maquina.bucle_general:=pooyan_principal;
+llamadas_maquina.reset:=reset_pooyan;
 end;
 
 end.

@@ -5,14 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,sn_76496,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,misc_functions;
 
-procedure Cargar_ladybug;
-procedure ladybug_principal;
-function iniciar_ladybug:boolean;
-procedure reset_ladybug;
-//Main CPU
-function ladybug_getbyte(direccion:word):byte;
-procedure ladybug_putbyte(direccion:word;valor:byte);
-procedure ladybug_sound_update;
+procedure cargar_ladybug;
 
 implementation
 const
@@ -79,11 +72,166 @@ const
 var
  vblank_val:byte;
 
-procedure Cargar_ladybug;
+procedure update_video_ladybug;
+var
+  f,h,color,nchar:word;
+  x,y,atrib:byte;
+  flipx,flipy:boolean;
+  i:integer;
 begin
-llamadas_maquina.iniciar:=iniciar_ladybug;
-llamadas_maquina.bucle_general:=ladybug_principal;
-llamadas_maquina.reset:=reset_ladybug;
+fill_full_screen(1,0);
+for f:=$0 to $3ff do begin
+  if gfx[0].buffer[f] then begin
+    x:=f div 32;
+    y:=31-(f mod 32);
+    atrib:=memoria[$d400+f];
+    nchar:=memoria[$d000+f]+(atrib and $08) shl 5;
+    color:=(atrib and $7) shl 2;
+    put_gfx_trans(x*8,y*8,nchar,color,2,0);
+    gfx[0].buffer[f]:=false;
+  end;
+end;
+for f:=0 to 31 do scroll__y_part(2,1,255-memoria[$d000+(32*(f mod 4)+(f div 4))],0,f*8,8);
+{abccdddd eeeeeeee fffghhhh iiiiiiii
+ a enable?
+ b size (0 = 8x8, 1 = 16x16)
+ cc flip
+ dddd x offset
+ eeeeeeee sprite code (shift right 2 bits for 16x16 sprites)
+ fff unknown
+ g sprite bank
+ hhhh color
+ iiiiiiii y position}
+for f:=$e downto $2 do begin
+  i:=0;
+  h:=f*$40;
+  while ((i<$40) and (buffer_sprites[h+i]<>0)) do i:=i+4;
+  while (i>0) do begin
+    i:=i-4;
+    atrib:=buffer_sprites[h+i];
+    if (atrib and $80)<>0 then begin
+      color:=(buffer_sprites[$2+(h+i)] and $f) shl 2;
+      if main_screen.flip_main_screen then y:=buffer_sprites[$3+(h+i)]+1
+        else y:=241-(buffer_sprites[$3+(h+i)]);
+      flipy:=(atrib and $20)<>0;
+      flipx:=(atrib and $10)<>0;
+      if (atrib and $40)<>0	then begin // 16x16
+        nchar:=(buffer_sprites[$1+(h+i)] shr 2)+4*(buffer_sprites[$2+(h+i)] and $10);
+        x:=(h shr 2)-8+(atrib and $f);
+        if main_screen.flip_main_screen then begin
+          x:=240-x;
+          flipy:=not(flipy);
+          flipx:=not(flipx);
+        end;
+        put_gfx_sprite(nchar and $7f,color,flipx,flipy,1);
+        actualiza_gfx_sprite(x,y,1,1);
+      end else begin  //8x8 Parece ser que LB no usa los sprites pequeños!!!
+        nchar:=buffer_sprites[$1+(h+i)]+16*(buffer_sprites[$2+(h+i)] and $10);
+        x:=(h shr 2)+(atrib and $f);
+        if main_screen.flip_main_screen then begin
+          x:=240-x;
+          flipy:=not(flipy);
+          flipx:=not(flipx);
+        end;
+        put_gfx_sprite(nchar and $1ff,color,flipx,flipy,2);
+        actualiza_gfx_sprite(x,y+8,1,2);
+      end;
+    end;
+  end;
+end;
+actualiza_trozo_final(32,8,192,240,1);
+end;
+
+procedure eventos_ladybug;
+begin
+if event.arcade then begin
+  //P1
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  //MISC
+  if arcade_input.but1[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  //P2
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  //SYS
+  if arcade_input.coin[0] then main_z80.change_nmi(ASSERT_LINE) else main_z80.change_nmi(CLEAR_LINE);
+  if arcade_input.coin[1] then main_z80.change_irq(HOLD_LINE);
+end;
+end;
+
+procedure ladybug_principal;
+var
+  frame:single;
+  f:byte;
+begin
+init_controls(false,false,false,true);
+frame:=main_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    main_z80.run(frame);
+    frame:=frame+main_z80.tframes-main_z80.contador;
+    if f=224 then begin
+      vblank_val:=$80;
+      update_video_ladybug;
+    end;
+  end;
+  eventos_ladybug;
+  video_sync;
+  copymemory(@buffer_sprites[0],@memoria[$7000],$400);
+  vblank_val:=$40;
+end;
+end;
+
+function ladybug_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$6fff,$d000..$d7ff:ladybug_getbyte:=memoria[direccion];
+  $9000:ladybug_getbyte:=marcade.in0;
+  $9001:ladybug_getbyte:=marcade.in1 or vblank_val;
+  $9002:ladybug_getbyte:=marcade.dswa;
+  $9003:ladybug_getbyte:=marcade.dswb;
+  $e000:ladybug_getbyte:=marcade.in2;
+end;
+end;
+
+procedure ladybug_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$6000 then exit;
+memoria[direccion]:=valor;
+case direccion of
+  $a000:main_screen.flip_main_screen:=(valor and 1)<>0;
+  $b000..$bfff:sn_76496_0.Write(valor);
+  $c000..$cfff:sn_76496_1.Write(valor);
+  $d000..$dfff:gfx[0].buffer[direccion and $3ff]:=true;
+end;
+end;
+
+procedure ladybug_sound_update;
+begin
+  sn_76496_0.Update;
+  sn_76496_1.Update;
+end;
+
+//Main
+procedure reset_ladybug;
+begin
+ main_z80.reset;
+ sn_76496_0.reset;
+ sn_76496_1.reset;
+ reset_audio;
+ vblank_val:=$40;
+ marcade.in0:=$FF;
+ marcade.in1:=$3F;
+ marcade.in2:=$FF;
 end;
 
 function iniciar_ladybug:boolean;
@@ -106,7 +254,6 @@ const
 begin
 iniciar_ladybug:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256,false,true);
 screen_init(2,256,256,true);
 screen_mod_scroll(2,0,0,0,256,256,255);
@@ -236,165 +383,11 @@ reset_ladybug;
 iniciar_ladybug:=true;
 end;
 
-procedure reset_ladybug;
+procedure Cargar_ladybug;
 begin
- main_z80.reset;
- sn_76496_0.reset;
- sn_76496_1.reset;
- reset_audio;
- vblank_val:=$40;
- marcade.in0:=$FF;
- marcade.in1:=$3F;
- marcade.in2:=$FF;
-end;
-
-procedure update_video_ladybug;
-var
-  f,h,color,nchar:word;
-  x,y,atrib:byte;
-  flipx,flipy:boolean;
-  i:integer;
-begin
-fill_full_screen(1,0);
-for f:=$0 to $3ff do begin
-  if gfx[0].buffer[f] then begin
-    x:=f div 32;
-    y:=31-(f mod 32);
-    atrib:=memoria[$d400+f];
-    nchar:=memoria[$d000+f]+(atrib and $08) shl 5;
-    color:=(atrib and $7) shl 2;
-    put_gfx_trans(x*8,y*8,nchar,color,2,0);
-    gfx[0].buffer[f]:=false;
-  end;
-end;
-for f:=0 to 31 do scroll__y_part(2,1,255-memoria[$d000+(32*(f mod 4)+(f div 4))],0,f*8,8);
-{abccdddd eeeeeeee fffghhhh iiiiiiii
- a enable?
- b size (0 = 8x8, 1 = 16x16)
- cc flip
- dddd x offset
- eeeeeeee sprite code (shift right 2 bits for 16x16 sprites)
- fff unknown
- g sprite bank
- hhhh color
- iiiiiiii y position}
-for f:=$e downto $2 do begin
-  i:=0;
-  h:=f*$40;
-  while ((i<$40) and (buffer_sprites[h+i]<>0)) do i:=i+4;
-  while (i>0) do begin
-    i:=i-4;
-    atrib:=buffer_sprites[h+i];
-    if (atrib and $80)<>0 then begin
-      color:=(buffer_sprites[$2+(h+i)] and $f) shl 2;
-      if main_screen.flip_main_screen then y:=buffer_sprites[$3+(h+i)]+1
-        else y:=241-(buffer_sprites[$3+(h+i)]);
-      flipy:=(atrib and $20)<>0;
-      flipx:=(atrib and $10)<>0;
-      if (atrib and $40)<>0	then begin // 16x16
-        nchar:=(buffer_sprites[$1+(h+i)] shr 2)+4*(buffer_sprites[$2+(h+i)] and $10);
-        x:=(h shr 2)-8+(atrib and $f);
-        if main_screen.flip_main_screen then begin
-          x:=240-x;
-          flipy:=not(flipy);
-          flipx:=not(flipx);
-        end;
-        put_gfx_sprite(nchar and $7f,color,flipx,flipy,1);
-        actualiza_gfx_sprite(x,y,1,1);
-      end else begin  //8x8 Parece ser que LB no usa los sprites pequeños!!!
-        nchar:=buffer_sprites[$1+(h+i)]+16*(buffer_sprites[$2+(h+i)] and $10);
-        x:=(h shr 2)+(atrib and $f);
-        if main_screen.flip_main_screen then begin
-          x:=240-x;
-          flipy:=not(flipy);
-          flipx:=not(flipx);
-        end;
-        put_gfx_sprite(nchar and $1ff,color,flipx,flipy,2);
-        actualiza_gfx_sprite(x,y+8,1,2);
-      end;
-    end;
-  end;
-end;
-actualiza_trozo_final(32,8,192,240,1);
-end;
-
-procedure eventos_ladybug;
-begin
-if event.arcade then begin
-  //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  //MISC
-  if arcade_input.but1[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  //P2
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  //SYS
-  if arcade_input.coin[0] then main_z80.change_nmi(ASSERT_LINE) else main_z80.change_nmi(CLEAR_LINE);
-  if arcade_input.coin[1] then main_z80.pedir_irq:=HOLD_LINE;
-end;
-end;
-
-procedure ladybug_principal;
-var
-  frame:single;
-  f:byte;
-begin
-init_controls(false,false,false,true);
-frame:=main_z80.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
-    if f=224 then begin
-      vblank_val:=$80;
-      update_video_ladybug;
-    end;
-  end;
-  eventos_ladybug;
-  video_sync;
-  copymemory(@buffer_sprites[0],@memoria[$7000],$400);
-  vblank_val:=$40;
-end;
-end;
-
-function ladybug_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$6fff,$d000..$d7ff:ladybug_getbyte:=memoria[direccion];
-  $9000:ladybug_getbyte:=marcade.in0;
-  $9001:ladybug_getbyte:=marcade.in1 or vblank_val;
-  $9002:ladybug_getbyte:=marcade.dswa;
-  $9003:ladybug_getbyte:=marcade.dswb;
-  $e000:ladybug_getbyte:=marcade.in2;
-end;
-end;
-
-procedure ladybug_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$6000 then exit;
-memoria[direccion]:=valor;
-case direccion of
-  $a000:main_screen.flip_main_screen:=(valor and 1)<>0;
-  $b000..$bfff:sn_76496_0.Write(valor);
-  $c000..$cfff:sn_76496_1.Write(valor);
-  $d000..$dfff:gfx[0].buffer[direccion and $3ff]:=true;
-end;
-end;
-
-procedure ladybug_sound_update;
-begin
-  sn_76496_0.Update;
-  sn_76496_1.Update;
+llamadas_maquina.iniciar:=iniciar_ladybug;
+llamadas_maquina.bucle_general:=ladybug_principal;
+llamadas_maquina.reset:=reset_ladybug;
 end;
 
 end.

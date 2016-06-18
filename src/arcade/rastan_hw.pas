@@ -5,20 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,
      msm5205,taitosnd,rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_rastan;
-procedure rastan_principal;
-function iniciar_rastan:boolean;
-procedure reset_rastan;
-//Main CPU
-function rastan_getword(direccion:dword):word;
-procedure rastan_putword(direccion:dword;valor:word);
-//Sound CPU
-function rastan_snd_getbyte(direccion:word):byte;
-procedure rastan_snd_putbyte(direccion:word;valor:byte);
-procedure sound_bank_rom(valor:byte);
-procedure sound_instruccion;
-procedure ym2151_snd_irq(irqstate:byte);
-procedure snd_adpcm;
+procedure cargar_rastan;
 
 implementation
 const
@@ -43,92 +30,6 @@ var
  spritebank,sound_bank:byte;
  ram2:array [0..$7fff] of word;
  adpcm:array[0..$ffff] of byte;
-
-procedure Cargar_rastan;
-begin
-llamadas_maquina.iniciar:=iniciar_rastan;
-llamadas_maquina.bucle_general:=rastan_principal;
-llamadas_maquina.reset:=reset_rastan;
-end;
-
-function iniciar_rastan:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 4, $40000*8+0 ,$40000*8+4, 8+0, 8+4, $40000*8+8+0, $40000*8+8+4);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  ps_x:array[0..15] of dword=(0, 4, $40000*8+0 ,$40000*8+4,	8+0, 8+4, $40000*8+8+0, $40000*8+8+4,
-              	16+0, 16+4, $40000*8+16+0, $40000*8+16+4,24+0, 24+4, $40000*8+24+0, $40000*8+24+4);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-			8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32 );
-var
-  memoria_temp:array[0..$7ffff] of byte;
-begin
-iniciar_rastan:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512);
-screen_mod_scroll(1,512,512,511,512,256,511);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,512,511,512,256,511);
-screen_init(3,512,512,false,true);
-iniciar_video(320,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(rastan_getword,rastan_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,256);
-snd_z80.change_ram_calls(rastan_snd_getbyte,rastan_snd_putbyte);
-snd_z80.init_sound(sound_instruccion);
-//Sound Chips
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm);
-ym2151_0:=ym2151_chip.create(4000000);
-ym2151_0.change_port_func(sound_bank_rom);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@rastan_rom[0],'rastan.zip',0)) then exit;
-//rom[$05FF9F]:=$fa;  //Cheeeeeeeeat
-//cargar sonido+ponerlas en su banco+adpcm
-if not(cargar_roms(@memoria_temp[0],@rastan_sound,'rastan.zip')) then exit;
-copymemory(@mem_snd[0],@memoria_temp[0],$4000);
-copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
-copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
-copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
-copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
-if not(cargar_roms(@adpcm[0],@rastan_adpcm,'rastan.zip')) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@rastan_char[0],'rastan.zip',0)) then exit;
-init_gfx(0,8,8,$4000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,16*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@rastan_sprites[0],'rastan.zip',0)) then exit;
-init_gfx(1,16,16,$1000);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,64*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//final
-reset_rastan;
-iniciar_rastan:=true;
-end;
-
-procedure reset_rastan;
-begin
- main_m68000.reset;
- snd_z80.reset;
- YM2151_0.reset;
- msm_5205_0.reset;
- taitosound_reset;
- reset_audio;
- marcade.in0:=$1F;
- marcade.in1:=$fF;
- sound_bank:=0;
- scroll_x1:=0;
- scroll_y1:=0;
- scroll_x2:=0;
- scroll_y2:=0;
- adpcm_data:=$100;
- adpcm_pos:=0;
-end;
 
 procedure update_video_rastan;inline;
 var
@@ -321,8 +222,7 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure snd_adpcm;
@@ -335,6 +235,92 @@ end else begin
 		adpcm_data:=adpcm[adpcm_pos];
 		msm_5205_0.data_w(adpcm_data shr 4);
 end;
+end;
+
+//Main
+procedure reset_rastan;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ YM2151_0.reset;
+ msm_5205_0.reset;
+ taitosound_reset;
+ reset_audio;
+ marcade.in0:=$1F;
+ marcade.in1:=$fF;
+ sound_bank:=0;
+ scroll_x1:=0;
+ scroll_y1:=0;
+ scroll_x2:=0;
+ scroll_y2:=0;
+ adpcm_data:=$100;
+ adpcm_pos:=0;
+end;
+
+function iniciar_rastan:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 4, $40000*8+0 ,$40000*8+4, 8+0, 8+4, $40000*8+8+0, $40000*8+8+4);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  ps_x:array[0..15] of dword=(0, 4, $40000*8+0 ,$40000*8+4,	8+0, 8+4, $40000*8+8+0, $40000*8+8+4,
+              	16+0, 16+4, $40000*8+16+0, $40000*8+16+4,24+0, 24+4, $40000*8+24+0, $40000*8+24+4);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32 );
+var
+  memoria_temp:array[0..$7ffff] of byte;
+begin
+iniciar_rastan:=false;
+iniciar_audio(false);
+screen_init(1,512,512);
+screen_mod_scroll(1,512,512,511,512,256,511);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,512,511,512,256,511);
+screen_init(3,512,512,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(8000000,256);
+main_m68000.change_ram16_calls(rastan_getword,rastan_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,256);
+snd_z80.change_ram_calls(rastan_snd_getbyte,rastan_snd_putbyte);
+snd_z80.init_sound(sound_instruccion);
+//Sound Chips
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm);
+ym2151_0:=ym2151_chip.create(4000000);
+ym2151_0.change_port_func(sound_bank_rom);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@rastan_rom[0],'rastan.zip',0)) then exit;
+//rom[$05FF9F]:=$fa;  //Cheeeeeeeeat
+//cargar sonido+ponerlas en su banco+adpcm
+if not(cargar_roms(@memoria_temp[0],@rastan_sound,'rastan.zip')) then exit;
+copymemory(@mem_snd[0],@memoria_temp[0],$4000);
+copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
+copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
+copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
+copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
+if not(cargar_roms(@adpcm[0],@rastan_adpcm,'rastan.zip')) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@rastan_char[0],'rastan.zip',0)) then exit;
+init_gfx(0,8,8,$4000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,16*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@rastan_sprites[0],'rastan.zip',0)) then exit;
+init_gfx(1,16,16,$1000);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,64*8,0,1,2,3);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//final
+reset_rastan;
+iniciar_rastan:=true;
+end;
+
+procedure Cargar_rastan;
+begin
+llamadas_maquina.iniciar:=iniciar_rastan;
+llamadas_maquina.bucle_general:=rastan_principal;
+llamadas_maquina.reset:=reset_rastan;
 end;
 
 end.

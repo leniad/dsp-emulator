@@ -5,20 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,ym_3812,nz80,upd7759,sound_engine;
 
-procedure Cargar_prehisle;
-procedure prehisle_principal;
-function iniciar_prehisle:boolean;
-procedure reset_prehisle;
-//Main CPU
-function prehisle_getword(direccion:dword):word;
-procedure prehisle_putword(direccion:dword;valor:word);
-//Sound CPU
-function prehisle_snd_getbyte(direccion:word):byte;
-procedure prehisle_snd_putbyte(direccion:word;valor:byte);
-function prehisle_snd_inbyte(puerto:word):byte;
-procedure prehisle_snd_outbyte(valor:byte;puerto:word);
-procedure prehisle_sound_update;
-procedure snd_irq(irqstate:byte);
+procedure cargar_prehisle;
 
 implementation
 const
@@ -52,108 +39,6 @@ var
  video_ram,sprite_ram:array[0..$3ff] of word;
  invert_controls,sound_latch,vblank_val:byte;
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
-
-procedure Cargar_prehisle;
-begin
-llamadas_maquina.iniciar:=iniciar_prehisle;
-llamadas_maquina.bucle_general:=prehisle_principal;
-llamadas_maquina.reset:=reset_prehisle;
-end;
-
-function iniciar_prehisle:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28);
-  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-  ps_x:array[0..15] of dword=(0,4,8,12,16,20,24,28,
-		0+64*8,4+64*8,8+64*8,12+64*8,16+64*8,20+64*8,24+64*8,28+64*8);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-		8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32 );
-var
-  memoria_temp:pbyte;
-begin
-iniciar_prehisle:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512,false,true);
-screen_init(2,256,256,true);
-//BG2
-screen_init(4,272,272);
-screen_mod_scroll(4,272,256,255,272,256,255);
-//BG0
-screen_init(5,272,272,true);
-screen_mod_scroll(5,272,256,255,272,256,255);
-iniciar_video(256,224);
-//Main CPU
-getmem(memoria_temp,$100000);
-main_m68000:=cpu_m68000.create(9000000,$100);
-main_m68000.change_ram16_calls(prehisle_getword,prehisle_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,$100);
-snd_z80.change_ram_calls(prehisle_snd_getbyte,prehisle_snd_putbyte);
-snd_z80.change_io_calls(prehisle_snd_inbyte,prehisle_snd_outbyte);
-snd_z80.init_sound(prehisle_sound_update);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
-ym3812_0.change_irq_calls(snd_irq);
-upd7759_0:=upd7759_chip.create(640000,0.9);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@prehisle_rom[0],'prehisle.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@prehisle_sound,'prehisle.zip',1)) then exit;
-if not(cargar_roms(upd7759_0.get_rom_addr,@prehisle_upd,'prehisle.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(memoria_temp,@prehisle_char,'prehisle.zip',1)) then exit;
-init_gfx(0,8,8,1024);
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-gfx[0].trans[15]:=true;
-//sprites
-if not(cargar_roms(memoria_temp,@prehisle_sprites,'prehisle.zip',0)) then exit;
-init_gfx(1,16,16,$1400);
-gfx[1].trans[15]:=true;
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//fondo 1
-if not(cargar_roms(@fondo_rom[0],@prehisle_fondo_rom,'prehisle.zip',1)) then exit;
-if not(cargar_roms(memoria_temp,@prehisle_fondo1,'prehisle.zip',1)) then exit;
-init_gfx(2,16,16,$800);
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//fondo2
-if not(cargar_roms(memoria_temp,@prehisle_fondo2,'prehisle.zip',1)) then exit;
-init_gfx(3,16,16,$800);
-gfx[3].trans[15]:=true;
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7f;
-marcade.dswa_val:=@prehisle_dip_a;
-marcade.dswb_val:=@prehisle_dip_b;
-//final
-freemem(memoria_temp);
-reset_prehisle;
-iniciar_prehisle:=true;
-end;
-
-procedure reset_prehisle;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym3812_0.reset;
- upd7759_0.reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
- invert_controls:=0;
- scroll_x1:=0;
- scroll_y1:=0;
- scroll_x2:=0;
- scroll_y2:=0;
- sound_latch:=0;
- vblank_val:=0;
-end;
 
 procedure poner_sprites(prioridad:boolean);inline;
 var
@@ -395,7 +280,109 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
+end;
+
+//Main
+procedure reset_prehisle;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym3812_0.reset;
+ upd7759_0.reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+ invert_controls:=0;
+ scroll_x1:=0;
+ scroll_y1:=0;
+ scroll_x2:=0;
+ scroll_y2:=0;
+ sound_latch:=0;
+ vblank_val:=0;
+end;
+
+function iniciar_prehisle:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28);
+  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+  ps_x:array[0..15] of dword=(0,4,8,12,16,20,24,28,
+		0+64*8,4+64*8,8+64*8,12+64*8,16+64*8,20+64*8,24+64*8,28+64*8);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+		8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32 );
+var
+  memoria_temp:pbyte;
+begin
+iniciar_prehisle:=false;
+iniciar_audio(false);
+screen_init(1,512,512,false,true);
+screen_init(2,256,256,true);
+//BG2
+screen_init(4,272,272);
+screen_mod_scroll(4,272,256,255,272,256,255);
+//BG0
+screen_init(5,272,272,true);
+screen_mod_scroll(5,272,256,255,272,256,255);
+iniciar_video(256,224);
+//Main CPU
+getmem(memoria_temp,$100000);
+main_m68000:=cpu_m68000.create(9000000,$100);
+main_m68000.change_ram16_calls(prehisle_getword,prehisle_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,$100);
+snd_z80.change_ram_calls(prehisle_snd_getbyte,prehisle_snd_putbyte);
+snd_z80.change_io_calls(prehisle_snd_inbyte,prehisle_snd_outbyte);
+snd_z80.init_sound(prehisle_sound_update);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
+ym3812_0.change_irq_calls(snd_irq);
+upd7759_0:=upd7759_chip.create(640000,0.9);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@prehisle_rom[0],'prehisle.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@prehisle_sound,'prehisle.zip',1)) then exit;
+if not(cargar_roms(upd7759_0.get_rom_addr,@prehisle_upd,'prehisle.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(memoria_temp,@prehisle_char,'prehisle.zip',1)) then exit;
+init_gfx(0,8,8,1024);
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+gfx[0].trans[15]:=true;
+//sprites
+if not(cargar_roms(memoria_temp,@prehisle_sprites,'prehisle.zip',0)) then exit;
+init_gfx(1,16,16,$1400);
+gfx[1].trans[15]:=true;
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//fondo 1
+if not(cargar_roms(@fondo_rom[0],@prehisle_fondo_rom,'prehisle.zip',1)) then exit;
+if not(cargar_roms(memoria_temp,@prehisle_fondo1,'prehisle.zip',1)) then exit;
+init_gfx(2,16,16,$800);
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//fondo2
+if not(cargar_roms(memoria_temp,@prehisle_fondo2,'prehisle.zip',1)) then exit;
+init_gfx(3,16,16,$800);
+gfx[3].trans[15]:=true;
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$7f;
+marcade.dswa_val:=@prehisle_dip_a;
+marcade.dswb_val:=@prehisle_dip_b;
+//final
+freemem(memoria_temp);
+reset_prehisle;
+iniciar_prehisle:=true;
+end;
+
+procedure cargar_prehisle;
+begin
+llamadas_maquina.iniciar:=iniciar_prehisle;
+llamadas_maquina.bucle_general:=prehisle_principal;
+llamadas_maquina.reset:=reset_prehisle;
 end;
 
 end.

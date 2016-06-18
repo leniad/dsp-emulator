@@ -5,23 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,ym_3812,nz80,upd7759,sound_engine;
 
-procedure Cargar_snk68;
-procedure snk68_principal;
-function iniciar_snk68:boolean;
-procedure reset_snk68;
-//Main CPU
-function pow_getword(direccion:dword):word;
-procedure pow_putword(direccion:dword;valor:word);
-//Sound CPU
-function pow_snd_getbyte(direccion:word):byte;
-procedure pow_snd_putbyte(direccion:word;valor:byte);
-function pow_snd_inbyte(puerto:word):byte;
-procedure pow_snd_outbyte(valor:byte;puerto:word);
-procedure snk68_sound_update;
-procedure snd_irq(irqstate:byte);
-//Ikari 3
-function ikari3_getword(direccion:dword):word;
-procedure ikari3_putword(direccion:dword;valor:word);
+procedure cargar_snk68;
 
 implementation
 const
@@ -99,14 +83,6 @@ var
  fg_tile_offset:word;
  is_pow,sprite_flip:boolean;
  update_video_nmk68:tipo_update_video;
-
-procedure Cargar_snk68;
-begin
-llamadas_maquina.iniciar:=iniciar_snk68;
-llamadas_maquina.bucle_general:=snk68_principal;
-llamadas_maquina.reset:=reset_snk68;
-llamadas_maquina.fps_max:=59.185606;
-end;
 
 {Primer bloque de $1000bytes
        0:$FF -> Fijo
@@ -210,150 +186,6 @@ poner_sprites(3);
 poner_sprites(1);
 actualiza_trozo(0,0,256,256,1,0,0,256,256,2);
 actualiza_trozo_final(0,16,256,224,2);
-end;
-
-function iniciar_snk68:boolean;
-const
-  pc_x:array[0..7] of dword=(8*8+3, 8*8+2, 8*8+1, 8*8+0, 3, 2, 1, 0);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_x:array[0..15] of dword=(32*8+7,32*8+6,32*8+5,32*8+4,32*8+3,32*8+2,32*8+1,32*8+0,
-		7,6,5,4,3,2,1,0);
-  ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 );
-var
-  memoria_temp:pbyte;
-
-procedure convert_chars;
-begin
-  init_gfx(0,8,8,$800);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(4,0,16*8,0,4,$800*16*8+0,$800*16*8+4);
-  convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-end;
-
-procedure convert_sprites(num:dword);
-begin
-  init_gfx(1,16,16,num);
-  gfx[1].trans[0]:=true;
-  gfx_set_desc_data(4,0,64*8,0,8,num*64*8+0,num*64*8+8);
-  convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-end;
-
-begin
-iniciar_snk68:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-if main_vars.tipo_maquina=150 then main_screen.rot90_screen:=true;
-screen_init(1,256,256,true);
-screen_init(2,512,512,false,true);
-iniciar_video(256,224);
-//Main CPU
-getmem(memoria_temp,$400000);
-main_m68000:=cpu_m68000.create(9000000,264);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,264);
-snd_z80.change_ram_calls(pow_snd_getbyte,pow_snd_putbyte);
-snd_z80.change_io_calls(pow_snd_inbyte,pow_snd_outbyte);
-snd_z80.init_sound(snk68_sound_update);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
-ym3812_0.change_irq_calls(snd_irq);
-upd7759_0:=upd7759_chip.create(640000,0.5);
-case main_vars.tipo_maquina of
-  136:begin //POW
-        main_m68000.change_ram16_calls(pow_getword,pow_putword);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@pow_rom,'pow.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@pow_sound,'pow.zip',1)) then exit;
-        //ADPCM Sounds
-        if not(cargar_roms(upd7759_0.get_rom_addr,@pow_upd,'pow.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(memoria_temp,@pow_char[0],'pow.zip',0)) then exit;
-        convert_chars;
-        //sprites
-        if not(cargar_roms16b(memoria_temp,@pow_sprites,'pow.zip',0)) then exit;
-        convert_sprites($4000);
-        is_pow:=true;
-        dsw1:=$10;
-        update_video_nmk68:=update_video_pow;
-      end;
-  137:begin  //Street Smart
-        main_m68000.change_ram16_calls(pow_getword,pow_putword);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@streetsm_rom,'streetsm.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@streetsm_sound,'streetsm.zip',1)) then exit;
-        //ADPCM Sounds
-        if not(cargar_roms(upd7759_0.get_rom_addr,@streetsm_upd,'streetsm.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(memoria_temp,@streetsm_char,'streetsm.zip',0)) then exit;
-        convert_chars;
-        //sprites
-        if not(cargar_roms(memoria_temp,@streetsm_sprites,'streetsm.zip',0)) then exit;
-        convert_sprites($8000);
-        is_pow:=false;
-        dsw1:=0;
-        update_video_nmk68:=update_video_pow;
-      end;
-  149:begin //Ikari 3
-        main_m68000.change_ram16_calls(ikari3_getword,ikari3_putword);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@ikari3_rom,'ikari3.zip',0)) then exit;
-        if not(cargar_roms16w(@rom2[0],@ikari3_rom2,'ikari3.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@ikari3_sound,'ikari3.zip',1)) then exit;
-        //ADPCM Sounds
-        if not(cargar_roms(upd7759_0.get_rom_addr,@ikari3_upd,'ikari3.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(memoria_temp,@ikari3_char,'ikari3.zip',0)) then exit;
-        convert_chars;
-        //sprites
-        if not(cargar_roms16b(memoria_temp,@ikari3_sprites,'ikari3.zip',0)) then exit;
-        convert_sprites($8000);
-        is_pow:=false;
-        update_video_nmk68:=update_video_ikari3;
-      end;
-  150:begin //Search and Rescue
-        main_m68000.change_ram16_calls(ikari3_getword,ikari3_putword);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@sar_rom,'searchar.zip',0)) then exit;
-        if not(cargar_roms16w(@rom2[0],@sar_rom2,'searchar.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@sar_sound,'searchar.zip',1)) then exit;
-        //ADPCM Sounds
-        if not(cargar_roms(upd7759_0.get_rom_addr,@sar_upd,'searchar.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(memoria_temp,@sar_char,'searchar.zip',0)) then exit;
-        convert_chars;
-        //sprites
-        if not(cargar_roms(memoria_temp,@sar_sprites,'searchar.zip',0)) then exit;
-        convert_sprites($8000);
-        is_pow:=false;
-        update_video_nmk68:=update_video_ikari3;
-      end;
-end;
-//final
-freemem(memoria_temp);
-reset_snk68;
-iniciar_snk68:=true;
-end;
-
-procedure reset_snk68;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym3812_0.reset;
- upd7759_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$fF;
- fg_tile_offset:=0;
- sound_latch:=0;
- sound_stat:=0;
- protection:=0;
- sprite_flip:=false;
 end;
 
 procedure eventos_pow;
@@ -510,7 +342,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
 end;
 
 //Ikari 3
@@ -562,6 +394,158 @@ case direccion of
                         cambiar_color(valor,((direccion and $fff) shr 1));
                      end;
   end;
+end;
+
+//Main
+procedure reset_snk68;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym3812_0.reset;
+ upd7759_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$fF;
+ fg_tile_offset:=0;
+ sound_latch:=0;
+ sound_stat:=0;
+ protection:=0;
+ sprite_flip:=false;
+end;
+
+function iniciar_snk68:boolean;
+const
+  pc_x:array[0..7] of dword=(8*8+3, 8*8+2, 8*8+1, 8*8+0, 3, 2, 1, 0);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..15] of dword=(32*8+7,32*8+6,32*8+5,32*8+4,32*8+3,32*8+2,32*8+1,32*8+0,
+		7,6,5,4,3,2,1,0);
+  ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+		8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16 );
+var
+  memoria_temp:pbyte;
+
+procedure convert_chars;
+begin
+  init_gfx(0,8,8,$800);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(4,0,16*8,0,4,$800*16*8+0,$800*16*8+4);
+  convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+end;
+
+procedure convert_sprites(num:dword);
+begin
+  init_gfx(1,16,16,num);
+  gfx[1].trans[0]:=true;
+  gfx_set_desc_data(4,0,64*8,0,8,num*64*8+0,num*64*8+8);
+  convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+end;
+
+begin
+iniciar_snk68:=false;
+iniciar_audio(false);
+if main_vars.tipo_maquina=150 then main_screen.rot90_screen:=true;
+screen_init(1,256,256,true);
+screen_init(2,512,512,false,true);
+iniciar_video(256,224);
+//Main CPU
+getmem(memoria_temp,$400000);
+main_m68000:=cpu_m68000.create(9000000,264);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,264);
+snd_z80.change_ram_calls(pow_snd_getbyte,pow_snd_putbyte);
+snd_z80.change_io_calls(pow_snd_inbyte,pow_snd_outbyte);
+snd_z80.init_sound(snk68_sound_update);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
+ym3812_0.change_irq_calls(snd_irq);
+upd7759_0:=upd7759_chip.create(640000,0.5);
+case main_vars.tipo_maquina of
+  136:begin //POW
+        main_m68000.change_ram16_calls(pow_getword,pow_putword);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@pow_rom,'pow.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@pow_sound,'pow.zip',1)) then exit;
+        //ADPCM Sounds
+        if not(cargar_roms(upd7759_0.get_rom_addr,@pow_upd,'pow.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(memoria_temp,@pow_char[0],'pow.zip',0)) then exit;
+        convert_chars;
+        //sprites
+        if not(cargar_roms16b(memoria_temp,@pow_sprites,'pow.zip',0)) then exit;
+        convert_sprites($4000);
+        is_pow:=true;
+        dsw1:=$10;
+        update_video_nmk68:=update_video_pow;
+      end;
+  137:begin  //Street Smart
+        main_m68000.change_ram16_calls(pow_getword,pow_putword);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@streetsm_rom,'streetsm.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@streetsm_sound,'streetsm.zip',1)) then exit;
+        //ADPCM Sounds
+        if not(cargar_roms(upd7759_0.get_rom_addr,@streetsm_upd,'streetsm.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(memoria_temp,@streetsm_char,'streetsm.zip',0)) then exit;
+        convert_chars;
+        //sprites
+        if not(cargar_roms(memoria_temp,@streetsm_sprites,'streetsm.zip',0)) then exit;
+        convert_sprites($8000);
+        is_pow:=false;
+        dsw1:=0;
+        update_video_nmk68:=update_video_pow;
+      end;
+  149:begin //Ikari 3
+        main_m68000.change_ram16_calls(ikari3_getword,ikari3_putword);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@ikari3_rom,'ikari3.zip',0)) then exit;
+        if not(cargar_roms16w(@rom2[0],@ikari3_rom2,'ikari3.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@ikari3_sound,'ikari3.zip',1)) then exit;
+        //ADPCM Sounds
+        if not(cargar_roms(upd7759_0.get_rom_addr,@ikari3_upd,'ikari3.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(memoria_temp,@ikari3_char,'ikari3.zip',0)) then exit;
+        convert_chars;
+        //sprites
+        if not(cargar_roms16b(memoria_temp,@ikari3_sprites,'ikari3.zip',0)) then exit;
+        convert_sprites($8000);
+        is_pow:=false;
+        update_video_nmk68:=update_video_ikari3;
+      end;
+  150:begin //Search and Rescue
+        main_m68000.change_ram16_calls(ikari3_getword,ikari3_putword);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@sar_rom,'searchar.zip',0)) then exit;
+        if not(cargar_roms16w(@rom2[0],@sar_rom2,'searchar.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@sar_sound,'searchar.zip',1)) then exit;
+        //ADPCM Sounds
+        if not(cargar_roms(upd7759_0.get_rom_addr,@sar_upd,'searchar.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(memoria_temp,@sar_char,'searchar.zip',0)) then exit;
+        convert_chars;
+        //sprites
+        if not(cargar_roms(memoria_temp,@sar_sprites,'searchar.zip',0)) then exit;
+        convert_sprites($8000);
+        is_pow:=false;
+        update_video_nmk68:=update_video_ikari3;
+      end;
+end;
+//final
+freemem(memoria_temp);
+reset_snk68;
+iniciar_snk68:=true;
+end;
+
+procedure Cargar_snk68;
+begin
+llamadas_maquina.iniciar:=iniciar_snk68;
+llamadas_maquina.bucle_general:=snk68_principal;
+llamadas_maquina.reset:=reset_snk68;
+llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

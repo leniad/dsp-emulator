@@ -5,23 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m6809,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ay_8910,sound_engine,konami_decrypt;
 
-procedure Cargar_gyruss;
-procedure gyruss_principal;
-function gyruss_iniciar:boolean;
-procedure gyruss_reset;
-//Main CPU
-function gyruss_getbyte(direccion:word):byte;
-procedure gyruss_putbyte(direccion:word;valor:byte);
-//Sub CPU
-function gyruss_sub_getbyte(direccion:word):byte;
-procedure gyruss_sub_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function gyruss_sound_getbyte(direccion:word):byte;
-procedure gyruss_sound_putbyte(direccion:word;valor:byte);
-function gyruss_sound_inbyte(puerto:word):byte;
-procedure gyruss_sound_outbyte(valor:byte;puerto:word);
-function gyruss_portar:byte;
-procedure gyruss_sound_update;
+procedure cargar_gyruss;
 
 implementation
 const
@@ -57,134 +41,6 @@ var
   scan_line,sound_latch:byte;
   main_nmi,sub_irq:boolean;
   mem_opcodes:array[0..$1fff] of byte;
-
-procedure Cargar_gyruss;
-begin
-llamadas_maquina.iniciar:=gyruss_iniciar;
-llamadas_maquina.bucle_general:=gyruss_principal;
-llamadas_maquina.reset:=gyruss_reset;
-llamadas_maquina.fps_max:=60.606060606060606060;
-end;
-
-function gyruss_iniciar:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-var
-  colores:tpaleta;
-  f:word;
-  bit0,bit1,bit2:byte;
-  memoria_temp:array[0..$7fff] of byte;
-  rgweights:array[0..2] of single;
-  bweights:array[0..1] of single;
-const
-  resistances_rg:array[0..2] of integer=(1000,470,220);
-  resistances_b:array[0..1] of integer=(470,220);
-begin
-gyruss_iniciar:=false;
-iniciar_audio(false);
-screen_init(1,256,256);
-screen_init(2,256,256,true);
-screen_init(3,256,256,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(trunc(18432000/6),256);
-main_z80.change_ram_calls(gyruss_getbyte,gyruss_putbyte);
-//Sub CPU
-misc_m6809:=cpu_m6809.Create(trunc(18432000/12),256);
-misc_m6809.change_ram_calls(gyruss_sub_getbyte,gyruss_sub_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(trunc(14318180/4),256);
-snd_z80.change_ram_calls(gyruss_sound_getbyte,gyruss_sound_putbyte);
-snd_z80.change_io_calls(gyruss_sound_inbyte,gyruss_sound_outbyte);
-snd_z80.init_sound(gyruss_sound_update);
-//Sound Chip
-ay8910_0:=ay8910_chip.create(trunc(14318180/8),0.2);
-ay8910_1:=ay8910_chip.create(trunc(14318180/8),0.2);
-ay8910_2:=ay8910_chip.create(trunc(14318180/8),1);
-ay8910_2.change_io_calls(gyruss_portar,nil,nil,nil);
-ay8910_3:=ay8910_chip.create(trunc(14318180/8),1);
-ay8910_4:=ay8910_chip.create(trunc(14318180/8),1);
-//Main ROMS
-if not(cargar_roms(@memoria[0],@gyruss_rom[0],'gyruss.zip',0)) then exit;
-//Sub ROMS
-if not(cargar_roms(@mem_misc[0],@gyruss_sub,'gyruss.zip')) then exit;
-konami1_decode(@mem_misc[$e000],@mem_opcodes[0],$2000);
-//Sound ROMS
-if not(cargar_roms(@mem_snd[0],@gyruss_sound[0],'gyruss.zip',0)) then exit;
-//cargar chars
-if not(cargar_roms(@memoria_temp[0],@gyruss_char,'gyruss.zip')) then exit;
-init_gfx(0,8,8,$200);
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//cargar sprites
-if not(cargar_roms(@memoria_temp[0],@gyruss_sprites[0],'gyruss.zip',0)) then exit;
-init_gfx(1,8,16,$200);
-gfx_set_desc_data(4,2,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@ps_y[0],true,false);
-gfx_set_desc_data(4,2,64*8,($4000+$10)*8+4,($4000+$10)*8+0,($10*8)+4,($10*8)+0);
-convert_gfx(1,$100*8*16,@memoria_temp[0],@pc_x[0],@ps_y[0],true,false);
-gfx[1].x:=16;
-gfx[1].y:=8;
-//paleta de colores
-if not(cargar_roms(@memoria_temp[0],@gyruss_pal[0],'gyruss.zip',0)) then exit;
-compute_resistor_weights(0,	255, -1.0,
-			3,@resistances_rg[0],@rgweights[0],0,0,
-			2,@resistances_b[0],@bweights[0],0,0,
-			0,nil,nil,0,0);
-for f:=0 to 31 do begin
-		// red component */
-		bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
-		colores[f].r:=combine_3_weights(@rgweights[0], bit0, bit1, bit2);
-		// green component */
-		bit0:=(memoria_temp[f] shr 3) and $01;
-		bit1:=(memoria_temp[f] shr 4) and $01;
-		bit2:=(memoria_temp[f] shr 5) and $01;
-		colores[f].g:=combine_3_weights(@rgweights[0], bit0, bit1, bit2);
-		// blue component */
-		bit0:=(memoria_temp[f] shr 6) and $01;
-		bit1:=(memoria_temp[f] shr 7) and $01;
-		colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
-end;
-set_pal(colores,$20);
-//CLUT Sprites
-for f:=0 to $ff do gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
-//CLUT chars
-for f:=0 to $ff do gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$3b;
-marcade.dswc:=$fe;
-marcade.dswa_val:=@gyruss_dip_a;
-marcade.dswb_val:=@gyruss_dip_b;
-marcade.dswc_val:=@gyruss_dip_c;
-//Final
-gyruss_reset;
-gyruss_iniciar:=true;
-end;
-
-procedure gyruss_reset;
-begin
-main_z80.reset;
-misc_m6809.reset;
-snd_z80.reset;
-ay8910_0.reset;
-ay8910_1.reset;
-ay8910_2.reset;
-ay8910_3.reset;
-ay8910_4.reset;
-reset_audio;
-main_nmi:=false;
-sub_irq:=false;
-sound_latch:=0;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-end;
 
 procedure update_video_gyruss;inline;
 var
@@ -299,7 +155,7 @@ case direccion of
                     gfx[0].buffer[direccion and $3ff]:=true;
                  end;
     $9000..$a7ff:memoria[direccion]:=valor;
-    $c080:snd_z80.pedir_irq:=HOLD_LINE;
+    $c080:snd_z80.change_irq(HOLD_LINE);
     $c100:sound_latch:=valor;
     $c180:begin
             main_nmi:=(valor and 1)<>0;
@@ -392,5 +248,133 @@ begin
   ay8910_4.update;
 end;
 
+//Main
+procedure gyruss_reset;
+begin
+main_z80.reset;
+misc_m6809.reset;
+snd_z80.reset;
+ay8910_0.reset;
+ay8910_1.reset;
+ay8910_2.reset;
+ay8910_3.reset;
+ay8910_4.reset;
+reset_audio;
+main_nmi:=false;
+sub_irq:=false;
+sound_latch:=0;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$ff;
+end;
+
+function gyruss_iniciar:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+var
+  colores:tpaleta;
+  f:word;
+  bit0,bit1,bit2:byte;
+  memoria_temp:array[0..$7fff] of byte;
+  rgweights:array[0..2] of single;
+  bweights:array[0..1] of single;
+const
+  resistances_rg:array[0..2] of integer=(1000,470,220);
+  resistances_b:array[0..1] of integer=(470,220);
+begin
+gyruss_iniciar:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_init(2,256,256,true);
+screen_init(3,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(trunc(18432000/6),256);
+main_z80.change_ram_calls(gyruss_getbyte,gyruss_putbyte);
+//Sub CPU
+misc_m6809:=cpu_m6809.Create(trunc(18432000/12),256);
+misc_m6809.change_ram_calls(gyruss_sub_getbyte,gyruss_sub_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(trunc(14318180/4),256);
+snd_z80.change_ram_calls(gyruss_sound_getbyte,gyruss_sound_putbyte);
+snd_z80.change_io_calls(gyruss_sound_inbyte,gyruss_sound_outbyte);
+snd_z80.init_sound(gyruss_sound_update);
+//Sound Chip
+ay8910_0:=ay8910_chip.create(trunc(14318180/8),0.2);
+ay8910_1:=ay8910_chip.create(trunc(14318180/8),0.2);
+ay8910_2:=ay8910_chip.create(trunc(14318180/8),1);
+ay8910_2.change_io_calls(gyruss_portar,nil,nil,nil);
+ay8910_3:=ay8910_chip.create(trunc(14318180/8),1);
+ay8910_4:=ay8910_chip.create(trunc(14318180/8),1);
+//Main ROMS
+if not(cargar_roms(@memoria[0],@gyruss_rom[0],'gyruss.zip',0)) then exit;
+//Sub ROMS
+if not(cargar_roms(@mem_misc[0],@gyruss_sub,'gyruss.zip')) then exit;
+konami1_decode(@mem_misc[$e000],@mem_opcodes[0],$2000);
+//Sound ROMS
+if not(cargar_roms(@mem_snd[0],@gyruss_sound[0],'gyruss.zip',0)) then exit;
+//cargar chars
+if not(cargar_roms(@memoria_temp[0],@gyruss_char,'gyruss.zip')) then exit;
+init_gfx(0,8,8,$200);
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//cargar sprites
+if not(cargar_roms(@memoria_temp[0],@gyruss_sprites[0],'gyruss.zip',0)) then exit;
+init_gfx(1,8,16,$200);
+gfx_set_desc_data(4,2,64*8,$4000*8+4,$4000*8+0,4,0);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@ps_y[0],true,false);
+gfx_set_desc_data(4,2,64*8,($4000+$10)*8+4,($4000+$10)*8+0,($10*8)+4,($10*8)+0);
+convert_gfx(1,$100*8*16,@memoria_temp[0],@pc_x[0],@ps_y[0],true,false);
+gfx[1].x:=16;
+gfx[1].y:=8;
+//paleta de colores
+if not(cargar_roms(@memoria_temp[0],@gyruss_pal[0],'gyruss.zip',0)) then exit;
+compute_resistor_weights(0,	255, -1.0,
+			3,@resistances_rg[0],@rgweights[0],0,0,
+			2,@resistances_b[0],@bweights[0],0,0,
+			0,nil,nil,0,0);
+for f:=0 to 31 do begin
+		// red component */
+		bit0:=(memoria_temp[f] shr 0) and $01;
+		bit1:=(memoria_temp[f] shr 1) and $01;
+		bit2:=(memoria_temp[f] shr 2) and $01;
+		colores[f].r:=combine_3_weights(@rgweights[0], bit0, bit1, bit2);
+		// green component */
+		bit0:=(memoria_temp[f] shr 3) and $01;
+		bit1:=(memoria_temp[f] shr 4) and $01;
+		bit2:=(memoria_temp[f] shr 5) and $01;
+		colores[f].g:=combine_3_weights(@rgweights[0], bit0, bit1, bit2);
+		// blue component */
+		bit0:=(memoria_temp[f] shr 6) and $01;
+		bit1:=(memoria_temp[f] shr 7) and $01;
+		colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
+end;
+set_pal(colores,$20);
+//CLUT Sprites
+for f:=0 to $ff do gfx[1].colores[f]:=memoria_temp[$20+f] and $f;
+//CLUT chars
+for f:=0 to $ff do gfx[0].colores[f]:=(memoria_temp[$120+f] and $f)+$10;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$3b;
+marcade.dswc:=$fe;
+marcade.dswa_val:=@gyruss_dip_a;
+marcade.dswb_val:=@gyruss_dip_b;
+marcade.dswc_val:=@gyruss_dip_c;
+//Final
+gyruss_reset;
+gyruss_iniciar:=true;
+end;
+
+procedure Cargar_gyruss;
+begin
+llamadas_maquina.iniciar:=gyruss_iniciar;
+llamadas_maquina.bucle_general:=gyruss_principal;
+llamadas_maquina.reset:=gyruss_reset;
+llamadas_maquina.fps_max:=60.606060606060606060;
+end;
 
 end.

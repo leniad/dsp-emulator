@@ -5,13 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,sega_decrypt;
 
-procedure Cargar_pengo;
-procedure pengo_principal;
-function iniciar_pengo:boolean;
-procedure reset_pengo;
-//Main CPU
-function pengo_getbyte(direccion:word):byte;
-procedure pengo_putbyte(direccion:word;valor:byte);
+procedure cargar_pengo;
 
 implementation
 const
@@ -30,12 +24,133 @@ var
  rom_opcode:array[0..$7fff] of byte;
  colortable_bank,gfx_bank,pal_bank:byte;
 
-procedure Cargar_pengo;
+procedure update_video_pengo;inline;
+var
+  x,y,f,color,nchar,offs:word;
+  sx,sy,atrib:byte;
 begin
-llamadas_maquina.iniciar:=iniciar_pengo;
-llamadas_maquina.bucle_general:=pengo_principal;
-llamadas_maquina.reset:=reset_pengo;
-llamadas_maquina.fps_max:=60.6060606060;
+for x:=0 to 27 do begin
+  for y:=0 to 35 do begin
+     sx:=29-x;
+     sy:=y-2;
+	   if (sy and $20)<>0 then offs:=sx+((sy and $1f) shl 5)
+	    else offs:=sy+(sx shl 5);
+     if gfx[0].buffer[offs] then begin
+        color:=(((memoria[$8400+offs]) and $1f) or (colortable_bank shl 5) or (pal_bank shl 6)) shl 2 ;
+        nchar:=memoria[$8000+offs]+(gfx_bank shl 8);
+        put_gfx(x*8,y*8,nchar,color,1,0);
+        gfx[0].buffer[offs]:=false;
+     end;
+  end;
+end;
+actualiza_trozo(0,0,224,288,1,0,0,224,288,2);
+for f:=7 downto 0 do begin
+  atrib:=memoria[$8ff0+(f*2)];
+  nchar:=(atrib shr 2) or (gfx_bank shl 6);
+  color:=(((memoria[$8ff1+(f*2)]) and $1f) or (colortable_bank shl 5) or (pal_bank shl 6)) shl 2 ;
+  x:=240-memoria[$9020+(f*2)];
+  y:=272-memoria[$9021+(f*2)];
+  put_gfx_sprite_mask(nchar,color,(atrib and 2)<>0,(atrib and 1)<>0,1,0,$f);
+  actualiza_gfx_sprite((x-1) and $ff,y,2,1);
+end;
+actualiza_trozo_final(0,0,224,288,2);
+end;
+
+procedure eventos_pengo;
+begin
+if event.arcade then begin
+  //marcade.in0
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //marcade.in1
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
+end;
+end;
+
+procedure pengo_principal;
+var
+  frame:single;
+  f:word;
+begin
+init_controls(false,false,false,true);
+frame:=main_z80.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to 263 do begin
+    main_z80.run(frame);
+    frame:=frame+main_z80.tframes-main_z80.contador;
+    if f=223 then begin
+      update_video_pengo;
+      if irq_enable then main_z80.change_irq(HOLD_LINE);
+    end;
+  end;
+  if sound_status.hay_sonido then begin
+      namco_playsound;
+      play_sonido;
+  end;
+  eventos_pengo;
+  video_sync;
+end;
+end;
+
+function pengo_getbyte(direccion:word):byte;
+begin
+case direccion of
+   0..$7fff:if main_z80.opcode then pengo_getbyte:=rom_opcode[direccion]
+               else pengo_getbyte:=memoria[direccion];
+   $8000..$8fff:pengo_getbyte:=memoria[direccion];
+   $9000..$903f:pengo_getbyte:=$cc;
+   $9040..$907f:pengo_getbyte:=$b0;
+   $9080..$90bf:pengo_getbyte:=marcade.in1;
+   $90c0..$90ff:pengo_getbyte:=marcade.in0;
+end;
+end;
+
+procedure pengo_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$8000 then exit;
+case direccion of
+   $8000..$87ff:begin
+                     gfx[0].buffer[(direccion and $3ff)]:=true;
+                     memoria[direccion]:=valor;
+                end;
+   $8800..$8fff,$9020..$902f:memoria[direccion]:=valor;
+   $9000..$901f:namco_sound.registros_namco[direccion and $1f]:=valor;
+   $9040:irq_enable:=(valor<>0);
+   $9041:namco_sound.enabled:=valor<>0;
+   $9042:if pal_bank<>valor then begin
+            pal_bank:=valor;
+            fillchar(gfx[0].buffer,$400,0);
+         end;
+   $9043:main_screen.flip_main_screen:=(valor and 1)<>0;
+   $9046:if colortable_bank<>valor then begin
+             colortable_bank:=valor;
+             fillchar(gfx[0].buffer,$400,0);
+         end;
+   $9047:if (gfx_bank<>(valor and $1)) then begin
+             gfx_bank:=valor and $1;
+             fillchar(gfx[0].buffer,$400,0);
+         end;
+end;
+end;
+
+//Main
+procedure reset_pengo;
+begin
+ main_z80.reset;
+ namco_sound_reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ irq_enable:=false;
+ gfx_bank:=0;
+ pal_bank:=0;
+ colortable_bank:=0;
 end;
 
 function iniciar_pengo:boolean;
@@ -116,128 +231,12 @@ reset_pengo;
 iniciar_pengo:=true;
 end;
 
-procedure reset_pengo;
+procedure cargar_pengo;
 begin
- main_z80.reset;
- namco_sound_reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- irq_enable:=false;
- gfx_bank:=0;
- pal_bank:=0;
- colortable_bank:=0;
-end;
-
-procedure update_video_pengo;inline;
-var
-  x,y,f,color,nchar,offs:word;
-  sx,sy,atrib:byte;
-begin
-for x:=0 to 27 do begin
-  for y:=0 to 35 do begin
-     sx:=29-x;
-     sy:=y-2;
-	   if (sy and $20)<>0 then offs:=sx+((sy and $1f) shl 5)
-	    else offs:=sy+(sx shl 5);
-     if gfx[0].buffer[offs] then begin
-        color:=(((memoria[$8400+offs]) and $1f) or (colortable_bank shl 5) or (pal_bank shl 6)) shl 2 ;
-        nchar:=memoria[$8000+offs]+(gfx_bank shl 8);
-        put_gfx(x*8,y*8,nchar,color,1,0);
-        gfx[0].buffer[offs]:=false;
-     end;
-  end;
-end;
-actualiza_trozo(0,0,224,288,1,0,0,224,288,2);
-for f:=7 downto 0 do begin
-  atrib:=memoria[$8ff0+(f*2)];
-  nchar:=(atrib shr 2) or (gfx_bank shl 6);
-  color:=(((memoria[$8ff1+(f*2)]) and $1f) or (colortable_bank shl 5) or (pal_bank shl 6)) shl 2 ;
-  x:=240-memoria[$9020+(f*2)];
-  y:=272-memoria[$9021+(f*2)];
-  put_gfx_sprite_mask(nchar,color,(atrib and 2)<>0,(atrib and 1)<>0,1,0,$f);
-  actualiza_gfx_sprite((x-1) and $ff,y,2,1);
-end;
-actualiza_trozo_final(0,0,224,288,2);
-end;
-
-procedure eventos_pengo;
-begin
-if event.arcade then begin
-  //marcade.in0
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
-  //marcade.in1
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-end;
-end;
-
-procedure pengo_principal;
-var
-  frame:single;
-  f:word;
-begin
-init_controls(false,false,false,true);
-frame:=main_z80.tframes;
-while EmuStatus=EsRuning do begin
-  for f:=0 to 263 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
-    if f=223 then begin
-      update_video_pengo;
-      if irq_enable then main_z80.pedir_irq:=HOLD_LINE;
-    end;
-  end;
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
-  eventos_pengo;
-  video_sync;
-end;
-end;
-
-function pengo_getbyte(direccion:word):byte;
-begin
-case direccion of
-        0..$7fff:if main_z80.opcode then pengo_getbyte:=rom_opcode[direccion]
-                    else pengo_getbyte:=memoria[direccion];
-        $9000..$903f:pengo_getbyte:=$cc;
-        $9040..$907f:pengo_getbyte:=$b0;
-        $9080..$90bf:pengo_getbyte:=marcade.in1;
-        $90c0..$90ff:pengo_getbyte:=marcade.in0;
-        else pengo_getbyte:=memoria[direccion];
-end;
-end;
-
-procedure pengo_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$8000 then exit;
-memoria[direccion]:=valor;
-case direccion of
-        $8000..$87ff:gfx[0].buffer[(direccion and $3ff)]:=true;
-        $9000..$901f:namco_sound.registros_namco[direccion and $1f]:=valor;
-        $9040:irq_enable:=(valor<>0);
-        $9041:namco_sound.enabled:=valor<>0;
-        $9042:if pal_bank<>valor then begin
-                pal_bank:=valor;
-                fillchar(gfx[0].buffer,$400,0);
-              end;
-        $9046:if colortable_bank<>valor then begin
-                colortable_bank:=valor;
-                fillchar(gfx[0].buffer,$400,0);
-              end;
-        $9047:if (gfx_bank<>(valor and $1)) then begin
-                gfx_bank:=valor and $1;
-                fillchar(gfx[0].buffer,$400,0);
-              end;
-end;
+llamadas_maquina.iniciar:=iniciar_pengo;
+llamadas_maquina.bucle_general:=pengo_principal;
+llamadas_maquina.reset:=reset_pengo;
+llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

@@ -313,7 +313,6 @@ var
 begin
 iniciar_toki:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256,true);
 screen_init(2,512,512,true);
 screen_mod_scroll(2,512,256,511,512,256,511);

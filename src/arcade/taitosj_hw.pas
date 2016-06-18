@@ -5,30 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine,dac,m6805;
 
-procedure Cargar_taitosj;
-procedure taitosj_nomcu_principal;
-procedure taitosj_mcu_principal;
-function taitosj_iniciar:boolean;
-procedure taitosj_reset;
-//Main CPU
-function taitosj_nomcu_getbyte(direccion:word):byte;
-procedure taitosj_nomcu_putbyte(direccion:word;valor:byte);
-function taitosj_mcu_getbyte(direccion:word):byte;
-procedure taitosj_mcu_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function taitosj_snd_getbyte(direccion:word):byte;
-procedure taitosj_snd_putbyte(direccion:word;valor:byte);
-//MCU
-function mcu_taitosj_getbyte(direccion:word):byte;
-procedure mcu_taitosj_putbyte(direccion:word;valor:byte);
-procedure taitosj_sound_update;
-procedure taitosj_snd_irq;
-function ay0_porta_read:byte;
-function ay0_portb_read:byte;
-procedure ay1_porta_write(valor:byte);
-procedure ay1_portb_write(valor:byte);
-procedure ay2_porta_write(valor:byte);
-procedure ay3_portb_write(valor:byte);
+procedure cargar_taitosj;
 
 implementation
 const
@@ -108,134 +85,6 @@ var
  mcu_toz80,mcu_zready,mcu_zaccept,mcu_address,mcu_busreq,mcu_fromz80,mcu_portA_in,
  mcu_portA_out:byte;
 
-procedure Cargar_taitosj;
-begin
-llamadas_maquina.iniciar:=taitosj_iniciar;
-case main_vars.tipo_maquina of
-  185:llamadas_maquina.bucle_general:=taitosj_mcu_principal;
-  189:llamadas_maquina.bucle_general:=taitosj_nomcu_principal;
-end;
-llamadas_maquina.reset:=taitosj_reset;
-end;
-
-function taitosj_iniciar:boolean;
-const
-  resistances:array[0..2] of integer=(1000,470,270);
-var
-  memoria_temp:array[0..$8fff] of byte;
-  i,j,mask,data:byte;
-begin
-taitosj_iniciar:=false;
-iniciar_audio(false);
-//Back
-screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
-//Mid
-screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
-//Front
-screen_init(3,256,256,true);
-screen_mod_scroll(3,256,256,255,256,256,255);
-screen_init(4,256,256,false,true); //Final
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-//Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(taitosj_snd_getbyte,taitosj_snd_putbyte);
-snd_z80.init_sound(taitosj_sound_update);
-//IRQ sonido
-init_timer(snd_z80.numero_cpu,3000000/(6000000/(4*16*16*10*16)),taitosj_snd_irq,true);
-//Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,1);
-ay8910_0.change_io_calls(ay0_porta_read,ay0_portb_read,nil,nil);
-ay8910_1:=ay8910_chip.create(1500000,1);
-ay8910_1.change_io_calls(nil,nil,ay1_porta_write,ay1_portb_write);
-ay8910_2:=ay8910_chip.create(1500000,1);
-ay8910_2.change_io_calls(nil,nil,ay2_porta_write,nil);
-ay8910_3:=ay8910_chip.create(1500000,1);
-ay8910_3.change_io_calls(nil,nil,nil,ay3_portb_write);
-dac_0:=dac_chip.create(32);
-case main_vars.tipo_maquina of
-  185:begin  //Elevator Action
-        main_z80.change_ram_calls(taitosj_mcu_getbyte,taitosj_mcu_putbyte);
-        //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@elevator_rom[0],'elevator.zip',0)) then exit;
-        //Poner roms en sus bancos
-        copymemory(@memoria[0],@memoria_temp[0],$6000);
-        copymemory(@memoria_rom[0,0],@memoria_temp[$6000],$2000);
-        copymemory(@memoria_rom[1,0],@memoria_temp[$6000],$1000);
-        copymemory(@memoria_rom[1,$1000],@memoria_temp[$8000],$1000);
-        //cargar roms sonido
-        if not(cargar_roms(@mem_snd[0],@elevator_sonido[0],'elevator.zip',0)) then exit;
-        //MCU CPU
-        if not(cargar_roms(@mcu_mem[0],@elevator_mcu,'elevator.zip')) then exit;
-        main_m6805:=cpu_m6805.create(3000000,$100,tipo_m68705);
-        main_m6805.change_ram_calls(mcu_taitosj_getbyte,mcu_taitosj_putbyte);
-        //cargar chars
-        if not(cargar_roms(@gfx_rom[0],@elevator_char[0],'elevator.zip',0)) then exit;
-        //crear gfx
-        init_gfx(0,8,8,256);
-        gfx[0].trans[0]:=true;
-        init_gfx(1,16,16,64);
-        gfx[1].trans[0]:=true;
-        init_gfx(2,8,8,256);
-        gfx[2].trans[0]:=true;
-        init_gfx(3,16,16,64);
-        gfx[3].trans[0]:=true;
-        //Calculo de prioridades
-        if not(cargar_roms(@memoria_temp[0],@elevator_prom,'elevator.zip')) then exit;
-      end;
-  189:begin //Jungle King
-        main_z80.change_ram_calls(taitosj_nomcu_getbyte,taitosj_nomcu_putbyte);
-        //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@junglek_rom[0],'junglek.zip',0)) then exit;
-        //Poner roms en sus bancos
-        copymemory(@memoria[0],@memoria_temp[0],$6000);
-        copymemory(@memoria_rom[0,0],@memoria_temp[$6000],$2000);
-        copymemory(@memoria_rom[1,0],@memoria_temp[$6000],$1000);
-        copymemory(@memoria_rom[1,$1000],@memoria_temp[$8000],$1000);
-        //cargar roms sonido
-        if not(cargar_roms(@mem_snd[0],@junglek_sonido[0],'junglek.zip',0)) then exit;
-        //cargar chars
-        if not(cargar_roms(@gfx_rom[0],@junglek_char[0],'junglek.zip',0)) then exit;
-        //crear gfx
-        init_gfx(0,8,8,256);
-        gfx[0].trans[0]:=true;
-        init_gfx(1,16,16,64);
-        gfx[1].trans[0]:=true;
-        init_gfx(2,8,8,256);
-        gfx[2].trans[0]:=true;
-        init_gfx(3,16,16,64);
-        gfx[3].trans[0]:=true;
-        //Calculo de prioridades
-        if not(cargar_roms(@memoria_temp[0],@junglek_prom,'junglek.zip')) then exit;
-  end;
-end;
-for i:=0 to $1f do begin
-		mask:=0;
-    // start with all four layers active, so we'll get the highest
-    // priority one in the first loop
-		for j:=3 downto 0 do begin
-			data:=memoria_temp[$10*(i and $0f)+mask] and $0f;
-  		if (i and $10)<>0 then data:=data shr 2
-  			else data:=data and $03;
-      mask:=mask or (1 shl data);
-      // in next loop, we'll see which of the remaining
-      // layers has top priority when this one is transparent
-	 		draw_order[i,j]:=data;
-		end;
-end;
-//precalculo de la paleta
-compute_resistor_weights(0,255,-1.0,
-			3,@resistances[0],@rweights[0],0,0,
-			3,@resistances[0],@gweights[0],0,0,
-			3,@resistances[0],@bweights[0],0,0);
-//final
-taitosj_reset;
-taitosj_iniciar:=true;
-end;
-
 procedure conv_chars1;inline;
 begin
   gfx_set_desc_data(3,0,8*8,512*8*8,256*8*8,0);
@@ -253,43 +102,6 @@ begin
   //sprites
   gfx_set_desc_data(3,0,32*8,128*16*16,64*16*16,0);
   convert_gfx(3,0,@memoria[$a800],@ps_x[0],@ps_y[0],false,false);
-end;
-
-procedure taitosj_reset;
-begin
-main_z80.reset;
-snd_z80.reset;
-if main_vars.tipo_maquina=185 then main_m6805.reset;
-ay8910_0.reset;
-ay8910_1.reset;
-ay8910_2.reset;
-ay8910_3.reset;
-dac_0.reset;
-reset_audio;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-collision_reg[0]:=0;
-collision_reg[1]:=0;
-collision_reg[2]:=0;
-collision_reg[3]:=0;
-gfx_pos:=0;
-video_priority:=0;
-fillchar(scroll[0],6,0);
-colorbank[0]:=0;
-colorbank[1]:=0;
-sndnmi_disable:=false;
-rechars1:=false;
-rechars2:=false;
-rom_bank:=0;
-video_mode:=0;
-sprite_offset:=0;
-dac_vol:=0;
-input_port_4_f0:=0;
-//mcu
-mcu_zaccept:=1;
-mcu_zready:=0;
-mcu_busreq:=0;
 end;
 
 function get_sprite_xy(offs:word;sx,sy:pbyte):boolean;
@@ -449,7 +261,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=239 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_taitosj;
     end;
   end;
@@ -573,7 +385,7 @@ while EmuStatus=EsRuning do begin
     main_m6805.run(frame_mcu);
     frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
     if f=239 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_taitosj;
     end;
   end;
@@ -762,7 +574,7 @@ end;
 
 procedure taitosj_snd_irq;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 procedure taitosj_sound_update;
@@ -772,6 +584,172 @@ begin
   ay8910_2.update;
   ay8910_3.update;
   dac_0.update;
+end;
+
+//Main
+procedure taitosj_reset;
+begin
+main_z80.reset;
+snd_z80.reset;
+if main_vars.tipo_maquina=185 then main_m6805.reset;
+ay8910_0.reset;
+ay8910_1.reset;
+ay8910_2.reset;
+ay8910_3.reset;
+dac_0.reset;
+reset_audio;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$ff;
+collision_reg[0]:=0;
+collision_reg[1]:=0;
+collision_reg[2]:=0;
+collision_reg[3]:=0;
+gfx_pos:=0;
+video_priority:=0;
+fillchar(scroll[0],6,0);
+colorbank[0]:=0;
+colorbank[1]:=0;
+sndnmi_disable:=false;
+rechars1:=false;
+rechars2:=false;
+rom_bank:=0;
+video_mode:=0;
+sprite_offset:=0;
+dac_vol:=0;
+input_port_4_f0:=0;
+//mcu
+mcu_zaccept:=1;
+mcu_zready:=0;
+mcu_busreq:=0;
+end;
+
+function taitosj_iniciar:boolean;
+const
+  resistances:array[0..2] of integer=(1000,470,270);
+var
+  memoria_temp:array[0..$8fff] of byte;
+  i,j,mask,data:byte;
+begin
+taitosj_iniciar:=false;
+iniciar_audio(false);
+//Back
+screen_init(1,256,256,true);
+screen_mod_scroll(1,256,256,255,256,256,255);
+//Mid
+screen_init(2,256,256,true);
+screen_mod_scroll(2,256,256,255,256,256,255);
+//Front
+screen_init(3,256,256,true);
+screen_mod_scroll(3,256,256,255,256,256,255);
+screen_init(4,256,256,false,true); //Final
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,256);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.change_ram_calls(taitosj_snd_getbyte,taitosj_snd_putbyte);
+snd_z80.init_sound(taitosj_sound_update);
+//IRQ sonido
+init_timer(snd_z80.numero_cpu,3000000/(6000000/(4*16*16*10*16)),taitosj_snd_irq,true);
+//Sound Chip
+ay8910_0:=ay8910_chip.create(1500000,1);
+ay8910_0.change_io_calls(ay0_porta_read,ay0_portb_read,nil,nil);
+ay8910_1:=ay8910_chip.create(1500000,1);
+ay8910_1.change_io_calls(nil,nil,ay1_porta_write,ay1_portb_write);
+ay8910_2:=ay8910_chip.create(1500000,1);
+ay8910_2.change_io_calls(nil,nil,ay2_porta_write,nil);
+ay8910_3:=ay8910_chip.create(1500000,1);
+ay8910_3.change_io_calls(nil,nil,nil,ay3_portb_write);
+dac_0:=dac_chip.create(32);
+case main_vars.tipo_maquina of
+  185:begin  //Elevator Action
+        main_z80.change_ram_calls(taitosj_mcu_getbyte,taitosj_mcu_putbyte);
+        //cargar roms
+        if not(cargar_roms(@memoria_temp[0],@elevator_rom[0],'elevator.zip',0)) then exit;
+        //Poner roms en sus bancos
+        copymemory(@memoria[0],@memoria_temp[0],$6000);
+        copymemory(@memoria_rom[0,0],@memoria_temp[$6000],$2000);
+        copymemory(@memoria_rom[1,0],@memoria_temp[$6000],$1000);
+        copymemory(@memoria_rom[1,$1000],@memoria_temp[$8000],$1000);
+        //cargar roms sonido
+        if not(cargar_roms(@mem_snd[0],@elevator_sonido[0],'elevator.zip',0)) then exit;
+        //MCU CPU
+        if not(cargar_roms(@mcu_mem[0],@elevator_mcu,'elevator.zip')) then exit;
+        main_m6805:=cpu_m6805.create(3000000,$100,tipo_m68705);
+        main_m6805.change_ram_calls(mcu_taitosj_getbyte,mcu_taitosj_putbyte);
+        //cargar chars
+        if not(cargar_roms(@gfx_rom[0],@elevator_char[0],'elevator.zip',0)) then exit;
+        //crear gfx
+        init_gfx(0,8,8,256);
+        gfx[0].trans[0]:=true;
+        init_gfx(1,16,16,64);
+        gfx[1].trans[0]:=true;
+        init_gfx(2,8,8,256);
+        gfx[2].trans[0]:=true;
+        init_gfx(3,16,16,64);
+        gfx[3].trans[0]:=true;
+        //Calculo de prioridades
+        if not(cargar_roms(@memoria_temp[0],@elevator_prom,'elevator.zip')) then exit;
+      end;
+  189:begin //Jungle King
+        main_z80.change_ram_calls(taitosj_nomcu_getbyte,taitosj_nomcu_putbyte);
+        //cargar roms
+        if not(cargar_roms(@memoria_temp[0],@junglek_rom[0],'junglek.zip',0)) then exit;
+        //Poner roms en sus bancos
+        copymemory(@memoria[0],@memoria_temp[0],$6000);
+        copymemory(@memoria_rom[0,0],@memoria_temp[$6000],$2000);
+        copymemory(@memoria_rom[1,0],@memoria_temp[$6000],$1000);
+        copymemory(@memoria_rom[1,$1000],@memoria_temp[$8000],$1000);
+        //cargar roms sonido
+        if not(cargar_roms(@mem_snd[0],@junglek_sonido[0],'junglek.zip',0)) then exit;
+        //cargar chars
+        if not(cargar_roms(@gfx_rom[0],@junglek_char[0],'junglek.zip',0)) then exit;
+        //crear gfx
+        init_gfx(0,8,8,256);
+        gfx[0].trans[0]:=true;
+        init_gfx(1,16,16,64);
+        gfx[1].trans[0]:=true;
+        init_gfx(2,8,8,256);
+        gfx[2].trans[0]:=true;
+        init_gfx(3,16,16,64);
+        gfx[3].trans[0]:=true;
+        //Calculo de prioridades
+        if not(cargar_roms(@memoria_temp[0],@junglek_prom,'junglek.zip')) then exit;
+  end;
+end;
+for i:=0 to $1f do begin
+		mask:=0;
+    // start with all four layers active, so we'll get the highest
+    // priority one in the first loop
+		for j:=3 downto 0 do begin
+			data:=memoria_temp[$10*(i and $0f)+mask] and $0f;
+  		if (i and $10)<>0 then data:=data shr 2
+  			else data:=data and $03;
+      mask:=mask or (1 shl data);
+      // in next loop, we'll see which of the remaining
+      // layers has top priority when this one is transparent
+	 		draw_order[i,j]:=data;
+		end;
+end;
+//precalculo de la paleta
+compute_resistor_weights(0,255,-1.0,
+			3,@resistances[0],@rweights[0],0,0,
+			3,@resistances[0],@gweights[0],0,0,
+			3,@resistances[0],@bweights[0],0,0);
+//final
+taitosj_reset;
+taitosj_iniciar:=true;
+end;
+
+procedure Cargar_taitosj;
+begin
+llamadas_maquina.iniciar:=taitosj_iniciar;
+case main_vars.tipo_maquina of
+  185:llamadas_maquina.bucle_general:=taitosj_mcu_principal;
+  189:llamadas_maquina.bucle_general:=taitosj_nomcu_principal;
+end;
+llamadas_maquina.reset:=taitosj_reset;
 end;
 
 end.

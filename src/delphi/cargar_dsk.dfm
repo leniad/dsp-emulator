@@ -51,6 +51,12 @@ object load_dsk: Tload_dsk
       OnClick = StringGrid1Click
       OnDblClick = StringGrid1DblClick
       OnKeyUp = FileListBox1KeyUp
+      ColWidths = (
+        134
+        134)
+      RowHeights = (
+        15
+        15)
     end
   end
   object Button2: TButton

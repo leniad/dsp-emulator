@@ -5,23 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ay_8910;
 
-procedure Cargar_nemesis;
-function iniciar_nemesis:boolean;
-procedure reset_nemesis;
-procedure sound_instruccion;
-function ay0_porta_read:byte;
-//Nemesis
-procedure nemesis_principal;
-function nemesis_getword(direccion:dword):word;
-procedure nemesis_putword(direccion:dword;valor:word);
-function nemesis_snd_getbyte(direccion:word):byte;
-procedure nemesis_snd_putbyte(direccion:word;valor:byte);
-//GX400
-procedure gx400_principal;
-function gx400_getword(direccion:dword):word;
-procedure gx400_putword(direccion:dword;valor:word);
-function gx400_snd_getbyte(direccion:word):byte;
-procedure gx400_snd_putbyte(direccion:word;valor:byte);
+procedure cargar_nemesis;
 
 implementation
 type
@@ -109,94 +93,6 @@ var
  screen_par,irq_on,irq2_on,irq4_on,flipy_char:boolean;
  sound_latch,linea:byte;
  recalc_char:array[0..7] of boolean;
-
-procedure Cargar_nemesis;
-begin
-llamadas_maquina.iniciar:=iniciar_nemesis;
-case main_vars.tipo_maquina of
-  204:llamadas_maquina.bucle_general:=nemesis_principal;
-  205:llamadas_maquina.bucle_general:=gx400_principal;
-end;
-llamadas_maquina.reset:=reset_nemesis;
-llamadas_maquina.fps_max:=60.60606060606060;
-end;
-
-function iniciar_nemesis:boolean;
-var
-  f:byte;
-begin
-iniciar_nemesis:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-for f:=1 to 8 do begin
-  screen_init(f,512,256,true);
-  screen_mod_scroll(f,512,512,511,256,256,255);
-  //screen_init(f,512,512,true);
-  //screen_mod_scroll(f,512,512,511,512,512,511);
-end;
-screen_init(9,512,256,false,true);
-screen_mod_sprites(9,1024,256,1023,255);
-//screen_init(9,512,512,false,true);
-if main_vars.tipo_maquina=205 then main_screen.rot90_screen:=true;
-iniciar_video(256,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(18432000 div 2,256);
-//Sound CPU
-snd_z80:=cpu_z80.create(14318180 div 4,256);
-snd_z80.init_sound(sound_instruccion);
-//Sound Chips
-ay8910_0:=ay8910_chip.create(18432000 div 8,1);
-ay8910_0.change_io_calls(ay0_porta_read,nil,nil,nil);
-ay8910_1:=ay8910_chip.create(18432000 div 8,1);
-case main_vars.tipo_maquina of
-  204:begin //nemesis
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@nemesis_rom[0],'nemesis.zip',0)) then exit;
-        if not(cargar_roms(@mem_snd[0],@nemesis_sound,'nemesis.zip')) then exit;
-        main_m68000.change_ram16_calls(nemesis_getword,nemesis_putword);
-        snd_z80.change_ram_calls(nemesis_snd_getbyte,nemesis_snd_putbyte);
-  end;
-  205:begin //twinbee
-        //cargar roms
-        if not(cargar_roms16w(@bios_rom[0],@gx400_bios[0],'twinbee.zip',0)) then exit;
-        if not(cargar_roms16w(@rom[0],@twinbee_rom[0],'twinbee.zip',0)) then exit;
-        if not(cargar_roms(@mem_snd[0],@twinbee_sound,'twinbee.zip')) then exit;
-        main_m68000.change_ram16_calls(gx400_getword,gx400_putword);
-        snd_z80.change_ram_calls(gx400_snd_getbyte,gx400_snd_putbyte);
-  end;
-end;
-//graficos, solo los inicio, los cambia en tiempo real...
-init_gfx(0,8,8,$800);
-init_gfx(1,16,16,$200);
-init_gfx(2,32,16,$100);
-init_gfx(3,8,16,$400);
-init_gfx(4,32,32,$80);
-init_gfx(5,16,32,$100);
-init_gfx(6,16,8,$400);
-init_gfx(7,64,64,$20);
-for f:=0 to 7 do gfx[f].trans[0]:=true;
-//final
-reset_nemesis;
-iniciar_nemesis:=true;
-end;
-
-procedure reset_nemesis;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ay8910_0.reset;
- ay8910_1.reset;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- irq_on:=false;
- irq2_on:=false;
- irq4_on:=false;
- screen_par:=false;
- fillchar(recalc_char[0],8,1);
- flipy_char:=false;
-end;
 
 procedure char_calc(num:byte);
 begin
@@ -540,7 +436,7 @@ case direccion of
   $5e000:irq_on:=(valor and $ff)<>0;
   $5e004:begin
             //main_screen.flip_main_screen:=(valor and $1)<>0;
-            if (valor and $100)<>0 then snd_z80.pedir_irq:=HOLD_LINE;
+            if (valor and $100)<>0 then snd_z80.change_irq(HOLD_LINE);
          end;
   $5e006:if byte(flipy_char)<>(valor and $1) then begin
             flipy_char:=(valor and $1)<>0;
@@ -679,7 +575,7 @@ case direccion of
   $5e002:irq_on:=(valor and $1)<>0;
   $5e004:begin
             //main_screen.flip_main_screen:=(valor and $1)<>0;
-            if (valor and $100)<>0 then snd_z80.pedir_irq:=HOLD_LINE;
+            if (valor and $100)<>0 then snd_z80.change_irq(HOLD_LINE);
          end;
   $5e006:if byte(flipy_char)<>(valor and $1) then begin
             flipy_char:=(valor and $1)<>0;
@@ -711,6 +607,94 @@ case direccion of
   $e106:ay8910_0.Write(valor);
   $e405:ay8910_1.Write(valor);
 end;
+end;
+
+//Main
+procedure reset_nemesis;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ay8910_0.reset;
+ ay8910_1.reset;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ irq_on:=false;
+ irq2_on:=false;
+ irq4_on:=false;
+ screen_par:=false;
+ fillchar(recalc_char[0],8,1);
+ flipy_char:=false;
+end;
+
+function iniciar_nemesis:boolean;
+var
+  f:byte;
+begin
+iniciar_nemesis:=false;
+iniciar_audio(false);
+for f:=1 to 8 do begin
+  screen_init(f,512,256,true);
+  screen_mod_scroll(f,512,512,511,256,256,255);
+  //screen_init(f,512,512,true);
+  //screen_mod_scroll(f,512,512,511,512,512,511);
+end;
+screen_init(9,512,256,false,true);
+screen_mod_sprites(9,1024,256,1023,255);
+//screen_init(9,512,512,false,true);
+if main_vars.tipo_maquina=205 then main_screen.rot90_screen:=true;
+iniciar_video(256,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(18432000 div 2,256);
+//Sound CPU
+snd_z80:=cpu_z80.create(14318180 div 4,256);
+snd_z80.init_sound(sound_instruccion);
+//Sound Chips
+ay8910_0:=ay8910_chip.create(18432000 div 8,1);
+ay8910_0.change_io_calls(ay0_porta_read,nil,nil,nil);
+ay8910_1:=ay8910_chip.create(18432000 div 8,1);
+case main_vars.tipo_maquina of
+  204:begin //nemesis
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@nemesis_rom[0],'nemesis.zip',0)) then exit;
+        if not(cargar_roms(@mem_snd[0],@nemesis_sound,'nemesis.zip')) then exit;
+        main_m68000.change_ram16_calls(nemesis_getword,nemesis_putword);
+        snd_z80.change_ram_calls(nemesis_snd_getbyte,nemesis_snd_putbyte);
+  end;
+  205:begin //twinbee
+        //cargar roms
+        if not(cargar_roms16w(@bios_rom[0],@gx400_bios[0],'twinbee.zip',0)) then exit;
+        if not(cargar_roms16w(@rom[0],@twinbee_rom[0],'twinbee.zip',0)) then exit;
+        if not(cargar_roms(@mem_snd[0],@twinbee_sound,'twinbee.zip')) then exit;
+        main_m68000.change_ram16_calls(gx400_getword,gx400_putword);
+        snd_z80.change_ram_calls(gx400_snd_getbyte,gx400_snd_putbyte);
+  end;
+end;
+//graficos, solo los inicio, los cambia en tiempo real...
+init_gfx(0,8,8,$800);
+init_gfx(1,16,16,$200);
+init_gfx(2,32,16,$100);
+init_gfx(3,8,16,$400);
+init_gfx(4,32,32,$80);
+init_gfx(5,16,32,$100);
+init_gfx(6,16,8,$400);
+init_gfx(7,64,64,$20);
+for f:=0 to 7 do gfx[f].trans[0]:=true;
+//final
+reset_nemesis;
+iniciar_nemesis:=true;
+end;
+
+procedure Cargar_nemesis;
+begin
+llamadas_maquina.iniciar:=iniciar_nemesis;
+case main_vars.tipo_maquina of
+  204:llamadas_maquina.bucle_general:=nemesis_principal;
+  205:llamadas_maquina.bucle_general:=gx400_principal;
+end;
+llamadas_maquina.reset:=reset_nemesis;
+llamadas_maquina.fps_max:=60.60606060606060;
 end;
 
 end.

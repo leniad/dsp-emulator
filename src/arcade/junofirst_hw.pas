@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,konami_decrypt,ay_8910;
 
-procedure Cargar_junofrst;
-procedure junofrst_principal;
-function iniciar_junofrst:boolean;
-procedure reset_junofrst;
-//Main CPU
-function junofrst_getbyte(direccion:word):byte;
-procedure junofrst_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function junofrst_snd_getbyte(direccion:word):byte;
-procedure junofrst_snd_putbyte(direccion:word;valor:byte);
-function junofrst_portar:byte;
-procedure junofrst_portbw(valor:byte);
-procedure junofrst_sound_update;
+procedure cargar_junofrst;
 
 implementation
 const
@@ -49,75 +37,6 @@ var
  irq_enable:boolean;
  frame,xorx,xory,last_snd_val,sound_latch,rom_nbank,scroll_y:byte;
  blit_data:array[0..3] of byte;
-
-procedure Cargar_junofrst;
-begin
-llamadas_maquina.iniciar:=iniciar_junofrst;
-llamadas_maquina.bucle_general:=junofrst_principal;
-llamadas_maquina.reset:=reset_junofrst;
-end;
-
-function iniciar_junofrst:boolean;
-var
-  f:byte;
-  memoria_temp,memoria_temp_bank:array[0..$ffff] of byte;
-begin
-iniciar_junofrst:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,256,256);
-iniciar_video(224,256);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1500000,$100);
-main_m6809.change_ram_calls(junofrst_getbyte,junofrst_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(1789750,$100);
-snd_z80.change_ram_calls(junofrst_snd_getbyte,junofrst_snd_putbyte);
-snd_z80.init_sound(junofrst_sound_update);
-//Sound Chip
-ay8910_0:=ay8910_chip.create(1789750,1);
-ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);
-//cargar roms
-if not(cargar_roms(@memoria[0],@junofrst_rom[0],'junofrst.zip',0)) then exit;
-konami1_decode(@memoria[$a000],@mem_opcodes[0],$6000);
-if not(cargar_roms(@memoria_temp[0],@junofrst_bank_rom[0],'junofrst.zip',0)) then exit;
-konami1_decode(@memoria_temp[$0],@memoria_temp_bank[0],$c000);
-for f:=0 to $f do begin
-  copymemory(@rom_bank[f,0],@memoria_temp[f*$1000],$1000);
-  copymemory(@rom_bank_dec[f,0],@memoria_temp_bank[f*$1000],$1000);
-end;
-if not(cargar_roms(@blit_mem[0],@junofrst_blit[0],'junofrst.zip',0)) then exit;
-//Cargar roms sound
-if not(cargar_roms(@mem_snd[0],@junofrst_sound,'junofrst.zip')) then exit;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$7b;
-marcade.dswa_val:=@junofrst_dip_a;
-marcade.dswb_val:=@junofrst_dip_b;
-//final
-reset_junofrst;
-iniciar_junofrst:=true;
-end;
-
-procedure reset_junofrst;
-begin
- main_m6809.reset;
- snd_z80.reset;
- ay8910_0.reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in2:=$ff;
- irq_enable:=false;
- fillchar(punt,$20000,0);
- fillchar(blit_data[0],4,0);
- xorx:=0;
- xory:=0;
- last_snd_val:=0;
- sound_latch:=0;
- rom_nbank:=0;
- scroll_y:=0;
-end;
 
 procedure update_video_junofrst;inline;
 var
@@ -260,7 +179,7 @@ case direccion of
   $8035:if (valor and 1)<>0 then xory:=255
           else xory:=0;
   $8040:begin
-          if ((last_snd_val=0) and ((valor and 1)=1))then snd_z80.pedir_irq:=HOLD_LINE;
+          if ((last_snd_val=0) and ((valor and 1)=1))then snd_z80.change_irq(HOLD_LINE);
           last_snd_val:=valor and 1;
         end;
   $8050:sound_latch:=valor;
@@ -309,6 +228,76 @@ end;
 procedure junofrst_sound_update;
 begin
   ay8910_0.update;
+end;
+
+//Main
+procedure reset_junofrst;
+begin
+ main_m6809.reset;
+ snd_z80.reset;
+ ay8910_0.reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
+ irq_enable:=false;
+ fillchar(punt,$20000,0);
+ fillchar(blit_data[0],4,0);
+ xorx:=0;
+ xory:=0;
+ last_snd_val:=0;
+ sound_latch:=0;
+ rom_nbank:=0;
+ scroll_y:=0;
+end;
+
+function iniciar_junofrst:boolean;
+var
+  f:byte;
+  memoria_temp,memoria_temp_bank:array[0..$ffff] of byte;
+begin
+iniciar_junofrst:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,256,256);
+iniciar_video(224,256);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1500000,$100);
+main_m6809.change_ram_calls(junofrst_getbyte,junofrst_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(1789750,$100);
+snd_z80.change_ram_calls(junofrst_snd_getbyte,junofrst_snd_putbyte);
+snd_z80.init_sound(junofrst_sound_update);
+//Sound Chip
+ay8910_0:=ay8910_chip.create(1789750,1);
+ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);
+//cargar roms
+if not(cargar_roms(@memoria[0],@junofrst_rom[0],'junofrst.zip',0)) then exit;
+konami1_decode(@memoria[$a000],@mem_opcodes[0],$6000);
+if not(cargar_roms(@memoria_temp[0],@junofrst_bank_rom[0],'junofrst.zip',0)) then exit;
+konami1_decode(@memoria_temp[$0],@memoria_temp_bank[0],$c000);
+for f:=0 to $f do begin
+  copymemory(@rom_bank[f,0],@memoria_temp[f*$1000],$1000);
+  copymemory(@rom_bank_dec[f,0],@memoria_temp_bank[f*$1000],$1000);
+end;
+if not(cargar_roms(@blit_mem[0],@junofrst_blit[0],'junofrst.zip',0)) then exit;
+//Cargar roms sound
+if not(cargar_roms(@mem_snd[0],@junofrst_sound,'junofrst.zip')) then exit;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$7b;
+marcade.dswa_val:=@junofrst_dip_a;
+marcade.dswb_val:=@junofrst_dip_b;
+//final
+reset_junofrst;
+iniciar_junofrst:=true;
+end;
+
+procedure Cargar_junofrst;
+begin
+llamadas_maquina.iniciar:=iniciar_junofrst;
+llamadas_maquina.bucle_general:=junofrst_principal;
+llamadas_maquina.reset:=reset_junofrst;
 end;
 
 end.

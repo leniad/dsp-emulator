@@ -420,12 +420,12 @@ case direccion of
         $7c80:latch2:=valor;
         $7d00:latch3:=valor;
         $7d80:if ((valor and $1)<>0) then begin
-                main_m6502.pedir_reset:=CLEAR_LINE;
-                snd_m6502.pedir_reset:=CLEAR_LINE;
+                main_m6502.change_reset(CLEAR_LINE);
+                snd_m6502.change_reset(CLEAR_LINE);
               end else begin
-                  main_m6502.pedir_reset:=ASSERT_LINE;
+                  main_m6502.change_reset(ASSERT_LINE);
                   reset_n2a03_sound(0);
-                  snd_m6502.pedir_reset:=ASSERT_LINE;
+                  snd_m6502.change_reset(ASSERT_LINE);
                   reset_n2a03_sound(1);
               end;
         $7e81:if char_bank<>((not(valor) and 1)*$100) then begin
@@ -595,7 +595,6 @@ end;
 begin
 iniciar_dkong:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);

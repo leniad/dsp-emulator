@@ -3,8 +3,8 @@
 interface
 uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      {$ifndef fpc}uchild,{$endif}
-     controls,forms,sysutils,misc_functions,pal_engine,timer_engine,
-     gfx_engine,sound_engine,arcade_config,vars_hide,device_functions;
+     controls,forms,sysutils,misc_functions,pal_engine,sound_engine,
+     gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
         dsp_version='0.16b3WIP';
@@ -15,6 +15,10 @@ const
         max_pant_visible=19;
         MAX_PANT_SPRITES=256;
 
+        MAX_DIP_VALUES=$f;
+        MAX_PUNBUF=768;
+        SCREEN_DIF=20;
+        //Cpu lines
         CLEAR_LINE=0;
         ASSERT_LINE=1;
         HOLD_LINE=2;
@@ -23,45 +27,7 @@ const
         IRQ_DELAY=5;
         INPUT_LINE_NMI=$20;
 
-        MAX_DIP_VALUES=$f;
-
-        MAX_PUNBUF=768;
-
-        SCREEN_DIF=20;
-
 type
-        tgetbyte=function (direccion:word):byte;
-        tputbyte=procedure (direccion:word;valor:byte);
-        tgetbyte16=function (direccion:dword):byte;
-        tputbyte16=procedure (direccion:dword;valor:byte);
-        tgetword=function (direccion:dword):word;
-        tputword=procedure (direccion:dword;valor:word);
-        tdespues_instruccion=procedure (tstates:word);
-        cpu_inport_call=function:byte;
-        cpu_outport_call=procedure (valor:byte);
-        cpu_inport_call16=function:word;
-        cpu_outport_call16=procedure (valor:word);
-        cpu_inport_full=function(puerto:word):byte;
-        cpu_outport_full=procedure (valor:byte;puerto:word);
-        cpu_inport_full16=function(puerto:word):word;
-        cpu_outport_full16=procedure (valor:word;puerto:word);
-        cpu_class=class
-          public
-            //Llamadas a RAM
-            getbyte:tgetbyte;
-            putbyte:tputbyte;
-            despues_instruccion:tdespues_instruccion;
-            //Misc
-            clock:dword;
-            contador:integer;
-            opcode:boolean;
-            numero_cpu,pedir_halt,pedir_reset:byte;
-            tframes:single;
-            estados_demas:word;
-            procedure change_ram_calls(getbyte:tgetbyte;putbyte:tputbyte);
-            procedure change_despues_instruccion(despues_instruccion:tdespues_instruccion);
-            procedure init_sound(update_call:exec_type);
-        end;
         TMain_vars=record
             mensaje_general,cadena_dir:string;
             frames_sec,tipo_maquina:word;
@@ -135,7 +101,6 @@ procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=fa
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
 procedure screen_mod_sprites(num:byte;sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word);
 //Update final screen
-//procedure actualiza_trozo_principal(x1,y1,x2,y2:word);
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);
 procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
@@ -174,23 +139,6 @@ var
 
 implementation
 uses principal,controls_engine;
-
-//CPU Calls
-procedure cpu_class.change_ram_calls(getbyte:tgetbyte;putbyte:tputbyte);
-begin
-  self.getbyte:=getbyte;
-  self.putbyte:=putbyte;
-end;
-
-procedure cpu_class.change_despues_instruccion(despues_instruccion:tdespues_instruccion);
-begin
-  self.despues_instruccion:=despues_instruccion;
-end;
-
-procedure cpu_class.init_sound(update_call:exec_type);
-begin
-sound_engine_init(self.numero_cpu,self.clock,update_call);
-end;
 
 procedure cambiar_video;
 //Si el sistema usa la pantalla SDL arreglos visuales
@@ -640,10 +588,6 @@ procedure video_sync;
 var
   l2:int64;
   res:single;
-procedure nop_asm;
-asm
-  nop;
-end;
 begin
 main_vars.frames_sec:=main_vars.frames_sec+1;
 actualiza_video;
@@ -654,7 +598,6 @@ res:=(l2-cont_sincroniza);
 while (res<valor_sync) do begin
   QueryPerformanceCounter(Int64((@l2)^));
   res:=(l2-cont_sincroniza);
-  nop_asm;
 end;
 QueryPerformanceCounter(Int64((@cont_sincroniza)^));
 end;
@@ -676,12 +619,7 @@ actualiza_video;
 evalue_controls;
 if main_screen.rapido then exit;
 res:=0;
-while res<valor_sync do begin
-  res:=sdl_getticks()-cont_sincroniza;
-  asm
-    nop;
-  end;
-end;
+while res<valor_sync do res:=sdl_getticks()-cont_sincroniza;
 valor_sync:=cont_micro-(res-valor_sync);
 cont_sincroniza:=sdl_getticks();
 end;

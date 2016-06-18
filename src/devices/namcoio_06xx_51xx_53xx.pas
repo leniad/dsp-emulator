@@ -1,7 +1,7 @@
 unit namcoio_06xx_51xx_53xx;
 
 interface
-uses main_engine,timer_engine,mb88xx,rom_engine;
+uses main_engine,timer_engine,mb88xx,rom_engine,cpu_misc;
 
 const
   NONE=0;

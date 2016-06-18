@@ -9,7 +9,7 @@ Corregidos opcodes $f2 y $f3
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,sysutils,vars_hide;
+     main_engine,dialogs,sysutils,vars_hide,cpu_misc;
 
 const
   NEC_V20=0;
@@ -33,7 +33,6 @@ type
             constructor create(clock:dword;frames_div:word;tipo:byte);
             destructor free;
           public
-            pedir_irq:boolean;
             vect_req:byte;
             procedure reset;
             procedure run(maximo:single);
@@ -190,7 +189,7 @@ r.f.CarryVal:=false;
 r.f.ParityVal:=true;
 r.f.M:=true;
 self.prefetch_reset:=true;
-self.pedir_irq:=false;
+self.change_irq(CLEAR_LINE);
 r.ps_r:=$ffff;
 r.ds1_r:=0;
 r.ds0_r:=0;
@@ -2643,7 +2642,7 @@ begin
     exit;
   end;
   if vect_num=$100 then vect_num:=self.vect;
-  self.pedir_irq:=false;
+  self.change_irq(CLEAR_LINE);
   self.irq_pending:=false;
   i_pushf;
   r.f.T:=false;
@@ -2664,7 +2663,7 @@ while self.contador<maximo do begin
   //IRQ's
   prev_icount:=self.contador;
   if self.irq_pending then nec_interrupt($100)
-    else if self.pedir_irq then nec_interrupt(self.vect_req);
+    else if self.pedir_irq<>CLEAR_LINE then nec_interrupt(self.vect_req);
   self.opcode:=true;
   self.r.old_pc:=self.r.ip;
   instruccion:=fetch;

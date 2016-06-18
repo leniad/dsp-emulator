@@ -9,7 +9,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure cargar_hgalaxian;
 
 implementation
-uses principal,sysutils;
 
 type
   tstars=record
@@ -107,7 +106,7 @@ var
   //Variables globales
   haz_nmi,stars_enable:boolean;
   stars_scrollpos:dword;
-  stars_blinking,latch,port_b_latch,local_frame:byte;
+  stars_blinking,port_b_latch,local_frame:byte;
   stars:array[0..star_count-1] of tstars;
   videoram_mem:array[0..$3ff] of byte;
   sprite_mem,disparo_mem:array[0..$1f] of byte;
@@ -946,7 +945,6 @@ begin
  haz_nmi:=false;
  stars_enable:=false;
  scramble_background:=false;
- latch:=0;
  port_b_latch:=0;
  sound1_pos:=0;
  sound2_pos:=0;
@@ -1043,7 +1041,6 @@ end;
 begin
 iniciar_hgalaxian:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,512,true,true);
 screen_init(2,512,256,true);
 iniciar_video(224,256);

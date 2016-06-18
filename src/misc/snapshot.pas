@@ -490,7 +490,7 @@ while longitud<>long do begin
     spec_z80_reg.iff1:=szx_regs.iff1<>0;
     spec_z80_reg.iff2:=szx_regs.iff2<>0;
     spec_z80_reg.im:=szx_regs.im;
-    spec_z80.halt:=(szx_regs.misc=2);
+    spec_z80_reg.halt_opcode:=(szx_regs.misc=2);
     //opppssss!!!
     if szx_regs.estados_t_irq<40 then var_spectrum.irq_pos:=szx_regs.estados_t_irq;
     if szx_regs.estados_t<71000 then spec_z80.contador:=szx_regs.estados_t;
@@ -653,7 +653,7 @@ szx_regs.iff2:=byte(spec_z80_reg.iff2);
 szx_regs.im:=spec_z80_reg.im;
 szx_regs.estados_t:=spec_z80.contador;
 szx_regs.estados_t_irq:=var_spectrum.irq_pos;
-szx_regs.misc:=byte(spec_z80.halt) shl 1;
+szx_regs.misc:=byte(spec_z80_reg.halt_opcode) shl 1;
 copymemory(ptemp,szx_block,8);inc(ptemp,8);longitud:=longitud+8;
 copymemory(ptemp,szx_regs,37);inc(ptemp,37);longitud:=longitud+37;
 freemem(szx_regs);
@@ -1227,7 +1227,7 @@ end;
 cpc_sna.hw_type:=main_vars.tipo_maquina-7;
 cpc_sna.ga_lines_sync:=cpc_ga.lines_sync;
 cpc_sna.ga_lines_count:=cpc_ga.lines_count;
-if main_z80.pedir_irq<>CLEAR_LINE then cpc_sna.irq:=1;
+if main_z80.get_irq<>CLEAR_LINE then cpc_sna.irq:=1;
 copymemory(ptemp,cpc_sna,$100);inc(ptemp,$100);long:=$100;
 freemem(cpc_sna);
 //Datos
@@ -1363,8 +1363,8 @@ case cpc_sna.version of
       if cpc_sna.version=3 then begin
         cpc_ga.lines_sync:=cpc_sna.ga_lines_sync;
         cpc_ga.lines_count:=cpc_sna.ga_lines_count;
-        if cpc_sna.irq<>0 then main_z80.pedir_irq:=PULSE_LINE
-           else main_z80.pedir_irq:=CLEAR_LINE;
+        if cpc_sna.irq<>0 then main_z80.change_irq(PULSE_LINE)
+           else main_z80.change_irq(CLEAR_LINE);
       end;
     end;
 end;
@@ -1486,8 +1486,8 @@ while longitud<long do begin
           main_z80_reg.iy.w:=z80_v1.iy;
           main_z80_reg.iff1:=z80_v1.iff1;
           main_z80_reg.iff2:=z80_v1.iff2;
-          main_z80.halt:=z80_v1.halt;
-          main_z80.pedir_irq:=z80_v1.pedir_irq;
+          main_z80_reg.halt_opcode:=z80_v1.halt;
+          main_z80.change_irq(z80_v1.pedir_irq);
           main_z80.change_nmi(z80_v1.pedir_nmi);
           {main_z80.nmi_state:=(ptemp^<>0);}
           main_z80_reg.a:=z80_v1.a;
@@ -1525,8 +1525,8 @@ while longitud<long do begin
           copymemory(main_z80_reg,z80_v2,45);
           getmem(z80_v2_ext,sizeof(tz80_v2_ext));
           copymemory(z80_v2_ext,ptemp,9);
-          main_z80.halt:=z80_v2_ext.halt;
-          main_z80.pedir_irq:=z80_v2_ext.pedir_irq;
+          main_z80_reg.halt_opcode:=z80_v2_ext.halt;
+          main_z80.change_irq(z80_v2_ext.pedir_irq);
           main_z80.change_nmi(z80_v2_ext.pedir_nmi);
           main_z80.contador:=z80_v2_ext.contador;
           main_z80.im2_lo:=z80_v2_ext.im2_lo;

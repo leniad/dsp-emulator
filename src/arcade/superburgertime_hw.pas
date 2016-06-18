@@ -5,14 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      oki6295,sound_engine,hu6280,deco16ic,deco_common;
 
-procedure Cargar_supbtime;
-function iniciar_supbtime:boolean;
-procedure reset_supbtime;
-procedure cerrar_supbtime;
-procedure supbtime_principal;
-//Main CPU
-function supbtime_getword(direccion:dword):word;
-procedure supbtime_putword(direccion:dword;valor:word);
+procedure cargar_supbtime;
 
 implementation
 const
@@ -27,90 +20,6 @@ const
 var
  rom:array[0..$1ffff] of word;
  ram:array[0..$1fff] of word;
-
-procedure Cargar_supbtime;
-begin
-llamadas_maquina.bucle_general:=supbtime_principal;
-llamadas_maquina.iniciar:=iniciar_supbtime;
-llamadas_maquina.cerrar:=cerrar_supbtime;
-llamadas_maquina.reset:=reset_supbtime;
-llamadas_maquina.fps_max:=58;
-end;
-
-//Inicio Normal
-function iniciar_supbtime:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  pt_x:array[0..15] of dword=(256,257,258,259,260,261,262,263,
-  0, 1, 2, 3, 4, 5, 6, 7);
-  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-  8*16,9*16,10*16,11*16,12*16,13*16,14*16,15*16);
-  ps_x:array[0..15] of dword=(512,513,514,515,516,517,518,519,
-   0, 1, 2, 3, 4, 5, 6, 7);
-  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32 );
-var
-  memoria_temp:pbyte;
-begin
-iniciar_supbtime:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-init_dec16ic(0,1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
-screen_init(3,512,512,false,true);
-iniciar_video(320,240);
-//Main CPU
-main_m68000:=cpu_m68000.create(14000000,$100);
-main_m68000.change_ram16_calls(supbtime_getword,supbtime_putword);
-//Sound CPU
-deco16_sprite_color_add:=0;
-deco16_sprite_mask:=$1fff;
-deco16_snd_simple_init(32220000 div 8,32220000,nil);
-getmem(memoria_temp,$100000);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@supbtime_rom[0],'supbtime.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@supbtime_sound,'supbtime.zip',1)) then exit;
-//OKI rom
-if not(cargar_roms(oki_6295_0.get_rom_addr,@supbtime_oki,'supbtime.zip',1)) then exit;
-//convertir chars}
-if not(cargar_roms(memoria_temp,@supbtime_char,'supbtime.zip',1)) then exit;
-init_gfx(0,8,8,$4000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,16*8,$4000*16*8+8,$4000*16*8+0,8,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-//Tiles
-init_gfx(1,16,16,$1000);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,32*16,$1000*32*16+8,$1000*32*16+0,8,0);
-convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
-//Sprites
-if not(cargar_roms16b(memoria_temp,@supbtime_sprites[0],'supbtime.zip',0)) then exit;
-init_gfx(2,16,16,$2000);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(4,0,32*32,24,8,16,0);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//final
-freemem(memoria_temp);
-reset_supbtime;
-iniciar_supbtime:=true;
-end;
-
-procedure cerrar_supbtime;
-begin
-close_dec16ic(0);
-end;
-
-procedure reset_supbtime;
-begin
- main_m68000.reset;
- reset_dec16ic(0);
- deco16_snd_simple_reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$F7;
- marcade.in2:=$FF;
-end;
 
 procedure update_video_supbtime;inline;
 begin
@@ -235,6 +144,89 @@ case direccion of
   $340000..$3407ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
   $342000..$3427ff:deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $7ff) shr 1]:=valor;
 end;
+end;
+
+//Main
+procedure reset_supbtime;
+begin
+ main_m68000.reset;
+ reset_dec16ic(0);
+ deco16_snd_simple_reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$F7;
+ marcade.in2:=$FF;
+end;
+
+function iniciar_supbtime:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  pt_x:array[0..15] of dword=(256,257,258,259,260,261,262,263,
+  0, 1, 2, 3, 4, 5, 6, 7);
+  pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+  8*16,9*16,10*16,11*16,12*16,13*16,14*16,15*16);
+  ps_x:array[0..15] of dword=(512,513,514,515,516,517,518,519,
+   0, 1, 2, 3, 4, 5, 6, 7);
+  ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32 );
+var
+  memoria_temp:pbyte;
+begin
+iniciar_supbtime:=false;
+iniciar_audio(false);
+init_dec16ic(0,1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
+screen_init(3,512,512,false,true);
+iniciar_video(320,240);
+//Main CPU
+main_m68000:=cpu_m68000.create(14000000,$100);
+main_m68000.change_ram16_calls(supbtime_getword,supbtime_putword);
+//Sound CPU
+deco16_sprite_color_add:=0;
+deco16_sprite_mask:=$1fff;
+deco16_snd_simple_init(32220000 div 8,32220000,nil);
+getmem(memoria_temp,$100000);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@supbtime_rom[0],'supbtime.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@supbtime_sound,'supbtime.zip',1)) then exit;
+//OKI rom
+if not(cargar_roms(oki_6295_0.get_rom_addr,@supbtime_oki,'supbtime.zip',1)) then exit;
+//convertir chars}
+if not(cargar_roms(memoria_temp,@supbtime_char,'supbtime.zip',1)) then exit;
+init_gfx(0,8,8,$4000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,16*8,$4000*16*8+8,$4000*16*8+0,8,0);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+//Tiles
+init_gfx(1,16,16,$1000);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,32*16,$1000*32*16+8,$1000*32*16+0,8,0);
+convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+//Sprites
+if not(cargar_roms16b(memoria_temp,@supbtime_sprites[0],'supbtime.zip',0)) then exit;
+init_gfx(2,16,16,$2000);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(4,0,32*32,24,8,16,0);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//final
+freemem(memoria_temp);
+reset_supbtime;
+iniciar_supbtime:=true;
+end;
+
+procedure cerrar_supbtime;
+begin
+close_dec16ic(0);
+end;
+
+procedure Cargar_supbtime;
+begin
+llamadas_maquina.bucle_general:=supbtime_principal;
+llamadas_maquina.iniciar:=iniciar_supbtime;
+llamadas_maquina.cerrar:=cerrar_supbtime;
+llamadas_maquina.reset:=reset_supbtime;
+llamadas_maquina.fps_max:=58;
 end;
 
 end.

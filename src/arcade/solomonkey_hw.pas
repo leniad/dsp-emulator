@@ -5,19 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine;
 
-procedure Cargar_solomon;
-procedure solomon_principal;
-function iniciar_solomon:boolean;
-procedure reset_solomon;
-//Main CPU
-function solomon_getbyte(direccion:word):byte;
-procedure solomon_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function solomon_snd_getbyte(direccion:word):byte;
-procedure solomon_snd_putbyte(direccion:word;valor:byte);
-procedure solomon_snd_outbyte(valor:byte;puerto:word);
-procedure solomon_despues_instruccion;
-procedure solomon_snd_irq;
+procedure cargar_solomon;
 
 implementation
 const
@@ -36,88 +24,6 @@ const
 var
  sound_latch:byte;
  nmi_enable:boolean;
-
-procedure Cargar_solomon;
-begin
-llamadas_maquina.iniciar:=iniciar_solomon;
-llamadas_maquina.bucle_general:=solomon_principal;
-llamadas_maquina.reset:=reset_solomon;
-end;
-
-function iniciar_solomon:boolean;
-var
-    memoria_temp:array[0..$13fff] of byte;
-const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
-    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
-begin
-iniciar_solomon:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256);
-screen_init(2,256,256,true);
-screen_init(3,256,256,false,true);
-iniciar_video(256,224);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(solomon_getbyte,solomon_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3072000,256);
-snd_z80.change_ram_calls(solomon_snd_getbyte,solomon_snd_putbyte);
-snd_z80.change_io_calls(nil,solomon_snd_outbyte);
-snd_z80.init_sound(solomon_despues_instruccion);
-init_timer(snd_z80.numero_cpu,3072000/(60*2),solomon_snd_irq,true);
-//Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
-AY8910_2:=ay8910_chip.create(1500000,1);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@solomon_rom[0],'solomon.zip',0)) then exit;
-copymemory(@memoria[0],@memoria_temp[0],$4000);
-copymemory(@memoria[$4000],@memoria_temp[$8000],$4000);
-copymemory(@memoria[$8000],@memoria_temp[$4000],$4000);
-copymemory(@memoria[$f000],@memoria_temp[$c000],$1000);
-//cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@solomon_snd_rom,'solomon.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@solomon_chars[0],'solomon.zip',0)) then exit;
-init_gfx(0,8,8,$800);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//tiles
-if not(cargar_roms(@memoria_temp[0],@solomon_tiles[0],'solomon.zip',0)) then exit;
-init_gfx(1,8,8,$800);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@solomon_sprites[0],'solomon.zip',0)) then exit;
-init_gfx(2,16,16,$400);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,512*32*8,2*512*32*8,3*512*32*8);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//final
-reset_solomon;
-iniciar_solomon:=true;
-end;
-
-procedure reset_solomon;
-begin
- main_z80.reset;
- snd_z80.reset;
- AY8910_0.reset;
- AY8910_1.reset;
- AY8910_2.reset;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- sound_latch:=0;
- nmi_enable:=true;
-end;
 
 procedure update_video_solomon;inline;
 var
@@ -298,7 +204,7 @@ end;
 
 procedure solomon_snd_irq;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 procedure solomon_despues_instruccion;
@@ -306,6 +212,88 @@ begin
   ay8910_0.update;
   ay8910_1.update;
   ay8910_2.update;
+end;
+
+//Main
+procedure reset_solomon;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ AY8910_0.reset;
+ AY8910_1.reset;
+ AY8910_2.reset;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ sound_latch:=0;
+ nmi_enable:=true;
+end;
+
+function iniciar_solomon:boolean;
+var
+    memoria_temp:array[0..$13fff] of byte;
+const
+    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
+    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
+begin
+iniciar_solomon:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_init(2,256,256,true);
+screen_init(3,256,256,false,true);
+iniciar_video(256,224);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,256);
+main_z80.change_ram_calls(solomon_getbyte,solomon_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3072000,256);
+snd_z80.change_ram_calls(solomon_snd_getbyte,solomon_snd_putbyte);
+snd_z80.change_io_calls(nil,solomon_snd_outbyte);
+snd_z80.init_sound(solomon_despues_instruccion);
+init_timer(snd_z80.numero_cpu,3072000/(60*2),solomon_snd_irq,true);
+//Sound Chips
+AY8910_0:=ay8910_chip.create(1500000,1);
+AY8910_1:=ay8910_chip.create(1500000,1);
+AY8910_2:=ay8910_chip.create(1500000,1);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@solomon_rom[0],'solomon.zip',0)) then exit;
+copymemory(@memoria[0],@memoria_temp[0],$4000);
+copymemory(@memoria[$4000],@memoria_temp[$8000],$4000);
+copymemory(@memoria[$8000],@memoria_temp[$4000],$4000);
+copymemory(@memoria[$f000],@memoria_temp[$c000],$1000);
+//cargar ROMS sonido
+if not(cargar_roms(@mem_snd[0],@solomon_snd_rom,'solomon.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@solomon_chars[0],'solomon.zip',0)) then exit;
+init_gfx(0,8,8,$800);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//tiles
+if not(cargar_roms(@memoria_temp[0],@solomon_tiles[0],'solomon.zip',0)) then exit;
+init_gfx(1,8,8,$800);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@solomon_sprites[0],'solomon.zip',0)) then exit;
+init_gfx(2,16,16,$400);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,512*32*8,2*512*32*8,3*512*32*8);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//final
+reset_solomon;
+iniciar_solomon:=true;
+end;
+
+procedure Cargar_solomon;
+begin
+llamadas_maquina.iniciar:=iniciar_solomon;
+llamadas_maquina.bucle_general:=solomon_principal;
+llamadas_maquina.reset:=reset_solomon;
 end;
 
 end.

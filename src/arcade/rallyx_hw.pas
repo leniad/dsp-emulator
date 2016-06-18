@@ -276,7 +276,7 @@ while EmuStatus=EsRuning do begin
       main_z80.run(frame);
       frame:=frame+main_z80.tframes-main_z80.contador;
       if f=239 then begin
-        if hacer_int then main_z80.pedir_irq:=ASSERT_LINE;
+        if hacer_int then main_z80.change_irq(ASSERT_LINE);
         update_video_rallyx;
       end;
   end;
@@ -321,7 +321,7 @@ case direccion of
                       end;
                     1:begin
                           hacer_int:=(valor<>0);
-                          if not(hacer_int) then main_z80.pedir_irq:=CLEAR_LINE;
+                          if not(hacer_int) then main_z80.change_irq(CLEAR_LINE);
                       end;
                     3:main_screen.flip_main_screen:=valor<>0;
                   end;
@@ -333,7 +333,7 @@ procedure rallyx_outbyte(valor:byte;puerto:word);
 begin
 if (puerto and $ff)=0 then begin
   main_z80.im0:=valor;
-  main_z80.pedir_irq:=CLEAR_LINE;
+  main_z80.change_irq(CLEAR_LINE);
 end;
 end;
 
@@ -421,7 +421,6 @@ end;
 begin
  iniciar_rallyxh:=false;
  iniciar_audio(false);
- //Pantallas:  principal+char y sprites
  if main_vars.tipo_maquina=29 then main_screen.rol90_screen:=true;
  screen_init(1,256,256);
  screen_mod_scroll(1,256,256,255,256,256,255);

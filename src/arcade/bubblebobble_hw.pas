@@ -129,7 +129,7 @@ while EmuStatus=EsRuning do begin
   main_m6800.run(frame_mcu);
   frame_mcu:=frame_mcu+main_m6800.tframes-main_m6800.contador;
   if f=239 then begin
-    sub_z80.pedir_irq:=HOLD_LINE;
+    sub_z80.change_irq(HOLD_LINE);
     main_m6800.change_irq(HOLD_LINE);
     update_video_bublbobl;
   end;
@@ -208,14 +208,14 @@ case direccion of
                   else pending_nmi:=true;
                 sound_latch:=valor;
               end;
-        $fa03:if valor<>0 then snd_z80.pedir_reset:=ASSERT_LINE
-                else snd_z80.pedir_reset:=CLEAR_LINE;
+        $fa03:if valor<>0 then snd_z80.change_reset(ASSERT_LINE)
+                else snd_z80.change_reset(CLEAR_LINE);
         $fb40:begin
                 banco_rom:=(valor xor 4) and 7;
-                if (valor and $10)<>0 then sub_z80.pedir_reset:=CLEAR_LINE
-                    else sub_z80.pedir_reset:=ASSERT_LINE;
-                if (valor and $20)<>0 then main_m6800.pedir_reset:=CLEAR_LINE
-                    else main_m6800.pedir_reset:=ASSERT_LINE;
+                if (valor and $10)<>0 then sub_z80.change_reset(CLEAR_LINE)
+                    else sub_z80.change_reset(ASSERT_LINE);
+                if (valor and $20)<>0 then main_m6800.change_reset(CLEAR_LINE)
+                    else main_m6800.change_reset(ASSERT_LINE);
                 video_enable:=(valor and $40)<>0;
                 main_screen.flip_main_screen:=(valor and $80)<>0;
               end;
@@ -247,8 +247,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.change_irq(irqstate);
 end;
 
 function mcu_getbyte(direccion:word):byte;
@@ -281,7 +280,7 @@ case direccion of
   $2:begin //port1
        if (((port1_out and $40)<>0) and ((not(valor) and $40)<>0)) then begin
           main_z80.im2_lo:=memoria[$fc00];
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
 	      end;
 	      port1_out:=valor;
      end;
@@ -344,7 +343,6 @@ const
 begin
 iniciar_bublbobl:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU

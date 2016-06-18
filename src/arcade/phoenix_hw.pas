@@ -5,18 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms36xx,phoenix_audio_digital,
      rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_Phoenix;
-function phoenix_iniciar:boolean;
-procedure phoenix_reset;
-procedure phoenix_cerrar;
-//Phoenix
-procedure phoenix_principal;
-function phoenix_getbyte(direccion:word):byte;
-procedure phoenix_putbyte(direccion:word;valor:byte);
-procedure phoenix_sound_update;
-//Pleiads
-procedure pleiads_principal;
-procedure pleiads_putbyte(direccion:word;valor:byte);
+procedure cargar_phoenix;
 
 implementation
 var
@@ -57,121 +46,6 @@ const
         (mask:$0c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'3k 30k'),(dip_val:$4;dip_name:'4k 40k'),(dip_val:$8;dip_name:'5k 50k'),(dip_val:$c;dip_name:'6k 60k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Coinage';number:2;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-
-procedure Cargar_Phoenix;
-begin
-llamadas_maquina.iniciar:=phoenix_iniciar;
-case main_vars.tipo_maquina of
-  11:llamadas_maquina.bucle_general:=phoenix_principal;
-  202:llamadas_maquina.bucle_general:=pleiads_principal;
-end;
-llamadas_maquina.cerrar:=phoenix_cerrar;
-llamadas_maquina.reset:=phoenix_reset;
-llamadas_maquina.fps_max:=61.035156;
-end;
-
-function phoenix_iniciar:boolean;
-var
-      colores:tpaleta;
-      ctemp1,ctemp2,f:byte;
-      memoria_temp:array[0..$fff] of byte;
-const
-      pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      phoenix_dec:array[0..5] of extended=(0.5,0,0,1.05,0,0);
-      pleiads_dec:array[0..5] of extended=(0.33,0.33,0,0.33,0,0.33);
-begin
-phoenix_iniciar:=false;
-iniciar_audio(false);
-screen_init(1,256,256);
-screen_mod_scroll(1,0,0,0,256,256,255);
-screen_init(2,256,256,true);
-screen_init(3,256,256,false,true);
-iniciar_video(208,248);
-//Main CPU
-main_z80:=cpu_z80.create(5500000,256);
-main_z80.init_sound(phoenix_sound_update);
-case main_vars.tipo_maquina of
-  11:begin //Phoenix
-        main_z80.change_ram_calls(phoenix_getbyte,phoenix_putbyte);
-        //Chip sonido
-        tms36xx_start(372,0.21,@phoenix_dec[0]);
-        phoenix_audio_start;
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@phoenix_rom[0],'phoenix.zip',0)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@phoenix_char1[0],'phoenix.zip',0)) then exit;
-        init_gfx(0,8,8,512);
-        gfx[0].trans[0]:=true;
-        gfx_set_desc_data(2,2,8*8,256*8*8,0);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-        //Segundo juego de chars
-        if not(cargar_roms(@memoria_temp[0],@phoenix_char2[0],'phoenix.zip',0)) then exit;
-        convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-        //poner paleta
-        if not(cargar_roms(@memoria_temp[0],@phoenix_pal[0],'phoenix.zip',0)) then exit;
-        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $60);
-        //DIP
-        marcade.dswa:=$e0;
-        marcade.dswa_val:=@phoenix_dip_a;
-  end;
-  202:begin //Pleiads
-        main_z80.change_ram_calls(phoenix_getbyte,pleiads_putbyte);
-        //Chip sonido
-        tms36xx_start(247,0.21,@pleiads_dec[0]);
-        //phoenix_audio_start;
-        //cargar roms
-        if not(cargar_roms(@memoria[0],@pleiads_rom[0],'pleiads.zip',0)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@pleiads_char1[0],'pleiads.zip',0)) then exit;
-        init_gfx(0,8,8,512);
-        gfx[0].trans[0]:=true;
-        gfx_set_desc_data(2,2,8*8,256*8*8,0);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-        //Segundo juego de chars
-        if not(cargar_roms(@memoria_temp[0],@pleiads_char2[0],'pleiads.zip',0)) then exit;
-        convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-        //poner paleta
-        if not(cargar_roms(@memoria_temp[0],@pleiads_pal[0],'pleiads.zip',0)) then exit;
-        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $e0);
-        //DIP
-        marcade.dswa:=$e0;
-        marcade.dswa_val:=@pleiads_dip_a;
-  end;
-end;
-for f:=0 to $ff do begin
-    //paleta
-    ctemp1:=memoria_temp[f];
-    ctemp2:=memoria_temp[f+256];
-    colores[f].r:=$55*(ctemp1 and 1)+$AA*(ctemp2 and 1);
-    colores[f].g:=$55*((ctemp1 shr 2) and 1)+$AA*((ctemp2 shr 2) and 1);
-    colores[f].b:=$55*((ctemp1 shr 1) and 1)+$AA*((ctemp2 shr 1) and 1);
-end;
-set_pal(colores,256);
-//final
-phoenix_reset;
-phoenix_iniciar:=true;
-end;
-
-procedure phoenix_cerrar;
-begin
-tms36xx_close;
-if main_vars.tipo_maquina=11 then phoenix_audio_cerrar;
-end;
-
-procedure phoenix_reset;
-begin
-main_z80.reset;
-scroll_y:=0;
-banco_pal:=0;
-marcade.in0:=$ff;
-fillchar(mem_video[0,0],$1000,0);
-fillchar(mem_video[1,0],$1000,0);
-case main_vars.tipo_maquina of
-  11:phoenix_audio_reset;
-  202:;
-end;
-end;
 
 procedure update_video_phoenix;inline;
 var
@@ -347,6 +221,119 @@ end;
 procedure phoenix_sound_update;
 begin
   tms36xx_sound_update;
+end;
+
+//Main
+procedure phoenix_reset;
+begin
+main_z80.reset;
+scroll_y:=0;
+banco_pal:=0;
+marcade.in0:=$ff;
+fillchar(mem_video[0,0],$1000,0);
+fillchar(mem_video[1,0],$1000,0);
+if main_vars.tipo_maquina=11 then phoenix_audio_reset;
+end;
+
+function phoenix_iniciar:boolean;
+var
+      colores:tpaleta;
+      ctemp1,ctemp2,f:byte;
+      memoria_temp:array[0..$fff] of byte;
+const
+      pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
+      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+      phoenix_dec:array[0..5] of extended=(0.5,0,0,1.05,0,0);
+      pleiads_dec:array[0..5] of extended=(0.33,0.33,0,0.33,0,0.33);
+begin
+phoenix_iniciar:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_mod_scroll(1,0,0,0,256,256,255);
+screen_init(2,256,256,true);
+screen_init(3,256,256,false,true);
+iniciar_video(208,248);
+//Main CPU
+main_z80:=cpu_z80.create(5500000,256);
+main_z80.init_sound(phoenix_sound_update);
+case main_vars.tipo_maquina of
+  11:begin //Phoenix
+        main_z80.change_ram_calls(phoenix_getbyte,phoenix_putbyte);
+        //Chip sonido
+        tms36xx_start(372,0.21,@phoenix_dec[0]);
+        phoenix_audio_start;
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@phoenix_rom[0],'phoenix.zip',0)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@phoenix_char1[0],'phoenix.zip',0)) then exit;
+        init_gfx(0,8,8,512);
+        gfx[0].trans[0]:=true;
+        gfx_set_desc_data(2,2,8*8,256*8*8,0);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        //Segundo juego de chars
+        if not(cargar_roms(@memoria_temp[0],@phoenix_char2[0],'phoenix.zip',0)) then exit;
+        convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        //poner paleta
+        if not(cargar_roms(@memoria_temp[0],@phoenix_pal[0],'phoenix.zip',0)) then exit;
+        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $60);
+        //DIP
+        marcade.dswa:=$e0;
+        marcade.dswa_val:=@phoenix_dip_a;
+  end;
+  202:begin //Pleiads
+        main_z80.change_ram_calls(phoenix_getbyte,pleiads_putbyte);
+        //Chip sonido
+        tms36xx_start(247,0.21,@pleiads_dec[0]);
+        //phoenix_audio_start;
+        //cargar roms
+        if not(cargar_roms(@memoria[0],@pleiads_rom[0],'pleiads.zip',0)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@pleiads_char1[0],'pleiads.zip',0)) then exit;
+        init_gfx(0,8,8,512);
+        gfx[0].trans[0]:=true;
+        gfx_set_desc_data(2,2,8*8,256*8*8,0);
+        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        //Segundo juego de chars
+        if not(cargar_roms(@memoria_temp[0],@pleiads_char2[0],'pleiads.zip',0)) then exit;
+        convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        //poner paleta
+        if not(cargar_roms(@memoria_temp[0],@pleiads_pal[0],'pleiads.zip',0)) then exit;
+        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $e0);
+        //DIP
+        marcade.dswa:=$e0;
+        marcade.dswa_val:=@pleiads_dip_a;
+  end;
+end;
+for f:=0 to $ff do begin
+    //paleta
+    ctemp1:=memoria_temp[f];
+    ctemp2:=memoria_temp[f+256];
+    colores[f].r:=$55*(ctemp1 and 1)+$AA*(ctemp2 and 1);
+    colores[f].g:=$55*((ctemp1 shr 2) and 1)+$AA*((ctemp2 shr 2) and 1);
+    colores[f].b:=$55*((ctemp1 shr 1) and 1)+$AA*((ctemp2 shr 1) and 1);
+end;
+set_pal(colores,256);
+//final
+phoenix_reset;
+phoenix_iniciar:=true;
+end;
+
+procedure phoenix_cerrar;
+begin
+tms36xx_close;
+if main_vars.tipo_maquina=11 then phoenix_audio_cerrar;
+end;
+
+procedure cargar_phoenix;
+begin
+llamadas_maquina.iniciar:=phoenix_iniciar;
+case main_vars.tipo_maquina of
+  11:llamadas_maquina.bucle_general:=phoenix_principal;
+  202:llamadas_maquina.bucle_general:=pleiads_principal;
+end;
+llamadas_maquina.cerrar:=phoenix_cerrar;
+llamadas_maquina.reset:=phoenix_reset;
+llamadas_maquina.fps_max:=61.035156;
 end;
 
 end.

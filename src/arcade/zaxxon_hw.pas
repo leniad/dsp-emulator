@@ -212,7 +212,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=239 then begin
-      if irq_vblank then main_z80.pedir_irq:=ASSERT_LINE;
+      if irq_vblank then main_z80.change_irq(ASSERT_LINE);
       update_video_congo;
     end;
   end;
@@ -259,7 +259,7 @@ case direccion of
 	                      $1e:main_screen.flip_main_screen:=(valor and 1)=0;//zaxxon_flipscreen_w
 	                      $1f:begin
                               irq_vblank:=(valor and 1)<>0;
-                              if not(irq_vblank) then main_z80.pedir_irq:=CLEAR_LINE;
+                              if not(irq_vblank) then main_z80.change_irq(CLEAR_LINE);
                             end;
 	                      $21:begin //zaxxon_fg_color_w
                               fg_color:=(valor and 1)*$80;
@@ -365,7 +365,7 @@ end;
 
 procedure congo_sound_irq;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 //Zaxxon
@@ -473,7 +473,7 @@ while EmuStatus=EsRuning do begin
     main_z80.run(frame);
     frame:=frame+main_z80.tframes-main_z80.contador;
     if f=239 then begin
-      if irq_vblank then main_z80.pedir_irq:=ASSERT_LINE;
+      if irq_vblank then main_z80.change_irq(ASSERT_LINE);
       update_video_zaxxon;
     end;
   end;
@@ -523,7 +523,7 @@ case direccion of
                     $3c..$3f:pia8255_0.write(direccion and $3,valor); //ppi
                     $f0:begin //int_enable_w
                           irq_vblank:=(valor and 1)<>0;
-                          if not(irq_vblank) then main_z80.pedir_irq:=CLEAR_LINE;
+                          if not(irq_vblank) then main_z80.change_irq(CLEAR_LINE);
                         end;
                     $f1:begin //zaxxon_fg_color_w
                               fg_color:=(valor and 1)*$80;
@@ -723,7 +723,6 @@ end;
 begin
 iniciar_zaxxon:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256,true);
 screen_init(2,256,256,false,true);
 screen_init(3,256,256);

@@ -130,7 +130,7 @@ while EmuStatus=EsRuning do begin
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
     if f=239 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
+      main_z80.change_irq(HOLD_LINE);
       update_video_commando;
     end;
   end;
@@ -160,8 +160,8 @@ memoria[direccion]:=valor;
 case direccion of
    $c800:sound_command:=valor;
    $c804:begin
-            if (valor and $10)<>0 then snd_z80.pedir_reset:=ASSERT_LINE
-                    else snd_z80.pedir_reset:=CLEAR_LINE;
+            if (valor and $10)<>0 then snd_z80.change_reset(ASSERT_LINE)
+                    else snd_z80.change_reset(CLEAR_LINE);
             main_screen.flip_main_screen:=(valor and $80)<>0;
          end;
    $c808:scroll_y:=(scroll_y and $ff00) or valor;
@@ -201,7 +201,7 @@ end;
 
 procedure commando_snd_irq;
 begin
-  snd_z80.pedir_irq:=HOLD_LINE;
+  snd_z80.change_irq(HOLD_LINE);
 end;
 
 //Main
@@ -240,7 +240,6 @@ const
 begin
 iniciar_commando:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,512,512,false,true);
 screen_init(2,512,512);
 screen_mod_scroll(2,512,256,511,512,256,511);

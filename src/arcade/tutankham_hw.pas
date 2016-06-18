@@ -5,13 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,konami_snd,sound_engine;
 
-procedure Cargar_tutankham;
-procedure tutankham_principal;
-function iniciar_tutankham:boolean;
-procedure reset_tutankham;
-//Main CPU
-function tutankham_getbyte(direccion:word):byte;
-procedure tutankham_putbyte(direccion:word;valor:byte);
+procedure cargar_tutankham;
 
 implementation
 const
@@ -33,50 +27,6 @@ var
  rom_nbank,scroll_y:byte;
  rom_bank:array[0..$f,0..$fff] of byte;
  punt:array[0..$ffff] of word;
-
-procedure Cargar_tutankham;
-begin
-llamadas_maquina.iniciar:=iniciar_tutankham;
-llamadas_maquina.bucle_general:=tutankham_principal;
-llamadas_maquina.reset:=reset_tutankham;
-end;
-
-function iniciar_tutankham:boolean;
-var
-  f:byte;
-  memoria_temp:array[0..$efff] of byte;
-begin
-iniciar_tutankham:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,256,256);
-iniciar_video(224,256);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(tutankham_getbyte,tutankham_putbyte);
-//Sound Chip
-konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@tutan_rom[0],'tutankhm.zip',0)) then exit;
-copymemory(@memoria[$a000],@memoria_temp[0],$6000);
-for f:=0 to 8 do copymemory(@rom_bank[f,0],@memoria_temp[$6000+(f*$1000)],$1000);
-//Cargar roms sound
-if not(cargar_roms(@mem_snd[0],@tutan_sound[0],'tutankhm.zip',0)) then exit;
-//final
-reset_tutankham;
-iniciar_tutankham:=true;
-end;
-
-procedure reset_tutankham;
-begin
- main_m6809.reset;
- reset_audio;
- konamisnd_0.reset;
- marcade.in0:=$fF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- irq_enable:=false;
-end;
 
 procedure update_video_tutankham;inline;
 var
@@ -193,6 +143,51 @@ case direccion of
   $8600..$86ff:konamisnd_0.pedir_irq:=HOLD_LINE;
   $8700..$87ff:konamisnd_0.sound_latch:=valor;
 end;
+end;
+
+//Main
+procedure reset_tutankham;
+begin
+ main_m6809.reset;
+ reset_audio;
+ konamisnd_0.reset;
+ marcade.in0:=$fF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ irq_enable:=false;
+end;
+
+function iniciar_tutankham:boolean;
+var
+  f:byte;
+  memoria_temp:array[0..$efff] of byte;
+begin
+iniciar_tutankham:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,256,256);
+iniciar_video(224,256);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1536000,$100);
+main_m6809.change_ram_calls(tutankham_getbyte,tutankham_putbyte);
+//Sound Chip
+konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@tutan_rom[0],'tutankhm.zip',0)) then exit;
+copymemory(@memoria[$a000],@memoria_temp[0],$6000);
+for f:=0 to 8 do copymemory(@rom_bank[f,0],@memoria_temp[$6000+(f*$1000)],$1000);
+//Cargar roms sound
+if not(cargar_roms(@mem_snd[0],@tutan_sound[0],'tutankhm.zip',0)) then exit;
+//final
+reset_tutankham;
+iniciar_tutankham:=true;
+end;
+
+procedure Cargar_tutankham;
+begin
+llamadas_maquina.iniciar:=iniciar_tutankham;
+llamadas_maquina.bucle_general:=tutankham_principal;
+llamadas_maquina.reset:=reset_tutankham;
 end;
 
 end.

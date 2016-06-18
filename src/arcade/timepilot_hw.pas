@@ -5,13 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      konami_snd,sound_engine;
 
-procedure Cargar_timepilot;
-procedure timepilot_principal;
-function timepilot_iniciar:boolean;
-procedure timepilot_reset;
-//Main CPU
-function timepilot_getbyte(direccion:word):byte;
-procedure timepilot_putbyte(direccion:word;valor:byte);
+procedure cargar_timepilot;
 
 implementation
 const
@@ -29,98 +23,6 @@ const
 var
   scan_line,last:byte;
   nmi_enable:boolean;
-
-procedure Cargar_timepilot;
-begin
-llamadas_maquina.iniciar:=timepilot_iniciar;
-llamadas_maquina.bucle_general:=timepilot_principal;
-llamadas_maquina.reset:=timepilot_reset;
-end;
-
-function timepilot_iniciar:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3,8*8+0,8*8+1,8*8+2,8*8+3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3,
-			16*8+0,16*8+1,16*8+2,16*8+3,24*8+0,24*8+1,24*8+2,24*8+3);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-var
-        colores:tpaleta;
-        f:word;
-        bit0,bit1,bit2,bit3,bit4:byte;
-        memoria_temp:array[0..$3fff] of byte;
-begin
-timepilot_iniciar:=false;
-iniciar_audio(false);
-screen_init(1,256,256);
-screen_init(2,256,256,true);
-screen_mod_scroll(2,0,0,255,0,0,255);
-screen_init(3,256,256,false,true);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(3072000,256);
-main_z80.change_ram_calls(timepilot_getbyte,timepilot_putbyte);
-//Sound Chip
-konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,256);
-//Cargar las roms...
-if not(cargar_roms(@memoria[0],@timepilot_rom[0],'timeplt.zip',0)) then exit;
-//roms de sonido
-if not(cargar_roms(@mem_snd[0],@timepilot_sound,'timeplt.zip')) then exit;
-//cargar chars
-if not(cargar_roms(@memoria_temp[0],@timepilot_char,'timeplt.zip')) then exit;
-init_gfx(0,8,8,$200);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//cargar sprites
-if not(cargar_roms(@memoria_temp[0],@timepilot_sprt[0],'timeplt.zip',0)) then exit;
-init_gfx(1,16,16,$100);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(2,0,64*8,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//paleta de colores
-if not(cargar_roms(@memoria_temp[0],@timepilot_pal[0],'timeplt.zip',0)) then exit;
-for f:=0 to 31 do begin
-		bit0:= (memoria_temp[f+$20] shr 1) and $01;
-		bit1:= (memoria_temp[f+$20] shr 2) and $01;
-		bit2:= (memoria_temp[f+$20] shr 3) and $01;
-		bit3:= (memoria_temp[f+$20] shr 4) and $01;
-		bit4:= (memoria_temp[f+$20] shr 5) and $01;
-		colores[f].r:=$19*bit0+$24*bit1+$35*bit2+$40*bit3+$4d*bit4;
-		bit0:= (memoria_temp[f+$20] shr 6) and $01;
-		bit1:= (memoria_temp[f+$20] shr 7) and $01;
-		bit2:= (memoria_temp[f] shr 0) and $01;
-		bit3:= (memoria_temp[f] shr 1) and $01;
-		bit4:= (memoria_temp[f] shr 2) and $01;
-		colores[f].g:=$19*bit0+$24*bit1+$35*bit2+$40*bit3+$4d*bit4;
-		bit0:= (memoria_temp[f] shr 3) and $01;
-		bit1:= (memoria_temp[f] shr 4) and $01;
-		bit2:= (memoria_temp[f] shr 5) and $01;
-		bit3:= (memoria_temp[f] shr 6) and $01;
-		bit4:= (memoria_temp[f] shr 7) and $01;
-		colores[f].b:=$19*bit0+$24*bit1+$35*bit2+$40*bit3+$4d*bit4;
-end;
-set_pal(colores,$40);
-//CLUT Sprites
-for f:=0 to $ff do gfx[1].colores[f]:=memoria_temp[$40+f] and $f;
-//CLUT chars
-for f:=0 to $7f do gfx[0].colores[f]:=(memoria_temp[$140+f] and $f)+$10;
-//Final
-timepilot_reset;
-timepilot_iniciar:=true;
-end;
-
-procedure timepilot_reset;
-begin
-main_z80.reset;
-konamisnd_0.reset;
-reset_audio;
-nmi_enable:=false;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-end;
 
 procedure update_video_timepilot;
 var
@@ -238,6 +140,99 @@ case direccion of
                 end;
                end;
 end;
+end;
+
+//Main
+procedure timepilot_reset;
+begin
+main_z80.reset;
+konamisnd_0.reset;
+reset_audio;
+nmi_enable:=false;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$ff;
+end;
+
+function timepilot_iniciar:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3,8*8+0,8*8+1,8*8+2,8*8+3);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3,
+			16*8+0,16*8+1,16*8+2,16*8+3,24*8+0,24*8+1,24*8+2,24*8+3);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+var
+        colores:tpaleta;
+        f:word;
+        bit0,bit1,bit2,bit3,bit4:byte;
+        memoria_temp:array[0..$3fff] of byte;
+begin
+timepilot_iniciar:=false;
+iniciar_audio(false);
+screen_init(1,256,256);
+screen_init(2,256,256,true);
+screen_mod_scroll(2,0,0,255,0,0,255);
+screen_init(3,256,256,false,true);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(3072000,256);
+main_z80.change_ram_calls(timepilot_getbyte,timepilot_putbyte);
+//Sound Chip
+konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,256);
+//Cargar las roms...
+if not(cargar_roms(@memoria[0],@timepilot_rom[0],'timeplt.zip',0)) then exit;
+//roms de sonido
+if not(cargar_roms(@mem_snd[0],@timepilot_sound,'timeplt.zip')) then exit;
+//cargar chars
+if not(cargar_roms(@memoria_temp[0],@timepilot_char,'timeplt.zip')) then exit;
+init_gfx(0,8,8,$200);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//cargar sprites
+if not(cargar_roms(@memoria_temp[0],@timepilot_sprt[0],'timeplt.zip',0)) then exit;
+init_gfx(1,16,16,$100);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(2,0,64*8,4,0);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//paleta de colores
+if not(cargar_roms(@memoria_temp[0],@timepilot_pal[0],'timeplt.zip',0)) then exit;
+for f:=0 to 31 do begin
+		bit0:= (memoria_temp[f+$20] shr 1) and $01;
+		bit1:= (memoria_temp[f+$20] shr 2) and $01;
+		bit2:= (memoria_temp[f+$20] shr 3) and $01;
+		bit3:= (memoria_temp[f+$20] shr 4) and $01;
+		bit4:= (memoria_temp[f+$20] shr 5) and $01;
+		colores[f].r:=$19*bit0+$24*bit1+$35*bit2+$40*bit3+$4d*bit4;
+		bit0:= (memoria_temp[f+$20] shr 6) and $01;
+		bit1:= (memoria_temp[f+$20] shr 7) and $01;
+		bit2:= (memoria_temp[f] shr 0) and $01;
+		bit3:= (memoria_temp[f] shr 1) and $01;
+		bit4:= (memoria_temp[f] shr 2) and $01;
+		colores[f].g:=$19*bit0+$24*bit1+$35*bit2+$40*bit3+$4d*bit4;
+		bit0:= (memoria_temp[f] shr 3) and $01;
+		bit1:= (memoria_temp[f] shr 4) and $01;
+		bit2:= (memoria_temp[f] shr 5) and $01;
+		bit3:= (memoria_temp[f] shr 6) and $01;
+		bit4:= (memoria_temp[f] shr 7) and $01;
+		colores[f].b:=$19*bit0+$24*bit1+$35*bit2+$40*bit3+$4d*bit4;
+end;
+set_pal(colores,$40);
+//CLUT Sprites
+for f:=0 to $ff do gfx[1].colores[f]:=memoria_temp[$40+f] and $f;
+//CLUT chars
+for f:=0 to $7f do gfx[0].colores[f]:=(memoria_temp[$140+f] and $f)+$10;
+//Final
+timepilot_reset;
+timepilot_iniciar:=true;
+end;
+
+procedure Cargar_timepilot;
+begin
+llamadas_maquina.iniciar:=timepilot_iniciar;
+llamadas_maquina.bucle_general:=timepilot_principal;
+llamadas_maquina.reset:=timepilot_reset;
 end;
 
 end.

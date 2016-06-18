@@ -2,7 +2,7 @@ unit M6502;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,sysutils,timer_engine;
+     main_engine,dialogs,sysutils,timer_engine,cpu_misc;
 
 type
         band_m6502=record
@@ -25,13 +25,9 @@ type
             procedure run(maximo:single);
             procedure change_io_calls(in_port0,in_port1:cpu_inport_call);
             function get_internal_r:preg_m6502;
-            procedure change_nmi(estado:byte);
-            procedure change_irq(estado:byte);
           private
             //Internal Regs
             r:preg_m6502;
-            //IRQ
-            pedir_nmi,nmi_state,pedir_irq:byte;
             //RAM calls/IO Calls
             in_port0,in_port1:cpu_inport_call;
             read_dummy:boolean;
@@ -180,23 +176,9 @@ r.p.int:=true;
 r.p.z:=false;
 r.p.c:=false;
 self.after_ei:=false;
-self.pedir_nmi:=CLEAR_LINE;
-self.pedir_irq:=CLEAR_LINE;
-self.nmi_state:=CLEAR_LINE;
-self.pedir_reset:=CLEAR_LINE;
-end;
-
-procedure cpu_m6502.change_nmi(estado:byte);
-begin
-if estado=CLEAR_LINE then begin
-  self.pedir_nmi:=CLEAR_LINE;
-  self.nmi_state:=CLEAR_LINE;
-end else self.pedir_nmi:=estado;
-end;
-
-procedure cpu_m6502.change_irq(estado:byte);
-begin
-  self.pedir_irq:=estado;
+self.change_nmi(CLEAR_LINE);
+self.change_irq(CLEAR_LINE);
+self.change_reset(CLEAR_LINE);
 end;
 
 function cpu_m6502.call_nmi:byte;
@@ -301,10 +283,11 @@ end;
 procedure cpu_m6502.run(maximo:single);
 var
     instruccion,numero,tempb,carry:byte;
-    tempw,posicion:word;
+    tempw,posicion,old_contador:word;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
+old_contador:=self.contador;
 if self.pedir_reset<>CLEAR_LINE then begin
   tempb:=self.pedir_reset;
   self.reset;
@@ -853,7 +836,7 @@ case instruccion of
 end; //del case!!
 tempw:=estados_t[self.tipo_cpu and $1,instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
-update_timer(tempw,self.numero_cpu);
+update_timer(self.contador-old_contador,self.numero_cpu);
 end; //del while!!
 end;
 

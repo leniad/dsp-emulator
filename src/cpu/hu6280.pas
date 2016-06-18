@@ -2,7 +2,7 @@ unit hu6280;
 
 interface
 uses  {$IFDEF WINDOWS}windows,{$ENDIF}
-      main_engine,dialogs,sysutils,timer_engine,vars_hide;
+      main_engine,dialogs,sysutils,timer_engine,vars_hide,cpu_misc;
 
 type
         band_h6280=record
@@ -32,7 +32,6 @@ type
             clocks_per_cycle:byte;
             timer_status:byte;
             timer_load,timer_value:integer;
-            pedir_nmi,nmi_state:byte;
             irq_pending:byte;
             irq_state:array[0..2] of byte;
             io_buffer,irq_mask:byte;
@@ -163,17 +162,17 @@ begin
   r.sp:=$ff;
   // read the reset vector into PC */
   r.pc:=self.getbyte(self.translated($FFFE))+(self.getbyte(self.translated($FFFF)) shl 8);
-	// CPU starts in low speed mode */
+  // CPU starts in low speed mode */
   self.clocks_per_cycle:=4;
-	// timer off by default */
-	self.timer_status:=0;
-	self.timer_load:=128*1024;
+  // timer off by default */
+  self.timer_status:=0;
+  self.timer_load:=128*1024;
   // clear pending interrupts */
-	self.irq_state[0]:=CLEAR_LINE;
+  self.irq_state[0]:=CLEAR_LINE;
   self.irq_state[1]:=CLEAR_LINE;
   self.irq_state[2]:=CLEAR_LINE;
-	self.nmi_state:=CLEAR_LINE;
-	self.irq_pending:=0;
+  self.nmi_state:=CLEAR_LINE;
+  self.irq_pending:=0;
 end;
 
 procedure cpu_h6280.pon_pila(temp:byte);

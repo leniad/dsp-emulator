@@ -5,14 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      pal_engine,sound_engine;
 
-procedure Cargar_mrdo;
-procedure mrdo_principal;
-function iniciar_mrdo:boolean;
-procedure reset_mrdo;
-//Main CPU
-function mrdo_getbyte(direccion:word):byte;
-procedure mrdo_putbyte(direccion:word;valor:byte);
-procedure mrdo_despues_instruccion;
+procedure cargar_mrdo;
 
 implementation
 const
@@ -30,134 +23,6 @@ const
         (n:'h5-05.bin';l:$1000;p:0;crc:$e1218cc5),(n:'k5-06.bin';l:$1000;p:$1000;crc:$b1f68b04),());
 var
   scroll_x,scroll_y:byte;
-
-procedure Cargar_mrdo;
-begin
-llamadas_maquina.iniciar:=iniciar_mrdo;
-llamadas_maquina.bucle_general:=mrdo_principal;
-llamadas_maquina.reset:=reset_mrdo;
-llamadas_maquina.fps_max:=59.94323742;
-end;
-
-function iniciar_mrdo:boolean;
-var
-      memoria_temp:array[0..$1fff] of byte;
-const
-      pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      ps_x:array[0..15] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0,
-			16+3, 16+2, 16+1, 16+0, 24+3, 24+2, 24+1, 24+0);
-      ps_y:array[0..15] of dword=(0*16, 2*16, 4*16, 6*16, 8*16, 10*16, 12*16, 14*16,
-			16*16, 18*16, 20*16, 22*16, 24*16, 26*16, 28*16, 30*16);
-procedure calc_paleta;
-var
-  pot:array[0..15] of single;
-	weight:array[0..15] of byte;
-  par:single;
-  f:byte;
-  a1,a2,bits0,bits1:byte;
-  colores:tpaleta;
-const
-  R1=150;
-	R2=120;
-	R3=100;
-	R4=75;
-	pull=220;
-	potadjust=0.7;	// diode voltage drop */
-begin
-	for f:=$0f downto 0 do begin
-		par:=0;
-		if (f and 1)<>0 then par:=par+(1.0/R1);
-		if (f and 2)<>0 then par:=par+(1.0/R2);
-		if (f and 4)<>0 then par:=par+(1.0/R3);
-		if (f and 8)<>0 then par:=par+(1.0/R4);
-		if (par<>0) then begin
-			par:=1/par;
-			pot[f]:=pull/(pull+par)-potadjust;
-		end	else pot[f]:=0;
-		weight[f]:=trunc($ff*pot[f]/pot[$0f]);
-	end;
-  for f:=0 to $ff do begin
-		a1:=((f shr 3) and $1c)+(f and $03)+$20;
-		a2:=((f shr 0) and $1c)+(f and $03);
-		bits0:=(memoria_temp[a1] shr 0) and $03;
-		bits1:=(memoria_temp[a2] shr 0) and $03;
-		colores[f].r:=weight[bits0 + (bits1 shl 2)];
-    bits0:=(memoria_temp[a1] shr 2) and $03;
-		bits1:=(memoria_temp[a2] shr 2) and $03;
-		colores[f].g:=weight[bits0 + (bits1 shl 2)];
-    bits0:=(memoria_temp[a1] shr 4) and $03;
-		bits1:=(memoria_temp[a2] shr 4) and $03;
-		colores[f].b:=weight[bits0 + (bits1 shl 2)];
-  end;
-  set_pal(colores,$100);
-  //CLUT sprites
-  for f:=0 to $3f do begin
-		bits0:=memoria_temp[($40+(f and $1f))];
-		if (f and $20)<>0 then bits0:=bits0 shr 4		// high 4 bits are for sprite color n + 8 */
-  		else bits0:=bits0 and $0f;	// low 4 bits are for sprite color n */
-    gfx[2].colores[f]:=bits0+((bits0 and $0c) shl 3);
-	end;
-end;
-begin
-iniciar_mrdo:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
-screen_init(2,256,256,true);
-screen_init(3,256,256,false,true);
-screen_init(4,256,256,true);
-screen_mod_scroll(4,256,256,255,256,256,255);
-screen_init(5,256,256,true);
-iniciar_video(192,240);
-//Main CPU
-main_z80:=cpu_z80.create(4100000,262);
-main_z80.change_ram_calls(mrdo_getbyte,mrdo_putbyte);
-main_z80.init_sound(mrdo_despues_instruccion);
-//Sound Chips
-sn_76496_0:=sn76496_chip.Create(4100000);
-sn_76496_1:=sn76496_chip.Create(4100000);
-//cargar roms
-if not(cargar_roms(@memoria[0],@mrdo_rom[0],'mrdo.zip',0)) then exit;
-//convertir chars fg
-if not(cargar_roms(@memoria_temp[0],@mrdo_char1[0],'mrdo.zip',0)) then exit;
-init_gfx(0,8,8,512);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(2,0,8*8,0,512*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//convertir chars bg
-if not(cargar_roms(@memoria_temp[0],@mrdo_char2[0],'mrdo.zip',0)) then exit;
-init_gfx(1,8,8,512);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(2,0,8*8,0,512*8*8);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-//convertir sprites
-if not(cargar_roms(@memoria_temp[0],@mrdo_sprites[0],'mrdo.zip',0)) then exit;
-init_gfx(2,16,16,128);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(2,0,64*8,4,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-//poner la paleta
-if not(cargar_roms(@memoria_temp[0],@mrdo_pal[0],'mrdo.zip',0)) then exit;
-calc_paleta;
-//final
-reset_mrdo;
-iniciar_mrdo:=true;
-end;
-
-procedure reset_mrdo;
-begin
- main_z80.reset;
- sn_76496_0.reset;
- sn_76496_1.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- scroll_x:=0;
- scroll_y:=0;
-end;
 
 procedure update_video_mrdo;inline;
 var
@@ -244,7 +109,7 @@ while EmuStatus=EsRuning do begin
       main_z80.run(frame_m);
       frame_m:=frame_m+main_z80.tframes-main_z80.contador;
       if f=223 then begin
-          main_z80.pedir_irq:=HOLD_LINE;
+          main_z80.change_irq(HOLD_LINE);
           update_video_mrdo;
       end;
   end;
@@ -258,6 +123,7 @@ var
   main_z80_reg:npreg_z80;
 begin
 case direccion of
+  0..$8fff,$e000..$efff:mrdo_getbyte:=memoria[direccion];
   $9803:begin
           main_z80_reg:=main_z80.get_internal_r;
           mrdo_getbyte:=memoria[main_z80_reg.hl.w];
@@ -266,22 +132,27 @@ case direccion of
   $a001:mrdo_getbyte:=marcade.in1;
   $a002:mrdo_getbyte:=$df;
   $a003:mrdo_getbyte:=$ff;
-  else mrdo_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure mrdo_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $8000..$87ff:gfx[1].buffer[direccion and $3ff]:=true;
-        $8800..$8fff:gfx[0].buffer[direccion and $3ff]:=true;
-        $9800:main_screen.flip_main_screen:=(valor and 1)<>0;
-        $9801:sn_76496_0.Write(valor);
-        $9802:sn_76496_1.Write(valor);
-        $f000..$f7ff:scroll_y:=valor;
-        $f800..$ffff:scroll_x:=valor;
+   $8000..$87ff:begin
+                     gfx[1].buffer[direccion and $3ff]:=true;
+                     memoria[direccion]:=valor;
+                end;
+   $8800..$8fff:begin
+                     gfx[0].buffer[direccion and $3ff]:=true;
+                     memoria[direccion]:=valor;
+                end;
+   $9000..$90ff,$e000..$efff:memoria[direccion]:=valor;
+   $9800:main_screen.flip_main_screen:=(valor and 1)<>0;
+   $9801:sn_76496_0.Write(valor);
+   $9802:sn_76496_1.Write(valor);
+   $f000..$f7ff:scroll_y:=valor;
+   $f800..$ffff:scroll_x:=valor;
 end;
 end;
 
@@ -289,6 +160,134 @@ procedure mrdo_despues_instruccion;
 begin
   sn_76496_0.Update;
   sn_76496_1.Update;
+end;
+
+//Main
+procedure reset_mrdo;
+begin
+ main_z80.reset;
+ sn_76496_0.reset;
+ sn_76496_1.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ scroll_x:=0;
+ scroll_y:=0;
+end;
+
+function iniciar_mrdo:boolean;
+var
+      memoria_temp:array[0..$1fff] of byte;
+const
+      pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
+      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+      ps_x:array[0..15] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0,
+			16+3, 16+2, 16+1, 16+0, 24+3, 24+2, 24+1, 24+0);
+      ps_y:array[0..15] of dword=(0*16, 2*16, 4*16, 6*16, 8*16, 10*16, 12*16, 14*16,
+			16*16, 18*16, 20*16, 22*16, 24*16, 26*16, 28*16, 30*16);
+procedure calc_paleta;
+var
+  pot:array[0..15] of single;
+	weight:array[0..15] of byte;
+  par:single;
+  f:byte;
+  a1,a2,bits0,bits1:byte;
+  colores:tpaleta;
+const
+  R1=150;
+	R2=120;
+	R3=100;
+	R4=75;
+	pull=220;
+	potadjust=0.7;	// diode voltage drop */
+begin
+	for f:=$0f downto 0 do begin
+		par:=0;
+		if (f and 1)<>0 then par:=par+(1.0/R1);
+		if (f and 2)<>0 then par:=par+(1.0/R2);
+		if (f and 4)<>0 then par:=par+(1.0/R3);
+		if (f and 8)<>0 then par:=par+(1.0/R4);
+		if (par<>0) then begin
+			par:=1/par;
+			pot[f]:=pull/(pull+par)-potadjust;
+		end	else pot[f]:=0;
+		weight[f]:=trunc($ff*pot[f]/pot[$0f]);
+	end;
+  for f:=0 to $ff do begin
+		a1:=((f shr 3) and $1c)+(f and $03)+$20;
+		a2:=((f shr 0) and $1c)+(f and $03);
+		bits0:=(memoria_temp[a1] shr 0) and $03;
+		bits1:=(memoria_temp[a2] shr 0) and $03;
+		colores[f].r:=weight[bits0 + (bits1 shl 2)];
+    bits0:=(memoria_temp[a1] shr 2) and $03;
+		bits1:=(memoria_temp[a2] shr 2) and $03;
+		colores[f].g:=weight[bits0 + (bits1 shl 2)];
+    bits0:=(memoria_temp[a1] shr 4) and $03;
+		bits1:=(memoria_temp[a2] shr 4) and $03;
+		colores[f].b:=weight[bits0 + (bits1 shl 2)];
+  end;
+  set_pal(colores,$100);
+  //CLUT sprites
+  for f:=0 to $3f do begin
+		bits0:=memoria_temp[($40+(f and $1f))];
+		if (f and $20)<>0 then bits0:=bits0 shr 4		// high 4 bits are for sprite color n + 8 */
+  		else bits0:=bits0 and $0f;	// low 4 bits are for sprite color n */
+    gfx[2].colores[f]:=bits0+((bits0 and $0c) shl 3);
+	end;
+end;
+begin
+iniciar_mrdo:=false;
+iniciar_audio(false);
+screen_init(1,256,256,true);
+screen_mod_scroll(1,256,256,255,256,256,255);
+screen_init(2,256,256,true);
+screen_init(3,256,256,false,true);
+screen_init(4,256,256,true);
+screen_mod_scroll(4,256,256,255,256,256,255);
+screen_init(5,256,256,true);
+iniciar_video(192,240);
+//Main CPU
+main_z80:=cpu_z80.create(4100000,262);
+main_z80.change_ram_calls(mrdo_getbyte,mrdo_putbyte);
+main_z80.init_sound(mrdo_despues_instruccion);
+//Sound Chips
+sn_76496_0:=sn76496_chip.Create(4100000);
+sn_76496_1:=sn76496_chip.Create(4100000);
+//cargar roms
+if not(cargar_roms(@memoria[0],@mrdo_rom[0],'mrdo.zip',0)) then exit;
+//convertir chars fg
+if not(cargar_roms(@memoria_temp[0],@mrdo_char1[0],'mrdo.zip',0)) then exit;
+init_gfx(0,8,8,512);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(2,0,8*8,0,512*8*8);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//convertir chars bg
+if not(cargar_roms(@memoria_temp[0],@mrdo_char2[0],'mrdo.zip',0)) then exit;
+init_gfx(1,8,8,512);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(2,0,8*8,0,512*8*8);
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+//convertir sprites
+if not(cargar_roms(@memoria_temp[0],@mrdo_sprites[0],'mrdo.zip',0)) then exit;
+init_gfx(2,16,16,128);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(2,0,64*8,4,0);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+//poner la paleta
+if not(cargar_roms(@memoria_temp[0],@mrdo_pal[0],'mrdo.zip',0)) then exit;
+calc_paleta;
+//final
+reset_mrdo;
+iniciar_mrdo:=true;
+end;
+
+procedure Cargar_mrdo;
+begin
+llamadas_maquina.iniciar:=iniciar_mrdo;
+llamadas_maquina.bucle_general:=mrdo_principal;
+llamadas_maquina.reset:=reset_mrdo;
+llamadas_maquina.fps_max:=59.94323742;
 end;
 
 end.

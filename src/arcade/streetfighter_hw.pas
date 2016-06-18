@@ -5,23 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,timer_engine,msm5205;
 
-procedure Cargar_sfighter;
-procedure sfighter_principal;
-function iniciar_sfighter:boolean;
-procedure reset_sfighter;
-//Main CPU
-function sfighter_getword(direccion:dword):word;
-procedure sfighter_putword(direccion:dword;valor:word);
-//Sound CPUs
-function sf_snd_getbyte(direccion:word):byte;
-procedure sf_snd_putbyte(direccion:word;valor:byte);
-function sf_misc_getbyte(direccion:word):byte;
-procedure sf_misc_putbyte(direccion:word;valor:byte);
-function sf_misc_inbyte(puerto:word):byte;
-procedure sf_misc_outbyte(valor:byte;puerto:word);
-procedure sf_adpcm_instruccion;
-procedure ym2151_snd_irq(irqstate:byte);
-procedure sound_instruccion;
+procedure cargar_sfighter;
 
 implementation
 const
@@ -64,120 +48,6 @@ var
  bg_paint,fg_paint,bg_act,fg_act,char_act,sp_act:boolean;
  ram_tile_map1,ram_tile_map2:array[0..$1ffff] of byte;
  soundlatch,misc_bank:byte;
-
-procedure Cargar_sfighter;
-begin
-llamadas_maquina.iniciar:=iniciar_sfighter;
-llamadas_maquina.bucle_general:=sfighter_principal;
-llamadas_maquina.reset:=reset_sfighter;
-end;
-
-function iniciar_sfighter:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
-			16*16+0, 16*16+1, 16*16+2, 16*16+3, 16*16+8+0, 16*16+8+1, 16*16+8+2, 16*16+8+3);
-  ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-var
-  memoria_temp,ptemp:pbyte;
-  f:byte;
-begin
-iniciar_sfighter:=false;
-iniciar_audio(true);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,512,false,true);
-screen_init(2,512,256,true);
-screen_init(3,512,256);
-screen_init(4,512,256,true);
-iniciar_video(384,224);
-//Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(sfighter_getword,sfighter_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(sf_snd_getbyte,sf_snd_putbyte);
-snd_z80.init_sound(sound_instruccion);
-//Sub CPU
-sub_z80:=cpu_z80.create(3579545,256);
-sub_z80.change_ram_calls(sf_misc_getbyte,sf_misc_putbyte);
-sub_z80.change_io_calls(sf_misc_inbyte,sf_misc_outbyte);
-init_timer(sub_z80.numero_cpu,3579545/8000,sf_adpcm_instruccion,true);
-//Sound Chips
-ym2151_0:=ym2151_chip.create(3579545);
-ym2151_0.change_irq_func(ym2151_snd_irq);
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
-msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@sfighter_rom[0],'sf.zip',0)) then exit;
-//Sound CPUs
-if not(cargar_roms(@mem_snd[0],@sfighter_snd,'sf.zip',1)) then exit;
-getmem(memoria_temp,$200000);
-if not(cargar_roms(memoria_temp,@sfighter_msm,'sf.zip',0)) then exit;
-ptemp:=memoria_temp;
-for f:=0 to 7 do begin
-  copymemory(@rom_misc[f,0],ptemp,$8000);
-  inc(ptemp,$8000);
-end;
-//convertir chars
-if not(cargar_roms(memoria_temp,@sfighter_char,'sf.zip',1)) then exit;
-init_gfx(0,8,8,$400);
-gfx[0].trans[3]:=true;
-gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
-//convertir bg y cargar tile maps
-if not(cargar_roms(memoria_temp,@sfighter_bg[0],'sf.zip',0)) then exit;
-if not(cargar_roms(@ram_tile_map1[0],@sfighter_tile_map1[0],'sf.zip',0)) then exit;
-init_gfx(1,16,16,$1000);
-gfx_set_desc_data(4,0,64*8,4,0,$40000*8+4,$40000*8+0);
-convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//convertir fg y cargar tile maps
-if not(cargar_roms(memoria_temp,@sfighter_fg[0],'sf.zip',0)) then exit;
-if not(cargar_roms(@ram_tile_map2[0],@sfighter_tile_map2[0],'sf.zip',0)) then exit;
-init_gfx(2,16,16,$2000);
-gfx[2].trans[15]:=true;
-gfx_set_desc_data(4,0,64*8,4,0,$80000*8+4,$80000*8+0);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//sprites
-if not(cargar_roms(memoria_temp,@sfighter_sprites[0],'sf.zip',0)) then exit;
-init_gfx(3,16,16,$4000);
-gfx[3].trans[15]:=true;
-gfx_set_desc_data(4,0,64*8,4,0,$e0000*8+4,$e0000*8+0);
-convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-//final
-freemem(memoria_temp);
-reset_sfighter;
-iniciar_sfighter:=true;
-end;
-
-procedure reset_sfighter;
-begin
- main_m68000.reset;
- snd_z80.reset;
- sub_z80.reset;
- ym2151_0.reset;
- msm_5205_0.reset;
- msm_5205_1.reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in7:=$ff;
- marcade.in2:=$7f;
- marcade.in3:=0;
- marcade.in4:=0;
- marcade.in5:=0;
- marcade.in6:=0;
- scroll_bg:=0;
- scroll_fg:=0;
- bg_paint:=false;
- fg_paint:=false;
- bg_act:=false;
- fg_act:=false;
- char_act:=false;
- sp_act:=false;
- misc_bank:=1;
-end;
 
 procedure update_video_sfighter;
 var
@@ -476,8 +346,7 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.change_irq(irqstate);
 end;
 
 procedure sound_instruccion;
@@ -487,7 +356,121 @@ end;
 
 procedure sf_adpcm_instruccion;
 begin
-  sub_z80.pedir_irq:=HOLD_LINE;
+  sub_z80.change_irq(HOLD_LINE);
+end;
+
+//Main
+procedure reset_sfighter;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ sub_z80.reset;
+ ym2151_0.reset;
+ msm_5205_0.reset;
+ msm_5205_1.reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in7:=$ff;
+ marcade.in2:=$7f;
+ marcade.in3:=0;
+ marcade.in4:=0;
+ marcade.in5:=0;
+ marcade.in6:=0;
+ scroll_bg:=0;
+ scroll_fg:=0;
+ bg_paint:=false;
+ fg_paint:=false;
+ bg_act:=false;
+ fg_act:=false;
+ char_act:=false;
+ sp_act:=false;
+ misc_bank:=1;
+end;
+
+function iniciar_sfighter:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
+  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
+			16*16+0, 16*16+1, 16*16+2, 16*16+3, 16*16+8+0, 16*16+8+1, 16*16+8+2, 16*16+8+3);
+  ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+var
+  memoria_temp,ptemp:pbyte;
+  f:byte;
+begin
+iniciar_sfighter:=false;
+iniciar_audio(true);
+screen_init(1,512,512,false,true);
+screen_init(2,512,256,true);
+screen_init(3,512,256);
+screen_init(4,512,256,true);
+iniciar_video(384,224);
+//Main CPU
+main_m68000:=cpu_m68000.create(8000000,256);
+main_m68000.change_ram16_calls(sfighter_getword,sfighter_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(sf_snd_getbyte,sf_snd_putbyte);
+snd_z80.init_sound(sound_instruccion);
+//Sub CPU
+sub_z80:=cpu_z80.create(3579545,256);
+sub_z80.change_ram_calls(sf_misc_getbyte,sf_misc_putbyte);
+sub_z80.change_io_calls(sf_misc_inbyte,sf_misc_outbyte);
+init_timer(sub_z80.numero_cpu,3579545/8000,sf_adpcm_instruccion,true);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+ym2151_0.change_irq_func(ym2151_snd_irq);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
+msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@sfighter_rom[0],'sf.zip',0)) then exit;
+//Sound CPUs
+if not(cargar_roms(@mem_snd[0],@sfighter_snd,'sf.zip',1)) then exit;
+getmem(memoria_temp,$200000);
+if not(cargar_roms(memoria_temp,@sfighter_msm,'sf.zip',0)) then exit;
+ptemp:=memoria_temp;
+for f:=0 to 7 do begin
+  copymemory(@rom_misc[f,0],ptemp,$8000);
+  inc(ptemp,$8000);
+end;
+//convertir chars
+if not(cargar_roms(memoria_temp,@sfighter_char,'sf.zip',1)) then exit;
+init_gfx(0,8,8,$400);
+gfx[0].trans[3]:=true;
+gfx_set_desc_data(2,0,16*8,4,0);
+convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+//convertir bg y cargar tile maps
+if not(cargar_roms(memoria_temp,@sfighter_bg[0],'sf.zip',0)) then exit;
+if not(cargar_roms(@ram_tile_map1[0],@sfighter_tile_map1[0],'sf.zip',0)) then exit;
+init_gfx(1,16,16,$1000);
+gfx_set_desc_data(4,0,64*8,4,0,$40000*8+4,$40000*8+0);
+convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//convertir fg y cargar tile maps
+if not(cargar_roms(memoria_temp,@sfighter_fg[0],'sf.zip',0)) then exit;
+if not(cargar_roms(@ram_tile_map2[0],@sfighter_tile_map2[0],'sf.zip',0)) then exit;
+init_gfx(2,16,16,$2000);
+gfx[2].trans[15]:=true;
+gfx_set_desc_data(4,0,64*8,4,0,$80000*8+4,$80000*8+0);
+convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//sprites
+if not(cargar_roms(memoria_temp,@sfighter_sprites[0],'sf.zip',0)) then exit;
+init_gfx(3,16,16,$4000);
+gfx[3].trans[15]:=true;
+gfx_set_desc_data(4,0,64*8,4,0,$e0000*8+4,$e0000*8+0);
+convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//final
+freemem(memoria_temp);
+reset_sfighter;
+iniciar_sfighter:=true;
+end;
+
+procedure Cargar_sfighter;
+begin
+llamadas_maquina.iniciar:=iniciar_sfighter;
+llamadas_maquina.bucle_general:=sfighter_principal;
+llamadas_maquina.reset:=reset_sfighter;
 end;
 
 end.

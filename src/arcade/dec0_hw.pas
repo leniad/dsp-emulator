@@ -6,26 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      pal_engine,ym_2203,ym_3812,oki6295,m6502,sound_engine,hu6280,misc_functions,
      deco_bac06;
 
-procedure Cargar_dec0;
-function iniciar_dec0:boolean;
-procedure reset_dec0;
-procedure cerrar_dec0;
-procedure dec0_h6280_principal;
-procedure dec0_principal;
-//Main CPU
-function dec0_getword(direccion:dword):word;
-procedure dec0_putword(direccion:dword;valor:word);
-//Sound CPU
-function dec0_snd_getbyte(direccion:word):byte;
-procedure dec0_snd_putbyte(direccion:word;valor:byte);
-procedure dec0_sound_update;
-procedure snd_irq(irqstate:byte);
-//Robocop
-function robocop_mcu_getbyte(direccion:dword):byte;
-procedure robocop_mcu_putbyte(direccion:dword;valor:byte);
-//Hippodrome
-function hippo_mcu_getbyte(direccion:dword):byte;
-procedure hippo_mcu_putbyte(direccion:dword;valor:byte);
+procedure cargar_dec0;
 
 implementation
 const
@@ -107,20 +88,6 @@ var
  //8751
  i8751_return:word;
 
-
-procedure Cargar_dec0;
-begin
-case main_vars.tipo_maquina of
-  156,158:llamadas_maquina.bucle_general:=dec0_h6280_principal;
-  157:llamadas_maquina.bucle_general:=dec0_principal;
-end;
-llamadas_maquina.iniciar:=iniciar_dec0;
-llamadas_maquina.cerrar:=cerrar_dec0;
-llamadas_maquina.reset:=reset_dec0;
-llamadas_maquina.fps_max:=57.392103;
-end;
-
-//Video Part
 procedure update_video_robocop;
 var
   trans:byte;
@@ -198,180 +165,6 @@ sprites_deco_bac06($00,$00,3,4);
 update_pf(1,0,true,false);
 show_pf(1,4);
 actualiza_trozo_final(0,8,256,240,4);
-end;
-
-//Inicio Normal
-function iniciar_dec0:boolean;
-const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
-			0, 1, 2, 3, 4, 5, 6, 7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
-var
-  memoria_temp:array[0..$7ffff] of byte;
-  f:word;
-
-procedure convert_chars(ch_num:word);
-begin
-init_gfx(0,8,8,ch_num);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,8*8,0,ch_num*8*8*2,ch_num*8*8*1,ch_num*8*8*3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-end;
-
-procedure convert_tiles(num_gfx:byte;tl_num:word);
-begin
-init_gfx(num_gfx,16,16,tl_num);
-gfx[num_gfx].trans[0]:=true;
-gfx_set_desc_data(4,0,16*16,tl_num*16*16*1,tl_num*16*16*3,tl_num*16*16*0,tl_num*16*16*2);
-convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-end;
-
-begin
-iniciar_dec0:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,1024,1024,true);
-screen_mod_scroll(1,1024,256,1023,1024,256,1023);
-screen_init(2,1024,1024,true);
-screen_mod_scroll(2,1024,256,1023,1024,256,1023);
-screen_init(3,1024,1024,true);
-screen_mod_scroll(3,1024,256,1023,1024,256,1023);
-screen_init(4,512,512,false,true);
-//Pantallas de prioridades
-screen_init(5,1024,1024,true);
-screen_init(6,1024,1024,true);
-iniciar_video(256,240);
-sprite_bac06_color:=$100;
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,264);
-main_m68000.change_ram16_calls(dec0_getword,dec0_putword);
-//Sound CPU
-snd_m6502:=cpu_m6502.create(1500000,264,TCPU_M6502);
-snd_m6502.change_ram_calls(dec0_snd_getbyte,dec0_snd_putbyte);
-snd_m6502.init_sound(dec0_sound_update);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-ym3812_0.change_irq_calls(snd_irq);
-ym2203_0:=ym2203_chip.create(1500000);
-oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH);
-case main_vars.tipo_maquina of
-  156:begin  //Robocop
-        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$fff,$7ff,$3ff,1,1,1);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@robocop_rom[0],'robocop.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@robocop_sound,'robocop.zip',1)) then exit;
-        //MCU
-        main_h6280:=cpu_h6280.create(21477200 div 16,264);
-        main_h6280.change_ram_calls(robocop_mcu_getbyte,robocop_mcu_putbyte);
-        if not(cargar_roms(@robocop_mcu_rom[0],@robocop_mcu,'robocop.zip',1)) then exit;
-        //OKI rom
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@robocop_oki,'robocop.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@robocop_char,'robocop.zip',0)) then exit;
-        convert_chars($1000);
-        //tiles 1
-        if not(cargar_roms(@memoria_temp[0],@robocop_tiles1,'robocop.zip',0)) then exit;
-        convert_tiles(1,$800);
-        //tiles 2
-        if not(cargar_roms(@memoria_temp[0],@robocop_tiles2,'robocop.zip',0)) then exit;
-        convert_tiles(2,$400);
-        //sprites
-        if not(cargar_roms(@memoria_temp[0],@robocop_sprites,'robocop.zip',0)) then exit;
-        convert_tiles(3,$1000);
-        proc_update_video:=update_video_robocop;
-        dip_b:=$7f;
-      end;
-  157:begin //Baddudes
-        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$7ff,$7ff,$3ff,1,1,1);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@baddudes_rom[0],'baddudes.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@baddudes_sound,'baddudes.zip',1)) then exit;
-        //OKI rom
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@baddudes_oki,'baddudes.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@baddudes_char,'baddudes.zip',0)) then exit;
-        convert_chars($800);
-        //tiles 1
-        if not(cargar_roms(@memoria_temp[0],@baddudes_tiles1,'baddudes.zip',0)) then exit;
-        convert_tiles(1,$800);
-        //tiles 2, ordenar
-        if not(cargar_roms(@memoria_temp[0],@baddudes_tiles2,'baddudes.zip',0)) then exit;
-        copymemory(@memoria_temp[$8000],@memoria_temp[$20000],$8000);
-        copymemory(@memoria_temp[$0],@memoria_temp[$28000],$8000);
-        copymemory(@memoria_temp[$18000],@memoria_temp[$30000],$8000);
-        copymemory(@memoria_temp[$10000],@memoria_temp[$38000],$8000);
-        convert_tiles(2,$400);
-        //sprites
-        if not(cargar_roms(@memoria_temp[0],@baddudes_sprites,'baddudes.zip',0)) then exit;
-        convert_tiles(3,$1000);
-        proc_update_video:=update_video_baddudes;
-        dip_b:=$ff;
-      end;
-  158:begin  //Hippodrome
-        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$fff,$3ff,$3ff,1,1,1);
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@hippo_rom[0],'hippodrm.zip',0)) then exit;
-        //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@hippo_sound,'hippodrm.zip',1)) then exit;
-        //MCU+decrypt
-        main_h6280:=cpu_h6280.create(21477200 div 16,264);
-        main_h6280.change_ram_calls(hippo_mcu_getbyte,hippo_mcu_putbyte);
-        if not(cargar_roms(@hippo_mcu_rom[0],@hippo_mcu,'hippodrm.zip',1)) then exit;
-        for f:=0 to $ffff do hippo_mcu_rom[f]:=bitswap8(hippo_mcu_rom[f],0,6,5,4,3,2,1,7);
-        hippo_mcu_rom[$189]:=$60; // RTS prot area
-	      hippo_mcu_rom[$1af]:=$60; // RTS prot area
-	      hippo_mcu_rom[$1db]:=$60; // RTS prot area
-	      hippo_mcu_rom[$21a]:=$60; // RTS prot area
-        //OKI rom
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@hippo_oki,'hippodrm.zip',1)) then exit;
-        //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@hippo_char,'hippodrm.zip',0)) then exit;
-        convert_chars($1000);
-        //tiles 1
-        if not(cargar_roms(@memoria_temp[0],@hippo_tiles1,'hippodrm.zip',0)) then exit;
-        convert_tiles(1,$400);
-        //tiles 2
-        if not(cargar_roms(@memoria_temp[0],@hippo_tiles2,'hippodrm.zip',0)) then exit;
-        convert_tiles(2,$400);
-        //sprites
-        if not(cargar_roms(@memoria_temp[0],@hippo_sprites,'hippodrm.zip',0)) then exit;
-        convert_tiles(3,$1000);
-        proc_update_video:=update_video_hippo;
-        dip_b:=$ff;
-      end;
-end;
-//final
-reset_dec0;
-iniciar_dec0:=true;
-end;
-
-procedure cerrar_dec0;
-begin
-deco_bac06_close(0);
-end;
-
-procedure reset_dec0;
-begin
- main_m68000.reset;
- snd_m6502.reset;
- case main_vars.tipo_maquina of
-  156,158:main_h6280.reset;
- end;
- ym3812_0.reset;
- ym2203_0.reset;
- oki_6295_0.reset;
- deco_bac06_reset(0);
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$7F;
- marcade.in2:=$FF;
- sound_latch:=0;
- vblank_val:=0;
 end;
 
 procedure eventos_dec0;
@@ -689,6 +482,191 @@ case direccion of
   $1f0000..$1f1fff:mcu_ram[direccion and $1fff]:=valor;
   $1ff400..$1ff403:main_h6280.irq_status_w(direccion and $3,valor);
 end;
+end;
+
+//Main
+procedure reset_dec0;
+begin
+ main_m68000.reset;
+ snd_m6502.reset;
+ case main_vars.tipo_maquina of
+  156,158:main_h6280.reset;
+ end;
+ ym3812_0.reset;
+ ym2203_0.reset;
+ oki_6295_0.reset;
+ deco_bac06_reset(0);
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$7F;
+ marcade.in2:=$FF;
+ sound_latch:=0;
+ vblank_val:=0;
+end;
+
+function iniciar_dec0:boolean;
+const
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
+			0, 1, 2, 3, 4, 5, 6, 7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8 );
+var
+  memoria_temp:array[0..$7ffff] of byte;
+  f:word;
+
+procedure convert_chars(ch_num:word);
+begin
+init_gfx(0,8,8,ch_num);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,8*8,0,ch_num*8*8*2,ch_num*8*8*1,ch_num*8*8*3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+end;
+
+procedure convert_tiles(num_gfx:byte;tl_num:word);
+begin
+init_gfx(num_gfx,16,16,tl_num);
+gfx[num_gfx].trans[0]:=true;
+gfx_set_desc_data(4,0,16*16,tl_num*16*16*1,tl_num*16*16*3,tl_num*16*16*0,tl_num*16*16*2);
+convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+end;
+
+begin
+iniciar_dec0:=false;
+iniciar_audio(false);
+screen_init(1,1024,1024,true);
+screen_mod_scroll(1,1024,256,1023,1024,256,1023);
+screen_init(2,1024,1024,true);
+screen_mod_scroll(2,1024,256,1023,1024,256,1023);
+screen_init(3,1024,1024,true);
+screen_mod_scroll(3,1024,256,1023,1024,256,1023);
+screen_init(4,512,512,false,true);
+//Pantallas de prioridades
+screen_init(5,1024,1024,true);
+screen_init(6,1024,1024,true);
+iniciar_video(256,240);
+sprite_bac06_color:=$100;
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,264);
+main_m68000.change_ram16_calls(dec0_getword,dec0_putword);
+//Sound CPU
+snd_m6502:=cpu_m6502.create(1500000,264,TCPU_M6502);
+snd_m6502.change_ram_calls(dec0_snd_getbyte,dec0_snd_putbyte);
+snd_m6502.init_sound(dec0_sound_update);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
+ym3812_0.change_irq_calls(snd_irq);
+ym2203_0:=ym2203_chip.create(1500000);
+oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH);
+case main_vars.tipo_maquina of
+  156:begin  //Robocop
+        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$fff,$7ff,$3ff,1,1,1);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@robocop_rom[0],'robocop.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@robocop_sound,'robocop.zip',1)) then exit;
+        //MCU
+        main_h6280:=cpu_h6280.create(21477200 div 16,264);
+        main_h6280.change_ram_calls(robocop_mcu_getbyte,robocop_mcu_putbyte);
+        if not(cargar_roms(@robocop_mcu_rom[0],@robocop_mcu,'robocop.zip',1)) then exit;
+        //OKI rom
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@robocop_oki,'robocop.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@robocop_char,'robocop.zip',0)) then exit;
+        convert_chars($1000);
+        //tiles 1
+        if not(cargar_roms(@memoria_temp[0],@robocop_tiles1,'robocop.zip',0)) then exit;
+        convert_tiles(1,$800);
+        //tiles 2
+        if not(cargar_roms(@memoria_temp[0],@robocop_tiles2,'robocop.zip',0)) then exit;
+        convert_tiles(2,$400);
+        //sprites
+        if not(cargar_roms(@memoria_temp[0],@robocop_sprites,'robocop.zip',0)) then exit;
+        convert_tiles(3,$1000);
+        proc_update_video:=update_video_robocop;
+        dip_b:=$7f;
+      end;
+  157:begin //Baddudes
+        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$7ff,$7ff,$3ff,1,1,1);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@baddudes_rom[0],'baddudes.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@baddudes_sound,'baddudes.zip',1)) then exit;
+        //OKI rom
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@baddudes_oki,'baddudes.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@baddudes_char,'baddudes.zip',0)) then exit;
+        convert_chars($800);
+        //tiles 1
+        if not(cargar_roms(@memoria_temp[0],@baddudes_tiles1,'baddudes.zip',0)) then exit;
+        convert_tiles(1,$800);
+        //tiles 2, ordenar
+        if not(cargar_roms(@memoria_temp[0],@baddudes_tiles2,'baddudes.zip',0)) then exit;
+        copymemory(@memoria_temp[$8000],@memoria_temp[$20000],$8000);
+        copymemory(@memoria_temp[$0],@memoria_temp[$28000],$8000);
+        copymemory(@memoria_temp[$18000],@memoria_temp[$30000],$8000);
+        copymemory(@memoria_temp[$10000],@memoria_temp[$38000],$8000);
+        convert_tiles(2,$400);
+        //sprites
+        if not(cargar_roms(@memoria_temp[0],@baddudes_sprites,'baddudes.zip',0)) then exit;
+        convert_tiles(3,$1000);
+        proc_update_video:=update_video_baddudes;
+        dip_b:=$ff;
+      end;
+  158:begin  //Hippodrome
+        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$fff,$3ff,$3ff,1,1,1);
+        //cargar roms
+        if not(cargar_roms16w(@rom[0],@hippo_rom[0],'hippodrm.zip',0)) then exit;
+        //cargar sonido
+        if not(cargar_roms(@mem_snd[0],@hippo_sound,'hippodrm.zip',1)) then exit;
+        //MCU+decrypt
+        main_h6280:=cpu_h6280.create(21477200 div 16,264);
+        main_h6280.change_ram_calls(hippo_mcu_getbyte,hippo_mcu_putbyte);
+        if not(cargar_roms(@hippo_mcu_rom[0],@hippo_mcu,'hippodrm.zip',1)) then exit;
+        for f:=0 to $ffff do hippo_mcu_rom[f]:=bitswap8(hippo_mcu_rom[f],0,6,5,4,3,2,1,7);
+        hippo_mcu_rom[$189]:=$60; // RTS prot area
+	      hippo_mcu_rom[$1af]:=$60; // RTS prot area
+	      hippo_mcu_rom[$1db]:=$60; // RTS prot area
+	      hippo_mcu_rom[$21a]:=$60; // RTS prot area
+        //OKI rom
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@hippo_oki,'hippodrm.zip',1)) then exit;
+        //convertir chars
+        if not(cargar_roms(@memoria_temp[0],@hippo_char,'hippodrm.zip',0)) then exit;
+        convert_chars($1000);
+        //tiles 1
+        if not(cargar_roms(@memoria_temp[0],@hippo_tiles1,'hippodrm.zip',0)) then exit;
+        convert_tiles(1,$400);
+        //tiles 2
+        if not(cargar_roms(@memoria_temp[0],@hippo_tiles2,'hippodrm.zip',0)) then exit;
+        convert_tiles(2,$400);
+        //sprites
+        if not(cargar_roms(@memoria_temp[0],@hippo_sprites,'hippodrm.zip',0)) then exit;
+        convert_tiles(3,$1000);
+        proc_update_video:=update_video_hippo;
+        dip_b:=$ff;
+      end;
+end;
+//final
+reset_dec0;
+iniciar_dec0:=true;
+end;
+
+procedure cerrar_dec0;
+begin
+deco_bac06_close(0);
+end;
+
+procedure Cargar_dec0;
+begin
+case main_vars.tipo_maquina of
+  156,158:llamadas_maquina.bucle_general:=dec0_h6280_principal;
+  157:llamadas_maquina.bucle_general:=dec0_principal;
+end;
+llamadas_maquina.iniciar:=iniciar_dec0;
+llamadas_maquina.cerrar:=cerrar_dec0;
+llamadas_maquina.reset:=reset_dec0;
+llamadas_maquina.fps_max:=57.392103;
 end;
 
 end.

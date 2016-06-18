@@ -70,6 +70,7 @@ var
   szx_ramp:^tszx_ramp;
   tap_header:^ttap_header;
   csw_header:^tcsw_header;
+  cadena:string;
 begin
 load_spec.label3.Caption:='';
 load_spec.label4.Caption:='';
@@ -102,7 +103,7 @@ if extension='ZIP' then begin
       getmem(spec_rom.datos_rom,spec_rom.rom_size);
       load_file_from_zip(nombre,spec_rom.nombre_rom,spec_rom.datos_rom,t1,t2,false);
   end;
-  find_first_file_zip(nombre,'*.*',nombre_file,file_size,t2,false);
+  search_file_from_zip(nombre,'*.*',nombre_file,file_size,t2,false);
   repeat
     if datos<>nil then begin
       freemem(datos);
@@ -326,8 +327,6 @@ if extension='PZX' then begin
   freemem(pzx_header);
 end;
 if ((extension='Z80') or (extension='DSP')) then begin
-  if extension='Z80' then load_spec.label3.Caption:='Z80 Spectrum Snapshot'
-    else load_spec.label3.Caption:='DSP Spectrum Snapshot';
   inc(temp,6);
   g:=0;
   copymemory(@g,temp,2);
@@ -336,14 +335,17 @@ if ((extension='Z80') or (extension='DSP')) then begin
     getmem(temp2,16384);
     copymemory(@g,temp,2);
     inc(temp,4);
+    cadena:='3.0';
     case temp^ of
-      0,1:load_spec.label4.Caption:='Spectrum 48K v3.0';  //Modo 48k
-      3:if g=23 then load_spec.label4.Caption:='Spectrum 128K v2.0'
-          else load_spec.label4.Caption:='Spectrum 48K v3.0';
-      4,5,6:load_spec.label4.Caption:='Spectrum 128K v3.0';  //Modo 128K
-      7,8:load_spec.label4.Caption:='Spectrum +3 v3.0';  //Modo +3
-      12:load_spec.label4.Caption:='Spectrum +2A v3.0'; //Modo +2A
-      13:load_spec.label4.Caption:='Spectrum +2 v3,0'; //Modo +2
+      0,1:load_spec.label4.Caption:='Spectrum 48K';  //Modo 48k
+      3:if g=23 then begin
+           load_spec.label4.Caption:='Spectrum 128K';
+           cadena:='2.0';
+        end else load_spec.label4.Caption:='Spectrum 48K';
+      4,5,6:load_spec.label4.Caption:='Spectrum 128K';  //Modo 128K
+      7,8:load_spec.label4.Caption:='Spectrum +3';  //Modo +3
+      12:load_spec.label4.Caption:='Spectrum +2A'; //Modo +2A
+      13:load_spec.label4.Caption:='Spectrum +2'; //Modo +2
     end;
     inc(temp,g-2);
     f:=0;
@@ -363,11 +365,14 @@ if ((extension='Z80') or (extension='DSP')) then begin
         else inc(temp,g);
     end;
   end else begin
-    load_spec.label4.Caption:='Spectrum 48K v1.0';
+    load_spec.label4.Caption:='Spectrum 48K';
+    cadena:='1.0';
     getmem(temp2,49192);
     g:=file_size-34;
     descomprimir_z80(temp2,temp,g);
   end;
+  if extension='Z80' then load_spec.label3.Caption:='Z80 Spectrum Snapshot v'+cadena
+    else load_spec.label3.Caption:='DSP Spectrum Snapshot';
   temp:=temp2;
   hay_imagen:=true;
 end;

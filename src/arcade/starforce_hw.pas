@@ -5,24 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,z80pio,z80daisy,main_engine,controls_engine,gfx_engine,sn_76496,
      z80ctc,rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_starforce;
-procedure starforce_principal;
-function iniciar_starforce:boolean;
-procedure reset_starforce;
-procedure cerrar_starforce;
-//Main CPU
-function starforce_getbyte(direccion:word):byte;
-procedure starforce_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function snd_getbyte(direccion:word):byte;
-procedure snd_putbyte(direccion:word;valor:byte);
-function snd_inbyte(puerto:word):byte;
-procedure snd_outbyte(valor:byte;puerto:word);
-procedure starforce_sound_update;
-//PIO
-function pio_read_porta:byte;
-//PIO+CTC INT
-procedure pio_int_main(state:byte);
+procedure cargar_starforce;
 
 implementation
 const
@@ -59,133 +42,6 @@ const
 var
  x1,x2,x3:word;
  y1,y2,y3,sound_latch:byte;
-
-procedure Cargar_starforce;
-begin
-llamadas_maquina.iniciar:=iniciar_starforce;
-llamadas_maquina.bucle_general:=starforce_principal;
-llamadas_maquina.cerrar:=cerrar_starforce;
-llamadas_maquina.reset:=reset_starforce;
-end;
-
-function iniciar_starforce:boolean;
-const
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
-  pbs_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
-			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
-			40*8+0, 40*8+1, 40*8+2, 40*8+3, 40*8+4, 40*8+5, 40*8+6, 40*8+7);
-  pbs_y:array[0..31] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
-			64*8, 65*8, 66*8, 67*8, 68*8, 69*8, 70*8, 71*8,
-			80*8, 81*8, 82*8, 83*8, 84*8, 85*8, 86*8, 87*8);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-var
-  memoria_temp:array[0..$ffff] of byte;
-begin
-iniciar_starforce:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,256,false,true);
-//bg3
-screen_init(2,512,256);
-screen_mod_scroll(2,512,256,511,256,256,255);
-//chars
-screen_init(3,256,256,true);
-//bg2
-screen_init(4,512,256,true);
-screen_mod_scroll(4,512,256,511,256,256,255);
-//bg1
-screen_init(5,512,256,true);
-screen_mod_scroll(5,512,256,511,256,256,255);
-iniciar_video(224,256);
-//Main CPU
-main_z80:=cpu_z80.create(4000000,$100);
-main_z80.change_ram_calls(starforce_getbyte,starforce_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(2000000,$100);
-snd_z80.daisy:=true;
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
-snd_z80.init_sound(starforce_sound_update);
-//Daisy Chain PIO+CTC
-z80ctc_init(0,snd_z80.numero_cpu,2000000,snd_z80.clock,NOTIMER_2,pio_int_main,z80ctc_trg01_w);
-z80pio_init(0,pio_int_main,pio_read_porta);
-z80daisy_init(Z80_PIO_TYPE,Z80_CTC_TYPE);
-//Chip CPU
-sn_76496_0:=sn76496_chip.Create(2000000);
-sn_76496_1:=sn76496_chip.Create(2000000);
-sn_76496_2:=sn76496_chip.Create(2000000);
-//cargar roms
-if not(cargar_roms(@memoria[0],@starforce_rom[0],'starforc.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@starforce_sound,'starforc.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@starforce_fg[0],'starforc.zip',0)) then exit;
-init_gfx(0,8,8,512);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,0,512*8*8,2*512*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//big sprites
-if not(cargar_roms(@memoria_temp[0],@starforce_sprites[0],'starforc.zip',0)) then exit;
-init_gfx(2,32,32,128);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(3,0,128*8,0,128*32*32,2*128*32*32);
-convert_gfx(2,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
-//sprites
-init_gfx(1,16,16,512);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(3,0,32*8,0,512*16*16,2*512*16*16);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//bg1
-if not(cargar_roms(@memoria_temp[0],@starforce_bg1[0],'starforc.zip',0)) then exit;
-init_gfx(3,16,16,768);
-gfx[3].trans[0]:=true;
-gfx_set_desc_data(3,3,32*8,0,256*16*16,2*256*16*16);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//bg2
-if not(cargar_roms(@memoria_temp[0],@starforce_bg2[0],'starforc.zip',0)) then exit;
-convert_gfx(3,256*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//bg3
-if not(cargar_roms(@memoria_temp[0],@starforce_bg3[0],'starforc.zip',0)) then exit;
-gfx_set_desc_data(3,3,32*8,0,128*16*16,2*128*16*16);
-convert_gfx(3,512*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-//DIP
-marcade.dswa:=$c0;
-marcade.dswa_val:=@starforce_dipa;
-marcade.dswb:=0;
-marcade.dswb_val:=@starforce_dipb;
-marcade.dswc:=0;
-marcade.dswc_val:=@starforce_dipc;
-
-reset_starforce;
-iniciar_starforce:=true;
-end;
-
-procedure cerrar_starforce;
-begin
-z80pio_close(0);
-z80ctc_close(0);
-end;
-
-procedure reset_starforce;
-begin
- z80pio_reset(0);
- z80ctc_reset(0);
- sn_76496_0.reset;
- sn_76496_1.reset;
- sn_76496_2.reset;
- main_z80.reset;
- snd_z80.reset;
- reset_audio;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
-end;
 
 procedure draw_sprites(prioridad:byte);inline;
 var
@@ -312,7 +168,7 @@ while EmuStatus=EsRuning do begin
       snd_z80.run(frame_s);
       frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
       if f=239 then begin
-        main_z80.pedir_irq:=ASSERT_LINE;
+        main_z80.change_irq(ASSERT_LINE);
         update_video_starforce;
       end;
   end;
@@ -395,7 +251,7 @@ case direccion of
         $a800..$afff:gfx[4].buffer[direccion and $7ff]:=true;
         $b000..$b7ff:gfx[5].buffer[direccion and $7ff]:=true;
         $d000:main_screen.flip_main_screen:=(valor and 1)<>0;
-        $d002:main_z80.pedir_irq:=CLEAR_LINE;
+        $d002:main_z80.change_irq(CLEAR_LINE);
         $d004:write_sound_command(valor);
 end;
 end;
@@ -449,8 +305,134 @@ end;
 //PIO+CTC INT
 procedure pio_int_main(state:byte);
 begin
-  if state<>0 then snd_z80.pedir_irq:=ASSERT_LINE
-    else snd_z80.pedir_irq:=CLEAR_LINE;
+  snd_z80.change_irq(state);
+end;
+
+//Main
+procedure reset_starforce;
+begin
+ z80pio_reset(0);
+ z80ctc_reset(0);
+ sn_76496_0.reset;
+ sn_76496_1.reset;
+ sn_76496_2.reset;
+ main_z80.reset;
+ snd_z80.reset;
+ reset_audio;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+end;
+
+function iniciar_starforce:boolean;
+const
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
+  pbs_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
+			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
+			40*8+0, 40*8+1, 40*8+2, 40*8+3, 40*8+4, 40*8+5, 40*8+6, 40*8+7);
+  pbs_y:array[0..31] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
+			64*8, 65*8, 66*8, 67*8, 68*8, 69*8, 70*8, 71*8,
+			80*8, 81*8, 82*8, 83*8, 84*8, 85*8, 86*8, 87*8);
+  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+var
+  memoria_temp:array[0..$ffff] of byte;
+begin
+iniciar_starforce:=false;
+iniciar_audio(false);
+screen_init(1,256,256,false,true);
+//bg3
+screen_init(2,512,256);
+screen_mod_scroll(2,512,256,511,256,256,255);
+//chars
+screen_init(3,256,256,true);
+//bg2
+screen_init(4,512,256,true);
+screen_mod_scroll(4,512,256,511,256,256,255);
+//bg1
+screen_init(5,512,256,true);
+screen_mod_scroll(5,512,256,511,256,256,255);
+iniciar_video(224,256);
+//Main CPU
+main_z80:=cpu_z80.create(4000000,$100);
+main_z80.change_ram_calls(starforce_getbyte,starforce_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(2000000,$100);
+snd_z80.daisy:=true;
+snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
+snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
+snd_z80.init_sound(starforce_sound_update);
+//Daisy Chain PIO+CTC
+z80ctc_init(0,snd_z80.numero_cpu,2000000,snd_z80.clock,NOTIMER_2,pio_int_main,z80ctc_trg01_w);
+z80pio_init(0,pio_int_main,pio_read_porta);
+z80daisy_init(Z80_PIO_TYPE,Z80_CTC_TYPE);
+//Chip CPU
+sn_76496_0:=sn76496_chip.Create(2000000);
+sn_76496_1:=sn76496_chip.Create(2000000);
+sn_76496_2:=sn76496_chip.Create(2000000);
+//cargar roms
+if not(cargar_roms(@memoria[0],@starforce_rom[0],'starforc.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@starforce_sound,'starforc.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@starforce_fg[0],'starforc.zip',0)) then exit;
+init_gfx(0,8,8,512);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,0,512*8*8,2*512*8*8);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+//big sprites
+if not(cargar_roms(@memoria_temp[0],@starforce_sprites[0],'starforc.zip',0)) then exit;
+init_gfx(2,32,32,128);
+gfx[2].trans[0]:=true;
+gfx_set_desc_data(3,0,128*8,0,128*32*32,2*128*32*32);
+convert_gfx(2,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
+//sprites
+init_gfx(1,16,16,512);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(3,0,32*8,0,512*16*16,2*512*16*16);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//bg1
+if not(cargar_roms(@memoria_temp[0],@starforce_bg1[0],'starforc.zip',0)) then exit;
+init_gfx(3,16,16,768);
+gfx[3].trans[0]:=true;
+gfx_set_desc_data(3,3,32*8,0,256*16*16,2*256*16*16);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//bg2
+if not(cargar_roms(@memoria_temp[0],@starforce_bg2[0],'starforc.zip',0)) then exit;
+convert_gfx(3,256*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//bg3
+if not(cargar_roms(@memoria_temp[0],@starforce_bg3[0],'starforc.zip',0)) then exit;
+gfx_set_desc_data(3,3,32*8,0,128*16*16,2*128*16*16);
+convert_gfx(3,512*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+//DIP
+marcade.dswa:=$c0;
+marcade.dswa_val:=@starforce_dipa;
+marcade.dswb:=0;
+marcade.dswb_val:=@starforce_dipb;
+marcade.dswc:=0;
+marcade.dswc_val:=@starforce_dipc;
+
+reset_starforce;
+iniciar_starforce:=true;
+end;
+
+procedure cerrar_starforce;
+begin
+z80pio_close(0);
+z80ctc_close(0);
+end;
+
+procedure Cargar_starforce;
+begin
+llamadas_maquina.iniciar:=iniciar_starforce;
+llamadas_maquina.bucle_general:=starforce_principal;
+llamadas_maquina.cerrar:=cerrar_starforce;
+llamadas_maquina.reset:=reset_starforce;
 end;
 
 end.

@@ -5,29 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,pal_engine,
      m6805,sound_engine,timer_engine;
 
-procedure Cargar_sf_hw;
-function iniciar_sf_hw:boolean;
-procedure reset_sf_hw;
-//Slap Fight
-procedure sf_hw_principal;
-function sf_getbyte(direccion:word):byte;
-procedure sf_putbyte(direccion:word;valor:byte);
-function sf_inbyte(puerto:word):byte;
-procedure sf_outbyte(valor:byte;puerto:word);
-//Sound
-function snd_sf_hw_getbyte(direccion:word):byte;
-procedure snd_sf_hw_putbyte(direccion:word;valor:byte);
-function ay8910_porta_0:byte;
-function ay8910_portb_0:byte;
-function ay8910_porta_1:byte;
-function ay8910_portb_1:byte;
-procedure sf_hw_sound_update;
-procedure sf_sound_nmi;
-//MCU CPU
-function mcu_sf_hw_getbyte(direccion:word):byte;
-procedure mcu_sf_hw_putbyte(direccion:word;valor:byte);
-function mcu_tigerh_hw_getbyte(direccion:word):byte;
-procedure mcu_tigerh_hw_putbyte(direccion:word;valor:byte);
+procedure cargar_sf_hw;
 
 implementation
 const
@@ -74,181 +52,6 @@ var
  mcu_ram:array[0..$7ff] of byte;
  portc_in,portc_out,portb_out,portb_in,porta_in,porta_out,ddra,ddrb,ddrc:byte;
  mcu_sent,from_main,main_sent,from_mcu:byte;
-
-procedure Cargar_sf_hw;
-begin
-llamadas_maquina.bucle_general:=sf_hw_principal;
-llamadas_maquina.iniciar:=iniciar_sf_hw;
-llamadas_maquina.reset:=reset_sf_hw;
-end;
-
-function iniciar_sf_hw:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      bit0,bit1,bit2,bit3:byte;
-      memoria_temp:array[0..$1ffff] of byte;
-const
-      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8,
-			9, 10 ,11, 12, 13, 14, 15);
-      ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-procedure make_chars(num:word);
-begin
-init_gfx(0,8,8,num);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(2,0,8*8,0*8*8,num*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-end;
-procedure make_tiles(num:word);
-begin
-  init_gfx(1,8,8,num);
-  gfx_set_desc_data(4,0,8*8,num*8*8*0,num*8*8*1,num*8*8*2,num*8*8*3);
-  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-end;
-procedure make_sprites(num:word);
-begin
-  init_gfx(2,16,16,num);
-  gfx[2].trans[0]:=true;
-  gfx_set_desc_data(4,0,32*8,num*32*8*0,num*32*8*1,num*32*8*2,num*32*8*3);
-  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-end;
-
-begin
-iniciar_sf_hw:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,512,true);
-screen_init(2,256,512);
-screen_mod_scroll(2,256,256,255,512,512,511);
-screen_init(3,256,512,false,true);
-iniciar_video(239,280);
-//Main CPU
-main_z80:=cpu_z80.create(6000000,256);
-main_z80.change_ram_calls(sf_getbyte,sf_putbyte);
-main_z80.change_io_calls(sf_inbyte,sf_outbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(snd_sf_hw_getbyte,snd_sf_hw_putbyte);
-snd_z80.init_sound(sf_hw_sound_update);
-//MCU
-main_m6805:=cpu_m6805.create(3000000,256,tipo_m68705);
-//Sound Chips
-ay8910_0:=ay8910_chip.create(1500000,1);
-ay8910_0.change_io_calls(ay8910_porta_0,ay8910_portb_0,nil,nil);
-ay8910_1:=ay8910_chip.create(1500000,1);
-ay8910_1.change_io_calls(ay8910_porta_1,ay8910_portb_1,nil,nil);
-case main_vars.tipo_maquina of
-  98:begin
-      //SND CPU
-      init_timer(snd_z80.numero_cpu,3000000/360,sf_sound_nmi,true);
-      //MCU CPU
-      main_m6805.change_ram_calls(mcu_tigerh_hw_getbyte,mcu_tigerh_hw_putbyte);
-      tiles_mask:=$7;
-      sprite_mask:=$40;
-      //cargar roms
-      if not(cargar_roms(@memoria[0],@tigerh_rom[0],'tigerh.zip',0)) then exit;
-      copymemory(@rom[0,0],@memoria[$8000],$4000);
-      copymemory(@rom[1,0],@memoria[$8000],$4000);
-      //cargar roms snd
-      if not(cargar_roms(@mem_snd[0],@tigerh_snd,'tigerh.zip',1)) then exit;
-      //cargar roms mcu
-      if not(cargar_roms(@mcu_ram[0],@tigerh_mcu,'tigerh.zip',1)) then exit;
-      //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@tigerh_char[0],'tigerh.zip',0)) then exit;
-      make_chars($400);
-      //convertir tiles
-      if not(cargar_roms(@memoria_temp[0],@tigerh_tiles[0],'tigerh.zip',0)) then exit;
-      make_tiles($800);
-      //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@tigerh_sprites[0],'tigerh.zip',0)) then exit;
-      make_sprites($200);
-      //Poner colores
-      if not(cargar_roms(@memoria_temp[0],@tigerh_pal[0],'tigerh.zip',0)) then exit;
-  end;
-  99:begin
-      //SND CPU
-      init_timer(snd_z80.numero_cpu,3000000/180,sf_sound_nmi,true);
-      //MCU CPU
-      main_m6805.change_ram_calls(mcu_sf_hw_getbyte,mcu_sf_hw_putbyte);
-      tiles_mask:=$f;
-      sprite_mask:=$c0;
-      //cargar roms
-      if not(cargar_roms(@memoria_temp[0],@sf_rom[0],'slapfigh.zip',0)) then exit;
-      copymemory(@memoria[0],@memoria_temp[0],$8000);
-      copymemory(@rom[0,0],@memoria_temp[$8000],$4000);
-      copymemory(@rom[1,0],@memoria_temp[$c000],$4000);
-      //cargar roms snd
-      if not(cargar_roms(@mem_snd[0],@sf_snd,'slapfigh.zip',1)) then exit;
-      //cargar roms mcu
-      if not(cargar_roms(@mcu_ram[0],@sf_mcu,'slapfigh.zip',1)) then exit;
-      //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@sf_char[0],'slapfigh.zip',0)) then exit;
-      make_chars($400);
-      //convertir tiles
-      if not(cargar_roms(@memoria_temp[0],@sf_tiles[0],'slapfigh.zip',0)) then exit;
-      make_tiles($1000);
-      //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@sf_sprites[0],'slapfigh.zip',0)) then exit;
-      make_sprites($400);
-      //Poner colores
-      if not(cargar_roms(@memoria_temp[0],@sf_pal[0],'slapfigh.zip',0)) then exit;
-  end;
-end;
-for f:=0 to $ff do begin
-    bit0:=(memoria_temp[f] shr 0) and $01;
-		bit1:=(memoria_temp[f] shr 1) and $01;
-		bit2:=(memoria_temp[f] shr 2) and $01;
-    bit3:=(memoria_temp[f] shr 3) and $01;
-		colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-		bit0:=(memoria_temp[f+$100] shr 0) and $01;
-		bit1:=(memoria_temp[f+$100] shr 1) and $01;
-		bit2:=(memoria_temp[f+$100] shr 2) and $01;
-    bit3:=(memoria_temp[f+$100] shr 3) and $01;
-		colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-		bit0:=(memoria_temp[f+$200] shr 0) and $01;
-		bit1:=(memoria_temp[f+$200] shr 1) and $01;
-		bit2:=(memoria_temp[f+$200] shr 2) and $01;
-    bit3:=(memoria_temp[f+$200] shr 3) and $01;
-		colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-end;
-set_pal(colores,$100);
-reset_sf_hw;
-iniciar_sf_hw:=true;
-end;
-
-procedure reset_sf_hw;
-begin
- main_z80.reset;
- snd_z80.reset;
- main_m6805.reset;
- AY8910_0.reset;
- AY8910_1.reset;
- reset_audio;
- ena_irq:=false;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- rom_bank:=0;
- slapfight_status_state:=$c7;
- scroll_y:=0;
- scroll_x:=0;
- //mcu
- porta_in:=0;
- porta_out:=0;
- ddra:=0;
- portb_in:=0;
- portb_out:=0;
- ddrb:=0;
- portc_in:=0;
- portc_out:=0;
- ddrc:=0;
- mcu_sent:=0;
- main_sent:=0;
- from_main:=0;
- from_mcu:=0;
-end;
 
 procedure update_video_sf_hw;inline;
 var
@@ -327,7 +130,7 @@ while EmuStatus=EsRuning do begin
     main_m6805.run(frame_mcu);
     frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
   end;
-  if ena_irq then main_z80.pedir_irq:=HOLD_LINE;
+  if ena_irq then main_z80.change_irq(HOLD_LINE);
   update_video_sf_hw;
   copymemory(@buffer_sprites[0],@memoria[$e000],$800);
   eventos_sf_hw;
@@ -438,8 +241,8 @@ end;
 procedure sf_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-     0:snd_z80.pedir_irq:=ASSERT_LINE;
-     1:snd_z80.pedir_irq:=CLEAR_LINE;
+     0:snd_z80.change_irq(ASSERT_LINE);
+     1:snd_z80.change_irq(CLEAR_LINE);
      6,7:ena_irq:=(puerto and 1)<>0;
      8,9:rom_bank:=puerto and 1;
 end;
@@ -542,6 +345,181 @@ end;
 procedure sf_sound_nmi;
 begin
   snd_z80.change_nmi(PULSE_LINE);
+end;
+
+//Main
+procedure reset_sf_hw;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ main_m6805.reset;
+ AY8910_0.reset;
+ AY8910_1.reset;
+ reset_audio;
+ ena_irq:=false;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ rom_bank:=0;
+ slapfight_status_state:=$c7;
+ scroll_y:=0;
+ scroll_x:=0;
+ //mcu
+ porta_in:=0;
+ porta_out:=0;
+ ddra:=0;
+ portb_in:=0;
+ portb_out:=0;
+ ddrb:=0;
+ portc_in:=0;
+ portc_out:=0;
+ ddrc:=0;
+ mcu_sent:=0;
+ main_sent:=0;
+ from_main:=0;
+ from_mcu:=0;
+end;
+
+function iniciar_sf_hw:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      bit0,bit1,bit2,bit3:byte;
+      memoria_temp:array[0..$1ffff] of byte;
+const
+      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8,
+			9, 10 ,11, 12, 13, 14, 15);
+      ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+procedure make_chars(num:word);
+begin
+init_gfx(0,8,8,num);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(2,0,8*8,0*8*8,num*8*8);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+end;
+procedure make_tiles(num:word);
+begin
+  init_gfx(1,8,8,num);
+  gfx_set_desc_data(4,0,8*8,num*8*8*0,num*8*8*1,num*8*8*2,num*8*8*3);
+  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+end;
+procedure make_sprites(num:word);
+begin
+  init_gfx(2,16,16,num);
+  gfx[2].trans[0]:=true;
+  gfx_set_desc_data(4,0,32*8,num*32*8*0,num*32*8*1,num*32*8*2,num*32*8*3);
+  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+end;
+
+begin
+iniciar_sf_hw:=false;
+iniciar_audio(false);
+screen_init(1,256,512,true);
+screen_init(2,256,512);
+screen_mod_scroll(2,256,256,255,512,512,511);
+screen_init(3,256,512,false,true);
+iniciar_video(239,280);
+//Main CPU
+main_z80:=cpu_z80.create(6000000,256);
+main_z80.change_ram_calls(sf_getbyte,sf_putbyte);
+main_z80.change_io_calls(sf_inbyte,sf_outbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3000000,256);
+snd_z80.change_ram_calls(snd_sf_hw_getbyte,snd_sf_hw_putbyte);
+snd_z80.init_sound(sf_hw_sound_update);
+//MCU
+main_m6805:=cpu_m6805.create(3000000,256,tipo_m68705);
+//Sound Chips
+ay8910_0:=ay8910_chip.create(1500000,1);
+ay8910_0.change_io_calls(ay8910_porta_0,ay8910_portb_0,nil,nil);
+ay8910_1:=ay8910_chip.create(1500000,1);
+ay8910_1.change_io_calls(ay8910_porta_1,ay8910_portb_1,nil,nil);
+case main_vars.tipo_maquina of
+  98:begin
+      //SND CPU
+      init_timer(snd_z80.numero_cpu,3000000/360,sf_sound_nmi,true);
+      //MCU CPU
+      main_m6805.change_ram_calls(mcu_tigerh_hw_getbyte,mcu_tigerh_hw_putbyte);
+      tiles_mask:=$7;
+      sprite_mask:=$40;
+      //cargar roms
+      if not(cargar_roms(@memoria[0],@tigerh_rom[0],'tigerh.zip',0)) then exit;
+      copymemory(@rom[0,0],@memoria[$8000],$4000);
+      copymemory(@rom[1,0],@memoria[$8000],$4000);
+      //cargar roms snd
+      if not(cargar_roms(@mem_snd[0],@tigerh_snd,'tigerh.zip',1)) then exit;
+      //cargar roms mcu
+      if not(cargar_roms(@mcu_ram[0],@tigerh_mcu,'tigerh.zip',1)) then exit;
+      //convertir chars
+      if not(cargar_roms(@memoria_temp[0],@tigerh_char[0],'tigerh.zip',0)) then exit;
+      make_chars($400);
+      //convertir tiles
+      if not(cargar_roms(@memoria_temp[0],@tigerh_tiles[0],'tigerh.zip',0)) then exit;
+      make_tiles($800);
+      //convertir sprites
+      if not(cargar_roms(@memoria_temp[0],@tigerh_sprites[0],'tigerh.zip',0)) then exit;
+      make_sprites($200);
+      //Poner colores
+      if not(cargar_roms(@memoria_temp[0],@tigerh_pal[0],'tigerh.zip',0)) then exit;
+  end;
+  99:begin
+      //SND CPU
+      init_timer(snd_z80.numero_cpu,3000000/180,sf_sound_nmi,true);
+      //MCU CPU
+      main_m6805.change_ram_calls(mcu_sf_hw_getbyte,mcu_sf_hw_putbyte);
+      tiles_mask:=$f;
+      sprite_mask:=$c0;
+      //cargar roms
+      if not(cargar_roms(@memoria_temp[0],@sf_rom[0],'slapfigh.zip',0)) then exit;
+      copymemory(@memoria[0],@memoria_temp[0],$8000);
+      copymemory(@rom[0,0],@memoria_temp[$8000],$4000);
+      copymemory(@rom[1,0],@memoria_temp[$c000],$4000);
+      //cargar roms snd
+      if not(cargar_roms(@mem_snd[0],@sf_snd,'slapfigh.zip',1)) then exit;
+      //cargar roms mcu
+      if not(cargar_roms(@mcu_ram[0],@sf_mcu,'slapfigh.zip',1)) then exit;
+      //convertir chars
+      if not(cargar_roms(@memoria_temp[0],@sf_char[0],'slapfigh.zip',0)) then exit;
+      make_chars($400);
+      //convertir tiles
+      if not(cargar_roms(@memoria_temp[0],@sf_tiles[0],'slapfigh.zip',0)) then exit;
+      make_tiles($1000);
+      //convertir sprites
+      if not(cargar_roms(@memoria_temp[0],@sf_sprites[0],'slapfigh.zip',0)) then exit;
+      make_sprites($400);
+      //Poner colores
+      if not(cargar_roms(@memoria_temp[0],@sf_pal[0],'slapfigh.zip',0)) then exit;
+  end;
+end;
+for f:=0 to $ff do begin
+    bit0:=(memoria_temp[f] shr 0) and $01;
+		bit1:=(memoria_temp[f] shr 1) and $01;
+		bit2:=(memoria_temp[f] shr 2) and $01;
+    bit3:=(memoria_temp[f] shr 3) and $01;
+		colores[f].r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		bit0:=(memoria_temp[f+$100] shr 0) and $01;
+		bit1:=(memoria_temp[f+$100] shr 1) and $01;
+		bit2:=(memoria_temp[f+$100] shr 2) and $01;
+    bit3:=(memoria_temp[f+$100] shr 3) and $01;
+		colores[f].g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+		bit0:=(memoria_temp[f+$200] shr 0) and $01;
+		bit1:=(memoria_temp[f+$200] shr 1) and $01;
+		bit2:=(memoria_temp[f+$200] shr 2) and $01;
+    bit3:=(memoria_temp[f+$200] shr 3) and $01;
+		colores[f].b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+end;
+set_pal(colores,$100);
+reset_sf_hw;
+iniciar_sf_hw:=true;
+end;
+
+procedure Cargar_sf_hw;
+begin
+llamadas_maquina.bucle_general:=sf_hw_principal;
+llamadas_maquina.iniciar:=iniciar_sf_hw;
+llamadas_maquina.reset:=reset_sf_hw;
 end;
 
 end.

@@ -5,26 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,nz80,main_engine,controls_engine,gfx_engine,tms32010,ym_3812,
      rom_engine,pal_engine,sound_engine;
 
-procedure Cargar_twincobra;
-procedure twincobra_principal;
-procedure reset_twincobra;
-function iniciar_twincobra:boolean;
-//Main CPU
-function twincobr_getword(direccion:dword):word;
-procedure twincobr_putword(direccion:dword;valor:word);
-//SND
-function twincobr_snd_getbyte(direccion:word):byte;
-procedure twincobr_snd_putbyte(direccion:word;valor:byte);
-function twincobr_snd_inbyte(puerto:word):byte;
-procedure twincobr_snd_outbyte(valor:byte;puerto:word);
-procedure snd_irq(irqstate:byte);
-procedure twincobr_update_sound;
-//MCU
-procedure twincobr_dsp_bio_w(valor:word);
-function twincobr_dsp_r:word;
-procedure twincobr_dsp_addrsel_w(valor:word);
-procedure twincobr_dsp_w(valor:word);
-function twincobr_BIO_r:boolean;
+procedure cargar_twincobra;
 
 implementation
 const
@@ -79,164 +60,6 @@ var
  txt_offs,bg_offs,fg_offs,bg_bank,fg_bank:word;
  main_ram_seg,dsp_addr_w:dword;
  txt_scroll_x,txt_scroll_y,bg_scroll_x,bg_scroll_y,fg_scroll_x,fg_scroll_y:word;
-
-procedure Cargar_twincobra;
-begin
-llamadas_maquina.iniciar:=iniciar_twincobra;
-llamadas_maquina.bucle_general:=twincobra_principal;
-llamadas_maquina.reset:=reset_twincobra;
-llamadas_maquina.fps_max:=(28000000/4)/(446*286);
-end;
-
-function iniciar_twincobra:boolean;
-var
-    memoria_temp:array[0..$3ffff] of byte;
-    temp_rom:array[0..$fff] of word;
-    f:word;
-const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
-    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
-procedure convert_chars;
-begin
-  init_gfx(0,8,8,2048);
-  gfx[0].trans[0]:=true;
-  gfx_set_desc_data(3,0,8*8,0*2048*8*8,1*2048*8*8,2*2048*8*8);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-end;
-
-procedure convert_tiles(ngfx:byte;ntiles:word);
-begin
-init_gfx(ngfx,8,8,ntiles);
-gfx[ngfx].trans[0]:=true;
-gfx_set_desc_data(4,0,8*8,0*ntiles*8*8,1*ntiles*8*8,2*ntiles*8*8,3*ntiles*8*8);
-convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
-end;
-
-procedure convert_sprites;
-begin
-init_gfx(3,16,16,2048);
-gfx[3].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0*2048*32*8,1*2048*32*8,2*2048*32*8,3*2048*32*8);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-end;
-
-begin
-iniciar_twincobra:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,256,512,true);
-screen_mod_scroll(1,256,256,255,512,512,511);
-screen_init(2,512,512,true);
-screen_mod_scroll(2,512,256,511,512,512,511);
-screen_init(3,512,512);
-screen_mod_scroll(3,512,256,511,512,512,511);
-screen_init(4,512,512,false,true);
-iniciar_video(240,320);
-//Main CPU
-main_m68000:=cpu_m68000.create(24000000 div 4,286);
-main_m68000.change_ram16_calls(twincobr_getword,twincobr_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(3500000,286);
-snd_z80.change_ram_calls(twincobr_snd_getbyte,twincobr_snd_putbyte);
-snd_z80.change_io_calls(twincobr_snd_inbyte,twincobr_snd_outbyte);
-snd_z80.init_sound(twincobr_update_sound);
-//TMS MCU
-main_tms32010:=cpu_tms32010.create(14000000,286);
-main_tms32010.change_io_calls(twincobr_BIO_r,nil,twincobr_dsp_r,nil,nil,nil,nil,nil,nil,twincobr_dsp_addrsel_w,twincobr_dsp_w,nil,twincobr_dsp_bio_w,nil,nil,nil,nil);
-//Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
-ym3812_0.change_irq_calls(snd_irq);
-case main_vars.tipo_maquina of
-    146:begin
-          //cargar roms
-          if not(cargar_roms16w(@rom[0],@twincobr_rom[0],'twincobr.zip',0)) then exit;
-          //cargar ROMS sonido
-          if not(cargar_roms(@mem_snd[0],@twincobr_snd_rom,'twincobr.zip',1)) then exit;
-          //cargar ROMS MCU
-          if not(cargar_roms16b(main_tms32010.get_rom_addr,@twincobr_mcu_rom[0],'twincobr.zip',0)) then exit;
-          //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@twincobr_char[0],'twincobr.zip',0)) then exit;
-          convert_chars;
-          //convertir tiles fg
-          if not(cargar_roms(@memoria_temp[0],@twincobr_fg_tiles[0],'twincobr.zip',0)) then exit;
-          convert_tiles(1,8192);
-          //convertir tiles bg
-          if not(cargar_roms(@memoria_temp[0],@twincobr_bg_tiles[0],'twincobr.zip',0)) then exit;
-          convert_tiles(2,4096);
-          //convertir tiles sprites
-          if not(cargar_roms(@memoria_temp[0],@twincobr_sprites[0],'twincobr.zip',0)) then exit;
-          convert_sprites;
-          dswa:=0;
-          dswb:=0;
-    end;
-    147:begin
-          //cargar roms
-          if not(cargar_roms16w(@rom[0],@fshark_rom[0],'fshark.zip',0)) then exit;
-          //cargar ROMS sonido
-          if not(cargar_roms(@mem_snd[0],@fshark_snd_rom,'fshark.zip',1)) then exit;
-          //cargar ROMS MCU
-          if not(cargar_roms(@memoria_temp[0],@fshark_mcu_rom[0],'fshark.zip',0)) then exit;
-          for f:=0 to $3ff do begin
-            temp_rom[f]:=(((memoria_temp[f] and $f) shl 4+(memoria_temp[f+$400] and $f)) shl 8) or
-              (memoria_temp[f+$800] and $f) shl 4+(memoria_temp[f+$c00] and $f);
-          end;
-          for f:=0 to $3ff do begin
-             temp_rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1400] and $f)) shl 8) or
-                        (memoria_temp[f+$1800] and $f) shl 4+(memoria_temp[f+$1c00] and $f);
-          end;
-          copymemory(main_tms32010.get_rom_addr,@temp_rom[0],$1000);
-          //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@fshark_char[0],'fshark.zip',0)) then exit;
-          convert_chars;
-          //convertir tiles fg
-          if not(cargar_roms(@memoria_temp[0],@fshark_fg_tiles[0],'fshark.zip',0)) then exit;
-          convert_tiles(1,4096);
-          //convertir tiles bg
-          if not(cargar_roms(@memoria_temp[0],@fshark_bg_tiles[0],'fshark.zip',0)) then exit;
-          convert_tiles(2,4096);
-          //convertir tiles sprites
-          if not(cargar_roms(@memoria_temp[0],@fshark_sprites[0],'fshark.zip',0)) then exit;
-          convert_sprites;
-          dswa:=1;
-          dswb:=$80;
-    end;
-end;
-//final
-reset_twincobra;
-iniciar_twincobra:=true;
-end;
-
-procedure reset_twincobra;
-begin
- main_m68000.reset;
- snd_z80.reset;
- main_tms32010.reset;
- ym3812_0.reset;
- reset_audio;
- txt_scroll_y:=457;
- txt_scroll_x:=226;
- bg_scroll_x:=40;
- bg_scroll_y:=0;
- fg_scroll_x:=0;
- fg_scroll_y:=0;
- marcade.in0:=0;
- marcade.in1:=0;
- marcade.in2:=0;
- txt_offs:=0;
- bg_offs:=0;
- fg_offs:=0;
- bg_bank:=0;
- fg_bank:=0;
- int_enable:=false;
- vsync:=0;
- twincobr_dsp_BIO:=false;
- dsp_execute:=false;
- main_ram_seg:=0;
- dsp_addr_w:=0;
-end;
 
 procedure draw_sprites(priority:word);inline;
 var
@@ -374,88 +197,6 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-//DSP
-function twincobr_dsp_r:word;
-begin
-	// DSP can read data from main CPU RAM via DSP IO port 1 */
-	case main_ram_seg of
-		$30000,$40000,$50000:twincobr_dsp_r:=twincobr_getword(main_ram_seg+dsp_addr_w);
-      else twincobr_dsp_r:=0;
-	end;
-end;
-
-procedure twincobr_dsp_w(valor:word);
-begin
-  // Data written to main CPU RAM via DSP IO port 1 */
-	dsp_execute:=false;
-	case main_ram_seg of
-    $30000:begin
-              if ((dsp_addr_w<3) and (valor=0)) then dsp_execute:=true;
-              twincobr_putword(main_ram_seg+dsp_addr_w,valor);
-           end;
-		$40000,$50000:twincobr_putword(main_ram_seg+dsp_addr_w,valor);
-	end;
-end;
-
-procedure twincobr_dsp_addrsel_w(valor:word);
-begin
-  main_ram_seg:=((valor and $e000) shl 3);
-	dsp_addr_w:=((valor and $1fff) shl 1);
-end;
-
-procedure twincobr_dsp_bio_w(valor:word);
-begin
-  if (valor and $8000)<>0 then twincobr_dsp_BIO:=false;
-	if (valor=0) then begin
-		if dsp_execute then begin
-      main_m68000.pedir_halt:=CLEAR_LINE;
-			dsp_execute:=false;
-		end;
-		twincobr_dsp_BIO:=true;
-	end;
-end;
-
-function twincobr_BIO_r:boolean;
-begin
-  twincobr_BIO_r:=twincobr_dsp_BIO;
-end;
-
-//Snd CPU
-function twincobr_snd_getbyte(direccion:word):byte;
-begin
-twincobr_snd_getbyte:=mem_snd[direccion];
-end;
-
-procedure twincobr_snd_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
-end;
-
-function twincobr_snd_inbyte(puerto:word):byte;
-begin
-case (puerto and $ff) of
-  0:twincobr_snd_inbyte:=ym3812_0.status;
-  $10:twincobr_snd_inbyte:=marcade.in2;
-  $20,$30:twincobr_snd_inbyte:=0;
-  $40:twincobr_snd_inbyte:=dswa and $ff;
-  $50:twincobr_snd_inbyte:=dswb and $ff;
-end;
-end;
-
-procedure twincobr_snd_outbyte(valor:byte;puerto:word);
-begin
-case (puerto and $ff) of
-  $0:ym3812_0.control(valor);
-  $1:ym3812_0.write(valor);
-end;
-end;
-
-procedure snd_irq(irqstate:byte);
-begin
-  snd_z80.pedir_irq:=irqstate;
-end;
-
 //Main CPU
 function twincobr_getword(direccion:dword):word;
 begin
@@ -520,13 +261,13 @@ case direccion of
   $76000..$76003:;
   $7800a:case (valor and $ff) of
         $00:begin	// This means assert the INT line to the DSP */
-					    main_tms32010.pedir_halt:=CLEAR_LINE;
-              main_m68000.pedir_halt:=ASSERT_LINE;
-              main_tms32010.pedir_int:=ASSERT_LINE;
-					 end;
-		    $01:begin	// This means inhibit the INT line to the DSP */
-              main_tms32010.pedir_int:=CLEAR_LINE;
-					    main_tms32010.pedir_halt:=ASSERT_LINE;
+	      main_tms32010.change_halt(CLEAR_LINE);
+              main_m68000.change_halt(ASSERT_LINE);
+              main_tms32010.change_irq(ASSERT_LINE);
+	    end;
+        $01:begin	// This means inhibit the INT line to the DSP */
+              main_tms32010.change_irq(CLEAR_LINE);
+	      main_tms32010.change_halt(ASSERT_LINE);
             end;
       end;
   $7800c:case (valor and $ff) of
@@ -538,13 +279,13 @@ case direccion of
 		        $0a:fg_bank:=$0000;
             $0b:fg_bank:=$1000;
             $0c:begin	// This means assert the INT line to the DSP */
-    					    main_tms32010.pedir_halt:=CLEAR_LINE;
-                  main_m68000.pedir_halt:=ASSERT_LINE;
-                  main_tms32010.pedir_int:=ASSERT_LINE;
-					      end;
-		        $0d:begin	// This means inhibit the INT line to the DSP */
-                 main_tms32010.pedir_int:=CLEAR_LINE;
-                 main_tms32010.pedir_halt:=ASSERT_LINE;
+    		  main_tms32010.change_halt(CLEAR_LINE);
+                  main_m68000.change_halt(ASSERT_LINE);
+                  main_tms32010.change_irq(ASSERT_LINE);
+		end;
+	    $0d:begin	// This means inhibit the INT line to the DSP */
+                 main_tms32010.change_irq(CLEAR_LINE);
+                 main_tms32010.change_halt(ASSERT_LINE);
                 end;
             $0e,$0f:; // Turn display on / off
   end;
@@ -564,9 +305,247 @@ case direccion of
 end;
 end;
 
+function twincobr_snd_getbyte(direccion:word):byte;
+begin
+twincobr_snd_getbyte:=mem_snd[direccion];
+end;
+
+procedure twincobr_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$8000 then exit;
+mem_snd[direccion]:=valor;
+end;
+
+function twincobr_snd_inbyte(puerto:word):byte;
+begin
+case (puerto and $ff) of
+  0:twincobr_snd_inbyte:=ym3812_0.status;
+  $10:twincobr_snd_inbyte:=marcade.in2;
+  $20,$30:twincobr_snd_inbyte:=0;
+  $40:twincobr_snd_inbyte:=dswa and $ff;
+  $50:twincobr_snd_inbyte:=dswb and $ff;
+end;
+end;
+
+procedure twincobr_snd_outbyte(valor:byte;puerto:word);
+begin
+case (puerto and $ff) of
+  $0:ym3812_0.control(valor);
+  $1:ym3812_0.write(valor);
+end;
+end;
+
+procedure snd_irq(irqstate:byte);
+begin
+  snd_z80.change_irq(irqstate);
+end;
+
+function twincobr_dsp_r:word;
+begin
+	// DSP can read data from main CPU RAM via DSP IO port 1 */
+	case main_ram_seg of
+		$30000,$40000,$50000:twincobr_dsp_r:=twincobr_getword(main_ram_seg+dsp_addr_w);
+      else twincobr_dsp_r:=0;
+	end;
+end;
+
+procedure twincobr_dsp_w(valor:word);
+begin
+  // Data written to main CPU RAM via DSP IO port 1 */
+	dsp_execute:=false;
+	case main_ram_seg of
+    $30000:begin
+              if ((dsp_addr_w<3) and (valor=0)) then dsp_execute:=true;
+              twincobr_putword(main_ram_seg+dsp_addr_w,valor);
+           end;
+		$40000,$50000:twincobr_putword(main_ram_seg+dsp_addr_w,valor);
+	end;
+end;
+
+procedure twincobr_dsp_addrsel_w(valor:word);
+begin
+  main_ram_seg:=((valor and $e000) shl 3);
+	dsp_addr_w:=((valor and $1fff) shl 1);
+end;
+
+procedure twincobr_dsp_bio_w(valor:word);
+begin
+  if (valor and $8000)<>0 then twincobr_dsp_BIO:=false;
+	if (valor=0) then begin
+		if dsp_execute then begin
+      main_m68000.change_halt(CLEAR_LINE);
+			dsp_execute:=false;
+		end;
+		twincobr_dsp_BIO:=true;
+	end;
+end;
+
+function twincobr_BIO_r:boolean;
+begin
+  twincobr_BIO_r:=twincobr_dsp_BIO;
+end;
+
 procedure twincobr_update_sound;
 begin
   ym3812_0.update;
+end;
+
+//Main
+procedure reset_twincobra;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ main_tms32010.reset;
+ ym3812_0.reset;
+ reset_audio;
+ txt_scroll_y:=457;
+ txt_scroll_x:=226;
+ bg_scroll_x:=40;
+ bg_scroll_y:=0;
+ fg_scroll_x:=0;
+ fg_scroll_y:=0;
+ marcade.in0:=0;
+ marcade.in1:=0;
+ marcade.in2:=0;
+ txt_offs:=0;
+ bg_offs:=0;
+ fg_offs:=0;
+ bg_bank:=0;
+ fg_bank:=0;
+ int_enable:=false;
+ vsync:=0;
+ twincobr_dsp_BIO:=false;
+ dsp_execute:=false;
+ main_ram_seg:=0;
+ dsp_addr_w:=0;
+end;
+
+function iniciar_twincobra:boolean;
+var
+    memoria_temp:array[0..$3ffff] of byte;
+    temp_rom:array[0..$fff] of word;
+    f:word;
+const
+    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
+			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
+procedure convert_chars;
+begin
+  init_gfx(0,8,8,2048);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(3,0,8*8,0*2048*8*8,1*2048*8*8,2*2048*8*8);
+  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+end;
+
+procedure convert_tiles(ngfx:byte;ntiles:word);
+begin
+init_gfx(ngfx,8,8,ntiles);
+gfx[ngfx].trans[0]:=true;
+gfx_set_desc_data(4,0,8*8,0*ntiles*8*8,1*ntiles*8*8,2*ntiles*8*8,3*ntiles*8*8);
+convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+end;
+
+procedure convert_sprites;
+begin
+init_gfx(3,16,16,2048);
+gfx[3].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0*2048*32*8,1*2048*32*8,2*2048*32*8,3*2048*32*8);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+end;
+
+begin
+iniciar_twincobra:=false;
+iniciar_audio(false);
+screen_init(1,256,512,true);
+screen_mod_scroll(1,256,256,255,512,512,511);
+screen_init(2,512,512,true);
+screen_mod_scroll(2,512,256,511,512,512,511);
+screen_init(3,512,512);
+screen_mod_scroll(3,512,256,511,512,512,511);
+screen_init(4,512,512,false,true);
+iniciar_video(240,320);
+//Main CPU
+main_m68000:=cpu_m68000.create(24000000 div 4,286);
+main_m68000.change_ram16_calls(twincobr_getword,twincobr_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(3500000,286);
+snd_z80.change_ram_calls(twincobr_snd_getbyte,twincobr_snd_putbyte);
+snd_z80.change_io_calls(twincobr_snd_inbyte,twincobr_snd_outbyte);
+snd_z80.init_sound(twincobr_update_sound);
+//TMS MCU
+main_tms32010:=cpu_tms32010.create(14000000,286);
+main_tms32010.change_io_calls(twincobr_BIO_r,nil,twincobr_dsp_r,nil,nil,nil,nil,nil,nil,twincobr_dsp_addrsel_w,twincobr_dsp_w,nil,twincobr_dsp_bio_w,nil,nil,nil,nil);
+//Sound Chips
+ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
+ym3812_0.change_irq_calls(snd_irq);
+case main_vars.tipo_maquina of
+    146:begin
+          //cargar roms
+          if not(cargar_roms16w(@rom[0],@twincobr_rom[0],'twincobr.zip',0)) then exit;
+          //cargar ROMS sonido
+          if not(cargar_roms(@mem_snd[0],@twincobr_snd_rom,'twincobr.zip',1)) then exit;
+          //cargar ROMS MCU
+          if not(cargar_roms16b(main_tms32010.get_rom_addr,@twincobr_mcu_rom[0],'twincobr.zip',0)) then exit;
+          //convertir chars
+          if not(cargar_roms(@memoria_temp[0],@twincobr_char[0],'twincobr.zip',0)) then exit;
+          convert_chars;
+          //convertir tiles fg
+          if not(cargar_roms(@memoria_temp[0],@twincobr_fg_tiles[0],'twincobr.zip',0)) then exit;
+          convert_tiles(1,8192);
+          //convertir tiles bg
+          if not(cargar_roms(@memoria_temp[0],@twincobr_bg_tiles[0],'twincobr.zip',0)) then exit;
+          convert_tiles(2,4096);
+          //convertir tiles sprites
+          if not(cargar_roms(@memoria_temp[0],@twincobr_sprites[0],'twincobr.zip',0)) then exit;
+          convert_sprites;
+          dswa:=0;
+          dswb:=0;
+    end;
+    147:begin
+          //cargar roms
+          if not(cargar_roms16w(@rom[0],@fshark_rom[0],'fshark.zip',0)) then exit;
+          //cargar ROMS sonido
+          if not(cargar_roms(@mem_snd[0],@fshark_snd_rom,'fshark.zip',1)) then exit;
+          //cargar ROMS MCU
+          if not(cargar_roms(@memoria_temp[0],@fshark_mcu_rom[0],'fshark.zip',0)) then exit;
+          for f:=0 to $3ff do begin
+            temp_rom[f]:=(((memoria_temp[f] and $f) shl 4+(memoria_temp[f+$400] and $f)) shl 8) or
+              (memoria_temp[f+$800] and $f) shl 4+(memoria_temp[f+$c00] and $f);
+          end;
+          for f:=0 to $3ff do begin
+             temp_rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1400] and $f)) shl 8) or
+                        (memoria_temp[f+$1800] and $f) shl 4+(memoria_temp[f+$1c00] and $f);
+          end;
+          copymemory(main_tms32010.get_rom_addr,@temp_rom[0],$1000);
+          //convertir chars
+          if not(cargar_roms(@memoria_temp[0],@fshark_char[0],'fshark.zip',0)) then exit;
+          convert_chars;
+          //convertir tiles fg
+          if not(cargar_roms(@memoria_temp[0],@fshark_fg_tiles[0],'fshark.zip',0)) then exit;
+          convert_tiles(1,4096);
+          //convertir tiles bg
+          if not(cargar_roms(@memoria_temp[0],@fshark_bg_tiles[0],'fshark.zip',0)) then exit;
+          convert_tiles(2,4096);
+          //convertir tiles sprites
+          if not(cargar_roms(@memoria_temp[0],@fshark_sprites[0],'fshark.zip',0)) then exit;
+          convert_sprites;
+          dswa:=1;
+          dswb:=$80;
+    end;
+end;
+//final
+reset_twincobra;
+iniciar_twincobra:=true;
+end;
+
+procedure Cargar_twincobra;
+begin
+llamadas_maquina.iniciar:=iniciar_twincobra;
+llamadas_maquina.bucle_general:=twincobra_principal;
+llamadas_maquina.reset:=reset_twincobra;
+llamadas_maquina.fps_max:=(28000000/4)/(446*286);
 end;
 
 end.

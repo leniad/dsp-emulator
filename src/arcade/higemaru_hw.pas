@@ -85,12 +85,12 @@ while EmuStatus=EsRuning do begin
     case f of
       239:begin
             main_z80.im0:=$cf;  //rst 8
-            main_z80.pedir_irq:=HOLD_LINE;
+            main_z80.change_irq(HOLD_LINE);
             update_video_higemaru;
           end;
       255:begin
            main_z80.im0:=$d7;  //rst 10
-           main_z80.pedir_irq:=HOLD_LINE;
+           main_z80.change_irq(HOLD_LINE);
         end;
     end;
   end;
@@ -158,7 +158,6 @@ const
 begin
 iniciar_higemaru:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);

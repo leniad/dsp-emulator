@@ -1,7 +1,7 @@
 unit ym_2151;
 
 interface
-uses {$ifdef windows}windows,{$endif}fm_2151,sound_engine,main_engine;
+uses {$ifdef windows}windows,{$endif}fm_2151,sound_engine,cpu_misc;
 
 type
   ym2151_chip=class(snd_chip_class)

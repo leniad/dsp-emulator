@@ -8,17 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 function iniciar_system1:boolean;
 procedure system1_principal;
 procedure reset_system1;
-//Main CPU
-function system1_getbyte(direccion:word):byte;
-procedure system1_putbyte(direccion:word;valor:byte);
-function system1_inbyte_pio(puerto:word):byte;
-procedure system1_outbyte_pio(valor:byte;puerto:word);
-//Sound CPU
-function system1_snd_getbyte_pio(direccion:word):byte;
-//PIO
-procedure system1_pio_porta_write(valor:byte);
-procedure system1_pio_porta_nmi(state:boolean);
-procedure system1_pio_portb_write(valor:byte);
 
 implementation
   uses system1_hw;
@@ -170,6 +159,178 @@ begin
       tbl3:=swaptable[data_swap_select[row]][3];
 		  memoria[a]:=((src and $aa) or (((src shr tbl0) and 1) shl 6) or (((src shr tbl1) and 1) shl 4) or (((src shr tbl2) and 1) shl 2) or (((src shr tbl3) and 1) shl 0)) xor data_xor[row];
     end;
+end;
+
+procedure update_video;inline;
+var
+  x_temp:word;
+begin
+update_backgroud(0);
+update_backgroud(1);
+x_temp:=(bg_ram[$ffc]+(bg_ram[$ffd] shl 8)) div 2+14;
+fillword(@xscroll[0],32,x_temp);
+yscroll:=bg_ram[$fbd];
+update_video_system1;
+end;
+
+procedure system1_principal;
+var
+  f,snd_irq:word;
+  frame_m,frame_s:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+frame_s:=snd_z80.tframes;
+snd_irq:=32;
+while EmuStatus=EsRuning do begin
+  for f:=0 to 259 do begin
+    //Main CPU
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    //Sound CPU
+    snd_z80.run(frame_s);
+    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    if f=223 then begin
+      main_z80.change_irq(HOLD_LINE);
+      update_video;
+    end;
+    if snd_irq=64 then begin
+      snd_irq:=0;
+      snd_z80.change_irq(HOLD_LINE);
+    end;
+    snd_irq:=snd_irq+1;
+  end;
+  eventos_system1;
+  video_sync;
+end;
+end;
+
+function system1_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0..$7fff:if main_z80.opcode then system1_getbyte:=mem_dec[direccion]
+              else system1_getbyte:=memoria[direccion];
+  $d800..$ddff:system1_getbyte:=buffer_paleta[direccion and $7ff];
+  $e000..$efff:system1_getbyte:=bg_ram[direccion and $fff];
+  $f000..$f3ff:system1_getbyte:=mix_collide[direccion and $3f] or $7e or (mix_collide_summary shl 7);
+  $f800..$fbff:system1_getbyte:=sprite_collide[direccion and $3ff] or $7e or (sprite_collide_summary shl 7);
+  else system1_getbyte:=memoria[direccion];
+end;
+end;
+
+procedure cambiar_color(valor:byte;pos:word);inline;
+var
+  color:tcolor;
+begin
+  color.r:=pal3bit(valor shr 0);
+  color.g:=pal3bit(valor shr 3);
+	color.b:=pal2bit(valor shr 6);
+  set_pal_color(color,pos);
+end;
+
+procedure system1_putbyte(direccion:word;valor:byte);
+var
+  pos_bg:word;
+begin
+if direccion<$c000 then exit;
+memoria[direccion]:=valor;
+case direccion of
+        $d800..$ddff:if buffer_paleta[direccion and $7ff]<>valor then begin
+                        cambiar_color(valor,direccion and $7ff);
+                        buffer_paleta[direccion and $7ff]:=valor;
+                     end;
+        $e000..$efff:begin
+                        pos_bg:=direccion and $fff;
+                        bg_ram[pos_bg]:=valor;
+                        bg_ram_w[pos_bg shr 1]:=true;
+                     end;
+        $f000..$f3ff:mix_collide[direccion and $3f]:=0;
+        $f400..$f7ff:mix_collide_summary:=0;
+        $f800..$fbff:sprite_collide[direccion and $3ff]:=0;
+        $fc00..$ffff:sprite_collide_summary:=0;
+end;
+end;
+
+function system1_snd_getbyte_pio(direccion:word):byte;
+begin
+case direccion of
+  $0000..$7fff:system1_snd_getbyte_pio:=mem_snd[direccion];
+  $8000..$9fff:system1_snd_getbyte_pio:=mem_snd[(direccion and $7ff)+$8000];
+  $e000..$efff:begin
+                  system1_snd_getbyte_pio:=z80pio_port_read(0,PORT_A);
+                  z80pio_astb_w(0,false);
+                  z80pio_astb_w(0,true);
+               end;
+end;
+end;
+
+function system1_inbyte_pio(puerto:word):byte;
+begin
+case (puerto and $1f) of
+  $0..$3:system1_inbyte_pio:=marcade.in1;
+  $4..$7:system1_inbyte_pio:=marcade.in2;
+  $8..$b:system1_inbyte_pio:=marcade.in0;
+  $c,$e:system1_inbyte_pio:=dip_a;
+  $d,$f,$10..$13:system1_inbyte_pio:=dip_b;
+  $18..$1b:system1_inbyte_pio:=z80pio_cd_ba_r(0,puerto and $1f);
+end;
+end;
+
+procedure system1_outbyte_pio(valor:byte;puerto:word);
+begin
+case (puerto and $1f) of
+  $18..$1b:z80pio_cd_ba_w(0,puerto and $1f,valor);
+end;
+end;
+
+//PIO
+procedure system1_pio_porta_write(valor:byte);
+begin
+  sound_latch:=valor;
+end;
+
+procedure system1_pio_porta_nmi(state:boolean);
+begin
+  snd_z80.change_nmi(PULSE_LINE);
+end;
+
+procedure system1_pio_portb_write(valor:byte);
+begin
+  system1_videomode:=valor;
+end;
+
+//Main
+procedure reset_system1;
+begin
+case main_vars.tipo_maquina of
+  27,35,36,153,155:z80pio_reset(0);
+  152,154:pia8255_0.reset;
+end;
+sn_76496_0.reset;
+sn_76496_1.reset;
+main_z80.reset;
+snd_z80.reset;
+reset_audio;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$ff;
+sound_latch:=0;
+mix_collide_summary:=0;
+sprite_collide_summary:=0;
+scroll_x:=0;
+scroll_y:=0;
+system1_videomode:=0;
+//Clear all
+fillchar(bg_ram[0],$4000,0);
+fillchar(bg_ram_w[0],$2000,0);
+fillchar(sprites_final_screen[0],$20000,0);
+fillchar(final_screen[0,0],8*$10000*2,0);
+fillchar(bgpixmaps[0],4,0);
+sprite_offset:=0;
+yscroll:=0;
+fillchar(xscroll,$20*2,0);
+fillchar(sprite_collide[0],$400,0);
+fillchar(mix_collide[0],$40,0);
 end;
 
 function iniciar_system1:boolean;
@@ -376,177 +537,6 @@ dip_a:=$ff;
 mask_char:=$7ff;
 reset_system1;
 iniciar_system1:=true;
-end;
-
-procedure reset_system1;
-begin
-case main_vars.tipo_maquina of
-  27,35,36,153,155:z80pio_reset(0);
-  152,154:pia8255_0.reset;
-end;
-sn_76496_0.reset;
-sn_76496_1.reset;
-main_z80.reset;
-snd_z80.reset;
-reset_audio;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-sound_latch:=0;
-mix_collide_summary:=0;
-sprite_collide_summary:=0;
-scroll_x:=0;
-scroll_y:=0;
-system1_videomode:=0;
-//Clear all
-fillchar(bg_ram[0],$4000,0);
-fillchar(bg_ram_w[0],$2000,0);
-fillchar(sprites_final_screen[0],$20000,0);
-fillchar(final_screen[0,0],8*$10000*2,0);
-fillchar(bgpixmaps[0],4,0);
-sprite_offset:=0;
-yscroll:=0;
-fillchar(xscroll,$20*2,0);
-fillchar(sprite_collide[0],$400,0);
-fillchar(mix_collide[0],$40,0);
-end;
-
-procedure update_video;inline;
-var
-  x_temp:word;
-begin
-update_backgroud(0);
-update_backgroud(1);
-x_temp:=(bg_ram[$ffc]+(bg_ram[$ffd] shl 8)) div 2+14;
-fillword(@xscroll[0],32,x_temp);
-yscroll:=bg_ram[$fbd];
-update_video_system1;
-end;
-
-procedure system1_principal;
-var
-  f,snd_irq:word;
-  frame_m,frame_s:single;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-snd_irq:=32;
-while EmuStatus=EsRuning do begin
-  for f:=0 to 259 do begin
-    //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    if f=223 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
-      update_video;
-    end;
-    if snd_irq=64 then begin
-      snd_irq:=0;
-      snd_z80.pedir_irq:=HOLD_LINE;
-    end;
-    snd_irq:=snd_irq+1;
-  end;
-  eventos_system1;
-  video_sync;
-end;
-end;
-
-function system1_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $0..$7fff:if main_z80.opcode then system1_getbyte:=mem_dec[direccion]
-              else system1_getbyte:=memoria[direccion];
-  $d800..$ddff:system1_getbyte:=buffer_paleta[direccion and $7ff];
-  $e000..$efff:system1_getbyte:=bg_ram[direccion and $fff];
-  $f000..$f3ff:system1_getbyte:=mix_collide[direccion and $3f] or $7e or (mix_collide_summary shl 7);
-  $f800..$fbff:system1_getbyte:=sprite_collide[direccion and $3ff] or $7e or (sprite_collide_summary shl 7);
-  else system1_getbyte:=memoria[direccion];
-end;
-end;
-
-procedure cambiar_color(valor:byte;pos:word);inline;
-var
-  color:tcolor;
-begin
-  color.r:=pal3bit(valor shr 0);
-  color.g:=pal3bit(valor shr 3);
-	color.b:=pal2bit(valor shr 6);
-  set_pal_color(color,pos);
-end;
-
-procedure system1_putbyte(direccion:word;valor:byte);
-var
-  pos_bg:word;
-begin
-if direccion<$c000 then exit;
-memoria[direccion]:=valor;
-case direccion of
-        $d800..$ddff:if buffer_paleta[direccion and $7ff]<>valor then begin
-                        cambiar_color(valor,direccion and $7ff);
-                        buffer_paleta[direccion and $7ff]:=valor;
-                     end;
-        $e000..$efff:begin
-                        pos_bg:=direccion and $fff;
-                        bg_ram[pos_bg]:=valor;
-                        bg_ram_w[pos_bg shr 1]:=true;
-                     end;
-        $f000..$f3ff:mix_collide[direccion and $3f]:=0;
-        $f400..$f7ff:mix_collide_summary:=0;
-        $f800..$fbff:sprite_collide[direccion and $3ff]:=0;
-        $fc00..$ffff:sprite_collide_summary:=0;
-end;
-end;
-
-function system1_snd_getbyte_pio(direccion:word):byte;
-begin
-case direccion of
-  $0000..$7fff:system1_snd_getbyte_pio:=mem_snd[direccion];
-  $8000..$9fff:system1_snd_getbyte_pio:=mem_snd[(direccion and $7ff)+$8000];
-  $e000..$efff:begin
-                  system1_snd_getbyte_pio:=z80pio_port_read(0,PORT_A);
-                  z80pio_astb_w(0,false);
-                  z80pio_astb_w(0,true);
-               end;
-end;
-end;
-
-function system1_inbyte_pio(puerto:word):byte;
-begin
-case (puerto and $1f) of
-  $0..$3:system1_inbyte_pio:=marcade.in1;
-  $4..$7:system1_inbyte_pio:=marcade.in2;
-  $8..$b:system1_inbyte_pio:=marcade.in0;
-  $c,$e:system1_inbyte_pio:=dip_a;
-  $d,$f,$10..$13:system1_inbyte_pio:=dip_b;
-  $18..$1b:system1_inbyte_pio:=z80pio_cd_ba_r(0,puerto and $1f);
-end;
-end;
-
-procedure system1_outbyte_pio(valor:byte;puerto:word);
-begin
-case (puerto and $1f) of
-  $18..$1b:z80pio_cd_ba_w(0,puerto and $1f,valor);
-end;
-end;
-
-//PIO
-procedure system1_pio_porta_write(valor:byte);
-begin
-  sound_latch:=valor;
-end;
-
-procedure system1_pio_porta_nmi(state:boolean);
-begin
-  snd_z80.change_nmi(PULSE_LINE);
-end;
-
-procedure system1_pio_portb_write(valor:byte);
-begin
-  system1_videomode:=valor;
 end;
 
 end.

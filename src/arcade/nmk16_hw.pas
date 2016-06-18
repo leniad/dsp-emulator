@@ -360,7 +360,6 @@ end;
 begin
 iniciar_nmk16:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 if main_vars.tipo_maquina=71 then main_screen.rol90_screen:=true;
 screen_init(1,512,512);
 screen_init(2,512,512,false,true);

@@ -2,7 +2,7 @@ unit lr35902;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,timer_engine,dialogs,sysutils,vars_hide;
+     main_engine,timer_engine,dialogs,sysutils,vars_hide,cpu_misc;
 
 type
   band_lr = record
@@ -20,7 +20,7 @@ type
         destructor free;
       public
         speed:byte;
-        ime,pedir_irq,change_speed:boolean;
+        ime,change_speed:boolean;
         vblank_ena,lcdstat_ena,timer_ena,joystick_ena,serial_ena:boolean;
         vblank_req,lcdstat_req,timer_req,joystick_req,serial_req:boolean;
         procedure reset;
@@ -117,7 +117,7 @@ begin
   r.de.w:=0;
   r.hl.w:=0;
   self.ime:=true;
-  self.pedir_irq:=false;
+  self.change_irq(CLEAR_LINE);
   self.after_ei:=false;
   r.a:=0;
   r.f.z:=false;
@@ -398,13 +398,14 @@ end;
 procedure cpu_lr.run(maximo:single);
 var
   instruccion:byte;
-  tempw,oldpc:word;
+  tempw,oldpc,old_contador:word;
   tempb,tempb2:byte;
 begin
 self.contador:=0;
 while self.contador<maximo do begin
 //Aqui van las IRQ's
 self.estados_demas:=0;
+old_contador:=self.contador;
 if not(self.after_ei) then begin
     if (self.vblank_ena and self.vblank_req) then begin //Vblank
       self.halt:=false;
@@ -1429,7 +1430,7 @@ if not(self.halt) then begin
 end;
 tempw:=(gb_t[instruccion]+self.estados_demas) shr self.speed;
 self.contador:=self.contador+tempw;
-update_timer(tempw,self.numero_cpu);
+update_timer(self.contador-old_contador,self.numero_cpu);
 self.despues_instruccion(tempw);
 end; //Del while
 end;

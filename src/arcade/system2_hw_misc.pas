@@ -8,9 +8,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 function iniciar_system2:boolean;
 procedure system2_principal;
 procedure reset_system2;
-//Main CPU
-function system2_getbyte(direccion:word):byte;
-procedure system2_putbyte(direccion:word;valor:byte);
 
 var
   type_row_scroll:boolean;
@@ -49,6 +46,155 @@ const
         (n:'pr7119.ic20';l:$100;p:0;crc:$b2a8260f),(n:'pr7118.ic14';l:$100;p:$100;crc:$693e20c7),
         (n:'pr7117.ic8';l:$100;p:$200;crc:$4124307e),());
     choplift_video_prom:tipo_roms=(n:'pr5317.ic28';l:$100;p:0;crc:$648350b8);
+
+procedure update_video;inline;
+var
+  f:byte;
+  x_temp:word;
+begin
+for f:=0 to 7 do update_backgroud(f);
+x_temp:=(((bg_ram[$7c0] or (bg_ram[$7c1] shl 8)) div 2) and $ff)-256+5;
+fillword(@xscroll[0],32,x_temp);
+yscroll:=bg_ram[$7ba];
+update_video_system1;
+end;
+
+procedure update_video_row_scroll;inline;
+var
+  f:byte;
+begin
+for f:=0 to 7 do update_backgroud(f);
+for f:=0 to $1f do xscroll[f]:=(((bg_ram[$7c0+f*2] or (bg_ram[$7c1+f*2] shl 8)) div 2) and $ff)-256+5;
+yscroll:=bg_ram[$7ba];
+update_video_system1;
+end;
+
+procedure system2_principal;
+var
+  f,snd_irq:word;
+  frame_m,frame_s:single;
+begin
+init_controls(false,false,false,true);
+frame_m:=main_z80.tframes;
+frame_s:=snd_z80.tframes;
+snd_irq:=32;
+while EmuStatus=EsRuning do begin
+  for f:=0 to 259 do begin
+    //Main CPU
+    main_z80.run(frame_m);
+    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    //Sound CPU
+    snd_z80.run(frame_s);
+    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    if f=223 then begin
+      main_z80.change_irq(HOLD_LINE);
+      if type_row_scroll then update_video_row_scroll
+        else update_video;
+      eventos_system1;
+    end;
+    if snd_irq=64 then begin
+      snd_irq:=0;
+      snd_z80.change_irq(HOLD_LINE);
+    end;
+    snd_irq:=snd_irq+1;
+  end;
+  video_sync;
+end;
+end;
+
+//Main CPU
+function system2_getbyte(direccion:word):byte;
+begin
+case direccion of
+  $0..$7fff:if main_z80.opcode then system2_getbyte:=mem_dec[direccion]
+              else system2_getbyte:=memoria[direccion];
+  $8000..$bfff:if main_z80.opcode then system2_getbyte:=roms_dec[rom_bank,direccion and $3fff] //Banked ROMS
+                  else system2_getbyte:=roms[rom_bank,direccion and $3fff];
+  $d800..$dfff:system2_getbyte:=buffer_paleta[direccion and $7ff];
+  $e000..$efff:system2_getbyte:=bg_ram[$1000*bg_ram_bank+(direccion and $fff)]; //banked bg
+  $f000..$f3ff:system2_getbyte:=mix_collide[direccion and $3f] or $7e or (mix_collide_summary shl 7);
+  $f800..$fbff:system2_getbyte:=sprite_collide[direccion and $3ff] or $7e or (sprite_collide_summary shl 7);
+  else system2_getbyte:=memoria[direccion];
+end;
+end;
+
+procedure cambiar_color(numero:byte;pos:word);inline;
+var
+  val:byte;
+  color:tcolor;
+  bit0,bit1,bit2,bit3:byte;
+begin
+  val:=memoria_proms[numero];
+  bit0:=(val shr 0) and $01;
+  bit1:=(val shr 1) and $01;
+  bit2:=(val shr 2) and $01;
+  bit3:=(val shr 3) and $01;
+  color.r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  val:=memoria_proms[numero+$100];
+  bit0:=(val shr 0) and $01;
+  bit1:=(val shr 1) and $01;
+  bit2:=(val shr 2) and $01;
+  bit3:=(val shr 3) and $01;
+  color.g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  val:=memoria_proms[numero+$200];
+  bit0:=(val shr 0) and $01;
+  bit1:=(val shr 1) and $01;
+  bit2:=(val shr 2) and $01;
+  bit3:=(val shr 3) and $01;
+  color.b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  set_pal_color(color,pos);
+end;
+
+procedure system2_putbyte(direccion:word;valor:byte);
+var
+  pos_bg:word;
+begin
+if direccion<$c000 then exit;
+memoria[direccion]:=valor;
+case direccion of
+        $d800..$dfff:if buffer_paleta[direccion and $7ff]<>valor then begin
+                        buffer_paleta[direccion and $7ff]:=valor;
+                        cambiar_color(valor,direccion and $7ff);
+                     end;
+        $e000..$efff:begin
+                        pos_bg:=$1000*bg_ram_bank+(direccion and $fff);
+                        bg_ram[pos_bg]:=valor;
+                        if ((pos_bg=$0740) or (pos_bg=$0742) or (pos_bg=$0744) or (pos_bg=$0746)) then begin
+                          fillchar(bg_ram_w[$400],$1c00,1);
+                          bgpixmaps[0]:=bg_ram[$740] and 7;
+                          bgpixmaps[1]:=bg_ram[$742] and 7;
+                          bgpixmaps[2]:=bg_ram[$744] and 7;
+                          bgpixmaps[3]:=bg_ram[$746] and 7;
+                        end else bg_ram_w[pos_bg shr 1]:=true;
+                     end;
+        $f000..$f3ff:mix_collide[direccion and $3f]:=0;
+        $f400..$f7ff:mix_collide_summary:=0;
+        $f800..$fbff:sprite_collide[direccion and $3ff]:=0;
+        $fc00..$ffff:sprite_collide_summary:=0;
+end;
+end;
+
+//Main
+procedure reset_system2;
+begin
+pia8255_0.reset;
+sn_76496_0.reset;
+sn_76496_1.reset;
+main_z80.reset;
+snd_z80.reset;
+reset_audio;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$ff;
+rom_bank:=0;
+bg_ram_bank:=0;
+sound_latch:=0;
+mix_collide_summary:=0;
+sprite_collide_summary:=0;
+scroll_x:=0;
+scroll_y:=0;
+system1_videomode:=0;
+end;
 
 function iniciar_system2:boolean;
 const
@@ -152,154 +298,6 @@ sprite_offset:=7;
 mask_char:=$fff;
 reset_system2;
 iniciar_system2:=true;
-end;
-
-procedure reset_system2;
-begin
-pia8255_0.reset;
-sn_76496_0.reset;
-sn_76496_1.reset;
-main_z80.reset;
-snd_z80.reset;
-reset_audio;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-rom_bank:=0;
-bg_ram_bank:=0;
-sound_latch:=0;
-mix_collide_summary:=0;
-sprite_collide_summary:=0;
-scroll_x:=0;
-scroll_y:=0;
-system1_videomode:=0;
-end;
-
-procedure update_video;inline;
-var
-  f:byte;
-  x_temp:word;
-begin
-for f:=0 to 7 do update_backgroud(f);
-x_temp:=(((bg_ram[$7c0] or (bg_ram[$7c1] shl 8)) div 2) and $ff)-256+5;
-fillword(@xscroll[0],32,x_temp);
-yscroll:=bg_ram[$7ba];
-update_video_system1;
-end;
-
-procedure update_video_row_scroll;inline;
-var
-  f:byte;
-begin
-for f:=0 to 7 do update_backgroud(f);
-for f:=0 to $1f do xscroll[f]:=(((bg_ram[$7c0+f*2] or (bg_ram[$7c1+f*2] shl 8)) div 2) and $ff)-256+5;
-yscroll:=bg_ram[$7ba];
-update_video_system1;
-end;
-
-procedure system2_principal;
-var
-  f,snd_irq:word;
-  frame_m,frame_s:single;
-begin
-init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-snd_irq:=32;
-while EmuStatus=EsRuning do begin
-  for f:=0 to 259 do begin
-    //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    if f=223 then begin
-      main_z80.pedir_irq:=HOLD_LINE;
-      if type_row_scroll then update_video_row_scroll
-        else update_video;
-      eventos_system1;
-    end;
-    if snd_irq=64 then begin
-      snd_irq:=0;
-      snd_z80.pedir_irq:=HOLD_LINE;
-    end;
-    snd_irq:=snd_irq+1;
-  end;
-  video_sync;
-end;
-end;
-
-//Main CPU
-function system2_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $0..$7fff:if main_z80.opcode then system2_getbyte:=mem_dec[direccion]
-              else system2_getbyte:=memoria[direccion];
-  $8000..$bfff:if main_z80.opcode then system2_getbyte:=roms_dec[rom_bank,direccion and $3fff] //Banked ROMS
-                  else system2_getbyte:=roms[rom_bank,direccion and $3fff];
-  $d800..$dfff:system2_getbyte:=buffer_paleta[direccion and $7ff];
-  $e000..$efff:system2_getbyte:=bg_ram[$1000*bg_ram_bank+(direccion and $fff)]; //banked bg
-  $f000..$f3ff:system2_getbyte:=mix_collide[direccion and $3f] or $7e or (mix_collide_summary shl 7);
-  $f800..$fbff:system2_getbyte:=sprite_collide[direccion and $3ff] or $7e or (sprite_collide_summary shl 7);
-  else system2_getbyte:=memoria[direccion];
-end;
-end;
-
-procedure cambiar_color(numero:byte;pos:word);inline;
-var
-  val:byte;
-  color:tcolor;
-  bit0,bit1,bit2,bit3:byte;
-begin
-  val:=memoria_proms[numero];
-  bit0:=(val shr 0) and $01;
-  bit1:=(val shr 1) and $01;
-  bit2:=(val shr 2) and $01;
-  bit3:=(val shr 3) and $01;
-  color.r:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  val:=memoria_proms[numero+$100];
-  bit0:=(val shr 0) and $01;
-  bit1:=(val shr 1) and $01;
-  bit2:=(val shr 2) and $01;
-  bit3:=(val shr 3) and $01;
-  color.g:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  val:=memoria_proms[numero+$200];
-  bit0:=(val shr 0) and $01;
-  bit1:=(val shr 1) and $01;
-  bit2:=(val shr 2) and $01;
-  bit3:=(val shr 3) and $01;
-  color.b:=$0e*bit0+$1f*bit1+$43*bit2+$8f*bit3;
-  set_pal_color(color,pos);
-end;
-
-procedure system2_putbyte(direccion:word;valor:byte);
-var
-  pos_bg:word;
-begin
-if direccion<$c000 then exit;
-memoria[direccion]:=valor;
-case direccion of
-        $d800..$dfff:if buffer_paleta[direccion and $7ff]<>valor then begin
-                        buffer_paleta[direccion and $7ff]:=valor;
-                        cambiar_color(valor,direccion and $7ff);
-                     end;
-        $e000..$efff:begin
-                        pos_bg:=$1000*bg_ram_bank+(direccion and $fff);
-                        bg_ram[pos_bg]:=valor;
-                        if ((pos_bg=$0740) or (pos_bg=$0742) or (pos_bg=$0744) or (pos_bg=$0746)) then begin
-                          fillchar(bg_ram_w[$400],$1c00,1);
-                          bgpixmaps[0]:=bg_ram[$740] and 7;
-                          bgpixmaps[1]:=bg_ram[$742] and 7;
-                          bgpixmaps[2]:=bg_ram[$744] and 7;
-                          bgpixmaps[3]:=bg_ram[$746] and 7;
-                        end else bg_ram_w[pos_bg shr 1]:=true;
-                     end;
-        $f000..$f3ff:mix_collide[direccion and $3f]:=0;
-        $f400..$f7ff:mix_collide_summary:=0;
-        $f800..$fbff:sprite_collide[direccion and $3ff]:=0;
-        $fc00..$ffff:sprite_collide_summary:=0;
-end;
 end;
 
 end.

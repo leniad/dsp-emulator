@@ -5,20 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2203,
      taitosnd,rom_engine,pal_engine,sound_engine,volfied_cchip;
 
-procedure Cargar_volfied;
-procedure volfied_principal;
-function iniciar_volfied:boolean;
-procedure reset_volfied;
-//Main CPU
-function volfied_getword(direccion:dword):word;
-procedure volfied_putword(direccion:dword;valor:word);
-//Sound CPU
-function volfied_snd_getbyte(direccion:word):byte;
-procedure volfied_snd_putbyte(direccion:word;valor:byte);
-procedure volfied_update_sound;
-function volfied_dipa:byte;
-function volfied_dipb:byte;
-procedure snd_irq(irqstate:byte);
+procedure cargar_volfied;
 
 implementation
 const
@@ -53,78 +40,6 @@ var
  rom2,ram2:array[0..$3ffff] of word;
  ram1,ram3:array[0..$1fff] of word;
  spritebank:byte;
-
-procedure Cargar_volfied;
-begin
-llamadas_maquina.iniciar:=iniciar_volfied;
-llamadas_maquina.bucle_general:=volfied_principal;
-llamadas_maquina.reset:=reset_volfied;
-end;
-
-function iniciar_volfied:boolean;
-const
-  ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4, 8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4);
-  ps_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
-var
-  memoria_temp:pbyte;
-begin
-iniciar_volfied:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,248,512);
-screen_init(2,512,512,false,true);
-iniciar_video(240,320);
-//Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(volfied_getword,volfied_putword);
-//Sound CPU
-snd_z80:=cpu_z80.create(4000000,256);
-snd_z80.change_ram_calls(volfied_snd_getbyte,volfied_snd_putbyte);
-snd_z80.init_sound(volfied_update_sound);
-//Sound Chips
-ym2203_0:=ym2203_chip.create(4000000,4);
-ym2203_0.change_io_calls(volfied_dipa,volfied_dipb,nil,nil);
-ym2203_0.change_irq_calls(snd_irq);
-//MCU
-volfied_init_cchip(main_m68000.numero_cpu);
-//ROMS
-if not(cargar_roms16w(@rom,@volfied_rom,'volfied.zip',0)) then exit;
-if not(cargar_roms16w(@rom2,@volfied_rom2,'volfied.zip',0)) then exit;
-//cargar sonido+ponerlas en su banco
-if not(cargar_roms(@mem_snd,@volfied_sound,'volfied.zip')) then exit;
-//convertir sprites
-getmem(memoria_temp,$100000);
-if not(cargar_roms16b(memoria_temp,@volfied_sprites,'volfied.zip',0)) then exit;
-init_gfx(0,16,16,$1800);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,true);
-freemem(memoria_temp);
-//DIP
-marcade.dswa:=$fe;
-marcade.dswa_val:=@volfied_dip1;
-marcade.dswb:=$7f;
-marcade.dswb_val:=@volfied_dip2;
-//final
-reset_volfied;
-iniciar_volfied:=true;
-end;
-
-procedure reset_volfied;
-begin
- main_m68000.reset;
- snd_z80.reset;
- ym2203_0.reset;
- taitosound_reset;
- volfied_cchip_reset;
- reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$fc;
- marcade.in2:=$ff;
- video_mask:=0;
- video_ctrl:=0;
- spritebank:=0;
-end;
 
 procedure update_video_volfied;
 var
@@ -295,7 +210,79 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.pedir_irq:=irqstate;
+  snd_z80.change_irq(irqstate);
+end;
+
+//Main
+procedure reset_volfied;
+begin
+ main_m68000.reset;
+ snd_z80.reset;
+ ym2203_0.reset;
+ taitosound_reset;
+ volfied_cchip_reset;
+ reset_audio;
+ marcade.in0:=$ff;
+ marcade.in1:=$fc;
+ marcade.in2:=$ff;
+ video_mask:=0;
+ video_ctrl:=0;
+ spritebank:=0;
+end;
+
+function iniciar_volfied:boolean;
+const
+  ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4, 8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4);
+  ps_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
+var
+  memoria_temp:pbyte;
+begin
+iniciar_volfied:=false;
+iniciar_audio(false);
+screen_init(1,248,512);
+screen_init(2,512,512,false,true);
+iniciar_video(240,320);
+//Main CPU
+main_m68000:=cpu_m68000.create(8000000,256);
+main_m68000.change_ram16_calls(volfied_getword,volfied_putword);
+//Sound CPU
+snd_z80:=cpu_z80.create(4000000,256);
+snd_z80.change_ram_calls(volfied_snd_getbyte,volfied_snd_putbyte);
+snd_z80.init_sound(volfied_update_sound);
+//Sound Chips
+ym2203_0:=ym2203_chip.create(4000000,4);
+ym2203_0.change_io_calls(volfied_dipa,volfied_dipb,nil,nil);
+ym2203_0.change_irq_calls(snd_irq);
+//MCU
+volfied_init_cchip(main_m68000.numero_cpu);
+//ROMS
+if not(cargar_roms16w(@rom,@volfied_rom,'volfied.zip',0)) then exit;
+if not(cargar_roms16w(@rom2,@volfied_rom2,'volfied.zip',0)) then exit;
+//cargar sonido+ponerlas en su banco
+if not(cargar_roms(@mem_snd,@volfied_sound,'volfied.zip')) then exit;
+//convertir sprites
+getmem(memoria_temp,$100000);
+if not(cargar_roms16b(memoria_temp,@volfied_sprites,'volfied.zip',0)) then exit;
+init_gfx(0,16,16,$1800);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,true);
+freemem(memoria_temp);
+//DIP
+marcade.dswa:=$fe;
+marcade.dswa_val:=@volfied_dip1;
+marcade.dswb:=$7f;
+marcade.dswb_val:=@volfied_dip2;
+//final
+reset_volfied;
+iniciar_volfied:=true;
+end;
+
+procedure Cargar_volfied;
+begin
+llamadas_maquina.iniciar:=iniciar_volfied;
+llamadas_maquina.bucle_general:=volfied_principal;
+llamadas_maquina.reset:=reset_volfied;
 end;
 
 end.

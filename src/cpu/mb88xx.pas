@@ -2,7 +2,7 @@ unit mb88xx;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,sysutils,timer_engine;
+     main_engine,dialogs,sysutils,timer_engine,cpu_misc;
 
 type
      type_mb88xx_inport_r=function (port:byte):byte;
@@ -151,7 +151,7 @@ begin
 	self.sb:=0;
 	self.sbcount:= 0;
 	self.pending_interrupt:= 0;
-  self.pedir_reset:=CLEAR_LINE;
+  self.change_reset(CLEAR_LINE);
 end;
 
 procedure inc_pc(r:preg_mb88xx);

@@ -5,30 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,namcoio_06xx_51xx_53xx,
      rom_engine,pal_engine,sound_engine,galaga_stars_const;
 
-procedure Cargar_Galagahw;
-function iniciar_galagahw:boolean;
-procedure reset_galagahw;
-procedure cerrar_galagahw;
-//Galaga
-procedure galaga_principal;
-function galaga_getbyte(direccion:word):byte;
-procedure galaga_putbyte(direccion:word;valor:byte);
-function galaga_sub_getbyte(direccion:word):byte;
-function galaga_sub2_getbyte(direccion:word):byte;
-//DigDug
-procedure digdug_principal;
-function digdug_getbyte(direccion:word):byte;
-procedure digdug_putbyte(direccion:word;valor:byte);
-function digdug_sub_getbyte(direccion:word):byte;
-function digdug_sub2_getbyte(direccion:word):byte;
-//Namco IO's
-procedure namco_06xx_nmi;
-function namco_51xx_io0:byte;
-function namco_51xx_io1:byte;
-function namco_51xx_io2:byte;
-function namco_51xx_io3:byte;
-function namco_53xx_r_r(port:byte):byte;
-function namco_53xx_k_r:byte;
+procedure cargar_Galagahw;
 
 implementation
 const
@@ -72,179 +49,6 @@ var
  digdug_bg:array[0..$fff] of byte;
  custom_mod,bg_select,bg_color_bank,bg_disable,tx_color_mode:byte;
  bg_repaint:boolean;
-
-procedure Cargar_galagahw;
-begin
-llamadas_maquina.iniciar:=iniciar_galagahw;
-case main_vars.tipo_maquina of
-  65:llamadas_maquina.bucle_general:=galaga_principal;
-  167:llamadas_maquina.bucle_general:=digdug_principal;
-end;
-llamadas_maquina.cerrar:=cerrar_galagahw;
-llamadas_maquina.reset:=reset_galagahw;
-llamadas_maquina.fps_max:=60.6060606060;
-end;
-
-function iniciar_galagahw:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      ctemp1:byte;
-      memoria_temp:array[0..$3fff] of byte;
-const
-  map:array[0..3] of byte=($00,$47,$97,$de);
-  pc_x_digdug:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-  pc_y_digdug:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-
-procedure galaga_chr(ngfx:byte;num:word);
-const
-  pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3,  0, 1, 2, 3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-begin
-init_gfx(ngfx,8,8,num);
-gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-end;
-
-procedure galaga_spr(num:word);
-const
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
-			24*8+0, 24*8+1, 24*8+2, 24*8+3);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-begin
-init_gfx(1,16,16,num);
-gfx_set_desc_data(2,0,64*8,0,4);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
-end;
-
-begin
-iniciar_galagahw:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,224,288,true);
-screen_init(2,256,512,false,true);
-screen_init(3,224,288); //Digdug background
-iniciar_video(224,288);
-//Main CPU
-main_z80:=cpu_z80.create(3072000,264);
-//Sub CPU
-snd_z80:=cpu_z80.create(3072000,264);
-//Sub2 CPU
-sub_z80:=cpu_z80.create(3072000,264);
-//Sound
-namco_sound_init(3,false);
-//IO's
-namco_51xx.read_port[0]:=namco_51xx_io0;
-namco_51xx.read_port[1]:=namco_51xx_io1;
-namco_51xx.read_port[2]:=namco_51xx_io2;
-namco_51xx.read_port[3]:=namco_51xx_io3;
-case main_vars.tipo_maquina of
-    65:begin  //Galaga
-          //CPU's
-          //Main
-          main_z80.change_ram_calls(galaga_getbyte,galaga_putbyte);
-          //Sub1
-          snd_z80.change_ram_calls(galaga_sub_getbyte,galaga_putbyte);
-          //Sub2
-          sub_z80.change_ram_calls(galaga_sub2_getbyte,galaga_putbyte);
-          //Init IO's
-          namco_06xx_init(0,IO51XX,NONE,NONE,NONE,namco_06xx_nmi);
-          //cargar roms
-          if not(cargar_roms(@memoria[0],@galaga_rom[0],'galaga.zip',0)) then exit;
-          if not(cargar_roms(@mem_snd[0],@galaga_sub,'galaga.zip',1)) then exit;
-          if not(cargar_roms(@mem_misc[0],@galaga_sub2,'galaga.zip',1)) then exit;
-          //cargar sonido & iniciar_sonido
-          if not(cargar_roms(@namco_sound.onda_namco[0],@galaga_sound,'galaga.zip',1)) then exit;
-          //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@galaga_char,'galaga.zip',1)) then exit;
-          galaga_chr(0,$100);
-          //convertir sprites
-          if not(cargar_roms(@memoria_temp[0],@galaga_sprites[0],'galaga.zip',0)) then exit;
-          galaga_spr($80);
-          //poner la paleta
-          if not(cargar_roms(@memoria_temp[0],@galaga_prom[0],'galaga.zip',0)) then exit;
-          for f:=0 to $1f do begin
-              ctemp1:=memoria_temp[f];
-              colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
-              colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
-              colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
-          end;
-          //paleta de las estrellas
-          for f:=0 to $3f do begin
-          		ctemp1:=(f shr 0) and $03;
-          		colores[$20+f].r:=map[ctemp1];
-          		ctemp1:=(f shr 2) and $03;
-          		colores[$20+f].g:=map[ctemp1];
-          		ctemp1:=(f shr 4) and $03;
-          		colores[$20+f].b:=map[ctemp1];
-          end;
-          set_pal(colores,32+64);
-          //CLUT
-          for f:=0 to $ff do begin
-            gfx[0].colores[f]:=memoria_temp[$20+f]+$10;
-            gfx[1].colores[f]:=memoria_temp[$120+f];
-          end;
-       end;
-    167:begin //DigDug
-          //Main
-          main_z80.change_ram_calls(digdug_getbyte,digdug_putbyte);
-          //Sub1
-          snd_z80.change_ram_calls(digdug_sub_getbyte,digdug_putbyte);
-          //Sub2
-          sub_z80.change_ram_calls(digdug_sub2_getbyte,digdug_putbyte);
-          //Init IO's
-          namco_06xx_init(0,IO51XX,IO53XX,NONE,NONE,namco_06xx_nmi);
-          //Namco 53XX
-          namcoio_53xx_init(namco_53xx_k_r,namco_53xx_r_r,'digdug.zip');
-          //cargar roms
-          if not(cargar_roms(@memoria[0],@digdug_rom[0],'digdug.zip',0)) then exit;
-          if not(cargar_roms(@mem_snd[0],@digdug_sub,'digdug.zip',0)) then exit;
-          if not(cargar_roms(@mem_misc[0],@digdug_sub2,'digdug.zip',1)) then exit;
-          //cargar sonido & iniciar_sonido
-          if not(cargar_roms(@namco_sound.onda_namco[0],@digdug_sound,'digdug.zip',1)) then exit;
-          //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@digdug_chars,'digdug.zip',1)) then exit;
-          init_gfx(0,8,8,$200);
-          gfx[0].trans[0]:=true;
-          gfx_set_desc_data(1,0,8*8,0);
-          convert_gfx(0,0,@memoria_temp[$0],@pc_x_digdug[0],@pc_y_digdug[0],true,false);
-          //sprites
-          if not(cargar_roms(@memoria_temp[0],@digdug_sprites,'digdug.zip',0)) then exit;
-          galaga_spr($100);
-          //Background
-          if not(cargar_roms(@digdug_bg[0],@digdug_background,'digdug.zip',1)) then exit;
-          if not(cargar_roms(@memoria_temp[0],@digdug_chars2,'digdug.zip',1)) then exit;
-          galaga_chr(2,$100);
-          //poner la paleta
-          if not(cargar_roms(@memoria_temp[0],@digdug_prom[0],'digdug.zip',0)) then exit;
-          for f:=0 to $1f do begin
-              ctemp1:=memoria_temp[f];
-              colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
-              colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
-              colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
-          end;
-          set_pal(colores,32);
-          //CLUT
-          for f:=0 to 15 do begin //chars
-        		gfx[0].colores[f*2+0]:=$0;
-		        gfx[0].colores[f*2+1]:=f;
-          end;
-          for f:=0 to $ff do begin
-            gfx[1].colores[f]:=memoria_temp[$20+f]+$10; //sprites
-            gfx[2].colores[f]:=memoria_temp[$120+f];    //background
-          end;
-        end;
-end;
-//final
-reset_galagahw;
-iniciar_galagahw:=true;
-end;
-
-procedure cerrar_galagahw;
-begin
-if main_vars.tipo_maquina=167 then namco_53xx_close;
-end;
 
 procedure draw_sprites_galaga;
 var
@@ -399,8 +203,8 @@ while EmuStatus=EsRuning do begin
 	      if (scanline>=272) then scanline:=63;
     end;
     if f=223 then begin
-        if main_irq then main_z80.pedir_irq:=ASSERT_LINE;
-        if sub_irq then snd_z80.pedir_irq:=ASSERT_LINE;
+        if main_irq then main_z80.change_irq(ASSERT_LINE);
+        if sub_irq then snd_z80.change_irq(ASSERT_LINE);
         update_video_galaga;
         copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
     end;
@@ -422,60 +226,25 @@ bit:=val and 1;
 case dir of
 		$0:begin	// IRQ1 */
         main_irq:=bit<>0;
-			  if not(main_irq) then main_z80.pedir_irq:=CLEAR_LINE;
+			  if not(main_irq) then main_z80.change_irq(CLEAR_LINE);
 			 end;
 		$1:begin	// IRQ2 */
 			    sub_irq:=bit<>0;
-  			  if not(sub_irq) then snd_z80.pedir_irq:=CLEAR_LINE;
+  			  if not(sub_irq) then snd_z80.change_irq(CLEAR_LINE);
 			 end;
 		$2:sub2_nmi:=(bit=0);	// NMION */
 		$3:if (bit<>0) then begin  // RESET */
-          snd_z80.pedir_reset:=CLEAR_LINE;
-          sub_z80.pedir_reset:=CLEAR_LINE;
+          snd_z80.change_reset(CLEAR_LINE);
+          sub_z80.change_reset(CLEAR_LINE);
        end else begin
-          snd_z80.pedir_reset:=ASSERT_LINE;
-          sub_z80.pedir_reset:=ASSERT_LINE;
+          snd_z80.change_reset(ASSERT_LINE);
+          sub_z80.change_reset(ASSERT_LINE);
        end;
 		$4:; //n.c.
     $05:custom_mod:=(custom_mod and $fe) or (bit shl 0);	// MOD 0
 		$06:custom_mod:=(custom_mod and $fd) or (bit shl 1);	// MOD 1
     $07:custom_mod:=(custom_mod and $fb) or (bit shl 2);	// MOD 2
 end;
-end;
-
-procedure reset_galagahw;
-var
-  f:byte;
-begin
- main_z80.reset;
- snd_z80.reset;
- sub_z80.reset;
- case main_vars.tipo_maquina of
-    65:begin
-          for f:=0 to 5 do galaga_starcontrol[f]:=0;
-          stars_scrollx:=0;
-          stars_scrolly:=0;
-       end;
-   167:begin
-          namcoio_53xx_reset;
-          custom_mod:=0;
-          bg_select:=0;
-          bg_color_bank:=0;
-          bg_disable:=0;
-          tx_color_mode:=0;
-          bg_repaint:=true;
-       end;
- end;
- namco_sound_reset;
- reset_audio;
- namcoio_51xx_reset;
- namcoio_06xx_reset(0);
- main_irq:=false;
- sub_irq:=false;
- sub2_nmi:=false;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- for f:=0 to 7 do galaga_latch(f,0);
 end;
 
 procedure galaga_putbyte(direccion:word;valor:byte);
@@ -633,8 +402,8 @@ while EmuStatus=EsRuning do begin
 	  if (scanline>=272) then scanline:=63;
   end;
   if f=223 then begin
-    if main_irq then main_z80.pedir_irq:=ASSERT_LINE;
-    if sub_irq then snd_z80.pedir_irq:=ASSERT_LINE;
+    if main_irq then main_z80.change_irq(ASSERT_LINE);
+    if sub_irq then snd_z80.change_irq(ASSERT_LINE);
     update_video_digdug;
   end;
  end;
@@ -764,6 +533,214 @@ end;
 function namco_53xx_k_r:byte;
 begin
   namco_53xx_k_r:=custom_mod shl 1;
+end;
+
+//Main
+procedure reset_galagahw;
+var
+  f:byte;
+begin
+ main_z80.reset;
+ snd_z80.reset;
+ sub_z80.reset;
+ case main_vars.tipo_maquina of
+    65:begin
+          for f:=0 to 5 do galaga_starcontrol[f]:=0;
+          stars_scrollx:=0;
+          stars_scrolly:=0;
+       end;
+   167:begin
+          namcoio_53xx_reset;
+          custom_mod:=0;
+          bg_select:=0;
+          bg_color_bank:=0;
+          bg_disable:=0;
+          tx_color_mode:=0;
+          bg_repaint:=true;
+       end;
+ end;
+ namco_sound_reset;
+ reset_audio;
+ namcoio_51xx_reset;
+ namcoio_06xx_reset(0);
+ main_irq:=false;
+ sub_irq:=false;
+ sub2_nmi:=false;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ for f:=0 to 7 do galaga_latch(f,0);
+end;
+
+function iniciar_galagahw:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      ctemp1:byte;
+      memoria_temp:array[0..$3fff] of byte;
+const
+  map:array[0..3] of byte=($00,$47,$97,$de);
+  pc_x_digdug:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
+  pc_y_digdug:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+
+procedure galaga_chr(ngfx:byte;num:word);
+const
+  pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3,  0, 1, 2, 3);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+begin
+init_gfx(ngfx,8,8,num);
+gfx_set_desc_data(2,0,16*8,0,4);
+convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+end;
+
+procedure galaga_spr(num:word);
+const
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
+			24*8+0, 24*8+1, 24*8+2, 24*8+3);
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+begin
+init_gfx(1,16,16,num);
+gfx_set_desc_data(2,0,64*8,0,4);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+end;
+
+begin
+iniciar_galagahw:=false;
+iniciar_audio(false);
+screen_init(1,224,288,true);
+screen_init(2,256,512,false,true);
+screen_init(3,224,288); //Digdug background
+iniciar_video(224,288);
+//Main CPU
+main_z80:=cpu_z80.create(3072000,264);
+//Sub CPU
+snd_z80:=cpu_z80.create(3072000,264);
+//Sub2 CPU
+sub_z80:=cpu_z80.create(3072000,264);
+//Sound
+namco_sound_init(3,false);
+//IO's
+namco_51xx.read_port[0]:=namco_51xx_io0;
+namco_51xx.read_port[1]:=namco_51xx_io1;
+namco_51xx.read_port[2]:=namco_51xx_io2;
+namco_51xx.read_port[3]:=namco_51xx_io3;
+case main_vars.tipo_maquina of
+    65:begin  //Galaga
+          //CPU's
+          //Main
+          main_z80.change_ram_calls(galaga_getbyte,galaga_putbyte);
+          //Sub1
+          snd_z80.change_ram_calls(galaga_sub_getbyte,galaga_putbyte);
+          //Sub2
+          sub_z80.change_ram_calls(galaga_sub2_getbyte,galaga_putbyte);
+          //Init IO's
+          namco_06xx_init(0,IO51XX,NONE,NONE,NONE,namco_06xx_nmi);
+          //cargar roms
+          if not(cargar_roms(@memoria[0],@galaga_rom[0],'galaga.zip',0)) then exit;
+          if not(cargar_roms(@mem_snd[0],@galaga_sub,'galaga.zip',1)) then exit;
+          if not(cargar_roms(@mem_misc[0],@galaga_sub2,'galaga.zip',1)) then exit;
+          //cargar sonido & iniciar_sonido
+          if not(cargar_roms(@namco_sound.onda_namco[0],@galaga_sound,'galaga.zip',1)) then exit;
+          //convertir chars
+          if not(cargar_roms(@memoria_temp[0],@galaga_char,'galaga.zip',1)) then exit;
+          galaga_chr(0,$100);
+          //convertir sprites
+          if not(cargar_roms(@memoria_temp[0],@galaga_sprites[0],'galaga.zip',0)) then exit;
+          galaga_spr($80);
+          //poner la paleta
+          if not(cargar_roms(@memoria_temp[0],@galaga_prom[0],'galaga.zip',0)) then exit;
+          for f:=0 to $1f do begin
+              ctemp1:=memoria_temp[f];
+              colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
+              colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
+              colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
+          end;
+          //paleta de las estrellas
+          for f:=0 to $3f do begin
+          		ctemp1:=(f shr 0) and $03;
+          		colores[$20+f].r:=map[ctemp1];
+          		ctemp1:=(f shr 2) and $03;
+          		colores[$20+f].g:=map[ctemp1];
+          		ctemp1:=(f shr 4) and $03;
+          		colores[$20+f].b:=map[ctemp1];
+          end;
+          set_pal(colores,32+64);
+          //CLUT
+          for f:=0 to $ff do begin
+            gfx[0].colores[f]:=memoria_temp[$20+f]+$10;
+            gfx[1].colores[f]:=memoria_temp[$120+f];
+          end;
+       end;
+    167:begin //DigDug
+          //Main
+          main_z80.change_ram_calls(digdug_getbyte,digdug_putbyte);
+          //Sub1
+          snd_z80.change_ram_calls(digdug_sub_getbyte,digdug_putbyte);
+          //Sub2
+          sub_z80.change_ram_calls(digdug_sub2_getbyte,digdug_putbyte);
+          //Init IO's
+          namco_06xx_init(0,IO51XX,IO53XX,NONE,NONE,namco_06xx_nmi);
+          //Namco 53XX
+          namcoio_53xx_init(namco_53xx_k_r,namco_53xx_r_r,'digdug.zip');
+          //cargar roms
+          if not(cargar_roms(@memoria[0],@digdug_rom[0],'digdug.zip',0)) then exit;
+          if not(cargar_roms(@mem_snd[0],@digdug_sub,'digdug.zip',0)) then exit;
+          if not(cargar_roms(@mem_misc[0],@digdug_sub2,'digdug.zip',1)) then exit;
+          //cargar sonido & iniciar_sonido
+          if not(cargar_roms(@namco_sound.onda_namco[0],@digdug_sound,'digdug.zip',1)) then exit;
+          //convertir chars
+          if not(cargar_roms(@memoria_temp[0],@digdug_chars,'digdug.zip',1)) then exit;
+          init_gfx(0,8,8,$200);
+          gfx[0].trans[0]:=true;
+          gfx_set_desc_data(1,0,8*8,0);
+          convert_gfx(0,0,@memoria_temp[$0],@pc_x_digdug[0],@pc_y_digdug[0],true,false);
+          //sprites
+          if not(cargar_roms(@memoria_temp[0],@digdug_sprites,'digdug.zip',0)) then exit;
+          galaga_spr($100);
+          //Background
+          if not(cargar_roms(@digdug_bg[0],@digdug_background,'digdug.zip',1)) then exit;
+          if not(cargar_roms(@memoria_temp[0],@digdug_chars2,'digdug.zip',1)) then exit;
+          galaga_chr(2,$100);
+          //poner la paleta
+          if not(cargar_roms(@memoria_temp[0],@digdug_prom[0],'digdug.zip',0)) then exit;
+          for f:=0 to $1f do begin
+              ctemp1:=memoria_temp[f];
+              colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
+              colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
+              colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
+          end;
+          set_pal(colores,32);
+          //CLUT
+          for f:=0 to 15 do begin //chars
+        		gfx[0].colores[f*2+0]:=$0;
+		        gfx[0].colores[f*2+1]:=f;
+          end;
+          for f:=0 to $ff do begin
+            gfx[1].colores[f]:=memoria_temp[$20+f]+$10; //sprites
+            gfx[2].colores[f]:=memoria_temp[$120+f];    //background
+          end;
+        end;
+end;
+//final
+reset_galagahw;
+iniciar_galagahw:=true;
+end;
+
+procedure cerrar_galagahw;
+begin
+if main_vars.tipo_maquina=167 then namco_53xx_close;
+end;
+
+procedure Cargar_galagahw;
+begin
+llamadas_maquina.iniciar:=iniciar_galagahw;
+case main_vars.tipo_maquina of
+  65:llamadas_maquina.bucle_general:=galaga_principal;
+  167:llamadas_maquina.bucle_general:=digdug_principal;
+end;
+llamadas_maquina.cerrar:=cerrar_galagahw;
+llamadas_maquina.reset:=reset_galagahw;
+llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

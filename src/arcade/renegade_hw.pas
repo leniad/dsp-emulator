@@ -5,22 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,gfx_engine,m6805,ym_3812,
      rom_engine,pal_engine,sound_engine,generic_adpcm;
 
-procedure Cargar_renegade;
-procedure principal_renegade;
-function iniciar_renegade:boolean;
-procedure cerrar_renegade;
-procedure reset_renegade;
-//Main CPU
-function getbyte_renegade(direccion:word):byte;
-procedure putbyte_renegade(direccion:word;valor:byte);
-//Sound CPU
-function getbyte_snd_renegade(direccion:word):byte;
-procedure putbyte_snd_renegade(direccion:word;valor:byte);
-procedure renegade_sound_update;
-procedure snd_irq(irqstate:byte);
-//MCU CPU
-function renegade_mcu_getbyte(direccion:word):byte;
-procedure renegade_mcu_putbyte(direccion:word;valor:byte);
+procedure cargar_renegade;
 
 implementation
 const
@@ -63,134 +48,6 @@ var
   ddr_a,ddr_b,ddr_c,from_main,from_mcu:byte;
   main_sent,mcu_sent:boolean;
   scroll_comp:integer;
-
-procedure Cargar_renegade;
-begin
-llamadas_maquina.iniciar:=iniciar_renegade;
-llamadas_maquina.bucle_general:=principal_renegade;
-llamadas_maquina.cerrar:=cerrar_renegade;
-llamadas_maquina.reset:=reset_renegade;
-end;
-
-function iniciar_renegade:boolean;
-const
-    pc_x:array[0..7] of dword=(1, 0, 65, 64, 129, 128, 193, 192);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-    pt_x:array[0..15] of dword=(3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
-		32*8+3,32*8+2 ,32*8+1 ,32*8+0 ,48*8+3 ,48*8+2 ,48*8+1 ,48*8+0);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
-var
-  f:byte;
-  memoria_temp:array[0..$5ffff] of byte;
-begin
-iniciar_renegade:=false;
-iniciar_audio(false);
-screen_init(1,1024,256);
-screen_mod_scroll(1,1024,256,1023,0,0,0);
-screen_init(2,256,256,true);
-screen_init(3,256,256,false,true);
-iniciar_video(240,240);
-//Main CPU
-main_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
-main_m6502.change_ram_calls(getbyte_renegade,putbyte_renegade);
-//Sound CPU
-snd_m6809:=cpu_m6809.Create(1500000,256);
-snd_m6809.change_ram_calls(getbyte_snd_renegade,putbyte_snd_renegade);
-snd_m6809.init_sound(renegade_sound_update);
-//MCU CPU
-main_m6805:=cpu_m6805.create(3000000,256,tipo_m68705);
-main_m6805.change_ram_calls(renegade_mcu_getbyte,renegade_mcu_putbyte);
-//Sound Chip
-ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
-ym3812_0.change_irq_calls(snd_irq);
-gen_adpcm_init(0,8000,$20000);
-//cargar roms
-if not(cargar_roms(@memoria_temp,@renegade_rom,'renegade.zip',0)) then exit;
-copymemory(@memoria[$8000],@memoria_temp[0],$8000);
-copymemory(@rom_mem[0,0],@memoria_temp[$8000],$4000);
-copymemory(@rom_mem[1,0],@memoria_temp[$c000],$4000);
-//cargar roms audio
-if not(cargar_roms(@mem_snd,@renegade_snd,'renegade.zip')) then exit;
-//cargar roms mcu
-if not(cargar_roms(@mcu_mem,@renegade_mcu,'renegade.zip')) then exit;
-//adpcm roms
-if not(cargar_roms(@gen_adpcm[0].mem[0],@renegade_adpcm,'renegade.zip',0)) then exit;
-//Cargar chars
-if not(cargar_roms(@memoria_temp,@renegade_char,'renegade.zip')) then exit;
-init_gfx(0,8,8,$400);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,32*8,2,4,6);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
-//Cargar tiles
-if not(cargar_roms(@memoria_temp,@renegade_tiles,'renegade.zip',0)) then exit;
-init_gfx(1,16,16,$800);
-for f:=0 to 1 do begin
-  gfx_set_desc_data(3,8,64*8,4,$8000*8+0,$8000*8+4);
-  convert_gfx(1,f*$400*16*16,@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-  gfx_set_desc_data(3,8,64*8,0,$C000*8+0,$C000*8+4);
-  convert_gfx(1,(f*$400*16*16)+($100*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-  gfx_set_desc_data(3,8,64*8,$4000*8+4,$10000*8+0,$10000*8+4);
-  convert_gfx(1,(f*$400*16*16)+($200*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-  gfx_set_desc_data(3,8,64*8,$4000*8+0,$14000*8+0,$14000*8+4);
-  convert_gfx(1,(f*$400*16*16)+($300*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-end;
-//sprites
-if not(cargar_roms(@memoria_temp,@renegade_sprites,'renegade.zip',0)) then exit;
-init_gfx(2,16,16,$1000);
-gfx[2].trans[0]:=true;
-for f:=0 to 3 do begin
-  gfx_set_desc_data(3,16,64*8,4,$8000*8+0,$8000*8+4);
-  convert_gfx(2,f*$400*16*16,@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-  gfx_set_desc_data(3,16,64*8,0,$C000*8+0,$C000*8+4);
-  convert_gfx(2,(f*$400*16*16)+($100*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-  gfx_set_desc_data(3,16,64*8,$4000*8+4,$10000*8+0,$10000*8+4);
-  convert_gfx(2,(f*$400*16*16)+($200*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-  gfx_set_desc_data(3,16,64*8,$4000*8+0,$14000*8+0,$14000*8+4);
-  convert_gfx(2,(f*$400*16*16)+($300*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-end;
-//Dip
-marcade.dswa:=$bf;
-marcade.dswb:=$8f;
-marcade.dswa_val:=@renegade_dip_a;
-marcade.dswb_val:=@renegade_dip_b;
-//final
-reset_renegade;
-iniciar_renegade:=true;
-end;
-
-procedure cerrar_renegade;
-begin
-gen_adpcm_close(0);
-end;
-
-procedure reset_renegade;
-begin
-main_m6502.reset;
-snd_m6809.reset;
-main_m6805.reset;
-ym3812_0.reset;
-gen_adpcm_reset(0);
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-rom_bank:=0;
-sound_latch:=0;
-scroll_x:=0;
-port_c_in:=0;
-port_c_out:=0;
-port_b_out:=0;
-port_b_in:=0;
-port_a_in:=0;
-port_a_out:=0;
-ddr_a:=0;
-ddr_b:=0;
-ddr_c:=0;
-from_main:=0;
-from_mcu:=0;
-main_sent:=false;
-mcu_sent:=false;
-scroll_comp:=-256;
-end;
 
 procedure update_video_renegade;
 var
@@ -327,7 +184,7 @@ case direccion of
             mcu_sent:=false;
 		        getbyte_renegade:=from_mcu;
          end;
-   $3805:main_m6805.pedir_reset:=PULSE_LINE;
+   $3805:main_m6805.change_reset(PULSE_LINE);
    $4000..$7fff:getbyte_renegade:=rom_mem[rom_bank,direccion and $3fff];
 end;
 end;
@@ -476,6 +333,135 @@ end;
 procedure snd_irq(irqstate:byte);
 begin
   snd_m6809.change_firq(irqstate);
+end;
+
+//Main
+procedure reset_renegade;
+begin
+main_m6502.reset;
+snd_m6809.reset;
+main_m6805.reset;
+ym3812_0.reset;
+gen_adpcm_reset(0);
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+rom_bank:=0;
+sound_latch:=0;
+scroll_x:=0;
+port_c_in:=0;
+port_c_out:=0;
+port_b_out:=0;
+port_b_in:=0;
+port_a_in:=0;
+port_a_out:=0;
+ddr_a:=0;
+ddr_b:=0;
+ddr_c:=0;
+from_main:=0;
+from_mcu:=0;
+main_sent:=false;
+mcu_sent:=false;
+scroll_comp:=-256;
+end;
+
+function iniciar_renegade:boolean;
+const
+    pc_x:array[0..7] of dword=(1, 0, 65, 64, 129, 128, 193, 192);
+    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+    pt_x:array[0..15] of dword=(3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
+		32*8+3,32*8+2 ,32*8+1 ,32*8+0 ,48*8+3 ,48*8+2 ,48*8+1 ,48*8+0);
+    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+		8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+var
+  f:byte;
+  memoria_temp:array[0..$5ffff] of byte;
+begin
+iniciar_renegade:=false;
+iniciar_audio(false);
+screen_init(1,1024,256);
+screen_mod_scroll(1,1024,256,1023,0,0,0);
+screen_init(2,256,256,true);
+screen_init(3,256,256,false,true);
+iniciar_video(240,240);
+//Main CPU
+main_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
+main_m6502.change_ram_calls(getbyte_renegade,putbyte_renegade);
+//Sound CPU
+snd_m6809:=cpu_m6809.Create(1500000,256);
+snd_m6809.change_ram_calls(getbyte_snd_renegade,putbyte_snd_renegade);
+snd_m6809.init_sound(renegade_sound_update);
+//MCU CPU
+main_m6805:=cpu_m6805.create(3000000,256,tipo_m68705);
+main_m6805.change_ram_calls(renegade_mcu_getbyte,renegade_mcu_putbyte);
+//Sound Chip
+ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
+ym3812_0.change_irq_calls(snd_irq);
+gen_adpcm_init(0,8000,$20000);
+//cargar roms
+if not(cargar_roms(@memoria_temp,@renegade_rom,'renegade.zip',0)) then exit;
+copymemory(@memoria[$8000],@memoria_temp[0],$8000);
+copymemory(@rom_mem[0,0],@memoria_temp[$8000],$4000);
+copymemory(@rom_mem[1,0],@memoria_temp[$c000],$4000);
+//cargar roms audio
+if not(cargar_roms(@mem_snd,@renegade_snd,'renegade.zip')) then exit;
+//cargar roms mcu
+if not(cargar_roms(@mcu_mem,@renegade_mcu,'renegade.zip')) then exit;
+//adpcm roms
+if not(cargar_roms(@gen_adpcm[0].mem[0],@renegade_adpcm,'renegade.zip',0)) then exit;
+//Cargar chars
+if not(cargar_roms(@memoria_temp,@renegade_char,'renegade.zip')) then exit;
+init_gfx(0,8,8,$400);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,32*8,2,4,6);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+//Cargar tiles
+if not(cargar_roms(@memoria_temp,@renegade_tiles,'renegade.zip',0)) then exit;
+init_gfx(1,16,16,$800);
+for f:=0 to 1 do begin
+  gfx_set_desc_data(3,8,64*8,4,$8000*8+0,$8000*8+4);
+  convert_gfx(1,f*$400*16*16,@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
+  gfx_set_desc_data(3,8,64*8,0,$C000*8+0,$C000*8+4);
+  convert_gfx(1,(f*$400*16*16)+($100*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
+  gfx_set_desc_data(3,8,64*8,$4000*8+4,$10000*8+0,$10000*8+4);
+  convert_gfx(1,(f*$400*16*16)+($200*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
+  gfx_set_desc_data(3,8,64*8,$4000*8+0,$14000*8+0,$14000*8+4);
+  convert_gfx(1,(f*$400*16*16)+($300*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
+end;
+//sprites
+if not(cargar_roms(@memoria_temp,@renegade_sprites,'renegade.zip',0)) then exit;
+init_gfx(2,16,16,$1000);
+gfx[2].trans[0]:=true;
+for f:=0 to 3 do begin
+  gfx_set_desc_data(3,16,64*8,4,$8000*8+0,$8000*8+4);
+  convert_gfx(2,f*$400*16*16,@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
+  gfx_set_desc_data(3,16,64*8,0,$C000*8+0,$C000*8+4);
+  convert_gfx(2,(f*$400*16*16)+($100*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
+  gfx_set_desc_data(3,16,64*8,$4000*8+4,$10000*8+0,$10000*8+4);
+  convert_gfx(2,(f*$400*16*16)+($200*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
+  gfx_set_desc_data(3,16,64*8,$4000*8+0,$14000*8+0,$14000*8+4);
+  convert_gfx(2,(f*$400*16*16)+($300*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
+end;
+//Dip
+marcade.dswa:=$bf;
+marcade.dswb:=$8f;
+marcade.dswa_val:=@renegade_dip_a;
+marcade.dswb_val:=@renegade_dip_b;
+//final
+reset_renegade;
+iniciar_renegade:=true;
+end;
+
+procedure cerrar_renegade;
+begin
+gen_adpcm_close(0);
+end;
+
+procedure Cargar_renegade;
+begin
+llamadas_maquina.iniciar:=iniciar_renegade;
+llamadas_maquina.bucle_general:=principal_renegade;
+llamadas_maquina.cerrar:=cerrar_renegade;
+llamadas_maquina.reset:=reset_renegade;
 end;
 
 end.

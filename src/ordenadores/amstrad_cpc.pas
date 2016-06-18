@@ -327,14 +327,14 @@ cpc_ga.lines_count:=cpc_ga.lines_count+1;
 if (cpc_ga.lines_sync<>0) then begin
   cpc_ga.lines_sync:=cpc_ga.lines_sync-1;
   if (cpc_ga.lines_sync=0) then begin
-    if (cpc_ga.lines_count>=32) then main_z80.pedir_irq:=PULSE_LINE
-      else main_z80.pedir_irq:=CLEAR_LINE;
+    if (cpc_ga.lines_count>=32) then main_z80.change_irq(PULSE_LINE)
+      else main_z80.change_irq(CLEAR_LINE);
     cpc_ga.lines_count:=0;
   end;
 end;
 if (cpc_ga.lines_count>=52) then begin
     cpc_ga.lines_count:=0;
-    main_z80.pedir_irq:=PULSE_LINE;
+    main_z80.change_irq(PULSE_LINE);
 end;
 end;
 
@@ -542,7 +542,7 @@ case (val shr 6) of
                 cpc_ga.rom_high:=(val and 8)=0;
                 if (val and $10)<>0 then begin
                    cpc_ga.lines_count:=0;
-                   main_z80.pedir_irq:=CLEAR_LINE;
+                   main_z80.change_irq(CLEAR_LINE);
                 end;
             end;
           3:if cpc_ga.ram_exp=1 then begin //Dk'tronics RAM expansion
@@ -645,7 +645,7 @@ function amstrad_raised_z80:byte;
 begin
   cpc_ga.lines_count:=cpc_ga.lines_count and $1f;
   amstrad_raised_z80:=2;
-  main_z80.pedir_irq:=CLEAR_LINE;
+  main_z80.change_irq(CLEAR_LINE);
 end;
 
 //PPI 8255

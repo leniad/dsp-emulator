@@ -77,19 +77,13 @@ end;
 stringgrid1.RowCount:=2;
 f:=1;
 if extension_dsk='ZIP' then begin
-  if not(find_first_file_zip(nombre_dsk,'*.dsk',nombre_zip,longitud,crc,false)) then
-    if not(find_first_file_zip(nombre_dsk,'*.ipf',nombre_zip,longitud,crc,false)) then exit;
+  if not(search_file_from_zip(nombre_dsk,'*.dsk',nombre_zip,longitud,crc,false)) then
+    if not(search_file_from_zip(nombre_dsk,'*.ipf',nombre_zip,longitud,crc,false)) then exit;
   repeat
     extension_zip:=extension_fichero(nombre_zip);
     if ((extension_zip='DSK') or (extension_zip='IPF')) then begin
        stringgrid1.Cells[0,f]:=nombre_zip;
        stringgrid1.Cells[1,f]:=inttostr(longitud);
-       if f=1 then begin
-        nombre_def:=nombre_zip;
-        file_size:=longitud;
-        getmem(datos_dsk,longitud);
-        if not(load_file_from_zip(nombre_dsk,nombre_zip,datos_dsk,longitud,crc,true)) then exit;
-       end;
        inc(f);
        stringgrid1.RowCount:=stringgrid1.RowCount+1;
     end;
@@ -113,15 +107,16 @@ procedure Tload_dsk.FileListBox1DblClick(Sender: TObject);
 var
   cadena:string;
   correcto:boolean;
+  extension_final:string;
 begin
 if extension_dsk='ZIP' then cadena:=extractfilename(nombre_zip)
   else cadena:=extractfilename(nombre_dsk);
 if cadena='' then exit;
-extension_dsk:=extension_fichero(cadena);
-if extension_dsk='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
-if extension_dsk='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
+extension_final:=extension_fichero(cadena);
+if extension_final='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
+if extension_final='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
 if correcto then begin
-    change_caption(llamadas_maquina.caption+' - '+extension_dsk+': '+cadena);
+    change_caption(llamadas_maquina.caption+' - '+extension_final+': '+cadena);
     ResetFDC;
     dsk[0].ImageName:=cadena;
     load_dsk.Button1Click(self);

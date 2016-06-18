@@ -5,22 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232;
 
-procedure Cargar_gradius3;
-function iniciar_gradius3:boolean;
-procedure reset_gradius3;
-procedure cerrar_gradius3;
-//gradius3
-procedure gradius3_principal;
-function gradius3_getword(direccion:dword):word;
-procedure gradius3_putword(direccion:dword;valor:word);
-function gradius3_getword_sub(direccion:dword):word;
-procedure gradius3_putword_sub(direccion:dword;valor:word);
-function gradius3_snd_getbyte(direccion:word):byte;
-procedure gradius3_snd_putbyte(direccion:word;valor:byte);
-procedure gradius3_sound_update;
-procedure gradius3_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
-procedure gradius3_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
-procedure gradius3_k007232_cb(valor:byte);
+procedure cargar_gradius3;
 
 implementation
 const
@@ -65,93 +50,6 @@ var
  sound_latch,sprite_colorbase,irqB_mask:byte;
  layer_colorbase:array[0..2] of byte;
  irqA_mask,priority:boolean;
-
-procedure Cargar_gradius3;
-begin
-llamadas_maquina.iniciar:=iniciar_gradius3;
-llamadas_maquina.cerrar:=cerrar_gradius3;
-llamadas_maquina.reset:=reset_gradius3;
-llamadas_maquina.bucle_general:=gradius3_principal;
-end;
-
-function iniciar_gradius3:boolean;
-begin
-iniciar_gradius3:=false;
-//Pantallas para el K052109
-screen_init(1,512,256,true);
-screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,256,256,255);
-screen_init(3,512,256,true);
-screen_mod_scroll(3,512,512,511,256,256,255);
-screen_init(4,1024,1024,false,true);
-iniciar_video(320,224,true);
-iniciar_audio(false);
-//cargar roms
-if not(cargar_roms16w(@rom[0],@gradius3_rom[0],'gradius3.zip',0)) then exit;
-if not(cargar_roms16w(@rom_sub[0],@gradius3_rom_sub[0],'gradius3.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@gradius3_sound,'gradius3.zip',1)) then exit;
-//Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(gradius3_getword,gradius3_putword);
-sub_m68000:=cpu_m68000.create(10000000,256);
-sub_m68000.change_ram16_calls(gradius3_getword_sub,gradius3_putword_sub);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(gradius3_snd_getbyte,gradius3_snd_putbyte);
-snd_z80.init_sound(gradius3_sound_update);
-//Sound Chips
-ym2151_0:=ym2151_chip.create(3579545);
-getmem(k007232_rom,$80000);
-if not(cargar_roms(k007232_rom,@gradius3_k007232,'gradius3.zip',0)) then exit;
-k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,gradius3_k007232_cb);
-//Iniciar video
-k052109_0:=k052109_chip.create(1,2,3,gradius3_cb,pbyte(@ram_gfx[0]),$20000);
-getmem(sprite_rom,$200000);
-if not(cargar_roms32b(sprite_rom,@gradius3_sprites_1,'gradius3.zip',0)) then exit;
-if not(cargar_roms32b_b(sprite_rom,@gradius3_sprites_2,'gradius3.zip',0)) then exit;
-k051960_0:=k051960_chip.create(4,sprite_rom,$200000,gradius3_sprite_cb,1);
-layer_colorbase[0]:=0;
-layer_colorbase[1]:=32;
-layer_colorbase[2]:=48;
-sprite_colorbase:=16;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswa_val:=@gradius3_dip_a;
-marcade.dswb:=$5a;
-marcade.dswb_val:=@gradius3_dip_b;
-marcade.dswc:=$ff;
-marcade.dswc_val:=@gradius3_dip_c;
-//final
-reset_gradius3;
-iniciar_gradius3:=true;
-end;
-
-procedure cerrar_gradius3;
-begin
-if k007232_rom<>nil then freemem(k007232_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-k007232_rom:=nil;
-sprite_rom:=nil;
-end;
-
-procedure reset_gradius3;
-begin
- main_m68000.reset;
- sub_m68000.reset;
- sub_m68000.pedir_halt:=ASSERT_LINE;
- snd_z80.reset;
- k052109_0.reset;
- ym2151_0.reset;
- k051960_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- sound_latch:=0;
- irqA_mask:=false;
- irqB_mask:=0;
-end;
 
 procedure gradius3_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
@@ -318,14 +216,14 @@ case direccion of
     $0c0000:begin
               valor:=valor shr 8;
               priority:=(valor and $4)<>0;
-              if (valor and $8)<>0 then sub_m68000.pedir_halt:=CLEAR_LINE
-                else sub_m68000.pedir_halt:=ASSERT_LINE;
+              if (valor and $8)<>0 then sub_m68000.change_halt(CLEAR_LINE)
+                else sub_m68000.change_halt(ASSERT_LINE);
 		          irqA_mask:=(valor and $20)<>0;
             end;
     $0d8000:if (irqB_mask and 4)<>0 then sub_m68000.irq[4]:=HOLD_LINE;
     $0e0000:; //wd
     $0e8000:sound_latch:=valor shr 8;
-    $0f0000:snd_z80.pedir_irq:=HOLD_LINE;
+    $0f0000:snd_z80.change_irq(HOLD_LINE);
     $100000..$103fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $14c000..$153fff:begin
                         direccion:=(direccion-$14c000) shr 1;
@@ -402,6 +300,94 @@ procedure gradius3_sound_update;
 begin
   ym2151_0.update;
   k007232_0.update;
+end;
+
+//Main
+procedure reset_gradius3;
+begin
+ main_m68000.reset;
+ sub_m68000.reset;
+ sub_m68000.change_halt(ASSERT_LINE);
+ snd_z80.reset;
+ k052109_0.reset;
+ ym2151_0.reset;
+ k051960_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ sound_latch:=0;
+ irqA_mask:=false;
+ irqB_mask:=0;
+end;
+
+function iniciar_gradius3:boolean;
+begin
+iniciar_gradius3:=false;
+//Pantallas para el K052109
+screen_init(1,512,256,true);
+screen_init(2,512,256,true);
+screen_mod_scroll(2,512,512,511,256,256,255);
+screen_init(3,512,256,true);
+screen_mod_scroll(3,512,512,511,256,256,255);
+screen_init(4,1024,1024,false,true);
+iniciar_video(320,224,true);
+iniciar_audio(false);
+//cargar roms
+if not(cargar_roms16w(@rom[0],@gradius3_rom[0],'gradius3.zip',0)) then exit;
+if not(cargar_roms16w(@rom_sub[0],@gradius3_rom_sub[0],'gradius3.zip',0)) then exit;
+//cargar sonido
+if not(cargar_roms(@mem_snd[0],@gradius3_sound,'gradius3.zip',1)) then exit;
+//Main CPU
+main_m68000:=cpu_m68000.create(10000000,256);
+main_m68000.change_ram16_calls(gradius3_getword,gradius3_putword);
+sub_m68000:=cpu_m68000.create(10000000,256);
+sub_m68000.change_ram16_calls(gradius3_getword_sub,gradius3_putword_sub);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,256);
+snd_z80.change_ram_calls(gradius3_snd_getbyte,gradius3_snd_putbyte);
+snd_z80.init_sound(gradius3_sound_update);
+//Sound Chips
+ym2151_0:=ym2151_chip.create(3579545);
+getmem(k007232_rom,$80000);
+if not(cargar_roms(k007232_rom,@gradius3_k007232,'gradius3.zip',0)) then exit;
+k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,gradius3_k007232_cb);
+//Iniciar video
+k052109_0:=k052109_chip.create(1,2,3,gradius3_cb,pbyte(@ram_gfx[0]),$20000);
+getmem(sprite_rom,$200000);
+if not(cargar_roms32b(sprite_rom,@gradius3_sprites_1,'gradius3.zip',0)) then exit;
+if not(cargar_roms32b_b(sprite_rom,@gradius3_sprites_2,'gradius3.zip',0)) then exit;
+k051960_0:=k051960_chip.create(4,sprite_rom,$200000,gradius3_sprite_cb,1);
+layer_colorbase[0]:=0;
+layer_colorbase[1]:=32;
+layer_colorbase[2]:=48;
+sprite_colorbase:=16;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswa_val:=@gradius3_dip_a;
+marcade.dswb:=$5a;
+marcade.dswb_val:=@gradius3_dip_b;
+marcade.dswc:=$ff;
+marcade.dswc_val:=@gradius3_dip_c;
+//final
+reset_gradius3;
+iniciar_gradius3:=true;
+end;
+
+procedure cerrar_gradius3;
+begin
+if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+end;
+
+procedure Cargar_gradius3;
+begin
+llamadas_maquina.iniciar:=iniciar_gradius3;
+llamadas_maquina.cerrar:=cerrar_gradius3;
+llamadas_maquina.reset:=reset_gradius3;
+llamadas_maquina.bucle_general:=gradius3_principal;
 end;
 
 end.

@@ -1,3 +1,14 @@
+procedure m680x_neg(valor:pbyte;cc:pband_m6809);
+var
+  tempw:word;
+begin
+tempw:=-valor^;
+cc.n:=(tempw and $80)<>0;
+cc.z:=(tempw and $ff)=0;
+cc.c:=(tempw and $100)<>0;
+cc.v:=((0 xor valor^ xor tempw xor (tempw shr 1)) and $80)<>0;
+valor^:=tempw;
+end;
 
 function m680x_com(valor:byte;cc:pband_m6809):byte;
 var
@@ -70,26 +81,26 @@ cc.z:=(tempw and $ff)=0;
 m680x_rol:=tempw;
 end;
 
-function m680x_dec(valor:byte;cc:pband_m6809):byte;
+procedure m680x_dec(valor:pbyte;cc:pband_m6809);
 var
   tempw:word;
 begin
-tempw:=valor-1;
+tempw:=valor^-1;
 cc.z:=((tempw and $ff)=0);
 cc.n:=(tempw and $80)<>0;
-cc.v:=((valor xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
-m680x_dec:=tempw;
+cc.v:=((valor^ xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+valor^:=tempw;
 end;
 
-function m680x_inc(valor:byte;cc:pband_m6809):byte;
+procedure m680x_inc(valor:pbyte;cc:pband_m6809);
 var
   tempw:word;
 begin
-tempw:=valor+1;
+tempw:=valor^+1;
 cc.z:=((tempw and $ff)=0);
 cc.n:=(tempw and $80)<>0;
-cc.v:=((valor xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
-m680x_inc:=tempw;
+cc.v:=((valor^ xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+valor^:=tempw;
 end;
 
 procedure m680x_tst(valor:byte;cc:pband_m6809);

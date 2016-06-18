@@ -5,20 +5,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      hd6309,nz80,main_engine,controls_engine,gfx_engine,
      rom_engine,pal_engine,konami_video,ym_2203,upd7759,sound_engine;
 
-procedure Cargar_combatsc;
-procedure combatsc_principal;
-function iniciar_combatsc:boolean;
-procedure reset_combatsc;
-//Main CPU
-function combatsc_getbyte(direccion:word):byte;
-procedure combatsc_putbyte(direccion:word;valor:byte);
-//Sound CPU
-function sound_getbyte(direccion:word):byte;
-procedure sound_putbyte(direccion:word;valor:byte);
-procedure combatsc_sound_update;
+procedure cargar_combatsc;
 
 implementation
-//uses principal,sysutils;
 
 const
         combatsc_rom:array[0..2] of tipo_roms=(
@@ -38,110 +27,6 @@ var
  video_circuit,bank_rom,prot_0,prot_1,vreg,priority,sound_latch:byte;
  page_ram:array[0..1,0..$1fff] of byte;
  scroll_ram:array[0..1,0..$3f] of byte;
-
-procedure Cargar_combatsc;
-begin
-llamadas_maquina.iniciar:=iniciar_combatsc;
-llamadas_maquina.bucle_general:=combatsc_principal;
-llamadas_maquina.reset:=reset_combatsc;
-end;
-
-function iniciar_combatsc:boolean;
-var
-  f:word;
-  memoria_temp:array[0..$7ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-procedure clut_combatsc;
-var
-  chip,pal,i,ctabentry,clut:byte;
-begin
-for chip:=0 to 1 do begin
-		for pal:=0 to 7 do begin
-			clut:=(chip shl 1) or (pal and 1);
-			for i:=0 to $ff do begin
-				if (((pal and $01)=0) and (memoria_temp[(clut shl 8) or i]=0)) then ctabentry:=0
-				  else ctabentry:=(pal shl 4) or (memoria_temp[(clut shl 8) or i] and $0f);
-        gfx[chip].colores[(pal shl 8) or i]:=ctabentry;
-			end;
-		end;
-end;
-end;
-begin
-iniciar_combatsc:=false;
-iniciar_audio(false);
-//Pantallas
-screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,256,256,255);
-screen_init(2,256,256,true);
-screen_mod_scroll(2,256,256,255,256,256,255);
-screen_init(3,256,256,true);
-screen_mod_scroll(3,256,256,255,256,256,255);
-screen_init(4,256,256,true);
-screen_mod_scroll(4,256,256,255,256,256,255);
-screen_init(5,512,256,false,true); //Final
-screen_init(6,256,256,true); //Text
-screen_mod_scroll(6,256,256,255,256,256,255);
-iniciar_video(256,224);
-//iniciar_video(256,256);
-//Main CPU
-main_hd6309:=cpu_hd6309.create(12000000,$100);
-main_hd6309.change_ram_calls(combatsc_getbyte,combatsc_putbyte);
-//Sound CPU
-snd_z80:=cpu_z80.create(3579545,$100);
-snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
-snd_z80.init_sound(combatsc_sound_update);
-//Audio chips
-ym2203_0:=ym2203_chip.create(3000000,4);
-upd7759_0:=upd7759_chip.create(640000,2);
-if not(cargar_roms(upd7759_0.get_rom_addr,@combatsc_upd,'combatsc.zip')) then exit;
-//cargar roms
-if not(cargar_roms(@memoria_temp[0],@combatsc_rom[0],'combatsc.zip',0)) then exit;
-//Pongo las ROMs en su banco
-copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
-for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$4000)],$4000);
-for f:=0 to 1 do copymemory(@memoria_rom[8+f,0],@memoria_temp[0+(f*$4000)],$4000);
-//Cargar Sound
-if not(cargar_roms(@mem_snd[0],@combatsc_sound,'combatsc.zip',1)) then exit;
-//convertir chars
-if not(cargar_roms16b(@memoria_temp[0],@combatsc_chars[0],'combatsc.zip',0)) then exit;
-init_gfx(0,8,8,$4000);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//chars 2
-if not(cargar_roms16b(@memoria_temp[0],@combatsc_chars2[0],'combatsc.zip',0)) then exit;
-init_gfx(1,8,8,$4000);
-gfx[1].trans[0]:=true;
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//Color lookup
-if not(cargar_roms(@memoria_temp[0],@combatsc_proms,'combatsc.zip',0)) then exit;
-clut_combatsc;
-reset_combatsc;
-iniciar_combatsc:=true;
-end;
-
-procedure reset_combatsc;
-begin
- main_hd6309.reset;
- snd_z80.reset;
- reset_audio;
- ym2203_0.reset;
- upd7759_0.reset;
- K007121_reset(0);
- K007121_reset(1);
- marcade.in0:=$FF;
- marcade.in1:=$5F;
- marcade.in2:=$ff;
- video_circuit:=0;
- bank_rom:=0;
- prot_0:=0;
- prot_1:=0;
- vreg:=0;
- priority:=0;
- sound_latch:=0;
-end;
 
 procedure draw_sprites(bank:byte);inline;
 var
@@ -361,7 +246,7 @@ case direccion of
           else bank_rom:=8+(valor and 1);
        end;
   $414:sound_latch:=valor;
-  $418:snd_z80.pedir_irq:=HOLD_LINE;
+  $418:snd_z80.change_irq(HOLD_LINE);
   $600..$6ff:if buffer_paleta[direccion and $ff]<>valor then begin
         buffer_paleta[direccion and $ff]:=valor;
         cambiar_color(direccion and $fe);
@@ -417,6 +302,111 @@ procedure combatsc_sound_update;
 begin
   ym2203_0.Update;
   upd7759_0.update;
+end;
+
+//Main
+procedure reset_combatsc;
+begin
+ main_hd6309.reset;
+ snd_z80.reset;
+ reset_audio;
+ ym2203_0.reset;
+ upd7759_0.reset;
+ K007121_reset(0);
+ K007121_reset(1);
+ marcade.in0:=$FF;
+ marcade.in1:=$5F;
+ marcade.in2:=$ff;
+ video_circuit:=0;
+ bank_rom:=0;
+ prot_0:=0;
+ prot_1:=0;
+ vreg:=0;
+ priority:=0;
+ sound_latch:=0;
+end;
+
+function iniciar_combatsc:boolean;
+var
+  f:word;
+  memoria_temp:array[0..$7ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28);
+    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+procedure clut_combatsc;
+var
+  chip,pal,i,ctabentry,clut:byte;
+begin
+for chip:=0 to 1 do begin
+		for pal:=0 to 7 do begin
+			clut:=(chip shl 1) or (pal and 1);
+			for i:=0 to $ff do begin
+				if (((pal and $01)=0) and (memoria_temp[(clut shl 8) or i]=0)) then ctabentry:=0
+				  else ctabentry:=(pal shl 4) or (memoria_temp[(clut shl 8) or i] and $0f);
+        gfx[chip].colores[(pal shl 8) or i]:=ctabentry;
+			end;
+		end;
+end;
+end;
+begin
+iniciar_combatsc:=false;
+iniciar_audio(false);
+//Pantallas
+screen_init(1,256,256,true);
+screen_mod_scroll(1,256,256,255,256,256,255);
+screen_init(2,256,256,true);
+screen_mod_scroll(2,256,256,255,256,256,255);
+screen_init(3,256,256,true);
+screen_mod_scroll(3,256,256,255,256,256,255);
+screen_init(4,256,256,true);
+screen_mod_scroll(4,256,256,255,256,256,255);
+screen_init(5,512,256,false,true); //Final
+screen_init(6,256,256,true); //Text
+screen_mod_scroll(6,256,256,255,256,256,255);
+iniciar_video(256,224);
+//iniciar_video(256,256);
+//Main CPU
+main_hd6309:=cpu_hd6309.create(12000000,$100);
+main_hd6309.change_ram_calls(combatsc_getbyte,combatsc_putbyte);
+//Sound CPU
+snd_z80:=cpu_z80.create(3579545,$100);
+snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
+snd_z80.init_sound(combatsc_sound_update);
+//Audio chips
+ym2203_0:=ym2203_chip.create(3000000,4);
+upd7759_0:=upd7759_chip.create(640000,2);
+if not(cargar_roms(upd7759_0.get_rom_addr,@combatsc_upd,'combatsc.zip')) then exit;
+//cargar roms
+if not(cargar_roms(@memoria_temp[0],@combatsc_rom[0],'combatsc.zip',0)) then exit;
+//Pongo las ROMs en su banco
+copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
+for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$4000)],$4000);
+for f:=0 to 1 do copymemory(@memoria_rom[8+f,0],@memoria_temp[0+(f*$4000)],$4000);
+//Cargar Sound
+if not(cargar_roms(@mem_snd[0],@combatsc_sound,'combatsc.zip',1)) then exit;
+//convertir chars
+if not(cargar_roms16b(@memoria_temp[0],@combatsc_chars[0],'combatsc.zip',0)) then exit;
+init_gfx(0,8,8,$4000);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//chars 2
+if not(cargar_roms16b(@memoria_temp[0],@combatsc_chars2[0],'combatsc.zip',0)) then exit;
+init_gfx(1,8,8,$4000);
+gfx[1].trans[0]:=true;
+convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//Color lookup
+if not(cargar_roms(@memoria_temp[0],@combatsc_proms,'combatsc.zip',0)) then exit;
+clut_combatsc;
+reset_combatsc;
+iniciar_combatsc:=true;
+end;
+
+procedure Cargar_combatsc;
+begin
+llamadas_maquina.iniciar:=iniciar_combatsc;
+llamadas_maquina.bucle_general:=combatsc_principal;
+llamadas_maquina.reset:=reset_combatsc;
 end;
 
 end.

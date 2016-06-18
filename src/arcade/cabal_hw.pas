@@ -276,7 +276,6 @@ var
 begin
 iniciar_cabal:=false;
 iniciar_audio(false);
-//Pantallas:  principal+char y sprites
 screen_init(1,256,256,true);
 screen_init(2,256,256,true);
 screen_init(3,512,256,false,true);

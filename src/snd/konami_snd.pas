@@ -110,10 +110,10 @@ end;
 procedure konamisnd_chip.run(frame:word);
 begin
 self.frame:=frame;
-snd_z80.pedir_irq:=self.pedir_irq;
+snd_z80.change_irq(self.pedir_irq);
 snd_z80.run(frame_s);
 frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-self.pedir_irq:=snd_z80.pedir_irq;
+self.pedir_irq:=snd_z80.get_irq;
 end;
 
 function konamisnd_chip.portb_read:byte;

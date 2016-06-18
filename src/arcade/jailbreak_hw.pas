@@ -5,16 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
      timer_engine,rom_engine,pal_engine,konami_decrypt,sound_engine;
 
-//main
-procedure Cargar_jailbreak;
-procedure jailbreak_principal;
-function iniciar_jailbreak:boolean;
-procedure reset_jailbreak;
-//cpu
-function jailbreak_getbyte(direccion:word):byte;
-procedure jailbreak_putbyte(direccion:word;valor:byte);
-procedure jailbreak_sound;
-procedure jailbreak_snd_nmi;
+procedure cargar_jailbreak;
 
 implementation
 const
@@ -44,105 +35,9 @@ const
         (mask:$2;name:'Upright Controls';number:2;dip:((dip_val:$2;dip_name:'Single'),(dip_val:$0;dip_name:'Dual'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- pedir_irq,pedir_nmi,scroll_dir:boolean;
+ irq_ena,nmi_ena,scroll_dir:boolean;
  mem_opcodes:array[0..$7fff] of byte;
  scroll_lineas:array[0..$1f] of word;
-
-procedure Cargar_jailbreak;
-begin
-llamadas_maquina.iniciar:=iniciar_jailbreak;
-llamadas_maquina.bucle_general:=jailbreak_principal;
-llamadas_maquina.reset:=reset_jailbreak;
-llamadas_maquina.fps_max:=60.606060606060;
-end;
-
-function iniciar_jailbreak:boolean;
-var
-      colores:tpaleta;
-      f:word;
-      memoria_temp:array[0..$ffff] of byte;
-const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
-    ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
-			32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
-    ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
-			16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32);
-begin
-iniciar_jailbreak:=false;
-iniciar_audio(false);
-//Pantallas:  principal+char y sprites
-screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,0,0,0);
-screen_init(2,512,256,false,true);
-iniciar_video(240,224);
-//Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(jailbreak_getbyte,jailbreak_putbyte);
-main_m6809.init_sound(jailbreak_sound);
-//Sound Chip
-sn_76496_0:=sn76496_chip.Create(1536000);
-//cargar rom sonido
-vlm5030_0:=vlm5030_chip.Create(3579545,$4000,2);
-if not(cargar_roms(@memoria_temp[0],@jailbreak_vlm,'jailbrek.zip')) then exit;
-for f:=0 to $1fff do memoria_temp[f]:=memoria_temp[f+$2000];
-copymemory(vlm5030_0.get_rom_addr,@memoria_temp[0],$4000);
-//NMI sonido
-init_timer(main_m6809.numero_cpu,1536000/480,jailbreak_snd_nmi,true);
-//cargar roms y desencriptarlas
-if not(cargar_roms(@memoria[0],@jailbreak_rom[0],'jailbrek.zip',0)) then exit;
-konami1_decode(@memoria[$8000],@mem_opcodes[0],$8000);
-//mem_opcodes[$9a7c and $7fff]:=$20;  inmune
-//mem_opcodes[$9aee and $7fff]:=$39;
-//mem_opcodes[$9b4b and $7fff]:=$20;
-//convertir chars
-if not(cargar_roms(@memoria_temp[0],@jailbreak_char[0],'jailbrek.zip',0)) then exit;
-init_gfx(0,8,8,1024);
-gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
-//sprites
-if not(cargar_roms(@memoria_temp[0],@jailbreak_sprites[0],'jailbrek.zip',0)) then exit;
-init_gfx(1,16,16,512);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//paleta
-if not(cargar_roms(@memoria_temp[0],@jailbreak_pal[0],'jailbrek.zip',0)) then exit;
-for f:=0 to $1f do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f] shr 4) shl 4) or (memoria_temp[f] shr 4);
-  colores[f].b:=((memoria_temp[f+$20] and $f) shl 4) or (memoria_temp[f+$20] and $f);
-end;
-set_pal(colores,32);
-for f:=0 to $ff do begin
-  gfx[0].colores[f]:=(memoria_temp[$40+f] and $f)+$10;  //chars
-  gfx[1].colores[f]:=memoria_temp[$140+f] and $f;  //sprites
-end;
-//DIP
-marcade.dswa:=$ff;
-marcade.dswb:=$19;
-marcade.dswc:=$3;
-marcade.dswa_val:=@jailbreak_dip_a;
-marcade.dswb_val:=@jailbreak_dip_b;
-marcade.dswc_val:=@jailbreak_dip_c;
-//final
-reset_jailbreak;
-iniciar_jailbreak:=true;
-end;
-
-procedure reset_jailbreak;
-begin
- main_m6809.reset;
- sn_76496_0.reset;
- vlm5030_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
- pedir_irq:=false;
- pedir_nmi:=false;
- scroll_dir:=false;
-end;
 
 procedure update_video_jailbreak;inline;
 var
@@ -212,7 +107,7 @@ while EmuStatus=EsRuning do begin
       main_m6809.run(frame);
       frame:=frame+main_m6809.tframes-main_m6809.contador;
       if f=239 then begin
-        if pedir_irq then main_m6809.change_irq(HOLD_LINE);
+        if irq_ena then main_m6809.change_irq(HOLD_LINE);
         update_video_jailbreak;
       end;
   end;
@@ -247,8 +142,8 @@ case direccion of
   $2020..$203f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $00ff) or ((valor and 1) shl 8);
   $2042:scroll_dir:=(valor and $4)<>0;
   $2044:begin
-          pedir_nmi:=((valor and $1)<>0);
-          pedir_irq:=((valor and $2)<>0);
+          nmi_ena:=((valor and $1)<>0);
+          irq_ena:=((valor and $2)<>0);
           main_screen.flip_main_screen:=(valor and 8)<>0;
         end;
   $3100:sn_76496_0.Write(valor);
@@ -262,13 +157,109 @@ end;
 
 procedure jailbreak_snd_nmi;
 begin
-  if pedir_nmi then main_m6809.change_nmi(PULSE_LINE);
+  if nmi_ena then main_m6809.change_nmi(PULSE_LINE);
 end;
 
 procedure jailbreak_sound;
 begin
   sn_76496_0.Update;
   vlm5030_0.update;
+end;
+
+//Main
+procedure reset_jailbreak;
+begin
+ main_m6809.reset;
+ sn_76496_0.reset;
+ vlm5030_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ marcade.in2:=$FF;
+ irq_ena:=false;
+ nmi_ena:=false;
+ scroll_dir:=false;
+end;
+
+function iniciar_jailbreak:boolean;
+var
+      colores:tpaleta;
+      f:word;
+      memoria_temp:array[0..$ffff] of byte;
+const
+    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+    ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
+			32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
+    ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
+			16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32);
+begin
+iniciar_jailbreak:=false;
+iniciar_audio(false);
+screen_init(1,512,256);
+screen_mod_scroll(1,512,256,511,0,0,0);
+screen_init(2,512,256,false,true);
+iniciar_video(240,224);
+//Main CPU
+main_m6809:=cpu_m6809.Create(1536000,$100);
+main_m6809.change_ram_calls(jailbreak_getbyte,jailbreak_putbyte);
+main_m6809.init_sound(jailbreak_sound);
+//Sound Chip
+sn_76496_0:=sn76496_chip.Create(1536000);
+//cargar rom sonido
+vlm5030_0:=vlm5030_chip.Create(3579545,$4000,2);
+if not(cargar_roms(@memoria_temp[0],@jailbreak_vlm,'jailbrek.zip')) then exit;
+for f:=0 to $1fff do memoria_temp[f]:=memoria_temp[f+$2000];
+copymemory(vlm5030_0.get_rom_addr,@memoria_temp[0],$4000);
+//NMI sonido
+init_timer(main_m6809.numero_cpu,1536000/480,jailbreak_snd_nmi,true);
+//cargar roms y desencriptarlas
+if not(cargar_roms(@memoria[0],@jailbreak_rom[0],'jailbrek.zip',0)) then exit;
+konami1_decode(@memoria[$8000],@mem_opcodes[0],$8000);
+//mem_opcodes[$9a7c and $7fff]:=$20;  inmune
+//mem_opcodes[$9aee and $7fff]:=$39;
+//mem_opcodes[$9b4b and $7fff]:=$20;
+//convertir chars
+if not(cargar_roms(@memoria_temp[0],@jailbreak_char[0],'jailbrek.zip',0)) then exit;
+init_gfx(0,8,8,1024);
+gfx_set_desc_data(4,0,32*8,0,1,2,3);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+//sprites
+if not(cargar_roms(@memoria_temp[0],@jailbreak_sprites[0],'jailbrek.zip',0)) then exit;
+init_gfx(1,16,16,512);
+gfx[1].trans[0]:=true;
+gfx_set_desc_data(4,0,128*8,0,1,2,3);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+//paleta
+if not(cargar_roms(@memoria_temp[0],@jailbreak_pal[0],'jailbrek.zip',0)) then exit;
+for f:=0 to $1f do begin
+  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
+  colores[f].g:=((memoria_temp[f] shr 4) shl 4) or (memoria_temp[f] shr 4);
+  colores[f].b:=((memoria_temp[f+$20] and $f) shl 4) or (memoria_temp[f+$20] and $f);
+end;
+set_pal(colores,32);
+for f:=0 to $ff do begin
+  gfx[0].colores[f]:=(memoria_temp[$40+f] and $f)+$10;  //chars
+  gfx[1].colores[f]:=memoria_temp[$140+f] and $f;  //sprites
+end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$19;
+marcade.dswc:=$3;
+marcade.dswa_val:=@jailbreak_dip_a;
+marcade.dswb_val:=@jailbreak_dip_b;
+marcade.dswc_val:=@jailbreak_dip_c;
+//final
+reset_jailbreak;
+iniciar_jailbreak:=true;
+end;
+
+procedure Cargar_jailbreak;
+begin
+llamadas_maquina.iniciar:=iniciar_jailbreak;
+llamadas_maquina.bucle_general:=jailbreak_principal;
+llamadas_maquina.reset:=reset_jailbreak;
+llamadas_maquina.fps_max:=60.606060606060;
 end;
 
 end.
