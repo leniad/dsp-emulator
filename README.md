@@ -1,4 +1,13 @@
 ﻿#DSP Emulator status<br>
+<b>18/06/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary updated.</b><br><pre>
+-Lazarus: Fixed zlib stuff. Removed external library dependency, now you can use fast snapshots, load spectrum SZX, DSP, CSW files, load Coleco snapshots, etc.
+-Finished IQR, NMI, reset and halt signals rewrite
+-Simplified and reorganized all drivers procedures and functions
+-Enhanced ZIP file load:
+    +Delphi: the internal classes are used
+    +Lazarus: More simple object implementation
+-CPU M680X: Unified all opcodes
+</pre><br>
 <b>02/06/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary updated.</b><br><pre>
 -General
     +Begin a general driver cleaning
