@@ -1,4 +1,4 @@
-<h1>DSP Emulator v0.16b2 by Leniad 2001-2016</h1><br>
+<h1>DSP Emulator v0.17 by Leniad 2001-2016</h1><br>
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 Since version 0.9b3 has ported to Lazarus/Free Pascal, so there is a Linux 32/64bits version available.<br>
@@ -7,11 +7,10 @@ Since version 0.14b3 there is a Mac OSX 32bits WIP version.<br><br>
 <hr>
 - Can natively handle ZIP format. You can load ROMS, tapes, snapshots or disks from a ZIP files.<br>
 - Needed libraries<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- The library 'SDL2.DLL' is essential. You can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- The library 'CAPSImg.dll' is optional and it's needed to open disk images IPF. (Not working)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Linux and OSX<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ The library 'Zlib' (Snapshots) is also optional, emulation can start without it, but there are features that are not available if the file can not be found.<br><br>
-The emulator includes inside the ZIP (not in WIP) the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco.<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;- SDL2: you can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start.<br>
+- Optional libraries<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- CAPSImg: it's needed to open disk images IPF. (Not working)<br><br>
+The emulator includes inside the ZIP (not in WIP versions) the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco.<br><br>
 <b>IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS</b><br><br>
 <b>1.1-. Keys</b>
 <hr>
@@ -278,7 +277,7 @@ Tiger Road                 | TIGEROAD.ZIP |     100    | Tiger Road Hardware
 F1 Dream                   | F1DREAM.ZIP  |     100    | Tiger Road Hardware
 Snow Bros                  | SNOWBROS.ZIP |     100    |
 Toki                       | TOKI.ZIP     |     100    |
-Contra                     | CONTRA.ZIP   |      99    | Some graphics bugs
+Contra                     | CONTRA.ZIP   |     100    |
 Mappy                      | MAPPY.ZIP    |     100    | Mappy Hardware
 Dig-Dug II                 | DIGDUG2.ZIP  |     100    | Mappy Hardware
 Super Pacman               | SUPERPAC.ZIP |     100    | Mappy Hardware
@@ -372,7 +371,7 @@ Insector X                 | INSECTX.ZIP  |     100    | The NewZealand Story Ha
 Pacland                    | PACLAND.ZIP  |     100    |
 Mario Bros.                | MARIO.ZIP    |     100    | Full sound using samples
 Solomon Key                | SOLOMON.ZIP  |     100    |
-Combat School              | COMBATSC.ZIP |      95    | Minimal graphics problems
+Combat School              | COMBATSC.ZIP |     100    |
 Heavy Unit                 | HVYUNIT.ZIP  |     100    |
 P.O.W. - Prisoners of War  | POW.ZIP      |     100    | SNK 68K Hardware
 Street Smart               | STREETSM.ZIP |     100    | SNK 68K Hardware
@@ -436,8 +435,17 @@ Teenage Mutant Ninja       |
    Turtles                 | TMNT.ZIP     |     100    | TMNT HW
 Sunset Riders              | SSRIDERS.ZIP |     100    | TMNT HW
 Gradius III                | GRADIUS3.ZIP |     100    |
+Space Invaders             | INVADERS.ZIP |     100    | Full sound using samples
+Centipede                  | CENTIPED.ZIP |     100    |
+Karnov                     | KARNOV.ZIP   |     100    | Karnov HW
+Chelnov                    | CHELNOV.ZIP  |     100    | Karnov HW
+Aliens                     | ALIENS.ZIP   |      95    | Small sprites priority problems
+Super Contra               | SCONTRA.ZIP  |     100    | Thunder Cross HW
+Gang Busters               | GBUSTERS.ZIP |     100    | Thunder Cross HW
+Thunder Cross HW           | THUNDERZ.ZIP |     100    | Thunder Cross HW
+The Simpsons               | SIMPSONS.ZIP |      50    | Without sprites and graphics problems
 -----------------------------------------------------------------------------------------------------------------
-Total: 206</pre>
+Total: 215</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
 If you want to add another language, edit any file with the extension '.lng' in the 'LNG' directory, rename it with the name of the language and send it to me to add it to the next version.<br>
