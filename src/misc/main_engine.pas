@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        dsp_version='0.16b3WIP';
+        dsp_version='0.17';
         pant_sprites=20;
         pant_doble=21;
         pant_temp=23;

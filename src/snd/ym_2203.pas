@@ -46,6 +46,16 @@ implementation
 var
   chips_total:integer=-1;
 
+procedure change_ay_clock_0(clock:dword);
+begin
+  if ym2203_0<>nil then ym2203_0.ay8910_int.change_clock(clock);
+end;
+
+procedure change_ay_clock_1(clock:dword);
+begin
+  if ym2203_1<>nil then ym2203_1.ay8910_int.change_clock(clock);
+end;
+
 constructor ym2203_chip.create(clock:dword;amp:single;ay_amp:single);
 begin
   chips_total:=chips_total+1;
@@ -66,12 +76,14 @@ begin
         self.timer2:=init_timer(sound_status.cpu_num,1,ym2203_0_timer2,false);
         self.OPN.ST.TIMER_set_a:=ym2203_0_init_timer_a;
         self.OPN.ST.TIMER_set_b:=ym2203_0_init_timer_b;
+        self.OPN.ST.SSG_Clock_change:=change_ay_clock_0;
     end;
     1:begin
         self.timer1:=init_timer(sound_status.cpu_num,1,ym2203_1_timer1,false);
         self.timer2:=init_timer(sound_status.cpu_num,1,ym2203_1_timer2,false);
         self.OPN.ST.TIMER_set_a:=ym2203_1_init_timer_a;
         self.OPN.ST.TIMER_set_b:=ym2203_1_init_timer_b;
+        self.OPN.ST.SSG_Clock_change:=change_ay_clock_1;
     end;
   end;
   self.Reset;
@@ -312,18 +324,17 @@ begin
 			  advance_eg_channel(OPN,cch[1]);
 			  advance_eg_channel(OPN,cch[2]);
     end;
-    // calculate FM */
-    chan_calc(OPN,cch[0],0);
-    chan_calc(OPN,cch[1],0);
-    chan_calc(OPN,cch[2],0);
-    // buffering */
+    // calculate FM
+    chan_calc(OPN,cch[0]);
+    chan_calc(OPN,cch[1]);
+    chan_calc(OPN,cch[2]);
     lt:=self.ay8910_int.update_internal^;
     lt:=lt+trunc((out_fm[0]+out_fm[1]+out_fm[2])*self.amp);
     if lt>$7fff then lt:=$7fff
       else if lt<-$7fff then lt:=-$7fff;
     tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
     INTERNAL_TIMER_A(self.OPN.ST,self.OPN.p_ch[2]);
-    INTERNAL_TIMER_B(self.OPN.ST,1)
+    INTERNAL_TIMER_B(self.OPN.ST)
 end;
 
 procedure ym2203_chip.write_int(port,data:byte);
@@ -335,7 +346,7 @@ OPN:=self.OPN;
 if ((port and 1)=0) then begin // address port */
    OPN.ST.address:=data;
    // Write register to SSG emulator */
-   if (data<16) then self.ay8910_int.Control(data);
+   if (data<$10) then self.ay8910_int.Control(data);
    // prescaler select : 2d,2e,2f  */
    if ((data>=$2d) and (data<=$2f)) then OPNPrescaler_w(OPN,data,1);
 end else begin // data port */
@@ -388,7 +399,7 @@ begin
   TimerAOver(ym2203_0.OPN.ST);
   if (ym2203_0.OPN.ST.mode and $80)<>0 then begin
 			// CSM mode auto key on */
-			CSMKeyControll(ym2203_0.OPN.type_,ym2203_0.OPN.p_ch[2]);
+			CSMKeyControll(ym2203_0.OPN.p_ch[2]);
   end;
 end;
 
@@ -402,7 +413,7 @@ begin
   TimerAOver(ym2203_1.OPN.ST);
   if (ym2203_1.OPN.ST.mode and $80)<>0 then begin
 			// CSM mode auto key on */
-			CSMKeyControll(ym2203_1.OPN.type_,ym2203_1.OPN.p_ch[2]);
+			CSMKeyControll(ym2203_1.OPN.p_ch[2]);
   end;
 end;
 

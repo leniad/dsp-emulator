@@ -41,6 +41,7 @@ type
         ppc,pc,sp:word;
         bc,de,hl:parejas;
         bc2,de2,hl2:parejas;
+        wz:word;
         ix,iy:parejas;
         iff1,iff2,halt_opcode:boolean;
         a,a2,i,r:byte;
@@ -93,8 +94,8 @@ type
           procedure bit_8(bit,valor:byte);
           procedure bit_7(valor:byte);
           function add_16(valor1,valor2:word):word;
-          function adc_16(valor1,valor2:word):word;
-          function sbc_16(valor1,valor2:word):word;
+          function adc_hl(valor:word):word;
+          function sbc_hl(valor:word):word;
         private
           z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
           raised_z80:type_raised;
@@ -513,6 +514,7 @@ var
   templ:dword;
 begin
   templ:=valor1+valor2;
+  r.wz:=valor1+1;
   r.f.bit3:=(templ and $800)<>0;
   r.f.bit5:=(templ and $2000)<>0;
   r.f.c:=(templ and $10000)<>0;
@@ -521,40 +523,42 @@ begin
   add_16:=templ;
 end;
 
-function cpu_z80.adc_16(valor1,valor2:word):word;
+function cpu_z80.adc_hl(valor:word):word;
 var
   templ:dword;
   carry:byte;
 begin
  carry:=byte(r.f.c);
- templ:=valor1+valor2+carry;
- r.f.p_v:=((valor1 xor ((not valor2) and $FFFF)) and (valor1 xor templ) and $8000)<>0;
- r.f.h:=(((valor1 and $FFF)+(valor2 and $FFF)+carry) and $1000)<>0;
+ templ:=r.hl.w+valor+carry;
+ r.wz:=r.hl.w+1;
+ r.f.p_v:=((r.hl.w xor ((not valor) and $FFFF)) and (r.hl.w xor templ) and $8000)<>0;
+ r.f.h:=(((r.hl.w and $FFF)+(valor and $FFF)+carry) and $1000)<>0;
  r.f.s:=(templ and $8000)<>0;
  r.f.z:=(templ=0);
  r.f.bit5:=(templ and $2000)<>0;
  r.f.bit3:=(templ and $800)<>0;
  r.f.n:=false;
  r.f.c:=(templ and $10000)<>0;
- adc_16:=templ;
+ adc_hl:=templ;
 end;
 
-function cpu_z80.sbc_16(valor1,valor2:word):word;
+function cpu_z80.sbc_hl(valor:word):word;
 var
   carry:byte;
   templ:dword;
 begin
   carry:=byte(r.f.c);
-  templ:=valor1-valor2-carry;
+  r.wz:=r.hl.w+1;
+  templ:=r.hl.w-valor-carry;
   r.f.s:=(templ and $8000)<>0;
   r.f.bit3:=(templ and $800)<>0;
   r.f.bit5:=(templ and $2000)<>0;
   r.f.z:=(templ=0);
   r.f.c:=(templ and $10000)<>0;
-  r.f.P_V:=((valor1 xor valor2) and (valor1 xor templ) and $8000)<>0;
-  r.f.h:=(((valor1 and $FFF)-(valor2 and $FFF)-carry) and $1000)<>0;
+  r.f.P_V:=((r.hl.w xor valor) and (r.hl.w xor templ) and $8000)<>0;
+  r.f.h:=(((r.hl.w and $FFF)-(valor and $FFF)-carry) and $1000)<>0;
   r.f.n:=True;
-  sbc_16:=templ;
+  sbc_hl:=templ;
 end;
 
 constructor cpu_z80.create(clock:dword;frames_div:word);
@@ -598,6 +602,7 @@ begin
   r.pc:=0;
   r.a:=0;r.bc.w:=0;r.de.w:=0;r.hl.w:=0;
   r.a2:=0;r.bc2.w:=0;r.de2.w:=0;r.hl2.w:=0;
+  r.wz:=0;
   r.ix.w:=$ffff;
   r.iy.w:=$ffff;
   r.iff1:=false;
@@ -689,6 +694,7 @@ r.r:=((r.r+1) and $7f) or (r.r and $80);
 self.push_sp(r.pc);
 r.IFF1:=false;
 r.pc:=$66;
+r.wz:=$66;
 call_nmi:=11;
 if (self.pedir_nmi=PULSE_LINE) then self.pedir_nmi:=CLEAR_LINE;
 if (self.pedir_nmi=ASSERT_LINE) then self.nmi_state:=ASSERT_LINE;
@@ -726,7 +732,8 @@ Case r.im of
             r.pc:=self.getbyte(posicion)+(self.getbyte(posicion+1) shl 8);
             estados_t:=estados_t+19;
         end;
-end; {del case}
+end;
+r.wz:=r.pc;
 call_irq:=estados_t;
 end;
 
@@ -794,7 +801,10 @@ case instruccion of
                 r.bc.h:=self.getbyte(r.pc+1);
                 r.pc:=r.pc+2;
             end;
-        $02:self.putbyte(r.bc.w,r.a);{ld (BC),A}
+        $02:begin //ld (BC),A
+              self.putbyte(r.bc.w,r.a);
+              r.wz:=((r.bc.w+1) and $ff) or (r.a shl 8);
+            end;
         $03:r.bc.w:=r.bc.w+1;  {inc BC}
         $04:r.bc.h:=inc_8(r.bc.h); //inc B
         $05:r.bc.h:=dec_8(r.bc.h); //dec B
@@ -819,7 +829,10 @@ case instruccion of
                 r.a2:=temp;
             end;
         $09:r.hl.w:=add_16(r.hl.w,r.bc.w); //add HL,BC
-        $0a:r.a:=self.getbyte(r.bc.w); {ld A,(BC)}
+        $0a:begin //ld A,(BC)
+              r.a:=self.getbyte(r.bc.w);
+              r.wz:=r.bc.w+1;
+            end;
         $0b:r.bc.w:=r.bc.w-1;  {dec BC}
         $0c:r.bc.l:=inc_8(r.bc.l); //inc C
         $0d:r.bc.l:=dec_8(r.bc.l); //dec C
@@ -835,13 +848,14 @@ case instruccion of
                 r.f.h:=false;
                 r.f.n:=false;
             end;
-        $10:begin {dnjz (PC+e)}
+        $10:begin //dnjz (PC+e)
                 r.bc.h:=r.bc.h-1;
                 r.pc:=r.pc+1;
                 if r.bc.h<>0 then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        r.wz:=r.pc;
                 end;
             end;
         $11:begin {ld DE,nn}
@@ -849,7 +863,10 @@ case instruccion of
                 r.de.h:=self.getbyte(r.pc+1);
                 r.pc:=r.pc+2;
             end;
-        $12:self.putbyte(r.de.w,r.a);  {ld (DE),A}
+        $12:begin //ld (DE),A
+              self.putbyte(r.de.w,r.a);
+              r.wz:=((r.de.w+1) and $ff) or (r.a shl 8);
+            end;
         $13:r.de.w:=r.de.w+1;  {inc DE}
         $14:r.de.h:=inc_8(r.de.h); //inc D
         $15:r.de.h:=dec_8(r.de.h); //dec D
@@ -866,13 +883,17 @@ case instruccion of
                 r.f.h:=false;
                 r.f.n:=false;
             end;
-        $18:begin   {jr e}
+        $18:begin  //jr e
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 r.pc:=r.pc+shortint(temp);
+                r.wz:=r.pc;
             end;
         $19:r.hl.w:=add_16(r.hl.w,r.de.w); //add HL,DE
-        $1a:r.a:=self.getbyte(r.de.w); {ld A,(DE)}
+        $1a:begin //ld A,(DE)
+                r.a:=self.getbyte(r.de.w);
+                r.wz:=r.de.w+1;
+            end;
         $1b:r.de.w:=r.de.w-1;  {dec DE}
         $1c:r.de.l:=inc_8(r.de.l); //inc E
         $1d:r.de.l:=dec_8(r.de.l); //dec E
@@ -889,12 +910,13 @@ case instruccion of
                 r.f.bit5:=(r.a and $20)<>0;
                 r.f.bit3:=(r.a and 8)<>0;
             end;
-        $20:begin  {jr NZ,(PC+e)}
+        $20:begin  //jr NZ,(PC+e)
                 r.pc:=r.pc+1;
                 if not(r.f.z) then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        r.wz:=r.pc;
                 end;
             end;
         $21:begin {ld HL,nn}
@@ -908,6 +930,7 @@ case instruccion of
                 r.pc:=r.pc+2;
                 self.putbyte(posicion.w,r.hl.l);
                 self.putbyte(posicion.w+1,r.hl.h);
+                r.wz:=posicion.w+1;
             end;
         $23:r.hl.w:=r.hl.w+1;  {inc HL}
         $24:r.hl.h:=inc_8(r.hl.h); //inc H
@@ -935,12 +958,13 @@ case instruccion of
                 r.f.bit5:=(r.a and $20)<>0;
                 r.f.bit3:=(r.a and 8)<>0;
             end;
-        $28:begin  {jr Z,(PC+e)}
+        $28:begin  //jr Z,(PC+e)
                 r.pc:=r.pc+1;
                 if r.f.z then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        r.wz:=r.pc;
                 end;
             end;
         $29:r.hl.w:=add_16(r.hl.w,r.hl.w); //add HL,HL
@@ -950,6 +974,7 @@ case instruccion of
                 r.pc:=r.pc+2;
                 r.hl.l:=self.getbyte(posicion.w);
                 r.hl.h:=self.getbyte(posicion.w+1);
+                r.wz:=posicion.w+1;
             end;
         $2b:r.hl.w:=r.hl.w-1;  {dec HL}
         $2c:r.hl.l:=inc_8(r.hl.l); //inc L
@@ -965,12 +990,13 @@ case instruccion of
                 r.f.h:=true;
                 r.f.n:=true;
             end;
-        $30:begin  {jr NC,(PC+e)}
+        $30:begin  //jr NC,(PC+e)
                 r.pc:=r.pc+1;
                 if not(r.f.c) then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        r.wz:=r.pc;
                 end;
             end;
         $31:begin {ld SP,nn}
@@ -982,6 +1008,7 @@ case instruccion of
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;
                 self.putbyte(posicion.w,r.a);
+                r.wz:=((posicion.w+1) and $ff) or (r.a shl 8);
             end;
         $33:r.sp:=r.sp+1;  {inc SP}
         $34:begin  //inc (HL)
@@ -1004,12 +1031,13 @@ case instruccion of
                 r.f.h:=false;
                 r.f.n:=false;
             end;
-        $38:begin  {jr C,(PC+e)}
+        $38:begin  //jr C,(PC+e)
                 r.pc:=r.pc+1;
                 if r.f.c then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        r.wz:=r.pc;
                 end;
             end;
         $39:r.hl.w:=add_16(r.hl.w,r.sp); //add HL,SP
@@ -1018,6 +1046,7 @@ case instruccion of
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;
                 r.a:=self.getbyte(posicion.w);
+                r.wz:=posicion.w+1;
             end;
         $3b:r.sp:=r.sp-1;  {dec SP}
         $3c:r.a:=inc_8(r.a); //inc A
@@ -1171,22 +1200,27 @@ case instruccion of
         $bd:cp_a(r.hl.l); {cp L}
         $be:cp_a(self.getbyte(r.hl.w)); {cp (HL)}
         $bf:cp_a(r.a); {cp A}
-        $c0:if not(r.f.z) then begin {ret NZ}
+        $c0:if not(r.f.z) then begin //ret NZ
                 r.pc:=self.pop_sp;
+                r.wz:=r.pc;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $c1:r.bc.w:=self.pop_sp;  {pop BC}
-        $c2:if not(r.f.z) then begin {jp NZ,nn}
-                        posicion.h:=self.getbyte(r.pc+1);
-                        posicion.l:=self.getbyte(r.pc);
-                        r.pc:=posicion.w;
-            end else r.pc:=r.pc+2;
+        $c2:begin  //jp NZ,nn
+                if not(r.f.z) then begin
+                    posicion.h:=self.getbyte(r.pc+1);
+                    posicion.l:=self.getbyte(r.pc);
+                    r.pc:=posicion.w;
+                end else r.pc:=r.pc+2;
+                r.wz:=r.pc;
+            end;
         $c3:begin {jp nn}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=posicion.w;
+                r.wz:=posicion.w;
              end;
-        $c4:begin   {call NZ,nn}
+        $c4:begin   //call NZ,nn
                 r.pc:=r.pc+2;
                 if not(r.f.z) then begin
                         self.push_sp(r.pc);
@@ -1195,6 +1229,7 @@ case instruccion of
                         r.pc:=posicion.w;
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
+                r.wz:=r.pc;
              end;
         $c5:self.push_sp(r.bc.w);  {push BC}
         $c6:begin {add A,n}
@@ -1202,22 +1237,30 @@ case instruccion of
                 r.pc:=r.pc+1;
                 add_8(temp);
              end;
-        $c7:begin  {rst 00H}
+        $c7:begin  //rst 00H
                 self.push_sp(r.pc);
                 r.pc:=0;
+                r.wz:=0;
              end;
-        $c8:if r.f.z then begin {ret Z}
+        $c8:if r.f.z then begin //ret Z
                 r.pc:=self.pop_sp;
+                r.wz:=r.pc;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
-        $c9:r.pc:=pop_sp;  {ret}
-        $ca:if r.f.z then begin {jp Z,nn}
-                posicion.h:=self.getbyte(r.pc+1);
-                posicion.l:=self.getbyte(r.pc);
-                r.pc:=posicion.w;
-            end else r.pc:=r.pc+2;
+        $c9:begin //ret
+                r.pc:=pop_sp;
+                r.wz:=r.pc;
+            end;
+        $ca:begin //jp Z,nn
+                if r.f.z then begin
+                    posicion.h:=self.getbyte(r.pc+1);
+                    posicion.l:=self.getbyte(r.pc);
+                    r.pc:=posicion.w;
+                end else r.pc:=r.pc+2;
+                r.wz:=r.pc;
+            end;
         $cb:self.estados_demas:=self.estados_demas+self.exec_cb;
-        $cc:begin   {call Z,nn}
+        $cc:begin   //call Z,nn
                 r.pc:=r.pc+2;
                 if r.f.z then begin
                         self.push_sp(r.pc);
@@ -1226,10 +1269,12 @@ case instruccion of
                         r.pc:=posicion.w;
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
+                r.wz:=r.pc;
              end;
         $cd:begin   {call nn}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
+                r.wz:=posicion.w;
                 r.pc:=r.pc+2;
                 self.push_sp(r.pc);
                 r.pc:=posicion.w;
@@ -1239,27 +1284,33 @@ case instruccion of
                 r.pc:=r.pc+1;
                 adc_8(temp);
              end;
-        $cf:begin  {rst 08H}
+        $cf:begin  //rst 08H
                 self.push_sp(r.pc);
                 r.pc:=$8;
+                r.wz:=$8;
              end;
-        $d0:if not(r.f.c) then begin {ret NC}
+        $d0:if not(r.f.c) then begin //ret NC
                 r.pc:=pop_sp;
+                r.wz:=r.pc;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $d1:r.de.w:=pop_sp;  {pop DE}
-        $d2:if not(r.f.c) then begin {jp NC,nn}
-                posicion.h:=self.getbyte(r.pc+1);
-                posicion.l:=self.getbyte(r.pc);
-                r.pc:=posicion.w;
-             end else r.pc:=r.pc+2;
+        $d2:begin  //jp NC,nn
+                if not(r.f.c) then begin
+                    posicion.h:=self.getbyte(r.pc+1);
+                    posicion.l:=self.getbyte(r.pc);
+                    r.pc:=posicion.w;
+                end else r.pc:=r.pc+2;
+                r.wz:=r.pc;
+            end;
         $d3:begin {out (n),A}
                 posicion.l:=self.getbyte(r.pc);
                 posicion.h:=r.a;
                 r.pc:=r.pc+1;
                 if @self.out_port<>nil then self.out_port(r.a,posicion.w);
+                r.wz:=((posicion.l+1) and $ff) or (r.a shl 8);
              end;
-        $d4:begin   {call NC,nn}
+        $d4:begin   //call NC,nn
                 r.pc:=r.pc+2;
                 if not(r.f.c) then begin
                         self.push_sp(r.pc);
@@ -1268,6 +1319,7 @@ case instruccion of
                         r.pc:=posicion.w;
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
+                r.wz:=r.pc;
              end;
         $d5:self.push_sp(r.de.w);  {push DE}
         $d6:begin {sub n}
@@ -1275,12 +1327,14 @@ case instruccion of
                 r.pc:=r.pc+1;
                 sub_8(temp);
              end;
-        $d7:begin  {rst 10H}
+        $d7:begin  //rst 10H
                 self.push_sp(r.pc);
                 r.pc:=$10;
+                r.wz:=$10;
              end;
-        $d8:if r.f.c then begin {ret C}
+        $d8:if r.f.c then begin //ret C
                 r.pc:=pop_sp;
+                r.wz:=r.pc;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $d9:begin {exx}
@@ -1294,19 +1348,23 @@ case instruccion of
                 r.hl:=r.hl2;
                 r.hl2:=posicion;
              end;
-        $da:if r.f.c then begin {jp C,nn}
-                posicion.h:=self.getbyte(r.pc+1);
+        $da:begin //jp C,nn
+                if r.f.c then begin
+                    posicion.h:=self.getbyte(r.pc+1);
+                    posicion.l:=self.getbyte(r.pc);
+                    r.pc:=posicion.w;
+                end else r.pc:=r.pc+2;
+                r.wz:=r.pc;
+            end;
+        $db:begin  //in A,(n)
                 posicion.l:=self.getbyte(r.pc);
-                r.pc:=posicion.w;
-            end else r.pc:=r.pc+2;
-        $db:begin  {in A,(n)}
-             posicion.l:=self.getbyte(r.pc);
-             r.pc:=r.pc+1;
-             posicion.h:=r.a;
-             if @self.in_port<>nil then r.a:=self.in_port(posicion.w)
-              else r.a:=$ff;
+                r.pc:=r.pc+1;
+                posicion.h:=r.a;
+                if @self.in_port<>nil then r.a:=self.in_port(posicion.w)
+                  else r.a:=$ff;
+                r.wz:=posicion.w+1;
              end;
-        $dc:begin   {call C,nn}
+        $dc:begin   //call C,nn
                 r.pc:=r.pc+2;
                 if r.f.c then begin
                         self.push_sp(r.pc);
@@ -1315,6 +1373,7 @@ case instruccion of
                         r.pc:=posicion.w;
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
+                r.wz:=r.pc;
              end;
         $dd:self.estados_demas:=self.estados_demas+self.exec_dd_fd(true);
         $de:begin {sbc A,n}
@@ -1322,26 +1381,32 @@ case instruccion of
                 r.pc:=r.pc+1;
                 sbc_8(temp);
             end;
-        $df:begin  {rst 18H}
+        $df:begin  //rst 18H
                 self.push_sp(r.pc);
                 r.pc:=$18;
+                r.wz:=$18;
              end;
-        $e0:if not(r.f.p_v) then begin {ret PO}
+        $e0:if not(r.f.p_v) then begin //ret PO
                 r.pc:=self.pop_sp;
+                r.wz:=r.pc;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $e1:r.hl.w:=pop_sp;  {pop HL}
-        $e2:if not(r.f.p_v) then begin {jp PO,nn}
-                posicion.h:=self.getbyte(r.pc+1);
-                posicion.l:=self.getbyte(r.pc);
-                r.pc:=posicion.w;
-            end else r.pc:=r.pc+2;
+        $e2:begin //jp PO,nn
+                if not(r.f.p_v) then begin
+                    posicion.h:=self.getbyte(r.pc+1);
+                    posicion.l:=self.getbyte(r.pc);
+                    r.pc:=posicion.w;
+                end else r.pc:=r.pc+2;
+                r.wz:=r.pc;
+            end;
         $e3:begin   {ex (sp),hl}
                 posicion.w:=pop_sp;
                 self.push_sp(r.hl.w);
                 r.hl:=posicion;
+                r.wz:=posicion.w;
              end;
-        $e4:begin   {call PO,nn}
+        $e4:begin   //call PO,nn
                 r.pc:=r.pc+2;
                 if not(r.f.p_v) then begin
                         self.push_sp(r.pc);
@@ -1350,6 +1415,7 @@ case instruccion of
                         r.pc:=posicion.w;
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
+                r.wz:=r.pc;
              end;
         $e5:self.push_sp(r.hl.w);  {push HL}
         $e6:begin {and A,n}
@@ -1357,26 +1423,31 @@ case instruccion of
                 r.pc:=r.pc+1;
                 and_a(temp);
              end;
-        $e7:begin  {rst 20H}
+        $e7:begin  //rst 20H
                 self.push_sp(r.pc);
                 r.pc:=$20;
+                r.wz:=$20;
              end;
-        $e8:if r.f.p_v then begin {ret PE}
+        $e8:if r.f.p_v then begin //ret PE
                 r.pc:=pop_sp;
+                r.wz:=r.pc;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $e9:r.pc:=r.hl.w; {jp (HL)}
-        $ea:if r.f.p_v then begin {jp PE,nn}
-                posicion.h:=self.getbyte(r.pc+1);
-                posicion.l:=self.getbyte(r.pc);
-                r.pc:=posicion.w;
-            end else r.pc:=r.pc+2;
+        $ea:begin //jp PE,nn
+                if r.f.p_v then begin
+                    posicion.h:=self.getbyte(r.pc+1);
+                    posicion.l:=self.getbyte(r.pc);
+                    r.pc:=posicion.w;
+                end else r.pc:=r.pc+2;
+                r.wz:=r.pc;
+            end;
         $eb:begin { ex DE,HL}
                 posicion:=r.de;
                 r.de:=r.hl;
                 r.hl:=posicion;
              end;
-        $ec:begin   {call PE,nn}
+        $ec:begin   //call PE,nn
                 r.pc:=r.pc+2;
                 if r.f.p_v then begin
                         self.push_sp(r.pc);
@@ -1385,6 +1456,7 @@ case instruccion of
                         r.pc:=posicion.w;
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
+                r.wz:=r.pc;
              end;
         $ed:self.estados_demas:=self.estados_demas+exec_ed;
         $ee:begin  {xor A,n}
@@ -1392,12 +1464,14 @@ case instruccion of
                 r.pc:=r.pc+1;
                 xor_a(temp);
               end;
-        $ef:begin  {rst 28H}
+        $ef:begin  //rst 28H
                 self.push_sp(r.pc);
                 r.pc:=$28;
+                r.wz:=$28;
              end;
-        $f0:if not(r.f.s) then begin {ret NP}
+        $f0:if not(r.f.s) then begin //ret NP
                 r.pc:=self.pop_sp;
+                r.wz:=r.pc;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $f1:begin  {pop AF}
@@ -1412,16 +1486,19 @@ case instruccion of
                 if (posicion.l and 2)<>0 then r.f.n:=true else r.f.n:=false;
                 if (posicion.l and 1)<>0 then r.f.c:=true else r.f.c:=false;
                 end;
-        $f2:if not(r.f.s) then begin {jp P,nn}
-                posicion.h:=self.getbyte(r.pc+1);
-                posicion.l:=self.getbyte(r.pc);
-                r.pc:=posicion.w;
-             end else r.pc:=r.pc+2;
+        $f2:begin //jp P,nn
+                if not(r.f.s) then begin
+                    posicion.h:=self.getbyte(r.pc+1);
+                    posicion.l:=self.getbyte(r.pc);
+                    r.pc:=posicion.w;
+                end else r.pc:=r.pc+2;
+                r.wz:=r.pc;
+            end;
         $f3:begin {di}
                 r.iff1:=false;
                 r.iff2:=false;
               end;
-        $f4:begin   {call P,nn}
+        $f4:begin   //call P,nn
                 r.pc:=r.pc+2;
                 if not(r.f.s) then begin
                         self.push_sp(r.pc);
@@ -1430,6 +1507,7 @@ case instruccion of
                         r.pc:=posicion.w;
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
+                r.wz:=r.pc;
              end;
         $f5:begin  //push AF
                 posicion.h:=r.a;
@@ -1448,26 +1526,31 @@ case instruccion of
                 r.pc:=r.pc+1;
                 or_a(temp);
              end;
-        $f7:begin  {rst 30H}
+        $f7:begin  //rst 30H
                 self.push_sp(r.pc);
                 r.pc:=$30;
+                r.wz:=$30;
              end;
-        $f8:if r.f.s then begin {ret M}
+        $f8:if r.f.s then begin //ret M
                 r.pc:=self.pop_sp;
+                r.wz:=r.pc;
                 self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
              end;
         $f9:r.sp:=r.hl.w; {ld SP,HL}
-        $fa:if r.f.s then begin {jp M,nn}
-                posicion.h:=self.getbyte(r.pc+1);
-                posicion.l:=self.getbyte(r.pc);
-                r.pc:=posicion.w;
-            end else r.pc:=r.pc+2;
+        $fa:begin  //jp M,nn
+                if r.f.s then begin
+                    posicion.h:=self.getbyte(r.pc+1);
+                    posicion.l:=self.getbyte(r.pc);
+                    r.pc:=posicion.w;
+                end else r.pc:=r.pc+2;
+                r.wz:=r.pc;
+            end;
         $fb:begin   {ei}
                 r.iff1:=true;
                 r.iff2:=true;
                 self.after_ei:=true;
              end;
-        $fc:begin   {call M,nn}
+        $fc:begin   //call M,nn
                 r.pc:=r.pc+2;
                 if r.f.s then begin
                         self.push_sp(r.pc);
@@ -1476,6 +1559,7 @@ case instruccion of
                         r.pc:=posicion.w;
                         self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
                 end;
+                r.wz:=r.pc;
              end;
         $fd:self.estados_demas:=self.estados_demas+self.exec_dd_fd(false);
         $fe:begin  {cp n}
@@ -1483,9 +1567,10 @@ case instruccion of
                 r.pc:=r.pc+1;
                 cp_a(temp);
             end;
-        $ff:begin  {rst 38H}
+        $ff:begin  //rst 38H
                 self.push_sp(r.pc);
                 r.pc:=$38;
+                r.wz:=$38;
              end;
 end; {del case}
 cantidad_t:=self.z80t[instruccion]+self.estados_demas;
@@ -1573,10 +1658,9 @@ case instruccion of
         $2d:r.hl.l:=sra_8(r.hl.l); //sra L
         $2e:begin //sra (HL)
                 temp:=sra_8(self.getbyte(r.hl.w));
-                temp:=sra_8(temp);
                 self.putbyte(r.hl.w,temp);
             end;
-        $2f:r.a:=(r.a); //sra A
+        $2f:r.a:=sra_8(r.a); //sra A
         $30:sll_8(@r.bc.h); {sll B}
         $31:sll_8(@r.bc.l); {sll C}
         $32:sll_8(@r.de.h); {sll D}
@@ -1607,7 +1691,11 @@ case instruccion of
         $43:bit_8(0,r.de.l);  {bit 0,E}
         $44:bit_8(0,r.hl.h);  {bit 0,H}
         $45:bit_8(0,r.hl.l);  {bit 0,L}
-        $46:bit_8(0,self.getbyte(r.hl.w)); {bit 0,(HL)}
+        $46:begin //bit 0,(HL)
+              bit_8(0,self.getbyte(r.hl.w));
+              r.f.bit5:=(r.wz and $20)<>0;
+              r.f.bit3:=(r.wz and 8)<>0;
+            end;
         $47:bit_8(0,r.a);  {bit 0,A}
         $48:bit_8(1,r.bc.h);  {bit 1,B}
         $49:bit_8(1,r.bc.l);  {bit 1,C}
@@ -1615,7 +1703,11 @@ case instruccion of
         $4b:bit_8(1,r.de.l);  {bit 1,E}
         $4c:bit_8(1,r.hl.h);  {bit 1,H}
         $4d:bit_8(1,r.hl.l);  {bit 1,L}
-        $4e:bit_8(1,self.getbyte(r.hl.w));  {bit 1,(HL)}
+        $4e:begin //bit 1,(HL)
+              bit_8(1,self.getbyte(r.hl.w));
+              r.f.bit5:=(r.wz and $20)<>0;
+              r.f.bit3:=(r.wz and 8)<>0;
+            end;
         $4f:bit_8(1,r.a);  {bit 1,A}
         $50:bit_8(2,r.bc.h);  {bit 2,B}
         $51:bit_8(2,r.bc.l);  {bit 2,C}
@@ -1623,7 +1715,11 @@ case instruccion of
         $53:bit_8(2,r.de.l);  {bit 2,E}
         $54:bit_8(2,r.hl.h);  {bit 2,H}
         $55:bit_8(2,r.hl.l);  {bit 2,L}
-        $56:bit_8(2,self.getbyte(r.hl.w));  {bit 2,(HL)}
+        $56:begin //bit 2,(HL)
+              bit_8(2,self.getbyte(r.hl.w));
+              r.f.bit5:=(r.wz and $20)<>0;
+              r.f.bit3:=(r.wz and 8)<>0;
+            end;
         $57:bit_8(2,r.a);  {bit 2,A}
         $58:bit_8(3,r.bc.h);  {bit 3,B}
         $59:bit_8(3,r.bc.l);  {bit 3,C}
@@ -1631,7 +1727,11 @@ case instruccion of
         $5b:bit_8(3,r.de.l);  {bit 3,E}
         $5c:bit_8(3,r.hl.h);  {bit 3,H}
         $5d:bit_8(3,r.hl.l);  {bit 3,L}
-        $5e:bit_8(3,self.getbyte(r.hl.w));  {bit 3,(HL)}
+        $5e:begin //bit 3,(HL)
+              bit_8(3,self.getbyte(r.hl.w));
+              r.f.bit5:=(r.wz and $20)<>0;
+              r.f.bit3:=(r.wz and 8)<>0;
+            end;
         $5f:bit_8(3,r.a);  {bit 3,A}
         $60:bit_8(4,r.bc.h);  {bit 4,B}
         $61:bit_8(4,r.bc.l);  {bit 4,C}
@@ -1639,7 +1739,11 @@ case instruccion of
         $63:bit_8(4,r.de.l);  {bit 4,E}
         $64:bit_8(4,r.hl.h);  {bit 4,H}
         $65:bit_8(4,r.hl.l);  {bit 4,L}
-        $66:bit_8(4,self.getbyte(r.hl.w)); {bit 4,(HL)}
+        $66:begin //bit 4,(HL)
+              bit_8(4,self.getbyte(r.hl.w));
+              r.f.bit5:=(r.wz and $20)<>0;
+              r.f.bit3:=(r.wz and 8)<>0;
+            end;
         $67:bit_8(4,r.a);  {bit 4,A}
         $68:bit_8(5,r.bc.h);  {bit 5,B}
         $69:bit_8(5,r.bc.l);  {bit 5,C}
@@ -1647,7 +1751,11 @@ case instruccion of
         $6b:bit_8(5,r.de.l);  {bit 5,E}
         $6c:bit_8(5,r.hl.h);  {bit 5,H}
         $6d:bit_8(5,r.hl.l);  {bit 5,L}
-        $6e:bit_8(5,self.getbyte(r.hl.w)); {bit 5,(HL)}
+        $6e:begin //bit 5,(HL)
+              bit_8(5,self.getbyte(r.hl.w));
+              r.f.bit5:=(r.wz and $20)<>0;
+              r.f.bit3:=(r.wz and 8)<>0;
+            end;
         $6f:bit_8(5,r.a);  {bit 5,A}
         $70:bit_8(6,r.bc.h);  {bit 6,B}
         $71:bit_8(6,r.bc.l);  {bit 6,C}
@@ -1655,7 +1763,11 @@ case instruccion of
         $73:bit_8(6,r.de.l);  {bit 6,E}
         $74:bit_8(6,r.hl.h);  {bit 6,H}
         $75:bit_8(6,r.hl.l);  {bit 6,L}
-        $76:bit_8(6,self.getbyte(r.hl.w)); {bit 6,(HL)}
+        $76:begin //bit 6,(HL)
+              bit_8(6,self.getbyte(r.hl.w));
+              r.f.bit5:=(r.wz and $20)<>0;
+              r.f.bit3:=(r.wz and 8)<>0;
+            end;
         $77:bit_8(6,r.a);  {bit 6,A}
         $78:bit_7(r.bc.h);  {bit 7,B}
         $79:bit_7(r.bc.l);  {bit 7,C}
@@ -1663,7 +1775,11 @@ case instruccion of
         $7b:bit_7(r.de.l);  {bit 7,E}
         $7c:bit_7(r.hl.h);  {bit 7,H}
         $7d:bit_7(r.hl.l);  {bit 7,L}
-        $7e:bit_7(self.getbyte(r.hl.w));  {bit 7,(HL)}
+        $7e:begin //bit 7,(HL)
+              bit_7(self.getbyte(r.hl.w));
+              r.f.bit5:=(r.wz and $20)<>0;
+              r.f.bit3:=(r.wz and 8)<>0;
+            end;
         $7f:bit_7(r.a);  {bit 7,A}
         $80:r.bc.h:=(r.bc.h and $fe); {res 0,B}
         $81:r.bc.l:=(r.bc.l and $fe); {res 0,C}
@@ -1875,6 +1991,7 @@ case instruccion of
                 r.pc:=r.pc+2;
                 self.putbyte(posicion.w,registro.l);
                 self.putbyte(posicion.w+1,registro.h);
+                r.wz:=posicion.w+1;
             end;
         $23:registro.w:=registro.w+1; {inc IX}
         $24:registro.h:=inc_8(registro.h);  //inc IXh
@@ -1890,6 +2007,7 @@ case instruccion of
                 r.pc:=r.pc+2;
                 registro^.l:=self.getbyte(posicion.w);
                 registro^.h:=self.getbyte(posicion.w+1);
+                r.wz:=posicion.w+1;
             end;
         $2b:registro^.w:=registro^.w-1; {dec IX}
         $2c:registro.l:=inc_8(registro.l); //inc IXl
@@ -1902,6 +2020,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=inc_8(self.getbyte(temp2));
                 self.putbyte(temp2,temp);
             end;
@@ -1909,6 +2028,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=dec_8(self.getbyte(temp2));
                 self.putbyte(temp2,temp);
            end;
@@ -1916,6 +2036,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 temp2:=temp2+shortint(temp);
                 temp:=self.getbyte(r.pc+1);
+                r.wz:=temp2;
                 r.pc:=r.pc+2;
                 self.putbyte(temp2,temp);
             end;
@@ -1926,6 +2047,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 r.bc.h:=self.getbyte(temp2);
             end;
         $4c:r.bc.l:=registro^.h; {ld C,IXh}
@@ -1934,6 +2056,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 r.bc.l:=self.getbyte(temp2);
             end;
         $54:r.de.h:=registro^.h;  {ld D,IXh}
@@ -1942,6 +2065,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 r.de.h:=self.getbyte(temp2);
             end;
         $5c:r.de.l:=registro^.h;  {ld E,IXh}
@@ -1950,6 +2074,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 r.de.l:=self.getbyte(temp2);
             end;
         $60:registro^.h:=r.bc.h;  {ld IXh,B}
@@ -1962,6 +2087,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 r.hl.h:=self.getbyte(temp2);
             end;
         $67:registro^.h:=r.a;  {ld IXh,A}
@@ -1975,6 +2101,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 r.hl.l:=self.getbyte(temp2);
             end;
         $6f:registro^.l:=r.a; {ld IXl,A}
@@ -1982,42 +2109,49 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 self.putbyte(temp2,r.bc.h);
             end;
         $71:begin {ld (IX+d),C}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 self.putbyte(temp2,r.bc.l);
             end;
         $72:begin {ld (IX+d),D}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 self.putbyte(temp2,r.de.h);
             end;
         $73:begin {ld (IX+d),E}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 self.putbyte(temp2,r.de.l);
             end;
         $74:begin {ld (IX+d),H}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 self.putbyte(temp2,r.hl.h);
             end;
         $75:begin {ld (IX+d),L}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 self.putbyte(temp2,r.hl.l);
             end;
         $77:begin {ld (IX+d),A}
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 self.putbyte(temp2,r.a);
             end;
         $7c:r.a:=registro^.h;  {ld A,IXh}
@@ -2026,6 +2160,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 r.a:=self.getbyte(temp2);
             end;
         $84:add_8(registro^.h);  {add A,IXh}
@@ -2034,6 +2169,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=self.getbyte(temp2);
                 add_8(temp);
             end;
@@ -2043,6 +2179,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=self.getbyte(temp2);
                 adc_8(temp);
         end;
@@ -2052,6 +2189,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=self.getbyte(temp2);
                 sub_8(temp);
         end;
@@ -2061,6 +2199,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=self.getbyte(temp2);
                 sbc_8(temp);
         end;
@@ -2070,6 +2209,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=self.getbyte(temp2);
                 and_a(temp);
         end;
@@ -2079,6 +2219,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=self.getbyte(temp2);
                 xor_a(temp);
               end;
@@ -2088,6 +2229,7 @@ case instruccion of
                  temp:=self.getbyte(r.pc);
                  r.pc:=r.pc+1;
                  temp2:=temp2+shortint(temp);
+                 r.wz:=temp2;
                  temp:=self.getbyte(temp2);
                  or_a(temp);
              end;
@@ -2097,6 +2239,7 @@ case instruccion of
                 temp:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
                 temp2:=temp2+shortint(temp);
+                r.wz:=temp2;
                 temp:=self.getbyte(temp2);
                 cp_a(temp);
         end;
@@ -2106,6 +2249,7 @@ case instruccion of
                 posicion.w:=self.pop_sp;
                 self.push_sp(registro^.w);
                 registro^.w:=posicion.w;
+                r.wz:=posicion.w;
              end;
         $e5:self.push_sp(registro^.w);  {push IX}
         $e9:r.pc:=registro^.w; {jp IX}
@@ -2126,6 +2270,7 @@ instruccion:=self.getbyte(r.pc);
 temp2:=temp2+shortint(instruccion);
 instruccion:=self.getbyte(r.pc+1);
 r.pc:=r.pc+2;
+r.wz:=temp2;
 case instruccion of
         $00:begin {ld B,rlc (IX+d) >23t<}
                 r.bc.h:=self.getbyte(temp2);
@@ -3031,13 +3176,14 @@ case instruccion of
                 r.f.h:=false;
             end;
         $41:if @self.out_port<>nil then self.out_port(r.bc.h,r.bc.w); {out (C),B}
-        $42:r.hl.w:=sbc_16(r.hl.w,r.bc.w); //sbc HL,BC
+        $42:r.hl.w:=sbc_hl(r.bc.w); //sbc HL,BC
         $43:begin {ld (nn),BC}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;
                 self.putbyte(posicion.w,r.bc.l);
                 self.putbyte(posicion.w+1,r.bc.h);
+                r.wz:=posicion.w+1;
             end;
         $44,$4c,$54,$5c,$64,$6c,$74,$7c:begin  {neg}
                 temp:=r.a;
@@ -3046,6 +3192,7 @@ case instruccion of
             end;
         $45,$55,$65,$75:begin  {retn}
                 r.pc:=pop_sp;
+                r.wz:=r.pc;
                 r.iff1:=r.iff2;
             end;
         $46,$4e,$66,$6e:r.im:=0; {im 0}
@@ -3062,18 +3209,20 @@ case instruccion of
                 r.f.h:=false;
             end;
         $49:if @self.out_port<>nil then self.out_port(r.bc.l,r.bc.w); {out (C),C}
-        $4a:r.hl.w:=adc_16(r.hl.w,r.bc.w); //adc HL,BC
+        $4a:r.hl.w:=adc_hl(r.bc.w); //adc HL,BC
         $4b:begin  {ld BC,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;;
                 r.bc.l:=self.getbyte(posicion.w);
                 r.bc.h:=self.getbyte(posicion.w+1);
+                r.wz:=posicion.w+1;
             end;
         {4c: neg}
         $4d,$5d,$6d,$7d:begin   {reti}
                 r.iff1:=r.iff2;
                 r.pc:=pop_sp;
+                r.wz:=r.pc;
                 if self.daisy then z80daisy_reti;
             end;
         {4e: im 0}
@@ -3090,13 +3239,14 @@ case instruccion of
                 r.f.h:=false;
             end;
         $51:if @self.out_port<>nil then self.out_port(r.de.h,r.bc.w); {out (C),D}
-        $52:r.hl.w:=sbc_16(r.hl.w,r.de.w); //sbc HL,DE
+        $52:r.hl.w:=sbc_hl(r.de.w); //sbc HL,DE
         $53:begin {ld (nn),DE}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;;
                 self.putbyte(posicion.w,r.de.l);
                 self.putbyte(posicion.w+1,r.de.h);
+                r.wz:=posicion.w+1;
             end;
         {54: neg
         $55:retn}
@@ -3123,13 +3273,14 @@ case instruccion of
                 r.f.h:=false;
             end;
         $59:if @self.out_port<>nil then self.out_port(r.de.l,r.bc.w); {out (C),E}
-        $5a:r.hl.w:=adc_16(r.hl.w,r.de.w); //adc HL,DE
+        $5a:r.hl.w:=adc_hl(r.de.w); //adc HL,DE
         $5b:begin  {ld DE,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;;
                 r.de.l:=self.getbyte(posicion.w);
                 r.de.h:=self.getbyte(posicion.w+1);
+                r.wz:=posicion.w+1;
             end;
         {5c:neg
         5d:reti}
@@ -3156,19 +3307,21 @@ case instruccion of
                 r.f.h:=false;
             end;
         $61:if @self.out_port<>nil then self.out_port(r.hl.h,r.bc.w); {out (C),H}
-        $62:r.hl.w:=sbc_16(r.hl.w,r.hl.w); //sbc HL,HL
+        $62:r.hl.w:=sbc_hl(r.hl.w); //sbc HL,HL
         $63:begin {ld (nn),HL}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;;
                 self.putbyte(posicion.w,r.hl.l);
                 self.putbyte(posicion.w+1,r.hl.h);
+                r.wz:=posicion.w+1;
             end;
         {64:neg
         $65:retn
         $66:im 0}
-        $67:begin {rrd}
+        $67:begin //rrd
                 temp2:=self.getbyte(r.hl.w);
+                r.wz:=r.hl.w+1;
                 temp:=(r.a and $F)*16;
                 r.a:=(r.a and $F0)+ (temp2 and $F);
                 temp2:=(temp2 div 16) + temp;
@@ -3193,19 +3346,21 @@ case instruccion of
                 r.f.h:=false;
              end;
         $69:if @self.out_port<>nil then self.out_port(r.hl.l,r.bc.w); {out (C),L}
-        $6a:r.hl.w:=adc_16(r.hl.w,r.hl.w); //adc HL,HL
+        $6a:r.hl.w:=adc_hl(r.hl.w); //adc HL,HL
         $6b:begin  {ld HL,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;;
                 r.hl.l:=self.getbyte(posicion.w);
                 r.hl.h:=self.getbyte(posicion.w+1);
+                r.wz:=posicion.w+1;
             end;
         {6c:neg
         $6d:reti
         $6e:im 0}
-        $6f:begin  {rld}
+        $6f:begin  //rld
                 temp2:=self.getbyte(r.hl.w);
+                r.wz:=r.hl.w+1;
                 temp:=r.a and $0f;
                 r.a:=(r.a  and $F0)+ (temp2 div 16);
                 temp2:=(temp2*16) + temp;
@@ -3230,19 +3385,20 @@ case instruccion of
                 r.f.h:=false;
             end;
         $71:if @self.out_port<>nil then self.out_port(0,r.bc.w); {out (C),0}
-        $72:r.hl.w:=sbc_16(r.hl.w,r.sp); //sbc HL,SP
+        $72:r.hl.w:=sbc_hl(r.sp); //sbc HL,SP
         $73:begin {ld (nn),SP}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;;
                 self.putbyte(posicion.w,r.sp and $ff);
                 self.putbyte(posicion.w+1,r.sp shr 8);
+                r.wz:=posicion.w+1;
             end;
         {74:neg
         $75:retn
         $76:im 1
         $77:nop*2}
-        $78:begin       {in A,(C)}
+        $78:begin  //in A,(C)
                 if @self.in_port<>nil then r.a:=self.in_port(r.bc.w)
                   else r.a:=$ff;
                 r.f.z:=(r.a=0);
@@ -3252,20 +3408,25 @@ case instruccion of
                 r.f.p_v:= paridad[r.a];
                 r.f.n:=false;
                 r.f.h:=false;
+                r.wz:=r.bc.w+1;
             end;
-        $79:if @self.out_port<>nil then self.out_port(r.a,r.bc.w); {out (C),A}
-        $7a:r.hl.w:=adc_16(r.hl.w,r.sp); //adc HL,SP
+        $79:begin  //out (C),A
+                if @self.out_port<>nil then self.out_port(r.a,r.bc.w);
+                r.wz:=r.bc.w+1;
+            end;
+        $7a:r.hl.w:=adc_hl(r.sp); //adc HL,SP
         $7b:begin  {ld SP,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
                 posicion.l:=self.getbyte(r.pc);
                 r.pc:=r.pc+2;;
                 r.sp:=self.getbyte(posicion.w)+(self.getbyte(posicion.w+1) shl 8);
+                r.wz:=posicion.w+1;
             end;
         {7c:neg
         $7d:reti
         $7e:im 2
         $7f..9c:nop*2}
-        $a0:begin   {ldi}
+        $a0:begin   //ldi
                  temp:=self.getbyte(r.hl.w);
                  r.hl.w:=r.hl.w+1;
                  self.putbyte(r.de.w,temp);
@@ -3283,6 +3444,7 @@ case instruccion of
                  temp2:=self.getbyte(r.hl.w);
                  temp:=r.a-temp2;
                  temp3:=r.a xor temp2 xor temp;
+                 r.wz:=r.wz+1;
                  r.hl.w:=r.hl.w+1;
                  r.bc.w:=r.bc.w-1;
                  r.f.p_v:=(r.bc.w<>0);
@@ -3297,8 +3459,9 @@ case instruccion of
                    //Primer juego que lo usa Titan 09 de Sep 2006
                  if @self.in_port<>nil then temp:=self.in_port(r.bc.w)
                   else temp:=$ff;
-                 self.putbyte(r.hl.w,temp);
+                 r.wz:=r.bc.w+1;
                  r.bc.h:=r.bc.h-1;
+                 self.putbyte(r.hl.w,temp);
                  r.hl.w:=r.hl.w+1;
                  r.f.n:=(temp and $80)<>0;
                  tempw:=temp+r.bc.l+1;
@@ -3314,6 +3477,7 @@ case instruccion of
                  //08 de feb 2003
                  temp:=self.getbyte(r.hl.w);
                  r.bc.h:=r.bc.h-1;
+                 r.wz:=r.bc.w+1;
                  if @self.out_port<>nil then self.out_port(self.getbyte(r.hl.w),r.bc.w);
                  r.hl.w:=r.hl.w+1;
                  r.f.n:=(temp and $80)<>0;
@@ -3344,6 +3508,7 @@ case instruccion of
                  temp2:=self.getbyte(r.hl.w);
                  temp:=r.a-temp2;
                  temp3:=r.a xor temp2 xor temp;
+                 r.wz:=r.wz-1;
                  r.hl.w:=r.hl.w-1;
                  r.bc.w:=r.bc.w-1;
                  r.f.s:=(temp and $80) <>0;
@@ -3357,6 +3522,7 @@ case instruccion of
         $aa:begin   //ind añadido el 03-12-08 usado por CPC test
                  if @self.in_port<>nil then temp:=self.in_port(r.bc.w)
                    else temp:=$ff;
+                 r.wz:=r.bc.w-1;
                  r.bc.h:=r.bc.h-1;
                  self.putbyte(r.hl.w,temp);
                  r.hl.w:=r.hl.w-1;
@@ -3370,9 +3536,10 @@ case instruccion of
                  r.f.bit3:=(r.bc.h and 8)<>0;
                  r.f.s:=(r.bc.h and $80)<>0;
             end;
-        $ab:begin   {outd}
+        $ab:begin   //outd
                  temp:=self.getbyte(r.hl.w);
                  r.bc.h:=r.bc.h-1;
+                 r.wz:=r.bc.w-1;
                  if @self.out_port<>nil then self.out_port(self.getbyte(r.hl.w),r.bc.w);
                  dec(r.hl.w);
                  r.f.n:=(temp and $80)<>0;
@@ -3386,7 +3553,7 @@ case instruccion of
                  r.f.s:=(r.bc.h and $80)<>0;
             end;
         {ac..$af:nop*2}
-        $b0:begin {ldir}
+        $b0:begin //ldir
                  temp:=self.getbyte(r.hl.w);
                  r.hl.w:=r.hl.w+1;
                  self.putbyte(r.de.w,temp);
@@ -3394,6 +3561,7 @@ case instruccion of
                  r.bc.w:=r.bc.w-1;
                  if (r.bc.w<>0) then begin
                         r.pc:=r.pc-2;
+                        r.wz:=r.pc+1;
                         estados_demas:=self.z80t_ex[instruccion];
                  end;
                  r.f.p_v:=(r.bc.w<>0);
@@ -3403,10 +3571,11 @@ case instruccion of
                  r.f.bit5:=(temp and 2)<>0;
                  r.f.bit3:=(temp and 8)<>0;
              end;
-        $b1:begin  {cpir}
+        $b1:begin  //cpir
                 temp2:=self.getbyte(r.hl.w);
                 temp:=r.a-temp2;
                 temp3:=r.a xor temp2 xor temp;
+                r.wz:=r.wz+1;
                 r.hl.w:=r.hl.w+1;
                 r.bc.w:=r.bc.w-1;
                 r.f.s:=(temp and $80) <>0;
@@ -3419,13 +3588,15 @@ case instruccion of
                 If (r.f.p_v and not(r.f.z)) then begin
                   estados_demas:=self.z80t_ex[instruccion];
                   r.pc:=r.pc-2;
+                  r.wz:=r.pc+1;
                 end;
             end;
         $b2:begin  //inir añadido el 05-10-08, lo usa una rom de Coleco!
                 if @self.in_port<>nil then temp:=self.in_port(r.bc.w)
                   else temp:=$ff;
-                self.putbyte(r.hl.w,temp);
+                r.wz:=r.bc.w+1;
                 r.bc.h:=r.bc.h-1;
+                self.putbyte(r.hl.w,temp);
                 r.hl.w:=r.hl.w+1;
                 r.f.n:=(temp and $80)<>0;
                 tempw:=temp+r.bc.l+1;
@@ -3444,6 +3615,7 @@ case instruccion of
         $b3:begin //otir añadido el dia 18-09-04
                 temp:=self.getbyte(r.hl.w);
                 r.bc.h:=r.bc.h-1;
+                r.wz:=r.bc.w+1;
                 if @self.out_port<>nil then self.out_port(self.getbyte(r.hl.w),r.bc.w);
                 r.hl.w:=r.hl.w+1;
                 r.f.n:=(temp and $80)<>0;
@@ -3461,7 +3633,7 @@ case instruccion of
                 end;
             end;
         { $b4..$b7:nop*2}
-        $b8:begin {lddr}
+        $b8:begin //lddr
                 temp:=self.getbyte(r.hl.w);
                 r.hl.w:=r.hl.w-1;
                 self.putbyte(r.de.w,temp);
@@ -3475,12 +3647,14 @@ case instruccion of
                 if (r.bc.w<>0) then begin
                   r.pc:=r.pc-2;
                   estados_demas:=self.z80t_ex[instruccion];
+                  r.wz:=r.pc+1;
                 end;
              end;
-        $b9:begin   {cpdr}
+        $b9:begin   //cpdr
                  temp2:=self.getbyte(r.hl.w);
                  temp:=r.a-temp2;
                  temp3:=r.a xor temp2 xor temp;
+                 r.wz:=r.wz-1;
                  r.hl.w:=r.hl.w-1;
                  r.bc.w:=r.bc.w-1;
                  r.f.s:=(temp and $80) <>0;
@@ -3493,12 +3667,14 @@ case instruccion of
                  if r.f.p_v and not(r.f.z) then begin
                      r.pc:=r.pc-2;
                      estados_demas:=self.z80t_ex[instruccion];
+                     r.wz:=r.pc+1;
                  end;
              end;
         $ba:begin  //indr  >16t<
                  if @self.in_port<>nil then temp:=self.in_port(r.bc.w)
                   else temp:=$ff;
                  self.putbyte(r.hl.w,temp);
+                 r.wz:=r.bc.w-1;
                  r.bc.h:=r.bc.h-1;
                  r.f.n:=(temp and $80)<>0;
                  tempw:=temp+r.bc.l-1;
@@ -3518,6 +3694,7 @@ case instruccion of
         $bb:begin //otdr
                 temp:=self.getbyte(r.hl.w);
                 dec(r.bc.h);
+                r.wz:=r.bc.w-1;
                 if @self.out_port<>nil then self.out_port(temp,r.bc.w);
                 dec(r.hl.w);
                 r.f.n:=(temp and $80)<>0;

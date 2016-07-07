@@ -1,7 +1,18 @@
 ﻿#DSP Emulator status<br>
+<b>07/07/16 - DSP Emulator 0.17 Final. All binary and source updated.</b><br><pre>
+-All previous enhacements
+-Z80: Implemented WZ/MEMPTR register, now passes all ZEXALL tests
+-YM2203: Added functions to change the AY internal clock
+-Spectrum
+    +When a snapshot without ROM is loaded and previously changed to a different ROM than the original, it's reloaded the original ROM
+    +Contended memory changes
+-Amstrad CPC
+    +Added LensLok protection
+    +Enhanced video mode 2, more speed
+</pre><br>
 <b>18/06/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary updated.</b><br><pre>
 -Lazarus: Fixed zlib stuff. Removed external library dependency, now you can use fast snapshots, load spectrum SZX, DSP, CSW files, load Coleco snapshots, etc.
--Finished IQR, NMI, reset and halt signals rewrite
+-Finished IRQ, NMI, reset and halt signals rewrite
 -Simplified and reorganized all drivers procedures and functions
 -Enhanced ZIP file load:
     +Delphi: the internal classes are used
@@ -26,7 +37,7 @@
 <b>26/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary updated.</b><br><pre>
 -General
     +GFX: Fixed and enhanced the final screen rotation
-    +Improved how is closed the drivers, CPU, video, etc. Fixed bugs and removed some problems when the driver is not initialized and changed an other
+    +Improved how drivers are closed, CPU, video, etc. Fixed bugs and removed some problems when the driver is not initialized and changed an other
     +K007232: Fixed sound
 -Thunder Cross HW
     +Super Contra: Added driver with sound

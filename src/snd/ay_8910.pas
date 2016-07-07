@@ -20,6 +20,7 @@ type
         procedure change_io_calls(porta_read,portb_read:cpu_inport_call;porta_write,portb_write:cpu_outport_call);
         function save_snapshot(data:pbyte):word;
         procedure load_snapshot(data:pbyte);
+        procedure change_clock(clock:dword);
       private
         Regs:array[0..15] of byte;
         PeriodA,PeriodB,PeriodC,PeriodN,PeriodE:integer;
@@ -76,6 +77,12 @@ begin
     l_out:=l_out/1.188502227;	// = 10 ^ (1.5/20) = 1.5dB */
   end;
   Vol_Table[0]:=0;
+end;
+
+procedure ay8910_chip.change_clock(clock:dword);
+begin
+  self.clock:=clock;
+  self.UpdateStep:=trunc((STEP*freq_base_audio*8)/self.clock);
 end;
 
 constructor ay8910_chip.create(clock:integer;amp:single;internal:boolean=false);

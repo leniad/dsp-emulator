@@ -405,7 +405,6 @@ llamadas_maquina.bucle_general:=terracre_principal;
 llamadas_maquina.reset:=reset_terracre;
 llamadas_maquina.save_qsnap:=terracre_qsave;
 llamadas_maquina.load_qsnap:=terracre_qload;
-llamadas_maquina.fps_max:=57.444853;
 end;
 
 end.

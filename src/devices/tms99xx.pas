@@ -38,7 +38,7 @@ uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
         procedure draw_mode12(linea:byte);
         procedure draw_mode2(linea:byte);
         procedure draw_mode3(linea:byte);
-        procedure draw_modebogus(linea:byte);
+        procedure draw_modebogus;
         procedure draw_mode23(linea:byte);
     end;
 
@@ -407,7 +407,7 @@ begin //256x192 --> Caracteres de 4x4 en dos bloques
  fillword(ptemp,PIXELS_RIGHT_BORDER_VISIBLES,paleta[self.bgcolor]);
 end;
 
-procedure tms99xx_chip.draw_modebogus(linea:byte);
+procedure tms99xx_chip.draw_modebogus;
 var
     fc,bc,x:byte;
     ptemp:pword;
@@ -498,7 +498,7 @@ begin
                     3:self.draw_mode12(linea);
                     4:self.draw_mode3(linea);
                     6:self.draw_mode23(linea);
-                    5,7:self.draw_modebogus(linea);
+                    5,7:self.draw_modebogus;
                end;
                putpixel(0,linea+LINEAS_TOP_BORDE,PIXELS_VISIBLES_TOTAL,punbuf,self.pant);
                if ((self.regs[1] and $50)=$40) then draw_sprites(linea)

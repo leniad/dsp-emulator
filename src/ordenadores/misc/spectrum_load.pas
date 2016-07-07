@@ -448,6 +448,7 @@ var
   cadena:string;
 begin
 if ((datos=nil) and not(spec_rom.hay_rom)) then exit;
+rom_cambiada_48:=false;
 cinta:=false;
 resultado:=false;
 if spec_rom.hay_rom then begin
@@ -485,6 +486,8 @@ if extension='ZX' then resultado:=abrir_zx(datos,file_size);
 if extension='SZX' then resultado:=abrir_szx(datos,file_size);
 if not(resultado) then MessageDlg('No es una cinta o un snapshot válido.'+chr(10)+chr(13)+'Not a valid tape or snapshot', mtInformation,[mbOk], 0)
   else begin
+    //Si todo ha ido bien y no hay ROM, devolver la original!
+    if not(rom_cambiada_48) then copymemory(@memoria[0],@mem_snd[0],$4000);
     if cinta then begin
       tape_window1.edit1.Text:=nombre;
       tape_window1.show;

@@ -61,15 +61,17 @@ spec_z80.change_retraso_call(spec48_retraso_memoria,spec48_retraso_puerto);
 spec_z80.change_ram_calls(spec48_getbyte,spec48_putbyte);
 spec_z80.change_io_calls(spec48_inbyte,spec48_outbyte);
 cadena:=file_name_only(changefileext(extractfilename(Directory.spectrum_48),''));
-if extension_fichero(Directory.spectrum_48)='ZIP' then rom_cargada:=carga_rom_zip(Directory.spectrum_48,cadena+'.ROM',@memoria[0],$4000,0,false)
+//Aqui utilizo la memoria de la CPU de sonido como buffer...
+if extension_fichero(Directory.spectrum_48)='ZIP' then rom_cargada:=carga_rom_zip(Directory.spectrum_48,cadena+'.ROM',@mem_snd[0],$4000,0,false)
   else begin
-    rom_cargada:=read_file(Directory.spectrum_48,@memoria[0],pos);
-    if pos<>$4000 then rom_cargada:=false;
+    rom_cargada:=read_file(Directory.spectrum_48,@mem_snd[0],pos);
+    rom_cargada:=(pos=$4000);
   end;
+//Si ha ido mal me quejo, si ha ido bien copio la ROM a la memoria
 if not(rom_cargada) then begin
   MessageDlg(leng[main_vars.idioma].errores[0]+' "'+Directory.spectrum_48+'"', mtError,[mbOk], 0);
   exit;
-end;
+end else copymemory(@memoria[0],@mem_snd[0],$4000);
 iniciar_audio(false);
 fillchar(var_spectrum.retraso[0],70000,0);
 f:=14335;  //24 del borde

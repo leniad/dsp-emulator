@@ -874,7 +874,10 @@ if (z80_regs.pc=0) then begin  //version 2 o 3
                 end; //Si no esta comprimida copio directamente los datos...
                 case main_vars.tipo_maquina of
                   0,5:case z80_ram.numero of //Spectrum 48k
-                          0:copymemory(@memoria[0],@z80_ram.datos[0],$4000);
+                          0:begin
+                              copymemory(@memoria[0],@z80_ram.datos[0],$4000);
+                              rom_cambiada_48:=true;
+                            end;
                           4:copymemory(@memoria[$8000],@z80_ram.datos[0],$4000);
                           5:copymemory(@memoria[$c000],@z80_ram.datos[0],$4000);
                           8:copymemory(@memoria[$4000],@z80_ram.datos[0],$4000);
@@ -1011,7 +1014,6 @@ var
   z80_ext:^tz80_ext;
   z80_ram:^tz80_ram;
 begin
-grabar_z80:=false;
 getmem(pdatos,$30000);
 ptemp:=pdatos;
 spec_z80_reg:=spec_z80.get_internal_r;
@@ -1160,7 +1162,6 @@ var
   main_z80_reg:npreg_z80;
   cpc_sna:^tcpc_sna;
 begin
-grabar_amstrad_sna:=false;
 main_z80_reg:=main_z80.get_internal_r;
 getmem(pdatos,$30000);
 ptemp:=pdatos;
@@ -1594,7 +1595,6 @@ var
   coleco_block:^tcoleco_block;
   pdata,ptemp,ptemp2,ptemp3:pbyte;
 begin
-grabar_coleco_snapshot:=false;
 getmem(coleco_header,sizeof(tcoleco_header));
 fillchar(coleco_header^,sizeof(tcoleco_header),0);
 coleco_header.magic:='CLSN';

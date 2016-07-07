@@ -40,7 +40,7 @@ const
         LINEAS_TOP_BORDE:byte;
         LINEAS_Y_BORDE_INFERIOR,LINEAS_Y_SYNC:word;
         procedure select_sprites(linea:word);
-        procedure draw_sprites(linea:byte);
+        procedure draw_sprites;
         procedure draw_mode_sms(linea:byte);
     end;
 
@@ -120,7 +120,7 @@ end;
 
 procedure vdp_chip.select_sprites(linea:word);
 var
-  max_sprites,sprite_index,sprite_x,flags:byte;
+  max_sprites,sprite_index,sprite_x:byte;
   parse_line,sprite_tile_selected:word;
   sprite_line,sprite_y:integer;
 begin
@@ -170,7 +170,7 @@ begin
 	end;
 end;
 
-procedure vdp_chip.draw_sprites(linea:byte);
+procedure vdp_chip.draw_sprites;
 var
   sprite_col_occurred:boolean;
   sprite_col_x,plot_min_x,sprite_x,pixel_plot_x,sprite_tile_selected,sprite_pattern_line:word;
@@ -393,7 +393,7 @@ if self.tms.vdp_mode then begin
     fillword(@priority_selected[0],256,0);
     self.draw_mode_sms(linea);
     self.select_sprites(linea);
-    self.draw_sprites(linea);
+    self.draw_sprites;
     if (self.tms.regs[0] and $20)<>0 then begin
       ptemp:=punbuf;
       inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES);

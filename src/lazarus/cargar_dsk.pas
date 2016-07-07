@@ -105,10 +105,10 @@ end;
 
 procedure Tload_dsk.FileListBox1DblClick(Sender: TObject);
 var
-  cadena:string;
+  cadena,extension_final:string;
   correcto:boolean;
-  extension_final:string;
 begin
+correcto:=false;
 if extension_dsk='ZIP' then cadena:=extractfilename(nombre_zip)
   else cadena:=extractfilename(nombre_dsk);
 if cadena='' then exit;

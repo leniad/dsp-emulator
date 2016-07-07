@@ -1,7 +1,7 @@
 unit amstrad_cpc;
 
 interface
-uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,controls_engine,ay_8910,sysutils,gfx_engine,upd765,cargar_dsk,forms,
      dialogs,rom_engine,misc_functions,main_engine,pal_engine,sound_engine,
      tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc;
@@ -437,21 +437,37 @@ while (x<cpc_crt.char_total) do begin
           p7:=((val and $2) shr 1);
           p8:=((val and $1) shr 0);
           ptemp:=punbuf;
-          SDL_GetRGB(paleta[cpc_ga.pal[p1]],pantalla[pant_sprites].format,@temp1,@temp2,@temp3);
-          SDL_GetRGB(paleta[cpc_ga.pal[p2]],pantalla[pant_sprites].format,@temp4,@temp5,@temp6);
-          ptemp^:=SDL_MapRGB(pantalla[pant_sprites].format,(temp1+temp4) div 2,(temp2+temp5) div 2,(temp3+temp6) div 2);
+          temp1:=(paleta[cpc_ga.pal[p1]] and $f800) shr 11;
+          temp2:=(paleta[cpc_ga.pal[p1]] and $7e0) shr 5;
+          temp3:=paleta[cpc_ga.pal[p1]] and $1f;
+          temp4:=(paleta[cpc_ga.pal[p2]] and $f800) shr 11;
+          temp5:=(paleta[cpc_ga.pal[p2]] and $7e0) shr 5;
+          temp6:=paleta[cpc_ga.pal[p2]] and $1f;
+          ptemp^:=(((temp1+temp4) shr 1) shl 11) or (((temp2+temp5) shr 1) shl 5) or ((temp3+temp6) shr 1);
           inc(ptemp);
-          SDL_GetRGB(paleta[cpc_ga.pal[p3]],pantalla[pant_sprites].format,@temp1,@temp2,@temp3);
-          SDL_GetRGB(paleta[cpc_ga.pal[p4]],pantalla[pant_sprites].format,@temp4,@temp5,@temp6);
-          ptemp^:=SDL_MapRGB(pantalla[pant_sprites].format,(temp1+temp4) div 2,(temp2+temp5) div 2,(temp3+temp6) div 2);
+          temp1:=(paleta[cpc_ga.pal[p3]] and $f800) shr 11;
+          temp2:=(paleta[cpc_ga.pal[p3]] and $7e0) shr 5;
+          temp3:=paleta[cpc_ga.pal[p3]] and $1f;
+          temp4:=(paleta[cpc_ga.pal[p4]] and $f800) shr 11;
+          temp5:=(paleta[cpc_ga.pal[p4]] and $7e0) shr 5;
+          temp6:=paleta[cpc_ga.pal[p4]] and $1f;
+          ptemp^:=(((temp1+temp4) shr 1) shl 11) or (((temp2+temp5) shr 1) shl 5) or ((temp3+temp6) shr 1);
           inc(ptemp);
-          SDL_GetRGB(paleta[cpc_ga.pal[p5]],pantalla[pant_sprites].format,@temp1,@temp2,@temp3);
-          SDL_GetRGB(paleta[cpc_ga.pal[p6]],pantalla[pant_sprites].format,@temp4,@temp5,@temp6);
-          ptemp^:=SDL_MapRGB(pantalla[pant_sprites].format,(temp1+temp4) div 2,(temp2+temp5) div 2,(temp3+temp6) div 2);
+          temp1:=(paleta[cpc_ga.pal[p5]] and $f800) shr 11;
+          temp2:=(paleta[cpc_ga.pal[p5]] and $7e0) shr 5;
+          temp3:=paleta[cpc_ga.pal[p5]] and $1f;
+          temp4:=(paleta[cpc_ga.pal[p6]] and $f800) shr 11;
+          temp5:=(paleta[cpc_ga.pal[p6]] and $7e0) shr 5;
+          temp6:=paleta[cpc_ga.pal[p6]] and $1f;
+          ptemp^:=(((temp1+temp4) shr 1) shl 11) or (((temp2+temp5) shr 1) shl 5) or ((temp3+temp6) shr 1);
           inc(ptemp);
-          SDL_GetRGB(paleta[cpc_ga.pal[p7]],pantalla[pant_sprites].format,@temp1,@temp2,@temp3);
-          SDL_GetRGB(paleta[cpc_ga.pal[p8]],pantalla[pant_sprites].format,@temp4,@temp5,@temp6);
-          ptemp^:=SDL_MapRGB(pantalla[pant_sprites].format,(temp1+temp4) div 2,(temp2+temp5) div 2,(temp3+temp6) div 2);
+          temp1:=(paleta[cpc_ga.pal[p7]] and $f800) shr 11;
+          temp2:=(paleta[cpc_ga.pal[p7]] and $7e0) shr 5;
+          temp3:=paleta[cpc_ga.pal[p7]] and $1f;
+          temp4:=(paleta[cpc_ga.pal[p8]] and $f800) shr 11;
+          temp5:=(paleta[cpc_ga.pal[p8]] and $7e0) shr 5;
+          temp6:=paleta[cpc_ga.pal[p8]] and $1f;
+          ptemp^:=(((temp1+temp4) shr 1) shl 11) or (((temp2+temp5) shr 1) shl 5) or ((temp3+temp6) shr 1);
       end;
     end;
     putpixel(x+borde,linea+cpc_crt.lineas_borde,4,punbuf,1);
