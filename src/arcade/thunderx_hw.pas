@@ -620,7 +620,7 @@ end;
 procedure Cargar_thunderx;
 begin
 llamadas_maquina.iniciar:=iniciar_thunderx;
-llamadas_maquina.cerrar:=cerrar_thunderx;
+llamadas_maquina.close:=cerrar_thunderx;
 llamadas_maquina.reset:=reset_thunderx;
 llamadas_maquina.bucle_general:=thunderx_principal;
 llamadas_maquina.fps_max:=59.185606;

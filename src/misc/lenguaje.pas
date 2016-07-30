@@ -180,6 +180,7 @@ readln(fichero,cadena);leng[posicion].hints[18]:=cadena; //Configurar dipswitch
 readln(fichero,cadena);leng[posicion].hints[19]:=cadena; //Cambiar driver
 //Nuevos...
 readln(fichero,cadena);leng[posicion].opciones[4]:=cadena; //Configuracion
+readln(fichero,cadena);leng[posicion].errores[2]:=cadena; //dentro del fichero
 close(fichero);
 leer_fichero_idioma:=true;
 end;

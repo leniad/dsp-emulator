@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        dsp_version='0.17';
+        dsp_version='0.17b1';
         pant_sprites=20;
         pant_doble=21;
         pant_temp=23;
@@ -69,7 +69,7 @@ type
         end;
         tllamadas_globales = record
            iniciar,cintas,cartuchos:function:boolean;
-           bucle_general,reset,cerrar,grabar_snapshot,configurar,acepta_config:procedure;
+           bucle_general,reset,close,grabar_snapshot,configurar,acepta_config:procedure;
            caption:string;
            fps_max:single;
            velocidad_cpu:dword;
@@ -593,13 +593,13 @@ main_vars.frames_sec:=main_vars.frames_sec+1;
 actualiza_video;
 evalue_controls;
 if main_screen.rapido then exit;
-QueryPerformanceCounter(Int64((@l2)^));
+QueryPerformanceCounter(l2);
 res:=(l2-cont_sincroniza);
 while (res<valor_sync) do begin
-  QueryPerformanceCounter(Int64((@l2)^));
+  QueryPerformanceCounter(l2);
   res:=(l2-cont_sincroniza);
 end;
-QueryPerformanceCounter(Int64((@cont_sincroniza)^));
+QueryPerformanceCounter(cont_sincroniza);
 end;
 {$else}
 {$ifndef windows}
@@ -638,7 +638,7 @@ llamadas_maquina.grabar_snapshot:=nil;
 llamadas_maquina.cintas:=nil;
 llamadas_maquina.iniciar:=nil;
 llamadas_maquina.reset:=nil;
-llamadas_maquina.cerrar:=nil;
+llamadas_maquina.close:=nil;
 llamadas_maquina.bucle_general:=nil;
 llamadas_maquina.configurar:=nil;
 llamadas_maquina.acepta_config:=nil;

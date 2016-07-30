@@ -281,7 +281,7 @@ procedure Cargar_foodf;
 begin
 llamadas_maquina.iniciar:=iniciar_foodf;
 llamadas_maquina.bucle_general:=foodf_principal;
-llamadas_maquina.cerrar:=cerrar_foodf;
+llamadas_maquina.close:=cerrar_foodf;
 llamadas_maquina.reset:=reset_foodf;
 end;
 

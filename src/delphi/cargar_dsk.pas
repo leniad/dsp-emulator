@@ -3,9 +3,9 @@ unit cargar_dsk;
 interface
 
 uses
-  Windows, SysUtils, Variants, Classes,Forms,
-  Dialogs, Grids, StdCtrls, FileCtrl,upd765,main_engine,lenguaje,misc_functions,
-  file_engine,disk_file_format, Vcl.Controls;
+  Windows, SysUtils, Variants, Classes,Forms,Vcl.Controls,Dialogs, Grids,
+  StdCtrls, FileCtrl,upd765,main_engine,lenguaje,misc_functions,
+  file_engine,disk_file_format,ipf_disk;
 
 type
   Tload_dsk = class(TForm)
@@ -21,7 +21,6 @@ type
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure FileListBox1DblClick(Sender: TObject);
-    procedure StringGrid1Click(Sender: TObject);
     procedure StringGrid1DblClick(Sender: TObject);
     procedure FileListBox1KeyUp(Sender:TObject;var Key:word;Shift: TShiftState);
   private
@@ -32,8 +31,7 @@ type
 
 var
   load_dsk: Tload_dsk;
-  nombre_dsk,extension_dsk:string;
-  extension_zip,nombre_zip:string;
+  file_name,file_extension,end_file_name:string;
   datos_dsk:pbyte;
   file_size,ultima_posicion:integer;
 
@@ -62,11 +60,12 @@ end;
 procedure Tload_dsk.FileListBox1Click(Sender: TObject);
 var
   f:word;
-  nombre_def:string;
   longitud,crc:integer;
+  nothing1,nothing2:boolean;
+  file_inside_zip:string;
 begin
-nombre_dsk:=filelistbox1.FileName;
-extension_dsk:=extension_fichero(filelistbox1.FileName);
+file_name:=filelistbox1.FileName;
+file_extension:=extension_fichero(filelistbox1.FileName);
 if datos_dsk<>nil then begin
   freemem(datos_dsk);
   datos_dsk:=nil;
@@ -77,52 +76,53 @@ for f:=1 to (stringgrid1.RowCount-1) do begin
 end;
 stringgrid1.RowCount:=2;
 f:=1;
-if extension_dsk='ZIP' then begin
-  if not(search_file_from_zip(nombre_dsk,'*.dsk',nombre_zip,longitud,crc,false)) then
-    if not(search_file_from_zip(nombre_dsk,'*.ipf',nombre_zip,longitud,crc,false)) then exit;
-  repeat
-    extension_zip:=extension_fichero(nombre_zip);
-    if ((extension_zip='DSK') or (extension_zip='IPF')) then begin
-       stringgrid1.Cells[0,f]:=nombre_zip;
+if file_extension='ZIP' then begin
+  //Primero busco los DSK
+  if search_file_from_zip(file_name,'*.dsk',file_inside_zip,longitud,crc,false) then begin
+    repeat
+       stringgrid1.Cells[0,f]:=file_inside_zip;
        stringgrid1.Cells[1,f]:=inttostr(longitud);
        inc(f);
        stringgrid1.RowCount:=stringgrid1.RowCount+1;
-    end;
-  until not(find_next_file_zip(nombre_zip,longitud,crc));
-  nombre_zip:=nombre_def;
+    until not(find_next_file_zip(file_inside_zip,longitud,crc));
+    nothing1:=false;
+  end else nothing1:=true;
+  //Ahora busco los IPF
+  if search_file_from_zip(file_name,'*.ipf',file_inside_zip,longitud,crc,false) then begin
+    repeat
+       stringgrid1.Cells[0,f]:=file_inside_zip;
+       stringgrid1.Cells[1,f]:=inttostr(longitud);
+       inc(f);
+       stringgrid1.RowCount:=stringgrid1.RowCount+1;
+    until not(find_next_file_zip(file_inside_zip,longitud,crc));
+    nothing2:=false;
+  end else nothing1:=true;
+  if (nothing1 and nothing2) then exit;
   stringgrid1.RowCount:=stringgrid1.RowCount-1;
 end;
-if extension_dsk='DSK' then begin
-  if not(read_file_size(nombre_dsk,file_size)) then exit;
+if ((file_extension='DSK') or (file_extension='IPF')) then begin
+  if not(read_file_size(file_name,file_size)) then exit;
   getmem(datos_dsk,file_size);
-  if not(read_file(nombre_dsk,datos_dsk,file_size)) then exit;
-end;
-if extension_dsk='IPF' then begin
-  if not(read_file_size(nombre_dsk,file_size)) then exit;
-  getmem(datos_dsk,file_size);
-  if not(read_file(nombre_dsk,datos_dsk,file_size)) then exit;
+  if not(read_file(file_name,datos_dsk,file_size)) then exit;
+  end_file_name:=extractfilename(file_name);
 end;
 end;
 
 procedure Tload_dsk.FileListBox1DblClick(Sender: TObject);
 var
-  cadena,extension_final:string;
   correcto:boolean;
 begin
 correcto:=false;
-if extension_dsk='ZIP' then cadena:=extractfilename(nombre_zip)
-  else cadena:=extractfilename(nombre_dsk);
-if cadena='' then exit;
-extension_final:=extension_fichero(cadena);
-if extension_final='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
-if extension_final='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
+if file_extension='' then exit;
+if file_extension='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
+if file_extension='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
 if correcto then begin
-    change_caption(llamadas_maquina.caption+' - '+extension_final+': '+cadena);
+    change_caption(llamadas_maquina.caption+' - '+file_extension+':'+end_file_name);
     ResetFDC;
-    dsk[0].ImageName:=cadena;
+    dsk[0].ImageName:=end_file_name;
     load_dsk.Button1Click(self);
 end else begin
-  MessageDlg('Error abriendo el disco: "'+cadena+'".', mtError,[mbOk], 0);
+  MessageDlg('Error abriendo el disco: "'+end_file_name+'".', mtError,[mbOk], 0);
 end;
 freemem(datos_dsk);
 datos_dsk:=nil;
@@ -160,24 +160,21 @@ filelistbox1.setfocus;
 FileListBox1Click(nil);
 end;
 
-procedure Tload_dsk.StringGrid1Click(Sender: TObject);
+procedure Tload_dsk.StringGrid1DblClick(Sender: TObject);
 var
   crc:integer;
+  file_inside_zip:string;
 begin
 if stringgrid1.RowCount=1 then exit;
 if datos_dsk<>nil then begin
   freemem(datos_dsk);
   datos_dsk:=nil;
 end;
-if not(search_file_from_zip(nombre_dsk,stringgrid1.Cells[0,stringgrid1.Selection.top],nombre_zip,file_size,crc,true)) then exit;
+if not(search_file_from_zip(file_name,stringgrid1.Cells[0,stringgrid1.Selection.top],file_inside_zip,file_size,crc,true)) then exit;
 getmem(datos_dsk,file_size);
-if not(load_file_from_zip(nombre_dsk,nombre_zip,datos_dsk,file_size,crc,true)) then exit;
-extension_zip:=extension_fichero(nombre_zip);
-end;
-
-procedure Tload_dsk.StringGrid1DblClick(Sender: TObject);
-begin
-StringGrid1Click(self);
+if not(load_file_from_zip(file_name,file_inside_zip,datos_dsk,file_size,crc,true)) then exit;
+file_extension:=extension_fichero(file_inside_zip);
+end_file_name:=file_inside_zip;
 FileListBox1DblClick(self);
 end;
 

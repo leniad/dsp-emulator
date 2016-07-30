@@ -385,7 +385,7 @@ end;
 procedure Cargar_gradius3;
 begin
 llamadas_maquina.iniciar:=iniciar_gradius3;
-llamadas_maquina.cerrar:=cerrar_gradius3;
+llamadas_maquina.close:=cerrar_gradius3;
 llamadas_maquina.reset:=reset_gradius3;
 llamadas_maquina.bucle_general:=gradius3_principal;
 end;

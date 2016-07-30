@@ -297,7 +297,7 @@ procedure Cargar_boogwing;
 begin
 llamadas_maquina.bucle_general:=boogwing_principal;
 llamadas_maquina.iniciar:=iniciar_boogwing;
-llamadas_maquina.cerrar:=cerrar_boogwing;
+llamadas_maquina.close:=cerrar_boogwing;
 llamadas_maquina.reset:=reset_boogwing;
 llamadas_maquina.fps_max:=58;
 end;

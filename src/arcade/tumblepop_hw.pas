@@ -223,7 +223,7 @@ procedure Cargar_tumblep;
 begin
 llamadas_maquina.bucle_general:=tumblep_principal;
 llamadas_maquina.iniciar:=iniciar_tumblep;
-llamadas_maquina.cerrar:=cerrar_tumblep;
+llamadas_maquina.close:=cerrar_tumblep;
 llamadas_maquina.reset:=reset_tumblep;
 llamadas_maquina.fps_max:=58;
 end;

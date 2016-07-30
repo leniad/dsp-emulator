@@ -4,8 +4,8 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ipf_disk,misc_functions;
 
 function dsk_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
-function ipf_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
 procedure clear_disk(drvnum:byte);
+procedure check_protections(drvnum:byte;hay_multi:boolean);
 
 type
 disc_header_type=record
@@ -92,15 +92,14 @@ type
 
 function dsk_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
 var
-  puntero,ptemp,ptemp2,ptemp3:pbyte;
-  h,cont,posicion,tempw:word;
-  cadena,cadena2:string;
-  estandar,sp3_presente,hay_multi,primer_sector,salir:boolean;
+  puntero,ptemp:pbyte;
+  posicion,tempw:word;
+  estandar,primer_sector,salir,hay_multi:boolean;
   dsk_header:^tdsk_header;
   dsk_track:^tdsk_track;
   dsk_sector:^tdsk_sector;
   f,side_count,track_count:byte;
-  longi,track_long,long_temp,tempdw:dword;
+  longi,track_long,long_temp:dword;
   sector_count:integer;
 begin
    dsk_format:=false;
@@ -124,8 +123,8 @@ begin
            freemem(dsk_sector);
            exit;
         end;
-   dsk[drvnum].DiskHeader.nbof_tracks:=dsk_header.tracks;
-   dsk[drvnum].DiskHeader.nbof_heads:=dsk_header.sides;
+   dsk[drvnum].DiskHeader.nbof_tracks:=dsk_header.tracks-1;
+   dsk[drvnum].DiskHeader.nbof_heads:=dsk_header.sides-1;
    f:=0;
    for track_count:=0 to (dsk_header.tracks-1) do begin
      for side_count:=0 to (dsk_header.sides-1) do begin
@@ -228,89 +227,7 @@ begin
              track_count:=track_count+1;
            end;
    end; //del while
-   case main_vars.tipo_maquina of
-    8,9:begin  //Comprobar algunas protecciones para poder parchearlas...
-          tempdw:=calc_crc(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-          case tempdw of
-            $8c817e25,$4b616c83:dsk[drvnum].Tracks[0,40].sector[6].sector_size:=2; //Titus the fox
-            $57a3276f:dsk[drvnum].Tracks[0,39].sector[10].sector_size:=0; //Prehistorik
-            $f05fe06e:dsk[drvnum].Tracks[0,39].sector[0].sector_size:=2; //Prehistorik alt
-            $31388451:begin // Tomahawk
-                        lenslok.indice:=5;
-                        lenslock1.Show;
-                      end;
-            $23a68c26:begin //Graphic Adventure Creator
-                        lenslok.indice:=7;
-                        lenslock1.Show;
-                      end;
-            $4c23dda4:begin // Art Studio
-                        lenslok.indice:=1;
-                        lenslock1.Show;
-                      end;
-          end;
-          if lenslock1.Showing then lenslock1.combobox1.ItemIndex:=lenslok.indice;
-        end;
-   2:begin  //Comprobar SpeedLock +3
-      puntero:=dsk[drvnum].Tracks[0,0].data;
-      cadena2:='SPEEDLOCK';
-      cadena:='';
-      for h:=0 to (dsk[drvnum].Tracks[0,0].sector[0].data_length-1) do begin
-        cadena:=cadena+char(puntero^);
-        inc(puntero);
-      end;
-      sp3_presente:=pos(cadena2,cadena)<>0;
-      if ((sp3_presente) and not(hay_multi)) then begin
-        //main_vars.mensaje_general:='SpeedLock +3 Simulated';
-        dsk[drvnum].Tracks[0,0].sector[1].multi:=true;
-        dsk[drvnum].cont_multi:=3;
-        dsk[drvnum].max_multi:=3;
-        //Ahora reago todos los datos
-        getmem(ptemp3,dsk[drvnum].Tracks[0,0].track_lenght);
-        ptemp:=ptemp3;
-        //Guardo los viejos
-        copymemory(ptemp,dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].track_lenght);
-        //Libero los datos antiguos
-        freemem(dsk[drvnum].Tracks[0,0].data);
-        dsk[drvnum].Tracks[0,0].data:=nil;
-        //Creo los nuevos
-        getmem(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].track_lenght+(dsk[drvnum].Tracks[0,0].sector[1].data_length*2));
-        //Muevo el primer sector
-        cont:=0;
-        ptemp2:=dsk[drvnum].Tracks[0,0].data;
-        copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-        inc(ptemp,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-        inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-        inc(cont,dsk[drvnum].Tracks[0,0].sector[0].data_length);
-        //Arreglo el segundo
-        //Lo copio, pero dejo el puntero a los datos para copiar los 256 primeros bytes
-        copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-        inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-        inc(cont,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-        for f:=0 to 1 do begin
-          //Copio los 256 primeros datos
-          copymemory(ptemp2,ptemp,256);
-          inc(ptemp2,256);
-          //Me invento el resto
-          for h:=0 to 255 do begin
-            ptemp2^:=random(256);
-            inc(ptemp2);
-          end;
-          inc(cont,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-        end;
-        //Paso al sector 2
-        inc(ptemp,dsk[drvnum].Tracks[0,0].sector[1].data_length);
-        //Y los ultimos sectores arreglando la pos relativa dentro del track
-        for f:=2 to (dsk[drvnum].Tracks[0,0].number_sector-1) do begin
-          dsk[drvnum].Tracks[0,0].sector[f].posicion_data:=cont;
-          copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[f].data_length);
-          inc(ptemp,dsk[drvnum].Tracks[0,0].sector[f].data_length);
-          inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[f].data_length);
-          inc(cont,dsk[drvnum].Tracks[0,0].sector[f].data_length);
-        end;
-        freemem(ptemp3);
-      end else main_vars.mensaje_general:='';
-    end;
-   end;
+   check_protections(drvnum,hay_multi);
    dsk[drvnum].abierto:=true;
    dsk_format:=true;
    freemem(dsk_sector);
@@ -362,35 +279,98 @@ begin
     fillchar(dsk[drvnum].DiskHeader.track_size_table,408,0);
 end;
 
-function ipf_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
+procedure check_protections(drvnum:byte;hay_multi:boolean);
 var
-  id,error:SDWORD;
-  info:PCAPSIMAGEINFO;
-  track:PCAPSTRACKINFO;
+  tempdw:dword;
+  puntero,ptemp,ptemp2,ptemp3:pbyte;
+  h,cont:word;
+  cadena,cadena2:string;
+  sp3_presente:boolean;
+  f:byte;
 begin
-  ipf_format:=false;
-  if not(init_ipf_dll) then exit;
-  //Cargar IPF
-  CAPSInit;
-  id:=CAPSAddImage;
-  error:=CAPSLockImageMemory(id,datos,longi_ini,DI_LOCK_MEMREF);
-  if error<>0 then exit;
-  getmem(info,sizeof(CapsImageInfo));
-  CAPSGetImageInfo(info,id);
-  //form1.statusbar1.panels[2].text:=inttostr(info.type_);
-  //error:=CAPSLoadImage(id,DI_LOCK_DENVAR);
-  //if error<>0 then exit;
-  getmem(track,sizeof(CapsTrackInfo));
-  CAPSLockTrack(track,id,0,0,DI_LOCK_DENVAR);
-  principal1.statusbar1.panels[2].text:=inttostr(track.type_);
-  //cerrar
-  freemem(track);
-  freemem(info);
-  CAPSUnlockAllTracks(id);
-  CAPSUnlockImage(id);
-  CAPSRemImage(id);
-  CAPSExit;
-  close_ipf_dll;
+  case main_vars.tipo_maquina of
+      8,9:begin  //Comprobar algunas protecciones para poder parchearlas...
+            tempdw:=calc_crc(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+            case tempdw of
+              $8c817e25,$4b616c83:dsk[drvnum].Tracks[0,40].sector[6].sector_size:=2; //Titus the fox
+              $57a3276f:dsk[drvnum].Tracks[0,39].sector[10].sector_size:=0; //Prehistorik
+              $f05fe06e:dsk[drvnum].Tracks[0,39].sector[0].sector_size:=2; //Prehistorik alt
+              $31388451:begin // Tomahawk
+                          lenslok.indice:=5;
+                          lenslock1.Show;
+                        end;
+              $23a68c26:begin //Graphic Adventure Creator
+                          lenslok.indice:=7;
+                          lenslock1.Show;
+                        end;
+              $4c23dda4:begin // Art Studio
+                          lenslok.indice:=1;
+                          lenslock1.Show;
+                        end;
+            end;
+            if lenslock1.Showing then lenslock1.combobox1.ItemIndex:=lenslok.indice;
+          end;
+     2:begin  //Comprobar SpeedLock +3
+        puntero:=dsk[drvnum].Tracks[0,0].data;
+        cadena2:='SPEEDLOCK';
+        cadena:='';
+        for h:=0 to (dsk[drvnum].Tracks[0,0].sector[0].data_length-1) do begin
+          cadena:=cadena+char(puntero^);
+          inc(puntero);
+        end;
+        sp3_presente:=pos(cadena2,cadena)<>0;
+        if ((sp3_presente) and not(hay_multi)) then begin
+          //main_vars.mensaje_general:='SpeedLock +3 Simulated';
+          dsk[drvnum].Tracks[0,0].sector[1].multi:=true;
+          dsk[drvnum].cont_multi:=3;
+          dsk[drvnum].max_multi:=3;
+          //Ahora reago todos los datos
+          getmem(ptemp3,dsk[drvnum].Tracks[0,0].track_lenght);
+          ptemp:=ptemp3;
+          //Guardo los viejos
+          copymemory(ptemp,dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].track_lenght);
+          //Libero los datos antiguos
+          freemem(dsk[drvnum].Tracks[0,0].data);
+          dsk[drvnum].Tracks[0,0].data:=nil;
+          //Creo los nuevos
+          getmem(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].track_lenght+(dsk[drvnum].Tracks[0,0].sector[1].data_length*2));
+          //Muevo el primer sector
+          cont:=0;
+          ptemp2:=dsk[drvnum].Tracks[0,0].data;
+          copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+          inc(ptemp,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+          inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+          inc(cont,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+          //Arreglo el segundo
+          //Lo copio, pero dejo el puntero a los datos para copiar los 256 primeros bytes
+          copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[1].data_length);
+          inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[1].data_length);
+          inc(cont,dsk[drvnum].Tracks[0,0].sector[1].data_length);
+          for f:=0 to 1 do begin
+            //Copio los 256 primeros datos
+            copymemory(ptemp2,ptemp,256);
+            inc(ptemp2,256);
+            //Me invento el resto
+            for h:=0 to 255 do begin
+              ptemp2^:=random(256);
+              inc(ptemp2);
+            end;
+            inc(cont,dsk[drvnum].Tracks[0,0].sector[1].data_length);
+          end;
+          //Paso al sector 2
+          inc(ptemp,dsk[drvnum].Tracks[0,0].sector[1].data_length);
+          //Y los ultimos sectores arreglando la pos relativa dentro del track
+          for f:=2 to (dsk[drvnum].Tracks[0,0].number_sector-1) do begin
+            dsk[drvnum].Tracks[0,0].sector[f].posicion_data:=cont;
+            copymemory(ptemp2,ptemp,dsk[drvnum].Tracks[0,0].sector[f].data_length);
+            inc(ptemp,dsk[drvnum].Tracks[0,0].sector[f].data_length);
+            inc(ptemp2,dsk[drvnum].Tracks[0,0].sector[f].data_length);
+            inc(cont,dsk[drvnum].Tracks[0,0].sector[f].data_length);
+          end;
+          freemem(ptemp3);
+        end;
+      end;
+   end;
 end;
 
 end.

@@ -664,7 +664,7 @@ case main_vars.tipo_maquina of
   157:llamadas_maquina.bucle_general:=dec0_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_dec0;
-llamadas_maquina.cerrar:=cerrar_dec0;
+llamadas_maquina.close:=cerrar_dec0;
 llamadas_maquina.reset:=reset_dec0;
 llamadas_maquina.fps_max:=57.392103;
 end;

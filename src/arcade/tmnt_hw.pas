@@ -778,7 +778,7 @@ end;
 procedure Cargar_tmnt;
 begin
 llamadas_maquina.iniciar:=iniciar_tmnt;
-llamadas_maquina.cerrar:=cerrar_tmnt;
+llamadas_maquina.close:=cerrar_tmnt;
 llamadas_maquina.reset:=reset_tmnt;
 case main_vars.tipo_maquina of
   214:llamadas_maquina.bucle_general:=tmnt_principal;

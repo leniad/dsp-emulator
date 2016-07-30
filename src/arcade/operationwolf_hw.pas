@@ -370,7 +370,7 @@ procedure Cargar_opwolf;
 begin
 llamadas_maquina.iniciar:=iniciar_opwolf;
 llamadas_maquina.bucle_general:=opwolf_principal;
-llamadas_maquina.cerrar:=cerrar_opwolf;
+llamadas_maquina.close:=cerrar_opwolf;
 llamadas_maquina.reset:=reset_opwolf;
 end;
 

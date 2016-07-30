@@ -738,7 +738,7 @@ case main_vars.tipo_maquina of
   65:llamadas_maquina.bucle_general:=galaga_principal;
   167:llamadas_maquina.bucle_general:=digdug_principal;
 end;
-llamadas_maquina.cerrar:=cerrar_galagahw;
+llamadas_maquina.close:=cerrar_galagahw;
 llamadas_maquina.reset:=reset_galagahw;
 llamadas_maquina.fps_max:=60.6060606060;
 end;

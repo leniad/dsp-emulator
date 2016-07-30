@@ -263,7 +263,7 @@ procedure Cargar_centipede;
 begin
 llamadas_maquina.iniciar:=iniciar_centipede;
 llamadas_maquina.bucle_general:=centipede_principal;
-llamadas_maquina.cerrar:=cerrar_centipede;
+llamadas_maquina.close:=cerrar_centipede;
 llamadas_maquina.reset:=reset_centipede;
 end;
 

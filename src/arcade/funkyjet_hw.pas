@@ -256,7 +256,7 @@ procedure Cargar_funkyjet;
 begin
 llamadas_maquina.bucle_general:=funkyjet_principal;
 llamadas_maquina.iniciar:=iniciar_funkyjet;
-llamadas_maquina.cerrar:=cerrar_funkyjet;
+llamadas_maquina.close:=cerrar_funkyjet;
 llamadas_maquina.reset:=reset_funkyjet;
 llamadas_maquina.fps_max:=58;
 end;

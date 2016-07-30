@@ -333,7 +333,7 @@ procedure Cargar_cabal;
 begin
 llamadas_maquina.iniciar:=iniciar_cabal;
 llamadas_maquina.bucle_general:=cabal_principal;
-llamadas_maquina.cerrar:=cerrar_cabal;
+llamadas_maquina.close:=cerrar_cabal;
 llamadas_maquina.reset:=reset_cabal;
 llamadas_maquina.fps_max:=59.60;
 end;

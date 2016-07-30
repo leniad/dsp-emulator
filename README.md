@@ -1,4 +1,14 @@
 ﻿#DSP Emulator status<br>
+<b>30/07/16 - DSP Emulator 0.17b1. Win32 binary and source updated.</b><br><pre>
+-General
+    +Added support for IPF files natively without external libraries. 
+        -Many thanks to Jean Louis-Guerin (DrCoolZic) for the documententation 'http://info-coach.fr/atari/documents/_mydoc/IPF-Documentation.pdf'
+        -Many thanks also to Bruno Kukulcan and Yoan Courtois (Megachur) for some Amstrad CPC IPF files for testing.
+-Updated languaje files with new messages
+-Track & Field
+    +Added driver with sound
+</pre><br>
+<img src='http://img1.imagilive.com/0716/track_and_field.png'><br>
 <b>07/07/16 - DSP Emulator 0.17 Final. All binary and source updated.</b><br><pre>
 -All previous enhacements
 -Z80: Implemented WZ/MEMPTR register, now passes all ZEXALL tests

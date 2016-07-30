@@ -259,7 +259,8 @@ uses
   k053251 in '..\devices\k053251.pas',
   k007232 in '..\snd\k007232.pas',
   k053260 in '..\snd\k053260.pas',
-  cpu_misc in '..\cpu\cpu_misc.pas';
+  cpu_misc in '..\cpu\cpu_misc.pas',
+  trackandfield_hw in '..\arcade\trackandfield_hw.pas';
 
 {$R *.res}
 

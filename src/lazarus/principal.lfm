@@ -2498,6 +2498,13 @@ object principal1: Tprincipal1
             Caption = 'Juno First'
             OnClick = CambiarMaquina
           end
+          object MenuItem32: TMenuItem
+            Caption = 'Track & Field HW'
+            object trackfield1: TMenuItem
+              Caption = 'Track & Field'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object MenuItem10: TMenuItem
           Caption = 'HD6309'

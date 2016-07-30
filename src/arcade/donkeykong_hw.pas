@@ -706,7 +706,7 @@ end;
 procedure Cargar_dkong;
 begin
 llamadas_maquina.iniciar:=iniciar_dkong;
-llamadas_maquina.cerrar:=cerrar_dkong;
+llamadas_maquina.close:=cerrar_dkong;
 llamadas_maquina.reset:=reset_dkong;
 llamadas_maquina.fps_max:=60.6060606060606060;
 case main_vars.tipo_maquina of

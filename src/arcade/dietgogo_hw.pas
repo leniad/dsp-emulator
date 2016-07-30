@@ -282,7 +282,7 @@ procedure Cargar_dietgo;
 begin
 llamadas_maquina.bucle_general:=dietgo_principal;
 llamadas_maquina.iniciar:=iniciar_dietgo;
-llamadas_maquina.cerrar:=cerrar_dietgo;
+llamadas_maquina.close:=cerrar_dietgo;
 llamadas_maquina.reset:=reset_dietgo;
 llamadas_maquina.fps_max:=58;
 end;

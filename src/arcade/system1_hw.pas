@@ -439,7 +439,7 @@ case main_vars.tipo_maquina of
         llamadas_maquina.reset:=reset_system2;
      end;
 end;
-llamadas_maquina.cerrar:=cerrar_system1;
+llamadas_maquina.close:=cerrar_system1;
 llamadas_maquina.fps_max:=60.096154;
 end;
 

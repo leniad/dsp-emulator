@@ -1341,7 +1341,7 @@ procedure Cargar_cps1;
 begin
 llamadas_maquina.iniciar:=iniciar_cps1;
 llamadas_maquina.bucle_general:=cps1_principal;
-llamadas_maquina.cerrar:=cerrar_cps1;
+llamadas_maquina.close:=cerrar_cps1;
 llamadas_maquina.reset:=reset_cps1;
 llamadas_maquina.fps_max:=59.61;
 end;

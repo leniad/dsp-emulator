@@ -224,7 +224,7 @@ procedure Cargar_supbtime;
 begin
 llamadas_maquina.bucle_general:=supbtime_principal;
 llamadas_maquina.iniciar:=iniciar_supbtime;
-llamadas_maquina.cerrar:=cerrar_supbtime;
+llamadas_maquina.close:=cerrar_supbtime;
 llamadas_maquina.reset:=reset_supbtime;
 llamadas_maquina.fps_max:=58;
 end;

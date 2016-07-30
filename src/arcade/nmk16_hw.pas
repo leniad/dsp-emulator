@@ -436,7 +436,7 @@ procedure Cargar_nmk16;
 begin
 llamadas_maquina.iniciar:=iniciar_nmk16;
 llamadas_maquina.bucle_general:=nmk16_principal;
-llamadas_maquina.cerrar:=cerrar_nmk16;
+llamadas_maquina.close:=cerrar_nmk16;
 llamadas_maquina.reset:=reset_nmk16;
 llamadas_maquina.fps_max:=56;
 end;

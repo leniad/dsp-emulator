@@ -98,19 +98,19 @@ end;
 function saltar_sector:boolean;
 begin
 if ((FDCCommand[0] and $20)<>0) then begin
-  if ((FDCCommand[0] and $1f)=$6) then begin
-    if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)<>0) then begin
-      saltar_sector:=TRUE;
-      exit;
-    end;
-  end else begin
-    if ((FDCCommand[0] and $1f)=$c) then begin
-      if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)=0) then begin
-        saltar_sector:=true;
+    if ((FDCCommand[0] and $1f)=$6) then begin
+      if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)<>0) then begin
+        saltar_sector:=TRUE;
         exit;
-			end;
-		end;
-  end;
+      end;
+    end else begin
+      if ((FDCCommand[0] and $1f)=$c) then begin
+        if ((dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status2 and $40)=0) then begin
+          saltar_sector:=true;
+          exit;
+			  end;
+		  end;
+    end;
 end;
 saltar_sector:=FALSE;
 end;
@@ -146,6 +146,7 @@ if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actu
 end else begin
   FDCDataPointer:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].posicion_data;
   FDCDataLength:=1 shl (FDCCommand[5]+7);
+  //FDCDataLength:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].data_length;
 end;
 if FDCCommand[5]=0 then begin
   FDCDataLength:=FDCCommand[8];
@@ -159,7 +160,8 @@ end;
 
 procedure read_track;
 begin
-FDCDataLength:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_read_track].data_length;
+//FDCDataLength:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_read_track].data_length;
+FDCDataLength:=1 shl (FDCCommand[5]+7);
 FDCDataPointer:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_read_track].posicion_data;
 FDCCounter:=0;
 ExecCmdPhase:=TRUE;
@@ -180,7 +182,7 @@ function seek_track(track:byte):boolean;
 var
   test:boolean;
 begin
-test:=not(track>(dsk[FDCCurrDrv].DiskHeader.nbof_tracks-1));
+test:=not(track>dsk[FDCCurrDrv].DiskHeader.nbof_tracks);
 if test then dsk[FDCCurrDrv].track_actual:=track
   else dsk[FDCCurrDrv].track_actual:=dsk[FDCCurrDrv].DiskHeader.nbof_tracks;
 seek_track:=test;
@@ -381,7 +383,7 @@ begin
       inc(FDCDataPointer);
       inc(FDCCounter);
       if (FDCCounter=FDCDataLength) then begin
-        if dsk[FDCCurrDrv].sector_read_track=FDCCommand[6]-1 then begin
+        if dsk[FDCCurrDrv].sector_read_track=FDCCommand[6] then begin
             st1:=st1 or $80;
             GetRes7;
             principal1.Image1.visible:=false;

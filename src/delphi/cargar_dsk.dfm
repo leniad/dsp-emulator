@@ -2,8 +2,8 @@ object load_dsk: Tload_dsk
   Left = 183
   Top = 154
   Caption = 'Open/Abrir DSK'
-  ClientHeight = 492
-  ClientWidth = 564
+  ClientHeight = 465
+  ClientWidth = 699
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,8 +17,8 @@ object load_dsk: Tload_dsk
   PixelsPerInch = 96
   TextHeight = 13
   object Button1: TButton
-    Left = 459
-    Top = 320
+    Left = 579
+    Top = 376
     Width = 97
     Height = 34
     Caption = 'CANCELAR'
@@ -27,16 +27,16 @@ object load_dsk: Tload_dsk
     OnKeyUp = FileListBox1KeyUp
   end
   object GroupBox1: TGroupBox
-    Left = 275
-    Top = 33
-    Width = 281
+    Left = 8
+    Top = 271
+    Width = 565
     Height = 185
     Caption = 'Contenido ZIP / Inside ZIP'
     TabOrder = 2
     object StringGrid1: TStringGrid
-      Left = 6
-      Top = 18
-      Width = 272
+      Left = 0
+      Top = 26
+      Width = 562
       Height = 159
       TabStop = False
       ColCount = 2
@@ -48,7 +48,6 @@ object load_dsk: Tload_dsk
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
       ScrollBars = ssVertical
       TabOrder = 0
-      OnClick = StringGrid1Click
       OnDblClick = StringGrid1DblClick
       OnKeyUp = FileListBox1KeyUp
       ColWidths = (
@@ -60,8 +59,8 @@ object load_dsk: Tload_dsk
     end
   end
   object Button2: TButton
-    Left = 459
-    Top = 280
+    Left = 579
+    Top = 336
     Width = 97
     Height = 34
     Caption = 'CARGAR'
@@ -70,9 +69,9 @@ object load_dsk: Tload_dsk
     OnKeyUp = FileListBox1KeyUp
   end
   object FileListBox1: TFileListBox
-    Left = 8
-    Top = 224
-    Width = 445
+    Left = 271
+    Top = 8
+    Width = 420
     Height = 257
     TabStop = False
     ItemHeight = 13
@@ -86,7 +85,7 @@ object load_dsk: Tload_dsk
     Left = 8
     Top = 33
     Width = 257
-    Height = 185
+    Height = 232
     TabStop = False
     FileList = FileListBox1
     TabOrder = 4

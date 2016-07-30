@@ -49,7 +49,7 @@ if main_vars.tipo_maquina=model then begin
   exit;
 end;
 //Cerrar el Spectrum y cambiar el modelo
-llamadas_maquina.cerrar;
+llamadas_maquina.close;
 todos_false;
 reset_dsp;
 case model of

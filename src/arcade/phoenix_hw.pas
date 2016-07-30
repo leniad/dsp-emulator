@@ -331,7 +331,7 @@ case main_vars.tipo_maquina of
   11:llamadas_maquina.bucle_general:=phoenix_principal;
   202:llamadas_maquina.bucle_general:=pleiads_principal;
 end;
-llamadas_maquina.cerrar:=phoenix_cerrar;
+llamadas_maquina.close:=phoenix_cerrar;
 llamadas_maquina.reset:=phoenix_reset;
 llamadas_maquina.fps_max:=61.035156;
 end;

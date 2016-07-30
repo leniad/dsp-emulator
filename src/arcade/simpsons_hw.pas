@@ -366,7 +366,7 @@ end;
 procedure Cargar_simpsons;
 begin
 llamadas_maquina.iniciar:=iniciar_simpsons;
-llamadas_maquina.cerrar:=cerrar_simpsons;
+llamadas_maquina.close:=cerrar_simpsons;
 llamadas_maquina.reset:=reset_simpsons;
 llamadas_maquina.bucle_general:=simpsons_principal;
 llamadas_maquina.fps_max:=59.185606;

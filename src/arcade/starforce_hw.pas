@@ -431,7 +431,7 @@ procedure Cargar_starforce;
 begin
 llamadas_maquina.iniciar:=iniciar_starforce;
 llamadas_maquina.bucle_general:=starforce_principal;
-llamadas_maquina.cerrar:=cerrar_starforce;
+llamadas_maquina.close:=cerrar_starforce;
 llamadas_maquina.reset:=reset_starforce;
 end;
 

@@ -1303,7 +1303,7 @@ case main_vars.tipo_maquina of
   end;
 end;
 llamadas_maquina.iniciar:=iniciar_hgalaxian;
-llamadas_maquina.cerrar:=cerrar_hgalaxian;
+llamadas_maquina.close:=cerrar_hgalaxian;
 llamadas_maquina.reset:=reset_hgalaxian;
 llamadas_maquina.fps_max:=60.6060606060;
 end;

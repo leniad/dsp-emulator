@@ -2210,6 +2210,17 @@ const
         (n:'072-b09.8n';l:$100000;p:2;crc:$aa085093),(n:'072-b10.12n';l:$100000;p:4;crc:$577dbd53),
         (n:'072-b11.16l';l:$100000;p:6;crc:$55fab05d),(n:'072-d05.1f';l:$100000;p:0;crc:$1397a73b),
         (n:'072-d04.1d';l:$40000;p:2;crc:$78778013),(n:'simpsons.12c.nv';l:$80;p:0;crc:$ec3f0449),());
+        trackfield:array[0..17] of tipo_roms=(
+        (n:'a01_e01.bin';l:$2000;p:$6000;crc:$2882f6d4),(n:'a02_e02.bin';l:$2000;p:$8000;crc:$1743b5ee),
+        (n:'a03_k03.bin';l:$2000;p:$a000;crc:$6c0d1ee9),(n:'a04_e04.bin';l:$2000;p:$c000;crc:$21d6c448),
+        (n:'a05_e05.bin';l:$2000;p:$e000;crc:$f08c7b7e),
+        (n:'h16_e12.bin';l:$2000;p:0;crc:$50075768),(n:'h15_e11.bin';l:$2000;p:$2000;crc:$dda9e29f),
+        (n:'h14_e10.bin';l:$2000;p:$4000;crc:$c2166a5c),
+        (n:'c11_d06.bin';l:$2000;p:0;crc:$82e2185a),(n:'c12_d07.bin';l:$2000;p:$2000;crc:$800ff1f1),
+        (n:'c13_d08.bin';l:$2000;p:$4000;crc:$d9faf183),(n:'c14_d09.bin';l:$2000;p:$6000;crc:$5886c802),
+        (n:'361b16.f1';l:$20;p:$0;crc:$d55f30b5),(n:'361b17.b16';l:$100;p:$20;crc:$d2ba4d32),
+        (n:'361b18.e15';l:$100;p:$120;crc:$053e5861),(n:'c9_d15.bin';l:$2000;p:$0;crc:$f546a56b),
+        (n:'c2_d13.bin';l:$2000;p:$0;crc:$95bf79b6),());
 
 implementation
 uses principal,init_games;

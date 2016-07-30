@@ -744,7 +744,10 @@ var
 begin
   load_file_from_zip_crc:=false;
   //Si no existe el ZIP -> Error
-  if not(FileExists(nombre_zip)) then exit;
+  if not(FileExists(nombre_zip)) then begin
+    MessageDlg(leng[main_vars.idioma].errores[2]+' "'+nombre_zip+'" ', mtError,[mbOk], 0);
+    exit;
+  end;
 {$ifndef fpc}
   ZipFile:=TZipFile.Create;
   ZipFile.Open(nombre_zip,zmRead);

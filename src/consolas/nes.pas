@@ -512,7 +512,7 @@ begin
   principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
   llamadas_maquina.iniciar:=iniciar_nes;
   llamadas_maquina.bucle_general:=nes_principal;
-  llamadas_maquina.cerrar:=nes_cerrar;
+  llamadas_maquina.close:=nes_cerrar;
   llamadas_maquina.reset:=nes_reset;
   llamadas_maquina.cartuchos:=abrir_nes;
   llamadas_maquina.fps_max:=NTSC_refresh;

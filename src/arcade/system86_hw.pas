@@ -698,7 +698,7 @@ procedure Cargar_system86;
 begin
 llamadas_maquina.iniciar:=iniciar_system86;
 llamadas_maquina.bucle_general:=system86_principal;
-llamadas_maquina.cerrar:=cerrar_system86;
+llamadas_maquina.close:=cerrar_system86;
 llamadas_maquina.reset:=reset_system86;
 llamadas_maquina.fps_max:=60.606060;
 end;

@@ -460,7 +460,7 @@ procedure Cargar_renegade;
 begin
 llamadas_maquina.iniciar:=iniciar_renegade;
 llamadas_maquina.bucle_general:=principal_renegade;
-llamadas_maquina.cerrar:=cerrar_renegade;
+llamadas_maquina.close:=cerrar_renegade;
 llamadas_maquina.reset:=reset_renegade;
 end;
 

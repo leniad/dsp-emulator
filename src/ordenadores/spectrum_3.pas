@@ -3,7 +3,8 @@ unit spectrum_3;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,ay_8910,z80_sp,upd765,controls_engine,spectrum_128k,cargar_dsk,
-     forms,rom_engine,pal_engine,sound_engine,z80pio,disk_file_format;
+     forms,rom_engine,pal_engine,sound_engine,z80pio,disk_file_format,
+     misc_functions;
 
 const
   plus3_rom:array[0..4] of tipo_roms=(
@@ -47,7 +48,7 @@ case main_vars.tipo_maquina of
 end;
 llamadas_maquina.iniciar:=iniciar_3;
 llamadas_maquina.bucle_general:=spectrum3_main;
-llamadas_maquina.cerrar:=spec_cerrar_comun;
+llamadas_maquina.close:=spec_cerrar_comun;
 llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.reset:=spec3_reset;
 llamadas_maquina.grabar_snapshot:=grabar_spec;
@@ -121,8 +122,9 @@ var_spectrum.pantalla_128k:=5;
 old_1ffd:=0;
 var_spectrum.old_7ffd:=7;
 ResetFDC;
+
 if not(dsk[0].abierto) then change_caption(llamadas_maquina.caption)
-    else change_caption(llamadas_maquina.caption+' - DSK: '+dsk[0].imagename);
+    else change_caption(llamadas_maquina.caption+' - '+extension_fichero(dsk[0].imagename)+':'+dsk[0].imagename);
 end;
 
 procedure spec3_retraso_memoria(direccion:word);

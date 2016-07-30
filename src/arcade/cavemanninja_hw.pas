@@ -644,7 +644,7 @@ procedure Cargar_cninja;
 begin
 llamadas_maquina.bucle_general:=cninja_principal;
 llamadas_maquina.iniciar:=iniciar_cninja;
-llamadas_maquina.cerrar:=cerrar_cninja;
+llamadas_maquina.close:=cerrar_cninja;
 llamadas_maquina.reset:=reset_cninja;
 llamadas_maquina.fps_max:=58;
 end;

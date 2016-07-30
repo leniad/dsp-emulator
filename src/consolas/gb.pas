@@ -1218,7 +1218,7 @@ principal1.imagelist2.GetBitmap(2,principal1.BitBtn10.Glyph);
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 llamadas_maquina.iniciar:=iniciar_gb;
 llamadas_maquina.bucle_general:=gb_principal;
-llamadas_maquina.cerrar:=cerrar_gb;
+llamadas_maquina.close:=cerrar_gb;
 llamadas_maquina.reset:=reset_gb;
 llamadas_maquina.fps_max:=59.727500569605832763727500569606;
 llamadas_maquina.cartuchos:=abrir_gb;

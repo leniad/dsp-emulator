@@ -2227,6 +2227,11 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object Trackfield1: TMenuItem
+            Caption = 'Track && Field'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object HD63091: TMenuItem
           Caption = 'HD6309'
@@ -2687,7 +2692,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807B80320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807C00320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -383,7 +383,7 @@ procedure cargar_gberet;
 begin
 llamadas_maquina.iniciar:=iniciar_gberet;
 llamadas_maquina.bucle_general:=gberet_principal;
-llamadas_maquina.cerrar:=cerrar_gberet;
+llamadas_maquina.close:=cerrar_gberet;
 llamadas_maquina.reset:=reset_gberet;
 llamadas_maquina.fps_max:=60.60606060;
 llamadas_maquina.save_qsnap:=gberet_qsave;

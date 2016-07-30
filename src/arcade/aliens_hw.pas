@@ -331,7 +331,7 @@ end;
 procedure Cargar_aliens;
 begin
 llamadas_maquina.iniciar:=iniciar_aliens;
-llamadas_maquina.cerrar:=cerrar_aliens;
+llamadas_maquina.close:=cerrar_aliens;
 llamadas_maquina.reset:=reset_aliens;
 llamadas_maquina.bucle_general:=aliens_principal;
 llamadas_maquina.fps_max:=59.185606;

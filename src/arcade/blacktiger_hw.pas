@@ -563,7 +563,7 @@ procedure cargar_blktiger;
 begin
 llamadas_maquina.iniciar:=iniciar_blktiger;
 llamadas_maquina.bucle_general:=blktiger_principal;
-llamadas_maquina.cerrar:=cerrar_blktiger;
+llamadas_maquina.close:=cerrar_blktiger;
 llamadas_maquina.reset:=reset_blktiger;
 llamadas_maquina.save_qsnap:=blktiger_qsave;
 llamadas_maquina.load_qsnap:=blktiger_qload;

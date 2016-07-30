@@ -319,7 +319,7 @@ procedure Cargar_actfancer;
 begin
 llamadas_maquina.bucle_general:=actfancer_principal;
 llamadas_maquina.iniciar:=iniciar_actfancer;
-llamadas_maquina.cerrar:=cerrar_actfancer;
+llamadas_maquina.close:=cerrar_actfancer;
 llamadas_maquina.reset:=reset_actfancer;
 llamadas_maquina.fps_max:=60;
 end;

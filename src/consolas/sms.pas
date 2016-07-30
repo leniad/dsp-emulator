@@ -338,7 +338,7 @@ principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 llamadas_maquina.iniciar:=iniciar_sms;
 llamadas_maquina.bucle_general:=sms_principal;
-llamadas_maquina.cerrar:=cerrar_sms;
+llamadas_maquina.close:=cerrar_sms;
 llamadas_maquina.reset:=reset_sms;
 llamadas_maquina.cartuchos:=abrir_sms;
 llamadas_maquina.grabar_snapshot:=sms_grabar_snapshot;

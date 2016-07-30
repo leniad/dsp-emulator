@@ -364,6 +364,7 @@ type
     gbusters1: TMenuItem;
     thunderx1: TMenuItem;
     simpsons1: TMenuItem;
+    Trackfield1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -502,7 +503,7 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
-if @llamadas_maquina.cerrar<>nil then llamadas_maquina.cerrar;
+if @llamadas_maquina.close<>nil then llamadas_maquina.close;
 reset_dsp;
 main_vars.tipo_maquina:=tipo_new;
 cargar_maquina(main_vars.tipo_maquina);
@@ -622,7 +623,7 @@ begin
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 if cinta_tzx.cargada then vaciar_cintas;
-if ((@llamadas_maquina.cerrar<>nil) and main_vars.driver_ok) then llamadas_maquina.cerrar;
+if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
 file_ini_save;
 if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
