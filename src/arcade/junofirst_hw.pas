@@ -3,7 +3,7 @@ unit junofirst_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     sound_engine,konami_decrypt,ay_8910;
+     sound_engine,konami_decrypt,ay_8910,mcs48,dac;
 
 procedure cargar_junofrst;
 
@@ -17,7 +17,7 @@ const
         (n:'jfc3_a6.bin';l:$2000;p:$4000;crc:$879d194b),(n:'jfc4_a7.bin';l:$2000;p:$6000;crc:$f28af80b),
         (n:'jfc5_a8.bin';l:$2000;p:$8000;crc:$0539f328),(n:'jfc6_a9.bin';l:$2000;p:$a000;crc:$1da2ad6e),());
         junofrst_sound:tipo_roms=(n:'jfs1_j3.bin';l:$1000;p:0;crc:$235a2893);
-        junofrst_mcu:tipo_roms=(n:'jfs2_p4.bin';l:$1000;p:0;crc:$d0fa5d5f);
+        junofrst_sound_sub:tipo_roms=(n:'jfs2_p4.bin';l:$1000;p:0;crc:$d0fa5d5f);
         junofrst_blit:array[0..3] of tipo_roms=(
         (n:'jfs3_c7.bin';l:$2000;p:$0;crc:$aeacf6db),(n:'jfs4_d7.bin';l:$2000;p:$2000;crc:$206d954c),
         (n:'jfs5_e7.bin';l:$2000;p:$4000;crc:$1eb87a6e),());
@@ -35,8 +35,9 @@ var
  mem_opcodes,blit_mem:array[0..$5fff] of byte;
  punt:array[0..$ffff] of word;
  irq_enable:boolean;
- frame,xorx,xory,last_snd_val,sound_latch,rom_nbank,scroll_y:byte;
+ i8039_status,frame,xorx,xory,last_snd_val,sound_latch,sound_latch2,rom_nbank,scroll_y:byte;
  blit_data:array[0..3] of byte;
+ mem_snd_sub:array[0..$fff] of byte;
 
 procedure update_video_junofrst;inline;
 var
@@ -87,12 +88,13 @@ end;
 
 procedure junofrst_principal;
 var
-  frame_m,frame_s:single;
+  frame_m,frame_s,frame_s_sub:single;
   irq_req:boolean;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_m6809.tframes;
 frame_s:=snd_z80.tframes;
+frame_s_sub:=main_mcs48.tframes;
 irq_req:=false;
 while EmuStatus=EsRuning do begin
   for frame:=0 to $ff do begin
@@ -102,6 +104,9 @@ while EmuStatus=EsRuning do begin
     //Sound CPU
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    //snd sub
+    main_mcs48.run(frame_s_sub);
+    frame_s_sub:=frame_s_sub+main_mcs48.tframes-main_mcs48.contador;
     if frame=239 then begin
       if (irq_req and irq_enable) then main_m6809.change_irq(ASSERT_LINE);
       update_video_junofrst;
@@ -208,8 +213,29 @@ case direccion of
   $2000..$23ff:mem_snd[direccion]:=valor;
   $4000:ay8910_0.Control(valor);
   $4002:ay8910_0.Write(valor);
-  $5000:; //snd2
-  $6000:; //irq i8039
+  $5000:sound_latch2:=valor;
+  $6000:main_mcs48.change_irq(ASSERT_LINE);
+end;
+end;
+
+function junofrst_sound2_getbyte(direccion:word):byte;
+begin
+if direccion<$1000 then junofrst_sound2_getbyte:=mem_snd_sub[direccion];
+end;
+
+function junofrst_sound2_inport(puerto:word):byte;
+begin
+if puerto<$100 then junofrst_sound2_inport:=sound_latch2;
+end;
+
+procedure junofrst_sound2_outport(valor:byte;puerto:word);
+begin
+case puerto of
+  MCS48_PORT_P1:dac_0.data8_w(valor);
+  MCS48_PORT_P2:begin
+                  if (valor and $80)=0 then main_mcs48.change_irq(CLEAR_LINE);
+                  i8039_status:=(valor and $70) shr 4;
+                end;
 end;
 end;
 
@@ -218,7 +244,7 @@ var
   timer:byte;
 begin
 timer:=((snd_z80.contador+trunc(snd_z80.tframes*frame)) div (1024 div 2)) and $f;
-junofrst_portar:=(timer shl 4);
+junofrst_portar:=(timer shl 4) or i8039_status;
 end;
 
 procedure junofrst_portbw(valor:byte); //filter RC
@@ -228,6 +254,7 @@ end;
 procedure junofrst_sound_update;
 begin
   ay8910_0.update;
+  dac_0.update;
 end;
 
 //Main
@@ -235,7 +262,9 @@ procedure reset_junofrst;
 begin
  main_m6809.reset;
  snd_z80.reset;
+ main_mcs48.reset;
  ay8910_0.reset;
+ dac_0.reset;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -249,6 +278,7 @@ begin
  sound_latch:=0;
  rom_nbank:=0;
  scroll_y:=0;
+ i8039_status:=0;
 end;
 
 function iniciar_junofrst:boolean;
@@ -268,9 +298,14 @@ main_m6809.change_ram_calls(junofrst_getbyte,junofrst_putbyte);
 snd_z80:=cpu_z80.create(1789750,$100);
 snd_z80.change_ram_calls(junofrst_snd_getbyte,junofrst_snd_putbyte);
 snd_z80.init_sound(junofrst_sound_update);
+//Sound CPU 2
+main_mcs48:=cpu_mcs48.create(8000000,$100,I8039);
+main_mcs48.change_ram_calls(junofrst_sound2_getbyte,nil);
+main_mcs48.change_io_calls(junofrst_sound2_inport,junofrst_sound2_outport);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1789750,1);
+ay8910_0:=ay8910_chip.create(1789750,0.3);
 ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);
+dac_0:=dac_chip.Create(0.5);
 //cargar roms
 if not(cargar_roms(@memoria[0],@junofrst_rom[0],'junofrst.zip',0)) then exit;
 konami1_decode(@memoria[$a000],@mem_opcodes[0],$6000);
@@ -283,6 +318,7 @@ end;
 if not(cargar_roms(@blit_mem[0],@junofrst_blit[0],'junofrst.zip',0)) then exit;
 //Cargar roms sound
 if not(cargar_roms(@mem_snd[0],@junofrst_sound,'junofrst.zip')) then exit;
+if not(cargar_roms(@mem_snd_sub[0],@junofrst_sound_sub,'junofrst.zip',1)) then exit;
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$7b;

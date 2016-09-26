@@ -1165,7 +1165,6 @@ begin
       rom_exist:=false;
       if carga_rom_zip(Directory.Arcade_roms+'gbcolor.zip',gbc_rom[0].n,@bios_rom[0],gbc_rom[0].l,gbc_rom[0].crc,false) then
         if rom_exist or carga_rom_zip(Directory.Arcade_roms+'gbcolor.zip',gbc_rom[1].n,@bios_rom[gbc_rom[1].p],gbc_rom[1].l,gbc_rom[1].crc,false) then rom_exist:=true;
-      change_caption('GameBoy Color - '+ncartucho);
       //Iniciar Paletas
       for h:=0 to $7fff do begin
         colores[h].r:=(h and $1F) shl 3;
@@ -1179,10 +1178,11 @@ begin
       rom_exist:=carga_rom_zip(Directory.Arcade_roms+'gameboy.zip',gb_rom.n,@bios_rom[0],gb_rom.l,gb_rom.crc,false);
       ncartucho:='';
       for f:=0 to 15 do ncartucho:=ncartucho+chr(cabecera[$134+f]);
-      change_caption('GameBoy - '+ncartucho);
     end;
+    llamadas_maquina.open_file:=ncartucho;
     abrir_gb:=true;
-  end;
+  end else llamadas_maquina.open_file:='';
+  change_caption;
   cartucho_cargado:=true;
   freemem(datos);
   reset_gb;

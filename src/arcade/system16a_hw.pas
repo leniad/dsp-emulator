@@ -3,7 +3,7 @@ unit system16a_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     ppi8255,sound_engine,ym_2151,fd1089;
+     ppi8255,sound_engine,ym_2151,fd1089,mcs48,dac;
 
 procedure cargar_system16a;
 
@@ -14,6 +14,8 @@ const
         (n:'epr-12010.43';l:$10000;p:0;crc:$7df7f4a2),(n:'epr-12008.26';l:$10000;p:$1;crc:$f5ae64cd),
         (n:'epr-12011.42';l:$10000;p:$20000;crc:$9d46e707),(n:'epr-12009.25';l:$10000;p:$20001;crc:$7961d07e),());
         shinobi_sound:tipo_roms=(n:'epr-11267.12';l:$8000;p:0;crc:$dd50b745);
+        shinobi_n7751:tipo_roms=(n:'7751.bin';l:$400;p:0;crc:$6a9534fc);
+        shinobi_n7751_data:tipo_roms=(n:'epr-11268.1';l:$8000;p:0;crc:$6d7966da);
         shinobi_tiles:array[0..3] of tipo_roms=(
         (n:'epr-11264.95';l:$10000;p:0;crc:$46627e7d),(n:'epr-11265.94';l:$10000;p:$10000;crc:$87d0f321),
         (n:'epr-11266.93';l:$10000;p:$20000;crc:$efb4af87),());
@@ -141,10 +143,12 @@ var
  sprite_ram:array[0..$3ff] of word;
  sprite_rom:array[0..$7ffff] of byte;
  sprite_bank:array[0..$f] of byte;
+ n7751_data:array[0..$7fff]of byte;
  s16_info:tsystem16_info;
  s16_screen:array[0..7] of byte;
  screen_enabled:boolean;
- sound_latch:byte;
+ sound_latch,n7751_command:byte;
+ n7751_rom_address:word;
 
 //Cada sprite 16bytes (8 words)
 //parte alta byte 0
@@ -365,12 +369,13 @@ end;
 
 procedure system16a_principal;
 var
-  frame_m,frame_s:single;
+  frame_m,frame_s,frame_s_sub:single;
   f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_m68000.tframes;
 frame_s:=snd_z80.tframes;
+frame_s_sub:=main_mcs48.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
      //main
@@ -379,6 +384,9 @@ while EmuStatus=EsRuning do begin
      //sound
      snd_z80.run(frame_s);
      frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+     //sound sub cpu
+     //main_mcs48.run(frame_s_sub);
+     //frame_s_sub:=frame_s_sub+main_mcs48.tframes-main_mcs48.contador;
      if f=223 then begin
        main_m68000.irq[4]:=HOLD_LINE;
        update_video_system16a;
@@ -637,6 +645,11 @@ case (puerto and $ff) of
               0:ym2151_0.reg(valor);
               1:ym2151_0.write(valor);
            end;
+  $80..$bf:begin
+              n7751_rom_address:=n7751_rom_address and $3fff;
+	            n7751_rom_address:=n7751_rom_address or ((valor and 1) shl 14);
+              n7751_command:=valor shr 5;
+           end;
 end;
 end;
 
@@ -659,10 +672,47 @@ end;
 procedure system16a_sound_act;
 begin
   ym2151_0.update;
+  dac_0.update;
 end;
 
-procedure ym2151_snd_irq(irqstate:byte);
+procedure ym2151_snd_port(valor:byte);
 begin
+if (valor and $1)<>0 then main_mcs48.change_reset(CLEAR_LINE)
+  else main_mcs48.change_reset(ASSERT_LINE);
+if (valor and $2)<>0 then main_mcs48.change_irq(CLEAR_LINE)
+  else main_mcs48.change_irq(ASSERT_LINE);
+end;
+
+//Sub sound cpu
+function system16a_sound_inport(puerto:word):byte;
+begin
+case puerto of
+  MCS48_PORT_BUS:system16a_sound_inport:=n7751_data[n7751_rom_address];
+  MCS48_PORT_T1:system16a_sound_inport:=0;
+  MCS48_PORT_P2:system16a_sound_inport:=$80 or ((n7751_command and $07) shl 4) or (main_mcs48.i8243.p2_r and $f)
+end;
+end;
+
+procedure system16a_sound_outport(valor:byte;puerto:word);
+begin
+case puerto of
+  MCS48_PORT_P1:dac_0.data8_w(valor);
+  MCS48_PORT_P2:main_mcs48.i8243.p2_w(valor and $f);
+  MCS48_PORT_PROG:main_mcs48.i8243.prog_w(valor);
+end;
+end;
+
+procedure n7751_rom_offset_w(valor:byte;puerto:word);
+var
+  mask,newdata:integer;
+begin
+	// P4 - address lines 0-3
+	// P5 - address lines 4-7
+	// P6 - address lines 8-11
+	// P7 - address lines 12-13
+	mask:=($f shl (4*puerto)) and $3fff;
+	newdata:=(valor shl (4*puerto)) and mask;
+	n7751_rom_address:=(n7751_rom_address and not(mask)) or newdata;
 end;
 
 //Main
@@ -674,6 +724,7 @@ begin
  snd_z80.reset;
  ym2151_0.reset;
  pia8255_0.reset;
+ main_mcs48.reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -682,6 +733,7 @@ begin
  screen_enabled:=true;
  fillchar(tile_buffer[0],$800*8,1);
  sound_latch:=0;
+ n7751_rom_address:=0;
 end;
 
 function iniciar_system16a:boolean;
@@ -736,12 +788,20 @@ pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
 //Timers
 ym2151_0:=ym2151_chip.create(4000000);
-ym2151_0.change_irq_func(ym2151_snd_irq);
+ym2151_0.change_port_func(ym2151_snd_port);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@system16a_dip_a;
 case main_vars.tipo_maquina of
   114:begin  //Shinobi
+        //Creo el segundo chip de sonido
+        main_mcs48:=cpu_mcs48.create(6000000,262,N7751);
+        main_mcs48.change_io_calls(system16a_sound_inport,system16a_sound_outport);
+        main_mcs48.i8243.change_calls(nil,n7751_rom_offset_w);
+        if not(cargar_roms(main_mcs48.get_rom_addr,@shinobi_n7751,'shinobi.zip')) then exit;
+        if not(cargar_roms(@n7751_data[0],@shinobi_n7751_data,'shinobi.zip')) then exit;
+        dac_0:=dac_chip.Create(1);
+        //Main CPU
         main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@shinobi_rom[0],'shinobi.zip',0)) then exit;

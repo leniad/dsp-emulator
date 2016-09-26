@@ -9,7 +9,7 @@ object configcpc: Tconfigcpc
   ClientHeight = 452
   ClientWidth = 499
   OnShow = FormShow
-  LCLVersion = '1.6.0.1'
+  LCLVersion = '1.7'
   object GroupBox1: TGroupBox
     Left = 20
     Height = 163
@@ -358,7 +358,7 @@ object configcpc: Tconfigcpc
       Height = 19
       Top = 48
       Width = 44
-      Caption = '1Mb'
+      Caption = '4Mb'
       TabOrder = 2
     end
   end

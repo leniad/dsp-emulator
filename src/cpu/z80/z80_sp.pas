@@ -30,7 +30,7 @@ var
   spec_z80:cpu_z80_sp;
 
 implementation
-uses dialogs,spectrum_misc,sysutils;
+uses spectrum_misc;
 
 procedure cpu_z80_sp.change_retraso_call(retraso:tretraso;retraso_puerto:tretraso_puerto);
 begin
@@ -3819,7 +3819,7 @@ case instruccion of
                 end;
                 r.hl.w:=r.hl.w-1;
             end;
-        $fb:main_vars.mensaje_general:='Instruccion no implmentada EDFB';
+        $fb:main_vars.mensaje_principal:='Instruccion no implmentada EDFB';
 end;
 end;
 

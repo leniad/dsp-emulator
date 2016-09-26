@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.7'
+  LCLVersion = '1.6.0.4'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -2332,6 +2332,10 @@ object principal1: Tprincipal1
             Caption = 'Space Invaders'
             OnClick = CambiarMaquina
           end
+          object spacefb1: TMenuItem
+            Caption = 'Space Firebirds'
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2498,12 +2502,18 @@ object principal1: Tprincipal1
             Caption = 'Juno First'
             OnClick = CambiarMaquina
           end
+          object trackfield1: TMenuItem
+            Caption = 'Track && Field'
+          end
           object MenuItem32: TMenuItem
-            Caption = 'Track & Field HW'
-            object trackfield1: TMenuItem
-              Caption = 'Track & Field'
-              OnClick = CambiarMaquina
+            Caption = 'Hyper Sports HW'
+            object hypersports1: TMenuItem
+              Caption = 'Hyper Sports'
             end
+          end
+          object Megazone1: TMenuItem
+            Caption = 'Megazone'
+            OnClick = CambiarMaquina
           end
         end
         object MenuItem10: TMenuItem
@@ -2552,6 +2562,9 @@ object principal1: Tprincipal1
           object simpsons1: TMenuItem
             Caption = 'The Simpsons'
             OnClick = CambiarMaquina
+          end
+          object ajax1: TMenuItem
+            Caption = 'Ajax'
           end
         end
         object M680001: TMenuItem

@@ -239,7 +239,6 @@ procedure clear_disk(drvnum:byte);
 var
   f,h,g:byte;
 begin
-  main_vars.mensaje_general:='';
   if not(dsk[drvnum].abierto) then exit;
   dsk[drvnum].cont_multi:=0;
   dsk[drvnum].max_multi:=0;

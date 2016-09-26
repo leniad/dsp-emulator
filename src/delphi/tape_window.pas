@@ -82,17 +82,17 @@ cinta_tzx.play_tape:=true;
 cinta_tzx.estados:=0;
 BitBtn1.Enabled:=false;
 BitBtn2.Enabled:=true;
-Windows.SetFocus(child.Handle);
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
 procedure Ttape_window1.fstopcinta(Sender: TObject); //stop
 begin
+main_vars.mensaje_principal:='';
 cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
-main_vars.mensaje_general:='';
 main_screen.rapido:=false;
-Windows.SetFocus(child.Handle);
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
 procedure Ttape_window1.StringGrid1Click(Sender: TObject);

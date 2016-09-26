@@ -115,13 +115,15 @@ if file_extension='' then exit;
 if file_extension='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
 if file_extension='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
 if correcto then begin
-    change_caption(llamadas_maquina.caption+' - '+file_extension+':'+end_file_name);
+    llamadas_maquina.open_file:=file_extension+':'+end_file_name;
     ResetFDC;
     dsk[0].ImageName:=end_file_name;
     load_dsk.Button1Click(self);
 end else begin
   MessageDlg('Error abriendo el disco: "'+end_file_name+'".', mtError,[mbOk], 0);
+  llamadas_maquina.open_file:='';
 end;
+change_caption;
 freemem(datos_dsk);
 datos_dsk:=nil;
 end;

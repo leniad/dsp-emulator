@@ -29,11 +29,11 @@ const
 
 type
         TMain_vars=record
-            mensaje_general,cadena_dir:string;
+            mensaje_principal,cadena_dir,caption:string;
             frames_sec,tipo_maquina:word;
             idioma:integer;
             vactual:byte;
-            service1,driver_ok,auto_exec,show_crc_error,lenguaje_ok,center_screen,x11:boolean;
+            service1,driver_ok,auto_exec,show_crc_error,center_screen,x11:boolean;
         end;
         TDirectory=Record
             Base:string;
@@ -64,13 +64,12 @@ type
             amstrad_rom:string;
             //Misc
             Preview:String;
-            lenguaje:string;
             qsnapshot:string;
         end;
         tllamadas_globales = record
            iniciar,cintas,cartuchos:function:boolean;
            bucle_general,reset,close,grabar_snapshot,configurar,acepta_config:procedure;
-           caption:string;
+           caption,open_file:string;
            fps_max:single;
            velocidad_cpu:dword;
            save_qsnap,load_qsnap:procedure(nombre:string);
@@ -106,7 +105,7 @@ procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 procedure video_sync;
 //misc
-procedure change_caption(nombre:string);
+procedure change_caption;
 procedure reset_dsp;
 //linux misc
 {$ifndef windows}
@@ -212,7 +211,7 @@ if principal1.Panel2.visible then x:=x-60;
 child.Left:=(x-child.width) div 2;
 {$endif}
 //pongo el nombre de la maquina...
-change_caption(llamadas_maquina.caption);
+change_caption;
 if main_vars.center_screen then begin
   principal1.Left:=(screen.Width div 2)-(principal1.ClientWidth div 2);
   principal1.Top:=(screen.Height div 2)-(principal1.ClientHeight div 2);
@@ -316,7 +315,6 @@ if not(main_screen.pantalla_completa) then begin
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
-  pantalla[0]:=SDL_GetWindowSurface(window_render);
   main_screen.pantalla_completa:=true;
 end else begin
   main_screen.video_mode:=main_screen.old_video_mode;
@@ -331,10 +329,10 @@ end else begin
   {$else}
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,0);
   {$endif}
-  pantalla[0]:=SDL_GetWindowSurface(window_render);
   cambiar_video;
   main_screen.pantalla_completa:=false;
 end;
+pantalla[0]:=SDL_GetWindowSurface(window_render);
 end;
 
 procedure close_video;
@@ -458,6 +456,8 @@ var
   f,i,h:word;
   origen:libsdl_rect;
 begin
+origen.x:=0;
+origen.y:=0;
 if main_screen.flip_main_screen then begin
   h:=0;
   for i:=p_final[0].y-1 downto 0 do begin
@@ -472,16 +472,12 @@ if main_screen.flip_main_screen then begin
       dec(punt2);
     end;
   end;
-  origen.x:=0;
-  origen.y:=0;
   origen.w:=p_final[0].x;
   origen.h:=p_final[0].y;
   SDL_UpperBlit(pantalla[pant_doble],@origen,pantalla[pant_temp],@origen);
 end;
 case main_screen.video_mode of
   1,6:begin
-      origen.x:=0;
-      origen.y:=0;
       origen.w:=pantalla[pant_temp].w;
       origen.h:=pantalla[pant_temp].h;
       SDL_UpperBlit(pantalla[pant_temp],@origen,pantalla[0],@origen);
@@ -506,8 +502,6 @@ case main_screen.video_mode of
               inc(punt);
           end;
        end;
-       origen.x:=0;
-       origen.y:=0;
        origen.w:=p_final[0].x*2;
        origen.h:=p_final[0].y*2;
        SDL_UpperBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
@@ -536,8 +530,6 @@ case main_screen.video_mode of
               inc(punt);
            end;
         end;
-        origen.x:=0;
-        origen.y:=0;
         origen.w:=p_final[0].x*2;
         origen.h:=p_final[0].y*2;
         SDL_UpperBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
@@ -564,8 +556,6 @@ case main_screen.video_mode of
               inc(punt);
            end;
         end;
-        origen.x:=0;
-        origen.y:=0;
         origen.w:=p_final[0].x*3;
         origen.h:=p_final[0].y*3;
         SDL_UpperBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
@@ -574,12 +564,16 @@ case main_screen.video_mode of
 SDL_UpdateWindowSurface(window_render);
 end;
 
-procedure change_caption(nombre:string);
+procedure change_caption;
+var
+  cadena:string;
 begin
+if llamadas_maquina.open_file='' then cadena:=llamadas_maquina.caption
+  else cadena:=llamadas_maquina.caption+' - '+llamadas_maquina.open_file;
 {$IFnDEF fpc}
-child.Caption:=nombre;
+child.Caption:=cadena;
 {$Else}
-SDL_SetWindowTitle(window_render,pointer(nombre));
+SDL_SetWindowTitle(window_render,pointer(cadena));
 {$endif}
 end;
 
@@ -589,9 +583,9 @@ var
   l2:int64;
   res:single;
 begin
-main_vars.frames_sec:=main_vars.frames_sec+1;
 actualiza_video;
 evalue_controls;
+main_vars.frames_sec:=main_vars.frames_sec+1;
 if main_screen.rapido then exit;
 QueryPerformanceCounter(l2);
 res:=(l2-cont_sincroniza);
@@ -649,8 +643,9 @@ if ((main_vars.tipo_maquina>9) and (main_vars.tipo_maquina<1000)) then llamadas_
 llamadas_maquina.acepta_config:=nil;
 llamadas_maquina.bucle_general:=nil;
 llamadas_maquina.fps_max:=60;
+llamadas_maquina.open_file:='';
 main_vars.vactual:=0;
-main_vars.mensaje_general:='';
+main_vars.mensaje_principal:='';
 main_vars.service1:=false;
 sound_status.canales_usados:=-1;
 principal1.timer1.Enabled:=false;

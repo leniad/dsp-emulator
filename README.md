@@ -1,4 +1,38 @@
 ﻿#DSP Emulator status<br>
+<b>26/09/16 - DSP Emulator 0.17b1. Win32 binary and source updated.</b><br><pre>
+-General
+    +K051960: Implemented IRQ's
+    +Changed the way to show the main window caption, including the name of the tape, snapshot, disk, etc.
+    +Added MCS48 CPU series: i8035, i8039 and N7751
+    +Added i8243, port expander
+    +Deleted languages files, they are now integrated
+    +K051316: Added basic implementation
+    +Added a check when directories are saved to avoid duplicating the folder separator
+-Amstrad CPC
+    +Added support for the snapshot V3 chuncks (including compressed memory)
+-Black Tiger
+    +Small video updates
+-Popeye
+    +Small video updates
+-Gyruss
+    +Added i8039 CPU and DAC, completed sound
+    +Converted audio to stereo
+-Juno First
+    +Added i8039 CPU and DAC, completed sound
+-Sega System 16A
+    +Preliminary support of the digital audio with the N7751 CPU
+-Hyper Sports
+    +Added driver with sound
+-Megazone
+    +Added driver with sound
+-Space Fire Bird
+    +Added driver with sound
+    +Small problems with the backgroud stars
+-Ajax
+    +Basic driver
+</pre><br>
+<img src='http://img1.imagilive.com/0916/hypersports.png'><img src='http://img1.imagilive.com/0916/megazone.png'><br>
+<img src='http://img1.imagilive.com/0916/spacefirebird.png'><br>
 <b>30/07/16 - DSP Emulator 0.17b1. Win32 binary and source updated.</b><br><pre>
 -General
     +Added support for IPF files natively without external libraries. 

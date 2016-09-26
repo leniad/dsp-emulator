@@ -260,7 +260,14 @@ uses
   k007232 in '..\snd\k007232.pas',
   k053260 in '..\snd\k053260.pas',
   cpu_misc in '..\cpu\cpu_misc.pas',
-  trackandfield_hw in '..\arcade\trackandfield_hw.pas';
+  trackandfield_hw in '..\arcade\trackandfield_hw.pas',
+  hypersports_hw in '..\arcade\hypersports_hw.pas',
+  mcs48 in '..\cpu\mcs48.pas',
+  megazone_hw in '..\arcade\megazone_hw.pas',
+  i8243 in '..\devices\i8243.pas',
+  spacefirebird_hw in '..\arcade\spacefirebird_hw.pas',
+  ajax_hw in '..\arcade\ajax_hw.pas',
+  k051316 in '..\devices\k051316.pas';
 
 {$R *.res}
 

@@ -35,7 +35,7 @@ type
 procedure internal_update_k007232_0;
 
 var
-  k007232_0:k007232_chip;
+  k007232_0,k007232_1:k007232_chip;
 
 implementation
 const

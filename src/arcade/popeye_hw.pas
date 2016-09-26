@@ -65,23 +65,18 @@ end;
 
 procedure update_video_popeye;inline;
 var
-  f,color,nchar:word;
-  x,y,sc_y:word;
-  ptemp:pword;
-  atrib,atrib2:byte;
+  f,color,nchar,x,y:word;
+  i,atrib,atrib2:byte;
+  punto:array[0..7] of word;
 begin
 if scroll_y=0 then fill_full_screen(3,0)
   else begin //Fondo con scroll (lo escribe directo)
     for f:=0 to $1fff do begin
       if fondo_write[f] then begin
         x:=8*(f mod 64);
-        sc_y:=4*(f div 64);
-        ptemp:=punbuf;
-        for y:=0 to 7 do begin
-          ptemp^:=paleta[memoria[f+$c000] and $0f];
-          inc(ptemp);
-        end;
-        for y:=0 to 3 do putpixel(x,sc_y+y,8,punbuf,1);
+        y:=4*(f div 64);
+        for i:=0 to 7 do punto[i]:=paleta[memoria[f+$c000] and $0f];
+        for i:=0 to 3 do putpixel(x,y+i,8,@punto[0],1);
         fondo_write[f]:=false;
       end;
     end;

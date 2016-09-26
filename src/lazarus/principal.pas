@@ -186,6 +186,10 @@ type
     MenuItem31: TMenuItem;
     gbusters1: TMenuItem;
     MenuItem32: TMenuItem;
+    hypersports1: TMenuItem;
+    Megazone1: TMenuItem;
+    ajax1: TMenuItem;
+    spacefb1: TMenuItem;
     trackfield1: TMenuItem;
     simpsons1: TMenuItem;
     thunderx1: TMenuItem;
@@ -538,7 +542,7 @@ procedure Tprincipal1.Timer1Timer(Sender: TObject);
 var
   velocidad:integer;
 begin
-statusbar1.Panels[2].Text:=main_vars.mensaje_general;
+statusbar1.Panels[2].Text:=main_vars.mensaje_principal;
 velocidad:=round((main_vars.frames_sec*100)/llamadas_maquina.fps_max);
 statusbar1.Panels[0].Text:='FPS: '+inttostr(main_vars.frames_sec);
 statusbar1.panels[1].text:=leng[main_vars.idioma].mensajes[0]+': '+inttostr(velocidad)+'%';
@@ -592,7 +596,7 @@ directory.Base:=copy(cadena,1,f);
 {$endif}
 if not DirectoryExists(directory.Base+'preview'+main_vars.cadena_dir) then CreateDir(directory.Base+'preview');
 file_ini_load;
-main_vars.lenguaje_ok:=leer_idioma;
+leer_idioma;
 principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
 end;
@@ -727,7 +731,7 @@ end;
 
 procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
-main_screen.flip_main_screen:=false;
+main_vars.mensaje_principal:='';
 if addr(llamadas_maquina.reset)<>nil then llamadas_maquina.reset;
 sync_all;
 end;
@@ -791,7 +795,7 @@ begin
 timer2.Enabled:=false;
 principal1.Caption:=principal1.Caption+dsp_version;
 tipo:=main_vars.tipo_maquina;
-main_vars.tipo_maquina:=255;
+main_vars.tipo_maquina:=$ffff;
 if not(main_vars.auto_exec) then begin
   principal1.LstRomsClick(nil);
   exit;
@@ -812,9 +816,9 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.enabled:=false;
+main_vars.tipo_maquina:=tipo_new;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
-main_vars.tipo_maquina:=tipo_new;
 cargar_maquina(main_vars.tipo_maquina);
 //focus
 if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar

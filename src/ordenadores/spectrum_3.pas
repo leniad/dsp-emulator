@@ -122,9 +122,6 @@ var_spectrum.pantalla_128k:=5;
 old_1ffd:=0;
 var_spectrum.old_7ffd:=7;
 ResetFDC;
-
-if not(dsk[0].abierto) then change_caption(llamadas_maquina.caption)
-    else change_caption(llamadas_maquina.caption+' - '+extension_fichero(dsk[0].imagename)+':'+dsk[0].imagename);
 end;
 
 procedure spec3_retraso_memoria(direccion:word);

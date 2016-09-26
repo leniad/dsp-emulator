@@ -470,11 +470,15 @@ begin
   if resultado then begin
     directory.Nes:=ExtractFilePath(romfile);
     cart_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
-    change_caption('NES - '+nombre_file);
+    llamadas_maquina.open_file:=nombre_file;
     nes_reset;
     abrir_nes:=true;
     cartucho_cargado:=true;
-  end else MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+  end else begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    llamadas_maquina.open_file:='';
+  end;
+  change_caption;
   Directory.Nes:=ExtractFilePath(romfile);
 end;
 

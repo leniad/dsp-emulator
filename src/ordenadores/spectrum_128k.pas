@@ -112,7 +112,6 @@ var
   f:byte;
 begin
 reset_misc;
-change_caption(llamadas_maquina.caption);
 for f:=0 to 7 do fillchar(memoria_128k[f],16384,0);
 ay8910_0.reset;
 var_spectrum.marco[0]:=8;

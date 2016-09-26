@@ -104,7 +104,6 @@ end;
 procedure spec48k_reset;
 begin
 reset_misc;
-if not(rom_cambiada_48) then change_caption(llamadas_maquina.caption);
 fillchar(memoria[$4000],49152,0);
 end;
 

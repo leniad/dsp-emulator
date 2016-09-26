@@ -261,7 +261,7 @@ if event.keyboard then begin
   end;
   if ((keyboard[KEYBOARD_F5]) and (main_vars.tipo_maquina=2)) then begin
     clear_disk(0);
-    change_caption(llamadas_maquina.caption);
+    change_caption;
   end;
   if false then teclado_matriz
     else copymemory(@var_spectrum.key_spec[0],@keyboard[0],256);
@@ -431,7 +431,6 @@ var_spectrum.fastload:=true;
 cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
-main_vars.mensaje_general:='';
 main_vars.frames_sec:=0;
 screen_init(1,352,288);
 iniciar_video(352,288);
@@ -465,7 +464,13 @@ begin
 spec_z80.reset;
 reset_audio;
 var_spectrum.posicion_beeper:=0;
-if cinta_tzx.cargada then cinta_tzx.play_once:=false;
+if cinta_tzx.cargada then begin
+  cinta_tzx.play_once:=false;
+  llamadas_maquina.open_file:=cinta_tzx.name;
+end else if dsk[0].abierto then begin
+  llamadas_maquina.open_file:=dsk[0].ImageName;
+end else llamadas_maquina.open_file:='';
+change_caption;
 var_spectrum.key6_0:=$ff;
 var_spectrum.keyY_P:=$ff;
 var_spectrum.keyQ_T:=$ff;

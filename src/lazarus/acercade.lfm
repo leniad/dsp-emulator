@@ -15,7 +15,7 @@ object Aboutbox: TAboutbox
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '1.4.0.2'
+  LCLVersion = '1.7'
   object Panel1: TPanel
     Left = 8
     Height = 150
@@ -156,7 +156,7 @@ object Aboutbox: TAboutbox
       Height = 13
       Top = 80
       Width = 136
-      Caption = 'Copyright Leniad 2002-2015'
+      Caption = 'Copyright Leniad 2002-2016'
       ParentColor = False
     end
     object Label1: TLabel

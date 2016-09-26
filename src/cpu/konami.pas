@@ -188,6 +188,7 @@ case (iindexed and $70) of
   $60:origen:=@r.s;
   $70:origen:=@r.pc;
 end;
+direccion:=$ffff;
 case (iindexed and $f7) of
       7:begin // =
           direccion:=self.getword(r.pc);

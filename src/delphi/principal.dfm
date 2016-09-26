@@ -1292,11 +1292,9 @@ object principal1: Tprincipal1
       Anchors = [akLeft, akBottom]
       Panels = <
         item
-          Alignment = taCenter
           Width = 60
         end
         item
-          Alignment = taCenter
           Width = 100
         end
         item
@@ -2030,6 +2028,11 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object spacefb1: TMenuItem
+            Caption = 'Space Fire Bird'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2232,6 +2235,19 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object HyperSportsHW1: TMenuItem
+            Caption = 'Hyper Sports HW'
+            GroupIndex = 1
+            object HyperSports1: TMenuItem
+              Caption = 'Hyper Sports'
+              OnClick = CambiarMaquina
+            end
+          end
+          object Megazone1: TMenuItem
+            Caption = 'Megazone'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object HD63091: TMenuItem
           Caption = 'HD6309'
@@ -2281,6 +2297,10 @@ object principal1: Tprincipal1
           end
           object simpsons1: TMenuItem
             Caption = 'The Simpsons'
+            OnClick = CambiarMaquina
+          end
+          object Ajax1: TMenuItem
+            Caption = 'Ajax'
             OnClick = CambiarMaquina
           end
         end
@@ -2692,7 +2712,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807C00320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807F00320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -1132,8 +1132,7 @@ end;
 type
   tcpc_sna=packed record
       magic:array[0..7] of ansichar;
-      cpc_model:byte; // <-- Esto es mio!
-      unused1:array[0..6] of byte;
+      unused1:array[0..7] of byte;
       version,flags,a:byte;
       bc,de,hl:word;
       r,i,iff1,iff2:byte;
@@ -1153,6 +1152,10 @@ type
       ga_lines_sync,ga_lines_count,irq:byte;
       unused3:array[0..$4a] of byte;
     end;
+  tcpc_chunk=packed record
+      name:array[0..3] of ansichar;
+      size:dword;
+    end;
 
 function grabar_amstrad_sna(nombre:string):boolean;
 var
@@ -1161,14 +1164,15 @@ var
   pdatos,ptemp:pbyte;
   main_z80_reg:npreg_z80;
   cpc_sna:^tcpc_sna;
+  cpc_chunk:^tcpc_chunk;
+  buffer:array[0..9] of byte;
 begin
 main_z80_reg:=main_z80.get_internal_r;
-getmem(pdatos,$30000);
+getmem(pdatos,$50000);
 ptemp:=pdatos;
 getmem(cpc_sna,sizeof(tcpc_sna));
 fillchar(cpc_sna^,sizeof(tcpc_sna),0);
 cpc_sna.magic:='MV - SNA';
-cpc_sna.cpc_model:=cpc_ga.cpc_model+1;
 cpc_sna.version:=3;
 if main_z80_reg.f.s then cpc_sna.flags:=cpc_sna.flags or $80;
 if main_z80_reg.f.z then cpc_sna.flags:=cpc_sna.flags or $40;
@@ -1244,25 +1248,106 @@ case main_vars.tipo_maquina of
           inc(long,$4000);
     end;
 end;
+//Y ahora grabo chunks con las ROMs cambiadas (si las hay)
+case cpc_ga.cpc_model of
+  1,2,3:begin
+           getmem(cpc_chunk,sizeof(tcpc_chunk));
+           cpc_chunk.name:='LOCL';
+           cpc_chunk.size:=10;
+           copymemory(ptemp,cpc_chunk,8);
+           inc(ptemp,8);
+           inc(long,8);
+           buffer[0]:=cpc_ga.cpc_model;
+           copymemory(ptemp,@buffer[0],10);
+           freemem(cpc_chunk);
+           inc(ptemp,10);
+           inc(long,10);
+        end;
+  4:begin
+      getmem(cpc_chunk,sizeof(tcpc_chunk));
+      cpc_chunk.name:='LROM';
+      cpc_chunk.size:=$4000;
+      copymemory(ptemp,cpc_chunk,8);
+      inc(ptemp,8);
+      inc(long,8);
+      copymemory(ptemp,@cpc_low_rom[0],$4000);
+      freemem(cpc_chunk);
+      inc(ptemp,$4000);
+      inc(long,$4000);
+  end;
+end;
+for f:=1 to 6 do begin
+  if cpc_rom_slot[f]<>'' then begin
+    getmem(cpc_chunk,sizeof(tcpc_chunk));
+    cpc_chunk.name:='ROM';
+    cpc_chunk.name[3]:=ansichar(chr(48+f));
+    cpc_chunk.size:=$4000;
+    copymemory(ptemp,cpc_chunk,8);
+    inc(ptemp,8);
+    inc(long,8);
+    copymemory(ptemp,@cpc_rom[f,0],$4000);
+    freemem(cpc_chunk);
+    inc(ptemp,$4000);
+    inc(long,$4000);
+  end;
+end;
 grabar_amstrad_sna:=write_file(nombre,pdatos,long);
 freemem(pdatos);
+end;
+
+procedure decompress_chunk(origen,destino:pbyte;longitud:dword);
+var
+   posicion:dword;
+   mark,rep,data,f:byte;
+begin
+posicion:=0;
+while posicion<>longitud do begin
+   mark:=origen^;
+   inc(origen);
+   inc(posicion);
+   //Tiene repeticiones?
+   if mark=$e5 then begin
+       rep:=origen^;
+       inc(origen);
+       inc(posicion);
+       //Caso especial...
+       if rep=0 then begin
+          destino^:=$e5;
+          inc(destino);
+       end else begin
+          data:=origen^;
+          inc(origen);
+          inc(posicion);
+          for f:=1 to rep do begin
+              destino^:=data;
+              inc(destino);
+          end;
+       end;
+   end else begin
+       destino^:=mark;
+       inc(destino);
+   end;
+end;
 end;
 
 function abrir_sna_cpc(data:pbyte;longitud:integer):boolean;
 var
   f:byte;
+  position:integer;
   main_z80_reg:npreg_z80;
   cpc_sna:^tcpc_sna;
+  cpc_chunk:^tcpc_chunk;
+  mem_temp,mem_temp2:pbyte;
 begin
 abrir_sna_cpc:=false;
 getmem(cpc_sna,sizeof(tcpc_sna));
 copymemory(cpc_sna,data,$100);
 inc(data,$100);
+position:=256;
 if (cpc_sna.magic)<>'MV - SNA' then begin
   freemem(cpc_sna);
   exit;
 end;
-if cpc_sna.cpc_model<>0 then cpc_ga.cpc_model:=cpc_sna.cpc_model-1;
 main_z80_reg:=main_z80.get_internal_r;
 main_z80_reg.f.s:=(cpc_sna.flags and $80)<>0;
 main_z80_reg.f.z:=(cpc_sna.flags and $40)<>0;
@@ -1320,13 +1405,16 @@ cpc_outbyte(cpc_sna.ppi_control,$f782);
 for f:=0 to $f do ay8910_0.set_reg(f,cpc_sna.ay_regs[f]);
 ay8910_0.control(cpc_sna.ay_control);
 case cpc_sna.mem_size of
+  0:; //La informacion de la memoria viene adjunta en Chuncks
   64:for f:=0 to 3 do begin
          copymemory(@cpc_mem[f,0],data,$4000);
          inc(data,$4000);
+         position:=position+$4000;
      end;
   128:for f:=0 to 7 do begin
          copymemory(@cpc_mem[f,0],data,$4000);
          inc(data,$4000);
+         position:=position+$4000;
       end;
   else exit; //Si hay mas memoria, es otro modelo --> No soportado
 end;
@@ -1334,8 +1422,8 @@ case cpc_sna.version of
   1:begin
       case cpc_sna.mem_size of
            64:begin
-                 main_vars.tipo_maquina:=8;
-                 llamadas_maquina.caption:='Amstrad CPC 664';
+                 main_vars.tipo_maquina:=7;
+                 llamadas_maquina.caption:='Amstrad CPC 464';
            end;
            128:begin
                  main_vars.tipo_maquina:=9;
@@ -1346,7 +1434,7 @@ case cpc_sna.version of
     end;
   2,3:begin
       case cpc_sna.hw_type of
-        0:begin
+        0,5:begin
           main_vars.tipo_maquina:=7;
           llamadas_maquina.caption:='Amstrad CPC 464';
         end;
@@ -1354,10 +1442,23 @@ case cpc_sna.version of
           main_vars.tipo_maquina:=8;
           llamadas_maquina.caption:='Amstrad CPC 664';
         end;
-        2:begin
+        2,4:begin
           main_vars.tipo_maquina:=9;
           llamadas_maquina.caption:='Amstrad CPC 6128';
         end;
+        3:begin  //Desconocido?
+           case cpc_sna.mem_size of
+                64:begin
+                       main_vars.tipo_maquina:=7;
+                       llamadas_maquina.caption:='Amstrad CPC 464';
+                   end;
+               128:begin
+                       main_vars.tipo_maquina:=9;
+                       llamadas_maquina.caption:='Amstrad CPC 6128';
+                   end;
+               else exit;
+           end;
+          end;
         else exit; //Modelo no soportado
       end;
       cpc_load_roms;
@@ -1366,6 +1467,43 @@ case cpc_sna.version of
         cpc_ga.lines_count:=cpc_sna.ga_lines_count;
         if cpc_sna.irq<>0 then main_z80.change_irq(PULSE_LINE)
            else main_z80.change_irq(CLEAR_LINE);
+        getmem(cpc_chunk,sizeof(tcpc_chunk));
+        while position<>longitud do begin //Hay chunks??
+           copymemory(cpc_chunk,data,8);
+           inc(data,8);
+           position:=position+8;
+           if cpc_chunk.name='MEM0' then begin
+              getmem(mem_temp,$10000);
+              decompress_chunk(data,mem_temp,cpc_chunk.size);
+              mem_temp2:=mem_temp;
+              for f:=0 to 3 do begin
+                  copymemory(@cpc_mem[f,0],mem_temp2,$4000);
+                  inc(mem_temp2,$4000);
+              end;
+              freemem(mem_temp);
+           end;
+           if cpc_chunk.name='MEM1' then begin
+              getmem(mem_temp,$10000);
+              decompress_chunk(data,mem_temp,cpc_chunk.size);
+              mem_temp2:=mem_temp;
+              for f:=0 to 3 do begin
+                  copymemory(@cpc_mem[4+f,0],mem_temp2,$4000);
+                  inc(mem_temp2,$4000);
+              end;
+              freemem(mem_temp);
+           end;
+           if ((cpc_chunk.name[0]='R') and (cpc_chunk.name[1]='O') and (cpc_chunk.name[2]='M')) then
+                copymemory(@cpc_rom[strtoint(cpc_chunk.name[3]),0],data,$4000);
+           if cpc_chunk.name='LROM' then begin
+                copymemory(@cpc_low_rom[0],data,$4000);
+                cpc_ga.cpc_model:=4;
+           end;
+           if cpc_chunk.name='LOCL' then cpc_ga.cpc_model:=data^;
+           if cpc_chunk.name='CPC+' then exit; //Es un CPC plus de verdad!
+           inc(data,cpc_chunk.size);
+           position:=position+cpc_chunk.size;
+        end;
+        freemem(cpc_chunk);
       end;
     end;
 end;

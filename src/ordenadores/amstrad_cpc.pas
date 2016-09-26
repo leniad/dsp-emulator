@@ -221,7 +221,8 @@ if event.keyboard then begin
   if keyboard[KEYBOARD_N8] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $f7) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $8);
   if keyboard[KEYBOARD_F5] then begin
     clear_disk(0);
-    change_caption(llamadas_maquina.caption);
+    llamadas_maquina.open_file:='';
+    change_caption;
   end;
   if keyboard[KEYBOARD_N5] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $ef) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $10);
   if keyboard[KEYBOARD_F1] then begin
@@ -795,8 +796,12 @@ begin
   if extension='SNA' then begin
       resultado:=abrir_sna_cpc(datos,file_size);
       es_cinta:=false;
-      if resultado then change_caption(llamadas_maquina.caption+' - Snap: '+nombre_file)
-         else MessageDlg('Error cargando snapshot.'+chr(10)+chr(13)+'Error loading the snapshot.', mtInformation,[mbOk], 0);
+      if resultado then begin
+        llamadas_maquina.open_file:='Snap: '+nombre_file;
+      end else begin
+        MessageDlg('Error cargando snapshot.'+chr(10)+chr(13)+'Error loading the snapshot.', mtInformation,[mbOk], 0);
+        llamadas_maquina.open_file:='';
+      end;
   end;
   if es_cinta then begin
      if resultado then begin
@@ -805,12 +810,15 @@ begin
         tape_window1.BitBtn1.Enabled:=true;
         tape_window1.BitBtn2.Enabled:=false;
         cinta_tzx.play_tape:=false;
+        llamadas_maquina.open_file:=extension+': '+nombre_file;
      end else begin
         MessageDlg('Error cargando cinta/CSW/WAV.'+chr(10)+chr(13)+'Error loading tape/CSW/WAV.', mtInformation,[mbOk], 0);
+        llamadas_maquina.open_file:='';
      end;
   end;
   freemem(datos);
   directory.amstrad_tap:=extractfiledir(nombre_zip)+main_vars.cadena_dir;
+  change_caption;
 end;
 
 function amstrad_loaddisk:boolean;
@@ -857,8 +865,6 @@ begin
   pia8255_0.reset;
   reset_audio;
   if cinta_tzx.cargada then cinta_tzx.play_once:=false;
-  if not(dsk[0].abierto) then change_caption(llamadas_maquina.caption)
-    else change_caption(llamadas_maquina.caption+' - DSK: '+dsk[0].imagename);
   cinta_tzx.value:=0;
   ResetFDC;
   //Init GA

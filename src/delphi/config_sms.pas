@@ -64,7 +64,7 @@ begin
 if radiobutton1.Checked then begin //NTSC
   if vdp_0.is_pal then begin
     llamadas_maquina.fps_max:=FPS_NTSC;
-    valor_sync:=(1000000/FPS_NTSC)*(cont_micro/1000000);
+    valor_sync:=(1/FPS_NTSC)*cont_micro;
     close_audio;
     iniciar_audio(false);
     close_video;
@@ -80,7 +80,7 @@ if radiobutton1.Checked then begin //NTSC
 end else begin //PAL
   if not(vdp_0.is_pal) then begin
     llamadas_maquina.fps_max:=FPS_PAL;
-    valor_sync:=(1000000/FPS_PAL)*(cont_micro/1000000);
+    valor_sync:=(1/FPS_PAL)*cont_micro;
     close_audio;
     iniciar_audio(false);
     close_video;

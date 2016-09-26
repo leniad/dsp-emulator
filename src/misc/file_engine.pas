@@ -86,7 +86,6 @@ if fileexists(directory.Base+'dsp.ini') then begin
   fich_ini:=Tinifile.Create(directory.Base+'dsp.ini');
   //Diretorios de roms
   Directory.Arcade_roms:=fich_ini.readString('Dir','arcade',directory.Base+'roms'+main_vars.cadena_dir);
-  Directory.lenguaje:=fich_ini.readString('Dir','lng',directory.Base+'lng'+main_vars.cadena_dir);
   Directory.Arcade_hi:=fich_ini.readString('dir','dir_hi',directory.Base+'hi'+main_vars.cadena_dir);
   Directory.Arcade_nvram:=fich_ini.readString('dir','dir_nvram',directory.Base+'nvram'+main_vars.cadena_dir);
   Directory.qsnapshot:=fich_ini.readString('dir','qsnapshot',directory.Base+'qsnap'+main_vars.cadena_dir);
@@ -208,7 +207,6 @@ end else begin
   Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
   Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
   Directory.Arcade_roms:=directory.base+'roms'+main_vars.cadena_dir;
-  Directory.lenguaje:=directory.base+'lng'+main_vars.cadena_dir;
   Directory.Arcade_hi:=directory.base+'hi'+main_vars.cadena_dir;
   Directory.Arcade_nvram:=directory.base+'nvram'+main_vars.cadena_dir;
   Directory.Arcade_samples:=directory.base+'samples'+main_vars.cadena_dir;
@@ -308,7 +306,6 @@ if Directory.spectrum_48='' then Directory.spectrum_48:=directory.base+'roms'+ma
 if Directory.spectrum_128='' then Directory.spectrum_128:=directory.base+'roms'+main_vars.cadena_dir+'spec128.zip';
 if Directory.spectrum_3='' then Directory.spectrum_3:=directory.base+'roms'+main_vars.cadena_dir+'plus3.zip';
 if ((Directory.Arcade_roms='') or (directory.Arcade_roms[length(directory.Arcade_roms)]<>main_vars.cadena_dir)) then Directory.Arcade_roms:=directory.base+'roms'+main_vars.cadena_dir;
-if ((Directory.lenguaje='') or (directory.lenguaje[length(directory.lenguaje)]<>main_vars.cadena_dir)) then Directory.lenguaje:=directory.base+'lng'+main_vars.cadena_dir;
 if ((directory.Arcade_hi='') or (directory.Arcade_hi[length(directory.Arcade_hi)]<>main_vars.cadena_dir)) then directory.Arcade_hi:=directory.base+'hi'+main_vars.cadena_dir;
 if ((directory.Arcade_nvram='') or (directory.Arcade_nvram[length(directory.Arcade_nvram)]<>main_vars.cadena_dir)) then directory.Arcade_nvram:=directory.base+'nvram'+main_vars.cadena_dir;
 if ((directory.Arcade_samples='') or (directory.Arcade_samples[length(directory.Arcade_samples)]<>main_vars.cadena_dir)) then directory.Arcade_samples:=directory.base+'samples'+main_vars.cadena_dir;
@@ -320,6 +317,15 @@ if ((Directory.amstrad_tap='') or (directory.amstrad_tap[length(directory.amstra
 if ((Directory.amstrad_disk='') or (directory.amstrad_disk[length(directory.amstrad_disk)]<>main_vars.cadena_dir)) then Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
 if ((Directory.amstrad_snap='') or (directory.amstrad_snap[length(directory.amstrad_snap)]<>main_vars.cadena_dir)) then Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
 if ((Directory.amstrad_rom='') or (directory.amstrad_rom[length(directory.amstrad_rom)]<>main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
+end;
+
+function test_dir(cadena:string):string;
+var
+   f:word;
+begin
+    for f:=length(cadena) downto 1 do
+       if cadena[f]<>main_vars.cadena_dir then break;
+    test_dir:=system.copy(cadena,1,f);
 end;
 
 procedure file_ini_save;
@@ -334,30 +340,29 @@ if @fich_ini=nil then begin
 end;
 fich_ini.WriteInteger('dsp','idioma',main_vars.idioma);
 //Inicializacion de Diretorios
-fich_ini.Writestring('dir','arcade',Directory.Arcade_roms);
-fich_ini.Writestring('dir','lng',Directory.lenguaje);
-fich_ini.Writestring('dir','dir_hi',Directory.Arcade_hi);
-fich_ini.Writestring('dir','dir_nvram',Directory.Arcade_nvram);
-fich_ini.Writestring('dir','dir_samples',Directory.Arcade_samples);
-fich_ini.Writestring('dir','nes',Directory.Nes);
-fich_ini.Writestring('dir','chip8',Directory.Chip8);
-fich_ini.Writestring('dir','sms',Directory.sms);
-fich_ini.Writestring('dir','qsnapshot',Directory.qsnapshot);
-fich_ini.Writestring('dir','GameBoy',Directory.GameBoy);
-fich_ini.Writestring('dir','Colecovision',Directory.ColecoVision);
-fich_ini.Writestring('dir','ColecoSnap',Directory.Coleco_snap);
-fich_ini.Writestring('dir','spectrum_rom_48',Directory.spectrum_48);
-fich_ini.Writestring('dir','spectrum_rom_128',Directory.spectrum_128);
-fich_ini.Writestring('dir','spectrum_rom_plus3',Directory.spectrum_3);
-fich_ini.Writestring('dir','dir_gif',Directory.spectrum_image);
-fich_ini.Writestring('dir','dir_tap',Directory.spectrum_tap);
-fich_ini.Writestring('dir','dir_preview',Directory.Preview);
-fich_ini.Writestring('dir','dir_save',Directory.spectrum_snap);
-fich_ini.Writestring('dir','dir_dsk',Directory.spectrum_disk);
-fich_ini.Writestring('dir','ams_tap',Directory.amstrad_tap);
-fich_ini.Writestring('dir','ams_dsk',Directory.amstrad_disk);
-fich_ini.Writestring('dir','ams_snap',Directory.amstrad_snap);
-fich_ini.Writestring('dir','ams_rom',Directory.amstrad_rom);
+fich_ini.Writestring('dir','arcade',test_dir(Directory.Arcade_roms));
+fich_ini.Writestring('dir','dir_hi',test_dir(Directory.Arcade_hi));
+fich_ini.Writestring('dir','dir_nvram',test_dir(Directory.Arcade_nvram));
+fich_ini.Writestring('dir','dir_samples',test_dir(Directory.Arcade_samples));
+fich_ini.Writestring('dir','nes',test_dir(Directory.Nes));
+fich_ini.Writestring('dir','chip8',test_dir(Directory.Chip8));
+fich_ini.Writestring('dir','sms',test_dir(Directory.sms));
+fich_ini.Writestring('dir','qsnapshot',test_dir(Directory.qsnapshot));
+fich_ini.Writestring('dir','GameBoy',test_dir(Directory.GameBoy));
+fich_ini.Writestring('dir','Colecovision',test_dir(Directory.ColecoVision));
+fich_ini.Writestring('dir','ColecoSnap',test_dir(Directory.Coleco_snap));
+fich_ini.Writestring('dir','spectrum_rom_48',test_dir(Directory.spectrum_48));
+fich_ini.Writestring('dir','spectrum_rom_128',test_dir(Directory.spectrum_128));
+fich_ini.Writestring('dir','spectrum_rom_plus3',test_dir(Directory.spectrum_3));
+fich_ini.Writestring('dir','dir_gif',test_dir(Directory.spectrum_image));
+fich_ini.Writestring('dir','dir_tap',test_dir(Directory.spectrum_tap));
+fich_ini.Writestring('dir','dir_preview',test_dir(Directory.Preview));
+fich_ini.Writestring('dir','dir_save',test_dir(Directory.spectrum_snap));
+fich_ini.Writestring('dir','dir_dsk',test_dir(Directory.spectrum_disk));
+fich_ini.Writestring('dir','ams_tap',test_dir(Directory.amstrad_tap));
+fich_ini.Writestring('dir','ams_dsk',test_dir(Directory.amstrad_disk));
+fich_ini.Writestring('dir','ams_snap',test_dir(Directory.amstrad_snap));
+fich_ini.Writestring('dir','ams_rom',test_dir(Directory.amstrad_rom));
 //Config general
 fich_ini.WriteInteger('dsp','sonido',sound_status.calidad_audio);
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
@@ -372,9 +377,7 @@ fich_ini.WriteInteger('spectrum','joystick',var_spectrum.tipo_joy);
 fich_ini.WriteInteger('spectrum','border',borde.tipo);
 fich_ini.WriteInteger('spectrum','tipo_mouse',mouse.tipo);
 fich_ini.WriteInteger('spectrum','beepfilter',byte(var_spectrum.beeper_filter));
-f:=byte(var_spectrum.audio_load);
-if main_vars.tipo_maquina=255 then f:=0;
-fich_ini.WriteInteger('spectrum','audioload',f);
+fich_ini.WriteInteger('spectrum','audioload',byte(var_spectrum.audio_load));
 fich_ini.WriteInteger('spectrum','audio_128k',var_spectrum.audio_128k);
 fich_ini.WriteInteger('spectrum','beeper_oversample',var_spectrum.beeper_oversample);
 fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
@@ -526,7 +529,6 @@ var
   res:boolean;
 {$ifndef fpc}
   ZipFile:TZipFile;
-  buffer:Tbytes;
 {$else}
   ZipFile:TUnZipper;
 {$endif}
@@ -684,6 +686,7 @@ begin
   load_file_from_zip:=false;
   //Si no existe el ZIP -> Error
   if not(FileExists(nombre_zip)) then exit;
+  find:=false;
 {$ifndef fpc}
   ZipFile:=TZipFile.Create;
   ZipFile.Open(nombre_zip,zmRead);
@@ -696,6 +699,7 @@ begin
   if not(find) then begin
     ZipFile.Close;
     ZipFile.Free;
+    if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
     exit;
   end;
   longitud:=ZipFile.FileInfos[f].UncompressedSize;
@@ -717,6 +721,7 @@ begin
   end;
   if not(find) then begin
     ZipFile.Free;
+    if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
     exit;
   end;
   zfile:=unzOpen(pchar(nombre_zip));
@@ -748,6 +753,7 @@ begin
     MessageDlg(leng[main_vars.idioma].errores[2]+' "'+nombre_zip+'" ', mtError,[mbOk], 0);
     exit;
   end;
+  find:=false;
 {$ifndef fpc}
   ZipFile:=TZipFile.Create;
   ZipFile.Open(nombre_zip,zmRead);

@@ -365,6 +365,11 @@ type
     thunderx1: TMenuItem;
     simpsons1: TMenuItem;
     Trackfield1: TMenuItem;
+    HyperSportsHW1: TMenuItem;
+    HyperSports1: TMenuItem;
+    Megazone1: TMenuItem;
+    spacefb1: TMenuItem;
+    Ajax1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -420,8 +425,8 @@ end;
 
 procedure Tprincipal1.FormCreate(Sender: TObject);
 begin
-SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
-SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
+//SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
+//SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
 Init_sdl_lib;
 status_bitmap:=TBitmap.Create;
 EmuStatus:=EsStoped;
@@ -431,7 +436,7 @@ file_ini_load;
 if not DirectoryExists(Directory.Preview) then CreateDir(Directory.Preview);
 if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_nvram);
 if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
-main_vars.lenguaje_ok:=leer_idioma;
+leer_idioma;
 principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
 end;
@@ -447,7 +452,7 @@ if EmuStatus=EsRuning then begin //Pausa
 end else begin //Play
   EmuStatus:=EsRuning;
   timer1.Enabled:=true;
-  Windows.SetFocus(child.Handle);
+  if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
   principal1.BitBtn3.Glyph:=nil;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
@@ -474,12 +479,12 @@ end;
 
 procedure Tprincipal1.Timer1Timer(Sender: TObject);
 var
-  velocidad:integer;
+  velocidad:word;
 begin
-statusbar1.Panels[2].Text:=main_vars.mensaje_general;
 velocidad:=trunc((main_vars.frames_sec*100)/llamadas_maquina.fps_max);
 statusbar1.Panels[0].Text:='FPS: '+inttostr(main_vars.frames_sec);
 statusbar1.panels[1].text:=leng[main_vars.idioma].mensajes[0]+': '+inttostr(velocidad)+'%';
+statusbar1.Panels[2].Text:=main_vars.mensaje_principal;
 main_vars.frames_sec:=0;
 end;
 
@@ -492,7 +497,7 @@ timer2.Enabled:=false;
 Child:=TfrChild.Create(application);
 principal1.Caption:=principal1.Caption+dsp_version;
 tipo:=main_vars.tipo_maquina;
-main_vars.tipo_maquina:=255;
+main_vars.tipo_maquina:=$ffff;
 if not(main_vars.auto_exec) then begin
   principal1.LstRomsClick(nil);
   exit;
@@ -503,12 +508,12 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
+main_vars.tipo_maquina:=tipo_new;
 if @llamadas_maquina.close<>nil then llamadas_maquina.close;
 reset_dsp;
-main_vars.tipo_maquina:=tipo_new;
 cargar_maquina(main_vars.tipo_maquina);
-QueryPerformanceFrequency(Int64((@cont_micro)^));
-valor_sync:=(1000000/llamadas_maquina.fps_max)*(cont_micro/1000000);
+QueryPerformanceFrequency(cont_micro);
+valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
 if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar
   else main_vars.driver_ok:=false;
 if not(main_vars.driver_ok) then begin
@@ -528,7 +533,7 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn19.Enabled:=false;
 end else begin
   principal1.timer1.Enabled:=true;
-  QueryPerformanceCounter(Int64((@cont_sincroniza)^));
+  QueryPerformanceCounter(cont_sincroniza);
   if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
   principal1.ejecutar1click(nil);
 end;
@@ -572,9 +577,9 @@ end;
 
 procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
-main_screen.flip_main_screen:=false;
+main_vars.mensaje_principal:='';
 if @llamadas_maquina.reset<>nil then llamadas_maquina.reset;
-Windows.SetFocus(child.Handle);
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
@@ -668,8 +673,7 @@ end;
 procedure Tprincipal1.fSaveGif(Sender: TObject);
 var
   r:integer;
-  nombre:string;
-  nombre2:ansistring;
+  nombre,nombre2:string;
   rect2:libsdl_rect;
   temp_s:libsdlP_Surface;
   gif:tgifimage;
@@ -762,14 +766,14 @@ end;
 procedure Tprincipal1.fSlow(Sender: TObject);
 begin
 main_vars.vactual:=(main_vars.vactual+1) and 3;
-valor_sync:=(1000000/(llamadas_maquina.fps_max/(main_vars.vactual+1)))*(cont_micro/1000000);
+valor_sync:=(1/(llamadas_maquina.fps_max/(main_vars.vactual+1)))*cont_micro;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.fFast(Sender: TObject);
 begin
 main_screen.rapido:=not(main_screen.rapido);
-QueryPerformanceCounter(Int64((@cont_sincroniza)^));
+QueryPerformanceCounter(cont_sincroniza);
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
@@ -784,15 +788,8 @@ if sender<>nil then nuevo:=Tmenuitem(sender).tag
   end;
 if main_screen.video_mode<>nuevo then main_screen.video_mode:=nuevo;
 if main_vars.driver_ok then begin
-    if nuevo=6 then begin
-      pasar_pantalla_completa;
-    end else begin
-      cambiar_video;
-      if main_vars.tipo_maquina<7 then begin
-        fillchar(var_spectrum.buffer_video[0],6144,1);
-        fillchar(borde.buffer[0],78000,$80);
-      end;
-    end;
+    if nuevo=6 then pasar_pantalla_completa
+      else cambiar_video;
 end;
 Windows.SetFocus(child.Handle);
 end;

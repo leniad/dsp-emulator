@@ -445,7 +445,6 @@ end;
 procedure spectrum_load_exit;
 var
   resultado,cinta:boolean;
-  cadena:string;
 begin
 if ((datos=nil) and not(spec_rom.hay_rom)) then exit;
 rom_cambiada_48:=false;
@@ -456,9 +455,8 @@ if spec_rom.hay_rom then begin
   llamadas_maquina.reset;
   rom_cambiada_48:=true;
   resultado:=true;
-  change_caption(llamadas_maquina.caption+' - ROM: '+spec_rom.nombre_rom);
-  cadena:=' - ROM: ';
-end else cadena:=' - Snap: ';
+  llamadas_maquina.open_file:='ROM: '+spec_rom.nombre_rom;
+end;
 if extension='TAP' then begin
   resultado:=abrir_tap(datos,file_size);
   cinta:=true;
@@ -484,8 +482,10 @@ if extension='SNA' then resultado:=abrir_sna(datos,file_size);
 if extension='SP' then resultado:=abrir_sp(datos,file_size);
 if extension='ZX' then resultado:=abrir_zx(datos,file_size);
 if extension='SZX' then resultado:=abrir_szx(datos,file_size);
-if not(resultado) then MessageDlg('No es una cinta o un snapshot válido.'+chr(10)+chr(13)+'Not a valid tape or snapshot', mtInformation,[mbOk], 0)
-  else begin
+if not(resultado) then begin
+  MessageDlg('No es una cinta o un snapshot válido.'+chr(10)+chr(13)+'Not a valid tape or snapshot', mtInformation,[mbOk], 0);
+  llamadas_maquina.open_file:='';
+end else begin
     //Si todo ha ido bien y no hay ROM, devolver la original!
     if not(rom_cambiada_48) then copymemory(@memoria[0],@mem_snd[0],$4000);
     if cinta then begin
@@ -493,9 +493,12 @@ if not(resultado) then MessageDlg('No es una cinta o un snapshot válido.'+chr(10
       tape_window1.show;
       tape_window1.BitBtn1.Enabled:=true;
       tape_window1.BitBtn2.Enabled:=false;
+      llamadas_maquina.open_file:=extension+': '+nombre;
+      cinta_tzx.name:=llamadas_maquina.open_file;
     end else begin  //Snap shot
-      change_caption(llamadas_maquina.caption+cadena+nombre);
+      change_caption;
       main_screen.rapido:=false;
+      llamadas_maquina.open_file:=extension+': '+nombre;
     end;
     Directory.spectrum_tap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
     ultima_posicion:=load_spec.filelistbox1.ItemIndex;
@@ -505,6 +508,7 @@ if datos<>nil then freemem(datos);
 datos:=nil;
 if spec_rom.datos_rom<>nil then freemem(spec_rom.datos_rom);
 spec_rom.datos_rom:=nil;
+change_caption;
 end;
 
 procedure spectrum_load_close;

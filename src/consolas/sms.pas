@@ -266,8 +266,7 @@ begin
   resultado:=abrir_cartucho_sms(datos,longitud);
   if resultado then begin
     directory.sms:=ExtractFilePath(romfile);
-    if is_sg then change_caption('SG - '+nombre_file)
-      else change_caption('SMS - '+nombre_file);
+    llamadas_maquina.open_file:=nombre_file;
     abrir_sms:=true;
     if mapper_sms.max=0 then mapper_sms.max:=1;
     reset_sms;
@@ -277,7 +276,11 @@ begin
     end;
     EmuStatusTemp:=EsRuning;
     principal1.timer1.Enabled:=true;
-  end else MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+  end else begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    llamadas_maquina.open_file:='';
+  end;
+  change_caption;
   Directory.sms:=ExtractFilePath(romfile);
   freemem(datos);
 end;

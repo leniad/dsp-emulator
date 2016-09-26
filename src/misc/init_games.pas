@@ -29,7 +29,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw,freekick_hw,
   boogiewings_hw,pinballaction_hw,renegade_hw,tmnt_hw,gradius3_hw,
   spaceinvaders_hw,centipede_hw,karnov_hw,aliens_hw,thunderx_hw,simpsons_hw,
-  trackandfield_hw;
+  trackandfield_hw,hypersports_hw,megazone_hw,spacefirebird_hw,ajax_hw;
 
 type
   tgame_desc=record
@@ -44,7 +44,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=232;
+  games_cont=236;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -274,6 +274,10 @@ const
   (name:'Thunder Cross';year:'1988';snd:1;hi:false;zip:'thunderx';grid:224;company:'Konami';rom:@thunderx),
   (name:'The Simpsons';year:'1991';snd:1;hi:false;zip:'simpsons';grid:225;company:'Konami';rom:@simpsons),
   (name:'Track & Field';year:'1983';snd:1;hi:false;zip:'trackfld';grid:226;company:'Konami';rom:@trackfield),
+  (name:'Hyper Sports';year:'1984';snd:1;hi:false;zip:'hyperspt';grid:227;company:'Konami';rom:@hypersports),
+  (name:'Megazone';year:'1983';snd:1;hi:false;zip:'megazone';grid:228;company:'Konami';rom:@megazone),
+  (name:'Space Fire Bird';year:'1980';snd:1;hi:false;zip:'spacefb';grid:229;company:'Nintendo';rom:@spacefb),
+  (name:'Ajax';year:'1987';snd:1;hi:false;zip:'ajax';grid:230;company:'Konami';rom:@ajax),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -523,6 +527,10 @@ case numero of
   224:principal1.CambiarMaquina(principal1.thunderx1);
   225:principal1.CambiarMaquina(principal1.simpsons1);
   226:principal1.CambiarMaquina(principal1.trackfield1);
+  227:principal1.CambiarMaquina(principal1.hypersports1);
+  228:principal1.CambiarMaquina(principal1.megazone1);
+  229:principal1.CambiarMaquina(principal1.spacefb1);
+  230:principal1.CambiarMaquina(principal1.ajax1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -761,6 +769,10 @@ principal1.gbusters1.checked:=false;
 principal1.thunderx1.checked:=false;
 principal1.simpsons1.checked:=false;
 principal1.trackfield1.checked:=false;
+principal1.HyperSports1.Checked:=false;
+principal1.megazone1.checked:=false;
+principal1.spacefb1.checked:=false;
+principal1.ajax1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -963,6 +975,10 @@ case tmaquina of
   222,223,224:Cargar_thunderx;
   225:cargar_simpsons;
   226:cargar_trackfield;
+  227:cargar_hypersports;
+  228:Cargar_megazone;
+  229:Cargar_spacefb;
+  230:Cargar_ajax;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1881,6 +1897,22 @@ end;
 if sender=principal1.trackfield1 then begin
   tipo:=226;
   principal1.trackfield1.Checked:=true;
+end;
+if sender=principal1.hypersports1 then begin
+  tipo:=227;
+  principal1.hypersports1.Checked:=true;
+end;
+if sender=principal1.megazone1 then begin
+  tipo:=228;
+  principal1.megazone1.Checked:=true;
+end;
+if sender=principal1.spacefb1 then begin
+  tipo:=229;
+  principal1.spacefb1.Checked:=true;
+end;
+if sender=principal1.ajax1 then begin
+  tipo:=230;
+  principal1.ajax1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

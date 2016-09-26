@@ -416,16 +416,6 @@ begin
     5:radiobutton10.Checked:=true;
     6:radiobutton11.Checked:=true;
   end;
-  if not(main_vars.lenguaje_ok) then begin
-    groupbox3.Enabled:=false;
-    radiobutton5.Enabled:=false;
-    radiobutton6.Enabled:=false;
-    radiobutton7.Enabled:=false;
-    radiobutton8.Enabled:=false;
-    radiobutton9.Enabled:=false;
-    radiobutton10.Enabled:=false;
-    radiobutton11.Enabled:=false;
-  end;
   //audio
   radiobutton15.Caption := leng[main_vars.idioma].opciones[3];
   case sound_status.calidad_audio of

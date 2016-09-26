@@ -972,9 +972,7 @@ begin
 	chip.status:=0;
 	YM_2151WriteReg(num,$1b,0);	// only because of CT1, CT2 output pins */
 	YM_2151WriteReg(num,$18,0);	// set LFO frequency */
-	for i:=$20 to $ff do begin		// set the operators */
-		YM_2151WriteReg(num,i,0);
-	end;
+	for i:=$20 to $ff do YM_2151WriteReg(num,i,0);	// set the operators */
   timer[chip.timer_a].enabled:=false;
   timer[chip.timer_b].enabled:=false;
   chip.irqlinestate:=0;

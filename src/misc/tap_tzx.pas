@@ -92,6 +92,7 @@ type
             datos_tzx:array[0..MAX_TZX] of ptipo_datos_tzx;
             indice_saltos,indice_select:array[0..MAX_TZX] of word;
             value:byte;
+            name:string;
           end;
 
 var
@@ -109,7 +110,7 @@ function abrir_wav(data:pbyte;long:integer):boolean;
 function abrir_pzx(data:pbyte;long:integer):boolean;
 
 implementation
-uses spectrum_48k,spectrum_128k,spectrum_3;
+uses principal,spectrum_48k,spectrum_128k,spectrum_3;
 
 const
   tabla_tzx:array[1..8] of byte=(128,64,32,16,8,4,2,1);
@@ -176,7 +177,7 @@ var
   ptemp:pbyte;
 begin
 if cinta_tzx.estados<=tzx_estados_necesarios then exit;
-main_vars.mensaje_general:='    '+leng[main_vars.idioma].mensajes[1]+': '+inttostr(datos_totales_tzx);
+main_vars.mensaje_principal:='    '+leng[main_vars.idioma].mensajes[1]+': '+inttostr(datos_totales_tzx);
 cinta_tzx.estados:=cinta_tzx.estados-tzx_estados_necesarios;
 if cinta_tzx.en_pausa then begin
   cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
@@ -611,12 +612,12 @@ if cinta_tzx.cargada then begin
 end;
 cinta_tzx.es_tap:=false;
 cinta_tzx.indice_cinta:=0;
-//for temp:=0 to (tape_window1.stringgrid1.RowCount-1) do tape_window1.StringGrid1.Cells[0,temp]:='';
+llamadas_maquina.open_file:='';
+change_caption;
 tape_window1.stringgrid1.RowCount:=1;
 var_spectrum.sd_1:=false;
 if lenslock1.Showing then lenslock1.Close;
 lenslok.activo:=false;
-main_vars.mensaje_general:='';
 tape_window1.label2.caption:='';
 end;
 

@@ -60,7 +60,7 @@ procedure actualiza_gfx_sprite_size_pos(pos_x,pos_y:word;dest:byte;x_size,y_size
 procedure actualiza_gfx_sprite_zoom(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 procedure actualiza_gfx_sprite_alpha(pos_x,pos_y:word;dest,ngfx:byte);
 //Scroll
-procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word);
+procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0);
 procedure scroll__x(porigen,pdestino:byte;scroll_x:word);
 procedure scroll__x_part(porigen,pdestino:byte;scroll_x,scroll_y:word;orgy,sizey:word);
 procedure scroll__y(porigen,pdestino:byte;scroll_y:word);
@@ -227,7 +227,7 @@ end;
 end;
 
 //Scroll functions
-procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word);
+procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0);
 var
   long_x,long_y,long_x2,long_y2:word;
 begin
@@ -239,11 +239,11 @@ if ((scroll_y+p_final[porigen].scroll.max_y)>=p_final[porigen].scroll.long_y) th
   else long_y:=p_final[porigen].scroll.max_y;
 long_x2:=p_final[porigen].scroll.max_x-long_x;
 long_y2:=p_final[porigen].scroll.max_y-long_y;
-actualiza_trozo(scroll_x,scroll_y,long_x,long_y,porigen,0,0,long_x,long_y,pdestino);
-if long_x<p_final[porigen].scroll.max_x then actualiza_trozo(0,scroll_y,long_x2,long_y,porigen,long_x,0,long_x2,long_y,pdestino);
-if long_y<p_final[porigen].scroll.max_y then actualiza_trozo(scroll_x,0,long_x,long_y2,porigen,0,long_y,long_x,long_y2,pdestino);
+actualiza_trozo(scroll_x,scroll_y,long_x,long_y,porigen,diff_x,diff_y,long_x,long_y,pdestino);
+if long_x<p_final[porigen].scroll.max_x then actualiza_trozo(0,scroll_y,long_x2,long_y,porigen,long_x+diff_x,diff_y,long_x2,long_y,pdestino);
+if long_y<p_final[porigen].scroll.max_y then actualiza_trozo(scroll_x,0,long_x,long_y2,porigen,diff_x,long_y+diff_y,long_x,long_y2,pdestino);
 if ((long_x<p_final[porigen].scroll.max_x) and (long_y<p_final[porigen].scroll.max_y)) then
-actualiza_trozo(0,0,long_x2,long_y2,porigen,long_x,long_y,long_x2,long_y2,pdestino);
+  actualiza_trozo(0,0,long_x2,long_y2,porigen,long_x+diff_x,long_y+diff_y,long_x2,long_y2,pdestino);
 end;
 
 procedure scroll__x(porigen,pdestino:byte;scroll_x:word);

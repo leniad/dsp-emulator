@@ -67,6 +67,11 @@ begin
   k007232_0.set_volume(1,0,(valor shr 4)*$11);
 end;
 
+procedure aliens_k051960_cb(state:byte);
+begin
+  main_konami.change_irq(state);
+end;
+
 procedure update_video_aliens;
 begin
 k052109_0.draw_tiles;
@@ -117,16 +122,14 @@ frame_m:=main_konami.tframes;
 frame_s:=snd_z80.tframes;
 while EmuStatus=EsRuning do begin
     for f:=0 to $ff do begin
-    //main
-    main_konami.run(frame_m);
-    frame_m:=frame_m+main_konami.tframes-main_konami.contador;
-    //sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    if f=239 then begin
-                    update_video_aliens;
-                    if k051960_0.is_irq_enabled then main_konami.change_irq(HOLD_LINE);
-                  end;
+      //main
+      main_konami.run(frame_m);
+      frame_m:=frame_m+main_konami.tframes-main_konami.contador;
+      //sound
+      snd_z80.run(frame_s);
+      frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+      if f=239 then update_video_aliens;
+      k051960_0.update_line(f);
     end;
     eventos_aliens;
     video_sync;
@@ -302,6 +305,7 @@ k052109_0:=k052109_chip.create(1,2,3,aliens_cb,tiles_rom,$200000);
 getmem(sprite_rom,$200000);
 if not(cargar_roms32b(sprite_rom,@aliens_sprites,'aliens.zip',0)) then exit;
 k051960_0:=k051960_chip.create(4,sprite_rom,$200000,aliens_sprite_cb,2);
+k051960_0.change_irqs(aliens_k051960_cb,nil,nil);
 layer_colorbase[0]:=0;
 layer_colorbase[1]:=4;
 layer_colorbase[2]:=8;

@@ -1,7 +1,7 @@
 object redefine1: Tredefine1
-  Left = 627
+  Left = 728
   Height = 216
-  Top = 328
+  Top = 62
   Width = 532
   BorderIcons = []
   BorderStyle = bsSingle
@@ -15,7 +15,7 @@ object redefine1: Tredefine1
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '1.5'
+  LCLVersion = '1.7'
   object Button1: TButton
     Left = 148
     Height = 25

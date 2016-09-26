@@ -236,8 +236,13 @@ extension:=extension_fichero(nombre_file);
 if ((extension='CSN') or (extension='DSP')) then resultado:=abrir_coleco_snapshot(datos,longitud)
    else resultado:=abrir_cartucho(datos,longitud);
 freemem(datos);
-if resultado then change_caption(llamadas_maquina.caption+' - '+nombre_file)
-   else MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+if resultado then begin
+  llamadas_maquina.open_file:=nombre_file;
+end else begin
+  MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+  llamadas_maquina.open_file:='';
+end;
+change_caption;
 directory.ColecoVision:=ExtractFilePath(romfile);
 end;
 

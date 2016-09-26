@@ -3,7 +3,7 @@ unit gyruss_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m6809,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     ay_8910,sound_engine,konami_decrypt;
+     ay_8910,sound_engine,konami_decrypt,mcs48,dac;
 
 procedure cargar_gyruss;
 
@@ -38,9 +38,10 @@ const
     gyruss_timer:array[0..9] of byte=($00,$01,$02,$03,$04,$09,$0a,$0b,$0a,$0d);
 
 var
-  scan_line,sound_latch:byte;
+  scan_line,sound_latch,sound_latch2:byte;
   main_nmi,sub_irq:boolean;
   mem_opcodes:array[0..$1fff] of byte;
+  mem_sound_sub:array[0..$fff] of byte;
 
 procedure update_video_gyruss;inline;
 var
@@ -105,12 +106,13 @@ end;
 
 procedure gyruss_principal;
 var
-  frame_m,frame_sub,frame_s:single;
+  frame_m,frame_sub,frame_s,frame_s_sub:single;
 begin
 init_controls(false,false,false,true);
 frame_m:=main_z80.tframes;
 frame_sub:=misc_m6809.tframes;
 frame_s:=snd_z80.tframes;
+frame_s_sub:=main_mcs48.tframes;
 while EmuStatus=EsRuning do begin
   for scan_line:=0 to $ff do begin
     //main
@@ -122,6 +124,9 @@ while EmuStatus=EsRuning do begin
     //snd
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    //snd sub
+    main_mcs48.run(frame_s_sub);
+    frame_s_sub:=frame_s_sub+main_mcs48.tframes-main_mcs48.contador;
     if (scan_line=239) then begin
       if main_nmi then main_z80.change_nmi(ASSERT_LINE);
       if sub_irq then misc_m6809.change_irq(ASSERT_LINE);
@@ -229,8 +234,26 @@ case (puerto and $ff) of
   $0e:ay8910_3.Write(valor);
   $10:ay8910_4.Control(valor);
   $12:ay8910_4.Write(valor);
-  $14:;//irq 8039
-  $18:;//sound_latch2
+  $14:main_mcs48.change_irq(ASSERT_LINE);
+  $18:sound_latch2:=valor;
+end;
+end;
+
+function gyruss_sound2_getbyte(direccion:word):byte;
+begin
+if direccion<$1000 then gyruss_sound2_getbyte:=mem_sound_sub[direccion];
+end;
+
+function gyruss_sound2_inport(puerto:word):byte;
+begin
+if puerto<$100 then gyruss_sound2_inport:=sound_latch2;
+end;
+
+procedure gyruss_sound2_outport(valor:byte;puerto:word);
+begin
+case puerto of
+  MCS48_PORT_P1:dac_0.data8_w(valor);
+  MCS48_PORT_P2:main_mcs48.change_irq(CLEAR_LINE);
 end;
 end;
 
@@ -240,12 +263,17 @@ begin
 end;
 
 procedure gyruss_sound_update;
+var
+  out_left,out_right:integer;
 begin
-  ay8910_0.update;
-  ay8910_1.update;
-  ay8910_2.update;
-  ay8910_3.update;
-  ay8910_4.update;
+  out_right:=ay8910_0.update_internal^;
+  out_left:=ay8910_1.update_internal^;
+  out_right:=out_right+ay8910_2.update_internal^;
+  out_right:=(out_right+ay8910_3.update_internal^) div 3;
+  out_left:=out_left+ay8910_4.update_internal^;
+  out_left:=(out_left+dac_0.internal_update) div 3;
+  tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=out_left;
+  tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido+1]:=out_right;
 end;
 
 //Main
@@ -254,11 +282,13 @@ begin
 main_z80.reset;
 misc_m6809.reset;
 snd_z80.reset;
+main_mcs48.reset;
 ay8910_0.reset;
 ay8910_1.reset;
 ay8910_2.reset;
 ay8910_3.reset;
 ay8910_4.reset;
+dac_0.reset;
 reset_audio;
 main_nmi:=false;
 sub_irq:=false;
@@ -286,7 +316,7 @@ const
   resistances_b:array[0..1] of integer=(470,220);
 begin
 gyruss_iniciar:=false;
-iniciar_audio(false);
+iniciar_audio(true);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
@@ -302,13 +332,18 @@ snd_z80:=cpu_z80.create(trunc(14318180/4),256);
 snd_z80.change_ram_calls(gyruss_sound_getbyte,gyruss_sound_putbyte);
 snd_z80.change_io_calls(gyruss_sound_inbyte,gyruss_sound_outbyte);
 snd_z80.init_sound(gyruss_sound_update);
+//Sound CPU 2
+main_mcs48:=cpu_mcs48.create(8000000,256,I8039);
+main_mcs48.change_ram_calls(gyruss_sound2_getbyte,nil);
+main_mcs48.change_io_calls(gyruss_sound2_inport,gyruss_sound2_outport);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(trunc(14318180/8),0.2);
-ay8910_1:=ay8910_chip.create(trunc(14318180/8),0.2);
-ay8910_2:=ay8910_chip.create(trunc(14318180/8),1);
+ay8910_0:=ay8910_chip.create(trunc(14318180/8),1);
+ay8910_1:=ay8910_chip.create(trunc(14318180/8),1,true);
+ay8910_2:=ay8910_chip.create(trunc(14318180/8),1,true);
 ay8910_2.change_io_calls(gyruss_portar,nil,nil,nil);
-ay8910_3:=ay8910_chip.create(trunc(14318180/8),1);
-ay8910_4:=ay8910_chip.create(trunc(14318180/8),1);
+ay8910_3:=ay8910_chip.create(trunc(14318180/8),1,true);
+ay8910_4:=ay8910_chip.create(trunc(14318180/8),1,true);
+dac_0:=dac_chip.Create(1,true);
 //Main ROMS
 if not(cargar_roms(@memoria[0],@gyruss_rom[0],'gyruss.zip',0)) then exit;
 //Sub ROMS
@@ -316,6 +351,7 @@ if not(cargar_roms(@mem_misc[0],@gyruss_sub,'gyruss.zip')) then exit;
 konami1_decode(@mem_misc[$e000],@mem_opcodes[0],$2000);
 //Sound ROMS
 if not(cargar_roms(@mem_snd[0],@gyruss_sound[0],'gyruss.zip',0)) then exit;
+if not(cargar_roms(@mem_sound_sub[0],@gyruss_sound_sub,'gyruss.zip',1)) then exit;
 //cargar chars
 if not(cargar_roms(@memoria_temp[0],@gyruss_char,'gyruss.zip')) then exit;
 init_gfx(0,8,8,$200);

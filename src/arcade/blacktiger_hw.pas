@@ -53,12 +53,12 @@ var
     sx,sy,pos,atrib:word;
     flip_x:boolean;
 begin
+fill_full_screen(4,$3ff);
 //atributo de las tiles
 //80 --> flip x
 //40+20+10+8 --> Color
 //4+2+1 --> Numero tile
 if bg_on then begin
-  fill_full_screen(4,$3ff);
   pos_x:=(scroll_x and mask_sx) shr 4;
   pos_y:=(scroll_y and mask_sy) shr 4;
   for f:=0 to $120 do begin
@@ -78,8 +78,8 @@ if bg_on then begin
       gfx[2].buffer[pos shr 1]:=false;
     end;
   end;
+  scroll_x_y(1,4,scroll_x and $f,scroll_y and $f);
 end;
-scroll_x_y(1,4,scroll_x and $f,scroll_y and $f);
 //cuatro bytes
 // 0 --> codigo sprite
 // 1 --> Atributo
@@ -155,7 +155,7 @@ frame_m:=main_z80.tframes;
 frame_s:=snd_z80.tframes;
 frame_mcu:=main_mcs51.tframes;
 while EmuStatus=EsRuning do begin
-  {$ifdef speed_debug}QueryPerformanceCounter(Int64((@cont1)^));{$endif}
+  {$ifdef speed_debug}QueryPerformanceCounter(cont1);{$endif}
   for f:=0 to $ff do begin
     //Main CPU
     main_z80.run(frame_m);
@@ -173,7 +173,7 @@ while EmuStatus=EsRuning do begin
     end;
   end;
   eventos_blktiger;
-  {$ifdef speed_debug}QueryPerformanceCounter(Int64((@cont2)^));
+  {$ifdef speed_debug}QueryPerformanceCounter(cont2);
   principal1.statusbar1.panels[2].text:=inttostr(cont2-cont1);{$endif}
   video_sync;
 end;

@@ -5,7 +5,7 @@ uses {$ifdef windows}windows,{$else}main_engine,{$ENDIF}sound_engine;
 
 type
   dac_chip=class(snd_chip_class)
-      constructor Create(amp:single=1);
+      constructor Create(amp:single=1;internal:boolean=false);
       destructor free;
     public
       procedure update;
@@ -16,6 +16,7 @@ type
       procedure signed_data16_w(data:word);
       function save_snapshot(data:pbyte):word;
       procedure load_snapshot(data:pbyte);
+      function internal_update:integer;
     private
       output:integer;
       amp:single;
@@ -25,10 +26,10 @@ var
 
 implementation
 
-constructor dac_chip.Create(amp:single=1);
+constructor dac_chip.Create(amp:single=1;internal:boolean=false);
 begin
   self.amp:=amp;
-  self.tsample_num:=init_channel;
+  if not(internal) then self.tsample_num:=init_channel;
   self.reset;
 end;
 
@@ -53,6 +54,11 @@ begin
   ptemp:=data;
   copymemory(@self.output,ptemp,sizeof(integer));inc(ptemp,sizeof(integer));
   copymemory(@self.amp,ptemp,sizeof(single));
+end;
+
+function dac_chip.internal_update:integer;
+begin
+  internal_update:=trunc(self.output*self.amp);
 end;
 
 procedure dac_chip.update;

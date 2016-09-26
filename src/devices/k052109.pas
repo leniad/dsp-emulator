@@ -39,7 +39,7 @@ type
         char_rom:pbyte;
         char_size,char_mask:dword;
         k052109_cb:t_k052109_cb;
-        video_buffer:array[0..2,0..$7ff] of boolean;
+        video_buffer:array[0..3,0..$7ff] of boolean;
         procedure recalc_chars;
         procedure update_all_tile(layer:byte);
         procedure calc_scroll_1;

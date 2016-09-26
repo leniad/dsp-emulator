@@ -1,10 +1,11 @@
 unit k051960;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine,main_engine;
 
 type
   t_k051960_cb=procedure(var code:word;var color:word;var pri:word;var shadow:word);
+  t_irq_call=procedure(state:byte);
   k051960_chip=class
       constructor create(pant:byte;spr_rom:pbyte;spr_size:dword;call_back:t_k051960_cb;tipo:byte=0);
       destructor free;
@@ -15,16 +16,18 @@ type
       function k051937_read(direccion:word):byte;
       procedure k051937_write(direccion:word;valor:byte);
       procedure draw_sprites(min_priority,max_priority:integer);
-      function is_irq_enabled:boolean;
+      procedure change_irqs(irq_call,firq_call,nmi_call:t_irq_call);
+      procedure update_line(line:word);
     private
       ram:array[0..$3ff] of byte;
       counter,pant:byte;
-      readroms,irq_enabled,nmi_enabled,spriteflip:boolean;
+      readroms,nmi_enabled,spriteflip:boolean;
       romoffset:word;
       spriterombank:array[0..2] of byte;
       sprite_rom:pbyte;
       sprite_size,sprite_mask:dword;
       k051960_cb:t_k051960_cb;
+      irq_cb,firq_cb,nmi_cb:t_irq_call;
       function fetchromdata(direccion:word):byte;
     end;
 
@@ -39,7 +42,6 @@ begin
 	self.romoffset:=0;
 	self.spriteflip:=false;
 	self.readroms:=false;
-	self.irq_enabled:=false;
 	self.nmi_enabled:=false;
 	self.spriterombank[0]:=0;
 	self.spriterombank[1]:=0;
@@ -85,9 +87,11 @@ destructor k051960_chip.free;
 begin
 end;
 
-function k051960_chip.is_irq_enabled:boolean;
+procedure k051960_chip.change_irqs(irq_call,firq_call,nmi_call:t_irq_call);
 begin
-  is_irq_enabled:=self.irq_enabled;
+  self.irq_cb:=irq_call;
+  self.firq_cb:=firq_call;
+  self.nmi_cb:=nmi_call;
 end;
 
 function k051960_chip.fetchromdata(direccion:word):byte;
@@ -135,15 +139,24 @@ begin
   end;
 end;
 
+procedure k051960_chip.update_line(line:word);
+begin
+if (((line mod 32)=0) and self.nmi_enabled) then if addr(self.nmi_cb)<>nil then self.nmi_cb(ASSERT_LINE);
+// vblank
+if (line=240) then if addr(self.irq_cb)<>nil then self.irq_cb(ASSERT_LINE);
+end;
+
 procedure k051960_chip.k051937_write(direccion:word;valor:byte);
 begin
 	if (direccion=0) then begin
 		//if (data & 0xc2) popmessage("051937 reg 00 = %02x",data);
 		// bit 0 is IRQ enable */
-		self.irq_enabled:=(valor and $01)<>0;
+		if (((valor and $01)<>0) and (addr(self.irq_cb)<>nil)) then self.irq_cb(CLEAR_LINE);
 		// bit 1: probably FIRQ enable */
+    if (((valor and $02)<>0) and (addr(self.firq_cb)<>nil)) then self.firq_cb(CLEAR_LINE);
 		// bit 2 is NMI enable */
-		self.nmi_enabled:=(valor and $04)<>0;
+    self.nmi_enabled:=(valor and $04)<>0;
+    if ((addr(self.nmi_cb)<>nil) and self.nmi_enabled) then self.nmi_cb(CLEAR_LINE);
 		// bit 3 = flip screen */
 		self.spriteflip:=(valor and $08)<>0;
 		// bit 4 used by Devastators and TMNT, unknown */

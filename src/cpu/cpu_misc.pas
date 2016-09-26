@@ -110,6 +110,5 @@ begin
 sound_engine_init(self.numero_cpu,self.clock,update_call);
 end;
 
-
 end.
 
