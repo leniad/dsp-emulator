@@ -243,7 +243,7 @@ end else begin
   llamadas_maquina.open_file:='';
 end;
 change_caption;
-directory.ColecoVision:=ExtractFilePath(romfile);
+directory.coleco_snap:=ExtractFilePath(romfile);
 end;
 
 procedure coleco_grabar_snapshot;

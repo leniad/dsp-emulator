@@ -368,6 +368,17 @@ while self.contador<maximo do begin
 				   r.a:=arg and $0f;
            r.zf:=update_zf(r.a);
         end;
+    $0f:begin // and ZCS:x.x
+				  r.a:=r.a and self.ram[get_ea(r)];
+				  r.zf:=update_zf(r.a);
+          r.st:=r.zf xor 1;
+				end;
+    $10:begin // daa ZCS:.xx
+				  if (((r.cf and 1)<>0) or (r.a>9)) then r.a:=r.a+6;
+				  update_st_c(r.a);
+				  r.cf:=r.st xor 1;
+				  r.a:=r.a and $0f;
+				end;
     $12:begin //inK
            if @self.port_k<>nil then r.a:=self.port_k and $f
             else r.a:=self.io[MB88_PORTK] and $f;
@@ -413,6 +424,13 @@ while self.contador<maximo do begin
           r.zf:=update_zf(arg);
           self.ram[get_ea(r)]:=arg;
         end;
+    $1a:begin  //stdc ZCS:x.x
+          self.ram[get_ea(r)]:=r.a;
+				  r.y:=r.y-1;
+				  r.st:=update_st_c(r.y);
+				  r.y:=r.y and $f;
+				  r.zf:=update_zf(r.y);
+        end;
     $1b:begin //xx
            arg:=r.x;
            r.x:=r.a;
@@ -444,10 +462,24 @@ while self.contador<maximo do begin
            r.zf:=update_zf(r.a);
            r.st:=r.zf xor 1;
         end;
+    $20:begin // setR ZCS:...
+          if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4)
+            else arg:=self.io[MB88_PORTR0+(r.y div 4)];
+          if @self.port_r_w<>nil then self.port_r_w(r.y div 4,arg or not(1 shl (r.y mod 4)))
+            else self.io[MB88_PORTR0+(r.y div 4)]:=arg or not(1 shl (r.y mod 4));
+				  r.st:=1;
+				end;
     $21:begin  //setc
            r.cf:=1;
            r.st:=1;
         end;
+    $22:begin // rstR ZCS:...
+          if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4)
+            else arg:=self.io[MB88_PORTR0+(r.y div 4)];
+          if @self.port_r_w<>nil then self.port_r_w(r.y div 4,arg and not(1 shl (r.y mod 4)))
+            else self.io[MB88_PORTR0+(r.y div 4)]:=arg and not(1 shl (r.y mod 4));
+          r.st:=1;
+				end;
     $23:begin  //rstc
            r.cf:=0;
            r.st:=1;
@@ -474,6 +506,11 @@ while self.contador<maximo do begin
            r.st:=update_st_z(arg);
            r.zf:=r.st xor 1;
         end;
+    $2f:begin // eor ZCS:x.x
+				  r.a:=r.a xor self.ram[get_ea(r)];
+				  r.st:=update_st_z(r.a);
+				  r.zf:=r.st xor 1;
+				end;
     $30..$33:begin //sbit
            arg:=self.ram[get_ea(r)];
            self.ram[get_ea(r)]:=arg or (1 shl (instruccion and 3));
@@ -531,6 +568,12 @@ while self.contador<maximo do begin
             else self.io[MB88_PORTR0]:=arg;
            r.st:=1;
         end;
+    $48,$49,$4a,$4b:begin // tstD ZCS:..x
+            if @self.port_r_r<>nil then arg:=self.port_r_r(2)
+              else arg:=self.io[MB88_PORTR2];
+				    if (arg and (1 shl (instruccion and 3)))<>0 then r.st:=0
+              else r.st:=1;
+				end;
     $4c..$4f:if (r.a and (1 shl (instruccion and 3)))<>0 then r.st:=0
                 else r.st:=1; //tba
     $50..$53:begin  //xd
@@ -610,7 +653,7 @@ while self.contador<maximo do begin
            if r.st<>0 then r.pc:=instruccion and $3f;
 				   r.st:=1;
         end;
-    else MessageDlg('Instruccion MB88XX '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(get_pc(r),10), mtInformation,[mbOk], 0);
+    else MessageDlg('Instruccion MB88XX '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(get_pc(r)-1,10), mtInformation,[mbOk], 0);
   end;
 tempb:=timming+self.update_pio(timming);
 self.contador:=self.contador+tempb;

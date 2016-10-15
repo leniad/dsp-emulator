@@ -34,9 +34,9 @@ load_spec.Button1.Caption:=leng[main_vars.idioma].mensajes[8];
 load_spec.FileListBox1.Mask:='*.zip;*.sp;*.zx;*.sna;*.z80;*.tzx;*.tap;*.csw;*.dsp;*.wav;*.szx;*.pzx';
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then load_spec.FileListBox1.Mask:=load_spec.FileListBox1.Mask+';*.rom';
 {$ifdef fpc}
-load_spec.DirectoryEdit1.Directory:=Directory.spectrum_tap;
+load_spec.DirectoryEdit1.Directory:=Directory.spectrum_tap_snap;
 {$else}
-load_spec.DirectoryListBox1.Directory:=Directory.spectrum_tap;
+load_spec.DirectoryListBox1.Directory:=Directory.spectrum_tap_snap;
 {$endif}
 if (load_spec.filelistbox1.Count=0) then ultima_posicion:=-1
   else begin
@@ -70,6 +70,9 @@ var
   szx_ramp:^tszx_ramp;
   tap_header:^ttap_header;
   csw_header:^tcsw_header;
+  z80_regs:^tz80_regs;
+  z80_ext:^tz80_ext;
+  z80_ram:^tz80_ram;
   cadena:string;
 begin
 load_spec.label3.Caption:='';
@@ -140,6 +143,9 @@ end else begin  //fichero normal
   end;
 end;
 if datos=nil then exit;
+//Ya tengo los datos
+//  datos     --> puntero al fichero
+//  file_size --> longitud fichero
 temp:=datos;
 temp2:=nil;
 nombre:=extractfilename(nombre);
@@ -327,54 +333,87 @@ if extension='PZX' then begin
   freemem(pzx_header);
 end;
 if ((extension='Z80') or (extension='DSP')) then begin
-  inc(temp,6);
-  g:=0;
-  copymemory(@g,temp,2);
-  inc(temp,24);
-  if g=0 then begin
-    getmem(temp2,16384);
-    copymemory(@g,temp,2);
-    inc(temp,4);
+  hay_imagen:=true;
+  getmem(z80_regs,sizeof(tz80_regs));
+  copymemory(z80_regs,temp,30);inc(temp,30);
+  if z80_regs.pc=0 then begin
+    getmem(z80_ext,sizeof(tz80_ext));
+    copymemory(z80_ext,temp,2);
+    copymemory(z80_ext,temp,z80_ext.long+2);
+    inc(temp,z80_ext.long+2);
     cadena:='3.0';
-    case temp^ of
-      0,1:load_spec.label4.Caption:='Spectrum 48K';  //Modo 48k
-      3:if g=23 then begin
+    case z80_ext.hw_mode of
+      0,1:begin
+            if (z80_ext.modify_hw and $80)<>0 then load_spec.label4.Caption:='Spectrum 16K' //Modo 16k
+              else load_spec.label4.Caption:='Spectrum 48K'; //Modo 48k
+            z80_ext.reg_7ffd:=0;
+          end;
+      2:begin
+          load_spec.label4.Caption:='SamRam';
+          z80_ext.reg_7ffd:=0;
+        end;
+      3:if z80_ext.long=23 then begin
            load_spec.label4.Caption:='Spectrum 128K';
            cadena:='2.0';
-        end else load_spec.label4.Caption:='Spectrum 48K';
-      4,5,6:load_spec.label4.Caption:='Spectrum 128K';  //Modo 128K
-      7,8:load_spec.label4.Caption:='Spectrum +3';  //Modo +3
+        end else begin
+          if (z80_ext.modify_hw and $80)<>0 then load_spec.label4.Caption:='Spectrum 16K' //Modo 16k
+            else load_spec.label4.Caption:='Spectrum 48K'; //Modo 48k
+          z80_ext.reg_7ffd:=0;
+        end;
+      4,5,6:if (z80_ext.modify_hw and $80)<>0 then load_spec.label4.Caption:='Spectrum +2' //Modo +2
+              else load_spec.label4.Caption:='Spectrum 128K'; //Modo 128K
+      7,8:if (z80_ext.modify_hw and $80)<>0 then load_spec.label4.Caption:='Spectrum +2A' //Modo +2A
+                      else load_spec.label4.Caption:='Spectrum +3'; //Modo +3
       12:load_spec.label4.Caption:='Spectrum +2A'; //Modo +2A
       13:load_spec.label4.Caption:='Spectrum +2'; //Modo +2
     end;
-    inc(temp,g-2);
-    f:=0;
-    while f<>8 do begin
-      copymemory(@g,temp,2);
-      inc(temp,2);
-      f:=temp^;
-      inc(temp);
-      if f=8 then begin
-        if g=$FFFF then copymemory(temp2,temp,$4000)
-          else begin
-            if extension='DSP' then Decompress_zlib(temp,g,pointer(temp2),g)
-              else descomprimir_z80(temp2,temp,g);
-          end;
+    g:=30+z80_ext.long;
+    getmem(z80_ram,sizeof(tz80_ram));
+    while g<file_size do begin
+      copymemory(z80_ram,temp,2);
+      if z80_ram.longitud<>$FFFF then begin //Comprimida
+        if z80_ram.longitud>$4000 then begin //ERROR: Snapshot no valido!!
+          freemem(z80_ram);
+          freemem(z80_ext);
+          load_spec.label4.Caption:='Error in Z80 format';
+          hay_imagen:=false;
+          break;
+        end;
+        copymemory(z80_ram,temp,z80_ram.longitud+3);
+        inc(temp,z80_ram.longitud+3);inc(g,z80_ram.longitud+3);
+        getmem(temp2,$5000);
+        t1:=z80_ram.longitud;
+        if extension='DSP' then Decompress_zlib(pointer(@z80_ram.datos[0]),$4000,pointer(temp2),t1)
+          else descomprimir_z80(temp2,@z80_ram.datos[0],t1);
+      end else begin //Sin comprimir
+        copymemory(z80_ram,datos,$4000+3);
+        z80_ram.longitud:=$4000;
+        inc(temp,z80_ram.longitud+3);inc(g,z80_ram.longitud+3);
+        getmem(temp2,$4000);
+        copymemory(temp2,@z80_ram.datos[0],$4000);
       end;
-      if g=$FFFF then inc(temp,$4000)
-        else inc(temp,g);
+      //Revisar que pantalla esta activa
+      if z80_ram.numero=(((z80_ext.reg_7ffd and 8) shr 2)+8) then begin
+        freemem(z80_ext);
+        freemem(z80_ram);
+        break;
+      end else begin
+        freemem(temp2);
+        temp2:=nil;
+      end;
     end;
   end else begin
     load_spec.label4.Caption:='Spectrum 48K';
     cadena:='1.0';
-    getmem(temp2,49192);
-    g:=file_size-34;
+    //Por si acaso, cojo mas memoria de la necesaria...
+    getmem(temp2,60000);
+    g:=file_size-30-4;
     descomprimir_z80(temp2,temp,g);
   end;
   if extension='Z80' then load_spec.label3.Caption:='Z80 Spectrum Snapshot v'+cadena
     else load_spec.label3.Caption:='DSP Spectrum Snapshot';
   temp:=temp2;
-  hay_imagen:=true;
+  freemem(z80_regs);
 end;
 if extension='SNA' then begin
   load_spec.label3.Caption:='SNA Spectrum Snapshot';
@@ -417,8 +456,14 @@ end;
 //mostrar imagen si hay...
 if hay_imagen then spec_a_pantalla(temp,load_spec.image1.picture.Bitmap)
   else load_spec.image1.picture:=nil;
-if temp2<>nil then freemem(temp2);
-if datos_scr<>nil then freemem(datos_scr);
+if temp2<>nil then begin
+  freemem(temp2);
+  temp2:=nil;
+end;
+if datos_scr<>nil then begin
+  freemem(datos_scr);
+  datos_scr:=nil;
+end;
 end;
 
 procedure spectrum_load_test_rom;
@@ -500,14 +545,18 @@ end else begin
       main_screen.rapido:=false;
       llamadas_maquina.open_file:=extension+': '+nombre;
     end;
-    Directory.spectrum_tap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
+    Directory.spectrum_tap_snap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
     ultima_posicion:=load_spec.filelistbox1.ItemIndex;
     load_spec.close;
    end;
-if datos<>nil then freemem(datos);
-datos:=nil;
-if spec_rom.datos_rom<>nil then freemem(spec_rom.datos_rom);
-spec_rom.datos_rom:=nil;
+if datos<>nil then begin
+  freemem(datos);
+  datos:=nil;
+end;
+if spec_rom.datos_rom<>nil then begin
+  freemem(spec_rom.datos_rom);
+  spec_rom.datos_rom:=nil;
+end;
 change_caption;
 end;
 
@@ -521,7 +570,7 @@ if spec_rom.datos_rom<>nil then begin
   freemem(spec_rom.datos_rom);
   spec_rom.datos_rom:=nil;
 end;
-Directory.spectrum_tap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
+Directory.spectrum_tap_snap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
 end;
 
 end.

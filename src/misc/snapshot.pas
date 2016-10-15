@@ -19,6 +19,30 @@ type
     numero:byte;
     data:array[0..$3fff] of byte;
   end;
+  //Spectrum .Z80
+  tz80_regs=packed record
+    a,flags:byte;
+    bc,hl,pc,sp:word;
+    i,r,misc:byte;
+    de,bc2,de2,hl2:word;
+    a2,flags2:byte;
+    iy,ix:word;
+    iff1,iff2,misc2:byte;
+  end;
+  tz80_ext=packed record
+    long,pc:word;
+    hw_mode,reg_7ffd,unused1,modify_hw,reg_fffd:byte;
+    ay_regs:array[0..15] of byte;
+    low_t:word;
+    hi_t:byte;
+    unused2:array[0..27] of byte;
+    reg_1ffd:byte;
+  end;
+  tz80_ram=packed record
+    longitud:word;
+    numero:byte;
+    datos:array[0..$3fff] of byte;
+  end;
 
 //Spectrum
 function abrir_sna(datos:pbyte;long:integer):boolean;
@@ -726,32 +750,6 @@ grabar_szx:=write_file(nombre,pdatos,longitud);
 freemem(pdatos);
 end;
 
-//Spectrum .Z80
-type
-  tz80_regs=packed record
-    a,flags:byte;
-    bc,hl,pc,sp:word;
-    i,r,misc:byte;
-    de,bc2,de2,hl2:word;
-    a2,flags2:byte;
-    iy,ix:word;
-    iff1,iff2,misc2:byte;
-  end;
-  tz80_ext=packed record
-    long,pc:word;
-    hw_mode,reg_7ffd,unused1,modify_hw,reg_fffd:byte;
-    ay_regs:array[0..15] of byte;
-    low_t:word;
-    hi_t:byte;
-    unused2:array[0..27] of byte;
-    reg_1ffd:byte;
-  end;
-  tz80_ram=packed record
-    longitud:word;
-    numero:byte;
-    datos:array[0..$3fff] of byte;
-  end;
-
 procedure descomprimir_z80(destino,origen:pbyte;var longitud:integer);
 var
   pdestino,porigen:pbyte;
@@ -764,32 +762,24 @@ f:=0;
 cont_final:=0;
 while (f<longitud) do begin
         if porigen^=$ed then begin
-                inc(porigen);
-                f:=f+1;
+                inc(porigen);f:=f+1;
                 if porigen^=$ed then begin
-                        inc(porigen);
-                        f:=f+1;
+                        inc(porigen);f:=f+1;
                         contador:=porigen^;
-                        inc(porigen);
-                        f:=f+1;
+                        inc(porigen);f:=f+1;
                         for g:=1 to contador do begin
                                 pdestino^:=porigen^;
-                                inc(pdestino);
-                                cont_final:=cont_final+1;
+                                inc(pdestino);cont_final:=cont_final+1;
                         end;
-                        inc(porigen);
-                        f:=f+1;
+                        inc(porigen);f:=f+1;
                 end else begin
                         pdestino^:=$ed;
-                        inc(pdestino);
-                        cont_final:=cont_final+1;
+                        inc(pdestino);cont_final:=cont_final+1;
                 end;
         end else begin
                 pdestino^:=porigen^;
-                inc(pdestino);
-                inc(porigen);
-                f:=f+1;
-                cont_final:=cont_final+1;
+                inc(pdestino);cont_final:=cont_final+1;
+                inc(porigen);f:=f+1;
         end;
 end;
 longitud:=cont_final;
@@ -804,12 +794,14 @@ var
   z80_regs:^tz80_regs;
   z80_ext:^tz80_ext;
   z80_ram:^tz80_ram;
+  ptemp:pbyte;
 begin
 abrir_z80:=false;
 spec_z80_reg:=spec_z80.get_internal_r;
 getmem(z80_regs,sizeof(tz80_regs));
 copymemory(z80_regs,datos,30);inc(datos,30);
 longitud:=30;
+puntero:=nil;
 if z80_regs.misc=$ff then z80_regs.misc:=1;
 if (z80_regs.pc=0) then begin  //version 2 o 3
         getmem(z80_ext,sizeof(tz80_ext));
@@ -831,7 +823,8 @@ if (z80_regs.pc=0) then begin  //version 2 o 3
                 12:spectrum_change_model(3); //Modo +2A
                 13:spectrum_change_model(4); //Modo +2
                 else begin
-                  freemem(puntero);
+                  freemem(z80_ext);
+                  freemem(z80_regs);
                   MessageDlg('Modelo no de Spectrum soportado.'+chr(10)+chr(13)+'Spectrum model not supported.', mtInformation,[mbOk], 0);
                   exit;
                 end;
@@ -858,20 +851,29 @@ if (z80_regs.pc=0) then begin  //version 2 o 3
         getmem(z80_ram,sizeof(tz80_ram));
         while longitud<>long do begin
                 copymemory(z80_ram,datos,2);
-                copymemory(z80_ram,datos,z80_ram.longitud+3);
-                inc(datos,z80_ram.longitud+3);inc(longitud,z80_ram.longitud+3);
-                if z80_ram.longitud<>$FFFF then begin //esta comprimida
-                  contador:=z80_ram.longitud;
-                  getmem(puntero,$4000);
-                  if es_dsp then Decompress_zlib(pointer(@z80_ram.datos[0]),$4000,pointer(puntero),contador)
-                    else descomprimir_z80(puntero,@z80_ram.datos[0],contador);
-                  if contador<>$4000 then begin
-                    freemem(puntero);
+                //Comprobar si la pagina esta comprimida, si la longitud no es $ffff--> lo esta
+                if z80_ram.longitud<>$FFFF then begin
+                  //ERROR: Snapshot no valido!!, si esta comprimido y ocupa mas de $4000 --> esta mal
+                  if z80_ram.longitud>$4000 then begin
+                    freemem(z80_ram);
+                    freemem(z80_regs);
                     exit;
                   end;
+                  //Copio el resto de los datos
+                  copymemory(z80_ram,datos,z80_ram.longitud+3);
+                  inc(datos,z80_ram.longitud+3);inc(longitud,z80_ram.longitud+3);
+                  contador:=z80_ram.longitud;
+                  getmem(puntero,$5000); //Siempre un poco mas por si acaso
+                  if es_dsp then Decompress_zlib(pointer(@z80_ram.datos[0]),$4000,pointer(puntero),contador)
+                    else descomprimir_z80(puntero,@z80_ram.datos[0],contador);
                   copymemory(@z80_ram.datos[0],puntero,$4000);
                   freemem(puntero);
-                end; //Si no esta comprimida copio directamente los datos...
+                  puntero:=nil;
+                end else begin //Si no esta comprimida, copio los datos, pero con longitud fija de $4000
+                  copymemory(z80_ram,datos,$4000+3);
+                  z80_ram.longitud:=$4000;
+                  inc(datos,z80_ram.longitud+3);inc(longitud,z80_ram.longitud+3);
+                end;
                 case main_vars.tipo_maquina of
                   0,5:case z80_ram.numero of //Spectrum 48k
                           0:begin
@@ -900,9 +902,16 @@ end else begin //version 1.XX solo 48k
         spectrum_change_model(0);
         spec_z80_reg.pc:=z80_regs.pc;
         if (z80_regs.misc and $20)<>0 then begin //comprimido
-            contador:=long-30;
+            //IMPORTANTE: Son 30 bytes de la cabecera + 4 bytes que marcan el fin del bloque
+            //En la version 2 y 3 no es necesario tener en cuenta esto porque la longitud
+            //esta dentro de la cabecera del bloque
+            contador:=long-30-4;
             if contador>$c000 then exit;
-            descomprimir_z80(@memoria[$4000],datos,contador);
+            //Por si acaso, cojo mas memoria de la necesaria...
+            getmem(ptemp,60000);
+            descomprimir_z80(ptemp,datos,contador);
+            copymemory(@memoria[$4000],ptemp,$c000);
+            freemem(ptemp);
         end else copymemory(@memoria[$4000],datos,$c000); //Si no esta comprimida copio directamente los datos...
 end;
 spec_z80_reg.a:=z80_regs.a;
@@ -919,7 +928,7 @@ spec_z80_reg.hl.w:=z80_regs.hl;
 spec_z80_reg.sp:=z80_regs.sp;
 spec_z80_reg.i:=z80_regs.i;
 spec_z80_reg.r:=z80_regs.r and $7f;
-if (z80_regs.misc and 1)<>0 then spec_z80_reg.r:=(spec_z80_reg.r or $80);
+spec_z80_reg.r:=spec_z80_reg.r or ((z80_regs.misc and 1) shl 7);
 borde.color:=(z80_regs.misc and $0e) shr 1;
 spec_z80_reg.de.w:=z80_regs.de;
 spec_z80_reg.bc2.w:=z80_regs.bc2;
@@ -939,7 +948,7 @@ spec_z80_reg.ix.w:=z80_regs.ix;
 spec_z80_reg.iff1:=(z80_regs.iff1<>0);
 spec_z80_reg.iff2:=(z80_regs.iff2<>0);
 spec_z80_reg.im:=z80_regs.misc2 and 3;
-var_spectrum.issue2:=(z80_regs.misc2 and 4)<>0;
+var_spectrum.issue2:=(z80_regs.misc2 and 4)=0;
 freemem(z80_regs);
 abrir_z80:=true;
 end;

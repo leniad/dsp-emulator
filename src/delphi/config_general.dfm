@@ -18,26 +18,21 @@ object MConfig: TMConfig
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Label12: TLabel
-    Left = 7
-    Top = 265
-    Width = 25
-    Height = 13
-    Caption = 'But 2'
+  object SpeedButton3: TSpeedButton
+    Left = 367
+    Top = 298
+    Width = 23
+    Height = 22
+    Caption = '...'
+    OnClick = SpeedButton2Click
   end
-  object Label13: TLabel
-    Left = 7
-    Top = 218
-    Width = 25
-    Height = 13
-    Caption = 'But 0'
-  end
-  object Label14: TLabel
-    Left = 7
-    Top = 242
-    Width = 25
-    Height = 13
-    Caption = 'But 1'
+  object SpeedButton7: TSpeedButton
+    Left = 367
+    Top = 284
+    Width = 23
+    Height = 22
+    Caption = '...'
+    OnClick = SpeedButton6Click
   end
   object Button1: TButton
     Left = 47
@@ -68,10 +63,6 @@ object MConfig: TMConfig
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Misc'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox3: TGroupBox
         Left = 6
         Top = 13
@@ -355,16 +346,12 @@ object MConfig: TMConfig
     object TabSheet2: TTabSheet
       Caption = 'Directory'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label1: TLabel
-        Left = 5
-        Top = 13
-        Width = 86
+        Left = 3
+        Top = 110
+        Width = 90
         Height = 13
-        Caption = 'Nintendo - Nes'
+        Caption = 'Preview Images'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -373,58 +360,16 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object SpeedButton1: TSpeedButton
-        Left = 365
-        Top = 28
+        Left = 363
+        Top = 124
         Width = 23
         Height = 22
         Caption = '...'
         OnClick = SpeedButton1Click
       end
-      object SpeedButton2: TSpeedButton
-        Left = 365
-        Top = 76
-        Width = 23
-        Height = 22
-        Caption = '...'
-        OnClick = SpeedButton2Click
-      end
-      object Label2: TLabel
-        Left = 5
-        Top = 61
-        Width = 58
-        Height = 13
-        Caption = 'Game Boy'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object SpeedButton3: TSpeedButton
-        Left = 365
-        Top = 124
-        Width = 23
-        Height = 22
-        Caption = '...'
-        OnClick = SpeedButton3Click
-      end
-      object Label3: TLabel
-        Left = 5
-        Top = 109
-        Width = 73
-        Height = 13
-        Caption = 'Colecovision'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
       object Label4: TLabel
-        Left = 5
-        Top = 157
+        Left = 1
+        Top = 14
         Width = 41
         Height = 13
         Caption = 'Arcade'
@@ -436,8 +381,8 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object SpeedButton4: TSpeedButton
-        Left = 365
-        Top = 172
+        Left = 363
+        Top = 28
         Width = 23
         Height = 22
         Caption = '...'
@@ -445,7 +390,7 @@ object MConfig: TMConfig
       end
       object Label5: TLabel
         Left = 3
-        Top = 212
+        Top = 62
         Width = 88
         Height = 13
         Caption = 'Arcade Hiscore'
@@ -457,56 +402,122 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object SpeedButton5: TSpeedButton
-        Left = 365
-        Top = 228
+        Left = 363
+        Top = 76
         Width = 23
         Height = 22
         Caption = '...'
         OnClick = SpeedButton5Click
       end
+      object Label2: TLabel
+        Left = 3
+        Top = 156
+        Width = 48
+        Height = 13
+        Caption = 'Samples'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object SpeedButton2: TSpeedButton
+        Left = 362
+        Top = 170
+        Width = 24
+        Height = 22
+        Caption = '...'
+        OnClick = SpeedButton2Click
+      end
+      object Label3: TLabel
+        Left = 3
+        Top = 252
+        Width = 49
+        Height = 13
+        Caption = 'NV RAM'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object SpeedButton6: TSpeedButton
+        Left = 363
+        Top = 266
+        Width = 23
+        Height = 22
+        Caption = '...'
+        OnClick = SpeedButton6Click
+      end
+      object Label12: TLabel
+        Left = 3
+        Top = 199
+        Width = 91
+        Height = 13
+        Caption = 'Quick Snapshot'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object SpeedButton8: TSpeedButton
+        Left = 363
+        Top = 213
+        Width = 23
+        Height = 22
+        Caption = '...'
+        OnClick = SpeedButton8Click
+      end
       object d1: TEdit
-        Left = 5
-        Top = 28
+        Left = 3
+        Top = 124
         Width = 354
         Height = 21
         TabOrder = 0
       end
-      object d2: TEdit
-        Left = 5
-        Top = 76
+      object d4: TEdit
+        Left = 3
+        Top = 28
         Width = 354
         Height = 21
         TabOrder = 1
       end
-      object d3: TEdit
-        Left = 5
-        Top = 124
+      object d5: TEdit
+        Left = 3
+        Top = 76
         Width = 354
         Height = 21
         TabOrder = 2
       end
-      object d4: TEdit
-        Left = 5
-        Top = 172
+      object d2: TEdit
+        Left = 3
+        Top = 170
         Width = 354
         Height = 21
         TabOrder = 3
       end
-      object d5: TEdit
+      object d3: TEdit
         Left = 3
-        Top = 228
+        Top = 266
         Width = 354
         Height = 21
         TabOrder = 4
+      end
+      object D6: TEdit
+        Left = 3
+        Top = 213
+        Width = 354
+        Height = 21
+        TabOrder = 5
       end
     end
     object TabSheet3: TTabSheet
       Caption = 'Input'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 7
         Top = 13
@@ -1009,10 +1020,6 @@ object MConfig: TMConfig
     object TabSheet4: TTabSheet
       Caption = 'Main Keys'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label21: TLabel
         Left = 58
         Top = 40
@@ -1081,10 +1088,6 @@ object MConfig: TMConfig
     object ROM: TTabSheet
       Caption = 'ROM'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object BitBtn21: TBitBtn
         Left = 40
         Top = 32

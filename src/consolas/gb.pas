@@ -1158,7 +1158,7 @@ begin
       else MessageDlg('Mapper '+inttohex(tipo_rom,2)+' no implementado', mtInformation,[mbOk], 0);
   end;
   if not(mal) then begin
-    directory.GameBoy:=ExtractFilePath(romfile);
+    directory.GameBoy:=ExtractFilePath(romfile)+main_vars.cadena_dir;
     if colorgb then begin //GameBoy Color
       ncartucho:='';
       for f:=0 to 10 do ncartucho:=ncartucho+chr(cabecera[$134+f]);

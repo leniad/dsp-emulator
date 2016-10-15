@@ -1,7 +1,7 @@
 object MConfig: TMConfig
-  Left = 361
+  Left = 956
   Height = 476
-  Top = 166
+  Top = 169
   Width = 418
   BorderIcons = []
   BorderStyle = bsSingle
@@ -17,7 +17,7 @@ object MConfig: TMConfig
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.7'
+  LCLVersion = '1.6.0.4'
   object Button1: TButton
     Left = 53
     Height = 41
@@ -340,37 +340,11 @@ object MConfig: TMConfig
       ClientWidth = 391
       ImageIndex = 1
       object Label1: TLabel
-        Left = 5
+        Left = 8
         Height = 13
-        Top = 13
-        Width = 86
-        Caption = 'Nintendo - Nes'
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = [fsBold]
-        ParentColor = False
-        ParentFont = False
-      end
-      object Label2: TLabel
-        Left = 5
-        Height = 13
-        Top = 61
-        Width = 58
-        Caption = 'Game Boy'
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'MS Sans Serif'
-        Font.Style = [fsBold]
-        ParentColor = False
-        ParentFont = False
-      end
-      object Label3: TLabel
-        Left = 5
-        Height = 13
-        Top = 109
-        Width = 73
-        Caption = 'Colecovision'
+        Top = 112
+        Width = 90
+        Caption = 'Preview Images'
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'MS Sans Serif'
@@ -379,9 +353,9 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object Label4: TLabel
-        Left = 5
+        Left = 8
         Height = 13
-        Top = 157
+        Top = 16
         Width = 41
         Caption = 'Arcade'
         Font.Color = clWindowText
@@ -392,9 +366,9 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object Label5: TLabel
-        Left = 3
+        Left = 8
         Height = 13
-        Top = 212
+        Top = 64
         Width = 88
         Caption = 'Arcade Hiscore'
         Font.Color = clWindowText
@@ -405,9 +379,9 @@ object MConfig: TMConfig
         ParentFont = False
       end
       object D1: TDirectoryEdit
-        Left = 4
+        Left = 8
         Height = 21
-        Top = 34
+        Top = 128
         Width = 360
         ShowHidden = False
         ButtonWidth = 23
@@ -415,21 +389,21 @@ object MConfig: TMConfig
         MaxLength = 0
         TabOrder = 0
       end
-      object D2: TDirectoryEdit
-        Left = 5
+      object D4: TDirectoryEdit
+        Left = 8
         Height = 21
-        Top = 82
-        Width = 359
+        Top = 32
+        Width = 360
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
         MaxLength = 0
         TabOrder = 1
       end
-      object D3: TDirectoryEdit
-        Left = 4
+      object D5: TDirectoryEdit
+        Left = 8
         Height = 21
-        Top = 130
+        Top = 80
         Width = 360
         ShowHidden = False
         ButtonWidth = 23
@@ -437,10 +411,10 @@ object MConfig: TMConfig
         MaxLength = 0
         TabOrder = 2
       end
-      object D4: TDirectoryEdit
-        Left = 4
+      object D2: TDirectoryEdit
+        Left = 8
         Height = 21
-        Top = 178
+        Top = 176
         Width = 360
         ShowHidden = False
         ButtonWidth = 23
@@ -448,16 +422,66 @@ object MConfig: TMConfig
         MaxLength = 0
         TabOrder = 3
       end
-      object D5: TDirectoryEdit
-        Left = 4
+      object Label2: TLabel
+        Left = 8
+        Height = 13
+        Top = 160
+        Width = 48
+        Caption = 'Samples'
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object D6: TDirectoryEdit
+        Left = 8
         Height = 21
-        Top = 234
+        Top = 224
         Width = 360
         ShowHidden = False
         ButtonWidth = 23
         NumGlyphs = 1
         MaxLength = 0
         TabOrder = 4
+      end
+      object Label3: TLabel
+        Left = 8
+        Height = 13
+        Top = 208
+        Width = 91
+        Caption = 'Quick Snapshot'
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object D3: TDirectoryEdit
+        Left = 8
+        Height = 21
+        Top = 272
+        Width = 360
+        ShowHidden = False
+        ButtonWidth = 23
+        NumGlyphs = 1
+        MaxLength = 0
+        TabOrder = 5
+      end
+      object Label12: TLabel
+        Left = 8
+        Height = 13
+        Top = 256
+        Width = 47
+        Caption = 'NV-Ram'
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
       end
     end
     object TabSheet3: TTabSheet

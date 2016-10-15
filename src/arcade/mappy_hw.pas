@@ -84,7 +84,7 @@ for f:=0 to $3f do begin
     atrib:=memoria[$2780+(f*2)];
     nchar:=memoria[$1780+(f*2)] and sprite_mask;
     color:=memoria[$1781+(f*2)] shl 4;
-    x:=memoria[$1f80+(f*2)]+1;
+    x:=memoria[$1f80+(f*2)]-16;
     y:=memoria[$1f81+(f*2)]+$100*(memoria[$2781+(f*2)] and 1)-40;
     flipx_v:=atrib and $02;
     flipy_v:=atrib and $01;
@@ -94,7 +94,7 @@ for f:=0 to $3f do begin
     case size of
       0:begin  //16x16
             put_gfx_sprite_mask(nchar,color,flipx,flipy,1,$f,$f);
-            actualiza_gfx_sprite(x-17,y,5,1);
+            actualiza_gfx_sprite(x,y,5,1);
         end;
       1:begin //16x32
             nchar:=nchar and $fe;
@@ -102,7 +102,7 @@ for f:=0 to $3f do begin
             b:=1 xor flipy_v;
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,false,1,$f,$f,0,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,false,1,$f,$f,0,16);
-            actualiza_gfx_sprite_size(x-17,y,5,16,32);
+            actualiza_gfx_sprite_size(x,y,5,16,32);
         end;
       2:begin //32x16
             nchar:=nchar and $fd;
@@ -110,7 +110,7 @@ for f:=0 to $3f do begin
             b:=0 xor flipx_v;
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,flipy,1,15,$f,0,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,15,$f,16,0);
-            actualiza_gfx_sprite_size(x-17,y,5,32,16);
+            actualiza_gfx_sprite_size(x,y,5,32,16);
         end;
       3:begin //32x32
             nchar:=nchar and $fc;
@@ -127,7 +127,7 @@ for f:=0 to $3f do begin
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,15,$f,16,0);
             put_gfx_sprite_mask_diff(nchar+c,color,flipx,flipy,1,15,$f,0,16);
             put_gfx_sprite_mask_diff(nchar+d,color,flipx,flipy,1,15,$f,16,16);
-            actualiza_gfx_sprite_size(x-17,y,5,32,32);
+            actualiza_gfx_sprite_size(x,y,5,32,32);
          end;
       end;
     end;

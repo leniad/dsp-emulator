@@ -140,12 +140,15 @@ while EmuStatus=EsRuning do begin
     //sound
     snd_z80.run(frame_s);
     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-    if f=271 then vblank:=0  //linea 0
-      else if f=238 then vblank:=1; //linea 239 (deberia ser 240)
-    if (((f mod 16)=0) and (f<>0)) then main_m68000.irq[5]:=ASSERT_LINE;
-    if f=239 then begin
-        main_m68000.irq[6]:=ASSERT_LINE;
-        update_video_wwfsstar;
+    case f of
+      15,31,47,63,79,95,111,127,143,159,175,191,207,223,255:main_m68000.irq[5]:=ASSERT_LINE;
+      239:begin
+            main_m68000.irq[5]:=ASSERT_LINE;
+            main_m68000.irq[6]:=ASSERT_LINE;
+            update_video_wwfsstar;
+            vblank:=1;
+          end;
+      271:vblank:=0;
     end;
  end;
  eventos_wwfsstar;

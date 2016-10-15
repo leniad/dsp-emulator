@@ -217,7 +217,7 @@ function OpenRom(Sistema:TSistema;var name:string):boolean;
 begin
 case Sistema of
   StColecovision:begin
-         principal1.opendialog1.InitialDir:=Directory.ColecoVision;
+         principal1.opendialog1.InitialDir:=Directory.coleco_snap;
          principal1.OpenDialog1.Filter:='ColecoVision Files (*.col;*.rom;*.csn;*.dsp;*.bin;*.zip)|*.col;*.rom;*.csn;*.dsp;*.bin;*.zip';
        end;
   Stnes:begin

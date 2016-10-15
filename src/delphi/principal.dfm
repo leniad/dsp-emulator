@@ -1787,6 +1787,10 @@ object principal1: Tprincipal1
               Caption = 'Dig Dug'
               OnClick = CambiarMaquina
             end
+            object Xevious1: TMenuItem
+              Caption = 'Xevious'
+              OnClick = CambiarMaquina
+            end
           end
           object SunaHardware1: TMenuItem
             Caption = 'Suna HW'
@@ -2712,7 +2716,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807F00320002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807080420002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

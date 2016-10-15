@@ -549,7 +549,7 @@ var
   nombre:string;
   correcto:boolean;
 begin
-principal1.savedialog1.InitialDir:=Directory.spectrum_snap;
+principal1.savedialog1.InitialDir:=Directory.spectrum_tap_snap;
 if ((main_vars.tipo_maquina=2) or (main_vars.tipo_maquina=3)) then principal1.saveDialog1.Filter := 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP'
   else principal1.saveDialog1.Filter := 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP|SNA Format (*.SNA)|*.SNA';
 if principal1.savedialog1.execute then begin
@@ -570,7 +570,7 @@ if principal1.savedialog1.execute then begin
           4:correcto:=grabar_sna(nombre);
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0)
-          else Directory.spectrum_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
+          else Directory.spectrum_tap_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
 end;
 end;
 

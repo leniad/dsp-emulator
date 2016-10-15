@@ -42,8 +42,7 @@ type
             Chip8:String;
             sms:String;
             //Coleco
-            ColecoVision:String;
-            Coleco_snap:string;
+            coleco_snap:String;
             //Dirs Arcade
             Arcade_roms:String;
             Arcade_hi:string;
@@ -53,8 +52,7 @@ type
             spectrum_48:String;
             spectrum_128:String;
             spectrum_3:string;
-            spectrum_tap:string;
-            spectrum_snap:string;
+            spectrum_tap_snap:string;
             spectrum_disk:string;
             spectrum_image:string;
             //Dirs amstrad
@@ -577,16 +575,20 @@ SDL_SetWindowTitle(window_render,pointer(cadena));
 {$endif}
 end;
 
-{$ifndef fpc}
 procedure video_sync;
 var
+{$ifndef fpc}
   l2:int64;
   res:single;
+{$else}
+  res:dword;
+{$endif}
 begin
 actualiza_video;
 evalue_controls;
 main_vars.frames_sec:=main_vars.frames_sec+1;
 if main_screen.rapido then exit;
+{$ifndef fpc}
 QueryPerformanceCounter(l2);
 res:=(l2-cont_sincroniza);
 while (res<valor_sync) do begin
@@ -594,28 +596,18 @@ while (res<valor_sync) do begin
   res:=(l2-cont_sincroniza);
 end;
 QueryPerformanceCounter(cont_sincroniza);
-end;
 {$else}
-{$ifndef windows}
-procedure copymemory(dest,source:pointer;size:integer);inline;
-begin
-move(source^,dest^,size);
-end;
-{$endif}
-
-procedure video_sync;
-var
-  res:dword;
-begin
-application.ProcessMessages;
-main_vars.frames_sec:=main_vars.frames_sec+1;
-actualiza_video;
-evalue_controls;
-if main_screen.rapido then exit;
 res:=0;
 while res<valor_sync do res:=sdl_getticks()-cont_sincroniza;
 valor_sync:=cont_micro-(res-valor_sync);
 cont_sincroniza:=sdl_getticks();
+{$endif}
+end;
+
+{$ifndef windows}
+procedure copymemory(dest,source:pointer;size:integer);inline;
+begin
+move(source^,dest^,size);
 end;
 {$endif}
 

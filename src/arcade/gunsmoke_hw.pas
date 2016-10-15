@@ -135,9 +135,9 @@ if bg2on then begin
      nchar:=tiles_pos[pos+$8000];
      put_gfx_flip(x*32,(15-y)*32,nchar,color,1,2,(attr and $80)<>0,(attr and $40)<>0);
   end;
+  bgpaint2:=false;
  end;
  scroll_x_y(1,4,scroll_x,224+(31-(scroll_bg and $1f)));
- bgpaint2:=false;
 end else fill_full_screen(4,0);
 if objon then draw_sprites(false);
 if bg1on then begin
@@ -151,9 +151,9 @@ if bg1on then begin
      nchar:=tiles_pos[pos]+((attr and $1) shl 8);
      put_gfx_mask_flip(x*32,(15-y)*32,nchar,color,2,1,$f,$ff,(attr and $80)<>0,(attr and $40)<>0);
    end;
+   bgpaint:=false;
   end;
   scroll_x_y(2,4,scroll_x,224+(31-(scroll_y and $1f)));
-  bgpaint:=false;
 end;
 if objon then draw_sprites(true);
 if chon then begin //chars activos
@@ -386,12 +386,11 @@ case direccion of
                 scroll_x:=valor;
                 bgpaint:=true;
               end;
-        $d803:;
-        $d804:if (scroll_bg and $ff)<>valor then begin
+        $d803:if (scroll_bg and $ff)<>valor then begin
                 if abs((scroll_bg and $e0)-(valor and $e0))>31 then bgpaint2:=true;
                 scroll_bg:=(scroll_bg and $ff00) or valor;
               end;
-        $d805:if (scroll_bg shr 8)<>valor then begin
+        $d804:if (scroll_bg shr 8)<>valor then begin
                 scroll_bg:=(scroll_bg and $ff) or (valor shl 8);
                 bgpaint2:=true;
               end;
@@ -510,8 +509,8 @@ snd_z80.change_ram_calls(gunsmoke_snd_getbyte,gunsmoke_snd_putbyte);
 init_timer(snd_z80.numero_cpu,3000000/(60*4),gunsmoke_snd_irq,true);
 snd_z80.init_sound(gunsmoke_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,2);
-ym2203_1:=ym2203_chip.create(1500000,2);
+ym2203_0:=ym2203_chip.create(1500000,0.5,0.75);
+ym2203_1:=ym2203_chip.create(1500000,0.5,0.75);
 case main_vars.tipo_maquina of
   80:begin
        //video

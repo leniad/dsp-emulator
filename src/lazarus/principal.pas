@@ -189,6 +189,7 @@ type
     hypersports1: TMenuItem;
     Megazone1: TMenuItem;
     ajax1: TMenuItem;
+    xevious1: TMenuItem;
     spacefb1: TMenuItem;
     trackfield1: TMenuItem;
     simpsons1: TMenuItem;

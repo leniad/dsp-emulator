@@ -823,7 +823,7 @@ const
         (n:'prom-1.1d';l:$100;p:0;crc:$7a2815b4),
         (n:'gg1_11.4d';l:$1000;p:0;crc:$ad447c80),(n:'gg1_10.4f';l:$1000;p:$1000;crc:$dd6f1afc),());
         //Dig Dug
-        digdug:array[0..18] of tipo_roms=(
+        digdug:array[0..19] of tipo_roms=(
         (n:'dd1a.1';l:$1000;p:0;crc:$a80ec984),(n:'dd1a.2';l:$1000;p:$1000;crc:$559f00bd),
         (n:'dd1a.3';l:$1000;p:$2000;crc:$8cbc6fe1),(n:'dd1a.4';l:$1000;p:$3000;crc:$d066f830),
         (n:'dd1a.5';l:$1000;p:0;crc:$6687933b),(n:'dd1a.6';l:$1000;p:$1000;crc:$843d857f),
@@ -833,7 +833,8 @@ const
         (n:'dd1.9';l:$800;p:0;crc:$f14a6fe1),
         (n:'dd1.15';l:$1000;p:0;crc:$e22957c8),(n:'dd1.14';l:$1000;p:$1000;crc:$2829ec99),
         (n:'dd1.13';l:$1000;p:$2000;crc:$458499e9),(n:'dd1.12';l:$1000;p:$3000;crc:$c58252a0),
-        (n:'dd1.11';l:$1000;p:0;crc:$7b383983),(n:'dd1.10b';l:$1000;p:0;crc:$2cf399c2),());
+        (n:'dd1.11';l:$1000;p:0;crc:$7b383983),(n:'dd1.10b';l:$1000;p:0;crc:$2cf399c2),
+        (n:'53xx.bin';l:$400;p:0;crc:$b326fecb),());
         xsleena:array[0..29] of tipo_roms=(
         (n:'p9-08.ic66';l:$8000;p:$0;crc:$5179ae3f),(n:'pa-09.ic65';l:$8000;p:$8000;crc:$10a7c800),
         (n:'p1-0.ic29';l:$8000;p:$0;crc:$a1a860e2),(n:'p0-0.ic15';l:$8000;p:$8000;crc:$948b9757),
@@ -2276,6 +2277,21 @@ const
         (n:'770c06.f4';l:$10000;p:$20000;crc:$7471f24a),(n:'770c07.h4';l:$10000;p:$30000;crc:$a58be323),
         (n:'770c06.f4';l:$10000;p:$40000;crc:$dd553541),(n:'770c07.h4';l:$10000;p:$50000;crc:$3f78bd0f),
         (n:'770c06.f4';l:$10000;p:$60000;crc:$078c51b2),(n:'770c07.h4';l:$10000;p:$70000;crc:$7300c2e1),());
+        xevious:array[0..25] of tipo_roms=(
+        (n:'xvi_1.3p';l:$1000;p:0;crc:$09964dda),(n:'xvi_2.3m';l:$1000;p:$1000;crc:$60ecce84),
+        (n:'xvi_3.2m';l:$1000;p:$2000;crc:$79754b7d),(n:'xvi_4.2l';l:$1000;p:$3000;crc:$c7d4bbf0),
+        (n:'xvi_5.3f';l:$1000;p:$0;crc:$c85b703f),(n:'xvi_6.3j';l:$1000;p:$1000;crc:$e18cdaad),
+        (n:'xvi_7.2c';l:$1000;p:0;crc:$dd35cf1c),
+        (n:'xvi-8.6a';l:$100;p:0;crc:$5cc2727f),(n:'xvi-9.6d';l:$100;p:$100;crc:$5c8796cc),
+        (n:'xvi-10.6e';l:$100;p:$200;crc:$3cb60975),(n:'xvi-7.4h';l:$200;p:$300;crc:$22d98032),
+        (n:'xvi-6.4f';l:$200;p:$500;crc:$3a7599f0),(n:'xvi-4.3l';l:$200;p:$700;crc:$fd8b9d91),
+        (n:'xvi-5.3m';l:$200;p:$900;crc:$bf906d82),(n:'xvi-2.7n';l:$100;p:0;crc:$550f06bc),
+        (n:'xvi_12.3b';l:$1000;p:0;crc:$088c8b26),
+        (n:'xvi_15.4m';l:$2000;p:0;crc:$ad447c80),(n:'xvi_17.4p';l:$2000;p:$2000;crc:$dd6f1afc),
+        (n:'xvi_16.4n';l:$1000;p:$4000;crc:$ad447c80),(n:'xvi_18.4r';l:$2000;p:$5000;crc:$dd6f1afc),
+        (n:'xvi_13.3c';l:$1000;p:$0;crc:$de60ba25),(n:'xvi_14.3d';l:$1000;p:$1000;crc:$535cdbbc),
+        (n:'xvi_9.2a';l:$1000;p:0;crc:$57ed9879),(n:'xvi_10.2b';l:$2000;p:$1000;crc:$ae3ba9e5),
+        (n:'xvi_11.2c';l:$1000;p:$3000;crc:$31e244dd),());
 
 implementation
 uses principal,init_games;

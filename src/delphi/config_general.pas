@@ -17,12 +17,6 @@ type
     d1: TEdit;
     Label1: TLabel;
     SpeedButton1: TSpeedButton;
-    SpeedButton2: TSpeedButton;
-    d2: TEdit;
-    Label2: TLabel;
-    SpeedButton3: TSpeedButton;
-    d3: TEdit;
-    Label3: TLabel;
     Label4: TLabel;
     d4: TEdit;
     SpeedButton4: TSpeedButton;
@@ -63,9 +57,6 @@ type
     ComboBox7: TComboBox;
     ComboBox8: TComboBox;
     SpeedButton5: TSpeedButton;
-    Label12: TLabel;
-    Label13: TLabel;
-    Label14: TLabel;
     Label15: TLabel;
     Label16: TLabel;
     Label17: TLabel;
@@ -126,6 +117,17 @@ type
     RadioButton21: TRadioButton;
     Button7: TButton;
     ComboBox1: TComboBox;
+    d2: TEdit;
+    Label2: TLabel;
+    SpeedButton2: TSpeedButton;
+    SpeedButton3: TSpeedButton;
+    d3: TEdit;
+    Label3: TLabel;
+    SpeedButton6: TSpeedButton;
+    SpeedButton7: TSpeedButton;
+    Label12: TLabel;
+    D6: TEdit;
+    SpeedButton8: TSpeedButton;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -149,8 +151,6 @@ type
     procedure RadioButton3Click(Sender: TObject);
     procedure RadioButton4Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
-    procedure SpeedButton2Click(Sender: TObject);
-    procedure SpeedButton3Click(Sender: TObject);
     procedure SpeedButton4Click(Sender: TObject);
     procedure SpeedButton5Click(Sender: TObject);
     procedure BitBtn17Click(Sender: TObject);
@@ -169,6 +169,9 @@ type
     procedure RadioButton22Click(Sender: TObject);
     procedure RadioButton21Click(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
+    procedure SpeedButton2Click(Sender: TObject);
+    procedure SpeedButton6Click(Sender: TObject);
+    procedure SpeedButton8Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -439,11 +442,12 @@ begin
   //Centrar Pantalla
   checkbox3.Checked:=main_vars.center_screen;
   //Diretorios
-  D1.Text:=Directory.Nes;
-  D2.Text:=Directory.GameBoy;
-  D3.Text:=Directory.ColecoVision;
+  D1.Text:=Directory.Preview;
+  D2.Text:=Directory.Arcade_samples;
+  D3.Text:=Directory.Arcade_nvram;
   D4.Text:=Directory.Arcade_roms;
   D5.Text:=Directory.Arcade_hi;
+  D6.Text:=Directory.qsnapshot;
   //Componer todas las entradas
   if event.num_joysticks=0 then begin
     radiobutton1.Checked:=true;
@@ -783,27 +787,32 @@ end;
 
 procedure TMConfig.SpeedButton1Click(Sender: TObject);
 begin
-  d1.Text:=BrowseForFolder(d1.text,label1.Caption)+main_vars.cadena_dir;
+  d1.Text:=BrowseForFolder(d1.text,label1.Caption);
 end;
 
 procedure TMConfig.SpeedButton2Click(Sender: TObject);
 begin
-  d2.Text:=BrowseForFolder(d2.text,label2.Caption)+main_vars.cadena_dir;
-end;
-
-procedure TMConfig.SpeedButton3Click(Sender: TObject);
-begin
-  d3.Text:=BrowseForFolder(d3.text,label3.Caption)+main_vars.cadena_dir;
+  d2.Text:=BrowseForFolder(d2.text,label2.Caption);
 end;
 
 procedure TMConfig.SpeedButton4Click(Sender: TObject);
 begin
-  d4.Text:=BrowseForFolder(d4.text,label4.Caption)+main_vars.cadena_dir;
+  d4.Text:=BrowseForFolder(d4.text,label4.Caption);
 end;
 
 procedure TMConfig.SpeedButton5Click(Sender: TObject);
 begin
-  d5.Text:=BrowseForFolder(d5.text,label5.Caption)+main_vars.cadena_dir;
+  d5.Text:=BrowseForFolder(d5.text,label5.Caption);
+end;
+
+procedure TMConfig.SpeedButton6Click(Sender: TObject);
+begin
+  d3.Text:=BrowseForFolder(d3.text,label3.Caption);
+end;
+
+procedure TMConfig.SpeedButton8Click(Sender: TObject);
+begin
+  d6.Text:=BrowseForFolder(d6.text,label12.Caption);
 end;
 
 procedure TMConfig.Button2Click(Sender: TObject);
@@ -957,11 +966,18 @@ procedure TMConfig.Button1Click(Sender: TObject);
 var
   tmp_var:byte;
 begin
-  Directory.Nes:=D1.Text;
-  Directory.GameBoy:=D2.Text;
-  Directory.ColecoVision:=D3.Text;
+  Directory.Preview:=D1.Text;
+  if d1.Text[length(d1.Text)]<>main_vars.cadena_dir then Directory.Preview:=Directory.Preview+main_vars.cadena_dir;
+  Directory.Arcade_samples:=D2.Text;
+  if d2.Text[length(d2.Text)]<>main_vars.cadena_dir then Directory.Arcade_samples:=Directory.Arcade_samples+main_vars.cadena_dir;
+  Directory.Arcade_nvram:=D3.Text;
+  if d3.Text[length(d3.Text)]<>main_vars.cadena_dir then Directory.Arcade_nvram:=Directory.Arcade_nvram+main_vars.cadena_dir;
   Directory.Arcade_roms:=D4.Text;
+  if d4.Text[length(d4.Text)]<>main_vars.cadena_dir then Directory.Arcade_roms:=Directory.Arcade_roms+main_vars.cadena_dir;
   Directory.Arcade_hi:=D5.Text;
+  if d5.Text[length(d5.Text)]<>main_vars.cadena_dir then Directory.Arcade_hi:=Directory.Arcade_hi+main_vars.cadena_dir;
+  Directory.Arcade_hi:=D6.Text;
+  if d6.Text[length(d6.Text)]<>main_vars.cadena_dir then Directory.qsnapshot:=Directory.qsnapshot+main_vars.cadena_dir;
   if radiobutton5.Checked then tmp_var:=0
     else if radiobutton6.Checked then tmp_var:=1
       else if radiobutton7.Checked then tmp_var:=2

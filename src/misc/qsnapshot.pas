@@ -80,9 +80,9 @@ var
   buffer:array[0..1] of byte;
 begin
 open_qsnapshot_load:=false;
-if not FileExists(directory.qsnapshot+main_vars.cadena_dir+name) then exit;
+if not FileExists(directory.qsnapshot+name) then exit;
 {$I-}
-assignfile(qsnap_fichero,directory.qsnapshot+main_vars.cadena_dir+name);
+assignfile(qsnap_fichero,directory.qsnapshot+name);
 reset(qsnap_fichero);
 blockread(qsnap_fichero,cadena[0],18);
 if cadena<>'DSP-QSNAP' then exit;

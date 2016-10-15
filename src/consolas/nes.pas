@@ -468,7 +468,6 @@ begin
   resultado:=abrir_cartucho(datos,longitud);
   freemem(datos);
   if resultado then begin
-    directory.Nes:=ExtractFilePath(romfile);
     cart_name:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
     llamadas_maquina.open_file:=nombre_file;
     nes_reset;
@@ -479,7 +478,7 @@ begin
     llamadas_maquina.open_file:='';
   end;
   change_caption;
-  Directory.Nes:=ExtractFilePath(romfile);
+  Directory.Nes:=ExtractFilePath(romfile)+main_vars.cadena_dir;
 end;
 
 function iniciar_nes:boolean;

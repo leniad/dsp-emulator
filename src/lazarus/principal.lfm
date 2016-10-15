@@ -2126,6 +2126,10 @@ object principal1: Tprincipal1
               Caption = 'Dig Dug'
               OnClick = CambiarMaquina
             end
+            object xevious1: TMenuItem
+              Caption = 'Xevious'
+              OnClick = CambiarMaquina
+            end
           end
           object sunahw1: TMenuItem
             Caption = 'Suna HW'

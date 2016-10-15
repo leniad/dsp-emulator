@@ -98,7 +98,7 @@ uses
   legendarywings_hw in '..\arcade\legendarywings_hw.pas',
   streetfighter_hw in '..\arcade\streetfighter_hw.pas',
   galaga_hw in '..\arcade\galaga_hw.pas',
-  namcoio_06xx_51xx_53xx in '..\devices\namcoio_06xx_51xx_53xx.pas',
+  namcoio_06xx_5Xxx in '..\devices\namcoio_06xx_5Xxx.pas',
   xaindsleena_hw in '..\arcade\xaindsleena_hw.pas',
   suna8_hw in '..\arcade\suna8_hw.pas',
   nmk16_hw in '..\arcade\nmk16_hw.pas',

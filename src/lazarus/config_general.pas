@@ -62,9 +62,10 @@ type
     ComboBox9: TComboBox;
     D1: TDirectoryEdit;
     D2: TDirectoryEdit;
-    D3: TDirectoryEdit;
+    D6: TDirectoryEdit;
     D4: TDirectoryEdit;
     D5: TDirectoryEdit;
+    D3: TDirectoryEdit;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox6: TGroupBox;
@@ -72,6 +73,7 @@ type
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
+    Label12: TLabel;
     Label15: TLabel;
     Label16: TLabel;
     Label17: TLabel;
@@ -422,11 +424,18 @@ procedure TMConfig.Button1Click(Sender: TObject);
 var
   tmp_var:byte;
 begin
-  Directory.Nes:=D1.Directory+main_vars.cadena_dir;
-  Directory.GameBoy:=D2.Directory+main_vars.cadena_dir;
-  Directory.ColecoVision:=D3.Directory+main_vars.cadena_dir;
-  Directory.Arcade_roms:=D4.Directory+main_vars.cadena_dir;
-  Directory.Arcade_hi:=D5.Directory+main_vars.cadena_dir;
+  Directory.Preview:=D1.Text;
+  if d1.Text[length(d1.Text)]<>main_vars.cadena_dir then Directory.Preview:=Directory.Preview+main_vars.cadena_dir;
+  Directory.Arcade_samples:=D2.Text;
+  if d2.Text[length(d2.Text)]<>main_vars.cadena_dir then Directory.Arcade_samples:=Directory.Arcade_samples+main_vars.cadena_dir;
+  Directory.Arcade_nvram:=D3.Text;
+  if d3.Text[length(d3.Text)]<>main_vars.cadena_dir then Directory.Arcade_nvram:=Directory.Arcade_nvram+main_vars.cadena_dir;
+  Directory.Arcade_roms:=D4.Text;
+  if d4.Text[length(d4.Text)]<>main_vars.cadena_dir then Directory.Arcade_roms:=Directory.Arcade_roms+main_vars.cadena_dir;
+  Directory.Arcade_hi:=D5.Text;
+  if d5.Text[length(d5.Text)]<>main_vars.cadena_dir then Directory.Arcade_hi:=Directory.Arcade_hi+main_vars.cadena_dir;
+  Directory.Arcade_hi:=D6.Text;
+  if d6.Text[length(d6.Text)]<>main_vars.cadena_dir then Directory.qsnapshot:=Directory.qsnapshot+main_vars.cadena_dir;
   if radiobutton5.Checked then tmp_var:=0
     else if radiobutton6.Checked then tmp_var:=1
       else if radiobutton7.Checked then tmp_var:=2
@@ -578,19 +587,6 @@ begin
     end;
     extract_joy_name:=cadena;
 end;
-
-function delete_last_char(cadena:string):string;
-var
-   cadena_t:string;
-   f:integer;
-begin
-   if cadena[length(cadena)]=main_vars.cadena_dir then begin
-      cadena_t:='';
-      for f:=1 to length(cadena)-1 do cadena_t:=cadena_t+cadena[f];
-   end else cadena_t:=cadena;
-   delete_last_char:=cadena_t;
-end;
-
 begin
   radiogroup1.Caption:=leng[main_vars.idioma].archivo[1];
   button2.Caption:=leng[main_vars.idioma].mensajes[8];
@@ -627,11 +623,12 @@ begin
   //Centrar Pantalla
   checkbox3.Checked:=main_vars.center_screen;
   //Diretorios
-  D1.Text:=Directory.Nes;
-  D2.Text:=Directory.GameBoy;
-  D3.Text:=Directory.ColecoVision;
+  D1.Text:=Directory.Preview;
+  D2.Text:=Directory.Arcade_samples;
+  D3.Text:=Directory.Arcade_nvram;
   D4.Text:=Directory.Arcade_roms;
   D5.Text:=Directory.Arcade_hi;
+  D6.Text:=Directory.qsnapshot;
   //Componer todas las entradas
   if event.num_joysticks=0 then begin
     radiobutton1.Checked:=true;

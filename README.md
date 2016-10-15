@@ -1,4 +1,32 @@
 ﻿#DSP Emulator status<br>
+<b>15/10/16 - DSP Emulator 0.17b1. Win32 binary and source updated.</b><br><pre>
+-General
+    +Namco IO
+        -Added 50XX control CPU
+        -Added 54XX sound CPU, using samples
+    +MB88XX CPU: Added opcodes $0f, $10, $1a, $20, $22, $2f and $48
+    +Fixed folders load/save, now the correct last folder used for Spectrum, Amstrad, Coleco, NES, GB, etc is remembered
+    +In general configuration menu, you can change preview images, samples, quick snapshot and NV-Ram folders. Removed NES, Coleco and GB folder change (useless now) 
+-Spectrum
+    +Z80 snapshot
+        -V1 - Fixed lenght of the compressed full memory block, I was ignoring the end mark
+        -V1 - Fixed buffer overflow, some times the snapshot data has more info that it's needed
+        -V2/V3 - Fixed uncompressed memory page inside of the data
+        -V2/V3 - Some checks to avoid bad snapshots
+        -V2/V3 - Now identify the correct Spectrum model
+        -V2/V3 - The preview image, now uses the active screen in 128k models
+-Gun.Smoke HW
+    +Gun.Smoke: Small video updates
+    +1943: Fixed background scroll
+-Galaga HW
+    +Galaga: added samples
+    +Xevious: added driver with sound, small problems with scroll and samples
+-WWF Superstars
+    +Small video updates
+-TMNT HW
+    +Sunset Riders: Enhanced copyprotection
+</pre><br>
+<img src='http://img1.imagilive.com/1016/xevious.png'><br>
 <b>26/09/16 - DSP Emulator 0.17b1. Win32 binary and source updated.</b><br><pre>
 -General
     +K051960: Implemented IRQ's

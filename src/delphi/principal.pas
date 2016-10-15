@@ -370,6 +370,7 @@ type
     Megazone1: TMenuItem;
     spacefb1: TMenuItem;
     Ajax1: TMenuItem;
+    Xevious1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -409,9 +410,6 @@ var
   Child:TfrChild;
   //Misc Vars
   tipo_new:word;
-  fila_dibujo:word;
-  //Status bitmap
-  status_bitmap:tbitmap;
 
 implementation
 uses acercade,file_engine,poke_memoria,lenslock,spectrum_misc,tap_tzx;
@@ -428,7 +426,6 @@ begin
 //SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
 //SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
 Init_sdl_lib;
-status_bitmap:=TBitmap.Create;
 EmuStatus:=EsStoped;
 main_vars.cadena_dir:='\';
 directory.Base:=extractfiledir(application.ExeName)+main_vars.cadena_dir;
@@ -508,14 +505,14 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
-main_vars.tipo_maquina:=tipo_new;
 if @llamadas_maquina.close<>nil then llamadas_maquina.close;
+main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
 QueryPerformanceFrequency(cont_micro);
 valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
-if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar
-  else main_vars.driver_ok:=false;
+main_vars.driver_ok:=false;
+if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
   principal1.timer1.Enabled:=false;
@@ -533,8 +530,8 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn19.Enabled:=false;
 end else begin
   principal1.timer1.Enabled:=true;
-  QueryPerformanceCounter(cont_sincroniza);
   if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+  QueryPerformanceCounter(cont_sincroniza);
   principal1.ejecutar1click(nil);
 end;
 end;
@@ -636,7 +633,6 @@ if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
 SDL_DestroyWindow(window_render);
 SDL_VideoQuit;
 SDL_Quit;
-status_bitmap.Destroy;
 close_sdl_lib;
 halt(0);
 end;

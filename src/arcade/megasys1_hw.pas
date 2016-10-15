@@ -147,7 +147,7 @@ for f:=0 to $ff do begin
 end; //del for
 end;
 
-procedure poner_pant_16(layer,pant_x:byte;trans:boolean;pos_x,pos_y:word);inline;
+procedure poner_pant_16(layer,pant_x:byte;trans:boolean;pos_x,pos_y:word);
 var
   f,x,y:byte;
   nchar,color,pos,sx,sy:word;
@@ -184,7 +184,7 @@ for f:=0 to $ff do begin
 end;
 end;
 
-procedure poner_pant_8(layer,pant_x:byte;trans:boolean;pos_x,pos_y:word);inline;
+procedure poner_pant_8(layer,pant_x:byte;trans:boolean;pos_x,pos_y:word);
 var
   x,y:byte;
   f,nchar,color,pos:word;
@@ -207,7 +207,7 @@ for f:=0 to $3ff do begin
 end;
 end;
 
-procedure update_video_megasys1;inline;
+procedure update_video_megasys1;
 var
   g,f,pant_x,h,layer:byte;
   trans:boolean;

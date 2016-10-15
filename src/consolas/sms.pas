@@ -265,7 +265,6 @@ begin
   //  else
   resultado:=abrir_cartucho_sms(datos,longitud);
   if resultado then begin
-    directory.sms:=ExtractFilePath(romfile);
     llamadas_maquina.open_file:=nombre_file;
     abrir_sms:=true;
     if mapper_sms.max=0 then mapper_sms.max:=1;
@@ -281,7 +280,7 @@ begin
     llamadas_maquina.open_file:='';
   end;
   change_caption;
-  Directory.sms:=ExtractFilePath(romfile);
+  Directory.sms:=ExtractFilePath(romfile)+main_vars.cadena_dir;
   freemem(datos);
 end;
 

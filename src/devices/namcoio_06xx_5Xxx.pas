@@ -1,28 +1,45 @@
-unit namcoio_06xx_51xx_53xx;
+unit namcoio_06xx_5Xxx;
 
 interface
-uses main_engine,timer_engine,mb88xx,rom_engine,cpu_misc;
+uses main_engine,timer_engine,mb88xx,rom_engine,cpu_misc,samples;
 
 const
   NONE=0;
+  IO50XX=4;
   IO51XX=1;
   IO53XX=2;
+  IO54XX=3;
 
 type
   read_chip=function:byte;
   write_chip=procedure(data:byte);
   read_req_chip=procedure;
+  tipo_50xx=record
+    frames:single;
+    latched_cmd:byte;
+    latched_rw:byte;
+    port_o:byte;
+    timer:byte;
+    mb88:cpu_mb88xx;
+  end;
   tipo_51xx=record
   	mode,coincred_mode,credits,in_count,lastcoins,lastbuttons:byte;
     coins_per_cred,creds_per_coin,coins:array[0..1] of byte;
-    remap_joy:boolean;
-    read_port:array[0..3] of read_chip;
+    remap_joy,kludge:boolean;
+    read_port:array[0..1] of pbyte;
     write_port:array[0..1] of write_chip;
   end;
   tipo_53xx=record
     port_o:byte;
     timer:byte;
     frame:single;
+    mb88:cpu_mb88xx;
+  end;
+  tipo_54xx=record
+    latched_cmd:byte;
+    timer:byte;
+    frame:single;
+    mb88:cpu_mb88xx;
   end;
   tipo_06xx=record
     control:byte;
@@ -39,23 +56,117 @@ function namco_06xx_data_r(dir,num:byte):byte;
 procedure namco_06xx_data_w(dir,num,data:byte);
 function namco_06xx_ctrl_r(num:byte):byte;
 procedure namco_06xx_ctrl_w(num,data:byte);
+//50XX
+function namcoio_50xx_init(zip_name:string):boolean;
+procedure run_namco_50xx;
+procedure namcoio_50xx_reset;
+procedure namco_50xx_close;
 //51XX
-procedure namcoio_51xx_reset;
+procedure namcoio_51xx_init(in0,in1:pbyte);
+procedure namcoio_51xx_reset(kludge:boolean);
 //53XX
-procedure namcoio_53xx_init(port_k:cpu_inport_call;port_r_r:type_mb88xx_inport_r;zip_name:string);
+function namcoio_53xx_init(port_k:cpu_inport_call;port_r_r:type_mb88xx_inport_r;zip_name:string):boolean;
 procedure namco_53xx_o_w(valor:byte);
 procedure namcoio_53xx_reset;
 procedure run_namco_53xx;
 procedure namco_53xx_close;
+//54XX
+function namcoio_54xx_init(zip_name:string):boolean;
+procedure run_namco_54xx;
+procedure namcoio_54xx_reset;
+procedure namco_54xx_close;
 
 var
   namco_06xx:array[0..1] of tipo_06xx;
+  namco_50xx:tipo_50xx;
   namco_51xx:tipo_51xx;
   namco_53xx:tipo_53xx;
+  namco_54xx:tipo_54xx;
 
 implementation
 const
+  namco_50xx_rom:tipo_roms=(n:'50xx.bin';l:$800;p:0;crc:$a0acbaf7);
   namco_53xx_rom:tipo_roms=(n:'53xx.bin';l:$400;p:0;crc:$b326fecb);
+  namco_54xx_rom:tipo_roms=(n:'54xx.bin';l:$400;p:0;crc:$ee7357e0);
+
+//Namco 50XX
+function namco_50xx_k_r:byte;
+begin
+  namco_50xx_k_r:=namco_50xx.latched_cmd shr 4;
+end;
+
+procedure namco_50xx_o_w(valor:byte);
+begin
+	if (valor and $10)<>0 then namco_50xx.port_o:=(namco_50xx.port_o and $f) or ((valor and $f) shl 4)
+    else namco_50xx.port_o:=(namco_50xx.port_o and $f0) or (valor and $f);
+end;
+
+function namco_50xx_r_r(port:byte):byte;
+begin
+  case port of
+    0:namco_50xx_r_r:=namco_50xx.latched_cmd and $f;
+    2:namco_50xx_r_r:=namco_50xx.latched_rw and 1;
+  end;
+end;
+
+function namcoio_50XX_read:byte;
+begin
+  namcoio_50XX_read:=namco_50xx.port_o;
+  namco_50xx.latched_rw:=1;
+  namco_50xx.mb88.set_irq_line(ASSERT_LINE);
+  timer[namco_50xx.timer].enabled:=true;
+end;
+
+procedure namcoio_50XX_write(valor:byte);
+begin
+  namco_50xx.latched_cmd:=valor;
+  namco_50xx.latched_rw:=0;
+  namco_50xx.mb88.set_irq_line(ASSERT_LINE);
+  timer[namco_50xx.timer].enabled:=true;
+end;
+
+procedure namcoio_50xx_read_req;
+begin
+  namco_50xx.latched_rw:=1;
+  namco_50xx.mb88.set_irq_line(ASSERT_LINE);
+  timer[namco_50xx.timer].enabled:=true;
+end;
+
+procedure namcoio_50xx_irq_clear;
+begin
+	namco_50xx.mb88.set_irq_line(CLEAR_LINE);
+  timer[namco_50xx.timer].enabled:=false;
+end;
+
+function namcoio_50xx_init(zip_name:string):boolean;
+begin
+namco_50xx.mb88:=cpu_mb88xx.Create(1536000,264);
+namco_50xx.frames:=namco_50xx.mb88.tframes;
+namco_50xx.mb88.change_io_calls(namco_50xx_k_r,namco_50xx_o_w,nil,nil,namco_50xx_r_r,nil);
+//namco 50XX clock 1536000*0.000021=32.256
+namco_50xx.timer:=init_timer(namco_50xx.mb88.numero_cpu,32.256,namcoio_50xx_irq_clear,false);
+//rom
+namcoio_50xx_init:=cargar_roms(namco_50xx.mb88.get_rom_addr,@namco_50xx_rom,zip_name,1);
+end;
+
+procedure namco_50xx_close;
+begin
+namco_50xx.mb88.free;
+end;
+
+procedure run_namco_50xx;
+begin
+  namco_50xx.mb88.run(namco_50xx.mb88.tframes);
+  namco_50xx.frames:=namco_50xx.frames+namco_50xx.mb88.tframes-namco_50xx.mb88.contador;
+end;
+
+procedure namcoio_50xx_reset;
+begin
+  namco_50xx.mb88.reset;
+  namco_50xx.latched_cmd:=0;
+  namco_50xx.latched_rw:=0;
+  timer[namco_50xx.timer].enabled:=false;
+end;
 
 //Namco 51XX
 procedure namcoio_51XX_write(data:byte);
@@ -72,7 +183,10 @@ begin
 	end	else begin
 		case data of
 			0:;	// nop
-			1:begin	// set coinage
+			1:if namco_51xx.kludge then begin	// set coinage
+          namco_51xx.coincred_mode:=6;
+          namco_51xx.remap_joy:=true;
+        end else begin
 				  namco_51xx.coincred_mode:=4;
 				  // this is a good time to reset the credits counter */
 				  namco_51xx.credits:=0;
@@ -100,15 +214,15 @@ const
 begin
 	if (namco_51xx.mode=0) then begin	// switch mode
 		case namco_51xx.in_count of
-			0:res:=namco_51xx.read_port[0] or (namco_51xx.read_port[1] shl 4);
-			1:res:=namco_51xx.read_port[2] or (namco_51xx.read_port[3] shl 4);
+			0:res:=namco_51xx.read_port[0]^;
+			1:res:=namco_51xx.read_port[1]^;
 			2:res:=0;	// nothing?
     end;
     namco_51xx.in_count:=(namco_51xx.in_count+1) and $3;
 	end	else begin 	// credits mode
 		case namco_51xx.in_count of
 			0:begin	// number of credits in BCD format
-					in_:=not(namco_51xx.read_port[0] or (namco_51xx.read_port[1] shl 4));
+					in_:=not(namco_51xx.read_port[0]^);
 					toggle:=in_ xor namco_51xx.lastcoins;
 					namco_51xx.lastcoins:=in_;
 					if (namco_51xx.coins_per_cred[0]>0) then begin
@@ -161,15 +275,15 @@ begin
               end;
             end;
 					end;  //Del mode=1
-  				if (not(namco_51xx.read_port[1]) and $8)<>0 then begin //check test mode switch */
+  				if (not(namco_51xx.read_port[0]^ shr 4) and $8)<>0 then begin //check test mode switch */
 	  				namcoio_51XX_read:=$bb;
             exit;
           end;
 			  	res:=(namco_51xx.credits div 10)*16+namco_51xx.credits mod 10;
         end;
 			1:begin
-					joy:=namco_51xx.read_port[2] and $0f;
-					in_:=not(namco_51xx.read_port[0]);
+					joy:=namco_51xx.read_port[1]^ and $0f;
+					in_:=not(namco_51xx.read_port[0]^ and $0f);
 					toggle:=in_ xor namco_51xx.lastbuttons;
 					namco_51xx.lastbuttons:=(namco_51xx.lastbuttons and 2) or (in_ and 1);
 					// remap joystick */
@@ -180,8 +294,8 @@ begin
 					res:=joy;
 				end;
 			2:begin
-					joy:=namco_51xx.read_port[3] and $0f;
-					in_:=not(namco_51xx.read_port[0]);
+					joy:=namco_51xx.read_port[1]^ shr 4;
+					in_:=not(namco_51xx.read_port[0]^ and $0f);
 					toggle:=in_ xor namco_51xx.lastbuttons;
 					namco_51xx.lastbuttons:=(namco_51xx.lastbuttons and 1) or (in_ and 2);
 					// remap joystick */
@@ -197,8 +311,15 @@ begin
   namcoio_51XX_read:=res;
 end;
 
-procedure namcoio_51xx_reset;
+procedure namcoio_51xx_init(in0,in1:pbyte);
 begin
+  namco_51xx.read_port[0]:=in0;
+  namco_51xx.read_port[1]:=in1;
+end;
+
+procedure namcoio_51xx_reset(kludge:boolean);
+begin
+  namco_51xx.kludge:=kludge;
   namco_51xx.credits:=0;
 	namco_51xx.coins[0]:=0;
 	namco_51xx.coins_per_cred[0]:=1;
@@ -217,23 +338,24 @@ end;
 //Namco 53XX
 procedure namco_53xx_close;
 begin
+namco_53xx.mb88.free;
 end;
 
 procedure run_namco_53xx;
 begin
-  main_mb88xx.run(namco_53xx.frame);
-  namco_53xx.frame:=namco_53xx.frame+main_mb88xx.tframes-main_mb88xx.contador;
+  namco_53xx.mb88.run(namco_53xx.frame);
+  namco_53xx.frame:=namco_53xx.frame+namco_53xx.mb88.tframes-namco_53xx.mb88.contador;
 end;
 
 procedure namcoio_53xx_irq_clear;
 begin
-	main_mb88xx.set_irq_line(CLEAR_LINE);
+	namco_53xx.mb88.set_irq_line(CLEAR_LINE);
   timer[namco_53xx.timer].enabled:=false;
 end;
 
 procedure namcoio_53xx_read_req;
 begin
-  main_mb88xx.set_irq_line(ASSERT_LINE);
+  namco_53xx.mb88.set_irq_line(ASSERT_LINE);
 	// The execution time of one instruction is ~4us, so we must make sure to
 	// give the cpu time to poll the /IRQ input before we clear it.
 	// The input clock to the 06XX interface chip is 64H, that is
@@ -248,20 +370,20 @@ begin
   namcoio_53xx_read_req;
 end;
 
-procedure namcoio_53xx_init(port_k:cpu_inport_call;port_r_r:type_mb88xx_inport_r;zip_name:string);
+function namcoio_53xx_init(port_k:cpu_inport_call;port_r_r:type_mb88xx_inport_r;zip_name:string):boolean;
 begin
-main_mb88xx:=cpu_mb88xx.Create(1536000,264);
-main_mb88xx.change_io_calls(port_k,namco_53xx_o_w,nil,nil,port_r_r,nil);
-namco_53xx.frame:=main_mb88xx.tframes;
+namco_53xx.mb88:=cpu_mb88xx.Create(1536000,264);
+namco_53xx.mb88.change_io_calls(port_k,namco_53xx_o_w,nil,nil,port_r_r,nil);
+namco_53xx.frame:=namco_53xx.mb88.tframes;
 //namco 53XX clock 1536000*0.000021=32.256
-namco_53xx.timer:=init_timer(main_mb88xx.numero_cpu,32.256,namcoio_53xx_irq_clear,false);
+namco_53xx.timer:=init_timer(namco_53xx.mb88.numero_cpu,32.256,namcoio_53xx_irq_clear,false);
 //rom
-if not(cargar_roms(main_mb88xx.get_rom_addr,@namco_53xx_rom,zip_name,1)) then exit;
+namcoio_53xx_init:=cargar_roms(namco_53xx.mb88.get_rom_addr,@namco_53xx_rom,zip_name,1);
 end;
 
 procedure namcoio_53xx_reset;
 begin
-  main_mb88xx.reset;
+  namco_53xx.mb88.reset;
   namco_53xx.port_o:=0;
   timer[namco_53xx.timer].enabled:=false;
 end;
@@ -273,6 +395,74 @@ begin
   res:=(valor and $0f);
 	if (valor and $10)<>0 then namco_53xx.port_o:=(namco_53xx.port_o and $0f) or (res shl 4)
 	  else namco_53xx.port_o:=(namco_53xx.port_o and $f0) or res;
+end;
+
+//Namco 54XX
+function namco_54xx_k_r:byte;
+begin
+  namco_54xx_k_r:=namco_54xx.latched_cmd shr 4;
+end;
+
+procedure namco_54xx_o_w(valor:byte);
+begin
+	if (valor and $10)<>0 then if (valor and $f)<>0 then
+    start_sample(1)
+    else if (valor and $f)<>0 then
+    start_sample(0);
+end;
+
+function namco_54xx_r_r(port:byte):byte;
+begin
+  if port=0 then namco_54xx_r_r:=namco_54xx.latched_cmd and $f
+    else namco_54xx_r_r:=$ff;
+end;
+
+procedure namco_54xx_r_w(port,valor:byte);
+begin
+  if port=1 then if valor<>0 then
+    start_sample(2);
+end;
+
+procedure namcoio_54XX_write(valor:byte);
+begin
+  namco_54xx.latched_cmd:=valor;
+  namco_54xx.mb88.set_irq_line(ASSERT_LINE);
+  timer[namco_54xx.timer].enabled:=true;
+end;
+
+procedure namcoio_54xx_irq_clear;
+begin
+	namco_54xx.mb88.set_irq_line(CLEAR_LINE);
+  timer[namco_54xx.timer].enabled:=false;
+end;
+
+function namcoio_54xx_init(zip_name:string):boolean;
+begin
+namco_54xx.mb88:=cpu_mb88xx.Create(1536000,264);
+namco_54xx.mb88.change_io_calls(namco_54xx_k_r,namco_54xx_o_w,nil,nil,namco_54xx_r_r,namco_54xx_r_w);
+namco_54xx.frame:=namco_54xx.mb88.tframes;
+//namco 53XX clock 1536000*0.000021=32.256
+namco_54xx.timer:=init_timer(namco_54xx.mb88.numero_cpu,32.256,namcoio_54xx_irq_clear,false);
+//rom
+namcoio_54xx_init:=cargar_roms(namco_54xx.mb88.get_rom_addr,@namco_54xx_rom,zip_name,1);
+end;
+
+procedure namco_54xx_close;
+begin
+  namco_54xx.mb88.free;
+end;
+
+procedure run_namco_54xx;
+begin
+  namco_54xx.mb88.run(namco_54xx.frame);
+  namco_54xx.frame:=namco_54xx.frame+namco_54xx.mb88.tframes-namco_54xx.mb88.contador;
+end;
+
+procedure namcoio_54xx_reset;
+begin
+  namco_54xx.mb88.reset;
+  namco_54xx.latched_cmd:=0;
+  timer[namco_54xx.timer].enabled:=false;
 end;
 
 //Namco 06XX
@@ -289,6 +479,12 @@ begin
   namco_06xx[io].fwrite[num]:=nil;
   namco_06xx[io].fread_req[num]:=nil;
 end;
+procedure namco_50xx_chip(io,num:byte);
+begin
+  namco_06xx[io].fread[num]:=namcoio_50XX_read;
+  namco_06xx[io].fwrite[num]:=namcoio_50XX_write;
+  namco_06xx[io].fread_req[num]:=namcoio_50xx_read_req;
+end;
 procedure namco_51xx_chip(io,num:byte);
 begin
   namco_06xx[io].fread[num]:=namcoio_51XX_read;
@@ -301,29 +497,43 @@ begin
   namco_06xx[io].fwrite[num]:=nil;
   namco_06xx[io].fread_req[num]:=namcoio_53xx_read_req;
 end;
+procedure namco_54xx_chip(io,num:byte);
+begin
+  namco_06xx[io].fread[num]:=nil;
+  namco_06xx[io].fwrite[num]:=namcoio_54XX_write;
+  namco_06xx[io].fread_req[num]:=nil;
+end;
 begin
   //Namco 06xx clock 48000Hz --> 200us --> 48000*0.0002 = 9.6
   //Z80 Clock 3072000
   // (3072000*9.6)/48000 = 614.4 --> No funciona?!?!? Con 768 Sip (250us) un 25% mas de tiempo...
   namco_06xx[num].nmi_timer:=init_timer(0,768,nmi_function,false);
   case chip0 of
+    IO50XX:namco_50xx_chip(num,0);  //50XX
     IO51XX:namco_51xx_chip(num,0);  //51XX
     IO53XX:namco_53xx_chip(num,0); //53XX
+    IO54XX:namco_54xx_chip(num,0); //54XX
   end;
   case chip1 of
     NONE:none_chip(num,1);
+    IO50XX:namco_50xx_chip(num,1);  //50XX
     IO51XX:namco_51xx_chip(num,1);  //51XX
     IO53XX:namco_53xx_chip(num,1);  //53XX
+    IO54XX:namco_54xx_chip(num,1); //54XX
   end;
   case chip2 of
     NONE:none_chip(num,2);
+    IO50XX:namco_50xx_chip(num,2);  //50XX
     IO51XX:namco_51xx_chip(num,2);  //51XX
     IO53XX:namco_53xx_chip(num,2);  //53XX
+    IO54XX:namco_54xx_chip(num,2); //54XX
   end;
   case chip3 of
     NONE:none_chip(num,3);
+    IO50XX:namco_50xx_chip(num,3);  //50XX
     IO51XX:namco_51xx_chip(num,3);  //51XX
     IO53XX:namco_53xx_chip(num,3);  //53XX
+    IO54XX:namco_54xx_chip(num,3); //54XX
   end;
 end;
 

@@ -44,7 +44,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=236;
+  games_cont=237;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -278,6 +278,7 @@ const
   (name:'Megazone';year:'1983';snd:1;hi:false;zip:'megazone';grid:228;company:'Konami';rom:@megazone),
   (name:'Space Fire Bird';year:'1980';snd:1;hi:false;zip:'spacefb';grid:229;company:'Nintendo';rom:@spacefb),
   (name:'Ajax';year:'1987';snd:1;hi:false;zip:'ajax';grid:230;company:'Konami';rom:@ajax),
+  (name:'Xevious';year:'1982';snd:1;hi:false;zip:'xevious';grid:231;company:'Namco';rom:@xevious),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -531,6 +532,7 @@ case numero of
   228:principal1.CambiarMaquina(principal1.megazone1);
   229:principal1.CambiarMaquina(principal1.spacefb1);
   230:principal1.CambiarMaquina(principal1.ajax1);
+  231:principal1.CambiarMaquina(principal1.xevious1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -773,6 +775,7 @@ principal1.HyperSports1.Checked:=false;
 principal1.megazone1.checked:=false;
 principal1.spacefb1.checked:=false;
 principal1.ajax1.checked:=false;
+principal1.xevious1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -891,7 +894,7 @@ case tmaquina of
   58:Cargar_rastan;
   59,60,61:Cargar_hlwings;
   62:Cargar_SFighter;
-  65,167:Cargar_galagahw;
+  65,167,231:Cargar_galagahw;
   66:Cargar_xain;
   67,68:Cargar_suna_hw;
   69,71:Cargar_nmk16;
@@ -1913,6 +1916,10 @@ end;
 if sender=principal1.ajax1 then begin
   tipo:=230;
   principal1.ajax1.Checked:=true;
+end;
+if sender=principal1.xevious1 then begin
+  tipo:=231;
+  principal1.xevious1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin
