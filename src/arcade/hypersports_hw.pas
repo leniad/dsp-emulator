@@ -96,18 +96,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for frame:=0 to $ff do begin
       //main
-      main_m6809.run(frame_m);
-      frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+      m6809_0.run(frame_m);
+      frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
       //sound
-      snd_z80.run(frame_s);
-      frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+      z80_0.run(frame_s);
+      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
       if frame=239 then begin
-          if irq_ena then main_m6809.change_irq(HOLD_LINE);
+          if irq_ena then m6809_0.change_irq(HOLD_LINE);
           update_video_hypersports;
       end;
   end;
@@ -126,7 +126,7 @@ case direccion of
   $1681:hypersports_getbyte:=marcade.in0;
   $1682:hypersports_getbyte:=marcade.in1;
   $1683:hypersports_getbyte:=marcade.dswa; //DSW1
-  $4000..$ffff:if main_m6809.opcode then hypersports_getbyte:=mem_opcodes[direccion-$4000]
+  $4000..$ffff:if m6809_0.opcode then hypersports_getbyte:=mem_opcodes[direccion-$4000]
                   else hypersports_getbyte:=memoria[direccion];
  end;
 end;
@@ -137,7 +137,7 @@ if direccion>$3fff then exit;
 case direccion of
   $1000..$10ff,$3000..$3fff:memoria[direccion]:=valor;
   $1480:main_screen.flip_main_screen:=(valor and $1)<>0;
-  $1481:snd_z80.change_irq(HOLD_LINE);
+  $1481:z80_0.change_irq(HOLD_LINE);
   $1487:irq_ena:=(valor<>0);
   $1500:sound_latch:=valor;
   $2000..$2fff:begin
@@ -152,7 +152,7 @@ begin
 case direccion of
   0..$4fff:hypersports_snd_getbyte:=mem_snd[direccion];
   $6000:hypersports_snd_getbyte:=sound_latch;
-  $8000:hypersports_snd_getbyte:=((snd_z80.contador+trunc(snd_z80.tframes*frame)) shr 10) and $f;
+  $8000:hypersports_snd_getbyte:=((z80_0.contador+trunc(z80_0.tframes*frame)) shr 10) and $f;
 end;
 end;
 
@@ -195,9 +195,9 @@ begin
 open_qsnapshot_save('hypersports'+nombre);
 getmem(data,250);
 //CPU
-size:=main_m6809.save_snapshot(data);
+size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=sn_76496_0.save_snapshot(data);
@@ -229,9 +229,9 @@ if not(open_qsnapshot_load('hypersports'+nombre)) then exit;
 getmem(data,250);
 //CPU
 loaddata_qsnapshot(data);
-main_m6809.load_snapshot(data);
+m6809_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 sn_76496_0.load_snapshot(data);
@@ -262,8 +262,8 @@ end;
 
 procedure reset_hypersports;
 begin
- main_m6809.reset;
- snd_z80.reset;
+ m6809_0.reset;
+ z80_0.reset;
  vlm5030_0.reset;
  dac_0.reset;
  reset_audio;
@@ -302,12 +302,12 @@ screen_mod_scroll(1,512,256,511,0,0,0);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(18432000 div 12,$100);
-main_m6809.change_ram_calls(hypersports_getbyte,hypersports_putbyte);
+m6809_0:=cpu_m6809.Create(18432000 div 12,$100);
+m6809_0.change_ram_calls(hypersports_getbyte,hypersports_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(14318180 div 4,$100);
-snd_z80.change_ram_calls(hypersports_snd_getbyte,hypersports_snd_putbyte);
-snd_z80.init_sound(hypersports_sound_update);
+z80_0:=cpu_z80.create(14318180 div 4,$100);
+z80_0.change_ram_calls(hypersports_snd_getbyte,hypersports_snd_putbyte);
+z80_0.init_sound(hypersports_sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(14318180 div 8);
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,4);

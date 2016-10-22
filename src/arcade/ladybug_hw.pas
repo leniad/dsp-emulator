@@ -163,8 +163,8 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   //SYS
-  if arcade_input.coin[0] then main_z80.change_nmi(ASSERT_LINE) else main_z80.change_nmi(CLEAR_LINE);
-  if arcade_input.coin[1] then main_z80.change_irq(HOLD_LINE);
+  if arcade_input.coin[0] then z80_0.change_nmi(ASSERT_LINE) else z80_0.change_nmi(CLEAR_LINE);
+  if arcade_input.coin[1] then z80_0.change_irq(HOLD_LINE);
 end;
 end;
 
@@ -174,11 +174,11 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=224 then begin
       vblank_val:=$80;
       update_video_ladybug;
@@ -224,7 +224,7 @@ end;
 //Main
 procedure reset_ladybug;
 begin
- main_z80.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
@@ -260,9 +260,9 @@ screen_mod_scroll(2,0,0,0,256,256,255);
 if main_vars.tipo_maquina<>34 then main_screen.rot90_screen:=true;
 iniciar_video(192,240);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(ladybug_getbyte,ladybug_putbyte);
-main_z80.init_sound(ladybug_sound_update);
+z80_0:=cpu_z80.create(4000000,256);
+z80_0.change_ram_calls(ladybug_getbyte,ladybug_putbyte);
+z80_0.init_sound(ladybug_sound_update);
 //Audio chips
 sn_76496_0:=sn76496_chip.Create(4000000);
 sn_76496_1:=sn76496_chip.Create(4000000);

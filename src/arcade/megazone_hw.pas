@@ -115,23 +115,23 @@ var
   frame_m,frame_s,frame_s_sub:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
-frame_s_sub:=main_mcs48.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
+frame_s_sub:=mcs48_0.tframes;
 while EmuStatus=EsRuning do begin
   for frame:=0 to $ff do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     //snd sub
-    main_mcs48.run(frame_s_sub);
-    frame_s_sub:=frame_s_sub+main_mcs48.tframes-main_mcs48.contador;
+    mcs48_0.run(frame_s_sub);
+    frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
     if frame=239 then begin
-      if irq_enable then main_m6809.change_irq(HOLD_LINE);
-      snd_z80.change_irq(HOLD_LINE);
+      if irq_enable then m6809_0.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_megazone;
     end;
   end;
@@ -145,7 +145,7 @@ begin
 case direccion of
   $2000..$33ff,$3800..$3fff:megazone_getbyte:=memoria[direccion];
   $4000..$5fff:;
-  $6000..$ffff:if main_m6809.opcode then megazone_getbyte:=mem_opcodes[direccion-$6000]
+  $6000..$ffff:if m6809_0.opcode then megazone_getbyte:=mem_opcodes[direccion-$6000]
                   else megazone_getbyte:=memoria[direccion];
 end;
 end;
@@ -188,7 +188,7 @@ procedure megazone_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$2000 then exit;
 case direccion of
-  $2000:main_mcs48.change_irq(ASSERT_LINE);
+  $2000:mcs48_0.change_irq(ASSERT_LINE);
   $4000:sound_latch:=valor;
   $a000,$c000,$c001:; //NMI+Watch Dog
   $e000..$e7ff:memoria[(direccion and $7ff)+$3800]:=valor;
@@ -224,7 +224,7 @@ begin
 case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);
   MCS48_PORT_P2:begin
-                  if (valor and $80)=0 then main_mcs48.change_irq(CLEAR_LINE);
+                  if (valor and $80)=0 then mcs48_0.change_irq(CLEAR_LINE);
                   i8039_status:=(valor and $70) shr 4;
                 end;
 end;
@@ -234,7 +234,7 @@ function megazone_portar:byte;
 var
   timer:byte;
 begin
-timer:=trunc(((snd_z80.contador+(snd_z80.tframes*frame))*(7159/12288))/(1024/2)) and $f;
+timer:=trunc(((z80_0.contador+(z80_0.tframes*frame))*(7159/12288))/(1024/2)) and $f;
 megazone_portar:=(timer shl 4) or i8039_status;
 end;
 
@@ -251,9 +251,9 @@ end;
 //Main
 procedure reset_megazone;
 begin
- main_m6809.reset;
- snd_z80.reset;
- main_mcs48.reset;
+ m6809_0.reset;
+ z80_0.reset;
+ mcs48_0.reset;
  ay8910_0.reset;
  dac_0.reset;
  reset_audio;
@@ -295,19 +295,19 @@ screen_init(3,256,288,false,true);
 screen_mod_sprites(3,256,512,255,511);
 iniciar_video(224,288);
 //Main CPU
-main_m6809:=cpu_m6809.Create(18432000 div 9,$100);
-main_m6809.change_ram_calls(megazone_getbyte,megazone_putbyte);
+m6809_0:=cpu_m6809.Create(18432000 div 9,$100);
+m6809_0.change_ram_calls(megazone_getbyte,megazone_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(18432000 div 6,$100);
-snd_z80.change_ram_calls(megazone_snd_getbyte,megazone_snd_putbyte);
-snd_z80.change_io_calls(megazone_sound_inbyte,megazone_sound_outbyte);
-snd_z80.init_sound(megazone_sound_update);
+z80_0:=cpu_z80.create(18432000 div 6,$100);
+z80_0.change_ram_calls(megazone_snd_getbyte,megazone_snd_putbyte);
+z80_0.change_io_calls(megazone_sound_inbyte,megazone_sound_outbyte);
+z80_0.init_sound(megazone_sound_update);
 //Sound CPU 2
-main_mcs48:=cpu_mcs48.create(14318000 div 2,$100,I8039);
-main_mcs48.change_ram_calls(megazone_sound2_getbyte,nil);
-main_mcs48.change_io_calls(megazone_sound2_inport,megazone_sound2_outport);
+mcs48_0:=cpu_mcs48.create(14318000 div 2,$100,I8039);
+mcs48_0.change_ram_calls(megazone_sound2_getbyte,nil);
+mcs48_0.change_io_calls(megazone_sound2_inport,megazone_sound2_outport);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(14318000 div 8,0.3);
+ay8910_0:=ay8910_chip.create(14318000 div 8,AY8910,0.3);
 ay8910_0.change_io_calls(megazone_portar,nil,nil,megazone_portbw);
 dac_0:=dac_chip.Create(0.5);
 //cargar roms

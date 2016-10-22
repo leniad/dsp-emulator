@@ -96,16 +96,16 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
+frame_m:=m68000_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 258 do begin
     //main
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     case f of
-    31,95,159,224:main_m68000.irq[1]:=ASSERT_LINE;
+    31,95,159,224:m68000_0.irq[1]:=ASSERT_LINE;
     223:begin
-          main_m68000.irq[2]:=ASSERT_LINE;
+          m68000_0.irq[2]:=ASSERT_LINE;
           update_video_foodf;
         end;
     end;
@@ -179,8 +179,8 @@ case direccion of
     $940000..$97ffff:case (direccion and $1ffff) of
                   $4000..$7fff:analog_select:=(direccion and $7) xor 3; //write analog
                   $8000..$bfff:begin
-                                 if (valor and $4)=0 then main_m68000.irq[1]:=CLEAR_LINE;
-                                 if (valor and $8)=0 then main_m68000.irq[2]:=CLEAR_LINE;
+                                 if (valor and $4)=0 then m68000_0.irq[1]:=CLEAR_LINE;
+                                 if (valor and $8)=0 then m68000_0.irq[2]:=CLEAR_LINE;
                                end;
                   $10000..$13fff:cambiar_color((direccion and $1ff) shr 1,valor); //palette write
                   $14000:; //read nvram recall
@@ -206,7 +206,7 @@ end;
 //Main
 procedure reset_foodf;
 begin
- main_m68000.reset;
+ m68000_0.reset;
  pokey_0.reset;
  pokey_1.reset;
  pokey_2.reset;
@@ -234,11 +234,11 @@ screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(trunc(12096000/2),259);
-main_m68000.change_ram16_calls(foodf_getword,foodf_putword);
-main_m68000.init_sound(foodf_sound_update);
+m68000_0:=cpu_m68000.create(trunc(12096000/2),259);
+m68000_0.change_ram16_calls(foodf_getword,foodf_putword);
+m68000_0.init_sound(foodf_sound_update);
 //Init Analog
-init_analog(main_m68000.numero_cpu,main_m68000.clock,100,10,$7f,$ff,0,true);
+init_analog(m68000_0.numero_cpu,m68000_0.clock,100,10,$7f,$ff,0,true);
 //Sound Chips
 pokey_0:=pokey_chip.create(0,trunc(12096000/2/10));
 pokey_0.change_pot(foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r);

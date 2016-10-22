@@ -124,7 +124,7 @@ type
         end;
 
 var
-  main_nec:cpu_nec;
+  nec_0:cpu_nec;
 
 implementation
 var
@@ -385,10 +385,10 @@ end;
 
 procedure CLKS(clk_v20,clk_v30,clk_v33:byte);
 begin
-  case main_nec.tipo_cpu of
-    0:main_nec.contador:=main_nec.contador+clk_v20;
-    1:main_nec.contador:=main_nec.contador+clk_v30;
-    2:main_nec.contador:=main_nec.contador+clk_v33;
+  case nec_0.tipo_cpu of
+    0:nec_0.contador:=nec_0.contador+clk_v20;
+    1:nec_0.contador:=nec_0.contador+clk_v30;
+    2:nec_0.contador:=nec_0.contador+clk_v33;
   end;
 end;
 

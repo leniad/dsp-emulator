@@ -896,15 +896,15 @@ var
   frame_m:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
+frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for local_frame:=0 to $ff do begin
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //SND
     konamisnd_0.run(local_frame);
     if local_frame=248 then begin
-      if haz_nmi then main_z80.change_nmi(PULSE_LINE);
+      if haz_nmi then z80_0.change_nmi(PULSE_LINE);
       if stars_enable then stars_scrollpos:=stars_scrollpos+1;
       galaxian_update_video;
     end;
@@ -920,13 +920,13 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=248 then begin
-      if haz_nmi then main_z80.change_nmi(PULSE_LINE);
+      if haz_nmi then z80_0.change_nmi(PULSE_LINE);
       if stars_enable then stars_scrollpos:=stars_scrollpos+1;
       update_video_hgalaxian;  //el general, no hace falta la funcion
     end;
@@ -939,7 +939,7 @@ end;
 //Main
 procedure reset_hgalaxian;
 begin
- main_z80.reset;
+ z80_0.reset;
  reset_audio;
  stars_scrollpos:=0;
  haz_nmi:=false;
@@ -1045,15 +1045,18 @@ screen_init(1,256,512,true,true);
 screen_init(2,512,256,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,256);
+z80_0:=cpu_z80.create(3072000,256);
 case main_vars.tipo_maquina of
   14:begin  //frogger
       //Main CPU
-      main_z80.change_ram_calls(frogger_getbyte,frogger_putbyte);
+      z80_0.change_ram_calls(frogger_getbyte,frogger_putbyte);
       //Sound
       konamisnd_0:=konamisnd_chip.create(1,TIPO_FROGGER,1789750,256);
+      if not(cargar_roms(@konamisnd_0.memoria[0],@frogger_sound[0],'frogger.zip',0)) then exit;
+      //Las ROMS tienen lineas movidas...
+      for f:=0 to $7FF do konamisnd_0.memoria[f]:=BITSWAP8(konamisnd_0.memoria[f],7,6,5,4,3,2,0,1);
       //Hi-Score
-      timer_hs_frogger:=init_timer(main_z80.numero_cpu,10000,frogger_hi_score,true);
+      timer_hs_frogger:=init_timer(z80_0.numero_cpu,10000,frogger_hi_score,true);
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
       pia8255_0.change_ports(port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
@@ -1061,9 +1064,6 @@ case main_vars.tipo_maquina of
       pia8255_1.change_ports(nil,nil,nil,frogger_port_1_a_write,frogger_port_1_b_write,nil);
       //cargar roms
       if not(cargar_roms(@memoria[0],@frogger_rom[0],'frogger.zip',0)) then exit;
-      if not(cargar_roms(@mem_snd[0],@frogger_sound[0],'frogger.zip',0)) then exit;
-      //Las ROMS tienen lineas movidas...
-      for f:=0 to $7FF do mem_snd[f]:=BITSWAP8(mem_snd[f],7,6,5,4,3,2,0,1);
       //convertir chars & sprites
       if not(cargar_roms(@memoria_temp[0],@frogger_char[0],'frogger.zip',0)) then exit;
       //la rom tiene cambiadas D1 y D0
@@ -1074,11 +1074,11 @@ case main_vars.tipo_maquina of
   end;
   47:begin  //galaxian
       //funciones Z80
-      main_z80.change_ram_calls(galaxian_getbyte,galaxian_putbyte);
+      z80_0.change_ram_calls(galaxian_getbyte,galaxian_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@galaxian_rom[0],'galaxian.zip',0)) then exit;
       //cargar samples
-      if load_samples('galaxian.zip',@galaxian_samples[0],galaxian_num_samples) then main_z80.init_sound(galaxian_despues_instruccion);
+      if load_samples('galaxian.zip',@galaxian_samples[0],galaxian_num_samples) then z80_0.init_sound(galaxian_despues_instruccion);
       //convertir chars &sprites
       if not(cargar_roms(@memoria_temp[0],@galaxian_char[0],'galaxian.zip',0)) then exit;
       convert_chars(256);
@@ -1087,10 +1087,10 @@ case main_vars.tipo_maquina of
   end;
   48:begin //Jump Bug
       //funciones Z80
-      main_z80.change_ram_calls(jumpbug_getbyte,jumpbug_putbyte);
+      z80_0.change_ram_calls(jumpbug_getbyte,jumpbug_putbyte);
       //chip de sonido
-      main_z80.init_sound(jumpbug_despues_instruccion);
-      ay8910_0:=ay8910_chip.create(1500000,1);
+      z80_0.init_sound(jumpbug_despues_instruccion);
+      ay8910_0:=ay8910_chip.create(1500000,AY8910,1);
       //Timers
       init_timer(0,3072000*(0.693*(100000+2*10000)*0.00001),jumpbug_blinking,true);
       //cargar roms
@@ -1103,7 +1103,7 @@ case main_vars.tipo_maquina of
   end;
   49:begin  //mooncrst
       //funciones Z80
-      main_z80.change_ram_calls(mooncrst_getbyte,mooncrst_putbyte);
+      z80_0.change_ram_calls(mooncrst_getbyte,mooncrst_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@mooncrst_rom[0],'mooncrst.zip',0)) then exit;
       //Desencriptarlas
@@ -1116,7 +1116,7 @@ case main_vars.tipo_maquina of
           else ctemp1:=ctemp2;
 		    memoria[f]:=ctemp1;
       end;
-      if load_samples('mooncrst.zip',@mooncrst_samples[0],5) then main_z80.init_sound(galaxian_despues_instruccion);
+      if load_samples('mooncrst.zip',@mooncrst_samples[0],5) then z80_0.init_sound(galaxian_despues_instruccion);
       //convertir chars & sprites
       if not(cargar_roms(@memoria_temp[0],@mooncrst_char[0],'mooncrst.zip',0)) then exit;
       convert_chars(512);
@@ -1125,9 +1125,10 @@ case main_vars.tipo_maquina of
   end;
   143:begin  //scramble
       //Main CPU
-      main_z80.change_ram_calls(scramble_getbyte,scramble_putbyte);
+      z80_0.change_ram_calls(scramble_getbyte,scramble_putbyte);
       //Sound
       konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
+      if not(cargar_roms(@konamisnd_0.memoria[0],@scramble_sound[0],'scramble.zip',0)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
       pia8255_0.change_ports(port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
@@ -1136,7 +1137,6 @@ case main_vars.tipo_maquina of
       init_timer(0,3072000*(0.693*(100000+2*10000)*0.00001),jumpbug_blinking,true);
       //cargar roms
       if not(cargar_roms(@memoria[0],@scramble_rom[0],'scramble.zip',0)) then exit;
-      if not(cargar_roms(@mem_snd[0],@scramble_sound[0],'scramble.zip',0)) then exit;
       //convertir chars & sprites
       if not(cargar_roms(@memoria_temp[0],@scramble_char[0],'scramble.zip',0)) then exit;
       convert_chars(256);
@@ -1145,9 +1145,10 @@ case main_vars.tipo_maquina of
   end;
   144:begin  //super cobra
       //Main CPU
-      main_z80.change_ram_calls(scobra_getbyte,scobra_putbyte);
+      z80_0.change_ram_calls(scobra_getbyte,scobra_putbyte);
       //Sound
       konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
+      if not(cargar_roms(@konamisnd_0.memoria[0],@scobra_sound[0],'scobra.zip',0)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
       pia8255_0.change_ports(port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
@@ -1156,7 +1157,6 @@ case main_vars.tipo_maquina of
       init_timer(0,3072000*(0.693*(100000+2*10000)*0.00001),jumpbug_blinking,true);
       //cargar roms
       if not(cargar_roms(@memoria[0],@scobra_rom[0],'scobra.zip',0)) then exit;
-      if not(cargar_roms(@mem_snd[0],@scobra_sound[0],'scobra.zip',0)) then exit;
       //convertir chars & sprites
       if not(cargar_roms(@memoria_temp[0],@scobra_char[0],'scobra.zip',0)) then exit;
       convert_chars(256);
@@ -1165,9 +1165,10 @@ case main_vars.tipo_maquina of
   end;
   145:begin  //amidar
       //Main CPU
-      main_z80.change_ram_calls(amidar_getbyte,amidar_putbyte);
+      z80_0.change_ram_calls(amidar_getbyte,amidar_putbyte);
       //Sound
       konamisnd_0:=konamisnd_chip.create(1,TIPO_SCRAMBLE,1789750,256);
+      if not(cargar_roms(@konamisnd_0.memoria[0],@amidar_sound[0],'amidar.zip',0)) then exit;
       //PPI 8255
       pia8255_0:=pia8255_chip.create;
       pia8255_0.change_ports(port_0_a_read,port_0_b_read,port_0_c_read,nil,nil,nil);
@@ -1175,7 +1176,6 @@ case main_vars.tipo_maquina of
       pia8255_1.change_ports(nil,nil,port_1_c_read,scramble_port_1_a_write,scramble_port_1_b_write,nil);
       //cargar roms
       if not(cargar_roms(@memoria[0],@amidar_rom[0],'amidar.zip',0)) then exit;
-      if not(cargar_roms(@mem_snd[0],@amidar_sound[0],'amidar.zip',0)) then exit;
       //convertir chars & sprites
       if not(cargar_roms(@memoria_temp[0],@amidar_char[0],'amidar.zip',0)) then exit;
       convert_chars(256);

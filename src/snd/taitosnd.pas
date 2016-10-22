@@ -1,7 +1,7 @@
 unit taitosnd;
 
 interface
-uses nz80,main_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}nz80,main_engine;
 
 const
   TC0140SYT_PORT01_FULL=$01;
@@ -10,175 +10,191 @@ const
   TC0140SYT_PORT23_FULL_MASTER=$08;
 
 type
-  t_TC0140SYT=record
-  	slavedata:array[0..3] of byte;	// Data on master->slave port (4 nibbles) */
-  	masterdata:array[0..3] of byte;// Data on slave->master port (4 nibbles) */
-  	mainmode:byte;		// Access mode on master cpu side */
-  	submode:byte;		// Access mode on slave cpu side */
-  	status:byte;		// Status data */
-  	nmi_enabled:boolean;	// 1 if slave cpu has nmi's enabled */
-  	nmi_req:boolean;		// 1 if slave cpu has a pending nmi */
+  tc0140syt_chip=class
+    constructor create(clock:dword;frames_div:word);
+    destructor free;
+    public
+      z80:cpu_z80;
+      procedure port_w(valor:byte);
+      procedure comm_w(valor:byte);
+      function comm_r:byte;
+      procedure slave_port_w(valor:byte);
+      procedure slave_comm_w(valor:byte);
+      function slave_comm_r:byte;
+      procedure reset;
+    private
+  	  slavedata:array[0..3] of byte;	// Data on master->slave port (4 nibbles) */
+  	  masterdata:array[0..3] of byte;// Data on slave->master port (4 nibbles) */
+  	  mainmode:byte;		// Access mode on master cpu side */
+  	  submode:byte;		// Access mode on slave cpu side */
+  	  status:byte;		// Status data */
+  	  nmi_enabled:boolean;	// 1 if slave cpu has nmi's enabled */
+  	  nmi_req:boolean;		// 1 if slave cpu has a pending nmi */
+      procedure interrupt_controller;
   end;
 var
-  TC0140SYT:t_TC0140SYT;
-
-procedure taitosound_port_w(valor:byte);
-procedure taitosound_comm_w(valor:byte);
-function taitosound_comm_r:byte;
-procedure taitosound_slave_port_w(valor:byte);
-procedure taitosound_slave_comm_w(valor:byte);
-function taitosound_slave_comm_r:byte;
-procedure taitosound_reset;
+  tc0140syt_0:tc0140syt_chip;
 
 implementation
 
-procedure Interrupt_Controller;
+constructor tc0140syt_chip.create(clock:dword;frames_div:word);
 begin
-	if (tc0140syt.nmi_req and tc0140syt.nmi_enabled) then begin
-    snd_z80.change_nmi(PULSE_LINE);
-		tc0140syt.nmi_req:=false;
-	end;
+  self.z80:=cpu_z80.create(clock,frames_div);
 end;
 
-procedure taitosound_port_w(valor:byte);
+destructor tc0140syt_chip.free;
 begin
-	tc0140syt.mainmode:=valor and $f;
+  self.z80.free;
 end;
 
-procedure taitosound_comm_w(valor:byte);
+procedure tc0140syt_chip.reset;
 begin
-	valor:=valor and $0f;	//this is important, otherwise ballbros won't work*/
-	case tc0140syt.mainmode of
+  fillchar(self.slavedata[0],4,0);
+  fillchar(self.masterdata[0],4,0);
+  self.mainmode:=0;
+  self.submode:=0;
+  self.status:=0;
+  self.nmi_enabled:=false;
+  self.nmi_req:=false;
+  self.z80.reset;
+end;
+
+procedure tc0140syt_chip.port_w(valor:byte);
+begin
+	self.mainmode:=valor and $f;
+end;
+
+procedure tc0140syt_chip.comm_w(valor:byte);
+begin
+	valor:=valor and $0f;	//this is important, otherwise ballbros won't work
+	case self.mainmode of
 		$00:begin		// mode #0
-			    tc0140syt.slavedata[tc0140syt.mainmode]:=valor;
-          tc0140syt.mainmode:=tc0140syt.mainmode+1;
+			    self.slavedata[self.mainmode]:=valor;
+          self.mainmode:=self.mainmode+1;
 			  end;
 		$01:begin		// mode #1
-    			tc0140syt.slavedata[tc0140syt.mainmode]:=valor;
-          tc0140syt.mainmode:=tc0140syt.mainmode+1;
-		    	tc0140syt.status:=tc0140syt.status or TC0140SYT_PORT01_FULL;
-    			tc0140syt.nmi_req:=true;
+    			self.slavedata[self.mainmode]:=valor;
+          self.mainmode:=self.mainmode+1;
+		    	self.status:=self.status or TC0140SYT_PORT01_FULL;
+    			self.nmi_req:=true;
         end;
 		$02:begin		// mode #2
-			    tc0140syt.slavedata[tc0140syt.mainmode]:=valor;
-          tc0140syt.mainmode:=tc0140syt.mainmode+1;
+			    self.slavedata[self.mainmode]:=valor;
+          self.mainmode:=self.mainmode+1;
 			  end;
 		$03:begin		// mode #3
-    			tc0140syt.slavedata[tc0140syt.mainmode]:=valor;
-          tc0140syt.mainmode:=tc0140syt.mainmode+1;
-    			tc0140syt.status:=tc0140syt.status or TC0140SYT_PORT23_FULL;
-    			tc0140syt.nmi_req:=true;
+    			self.slavedata[self.mainmode]:=valor;
+          self.mainmode:=self.mainmode+1;
+    			self.status:=self.status or TC0140SYT_PORT23_FULL;
+          self.nmi_req:=true;
         end;
 		$04:begin		// port status
     			// this does a hi-lo transition to reset the sound cpu */
-    			if (valor<>0) then snd_z80.reset;
+    			if (valor<>0) then self.reset;
             //cpu_spin(space->cpu); /* otherwise no sound in driftout */
         end;
 	end;
 end;
 
-function taitosound_comm_r:byte;
+function tc0140syt_chip.comm_r:byte;
 begin
-	case tc0140syt.mainmode of
+	case self.mainmode of
 		$00:begin		// mode #0
-			    taitosound_comm_r:=tc0140syt.masterdata[tc0140syt.mainmode];
-          tc0140syt.mainmode:=tc0140syt.mainmode+1;
+			    comm_r:=self.masterdata[self.mainmode];
+          self.mainmode:=self.mainmode+1;
         end;
 		$01:begin		// mode #1
-    			tc0140syt.status:=tc0140syt.status and not(TC0140SYT_PORT01_FULL_MASTER);
-			    taitosound_comm_r:=tc0140syt.masterdata[tc0140syt.mainmode];
-          tc0140syt.mainmode:=tc0140syt.mainmode+1;
+    			self.status:=self.status and not(TC0140SYT_PORT01_FULL_MASTER);
+			    comm_r:=self.masterdata[self.mainmode];
+          self.mainmode:=self.mainmode+1;
         end;
 		$02:begin		// mode #2
-			    taitosound_comm_r:=tc0140syt.masterdata[tc0140syt.mainmode];
-          tc0140syt.mainmode:=tc0140syt.mainmode+1;
+			    comm_r:=self.masterdata[self.mainmode];
+          self.mainmode:=self.mainmode+1;
         end;
 		$03:begin		// mode #3
-    			tc0140syt.status:=tc0140syt.status and not(TC0140SYT_PORT23_FULL_MASTER);
-		    	taitosound_comm_r:=tc0140syt.masterdata[tc0140syt.mainmode];
-          tc0140syt.mainmode:=tc0140syt.mainmode+1;
+    			self.status:=self.status and not(TC0140SYT_PORT23_FULL_MASTER);
+		    	comm_r:=self.masterdata[self.mainmode];
+          self.mainmode:=self.mainmode+1;
         end;
-		$04:taitosound_comm_r:=tc0140syt.status;		// port status
-		  else taitosound_comm_r:=0;
+		$04:comm_r:=self.status;		// port status
+		  else comm_r:=0;
 	end;
 end;
 
 //SLAVE
-procedure taitosound_slave_port_w(valor:byte);
+procedure tc0140syt_chip.interrupt_controller;
 begin
-	tc0140syt.submode:=valor and $f;
+	if (self.nmi_req and self.nmi_enabled) then begin
+    self.z80.change_nmi(PULSE_LINE);
+		self.nmi_req:=false;
+	end;
 end;
 
-procedure taitosound_slave_comm_w(valor:byte);
+procedure tc0140syt_chip.slave_port_w(valor:byte);
+begin
+	self.submode:=valor and $f;
+end;
+
+procedure tc0140syt_chip.slave_comm_w(valor:byte);
 begin
 	valor:=valor and $0f;
-	case tc0140syt.submode of
+	case self.submode of
 		$00:begin		// mode #0
-    			tc0140syt.masterdata[tc0140syt.submode]:=valor;
-          tc0140syt.submode:=tc0140syt.submode+1;
+    			self.masterdata[self.submode]:=valor;
+          self.submode:=self.submode+1;
         end;
 		$01:begin		// mode #1
-    			tc0140syt.masterdata[tc0140syt.submode]:=valor;
-          tc0140syt.submode:=tc0140syt.submode+1;
-    			tc0140syt.status:=tc0140syt.status or TC0140SYT_PORT01_FULL_MASTER;
+    			self.masterdata[self.submode]:=valor;
+          self.submode:=self.submode+1;
+    			self.status:=self.status or TC0140SYT_PORT01_FULL_MASTER;
     			//cpu_spin(space->cpu); /* writing should take longer than emulated, so spin */
 			  end;
 		$02:begin		// mode #2
-    			tc0140syt.masterdata[tc0140syt.submode]:=valor;
-          tc0140syt.submode:=tc0140syt.submode+1;
+    			self.masterdata[self.submode]:=valor;
+          self.submode:=self.submode+1;
 			  end;
 		$03:begin		// mode #3
-    			tc0140syt.masterdata[tc0140syt.submode]:=valor;
-          tc0140syt.submode:=tc0140syt.submode+1;
-    			tc0140syt.status:=tc0140syt.status or TC0140SYT_PORT23_FULL_MASTER;
+    			self.masterdata[self.submode]:=valor;
+          self.submode:=self.submode+1;
+    			self.status:=self.status or TC0140SYT_PORT23_FULL_MASTER;
 			    //cpu_spin(space->cpu); /* writing should take longer than emulated, so spin */
 			  end;
 		$04:;		// port status
-		$05:tc0140syt.nmi_enabled:=false;		// nmi disable
-		$06:tc0140syt.nmi_enabled:=true;		// nmi enable
+		$05:self.nmi_enabled:=false;		// nmi disable
+		$06:self.nmi_enabled:=true;		// nmi enable
 	end;
 	Interrupt_Controller;
 end;
 
-function taitosound_slave_comm_r:byte;
+function tc0140syt_chip.slave_comm_r:byte;
 var
   res:byte;
 begin
-	case tc0140syt.submode of
+	case self.submode of
 		$00:begin		// mode #0
-    			res:=tc0140syt.slavedata[tc0140syt.submode];
-          tc0140syt.submode:=tc0140syt.submode+1;
+    			res:=self.slavedata[self.submode];
+          self.submode:=self.submode+1;
 			  end;
 		$01:begin		// mode #1
-    			tc0140syt.status:=tc0140syt.status and not(TC0140SYT_PORT01_FULL);
-		    	res:=tc0140syt.slavedata[tc0140syt.submode];
-          tc0140syt.submode:=tc0140syt.submode+1;
+    			self.status:=self.status and not(TC0140SYT_PORT01_FULL);
+		    	res:=self.slavedata[self.submode];
+          self.submode:=self.submode+1;
         end;
 		02:begin		// mode #2
-    			res:=tc0140syt.slavedata[tc0140syt.submode];
-          tc0140syt.submode:=tc0140syt.submode+1;
+    			res:=self.slavedata[self.submode];
+          self.submode:=self.submode+1;
 			 end;
 		$03:begin		// mode #3
-    			tc0140syt.status:=tc0140syt.status and not(TC0140SYT_PORT23_FULL);
-    			res:=tc0140syt.slavedata[tc0140syt.submode];
-          tc0140syt.submode:=tc0140syt.submode+1;
+    			self.status:=self.status and not(TC0140SYT_PORT23_FULL);
+    			res:=self.slavedata[self.submode];
+          self.submode:=self.submode+1;
         end;
-		$04:res:= tc0140syt.status;		// port status
+		$04:res:= self.status;		// port status
     	 else res:=0;
     end;
 	Interrupt_Controller;
-  taitosound_slave_comm_r:=res;
-end;
-
-procedure taitosound_reset;
-begin
-  fillchar(TC0140SYT.slavedata[0],4,0);
-  fillchar(TC0140SYT.masterdata[0],4,0);
-  TC0140SYT.mainmode:=0;
-  TC0140SYT.submode:=0;
-  TC0140SYT.status:=0;
-  TC0140SYT.nmi_enabled:=false;
-  TC0140SYT.nmi_req:=false;
+  slave_comm_r:=res;
 end;
 
 end.

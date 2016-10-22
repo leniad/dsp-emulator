@@ -59,7 +59,7 @@ type
         end;
 
 var
-  main_mcs51:cpu_mcs51;
+  mcs51_0:cpu_mcs51;
 
 implementation
 const

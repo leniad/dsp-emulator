@@ -103,9 +103,9 @@ end;
 //Sound
 procedure deco16_snd_double_init(cpu_clock,sound_clock:dword;sound_bank:cpu_outport_call);
 begin
-main_h6280:=cpu_h6280.create(cpu_clock,$100);
-main_h6280.change_ram_calls(deco16_double_snd_getbyte,deco16_double_snd_putbyte);
-main_h6280.init_sound(deco16_double_sound);
+h6280_0:=cpu_h6280.create(cpu_clock,$100);
+h6280_0.change_ram_calls(deco16_double_snd_getbyte,deco16_double_snd_putbyte);
+h6280_0.init_sound(deco16_double_sound);
 ym2203_0:=ym2203_chip.create(sound_clock div 8);
 ym2151_0:=ym2151_chip.create(sound_clock div 9);
 ym2151_0.change_port_func(sound_bank);
@@ -116,7 +116,7 @@ end;
 
 procedure deco16_snd_double_reset;
 begin
-  main_h6280.reset;
+  h6280_0.reset;
   ym2203_0.reset;
   ym2151_0.reset;
   oki_6295_0.reset;
@@ -149,8 +149,8 @@ case direccion of
   $120000..$120001:oki_6295_0.write(valor);
   $130000..$130001:oki_6295_1.write(valor);
   $1f0000..$1f1fff:snd_ram[direccion and $1fff]:=valor;
-  $1fec00..$1fec01:main_h6280.timer_w(direccion and $1,valor);
-  $1ff400..$1ff403:main_h6280.irq_status_w(direccion and $3,valor);
+  $1fec00..$1fec01:h6280_0.timer_w(direccion and $1,valor);
+  $1ff400..$1ff403:h6280_0.irq_status_w(direccion and $3,valor);
 end;
 end;
 
@@ -164,9 +164,9 @@ end;
 
 procedure deco16_snd_simple_init(cpu_clock,sound_clock:dword;sound_bank:cpu_outport_call);
 begin
-  main_h6280:=cpu_h6280.create(cpu_clock,$100);
-  main_h6280.change_ram_calls(deco16_simple_snd_getbyte,deco16_simple_snd_putbyte);
-  main_h6280.init_sound(deco16_simple_sound);
+  h6280_0:=cpu_h6280.create(cpu_clock,$100);
+  h6280_0.change_ram_calls(deco16_simple_snd_getbyte,deco16_simple_snd_putbyte);
+  h6280_0.init_sound(deco16_simple_sound);
   ym2151_0:=ym2151_chip.create(sound_clock div 9);
   ym2151_0.change_port_func(sound_bank);
   ym2151_0.change_irq_func(deco16_snd_irq);
@@ -175,7 +175,7 @@ end;
 
 procedure deco16_snd_simple_reset;
 begin
-  main_h6280.reset;
+  h6280_0.reset;
   ym2151_0.reset;
   oki_6295_0.reset;
   deco16_sound_latch:=0;
@@ -200,15 +200,15 @@ case direccion of
   $110001:ym2151_0.write(valor);
   $120000..$120001:oki_6295_0.write(valor);
   $1f0000..$1f1fff:snd_ram[direccion and $1fff]:=valor;
-  $1fec00..$1fec01:main_h6280.timer_w(direccion and $1,valor);
-  $1ff400..$1ff403:main_h6280.irq_status_w(direccion and $3,valor);
+  $1fec00..$1fec01:h6280_0.timer_w(direccion and $1,valor);
+  $1ff400..$1ff403:h6280_0.irq_status_w(direccion and $3,valor);
 end;
 end;
 
 procedure deco16_snd_irq(irqstate:byte);
 begin
-  if irqstate=1 then main_h6280.set_irq_line(1,ASSERT_LINE)
-    else main_h6280.set_irq_line(1,CLEAR_LINE);
+  if irqstate=1 then h6280_0.set_irq_line(1,ASSERT_LINE)
+    else h6280_0.set_irq_line(1,CLEAR_LINE);
 end;
 
 procedure deco16_simple_sound;

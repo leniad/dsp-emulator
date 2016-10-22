@@ -130,21 +130,21 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 271 do begin
     //main
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     case f of
-      15,31,47,63,79,95,111,127,143,159,175,191,207,223,255:main_m68000.irq[5]:=ASSERT_LINE;
+      15,31,47,63,79,95,111,127,143,159,175,191,207,223,255:m68000_0.irq[5]:=ASSERT_LINE;
       239:begin
-            main_m68000.irq[5]:=ASSERT_LINE;
-            main_m68000.irq[6]:=ASSERT_LINE;
+            m68000_0.irq[5]:=ASSERT_LINE;
+            m68000_0.irq[6]:=ASSERT_LINE;
             update_video_wwfsstar;
             vblank:=1;
           end;
@@ -203,12 +203,12 @@ case direccion of
                     buffer_paleta[(direccion and $fff) shr 1]:=valor;
                     cambiar_color((direccion and $fff) shr 1,valor);
                   end;
-    $180000:main_m68000.irq[6]:=CLEAR_LINE;
-    $180002:main_m68000.irq[5]:=CLEAR_LINE;
+    $180000:m68000_0.irq[6]:=CLEAR_LINE;
+    $180002:m68000_0.irq[5]:=CLEAR_LINE;
     $180004:scroll_x:=valor and $1ff;
     $180006:scroll_y:=valor and $1ff;
     $180008:begin
-              snd_z80.change_nmi(PULSE_LINE);
+              z80_0.change_nmi(PULSE_LINE);
               sound_latch:=valor and $ff;
             end;
     $18000a:main_screen.flip_main_screen:=(valor and 1)<>0;
@@ -239,7 +239,7 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_0.change_irq(irqstate);
 end;
 
 procedure wwfsstar_sound_update;
@@ -251,8 +251,8 @@ end;
 //Main
 procedure reset_wwfsstar;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
  reset_audio;
@@ -284,12 +284,12 @@ screen_init(3,512,512);
 screen_mod_scroll(3,512,256,511,512,256,511);
 iniciar_video(256,240);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,272);
-main_m68000.change_ram16_calls(wwfsstar_getword,wwfsstar_putword);
+m68000_0:=cpu_m68000.create(10000000,272);
+m68000_0.change_ram16_calls(wwfsstar_getword,wwfsstar_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,272);
-snd_z80.change_ram_calls(wwfsstar_snd_getbyte,wwfsstar_snd_putbyte);
-snd_z80.init_sound(wwfsstar_sound_update);
+z80_0:=cpu_z80.create(3579545,272);
+z80_0.change_ram_calls(wwfsstar_snd_getbyte,wwfsstar_snd_putbyte);
+z80_0.init_sound(wwfsstar_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);

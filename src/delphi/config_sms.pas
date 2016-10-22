@@ -70,8 +70,8 @@ if radiobutton1.Checked then begin //NTSC
     close_video;
     screen_init(1,284,243);
     iniciar_video(284,243);
-    main_z80.clock:=CLOCK_NTSC;
-    main_z80.tframes:=(CLOCK_NTSC/LINES_NTSC)/FPS_NTSC;
+    z80_0.clock:=CLOCK_NTSC;
+    z80_0.tframes:=(CLOCK_NTSC/LINES_NTSC)/FPS_NTSC;
     sound_engine_change_clock(CLOCK_NTSC);
     sn_76496_0.free;
     sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
@@ -86,8 +86,8 @@ end else begin //PAL
     close_video;
     screen_init(1,284,294);
     iniciar_video(284,294);
-    main_z80.clock:=CLOCK_PAL;
-    main_z80.tframes:=(CLOCK_PAL/LINES_PAL)/FPS_PAL;
+    z80_0.clock:=CLOCK_PAL;
+    z80_0.tframes:=(CLOCK_PAL/LINES_PAL)/FPS_PAL;
     sound_engine_change_clock(CLOCK_PAL);
     sn_76496_0.free;
     sn_76496_0:=sn76496_chip.Create(CLOCK_PAL);

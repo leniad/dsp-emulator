@@ -569,18 +569,18 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 261 do begin
     //main
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=239 then begin
-       main_m68000.irq[2]:=HOLD_LINE;
+       m68000_0.irq[2]:=HOLD_LINE;
        update_video_cps1;
        copymemory(@sprite_buffer[0],@vram[cps1_sprites shr 1],$400*2);
     end;
@@ -765,7 +765,7 @@ end;
 
 procedure cps1_ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_0.change_irq(irqstate);
 end;
 
 procedure cps1_sound_update;
@@ -813,7 +813,7 @@ end;
 function cps1_qz80_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0000..$7fff:if snd_z80.opcode then cps1_qz80_getbyte:=qsnd_opcode[direccion]
+  $0000..$7fff:if z80_0.opcode then cps1_qz80_getbyte:=qsnd_opcode[direccion]
                   else cps1_qz80_getbyte:=qsnd_data[direccion];
   $8000..$bfff:cps1_qz80_getbyte:=snd_rom[sound_bank,direccion and $3fff];
   $c000..$cfff:cps1_qz80_getbyte:=qram1[direccion and $fff];
@@ -835,14 +835,14 @@ end;
 
 procedure cps1_qsnd_int;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_0.change_irq(HOLD_LINE);
 end;
 
 //Main
 procedure reset_cps1;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  reset_audio;
  case main_vars.tipo_maquina of
   103..111:begin
@@ -997,13 +997,13 @@ getmem(memoria_temp,$600000);
 case main_vars.tipo_maquina of
   103..111:begin
              iniciar_audio(false);
-             if (main_vars.tipo_maquina=111) then main_m68000:=cpu_m68000.create(12000000,262)
-                else main_m68000:=cpu_m68000.create(10000000,262);
-             main_m68000.change_ram16_calls(cps1_getword,cps1_putword);
+             if (main_vars.tipo_maquina=111) then m68000_0:=cpu_m68000.create(12000000,262)
+                else m68000_0:=cpu_m68000.create(10000000,262);
+             m68000_0.change_ram16_calls(cps1_getword,cps1_putword);
              //Sound CPU
-             snd_z80:=cpu_z80.create(3579545,262);
-             snd_z80.change_ram_calls(cps1_snd_getbyte,cps1_snd_putbyte);
-             snd_z80.init_sound(cps1_sound_update);
+             z80_0:=cpu_z80.create(3579545,262);
+             z80_0.change_ram_calls(cps1_snd_getbyte,cps1_snd_putbyte);
+             z80_0.init_sound(cps1_sound_update);
              //Sound chips
              ym2151_0:=ym2151_chip.create(3579545);
              ym2151_0.change_irq_func(cps1_ym2151_snd_irq);
@@ -1011,15 +1011,15 @@ case main_vars.tipo_maquina of
            end;
   112,113:begin  //Qsound
            iniciar_audio(true);
-           main_m68000:=cpu_m68000.create(12000000,262);
-           main_m68000.change_ram16_calls(cps1_qsnd_getword,cps1_qsnd_putword);
+           m68000_0:=cpu_m68000.create(12000000,262);
+           m68000_0.change_ram16_calls(cps1_qsnd_getword,cps1_qsnd_putword);
            //Sound CPU
-           snd_z80:=cpu_z80.create(8000000,262);
-           snd_z80.change_ram_calls(cps1_qz80_getbyte,cps1_qz80_putbyte);
-           snd_z80.init_sound(qsound_sound_update);
+           z80_0:=cpu_z80.create(8000000,262);
+           z80_0.change_ram_calls(cps1_qz80_getbyte,cps1_qz80_putbyte);
+           z80_0.init_sound(qsound_sound_update);
            //Sound Chip
            qsound_init($200000,8000000);
-           init_timer(snd_z80.numero_cpu,8000000/250,cps1_qsnd_int,true);
+           init_timer(z80_0.numero_cpu,8000000/250,cps1_qsnd_int,true);
       end;
 end;
 case main_vars.tipo_maquina of

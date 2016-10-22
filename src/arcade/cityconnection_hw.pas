@@ -128,18 +128,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_m6809.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=m6809_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
-    snd_m6809.run(frame_s);
-    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+    m6809_1.run(frame_s);
+    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
     if f=239 then begin
-      main_m6809.change_irq(ASSERT_LINE);
+      m6809_0.change_irq(ASSERT_LINE);
       update_video_citycon;
     end;
   end;
@@ -156,7 +156,7 @@ begin
                 else citycon_getbyte:=marcade.in0;
         $3001:citycon_getbyte:=marcade.dswa+marcade.in1;
         $3002:citycon_getbyte:=marcade.dswb;
-        $3007:main_m6809.change_irq(CLEAR_LINE);
+        $3007:m6809_0.change_irq(CLEAR_LINE);
         $3800..$3cff:citycon_getbyte:=buffer_paleta[direccion and $7ff];
   end;
 end;
@@ -257,9 +257,9 @@ begin
 open_qsnapshot_save('cityconn'+nombre);
 getmem(data,20000);
 //CPU
-size:=main_m6809.save_snapshot(data);
+size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_m6809.save_snapshot(data);
+size:=m6809_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
@@ -293,9 +293,9 @@ if not(open_qsnapshot_load('cityconn'+nombre)) then exit;
 getmem(data,20000);
 //CPU
 loaddata_qsnapshot(data);
-main_m6809.load_snapshot(data);
+m6809_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_m6809.load_snapshot(data);
+m6809_1.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 ym2203_0.load_snapshot(data);
@@ -322,8 +322,8 @@ end;
 //Main
 procedure reset_citycon;
 begin
- main_m6809.reset;
- snd_m6809.reset;
+ m6809_0.reset;
+ m6809_1.reset;
  YM2203_0.Reset;
  ay8910_0.reset;
  reset_audio;
@@ -358,16 +358,16 @@ screen_mod_scroll(2,1024,256,1023,0,0,0);
 screen_init(3,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(2048000,$100);
-main_m6809.change_ram_calls(citycon_getbyte,citycon_putbyte);
+m6809_0:=cpu_m6809.Create(2048000,$100);
+m6809_0.change_ram_calls(citycon_getbyte,citycon_putbyte);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(640000,$100);
-snd_m6809.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
-snd_m6809.init_sound(citycon_sound_update);
+m6809_1:=cpu_m6809.Create(640000,$100);
+m6809_1.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
+m6809_1.init_sound(citycon_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(1250000,0.4,0.2);
+ym2203_0:=ym2203_chip.create(1250000,0.2,0.4);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
-AY8910_0:=ay8910_chip.create(1250000,0.40);
+AY8910_0:=ay8910_chip.create(1250000,AY8910,0.40);
 //cargar roms
 if not(cargar_roms(@memoria[0],@citycon_rom[0],'citycon.zip',0)) then exit;
 //Cargar Sound

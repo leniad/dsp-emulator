@@ -111,7 +111,7 @@ const
   1,1,2,0,2,1,2,1,1,1,1,1,1,1,1,1);//f0
 
 var
-  main_mcs48:cpu_mcs48;
+  mcs48_0:cpu_mcs48;
 
 implementation
 

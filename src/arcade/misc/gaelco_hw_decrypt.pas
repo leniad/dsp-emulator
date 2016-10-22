@@ -5,9 +5,9 @@ Thanks to GAELCO SA for information on the algorithm.}
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     misc_functions,m68000;
+     misc_functions;
 
-function gaelco_dec(offset,data:word;param1:byte;param2:word):word;
+function gaelco_dec(offset,data:word;param1:byte;param2:word;thispc:dword):word;
 
 var
   lastpc:dword;
@@ -83,24 +83,20 @@ begin
 	decrypt:=BITSWAP16(res,2,6,0,11,14,12,7,10,5,4,8,3,9,1,13,15);
 end;
 
-function gaelco_dec(offset,data:word;param1:byte;param2:word):word;
+function gaelco_dec(offset,data:word;param1:byte;param2:word;thispc:dword):word;
 var
-  thispc:dword;
   decode:word;
-  regs:preg_m68000;
 begin
-  regs:=main_m68000.get_internal_r;
-	thispc:=regs.pc.l;
-	// check if 2nd half of 32 bit */
+	// check if 2nd half of 32 bit
 	if ((lastpc=thispc) and (offset=lastoffset+1)) then begin
 		lastpc:=0;
 		decode:=decrypt(param1,param2,lastencword,lastdecword,data);
 	end else begin
-		// code as 1st word */
+		// code as 1st word
 		lastpc:=thispc;
 		lastoffset:=offset;
 		lastencword:=data;
-		// high word returned */
+		// high word returned
 		decode:=decrypt(param1,param2,0,0,data);
 		lastdecword:=decode;
 	end;

@@ -25,7 +25,7 @@ const
         centipede_dip_b:array [0..3] of def_dip=(
         (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$2;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$1c;name:'Game Time';number:4;dip:((dip_val:$0;dip_name:'Untimed'),(dip_val:$4;dip_name:'1 Minute'),(dip_val:$8;dip_name:'2 Minutes'),(dip_val:$c;dip_name:'3 Minutes'),(dip_val:$10;dip_name:'4 Minutes'),(dip_val:$14;dip_name:'5 Minutes'),(dip_val:$18;dip_name:'6 Minutes'),(dip_val:$1c;dip_name:'7 Minutes'),(),(),(),(),(),(),(),())),
-        (mask:$e0;name:'Bonus Coin';number:6;dip:((dip_val:$0;dip_name:'None'),(dip_val:$20;dip_name:'3 credits/2 coins'),(dip_val:$40;dip_name:'5 credits/4 coins'),(dip_val:$60;dip_name:'6 credits/4 coins'),(dip_val:$80;dip_name:'6 credits/5 coins'),(dip_val:$a0;dip_name:'4 credits/3 coins'),(),(),(),(),(),(),(),(),(),())),());
+        (mask:$e0;name:'Bonus Coin';number:6;dip:((dip_val:$0;dip_name:'None'),(dip_val:$20;dip_name:'3C 2C'),(dip_val:$40;dip_name:'5C 4C'),(dip_val:$60;dip_name:'6C 4C'),(dip_val:$80;dip_name:'6C 5C'),(dip_val:$a0;dip_name:'4C 3C'),(),(),(),(),(),(),(),(),(),())),());
         centipede_dip_c:array [0..1] of def_dip=(
         (mask:$10;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$10;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
@@ -90,19 +90,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6502.tframes;
+frame_m:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
     //main
-    main_m6502.run(frame_m);
-    frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
+    m6502_0.run(frame_m);
+    frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
     case f of
     0:marcade.in0:=marcade.in0 and $bf;
-    31,95,159,224:main_m6502.change_irq(CLEAR_LINE);
-    47,111,175:main_m6502.change_irq(ASSERT_LINE);
+    31,95,159,224:m6502_0.change_irq(CLEAR_LINE);
+    47,111,175:m6502_0.change_irq(ASSERT_LINE);
     239:begin
           update_video_centipede;
-          main_m6502.change_irq(ASSERT_LINE);
+          m6502_0.change_irq(ASSERT_LINE);
           marcade.in0:=marcade.in0 or $40;
         end;
     end;
@@ -175,7 +175,7 @@ case direccion of
     $1400..$140f:cambiar_color(direccion and $f,valor);
     $1600..$163f:nvram[direccion and $3f]:=valor;
     $1680:; //nvram clock
-    $1800:main_m6502.change_irq(CLEAR_LINE);
+    $1800:m6502_0.change_irq(CLEAR_LINE);
     $1c07:main_screen.flip_main_screen:=(valor and $80)<>0;
     $2000:; //watchdog
 end;
@@ -189,7 +189,7 @@ end;
 //Main
 procedure reset_centipede;
 begin
- main_m6502.reset;
+ m6502_0.reset;
  pokey_0.reset;
  reset_audio;
  marcade.in0:=$20;
@@ -215,9 +215,9 @@ screen_init(1,256,256);
 screen_init(2,256,256,true,true);
 iniciar_video(240,256);
 //Main CPU
-main_m6502:=cpu_m6502.create(trunc(12096000/8),256,TCPU_M6502);
-main_m6502.change_ram_calls(centipede_getbyte,centipede_putbyte);
-main_m6502.init_sound(centipede_sound_update);
+m6502_0:=cpu_m6502.create(trunc(12096000/8),256,TCPU_M6502);
+m6502_0.change_ram_calls(centipede_getbyte,centipede_putbyte);
+m6502_0.init_sound(centipede_sound_update);
 //Sound Chips
 pokey_0:=pokey_chip.create(0,trunc(12096000/8));
 //cargar roms

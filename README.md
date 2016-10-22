@@ -1,4 +1,27 @@
 ﻿#DSP Emulator status<br>
+<b>22/10/16 - DSP Emulator 0.17b1 Final. All binary and source updated. New preview images (thanks to FJ Marti)</b><br><pre>
+-All previous WIP enhacements
+-General
+    +Windows: Fixed image snapshot save bug (Thanks to FJ Marti)
+    +Fixed a bug that if DSP is started with the ROMs list and no driver was selected, the emulator hangs (Thanks to FJ Marti)
+    +Fixes to the ROMs/Samples file list exportation (Thanks to FJ Marti)
+    +N2A03 
+        -Converted to CPU
+        -Converted to classes
+    +Taito Sound
+        -Converted to classes
+        -Integrated Z80 CPU
+    +Konami Sound
+        -Converted to classes
+        -Integrated Z80 CPU
+-ExedExes
+    +Added dipswitches
+-Express Raider
+    +Added dipswitches
+-Double Dragon HW
+    +Fixed IRQs
+    +Double Dragon II: Fixed VBlank, solves the problem of color fading in transitions
+</pre><br>
 <b>15/10/16 - DSP Emulator 0.17b1. Win32 binary and source updated.</b><br><pre>
 -General
     +Namco IO

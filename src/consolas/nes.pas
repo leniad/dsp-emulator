@@ -3,8 +3,8 @@ unit nes;
 interface
 
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m6502,main_engine,nes_ppu,controls_engine,sysutils,dialogs,misc_functions,
-     sound_engine,file_engine,n2a03_sound,nes_mappers;
+     main_engine,nes_ppu,controls_engine,sysutils,dialogs,misc_functions,
+     sound_engine,file_engine,n2a03,m6502,nes_mappers;
 
 type
     tllamadas_nes=record
@@ -69,7 +69,7 @@ begin
     //Soft Reset
     if keyboard[KEYBOARD_f5] then begin
       //Softreset
-        temp_r:=main_m6502.get_internal_r;
+        temp_r:=n2a03_0.m6502.get_internal_r;
         temp_r.p.int:=true;
         temp_r.sp:=temp_r.sp-3;
         temp_r.pc:=memoria[$FFFC]+(memoria[$FFFD] shl 8);
@@ -85,7 +85,7 @@ var
 begin
   if not(cartucho_cargado) then exit;
   init_controls(false,true,false,true);
-  frame:=main_m6502.tframes;
+  frame:=n2a03_0.m6502.tframes;
   even:=true;
   while EmuStatus=EsRuning do begin
     for nes_linea:=0 to NTSC_lines do begin
@@ -94,17 +94,17 @@ begin
               //El sprite hit se evalua en 85T, para compensar de las otras lineas pongo la resta...
               ppu_linea(nes_linea);
               if ppu_nes.sprite_over_flow then begin
-                main_m6502.run(43-(main_m6502.tframes-frame));
-                frame:=frame-main_m6502.contador;
+                n2a03_0.m6502.run(43-(n2a03_0.m6502.tframes-frame));
+                frame:=frame-n2a03_0.m6502.contador;
                 ppu_nes.status:=ppu_nes.status or $20;
               end;
               if ppu_nes.sprite0_hit then begin
-                main_m6502.run(ppu_nes.sprite0_hit_pos-(main_m6502.tframes-frame));
-                frame:=frame-main_m6502.contador;
+                n2a03_0.m6502.run(ppu_nes.sprite0_hit_pos-(n2a03_0.m6502.tframes-frame));
+                frame:=frame-n2a03_0.m6502.contador;
                 ppu_nes.status:=ppu_nes.status or $40;
               end;
-              main_m6502.run(frame);
-              frame:=frame+main_m6502.tframes-main_M6502.contador;
+              n2a03_0.m6502.run(frame);
+              frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
               if (ppu_nes.control2 and $8)<>0 then begin
                 ppu_nes.address:=(ppu_nes.address and $FBE0) or (ppu_nes.address_temp and $41F);
                 ppu_end_linea;
@@ -112,33 +112,33 @@ begin
             end;
           241:begin //241
               //Poner VBL
-              if (main_m6502.tframes-frame)<0.333 then begin
-                main_m6502.run(0.333);
-                frame:=frame-main_m6502.contador;
+              if (n2a03_0.m6502.tframes-frame)<0.333 then begin
+                n2a03_0.m6502.run(0.333);
+                frame:=frame-n2a03_0.m6502.contador;
               end;
               ppu_nes.status:=ppu_nes.status or $80;
               if (ppu_nes.control1 and $80)<>0 then begin
-                 main_m6502.change_nmi(PULSE_LINE);
-                 main_m6502.after_ei:=true;
+                 n2a03_0.m6502.change_nmi(PULSE_LINE);
+                 n2a03_0.m6502.after_ei:=true;
               end;
-              main_m6502.run(frame);
-              frame:=frame+main_m6502.tframes-main_m6502.contador;
+              n2a03_0.m6502.run(frame);
+              frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
             end;
           240,242..260:begin //240,242..260
-                main_m6502.run(frame);
-                frame:=frame+main_m6502.tframes-main_m6502.contador;
+                n2a03_0.m6502.run(frame);
+                frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
               end;
            261:begin
-              if (main_m6502.tframes-frame)<0.333 then begin
-                main_m6502.run(0.333);
-                frame:=frame-main_m6502.contador;
+              if (n2a03_0.m6502.tframes-frame)<0.333 then begin
+                n2a03_0.m6502.run(0.333);
+                frame:=frame-n2a03_0.m6502.contador;
               end;
               //Limpiar VBL, sprite 0 hit y sprite overflow
               ppu_nes.status:=ppu_nes.status and $1F;
               ppu_nes.sprite0_hit:=false;
               ppu_nes.sprite_over_flow:=false;
-              main_m6502.run(frame);
-              frame:=frame+main_m6502.tframes-main_m6502.contador;
+              n2a03_0.m6502.run(frame);
+              frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
               if (ppu_nes.control2 and $8)<>0 then ppu_nes.address:=ppu_nes.address_temp;
               if even then frame:=frame-0.333;
               even:=not(even);
@@ -175,7 +175,7 @@ begin
                        end;
                 end;
               end;
-    $4000..$4013,$4015:nes_getbyte:=n2a03_read(0,direccion);
+    $4000..$4013,$4015:nes_getbyte:=n2a03_0.read(direccion);
     $4016:begin
             nes_getbyte:=(open_bus and $e0)+((joy1_read shr joy1) and 1);
             joy1:=(joy1+1) and $7;
@@ -201,8 +201,8 @@ begin
         case (direccion and 7) of
             0:begin
                 if (((ppu_nes.status and $80)<>0) and ((ppu_nes.control1 and $80)=0) and ((valor and $80)<>0)) then begin
-                   main_m6502.change_nmi(PULSE_LINE);
-                   main_m6502.after_ei:=true;
+                   n2a03_0.m6502.change_nmi(PULSE_LINE);
+                   n2a03_0.m6502.after_ei:=true;
                 end;
                 ppu_nes.control1:=valor;
                 ppu_nes.pos_bg:=(valor shr 4) and 1;
@@ -235,7 +235,7 @@ begin
             7:ppu_write(valor);
           end;
           end;
-        $4000..$4013,$4015,$4017:n2a03_write(0,direccion,valor);
+        $4000..$4013,$4015,$4017:n2a03_0.write(direccion,valor);
         $4014:ppu_dma_spr(valor);
         $4016:begin
                 if (((valor and 1)=0) and (val_4016=1)) then begin
@@ -254,14 +254,9 @@ begin
   end;
 end;
 
-procedure nes_sound_update;
-begin
-  n2a03_sound_update(0);
-end;
-
 procedure nes_irq(status:byte);
 begin
-  main_m6502.change_irq(status);
+  n2a03_0.m6502.change_irq(status);
 end;
 
 //Main
@@ -270,8 +265,8 @@ begin
   fillchar(memoria[0],$800,0);
   fillchar(memoria[$6000],$2000,0);
   reset_audio;
-  main_m6502.reset;
-  reset_n2a03_sound(0);
+  n2a03_0.m6502.reset;
+  n2a03_0.reset;
   reset_ppu;
   joy1:=0;
   joy2:=0;
@@ -478,7 +473,7 @@ begin
     llamadas_maquina.open_file:='';
   end;
   change_caption;
-  Directory.Nes:=ExtractFilePath(romfile)+main_vars.cadena_dir;
+  Directory.Nes:=ExtractFilePath(romfile);
 end;
 
 function iniciar_nes:boolean;
@@ -487,10 +482,9 @@ begin
   screen_init(1,512,1,true);
   screen_init(2,256,240);
   iniciar_video(256,240);
-  main_m6502:=cpu_m6502.create(NTSC_clock,NTSC_lines+1,TCPU_NES);
-  main_m6502.change_ram_calls(nes_getbyte,nes_putbyte);
-  main_m6502.init_sound(nes_sound_update);
-  init_n2a03_sound(0,nes_getbyte,nes_irq);
+  n2a03_0:=cpu_n2a03.create(NTSC_clock,NTSC_lines+1);
+  n2a03_0.m6502.change_ram_calls(nes_getbyte,nes_putbyte);
+  n2a03_0.change_internals(nes_getbyte,nes_irq);
   getmem(mapper_nes,sizeof(tnes_mapper));
   getmem(ppu_nes,sizeof(tnes_ppu));
   nes_init_palette;
@@ -501,7 +495,6 @@ end;
 procedure nes_cerrar;
 begin
   if sram_present then write_file(cart_name,@memoria[$6000],$2000);
-  close_n2a03_sound(0);
   if mapper_nes<>nil then freemem(mapper_nes);
   if ppu_nes<>nil then freemem(ppu_nes);
   mapper_nes:=nil;

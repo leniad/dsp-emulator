@@ -143,19 +143,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   snd_z80.run(frame_s);
-   frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   z80_0.run(frame_s);
+   frame_s:=frame_s+z80_0.tframes-z80_0.contador;
    case f of
     21:vblank_val:=$0;
     239:begin
           vblank_val:=$80;
-          main_m68000.irq[4]:=HOLD_LINE;
+          m68000_0.irq[4]:=HOLD_LINE;
           update_video_prehisle;
         end;
    end;
@@ -237,7 +237,7 @@ case direccion of
     $f0031..$f0045,$f0047..$f005f,$f0061..$f0069:;
     $f0070:begin
               sound_latch:=valor and $ff;
-              snd_z80.change_nmi(PULSE_LINE);
+              z80_0.change_nmi(PULSE_LINE);
            end;
 end;
 end;
@@ -280,14 +280,14 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_0.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_prehisle;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  ym3812_0.reset;
  upd7759_0.reset;
  reset_audio;
@@ -327,13 +327,13 @@ screen_mod_scroll(5,272,256,255,272,256,255);
 iniciar_video(256,224);
 //Main CPU
 getmem(memoria_temp,$100000);
-main_m68000:=cpu_m68000.create(9000000,$100);
-main_m68000.change_ram16_calls(prehisle_getword,prehisle_putword);
+m68000_0:=cpu_m68000.create(9000000,$100);
+m68000_0.change_ram16_calls(prehisle_getword,prehisle_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,$100);
-snd_z80.change_ram_calls(prehisle_snd_getbyte,prehisle_snd_putbyte);
-snd_z80.change_io_calls(prehisle_snd_inbyte,prehisle_snd_outbyte);
-snd_z80.init_sound(prehisle_sound_update);
+z80_0:=cpu_z80.create(4000000,$100);
+z80_0.change_ram_calls(prehisle_snd_getbyte,prehisle_snd_putbyte);
+z80_0.change_io_calls(prehisle_snd_inbyte,prehisle_snd_outbyte);
+z80_0.init_sound(prehisle_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
 ym3812_0.change_irq_calls(snd_irq);

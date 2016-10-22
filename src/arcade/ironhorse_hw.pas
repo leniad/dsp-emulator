@@ -125,21 +125,21 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=240 then begin
       update_video_ironhorse;
-      if pedir_firq then main_m6809.change_firq(HOLD_LINE);
+      if pedir_firq then m6809_0.change_firq(HOLD_LINE);
     end;
-    if ((((f+16) mod 64)=0) and pedir_nmi) then main_m6809.change_nmi(PULSE_LINE);
+    if ((((f+16) mod 64)=0) and pedir_nmi) then m6809_0.change_nmi(PULSE_LINE);
   end;
   eventos_ironhorse;
   video_sync;
@@ -178,7 +178,7 @@ case direccion of
      end;
   $20..$3f:scroll_lineas[direccion and $1f]:=valor;
   $800:sound_latch:=valor;
-  $900:snd_z80.change_irq(HOLD_LINE);
+  $900:z80_0.change_irq(HOLD_LINE);
   $a00:if palettebank<>(valor and $7) then begin
             palettebank:=valor and $7;
             fillchar(gfx[0].buffer[0],$400,1);
@@ -220,8 +220,8 @@ end;
 //Main
 procedure reset_ironhorse;
 begin
- main_m6809.reset;
- snd_z80.reset;
+ m6809_0.reset;
+ z80_0.reset;
  ym2203_0.reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -250,13 +250,13 @@ screen_mod_scroll(1,256,256,255,0,0,0);
 screen_init(2,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(3072000,$100);
-main_m6809.change_ram_calls(ironhorse_getbyte,ironhorse_putbyte);
+m6809_0:=cpu_m6809.Create(3072000,$100);
+m6809_0.change_ram_calls(ironhorse_getbyte,ironhorse_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3072000,$100);
-snd_z80.change_ram_calls(ironhorse_snd_getbyte,ironhorse_snd_putbyte);
-snd_z80.change_io_calls(ironhorse_snd_inbyte,ironhorse_snd_outbyte);
-snd_z80.init_sound(ironhorse_sound_update);
+z80_0:=cpu_z80.create(3072000,$100);
+z80_0.change_ram_calls(ironhorse_snd_getbyte,ironhorse_snd_putbyte);
+z80_0.change_io_calls(ironhorse_snd_inbyte,ironhorse_snd_outbyte);
+z80_0.init_sound(ironhorse_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3072000);
 //cargar roms

@@ -3,7 +3,7 @@ unit donkeykong_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,samples,rom_engine,
-     pal_engine,sound_engine,n2a03_sound,m6502;
+     pal_engine,sound_engine,n2a03;
 
 procedure cargar_dkong;
 
@@ -152,13 +152,13 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=239 then begin
-      if haz_nmi then main_z80.change_nmi(PULSE_LINE);
+      if haz_nmi then z80_0.change_nmi(PULSE_LINE);
       update_video_dkong;
     end;
   end;
@@ -371,25 +371,25 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s1:=main_m6502.tframes;
-frame_s2:=snd_m6502.tframes;
+frame_m:=z80_0.tframes;
+frame_s1:=n2a03_0.m6502.tframes;
+frame_s2:=n2a03_1.m6502.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //SND 1
-    main_m6502.run(frame_s1);
-    frame_s1:=frame_s1+main_m6502.tframes-main_m6502.contador;
+    n2a03_0.m6502.run(frame_s1);
+    frame_s1:=frame_s1+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
     //SND 2
-    snd_m6502.run(frame_s2);
-    frame_s2:=frame_s2+snd_m6502.tframes-snd_m6502.contador;
+    n2a03_1.m6502.run(frame_s2);
+    frame_s2:=frame_s2+n2a03_1.m6502.tframes-n2a03_1.m6502.contador;
     if f=239 then begin
       if haz_nmi then begin
-        main_z80.change_nmi(PULSE_LINE);
-        main_m6502.change_nmi(PULSE_LINE);
-        snd_m6502.change_nmi(PULSE_LINE);
+        z80_0.change_nmi(PULSE_LINE);
+        n2a03_0.m6502.change_nmi(PULSE_LINE);
+        n2a03_1.m6502.change_nmi(PULSE_LINE);
       end;
       update_video_dkong;
     end;
@@ -420,13 +420,13 @@ case direccion of
         $7c80:latch2:=valor;
         $7d00:latch3:=valor;
         $7d80:if ((valor and $1)<>0) then begin
-                main_m6502.change_reset(CLEAR_LINE);
-                snd_m6502.change_reset(CLEAR_LINE);
+                n2a03_0.m6502.change_reset(CLEAR_LINE);
+                n2a03_1.m6502.change_reset(CLEAR_LINE);
               end else begin
-                  main_m6502.change_reset(ASSERT_LINE);
-                  reset_n2a03_sound(0);
-                  snd_m6502.change_reset(ASSERT_LINE);
-                  reset_n2a03_sound(1);
+                  n2a03_0.reset;
+                  n2a03_0.m6502.change_reset(ASSERT_LINE);
+                  n2a03_1.reset;
+                  n2a03_1.m6502.change_reset(ASSERT_LINE);
               end;
         $7e81:if char_bank<>((not(valor) and 1)*$100) then begin
                 fillchar(gfx[0].buffer[0],$400,1);
@@ -451,7 +451,7 @@ function dkong3_snd1_getbyte(direccion:word):byte;
 begin
   case direccion of
     $0..$1ff,$e000..$ffff:dkong3_snd1_getbyte:=mem_snd[direccion];
-    $4000..$4015:dkong3_snd1_getbyte:=n2a03_read(0,direccion);
+    $4000..$4015:dkong3_snd1_getbyte:=n2a03_0.read(direccion);
     $4016:dkong3_snd1_getbyte:=latch1;
     $4017:dkong3_snd1_getbyte:=latch2;
   end;
@@ -462,7 +462,7 @@ begin
 if direccion>$dfff then exit;
 case direccion of
     0..$1ff:mem_snd[direccion]:=valor;
-    $4000..$4017:n2a03_write(0,direccion,valor);
+    $4000..$4017:n2a03_0.write(direccion,valor);
   end;
 end;
 
@@ -470,7 +470,7 @@ function dkong3_snd2_getbyte(direccion:word):byte;
 begin
   case direccion of
     $0..$1ff,$e000..$ffff:dkong3_snd2_getbyte:=mem_misc[direccion];
-    $4000..$4015,$4017:dkong3_snd2_getbyte:=n2a03_read(1,direccion);
+    $4000..$4015,$4017:dkong3_snd2_getbyte:=n2a03_1.read(direccion);
     $4016:dkong3_snd2_getbyte:=latch3;
   end;
 end;
@@ -480,20 +480,14 @@ begin
 if direccion>$dfff then exit;
 case direccion of
     0..$1ff:mem_misc[direccion]:=valor;
-    $4000..$4017:n2a03_write(1,direccion,valor);
+    $4000..$4017:n2a03_1.write(direccion,valor);
   end;
-end;
-
-procedure dkong3_sound_update;
-begin
-  n2a03_sound_update(0);
-  n2a03_sound_update(1);
 end;
 
 //Main
 procedure reset_dkong;
 begin
- main_z80.reset;
+ z80_0.reset;
  case main_vars.tipo_maquina of
     15:begin
         marcade.in2:=0;
@@ -505,10 +499,8 @@ begin
        end;
    169:begin
         marcade.in2:=0;
-        main_m6502.reset;
-        snd_m6502.reset;
-        reset_n2a03_sound(0);
-        reset_n2a03_sound(1);
+        n2a03_0.reset;
+        n2a03_1.reset;
        end;
  end;
  reset_audio;
@@ -601,12 +593,12 @@ iniciar_video(224,256);
 case main_vars.tipo_maquina of
   15:begin //Donkey Kong
         //Main CPU
-        main_z80:=cpu_z80.create(3072000,264);
-        main_z80.change_ram_calls(dkong_getbyte,dkong_putbyte);
+        z80_0:=cpu_z80.create(3072000,264);
+        z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
         //cargar roms
         if not(cargar_roms(@memoria[0],@dkong_rom[0],'dkong.zip',0)) then exit;
         //samples
-        if load_samples('dkong.zip',@dk_samples[0],num_samples) then main_z80.init_sound(dkong_sound_update);
+        if load_samples('dkong.zip',@dk_samples[0],num_samples) then z80_0.init_sound(dkong_sound_update);
         audio_tunes:=dkong_tune_sound;
         audio_effects:=dkong_effects_sound;
         //convertir chars
@@ -624,8 +616,8 @@ case main_vars.tipo_maquina of
      end;
  168:begin //Donkey Kong Jr.
         //Main CPU
-        main_z80:=cpu_z80.create(3072000,264);
-        main_z80.change_ram_calls(dkong_getbyte,dkong_putbyte);
+        z80_0:=cpu_z80.create(3072000,264);
+        z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@dkongjr_rom[0],'dkongjr.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$1000);
@@ -639,7 +631,7 @@ case main_vars.tipo_maquina of
         copymemory(@memoria[$5000],@memoria_temp[$5000],$800);
         copymemory(@memoria[$1800],@memoria_temp[$5800],$800);
         //samples
-        if load_samples('dkongjr.zip',@dkjr_samples[0],num_samples_jr) then main_z80.init_sound(dkong_sound_update);
+        if load_samples('dkongjr.zip',@dkjr_samples[0],num_samples_jr) then z80_0.init_sound(dkong_sound_update);
         audio_tunes:=dkongjr_tune_sound;
         audio_effects:=dkongjr_effects_sound;
         //convertir chars
@@ -657,21 +649,18 @@ case main_vars.tipo_maquina of
      end;
  169:begin //Donkey Kong 3
         //Main CPU
-        main_z80:=cpu_z80.create(4000000,264);
-        main_z80.change_ram_calls(dkong3_getbyte,dkong3_putbyte);
+        z80_0:=cpu_z80.create(4000000,264);
+        z80_0.change_ram_calls(dkong3_getbyte,dkong3_putbyte);
         //cargar roms
         if not(cargar_roms(@memoria[0],@dkong3_rom[0],'dkong3.zip',0)) then exit;
         //sound 1
         if not(cargar_roms(@mem_snd[0],@dkong3_snd1,'dkong3.zip')) then exit;
-        main_m6502:=cpu_m6502.create(1789772,264,TCPU_M6502);
-        main_m6502.change_ram_calls(dkong3_snd1_getbyte,dkong3_snd1_putbyte);
-        main_m6502.init_sound(dkong3_sound_update);
-        init_n2a03_sound(0,nil,nil);
+        n2a03_0:=cpu_n2a03.Create(1789772,264);
+        n2a03_0.m6502.change_ram_calls(dkong3_snd1_getbyte,dkong3_snd1_putbyte);
         //sound 2
         if not(cargar_roms(@mem_misc[0],@dkong3_snd2,'dkong3.zip')) then exit;
-        snd_m6502:=cpu_m6502.create(1789772,264,TCPU_M6502);
-        snd_m6502.change_ram_calls(dkong3_snd2_getbyte,dkong3_snd2_putbyte);
-        init_n2a03_sound(1,nil,nil);
+        n2a03_1:=cpu_n2a03.Create(1789772,264);
+        n2a03_1.m6502.change_ram_calls(dkong3_snd2_getbyte,dkong3_snd2_putbyte);
         //convertir chars
         if not(cargar_roms(@memoria_temp[0],@dkong3_char[0],'dkong3.zip',0)) then exit;
         dkong_char_load($200);
@@ -693,20 +682,9 @@ reset_dkong;
 iniciar_dkong:=true;
 end;
 
-procedure cerrar_dkong;
-begin
-case main_vars.tipo_maquina of
-  169:begin
-        close_n2a03_sound(0);
-        close_n2a03_sound(1);
-      end;
-end;
-end;
-
 procedure Cargar_dkong;
 begin
 llamadas_maquina.iniciar:=iniciar_dkong;
-llamadas_maquina.close:=cerrar_dkong;
 llamadas_maquina.reset:=reset_dkong;
 llamadas_maquina.fps_max:=60.6060606060606060;
 case main_vars.tipo_maquina of

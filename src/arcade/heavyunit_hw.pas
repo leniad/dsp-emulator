@@ -85,34 +85,34 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_m2:=sub_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_mcu:=main_mcs51.tframes;
+frame_m:=z80_0.tframes;
+frame_m2:=z80_1.tframes;
+frame_s:=z80_2.tframes;
+frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
   //CPU 1
-  main_z80.run(frame_m);
-  frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+  z80_0.run(frame_m);
+  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
   //CPU 2
-  sub_z80.run(frame_m2);
-  frame_m2:=frame_m2+sub_z80.tframes-sub_z80.contador;
+  z80_1.run(frame_m2);
+  frame_m2:=frame_m2+z80_1.tframes-z80_1.contador;
   //CPU Sound
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_2.run(frame_s);
+  frame_s:=frame_s+z80_2.tframes-z80_2.contador;
   //MCU
-  main_mcs51.run(frame_mcu);
-  frame_mcu:=frame_mcu+main_mcs51.tframes-main_mcs51.contador;
+  mcs51_0.run(frame_mcu);
+  frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
   case f of
     63:begin
-        main_z80.im2_lo:=$ff;
-         main_z80.change_irq(HOLD_LINE);
+        z80_0.im2_lo:=$ff;
+         z80_0.change_irq(HOLD_LINE);
        end;
     239:begin
-         main_z80.im2_lo:=$fd;
-         main_z80.change_irq(HOLD_LINE);
-         sub_z80.change_irq(HOLD_LINE);
-         snd_z80.change_irq(HOLD_LINE);
+         z80_0.im2_lo:=$fd;
+         z80_0.change_irq(HOLD_LINE);
+         z80_1.change_irq(HOLD_LINE);
+         z80_2.change_irq(HOLD_LINE);
          update_video_hvyunit;
         end;
   end;
@@ -146,7 +146,7 @@ procedure hvyunit_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   0,1:nrom_cpu1:=valor and $7;
-  2:sub_z80.change_nmi(PULSE_LINE);
+  2:z80_1.change_nmi(PULSE_LINE);
 end;
 end;
 
@@ -212,14 +212,14 @@ case (puerto and $ff) of
       scroll_port:=valor;
      end;
   $2:begin
-      snd_z80.change_nmi(PULSE_LINE);
+      z80_2.change_nmi(PULSE_LINE);
       sound_latch:=valor;
      end;
   $4:begin
       data_to_mermaid:=valor;
 	    z80_to_mermaid_full:=1;
 	    mermaid_int0_l:=0;
-      main_mcs51.change_irq0(ASSERT_LINE);
+      mcs51_0.change_irq0(ASSERT_LINE);
      end;
   $6:scroll_y:=valor;
   $8:scroll_x:=valor;
@@ -288,7 +288,7 @@ procedure mcu_out_port1(valor:byte);
 begin
   if (valor=$ff) then begin
 		mermaid_int0_l:=1;
-    main_mcs51.change_irq0(CLEAR_LINE);
+    mcs51_0.change_irq0(CLEAR_LINE);
 	end;
 	mermaid_p[1]:=valor;
 end;
@@ -330,8 +330,8 @@ end;
 procedure mcu_out_port3(valor:byte);
 begin
   mermaid_p[3]:=valor;
-  if (valor and $2)<>0 then sub_z80.change_reset(CLEAR_LINE)
-    else sub_z80.change_reset(ASSERT_LINE);
+  if (valor and $2)<>0 then z80_1.change_reset(CLEAR_LINE)
+    else z80_1.change_reset(ASSERT_LINE);
 end;
 
 procedure hvyunit_sound_update;
@@ -342,11 +342,11 @@ end;
 //Main
 procedure reset_hvyunit;
 begin
- main_z80.reset;
- main_z80.im2_lo:=$ff;
- sub_z80.reset;
- snd_z80.reset;
- main_mcs51.reset;
+ z80_0.reset;
+ z80_0.im2_lo:=$ff;
+ z80_1.reset;
+ z80_2.reset;
+ mcs51_0.reset;
  pandora_reset;
  ym2203_0.reset;
  reset_audio;
@@ -386,21 +386,21 @@ screen_mod_scroll(1,512,256,511,512,256,511);
 screen_init(2,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,$100);
-main_z80.change_ram_calls(hvyunit_getbyte,hvyunit_putbyte);
-main_z80.change_io_calls(nil,hvyunit_outbyte);
+z80_0:=cpu_z80.create(6000000,$100);
+z80_0.change_ram_calls(hvyunit_getbyte,hvyunit_putbyte);
+z80_0.change_io_calls(nil,hvyunit_outbyte);
 //Misc CPU
-sub_z80:=cpu_z80.create(6000000,$100);
-sub_z80.change_ram_calls(hvyunit_misc_getbyte,hvyunit_misc_putbyte);
-sub_z80.change_io_calls(hvyunit_misc_inbyte,hvyunit_misc_outbyte);
+z80_1:=cpu_z80.create(6000000,$100);
+z80_1.change_ram_calls(hvyunit_misc_getbyte,hvyunit_misc_putbyte);
+z80_1.change_io_calls(hvyunit_misc_inbyte,hvyunit_misc_outbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(6000000,$100);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
-snd_z80.init_sound(hvyunit_sound_update);
+z80_2:=cpu_z80.create(6000000,$100);
+z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
+z80_2.change_io_calls(snd_inbyte,snd_outbyte);
+z80_2.init_sound(hvyunit_sound_update);
 //mcu cpu
-main_mcs51:=cpu_mcs51.create(6000000,$100);
-main_mcs51.change_io_calls(mcu_in_port0,mcu_in_port1,mcu_in_port2,mcu_in_port3,mcu_out_port0,mcu_out_port1,mcu_out_port2,mcu_out_port3);
+mcs51_0:=cpu_mcs51.create(6000000,$100);
+mcs51_0.change_io_calls(mcu_in_port0,mcu_in_port1,mcu_in_port2,mcu_in_port3,mcu_out_port0,mcu_out_port1,mcu_out_port2,mcu_out_port3);
 //pandora
 pandora.mask_nchar:=$3fff;
 pandora.color_offset:=$100;
@@ -417,7 +417,7 @@ for f:=0 to 3 do copymemory(@rom_cpu2[f,0],@memoria_temp[f*$4000],$4000);
 if not(cargar_roms(@memoria_temp[0],@hvyunit_sound,'hvyunit.zip',1)) then exit;
 for f:=0 to 3 do copymemory(@rom_cpu3[f,0],@memoria_temp[f*$4000],$4000);
 //cargar mermaid
-if not(cargar_roms(main_mcs51.get_rom_addr,@hvyunit_memaid,'hvyunit.zip',1)) then exit;
+if not(cargar_roms(mcs51_0.get_rom_addr,@hvyunit_memaid,'hvyunit.zip',1)) then exit;
 //convertir chars
 getmem(ptemp,$200000);
 if not(cargar_roms(ptemp,@hvyunit_gfx0[0],'hvyunit.zip',0)) then exit;

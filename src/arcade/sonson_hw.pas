@@ -97,18 +97,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_m6809.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=m6809_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 255 do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Snd CPU
-    snd_m6809.run(frame_s);
-    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+    m6809_1.run(frame_s);
+    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
     if f=247 then begin
-      main_m6809.change_irq(HOLD_LINE);
+      m6809_0.change_irq(HOLD_LINE);
       update_video_sonson;
     end;
   end;
@@ -142,7 +142,7 @@ case direccion of
   $3010:soundlatch:=valor;
   $3018:main_screen.flip_main_screen:=(valor and 1)<>1;
   $3019:begin
-          if ((last=0) and ((valor and 1)=1)) then snd_m6809.change_firq(HOLD_LINE);
+          if ((last=0) and ((valor and 1)=1)) then m6809_1.change_firq(HOLD_LINE);
           last:=valor and 1;
         end;
 end;
@@ -170,7 +170,7 @@ end;
 
 procedure sonson_snd_irq;
 begin
-  snd_m6809.change_irq(HOLD_LINE);
+  m6809_1.change_irq(HOLD_LINE);
 end;
 
 procedure sonson_sound_update;
@@ -188,9 +188,9 @@ begin
 open_qsnapshot_save('sonson'+nombre);
 getmem(data,250);
 //CPU
-size:=main_m6809.save_snapshot(data);
+size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_m6809.save_snapshot(data);
+size:=m6809_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=AY8910_0.save_snapshot(data);
@@ -218,9 +218,9 @@ if not(open_qsnapshot_load('sonson'+nombre)) then exit;
 getmem(data,250);
 //CPU
 loaddata_qsnapshot(data);
-main_m6809.load_snapshot(data);
+m6809_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_m6809.load_snapshot(data);
+m6809_1.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 AY8910_0.load_snapshot(data);
@@ -243,8 +243,8 @@ end;
 //Main
 procedure reset_sonson;
 begin
- main_m6809.reset;
- snd_m6809.reset;
+ m6809_0.reset;
+ m6809_1.reset;
  AY8910_0.reset;
  AY8910_1.reset;
  reset_audio;
@@ -276,17 +276,17 @@ screen_init(2,256,256);
 screen_mod_scroll(2,256,256,255,0,0,0);
 iniciar_video(240,240);
 //Main CPU
-main_m6809:=cpu_m6809.Create(2000000,256);
-main_m6809.change_ram_calls(sonson_getbyte,sonson_putbyte);
+m6809_0:=cpu_m6809.Create(2000000,256);
+m6809_0.change_ram_calls(sonson_getbyte,sonson_putbyte);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(2000000,256);
-snd_m6809.change_ram_calls(ssonson_getbyte,ssonson_putbyte);
-snd_m6809.init_sound(sonson_sound_update);
+m6809_1:=cpu_m6809.Create(2000000,256);
+m6809_1.change_ram_calls(ssonson_getbyte,ssonson_putbyte);
+m6809_1.init_sound(sonson_sound_update);
 //IRQ Sound CPU
 init_timer(1,2000000/(4*60),sonson_snd_irq,true);
 //Sound Chip
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
+AY8910_1:=ay8910_chip.create(1500000,AY8910,0.3);
 //cargar roms
 if not(cargar_roms(@memoria[0],@sonson_rom[0],'sonson.zip',0)) then exit;
 //Cargar Sound

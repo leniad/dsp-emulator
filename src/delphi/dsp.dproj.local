@@ -100,8 +100,8 @@
     <Transaction>2008/08/13 17:42:08.234.pas,C:\dsp\src\snd\ym_3526.pas=</Transaction>
     <Transaction>2008/08/14 02:24:59.828.pas,C:\dsp\src\arcade\shootout.pas=C:\dsp\src\Unit1.pas</Transaction>
     <Transaction>2008/08/25 16:21:57.390.pas,C:\dsp\src\arcade\vigilante.pas=C:\dsp\src\Unit1.pas</Transaction>
-    <Transaction>2008/08/26 16:17:36.171.dfm,C:\dsp\src\uchild.dfm=</Transaction>
     <Transaction>2008/08/26 16:17:36.171.pas,C:\dsp\src\uchild.pas=</Transaction>
+    <Transaction>2008/08/26 16:17:36.171.dfm,C:\dsp\src\uchild.dfm=</Transaction>
     <Transaction>2008/09/07 20:04:02.218.pas,C:\dsp\src\snd\ym_3812.pas=C:\dsp\src\ym_3812.pas</Transaction>
     <Transaction>2008/09/07 20:20:09.781.pas,C:\dsp\src\init_games.pas=C:\dsp\src\Unit1.pas</Transaction>
     <Transaction>2008/10/04 21:01:50.718.pas,C:\dsp\src\CONSOLAS\coleco.pas=C:\dsp\src\Unit1.pas</Transaction>
@@ -110,8 +110,8 @@
     <Transaction>2008/10/05 14:02:35.609.pas,C:\dsp\src\CONSOLAS\tms992X.pas=</Transaction>
     <Transaction>2008/10/06 19:39:09.187.pas,C:\dsp\src\CONSOLAS\tms99xx.pas=C:\dsp\src\CONSOLAS\Uvdp.pas</Transaction>
     <Transaction>2008/10/18 21:03:00.093.pas,F:\em\dsp\dsp9\dsp_09_s\CONSOLAS\Nesmapper.pas=</Transaction>
-    <Transaction>2008/10/19 19:06:43.843.pas,F:\em\dsp\dsp9\dsp_09_s\LoadRom.pas=F:\em\dsp\dsp9\dsp_09_s\Unit7.pas</Transaction>
     <Transaction>2008/10/19 19:06:43.843.dfm,F:\em\dsp\dsp9\dsp_09_s\LoadRom.dfm=F:\em\dsp\dsp9\dsp_09_s\Unit7.dfm</Transaction>
+    <Transaction>2008/10/19 19:06:43.843.pas,F:\em\dsp\dsp9\dsp_09_s\LoadRom.pas=F:\em\dsp\dsp9\dsp_09_s\Unit7.pas</Transaction>
     <Transaction>2008/11/01 11:00:40.078.pas,C:\dsp\src\arcade\jackal.pas=C:\dsp\src\Unit1.pas</Transaction>
     <Transaction>2008/11/01 17:46:53.421.pas,C:\dsp\src\snd\fm_2151.pas=C:\dsp\src\Unit1.pas</Transaction>
     <Transaction>2008/11/01 19:07:02.000.pas,C:\dsp\src\snd\ym_2151.pas=C:\dsp\src\Unit1.pas</Transaction>
@@ -130,8 +130,8 @@
     <Transaction>2010/09/24 18:54:49.062.pas,C:\dsp\src\snd\qsound.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2010/09/28 18:17:10.015.dfm,C:\dsp\src\delphi\cargar_spec.dfm=</Transaction>
     <Transaction>2010/09/28 18:17:10.015.pas,C:\dsp\src\delphi\cargar_spec.pas=</Transaction>
-    <Transaction>2010/09/28 18:25:19.640.dfm,C:\dsp\src\delphi\cargar_spec.dfm=C:\dsp\src\delphi\Unit2.dfm</Transaction>
     <Transaction>2010/09/28 18:25:19.640.pas,C:\dsp\src\delphi\cargar_spec.pas=C:\dsp\src\delphi\Unit2.pas</Transaction>
+    <Transaction>2010/09/28 18:25:19.640.dfm,C:\dsp\src\delphi\cargar_spec.dfm=C:\dsp\src\delphi\Unit2.dfm</Transaction>
     <Transaction>2011/02/08 10:01:25.910.pas,C:\dsp\src\arcade\system86_hw.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2011/02/16 16:16:25.411.pas,C:\dsp\src\arcade\rocknrope_hw.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2011/02/16 16:36:53.069.pas,C:\dsp\src\arcade\rocnrope_hw.pas=C:\dsp\src\arcade\rocknrope_hw.pas</Transaction>
@@ -166,8 +166,8 @@
     <Transaction>2011/08/08 19:26:42.796.dfm,C:\dsp\src\delphi\tape_window.dfm=C:\dsp\src\delphi\Unit5.dfm</Transaction>
     <Transaction>2011/08/08 19:26:42.796.pas,C:\dsp\src\delphi\tape_window.pas=C:\dsp\src\delphi\Unit5.pas</Transaction>
     <Transaction>2011/08/09 12:24:54.046.pas,C:\dsp\src\misc\file_engine.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
-    <Transaction>2011/08/13 01:20:31.280.pas,C:\dsp\src\delphi\lenslock.pas=C:\dsp\src\delphi\Unit7.pas</Transaction>
     <Transaction>2011/08/13 01:20:31.280.dfm,C:\dsp\src\delphi\lenslock.dfm=C:\dsp\src\delphi\Unit7.dfm</Transaction>
+    <Transaction>2011/08/13 01:20:31.280.pas,C:\dsp\src\delphi\lenslock.pas=C:\dsp\src\delphi\Unit7.pas</Transaction>
     <Transaction>2011/08/17 13:38:12.017.pas,C:\dsp\src\arcade\twincobra_hw.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2011/09/09 11:43:57.574.pas,C:\dsp\src\arcade\jrpacman_hardware.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2011/11/07 11:12:04.250.pas,C:\dsp\src\arcade\dec0_hw.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
@@ -301,8 +301,8 @@
     <Transaction>2015/08/18 17:32:46.000.848,C:\dsp\src\consolas\sms.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2015/09/18 20:38:18.000.425,=C:\dsp\src\consolas\sega_vdp.pas</Transaction>
     <Transaction>2015/09/20 10:47:14.000.370,=C:\dsp\src\delphi\Unit1.pas</Transaction>
-    <Transaction>2015/09/20 10:49:15.000.272,C:\dsp\src\delphi\Unit1.pas=C:\dsp\src\delphi\config_sms.pas</Transaction>
     <Transaction>2015/09/20 10:49:15.000.272,C:\dsp\src\delphi\Unit1.dfm=C:\dsp\src\delphi\config_sms.dfm</Transaction>
+    <Transaction>2015/09/20 10:49:15.000.272,C:\dsp\src\delphi\Unit1.pas=C:\dsp\src\delphi\config_sms.pas</Transaction>
     <Transaction>2015/10/20 17:57:57.000.276,=C:\dsp\src\misc\lib_sdl2.pas</Transaction>
     <Transaction>2015/10/23 19:47:55.000.901,=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2015/10/23 19:48:10.000.123,C:\dsp\src\delphi\Unit1.pas=C:\dsp\src\arcade\renegade_hw.pas</Transaction>
@@ -331,8 +331,8 @@
     <Transaction>2016/02/27 22:26:43.000.091,=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2016/02/27 22:27:18.000.387,C:\dsp\src\misc\rom_export.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2016/03/14 18:02:50.000.223,=C:\dsp\src\delphi\Unit1.pas</Transaction>
-    <Transaction>2016/03/14 18:04:29.000.751,C:\dsp\src\delphi\Unit1.dfm=C:\dsp\src\delphi\config_cpc.dfm</Transaction>
     <Transaction>2016/03/14 18:04:29.000.751,C:\dsp\src\delphi\Unit1.pas=C:\dsp\src\delphi\config_cpc.pas</Transaction>
+    <Transaction>2016/03/14 18:04:29.000.751,C:\dsp\src\delphi\Unit1.dfm=C:\dsp\src\delphi\config_cpc.dfm</Transaction>
     <Transaction>2016/05/01 20:28:00.000.533,=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2016/05/01 20:28:23.000.097,C:\dsp\src\delphi\Unit1.pas=C:\dsp\src\arcade\spaceinvaders_hw.pas</Transaction>
     <Transaction>2016/05/07 19:13:01.000.419,=C:\dsp\src\delphi\Unit1.pas</Transaction>
@@ -349,17 +349,17 @@
     <Transaction>2016/05/26 18:34:33.000.701,C:\dsp\src\misc\device_functions.pas=C:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2016/05/30 22:09:43.000.068,=C:\dsp\src\arcade\simpsons_hw.pas</Transaction>
     <Transaction>2016/05/30 22:10:01.000.291,=C:\dsp\src\arcade\misc\k053246_k053247_k055673.pas</Transaction>
-    <Transaction>2016/05/31 18:19:05.000.792,=C:\dsp\src\devices\deco_146.pas</Transaction>
     <Transaction>2016/05/31 18:19:05.000.739,=C:\dsp\src\devices\deco_104.pas</Transaction>
+    <Transaction>2016/05/31 18:19:05.000.792,=C:\dsp\src\devices\deco_146.pas</Transaction>
     <Transaction>2016/05/31 18:19:28.000.935,C:\dsp\src\snd\k007232.pas=</Transaction>
     <Transaction>2016/05/31 18:19:28.000.754,C:\dsp\src\snd\k053260.pas=</Transaction>
-    <Transaction>2016/05/31 18:19:40.000.875,=C:\dsp\src\devices\k052109.pas</Transaction>
     <Transaction>2016/05/31 18:19:40.000.969,=C:\dsp\src\devices\k053246_k053247_k055673.pas</Transaction>
-    <Transaction>2016/05/31 18:19:40.000.827,=C:\dsp\src\devices\k051960.pas</Transaction>
     <Transaction>2016/05/31 18:19:40.000.922,=C:\dsp\src\devices\k053244_k053245.pas</Transaction>
+    <Transaction>2016/05/31 18:19:40.000.875,=C:\dsp\src\devices\k052109.pas</Transaction>
+    <Transaction>2016/05/31 18:19:40.000.827,=C:\dsp\src\devices\k051960.pas</Transaction>
     <Transaction>2016/05/31 18:19:41.000.016,=C:\dsp\src\devices\k053251.pas</Transaction>
-    <Transaction>2016/05/31 18:19:59.000.083,=C:\dsp\src\snd\k007232.pas</Transaction>
     <Transaction>2016/05/31 18:19:59.000.132,=C:\dsp\src\snd\k053260.pas</Transaction>
+    <Transaction>2016/05/31 18:19:59.000.083,=C:\dsp\src\snd\k007232.pas</Transaction>
     <Transaction>2016/06/06 20:26:36.000.992,=C:\dsp\src\cpu\cpu_misc.pas</Transaction>
     <Transaction>2016/06/14 22:08:14.000.215,C:\dsp\src\misc\unzip2.pas=</Transaction>
     <Transaction>2016/07/12 21:13:10.000.376,=C:\dsp\src\delphi\Unit1.pas</Transaction>
@@ -382,5 +382,6 @@
     <Transaction>2016/09/07 17:13:52.000.012,=D:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2016/09/07 17:14:49.000.268,D:\dsp\src\devices\k051316.pas=D:\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2016/09/29 11:07:28.000.329,D:\dsp\src\devices\namcoio_06xx_51xx_53xx.pas=D:\dsp\src\devices\namcoio_06xx_5Xxx.pas</Transaction>
+    <Transaction>2016/10/17 16:24:57.000.441,D:\dsp\src\snd\n2a03_sound.pas=D:\dsp\src\cpu\n2a03.pas</Transaction>
   </Transactions>
 </BorlandProject>

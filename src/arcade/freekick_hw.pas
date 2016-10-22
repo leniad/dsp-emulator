@@ -104,14 +104,14 @@ var
   frame_m:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
+frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 262 do begin
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     if f=239 then begin
       update_video_freekick;
-      if nmi_enable then main_z80.change_nmi(PULSE_LINE);
+      if nmi_enable then z80_0.change_nmi(PULSE_LINE);
     end;
   end;
   eventos_freekick;
@@ -165,7 +165,7 @@ end;
 
 procedure freeckick_snd_irq;
 begin
-  main_z80.change_irq(HOLD_LINE);
+  z80_0.change_irq(HOLD_LINE);
 end;
 
 function ppi0_c_read:byte;
@@ -209,7 +209,7 @@ end;
 //Main
 procedure reset_freekick;
 begin
- main_z80.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
@@ -244,21 +244,21 @@ screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(3000000,263);
-main_z80.change_ram_calls(freekick_getbyte,freekick_putbyte);
-main_z80.change_io_calls(freekick_inbyte,freekick_outbyte);
-main_z80.init_sound(freekick_sound_update);
+z80_0:=cpu_z80.create(3000000,263);
+z80_0.change_ram_calls(freekick_getbyte,freekick_putbyte);
+z80_0.change_io_calls(freekick_inbyte,freekick_outbyte);
+z80_0.init_sound(freekick_sound_update);
 //Sound Chips
 sn_76496_0:=sn76496_chip.Create(3000000);
 sn_76496_1:=sn76496_chip.Create(3000000);
 sn_76496_2:=sn76496_chip.Create(3000000);
 sn_76496_3:=sn76496_chip.Create(3000000);
 //IRQ Sound CPU
-init_timer(main_z80.numero_cpu,3000000/120,freeckick_snd_irq,true);
+init_timer(z80_0.numero_cpu,3000000/120,freeckick_snd_irq,true);
 case main_vars.tipo_maquina of
   211:begin //Free Kick
         //analog
-        init_analog(main_z80.numero_cpu,main_z80.clock,30,15,$ff,$FFFF,0,false);
+        init_analog(z80_0.numero_cpu,z80_0.clock,30,15,$ff,$FFFF,0,false);
         //PPI
         pia8255_0:=pia8255_chip.create;
         pia8255_0.change_ports(nil,nil,ppi0_c_read,ppi0_a_write,ppi0_b_write,nil);

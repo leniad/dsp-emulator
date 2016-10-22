@@ -89,17 +89,17 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
+frame_m:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //snd
     konamisnd_0.run(f);
     if f=239 then begin
       update_video_rocnrope;
-      if irq_ena then main_m6809.change_irq(HOLD_LINE);
+      if irq_ena then m6809_0.change_irq(HOLD_LINE);
     end;
   end;
   eventos_rocnrope;
@@ -116,7 +116,7 @@ case direccion of
     $3082:rocnrope_getbyte:=marcade.in1;
     $3083:rocnrope_getbyte:=$ff;
     $3100:rocnrope_getbyte:=$3f;
-    $6000..$ffff:if main_m6809.opcode then rocnrope_getbyte:=mem_opcodes[direccion-$6000]
+    $6000..$ffff:if m6809_0.opcode then rocnrope_getbyte:=mem_opcodes[direccion-$6000]
         else rocnrope_getbyte:=memoria[direccion];
   else rocnrope_getbyte:=memoria[direccion];
 end;
@@ -137,7 +137,7 @@ end;
 //Main
 procedure reset_rocnrope;
 begin
- main_m6809.reset;
+ m6809_0.reset;
  konamisnd_0.reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -169,16 +169,15 @@ screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(rocnrope_getbyte,rocnrope_putbyte);
+m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0.change_ram_calls(rocnrope_getbyte,rocnrope_putbyte);
 //Sound Chip
 konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
+if not(cargar_roms(@konamisnd_0.memoria[0],@rocnrope_snd[0],'rocnrope.zip',0)) then exit;
 //cargar roms y desencriptarlas
 if not(cargar_roms(@memoria[0],@rocnrope_rom[0],'rocnrope.zip',0)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
 mem_opcodes[$703d-$6000]:=$98;  //Patch
-//roms sonido
-if not(cargar_roms(@mem_snd[0],@rocnrope_snd[0],'rocnrope.zip',0)) then exit;
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@rocnrope_chars[0],'rocnrope.zip',0)) then exit;
 init_gfx(0,8,8,512);

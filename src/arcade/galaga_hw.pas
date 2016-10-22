@@ -220,30 +220,30 @@ var
   f,scanline:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s1:=snd_z80.tframes;
-frame_s2:=sub_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s1:=z80_2.tframes;
+frame_s2:=z80_1.tframes;
 scanline:=63;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sub CPU
-    snd_z80.run(frame_s1);
-    frame_s1:=frame_s1+snd_z80.tframes-snd_z80.contador;
+    z80_2.run(frame_s1);
+    frame_s1:=frame_s1+z80_2.tframes-z80_2.contador;
     //Sub 2 CPU
-    sub_z80.run(frame_s2);
-    frame_s2:=frame_s2+sub_z80.tframes-sub_z80.contador;
+    z80_1.run(frame_s2);
+    frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
     run_namco_54xx;
     if (f=scanline) then begin
-        if sub2_nmi then sub_z80.change_nmi(PULSE_LINE);
+        if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
         scanline:=scanline+128;
 	      if (scanline>=272) then scanline:=63;
     end;
     if f=223 then begin
-        if main_irq then main_z80.change_irq(ASSERT_LINE);
-        if sub_irq then snd_z80.change_irq(ASSERT_LINE);
+        if main_irq then z80_0.change_irq(ASSERT_LINE);
+        if sub_irq then z80_2.change_irq(ASSERT_LINE);
         update_video_galaga;
         copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
     end;
@@ -262,19 +262,19 @@ bit:=val and 1;
 case dir of
 		$0:begin	// IRQ1 */
         main_irq:=bit<>0;
-			  if not(main_irq) then main_z80.change_irq(CLEAR_LINE);
+			  if not(main_irq) then z80_0.change_irq(CLEAR_LINE);
 			 end;
 		$1:begin	// IRQ2 */
 			    sub_irq:=bit<>0;
-  			  if not(sub_irq) then snd_z80.change_irq(CLEAR_LINE);
+  			  if not(sub_irq) then z80_2.change_irq(CLEAR_LINE);
 			 end;
 		$2:sub2_nmi:=(bit=0);	// NMION */
 		$3:if (bit<>0) then begin  // RESET */
-          snd_z80.change_reset(CLEAR_LINE);
-          sub_z80.change_reset(CLEAR_LINE);
+          z80_2.change_reset(CLEAR_LINE);
+          z80_1.change_reset(CLEAR_LINE);
        end else begin
-          snd_z80.change_reset(ASSERT_LINE);
-          sub_z80.change_reset(ASSERT_LINE);
+          z80_2.change_reset(ASSERT_LINE);
+          z80_1.change_reset(ASSERT_LINE);
        end;
 		$4:; //n.c.
     $05:custom_mod:=(custom_mod and $fe) or (bit shl 0);	// MOD 0
@@ -430,31 +430,31 @@ var
   f,scanline:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s1:=snd_z80.tframes;
-frame_s2:=sub_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s1:=z80_2.tframes;
+frame_s2:=z80_1.tframes;
 scanline:=63;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
   //Main CPU
-  main_z80.run(frame_m);
-  frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+  z80_0.run(frame_m);
+  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
   //Sub CPU
-  snd_z80.run(frame_s1);
-  frame_s1:=frame_s1+snd_z80.tframes-snd_z80.contador;
+  z80_2.run(frame_s1);
+  frame_s1:=frame_s1+z80_2.tframes-z80_2.contador;
   //Sub 2 CPU
-  sub_z80.run(frame_s2);
-  frame_s2:=frame_s2+sub_z80.tframes-sub_z80.contador;
+  z80_1.run(frame_s2);
+  frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
   //IO's
   run_namco_53xx;
   if (f=scanline) then begin
-    if sub2_nmi then sub_z80.change_nmi(PULSE_LINE);
+    if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
     scanline:=scanline+128;
 	  if (scanline>=272) then scanline:=63;
   end;
   if f=223 then begin
-    if main_irq then main_z80.change_irq(ASSERT_LINE);
-    if sub_irq then snd_z80.change_irq(ASSERT_LINE);
+    if main_irq then z80_0.change_irq(ASSERT_LINE);
+    if sub_irq then z80_2.change_irq(ASSERT_LINE);
     update_video_digdug;
   end;
  end;
@@ -634,32 +634,32 @@ var
   f,scanline:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s1:=snd_z80.tframes;
-frame_s2:=sub_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s1:=z80_2.tframes;
+frame_s2:=z80_1.tframes;
 scanline:=63;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
   //Main CPU
-  main_z80.run(frame_m);
-  frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+  z80_0.run(frame_m);
+  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
   //Sub CPU
-  snd_z80.run(frame_s1);
-  frame_s1:=frame_s1+snd_z80.tframes-snd_z80.contador;
+  z80_2.run(frame_s1);
+  frame_s1:=frame_s1+z80_2.tframes-z80_2.contador;
   //Sub 2 CPU
-  sub_z80.run(frame_s2);
-  frame_s2:=frame_s2+sub_z80.tframes-sub_z80.contador;
+  z80_1.run(frame_s2);
+  frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
   //IO's
   run_namco_50xx;
   run_namco_54xx;
   if (f=scanline) then begin
-    if sub2_nmi then sub_z80.change_nmi(PULSE_LINE);
+    if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
     scanline:=scanline+128;
 	  if (scanline>=272) then scanline:=63;
   end;
   if f=223 then begin
-    if main_irq then main_z80.change_irq(ASSERT_LINE);
-    if sub_irq then snd_z80.change_irq(ASSERT_LINE);
+    if main_irq then z80_0.change_irq(ASSERT_LINE);
+    if sub_irq then z80_2.change_irq(ASSERT_LINE);
     update_video_xevious;
   end;
  end;
@@ -783,7 +783,7 @@ end;
 //Namco IO
 procedure namco_06xx_nmi;
 begin
-  main_z80.change_nmi(PULSE_LINE);
+  z80_0.change_nmi(PULSE_LINE);
 end;
 
 //Main
@@ -791,9 +791,9 @@ procedure reset_galagahw;
 var
   f:byte;
 begin
- main_z80.reset;
- snd_z80.reset;
- sub_z80.reset;
+ z80_0.reset;
+ z80_2.reset;
+ z80_1.reset;
  case main_vars.tipo_maquina of
     65:begin
           namcoio_51xx_reset(false);
@@ -885,11 +885,11 @@ end else begin
 end;
 iniciar_video(224,288);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,264);
+z80_0:=cpu_z80.create(3072000,264);
 //Sub CPU
-snd_z80:=cpu_z80.create(3072000,264);
+z80_2:=cpu_z80.create(3072000,264);
 //Sub2 CPU
-sub_z80:=cpu_z80.create(3072000,264);
+z80_1:=cpu_z80.create(3072000,264);
 //Sound
 namco_sound_init(3,false);
 //IO's
@@ -898,16 +898,16 @@ case main_vars.tipo_maquina of
     65:begin  //Galaga
           //CPU's
           //Main
-          main_z80.change_ram_calls(galaga_getbyte,galaga_putbyte);
+          z80_0.change_ram_calls(galaga_getbyte,galaga_putbyte);
           //Sub1
-          snd_z80.change_ram_calls(galaga_sub_getbyte,galaga_putbyte);
+          z80_2.change_ram_calls(galaga_sub_getbyte,galaga_putbyte);
           //Sub2
-          sub_z80.change_ram_calls(galaga_sub2_getbyte,galaga_putbyte);
+          z80_1.change_ram_calls(galaga_sub2_getbyte,galaga_putbyte);
           //Init IO's
           namco_06xx_init(0,IO51XX,NONE,NONE,IO54XX,namco_06xx_nmi);
           //Namco 54xx
           if not(namcoio_54xx_init('galaga.zip')) then exit;
-          if load_samples('galaga.zip',@galaga_samples[0],num_samples_galaga) then main_z80.init_sound(galaga_sound_update);
+          if load_samples('galaga.zip',@galaga_samples[0],num_samples_galaga) then z80_0.init_sound(galaga_sound_update);
           //cargar roms
           if not(cargar_roms(@memoria[0],@galaga_rom[0],'galaga.zip',0)) then exit;
           if not(cargar_roms(@mem_snd[0],@galaga_sub,'galaga.zip',1)) then exit;
@@ -946,11 +946,11 @@ case main_vars.tipo_maquina of
        end;
     167:begin //DigDug
           //Main
-          main_z80.change_ram_calls(digdug_getbyte,digdug_putbyte);
+          z80_0.change_ram_calls(digdug_getbyte,digdug_putbyte);
           //Sub1
-          snd_z80.change_ram_calls(digdug_sub_getbyte,digdug_putbyte);
+          z80_2.change_ram_calls(digdug_sub_getbyte,digdug_putbyte);
           //Sub2
-          sub_z80.change_ram_calls(digdug_sub2_getbyte,digdug_putbyte);
+          z80_1.change_ram_calls(digdug_sub2_getbyte,digdug_putbyte);
           //Init IO's
           namco_06xx_init(0,IO51XX,IO53XX,NONE,NONE,namco_06xx_nmi);
           //Namco 53XX
@@ -996,17 +996,17 @@ case main_vars.tipo_maquina of
     231:begin  //Xevious
           //CPU's
           //Main
-          main_z80.change_ram_calls(xevious_getbyte,xevious_putbyte);
+          z80_0.change_ram_calls(xevious_getbyte,xevious_putbyte);
           //Sub1
-          snd_z80.change_ram_calls(xevious_sub_getbyte,xevious_putbyte);
+          z80_2.change_ram_calls(xevious_sub_getbyte,xevious_putbyte);
           //Sub2
-          sub_z80.change_ram_calls(xevious_sub2_getbyte,xevious_putbyte);
+          z80_1.change_ram_calls(xevious_sub2_getbyte,xevious_putbyte);
           //Init IO's
           namco_06xx_init(0,IO51XX,NONE,IO50XX,IO54XX,namco_06xx_nmi);
           //Namco 54xx
           if not(namcoio_50xx_init('xevious.zip')) then exit;
           if not(namcoio_54xx_init('xevious.zip')) then exit;
-          if load_samples('xevious.zip',@xevious_samples[0],num_samples_xevious) then main_z80.init_sound(galaga_sound_update);
+          if load_samples('xevious.zip',@xevious_samples[0],num_samples_xevious) then z80_0.init_sound(galaga_sound_update);
           //cargar roms
           if not(cargar_roms(@memoria[0],@xevious_rom[0],'xevious.zip',0)) then exit;
           if not(cargar_roms(@mem_snd[0],@xevious_sub,'xevious.zip',0)) then exit;

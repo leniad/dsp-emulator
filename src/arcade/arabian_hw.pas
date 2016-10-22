@@ -71,18 +71,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=main_mb88xx.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=mb88xx_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 255 do begin
     //Main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //MCU
-    main_mb88xx.run(frame_s);
-    frame_s:=frame_s+main_mb88xx.tframes-main_mb88xx.contador;
+    mb88xx_0.run(frame_s);
+    frame_s:=frame_s+mb88xx_0.tframes-mb88xx_0.contador;
     if f=244 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_arabian;
     end;
   end;
@@ -207,10 +207,10 @@ end;
 procedure arabian_portbw(valor:byte);
 begin
 //reset mcu + irq mcu
-if (valor and $20)=0 then main_mb88xx.set_irq_line(ASSERT_LINE)
-  else main_mb88xx.set_irq_line(CLEAR_LINE);
-if (valor and $10)<>0 then main_mb88xx.change_reset(CLEAR_LINE)
-  else main_mb88xx.change_reset(ASSERT_LINE);
+if (valor and $20)=0 then mb88xx_0.set_irq_line(ASSERT_LINE)
+  else mb88xx_0.set_irq_line(CLEAR_LINE);
+if (valor and $10)<>0 then mb88xx_0.change_reset(CLEAR_LINE)
+  else mb88xx_0.change_reset(ASSERT_LINE);
 end;
 
 procedure arabian_sound_update;
@@ -286,8 +286,8 @@ end;
 //Main
 procedure reset_arabian;
 begin
- main_z80.reset;
- main_mb88xx.reset;
+ z80_0.reset;
+ mb88xx_0.reset;
  ay8910_0.reset;
  reset_audio;
  video_control:=0;
@@ -404,20 +404,20 @@ iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(234,256);
 //Main CPU
-main_z80:=cpu_z80.create(3000000,256);
-main_z80.change_ram_calls(arabian_getbyte,arabian_putbyte);
-main_z80.change_io_calls(nil,arabian_outbyte);
-main_z80.init_sound(arabian_sound_update);
+z80_0:=cpu_z80.create(3000000,256);
+z80_0.change_ram_calls(arabian_getbyte,arabian_putbyte);
+z80_0.change_io_calls(nil,arabian_outbyte);
+z80_0.init_sound(arabian_sound_update);
 //MCU
-main_mb88xx:=cpu_mb88xx.Create(2000000,256);
-main_mb88xx.change_io_calls(mcu_port_k_r,mcu_port_o_w,nil,mcu_port_p_w,mcu_port_r_r,mcu_port_r_w);
+mb88xx_0:=cpu_mb88xx.Create(2000000,256);
+mb88xx_0.change_io_calls(mcu_port_k_r,mcu_port_o_w,nil,mcu_port_p_w,mcu_port_r_r,mcu_port_r_w);
 //Audio chips
-ay8910_0:=ay8910_chip.create(1500000,1);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.5);
 ay8910_0.change_io_calls(nil,nil,arabian_portaw,arabian_portbw);
 //cargar roms
 if not(cargar_roms(@memoria[0],@arabian_rom[0],'arabian.zip',0)) then exit;
 //Cargar MCU
-if not(cargar_roms(main_mb88xx.get_rom_addr,@arabian_mcu,'arabian.zip',1)) then exit;
+if not(cargar_roms(mb88xx_0.get_rom_addr,@arabian_mcu,'arabian.zip',1)) then exit;
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@arabian_gfx,'arabian.zip',0)) then exit;
 convert_gfx_arabian;

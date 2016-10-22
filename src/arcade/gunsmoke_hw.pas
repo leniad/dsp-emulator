@@ -258,18 +258,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       drawvideo_gs_hw;
     end;
   end;
@@ -346,7 +346,7 @@ end;
 
 function hw1943_getbyte(direccion:word):byte;
 var
-  main_z80_reg:npreg_z80;
+  z80_0_reg:npreg_z80;
 begin
 case direccion of
   $8000..$bfff:hw1943_getbyte:=rom_mem[rom_bank,direccion and $3fff];
@@ -356,8 +356,8 @@ case direccion of
   $c003:hw1943_getbyte:=$f8;
   $c004:hw1943_getbyte:=$ff;
   $c007:begin
-          main_z80_reg:=main_z80.get_internal_r;
-          hw1943_getbyte:=main_z80_reg.bc.h;
+          z80_0_reg:=z80_0.get_internal_r;
+          hw1943_getbyte:=z80_0_reg.bc.h;
         end;
     else hw1943_getbyte:=memoria[direccion];
 end;
@@ -404,7 +404,7 @@ end;
 
 procedure gunsmoke_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure gunsmoke_sound_update;
@@ -416,8 +416,8 @@ end;
 //Main
 procedure reset_gunsmokehw;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  YM2203_0.reset;
  YM2203_1.reset;
  reset_audio;
@@ -504,10 +504,10 @@ case main_vars.tipo_maquina of
 end;
 iniciar_video(224,256);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(gunsmoke_snd_getbyte,gunsmoke_snd_putbyte);
-init_timer(snd_z80.numero_cpu,3000000/(60*4),gunsmoke_snd_irq,true);
-snd_z80.init_sound(gunsmoke_sound_update);
+z80_1:=cpu_z80.create(3000000,256);
+z80_1.change_ram_calls(gunsmoke_snd_getbyte,gunsmoke_snd_putbyte);
+init_timer(z80_1.numero_cpu,3000000/(60*4),gunsmoke_snd_irq,true);
+z80_1.init_sound(gunsmoke_sound_update);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(1500000,0.5,0.75);
 ym2203_1:=ym2203_chip.create(1500000,0.5,0.75);
@@ -516,8 +516,8 @@ case main_vars.tipo_maquina of
        //video
        drawvideo_gs_hw:=update_video_gunsmoke;
        //Main CPU
-       main_z80:=cpu_z80.create(4000000,256);
-       main_z80.change_ram_calls(gunsmoke_getbyte,gunsmoke_putbyte);
+       z80_0:=cpu_z80.create(4000000,256);
+       z80_0.change_ram_calls(gunsmoke_getbyte,gunsmoke_putbyte);
        //cargar roms y ponerlas en su sitio
        if not(cargar_roms(@memoria_temp[0],@gunsmoke_rom[0],'gunsmoke.zip',0)) then exit;
        copymemory(@memoria[0],@memoria_temp[0],$8000);
@@ -549,8 +549,8 @@ case main_vars.tipo_maquina of
        //video
        drawvideo_gs_hw:=update_video_1943;
        //Main CPU
-       main_z80:=cpu_z80.create(6000000,256);
-       main_z80.change_ram_calls(hw1943_getbyte,hw1943_putbyte);
+       z80_0:=cpu_z80.create(6000000,256);
+       z80_0.change_ram_calls(hw1943_getbyte,hw1943_putbyte);
        //cargar roms y ponerlas en su sitio
        if not(cargar_roms(@memoria_temp[0],@hw1943_rom[0],'1943.zip',0)) then exit;
        copymemory(@memoria[0],@memoria_temp[0],$8000);
@@ -589,8 +589,8 @@ case main_vars.tipo_maquina of
        //video
        drawvideo_gs_hw:=update_video_1943;
        //Main CPU
-       main_z80:=cpu_z80.create(6000000,256);
-       main_z80.change_ram_calls(hw1943_getbyte,hw1943_putbyte);
+       z80_0:=cpu_z80.create(6000000,256);
+       z80_0.change_ram_calls(hw1943_getbyte,hw1943_putbyte);
        //cargar roms y ponerlas en su sitio
        if not(cargar_roms(@memoria_temp[0],@hw1943kai_rom[0],'1943kai.zip',0)) then exit;
        copymemory(@memoria[0],@memoria_temp[0],$8000);

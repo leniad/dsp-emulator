@@ -151,24 +151,24 @@ var
   {$ifdef speed_debug}cont1,cont2:int64;{$endif}
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_mcu:=main_mcs51.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRuning do begin
   {$ifdef speed_debug}QueryPerformanceCounter(cont1);{$endif}
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     //MCU
-    main_mcs51.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_mcs51.tframes-main_mcs51.contador;
+    mcs51_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
     if f=239 then begin
       update_video_blktiger;
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
     end;
   end;
@@ -210,17 +210,23 @@ end;
 procedure blktiger_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $c000..$cfff:if scroll_ram[scroll_bank+(direccion and $fff)]<>valor then begin
-                        scroll_ram[scroll_bank+(direccion and $fff)]:=valor;
-                        gfx[2].buffer[(scroll_bank+(direccion and $fff)) shr 1]:=true;
+        $c000..$cfff:begin
+                        if scroll_ram[scroll_bank+(direccion and $fff)]<>valor then begin
+                          scroll_ram[scroll_bank+(direccion and $fff)]:=valor;
+                          gfx[2].buffer[(scroll_bank+(direccion and $fff)) shr 1]:=true;
+                        end;
+                        memoria[direccion]:=valor;
                      end;
-        $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
+        $d000..$d7ff:begin
+                        gfx[0].buffer[direccion and $3ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $d800..$dfff:if buffer_paleta[direccion and $7ff]<>valor then begin
                         buffer_paleta[direccion and $7ff]:=valor;
                         cambiar_color(direccion and $3ff);
                      end;
+        $e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
 
@@ -246,11 +252,11 @@ case (puerto and $FF) of
   4:begin
       ch_on:=(valor and $80)=0;
       main_screen.flip_main_screen:=(valor and $40)<>0;
-      snd_z80.change_reset((valor and $20) shr 5);
+      z80_1.change_reset((valor and $20) shr 5);
     end;
   7:begin
       z80_latch:=valor;
-      main_mcs51.change_irq1(ASSERT_LINE);
+      mcs51_0.change_irq1(ASSERT_LINE);
     end;
   8:if ((scroll_x and $ff)<>valor) then begin
       if abs((scroll_x and mask_sx)-(valor and mask_sx))>15 then fillchar(gfx[2].buffer[0],$2000,1);
@@ -321,7 +327,7 @@ end;
 
 function in_port0:byte;
 begin
-  main_mcs51.change_irq1(CLEAR_LINE);
+  mcs51_0.change_irq1(CLEAR_LINE);
   in_port0:=z80_latch;
 end;
 
@@ -333,7 +339,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_1.change_irq(irqstate);
 end;
 
 procedure blk_hi_score;
@@ -354,11 +360,11 @@ begin
 open_qsnapshot_save('blacktiger'+nombre);
 getmem(data,20000);
 //CPU
-size:=main_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=main_mcs51.save_snapshot(data);
+size:=mcs51_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
@@ -407,11 +413,11 @@ if not(open_qsnapshot_load('blacktiger'+nombre)) then exit;
 getmem(data,20000);
 //CPU
 loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_1.load_snapshot(data);
 loaddata_qsnapshot(data);
-main_mcs51.load_snapshot(data);
+mcs51_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 ym2203_0.load_snapshot(data);
@@ -449,9 +455,9 @@ end;
 //Main
 procedure reset_blktiger;
 begin
- main_z80.reset;
- snd_z80.reset;
- main_mcs51.reset;
+ z80_0.reset;
+ z80_1.reset;
+ mcs51_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
  reset_audio;
@@ -497,22 +503,22 @@ screen_init(3,256,256,true); //Chars
 screen_init(4,512,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,256);
-main_z80.change_ram_calls(blktiger_getbyte,blktiger_putbyte);
-main_z80.change_io_calls(blktiger_inbyte,blktiger_outbyte);
+z80_0:=cpu_z80.create(6000000,256);
+z80_0.change_ram_calls(blktiger_getbyte,blktiger_putbyte);
+z80_0.change_io_calls(blktiger_inbyte,blktiger_outbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(blksnd_getbyte,blksnd_putbyte);
-snd_z80.init_sound(blktiger_sound_update);
+z80_1:=cpu_z80.create(3579545,256);
+z80_1.change_ram_calls(blksnd_getbyte,blksnd_putbyte);
+z80_1.init_sound(blktiger_sound_update);
 //MCU
-main_mcs51:=cpu_mcs51.create(6000000,256);
-main_mcs51.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
+mcs51_0:=cpu_mcs51.create(6000000,256);
+mcs51_0.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3579545);
 ym2203_0.change_irq_calls(snd_irq);
 ym2203_1:=ym2203_chip.create(3579545);
 //Timers
-timer_hs:=init_timer(main_z80.numero_cpu,10000,blk_hi_score,true);
+timer_hs:=init_timer(z80_0.numero_cpu,10000,blk_hi_score,true);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@blktiger_rom[0],'blktiger.zip',0)) then exit;
 //poner las roms y los bancos de rom
@@ -521,7 +527,7 @@ for f:=0 to 15 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4
 //sonido
 if not(cargar_roms(@mem_snd[0],@blktiger_snd,'blktiger.zip')) then exit;
 //MCU ROM
-if not(cargar_roms(main_mcs51.get_rom_addr,@blktiger_mcu,'blktiger.zip')) then exit;
+if not(cargar_roms(mcs51_0.get_rom_addr,@blktiger_mcu,'blktiger.zip')) then exit;
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@blktiger_char,'blktiger.zip')) then exit;
 init_gfx(0,8,8,2048);

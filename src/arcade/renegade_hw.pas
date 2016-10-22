@@ -136,24 +136,24 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6502.tframes;
-frame_s:=snd_m6809.tframes;
-frame_mcu:=main_m6805.tframes;
+frame_m:=m6502_0.tframes;
+frame_s:=m6809_0.tframes;
+frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-   main_m6502.run(frame_m);
-   frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
+   m6502_0.run(frame_m);
+   frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
    //Sound
-   snd_m6809.run(frame_s);
-   frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+   m6809_0.run(frame_s);
+   frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
    //mcu
-   main_m6805.run(frame_mcu);
-   frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
+   m6805_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
    case f of
-      111:main_m6502.change_nmi(PULSE_LINE);
+      111:m6502_0.change_nmi(PULSE_LINE);
       239:begin
             update_video_renegade;
-            main_m6502.change_irq(HOLD_LINE);
+            m6502_0.change_irq(HOLD_LINE);
             marcade.dswb:=marcade.dswb and $bf;
           end;
       63:marcade.dswb:=marcade.dswb or $40;
@@ -184,7 +184,7 @@ case direccion of
             mcu_sent:=false;
 		        getbyte_renegade:=from_mcu;
          end;
-   $3805:main_m6805.change_reset(PULSE_LINE);
+   $3805:m6805_0.change_reset(PULSE_LINE);
    $4000..$7fff:getbyte_renegade:=rom_mem[rom_bank,direccion and $3fff];
 end;
 end;
@@ -227,7 +227,7 @@ case direccion of
   $3801:scroll_x:=(scroll_x and $ff) or (valor shl 8);
   $3802:begin
           sound_latch:=valor;
-          snd_m6809.change_irq(HOLD_LINE);
+          m6809_0.change_irq(HOLD_LINE);
         end;
   $3803:begin
           if ((valor and 1)=0) then begin
@@ -241,7 +241,7 @@ case direccion of
   $3804:begin
           from_main:=valor;
 		      main_sent:=true;
-		      main_m6805.irq_request(0,ASSERT_LINE);
+		      m6805_0.irq_request(0,ASSERT_LINE);
         end;
   $3805:rom_bank:=valor and 1;
 end;
@@ -307,7 +307,7 @@ case direccion of
 	1:begin
       if (((ddr_b and $02)<>0) and ((not(valor) and $02)<>0) and ((port_b_out and $2)<>0)) then begin
     		port_a_in:=from_main;
-    	  if main_sent then main_m6805.irq_request(0,CLEAR_LINE);
+    	  if main_sent then m6805_0.irq_request(0,CLEAR_LINE);
         main_sent:=false;
     	end;
     	if (((ddr_b and $04)<>0) and ((valor and $04)<>0) and ((not(port_b_out) and $04)<>0)) then begin
@@ -332,15 +332,15 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_m6809.change_firq(irqstate);
+  m6809_0.change_firq(irqstate);
 end;
 
 //Main
 procedure reset_renegade;
 begin
-main_m6502.reset;
-snd_m6809.reset;
-main_m6805.reset;
+m6502_0.reset;
+m6809_0.reset;
+m6805_0.reset;
 ym3812_0.reset;
 gen_adpcm_reset(0);
 marcade.in0:=$ff;
@@ -384,15 +384,15 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(240,240);
 //Main CPU
-main_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
-main_m6502.change_ram_calls(getbyte_renegade,putbyte_renegade);
+m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
+m6502_0.change_ram_calls(getbyte_renegade,putbyte_renegade);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(1500000,256);
-snd_m6809.change_ram_calls(getbyte_snd_renegade,putbyte_snd_renegade);
-snd_m6809.init_sound(renegade_sound_update);
+m6809_0:=cpu_m6809.Create(1500000,256);
+m6809_0.change_ram_calls(getbyte_snd_renegade,putbyte_snd_renegade);
+m6809_0.init_sound(renegade_sound_update);
 //MCU CPU
-main_m6805:=cpu_m6805.create(3000000,256,tipo_m68705);
-main_m6805.change_ram_calls(renegade_mcu_getbyte,renegade_mcu_putbyte);
+m6805_0:=cpu_m6805.create(3000000,256,tipo_m68705);
+m6805_0.change_ram_calls(renegade_mcu_getbyte,renegade_mcu_putbyte);
 //Sound Chip
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);

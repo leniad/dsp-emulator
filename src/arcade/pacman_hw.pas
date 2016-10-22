@@ -114,13 +114,13 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=223 then begin
-      if irq_vblank then main_z80.change_irq(HOLD_LINE);
+      if irq_vblank then z80_0.change_irq(HOLD_LINE);
       update_video_pacman;
     end;
   end;
@@ -170,7 +170,7 @@ end;
 
 procedure pacman_outbyte(valor:byte;puerto:word);
 begin
-if (puerto and $FF)=0 then main_z80.im2_lo:=valor;
+if (puerto and $FF)=0 then z80_0.im2_lo:=valor;
 end;
 
 //MS Pacman
@@ -224,7 +224,7 @@ if main_vars.tipo_maquina=10 then open_qsnapshot_save('pacman'+nombre)
   else open_qsnapshot_save('mspacman'+nombre);
 getmem(data,2000);
 //CPU
-size:=main_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=namco_sound_save_snapshot(data);
@@ -253,7 +253,7 @@ end;
 getmem(data,2000);
 //CPU
 loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 namco_sound_load_snapshot(data);
@@ -272,7 +272,7 @@ end;
 //Main
 procedure reset_pacman;
 begin
- main_z80.reset;
+ z80_0.reset;
  namco_sound_reset;
  reset_audio;
  irq_vblank:=false;
@@ -367,12 +367,12 @@ screen_init(2,256,288,false,true);
 screen_mod_sprites(2,0,512,0,$1ff);
 iniciar_video(224,288);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,264);
-main_z80.change_io_calls(nil,pacman_outbyte);
+z80_0:=cpu_z80.create(3072000,264);
+z80_0.change_io_calls(nil,pacman_outbyte);
 namco_sound_init(3,false);
 case main_vars.tipo_maquina of
   10:begin  //Pacman
-        main_z80.change_ram_calls(pacman_getbyte,pacman_putbyte);
+        z80_0.change_ram_calls(pacman_getbyte,pacman_putbyte);
         //cargar roms
         if not(cargar_roms(@memoria[0],@pacman_rom[0],'pacman.zip',0)) then exit;
         //cargar sonido & iniciar_sonido
@@ -390,7 +390,7 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@pacman_dip;
      end;
      88:begin  //MS Pacman
-        main_z80.change_ram_calls(mspacman_getbyte,mspacman_putbyte);
+        z80_0.change_ram_calls(mspacman_getbyte,mspacman_putbyte);
         //cargar y desencriptar roms
         if not(cargar_roms(@memoria[0],@mspacman_rom[0],'mspacman.zip',0)) then exit;
         copymemory(@rom_decode[0],@memoria[0],$1000);  // pacman.6e */

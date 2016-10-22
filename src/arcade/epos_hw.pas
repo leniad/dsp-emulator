@@ -71,13 +71,13 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 240 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=235 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_epos;
     end;
   end;
@@ -127,7 +127,7 @@ end;
 //Main
 procedure reset_epos_hw;
 begin
- main_z80.reset;
+ z80_0.reset;
  AY8910_0.reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -147,12 +147,12 @@ iniciar_audio(false);
 screen_init(1,241,272);
 iniciar_video(236,272);
 //Main CPU
-main_z80:=cpu_z80.create(2750000,241);
-main_z80.change_ram_calls(epos_getbyte,epos_putbyte);
-main_z80.change_io_calls(epos_inbyte,epos_outbyte);
-main_z80.init_sound(epos_despues_instruccion);
+z80_0:=cpu_z80.create(2750000,241);
+z80_0.change_ram_calls(epos_getbyte,epos_putbyte);
+z80_0.change_io_calls(epos_inbyte,epos_outbyte);
+z80_0.init_sound(epos_despues_instruccion);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(2750000,1);
+AY8910_0:=ay8910_chip.create(2750000,AY8910,1);
 case main_vars.tipo_maquina of
   94:begin
       //cargar roms

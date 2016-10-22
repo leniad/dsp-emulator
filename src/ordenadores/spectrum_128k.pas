@@ -67,7 +67,7 @@ if not(spec_comun) then exit;
 spec_z80.change_ram_calls(spec128_getbyte,spec128_putbyte);
 spec_z80.change_io_calls(spec128_inbyte,spec128_outbyte);
 spec_z80.change_retraso_call(spec128_retraso_memoria,spec128_retraso_puerto);
-ay8910_0:=ay8910_chip.create(1773400,1);
+ay8910_0:=ay8910_chip.create(1773400,AY8912,1);
 ay8910_0.change_io_calls(spec128_lg,nil,nil,nil);
 case main_vars.tipo_maquina of
   1:if not(cargar_roms(@mem_temp[0],@spec128_rom[0],'spec128.zip',0)) then exit;

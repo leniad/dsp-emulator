@@ -26,6 +26,17 @@ const
         (n:'a03_ee06.bin';l:$4000;p:0;crc:$6039bdd1),(n:'a02_ee05.bin';l:$4000;p:$4000;crc:$b32d8252),());
         exedexes_tilesbg_pos:array[0..2] of tipo_roms=(
         (n:'c01_ee07.bin';l:$4000;p:0;crc:$3625a68d),(n:'h04_ee09.bin';l:$2000;p:$4000;crc:$6057c907),());
+        exedexes_dip_a:array [0..5] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$8;dip_name:'1'),(dip_val:$4;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'2 Players Game';number:2;dip:((dip_val:$0;dip_name:'1 Credit'),(dip_val:$10;dip_name:'2 Credit'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Languaje';number:2;dip:((dip_val:$0;dip_name:'English'),(dip_val:$20;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Freeze';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        exedexes_dip_b:array [0..4] of def_dip=(
+        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$40;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  scroll_x,scroll_y,scroll_bg:word;
@@ -110,25 +121,25 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //sonido
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     case f of
       239:begin
-          main_z80.im0:=$d7;  //rst 10
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.im0:=$d7;  //rst 10
+          z80_0.change_irq(HOLD_LINE);
           update_video_exedexes;
         end;
       255:begin
-          main_z80.im0:=$cf;  //rst 8
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.im0:=$cf;  //rst 8
+          z80_0.change_irq(HOLD_LINE);
         end;
     end;
   end;
@@ -144,30 +155,33 @@ case direccion of
   $c000:exedexes_getbyte:=marcade.in0;
   $c001:exedexes_getbyte:=marcade.in1;
   $c002:exedexes_getbyte:=marcade.in2;
-  $c003:exedexes_getbyte:=$df;
-  $c004:exedexes_getbyte:=$ff;
+  $c003:exedexes_getbyte:=marcade.dswa;
+  $c004:exedexes_getbyte:=marcade.dswb;
 end;
 end;
 
 procedure exedexes_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $c800:sound_command:=valor;
-        $c804:chon:=(valor and $80)<>0;
-        $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
-        $d800:scroll_y:=(scroll_y and $700) or valor;
-        $d801:scroll_y:=(scroll_y and $ff) or ((valor and $7) shl 8);
-        $d802:scroll_x:=(scroll_x and $700) or valor;
-        $d803:scroll_x:=(scroll_x and $ff) or ((valor and $7) shl 8);
-        $d804:scroll_bg:=(scroll_bg and $700) or valor;
-        $d805:scroll_bg:=(scroll_bg and $ff) or ((valor and $7) shl 8);
-        $d807:begin
-                sc2on:=(valor and $10)<>0;
-                sc1on:=(valor and $20)<>0;
-                objon:=(valor and $40)<>0;
-              end;
+  $c800:sound_command:=valor;
+  $c804:chon:=(valor and $80)<>0;
+  $d000..$d7ff:begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $d800:scroll_y:=(scroll_y and $700) or valor;
+  $d801:scroll_y:=(scroll_y and $ff) or ((valor and $7) shl 8);
+  $d802:scroll_x:=(scroll_x and $700) or valor;
+  $d803:scroll_x:=(scroll_x and $ff) or ((valor and $7) shl 8);
+  $d804:scroll_bg:=(scroll_bg and $700) or valor;
+  $d805:scroll_bg:=(scroll_bg and $ff) or ((valor and $7) shl 8);
+  $d807:begin
+          sc2on:=(valor and $10)<>0;
+          sc1on:=(valor and $20)<>0;
+          objon:=(valor and $40)<>0;
+        end;
+  $e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
 
@@ -183,8 +197,8 @@ end;
 procedure exedexes_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$4000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  $4000..$47ff:mem_snd[direccion]:=valor;
   $8000:ay8910_0.Control(valor);
   $8001:ay8910_0.Write(valor);
   $8002:sn_76496_0.Write(valor);
@@ -194,7 +208,7 @@ end;
 
 procedure exedexes_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure exedexes_sound;
@@ -207,8 +221,8 @@ end;
 //Main
 procedure reset_exedexes_hw;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  AY8910_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
@@ -287,17 +301,17 @@ screen_init(3,256,256,true);
 screen_init(4,256,512,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(exedexes_getbyte,exedexes_putbyte);
+z80_0:=cpu_z80.create(4000000,256);
+z80_0.change_ram_calls(exedexes_getbyte,exedexes_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(exedexes_snd_getbyte,exedexes_snd_putbyte);
-snd_z80.init_sound(exedexes_sound);
+z80_1:=cpu_z80.create(3000000,256);
+z80_1.change_ram_calls(exedexes_snd_getbyte,exedexes_snd_putbyte);
+z80_1.init_sound(exedexes_sound);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,1);
-sn_76496_0:=sn76496_chip.Create(3000000);
-sn_76496_1:=sn76496_chip.Create(3000000);
-init_timer(snd_z80.numero_cpu,3000000/(4*60),exedexes_snd_irq,true);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,0.1);
+sn_76496_0:=sn76496_chip.Create(3000000,0.36);
+sn_76496_1:=sn76496_chip.Create(3000000,0.36);
+init_timer(z80_1.numero_cpu,3000000/(4*60),exedexes_snd_irq,true);
 //cargar roms
 if not(cargar_roms(@memoria[0],@exedexes_rom[0],'exedexes.zip',0)) then exit;
 //cargar ROMS sonido
@@ -342,6 +356,11 @@ end;
 if not(cargar_roms(@memoria_temp[0],@exedexes_tilesbg_pos[0],'exedexes.zip',0)) then exit;
 poner_bg;
 poner_fg;
+//DIP
+marcade.dswa:=$df;
+marcade.dswa_val:=@exedexes_dip_a;
+marcade.dswb:=$ff;
+marcade.dswb_val:=@exedexes_dip_b;
 //final
 reset_exedexes_hw;
 iniciar_exedexes_hw:=true;

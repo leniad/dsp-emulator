@@ -212,7 +212,7 @@ end;
 
 procedure thunderx_firq;
 begin
-     main_konami.change_firq(HOLD_LINE);
+     konami_0.change_firq(HOLD_LINE);
      timer[thunderx_timer].enabled:=false;
 end;
 
@@ -300,19 +300,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_konami.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=konami_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_konami.run(frame_m);
-    frame_m:=frame_m+main_konami.tframes-main_konami.contador;
+    konami_0.run(frame_m);
+    frame_m:=frame_m+konami_0.tframes-konami_0.contador;
     //sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=239 then begin
                     update_video_thunderx;
-                    if k052109_0.is_irq_enabled then main_konami.change_irq(HOLD_LINE);
+                    if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
                   end;
   end;
   eventos_thunderx;
@@ -367,7 +367,7 @@ case direccion of
     $0..$3fff:case direccion of
                    $1f80:video_bank_call(valor);
                    $1f84:sound_latch:=valor;
-                   $1f88:snd_z80.change_irq(HOLD_LINE);
+                   $1f88:z80_0.change_irq(HOLD_LINE);
                    $1f98:call_function_1f98(valor);
                    else if ((direccion>=$3800) and (direccion<$3808)) then k051960_0.k051937_write(direccion-$3800,valor)
                            else if (direccion<$3c00) then k052109_0.write(direccion,valor)
@@ -450,8 +450,8 @@ end;
 //Main
 procedure reset_thunderx;
 begin
- main_konami.reset;
- snd_z80.reset;
+ konami_0.reset;
+ z80_0.reset;
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
@@ -483,10 +483,10 @@ if main_vars.tipo_maquina<>224 then main_screen.rot90_screen:=true;
 iniciar_video(288,224,true);
 iniciar_audio(false);
 //Main CPU
-main_konami:=cpu_konami.create(3000000,256);
-main_konami.change_ram_calls(thunderx_getbyte,thunderx_putbyte);
+konami_0:=cpu_konami.create(3000000,256);
+konami_0.change_ram_calls(thunderx_getbyte,thunderx_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(3579545,256);
 case main_vars.tipo_maquina of
      222:begin //Super contra
             call_function_1f98:=scontra_1f98_call;
@@ -501,8 +501,8 @@ case main_vars.tipo_maquina of
             //cargar sonido
             if not(cargar_roms(@mem_snd[0],@scontra_sound,'scontra.zip',1)) then exit;
             //Sound CPU
-            snd_z80.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
-            snd_z80.init_sound(scontra_sound_update);
+            z80_0.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
+            z80_0.init_sound(scontra_sound_update);
             //Sound Chips
             ym2151_0:=ym2151_chip.create(3579545);
             getmem(k007232_rom,$80000);
@@ -525,7 +525,7 @@ case main_vars.tipo_maquina of
             marcade.dswc_val:=@scontra_dip_c;
      end;
      223:begin //Gang Busters
-            main_konami.change_set_lines(thunderx_bank);
+            konami_0.change_set_lines(thunderx_bank);
             call_function_1f98:=scontra_1f98_call;
             //cargar roms y ponerlas en su sitio...
             if not(cargar_roms(@temp_mem[0],@gbusters_rom[0],'gbusters.zip',0)) then exit;
@@ -538,8 +538,8 @@ case main_vars.tipo_maquina of
             //cargar sonido
             if not(cargar_roms(@mem_snd[0],@gbusters_sound,'gbusters.zip',1)) then exit;
             //Sound CPU
-            snd_z80.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
-            snd_z80.init_sound(scontra_sound_update);
+            z80_0.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
+            z80_0.init_sound(scontra_sound_update);
             //Sound Chips
             ym2151_0:=ym2151_chip.create(3579545);
             getmem(k007232_rom,$40000);
@@ -562,7 +562,7 @@ case main_vars.tipo_maquina of
             marcade.dswc_val:=@gbusters_dip_c;
      end;
      224:begin //Thunder Cross
-            main_konami.change_set_lines(thunderx_bank);
+            konami_0.change_set_lines(thunderx_bank);
             call_function_1f98:=thunderx_1f98_call;
             //cargar roms y ponerlas en su sitio...
             if not(cargar_roms(@temp_mem[0],@thunderx_rom[0],'thunderx.zip',0)) then exit;
@@ -573,12 +573,12 @@ case main_vars.tipo_maquina of
             end;
             for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
             //Despues de calcular las colisiones hay que llamar a FIRQ, pero hay que retrasarla 100T o se cuelga...
-            thunderx_timer:=init_timer(main_konami.numero_cpu,100,thunderx_firq,false);
+            thunderx_timer:=init_timer(konami_0.numero_cpu,100,thunderx_firq,false);
             //cargar sonido
             if not(cargar_roms(@mem_snd[0],@thunderx_sound,'thunderx.zip',1)) then exit;
             //Sound CPU
-            snd_z80.change_ram_calls(thunderx_snd_getbyte,thunderx_snd_putbyte);
-            snd_z80.init_sound(thunderx_sound_update);
+            z80_0.change_ram_calls(thunderx_snd_getbyte,thunderx_snd_putbyte);
+            z80_0.init_sound(thunderx_sound_update);
             //Sound Chips
             ym2151_0:=ym2151_chip.create(3579545);
             //Iniciar video

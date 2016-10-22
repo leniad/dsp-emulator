@@ -138,16 +138,16 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 511 do begin
-      main_z80.run(frame);
-      frame:=frame+main_z80.tframes-main_z80.contador;
+      z80_0.run(frame);
+      frame:=frame+z80_0.tframes-z80_0.contador;
       if f=479 then begin
           update_video_popeye;
-          main_z80_reg:=main_z80.get_internal_r;
+          main_z80_reg:=z80_0.get_internal_r;
           if (main_z80_reg.i and 1)<>0 then begin
-            main_z80.change_nmi(PULSE_LINE);
+            z80_0.change_nmi(PULSE_LINE);
             field:=field xor $10;
           end;
       end;
@@ -241,7 +241,7 @@ begin
 open_qsnapshot_save('popeye'+nombre);
 getmem(data,200);
 //CPU
-size:=main_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ay8910_0.save_snapshot(data);
@@ -271,7 +271,7 @@ if not(open_qsnapshot_load('popeye'+nombre)) then exit;
 getmem(data,200);
 //CPU
 loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 ay8910_0.load_snapshot(data);
@@ -295,7 +295,7 @@ end;
 //Main
 procedure reset_popeye;
 begin
- main_z80.reset;
+ z80_0.reset;
  ay8910_0.reset;
  reset_audio;
  marcade.in0:=0;
@@ -335,12 +335,12 @@ screen_init(2,512,512,true);
 screen_init(3,512,512,false,true);
 iniciar_video(512,448);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,512);
-main_z80.change_ram_calls(popeye_getbyte,popeye_putbyte);
-main_z80.change_io_calls(popeye_inbyte,popeye_outbyte);
-main_z80.init_sound(popeye_sound_update);
+z80_0:=cpu_z80.create(4000000,512);
+z80_0.change_ram_calls(popeye_getbyte,popeye_putbyte);
+z80_0.change_io_calls(popeye_inbyte,popeye_outbyte);
+z80_0.init_sound(popeye_sound_update);
 //Audio chips
-ay8910_0:=ay8910_chip.create(2000000,1);
+ay8910_0:=ay8910_chip.create(2000000,AY8910,1);
 ay8910_0.change_io_calls(popeye_portar,nil,nil,popeye_portbw);
 //cargar roms y decodificarlas
 if not(cargar_roms(@memoria_temp[0],@popeye_rom[0],'popeye.zip',0)) then exit;

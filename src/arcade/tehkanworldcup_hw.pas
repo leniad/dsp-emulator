@@ -110,24 +110,24 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_m2:=sub_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_m2:=z80_1.tframes;
+frame_s:=z80_2.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $1ff do begin
   //CPU 1
-  main_z80.run(frame_m);
-  frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+  z80_0.run(frame_m);
+  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
   //CPU 2
-  sub_z80.run(frame_m2);
-  frame_m2:=frame_m2+sub_z80.tframes-sub_z80.contador;
+  z80_1.run(frame_m2);
+  frame_m2:=frame_m2+z80_1.tframes-z80_1.contador;
   //CPU Sound
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_2.run(frame_s);
+  frame_s:=frame_s+z80_2.tframes-z80_2.contador;
   if f=479 then begin
-     main_z80.change_irq(HOLD_LINE);
-     sub_z80.change_irq(HOLD_LINE);
-     snd_z80.change_irq(HOLD_LINE);
+     z80_0.change_irq(HOLD_LINE);
+     z80_1.change_irq(HOLD_LINE);
+     z80_2.change_irq(HOLD_LINE);
      update_video_tehkanwc;
   end;
  end;
@@ -201,10 +201,10 @@ case direccion of
     $f811:track1[1]:=valor;
     $f820:begin
             sound_latch:=valor;
-            snd_z80.change_nmi(ASSERT_LINE);
+            z80_2.change_nmi(ASSERT_LINE);
           end;
-    $f840:if valor=0 then sub_z80.change_reset(ASSERT_LINE)
-            else sub_z80.change_reset(CLEAR_LINE);
+    $f840:if valor=0 then z80_1.change_reset(ASSERT_LINE)
+            else z80_1.change_reset(CLEAR_LINE);
 end;
 end;
 
@@ -240,7 +240,7 @@ if direccion<$4000 then exit;
 case direccion of
   $4000..$47ff:mem_snd[direccion]:=valor;
   $8001:msm_5205_0.reset_w((valor xor $1) and 1);
-  $8003:snd_z80.change_nmi(CLEAR_LINE);
+  $8003:z80_2.change_nmi(CLEAR_LINE);
   $c000:sound_latch2:=valor;
 end;
 end;
@@ -304,9 +304,9 @@ end;
 //Main
 procedure reset_tehkanwc;
 begin
- main_z80.reset;
- sub_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
+ z80_2.reset;
  ay8910_0.reset;
  ay8910_1.reset;
  msm_5205_0.reset;
@@ -342,22 +342,22 @@ screen_init(3,256,256,true);
 screen_init(4,256,256,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(4608000,$200);
-main_z80.change_ram_calls(tehkanwc_getbyte,tehkanwc_putbyte);
+z80_0:=cpu_z80.create(4608000,$200);
+z80_0.change_ram_calls(tehkanwc_getbyte,tehkanwc_putbyte);
 //Misc CPU
-sub_z80:=cpu_z80.create(4608000,$200);
-sub_z80.change_ram_calls(tehkanwc_misc_getbyte,tehkanwc_misc_putbyte);
+z80_1:=cpu_z80.create(4608000,$200);
+z80_1.change_ram_calls(tehkanwc_misc_getbyte,tehkanwc_misc_putbyte);
 //analog
-init_analog(main_z80.numero_cpu,main_z80.clock,100,10,0,63,-63,true);
+init_analog(z80_0.numero_cpu,z80_0.clock,100,10,0,63,-63,true);
 //Sound CPU
-snd_z80:=cpu_z80.create(4608000,$200);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
-snd_z80.init_sound(tehkanwc_sound_update);
+z80_2:=cpu_z80.create(4608000,$200);
+z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
+z80_2.change_io_calls(snd_inbyte,snd_outbyte);
+z80_2.init_sound(tehkanwc_sound_update);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1536000,0.50);
+ay8910_0:=ay8910_chip.create(1536000,AY8910,0.50);
 ay8910_0.change_io_calls(nil,nil,tehkan_porta_write,tehkan_portb_write);
-ay8910_1:=ay8910_chip.create(1536000,0.50);
+ay8910_1:=ay8910_chip.create(1536000,AY8910,0.50);
 ay8910_1.change_io_calls(tehkan_porta_read,tehkan_portb_read,nil,nil);
 msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.45,msm5205_sound);
 //cargar roms

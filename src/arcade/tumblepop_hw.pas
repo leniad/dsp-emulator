@@ -61,17 +61,17 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=main_h6280.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=h6280_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   main_h6280.run(frame_s);
-   frame_s:=frame_s+main_h6280.tframes-main_h6280.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   h6280_0.run(frame_s);
+   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
    case f of
       247:begin
-            main_m68000.irq[6]:=HOLD_LINE;
+            m68000_0.irq[6]:=HOLD_LINE;
             update_video_tumblep;
             marcade.in1:=marcade.in1 and $f7;
           end;
@@ -119,7 +119,7 @@ if direccion<$80000 then exit;
 case direccion of
   $100000:begin
             deco16_sound_latch:=valor and $ff;
-            main_h6280.set_irq_line(0,HOLD_LINE);
+            h6280_0.set_irq_line(0,HOLD_LINE);
           end;
   $120000..$123fff:ram[(direccion and $3fff) shr 1]:=valor;
   $140000..$1407ff:if (buffer_paleta[(direccion and $7ff) shr 1]<>valor) then begin
@@ -147,7 +147,7 @@ end;
 //Main
 procedure reset_tumblep;
 begin
- main_m68000.reset;
+ m68000_0.reset;
  reset_dec16ic(0);
  deco16_snd_simple_reset;
  reset_audio;
@@ -177,8 +177,8 @@ init_dec16ic(0,1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
 screen_init(3,512,512,false,true);
 iniciar_video(319,240);
 //Main CPU
-main_m68000:=cpu_m68000.create(14000000,$100);
-main_m68000.change_ram16_calls(tumblep_getword,tumblep_putword);
+m68000_0:=cpu_m68000.create(14000000,$100);
+m68000_0.change_ram16_calls(tumblep_getword,tumblep_putword);
 //Sound CPU
 deco16_sprite_color_add:=0;
 deco16_sprite_mask:=$1fff;

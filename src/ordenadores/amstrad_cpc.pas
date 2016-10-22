@@ -328,14 +328,14 @@ cpc_ga.lines_count:=cpc_ga.lines_count+1;
 if (cpc_ga.lines_sync<>0) then begin
   cpc_ga.lines_sync:=cpc_ga.lines_sync-1;
   if (cpc_ga.lines_sync=0) then begin
-    if (cpc_ga.lines_count>=32) then main_z80.change_irq(PULSE_LINE)
-      else main_z80.change_irq(CLEAR_LINE);
+    if (cpc_ga.lines_count>=32) then z80_0.change_irq(PULSE_LINE)
+      else z80_0.change_irq(CLEAR_LINE);
     cpc_ga.lines_count:=0;
   end;
 end;
 if (cpc_ga.lines_count>=52) then begin
     cpc_ga.lines_count:=0;
-    main_z80.change_irq(PULSE_LINE);
+    z80_0.change_irq(PULSE_LINE);
 end;
 end;
 
@@ -503,11 +503,11 @@ var
   f:word;
 begin
 init_controls(false,true,true,false);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to (pantalla_alto-1) do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     draw_line(f);
   end;
   eventos_cpc;
@@ -559,7 +559,7 @@ case (val shr 6) of
                 cpc_ga.rom_high:=(val and 8)=0;
                 if (val and $10)<>0 then begin
                    cpc_ga.lines_count:=0;
-                   main_z80.change_irq(CLEAR_LINE);
+                   z80_0.change_irq(CLEAR_LINE);
                 end;
             end;
           3:if cpc_ga.ram_exp=1 then begin //Dk'tronics RAM expansion
@@ -662,7 +662,7 @@ function amstrad_raised_z80:byte;
 begin
   cpc_ga.lines_count:=cpc_ga.lines_count and $1f;
   amstrad_raised_z80:=2;
-  main_z80.change_irq(CLEAR_LINE);
+  z80_0.change_irq(CLEAR_LINE);
 end;
 
 //PPI 8255
@@ -714,7 +714,6 @@ begin
   cpc_porta_read:=cpc_ppi.keyb_val[cpc_ppi.keyb_line];
 end;
 
-
 //Sound
 procedure amstrad_sound_update;
 begin
@@ -747,7 +746,7 @@ if cinta_tzx.cargada then begin
       cinta_tzx.estados:=cinta_tzx.estados+estados_t;
       play_cinta_tzx;
   end else begin
-    amst_z80_reg:=main_z80.get_internal_r;
+    amst_z80_reg:=z80_0.get_internal_r;
     if ((amst_z80_reg.pc=$bc77) and not(cinta_tzx.play_once)) then begin
        cinta_tzx.play_once:=true;
        main_screen.rapido:=true;
@@ -860,7 +859,7 @@ end;
 //Main
 procedure cpc_reset;
 begin
-  main_z80.reset;
+  z80_0.reset;
   ay8910_0.reset;
   pia8255_0.reset;
   reset_audio;
@@ -1006,16 +1005,17 @@ for f:=0 to 31 do begin
   colores[f].b:=cpc_paleta[f] and $FF;
 end;
 set_pal(colores,32);
-main_z80:=cpu_z80.create(4000000,pantalla_alto);
-main_z80.change_ram_calls(cpc_getbyte,cpc_putbyte);
-main_z80.change_io_calls(cpc_inbyte,cpc_outbyte);
-main_z80.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80);
-main_z80.change_timmings(@z80_op,@z80_op_cb,@z80_op_dd,@z80_op_ddcb,@z80_op_ed,@z80_op_ex);
-main_z80.init_sound(amstrad_sound_update);
+z80_0:=cpu_z80.create(4000000,pantalla_alto);
+z80_0.change_ram_calls(cpc_getbyte,cpc_putbyte);
+z80_0.change_io_calls(cpc_inbyte,cpc_outbyte);
+z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80);
+z80_0.change_timmings(@z80_op,@z80_op_cb,@z80_op_dd,@z80_op_ddcb,@z80_op_ed,@z80_op_ex);
+z80_0.init_sound(amstrad_sound_update);
 tape_sound_channel:=init_channel;
 //El CPC lee el teclado el puerto A del AY, pero el puerto B esta unido al A
 //por lo que hay programas que usan el B!!! (Bestial Warrior por ejemplo)
-ay8910_0:=ay8910_chip.create(1000000,1);
+//Esto tengo que revisarlo
+ay8910_0:=ay8910_chip.create(1000000,AY8910,1);
 ay8910_0.change_io_calls(cpc_porta_read,cpc_porta_read,nil,nil);
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);

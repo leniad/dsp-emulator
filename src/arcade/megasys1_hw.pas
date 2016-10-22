@@ -292,23 +292,23 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_m68000.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=m68000_1.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    //Main CPU
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
    //Sound CPU
-   snd_m68000.run(frame_s);
-   frame_s:=frame_s+snd_m68000.tframes-snd_m68000.contador;
+   m68000_1.run(frame_s);
+   frame_s:=frame_s+m68000_1.tframes-m68000_1.contador;
    case f of
-    127:main_m68000.irq[3]:=HOLD_LINE;
+    127:m68000_0.irq[3]:=HOLD_LINE;
     239:begin
           update_video_megasys1;
-          main_m68000.irq[2]:=HOLD_LINE;
+          m68000_0.irq[2]:=HOLD_LINE;
         end;
-    15:main_m68000.irq[1]:=HOLD_LINE;
+    15:m68000_0.irq[1]:=HOLD_LINE;
    end;
  end;
  eventos_megasys1;
@@ -425,11 +425,11 @@ case direccion of
                                 layer_scr[1].scroll_y:=valor and layer_scr[1].mask_y;
                              end;
                         $20c:if layer_scr[1].info<>valor then cambiar_layer(1,valor);
-                        $300:if (valor and $10)<>0 then snd_m68000.change_reset(ASSERT_LINE)
-                                else snd_m68000.change_reset(CLEAR_LINE);
+                        $300:if (valor and $10)<>0 then m68000_1.change_reset(ASSERT_LINE)
+                                else m68000_1.change_reset(CLEAR_LINE);
                         $308:begin
                                 sound_latch:=valor;
-                                snd_m68000.irq[4]:=HOLD_LINE;
+                                m68000_1.irq[4]:=HOLD_LINE;
                              end;
                       end;
                    end;
@@ -489,7 +489,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if irqstate=1 then snd_m68000.irq[4]:=HOLD_LINE;
+  if irqstate=1 then m68000_1.irq[4]:=HOLD_LINE;
 end;
 
 //Main
@@ -497,8 +497,8 @@ procedure reset_megasys1;
 var
   f:byte;
 begin
- main_m68000.reset;
- snd_m68000.reset;
+ m68000_0.reset;
+ m68000_1.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
  oki_6295_1.reset;
@@ -690,12 +690,12 @@ iniciar_video(256,224);
 //Main CPU
 getmem(memoria_temp,$100000);
 getmem(memoria_w,$60000);
-main_m68000:=cpu_m68000.create(6000000,$100);
-main_m68000.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
+m68000_0:=cpu_m68000.create(6000000,$100);
+m68000_0.change_ram16_calls(megasys1_a_getword,megasys1_a_putword);
 //Sound CPU
-snd_m68000:=cpu_m68000.create(7000000,$100);
-snd_m68000.change_ram16_calls(megasys1_snd_a_getword,megasys1_snd_a_putword);
-snd_m68000.init_sound(megasys1_sound_update);
+m68000_1:=cpu_m68000.create(7000000,$100);
+m68000_1.change_ram16_calls(megasys1_snd_a_getword,megasys1_snd_a_putword);
+m68000_1.init_sound(megasys1_sound_update);
 //Sound Chips
 oki_6295_0:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);
 oki_6295_1:=snd_okim6295.Create(4000000,OKIM6295_PIN7_HIGH);

@@ -186,7 +186,7 @@ uses
   actfancer_hw in '..\arcade\actfancer_hw.pas',
   deco_bac06 in '..\arcade\misc\deco_bac06.pas',
   arabian_hw in '..\arcade\arabian_hw.pas',
-  n2a03_sound in '..\snd\n2a03_sound.pas',
+  n2a03 in '..\cpu\n2a03.pas',
   higemaru_hw in '..\arcade\higemaru_hw.pas',
   arcade_config in 'arcade_config.pas' {config_arcade},
   bagman_hw in '..\arcade\bagman_hw.pas',

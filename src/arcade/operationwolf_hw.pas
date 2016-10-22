@@ -2,7 +2,7 @@ unit operationwolf_hw;
 
 interface
 uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,msm5205,
+     m68000,main_engine,controls_engine,gfx_engine,ym_2151,msm5205,
      taitosnd,rom_engine,pal_engine,sound_engine,opwolf_cchip;
 
 procedure cargar_opwolf;
@@ -101,19 +101,19 @@ var
   f:byte;
 begin
 init_controls(true,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=tc0140syt_0.z80.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
   //Main CPU
-  main_m68000.run(frame_m);
-  frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //Sound CPU
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  tc0140syt_0.z80.run(frame_s);
+  frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
   if f=247 then begin
     update_video_opwolf;
-    main_m68000.irq[5]:=HOLD_LINE;
+    m68000_0.irq[5]:=HOLD_LINE;
   end;
  end;
  eventos_opwolf;
@@ -135,7 +135,7 @@ case direccion of
   $380002:opwolf_getword:=$7f;
   $3a0000:opwolf_getword:=raton.x+15;  //mouse x
   $3a0002:opwolf_getword:=raton.y;  //mouse y
-  $3e0002:if main_m68000.access_8bits_hi_dir then opwolf_getword:=taitosound_comm_r;
+  $3e0002:if m68000_0.access_8bits_hi_dir then opwolf_getword:=tc0140syt_0.comm_r;
   $c00000..$c0ffff:opwolf_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:opwolf_getword:=ram3[(direccion and $3fff) shr 1];
 end;
@@ -166,8 +166,8 @@ case direccion of
                        end;
       $350008,$3c0000:;
       $380000:spritebank:=(valor and $e0) shr 5;
-      $3e0000:taitosound_port_w(valor shr 8);
-      $3e0002:taitosound_comm_w(valor shr 8);
+      $3e0000:tc0140syt_0.port_w(valor shr 8);
+      $3e0002:tc0140syt_0.comm_w(valor shr 8);
       $c00000..$c03fff:begin
                       ram2[(direccion and $ffff) shr 1]:=valor;
                       gfx[0].buffer[(direccion and $3fff) shr 2]:=true;
@@ -192,7 +192,7 @@ case direccion of
   $0..$3fff,$8000..$8fff:opwolf_snd_getbyte:=mem_snd[direccion];
   $4000..$7fff:opwolf_snd_getbyte:=bank_sound[sound_bank,direccion and $3fff];
   $9001:opwolf_snd_getbyte:=ym2151_0.status;
-  $a001:opwolf_snd_getbyte:=taitosound_slave_comm_r;
+  $a001:opwolf_snd_getbyte:=tc0140syt_0.slave_comm_r;
 end;
 end;
 
@@ -203,8 +203,8 @@ case direccion of
   $8000..$8fff:mem_snd[direccion]:=valor;
   $9000:ym2151_0.reg(valor);
   $9001:ym2151_0.write(valor);
-  $a000:taitosound_slave_port_w(valor);
-  $a001:taitosound_slave_comm_w(valor);
+  $a000:tc0140syt_0.slave_port_w(valor);
+  $a001:tc0140syt_0.slave_comm_w(valor);
   $b000..$b006:begin
                   adpcm_b[direccion and $7]:=valor;
                 	if ((direccion and $7)=$04) then begin //trigger ?
@@ -236,9 +236,8 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  tc0140syt_0.z80.change_irq(irqstate);
 end;
-
 
 procedure snd_adpcm_0;
 begin
@@ -269,14 +268,13 @@ end;
 //Main
 procedure reset_opwolf;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ tc0140syt_0.reset;
  ym2151_0.reset;
  msm_5205_0.reset;
  msm_5205_1.reset;
  msm_5205_0.reset_w(1);
  msm_5205_1.reset_w(1);
- taitosound_reset;
  opwolf_cchip_reset;
  reset_audio;
  marcade.in0:=$fc;
@@ -316,14 +314,14 @@ screen_mod_scroll(2,512,512,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(opwolf_getword,opwolf_putword);
+m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0.change_ram16_calls(opwolf_getword,opwolf_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,256);
-snd_z80.change_ram_calls(opwolf_snd_getbyte,opwolf_snd_putbyte);
-snd_z80.init_sound(opwolf_sound_update);
+tc0140syt_0:=tc0140syt_chip.create(4000000,256);
+tc0140syt_0.z80.change_ram_calls(opwolf_snd_getbyte,opwolf_snd_putbyte);
+tc0140syt_0.z80.init_sound(opwolf_sound_update);
 //MCU
-opwolf_init_cchip(main_m68000.numero_cpu);
+opwolf_init_cchip(m68000_0.numero_cpu);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(4000000);
 ym2151_0.change_port_func(sound_bank_rom);

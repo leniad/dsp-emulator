@@ -95,13 +95,13 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=main_m6809.tframes;
+frame:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    main_m6809.run(frame);
-    frame:=frame+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame);
+    frame:=frame+m6809_0.tframes-m6809_0.contador;
     if f=239 then begin
-      if irq_ena then main_m6809.change_irq(HOLD_LINE);
+      if irq_ena then m6809_0.change_irq(HOLD_LINE);
       update_video_yiear;
     end;
   end;
@@ -147,7 +147,7 @@ end;
 
 procedure yiear_snd_nmi;
 begin
-  if nmi_ena then main_m6809.change_nmi(PULSE_LINE);
+  if nmi_ena then m6809_0.change_nmi(PULSE_LINE);
 end;
 
 procedure yiear_sound_update;
@@ -165,7 +165,7 @@ begin
 open_qsnapshot_save('yiear'+nombre);
 getmem(data,250);
 //CPU
-size:=main_m6809.save_snapshot(data);
+size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=sn_76496_0.save_snapshot(data);
@@ -192,7 +192,7 @@ if not(open_qsnapshot_load('yiear'+nombre)) then exit;
 getmem(data,250);
 //CPU
 loaddata_qsnapshot(data);
-main_m6809.load_snapshot(data);
+m6809_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 sn_76496_0.load_snapshot(data);
@@ -214,7 +214,7 @@ end;
 //Main
 procedure reset_yiear;
 begin
- main_m6809.reset;
+ m6809_0.reset;
  sn_76496_0.reset;
  vlm5030_0.reset;
  reset_audio;
@@ -246,16 +246,16 @@ screen_init(2,256,256,false,true);
 screen_mod_sprites(2,256,256,$ff,$ff);
 iniciar_video(256,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(yiear_getbyte,yiear_putbyte);
-main_m6809.init_sound(yiear_sound_update);
+m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0.change_ram_calls(yiear_getbyte,yiear_putbyte);
+m6809_0.init_sound(yiear_sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(1536000);
 //cargar rom sonido
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,2);
 if not(cargar_roms(vlm5030_0.get_rom_addr,@yiear_vlm,'yiear.zip')) then exit;
 //NMI sonido
-init_timer(main_m6809.numero_cpu,1536000/480,yiear_snd_nmi,true);
+init_timer(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,true);
 //cargar roms
 if not(cargar_roms(@memoria[0],@yiear_rom[0],'yiear.zip',0)) then exit;
 //convertir chars

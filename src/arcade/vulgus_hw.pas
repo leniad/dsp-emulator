@@ -114,18 +114,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_vulgus;
     end;
   end;
@@ -193,15 +193,15 @@ end;
 
 procedure vulgus_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 //Main
 procedure reset_vulgus;
 begin
- main_z80.reset;
- main_z80.im0:=$d7;  //rst 10
- snd_z80.reset;
+ z80_0.reset;
+ z80_0.im0:=$d7;  //rst 10
+ z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
  reset_audio;
@@ -239,17 +239,17 @@ screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(3000000,256);
-main_z80.change_ram_calls(vulgus_getbyte,vulgus_putbyte);
+z80_0:=cpu_z80.create(3000000,256);
+z80_0.change_ram_calls(vulgus_getbyte,vulgus_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(vulgus_snd_getbyte,vulgus_snd_putbyte);
-snd_z80.init_sound(vulgus_sound_update);
+z80_1:=cpu_z80.create(3000000,256);
+z80_1.change_ram_calls(vulgus_snd_getbyte,vulgus_snd_putbyte);
+z80_1.init_sound(vulgus_sound_update);
 //IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3000000/(8*60),vulgus_snd_irq,true);
+init_timer(z80_1.numero_cpu,3000000/(8*60),vulgus_snd_irq,true);
 //Sound Chips
-ay8910_0:=ay8910_chip.create(1500000,1);
-ay8910_1:=ay8910_chip.create(1500000,1);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.25);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,0.25);
 //cargar y desencriptar las ROMS
 if not(cargar_roms(@memoria[0],@vulgus_rom[0],'vulgus.zip',0)) then exit;
 //cargar ROMS sonido

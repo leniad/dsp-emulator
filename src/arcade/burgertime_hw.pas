@@ -102,15 +102,15 @@ if event.arcade then begin
   //SYS
   if arcade_input.coin[0] then begin
       marcade.in2:=(marcade.in2 or $40);
-      main_m6502.change_nmi(ASSERT_LINE);
+      m6502_0.change_nmi(ASSERT_LINE);
   end else begin
       marcade.in2:=(marcade.in2 and $bf);
       if arcade_input.coin[1] then begin
           marcade.in2:=(marcade.in2 or $80);
-          main_m6502.change_nmi(ASSERT_LINE);
+          m6502_0.change_nmi(ASSERT_LINE);
       end else begin
           marcade.in2:=(marcade.in2 and $7f);
-          main_m6502.change_nmi(CLEAR_LINE);
+          m6502_0.change_nmi(CLEAR_LINE);
       end;
   end;
   if arcade_input.start[0] then marcade.in2:=marcade.in2 and $fe else marcade.in2:=marcade.in2 or $1;
@@ -124,18 +124,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6502.tframes;
-frame_s:=snd_m6502.tframes;
+frame_m:=m6502_0.tframes;
+frame_s:=m6502_1.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 271 do begin
   //Main CPU
-  main_m6502.run(frame_m);
-  frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
+  m6502_0.run(frame_m);
+  frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
   //Sound CPU
-  snd_m6502.run(frame_s);
-  frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
-  if (((f and 8)<>0) and haz_nmi) then snd_m6502.change_nmi(ASSERT_LINE)
-    else snd_m6502.change_nmi(CLEAR_LINE);
+  m6502_1.run(frame_s);
+  frame_s:=frame_s+m6502_1.tframes-m6502_1.contador;
+  if (((f and 8)<>0) and haz_nmi) then m6502_1.change_nmi(ASSERT_LINE)
+    else m6502_1.change_nmi(CLEAR_LINE);
   case f of
     247:begin
           haz_vb:=$80;
@@ -158,7 +158,7 @@ begin
 //solo despues de un opcode de escritura y si el opcode esta en la direccion
 //cuya mascara es $0104 se debe desencriptar. Hay que tener cuidado con el
 //salto a subrutina (opcode $20) que tambien puede ir encriptado.
-temp_r:=main_m6502.get_internal_r;
+temp_r:=m6502_0.get_internal_r;
 act_pc:=temp_r.pc;
 old_pc:=temp_r.old_pc;
 if memoria_dec[old_pc]=$20 then act_pc:=memoria[old_pc+1]+256*memoria[old_pc+2];
@@ -232,7 +232,7 @@ case direccion of
   $4002:main_screen.flip_main_screen:=(valor and 1)<>0;
   $4003:begin
           sound_latch:=valor;
-          snd_m6502.change_irq(ASSERT_LINE);
+          m6502_1.change_irq(ASSERT_LINE);
         end;
   $4004:if scroll_bg<>valor then begin
           scroll_bg:=valor;
@@ -250,7 +250,7 @@ case direccion of
   0..$1fff:getbyte_snd_btime:=mem_snd[direccion and $3ff];
   $a000..$bfff:begin
                   getbyte_snd_btime:=sound_latch;
-                  snd_m6502.change_irq(CLEAR_LINE);
+                  m6502_1.change_irq(CLEAR_LINE);
                end;
    $e000..$ffff:getbyte_snd_btime:=mem_snd[$e000+(direccion and $fff)];
 end;
@@ -278,8 +278,8 @@ end;
 //Main
 procedure reset_btime;
 begin
-main_m6502.reset;
-snd_m6502.reset;
+m6502_0.reset;
+m6502_1.reset;
 AY8910_0.reset;
 AY8910_1.reset;
 marcade.in0:=$ff;
@@ -310,15 +310,15 @@ screen_init(2,256,256,true); //Chars
 screen_init(3,256,256,false,true); //Final
 iniciar_video(240,240);
 //Main CPU
-main_m6502:=cpu_m6502.create(1500000,272,TCPU_M6502);
-main_m6502.change_ram_calls(getbyte_btime,putbyte_btime);
+m6502_0:=cpu_m6502.create(1500000,272,TCPU_M6502);
+m6502_0.change_ram_calls(getbyte_btime,putbyte_btime);
 //Sound CPU
-snd_m6502:=cpu_m6502.create(500000,272,TCPU_M6502);
-snd_m6502.change_ram_calls(getbyte_snd_btime,putbyte_snd_btime);
-snd_m6502.init_sound(btime_sound_update);
+m6502_1:=cpu_m6502.create(500000,272,TCPU_M6502);
+m6502_1.change_ram_calls(getbyte_snd_btime,putbyte_snd_btime);
+m6502_1.init_sound(btime_sound_update);
 //Sound Chip
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,1);
+AY8910_1:=ay8910_chip.create(1500000,AY8910,1);
 //cargar roms
 if not(cargar_roms(@memoria[0],@btime_rom[0],'btime.zip',0)) then exit;
 copymemory(@memoria_dec[0],@memoria[0],$10000);

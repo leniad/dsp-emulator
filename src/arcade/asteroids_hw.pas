@@ -150,11 +150,11 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_m6502.tframes;
+frame:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 299 do begin
-    main_m6502.run(frame);
-    frame:=frame+main_m6502.tframes-main_m6502.contador;
+    m6502_0.run(frame);
+    frame:=frame+m6502_0.tframes-m6502_0.contador;
     if ((f=282) and dibujar) then begin
       fill_full_screen(1,0);
       update_video_as;
@@ -176,7 +176,7 @@ direccion:=direccion and $7FFF;
 case direccion of
   $200..$2ff:getbyte_as:=ram[invertir_ram,direccion and $ff];
   $300..$3ff:getbyte_as:=ram[(1-invertir_ram),direccion and $ff];
-  $2001:if (main_m6502.contador and $100)<>0 then getbyte_as:=1
+  $2001:if (m6502_0.contador and $100)<>0 then getbyte_as:=1
           else getbyte_as:=0;
   $2000,$2002..$2007:begin
     mascara:=1 shl (direccion and $7);
@@ -218,7 +218,7 @@ end;
 
 procedure as_snd_nmi;
 begin
-  main_m6502.change_nmi(PULSE_LINE);
+  m6502_0.change_nmi(PULSE_LINE);
 end;
 
 procedure as_sound;
@@ -230,7 +230,7 @@ end;
 //Main
 procedure reset_as;
 begin
-main_m6502.reset;
+m6502_0.reset;
 reset_samples;
 marcade.in0:=0;
 marcade.in1:=0;
@@ -250,9 +250,9 @@ iniciar_audio(false);
 screen_init(1,400,400);
 iniciar_video(400,320);
 //Main CPU
-main_m6502:=cpu_m6502.create(1512000,300,TCPU_M6502);
-main_m6502.change_ram_calls(getbyte_as,putbyte_as);
-main_m6502.init_sound(as_sound);
+m6502_0:=cpu_m6502.create(1512000,300,TCPU_M6502);
+m6502_0.change_ram_calls(getbyte_as,putbyte_as);
+m6502_0.init_sound(as_sound);
 asteroid_sound_init;
 //Timers
 init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);

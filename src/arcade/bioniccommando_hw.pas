@@ -149,22 +149,22 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
     //main
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     case f of
     239:begin
-          main_m68000.irq[2]:=HOLD_LINE;
+          m68000_0.irq[2]:=HOLD_LINE;
           update_video_bionicc;
         end;
-    255:main_m68000.irq[4]:=HOLD_LINE;
+    255:m68000_0.irq[4]:=HOLD_LINE;
     end;
  end;
  copymemory(@sprite_ram[0],@ram[$400],$280*2);
@@ -295,21 +295,19 @@ end;
 
 procedure bionicc_snd_irq;
 begin
-  snd_z80.change_nmi(PULSE_LINE);
+  z80_0.change_nmi(PULSE_LINE);
 end;
 
 //Main
 procedure reset_bionicc;
-var
-  f:byte;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  ym2151_0.reset;
  reset_audio;
  marcade.in0:=$F;
  marcade.in1:=$FF;
- for f:=0 to 7 do input[f]:=0;
+ fillchar(input[0],6,0);
  scroll_fg_x:=0;
  scroll_fg_y:=0;
  scroll_bg_x:=0;
@@ -345,14 +343,14 @@ screen_init(6,256+16,256+16,true);
 screen_mod_scroll(6,272,256,255,272,256,255);
 iniciar_video(256,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(12000000,256);
-main_m68000.change_ram16_calls(bionicc_getword,bionicc_putword);
+m68000_0:=cpu_m68000.create(12000000,256);
+m68000_0.change_ram16_calls(bionicc_getword,bionicc_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(bionicc_snd_getbyte,bionicc_snd_putbyte);
-snd_z80.init_sound(bionicc_sound_update);
+z80_0:=cpu_z80.create(3579545,256);
+z80_0.change_ram_calls(bionicc_snd_getbyte,bionicc_snd_putbyte);
+z80_0.init_sound(bionicc_sound_update);
 //IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3579545/(4*60),bionicc_snd_irq,true);
+init_timer(z80_0.numero_cpu,3579545/(4*60),bionicc_snd_irq,true);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 //cargar roms

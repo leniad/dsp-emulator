@@ -191,23 +191,23 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
-frame_a:=sub_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_1.tframes;
+frame_a:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    //Main CPU
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
    //Sound CPU
-   snd_z80.run(frame_s);
-   frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+   z80_1.run(frame_s);
+   frame_s:=frame_s+z80_1.tframes-z80_1.contador;
    //ADPCM CPU
-   sub_z80.run(frame_a);
-   frame_a:=frame_a+sub_z80.tframes-sub_z80.contador;
+   z80_0.run(frame_a);
+   frame_a:=frame_a+z80_0.tframes-z80_0.contador;
    if f=239 then begin
       update_video_sfighter;
-      main_m68000.irq[1]:=HOLD_LINE;
+      m68000_0.irq[1]:=HOLD_LINE;
    end;
  end;
  eventos_sfighter;
@@ -277,7 +277,7 @@ case direccion of
             end;
     $c0001c:begin
               soundlatch:=valor and $ff;
-              snd_z80.change_nmi(PULSE_LINE);
+              z80_1.change_nmi(PULSE_LINE);
             end;
     $ff8000..$ffffff:begin
                         ram3[(direccion and $7fff)+1]:=valor and $ff;
@@ -346,7 +346,7 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_1.change_irq(irqstate);
 end;
 
 procedure sound_instruccion;
@@ -356,15 +356,15 @@ end;
 
 procedure sf_adpcm_instruccion;
 begin
-  sub_z80.change_irq(HOLD_LINE);
+  z80_0.change_irq(HOLD_LINE);
 end;
 
 //Main
 procedure reset_sfighter;
 begin
- main_m68000.reset;
- snd_z80.reset;
- sub_z80.reset;
+ m68000_0.reset;
+ z80_1.reset;
+ z80_0.reset;
  ym2151_0.reset;
  msm_5205_0.reset;
  msm_5205_1.reset;
@@ -408,17 +408,17 @@ screen_init(3,512,256);
 screen_init(4,512,256,true);
 iniciar_video(384,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(sfighter_getword,sfighter_putword);
+m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0.change_ram16_calls(sfighter_getword,sfighter_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(sf_snd_getbyte,sf_snd_putbyte);
-snd_z80.init_sound(sound_instruccion);
+z80_1:=cpu_z80.create(3579545,256);
+z80_1.change_ram_calls(sf_snd_getbyte,sf_snd_putbyte);
+z80_1.init_sound(sound_instruccion);
 //Sub CPU
-sub_z80:=cpu_z80.create(3579545,256);
-sub_z80.change_ram_calls(sf_misc_getbyte,sf_misc_putbyte);
-sub_z80.change_io_calls(sf_misc_inbyte,sf_misc_outbyte);
-init_timer(sub_z80.numero_cpu,3579545/8000,sf_adpcm_instruccion,true);
+z80_0:=cpu_z80.create(3579545,256);
+z80_0.change_ram_calls(sf_misc_getbyte,sf_misc_putbyte);
+z80_0.change_io_calls(sf_misc_inbyte,sf_misc_outbyte);
+init_timer(z80_0.numero_cpu,3579545/8000,sf_adpcm_instruccion,true);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);

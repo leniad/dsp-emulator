@@ -79,14 +79,14 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=223 then begin
       update_video_pengo;
-      if irq_enable then main_z80.change_irq(HOLD_LINE);
+      if irq_enable then z80_0.change_irq(HOLD_LINE);
     end;
   end;
   if sound_status.hay_sonido then begin
@@ -101,7 +101,7 @@ end;
 function pengo_getbyte(direccion:word):byte;
 begin
 case direccion of
-   0..$7fff:if main_z80.opcode then pengo_getbyte:=rom_opcode[direccion]
+   0..$7fff:if z80_0.opcode then pengo_getbyte:=rom_opcode[direccion]
                else pengo_getbyte:=memoria[direccion];
    $8000..$8fff:pengo_getbyte:=memoria[direccion];
    $9000..$903f:pengo_getbyte:=$cc;
@@ -142,7 +142,7 @@ end;
 //Main
 procedure reset_pengo;
 begin
- main_z80.reset;
+ z80_0.reset;
  namco_sound_reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -176,8 +176,8 @@ screen_init(2,224,288,false,true);
 screen_mod_sprites(2,256,512,$ff,$1ff);
 iniciar_video(224,288);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,264);
-main_z80.change_ram_calls(pengo_getbyte,pengo_putbyte);
+z80_0:=cpu_z80.create(3072000,264);
+z80_0.change_ram_calls(pengo_getbyte,pengo_putbyte);
 //cargar roms
 if not(cargar_roms(@memoria[0],@pengo_rom[0],'pengo.zip',0)) then exit;
 decrypt_sega(@memoria[0],@rom_opcode[0],2);

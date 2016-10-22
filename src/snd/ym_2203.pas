@@ -60,7 +60,7 @@ constructor ym2203_chip.create(clock:dword;amp:single;ay_amp:single);
 begin
   chips_total:=chips_total+1;
   self.amp:=amp;
-  self.ay8910_int:=ay8910_chip.create(clock,ay_amp,true); //El PSG
+  self.ay8910_int:=ay8910_chip.create(clock,AY8910,ay_amp,true); //El PSG
   self.OPN:=opn_init(4); //Inicializo el OPN
   //Inicializo el state
   self.OPN.type_:=TYPE_YM2203;

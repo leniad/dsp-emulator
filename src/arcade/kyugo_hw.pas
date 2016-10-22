@@ -114,18 +114,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      if nmi_enable then main_z80.change_nmi(PULSE_LINE);
+      if nmi_enable then z80_0.change_nmi(PULSE_LINE);
       update_video_kyugo_hw;
     end;
   end;
@@ -176,8 +176,8 @@ begin
   case (puerto and $7) of
     0:nmi_enable:=(valor and 1)<>0;
     1:main_screen.flip_main_screen:=(valor<>0);
-    2:if (valor<>0) then snd_z80.change_halt(CLEAR_LINE)
-        else snd_z80.change_halt(ASSERT_LINE);
+    2:if (valor<>0) then z80_1.change_halt(CLEAR_LINE)
+        else z80_1.change_halt(ASSERT_LINE);
   end;
 end;
 
@@ -228,7 +228,7 @@ end;
 
 procedure kyugo_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure kyugo_hw_despues_instruccion;
@@ -240,8 +240,8 @@ end;
 //Main
 procedure reset_kyugo_hw;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  AY8910_0.reset;
  AY8910_1.reset;
  reset_audio;
@@ -253,7 +253,7 @@ begin
  fg_color:=0;
  bg_pal_bank:=0;
  nmi_enable:=false;
- snd_z80.change_halt(ASSERT_LINE);
+ z80_1.change_halt(ASSERT_LINE);
 end;
 
 function iniciar_kyugo_hw:boolean;
@@ -278,19 +278,19 @@ screen_mod_scroll(2,256,256,255,512,512,511);
 screen_init(3,256,512,false,true);
 iniciar_video(224,288);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,256);
-main_z80.change_ram_calls(kyugo_getbyte,kyugo_putbyte);
-main_z80.change_io_calls(nil,kyugo_outbyte);
+z80_0:=cpu_z80.create(3072000,256);
+z80_0.change_ram_calls(kyugo_getbyte,kyugo_putbyte);
+z80_0.change_io_calls(nil,kyugo_outbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3072000,256);
-snd_z80.change_ram_calls(snd_kyugo_hw_getbyte,snd_kyugo_hw_putbyte);
-snd_z80.change_io_calls(snd_kyugo_inbyte,snd_kyugo_outbyte);
-snd_z80.init_sound(kyugo_hw_despues_instruccion);
-init_timer(snd_z80.numero_cpu,3072000/(60*4),kyugo_snd_irq,true);
+z80_1:=cpu_z80.create(3072000,256);
+z80_1.change_ram_calls(snd_kyugo_hw_getbyte,snd_kyugo_hw_putbyte);
+z80_1.change_io_calls(snd_kyugo_inbyte,snd_kyugo_outbyte);
+z80_1.init_sound(kyugo_hw_despues_instruccion);
+init_timer(z80_1.numero_cpu,3072000/(60*4),kyugo_snd_irq,true);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1536000,1);
+ay8910_0:=ay8910_chip.create(1536000,AY8910,0.3);
 ay8910_0.change_io_calls(kyugo_porta_r,kyugo_portb_r,nil,nil);
-ay8910_1:=ay8910_chip.create(1536000,1);
+ay8910_1:=ay8910_chip.create(1536000,AY8910,0.3);
 //cargar roms
 if not(cargar_roms(@memoria[0],@repulse_rom[0],'repulse.zip',0)) then exit;
 //cargar roms snd

@@ -118,18 +118,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
   //CPU 1
-  main_z80.run(frame_m);
-  frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+  z80_0.run(frame_m);
+  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
   //CPU Sound
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_1.run(frame_s);
+  frame_s:=frame_s+z80_1.tframes-z80_1.contador;
   if f=240 then begin
-     if nmi_mask then main_z80.change_nmi(PULSE_LINE);
+     if nmi_mask then z80_0.change_nmi(PULSE_LINE);
      update_video_pinballaction;
   end;
  end;
@@ -191,8 +191,8 @@ case direccion of
     $e606:scroll_y:=valor-3;
     $e800:begin
             sound_latch:=valor;
-            snd_z80.change_irq(HOLD_LINE);
-            snd_z80.im2_lo:=0;
+            z80_1.change_irq(HOLD_LINE);
+            z80_1.im2_lo:=0;
           end;
 end;
 end;
@@ -227,8 +227,8 @@ end;
 
 procedure pbaction_sound_irq;
 begin
-snd_z80.change_irq(HOLD_LINE);
-snd_z80.im2_lo:=2;
+z80_1.change_irq(HOLD_LINE);
+z80_1.im2_lo:=2;
 end;
 
 procedure pinballaction_sound_update;
@@ -241,8 +241,8 @@ end;
 //Main
 procedure reset_pinballaction;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
  ay8910_2.reset;
@@ -283,18 +283,18 @@ screen_mod_scroll(2,0,0,0,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,$100);
-main_z80.change_ram_calls(pinballaction_getbyte,pinballaction_putbyte);
+z80_0:=cpu_z80.create(4000000,$100);
+z80_0.change_ram_calls(pinballaction_getbyte,pinballaction_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3072000,$100);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(nil,snd_outbyte);
-snd_z80.init_sound(pinballaction_sound_update);
-init_timer(snd_z80.numero_cpu,3072000/(2*60),pbaction_sound_irq,true);
+z80_1:=cpu_z80.create(3072000,$100);
+z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
+z80_1.change_io_calls(nil,snd_outbyte);
+z80_1.init_sound(pinballaction_sound_update);
+init_timer(z80_1.numero_cpu,3072000/(2*60),pbaction_sound_irq,true);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,1);
-ay8910_1:=ay8910_chip.create(1500000,1);
-ay8910_2:=ay8910_chip.create(1500000,1);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.25);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,0.25);
+ay8910_2:=ay8910_chip.create(1500000,AY8910,0.25);
 //cargar roms
 if not(cargar_roms(@memoria,@pinballaction_rom,'pbaction.zip',0)) then exit;
 //cargar sonido

@@ -203,16 +203,16 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      if irq_vblank then main_z80.change_irq(ASSERT_LINE);
+      if irq_vblank then z80_0.change_irq(ASSERT_LINE);
       update_video_congo;
     end;
   end;
@@ -259,7 +259,7 @@ case direccion of
 	                      $1e:main_screen.flip_main_screen:=(valor and 1)=0;//zaxxon_flipscreen_w
 	                      $1f:begin
                               irq_vblank:=(valor and 1)<>0;
-                              if not(irq_vblank) then main_z80.change_irq(CLEAR_LINE);
+                              if not(irq_vblank) then z80_0.change_irq(CLEAR_LINE);
                             end;
 	                      $21:begin //zaxxon_fg_color_w
                               fg_color:=(valor and 1)*$80;
@@ -281,7 +281,7 @@ case direccion of
                                 saddr:=congo_sprite[0] or (congo_sprite[1] shl 8);
 		                            count:=congo_sprite[2];
 		                            // count cycles (just a guess) */
-                                main_z80.contador:=main_z80.contador+(count*5);
+                                z80_0.contador:=z80_0.contador+(count*5);
 		                            // this is just a guess; the chip is hardwired to the spriteram */
 		                            while (count>=0) do begin
                             			daddr:=memoria[saddr+0]*4;
@@ -365,7 +365,7 @@ end;
 
 procedure congo_sound_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 //Zaxxon
@@ -467,13 +467,13 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=239 then begin
-      if irq_vblank then main_z80.change_irq(ASSERT_LINE);
+      if irq_vblank then z80_0.change_irq(ASSERT_LINE);
       update_video_zaxxon;
     end;
   end;
@@ -523,7 +523,7 @@ case direccion of
                     $3c..$3f:pia8255_0.write(direccion and $3,valor); //ppi
                     $f0:begin //int_enable_w
                           irq_vblank:=(valor and 1)<>0;
-                          if not(irq_vblank) then main_z80.change_irq(CLEAR_LINE);
+                          if not(irq_vblank) then z80_0.change_irq(CLEAR_LINE);
                         end;
                     $f1:begin //zaxxon_fg_color_w
                               fg_color:=(valor and 1)*$80;
@@ -607,9 +607,9 @@ end;
 //Main
 procedure reset_zaxxon;
 begin
- main_z80.reset;
+ z80_0.reset;
  if main_vars.tipo_maquina=175 then begin
-  snd_z80.reset;
+  z80_1.reset;
   sn_76496_0.reset;
   sn_76496_1.reset;
  end;
@@ -728,19 +728,19 @@ screen_init(2,256,256,false,true);
 screen_init(3,256,256);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(3041250,264);
+z80_0:=cpu_z80.create(3041250,264);
 case main_vars.tipo_maquina of
   175:begin  //Congo
-        main_z80.change_ram_calls(congo_getbyte,congo_putbyte);
+        z80_0.change_ram_calls(congo_getbyte,congo_putbyte);
         //Sound
-        snd_z80:=cpu_z80.create(4000000,264);
-        snd_z80.change_ram_calls(snd_congo_getbyte,snd_congo_putbyte);
-        init_timer(snd_z80.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,true);
+        z80_1:=cpu_z80.create(4000000,264);
+        z80_1.change_ram_calls(snd_congo_getbyte,snd_congo_putbyte);
+        init_timer(z80_1.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,true);
         pia8255_0:=pia8255_chip.create;
         pia8255_0.change_ports(ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
         //Samples
         load_samples('congo.zip',@congo_samples[0],num_samples_congo);
-        snd_z80.init_sound(congo_sound_update);
+        z80_1.init_sound(congo_sound_update);
         sn_76496_0:=sn76496_chip.Create(4000000);
         sn_76496_1:=sn76496_chip.Create(1000000);
         //cargar roms
@@ -767,12 +767,12 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@zaxxon_dip_b;
      end;
   188:begin  //Zaxxon
-        main_z80.change_ram_calls(zaxxon_getbyte,zaxxon_putbyte);
+        z80_0.change_ram_calls(zaxxon_getbyte,zaxxon_putbyte);
         pia8255_0:=pia8255_chip.create;
         pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
         //Samples
         if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon) then begin
-          main_z80.init_sound(zaxxon_sound_update);
+          z80_0.init_sound(zaxxon_sound_update);
         end;
         //cargar roms
         if not(cargar_roms(@memoria[0],@zaxxon_rom[0],'zaxxon.zip',0)) then exit;

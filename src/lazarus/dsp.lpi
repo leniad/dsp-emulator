@@ -14,7 +14,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="17"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1028"/>
+      <BuildNr Value="1033"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.16"/>
     </VersionInfo>
@@ -59,9 +59,8 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="588"/>
-        <CursorPos X="5" Y="594"/>
+        <TopLine Value="484"/>
+        <CursorPos X="48" Y="496"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -198,9 +197,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoadRom"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="10" Y="8"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="49"/>
+        <CursorPos X="5" Y="70"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
@@ -465,10 +466,12 @@
       </Unit45>
       <Unit46>
         <Filename Value="..\misc\gfx_engine.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="353"/>
-        <CursorPos Y="366"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="603"/>
+        <CursorPos Y="615"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit46>
       <Unit47>
@@ -534,9 +537,11 @@
         <ComponentName Value="SMSConfig"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos Y="8"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="81"/>
+        <CursorPos X="5" Y="95"/>
         <UsageCount Value="213"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit54>
       <Unit55>
@@ -1932,7 +1937,7 @@
         <UsageCount Value="10"/>
       </Unit237>
     </Units>
-    <JumpHistory Count="4" HistoryIndex="3">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
         <Filename Value="principal.pas"/>
         <Caret Line="578" Column="15" TopLine="573"/>
@@ -1949,6 +1954,26 @@
         <Filename Value="principal.pas"/>
         <Caret Line="594" Column="5" TopLine="588"/>
       </Position4>
+      <Position5>
+        <Filename Value="principal.pas"/>
+        <Caret Line="498" Column="48" TopLine="475"/>
+      </Position5>
+      <Position6>
+        <Filename Value="loadrom.pas"/>
+        <Caret Line="150" Column="32" TopLine="141"/>
+      </Position6>
+      <Position7>
+        <Filename Value="config_sms.pas"/>
+        <Caret Line="8"/>
+      </Position7>
+      <Position8>
+        <Filename Value="config_sms.pas"/>
+        <Caret Line="79" Column="10" TopLine="65"/>
+      </Position8>
+      <Position9>
+        <Filename Value="config_sms.pas"/>
+        <Caret Line="95" Column="5" TopLine="81"/>
+      </Position9>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

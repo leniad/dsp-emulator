@@ -148,21 +148,21 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=main_h6280.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=h6280_0.tframes;
 while EmuStatus=EsRuning do begin
  for screen_line:=0 to $ff do begin
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   main_h6280.run(trunc(frame_s));
-   frame_s:=frame_s+main_h6280.tframes-main_h6280.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   h6280_0.run(trunc(frame_s));
+   frame_s:=frame_s+h6280_0.tframes-h6280_0.contador;
    case screen_line of
       0..239:if (((irq_mask and $2)<>0) and (irq_line=(screen_line+1))) then begin
-              if (irq_mask and $10)<>0 then main_m68000.irq[3]:=ASSERT_LINE
-                else main_m68000.irq[4]:=ASSERT_LINE;
+              if (irq_mask and $10)<>0 then m68000_0.irq[3]:=ASSERT_LINE
+                else m68000_0.irq[4]:=ASSERT_LINE;
              end;
       247:begin
-            main_m68000.irq[5]:=HOLD_LINE;
+            m68000_0.irq[5]:=HOLD_LINE;
             proc_update_video;
             marcade.in1:=marcade.in1 and $f7;
           end;
@@ -202,8 +202,8 @@ case direccion of
   $190000..$190007:case (direccion and $7) of
                       1:cninja_getword:=screen_line; // Raster IRQ scanline position
 	                    2:begin // Raster IRQ ACK
-                          main_m68000.irq[3]:=CLEAR_LINE;
-                          main_m68000.irq[4]:=CLEAR_LINE;
+                          m68000_0.irq[3]:=CLEAR_LINE;
+                          m68000_0.irq[4]:=CLEAR_LINE;
                           cninja_getword:=0;
                       end;
                         else cninja_getword:=0;
@@ -321,8 +321,8 @@ case direccion of
   $1b0000..$1b0007:case (direccion and $7) of
                       1:robocop2_getword:=screen_line; // Raster IRQ scanline position
 	                    2:begin // Raster IRQ ACK
-                          main_m68000.irq[3]:=CLEAR_LINE;
-                          main_m68000.irq[4]:=CLEAR_LINE;
+                          m68000_0.irq[3]:=CLEAR_LINE;
+                          m68000_0.irq[4]:=CLEAR_LINE;
                           robocop2_getword:=0;
                       end;
                         else robocop2_getword:=0;
@@ -427,7 +427,7 @@ end;
 //Main
 procedure reset_cninja;
 begin
- main_m68000.reset;
+ m68000_0.reset;
  reset_dec16ic(0);
  reset_dec16ic(1);
  case main_vars.tipo_maquina of
@@ -507,8 +507,8 @@ case main_vars.tipo_maquina of
   162:begin //Caveman Ninja
         deco16_sprite_mask:=$3fff;
         //Main CPU
-        main_m68000:=cpu_m68000.create(12000000,$100);
-        main_m68000.change_ram16_calls(cninja_getword,cninja_putword);
+        m68000_0:=cpu_m68000.create(12000000,$100);
+        m68000_0.change_ram16_calls(cninja_getword,cninja_putword);
         proc_update_video:=update_video_cninja;
         //cargar roms
         if not(cargar_roms16w(@rom[0],@cninja_rom[0],'cninja.zip',0)) then exit;
@@ -554,8 +554,8 @@ case main_vars.tipo_maquina of
   163:begin //Robocop 2
         deco16_sprite_mask:=$7fff;
         //Main CPU
-        main_m68000:=cpu_m68000.create(14000000,$100);
-        main_m68000.change_ram16_calls(robocop2_getword,robocop2_putword);
+        m68000_0:=cpu_m68000.create(14000000,$100);
+        m68000_0.change_ram16_calls(robocop2_getword,robocop2_putword);
         proc_update_video:=update_video_robocop2;
         //cargar roms
         if not(cargar_roms16w(@rom[0],@robocop2_rom[0],'robocop2.zip',0)) then exit;

@@ -2,7 +2,7 @@ unit volfied_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2203,
+     m68000,main_engine,controls_engine,gfx_engine,ym_2203,
      taitosnd,rom_engine,pal_engine,sound_engine,volfied_cchip;
 
 procedure cargar_volfied;
@@ -103,19 +103,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=tc0140syt_0.z80.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
   //Main CPU
-  main_m68000.run(frame_m);
-  frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //Sound CPU
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  tc0140syt_0.z80.run(frame_s);
+  frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
   if f=247 then begin
     update_video_volfied;
-    main_m68000.irq[4]:=HOLD_LINE;
+    m68000_0.irq[4]:=HOLD_LINE;
   end;
  end;
  eventos_volfied;
@@ -133,7 +133,7 @@ case direccion of
   $400000..$47ffff:volfied_getword:=ram2[(direccion and $7ffff) shr 1];
   $500000..$503fff:volfied_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $d00000:volfied_getword:=$60;
-  $e00002:if main_m68000.access_8bits_hi_dir then volfied_getword:=taitosound_comm_r;
+  $e00002:if m68000_0.access_8bits_hi_dir then volfied_getword:=tc0140syt_0.comm_r;
   $f00000..$f007ff:volfied_getword:=volfied_cchip_ram_r(direccion and $7ff);
 	$f00802:volfied_getword:=volfied_cchip_ctrl_r;
 end;
@@ -163,8 +163,8 @@ case direccion of
       $600000:video_mask:=valor;
       $700000:spritebank:=(valor and $3c) shl 2;
       $d00000:video_ctrl:=valor;
-      $e00000:taitosound_port_w(valor and $ff);
-      $e00002:taitosound_comm_w(valor and $ff);
+      $e00000:tc0140syt_0.port_w(valor and $ff);
+      $e00002:tc0140syt_0.comm_w(valor and $ff);
       $f00000..$f007ff:volfied_cchip_ram_w(direccion and $7ff,valor);
 	    $f00802:volfied_cchip_ctrl_w(valor);
 	    $f00c00:volfied_cchip_bank_w(valor);
@@ -175,7 +175,7 @@ function volfied_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
   $0..$87ff:volfied_snd_getbyte:=mem_snd[direccion];
-  $8801:volfied_snd_getbyte:=taitosound_slave_comm_r;
+  $8801:volfied_snd_getbyte:=tc0140syt_0.slave_comm_r;
   $9000:volfied_snd_getbyte:=ym2203_0.status;
   $9001:volfied_snd_getbyte:=ym2203_0.Read;
 end;
@@ -186,8 +186,8 @@ begin
 if direccion<$8000 then exit;
 case direccion of
   $8000..$87ff:mem_snd[direccion]:=valor;
-  $8800:taitosound_slave_port_w(valor);
-  $8801:taitosound_slave_comm_w(valor);
+  $8800:tc0140syt_0.slave_port_w(valor);
+  $8801:tc0140syt_0.slave_comm_w(valor);
   $9000:ym2203_0.Control(valor);
   $9001:ym2203_0.Write(valor);
 end;
@@ -210,16 +210,15 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  tc0140syt_0.z80.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_volfied;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ tc0140syt_0.reset;
  ym2203_0.reset;
- taitosound_reset;
  volfied_cchip_reset;
  reset_audio;
  marcade.in0:=$ff;
@@ -243,18 +242,18 @@ screen_init(1,248,512);
 screen_init(2,512,512,false,true);
 iniciar_video(240,320);
 //Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(volfied_getword,volfied_putword);
+m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0.change_ram16_calls(volfied_getword,volfied_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,256);
-snd_z80.change_ram_calls(volfied_snd_getbyte,volfied_snd_putbyte);
-snd_z80.init_sound(volfied_update_sound);
+tc0140syt_0:=tc0140syt_chip.create(4000000,256);
+tc0140syt_0.z80.change_ram_calls(volfied_snd_getbyte,volfied_snd_putbyte);
+tc0140syt_0.z80.init_sound(volfied_update_sound);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(4000000,4);
 ym2203_0.change_io_calls(volfied_dipa,volfied_dipb,nil,nil);
 ym2203_0.change_irq_calls(snd_irq);
 //MCU
-volfied_init_cchip(main_m68000.numero_cpu);
+volfied_init_cchip(m68000_0.numero_cpu);
 //ROMS
 if not(cargar_roms16w(@rom,@volfied_rom,'volfied.zip',0)) then exit;
 if not(cargar_roms16w(@rom2,@volfied_rom2,'volfied.zip',0)) then exit;

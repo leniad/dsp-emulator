@@ -99,19 +99,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
+frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     case f of
       $ef:begin
-            main_z80.change_irq(HOLD_LINE);
+            z80_0.change_irq(HOLD_LINE);
             irq_source:=1;
           end;
       $f7:vblank:=8;
       $ff:begin
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.change_irq(HOLD_LINE);
           vblank:=0;
           irq_source:=0;
       end;
@@ -126,9 +126,9 @@ end;
 function pang_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$7fff:if main_z80.opcode then pang_getbyte:=memoria[direccion]
+  $0..$7fff:if z80_0.opcode then pang_getbyte:=memoria[direccion]
                  else pang_getbyte:=mem_dat[direccion];
-  $8000..$bfff:if main_z80.opcode then pang_getbyte:=mem_rom_op[rom_nbank,direccion and $3fff]
+  $8000..$bfff:if z80_0.opcode then pang_getbyte:=mem_rom_op[rom_nbank,direccion and $3fff]
                  else pang_getbyte:=mem_rom_dat[rom_nbank,direccion and $3fff];
   $c000..$c7ff:pang_getbyte:=buffer_paleta[(direccion and $7ff)+pal_bank];
   $d000..$dfff:if (video_bank<>0) then pang_getbyte:=obj_ram[direccion and $fff]
@@ -208,7 +208,7 @@ end;
 //Main
 procedure reset_pang;
 begin
- main_z80.reset;
+ z80_0.reset;
  reset_audio;
  oki_6295_0.reset;
  eeprom_0.reset;
@@ -259,10 +259,10 @@ screen_init(1,512,256,true);
 screen_init(2,512,256,false,true);
 iniciar_video(384,240);
 //Main CPU
-main_z80:=cpu_z80.create(8000000,256);
-main_z80.change_ram_calls(pang_getbyte,pang_putbyte);
-main_z80.change_io_calls(pang_inbyte,pang_outbyte);
-main_z80.init_sound(pang_sound_update);
+z80_0:=cpu_z80.create(8000000,256);
+z80_0.change_ram_calls(pang_getbyte,pang_putbyte);
+z80_0.change_io_calls(pang_inbyte,pang_outbyte);
+z80_0.init_sound(pang_sound_update);
 //eeprom
 eeprom_0:=eeprom_class.create(6,16,'0110','0101','0111');
 //Sound Chips

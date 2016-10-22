@@ -49,7 +49,7 @@ type
         end;
 
 var
-    main_tms32010:cpu_tms32010;
+    tms32010_0:cpu_tms32010;
 
 implementation
 const

@@ -286,18 +286,18 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
      //main
-     main_m68000.run(frame_m);
-     frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+     m68000_0.run(frame_m);
+     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
      //sound
-     snd_z80.run(frame_s);
-     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+     z80_0.run(frame_s);
+     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
      if f=223 then begin
-       main_m68000.irq[4]:=HOLD_LINE;
+       m68000_0.irq[4]:=HOLD_LINE;
        update_video_outrun;
      end;
   end;
@@ -548,8 +548,8 @@ end;
 
 procedure ppi8255_wportc(valor:byte);
 begin
-if (valor and $80)<>0 then snd_z80.change_nmi(CLEAR_LINE)
-  else snd_z80.change_nmi(ASSERT_LINE);
+if (valor and $80)<>0 then z80_0.change_nmi(CLEAR_LINE)
+  else z80_0.change_nmi(ASSERT_LINE);
 end;
 
 procedure outrun_sound_act;
@@ -566,8 +566,8 @@ procedure reset_outrun;
 var
   f:byte;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  ym2151_0.reset;
  pia8255_0.reset;
  reset_audio;
@@ -593,7 +593,7 @@ const
 	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
 begin
 iniciar_outrun:=false;
-if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. ¿Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
+if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 iniciar_audio(false);
 screen_init(1,512,256,true); //text
 screen_init(2,512,256,true);
@@ -611,13 +611,13 @@ screen_mod_scroll(6,1024,512,1023,512,256,511);
 screen_init(7,512,256,false,true);
 iniciar_video(320,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,262);
-main_m68000.change_ram16_calls(outrun_getword,outrun_putword);
+m68000_0:=cpu_m68000.create(10000000,262);
+m68000_0.change_ram16_calls(outrun_getword,outrun_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,262);
-snd_z80.change_ram_calls(outrun_snd_getbyte,outrun_snd_putbyte);
-snd_z80.change_io_calls(outrun_snd_inbyte,outrun_snd_outbyte);
-snd_z80.init_sound(outrun_sound_act);
+z80_0:=cpu_z80.create(4000000,262);
+z80_0.change_ram_calls(outrun_snd_getbyte,outrun_snd_putbyte);
+z80_0.change_io_calls(outrun_snd_inbyte,outrun_snd_outbyte);
+z80_0.init_sound(outrun_sound_act);
 //PPI 825
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);

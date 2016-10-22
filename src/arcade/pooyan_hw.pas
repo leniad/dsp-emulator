@@ -99,16 +99,16 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
+frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //SND CPU
     konamisnd_0.run(f);
     if f=239 then begin
-      if nmi_vblank then main_z80.change_nmi(ASSERT_LINE);
+      if nmi_vblank then z80_0.change_nmi(ASSERT_LINE);
       update_video_pooyan;
     end;
   end;
@@ -153,7 +153,7 @@ case direccion of
                   $100..$17f,$300..$37f:konamisnd_0.sound_latch:=valor;
                   $180,$380:begin
                               nmi_vblank:=valor<>0;
-                              if not(nmi_vblank) then main_z80.change_nmi(CLEAR_LINE);
+                              if not(nmi_vblank) then z80_0.change_nmi(CLEAR_LINE);
                             end;
                   $181,$381:begin
                               if ((last=0) and (valor<>0)) then konamisnd_0.pedir_irq:=HOLD_LINE;
@@ -167,7 +167,7 @@ end;
 //Main
 procedure reset_pooyan;
 begin
- main_z80.reset;
+ z80_0.reset;
  reset_audio;
  konamisnd_0.reset;
  nmi_vblank:=false;
@@ -197,14 +197,13 @@ screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,256);
-main_z80.change_ram_calls(pooyan_getbyte,pooyan_putbyte);
+z80_0:=cpu_z80.create(3072000,256);
+z80_0.change_ram_calls(pooyan_getbyte,pooyan_putbyte);
 //Sound Chip
 konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,256);
+if not(cargar_roms(@konamisnd_0.memoria[0],@pooyan_sound[0],'pooyan.zip',0)) then exit;
 //cargar roms
 if not(cargar_roms(@memoria[0],@pooyan_rom[0],'pooyan.zip',0)) then exit;
-//cargar sonido
-if not(cargar_roms(@mem_snd[0],@pooyan_sound[0],'pooyan.zip',0)) then exit;
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@pooyan_char[0],'pooyan.zip',0)) then exit;
 init_gfx(0,8,8,256);

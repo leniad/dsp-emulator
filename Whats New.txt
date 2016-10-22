@@ -1,88 +1,87 @@
 What's New!!! DSP Emulator
 
-DSP 0.17 07/07/16
-********
+DSP 0.17b1 22/10/16
+**********
 - General
-    + Lazarus: Fixed zlib stuff. Removed external library dependency, now you can use fast snapshots, load spectrum SZX, DSP, CSW files, load Coleco snapshots, etc.
-    + Enhanced ZIP file load. In Delphi internal classes are used, in Lazarus using more simple object implementation
-    + Unified into a single button Play/Pause
-    + Fixed fast snapshots loading in some drivers
-    + Fixed value and type of the amplifier in some sound chips
-    + Finished IRQ, NMI, reset and halt signals rewrite
-    + Simplified and reorganized all drivers procedures and functions
-    + Completely eliminated references to the 'SDL2.pas' unit and improved the 'lib_sdl2.pas' to be independent
-    + Improved how drivers are closed, CPU, video, etc. Fixed bugs and removed some problems when the driver is not initialized and changed an other
-    + GFX
-        - Fixed left rotate of the nonsquare graphics (required for 'Centipede')
-        - Fixed and enhanced the final screen rotation
-    + K007232: Fixed sound
-    + Z80
-        - Removed the special case of HALT opcode
-        - Fixed possible loose of timings after the execution of an opcode
-        - Added opcode function calls in class
-        - Implemented WZ/MEMPTR register, now passes all ZEXALL tests
-    + M6809
-        - Cleaning and unified opcodes
-        - Enhanced timings
-        - Fixed 'sync' opcode
-        - Added $102d opcode (Fix video in 'Combat School' and 'Contra')
-        - Modified and simplified IRQs calls
-    + HD6309
-        - Total CPU cleaning
-        - Added an internal M6809 for compatibility mode
-    + KONAMI CPU: Finished, some opcodes are missing
-    + CPU M680X: Unified all opcodes
-    + YM2203: Added functions to change the AY internal clock
-    + YM3812
+    + Added support for IPF files natively without external libraries
+        - Many thanks to Jean Louis-Guerin (DrCoolZic) for the documententation 'http://info-coach.fr/atari/documents/_mydoc/IPF-Documentation.pdf'
+        - Many thanks also to Bruno Kukulcan and Yoan Courtois (Megachur) for some Amstrad CPC IPF files for testing
+    + K051960: Implemented IRQ's
+    + Changed the way to show the main window caption, including the name of the tape, snapshot, disk, etc.
+    + Added MCS48 CPU series: i8035, i8039 and N7751
+    + Added i8243, port expander
+    + Deleted languages files, they are now integrated
+    + K051316: Added basic implementation
+    + Added a check when directories are saved to avoid duplicating the folder separator
+    + Namco IO
+        - Added 50XX control CPU
+        - Added 54XX sound CPU, using samples
+    + MB88XX CPU: Added opcodes $0f, $10, $1a, $20, $22, $2f and $48
+    + Fixed folders load/save, now the correct last folder used for Spectrum, Amstrad, Coleco, NES, GB, etc is remembered
+    + In general configuration menu, you can change preview images, samples, quick snapshot and NV-Ram folders. Removed NES, Coleco and GB folder change (useless now) 
+    + Windows: Fixed image snapshot save bug (Thanks to FJ Marti)
+    + Fixed a bug that if DSP is started with the ROMs list and no driver was selected, the emulator hangs (Thanks to FJ Marti)
+    + Fixes to the ROMs/Samples file list exportation (Thanks to FJ Marti)
+    + N2A03 
+        - Converted to CPU
         - Converted to classes
-        - Added chip YM3526
+    + Taito Sound
+        - Converted to classes
+        - Integrated Z80 CPU
     + Konami Sound
         - Converted to classes
-        - Integrated Z80 sound CPU
-        - Integrated Frogger and Scramble sound driver
-        - Improved and corrected some drivers
-        - Separated into four types 'Time Pilot', 'Jungler', 'Frogger' and 'scamble'
-    + PIA 8255
-        - Converted to classes
-        - Device driver cleaning
+        - Integrated Z80 CPU
 - Spectrum
-    + When a snapshot without ROM is loaded and previously changed to a different ROM than the original, it's reloaded the original ROM
-    + Contended memory changes
+    + Z80 snapshot
+        - V1 - Fixed lenght of the compressed full memory block, I was ignoring the end mark
+        - V1 - Fixed buffer overflow, some times the snapshot data has more info that it's needed
+        - V2/V3 - Fixed uncompressed memory page inside of the data
+        - V2/V3 - Some checks to avoid bad snapshots
+        - V2/V3 - Now identify the correct Spectrum model
+        - V2/V3 - The preview image, now uses the active screen in 128k models
 - Amstrad CPC
-    + Added LensLok protection
-    + Enhanced video mode 2, more speed
-- Sega System 1
-    + Added custom Z80 timings
+    + Added support for the snapshot V3 chuncks (including compressed memory)
+- Black Tiger
+    + Small video updates
+- Psychic 5
+    + Modernized driver
+    + Fixed audio CPU clock, Vblank and FPS
+    + Added controls for player 2 and dipswitches
+    + Changed ROMs to World version
+- ExedExes
+    + Added dipswitches
+- Express Raider
+    + Added dipswitches
+- Double Dragon HW
+    + Fixed IRQs
+    + Double Dragon II: Fixed VBlank, solves the problem of color fading in transitions
 - Popeye
-    + Added 2nd player controls
-    + Driver cleaning
-- Galaxian HW
-    + Galaxian: Added several sounds (samples)
-    + Fixed stars background
-- Rally X HW
-    + Cleaned and fixed driver (memory, video, etc)
-    + Jungler: Simplified the video, eliminated manual rotation
-- Arabian
-    + Fixed video
-- Blockout
-    + Fixed video
-- Mappy HW
-    + Fixed sprites: added a mask for the sprites size
+    + Small video updates
+- Gun.Smoke HW
+    + Gun.Smoke: Small video updates
+    + 1943: Fixed background scroll
+- Gyruss
+    + Added i8039 CPU and DAC, completed sound
+    + Changed audio to stereo
+- Galaga HW
+    + Galaga: added samples
+    + Xevious: added driver with sound, small problems with scroll and samples
 - Juno First
-    + Fixed driver initialisation
-- Space Invaders
-    + Added driver with sound (samples)
-- Centipede
+    + Added i8039 CPU and DAC, completed sound
+- Sega System 16A
+    + Preliminary support of the digital audio with the N7751 CPU
+- WWF Superstars
+    + Small video updates
+- TMNT HW
+    + Sunset Riders: Enhanced copyprotection
+- Track & Field
     + Added driver with sound
-- Karnov HW
-    + Karnov: Added driver with sound
-    + Chelnov: Added driver with sound
-- Aliens
-    - Added driver with sound
-    - Small problem with sprite priorities
-- Thunder Cross HW
-    + Super Contra: Added driver with sound
-    + Gang Busters: Added driver with sound
-    + Thunder Cross: Added driver with sound
-- The Simpsons
-    + Added driver with sound, without sprites and graphics problems
+- Hyper Sports
+    + Added driver with sound
+- Megazone
+    + Added driver with sound
+- Space Fire Bird
+    + Added driver with sound
+    + Small problems with the backgroud stars
+- Ajax
+    + Basic driver

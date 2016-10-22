@@ -1176,7 +1176,7 @@ var
   cpc_chunk:^tcpc_chunk;
   buffer:array[0..9] of byte;
 begin
-main_z80_reg:=main_z80.get_internal_r;
+main_z80_reg:=z80_0.get_internal_r;
 getmem(pdatos,$50000);
 ptemp:=pdatos;
 getmem(cpc_sna,sizeof(tcpc_sna));
@@ -1241,7 +1241,7 @@ end;
 cpc_sna.hw_type:=main_vars.tipo_maquina-7;
 cpc_sna.ga_lines_sync:=cpc_ga.lines_sync;
 cpc_sna.ga_lines_count:=cpc_ga.lines_count;
-if main_z80.get_irq<>CLEAR_LINE then cpc_sna.irq:=1;
+if z80_0.get_irq<>CLEAR_LINE then cpc_sna.irq:=1;
 copymemory(ptemp,cpc_sna,$100);inc(ptemp,$100);long:=$100;
 freemem(cpc_sna);
 //Datos
@@ -1357,7 +1357,7 @@ if (cpc_sna.magic)<>'MV - SNA' then begin
   freemem(cpc_sna);
   exit;
 end;
-main_z80_reg:=main_z80.get_internal_r;
+main_z80_reg:=z80_0.get_internal_r;
 main_z80_reg.f.s:=(cpc_sna.flags and $80)<>0;
 main_z80_reg.f.z:=(cpc_sna.flags and $40)<>0;
 main_z80_reg.f.bit5:=(cpc_sna.flags and $20)<>0;
@@ -1474,8 +1474,8 @@ case cpc_sna.version of
       if cpc_sna.version=3 then begin
         cpc_ga.lines_sync:=cpc_sna.ga_lines_sync;
         cpc_ga.lines_count:=cpc_sna.ga_lines_count;
-        if cpc_sna.irq<>0 then main_z80.change_irq(PULSE_LINE)
-           else main_z80.change_irq(CLEAR_LINE);
+        if cpc_sna.irq<>0 then z80_0.change_irq(PULSE_LINE)
+           else z80_0.change_irq(CLEAR_LINE);
         getmem(cpc_chunk,sizeof(tcpc_chunk));
         while position<>longitud do begin //Hay chunks??
            copymemory(cpc_chunk,data,8);
@@ -1620,7 +1620,7 @@ while longitud<long do begin
      $1:begin //Version 1.00
           getmem(z80_v1,sizeof(tz80_v1));
           copymemory(z80_v1,data,68);
-          main_z80_reg:=main_z80.get_internal_r;
+          main_z80_reg:=z80_0.get_internal_r;
           main_z80_reg.ppc:=z80_v1.ppc;
           main_z80_reg.pc:=z80_v1.pc;
           main_z80_reg.sp:=z80_v1.sp;
@@ -1635,9 +1635,9 @@ while longitud<long do begin
           main_z80_reg.iff1:=z80_v1.iff1;
           main_z80_reg.iff2:=z80_v1.iff2;
           main_z80_reg.halt_opcode:=z80_v1.halt;
-          main_z80.change_irq(z80_v1.pedir_irq);
-          main_z80.change_nmi(z80_v1.pedir_nmi);
-          {main_z80.nmi_state:=(ptemp^<>0);}
+          z80_0.change_irq(z80_v1.pedir_irq);
+          z80_0.change_nmi(z80_v1.pedir_nmi);
+          {z80_0.nmi_state:=(ptemp^<>0);}
           main_z80_reg.a:=z80_v1.a;
           main_z80_reg.a2:=z80_v1.a2;
           main_z80_reg.i:=z80_v1.i;
@@ -1658,14 +1658,14 @@ while longitud<long do begin
           main_z80_reg.f2.p_v:=z80_v1.f2[2];
           main_z80_reg.f2.n:=z80_v1.f2[1];
           main_z80_reg.f2.c:=z80_v1.f2[0];
-          main_z80.contador:=z80_v1.contador;
+          z80_0.contador:=z80_v1.contador;
           main_z80_reg.im:=z80_v1.im;
-          main_z80.im2_lo:=z80_v1.im2_lo;
-          main_z80.im0:=z80_v1.im0;
+          z80_0.im2_lo:=z80_v1.im2_lo;
+          z80_0.im0:=z80_v1.im0;
           freemem(z80_v1);
       end;
       $2:begin //Version 2.00
-          main_z80_reg:=main_z80.get_internal_r;
+          main_z80_reg:=z80_0.get_internal_r;
           ptemp:=data;
           getmem(z80_v2,sizeof(tz80_v2));
           copymemory(z80_v2,ptemp,46);
@@ -1674,11 +1674,11 @@ while longitud<long do begin
           getmem(z80_v2_ext,sizeof(tz80_v2_ext));
           copymemory(z80_v2_ext,ptemp,9);
           main_z80_reg.halt_opcode:=z80_v2_ext.halt;
-          main_z80.change_irq(z80_v2_ext.pedir_irq);
-          main_z80.change_nmi(z80_v2_ext.pedir_nmi);
-          main_z80.contador:=z80_v2_ext.contador;
-          main_z80.im2_lo:=z80_v2_ext.im2_lo;
-          main_z80.im0:=z80_v2_ext.im0;
+          z80_0.change_irq(z80_v2_ext.pedir_irq);
+          z80_0.change_nmi(z80_v2_ext.pedir_nmi);
+          z80_0.contador:=z80_v2_ext.contador;
+          z80_0.im2_lo:=z80_v2_ext.im2_lo;
+          z80_0.im0:=z80_v2_ext.im0;
           freemem(z80_v2_ext);
           freemem(z80_v2);
         end;
@@ -1689,10 +1689,10 @@ while longitud<long do begin
           copymemory(ptemp3,ptemp,45);
           inc(ptemp,46);inc(ptemp3,45);
           copymemory(ptemp3,ptemp,12);
-          main_z80.load_snapshot(ptemp2);
+          z80_0.load_snapshot(ptemp2);
           freemem(ptemp2);
         end;
-      $220:main_z80.load_snapshot(data); //Version 2.20
+      $220:z80_0.load_snapshot(data); //Version 2.20
     end;
   end;
   if coleco_block.nombre='TMSR' then begin
@@ -1780,7 +1780,7 @@ fillchar(coleco_block^,sizeof(tcoleco_block),0);
 coleco_block.nombre:='Z80R';
 ptemp2:=ptemp;
 inc(ptemp2,10);
-comprimido:=main_z80.save_snapshot(ptemp2);
+comprimido:=z80_0.save_snapshot(ptemp2);
 coleco_block.longitud:=comprimido;
 copymemory(ptemp,coleco_block,10);
 inc(ptemp,10);inc(longitud,10);

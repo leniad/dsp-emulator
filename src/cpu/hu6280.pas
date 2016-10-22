@@ -44,7 +44,7 @@ type
             procedure CHECK_AND_TAKE_IRQ_LINES;
         end;
 var
-    main_h6280:cpu_h6280;
+    h6280_0:cpu_h6280;
 
 implementation
   const

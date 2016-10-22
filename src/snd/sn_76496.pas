@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine;
 type
 
  SN76496_chip=class(snd_chip_class)
-      constructor Create(clock:dword);
+      constructor Create(clock:dword;amp:single=1);
       destructor free;
     public
       procedure Write(data:byte);
@@ -39,7 +39,7 @@ const
      FB_PNOISE=$8000;
      NG_PRESET=$0f35;
 
-constructor sn76496_chip.Create(clock:dword);
+constructor sn76496_chip.Create(clock:dword;amp:single=1);
 begin
   self.set_gain(0);
 	self.clock:=clock;
@@ -286,7 +286,7 @@ begin
 		out_sn:= vol[0] * self.Volume[0] + vol[1] * self.Volume[1] +
 				vol[2] * self.Volume[2] + vol[3] * self.Volume[3];
     if (out_sn>MAX_OUTPUT*SN_STEP) then out_sn:=MAX_OUTPUT*SN_STEP;
-    tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc(out_sn/SN_STEP);
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=trunc((out_sn/SN_STEP)*self.amp);
 end;
 
 end.

@@ -142,22 +142,22 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_mcu:=main_m6805.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     //MCU CPU
-    main_m6805.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
+    m6805_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_lk_hw;
     end;
   end;
@@ -252,14 +252,14 @@ case direccion of
             fillchar(gfx[0].buffer[0],$c00,1);
           end;
   $f060:begin
-          if snd_nmi then snd_z80.change_nmi(PULSE_LINE)
+          if snd_nmi then z80_1.change_nmi(PULSE_LINE)
             else pending_nmi:=true;
           sound_cmd:=valor;
         end;
   $f062:begin
           from_main:=valor;
 	        main_sent:=1;
-          main_m6805.irq_request(0,ASSERT_LINE);
+          m6805_0.irq_request(0,ASSERT_LINE);
         end;
   $f0c0:scroll_txt_x:=valor+1;
   $f0c1:scroll_txt_y:=valor;
@@ -306,7 +306,7 @@ case direccion of
           snd_nmi:=true;
           if pending_nmi then begin
               pending_nmi:=false;
-              snd_z80.change_nmi(PULSE_LINE);
+              z80_1.change_nmi(PULSE_LINE);
           end;
         end;
   $b002:snd_nmi:=false;
@@ -339,7 +339,7 @@ case direccion of
 	1:begin
       if (((ddr_b and $02)<>0) and ((not(valor) and $02)<>0) and ((port_b_out and $02)<>0)) then begin
     		port_a_in:=from_main;
-    		if (main_sent<>0) then main_m6805.irq_request(0,CLEAR_LINE);
+    		if (main_sent<>0) then m6805_0.irq_request(0,CLEAR_LINE);
     		main_sent:=0;
     	end;
     	if (((ddr_b and $04)<>0) and ((valor and $04)<>0) and ((not(port_b_out) and $04)<>0)) then begin
@@ -357,7 +357,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_1.change_irq(irqstate);
 end;
 
 procedure lk_hw_sound_update;
@@ -369,9 +369,9 @@ end;
 //Main
 procedure reset_lk_hw;
 begin
- main_z80.reset;
- snd_z80.reset;
- main_m6805.reset;
+ z80_0.reset;
+ z80_1.reset;
+ m6805_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
  reset_audio;
@@ -429,16 +429,16 @@ screen_mod_scroll(3,256,256,255,256,256,255);
 screen_init(4,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,$100);
-main_z80.change_ram_calls(lk_getbyte,lk_putbyte);
-main_z80.change_io_calls(lk_inbyte,nil);
+z80_0:=cpu_z80.create(6000000,$100);
+z80_0.change_ram_calls(lk_getbyte,lk_putbyte);
+z80_0.change_io_calls(lk_inbyte,nil);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,$100);
-snd_z80.change_ram_calls(snd_lk_hw_getbyte,snd_lk_hw_putbyte);
-snd_z80.init_sound(lk_hw_sound_update);
+z80_1:=cpu_z80.create(4000000,$100);
+z80_1.change_ram_calls(snd_lk_hw_getbyte,snd_lk_hw_putbyte);
+z80_1.init_sound(lk_hw_sound_update);
 //MCU CPU
-main_m6805:=cpu_m6805.create(3000000,$100,tipo_m68705);
-main_m6805.change_ram_calls(mcu_lk_hw_getbyte,mcu_lk_hw_putbyte);
+m6805_0:=cpu_m6805.create(3000000,$100,tipo_m68705);
+m6805_0.change_ram_calls(mcu_lk_hw_getbyte,mcu_lk_hw_putbyte);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(4000000);
 ym2203_0.change_irq_calls(snd_irq);

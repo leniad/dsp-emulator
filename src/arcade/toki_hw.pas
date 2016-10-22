@@ -135,18 +135,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+///PRECAUCION EL Z80 ES EL 1, PORQUE EL SISTEMA DE SONIDO LO COGE ASI, HAY QUE CAMBIARLO...
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
    for f:=0 to $ff do begin
      //Main CPU
-     main_m68000.run(frame_m);
-     frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+     m68000_0.run(frame_m);
+     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
      //Sound CPU
-     snd_z80.run(frame_s);
-     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+     z80_1.run(frame_s);
+     frame_s:=frame_s+z80_1.tframes-z80_1.contador;
      if f=239 then begin
-        main_m68000.irq[1]:=HOLD_LINE;
+        m68000_0.irq[1]:=HOLD_LINE;
         update_video_toki;
         copymemory(@sprite_ram[0],@ram[$6c00],$800);
      end;
@@ -231,7 +232,7 @@ end;
 function toki_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$1fff:if snd_z80.opcode then toki_snd_getbyte:=decrypt[direccion]
+  0..$1fff:if z80_1.opcode then toki_snd_getbyte:=decrypt[direccion]
               else toki_snd_getbyte:=mem_snd[direccion];
   $2000..$27ff:toki_snd_getbyte:=mem_snd[direccion];
   $4008:toki_snd_getbyte:=ym3812_0.status;
@@ -281,8 +282,8 @@ end;
 //Main
 procedure reset_toki;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_1.reset;
  ym3812_0.Reset;
  oki_6295_0.reset;
  seibu_reset;
@@ -323,12 +324,12 @@ screen_mod_scroll(4,512,256,511,512,256,511);
 iniciar_video(256,224);
 getmem(memoria_temp,$100000);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(toki_getword,toki_putword);
+m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0.change_ram16_calls(toki_getword,toki_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(toki_snd_getbyte,toki_snd_putbyte);
-snd_z80.init_sound(toki_sound_update);
+z80_1:=cpu_z80.create(3579545,256);
+z80_1.change_ram_calls(toki_snd_getbyte,toki_snd_putbyte);
+z80_1.init_sound(toki_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,3579545);
 ym3812_0.change_irq_calls(snd_irq);

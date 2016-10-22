@@ -297,18 +297,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_m6800.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=m6800_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
-    snd_m6800.run(frame_s);
-    frame_s:=frame_s+snd_m6800.tframes-snd_m6800.contador;
+    m6800_0.run(frame_s);
+    frame_s:=frame_s+m6800_0.tframes-m6800_0.contador;
   end;
-  main_z80.change_irq(HOLD_LINE);
+  z80_0.change_irq(HOLD_LINE);
   update_video_m62;
   eventos_irem_m62;
   video_sync;
@@ -347,7 +347,7 @@ procedure kungfum_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
   0:if ((valor and $80)=0) then sound_command:=valor and $7f
-    	else snd_m6800.change_irq(ASSERT_LINE);
+    	else m6800_0.change_irq(ASSERT_LINE);
 end;
 end;
 
@@ -462,7 +462,7 @@ const
 begin
 case (puerto and $ff) of
   0:if ((valor and $80)=0) then sound_command:=valor and $7f
-    	else snd_m6800.change_irq(ASSERT_LINE);
+    	else m6800_0.change_irq(ASSERT_LINE);
   $80..$81:begin
              bankcontrol[puerto and 1]:=valor;
 	           if ((puerto and 1)=0) then begin
@@ -479,7 +479,7 @@ end;
 function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$1f:snd_getbyte:=snd_m6800.m6803_internal_reg_r(direccion);
+  $0..$1f:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
     else snd_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -489,9 +489,9 @@ begin
 if direccion>$3fff then exit;
 mem_snd[direccion]:=valor;
 case direccion of
-  $0..$1f:snd_m6800.m6803_internal_reg_w(direccion,valor);
+  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
   $0800..$8ff:case direccion and $3 of
-                  0:snd_m6800.change_irq(CLEAR_LINE);
+                  0:m6800_0.change_irq(CLEAR_LINE);
                   1:msm_5205_0.data_w(valor);
                   2:msm_5205_1.data_w(valor);
                end;
@@ -550,7 +550,7 @@ end;
 
 procedure adpcm_int;
 begin
-  snd_m6800.change_nmi(PULSE_LINE);
+  m6800_0.change_nmi(PULSE_LINE);
 end;
 
 procedure irem_m62_play_sound;
@@ -562,8 +562,8 @@ end;
 //Main
 procedure reset_irem_m62;
 begin
- main_z80.reset;
- snd_m6800.reset;
+ z80_0.reset;
+ m6800_0.reset;
  reset_audio;
  ay8910_0.reset;
  ay8910_1.reset;
@@ -703,24 +703,24 @@ case main_vars.tipo_maquina of
 end;
 iniciar_video(x,256);
 //Sound CPU
-snd_m6800:=cpu_m6800.create(3579545,$100,CPU_M6803);
-snd_m6800.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_m6800.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
-snd_m6800.init_sound(irem_m62_play_sound);
+m6800_0:=cpu_m6800.create(3579545,$100,CPU_M6803);
+m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
+m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
+m6800_0.init_sound(irem_m62_play_sound);
 //sound chips
 msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,1,adpcm_int);
 msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,1,nil);
-ay8910_0:=ay8910_chip.create(3579545 div 4,1);
+ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910,1);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,ay0_portb_w);
-ay8910_1:=ay8910_chip.create(3579545 div 4,1);
+ay8910_1:=ay8910_chip.create(3579545 div 4,AY8910,1);
 marcade.dswa:=$ff;
 marcade.dswb:=$fd;
 case main_vars.tipo_maquina of
   42:begin  //KungFu Master
         //Main CPU
-        main_z80:=cpu_z80.create(3072000,$100);
-        main_z80.change_ram_calls(kungfum_getbyte,kungfum_putbyte);
-        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
+        z80_0:=cpu_z80.create(3072000,$100);
+        z80_0.change_ram_calls(kungfum_getbyte,kungfum_putbyte);
+        z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
         update_video_m62:=update_video_kungfum;
         //cargar roms
@@ -743,9 +743,9 @@ case main_vars.tipo_maquina of
      end;
      72:begin  //Spelunker
         //Main CPU
-        main_z80:=cpu_z80.create(4000000,$100);
-        main_z80.change_ram_calls(spl_getbyte,spl_putbyte);
-        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
+        z80_0:=cpu_z80.create(4000000,$100);
+        z80_0.change_ram_calls(spl_getbyte,spl_putbyte);
+        z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
         update_video_m62:=update_video_spelunker;
         calc_nchar_sp:=calc_nchar_splunker;
@@ -772,9 +772,9 @@ case main_vars.tipo_maquina of
      end;
      73:begin  //Spelunker II
         //Main CPU
-        main_z80:=cpu_z80.create(4000000,$100);
-        main_z80.change_ram_calls(spl2_getbyte,spl2_putbyte);
-        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
+        z80_0:=cpu_z80.create(4000000,$100);
+        z80_0.change_ram_calls(spl2_getbyte,spl2_putbyte);
+        z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
         update_video_m62:=update_video_spelunker;
         calc_nchar_sp:=calc_nchar_splunker2;
@@ -802,9 +802,9 @@ case main_vars.tipo_maquina of
      end;
      74:begin  //Lode Runner
         //Main CPU
-        main_z80:=cpu_z80.create(4000000,$100);
-        main_z80.change_ram_calls(kungfum_getbyte,ldrun_putbyte);
-        main_z80.change_io_calls(kungfum_inbyte,kungfum_outbyte);
+        z80_0:=cpu_z80.create(4000000,$100);
+        z80_0.change_ram_calls(kungfum_getbyte,ldrun_putbyte);
+        z80_0.change_io_calls(kungfum_inbyte,kungfum_outbyte);
         //video
         update_video_m62:=update_video_ldrun;
         ldrun_color:=$0c;
@@ -826,9 +826,9 @@ case main_vars.tipo_maquina of
      end;
      75:begin  //Lode Runner II
         //Main CPU
-        main_z80:=cpu_z80.create(4000000,$100);
-        main_z80.change_ram_calls(ldrun2_getbyte,ldrun_putbyte);
-        main_z80.change_io_calls(ldrun2_inbyte,ldrun2_outbyte);
+        z80_0:=cpu_z80.create(4000000,$100);
+        z80_0.change_ram_calls(ldrun2_getbyte,ldrun_putbyte);
+        z80_0.change_io_calls(ldrun2_inbyte,ldrun2_outbyte);
         //video
         update_video_m62:=update_video_ldrun;
         ldrun_color:=$04;

@@ -114,19 +114,19 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_m6502.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
    //Main
-   main_m6809.run(frame_m);
-   frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+   m6809_0.run(frame_m);
+   frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
    //Sound
-   snd_m6502.run(frame_s);
-   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
+   m6502_0.run(frame_s);
+   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
    case f of
       247:begin
-            main_m6809.change_nmi(PULSE_LINE);
+            m6809_0.change_nmi(PULSE_LINE);
             update_video_dec8;
             vblank_val:=0;
       end;
@@ -218,7 +218,7 @@ case direccion of
   $1806:scroll_x:=(scroll_x and $f00) or valor;
   $2000:begin
         sound_latch:=valor;
-        snd_m6502.change_nmi(PULSE_LINE);
+        m6502_0.change_nmi(PULSE_LINE);
         end;
   $2800..$288f:if buffer_paleta[direccion and $ff]<>valor then begin
           buffer_paleta[direccion and $ff]:=valor;
@@ -238,7 +238,7 @@ begin
     $2001:getbyte_snd_dec8:=ym2203_0.Read;
     $4000:getbyte_snd_dec8:=ym3812_0.status;
     $6000:getbyte_snd_dec8:=sound_latch;
-    $8000..$ffff:if snd_m6502.opcode then getbyte_snd_dec8:=snd_dec[direccion and $7fff]
+    $8000..$ffff:if m6502_0.opcode then getbyte_snd_dec8:=snd_dec[direccion and $7fff]
                     else getbyte_snd_dec8:=mem_snd[direccion];
     else getbyte_snd_dec8:=mem_snd[direccion];
   end;
@@ -264,14 +264,14 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_m6502.change_irq(irqstate);
+  m6502_0.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_dec8;
 begin
-main_m6809.reset;
-snd_m6502.reset;
+m6809_0.reset;
+m6502_0.reset;
 ym2203_0.reset;
 ym3812_0.reset;
 marcade.in0:=$ff;
@@ -310,12 +310,12 @@ screen_mod_scroll(3,0,0,0,512,256,511);
 screen_init(4,256,512,false,true);
 iniciar_video(240,256);
 //Main CPU
-main_m6809:=cpu_m6809.Create(2000000,264);
-main_m6809.change_ram_calls(getbyte_dec8,putbyte_dec8);
+m6809_0:=cpu_m6809.Create(2000000,264);
+m6809_0.change_ram_calls(getbyte_dec8,putbyte_dec8);
 //Sound CPU
-snd_m6502:=cpu_m6502.create(1500000,264,TCPU_M6502);
-snd_m6502.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
-snd_m6502.init_sound(dec8_sound_update);
+m6502_0:=cpu_m6502.create(1500000,264,TCPU_M6502);
+m6502_0.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
+m6502_0.init_sound(dec8_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(1500000);
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);

@@ -83,18 +83,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for video_line:=0 to $ff do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if video_line=239 then begin
-      main_m6809.change_irq(HOLD_LINE);
+      m6809_0.change_irq(HOLD_LINE);
       update_video_mikie;
     end;
   end;
@@ -122,7 +122,7 @@ if direccion>$3fff then exit;
 memoria[direccion]:=valor;
 case direccion of
   $2002:begin
-          if ((sound_trq=0) and (valor=1)) then snd_z80.change_irq(HOLD_LINE);
+          if ((sound_trq=0) and (valor=1)) then z80_0.change_irq(HOLD_LINE);
           sound_trq:=valor;
         end;
   $2006:main_screen.flip_main_screen:=(valor and 1)<>0;
@@ -138,7 +138,7 @@ begin
 case direccion of
   0..$43ff:sound_getbyte:=mem_snd[direccion];
   $8003:sound_getbyte:=sound_latch;
-  $8005:sound_getbyte:=(trunc(video_line*snd_z80.tframes)+snd_z80.contador) shr 9;
+  $8005:sound_getbyte:=(trunc(video_line*z80_0.tframes)+z80_0.contador) shr 9;
 end;
 end;
 
@@ -167,9 +167,9 @@ begin
 open_qsnapshot_save('mikie'+nombre);
 getmem(data,180);
 //CPU
-size:=main_m6809.save_snapshot(data);
+size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=sn_76496_0.save_snapshot(data);
@@ -199,9 +199,9 @@ if not(open_qsnapshot_load('mikie'+nombre)) then exit;
 getmem(data,180);
 //CPU
 loaddata_qsnapshot(data);
-main_m6809.load_snapshot(data);
+m6809_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 sn_76496_0.load_snapshot(data);
@@ -226,8 +226,8 @@ end;
 //Main
 procedure reset_mikie;
 begin
- main_m6809.reset;
- snd_z80.reset;
+ m6809_0.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
@@ -262,12 +262,12 @@ screen_mod_scroll(2,0,0,255,0,0,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,256);
-main_m6809.change_ram_calls(mikie_getbyte,mikie_putbyte);
+m6809_0:=cpu_m6809.Create(1536000,256);
+m6809_0.change_ram_calls(mikie_getbyte,mikie_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
-snd_z80.init_sound(sound_despues_instruccion);
+z80_0:=cpu_z80.create(3579545,256);
+z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
+z80_0.init_sound(sound_despues_instruccion);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(1789772);
 sn_76496_1:=sn76496_chip.Create(3579545);

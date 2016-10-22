@@ -221,18 +221,18 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
    //Main CPU
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
    //Sound CPU
-   snd_z80.run(frame_s);
-   frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+   z80_0.run(frame_s);
+   frame_s:=frame_s+z80_0.tframes-z80_0.contador;
    if f=239 then begin
-      main_m68000.irq[1]:=HOLD_LINE;
+      m68000_0.irq[1]:=HOLD_LINE;
       update_video_nmk68;
    end;
  end;
@@ -279,7 +279,7 @@ case direccion of
                    end;
     $80000:begin
           sound_latch:=valor shr 8;
-          snd_z80.change_nmi(PULSE_LINE);
+          z80_0.change_nmi(PULSE_LINE);
          end;
     $c0000:begin
             fg_tile_offset:=(valor and $70) shl 4;
@@ -342,7 +342,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_0.change_irq(irqstate);
 end;
 
 //Ikari 3
@@ -375,7 +375,7 @@ case direccion of
                    end;
     $80000:begin
              sound_latch:=valor shr 8;
-             snd_z80.change_nmi(PULSE_LINE);
+             z80_0.change_nmi(PULSE_LINE);
          end;
     $80006:if (valor=7) then protection:=$ff
             else protection:=0;
@@ -399,8 +399,8 @@ end;
 //Main
 procedure reset_snk68;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  ym3812_0.reset;
  upd7759_0.reset;
  reset_audio;
@@ -450,19 +450,19 @@ screen_init(2,512,512,false,true);
 iniciar_video(256,224);
 //Main CPU
 getmem(memoria_temp,$400000);
-main_m68000:=cpu_m68000.create(9000000,264);
+m68000_0:=cpu_m68000.create(9000000,264);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,264);
-snd_z80.change_ram_calls(pow_snd_getbyte,pow_snd_putbyte);
-snd_z80.change_io_calls(pow_snd_inbyte,pow_snd_outbyte);
-snd_z80.init_sound(snk68_sound_update);
+z80_0:=cpu_z80.create(4000000,264);
+z80_0.change_ram_calls(pow_snd_getbyte,pow_snd_putbyte);
+z80_0.change_io_calls(pow_snd_inbyte,pow_snd_outbyte);
+z80_0.init_sound(snk68_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
 ym3812_0.change_irq_calls(snd_irq);
 upd7759_0:=upd7759_chip.create(640000,0.5);
 case main_vars.tipo_maquina of
   136:begin //POW
-        main_m68000.change_ram16_calls(pow_getword,pow_putword);
+        m68000_0.change_ram16_calls(pow_getword,pow_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@pow_rom,'pow.zip',0)) then exit;
         //cargar sonido
@@ -480,7 +480,7 @@ case main_vars.tipo_maquina of
         update_video_nmk68:=update_video_pow;
       end;
   137:begin  //Street Smart
-        main_m68000.change_ram16_calls(pow_getword,pow_putword);
+        m68000_0.change_ram16_calls(pow_getword,pow_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@streetsm_rom,'streetsm.zip',0)) then exit;
         //cargar sonido
@@ -498,7 +498,7 @@ case main_vars.tipo_maquina of
         update_video_nmk68:=update_video_pow;
       end;
   149:begin //Ikari 3
-        main_m68000.change_ram16_calls(ikari3_getword,ikari3_putword);
+        m68000_0.change_ram16_calls(ikari3_getword,ikari3_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@ikari3_rom,'ikari3.zip',0)) then exit;
         if not(cargar_roms16w(@rom2[0],@ikari3_rom2,'ikari3.zip',0)) then exit;
@@ -516,7 +516,7 @@ case main_vars.tipo_maquina of
         update_video_nmk68:=update_video_ikari3;
       end;
   150:begin //Search and Rescue
-        main_m68000.change_ram16_calls(ikari3_getword,ikari3_putword);
+        m68000_0.change_ram16_calls(ikari3_getword,ikari3_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@sar_rom,'searchar.zip',0)) then exit;
         if not(cargar_roms16w(@rom2[0],@sar_rom2,'searchar.zip',0)) then exit;

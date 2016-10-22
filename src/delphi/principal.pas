@@ -669,7 +669,8 @@ end;
 procedure Tprincipal1.fSaveGif(Sender: TObject);
 var
   r:integer;
-  nombre,nombre2:string;
+  nombre:string;
+  nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlP_Surface;
   gif:tgifimage;

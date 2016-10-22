@@ -69,21 +69,21 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 261 do begin
   //Main CPU
-  main_m68000.run(frame_m);
-  frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //Sound CPU
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_0.run(frame_s);
+  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
   case f of
-    31:main_m68000.irq[4]:=ASSERT_LINE;
-    127:main_m68000.irq[3]:=ASSERT_LINE;
+    31:m68000_0.irq[4]:=ASSERT_LINE;
+    127:m68000_0.irq[3]:=ASSERT_LINE;
     239:begin
-          main_m68000.irq[2]:=ASSERT_LINE;
+          m68000_0.irq[2]:=ASSERT_LINE;
           update_video_snowbros;
         end;
   end;
@@ -126,16 +126,16 @@ case direccion of
     $400000:main_screen.flip_main_screen:=(valor and $8000)=0;
     $300000:begin
             sound_latch:=valor and $ff;
-            snd_z80.change_nmi(PULSE_LINE);
+            z80_0.change_nmi(PULSE_LINE);
           end;
     $600000..$6001ff:if buffer_paleta[(direccion and $1ff) shr 1]<>valor then begin
                       buffer_paleta[(direccion and $1ff) shr 1]:=valor;
                       cambiar_color(valor,(direccion and $1ff) shr 1);
                    end;
     $700000..$701fff:pandora.sprite_ram[(direccion and $1fff) shr 1]:=valor and $ff;
-    $800000:main_m68000.irq[4]:=CLEAR_LINE;
-    $900000:main_m68000.irq[3]:=CLEAR_LINE;
-    $a00000:main_m68000.irq[2]:=CLEAR_LINE;
+    $800000:m68000_0.irq[4]:=CLEAR_LINE;
+    $900000:m68000_0.irq[3]:=CLEAR_LINE;
+    $a00000:m68000_0.irq[2]:=CLEAR_LINE;
   end;
 end;
 
@@ -173,14 +173,14 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_0.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_snowbros;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  pandora_reset;
  ym3812_0.reset;
  reset_audio;
@@ -204,13 +204,13 @@ iniciar_audio(false);
 screen_init(1,512,512,true,true);
 iniciar_video(256,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(8000000,262);
-main_m68000.change_ram16_calls(snowbros_getword,snowbros_putword);
+m68000_0:=cpu_m68000.create(8000000,262);
+m68000_0.change_ram16_calls(snowbros_getword,snowbros_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(6000000,262);
-snd_z80.change_ram_calls(snowbros_snd_getbyte,snowbros_snd_putbyte);
-snd_z80.change_io_calls(snowbros_snd_inbyte,snowbros_snd_outbyte);
-snd_z80.init_sound(snowbros_sound_act);
+z80_0:=cpu_z80.create(6000000,262);
+z80_0.change_ram_calls(snowbros_snd_getbyte,snowbros_snd_putbyte);
+z80_0.change_io_calls(snowbros_snd_inbyte,snowbros_snd_outbyte);
+z80_0.init_sound(snowbros_sound_act);
 //pandora
 pandora.mask_nchar:=$fff;
 pandora.color_offset:=0;

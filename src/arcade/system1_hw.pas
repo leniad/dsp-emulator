@@ -412,8 +412,8 @@ end;
 
 procedure system1_port_c_write(valor:byte);
 begin //sound_controlw
-  if (valor and $80)<>0 then snd_z80.change_nmi(CLEAR_LINE)
-    else snd_z80.change_nmi(ASSERT_LINE);
+  if (valor and $80)<>0 then z80_1.change_nmi(CLEAR_LINE)
+    else z80_1.change_nmi(ASSERT_LINE);
   bg_ram_bank:=(valor shr 1) and $3;
 end;
 

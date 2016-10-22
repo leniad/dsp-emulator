@@ -125,18 +125,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
   end;
-  main_z80.change_irq(HOLD_LINE);
+  z80_0.change_irq(HOLD_LINE);
   update_video_vigilante;
   eventos_vigilante;
   video_sync;
@@ -186,13 +186,13 @@ end;
 procedure snd_irq_set(tipo:byte);
 begin
   case tipo of
-    0:snd_z80.im0:=snd_z80.im0 or $20; //Clear Z80
-    1:snd_z80.im0:=snd_z80.im0 and $df; //Set Z80
-    2:snd_z80.im0:=snd_z80.im0 or $10; //Clear YM2151
-    3:snd_z80.im0:=snd_z80.im0 and $ef; //Set YM2151
+    0:z80_1.im0:=z80_1.im0 or $20; //Clear Z80
+    1:z80_1.im0:=z80_1.im0 and $df; //Set Z80
+    2:z80_1.im0:=z80_1.im0 or $10; //Clear YM2151
+    3:z80_1.im0:=z80_1.im0 and $ef; //Set YM2151
   end;
-  if (snd_z80.im0<>$ff) then snd_z80.change_irq(ASSERT_LINE)
-    else snd_z80.change_irq(CLEAR_LINE);
+  if (z80_1.im0<>$ff) then z80_1.change_irq(ASSERT_LINE)
+    else z80_1.change_irq(CLEAR_LINE);
 end;
 
 function vigilante_inbyte(puerto:word):byte;
@@ -267,7 +267,7 @@ end;
 
 procedure vigilante_snd_irq;
 begin
-  snd_z80.change_nmi(PULSE_LINE);
+  z80_1.change_nmi(PULSE_LINE);
 end;
 
 procedure snd_despues_instruccion;
@@ -279,8 +279,8 @@ end;
 //Main
 procedure reset_vigilante;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  ym2151_0.reset;
  reset_audio;
  marcade.in0:=$ff;
@@ -322,15 +322,15 @@ screen_mod_sprites(3,0,$200,0,$1ff);
 screen_init(4,512*4,256);
 iniciar_video(256,256);
 //Main CPU
-main_z80:=cpu_z80.create(3579645,256);
-main_z80.change_ram_calls(vigilante_getbyte,vigilante_putbyte);
-main_z80.change_io_calls(vigilante_inbyte,vigilante_outbyte);
+z80_0:=cpu_z80.create(3579645,256);
+z80_0.change_ram_calls(vigilante_getbyte,vigilante_putbyte);
+z80_0.change_io_calls(vigilante_inbyte,vigilante_outbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579645,256);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
-snd_z80.init_sound(snd_despues_instruccion);
-init_timer(snd_z80.numero_cpu,3579645/(128*55),vigilante_snd_irq,true);
+z80_1:=cpu_z80.create(3579645,256);
+z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
+z80_1.change_io_calls(snd_inbyte,snd_outbyte);
+z80_1.init_sound(snd_despues_instruccion);
+init_timer(z80_1.numero_cpu,3579645/(128*55),vigilante_snd_irq,true);
 //sound chips
 dac_0:=dac_chip.Create;
 ym2151_0:=ym2151_chip.create(3579645);

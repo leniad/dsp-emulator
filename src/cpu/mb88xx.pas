@@ -63,7 +63,7 @@ type
      end;
 
 var
-  main_mb88xx:cpu_mb88xx;
+  mb88xx_0:cpu_mb88xx;
 
 implementation
 const

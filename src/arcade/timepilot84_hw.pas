@@ -112,24 +112,24 @@ var
   frame_m,frame_2,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_2:=misc_m6809.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m6809_0.tframes;
+frame_2:=m6809_1.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for linea:=0 to $ff do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //SubCPU
-    misc_m6809.run(frame_2);
-    frame_2:=frame_2+misc_m6809.tframes-misc_m6809.contador;
+    m6809_1.run(frame_2);
+    frame_2:=frame_2+m6809_1.tframes-m6809_1.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if linea=239 then begin
         if irq_enable then begin
-          main_m6809.change_irq(HOLD_LINE);
-          misc_m6809.change_irq(HOLD_LINE);
+          m6809_0.change_irq(HOLD_LINE);
+          m6809_1.change_irq(HOLD_LINE);
         end;
         update_video_tp84;
     end;
@@ -160,7 +160,7 @@ case direccion of
           tp84_pal_bank:=valor;
           fillchar(gfx[0].buffer[0],$800,1);
         end;
-  $3800:snd_z80.change_irq(HOLD_LINE);
+  $3800:z80_0.change_irq(HOLD_LINE);
   $3a00:sound_latch:=valor;
   $3c00:scroll_y:=valor;
   $3e00:scroll_x:=not(valor);
@@ -192,7 +192,7 @@ function sound_getbyte(direccion:word):byte;
 begin
 case direccion of
   $6000:sound_getbyte:=sound_latch;
-  $8000:sound_getbyte:=((snd_z80.contador+round(snd_z80.tframes*linea)) shr 10) and $f;
+  $8000:sound_getbyte:=((z80_0.contador+round(z80_0.tframes*linea)) shr 10) and $f;
     else sound_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -218,9 +218,9 @@ end;
 //Main
 procedure reset_tp84;
 begin
- main_m6809.reset;
- misc_m6809.reset;
- snd_z80.reset;
+ m6809_0.reset;
+ m6809_1.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
@@ -260,15 +260,15 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,256);
-main_m6809.change_ram_calls(tp84_getbyte,tp84_putbyte);
+m6809_0:=cpu_m6809.Create(1536000,256);
+m6809_0.change_ram_calls(tp84_getbyte,tp84_putbyte);
 //Second CPU
-misc_m6809:=cpu_m6809.Create(1536000,256);
-misc_m6809.change_ram_calls(cpu2_tp84_getbyte,cpu2_tp84_putbyte);
+m6809_1:=cpu_m6809.Create(1536000,256);
+m6809_1.change_ram_calls(cpu2_tp84_getbyte,cpu2_tp84_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,$100);
-snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
-snd_z80.init_sound(sound_instruccion);
+z80_0:=cpu_z80.create(3579545,$100);
+z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
+z80_0.init_sound(sound_instruccion);
 //Audio chips
 sn_76496_0:=sn76496_chip.Create(1789772);
 sn_76496_1:=sn76496_chip.Create(1789772);

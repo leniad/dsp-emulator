@@ -69,7 +69,7 @@ end;
 
 procedure aliens_k051960_cb(state:byte);
 begin
-  main_konami.change_irq(state);
+  konami_0.change_irq(state);
 end;
 
 procedure update_video_aliens;
@@ -118,16 +118,16 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_konami.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=konami_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
     for f:=0 to $ff do begin
       //main
-      main_konami.run(frame_m);
-      frame_m:=frame_m+main_konami.tframes-main_konami.contador;
+      konami_0.run(frame_m);
+      frame_m:=frame_m+konami_0.tframes-konami_0.contador;
       //sound
-      snd_z80.run(frame_s);
-      frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+      z80_0.run(frame_s);
+      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
       if f=239 then update_video_aliens;
       k051960_0.update_line(f);
     end;
@@ -196,7 +196,7 @@ case direccion of
                                end;
                          $5f8c:begin
                                     sound_latch:=valor;
-                                    snd_z80.change_irq(HOLD_LINE);
+                                    z80_0.change_irq(HOLD_LINE);
                                end;
                          else begin
                               direccion:=direccion and $3fff;
@@ -250,8 +250,8 @@ end;
 //Main
 procedure reset_aliens;
 begin
- main_konami.reset;
- snd_z80.reset;
+ konami_0.reset;
+ z80_0.reset;
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
@@ -285,13 +285,13 @@ for f:=0 to 19 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 //cargar sonido
 if not(cargar_roms(@mem_snd[0],@aliens_sound,'aliens.zip',1)) then exit;
 //Main CPU
-main_konami:=cpu_konami.create(3000000,256);
-main_konami.change_ram_calls(aliens_getbyte,aliens_putbyte);
-main_konami.change_set_lines(aliens_bank);
+konami_0:=cpu_konami.create(3000000,256);
+konami_0.change_ram_calls(aliens_getbyte,aliens_putbyte);
+konami_0.change_set_lines(aliens_bank);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(aliens_snd_getbyte,aliens_snd_putbyte);
-snd_z80.init_sound(aliens_sound_update);
+z80_0:=cpu_z80.create(3579545,256);
+z80_0.change_ram_calls(aliens_snd_getbyte,aliens_snd_putbyte);
+z80_0.init_sound(aliens_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_port_func(aliens_snd_bankswitch);

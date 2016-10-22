@@ -195,18 +195,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_tecmo;
     end;
   end;
@@ -285,7 +285,7 @@ case direccion of
     $f805:scroll_y2:=valor;
     $f806:begin
             soundlatch:=valor;
-            snd_z80.change_nmi(ASSERT_LINE);
+            z80_1.change_nmi(ASSERT_LINE);
           end;
     $f807:main_screen.flip_main_screen:=(valor and $1)<>0;
     $f808:nbank_rom:=(valor and $f8) shr 3;
@@ -313,7 +313,7 @@ if direccion<$4000 then exit;
            end;
      $d000:adpcm_end:=((valor+1) shl 8);
      //$e000:volumen
-     $f000:snd_z80.change_nmi(CLEAR_LINE);
+     $f000:z80_1.change_nmi(CLEAR_LINE);
   end;
 end;
 
@@ -369,7 +369,7 @@ case direccion of
     $f805:scroll_y2:=valor;
     $f806:begin
             soundlatch:=valor;
-            snd_z80.change_nmi(ASSERT_LINE);
+            z80_1.change_nmi(ASSERT_LINE);
           end;
     $f807:main_screen.flip_main_screen:=(valor and $1)<>0;
     $f808:nbank_rom:=(valor and $f8) shr 3;
@@ -397,13 +397,13 @@ if direccion<$8000 then exit;
            end;
      $c400:adpcm_end:=((valor+1) shl 8);
      //$c800:volumen
-     $cc00:snd_z80.change_nmi(CLEAR_LINE);
+     $cc00:z80_1.change_nmi(CLEAR_LINE);
   end;
 end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_1.change_irq(irqstate);
 end;
 
 procedure snd_sound_play;
@@ -430,8 +430,8 @@ end;
 //Main
 procedure reset_tecmo;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  ym3812_0.reset;
  msm_5205_0.reset;
  reset_audio;
@@ -499,10 +499,10 @@ screen_init(7,512,256,true);
 screen_mod_scroll(7,512,256+48,511,256,256,255);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,$100);
+z80_0:=cpu_z80.create(6000000,$100);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,$100);
-snd_z80.init_sound(snd_sound_play);
+z80_1:=cpu_z80.create(4000000,$100);
+z80_1.init_sound(snd_sound_play);
 //Sound Chip
 msm_5205_0:=MSM5205_chip.create(400000,MSM5205_S48_4B,0.5,snd_adpcm);
 ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
@@ -511,9 +511,9 @@ ym3812_0.change_irq_calls(snd_irq);
 case main_vars.tipo_maquina of
   26:begin
       //Main
-      main_z80.change_ram_calls(rygar_getbyte,rygar_putbyte);
+      z80_0.change_ram_calls(rygar_getbyte,rygar_putbyte);
       //Sound
-      snd_z80.change_ram_calls(rygar_snd_getbyte,rygar_snd_putbyte);
+      z80_1.change_ram_calls(rygar_snd_getbyte,rygar_snd_putbyte);
       //Video
       tipo_video:=0;
       if not(cargar_roms(@memoria_temp[0],@rygar_rom[0],'rygar.zip',0)) then exit;
@@ -542,9 +542,9 @@ case main_vars.tipo_maquina of
   end;
   97:begin  //Silk Worm
       //Main
-      main_z80.change_ram_calls(sw_getbyte,sw_putbyte);
+      z80_0.change_ram_calls(sw_getbyte,sw_putbyte);
       //Sound
-      snd_z80.change_ram_calls(sw_snd_getbyte,sw_snd_putbyte);
+      z80_1.change_ram_calls(sw_snd_getbyte,sw_snd_putbyte);
       //Video
       tipo_video:=1;
       if not(cargar_roms(@memoria_temp[0],@sw_rom[0],'silkworm.zip',0)) then exit;

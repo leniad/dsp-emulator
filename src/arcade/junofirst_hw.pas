@@ -92,23 +92,23 @@ var
   irq_req:boolean;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
-frame_s_sub:=main_mcs48.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
+frame_s_sub:=mcs48_0.tframes;
 irq_req:=false;
 while EmuStatus=EsRuning do begin
   for frame:=0 to $ff do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     //snd sub
-    main_mcs48.run(frame_s_sub);
-    frame_s_sub:=frame_s_sub+main_mcs48.tframes-main_mcs48.contador;
+    mcs48_0.run(frame_s_sub);
+    frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
     if frame=239 then begin
-      if (irq_req and irq_enable) then main_m6809.change_irq(ASSERT_LINE);
+      if (irq_req and irq_enable) then m6809_0.change_irq(ASSERT_LINE);
       update_video_junofrst;
     end;
   end;
@@ -127,9 +127,9 @@ case direccion of
   $8024:junofrst_getbyte:=marcade.in1;
   $8028:junofrst_getbyte:=marcade.in2;
   $802c:junofrst_getbyte:=marcade.dswa; //dsw1
-  $9000..$9fff:if main_m6809.opcode then junofrst_getbyte:=rom_bank_dec[rom_nbank,direccion and $fff]
+  $9000..$9fff:if m6809_0.opcode then junofrst_getbyte:=rom_bank_dec[rom_nbank,direccion and $fff]
                   else junofrst_getbyte:=rom_bank[rom_nbank,direccion and $fff];
-  $a000..$ffff:if main_m6809.opcode then junofrst_getbyte:=mem_opcodes[direccion-$a000]
+  $a000..$ffff:if m6809_0.opcode then junofrst_getbyte:=mem_opcodes[direccion-$a000]
                   else junofrst_getbyte:=memoria[direccion];
 end;
 end;
@@ -175,7 +175,7 @@ case direccion of
                end;
   $8030:begin
             irq_enable:=(valor and 1)<>0;
-            if not(irq_enable) then main_m6809.change_irq(CLEAR_LINE);
+            if not(irq_enable) then m6809_0.change_irq(CLEAR_LINE);
         end;
   $8031:; //Coin counter...
   $8033:scroll_y:=valor;
@@ -184,7 +184,7 @@ case direccion of
   $8035:if (valor and 1)<>0 then xory:=255
           else xory:=0;
   $8040:begin
-          if ((last_snd_val=0) and ((valor and 1)=1))then snd_z80.change_irq(HOLD_LINE);
+          if ((last_snd_val=0) and ((valor and 1)=1))then z80_0.change_irq(HOLD_LINE);
           last_snd_val:=valor and 1;
         end;
   $8050:sound_latch:=valor;
@@ -214,7 +214,7 @@ case direccion of
   $4000:ay8910_0.Control(valor);
   $4002:ay8910_0.Write(valor);
   $5000:sound_latch2:=valor;
-  $6000:main_mcs48.change_irq(ASSERT_LINE);
+  $6000:mcs48_0.change_irq(ASSERT_LINE);
 end;
 end;
 
@@ -233,7 +233,7 @@ begin
 case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);
   MCS48_PORT_P2:begin
-                  if (valor and $80)=0 then main_mcs48.change_irq(CLEAR_LINE);
+                  if (valor and $80)=0 then mcs48_0.change_irq(CLEAR_LINE);
                   i8039_status:=(valor and $70) shr 4;
                 end;
 end;
@@ -243,7 +243,7 @@ function junofrst_portar:byte;
 var
   timer:byte;
 begin
-timer:=((snd_z80.contador+trunc(snd_z80.tframes*frame)) div (1024 div 2)) and $f;
+timer:=((z80_0.contador+trunc(z80_0.tframes*frame)) div (1024 div 2)) and $f;
 junofrst_portar:=(timer shl 4) or i8039_status;
 end;
 
@@ -260,9 +260,9 @@ end;
 //Main
 procedure reset_junofrst;
 begin
- main_m6809.reset;
- snd_z80.reset;
- main_mcs48.reset;
+ m6809_0.reset;
+ z80_0.reset;
+ mcs48_0.reset;
  ay8910_0.reset;
  dac_0.reset;
  reset_audio;
@@ -292,18 +292,18 @@ iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1500000,$100);
-main_m6809.change_ram_calls(junofrst_getbyte,junofrst_putbyte);
+m6809_0:=cpu_m6809.Create(1500000,$100);
+m6809_0.change_ram_calls(junofrst_getbyte,junofrst_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(1789750,$100);
-snd_z80.change_ram_calls(junofrst_snd_getbyte,junofrst_snd_putbyte);
-snd_z80.init_sound(junofrst_sound_update);
+z80_0:=cpu_z80.create(1789750,$100);
+z80_0.change_ram_calls(junofrst_snd_getbyte,junofrst_snd_putbyte);
+z80_0.init_sound(junofrst_sound_update);
 //Sound CPU 2
-main_mcs48:=cpu_mcs48.create(8000000,$100,I8039);
-main_mcs48.change_ram_calls(junofrst_sound2_getbyte,nil);
-main_mcs48.change_io_calls(junofrst_sound2_inport,junofrst_sound2_outport);
+mcs48_0:=cpu_mcs48.create(8000000,$100,I8039);
+mcs48_0.change_ram_calls(junofrst_sound2_getbyte,nil);
+mcs48_0.change_io_calls(junofrst_sound2_inport,junofrst_sound2_outport);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1789750,0.3);
+ay8910_0:=ay8910_chip.create(1789750,AY8910,0.3);
 ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);
 dac_0:=dac_chip.Create(0.5);
 //cargar roms

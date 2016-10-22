@@ -3,7 +3,7 @@ unit system16a_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     ppi8255,sound_engine,ym_2151,fd1089,mcs48,dac;
+     ppi8255,sound_engine,ym_2151,fd1089,dialogs;//,mcs48,dac
 
 procedure cargar_system16a;
 
@@ -373,22 +373,22 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
-frame_s_sub:=main_mcs48.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+//frame_s_sub:=main_mcs48.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
      //main
-     main_m68000.run(frame_m);
-     frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+     m68000_0.run(frame_m);
+     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
      //sound
-     snd_z80.run(frame_s);
-     frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+     z80_0.run(frame_s);
+     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
      //sound sub cpu
      //main_mcs48.run(frame_s_sub);
      //frame_s_sub:=frame_s_sub+main_mcs48.tframes-main_mcs48.contador;
      if f=223 then begin
-       main_m68000.irq[4]:=HOLD_LINE;
+       m68000_0.irq[4]:=HOLD_LINE;
        update_video_system16a;
      end;
   end;
@@ -421,7 +421,7 @@ end;
 function system16a_getword_fd1089(direccion:dword):word;
 begin
 case direccion of
-    0..$3fffff:if main_m68000.opcode then system16a_getword_fd1089:=rom[(direccion and $3ffff) shr 1]
+    0..$3fffff:if m68000_0.opcode then system16a_getword_fd1089:=rom[(direccion and $3ffff) shr 1]
       else system16a_getword_fd1089:=rom_data[(direccion and $3ffff) shr 1];
     $400000..$7fffff:case (direccion and $7ffff) of
                         $00000..$0ffff:system16a_getword_fd1089:=tile_ram[(direccion and $7fff) shr 1];
@@ -665,41 +665,41 @@ end;
 
 procedure ppi8255_wportc(valor:byte);
 begin
-if (valor and $80)<>0 then snd_z80.change_nmi(CLEAR_LINE)
-  else snd_z80.change_nmi(ASSERT_LINE);
+if (valor and $80)<>0 then z80_0.change_nmi(CLEAR_LINE)
+  else z80_0.change_nmi(ASSERT_LINE);
 end;
 
 procedure system16a_sound_act;
 begin
   ym2151_0.update;
-  dac_0.update;
+  //dac_0.update;
 end;
 
 procedure ym2151_snd_port(valor:byte);
 begin
-if (valor and $1)<>0 then main_mcs48.change_reset(CLEAR_LINE)
+{if (valor and $1)<>0 then main_mcs48.change_reset(CLEAR_LINE)
   else main_mcs48.change_reset(ASSERT_LINE);
 if (valor and $2)<>0 then main_mcs48.change_irq(CLEAR_LINE)
-  else main_mcs48.change_irq(ASSERT_LINE);
+  else main_mcs48.change_irq(ASSERT_LINE);}
 end;
 
 //Sub sound cpu
 function system16a_sound_inport(puerto:word):byte;
 begin
-case puerto of
+{case puerto of
   MCS48_PORT_BUS:system16a_sound_inport:=n7751_data[n7751_rom_address];
   MCS48_PORT_T1:system16a_sound_inport:=0;
   MCS48_PORT_P2:system16a_sound_inport:=$80 or ((n7751_command and $07) shl 4) or (main_mcs48.i8243.p2_r and $f)
-end;
+end;}
 end;
 
 procedure system16a_sound_outport(valor:byte;puerto:word);
 begin
-case puerto of
+{case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);
   MCS48_PORT_P2:main_mcs48.i8243.p2_w(valor and $f);
   MCS48_PORT_PROG:main_mcs48.i8243.prog_w(valor);
-end;
+end;}
 end;
 
 procedure n7751_rom_offset_w(valor:byte;puerto:word);
@@ -720,11 +720,11 @@ procedure reset_system16a;
 var
   f:byte;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  ym2151_0.reset;
  pia8255_0.reset;
- main_mcs48.reset;
+ //if main_vars.tipo_maquina=114 then main_mcs48.reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -759,6 +759,7 @@ end;
 
 begin
 iniciar_system16a:=false;
+if main_vars.tipo_maquina=198 then if MessageDlg('Warning! This driver uses a predecrypted ROMS from "http://www.pinballzone.com/tech/fd1094/index.htm" due the lack of FD1094 emulation and you need to download them. Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 iniciar_audio(false);
 //text
 screen_init(1,512,256,true);
@@ -777,32 +778,32 @@ screen_mod_scroll(6,1024,512,1023,512,256,511);
 screen_init(7,512,256,false,true);
 iniciar_video(320,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,262);
+m68000_0:=cpu_m68000.create(10000000,262);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,262);
-snd_z80.change_ram_calls(system16a_snd_getbyte,system16a_snd_putbyte);
-snd_z80.change_io_calls(system16a_snd_inbyte,system16a_snd_outbyte);
-snd_z80.init_sound(system16a_sound_act);
+z80_0:=cpu_z80.create(4000000,262);
+z80_0.change_ram_calls(system16a_snd_getbyte,system16a_snd_putbyte);
+z80_0.change_io_calls(system16a_snd_inbyte,system16a_snd_outbyte);
+z80_0.init_sound(system16a_sound_act);
 //PPI 825
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
 //Timers
 ym2151_0:=ym2151_chip.create(4000000);
-ym2151_0.change_port_func(ym2151_snd_port);
+//ym2151_0.change_port_func(ym2151_snd_port);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@system16a_dip_a;
 case main_vars.tipo_maquina of
   114:begin  //Shinobi
         //Creo el segundo chip de sonido
-        main_mcs48:=cpu_mcs48.create(6000000,262,N7751);
+        {main_mcs48:=cpu_mcs48.create(6000000,262,N7751);
         main_mcs48.change_io_calls(system16a_sound_inport,system16a_sound_outport);
         main_mcs48.i8243.change_calls(nil,n7751_rom_offset_w);
         if not(cargar_roms(main_mcs48.get_rom_addr,@shinobi_n7751,'shinobi.zip')) then exit;
         if not(cargar_roms(@n7751_data[0],@shinobi_n7751_data,'shinobi.zip')) then exit;
-        dac_0:=dac_chip.Create(1);
+        dac_0:=dac_chip.Create(1);}
         //Main CPU
-        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
+        m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@shinobi_rom[0],'shinobi.zip',0)) then exit;
         //cargar sonido
@@ -827,7 +828,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@shinobi_dip_b;
   end;
   115:begin //Alex Kid
-        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
+        m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@alexkid_rom[0],'alexkidd.zip',0)) then exit;
         //cargar sonido
@@ -842,7 +843,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@alexkidd_dip_b;
   end;
   116:begin //Fantasy Zone
-        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
+        m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@fantzone_rom[0],'fantzone.zip',0)) then exit;
         //cargar sonido
@@ -857,7 +858,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@fantzone_dip_b;
   end;
   186:begin //Alien Syndrome
-        main_m68000.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
+        m68000_0.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
         //cargar roms
         if not(cargar_roms16w(@memoria_temp[0],@alien_rom[0],'aliensyn.zip',0)) then exit;
         //Decode fd1089
@@ -885,7 +886,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@aliensynd_dip_b;
   end;
   187:begin //WB3
-        main_m68000.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
+        m68000_0.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
         //cargar roms
         if not(cargar_roms16w(@memoria_temp[0],@wb3_rom[0],'wb3.zip',0)) then exit;
         //Decode fd1089
@@ -913,7 +914,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@wb3_dip_b;
   end;
   198:begin //Tetris
-        main_m68000.change_ram16_calls(system16a_getword,system16a_putword);
+        m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@tetris_rom[0],'tetris.zip',0)) then exit;
         //cargar sonido

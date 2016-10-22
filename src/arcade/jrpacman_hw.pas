@@ -134,14 +134,14 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 223 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=223 then begin
       update_video_jrpacman;
-      if irq_vblank then main_z80.change_irq(HOLD_LINE);
+      if irq_vblank then z80_0.change_irq(HOLD_LINE);
     end;
   end;
   if sound_status.hay_sonido then begin
@@ -205,13 +205,13 @@ end;
 
 procedure jrpacman_outbyte(valor:byte;puerto:word);
 begin
-if (puerto and $FF)=0 then main_z80.im2_lo:=valor;
+if (puerto and $FF)=0 then z80_0.im2_lo:=valor;
 end;
 
 //Main
 procedure reset_jrpacman;
 begin
- main_z80.reset;
+ z80_0.reset;
  namco_sound_reset;
  reset_audio;
  irq_vblank:=false;
@@ -250,9 +250,9 @@ screen_init(2,224,288,false,true);
 screen_mod_sprites(2,256,512,$ff,$1ff);
 iniciar_video(224,288);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,224);
-main_z80.change_ram_calls(jrpacman_getbyte,jrpacman_putbyte);
-main_z80.change_io_calls(nil,jrpacman_outbyte);
+z80_0:=cpu_z80.create(3072000,224);
+z80_0.change_ram_calls(jrpacman_getbyte,jrpacman_putbyte);
+z80_0.change_io_calls(nil,jrpacman_outbyte);
 namco_sound_init(3,false);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@jrpacman_rom[0],'jrpacman.zip',0)) then exit;

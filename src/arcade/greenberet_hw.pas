@@ -124,20 +124,20 @@ var
   frame_m:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
+frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 255 do begin
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     if f=239 then update_video_gberet;
     if (f and $f)=0 then begin //every 16 scanlines
        ticks_mask:=not(interrupt_ticks) and (interrupt_ticks+1); // 0->1
 	     interrupt_ticks:=interrupt_ticks+1;
 	     // NMI on d0
-	     if (ticks_mask and interrupt_mask and 1)<>0 then main_z80.change_nmi(ASSERT_LINE);
+	     if (ticks_mask and interrupt_mask and 1)<>0 then z80_0.change_nmi(ASSERT_LINE);
 	     // IRQ on d4
-       if (ticks_mask and (interrupt_mask shl 2) and 8)<>0 then main_z80.change_irq(ASSERT_LINE);
-	     if (ticks_mask and (interrupt_mask shl 2) and 16)<>0 then main_z80.change_irq(ASSERT_LINE);
+       if (ticks_mask and (interrupt_mask shl 2) and 8)<>0 then z80_0.change_irq(ASSERT_LINE);
+	     if (ticks_mask and (interrupt_mask shl 2) and 16)<>0 then z80_0.change_irq(ASSERT_LINE);
     end;
   end;
   eventos_gberet;
@@ -173,8 +173,8 @@ case direccion of
         $e044:begin
                 // bits 0/1/2 = interrupt enable
 	              ack_mask:=not(valor) and interrupt_mask; // 1->0
-	              if (ack_mask and 1)<>0 then main_z80.change_nmi(CLEAR_LINE);
-                if (ack_mask and 6)<>0 then main_z80.change_irq(CLEAR_LINE);
+	              if (ack_mask and 1)<>0 then z80_0.change_nmi(CLEAR_LINE);
+                if (ack_mask and 6)<>0 then z80_0.change_irq(CLEAR_LINE);
 	              interrupt_mask:=valor and 7;
 	              // bit 3 = flip screen
                 main_screen.flip_main_screen:=(valor and 8)<>0;
@@ -211,7 +211,7 @@ case main_vars.tipo_maquina of
 end;
 getmem(data,200);
 //CPU
-size:=main_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=sn_76496_0.save_snapshot(data);
@@ -243,7 +243,7 @@ end;
 getmem(data,200);
 //CPU
 loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 sn_76496_0.load_snapshot(data);
@@ -266,7 +266,7 @@ end;
 //Main
 procedure reset_gberet;
 begin
- main_z80.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -315,15 +315,15 @@ screen_init(3,512,256,true,false);
 screen_mod_scroll(3,512,256,511,0,0,0);
 iniciar_video(240,224);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,256);
-main_z80.change_ram_calls(gberet_getbyte,gberet_putbyte);
-main_z80.init_sound(gberet_sound_update);
+z80_0:=cpu_z80.create(3072000,256);
+z80_0.change_ram_calls(gberet_getbyte,gberet_putbyte);
+z80_0.init_sound(gberet_sound_update);
 //Sound Chips
 sn_76496_0:=sn76496_chip.Create(1536000);
 case main_vars.tipo_maquina of
   17:begin //Green Beret
         //Timers
-        timer_hs:=init_timer(main_z80.numero_cpu,10000,gberet_hi_score,true);
+        timer_hs:=init_timer(z80_0.numero_cpu,10000,gberet_hi_score,true);
         //cargar roms
         if not(cargar_roms(@memoria[0],@gberet_rom[0],'gberet.zip',0)) then exit;
         //convertir chars

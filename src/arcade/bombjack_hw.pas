@@ -112,20 +112,20 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_s:=main_z80.tframes;
-frame_m:=snd_z80.tframes;
+frame_s:=z80_0.tframes;
+frame_m:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      if nmi_vblank then main_z80.change_nmi(PULSE_LINE);
+      if nmi_vblank then z80_0.change_nmi(PULSE_LINE);
       update_video_bombjack;
-      snd_z80.change_nmi(PULSE_LINE);
+      z80_1.change_nmi(PULSE_LINE);
     end;
   end;
   eventos_bombjack;
@@ -250,9 +250,9 @@ begin
 open_qsnapshot_save('bombjack'+nombre);
 getmem(data,200);
 //CPU
-size:=main_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ay8910_0.save_snapshot(data);
@@ -285,9 +285,9 @@ if not(open_qsnapshot_load('bombjack'+nombre)) then exit;
 getmem(data,200);
 //CPU
 loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_1.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 ay8910_0.load_snapshot(data);
@@ -314,8 +314,8 @@ end;
 //Main
 procedure bombjack_reset;
 begin
-main_z80.reset;
-snd_z80.reset;
+z80_0.reset;
+z80_1.reset;
 ay8910_0.reset;
 ay8910_1.reset;
 ay8910_2.reset;
@@ -355,17 +355,17 @@ screen_init(2,256,256,true); //Chars
 screen_init(3,256,256,false,true); //Final
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(bombjack_getbyte,bombjack_putbyte);
+z80_0:=cpu_z80.create(4000000,256);
+z80_0.change_ram_calls(bombjack_getbyte,bombjack_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(nil,snd_outbyte);
-snd_z80.init_sound(bombjack_update_sound);
+z80_1:=cpu_z80.create(3000000,256);
+z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
+z80_1.change_io_calls(nil,snd_outbyte);
+z80_1.init_sound(bombjack_update_sound);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,0.13);
-ay8910_1:=ay8910_chip.create(1500000,0.13);
-ay8910_2:=ay8910_chip.create(1500000,0.13);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.13);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,0.13);
+ay8910_2:=ay8910_chip.create(1500000,AY8910,0.13);
 //cargar roms
 if not(cargar_roms(@memoria[0],@bombjack_rom[0],'bombjack.zip',0)) then exit;
 //cargar roms sonido

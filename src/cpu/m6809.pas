@@ -55,7 +55,7 @@ type
         end;
 
 var
-  main_m6809,snd_m6809,misc_m6809:cpu_m6809;
+  m6809_0,m6809_1,m6809_2:cpu_m6809;
 
 implementation
 

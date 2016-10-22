@@ -72,19 +72,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_h6280.tframes;
-frame_s:=snd_m6502.tframes;
+frame_m:=h6280_0.tframes;
+frame_s:=m6502_1.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    //Main
-   main_h6280.run(trunc(frame_m));
-   frame_m:=frame_m+main_h6280.tframes-main_h6280.contador;
+   h6280_0.run(trunc(frame_m));
+   frame_m:=frame_m+h6280_0.tframes-h6280_0.contador;
    //Sound
-   snd_m6502.run(frame_s);
-   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
+   m6502_1.run(frame_s);
+   frame_s:=frame_s+m6502_1.tframes-m6502_1.contador;
    case f of
       247:begin
-            main_h6280.set_irq_line(0,HOLD_LINE);
+            h6280_0.set_irq_line(0,HOLD_LINE);
             update_video_actfancer;
             marcade.in1:=marcade.in1 or $80;
           end;
@@ -187,7 +187,7 @@ case direccion of
                    end;
   $150000:begin
               sound_latch:=valor;
-              snd_m6502.change_nmi(PULSE_LINE);
+              m6502_1.change_nmi(PULSE_LINE);
           end;
   $160000:;
   $1f0000..$1f3fff:ram[direccion and $3fff]:=valor;
@@ -225,14 +225,14 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_m6502.change_irq(irqstate);
+  m6502_1.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_actfancer;
 begin
- main_h6280.reset;
- snd_m6502.reset;
+ h6280_0.reset;
+ m6502_1.reset;
  ym3812_0.reset;
  ym2203_0.reset;
  oki_6295_0.reset;
@@ -266,12 +266,12 @@ iniciar_video(256,240);
 sprite_bac06_color:=$200;
 deco_bac06_init(0,1,2,0,1,2,0,$100,$000,$000,$fff,$fff,$000,2,1,1);
 //Main CPU
-main_h6280:=cpu_h6280.create(21477200 div 3,$100);
-main_h6280.change_ram_calls(actfancer_getbyte,actfancer_putbyte);
+h6280_0:=cpu_h6280.create(21477200 div 3,$100);
+h6280_0.change_ram_calls(actfancer_getbyte,actfancer_putbyte);
 //Sound CPU
-snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
-snd_m6502.change_ram_calls(actfancer_snd_getbyte,actfancer_snd_putbyte);
-snd_m6502.init_sound(actfancer_sound_update);
+m6502_1:=cpu_m6502.create(1500000,256,TCPU_M6502);
+m6502_1.change_ram_calls(actfancer_snd_getbyte,actfancer_snd_putbyte);
+m6502_1.init_sound(actfancer_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.9);
 ym3812_0.change_irq_calls(snd_irq);

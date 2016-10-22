@@ -338,19 +338,19 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_m6809.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=m6809_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
-    snd_m6809.run(frame_s);
-    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+    m6809_1.run(frame_s);
+    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
     if f=223 then begin
-      if main_int then main_m6809.change_irq(ASSERT_LINE);
-      if snd_int then snd_m6809.change_irq(ASSERT_LINE);
+      if main_int then m6809_0.change_irq(ASSERT_LINE);
+      if snd_int then m6809_1.change_irq(ASSERT_LINE);
       update_video_proc;
     end;
   end;
@@ -380,11 +380,11 @@ begin
 case (direccion and $0e) of
   $00:begin
         snd_int:=(direccion and 1)<>0;
-        if not(snd_int) then snd_m6809.change_irq(CLEAR_LINE);
+        if not(snd_int) then m6809_1.change_irq(CLEAR_LINE);
       end;
   $02:begin
         main_int:=(direccion and 1)<>0;
-        if not(main_int) then main_m6809.change_irq(CLEAR_LINE);
+        if not(main_int) then m6809_0.change_irq(CLEAR_LINE);
       end;
   $04:main_screen.flip_main_screen:=(direccion and 1)<>0;
   $06:namco_sound.enabled:=(direccion and 1)<>0;
@@ -392,8 +392,8 @@ case (direccion and $0e) of
         namco_io_reset(0,(direccion and 1)<>0);
         namco_io_reset(1,(direccion and 1)<>0);
       end;
-  $0a:if ((direccion and 1)<>0) then snd_m6809.change_reset(CLEAR_LINE)
-          else snd_m6809.change_reset(ASSERT_LINE);
+  $0a:if ((direccion and 1)<>0) then m6809_1.change_reset(CLEAR_LINE)
+          else m6809_1.change_reset(ASSERT_LINE);
 end;
 end;
 
@@ -508,8 +508,8 @@ end;
 //Main
 procedure reset_mappyhw;
 begin
- main_m6809.reset;
- snd_m6809.reset;
+ m6809_0.reset;
+ m6809_1.reset;
  namco_sound_reset;
  reset_audio;
  namco_io_init(0);
@@ -580,14 +580,14 @@ screen_init(4,256,32,true);
 screen_init(5,512,512,false,true);
 iniciar_video(224,288);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,264);
+m6809_0:=cpu_m6809.Create(1536000,264);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(1536000,264);
-snd_m6809.change_ram_calls(sound_getbyte,sound_putbyte);
+m6809_1:=cpu_m6809.Create(1536000,264);
+m6809_1.change_ram_calls(sound_getbyte,sound_putbyte);
 namco_sound_init(8,false);
 //IO Chips
-io_timer0:=init_timer(main_m6809.numero_cpu,77,mappy_io0,false);
-io_timer1:=init_timer(main_m6809.numero_cpu,77,mappy_io1,false);
+io_timer0:=init_timer(m6809_0.numero_cpu,77,mappy_io0,false);
+io_timer1:=init_timer(m6809_0.numero_cpu,77,mappy_io1,false);
 namco_chip[0].in_f[0]:=inport0_0;
 namco_chip[0].in_f[1]:=inport0_1;
 namco_chip[0].in_f[2]:=inport0_2;
@@ -602,7 +602,7 @@ namco_chip[1].out_f[0]:=outport1_0;
 namco_chip[1].out_f[1]:=nil;
 case  main_vars.tipo_maquina of
   57:begin //Mappy
-      main_m6809.change_ram_calls(mappy_getbyte,mappy_putbyte);
+      m6809_0.change_ram_calls(mappy_getbyte,mappy_putbyte);
       update_video_proc:=update_video_mappy;
       //IO Chips
       namco_chip[0].tipo:=namco_58xx;
@@ -624,7 +624,7 @@ case  main_vars.tipo_maquina of
       set_color_lookup(0,$100);
   end;
   63:begin //Dig-Dug 2
-      main_m6809.change_ram_calls(mappy_getbyte,mappy_putbyte);
+      m6809_0.change_ram_calls(mappy_getbyte,mappy_putbyte);
       update_video_proc:=update_video_mappy;
       //IO Chips
       namco_chip[0].tipo:=namco_58xx;
@@ -646,7 +646,7 @@ case  main_vars.tipo_maquina of
       set_color_lookup(0,$100);
   end;
   64:begin //Super Pacman
-      main_m6809.change_ram_calls(mappy_getbyte,spacman_putbyte);
+      m6809_0.change_ram_calls(mappy_getbyte,spacman_putbyte);
       update_video_proc:=update_video_spacman;
       //IO Chips
       namco_chip[0].tipo:=namco_56xx;
@@ -668,7 +668,7 @@ case  main_vars.tipo_maquina of
       set_color_lookup(1,$100);
   end;
   192:begin //The Tower of Druaga
-      main_m6809.change_ram_calls(mappy_getbyte,mappy_putbyte);
+      m6809_0.change_ram_calls(mappy_getbyte,mappy_putbyte);
       update_video_proc:=update_video_mappy;
       //IO Chips
       namco_chip[0].tipo:=namco_58xx;
@@ -690,7 +690,7 @@ case  main_vars.tipo_maquina of
       set_color_lookup(0,$400);
   end;
   193:begin //Motos
-      main_m6809.change_ram_calls(mappy_getbyte,mappy_putbyte);
+      m6809_0.change_ram_calls(mappy_getbyte,mappy_putbyte);
       update_video_proc:=update_video_mappy;
       //IO Chips
       namco_chip[0].tipo:=namco_56xx;

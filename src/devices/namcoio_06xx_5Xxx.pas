@@ -405,10 +405,8 @@ end;
 
 procedure namco_54xx_o_w(valor:byte);
 begin
-	if (valor and $10)<>0 then if (valor and $f)<>0 then
-    start_sample(1)
-    else if (valor and $f)<>0 then
-    start_sample(0);
+	if (valor and $10)<>0 then if (valor and $f)<>0 then start_sample(1)
+    else if (valor and $f)<>0 then start_sample(0);
 end;
 
 function namco_54xx_r_r(port:byte):byte;
@@ -419,8 +417,7 @@ end;
 
 procedure namco_54xx_r_w(port,valor:byte);
 begin
-  if port=1 then if valor<>0 then
-    start_sample(2);
+  if port=1 then if valor<>0 then start_sample(2);
 end;
 
 procedure namcoio_54XX_write(valor:byte);

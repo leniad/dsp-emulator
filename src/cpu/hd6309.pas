@@ -47,7 +47,7 @@ type
         end;
 
 var
-    main_hd6309:cpu_hd6309;
+    hd6309_0:cpu_hd6309;
 
 implementation
 

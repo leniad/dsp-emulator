@@ -132,14 +132,14 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
+frame_m:=m68000_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
     //main
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     if (f=239) then begin
-      main_m68000.irq[1]:=HOLD_LINE;
+      m68000_0.irq[1]:=HOLD_LINE;
       update_video_pirates;
     end;
  end;
@@ -229,7 +229,7 @@ end;
 //Main
 procedure reset_pirates;
 begin
- main_m68000.reset;
+ m68000_0.reset;
  oki_6295_0.reset;
  reset_audio;
  marcade.in0:=$9f;
@@ -346,15 +346,15 @@ screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(16000000,256);
-main_m68000.init_sound(pirates_sound_update);
+m68000_0:=cpu_m68000.create(16000000,256);
+m68000_0.init_sound(pirates_sound_update);
 //sound
 oki_6295_0:=snd_okim6295.Create(1333333,OKIM6295_PIN7_LOW);
 getmem(ptempb,$200000);
 getmem(ptempb2,$200000);
 case main_vars.tipo_maquina of
   206:begin //Pirates
-        main_m68000.change_ram16_calls(pirates_getword,pirates_putword);
+        m68000_0.change_ram16_calls(pirates_getword,pirates_putword);
         //OKI snd
         if not(cargar_roms(ptempb,@pirates_oki,'pirates.zip')) then exit;
         decr_and_load_oki;
@@ -373,7 +373,7 @@ case main_vars.tipo_maquina of
         decr_and_load_sprites;
       end;
   207:begin //Genix Family
-        main_m68000.change_ram16_calls(genix_getword,pirates_putword);
+        m68000_0.change_ram16_calls(genix_getword,pirates_putword);
         //OKI snd
         if not(cargar_roms(ptempb,@genix_oki,'genix.zip')) then exit;
         decr_and_load_oki;

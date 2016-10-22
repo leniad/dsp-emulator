@@ -1,4 +1,4 @@
-<h1>DSP Emulator v0.17 by Leniad 2001-2016</h1><br>
+<h1>DSP Emulator v0.17b1 by Leniad 2001-2016</h1><br>
 Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 Since version 0.9b3 has ported to Lazarus/Free Pascal, so there is a Linux 32/64bits version available.<br>
@@ -6,10 +6,7 @@ Since version 0.14b3 there is a Mac OSX 32bits WIP version.<br><br>
 <b>1-. Emulator</b>
 <hr>
 - Can natively handle ZIP format. You can load ROMS, tapes, snapshots or disks from a ZIP files.<br>
-- Needed libraries<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- SDL2: you can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start.<br>
-- Optional libraries<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- CAPSImg: it's needed to open disk images IPF. (Not working)<br><br>
+- Needed library: SDL2: you can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start.<br><br>
 The emulator includes inside the ZIP (not in WIP versions) the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128 and Coleco.<br><br>
 <b>IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS</b><br><br>
 <b>1.1-. Keys</b>
@@ -45,18 +42,19 @@ Any other control is not defined. You can redefine it in the main configuration 
     F5 --> Remove Disk</pre><br>
 <b>1.2-. Language Files</b>
 <hr>
-DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button. You can select 'Castellano', 'Catalan', 'English', 'German', 'French', 'Brazilian' or 'Italian'.<br>
-If the language files are not present, you receive a warning and the emulator will be in Spanish and you can not change the language.<br><br>
+DSP is by default in English, if you want to change it using 'File -> Language' or click the Settings button.<br>
+You can select 'Castellano', 'Catalan', 'English', 'German', 'French', 'Brazilian' or 'Italian'.<br>
+Since 0.17b1 version, languaje files are not needed, they are integrated.<br><br>
 <b>1.3-. Configuration</b>
 <hr>
 In the main screen of the emulator you can press some buttons<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Reset/Start/Pause emulation<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Fastest/Slow emulation<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Configure DSP: you can configure some options<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- General configuration, you can configure some options<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Select the main language<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Audio quality: 11025Khz, 22050Khz, 44100Khz or 'No Sound'<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Video settings: 1x, 2x, scanlines 1x, scanlines 2x or 3x factor<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Default directories<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Default directories for arcade ROMs, hiscore files, preview images, samples, quick snapshots and NV-Ram files<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Redefine all keys or use external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Load last driver/use driver list<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Show the ROMs CRC errors<br>
@@ -104,7 +102,7 @@ Other features<br>
 &nbsp;Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
 - Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
 - Audio: Spectrum beeper and in modern Spectrum revisions there is a AY-8912.<br>
-- Floppy disk: Emulated all NEC-765 functions but write operations. Supports DSK format and 'extended' DSK.<br>
+- Floppy disk: Emulated all NEC-765 functions but write operations. Supports IPF, DSK and 'extended' DSK formats.<br>
 - To do:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Contented IO is not working at 100%.<br><br>
 <b>Amstrad CPC 464,664 and 6128</b><br>
@@ -125,7 +123,7 @@ Other features<br>
 - Joystick: Emulated with the redefinable keys or external joystick.<br>
 - Virtual Tape: you can load ZIP, CDT, WAV and CSW. Work the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
 - Sound: All version have the AY-8912 chip<br>
-- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports the format 'DSK' and the 'extended' DSK formats.<br>
+- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports IPF, DSK and 'extended' DSK formats.<br>
 - Snapshots: Support load/save 'SNA' format<br>
 - To do:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Some disk protections are not working (a few left)<br>
@@ -215,6 +213,7 @@ Galaxian                   | GALAXIAN.ZIP |      95    | Galaxian Hardware
                                                        | Partial sound with samples
 Jump Bug                   | JUMPBUG.ZIP  |     100    | Galaxian Hardware
 Moon Cresta                | MOONCRST.ZIP |      90    | Galaxian Hardware
+                                                       | Partial sound with samples
                                                        | No sound
 Scramble                   | SCRAMBLE.ZIP |     100    | Galaxian Hardware
 Super Cobra                | SCOBRA.ZIP   |     100    | Galaxian Hardware
@@ -289,7 +288,11 @@ Section Z                  | SECTIONZ.ZIP |     100    | Legendary Wings Hardwar
 Trojan                     | TROJAN.ZIP   |     100    | Legendary Wings Hardware
 Street Fighter             | SF.ZIP       |     100    |
 Galaga                     | GALAGA.ZIP   |     100    | Galaga Hardware
+                                                       | Partial sound using samples
 DigDug                     | DIGDUG.ZIP   |     100    | Galaga Hardware
+Xevious                    | XEVIOUS.ZIP  |      90    | Galaga Hardware
+                                                       | Partial sound using samples
+                                                       | Problems with the scroll and sound
 Xain'd Sleena              | XSLEENA.ZIP  |     100    |
 Hard Head                  | HARDHEAD.ZIP |     100    | Suna Hardware
 Hard Head 2                | HARDHED2.ZIP |      10    | Basic driver
@@ -444,8 +447,13 @@ Super Contra               | SCONTRA.ZIP  |     100    | Thunder Cross HW
 Gang Busters               | GBUSTERS.ZIP |     100    | Thunder Cross HW
 Thunder Cross HW           | THUNDERZ.ZIP |     100    | Thunder Cross HW
 The Simpsons               | SIMPSONS.ZIP |      50    | Without sprites and graphics problems
+Track & Field              | TRACKFLD.ZIP |     100    |
+Hyper Sports               | HYPERSPT.ZIP |     100    |
+Megazone                   | MEGAZONE.ZIP |     100    |
+Space Fire Bird            | SPACEFB.ZIP  |     100    | Partial sound using samples
+Ajax                       | AJAX.ZIP     |      50    | Without sprites or sound. Graphics problems
 -----------------------------------------------------------------------------------------------------------------
-Total: 215</pre>
+Total: 221</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
 If you want to add another language, edit any file with the extension '.lng' in the 'LNG' directory, rename it with the name of the language and send it to me to add it to the next version.<br>
@@ -463,6 +471,8 @@ If you use part of the code of the emulator for any non commercial purpose, you 
 - sremulador, for begin the rewriting of NES driver<br>
 - Martijn, from Revival Studios for the info about Chip8<br>
 - greatxerox, for his time and emulation tests on the CPC (and other bugs)<br>
+- Thanks to Bruno Kukulcan and Megachur for some Amstrad CPC IPF files for testing<br>
+- Thanks to Francisco José Martí Terrón for general bug discover, tests and preview images<br>
 - And many pages from Internet, many documents ... and people who I forget, thank you all.<br><br>
 <b>5-. Copyright</b><br>
 <hr>
@@ -470,11 +480,10 @@ If you use part of the code of the emulator for any non commercial purpose, you 
 - The CPS1 has been rewrited from the original by Tomas Walker.<br>
 - The source code for the Lensloc protection simulation comes from Simon Owen.<br>
 - All the drivers, the Z80 core, M6502 core, M6809 (HD6309) core, M68000 core, M680X core, TMS-32010 core, NEC v20/v30/v33 core, LR35902 core, M6805 core, MCS51 core,Hu6280 core and MB88XX core are writed by me, Leniad.<br>
-- AY-3-8912 emulator is a conversion from Chris Cowley, but the original emulator come from MAME team.<br>
+- AY-3-891X emulator is a conversion from Chris Cowley, but the original emulator come from MAME team.<br>
 - SN76496, YM2203, TMS36XX, VLM-5030, YM3812/YM3526, YM2151, i8255, OKI6295, UPD7759, Z80PIO, Z80CTC, NES sound emulator, pokey and Sega VDP emulators are a conversion writed by me from MAME original.<br>
 - TMS99XX emulator have been rewrited from the original by Michael Franzen and have parts from MAME.<br>
 - NEC765 emulator is a conversion writed and adapted by me, from MESS original.<br>
-- GameBoy/GameBoy Color sound emulator is a conversion writed by me from MESS original.<br>
 All Spectrum, CPC464, CPC664 and CPC6128 roms are copyright of Amstrad.<br><br>
 <b>6-. Contact & Links</b><br>
 <hr>

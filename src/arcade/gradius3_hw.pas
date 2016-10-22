@@ -146,26 +146,26 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_sub:=sub_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_sub:=m68000_1.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
   //main
-  main_m68000.run(frame_m);
-  frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //sub
-  sub_m68000.run(frame_sub);
-  frame_sub:=frame_sub+sub_m68000.tframes-sub_m68000.contador;
+  m68000_1.run(frame_sub);
+  frame_sub:=frame_sub+m68000_1.tframes-m68000_1.contador;
   //sound
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_0.run(frame_s);
+  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
   case f of
-    15:if (irqB_mask and 2)<>0 then sub_m68000.irq[2]:=HOLD_LINE;
+    15:if (irqB_mask and 2)<>0 then m68000_1.irq[2]:=HOLD_LINE;
     239:begin
           update_video_gradius3;
-          if irqA_mask then main_m68000.irq[2]:=HOLD_LINE;
-          if (irqB_mask and 1)<>0 then sub_m68000.irq[1]:=HOLD_LINE;
+          if irqA_mask then m68000_0.irq[2]:=HOLD_LINE;
+          if (irqB_mask and 1)<>0 then m68000_1.irq[1]:=HOLD_LINE;
         end;
   end;
  end;
@@ -216,19 +216,19 @@ case direccion of
     $0c0000:begin
               valor:=valor shr 8;
               priority:=(valor and $4)<>0;
-              if (valor and $8)<>0 then sub_m68000.change_halt(CLEAR_LINE)
-                else sub_m68000.change_halt(ASSERT_LINE);
+              if (valor and $8)<>0 then m68000_1.change_halt(CLEAR_LINE)
+                else m68000_1.change_halt(ASSERT_LINE);
 		          irqA_mask:=(valor and $20)<>0;
             end;
-    $0d8000:if (irqB_mask and 4)<>0 then sub_m68000.irq[4]:=HOLD_LINE;
+    $0d8000:if (irqB_mask and 4)<>0 then m68000_1.irq[4]:=HOLD_LINE;
     $0e0000:; //wd
     $0e8000:sound_latch:=valor shr 8;
-    $0f0000:snd_z80.change_irq(HOLD_LINE);
+    $0f0000:z80_0.change_irq(HOLD_LINE);
     $100000..$103fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $14c000..$153fff:begin
                         direccion:=(direccion-$14c000) shr 1;
-                        if not(main_m68000.access_8bits_lo_dir) then k052109_0.write(direccion,valor);
-                        if main_m68000.access_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
+                        if not(m68000_0.access_8bits_lo_dir) then k052109_0.write(direccion,valor);
+                        if m68000_0.access_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
                      end;
     $180000..$19ffff:if ram_gfx[(direccion and $1ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
@@ -261,8 +261,8 @@ case direccion of
     $200000..$203fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $24c000..$253fff:begin
                         direccion:=(direccion-$24c000) shr 1;
-                        if not(sub_m68000.access_8bits_lo_dir) then k052109_0.write(direccion,valor);
-                        if sub_m68000.access_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
+                        if not(m68000_1.access_8bits_lo_dir) then k052109_0.write(direccion,valor);
+                        if m68000_1.access_8bits_lo_dir then k052109_0.write(direccion,valor shr 8);
                      end;
     $280000..$29ffff:if ram_gfx[(direccion and $1ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
@@ -305,10 +305,10 @@ end;
 //Main
 procedure reset_gradius3;
 begin
- main_m68000.reset;
- sub_m68000.reset;
- sub_m68000.change_halt(ASSERT_LINE);
- snd_z80.reset;
+ m68000_0.reset;
+ m68000_1.reset;
+ m68000_1.change_halt(ASSERT_LINE);
+ z80_0.reset;
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
@@ -339,14 +339,14 @@ if not(cargar_roms16w(@rom_sub[0],@gradius3_rom_sub[0],'gradius3.zip',0)) then e
 //cargar sonido
 if not(cargar_roms(@mem_snd[0],@gradius3_sound,'gradius3.zip',1)) then exit;
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(gradius3_getword,gradius3_putword);
-sub_m68000:=cpu_m68000.create(10000000,256);
-sub_m68000.change_ram16_calls(gradius3_getword_sub,gradius3_putword_sub);
+m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0.change_ram16_calls(gradius3_getword,gradius3_putword);
+m68000_1:=cpu_m68000.create(10000000,256);
+m68000_1.change_ram16_calls(gradius3_getword_sub,gradius3_putword_sub);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(gradius3_snd_getbyte,gradius3_snd_putbyte);
-snd_z80.init_sound(gradius3_sound_update);
+z80_0:=cpu_z80.create(3579545,256);
+z80_0.change_ram_calls(gradius3_snd_getbyte,gradius3_snd_putbyte);
+z80_0.init_sound(gradius3_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k007232_rom,$80000);

@@ -24,7 +24,7 @@ type
         end;
 
 var
-  main_konami:cpu_konami;
+  konami_0:cpu_konami;
 
 implementation
 

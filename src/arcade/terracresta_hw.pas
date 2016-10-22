@@ -124,20 +124,20 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
   //main
-  main_m68000.run(frame_m);
-  frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //sound
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_0.run(frame_s);
+  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
   if f=239 then begin
     update_video_terracre;
     copymemory(@spritebuffer[0],@ram[0],$100*2);
-    main_m68000.irq[1]:=HOLD_LINE;
+    m68000_0.irq[1]:=HOLD_LINE;
   end;
  end;
  eventos_terracre;
@@ -219,7 +219,7 @@ end;
 
 procedure terracre_snd_timer;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_0.change_irq(HOLD_LINE);
 end;
 
 procedure terracre_qsave(nombre:string);
@@ -231,9 +231,9 @@ begin
 open_qsnapshot_save('terracresta'+nombre);
 getmem(data,20000);
 //CPU
-size:=main_m68000.save_snapshot(data);
+size:=m68000_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
@@ -267,9 +267,9 @@ if not(open_qsnapshot_load('terracresta'+nombre)) then exit;
 getmem(data,20000);
 //CPU
 loaddata_qsnapshot(data);
-main_m68000.load_snapshot(data);
+m68000_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 ym2203_0.load_snapshot(data);
@@ -297,8 +297,8 @@ end;
 //Main
 procedure reset_terracre;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  YM2203_0.reset;
  dac_0.reset;
  dac_1.reset;
@@ -341,18 +341,18 @@ if not(cargar_roms16w(@rom[0],@terracre_rom[0],'terracre.zip',0)) then exit;
 //cargar sonido
 if not(cargar_roms(@mem_snd[0],@terracre_sound[0],'terracre.zip',0)) then exit;
 //Main CPU
-main_m68000:=cpu_m68000.create(8000000,256);
-main_m68000.change_ram16_calls(terracre_getword,terracre_putword);
+m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0.change_ram16_calls(terracre_getword,terracre_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,256);
-snd_z80.change_ram_calls(terracre_snd_getbyte,terracre_snd_putbyte);
-snd_z80.change_io_calls(terracre_snd_inbyte,terracre_snd_outbyte);
-snd_z80.init_sound(terracre_sound_update);
+z80_0:=cpu_z80.create(4000000,256);
+z80_0.change_ram_calls(terracre_snd_getbyte,terracre_snd_putbyte);
+z80_0.change_io_calls(terracre_snd_inbyte,terracre_snd_outbyte);
+z80_0.init_sound(terracre_sound_update);
 //Sound Chips
 YM2203_0:=ym2203_chip.create(4000000,2);
 dac_0:=dac_chip.Create(0.5);
 dac_1:=dac_chip.Create(0.5);
-init_timer(snd_z80.numero_cpu,4000000/128/57.444853,terracre_snd_timer,true);
+init_timer(z80_0.numero_cpu,4000000/128/57.444853,terracre_snd_timer,true);
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@terracre_char,'terracre.zip')) then exit;
 init_gfx(0,8,8,256);

@@ -186,13 +186,13 @@ if event.arcade then begin
   //misc
   if (arcade_input.coin[0] and not(old_val)) then begin
       marcade.in2:=(marcade.in2 and $df);
-      main_m6809.change_irq(HOLD_LINE);
+      m6809_0.change_irq(HOLD_LINE);
   end else begin
       marcade.in2:=(marcade.in2 or $20);
   end;
   if (arcade_input.coin[1] and not(old_val2)) then begin
       marcade.in2:=(marcade.in2 and $bf);
-      main_m6809.change_irq(HOLD_LINE);
+      m6809_0.change_irq(HOLD_LINE);
   end else begin
       marcade.in2:=(marcade.in2 or $40);
   end;
@@ -207,18 +207,18 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_m6809.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=m6809_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 271 do begin
     //main
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //snd
-    snd_m6809.run(frame_s);
-    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+    m6809_1.run(frame_s);
+    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
     if f=247 then begin
-      if nmi_ena then main_m6809.change_nmi(PULSE_LINE);
+      if nmi_ena then m6809_0.change_nmi(PULSE_LINE);
       proc_update_video;
     end;
   end;
@@ -259,7 +259,7 @@ case direccion of
           end;
     $1802:begin
             sound_latch:=valor;
-            snd_m6809.change_nmi(PULSE_LINE);
+            m6809_1.change_nmi(PULSE_LINE);
           end;
     $1803:nmi_ena:=((valor and 1)=0);
 end;
@@ -295,7 +295,7 @@ case direccion of
           end;
     $802:begin
             sound_latch:=valor;
-            snd_m6809.change_nmi(PULSE_LINE);
+            m6809_1.change_nmi(PULSE_LINE);
           end;
     $803:nmi_ena:=(valor and 1)<>0;
     $1000..$13ff:gfx[0].buffer[direccion and $3ff]:=true;
@@ -326,7 +326,7 @@ end;
 
 procedure brkthru_snd_irq(irqstate:byte);
 begin
-  snd_m6809.change_irq(irqstate);
+  m6809_1.change_irq(irqstate);
 end;
 
 procedure brkthru_sound_update;
@@ -338,8 +338,8 @@ end;
 //Main
 procedure reset_brkthru;
 begin
- main_m6809.reset;
- snd_m6809.reset;
+ m6809_0.reset;
+ m6809_1.reset;
  ym2203_0.reset;
  ym3812_0.reset;
  reset_audio;
@@ -425,18 +425,18 @@ screen_mod_scroll(3,512,256,511,512,256,511);
 screen_init(4,512,512,false,true);
 iniciar_video(240,240);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1500000,272);
+m6809_0:=cpu_m6809.Create(1500000,272);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(1500000,272);
-snd_m6809.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
-snd_m6809.init_sound(brkthru_sound_update);
+m6809_1:=cpu_m6809.Create(1500000,272);
+m6809_1.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
+m6809_1.init_sound(brkthru_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(brkthru_snd_irq);
 case main_vars.tipo_maquina of
   89:begin
-        main_m6809.change_ram_calls(brkthru_getbyte,brkthru_putbyte);
+        m6809_0.change_ram_calls(brkthru_getbyte,brkthru_putbyte);
         proc_update_video:=update_video_brkthru;
         //cargar roms y ponerlas en su sitio
         if not(cargar_roms(@memoria_temp[0],@brkthru_rom[0],'brkthru.zip',0)) then exit;
@@ -457,7 +457,7 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@brkthru_pal[0],'brkthru.zip',0)) then exit;
      end;
   90:begin
-        main_m6809.change_ram_calls(darwin_getbyte,darwin_putbyte);
+        m6809_0.change_ram_calls(darwin_getbyte,darwin_putbyte);
         proc_update_video:=update_video_darwin;
         //cargar roms y ponerlas en su sitio
         if not(cargar_roms(@memoria_temp[0],@darwin_rom[0],'darwin.zip',0)) then exit;

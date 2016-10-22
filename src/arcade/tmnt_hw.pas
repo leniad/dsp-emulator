@@ -119,19 +119,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
   //main
-  main_m68000.run(frame_m);
-  frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //sound
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_0.run(frame_s);
+  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
   if f=239 then begin
     update_video_tmnt;
-    if irq5_mask then main_m68000.irq[5]:=HOLD_LINE;
+    if irq5_mask then m68000_0.irq[5]:=HOLD_LINE;
   end;
  end;
  eventos_tmnt;
@@ -155,11 +155,11 @@ case direccion of
     $0a0018:tmnt_getword:=marcade.dswc;
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        if main_m68000.access_8bits_hi_dir then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
+                        if m68000_0.access_8bits_hi_dir then tmnt_getword:=k052109_0.read_msb(((direccion and $3000) shr 1) or (direccion and $07ff))
                             else tmnt_getword:=k052109_0.read_lsb(((direccion and $3000) shr 1) or (direccion and $07ff)) shl 8;
                      end;
     $140000..$140007:tmnt_getword:=k051960_0.k051937_read(direccion and 7);
-	  $140400..$1407ff:if main_m68000.access_8bits_hi_dir then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
+	  $140400..$1407ff:if m68000_0.access_8bits_hi_dir then tmnt_getword:=k051960_0.read((direccion and $3ff)+1)
                           else tmnt_getword:=k051960_0.read(direccion and $3ff) shl 8;
 end;
 end;
@@ -187,7 +187,7 @@ case direccion of
                         cambiar_color_tmnt((direccion and $fff) shr 1);
                    end;
     $0a0000:begin
-              if ((last_snd=8) and ((valor and 8)=0)) then snd_z80.change_irq(HOLD_LINE);
+              if ((last_snd=8) and ((valor and 8)=0)) then z80_0.change_irq(HOLD_LINE);
               last_snd:=valor and 8;
 		          // bit 5 = irq enable
 		          irq5_mask:=(valor and $20)<>0;
@@ -199,11 +199,11 @@ case direccion of
     $0c0000:sprites_pri:=((valor and $0c) shr 2)<>0; //prioridad
     $100000..$107fff:begin
                         direccion:=direccion shr 1;
-                        if main_m68000.access_8bits_hi_dir then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
+                        if m68000_0.access_8bits_hi_dir then k052109_0.write_msb(((direccion and $3000) shr 1) or (direccion and $07ff),valor)
                           else k052109_0.write_lsb(((direccion and $3000) shr 1) or (direccion and $07ff),valor shr 8)
                      end;
     $140000..$140007:k051960_0.k051937_write((direccion and $7),valor);
-	  $140400..$1407ff:if main_m68000.access_8bits_hi_dir then k051960_0.write((direccion and $3ff)+1,valor and $ff)
+	  $140400..$1407ff:if m68000_0.access_8bits_hi_dir then k051960_0.write((direccion and $3ff)+1,valor and $ff)
                         else k051960_0.write(direccion and $3ff,valor shr 8)
   end;
 end;
@@ -309,19 +309,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
   //main
-  main_m68000.run(frame_m);
-  frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+  m68000_0.run(frame_m);
+  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //sound
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_0.run(frame_s);
+  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
   case f of
     21:update_video_ssriders;
-    239:if k052109_0.is_irq_enabled then main_m68000.irq[4]:=HOLD_LINE;
+    239:if k052109_0.is_irq_enabled then m68000_0.irq[4]:=HOLD_LINE;
   end;
  end;
  eventos_tmnt;
@@ -394,7 +394,7 @@ case direccion of
                         ssriders_getword:=k053244_read(direccion+1)+(k053244_read(direccion) shl 8);
                       end;
     $5c0600..$5c0603:ssriders_getword:=k053260_0.main_read((direccion and 3) shr 1); //k053260
-    $600000..$603fff:if main_m68000.access_8bits_hi_dir then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
+    $600000..$603fff:if m68000_0.access_8bits_hi_dir then ssriders_getword:=k052109_0.read_msb((direccion and $3fff) shr 1)
                         else ssriders_getword:=k052109_0.read_lsb((direccion and $3fff) shr 1) shl 8;
 end;
 end;
@@ -465,13 +465,13 @@ case direccion of
     $1c0800..$1c0803:ssriders_protection_w((direccion and $3) shr 1); //proteccion
     $5a0000..$5a001f:begin  //k053244
                         direccion:=((direccion and $1f) shr 1) and $fe;   // handle mirror address
-                        if main_m68000.access_8bits_hi_dir then k053244_write(direccion+1,valor and $ff)
+                        if m68000_0.access_8bits_hi_dir then k053244_write(direccion+1,valor and $ff)
                           else k053244_write(direccion,valor shr 8);
                      end;
     $5c0600..$5c0603:k053260_0.main_write((direccion and 3) shr 1,valor); //k053260
-    $5c0604:snd_z80.change_irq(HOLD_LINE); //sound
+    $5c0604:z80_0.change_irq(HOLD_LINE); //sound
     $5c0700..$5c071f:k053251_0.lsb_w((direccion and $1f) shr 1,valor); //k053251
-    $600000..$603fff:if main_m68000.access_8bits_hi_dir then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
+    $600000..$603fff:if m68000_0.access_8bits_hi_dir then k052109_0.write_msb((direccion and $3fff) shr 1,valor)
                         else k052109_0.write_lsb((direccion and $3fff) shr 1,valor shr 8);
   end;
 end;
@@ -493,7 +493,7 @@ case direccion of
   $f800:ym2151_0.reg(valor);
   $f801:ym2151_0.write(valor);
   $fa00..$fa2f:k053260_0.write(direccion and $3f,valor); //k053260
-  $fc00:snd_z80.change_nmi(HOLD_LINE);
+  $fc00:z80_0.change_nmi(HOLD_LINE);
 end;
 end;
 
@@ -506,8 +506,8 @@ end;
 //Main
 procedure reset_tmnt;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  k052109_0.reset;
  ym2151_0.reset;
  case main_vars.tipo_maquina of
@@ -649,12 +649,12 @@ case main_vars.tipo_maquina of
         iniciar_video(320,224,true);
         iniciar_audio(false); //Sonido mono
         //Main CPU
-        main_m68000:=cpu_m68000.create(8000000,256);
-        main_m68000.change_ram16_calls(tmnt_getword,tmnt_putword);
+        m68000_0:=cpu_m68000.create(8000000,256);
+        m68000_0.change_ram16_calls(tmnt_getword,tmnt_putword);
         //Sound CPU
-        snd_z80:=cpu_z80.create(3579545,256);
-        snd_z80.change_ram_calls(tmnt_snd_getbyte,tmnt_snd_putbyte);
-        snd_z80.init_sound(tmnt_sound_update);
+        z80_0:=cpu_z80.create(3579545,256);
+        z80_0.change_ram_calls(tmnt_snd_getbyte,tmnt_snd_putbyte);
+        z80_0.init_sound(tmnt_sound_update);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@tmnt_rom[0],'tmnt.zip',0)) then exit;
         //cargar sonido
@@ -722,12 +722,12 @@ case main_vars.tipo_maquina of
         iniciar_video(288,224,true);
         iniciar_audio(true); //Sonido stereo
         //Main CPU
-        main_m68000:=cpu_m68000.create(16000000,256);
-        main_m68000.change_ram16_calls(ssriders_getword,ssriders_putword);
+        m68000_0:=cpu_m68000.create(16000000,256);
+        m68000_0.change_ram16_calls(ssriders_getword,ssriders_putword);
         //Sound CPU
-        snd_z80:=cpu_z80.create(8000000,256);
-        snd_z80.change_ram_calls(ssriders_snd_getbyte,ssriders_snd_putbyte);
-        snd_z80.init_sound(ssriders_sound_update);
+        z80_0:=cpu_z80.create(8000000,256);
+        z80_0.change_ram_calls(ssriders_snd_getbyte,ssriders_snd_putbyte);
+        z80_0.init_sound(ssriders_sound_update);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@ssriders_rom[0],'ssriders.zip',0)) then exit;
         //cargar sonido

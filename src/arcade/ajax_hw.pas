@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,m6809,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232,misc_functions,
-     k051316;
+     k051316,dialogs;
 
 procedure cargar_ajax;
 var
@@ -95,7 +95,7 @@ end;
 
 procedure ajax_k051960_cb(state:byte);
 begin
-  main_konami.change_irq(state);
+  konami_0.change_irq(state);
 end;
 
 procedure update_video_ajax;
@@ -143,20 +143,20 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_konami.tframes;
-frame_sub:=misc_m6809.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=konami_0.tframes;
+frame_sub:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
     for f:=0 to $ff do begin
     //main
-    main_konami.run(frame_m);
-    frame_m:=frame_m+main_konami.tframes-main_konami.contador;
+    konami_0.run(frame_m);
+    frame_m:=frame_m+konami_0.tframes-konami_0.contador;
     //sub
-    misc_m6809.run(frame_sub);
-    frame_sub:=frame_sub+misc_m6809.tframes-misc_m6809.contador;
+    m6809_0.run(frame_sub);
+    frame_sub:=frame_sub+m6809_0.tframes-m6809_0.contador;
     //sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     k051960_0.update_line(f);
     if f=239 then update_video_ajax;
     end;
@@ -198,8 +198,8 @@ begin
 if direccion>$5fff then exit;
 case direccion of
    0..$1c0:case ((direccion and $1c0) shr 6) of
-              0:if (direccion=0) then if (sub_firq_enable) then misc_m6809.change_firq(HOLD_LINE);
-              1:snd_z80.change_irq(HOLD_LINE);
+              0:if (direccion=0) then if (sub_firq_enable) then m6809_0.change_firq(HOLD_LINE);
+              1:z80_0.change_irq(HOLD_LINE);
               2:sound_latch:=valor;
               3:rom_bank1:=valor mod 12;
               5:;
@@ -290,9 +290,9 @@ end;
 //Main
 procedure reset_ajax;
 begin
- main_konami.reset;
- misc_m6809.reset;
- snd_z80.reset;
+ konami_0.reset;
+ m6809_0.reset;
+ z80_0.reset;
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
@@ -312,6 +312,7 @@ var
    f:byte;
 begin
 iniciar_ajax:=false;
+if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 main_screen.rot90_screen:=true;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
@@ -336,15 +337,15 @@ for f:=0 to 7 do copymemory(@rom_sub_bank[f,0],@temp_mem[$8000+(f*$2000)],$2000)
 //cargar sonido
 if not(cargar_roms(@mem_snd[0],@ajax_sound,'ajax.zip',1)) then exit;
 //Main CPU
-main_konami:=cpu_konami.create(3000000,256);
-main_konami.change_ram_calls(ajax_getbyte,ajax_putbyte);
+konami_0:=cpu_konami.create(3000000,256);
+konami_0.change_ram_calls(ajax_getbyte,ajax_putbyte);
 //Sub CPU
-misc_m6809:=cpu_m6809.create(3000000,256);
-misc_m6809.change_ram_calls(ajax_sub_getbyte,ajax_sub_putbyte);
+m6809_0:=cpu_m6809.create(3000000,256);
+m6809_0.change_ram_calls(ajax_sub_getbyte,ajax_sub_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(ajax_snd_getbyte,ajax_snd_putbyte);
-snd_z80.init_sound(ajax_sound_update);
+z80_0:=cpu_z80.create(3579545,256);
+z80_0.change_ram_calls(ajax_snd_getbyte,ajax_snd_putbyte);
+z80_0.init_sound(ajax_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_port_func(ajax_snd_bankswitch);

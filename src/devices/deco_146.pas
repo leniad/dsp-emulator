@@ -1258,7 +1258,7 @@ begin
       if ((address and $ff)=soundlatch_port) then begin
 			  //logerror("LOAD SOUND LATCH %04x %04x\n", data, mem_mask);
         deco16_sound_latch:=data and $ff;
-        main_h6280.set_irq_line(0,HOLD_LINE);
+        h6280_0.set_irq_line(0,HOLD_LINE);
       end;
     end;
   end;

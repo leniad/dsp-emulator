@@ -126,19 +126,20 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+///PRECAUCION EL Z80 ES EL 1, PORQUE EL SISTEMA DE SONIDO LO COGE ASI, HAY QUE CAMBIARLO...
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
    for f:=0 to $ff do begin
       //Main CPU
-      main_m68000.run(frame_m);
-      frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+      m68000_0.run(frame_m);
+      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
       //Sound CPU
-      snd_z80.run(frame_s);
-      frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+      z80_1.run(frame_s);
+      frame_s:=frame_s+z80_1.tframes-z80_1.contador;
       if f=239 then begin
           update_video_cabal;
-          main_m68000.irq[1]:=HOLD_LINE;
+          m68000_0.irq[1]:=HOLD_LINE;
       end;
    end;
    eventos_cabal;
@@ -203,7 +204,7 @@ end;
 function cabal_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$1fff:if snd_z80.opcode then cabal_snd_getbyte:=decrypt[direccion]
+  0..$1fff:if z80_1.opcode then cabal_snd_getbyte:=decrypt[direccion]
               else cabal_snd_getbyte:=mem_snd[direccion];
   $2000..$27ff,$8000..$ffff:cabal_snd_getbyte:=mem_snd[direccion];
   $4009:cabal_snd_getbyte:=ym2151_0.status;
@@ -247,8 +248,8 @@ end;
 //Main
 procedure reset_cabal;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_1.reset;
  ym2151_0.reset;
  seibu_adpcm_reset;
  seibu_reset;
@@ -281,12 +282,12 @@ screen_init(2,256,256,true);
 screen_init(3,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(cabal_getword,cabal_putword);
+m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0.change_ram16_calls(cabal_getword,cabal_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(cabal_snd_getbyte,cabal_snd_putbyte);
-snd_z80.init_sound(cabal_sound_act);
+z80_1:=cpu_z80.create(3579545,256);
+z80_1.change_ram_calls(cabal_snd_getbyte,cabal_snd_putbyte);
+z80_1.init_sound(cabal_sound_act);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(snd_irq);

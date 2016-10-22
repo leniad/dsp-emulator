@@ -14,7 +14,7 @@ Añadidos mapper 12 y 9
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m6502,nes_ppu,main_engine;
+     nes_ppu,main_engine,n2a03;
 
 type
   tnes_mapper=packed record
@@ -199,7 +199,7 @@ begin
     mapper_nes.reload:=false;
   end else begin
     if ((count<>0) and (mapper_nes.reg[1]=0)) then
-        if mapper_nes.irq_ena then main_m6502.change_irq(HOLD_LINE);
+        if mapper_nes.irq_ena then n2a03_0.m6502.change_irq(HOLD_LINE);
   end;
 end;
 

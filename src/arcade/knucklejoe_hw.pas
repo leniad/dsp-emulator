@@ -92,18 +92,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_m6800.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=m6800_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
-    snd_m6800.run(frame_s);
-    frame_s:=frame_s+snd_m6800.tframes-snd_m6800.contador;
+    m6800_0.run(frame_s);
+    frame_s:=frame_s+m6800_0.tframes-m6800_0.contador;
   end;
-  main_z80.change_irq(HOLD_LINE);
+  z80_0.change_irq(HOLD_LINE);
   update_video_knjoe;
   eventos_knjoe;
   video_sync;
@@ -133,7 +133,7 @@ case direccion of
     $d000:scroll_x:=(scroll_x and $ff00) or valor;
     $d001:scroll_x:=(scroll_x and $00ff) or ((valor and 1) shl 8);
     $d800:if ((valor and $80)=0) then sound_command:=valor and $7f
-          	else snd_m6800.change_irq(ASSERT_LINE);
+          	else m6800_0.change_irq(ASSERT_LINE);
     $d801:begin
             if tile_bank<>(valor and $10) then begin
               tile_bank:=valor and $10;
@@ -152,7 +152,7 @@ function snd_getbyte(direccion:word):byte;
 begin
 direccion:=direccion and $7fff;
 case direccion of
-  $0..$1f:snd_getbyte:=snd_m6800.m6803_internal_reg_r(direccion);
+  $0..$1f:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $80..$ff,$2000..$7fff:snd_getbyte:=mem_snd[direccion];
 end;
 end;
@@ -162,9 +162,9 @@ begin
 direccion:=direccion and $7fff;
 if direccion>$1fff then exit;
 case direccion of
-  $0..$1f:snd_m6800.m6803_internal_reg_w(direccion,valor);
+  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
   $80..$ff:mem_snd[direccion]:=valor;
-  $1000..$1fff:snd_m6800.change_irq(CLEAR_LINE);
+  $1000..$1fff:m6800_0.change_irq(CLEAR_LINE);
 end;
 end;
 
@@ -214,14 +214,14 @@ end;
 
 procedure knjoe_snd_nmi;
 begin
-  snd_m6800.change_nmi(PULSE_LINE);
+  m6800_0.change_nmi(PULSE_LINE);
 end;
 
 //Main
 procedure reset_knjoe;
 begin
- main_z80.reset;
- snd_m6800.reset;
+ z80_0.reset;
+ m6800_0.reset;
  AY8910_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
@@ -258,20 +258,20 @@ screen_init(2,512,256,false,true);
 screen_mod_sprites(2,256,0,$ff,0);
 iniciar_video(240,256);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,256);
-main_z80.change_ram_calls(knjoe_getbyte,knjoe_putbyte);
+z80_0:=cpu_z80.create(6000000,256);
+z80_0.change_ram_calls(knjoe_getbyte,knjoe_putbyte);
 //Sound CPU
-snd_m6800:=cpu_m6800.create(3579545,256,CPU_M6803);
-snd_m6800.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_m6800.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
-snd_m6800.init_sound(knjoe_sound_update);
+m6800_0:=cpu_m6800.create(3579545,256,CPU_M6803);
+m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
+m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
+m6800_0.init_sound(knjoe_sound_update);
 //sound chips
-ay8910_0:=ay8910_chip.create(3579545 div 4,1);
+ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910,1);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,nil);
 sn_76496_0:=sn76496_chip.Create(3579545);
 sn_76496_1:=sn76496_chip.Create(3579545);
 //Timers
-init_timer(snd_m6800.numero_cpu,3579545/4/3970,knjoe_snd_nmi,true);
+init_timer(m6800_0.numero_cpu,3579545/4/3970,knjoe_snd_nmi,true);
 //cargar roms y ponerlas en sus bancos
 if not(cargar_roms(@memoria[0],@knjoe_rom[0],'kncljoe.zip',0)) then exit;
 //cargar sonido

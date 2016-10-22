@@ -105,18 +105,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for linea:=0 to $ff do begin
     //main
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if linea=239 then begin
-      if irq_ena then main_m6809.change_irq(HOLD_LINE);
+      if irq_ena then m6809_0.change_irq(HOLD_LINE);
       update_video_circusc;
     end;
   end;
@@ -137,7 +137,7 @@ case direccion of
     $1400..$17ff:circusc_getbyte:=marcade.dswa;  //dsw1
     $1800..$1bff:circusc_getbyte:=marcade.dswb;  //dsw2
     $2000..$3fff:circusc_getbyte:=memoria[direccion];
-    $6000..$ffff:if main_m6809.opcode then circusc_getbyte:=mem_opcodes[direccion-$6000]
+    $6000..$ffff:if m6809_0.opcode then circusc_getbyte:=mem_opcodes[direccion-$6000]
                     else circusc_getbyte:=memoria[direccion];
 end;
 end;
@@ -145,18 +145,20 @@ end;
 procedure circusc_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$5fff then exit;
-memoria[direccion]:=valor;
 case direccion of
   $0..$3ff:case (direccion and $7) of
               0:main_screen.flip_main_screen:=(valor and 1)<>0;
               1:irq_ena:=(valor<>0);
-              5:if (valor and 1)<>0 then spritebank:=$3900
-                  else spritebank:=$3800;
+              5:spritebank:=$3800+((valor and 1) shl 8);
            end;
   $800..$bff:sound_latch:=valor;
-  $c00..$fff:snd_z80.change_irq(HOLD_LINE);
+  $c00..$fff:z80_0.change_irq(HOLD_LINE);
   $1c00..$1fff:scroll_x:=256-valor;
-  $3000..$37ff:gfx[0].buffer[direccion and $3ff]:=true;
+  $2000..$2fff,$3800..$3fff:memoria[direccion]:=valor;
+  $3000..$37ff:begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
 end;
 end;
 
@@ -166,7 +168,7 @@ case direccion of
  $0..$3fff:circusc_snd_getbyte:=mem_snd[direccion];
  $4000..$5fff:circusc_snd_getbyte:=mem_snd[$4000+(direccion and $3ff)];
  $6000..$7fff:circusc_snd_getbyte:=sound_latch;
- $8000..$9fff:circusc_snd_getbyte:=((trunc(snd_z80.tframes*linea)+snd_z80.contador) shr 9 and $1e);
+ $8000..$9fff:circusc_snd_getbyte:=((trunc(z80_0.tframes*linea)+z80_0.contador) shr 9 and $1e);
 end;
 end;
 
@@ -194,8 +196,8 @@ end;
 //Main
 procedure reset_circusc;
 begin
- main_m6809.reset;
- snd_z80.reset;
+ m6809_0.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  dac_0.reset;
@@ -232,12 +234,12 @@ screen_mod_scroll(2,256,256,255,0,0,0);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_m6809:=cpu_m6809.Create(2048000,$100);
-main_m6809.change_ram_calls(circusc_getbyte,circusc_putbyte);
+m6809_0:=cpu_m6809.Create(2048000,$100);
+m6809_0.change_ram_calls(circusc_getbyte,circusc_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,$100);
-snd_z80.change_ram_calls(circusc_snd_getbyte,circusc_snd_putbyte);
-snd_z80.init_sound(circusc_sound);
+z80_0:=cpu_z80.create(3579545,$100);
+z80_0.change_ram_calls(circusc_snd_getbyte,circusc_snd_putbyte);
+z80_0.init_sound(circusc_sound);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(1789772);
 sn_76496_1:=sn76496_chip.Create(1789772);

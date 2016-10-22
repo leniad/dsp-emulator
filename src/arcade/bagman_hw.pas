@@ -105,13 +105,13 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=239 then begin
-      if irq_enable then main_z80.change_irq(HOLD_LINE);
+      if irq_enable then z80_0.change_irq(HOLD_LINE);
       if video_enable then update_video_bagman;
     end;
   end;
@@ -173,7 +173,7 @@ end;
 //Main
 procedure reset_bagman;
 begin
- main_z80.reset;
+ z80_0.reset;
  ay8910_0.reset;
  reset_audio;
  irq_enable:=true;
@@ -230,11 +230,11 @@ screen_init(2,256,256,false,true);
 screen_mod_sprites(2,0,512,0,$1ff);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,264);
-main_z80.change_ram_calls(bagman_getbyte,bagman_putbyte);
-main_z80.change_io_calls(bagman_inbyte,bagman_outbyte);
-main_z80.init_sound(bagman_sound);
-ay8910_0:=ay8910_chip.create(1536000,1);
+z80_0:=cpu_z80.create(3072000,264);
+z80_0.change_ram_calls(bagman_getbyte,bagman_putbyte);
+z80_0.change_io_calls(bagman_inbyte,bagman_outbyte);
+z80_0.init_sound(bagman_sound);
+ay8910_0:=ay8910_chip.create(1536000,AY8910,0.4);
 ay8910_0.change_io_calls(bagman_portar,bagman_portbr,nil,nil);
 case main_vars.tipo_maquina of
   171:begin  //bagman

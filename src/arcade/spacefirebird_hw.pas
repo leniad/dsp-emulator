@@ -162,24 +162,24 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=main_mcs48.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=mcs48_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 255 do begin
     //Main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //MCU
-    main_mcs48.run(frame_s);
-    frame_s:=frame_s+main_mcs48.tframes-main_mcs48.contador;
+    mcs48_0.run(frame_s);
+    frame_s:=frame_s+mcs48_0.tframes-mcs48_0.contador;
     case f of
       127:begin
-            main_z80.im0:=$cf;
-            main_z80.change_irq(HOLD_LINE);
+            z80_0.im0:=$cf;
+            z80_0.change_irq(HOLD_LINE);
           end;
       239:begin
-            main_z80.im0:=$d7;
-            main_z80.change_irq(HOLD_LINE);
+            z80_0.im0:=$d7;
+            z80_0.change_irq(HOLD_LINE);
             update_video_spacefb;
           end;
     end;
@@ -292,8 +292,8 @@ case (puerto and $7) of
         get_sprite_pens;
       end;
   1,5:begin
-        if (valor and 2)<>0 then main_mcs48.change_irq(CLEAR_LINE)
-          else main_mcs48.change_irq(ASSERT_LINE);
+        if (valor and 2)<>0 then mcs48_0.change_irq(CLEAR_LINE)
+          else mcs48_0.change_irq(ASSERT_LINE);
         // enemy killed
 	      if (((valor and $01)=0) and ((sound_latch and $01)<>0)) then  start_sample(0);
 	      // ship fire
@@ -341,8 +341,8 @@ end;
 //Main
 procedure reset_spacefb;
 begin
- main_z80.reset;
- main_mcs48.reset;
+ z80_0.reset;
+ mcs48_0.reset;
  dac_0.reset;
  reset_samples;
  reset_audio;
@@ -367,14 +367,14 @@ iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(6000000 div 2,256);
-main_z80.change_ram_calls(spacefb_getbyte,spacefb_putbyte);
-main_z80.change_io_calls(spacefb_inbyte,spacefb_outbyte);
+z80_0:=cpu_z80.create(6000000 div 2,256);
+z80_0.change_ram_calls(spacefb_getbyte,spacefb_putbyte);
+z80_0.change_io_calls(spacefb_inbyte,spacefb_outbyte);
 //MCU
-main_mcs48:=cpu_mcs48.create(6000000,256,I8035);
-main_mcs48.change_ram_calls(spacefb_snd_getbyte,nil);
-main_mcs48.change_io_calls(spacefb_snd_inport,spacefb_snd_outport);
-main_mcs48.init_sound(spacefb_sound_update);
+mcs48_0:=cpu_mcs48.create(6000000,256,I8035);
+mcs48_0.change_ram_calls(spacefb_snd_getbyte,nil);
+mcs48_0.change_io_calls(spacefb_snd_inport,spacefb_snd_outport);
+mcs48_0.init_sound(spacefb_sound_update);
 //cargar roms
 if not(cargar_roms(@memoria[0],@spacefb_rom[0],'spacefb.zip',0)) then exit;
 //Cargar MCU

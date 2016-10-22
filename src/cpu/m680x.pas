@@ -74,7 +74,7 @@ type
         end;
 
 var
-  main_m6800,snd_m6800:cpu_m6800;
+  m6800_0:cpu_m6800;
 
 implementation
 const

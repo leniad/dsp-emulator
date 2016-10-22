@@ -157,18 +157,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
       //Main CPU
-      main_z80.run(frame_m);
-      frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+      z80_0.run(frame_m);
+      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
       //Sound CPU
-      snd_z80.run(frame_s);
-      frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+      z80_1.run(frame_s);
+      frame_s:=frame_s+z80_1.tframes-z80_1.contador;
       if f=239 then begin
-        main_z80.change_irq(ASSERT_LINE);
+        z80_0.change_irq(ASSERT_LINE);
         update_video_starforce;
       end;
   end;
@@ -251,7 +251,7 @@ case direccion of
         $a800..$afff:gfx[4].buffer[direccion and $7ff]:=true;
         $b000..$b7ff:gfx[5].buffer[direccion and $7ff]:=true;
         $d000:main_screen.flip_main_screen:=(valor and 1)<>0;
-        $d002:main_z80.change_irq(CLEAR_LINE);
+        $d002:z80_0.change_irq(CLEAR_LINE);
         $d004:write_sound_command(valor);
 end;
 end;
@@ -305,7 +305,7 @@ end;
 //PIO+CTC INT
 procedure pio_int_main(state:byte);
 begin
-  snd_z80.change_irq(state);
+  z80_1.change_irq(state);
 end;
 
 //Main
@@ -316,8 +316,8 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
@@ -359,16 +359,16 @@ screen_init(5,512,256,true);
 screen_mod_scroll(5,512,256,511,256,256,255);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,$100);
-main_z80.change_ram_calls(starforce_getbyte,starforce_putbyte);
+z80_0:=cpu_z80.create(4000000,$100);
+z80_0.change_ram_calls(starforce_getbyte,starforce_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(2000000,$100);
-snd_z80.daisy:=true;
-snd_z80.change_ram_calls(snd_getbyte,snd_putbyte);
-snd_z80.change_io_calls(snd_inbyte,snd_outbyte);
-snd_z80.init_sound(starforce_sound_update);
+z80_1:=cpu_z80.create(2000000,$100);
+z80_1.daisy:=true;
+z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
+z80_1.change_io_calls(snd_inbyte,snd_outbyte);
+z80_1.init_sound(starforce_sound_update);
 //Daisy Chain PIO+CTC
-z80ctc_init(0,snd_z80.numero_cpu,2000000,snd_z80.clock,NOTIMER_2,pio_int_main,z80ctc_trg01_w);
+z80ctc_init(0,z80_1.numero_cpu,2000000,z80_1.clock,NOTIMER_2,pio_int_main,z80ctc_trg01_w);
 z80pio_init(0,pio_int_main,pio_read_porta);
 z80daisy_init(Z80_PIO_TYPE,Z80_CTC_TYPE);
 //Chip CPU

@@ -95,18 +95,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for frame:=0 to $ff do begin
       //main
-      main_m6809.run(frame_m);
-      frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+      m6809_0.run(frame_m);
+      frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
       //sound
-      snd_z80.run(frame_s);
-      frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+      z80_0.run(frame_s);
+      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
       if frame=239 then begin
-          if irq_ena then main_m6809.change_irq(HOLD_LINE);
+          if irq_ena then m6809_0.change_irq(HOLD_LINE);
           update_video_trackfield;
       end;
   end;
@@ -127,7 +127,7 @@ case direccion of
                     3:trackfield_getbyte:=marcade.dswa; //DSW1
                end;
   $1800..$1fff,$2800..$3fff:trackfield_getbyte:=memoria[direccion];
-  $6000..$ffff:if main_m6809.opcode then trackfield_getbyte:=mem_opcodes[direccion-$6000]
+  $6000..$ffff:if m6809_0.opcode then trackfield_getbyte:=mem_opcodes[direccion-$6000]
                   else trackfield_getbyte:=memoria[direccion];
  end;
 end;
@@ -138,7 +138,7 @@ if direccion>$5FFF then exit;
 case direccion of
   $1080..$10ff:case (direccion and 7) of
                   0:main_screen.flip_main_screen:=(valor and $1)<>0;
-                  1:snd_z80.change_irq(HOLD_LINE);
+                  1:z80_0.change_irq(HOLD_LINE);
                   7:irq_ena:=(valor<>0);
                end;
   $1100..$117f:sound_latch:=valor;
@@ -156,7 +156,7 @@ case direccion of
   0..$1fff:trackfield_snd_getbyte:=mem_snd[direccion];
   $4000..$5fff:trackfield_snd_getbyte:=mem_snd[(direccion and $3ff)+$4000];
   $6000..$7fff:trackfield_snd_getbyte:=sound_latch;
-  $8000..$9fff:trackfield_snd_getbyte:=((snd_z80.contador+trunc(snd_z80.tframes*frame)) shr 10) and $f;
+  $8000..$9fff:trackfield_snd_getbyte:=((z80_0.contador+trunc(z80_0.tframes*frame)) shr 10) and $f;
   $e000..$ffff:if ((direccion and 7)=2) then trackfield_snd_getbyte:=vlm5030_0.get_bsy shl 4;
 end;
 end;
@@ -203,9 +203,9 @@ begin
 open_qsnapshot_save('trackfield'+nombre);
 getmem(data,250);
 //CPU
-size:=main_m6809.save_snapshot(data);
+size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=sn_76496_0.save_snapshot(data);
@@ -237,9 +237,9 @@ if not(open_qsnapshot_load('trackfield'+nombre)) then exit;
 getmem(data,250);
 //CPU
 loaddata_qsnapshot(data);
-main_m6809.load_snapshot(data);
+m6809_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 sn_76496_0.load_snapshot(data);
@@ -270,8 +270,8 @@ end;
 
 procedure reset_trackfield;
 begin
- main_m6809.reset;
- snd_z80.reset;
+ m6809_0.reset;
+ z80_0.reset;
  vlm5030_0.reset;
  dac_0.reset;
  reset_audio;
@@ -310,12 +310,12 @@ screen_mod_scroll(1,512,256,511,0,0,0);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(18432000 div 12,$100);
-main_m6809.change_ram_calls(trackfield_getbyte,trackfield_putbyte);
+m6809_0:=cpu_m6809.Create(18432000 div 12,$100);
+m6809_0.change_ram_calls(trackfield_getbyte,trackfield_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(14318180 div 4,$100);
-snd_z80.change_ram_calls(trackfield_snd_getbyte,trackfield_snd_putbyte);
-snd_z80.init_sound(trackfield_sound_update);
+z80_0:=cpu_z80.create(14318180 div 4,$100);
+z80_0.change_ram_calls(trackfield_snd_getbyte,trackfield_snd_putbyte);
+z80_0.init_sound(trackfield_sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(14318180 div 8);
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,4);

@@ -57,11 +57,11 @@ var
   f:word;
 begin
 init_controls(false,false,true,false);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to (vdp_0.VIDEO_Y_TOTAL-1) do begin
-      main_z80.run(frame);
-      frame:=frame+main_z80.tframes-main_z80.contador;
+      z80_0.run(frame);
+      frame:=frame+z80_0.tframes-z80_0.contador;
       vdp_0.refresh(f);
   end;
   actualiza_trozo_simple(0,0,284,vdp_0.VIDEO_VISIBLE_Y_TOTAL,1);
@@ -168,8 +168,8 @@ end;
 
 procedure sms_interrupt(int:boolean);
 begin
-  if int then main_z80.change_irq(ASSERT_LINE)
-     else main_z80.change_irq(CLEAR_LINE);
+  if int then z80_0.change_irq(ASSERT_LINE)
+     else z80_0.change_irq(CLEAR_LINE);
 end;
 
 procedure sms_sound_update;
@@ -179,7 +179,7 @@ end;
 
 procedure sms_hlines(estados:word);
 begin
-  vdp_0.hlines(round(main_z80.contador));
+  vdp_0.hlines(round(z80_0.contador));
 end;
 
 //Main
@@ -207,7 +207,7 @@ end;
 
 procedure reset_sms;
 begin
- main_z80.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  vdp_0.reset;
  reset_audio;
@@ -280,7 +280,7 @@ begin
     llamadas_maquina.open_file:='';
   end;
   change_caption;
-  Directory.sms:=ExtractFilePath(romfile)+main_vars.cadena_dir;
+  Directory.sms:=ExtractFilePath(romfile);
   freemem(datos);
 end;
 
@@ -295,16 +295,16 @@ iniciar_audio(false);
 if file_data.sms_is_pal then begin
   screen_init(1,284,294);
   iniciar_video(284,294);
-  main_z80:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
+  z80_0:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
 end else begin
   screen_init(1,284,243);
   iniciar_video(284,243);
-  main_z80:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
+  z80_0:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
 end;
 //Main CPU
-main_z80.change_ram_calls(sms_getbyte,sms_putbyte);
-main_z80.change_io_calls(sms_inbyte,sms_outbyte);
-main_z80.init_sound(sms_sound_update);
+z80_0.change_ram_calls(sms_getbyte,sms_putbyte);
+z80_0.change_io_calls(sms_inbyte,sms_outbyte);
+z80_0.init_sound(sms_sound_update);
 //Mapper
 getmem(mapper_sms,sizeof(tmapper_sms));
 mapper_sms.bios_loaded:=carga_rom_zip(Directory.Arcade_roms+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
@@ -319,7 +319,7 @@ end else begin
   vdp_0.set_ntsc_video;
   sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
 end;
-main_z80.change_misc_calls(sms_hlines,nil);
+z80_0.change_misc_calls(sms_hlines,nil);
 //final
 abrir_sms;
 iniciar_sms:=true;

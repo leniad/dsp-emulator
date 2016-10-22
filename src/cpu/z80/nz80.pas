@@ -109,7 +109,7 @@ type
         end;
 
 var
-  main_z80,sub_z80,snd_z80:cpu_z80;
+  z80_0,z80_1,z80_2:cpu_z80;
 
 implementation
 const

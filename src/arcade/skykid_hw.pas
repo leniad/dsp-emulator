@@ -178,19 +178,19 @@ var
   frame_m,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_mcu:=main_m6800.tframes;
+frame_m:=m6809_0.tframes;
+frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 223 do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
-    main_m6800.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_m6800.tframes-main_m6800.contador;
+    m6800_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
   end;
-  if irq_enable then main_m6809.change_irq(ASSERT_LINE);
-  if irq_enable_mcu then main_m6800.change_irq(ASSERT_LINE);
+  if irq_enable then m6809_0.change_irq(ASSERT_LINE);
+  if irq_enable_mcu then m6800_0.change_irq(ASSERT_LINE);
   if sound_status.hay_sonido then begin
       namco_playsound;
       play_sonido;
@@ -230,9 +230,9 @@ case direccion of
   $6800..$6bff:namcos1_cus30_w(direccion and $3ff,valor);
   $7000..$7fff:begin
                    irq_enable:=not(BIT((direccion and $fff),11));
-                   if not(irq_enable) then main_m6809.change_irq(CLEAR_LINE);
+                   if not(irq_enable) then m6809_0.change_irq(CLEAR_LINE);
                end;
-  $8000..$8fff:if not(BIT((direccion and $fff),11)) then main_m6800.reset;
+  $8000..$8fff:if not(BIT((direccion and $fff),11)) then m6800_0.reset;
   $9000..$9fff:rom_nbank:=(not(BIT_n((direccion and $fff),11))) and 1;
   $a000..$a001:priority:=valor;
 end;
@@ -241,7 +241,7 @@ end;
 function mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$1f:mcu_getbyte:=main_m6800.m6803_internal_reg_r(direccion);
+  $0..$1f:mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $1000..$13ff:mcu_getbyte:=namcos1_cus30_r(direccion and $3ff);
     else mcu_getbyte:=mem_snd[direccion];
 end;
@@ -250,11 +250,11 @@ end;
 procedure mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$1f:main_m6800.m6803_internal_reg_w(direccion,valor);
+  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$13ff:namcos1_cus30_w(direccion and $3ff,valor);
   $4000..$7fff:begin
                   irq_enable_mcu:=not(BIT(direccion and $3fff,13));
-                  if not(irq_enable_mcu) then main_m6800.change_irq(CLEAR_LINE);
+                  if not(irq_enable_mcu) then m6800_0.change_irq(CLEAR_LINE);
                end;
   $8000..$bfff,$f000..$ffff:exit;
 end;
@@ -288,8 +288,8 @@ end;
 //Main
 procedure reset_skykid;
 begin
- main_m6809.reset;
- main_m6800.reset;
+ m6809_0.reset;
+ m6800_0.reset;
  namco_sound_reset;
  reset_audio;
  marcade.in0:=$FF;
@@ -327,12 +327,12 @@ screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,224);
-main_m6809.change_ram_calls(skykid_getbyte,skykid_putbyte);
+m6809_0:=cpu_m6809.Create(1536000,224);
+m6809_0.change_ram_calls(skykid_getbyte,skykid_putbyte);
 //MCU CPU
-main_m6800:=cpu_m6800.create(6144000,224,cpu_hd63701);
-main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
-main_m6800.change_io_calls(in_port1,in_port2,nil,nil,out_port1,nil,nil,nil);
+m6800_0:=cpu_m6800.create(6144000,224,cpu_hd63701);
+m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
+m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,nil,nil,nil);
 case  main_vars.tipo_maquina of
     123:begin
           //cargar roms

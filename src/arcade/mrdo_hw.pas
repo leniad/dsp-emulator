@@ -103,13 +103,13 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
+frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
-      main_z80.run(frame_m);
-      frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+      z80_0.run(frame_m);
+      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
       if f=223 then begin
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.change_irq(HOLD_LINE);
           update_video_mrdo;
       end;
   end;
@@ -120,13 +120,13 @@ end;
 
 function mrdo_getbyte(direccion:word):byte;
 var
-  main_z80_reg:npreg_z80;
+  z80_0_reg:npreg_z80;
 begin
 case direccion of
   0..$8fff,$e000..$efff:mrdo_getbyte:=memoria[direccion];
   $9803:begin
-          main_z80_reg:=main_z80.get_internal_r;
-          mrdo_getbyte:=memoria[main_z80_reg.hl.w];
+          z80_0_reg:=z80_0.get_internal_r;
+          mrdo_getbyte:=memoria[z80_0_reg.hl.w];
         end;
   $a000:mrdo_getbyte:=marcade.in0;
   $a001:mrdo_getbyte:=marcade.in1;
@@ -165,7 +165,7 @@ end;
 //Main
 procedure reset_mrdo;
 begin
- main_z80.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
@@ -248,9 +248,9 @@ screen_mod_scroll(4,256,256,255,256,256,255);
 screen_init(5,256,256,true);
 iniciar_video(192,240);
 //Main CPU
-main_z80:=cpu_z80.create(4100000,262);
-main_z80.change_ram_calls(mrdo_getbyte,mrdo_putbyte);
-main_z80.init_sound(mrdo_despues_instruccion);
+z80_0:=cpu_z80.create(4100000,262);
+z80_0.change_ram_calls(mrdo_getbyte,mrdo_putbyte);
+z80_0.init_sound(mrdo_despues_instruccion);
 //Sound Chips
 sn_76496_0:=sn76496_chip.Create(4100000);
 sn_76496_1:=sn76496_chip.Create(4100000);

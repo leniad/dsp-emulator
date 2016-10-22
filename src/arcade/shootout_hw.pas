@@ -105,11 +105,11 @@ if event.arcade then begin
   if (arcade_input.coin[0] and not(old_val)) then begin
       marcade.in2:=marcade.in2 and $bf;
       marcade.in1:=marcade.in1 and $7f;
-      main_m6502.change_nmi(ASSERT_LINE);
+      m6502_0.change_nmi(ASSERT_LINE);
   end else begin
       marcade.in2:=(marcade.in2 or $40);
       marcade.in1:=(marcade.in1 or $80);
-      main_m6502.change_nmi(CLEAR_LINE);
+      m6502_0.change_nmi(CLEAR_LINE);
   end;
   old_val:=arcade_input.coin[0];
   if arcade_input.start[0] then marcade.in0:=marcade.in0 and $bf else marcade.in0:=marcade.in0 or $40;
@@ -123,14 +123,14 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6502.tframes;
-frame_s:=snd_m6502.tframes;
+frame_m:=m6502_0.tframes;
+frame_s:=m6502_1.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-   main_m6502.run(frame_m);
-   frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
-   snd_m6502.run(frame_s);
-   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
+   m6502_0.run(frame_m);
+   frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
+   m6502_1.run(frame_s);
+   frame_s:=frame_s+m6502_1.tframes-m6502_1.contador;
    case f of
       30:marcade.in2:=marcade.in2 and $7f;
       247:begin
@@ -152,9 +152,9 @@ case direccion of
   $1001:getbyte_shootout:=marcade.in0;
   $1002:getbyte_shootout:=marcade.in1;
   $1003:getbyte_shootout:=marcade.in2;
-  $4000..$7fff:if main_m6502.opcode then getbyte_shootout:=mem_bank_dec[banco,direccion and $3fff]
+  $4000..$7fff:if m6502_0.opcode then getbyte_shootout:=mem_bank_dec[banco,direccion and $3fff]
                   else getbyte_shootout:=mem_bank[banco,direccion and $3fff];
-  $8000..$ffff:if main_m6502.opcode then getbyte_shootout:=mem_dec[direccion and $7fff]
+  $8000..$ffff:if m6502_0.opcode then getbyte_shootout:=mem_dec[direccion and $7fff]
                   else getbyte_shootout:=memoria[direccion];
 end;
 end;
@@ -167,7 +167,7 @@ case direccion of
   $1000:banco:=valor and $f;
   $1003:begin
           sound_latch:=valor;
-          snd_m6502.change_nmi(PULSE_LINE);
+          m6502_1.change_nmi(PULSE_LINE);
         end;
   $2000..$27ff:begin
                   gfx[0].buffer[direccion and $3ff]:=true;
@@ -207,14 +207,14 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_m6502.change_irq(irqstate);
+  m6502_1.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_shootout;
 begin
-main_m6502.reset;
-snd_m6502.reset;
+m6502_0.reset;
+m6502_1.reset;
 ym2203_0.reset;
 reset_audio;
 marcade.in0:=$ff;
@@ -248,12 +248,12 @@ screen_init(2,256,256);
 screen_init(3,256,256,false,true);
 iniciar_video(256,240);
 //Main CPU
-main_m6502:=cpu_m6502.create(2000000,256,TCPU_M6502);
-main_m6502.change_ram_calls(getbyte_shootout,putbyte_shootout);
+m6502_0:=cpu_m6502.create(2000000,256,TCPU_M6502);
+m6502_0.change_ram_calls(getbyte_shootout,putbyte_shootout);
 //sound CPU
-snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
-snd_m6502.change_ram_calls(getbyte_snd_shootout,putbyte_snd_shootout);
-snd_m6502.init_sound(shootout_sound_update);
+m6502_1:=cpu_m6502.create(1500000,256,TCPU_M6502);
+m6502_1.change_ram_calls(getbyte_snd_shootout,putbyte_snd_shootout);
+m6502_1.init_sound(shootout_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(1500000);
 ym2203_0.change_irq_calls(snd_irq);

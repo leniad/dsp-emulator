@@ -41,7 +41,7 @@ type
             function pullword:word;
         end;
  var
-    main_m6805:cpu_m6805;
+    m6805_0:cpu_m6805;
 
 implementation
 const

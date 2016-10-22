@@ -113,25 +113,25 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     case f of
       239:begin //rst 10
-          main_z80.im0:=$d7;
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.im0:=$d7;
+          z80_0.change_irq(HOLD_LINE);
           update_video_hw1942;
         end;
       $ff:begin //rst 8
-          main_z80.im0:=$cf;
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.im0:=$cf;
+          z80_0.change_irq(HOLD_LINE);
         end;
     end;
   end;
@@ -162,8 +162,8 @@ case direccion of
         $c802:scroll:=valor or (scroll and $100);
         $c803:scroll:=((valor and $1) shl 8) or (scroll and $ff);
         $c804:begin
-                if (valor and $10)<>0 then snd_z80.change_reset(ASSERT_LINE)
-                  else snd_z80.change_reset(CLEAR_LINE);
+                if (valor and $10)<>0 then z80_1.change_reset(ASSERT_LINE)
+                  else z80_1.change_reset(CLEAR_LINE);
                 main_screen.flip_main_screen:=(valor and $80)<>0;
               end;
         $c805:palette_bank:=valor;
@@ -193,7 +193,7 @@ end;
 
 procedure hw1942_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure hw1942_sound_update;
@@ -211,9 +211,9 @@ begin
 open_qsnapshot_save('1942'+nombre);
 getmem(data,200);
 //CPU
-size:=main_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ay8910_0.save_snapshot(data);
@@ -243,9 +243,9 @@ if not(open_qsnapshot_load('1942'+nombre)) then exit;
 getmem(data,200);
 //CPU
 loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_1.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 ay8910_0.load_snapshot(data);
@@ -267,8 +267,8 @@ end;
 //Main
 procedure reset_hw1942;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  ay8910_0.reset;
  ay8910_1.reset;
  reset_audio;
@@ -305,17 +305,17 @@ screen_mod_scroll(2,0,0,0,512,256,511);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,$100);
-main_z80.change_ram_calls(hw1942_getbyte,hw1942_putbyte);
+z80_0:=cpu_z80.create(4000000,$100);
+z80_0.change_ram_calls(hw1942_getbyte,hw1942_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,$100);
-snd_z80.change_ram_calls(hw1942_snd_getbyte,hw1942_snd_putbyte);
-snd_z80.init_sound(hw1942_sound_update);
+z80_1:=cpu_z80.create(3000000,$100);
+z80_1.change_ram_calls(hw1942_snd_getbyte,hw1942_snd_putbyte);
+z80_1.init_sound(hw1942_sound_update);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,1);
+AY8910_1:=ay8910_chip.create(1500000,AY8910,1);
 //IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3000000/(4*60),hw1942_snd_irq,true);
+init_timer(z80_1.numero_cpu,3000000/(4*60),hw1942_snd_irq,true);
 //cargar roms y ponerlas en su sitio
 if not(cargar_roms(@memoria_temp[0],@hw1942_rom[0],'1942.zip',0)) then exit;
 copymemory(@memoria[0],@memoria_temp[0],$8000);

@@ -109,27 +109,27 @@ var
   frame_m,frame_sub,frame_s,frame_s_sub:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_sub:=misc_m6809.tframes;
-frame_s:=snd_z80.tframes;
-frame_s_sub:=main_mcs48.tframes;
+frame_m:=z80_0.tframes;
+frame_sub:=m6809_0.tframes;
+frame_s:=z80_1.tframes;
+frame_s_sub:=mcs48_0.tframes;
 while EmuStatus=EsRuning do begin
   for scan_line:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //sub
-    misc_m6809.run(frame_sub);
-    frame_sub:=frame_sub+misc_m6809.tframes-misc_m6809.contador;
+    m6809_0.run(frame_sub);
+    frame_sub:=frame_sub+m6809_0.tframes-m6809_0.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     //snd sub
-    main_mcs48.run(frame_s_sub);
-    frame_s_sub:=frame_s_sub+main_mcs48.tframes-main_mcs48.contador;
+    mcs48_0.run(frame_s_sub);
+    frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
     if (scan_line=239) then begin
-      if main_nmi then main_z80.change_nmi(ASSERT_LINE);
-      if sub_irq then misc_m6809.change_irq(ASSERT_LINE);
+      if main_nmi then z80_0.change_nmi(ASSERT_LINE);
+      if sub_irq then m6809_0.change_irq(ASSERT_LINE);
       update_video_gyruss;
     end;
   end;
@@ -160,11 +160,11 @@ case direccion of
                     gfx[0].buffer[direccion and $3ff]:=true;
                  end;
     $9000..$a7ff:memoria[direccion]:=valor;
-    $c080:snd_z80.change_irq(HOLD_LINE);
+    $c080:z80_1.change_irq(HOLD_LINE);
     $c100:sound_latch:=valor;
     $c180:begin
             main_nmi:=(valor and 1)<>0;
-            if not(main_nmi) then main_z80.change_nmi(CLEAR_LINE);
+            if not(main_nmi) then z80_0.change_nmi(CLEAR_LINE);
           end;
     $c185:main_screen.flip_main_screen:=(valor and $1)<>0;
 end;
@@ -176,7 +176,7 @@ case direccion of
   0:gyruss_sub_getbyte:=scan_line;
   $6000..$67ff:gyruss_sub_getbyte:=memoria[$a000+(direccion and $7ff)];
   $4000..$47ff:gyruss_sub_getbyte:=mem_misc[direccion];
-  $e000..$ffff:if misc_m6809.opcode then gyruss_sub_getbyte:=mem_opcodes[direccion and $1fff]
+  $e000..$ffff:if m6809_0.opcode then gyruss_sub_getbyte:=mem_opcodes[direccion and $1fff]
                   else gyruss_sub_getbyte:=mem_misc[direccion];
 end;
 end;
@@ -187,7 +187,7 @@ if direccion>$dfff then exit;
 case direccion of
   $2000:begin
             sub_irq:=(valor and 1)<>0;
-            if not(sub_irq) then misc_m6809.change_irq(CLEAR_LINE);
+            if not(sub_irq) then m6809_0.change_irq(CLEAR_LINE);
         end;
   $4000..$47ff:mem_misc[direccion]:=valor;
   $6000..$67ff:memoria[$a000+(direccion and $7ff)]:=valor;
@@ -234,7 +234,7 @@ case (puerto and $ff) of
   $0e:ay8910_3.Write(valor);
   $10:ay8910_4.Control(valor);
   $12:ay8910_4.Write(valor);
-  $14:main_mcs48.change_irq(ASSERT_LINE);
+  $14:mcs48_0.change_irq(ASSERT_LINE);
   $18:sound_latch2:=valor;
 end;
 end;
@@ -253,13 +253,13 @@ procedure gyruss_sound2_outport(valor:byte;puerto:word);
 begin
 case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);
-  MCS48_PORT_P2:main_mcs48.change_irq(CLEAR_LINE);
+  MCS48_PORT_P2:mcs48_0.change_irq(CLEAR_LINE);
 end;
 end;
 
 function gyruss_portar:byte;
 begin
-  gyruss_portar:=gyruss_timer[((snd_z80.contador+round(scan_line*snd_z80.tframes)) div 1024) mod 10];
+  gyruss_portar:=gyruss_timer[((z80_1.contador+round(scan_line*z80_1.tframes)) div 1024) mod 10];
 end;
 
 procedure gyruss_sound_update;
@@ -279,10 +279,10 @@ end;
 //Main
 procedure gyruss_reset;
 begin
-main_z80.reset;
-misc_m6809.reset;
-snd_z80.reset;
-main_mcs48.reset;
+z80_0.reset;
+m6809_0.reset;
+z80_1.reset;
+mcs48_0.reset;
 ay8910_0.reset;
 ay8910_1.reset;
 ay8910_2.reset;
@@ -322,27 +322,27 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(trunc(18432000/6),256);
-main_z80.change_ram_calls(gyruss_getbyte,gyruss_putbyte);
+z80_0:=cpu_z80.create(trunc(18432000/6),256);
+z80_0.change_ram_calls(gyruss_getbyte,gyruss_putbyte);
 //Sub CPU
-misc_m6809:=cpu_m6809.Create(trunc(18432000/12),256);
-misc_m6809.change_ram_calls(gyruss_sub_getbyte,gyruss_sub_putbyte);
+m6809_0:=cpu_m6809.Create(trunc(18432000/12),256);
+m6809_0.change_ram_calls(gyruss_sub_getbyte,gyruss_sub_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(trunc(14318180/4),256);
-snd_z80.change_ram_calls(gyruss_sound_getbyte,gyruss_sound_putbyte);
-snd_z80.change_io_calls(gyruss_sound_inbyte,gyruss_sound_outbyte);
-snd_z80.init_sound(gyruss_sound_update);
+z80_1:=cpu_z80.create(trunc(14318180/4),256);
+z80_1.change_ram_calls(gyruss_sound_getbyte,gyruss_sound_putbyte);
+z80_1.change_io_calls(gyruss_sound_inbyte,gyruss_sound_outbyte);
+z80_1.init_sound(gyruss_sound_update);
 //Sound CPU 2
-main_mcs48:=cpu_mcs48.create(8000000,256,I8039);
-main_mcs48.change_ram_calls(gyruss_sound2_getbyte,nil);
-main_mcs48.change_io_calls(gyruss_sound2_inport,gyruss_sound2_outport);
+mcs48_0:=cpu_mcs48.create(8000000,256,I8039);
+mcs48_0.change_ram_calls(gyruss_sound2_getbyte,nil);
+mcs48_0.change_io_calls(gyruss_sound2_inport,gyruss_sound2_outport);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(trunc(14318180/8),1);
-ay8910_1:=ay8910_chip.create(trunc(14318180/8),1,true);
-ay8910_2:=ay8910_chip.create(trunc(14318180/8),1,true);
+ay8910_0:=ay8910_chip.create(trunc(14318180/8),AY8910,1);
+ay8910_1:=ay8910_chip.create(trunc(14318180/8),AY8910,1,true);
+ay8910_2:=ay8910_chip.create(trunc(14318180/8),AY8910,1,true);
 ay8910_2.change_io_calls(gyruss_portar,nil,nil,nil);
-ay8910_3:=ay8910_chip.create(trunc(14318180/8),1,true);
-ay8910_4:=ay8910_chip.create(trunc(14318180/8),1,true);
+ay8910_3:=ay8910_chip.create(trunc(14318180/8),AY8910,1,true);
+ay8910_4:=ay8910_chip.create(trunc(14318180/8),AY8910,1,true);
 dac_0:=dac_chip.Create(1,true);
 //Main ROMS
 if not(cargar_roms(@memoria[0],@gyruss_rom[0],'gyruss.zip',0)) then exit;

@@ -100,16 +100,16 @@ var
   frame:single;
 begin
 init_controls(false,false,false,true);
-frame:=main_m6809.tframes;
+frame:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    main_m6809.run(trunc(frame));
-    frame:=frame+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(trunc(frame));
+    frame:=frame+m6809_0.tframes-m6809_0.contador;
     if f=239 then begin
-      main_m6809.change_irq(HOLD_LINE);
+      m6809_0.change_irq(HOLD_LINE);
       update_video_shaolin;
     end else begin
-      if (((f and $1f)=0) and pedir_nmi) then main_m6809.change_nmi(PULSE_LINE);
+      if (((f and $1f)=0) and pedir_nmi) then m6809_0.change_nmi(PULSE_LINE);
     end;
   end;
   eventos_shaolin;
@@ -162,7 +162,7 @@ begin
 open_qsnapshot_save('shaolinsroad'+nombre);
 getmem(data,180);
 //CPU
-size:=main_m6809.save_snapshot(data);
+size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=sn_76496_0.save_snapshot(data);
@@ -189,7 +189,7 @@ if not(open_qsnapshot_load('shaolinsroad'+nombre)) then exit;
 getmem(data,180);
 //CPU
 loaddata_qsnapshot(data);
-main_m6809.load_snapshot(data);
+m6809_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 sn_76496_0.load_snapshot(data);
@@ -211,7 +211,7 @@ end;
 //Main
 procedure reset_shaolin;
 begin
- main_m6809.reset;
+ m6809_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
@@ -243,9 +243,9 @@ screen_mod_scroll(1,256,256,255,0,0,0);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(shaolin_getbyte,shaolin_putbyte);
-main_m6809.init_sound(shaolin_sound);
+m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0.change_ram_calls(shaolin_getbyte,shaolin_putbyte);
+m6809_0.init_sound(shaolin_sound);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(1536000);
 sn_76496_1:=sn76496_chip.Create(3072000);

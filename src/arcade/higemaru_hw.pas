@@ -75,22 +75,22 @@ var
   frame_m:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
+frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
     case f of
       239:begin
-            main_z80.im0:=$cf;  //rst 8
-            main_z80.change_irq(HOLD_LINE);
+            z80_0.im0:=$cf;  //rst 8
+            z80_0.change_irq(HOLD_LINE);
             update_video_higemaru;
           end;
       255:begin
-           main_z80.im0:=$d7;  //rst 10
-           main_z80.change_irq(HOLD_LINE);
+           z80_0.im0:=$d7;  //rst 10
+           z80_0.change_irq(HOLD_LINE);
         end;
     end;
   end;
@@ -134,7 +134,7 @@ end;
 //Main
 procedure reset_higemaru;
 begin
- main_z80.reset;
+ z80_0.reset;
  AY8910_0.reset;
  AY8910_1.reset;
  reset_audio;
@@ -162,12 +162,12 @@ screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(3000000,256);
-main_z80.change_ram_calls(higemaru_getbyte,higemaru_putbyte);
-main_z80.init_sound(higemaru_sound);
+z80_0:=cpu_z80.create(3000000,256);
+z80_0.change_ram_calls(higemaru_getbyte,higemaru_putbyte);
+z80_0.init_sound(higemaru_sound);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,0.25);
+AY8910_1:=ay8910_chip.create(1500000,AY8910,0.25);
 //cargar ROMS
 if not(cargar_roms(@memoria[0],@higemaru_rom[0],'higemaru.zip',0)) then exit;
 //convertir chars

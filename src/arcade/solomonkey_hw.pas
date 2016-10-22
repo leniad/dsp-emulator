@@ -99,18 +99,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-        if nmi_enable then main_z80.change_nmi(PULSE_LINE);
+        if nmi_enable then z80_0.change_nmi(PULSE_LINE);
         update_video_solomon;
     end;
   end;
@@ -122,15 +122,15 @@ end;
 //Main
 function solomon_getbyte(direccion:word):byte;
 var
-  main_z80_reg:npreg_z80;
+  z80_0_reg:npreg_z80;
 begin
 case direccion of
   $e600:solomon_getbyte:=marcade.in0;
   $e601:solomon_getbyte:=marcade.in1;
   $e602:solomon_getbyte:=marcade.in2;
   $e603:begin
-          main_z80_reg:=main_z80.get_internal_r;
-          if (main_z80_reg.pc=$4cf0) then solomon_getbyte:=main_z80_reg.bc.w and $08 //proteccion ???
+          z80_0_reg:=z80_0.get_internal_r;
+          if (z80_0_reg.pc=$4cf0) then solomon_getbyte:=z80_0_reg.bc.w and $08 //proteccion ???
             else solomon_getbyte:=0;
         end;
   $e604:solomon_getbyte:=2;
@@ -171,7 +171,7 @@ case direccion of
    $e600:nmi_enable:=valor<>0;
    $e800:begin
             sound_latch:=valor;
-            snd_z80.change_nmi(PULSE_LINE);
+            z80_1.change_nmi(PULSE_LINE);
          end;
    $f000..$ffff:exit;
 end;
@@ -204,7 +204,7 @@ end;
 
 procedure solomon_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure solomon_despues_instruccion;
@@ -217,8 +217,8 @@ end;
 //Main
 procedure reset_solomon;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  AY8910_0.reset;
  AY8910_1.reset;
  AY8910_2.reset;
@@ -248,18 +248,18 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(solomon_getbyte,solomon_putbyte);
+z80_0:=cpu_z80.create(4000000,256);
+z80_0.change_ram_calls(solomon_getbyte,solomon_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3072000,256);
-snd_z80.change_ram_calls(solomon_snd_getbyte,solomon_snd_putbyte);
-snd_z80.change_io_calls(nil,solomon_snd_outbyte);
-snd_z80.init_sound(solomon_despues_instruccion);
-init_timer(snd_z80.numero_cpu,3072000/(60*2),solomon_snd_irq,true);
+z80_1:=cpu_z80.create(3072000,256);
+z80_1.change_ram_calls(solomon_snd_getbyte,solomon_snd_putbyte);
+z80_1.change_io_calls(nil,solomon_snd_outbyte);
+z80_1.init_sound(solomon_despues_instruccion);
+init_timer(z80_1.numero_cpu,3072000/(60*2),solomon_snd_irq,true);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,1);
-AY8910_1:=ay8910_chip.create(1500000,1);
-AY8910_2:=ay8910_chip.create(1500000,1);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,0.12);
+AY8910_1:=ay8910_chip.create(1500000,AY8910,0.12);
+AY8910_2:=ay8910_chip.create(1500000,AY8910,0.12);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@solomon_rom[0],'solomon.zip',0)) then exit;
 copymemory(@memoria[0],@memoria_temp[0],$4000);

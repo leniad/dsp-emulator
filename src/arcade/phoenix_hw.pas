@@ -93,11 +93,11 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     case f of
         207:begin
               marcade.dswa:=marcade.dswa and $7f;
@@ -162,11 +162,11 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     case f of
         207:begin
               marcade.dswa:=marcade.dswa and $7f;
@@ -226,7 +226,7 @@ end;
 //Main
 procedure phoenix_reset;
 begin
-main_z80.reset;
+z80_0.reset;
 scroll_y:=0;
 banco_pal:=0;
 marcade.in0:=$ff;
@@ -254,11 +254,11 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(208,248);
 //Main CPU
-main_z80:=cpu_z80.create(5500000,256);
-main_z80.init_sound(phoenix_sound_update);
+z80_0:=cpu_z80.create(5500000,256);
+z80_0.init_sound(phoenix_sound_update);
 case main_vars.tipo_maquina of
   11:begin //Phoenix
-        main_z80.change_ram_calls(phoenix_getbyte,phoenix_putbyte);
+        z80_0.change_ram_calls(phoenix_getbyte,phoenix_putbyte);
         //Chip sonido
         tms36xx_start(372,0.21,@phoenix_dec[0]);
         phoenix_audio_start;
@@ -281,7 +281,7 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@phoenix_dip_a;
   end;
   202:begin //Pleiads
-        main_z80.change_ram_calls(phoenix_getbyte,pleiads_putbyte);
+        z80_0.change_ram_calls(phoenix_getbyte,pleiads_putbyte);
         //Chip sonido
         tms36xx_start(247,0.21,@pleiads_dec[0]);
         //phoenix_audio_start;

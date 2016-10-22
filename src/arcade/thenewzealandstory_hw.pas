@@ -177,25 +177,25 @@ var
   frame_m,frame_s,frame_misc:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=sub_z80.tframes;
-frame_misc:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+frame_misc:=z80_2.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //sub
-    sub_z80.run(frame_misc);
-    frame_misc:=frame_misc+sub_z80.tframes-sub_z80.contador;
+    z80_1.run(frame_misc);
+    frame_misc:=frame_misc+z80_1.tframes-z80_1.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_2.run(frame_s);
+    frame_s:=frame_s+z80_2.tframes-z80_2.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_tnzs;
     end;
-    if f=247 then sub_z80.change_irq(HOLD_LINE);
+    if f=247 then z80_1.change_irq(HOLD_LINE);
   end;
 	if (not(obj_control[1]) and $20)<>0 then begin
 		if (obj_control[1] and $40)<>0 then begin
@@ -233,8 +233,8 @@ case direccion of
                  end;
    $f400:bg_flag:=valor;
    $f600:begin
-          if (valor and $10)<>0 then sub_z80.change_reset(CLEAR_LINE)
-            else sub_z80.change_reset(ASSERT_LINE);
+          if (valor and $10)<>0 then z80_1.change_reset(CLEAR_LINE)
+            else z80_1.change_reset(ASSERT_LINE);
 	        main_bank:=valor and $07;
         end;
    end;
@@ -274,7 +274,7 @@ case direccion of
   $a000:misc_bank:=valor and $3;
   $b004:begin
           sound_latch:=valor;
-          snd_z80.change_irq(HOLD_LINE);
+          z80_2.change_irq(HOLD_LINE);
         end;
   $d000..$dfff:mem_misc[direccion]:=valor;
   $e000..$efff:memoria[direccion]:=valor;
@@ -319,7 +319,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_nmi(irqstate);
+  z80_2.change_nmi(irqstate);
 end;
 
 //Insector X
@@ -354,19 +354,19 @@ var
   frame_m,frame_misc:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_misc:=sub_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_misc:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //sub
-    sub_z80.run(frame_misc);
-    frame_misc:=frame_misc+sub_z80.tframes-sub_z80.contador;
+    z80_1.run(frame_misc);
+    frame_misc:=frame_misc+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
-      sub_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
       update_video_tnzs;
     end;
   end;
@@ -407,8 +407,8 @@ case direccion of
                  end;
    $f400:bg_flag:=valor;
    $f600:begin
-          if (valor and $10)<>0 then sub_z80.change_reset(CLEAR_LINE)
-            else sub_z80.change_reset(ASSERT_LINE);
+          if (valor and $10)<>0 then z80_1.change_reset(CLEAR_LINE)
+            else z80_1.change_reset(ASSERT_LINE);
 	        main_bank:=valor and $07;
         end;
    $f800..$fbff:if buffer_paleta[direccion and $3ff]<>valor then begin
@@ -463,9 +463,9 @@ end;
 //Main
 procedure reset_tnzs;
 begin
- main_z80.reset;
- sub_z80.reset;
- if main_vars.tipo_maquina=129 then snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
+ if main_vars.tipo_maquina=129 then z80_2.reset;
  YM2203_0.reset;
  reset_audio;
  marcade.in0:=$ff;
@@ -495,22 +495,22 @@ iniciar_audio(false);
 screen_init(1,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,$100);
+z80_0:=cpu_z80.create(6000000,$100);
 //Misc CPU
-sub_z80:=cpu_z80.create(6000000,$100);
+z80_1:=cpu_z80.create(6000000,$100);
 //Sound chip
+ym2203_0:=ym2203_chip.create(3000000,2);
 case main_vars.tipo_maquina of
   129:begin   //TNZS
-        main_z80.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
+        z80_0.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
         //Misc CPU
-        sub_z80.change_ram_calls(tnzs_misc_getbyte,tnzs_misc_putbyte);
+        z80_1.change_ram_calls(tnzs_misc_getbyte,tnzs_misc_putbyte);
         //Sound CPU
-        snd_z80:=cpu_z80.create(6000000,$100);
-        snd_z80.change_ram_calls(tnzs_snd_getbyte,tnzs_snd_putbyte);
-        snd_z80.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
-        snd_z80.init_sound(tnzs_sound_update);
+        z80_2:=cpu_z80.create(6000000,$100);
+        z80_2.change_ram_calls(tnzs_snd_getbyte,tnzs_snd_putbyte);
+        z80_2.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
+        z80_2.init_sound(tnzs_sound_update);
         //Sound Chips
-        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_irq_calls(snd_irq);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@tnzs_rom,'tnzs.zip',1)) then exit;
@@ -537,12 +537,11 @@ case main_vars.tipo_maquina of
   end;
   130:begin   //Insector X
         //Main CPU
-        main_z80.change_ram_calls(insectorx_getbyte,insectorx_putbyte);
+        z80_0.change_ram_calls(insectorx_getbyte,insectorx_putbyte);
         //Misc CPU
-        sub_z80.init_sound(tnzs_sound_update);
-        sub_z80.change_ram_calls(insectorx_misc_getbyte,insectorx_misc_putbyte);
+        z80_1.init_sound(tnzs_sound_update);
+        z80_1.change_ram_calls(insectorx_misc_getbyte,insectorx_misc_putbyte);
         //Sound Chips
-        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@insectorx_rom,'insectx.zip',1)) then exit;

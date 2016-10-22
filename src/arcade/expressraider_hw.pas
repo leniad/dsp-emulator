@@ -24,6 +24,17 @@ const
         expraid_proms:array[0..4] of tipo_roms=(
         (n:'cz17.prm';l:$100;p:$000;crc:$da31dfbc),(n:'cz16.prm';l:$100;p:$100;crc:$51f25b4c),
         (n:'cz15.prm';l:$100;p:$200;crc:$a6168d7f),(n:'cz14.prm';l:$100;p:$300;crc:$52aad300),());
+        expraid_dip_a:array [0..5] of def_dip=(
+        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$4;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Coin Mode';number:2;dip:((dip_val:$10;dip_name:'Mode 1'),(dip_val:$0;dip_name:'Mode 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Flip Screen';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        expraid_dip_b:array [0..4] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$1;dip_name:'1'),(dip_val:$3;dip_name:'3'),(dip_val:$5;dip_name:'2'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'50K 80K'),(dip_val:$4;dip_name:'50K only'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Difficulty';number:4;dip:((dip_val:$18;dip_name:'Easy'),(dip_val:$10;dip_name:'Normal'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
   vb,prot_val,sound_latch,scroll_x,scroll_y,scroll_x2:byte;
@@ -105,13 +116,13 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
   if (arcade_input.coin[0] and not(old_val)) then begin
       marcade.in2:=(marcade.in2 and $bf);
-      main_m6502.change_nmi(ASSERT_LINE);
+      m6502_0.change_nmi(ASSERT_LINE);
   end else begin
       marcade.in2:=(marcade.in2 or $40);
   end;
   if (arcade_input.coin[1] and not(old_val2)) then begin
       marcade.in2:=(marcade.in2 and $7f);
-      main_m6502.change_nmi(ASSERT_LINE);
+      m6502_0.change_nmi(ASSERT_LINE);
   end else begin
       marcade.in2:=(marcade.in2 or $80);
   end;
@@ -128,15 +139,15 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6502.tframes;
-frame_s:=snd_m6809.tframes;
+frame_m:=m6502_0.tframes;
+frame_s:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 261 do begin
-   main_m6502.run(frame_m);
-   frame_m:=frame_m+main_m6502.tframes-main_m6502.contador;
+   m6502_0.run(frame_m);
+   frame_m:=frame_m+m6502_0.tframes-m6502_0.contador;
    //Sound
-   snd_m6809.run(frame_s);
-   frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+   m6809_0.run(frame_s);
+   frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
    case f of
       7:vb:=0;
       247:begin
@@ -154,10 +165,10 @@ function getbyte_expraid(direccion:word):byte;
 begin
 case direccion of
    0..$fff,$4000..$ffff:getbyte_expraid:=memoria[direccion];
-   $1800:getbyte_expraid:=$bf;
+   $1800:getbyte_expraid:=marcade.dswa;
    $1801:getbyte_expraid:=marcade.in0;
    $1802:getbyte_expraid:=marcade.in2;
-   $1803:getbyte_expraid:=$ff;
+   $1803:getbyte_expraid:=marcade.dswb;
    $2800:getbyte_expraid:=prot_val;
    $2801:getbyte_expraid:=$2;
 end;
@@ -172,11 +183,12 @@ case direccion of
                 gfx[0].buffer[direccion and $3ff]:=true;
                 memoria[direccion]:=valor;
              end;
-  $2000:main_m6502.change_nmi(CLEAR_LINE);
+  $2000:m6502_0.change_nmi(CLEAR_LINE);
   $2001:begin
            sound_latch:=valor;
-           snd_m6809.change_nmi(ASSERT_LINE);
+           m6809_0.change_nmi(ASSERT_LINE);
         end;
+  $2002:main_screen.flip_main_screen:=(valor and $1)<>0;
   $2800..$2803:if bg_tiles[direccion and $3]<>(valor and $3f) then begin
                 bg_tiles[direccion and $3]:=valor and $3f;
                 bg_tiles_cam[direccion and $3]:=true;
@@ -206,7 +218,7 @@ begin
     $4000:getbyte_snd_expraid:=ym3812_0.status;
     $6000:begin
             getbyte_snd_expraid:=sound_latch;
-            snd_m6809.change_nmi(CLEAR_LINE);
+            m6809_0.change_nmi(CLEAR_LINE);
           end;
   end;
 end;
@@ -231,14 +243,14 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_m6809.change_irq(irqstate);
+  m6809_0.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_expraid;
 begin
-main_m6502.reset;
-snd_m6809.reset;
+m6502_0.reset;
+m6809_0.reset;
 YM2203_0.Reset;
 YM3812_0.reset;
 marcade.in0:=$ff;
@@ -282,13 +294,13 @@ screen_init(4,512,512,true);
 screen_init(6,256,256,true);
 iniciar_video(240,240);
 //Main CPU
-main_m6502:=cpu_m6502.create(1500000,262,TCPU_DECO16);
-main_m6502.change_ram_calls(getbyte_expraid,putbyte_expraid);
-main_m6502.change_io_calls(nil,get_io_expraid);
+m6502_0:=cpu_m6502.create(1500000,262,TCPU_DECO16);
+m6502_0.change_ram_calls(getbyte_expraid,putbyte_expraid);
+m6502_0.change_io_calls(nil,get_io_expraid);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(1500000,262);
-snd_m6809.change_ram_calls(getbyte_snd_expraid,putbyte_snd_expraid);
-snd_m6809.init_sound(expraid_sound_update);
+m6809_0:=cpu_m6809.Create(1500000,262);
+m6809_0.change_ram_calls(getbyte_snd_expraid,putbyte_snd_expraid);
+m6809_0.init_sound(expraid_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(1500000,0.3,0.3);
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,0.6);
@@ -338,6 +350,11 @@ for f:=0 to 255 do begin
   colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
 end;
 set_pal(colores,256);
+//DIP
+marcade.dswa:=$bf;
+marcade.dswa_val:=@expraid_dip_a;
+marcade.dswb:=$ff;
+marcade.dswb_val:=@expraid_dip_b;
 //final
 reset_expraid;
 iniciar_expraid:=true;

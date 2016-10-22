@@ -396,7 +396,7 @@ if not(OpenRom(StChip8,RomFile)) then exit;
   change_caption;
   copymemory(@memoria[$200],datos,longitud);
   freemem(datos);
-  directory.Chip8:=ExtractFilePath(romfile)+main_vars.cadena_dir;
+  directory.Chip8:=ExtractFilePath(romfile);
   abrir_chip8:=true;
 end;
 

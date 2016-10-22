@@ -93,13 +93,13 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     if f=239 then begin
-      if haz_nmi then main_z80.change_nmi(PULSE_LINE);
+      if haz_nmi then z80_0.change_nmi(PULSE_LINE);
       update_video_mario;
     end;
   end;
@@ -192,7 +192,7 @@ end;
 //Main
 procedure reset_mario;
 begin
- main_z80.reset;
+ z80_0.reset;
  reset_samples;
  reset_audio;
  marcade.in0:=0;
@@ -226,12 +226,12 @@ screen_mod_scroll(1,0,0,0,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,264);
-main_z80.change_ram_calls(mario_getbyte,mario_putbyte);
+z80_0:=cpu_z80.create(4000000,264);
+z80_0.change_ram_calls(mario_getbyte,mario_putbyte);
 //cargar roms
 if not(cargar_roms(@memoria[0],@mario_rom[0],'mario.zip',0)) then exit;
 //samples
-if load_samples('mario.zip',@mario_samples[0],num_samples) then main_z80.init_sound(mario_sound_update);
+if load_samples('mario.zip',@mario_samples[0],num_samples) then z80_0.init_sound(mario_sound_update);
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@mario_char[0],'mario.zip',0)) then exit;
 init_gfx(0,8,8,512);

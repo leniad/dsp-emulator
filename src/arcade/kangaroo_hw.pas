@@ -113,19 +113,19 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 259 do begin
     //Main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=247 then begin
-      main_z80.change_irq(HOLD_LINE);
-      snd_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
       update_video_kangaroo;
     end;
   end;
@@ -270,9 +270,9 @@ begin
 open_qsnapshot_save('kangaroo'+nombre);
 getmem(data,200);
 //CPU
-size:=main_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ay8910_0.save_snapshot(data);
@@ -300,9 +300,9 @@ if not(open_qsnapshot_load('kangaroo'+nombre)) then exit;
 getmem(data,200);
 //CPU
 loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_1.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 ay8910_0.load_snapshot(data);
@@ -323,9 +323,9 @@ end;
 //Main
 procedure reset_kangaroo;
 begin
- main_z80.reset;
- main_z80.change_nmi(PULSE_LINE);
- snd_z80.reset;
+ z80_0.reset;
+ z80_0.change_nmi(PULSE_LINE);
+ z80_1.reset;
  ay8910_0.reset;
  reset_audio;
  marcade.in0:=0;
@@ -348,15 +348,15 @@ iniciar_audio(false);
 screen_init(1,256,512);
 iniciar_video(240,512);
 //Main CPU
-main_z80:=cpu_z80.create(2500000,260);
-main_z80.change_ram_calls(kangaroo_getbyte,kangaroo_putbyte);
+z80_0:=cpu_z80.create(2500000,260);
+z80_0.change_ram_calls(kangaroo_getbyte,kangaroo_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(1250000,260);
-snd_z80.change_ram_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
-snd_z80.change_io_calls(kangaroo_snd_inbyte,kangaroo_snd_outbyte);
-snd_z80.init_sound(kangaroo_sound_update);
+z80_1:=cpu_z80.create(1250000,260);
+z80_1.change_ram_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
+z80_1.change_io_calls(kangaroo_snd_inbyte,kangaroo_snd_outbyte);
+z80_1.init_sound(kangaroo_sound_update);
 //Sound chip
-ay8910_0:=ay8910_chip.create(1250000,1);
+ay8910_0:=ay8910_chip.create(1250000,AY8910,0.5);
 //cargar roms
 if not(cargar_roms(@memoria[0],@kangaroo_rom[0],'kangaroo.zip',0)) then exit;
 //cargar roms snd

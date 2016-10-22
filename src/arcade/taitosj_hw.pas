@@ -250,18 +250,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_taitosj;
     end;
   end;
@@ -356,7 +356,7 @@ case direccion of
       $a:gfx_pos:=(gfx_pos and $ff) or (valor shl 8);
       $b:begin
             soundlatch:=valor;
-	          if not(sndnmi_disable) then snd_z80.change_nmi(PULSE_LINE);
+	          if not(sndnmi_disable) then z80_1.change_nmi(PULSE_LINE);
          end;
       $e:rom_bank:=valor shr 7;
   end;
@@ -370,22 +370,22 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_mcu:=main_m6805.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     //mcu
-    main_m6805.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
+    m6805_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_taitosj;
     end;
   end;
@@ -432,7 +432,7 @@ memoria[direccion]:=valor;
 case direccion of
   $8800..$8fff:if (direccion and 1)=0 then begin
                   mcu_zready:=1;
-	                main_m6805.irq_request(0,ASSERT_LINE);
+	                m6805_0.irq_request(0,ASSERT_LINE);
 	                mcu_fromz80:=valor;
                end;
 	$9000..$a7ff:rechars1:=true;
@@ -463,7 +463,7 @@ case direccion of
       $a:gfx_pos:=(gfx_pos and $00ff) or (valor shl 8);
       $b:begin
             soundlatch:=valor;
-	          if not(sndnmi_disable) then snd_z80.change_nmi(PULSE_LINE);
+	          if not(sndnmi_disable) then z80_1.change_nmi(PULSE_LINE);
          end;
       $e:rom_bank:=valor shr 7;
   end;
@@ -492,7 +492,7 @@ case direccion of
 	    if (not(valor) and $02)<>0 then begin
     		// 68705 is going to read data from the Z80 */
         mcu_zready:=0;
-        main_m6805.irq_request(0,CLEAR_LINE);
+        m6805_0.irq_request(0,CLEAR_LINE);
 		    mcu_portA_in:=mcu_fromz80;
 	    end;
 	    if (not(valor) and $08)<>0 then mcu_busreq:=1 else mcu_busreq:=0;
@@ -574,7 +574,7 @@ end;
 
 procedure taitosj_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure taitosj_sound_update;
@@ -589,9 +589,9 @@ end;
 //Main
 procedure taitosj_reset;
 begin
-main_z80.reset;
-snd_z80.reset;
-if main_vars.tipo_maquina=185 then main_m6805.reset;
+z80_0.reset;
+z80_1.reset;
+if main_vars.tipo_maquina=185 then m6805_0.reset;
 ay8910_0.reset;
 ay8910_1.reset;
 ay8910_2.reset;
@@ -645,26 +645,26 @@ screen_mod_scroll(3,256,256,255,256,256,255);
 screen_init(4,256,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(4000000,256);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(taitosj_snd_getbyte,taitosj_snd_putbyte);
-snd_z80.init_sound(taitosj_sound_update);
+z80_1:=cpu_z80.create(3000000,256);
+z80_1.change_ram_calls(taitosj_snd_getbyte,taitosj_snd_putbyte);
+z80_1.init_sound(taitosj_sound_update);
 //IRQ sonido
-init_timer(snd_z80.numero_cpu,3000000/(6000000/(4*16*16*10*16)),taitosj_snd_irq,true);
+init_timer(z80_1.numero_cpu,3000000/(6000000/(4*16*16*10*16)),taitosj_snd_irq,true);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,1);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.15);
 ay8910_0.change_io_calls(ay0_porta_read,ay0_portb_read,nil,nil);
-ay8910_1:=ay8910_chip.create(1500000,1);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,0.15);
 ay8910_1.change_io_calls(nil,nil,ay1_porta_write,ay1_portb_write);
-ay8910_2:=ay8910_chip.create(1500000,1);
+ay8910_2:=ay8910_chip.create(1500000,AY8910,0.15);
 ay8910_2.change_io_calls(nil,nil,ay2_porta_write,nil);
-ay8910_3:=ay8910_chip.create(1500000,1);
+ay8910_3:=ay8910_chip.create(1500000,AY8910,0.3);
 ay8910_3.change_io_calls(nil,nil,nil,ay3_portb_write);
 dac_0:=dac_chip.create(32);
 case main_vars.tipo_maquina of
   185:begin  //Elevator Action
-        main_z80.change_ram_calls(taitosj_mcu_getbyte,taitosj_mcu_putbyte);
+        z80_0.change_ram_calls(taitosj_mcu_getbyte,taitosj_mcu_putbyte);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@elevator_rom[0],'elevator.zip',0)) then exit;
         //Poner roms en sus bancos
@@ -676,8 +676,8 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@mem_snd[0],@elevator_sonido[0],'elevator.zip',0)) then exit;
         //MCU CPU
         if not(cargar_roms(@mcu_mem[0],@elevator_mcu,'elevator.zip')) then exit;
-        main_m6805:=cpu_m6805.create(3000000,$100,tipo_m68705);
-        main_m6805.change_ram_calls(mcu_taitosj_getbyte,mcu_taitosj_putbyte);
+        m6805_0:=cpu_m6805.create(3000000,$100,tipo_m68705);
+        m6805_0.change_ram_calls(mcu_taitosj_getbyte,mcu_taitosj_putbyte);
         //cargar chars
         if not(cargar_roms(@gfx_rom[0],@elevator_char[0],'elevator.zip',0)) then exit;
         //crear gfx
@@ -693,7 +693,7 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@elevator_prom,'elevator.zip')) then exit;
       end;
   189:begin //Jungle King
-        main_z80.change_ram_calls(taitosj_nomcu_getbyte,taitosj_nomcu_putbyte);
+        z80_0.change_ram_calls(taitosj_nomcu_getbyte,taitosj_nomcu_putbyte);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@junglek_rom[0],'junglek.zip',0)) then exit;
         //Poner roms en sus bancos

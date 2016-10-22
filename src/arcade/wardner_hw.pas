@@ -137,26 +137,26 @@ var
   frame_m,frame_s,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_mcu:=main_tms32010.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+frame_mcu:=tms32010_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 285 do begin
     //MAIN CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //SND CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     //MCU
-    main_tms32010.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_tms32010.tframes-main_tms32010.contador;
+    tms32010_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+tms32010_0.tframes-tms32010_0.contador;
     case f of
       0:marcade.in0:=marcade.in0 and $7f;
       239:begin
             marcade.in0:=marcade.in0 or $80;
             if int_enable then begin
-                main_z80.change_irq(HOLD_LINE);
+                z80_0.change_irq(HOLD_LINE);
                 int_enable:=false;
             end;
             update_video_wardner;
@@ -209,7 +209,7 @@ begin
 	end;
 	if (valor=0) then begin
 		if dsp_execute then begin
-      main_z80.change_halt(CLEAR_LINE);
+      z80_0.change_halt(CLEAR_LINE);
 			dsp_execute:=false;
 		end;
 		wardner_dsp_BIO:=true;
@@ -255,7 +255,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_1.change_irq(irqstate);
 end;
 
 function wardner_getbyte(direccion:word):byte;
@@ -339,13 +339,13 @@ case (puerto and $ff) of
   $35:fg_offs:=(fg_offs and $00ff) or ((valor and $f) shl 8);
   $5a:case valor of
         $00:begin	// This means assert the INT line to the DSP */
-	      main_tms32010.change_halt(CLEAR_LINE);
-              main_z80.change_halt(ASSERT_LINE);
-              main_tms32010.change_irq(ASSERT_LINE);
+	      tms32010_0.change_halt(CLEAR_LINE);
+              z80_0.change_halt(ASSERT_LINE);
+              tms32010_0.change_irq(ASSERT_LINE);
 	    end;
 	$01:begin	// This means inhibit the INT line to the DSP */
-              main_tms32010.change_irq(CLEAR_LINE);
-	      main_tms32010.change_halt(ASSERT_LINE);
+              tms32010_0.change_irq(CLEAR_LINE);
+	      tms32010_0.change_halt(ASSERT_LINE);
             end;
       end;
   $5c:case valor of
@@ -400,9 +400,9 @@ end;
 //Main
 procedure reset_wardnerhw;
 begin
- main_z80.reset;
- snd_z80.reset;
- main_tms32010.reset;
+ z80_0.reset;
+ z80_1.reset;
+ tms32010_0.reset;
  ym3812_0.reset;
  reset_audio;
  txt_scroll_x:=457;
@@ -450,17 +450,17 @@ screen_mod_scroll(3,512,512,511,512,256,511);
 screen_init(4,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
-main_z80:=cpu_z80.create(24000000 div 4,286);
-main_z80.change_ram_calls(wardner_getbyte,wardner_putbyte);
-main_z80.change_io_calls(wardner_inbyte,wardner_outbyte);
+z80_0:=cpu_z80.create(24000000 div 4,286);
+z80_0.change_ram_calls(wardner_getbyte,wardner_putbyte);
+z80_0.change_io_calls(wardner_inbyte,wardner_outbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3500000,286);
-snd_z80.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
-snd_z80.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
-snd_z80.init_sound(wardner_sound_update);
+z80_1:=cpu_z80.create(3500000,286);
+z80_1.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
+z80_1.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
+z80_1.init_sound(wardner_sound_update);
 //TMS MCU
-main_tms32010:=cpu_tms32010.create(14000000,286);
-main_tms32010.change_io_calls(wardner_BIO_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
+tms32010_0:=cpu_tms32010.create(14000000,286);
+tms32010_0.change_io_calls(wardner_BIO_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
 ym3812_0.change_irq_calls(snd_irq);
@@ -483,7 +483,7 @@ for f:=0 to $1ff do begin
    rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1200] and $f)) shl 8) or
                         (memoria_temp[f+$1400] and $f) shl 4+(memoria_temp[f+$1600] and $f);
 end;
-copymemory(main_tms32010.get_rom_addr,@rom[0],$1000);
+copymemory(tms32010_0.get_rom_addr,@rom[0],$1000);
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@wardner_char[0],'wardner.zip',0)) then exit;
 init_gfx(0,8,8,2048);

@@ -202,24 +202,24 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_nec.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=nec_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 283 do begin
     //Main CPU
-    main_nec.run(frame_m);
-    frame_m:=frame_m+main_nec.tframes-main_nec.contador;
+    nec_0.run(frame_m);
+    frame_m:=frame_m+nec_0.tframes-nec_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if ((f<255) and (f=(m72_raster_irq_position-1))) then begin
-      main_nec.vect_req:=irq_base[1]+2;
-      main_nec.change_irq(HOLD_LINE);
+      nec_0.vect_req:=irq_base[1]+2;
+      nec_0.change_irq(HOLD_LINE);
       if not(video_off) then paint_video_irem_m72(0,f);
     end;
     if f=255 then begin
-      main_nec.vect_req:=irq_base[1];
-      main_nec.change_irq(HOLD_LINE);
+      nec_0.vect_req:=irq_base[1];
+      nec_0.change_irq(HOLD_LINE);
       if not(video_off) then begin
         paint_video_irem_m72(m72_raster_irq_position and $ff,f);
         update_video_irem_m72;
@@ -285,8 +285,8 @@ case puerto of
       timer[timer_sound].enabled:=true;
     end;
   2:begin
-      if (valor and $10)=0 then snd_z80.change_reset(ASSERT_LINE)
-        else snd_z80.change_reset(CLEAR_LINE);
+      if (valor and $10)=0 then z80_0.change_reset(ASSERT_LINE)
+        else z80_0.change_reset(CLEAR_LINE);
       video_off:=(valor and $08)<>0;
     end;
   4:begin //DMA
@@ -625,9 +625,9 @@ end;
 //Sound
 procedure sound_irq_ack;
 begin
-snd_z80.im0:=snd_irq_vector;
-if snd_irq_vector=$ff then snd_z80.change_irq(CLEAR_LINE)
-  else snd_z80.change_irq(ASSERT_LINE);
+z80_0.im0:=snd_irq_vector;
+if snd_irq_vector=$ff then z80_0.change_irq(CLEAR_LINE)
+  else z80_0.change_irq(ASSERT_LINE);
 timer[timer_sound].enabled:=false;
 end;
 
@@ -705,7 +705,7 @@ end;
 
 procedure rtype2_perodic_int;
 begin
-  snd_z80.change_nmi(PULSE_LINE);
+  z80_0.change_nmi(PULSE_LINE);
 end;
 
 procedure irem_m72_sound_update;
@@ -722,8 +722,8 @@ end;
 //Main
 procedure reset_irem_m72;
 begin
- main_nec.reset;
- snd_z80.reset;
+ nec_0.reset;
+ z80_0.reset;
  ym2151_0.reset;
  case main_vars.tipo_maquina of
   190,191:dac_0.reset;
@@ -771,21 +771,21 @@ screen_init(6,384,256);
 iniciar_video(384,256);
 //iniciar_video(1024,512);
 //Main CPU
-main_nec:=cpu_nec.create(8000000,284,NEC_V30);
+nec_0:=cpu_nec.create(8000000,284,NEC_V30);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,284);
-snd_z80.change_ram_calls(irem_m72_snd_getbyte,irem_m72_snd_putbyte);
-timer_sound:=init_timer(snd_z80.numero_cpu,1,sound_irq_ack,true);
+z80_0:=cpu_z80.create(3579545,284);
+z80_0.change_ram_calls(irem_m72_snd_getbyte,irem_m72_snd_putbyte);
+timer_sound:=init_timer(z80_0.numero_cpu,1,sound_irq_ack,true);
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   87:begin //R-Type
       //Main CPU
-      main_nec.change_ram_calls(irem_m72_getbyte,irem_m72_putbyte);
-      main_nec.change_io_calls16(irem_m72_inword,irem_m72_outword);
+      nec_0.change_ram_calls(irem_m72_getbyte,irem_m72_putbyte);
+      nec_0.change_io_calls16(irem_m72_inword,irem_m72_outword);
       if not(cargar_roms16b(@rom[0],@rtype_rom[0],'rtype.zip',0)) then exit;
       //Sound
-      snd_z80.change_io_calls(irem_m72_snd_inbyte,irem_m72_snd_outbyte);
-      snd_z80.init_sound(irem_m72_sound_update);
+      z80_0.change_io_calls(irem_m72_snd_inbyte,irem_m72_snd_outbyte);
+      z80_0.init_sound(irem_m72_sound_update);
       //video
       update_video_irem_m72:=update_video_rtype;
       paint_video_irem_m72:=paint_video_rtype;
@@ -809,15 +809,15 @@ case main_vars.tipo_maquina of
     end;
   190:begin //Hammerin' Harry
       //Main CPU
-      main_nec.change_ram_calls(hharry_getbyte,hharry_putbyte);
-      main_nec.change_io_calls16(hharry_inword,hharry_outword);
-      main_nec.change_io_calls(hharry_inbyte,hharry_outbyte);
+      nec_0.change_ram_calls(hharry_getbyte,hharry_putbyte);
+      nec_0.change_io_calls16(hharry_inword,hharry_outword);
+      nec_0.change_io_calls(hharry_inbyte,hharry_outbyte);
       if not(cargar_roms16b(@rom[0],@hharry_rom[0],'hharry.zip',0)) then exit;
       //Sound
       if not(cargar_roms(@mem_snd[0],@hharry_snd,'hharry.zip')) then exit;
-      snd_z80.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
-      init_timer(snd_z80.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
-      snd_z80.init_sound(rtype2_sound_update);
+      z80_0.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
+      init_timer(z80_0.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
+      z80_0.init_sound(rtype2_sound_update);
       dac_0:=dac_chip.Create;
       if not(cargar_roms(@mem_dac[0],@hharry_dac,'hharry.zip')) then exit;
       //video
@@ -838,15 +838,15 @@ case main_vars.tipo_maquina of
     end;
     191:begin //R-Type 2
       //Main CPU
-      main_nec.change_ram_calls(rtype2_getbyte,rtype2_putbyte);
-      main_nec.change_io_calls16(rtype2_inword,rtype2_outword);
-      main_nec.change_io_calls(rtype2_inbyte,rtype2_outbyte);
+      nec_0.change_ram_calls(rtype2_getbyte,rtype2_putbyte);
+      nec_0.change_io_calls16(rtype2_inword,rtype2_outword);
+      nec_0.change_io_calls(rtype2_inbyte,rtype2_outbyte);
       if not(cargar_roms16b(@rom[0],@rtype2_rom[0],'rtype2.zip',0)) then exit;
       //Sound
       if not(cargar_roms(@mem_snd[0],@rtype2_snd,'rtype2.zip')) then exit;
-      snd_z80.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
-      init_timer(snd_z80.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
-      snd_z80.init_sound(rtype2_sound_update);
+      z80_0.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
+      init_timer(z80_0.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
+      z80_0.init_sound(rtype2_sound_update);
       dac_0:=dac_chip.Create;
       if not(cargar_roms(@mem_dac[0],@rtype2_dac,'rtype2.zip')) then exit;
       //video

@@ -142,18 +142,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=247 then begin
-      if irq_ena then main_z80.change_irq(HOLD_LINE);
+      if irq_ena then z80_0.change_irq(HOLD_LINE);
       update_video_lw;
       copymemory(@buffer_sprites[0],@memoria[$de00],$200);
     end;
@@ -246,7 +246,7 @@ end;
 
 procedure lwings_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure lwings_sound_update;
@@ -335,22 +335,22 @@ var
   frame_m,frame_s,frame_ms:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_ms:=sub_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+frame_ms:=z80_2.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main Z80
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound Z80
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     //ADPCM Z80
-    sub_z80.run(frame_ms);
-    frame_ms:=frame_ms+sub_z80.tframes-sub_z80.contador;
+    z80_2.run(frame_ms);
+    frame_ms:=frame_ms+z80_2.tframes-z80_2.contador;
     if f=247 then begin
-      if irq_ena then main_z80.change_irq(HOLD_LINE);
+      if irq_ena then z80_0.change_irq(HOLD_LINE);
       update_video_trojan;
       copymemory(@buffer_sprites[0],@memoria[$de00],$200);
     end;
@@ -445,19 +445,19 @@ end;
 
 procedure trojan_adpcm_instruccion;
 begin
-  sub_z80.change_irq(HOLD_LINE);
+  z80_2.change_irq(HOLD_LINE);
 end;
 
 //Main
 procedure reset_lwings;
 begin
- main_z80.reset;
- main_z80.im0:=$d7;  //rst 10
- snd_z80.reset;
+ z80_0.reset;
+ z80_0.im0:=$d7;  //rst 10
+ z80_1.reset;
  YM2203_0.reset;
  YM2203_1.reset;
  if main_vars.tipo_maquina=61 then begin
-  sub_z80.reset;
+  z80_2.reset;
   msm_5205_0.reset;
  end;
  reset_audio;
@@ -534,18 +534,18 @@ case main_vars.tipo_maquina of
 end;
 iniciar_video(256,240);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.init_sound(lwings_sound_update);
-init_timer(snd_z80.numero_cpu,3000000/222,lwings_snd_irq,true);
-snd_z80.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
+z80_1:=cpu_z80.create(3000000,256);
+z80_1.init_sound(lwings_sound_update);
+init_timer(z80_1.numero_cpu,3000000/222,lwings_snd_irq,true);
+z80_1.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(1500000,0.20,0.10);
 ym2203_1:=ym2203_chip.create(1500000,0.20,0.10);
 case main_vars.tipo_maquina of
   59:begin
         //Main CPU
-        main_z80:=cpu_z80.create(6000000,256);
-        main_z80.change_ram_calls(lwings_getbyte,lwings_putbyte);
+        z80_0:=cpu_z80.create(6000000,256);
+        z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
         if not(cargar_roms(@memoria_temp[0],@lwings_rom[0],'lwings.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
@@ -563,8 +563,8 @@ case main_vars.tipo_maquina of
      end;
   60:begin
         //Main CPU
-        main_z80:=cpu_z80.create(6000000,256);
-        main_z80.change_ram_calls(lwings_getbyte,lwings_putbyte);
+        z80_0:=cpu_z80.create(6000000,256);
+        z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
         if not(cargar_roms(@memoria_temp[0],@sectionz_rom[0],'sectionz.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
@@ -582,14 +582,14 @@ case main_vars.tipo_maquina of
       end;
   61:begin
         //Main CPU
-        main_z80:=cpu_z80.create(3000000,256);
-        main_z80.change_ram_calls(lwings_getbyte,trojan_putbyte);
+        z80_0:=cpu_z80.create(3000000,256);
+        z80_0.change_ram_calls(lwings_getbyte,trojan_putbyte);
         //ADPCM Z80
-        sub_z80:=cpu_z80.create(3000000,256);
-        sub_z80.change_ram_calls(trojan_misc_getbyte,trojan_misc_putbyte);
-        sub_z80.change_io_calls(trojan_inbyte,trojan_outbyte);
+        z80_2:=cpu_z80.create(3000000,256);
+        z80_2.change_ram_calls(trojan_misc_getbyte,trojan_misc_putbyte);
+        z80_2.change_io_calls(trojan_inbyte,trojan_outbyte);
         msm_5205_0:=MSM5205_chip.create(445000,MSM5205_SEX_4B,0.50,nil);
-        init_timer(sub_z80.numero_cpu,3000000/4000,trojan_adpcm_instruccion,true);
+        init_timer(z80_2.numero_cpu,3000000/4000,trojan_adpcm_instruccion,true);
         //Graficos
         if not(cargar_roms(@memoria_temp[0],@trojan_rom[0],'trojan.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);

@@ -116,21 +116,21 @@ var
   frame_m,frame_s,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_mcu:=main_m6805.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
+frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     //MCU CPU
-    main_m6805.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
+    m6805_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
   end;
-  if ena_irq then main_z80.change_irq(HOLD_LINE);
+  if ena_irq then z80_0.change_irq(HOLD_LINE);
   update_video_sf_hw;
   copymemory(@buffer_sprites[0],@memoria[$e000],$800);
   eventos_sf_hw;
@@ -178,7 +178,7 @@ case direccion of
 	1:begin
       if (((ddrB and $02)<>0) and ((not(valor) and  $02)<>0) and ((portB_out and $02)<>0)) then begin
 		    portA_in:=from_main;
-		    if (main_sent<>0) then main_m6805.irq_request(0,CLEAR_LINE);
+		    if (main_sent<>0) then m6805_0.irq_request(0,CLEAR_LINE);
     		main_sent:=0;
       end;
     	if (((ddrB and $04)<>0) and ((valor and $04)<>0) and ((not(portB_out) and $04)<>0)) then begin
@@ -220,7 +220,7 @@ case direccion of
           from_main:=valor;
          	main_sent:=1;
           mcu_sent:=0;
-          main_m6805.irq_request(0,ASSERT_LINE);
+          m6805_0.irq_request(0,ASSERT_LINE);
         end;
   $f000..$ffff:gfx[0].buffer[direccion and $7ff]:=true;
 end;
@@ -241,8 +241,8 @@ end;
 procedure sf_outbyte(valor:byte;puerto:word);
 begin
 case (puerto and $ff) of
-     0:snd_z80.change_irq(ASSERT_LINE);
-     1:snd_z80.change_irq(CLEAR_LINE);
+     0:z80_1.change_irq(ASSERT_LINE);
+     1:z80_1.change_irq(CLEAR_LINE);
      6,7:ena_irq:=(puerto and 1)<>0;
      8,9:rom_bank:=puerto and 1;
 end;
@@ -274,7 +274,7 @@ case direccion of
 	1:begin
       if (((ddrB and $02)<>0) and ((not(valor) and  $02)<>0) and ((portB_out and $02)<>0)) then begin
 		    portA_in:=from_main;
-		    if (main_sent<>0) then main_m6805.irq_request(0,CLEAR_LINE);
+		    if (main_sent<>0) then m6805_0.irq_request(0,CLEAR_LINE);
 		    main_sent:=0;
       end;
 	    if (((ddrB and $04)<>0) and ((valor and $04)<>0) and ((not(portB_out) and $04)<>0)) then begin
@@ -344,15 +344,15 @@ end;
 
 procedure sf_sound_nmi;
 begin
-  snd_z80.change_nmi(PULSE_LINE);
+  z80_1.change_nmi(PULSE_LINE);
 end;
 
 //Main
 procedure reset_sf_hw;
 begin
- main_z80.reset;
- snd_z80.reset;
- main_m6805.reset;
+ z80_0.reset;
+ z80_1.reset;
+ m6805_0.reset;
  AY8910_0.reset;
  AY8910_1.reset;
  reset_audio;
@@ -422,26 +422,26 @@ screen_mod_scroll(2,256,256,255,512,512,511);
 screen_init(3,256,512,false,true);
 iniciar_video(239,280);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,256);
-main_z80.change_ram_calls(sf_getbyte,sf_putbyte);
-main_z80.change_io_calls(sf_inbyte,sf_outbyte);
+z80_0:=cpu_z80.create(6000000,256);
+z80_0.change_ram_calls(sf_getbyte,sf_putbyte);
+z80_0.change_io_calls(sf_inbyte,sf_outbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(snd_sf_hw_getbyte,snd_sf_hw_putbyte);
-snd_z80.init_sound(sf_hw_sound_update);
+z80_1:=cpu_z80.create(3000000,256);
+z80_1.change_ram_calls(snd_sf_hw_getbyte,snd_sf_hw_putbyte);
+z80_1.init_sound(sf_hw_sound_update);
 //MCU
-main_m6805:=cpu_m6805.create(3000000,256,tipo_m68705);
+m6805_0:=cpu_m6805.create(3000000,256,tipo_m68705);
 //Sound Chips
-ay8910_0:=ay8910_chip.create(1500000,1);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.25);
 ay8910_0.change_io_calls(ay8910_porta_0,ay8910_portb_0,nil,nil);
-ay8910_1:=ay8910_chip.create(1500000,1);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,0.25);
 ay8910_1.change_io_calls(ay8910_porta_1,ay8910_portb_1,nil,nil);
 case main_vars.tipo_maquina of
   98:begin
       //SND CPU
-      init_timer(snd_z80.numero_cpu,3000000/360,sf_sound_nmi,true);
+      init_timer(z80_1.numero_cpu,3000000/360,sf_sound_nmi,true);
       //MCU CPU
-      main_m6805.change_ram_calls(mcu_tigerh_hw_getbyte,mcu_tigerh_hw_putbyte);
+      m6805_0.change_ram_calls(mcu_tigerh_hw_getbyte,mcu_tigerh_hw_putbyte);
       tiles_mask:=$7;
       sprite_mask:=$40;
       //cargar roms
@@ -466,9 +466,9 @@ case main_vars.tipo_maquina of
   end;
   99:begin
       //SND CPU
-      init_timer(snd_z80.numero_cpu,3000000/180,sf_sound_nmi,true);
+      init_timer(z80_1.numero_cpu,3000000/180,sf_sound_nmi,true);
       //MCU CPU
-      main_m6805.change_ram_calls(mcu_sf_hw_getbyte,mcu_sf_hw_putbyte);
+      m6805_0.change_ram_calls(mcu_sf_hw_getbyte,mcu_sf_hw_putbyte);
       tiles_mask:=$f;
       sprite_mask:=$c0;
       //cargar roms

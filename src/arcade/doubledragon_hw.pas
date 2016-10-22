@@ -44,7 +44,7 @@ const
 
 var
  rom:array[0..5,0..$3FFF] of byte;
- banco_rom,soundlatch,dd_sub_port,vblank:byte;
+ banco_rom,soundlatch,dd_sub_port:byte;
  scroll_x,scroll_y:word;
  common_ram:array[0..$1ff] of byte;
  adpcm_mem:array[0..$1ffff] of byte;
@@ -61,13 +61,13 @@ var
 begin
 	for f:=0 to $3f do begin
 		atrib:=buffer_sprites[$1+(f*5)];
-		if (atrib and $80)<>0 then begin  // visible */
+		if (atrib and $80)<>0 then begin  // visible
 			x:=240-buffer_sprites[$4+(f*5)]+((atrib and 2) shl 7);
 			y:=240-buffer_sprites[f*5]+ ((atrib and 1) shl 8);
 			size:=(atrib and $30) shr 4;
 			flipx:=(atrib and 8)<>0;
 			flipy:=(atrib and 4)<>0;
-      if tipo_video=1 then begin
+      if tipo_video<>0 then begin
           color:=(buffer_sprites[$2+(f*5)] shr 5) shl 4;
 			    nchar:=buffer_sprites[$3+(f*5)]+((buffer_sprites[$2+(f*5)] and $1f) shl 8);
       end else begin
@@ -76,16 +76,16 @@ begin
       end;
 			nchar:=nchar and not(size);
 			case size of
-				0:begin // normal */
+				0:begin // normal
              put_gfx_sprite(nchar,128+color,flipx,flipy,2);
              actualiza_gfx_sprite(x,y,4,2);
 				  end;
-				1:begin // double y */
+				1:begin // double y
              put_gfx_sprite_diff(nchar,128+color,flipx,flipy,2,0,0);
              put_gfx_sprite_diff(nchar+1,128+color,flipx,flipy,2,0,16);
              actualiza_gfx_sprite_size(x,y-16,4,16,32);
 				  end;
-				2:begin // double x */
+				2:begin // double x
              put_gfx_sprite_diff(nchar,128+color,flipx,flipy,2,0,0);
              put_gfx_sprite_diff(nchar+1,128+color,flipx,flipy,2,16,0);
              actualiza_gfx_sprite_size(x-16,y,4,32,16);
@@ -102,7 +102,7 @@ begin
 	end;  //for
 end;
 
-procedure update_video_ddragon;inline;
+procedure update_video_ddragon;
 var
   x,y,color,f,nchar,pos:word;
   atrib:byte;
@@ -167,31 +167,30 @@ var
   frame_m,frame_s,frame_snd:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_hd6309.tframes;
-frame_s:=main_m6800.tframes;
-frame_snd:=snd_m6809.tframes;
+frame_m:=hd6309_0.tframes;
+frame_s:=m6800_0.tframes;
+frame_snd:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 271 do begin
     //main
-    main_hd6309.run(frame_m);
-    frame_m:=frame_m+main_hd6309.tframes-main_hd6309.contador;
+    hd6309_0.run(frame_m);
+    frame_m:=frame_m+hd6309_0.tframes-hd6309_0.contador;
     //sub
-    main_m6800.run(frame_s);
-    frame_s:=frame_s+main_m6800.tframes-main_m6800.contador;
+    m6800_0.run(frame_s);
+    frame_s:=frame_s+m6800_0.tframes-m6800_0.contador;
     //snd
-    snd_m6809.run(frame_snd);
-    frame_snd:=frame_snd+snd_m6809.tframes-snd_m6809.contador;
+    m6809_0.run(frame_snd);
+    frame_snd:=frame_snd+m6809_0.tframes-m6809_0.contador;
     //video
     case ddragon_scanline[f] of
-      $8:vblank:=0;
+      $8:marcade.in2:=marcade.in2 and $f7;
+      $e8:marcade.in2:=marcade.in2 or 8;
       $f8:begin
             update_video_ddragon;
-            main_hd6309.change_nmi(ASSERT_LINE);
-            main_hd6309.change_firq(ASSERT_LINE);
-            vblank:=8;
+            hd6309_0.change_nmi(ASSERT_LINE);
           end;
     end;
-    if ((ddragon_scanline[f] and $f)=8) then main_hd6309.change_firq(ASSERT_LINE);
+    if ((ddragon_scanline[f] and $8)<>0) then hd6309_0.change_firq(ASSERT_LINE);
   end;
   eventos_ddragon;
   video_sync;
@@ -216,43 +215,38 @@ begin
 end;
 
 function ddragon_getbyte(direccion:word):byte;
-var
-  busy:byte;
 begin
     case direccion of
         $0..$fff,$1800..$1fff,$3000..$37ff:ddragon_getbyte:=memoria[direccion];
         $1000..$13ff:ddragon_getbyte:=buffer_paleta[direccion and $3ff];
-        $2000..$27ff:if ((main_m6800.get_halt<>CLEAR_LINE) or (main_m6800.get_reset<>CLEAR_LINE)) then ddragon_getbyte:=common_ram[direccion and $1ff]
+        $2000..$27ff:if ((m6800_0.get_halt<>CLEAR_LINE) or (m6800_0.get_reset<>CLEAR_LINE)) then ddragon_getbyte:=common_ram[direccion and $1ff]
                         else ddragon_getbyte:=$ff;
         $2800..$2fff:ddragon_getbyte:=buffer_sprites[direccion and $fff];
         $3800:ddragon_getbyte:=marcade.in0;
         $3801:ddragon_getbyte:=marcade.in1;
-        $3802:begin
-                if ((main_m6800.get_halt<>CLEAR_LINE) or (main_m6800.get_reset<>CLEAR_LINE)) then busy:=$0
-                  else busy:=$10;
-                ddragon_getbyte:=marcade.in2+busy+vblank;
-              end;
+        $3802:if ((m6800_0.get_halt<>CLEAR_LINE) or (m6800_0.get_reset<>CLEAR_LINE)) then ddragon_getbyte:=marcade.in2
+                  else ddragon_getbyte:=marcade.in2+$10;
         $3803:ddragon_getbyte:=$ff;
         $3804:ddragon_getbyte:=$ff;
         $380b:begin
-                main_hd6309.change_nmi(CLEAR_LINE);
+                hd6309_0.change_nmi(CLEAR_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $380c:begin
-                main_hd6309.change_firq(CLEAR_LINE);
+                hd6309_0.change_firq(CLEAR_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $380d:begin
-                main_hd6309.change_irq(CLEAR_LINE);
+                hd6309_0.change_irq(CLEAR_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $380e:begin
                 soundlatch:=$ff;
-                snd_m6809.change_irq(ASSERT_LINE);
+                m6809_0.change_irq(ASSERT_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $380f:begin
-                main_m6800.change_nmi(ASSERT_LINE);
+                m6800_0.change_nmi(ASSERT_LINE);
                 ddragon_getbyte:=$ff;
               end;
         $4000..$7fff:ddragon_getbyte:=rom[banco_rom,direccion and $3FFF];
@@ -270,29 +264,29 @@ case direccion of
                           cambiar_color(direccion and $1ff);
                      end;
         $1800..$1fff:gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-        $2000..$27ff:if ((main_m6800.get_halt<>CLEAR_LINE) or (main_m6800.get_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
+        $2000..$27ff:if ((m6800_0.get_halt<>CLEAR_LINE) or (m6800_0.get_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
         $2800..$2fff:buffer_sprites[direccion and $7ff]:=valor;
         $3000..$37ff:gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
         $3808:begin
                 scroll_x:=(scroll_x and $ff) or ((valor and $1) shl 8);
                 scroll_y:=(scroll_y and $ff) or ((valor and $2) shl 7);
                 main_screen.flip_main_screen:=(valor and 4)=0;
-                if (valor and $8)<>0 then main_m6800.change_reset(CLEAR_LINE)
-                  else main_m6800.change_reset(ASSERT_LINE);
-                if (valor and $10)<>0 then main_m6800.change_halt(ASSERT_LINE)
-                  else main_m6800.change_halt(CLEAR_LINE);
+                if (valor and $8)<>0 then m6800_0.change_reset(CLEAR_LINE)
+                  else m6800_0.change_reset(ASSERT_LINE);
+                if (valor and $10)<>0 then m6800_0.change_halt(ASSERT_LINE)
+                  else m6800_0.change_halt(CLEAR_LINE);
                 banco_rom:=(valor and $e0) shr 5;
               end;
         $3809:scroll_x:=(scroll_x and $100) or valor;
         $380a:scroll_y:=(scroll_y and $100) or valor;
-        $380b:main_hd6309.change_nmi(CLEAR_LINE);
-        $380c:main_hd6309.change_firq(CLEAR_LINE);
-        $380d:main_hd6309.change_irq(CLEAR_LINE);
+        $380b:hd6309_0.change_nmi(CLEAR_LINE);
+        $380c:hd6309_0.change_firq(CLEAR_LINE);
+        $380d:hd6309_0.change_irq(CLEAR_LINE);
         $380e:begin
                 soundlatch:=valor;
-                snd_m6809.change_irq(ASSERT_LINE);
+                m6809_0.change_irq(ASSERT_LINE);
               end;
-        $380f:main_m6800.change_nmi(ASSERT_LINE);
+        $380f:m6800_0.change_nmi(ASSERT_LINE);
 end;
 end;
 
@@ -311,8 +305,8 @@ if direccion>$bfff then exit;
 mem_misc[direccion]:=valor;
 case direccion of
   $0..$1f:if (direccion=$17) then begin
-              if (valor and 1)=0 then main_m6800.change_nmi(CLEAR_LINE);
-		          if (((valor and 2)<>0) and ((dd_sub_port and $2)<>0)) then main_hd6309.change_irq(ASSERT_LINE);
+              if (valor and 1)=0 then m6800_0.change_nmi(CLEAR_LINE);
+		          if (((valor and 2)<>0) and ((dd_sub_port and $2)<>0)) then hd6309_0.change_irq(ASSERT_LINE);
               dd_sub_port:=valor;
         	end;
   $8000..$81ff:common_ram[direccion and $1ff]:=valor;
@@ -324,7 +318,7 @@ begin
 case direccion of
   $1000:begin
           ddragon_snd_getbyte:=soundlatch;
-          snd_m6809.change_irq(CLEAR_LINE);
+          m6809_0.change_irq(CLEAR_LINE);
         end;
   $1800:ddragon_snd_getbyte:=adpcm_idle[0]+(adpcm_idle[1] shl 1);
   $2801:ddragon_snd_getbyte:=ym2151_0.status;
@@ -363,7 +357,7 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_m6809.change_firq(irqstate);
+  m6809_0.change_firq(irqstate);
 end;
 
 procedure snd_adpcm0;
@@ -371,15 +365,15 @@ begin
 if ((adpcm_pos[0]>=adpcm_end[0]) or (adpcm_pos[0]>=$10000)) then begin
 		adpcm_idle[0]:=1;
 		msm_5205_0.reset_w(1);
-	end else if adpcm_ch[0]<>1 then begin
+end else if adpcm_ch[0]<>1 then begin
 		          msm_5205_0.data_w(adpcm_data[0] and $0f);
 		          adpcm_ch[0]:=1;
-	          end else begin
+	       end else begin
               adpcm_ch[0]:=0;
               adpcm_data[0]:=adpcm_mem[adpcm_pos[0]];
               adpcm_pos[0]:=(adpcm_pos[0]+1) and $ffff;
           		msm_5205_0.data_w(adpcm_data[0] shr 4);
-            end;
+         end;
 end;
 
 procedure snd_adpcm1;
@@ -410,31 +404,30 @@ var
   frame_m,frame_s,frame_snd:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_hd6309.tframes;
-frame_s:=sub_z80.tframes;
-frame_snd:=snd_z80.tframes;
+frame_m:=hd6309_0.tframes;
+frame_s:=z80_0.tframes;
+frame_snd:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 271 do begin
     //main
-    main_hd6309.run(frame_m);
-    frame_m:=frame_m+main_hd6309.tframes-main_hd6309.contador;
+    hd6309_0.run(frame_m);
+    frame_m:=frame_m+hd6309_0.tframes-hd6309_0.contador;
     //sub
-    sub_z80.run(frame_s);
-    frame_s:=frame_s+sub_z80.tframes-sub_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     //snd
-    snd_z80.run(frame_snd);
-    frame_snd:=frame_snd+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_snd);
+    frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
     //video
     case ddragon_scanline[f] of
-      $8:vblank:=0;
+      $8:marcade.in2:=marcade.in2 and $f7;
+      $e8:marcade.in2:=marcade.in2 or 8;
       $f8:begin
             update_video_ddragon;
-            main_hd6309.change_nmi(ASSERT_LINE);
-            main_hd6309.change_firq(ASSERT_LINE);
-            vblank:=8;
+            hd6309_0.change_nmi(ASSERT_LINE);
           end;
     end;
-    if ((ddragon_scanline[f] and $f)=8) then main_hd6309.change_firq(ASSERT_LINE);
+    if ((ddragon_scanline[f] and $8)<>0) then hd6309_0.change_firq(ASSERT_LINE);
   end;
   eventos_ddragon;
   video_sync;
@@ -444,72 +437,77 @@ end;
 function ddragon2_getbyte(direccion:word):byte;
 begin
     case direccion of
-        $0..$1fff,$3000..$37ff:ddragon2_getbyte:=memoria[direccion];
-        $2000..$27ff:if ((sub_z80.get_halt<>CLEAR_LINE) or (sub_z80.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=common_ram[direccion and $1ff]
+        $0..$1fff,$3000..$37ff,$8000..$ffff:ddragon2_getbyte:=memoria[direccion];
+        $2000..$27ff:if ((z80_0.get_halt<>CLEAR_LINE) or (z80_0.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=common_ram[direccion and $1ff]
                         else ddragon2_getbyte:=$ff;
         $2800..$2fff:ddragon2_getbyte:=buffer_sprites[direccion and $7ff];
         $3800:ddragon2_getbyte:=marcade.in0;
         $3801:ddragon2_getbyte:=marcade.in1;
-        $3802:if ((sub_z80.get_halt<>CLEAR_LINE) or (sub_z80.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=marcade.in2+vblank
-                  else ddragon2_getbyte:=marcade.in2+$10+vblank;
+        $3802:if ((z80_0.get_halt<>CLEAR_LINE) or (z80_0.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=marcade.in2
+                  else ddragon2_getbyte:=marcade.in2+$10;
         $3803:ddragon2_getbyte:=$ff;
         $3804:ddragon2_getbyte:=$ff;
         $380b:begin
-                main_hd6309.change_nmi(CLEAR_LINE);
+                hd6309_0.change_nmi(CLEAR_LINE);
                 ddragon2_getbyte:=$ff;
               end;
         $380c:begin
-                main_hd6309.change_firq(CLEAR_LINE);
+                hd6309_0.change_firq(CLEAR_LINE);
                 ddragon2_getbyte:=$ff;
               end;
         $380d:begin
-                main_hd6309.change_irq(CLEAR_LINE);
+                hd6309_0.change_irq(CLEAR_LINE);
                 ddragon2_getbyte:=$ff;
               end;
         $380e:begin
                 soundlatch:=$ff;
-                snd_z80.change_nmi(ASSERT_LINE);
+                z80_1.change_nmi(ASSERT_LINE);
                 ddragon2_getbyte:=$ff;
               end;
         $380f:begin
-                sub_z80.change_nmi(ASSERT_LINE);
+                z80_0.change_nmi(ASSERT_LINE);
                 ddragon2_getbyte:=$ff;
               end;
         $3c00..$3fff:ddragon2_getbyte:=buffer_paleta[direccion and $3ff];
         $4000..$7fff:ddragon2_getbyte:=rom[banco_rom,direccion and $3FFF];
-        $8000..$ffff:ddragon2_getbyte:=memoria[direccion];
     end;
 end;
 
 procedure ddragon2_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $1800..$1fff:gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-        $2000..$27ff:if ((sub_z80.get_halt<>CLEAR_LINE) or (sub_z80.get_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
+        0..$17ff:memoria[direccion]:=valor;
+        $1800..$1fff:begin
+                        gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
+                        memoria[direccion]:=valor;
+                     end;
+        $2000..$27ff:if ((z80_0.get_halt<>CLEAR_LINE) or (z80_0.get_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
         $2800..$2fff:buffer_sprites[direccion and $7ff]:=valor;
-        $3000..$37ff:gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
+        $3000..$37ff:begin
+                        gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $3808:begin
                 scroll_x:=(scroll_x and $ff) or ((valor and $1) shl 8);
                 scroll_y:=(scroll_y and $ff) or ((valor and $2) shl 7);
                 main_screen.flip_main_screen:=(valor and 4)=0;
-                if (valor and $8)<>0 then sub_z80.change_reset(CLEAR_LINE)
-                  else sub_z80.change_reset(ASSERT_LINE);
-                if (valor and $10)<>0 then sub_z80.change_halt(ASSERT_LINE)
-                  else sub_z80.change_halt(CLEAR_LINE);
+                if (valor and $8)<>0 then z80_0.change_reset(CLEAR_LINE)
+                  else z80_0.change_reset(ASSERT_LINE);
+                if (valor and $10)<>0 then z80_0.change_halt(ASSERT_LINE)
+                  else z80_0.change_halt(CLEAR_LINE);
                 banco_rom:=(valor and $e0) shr 5;
               end;
         $3809:scroll_x:=(scroll_x and $100) or valor;
         $380a:scroll_y:=(scroll_y and $100) or valor;
-        $380b:main_hd6309.change_nmi(CLEAR_LINE);
-        $380c:main_hd6309.change_firq(CLEAR_LINE);
-        $380d:main_hd6309.change_irq(CLEAR_LINE);
+        $380b:hd6309_0.change_nmi(CLEAR_LINE);
+        $380c:hd6309_0.change_firq(CLEAR_LINE);
+        $380d:hd6309_0.change_irq(CLEAR_LINE);
         $380e:begin
                 soundlatch:=valor;
-                snd_z80.change_nmi(ASSERT_LINE);
+                z80_1.change_nmi(ASSERT_LINE);
               end;
-        $380f:sub_z80.change_nmi(ASSERT_LINE);
+        $380f:z80_0.change_nmi(ASSERT_LINE);
         $3c00..$3fff:if buffer_paleta[direccion and $3ff]<>valor then begin
                           buffer_paleta[direccion and $3ff]:=valor;
                           cambiar_color(direccion and $1ff);
@@ -520,40 +518,39 @@ end;
 function ddragon2_sub_getbyte(direccion:word):byte;
 begin
 case direccion of
+    0..$bfff:ddragon2_sub_getbyte:=mem_misc[direccion];
     $c000..$c3ff:ddragon2_sub_getbyte:=common_ram[direccion and $3ff];
-    else ddragon2_sub_getbyte:=mem_misc[direccion];
   end;
 end;
 
 procedure ddragon2_sub_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-mem_misc[direccion]:=valor;
 case direccion of
   $c000..$c3ff:common_ram[direccion and $3ff]:=valor;
-  $d000:sub_z80.change_nmi(CLEAR_LINE);
-	$e000:main_hd6309.change_irq(ASSERT_LINE);
+  $d000:z80_0.change_nmi(CLEAR_LINE);
+	$e000:hd6309_0.change_irq(ASSERT_LINE);
 end;
 end;
 
 function ddragon2_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+    0..$87ff:ddragon2_snd_getbyte:=mem_snd[direccion];
     $8801:ddragon2_snd_getbyte:=ym2151_0.status;
     $9800:ddragon2_snd_getbyte:=oki_6295_0.read;
     $a000:begin
             ddragon2_snd_getbyte:=soundlatch;
-            snd_z80.change_nmi(CLEAR_LINE);
+            z80_1.change_nmi(CLEAR_LINE);
           end;
-    else ddragon2_snd_getbyte:=mem_snd[direccion];
   end;
 end;
 
 procedure ddragon2_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  $8000..$87ff:mem_snd[direccion]:=valor;
   $8800:ym2151_0.reg(valor);
   $8801:ym2151_0.write(valor);
   $9800:oki_6295_0.write(valor);
@@ -562,7 +559,7 @@ end;
 
 procedure ym2151_snd_irq_dd2(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_1.change_irq(irqstate);
 end;
 
 procedure dd2_sound_update;
@@ -574,18 +571,18 @@ end;
 //Main
 procedure reset_ddragon;
 begin
- main_hd6309.reset;
+ hd6309_0.reset;
  ym2151_0.reset;
  case main_vars.tipo_maquina of
     92:begin
-         main_m6800.reset;
-         snd_m6809.reset;
+         m6800_0.reset;
+         m6809_0.reset;
          msm_5205_0.reset;
          msm_5205_1.reset;
     end;
     96:begin
-        sub_z80.reset;
-        snd_z80.reset;
+        z80_0.reset;
+        z80_1.reset;
         oki_6295_0.reset;
        end;
  end;
@@ -594,7 +591,6 @@ begin
  marcade.in1:=$FF;
  marcade.in2:=$e7;
  soundlatch:=0;
- vblank:=0;
  banco_rom:=0;
  dd_sub_port:=0;
  scroll_x:=0;
@@ -647,15 +643,15 @@ iniciar_video(256,240);
 case main_vars.tipo_maquina of
   92:begin
         //Main CPU
-        main_hd6309:=cpu_hd6309.create(12000000,272);
-        main_hd6309.change_ram_calls(ddragon_getbyte,ddragon_putbyte);
+        hd6309_0:=cpu_hd6309.create(12000000,272);
+        hd6309_0.change_ram_calls(ddragon_getbyte,ddragon_putbyte);
         //Sub CPU
-        main_m6800:=cpu_m6800.create(6000000,272,cpu_hd63701);
-        main_m6800.change_ram_calls(ddragon_sub_getbyte,ddragon_sub_putbyte);
+        m6800_0:=cpu_m6800.create(6000000,272,cpu_hd63701);
+        m6800_0.change_ram_calls(ddragon_sub_getbyte,ddragon_sub_putbyte);
         //Sound CPU
-        snd_m6809:=cpu_m6809.Create(1500000,272);
-        snd_m6809.change_ram_calls(ddragon_snd_getbyte,ddragon_snd_putbyte);
-        snd_m6809.init_sound(ddragon_sound_update);
+        m6809_0:=cpu_m6809.Create(1500000,272);
+        m6809_0.change_ram_calls(ddragon_snd_getbyte,ddragon_snd_putbyte);
+        m6809_0.init_sound(ddragon_sound_update);
         //Sound Chips
         ym2151_0:=ym2151_chip.create(3579545);
         ym2151_0.change_irq_func(ym2151_snd_irq);
@@ -685,15 +681,15 @@ case main_vars.tipo_maquina of
      end;
   96:begin
         //Main CPU
-        main_hd6309:=cpu_hd6309.create(12000000,272);
-        main_hd6309.change_ram_calls(ddragon2_getbyte,ddragon2_putbyte);
+        hd6309_0:=cpu_hd6309.create(12000000,272);
+        hd6309_0.change_ram_calls(ddragon2_getbyte,ddragon2_putbyte);
         //Sub CPU
-        sub_z80:=cpu_z80.create(4000000,272);
-        sub_z80.change_ram_calls(ddragon2_sub_getbyte,ddragon2_sub_putbyte);
+        z80_0:=cpu_z80.create(4000000,272);
+        z80_0.change_ram_calls(ddragon2_sub_getbyte,ddragon2_sub_putbyte);
         //Sound CPU
-        snd_z80:=cpu_z80.create(3579545,272);
-        snd_z80.change_ram_calls(ddragon2_snd_getbyte,ddragon2_snd_putbyte);
-        snd_z80.init_sound(dd2_sound_update);
+        z80_1:=cpu_z80.create(3579545,272);
+        z80_1.change_ram_calls(ddragon2_snd_getbyte,ddragon2_snd_putbyte);
+        z80_1.init_sound(dd2_sound_update);
         //Sound Chips
         ym2151_0:=ym2151_chip.create(3579545);
         ym2151_0.change_irq_func(ym2151_snd_irq_dd2);

@@ -53,12 +53,13 @@ FLoadRom.label5.caption:=sound_tipo[games_desc[orden_games[Floadrom.RomList.Sele
 FLoadRom.label9.caption:=games_desc[orden_games[Floadrom.RomList.Selection.Top]].company;
 if games_desc[orden_games[Floadrom.RomList.Selection.Top]].hi then FLoadRom.label6.caption:='YES'
       else FLoadRom.label6.caption:='NO';
-//Si es la NES, GB o CHIP 8 es un caso especial, no tienen ROM por lo que la imagen del preview
-//sera 'nes.png' 'gb.png' y 'chip8.png'
+//En el caso de las consolas es especial prefiero poner una imagen fija
 case games_desc[orden_games[Floadrom.RomList.Selection.Top]].grid of
   1000:dir:='nes.png';
+  1001:dir:='coleco.png';
   1002:dir:='gb.png';
   1003:dir:='chip8.png';
+  1004:dir:='sms.png';
   else dir:=games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip+'.png';
 end;
 if FileExists(Directory.Preview+dir) then Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+dir)
@@ -141,8 +142,8 @@ end;
 
 procedure TFLoadRom.BitBtn1Click(Sender: TObject);
 begin
-if main_vars.tipo_maquina=255 then exit;
 floadrom.close;
+if main_vars.tipo_maquina=65535 then exit;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 EmuStatus:=EmuStatusTemp;
 principal1.timer1.Enabled:=true;

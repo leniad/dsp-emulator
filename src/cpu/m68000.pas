@@ -89,7 +89,7 @@ type
         end;
 
 var
-    main_m68000,snd_m68000,sub_m68000:cpu_m68000;
+    m68000_0,m68000_1:cpu_m68000;
 
 implementation
 const

@@ -9,106 +9,110 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      ay_8910,ym_3812,ym_2203,m6809,vlm_5030,m6502,pokey,m6805,sega_vdp,deco_104,
      deco_146,tms99xx,lr35902,mcs51,m680x,konami_snd,ppi8255,oki6295,dac,msm5205,
      mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,mcs48,k051316,
-     k053246_k053247_k055673,ym_2151,samples;
+     k053246_k053247_k055673,ym_2151,samples,n2a03;
 
 procedure close_all_devices;
 begin
 //Z80
-if main_z80<>nil then begin
-  main_z80.free;
-  main_z80:=nil;
+if z80_0<>nil then begin
+  z80_0.free;
+  z80_0:=nil;
 end;
-if sub_z80<>nil then begin
-  sub_z80.free;
-  sub_z80:=nil;
+if z80_1<>nil then begin
+  z80_1.free;
+  z80_1:=nil;
 end;
-if snd_z80<>nil then begin
-  snd_z80.free;
-  snd_z80:=nil;
+if z80_2<>nil then begin
+  z80_2.free;
+  z80_2:=nil;
 end;
 //M68000
-if main_m68000<>nil then begin
-   main_m68000.free;
-   main_m68000:=nil;
+if m68000_0<>nil then begin
+   m68000_0.free;
+   m68000_0:=nil;
 end;
-if snd_m68000<>nil then begin
-  snd_m68000.free;
-  snd_m68000:=nil;
-end;
-if sub_m68000<>nil then begin
-  sub_m68000.free;
-  sub_m68000:=nil;
+if m68000_1<>nil then begin
+  m68000_1.free;
+  m68000_1:=nil;
 end;
 //M6809
-if main_m6809<>nil then begin
-  main_m6809.free;
-  main_m6809:=nil;
+if m6809_0<>nil then begin
+  m6809_0.free;
+  m6809_0:=nil;
 end;
-if snd_m6809<>nil then begin
-  snd_m6809.free;
-  snd_m6809:=nil;
+if m6809_1<>nil then begin
+  m6809_1.free;
+  m6809_1:=nil;
 end;
-if misc_m6809<>nil then begin
-  misc_m6809.free;
-  misc_m6809:=nil;
+if m6809_2<>nil then begin
+  m6809_2.free;
+  m6809_2:=nil;
 end;
 //M6502
-if main_m6502<>nil then begin
-  main_m6502.free;
-  main_m6502:=nil;
+if m6502_0<>nil then begin
+  m6502_0.free;
+  m6502_0:=nil;
 end;
-if snd_m6502<>nil then begin
-  snd_m6502.free;
-  snd_m6502:=nil;
+if m6502_1<>nil then begin
+  m6502_1.free;
+  m6502_1:=nil;
 end;
 //Konami
-if main_konami<>nil then begin
-  main_konami.free;
-  main_konami:=nil;
+if konami_0<>nil then begin
+  konami_0.free;
+  konami_0:=nil;
 end;
 //M6805
-if main_m6805<>nil then begin
-  main_m6805.free;
-  main_m6805:=nil;
+if m6805_0<>nil then begin
+  m6805_0.free;
+  m6805_0:=nil;
 end;
-if main_hd6309<>nil then begin
-  main_hd6309.free;
-  main_hd6309:=nil;
+if hd6309_0<>nil then begin
+  hd6309_0.free;
+  hd6309_0:=nil;
 end;
 //GB
-if main_lr<>nil then begin
-  main_lr.free;
-  main_lr:=nil;
+if lr35902_0<>nil then begin
+  lr35902_0.free;
+  lr35902_0:=nil;
 end;
 //MCS51
-if main_mcs51<>nil then begin
-  main_mcs51.free;
-  main_mcs51:=nil;
+if mcs51_0<>nil then begin
+  mcs51_0.free;
+  mcs51_0:=nil;
 end;
 //MCS48
-if main_mcs48<>nil then begin
-  main_mcs48.free;
-  main_mcs48:=nil;
+if mcs48_0<>nil then begin
+  mcs48_0.free;
+  mcs48_0:=nil;
 end;
-if main_m6800<>nil then begin
-  main_m6800.free;
-  main_m6800:=nil;
+if m6800_0<>nil then begin
+  m6800_0.free;
+  m6800_0:=nil;
 end;
-if snd_m6800<>nil then begin
-  snd_m6800.free;
-  snd_m6800:=nil;
+if mb88xx_0<>nil then begin
+  mb88xx_0.free;
+  mb88xx_0:=nil;
 end;
-if main_mb88xx<>nil then begin
-  main_mb88xx.free;
-  main_mb88xx:=nil;
+if h6280_0<>nil then begin
+  h6280_0.free;
+  h6280_0:=nil;
 end;
-if main_h6280<>nil then begin
-  main_h6280.free;
-  main_h6280:=nil;
+if nec_0<>nil then begin
+  nec_0.free;
+  nec_0:=nil;
 end;
-if main_nec<>nil then begin
-  main_nec.free;
-  main_nec:=nil;
+if tms32010_0<>nil then begin
+    tms32010_0.free;
+    tms32010_0:=nil;
+end;
+if n2a03_0<>nil then begin
+  n2a03_0.free;
+  n2a03_0:=nil;
+end;
+if n2a03_1<>nil then begin
+  n2a03_1.free;
+  n2a03_1:=nil;
 end;
 if spec_z80<>nil then begin
   spec_z80.free;
@@ -281,10 +285,6 @@ end;
 if pia8255_1<>nil then begin
   pia8255_1.free;
   pia8255_1:=nil;
-end;
-if main_tms32010<>nil then begin
-    main_tms32010.free;
-    main_tms32010:=nil;
 end;
 if eeprom_0<>nil then begin
   eeprom_0.free;

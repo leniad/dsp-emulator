@@ -84,7 +84,7 @@ if not(spec_comun) then exit;
 spec_z80.change_ram_calls(spec3_getbyte,spec3_putbyte);
 spec_z80.change_io_calls(spec3_inbyte,spec3_outbyte);
 spec_z80.change_retraso_call(spec3_retraso_memoria,spec3_retraso_puerto);
-ay8910_0:=ay8910_chip.create(1773400,1);
+ay8910_0:=ay8910_chip.create(1773400,AY8912,1);
 ay8910_0.change_io_calls(spec128_lg,nil,nil,nil);
 if not(cargar_roms(@mem_temp[0],@plus3_rom[0],'plus3.zip',0)) then exit;
 copymemory(@memoria_3[8,0],@mem_temp[0],$4000);

@@ -53,7 +53,7 @@ type
   end;
 
 var
-  main_lr:cpu_lr;
+  lr35902_0:cpu_lr;
 
 implementation
 const

@@ -564,7 +564,7 @@ end;
 
 procedure change_caption;
 var
-  cadena:string;
+  cadena:ansistring;
 begin
 if llamadas_maquina.open_file='' then cadena:=llamadas_maquina.caption
   else cadena:=llamadas_maquina.caption+' - '+llamadas_maquina.open_file;
@@ -587,8 +587,8 @@ begin
 actualiza_video;
 evalue_controls;
 main_vars.frames_sec:=main_vars.frames_sec+1;
-if main_screen.rapido then exit;
 {$ifndef fpc}
+if main_screen.rapido then exit;
 QueryPerformanceCounter(l2);
 res:=(l2-cont_sincroniza);
 while (res<valor_sync) do begin
@@ -597,6 +597,8 @@ while (res<valor_sync) do begin
 end;
 QueryPerformanceCounter(cont_sincroniza);
 {$else}
+application.ProcessMessages;
+if main_screen.rapido then exit;
 res:=0;
 while res<valor_sync do res:=sdl_getticks()-cont_sincroniza;
 valor_sync:=cont_micro-(res-valor_sync);

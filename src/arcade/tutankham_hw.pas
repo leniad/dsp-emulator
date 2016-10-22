@@ -82,17 +82,17 @@ var
   irq_req:boolean;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
+frame_m:=m6809_0.tframes;
 irq_req:=false;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
     konamisnd_0.run(f);
     if f=239 then begin
-      if (irq_req and irq_enable) then main_m6809.change_irq(ASSERT_LINE);
+      if (irq_req and irq_enable) then m6809_0.change_irq(ASSERT_LINE);
       update_video_tutankham;
     end;
   end;
@@ -132,7 +132,7 @@ case direccion of
   $8200..$82ff:case (direccion and $7) of
                   0:begin
                       irq_enable:=(valor and 1)<>0;
-                      if not(irq_enable) then main_m6809.change_irq(CLEAR_LINE);
+                      if not(irq_enable) then m6809_0.change_irq(CLEAR_LINE);
                     end;
                   6:if (valor and 1)<>0 then xory:=255
                       else xory:=0;
@@ -148,7 +148,7 @@ end;
 //Main
 procedure reset_tutankham;
 begin
- main_m6809.reset;
+ m6809_0.reset;
  reset_audio;
  konamisnd_0.reset;
  marcade.in0:=$fF;
@@ -168,16 +168,15 @@ iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(tutankham_getbyte,tutankham_putbyte);
+m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0.change_ram_calls(tutankham_getbyte,tutankham_putbyte);
 //Sound Chip
 konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
+if not(cargar_roms(@konamisnd_0.memoria[0],@tutan_sound[0],'tutankhm.zip',0)) then exit;
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@tutan_rom[0],'tutankhm.zip',0)) then exit;
 copymemory(@memoria[$a000],@memoria_temp[0],$6000);
 for f:=0 to 8 do copymemory(@rom_bank[f,0],@memoria_temp[$6000+(f*$1000)],$1000);
-//Cargar roms sound
-if not(cargar_roms(@mem_snd[0],@tutan_sound[0],'tutankhm.zip',0)) then exit;
 //final
 reset_tutankham;
 iniciar_tutankham:=true;

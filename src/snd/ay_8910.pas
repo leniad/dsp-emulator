@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}sound_engine,cpu_misc;
 
 type
   ay8910_chip=class(snd_chip_class)
-        constructor create(clock:integer;amp:single;internal:boolean=false);
+        constructor create(clock:integer;type_:byte;amp:single;internal:boolean=false);
         destructor free;
       public
         procedure Write(v:byte);
@@ -28,7 +28,7 @@ type
         VolA,VolB,VolC,VolE:integer;
         EnvelopeA,EnvelopeB,EnvelopeC:integer;
         OutputA,OutputB,OutputC,OutputN:integer;
-        latch:byte;
+        latch,type_:byte;
         CountEnv:shortint;
         Hold,Alternate,Attack,Holding,RNG,UpdateStep:integer;
         lastenable:smallint;
@@ -40,6 +40,10 @@ type
 
 var
   ay8910_0,ay8910_1,ay8910_2,ay8910_3,ay8910_4:ay8910_chip;
+
+const
+  AY8910=0;
+  AY8912=1;
 
 implementation
 const
@@ -85,7 +89,7 @@ begin
   self.UpdateStep:=trunc((STEP*freq_base_audio*8)/self.clock);
 end;
 
-constructor ay8910_chip.create(clock:integer;amp:single;internal:boolean=false);
+constructor ay8910_chip.create(clock:integer;type_:byte;amp:single;internal:boolean=false);
 begin
   init_table;
   self.clock:=clock;
@@ -102,6 +106,7 @@ begin
   if not(internal) then self.tsample_num:=init_channel;
   self.amp:=amp;
   self.reset;
+  self.type_:=type_;
 end;
 
 procedure ay8910_chip.reset;
@@ -151,6 +156,7 @@ begin
   copymemory(temp,@self.OutputC,4);inc(temp,4);size:=size+4;
   copymemory(temp,@self.OutputN,4);inc(temp,4);size:=size+4;
   temp^:=self.latch;inc(temp);size:=size+1;
+  temp^:=self.type_;inc(temp);size:=size+1;
   copymemory(temp,@self.CountEnv,sizeof(shortint));inc(temp,sizeof(shortint));size:=size+sizeof(shortint);
   copymemory(temp,@self.Hold,4);inc(temp,4);size:=size+4;
   copymemory(temp,@self.Alternate,4);inc(temp,4);size:=size+4;
@@ -190,6 +196,7 @@ begin
   copymemory(@self.OutputC,temp,4);inc(temp,4);
   copymemory(@self.OutputN,temp,4);inc(temp,4);
   self.latch:=temp^;inc(temp);
+  self.type_:=temp^;inc(temp);
   copymemory(@self.CountEnv,temp,sizeof(shortint));inc(temp,sizeof(shortint));
   copymemory(@self.Hold,temp,4);inc(temp,4);
   copymemory(@self.Alternate,temp,4);inc(temp,4);
@@ -318,7 +325,10 @@ function ay8910_chip.AYReadReg(r:byte):byte;
 begin
   case r of
       AY_PORTA:if (@self.porta_read<>nil) then self.Regs[AY_PORTA]:=self.porta_read;
-      AY_PORTB:if (@self.portb_read<>nil) then self.Regs[AY_PORTB]:=self.portb_read;
+      AY_PORTB:case self.type_ of
+                  AY8910:if (@self.portb_read<>nil) then self.Regs[AY_PORTB]:=self.portb_read;
+                  AY8912:self.Regs[AY_PORTB]:=$ff;
+               end;
   end;
   AYReadReg:=self.Regs[r];
 end;

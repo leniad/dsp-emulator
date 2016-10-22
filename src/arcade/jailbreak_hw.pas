@@ -101,13 +101,13 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame:=main_m6809.tframes;
+frame:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-      main_m6809.run(frame);
-      frame:=frame+main_m6809.tframes-main_m6809.contador;
+      m6809_0.run(frame);
+      frame:=frame+m6809_0.tframes-m6809_0.contador;
       if f=239 then begin
-        if irq_ena then main_m6809.change_irq(HOLD_LINE);
+        if irq_ena then m6809_0.change_irq(HOLD_LINE);
         update_video_jailbreak;
       end;
   end;
@@ -127,7 +127,7 @@ case direccion of
   $3302:jailbreak_getbyte:=marcade.in1; //P2
   $3303:jailbreak_getbyte:=marcade.dswa;  //dsw1
   $6000:jailbreak_getbyte:=vlm5030_0.get_bsy;
-  $8000..$ffff:if main_m6809.opcode then jailbreak_getbyte:=mem_opcodes[direccion and $7fff]
+  $8000..$ffff:if m6809_0.opcode then jailbreak_getbyte:=mem_opcodes[direccion and $7fff]
     else jailbreak_getbyte:=memoria[direccion];
 end;
 end;
@@ -157,7 +157,7 @@ end;
 
 procedure jailbreak_snd_nmi;
 begin
-  if nmi_ena then main_m6809.change_nmi(PULSE_LINE);
+  if nmi_ena then m6809_0.change_nmi(PULSE_LINE);
 end;
 
 procedure jailbreak_sound;
@@ -169,7 +169,7 @@ end;
 //Main
 procedure reset_jailbreak;
 begin
- main_m6809.reset;
+ m6809_0.reset;
  sn_76496_0.reset;
  vlm5030_0.reset;
  reset_audio;
@@ -201,9 +201,9 @@ screen_mod_scroll(1,512,256,511,0,0,0);
 screen_init(2,512,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,$100);
-main_m6809.change_ram_calls(jailbreak_getbyte,jailbreak_putbyte);
-main_m6809.init_sound(jailbreak_sound);
+m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0.change_ram_calls(jailbreak_getbyte,jailbreak_putbyte);
+m6809_0.init_sound(jailbreak_sound);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(1536000);
 //cargar rom sonido
@@ -212,7 +212,7 @@ if not(cargar_roms(@memoria_temp[0],@jailbreak_vlm,'jailbrek.zip')) then exit;
 for f:=0 to $1fff do memoria_temp[f]:=memoria_temp[f+$2000];
 copymemory(vlm5030_0.get_rom_addr,@memoria_temp[0],$4000);
 //NMI sonido
-init_timer(main_m6809.numero_cpu,1536000/480,jailbreak_snd_nmi,true);
+init_timer(m6809_0.numero_cpu,1536000/480,jailbreak_snd_nmi,true);
 //cargar roms y desencriptarlas
 if not(cargar_roms(@memoria[0],@jailbreak_rom[0],'jailbrek.zip',0)) then exit;
 konami1_decode(@memoria[$8000],@mem_opcodes[0],$8000);

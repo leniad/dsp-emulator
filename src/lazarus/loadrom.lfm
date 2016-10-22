@@ -1,12 +1,12 @@
 object FLoadRom: TFLoadRom
   Left = 232
-  Height = 510
+  Height = 511
   Top = 58
   Width = 562
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Load Rom'
-  ClientHeight = 510
+  ClientHeight = 511
   ClientWidth = 562
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -16,7 +16,7 @@ object FLoadRom: TFLoadRom
   Font.Quality = fqDraft
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '1.6.0.1'
+  LCLVersion = '1.6.0.4'
   object GroupBox1: TGroupBox
     Left = 261
     Height = 311

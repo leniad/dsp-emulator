@@ -242,25 +242,25 @@ var
   frame_m,frame_s,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_m6809.tframes;
-frame_mcu:=main_m6800.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=m6809_1.tframes;
+frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sub CPU
-    snd_m6809.run(frame_s);
-    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+    m6809_1.run(frame_s);
+    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
     //Sound CPU
-    main_m6800.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_m6800.tframes-main_m6800.contador;
+    m6800_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
     if f=239 then begin
         update_video_system86;
-        if irq_enable then main_m6809.change_irq(ASSERT_LINE);
-        if irq_sub_enable then snd_m6809.change_irq(ASSERT_LINE);
-        main_m6800.change_irq(HOLD_LINE);
+        if irq_enable then m6809_0.change_irq(ASSERT_LINE);
+        if irq_sub_enable then m6809_1.change_irq(ASSERT_LINE);
+        m6800_0.change_irq(HOLD_LINE);
         if copy_sprites then copy_sprites_hw;
     end;
   end;
@@ -286,7 +286,7 @@ case direccion of
   $2000..$3fff:if memoria[direccion]<>valor then gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
   $4000..$43ff:namcos1_cus30_w(direccion and $3ff,valor);
   $5ff2:copy_sprites:=true;
-  $8400:main_m6809.change_irq(CLEAR_LINE);
+  $8400:m6809_0.change_irq(CLEAR_LINE);
   $8800..$8fff:tile_bank:=bit_n(direccion,10);
   $9000:begin
           prior[0]:=(valor and $e) shr 1;
@@ -333,7 +333,7 @@ case direccion of
                  end;
                  exit;
                end;
-  $8400:main_m6809.change_irq(CLEAR_LINE);
+  $8400:m6809_0.change_irq(CLEAR_LINE);
   $8800..$8fff:tile_bank:=bit_n(direccion,10);
   $9000:begin
           prior[0]:=(valor and $e) shr 1;
@@ -390,7 +390,7 @@ case direccion of
                   memoria[$2000+(direccion and $1fff)]:=valor;
                   gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
                end;
-  $8800:snd_m6809.change_irq(CLEAR_LINE);
+  $8800:m6809_1.change_irq(CLEAR_LINE);
   $d803:rom_sub_nbank:=valor and $3;
 end;
 end;
@@ -398,7 +398,7 @@ end;
 function rthunder_mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$1f:rthunder_mcu_getbyte:=main_m6800.m6803_internal_reg_r(direccion);
+  $0..$1f:rthunder_mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
   $1000..$13ff:rthunder_mcu_getbyte:=namcos1_cus30_r(direccion and $3ff);
   $2001:rthunder_mcu_getbyte:=ym2151_0.status;
   $2020:rthunder_mcu_getbyte:=marcade.in0;
@@ -412,7 +412,7 @@ end;
 procedure rthunder_mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$1f:main_m6800.m6803_internal_reg_w(direccion,valor);
+  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$13ff:namcos1_cus30_w(direccion and $3ff,valor);
   $2000:ym2151_0.reg(valor);
   $2001:ym2151_0.write(valor);
@@ -438,7 +438,7 @@ case direccion of
                   memoria[direccion]:=valor;
                   if direccion=$5ff2 then copy_sprites:=true;
                end;
-  $9400:snd_m6809.change_irq(CLEAR_LINE);
+  $9400:m6809_1.change_irq(CLEAR_LINE);
 end;
 end;
 
@@ -469,9 +469,9 @@ procedure reset_system86;
 var
   f:byte;
 begin
- main_m6809.reset;
- snd_m6809.reset;
- main_m6800.reset;
+ m6809_0.reset;
+ m6809_1.reset;
+ m6800_0.reset;
  namco_sound_reset;
  ym2151_0.reset;
  if main_vars.tipo_maquina=124 then namco_63701x_reset;
@@ -567,15 +567,15 @@ screen_mod_scroll(4,512,512,511,256,256,255);
 screen_init(5,512,256,false,true);
 iniciar_video(288,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1536000,256);
+m6809_0:=cpu_m6809.Create(1536000,256);
 //Sub CPU
-snd_m6809:=cpu_m6809.Create(1536000,256);
+m6809_1:=cpu_m6809.Create(1536000,256);
 //MCU CPU
-main_m6800:=cpu_m6800.create(6144000,$100,cpu_hd63701);
-main_m6800.change_ram_calls(rthunder_mcu_getbyte,rthunder_mcu_putbyte);
-main_m6800.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
-if main_vars.tipo_maquina<>124 then main_m6800.init_sound(sound_update)
-  else main_m6800.init_sound(sound_update_adpcm);
+m6800_0:=cpu_m6800.create(6144000,$100,cpu_hd63701);
+m6800_0.change_ram_calls(rthunder_mcu_getbyte,rthunder_mcu_putbyte);
+m6800_0.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
+if main_vars.tipo_maquina<>124 then m6800_0.init_sound(sound_update)
+  else m6800_0.init_sound(sound_update_adpcm);
 //Sound
 namco_sound_init(8,true);
 ym2151_0:=ym2151_chip.create(3579580,0.4);
@@ -583,13 +583,13 @@ case main_vars.tipo_maquina of
     124:begin
             //cargar roms main CPU
             if not(cargar_roms(@memoria[$0],@rthunder_rom,'rthunder.zip',1)) then exit;
-            main_m6809.change_ram_calls(system86_getbyte,rthunder_putbyte);
+            m6809_0.change_ram_calls(system86_getbyte,rthunder_putbyte);
             //Pongo las ROMs en su banco
             if not(cargar_roms(@memoria_temp[0],@rthunder_rom_bank[0],'rthunder.zip',0)) then exit;
             for f:=0 to $1f do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
             //cargar roms sub CPU
             if not(cargar_roms(@memoria_temp[0],@rthunder_sub_rom[0],'rthunder.zip',0)) then exit;
-            snd_m6809.change_ram_calls(rthunder_sub_getbyte,rthunder_sub_putbyte);
+            m6809_1.change_ram_calls(rthunder_sub_getbyte,rthunder_sub_putbyte);
             //Pongo las ROMs en su banco
             copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
             for f:=0 to $3 do copymemory(@rom_sub_bank[f,0],@memoria_temp[(f*$2000)+$8000],$2000);
@@ -617,10 +617,10 @@ case main_vars.tipo_maquina of
     125:begin
             //cargar roms main CPU
             if not(cargar_roms(@memoria[$0],@hopmappy_rom,'hopmappy.zip',1)) then exit;
-            main_m6809.change_ram_calls(system86_getbyte,system86_putbyte);
+            m6809_0.change_ram_calls(system86_getbyte,system86_putbyte);
             //cargar roms sub CPU
             if not(cargar_roms(@mem_misc[0],@hopmappy_sub_rom,'hopmappy.zip',1)) then exit;
-            snd_m6809.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
+            m6809_1.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
             //Cargar MCU
             if not(cargar_roms(@mem_snd[0],@hopmappy_mcu[0],'hopmappy.zip',0)) then exit;
             //convertir chars
@@ -647,10 +647,10 @@ case main_vars.tipo_maquina of
             if not(cargar_roms(@memoria_temp[$0],@skykiddx_rom[0],'skykiddx.zip',0)) then exit;
             copymemory(@memoria[$8000],@memoria_temp[0],$8000);
             for f:=0 to 3 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
-            main_m6809.change_ram_calls(system86_getbyte,system86_putbyte);
+            m6809_0.change_ram_calls(system86_getbyte,system86_putbyte);
             //cargar roms sub CPU
             if not(cargar_roms(@mem_misc[0],@skykiddx_sub_rom,'skykiddx.zip',1)) then exit;
-            snd_m6809.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
+            m6809_1.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
             //Cargar MCU
             if not(cargar_roms(@mem_snd[0],@skykiddx_mcu[0],'skykiddx.zip',0)) then exit;
             //convertir chars

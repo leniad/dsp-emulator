@@ -3,7 +3,7 @@ unit nes_ppu;
 interface
 
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m6502,gfx_engine,main_engine,pal_engine,math;
+     gfx_engine,main_engine,pal_engine,math,n2a03;
 
 type
   tnes_ppu=packed record
@@ -352,7 +352,7 @@ if ppu_nes.sprite_ram_pos<>0 then begin
 end else begin
   copymemory(@ppu_nes.sprite_ram[0],@memoria[$100*direccion],$100);
 end;
-main_m6502.contador:=main_m6502.contador+513+(main_m6502.contador and 1);
+n2a03_0.m6502.contador:=n2a03_0.m6502.contador+513+(n2a03_0.m6502.contador and 1);
 end;
 
 procedure reset_ppu;

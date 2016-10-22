@@ -127,19 +127,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=239 then begin
       update_video_tigeroad;
-      main_m68000.irq[2]:=HOLD_LINE;
+      m68000_0.irq[2]:=HOLD_LINE;
     end;
   end;
   eventos_tigeroad;
@@ -256,7 +256,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_0.change_irq(irqstate);
 end;
 
 procedure tigeroad_sound_update;
@@ -268,8 +268,8 @@ end;
 //Main
 procedure reset_tigeroad;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
  reset_audio;
@@ -341,12 +341,12 @@ screen_init(4,288,288,true);
 screen_mod_scroll(4,288,256,255,288,256,255);
 iniciar_video(256,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,$100);
-main_m68000.change_ram16_calls(tigeroad_getword,tigeroad_putword);
+m68000_0:=cpu_m68000.create(10000000,$100);
+m68000_0.change_ram16_calls(tigeroad_getword,tigeroad_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,$100);
-snd_z80.change_ram_calls(tigeroad_snd_getbyte,tigeroad_snd_putbyte);
-snd_z80.init_sound(tigeroad_sound_update);
+z80_0:=cpu_z80.create(3579545,$100);
+z80_0.change_ram_calls(tigeroad_snd_getbyte,tigeroad_snd_putbyte);
+z80_0.init_sound(tigeroad_sound_update);
 //sound chips
 ym2203_0:=ym2203_chip.create(3579545);
 ym2203_0.change_irq_calls(snd_irq);

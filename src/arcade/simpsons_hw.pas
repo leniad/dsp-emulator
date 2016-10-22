@@ -42,23 +42,6 @@ var
  firq_enabled:boolean;
  sprite_ram:array[0..$7ff] of word;
 
-procedure reset_simpsons;
-begin
- main_konami.reset;
- snd_z80.reset;
- k052109_0.reset;
- k053251_0.reset;
- ym2151_0.reset;
- reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- bank0_bank:=0;
- bank2000_bank:=0;
- rom_bank1:=0;
- sound_bank:=0;
- firq_enabled:=false;
-end;
-
 procedure simpsons_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
 code:=code or (((color and $3f) shl 8) or (bank shl 14));
@@ -68,7 +51,7 @@ end;
 procedure simpsons_sprites_firq;
 begin
 timer[sprite_timer].enabled:=false;
-if firq_enabled then main_konami.change_firq(HOLD_LINE);
+if firq_enabled then konami_0.change_firq(HOLD_LINE);
 end;
 
 procedure update_video_simpsons;
@@ -126,19 +109,19 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_konami.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=konami_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
     for f:=0 to $ff do begin
     //main
-    main_konami.run(frame_m);
-    frame_m:=frame_m+main_konami.tframes-main_konami.contador;
+    konami_0.run(frame_m);
+    frame_m:=frame_m+konami_0.tframes-konami_0.contador;
     //sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=239 then begin
                     update_video_simpsons;
-                    if k052109_0.is_irq_enabled then main_konami.change_irq(HOLD_LINE);
+                    if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
                     if k053246_0.is_irq_enabled then begin
                        //simpsons_objdma();
                        timer[sprite_timer].enabled:=true;
@@ -167,7 +150,7 @@ case direccion of
                    $1f93:simpsons_getbyte:=$ff; //p4
                    $1fc4:begin
                             simpsons_getbyte:=0;
-                            snd_z80.change_irq(HOLD_LINE);
+                            z80_0.change_irq(HOLD_LINE);
                          end;
                    $1fc6..$1fc7:simpsons_getbyte:=k053260_0.main_read(direccion and $1);
                    $1fc8..$1fc9:simpsons_getbyte:=k053246_0.read(direccion and 1);
@@ -261,7 +244,7 @@ end;
 procedure simpsons_nmi;
 begin
 timer[snd_timer].enabled:=false;
-snd_z80.change_nmi(ASSERT_LINE);
+z80_0.change_nmi(ASSERT_LINE);
 end;
 
 procedure simpsons_snd_putbyte(direccion:word;valor:byte);
@@ -272,7 +255,7 @@ case direccion of
   $f800:ym2151_0.reg(valor);
   $f801:ym2151_0.write(valor);
   $fa00:begin
-             snd_z80.change_nmi(CLEAR_LINE);
+             z80_0.change_nmi(CLEAR_LINE);
              timer[snd_timer].enabled:=true;
         end;
   $fc00..$fc2f:k053260_0.write(direccion and $3f,valor);
@@ -287,6 +270,23 @@ begin
 end;
 
 //Main
+procedure reset_simpsons;
+begin
+ konami_0.reset;
+ z80_0.reset;
+ k052109_0.reset;
+ k053251_0.reset;
+ ym2151_0.reset;
+ reset_audio;
+ marcade.in0:=$FF;
+ marcade.in1:=$FF;
+ bank0_bank:=0;
+ bank2000_bank:=0;
+ rom_bank1:=0;
+ sound_bank:=0;
+ firq_enabled:=false;
+end;
+
 procedure cerrar_simpsons;
 begin
 if sprite_rom<>nil then freemem(sprite_rom);
@@ -324,14 +324,14 @@ copymemory(@sound_rom_bank[1,0],@temp_mem[$8000],$4000);
 copymemory(@sound_rom_bank[2,0],@temp_mem[$8000],$4000);
 for f:=3 to 7 do copymemory(@sound_rom_bank[f,0],@temp_mem[$c000+((f-3)*$4000)],$4000);
 //Main CPU
-main_konami:=cpu_konami.create(3000000,256);
-main_konami.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
-main_konami.change_set_lines(simpsons_bank);
+konami_0:=cpu_konami.create(3000000,256);
+konami_0.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
+konami_0.change_set_lines(simpsons_bank);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(simpsons_snd_getbyte,simpsons_snd_putbyte);
-snd_z80.init_sound(simpsons_sound_update);
-snd_timer:=init_timer(main_konami.numero_cpu,25,simpsons_nmi,false);
+z80_0:=cpu_z80.create(3579545,256);
+z80_0.change_ram_calls(simpsons_snd_getbyte,simpsons_snd_putbyte);
+z80_0.init_sound(simpsons_sound_update);
+snd_timer:=init_timer(konami_0.numero_cpu,25,simpsons_nmi,false);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k053260_rom,$140000);
@@ -350,7 +350,7 @@ k052109_0:=k052109_chip.create(1,2,3,simpsons_cb,tiles_rom,$100000);
 getmem(sprite_rom,$400000);
 if not(cargar_roms32b(sprite_rom,@simpsons_sprites,'simpsons.zip',0)) then exit;
 k053246_0:=k053246_chip.create(4,nil,sprite_rom,$400000);
-sprite_timer:=init_timer(main_konami.numero_cpu,30,simpsons_sprites_firq,false);
+sprite_timer:=init_timer(konami_0.numero_cpu,30,simpsons_sprites_firq,false);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@aliens_dip_a;

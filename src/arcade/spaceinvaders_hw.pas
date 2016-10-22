@@ -80,19 +80,19 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
-    main_z80.run(frame);
-    frame:=frame+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame);
+    frame:=frame+z80_0.tframes-z80_0.contador;
     case f of
     95:begin
-          main_z80.im0:=$cf;
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.im0:=$cf;
+          z80_0.change_irq(HOLD_LINE);
        end;
     223:begin
-          main_z80.im0:=$d7;
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.im0:=$d7;
+          z80_0.change_irq(HOLD_LINE);
           update_video_spaceinv;
         end;
     end;
@@ -168,7 +168,7 @@ begin
 open_qsnapshot_save('spaceinv'+nombre);
 getmem(data,2000);
 //CPU
-size:=main_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
 savedata_com_qsnapshot(@memoria[$2000],$2000);
@@ -192,7 +192,7 @@ if not(open_qsnapshot_load('spaceinv'+nombre)) then exit;
 getmem(data,2000);
 //CPU
 loaddata_qsnapshot(data);
-main_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[$2000]);
 //MISC
@@ -209,7 +209,7 @@ end;
 //Main
 procedure reset_spaceinv;
 begin
- main_z80.reset;
+ z80_0.reset;
  reset_audio;
  shift_data:=0;
  shift_count:=0;
@@ -228,13 +228,13 @@ iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(1996800,262);
-main_z80.change_io_calls(spaceinv_inbyte,spaceinv_outbyte);
-main_z80.change_ram_calls(spaceinv_getbyte,spaceinv_putbyte);
+z80_0:=cpu_z80.create(1996800,262);
+z80_0.change_io_calls(spaceinv_inbyte,spaceinv_outbyte);
+z80_0.change_ram_calls(spaceinv_getbyte,spaceinv_putbyte);
 //cargar roms
 if not(cargar_roms(@memoria[0],@spaceinv_rom[0],'invaders.zip',0)) then exit;
 //Sound
-if (load_samples('invaders.zip',@spaceinv_samples[0],num_samples)) then main_z80.init_sound(spaceinv_sound_update);
+if (load_samples('invaders.zip',@spaceinv_samples[0],num_samples)) then z80_0.init_sound(spaceinv_sound_update);
 //DIP
 marcade.dswa:=0;
 marcade.dswa_val:=@spaceinv_dip;

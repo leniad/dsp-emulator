@@ -166,26 +166,26 @@ var
   frame_m,frame_s,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
-frame_mcu:=main_tms32010.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+frame_mcu:=tms32010_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 285 do begin
     //MAIN CPU
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //SND CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     //MCU
-    main_tms32010.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_tms32010.tframes-main_tms32010.contador;
+    tms32010_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+tms32010_0.tframes-tms32010_0.contador;
     case f of
       0:vsync:=0;
       240:begin
             vsync:=$80;
             if int_enable then begin
-                main_m68000.irq[4]:=HOLD_LINE;
+                m68000_0.irq[4]:=HOLD_LINE;
                 int_enable:=false;
             end;
             update_video_twincobr;
@@ -261,13 +261,13 @@ case direccion of
   $76000..$76003:;
   $7800a:case (valor and $ff) of
         $00:begin	// This means assert the INT line to the DSP */
-	      main_tms32010.change_halt(CLEAR_LINE);
-              main_m68000.change_halt(ASSERT_LINE);
-              main_tms32010.change_irq(ASSERT_LINE);
+	      tms32010_0.change_halt(CLEAR_LINE);
+              m68000_0.change_halt(ASSERT_LINE);
+              tms32010_0.change_irq(ASSERT_LINE);
 	    end;
         $01:begin	// This means inhibit the INT line to the DSP */
-              main_tms32010.change_irq(CLEAR_LINE);
-	      main_tms32010.change_halt(ASSERT_LINE);
+              tms32010_0.change_irq(CLEAR_LINE);
+	      tms32010_0.change_halt(ASSERT_LINE);
             end;
       end;
   $7800c:case (valor and $ff) of
@@ -279,13 +279,13 @@ case direccion of
 		        $0a:fg_bank:=$0000;
             $0b:fg_bank:=$1000;
             $0c:begin	// This means assert the INT line to the DSP */
-    		  main_tms32010.change_halt(CLEAR_LINE);
-                  main_m68000.change_halt(ASSERT_LINE);
-                  main_tms32010.change_irq(ASSERT_LINE);
+    		  tms32010_0.change_halt(CLEAR_LINE);
+                  m68000_0.change_halt(ASSERT_LINE);
+                  tms32010_0.change_irq(ASSERT_LINE);
 		end;
 	    $0d:begin	// This means inhibit the INT line to the DSP */
-                 main_tms32010.change_irq(CLEAR_LINE);
-                 main_tms32010.change_halt(ASSERT_LINE);
+                 tms32010_0.change_irq(CLEAR_LINE);
+                 tms32010_0.change_halt(ASSERT_LINE);
                 end;
             $0e,$0f:; // Turn display on / off
   end;
@@ -337,7 +337,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_0.change_irq(irqstate);
 end;
 
 function twincobr_dsp_r:word;
@@ -373,7 +373,7 @@ begin
   if (valor and $8000)<>0 then twincobr_dsp_BIO:=false;
 	if (valor=0) then begin
 		if dsp_execute then begin
-      main_m68000.change_halt(CLEAR_LINE);
+      m68000_0.change_halt(CLEAR_LINE);
 			dsp_execute:=false;
 		end;
 		twincobr_dsp_BIO:=true;
@@ -393,9 +393,9 @@ end;
 //Main
 procedure reset_twincobra;
 begin
- main_m68000.reset;
- snd_z80.reset;
- main_tms32010.reset;
+ m68000_0.reset;
+ z80_0.reset;
+ tms32010_0.reset;
  ym3812_0.reset;
  reset_audio;
  txt_scroll_y:=457;
@@ -467,16 +467,16 @@ screen_mod_scroll(3,512,256,511,512,512,511);
 screen_init(4,512,512,false,true);
 iniciar_video(240,320);
 //Main CPU
-main_m68000:=cpu_m68000.create(24000000 div 4,286);
-main_m68000.change_ram16_calls(twincobr_getword,twincobr_putword);
+m68000_0:=cpu_m68000.create(24000000 div 4,286);
+m68000_0.change_ram16_calls(twincobr_getword,twincobr_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(3500000,286);
-snd_z80.change_ram_calls(twincobr_snd_getbyte,twincobr_snd_putbyte);
-snd_z80.change_io_calls(twincobr_snd_inbyte,twincobr_snd_outbyte);
-snd_z80.init_sound(twincobr_update_sound);
+z80_0:=cpu_z80.create(3500000,286);
+z80_0.change_ram_calls(twincobr_snd_getbyte,twincobr_snd_putbyte);
+z80_0.change_io_calls(twincobr_snd_inbyte,twincobr_snd_outbyte);
+z80_0.init_sound(twincobr_update_sound);
 //TMS MCU
-main_tms32010:=cpu_tms32010.create(14000000,286);
-main_tms32010.change_io_calls(twincobr_BIO_r,nil,twincobr_dsp_r,nil,nil,nil,nil,nil,nil,twincobr_dsp_addrsel_w,twincobr_dsp_w,nil,twincobr_dsp_bio_w,nil,nil,nil,nil);
+tms32010_0:=cpu_tms32010.create(14000000,286);
+tms32010_0.change_io_calls(twincobr_BIO_r,nil,twincobr_dsp_r,nil,nil,nil,nil,nil,nil,twincobr_dsp_addrsel_w,twincobr_dsp_w,nil,twincobr_dsp_bio_w,nil,nil,nil,nil);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
 ym3812_0.change_irq_calls(snd_irq);
@@ -487,7 +487,7 @@ case main_vars.tipo_maquina of
           //cargar ROMS sonido
           if not(cargar_roms(@mem_snd[0],@twincobr_snd_rom,'twincobr.zip',1)) then exit;
           //cargar ROMS MCU
-          if not(cargar_roms16b(main_tms32010.get_rom_addr,@twincobr_mcu_rom[0],'twincobr.zip',0)) then exit;
+          if not(cargar_roms16b(tms32010_0.get_rom_addr,@twincobr_mcu_rom[0],'twincobr.zip',0)) then exit;
           //convertir chars
           if not(cargar_roms(@memoria_temp[0],@twincobr_char[0],'twincobr.zip',0)) then exit;
           convert_chars;
@@ -518,7 +518,7 @@ case main_vars.tipo_maquina of
              temp_rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1400] and $f)) shl 8) or
                         (memoria_temp[f+$1800] and $f) shl 4+(memoria_temp[f+$1c00] and $f);
           end;
-          copymemory(main_tms32010.get_rom_addr,@temp_rom[0],$1000);
+          copymemory(tms32010_0.get_rom_addr,@temp_rom[0],$1000);
           //convertir chars
           if not(cargar_roms(@memoria_temp[0],@fshark_char[0],'fshark.zip',0)) then exit;
           convert_chars;

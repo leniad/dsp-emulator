@@ -122,19 +122,19 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=239 then begin
         update_video_gng;
-        main_m6809.change_irq(HOLD_LINE);
+        m6809_0.change_irq(HOLD_LINE);
     end;
   end;
   eventos_gng;
@@ -227,7 +227,7 @@ end;
 
 procedure gng_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_0.change_irq(HOLD_LINE);
 end;
 
 procedure gng_qsave(nombre:string);
@@ -239,9 +239,9 @@ begin
 open_qsnapshot_save('gng'+nombre);
 getmem(data,20000);
 //CPU
-size:=main_m6809.save_snapshot(data);
+size:=m6809_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
-size:=snd_z80.save_snapshot(data);
+size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
 size:=ym2203_0.save_snapshot(data);
@@ -275,9 +275,9 @@ if not(open_qsnapshot_load('gng'+nombre)) then exit;
 getmem(data,20000);
 //CPU
 loaddata_qsnapshot(data);
-main_m6809.load_snapshot(data);
+m6809_0.load_snapshot(data);
 loaddata_qsnapshot(data);
-snd_z80.load_snapshot(data);
+z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
 ym2203_0.load_snapshot(data);
@@ -303,8 +303,8 @@ end;
 //Main
 procedure reset_gng;
 begin
- main_m6809.reset;
- snd_z80.reset;
+ m6809_0.reset;
+ z80_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
  reset_audio;
@@ -346,14 +346,14 @@ screen_init(3,256,256,true); //Chars
 screen_init(4,512,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1500000,256);
-main_m6809.change_ram_calls(gng_getbyte,gng_putbyte);
+m6809_0:=cpu_m6809.Create(1500000,256);
+m6809_0.change_ram_calls(gng_getbyte,gng_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
-snd_z80.init_sound(gng_sound_update);
+z80_0:=cpu_z80.create(3000000,256);
+z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
+z80_0.init_sound(gng_sound_update);
 //IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3000000/(4*60),gng_snd_irq,true);
+init_timer(z80_0.numero_cpu,3000000/(4*60),gng_snd_irq,true);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(1500000,0.2);
 ym2203_1:=ym2203_chip.create(1500000,0.2);

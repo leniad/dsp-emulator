@@ -75,26 +75,26 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 snd_irq:=32;
 while EmuStatus=EsRuning do begin
   for f:=0 to 259 do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=223 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       if type_row_scroll then update_video_row_scroll
         else update_video;
       eventos_system1;
     end;
     if snd_irq=64 then begin
       snd_irq:=0;
-      snd_z80.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
     end;
     snd_irq:=snd_irq+1;
   end;
@@ -106,9 +106,9 @@ end;
 function system2_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$7fff:if main_z80.opcode then system2_getbyte:=mem_dec[direccion]
+  $0..$7fff:if z80_0.opcode then system2_getbyte:=mem_dec[direccion]
               else system2_getbyte:=memoria[direccion];
-  $8000..$bfff:if main_z80.opcode then system2_getbyte:=roms_dec[rom_bank,direccion and $3fff] //Banked ROMS
+  $8000..$bfff:if z80_0.opcode then system2_getbyte:=roms_dec[rom_bank,direccion and $3fff] //Banked ROMS
                   else system2_getbyte:=roms[rom_bank,direccion and $3fff];
   $d800..$dfff:system2_getbyte:=buffer_paleta[direccion and $7ff];
   $e000..$efff:system2_getbyte:=bg_ram[$1000*bg_ram_bank+(direccion and $fff)]; //banked bg
@@ -180,8 +180,8 @@ begin
 pia8255_0.reset;
 sn_76496_0.reset;
 sn_76496_1.reset;
-main_z80.reset;
-snd_z80.reset;
+z80_0.reset;
+z80_1.reset;
 reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
@@ -218,14 +218,14 @@ iniciar_audio(false);
 screen_init(1,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(20000000,260);
-main_z80.change_ram_calls(system2_getbyte,system2_putbyte);
-main_z80.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
-main_z80.change_timmings(@z80_op,@z80_cb,@z80_dd,@z80_ddcb,@z80_ed,@z80_ex);
+z80_0:=cpu_z80.create(20000000,260);
+z80_0.change_ram_calls(system2_getbyte,system2_putbyte);
+z80_0.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
+z80_0.change_timmings(@z80_op,@z80_cb,@z80_dd,@z80_ddcb,@z80_ed,@z80_ex);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,260);
-snd_z80.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
-snd_z80.init_sound(system1_sound_update);
+z80_1:=cpu_z80.create(4000000,260);
+z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
+z80_1.init_sound(system1_sound_update);
 //PPI 8255
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);

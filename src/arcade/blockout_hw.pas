@@ -109,22 +109,22 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
     //main
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     case f of
       247:begin
-            main_m68000.irq[6]:=ASSERT_LINE;
+            m68000_0.irq[6]:=ASSERT_LINE;
             update_video_blockout;
           end;
-      255:main_m68000.irq[5]:=ASSERT_LINE;
+      255:m68000_0.irq[5]:=ASSERT_LINE;
     end;
  end;
  eventos_blockout;
@@ -182,11 +182,11 @@ procedure blockout_putword(direccion:dword;valor:word);
 begin
 if direccion<$40000 then exit;
 case direccion of
-    $100010:main_m68000.irq[6]:=CLEAR_LINE;
-    $100012:main_m68000.irq[5]:=CLEAR_LINE;
+    $100010:m68000_0.irq[6]:=CLEAR_LINE;
+    $100012:m68000_0.irq[5]:=CLEAR_LINE;
     $100014:begin
               sound_latch:=valor and $ff;
-              snd_z80.change_nmi(PULSE_LINE);
+              z80_0.change_nmi(PULSE_LINE);
             end;
     $180000..$1bffff:begin
                         video_ram[(direccion and $3ffff) shr 1]:=valor;
@@ -230,7 +230,7 @@ end;
 
 procedure ym2151_snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_0.change_irq(irqstate);
 end;
 
 procedure blockout_sound_update;
@@ -242,8 +242,8 @@ end;
 //Main
 procedure reset_blockout;
 begin
- main_m68000.reset;
- snd_z80.reset;
+ m68000_0.reset;
+ z80_0.reset;
  ym2151_0.reset;
  oki_6295_0.reset;
  reset_audio;
@@ -264,12 +264,12 @@ screen_init(2,320,256,true);
 screen_init(3,320,256,false,true);
 iniciar_video(320,240);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(blockout_getword,blockout_putword);
+m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0.change_ram16_calls(blockout_getword,blockout_putword);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,256);
-snd_z80.change_ram_calls(blockout_snd_getbyte,blockout_snd_putbyte);
-snd_z80.init_sound(blockout_sound_update);
+z80_0:=cpu_z80.create(3579545,256);
+z80_0.change_ram_calls(blockout_snd_getbyte,blockout_snd_putbyte);
+z80_0.init_sound(blockout_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);

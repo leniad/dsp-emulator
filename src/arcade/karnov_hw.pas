@@ -94,7 +94,7 @@ if (valor=$406) then i8751_return:=$41ca; // Town */
 if (valor=$407) then i8751_return:=$421e; // Desert */
 if (valor=$401) then i8751_return:=$4138; // ^Whistling wind */
 if (valor=$408) then i8751_return:=$4276; // ^Heavy Gates */
-main_m68000.irq[6]:=HOLD_LINE; // Signal main cpu task is complete */
+m68000_0.irq[6]:=HOLD_LINE; // Signal main cpu task is complete */
 i8751_needs_ack:=true;
 end;
 
@@ -201,7 +201,7 @@ if ((valor and $f000)=$3000) then begin
           end;
    end;
 end;
-main_m68000.irq[6]:=HOLD_LINE;
+m68000_0.irq[6]:=HOLD_LINE;
 i8751_needs_ack:=true;
 end;
 
@@ -313,7 +313,7 @@ if ((marcade.in2<>i8751_coin_mask) and i8751_latch) then begin
       i8751_coin_pending:=marcade.in2 or $8000;
    end else begin
        i8751_return:=marcade.in2 or $8000;
-       main_m68000.irq[6]:=HOLD_LINE;
+       m68000_0.irq[6]:=HOLD_LINE;
        i8751_needs_ack:=true;
    end;
    i8751_latch:=false;
@@ -326,20 +326,20 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_m6502.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   snd_m6502.run(frame_s);
-   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   m6502_0.run(frame_s);
+   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
    case f of
       30:marcade.in1:=marcade.in1 and $7f;
       247:begin
             marcade.in1:=marcade.in1 or $80;
             karnov_i8751_interrupt;
-            main_m68000.irq[7]:=HOLD_LINE;
+            m68000_0.irq[7]:=HOLD_LINE;
             update_video_karnov;
           end;
    end;
@@ -379,12 +379,12 @@ begin
 // Mnemonics filled in from the schematics, brackets are my comments */
 case (direccion shl 1) of
      0:begin // SECLR (Interrupt ack for Level 6 i8751 interrupt)
-           main_m68000.irq[6]:=CLEAR_LINE;
+           m68000_0.irq[6]:=CLEAR_LINE;
 	   if i8751_needs_ack then begin
 	      // If a command and coin insert happen at once, then the i8751 will queue the coin command until the previous command is ACK'd */
 	      if (i8751_coin_pending<>0) then begin
 	          i8751_return:=i8751_coin_pending;
-		        main_m68000.irq[6]:=HOLD_LINE;
+		        m68000_0.irq[6]:=HOLD_LINE;
 		        i8751_coin_pending:=0;
 	      end else if (i8751_command_queue<>0) then begin
 	                  // Pending control command - just write it back as SECREQ
@@ -398,7 +398,7 @@ case (direccion shl 1) of
        end;
      2:begin // SONREQ (Sound CPU byte)
           sound_latch:=valor and $ff;
-	        snd_m6502.change_nmi(PULSE_LINE);
+	        m6502_0.change_nmi(PULSE_LINE);
        end;
      4:copymemory(@sprite_ram2,@sprite_ram,$800*2); // DM (DMA to buffer spriteram)
      6:i8751_write_proc(valor); // SECREQ (Interrupt & Data to i8751)
@@ -413,7 +413,7 @@ case (direccion shl 1) of
 	        i8751_command_queue:=0;
 	        i8751_return:=0;
         end;
-     $e:main_m68000.irq[7]:=CLEAR_LINE; // INTCLR (Interrupt ack for Level 7 vbl interrupt) */
+     $e:m68000_0.irq[7]:=CLEAR_LINE; // INTCLR (Interrupt ack for Level 7 vbl interrupt) */
 end;
 end;
 
@@ -469,14 +469,14 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_m6502.change_irq(irqstate);
+  m6502_0.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_karnov;
 begin
- main_m68000.reset;
- snd_m6502.reset;
+ m68000_0.reset;
+ m6502_0.reset;
  ym3812_0.reset;
  ym2203_0.reset;
  reset_audio;
@@ -532,12 +532,12 @@ screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(256,240);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,256);
-main_m68000.change_ram16_calls(karnov_getword,karnov_putword);
+m68000_0:=cpu_m68000.create(10000000,256);
+m68000_0.change_ram16_calls(karnov_getword,karnov_putword);
 //Sound CPU
-snd_m6502:=cpu_m6502.create(1500000,256,TCPU_M6502);
-snd_m6502.change_ram_calls(karnov_snd_getbyte,karnov_snd_putbyte);
-snd_m6502.init_sound(karnov_sound_update);
+m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
+m6502_0.change_ram_calls(karnov_snd_getbyte,karnov_snd_putbyte);
+m6502_0.init_sound(karnov_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);

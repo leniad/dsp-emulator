@@ -200,17 +200,17 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_m6502.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   snd_m6502.run(frame_s);
-   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   m6502_0.run(frame_s);
+   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
    case f of
       255:begin
-            main_m68000.irq[6]:=HOLD_LINE;
+            m68000_0.irq[6]:=HOLD_LINE;
             proc_update_video;
             vblank_val:=$80;
           end;
@@ -228,20 +228,20 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_m6502.tframes;
-frame_mcu:=main_h6280.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=m6502_0.tframes;
+frame_mcu:=h6280_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
-   main_m68000.run(frame_m);
-   frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
-   snd_m6502.run(frame_s);
-   frame_s:=frame_s+snd_m6502.tframes-snd_m6502.contador;
-   main_h6280.run(frame_mcu);
-   frame_mcu:=frame_mcu+main_h6280.tframes-main_h6280.contador;
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   m6502_0.run(frame_s);
+   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
+   h6280_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+h6280_0.tframes-h6280_0.contador;
    case f of
       255:begin
-            main_m68000.irq[6]:=HOLD_LINE;
+            m68000_0.irq[6]:=HOLD_LINE;
             proc_update_video;
             vblank_val:=$80;
           end;
@@ -310,7 +310,7 @@ begin
 		$753:i8751_return:=$70e;
 		$75b:i8751_return:=$70f;
 	end;
-	main_m68000.irq[5]:=HOLD_LINE;
+	m68000_0.irq[5]:=HOLD_LINE;
 end;
 
 procedure dec0_putword(direccion:dword;valor:word);
@@ -319,7 +319,7 @@ if direccion<$60000 then exit;
 case direccion of
     $180000..$180fff:begin
                         mcu_shared_ram[(direccion and $fff) shr 1]:=valor and $ff;
-                        if ((direccion and $fff)=$ffe) then main_h6280.set_irq_line(0,HOLD_LINE);
+                        if ((direccion and $fff)=$ffe) then h6280_0.set_irq_line(0,HOLD_LINE);
                      end;
     $240000..$240007:change_control0(1,(direccion and 7) shr 1,valor);
     $240010..$240017:change_control1(1,(direccion and 7) shr 1,valor);
@@ -354,7 +354,7 @@ case direccion of
                         2:copymemory(@buffer_sprites[0],@sprite_ram_bac06[0],$800);
                         4:begin
                             sound_latch:=valor and $ff;
-                            snd_m6502.change_nmi(PULSE_LINE);
+                            m6502_0.change_nmi(PULSE_LINE);
                           end;
                         6:dec0_i8751_write(valor);
                         $e:i8751_return:=0;
@@ -409,7 +409,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_m6502.change_irq(irqstate);
+  m6502_0.change_irq(irqstate);
 end;
 
 //Robocop
@@ -428,7 +428,7 @@ if direccion<$10000 then exit;
 case direccion of
   $1f0000..$1f1fff:mcu_ram[direccion and $1fff]:=valor;
   $1f2000..$1f3fff:mcu_shared_ram[direccion and $1fff]:=valor;
-  $1ff400..$1ff403:main_h6280.irq_status_w(direccion and $3,valor);
+  $1ff400..$1ff403:h6280_0.irq_status_w(direccion and $3,valor);
 end;
 end;
 
@@ -480,17 +480,17 @@ case direccion of
                    end;
   $1d0000..$1d00ff:hippodrm_lsb:=valor;
   $1f0000..$1f1fff:mcu_ram[direccion and $1fff]:=valor;
-  $1ff400..$1ff403:main_h6280.irq_status_w(direccion and $3,valor);
+  $1ff400..$1ff403:h6280_0.irq_status_w(direccion and $3,valor);
 end;
 end;
 
 //Main
 procedure reset_dec0;
 begin
- main_m68000.reset;
- snd_m6502.reset;
+ m68000_0.reset;
+ m6502_0.reset;
  case main_vars.tipo_maquina of
-  156,158:main_h6280.reset;
+  156,158:h6280_0.reset;
  end;
  ym3812_0.reset;
  ym2203_0.reset;
@@ -548,12 +548,12 @@ screen_init(6,1024,1024,true);
 iniciar_video(256,240);
 sprite_bac06_color:=$100;
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,264);
-main_m68000.change_ram16_calls(dec0_getword,dec0_putword);
+m68000_0:=cpu_m68000.create(10000000,264);
+m68000_0.change_ram16_calls(dec0_getword,dec0_putword);
 //Sound CPU
-snd_m6502:=cpu_m6502.create(1500000,264,TCPU_M6502);
-snd_m6502.change_ram_calls(dec0_snd_getbyte,dec0_snd_putbyte);
-snd_m6502.init_sound(dec0_sound_update);
+m6502_0:=cpu_m6502.create(1500000,264,TCPU_M6502);
+m6502_0.change_ram_calls(dec0_snd_getbyte,dec0_snd_putbyte);
+m6502_0.init_sound(dec0_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
@@ -567,8 +567,8 @@ case main_vars.tipo_maquina of
         //cargar sonido
         if not(cargar_roms(@mem_snd[0],@robocop_sound,'robocop.zip',1)) then exit;
         //MCU
-        main_h6280:=cpu_h6280.create(21477200 div 16,264);
-        main_h6280.change_ram_calls(robocop_mcu_getbyte,robocop_mcu_putbyte);
+        h6280_0:=cpu_h6280.create(21477200 div 16,264);
+        h6280_0.change_ram_calls(robocop_mcu_getbyte,robocop_mcu_putbyte);
         if not(cargar_roms(@robocop_mcu_rom[0],@robocop_mcu,'robocop.zip',1)) then exit;
         //OKI rom
         if not(cargar_roms(oki_6295_0.get_rom_addr,@robocop_oki,'robocop.zip',1)) then exit;
@@ -621,8 +621,8 @@ case main_vars.tipo_maquina of
         //cargar sonido
         if not(cargar_roms(@mem_snd[0],@hippo_sound,'hippodrm.zip',1)) then exit;
         //MCU+decrypt
-        main_h6280:=cpu_h6280.create(21477200 div 16,264);
-        main_h6280.change_ram_calls(hippo_mcu_getbyte,hippo_mcu_putbyte);
+        h6280_0:=cpu_h6280.create(21477200 div 16,264);
+        h6280_0.change_ram_calls(hippo_mcu_getbyte,hippo_mcu_putbyte);
         if not(cargar_roms(@hippo_mcu_rom[0],@hippo_mcu,'hippodrm.zip',1)) then exit;
         for f:=0 to $ffff do hippo_mcu_rom[f]:=bitswap8(hippo_mcu_rom[f],0,6,5,4,3,2,1,7);
         hippo_mcu_rom[$189]:=$60; // RTS prot area

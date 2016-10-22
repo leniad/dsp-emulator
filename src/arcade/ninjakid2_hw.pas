@@ -267,18 +267,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=223 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_ninjakid2;
     end;
   end;
@@ -325,7 +325,7 @@ if direccion<$c000 then exit;
 memoria[direccion]:=valor;
 case direccion of
    $c200:sound_latch:=valor;
-   $c201:if (valor and $10)<>0 then snd_z80.reset;
+   $c201:if (valor and $10)<>0 then z80_1.reset;
    $c202:rom_nbank:=valor and $7;
    $c203:sprite_overdraw:=(valor and $1)<>0;
    $c208:scroll_x:=(scroll_x and $ff00) or valor;
@@ -382,7 +382,7 @@ case direccion of
                     cambiar_color(direccion and $7fe);
                 end;
    $fa00:sound_latch:=valor;
-   $fa01:if (valor and $10)<>0 then snd_z80.reset;
+   $fa01:if (valor and $10)<>0 then z80_1.reset;
    $fa02:rom_nbank:=valor and $7;
    $fa03:sprite_overdraw:=(valor and $1)<>0;
    $fa08:scroll_x:=(scroll_x and $ff00) or valor;
@@ -397,7 +397,7 @@ end;
 function ninjakid2_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$7fff:if snd_z80.opcode then ninjakid2_snd_getbyte:=mem_snd_opc[direccion]
+  $0..$7fff:if z80_1.opcode then ninjakid2_snd_getbyte:=mem_snd_opc[direccion]
               else ninjakid2_snd_getbyte:=mem_snd[direccion];
   $e000:ninjakid2_snd_getbyte:=sound_latch;
     else ninjakid2_snd_getbyte:=mem_snd[direccion];
@@ -432,7 +432,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_1.change_irq(irqstate);
 end;
 
 procedure ninjakid2_sound_update;
@@ -444,9 +444,9 @@ end;
 //Main
 procedure reset_ninjakid2;
 begin
- main_z80.reset;
- main_z80.im0:=$d7;  //rst 10
- snd_z80.reset;
+ z80_0.reset;
+ z80_0.im0:=$d7;  //rst 10
+ z80_1.reset;
  YM2203_0.reset;
  YM2203_1.reset;
  reset_audio;
@@ -516,12 +516,12 @@ screen_init(3,512,256,false,true);
 screen_init(4,512,256,true);
 iniciar_video(256,192);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,256);
+z80_0:=cpu_z80.create(6000000,256);
 //Sound CPU
-snd_z80:=cpu_z80.create(5000000,256);
-snd_z80.change_ram_calls(ninjakid2_snd_getbyte,ninjakid2_snd_putbyte);
-snd_z80.change_io_calls(ninjakid2_snd_inbyte,ninjakid2_snd_outbyte);
-snd_z80.init_sound(ninjakid2_sound_update);
+z80_1:=cpu_z80.create(5000000,256);
+z80_1.change_ram_calls(ninjakid2_snd_getbyte,ninjakid2_snd_putbyte);
+z80_1.change_io_calls(ninjakid2_snd_inbyte,ninjakid2_snd_outbyte);
+z80_1.init_sound(ninjakid2_sound_update);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(1500000,2);
 ym2203_0.change_irq_calls(snd_irq);
@@ -529,7 +529,7 @@ ym2203_1:=ym2203_chip.create(1500000,2);
 case main_vars.tipo_maquina of
   120:begin
         update_background:=bg_ninjakid2;
-        main_z80.change_ram_calls(ninjakid2_getbyte,ninjakid2_putbyte);
+        z80_0.change_ram_calls(ninjakid2_getbyte,ninjakid2_putbyte);
         //cargar roms y ponerlas en sus bancos
         if not(cargar_roms(@memoria_temp[0],@ninjakid2_rom[0],'ninjakd2.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
@@ -551,7 +551,7 @@ case main_vars.tipo_maquina of
   121:begin
         update_background:=bg_arkarea;
         marcade.in3:=$ef;
-        main_z80.change_ram_calls(aarea_getbyte,aarea_putbyte);
+        z80_0.change_ram_calls(aarea_getbyte,aarea_putbyte);
         //cargar roms y ponerlas en sus bancos
         if not(cargar_roms(@memoria_temp[0],@aarea_rom[0],'arkarea.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
@@ -572,7 +572,7 @@ case main_vars.tipo_maquina of
   122:begin
         update_background:=bg_arkarea;
         marcade.in3:=$cf;
-        main_z80.change_ram_calls(aarea_getbyte,aarea_putbyte);
+        z80_0.change_ram_calls(aarea_getbyte,aarea_putbyte);
         //cargar roms y ponerlas en sus bancos
         if not(cargar_roms(@memoria_temp[0],@mnight_rom[0],'mnight.zip',0)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);

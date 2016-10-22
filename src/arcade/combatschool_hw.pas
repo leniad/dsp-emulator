@@ -169,18 +169,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_hd6309.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=hd6309_0.tframes;
+frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main CPU
-    main_hd6309.run(frame_m);
-    frame_m:=frame_m+main_hd6309.tframes-main_hd6309.contador;
+    hd6309_0.run(frame_m);
+    frame_m:=frame_m+hd6309_0.tframes-hd6309_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=239 then begin
-        main_hd6309.change_irq(HOLD_LINE);
+        hd6309_0.change_irq(HOLD_LINE);
         update_video_combatsc;
     end;
   end;
@@ -246,7 +246,7 @@ case direccion of
           else bank_rom:=8+(valor and 1);
        end;
   $414:sound_latch:=valor;
-  $418:snd_z80.change_irq(HOLD_LINE);
+  $418:z80_0.change_irq(HOLD_LINE);
   $600..$6ff:if buffer_paleta[direccion and $ff]<>valor then begin
         buffer_paleta[direccion and $ff]:=valor;
         cambiar_color(direccion and $fe);
@@ -307,8 +307,8 @@ end;
 //Main
 procedure reset_combatsc;
 begin
- main_hd6309.reset;
- snd_z80.reset;
+ hd6309_0.reset;
+ z80_0.reset;
  reset_audio;
  ym2203_0.reset;
  upd7759_0.reset;
@@ -366,12 +366,12 @@ screen_mod_scroll(6,256,256,255,256,256,255);
 iniciar_video(256,224);
 //iniciar_video(256,256);
 //Main CPU
-main_hd6309:=cpu_hd6309.create(12000000,$100);
-main_hd6309.change_ram_calls(combatsc_getbyte,combatsc_putbyte);
+hd6309_0:=cpu_hd6309.create(12000000,$100);
+hd6309_0.change_ram_calls(combatsc_getbyte,combatsc_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3579545,$100);
-snd_z80.change_ram_calls(sound_getbyte,sound_putbyte);
-snd_z80.init_sound(combatsc_sound_update);
+z80_0:=cpu_z80.create(3579545,$100);
+z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
+z80_0.init_sound(combatsc_sound_update);
 //Audio chips
 ym2203_0:=ym2203_chip.create(3000000,4);
 upd7759_0:=upd7759_chip.create(640000,2);

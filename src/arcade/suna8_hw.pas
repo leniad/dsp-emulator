@@ -161,18 +161,18 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_hardhead;
     end;
  end;
@@ -272,7 +272,7 @@ end;
 
 procedure hardhead_snd;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 procedure hardhead_portaw(valor:byte);
@@ -415,19 +415,19 @@ var
   f:byte;
 begin
 init_controls(false,true,true,false);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 1 do begin
   //Main CPU
-  main_z80.run(frame_m);
-  frame_m:=frame_m+main_z80.tframes-main_z80.contador;
-  if f=0 then main_z80.change_irq(HOLD_LINE)
-    else main_z80.change_nmi(PULSE_LINE);
+  z80_0.run(frame_m);
+  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+  if f=0 then z80_0.change_irq(HOLD_LINE)
+    else z80_0.change_nmi(PULSE_LINE);
   //Sound CPU
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.run(frame_s);
+  frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+  z80_1.change_irq(HOLD_LINE);
  end;
   update_video_hardhead2;
   eventos_suna_hw;
@@ -438,7 +438,7 @@ end;
 function hardhead2_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7fff:if main_z80.opcode then hardhead2_getbyte:=mem_opcodes[direccion]
+  0..$7fff:if z80_0.opcode then hardhead2_getbyte:=mem_opcodes[direccion]
               else hardhead2_getbyte:=memoria[direccion];
   $8000..$bfff:hardhead2_getbyte:=rom_bank[banco_rom,direccion and $3fff];
   $c000..$c003,$c080:hardhead2_getbyte:=$ff;
@@ -485,8 +485,8 @@ end;
 //Main
 procedure reset_suna_hw;
 begin
- main_z80.reset;
- snd_z80.reset;
+ z80_0.reset;
+ z80_1.reset;
  ay8910_0.reset;
  ym3812_0.reset;
  reset_audio;
@@ -532,19 +532,19 @@ iniciar_video(256,224);
 case main_vars.tipo_maquina of
   67:begin
         //Main CPU
-        main_z80:=cpu_z80.create(6000000,256);
-        main_z80.change_ram_calls(hardhead_getbyte,hardhead_putbyte);
+        z80_0:=cpu_z80.create(6000000,256);
+        z80_0.change_ram_calls(hardhead_getbyte,hardhead_putbyte);
         //Sound CPU
-        snd_z80:=cpu_z80.create(3000000,256);
-        snd_z80.change_ram_calls(hardhead_snd_getbyte,hardhead_snd_putbyte);
-        snd_z80.init_sound(snd_despues_instruccion);
-        init_timer(snd_z80.numero_cpu,3000000/(60*4),hardhead_snd,true);
+        z80_1:=cpu_z80.create(3000000,256);
+        z80_1.change_ram_calls(hardhead_snd_getbyte,hardhead_snd_putbyte);
+        z80_1.init_sound(snd_despues_instruccion);
+        init_timer(z80_1.numero_cpu,3000000/(60*4),hardhead_snd,true);
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(2000000,2);
+        ay8910_0:=ay8910_chip.create(2000000,AY8910,0.3);
         ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
         //Y para el DAC
-        dac_timer:=init_timer(snd_z80.numero_cpu,3000000/4000,dac_sound,false);
+        dac_timer:=init_timer(z80_1.numero_cpu,3000000/4000,dac_sound,false);
         //cargar roms y rom en bancos
         if not(cargar_roms(@memoria_temp[0],@hardhead_rom[0],'hardhead.zip',0)) then exit;
         for f:=0 to $f do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
@@ -569,15 +569,15 @@ case main_vars.tipo_maquina of
      end;
      68:begin
         //Main CPU
-        main_z80:=cpu_z80.create(6000000,2);
-        main_z80.change_ram_calls(hardhead2_getbyte,hardhead2_putbyte);
+        z80_0:=cpu_z80.create(6000000,2);
+        z80_0.change_ram_calls(hardhead2_getbyte,hardhead2_putbyte);
         //Sound CPU
-        snd_z80:=cpu_z80.create(3000000,2);
-        snd_z80.change_ram_calls(hardhead2_snd_getbyte,hardhead2_snd_putbyte);
-        snd_z80.init_sound(snd_despues_instruccion);
+        z80_1:=cpu_z80.create(3000000,2);
+        z80_1.change_ram_calls(hardhead2_snd_getbyte,hardhead2_snd_putbyte);
+        z80_1.init_sound(snd_despues_instruccion);
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(2000000,2);
+        ay8910_0:=ay8910_chip.create(2000000,AY8910,0.3);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@hardhead2_rom[0],'hardhea2.zip',0)) then exit;
         //desencriptarlas

@@ -477,7 +477,7 @@ if event.arcade then begin
     else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f)
     else marcade.in0:=(marcade.in0 or $80);
-  if tmp_in0<>marcade.in0 then main_lr.joystick_req:=true;
+  if tmp_in0<>marcade.in0 then lr35902_0.joystick_req:=true;
 end;
 end;
 
@@ -500,11 +500,11 @@ case direccion of
   $07:leer_io:=tcontrol;
   $0f:begin
         tempb:=0;
-        if main_lr.vblank_req then tempb:=tempb or $1;
-        if main_lr.lcdstat_req  then tempb:=tempb or $2;
-        if main_lr.timer_req  then tempb:=tempb or $4;
-        if main_lr.serial_req then tempb:=tempb or $8;
-        if main_lr.joystick_req  then tempb:=tempb or $10;
+        if lr35902_0.vblank_req then tempb:=tempb or $1;
+        if lr35902_0.lcdstat_req  then tempb:=tempb or $2;
+        if lr35902_0.timer_req  then tempb:=tempb or $4;
+        if lr35902_0.serial_req then tempb:=tempb or $8;
+        if lr35902_0.joystick_req  then tempb:=tempb or $10;
         leer_io:=tempb;
       end;
   $10..$26:leer_io:=gb_sound_r(direccion-$10); //Sound
@@ -556,11 +556,11 @@ case direccion of
         timer[gb_timer].enabled:=(valor and $4)<>0;
       end;
   $0f:begin //irq request
-        main_lr.vblank_req:=(valor and $1)<>0;
-        main_lr.lcdstat_req:=(valor and $2)<>0;
-        main_lr.timer_req:=(valor and $4)<>0;
-        main_lr.serial_req:=(valor and $8)<>0;
-        main_lr.joystick_req:=(valor and $10)<>0;
+        lr35902_0.vblank_req:=(valor and $1)<>0;
+        lr35902_0.lcdstat_req:=(valor and $2)<>0;
+        lr35902_0.timer_req:=(valor and $4)<>0;
+        lr35902_0.serial_req:=(valor and $8)<>0;
+        lr35902_0.joystick_req:=(valor and $10)<>0;
       end;
   $10..$26:gb_sound_w(direccion-$10,valor); //Sound
   $30..$3f:gb_wave_w(direccion-$30,valor); //Sound Wav
@@ -591,7 +591,7 @@ case direccion of
             $ff00..$ffff:sprt_ram[f]:=io_ram[addrs and $ff];
           end;
         end;
-        main_lr.contador:=main_lr.contador+160;
+        lr35902_0.contador:=lr35902_0.contador+160;
       end;
   $47:begin
         bg_pal:=valor;
@@ -621,11 +621,11 @@ case direccion of
   $80..$fe:;  //high memory
   $ff:begin  //irq enable
         irq_ena:=valor;
-        main_lr.vblank_ena:=(valor and $1)<>0;
-        main_lr.lcdstat_ena:=(valor and $2)<>0;
-        main_lr.timer_ena:=(valor and $4)<>0;
-        main_lr.serial_ena:=(valor and $8)<>0;
-        main_lr.joystick_ena:=(valor and $10)<>0;
+        lr35902_0.vblank_ena:=(valor and $1)<>0;
+        lr35902_0.lcdstat_ena:=(valor and $2)<>0;
+        lr35902_0.timer_ena:=(valor and $4)<>0;
+        lr35902_0.serial_ena:=(valor and $8)<>0;
+        lr35902_0.joystick_ena:=(valor and $10)<>0;
       end;
   //else MessageDlg('IO desconocida escribe pos= '+inttohex(direccion and $ff,2)+' - '+inttohex(valor,2), mtInformation,[mbOk], 0);
 end;
@@ -645,11 +645,11 @@ case direccion of
   $07:leer_io_gbc:=tcontrol;
   $0f:begin
         tempb:=0;
-        if main_lr.vblank_req then tempb:=tempb or $1;
-        if main_lr.lcdstat_req  then tempb:=tempb or $2;
-        if main_lr.timer_req  then tempb:=tempb or $4;
-        if main_lr.serial_req then tempb:=tempb or $8;
-        if main_lr.joystick_req  then tempb:=tempb or $10;
+        if lr35902_0.vblank_req then tempb:=tempb or $1;
+        if lr35902_0.lcdstat_req  then tempb:=tempb or $2;
+        if lr35902_0.timer_req  then tempb:=tempb or $4;
+        if lr35902_0.serial_req then tempb:=tempb or $8;
+        if lr35902_0.joystick_req  then tempb:=tempb or $10;
         leer_io_gbc:=tempb;
       end;
   $10..$26:leer_io_gbc:=gb_sound_r(direccion-$10); //Sound
@@ -666,8 +666,8 @@ case direccion of
   $49:leer_io_gbc:=sprt1_pal;
   $4a:leer_io_gbc:=window_y;
   $4b:leer_io_gbc:=window_x;
-  $4d:if main_lr.change_speed then leer_io_gbc:=(main_lr.speed shl 7)+$7f
-        else leer_io_gbc:=(main_lr.speed shl 7)+$7e;
+  $4d:if lr35902_0.change_speed then leer_io_gbc:=(lr35902_0.speed shl 7)+$7f
+        else leer_io_gbc:=(lr35902_0.speed shl 7)+$7e;
   $4f:leer_io_gbc:=vram_nbank;
   $55:if hdma_ena then leer_io_gbc:=$0
         else leer_io_gbc:=$80;
@@ -737,11 +737,11 @@ case direccion of
         timer[gb_timer].enabled:=(valor and $4)<>0;
       end;
   $0f:begin //irq request
-        main_lr.vblank_req:=(valor and $1)<>0;
-        main_lr.lcdstat_req:=(valor and $2)<>0;
-        main_lr.timer_req:=(valor and $4)<>0;
-        main_lr.serial_req:=(valor and $8)<>0;
-        main_lr.joystick_req:=(valor and $10)<>0;
+        lr35902_0.vblank_req:=(valor and $1)<>0;
+        lr35902_0.lcdstat_req:=(valor and $2)<>0;
+        lr35902_0.timer_req:=(valor and $4)<>0;
+        lr35902_0.serial_req:=(valor and $8)<>0;
+        lr35902_0.joystick_req:=(valor and $10)<>0;
       end;
   $10..$26:gb_sound_w(direccion-$10,valor); //Sound
   //$27..$2f:io_ram[direccion]:=valor;
@@ -775,7 +775,7 @@ case direccion of
           end;
           sprt_ram[f]:=temp;
         end;
-        main_lr.contador:=main_lr.contador+(160 shr main_lr.speed);
+        lr35902_0.contador:=lr35902_0.contador+(160 shr lr35902_0.speed);
       end;
   $47:bg_pal:=valor;
   $48:sprt0_pal:=valor;
@@ -783,7 +783,7 @@ case direccion of
   $4a:window_y:=valor;
   $4b:window_x:=valor;
 //  $4c:io_ram[direccion]:=valor;  //????
-  $4d:if main_lr.speed<>(valor and 1) then main_lr.change_speed:=true;  //Cambiar velocidad
+  $4d:if lr35902_0.speed<>(valor and 1) then lr35902_0.change_speed:=true;  //Cambiar velocidad
   $4f:vram_nbank:=valor and 1; //VRAM Bank
   $50:enable_bios:=(valor=0);  //enable/disable ROM
   $51:dma_src:=(dma_src and $ff) or (valor shl 8);
@@ -797,7 +797,7 @@ case direccion of
           hdma_pos:=0;
         end else begin
           dma_trans((valor+1)*$10);
-          main_lr.contador:=main_lr.contador+((valor+1)*8);
+          lr35902_0.contador:=lr35902_0.contador+((valor+1)*8);
         end;
       end;
   $56:;
@@ -825,11 +825,11 @@ case direccion of
 //  $80..$fe:io_ram[direccion]:=valor;  //high memory
   $ff:begin  //irq enable
         irq_ena:=valor;
-        main_lr.vblank_ena:=(valor and $1)<>0;
-        main_lr.lcdstat_ena:=(valor and $2)<>0;
-        main_lr.timer_ena:=(valor and $4)<>0;
-        main_lr.serial_ena:=(valor and $8)<>0;
-        main_lr.joystick_ena:=(valor and $10)<>0;
+        lr35902_0.vblank_ena:=(valor and $1)<>0;
+        lr35902_0.lcdstat_ena:=(valor and $2)<>0;
+        lr35902_0.timer_ena:=(valor and $4)<>0;
+        lr35902_0.serial_ena:=(valor and $8)<>0;
+        lr35902_0.joystick_ena:=(valor and $10)<>0;
       end;
 //  else io_ram[direccion]:=valor;//MessageDlg('IO desconocida escribe pos= '+inttohex(direccion and $ff,2)+' - '+inttohex(valor,2), mtInformation,[mbOk], 0);
 end;
@@ -842,23 +842,23 @@ var
 begin
 if not(cartucho_cargado) then exit;
 init_controls(false,false,false,true);
-frame_m:=main_lr.tframes;
+frame_m:=lr35902_0.tframes;
 while EmuStatus=EsRuning do begin
   linea:=0;
   for f:=0 to 153 do begin
-    main_lr.run(frame_m);
-    frame_m:=frame_m+main_lr.tframes-main_lr.contador;
+    lr35902_0.run(frame_m);
+    frame_m:=frame_m+lr35902_0.tframes-lr35902_0.contador;
     case f of
         0..143:gameboy.video_render;
         144:begin //Modo 1 + VBLANK IRQ
-              main_lr.vblank_req:=true;
-              main_lr.lcdstat_req:=((stat and $10)<>0) and ((stat and $3)<>1);
+              lr35902_0.vblank_req:=true;
+              lr35902_0.lcdstat_req:=((stat and $10)<>0) and ((stat and $3)<>1);
               stat:=(stat and $fc) or $1;
             end;
     end;
     linea:=linea+1;
     if linea=ly_compare then begin
-        main_lr.lcdstat_req:=(stat and $40)<>0;
+        lr35902_0.lcdstat_req:=(stat and $40)<>0;
         stat:=stat or $4;
     end else begin
        stat:=stat and $fb;
@@ -922,7 +922,7 @@ procedure gb_despues_instruccion(estados_t:word);
 begin
 if hdma_ena then begin
     dma_trans($10);
-    main_lr.contador:=main_lr.contador+8;
+    lr35902_0.contador:=lr35902_0.contador+8;
     dma_src:=dma_src+$10;
     dma_dst:=dma_dst+$10;
     hdma_pos:=hdma_pos+1;
@@ -933,17 +933,17 @@ if (linea>143) then exit;
 // Mode 3  _33____33____33____33____33____33__________________3___
 // Mode 0  ___000___000___000___000___000___000________________000
 // Mode 1  ____________________________________11111111111111_____
-if main_lr.contador<80 then begin
+if lr35902_0.contador<80 then begin
     if  lcd_ena then begin
       //mode 2 OAM,se genera una IRQ si cambia a 2, pero solo cuando cambia!!
-      main_lr.lcdstat_req:=(((stat and $20)<>0) and ((stat and $3)<>2));
+      lr35902_0.lcdstat_req:=(((stat and $20)<>0) and ((stat and $3)<>2));
       stat:=(stat and $fc) or $2;
     end;
   end else begin //Mode 3
-    if ((main_lr.contador<(172+80+sprites_time)) or hdma_ena) then begin
+    if ((lr35902_0.contador<(172+80+sprites_time)) or hdma_ena) then begin
       if lcd_ena then stat:=(stat and $fc) or $3;
       end else begin //H-Blank mode 0, se genera una IRQ si cambia a 0, pero solo cuando cambia!!
-          main_lr.lcdstat_req:=(((stat and $8)<>0) and ((stat and $3)<>0));
+          lr35902_0.lcdstat_req:=(((stat and $8)<>0) and ((stat and $3)<>0));
           stat:=stat and $fc;
       end;
   end;
@@ -959,7 +959,7 @@ procedure reset_gb;
 var
   lr_reg:reg_lr;
 begin
- main_lr.reset;
+ lr35902_0.reset;
  reset_audio;
  gameboy_sound_reset;
  scroll_x:=0;
@@ -1032,7 +1032,7 @@ begin
      escribe_io($4b,$00);
      escribe_io($00,$00);
    end;
-   main_lr.set_internal_r(@lr_reg);
+   lr35902_0.set_internal_r(@lr_reg);
   end else enable_bios:=true;
 end;
 
@@ -1041,7 +1041,7 @@ begin
   prog_timer:=prog_timer+1;
   if prog_timer=0 then begin
     prog_timer:=tmodulo;
-    main_lr.timer_req:=true; //timer request irq
+    lr35902_0.timer_req:=true; //timer request irq
   end;
 end;
 
@@ -1158,7 +1158,6 @@ begin
       else MessageDlg('Mapper '+inttohex(tipo_rom,2)+' no implementado', mtInformation,[mbOk], 0);
   end;
   if not(mal) then begin
-    directory.GameBoy:=ExtractFilePath(romfile)+main_vars.cadena_dir;
     if colorgb then begin //GameBoy Color
       ncartucho:='';
       for f:=0 to 10 do ncartucho:=ncartucho+chr(cabecera[$134+f]);
@@ -1186,6 +1185,7 @@ begin
   cartucho_cargado:=true;
   freemem(datos);
   reset_gb;
+  directory.GameBoy:=ExtractFilePath(romfile);
 end;
 
 function iniciar_gb:boolean;
@@ -1196,10 +1196,10 @@ screen_init(1,256,1,true);
 screen_init(2,160,144);
 iniciar_video(160,144);
 //Main CPU
-main_lr:=cpu_lr.Create(4194304,154); //154 lineas, 456 estados t por linea
-main_lr.change_ram_calls(gb_getbyte,gb_putbyte);
-main_lr.change_despues_instruccion(gb_despues_instruccion);
-main_lr.init_sound(gameboy_sound_update);
+lr35902_0:=cpu_lr.Create(4194304,154); //154 lineas, 456 estados t por linea
+lr35902_0.change_ram_calls(gb_getbyte,gb_putbyte);
+lr35902_0.change_despues_instruccion(gb_despues_instruccion);
+lr35902_0.init_sound(gameboy_sound_update);
 //Timers internos de la GB
 init_timer(0,4194304/16384,gb_main_timer,true);
 gb_timer:=init_timer(0,4194304/4096,gb_prog_timer,false);

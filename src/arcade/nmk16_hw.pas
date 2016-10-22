@@ -150,13 +150,13 @@ var
   f:byte;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
+frame_m:=m68000_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-      main_m68000.run(frame_m);
-      frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+      m68000_0.run(frame_m);
+      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
       if f=239 then begin
-        main_m68000.irq[4]:=HOLD_LINE;
+        m68000_0.irq[4]:=HOLD_LINE;
         update_video_sbombers;
       end;
   end;
@@ -226,7 +226,7 @@ end;
 
 procedure sound_irq;
 begin
-  main_m68000.irq[1]:=HOLD_LINE;
+  m68000_0.irq[1]:=HOLD_LINE;
 end;
 
 procedure nmk16_update_sound;
@@ -240,7 +240,7 @@ procedure reset_nmk16;
 var
   f:byte;
 begin
- main_m68000.reset;
+ m68000_0.reset;
  oki_6295_0.reset;
  oki_6295_1.reset;
  reset_audio;
@@ -365,9 +365,9 @@ screen_init(1,512,512);
 screen_init(2,512,512,false,true);
 iniciar_video(384,224);
 //Main CPU
-main_m68000:=cpu_m68000.create(10000000,$100);
-main_m68000.change_ram16_calls(sbombers_getword,sbombers_putword);
-main_m68000.init_sound(nmk16_update_sound);
+m68000_0:=cpu_m68000.create(10000000,$100);
+m68000_0.change_ram16_calls(sbombers_getword,sbombers_putword);
+m68000_0.init_sound(nmk16_update_sound);
 //Sound Chips
 oki_6295_0:=snd_okim6295.Create(16000000 div 4,OKIM6295_PIN7_LOW);
 oki_6295_1:=snd_okim6295.Create(16000000 div 4,OKIM6295_PIN7_LOW);

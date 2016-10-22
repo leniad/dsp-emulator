@@ -77,15 +77,15 @@ var
   frame_m:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
+frame_m:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for scan_line:=0 to $ff do begin
     //Main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
     konamisnd_0.run(scan_line);
-    if (scan_line=244) then if nmi_enable then main_z80.change_nmi(ASSERT_LINE);
+    if (scan_line=244) then if nmi_enable then z80_0.change_nmi(ASSERT_LINE);
   end;
   update_video_timepilot;
   eventos_timepilot;
@@ -130,7 +130,7 @@ case direccion of
                 $300..$3ff:case (direccion and $f) of
                     $0..$1:begin
                               nmi_enable:=(valor and 1)<>0;
-	                            if not(nmi_enable) then main_z80.change_nmi(CLEAR_LINE);
+	                            if not(nmi_enable) then z80_0.change_nmi(CLEAR_LINE);
                            end;
                     $02:main_screen.flip_main_screen:=(valor and $1)=0;
                     $04:begin
@@ -145,7 +145,7 @@ end;
 //Main
 procedure timepilot_reset;
 begin
-main_z80.reset;
+z80_0.reset;
 konamisnd_0.reset;
 reset_audio;
 nmi_enable:=false;
@@ -176,14 +176,13 @@ screen_mod_scroll(2,0,0,255,0,0,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(3072000,256);
-main_z80.change_ram_calls(timepilot_getbyte,timepilot_putbyte);
+z80_0:=cpu_z80.create(3072000,256);
+z80_0.change_ram_calls(timepilot_getbyte,timepilot_putbyte);
 //Sound Chip
 konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,256);
+if not(cargar_roms(@konamisnd_0.memoria[0],@timepilot_sound,'timeplt.zip')) then exit;
 //Cargar las roms...
 if not(cargar_roms(@memoria[0],@timepilot_rom[0],'timeplt.zip',0)) then exit;
-//roms de sonido
-if not(cargar_roms(@mem_snd[0],@timepilot_sound,'timeplt.zip')) then exit;
 //cargar chars
 if not(cargar_roms(@memoria_temp[0],@timepilot_char,'timeplt.zip')) then exit;
 init_gfx(0,8,8,$200);

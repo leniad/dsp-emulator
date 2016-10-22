@@ -225,35 +225,35 @@ var
   frame_m,frame_s,frame_snd,frame_mcu:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m6809.tframes;
-frame_s:=misc_m6809.tframes;
-frame_snd:=snd_m6809.tframes;
-frame_mcu:=main_m6805.tframes;
+frame_m:=m6809_0.tframes;
+frame_s:=m6809_1.tframes;
+frame_snd:=m6809_2.tframes;
+frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 271 do begin
     //main
-    main_m6809.run(frame_m);
-    frame_m:=frame_m+main_m6809.tframes-main_m6809.contador;
+    m6809_0.run(frame_m);
+    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //sub
-    misc_m6809.run(frame_s);
-    frame_s:=frame_s+misc_m6809.tframes-misc_m6809.contador;
+    m6809_1.run(frame_s);
+    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
     //snd
-    snd_m6809.run(frame_snd);
-    frame_snd:=frame_snd+snd_m6809.tframes-snd_m6809.contador;
+    m6809_2.run(frame_snd);
+    frame_snd:=frame_snd+m6809_2.tframes-m6809_2.contador;
     //mcu
-    main_m6805.run(frame_mcu);
-    frame_mcu:=frame_mcu+main_m6805.tframes-main_m6805.contador;
+    m6805_0.run(frame_mcu);
+    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
     //video
     case xain_scanline[f] of
       $8:vblank:=0;
       $f7:vblank:=$20;
       $f8:begin
             update_video_xain;
-            main_m6809.change_nmi(ASSERT_LINE);
-            main_m6809.change_firq(ASSERT_LINE);
+            m6809_0.change_nmi(ASSERT_LINE);
+            m6809_0.change_firq(ASSERT_LINE);
           end;
     end;
-    if ((xain_scanline[f] and $f)=8) then main_m6809.change_firq(ASSERT_LINE);
+    if ((xain_scanline[f] and $f)=8) then m6809_0.change_firq(ASSERT_LINE);
   end;
   eventos_xain;
   video_sync;
@@ -294,7 +294,7 @@ case direccion of
     	end else begin
         if (((ddr_b and $02)<>0) and ((not(port_b_out) and $02)<>0) and ((valor and $02)<>0)) then begin
     		  mcu_accept:=true;
-    		  main_m6805.irq_request(0,CLEAR_LINE);
+    		  m6805_0.irq_request(0,CLEAR_LINE);
         end;
     	end;
     	if (((ddr_b and $04)<>0) and ((valor and $04)<>0) and ((not(port_b_out) and $04)<>0)) then begin
@@ -327,7 +327,7 @@ begin
         $3a06:begin
                 mcu_ready:=true;
 	              mcu_accept:=true;
-                main_m6805.irq_request(0,CLEAR_LINE);
+                m6805_0.irq_request(0,CLEAR_LINE);
                 xain_getbyte:=$ff;
               end;
         $4000..$7fff:xain_getbyte:=main_rom[banco_main,direccion and $3FFF]
@@ -379,17 +379,17 @@ case direccion of
         $3a07:scroll_y_p0:=(scroll_y_p0 and $ff) or ((valor and 1) shl 8);
         $3a08:begin
                 soundlatch:=valor;
-                snd_m6809.change_irq(HOLD_LINE);
+                m6809_2.change_irq(HOLD_LINE);
               end;
-        $3a09:main_m6809.change_nmi(CLEAR_LINE);
-        $3a0a:main_m6809.change_firq(CLEAR_LINE);
-        $3a0b:main_m6809.change_irq(CLEAR_LINE);
-        $3a0c:misc_m6809.change_irq(ASSERT_LINE);
+        $3a09:m6809_0.change_nmi(CLEAR_LINE);
+        $3a0a:m6809_0.change_firq(CLEAR_LINE);
+        $3a0b:m6809_0.change_irq(CLEAR_LINE);
+        $3a0c:m6809_1.change_irq(ASSERT_LINE);
         $3a0d:main_screen.flip_main_screen:=(valor and $1)<>0;
         $3a0e:begin
                 from_main:=valor;
 	              mcu_accept:=false;
-                main_m6805.irq_request(0,ASSERT_LINE);
+                m6805_0.irq_request(0,ASSERT_LINE);
               end;
         $3a0f:begin
                 if (xain_pri<>valor and $7) then begin
@@ -421,8 +421,8 @@ begin
 if direccion>$3fff then exit;
 case direccion of
   0..$1fff:memoria[direccion]:=valor;
-  $2000:main_m6809.change_irq(ASSERT_LINE);
-  $2800:misc_m6809.change_irq(CLEAR_LINE);
+  $2000:m6809_0.change_irq(ASSERT_LINE);
+  $2800:m6809_1.change_irq(CLEAR_LINE);
   $3000:banco_sub:=valor and 1;
 end;
 end;
@@ -449,8 +449,8 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then snd_m6809.change_firq(ASSERT_LINE)
-    else snd_m6809.change_firq(CLEAR_LINE);
+  if (irqstate=1) then m6809_2.change_firq(ASSERT_LINE)
+    else m6809_2.change_firq(CLEAR_LINE);
 end;
 
 procedure xain_sound_update;
@@ -462,10 +462,10 @@ end;
 //Main
 procedure reset_xain;
 begin
- main_m6809.reset;
- misc_m6809.reset;
- snd_m6809.reset;
- main_m6805.reset;
+ m6809_0.reset;
+ m6809_1.reset;
+ m6809_2.reset;
+ m6805_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
  reset_audio;
@@ -519,18 +519,18 @@ screen_init(4,512,512,false,true);
 screen_mod_sprites(4,256,256,$ff,$ff);
 iniciar_video(256,240);
 //Main CPU
-main_m6809:=cpu_m6809.Create(1500000,272);
-main_m6809.change_ram_calls(xain_getbyte,xain_putbyte);
+m6809_0:=cpu_m6809.Create(1500000,272);
+m6809_0.change_ram_calls(xain_getbyte,xain_putbyte);
 //Sub CPU
-misc_m6809:=cpu_m6809.Create(1500000,272);
-misc_m6809.change_ram_calls(xain_sub_getbyte,xain_sub_putbyte);
+m6809_1:=cpu_m6809.Create(1500000,272);
+m6809_1.change_ram_calls(xain_sub_getbyte,xain_sub_putbyte);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(1500000,272);
-snd_m6809.change_ram_calls(xain_snd_getbyte,xain_snd_putbyte);
-snd_m6809.init_sound(xain_sound_update);
+m6809_2:=cpu_m6809.Create(1500000,272);
+m6809_2.change_ram_calls(xain_snd_getbyte,xain_snd_putbyte);
+m6809_2.init_sound(xain_sound_update);
 //MCU CPU
-main_m6805:=cpu_m6805.create(3000000,272,tipo_m68705);
-main_m6805.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
+m6805_0:=cpu_m6805.create(3000000,272,tipo_m68705);
+m6805_0.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3000000);
 ym2203_0.change_irq_calls(snd_irq);

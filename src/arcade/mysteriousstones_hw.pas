@@ -116,15 +116,15 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
   if arcade_input.coin[0] then begin
       marcade.in0:=(marcade.in0 and $bf);
-      main_m6502.change_nmi(ASSERT_LINE);
+      m6502_0.change_nmi(ASSERT_LINE);
   end else begin
       marcade.in0:=(marcade.in0 or $40);
       if arcade_input.coin[1] then begin
           marcade.in0:=(marcade.in0 and $7f);
-          main_m6502.change_nmi(ASSERT_LINE);
+          m6502_0.change_nmi(ASSERT_LINE);
       end else begin
           marcade.in0:=(marcade.in0 or $80);
-          main_m6502.change_nmi(CLEAR_LINE);
+          m6502_0.change_nmi(CLEAR_LINE);
       end;
   end;
   //P2
@@ -145,11 +145,11 @@ var
   frame:single;
 begin
 init_controls(false,false,false,true);
-frame:=main_m6502.tframes;
+frame:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 271 do begin
-    main_m6502.run(frame);
-    frame:=frame+main_m6502.tframes-main_m6502.contador;
+    m6502_0.run(frame);
+    frame:=frame+m6502_0.tframes-m6502_0.contador;
     //video
     case ms_scanline[f] of
       $8:marcade.dswb:=marcade.dswb and $7f;
@@ -158,7 +158,7 @@ while EmuStatus=EsRuning do begin
             marcade.dswb:=marcade.dswb or $80;
           end;
     end;
-    if ((ms_scanline[f] and $f)=8) then main_m6502.change_irq(ASSERT_LINE);
+    if ((ms_scanline[f] and $f)=8) then m6502_0.change_irq(ASSERT_LINE);
  end;
  eventos_ms;
  video_sync;
@@ -203,7 +203,7 @@ case direccion of
                       end;
                       video_page:=(valor and $4) shl 8;
                     end;
-                $10..$1f:main_m6502.change_irq(CLEAR_LINE);
+                $10..$1f:m6502_0.change_irq(CLEAR_LINE);
                 $20..$2f:scroll:=valor;
                 $30..$3f:soundlatch:=valor;
                 $40..$4f:begin
@@ -235,7 +235,7 @@ end;
 //Main
 procedure reset_ms;
 begin
-main_m6502.reset;
+m6502_0.reset;
 ay8910_0.reset;
 ay8910_1.reset;
 reset_audio;
@@ -270,12 +270,12 @@ screen_mod_sprites(2,512,0,$1ff,0);
 screen_init(3,256,256,true);
 iniciar_video(240,256);
 //Main CPU
-main_m6502:=cpu_m6502.create(1500000,272,TCPU_M6502);
-main_m6502.change_ram_calls(getbyte_ms,putbyte_ms);
-main_m6502.init_sound(ms_sound_update);
+m6502_0:=cpu_m6502.create(1500000,272,TCPU_M6502);
+m6502_0.change_ram_calls(getbyte_ms,putbyte_ms);
+m6502_0.init_sound(ms_sound_update);
 //Sound Chip
-ay8910_0:=ay8910_chip.create(1500000,1);
-ay8910_1:=ay8910_chip.create(1500000,1);
+ay8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
+ay8910_1:=ay8910_chip.create(1500000,AY8910,0.3);
 //cargar roms
 if not(cargar_roms(@memoria[0],@ms_rom[0],'mystston.zip',0)) then exit;
 //Cargar chars

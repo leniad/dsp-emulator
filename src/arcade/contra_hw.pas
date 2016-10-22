@@ -135,18 +135,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_hd6309.tframes;
-frame_s:=snd_m6809.tframes;
+frame_m:=hd6309_0.tframes;
+frame_s:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //Main
-    main_hd6309.run(frame_m);
-    frame_m:=frame_m+main_hd6309.tframes-main_hd6309.contador;
+    hd6309_0.run(frame_m);
+    frame_m:=frame_m+hd6309_0.tframes-hd6309_0.contador;
     //SND
-    snd_m6809.run(frame_s);
-    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+    m6809_0.run(frame_s);
+    frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
     if f=239 then begin
-      if (K007121_chip[0].control[$07] and $2)<>0 then main_hd6309.change_irq(HOLD_LINE);
+      if (K007121_chip[0].control[$07] and $2)<>0 then hd6309_0.change_irq(HOLD_LINE);
       update_video_contra;
     end;
   end;
@@ -196,7 +196,7 @@ case direccion of
             K007121_chip[0].control[direccion]:=valor;
             fillchar(gfx[0].buffer[$400],$400,1);
          end;
-  $1a:snd_m6809.change_irq(HOLD_LINE);
+  $1a:m6809_0.change_irq(HOLD_LINE);
   $1c:sound_latch:=valor;
   $60..$67:begin
               if K007121_chip[1].control[direccion and $7]<>valor then begin
@@ -250,8 +250,8 @@ end;
 //Main
 procedure reset_contra;
 begin
- main_hd6309.reset;
- snd_m6809.reset;
+ hd6309_0.reset;
+ m6809_0.reset;
  reset_audio;
  K007121_reset(0);
  K007121_reset(1);
@@ -297,12 +297,12 @@ screen_mod_scroll(3,256,256,255,256,256,255);
 screen_init(4,512,256,false,true);
 iniciar_video(224,280);
 //Main CPU
-main_hd6309:=cpu_hd6309.create(24000000 div 2,$100);
-main_hd6309.change_ram_calls(contra_getbyte,contra_putbyte);
+hd6309_0:=cpu_hd6309.create(24000000 div 2,$100);
+hd6309_0.change_ram_calls(contra_getbyte,contra_putbyte);
 //Sound CPU
-snd_m6809:=cpu_m6809.Create(24000000 div 8,$100);
-snd_m6809.change_ram_calls(sound_getbyte,sound_putbyte);
-snd_m6809.init_sound(contra_sound_update);
+m6809_0:=cpu_m6809.Create(24000000 div 8,$100);
+m6809_0.change_ram_calls(sound_getbyte,sound_putbyte);
+m6809_0.init_sound(contra_sound_update);
 //Audio chips
 ym2151_0:=ym2151_chip.create(3579545);
 //cargar roms

@@ -83,9 +83,9 @@ begin
     RST18_ASSERT:irq2:=$df;
 		RST18_CLEAR:irq2:=$ff;
   end;
-  snd_z80.im0:=irq1 and irq2;
-	if (irq1 and irq2)=$ff then snd_z80.change_irq(CLEAR_LINE)
-  	else snd_z80.change_irq(ASSERT_LINE);
+  z80_1.im0:=irq1 and irq2;
+	if (irq1 and irq2)=$ff then z80_1.change_irq(CLEAR_LINE)
+  	else z80_1.change_irq(ASSERT_LINE);
 end;
 
 procedure decript_seibu_sound(data_in,data_out_opcode,data_out_data:pbyte);

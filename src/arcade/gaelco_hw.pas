@@ -253,18 +253,18 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
-frame_s:=snd_m6809.tframes;
+frame_m:=m68000_0.tframes;
+frame_s:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 511 do begin
     //main
-    main_m68000.run(frame_m);
-    frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
     //sound
-    snd_m6809.run(frame_s);
-    frame_s:=frame_s+snd_m6809.tframes-snd_m6809.contador;
+    m6809_0.run(frame_s);
+    frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
     if f=255 then begin
-      main_m68000.irq[6]:=HOLD_LINE;
+      m68000_0.irq[6]:=HOLD_LINE;
       update_video_bigk;
     end;
   end;
@@ -327,7 +327,7 @@ case direccion of
     //70000a..70003b:;
     $70000e:begin
             sound_latch:=valor and $ff;
-            snd_m6809.change_firq(HOLD_LINE);
+            m6809_0.change_firq(HOLD_LINE);
           end;
     $ff8000..$ffffff:main_ram[(direccion and $7fff) shr 1]:=valor;
   end;
@@ -467,13 +467,13 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_m68000.tframes;
+frame_m:=m68000_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 511 do begin
-     main_m68000.run(frame_m);
-     frame_m:=frame_m+main_m68000.tframes-main_m68000.contador;
+     m68000_0.run(frame_m);
+     frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
      if f=255 then begin
-        main_m68000.irq[6]:=HOLD_LINE;
+        m68000_0.irq[6]:=HOLD_LINE;
         update_video_thoop;
      end;
   end;
@@ -506,17 +506,17 @@ begin
 if direccion<$100000 then exit;
 case direccion of
     $100000..$100fff:begin
-                      dec:=gaelco_dec((direccion and $fff) shr 1,valor,gaelco_dec_val,$4228);
+                      dec:=gaelco_dec((direccion and $fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
                       video_ram[(direccion and $fff) shr 1]:=dec;
                       gfx[1].buffer[(direccion and $fff) shr 2]:=true;
                    end;
     $101000..$101fff:begin
-                      dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228);
+                      dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
                       video_ram[(direccion and $1fff) shr 1]:=dec;
                       gfx[1].buffer[((direccion and $fff) shr 2)+$400]:=true;
                    end;
     $102000..$103fff:begin
-                        dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228);
+                        dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
                         video_ram[(direccion and $3fff) shr 1]:=dec;
                      end;
     $108000:if scroll_y0<>(valor and $1ff) then begin
@@ -607,9 +607,9 @@ end;
 //Main
 procedure reset_gaelco_hw;
 begin
- main_m68000.reset;
+ m68000_0.reset;
  if main_vars.tipo_maquina=78 then begin
-  snd_m6809.reset;
+  m6809_0.reset;
   ym3812_0.reset;
  end;
  oki_6295_0.reset;
@@ -662,12 +662,12 @@ marcade.dswa:=$00ff;
 case main_vars.tipo_maquina of
   78:begin  //Big Karnak
       //Main CPU
-      main_m68000:=cpu_m68000.create(10000000,$200);
-      main_m68000.change_ram16_calls(bigk_getword,bigk_putword);
+      m68000_0:=cpu_m68000.create(10000000,$200);
+      m68000_0.change_ram16_calls(bigk_getword,bigk_putword);
       //Sound CPU
-      snd_m6809:=cpu_m6809.Create(2216750,$200);
-      snd_m6809.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
-      snd_m6809.init_sound(bigk_sound_update);
+      m6809_0:=cpu_m6809.Create(2216750,$200);
+      m6809_0.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
+      m6809_0.init_sound(bigk_sound_update);
       //Sound Chips
       ym3812_0:=ym3812_chip.create(YM3812_FM,3580000);
       oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1);
@@ -696,9 +696,9 @@ case main_vars.tipo_maquina of
   end;
   101:begin  //Thunder Hoop
         //Main CPU
-        main_m68000:=cpu_m68000.create(12000000,$200);
-        main_m68000.change_ram16_calls(thoop_getword,thoop_putword);
-        main_m68000.init_sound(thoop_sound_update);
+        m68000_0:=cpu_m68000.create(12000000,$200);
+        m68000_0.change_ram16_calls(thoop_getword,thoop_putword);
+        m68000_0.init_sound(thoop_sound_update);
         //Sound Chips
         oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS
@@ -737,9 +737,9 @@ case main_vars.tipo_maquina of
       end;
       173:begin  //Squash
         //Main CPU
-        main_m68000:=cpu_m68000.create(12000000,$200);
-        main_m68000.change_ram16_calls(thoop_getword,thoop_putword);
-        main_m68000.init_sound(thoop_sound_update);
+        m68000_0:=cpu_m68000.create(12000000,$200);
+        m68000_0.change_ram16_calls(thoop_getword,thoop_putword);
+        m68000_0.init_sound(thoop_sound_update);
         //Sound Chips
         oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS
@@ -776,9 +776,9 @@ case main_vars.tipo_maquina of
       end;
       174:begin  //Biomechanical Toy
         //Main CPU
-        main_m68000:=cpu_m68000.create(12000000,$200);
-        main_m68000.change_ram16_calls(thoop_getword,biomtoy_putword);
-        main_m68000.init_sound(thoop_sound_update);
+        m68000_0:=cpu_m68000.create(12000000,$200);
+        m68000_0.change_ram16_calls(thoop_getword,biomtoy_putword);
+        m68000_0.init_sound(thoop_sound_update);
         //Sound Chips
         oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS

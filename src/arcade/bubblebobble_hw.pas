@@ -110,27 +110,27 @@ var
   f:word;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_mi:=sub_z80.tframes;
-frame_s:=snd_z80.tframes;
-frame_mcu:=main_m6800.tframes;
+frame_m:=z80_0.tframes;
+frame_mi:=z80_1.tframes;
+frame_s:=z80_2.tframes;
+frame_mcu:=m6800_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
   //main
-  main_z80.run(frame_m);
-  frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+  z80_0.run(frame_m);
+  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
   //segunda cpu
-  sub_z80.run(frame_mi);
-  frame_mi:=frame_mi+sub_z80.tframes-sub_z80.contador;
+  z80_1.run(frame_mi);
+  frame_mi:=frame_mi+z80_1.tframes-z80_1.contador;
   //sonido
-  snd_z80.run(frame_s);
-  frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+  z80_2.run(frame_s);
+  frame_s:=frame_s+z80_2.tframes-z80_2.contador;
   //mcu
-  main_m6800.run(frame_mcu);
-  frame_mcu:=frame_mcu+main_m6800.tframes-main_m6800.contador;
+  m6800_0.run(frame_mcu);
+  frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
   if f=239 then begin
-    sub_z80.change_irq(HOLD_LINE);
-    main_m6800.change_irq(HOLD_LINE);
+    z80_1.change_irq(HOLD_LINE);
+    m6800_0.change_irq(HOLD_LINE);
     update_video_bublbobl;
   end;
  end;
@@ -142,20 +142,20 @@ end;
 function bbsnd_getbyte(direccion:word):byte;
 begin
   case direccion of
+    0..$8fff:bbsnd_getbyte:=mem_snd[direccion];
     $9000:bbsnd_getbyte:=ym2203_0.status;
     $9001:bbsnd_getbyte:=ym2203_0.read;
     $a000:bbsnd_getbyte:=ym3812_0.status;
     $a001:bbsnd_getbyte:=ym3812_0.read;
     $b000:bbsnd_getbyte:=sound_latch;
-    else bbsnd_getbyte:=mem_snd[direccion];
   end;
 end;
 
 procedure bbsnd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  $8000..$8fff:mem_snd[direccion]:=valor;
   $9000:ym2203_0.control(valor);
   $9001:ym2203_0.write(valor);
   $a000:YM3812_0.control(valor);
@@ -165,7 +165,7 @@ case direccion of
           sound_nmi:=true;
           if pending_nmi then begin
               pending_nmi:=false;
-              snd_z80.change_nmi(PULSE_LINE);
+              z80_2.change_nmi(PULSE_LINE);
           end;
         end;
   $b002:sound_nmi:=false;
@@ -188,34 +188,35 @@ end;
 function bublbobl_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$c000..$f7ff,$fc00..$ffff:bublbobl_getbyte:=memoria[direccion];
   $8000..$bfff:bublbobl_getbyte:=memoria_rom[banco_rom,(direccion and $3fff)];
+  $f800..$f9ff:bublbobl_getbyte:=buffer_paleta[direccion and $1ff];
   $fa00:bublbobl_getbyte:=sound_stat;
-  else bublbobl_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure bublbobl_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+        $c000..$f7ff,$fc00..$ffff:memoria[direccion]:=valor;
         $f800..$f9ff:if buffer_paleta[direccion and $1ff]<>valor then begin
                         buffer_paleta[direccion and $1ff]:=valor;
                         cambiar_color(direccion and $1fe);
                      end;
         $fa00:begin
-                if sound_nmi then snd_z80.change_nmi(PULSE_LINE)
+                if sound_nmi then z80_2.change_nmi(PULSE_LINE)
                   else pending_nmi:=true;
                 sound_latch:=valor;
               end;
-        $fa03:if valor<>0 then snd_z80.change_reset(ASSERT_LINE)
-                else snd_z80.change_reset(CLEAR_LINE);
+        $fa03:if valor<>0 then z80_2.change_reset(ASSERT_LINE)
+                else z80_2.change_reset(CLEAR_LINE);
         $fb40:begin
                 banco_rom:=(valor xor 4) and 7;
-                if (valor and $10)<>0 then sub_z80.change_reset(CLEAR_LINE)
-                    else sub_z80.change_reset(ASSERT_LINE);
-                if (valor and $20)<>0 then main_m6800.change_reset(CLEAR_LINE)
-                    else main_m6800.change_reset(ASSERT_LINE);
+                if (valor and $10)<>0 then z80_1.change_reset(CLEAR_LINE)
+                    else z80_1.change_reset(ASSERT_LINE);
+                if (valor and $20)<>0 then m6800_0.change_reset(CLEAR_LINE)
+                    else m6800_0.change_reset(ASSERT_LINE);
                 video_enable:=(valor and $40)<>0;
                 main_screen.flip_main_screen:=(valor and $80)<>0;
               end;
@@ -225,15 +226,14 @@ end;
 function bb_misc_getbyte(direccion:word):byte;
 begin
   case direccion of
+    0..$7fff:bb_misc_getbyte:=mem_misc[direccion];
     $e000..$f7ff:bb_misc_getbyte:=memoria[direccion];
-      else bb_misc_getbyte:=mem_misc[direccion];
   end;
 end;
 
 procedure bb_misc_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-mem_misc[direccion]:=valor;
 case direccion of
   $e000..$f7ff:memoria[direccion]:=valor;
 end;
@@ -247,7 +247,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  snd_z80.change_irq(irqstate);
+  z80_2.change_irq(irqstate);
 end;
 
 function mcu_getbyte(direccion:word):byte;
@@ -264,7 +264,7 @@ case direccion of
   $5:mcu_getbyte:=ddr4;
   $6:mcu_getbyte:=(port3_out and ddr3) or (port3_in and not(ddr3)); //port3
   $7:mcu_getbyte:=(port4_out and ddr4) or (port4_in and not(ddr4)); //port4
-      else mcu_getbyte:=mem_mcu[direccion];
+  $40..$ff,$f000..$ffff:mcu_getbyte:=mem_mcu[direccion];
 end;
 end;
 
@@ -273,14 +273,13 @@ var
   address:word;
 begin
 if direccion>$efff then exit;
-mem_mcu[direccion]:=valor;
 case direccion of
   $0:ddr1:=valor;
   $1:ddr2:=valor;
   $2:begin //port1
        if (((port1_out and $40)<>0) and ((not(valor) and $40)<>0)) then begin
-          main_z80.im2_lo:=memoria[$fc00];
-          main_z80.change_irq(HOLD_LINE);
+          z80_0.im2_lo:=memoria[$fc00];
+          z80_0.change_irq(HOLD_LINE);
 	      end;
 	      port1_out:=valor;
      end;
@@ -308,16 +307,17 @@ case direccion of
   $5:ddr4:=valor;
   $6:port3_out:=valor;
   $7:port4_out:=valor;
+  $40..$ff:mem_mcu[direccion]:=valor;
 end;
 end;
 
 //Main
 procedure reset_bublbobl;
 begin
- main_z80.reset;
- sub_z80.reset;
- snd_z80.reset;
- main_m6800.reset;
+ z80_0.reset;
+ z80_1.reset;
+ z80_2.reset;
+ m6800_0.reset;
  ym2203_0.reset;
  YM3812_0.reset;
  reset_audio;
@@ -346,18 +346,18 @@ iniciar_audio(false);
 screen_init(1,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-main_z80:=cpu_z80.create(6000000,264);
-main_z80.change_ram_calls(bublbobl_getbyte,bublbobl_putbyte);
+z80_0:=cpu_z80.create(6000000,264);
+z80_0.change_ram_calls(bublbobl_getbyte,bublbobl_putbyte);
 //Second CPU
-sub_z80:=cpu_z80.create(6000000,264);
-sub_z80.change_ram_calls(bb_misc_getbyte,bb_misc_putbyte);
+z80_1:=cpu_z80.create(6000000,264);
+z80_1.change_ram_calls(bb_misc_getbyte,bb_misc_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,264);
-snd_z80.change_ram_calls(bbsnd_getbyte,bbsnd_putbyte);
-snd_z80.init_sound(bb_sound_update);
+z80_2:=cpu_z80.create(3000000,264);
+z80_2.change_ram_calls(bbsnd_getbyte,bbsnd_putbyte);
+z80_2.init_sound(bb_sound_update);
 //MCU
-main_m6800:=cpu_m6800.create(4000000,264,CPU_M6801);
-main_m6800.change_ram_calls(mcu_getbyte,mcu_putbyte);
+m6800_0:=cpu_m6800.create(4000000,264,CPU_M6801);
+m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3000000,0.25,0.25);
 ym2203_0.change_irq_calls(snd_irq);

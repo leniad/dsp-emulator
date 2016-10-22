@@ -179,24 +179,24 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 snd_irq:=32;
 while EmuStatus=EsRuning do begin
   for f:=0 to 259 do begin
     //Main CPU
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound CPU
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=223 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video;
     end;
     if snd_irq=64 then begin
       snd_irq:=0;
-      snd_z80.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
     end;
     snd_irq:=snd_irq+1;
   end;
@@ -208,7 +208,7 @@ end;
 function system1_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$7fff:if main_z80.opcode then system1_getbyte:=mem_dec[direccion]
+  $0..$7fff:if z80_0.opcode then system1_getbyte:=mem_dec[direccion]
               else system1_getbyte:=memoria[direccion];
   $d800..$ddff:system1_getbyte:=buffer_paleta[direccion and $7ff];
   $e000..$efff:system1_getbyte:=bg_ram[direccion and $fff];
@@ -291,7 +291,7 @@ end;
 
 procedure system1_pio_porta_nmi(state:boolean);
 begin
-  snd_z80.change_nmi(PULSE_LINE);
+  z80_1.change_nmi(PULSE_LINE);
 end;
 
 procedure system1_pio_portb_write(valor:byte);
@@ -308,8 +308,8 @@ case main_vars.tipo_maquina of
 end;
 sn_76496_0.reset;
 sn_76496_1.reset;
-main_z80.reset;
-snd_z80.reset;
+z80_0.reset;
+z80_1.reset;
 reset_audio;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
@@ -359,12 +359,12 @@ case main_vars.tipo_maquina of
   else iniciar_video(256,224);
 end;
 //Main CPU
-main_z80:=cpu_z80.create(19300000,260);
-main_z80.change_ram_calls(system1_getbyte,system1_putbyte);
-main_z80.change_timmings(@z80_op,@z80_cb,@z80_dd,@z80_ddcb,@z80_ed,@z80_ex);
+z80_0:=cpu_z80.create(19300000,260);
+z80_0.change_ram_calls(system1_getbyte,system1_putbyte);
+z80_0.change_timmings(@z80_op,@z80_cb,@z80_dd,@z80_ddcb,@z80_ed,@z80_ex);
 //Sound CPU
-snd_z80:=cpu_z80.create(4000000,260);
-snd_z80.init_sound(system1_sound_update);
+z80_1:=cpu_z80.create(4000000,260);
+z80_1.init_sound(system1_sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(2000000);
 sn_76496_1:=sn76496_chip.Create(4000000);
@@ -373,9 +373,9 @@ case main_vars.tipo_maquina of
       sprite_num_banks:=1;
       char_screen:=1;
       //Main CPU
-      main_z80.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
+      z80_0.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
       //Sound CPU
-      snd_z80.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
+      z80_1.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@pitfall2_rom[0],'pitfall2.zip',0)) then exit;
       decrypt_sega(@memoria[0],@mem_dec[0],0); //Sega Decypt
@@ -396,9 +396,9 @@ case main_vars.tipo_maquina of
       sprite_num_banks:=2;
       char_screen:=1;
       //Main CPU
-      main_z80.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
+      z80_0.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
       //Sound CPU
-      snd_z80.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
+      z80_1.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@teddy_rom[0],'teddybb.zip',0)) then exit;
       decrypt_sega(@memoria[0],@mem_dec[0],1); //Sega Decypt
@@ -419,9 +419,9 @@ case main_vars.tipo_maquina of
       sprite_num_banks:=2;
       char_screen:=1;
       //Main CPU
-      main_z80.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
+      z80_0.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
       //Sound CPU
-      snd_z80.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
+      z80_1.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@wboy_rom[0],'wboy.zip',0)) then exit;
       decodifica_wonder_boy;
@@ -442,9 +442,9 @@ case main_vars.tipo_maquina of
       sprite_num_banks:=1;
       char_screen:=1;
       //Main CPU
-      main_z80.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
+      z80_0.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
       //Sound CPU
-      snd_z80.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
+      z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@mrviking_rom[0],'mrviking.zip',0)) then exit;
       decrypt_sega(@memoria[0],@mem_dec[0],3); //Sega Decypt
@@ -466,9 +466,9 @@ case main_vars.tipo_maquina of
       sprite_num_banks:=2;
       char_screen:=1;
       //Main CPU
-      main_z80.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
+      z80_0.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
       //Sound CPU
-      snd_z80.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
+      z80_1.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@seganinj_rom[0],'seganinj.zip',0)) then exit;
       decrypt_sega(@memoria[0],@mem_dec[0],4); //Sega Decypt
@@ -489,9 +489,9 @@ case main_vars.tipo_maquina of
       sprite_num_banks:=1;
       char_screen:=1;
       //Main CPU
-      main_z80.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
+      z80_0.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
       //Sound CPU
-      snd_z80.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
+      z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@upndown_rom[0],'upndown.zip',0)) then exit;
       decrypt_sega(@memoria[0],@mem_dec[0],5); //Sega Decypt
@@ -513,9 +513,9 @@ case main_vars.tipo_maquina of
       sprite_num_banks:=1;
       char_screen:=1;
       //Main CPU
-      main_z80.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
+      z80_0.change_io_calls(system1_inbyte_pio,system1_outbyte_pio);
       //Sound CPU
-      snd_z80.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
+      z80_1.change_ram_calls(system1_snd_getbyte_pio,system1_snd_putbyte);
       //cargar roms
       if not(cargar_roms(@memoria[0],@flicky_rom[0],'flicky.zip',0)) then exit;
       decrypt_sega(@memoria[0],@mem_dec[0],6); //Sega Decypt

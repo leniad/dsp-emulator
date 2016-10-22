@@ -80,11 +80,11 @@ var
   f:word;
 begin
 init_controls(false,true,true,false);
-frame:=main_z80.tframes;
+frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
-      main_z80.run(frame);
-      frame:=frame+main_z80.tframes-main_z80.contador;
+      z80_0.run(frame);
+      frame:=frame+z80_0.tframes-z80_0.contador;
       tms_0.refresh(f);
   end;
   actualiza_trozo_simple(0,0,284,243,1);
@@ -156,7 +156,7 @@ end;
 
 procedure coleco_interrupt(int:boolean);
 begin
-  if (int and not(last_nmi)) then main_z80.change_nmi(PULSE_LINE);
+  if (int and not(last_nmi)) then z80_0.change_nmi(PULSE_LINE);
   last_nmi:=int;
 end;
 
@@ -170,7 +170,7 @@ procedure reset_coleco;
 var
   f:word;
 begin
- main_z80.reset;
+ z80_0.reset;
  sn_76496_0.reset;
  tms_0.reset;
  reset_audio;
@@ -267,7 +267,7 @@ if principal1.savedialog1.execute then begin
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end else exit;
-Directory.coleco_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
+Directory.coleco_snap:=extractfiledir(principal1.savedialog1.FileName);
 end;
 
 function iniciar_coleco:boolean;
@@ -277,10 +277,10 @@ iniciar_audio(false);
 screen_init(1,284,243);
 iniciar_video(284,243);
 //Main CPU
-main_z80:=cpu_z80.create(3579545,262);
-main_z80.change_ram_calls(coleco_getbyte,coleco_putbyte);
-main_z80.change_io_calls(coleco_inbyte,coleco_outbyte);
-main_z80.init_sound(coleco_sound_update);
+z80_0:=cpu_z80.create(3579545,262);
+z80_0.change_ram_calls(coleco_getbyte,coleco_putbyte);
+z80_0.change_io_calls(coleco_inbyte,coleco_outbyte);
+z80_0.init_sound(coleco_sound_update);
 //TMS
 tms_0:=tms99xx_chip.create(1,coleco_interrupt);
 //Chip Sonido

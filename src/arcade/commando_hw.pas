@@ -119,18 +119,18 @@ var
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
-frame_m:=main_z80.tframes;
-frame_s:=snd_z80.tframes;
+frame_m:=z80_0.tframes;
+frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
-    main_z80.run(frame_m);
-    frame_m:=frame_m+main_z80.tframes-main_z80.contador;
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
-    snd_z80.run(frame_s);
-    frame_s:=frame_s+snd_z80.tframes-snd_z80.contador;
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=239 then begin
-      main_z80.change_irq(HOLD_LINE);
+      z80_0.change_irq(HOLD_LINE);
       update_video_commando;
     end;
   end;
@@ -142,7 +142,7 @@ end;
 function commando_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$bfff:if main_z80.opcode then commando_getbyte:=memoria_dec[direccion]
+  $0..$bfff:if z80_0.opcode then commando_getbyte:=memoria_dec[direccion]
                  else commando_getbyte:=memoria[direccion];
   $c000:commando_getbyte:=marcade.in0;
   $c001:commando_getbyte:=marcade.in1;
@@ -156,20 +156,26 @@ end;
 procedure commando_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
    $c800:sound_command:=valor;
    $c804:begin
-            if (valor and $10)<>0 then snd_z80.change_reset(ASSERT_LINE)
-                    else snd_z80.change_reset(CLEAR_LINE);
+            if (valor and $10)<>0 then z80_1.change_reset(ASSERT_LINE)
+                    else z80_1.change_reset(CLEAR_LINE);
             main_screen.flip_main_screen:=(valor and $80)<>0;
          end;
    $c808:scroll_y:=(scroll_y and $ff00) or valor;
    $c809:scroll_y:=(scroll_y and $00ff) or ((valor and $1) shl 8);
    $c80a:scroll_x:=(scroll_x and $ff00) or valor;
    $c80b:scroll_x:=(scroll_x and $00ff) or ((valor and $1) shl 8);
-   $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
-   $d800..$dfff:gfx[2].buffer[direccion and $3ff]:=true;
+   $d000..$d7ff:begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                end;
+   $d800..$dfff:begin
+                    gfx[2].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                end;
+   $e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
 
@@ -201,15 +207,15 @@ end;
 
 procedure commando_snd_irq;
 begin
-  snd_z80.change_irq(HOLD_LINE);
+  z80_1.change_irq(HOLD_LINE);
 end;
 
 //Main
 procedure reset_commando;
 begin
- main_z80.reset;
- main_z80.im0:=$d7;  //rst 10
- snd_z80.reset;
+ z80_0.reset;
+ z80_0.im0:=$d7;  //rst 10
+ z80_1.reset;
  YM2203_0.reset;
  YM2203_1.reset;
  reset_audio;
@@ -246,14 +252,14 @@ screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-main_z80:=cpu_z80.create(4000000,256);
-main_z80.change_ram_calls(commando_getbyte,commando_putbyte);
+z80_0:=cpu_z80.create(4000000,256);
+z80_0.change_ram_calls(commando_getbyte,commando_putbyte);
 //Sound CPU
-snd_z80:=cpu_z80.create(3000000,256);
-snd_z80.change_ram_calls(commando_snd_getbyte,commando_snd_putbyte);
-snd_z80.init_sound(commando_sound_update);
+z80_1:=cpu_z80.create(3000000,256);
+z80_1.change_ram_calls(commando_snd_getbyte,commando_snd_putbyte);
+z80_1.init_sound(commando_sound_update);
 //IRQ Sound CPU
-init_timer(snd_z80.numero_cpu,3000000/(4*60),commando_snd_irq,true);
+init_timer(z80_1.numero_cpu,3000000/(4*60),commando_snd_irq,true);
 //Sound Chips
 YM2203_0:=ym2203_chip.create(1500000,2);
 YM2203_1:=ym2203_chip.create(1500000,2);
