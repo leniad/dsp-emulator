@@ -9,25 +9,25 @@ procedure cargar_renegade;
 
 implementation
 const
-        renegade_rom:array[0..2] of tipo_roms=(
-        (n:'nb-5.ic51';l:$8000;p:$0;crc:$ba683ddf),(n:'na-5.ic52';l:$8000;p:$8000;crc:$de7e7df4),());
+        renegade_rom:array[0..1] of tipo_roms=(
+        (n:'nb-5.ic51';l:$8000;p:$0;crc:$ba683ddf),(n:'na-5.ic52';l:$8000;p:$8000;crc:$de7e7df4));
         renegade_char:tipo_roms=(n:'nc-5.bin';l:$8000;p:$0;crc:$9adfaa5d);
         renegade_snd:tipo_roms=(n:'n0-5.ic13';l:$8000;p:$8000;crc:$3587de3b);
         renegade_mcu:tipo_roms=(n:'nz-5.ic97';l:$800;p:$0;crc:$32e47560);
-        renegade_tiles:array[0..6] of tipo_roms=(
+        renegade_tiles:array[0..5] of tipo_roms=(
         (n:'n1-5.ic1';l:$8000;p:$0;crc:$4a9f47f3),(n:'n6-5.ic28';l:$8000;p:$8000;crc:$d62a0aa8),
         (n:'n7-5.ic27';l:$8000;p:$10000;crc:$7ca5a532),(n:'n2-5.ic14';l:$8000;p:$18000;crc:$8d2e7982),
-        (n:'n8-5.ic26';l:$8000;p:$20000;crc:$0dba31d3),(n:'n9-5.ic25';l:$8000;p:$28000;crc:$5b621b6a),());
-        renegade_sprites:array[0..12] of tipo_roms=(
+        (n:'n8-5.ic26';l:$8000;p:$20000;crc:$0dba31d3),(n:'n9-5.ic25';l:$8000;p:$28000;crc:$5b621b6a));
+        renegade_sprites:array[0..11] of tipo_roms=(
         (n:'nh-5.bin';l:$8000;p:$0;crc:$dcd7857c),(n:'nd-5.bin';l:$8000;p:$8000;crc:$2de1717c),
         (n:'nj-5.bin';l:$8000;p:$10000;crc:$0f96a18e),(n:'nn-5.bin';l:$8000;p:$18000;crc:$1bf15787),
         (n:'ne-5.bin';l:$8000;p:$20000;crc:$924c7388),(n:'nk-5.bin';l:$8000;p:$28000;crc:$69499a94),
         (n:'ni-5.bin';l:$8000;p:$30000;crc:$6f597ed2),(n:'nf-5.bin';l:$8000;p:$38000;crc:$0efc8d45),
         (n:'nl-5.bin';l:$8000;p:$40000;crc:$14778336),(n:'no-5.bin';l:$8000;p:$48000;crc:$147dd23b),
-        (n:'ng-5.bin';l:$8000;p:$50000;crc:$a8ee3720),(n:'nm-5.bin';l:$8000;p:$58000;crc:$c100258e),());
-        renegade_adpcm:array[0..3] of tipo_roms=(
+        (n:'ng-5.bin';l:$8000;p:$50000;crc:$a8ee3720),(n:'nm-5.bin';l:$8000;p:$58000;crc:$c100258e));
+        renegade_adpcm:array[0..2] of tipo_roms=(
         (n:'n5-5.ic31';l:$8000;p:$0;crc:$7ee43a3c),(n:'n4-5.ic32';l:$8000;p:$10000;crc:$6557564c),
-        (n:'n3-5.ic33';l:$8000;p:$18000;crc:$78fd6190),());
+        (n:'n3-5.ic33';l:$8000;p:$18000;crc:$78fd6190));
         //Dip
         renegade_dip_a:array [0..6] of def_dip=(
         (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -49,7 +49,7 @@ var
   main_sent,mcu_sent:boolean;
   scroll_comp:integer;
 
-procedure update_video_renegade;
+procedure update_video_renegade;inline;
 var
   f,nchar,x,y:word;
   color,atrib:byte;
@@ -87,11 +87,10 @@ for f:=0 to 95 do begin
     color:=(atrib and $30) shr 1;
     flip_x:=(atrib and $40)<>0;
     if (atrib and $80)<>0 then begin
-      nchar:=nchar and $fffe;
-      put_gfx_sprite(nchar+1,color+128,flip_x,false,2);
-      actualiza_gfx_sprite(x,y+16,3,2);
-      put_gfx_sprite(nchar,color+128,flip_x,false,2);
-      actualiza_gfx_sprite(x,y,3,2);
+      nchar:=nchar and $ffe;
+      put_gfx_sprite_diff(nchar+1,color+128,flip_x,false,2,0,16);
+      put_gfx_sprite_diff(nchar,color+128,flip_x,false,2,0,0);
+      actualiza_gfx_sprite_size(x,y,3,16,32);
     end else begin
       put_gfx_sprite(nchar,color+128,flip_x,false,2);
       actualiza_gfx_sprite(x,y+16,3,2);
@@ -211,11 +210,11 @@ begin
 if direccion>$3fff then exit;
 case direccion of
   0..$17ff,$2000..$27ff:memoria[direccion]:=valor;
-  $1800..$1fff:begin
+  $1800..$1fff:if memoria[direccion]<>valor then begin
                 gfx[0].buffer[direccion and $3ff]:=true;
                 memoria[direccion]:=valor;
              end;
-  $2800..$2fff:begin
+  $2800..$2fff:if memoria[direccion]<>valor then begin
                 gfx[1].buffer[direccion and $3ff]:=true;
                 memoria[direccion]:=valor;
              end;
@@ -229,14 +228,12 @@ case direccion of
           sound_latch:=valor;
           m6809_0.change_irq(HOLD_LINE);
         end;
-  $3803:begin
-          if ((valor and 1)=0) then begin
+  $3803:if ((valor and 1)=0) then begin
             scroll_comp:=0;
             main_screen.flip_main_screen:=true;
-          end else begin
+        end else begin
             scroll_comp:=-256;
             main_screen.flip_main_screen:=false;
-          end;
         end;
   $3804:begin
           from_main:=valor;
@@ -398,24 +395,24 @@ ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
 gen_adpcm_init(0,8000,$20000);
 //cargar roms
-if not(cargar_roms(@memoria_temp,@renegade_rom,'renegade.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@renegade_rom,'renegade.zip',sizeof(renegade_rom))) then exit;
 copymemory(@memoria[$8000],@memoria_temp[0],$8000);
 copymemory(@rom_mem[0,0],@memoria_temp[$8000],$4000);
 copymemory(@rom_mem[1,0],@memoria_temp[$c000],$4000);
 //cargar roms audio
-if not(cargar_roms(@mem_snd,@renegade_snd,'renegade.zip')) then exit;
+if not(roms_load(@mem_snd,@renegade_snd,'renegade.zip',sizeof(renegade_snd))) then exit;
 //cargar roms mcu
-if not(cargar_roms(@mcu_mem,@renegade_mcu,'renegade.zip')) then exit;
+if not(roms_load(@mcu_mem,@renegade_mcu,'renegade.zip',sizeof(renegade_mcu))) then exit;
 //adpcm roms
-if not(cargar_roms(@gen_adpcm[0].mem[0],@renegade_adpcm,'renegade.zip',0)) then exit;
+if not(roms_load(@gen_adpcm[0].mem[0],@renegade_adpcm,'renegade.zip',sizeof(renegade_adpcm))) then exit;
 //Cargar chars
-if not(cargar_roms(@memoria_temp,@renegade_char,'renegade.zip')) then exit;
+if not(roms_load(@memoria_temp,@renegade_char,'renegade.zip',sizeof(renegade_char))) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2,4,6);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //Cargar tiles
-if not(cargar_roms(@memoria_temp,@renegade_tiles,'renegade.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@renegade_tiles,'renegade.zip',sizeof(renegade_tiles))) then exit;
 init_gfx(1,16,16,$800);
 for f:=0 to 1 do begin
   gfx_set_desc_data(3,8,64*8,4,$8000*8+0,$8000*8+4);
@@ -428,7 +425,7 @@ for f:=0 to 1 do begin
   convert_gfx(1,(f*$400*16*16)+($300*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
 end;
 //sprites
-if not(cargar_roms(@memoria_temp,@renegade_sprites,'renegade.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@renegade_sprites,'renegade.zip',sizeof(renegade_sprites))) then exit;
 init_gfx(2,16,16,$1000);
 gfx[2].trans[0]:=true;
 for f:=0 to 3 do begin

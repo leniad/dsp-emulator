@@ -33,6 +33,8 @@ type
             procedure change_pin7(pin7:byte);
             function get_rom_addr:pbyte;
             procedure update;
+            function load_snapshot(data:pbyte):word;
+            function save_snapshot(data:pbyte):word;
           private
   	        voice:array[0..OKIM6295_VOICES-1] of ADPCMVoice;
             command,bank_offs,out_:integer;
@@ -129,6 +131,38 @@ destructor snd_okim6295.free;
 begin
 freemem(self.rom);
 chips_total:=chips_total-1;
+end;
+
+function snd_okim6295.load_snapshot(data:pbyte):word;
+var
+  temp:pbyte;
+  f:byte;
+begin
+temp:=data;
+copymemory(@self.command,temp,4);inc(temp,4);
+copymemory(@self.bank_offs,temp,4);inc(temp,4);
+copymemory(@self.out_,temp,4);inc(temp,4);
+copymemory(@self.bank_installed,temp,sizeof(boolean));inc(temp,sizeof(boolean));
+copymemory(@self.ntimer,temp,1);inc(temp,1);
+copymemory(@self.amp,temp,sizeof(single));inc(temp,sizeof(single));
+for f :=0 to (OKIM6295_VOICES-1) do copymemory(@self.voice[f],temp,sizeof(ADPCMVoice));inc(temp,sizeof(ADPCMVoice));
+end;
+
+function snd_okim6295.save_snapshot(data:pbyte):word;
+var
+  temp:pbyte;
+  size:word;
+  f:byte;
+begin
+temp:=data;
+copymemory(temp,@self.command,4);inc(temp,4);size:=4;
+copymemory(temp,@self.bank_offs,4);inc(temp,4);size:=size+4;
+copymemory(temp,@self.out_,4);inc(temp,4);size:=size+4;
+copymemory(temp,@self.bank_installed,sizeof(boolean));inc(temp,sizeof(boolean));size:=size+sizeof(boolean);
+copymemory(temp,@self.ntimer,1);inc(temp,1);size:=size+1;
+copymemory(temp,@self.amp,sizeof(single));inc(temp,sizeof(single));size:=size+sizeof(single);
+for f:=0 to (OKIM6295_VOICES-1) do copymemory(temp,@self.voice[f],sizeof(ADPCMVoice));inc(temp,sizeof(ADPCMVoice));size:=size+sizeof(ADPCMVoice);
+save_snapshot:=size;
 end;
 
 function snd_okim6295.get_rom_addr:pbyte;

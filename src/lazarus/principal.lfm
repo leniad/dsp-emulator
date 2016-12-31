@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 743
-  Height = 355
-  Top = 341
+  Left = 393
+  Height = 198
+  Top = 231
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -9,7 +9,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 335
+  ClientHeight = 178
   ClientWidth = 341
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.6.0.4'
+  LCLVersion = '1.6.2.0'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -952,21 +952,21 @@ object principal1: Tprincipal1
     end
   end
   object Panel2: TPanel
-    Left = 292
-    Height = 283
+    Left = 8
+    Height = 126
     Top = 33
-    Width = 49
+    Width = 333
     Align = alRight
     Anchors = [akTop, akBottom]
-    ClientHeight = 283
-    ClientWidth = 49
+    ClientHeight = 126
+    ClientWidth = 333
     TabOrder = 2
     Visible = False
     object BitBtn9: TBitBtn
-      Left = 6
+      Left = 64
       Height = 41
       Hint = 'Open Snapshot'
-      Top = 48
+      Top = 8
       Width = 41
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -1076,10 +1076,10 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn10: TBitBtn
-      Left = 6
+      Left = 120
       Height = 41
       Hint = 'Open Disk'
-      Top = 92
+      Top = 8
       Width = 41
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -1189,10 +1189,10 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn11: TBitBtn
-      Left = 5
+      Left = 176
       Height = 41
       Hint = 'Save Snapshot'
-      Top = 136
+      Top = 8
       Width = 41
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -1302,10 +1302,10 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn12: TBitBtn
-      Left = 6
+      Left = 224
       Height = 41
       Hint = 'Poke Memory'
-      Top = 184
+      Top = 8
       Width = 41
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -1414,10 +1414,10 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn14: TBitBtn
-      Left = 6
+      Left = 272
       Height = 41
       Hint = 'Fast Load'
-      Top = 232
+      Top = 8
       Width = 41
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -1620,7 +1620,7 @@ object principal1: Tprincipal1
   object Panel5: TPanel
     Left = 0
     Height = 19
-    Top = 316
+    Top = 159
     Width = 341
     Align = alBottom
     ClientHeight = 19
@@ -1703,8 +1703,8 @@ object principal1: Tprincipal1
     end
   end
   object MainMenu1: TMainMenu
-    left = 96
-    top = 65
+    left = 48
+    top = 88
     object Archivo1: TMenuItem
       Caption = 'Archivo'
       object LstRoms: TMenuItem
@@ -2347,9 +2347,17 @@ object principal1: Tprincipal1
             Caption = 'Misterious Stone'
             OnClick = CambiarMaquina
           end
-          object Asteroids1: TMenuItem
-            Caption = 'Asteroids'
+          object AsteroidsHW1: TMenuItem
+            Caption = 'Asteroids HW'
             OnClick = CambiarMaquina
+            object Asteroids1: TMenuItem
+              Caption = 'Asteroids'
+              OnClick = CambiarMaquina
+            end
+            object llander1: TMenuItem
+              Caption = 'Lunar Lander'
+              OnClick = CambiarMaquina
+            end
           end
           object BurgerTime1: TMenuItem
             Caption = 'Burger Time'
@@ -2830,9 +2838,16 @@ object principal1: Tprincipal1
             Caption = 'Operation Wolf'
             OnClick = CambiarMaquina
           end
-          object ddragon31: TMenuItem
-            Caption = 'Duoble Dragon 3: The Rosetta Stone'
-            OnClick = CambiarMaquina
+          object ddragon3_hw: TMenuItem
+            Caption = 'DD3 HW'
+            object ddragon31: TMenuItem
+              Caption = 'Duoble Dragon 3: The Rosetta Stone'
+              OnClick = CambiarMaquina
+            end
+            object ctribe1: TMenuItem
+              Caption = 'The Combatribes'
+              OnClick = CambiarMaquina
+            end
           end
           object blockout1: TMenuItem
             Caption = 'Block Out'
@@ -2967,8 +2982,8 @@ object principal1: Tprincipal1
   object ImageList2: TImageList
     Height = 32
     Width = 32
-    left = 64
-    top = 64
+    left = 16
+    top = 88
     Bitmap = {
       4C69070000002000000020000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -3872,36 +3887,36 @@ object principal1: Tprincipal1
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    left = 32
-    top = 144
+    left = 208
+    top = 96
   end
   object Timer2: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer2Timer
-    left = 64
-    top = 144
+    left = 240
+    top = 96
   end
   object SaveDialog1: TSaveDialog
-    left = 32
-    top = 96
+    left = 128
+    top = 88
   end
   object OpenDialog1: TOpenDialog
-    left = 64
-    top = 96
+    left = 160
+    top = 88
   end
   object Timer4: TTimer
     Enabled = False
     Interval = 300
     OnTimer = Timer4Timer
-    left = 128
-    top = 144
+    left = 304
+    top = 96
   end
   object Timer3: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer3Timer
-    left = 92
-    top = 144
+    left = 268
+    top = 96
   end
 end

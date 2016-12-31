@@ -28,7 +28,7 @@ type
  end;
 
 var
-  sn_76496_0,sn_76496_1,sn_76496_2,sn_76496_3:sn76496_chip;//chip_sn:array[0..3] of psn76496;
+  sn_76496_0,sn_76496_1,sn_76496_2,sn_76496_3:sn76496_chip;
 
 implementation
 const
@@ -41,6 +41,7 @@ const
 
 constructor sn76496_chip.Create(clock:dword;amp:single=1);
 begin
+  self.amp:=amp;
   self.set_gain(0);
 	self.clock:=clock;
   self.tsample_num:=init_channel;

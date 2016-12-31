@@ -476,9 +476,9 @@ z80_1.change_ram_calls(psychic5_snd_getbyte,psychic5_snd_putbyte);
 z80_1.change_io_calls(nil,psychic5_outbyte);
 z80_1.init_sound(psychic5_sound_update);
 //Sound Chips
-YM2203_0:=ym2203_chip.create(1500000,0.5,0.15);
+YM2203_0:=ym2203_chip.create(1500000,1,0.75);
 ym2203_0.change_irq_calls(snd_irq);
-YM2203_1:=ym2203_chip.create(1500000,0.5,0.15);
+YM2203_1:=ym2203_chip.create(1500000,1,0.75);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@psychic5_rom[0],'psychic5.zip',0)) then exit;
 //Poner las ROMS en sus bancos

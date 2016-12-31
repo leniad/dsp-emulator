@@ -98,7 +98,7 @@ var
   dsk_header:^tdsk_header;
   dsk_track:^tdsk_track;
   dsk_sector:^tdsk_sector;
-  f,side_count,track_count:byte;
+  f,side_count,track_count,old_track_count:byte;
   longi,track_long,long_temp:dword;
   sector_count:integer;
 begin
@@ -123,8 +123,8 @@ begin
            freemem(dsk_sector);
            exit;
         end;
-   dsk[drvnum].DiskHeader.nbof_tracks:=dsk_header.tracks-1;
-   dsk[drvnum].DiskHeader.nbof_heads:=dsk_header.sides-1;
+   dsk[drvnum].DiskHeader.nbof_tracks:=dsk_header.tracks;
+   dsk[drvnum].DiskHeader.nbof_heads:=dsk_header.sides;
    f:=0;
    for track_count:=0 to (dsk_header.tracks-1) do begin
      for side_count:=0 to (dsk_header.sides-1) do begin
@@ -149,6 +149,7 @@ begin
            end;
            primer_sector:=true;
            posicion:=0;
+           old_track_count:=track_count;
            //Sectores
            for sector_count:=0 to (dsk_track.number_of_sectors-1) do begin
               copymemory(dsk_sector,ptemp,8);
@@ -156,8 +157,9 @@ begin
               //Comprobar el track que es...
               if primer_sector then begin
                 if track_count<>dsk_track.track then begin
-                  if dsk_track.track=dsk_sector.track then track_count:=dsk_track.track
-                    else track_count:=dsk_sector.track;
+                  //if dsk_track.track=dsk_sector.track then
+                  track_count:=dsk_track.track
+                  //  else track_count:=dsk_sector.track;
                 end;
                 dsk[DrvNum].Tracks[side_count,track_count].track_number:=dsk_track.track;
                 dsk[DrvNum].Tracks[side_count,track_count].side_number:=dsk_track.side;
@@ -224,7 +226,7 @@ begin
            side_count:=side_count+1;
            if side_count=dsk_header.sides then begin
              side_count:=0;
-             track_count:=track_count+1;
+             track_count:=old_track_count+1;
            end;
    end; //del while
    check_protections(drvnum,hay_multi);

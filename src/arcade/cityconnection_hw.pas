@@ -9,18 +9,18 @@ procedure cargar_citycon;
 
 implementation
 const
-        citycon_rom:array[0..2] of tipo_roms=(
-        (n:'c10';l:$4000;p:$4000;crc:$ae88b53c),(n:'c11';l:$8000;p:$8000;crc:$139eb1aa),());
+        citycon_rom:array[0..1] of tipo_roms=(
+        (n:'c10';l:$4000;p:$4000;crc:$ae88b53c),(n:'c11';l:$8000;p:$8000;crc:$139eb1aa));
         citycon_sonido:tipo_roms=(n:'c1';l:$8000;p:$8000;crc:$1fad7589);
         citycon_char:tipo_roms=(n:'c4';l:$2000;p:0;crc:$a6b32fc6);
-        citycon_sprites:array[0..2] of tipo_roms=(
-        (n:'c12';l:$2000;p:0;crc:$08eaaccd),(n:'c13';l:$2000;p:$2000;crc:$1819aafb),());
-        citycon_tiles:array[0..4] of tipo_roms=(
+        citycon_sprites:array[0..1] of tipo_roms=(
+        (n:'c12';l:$2000;p:0;crc:$08eaaccd),(n:'c13';l:$2000;p:$2000;crc:$1819aafb));
+        citycon_tiles:array[0..3] of tipo_roms=(
         (n:'c9';l:$8000;p:0;crc:$8aeb47e6),(n:'c8';l:$4000;p:$8000;crc:$0d7a1eeb),
-        (n:'c6';l:$8000;p:$c000;crc:$2246fe9d),(n:'c7';l:$4000;p:$14000;crc:$e8b97de9),());
-        citycon_fondo:array[0..3] of tipo_roms=(
+        (n:'c6';l:$8000;p:$c000;crc:$2246fe9d),(n:'c7';l:$4000;p:$14000;crc:$e8b97de9));
+        citycon_fondo:array[0..2] of tipo_roms=(
         (n:'c2';l:$8000;p:0;crc:$f2da4f23),(n:'c3';l:$4000;p:$8000;crc:$7ef3ac1b),
-        (n:'c5';l:$2000;p:$c000;crc:$c03d8b1b),());
+        (n:'c5';l:$2000;p:$c000;crc:$c03d8b1b));
         //Dip
         citycon_dip_a:array [0..3] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -54,9 +54,8 @@ end;
 
 procedure update_video_citycon;inline;
 var
-  f,x,y:word;
+  f,x,y,color,nchar:word;
   y2,x2,atrib:byte;
-  color,nchar:word;
   temp:pword;
   pos:pbyte;
 begin
@@ -185,7 +184,7 @@ begin
 if direccion>$3fff then exit;
 case direccion of
   0..$fff,$2800..$28ff:memoria[direccion]:=valor;
-  $1000..$1fff:begin
+  $1000..$1fff:if memoria[direccion]<>valor then begin
                 gfx[0].buffer[direccion and $fff]:=true;
                 memoria[direccion]:=valor;
                end;
@@ -369,30 +368,30 @@ ym2203_0:=ym2203_chip.create(1250000,0.2,0.4);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
 AY8910_0:=ay8910_chip.create(1250000,AY8910,0.40);
 //cargar roms
-if not(cargar_roms(@memoria[0],@citycon_rom[0],'citycon.zip',0)) then exit;
+if not(roms_load(@memoria,@citycon_rom,'citycon.zip',sizeof(citycon_rom))) then exit;
 //Cargar Sound
-if not(cargar_roms(@mem_snd[0],@citycon_sonido,'citycon.zip')) then exit;
+if not(roms_load(@mem_snd,@citycon_sonido,'citycon.zip',sizeof(citycon_sonido))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@citycon_char,'citycon.zip')) then exit;
+if not(roms_load(@memoria_temp,@citycon_char,'citycon.zip',sizeof(citycon_char))) then exit;
 init_gfx(0,8,8,256);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //tiles
-if not(cargar_roms(@memoria_temp[0],@citycon_tiles[0],'citycon.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@citycon_tiles,'citycon.zip',sizeof(citycon_tiles))) then exit;
 init_gfx(1,8,8,3072);
 for f:=0 to $b do begin
   gfx_set_desc_data(4,12,8*8,4+($1000*f*8),0+($1000*f*8),($c000+($1000*f))*8+4,($c000+($1000*f))*8+0);
-  convert_gfx(1,$100*8*8*f,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(1,$100*8*8*f,@memoria_temp,@pc_x,@pc_y,false,false);
 end;
-if not(cargar_roms(@memoria_fondo[0],@citycon_fondo[0],'citycon.zip',0)) then exit;
+if not(roms_load(@memoria_fondo,@citycon_fondo,'citycon.zip',sizeof(citycon_fondo))) then exit;
 //sprites
-if not(cargar_roms(@memoria_temp[0],@citycon_sprites[0],'citycon.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@citycon_sprites,'citycon.zip',sizeof(citycon_sprites))) then exit;
 init_gfx(2,8,16,256);
 gfx[2].trans[0]:=true;
 for f:=0 to 1 do begin
   gfx_set_desc_data(4,2,16*8,($1000*f*8)+4,($1000*f*8)+0,($2000+$1000*f)*8+4,($2000+$1000*f)*8+0);
-  convert_gfx(2,$80*16*8*f,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(2,$80*16*8*f,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 //DIP
 marcade.dswa:=$0;

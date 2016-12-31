@@ -69,9 +69,6 @@ const
         (mask:$30;name:'Initial High Score';number:4;dip:((dip_val:$0;dip_name:'0'),(dip_val:$30;dip_name:'5000'),(dip_val:$20;dip_name:'8000'),(dip_val:$10;dip_name:'10000'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$80;dip_name:'4'),(dip_val:$40;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-var
- vblank_val:byte;
-
 procedure update_video_ladybug;
 var
   f,h,color,nchar:word;
@@ -180,14 +177,14 @@ while EmuStatus=EsRuning do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
     if f=224 then begin
-      vblank_val:=$80;
+      marcade.in1:=$80 or (marcade.in1 and $3f);
       update_video_ladybug;
+      copymemory(@buffer_sprites[0],@memoria[$7000],$400);
     end;
   end;
   eventos_ladybug;
   video_sync;
-  copymemory(@buffer_sprites[0],@memoria[$7000],$400);
-  vblank_val:=$40;
+  marcade.in1:=$40 or (marcade.in1 and $3f);
 end;
 end;
 
@@ -196,7 +193,7 @@ begin
 case direccion of
   0..$6fff,$d000..$d7ff:ladybug_getbyte:=memoria[direccion];
   $9000:ladybug_getbyte:=marcade.in0;
-  $9001:ladybug_getbyte:=marcade.in1 or vblank_val;
+  $9001:ladybug_getbyte:=marcade.in1;
   $9002:ladybug_getbyte:=marcade.dswa;
   $9003:ladybug_getbyte:=marcade.dswb;
   $e000:ladybug_getbyte:=marcade.in2;
@@ -206,12 +203,15 @@ end;
 procedure ladybug_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$6000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+  $6000..$73ff:memoria[direccion]:=valor;
   $a000:main_screen.flip_main_screen:=(valor and 1)<>0;
   $b000..$bfff:sn_76496_0.Write(valor);
   $c000..$cfff:sn_76496_1.Write(valor);
-  $d000..$dfff:gfx[0].buffer[direccion and $3ff]:=true;
+  $d000..$d7ff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
 end;
 end;
 
@@ -228,10 +228,9 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
- vblank_val:=$40;
- marcade.in0:=$FF;
- marcade.in1:=$3F;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$7f;
+ marcade.in2:=$ff;
 end;
 
 function iniciar_ladybug:boolean;

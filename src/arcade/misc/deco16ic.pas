@@ -6,7 +6,7 @@ uses main_engine,gfx_engine;
 type
     tipo_deco16ic_bank=function(direccion:word):word;
     tipo_deco16ic=record
-       dec16ic_pf_data:array[1..2,0..$fff] of byte;
+       dec16ic_pf_data:array[1..2,0..$7ff] of word;
        dec16ic_pf_control:array[0..7] of word;
        dec16ic_pf_rowscroll:array[1..2,0..$7ff] of word;
        dec16ic_color_mask,dec16ic_pant,dec16ic_gfx_plane,dec16ic_color_bank:array[1..2] of byte;
@@ -57,8 +57,8 @@ var
   r:ptipo_deco16ic;
 begin
  r:=deco16ic_chip[num];
- fillchar(r.dec16ic_pf_data[1,0],$1000,0);
- fillchar(r.dec16ic_pf_data[2,0],$1000,0);
+ fillchar(r.dec16ic_pf_data[1,0],$800*2,0);
+ fillchar(r.dec16ic_pf_data[2,0],$800*2,0);
  fillchar(r.dec16ic_pf_control[0],$10,0);
  fillchar(r.dec16ic_pf_rowscroll[1,0],$800,0);
  fillchar(r.dec16ic_pf_rowscroll[2,0],$800,0);
@@ -121,9 +121,9 @@ r:=deco16ic_chip[num];
 for f:=0 to $7ff do begin
   x:=f mod 64;
   y:=f div 64;
-  if r.dec16_is_8x8[plane] then pos:=f*2
-    else pos:=((x and $1f)+((y and $1f) shl 5)+((x and $20) shl 5)+((y and $20) shl 6)) shl 1;
-  atrib:=r.dec16ic_pf_data[plane,pos+1]+(r.dec16ic_pf_data[plane,pos] shl 8);
+  if r.dec16_is_8x8[plane] then pos:=f
+    else pos:=(x and $1f)+((y and $1f) shl 5)+((x and $20) shl 5)+((y and $20) shl 6);
+  atrib:=r.dec16ic_pf_data[plane,pos];
   flipx:=false;
   flipy:=false;
   if r.dec16_is_8x8[plane] then color_mask:=r.dec16ic_color_mask[1]
@@ -139,7 +139,7 @@ for f:=0 to $7ff do begin
     end;
   end;
   color:=(atrib shr 12) and color_mask;
-  if ((r.dec16ic_buffer[plane,pos shr 1]) or (r.dec16ic_buffer_color[plane,color])) then begin
+  if ((r.dec16ic_buffer[plane,pos]) or (r.dec16ic_buffer_color[plane,color])) then begin
     nchar:=(atrib and $fff) or r.dec16ic_pf_bank[plane];
     if r.dec16_is_8x8[plane] then begin //8x8
       if trans then put_gfx_trans_flip(x*8,y*8,nchar,((color+r.dec16ic_color_bank[plane]) shl 4)+r.dec16ic_color_base[1],r.dec16ic_pant[plane],r.dec16ic_gfx_plane[1],flipx,flipy)
@@ -148,7 +148,7 @@ for f:=0 to $7ff do begin
       if trans then put_gfx_trans_flip(x*16,y*16,nchar,((color+r.dec16ic_color_bank[plane]) shl 4)+r.dec16ic_color_base[2],r.dec16ic_pant[plane],r.dec16ic_gfx_plane[2],flipx,flipy)
         else put_gfx_flip(x*16,y*16,nchar,((color+r.dec16ic_color_bank[plane]) shl 4)+r.dec16ic_color_base[2],r.dec16ic_pant[plane],r.dec16ic_gfx_plane[2],flipx,flipy);
     end;
-    r.dec16ic_buffer[plane,pos shr 1]:=false;
+    r.dec16ic_buffer[plane,pos]:=false;
   end;
 end;
 case ((r.dec16ic_pf_control[6] shr shr_mask) and $60) of

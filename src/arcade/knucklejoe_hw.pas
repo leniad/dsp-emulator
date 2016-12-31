@@ -126,7 +126,7 @@ procedure knjoe_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
 case direccion of
-    $c000..$cfff:begin
+    $c000..$cfff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[(direccion and $fff) shr 1]:=true;
                     memoria[direccion]:=valor;
                  end;
@@ -152,8 +152,8 @@ function snd_getbyte(direccion:word):byte;
 begin
 direccion:=direccion and $7fff;
 case direccion of
-  $0..$1f:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
-  $80..$ff,$2000..$7fff:snd_getbyte:=mem_snd[direccion];
+  $0..$ff:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
+  $2000..$7fff:snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
@@ -162,8 +162,7 @@ begin
 direccion:=direccion and $7fff;
 if direccion>$1fff then exit;
 case direccion of
-  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
-  $80..$ff:mem_snd[direccion]:=valor;
+  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$1fff:m6800_0.change_irq(CLEAR_LINE);
 end;
 end;
@@ -238,10 +237,10 @@ end;
 
 function iniciar_knjoe:boolean;
 var
-      f:word;
-      colores:tpaleta;
-      ctemp1,ctemp2,ctemp3:byte;
-      memoria_temp:array[0..$17fff] of byte;
+  f:word;
+  colores:tpaleta;
+  ctemp1,ctemp2,ctemp3:byte;
+  memoria_temp:array[0..$17fff] of byte;
 const
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7 );

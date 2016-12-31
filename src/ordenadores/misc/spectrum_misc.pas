@@ -411,8 +411,8 @@ end;
 
 function spec_comun:boolean;
 var
-        colores:tpaleta;
-        f,npal:byte;
+  colores:tpaleta;
+  f:byte;
 begin
 spec_comun:=false;
 spec_z80:=cpu_z80_sp.create(1,1);
@@ -431,30 +431,25 @@ var_spectrum.fastload:=true;
 cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
-main_vars.frames_sec:=0;
 screen_init(1,352,288);
 iniciar_video(352,288);
-npal:=16;
+//Paleta general
 for f:=0 to 15 do begin
   colores[f].b:=spec_paleta[f] shr 16;
   colores[f].g:=(spec_paleta[f] shr 8) and $FF;
   colores[f].r:=spec_paleta[f] and $FF;
 end;
-if not(ulaplus.activa) then begin
-  for f:=16 to 79 do begin  //los colores iniciales de la ULA+
-    colores[f].b:=0;
-    colores[f].g:=0;
-    colores[f].r:=0;
-  end;
-  npal:=80;
+//los colores iniciales de la ULA+
+for f:=16 to 79 do begin
+  colores[f].b:=0;
+  colores[f].g:=0;
+  colores[f].r:=0;
 end;
-set_pal(colores,npal);
+set_pal(colores,80);
 var_spectrum.haz_flash:=false;
-old_cursor:=sdl_getcursor;
-sdl_setcursor(sdl_createcursor(@cdata,@cmask,16,16,7,7));
-if mouse.tipo<>MNONE then sdl_showcursor(1)
-  else sdl_showcursor(0);
-var_spectrum.ear_channel:=init_channel; //iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
+if mouse.tipo<>MNONE then show_mouse_cursor;
+//iniciar un canal para el ear (el otro lo inicia el AY si hace falta)
+var_spectrum.ear_channel:=init_channel;
 spec_comun:=true;
 if cinta_tzx.cargada then tape_window1.Show;
 end;
@@ -468,8 +463,8 @@ if cinta_tzx.cargada then begin
   cinta_tzx.play_once:=false;
   llamadas_maquina.open_file:=cinta_tzx.name;
 end else if dsk[0].abierto then begin
-  llamadas_maquina.open_file:=dsk[0].ImageName;
-end else llamadas_maquina.open_file:='';
+            llamadas_maquina.open_file:=dsk[0].ImageName;
+         end else llamadas_maquina.open_file:='';
 change_caption;
 var_spectrum.key6_0:=$ff;
 var_spectrum.keyY_P:=$ff;
@@ -483,16 +478,15 @@ var_spectrum.kempston:=0;
 mouse.lg_val:=$20;
 var_spectrum.flash:=0;
 var_spectrum.irq_pos:=0;
-cinta_tzx.value:=0;
 var_spectrum.altavoz:=0;
+cinta_tzx.value:=0;
 spec_z80.im2_lo:=$ff;
 fillchar(borde.buffer[0],78000,$80);
 fillchar(var_spectrum.buffer_beeper[0],$6000,0);
+//ULA+
 ulaplus.activa:=false;
-if not(ulaplus.enabled) then begin
-  fillchar(ulaplus.paleta[0],64,0);
-  ulaplus.last_reg:=0;
-end;
+fillchar(ulaplus.paleta[0],64,0);
+ulaplus.last_reg:=0;
 var_spectrum.kb_0:=false;
 var_spectrum.kb_1:=false;
 var_spectrum.kb_2:=false;
@@ -529,7 +523,6 @@ end;
 
 procedure spec_cerrar_comun;
 begin
-sdl_setcursor(old_cursor);
 rom_cambiada_48:=false;
 if main_vars.tipo_maquina=2 then begin
   ResetFDC;

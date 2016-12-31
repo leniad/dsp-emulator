@@ -52,7 +52,6 @@ for f:=$3ff downto 0 do begin
   if gfx[0].buffer[f] then begin
     x:=f div 32;
     y:=31-(f mod 32);
-    //Color RAM
     atrib:=memoria[f+$e400];
     color:=(atrib and $1f) shl 3;
     nchar:=memoria[f+$e000]+((atrib and $e0) shl 3);
@@ -138,7 +137,7 @@ begin
 if (direccion<$d000) then exit;
 case direccion of
         $d000..$dfff,$e800..$e8ff:memoria[direccion]:=valor;
-        $e000..$e7ff:begin //video ram
+        $e000..$e7ff:if memoria[direccion]<>valor then begin
                         gfx[0].buffer[direccion and $3ff]:=true;
                         memoria[direccion]:=valor;
                      end;
@@ -220,8 +219,8 @@ begin
  snd_rom_addr:=0;
  spinner:=false;
  nmi_enable:=false;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
 end;
 
 function iniciar_freekick:boolean;
@@ -290,7 +289,7 @@ case main_vars.tipo_maquina of
         marcade.dswc_val:=@freekick_dip_c;
   end;
 end;
-//Poner colores aleatorios hasta que inicie la paleta
+//Pal
 for f:=0 to $1ff do begin
 		//red
 		bit0:=(memoria_temp[f] shr 0) and 1;

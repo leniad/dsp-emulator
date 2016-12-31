@@ -250,7 +250,6 @@ while EmuStatus=EsRuning do begin
       $f8:begin
             update_video_xain;
             m6809_0.change_nmi(ASSERT_LINE);
-            m6809_0.change_firq(ASSERT_LINE);
           end;
     end;
     if ((xain_scanline[f] and $f)=8) then m6809_0.change_firq(ASSERT_LINE);
@@ -357,15 +356,15 @@ begin
 if direccion>$3fff then exit;
 case direccion of
         0..$1fff,$3800..$397f:memoria[direccion]:=valor;
-        $2000..$27ff:begin
+        $2000..$27ff:if memoria[direccion]<>valor then begin
                         gfx[0].buffer[direccion and $3ff]:=true;
                         memoria[direccion]:=valor;
                      end;
-        $2800..$2fff:begin
+        $2800..$2fff:if memoria[direccion]<>valor then begin
                         gfx[3].buffer[direccion and $3ff]:=true;
                         memoria[direccion]:=valor;
                      end;
-        $3000..$37ff:begin
+        $3000..$37ff:if memoria[direccion]<>valor then begin
                         gfx[2].buffer[direccion and $3ff]:=true;
                         memoria[direccion]:=valor;
                      end;
@@ -449,8 +448,7 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  if (irqstate=1) then m6809_2.change_firq(ASSERT_LINE)
-    else m6809_2.change_firq(CLEAR_LINE);
+  m6809_2.change_firq(irqstate);
 end;
 
 procedure xain_sound_update;

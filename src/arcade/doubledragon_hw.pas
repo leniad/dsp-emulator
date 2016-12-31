@@ -43,14 +43,12 @@ const
         (n:'26j6-0.bin';l:$20000;p:0;crc:$a84b2a29),(n:'26j7-0.bin';l:$20000;p:$20000;crc:$bc6a48d5),());
 
 var
- rom:array[0..5,0..$3FFF] of byte;
- banco_rom,soundlatch,dd_sub_port:byte;
+ rom:array[0..5,0..$3fff] of byte;
+ tipo_video,fg_mask,banco_rom,soundlatch,dd_sub_port:byte;
  scroll_x,scroll_y:word;
- common_ram:array[0..$1ff] of byte;
  adpcm_mem:array[0..$1ffff] of byte;
  adpcm_idle,adpcm_ch,adpcm_data:array[0..1] of byte;
  adpcm_pos,adpcm_end:array[0..1] of dword;
- tipo_video,mask:byte;
  ddragon_scanline:array[0..271] of word;
 
 procedure draw_sprites;inline;
@@ -60,19 +58,19 @@ var
   flipx,flipy:boolean;
 begin
 	for f:=0 to $3f do begin
-		atrib:=buffer_sprites[$1+(f*5)];
+		atrib:=memoria[$2801+(f*5)];
 		if (atrib and $80)<>0 then begin  // visible
-			x:=240-buffer_sprites[$4+(f*5)]+((atrib and 2) shl 7);
-			y:=240-buffer_sprites[f*5]+ ((atrib and 1) shl 8);
+			x:=240-memoria[$2804+(f*5)]+((atrib and 2) shl 7);
+			y:=240-memoria[$2800+(f*5)]+ ((atrib and 1) shl 8);
 			size:=(atrib and $30) shr 4;
 			flipx:=(atrib and 8)<>0;
 			flipy:=(atrib and 4)<>0;
       if tipo_video<>0 then begin
-          color:=(buffer_sprites[$2+(f*5)] shr 5) shl 4;
-			    nchar:=buffer_sprites[$3+(f*5)]+((buffer_sprites[$2+(f*5)] and $1f) shl 8);
+          color:=(memoria[$2802+(f*5)] shr 5) shl 4;
+			    nchar:=memoria[$2803+(f*5)]+((memoria[$2802+(f*5)] and $1f) shl 8);
       end else begin
-          color:=((buffer_sprites[$2+(f*5)] shr 4) and $07) shl 4;
-			    nchar:=buffer_sprites[$3+(f*5)]+((buffer_sprites[$2+(f*5)] and $0f) shl 8);
+          color:=((memoria[$2802+(f*5)] shr 4) and $07) shl 4;
+			    nchar:=memoria[$2803+(f*5)]+((memoria[$2802+(f*5)] and $0f) shl 8);
       end;
 			nchar:=nchar and not(size);
 			case size of
@@ -123,7 +121,7 @@ for f:=$0 to $3ff do begin
   atrib:=memoria[$1800+(f*2)];
   color:=(atrib and $e0) shr 5;
   if (gfx[0].buffer[f] or buffer_color[color]) then begin
-      nchar:=memoria[$1801+(f*2)]+((atrib and mask) shl 8);
+      nchar:=memoria[$1801+(f*2)]+((atrib and fg_mask) shl 8);
       put_gfx_trans(x*8,y*8,nchar,color shl 4,1,0);
       gfx[0].buffer[f]:=false;
    end;
@@ -217,11 +215,10 @@ end;
 function ddragon_getbyte(direccion:word):byte;
 begin
     case direccion of
-        $0..$fff,$1800..$1fff,$3000..$37ff:ddragon_getbyte:=memoria[direccion];
+        $0..$fff,$1800..$1fff,$2800..$37ff,$8000..$ffff:ddragon_getbyte:=memoria[direccion];
         $1000..$13ff:ddragon_getbyte:=buffer_paleta[direccion and $3ff];
-        $2000..$27ff:if ((m6800_0.get_halt<>CLEAR_LINE) or (m6800_0.get_reset<>CLEAR_LINE)) then ddragon_getbyte:=common_ram[direccion and $1ff]
+        $2000..$27ff:if ((m6800_0.get_halt<>CLEAR_LINE) or (m6800_0.get_reset<>CLEAR_LINE)) then ddragon_getbyte:=mem_misc[$8000+(direccion and $1ff)]
                         else ddragon_getbyte:=$ff;
-        $2800..$2fff:ddragon_getbyte:=buffer_sprites[direccion and $fff];
         $3800:ddragon_getbyte:=marcade.in0;
         $3801:ddragon_getbyte:=marcade.in1;
         $3802:if ((m6800_0.get_halt<>CLEAR_LINE) or (m6800_0.get_reset<>CLEAR_LINE)) then ddragon_getbyte:=marcade.in2
@@ -250,23 +247,27 @@ begin
                 ddragon_getbyte:=$ff;
               end;
         $4000..$7fff:ddragon_getbyte:=rom[banco_rom,direccion and $3FFF];
-        $8000..$ffff:ddragon_getbyte:=memoria[direccion];
     end;
 end;
 
 procedure ddragon_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
+        0..$fff,$2800..$2fff:memoria[direccion]:=valor;
         $1000..$13ff:if buffer_paleta[direccion and $3ff]<>valor then begin
                           buffer_paleta[direccion and $3ff]:=valor;
                           cambiar_color(direccion and $1ff);
                      end;
-        $1800..$1fff:gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-        $2000..$27ff:if ((m6800_0.get_halt<>CLEAR_LINE) or (m6800_0.get_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
-        $2800..$2fff:buffer_sprites[direccion and $7ff]:=valor;
-        $3000..$37ff:gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
+        $1800..$1fff:if memoria[direccion]<>valor then begin
+                        gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
+                        memoria[direccion]:=valor;
+                     end;
+        $2000..$27ff:if ((m6800_0.get_halt<>CLEAR_LINE) or (m6800_0.get_reset<>CLEAR_LINE)) then mem_misc[$8000+(direccion and $1ff)]:=valor;
+        $3000..$37ff:if memoria[direccion]<>valor then begin
+                        gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $3808:begin
                 scroll_x:=(scroll_x and $ff) or ((valor and $1) shl 8);
                 scroll_y:=(scroll_y and $ff) or ((valor and $2) shl 7);
@@ -294,35 +295,33 @@ function ddragon_sub_getbyte(direccion:word):byte;
 begin
   case direccion of
       $0..$1e:ddragon_sub_getbyte:=0;
-      $8000..$81ff:ddragon_sub_getbyte:=common_ram[direccion and $1ff];
-      else ddragon_sub_getbyte:=mem_misc[direccion];
+      $1f..$fff,$8000..$81ff,$c000..$ffff:ddragon_sub_getbyte:=mem_misc[direccion];
   end;
 end;
 
 procedure ddragon_sub_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$bfff then exit;
-mem_misc[direccion]:=valor;
 case direccion of
-  $0..$1f:if (direccion=$17) then begin
-              if (valor and 1)=0 then m6800_0.change_nmi(CLEAR_LINE);
-		          if (((valor and 2)<>0) and ((dd_sub_port and $2)<>0)) then hd6309_0.change_irq(ASSERT_LINE);
-              dd_sub_port:=valor;
-        	end;
-  $8000..$81ff:common_ram[direccion and $1ff]:=valor;
+  $17:begin
+        if (valor and 1)=0 then m6800_0.change_nmi(CLEAR_LINE);
+        if (((valor and 2)<>0) and ((dd_sub_port and $2)<>0)) then hd6309_0.change_irq(ASSERT_LINE);
+        dd_sub_port:=valor;
+      end;
+  $1f..$fff,$8000..$81ff:mem_misc[direccion]:=valor;
 end;
 end;
 
 function ddragon_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$fff,$8000..$ffff:ddragon_snd_getbyte:=mem_snd[direccion];
   $1000:begin
           ddragon_snd_getbyte:=soundlatch;
           m6809_0.change_irq(CLEAR_LINE);
         end;
   $1800:ddragon_snd_getbyte:=adpcm_idle[0]+(adpcm_idle[1] shl 1);
   $2801:ddragon_snd_getbyte:=ym2151_0.status;
-    else ddragon_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
@@ -330,9 +329,9 @@ procedure ddragon_snd_putbyte(direccion:word;valor:byte);
 var
   adpcm_chip:byte;
 begin
-if direccion>$3fff then exit;
-mem_snd[direccion]:=valor;
+if direccion>$7fff then exit;
 case direccion of
+  0..$fff:mem_snd[direccion]:=valor;
   $2800:ym2151_0.reg(valor);
   $2801:ym2151_0.write(valor);
   $3800..$3807:begin
@@ -437,10 +436,9 @@ end;
 function ddragon2_getbyte(direccion:word):byte;
 begin
     case direccion of
-        $0..$1fff,$3000..$37ff,$8000..$ffff:ddragon2_getbyte:=memoria[direccion];
-        $2000..$27ff:if ((z80_0.get_halt<>CLEAR_LINE) or (z80_0.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=common_ram[direccion and $1ff]
+        $0..$1fff,$2800..$37ff,$8000..$ffff:ddragon2_getbyte:=memoria[direccion];
+        $2000..$27ff:if ((z80_0.get_halt<>CLEAR_LINE) or (z80_0.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=mem_misc[$c000+(direccion and $1ff)]
                         else ddragon2_getbyte:=$ff;
-        $2800..$2fff:ddragon2_getbyte:=buffer_sprites[direccion and $7ff];
         $3800:ddragon2_getbyte:=marcade.in0;
         $3801:ddragon2_getbyte:=marcade.in1;
         $3802:if ((z80_0.get_halt<>CLEAR_LINE) or (z80_0.get_reset<>CLEAR_LINE)) then ddragon2_getbyte:=marcade.in2
@@ -477,14 +475,13 @@ procedure ddragon2_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
 case direccion of
-        0..$17ff:memoria[direccion]:=valor;
-        $1800..$1fff:begin
+        0..$17ff,$2800..$2fff:memoria[direccion]:=valor;
+        $1800..$1fff:if memoria[direccion]<>valor then begin
                         gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                         memoria[direccion]:=valor;
                      end;
-        $2000..$27ff:if ((z80_0.get_halt<>CLEAR_LINE) or (z80_0.get_reset<>CLEAR_LINE)) then common_ram[direccion and $1ff]:=valor;
-        $2800..$2fff:buffer_sprites[direccion and $7ff]:=valor;
-        $3000..$37ff:begin
+        $2000..$27ff:if ((z80_0.get_halt<>CLEAR_LINE) or (z80_0.get_reset<>CLEAR_LINE)) then mem_misc[$c000+(direccion and $1ff)]:=valor;
+        $3000..$37ff:if memoria[direccion]<>valor then begin
                         gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
                         memoria[direccion]:=valor;
                      end;
@@ -517,17 +514,14 @@ end;
 
 function ddragon2_sub_getbyte(direccion:word):byte;
 begin
-case direccion of
-    0..$bfff:ddragon2_sub_getbyte:=mem_misc[direccion];
-    $c000..$c3ff:ddragon2_sub_getbyte:=common_ram[direccion and $3ff];
-  end;
+if direccion<$c400 then ddragon2_sub_getbyte:=mem_misc[direccion];
 end;
 
 procedure ddragon2_sub_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
 case direccion of
-  $c000..$c3ff:common_ram[direccion and $3ff]:=valor;
+  $c000..$c3ff:mem_misc[direccion]:=valor;
   $d000:z80_0.change_nmi(CLEAR_LINE);
 	$e000:hd6309_0.change_irq(ASSERT_LINE);
 end;
@@ -677,7 +671,7 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@ddragon_sprites[0],'ddragon.zip',0)) then exit;
         extract_sprites($1000,4);
         tipo_video:=0;
-        mask:=$3
+        fg_mask:=$3
      end;
   96:begin
         //Main CPU
@@ -715,7 +709,7 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@ddragon2_sprites[0],'ddragon2.zip',0)) then exit;
         extract_sprites($1800,6);
         tipo_video:=1;
-        mask:=$7;
+        fg_mask:=$7;
      end;
 end;
 //init scanlines

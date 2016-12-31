@@ -3,6 +3,14 @@
 interface
 uses sysutils,{$IFDEF WINDOWS}windows,{$ENDIF}dialogs;
 
+procedure WriteFDCData(value:byte);
+function ReadFDCStatus:byte;
+function ReadFDCData:byte;
+procedure ResetFDC;
+
+implementation
+uses principal,disk_file_format;
+
 var
   FloppyMotor:byte;
   FDCCurrDrv:byte;
@@ -22,17 +30,8 @@ var
   FDCDataLength:word;
   FDCCounter:word;
   SeekTrack:boolean;
-  Mostrar_disco:boolean;
   bytes_in_cmd: array[0..31] of byte = (
   1,1,9,3,2,9,9,2,1,9,2,1,9,6,1,3,1,9,1,1,1,1,1,1,1,9,1,1,1,1,9,1);
-
-procedure WriteFDCData(value:byte);
-function ReadFDCStatus:byte;
-function ReadFDCData:byte;
-procedure ResetFDC;
-
-implementation
-uses principal,disk_file_format;
 
 procedure GetRes7;
 begin
@@ -182,7 +181,7 @@ function seek_track(track:byte):boolean;
 var
   test:boolean;
 begin
-test:=not(track>dsk[FDCCurrDrv].DiskHeader.nbof_tracks);
+test:=not(track>(dsk[FDCCurrDrv].DiskHeader.nbof_tracks-1));
 if test then dsk[FDCCurrDrv].track_actual:=track
   else dsk[FDCCurrDrv].track_actual:=dsk[FDCCurrDrv].DiskHeader.nbof_tracks;
 seek_track:=test;
@@ -296,21 +295,20 @@ case (FDCCommand[0] and $1f) of
       if not(dsk[FDCCurrDrv].abierto) then begin
         st0:=$48;
         getres7;
-        FDCResult[3]:=dsk[FDCCurrDrv].track_actual;
-        FDCResult[4]:=0;
-        FDCResult[5]:=0;
-        FDCResult[6]:=0;
-      end else begin
-          //Esto es fundamental, por ejemplo para 'Tintin on the Moon'
-          if (dsk[FDCCurrDrv].sector_actual+1)>dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector then begin
-            dsk[FDCCurrDrv].sector_actual:=0;
-            getres7;
-          end else begin
-            getres7;
-            inc(dsk[FDCCurrDrv].sector_actual);
-          end;
-        end;
-        end;
+      end else if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector=0 then begin
+                  getres7;
+                  FDCResult[3]:=dsk[FDCCurrDrv].track_actual;
+                  FDCResult[4]:=0;
+                  FDCResult[5]:=0;
+                  FDCResult[6]:=0;
+               end else begin
+                          //Esto es fundamental, por ejemplo para 'Tintin on the Moon'
+                          if (dsk[FDCCurrDrv].sector_actual+1)>dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector then
+                            dsk[FDCCurrDrv].sector_actual:=0;
+                          getres7;
+                          inc(dsk[FDCCurrDrv].sector_actual);
+                        end;
+      end;
      15:begin // SEEK
       fdc_get_drive;
       StatusRegister:=$80;
@@ -383,7 +381,7 @@ begin
       inc(FDCDataPointer);
       inc(FDCCounter);
       if (FDCCounter=FDCDataLength) then begin
-        if dsk[FDCCurrDrv].sector_read_track=FDCCommand[6] then begin
+        if dsk[FDCCurrDrv].sector_read_track=(FDCCommand[6]-1) then begin
             st1:=st1 or $80;
             GetRes7;
             principal1.Image1.visible:=false;
@@ -472,6 +470,11 @@ begin
     FDCCounter:=0;
     Contador_status:=0;
     contador_read_status:=0;
+    //Importante para la proteccion de sectores debiles, lo pongo aqui...
+    dsk[0].cont_multi:=3;
+    dsk[0].max_multi:=3;
+    dsk[1].cont_multi:=3;
+    dsk[1].max_multi:=3;
 end;
 
 procedure WriteFDCData(value:byte);

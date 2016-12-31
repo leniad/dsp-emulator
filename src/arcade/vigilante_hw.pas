@@ -10,27 +10,25 @@ procedure cargar_vigilante;
 implementation
 const
         vigilante_rom:array[0..2] of tipo_roms=(
-        (n:'g07_c03.bin';l:$8000;p:0;crc:$9dcca081),(n:'j07_c04.bin';l:$10000;p:$8000;crc:$e0159105),());
+        (n:'VG_A-8H-E.ic55';l:$8000;p:0;crc:$0d4e6866),(n:'VG_A-8L-A.ic57';l:$10000;p:$8000;crc:$690d812f),());
         vigilante_chars:array[0..2] of tipo_roms=(
-        (n:'f05_c08.bin';l:$10000;p:0;crc:$01579d20),(n:'h05_c09.bin';l:$10000;p:$10000;crc:$4f5872f0),());
-        vigilante_sprites:array[0..8] of tipo_roms=(
-        (n:'n07_c12.bin';l:$10000;p:$00000;crc:$10af8eb2),(n:'k07_c10.bin';l:$10000;p:$10000;crc:$9576f304),
-        (n:'o07_c13.bin';l:$10000;p:$20000;crc:$b1d9d4dc),(n:'l07_c11.bin';l:$10000;p:$30000;crc:$4598be4a),
-        (n:'t07_c16.bin';l:$10000;p:$40000;crc:$f5425e42),(n:'p07_c14.bin';l:$10000;p:$50000;crc:$cb50a17c),
-        (n:'v07_c17.bin';l:$10000;p:$60000;crc:$959ba3c7),(n:'s07_c15.bin';l:$10000;p:$70000;crc:$7f2e91c5),());
-        vigilante_dac:tipo_roms=(n:'d04_c01.bin';l:$10000;p:0;crc:$9b85101d);
-        vigilante_sound:tipo_roms=(n:'g05_c02.bin';l:$10000;p:0;crc:$10582b2d);
+        (n:'VG_B-4F-.ic34';l:$10000;p:0;crc:$01579d20),(n:'VG_B-4J-.ic35';l:$10000;p:$10000;crc:$4f5872f0),());
+        vigilante_sprites:array[0..4] of tipo_roms=(
+        (n:'VG_B-6L-.ic62';l:$20000;p:0;crc:$fbe9552d),(n:'VG_B-6K-.ic61';l:$20000;p:$20000;crc:$ae09d5c0),
+        (n:'VG_B-6P-.ic64';l:$20000;p:$40000;crc:$afb77461),(n:'VG_B-6N-.ic63';l:$20000;p:$60000;crc:$5065cd35),());
+        vigilante_dac:tipo_roms=(n:'VG_A-4D-.ic26';l:$10000;p:0;crc:$9b85101d);
+        vigilante_sound:tipo_roms=(n:'VG_A-5J-.ic37';l:$10000;p:0;crc:$10582b2d);
         vigilante_tiles:array[0..3] of tipo_roms=(
-        (n:'d01_c05.bin';l:$10000;p:$00000;crc:$81b1ee5c),(n:'e01_c06.bin';l:$10000;p:$10000;crc:$d0d33673),
-        (n:'f01_c07.bin';l:$10000;p:$20000;crc:$aae81695),());
+        (n:'VG_B-1D-.ic2';l:$10000;p:$00000;crc:$81b1ee5c),(n:'VG_B-1F-.ic3';l:$10000;p:$10000;crc:$d0d33673),
+        (n:'VG_B-1H-.ic4';l:$10000;p:$20000;crc:$aae81695),());
 var
- rom_bank:array[0..3,0..$3FFF] of byte;
+ rom_bank:array[0..3,0..$3fff] of byte;
  banco_rom,sound_latch,rear_color:byte;
  rear_scroll,scroll_x,sample_addr:word;
  rear_disable,rear_ch_color:boolean;
  mem_dac:array[0..$ffff] of byte;
 
-procedure update_video_vigilante;inline;
+procedure update_video_vigilante;
 var
   f,color,nchar,x,y,h,c,i:word;
   atrib:byte;
@@ -40,31 +38,29 @@ begin
 //fondo
 if not(rear_disable) then begin
  if rear_ch_color then begin
-  for i:=0 to 15 do begin
-		ccolor.r:=(memoria[$cc00+16*rear_color+i] shl 3) and $FF;
-		ccolor.g:=(memoria[$cd00+16*rear_color+i] shl 3) and $FF;
-		ccolor.b:=(memoria[$ce00+16*rear_color+i] shl 3) and $FF;
-    set_pal_color(ccolor,512+i);
-		ccolor.r:=(memoria[$cc00+16*rear_color+32+i] shl 3) and $FF;
-		ccolor.g:=(memoria[$cd00+16*rear_color+32+i] shl 3) and $FF;
-		ccolor.b:=(memoria[$ce00+16*rear_color+32+i] shl 3) and $FF;
-    set_pal_color(ccolor,512+i+16);
-	end;
-  nchar:=0;
-  for c:=0 to 2 do begin
-		for y:=0 to 255 do begin
-      x:=0;
-      while x<512 do begin
-        if y<128 then put_gfx(512*c+x,y,nchar,512+0,4,2)
-          else put_gfx(512*c+x,y,nchar,512+16,4,2);
-				nchar:=nchar+1;
-			  x:=x+32;
-      end;
-		end;
-  end;
-  rear_ch_color:=false;
+    for i:=0 to 15 do begin
+		    ccolor.r:=(buffer_paleta[$400+16*rear_color+i] shl 3) and $FF;
+		    ccolor.g:=(buffer_paleta[$500+16*rear_color+i] shl 3) and $FF;
+		    ccolor.b:=(buffer_paleta[$600+16*rear_color+i] shl 3) and $FF;
+        set_pal_color(ccolor,512+i);
+		    ccolor.r:=(buffer_paleta[$400+16*rear_color+32+i] shl 3) and $FF;
+		    ccolor.g:=(buffer_paleta[$500+16*rear_color+32+i] shl 3) and $FF;
+		    ccolor.b:=(buffer_paleta[$600+16*rear_color+32+i] shl 3) and $FF;
+        set_pal_color(ccolor,512+i+16);
+	  end;
+    nchar:=0;
+    for c:=0 to 2 do begin
+		    for y:=0 to 255 do begin
+          for x:=0 to 15 do begin
+            if y<128 then put_gfx(512*c+(x*32),y,nchar,512+0,4,2)
+              else put_gfx(512*c+(x*32),y,nchar,512+16,4,2);
+				    nchar:=nchar+1;
+          end;
+		    end;
+    end;
+    rear_ch_color:=false;
  end;
- actualiza_trozo(rear_scroll-(378+16*8)+64,0,256+128,256,4,0,0,256+128,256,3);
+ scroll__x(4,3,rear_scroll-(378+16*8));
 end;
 //chars
 for f:=0 to $7ff do begin
@@ -143,6 +139,15 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
+function vigilante_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$7fff,$c020..$c0df,$d000..$efff:vigilante_getbyte:=memoria[direccion];
+  $8000..$bfff:vigilante_getbyte:=rom_bank[banco_rom,(direccion and $3fff)];
+  $c800..$cfff:vigilante_getbyte:=buffer_paleta[direccion and $7ff];
+end;
+end;
+
 procedure cambiar_color(dir:word);inline;
 var
   color:tcolor;
@@ -159,27 +164,22 @@ begin
   case (bank shr 2)+pos2 of
     $100..$1ff:buffer_color[(((bank shr 2)+pos2) shr 4) and $f]:=true;
   end;
-  if bank>$3ff then rear_ch_color:=true;
-end;
-
-function vigilante_getbyte(direccion:word):byte;
-begin
-case direccion of
-  $8000..$bfff:vigilante_getbyte:=rom_bank[banco_rom,(direccion and $3fff)];
-  else vigilante_getbyte:=memoria[direccion];
-end;
+  rear_ch_color:=(bank=$400);
 end;
 
 procedure vigilante_putbyte(direccion:word;valor:byte);
 begin
 if (direccion<$c000) then exit;
-memoria[direccion]:=valor;
 case direccion of
+    $c020..$c0df,$e000..$efff:memoria[direccion]:=valor;
     $c800..$cfff:if buffer_paleta[direccion and $7ff]<>valor then begin
                     buffer_paleta[direccion and $7ff]:=valor;
                     cambiar_color(direccion and $7ff);
                  end;
-    $d000..$dfff:gfx[0].buffer[(direccion and $fff) shr 1]:=true;
+    $d000..$dfff:begin
+                    gfx[0].buffer[(direccion and $fff) shr 1]:=true;
+                    memoria[direccion]:=valor;
+                 end;
 end;
 end;
 
@@ -310,6 +310,7 @@ const
 var
   f:word;
   memoria_temp:array[0..$7ffff] of byte;
+  mem_load:pbyte;
 begin
 iniciar_vigilante:=false;
 iniciar_audio(true);
@@ -320,6 +321,7 @@ screen_mod_scroll(2,512,256+128,511,0,0,255);
 screen_init(3,512,256,false,true);
 screen_mod_sprites(3,0,$200,0,$1ff);
 screen_init(4,512*4,256);
+screen_mod_scroll(4,2048,512,2047,0,0,255);
 iniciar_video(256,256);
 //Main CPU
 z80_0:=cpu_z80.create(3579645,256);
@@ -336,7 +338,7 @@ dac_0:=dac_chip.Create;
 ym2151_0:=ym2151_chip.create(3579645);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms y rom en bancos
-if not(cargar_roms(@memoria_temp[0],@vigilante_rom[0],'vigilant.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@vigilante_rom,'vigilant.zip',0)) then exit;
 copymemory(@memoria[0],@memoria_temp[0],$8000);
 for f:=0 to 3 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //cargar sonido
@@ -350,12 +352,22 @@ for f:=0 to 7 do gfx[0].trans_alt[1,f]:=true;
 gfx_set_desc_data(4,0,128,64*1024*8,(64*1024*8)+4,0,4);
 convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@vigilante_sprites[0],'vigilant.zip',0)) then exit;
+getmem(mem_load,$80000);
+if not(cargar_roms(mem_load,@vigilante_sprites[0],'vigilant.zip',0)) then exit;
+copymemory(@memoria_temp[0],@mem_load[0],$10000);
+copymemory(@memoria_temp[$20000],@mem_load[$10000],$10000);
+copymemory(@memoria_temp[$10000],@mem_load[$20000],$10000);
+copymemory(@memoria_temp[$30000],@mem_load[$30000],$10000);
+copymemory(@memoria_temp[$40000],@mem_load[$40000],$10000);
+copymemory(@memoria_temp[$60000],@mem_load[$50000],$10000);
+copymemory(@memoria_temp[$50000],@mem_load[$60000],$10000);
+copymemory(@memoria_temp[$70000],@mem_load[$70000],$10000);
+freemem(mem_load);
 init_gfx(1,16,16,4096);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,$40*8,$40000*8,$40000*8+4,0,4);
 convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
-//sprites
+//tiles
 if not(cargar_roms(@memoria_temp[0],@vigilante_tiles[0],'vigilant.zip',0)) then exit;
 init_gfx(2,32,1,3*512*8);
 gfx_set_desc_data(4,0,16*8,0,2,4,6);

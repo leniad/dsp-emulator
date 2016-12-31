@@ -492,7 +492,7 @@ if cpc_crt.vsync_activo then begin
 end;
 if (linea_crt=cpc_crt.vsync_linea_ocurre) then begin
   cpc_crt.vsync_cont:=cpc_crt.vsync_lines-1;
-  cpc_ga.lines_sync:=2;
+  cpc_ga.lines_sync:=3;
   cpc_crt.vsync_activo:=true;
 end;
 end;
@@ -737,7 +737,7 @@ if cinta_tzx.cargada then begin
             cinta_tzx.indice_cinta:=0;
             tape_window1.StringGrid1.TopRow:=0;
             siguiente_bloque_tzx;
-            cinta_tzx.play_once:=true;
+            cinta_tzx.play_once:=false;
             tape_window1.fStopCinta(nil);
       end;
     end;
@@ -908,61 +908,61 @@ if cpc_ga.cpc_model=4 then begin
   if not(tempb) then begin
     MessageDlg('ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
     cpc_ga.cpc_model:=0;
-    if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
+    if not(roms_load(@memoria_temp,@cpc6128_rom,'cpc6128.zip',sizeof(cpc6128_rom))) then exit;
   end;
-  if main_vars.tipo_maquina<>7 then if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
+  if main_vars.tipo_maquina<>7 then if not(roms_load(@cpc_rom[7,0],@ams_rom,'cpc6128.zip',sizeof(ams_rom))) then exit;
 end else begin
   case main_vars.tipo_maquina of
     7:begin
       tempb:=false;
       case cpc_ga.cpc_model of
         0:tempb:=true;
-        1:if not(cargar_roms(@memoria_temp[0],@cpc464f_rom,'cpc464.zip')) then begin
+        1:if not(roms_load(@memoria_temp,@cpc464f_rom,'cpc464.zip',sizeof(cpc464f_rom))) then begin
             MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
         end;
-        2:if not(cargar_roms(@memoria_temp[0],@cpc464sp_rom,'cpc464.zip')) then begin
+        2:if not(roms_load(@memoria_temp,@cpc464sp_rom,'cpc464.zip',sizeof(cpc464sp_rom))) then begin
             MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
         end;
-        3:if not(cargar_roms(@memoria_temp[0],@cpc464d_rom,'cpc464.zip')) then begin
+        3:if not(roms_load(@memoria_temp,@cpc464d_rom,'cpc464.zip',sizeof(cpc464d_rom))) then begin
             MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
         end;
       end;
-      if tempb then if not(cargar_roms(@memoria_temp[0],@cpc464_rom,'cpc464.zip')) then exit;
+      if tempb then if not(roms_load(@memoria_temp,@cpc464_rom,'cpc464.zip',sizeof(cpc464_rom))) then exit;
       fillchar(cpc_rom[7,0],$4000,0);
     end;
     8:begin
-      if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc664.zip')) then exit;
-      if not(cargar_roms(@memoria_temp[0],@cpc664_rom,'cpc664.zip')) then exit;
+      if not(roms_load(@cpc_rom[7,0],@ams_rom,'cpc664.zip',sizeof(ams_rom))) then exit;
+      if not(roms_load(@memoria_temp,@cpc664_rom,'cpc664.zip',sizeof(cpc664_rom))) then exit;
       cpc_ga.cpc_model:=0;
     end;
     9:begin
-      if not(cargar_roms(@cpc_rom[7,0],@ams_rom,'cpc6128.zip')) then exit;
+      if not(roms_load(@cpc_rom[7,0],@ams_rom,'cpc6128.zip',sizeof(ams_rom))) then exit;
       tempb:=false;
       case cpc_ga.cpc_model of
         0:tempb:=true;
-        1:if not(cargar_roms(@memoria_temp[0],@cpc6128f_rom,'cpc6128.zip')) then begin
+        1:if not(roms_load(@memoria_temp,@cpc6128f_rom,'cpc6128.zip',sizeof(cpc6128f_rom))) then begin
             MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
           end;
-        2:if not(cargar_roms(@memoria_temp[0],@cpc6128sp_rom,'cpc6128.zip')) then begin
+        2:if not(roms_load(@memoria_temp,@cpc6128sp_rom,'cpc6128.zip',sizeof(cpc6128sp_rom))) then begin
             MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
           end;
-        3:if not(cargar_roms(@memoria_temp[0],@cpc6128d_rom,'cpc6128.zip')) then begin
+        3:if not(roms_load(@memoria_temp,@cpc6128d_rom,'cpc6128.zip',sizeof(cpc6128d_rom))) then begin
             MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
           end;
       end;
-      if tempb then if not(cargar_roms(@memoria_temp[0],@cpc6128_rom,'cpc6128.zip')) then exit;
+      if tempb then if not(roms_load(@memoria_temp,@cpc6128_rom,'cpc6128.zip',sizeof(cpc6128_rom))) then exit;
     end;
   end;
 end;

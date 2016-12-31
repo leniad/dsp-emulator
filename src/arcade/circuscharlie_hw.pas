@@ -155,7 +155,7 @@ case direccion of
   $c00..$fff:z80_0.change_irq(HOLD_LINE);
   $1c00..$1fff:scroll_x:=256-valor;
   $2000..$2fff,$3800..$3fff:memoria[direccion]:=valor;
-  $3000..$37ff:begin
+  $3000..$37ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;

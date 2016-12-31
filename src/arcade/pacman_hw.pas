@@ -10,20 +10,20 @@ procedure cargar_pacman;
 implementation
 const
         //Pacman
-        pacman_rom:array[0..4] of tipo_roms=(
+        pacman_rom:array[0..3] of tipo_roms=(
         (n:'pacman.6e';l:$1000;p:0;crc:$c1e6ab10),(n:'pacman.6f';l:$1000;p:$1000;crc:$1a6fb2d4),
-        (n:'pacman.6h';l:$1000;p:$2000;crc:$bcdd1beb),(n:'pacman.6j';l:$1000;p:$3000;crc:$817d94e3),());
-        pacman_pal:array[0..2] of tipo_roms=(
-        (n:'82s123.7f';l:$20;p:0;crc:$2fc650bd),(n:'82s126.4a';l:$100;p:$20;crc:$3eb3a8e4),());
+        (n:'pacman.6h';l:$1000;p:$2000;crc:$bcdd1beb),(n:'pacman.6j';l:$1000;p:$3000;crc:$817d94e3));
+        pacman_pal:array[0..1] of tipo_roms=(
+        (n:'82s123.7f';l:$20;p:0;crc:$2fc650bd),(n:'82s126.4a';l:$100;p:$20;crc:$3eb3a8e4));
         pacman_char:tipo_roms=(n:'pacman.5e';l:$1000;p:0;crc:$0c944964);
         pacman_sound:tipo_roms=(n:'82s126.1m';l:$100;p:0;crc:$a9cc86bf);
         pacman_sprites:tipo_roms=(n:'pacman.5f';l:$1000;p:0;crc:$958fedf9);
         //MS-Pacman
-        mspacman_rom:array[0..7] of tipo_roms=(
+        mspacman_rom:array[0..6] of tipo_roms=(
         (n:'pacman.6e';l:$1000;p:0;crc:$c1e6ab10),(n:'pacman.6f';l:$1000;p:$1000;crc:$1a6fb2d4),
         (n:'pacman.6h';l:$1000;p:$2000;crc:$bcdd1beb),(n:'pacman.6j';l:$1000;p:$3000;crc:$817d94e3),
         (n:'u5';l:$800;p:$8000;crc:$f45fbbcd),(n:'u6';l:$1000;p:$9000;crc:$a90e7000),
-        (n:'u7';l:$1000;p:$b000;crc:$c82cd714),());
+        (n:'u7';l:$1000;p:$b000;crc:$c82cd714));
         mspacman_char:tipo_roms=(n:'5e';l:$1000;p:0;crc:$5c281d01);
         mspacman_sprites:tipo_roms=(n:'5f';l:$1000;p:0;crc:$615af909);
         //DIP
@@ -41,7 +41,7 @@ const
 
 var
  irq_vblank:boolean;
- rom_decode:array[0..$ffff] of byte;
+ rom_decode:array[0..$bfff] of byte;
  dec_enable:boolean;
 
 procedure update_video_pacman;inline;
@@ -124,10 +124,6 @@ while EmuStatus=EsRuning do begin
       update_video_pacman;
     end;
   end;
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
   eventos_pacman;
   video_sync;
 end;
@@ -161,8 +157,8 @@ case direccion of
         $4c00..$4fff,$6c00..$6fff:memoria[(direccion and $3ff)+$4c00]:=valor;
         $5000..$5fff,$7000..$7fff:case (direccion and $ff) of
                         0:irq_vblank:=valor<>0;
-                        1:namco_sound.enabled:=valor<>0;
-                        $40..$5f:namco_sound.registros_namco[direccion and $1f]:=valor;
+                        1:namco_snd_0.enabled:=valor<>0;
+                        $40..$5f:namco_snd_0.regs[direccion and $1f]:=valor;
                         $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
                      end;
 end;
@@ -171,6 +167,11 @@ end;
 procedure pacman_outbyte(valor:byte;puerto:word);
 begin
 if (puerto and $FF)=0 then z80_0.im2_lo:=valor;
+end;
+
+procedure pacman_sound_update;
+begin
+  namco_snd_0.update;
 end;
 
 //MS Pacman
@@ -207,8 +208,8 @@ case direccion of
         $4c00..$4fff,$6c00..$6fff,$cc00..$cfff,$ec00..$efff:memoria[(direccion and $3ff)+$4c00]:=valor;
         $5000..$5fff,$7000..$7fff,$d000..$dfff,$f000..$ffff:case (direccion and $ff) of
                   0:irq_vblank:=valor<>0;
-                  1:namco_sound.enabled:=valor<>0;
-                  $40..$5f:namco_sound.registros_namco[direccion and $1f]:=valor;
+                  1:namco_snd_0.enabled:=valor<>0;
+                  $40..$5f:namco_snd_0.regs[direccion and $1f]:=valor;
                   $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
         end;
 end;
@@ -227,7 +228,7 @@ getmem(data,2000);
 size:=z80_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //SND
-size:=namco_sound_save_snapshot(data);
+size:=namco_snd_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
 savedata_com_qsnapshot(@memoria[$4000],$4000);
@@ -256,7 +257,7 @@ loaddata_qsnapshot(data);
 z80_0.load_snapshot(data);
 //SND
 loaddata_qsnapshot(data);
-namco_sound_load_snapshot(data);
+namco_snd_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[$4000]);
 if main_vars.tipo_maquina=88 then loaddata_qsnapshot(@memoria[$c000]);
@@ -273,7 +274,7 @@ end;
 procedure reset_pacman;
 begin
  z80_0.reset;
- namco_sound_reset;
+ namco_snd_0.reset;
  reset_audio;
  irq_vblank:=false;
  dec_enable:=false;
@@ -369,22 +370,23 @@ iniciar_video(224,288);
 //Main CPU
 z80_0:=cpu_z80.create(3072000,264);
 z80_0.change_io_calls(nil,pacman_outbyte);
-namco_sound_init(3,false);
+z80_0.init_sound(pacman_sound_update);
+namco_snd_0:=namco_snd_chip.create(3);
 case main_vars.tipo_maquina of
   10:begin  //Pacman
         z80_0.change_ram_calls(pacman_getbyte,pacman_putbyte);
         //cargar roms
-        if not(cargar_roms(@memoria[0],@pacman_rom[0],'pacman.zip',0)) then exit;
+        if not(roms_load(@memoria,@pacman_rom,'pacman.zip',sizeof(pacman_rom))) then exit;
         //cargar sonido & iniciar_sonido
-        if not(cargar_roms(@namco_sound.onda_namco[0],@pacman_sound,'pacman.zip',1)) then exit;
+        if not(roms_load(namco_snd_0.get_wave_dir,@pacman_sound,'pacman.zip',sizeof(pacman_sound))) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@pacman_char,'pacman.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,@pacman_char,'pacman.zip',sizeof(pacman_char))) then exit;
         conv_chars;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@pacman_sprites,'pacman.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,@pacman_sprites,'pacman.zip',sizeof(pacman_sprites))) then exit;
         conv_sprites;
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@pacman_pal[0],'pacman.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@pacman_pal,'pacman.zip',sizeof(pacman_pal))) then exit;
         //DIP
         marcade.dswa:=$C9;
         marcade.dswa_val:=@pacman_dip;
@@ -392,7 +394,7 @@ case main_vars.tipo_maquina of
      88:begin  //MS Pacman
         z80_0.change_ram_calls(mspacman_getbyte,mspacman_putbyte);
         //cargar y desencriptar roms
-        if not(cargar_roms(@memoria[0],@mspacman_rom[0],'mspacman.zip',0)) then exit;
+        if not(roms_load(@memoria,@mspacman_rom,'mspacman.zip',sizeof(mspacman_rom))) then exit;
         copymemory(@rom_decode[0],@memoria[0],$1000);  // pacman.6e */
         copymemory(@rom_decode[$1000],@memoria[$1000],$1000); // pacman.6f */
         copymemory(@rom_decode[$2000],@memoria[$2000],$1000); // pacman.6h */
@@ -408,15 +410,15 @@ case main_vars.tipo_maquina of
         copymemory(@rom_decode[$b000],@memoria[$3000],$1000); // mirror of pacman.6j */
         mspacman_install_patches;
         //cargar sonido & iniciar_sonido
-        if not(cargar_roms(@namco_sound.onda_namco[0],@pacman_sound,'mspacman.zip',1)) then exit;
+        if not(roms_load(namco_snd_0.get_wave_dir,@pacman_sound,'mspacman.zip',sizeof(pacman_sound))) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@mspacman_char,'mspacman.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,@mspacman_char,'mspacman.zip',sizeof(mspacman_char))) then exit;
         conv_chars;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@mspacman_sprites,'mspacman.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,@mspacman_sprites,'mspacman.zip',sizeof(mspacman_sprites))) then exit;
         conv_sprites;
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@pacman_pal[0],'mspacman.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@pacman_pal,'mspacman.zip',sizeof(pacman_pal))) then exit;
         //DIP
         marcade.dswa:=$C9;
         marcade.dswa_val:=@mspacman_dip;

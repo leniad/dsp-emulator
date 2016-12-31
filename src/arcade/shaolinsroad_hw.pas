@@ -133,7 +133,6 @@ end;
 procedure shaolin_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
   $0:begin
         main_screen.flip_main_screen:=(valor and 1)<>0;
@@ -143,7 +142,11 @@ case direccion of
   $0400:sn_76496_1.Write(valor);
   $1800:banco_pal:=valor and $7;
   $2000:scroll:=not(valor);
-  $3800..$3fff:gfx[0].buffer[direccion and $3ff]:=true;
+  $2800..$2bff,$3000..$33ff:memoria[direccion]:=valor;
+  $3800..$3fff:begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
 end;
 end;
 
@@ -226,8 +229,9 @@ function iniciar_shaolin:boolean;
 var
       colores:tpaleta;
       f:word;
-      ctemp1,ctemp2,ctemp3:byte;
+      bit0,bit1,bit2,bit3:byte;
       memoria_temp:array[0..$7fff] of byte;
+      rweights,gweights,bweights:array[0..3] of single;
 const
     pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
     pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
@@ -235,6 +239,7 @@ const
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+    resistances:array[0..3] of integer=(2200,1000,470,220);
 begin
 iniciar_shaolin:=false;
 iniciar_audio(false);
@@ -264,20 +269,39 @@ gfx_set_desc_data(4,0,64*8,256*64*8+4,256*64*8+0,4,0);
 convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //paleta
 if not(cargar_roms(@memoria_temp[0],@shaolin_pal[0],'shaolins.zip',0)) then exit;
-for f:=0 to 255 do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+compute_resistor_weights(0,	255, -1.0,
+			4,@resistances[0],@rweights[0],470,0,
+			4,@resistances[0],@gweights[0],470,0,
+			4,@resistances[0],@bweights[0],470,0);
+for f:=0 to $ff do begin
+		// red component
+		bit0:=(memoria_temp[f] shr 0) and $01;
+		bit1:=(memoria_temp[f] shr 1) and $01;
+		bit2:=(memoria_temp[f] shr 2) and $01;
+    bit3:=(memoria_temp[f] shr 3) and $01;
+		colores[f].r:=combine_4_weights(@rweights[0],bit0,bit1,bit2,bit3);
+		// green component
+		bit0:=(memoria_temp[f+$100] shr 0) and $01;
+		bit1:=(memoria_temp[f+$100] shr 1) and $01;
+		bit2:=(memoria_temp[f+$100] shr 2) and $01;
+    bit3:=(memoria_temp[f+$100] shr 3) and $01;
+		colores[f].g:=combine_4_weights(@gweights[0],bit0,bit1,bit2,bit3);
+		// blue component
+		bit0:=(memoria_temp[f+$200] shr 0) and $01;
+		bit1:=(memoria_temp[f+$200] shr 1) and $01;
+		bit2:=(memoria_temp[f+$200] shr 2) and $01;
+    bit3:=(memoria_temp[f+$200] shr 3) and $01;
+		colores[f].b:=combine_4_weights(@gweights[0],bit0,bit1,bit2,bit3);
 end;
-set_pal(colores,256);
+set_pal(colores,$100);
 //tabla_colores char & sprites
-ctemp1:=0;
-for ctemp2:=0 to 255 do begin
-	for ctemp3:=0 to 7 do begin
-		gfx[0].colores[ctemp2+ctemp3*256]:=(memoria_temp[ctemp1+$300] and $f)+32*ctemp3+16;
-    gfx[1].colores[ctemp2+ctemp3*256]:=(memoria_temp[ctemp1+$400] and $f)+32*ctemp3;
+bit0:=0;
+for bit1:=0 to 255 do begin
+	for bit2:=0 to 7 do begin
+		gfx[0].colores[bit1+bit2*256]:=(memoria_temp[bit0+$300] and $f)+32*bit2+16;
+    gfx[1].colores[bit1+bit2*256]:=(memoria_temp[bit0+$400] and $f)+32*bit2;
   end;
-	ctemp1:=ctemp1+1;
+	bit0:=bit0+1;
 end;
 //DIP
 marcade.dswa:=$5a;

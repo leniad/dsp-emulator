@@ -224,25 +224,23 @@ end;
 function wardner_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$807f,$c800..$cfff:wardner_snd_getbyte:=mem_snd[direccion];
   $c000..$c7ff:wardner_snd_getbyte:=memoria[direccion];
-    else wardner_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure wardner_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  $8000..$807f,$c800..$cfff:mem_snd[direccion]:=valor;
   $c000..$c7ff:memoria[direccion]:=valor;
 end;
 end;
 
 function wardner_snd_inbyte(puerto:word):byte;
 begin
-case (puerto and $ff) of
-  0:wardner_snd_inbyte:=ym3812_0.status;
-end;
+if (puerto and $ff)=0 then wardner_snd_inbyte:=ym3812_0.status;
 end;
 
 procedure wardner_snd_outbyte(valor:byte;puerto:word);
@@ -288,14 +286,17 @@ end;
 procedure wardner_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$7000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+  $7000..$7fff:memoria[direccion]:=valor;
   $8000..$ffff:if rom_ena then exit
-                  else case direccion of
-                          $a000..$adff:if buffer_paleta[direccion and $fff]<>valor then begin
+                  else begin
+                          case direccion of
+                            $a000..$adff:if buffer_paleta[direccion and $fff]<>valor then begin
                                           buffer_paleta[direccion and $fff]:=valor;
                                           cambiar_color(direccion and $ffe);
                                        end;
+                          end;
+                          memoria[direccion]:=valor;
                         end;
 end;
 end;
@@ -339,13 +340,13 @@ case (puerto and $ff) of
   $35:fg_offs:=(fg_offs and $00ff) or ((valor and $f) shl 8);
   $5a:case valor of
         $00:begin	// This means assert the INT line to the DSP */
-	      tms32010_0.change_halt(CLEAR_LINE);
+	            tms32010_0.change_halt(CLEAR_LINE);
               z80_0.change_halt(ASSERT_LINE);
               tms32010_0.change_irq(ASSERT_LINE);
-	    end;
-	$01:begin	// This means inhibit the INT line to the DSP */
+	          end;
+	      $01:begin	// This means inhibit the INT line to the DSP */
               tms32010_0.change_irq(CLEAR_LINE);
-	      tms32010_0.change_halt(ASSERT_LINE);
+	            tms32010_0.change_halt(ASSERT_LINE);
             end;
       end;
   $5c:case valor of
@@ -356,32 +357,32 @@ case (puerto and $ff) of
         $9:bg_bank:=$1000;
 		    $a:fg_bank:=$0000;
         $b:fg_bank:=$1000;
-//		    $c,$d:;//MessageDlg('Mierda DSP!!', mtInformation,[mbOk], 0);
-        // twincobr_dsp(machine, 1); break;	 /* Enable the INT line to the DSP */
-    //		case 0x000d: twincobr_dsp(machine, 0); break;	 /* Inhibit the INT line to the DSP */
-//		    $e,$f:halt(0);//MessageDlg('Mierda Pantalla on/off', mtInformation,[mbOk], 0);// twincobr_display(0); break; /* Turn display off */
+        //$c,$d:;//MessageDlg('Mierda DSP!!', mtInformation,[mbOk], 0);
+        //twincobr_dsp(machine, 1); break;	 /* Enable the INT line to the DSP */
+        //case 0x000d: twincobr_dsp(machine, 0); break;	 /* Inhibit the INT line to the DSP */
+        //$e,$f:halt(0);//MessageDlg('Mierda Pantalla on/off', mtInformation,[mbOk], 0);// twincobr_display(0); break; /* Turn display off */
 	    end;
-  $60:begin
+  $60:if (txt_ram[txt_offs] and $ff)<>valor then begin
           txt_ram[txt_offs]:=(txt_ram[txt_offs] and $ff00) or valor;
           gfx[0].buffer[txt_offs]:=true;
       end;
-  $61:begin
+  $61:if (txt_ram[txt_offs] and $ff00)<>(valor shl 8) then begin
         txt_ram[txt_offs]:=(txt_ram[txt_offs] and $ff) or (valor shl 8);
         gfx[0].buffer[txt_offs]:=true;
       end;
-  $62:begin
+  $62:if (bg_ram[bg_offs+bg_bank] and $ff)<>valor then begin
         bg_ram[bg_offs+bg_bank]:=(bg_ram[bg_offs+bg_bank] and $ff00) or valor;
         gfx[2].buffer[bg_offs+bg_bank]:=true;
       end;
-  $63:begin
+  $63:if (bg_ram[bg_offs+bg_bank] and $ff00)<>(valor shl 8) then begin
         bg_ram[bg_offs+bg_bank]:=(bg_ram[bg_offs+bg_bank] and $ff) or (valor shl 8);
         gfx[2].buffer[bg_offs+bg_bank]:=true;
       end;
-  $64:begin
+  $64:if (fg_ram[fg_offs] and $ff)<>valor then begin
         fg_ram[fg_offs]:=(fg_ram[fg_offs] and $ff00) or valor;
         gfx[1].buffer[fg_offs]:=true;
       end;
-  $65:begin
+  $65:if (fg_ram[fg_offs] and $ff00)<>(valor shl 8) then begin
         fg_ram[fg_offs]:=(fg_ram[fg_offs] and $ff) or (valor shl 8);
         gfx[1].buffer[fg_offs]:=true;
       end;

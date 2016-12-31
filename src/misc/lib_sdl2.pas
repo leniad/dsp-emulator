@@ -79,6 +79,8 @@ var
   SDL_PollEvent:function(event:libSDLp_Event):LongInt;cdecl;
   SDL_GetCursor:function:libsdlP_cursor;cdecl;
   SDL_CreateCursor:function(const data:pbyte;const mask:pbyte;w:LongInt;h:LongInt;hot_x:LongInt;hot_y:LongInt):libsdlP_cursor;cdecl;
+  SDL_CreateSystemCursor:function(id:word):libsdlP_cursor;cdecl;
+  SDL_FreeCursor:procedure(cursor:libsdlP_Cursor);cdecl;
   SDL_SetCursor:procedure(cursor:libsdlP_cursor);cdecl;
   SDL_ShowCursor:function(toggle:LongInt):LongInt;cdecl;
   SDL_DestroyWindow:procedure(window:libsdlP_Window);cdecl;
@@ -155,6 +157,8 @@ end;
 @SDL_CreateCursor:=GetProcAddress(sdl_dll_Handle,'SDL_CreateCursor');
 @SDL_SetCursor:=GetProcAddress(sdl_dll_Handle,'SDL_SetCursor');
 @SDL_ShowCursor:=GetProcAddress(sdl_dll_Handle,'SDL_ShowCursor');
+@SDL_CreateSystemCursor:=GetProcAddress(sdl_dll_Handle,'SDL_CreateSystemCursor');
+@SDL_FreeCursor:=GetProcAddress(sdl_dll_Handle,'SDL_FreeCursor');
 //video
 @SDL_DestroyWindow:=GetProcAddress(sdl_dll_Handle,'SDL_DestroyWindow');
 @SDL_VideoQuit:=GetProcAddress(sdl_dll_Handle,'SDL_VideoQuit');

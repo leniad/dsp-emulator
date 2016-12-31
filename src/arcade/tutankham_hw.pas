@@ -23,8 +23,7 @@ const
 
 var
  irq_enable:boolean;
- xorx,xory:byte;
- rom_nbank,scroll_y:byte;
+ xorx,xory,rom_nbank,scroll_y:byte;
  rom_bank:array[0..$f,0..$fff] of byte;
  punt:array[0..$ffff] of word;
 
@@ -105,13 +104,14 @@ end;
 function tutankham_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$8100,$8800..$8fff,$a000..$ffff:tutankham_getbyte:=memoria[direccion];
+  $8000..$80ff:tutankham_getbyte:=buffer_paleta[direccion and $f];
   $8160..$816f:tutankham_getbyte:=$7b;
   $8180..$818f:tutankham_getbyte:=marcade.in0;
   $81a0..$81af:tutankham_getbyte:=marcade.in1;
   $81c0..$81cf:tutankham_getbyte:=marcade.in2;
   $81e0..$81ef:tutankham_getbyte:=$ff;
   $9000..$9fff:tutankham_getbyte:=rom_bank[rom_nbank,direccion and $fff];
-    else tutankham_getbyte:=memoria[direccion];
 end;
 end;
 
@@ -119,14 +119,15 @@ procedure tutankham_putbyte(direccion:word;valor:byte);
 var
   color:tcolor;
 begin
-if direccion>$8FFF then exit;
-memoria[direccion]:=valor;
+if direccion>$8fff then exit;
 case direccion of
+  0..$7fff,$8800..$8fff:memoria[direccion]:=valor;
   $8000..$80ff:begin
                 color.r:=pal3bit(valor shr 0);
                 color.g:=pal3bit(valor shr 3);
                 color.b:=pal2bit(valor shr 6);
                 set_pal_color(color,direccion and $f);
+                buffer_paleta[direccion and $f]:=valor;
                end;
   $8100..$810f:scroll_y:=valor;
   $8200..$82ff:case (direccion and $7) of

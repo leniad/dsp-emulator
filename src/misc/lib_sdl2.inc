@@ -178,7 +178,7 @@ type
                   silence:byte;
                   samples:word;
                   padding:word;
-                  size_:word;
+                  size_:cardinal;
                   callback:pointer;
                   userdata:Pointer;
                 end;

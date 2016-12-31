@@ -63,7 +63,6 @@ type
     Commando1: TMenuItem;
     Panel1: TPanel;
     BitBtn2: TBitBtn;
-    BitBtn3: TBitBtn;
     BitBtn5: TBitBtn;
     BitBtn6: TBitBtn;
     btncfg: TBitBtn;
@@ -74,7 +73,7 @@ type
     Shaolin1: TMenuItem;
     Yiear1: TMenuItem;
     SaveDialog1: TSaveDialog;
-    Asteroids1: TMenuItem;
+    AsteroidsHW1: TMenuItem;
     Z801: TMenuItem;
     M65021: TMenuItem;
     M68091: TMenuItem;
@@ -318,7 +317,7 @@ type
     SkyKid1: TMenuItem;
     drgnbstr1: TMenuItem;
     Vulgus1: TMenuItem;
-    ddragon31: TMenuItem;
+    ddragon3_HW: TMenuItem;
     BlockOut1: TMenuItem;
     tetris1: TMenuItem;
     Foodf1: TMenuItem;
@@ -371,6 +370,11 @@ type
     spacefb1: TMenuItem;
     Ajax1: TMenuItem;
     Xevious1: TMenuItem;
+    ddragon31: TMenuItem;
+    ctribe1: TMenuItem;
+    BitBtn3: TBitBtn;
+    Asteroids1: TMenuItem;
+    llander1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -440,17 +444,15 @@ end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
-BitBtn3.Enabled:=true;
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+principal1.BitBtn3.Glyph:=nil;
 if EmuStatus=EsRuning then begin //Pausa
   timer1.Enabled:=false;
   EmuStatus:=EsPause;
-  principal1.BitBtn3.Glyph:=nil;
   principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
 end else begin //Play
   EmuStatus:=EsRuning;
   timer1.Enabled:=true;
-  if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
-  principal1.BitBtn3.Glyph:=nil;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
 end;

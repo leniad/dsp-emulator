@@ -47,8 +47,8 @@ principal1.BitBtn5.left:=(principal1.statusbar1.width div 2)-47;
 principal1.BitBtn6.left:=(principal1.statusbar1.width div 2)-19; //3
 principal1.btncfg.left:=(principal1.statusbar1.width div 2)+14;
 principal1.BitBtn8.left:=(principal1.statusbar1.width div 2)+42;
-principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+70;  //3
-principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+101;
+principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+72;  //3
+principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+103;
 end;
 
 function bit(data:dword;bitpos:byte):boolean;inline;

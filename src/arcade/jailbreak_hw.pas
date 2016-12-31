@@ -128,18 +128,27 @@ case direccion of
   $3303:jailbreak_getbyte:=marcade.dswa;  //dsw1
   $6000:jailbreak_getbyte:=vlm5030_0.get_bsy;
   $8000..$ffff:if m6809_0.opcode then jailbreak_getbyte:=mem_opcodes[direccion and $7fff]
-    else jailbreak_getbyte:=memoria[direccion];
+                  else jailbreak_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure jailbreak_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$7fff then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $0..$fff:gfx[0].buffer[direccion and $7ff]:=true;
-  $2000..$201f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $ff00) or valor;
-  $2020..$203f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $00ff) or ((valor and 1) shl 8);
+  $0..$fff:if memoria[direccion]<>valor then begin
+              gfx[0].buffer[direccion and $7ff]:=true;
+              memoria[direccion]:=valor;
+           end;
+  $1000..$1fff:memoria[direccion]:=valor;
+  $2000..$201f:begin
+                  scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $ff00) or valor;
+                  memoria[direccion]:=valor;
+               end;
+  $2020..$203f:begin
+                  scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $00ff) or ((valor and 1) shl 8);
+                  memoria[direccion]:=valor;
+               end;
   $2042:scroll_dir:=(valor and $4)<>0;
   $2044:begin
           nmi_ena:=((valor and $1)<>0);
@@ -183,9 +192,9 @@ end;
 
 function iniciar_jailbreak:boolean;
 var
-      colores:tpaleta;
-      f:word;
-      memoria_temp:array[0..$ffff] of byte;
+    colores:tpaleta;
+    f:word;
+    memoria_temp:array[0..$ffff] of byte;
 const
     pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
     pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
@@ -216,7 +225,7 @@ init_timer(m6809_0.numero_cpu,1536000/480,jailbreak_snd_nmi,true);
 //cargar roms y desencriptarlas
 if not(cargar_roms(@memoria[0],@jailbreak_rom[0],'jailbrek.zip',0)) then exit;
 konami1_decode(@memoria[$8000],@mem_opcodes[0],$8000);
-//mem_opcodes[$9a7c and $7fff]:=$20;  inmune
+//mem_opcodes[$9a7c and $7fff]:=$20;  //inmune
 //mem_opcodes[$9aee and $7fff]:=$39;
 //mem_opcodes[$9b4b and $7fff]:=$20;
 //convertir chars

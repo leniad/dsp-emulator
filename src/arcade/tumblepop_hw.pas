@@ -23,7 +23,6 @@ var
 
 procedure update_video_tumblep;inline;
 begin
-//fill_full_screen(3,$100);
 update_pf_2(0,3,false);
 update_pf_1(0,3,true);
 deco16_sprites;
@@ -42,13 +41,13 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $Fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $Fdff) else marcade.in0:=(marcade.in0 or $200);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $F7ff) else marcade.in0:=(marcade.in0 or $800);
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
+  if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
   //SYSTEM
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
@@ -73,9 +72,9 @@ while EmuStatus=EsRuning do begin
       247:begin
             m68000_0.irq[6]:=HOLD_LINE;
             update_video_tumblep;
-            marcade.in1:=marcade.in1 and $f7;
+            marcade.in1:=marcade.in1 or $8;
           end;
-      255:marcade.in1:=marcade.in1 or $8;
+      255:marcade.in1:=marcade.in1 and $f7;
    end;
  end;
  eventos_tumblep;
@@ -88,14 +87,16 @@ begin
 case direccion of
   $0..$7ffff:tumblep_getword:=rom[direccion shr 1];
   $120000..$123fff:tumblep_getword:=ram[(direccion and $3fff) shr 1];
-  $180000:tumblep_getword:=(marcade.in2 shl 8)+marcade.in0;
-  $180004,$180006,$18000e:tumblep_getword:=$ffff;
-  $180002:tumblep_getword:=$feff;
-  $180008:tumblep_getword:=$00+marcade.in1;
-  $18000a,$18000c:tumblep_getword:=0;
+  $180000..$18000f:case (direccion and $f) of
+                    $0:tumblep_getword:=marcade.in0;
+                    $2:tumblep_getword:=$feff; //dsw
+                    $8:tumblep_getword:=marcade.in1;
+                    $a,$c:tumblep_getword:=0;
+                      else tumblep_getword:=$ffff;
+                   end;
   $1a0000..$1a07ff:tumblep_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
-  $320000..$320fff:tumblep_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $322000..$322fff:tumblep_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $320000..$320fff:tumblep_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
+  $322000..$322fff:tumblep_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
 end;
 end;
 
@@ -130,13 +131,11 @@ case direccion of
   $1a0000..$1a07ff:deco_sprite_ram[(direccion and $7ff) shr 1]:=valor;
   $300000..$30000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
   $320000..$320fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
                    end;
   $322000..$322fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
                    end;
   $340000..$3407ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
@@ -151,9 +150,8 @@ begin
  reset_dec16ic(0);
  deco16_snd_simple_reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$F7;
- marcade.in2:=$FF;
+ marcade.in0:=$ffff;
+ marcade.in1:=$f7;
 end;
 
 function iniciar_tumblep:boolean;

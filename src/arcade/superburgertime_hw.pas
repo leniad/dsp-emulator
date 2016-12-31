@@ -21,7 +21,7 @@ var
  rom:array[0..$1ffff] of word;
  ram:array[0..$1fff] of word;
 
-procedure update_video_supbtime;inline;
+procedure update_video_supbtime;
 begin
 fill_full_screen(3,768);
 update_pf_2(0,3,true);
@@ -42,13 +42,13 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $Fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $Fdff) else marcade.in0:=(marcade.in0 or $200);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $F7ff) else marcade.in0:=(marcade.in0 or $800);
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
+  if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
   //SYSTEM
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
@@ -73,9 +73,9 @@ while EmuStatus=EsRuning do begin
       247:begin
             m68000_0.irq[6]:=HOLD_LINE;
             update_video_supbtime;
-            marcade.in1:=marcade.in1 and $f7;
+            marcade.in1:=marcade.in1 or $8;
           end;
-      255:marcade.in1:=marcade.in1 or $8;
+      255:marcade.in1:=marcade.in1 and $f7;
    end;
  end;
  eventos_supbtime;
@@ -90,13 +90,13 @@ case direccion of
   $100000..$103fff:supbtime_getword:=ram[(direccion and $3fff) shr 1];
   $120000..$1207ff:supbtime_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
   $140000..$1407ff:supbtime_getword:=buffer_paleta[(direccion and $7ff) shr 1];
-  $180000:supbtime_getword:=(marcade.in2 shl 8)+marcade.in0;
+  $180000:supbtime_getword:=marcade.in0;
   $180004,$180006,$18000e:supbtime_getword:=$ffff;
   $180002:supbtime_getword:=$feff;
-  $180008:supbtime_getword:=$00+marcade.in1;
+  $180008:supbtime_getword:=marcade.in1;
   $18000a,$18000c:supbtime_getword:=0;
-  $320000..$320fff:supbtime_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $322000..$322fff:supbtime_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $320000..$320fff:supbtime_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
+  $322000..$322fff:supbtime_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
 end;
 end;
 
@@ -131,14 +131,12 @@ case direccion of
           end;
   $300000..$30000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
   $320000..$320fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
                    end;
   $321000..$321fff,$323000..$323fff:;
   $322000..$322fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
                    end;
   $340000..$3407ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
@@ -153,9 +151,8 @@ begin
  reset_dec16ic(0);
  deco16_snd_simple_reset;
  reset_audio;
- marcade.in0:=$FF;
+ marcade.in0:=$ffff;
  marcade.in1:=$F7;
- marcade.in2:=$FF;
 end;
 
 function iniciar_supbtime:boolean;

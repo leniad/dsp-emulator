@@ -280,7 +280,6 @@ while EmuStatus=EsRuning do begin
         update_video_rallyx;
       end;
   end;
-  if sound_status.hay_sonido then namco_playsound;
   eventos_rallyx;
   video_sync;
 end;
@@ -309,7 +308,7 @@ case direccion of
                   memoria[direccion]:=valor;
                end;
   $9800..$9fff,$a000..$a00f:memoria[direccion]:=valor;
-  $a100..$a11f:namco_sound.registros_namco[direccion and $1f]:=valor;
+  $a100..$a11f:namco_snd_0.regs[direccion and $1f]:=valor;
   $a130:scroll_x:=valor;
   $a140:scroll_y:=valor;
   $a180..$a187:begin
@@ -340,6 +339,7 @@ end;
 procedure rallyx_playsound;
 begin
   samples_update;
+  namco_snd_0.update;
 end;
 
 //Main
@@ -353,7 +353,7 @@ begin
   end;
   50,70:begin
         marcade.in2:=$cb;
-        namco_sound_reset;
+        namco_snd_0.reset;
         reset_samples;
   end;
  end;
@@ -455,14 +455,13 @@ begin
    50:begin //rallyx
          z80_0.change_ram_calls(rallyx_getbyte,rallyx_putbyte);
          z80_0.change_io_calls(nil,rallyx_outbyte);
+          z80_0.init_sound(rallyx_playsound);
          //cargar roms
          if not(cargar_roms(@memoria[0],@rallyx_rom[0],'rallyx.zip',0)) then exit;
          //cargar sonido y samples
-         if not(cargar_roms(@namco_sound.onda_namco[0],@rallyx_sound,'rallyx.zip',1)) then exit;
-         namco_sound_init(3,false);
-         if load_samples('rallyx.zip',@rallyx_samples,1) then begin
-          z80_0.init_sound(rallyx_playsound);
-         end;
+         namco_snd_0:=namco_snd_chip.create(3);
+         if not(cargar_roms(namco_snd_0.get_wave_dir,@rallyx_sound,'rallyx.zip',1)) then exit;
+         load_samples('rallyx.zip',@rallyx_samples,1);
          //convertir chars
          if not(cargar_roms(@memoria_temp[0],@rallyx_char,'rallyx.zip',1)) then exit;
          cargar_chars(0);
@@ -477,6 +476,7 @@ begin
    70:begin  //new rally x
          z80_0.change_ram_calls(rallyx_getbyte,rallyx_putbyte);
          z80_0.change_io_calls(nil,rallyx_outbyte);
+         z80_0.init_sound(rallyx_playsound);
          //cargar roms y ordenarlas
          if not(cargar_roms(@memoria_temp[0],@nrallyx_rom[0],'nrallyx.zip',0)) then exit;
          copymemory(@memoria[$0],@memoria_temp[$0],$800);
@@ -488,11 +488,9 @@ begin
          copymemory(@memoria[$2800],@memoria_temp[$3000],$800);
          copymemory(@memoria[$3800],@memoria_temp[$3800],$800);
          //cargar sonido y samples
-         if not(cargar_roms(@namco_sound.onda_namco[0],@nrallyx_sound,'nrallyx.zip',1)) then exit;
-         namco_sound_init(3,false);
-         if load_samples('rallyx.zip',@rallyx_samples,1) then begin
-           z80_0.init_sound(rallyx_playsound);
-         end;
+         namco_snd_0:=namco_snd_chip.create(3);
+         if not(cargar_roms(namco_snd_0.get_wave_dir,@nrallyx_sound,'nrallyx.zip',1)) then exit;
+         load_samples('rallyx.zip',@rallyx_samples,1);
          //convertir chars
          if not(cargar_roms(@memoria_temp[0],@nrallyx_char[0],'nrallyx.zip',0)) then exit;
          cargar_chars(0);

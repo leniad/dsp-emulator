@@ -276,7 +276,7 @@ begin
   for f:=0 to MAX_CHANNELS do begin
       if (not(data_samples.tsample_use[f]) and (data_samples.tsample_reserved[f]<>-1)) then begin
         data_samples.tsample_use[f]:=true;
-        first_sample_free:=f;
+        first_sample_free:=data_samples.tsample_reserved[f];
         exit;
       end;
   end;

@@ -2,8 +2,8 @@ unit prehistoricisle_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m68000,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,ym_3812,nz80,upd7759,sound_engine;
+     m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
+     ym_3812,nz80,upd7759,sound_engine;
 
 procedure cargar_prehisle;
 
@@ -17,8 +17,8 @@ const
         prehisle_fondo2:tipo_roms=(n:'pi8916.h16';l:$40000;p:0;crc:$7cffe0f6);
         prehisle_sound:tipo_roms=(n:'gt1.1';l:$10000;p:0;crc:$80a4c093);
         prehisle_upd:tipo_roms=(n:'gt4.4';l:$20000;p:0;crc:$85dfb9ec);
-        prehisle_sprites:array[0..2] of tipo_roms=(
-        (n:'pi8910.k14';l:$80000;p:0;crc:$5a101b0b),(n:'gt.5';l:$20000;p:$80000;crc:$3d3ab273),());
+        prehisle_sprites:array[0..1] of tipo_roms=(
+        (n:'pi8910.k14';l:$80000;p:0;crc:$5a101b0b),(n:'gt.5';l:$20000;p:$80000;crc:$3d3ab273));
         //Dip
         prehisle_dip_a:array [0..5] of def_dip=(
         (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -36,23 +36,23 @@ var
  rom:array[0..$1ffff] of word;
  ram,back_ram:array[0..$1fff] of word;
  fondo_rom:array[0..$ffff] of byte;
- video_ram,sprite_ram:array[0..$3ff] of word;
+ video_ram:array[0..$3ff] of word;
  invert_controls,sound_latch,vblank_val:byte;
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
 
 procedure poner_sprites(prioridad:boolean);inline;
 var
-  f,atrib,nchar,color:word;
-  x,y:integer;
+  atrib,nchar,color,x,y:word;
+  f:byte;
 begin
 for f:=0 to $ff do begin
-    color:=sprite_ram[(f*4)+3] shr 12;
+    color:=buffer_sprites_w[(f*4)+3] shr 12;
     if (color<$4)<>prioridad then continue;
-		atrib:=sprite_ram[(f*4)+2];
+		atrib:=buffer_sprites_w[(f*4)+2];
 		nchar:=atrib and $1fff;
     if nchar>$1400 then nchar:=nchar-$1400;
-		x:=sprite_ram[(f*4)+1];
-		y:=sprite_ram[(f*4)];
+		x:=buffer_sprites_w[(f*4)+1];
+		y:=buffer_sprites_w[(f*4)];
     put_gfx_sprite(nchar,256+(color shl 4),(atrib and $4000)<>0,(atrib and $8000)<>0,1);
     actualiza_gfx_sprite(x,y,1,1);
 end;
@@ -171,7 +171,7 @@ case direccion of
   $0..$3ffff:prehisle_getword:=rom[direccion shr 1];
   $70000..$73fff:prehisle_getword:=ram[(direccion and $3fff) shr 1];
   $90000..$907ff:prehisle_getword:=video_ram[(direccion and $7ff) shr 1];
-  $a0000..$a07ff:prehisle_getword:=sprite_ram[(direccion and $7ff) shr 1];
+  $a0000..$a07ff:prehisle_getword:=buffer_sprites_w[(direccion and $7ff) shr 1];
   $b0000..$b3fff:prehisle_getword:=back_ram[(direccion and $3fff) shr 1];
   $d0000..$d07ff:prehisle_getword:=buffer_paleta[(direccion and $7ff) shr 1];
   $e0010:prehisle_getword:=marcade.in1;  //P2
@@ -199,22 +199,22 @@ end;
 
 procedure prehisle_putword(direccion:dword;valor:word);
 begin
+if direccion<$40000 then exit;
 case direccion of
     $70000..$73fff:ram[(direccion and $3fff) shr 1]:=valor;
-    $90000..$907ff:begin
+    $90000..$907ff:if video_ram[(direccion and $7ff) shr 1]<>valor then begin
                       video_ram[(direccion and $7ff) shr 1]:=valor;
-                      gfx[0].buffer[(direccion and $7ff) div 2]:=true;
+                      gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                    end;
-    $a0000..$a07ff:sprite_ram[(direccion and $7ff) shr 1]:=valor;
-    $b0000..$b3fff:begin
+    $a0000..$a07ff:buffer_sprites_w[(direccion and $7ff) shr 1]:=valor;
+    $b0000..$b3fff:if back_ram[(direccion and $3fff) shr 1]<>valor then begin
                       back_ram[(direccion and $3fff) shr 1]:=valor;
-                      gfx[3].buffer[(direccion and $3fff) div 2]:=true;
+                      gfx[3].buffer[(direccion and $3fff) shr 1]:=true;
                    end;
     $d0000..$d07ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                         buffer_paleta[(direccion and $7ff) shr 1]:=valor;
                         cambiar_color(valor,(direccion and $7ff) shr 1);
                    end;
-
     $f0000:if scroll_y2<>(valor and $1ff) then begin
               if abs((scroll_y2 and $1f0)-(valor and $1f0))>15 then fillchar(gfx[3].buffer[0],$2000,1);
               scroll_y2:=(valor and $1ff);
@@ -339,34 +339,34 @@ ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
 ym3812_0.change_irq_calls(snd_irq);
 upd7759_0:=upd7759_chip.create(640000,0.9);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@prehisle_rom[0],'prehisle.zip',0)) then exit;
+if not(cargar_roms16w(@rom,@prehisle_rom,'prehisle.zip',0)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@prehisle_sound,'prehisle.zip',1)) then exit;
-if not(cargar_roms(upd7759_0.get_rom_addr,@prehisle_upd,'prehisle.zip',1)) then exit;
+if not(roms_load(@mem_snd,@prehisle_sound,'prehisle.zip',sizeof(prehisle_sound))) then exit;
+if not(roms_load(upd7759_0.get_rom_addr,@prehisle_upd,'prehisle.zip',sizeof(prehisle_upd))) then exit;
 //convertir chars
-if not(cargar_roms(memoria_temp,@prehisle_char,'prehisle.zip',1)) then exit;
+if not(roms_load(memoria_temp,@prehisle_char,'prehisle.zip',sizeof(prehisle_char))) then exit;
 init_gfx(0,8,8,1024);
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pc_x,@pc_y,false,false);
 gfx[0].trans[15]:=true;
 //sprites
-if not(cargar_roms(memoria_temp,@prehisle_sprites,'prehisle.zip',0)) then exit;
+if not(roms_load(memoria_temp,@prehisle_sprites,'prehisle.zip',sizeof(prehisle_sprites))) then exit;
 init_gfx(1,16,16,$1400);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 //fondo 1
-if not(cargar_roms(@fondo_rom[0],@prehisle_fondo_rom,'prehisle.zip',1)) then exit;
-if not(cargar_roms(memoria_temp,@prehisle_fondo1,'prehisle.zip',1)) then exit;
+if not(roms_load(@fondo_rom,@prehisle_fondo_rom,'prehisle.zip',sizeof(prehisle_fondo_rom))) then exit;
+if not(roms_load(memoria_temp,@prehisle_fondo1,'prehisle.zip',sizeof(prehisle_fondo1))) then exit;
 init_gfx(2,16,16,$800);
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
 //fondo2
-if not(cargar_roms(memoria_temp,@prehisle_fondo2,'prehisle.zip',1)) then exit;
+if not(roms_load(memoria_temp,@prehisle_fondo2,'prehisle.zip',sizeof(prehisle_fondo2))) then exit;
 init_gfx(3,16,16,$800);
 gfx[3].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(3,0,memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$7f;

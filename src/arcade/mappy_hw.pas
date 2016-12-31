@@ -8,6 +8,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure cargar_mappyhw;
 
 implementation
+
 type
   tipo_update_video=procedure;
 
@@ -357,10 +358,6 @@ while EmuStatus=EsRuning do begin
   //Dar un poco de tiempo a las CPU's para hacer su trabajo con los IO's
   if namco_chip[0].reset then timer[io_timer0].enabled:=true;
   if namco_chip[1].reset then timer[io_timer1].enabled:=true;
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
   eventos_mappy;
   video_sync;
 end;
@@ -369,9 +366,9 @@ end;
 function mappy_getbyte(direccion:word):byte;
 begin
   case direccion of
+    0..$27ff,$4000..$43ff,$8000..$ffff:mappy_getbyte:=memoria[direccion];
     $4800..$480f:mappy_getbyte:=namcoio_r(0,direccion and $f);
     $4810..$481f:mappy_getbyte:=namcoio_r(1,direccion and $f);
-    else mappy_getbyte:=memoria[direccion];
   end;
 end;
 
@@ -387,7 +384,7 @@ case (direccion and $0e) of
         if not(main_int) then m6809_0.change_irq(CLEAR_LINE);
       end;
   $04:main_screen.flip_main_screen:=(direccion and 1)<>0;
-  $06:namco_sound.enabled:=(direccion and 1)<>0;
+  $06:namco_snd_0.enabled:=(direccion and 1)<>0;
   $08:begin
         namco_io_reset(0,(direccion and 1)<>0);
         namco_io_reset(1,(direccion and 1)<>0);
@@ -397,14 +394,20 @@ case (direccion and $0e) of
 end;
 end;
 
-procedure mappy_putbyte(direccion:word;valor:byte); 
+procedure mappy_putbyte(direccion:word;valor:byte);
 begin
 if (direccion>$7fff) then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $0..$fff:gfx[0].buffer[direccion and $7ff]:=true;
+  $0..$fff:if memoria[direccion]<>valor then begin
+              gfx[0].buffer[direccion and $7ff]:=true;
+              memoria[direccion]:=valor;
+           end;
+  $1000..$27ff,$4040..$43ff:memoria[direccion]:=valor;
   $3800..$3fff:scroll_x:=255-((direccion and $7ff) shr 3);
-  $4000..$403f:namco_sound.registros_namco[direccion and $3f]:=valor;
+  $4000..$403f:begin
+                  namco_snd_0.regs[direccion and $3f]:=valor;
+                  memoria[direccion]:=valor;
+               end;
   $4800..$480f:namcoio_w(0,direccion and $f,valor);
   $4810..$481f:namcoio_w(1,direccion and $f,valor);
   $5000..$500f:mappy_latch(direccion and $0f);
@@ -414,33 +417,43 @@ end;
 function sound_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $40..$3ff:sound_getbyte:=memoria[$4000+direccion];
-  else sound_getbyte:=mem_snd[direccion];
+  $0..$3ff:sound_getbyte:=memoria[$4000+direccion];
+  $e000..$ffff:sound_getbyte:=mem_snd[direccion];
 end;
 end;
 
-procedure sound_putbyte(direccion:word;valor:byte); 
+procedure sound_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$dfff then exit;
-mem_snd[direccion]:=valor;
 case direccion of
    $0..$3f:begin
             memoria[$4000+direccion]:=valor;
-            namco_sound.registros_namco[direccion and $3f]:=valor;
+            namco_snd_0.regs[direccion and $3f]:=valor;
            end;
    $40..$3ff:memoria[$4000+direccion]:=valor;
    $2000..$200f:mappy_latch(direccion and $0f);
 end;
 end;
 
-//Super Pacman
-procedure spacman_putbyte(direccion:word;valor:byte); 
+procedure mappy_sound_update;
 begin
-if (direccion>$7fff) then exit;
-memoria[direccion]:=valor;
+  namco_snd_0.update;
+end;
+
+//Super Pacman
+procedure spacman_putbyte(direccion:word;valor:byte);
+begin
+if (direccion>$9fff) then exit;
 case direccion of
-  $0..$7ff:gfx[0].buffer[direccion and $3ff]:=true;
-  $4000..$403f:namco_sound.registros_namco[direccion and $3f]:=valor;
+  $0..$7ff:if memoria[direccion]<>valor then begin
+              gfx[0].buffer[direccion and $3ff]:=true;
+              memoria[direccion]:=valor;
+           end;
+  $800..$1fff,$4040..$43ff:memoria[direccion]:=valor;
+  $4000..$403f:begin
+                  namco_snd_0.regs[direccion and $3f]:=valor;
+                  memoria[direccion]:=valor;
+               end;
   $4800..$480f:namcoio_w(0,direccion and $f,valor);
   $4810..$481f:namcoio_w(1,direccion and $f,valor);
   $5000..$500f:mappy_latch(direccion and $0f);
@@ -510,7 +523,7 @@ procedure reset_mappyhw;
 begin
  m6809_0.reset;
  m6809_1.reset;
- namco_sound_reset;
+ namco_snd_0.reset;
  reset_audio;
  namco_io_init(0);
  namco_io_init(1);
@@ -584,7 +597,8 @@ m6809_0:=cpu_m6809.Create(1536000,264);
 //Sound CPU
 m6809_1:=cpu_m6809.Create(1536000,264);
 m6809_1.change_ram_calls(sound_getbyte,sound_putbyte);
-namco_sound_init(8,false);
+m6809_1.init_sound(mappy_sound_update);
+namco_snd_0:=namco_snd_chip.create(8);
 //IO Chips
 io_timer0:=init_timer(m6809_0.numero_cpu,77,mappy_io0,false);
 io_timer1:=init_timer(m6809_0.numero_cpu,77,mappy_io1,false);
@@ -611,7 +625,7 @@ case  main_vars.tipo_maquina of
       if not(cargar_roms(@memoria[0],@mappy_rom[0],'mappy.zip',0)) then exit;
       //Cargar Sound+samples
       if not(cargar_roms(@mem_snd[0],@mappy_sound,'mappy.zip')) then exit;
-      if not(cargar_roms(@namco_sound.onda_namco[0],@mappy_sound_prom,'mappy.zip')) then exit;
+      if not(cargar_roms(namco_snd_0.get_wave_dir,@mappy_sound_prom,'mappy.zip')) then exit;
       //convertir chars
       if not(cargar_roms(@memoria_temp[0],@mappy_chars,'mappy.zip')) then exit;
       set_chars(true);
@@ -633,7 +647,7 @@ case  main_vars.tipo_maquina of
       if not(cargar_roms(@memoria[0],@dd2_rom[0],'digdug2.zip',0)) then exit;
       //Cargar Sound+samples
       if not(cargar_roms(@mem_snd[0],@dd2_sound,'digdug2.zip',1)) then exit;
-      if not(cargar_roms(@namco_sound.onda_namco[0],@dd2_sound_prom,'digdug2.zip',1)) then exit;
+      if not(cargar_roms(namco_snd_0.get_wave_dir,@dd2_sound_prom,'digdug2.zip',1)) then exit;
       //convertir chars
       if not(cargar_roms(@memoria_temp[0],@dd2_chars,'digdug2.zip',1)) then exit;
       set_chars(true);
@@ -655,7 +669,7 @@ case  main_vars.tipo_maquina of
       if not(cargar_roms(@memoria[0],@spacman_rom[0],'superpac.zip',0)) then exit;
       //Cargar Sound+samples
       if not(cargar_roms(@mem_snd[0],@spacman_sound,'superpac.zip')) then exit;
-      if not(cargar_roms(@namco_sound.onda_namco[0],@spacman_sound_prom,'superpac.zip')) then exit;
+      if not(cargar_roms(namco_snd_0.get_wave_dir,@spacman_sound_prom,'superpac.zip')) then exit;
       //convertir chars
       if not(cargar_roms(@memoria_temp[0],@spacman_chars,'superpac.zip')) then exit;
       set_chars(false);
@@ -677,7 +691,7 @@ case  main_vars.tipo_maquina of
       if not(cargar_roms(@memoria[0],@todruaga_rom[0],'todruaga.zip',0)) then exit;
       //Cargar Sound+samples
       if not(cargar_roms(@mem_snd[0],@todruaga_sound,'todruaga.zip')) then exit;
-      if not(cargar_roms(@namco_sound.onda_namco[0],@todruaga_sound_prom,'todruaga.zip')) then exit;
+      if not(cargar_roms(namco_snd_0.get_wave_dir,@todruaga_sound_prom,'todruaga.zip')) then exit;
       //convertir chars
       if not(cargar_roms(@memoria_temp[0],@todruaga_chars,'todruaga.zip')) then exit;
       set_chars(true);
@@ -699,7 +713,7 @@ case  main_vars.tipo_maquina of
       if not(cargar_roms(@memoria[0],@motos_rom[0],'motos.zip',0)) then exit;
       //Cargar Sound+samples
       if not(cargar_roms(@mem_snd[0],@motos_sound,'motos.zip')) then exit;
-      if not(cargar_roms(@namco_sound.onda_namco[0],@motos_sound_prom,'motos.zip')) then exit;
+      if not(cargar_roms(namco_snd_0.get_wave_dir,@motos_sound_prom,'motos.zip')) then exit;
       //convertir chars
       if not(cargar_roms(@memoria_temp[0],@motos_chars,'motos.zip')) then exit;
       set_chars(true);

@@ -21,7 +21,7 @@ const
         (n:'a78-19.34';l:$8000;p:$60000;crc:$66e9438c),(n:'a78-20.35';l:$8000;p:$68000;crc:$9ef863ad),());
         bublbobl_snd: tipo_roms=(n:'a78-07.46';l:$8000;p:0;crc:$4f9a26e8);
         bublbobl_prom: tipo_roms=(n:'a71-25.41';l:$100;p:0;crc:$2d0f8545);
-        bublbobl_mcu_rom:tipo_roms=(n:'a78-01.17';l:$1000;p:$f000;crc:$b1bfb53d);
+        bublbobl_mcu_rom:tipo_roms=(n:'a78-01.17';l:$1000;p:$0;crc:$b1bfb53d);
         //Dip
         bublbobl_dip_a:array [0..5] of def_dip=(
         (mask:$5;name:'Mode';number:4;dip:((dip_val:$4;dip_name:'Game - English'),(dip_val:$5;dip_name:'Game - Japanese'),(dip_val:$1;dip_name:'Test (Grid and Inputs)'),(dip_val:$0;dip_name:'Test (RAM and Sound)/Pause'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -37,7 +37,7 @@ const
         (mask:$80;name:'ROM Type';number:2;dip:((dip_val:$80;dip_name:'IC52=512kb, IC53=none'),(dip_val:$0;dip_name:'IC52=256kb, IC53=256kb'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
  memoria_rom:array [0..3,$0..$3FFF] of byte;
- mem_mcu:array[0..$FFFF] of byte;
+ mem_mcu:array[0..$fff] of byte;
  mem_prom:array[0..$ff] of byte;
  banco_rom,sound_stat,sound_latch:byte;
  sound_nmi,pending_nmi,video_enable:boolean;
@@ -264,7 +264,8 @@ case direccion of
   $5:mcu_getbyte:=ddr4;
   $6:mcu_getbyte:=(port3_out and ddr3) or (port3_in and not(ddr3)); //port3
   $7:mcu_getbyte:=(port4_out and ddr4) or (port4_in and not(ddr4)); //port4
-  $40..$ff,$f000..$ffff:mcu_getbyte:=mem_mcu[direccion];
+  $40..$ff:mcu_getbyte:=m6800_0.internal_ram[direccion];
+  $f000..$ffff:mcu_getbyte:=mem_mcu[direccion and $fff];
 end;
 end;
 
@@ -307,7 +308,7 @@ case direccion of
   $5:ddr4:=valor;
   $6:port3_out:=valor;
   $7:port4_out:=valor;
-  $40..$ff:mem_mcu[direccion]:=valor;
+  $40..$ff:m6800_0.internal_ram[direccion]:=valor;
 end;
 end;
 

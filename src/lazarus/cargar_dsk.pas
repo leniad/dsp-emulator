@@ -50,9 +50,25 @@ begin
   FileListBox1DblClick(self);
 end;
 
+procedure clean_all;
+var
+  f:word;
+begin
+if datos_dsk<>nil then begin
+  freemem(datos_dsk);
+  datos_dsk:=nil;
+end;
+for f:=1 to (load_dsk.stringgrid1.RowCount-1) do begin
+    load_dsk.stringgrid1.Cells[0,f]:='';
+    load_dsk.stringgrid1.Cells[1,f]:='';
+end;
+load_dsk.stringgrid1.RowCount:=2;
+end;
+
 procedure Tload_dsk.DirectoryEdit1Change(Sender: TObject);
 begin
 load_dsk.FileListBox1.Directory:=load_dsk.DirectoryEdit1.Directory;
+clean_all;
 end;
 
 procedure Tload_dsk.FileListBox1Click(Sender: TObject);
@@ -64,17 +80,11 @@ var
 begin
 file_name:=filelistbox1.FileName;
 file_extension:=extension_fichero(filelistbox1.FileName);
-if datos_dsk<>nil then begin
-  freemem(datos_dsk);
-  datos_dsk:=nil;
-end;
-for f:=1 to (stringgrid1.RowCount-1) do begin
-    stringgrid1.Cells[0,f]:='';
-    stringgrid1.Cells[1,f]:='';
-end;
-stringgrid1.RowCount:=2;
+clean_all;
 f:=1;
 if file_extension='ZIP' then begin
+  nothing1:=true;
+  nothing2:=true;
   //Primero busco los DSK
   if search_file_from_zip(file_name,'*.dsk',file_inside_zip,longitud,crc,false) then begin
     repeat
@@ -84,7 +94,7 @@ if file_extension='ZIP' then begin
        stringgrid1.RowCount:=stringgrid1.RowCount+1;
     until not(find_next_file_zip(file_inside_zip,longitud,crc));
     nothing1:=false;
-  end else nothing1:=true;
+  end;
   //Ahora busco los IPF
   if search_file_from_zip(file_name,'*.ipf',file_inside_zip,longitud,crc,false) then begin
     repeat
@@ -94,9 +104,16 @@ if file_extension='ZIP' then begin
        stringgrid1.RowCount:=stringgrid1.RowCount+1;
     until not(find_next_file_zip(file_inside_zip,longitud,crc));
     nothing2:=false;
-  end else nothing1:=true;
+  end;
   if (nothing1 and nothing2) then exit;
   stringgrid1.RowCount:=stringgrid1.RowCount-1;
+  //Bien, ya tengo los ficheros metidos para verlos, ahora cojo el primero y lo cargo
+  if not(search_file_from_zip(file_name,stringgrid1.Cells[0,1],file_inside_zip,file_size,crc,true)) then exit;
+  getmem(datos_dsk,file_size);
+  if not(load_file_from_zip(file_name,file_inside_zip,datos_dsk,file_size,crc,true)) then exit;
+  file_extension:=extension_fichero(file_inside_zip);
+  end_file_name:=file_inside_zip;
+  exit;
 end;
 if ((file_extension='DSK') or (file_extension='IPF')) then begin
   if not(read_file_size(file_name,file_size)) then exit;
@@ -111,7 +128,7 @@ var
   correcto:boolean;
 begin
 correcto:=false;
-if file_extension='' then exit;
+if ((file_extension<>'DSK') and (file_extension<>'IPF')) then exit;
 if file_extension='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
 if file_extension='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
 if correcto then begin
@@ -190,8 +207,8 @@ begin
 if datos_dsk<>nil then freemem(datos_dsk);
 datos_dsk:=nil;
 case main_vars.tipo_maquina of
-  2:Directory.spectrum_disk:=FileListBox1.Directory+main_vars.cadena_dir;
-  8,9:Directory.amstrad_disk:=FileListBox1.Directory+main_vars.cadena_dir;
+  2:Directory.spectrum_disk:=FileListBox1.Directory;
+  8,9:Directory.amstrad_disk:=FileListBox1.Directory;
 end;
 ultima_posicion:=filelistbox1.ItemIndex;
 load_dsk.close;

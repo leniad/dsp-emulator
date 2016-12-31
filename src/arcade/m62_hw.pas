@@ -324,11 +324,14 @@ end;
 procedure kungfum_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-memoria[direccion]:=valor;
 case direccion of
     $a000:scroll_x:=(scroll_x and $100) or valor;
     $b000:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
-    $d000..$dfff:gfx[0].buffer[direccion and $7ff]:=true;
+    $c000..$c0ff,$e000..$efff:memoria[direccion]:=valor;
+    $d000..$dfff:if memoria[direccion]<>valor then begin
+                    gfx[0].buffer[direccion and $7ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
 end;
 end;
 
@@ -479,18 +482,17 @@ end;
 function snd_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$1f:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
-    else snd_getbyte:=mem_snd[direccion];
+  $0..$ff:snd_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
+  $4000..$ffff:snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-mem_snd[direccion]:=valor;
 case direccion of
-  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
-  $0800..$8ff:case direccion and $3 of
+  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
+  $800..$8ff:case direccion and $3 of
                   0:m6800_0.change_irq(CLEAR_LINE);
                   1:msm_5205_0.data_w(valor);
                   2:msm_5205_1.data_w(valor);
@@ -863,6 +865,5 @@ llamadas_maquina.bucle_general:=irem_m62_principal;
 llamadas_maquina.reset:=reset_irem_m62;
 llamadas_maquina.fps_max:=55;
 end;
-
 
 end.

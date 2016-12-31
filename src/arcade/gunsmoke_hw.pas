@@ -31,6 +31,18 @@ const
         (n:'06a_gs09.bin';l:$8000;p:$20000;crc:$539f182d),(n:'05a_gs08.bin';l:$8000;p:$28000;crc:$e87e526d),
         (n:'04a_gs07.bin';l:$8000;p:$30000;crc:$4382c0d2),(n:'02a_gs06.bin';l:$8000;p:$38000;crc:$4cafe7a6),());
         gunsmoke_tiles_pos:tipo_roms=(n:'11c_gs14.bin';l:$8000;p:0;crc:$0af4f7eb);
+        //Dip
+        gunsmoke_dip_a:array [0..5] of def_dip=(
+        (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$1;dip_name:'30K 80K 80K+'),(dip_val:$3;dip_name:'30K 100K 100K+'),(dip_val:$0;dip_name:'30K 100K 150K+'),(dip_val:$2;dip_name:'30K 100K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Demo';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$8;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Difficult';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$30;dip_name:'Normal'),(dip_val:$10;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Freeze';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        gunsmoke_dip_b:array [0..4] of def_dip=(
+        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$40;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //1943
         hw1943_rom:array[0..3] of tipo_roms=(
         (n:'bmu01c.12d';l:$8000;p:0;crc:$c686cc5c),(n:'bmu02c.13d';l:$10000;p:$8000;crc:$d8880a41),
@@ -83,10 +95,16 @@ const
         (n:'bmk24.14k';l:$8000;p:0;crc:$bf186ef2),(n:'bmk25.14l';l:$8000;p:$8000;crc:$a755faf1),());
         hw1943kai_tilesbg_pos:array[0..2] of tipo_roms=(
         (n:'bmk14.5f';l:$8000;p:0;crc:$cf0f5a53),(n:'bmk23.8k';l:$8000;p:$8000;crc:$17f77ef9),());
+        //Dip
+        hw1943_dip_a:array [0..4] of def_dip=(
+        (mask:$f;name:'Difficulty';number:16;dip:((dip_val:$f;dip_name:'1 (Easy)'),(dip_val:$e;dip_name:'2'),(dip_val:$d;dip_name:'3'),(dip_val:$c;dip_name:'4'),(dip_val:$b;dip_name:'5'),(dip_val:$a;dip_name:'6'),(dip_val:$9;dip_name:'7'),(dip_val:$8;dip_name:'8 (Normal)'),(dip_val:$7;dip_name:'9'),(dip_val:$6;dip_name:'10'),(dip_val:$5;dip_name:'11'),(dip_val:$4;dip_name:'12'),(dip_val:$3;dip_name:'13'),(dip_val:$2;dip_name:'14'),(dip_val:$1;dip_name:'15'),(dip_val:$0;dip_name:'16 (Difficult)'))),
+        (mask:$10;name:'2 Player Game';number:2;dip:((dip_val:$0;dip_name:'1 Credit/2 Players'),(dip_val:$10;dip_name:'2 Credits/2 Players'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$20;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Screen Stop';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  scroll_y,scroll_bg:word;
- scroll_x,sound_command,rom_bank,sprite3bank:byte;
+ scroll_x,sound_command,rom_bank,sprite3bank,prot_val:byte;
  bg2on,bg1on,objon,chon,bgpaint,bgpaint2:boolean;
  rom_mem:array[0..7,0..$3fff] of byte;
  tiles_pos:array[0..$ffff] of byte;
@@ -176,9 +194,8 @@ end;
 
 procedure update_video_gunsmoke;
 var
-        f,color,nchar:word;
-        x,y,pos:word;
-        attr,bank:byte;
+  f,color,nchar,x,y,pos:word;
+  attr,bank:byte;
 begin
 //Background
 if bg1on then begin
@@ -232,6 +249,7 @@ end;
 procedure eventos_gunsmokehw;inline;
 begin
 if event.arcade then begin
+  //P1
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
@@ -239,12 +257,15 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  //P2
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  //System
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
@@ -278,51 +299,37 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function gunsmoke_snd_getbyte(direccion:word):byte;
-begin
-if direccion=$c800 then gunsmoke_snd_getbyte:=sound_command
- else gunsmoke_snd_getbyte:=mem_snd[direccion];
-end;
-
-procedure gunsmoke_snd_putbyte(direccion:word;valor:byte);
-begin
-if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
-case direccion of
-  $e000:ym2203_0.Control(valor);
-  $e001:ym2203_0.Write(valor);
-  $e002:ym2203_1.Control(valor);
-  $e003:ym2203_1.Write(valor);
-end;
-end;
-
+//Gun.Smoke
 function gunsmoke_getbyte(direccion:word):byte;
+const
+  prot:array[1..3] of byte=($ff,0,0);
 begin
 case direccion of
+  0..$7fff,$d000..$d7ff,$e000..$ffff:gunsmoke_getbyte:=memoria[direccion];
   $8000..$bfff:gunsmoke_getbyte:=rom_mem[rom_bank,direccion and $3fff];
   $c000:gunsmoke_getbyte:=marcade.in0;
   $c001:gunsmoke_getbyte:=marcade.in1;
-  $c002:gunsmoke_getbyte:=$ff;
-  $c003:gunsmoke_getbyte:=$f7;
-  $c004:gunsmoke_getbyte:=$ff;
-  $c4c9:gunsmoke_getbyte:=$ff; //Proteccion 1???
-  $c4ca:gunsmoke_getbyte:=$00; //Proteccion 2???
-  $c4cb:gunsmoke_getbyte:=$00; //Proteccion 3???
-    else gunsmoke_getbyte:=memoria[direccion];
+  $c002:gunsmoke_getbyte:=marcade.in2;
+  $c003:gunsmoke_getbyte:=marcade.dswa;
+  $c004:gunsmoke_getbyte:=marcade.dswb;
+  $c4c9..$c4cb:gunsmoke_getbyte:=prot[direccion and $3]; //Proteccion
 end;
 end;
 
 procedure gunsmoke_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
   $c800:sound_command:=valor;
   $c804:begin
           rom_bank:=(valor and $0c) shr 2;
           chon:=(valor and $80)<>0;
+          main_screen.flip_main_screen:=(valor and $40)<>0;
         end;
-  $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
+  $d000..$d7ff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
   $d800:if (scroll_y and $ff)<>valor then begin
             if abs((scroll_y and $e0)-(valor and $e0))>31 then bgpaint:=true;
             scroll_y:=(scroll_y and $ff00) or valor;
@@ -335,45 +342,103 @@ case direccion of
           scroll_x:=valor;
           bgpaint:=true;
         end;
-  $d803:;
   $d806:begin
             sprite3bank:=valor and $07;
             bg1on:=(valor and $10)<>0;
             objon:=(valor and $20)<>0;
         end;
+  $e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
 
-function hw1943_getbyte(direccion:word):byte;
-var
-  z80_0_reg:npreg_z80;
+function gunsmoke_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$c000..$c7ff:gunsmoke_snd_getbyte:=mem_snd[direccion];
+  $c800:gunsmoke_snd_getbyte:=sound_command
+end;
+end;
+
+procedure gunsmoke_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$8000 then exit;
+case direccion of
+  $c000..$c7ff:mem_snd[direccion]:=valor;
+  $e000:ym2203_0.Control(valor);
+  $e001:ym2203_0.Write(valor);
+  $e002:ym2203_1.Control(valor);
+  $e003:ym2203_1.Write(valor);
+end;
+end;
+
+//1943HW
+function hw1943_getbyte(direccion:word):byte;
+var
+  ret:byte;
+begin
+case direccion of
+  0..$7fff,$d000..$d7ff,$e000..$ffff:hw1943_getbyte:=memoria[direccion];
   $8000..$bfff:hw1943_getbyte:=rom_mem[rom_bank,direccion and $3fff];
   $c000:hw1943_getbyte:=marcade.in0;
   $c001:hw1943_getbyte:=marcade.in1;
   $c002:hw1943_getbyte:=marcade.in2;
-  $c003:hw1943_getbyte:=$f8;
-  $c004:hw1943_getbyte:=$ff;
+  $c003:hw1943_getbyte:=marcade.dswa;
+  $c004:hw1943_getbyte:=marcade.dswb;
   $c007:begin
-          z80_0_reg:=z80_0.get_internal_r;
-          hw1943_getbyte:=z80_0_reg.bc.h;
+          case prot_val of
+            $24:ret:=$1d;
+		        $60:ret:=$f7;
+		        $01:ret:=$ac;
+		        $55:ret:=$50;
+		        $56:ret:=$e2;
+		        $2a:ret:=$58;
+		        $a8:ret:=$13;
+		        $22:ret:=$3e;
+		        $3b:ret:=$5a;
+		        $1e:ret:=$1b;
+		        $e9:ret:=$41;
+		        $7d:ret:=$d5;
+		        $43:ret:=$54;
+		        $37:ret:=$6f;
+		        $4c:ret:=$59;
+		        $5f:ret:=$56;
+		        $3f:ret:=$2f;
+		        $3e:ret:=$3d;
+		        $fb:ret:=$36;
+		        $1d:ret:=$3b;
+		        $27:ret:=$ae;
+		        $26:ret:=$39;
+		        $58:ret:=$3c;
+		        $32:ret:=$51;
+		        $1a:ret:=$a8;
+		        $bc:ret:=$33;
+		        $30:ret:=$4a;
+		        $64:ret:=$12;
+		        $11:ret:=$40;
+		        $33:ret:=$35;
+		        $09:ret:=$17;
+		        $25:ret:=$04;
+          end;
+          hw1943_getbyte:=ret;
         end;
-    else hw1943_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure hw1943_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
         $c800:sound_command:=valor;
         $c804:begin
                 chon:=(valor and $80)<>0;
                 rom_bank:=(valor shr 2) and $7;
+                main_screen.flip_main_screen:=(valor and $40)<>0;
               end;
-        $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
+        $c807:prot_val:=valor;
+        $d000..$d7ff:if memoria[direccion]<>valor then begin
+                        gfx[0].buffer[direccion and $3ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $d800:if (scroll_y and $ff)<>valor then begin
                 if abs((scroll_y and $e0)-(valor and $e0))>31 then bgpaint:=true;
                 scroll_y:=(scroll_y and $ff00) or valor;
@@ -399,6 +464,7 @@ case direccion of
                 bg2on:=(valor and $20)<>0;
                 objon:=(valor and $40)<>0;
               end;
+        $e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
 
@@ -439,8 +505,9 @@ end;
 
 function iniciar_gunsmokehw:boolean;
 var
-      f:word;
-      memoria_temp:array[0..$3ffff] of byte;
+  f:word;
+  memoria_temp:array[0..$3ffff] of byte;
+  colores:tpaleta;
 const
     pc_1943_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
     pc_1943_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
@@ -471,18 +538,7 @@ init_gfx(ngfx,32,32,512);
 gfx_set_desc_data(4,0,256*8,512*256*8+4,512*256*8+0,4,0);
 convert_gfx(ngfx,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
 end;
-procedure convert_paleta;
-var
-  f:byte;
-  colores:tpaleta;
-begin
-for f:=0 to $ff do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,256);
-end;
+
 begin
 iniciar_gunsmokehw:=false;
 iniciar_audio(false);
@@ -509,8 +565,8 @@ z80_1.change_ram_calls(gunsmoke_snd_getbyte,gunsmoke_snd_putbyte);
 init_timer(z80_1.numero_cpu,3000000/(60*4),gunsmoke_snd_irq,true);
 z80_1.init_sound(gunsmoke_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,0.5,0.75);
-ym2203_1:=ym2203_chip.create(1500000,0.5,0.75);
+ym2203_0:=ym2203_chip.create(1500000,0.14,0.22);
+ym2203_1:=ym2203_chip.create(1500000,0.14,0.22);
 case main_vars.tipo_maquina of
   80:begin
        //video
@@ -536,9 +592,13 @@ case main_vars.tipo_maquina of
        if not(cargar_roms(@memoria_temp[0],@gunsmoke_tiles[0],'gunsmoke.zip',0)) then exit;
        if not(cargar_roms(@tiles_pos[0],@gunsmoke_tiles_pos,'gunsmoke.zip',1)) then exit;
        convertir_tiles(2);
-       //poner la paleta y clut
+       //DIP
+       marcade.dswa:=$f7;
+       marcade.dswb:=$ff;
+       marcade.dswa_val:=@gunsmoke_dip_a;
+       marcade.dswb_val:=@gunsmoke_dip_b;
+       //clut
        if not(cargar_roms(@memoria_temp[0],@gunsmoke_pal[0],'gunsmoke.zip',0)) then exit;
-       convert_paleta;
        for f:=0 to $ff do begin
           gfx[0].colores[f]:=memoria_temp[$300+f]+$40;  //chars
           gfx[1].colores[f]:=memoria_temp[$600+f]+((memoria_temp[$700+f] and $7) shl 4)+$80;  //sprites
@@ -575,9 +635,13 @@ case main_vars.tipo_maquina of
        //convertir_sprites
        if not(cargar_roms(@memoria_temp[0],@hw1943_sprites[0],'1943.zip',0)) then exit;
        convertir_sprites(3);
-       //poner paleta y CLUT
+       //DIP
+       marcade.dswa:=$f8;
+       marcade.dswb:=$ff;
+       marcade.dswa_val:=@hw1943_dip_a;
+       marcade.dswb_val:=@gunsmoke_dip_b;
+       //CLUT
        if not(cargar_roms(@memoria_temp[0],@hw1943_pal[0],'1943.zip',0)) then exit;
-       convert_paleta;
        for f:=0 to $ff do begin
           gfx[0].colores[f]:=(memoria_temp[$300+f] and $f)+$40;
           gfx[1].colores[f]:=((memoria_temp[$500+f] and $03) shl 4)+((memoria_temp[$400+f] and $0f) shl 0);
@@ -615,9 +679,13 @@ case main_vars.tipo_maquina of
        //convertir_sprites
        if not(cargar_roms(@memoria_temp[0],@hw1943kai_sprites[0],'1943kai.zip',0)) then exit;
        convertir_sprites(3);
-       //poner paleta y CLUT
+       //DIP
+       marcade.dswa:=$f8;
+       marcade.dswb:=$ff;
+       marcade.dswa_val:=@hw1943_dip_a;
+       marcade.dswb_val:=@gunsmoke_dip_b;
+       //CLUT
        if not(cargar_roms(@memoria_temp[0],@hw1943kai_pal[0],'1943kai.zip',0)) then exit;
-       convert_paleta;
        for f:=0 to $ff do begin
           gfx[0].colores[f]:=(memoria_temp[$300+f] and $f)+$40;
           gfx[1].colores[f]:=((memoria_temp[$500+f] and $03) shl 4)+((memoria_temp[$400+f] and $0f) shl 0);
@@ -626,6 +694,13 @@ case main_vars.tipo_maquina of
        end;
      end;
 end;
+//Paleta
+for f:=0 to $ff do begin
+  colores[f].r:=pal4bit(memoria_temp[f]);
+  colores[f].g:=pal4bit(memoria_temp[f+$100]);
+  colores[f].b:=pal4bit(memoria_temp[f+$200]);
+end;
+set_pal(colores,256);
 //final
 reset_gunsmokehw;
 iniciar_gunsmokehw:=true;

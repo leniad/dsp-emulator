@@ -150,13 +150,15 @@ case sound_status.calidad_audio of
   3:sound_status.hay_sonido:=false;
 end;
 sound_status.sample_final:=round(audio_rate/llamadas_maquina.fps_max)*canales;
-fillchar(wanted,sizeof(libsdl_AudioSpec),0);
 wanted.freq:=audio_rate;
+wanted.padding:=0;
 wanted.format:=libAUDIO_S16;
 wanted.channels:=canales;
 wanted.samples:=sound_status.sample_final;
-//wanted.size:=sound_status.sample_final*2;
+wanted.silence:=0; //wanted.size:=sound_status.sample_final*2;
+wanted.size_:=0;
 wanted.callback:=nil;//sound_call_back;
+wanted.userdata:=nil;
 if (SDL_OpenAudio(@wanted,@have)<>0) then exit;
 SDL_PauseAudio(0);
 SDL_ClearQueuedAudio(1);

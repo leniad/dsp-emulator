@@ -9,16 +9,16 @@ procedure cargar_btime;
 
 implementation
 const
-        btime_rom:array[0..4] of tipo_roms=(
+        btime_rom:array[0..3] of tipo_roms=(
         (n:'aa04.9b';l:$1000;p:$c000;crc:$368a25b5),(n:'aa06.13b';l:$1000;p:$d000;crc:$b4ba400d),
-        (n:'aa05.10b';l:$1000;p:$e000;crc:$8005bffa),(n:'aa07.15b';l:$1000;p:$f000;crc:$086440ad),());
-        btime_char:array[0..6] of tipo_roms=(
+        (n:'aa05.10b';l:$1000;p:$e000;crc:$8005bffa),(n:'aa07.15b';l:$1000;p:$f000;crc:$086440ad));
+        btime_char:array[0..5] of tipo_roms=(
         (n:'aa12.7k';l:$1000;p:$0000;crc:$c4617243),(n:'ab13.9k';l:$1000;p:$1000;crc:$ac01042f),
         (n:'ab10.10k';l:$1000;p:$2000;crc:$854a872a),(n:'ab11.12k';l:$1000;p:$3000;crc:$d4848014),
-        (n:'aa8.13k';l:$1000;p:$4000;crc:$8650c788),(n:'ab9.15k';l:$1000;p:$5000;crc:$8dec15e6),());
-        btime_tiles:array[0..3] of tipo_roms=(
+        (n:'aa8.13k';l:$1000;p:$4000;crc:$8650c788),(n:'ab9.15k';l:$1000;p:$5000;crc:$8dec15e6));
+        btime_tiles:array[0..2] of tipo_roms=(
         (n:'ab00.1b';l:$800;p:$0000;crc:$c7a14485),(n:'ab01.3b';l:$800;p:$800;crc:$25b49078),
-        (n:'ab02.4b';l:$800;p:$1000;crc:$b8ef56c3),());
+        (n:'ab02.4b';l:$800;p:$1000;crc:$b8ef56c3));
         btime_snd:tipo_roms=(n:'ab14.12h';l:$1000;p:$e000;crc:$f55e5211);
         btime_tiles_mem:tipo_roms=(n:'ab03.6b';l:$800;p:$0;crc:$d26bc1f3);
         //Dip
@@ -36,7 +36,7 @@ const
 var
   memoria_dec:array[0..$ffff] of byte;
   haz_nmi,bg_cambiado:boolean;
-  sound_latch,haz_vb,scroll_bg:byte;
+  sound_latch,scroll_bg:byte;
   video_ram,color_ram:array[0..$3ff] of byte;
   mem_tiles:array[0..$7ff] of byte;
 
@@ -44,8 +44,7 @@ procedure update_video_btime;inline;
 const
   pant_pos:array[0..7] of byte=(1,2,3,0,5,6,7,4);
 var
-  f,nchar:word;
-  x,y:word;
+  f,nchar,x,y:word;
   atrib:byte;
 begin
 if bg_cambiado then begin
@@ -138,10 +137,10 @@ while EmuStatus=EsRuning do begin
     else m6502_1.change_nmi(CLEAR_LINE);
   case f of
     247:begin
-          haz_vb:=$80;
+          marcade.dswa:=marcade.dswa or $80;
           update_video_btime;
         end;
-    271:haz_vb:=0;
+    271:marcade.dswa:=marcade.dswa and $7f;
   end;
  end;
  eventos_btime;
@@ -172,7 +171,7 @@ case direccion of
   $4000:getbyte_btime:=marcade.in0;
   $4001:getbyte_btime:=marcade.in1;
   $4002:getbyte_btime:=marcade.in2;
-  $4003:getbyte_btime:=marcade.dswa+haz_vb;
+  $4003:getbyte_btime:=marcade.dswa;
   $4004:getbyte_btime:=marcade.dswb;
 end;
 end;
@@ -285,7 +284,6 @@ AY8910_1.reset;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 marcade.in2:=$3f;
-haz_vb:=0;
 sound_latch:=0;
 haz_nmi:=false;
 bg_cambiado:=true;
@@ -320,27 +318,27 @@ m6502_1.init_sound(btime_sound_update);
 AY8910_0:=ay8910_chip.create(1500000,AY8910,1);
 AY8910_1:=ay8910_chip.create(1500000,AY8910,1);
 //cargar roms
-if not(cargar_roms(@memoria[0],@btime_rom[0],'btime.zip',0)) then exit;
-copymemory(@memoria_dec[0],@memoria[0],$10000);
+if not(roms_load(@memoria,@btime_rom,'btime.zip',sizeof(btime_rom))) then exit;
+copymemory(@memoria_dec,@memoria,$10000);
 //cargar roms audio
-if not(cargar_roms(@mem_snd[0],@btime_snd,'btime.zip',1)) then exit;
+if not(roms_load(@mem_snd,@btime_snd,'btime.zip',sizeof(btime_snd))) then exit;
 //Cargar chars
-if not(cargar_roms(@memoria_temp[0],@btime_char[0],'btime.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@btime_char,'btime.zip',sizeof(btime_char))) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
 //sprites
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*256*16*16,256*16*16,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //Cargar tiles
-if not(cargar_roms(@memoria_temp[0],@btime_tiles[0],'btime.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@btime_tiles,'btime.zip',sizeof(btime_tiles))) then exit;
 init_gfx(2,16,16,64);
 gfx_set_desc_data(3,0,32*8,2*64*16*16,64*16*16,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
-if not(cargar_roms(@mem_tiles[0],@btime_tiles_mem,'btime.zip',1)) then exit;
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
+if not(roms_load(@mem_tiles,@btime_tiles_mem,'btime.zip',sizeof(btime_tiles_mem))) then exit;
 //DIP
 marcade.dswa:=$3f;
 marcade.dswb:=$eb;

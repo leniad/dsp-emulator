@@ -119,17 +119,21 @@ end;
 procedure mikie_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
+  0..$ff,$2800..$37ff:memoria[direccion]:=valor;
   $2002:begin
           if ((sound_trq=0) and (valor=1)) then z80_0.change_irq(HOLD_LINE);
           sound_trq:=valor;
         end;
   $2006:main_screen.flip_main_screen:=(valor and 1)<>0;
   $2007:irq_ena:=(valor<>0);
+  $2100:; //wd
   $2200:banco_pal:=valor and $7;
   $2400:sound_latch:=valor;
-  $3800..$3fff:gfx[0].buffer[direccion and $3ff]:=true;
+  $3800..$3fff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
 end;
 end;
 
@@ -144,15 +148,15 @@ end;
 
 procedure sound_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$2000 then exit;
-mem_snd[direccion]:=valor;
+if direccion<$4000 then exit;
 case direccion of
+  $4000..$43ff:mem_snd[direccion]:=valor;
   $8002:sn_76496_0.Write(valor);
   $8004:sn_76496_1.Write(valor);
 end;
 end;
 
-procedure sound_despues_instruccion;
+procedure sound_update;
 begin
   sn_76496_0.update;
   sn_76496_1.update;
@@ -267,7 +271,7 @@ m6809_0.change_ram_calls(mikie_getbyte,mikie_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
-z80_0.init_sound(sound_despues_instruccion);
+z80_0.init_sound(sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(1789772);
 sn_76496_1:=sn76496_chip.Create(3579545);

@@ -292,14 +292,8 @@ begin
           exit;
         end;
         case (puerto and $F002) of
-          $C000,$D000,$E000,$F000:begin
-            ay8910_0.control(valor); //fffd
-            exit;
-          end;
-          $8000,$9000,$A000,$B000:begin
-            ay8910_0.write(valor); //bffd
-            exit;
-            end;
+          $C000,$D000,$E000,$F000:ay8910_0.control(valor); //fffd
+          $8000,$9000,$A000,$B000:ay8910_0.write(valor); //bffd
           $4000,$5000,$6000,$7000:begin //7ffd
                   if not(paginacion_activa) then exit;
                   old_pant:=((valor and 8) shr 2)+5;
@@ -309,16 +303,11 @@ begin
                   end;
                   var_spectrum.old_7ffd:=valor;
                   memoria_spectrum3;
-                  exit;
                 end;
-          $3000:begin
-            if disk_present then WriteFDCData(valor); //3ffd
-            exit;
-            end;
+          $3000:if disk_present then WriteFDCData(valor); //3ffd
           $1000:begin //1ffd
                    old_1ffd:=valor;
                    memoria_spectrum3;
-                   exit;
                 end;
         end;
         if mouse.tipo=MAMX then z80pio_cd_ba_w(0,puerto shr 5,valor);

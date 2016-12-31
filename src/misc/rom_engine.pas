@@ -24,6 +24,8 @@ function cargar_roms_skip(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;ca
 function cargar_roms_swap_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 function cargar_roms_skip_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms,skip:byte):boolean;
 
+function roms_load(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;roms_array:word):boolean;
+
 implementation
 
 function carga_rom_zip(nombre_zip,nombre_rom:string;donde:pbyte;longitud,crc:integer;warning:boolean):boolean;
@@ -55,6 +57,26 @@ if (longitud<>long_rom) then begin
   exit;
 end;
 carga_rom_zip_crc:=true;
+end;
+
+function roms_load(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;roms_array:word):boolean;
+var
+  f:byte;
+  ptemp:pbyte;
+  troms:ptipo_roms;
+  roms_size:word;
+begin
+roms_load:=false;
+troms:=ctipo_roms;
+roms_size:=roms_array div sizeof(tipo_roms);
+for f:=1 to roms_size do begin
+    ptemp:=sitio;
+    inc(ptemp,troms.p);
+    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,ptemp,troms.l,integer(troms.crc))) then
+        if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
+    inc(troms);
+end;
+roms_load:=true;
 end;
 
 function cargar_roms(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte=1):boolean;

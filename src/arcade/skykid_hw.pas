@@ -191,10 +191,6 @@ while EmuStatus=EsRuning do begin
   end;
   if irq_enable then m6809_0.change_irq(ASSERT_LINE);
   if irq_enable_mcu then m6800_0.change_irq(ASSERT_LINE);
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
   update_video_skykid;
   eventos_skykid;
   video_sync;
@@ -205,18 +201,24 @@ function skykid_getbyte(direccion:word):byte;
 begin
 case direccion of
   $0..$1fff:skykid_getbyte:=rom_bank[rom_nbank,direccion];
-  $6800..$6bff:skykid_getbyte:=namcos1_cus30_r(direccion and $3ff);
-  else skykid_getbyte:=memoria[direccion];
+  $2000..$2fff,$4000..$5fff,$8000..$ffff:skykid_getbyte:=memoria[direccion];
+  $6800..$6bff:skykid_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
 end;
 end;
 
 procedure skykid_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then memoria[direccion]:=valor;
 case direccion of
-  $0..$1fff:exit;
-  $2000..$2fff:gfx[2].buffer[direccion and $7ff]:=true;
-  $4000..$47ff:gfx[0].buffer[direccion and $3ff]:=true;
+  $0..$1fff,$a002..$ffff:exit;
+  $2000..$2fff:if memoria[direccion]<>valor then begin
+                  gfx[2].buffer[direccion and $7ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $4000..$47ff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $4800..$5fff:memoria[direccion]:=valor;
   $6000..$60ff:begin
                   scroll_y:=direccion and $ff;
                   if screen_flip then scroll_y:=(scroll_y+25) and $ff
@@ -227,7 +229,7 @@ case direccion of
                   if screen_flip then scroll_x:=(scroll_x+35) and $1ff
                     else scroll_x:=(189-(scroll_x xor 1)) and $1ff;
                end;
-  $6800..$6bff:namcos1_cus30_w(direccion and $3ff,valor);
+  $6800..$6bff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $7000..$7fff:begin
                    irq_enable:=not(BIT((direccion and $fff),11));
                    if not(irq_enable) then m6809_0.change_irq(CLEAR_LINE);
@@ -241,24 +243,29 @@ end;
 function mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$1f:mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
-  $1000..$13ff:mcu_getbyte:=namcos1_cus30_r(direccion and $3ff);
-    else mcu_getbyte:=mem_snd[direccion];
+  $0..$ff:mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
+  $1000..$13ff:mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
+  $8000..$c7ff,$f000..$ffff:mcu_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
-  $1000..$13ff:namcos1_cus30_w(direccion and $3ff,valor);
+  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
+  $1000..$13ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $4000..$7fff:begin
                   irq_enable_mcu:=not(BIT(direccion and $3fff,13));
                   if not(irq_enable_mcu) then m6800_0.change_irq(CLEAR_LINE);
                end;
   $8000..$bfff,$f000..$ffff:exit;
+  $c000..$cfff:mem_snd[direccion]:=valor;
 end;
-mem_snd[direccion]:=valor;
+end;
+
+procedure skykid_sound_update;
+begin
+  namco_snd_0.update;
 end;
 
 procedure out_port1(valor:byte);
@@ -290,7 +297,7 @@ procedure reset_skykid;
 begin
  m6809_0.reset;
  m6800_0.reset;
- namco_sound_reset;
+ namco_snd_0.reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -333,6 +340,8 @@ m6809_0.change_ram_calls(skykid_getbyte,skykid_putbyte);
 m6800_0:=cpu_m6800.create(6144000,224,cpu_hd63701);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,nil,nil,nil);
+m6800_0.init_sound(skykid_sound_update);
+namco_snd_0:=namco_snd_chip.create(8,true);
 case  main_vars.tipo_maquina of
     123:begin
           //cargar roms
@@ -342,7 +351,6 @@ case  main_vars.tipo_maquina of
           for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
           //Cargar MCU
           if not(cargar_roms(@mem_snd[0],@skykid_mcu[0],'skykid.zip',0)) then exit;
-          namco_sound_init(8,true);
           //convertir chars
           if not(cargar_roms(@memoria_temp[0],@skykid_char,'skykid.zip',1)) then exit;
           init_gfx(0,8,8,$200);
@@ -378,7 +386,6 @@ case  main_vars.tipo_maquina of
           for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
           //Cargar MCU
           if not(cargar_roms(@mem_snd[0],@drgnbstr_mcu[0],'drgnbstr.zip',0)) then exit;
-          namco_sound_init(8,true);
           //convertir chars
           if not(cargar_roms(@memoria_temp[0],@drgnbstr_char,'drgnbstr.zip')) then exit;
           init_gfx(0,8,8,$200);

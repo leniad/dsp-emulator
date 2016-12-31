@@ -8,9 +8,9 @@ procedure cargar_as;
 
 implementation
 const
-        as_rom:array[0..4] of tipo_roms=(
+        as_rom:array[0..3] of tipo_roms=(
         (n:'035145-04e.ef2';l:$800;p:$6800;crc:$b503eaf7),(n:'035144-04e.h2';l:$800;p:$7000;crc:$25233192),
-        (n:'035143-02.j2';l:$800;p:$7800;crc:$312caa02),(n:'035127-02.np3';l:$800;p:$5000;crc:$8b71fd9e),());
+        (n:'035143-02.j2';l:$800;p:$7800;crc:$312caa02),(n:'035127-02.np3';l:$800;p:$5000;crc:$8b71fd9e));
         as_samples:array[0..2] of tipo_nombre_samples=((nombre:'explode1.wav'),
         (nombre:'explode2.wav'),(nombre:'explode3.wav'));
         asteroids_dip_a:array [0..5] of def_dip=(
@@ -19,24 +19,29 @@ const
         (mask:$8;name:'Center Mech';number:2;dip:((dip_val:$0;dip_name:'X 1'),(dip_val:$8;dip_name:'X 2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Right Mech';number:4;dip:((dip_val:$0;dip_name:'X 1'),(dip_val:$10;dip_name:'X 4'),(dip_val:$20;dip_name:'X 5'),(dip_val:$30;dip_name:'X 6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Coinage';number:4;dip:((dip_val:$c0;dip_name:'2C 1C'),(dip_val:$80;dip_name:'1C 1C'),(dip_val:$40;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        llander_rom:array[0..6] of tipo_roms=(
+        (n:'034572-02.f1';l:$800;p:$6000;crc:$b8763eea),(n:'034571-02.de1';l:$800;p:$6800;crc:$77da4b2f),
+        (n:'034570-01.c1';l:$800;p:$7000;crc:$2724e591),(n:'034569-02.b1';l:$800;p:$7800;crc:$72837a4e),
+        (n:'034599-01.r3';l:$800;p:$4800;crc:$355a9371),(n:'034598-01.np3';l:$800;p:$5000;crc:$9c4ffa68),
+        (n:'034597-01.m3';l:$800;p:$5800;crc:$503f992e));
 
 var
   hay_samples,dibujar:boolean;
   ram:array[0..1,0..$ff] of byte;
   x_actual,y_actual:integer;
-  invertir_ram:byte;
+  ram_bank:byte;
+  linea:word;
 
 procedure update_video_as;inline;
 var
-  posicion,opcode:word;
-  istack:array[0..9] of word;
-  x,y,dx,dy,xa_d,ya_d:integer;
+  color,posicion,opcode:word;
+  istack:array[0..3] of word;
+  i,iscale,x,y,dx,dy,xa_d,ya_d:integer;
   pila:byte;
   salir,draw:boolean;
-  i,iscale:integer;
-  color:word;
 begin
-pila:=9;
+fill_full_screen(1,0);
+pila:=0;
 posicion:=$4000;
 salir:=false;
 iscale:=0;
@@ -44,7 +49,7 @@ while not(salir) do begin
   opcode:=(memoria[posicion+1] shl 8) or memoria[posicion];
   posicion:=posicion+2;
   draw:=false;
-  case (opcode and $F000) of
+  case (opcode and $f000) of
     0,$b000:salir:=true; //halt
     $1000,$2000,$3000,$4000,$5000,$6000,$7000,$8000,$9000:begin //vectores largos
             i:=((opcode shr 12)+iscale) and $f; // Scale factor */
@@ -75,22 +80,18 @@ while not(salir) do begin
     $c000:begin  //Llamada subrutina
             if ((opcode and $1fff)=0) then salir:=true// Address of 0 same as HALT */
               else begin
-                    iStack[pila]:=posicion; // push current position */
-                    pila:=pila-1;
+                    pila:=(pila+1) and $f;
+                    iStack[pila and 3]:=posicion; // push current position */
                     posicion:=$4000+(opcode and $1fff)*2;
               end;
           end;
     $d000:begin //Vuelta de subrutina
-            if pila=10 then begin
-              salir:=true;
-              pila:=0;
-            end;
-            pila:=pila+1;
-            posicion:=iStack[pila];
+            posicion:=iStack[pila and 3];
+            pila:=(pila-1) and $f;
           end;
     $e000:begin //Saltar a posicion
             if ((opcode and $1fff)=0) then salir:=true // Address of 0 same as HALT */
-             else posicion:=$4000+(opcode and $1fff)*2;
+              else posicion:=$4000+(opcode and $1fff)*2;
           end;
     $f000:begin //vector corto
             i:=((opcode shr 2) and $2)+((opcode shr 11) and $1);
@@ -124,9 +125,11 @@ while not(salir) do begin
     if y_actual>1024 then ya_d:=0
       else if y_actual<0 then ya_d:=400
         else ya_d:=trunc((1024-y_actual)/2.56);
-    draw_line(x,y,xa_d,ya_d,color,1);
+    draw_line(x+ADD_SPRITE,y+ADD_SPRITE,xa_d+ADD_SPRITE,ya_d+ADD_SPRITE,color,1);
   end;
 end;
+dibujar:=false;
+actualiza_trozo_final(0,0,400,400,1);
 end;
 
 procedure eventos_as;
@@ -147,72 +150,102 @@ end;
 procedure principal_as;
 var
   frame:single;
-  f:word;
 begin
 init_controls(false,false,false,true);
 frame:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
- for f:=0 to 299 do begin
+ for linea:=0 to 299 do begin
     m6502_0.run(frame);
     frame:=frame+m6502_0.tframes-m6502_0.contador;
-    if ((f=282) and dibujar) then begin
-      fill_full_screen(1,0);
-      update_video_as;
-      dibujar:=false;
-      actualiza_trozo_simple(0,40,400,320,1);
-    end;
+    if ((linea=282) and dibujar) then update_video_as;
  end;
  eventos_as;
  video_sync;
 end;
 end;
 
+//Asteroids
 function getbyte_as(direccion:word):byte;
 var
   mascara:byte;
-  res:boolean;
 begin
-direccion:=direccion and $7FFF;
+direccion:=direccion and $7fff;
 case direccion of
-  $200..$2ff:getbyte_as:=ram[invertir_ram,direccion and $ff];
-  $300..$3ff:getbyte_as:=ram[(1-invertir_ram),direccion and $ff];
-  $2001:if (m6502_0.contador and $100)<>0 then getbyte_as:=1
-          else getbyte_as:=0;
+  0..$1ff,$4000..$47ff,$5000..$57ff,$6800..$7fff:getbyte_as:=memoria[direccion];
+  $200..$2ff:getbyte_as:=ram[ram_bank,direccion and $ff];
+  $300..$3ff:getbyte_as:=ram[1-ram_bank,direccion and $ff];
+  $2001:getbyte_as:=((trunc(linea*m6502_0.tframes)+m6502_0.contador) and $100) shr 8;
   $2000,$2002..$2007:begin
-    mascara:=1 shl (direccion and $7);
-    res:=(marcade.in0 and mascara)<>0;
-    if res then getbyte_as:=$80
-      else getbyte_as:=$7f;
-  end;
+                        mascara:=1 shl (direccion and $7);
+                        if (marcade.in0 and mascara)<>0 then getbyte_as:=$80
+                          else getbyte_as:=$7f;
+                     end;
   $2400..$2407:begin
-    mascara:=1 shl (direccion and $7);
-    res:=(marcade.in1 and mascara)<>0;
-    if res then getbyte_as:=$80
-      else getbyte_as:=$7f;
-  end;
+                  mascara:=1 shl (direccion and $7);
+                  if (marcade.in1 and mascara)<>0 then getbyte_as:=$80
+                    else getbyte_as:=$7f;
+               end;
   $2800:getbyte_as:=$fc or ((marcade.dswa shr 6) and $3); //Coinage
   $2801:getbyte_as:=$fc or ((marcade.dswa shr 4) and $3); //Right Mech
   $2802:getbyte_as:=$fc or ((marcade.dswa shr 2) and $3); //Lives+Center Mech
   $2803:getbyte_as:=$fc or ((marcade.dswa shr 0) and $3); //Lenguaje
-  else getbyte_as:=memoria[direccion];
 end;
 end;
 
 procedure putbyte_as(direccion:word;valor:byte);
 begin
-direccion:=direccion and $7FFF;
+direccion:=direccion and $7fff;
+if direccion>$4fff then exit;
 case direccion of
-  $200..$2FF:ram[invertir_ram,direccion and $ff]:=valor;
-  $300..$3FF:ram[1-invertir_ram,direccion and $ff]:=valor;
+  0..$1ff:memoria[direccion]:=valor;
+  $200..$2ff:ram[ram_bank,direccion and $ff]:=valor;
+  $300..$3ff:ram[1-ram_bank,direccion and $ff]:=valor;
+  $3200:ram_bank:=(valor and 4) shr 2;
+  $3600:asteroid_explode_w(valor,hay_samples);
+  $3a00:asteroid_thump_w(valor);
+  $3c00..$3c05:asteroid_sounds_w(direccion and $7,valor);
   $4000..$47ff:begin
                   memoria[direccion]:=valor;
                   dibujar:=true;
                end;
-  $3200:invertir_ram:=(valor and 4) shr 2;
-  $3600:asteroid_explode_w(valor,hay_samples);
-  $3a00:asteroid_thump_w(valor);
-  $3c00..$3c05:asteroid_sounds_w(direccion and $7,valor);
-    else memoria[direccion]:=valor;
+end;
+end;
+
+//Lunar Lander
+function getbyte_llander(direccion:word):byte;
+var
+  mascara:byte;
+begin
+direccion:=direccion and $7fff;
+case direccion of
+  0..$1fff:getbyte_llander:=memoria[direccion and $ff];
+  $2000:getbyte_llander:=$bf or (((trunc(linea*m6502_0.tframes)+m6502_0.contador) and $100) shr 2);
+  $2400..$2407:begin
+                  mascara:=1 shl (direccion and $7);
+                  if ($50 and mascara)<>0 then getbyte_llander:=$80
+                    else getbyte_llander:=$7f;
+               end;
+  $2800:getbyte_llander:=$fe;//c or ((marcade.dswa shr 6) and $3); //Coinage
+  $2801:getbyte_llander:=$fc;// or ((marcade.dswa shr 4) and $3); //Right Mech
+  $2802:getbyte_llander:=$fc;// or ((marcade.dswa shr 2) and $3); //Lives+Center Mech
+  $2803:getbyte_llander:=$fc;// or ((marcade.dswa shr 0) and $3); //Lenguaje
+  $2c00:getbyte_llander:=0;
+  $4000..$7fff:getbyte_llander:=memoria[direccion];
+end;
+end;
+
+procedure putbyte_llander(direccion:word;valor:byte);
+begin
+direccion:=direccion and $7fff;
+if direccion>$4fff then exit;
+case direccion of
+  0..$1fff:memoria[direccion and $ff]:=valor;
+  $3c00:;
+  $3e00:;
+  $4000..$47ff:begin
+                  memoria[direccion]:=valor;
+                  dibujar:=true;
+               end;
 end;
 end;
 
@@ -223,8 +256,7 @@ end;
 
 procedure as_sound;
 begin
-asteroid_sound_update(hay_samples);
-if hay_samples then samples_update;
+  asteroid_sound_update(hay_samples);
 end;
 
 //Main
@@ -236,7 +268,7 @@ marcade.in0:=0;
 marcade.in1:=0;
 x_actual:=0;
 y_actual:=0;
-invertir_ram:=0;
+ram_bank:=0;
 dibujar:=true;
 end;
 
@@ -248,18 +280,38 @@ begin
 iniciar_as:=false;
 iniciar_audio(false);
 screen_init(1,400,400);
-iniciar_video(400,320);
+iniciar_video(400,400);
 //Main CPU
 m6502_0:=cpu_m6502.create(1512000,300,TCPU_M6502);
-m6502_0.change_ram_calls(getbyte_as,putbyte_as);
-m6502_0.init_sound(as_sound);
-asteroid_sound_init;
-//Timers
-init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);
-//cargar roms
-if not(cargar_roms(@memoria[0],@as_rom[0],'asteroid.zip',0)) then exit;
-//samples
-hay_samples:=load_samples('asteroid.zip',@as_samples[0],3);
+case main_vars.tipo_maquina of
+  23:begin //Asteroids
+        m6502_0.change_ram_calls(getbyte_as,putbyte_as);
+        m6502_0.init_sound(as_sound);
+        asteroid_sound_init;
+        //Timers
+        init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);
+        //cargar roms
+        if not(roms_load(@memoria,@as_rom,'asteroid.zip',sizeof(as_rom))) then exit;
+        //samples
+        hay_samples:=load_samples('asteroid.zip',@as_samples,3);
+        //dip
+        marcade.dswa:=$84;
+        marcade.dswa_val:=@asteroids_dip_a;
+      end;
+  233:begin //Lunar Lander
+        m6502_0.change_ram_calls(getbyte_llander,putbyte_llander);
+        //m6502_0.init_sound(as_sound);
+        //Timers
+        init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);
+        //cargar roms
+        if not(roms_load(@memoria,@llander_rom,'llander.zip',sizeof(llander_rom))) then exit;
+        //samples
+        //hay_samples:=load_samples('asteroid.zip',@as_samples,3);
+        //dip
+        marcade.dswa:=$84;
+        marcade.dswa_val:=@asteroids_dip_a;
+      end;
+end;
 //poner la paleta
 for f:=0 to 15 do begin
   colores[f].r:=17*f;
@@ -267,9 +319,6 @@ for f:=0 to 15 do begin
   colores[f].b:=17*f;
 end;
 set_pal(colores,16);
-//dip
-marcade.dswa:=$84;
-marcade.dswa_val:=@asteroids_dip_a;
 //final
 reset_as;
 iniciar_as:=true;

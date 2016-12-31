@@ -3,26 +3,26 @@ unit dec8_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,ym_2203,ym_3812,gfx_engine,
-     rom_engine,pal_engine,sound_engine;
+     rom_engine,pal_engine,sound_engine,misc_functions;
 
 procedure cargar_dec8;
 
 implementation
 const
-        srd_rom:array[0..2] of tipo_roms=(
-        (n:'dy01-e.b14';l:$10000;p:$0;crc:$176e9299),(n:'dy00.b16';l:$10000;p:$10000;crc:$2bf6b461),());
+        srd_rom:array[0..1] of tipo_roms=(
+        (n:'dy01-e.b14';l:$10000;p:$0;crc:$176e9299),(n:'dy00.b16';l:$10000;p:$10000;crc:$2bf6b461));
         srd_char:tipo_roms=(n:'dy05.b6';l:$4000;p:$0000;crc:$8780e8a3);
-        srd_tiles:array[0..2] of tipo_roms=(
-        (n:'dy03.b4';l:$10000;p:$0000;crc:$44f2a4f9),(n:'dy02.b5';l:$10000;p:$10000;crc:$522d9a9e),());
+        srd_tiles:array[0..1] of tipo_roms=(
+        (n:'dy03.b4';l:$10000;p:$0000;crc:$44f2a4f9),(n:'dy02.b5';l:$10000;p:$10000;crc:$522d9a9e));
         srd_snd:tipo_roms=(n:'dy04.d7';l:$8000;p:$8000;crc:$2ae3591c);
-        srd_sprites:array[0..6] of tipo_roms=(
+        srd_sprites:array[0..5] of tipo_roms=(
         (n:'dy07.h16';l:$8000;p:$0000;crc:$97eaba60),(n:'dy06.h14';l:$8000;p:$8000;crc:$c279541b),
         (n:'dy09.k13';l:$8000;p:$10000;crc:$d30d1745),(n:'dy08.k11';l:$8000;p:$18000;crc:$71d645fd),
-        (n:'dy11.k16';l:$8000;p:$20000;crc:$fd9ccc5b),(n:'dy10.k14';l:$8000;p:$28000;crc:$88770ab8),());
+        (n:'dy11.k16';l:$8000;p:$20000;crc:$fd9ccc5b),(n:'dy10.k14';l:$8000;p:$28000;crc:$88770ab8));
 
 var
   scroll_x,i8751_return,i8751_value:word;
-  rom_bank,coin1,sound_latch,vblank_val:byte;
+  rom_bank,coin1,sound_latch:byte;
   old_val:boolean;
   rom:array[0..5,0..$3fff] of byte;
   snd_dec:array[0..$7fff] of byte;
@@ -128,9 +128,9 @@ while EmuStatus=EsRuning do begin
       247:begin
             m6809_0.change_nmi(PULSE_LINE);
             update_video_dec8;
-            vblank_val:=0;
+            marcade.in1:=marcade.in1 and $bf;
       end;
-      263:vblank_val:=$40;
+      263:marcade.in1:=(marcade.in1 and $bf)+$40;
    end;
  end;
  eventos_dec8;
@@ -141,17 +141,16 @@ end;
 function getbyte_dec8(direccion:word):byte;
 begin
 case direccion of
-   $0..$17ff:getbyte_dec8:=memoria[direccion];
-   $2800..$288f:getbyte_dec8:=memoria[direccion];
-   $3000..$308f:getbyte_dec8:=memoria[direccion];
+   $0..$17ff,$8000..$ffff:getbyte_dec8:=memoria[direccion];
    $2000:getbyte_dec8:=i8751_return shr 8;
    $2001:getbyte_dec8:=i8751_return and $ff;
+   $2800..$288f:getbyte_dec8:=buffer_paleta[direccion and $ff];
+   $3000..$308f:getbyte_dec8:=buffer_paleta[(direccion and $ff)+$100];
    $3800:getbyte_dec8:=$7f;
    $3801:getbyte_dec8:=marcade.in0;
-   $3802:getbyte_dec8:=marcade.in1+vblank_val;
+   $3802:getbyte_dec8:=marcade.in1;
    $3803:getbyte_dec8:=$8f;
    $4000..$7fff:getbyte_dec8:=rom[rom_bank,direccion and $3fff];
-   $8000..$ffff:getbyte_dec8:=memoria[direccion];
 end;
 end;
 
@@ -197,10 +196,16 @@ end;
 procedure putbyte_dec8(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $1400..$17ff:gfx[1].buffer[(direccion and $3ff) shr 1]:=true;
-  $800..$bff:gfx[0].buffer[direccion and $3ff]:=true;
+  0..$7ff,$c00..$13ff:memoria[direccion]:=valor;
+  $800..$bff:if memoria[direccion]<>valor then begin
+                gfx[0].buffer[direccion and $3ff]:=true;
+                memoria[direccion]:=valor;
+             end;
+  $1400..$17ff:if memoria[direccion]<>valor then begin
+                  gfx[1].buffer[(direccion and $3ff) shr 1]:=true;
+                  memoria[direccion]:=valor;
+               end;
   $1800:begin
           i8751_value:=(i8751_value and $ff) or (valor shl 8);
           evalue_i8751;
@@ -217,38 +222,38 @@ case direccion of
         end;
   $1806:scroll_x:=(scroll_x and $f00) or valor;
   $2000:begin
-        sound_latch:=valor;
-        m6502_0.change_nmi(PULSE_LINE);
+          sound_latch:=valor;
+          m6502_0.change_nmi(PULSE_LINE);
         end;
   $2800..$288f:if buffer_paleta[direccion and $ff]<>valor then begin
-          buffer_paleta[direccion and $ff]:=valor;
-          cambiar_color(direccion and $ff);
-        end;
+                  buffer_paleta[direccion and $ff]:=valor;
+                  cambiar_color(direccion and $ff);
+               end;
   $3000..$308f:if buffer_paleta[(direccion and $ff)+$100]<>valor then begin
-          buffer_paleta[(direccion and $ff)+$100]:=valor;
-          cambiar_color(direccion and $ff);
-        end;
+                  buffer_paleta[(direccion and $ff)+$100]:=valor;
+                  cambiar_color(direccion and $ff);
+               end;
 end;
 end;
 
 function getbyte_snd_dec8(direccion:word):byte;
 begin
   case direccion of
+    0..$5ff:getbyte_snd_dec8:=mem_snd[direccion];
     $2000:getbyte_snd_dec8:=ym2203_0.status;
     $2001:getbyte_snd_dec8:=ym2203_0.Read;
     $4000:getbyte_snd_dec8:=ym3812_0.status;
     $6000:getbyte_snd_dec8:=sound_latch;
     $8000..$ffff:if m6502_0.opcode then getbyte_snd_dec8:=snd_dec[direccion and $7fff]
                     else getbyte_snd_dec8:=mem_snd[direccion];
-    else getbyte_snd_dec8:=mem_snd[direccion];
   end;
 end;
 
 procedure putbyte_snd_dec8(direccion:word;valor:byte);
 begin
 if direccion>$7fff then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  0..$5ff:mem_snd[direccion]:=valor;
   $2000:ym2203_0.control(valor);
   $2001:ym2203_0.write(valor);
   $4000:ym3812_0.control(valor);
@@ -317,11 +322,11 @@ m6502_0:=cpu_m6502.create(1500000,264,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
 m6502_0.init_sound(dec8_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(1500000);
-ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
+ym2203_0:=ym2203_chip.create(1500000,0.5,0.5);
+ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.7);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms y ponerlas en su sitio
-if not(cargar_roms(@memoria_temp[0],@srd_rom[0],'srdarwin.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@srd_rom,'srdarwin.zip',sizeof(srd_rom))) then exit;
 copymemory(@rom[4,0],@memoria_temp[0],$4000);
 copymemory(@rom[5,0],@memoria_temp[$4000],$4000);
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
@@ -330,31 +335,30 @@ copymemory(@rom[1,0],@memoria_temp[$14000],$4000);
 copymemory(@rom[2,0],@memoria_temp[$18000],$4000);
 copymemory(@rom[3,0],@memoria_temp[$1c000],$4000);
 //cargar roms audio y desencriptar
-if not(cargar_roms(@mem_snd[0],@srd_snd,'srdarwin.zip',1)) then exit;
-for f:=$8000 to $ffff do begin
-		snd_dec[f-$8000]:=(mem_snd[f] and $9f)+((mem_snd[f] and $20) shl 1)+((mem_snd[f] and $40) shr 1);
-end;
+if not(roms_load(@mem_snd,@srd_snd,'srdarwin.zip',sizeof(srd_snd))) then exit;
+for f:=$8000 to $ffff do snd_dec[f-$8000]:=bitswap8(mem_snd[f],7,5,6,4,3,2,1,0);
 //Cargar chars
-if not(cargar_roms(@memoria_temp[0],@srd_char,'srdarwin.zip',1)) then exit;
+if not(roms_load(@memoria_temp,@srd_char,'srdarwin.zip',sizeof(srd_char))) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
 //Cargar tiles y ponerlas en su sitio
-if not(cargar_roms(@memoria_temp[0],@srd_tiles[0],'srdarwin.zip',0)) then exit;
-for f:=0 to 3 do copymemory(@memoria_temp2[$10000*f],@memoria_temp[$4000*f],$4000);
-for f:=0 to 3 do copymemory(@memoria_temp2[$8000+($10000*f)],@memoria_temp[$10000+($4000*f)],$4000);
+if not(roms_load(@memoria_temp,@srd_tiles,'srdarwin.zip',sizeof(srd_tiles))) then exit;
+for f:=0 to 3 do begin
+  copymemory(@memoria_temp2[$10000*f],@memoria_temp[$4000*f],$4000);
+  copymemory(@memoria_temp2[$8000+($10000*f)],@memoria_temp[$10000+($4000*f)],$4000);
+end;
 init_gfx(1,16,16,$400);
 for f:=0 to 7 do gfx[1].trans[f]:=true;
 gfx_set_desc_data(4,4,32*8,$8000*8,$8000*8+4,0,4);
-for f:=0 to 3 do
-  convert_gfx(1,$100*f*16*16,@memoria_temp2[$10000*f],@pt_x[0],@pt_y[0],false,true);
+for f:=0 to 3 do convert_gfx(1,$100*f*16*16,@memoria_temp2[$10000*f],@pt_x,@pt_y,false,true);
 //Cargar sprites
-if not(cargar_roms(@memoria_temp[0],@srd_sprites[0],'srdarwin.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@srd_sprites,'srdarwin.zip',sizeof(srd_sprites))) then exit;
 init_gfx(2,16,16,$800);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,16*16,$10000*8,$20000*8,$0*8);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //final
 reset_dec8;
 iniciar_dec8:=true;

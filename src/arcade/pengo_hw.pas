@@ -89,10 +89,6 @@ while EmuStatus=EsRuning do begin
       if irq_enable then z80_0.change_irq(HOLD_LINE);
     end;
   end;
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
   eventos_pengo;
   video_sync;
 end;
@@ -120,9 +116,9 @@ case direccion of
                      memoria[direccion]:=valor;
                 end;
    $8800..$8fff,$9020..$902f:memoria[direccion]:=valor;
-   $9000..$901f:namco_sound.registros_namco[direccion and $1f]:=valor;
+   $9000..$901f:namco_snd_0.regs[direccion and $1f]:=valor;
    $9040:irq_enable:=(valor<>0);
-   $9041:namco_sound.enabled:=valor<>0;
+   $9041:namco_snd_0.enabled:=valor<>0;
    $9042:if pal_bank<>valor then begin
             pal_bank:=valor;
             fillchar(gfx[0].buffer,$400,0);
@@ -139,11 +135,16 @@ case direccion of
 end;
 end;
 
+procedure pengo_sound_update;
+begin
+  namco_snd_0.update;
+end;
+
 //Main
 procedure reset_pengo;
 begin
  z80_0.reset;
- namco_sound_reset;
+ namco_snd_0.reset;
  reset_audio;
  marcade.in0:=$FF;
  marcade.in1:=$FF;
@@ -178,12 +179,13 @@ iniciar_video(224,288);
 //Main CPU
 z80_0:=cpu_z80.create(3072000,264);
 z80_0.change_ram_calls(pengo_getbyte,pengo_putbyte);
+z80_0.init_sound(pengo_sound_update);
 //cargar roms
 if not(cargar_roms(@memoria[0],@pengo_rom[0],'pengo.zip',0)) then exit;
 decrypt_sega(@memoria[0],@rom_opcode[0],2);
 //cargar sonido & iniciar_sonido
-namco_sound_init(3,false);
-if not(cargar_roms(@namco_sound.onda_namco[0],@pengo_sound,'pengo.zip')) then exit;
+namco_snd_0:=namco_snd_chip.create(3);
+if not(cargar_roms(namco_snd_0.get_wave_dir,@pengo_sound,'pengo.zip')) then exit;
 //organizar y convertir gfx
 if not(cargar_roms(@memoria_temp[0],@pengo_sprites,'pengo.zip',0)) then exit;
 copymemory(@memoria_temp[$2000],@memoria_temp[$1000],$1000);

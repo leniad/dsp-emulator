@@ -121,9 +121,12 @@ end;
 procedure mario_putbyte(direccion:word;valor:byte);
 begin
 if ((direccion<$6000) or (direccion>$efff)) then exit;
-memoria[direccion]:=valor;
 case direccion of
-    $7400..$77ff:gfx[0].buffer[direccion and $3ff]:=true;
+    $6000..$73ff:memoria[direccion]:=valor;
+    $7400..$77ff:if memoria[direccion]<>valor then begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                 end;
     $7c00:start_sample(0);
     $7c80:start_sample(1);
     $7d00:scroll_y:=valor+17;

@@ -1,4 +1,76 @@
 ﻿#DSP Emulator status<br>
+<b>31/12/16 - DSP Emulator 0.17b2 WIP. Source and windows 32bits updated</b><br>
+After three months entering and leaving the hospital, I have time to update the emulator. I hope I will recover soon and upload more updates<br>
+Merry Christmas and happy new year!<br>
+<pre>
+-General
+    +GFX engine: GFX functions optimizations, more speed
+    +UPD765
+        -Fixed next sector ID load function
+        -Fixed a stupid bug when reading a full track (Fixes Spectrum +3 'Platoon' and many others)
+    +Disk loading: Fixed some problems selecting compressed files
+    +DSK files: Fixed track number asignation
+    +Cleaning and optimizations in many drivers (input, video, controls, etc)
+    +Namco sound
+        -Converted to clases
+        -Fixed some bugs
+        -Converted to standard audio functions
+    +M680X: Added internal RAM
+    +Deco 16ic: Converted playfield RAM to word, changed functions and drivers
+    +Mouse: Created new functions to standarize the cursor show/hide and creation
+    +M68000: Fixed carry flag on opcode roxr.l
+    +OKI 6295: Added snapshot functions
+    +Samples: Fixed a bug assigning the audio channel
+-Amstrad CPC
+    +Fixed WAV tape file loading
+-Black Tiger
+    +Video optimizations
+-Asteroids HW
+    +Small audio optimizations
+    +A video rewrite needed!
+    +Asteroids: Small memory optimizations
+    +Lunar Lander: added driver, no sound
+-Express Raider
+    +ROMS updated to 'World V4'
+-Gunsmoke HW
+    +Added dip switches to all games
+    +Added a simulated copy protections
+-Higemaru
+    +Added dip switches
+    +Added P2 controls
+-Iron Horse
+    +Added dip switches
+    +Small video optimizations
+-Jackal
+    +Added dip switches
+-Jr Pacman
+    +Added dip switches
+    +Fixed screen rotation
+    +Added P2 controls
+-Shoot Out
+    +Optimized sprites
+    +Implemented IRQ
+-Vulgus
+    +Added dip switches
+    +Added P2 controls
+-Vigilante
+    +Updated ROMS to version 'World E'
+    +Fixed background scroll
+-Space Firebird
+    +Fixed dip switches
+-Combat School
+    +Video optimizations, more speed
+    +Added dip switches
+-Twin Cobra HW
+    +Implemented video on/off
+-Double Dragon 3 HW
+    +Added snapshot functions
+    +Double Dragon 3
+        -Fixed scroll ('Egypt' screen)
+        -Fixed controls
+    +The Combatribes: Added driver with sound
+</pre><br>
+<img src='http://img1.imagilive.com/1216/ctribes.png'><img src='http://img1.imagilive.com/1216/llander.png'><br>
 <b>22/10/16 - DSP Emulator 0.17b1 Final. All binary and source updated. New preview images (thanks to FJ Marti)</b><br><pre>
 -All previous WIP enhacements
 -General

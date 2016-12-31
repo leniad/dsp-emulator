@@ -264,7 +264,6 @@ while EmuStatus=EsRuning do begin
         if copy_sprites then copy_sprites_hw;
     end;
   end;
-  if sound_status.hay_sonido then namco_playsound;
   eventos_system86;
   video_sync;
 end;
@@ -273,7 +272,7 @@ end;
 function system86_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $4000..$43ff:system86_getbyte:=namcos1_cus30_r(direccion and $3ff);
+  $4000..$43ff:system86_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
   $6000..$7fff:system86_getbyte:=rom_bank[rom_nbank,direccion and $1fff];
   else system86_getbyte:=memoria[direccion];
 end;
@@ -284,7 +283,7 @@ begin
 case direccion of
   0..$1fff:if memoria[direccion]<>valor then gfx[0].buffer[direccion shr 1]:=true;
   $2000..$3fff:if memoria[direccion]<>valor then gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
-  $4000..$43ff:namcos1_cus30_w(direccion and $3ff,valor);
+  $4000..$43ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $5ff2:copy_sprites:=true;
   $8400:m6809_0.change_irq(CLEAR_LINE);
   $8800..$8fff:tile_bank:=bit_n(direccion,10);
@@ -324,7 +323,7 @@ begin
 case direccion of
   0..$1fff:if memoria[direccion]<>valor then gfx[0].buffer[direccion shr 1]:=true;
   $2000..$3fff:if memoria[direccion]<>valor then gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
-  $4000..$43ff:namcos1_cus30_w(direccion and $3ff,valor);
+  $4000..$43ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $5ff2:copy_sprites:=true;
   $6000..$7fff:begin
                  case ((direccion and $1e00) shr 9) of
@@ -398,27 +397,27 @@ end;
 function rthunder_mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$1f:rthunder_mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
-  $1000..$13ff:rthunder_mcu_getbyte:=namcos1_cus30_r(direccion and $3ff);
+  $0..$ff:rthunder_mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
+  $1000..$13ff:rthunder_mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
+  $1400..$1fff,$4000..$bfff,$f000..$ffff:rthunder_mcu_getbyte:=mem_snd[direccion];
   $2001:rthunder_mcu_getbyte:=ym2151_0.status;
   $2020:rthunder_mcu_getbyte:=marcade.in0;
   $2021:rthunder_mcu_getbyte:=marcade.in1;
   $2030:rthunder_mcu_getbyte:=$ff;
   $2031:rthunder_mcu_getbyte:=dip_2;
-    else rthunder_mcu_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure rthunder_mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
-  $1000..$13ff:namcos1_cus30_w(direccion and $3ff,valor);
+  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
+  $1000..$13ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
+  $1400..$1fff:mem_snd[direccion]:=valor;
   $2000:ym2151_0.reg(valor);
   $2001:ym2151_0.write(valor);
   $4000..$bfff,$f000..$ffff:exit;
 end;
-mem_snd[direccion]:=valor;
 end;
 
 //Hopping Mappy
@@ -453,15 +452,17 @@ begin
   in_port2:=$ff;
 end;
 
-procedure sound_update;
+procedure sound_update_rthunder;
 begin
   ym2151_0.update;
+  namco_snd_0.update;
 end;
 
 procedure sound_update_adpcm;
 begin
   ym2151_0.update;
   namco_63701x_update;
+  namco_snd_0.update;
 end;
 
 //Main
@@ -472,7 +473,7 @@ begin
  m6809_0.reset;
  m6809_1.reset;
  m6800_0.reset;
- namco_sound_reset;
+ namco_snd_0.reset;
  ym2151_0.reset;
  if main_vars.tipo_maquina=124 then namco_63701x_reset;
  reset_audio;
@@ -574,10 +575,10 @@ m6809_1:=cpu_m6809.Create(1536000,256);
 m6800_0:=cpu_m6800.create(6144000,$100,cpu_hd63701);
 m6800_0.change_ram_calls(rthunder_mcu_getbyte,rthunder_mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
-if main_vars.tipo_maquina<>124 then m6800_0.init_sound(sound_update)
+if main_vars.tipo_maquina<>124 then m6800_0.init_sound(sound_update_rthunder)
   else m6800_0.init_sound(sound_update_adpcm);
 //Sound
-namco_sound_init(8,true);
+namco_snd_0:=namco_snd_chip.create(8,true);
 ym2151_0:=ym2151_chip.create(3579580,0.4);
 case main_vars.tipo_maquina of
     124:begin

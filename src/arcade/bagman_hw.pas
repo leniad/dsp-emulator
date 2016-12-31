@@ -132,9 +132,12 @@ end;
 procedure bagman_putbyte(direccion:word;valor:byte);
 begin
 if ((direccion<$6000) or (direccion>$bfff)) then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $9000..$93ff,$9800..$9bff:gfx[0].buffer[direccion and $3ff]:=true;
+  $6000..$67ff:memoria[direccion]:=valor;
+  $9000..$93ff,$9800..$9bff:if memoria[direccion]<>valor then begin
+                                gfx[0].buffer[direccion and $3ff]:=true;
+                                memoria[direccion]:=valor;
+                            end;
   $a000:irq_enable:=(valor and 1)<>0;
   $a001..$a002:main_screen.flip_main_screen:=(valor and 1)<>1;
   $a003:video_enable:=(valor and 1)<>0;

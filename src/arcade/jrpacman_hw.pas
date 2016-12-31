@@ -5,14 +5,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine;
 
-procedure cargar_jrPacman;
+procedure cargar_jrpacman;
 
 implementation
-type
-      tipo_table_dec=record
-                  count:word;
-                  val:byte;
-                end;
 
 const
         //JR. Pac-man
@@ -26,30 +21,19 @@ const
         jrpacman_char:array[0..2] of tipo_roms=(
         (n:'jrp2c.bin';l:$2000;p:0;crc:$0527ff9b),(n:'jrp2e.bin';l:$2000;p:$2000;crc:$73477193),());
         jrpacman_sound:tipo_roms=(n:'jrprom.7p';l:$100;p:0;crc:$a9cc86bf);
-        table:array[0..79] of tipo_table_dec=(
-        (count:$00C1;val:$00),(count:$0002;val:$80),(count:$0004;val:$00),(count:$0006;val:$80),
-    		(count:$0003;val:$00),(count:$0002;val:$80),(count:$0009;val:$00),(count:$0004;val:$80),
-    		(count:$9968;val:$00),(count:$0001;val:$80),(count:$0002;val:$00),(count:$0001;val:$80),
-    		(count:$0009;val:$00),(count:$0002;val:$80),(count:$0009;val:$00),(count:$0001;val:$80),
-    		(count:$00AF;val:$00),(count:$000E;val:$04),(count:$0002;val:$00),(count:$0004;val:$04),
-    		(count:$001E;val:$00),(count:$0001;val:$80),(count:$0002;val:$00),(count:$0001;val:$80),
-    		(count:$0002;val:$00),(count:$0002;val:$80),(count:$0009;val:$00),(count:$0002;val:$80),
-    		(count:$0009;val:$00),(count:$0002;val:$80),(count:$0083;val:$00),(count:$0001;val:$04),
-    		(count:$0001;val:$01),(count:$0001;val:$00),(count:$0002;val:$05),(count:$0001;val:$00),
-    		(count:$0003;val:$04),(count:$0003;val:$01),(count:$0002;val:$00),(count:$0001;val:$04),
-    		(count:$0003;val:$01),(count:$0003;val:$00),(count:$0003;val:$04),(count:$0001;val:$01),
-    		(count:$002E;val:$00),(count:$0078;val:$01),(count:$0001;val:$04),(count:$0001;val:$05),
-    		(count:$0001;val:$00),(count:$0001;val:$01),(count:$0001;val:$04),(count:$0002;val:$00),
-    		(count:$0001;val:$01),(count:$0001;val:$04),(count:$0002;val:$00),(count:$0001;val:$01),
-    		(count:$0001;val:$04),(count:$0002;val:$00),(count:$0001;val:$01),(count:$0001;val:$04),
-    		(count:$0001;val:$05),(count:$0001;val:$00),(count:$0001;val:$01),(count:$0001;val:$04),
-    		(count:$0002;val:$00),(count:$0001;val:$01),(count:$0001;val:$04),(count:$0002;val:$00),
-    		(count:$0001;val:$01),(count:$0001;val:$04),(count:$0001;val:$05),(count:$0001;val:$00),
-    		(count:$01B0;val:$01),(count:$0001;val:$00),(count:$0002;val:$01),(count:$00AD;val:$00),
-    		(count:$0031;val:$01),(count:$005C;val:$00),(count:$0005;val:$01),(count:$604E;val:$00));
+        //DIP
+        jrpacman_dip_a:array [0..1] of def_dip=(
+        (mask:$10;name:'Rack Test (Cheat)';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        jrpacman_dip_b:array [0..1] of def_dip=(
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        jrpacman_dip_c:array [0..4] of def_dip=(
+        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$4;dip_name:'2'),(dip_val:$8;dip_name:'3'),(dip_val:$c;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'10K'),(dip_val:$10;dip_name:'15K'),(dip_val:$20;dip_name:'20K'),(dip_val:$30;dip_name:'30K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$40;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- irq_vblank,bg_prio:boolean;
+ irq_vblank,bg_prio,flip_screen:boolean;
  gfx_bank,colortable_bank,pal_bank,scroll_x,sprite_bank:byte;
 
 procedure draw_sprites;inline;
@@ -69,8 +53,14 @@ for f:=7 downto 0 do begin
   atrib:=memoria[$4ff0+(f*2)];
   nchar:=(atrib shr 2)+(sprite_bank shl 6);
   color:=((memoria[$4ff1+(f*2)] and $1f) or (colortable_bank shl 5) or (pal_bank shl 6)) shl 2;
-  x:=240-memoria[$5060+(f*2)];
-  y:=272-memoria[$5061+(f*2)];
+  if flip_screen then begin
+    atrib:=atrib xor 3;
+    x:=memoria[$5060+(f*2)]-31;
+    y:=memoria[$5061+(f*2)];
+  end else begin
+    x:=240-memoria[$5060+(f*2)];
+    y:=272-memoria[$5061+(f*2)];
+  end;
   put_gfx_sprite_mask(nchar,color,(atrib and 2)<>0,(atrib and 1)<>0,1,0,$f);
   actualiza_gfx_sprite((x-1) and $ff,y,2,1);
 end;
@@ -88,9 +78,9 @@ for x:=0 to 53 do begin
 	   if (((sy and $20)<>0) and ((sx and $20)<>0)) then offs:=0
 	    else if (sy and $20)<>0 then offs:=sx+(((sy and $3) or $38) shl 5)
 	      else offs:=sy+(sx shl 5);
-     if offs<$700 then color_index:=offs and $1f
-          else color_index:=offs+$80;
      if gfx[0].buffer[offs] then begin
+        if offs<$700 then color_index:=offs and $1f
+          else color_index:=offs+$80;
         color:=(((memoria[$4000+color_index]) and $1f) or (colortable_bank shl 5) or (pal_bank shl 6)) shl 2;
         nchar:=memoria[$4000+offs]+(gfx_bank shl 8);
         if bg_prio then put_gfx(x*8,y*8,nchar,color,1,0)
@@ -117,12 +107,18 @@ end;
 procedure eventos_jrpacman;
 begin
 if event.arcade then begin
+  //P1
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  //P2
+  if arcade_input.up[1] then marcade.in0:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
 end;
@@ -144,10 +140,6 @@ while EmuStatus=EsRuning do begin
       if irq_vblank then z80_0.change_irq(HOLD_LINE);
     end;
   end;
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
   eventos_jrpacman;
   video_sync;
 end;
@@ -156,10 +148,10 @@ end;
 function jrpacman_getbyte(direccion:word):byte;
 begin
 case direccion of
-        0..$4fff,$8000..$dfff:jrpacman_getbyte:=memoria[direccion];
-        $5000..$503f:jrpacman_getbyte:=marcade.in0;
-        $5040..$507f:jrpacman_getbyte:=marcade.in1;
-        $5080..$50bf:jrpacman_getbyte:=marcade.in2;
+  0..$4fff,$8000..$dfff:jrpacman_getbyte:=memoria[direccion];
+  $5000..$503f:jrpacman_getbyte:=marcade.in0 or marcade.dswa;
+  $5040..$507f:jrpacman_getbyte:=marcade.in1 or marcade.dswb;
+  $5080..$50bf:jrpacman_getbyte:=marcade.dswc;
 end;
 end;
 
@@ -177,10 +169,18 @@ procedure jrpacman_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
         $0..$3fff,$8000..$dfff:exit;
-        $4000..$47ff:clean_tiles(direccion and $7ff);
+        $4000..$47ff:if memoria[direccion]<>valor then begin
+                        clean_tiles(direccion and $7ff);
+                        memoria[direccion]:=valor;
+                     end;
+        $4800..$4fff,$5060..$506f:memoria[direccion]:=valor;
         $5000:irq_vblank:=valor<>0;
-        $5001:namco_sound.enabled:=valor<>0;
-        $5040..$505f:namco_sound.registros_namco[direccion and $1f]:=valor;
+        $5001:namco_snd_0.enabled:=(valor and 1)<>0;
+        $5003:begin
+                flip_screen:=(valor and $1)<>0;
+                main_screen.flip_main_screen:=flip_screen;
+              end;
+        $5040..$505f:namco_snd_0.regs[direccion and $1f]:=valor;
         $5070:if pal_bank<>valor then begin
                 pal_bank:=valor;
                 fillchar(gfx[0].buffer,$800,1);
@@ -200,7 +200,11 @@ case direccion of
         $5075:sprite_bank:=valor and 1;
         $5080:scroll_x:=208-valor;
 end;
-memoria[direccion]:=valor;
+end;
+
+procedure jrpacman_sound_update;
+begin
+  namco_snd_0.update;
 end;
 
 procedure jrpacman_outbyte(valor:byte;puerto:word);
@@ -212,27 +216,32 @@ end;
 procedure reset_jrpacman;
 begin
  z80_0.reset;
- namco_sound_reset;
+ namco_snd_0.reset;
  reset_audio;
  irq_vblank:=false;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$C9;
+ marcade.in0:=$ef;
+ marcade.in1:=$7f;
  gfx_bank:=0;
  colortable_bank:=0;
  pal_bank:=0;
  scroll_x:=0;
  sprite_bank:=0;
  bg_prio:=true;
+ flip_screen:=false;
 end;
 
 function iniciar_jrpacman:boolean;
+type
+  tipo_table_dec=record
+                    count:word;
+                    val:byte;
+                 end;
 var
-      colores:tpaleta;
-      f,h,a:word;
-      bit0,bit1,bit2:byte;
-      memoria_temp:array[0..$ffff] of byte;
-      rweights,gweights,bweights:array[0..3] of single;
+  colores:tpaleta;
+  h,a:word;
+  f,bit0,bit1,bit2:byte;
+  memoria_temp:array[0..$ffff] of byte;
+  rweights,gweights,bweights:array[0..3] of single;
 const
   ps_x:array[0..15] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
 			24*8+0, 24*8+1, 24*8+2, 24*8+3, 0, 1, 2, 3);
@@ -241,6 +250,28 @@ const
   pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
   pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   resistances:array[0..2] of integer=(1000,470,220);
+  //Proteccion
+  table:array[0..79] of tipo_table_dec=(
+  (count:$00C1;val:$00),(count:$0002;val:$80),(count:$0004;val:$00),(count:$0006;val:$80),
+  (count:$0003;val:$00),(count:$0002;val:$80),(count:$0009;val:$00),(count:$0004;val:$80),
+  (count:$9968;val:$00),(count:$0001;val:$80),(count:$0002;val:$00),(count:$0001;val:$80),
+  (count:$0009;val:$00),(count:$0002;val:$80),(count:$0009;val:$00),(count:$0001;val:$80),
+  (count:$00AF;val:$00),(count:$000E;val:$04),(count:$0002;val:$00),(count:$0004;val:$04),
+  (count:$001E;val:$00),(count:$0001;val:$80),(count:$0002;val:$00),(count:$0001;val:$80),
+  (count:$0002;val:$00),(count:$0002;val:$80),(count:$0009;val:$00),(count:$0002;val:$80),
+  (count:$0009;val:$00),(count:$0002;val:$80),(count:$0083;val:$00),(count:$0001;val:$04),
+  (count:$0001;val:$01),(count:$0001;val:$00),(count:$0002;val:$05),(count:$0001;val:$00),
+  (count:$0003;val:$04),(count:$0003;val:$01),(count:$0002;val:$00),(count:$0001;val:$04),
+  (count:$0003;val:$01),(count:$0003;val:$00),(count:$0003;val:$04),(count:$0001;val:$01),
+  (count:$002E;val:$00),(count:$0078;val:$01),(count:$0001;val:$04),(count:$0001;val:$05),
+  (count:$0001;val:$00),(count:$0001;val:$01),(count:$0001;val:$04),(count:$0002;val:$00),
+  (count:$0001;val:$01),(count:$0001;val:$04),(count:$0002;val:$00),(count:$0001;val:$01),
+  (count:$0001;val:$04),(count:$0002;val:$00),(count:$0001;val:$01),(count:$0001;val:$04),
+  (count:$0001;val:$05),(count:$0001;val:$00),(count:$0001;val:$01),(count:$0001;val:$04),
+  (count:$0002;val:$00),(count:$0001;val:$01),(count:$0001;val:$04),(count:$0002;val:$00),
+  (count:$0001;val:$01),(count:$0001;val:$04),(count:$0001;val:$05),(count:$0001;val:$00),
+  (count:$01B0;val:$01),(count:$0001;val:$00),(count:$0002;val:$01),(count:$00AD;val:$00),
+  (count:$0031;val:$01),(count:$005C;val:$00),(count:$0005;val:$01),(count:$604E;val:$00));
 begin
 iniciar_jrpacman:=false;
 iniciar_audio(false);
@@ -253,7 +284,8 @@ iniciar_video(224,288);
 z80_0:=cpu_z80.create(3072000,224);
 z80_0.change_ram_calls(jrpacman_getbyte,jrpacman_putbyte);
 z80_0.change_io_calls(nil,jrpacman_outbyte);
-namco_sound_init(3,false);
+z80_0.init_sound(jrpacman_sound_update);
+namco_snd_0:=namco_snd_chip.create(3);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@jrpacman_rom[0],'jrpacman.zip',0)) then exit;
 a:=0;
@@ -264,7 +296,7 @@ for f:=0 to 79 do begin
     end;
 end;
 //cargar sonido & iniciar_sonido
-if not(cargar_roms(@namco_sound.onda_namco[0],@jrpacman_sound,'jrpacman.zip',1)) then exit;
+if not(cargar_roms(namco_snd_0.get_wave_dir,@jrpacman_sound,'jrpacman.zip',1)) then exit;
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@jrpacman_char[0],'jrpacman.zip',0)) then exit;
 init_gfx(0,8,8,$200);
@@ -277,42 +309,46 @@ gfx_set_desc_data(2,0,64*8,0,4);
 convert_gfx(1,0,@memoria_temp[$2000],@ps_x[0],@ps_y[0],true,false);
 //poner la paleta
 if not(cargar_roms(@memoria_temp[0],@jrpacman_pal[0],'jrpacman.zip',0)) then exit;
-for f:=0 to $ff do begin
-  memoria_temp[f+$300]:=(memoria_temp[f+0] and $f)+((memoria_temp[f+$100] and $f) shl 4);
-end;
 compute_resistor_weights(0,	255, -1.0,
 			3,@resistances[0],@rweights[0],0,0,
 			3,@resistances[0],@gweights[0],0,0,
-			2,@resistances[1],@bweights[0],0,0);
+	    2,@resistances[1],@bweights[0],0,0);
 for f:=0 to $ff do begin
-		// red component */
-		bit0:=(memoria_temp[$300+f] shr 0) and $01;
-		bit1:=(memoria_temp[$300+f] shr 1) and $01;
-		bit2:=(memoria_temp[$300+f] shr 2) and $01;
-		colores[f].r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
-		// green component */
-		bit0:=(memoria_temp[$300+f] shr 3) and $01;
-		bit1:=(memoria_temp[$300+f] shr 4) and $01;
-		bit2:=(memoria_temp[$300+f] shr 5) and $01;
-		colores[f].g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
-		// blue component */
-		bit0:=(memoria_temp[$300+f] shr 6) and $01;
-		bit1:=(memoria_temp[$300+f] shr 7) and $01;
-		colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
-end;
-set_pal(colores,$20);
-for f:=0 to 255 do begin
+  h:=(memoria_temp[f] and $f)+((memoria_temp[f+$100] and $f) shl 4);
+	// red component */
+	bit0:=(h shr 0) and $01;
+	bit1:=(h shr 1) and $01;
+	bit2:=(h shr 2) and $01;
+	colores[f].r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
+	// green component */
+	bit0:=(h shr 3) and $01;
+	bit1:=(h shr 4) and $01;
+	bit2:=(h shr 5) and $01;
+	colores[f].g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
+	// blue component */
+	bit0:=(h shr 6) and $01;
+	bit1:=(h shr 7) and $01;
+	colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
+  //Indirect tables
   gfx[0].colores[f]:=memoria_temp[$200+f] and $f;
   gfx[1].colores[f]:=memoria_temp[$200+f] and $f;
   gfx[0].colores[f+$100]:=(memoria_temp[$200+f] and $f)+$10;
   gfx[1].colores[f+$100]:=(memoria_temp[$200+f] and $f)+$10;
 end;
+set_pal(colores,$100);
+//DIP
+marcade.dswa:=$10;
+marcade.dswb:=$80;
+marcade.dswc:=$c9;
+marcade.dswa_val:=@jrpacman_dip_a;
+marcade.dswb_val:=@jrpacman_dip_b;
+marcade.dswc_val:=@jrpacman_dip_c;
 //final
 reset_jrpacman;
 iniciar_jrpacman:=true;
 end;
 
-procedure Cargar_JrPacman;
+procedure cargar_jrpacman;
 begin
 llamadas_maquina.iniciar:=iniciar_jrpacman;
 llamadas_maquina.bucle_general:=jrpacman_principal;

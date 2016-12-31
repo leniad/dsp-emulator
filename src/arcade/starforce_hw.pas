@@ -39,6 +39,7 @@ const
         (mask:$38;name:'Difficulty';number:6;dip:((dip_val:$0;dip_name:'Easyest'),(dip_val:$8;dip_name:'Easy'),(dip_val:$10;dip_name:'Medium'),(dip_val:$18;dip_name:'Difficult'),(dip_val:$20;dip_name:'Hard'),(dip_val:$28;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),())),());
         starforce_dipc:array [0..1] of def_dip=(
         (mask:$1;name:'Inmunnity';number:2;dip:((dip_val:$1;dip_name:'On'),(dip_val:$0;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
 var
  x1,x2,x3:word;
  y1,y2,y3,sound_latch:byte;
@@ -226,30 +227,45 @@ end;
 procedure starforce_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $9000..$97ff:gfx[0].buffer[direccion and $3ff]:=true;
+        $8000..$8fff,$9800..$987f,$b800..$bbff:memoria[direccion]:=valor;
+        $9000..$97ff:if memoria[direccion]<>valor then begin
+                        gfx[0].buffer[direccion and $3ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $9c00..$9dff:if buffer_paleta[direccion and $1ff]<>valor then begin
                         buffer_paleta[direccion and $1ff]:=valor;
                         cambiar_color(direccion and $1ff);
                      end;
-        $9e00..$9e3f:case (direccion and $3f) of
-                        $20:x3:=(x3 and $100) or not(valor);
-                        $21:x3:=(x3 and $ff) or ((valor and 1) shl 8);
-                        $25:if main_screen.flip_main_screen then y3:=not(valor)
-                              else y3:=valor;
-                        $28:x2:=(x2 and $100) or not(valor);
-                        $29:x2:=(x2 and $ff) or ((valor and 1) shl 8);
-                        $2d:if main_screen.flip_main_screen then y2:=not(valor)
-                              else y2:=valor;
-                        $30:x1:=(x1 and $100) or not(valor);
-                        $31:x1:=(x1 and $ff) or ((valor and 1) shl 8);
-                        $35:if main_screen.flip_main_screen then y1:=not(valor)
-                              else y1:=valor;
+        $9e00..$9e3f:begin
+                        case (direccion and $3f) of
+                          $20:x3:=(x3 and $100) or not(valor);
+                          $21:x3:=(x3 and $ff) or ((valor and 1) shl 8);
+                          $25:if main_screen.flip_main_screen then y3:=not(valor)
+                                else y3:=valor;
+                          $28:x2:=(x2 and $100) or not(valor);
+                          $29:x2:=(x2 and $ff) or ((valor and 1) shl 8);
+                          $2d:if main_screen.flip_main_screen then y2:=not(valor)
+                                else y2:=valor;
+                          $30:x1:=(x1 and $100) or not(valor);
+                          $31:x1:=(x1 and $ff) or ((valor and 1) shl 8);
+                          $35:if main_screen.flip_main_screen then y1:=not(valor)
+                                else y1:=valor;
+                        end;
+                        memoria[direccion]:=valor;
                      end;
-        $a000..$a7ff:gfx[3].buffer[direccion and $7ff]:=true;
-        $a800..$afff:gfx[4].buffer[direccion and $7ff]:=true;
-        $b000..$b7ff:gfx[5].buffer[direccion and $7ff]:=true;
+        $a000..$a7ff:if memoria[direccion]<>valor then begin
+                        gfx[3].buffer[direccion and $7ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
+        $a800..$afff:if memoria[direccion]<>valor then begin
+                        gfx[4].buffer[direccion and $7ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
+        $b000..$b7ff:if memoria[direccion]<>valor then begin
+                        gfx[5].buffer[direccion and $7ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $d000:main_screen.flip_main_screen:=(valor and 1)<>0;
         $d002:z80_0.change_irq(CLEAR_LINE);
         $d004:write_sound_command(valor);
@@ -258,14 +274,16 @@ end;
 
 function snd_getbyte(direccion:word):byte;
 begin
-if direccion<$4400 then snd_getbyte:=mem_snd[direccion];
+case direccion of
+  0..$1fff,$4000..$43ff:snd_getbyte:=mem_snd[direccion];
+end;
 end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
-mem_snd[direccion]:=valor;
+if direccion<$2000 then exit;
 case direccion of
+  $4000..$43ff:mem_snd[direccion]:=valor;
   $8000:sn_76496_0.Write(valor);
   $9000:sn_76496_1.Write(valor);
   $a000:sn_76496_2.Write(valor);
@@ -346,16 +364,12 @@ begin
 iniciar_starforce:=false;
 iniciar_audio(false);
 screen_init(1,256,256,false,true);
-//bg3
-screen_init(2,512,256);
+screen_init(2,512,256); //bg3
 screen_mod_scroll(2,512,256,511,256,256,255);
-//chars
-screen_init(3,256,256,true);
-//bg2
-screen_init(4,512,256,true);
+screen_init(3,256,256,true); //chars
+screen_init(4,512,256,true); //bg2
 screen_mod_scroll(4,512,256,511,256,256,255);
-//bg1
-screen_init(5,512,256,true);
+screen_init(5,512,256,true); //bg1
 screen_mod_scroll(5,512,256,511,256,256,255);
 iniciar_video(224,256);
 //Main CPU
@@ -416,7 +430,6 @@ marcade.dswb:=0;
 marcade.dswb_val:=@starforce_dipb;
 marcade.dswc:=0;
 marcade.dswc_val:=@starforce_dipc;
-
 reset_starforce;
 iniciar_starforce:=true;
 end;

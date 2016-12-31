@@ -3,7 +3,7 @@ unit heavyunit_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,mcs51,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     kaneco_pandora,misc_functions,ym_2203,sound_engine;
+     kaneco_pandora,ym_2203,sound_engine,misc_functions;
 
 procedure cargar_hvyunit;
 
@@ -21,8 +21,7 @@ const
         hvyunit_gfx1:tipo_roms=(n:'b73_09.2p';l:$80000;p:0;crc:$537c647f);
 
 var
- sound_latch,nrom_cpu1,nrom_cpu2,nrom_cpu3,scroll_port:byte;
- scroll_x,scroll_y:byte;
+ sound_latch,nrom_cpu1,nrom_cpu2,nrom_cpu3,scroll_port,scroll_x,scroll_y:byte;
  rom_cpu1:array[0..7,0..$3fff] of byte;
  rom_cpu2,rom_cpu3:array[0..3,0..$3fff] of byte;
  //mermaid
@@ -33,7 +32,7 @@ var
 procedure update_video_hvyunit;inline;
 var
   f,color,nchar,atrib:word;
-  x,y:word;
+  x,y:byte;
 begin
 //background
 for f:=0 to $3ff do begin
@@ -105,7 +104,7 @@ while EmuStatus=EsRuning do begin
   frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
   case f of
     63:begin
-        z80_0.im2_lo:=$ff;
+         z80_0.im2_lo:=$ff;
          z80_0.change_irq(HOLD_LINE);
        end;
     239:begin
@@ -129,16 +128,16 @@ case direccion of
   $4000..$7fff:hvyunit_getbyte:=rom_cpu1[1,direccion and $3fff];
   $8000..$bfff:hvyunit_getbyte:=rom_cpu1[nrom_cpu1,direccion and $3fff];
   $c000..$cfff:hvyunit_getbyte:=pandora_spriteram_r(direccion and $fff);
-    else hvyunit_getbyte:=memoria[direccion];
+  $d000..$ffff:hvyunit_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure hvyunit_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
   $c000..$cfff:pandora_spriteram_w((direccion and $fff),valor);
+  $d000..$ffff:memoria[direccion]:=valor;
 end;
 end;
 
@@ -170,7 +169,10 @@ case direccion of
   $0..$3fff:hvyunit_misc_getbyte:=rom_cpu2[0,direccion];
   $4000..$7fff:hvyunit_misc_getbyte:=rom_cpu2[1,direccion and $3fff];
   $8000..$bfff:hvyunit_misc_getbyte:=rom_cpu2[nrom_cpu2,direccion and $3fff];
-  $c000..$dfff:hvyunit_misc_getbyte:=mem_misc[direccion];
+  $c000..$cfff:hvyunit_misc_getbyte:=mem_misc[direccion];
+  $d000..$d1ff:hvyunit_misc_getbyte:=buffer_paleta[direccion and $1ff];
+  $d200..$d7ff,$da00..$dfff:hvyunit_misc_getbyte:=mem_misc[direccion];
+  $d800..$d9ff:hvyunit_misc_getbyte:=buffer_paleta[(direccion and $1ff)+$200];
   $e000..$ffff:hvyunit_misc_getbyte:=memoria[direccion];
 end;
 end;
@@ -178,16 +180,19 @@ end;
 procedure hvyunit_misc_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-mem_misc[direccion]:=valor;
 case direccion of
-  $c000..$c7ff:gfx[1].buffer[direccion and $3ff]:=true;
-  $d000..$d1ff:if buffer_paleta[direccion and $1ff]<>valor then begin
-                buffer_paleta[direccion and $1ff]:=valor;
-                cambiar_color(direccion and $1ff);
+  $c000..$c7ff:if mem_misc[direccion]<>valor then begin
+                  gfx[1].buffer[direccion and $3ff]:=true;
+                  mem_misc[direccion]:=valor;
                end;
+  $d000..$d1ff:if buffer_paleta[direccion and $1ff]<>valor then begin
+                  buffer_paleta[direccion and $1ff]:=valor;
+                  cambiar_color(direccion and $1ff);
+               end;
+  $d200..$d7ff,$da00..$dfff:mem_misc[direccion]:=valor;
   $d800..$d9ff:if buffer_paleta[(direccion and $1ff)+$200]<>valor then begin
-                buffer_paleta[(direccion and $1ff)+$200]:=valor;
-                cambiar_color(direccion and $1ff);
+                  buffer_paleta[(direccion and $1ff)+$200]:=valor;
+                  cambiar_color(direccion and $1ff);
                end;
   $e000..$ffff:memoria[direccion]:=valor;
 end;
@@ -232,7 +237,7 @@ case direccion of
   $0..$3fff:snd_getbyte:=rom_cpu3[0,direccion];
   $4000..$7fff:snd_getbyte:=rom_cpu3[1,direccion and $3fff];
   $8000..$bfff:snd_getbyte:=rom_cpu3[nrom_cpu3,direccion and $3fff];
-  $c000..$ffff:snd_getbyte:=mem_snd[direccion];
+  $c000..$c7ff:snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
@@ -267,21 +272,18 @@ end;
 
 procedure mcu_out_port0(valor:byte);
 begin
-  if ((BIT_n(mermaid_p[0],1)=0) and (BIT_n(valor,1)<>0)) then begin
+  if (((mermaid_p[0] and 2)=0) and ((valor and 2)<>0)) then begin
 		mermaid_to_z80_full:=1;
 		data_to_z80:=mermaid_p[1];
 	end;
-	if BIT_n(valor,0)=1 then z80_to_mermaid_full:=0;
+	if (valor and 1)=1 then z80_to_mermaid_full:=0;
 	mermaid_p[0]:=valor;
 end;
 
 function mcu_in_port1:byte;
-var
-  ret:byte;
 begin
-  if (BIT_n(mermaid_p[0],0)=0) then ret:=data_to_mermaid
-	  else ret:=0;
-  mcu_in_port1:=ret;
+  if (mermaid_p[0] and 1)=0 then mcu_in_port1:=data_to_mermaid
+	  else mcu_in_port1:=0;
 end;
 
 procedure mcu_out_port1(valor:byte);
@@ -294,16 +296,13 @@ begin
 end;
 
 function mcu_in_port2:byte;
-var
-  ret:byte;
 begin
   case ((mermaid_p[0] shr 2) and 3) of
-		0:ret:=marcade.in1;
-		1:ret:=marcade.in2;
-		2:ret:=marcade.in0;
-		  else ret:=$ff;
+		0:mcu_in_port2:=marcade.in1;
+		1:mcu_in_port2:=marcade.in2;
+		2:mcu_in_port2:=marcade.in0;
+		  else mcu_in_port2:=$ff;
   end;
-  mcu_in_port2:=ret;
 end;
 
 procedure mcu_out_port2(valor:byte);
@@ -406,7 +405,7 @@ pandora.mask_nchar:=$3fff;
 pandora.color_offset:=$100;
 pandora.clear_screen:=false;
 //Sound Chip
-ym2203_0:=ym2203_chip.create(3000000);
+ym2203_0:=ym2203_chip.create(3000000,0.8,0.8);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@hvyunit_cpu1,'hvyunit.zip',1)) then exit;
 for f:=0 to 7 do copymemory(@rom_cpu1[f,0],@memoria_temp[f*$4000],$4000);

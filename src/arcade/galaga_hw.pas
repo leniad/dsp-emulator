@@ -212,6 +212,7 @@ end;
 procedure galaga_sound_update;
 begin
   samples_update;
+  namco_snd_0.update;
 end;
 
 procedure galaga_principal;
@@ -248,7 +249,6 @@ while EmuStatus=EsRuning do begin
         copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
     end;
   end;
-  if sound_status.hay_sonido then namco_playsound;
   eventos_galaga;
   video_sync;
 end;
@@ -287,7 +287,7 @@ procedure galaga_putbyte(direccion:word;valor:byte);
 begin
 if (direccion<$4000) then exit;
 case direccion of
-    $6800..$681f:namco_sound.registros_namco[direccion and $1f]:=valor;
+    $6800..$681f:namco_snd_0.regs[direccion and $1f]:=valor;
     $6820..$6827:galaga_latch(direccion and $7,valor);
     $7000..$70ff:namco_06xx_data_w(direccion and $ff,0,valor);
     $7100..$7100:namco_06xx_ctrl_w(0,valor);
@@ -458,10 +458,6 @@ while EmuStatus=EsRuning do begin
     update_video_digdug;
   end;
  end;
- if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
- end;
  eventos_galaga;
  video_sync;
 end;
@@ -474,7 +470,7 @@ var
 begin
 if (direccion<$4000) then exit;
 case direccion of
-    $6800..$681f:namco_sound.registros_namco[direccion and $1f]:=valor;
+    $6800..$681f:namco_snd_0.regs[direccion and $1f]:=valor;
     $6820..$6827:galaga_latch(direccion and $7,valor);
     $7000..$70ff:namco_06xx_data_w(direccion and $ff,0,valor);
     $7100..$7100:namco_06xx_ctrl_w(0,valor);
@@ -545,6 +541,11 @@ case direccion of
 end;
 end;
 
+procedure digdug_sound_update;
+begin
+  namco_snd_0.update;
+end;
+
 //Xevious
 procedure draw_sprites_xevious;
 var
@@ -663,10 +664,6 @@ while EmuStatus=EsRuning do begin
     update_video_xevious;
   end;
  end;
- if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
- end;
  eventos_galaga;
  video_sync;
 end;
@@ -679,7 +676,7 @@ var
 begin
 if (direccion<$4000) then exit;
 case direccion of
-    $6800..$681f:namco_sound.registros_namco[direccion and $1f]:=valor;
+    $6800..$681f:namco_snd_0.regs[direccion and $1f]:=valor;
     $6820..$6827:galaga_latch(direccion and $7,valor);
     $6830:;
     $7000..$70ff:namco_06xx_data_w(direccion and $ff,0,valor);
@@ -825,7 +822,7 @@ begin
           xevious_bs[1]:=0;
        end;
  end;
- namco_sound_reset;
+ namco_snd_0.reset;
  reset_audio;
  namcoio_06xx_reset(0);
  main_irq:=false;
@@ -891,7 +888,7 @@ z80_2:=cpu_z80.create(3072000,264);
 //Sub2 CPU
 z80_1:=cpu_z80.create(3072000,264);
 //Sound
-namco_sound_init(3,false);
+namco_snd_0:=namco_snd_chip.create(3);
 //IO's
 namcoio_51xx_init(@marcade.in0,@marcade.in1);
 case main_vars.tipo_maquina of
@@ -899,6 +896,7 @@ case main_vars.tipo_maquina of
           //CPU's
           //Main
           z80_0.change_ram_calls(galaga_getbyte,galaga_putbyte);
+          z80_0.init_sound(galaga_sound_update);
           //Sub1
           z80_2.change_ram_calls(galaga_sub_getbyte,galaga_putbyte);
           //Sub2
@@ -907,13 +905,13 @@ case main_vars.tipo_maquina of
           namco_06xx_init(0,IO51XX,NONE,NONE,IO54XX,namco_06xx_nmi);
           //Namco 54xx
           if not(namcoio_54xx_init('galaga.zip')) then exit;
-          if load_samples('galaga.zip',@galaga_samples[0],num_samples_galaga) then z80_0.init_sound(galaga_sound_update);
+          load_samples('galaga.zip',@galaga_samples[0],num_samples_galaga);
           //cargar roms
           if not(cargar_roms(@memoria[0],@galaga_rom[0],'galaga.zip',0)) then exit;
           if not(cargar_roms(@mem_snd[0],@galaga_sub,'galaga.zip',1)) then exit;
           if not(cargar_roms(@mem_misc[0],@galaga_sub2,'galaga.zip',1)) then exit;
           //cargar sonido & iniciar_sonido
-          if not(cargar_roms(@namco_sound.onda_namco[0],@galaga_sound,'galaga.zip',1)) then exit;
+          if not(cargar_roms(namco_snd_0.get_wave_dir,@galaga_sound,'galaga.zip',1)) then exit;
           //convertir chars
           if not(cargar_roms(@memoria_temp[0],@galaga_char,'galaga.zip',1)) then exit;
           galaga_chr(0,$100);
@@ -947,6 +945,7 @@ case main_vars.tipo_maquina of
     167:begin //DigDug
           //Main
           z80_0.change_ram_calls(digdug_getbyte,digdug_putbyte);
+          z80_0.init_sound(digdug_sound_update);
           //Sub1
           z80_2.change_ram_calls(digdug_sub_getbyte,digdug_putbyte);
           //Sub2
@@ -960,7 +959,7 @@ case main_vars.tipo_maquina of
           if not(cargar_roms(@mem_snd[0],@digdug_sub,'digdug.zip',0)) then exit;
           if not(cargar_roms(@mem_misc[0],@digdug_sub2,'digdug.zip',1)) then exit;
           //cargar sonido & iniciar_sonido
-          if not(cargar_roms(@namco_sound.onda_namco[0],@digdug_sound,'digdug.zip',1)) then exit;
+          if not(cargar_roms(namco_snd_0.get_wave_dir,@digdug_sound,'digdug.zip',1)) then exit;
           //convertir chars
           if not(cargar_roms(@memoria_temp[0],@digdug_chars,'digdug.zip',1)) then exit;
           init_gfx(0,8,8,$200);
@@ -1006,13 +1005,14 @@ case main_vars.tipo_maquina of
           //Namco 54xx
           if not(namcoio_50xx_init('xevious.zip')) then exit;
           if not(namcoio_54xx_init('xevious.zip')) then exit;
-          if load_samples('xevious.zip',@xevious_samples[0],num_samples_xevious) then z80_0.init_sound(galaga_sound_update);
+          load_samples('xevious.zip',@xevious_samples[0],num_samples_xevious);
+          z80_0.init_sound(galaga_sound_update);
           //cargar roms
           if not(cargar_roms(@memoria[0],@xevious_rom[0],'xevious.zip',0)) then exit;
           if not(cargar_roms(@mem_snd[0],@xevious_sub,'xevious.zip',0)) then exit;
           if not(cargar_roms(@mem_misc[0],@xevious_sub2,'xevious.zip',1)) then exit;
           //cargar sonido & iniciar_sonido
-          if not(cargar_roms(@namco_sound.onda_namco[0],@xevious_sound,'xevious.zip',1)) then exit;
+          if not(cargar_roms(namco_snd_0.get_wave_dir,@xevious_sound,'xevious.zip',1)) then exit;
           //chars
           if not(cargar_roms(@memoria_temp[0],@xevious_char,'xevious.zip',1)) then exit;
           init_gfx(0,8,8,$200);

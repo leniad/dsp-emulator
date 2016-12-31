@@ -351,24 +351,15 @@ gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
 convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 //final
-old_cursor:=sdl_getcursor;
-sdl_setcursor(sdl_createcursor(@cdata,@cmask,16,16,7,7));
-sdl_showcursor(1);
+show_mouse_cursor;
 reset_opwolf;
 iniciar_opwolf:=true;
-end;
-
-procedure cerrar_opwolf;
-begin
-sdl_setcursor(old_cursor);
-sdl_showcursor(0);
 end;
 
 procedure Cargar_opwolf;
 begin
 llamadas_maquina.iniciar:=iniciar_opwolf;
 llamadas_maquina.bucle_general:=opwolf_principal;
-llamadas_maquina.close:=cerrar_opwolf;
 llamadas_maquina.reset:=reset_opwolf;
 end;
 

@@ -64,23 +64,23 @@ cadena:=file_name_only(changefileext(extractfilename(Directory.spectrum_48),''))
 //Aqui utilizo la memoria de la CPU de sonido como buffer...
 if extension_fichero(Directory.spectrum_48)='ZIP' then rom_cargada:=carga_rom_zip(Directory.spectrum_48,cadena+'.ROM',@mem_snd[0],$4000,0,false)
   else begin
-    rom_cargada:=read_file(Directory.spectrum_48,@mem_snd[0],pos);
+    rom_cargada:=read_file(Directory.spectrum_48,@mem_snd,pos);
     rom_cargada:=(pos=$4000);
   end;
 //Si ha ido mal me quejo, si ha ido bien copio la ROM a la memoria
 if not(rom_cargada) then begin
   MessageDlg(leng[main_vars.idioma].errores[0]+' "'+Directory.spectrum_48+'"', mtError,[mbOk], 0);
   exit;
-end else copymemory(@memoria[0],@mem_snd[0],$4000);
+end else copymemory(@memoria,@mem_snd,$4000);
 iniciar_audio(false);
-fillchar(var_spectrum.retraso[0],70000,0);
+fillchar(var_spectrum.retraso,70000,0);
 f:=14335;  //24 del borde
 for h:=0 to 191 do begin
-  copymemory(@var_spectrum.retraso[f],@cmemory[0],128);
+  copymemory(@var_spectrum.retraso[f],@cmemory,128);
   inc(f,224);
 end;
 pos:=14335; //deberia ser 14338
-fillchar(var_spectrum.ft_bus[0],70000*2,$ff);
+fillchar(var_spectrum.ft_bus,70000*2,$ff);
 for h:=0 to 191 do begin
   f:=$4000+((h mod $8)*$100);
   g:=$5800;
@@ -122,7 +122,7 @@ pos_video:=(linea and $f8) shl 2;
 spec_z80_reg:=spec_z80.get_internal_r;
 for x:=0 to 31 do begin
   atrib:=memoria[$5800+pos_video];
-  if ((spec_z80_reg.i>=$40) and (spec_z80_reg.i<=$7F)) then video:=memoria[$4000+tabla_scr[linea]+x+spec_z80_reg.r]
+  if ((spec_z80_reg.i>=$40) and (spec_z80_reg.i<=$7f)) then video:=memoria[$4000+tabla_scr[linea]+x+spec_z80_reg.r]
     else video:=memoria[$4000+tabla_scr[linea]+x];
   if ((var_spectrum.buffer_video[tabla_scr[linea]+x]) or (((atrib and $80)<>0)) and not(main_screen.rapido)) then begin
     var_spectrum.buffer_video[tabla_scr[linea]+x]:=false;
@@ -135,8 +135,15 @@ for x:=0 to 31 do begin
     end else begin
       color2:=(atrib shr 3) and 7;
       color:=atrib and 7;
-      if (atrib and 64)<>0 then begin color:=color+8;color2:=color2+8;end;
-      if (((atrib and 128)<>0) and var_spectrum.haz_flash) then begin temp:=color;color:=color2;color2:=temp;end;
+      if (atrib and 64)<>0 then begin
+        color:=color+8;
+        color2:=color2+8;
+      end;
+      if (((atrib and 128)<>0) and var_spectrum.haz_flash) then begin
+        temp:=color;
+        color:=color2;
+        color2:=temp;
+      end;
     end;
     if not(poner_linea) then exit;
     ptemp:=punbuf;
@@ -164,10 +171,9 @@ end;
 
 procedure borde_48_full(linea:word);
 var
-        linea_actual:word;
-        ptemp:pword;
-        f:word;
-        posicion:dword;
+  f,linea_actual:word;
+  ptemp:pword;
+  posicion:dword;
 begin
 //Si lo pongo antes no rellena la linea 15!!!!
 if ((main_screen.rapido and ((linea and 7)<>0)) or (linea<15) or (linea>303)) then exit;
@@ -267,8 +273,8 @@ end;
 
 procedure spec48_putbyte(direccion:word;valor:byte);
 var
-        temp,temp2:word;
-        f:byte;
+  temp,temp2:word;
+  f:byte;
 begin
 if spec_16k then direccion:=direccion and $7fff;
 if ((memoria[direccion]=valor) or (direccion<$4000)) then exit; //Si es igual me salgo

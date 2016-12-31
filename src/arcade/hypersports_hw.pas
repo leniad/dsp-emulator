@@ -124,7 +124,7 @@ case direccion of
   $1600:hypersports_getbyte:=marcade.dswb; //DSW2
   $1680:hypersports_getbyte:=marcade.in2; //SYSTEM
   $1681:hypersports_getbyte:=marcade.in0;
-  $1682:hypersports_getbyte:=marcade.in1;
+  $1682:hypersports_getbyte:=marcade.in1; //P3 y P4
   $1683:hypersports_getbyte:=marcade.dswa; //DSW1
   $4000..$ffff:if m6809_0.opcode then hypersports_getbyte:=mem_opcodes[direccion-$4000]
                   else hypersports_getbyte:=memoria[direccion];
@@ -140,7 +140,7 @@ case direccion of
   $1481:z80_0.change_irq(HOLD_LINE);
   $1487:irq_ena:=(valor<>0);
   $1500:sound_latch:=valor;
-  $2000..$2fff:begin
+  $2000..$2fff:if memoria[direccion]<>valor then begin
                    gfx[0].buffer[direccion and $7ff]:=true;
                    memoria[direccion]:=valor;
                end;

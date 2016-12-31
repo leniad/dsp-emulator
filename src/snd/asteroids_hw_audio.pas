@@ -341,8 +341,9 @@ begin
      sum:=sum+trunc(saucerfire/7);
      sum:=sum+trunc(shipfire/7);
      sum:=sum+trunc(life/7);
-     if not(hay_samples) then sum:=sum+trunc(explosion/7);
-    if sum>32767 then sum:=32767
+     if not(hay_samples) then sum:=sum+trunc(explosion/7)
+      else samples_update;
+     if sum>32767 then sum:=32767
        else if sum<-32767 then sum:=-32767;
     tsample[tsample_as,sound_status.posicion_sonido]:=sum;
 end;

@@ -107,25 +107,6 @@ const
   //Reservada la ultima para indicar que no hay tecla
   KEYBOARD_NONE=255;
 
-  cdata:array[0..63] of byte=(
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0);
-    cmask:array[0..63] of byte=(
-        3,192,15,240,28,56,56,28,
-        113,142,225,135,193,131,206,115,
-        206,115,193,131,225,135,113,142,
-        56,28,28,56,15,240,3,192,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0);
-
 type
     def_mouse = record
         x,y:word;
@@ -161,13 +142,14 @@ var
     analog:def_analog;
     raton:def_mouse;
     joystick_def:array[0..NUM_PLAYERS] of libsdlp_joystick;
-    //Cursor raton
-    old_cursor:libsdlP_cursor;
 
 procedure evalue_controls;
 procedure init_controls(evalue_mouse,evalue_keyboard,evalue_joystick,evalue_arcade:boolean);
 procedure open_joystick(player:byte);
 procedure close_joystick(num:byte);
+//Mouse cursor
+procedure show_mouse_cursor;
+procedure hide_mouse_cursor;
 //Analog
 procedure init_analog(cpu:byte;cpu_clock:integer;sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;reset_center:boolean=false);
 procedure analog_read;
@@ -177,6 +159,39 @@ uses principal;
 
 var
    keystate:pbyte=nil;
+   new_cursor:libsdlP_cursor;
+
+const
+    cdata:array[0..31] of byte=(
+        0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0);
+    cmask:array[0..31] of byte=(
+        3,192,15,240,28,56,56,28,
+        113,142,225,135,193,131,206,115,
+        206,115,193,131,225,135,113,142,
+        56,28,28,56,15,240,3,192);
+
+procedure show_mouse_cursor;
+begin
+{$ifndef fpc}
+new_cursor:=sdl_createcursor(@cdata,@cmask,16,16,7,7);
+{$else}
+new_cursor:=sdl_createsystemcursor(3);
+{$endif}
+sdl_setcursor(new_cursor);
+sdl_showcursor(1);
+end;
+
+procedure hide_mouse_cursor;
+begin
+if new_cursor<>nil then begin
+  sdl_freecursor(new_cursor);
+  new_cursor:=nil;
+end;
+sdl_showcursor(0);
+end;
 
 procedure open_joystick(player:byte);
 begin

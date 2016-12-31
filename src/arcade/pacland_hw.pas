@@ -3,7 +3,7 @@ unit pacland_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,misc_functions,sound_engine;
+     pal_engine,sound_engine;
 
 procedure cargar_pacland;
 
@@ -142,42 +142,43 @@ begin
 	end;
 end;
 
-procedure put_gfx_pacland(pos_x,pos_y,nchar:dword;color:word;screen,ngfx:byte;flipx,flipy:boolean);inline;
+procedure put_gfx_pacland(pos_x,pos_y,nchar:dword;color:word;screen,ngfx:byte;flipx,flipy:boolean);
 var
-  x,y,punto:byte;
-  temp:pword;
-  pos,post:pbyte;
+  x,y,py,cant_x,cant_y,punto:byte;
+  temp,temp2:pword;
+  pos:pbyte;
+  dir_x,dir_y:integer;
 begin
 pos:=gfx[ngfx].datos;
-inc(pos,nchar*8*8);
-if flipx then begin
-  for y:=0 to 7 do begin
-    post:=pos;
-    inc(post,(y*8)+7);
-    temp:=punbuf;
-    for x:=7 downto 0 do begin
-      punto:=gfx[ngfx].colores[post^+color];
-      if (punto and $7f)<$7f then temp^:=paleta[punto]
-        else temp^:=paleta[max_colores];
-      dec(post);
-      inc(temp);
-    end;
-    if flipy then putpixel(pos_x,pos_y+(7-y),8,punbuf,screen)
-      else putpixel(pos_x,pos_y+y,8,punbuf,screen);
-  end;
+cant_y:=gfx[ngfx].y;
+cant_x:=gfx[ngfx].x;
+inc(pos,nchar*cant_x*gfx[ngfx].y);
+if flipy then begin
+  py:=cant_y-1;
+  dir_y:=-1;
 end else begin
-  for y:=0 to 7 do begin
-    temp:=punbuf;
-    for x:=0 to 7 do begin
-      punto:=gfx[ngfx].colores[pos^+color];
-      if (punto and $7f)<$7f then temp^:=paleta[punto]
-        else temp^:=paleta[max_colores];
-      inc(pos);
-      inc(temp);
-    end;
-    if flipy then putpixel(pos_x,pos_y+(7-y),8,punbuf,screen)
-      else putpixel(pos_x,pos_y+y,8,punbuf,screen);
+  py:=0;
+  dir_y:=1;
+end;
+if flipx then begin
+  temp2:=punbuf;
+  inc(temp2,cant_x-1);
+  dir_x:=-1;
+end else begin
+  temp2:=punbuf;
+  dir_x:=1;
+end;
+for y:=0 to (cant_y-1) do begin
+  temp:=temp2;
+  for x:=0 to (cant_x-1) do begin
+    punto:=gfx[ngfx].colores[pos^+color];
+    if (punto and $7f)<$7f then temp^:=paleta[punto]
+      else temp^:=paleta[max_colores];
+    inc(pos);
+    inc(temp,dir_x);
   end;
+  putpixel_gfx_int(pos_x,pos_y+py,cant_x,screen);
+  py:=py+dir_y;
 end;
 end;
 
@@ -259,10 +260,6 @@ while EmuStatus=EsRuning do begin
       update_video_pacland;
     end;
   end;
-  if sound_status.hay_sonido then begin
-      namco_playsound;
-      play_sonido;
-  end;
   eventos_pacland;
   video_sync;
 end;
@@ -271,17 +268,25 @@ end;
 function pacland_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$37ff,$8000..$ffff:pacland_getbyte:=memoria[direccion];
   $4000..$5fff:pacland_getbyte:=rom_bank[rom_nbank,direccion and $1fff];
-  $6800..$6bff:pacland_getbyte:=namcos1_cus30_r(direccion and $3ff);
-  else pacland_getbyte:=memoria[direccion];
+  $6800..$6bff:pacland_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
 end;
 end;
 
 procedure pacland_putbyte(direccion:word;valor:byte);
 begin
+if direccion>$9fff then exit;
 case direccion of
-  $0..$fff:gfx[0].buffer[direccion shr 1]:=true;
-  $1000..$1fff:gfx[1].buffer[(direccion and $fff) shr 1]:=true;
+  $0..$fff:if memoria[direccion]<>valor then begin
+              gfx[0].buffer[direccion shr 1]:=true;
+              memoria[direccion]:=valor;
+           end;
+  $1000..$1fff:if memoria[direccion]<>valor then begin
+                  gfx[1].buffer[(direccion and $fff) shr 1]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $2000..$37ff:memoria[direccion]:=valor;
   $3800:scroll_x1:=valor;
   $3801:scroll_x1:=valor+256;
   $3a00:scroll_x2:=valor;
@@ -295,40 +300,40 @@ case direccion of
             fillchar(gfx[1].buffer[0],$800,1);
         end;
   $4000..$5fff:exit;
-  $6800..$6bff:namcos1_cus30_w(direccion and $3ff,valor);
+  $6800..$6bff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $7000..$7fff:begin
-                   irq_enable:=not(BIT((direccion and $fff),11));
+                   irq_enable:=(direccion and $800)=0;
                    if not(irq_enable) then m6809_0.change_irq(CLEAR_LINE);
                end;
-  $8000..$8fff:if not(BIT((direccion and $fff),11)) then m6800_0.reset;
+  $8000..$8fff:if ((direccion and $800)=0) then m6800_0.reset;
+  $9000..$9fff:main_screen.flip_main_screen:=(direccion and $800)=0;
 end;
-if direccion<$8000 then memoria[direccion]:=valor;
 end;
 
 function mcu_getbyte(direccion:word):byte;
 begin
 case direccion of
-  $0..$1f:mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
-  $1000..$13ff:mcu_getbyte:=namcos1_cus30_r(direccion and $3ff);
+  $0..$ff:mcu_getbyte:=m6800_0.m6803_internal_reg_r(direccion);
+  $1000..$13ff:mcu_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
+  $8000..$c7ff,$f000..$ffff:mcu_getbyte:=mem_snd[direccion];
   $d000,$d001:mcu_getbyte:=$ff;  //dswa dswb
-  $d002:mcu_getbyte:=(marcade.in1 and $f0)+$f;
-  $d003:mcu_getbyte:=((marcade.in1 and $f) shl 4)+$f;
-    else mcu_getbyte:=mem_snd[direccion];
+  $d002:mcu_getbyte:=(marcade.in1 and $f0)+$80;
+  $d003:mcu_getbyte:=(marcade.in1 and $f) shl 4;
   end;
 end;
 
 procedure mcu_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$1f:m6800_0.m6803_internal_reg_w(direccion,valor);
-  $1000..$13ff:namcos1_cus30_w(direccion and $3ff,valor);
+  $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
+  $1000..$13ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $4000..$7fff:begin
-                  irq_enable_mcu:=not(BIT(direccion and $3fff,13));
+                  irq_enable_mcu:=((direccion and $2000)=0);
                   if not(irq_enable_mcu) then m6800_0.change_irq(CLEAR_LINE);
                end;
   $8000..$bfff,$f000..$ffff:exit;
+  $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
-mem_snd[direccion]:=valor;
 end;
 
 function in_port1:byte;
@@ -341,15 +346,20 @@ begin
   in_port2:=$ff;
 end;
 
+procedure pacland_sound_update;
+begin
+  namco_snd_0.update;
+end;
+
 //Main
 procedure reset_pacland;
 begin
  m6809_0.reset;
  m6800_0.reset;
- namco_sound_reset;
+ namco_snd_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$7f;
  rom_nbank:=0;
  irq_enable:=false;
  irq_enable_mcu:=false;
@@ -388,6 +398,7 @@ m6809_0.change_ram_calls(pacland_getbyte,pacland_putbyte);
 m6800_0:=cpu_m6800.create(6144000,$100,cpu_hd63701);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
+m6800_0.init_sound(pacland_sound_update);
 //cargar roms
 if not(cargar_roms(@memoria_temp[0],@pacland_rom[0],'pacland.zip',0)) then exit;
 //Pongo las ROMs en su banco
@@ -395,7 +406,7 @@ copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
 for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
 //Cargar MCU
 if not(cargar_roms(@mem_snd[0],@pacland_mcu[0],'pacland.zip',0)) then exit;
-namco_sound_init(8,true);
+namco_snd_0:=namco_snd_chip.create(8,true);
 //convertir chars
 if not(cargar_roms(@memoria_temp[0],@pacland_char,'pacland.zip',1)) then exit;
 init_gfx(0,8,8,$200);

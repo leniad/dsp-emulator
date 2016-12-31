@@ -45,11 +45,9 @@ var
 
 procedure draw_sprites(pri:byte);inline;
 var
-  f,color,nchar:word;
-  x,y:word;
+  f,color,nchar,x,y:word;
   atrib:byte;
 begin
-if not(objon) then exit;
 	for f:=127 downto 0 do begin
     atrib:=buffer_sprites[(f*32)+1];
 		if ((atrib and $40)=pri) then begin
@@ -71,9 +69,9 @@ var
 begin
 if sc2on then scroll__y(1,4,1792-scroll_bg)
   else fill_full_screen(4,0);
-draw_sprites($40);
+if objon then draw_sprites($40);
 if sc1on then scroll_x_y(2,4,scroll_x,1792-scroll_y);
-draw_sprites(0);
+if objon then draw_sprites(0);
 if chon then begin //chars activos
   for f:=$3ff downto 0 do begin
     //Chars
@@ -166,7 +164,7 @@ if direccion<$c000 then exit;
 case direccion of
   $c800:sound_command:=valor;
   $c804:chon:=(valor and $80)<>0;
-  $d000..$d7ff:begin
+  $d000..$d7ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;

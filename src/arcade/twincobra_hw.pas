@@ -54,7 +54,7 @@ var
  rom:array[0..$17fff] of word;
  ram,bg_ram:array[0..$1fff] of word;
  vsync,dswa,dswb:byte;
- int_enable,twincobr_dsp_BIO,dsp_execute:boolean;
+ display_on,int_enable,twincobr_dsp_BIO,dsp_execute:boolean;
  txt_ram,sprite_ram:array[0..$7ff] of word;
  fg_ram:array[0..$fff] of word;
  txt_offs,bg_offs,fg_offs,bg_bank,fg_bank:word;
@@ -63,10 +63,8 @@ var
 
 procedure draw_sprites(priority:word);inline;
 var
-  f:word;
-  atrib,x,y:word;
+  f,atrib,x,y,nchar,color:word;
   flipx,flipy:boolean;
-  nchar,color:word;
 begin
 for f:=0 to $1ff do begin
   atrib:=sprite_ram[$1+(f shl 2)];
@@ -87,50 +85,50 @@ end;
 
 procedure update_video_twincobr;inline;
 var
-        f,color,nchar:word;
-        x,y:word;
-        atrib:word;
+  f,color,nchar,x,y,atrib:word;
 begin
-for f:=$7ff downto 0 do begin
-  //Chars
-  atrib:=txt_ram[f];
-  color:=(atrib and $F800) shr 11;
-  if (gfx[0].buffer[f] or buffer_color[color]) then begin
-    x:=(f shr 6) shl 3;
-    y:=(63-(f and $3f)) shl 3;
-    nchar:=atrib and $7ff;
-    put_gfx_trans(x,y,nchar,(color shl 3)+$600,1,0);
-    gfx[0].buffer[f]:=false;
+if display_on then begin
+  for f:=$7ff downto 0 do begin
+    //Chars
+    atrib:=txt_ram[f];
+    color:=(atrib and $F800) shr 11;
+    if (gfx[0].buffer[f] or buffer_color[color]) then begin
+      x:=(f shr 6) shl 3;
+      y:=(63-(f and $3f)) shl 3;
+      nchar:=atrib and $7ff;
+      put_gfx_trans(x,y,nchar,(color shl 3)+$600,1,0);
+      gfx[0].buffer[f]:=false;
+    end;
   end;
-end;
-for f:=0 to $fff do begin
-    atrib:=bg_ram[f+bg_bank];
-    color:=(atrib and $F000) shr 12;
-    if (gfx[2].buffer[f+bg_bank] or buffer_color[color+$30]) then begin
-      //background
-      x:=(f shr 6) shl 3;
-      y:=(63-(f and $3f)) shl 3;
-      nchar:=atrib and $fff;
-      put_gfx(x,y,nchar,(color shl 4)+$400,3,2);
-      gfx[2].buffer[f+bg_bank]:=false;
-    end;
-    atrib:=fg_ram[f];
-    color:=(atrib and $F000) shr 12;
-    if (gfx[1].buffer[f] or buffer_color[color+$20]) then begin
-      //foreground
-      x:=(f shr 6) shl 3;
-      y:=(63-(f and $3f)) shl 3;
-      nchar:=(atrib and $fff)+fg_bank;
-      put_gfx_trans(x,y,nchar,(color shl 4)+$500,2,1);
-      gfx[1].buffer[f]:=false;
-    end;
-end;
-scroll_x_y(3,4,bg_scroll_x+30,512-bg_scroll_y+137);
-draw_sprites($400);
-scroll_x_y(2,4,fg_scroll_x+30,512-fg_scroll_y+137);
-draw_sprites($800);
-scroll_x_y(1,4,256-txt_scroll_x-30,512-txt_scroll_y+137);
-draw_sprites($c00);
+  for f:=0 to $fff do begin
+      atrib:=bg_ram[f+bg_bank];
+      color:=(atrib and $F000) shr 12;
+      if (gfx[2].buffer[f+bg_bank] or buffer_color[color+$30]) then begin
+        //background
+        x:=(f shr 6) shl 3;
+        y:=(63-(f and $3f)) shl 3;
+        nchar:=atrib and $fff;
+        put_gfx(x,y,nchar,(color shl 4)+$400,3,2);
+        gfx[2].buffer[f+bg_bank]:=false;
+      end;
+      atrib:=fg_ram[f];
+      color:=(atrib and $F000) shr 12;
+      if (gfx[1].buffer[f] or buffer_color[color+$20]) then begin
+        //foreground
+        x:=(f shr 6) shl 3;
+        y:=(63-(f and $3f)) shl 3;
+        nchar:=(atrib and $fff)+fg_bank;
+        put_gfx_trans(x,y,nchar,(color shl 4)+$500,2,1);
+        gfx[1].buffer[f]:=false;
+      end;
+  end;
+  scroll_x_y(3,4,bg_scroll_x+30,512-bg_scroll_y+137);
+  draw_sprites($400);
+  scroll_x_y(2,4,fg_scroll_x+30,512-fg_scroll_y+137);
+  draw_sprites($800);
+  scroll_x_y(1,4,256-txt_scroll_x-30,512-txt_scroll_y+137);
+  draw_sprites($c00);
+end else fill_full_screen(4,$7ff);
 actualiza_trozo_final(0,0,240,320,4);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
@@ -247,13 +245,7 @@ case direccion of
   $70002:txt_scroll_x:=valor;
   $70004:txt_offs:=valor and $7ff;
   $72000:bg_scroll_y:=valor;
-  $72002:begin
-            bg_scroll_x:=valor;
-            if valor>$1ff then begin
-              bg_scroll_x:=0;
-              bg_scroll_x:=valor;
-            end;
-         end;
+  $72002:bg_scroll_x:=valor;
   $72004:bg_offs:=valor and $fff;
   $74000:fg_scroll_y:=valor;
   $74002:fg_scroll_x:=valor;
@@ -261,15 +253,15 @@ case direccion of
   $76000..$76003:;
   $7800a:case (valor and $ff) of
         $00:begin	// This means assert the INT line to the DSP */
-	      tms32010_0.change_halt(CLEAR_LINE);
+	            tms32010_0.change_halt(CLEAR_LINE);
               m68000_0.change_halt(ASSERT_LINE);
               tms32010_0.change_irq(ASSERT_LINE);
-	    end;
+	          end;
         $01:begin	// This means inhibit the INT line to the DSP */
               tms32010_0.change_irq(CLEAR_LINE);
-	      tms32010_0.change_halt(ASSERT_LINE);
+	            tms32010_0.change_halt(ASSERT_LINE);
             end;
-      end;
+         end;
   $7800c:case (valor and $ff) of
 		        $04:int_enable:=false;
 		        $05:int_enable:=true;
@@ -279,28 +271,29 @@ case direccion of
 		        $0a:fg_bank:=$0000;
             $0b:fg_bank:=$1000;
             $0c:begin	// This means assert the INT line to the DSP */
-    		  tms32010_0.change_halt(CLEAR_LINE);
+    		          tms32010_0.change_halt(CLEAR_LINE);
                   m68000_0.change_halt(ASSERT_LINE);
                   tms32010_0.change_irq(ASSERT_LINE);
-		end;
-	    $0d:begin	// This means inhibit the INT line to the DSP */
-                 tms32010_0.change_irq(CLEAR_LINE);
-                 tms32010_0.change_halt(ASSERT_LINE);
+		            end;
+	          $0d:begin	// This means inhibit the INT line to the DSP */
+                  tms32010_0.change_irq(CLEAR_LINE);
+                  tms32010_0.change_halt(ASSERT_LINE);
                 end;
-            $0e,$0f:; // Turn display on / off
-  end;
+            $0e:display_on:=false;
+            $0f:display_on:=true;
+         end;
   $7e000:begin
-          txt_ram[txt_offs]:=valor;
-          gfx[0].buffer[txt_offs]:=true;
-      end;
+            txt_ram[txt_offs]:=valor;
+            gfx[0].buffer[txt_offs]:=true;
+         end;
   $7e002:begin
-          bg_ram[bg_offs+bg_bank]:=valor;
-          gfx[2].buffer[bg_offs+bg_bank]:=true;
-      end;
+            bg_ram[bg_offs+bg_bank]:=valor;
+            gfx[2].buffer[bg_offs+bg_bank]:=true;
+         end;
   $7e004:begin
-          fg_ram[fg_offs]:=valor;
-          gfx[1].buffer[fg_offs]:=true;
-      end;
+            fg_ram[fg_offs]:=valor;
+            gfx[1].buffer[fg_offs]:=true;
+         end;
   $7a000..$7afff:mem_snd[$8000+((direccion and $fff) shr 1)]:=valor and $ff; //Shared RAM
 end;
 end;
@@ -322,8 +315,8 @@ case (puerto and $ff) of
   0:twincobr_snd_inbyte:=ym3812_0.status;
   $10:twincobr_snd_inbyte:=marcade.in2;
   $20,$30:twincobr_snd_inbyte:=0;
-  $40:twincobr_snd_inbyte:=dswa and $ff;
-  $50:twincobr_snd_inbyte:=dswb and $ff;
+  $40:twincobr_snd_inbyte:=dswa;
+  $50:twincobr_snd_inbyte:=dswb;
 end;
 end;
 
@@ -370,7 +363,7 @@ end;
 
 procedure twincobr_dsp_bio_w(valor:word);
 begin
-  if (valor and $8000)<>0 then twincobr_dsp_BIO:=false;
+  twincobr_dsp_BIO:=(valor and $8000)=0;
 	if (valor=0) then begin
 		if dsp_execute then begin
       m68000_0.change_halt(CLEAR_LINE);
@@ -413,6 +406,7 @@ begin
  bg_bank:=0;
  fg_bank:=0;
  int_enable:=false;
+ display_on:=true;
  vsync:=0;
  twincobr_dsp_BIO:=false;
  dsp_execute:=false;
@@ -516,7 +510,7 @@ case main_vars.tipo_maquina of
           end;
           for f:=0 to $3ff do begin
              temp_rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1400] and $f)) shl 8) or
-                        (memoria_temp[f+$1800] and $f) shl 4+(memoria_temp[f+$1c00] and $f);
+              (memoria_temp[f+$1800] and $f) shl 4+(memoria_temp[f+$1c00] and $f);
           end;
           copymemory(tms32010_0.get_rom_addr,@temp_rom[0],$1000);
           //convertir chars

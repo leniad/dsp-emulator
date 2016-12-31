@@ -13,8 +13,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="17"/>
-      <RevisionNr Value="1"/>
-      <BuildNr Value="1033"/>
+      <RevisionNr Value="2"/>
+      <BuildNr Value="1046"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.16"/>
     </VersionInfo>
@@ -43,7 +43,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="238">
+    <Units Count="241">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -59,8 +59,9 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="484"/>
-        <CursorPos X="48" Y="496"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="694"/>
+        <CursorPos Y="713"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -197,11 +198,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoadRom"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="49"/>
         <CursorPos X="5" Y="70"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
@@ -276,8 +276,8 @@
         <Filename Value="..\misc\sound_engine.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="134"/>
-        <CursorPos X="9" Y="134"/>
+        <TopLine Value="142"/>
+        <CursorPos X="16" Y="155"/>
         <UsageCount Value="200"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit26>
@@ -292,10 +292,11 @@
       </Unit27>
       <Unit28>
         <Filename Value="..\misc\file_engine.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="320"/>
-        <CursorPos X="42" Y="331"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="337"/>
+        <CursorPos X="68" Y="340"/>
         <UsageCount Value="57"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit28>
       <Unit29>
@@ -304,10 +305,11 @@
         <ComponentName Value="load_dsk"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="106"/>
-        <CursorPos X="16" Y="126"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="196"/>
+        <CursorPos Y="216"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit29>
       <Unit30>
@@ -450,10 +452,11 @@
       </Unit43>
       <Unit44>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="523"/>
-        <CursorPos X="44" Y="535"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="527"/>
+        <CursorPos X="44" Y="539"/>
         <UsageCount Value="16"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit44>
       <Unit45>
@@ -466,12 +469,10 @@
       </Unit45>
       <Unit46>
         <Filename Value="..\misc\gfx_engine.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="603"/>
         <CursorPos Y="615"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit46>
       <Unit47>
@@ -537,11 +538,10 @@
         <ComponentName Value="SMSConfig"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="81"/>
         <CursorPos X="5" Y="95"/>
         <UsageCount Value="213"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit54>
       <Unit55>
@@ -564,8 +564,7 @@
         <Filename Value="..\misc\lib_sdl2.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="79"/>
-        <CursorPos X="3" Y="91"/>
+        <CursorPos X="3" Y="12"/>
         <UsageCount Value="208"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit57>
@@ -710,6 +709,7 @@
         <TopLine Value="2944"/>
         <CursorPos X="6" Y="2953"/>
         <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit75>
       <Unit76>
         <Filename Value="..\cpu\z80\nz80.pas"/>
@@ -1009,7 +1009,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="46"/>
         <CursorPos X="20" Y="61"/>
-        <UsageCount Value="173"/>
+        <UsageCount Value="174"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit114>
       <Unit115>
@@ -1607,7 +1607,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="28"/>
         <CursorPos X="13" Y="28"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="123"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit192>
       <Unit193>
@@ -1723,6 +1723,7 @@
         <EditorIndex Value="-1"/>
         <CursorPos X="10"/>
         <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit208>
       <Unit209>
         <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\paszlib\src\zcompres.pas"/>
@@ -1730,6 +1731,7 @@
         <EditorIndex Value="-1"/>
         <CursorPos X="12" Y="16"/>
         <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit209>
       <Unit210>
         <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\paszlib\src\zdeflate.pas"/>
@@ -1737,6 +1739,7 @@
         <TopLine Value="46"/>
         <CursorPos X="4" Y="63"/>
         <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit210>
       <Unit211>
         <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\paszlib\src\zbase.pas"/>
@@ -1744,12 +1747,14 @@
         <TopLine Value="314"/>
         <CursorPos X="4" Y="333"/>
         <UsageCount Value="5"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit211>
       <Unit212>
         <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\paszlib\src\paszlib.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="2"/>
         <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit212>
       <Unit213>
         <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\paszlib\src\zipper.pp"/>
@@ -1757,6 +1762,7 @@
         <TopLine Value="454"/>
         <CursorPos X="23" Y="469"/>
         <UsageCount Value="7"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit213>
       <Unit214>
         <Filename Value="C:\lazarus\components\aarre\src\aarrepkglist.pas"/>
@@ -1765,6 +1771,7 @@
         <TopLine Value="23"/>
         <CursorPos X="29" Y="38"/>
         <UsageCount Value="4"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit214>
       <Unit215>
         <Filename Value="C:\lazarus\components\cairocanvas\cairoprinter.pas"/>
@@ -1773,6 +1780,7 @@
         <TopLine Value="14"/>
         <CursorPos X="10" Y="38"/>
         <UsageCount Value="6"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit215>
       <Unit216>
         <Filename Value="C:\lazarus\fpc\3.0.0\source\rtl\objpas\classes\classesh.inc"/>
@@ -1780,6 +1788,7 @@
         <TopLine Value="825"/>
         <CursorPos X="3" Y="840"/>
         <UsageCount Value="6"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit216>
       <Unit217>
         <Filename Value="unzip\unzip.pas"/>
@@ -1796,6 +1805,7 @@
         <TopLine Value="1324"/>
         <CursorPos X="28" Y="1353"/>
         <UsageCount Value="5"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit218>
       <Unit219>
         <Filename Value="..\misc\unzip2.pas"/>
@@ -1815,6 +1825,7 @@
         <Filename Value="C:\lazarus\fpc\3.0.0\source\packages\paszlib\src\ziputils.pas"/>
         <EditorIndex Value="-1"/>
         <UsageCount Value="5"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit221>
       <Unit222>
         <Filename Value="..\arcade\pengo_hw.pas"/>
@@ -1876,6 +1887,7 @@
         <TopLine Value="2095"/>
         <CursorPos Y="2106"/>
         <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit229>
       <Unit230>
         <Filename Value="C:\lazarus\lcl\include\customform.inc"/>
@@ -1883,6 +1895,7 @@
         <TopLine Value="1445"/>
         <CursorPos Y="1456"/>
         <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit230>
       <Unit231>
         <Filename Value="C:\lazarus\components\lazutils\lazmethodlist.pas"/>
@@ -1891,6 +1904,7 @@
         <TopLine Value="181"/>
         <CursorPos Y="195"/>
         <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit231>
       <Unit232>
         <Filename Value="C:\lazarus\lcl\include\wincontrol.inc"/>
@@ -1898,6 +1912,7 @@
         <TopLine Value="5366"/>
         <CursorPos Y="5378"/>
         <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit232>
       <Unit233>
         <Filename Value="C:\lazarus\lcl\lclmessageglue.pas"/>
@@ -1906,6 +1921,7 @@
         <TopLine Value="108"/>
         <CursorPos Y="123"/>
         <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit233>
       <Unit234>
         <Filename Value="C:\lazarus\lcl\interfaces\win32\win32callback.inc"/>
@@ -1913,6 +1929,7 @@
         <TopLine Value="72"/>
         <CursorPos Y="84"/>
         <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit234>
       <Unit235>
         <Filename Value="C:\lazarus\lcl\interfaces\win32\win32wsforms.pp"/>
@@ -1921,6 +1938,7 @@
         <TopLine Value="376"/>
         <CursorPos Y="387"/>
         <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit235>
       <Unit236>
         <Filename Value="..\arcade\megazone_hw.pas"/>
@@ -1935,45 +1953,101 @@
         <TopLine Value="13"/>
         <CursorPos X="24" Y="27"/>
         <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit237>
+      <Unit238>
+        <Filename Value="C:\Users\leniad\AppData\Local\Temp\7zO01C2169B\upd765.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="227"/>
+        <CursorPos Y="240"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit238>
+      <Unit239>
+        <Filename Value="..\arcade\popeye_hw.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="318"/>
+        <CursorPos X="13" Y="330"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit239>
+      <Unit240>
+        <Filename Value="..\misc\lib_sdl2.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="160"/>
+        <CursorPos X="29" Y="174"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit240>
     </Units>
-    <JumpHistory Count="9" HistoryIndex="8">
+    <JumpHistory Count="17" HistoryIndex="16">
       <Position1>
         <Filename Value="principal.pas"/>
-        <Caret Line="578" Column="15" TopLine="573"/>
+        <Caret Line="825" TopLine="812"/>
       </Position1>
       <Position2>
         <Filename Value="principal.pas"/>
-        <Caret Line="579" Column="15" TopLine="574"/>
+        <Caret Line="826" TopLine="813"/>
       </Position2>
       <Position3>
         <Filename Value="principal.pas"/>
-        <Caret Line="599" TopLine="587"/>
+        <Caret Line="708" Column="15" TopLine="698"/>
       </Position3>
       <Position4>
-        <Filename Value="principal.pas"/>
-        <Caret Line="594" Column="5" TopLine="588"/>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="131" Column="68" TopLine="117"/>
       </Position4>
       <Position5>
-        <Filename Value="principal.pas"/>
-        <Caret Line="498" Column="48" TopLine="475"/>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="171" Column="43" TopLine="164"/>
       </Position5>
       <Position6>
-        <Filename Value="loadrom.pas"/>
-        <Caret Line="150" Column="32" TopLine="141"/>
+        <Filename Value="cargar_dsk.pas"/>
       </Position6>
       <Position7>
-        <Filename Value="config_sms.pas"/>
-        <Caret Line="8"/>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="19" Column="31"/>
       </Position7>
       <Position8>
-        <Filename Value="config_sms.pas"/>
-        <Caret Line="79" Column="10" TopLine="65"/>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="26" Column="24" TopLine="4"/>
       </Position8>
       <Position9>
-        <Filename Value="config_sms.pas"/>
-        <Caret Line="95" Column="5" TopLine="81"/>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="69" Column="30" TopLine="47"/>
       </Position9>
+      <Position10>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="70" Column="67" TopLine="49"/>
+      </Position10>
+      <Position11>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="167" Column="43" TopLine="146"/>
+      </Position11>
+      <Position12>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="168" Column="45" TopLine="147"/>
+      </Position12>
+      <Position13>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="171" Column="43" TopLine="150"/>
+      </Position13>
+      <Position14>
+        <Filename Value="cargar_dsk.pas"/>
+        <Caret Line="172" Column="45" TopLine="151"/>
+      </Position14>
+      <Position15>
+        <Filename Value="..\misc\init_games.pas"/>
+        <Caret Line="535" Column="44" TopLine="523"/>
+      </Position15>
+      <Position16>
+        <Filename Value="principal.pas"/>
+        <Caret Line="711" TopLine="692"/>
+      </Position16>
+      <Position17>
+        <Filename Value="principal.pas"/>
+        <Caret Line="712" TopLine="693"/>
+      </Position17>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

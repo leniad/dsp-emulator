@@ -42,14 +42,13 @@ var
 procedure update_video_junofrst;inline;
 var
   y,x:word;
-  effx,yscroll,effy,vrambyte,shifted:byte;
+  effx,effy,vrambyte,shifted:byte;
 begin
 for y:=0 to 255 do begin
 		for x:=0 to 255 do begin
 			effy:=y xor xory;
-      if effy<192 then yscroll:=scroll_y
-        else yscroll:=0;
-			effx:=(x xor xorx)+yscroll;
+      if effy<192 then effx:=(x xor xorx)+scroll_y
+        else effx:=(x xor xorx);
 			vrambyte:=memoria[effx*128+effy shr 1];
 			shifted:=vrambyte shr (4*(effy and 1));
       punt[y*256+x]:=paleta[shifted and $0f];
@@ -179,10 +178,8 @@ case direccion of
         end;
   $8031:; //Coin counter...
   $8033:scroll_y:=valor;
-  $8034:if (valor and 1)<>0 then xorx:=0
-          else xorx:=255;
-  $8035:if (valor and 1)<>0 then xory:=255
-          else xory:=0;
+  $8034:xorx:=((valor and 1) xor 1)*$ff;
+  $8035:xory:=(valor and 1)*$ff;
   $8040:begin
           if ((last_snd_val=0) and ((valor and 1)=1))then z80_0.change_irq(HOLD_LINE);
           last_snd_val:=valor and 1;

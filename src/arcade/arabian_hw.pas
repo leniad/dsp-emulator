@@ -35,7 +35,7 @@ var
  video_control,mcu_port_p,mcu_port_o:byte;
  mcu_port_r:array[0..3] of byte;
 
-procedure update_video_arabian;
+procedure update_video_arabian;inline;
 var
   x,y:byte;
 begin

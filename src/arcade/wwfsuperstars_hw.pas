@@ -38,7 +38,6 @@ var
  rom:array[0..$1ffff] of word;
  fg_ram,bg_ram:array[0..$7ff] of word;
  ram:array[0..$1fff] of word;
- sprite_ram:array[0..$1ff] of word;
  vblank,sound_latch:byte;
 
 procedure update_video_wwfsstar;inline;
@@ -70,16 +69,16 @@ end;
 scroll_x_y(3,2,scroll_x,scroll_y);
 //Sprites
 for f:=0 to $65 do begin
-atrib:=sprite_ram[(f*5)+1];
+atrib:=buffer_sprites_w[(f*5)+1];
 if (atrib and 1)<>0 then begin
-  y:=(sprite_ram[f*5] and $00ff) or ((atrib and $0004) shl 6);
+  y:=(buffer_sprites_w[f*5] and $00ff) or ((atrib and $0004) shl 6);
   y:=(((256-y) and $1ff)-32);
-  x:=(sprite_ram[(f*5)+4] and $00ff) or ((atrib and $0008) shl 5);
+  x:=(buffer_sprites_w[(f*5)+4] and $00ff) or ((atrib and $0008) shl 5);
   x:=(((256-x) and $1ff)-16);
-  atrib2:=sprite_ram[(f*5)+2];
+  atrib2:=buffer_sprites_w[(f*5)+2];
   flipx:=(atrib2 and $0080)<>0;
   flipy:=(atrib2 and $0040)<>0;
-  nchar:=(sprite_ram[(f*5)+3] and $00ff) or ((atrib2 and $003f) shl 8);
+  nchar:=(buffer_sprites_w[(f*5)+3] and $00ff) or ((atrib2 and $003f) shl 8);
   color:=atrib and $00f0;
   if (atrib and $0002)<>0 then begin //16x32
     nchar:=nchar and $3ffe;
@@ -162,7 +161,7 @@ case direccion of
     0..$3ffff:wwfsstar_getword:=rom[direccion shr 1];
     $080000..$080fff:wwfsstar_getword:=fg_ram[(direccion and $fff) shr 1];
     $0c0000..$0c0fff:wwfsstar_getword:=bg_ram[(direccion and $fff) shr 1];
-    $100000..$1003ff:wwfsstar_getword:=sprite_ram[(direccion and $3ff) shr 1];
+    $100000..$1003ff:wwfsstar_getword:=buffer_sprites_w[(direccion and $3ff) shr 1];
     $180000..$180001:wwfsstar_getword:=marcade.dswa;
     $180002..$180003:wwfsstar_getword:=marcade.dswb;
     $180004..$180005:wwfsstar_getword:=marcade.in0;
@@ -190,15 +189,15 @@ procedure wwfsstar_putword(direccion:dword;valor:word);
 begin
 if direccion<$40000 then exit;
 case direccion of
-    $80000..$80fff:begin
+    $80000..$80fff:if fg_ram[(direccion and $fff) shr 1]<>valor then begin
                     fg_ram[(direccion and $fff) shr 1]:=valor;
                     gfx[0].buffer[(direccion and $fff) shr 2]:=true;
                   end;
-    $c0000..$c0fff:begin
+    $c0000..$c0fff:if bg_ram[(direccion and $fff) shr 1]<>valor then begin
                     bg_ram[(direccion and $fff) shr 1]:=valor;
                     gfx[1].buffer[(direccion and $fff) shr 2]:=true;
                   end;
-    $100000..$1003ff:sprite_ram[(direccion and $3ff) shr 1]:=valor;
+    $100000..$1003ff:buffer_sprites_w[(direccion and $3ff) shr 1]:=valor;
     $140000..$140fff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                     buffer_paleta[(direccion and $fff) shr 1]:=valor;
                     cambiar_color((direccion and $fff) shr 1,valor);
@@ -219,18 +218,18 @@ end;
 function wwfsstar_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+    0..$87ff:wwfsstar_snd_getbyte:=mem_snd[direccion];
     $8801:wwfsstar_snd_getbyte:=ym2151_0.status;
     $9800:wwfsstar_snd_getbyte:=oki_6295_0.read;
     $a000:wwfsstar_snd_getbyte:=sound_latch;
-    else wwfsstar_snd_getbyte:=mem_snd[direccion];
   end;
 end;
 
 procedure wwfsstar_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  $8000..$87ff:mem_snd[direccion]:=valor;
   $8800:ym2151_0.reg(valor);
   $8801:ym2151_0.write(valor);
   $9800:oki_6295_0.write(valor);

@@ -10,13 +10,13 @@ procedure cargar_spacefb;
 implementation
 const
         //spacefb
-        spacefb_rom:array[0..8] of tipo_roms=(
+        spacefb_rom:array[0..7] of tipo_roms=(
         (n:'tst-c-u.5e';l:$800;p:0;crc:$79c3527e),(n:'tst-c-u.5f';l:$800;p:$800;crc:$c0973965),
         (n:'tst-c-u.5h';l:$800;p:$1000;crc:$02c60ec5),(n:'tst-c-u.5i';l:$800;p:$1800;crc:$76fd18c7),
         (n:'tst-c-u.5j';l:$800;p:$2000;crc:$df52c97c),(n:'tst-c-u.5k';l:$800;p:$2800;crc:$1713300c),
-        (n:'tst-c-u.5m';l:$800;p:$3000;crc:$6286f534),(n:'tst-c-u.5n';l:$800;p:$3800;crc:$1c9f91ee),());
-        spacefb_gfx:array[0..2] of tipo_roms=(
-        (n:'tst-v-a.5k';l:$800;p:0;crc:$236e1ff7),(n:'tst-v-a.6k';l:$800;p:$800;crc:$bf901a4e),());
+        (n:'tst-c-u.5m';l:$800;p:$3000;crc:$6286f534),(n:'tst-c-u.5n';l:$800;p:$3800;crc:$1c9f91ee));
+        spacefb_gfx:array[0..1] of tipo_roms=(
+        (n:'tst-v-a.5k';l:$800;p:0;crc:$236e1ff7),(n:'tst-v-a.6k';l:$800;p:$800;crc:$bf901a4e));
         spacefb_bullet:tipo_roms=(n:'4i.vid';l:$100;p:0;crc:$528e8533);
         spacefb_mcu:tipo_roms=(n:'ic20.snd';l:$400;p:0;crc:$1c8670b3);
         spacefb_prom:tipo_roms=(n:'mb7051.3n';l:$20;p:0;crc:$465d07af);
@@ -24,16 +24,11 @@ const
         spacefb_samples:array[0..(num_samples-1)] of tipo_nombre_samples=(
         (nombre:'ekilled.wav';restart:true),(nombre:'explode1.wav'),(nombre:'explode2.wav'),(nombre:'shipfire.wav';restart:true));
         //Dip
-        spacefb_dip_a:array [0..5] of def_dip=(
-        (mask:$1;name:'Lives';number:2;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Cabinet';number:2;dip:((dip_val:$2;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$4;name:'Flip Screen';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$8;name:'Difficulty';number:2;dip:((dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Easy'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$f0;name:'Coinage';number:16;dip:((dip_val:$10;dip_name:'A 2/1 B 2/1'),(dip_val:$20;dip_name:'A 2/1 B 1/3'),(dip_val:$0;dip_name:'A 1/1 B 1/1'),(dip_val:$30;dip_name:'A 1/1 B 1/2'),(dip_val:$40;dip_name:'A 1/1 B 1/3'),(dip_val:$50;dip_name:'A 1/1 B 1/4'),(dip_val:$60;dip_name:'A 1/1 B 1/5'),(dip_val:$70;dip_name:'A 1/1 B 1/6'),(dip_val:$80;dip_name:'A 1/2 B 1/2'),(dip_val:$90;dip_name:'A 1/2 B 1/4'),(dip_val:$a0;dip_name:'A 1/2 B 1/5'),(dip_val:$e0;dip_name:'A 1/2 B 1/6'),(dip_val:$b0;dip_name:'A 1/2 B 1/10'),(dip_val:$c0;dip_name:'A 1/2 B 1/11'),(dip_val:$d0;dip_name:'A 1/2 B 1/12'),(dip_val:$f0;dip_name:'Free Play'))),());
-        spacefb_dip_b:array [0..3] of def_dip=(
-        (mask:$1;name:'Coin Counters';number:2;dip:((dip_val:$1;dip_name:'1'),(dip_val:$0;dip_name:'2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$c;dip_name:'30k 70k 40+'),(dip_val:$4;dip_name:'20k Only'),(dip_val:$8;dip_name:'40k Only'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        spacefb_dip:array [0..4] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coinage';number:4;dip:((dip_val:$8;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$c;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'5K'),(dip_val:$10;dip_name:'8K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$20;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  mem_snd_mcu:array[0..$3ff] of byte;
@@ -46,7 +41,7 @@ var
  punt:array[0..$ffff] of word;
  star_shift_reg:dword;
 
-procedure draw_sprite(offs:byte;flip:boolean);
+procedure draw_sprite(offs:byte;flip:boolean);inline;
 var
   sy,code,color_base,y,sx,dy,x,data,data1,data2,dx:byte;
 begin
@@ -72,7 +67,7 @@ begin
 	end;
 end;
 
-procedure draw_bullet(offs:byte;flip:boolean);
+procedure draw_bullet(offs:byte;flip:boolean);inline;
 var
   sy,code,y,sx,dy,data,x,dx:byte;
 begin
@@ -96,7 +91,7 @@ begin
 	end;
 end;
 
-procedure update_video_spacefb;
+procedure update_video_spacefb;inline;
 var
   offs:byte;
   flip:boolean;
@@ -115,12 +110,12 @@ putpixel(0,0,$10000,@punt[0],1);
 actualiza_trozo(16,0,224,256,1,0,0,224,256,pant_temp);
 end;
 
-procedure shift_star_generator;
+procedure shift_star_generator;inline;
 begin
   star_shift_reg:=((star_shift_reg shl 1) or (((not(star_shift_reg) shr 16) and 01) xor ((star_shift_reg shr 4) and $01))) and $1ffff;
 end;
 
-procedure draw_stars(y:byte);
+procedure draw_stars(y:byte);inline;
 var
   x:word;
 begin
@@ -190,7 +185,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure get_sprite_pens;
+procedure get_sprite_pens;inline;
 const
   fade_weights:array [0..3] of double=(1.0,1.5,2.5,4.0);
 var
@@ -222,7 +217,7 @@ begin
 	end;
 end;
 
-procedure get_stars_pens;
+procedure get_stars_pens;inline;
 var
   i,gb,ga,bb,ba,ra,rb,color_contrast_r,color_contrast_g,color_contrast_b,background_red,background_blue,disable_star_field:byte;
   color:tcolor;
@@ -279,7 +274,7 @@ case (puerto and $7) of
   0:spacefb_inbyte:=marcade.in1; //P1
   1:spacefb_inbyte:=marcade.in2; //P2
   2:spacefb_inbyte:=marcade.in0; //SYSTEM
-  3:spacefb_inbyte:=$20; //DSW1
+  3:spacefb_inbyte:=marcade.dswa; //DSW
   4..7:;
 end;
 end;
@@ -376,21 +371,19 @@ mcs48_0.change_ram_calls(spacefb_snd_getbyte,nil);
 mcs48_0.change_io_calls(spacefb_snd_inport,spacefb_snd_outport);
 mcs48_0.init_sound(spacefb_sound_update);
 //cargar roms
-if not(cargar_roms(@memoria[0],@spacefb_rom[0],'spacefb.zip',0)) then exit;
+if not(roms_load(@memoria,@spacefb_rom,'spacefb.zip',sizeof(spacefb_rom))) then exit;
 //Cargar MCU
-if not(cargar_roms(@mem_snd_mcu[0],@spacefb_mcu,'spacefb.zip',1)) then exit;
+if not(roms_load(@mem_snd_mcu,@spacefb_mcu,'spacefb.zip',sizeof(spacefb_mcu))) then exit;
 //Sound
-load_samples('spacefb.zip',@spacefb_samples[0],num_samples);
+load_samples('spacefb.zip',@spacefb_samples,num_samples);
 dac_0:=dac_chip.Create(0.5);
 //Cargar GFX and proms
-if not(cargar_roms(@gfx1[0],@spacefb_gfx,'spacefb.zip',0)) then exit;
-if not(cargar_roms(@gfx2[0],@spacefb_bullet,'spacefb.zip',1)) then exit;
-if not(cargar_roms(@prom[0],@spacefb_prom,'spacefb.zip',1)) then exit;
+if not(roms_load(@gfx1,@spacefb_gfx,'spacefb.zip',sizeof(spacefb_gfx))) then exit;
+if not(roms_load(@gfx2,@spacefb_bullet,'spacefb.zip',sizeof(spacefb_bullet))) then exit;
+if not(roms_load(@prom,@spacefb_prom,'spacefb.zip',sizeof(spacefb_prom))) then exit;
 //DIP
-marcade.dswa:=$06;
-marcade.dswb:=$0f;
-marcade.dswa_val:=@spacefb_dip_a;
-marcade.dswb_val:=@spacefb_dip_b;
+marcade.dswa:=$20;
+marcade.dswa_val:=@spacefb_dip;
 //Calcular paleta
 compute_resistor_weights(0,	255, -1.0,
 			3,@resistances_rg[0],@rgweights[0],470,0,

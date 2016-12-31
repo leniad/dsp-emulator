@@ -147,25 +147,33 @@ case direccion of
   $2840:tp84_getbyte:=marcade.in2;
   $2860:tp84_getbyte:=$ff;
   $3000:tp84_getbyte:=$32;
-  else tp84_getbyte:=memoria[direccion];
+  $4000..$57ff,$8000..$ffff:tp84_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure tp84_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$7FFF then exit;
-memoria[direccion]:=valor;
 case direccion of
+  $2000:; //wd
   $2800:if tp84_pal_bank<>valor then begin
           tp84_pal_bank:=valor;
           fillchar(gfx[0].buffer[0],$800,1);
         end;
+  $3004,$3005:; //Flip X y flip Y
   $3800:z80_0.change_irq(HOLD_LINE);
   $3a00:sound_latch:=valor;
   $3c00:scroll_y:=valor;
   $3e00:scroll_x:=not(valor);
-  $4000..$43ff,$4800..$4bff:gfx[0].buffer[direccion and $3ff]:=true;
-  $4400..$47ff,$4c00..$4fff:gfx[0].buffer[$400+(direccion and $3ff)]:=true;
+  $4000..$43ff,$4800..$4bff:begin
+                              gfx[0].buffer[direccion and $3ff]:=true;
+                              memoria[direccion]:=valor;
+                            end;
+  $4400..$47ff,$4c00..$4fff:begin
+                              gfx[0].buffer[$400+(direccion and $3ff)]:=true;
+                              memoria[direccion]:=valor;
+                            end;
+  $5000..$57ff:memoria[direccion]:=valor;
 end;
 end;
 
@@ -173,35 +181,36 @@ function cpu2_tp84_getbyte(direccion:word):byte;
 begin
 case direccion of
   $2000:cpu2_tp84_getbyte:=linea;
-  $8000..$87ff:cpu2_tp84_getbyte:=memoria[direccion-$3000];
-    else cpu2_tp84_getbyte:=mem_misc[direccion];
+  $6000..$67ff,$e000..$ffff:cpu2_tp84_getbyte:=mem_misc[direccion];
+  $8000..$87ff:cpu2_tp84_getbyte:=memoria[$5000+(direccion and $7ff)];
 end;
 end;
 
 procedure cpu2_tp84_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$dfff then exit;
-mem_misc[direccion]:=valor;
 case direccion of
   $4000:irq_enable:=(valor and 1)<>0;
-  $8000..$87ff:memoria[direccion-$3000]:=valor;
+  $6000..$67ff:mem_misc[direccion]:=valor;
+  $8000..$87ff:memoria[$5000+(direccion and $7ff)]:=valor;
 end;
 end;
 
 function sound_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$43ff:sound_getbyte:=mem_snd[direccion];
   $6000:sound_getbyte:=sound_latch;
   $8000:sound_getbyte:=((z80_0.contador+round(z80_0.tframes*linea)) shr 10) and $f;
-    else sound_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure sound_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$4000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  $4000..$43ff:mem_snd[direccion]:=valor;
+  $a000..$a1ff:; //filtros
   $c001:sn_76496_0.Write(valor);
   $c003:sn_76496_1.Write(valor);
   $c004:sn_76496_2.Write(valor);

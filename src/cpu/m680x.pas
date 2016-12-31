@@ -25,6 +25,7 @@ type
               constructor create(clock:dword;frames_div:word;tipo_cpu:byte);
               destructor Free;
             public
+              internal_ram:array[0..$ff] of byte;
               procedure run(maximo:single);
               procedure reset;
               procedure change_io_calls(in_port1,in_port2,in_port3,in_port4:cpu_inport_call;out_port1,out_port2,out_port3,out_port4:cpu_outport_call);
@@ -531,6 +532,7 @@ case direccion of
 			  ret:=self.trcsr;
       end;
   $14:ret:=self.ram_ctrl;
+  $40..$ff:ret:=self.internal_ram[direccion];
     else MessageDlg('Read Port 680X desconocido. Port='+inttohex(direccion,2), mtInformation,[mbOk], 0)
 end;
 m6803_internal_reg_r:=ret;
@@ -538,6 +540,7 @@ end;
 
 procedure cpu_m6800.m6803_internal_reg_w(direccion:word;valor:byte);
 begin
+self.internal_ram[direccion]:=valor;
 case direccion of
   $00:if (self.port1_ddr<>valor) then begin
 				self.port1_ddr:=valor;
@@ -644,7 +647,7 @@ case direccion of
 			  self.tdr:=valor;
       end;
   $14:self.ram_ctrl:=valor;
-  $12,$15..$1f:exit;
+  $12,$15,$40..$ff:exit;
   else MessageDlg('Write Port 680X desconocido. Port='+inttohex(direccion,2)+' PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0)
 end;
 end;

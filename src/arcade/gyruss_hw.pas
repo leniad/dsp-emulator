@@ -155,7 +155,7 @@ procedure gyruss_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
 case direccion of
-    $8000..$87ff:begin
+    $8000..$87ff:if memoria[direccion]<>valor then begin
                     memoria[direccion]:=valor;
                     gfx[0].buffer[direccion and $3ff]:=true;
                  end;

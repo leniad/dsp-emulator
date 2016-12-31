@@ -309,10 +309,13 @@ end;
 procedure dkong_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$6000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+        $6000..$6bff,$7000..$73ff:memoria[direccion]:=valor;
+        $7400..$77ff:if memoria[direccion]<>valor then begin
+                        gfx[0].buffer[direccion and $3ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $7c00:audio_tunes(valor);
-        $7400..$77ff:gfx[0].buffer[direccion and $3ff]:=true;
         $7c80:if char_bank<>((valor and 1)*$100) then begin
                 fillchar(gfx[0].buffer[0],$400,1);
                 char_bank:=(valor and 1)*$100;
@@ -413,9 +416,12 @@ end;
 procedure dkong3_putbyte(direccion:word;valor:byte);
 begin
 if ((direccion<$6000) or ((direccion>$7fff) and (direccion<$a000))) then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $7400..$77ff:gfx[0].buffer[direccion and $3ff]:=true;
+        $6000..$73ff:memoria[direccion]:=valor;
+        $7400..$77ff:if memoria[direccion]<>valor then begin
+                        gfx[0].buffer[direccion and $3ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
         $7c00:latch1:=valor;
         $7c80:latch2:=valor;
         $7d00:latch3:=valor;

@@ -89,6 +89,7 @@ object load_dsk: Tload_dsk
     TabStop = False
     FileList = FileListBox1
     TabOrder = 4
+    OnChange = DirectoryListBox1Change
     OnKeyUp = FileListBox1KeyUp
   end
   object DriveComboBox1: TDriveComboBox

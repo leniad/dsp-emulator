@@ -44,7 +44,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=237;
+  games_cont=239;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -279,6 +279,8 @@ const
   (name:'Space Fire Bird';year:'1980';snd:1;hi:false;zip:'spacefb';grid:229;company:'Nintendo';rom:@spacefb;samples:@spacefb_samples),
   (name:'Ajax';year:'1987';snd:1;hi:false;zip:'ajax';grid:230;company:'Konami';rom:@ajax),
   (name:'Xevious';year:'1982';snd:1;hi:false;zip:'xevious';grid:231;company:'Namco';rom:@xevious;samples:@xevious_samples),
+  (name:'The Combatribes';year:'1990';snd:1;hi:false;zip:'ctribe';grid:232;company:'Technos';rom:@ctribe),
+  (name:'Lunar Lander';year:'1979';snd:0;hi:false;zip:'llander';grid:233;company:'Atari';rom:@llander),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -533,6 +535,8 @@ case numero of
   229:principal1.CambiarMaquina(principal1.spacefb1);
   230:principal1.CambiarMaquina(principal1.ajax1);
   231:principal1.CambiarMaquina(principal1.xevious1);
+  232:principal1.CambiarMaquina(principal1.ctribe1);
+  233:principal1.CambiarMaquina(principal1.llander1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -776,6 +780,8 @@ principal1.megazone1.checked:=false;
 principal1.spacefb1.checked:=false;
 principal1.ajax1.checked:=false;
 principal1.xevious1.checked:=false;
+principal1.ctribe1.checked:=false;
+principal1.llander1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -795,7 +801,7 @@ principal1.BitBtn14.visible:=false; //Fast
 principal1.BitBtn8.visible:=false; //Config arcade
 principal1.Panel2.visible:=false; //Lateral
 principal1.BitBtn2.Enabled:=true;
-principal1.BitBtn3.Enabled:=false; //Play/Pause
+principal1.BitBtn3.Enabled:=true; //Play/Pause
 principal1.BitBtn5.Enabled:=true;
 principal1.BitBtn6.Enabled:=true;
 principal1.BitBtn8.Enabled:=true;
@@ -864,7 +870,7 @@ case tmaquina of
   20:Cargar_mikie;
   21:Cargar_Shaolin;
   22:Cargar_Yiear;
-  23:Cargar_as;
+  23,233:Cargar_as;
   24:cargar_sonson;
   25:Cargar_starforce;
   26,97:Cargar_tecmo;
@@ -958,7 +964,7 @@ case tmaquina of
   184:Cargar_outrun;
   185,189:Cargar_Taitosj;
   195:Cargar_vulgus;
-  196:Cargar_ddragon3;
+  196,232:Cargar_ddragon3;
   197:Cargar_blockout;
   199:Cargar_foodf;
   204,205:Cargar_nemesis;
@@ -1920,6 +1926,14 @@ end;
 if sender=principal1.xevious1 then begin
   tipo:=231;
   principal1.xevious1.Checked:=true;
+end;
+if sender=principal1.ctribe1 then begin
+  tipo:=232;
+  principal1.ctribe1.Checked:=true;
+end;
+if sender=principal1.llander1 then begin
+  tipo:=233;
+  principal1.llander1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

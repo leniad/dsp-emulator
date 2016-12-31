@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        dsp_version='0.17b1';
+        dsp_version='0.17b2WIP';
         pant_sprites=20;
         pant_doble=21;
         pant_temp=23;
@@ -114,8 +114,8 @@ var
         //video
         pantalla:array[0..max_pantalla] of libsdlP_Surface;
         window_render:libsdlp_Window;
-        punbuf,tpunbuf:pword;
-        punbuf_alpha,tpunbuf_alpha:pdword;
+        punbuf:pword;
+        punbuf_alpha:pdword;
         main_screen:tmain_screen;
         //Misc
         llamadas_maquina:tllamadas_globales;
@@ -230,7 +230,6 @@ if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
   if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
 //Puntero general del pixels
 getmem(punbuf,MAX_PUNBUF);
-getmem(tpunbuf,MAX_PUNBUF);
 //creo la pantalla general
 if main_screen.rot90_screen or main_screen.rol90_screen then begin
     p_final[0].x:=y;
@@ -251,7 +250,6 @@ pantalla[pant_temp]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0
 if alpha then begin
   pantalla[pant_sprites_alpha]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,32,$ff,$ff00,$ff0000,$ff000000);
   getmem(punbuf_alpha,MAX_PUNBUF*2);
-  getmem(tpunbuf_alpha,MAX_PUNBUF*2);
 end;
 pantalla[pant_sprites]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,16,0,0,0,0);
 SDL_Setcolorkey(pantalla[pant_sprites],1,set_trans_color);
@@ -349,13 +347,9 @@ for f:=0 to max_pantalla do begin
   fillchar(p_final[f],sizeof(tpantalla),0);
 end;
 if punbuf<>nil then freemem(punbuf);
-if tpunbuf<>nil then freemem(tpunbuf);
 if punbuf_alpha<>nil then freemem(punbuf_alpha);
-if tpunbuf_alpha<>nil then freemem(tpunbuf_alpha);
 punbuf:=nil;
-tpunbuf:=nil;
 punbuf_alpha:=nil;
-tpunbuf_alpha:=nil;
 end;
 
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
@@ -641,6 +635,7 @@ llamadas_maquina.open_file:='';
 main_vars.vactual:=0;
 main_vars.mensaje_principal:='';
 main_vars.service1:=false;
+main_vars.frames_sec:=0;
 sound_status.canales_usados:=-1;
 principal1.timer1.Enabled:=false;
 main_screen.rot90_screen:=false;
@@ -648,6 +643,7 @@ main_screen.rol90_screen:=false;
 main_screen.flip_main_screen:=false;
 main_screen.rapido:=false;
 close_all_devices;
+hide_mouse_cursor;
 reset_timer;
 marcade.dswa_val:=nil;
 marcade.dswb_val:=nil;

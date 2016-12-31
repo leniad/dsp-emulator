@@ -54,8 +54,7 @@ type
 var
   rom_bank:array[0..7,0..$3fff] of byte;
   mem_snd_opc:array[0..$7fff] of byte;
-  fg_data,bg_data:array[0..$7ff] of byte;
-  sprite_data:array[0..$5ff] of byte;
+  fg_data:array[0..$7ff] of byte;
   rom_nbank,sound_latch:byte;
   scroll_x,scroll_y:word;
   bg_enable,sprite_overdraw:boolean;
@@ -68,12 +67,12 @@ var
   x,y,atrib:byte;
 begin
 for f:=0 to $3ff do begin
-  atrib:=bg_data[$1+(f*2)];
+  atrib:=memoria[$d801+(f*2)];
   color:=atrib and $f;
   if (gfx[1].buffer[f] or buffer_color[color]) then begin
       x:=f mod 32;
       y:=f div 32;
-      nchar:=(bg_data[f*2]+((atrib and $c0) shl 2)) and $3ff;
+      nchar:=(memoria[$d800+(f*2)]+((atrib and $c0) shl 2)) and $3ff;
       put_gfx_flip(x*16,y*16,nchar,color shl 4,2,1,(atrib and $10)<>0,(atrib and $20)<>0);
       gfx[1].buffer[f]:=false;
     end;
@@ -86,13 +85,12 @@ var
   x,y,atrib:byte;
 begin
 for f:=0 to $3ff do begin
-  atrib:=bg_data[$1+(f*2)];
+  atrib:=memoria[$e001+(f*2)];
   color:=atrib and $f;
   if (gfx[1].buffer[f] or buffer_color[color]) then begin
       x:=f mod 32;
       y:=f div 32;
-      nchar:=bg_data[f*2]+((atrib and $10) shl 6)+((atrib and $c0) shl 2);
-      if nchar>$600 then continue;
+      nchar:=(memoria[$e000+(f*2)]+((atrib and $10) shl 6)+((atrib and $c0) shl 2)) mod $600;
       put_gfx_flip(x*16,y*16,nchar,color shl 4,2,1,false,(atrib and $20)<>0);
       gfx[1].buffer[f]:=false;
     end;
@@ -118,7 +116,7 @@ if flipx then begin
     for x:=15 downto 0 do begin
       if post^<>15 then temp^:=paleta[gfx[2].colores[post^+color+$100]]
         else temp^:=paleta[max_colores];
-      pant_sprites_tmp[pos_temp]:=color;
+      pant_sprites_tmp[pos_temp]:=color and $ff;
       pos_temp:=pos_temp-1;
       dec(post);
       inc(temp);
@@ -136,7 +134,7 @@ end else begin
     for x:=0 to 15 do begin
       if pos^<>15 then temp^:=paleta[gfx[2].colores[pos^+color+$100]]
         else temp^:=paleta[max_colores];
-      pant_sprites_tmp[pos_temp]:=color;
+      pant_sprites_tmp[pos_temp]:=color and $ff;
       pos_temp:=pos_temp+1;
       inc(temp);
       inc(pos);
@@ -176,15 +174,15 @@ end;
 num_sprites:=0;
 f:=0;
 repeat
-  atrib:=sprite_data[$d+f];
+  atrib:=buffer_sprites[$d+f];
   if (atrib and $2)<>0 then begin
-    sx:=sprite_data[$c+f]-((atrib and $01) shl 8);
-		sy:=sprite_data[$b+f];
+    sx:=buffer_sprites[$c+f]-((atrib and $01) shl 8);
+		sy:=buffer_sprites[$b+f];
     // Ninja Kid II doesn't use the topmost bit (it has smaller ROMs) so it might not be connected on the board
-		nchar:=sprite_data[$e+f]+((atrib and $c0) shl 2)+((atrib and $08) shl 7);
+		nchar:=buffer_sprites[$e+f]+((atrib and $c0) shl 2)+((atrib and $08) shl 7);
     flipx:=(atrib and $10)<>0;
     flipy:=(atrib and $20)<>0;
-		color:=(sprite_data[$f+f] and $f) shl 4;
+		color:=(buffer_sprites[$f+f] and $f) shl 4;
     // Ninja Kid II doesn't use the 'big' feature so it might not be available on the board
 		big:=(atrib and $04) shr 2;
     if big<>0 then begin
@@ -291,13 +289,16 @@ end;
 function ninjakid2_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$d800..$f9ff:ninjakid2_getbyte:=memoria[direccion];
   $8000..$bfff:ninjakid2_getbyte:=rom_bank[rom_nbank,direccion and $3fff];
   $c000:ninjakid2_getbyte:=marcade.in0;
   $c001:ninjakid2_getbyte:=marcade.in1;
   $c002:ninjakid2_getbyte:=marcade.in2;
   $c003:ninjakid2_getbyte:=$6f;
   $c004:ninjakid2_getbyte:=$f9;
-  else ninjakid2_getbyte:=memoria[direccion];
+  $c800:ninjakid2_getbyte:=buffer_paleta[direccion and $7ff];
+  $d000..$d7ff:ninjakid2_getbyte:=fg_data[direccion and $7ff];
+  $fa00..$ffff:ninjakid2_getbyte:=buffer_sprites[direccion-$fa00];
 end;
 end;
 
@@ -322,10 +323,12 @@ end;
 procedure ninjakid2_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
    $c200:sound_latch:=valor;
-   $c201:if (valor and $10)<>0 then z80_1.reset;
+   $c201:begin
+            if (valor and $10)<>0 then z80_1.reset;
+            main_screen.flip_main_screen:=(valor and $80)<>0;
+         end;
    $c202:rom_nbank:=valor and $7;
    $c203:sprite_overdraw:=(valor and $1)<>0;
    $c208:scroll_x:=(scroll_x and $ff00) or valor;
@@ -337,15 +340,16 @@ case direccion of
                     buffer_paleta[direccion and $7ff]:=valor;
                     cambiar_color(direccion and $7fe);
                 end;
-   $d000..$d7ff:begin
+   $d000..$d7ff:if fg_data[direccion and $7ff]<>valor then begin
                     fg_data[direccion and $7ff]:=valor;
                     gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                 end;
-   $d800..$dfff:begin
-                    bg_data[direccion and $7ff]:=valor;
+   $d800..$dfff:if memoria[direccion]<>valor then begin
                     gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
+                    memoria[direccion]:=valor;
                 end;
-   $fa00..$ffff:sprite_data[direccion-$fa00]:=valor;
+   $e000..$f9ff:memoria[direccion]:=valor;
+   $fa00..$ffff:buffer_sprites[direccion-$fa00]:=valor;
 end;
 end;
 
@@ -353,36 +357,42 @@ end;
 function aarea_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$c000..$d9ff,$e000..$e7ff:aarea_getbyte:=memoria[direccion];
   $8000..$bfff:aarea_getbyte:=rom_bank[rom_nbank,direccion and $3fff];
+  $da00..$dfff:aarea_getbyte:=buffer_sprites[direccion-$da00];
+  $e800..$efff:aarea_getbyte:=fg_data[direccion and $7ff];
+  $f000..$f5ff:aarea_getbyte:=buffer_paleta[direccion and $7ff];
   $f800:aarea_getbyte:=marcade.in0;
   $f801:aarea_getbyte:=marcade.in1;
   $f802:aarea_getbyte:=marcade.in2;
   $f803:aarea_getbyte:=marcade.in3;
   $f804:aarea_getbyte:=$ff;
-  else aarea_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure aarea_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
-memoria[direccion]:=valor;
+if (direccion<$c000) then exit;
 case direccion of
-   $da00..$dfff:sprite_data[direccion-$da00]:=valor;
-   $e000..$e7ff:begin
-                  bg_data[direccion and $7ff]:=valor;
+   $c000..$d9ff:memoria[direccion]:=valor;
+   $da00..$dfff:buffer_sprites[direccion-$da00]:=valor;
+   $e000..$e7ff:if memoria[direccion]<>valor then begin
                   gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
+                  memoria[direccion]:=valor;
                 end;
-   $e800..$efff:begin
+   $e800..$efff:if fg_data[direccion and $7ff]<>valor then begin
                   fg_data[direccion and $7ff]:=valor;
                   gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                 end;
    $f000..$f5ff:if buffer_paleta[direccion and $7ff]<>valor then begin
-                    buffer_paleta[direccion and $7ff]:=valor;
-                    cambiar_color(direccion and $7fe);
+                  buffer_paleta[direccion and $7ff]:=valor;
+                  cambiar_color(direccion and $7fe);
                 end;
    $fa00:sound_latch:=valor;
-   $fa01:if (valor and $10)<>0 then z80_1.reset;
+   $fa01:begin
+            if (valor and $10)<>0 then z80_1.reset;
+            main_screen.flip_main_screen:=(valor and $80)<>0;
+         end;
    $fa02:rom_nbank:=valor and $7;
    $fa03:sprite_overdraw:=(valor and $1)<>0;
    $fa08:scroll_x:=(scroll_x and $ff00) or valor;
@@ -399,15 +409,18 @@ begin
 case direccion of
   $0..$7fff:if z80_1.opcode then ninjakid2_snd_getbyte:=mem_snd_opc[direccion]
               else ninjakid2_snd_getbyte:=mem_snd[direccion];
+  $8000..$c7ff:ninjakid2_snd_getbyte:=mem_snd[direccion];
   $e000:ninjakid2_snd_getbyte:=sound_latch;
-    else ninjakid2_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure ninjakid2_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$c000 then exit;
-mem_snd[direccion]:=valor;
+case direccion of
+  $c000..$c7ff:mem_snd[direccion]:=valor;
+  $f000:;  //PCM
+end;
 end;
 
 function ninjakid2_snd_inbyte(puerto:word):byte;
@@ -523,9 +536,9 @@ z80_1.change_ram_calls(ninjakid2_snd_getbyte,ninjakid2_snd_putbyte);
 z80_1.change_io_calls(ninjakid2_snd_inbyte,ninjakid2_snd_outbyte);
 z80_1.init_sound(ninjakid2_sound_update);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,2);
+ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(1500000,2);
+ym2203_1:=ym2203_chip.create(1500000,0.5,0.1);
 case main_vars.tipo_maquina of
   120:begin
         update_background:=bg_ninjakid2;

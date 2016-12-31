@@ -199,11 +199,11 @@ begin
 if direccion<$c000 then exit;
 case direccion of
     $c000..$dfff:memoria[direccion]:=valor;
-    $e000..$e7ff:begin
+    $e000..$e7ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;
                  end;
-    $e800..$efff:begin
+    $e800..$efff:if memoria[direccion]<>valor then begin
                     gfx[2].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;
                  end;
@@ -383,11 +383,11 @@ begin
 if direccion<$c000 then exit;
 case direccion of
     $c000..$dfff:memoria[direccion]:=valor;
-    $e000..$e7ff:begin
+    $e000..$e7ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;
                  end;
-    $e800..$efff:begin
+    $e800..$efff:if memoria[direccion]<>valor then begin
                     gfx[2].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;
                     end;
@@ -475,8 +475,8 @@ end;
 
 function iniciar_lwings:boolean;
 var
-      f:word;
-      memoria_temp:array[0..$3ffff] of byte;
+    f:word;
+    memoria_temp:array[0..$3ffff] of byte;
 const
     pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
     pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);

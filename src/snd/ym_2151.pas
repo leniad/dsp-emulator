@@ -15,6 +15,8 @@ type
        procedure write(data:byte);
        procedure change_port_func(port_func:cpu_outport_call);
        procedure change_irq_func(irq_func:cpu_outport_call);
+       procedure load_snapshot(data:pbyte);
+       function save_snapshot(data:pbyte):word;
     private
        chip_number,lastreg:byte;
   end;
@@ -54,6 +56,26 @@ end;
 procedure ym2151_chip.reset;
 begin
   YM_2151ResetChip(self.chip_number);
+end;
+
+function ym2151_chip.save_snapshot(data:pbyte):word;
+var
+  temp:pbyte;
+  size:word;
+begin
+  temp:=data;
+  copymemory(temp,@self.chip_number,1);inc(temp);size:=1;
+  copymemory(temp,@self.lastreg,1);inc(temp);size:=size+1;
+  save_snapshot:=size;
+end;
+
+procedure ym2151_chip.load_snapshot(data:pbyte);
+var
+  temp:pbyte;
+begin
+  temp:=data;
+  copymemory(@self.chip_number,temp,1);inc(temp);
+  copymemory(@self.lastreg,temp,1);inc(temp);
 end;
 
 function ym2151_chip.status:byte;

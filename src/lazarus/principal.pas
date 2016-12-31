@@ -73,7 +73,7 @@ type
     Iremm621: TMenuItem;
     BubbleBobble1: TMenuItem;
     Jungler1: TMenuItem;
-    Asteroids1: TMenuItem;
+    AsteroidsHW1: TMenuItem;
     BurgerTime1: TMenuItem;
     ExpressRaider1: TMenuItem;
     gng1: TMenuItem;
@@ -162,7 +162,7 @@ type
     jungleking1: TMenuItem;
     hharry1: TMenuItem;
     drgnbstr1: TMenuItem;
-    ddragon31: TMenuItem;
+    ddragon3_hw: TMenuItem;
     blockout1: TMenuItem;
     foodf1: TMenuItem;
     LadyBug1: TMenuItem;
@@ -189,6 +189,10 @@ type
     hypersports1: TMenuItem;
     Megazone1: TMenuItem;
     ajax1: TMenuItem;
+    ddragon31: TMenuItem;
+    ctribe1: TMenuItem;
+    Asteroids1: TMenuItem;
+    llander1: TMenuItem;
     xevious1: TMenuItem;
     spacefb1: TMenuItem;
     trackfield1: TMenuItem;
@@ -695,23 +699,21 @@ end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
-BitBtn3.Enabled:=true;
+principal1.BitBtn3.Glyph:=nil;
 if emustatus=EsRuning then begin
-   principal1.BitBtn3.Glyph:=nil;
    principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
    timer1.Enabled:=false;
    EmuStatus:=EsPause;
    SDL_ClearQueuedAudio(1);
    SDL_PauseAudio(1);
 end else begin
-   principal1.BitBtn3.Glyph:=nil;
    principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
    EmuStatus:=EsRuning;
    timer1.Enabled:=true;
    SDL_PauseAudio(0);
    sync_all;
-   if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
 end;
+if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
 end;
 
 procedure Tprincipal1.fSlow(Sender: TObject);

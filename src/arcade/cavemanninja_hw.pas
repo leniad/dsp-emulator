@@ -164,9 +164,9 @@ while EmuStatus=EsRuning do begin
       247:begin
             m68000_0.irq[5]:=HOLD_LINE;
             proc_update_video;
-            marcade.in1:=marcade.in1 and $f7;
+            marcade.in1:=marcade.in1 or $8;
           end;
-      255:marcade.in1:=marcade.in1 or $8;
+      255:marcade.in1:=marcade.in1 and $f7;
    end;
  end;
  eventos_cninja;
@@ -190,12 +190,12 @@ function cninja_getword(direccion:dword):word;
 begin
 case direccion of
   $0..$bffff:cninja_getword:=rom[direccion shr 1];
-  $144000..$144fff:cninja_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $146000..$146fff:cninja_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $144000..$144fff:cninja_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
+  $146000..$146fff:cninja_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
   $14c000..$14c7ff:cninja_getword:=deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1];
   $14e000..$14e7ff:cninja_getword:=deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $7ff) shr 1];
-  $154000..$154fff:cninja_getword:=deco16ic_chip[1].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[1].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $156000..$156fff:cninja_getword:=deco16ic_chip[1].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[1].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $154000..$154fff:cninja_getword:=deco16ic_chip[1].dec16ic_pf_data[1,(direccion and $fff) shr 1];
+  $156000..$156fff:cninja_getword:=deco16ic_chip[1].dec16ic_pf_data[2,(direccion and $fff) shr 1];
   $15c000..$15c7ff:cninja_getword:=deco16ic_chip[1].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1];
   $15e000..$15e7ff:cninja_getword:=deco16ic_chip[1].dec16ic_pf_rowscroll[2,(direccion and $7ff) shr 1];
   $184000..$187fff:cninja_getword:=ram[(direccion and $3fff) shr 1];
@@ -247,13 +247,11 @@ if direccion<$c0000 then exit;
 case direccion of
   $140000..$14000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
   $144000..$144fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
                    end;
   $146000..$146fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
                    end;
   $14c000..$14c7ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
@@ -263,13 +261,11 @@ case direccion of
                       if ((direccion and $f)=0) then main_screen.flip_main_screen:=(valor and $0080)<>0
                    end;
 	$154000..$154fff:begin
-                      deco16ic_chip[1].dec16ic_pf_data[1,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[1].dec16ic_pf_data[1,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[1].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[1].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
                    end;
   $156000..$156fff:begin
-                      deco16ic_chip[1].dec16ic_pf_data[2,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[1].dec16ic_pf_data[2,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[1].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[1].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
                    end;
   $15c000..$15c7ff:deco16ic_chip[1].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
@@ -307,12 +303,12 @@ function robocop2_getword(direccion:dword):word;
 begin
 case direccion of
   $0..$fffff:robocop2_getword:=rom[direccion shr 1];
-  $144000..$144fff:robocop2_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $146000..$146fff:robocop2_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $144000..$144fff:robocop2_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
+  $146000..$146fff:robocop2_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
   $14c000..$14c7ff:robocop2_getword:=deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1];
   $14e000..$14e7ff:robocop2_getword:=deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $7ff) shr 1];
-  $154000..$154fff:robocop2_getword:=deco16ic_chip[1].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[1].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $156000..$156fff:robocop2_getword:=deco16ic_chip[1].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[1].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $154000..$154fff:robocop2_getword:=deco16ic_chip[1].dec16ic_pf_data[1,(direccion and $fff) shr 1];
+  $156000..$156fff:robocop2_getword:=deco16ic_chip[1].dec16ic_pf_data[2,(direccion and $fff) shr 1];
   $15c000..$15c7ff:robocop2_getword:=deco16ic_chip[1].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1];
   $15e000..$15e7ff:robocop2_getword:=deco16ic_chip[1].dec16ic_pf_rowscroll[2,(direccion and $7ff) shr 1];
   $180000..$1807ff:robocop2_getword:=buffer_sprites_w[(direccion and $7ff) shr 1];
@@ -349,13 +345,11 @@ if direccion<$100000 then exit;
 case direccion of
   $140000..$14000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
   $144000..$144fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
                    end;
   $146000..$146fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
                    end;
   $14c000..$14c7ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
@@ -365,13 +359,11 @@ case direccion of
                       if ((direccion and $f)=0) then main_screen.flip_main_screen:=(valor and $0080)<>0
                    end;
 	$154000..$154fff:begin
-                      deco16ic_chip[1].dec16ic_pf_data[1,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[1].dec16ic_pf_data[1,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[1].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[1].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
                    end;
   $156000..$156fff:begin
-                      deco16ic_chip[1].dec16ic_pf_data[2,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[1].dec16ic_pf_data[2,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[1].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[1].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
                    end;
   $15c000..$15c7ff:deco16ic_chip[1].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;

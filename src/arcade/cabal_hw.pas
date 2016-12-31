@@ -23,10 +23,10 @@ const
         (n:'bg_rom3.bin';l:$10000;p:$20000;crc:$420b0801),(n:'bg_rom4.bin';l:$10000;p:$20001;crc:$77bc7a60),
         (n:'bg_rom5.bin';l:$10000;p:$40000;crc:$543fcb37),(n:'bg_rom6.bin';l:$10000;p:$40001;crc:$0bc50075),
         (n:'bg_rom7.bin';l:$10000;p:$60000;crc:$d28d921e),(n:'bg_rom8.bin';l:$10000;p:$60001;crc:$67e4fe47),());
-        cabal_sound:array[0..2] of tipo_roms=(
-        (n:'4-3n';l:$2000;p:0;crc:$4038eff2),(n:'3-3p';l:$8000;p:$8000;crc:$d9defcbf),());
-        cabal_adpcm:array[0..2] of tipo_roms=(
-        (n:'2-1s';l:$10000;p:0;crc:$850406b4),(n:'1-1u';l:$10000;p:$10000;crc:$8b3e0789),());
+        cabal_sound:array[0..1] of tipo_roms=(
+        (n:'4-3n';l:$2000;p:0;crc:$4038eff2),(n:'3-3p';l:$8000;p:$8000;crc:$d9defcbf));
+        cabal_adpcm:array[0..1] of tipo_roms=(
+        (n:'2-1s';l:$10000;p:0;crc:$850406b4),(n:'1-1u';l:$10000;p:$10000;crc:$8b3e0789));
         //Dip
         cabal_dip_a:array [0..11] of def_dip=(
         (mask:$f;name:'Coinage';number:16;dip:((dip_val:$a;dip_name:'6C 1C'),(dip_val:$b;dip_name:'5C 1C'),(dip_val:$c;dip_name:'4C 1C'),(dip_val:$d;dip_name:'3C 1C'),(dip_val:$1;dip_name:'8C 3C'),(dip_val:$e;dip_name:'2C 1C'),(dip_val:$2;dip_name:'5C 3C'),(dip_val:$3;dip_name:'3C 2C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$4;dip_name:'2C 3C'),(dip_val:$9;dip_name:'1C 2C'),(dip_val:$8;dip_name:'1C 3C'),(dip_val:$7;dip_name:'1C 4C'),(dip_val:$6;dip_name:'1C 5C'),(dip_val:$5;dip_name:'1C 6C'),(dip_val:$0;dip_name:'Free Play'))),
@@ -96,24 +96,24 @@ end;
 procedure eventos_cabal;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
-
-  if arcade_input.but0[0] then marcade.in3:=(marcade.in3 and $fe) else marcade.in3:=(marcade.in3 or $1);
-  if arcade_input.but1[0] then marcade.in3:=(marcade.in3 and $fd) else marcade.in3:=(marcade.in3 or $2);
-  if arcade_input.but0[1] then marcade.in3:=(marcade.in3 and $fb) else marcade.in3:=(marcade.in3 or $4);
-  if arcade_input.but1[1] then marcade.in3:=(marcade.in3 and $f7) else marcade.in3:=(marcade.in3 or $8);
-  //marcade.in1
-  if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
+  //CONTROL1
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
+  //CONTROL2
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $efff) else marcade.in1:=(marcade.in1 or $1000);
+  if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $dfff) else marcade.in1:=(marcade.in1 or $2000);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $7fff) else marcade.in1:=(marcade.in1 or $8000);
   //Coins
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
@@ -155,10 +155,10 @@ case direccion of
     $60000..$607ff:cabal_getword:=fg_ram[(direccion and $7ff) shr 1];
     $80000..$803ff:cabal_getword:=bg_ram[(direccion and $3ff) shr 1];
     $a0000:cabal_getword:=marcade.dswa;  //DSW
-    $a0008:cabal_getword:=$ff+(marcade.in0 shl 8);
+    $a0008:cabal_getword:=marcade.in0;
     $a000c:cabal_getword:=$ffff;  //track 0
     $a000a,$a000e:cabal_getword:=$0;  //track 1
-    $a0010:cabal_getword:=(marcade.in1 shl 8)+marcade.in3;  //input
+    $a0010:cabal_getword:=marcade.in1;  //input
     $e0000..$e07ff:cabal_getword:=buffer_paleta[(direccion and $7ff) shr 1];
     $e8000..$e800d:cabal_getword:=seibu_get(direccion and $e);
 end;
@@ -180,14 +180,14 @@ end;
 
 procedure cabal_putword(direccion:dword;valor:word);
 begin
+if direccion<$40000 then exit;
 case direccion of
-  $0..$3ffff:exit;
   $40000..$4ffff:main_ram[(direccion and $ffff) shr 1]:=valor;
-  $60000..$607ff:begin
+  $60000..$607ff:if fg_ram[(direccion and $7ff) shr 1]<>valor then begin
                     fg_ram[(direccion and $7ff) shr 1]:=valor;
                     gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                  end;
-  $80000..$803ff:begin
+  $80000..$803ff:if bg_ram[(direccion and $3ff) shr 1]<>valor then begin
                     bg_ram[(direccion and $3ff) shr 1]:=valor;
                     gfx[2].buffer[(direccion and $3ff) shr 1]:=true;
                  end;
@@ -217,8 +217,8 @@ end;
 
 procedure cabal_snd_putbyte(direccion:word;valor:byte);
 begin
+if ((direccion<$2000) or (direccion>$7fff)) then exit;
 case direccion of
-  0..$1fff,$8000..$ffff:exit;
   $2000..$27ff:mem_snd[direccion]:=valor;
   $4001,$4002:;
   $4003:seibu_update_irq_lines(RST18_CLEAR);
@@ -254,10 +254,9 @@ begin
  seibu_adpcm_reset;
  seibu_reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
  marcade.in2:=$fc;
- marcade.in3:=$ff;
 end;
 
 function iniciar_cabal:boolean;
@@ -294,14 +293,14 @@ ym2151_0.change_irq_func(snd_irq);
 //cargar roms
 if not(cargar_roms16w(@rom,@cabal_rom,'cabal.zip',0)) then exit;
 //cargar sonido
-if not(cargar_roms(@memoria_temp,@cabal_sound,'cabal.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@cabal_sound,'cabal.zip',sizeof(cabal_sound))) then exit;
 decript_seibu_sound(@memoria_temp,@decrypt,@mem_snd);
 copymemory(@mem_snd[$8000],@memoria_temp[$8000],$8000);
 //adpcm
-if not(cargar_roms(@memoria_temp,@cabal_adpcm,'cabal.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@cabal_adpcm,'cabal.zip',sizeof(cabal_adpcm))) then exit;
 seibu_adpcm_init(@memoria_temp);
 //convertir chars
-if not(cargar_roms(@memoria_temp,@cabal_char,'cabal.zip')) then exit;
+if not(roms_load(@memoria_temp,@cabal_char,'cabal.zip',sizeof(cabal_char))) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,0,4);

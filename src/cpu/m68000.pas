@@ -3407,11 +3407,13 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
          $12,$16:begin  //roxr.l
                     self.contador:=self.contador+8;
-                    tempdl:=r.d[orig].l or (byte(r.cc.x) shl 32);
+                    //WTF???
+                    tempdl:=byte(r.cc.x) shl 31;  //No puedo poner directamente shl 32!!
+                    tempdl:=r.d[orig].l or (tempdl*2);
                     for tempb2:=1 to tempb do
                       tempdl:=(tempdl shr 1) or ((tempdl and 1) shl 32);
                     r.d[orig].l:=tempdl and $FFFFFFFF;
-                    r.cc.c:=((tempdl shl 24) and $100)<>0;
+                    r.cc.c:=((tempdl shr 24) and $100)<>0;
                     r.cc.n:=((tempdl shr 24) and $80)<>0;
                     r.cc.z:=((templ and $ffffffff)=0);
                     r.cc.v:=false;
@@ -3544,7 +3546,9 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                  end;
          $32:begin  //roxl.l
                     self.contador:=self.contador+8;
-                    tempdl:=r.d[orig].l or (byte(r.cc.x) shl 32);
+                    //WTF?????
+                    tempdl:=byte(r.cc.x) shl 31; //No puedo poner shl 32!!!
+                    tempdl:=(tempdl*2) or r.d[orig].l;
                     for tempb2:=1 to tempb do
                       tempdl:=(tempdl shl 1) or ((tempdl and $100000000) shr 32);
                     r.cc.c:=((tempdl shr 24) and $100)<>0;

@@ -52,9 +52,8 @@ const
 var
  scroll_lineas:array[0..$1f] of word;
  memoria_rom:array[0..7,0..$7ff] of byte;
- interrupt_mask,interrupt_ticks,sound_latch,rom_bank:byte;
+ interrupt_mask,interrupt_ticks,sound_latch,rom_bank,timer_hs:byte;
  banco_sprites:word;
- timer_hs:byte;
 
 procedure update_video_gberet;inline;
 var
@@ -164,11 +163,20 @@ var
   ack_mask:byte;
 begin
 if ((direccion<$c000) or (direccion>$f7ff)) then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $c000..$cfff:gfx[0].buffer[direccion and $7ff]:=true;
-        $e000..$e01f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $100) or valor;
-        $e020..$e03f:scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $ff) or ((valor and 1) shl 8);
+        $c000..$cfff:if memoria[direccion]<>valor then begin
+                        gfx[0].buffer[direccion and $7ff]:=true;
+                        memoria[direccion]:=valor;
+                     end;
+        $d000..$dfff:memoria[direccion]:=valor;
+        $e000..$e01f:begin
+                        scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $100) or valor;
+                        memoria[direccion]:=valor;
+                     end;
+        $e020..$e03f:begin
+                        scroll_lineas[direccion and $1f]:=(scroll_lineas[direccion and $1f] and $ff) or ((valor and 1) shl 8);
+                        memoria[direccion]:=valor;
+                     end;
         $e043:banco_sprites:=(valor and 8) shl 5;
         $e044:begin
                 // bits 0/1/2 = interrupt enable

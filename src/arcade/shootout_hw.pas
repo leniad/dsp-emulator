@@ -28,32 +28,32 @@ var
 
 procedure sprites(prioridad:byte);
 var
-  f,atrib:byte;
-  nchar,x,y:word;
+  f,atrib,x,y:byte;
+  nchar:word;
 begin
 { 76543210
   xxx-----    bank
   ---x----    vertical size
-  ----x---    y
+  ----x---    priority
   -----x--    horizontal flip
   ------x-    flicker
   -------x    enable}
-bflicker:=not(bflicker);
-for f:=0 to $7e do begin
+for f:=0 to $7f do begin
  atrib:=memoria[$1801+(f*4)];
  if (((atrib and 1)=0) or ((atrib and 8)<>prioridad)) then continue;
  if (bflicker or ((atrib and $2)=0)) then begin
     nchar:=memoria[$1803+(f*4)]+((atrib shl 3) and $700);
-    x:=(240-memoria[$1802+(f*4)]) and $ff;
-    y:=(240-memoria[$1800+(f*4)]) and $ff;
+    x:=240-memoria[$1802+(f*4)];
+    y:=240-memoria[$1800+(f*4)];
     if (atrib and $10)<>0 then begin //tamaño doble
       nchar:=nchar and $7fe;
+      put_gfx_sprite_diff(nchar,64,(atrib and $4)<>0,false,1,0,0);
+      put_gfx_sprite_diff(nchar+1,64,(atrib and $4)<>0,false,1,0,16);
+      actualiza_gfx_sprite_size(x,y-16,3,16,32);
+    end else begin
       put_gfx_sprite(nchar,64,(atrib and $4)<>0,false,1);
-      actualiza_gfx_sprite(x,y-16,3,1);
-      nchar:=nchar+1;
+      actualiza_gfx_sprite(x,y,3,1);
     end;
-    put_gfx_sprite(nchar,64,(atrib and $4)<>0,false,1);
-    actualiza_gfx_sprite(x,y,3,1);
  end;
 end;
 end;
@@ -61,8 +61,7 @@ end;
 procedure update_video_shootout;
 var
   f,nchar,color:word;
-  x,y:word;
-  atrib:byte;
+  x,y,atrib:byte;
 begin
 for f:=0 to $3ff do begin
   //tiles
@@ -86,6 +85,7 @@ for f:=0 to $3ff do begin
     gfx[0].buffer[f]:=false;
   end;
 end;
+bflicker:=not(bflicker);
 actualiza_trozo(0,0,256,256,2,0,0,256,256,3);
 sprites(8);
 actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
@@ -167,7 +167,7 @@ case direccion of
   $1000:banco:=valor and $f;
   $1003:begin
           sound_latch:=valor;
-          m6502_1.change_nmi(PULSE_LINE);
+          m6502_1.change_nmi(ASSERT_LINE);
         end;
   $2000..$27ff:begin
                   gfx[0].buffer[direccion and $3ff]:=true;
@@ -186,7 +186,10 @@ case direccion of
   0..$7ff,$c000..$ffff:getbyte_snd_shootout:=mem_snd[direccion];
   $4000:getbyte_snd_shootout:=ym2203_0.status;
   $4001:getbyte_snd_shootout:=ym2203_0.read;
-  $a000:getbyte_snd_shootout:=sound_latch;
+  $a000:begin
+          getbyte_snd_shootout:=sound_latch;
+          m6502_1.change_nmi(CLEAR_LINE);
+        end;
 end;
 end;
 

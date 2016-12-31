@@ -563,9 +563,12 @@ end;
 end;
 
 procedure system16a_putword(direccion:dword;valor:word);
+var
+  dir2:dword;
 begin
+if direccion<$400000 then exit;
+dir2:=direccion shr 1;
 case direccion of
-    0..$3fffff:exit;
     $400000..$7fffff:case (direccion and $7ffff) of
                         $00000..$0ffff:begin
                                         tile_ram[(direccion and $7fff) shr 1]:=valor;

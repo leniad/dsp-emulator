@@ -374,7 +374,7 @@ case nlayer of
   1:if (cps1_layer and cps1_cps_b[cps_b].mask_sc1)=cps1_cps_b[cps_b].mask_sc1 then begin
       if (sprite_next and mask_change) then begin
         mask_change:=false;
-        fillchar(gfx[0].buffer[0],$1000,1);
+        fillchar(gfx[0].buffer,$1000,1);
       end;
       for f:=0 to $6c7 do begin
        x:=f mod 56;
@@ -414,7 +414,7 @@ case nlayer of
   2:if (cps1_layer and cps1_cps_b[cps_b].mask_sc2)<>0 then begin
       if (sprite_next and mask_change) then begin
         mask_change:=false;
-        fillchar(gfx[2].buffer[0],$1000,1);
+        fillchar(gfx[2].buffer,$1000,1);
       end;
       for f:=0 to $1cf do begin
         x:=f mod 29;
@@ -460,7 +460,7 @@ case nlayer of
       if (sprite_next and mask_change) then begin
         //Si se ha modificado las mascaras, y es la pantalla de las prioridades borrar todo
         mask_change:=false;
-        fillchar(gfx[3].buffer[0],$1000,1);
+        fillchar(gfx[3].buffer,$1000,1);
       end;
       for f:=0 to $95 do begin
         x:=f mod 15;
@@ -519,7 +519,7 @@ begin
   draw_layer(l2,l3=0);
   draw_layer(l3,false);
   actualiza_trozo_final(64,16,384,224,5);
-  fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+  fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_cps1;
@@ -582,7 +582,7 @@ while EmuStatus=EsRuning do begin
     if f=239 then begin
        m68000_0.irq[2]:=HOLD_LINE;
        update_video_cps1;
-       copymemory(@sprite_buffer[0],@vram[cps1_sprites shr 1],$400*2);
+       copymemory(@sprite_buffer,@vram[cps1_sprites shr 1],$400*2);
     end;
  end;
  eventos_cps1;
@@ -624,44 +624,44 @@ begin
     $100:cps1_sprites:=(val*256)-$900000;
     $102:if cps1_scroll1<>(((val*256) and not($3fff))-$900000) then begin
             cps1_scroll1:=((val*256) and not($3fff))-$900000;
-            fillchar(gfx[0].buffer[0],$1000,1);
+            fillchar(gfx[0].buffer,$1000,1);
          end;
     $104:if cps1_scroll2<>(((val*256) and not($3fff))-$900000) then begin
             cps1_scroll2:=((val*256) and not($3fff))-$900000;
-            fillchar(gfx[2].buffer[0],$1000,1);
+            fillchar(gfx[2].buffer,$1000,1);
          end;
     $106:if cps1_scroll3<>(((val*256) and not($3fff))-$900000) then begin
             cps1_scroll3:=((val*256) and not($3fff))-$900000;
-            fillchar(gfx[3].buffer[0],$1000,1);
+            fillchar(gfx[3].buffer,$1000,1);
          end;
     $108:cps1_rowscroll:=((val*256) and not($3fff))-$900000;
     $10A:if cps1_pal<>(((val*256)-$900000) and $1ffff) then begin
             cps1_pal:=((val*256)-$900000) and $1ffff;
-            fillchar(buffer_paleta[0],$200*6,1);
+            fillchar(buffer_paleta,$200*6,1);
             pal_change:=true;
          end;
     $10C:if scroll_x1<>(val and $1ff) then begin
-            if abs((scroll_x1 and $1f8)-(val and $1f8))>7 then fillchar(gfx[0].buffer[0],$1000,1);
+            if abs((scroll_x1 and $1f8)-(val and $1f8))>7 then fillchar(gfx[0].buffer,$1000,1);
             scroll_x1:=val and $1ff;
          end;
     $10E:if scroll_y1<>(val and $1ff) then begin
-            if abs((scroll_y1 and $1f8)-(val and $1f8))>7 then fillchar(gfx[0].buffer[0],$1000,1);
+            if abs((scroll_y1 and $1f8)-(val and $1f8))>7 then fillchar(gfx[0].buffer,$1000,1);
             scroll_y1:=val and $1ff;
          end;
     $110:if scroll_x2<>(val and $3ff) then begin
-            if abs((scroll_x2 and $3f0)-(val and $3f0))>15 then fillchar(gfx[2].buffer[0],$1000,1);
+            if abs((scroll_x2 and $3f0)-(val and $3f0))>15 then fillchar(gfx[2].buffer,$1000,1);
             scroll_x2:=val and $3ff;
          end;
     $112:if scroll_y2<>(val and $3ff) then begin
-            if abs((scroll_y2 and $3f0)-(val and $3f0))>15 then fillchar(gfx[2].buffer[0],$1000,1);
+            if abs((scroll_y2 and $3f0)-(val and $3f0))>15 then fillchar(gfx[2].buffer,$1000,1);
             scroll_y2:=val and $3ff;
          end;
     $114:if scroll_x3<>(val and $7ff) then begin
-            if abs((scroll_x3 and $7e0)-(val and $7e0))>31 then fillchar(gfx[3].buffer[0],$1000,1);
+            if abs((scroll_x3 and $7e0)-(val and $7e0))>31 then fillchar(gfx[3].buffer,$1000,1);
             scroll_x3:=val and $7ff;
          end;
     $116:if scroll_y3<>(val and $7ff) then begin
-            if abs((scroll_y3 and $7e0)-(val and $7e0))>31 then fillchar(gfx[3].buffer[0],$1000,1);
+            if abs((scroll_y3 and $7e0)-(val and $7e0))>31 then fillchar(gfx[3].buffer,$1000,1);
             scroll_y3:=(val and $7ff);
          end;
     $120:cps1_rowscrollstart:=val;
@@ -676,7 +676,7 @@ begin
       if cps1_palcltr<>val then begin
              cps1_palcltr:=val;
              pal_change:=true;
-             fillchar(buffer_paleta[0],$200*6,1);
+             fillchar(buffer_paleta,$200*6,1);
          end;
   end;
   if (dir=cps1_cps_b[cps_b].mula) then cps1_mula:=val;
@@ -752,8 +752,8 @@ end;
 
 procedure cps1_snd_putbyte(direccion:word;valor:byte);
 begin
+if direccion<$c000 then exit;
 case direccion of
-  $0..$bfff:exit;
   $d000..$d7ff:mem_snd[direccion]:=valor;
   $f000:ym2151_0.reg(valor);
   $f001:ym2151_0.write(valor);
@@ -824,8 +824,8 @@ end;
 
 procedure cps1_qz80_putbyte(direccion:word;valor:byte);
 begin
+if direccion<$c000 then exit;
 case direccion of
-  $0..$bfff:exit;
   $c000..$cfff:qram1[direccion and $fff]:=valor;
   $d000..$d002:qsound_w(direccion and $3,valor);
   $d003:sound_bank:=valor and $f;
@@ -881,7 +881,7 @@ begin
  scroll_pri_x:=0;
  scroll_pri_y:=0;
  sprites_pri_draw:=false;
- fillchar(buffer_paleta[0],$200*6,1);
+ fillchar(buffer_paleta,$200*6,1);
  pri_mask0:=0;
  pri_mask1:=0;
  pri_mask2:=0;
@@ -958,8 +958,8 @@ begin
   gfx[0].trans[15]:=true;
   gfx[1].trans[15]:=true;
   gfx_set_desc_data(4,0,64*8,0,1,2,3);
-  convert_gfx(0,0,memoria_temp,@pc_x1[0],@pc_y[0],false,false);
-  convert_gfx(1,0,memoria_temp,@pc_x2[0],@pc_y[0],false,false);
+  convert_gfx(0,0,memoria_temp,@pc_x1,@pc_y,false,false);
+  convert_gfx(1,0,memoria_temp,@pc_x2,@pc_y,false,false);
 end;
 
 procedure convert_tiles16(memoria_temp:pbyte;n:dword);
@@ -967,7 +967,7 @@ begin
   init_gfx(2,16,16,n);
   gfx[2].trans[15]:=true;
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(2,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,0,memoria_temp,@pt_x,@pt_y,false,false);
 end;
 
 procedure convert_tiles32(memoria_temp:pbyte;n:dword);
@@ -975,7 +975,7 @@ begin
   init_gfx(3,32,32,n);
   gfx[3].trans[15]:=true;
   gfx_set_desc_data(4,0,512*8,0,1,2,3);
-  convert_gfx(3,0,memoria_temp,@pt2_x[0],@pt2_y[0],false,false);
+  convert_gfx(3,0,memoria_temp,@pt2_x,@pt2_y,false,false);
 end;
 
 begin
@@ -1018,7 +1018,7 @@ case main_vars.tipo_maquina of
            z80_0.change_ram_calls(cps1_qz80_getbyte,cps1_qz80_putbyte);
            z80_0.init_sound(qsound_sound_update);
            //Sound Chip
-           qsound_init($200000,8000000);
+           qsound_init($200000);
            init_timer(z80_0.numero_cpu,8000000/250,cps1_qsnd_int,true);
       end;
 end;
@@ -1027,17 +1027,17 @@ case main_vars.tipo_maquina of
         nbank:=0;
         cps_b:=0;
         //cargar roms
-        if not(cargar_roms16b(@rom[0],@ghouls_rom1[0],'ghouls.zip',0)) then exit;
-        if not(cargar_roms(@rom[0],@ghouls_rom2,'ghouls.zip',1)) then exit;
+        if not(cargar_roms16b(@rom,@ghouls_rom1,'ghouls.zip',0)) then exit;
+        if not(cargar_roms(@rom,@ghouls_rom2,'ghouls.zip',1)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@ghouls_sound,'ghouls.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@ghouls_gfx1[0],'ghouls.zip',0,8)) then exit;
-        if not(cargar_roms_skip(memoria_temp,@ghouls_gfx2[0],'ghouls.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@ghouls_gfx1,'ghouls.zip',0,8)) then exit;
+        if not(cargar_roms_skip(memoria_temp,@ghouls_gfx2,'ghouls.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$300000);
         //Chars
         convert_chars(memoria_temp,$c000);
@@ -1053,18 +1053,18 @@ case main_vars.tipo_maquina of
         nbank:=1;
         cps_b:=1;
         //cargar roms
-        if not(cargar_roms16b(@rom[0],@ffight_rom1[0],'ffight.zip',0)) then exit;
-        if not(cargar_roms_swap_word(@rom[0],@ffight_rom2,'ffight.zip',1)) then exit;
+        if not(cargar_roms16b(@rom,@ffight_rom1,'ffight.zip',0)) then exit;
+        if not(cargar_roms_swap_word(@rom,@ffight_rom2,'ffight.zip',1)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@ffight_sound,'ffight.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@ffight_oki[0],'ffight.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@ffight_oki,'ffight.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@ffight_gfx1[0],'ffight.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@ffight_gfx1,'ffight.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$200000);
         //Chars
         convert_chars(memoria_temp,$8000);
@@ -1080,17 +1080,17 @@ case main_vars.tipo_maquina of
         nbank:=2;
         cps_b:=2;
         //cargar roms
-        if not(cargar_roms16b(@rom[0],@kod_rom1[0],'kod.zip',0)) then exit;
+        if not(cargar_roms16b(@rom,@kod_rom1,'kod.zip',0)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@kod_sound,'kod.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@kod_oki[0],'kod.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@kod_oki,'kod.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@kod_gfx1[0],'kod.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@kod_gfx1,'kod.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1106,17 +1106,17 @@ case main_vars.tipo_maquina of
         nbank:=3;
         cps_b:=3;
         //cargar roms
-        if not(cargar_roms16b(@rom[0],@sf2_rom1[0],'sf2.zip',0)) then exit;
+        if not(cargar_roms16b(@rom,@sf2_rom1,'sf2.zip',0)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@sf2_sound,'sf2.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@sf2_oki[0],'sf2.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@sf2_oki,'sf2.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@sf2_gfx1[0],'sf2.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@sf2_gfx1,'sf2.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$600000);
         //Chars
         convert_chars(memoria_temp,$18000);
@@ -1132,18 +1132,18 @@ case main_vars.tipo_maquina of
         nbank:=4;
         cps_b:=0;
         //cargar roms
-        if not(cargar_roms16b(@rom[0],@strider_rom1[0],'strider.zip',0)) then exit;
-        if not(cargar_roms_swap_word(@rom[0],@strider_rom2,'strider.zip',1)) then exit;
+        if not(cargar_roms16b(@rom,@strider_rom1,'strider.zip',0)) then exit;
+        if not(cargar_roms_swap_word(@rom,@strider_rom2,'strider.zip',1)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@strider_sound,'strider.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@strider_oki[0],'strider.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@strider_oki,'strider.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@strider_gfx1[0],'strider.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@strider_gfx1,'strider.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1159,17 +1159,17 @@ case main_vars.tipo_maquina of
         nbank:=5;
         cps_b:=4;
         //cargar roms
-        if not(cargar_roms16b(@rom[0],@wonder3_rom1[0],'3wonders.zip',0)) then exit;
+        if not(cargar_roms16b(@rom,@wonder3_rom1,'3wonders.zip',0)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@wonder3_sound,'3wonders.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@wonder3_oki[0],'3wonders.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@wonder3_oki,'3wonders.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@wonder3_gfx1[0],'3wonders.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@wonder3_gfx1,'3wonders.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1185,18 +1185,18 @@ case main_vars.tipo_maquina of
         nbank:=6;
         cps_b:=5;
         //cargar roms
-        if not(cargar_roms_swap_word(@rom[0],@ccommando_rom1,'captcomm.zip',0)) then exit;
-        if not(cargar_roms16b(@rom[0],@ccommando_rom2[0],'captcomm.zip',0)) then exit;
+        if not(cargar_roms_swap_word(@rom,@ccommando_rom1,'captcomm.zip',0)) then exit;
+        if not(cargar_roms16b(@rom,@ccommando_rom2,'captcomm.zip',0)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@ccommando_sound,'captcomm.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@ccommando_oki[0],'captcomm.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@ccommando_oki,'captcomm.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@ccommando_gfx1[0],'captcomm.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@ccommando_gfx1,'captcomm.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1212,17 +1212,17 @@ case main_vars.tipo_maquina of
         nbank:=7;
         cps_b:=6;
         //cargar roms
-        if not(cargar_roms_swap_word(@rom[0],@knights_rom1,'knights.zip',0)) then exit;
+        if not(cargar_roms_swap_word(@rom,@knights_rom1,'knights.zip',0)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@knights_sound,'knights.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@knights_oki[0],'knights.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@knights_oki,'knights.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@knights_gfx1[0],'knights.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@knights_gfx1,'knights.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1238,17 +1238,17 @@ case main_vars.tipo_maquina of
         nbank:=8;
         cps_b:=7;
         //cargar roms
-        if not(cargar_roms_swap_word(@rom[0],@sf2ce_rom1,'sf2ce.zip',0)) then exit;
+        if not(cargar_roms_swap_word(@rom,@sf2ce_rom1,'sf2ce.zip',0)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@sf2ce_sound,'sf2ce.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@sf2ce_oki[0],'sf2ce.zip',0)) then exit;
+        if not(cargar_roms(oki_6295_0.get_rom_addr,@sf2ce_oki,'sf2ce.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@sf2ce_gfx1[0],'sf2ce.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@sf2ce_gfx1,'sf2ce.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$600000);
         //Chars
         convert_chars(memoria_temp,$18000);
@@ -1266,20 +1266,20 @@ case main_vars.tipo_maquina of
         //eeprom
         eeprom_0:=eeprom_class.create(7,8,'0110','0101','0111');
         //cargar roms
-        if not(cargar_roms_swap_word(@rom[0],@dino_rom1,'dino.zip',0)) then exit;
+        if not(cargar_roms_swap_word(@rom,@dino_rom1,'dino.zip',0)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@dino_sound,'dino.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         for f:=0 to 5 do begin
           copymemory(@snd_rom[f,0],ptemp,$4000);
           inc(ptemp,$4000);
         end;
-        kabuki_cps1_decode(@mem_snd[0],@qsnd_opcode[0],@qsnd_data[0],$76543210,$24601357,$4343,$43);
+        kabuki_cps1_decode(@mem_snd,@qsnd_opcode,@qsnd_data,$76543210,$24601357,$4343,$43);
         //Cargar ROMS Qsound
-        if not(cargar_roms(qsound_state.sample_rom,@dino_qsound1[0],'dino.zip',0)) then exit;
+        if not(cargar_roms(qsound_state.sample_rom,@dino_qsound1,'dino.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@dino_gfx1[0],'dino.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@dino_gfx1,'dino.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1297,21 +1297,21 @@ case main_vars.tipo_maquina of
         //eeprom
         eeprom_0:=eeprom_class.create(7,8,'0110','0101','0111');
         //cargar roms
-        if not(cargar_roms16b(@rom[0],@punisher_rom1,'punisher.zip',0)) then exit;
-        if not(cargar_roms_swap_word(@rom[0],@punisher_rom2,'punisher.zip',1)) then exit;
+        if not(cargar_roms16b(@rom,@punisher_rom1,'punisher.zip',0)) then exit;
+        if not(cargar_roms_swap_word(@rom,@punisher_rom2,'punisher.zip',1)) then exit;
         //roms sonido y poner en su banco
         if not(cargar_roms(memoria_temp,@punisher_sound,'punisher.zip',1)) then exit;
         ptemp:=memoria_temp;
-        copymemory(@mem_snd[0],ptemp,$8000);inc(ptemp,$8000);
+        copymemory(@mem_snd,ptemp,$8000);inc(ptemp,$8000);
         for f:=0 to 5 do begin
           copymemory(@snd_rom[f,0],ptemp,$4000);
           inc(ptemp,$4000);
         end;
-        kabuki_cps1_decode(@mem_snd[0],@qsnd_opcode[0],@qsnd_data[0],$67452103,$75316024,$2222,$22);
+        kabuki_cps1_decode(@mem_snd,@qsnd_opcode,@qsnd_data,$67452103,$75316024,$2222,$22);
         //Cargar ROMS Qsound
-        if not(cargar_roms(qsound_state.sample_rom,@punisher_qsound1[0],'punisher.zip',0)) then exit;
+        if not(cargar_roms(qsound_state.sample_rom,@punisher_qsound1,'punisher.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@punisher_gfx1[0],'punisher.zip',0,8)) then exit;
+        if not(cargar_roms_skip_word(memoria_temp,@punisher_gfx1,'punisher.zip',0,8)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);

@@ -79,12 +79,7 @@ var
  congo_sprite,coin_enable,coin_status,sound_state:array[0..2] of byte;
  coin_press:array[0..1] of byte;
 
-procedure update_video_congo;
-var
-  f,color,nchar,x,y,srcx,srcy:word;
-  atrib,atrib2:byte;
-  pixel:array[0..$ff,0..$ff] of word;
-function find_minimum_y(value:byte):byte;
+function find_minimum_y(value:byte):byte;inline;
 var
   y:byte;
   sum:word;
@@ -104,27 +99,25 @@ begin
 		y:=y-1;
 	end;
 	// add one line since we draw sprites on the previous line */
-	find_minimum_y:=(y+1);
+	find_minimum_y:=(y+1) and $ff;
 end;
 
-function find_minimum_x(value:byte):byte;
-var
-	x:word;
+function find_minimum_x(value:byte):byte;inline;
 begin
 	// the sum of the X position plus a constant specifies the address within */
 	// the line bufer; if we're flipped, we will write backwards */
-	x:=(value+$ef+1);
-	find_minimum_x:=x;
+	find_minimum_x:=value+$ef+1;
 end;
 
+procedure update_video_congo;
+var
+  f,color,nchar,x,y,srcx,srcy:word;
+  atrib,atrib2:byte;
+  pixel:array[0..$ff,0..$ff] of word;
 begin
 //Background
 if bg_enable then begin
   color:=bg_color+(congo_color_bank shl 8);
-  //xmask:=2048-1;
-  //ymask:=256-1;
-  //flipmask:=$00;
-  //flipoffs:=$40;
   // loop over visible rows */
   for x:=0 to $ff do begin
 			//VF = flipped V signals */
@@ -243,9 +236,9 @@ var
   count:integer;
 begin
 if direccion<$7fff then exit;
-memoria[direccion]:=valor;
 case direccion of
-        $a000..$bfff:begin
+        $8000..$8fff:memoria[direccion]:=valor;
+        $a000..$bfff:if memoria[(direccion and $7ff)+$a000]<>valor then begin
                         memoria[(direccion and $7ff)+$a000]:=valor;
                         gfx[0].buffer[direccion and $3ff]:=true;
                      end;
@@ -375,39 +368,6 @@ var
   x,y,srcx,srcy:word;
   pixel:array[0..$ff,0..$ff] of word;
   flipx,flipy:boolean;
-function find_minimum_y(value:byte):byte;inline;
-var
-  y:byte;
-  sum:word;
-begin
-	// the sum of the Y position plus a constant based on the flip state */
-	// is added to the current flipped VF; if the top 3 bits are 1, we hit */
-	// first find a 16-pixel bucket where we hit */
-	for y:=0 to 15 do begin
-		sum:=(value+$f1+1)+(y*16);
-		if ((sum and $e0)=$e0) then break;
-	end;
-  y:=y*16;
-	// then scan backwards until we no longer match */
-	while true do begin
-		sum:=(value+$f1+1)+(y-1);
-		if ((sum and $e0)<>$e0) then break;
-		y:=y-1;
-	end;
-	// add one line since we draw sprites on the previous line */
-	find_minimum_y:=(y+1) and $ff;
-end;
-
-function find_minimum_x(value:byte):byte;inline;
-var
-	x:word;
-begin
-	// the sum of the X position plus a constant specifies the address within */
-	// the line bufer; if we're flipped, we will write backwards */
-	x:=(value+$ef+1);
-	find_minimum_x:=x and $ff;
-end;
-
 begin
 //Background
 if bg_enable then begin
@@ -504,9 +464,9 @@ end;
 procedure zaxxon_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$6000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-    $8000..$9fff:begin
+    $6000..$6fff:memoria[direccion]:=valor;
+    $8000..$9fff:if memoria[(direccion and $3ff)+$8000]<>valor then begin
                     memoria[(direccion and $3ff)+$8000]:=valor;
                     gfx[0].buffer[direccion and $3ff]:=true;
                  end;

@@ -10,20 +10,20 @@ procedure cargar_expraid;
 implementation
 const
         expraid_rom:array[0..2] of tipo_roms=(
-        (n:'cz01';l:$4000;p:$4000;crc:$dc8f9fba),(n:'cz00';l:$8000;p:$8000;crc:$a81290bc),());
-        expraid_char:tipo_roms=(n:'cz07';l:$4000;p:$0000;crc:$686bac23);
+        (n:'cz01-2e.16b';l:$4000;p:$4000;crc:$a0ae6756),(n:'cz00-4e.15a';l:$8000;p:$8000;crc:$910f6ccc),());
+        expraid_char:tipo_roms=(n:'cz07.5b';l:$4000;p:$0000;crc:$686bac23);
         expraid_tiles:array[0..3] of tipo_roms=(
-        (n:'cz04';l:$8000;p:$0000;crc:$643a1bd3),(n:'cz05';l:$8000;p:$10000;crc:$c44570bf),
-        (n:'cz06';l:$8000;p:$18000;crc:$b9bb448b),());
-        expraid_snd:tipo_roms=(n:'cz02';l:$8000;p:$8000;crc:$552e6112);
-        expraid_tiles_mem:tipo_roms=(n:'cz03';l:$8000;p:$0000;crc:$6ce11971);
+        (n:'cz04.8e';l:$8000;p:$0000;crc:$643a1bd3),(n:'cz05.8f';l:$8000;p:$10000;crc:$c44570bf),
+        (n:'cz06.8h';l:$8000;p:$18000;crc:$b9bb448b),());
+        expraid_snd:tipo_roms=(n:'cz02-1.2a';l:$8000;p:$8000;crc:$552e6112);
+        expraid_tiles_mem:tipo_roms=(n:'cz03.12d';l:$8000;p:$0000;crc:$6ce11971);
         expraid_sprites:array[0..6] of tipo_roms=(
-        (n:'cz09';l:$8000;p:$0000;crc:$1ed250d1),(n:'cz08';l:$8000;p:$8000;crc:$2293fc61),
-        (n:'cz13';l:$8000;p:$10000;crc:$7c3bfd00),(n:'cz12';l:$8000;p:$18000;crc:$ea2294c8),
-        (n:'cz11';l:$8000;p:$20000;crc:$b7418335),(n:'cz10';l:$8000;p:$28000;crc:$2f611978),());
+        (n:'cz09.16h';l:$8000;p:$0000;crc:$1ed250d1),(n:'cz08.14h';l:$8000;p:$8000;crc:$2293fc61),
+        (n:'cz13.16k';l:$8000;p:$10000;crc:$7c3bfd00),(n:'cz12.14k';l:$8000;p:$18000;crc:$ea2294c8),
+        (n:'cz11.13k';l:$8000;p:$20000;crc:$b7418335),(n:'cz10.11k';l:$8000;p:$28000;crc:$2f611978),());
         expraid_proms:array[0..4] of tipo_roms=(
-        (n:'cz17.prm';l:$100;p:$000;crc:$da31dfbc),(n:'cz16.prm';l:$100;p:$100;crc:$51f25b4c),
-        (n:'cz15.prm';l:$100;p:$200;crc:$a6168d7f),(n:'cz14.prm';l:$100;p:$300;crc:$52aad300),());
+        (n:'cy-17.5b';l:$100;p:$000;crc:$da31dfbc),(n:'cy-16.6b';l:$100;p:$100;crc:$51f25b4c),
+        (n:'cy-15.7b';l:$100;p:$200;crc:$a6168d7f),(n:'cy-14.9b';l:$100;p:$300;crc:$52aad300),());
         expraid_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$4;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -179,7 +179,7 @@ begin
 if direccion>$3fff then exit;
 case direccion of
   0..$7ff:memoria[direccion]:=valor;
-  $800..$fff:begin
+  $800..$fff:if memoria[direccion]<>valor then begin
                 gfx[0].buffer[direccion and $3ff]:=true;
                 memoria[direccion]:=valor;
              end;

@@ -9,16 +9,18 @@ procedure cargar_gng;
 
 implementation
 const
-        gng_rom:array[0..3] of tipo_roms=(
+        gng_rom:array[0..2] of tipo_roms=(
         (n:'gg3.bin';l:$8000;p:$8000;crc:$9e01c65e),(n:'gg4.bin';l:$4000;p:$4000;crc:$66606beb),
-        (n:'gg5.bin';l:$8000;p:$10000;crc:$d6397b2b),());
+        (n:'gg5.bin';l:$8000;p:$10000;crc:$d6397b2b));
         gng_char:tipo_roms=(n:'gg1.bin';l:$4000;p:0;crc:$ecfccf07);
-        gng_tiles:array[0..6] of tipo_roms=(
-        (n:'gg11.bin';l:$4000;p:0;crc:$ddd56fa9),(n:'gg10.bin';l:$4000;p:$4000;crc:$7302529d),(n:'gg9.bin';l:$4000;p:$8000;crc:$20035bda),
-        (n:'gg8.bin';l:$4000;p:$c000;crc:$f12ba271),(n:'gg7.bin';l:$4000;p:$10000;crc:$e525207d),(n:'gg6.bin';l:$4000;p:$14000;crc:$2d77e9b2),());
-        gng_sprites:array[0..6] of tipo_roms=(
-        (n:'gg17.bin';l:$4000;p:0;crc:$93e50a8f),(n:'gg16.bin';l:$4000;p:$4000;crc:$06d7e5ca),(n:'gg15.bin';l:$4000;p:$8000;crc:$bc1fe02d),
-        (n:'gg14.bin';l:$4000;p:$c000;crc:$6aaf12f9),(n:'gg13.bin';l:$4000;p:$10000;crc:$e80c3fca),(n:'gg12.bin';l:$4000;p:$14000;crc:$7780a925),());
+        gng_tiles:array[0..5] of tipo_roms=(
+        (n:'gg11.bin';l:$4000;p:0;crc:$ddd56fa9),(n:'gg10.bin';l:$4000;p:$4000;crc:$7302529d),
+        (n:'gg9.bin';l:$4000;p:$8000;crc:$20035bda),(n:'gg8.bin';l:$4000;p:$c000;crc:$f12ba271),
+        (n:'gg7.bin';l:$4000;p:$10000;crc:$e525207d),(n:'gg6.bin';l:$4000;p:$14000;crc:$2d77e9b2));
+        gng_sprites:array[0..5] of tipo_roms=(
+        (n:'gg17.bin';l:$4000;p:0;crc:$93e50a8f),(n:'gg16.bin';l:$4000;p:$4000;crc:$06d7e5ca),
+        (n:'gg15.bin';l:$4000;p:$8000;crc:$bc1fe02d),(n:'gg14.bin';l:$4000;p:$c000;crc:$6aaf12f9),
+        (n:'gg13.bin';l:$4000;p:$10000;crc:$e80c3fca),(n:'gg12.bin';l:$4000;p:$14000;crc:$7780a925));
         gng_sound:tipo_roms=(n:'gg2.bin';l:$8000;p:0;crc:$615f5b6f);
         //Dip
         gng_dip_a:array [0..5] of def_dip=(
@@ -34,11 +36,11 @@ const
         (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$40;dip_name:'Easy'),(dip_val:$60;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- memoria_rom:array[0..4,0..$1FFF] of byte;
+ memoria_rom:array[0..4,0..$1fff] of byte;
  banco,soundlatch:byte;
  scroll_x,scroll_y:word;
 
-procedure update_video_gng;
+procedure update_video_gng;inline;
 var
   x,y,f,color,nchar:word;
   atrib:byte;
@@ -168,7 +170,8 @@ case direccion of
   $3002:gng_getbyte:=marcade.in2;
   $3003:gng_getbyte:=marcade.dswa;
   $3004:gng_getbyte:=marcade.dswb;
-  $4000..$5fff:gng_getbyte:=memoria_rom[banco,direccion and $1FFF];
+  $3800..$39ff:gng_getbyte:=buffer_paleta[direccion and $1ff];
+  $4000..$5fff:gng_getbyte:=memoria_rom[banco,direccion and $1fff];
 end;
 end;
 
@@ -177,11 +180,11 @@ begin
 if direccion>$3fff then exit;
 case direccion of
   0..$1fff:memoria[direccion]:=valor;
-  $2000..$27ff:begin
+  $2000..$27ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
-  $2800..$2fff:begin
+  $2800..$2fff:if memoria[direccion]<>valor then begin
                   gfx[2].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
@@ -358,34 +361,31 @@ init_timer(z80_0.numero_cpu,3000000/(4*60),gng_snd_irq,true);
 ym2203_0:=ym2203_chip.create(1500000,0.2);
 ym2203_1:=ym2203_chip.create(1500000,0.2);
 //cargar roms
-if not(cargar_roms(@memoria_temp,@gng_rom,'gng.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@gng_rom,'gng.zip',sizeof(gng_rom))) then exit;
 //Pongo las ROMs en su banco
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2000);
 copymemory(@memoria[$6000],@memoria_temp[$6000],$2000);
 copymemory(@memoria_rom[4,0],@memoria_temp[$4000],$2000);
 //Cargar Sound
-if not(cargar_roms(@mem_snd,@gng_sound,'gng.zip')) then exit;
+if not(roms_load(@mem_snd,@gng_sound,'gng.zip',sizeof(gng_sound))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp,@gng_char,'gng.zip')) then exit;
+if not(roms_load(@memoria_temp,@gng_char,'gng.zip',sizeof(gng_char))) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
-gfx[0].trans_alt[0,3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp,@gng_sprites,'gng.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@gng_sprites,'gng.zip',sizeof(gng_sprites))) then exit;
 init_gfx(1,16,16,1024);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms(@memoria_temp,@gng_tiles,'gng.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@gng_tiles,'gng.zip',sizeof(gng_tiles))) then exit;
 init_gfx(2,16,16,1024);
 gfx[2].trans[0]:=true;
 gfx[2].trans[6]:=true;
-gfx[2].trans_alt[0,0]:=true;
-gfx[2].trans_alt[0,6]:=true;
 gfx_set_desc_data(3,0,32*8,$10000*8,$8000*8,0);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 //Poner colores aleatorios hasta que inicie la paleta

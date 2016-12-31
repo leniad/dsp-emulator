@@ -2,8 +2,8 @@ unit ironhorse_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m6809,nz80,main_engine,controls_engine,gfx_engine,ym_2203,
-     rom_engine,pal_engine,sound_engine;
+     m6809,nz80,main_engine,controls_engine,gfx_engine,ym_2203,rom_engine,
+     pal_engine,sound_engine;
 
 //main
 procedure cargar_ironhorse;
@@ -20,20 +20,30 @@ const
         (n:'03f_h08.bin';l:$100;p:0;crc:$9f6ddf83),(n:'04f_h09.bin';l:$100;p:$100;crc:$e6773825),
         (n:'05f_h10.bin';l:$100;p:$200;crc:$30a57860),(n:'10f_h12.bin';l:$100;p:$300;crc:$5eb33e73),
         (n:'10f_h11.bin';l:$100;p:$400;crc:$a63e37d8),());
+        //Dip
+        ironhorse_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:15;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'No Coin B'))),());
+        ironhorse_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'30K 70K+'),(dip_val:$10;dip_name:'40K 80K+'),(dip_val:$8;dip_name:'40K'),(dip_val:$0;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        ironhorse_dip_c:array [0..3] of def_dip=(
+        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$1;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Upright Controls';number:2;dip:((dip_val:$2;dip_name:'Single'),(dip_val:$0;dip_name:'Dual'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Button Layout';number:2;dip:((dip_val:$4;dip_name:'Power Attack Squat'),(dip_val:$0;dip_name:'Squat Attack Power'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  pedir_nmi,pedir_firq:boolean;
  sound_latch,charbank,palettebank:byte;
  spritebank:word;
- scroll_lineas:array[0..$1f] of byte;
 
 procedure update_video_ironhorse;inline;
 var
-  x,y,atrib:byte;
-  f:word;
-  nchar,color:word;
-  flipx,flipy:byte;
-  a,b,c,d:byte;
+  x,y,atrib,flipx,flipy,a,b,c,d:byte;
+  f,nchar,color:word;
 begin
 for f:=0 to $3ff do begin
     if gfx[0].buffer[f] then begin
@@ -47,12 +57,12 @@ for f:=0 to $3ff do begin
     end;
 end;
 //Scroll linea a linea
-for f:=0 to 31 do scroll__x_part(1,2,scroll_lineas[f],0,f*8,8);
-for f:=0 to $33 do begin
+for f:=0 to 31 do scroll__x_part(1,2,memoria[$20+f],0,f*8,8);
+for f:=0 to $32 do begin
 		x:=memoria[spritebank+3+(f*5)];
 		y:=memoria[spritebank+2+(f*5)];
     atrib:=memoria[spritebank+1+(f*5)];
-    nchar:=(memoria[spritebank+(f*5)] shl 2)+((atrib and $03) shl 10) + ((atrib and $0c) shr 2);
+    nchar:=(memoria[spritebank+(f*5)] shl 2)+((atrib and $03) shl 10)+((atrib and $0c) shr 2);
 		color:=((((atrib and $f0) shr 4) + 16*palettebank) shl 4)+$800;
     atrib:=memoria[spritebank+4+(f*5)];
     flipx:=(atrib and $20) shr 5;
@@ -138,8 +148,9 @@ while EmuStatus=EsRuning do begin
     if f=240 then begin
       update_video_ironhorse;
       if pedir_firq then m6809_0.change_firq(HOLD_LINE);
+    end else begin
+      if ((((f+16) mod 64)=0) and pedir_nmi) then m6809_0.change_nmi(PULSE_LINE);
     end;
-    if ((((f+16) mod 64)=0) and pedir_nmi) then m6809_0.change_nmi(PULSE_LINE);
   end;
   eventos_ironhorse;
   video_sync;
@@ -149,48 +160,64 @@ end;
 function ironhorse_getbyte(direccion:word):byte;
 begin
 case direccion of
-    $900:ironhorse_getbyte:=$fe;  //dsw3
-    $a00:ironhorse_getbyte:=$5a;  //dsw2
-    $b00:ironhorse_getbyte:=$ff;  //dsw1
+    0..$df,$2000..$ffff:ironhorse_getbyte:=memoria[direccion];
+    $900:ironhorse_getbyte:=marcade.dswc;  //dsw3
+    $a00:ironhorse_getbyte:=marcade.dswb;  //dsw2
+    $b00:ironhorse_getbyte:=marcade.dswa;  //dsw1
     $b01:ironhorse_getbyte:=marcade.in1; //p2
     $b02:ironhorse_getbyte:=marcade.in0;  //p1
     $b03:ironhorse_getbyte:=marcade.in2;  //system
-      else ironhorse_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure ironhorse_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3FFF then exit;
-memoria[direccion]:=valor;
+if direccion>$3fff then exit;
 case direccion of
+  0..2,5..$df,$2800..$3fff:memoria[direccion]:=valor;
   $3:begin
        if charbank<>(valor and $3) then begin
           charbank:=valor and $3;
           fillchar(gfx[0].buffer[0],$400,1);
        end;
-       if (valor and $8)<>0 then spritebank:=$3800
-        else spritebank:=$3000;
+       spritebank:=$3000+((valor and $8) shl 8);
      end;
   $4:begin
        pedir_nmi:=(valor and $1)<>0;
        pedir_firq:=(valor and $4)<>0;
      end;
-  $20..$3f:scroll_lineas[direccion and $1f]:=valor;
   $800:sound_latch:=valor;
   $900:z80_0.change_irq(HOLD_LINE);
   $a00:if palettebank<>(valor and $7) then begin
             palettebank:=valor and $7;
             fillchar(gfx[0].buffer[0],$400,1);
        end;
-  $2000..$27ff:gfx[0].buffer[direccion and $3ff]:=true;
+  $b00:main_screen.flip_main_screen:=(valor and $8)=0;
+  $2000..$27ff:if memoria[direccion]<>valor then begin
+                gfx[0].buffer[direccion and $3ff]:=true;
+                memoria[direccion]:=valor;
+               end;
+
 end;
 end;
 
 function ironhorse_snd_getbyte(direccion:word):byte;
 begin
-if direccion=$8000 then ironhorse_snd_getbyte:=sound_latch
-  else ironhorse_snd_getbyte:=mem_snd[direccion];
+case direccion of
+  0..$43ff:ironhorse_snd_getbyte:=mem_snd[direccion];
+  $8000:ironhorse_snd_getbyte:=sound_latch
+end;
+end;
+
+procedure ironhorse_snd_putbyte(direccion:word;valor:byte);
+begin
+if direccion<$4000 then exit;
+mem_snd[direccion]:=valor;
+end;
+
+function ironhorse_snd_inbyte(puerto:word):byte;
+begin
+  if (puerto and $ff)=0 then ironhorse_snd_inbyte:=ym2203_0.status;
 end;
 
 procedure ironhorse_snd_outbyte(valor:byte;puerto:word);
@@ -199,17 +226,6 @@ case (puerto and $ff) of
   0:ym2203_0.Control(valor);
   1:ym2203_0.Write(valor);
 end;
-end;
-
-function ironhorse_snd_inbyte(puerto:word):byte;
-begin
-  if (puerto and $ff)=0 then ironhorse_snd_inbyte:=ym2203_0.status;
-end;
-
-procedure ironhorse_snd_putbyte(direccion:word;valor:byte);
-begin
-  if direccion<$4000 then exit;
-  mem_snd[direccion]:=valor;
 end;
 
 procedure ironhorse_sound_update;
@@ -285,6 +301,13 @@ for f:=0 to $1ff do begin
       gfx[1].colores[valor2]:=valor;  //sprites
   end;
 end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$5a;
+marcade.dswc:=$fe;
+marcade.dswa_val:=@ironhorse_dip_a;
+marcade.dswb_val:=@ironhorse_dip_b;
+marcade.dswc_val:=@ironhorse_dip_c;
 //final
 reset_ironhorse;
 iniciar_ironhorse:=true;

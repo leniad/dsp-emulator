@@ -84,9 +84,9 @@ while EmuStatus=EsRuning do begin
       247:begin
             m68000_0.irq[6]:=HOLD_LINE;
             update_video_funkyjet;
-            marcade.in1:=marcade.in1 and $fff7;
+            marcade.in1:=marcade.in1 or $8;
           end;
-      255:marcade.in1:=marcade.in1 or $0008;
+      255:marcade.in1:=marcade.in1 and $fff7;
    end;
  end;
  eventos_funkyjet;
@@ -115,8 +115,8 @@ case direccion of
   $140000..$143fff:funkyjet_getword:=ram[(direccion and $3fff) shr 1];
   $160000..$1607ff:funkyjet_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
   $180000..$1807ff:funkyjet_getword:=funkyjet_deco146_r(direccion and $7ff);//funkyjet_prot146(direccion and $7ff);
-  $320000..$320fff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $322000..$322fff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $320000..$320fff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
+  $322000..$322fff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
   $340000..$340bff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $fff) shr 1];
   $342000..$342bff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $fff) shr 1];
 end;
@@ -161,13 +161,11 @@ case direccion of
   $184000,$188000,$1a0002,$1a0400,$1a0402:;
   $300000..$30000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
   $320000..$320fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
                    end;
   $322000..$322fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
                    end;
   $340000..$340bff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $fff) shr 1]:=valor;

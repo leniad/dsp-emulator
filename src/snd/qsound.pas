@@ -45,7 +45,7 @@ type
 var
   qsound_state:pqsound_state_def;
 
-procedure qsound_init(sample_size,cpu_sound_clock:dword);
+procedure qsound_init(sample_size:dword);
 procedure qsound_close;
 procedure qsound_reset;
 procedure qsound_w(offset,data:byte);
@@ -207,7 +207,7 @@ begin
   tsample[qsound_state.tsample,sound_status.posicion_sonido+1]:=qsound_state.out_[1];
 end;
 
-procedure qsound_init(sample_size,cpu_sound_clock:dword);
+procedure qsound_init(sample_size:dword);
 var
   f:byte;
 begin
@@ -218,7 +218,7 @@ begin
 	// Create pan table
 	for f:=0 to 32 do qsound_state.pan_table[f]:=round((256/sqrt(32))*sqrt(f));
   qsound_state.sample_rom_length:=sample_size-1;
-  init_timer(1,cpu_sound_clock/(4000000/QSOUND_CLOCKDIV),qsound_update_internal,true);  //Aprox 24.096Hz
+  init_timer(1,sound_status.cpu_clock/(4000000/QSOUND_CLOCKDIV),qsound_update_internal,true);  //Aprox 24.096Hz
   qsound_state.tsample:=init_channel;
 end;
 

@@ -112,8 +112,8 @@ begin
 case direccion of
   $0..$7ffff:if m68000_0.opcode then dietgo_getword:=rom_opcode[direccion shr 1]
                   else dietgo_getword:=rom_data[direccion shr 1];
-  $210000..$210fff:dietgo_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff] shl 8);
-  $212000..$212fff:dietgo_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1] or (deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff] shl 8);
+  $210000..$210fff:dietgo_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
+  $212000..$212fff:dietgo_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
   $280000..$2807ff:dietgo_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
   $300000..$300bff:dietgo_getword:=buffer_paleta[(direccion and $fff) shr 1];
   $340000..$343fff:dietgo_getword:=dietgo_protection_region_0_104_r(direccion and $3fff);
@@ -152,13 +152,11 @@ if direccion<$80000 then exit;
 case direccion of
   $200000..$20000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
   $210000..$210fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[1,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
                    end;
   $212000..$212fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff)+1]:=valor and $ff;
-                      deco16ic_chip[0].dec16ic_pf_data[2,direccion and $fff]:=valor shr 8;
+                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
                       deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
                    end;
   $220000..$2207ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;

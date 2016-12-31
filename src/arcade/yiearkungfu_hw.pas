@@ -127,7 +127,6 @@ end;
 procedure yiear_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$7fff then exit;
-memoria[direccion]:=valor;
 case direccion of
   $4000:begin
           irq_ena:=(valor and $4)<>0;
@@ -141,7 +140,11 @@ case direccion of
 	         vlm5030_0.set_rst((valor shr 2) and 1);
         end;
   $4b00:vlm5030_0.data_w(valor);
-  $5800..$5fff:gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
+  $5000..$57ff:memoria[direccion]:=valor;
+  $5800..$5fff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
+                  memoria[direccion]:=valor;
+               end;
 end;
 end;
 
@@ -228,9 +231,9 @@ end;
 
 function iniciar_yiear:boolean;
 var
-      colores:tpaleta;
-      f,ctemp1,ctemp2,ctemp3:byte;
-      memoria_temp:array[0..$ffff] of byte;
+    colores:tpaleta;
+    f,ctemp1,ctemp2,ctemp3:byte;
+    memoria_temp:array[0..$ffff] of byte;
 const
     pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
     pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
@@ -257,20 +260,20 @@ if not(cargar_roms(vlm5030_0.get_rom_addr,@yiear_vlm,'yiear.zip')) then exit;
 //NMI sonido
 init_timer(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,true);
 //cargar roms
-if not(cargar_roms(@memoria[0],@yiear_rom[0],'yiear.zip',0)) then exit;
+if not(cargar_roms(@memoria,@yiear_rom,'yiear.zip',0)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@yiear_char[0],'yiear.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@yiear_char,'yiear.zip',0)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,16*8,4,0,$2000*8+4,$2000*8+0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@yiear_sprites[0],'yiear.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@yiear_sprites,'yiear.zip',0)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,4,0,$8000*8+4,$8000*8+0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@yiear_pal,'yiear.zip')) then exit;
+if not(cargar_roms(@memoria_temp,@yiear_pal,'yiear.zip')) then exit;
 for f:=0 to 31 do begin
   ctemp1:=memoria_temp[f] and 1;
   ctemp2:=(memoria_temp[f] shr 1) and 1;

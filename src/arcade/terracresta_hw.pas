@@ -14,18 +14,18 @@ const
         (n:'1a_6b.rom';l:$4000;p:$8001;crc:$ba4b5822),(n:'1a_6d.rom';l:$4000;p:$8000;crc:$ca4852f6),
         (n:'1a_7b.rom';l:$4000;p:$10001;crc:$d0771bba),(n:'1a_7d.rom';l:$4000;p:$10000;crc:$029d59d9),
         (n:'1a_9b.rom';l:$4000;p:$18001;crc:$69227b56),(n:'1a_9d.rom';l:$4000;p:$18000;crc:$5a672942),());
-        terracre_pal:array[0..5] of tipo_roms=(
+        terracre_pal:array[0..4] of tipo_roms=(
         (n:'tc1a_10f.bin';l:$100;p:0;crc:$ce07c544),(n:'tc1a_11f.bin';l:$100;p:$100;crc:$566d323a),
         (n:'tc1a_12f.bin';l:$100;p:$200;crc:$7ea63946),(n:'tc2a_2g.bin';l:$100;p:$300;crc:$08609bad),
-        (n:'tc2a_4e.bin';l:$100;p:$400;crc:$2c43991f),());
+        (n:'tc2a_4e.bin';l:$100;p:$400;crc:$2c43991f));
         terracre_char:tipo_roms=(n:'2a_16b.rom';l:$2000;p:0;crc:$591a3804);
-        terracre_sound:array[0..2] of tipo_roms=(
-        (n:'tc2a_15b.bin';l:$4000;p:0;crc:$790ddfa9),(n:'tc2a_17b.bin';l:$4000;p:$4000;crc:$d4531113),());
-        terracre_fondo:array[0..2] of tipo_roms=(
-        (n:'1a_15f.rom';l:$8000;p:0;crc:$984a597f),(n:'1a_17f.rom';l:$8000;p:$8000;crc:$30e297ff),());
-        terracre_sprites:array[0..4] of tipo_roms=(
+        terracre_sound:array[0..1] of tipo_roms=(
+        (n:'tc2a_15b.bin';l:$4000;p:0;crc:$790ddfa9),(n:'tc2a_17b.bin';l:$4000;p:$4000;crc:$d4531113));
+        terracre_fondo:array[0..1] of tipo_roms=(
+        (n:'1a_15f.rom';l:$8000;p:0;crc:$984a597f),(n:'1a_17f.rom';l:$8000;p:$8000;crc:$30e297ff));
+        terracre_sprites:array[0..3] of tipo_roms=(
         (n:'2a_6e.rom';l:$4000;p:0;crc:$bcf7740b),(n:'2a_7e.rom';l:$4000;p:$4000;crc:$a70b565c),
-        (n:'2a_6g.rom';l:$4000;p:$8000;crc:$4a9ec3e6),(n:'2a_7g.rom';l:$4000;p:$c000;crc:$450749fc),());
+        (n:'2a_6g.rom';l:$4000;p:$8000;crc:$4a9ec3e6),(n:'2a_7g.rom';l:$4000;p:$c000;crc:$450749fc));
         //DIP
         terracre_dip:array [0..10] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -45,11 +45,10 @@ var
  rom:array[0..$ffff] of word;
  ram:array[0..$1fff] of word;
  ram2:array[0..$3ff] of word;
- spritebuffer:array[0..$ff] of word;
  spritebank:array[0..$ff] of byte;
  sound_latch:byte;
 
-procedure update_video_terracre;
+procedure update_video_terracre;inline;
 var
   f,color,x,y,nchar,atrib:word;
 begin
@@ -71,10 +70,10 @@ end else begin
 end;
 //sprites
 for f:=0 to $3f do begin
-    atrib:=spritebuffer[(f*4)+2];
-		nchar:=(spritebuffer[(f*4)+1] and $ff)+((atrib and $2) shl 7);
-	  y:=240-((spritebuffer[(f*4)+3] and $ff)-$80+((atrib and 1) shl 8));
-	  x:=240-(spritebuffer[f*4] and $ff);
+    atrib:=buffer_sprites_w[(f*4)+2];
+		nchar:=(buffer_sprites_w[(f*4)+1] and $ff)+((atrib and $2) shl 7);
+	  y:=240-((buffer_sprites_w[(f*4)+3] and $ff)-$80+((atrib and 1) shl 8));
+	  x:=240-(buffer_sprites_w[f*4] and $ff);
     color:=((atrib and $f0) shr 4)+16*(spritebank[(nchar shr 1) and $ff] and $0f);
     put_gfx_sprite(nchar,color shl 4,(atrib and 8)<>0,(atrib and 4)<>0,2);
     actualiza_gfx_sprite(x,y,3,2);
@@ -111,10 +110,10 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYSTEM
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
 end;
 end;
 
@@ -136,7 +135,7 @@ while EmuStatus=EsRuning do begin
   frame_s:=frame_s+z80_0.tframes-z80_0.contador;
   if f=239 then begin
     update_video_terracre;
-    copymemory(@spritebuffer[0],@ram[0],$100*2);
+    copymemory(@buffer_sprites_w,@ram,$100*2);
     m68000_0.irq[1]:=HOLD_LINE;
   end;
  end;
@@ -152,7 +151,7 @@ case direccion of
     $20000..$23fff:terracre_getword:=ram[(direccion and $3fff) shr 1];
     $24000:terracre_getword:=marcade.in1;
     $24002:terracre_getword:=marcade.in2;
-    $24004:terracre_getword:=marcade.in0 shl 8;
+    $24004:terracre_getword:=marcade.in0;
     $24006:terracre_getword:=marcade.dswa;
     $28000..$287ff:terracre_getword:=ram2[(direccion and $7ff) shr 1];
 end;
@@ -163,18 +162,18 @@ begin
 if direccion<$20000 then exit;
 case direccion of
     $20000..$21fff,$23000..$23fff:ram[(direccion and $3fff) shr 1]:=valor;
-    $22000..$22fff:begin
+    $22000..$22fff:if ram[(direccion and $3fff) shr 1]<>valor then begin
                     gfx[1].buffer[(direccion and $fff) shr 1]:=true;
                     ram[(direccion and $3fff) shr 1]:=valor;
-                  end;
+                   end;
     $26000:main_screen.flip_main_screen:=(valor and $4)<>0;
     $26002:scroll_y:=valor;
     $26004:scroll_x:=valor and $1ff;
     $2600c:sound_latch:=((valor and $7f) shl 1) or 1;
-    $28000..$287ff:begin
-                  gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-                  ram2[(direccion and $7ff) shr 1]:=valor;
-                  end;
+    $28000..$287ff:if ram2[(direccion and $7ff) shr 1]<>valor then begin
+                    gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
+                    ram2[(direccion and $7ff) shr 1]:=valor;
+                   end;
   end;
 end;
 
@@ -185,8 +184,8 @@ end;
 
 procedure terracre_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit
-  else mem_snd[direccion]:=valor;
+if direccion<$c000 then exit;
+mem_snd[direccion]:=valor;
 end;
 
 function terracre_snd_inbyte(puerto:word):byte;
@@ -243,8 +242,8 @@ savedata_qsnapshot(data,size);
 size:=dac_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@ram[0],$2000*2);
-savedata_com_qsnapshot(@ram2[0],$400*2);
+savedata_com_qsnapshot(@ram,$2000*2);
+savedata_com_qsnapshot(@ram2,$400*2);
 savedata_com_qsnapshot(@mem_snd[$c000],$1000);
 //MISC
 buffer[0]:=byte(nmi_vblank);
@@ -253,7 +252,7 @@ buffer[2]:=scroll_x shr 8;
 buffer[3]:=scroll_y and $ff;
 buffer[4]:=scroll_y shr 8;
 buffer[5]:=sound_latch;
-savedata_qsnapshot(@buffer[0],7);
+savedata_qsnapshot(@buffer,7);
 freemem(data);
 close_qsnapshot;
 end;
@@ -278,11 +277,11 @@ dac_0.load_snapshot(data);
 loaddata_qsnapshot(data);
 dac_1.load_snapshot(data);
 //MEM
-loaddata_qsnapshot(@ram[0]);
-loaddata_qsnapshot(@ram2[0]);
+loaddata_qsnapshot(@ram);
+loaddata_qsnapshot(@ram2);
 loaddata_qsnapshot(@mem_snd[$c000]);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 nmi_vblank:=(buffer[0]<>0);
 scroll_x:=buffer[1] or (buffer[2] shl 8);
 scroll_y:=buffer[3] or (buffer[4] shl 8);
@@ -303,7 +302,7 @@ begin
  dac_0.reset;
  dac_1.reset;
  reset_audio;
- marcade.in0:=$FF;
+ marcade.in0:=$FF00;
  marcade.in1:=$FF;
  marcade.in2:=$FF;
  scroll_x:=0;
@@ -337,9 +336,9 @@ screen_init(2,256,256,true);
 screen_init(3,256,512,false,true);
 iniciar_video(224,256);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@terracre_rom[0],'terracre.zip',0)) then exit;
+if not(cargar_roms16w(@rom,@terracre_rom,'terracre.zip',0)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@terracre_sound[0],'terracre.zip',0)) then exit;
+if not(roms_load(@mem_snd,@terracre_sound,'terracre.zip',sizeof(terracre_sound))) then exit;
 //Main CPU
 m68000_0:=cpu_m68000.create(8000000,256);
 m68000_0.change_ram16_calls(terracre_getword,terracre_putword);
@@ -349,47 +348,44 @@ z80_0.change_ram_calls(terracre_snd_getbyte,terracre_snd_putbyte);
 z80_0.change_io_calls(terracre_snd_inbyte,terracre_snd_outbyte);
 z80_0.init_sound(terracre_sound_update);
 //Sound Chips
-YM2203_0:=ym2203_chip.create(4000000,2);
+YM2203_0:=ym2203_chip.create(4000000,0.8,0.4);
 dac_0:=dac_chip.Create(0.5);
 dac_1:=dac_chip.Create(0.5);
-init_timer(z80_0.numero_cpu,4000000/128/57.444853,terracre_snd_timer,true);
+init_timer(z80_0.numero_cpu,4000000/(4000000/512),terracre_snd_timer,true);
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@terracre_char,'terracre.zip')) then exit;
+if not(roms_load(@memoria_temp,@terracre_char,'terracre.zip',sizeof(terracre_char))) then exit;
 init_gfx(0,8,8,256);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
 //convertir fondo
-if not(cargar_roms(@memoria_temp[0],@terracre_fondo[0],'terracre.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@terracre_fondo,'terracre.zip',sizeof(terracre_fondo))) then exit;
 init_gfx(1,16,16,512);
 gfx_set_desc_data(4,0,64*16,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@pf_x[0],@pf_y[0],false,true);
+convert_gfx(1,0,@memoria_temp,@pf_x,@pf_y,false,true);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@terracre_sprites[0],'terracre.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@terracre_sprites,'terracre.zip',sizeof(terracre_sprites))) then exit;
 init_gfx(2,16,16,512);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*16,0,1,2,3);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //poner la paleta
-if not(cargar_roms(@memoria_temp[0],@terracre_pal[0],'terracre.zip',0)) then exit;
-copymemory(@spritebank[0],@memoria_temp[$400],$100);
-for f:=0 to 255 do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
-end;
-set_pal(colores,256);
-//color lookup de fondo
-for f:=0 to 255 do
-		if (f and 8)<>0 then gfx[1].colores[f]:=192+(f and $0f)+((f and $c0) shr 2)
-		  else gfx[1].colores[f]:=192+(f and $0f)+((f and $30) shr 0);
-//color lookup de sprites
+if not(roms_load(@memoria_temp,@terracre_pal,'terracre.zip',sizeof(terracre_pal))) then exit;
+copymemory(@spritebank,@memoria_temp[$400],$100);
 for f:=0 to $ff do begin
-		for j:=0 to $f do begin
+  colores[f].r:=pal4bit(memoria_temp[f]);
+  colores[f].g:=pal4bit(memoria_temp[f+$100]);
+  colores[f].b:=pal4bit(memoria_temp[f+$200]);
+  //color lookup de fondo
+  if (f and 8)<>0 then gfx[1].colores[f]:=192+(f and $0f)+((f and $c0) shr 2)
+		  else gfx[1].colores[f]:=192+(f and $0f)+((f and $30) shr 0);
+  //color lookup de sprites
+  for j:=0 to $f do begin
 			if (f and $8)<>0 then gfx[2].colores[f+j*$100]:=$80+((j and $0c) shl 2)+(memoria_temp[$300+f] and $0f)
 			  else gfx[2].colores[f+j*$100]:=$80+((j and $03) shl 4)+(memoria_temp[$300+f] and $0f);
     end;
 end;
+set_pal(colores,$100);
 //DIP
 marcade.dswa:=$ffdf;
 marcade.dswa_val:=@terracre_dip;
