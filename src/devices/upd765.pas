@@ -296,6 +296,8 @@ case (FDCCommand[0] and $1f) of
         st0:=$48;
         getres7;
       end else if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector=0 then begin
+                  //Esto es para que 'Tomahawk' de +3 funcione, por ejemplo
+                  st1:=1;
                   getres7;
                   FDCResult[3]:=dsk[FDCCurrDrv].track_actual;
                   FDCResult[4]:=0;
@@ -310,17 +312,17 @@ case (FDCCommand[0] and $1f) of
                         end;
       end;
      15:begin // SEEK
-      fdc_get_drive;
-      StatusRegister:=$80;
-      SeekTrack:=TRUE;
-      //st2:=st2 and $fd;
-      st0:=$20;
-      st1:=0;
-      st2:=0;
-      if not(dsk[FDCCurrDrv].abierto) then st0:=st0 or $48
-        else seek_track(FDCCommand[2]);
-      ExecCmdPhase:=FALSE;
-      end;
+          fdc_get_drive;
+          StatusRegister:=$80;
+          SeekTrack:=TRUE;
+          //st2:=st2 and $fd;
+          st0:=$20;
+          st1:=0;
+          st2:=0;
+          if not(dsk[FDCCurrDrv].abierto) then st0:=st0 or $48
+            else seek_track(FDCCommand[2]);
+          ExecCmdPhase:=FALSE;
+        end;
       else begin
         FDCResCounter:=1;
         FDCResPointer:=0;
@@ -436,7 +438,7 @@ var
   ret:byte;
 begin
   ret:=FDCResult[FDCResPointer];
-  FDCResPointer:= FDCResPointer + 1;
+  FDCResPointer:= FDCResPointer+1;
   if (FDCResPointer=FDCResCounter)  then begin
     StatusRegister:=$80;
     ResultPhase:=FALSE;

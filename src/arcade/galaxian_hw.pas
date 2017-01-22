@@ -49,7 +49,7 @@ const
         (n:'mcs_a';l:$800;p:$1000;crc:$631ebb5a),(n:'mcs_c';l:$800;p:$1800;crc:$24cfd145),());
         mooncrst_pal:tipo_roms=(n:'l06_prom.bin';l:$20;p:0;crc:$6a0c7d87);
         mooncrst_samples:array[0..4] of tipo_nombre_samples=(
-        (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'back1.wav'),(nombre:'back2.wav'),(nombre:'back3.wav'));
+        (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'ship1.wav'),(nombre:'enemy1.wav'),(nombre:'back3.wav'));
         //Scramble
         scramble_rom:array[0..8] of tipo_roms=(
         (n:'s1.2d';l:$800;p:0;crc:$ea35ccaa),(n:'s2.2e';l:$800;p:$800;crc:$e7bba1b3),
@@ -420,11 +420,14 @@ case direccion of
                          end;
                end;
   $a800..$afff:case (direccion and $7) of
-                  $0:if (valor<>0) then start_sample(2);
-                  $1:if (valor<>0) then start_sample(3);
-                  $2:if (valor<>0) then start_sample(4);
+                  $0,$1,$2:;
                   $3:if (valor<>0) then start_sample(1);
                   $5:if (valor<>0) then start_sample(0);
+                  $6:sound1_pos:=valor;
+                  $7:begin
+                      if ((sound1_pos=7) and (valor=131)) then start_sample(2);
+                      if ((sound1_pos=2) and (valor=1)) then start_sample(3);
+                     end;
                 end;
   $b000..$b7ff:case (direccion and $7) of
                   $0:haz_nmi:=(valor and 1)<>0;
@@ -443,7 +446,7 @@ begin
   charcode:=videoram_mem[direccion and $3ff];
   if ((gfx_bank[2]<>0) and ((charcode and $c0)=$80)) then
 		charcode:=(charcode and $3f) or (gfx_bank[0] shl 6) or (gfx_bank[1] shl 7) or $0100;
-  mooncrst_calc_nchar:=charcode;
+  mooncrst_calc_nchar:=charcode and $1ff;
 end;
 
 function mooncrst_calc_sprite(direccion:byte):word;
@@ -453,7 +456,7 @@ begin
   spritecode:=sprite_mem[$1+(direccion*4)] and $3f;
   if ((gfx_bank[2]<>0) and ((spritecode and $30)=$20)) then
 		spritecode:=(spritecode and $f) or (gfx_bank[0] shl 4) or (gfx_bank[1] shl 5) or $40;
-  mooncrst_calc_sprite:=spritecode;
+  mooncrst_calc_sprite:=spritecode and $7f;
 end;
 
 //Scramble

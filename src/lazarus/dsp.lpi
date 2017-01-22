@@ -14,7 +14,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="17"/>
       <RevisionNr Value="2"/>
-      <BuildNr Value="1046"/>
+      <BuildNr Value="1051"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.16"/>
     </VersionInfo>
@@ -60,8 +60,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="694"/>
-        <CursorPos Y="713"/>
+        <TopLine Value="829"/>
+        <CursorPos X="25" Y="846"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -185,10 +185,12 @@
         <ComponentName Value="Aboutbox"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="30"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="29"/>
         <CursorPos X="27" Y="43"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
@@ -210,10 +212,12 @@
         <ComponentName Value="MConfig"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="414"/>
-        <CursorPos X="25" Y="427"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="571"/>
+        <CursorPos Y="582"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
       <Unit19>
@@ -292,10 +296,10 @@
       </Unit27>
       <Unit28>
         <Filename Value="..\misc\file_engine.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="337"/>
         <CursorPos X="68" Y="340"/>
-        <UsageCount Value="57"/>
+        <UsageCount Value="59"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit28>
@@ -305,7 +309,7 @@
         <ComponentName Value="load_dsk"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="196"/>
         <CursorPos Y="216"/>
         <UsageCount Value="200"/>
@@ -452,10 +456,10 @@
       </Unit43>
       <Unit44>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="527"/>
         <CursorPos X="44" Y="539"/>
-        <UsageCount Value="16"/>
+        <UsageCount Value="18"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit44>
@@ -1009,7 +1013,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="46"/>
         <CursorPos X="20" Y="61"/>
-        <UsageCount Value="174"/>
+        <UsageCount Value="177"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit114>
       <Unit115>
@@ -1607,7 +1611,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="28"/>
         <CursorPos X="13" Y="28"/>
-        <UsageCount Value="123"/>
+        <UsageCount Value="126"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit192>
       <Unit193>
@@ -1980,74 +1984,127 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit240>
     </Units>
-    <JumpHistory Count="17" HistoryIndex="16">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="principal.pas"/>
-        <Caret Line="825" TopLine="812"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1025" Column="3" TopLine="1023"/>
       </Position1>
       <Position2>
-        <Filename Value="principal.pas"/>
-        <Caret Line="826" TopLine="813"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1024" Column="3" TopLine="1022"/>
       </Position2>
       <Position3>
-        <Filename Value="principal.pas"/>
-        <Caret Line="708" Column="15" TopLine="698"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1023" Column="3" TopLine="1021"/>
       </Position3>
       <Position4>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="131" Column="68" TopLine="117"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1022" Column="3" TopLine="1020"/>
       </Position4>
       <Position5>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="171" Column="43" TopLine="164"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1021" Column="3" TopLine="1019"/>
       </Position5>
       <Position6>
-        <Filename Value="cargar_dsk.pas"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1020" Column="3" TopLine="1018"/>
       </Position6>
       <Position7>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="19" Column="31"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1019" Column="3" TopLine="1017"/>
       </Position7>
       <Position8>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="26" Column="24" TopLine="4"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1018" Column="3" TopLine="1016"/>
       </Position8>
       <Position9>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="69" Column="30" TopLine="47"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1017" Column="3" TopLine="1015"/>
       </Position9>
       <Position10>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="70" Column="67" TopLine="49"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1016" Column="3" TopLine="1014"/>
       </Position10>
       <Position11>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="167" Column="43" TopLine="146"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1015" Column="3" TopLine="1013"/>
       </Position11>
       <Position12>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="168" Column="45" TopLine="147"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1014" Column="3" TopLine="1012"/>
       </Position12>
       <Position13>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="171" Column="43" TopLine="150"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="1013" Column="3" TopLine="1011"/>
       </Position13>
       <Position14>
-        <Filename Value="cargar_dsk.pas"/>
-        <Caret Line="172" Column="45" TopLine="151"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="973" Column="3" TopLine="948"/>
       </Position14>
       <Position15>
-        <Filename Value="..\misc\init_games.pas"/>
-        <Caret Line="535" Column="44" TopLine="523"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="974" Column="3" TopLine="949"/>
       </Position15>
       <Position16>
-        <Filename Value="principal.pas"/>
-        <Caret Line="711" TopLine="692"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="989" Column="3" TopLine="964"/>
       </Position16>
       <Position17>
-        <Filename Value="principal.pas"/>
-        <Caret Line="712" TopLine="693"/>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="995" Column="3" TopLine="970"/>
       </Position17>
+      <Position18>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="900" Column="25" TopLine="876"/>
+      </Position18>
+      <Position19>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="192" Column="49" TopLine="171"/>
+      </Position19>
+      <Position20>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="9" Column="62"/>
+      </Position20>
+      <Position21>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="945" Column="3" TopLine="932"/>
+      </Position21>
+      <Position22>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="997" TopLine="972"/>
+      </Position22>
+      <Position23>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="439" TopLine="430"/>
+      </Position23>
+      <Position24>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="593" Column="3" TopLine="579"/>
+      </Position24>
+      <Position25>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="171" Column="31" TopLine="159"/>
+      </Position25>
+      <Position26>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="440" TopLine="429"/>
+      </Position26>
+      <Position27>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="597" Column="15" TopLine="589"/>
+      </Position27>
+      <Position28>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="51" TopLine="51"/>
+      </Position28>
+      <Position29>
+        <Filename Value="config_general.pas"/>
+        <Caret Line="170" Column="45" TopLine="151"/>
+      </Position29>
+      <Position30>
+        <Filename Value="principal.pas"/>
+        <Caret Line="702" Column="7" TopLine="694"/>
+      </Position30>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

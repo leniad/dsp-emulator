@@ -10,7 +10,7 @@ type
                 destructor free;
              public
                 procedure reset;
-                procedure change_calls(readhandler:cpu_inport_full;writehandler:cpu_outport_full);
+                procedure change_calls(readhandler:tgetbyte;writehandler:tputbyte);
                 function p2_r:byte;
                 procedure p2_w(valor:byte);
                 procedure prog_w(valor:byte);
@@ -20,8 +20,8 @@ type
 	              prog:byte;
                 opcode:byte;
                 p:array[0..3] of byte;
-                read:cpu_inport_full;
-                write:cpu_outport_full;
+                read:tgetbyte;
+                write:tputbyte;
   end;
 
 const
@@ -47,7 +47,7 @@ begin
 	self.prog:=1;
 end;
 
-procedure i8243_chip.change_calls(readhandler:cpu_inport_full;writehandler:cpu_outport_full);
+procedure i8243_chip.change_calls(readhandler:tgetbyte;writehandler:tputbyte);
 begin
   self.read:=readhandler;
   self.write:=writehandler;
@@ -81,15 +81,15 @@ begin
 		case (self.opcode shr 2) of
 			MCS48_EXPANDER_OP_WRITE:begin
 				self.p[self.opcode and 3]:=self.p2 and $f;
-				self.write(self.p[self.opcode and 3],self.opcode and 3);
+				self.write(self.opcode and 3,self.p[self.opcode and 3]);
       end;
 			MCS48_EXPANDER_OP_OR:begin
 				self.p[self.opcode and 3]:=self.p[self.opcode and 3] or (self.p2 and $0f);
-        self.write(self.p[self.opcode and 3],self.opcode and 3);
+        self.write(self.opcode and 3,self.p[self.opcode and 3]);
       end;
 			MCS48_EXPANDER_OP_AND:begin
 				self.p[self.opcode and 3]:=self.p[self.opcode and 3] and (self.p2 and $0f);
-        self.write(self.p[self.opcode and 3],self.opcode and 3);
+        self.write(self.opcode and 3,self.p[self.opcode and 3]);
       end;
     end;
 	end;

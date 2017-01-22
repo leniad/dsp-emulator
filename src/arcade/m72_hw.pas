@@ -276,7 +276,7 @@ case direccion of
 end;
 end;
 
-procedure irem_m72_outword(valor:word;puerto:word);
+procedure irem_m72_outword(puerto:dword;valor:word);
 begin
 case puerto of
   0:begin
@@ -309,7 +309,7 @@ case puerto of
 end;
 end;
 
-function irem_m72_inword(puerto:word):word;
+function irem_m72_inword(puerto:dword):word;
 begin
   case puerto of
     0:irem_m72_inword:=$ff00+marcade.in0;
@@ -441,7 +441,7 @@ case puerto of
 end;
 end;
 
-procedure hharry_outword(valor:word;puerto:word);
+procedure hharry_outword(puerto:dword;valor:word);
 begin
   out_io(puerto,valor);
 end;
@@ -455,12 +455,12 @@ begin
   end;
 end;
 
-function hharry_inword(puerto:word):word;
+function hharry_inword(puerto:dword):word;
 begin
   hharry_inword:=in_io(puerto);
 end;
 
-procedure hharry_outbyte(valor:byte;puerto:word);
+procedure hharry_outbyte(puerto:word;valor:byte);
 begin
   out_io(puerto,valor);
 end;
@@ -592,7 +592,7 @@ case puerto of
 end;
 end;
 
-procedure rtype2_outword(valor:word;puerto:word);
+procedure rtype2_outword(puerto:dword;valor:word);
 begin
   rtype2_out_io(puerto,valor);
 end;
@@ -606,12 +606,12 @@ begin
   end;
 end;
 
-function rtype2_inword(puerto:word):word;
+function rtype2_inword(puerto:dword):word;
 begin
   rtype2_inword:=rtype2_in_io(puerto);
 end;
 
-procedure rtype2_outbyte(valor:byte;puerto:word);
+procedure rtype2_outbyte(puerto:word;valor:byte);
 begin
   rtype2_out_io(puerto,valor);
 end;
@@ -649,7 +649,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure irem_m72_snd_outbyte(valor:byte;puerto:word);
+procedure irem_m72_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0:ym2151_0.reg(valor);
@@ -670,7 +670,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure rtype2_snd_outbyte(valor:byte;puerto:word);
+procedure rtype2_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0:ym2151_0.reg(valor);

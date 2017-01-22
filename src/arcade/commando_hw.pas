@@ -9,21 +9,21 @@ procedure cargar_commando;
 
 implementation
 const
-        commando_rom:array[0..2] of tipo_roms=(
-        (n:'cm04.9m';l:$8000;p:0;crc:$8438b694),(n:'cm03.8m';l:$4000;p:$8000;crc:$35486542),());
+        commando_rom:array[0..1] of tipo_roms=(
+        (n:'cm04.9m';l:$8000;p:0;crc:$8438b694),(n:'cm03.8m';l:$4000;p:$8000;crc:$35486542));
         commando_snd_rom:tipo_roms=(n:'cm02.9f';l:$4000;p:0;crc:$f9cc4a74);
-        commando_pal:array[0..3] of tipo_roms=(
+        commando_pal:array[0..2] of tipo_roms=(
         (n:'vtb1.1d';l:$100;p:0;crc:$3aba15a1),(n:'vtb2.2d';l:$100;p:$100;crc:$88865754),
-        (n:'vtb3.3d';l:$100;p:$200;crc:$4c14c3f6),());
+        (n:'vtb3.3d';l:$100;p:$200;crc:$4c14c3f6));
         commando_char:tipo_roms=(n:'vt01.5d';l:$4000;p:0;crc:$505726e0);
-        commando_sprites:array[0..6] of tipo_roms=(
+        commando_sprites:array[0..5] of tipo_roms=(
         (n:'vt05.7e';l:$4000;p:0;crc:$79f16e3d),(n:'vt06.8e';l:$4000;p:$4000;crc:$26fee521),
         (n:'vt07.9e';l:$4000;p:$8000;crc:$ca88bdfd),(n:'vt08.7h';l:$4000;p:$c000;crc:$2019c883),
-        (n:'vt09.8h';l:$4000;p:$10000;crc:$98703982),(n:'vt10.9h';l:$4000;p:$14000;crc:$f069d2f8),());
-        commando_tiles:array[0..6] of tipo_roms=(
+        (n:'vt09.8h';l:$4000;p:$10000;crc:$98703982),(n:'vt10.9h';l:$4000;p:$14000;crc:$f069d2f8));
+        commando_tiles:array[0..5] of tipo_roms=(
         (n:'vt11.5a';l:$4000;p:0;crc:$7b2e1b48),(n:'vt12.6a';l:$4000;p:$4000;crc:$81b417d3),
         (n:'vt13.7a';l:$4000;p:$8000;crc:$5612dbd2),(n:'vt14.8a';l:$4000;p:$c000;crc:$2b2dee36),
-        (n:'vt15.9a';l:$4000;p:$10000;crc:$de70babf),(n:'vt16.10a';l:$4000;p:$14000;crc:$14178237),());
+        (n:'vt15.9a';l:$4000;p:$10000;crc:$de70babf),(n:'vt16.10a';l:$4000;p:$14000;crc:$14178237));
         //DIP
         commando_dip_a:array [0..4] of def_dip=(
         (mask:$3;name:'Starting Area';number:4;dip:((dip_val:$3;dip_name:'0 (Forest 1)'),(dip_val:$1;dip_name:'2 (Desert 1)'),(dip_val:$2;dip_name:'4 (Forest 2)'),(dip_val:$0;dip_name:'6 (Desert 2)'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -163,15 +163,15 @@ case direccion of
                     else z80_1.change_reset(CLEAR_LINE);
             main_screen.flip_main_screen:=(valor and $80)<>0;
          end;
-   $c808:scroll_y:=(scroll_y and $ff00) or valor;
-   $c809:scroll_y:=(scroll_y and $00ff) or ((valor and $1) shl 8);
-   $c80a:scroll_x:=(scroll_x and $ff00) or valor;
-   $c80b:scroll_x:=(scroll_x and $00ff) or ((valor and $1) shl 8);
-   $d000..$d7ff:begin
+   $c808:scroll_y:=(scroll_y and $100) or valor;
+   $c809:scroll_y:=(scroll_y and $ff) or ((valor and $1) shl 8);
+   $c80a:scroll_x:=(scroll_x and $100) or valor;
+   $c80b:scroll_x:=(scroll_x and $ff) or ((valor and $1) shl 8);
+   $d000..$d7ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;
                 end;
-   $d800..$dfff:begin
+   $d800..$dfff:if memoria[direccion]<>valor then begin
                     gfx[2].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;
                 end;
@@ -264,34 +264,34 @@ init_timer(z80_1.numero_cpu,3000000/(4*60),commando_snd_irq,true);
 YM2203_0:=ym2203_chip.create(1500000,2);
 YM2203_1:=ym2203_chip.create(1500000,2);
 //cargar y desencriptar las ROMS
-if not(cargar_roms(@memoria[0],@commando_rom[0],'commando.zip',0)) then exit;
+if not(roms_load(@memoria,@commando_rom,'commando.zip',sizeof(commando_rom))) then exit;
 memoria_dec[0]:=memoria[0];
 for f:=1 to $bfff do memoria_dec[f]:=bitswap8(memoria[f],3,2,1,4,7,6,5,0);
 //cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@commando_snd_rom,'commando.zip')) then exit;
+if not(roms_load(@mem_snd,@commando_snd_rom,'commando.zip',sizeof(commando_snd_rom))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@commando_char,'commando.zip')) then exit;
+if not(roms_load(@memoria_temp,@commando_char,'commando.zip',sizeof(commando_char))) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@commando_sprites[0],'commando.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@commando_sprites,'commando.zip',sizeof(commando_sprites))) then exit;
 init_gfx(1,16,16,768);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //tiles
-if not(cargar_roms(@memoria_temp[0],@commando_tiles[0],'commando.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@commando_tiles,'commando.zip',sizeof(commando_tiles))) then exit;
 init_gfx(2,16,16,1024);
 gfx_set_desc_data(3,0,32*8,0,$8000*8,$8000*8*2);
-convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //poner la paleta
-if not(cargar_roms(@memoria_temp[0],@commando_pal[0],'commando.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@commando_pal,'commando.zip',sizeof(commando_pal))) then exit;
 for f:=0 to 255 do begin
-  colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
-  colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
-  colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
+  colores[f].r:=pal4bit(memoria_temp[f]);
+  colores[f].g:=pal4bit(memoria_temp[f+$100]);
+  colores[f].b:=pal4bit(memoria_temp[f+$200]);
 end;
 set_pal(colores,256);
 //crear la tabla de colores

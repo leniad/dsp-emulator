@@ -1,12 +1,22 @@
 What's New!!! DSP Emulator
 
-DSP 0.17b2WIP 31/12/16
+DSP 0.17b2WIP 22/01/17
 *************
 - General
+    + Autofire
+        - General options -> Autofire -> Enable/disable
+        - Independent for each button
+    + CPU: Unified functions in/out with read/write
+    + Tape Engine
+        - Improved handling of 1-byte blocks in TAP tapes
+        - Added control to avoid blocks of 0 length in TAP tapes
+        - Corrected the length of the message block of the TZX tapes
+    + After pressing F4 to record a snapshot, the recording screen no longer shows each time a key is pressed
     + GFX engine: GFX functions optimizations, more speed
     + UPD765
         - Fixed next sector ID load function
         - Fixed a stupid bug when reading a full track (Fixes Spectrum +3 'Platoon' and many others)
+        - Improved processing a track with 0 sectors (Corrects 'Tomahawk' from Spectrum +3)
     + Disk loading: Fixed some problems selecting compressed files
     + DSK files: Fixed track number asignation
     + Cleaning and optimizations in many drivers (input, video, controls, etc)
@@ -16,10 +26,14 @@ DSP 0.17b2WIP 31/12/16
         - Converted to standard audio functions
     + M680X: Added internal RAM
     + Deco 16ic: Converted playfield RAM to word, changed functions and drivers
-    + Mouse: Created new functions to standarize the cursor show/hide and creation
+    + Mouse: Created new functions to standarize the cursor creation, show and hide
     + M68000: Fixed carry flag on opcode roxr.l
     + OKI 6295: Added snapshot functions
     + Samples: Fixed a bug assigning the audio channel
+- Spectrum
+    + Added Fuller joystick, and improved descriptions of other types of joystick
+    + Fixed Cursor joystick, only works if selected
+    + Improved Kempston joystick
 - Amstrad CPC
     + Fixed WAV tape file loading
 - Black Tiger
@@ -31,6 +45,10 @@ DSP 0.17b2WIP 31/12/16
     + Lunar Lander: added driver, no sound
 - Express Raider
     + ROMS updated to 'World V4'
+- Galaxian HW
+    + Moon Crest:
+        - Improved sound with samples
+        - Fixed a problem with chars/sprites
 - Gunsmoke HW
     + Added dip switches to all games
     + Added a simulated copy protections

@@ -208,7 +208,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure popeye_outbyte(valor:byte;puerto:word);
+procedure popeye_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:ay8910_0.control(valor);

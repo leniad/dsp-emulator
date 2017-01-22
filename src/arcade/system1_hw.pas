@@ -13,7 +13,7 @@ procedure update_backgroud(screen:byte);
 procedure eventos_system1;
 //PPI
 function system1_inbyte_ppi(puerto:word):byte;
-procedure system1_outbyte_ppi(valor:byte;puerto:word);
+procedure system1_outbyte_ppi(puerto:word;valor:byte);
 function system1_snd_getbyte_ppi(direccion:word):byte;
 procedure system1_snd_putbyte(direccion:word;valor:byte);
 procedure system1_port_a_write(valor:byte);
@@ -342,7 +342,7 @@ case (puerto and $1f) of
 end;
 end;
 
-procedure system1_outbyte_ppi(valor:byte;puerto:word);
+procedure system1_outbyte_ppi(puerto:word;valor:byte);
 begin
 case (puerto and $1f) of
   $14..$17:pia8255_0.write(puerto and $3,valor);

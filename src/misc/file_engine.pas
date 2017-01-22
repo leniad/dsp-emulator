@@ -8,7 +8,7 @@ uses {$IFDEF windows}windows,{$endif}
      Zlib,zip,
      {$endif}
      sysutils,dialogs,lenguaje,sound_engine,inifiles,main_engine,
-     controls_engine,misc_functions;
+     controls_engine,misc_functions,timer_engine;
 
 type
     tzip_find_files=record
@@ -181,9 +181,23 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.jbut3[1]:=fich_ini.ReadInteger('keyboard','jbut3_1',3) and $ff;
   arcade_input.jbut4[1]:=fich_ini.ReadInteger('keyboard','jbut4_1',4) and $ff;
   arcade_input.jbut5[1]:=fich_ini.ReadInteger('keyboard','jbut5_1',5) and $ff;
+  //Autofire
+  autofire_enabled[0]:=fich_ini.ReadInteger('keyboard','autofire_p1_but0',0)<>0;
+  autofire_enabled[1]:=fich_ini.ReadInteger('keyboard','autofire_p1_but1',0)<>0;
+  autofire_enabled[2]:=fich_ini.ReadInteger('keyboard','autofire_p1_but2',0)<>0;
+  autofire_enabled[3]:=fich_ini.ReadInteger('keyboard','autofire_p1_but3',0)<>0;
+  autofire_enabled[4]:=fich_ini.ReadInteger('keyboard','autofire_p1_but4',0)<>0;
+  autofire_enabled[5]:=fich_ini.ReadInteger('keyboard','autofire_p1_but5',0)<>0;
+  autofire_enabled[6]:=fich_ini.ReadInteger('keyboard','autofire_p2_but0',0)<>0;
+  autofire_enabled[7]:=fich_ini.ReadInteger('keyboard','autofire_p2_but1',0)<>0;
+  autofire_enabled[8]:=fich_ini.ReadInteger('keyboard','autofire_p2_but2',0)<>0;
+  autofire_enabled[9]:=fich_ini.ReadInteger('keyboard','autofire_p2_but3',0)<>0;
+  autofire_enabled[10]:=fich_ini.ReadInteger('keyboard','autofire_p2_but4',0)<>0;
+  autofire_enabled[11]:=fich_ini.ReadInteger('keyboard','autofire_p2_but5',0)<>0;
+  autofire_general:=fich_ini.ReadInteger('keyboard','autofire_general',0)=0;
   //tipo y numero joystick
-  arcade_input.use_key[0]:=(fich_ini.ReadInteger('keyboard','use_keyb_0',0)=0);
-  arcade_input.use_key[1]:=(fich_ini.ReadInteger('keyboard','use_keyb_1',0)=0);
+  arcade_input.use_key[0]:=fich_ini.ReadInteger('keyboard','use_keyb_0',0)=0;
+  arcade_input.use_key[1]:=fich_ini.ReadInteger('keyboard','use_keyb_1',0)=0;
   arcade_input.num_joystick[0]:=fich_ini.ReadInteger('keyboard','num_joy_0',0);
   arcade_input.num_joystick[1]:=fich_ini.ReadInteger('keyboard','num_joy_1',0);
   //Joystick calibration
@@ -282,6 +296,19 @@ end else begin
   arcade_input.use_key[1]:=true;
   arcade_input.num_joystick[0]:=0;
   arcade_input.num_joystick[1]:=0;
+  autofire_enabled[0]:=false;
+  autofire_enabled[1]:=false;
+  autofire_enabled[2]:=false;
+  autofire_enabled[3]:=false;
+  autofire_enabled[4]:=false;
+  autofire_enabled[5]:=false;
+  autofire_enabled[6]:=false;
+  autofire_enabled[7]:=false;
+  autofire_enabled[8]:=false;
+  autofire_enabled[9]:=false;
+  autofire_enabled[10]:=false;
+  autofire_enabled[11]:=false;
+  autofire_general:=false;
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
     arcade_input.joy_left[f]:=0;
@@ -419,6 +446,20 @@ fich_ini.WriteInteger('keyboard','jbut2_1',arcade_input.jbut2[1]);
 fich_ini.WriteInteger('keyboard','jbut3_1',arcade_input.jbut3[1]);
 fich_ini.WriteInteger('keyboard','jbut4_1',arcade_input.jbut4[1]);
 fich_ini.WriteInteger('keyboard','jbut5_1',arcade_input.jbut5[1]);
+//Autofire
+fich_ini.WriteInteger('keyboard','autofire_p1_but0',byte(autofire_enabled[0]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but1',byte(autofire_enabled[1]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but2',byte(autofire_enabled[2]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but3',byte(autofire_enabled[3]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but4',byte(autofire_enabled[4]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but5',byte(autofire_enabled[5]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but0',byte(autofire_enabled[6]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but1',byte(autofire_enabled[7]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but2',byte(autofire_enabled[8]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but3',byte(autofire_enabled[9]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but4',byte(autofire_enabled[10]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but5',byte(autofire_enabled[11]));
+fich_ini.WriteInteger('keyboard','autofire_general',byte(not(autofire_general)));
 //tipo y numero joystick
 fich_ini.WriteInteger('keyboard','use_keyb_0',byte(not(arcade_input.use_key[0])));
 fich_ini.WriteInteger('keyboard','use_keyb_1',byte(not(arcade_input.use_key[1])));

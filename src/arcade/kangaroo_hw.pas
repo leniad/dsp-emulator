@@ -9,13 +9,13 @@ procedure cargar_kangaroo;
 
 implementation
 const
-        kangaroo_rom:array[0..6] of tipo_roms=(
+        kangaroo_rom:array[0..5] of tipo_roms=(
         (n:'tvg_75.0';l:$1000;p:0;crc:$0d18c581),(n:'tvg_76.1';l:$1000;p:$1000;crc:$5978d37a),
         (n:'tvg_77.2';l:$1000;p:$2000;crc:$522d1097),(n:'tvg_78.3';l:$1000;p:$3000;crc:$063da970),
-        (n:'tvg_79.4';l:$1000;p:$4000;crc:$9e5cf8ca),(n:'tvg_80.5';l:$1000;p:$5000;crc:$2fc18049),());
-        kangaroo_gfx:array[0..4] of tipo_roms=(
+        (n:'tvg_79.4';l:$1000;p:$4000;crc:$9e5cf8ca),(n:'tvg_80.5';l:$1000;p:$5000;crc:$2fc18049));
+        kangaroo_gfx:array[0..3] of tipo_roms=(
         (n:'tvg_83.v0';l:$1000;p:0;crc:$c0446ca6),(n:'tvg_85.v2';l:$1000;p:$1000;crc:$72c52695),
-        (n:'tvg_84.v1';l:$1000;p:$2000;crc:$e4cb26c2),(n:'tvg_86.v3';l:$1000;p:$3000;crc:$9e6a599f),());
+        (n:'tvg_84.v1';l:$1000;p:$2000;crc:$e4cb26c2),(n:'tvg_86.v3';l:$1000;p:$3000;crc:$9e6a599f));
         kangaroo_sound:tipo_roms=(n:'tvg_81.8';l:$1000;p:0;crc:$fb449bfd);
         //DIP
         kangaroo_dipa:array [0..3] of def_dip=(
@@ -32,24 +32,22 @@ var
  video_control:array[0..$f] of byte;
  sound_latch,mcu_clock,rom_bank:byte;
  video_ram:array[0..(256*64)-1] of dword;
- gfx_data:array[0..$3fff] of byte;
- punt:array[0..$1ffff] of word;
+ gfx_data:array[0..1,0..$1fff] of byte;
 
-procedure update_video_kangaroo;
+procedure update_video_kangaroo;inline;
 var
   x,y,scrolly,scrollx,maska,maskb,xora,xorb:byte;
   effxb,effyb,pixa,pixb,finalpens:byte;
   effxa,effya,sy,tempa,tempb:word;
   enaa,enab,pria,prib:boolean;
+  punt:array[0..$1ffff] of word;
 begin
 	scrolly:=video_control[6];
 	scrollx:=video_control[7];
 	maska:=(video_control[10] and $28) shr 3;
 	maskb:=(video_control[10] and $07);
-	if (video_control[9] and $20)<>0 then xora:=$ff
-    else xora:=0;
-	if (video_control[9] and $10)<>0 then xorb:=$ff
-    else xorb:=0;
+  xora:=$ff*((video_control[9] and $20) shr 5);
+  xorb:=$ff*((video_control[9] and $10) shr 4);
 	enaa:=(video_control[9] and $08)<>0;
 	enab:=(video_control[9] and $04)<>0;
 	pria:=(not(video_control[9]) and $02)<>0;
@@ -178,8 +176,8 @@ begin
 			effdst:=(dst+x) and $3fff;
 			effsrc:=src and $1fff;
       src:=src+1;
-			videoram_write(effdst,gfx_data[effsrc],mask and $05);
-			videoram_write(effdst,gfx_data[$2000+effsrc],mask and $0a);
+			videoram_write(effdst,gfx_data[0,effsrc],mask and $05);
+			videoram_write(effdst,gfx_data[1,effsrc],mask and $0a);
 		end;
     dst:=dst+256;
   end;
@@ -189,7 +187,7 @@ function kangaroo_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$5fff,$e000..$e3ff:kangaroo_getbyte:=memoria[direccion];
-  $c000..$dfff:kangaroo_getbyte:=gfx_data[(direccion and $1fff)+(rom_bank*$2000)];
+  $c000..$dfff:kangaroo_getbyte:=gfx_data[rom_bank,direccion and $1fff];
   $e400..$e7ff:kangaroo_getbyte:=marcade.dswb;
   $ec00..$ecff:kangaroo_getbyte:=marcade.in0+marcade.dswa;
   $ed00..$edff:kangaroo_getbyte:=marcade.in1;
@@ -211,8 +209,7 @@ case direccion of
                   video_control[direccion and $f]:=valor;
                   case (direccion and $f) of
                     5:blitter_execute;
-                    8:if (valor and $5)<>0 then rom_bank:=0
-                        else rom_bank:=1;
+                    8:rom_bank:=byte((valor and $5)=0);
                   end;
                end;
   $ec00..$ecff:sound_latch:=valor;
@@ -233,24 +230,6 @@ begin
 if direccion<$1000 then exit;
 case direccion of
   $4000..$4fff:mem_snd[$4000+(direccion and $3ff)]:=valor;
-  $7000..$7fff:ay8910_0.write(valor);
-  $8000..$8fff:ay8910_0.control(valor);
-end;
-end;
-
-function kangaroo_snd_inbyte(puerto:word):byte;
-begin
-case puerto of
-  0..$fff:kangaroo_snd_inbyte:=mem_snd[puerto];
-  $4000..$4fff:kangaroo_snd_inbyte:=mem_snd[$4000+(puerto and $3ff)];
-  $6000..$6fff:kangaroo_snd_inbyte:=sound_latch;
-end;
-end;
-
-procedure kangaroo_snd_outbyte(valor:byte;puerto:word);
-begin
-case puerto of
-  $4000..$4fff:mem_snd[$4000+(puerto and $3ff)]:=valor;
   $7000..$7fff:ay8910_0.write(valor);
   $8000..$8fff:ay8910_0.control(valor);
 end;
@@ -340,8 +319,9 @@ end;
 
 function iniciar_kangaroo:boolean;
 var
-      colores:tpaleta;
-      f:word;
+  colores:tpaleta;
+  f:word;
+  mem_temp:array[0..$3fff] of byte;
 begin
 iniciar_kangaroo:=false;
 iniciar_audio(false);
@@ -353,16 +333,18 @@ z80_0.change_ram_calls(kangaroo_getbyte,kangaroo_putbyte);
 //Sound CPU
 z80_1:=cpu_z80.create(1250000,260);
 z80_1.change_ram_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
-z80_1.change_io_calls(kangaroo_snd_inbyte,kangaroo_snd_outbyte);
+z80_1.change_io_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
 z80_1.init_sound(kangaroo_sound_update);
 //Sound chip
 ay8910_0:=ay8910_chip.create(1250000,AY8910,0.5);
 //cargar roms
-if not(cargar_roms(@memoria[0],@kangaroo_rom[0],'kangaroo.zip',0)) then exit;
+if not(roms_load(@memoria,@kangaroo_rom,'kangaroo.zip',sizeof(kangaroo_rom))) then exit;
 //cargar roms snd
-if not(cargar_roms(@mem_snd[0],@kangaroo_sound,'kangaroo.zip',1)) then exit;
+if not(roms_load(@mem_snd,@kangaroo_sound,'kangaroo.zip',sizeof(kangaroo_sound))) then exit;
 //cargar gfx
-if not(cargar_roms(@gfx_data[0],@kangaroo_gfx[0],'kangaroo.zip',0)) then exit;
+if not(roms_load(@mem_temp,@kangaroo_gfx,'kangaroo.zip',sizeof(kangaroo_gfx))) then exit;
+copymemory(@gfx_data[0,0],@mem_temp[0],$2000);
+copymemory(@gfx_data[1,0],@mem_temp[$2000],$2000);
 for f:=0 to 7 do begin
   colores[f].r:=pal1bit(f shr 2);
   colores[f].g:=pal1bit(f shr 1);

@@ -96,10 +96,9 @@ constructor cpu_lr.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(reg_lr));
 fillchar(self.r^,sizeof(reg_lr),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_lr.free;

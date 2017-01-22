@@ -14,18 +14,18 @@ const
         (n:'tse_03.2a';l:$10000;p:$20000;crc:$b2ac0a45),(n:'tse_05.2b';l:$10000;p:$20001;crc:$a79cb406),());
         bionicc_char:tipo_roms=(n:'tsu_08.8l';l:$8000;p:0;crc:$9bf0b7a2);
         bionicc_sound:tipo_roms=(n:'ts_01b.4e';l:$8000;p:0;crc:$a9a6cafa);
-        bionicc_bg:array[0..2] of tipo_roms=(
-        (n:'tsu_07.5l';l:$8000;p:0;crc:$9469efa4),(n:'tsu_06.4l';l:$8000;p:$8000;crc:$40bf0eb4),());
-        bionicc_fg:array[0..8] of tipo_roms=(
+        bionicc_bg:array[0..1] of tipo_roms=(
+        (n:'tsu_07.5l';l:$8000;p:0;crc:$9469efa4),(n:'tsu_06.4l';l:$8000;p:$8000;crc:$40bf0eb4));
+        bionicc_fg:array[0..7] of tipo_roms=(
         (n:'ts_12.17f';l:$8000;p:0;crc:$e4b4619e),(n:'ts_11.15f';l:$8000;p:$8000;crc:$ab30237a),
         (n:'ts_17.17g';l:$8000;p:$10000;crc:$deb657e4),(n:'ts_16.15g';l:$8000;p:$18000;crc:$d363b5f9),
         (n:'ts_13.18f';l:$8000;p:$20000;crc:$a8f5a004),(n:'ts_18.18g';l:$8000;p:$28000;crc:$3b36948c),
-        (n:'ts_23.18j';l:$8000;p:$30000;crc:$bbfbe58a),(n:'ts_24.18k';l:$8000;p:$38000;crc:$f156e564),());
-        bionicc_sprites:array[0..8] of tipo_roms=(
+        (n:'ts_23.18j';l:$8000;p:$30000;crc:$bbfbe58a),(n:'ts_24.18k';l:$8000;p:$38000;crc:$f156e564));
+        bionicc_sprites:array[0..7] of tipo_roms=(
         (n:'tse_10.13f';l:$8000;p:0;crc:$d28eeacc),(n:'tsu_09.11f';l:$8000;p:$8000;crc:$6a049292),
         (n:'tse_15.13g';l:$8000;p:$10000;crc:$9b5593c0),(n:'tsu_14.11g';l:$8000;p:$18000;crc:$46b2ad83),
         (n:'tse_20.13j';l:$8000;p:$20000;crc:$b03db778),(n:'tsu_19.11j';l:$8000;p:$28000;crc:$b5c82722),
-        (n:'tse_22.17j';l:$8000;p:$30000;crc:$d4dedeb3),(n:'tsu_21.15j';l:$8000;p:$38000;crc:$98777006),());
+        (n:'tse_22.17j';l:$8000;p:$30000;crc:$d4dedeb3),(n:'tsu_21.15j';l:$8000;p:$38000;crc:$98777006));
         //DIP
         bionicc_dip:array [0..8] of def_dip=(
         (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
@@ -42,8 +42,7 @@ var
  rom:array[0..$1ffff] of word;
  ram,ram2,fg_ram,bg_ram:array[0..$1fff] of word;
  txt_ram:array[0..$7ff] of word;
- input:array[0..5] of byte;
- sprite_ram:array[0..$27f] of word;
+ input:array[0..2] of word;
 
 procedure update_video_bionicc;inline;
 var
@@ -109,12 +108,12 @@ scroll_x_y(4,3,scroll_bg_x and $7,scroll_bg_y and $7);
 scroll_x_y(5,3,scroll_fg_x and $f,scroll_fg_y and $f);
 //sprites
 for f:=$9f downto 0 do begin
-  nchar:=sprite_ram[f*4] and $7ff;
+  nchar:=buffer_sprites_w[f*4] and $7ff;
   if nchar<>$7ff then begin
-    atrib:=sprite_ram[(f*4)+1];
+    atrib:=buffer_sprites_w[(f*4)+1];
     color:=((atrib and $3c) shl 2)+512;
-    y:=sprite_ram[(f*4)+2];
-    x:=sprite_ram[(f*4)+3];
+    y:=buffer_sprites_w[(f*4)+2];
+    x:=buffer_sprites_w[(f*4)+3];
     put_gfx_sprite(nchar,color,(atrib and 2)<>0,false,3);
     actualiza_gfx_sprite_over(x,y,3,3,6,scroll_fg_x,scroll_fg_y);
   end;
@@ -163,11 +162,11 @@ while EmuStatus=EsRuning do begin
     239:begin
           m68000_0.irq[2]:=HOLD_LINE;
           update_video_bionicc;
+          copymemory(@buffer_sprites_w,@ram[$400],$280*2);
         end;
     255:m68000_0.irq[4]:=HOLD_LINE;
     end;
  end;
- copymemory(@sprite_ram[0],@ram[$400],$280*2);
  eventos_bionicc;
  video_sync;
 end;
@@ -186,7 +185,7 @@ case direccion of
     $ff8000..$ff87ff:bionicc_getword:=buffer_paleta[(direccion and $7ff) shr 1];
     $ffc000..$fffff7:bionicc_getword:=ram2[(direccion and $3fff) shr 1];
     $fffff8..$fffff9:bionicc_getword:=sound_latch;
-    $fffffa..$ffffff:bionicc_getword:=input[(direccion-$fffffa)+1] or (input[direccion-$fffffa] shl 8);
+    $fffffa..$ffffff:bionicc_getword:=input[(direccion-$fffffa) shr 1];
 end;
 end;
 
@@ -214,12 +213,9 @@ end;
 
 procedure bionicc_mpu_trigger_w;inline;
 begin
-  input[0]:=0;
-  input[1]:=marcade.in0 xor $f;
-  input[2]:=0;
-  input[3]:=0;
-  input[4]:=0;
-  input[5]:=marcade.in1 xor $ff;
+  input[0]:=marcade.in0 xor $f;
+  input[1]:=0;
+  input[2]:=marcade.in1 xor $ff;
 end;
 
 procedure bionicc_putword(direccion:dword;valor:word);
@@ -244,15 +240,15 @@ case direccion of
               scroll_bg_y:=valor and $1ff;
             end;
     $fe801a..$fe801b:bionicc_mpu_trigger_w;
-    $fec000..$fecfff:begin
+    $fec000..$fecfff:if txt_ram[(direccion and $fff) shr 1]<>valor then begin
                     txt_ram[(direccion and $fff) shr 1]:=valor;
                     gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                   end;
-    $ff0000..$ff3fff:begin
+    $ff0000..$ff3fff:if fg_ram[(direccion and $3fff) shr 1]<>valor then begin
                     fg_ram[(direccion and $3fff) shr 1]:=valor;
                     gfx[1].buffer[(direccion and $3fff) shr 2]:=true;
                   end;
-    $ff4000..$ff7fff:begin
+    $ff4000..$ff7fff:if bg_ram[(direccion and $3fff) shr 1]<>valor then begin
                     bg_ram[(direccion and $3fff) shr 1]:=valor;
                     gfx[2].buffer[(direccion and $3fff) shr 2]:=true;
                   end;
@@ -262,10 +258,7 @@ case direccion of
                   end;
     $ffc000..$fffff7:ram2[(direccion and $3fff) shr 1]:=valor;
     $fffff8..$fffff9:sound_latch:=valor;
-    $fffffa..$ffffff:begin
-                    input[direccion-$fffffa]:=valor shr 8;
-                    input[(direccion-$fffffa)+1]:=valor and $ff;
-                  end;
+    $fffffa..$ffffff:input[(direccion-$fffffa) shr 1]:=valor;
 end;
 end;
 
@@ -305,8 +298,8 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  reset_audio;
- marcade.in0:=$F;
- marcade.in1:=$FF;
+ marcade.in0:=$000f;
+ marcade.in1:=$00ff;
  fillchar(input[0],6,0);
  scroll_fg_x:=0;
  scroll_fg_y:=0;
@@ -354,23 +347,23 @@ init_timer(z80_0.numero_cpu,3579545/(4*60),bionicc_snd_irq,true);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@bionicc_rom[0],'bionicc.zip',0)) then exit;
+if not(cargar_roms16w(@rom,@bionicc_rom,'bionicc.zip',0)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@bionicc_sound,'bionicc.zip',1)) then exit;
+if not(roms_load(@mem_snd,@bionicc_sound,'bionicc.zip',sizeof(bionicc_sound))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@bionicc_char,'bionicc.zip',1)) then exit;
+if not(roms_load(@memoria_temp,@bionicc_char,'bionicc.zip',sizeof(bionicc_char))) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,128,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //convertir bg
-if not(cargar_roms(@memoria_temp[0],@bionicc_bg[0],'bionicc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@bionicc_bg,'bionicc.zip',sizeof(bionicc_bg))) then exit;
 init_gfx(1,8,8,2048);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128,($8000*8)+4,$8000*8,4,0);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //convertir fg
-if not(cargar_roms(@memoria_temp[0],@bionicc_fg[0],'bionicc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@bionicc_fg,'bionicc.zip',sizeof(bionicc_fg))) then exit;
 init_gfx(2,16,16,2048);
 gfx[2].trans_alt[0,15]:=true;
 gfx[2].trans_alt[1,1]:=true;
@@ -380,13 +373,13 @@ gfx[2].trans_alt[1,4]:=true;
 gfx[2].trans_alt[1,5]:=true;
 gfx[2].trans_alt[1,15]:=true;
 gfx_set_desc_data(4,0,512,($20000*8)+4,$20000*8,4,0);
-convert_gfx(2,0,@memoria_temp[0],@pf_x[0],@pf_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@pf_x,@pf_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@bionicc_sprites[0],'bionicc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@bionicc_sprites,'bionicc.zip',sizeof(bionicc_sprites))) then exit;
 init_gfx(3,16,16,2048);
 gfx[3].trans[15]:=true;
 gfx_set_desc_data(4,0,256,$30000*8,$20000*8,$10000*8,0);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$dfff;
 marcade.dswa_val:=@bionicc_dip;

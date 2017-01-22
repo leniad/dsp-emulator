@@ -346,7 +346,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure kungfum_outbyte(valor:byte;puerto:word);
+procedure kungfum_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:if ((valor and $80)=0) then sound_command:=valor and $7f
@@ -456,7 +456,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure ldrun2_outbyte(valor:byte;puerto:word);
+procedure ldrun2_outbyte(puerto:word;valor:byte);
 const
   banks:array[1..30] of byte=(
 		0,0,0,0,0,1,0,1,0,0,

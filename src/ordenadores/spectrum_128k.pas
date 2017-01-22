@@ -21,7 +21,7 @@ procedure spectrum128_main;
 function spec128_getbyte(direccion:word):byte;
 procedure spec128_putbyte(direccion:word;valor:byte);
 function spec128_inbyte(puerto:word):byte;
-procedure spec128_outbyte(valor:byte;puerto:word);
+procedure spec128_outbyte(puerto:word;valor:byte);
 function iniciar_128k:boolean;
 procedure spec128k_reset;
 procedure spec128_retraso_memoria(direccion:word);
@@ -317,8 +317,12 @@ function spec128_inbyte(puerto:word):byte;
 var
   temp:byte;
 begin
-if (((puerto and $20)=$0) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then begin
-  spec128_inbyte:=var_spectrum.kempston;
+if (((puerto and $1f)=$1f) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then begin
+  spec128_inbyte:=var_spectrum.joy_val;
+  exit;
+end;
+if (((puerto and $7f)=$7f) and (var_spectrum.tipo_joy=JFULLER)) then begin
+  spec128_inbyte:=var_spectrum.joy_val;
   exit;
 end;
 if (puerto and 1)=0 then begin
@@ -367,7 +371,7 @@ if var_spectrum.ft_bus[linea*228+spec_z80.contador]=$ffff then spec128_inbyte:=$
   else spec128_inbyte:=memoria_128k[var_spectrum.pantalla_128k,var_spectrum.ft_bus[linea*228+spec_z80.contador]];
 end;
 
-procedure spec128_outbyte(valor:byte;puerto:word);
+procedure spec128_outbyte(puerto:word;valor:byte);
 var
   old_pant:byte;
   color:tcolor;

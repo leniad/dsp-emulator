@@ -303,8 +303,8 @@ object ConfigSP: TConfigSP
         Caption = 'Joystick'
         TabOrder = 0
         object RadioButton3: TRadioButton
-          Left = 13
-          Top = 20
+          Left = 5
+          Top = 14
           Width = 79
           Height = 17
           Caption = 'Kempston'
@@ -312,30 +312,39 @@ object ConfigSP: TConfigSP
           OnKeyUp = FormKeyUp
         end
         object RadioButton4: TRadioButton
-          Left = 13
-          Top = 39
-          Width = 68
+          Left = 5
+          Top = 32
+          Width = 88
           Height = 17
-          Caption = 'Cursor'
+          Caption = 'Cursor/Protek'
           TabOrder = 1
           OnKeyUp = FormKeyUp
         end
         object RadioButton5: TRadioButton
-          Left = 13
-          Top = 59
-          Width = 70
+          Left = 5
+          Top = 50
+          Width = 89
           Height = 17
-          Caption = 'Sinclair 1'
+          Caption = 'Sinclair 1/IF 2'
           TabOrder = 2
           OnKeyUp = FormKeyUp
         end
         object RadioButton6: TRadioButton
-          Left = 13
-          Top = 79
-          Width = 73
+          Left = 5
+          Top = 68
+          Width = 89
           Height = 17
-          Caption = 'Sinclair 2'
+          Caption = 'Sinclair 2/IF 2'
           TabOrder = 3
+          OnKeyUp = FormKeyUp
+        end
+        object RadioButton25: TRadioButton
+          Left = 5
+          Top = 86
+          Width = 89
+          Height = 17
+          Caption = 'Fuller'
+          TabOrder = 4
           OnKeyUp = FormKeyUp
         end
       end

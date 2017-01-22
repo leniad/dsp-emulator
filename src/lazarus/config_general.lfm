@@ -1,13 +1,13 @@
 object MConfig: TMConfig
-  Left = 956
+  Left = 379
   Height = 476
-  Top = 169
-  Width = 418
+  Top = 159
+  Width = 502
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Configurar DSP'
   ClientHeight = 476
-  ClientWidth = 418
+  ClientWidth = 502
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
   Font.Height = -11
@@ -17,9 +17,9 @@ object MConfig: TMConfig
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.6.0.4'
+  LCLVersion = '1.6.2.0'
   object Button1: TButton
-    Left = 53
+    Left = 96
     Height = 41
     Top = 408
     Width = 113
@@ -28,7 +28,7 @@ object MConfig: TMConfig
     TabOrder = 0
   end
   object Button2: TButton
-    Left = 232
+    Left = 296
     Height = 41
     Top = 408
     Width = 113
@@ -37,17 +37,17 @@ object MConfig: TMConfig
     TabOrder = 1
   end
   object other: TPageControl
-    Left = 8
+    Left = 9
     Height = 393
     Top = 8
-    Width = 399
+    Width = 480
     ActivePage = TabSheet1
     TabIndex = 0
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Misc'
       ClientHeight = 367
-      ClientWidth = 391
+      ClientWidth = 472
       object RadioGroup1: TRadioGroup
         Left = 6
         Height = 160
@@ -487,16 +487,16 @@ object MConfig: TMConfig
     object TabSheet3: TTabSheet
       Caption = 'Input'
       ClientHeight = 367
-      ClientWidth = 391
+      ClientWidth = 472
       ImageIndex = 2
       object GroupBox1: TGroupBox
         Left = 3
         Height = 352
         Top = 8
-        Width = 187
+        Width = 221
         Caption = 'Player 1'
         ClientHeight = 334
-        ClientWidth = 183
+        ClientWidth = 217
         TabOrder = 0
         object Label6: TLabel
           Left = 0
@@ -523,7 +523,7 @@ object MConfig: TMConfig
           ParentColor = False
         end
         object Label15: TLabel
-          Left = 88
+          Left = 98
           Height = 13
           Top = 251
           Width = 25
@@ -531,7 +531,7 @@ object MConfig: TMConfig
           ParentColor = False
         end
         object Label16: TLabel
-          Left = 89
+          Left = 99
           Height = 13
           Top = 275
           Width = 25
@@ -539,7 +539,7 @@ object MConfig: TMConfig
           ParentColor = False
         end
         object Label17: TLabel
-          Left = 89
+          Left = 99
           Height = 13
           Top = 298
           Width = 25
@@ -567,7 +567,7 @@ object MConfig: TMConfig
           TabOrder = 1
         end
         object BitBtn2: TBitBtn
-          Left = 122
+          Left = 145
           Height = 33
           Top = 160
           Width = 41
@@ -579,7 +579,7 @@ object MConfig: TMConfig
           TabOrder = 2
         end
         object BitBtn3: TBitBtn
-          Left = 67
+          Left = 90
           Height = 33
           Top = 193
           Width = 41
@@ -591,7 +591,7 @@ object MConfig: TMConfig
           TabOrder = 3
         end
         object BitBtn1: TBitBtn
-          Left = 8
+          Left = 31
           Height = 33
           Top = 160
           Width = 41
@@ -603,7 +603,7 @@ object MConfig: TMConfig
           TabOrder = 4
         end
         object BitBtn4: TBitBtn
-          Left = 67
+          Left = 90
           Height = 33
           Top = 128
           Width = 41
@@ -666,7 +666,7 @@ object MConfig: TMConfig
           Text = 'ComboBox5'
         end
         object BitBtn15: TBitBtn
-          Left = 124
+          Left = 133
           Height = 27
           Top = 267
           Width = 52
@@ -674,7 +674,7 @@ object MConfig: TMConfig
           TabOrder = 12
         end
         object BitBtn16: TBitBtn
-          Left = 124
+          Left = 133
           Height = 28
           Top = 292
           Width = 52
@@ -682,15 +682,15 @@ object MConfig: TMConfig
           TabOrder = 13
         end
         object BitBtn17: TBitBtn
-          Left = 123
+          Left = 133
           Height = 27
           Top = 242
-          Width = 53
+          Width = 54
           OnClick = BitBtn17Click
           TabOrder = 14
         end
         object ComboBox9: TComboBox
-          Left = 119
+          Left = 135
           Height = 21
           Top = 244
           Width = 58
@@ -699,7 +699,7 @@ object MConfig: TMConfig
           Text = 'ComboBox3'
         end
         object ComboBox10: TComboBox
-          Left = 119
+          Left = 135
           Height = 21
           Top = 269
           Width = 58
@@ -708,7 +708,7 @@ object MConfig: TMConfig
           Text = 'ComboBox4'
         end
         object ComboBox11: TComboBox
-          Left = 118
+          Left = 134
           Height = 21
           Top = 295
           Width = 58
@@ -767,58 +767,58 @@ object MConfig: TMConfig
         end
       end
       object GroupBox2: TGroupBox
-        Left = 195
+        Left = 232
         Height = 352
         Top = 8
-        Width = 192
+        Width = 224
         Caption = 'Player 2'
         ClientHeight = 334
-        ClientWidth = 188
+        ClientWidth = 220
         TabOrder = 1
         object Label9: TLabel
-          Left = 7
+          Left = 11
           Height = 13
-          Top = 218
+          Top = 251
           Width = 25
           Caption = 'But 0'
           ParentColor = False
         end
         object Label10: TLabel
-          Left = 7
+          Left = 11
           Height = 13
-          Top = 242
+          Top = 275
           Width = 25
           Caption = 'But 1'
           ParentColor = False
         end
         object Label11: TLabel
-          Left = 7
+          Left = 11
           Height = 13
-          Top = 265
+          Top = 298
           Width = 25
           Caption = 'But 2'
           ParentColor = False
         end
         object Label18: TLabel
-          Left = 95
+          Left = 113
           Height = 13
-          Top = 218
+          Top = 250
           Width = 25
           Caption = 'But 3'
           ParentColor = False
         end
         object Label19: TLabel
-          Left = 95
+          Left = 113
           Height = 13
-          Top = 242
+          Top = 274
           Width = 25
           Caption = 'But 4'
           ParentColor = False
         end
         object Label20: TLabel
-          Left = 95
+          Left = 113
           Height = 13
-          Top = 265
+          Top = 297
           Width = 25
           Caption = 'But 5'
           ParentColor = False
@@ -855,134 +855,134 @@ object MConfig: TMConfig
           Text = 'ComboBox2'
         end
         object BitBtn5: TBitBtn
-          Left = 70
+          Left = 90
           Height = 33
-          Top = 96
+          Top = 128
           Width = 41
           OnClick = BitBtn5Click
           TabOrder = 3
         end
         object BitBtn6: TBitBtn
-          Left = 16
+          Left = 36
           Height = 33
-          Top = 128
+          Top = 160
           Width = 41
           OnClick = BitBtn6Click
           TabOrder = 4
         end
         object BitBtn7: TBitBtn
-          Left = 126
+          Left = 146
           Height = 33
-          Top = 128
+          Top = 160
           Width = 41
           OnClick = BitBtn7Click
           TabOrder = 5
         end
         object BitBtn8: TBitBtn
-          Left = 70
+          Left = 90
           Height = 33
-          Top = 161
+          Top = 193
           Width = 41
           OnClick = BitBtn8Click
           TabOrder = 6
         end
         object BitBtn12: TBitBtn
-          Left = 38
+          Left = 42
           Height = 27
-          Top = 209
+          Top = 242
           Width = 52
           OnClick = BitBtn12Click
           TabOrder = 7
         end
         object BitBtn13: TBitBtn
-          Left = 38
+          Left = 42
           Height = 27
-          Top = 234
+          Top = 267
           Width = 52
           OnClick = BitBtn13Click
           TabOrder = 8
         end
         object BitBtn14: TBitBtn
-          Left = 38
+          Left = 42
           Height = 28
-          Top = 259
+          Top = 292
           Width = 52
           OnClick = BitBtn14Click
           TabOrder = 9
         end
         object ComboBox6: TComboBox
-          Left = 38
+          Left = 43
           Height = 21
-          Top = 211
+          Top = 243
           Width = 58
           ItemHeight = 13
           TabOrder = 10
           Text = 'ComboBox6'
         end
         object ComboBox7: TComboBox
-          Left = 38
+          Left = 43
           Height = 21
-          Top = 236
+          Top = 268
           Width = 58
           ItemHeight = 13
           TabOrder = 11
           Text = 'ComboBox7'
         end
         object ComboBox8: TComboBox
-          Left = 38
+          Left = 43
           Height = 21
-          Top = 263
+          Top = 295
           Width = 58
           ItemHeight = 13
           TabOrder = 12
           Text = 'ComboBox8'
         end
         object BitBtn18: TBitBtn
-          Left = 123
+          Left = 144
           Height = 27
-          Top = 209
+          Top = 243
           Width = 52
           OnClick = BitBtn18Click
           TabOrder = 13
         end
         object BitBtn19: TBitBtn
-          Left = 123
+          Left = 144
           Height = 27
-          Top = 234
+          Top = 268
           Width = 52
           OnClick = BitBtn19Click
           TabOrder = 14
         end
         object BitBtn20: TBitBtn
-          Left = 123
+          Left = 144
           Height = 27
-          Top = 259
+          Top = 293
           Width = 52
           OnClick = BitBtn20Click
           TabOrder = 15
         end
         object ComboBox12: TComboBox
-          Left = 123
+          Left = 145
           Height = 21
-          Top = 211
+          Top = 244
           Width = 58
           ItemHeight = 13
           TabOrder = 16
           Text = 'ComboBox6'
         end
         object ComboBox13: TComboBox
-          Left = 123
+          Left = 145
           Height = 21
-          Top = 236
+          Top = 269
           Width = 58
           ItemHeight = 13
           TabOrder = 17
           Text = 'ComboBox6'
         end
         object ComboBox14: TComboBox
-          Left = 123
+          Left = 145
           Height = 21
-          Top = 262
+          Top = 295
           Width = 58
           ItemHeight = 13
           TabOrder = 18
@@ -1075,7 +1075,7 @@ object MConfig: TMConfig
     object TabSheet5: TTabSheet
       Caption = 'ROM'
       ClientHeight = 367
-      ClientWidth = 391
+      ClientWidth = 472
       object Button9: TButton
         Left = 35
         Height = 39
@@ -1084,6 +1084,136 @@ object MConfig: TMConfig
         Caption = 'Export ROM data'
         OnClick = Button9Click
         TabOrder = 0
+      end
+    end
+    object TabSheet6: TTabSheet
+      Caption = 'Autofire'
+      ClientHeight = 367
+      ClientWidth = 472
+      object CheckBox16: TCheckBox
+        Left = 36
+        Height = 19
+        Top = 42
+        Width = 102
+        Caption = 'Enabled/Disabled'
+        OnClick = CheckBox16Click
+        TabOrder = 0
+      end
+      object GroupBox9: TGroupBox
+        Left = 256
+        Height = 209
+        Top = 79
+        Width = 185
+        Caption = 'Player 2'
+        ClientHeight = 191
+        ClientWidth = 181
+        TabOrder = 1
+        object CheckBox10: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 34
+          Width = 61
+          Caption = 'Button 0'
+          TabOrder = 0
+        end
+        object CheckBox11: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 56
+          Width = 61
+          Caption = 'Button 1'
+          TabOrder = 1
+        end
+        object CheckBox12: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 80
+          Width = 61
+          Caption = 'Button 2'
+          TabOrder = 2
+        end
+        object CheckBox13: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 101
+          Width = 61
+          Caption = 'Button 3'
+          TabOrder = 3
+        end
+        object CheckBox14: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 123
+          Width = 61
+          Caption = 'Button 4'
+          TabOrder = 4
+        end
+        object CheckBox15: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 145
+          Width = 61
+          Caption = 'Button 5'
+          TabOrder = 5
+        end
+      end
+      object GroupBox8: TGroupBox
+        Left = 32
+        Height = 209
+        Top = 79
+        Width = 185
+        Caption = 'Player 1'
+        ClientHeight = 191
+        ClientWidth = 181
+        TabOrder = 2
+        object CheckBox5: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 34
+          Width = 61
+          Caption = 'Button 0'
+          TabOrder = 0
+        end
+        object CheckBox6: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 56
+          Width = 61
+          Caption = 'Button 1'
+          TabOrder = 1
+        end
+        object CheckBox7: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 80
+          Width = 61
+          Caption = 'Button 2'
+          TabOrder = 2
+        end
+        object CheckBox8: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 101
+          Width = 61
+          Caption = 'Button 3'
+          TabOrder = 3
+        end
+        object CheckBox9: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 123
+          Width = 61
+          Caption = 'Button 4'
+          TabOrder = 4
+        end
+        object CheckBox17: TCheckBox
+          Left = 28
+          Height = 19
+          Top = 145
+          Width = 61
+          Caption = 'Button 5'
+          TabOrder = 5
+        end
       end
     end
   end

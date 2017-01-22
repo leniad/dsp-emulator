@@ -200,7 +200,7 @@ begin
 if (puerto and $ff)<3 then megazone_sound_inbyte:=ay8910_0.Read;
 end;
 
-procedure megazone_sound_outbyte(valor:byte;puerto:word);
+procedure megazone_sound_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $00:ay8910_0.Control(valor);
@@ -219,7 +219,7 @@ begin
 if puerto<$100 then megazone_sound2_inport:=sound_latch;
 end;
 
-procedure megazone_sound2_outport(valor:byte;puerto:word);
+procedure megazone_sound2_outport(puerto:word;valor:byte);
 begin
 case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);

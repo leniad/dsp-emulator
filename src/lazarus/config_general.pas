@@ -6,7 +6,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ComCtrls, ExtCtrls, StdCtrls, Buttons, EditBtn, lib_sdl2, controls_engine,
-  main_engine, lenguaje, sound_engine,rom_export;
+  main_engine, lenguaje, sound_engine,rom_export,timer_engine;
 
 type
 
@@ -43,9 +43,22 @@ type
     Button8: TButton;
     Button9: TButton;
     CheckBox1: TCheckBox;
+    CheckBox10: TCheckBox;
+    CheckBox11: TCheckBox;
+    CheckBox12: TCheckBox;
+    CheckBox13: TCheckBox;
+    CheckBox14: TCheckBox;
+    CheckBox15: TCheckBox;
+    CheckBox16: TCheckBox;
+    CheckBox17: TCheckBox;
     CheckBox2: TCheckBox;
     CheckBox3: TCheckBox;
     CheckBox4: TCheckBox;
+    CheckBox5: TCheckBox;
+    CheckBox6: TCheckBox;
+    CheckBox7: TCheckBox;
+    CheckBox8: TCheckBox;
+    CheckBox9: TCheckBox;
     ComboBox1: TComboBox;
     ComboBox10: TComboBox;
     ComboBox11: TComboBox;
@@ -70,6 +83,8 @@ type
     GroupBox2: TGroupBox;
     GroupBox6: TGroupBox;
     GroupBox7: TGroupBox;
+    GroupBox8: TGroupBox;
+    GroupBox9: TGroupBox;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
@@ -123,6 +138,7 @@ type
     TabSheet3: TTabSheet;
     TabSheet4: TTabSheet;
     TabSheet5: TTabSheet;
+    TabSheet6: TTabSheet;
     procedure BitBtn10Click(Sender: TObject);
     procedure BitBtn11Click(Sender: TObject);
     procedure BitBtn12Click(Sender: TObject);
@@ -152,6 +168,7 @@ type
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure Button9Click(Sender: TObject);
+    procedure CheckBox16Click(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
@@ -485,6 +502,23 @@ begin
   arcade_input.jbut3[1]:=combobox12.ItemIndex;
   arcade_input.jbut4[1]:=combobox13.ItemIndex;
   arcade_input.jbut5[1]:=combobox14.ItemIndex;
+  autofire_general:=checkbox16.Checked;
+  if autofire_general then begin
+    autofire_enabled[0]:=checkbox4.Checked;
+    autofire_enabled[1]:=checkbox5.Checked;
+    autofire_enabled[2]:=checkbox6.Checked;
+    autofire_enabled[3]:=checkbox7.Checked;
+    autofire_enabled[4]:=checkbox8.Checked;
+    autofire_enabled[5]:=checkbox9.Checked;
+    autofire_enabled[6]:=checkbox10.Checked;
+    autofire_enabled[7]:=checkbox11.Checked;
+    autofire_enabled[8]:=checkbox12.Checked;
+    autofire_enabled[9]:=checkbox13.Checked;
+    autofire_enabled[10]:=checkbox14.Checked;
+    autofire_enabled[11]:=checkbox15.Checked;
+    init_autofire;
+  end else for tmp_var:=0 to 11 do autofire_enabled[tmp_var]:=false;
+  for tmp_var:=0 to 11 do autofire_status[tmp_var]:=false;
   close;
 end;
 
@@ -544,6 +578,21 @@ end;
 procedure TMConfig.Button9Click(Sender: TObject);
 begin
 export_roms;
+end;
+
+procedure TMConfig.CheckBox16Click(Sender: TObject);
+begin
+if checkbox16.Checked then begin
+   groupbox8.Enabled:=true;
+   groupbox9.Enabled:=true;
+   autofire_general:=true;
+   init_autofire;
+end else begin
+   groupbox8.Enabled:=false;
+   groupbox9.Enabled:=false;
+   autofire_general:=false;
+   close_autofire;
+end;
 end;
 
 procedure TMConfig.ComboBox1Change(Sender: TObject);
@@ -831,6 +880,20 @@ begin
     combobox13.ItemIndex:=arcade_input.jbut4[1];
     combobox14.ItemIndex:=arcade_input.jbut5[1];
   end;
+  checkbox4.Checked:=autofire_enabled[0];
+  checkbox5.Checked:=autofire_enabled[1];
+  checkbox6.Checked:=autofire_enabled[2];
+  checkbox7.Checked:=autofire_enabled[3];
+  checkbox8.Checked:=autofire_enabled[4];
+  checkbox9.Checked:=autofire_enabled[5];
+  checkbox10.Checked:=autofire_enabled[6];
+  checkbox11.Checked:=autofire_enabled[7];
+  checkbox12.Checked:=autofire_enabled[8];
+  checkbox13.Checked:=autofire_enabled[9];
+  checkbox14.Checked:=autofire_enabled[10];
+  checkbox15.Checked:=autofire_enabled[11];
+  checkbox16.Checked:=autofire_general;
+  CheckBox16Click(self);
   //Player 1
   bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);
   bitbtn2.Caption:=nombre_tecla(arcade_input.nright[0]);

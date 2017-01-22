@@ -27,7 +27,7 @@ procedure spectrum3_main;
 function spec3_getbyte(direccion:word):byte;
 procedure spec3_putbyte(direccion:word;valor:byte);
 function spec3_inbyte(puerto:word):byte;
-procedure spec3_outbyte(valor:byte;puerto:word);
+procedure spec3_outbyte(puerto:word;valor:byte);
 procedure spec3_retraso_memoria(direccion:word);
 procedure spec3_retraso_puerto(puerto:word);
 
@@ -186,8 +186,12 @@ function spec3_inbyte(puerto:word):byte;
 var
         temp:byte;
 begin
-if (((puerto and $20)=$0) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then begin
-  spec3_inbyte:=var_spectrum.kempston;
+if (((puerto and $1f)=$1f) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then begin
+  spec3_inbyte:=var_spectrum.joy_val;
+  exit;
+end;
+if (((puerto and $7f)=$7f) and (var_spectrum.tipo_joy=JFULLER)) then begin
+  spec3_inbyte:=var_spectrum.joy_val;
   exit;
 end;
 if (puerto and 1)=0 then begin
@@ -256,7 +260,7 @@ if not(paginacion_especial) then begin //Paginacion normal
 end else copymemory(@var_spectrum.marco[0],@ram_bank[(old_1ffd shr 1) and $3,0],4);
 end;
 
-procedure spec3_outbyte(valor:byte;puerto:word);
+procedure spec3_outbyte(puerto:word;valor:byte);
 var
         old_pant:byte;
         color:tcolor;

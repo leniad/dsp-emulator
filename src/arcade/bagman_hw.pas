@@ -150,7 +150,7 @@ begin
 if (puerto and $ff)=$c then bagman_inbyte:=ay8910_0.Read;
 end;
 
-procedure bagman_outbyte(valor:byte;puerto:word);
+procedure bagman_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $08:AY8910_0.Control(valor);

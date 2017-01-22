@@ -3,7 +3,7 @@ unit starforce_hw; //Senjyo
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,z80pio,z80daisy,main_engine,controls_engine,gfx_engine,sn_76496,
-     z80ctc,rom_engine,pal_engine,sound_engine;
+     z80ctc,rom_engine,pal_engine,sound_engine,timer_engine;
 
 procedure cargar_starforce;
 
@@ -299,7 +299,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure snd_outbyte(valor:byte;puerto:word);
+procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0..$3:z80pio_ba_cd_w(0,puerto and $3,valor);

@@ -121,8 +121,6 @@ var
         llamadas_maquina:tllamadas_globales;
         main_vars:TMain_vars;
         Directory:TDirectory;
-        //CPU
-        cpu_quantity:byte;
         {$ifndef fpc}
         cont_sincroniza,cont_micro:int64;
         valor_sync:single;
@@ -135,7 +133,7 @@ var
         memoria,mem_snd,mem_misc:array[0..$ffff] of byte;
 
 implementation
-uses principal,controls_engine;
+uses principal,controls_engine,cpu_misc;
 
 procedure cambiar_video;
 //Si el sistema usa la pantalla SDL arreglos visuales
@@ -613,7 +611,7 @@ fillchar(paleta[0],max_colores*2,0);
 fillchar(memoria[0],$10000,0);
 fillchar(mem_snd[0],$10000,0);
 fillchar(buffer_paleta[0],max_colores*2,1);
-cpu_quantity:=0;
+cpu_main_reset;
 llamadas_maquina.cartuchos:=nil;
 llamadas_maquina.cintas:=nil;
 llamadas_maquina.grabar_snapshot:=nil;

@@ -5,7 +5,7 @@ interface
 uses
   lib_sdl2,Messages,SysUtils,Variants,Classes,Graphics,Controls,Forms,Dialogs,
   StdCtrls,ExtCtrls,lenguaje,main_engine,ComCtrls,Buttons,controls_engine,
-  sound_engine,SHLOBJ,rom_export;
+  sound_engine,SHLOBJ,rom_export,timer_engine;
 
 type
   TMConfig = class(TForm)
@@ -128,6 +128,22 @@ type
     Label12: TLabel;
     D6: TEdit;
     SpeedButton8: TSpeedButton;
+    Autofire: TTabSheet;
+    GroupBox8: TGroupBox;
+    CheckBox4: TCheckBox;
+    CheckBox5: TCheckBox;
+    CheckBox6: TCheckBox;
+    CheckBox7: TCheckBox;
+    CheckBox8: TCheckBox;
+    CheckBox9: TCheckBox;
+    GroupBox9: TGroupBox;
+    CheckBox10: TCheckBox;
+    CheckBox11: TCheckBox;
+    CheckBox12: TCheckBox;
+    CheckBox13: TCheckBox;
+    CheckBox14: TCheckBox;
+    CheckBox15: TCheckBox;
+    CheckBox16: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -172,6 +188,7 @@ type
     procedure SpeedButton2Click(Sender: TObject);
     procedure SpeedButton6Click(Sender: TObject);
     procedure SpeedButton8Click(Sender: TObject);
+    procedure CheckBox16Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -650,6 +667,20 @@ begin
     combobox13.ItemIndex:=arcade_input.jbut4[1];
     combobox14.ItemIndex:=arcade_input.jbut5[1];
   end;
+  checkbox4.Checked:=autofire_enabled[0];
+  checkbox5.Checked:=autofire_enabled[1];
+  checkbox6.Checked:=autofire_enabled[2];
+  checkbox7.Checked:=autofire_enabled[3];
+  checkbox8.Checked:=autofire_enabled[4];
+  checkbox9.Checked:=autofire_enabled[5];
+  checkbox10.Checked:=autofire_enabled[6];
+  checkbox11.Checked:=autofire_enabled[7];
+  checkbox12.Checked:=autofire_enabled[8];
+  checkbox13.Checked:=autofire_enabled[9];
+  checkbox14.Checked:=autofire_enabled[10];
+  checkbox15.Checked:=autofire_enabled[11];
+  checkbox16.Checked:=autofire_general;
+  CheckBox16Click(self);
   //Player 1
   bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);
   bitbtn2.Caption:=nombre_tecla(arcade_input.nright[0]);
@@ -1025,7 +1056,39 @@ begin
   arcade_input.jbut3[1]:=combobox12.ItemIndex;
   arcade_input.jbut4[1]:=combobox13.ItemIndex;
   arcade_input.jbut5[1]:=combobox14.ItemIndex;
+  autofire_general:=checkbox16.Checked;
+  if autofire_general then begin
+    autofire_enabled[0]:=checkbox4.Checked;
+    autofire_enabled[1]:=checkbox5.Checked;
+    autofire_enabled[2]:=checkbox6.Checked;
+    autofire_enabled[3]:=checkbox7.Checked;
+    autofire_enabled[4]:=checkbox8.Checked;
+    autofire_enabled[5]:=checkbox9.Checked;
+    autofire_enabled[6]:=checkbox10.Checked;
+    autofire_enabled[7]:=checkbox11.Checked;
+    autofire_enabled[8]:=checkbox12.Checked;
+    autofire_enabled[9]:=checkbox13.Checked;
+    autofire_enabled[10]:=checkbox14.Checked;
+    autofire_enabled[11]:=checkbox15.Checked;
+    init_autofire;
+  end else for tmp_var:=0 to 11 do autofire_enabled[tmp_var]:=false;
+  for tmp_var:=0 to 11 do autofire_status[tmp_var]:=false;
   close;
+end;
+
+procedure TMConfig.CheckBox16Click(Sender: TObject);
+begin
+if checkbox16.Checked then begin
+  groupbox8.Enabled:=true;
+  groupbox9.Enabled:=true;
+  autofire_general:=true;
+  init_autofire;
+end else begin
+  groupbox8.Enabled:=false;
+  groupbox9.Enabled:=false;
+  autofire_general:=false;
+  close_autofire;
+end;
 end;
 
 procedure TMConfig.BitBtn21Click(Sender: TObject);

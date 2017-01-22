@@ -36,7 +36,7 @@ var
   tape_window1: Ttape_window1;
 
 implementation
-uses principal,tap_tzx,main_engine;
+uses principal,tap_tzx,main_engine,amstrad_cpc;
 
 {$R *.dfm}
 
@@ -82,6 +82,7 @@ cinta_tzx.play_tape:=true;
 cinta_tzx.estados:=0;
 BitBtn1.Enabled:=false;
 BitBtn2.Enabled:=true;
+if ((main_vars.tipo_maquina=7) or (main_vars.tipo_maquina=8) or (main_vars.tipo_maquina=9)) then cpc_ppi.tape_motor:=true;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 
@@ -92,6 +93,7 @@ cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
 main_screen.rapido:=false;
+if ((main_vars.tipo_maquina=7) or (main_vars.tipo_maquina=8) or (main_vars.tipo_maquina=9)) then cpc_ppi.tape_motor:=false;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
 

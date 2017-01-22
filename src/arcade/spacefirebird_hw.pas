@@ -279,7 +279,7 @@ case (puerto and $7) of
 end;
 end;
 
-procedure spacefb_outbyte(valor:byte;puerto:word);
+procedure spacefb_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $7) of
   0,4:begin
@@ -322,7 +322,7 @@ case puerto of
 end;
 end;
 
-procedure spacefb_snd_outport(valor:byte;puerto:word);
+procedure spacefb_snd_outport(puerto:word;valor:byte);
 begin
   if puerto=MCS48_PORT_P1 then dac_0.data8_w(valor);
 end;

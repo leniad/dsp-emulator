@@ -641,7 +641,7 @@ end;
 system16a_snd_inbyte:=res;
 end;
 
-procedure system16a_snd_outbyte(valor:byte;puerto:word);
+procedure system16a_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $00..$3f:case (puerto and 1) of
@@ -696,7 +696,7 @@ begin
 end;}
 end;
 
-procedure system16a_sound_outport(valor:byte;puerto:word);
+procedure system16a_sound_outport(puerto:word;valor:byte);
 begin
 {case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);

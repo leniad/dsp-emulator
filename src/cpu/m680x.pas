@@ -346,7 +346,7 @@ constructor cpu_m6800.create(clock:dword;frames_div:word;tipo_cpu:byte);
 begin
 getmem(self.r,sizeof(reg_m6800));
 fillchar(self.r^,sizeof(reg_m6800),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock div 4);
 self.clock:=clock div 4;
 self.tipo_cpu:=tipo_cpu;
 case tipo_cpu of
@@ -363,7 +363,6 @@ self.in_port1:=nil;
 self.in_port2:=nil;
 self.in_port3:=nil;
 self.in_port4:=nil;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_m6800.free;

@@ -191,7 +191,7 @@ case direccion of
 end;
 end;
 
-procedure arabian_outbyte(valor:byte;puerto:word);
+procedure arabian_outbyte(puerto:word;valor:byte);
 begin
 case puerto of
   $c800..$c9ff:ay8910_0.control(valor);

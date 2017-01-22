@@ -320,7 +320,7 @@ begin
 if (puerto and $ff)=0 then pow_snd_inbyte:=ym3812_0.status;
 end;
 
-procedure pow_snd_outbyte(valor:byte;puerto:word);
+procedure pow_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $00:ym3812_0.control(valor);

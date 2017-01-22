@@ -55,10 +55,9 @@ constructor cpu_hd6309.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(reg_hd6309));
 fillchar(self.r^,sizeof(reg_hd6309),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock div 4);
 self.clock:=clock div 4;
 self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
-cpu_quantity:=cpu_quantity+1;
 self.internal_m6809:=cpu_m6809.create(clock div 4,frames_div);
 end;
 

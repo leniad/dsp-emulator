@@ -182,7 +182,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure pang_outbyte(valor:byte;puerto:word);
+procedure pang_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0:begin

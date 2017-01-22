@@ -38,8 +38,8 @@ type
             procedure run(maximo:single);
             procedure nec_interrupt(vect_num:word);
             procedure change_ram_calls(getbyte:tgetbyte16;putbyte:tputbyte16);
-            procedure change_io_calls(inbyte:cpu_inport_full;outbyte:cpu_outport_full);
-            procedure change_io_calls16(inword:cpu_inport_full16;outword:cpu_outport_full16);
+            procedure change_io_calls(inbyte:tgetbyte;outbyte:tputbyte);
+            procedure change_io_calls16(inword:tgetword;outword:tputword);
           private
             getbyte:tgetbyte16;
             putbyte:tputbyte16;
@@ -49,10 +49,10 @@ type
             prefetch_count:integer;
             prefetch_reset,seg_prefix:boolean;
             ea_calculated,no_interrupt,irq_pending:boolean;
-            inbyte:cpu_inport_full;
-            outbyte:cpu_outport_full;
-            inword:cpu_inport_full16;
-            outword:cpu_outport_full16;
+            inbyte:tgetbyte;
+            outbyte:tputbyte;
+            inword:tgetword;
+            outword:tputword;
             //procedure init_nec(tipo:byte);
             function GetEA(ModRM:byte):dword;
             procedure write_word(dir:dword;x:word);
@@ -152,7 +152,7 @@ constructor cpu_nec.create(clock:dword;frames_div:word;tipo:byte);
 begin
 getmem(self.r,sizeof(reg_nec));
 fillchar(self.r^,sizeof(reg_nec),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 case tipo of
@@ -167,7 +167,6 @@ self.inbyte:=nil;
 self.outbyte:=nil;
 self.inword:=nil;
 self.outword:=nil;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_nec.free;
@@ -211,13 +210,13 @@ begin
   self.putbyte:=putbyte;
 end;
 
-procedure cpu_nec.change_io_calls(inbyte:cpu_inport_full;outbyte:cpu_outport_full);
+procedure cpu_nec.change_io_calls(inbyte:tgetbyte;outbyte:tputbyte);
 begin
   self.inbyte:=inbyte;
   self.outbyte:=outbyte;
 end;
 
-procedure cpu_nec.change_io_calls16(inword:cpu_inport_full16;outword:cpu_outport_full16);
+procedure cpu_nec.change_io_calls16(inword:tgetword;outword:tputword);
 begin
   self.inword:=inword;
   self.outword:=outword;
@@ -2287,12 +2286,12 @@ case instruccion of
         end;
     $e6:begin //outal
          tmpb:=fetch;
-         self.outbyte(r.aw.l,tmpb);
+         self.outbyte(tmpb,r.aw.l);
          CLKS(8,8,3);
         end;
     $e7:begin //outax
           tmpb:=fetch;
-          self.outword(r.aw.w,tmpb);
+          self.outword(tmpb,r.aw.w);
           CLKW(12,12,5,12,8,3,tmpb);
         end;
      $e8:begin //i_call_d16

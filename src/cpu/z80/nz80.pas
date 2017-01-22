@@ -58,7 +58,7 @@ type
           procedure reset;
           procedure run(maximo:single);
           procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
-          procedure change_io_calls(in_port:cpu_inport_full;out_port:cpu_outport_full);
+          procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte);
           procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised);
           function get_internal_r:npreg_z80;
           procedure set_internal_r(r:npreg_z80);
@@ -67,8 +67,8 @@ type
         protected
           after_ei:boolean;
           r:npreg_z80;
-          in_port:cpu_inport_full;
-          out_port:cpu_outport_full;
+          in_port:tgetbyte;
+          out_port:tputbyte;
           //pila
           procedure push_sp(reg:word);
           function pop_sp:word;
@@ -565,14 +565,13 @@ constructor cpu_z80.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(nreg_z80));
 fillchar(self.r^,sizeof(nreg_z80),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 self.in_port:=nil;
 self.out_port:=nil;
 self.despues_instruccion:=nil;
 self.raised_z80:=nil;
-cpu_quantity:=cpu_quantity+1;
 copymemory(@z80t[0],@z80t_m[0],$100);
 copymemory(@z80t_cb[0],@z80t_cb_m[0],$100);
 copymemory(@z80t_dd[0],@z80t_dd_m[0],$100);
@@ -673,7 +672,7 @@ begin
   self.im0:=temp^;
 end;
 
-procedure cpu_z80.change_io_calls(in_port:cpu_inport_full;out_port:cpu_outport_full);
+procedure cpu_z80.change_io_calls(in_port:tgetbyte;out_port:tputbyte);
 begin
   self.in_port:=in_port;
   self.out_port:=out_port;
@@ -1307,7 +1306,7 @@ case instruccion of
                 posicion.l:=self.getbyte(r.pc);
                 posicion.h:=r.a;
                 r.pc:=r.pc+1;
-                if @self.out_port<>nil then self.out_port(r.a,posicion.w);
+                if @self.out_port<>nil then self.out_port(posicion.w,r.a);
                 r.wz:=((posicion.l+1) and $ff) or (r.a shl 8);
              end;
         $d4:begin   //call NC,nn
@@ -3175,7 +3174,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $41:if @self.out_port<>nil then self.out_port(r.bc.h,r.bc.w); {out (C),B}
+        $41:if @self.out_port<>nil then self.out_port(r.bc.w,r.bc.h); {out (C),B}
         $42:r.hl.w:=sbc_hl(r.bc.w); //sbc HL,BC
         $43:begin {ld (nn),BC}
                 posicion.h:=self.getbyte(r.pc+1);
@@ -3208,7 +3207,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $49:if @self.out_port<>nil then self.out_port(r.bc.l,r.bc.w); {out (C),C}
+        $49:if @self.out_port<>nil then self.out_port(r.bc.w,r.bc.l); {out (C),C}
         $4a:r.hl.w:=adc_hl(r.bc.w); //adc HL,BC
         $4b:begin  {ld BC,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
@@ -3238,7 +3237,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $51:if @self.out_port<>nil then self.out_port(r.de.h,r.bc.w); {out (C),D}
+        $51:if @self.out_port<>nil then self.out_port(r.bc.w,r.de.h); {out (C),D}
         $52:r.hl.w:=sbc_hl(r.de.w); //sbc HL,DE
         $53:begin {ld (nn),DE}
                 posicion.h:=self.getbyte(r.pc+1);
@@ -3272,7 +3271,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $59:if @self.out_port<>nil then self.out_port(r.de.l,r.bc.w); {out (C),E}
+        $59:if @self.out_port<>nil then self.out_port(r.bc.w,r.de.l); {out (C),E}
         $5a:r.hl.w:=adc_hl(r.de.w); //adc HL,DE
         $5b:begin  {ld DE,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
@@ -3306,7 +3305,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $61:if @self.out_port<>nil then self.out_port(r.hl.h,r.bc.w); {out (C),H}
+        $61:if @self.out_port<>nil then self.out_port(r.bc.w,r.hl.h); {out (C),H}
         $62:r.hl.w:=sbc_hl(r.hl.w); //sbc HL,HL
         $63:begin {ld (nn),HL}
                 posicion.h:=self.getbyte(r.pc+1);
@@ -3345,7 +3344,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
              end;
-        $69:if @self.out_port<>nil then self.out_port(r.hl.l,r.bc.w); {out (C),L}
+        $69:if @self.out_port<>nil then self.out_port(r.bc.w,r.hl.l); {out (C),L}
         $6a:r.hl.w:=adc_hl(r.hl.w); //adc HL,HL
         $6b:begin  {ld HL,(nn)}
                 posicion.h:=self.getbyte(r.pc+1);
@@ -3384,7 +3383,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $71:if @self.out_port<>nil then self.out_port(0,r.bc.w); {out (C),0}
+        $71:if @self.out_port<>nil then self.out_port(r.bc.w,0); {out (C),0}
         $72:r.hl.w:=sbc_hl(r.sp); //sbc HL,SP
         $73:begin {ld (nn),SP}
                 posicion.h:=self.getbyte(r.pc+1);
@@ -3411,7 +3410,7 @@ case instruccion of
                 r.wz:=r.bc.w+1;
             end;
         $79:begin  //out (C),A
-                if @self.out_port<>nil then self.out_port(r.a,r.bc.w);
+                if @self.out_port<>nil then self.out_port(r.bc.w,r.a);
                 r.wz:=r.bc.w+1;
             end;
         $7a:r.hl.w:=adc_hl(r.sp); //adc HL,SP
@@ -3478,7 +3477,7 @@ case instruccion of
                  temp:=self.getbyte(r.hl.w);
                  r.bc.h:=r.bc.h-1;
                  r.wz:=r.bc.w+1;
-                 if @self.out_port<>nil then self.out_port(self.getbyte(r.hl.w),r.bc.w);
+                 if @self.out_port<>nil then self.out_port(r.bc.w,self.getbyte(r.hl.w));
                  r.hl.w:=r.hl.w+1;
                  r.f.n:=(temp and $80)<>0;
                  tempw:=temp+r.hl.l;
@@ -3540,7 +3539,7 @@ case instruccion of
                  temp:=self.getbyte(r.hl.w);
                  r.bc.h:=r.bc.h-1;
                  r.wz:=r.bc.w-1;
-                 if @self.out_port<>nil then self.out_port(self.getbyte(r.hl.w),r.bc.w);
+                 if @self.out_port<>nil then self.out_port(r.bc.w,self.getbyte(r.hl.w));
                  dec(r.hl.w);
                  r.f.n:=(temp and $80)<>0;
                  tempw:=temp+r.hl.l;
@@ -3616,7 +3615,7 @@ case instruccion of
                 temp:=self.getbyte(r.hl.w);
                 r.bc.h:=r.bc.h-1;
                 r.wz:=r.bc.w+1;
-                if @self.out_port<>nil then self.out_port(self.getbyte(r.hl.w),r.bc.w);
+                if @self.out_port<>nil then self.out_port(r.bc.w,self.getbyte(r.hl.w));
                 r.hl.w:=r.hl.w+1;
                 r.f.n:=(temp and $80)<>0;
                 tempw:=temp+r.hl.l;
@@ -3695,7 +3694,7 @@ case instruccion of
                 temp:=self.getbyte(r.hl.w);
                 dec(r.bc.h);
                 r.wz:=r.bc.w-1;
-                if @self.out_port<>nil then self.out_port(temp,r.bc.w);
+                if @self.out_port<>nil then self.out_port(r.bc.w,temp);
                 dec(r.hl.w);
                 r.f.n:=(temp and $80)<>0;
                 tempw:=temp+r.hl.l;

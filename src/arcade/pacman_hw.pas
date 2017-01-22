@@ -164,7 +164,7 @@ case direccion of
 end;
 end;
 
-procedure pacman_outbyte(valor:byte;puerto:word);
+procedure pacman_outbyte(puerto:word;valor:byte);
 begin
 if (puerto and $FF)=0 then z80_0.im2_lo:=valor;
 end;

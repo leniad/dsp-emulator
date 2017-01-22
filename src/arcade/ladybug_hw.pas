@@ -69,7 +69,7 @@ const
         (mask:$30;name:'Initial High Score';number:4;dip:((dip_val:$0;dip_name:'0'),(dip_val:$30;dip_name:'5000'),(dip_val:$20;dip_name:'8000'),(dip_val:$10;dip_name:'10000'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$80;dip_name:'4'),(dip_val:$40;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-procedure update_video_ladybug;
+procedure update_video_ladybug;inline;
 var
   f,h,color,nchar:word;
   x,y,atrib:byte;
@@ -370,8 +370,8 @@ for f:=0 to $1f do begin
   colores[f].b:=combine_2_weights(@bweights[0],bit0,bit1);
 end;
 set_pal(colores,$20);
-for f:=0 to $1f do gfx[0].colores[f]:=((f shl 3) and $18) or ((f shr 2) and $07);
 for f:=0 to $1f do begin
+  gfx[0].colores[f]:=((f shl 3) and $18) or ((f shr 2) and $07);
   gfx[1].colores[f]:=BITSWAP8((memoria_temp[f+$20] shr 0) and $f,7,6,5,4,0,1,2,3);
   gfx[1].colores[f+$20]:=BITSWAP8((memoria_temp[f+$20] shr 4) and $f,7,6,5,4,0,1,2,3);
   gfx[2].colores[f]:=gfx[1].colores[f];

@@ -171,7 +171,7 @@ case direccion of
 end;
 end;
 
-procedure kyugo_outbyte(valor:byte;puerto:word);
+procedure kyugo_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $7) of
     0:nmi_enable:=(valor and 1)<>0;
@@ -206,7 +206,7 @@ begin
   if (puerto and $ff)=2 then snd_kyugo_inbyte:=ay8910_0.read;
 end;
 
-procedure snd_kyugo_outbyte(valor:byte;puerto:word);
+procedure snd_kyugo_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $00:ay8910_0.Control(valor);

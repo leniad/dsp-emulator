@@ -328,7 +328,7 @@ case direccion of
   end;
 end;
 
-procedure rallyx_outbyte(valor:byte;puerto:word);
+procedure rallyx_outbyte(puerto:word;valor:byte);
 begin
 if (puerto and $ff)=0 then begin
   z80_0.im0:=valor;

@@ -157,7 +157,7 @@ begin
   end;
 end;
 
-procedure snowbros_snd_outbyte(valor:byte;puerto:word);
+procedure snowbros_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $2:ym3812_0.control(valor);

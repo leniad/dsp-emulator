@@ -213,7 +213,7 @@ case direccion of
 end;
 end;
 
-procedure snd_outbyte(valor:byte;puerto:word);
+procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $10:ay8910_0.Control(valor);

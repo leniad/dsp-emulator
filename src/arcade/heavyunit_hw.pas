@@ -141,7 +141,7 @@ case direccion of
 end;
 end;
 
-procedure hvyunit_outbyte(valor:byte;puerto:word);
+procedure hvyunit_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0,1:nrom_cpu1:=valor and $7;
@@ -209,7 +209,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure hvyunit_misc_outbyte(valor:byte;puerto:word);
+procedure hvyunit_misc_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0:begin
@@ -256,7 +256,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure snd_outbyte(valor:byte;puerto:word);
+procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
     $0:nrom_cpu3:=valor and $3;

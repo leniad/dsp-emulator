@@ -153,7 +153,7 @@ if (((vdp_0.port_3f and 8)=0) and ((valor and 8)<>0)) then
 vdp_0.port_3f:=valor;
 end;
 
-procedure sms_outbyte(valor:byte;puerto:word);
+procedure sms_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $ff) of
     0..$3f:if (puerto and $01)<>0 then config_io(valor)

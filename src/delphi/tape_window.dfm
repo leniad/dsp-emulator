@@ -455,7 +455,7 @@ object tape_window1: Ttape_window1
     DefaultColWidth = 94
     DefaultRowHeight = 15
     FixedCols = 0
-    RowCount = 3
+    RowCount = 1
     FixedRows = 0
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -476,8 +476,6 @@ object tape_window1: Ttape_window1
       94
       94)
     RowHeights = (
-      15
-      15
       15)
   end
   object Edit1: TEdit

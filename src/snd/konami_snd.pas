@@ -34,12 +34,12 @@ procedure konamisnd_jungler_putbyte(direccion:word;valor:byte);
 function konamisnd_scramble_getbyte(direccion:word):byte;
 procedure konamisnd_scramble_putbyte(direccion:word;valor:byte);
 function konamisnd_scramble_inbyte(puerto:word):byte;
-procedure konamisnd_scramble_outbyte(valor:byte;puerto:word);
+procedure konamisnd_scramble_outbyte(puerto:word;valor:byte);
 //Tipo frogger
 function konamisnd_frogger_getbyte(direccion:word):byte;
 procedure konamisnd_frogger_putbyte(direccion:word;valor:byte);
 function konamisnd_frogger_inbyte(puerto:word):byte;
-procedure konamisnd_frogger_outbyte(valor:byte;puerto:word);
+procedure konamisnd_frogger_outbyte(puerto:word;valor:byte);
 
 var
   konamisnd_0:konamisnd_chip;
@@ -207,7 +207,7 @@ if (puerto and $80)<>0 then res:=res and ay8910_0.Read;
 konamisnd_scramble_inbyte:=res;
 end;
 
-procedure konamisnd_scramble_outbyte(valor:byte;puerto:word);
+procedure konamisnd_scramble_outbyte(puerto:word;valor:byte);
 begin
 if (puerto and $10)<>0 then ay8910_1.Control(valor)
    else if (puerto and $20)<>0 then ay8910_1.Write(valor);
@@ -237,7 +237,7 @@ begin
 if (puerto and $ff)=$40 then konamisnd_frogger_inbyte:=($ff and ay8910_0.Read);
 end;
 
-procedure konamisnd_frogger_outbyte(valor:byte;puerto:word);
+procedure konamisnd_frogger_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
     $40:ay8910_0.Write(valor);

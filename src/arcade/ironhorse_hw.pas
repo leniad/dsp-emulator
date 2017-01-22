@@ -220,7 +220,7 @@ begin
   if (puerto and $ff)=0 then ironhorse_snd_inbyte:=ym2203_0.status;
 end;
 
-procedure ironhorse_snd_outbyte(valor:byte;puerto:word);
+procedure ironhorse_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:ym2203_0.Control(valor);

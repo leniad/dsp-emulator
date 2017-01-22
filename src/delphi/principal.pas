@@ -11,7 +11,7 @@ uses
   jpeg,gifimg,pngimage,
   //misc
   poke_spectrum,main_engine,sound_engine,tape_window,lenguaje,init_games,
-  controls_engine,LoadRom,config_general,
+  controls_engine,LoadRom,config_general,timer_engine,
   //other...
   vars_hide;
 
@@ -531,6 +531,8 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn14.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
 end else begin
+  if autofire_general then init_autofire
+    else close_autofire;
   principal1.timer1.Enabled:=true;
   if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
   QueryPerformanceCounter(cont_sincroniza);

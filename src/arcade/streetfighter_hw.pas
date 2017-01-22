@@ -325,7 +325,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure sf_misc_outbyte(valor:byte;puerto:word);
+procedure sf_misc_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:begin

@@ -1,4 +1,26 @@
 ﻿#DSP Emulator status<br>
+<b>22/01/17 - DSP Emulator 0.17b2 WIP. Updated source and windows 32bits binary</b><br>
+<pre>
+-General
+    +Autofire
+        -General options -> Autofire -> Enable/disable
+        -Independent for each button
+    +CPU: Unified functions in/out with read/write
+    +Tape Engine
+        -Improved handling of 1-byte blocks in TAP tapes
+        -Added control to avoid blocks of 0 length in TAP tapes
+        -Corrected the length of the message block of the TZX tapes
+    +After pressing F4 to record a snapshot, the recording screen no longer shows each time a key is pressed
+    +UPD765: Improved processing a track with 0 sectors (Corrects 'Tomahawk' from Spectrum +3)
+-Spectrum
+    +Added Fuller joystick, and improved descriptions of other types of joystick
+    +Fixed Cursor joystick, only works if selected
+    +Improved Kempston joystick
+-Galaxian HW
+    +Moon Crest:
+        -Improved sound with samples
+        -Fixed a problem with chars/sprites
+</pre><br>
 <b>31/12/16 - DSP Emulator 0.17b2 WIP. Source and windows 32bits updated</b><br>
 After three months entering and leaving the hospital, I have time to update the emulator. I hope I will recover soon and upload more updates<br>
 Merry Christmas and happy new year!<br>

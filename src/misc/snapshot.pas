@@ -139,7 +139,7 @@ if ((long-27)>$c000) then begin
         spec_z80_reg.pc:=sna_regs_128k.pc;
         spec_z80_reg.sp:=sna_regs.sp;
         ay8910_0.reset;
-        spec128_outbyte(sna_regs_128k.reg_7ffd,$7ffd);
+        spec128_outbyte($7ffd,sna_regs_128k.reg_7ffd);
         copymemory(@memoria_128k[var_spectrum.marco[3],0],ptemp,16384);
         for f:=0 to 7 do
            if ((f<>2) and (f<>5) and (f<>var_spectrum.marco[3])) then begin
@@ -527,16 +527,16 @@ while longitud<>long do begin
     getmem(szx_spcr,sizeof(tszx_spcr));
     copymemory(szx_spcr,data,9);
     case szx_header.tipo_maquina of
-      2,3:spec128_outbyte(szx_spcr.reg_7ffd,$7ffd);
-      4,5:spec3_outbyte(szx_spcr.reg_7ffd,$7ffd);
+      2,3:spec128_outbyte($7ffd,szx_spcr.reg_7ffd);
+      4,5:spec3_outbyte($7ffd,szx_spcr.reg_7ffd);
     end;
     case szx_header.tipo_maquina of
-      4,5:spec3_outbyte(szx_spcr.reg_1ffd,$1ffd);
+      4,5:spec3_outbyte($1ffd,szx_spcr.reg_1ffd);
     end;
     case szx_header.tipo_maquina of
-      0,1:spec48_outbyte(szx_spcr.reg_fe,$fe);
+      0,1:spec48_outbyte($fe,szx_spcr.reg_fe);
       2,3:spec128_outbyte(szx_spcr.reg_fe,$fe);
-      4,5:spec3_outbyte(szx_spcr.reg_fe,$fe);
+      4,5:spec3_outbyte($fe,szx_spcr.reg_fe);
     end;
     borde.color:=szx_spcr.borde;
     freemem(szx_spcr);
@@ -838,14 +838,14 @@ if (z80_regs.pc=0) then begin  //version 2 o 3
                     ay8910_0.reset;
                     for f:=0 to $f do ay8910_0.set_reg(f,z80_ext.ay_regs[f]);
                     ay8910_0.control(z80_ext.reg_fffd);
-                    spec128_outbyte(z80_ext.reg_7ffd,$7ffd);
+                    spec128_outbyte($7ffd,z80_ext.reg_7ffd);
                   end;
           2,3:begin
                     ay8910_0.reset;
                     for f:=0 to $f do ay8910_0.set_reg(f,z80_ext.ay_regs[f]);
                     ay8910_0.control(z80_ext.reg_fffd);
-                    spec3_outbyte(z80_ext.reg_7ffd,$7ffd);
-                    if (z80_ext.long=55) then spec3_outbyte(z80_ext.reg_1ffd,$1ffd);
+                    spec3_outbyte($7ffd,z80_ext.reg_7ffd);
+                    if (z80_ext.long=55) then spec3_outbyte($1ffd,z80_ext.reg_1ffd);
                   end;
         end;
         spec_z80_reg.pc:=z80_ext.pc;
@@ -1407,12 +1407,12 @@ for f:=0 to 17 do cpc_crt.regs[f]:=cpc_sna.crt_regs[f];
 cpc_calc_crt;
 cpc_calcular_dir_scr;
 //ROM
-cpc_outbyte(cpc_sna.rom_config,$df00);
+cpc_outbyte($df00,cpc_sna.rom_config);
 //PIA a,b,c,control
 cpc_ppi.port_a_read_latch:=cpc_sna.ppi_a;
 //Port b nada...
 port_c_write(cpc_sna.ppi_c);
-cpc_outbyte(cpc_sna.ppi_control,$f782);
+cpc_outbyte($f782,cpc_sna.ppi_control);
 //PSG control,reg
 for f:=0 to $f do ay8910_0.set_reg(f,cpc_sna.ay_regs[f]);
 ay8910_0.control(cpc_sna.ay_control);

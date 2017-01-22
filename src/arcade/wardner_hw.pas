@@ -243,7 +243,7 @@ begin
 if (puerto and $ff)=0 then wardner_snd_inbyte:=ym3812_0.status;
 end;
 
-procedure wardner_snd_outbyte(valor:byte;puerto:word);
+procedure wardner_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0:ym3812_0.control(valor);
@@ -317,7 +317,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure wardner_outbyte(valor:byte;puerto:word);
+procedure wardner_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $10:txt_scroll_x:=(txt_scroll_x and $ff00) or valor;

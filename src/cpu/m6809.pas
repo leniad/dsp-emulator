@@ -140,10 +140,9 @@ constructor cpu_m6809.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(reg_m6809));
 fillchar(self.r^,sizeof(reg_m6809),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_m6809.free;

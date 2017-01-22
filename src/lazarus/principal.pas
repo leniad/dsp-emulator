@@ -842,6 +842,8 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn14.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
 end else begin
+  if autofire_general then init_autofire
+    else close_autofire;
   principal1.timer1.Enabled:=true;
   sync_all;
   principal1.ejecutar1click(nil);

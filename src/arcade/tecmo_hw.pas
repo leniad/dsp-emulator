@@ -505,7 +505,7 @@ z80_1:=cpu_z80.create(4000000,$100);
 z80_1.init_sound(snd_sound_play);
 //Sound Chip
 msm_5205_0:=MSM5205_chip.create(400000,MSM5205_S48_4B,0.5,snd_adpcm);
-ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
+ym3812_0:=ym3812_chip.create(YM3526_FM,4000000);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 case main_vars.tipo_maquina of

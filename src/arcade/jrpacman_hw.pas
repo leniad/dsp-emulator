@@ -207,7 +207,7 @@ begin
   namco_snd_0.update;
 end;
 
-procedure jrpacman_outbyte(valor:byte;puerto:word);
+procedure jrpacman_outbyte(puerto:word;valor:byte);
 begin
 if (puerto and $FF)=0 then z80_0.im2_lo:=valor;
 end;

@@ -225,7 +225,7 @@ begin
 if puerto<$100 then junofrst_sound2_inport:=sound_latch2;
 end;
 
-procedure junofrst_sound2_outport(valor:byte;puerto:word);
+procedure junofrst_sound2_outport(puerto:word;valor:byte);
 begin
 case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);

@@ -276,7 +276,7 @@ case (puerto and $1f) of
 end;
 end;
 
-procedure system1_outbyte_pio(valor:byte;puerto:word);
+procedure system1_outbyte_pio(puerto:word;valor:byte);
 begin
 case (puerto and $1f) of
   $18..$1b:z80pio_cd_ba_w(0,puerto and $1f,valor);

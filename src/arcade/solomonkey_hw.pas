@@ -190,7 +190,7 @@ if direccion<$4000 then exit;
 mem_snd[direccion]:=valor;
 end;
 
-procedure solomon_snd_outbyte(valor:byte;puerto:word);
+procedure solomon_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $10:ay8910_0.control(valor);

@@ -130,7 +130,7 @@ case (puerto and $7) of
 end;
 end;
 
-procedure spaceinv_outbyte(valor:byte;puerto:word);
+procedure spaceinv_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $7) of
   2:shift_count:=not(valor) and 7;

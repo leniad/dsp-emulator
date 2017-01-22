@@ -238,7 +238,7 @@ begin
   end;
 end;
 
-procedure sf_outbyte(valor:byte;puerto:word);
+procedure sf_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
      0:z80_1.change_irq(ASSERT_LINE);

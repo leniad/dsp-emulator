@@ -193,7 +193,7 @@ end;
 case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
         $10,$11,$14:begin //cargas normal, turbo y datos puros
                    case cinta_tzx.estado_actual of
-                        0:begin   {cabecera}
+                        0:begin   //cabecera
                             cinta_tzx.value:=cinta_tzx.value Xor 64;
                             If tzx_temp<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].ltono_cab  Then begin
                                 tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
@@ -491,7 +491,7 @@ tzx_contador_datos:=0;
         $31:begin
               cadena:='';
               ptemp:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos;
-              for f:=0 to cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque do begin
+              for f:=1 to cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque do begin
                 cadena:=cadena+chr(ptemp^);
                 inc(ptemp);
               end;
@@ -557,8 +557,12 @@ begin
 main_screen.rapido:=true;
 cinta_tzx.es_tap:=true;
 ptemp:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos;
-checksum:=ptemp^;
-inc(ptemp);
+if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque>1 then begin
+  checksum:=ptemp^;
+  inc(ptemp);
+end else begin
+  checksum:=$ff;
+end;
 if checksum=z80_val.a2 then begin
     if z80_val.de.w>cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque then tam_bloque:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque else tam_bloque:=z80_val.de.w;
     for f:=0 to (tam_bloque-1) do begin
@@ -699,6 +703,8 @@ while longitud<long do begin
         cinta_tzx.datos_tzx[indice].lbyte:=8;
         //Recojo los datos
         copymemory(tap_header,datos,20);
+        //Control de errores! Si la longitud es 0 que se salga!!
+        if tap_header.size=0 then break;
         //Avanzo hasta los datos (quito la longitud que no es del Spectrum)
         inc(datos,2);inc(longitud,2);
         cinta_tzx.datos_tzx[indice].lbloque:=tap_header.size;
@@ -710,15 +716,20 @@ while longitud<long do begin
         cinta_tzx.datos_tzx[indice].crc32:=calc_crc(cinta_tzx.datos_tzx[indice].datos,tap_header.size);
         //Avanzo el resto, menos uno, para ir al final y poner el checksum
         inc(datos,tap_header.size-1);inc(longitud,tap_header.size);
-        cinta_tzx.datos_tzx[indice].checksum:=datos^;inc(datos);
-        //Pongo los datos del bloque
-        case tap_header.flag of
-          $00:cadena:=leng[main_vars.idioma].cinta[0]+': '+tap_header.file_name; //cabecera
-          $ff:cadena:=leng[main_vars.idioma].cinta[1]; //bytes
-            else cadena:=leng[main_vars.idioma].cinta[2]; //datos
+        if tap_header.size>1 then begin
+          cinta_tzx.datos_tzx[indice].checksum:=datos^;
+          inc(datos);
+        end else cinta_tzx.datos_tzx[indice].checksum:=$ff;
+        //Pongo los datos del bloque si la longitud del bloque es mayor que 20!
+        if tap_header.size>18 then begin
+          case tap_header.flag of
+            $00:cadena:=leng[main_vars.idioma].cinta[0]+': '+tap_header.file_name; //cabecera
+            $ff:cadena:=leng[main_vars.idioma].cinta[1]; //bytes
+              else cadena:=leng[main_vars.idioma].cinta[2]; //datos
+          end;
         end;
         tape_window1.stringgrid1.Cells[0,indice]:=cadena;
-        tape_window1.stringgrid1.Cells[1,indice]:=inttostr(tap_header.size-2);
+        tape_window1.stringgrid1.Cells[1,indice]:=inttostr(tap_header.size);
         //tape_window1.stringgrid1.Cells[2,temp]:=inttohex(cinta_tzx.datos_tzx[temp].crc32,8);
         indice:=indice+1;
         cinta_tzx.indice_saltos[indice]:=indice;

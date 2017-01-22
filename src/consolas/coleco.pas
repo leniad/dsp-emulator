@@ -144,7 +144,7 @@ begin
   end;
 end;
 
-procedure coleco_outbyte(valor:byte;puerto:word);
+procedure coleco_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $e0) of
     $80,$c0:joymode:=(puerto and $40)<>0;

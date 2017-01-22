@@ -9,10 +9,11 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      ay_8910,ym_3812,ym_2203,m6809,vlm_5030,m6502,pokey,m6805,sega_vdp,deco_104,
      deco_146,tms99xx,lr35902,mcs51,m680x,konami_snd,ppi8255,oki6295,dac,msm5205,
      mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,mcs48,k051316,
-     k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd;
+     k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,timer_engine;
 
 procedure close_all_devices;
 begin
+close_autofire;
 //Z80
 if z80_0<>nil then begin
   z80_0.free;

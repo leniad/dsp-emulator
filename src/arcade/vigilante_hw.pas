@@ -206,7 +206,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure vigilante_outbyte(valor:byte;puerto:word);
+procedure vigilante_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:begin
@@ -245,7 +245,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure snd_outbyte(valor:byte;puerto:word);
+procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   0:ym2151_0.reg(valor);

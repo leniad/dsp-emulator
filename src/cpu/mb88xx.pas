@@ -84,7 +84,7 @@ constructor cpu_mb88xx.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(reg_mb88xx));
 fillchar(self.r^,sizeof(reg_mb88xx),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock div 6);
 self.clock:=clock div 6;
 self.tframes:=(clock/6/frames_div)/llamadas_maquina.fps_max;
 self.port_k:=nil;
@@ -93,7 +93,6 @@ self.port_o:=nil;
 self.port_p_w:=nil;
 self.port_r_r:=nil;
 self.port_r_w:=nil;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_mb88xx.free;

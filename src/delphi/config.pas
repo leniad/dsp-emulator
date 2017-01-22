@@ -57,6 +57,7 @@ type
     GroupBox14: TGroupBox;
     RadioButton23: TRadioButton;
     RadioButton24: TRadioButton;
+    RadioButton25: TRadioButton;
     procedure Button2Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -106,7 +107,8 @@ end;
   if var_spectrum.tipo_joy=JKEMPSTON then radiobutton3.checked:=true
     else if var_spectrum.tipo_joy=JCURSOR then radiobutton4.checked:=true
       else if var_spectrum.tipo_joy=JSINCLAIR1 then radiobutton5.checked:=true
-        else if var_spectrum.tipo_joy=JSINCLAIR2 then radiobutton6.checked:=true;
+        else if var_spectrum.tipo_joy=JSINCLAIR2 then radiobutton6.checked:=true
+          else if var_spectrum.tipo_joy=JFULLER then radiobutton25.checked:=true;
   if ulaplus.enabled then radiobutton23.Checked:=true
     else radiobutton24.Checked:=true;
   //emulacion del borde
@@ -168,7 +170,11 @@ with ConfigSP do begin
   if radiobutton3.Checked then var_spectrum.tipo_joy:=JKEMPSTON
     else if radiobutton4.Checked then var_spectrum.tipo_joy:=JCURSOR
       else if radiobutton5.Checked then var_spectrum.tipo_joy:=JSINCLAIR1
-        else if radiobutton6.Checked then var_spectrum.tipo_joy:=JSINCLAIR2;
+        else if radiobutton6.Checked then var_spectrum.tipo_joy:=JSINCLAIR2
+          else if radiobutton25.Checked then begin
+            var_spectrum.tipo_joy:=JFULLER;
+            var_spectrum.joy_val:=$ff;
+          end;
   if radiobutton7.checked then borde.tipo:=0;
   if RadioButton8.Checked then begin
     borde.tipo:=1;

@@ -17,7 +17,7 @@ procedure spectrum48_main;
 function spec48_getbyte(direccion:word):byte;
 procedure spec48_putbyte(direccion:word;valor:byte);
 function spec48_inbyte(puerto:word):byte;
-procedure spec48_outbyte(valor:byte;puerto:word);
+procedure spec48_outbyte(puerto:word;valor:byte);
 procedure spec48_retraso_memoria(direccion:word);
 procedure spec48_retraso_puerto(puerto:word);
 //Video
@@ -293,19 +293,23 @@ function spec48_inbyte(puerto:word):byte;
 var
   temp:byte;
 begin
-if (((puerto and $20)=$0) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then begin
-  spec48_inbyte:=var_spectrum.kempston;
+if (((puerto and $1f)=$1f) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then begin
+  spec48_inbyte:=var_spectrum.joy_val;
+  exit;
+end;
+if (((puerto and $7f)=$7f) and (var_spectrum.tipo_joy=JFULLER)) then begin
+  spec48_inbyte:=var_spectrum.joy_val;
   exit;
 end;
 if (puerto and 1)=0 then begin
   if var_spectrum.sd_1 then temp:=$DF else temp:=$FF;
-  If (puerto And $8000)=0 Then temp:=temp And var_spectrum.keyB_SPC;
-  If (puerto And $4000)=0 Then temp:=temp And var_spectrum.keyH_ENT;
-  If (puerto And $2000)=0 Then temp:=temp And var_spectrum.keyY_P;
-  If (puerto And $1000)=0 Then temp:=temp And var_spectrum.key6_0;
-  If (puerto And $800)=0 Then temp:=temp And var_spectrum.key1_5;
-  If (puerto And $400)=0 Then temp:=temp And var_spectrum.keyQ_T;
-  If (puerto And $200)=0 Then temp:=temp And var_spectrum.keyA_G;
+  If (puerto And $8000)=0 Then temp:=temp and var_spectrum.keyB_SPC;
+  If (puerto And $4000)=0 Then temp:=temp and var_spectrum.keyH_ENT;
+  If (puerto And $2000)=0 Then temp:=temp and var_spectrum.keyY_P;
+  If (puerto And $1000)=0 Then temp:=temp and var_spectrum.key6_0;
+  If (puerto And $800)=0 Then temp:=temp and var_spectrum.key1_5;
+  If (puerto And $400)=0 Then temp:=temp and var_spectrum.keyQ_T;
+  If (puerto And $200)=0 Then temp:=temp and var_spectrum.keyA_G;
   If (puerto And $100)=0 Then temp:=temp and var_spectrum.keyCAPS_V;
   spec48_inbyte:=(temp and $bf) or cinta_tzx.value or var_spectrum.altavoz;
   exit;
@@ -337,7 +341,7 @@ if var_spectrum.ft_bus[linea*224+spec_z80.contador]=$ffff then spec48_inbyte:=$F
   else spec48_inbyte:=memoria[var_spectrum.ft_bus[linea*224+spec_z80.contador]];
 end;
 
-procedure spec48_outbyte(valor:byte;puerto:word);
+procedure spec48_outbyte(puerto:word;valor:byte);
 var
   color:tcolor;
 begin

@@ -57,6 +57,7 @@ const
         JCURSOR=2;
         JSINCLAIR1=3;
         JSINCLAIR2=4;
+        JFULLER=5;
         MNONE=0;
         MGUNSTICK=1;
         MKEMPSTON=2;
@@ -95,11 +96,11 @@ type
     ft_bus:array[0..71000] of word;
     haz_flash:boolean;
     //Keyboard
-    key6_0,keyY_P,key1_5,keyQ_T,keyH_ENT,keyCAPS_V,keyA_G,keyB_SPC,kempston:byte;
+    key6_0,keyY_P,key1_5,keyQ_T,keyH_ENT,keyCAPS_V,keyA_G,keyB_SPC:byte;
     kb_0,kb_1,kb_2,kb_3,kb_4:boolean;
     adr_8,adr_9,adr_10,adr_11,adr_12,adr_13,adr_14,adr_15:boolean;
     key_spec:array [0..255] of boolean;
-    tipo_joy:byte;
+    tipo_joy,joy_val:byte;
     //Audio
     buffer_beeper:array[0..$5FFF] of word;
     posicion_beeper:word;
@@ -149,7 +150,7 @@ begin
 if mouse.gs_activa then begin
     mouse.gs_activa:=false;
     var_spectrum.key6_0:=var_spectrum.key6_0 or 4;
-    var_spectrum.kempston:=(var_spectrum.kempston and $FB);
+    var_spectrum.joy_val:=(var_spectrum.joy_val and $FB);
     mouse.lg_val:=mouse.lg_val and $ef;
 end;
 case main_vars.tipo_maquina of
@@ -160,7 +161,7 @@ end;
 if ((gs_temp=63) or (gs_temp=127)) then begin
   mouse.gs_activa:=true;
   var_spectrum.key6_0:=var_spectrum.key6_0 And $FB;
-  var_spectrum.kempston:=(var_spectrum.kempston or 4);
+  var_spectrum.joy_val:=(var_spectrum.joy_val or 4);
   mouse.lg_val:=mouse.lg_val or $10;
 end;
 end;
@@ -212,11 +213,11 @@ if (event.mouse and (mouse.tipo<>MNONE)) then begin
             else mouse.x:=(raton.x-48) shr 3;
         if raton.button1 then begin
            var_spectrum.key6_0:=(var_spectrum.key6_0 and $fe);
-           var_spectrum.kempston:=(var_spectrum.kempston or $10);
+           var_spectrum.joy_val:=(var_spectrum.joy_val or $10);
            mouse.lg_val:=mouse.lg_val and $df;
         end else begin
           var_spectrum.key6_0:=(var_spectrum.key6_0 or 1);
-          var_spectrum.kempston:=(var_spectrum.kempston and $EF);
+          var_spectrum.joy_val:=(var_spectrum.joy_val and $EF);
           mouse.lg_val:=mouse.lg_val or $20;
         end;
       end;
@@ -322,22 +323,6 @@ if event.keyboard then begin
     var_spectrum.key1_5:=var_spectrum.key1_5 And $F7;
     var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
   end;
-  if var_spectrum.key_spec[KEYBOARD_LEFT] then begin //CAPS+5
-    var_spectrum.key1_5:=var_spectrum.key1_5 And $EF;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
-  end;
-  if var_spectrum.key_spec[KEYBOARD_DOWN] then begin //CAPS+6
-    var_spectrum.key6_0:=var_spectrum.key6_0 And $EF;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
-  end;
-  if var_spectrum.key_spec[KEYBOARD_UP] then begin //CAPS+7
-    var_spectrum.key6_0:=var_spectrum.key6_0 And $F7;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
-  end;
-  if var_spectrum.key_spec[KEYBOARD_RIGHT] then begin //CAPS+8
-    var_spectrum.key6_0:=var_spectrum.key6_0 And $FB;
-    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
-  end;
   if var_spectrum.key_spec[KEYBOARD_FILA0_T0] then begin //CAPS+9 Graphics
     var_spectrum.key6_0:=var_spectrum.key6_0 And $FD;
     var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
@@ -378,18 +363,37 @@ if event.arcade then begin
   end;
   case var_spectrum.tipo_joy of
     JKEMPSTON:begin
-                if arcade_input.up[0] then var_spectrum.kempston:=(var_spectrum.kempston or 8) else var_spectrum.kempston:=(var_spectrum.kempston and $F7);
-                if arcade_input.down[0] then var_spectrum.kempston:=(var_spectrum.kempston or 4) else var_spectrum.kempston:=(var_spectrum.kempston and $FB);
-                if arcade_input.left[0] then var_spectrum.kempston:=(var_spectrum.kempston or 2) else var_spectrum.kempston:=(var_spectrum.kempston and $FD);
-                if arcade_input.right[0] then var_spectrum.kempston:=(var_spectrum.kempston or 1) else var_spectrum.kempston:=(var_spectrum.kempston and $FE);
-                if arcade_input.but0[0] then var_spectrum.kempston:=(var_spectrum.kempston or $10) else var_spectrum.kempston:=(var_spectrum.kempston and $EF);
+                if arcade_input.up[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 8) else var_spectrum.joy_val:=(var_spectrum.joy_val and $F7);
+                if arcade_input.down[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 4) else var_spectrum.joy_val:=(var_spectrum.joy_val and $FB);
+                if arcade_input.left[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 2) else var_spectrum.joy_val:=(var_spectrum.joy_val and $FD);
+                if arcade_input.right[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or 1) else var_spectrum.joy_val:=(var_spectrum.joy_val and $FE);
+                if arcade_input.but0[0] then var_spectrum.joy_val:=(var_spectrum.joy_val or $10) else var_spectrum.joy_val:=(var_spectrum.joy_val and $EF);
+              end;
+    JFULLER:begin
+                if arcade_input.but0[0] then var_spectrum.joy_val:=(var_spectrum.joy_val and $7f) else var_spectrum.joy_val:=(var_spectrum.joy_val or $80);
+                if arcade_input.down[0] then var_spectrum.joy_val:=(var_spectrum.joy_val and $fd) else var_spectrum.joy_val:=(var_spectrum.joy_val or 2);
+                if arcade_input.left[0] then var_spectrum.joy_val:=(var_spectrum.joy_val and $fb) else var_spectrum.joy_val:=(var_spectrum.joy_val or 4);
+                if arcade_input.right[0] then var_spectrum.joy_val:=(var_spectrum.joy_val and $f7) else var_spectrum.joy_val:=(var_spectrum.joy_val or 8);
+                if arcade_input.up[0] then var_spectrum.joy_val:=(var_spectrum.joy_val and $fe) else var_spectrum.joy_val:=(var_spectrum.joy_val or 1);
               end;
     JCURSOR:begin
-                 if arcade_input.left[0] then var_spectrum.key1_5:=(var_spectrum.key1_5 And $EF) else var_spectrum.key1_5:=(var_spectrum.key1_5 or $10);
                  if arcade_input.but0[0] then var_spectrum.key6_0:=(var_spectrum.key6_0 And $FE) else var_spectrum.key6_0:=(var_spectrum.key6_0 or 1);
-                 if arcade_input.right[0] then var_spectrum.key6_0:=(var_spectrum.key6_0 And $FB) else var_spectrum.key6_0:=(var_spectrum.key6_0 or 4);
-                 if arcade_input.up[0] then var_spectrum.key6_0:=(var_spectrum.key6_0 And $F7) else var_spectrum.key6_0:=(var_spectrum.key6_0 or 8);
-                 if arcade_input.down[0] then var_spectrum.key6_0:=(var_spectrum.key6_0 And $EF) else var_spectrum.key6_0:=(var_spectrum.key6_0 or $10);
+                 if arcade_input.left[0] then begin //CAPS+5
+                    var_spectrum.key1_5:=var_spectrum.key1_5 And $EF;
+                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+                 end;
+                 if arcade_input.down[0] then begin //CAPS+6
+                    var_spectrum.key6_0:=var_spectrum.key6_0 And $EF;
+                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+                 end;
+                 if arcade_input.up[0] then begin //CAPS+7
+                    var_spectrum.key6_0:=var_spectrum.key6_0 And $F7;
+                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+                 end;
+                 if arcade_input.right[0] then begin //CAPS+8
+                    var_spectrum.key6_0:=var_spectrum.key6_0 And $FB;
+                    var_spectrum.keyCAPS_V:=var_spectrum.keyCAPS_V and $FE;
+                 end;
             end;
     JSINCLAIR1:begin
                  if arcade_input.but0[0] then var_spectrum.key6_0:=var_spectrum.key6_0 And $FE else var_spectrum.key6_0:=var_spectrum.key6_0 or 1;
@@ -474,7 +478,8 @@ var_spectrum.keyH_ENT:=$ff;
 var_spectrum.keyA_G:=$FF;
 var_spectrum.keyCAPS_V:=$FF;
 var_spectrum.keyB_SPC:=$FF;
-var_spectrum.kempston:=0;
+if var_spectrum.tipo_joy<>JFULLER then var_spectrum.joy_val:=0
+  else var_spectrum.joy_val:=$ff;
 mouse.lg_val:=$20;
 var_spectrum.flash:=0;
 var_spectrum.irq_pos:=0;

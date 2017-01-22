@@ -25,7 +25,7 @@ type
                 i8243:i8243_chip;
                 procedure run(maximo:single);
                 procedure reset;
-                procedure change_io_calls(in_port:cpu_inport_full;out_port:cpu_outport_full);
+                procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte);
                 function get_rom_addr:pbyte;
             private
                 r:preg_mcs48;
@@ -43,8 +43,8 @@ type
                 ram_mask:byte;
                 rom_mask:word;
                 chip_type:byte;
-                in_port:cpu_inport_full;
-                out_port:cpu_outport_full;
+                in_port:tgetbyte;
+                out_port:tputbyte;
                 function test_r(valor:byte):byte;
                 function bus_r:byte;
                 procedure bus_w(valor:byte);
@@ -119,12 +119,11 @@ constructor cpu_mcs48.create(clock:dword;frames_div:word;chip_type:byte);
 begin
 getmem(self.r,sizeof(reg_mcs48));
 fillchar(self.r^,sizeof(reg_mcs48),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock div 15;
 self.tframes:=(clock/15/frames_div)/llamadas_maquina.fps_max;
 self.in_port:=nil;
 self.out_port:=nil;
-cpu_quantity:=cpu_quantity+1;
 self.r.a:=0;
 self.timer:=0;
 self.prescaler:=0;
@@ -162,7 +161,7 @@ if self.chip_type=N7751 then begin
 end;
 end;
 
-procedure cpu_mcs48.change_io_calls(in_port:cpu_inport_full;out_port:cpu_outport_full);
+procedure cpu_mcs48.change_io_calls(in_port:tgetbyte;out_port:tputbyte);
 begin
   self.in_port:=in_port;
   self.out_port:=out_port;
@@ -237,7 +236,7 @@ end;
 
 procedure cpu_mcs48.bus_w(valor:byte);
 begin
-  if addr(self.out_port)<>nil then self.out_port(valor,MCS48_PORT_BUS);
+  if addr(self.out_port)<>nil then self.out_port(MCS48_PORT_BUS,valor);
 end;
 
 function cpu_mcs48.port_r(port_num:byte):byte;
@@ -247,7 +246,7 @@ end;
 
 procedure cpu_mcs48.port_w(port_num,valor:byte);
 begin
-  if addr(self.out_port)<>nil then self.out_port(valor,MCS48_PORT_P0+port_num);
+  if addr(self.out_port)<>nil then self.out_port(MCS48_PORT_P0+port_num,valor);
 end;
 
 procedure cpu_mcs48.expander_operation(operation,port:byte);
@@ -256,14 +255,14 @@ begin
   self.r.p2:=(self.r.p2 and $f0) or (operation shl 2) or (port and 3);
 	self.port_w(2,self.r.p2);
 	// generate high-to-low transition on PROG line */
-  if addr(self.out_port)<>nil then self.out_port(0,MCS48_PORT_PROG);
+  if addr(self.out_port)<>nil then self.out_port(MCS48_PORT_PROG,0);
 	// put data on low 4 bits of P2
 	if (operation<>0) then begin
     self.r.p2:=(self.r.p2 and $f0) or (self.r.a and $f);
     self.port_w(2,self.r.p2);
   end else self.r.a:=self.port_r(2) or $0f;
 	// generate low-to-high transition on PROG line
-	if addr(self.out_port)<>nil then self.out_port(1,MCS48_PORT_PROG);
+	if addr(self.out_port)<>nil then self.out_port(MCS48_PORT_PROG,1);
 end;
 
 procedure cpu_mcs48.update_regptr;

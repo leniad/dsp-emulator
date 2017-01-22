@@ -157,7 +157,7 @@ begin
   if (puerto and $ff)=$ff then freekick_inbyte:=freekick_ff;
 end;
 
-procedure freekick_outbyte(valor:byte;puerto:word);
+procedure freekick_outbyte(puerto:word;valor:byte);
 begin
   if (puerto and $ff)=$ff then freekick_ff:=valor;
 end;

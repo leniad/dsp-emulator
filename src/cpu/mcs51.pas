@@ -114,7 +114,7 @@ constructor cpu_mcs51.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(reg_mcs51));
 fillchar(self.r^,sizeof(reg_mcs51),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock div 12);
 self.clock:=clock div 12;
 self.tframes:=(clock/12/frames_div)/llamadas_maquina.fps_max;
 self.in_port0:=nil;
@@ -125,7 +125,6 @@ self.out_port0:=nil;
 self.out_port1:=nil;
 self.out_port2:=nil;
 self.out_port3:=nil;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_mcs51.free;

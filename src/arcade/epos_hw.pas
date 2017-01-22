@@ -110,7 +110,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure epos_outbyte(valor:byte;puerto:word);
+procedure epos_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
 	$01:palette:=(valor shr 3) and 1;

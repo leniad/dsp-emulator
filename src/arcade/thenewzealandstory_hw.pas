@@ -309,7 +309,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure tnzs_snd_outbyte(valor:byte;puerto:word);
+procedure tnzs_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0:ym2203_0.Control(valor);

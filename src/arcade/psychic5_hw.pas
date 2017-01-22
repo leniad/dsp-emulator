@@ -333,7 +333,7 @@ case direccion of
 end;
 end;
 
-procedure psychic5_outbyte(valor:byte;puerto:word);
+procedure psychic5_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $FF) of
   0:ym2203_0.control(valor);

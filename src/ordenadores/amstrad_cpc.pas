@@ -70,7 +70,7 @@ procedure write_ga(puerto:word;val:byte);
 procedure cpc_calcular_dir_scr;
 procedure cpc_calc_crt;
 //Main CPU
-procedure cpc_outbyte(valor:byte;puerto:word);
+procedure cpc_outbyte(puerto:word;valor:byte);
 //PPI 8255
 procedure port_c_write(valor:byte);
 
@@ -622,7 +622,7 @@ begin
   end;
 end;
 
-procedure cpc_outbyte(valor:byte;puerto:word);
+procedure cpc_outbyte(puerto:word;valor:byte);
 begin
 if (puerto and $c000)=$4000 then write_ga(puerto,valor)
   else if (puerto and $4000)=0 then write_crtc(puerto,valor)

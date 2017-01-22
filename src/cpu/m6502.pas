@@ -105,13 +105,12 @@ constructor cpu_m6502.Create(clock:dword;frames_div:word;cpu_type:byte);
 begin
 getmem(self.r,sizeof(reg_m6502));
 fillchar(self.r^,sizeof(reg_m6502),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tipo_cpu:=cpu_type;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 self.in_port0:=nil;
 self.in_port1:=nil;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_m6502.Free;

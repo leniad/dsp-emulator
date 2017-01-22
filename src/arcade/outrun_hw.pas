@@ -526,7 +526,7 @@ end;
 outrun_snd_inbyte:=res;
 end;
 
-procedure outrun_snd_outbyte(valor:byte;puerto:word);
+procedure outrun_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $00..$3f:case (puerto and 1) of

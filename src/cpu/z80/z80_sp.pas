@@ -18,7 +18,7 @@ type
       function spec_getbyte(posicion:word):byte;
       procedure spec_putbyte(posicion:word;valor:byte);
       function spec_inbyte(posicion:word):byte;
-      procedure spec_outbyte(valor:byte;posicion:word);
+      procedure spec_outbyte(posicion:word;valor:byte);
       //Resto opcodes
       procedure exec_cb_sp;
       procedure exec_dd_fd_sp(tipo:boolean);
@@ -43,9 +43,9 @@ begin
   get_pc:=self.r.pc;
 end;
 
-procedure cpu_z80_sp.spec_outbyte(valor:byte;posicion:word);
+procedure cpu_z80_sp.spec_outbyte(posicion:word;valor:byte);
 begin
-self.out_port(valor,posicion);
+self.out_port(posicion,valor);
 self.retraso_puerto(posicion);
 end;
 
@@ -739,7 +739,7 @@ case instruccion of
                 posicion.l:=spec_getbyte(r.pc);
                 posicion.h:=r.a;
                 r.pc:=r.pc+1;
-                spec_outbyte(r.a,posicion.w);
+                spec_outbyte(posicion.w,r.a);
                 r.wz:=((posicion.l+1) and $ff) or (r.a shl 8);
              end;
         $d4:begin {call NC,nn >10t o 17t<}
@@ -3181,7 +3181,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $41:spec_outbyte(r.bc.h,r.bc.w); {out (C),B >12t<}
+        $41:spec_outbyte(r.bc.w,r.bc.h); {out (C),B >12t<}
         $42:begin  //sbc HL,BC >15t<
               self.contador:=self.contador+7;
               r.hl.w:=sbc_hl(r.bc.w);
@@ -3221,7 +3221,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $49:spec_outbyte(r.bc.l,r.bc.w); {out (C),C >12t<}
+        $49:spec_outbyte(r.bc.w,r.bc.l); {out (C),C >12t<}
         $4a:begin  //adc HL,BC >15t<
               self.contador:=self.contador+7;
               r.hl.w:=adc_hl(r.bc.w);
@@ -3258,7 +3258,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $51:spec_outbyte(r.de.h,r.bc.w); {out (C),D >12t<}
+        $51:spec_outbyte(r.bc.w,r.de.h); {out (C),D >12t<}
         $52:begin //sbc HL,DE >15t<
               self.contador:=self.contador+7;
               r.hl.w:=sbc_hl(r.de.w);
@@ -3295,7 +3295,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $59:spec_outbyte(r.de.l,r.bc.w); {out (C),E >12t<}
+        $59:spec_outbyte(r.bc.w,r.de.l); {out (C),E >12t<}
         $5a:begin //adc HL,DE >15t<
               self.contador:=self.contador+7;
               r.hl.w:=adc_hl(r.de.w);
@@ -3332,7 +3332,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $61:spec_outbyte(r.hl.h,r.bc.w); {out (C),H >12t<}
+        $61:spec_outbyte(r.bc.w,r.hl.h); {out (C),H >12t<}
         $62:begin  //sbc HL,HL >15t<
                 self.contador:=self.contador+7;
                 r.hl.w:=sbc_hl(r.hl.w);
@@ -3377,7 +3377,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
              end;
-        $69:spec_outbyte(r.hl.l,r.bc.w); {out (C),L >12t<}
+        $69:spec_outbyte(r.bc.w,r.hl.l); {out (C),L >12t<}
         $6a:begin  //adc HL,HL >15t<
                 self.contador:=self.contador+7;
                 r.hl.w:=adc_hl(r.hl.w);
@@ -3422,7 +3422,7 @@ case instruccion of
                 r.f.n:=false;
                 r.f.h:=false;
             end;
-        $71:spec_outbyte(0,r.bc.w); {out (C),0 >12t<}
+        $71:spec_outbyte(r.bc.w,0); {out (C),0 >12t<}
         $72:begin  //sbc HL,SP >15t<
               self.contador:=self.contador+7;
               r.hl.w:=sbc_hl(r.sp);
@@ -3451,7 +3451,7 @@ case instruccion of
                 r.wz:=r.bc.w+1;
             end;
         $79:begin {out (C),A >12t<}
-                spec_outbyte(r.a,r.bc.w);
+                spec_outbyte(r.bc.w,r.a);
                 r.wz:=r.bc.w+1;
             end;
         $7a:begin  //adc HL,SP >15t<
@@ -3528,7 +3528,7 @@ case instruccion of
                  temp:=spec_getbyte(r.hl.w);
                  r.bc.h:=r.bc.h-1;
                  r.wz:=r.bc.w+1;
-                 spec_outbyte(temp,r.bc.w);
+                 spec_outbyte(r.bc.w,temp);
                  r.hl.w:=r.hl.w+1;
                  r.f.n:=(temp and $80)<>0;
                  tempw:=temp+r.hl.l;
@@ -3599,7 +3599,7 @@ case instruccion of
                  temp:=spec_getbyte(r.hl.w);
                  r.bc.h:=r.bc.h-1;
                  r.wz:=r.bc.w-1;
-                 spec_outbyte(temp,r.bc.w);
+                 spec_outbyte(r.bc.w,temp);
                  r.hl.w:=r.hl.w-1;
                  r.f.n:=(temp and $80)<>0;
                  tempw:=temp+r.hl.l;
@@ -3695,7 +3695,7 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 r.bc.h:=r.bc.h-1;
                 r.wz:=r.bc.w+1;
-                spec_outbyte(temp,r.bc.w);
+                spec_outbyte(r.bc.w,temp);
                 r.f.n:=(temp and $80)<>0;
                 tempw:=temp+r.hl.l;
                 r.f.h:=(tempw and $100)<>0;
@@ -3799,7 +3799,7 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 r.bc.h:=r.bc.h-1;
                 r.wz:=r.bc.w-1;
-                spec_outbyte(temp,r.bc.w);
+                spec_outbyte(r.bc.w,temp);
                 r.f.n:=(temp and $80)<>0;
                 tempw:=temp+r.hl.l;
                 r.f.h:=(tempw and $100)<>0;

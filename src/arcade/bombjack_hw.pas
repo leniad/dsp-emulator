@@ -42,10 +42,10 @@ var
  numero_fondo,sound_latch:byte;
  fondo_activo,nmi_vblank:boolean;
 
-procedure update_video_bombjack;inline;   //330 - 444 fps
+procedure update_video_bombjack;inline;
 var
-        x,y,atrib:byte;
-        f,nchar,color:word;
+  x,y,atrib:byte;
+  f,nchar,color:word;
 begin
   {distribucion de los tiles
         256bytes-->numero del tile referidos al banco grafico
@@ -178,13 +178,13 @@ begin
 if ((direccion<$8000) or ((direccion>$bfff) and (direccion<$e000))) then exit;
 case direccion of
         $8000..$8fff,$9820..$987f:memoria[direccion]:=valor;
-        $9000..$97ff:begin
+        $9000..$97ff:if memoria[direccion]<>valor then begin
                         gfx[0].buffer[direccion and $3ff]:=true;
                         memoria[direccion]:=valor;
                      end;
         $9c00..$9cff:if buffer_paleta[direccion and $ff]<>valor then begin
-                          buffer_paleta[direccion and $ff]:=valor;
-                          cambiar_color(direccion and $fe);
+                        buffer_paleta[direccion and $ff]:=valor;
+                        cambiar_color(direccion and $fe);
                      end;
         $9e00:begin
                 {byte 9e00 --> 76543210
@@ -192,7 +192,7 @@ case direccion of
                    b--> fondo activo o no
                    aaa--> numero de tile del fondo}
                    fondo_activo:=(valor and $10)<>0;
-                   if (fondo_activo and (numero_fondo<>(valor and 7))) then begin
+                   if numero_fondo<>(valor and 7) then begin
                       numero_fondo:=valor and 7;
                       cambia_fondo(numero_fondo*$200);
                    end;
@@ -222,7 +222,7 @@ case direccion of
 end;
 end;
 
-procedure snd_outbyte(valor:byte;puerto:word);
+procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $00:ay8910_0.Control(valor);
@@ -377,23 +377,23 @@ if not(cargar_roms(@memoria_temp[0],@bombjack_char[0],'bombjack.zip',0)) then ex
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0*8,512*8*8,512*2*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
 //convertir chars16
-if not(cargar_roms(@memoria_temp[0],@bombjack_char16[0],'bombjack.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@bombjack_char16,'bombjack.zip',0)) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,0,1024*8*8,1024*2*8*8);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@bombjack_sprites[0],'bombjack.zip',0)) then exit;
+if not(cargar_roms(@memoria_temp,@bombjack_sprites,'bombjack.zip',0)) then exit;
 init_gfx(2,16,16,128);
 gfx[2].trans[0]:=true;
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //sprites grandes
 init_gfx(3,32,32,32);
 gfx[3].trans[0]:=true;
-gfx_set_desc_data(3,0,128*8,0*8+$1000*8,1024*8*8+$1000*8,2*1024*8*8+$1000*8);
-convert_gfx(3,0,@memoria_temp[0],@pt_x[0],@pt_y[0],true,false);
+gfx_set_desc_data(3,0,128*8,0*8,1024*8*8,2*1024*8*8);
+convert_gfx(3,0,@memoria_temp[$1000],@pt_x,@pt_y,true,false);
 //DIP
 marcade.dswa:=$c0;
 marcade.dswa_val:=@bombjack_dipa;

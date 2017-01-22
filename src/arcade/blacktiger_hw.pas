@@ -241,7 +241,7 @@ case (puerto and $FF) of
 end;
 end;
 
-procedure blktiger_outbyte(valor:byte;puerto:word);
+procedure blktiger_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $FF) of
   0:soundlatch:=valor;

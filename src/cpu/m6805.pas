@@ -87,11 +87,10 @@ constructor cpu_m6805.create(clock:dword;frames_div:word;tipo_cpu:byte);
 begin
 getmem(self.r,sizeof(reg_m6805));
 fillchar(self.r^,sizeof(reg_m6805),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock div 4);
 self.clock:=clock div 4;
 self.tipo_cpu:=tipo_cpu;
 self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_m6805.free;

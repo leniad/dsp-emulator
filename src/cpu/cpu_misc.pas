@@ -16,11 +16,11 @@ type
      cpu_outport_call=procedure (valor:byte);
      cpu_inport_call16=function:word;
      cpu_outport_call16=procedure (valor:word);
-     cpu_inport_full=function(puerto:word):byte;
-     cpu_outport_full=procedure (valor:byte;puerto:word);
-     cpu_inport_full16=function(puerto:word):word;
-     cpu_outport_full16=procedure (valor:word;puerto:word);
      //CPU Master class
+     tcpu_info=record
+       clock:dword;
+       num_cpu:byte;
+     end;
      cpu_class=class
           public
             //Misc
@@ -49,8 +49,17 @@ type
             getbyte:tgetbyte;
             putbyte:tputbyte;
         end;
+const
+  MAX_CPU=6;
+var
+  cpu_info:array[0..MAX_CPU] of tcpu_info;
+
+function cpu_main_init(clock:dword):byte;
+procedure cpu_main_reset;
 
 implementation
+var
+  cpu_quantity:byte;
 
 //IRQ
 procedure cpu_class.change_nmi(estado:byte);
@@ -108,6 +117,19 @@ end;
 procedure cpu_class.init_sound(update_call:exec_type);
 begin
 sound_engine_init(self.numero_cpu,self.clock,update_call);
+end;
+
+function cpu_main_init(clock:dword):byte;
+begin
+  cpu_info[cpu_quantity].clock:=clock;
+  cpu_info[cpu_quantity].num_cpu:=cpu_quantity;
+  cpu_main_init:=cpu_quantity;
+  cpu_quantity:=cpu_quantity+1;
+end;
+
+procedure cpu_main_reset;
+begin
+  cpu_quantity:=0;
 end;
 
 end.

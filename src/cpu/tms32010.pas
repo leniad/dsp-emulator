@@ -76,7 +76,7 @@ constructor cpu_tms32010.create(clock:dword;frames_div:word);
 begin
 getmem(self.r,sizeof(reg_tms32010));
 fillchar(self.r^,sizeof(reg_tms32010),0);
-self.numero_cpu:=cpu_quantity;
+self.numero_cpu:=cpu_main_init(clock div 4);
 self.in_bio:=nil;
 self.in_port[0]:=nil;
 self.in_port[1]:=nil;
@@ -96,7 +96,6 @@ self.out_port[6]:=nil;
 self.out_port[7]:=nil;
 self.clock:=clock div 4;
 self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
-cpu_quantity:=cpu_quantity+1;
 end;
 
 destructor cpu_tms32010.free;

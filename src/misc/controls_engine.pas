@@ -277,29 +277,54 @@ if (arcade_input.right[player]<>(keyboard[arcade_input.nright[player]])) then be
     event.arcade:=true;
 end;
 if (arcade_input.left[player] and arcade_input.right[player]) then arcade_input.right[player]:=false;
-if (arcade_input.but0[player]<>(keyboard[arcade_input.nbut0[player]])) then begin
-  arcade_input.but0[player]:=keyboard[arcade_input.nbut0[player]];
-  event.arcade:=true;
+//Botones
+if autofire_enabled[0+(player*6)] then begin
+  autofire_status[0+(player*6)]:=keyboard[arcade_input.nbut0[player]];
+end else begin
+  if (arcade_input.but0[player]<>(keyboard[arcade_input.nbut0[player]])) then begin
+      arcade_input.but0[player]:=keyboard[arcade_input.nbut0[player]];
+      event.arcade:=true;
+  end;
 end;
-if (arcade_input.but1[player]<>(keyboard[arcade_input.nbut1[player]])) then begin
-  arcade_input.but1[player]:=keyboard[arcade_input.nbut1[player]];
-  event.arcade:=true;
+if autofire_enabled[1+(player*6)] then begin
+  autofire_status[1+(player*6)]:=keyboard[arcade_input.nbut1[player]];
+end else begin
+  if (arcade_input.but1[player]<>(keyboard[arcade_input.nbut1[player]])) then begin
+      arcade_input.but1[player]:=keyboard[arcade_input.nbut1[player]];
+      event.arcade:=true;
+  end;
 end;
-if (arcade_input.but2[player]<>(keyboard[arcade_input.nbut2[player]])) then begin
-  arcade_input.but2[player]:=keyboard[arcade_input.nbut2[player]];
-  event.arcade:=true;
+if autofire_enabled[2+(player*6)] then begin
+  autofire_status[2+(player*6)]:=keyboard[arcade_input.nbut2[player]];
+end else begin
+  if (arcade_input.but2[player]<>(keyboard[arcade_input.nbut2[player]])) then begin
+      arcade_input.but2[player]:=keyboard[arcade_input.nbut2[player]];
+      event.arcade:=true;
+  end;
 end;
-if (arcade_input.but3[player]<>(keyboard[arcade_input.nbut3[player]])) then begin
-  arcade_input.but3[player]:=keyboard[arcade_input.nbut3[player]];
-  event.arcade:=true;
+if autofire_enabled[3+(player*6)] then begin
+  autofire_status[3+(player*6)]:=keyboard[arcade_input.nbut3[player]];
+end else begin
+  if (arcade_input.but3[player]<>(keyboard[arcade_input.nbut3[player]])) then begin
+      arcade_input.but3[player]:=keyboard[arcade_input.nbut3[player]];
+      event.arcade:=true;
+  end;
 end;
-if (arcade_input.but4[player]<>(keyboard[arcade_input.nbut4[player]])) then begin
-  arcade_input.but4[player]:=keyboard[arcade_input.nbut4[player]];
-  event.arcade:=true;
+if autofire_enabled[4+(player*6)] then begin
+  autofire_status[4+(player*6)]:=keyboard[arcade_input.nbut4[player]];
+end else begin
+  if (arcade_input.but4[player]<>(keyboard[arcade_input.nbut4[player]])) then begin
+      arcade_input.but4[player]:=keyboard[arcade_input.nbut4[player]];
+      event.arcade:=true;
+  end;
 end;
-if (arcade_input.but5[player]<>(keyboard[arcade_input.nbut5[player]])) then begin
-  arcade_input.but5[player]:=keyboard[arcade_input.nbut5[player]];
-  event.arcade:=true;
+if autofire_enabled[5+(player*6)] then begin
+  autofire_status[5+(player*6)]:=keyboard[arcade_input.nbut5[player]];
+end else begin
+  if (arcade_input.but5[player]<>(keyboard[arcade_input.nbut5[player]])) then begin
+      arcade_input.but5[player]:=keyboard[arcade_input.nbut5[player]];
+      event.arcade:=true;
+  end;
 end;
 end;
 
@@ -312,13 +337,64 @@ if event.num_joysticks=0 then exit;
 SDL_JoystickUpdate();
 case tevent of
   libSDL_JOYBUTTONDOWN,libSDL_JOYBUTTONUP:begin
-    arcade_input.but0[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut0[player])<>0;
-    arcade_input.but1[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut1[player])<>0;
-    arcade_input.but2[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut2[player])<>0;
-    arcade_input.but3[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut3[player])<>0;
-    arcade_input.but4[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut4[player])<>0;
-    arcade_input.but5[player]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut5[player])<>0;
-    event.arcade:=true;
+      if autofire_enabled[0+(player*6)] then begin
+        autofire_status[0+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut0[player])<>0;
+      end else begin
+        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut0[player])<>0;
+        if arcade_input.but0[player]<>tempb then begin
+          arcade_input.but0[player]:=tempb;
+          event.arcade:=true;
+        end;
+      end;
+      if autofire_enabled[1+(player*6)] then begin
+        autofire_status[1+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut1[player])<>0;
+      end else begin
+        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut1[player])<>0;
+        if arcade_input.but1[player]<>tempb then begin
+          arcade_input.but1[player]:=tempb;
+          event.arcade:=true;
+        end;
+      end;
+      if autofire_enabled[2+(player*6)] then begin
+        autofire_status[2+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut2[player])<>0;
+      end else begin
+        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut2[player])<>0;
+        if arcade_input.but2[player]<>tempb then begin
+          arcade_input.but2[player]:=tempb;
+          event.arcade:=true;
+        end;
+        event.arcade:=true;
+      end;
+      if autofire_enabled[3+(player*6)] then begin
+        autofire_status[3+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut3[player])<>0;
+      end else begin
+        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut3[player])<>0;
+        if arcade_input.but3[player]<>tempb then begin
+          arcade_input.but3[player]:=tempb;
+          event.arcade:=true;
+        end;
+        event.arcade:=true;
+      end;
+      if autofire_enabled[4+(player*6)] then begin
+        autofire_status[4+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut4[player])<>0;
+      end else begin
+        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut4[player])<>0;
+        if arcade_input.but4[player]<>tempb then begin
+          arcade_input.but4[player]:=tempb;
+          event.arcade:=true;
+        end;
+        event.arcade:=true;
+      end;
+      if autofire_enabled[5+(player*6)] then begin
+        autofire_status[5+(player*6)]:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut5[player])<>0;
+      end else begin
+        tempb:=SDL_JoystickGetButton(joystick_def[player],arcade_input.jbut5[player])<>0;
+        if arcade_input.but5[player]<>tempb then begin
+          arcade_input.but5[player]:=tempb;
+          event.arcade:=true;
+        end;
+        event.arcade:=true;
+      end;
   end;
   libSDL_JOYAXISMOTION:begin
     valor:=SDL_JoystickGetAxis(joystick_def[player],0);
@@ -390,6 +466,7 @@ begin
      if keyboard[KEYBOARD_F3] then principal1.Reset1Click(nil);
      if (keyboard[KEYBOARD_F4] and not(main_screen.pantalla_completa)) then begin
         if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
+        keystate[KEYBOARD_F4]:=0; //Cuando tiene que poner a 0 la tecla esta en el menu... Tengo que ponerla a 0 yo o cree que esta todo el rato pulsada!
      end;
      if keyboard[KEYBOARD_F6] then pasar_pantalla_completa;
      if keyboard[KEYBOARD_F7] then if @llamadas_maquina.save_qsnap<>nil then llamadas_maquina.save_qsnap('-01');

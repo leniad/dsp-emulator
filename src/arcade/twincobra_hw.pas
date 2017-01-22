@@ -320,7 +320,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure twincobr_snd_outbyte(valor:byte;puerto:word);
+procedure twincobr_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0:ym3812_0.control(valor);

@@ -258,7 +258,7 @@ begin
 if (puerto and $ff)=0 then prehisle_snd_inbyte:=ym3812_0.status;
 end;
 
-procedure prehisle_snd_outbyte(valor:byte;puerto:word);
+procedure prehisle_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $00:ym3812_0.control(valor);

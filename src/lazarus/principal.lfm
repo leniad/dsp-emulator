@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 393
+  Left = 983
   Height = 198
-  Top = 231
+  Top = 433
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
