@@ -1,6 +1,5 @@
 ﻿#DSP Emulator status<br>
 <b>11/03/17 - DSP Emulator 0.17b2 Final. All binary and source updated.</b><br><pre>
-<pre>
 -All WIP previous enhacements
 -General
     +Fixed a bug when entering the options menu without starting a driver (Thanks to FJ Marti)
