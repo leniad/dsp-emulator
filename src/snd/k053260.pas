@@ -8,13 +8,6 @@ type
       constructor create(adpcm_rom:pbyte;size:dword);
       destructor free;
 	  public
-		  procedure voice_reset;
-		  procedure set_register(offset:word;data:byte);
-		  procedure set_loop_kadpcm(data:byte);
-		  procedure set_pan(data:byte);
-		  procedure update_pan_volume;
-		  procedure key_on;
-		  procedure key_off;
 		  procedure play;
 		  function voice_playing:boolean;
 		  function read_rom:byte;
@@ -37,6 +30,13 @@ type
 		  kadpcm:boolean;
       rom:pbyte;
       rom_size:dword;
+      procedure voice_reset;
+		  procedure set_register(offset:word;data:byte);
+		  procedure set_loop_kadpcm(data:byte);
+		  procedure set_pan(data:byte);
+		  procedure update_pan_volume;
+      procedure key_on;
+		  procedure key_off;
   end;
   tk053260_chip=class(snd_chip_class)
       constructor create(clock:dword;rom:pbyte;size:dword;amp:single);

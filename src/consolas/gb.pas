@@ -12,11 +12,27 @@ type
             write_io:procedure (direccion:byte;valor:byte);
             video_render:procedure;
   end;
+  tgb_head=packed record
+    title:array[0..10] of ansichar;
+    manu:array[0..3] of ansichar;
+    cgb_flag:byte;
+    new_license:array[0..1] of byte;
+    sbg_flag:byte;
+    cart_type:byte;
+    rom_size:byte;
+    ram_size:byte;
+    region:byte;
+    license:byte;
+    rom_ver:byte;
+    head_sum:byte;
+    total_sum:word;
+  end;
 
 procedure cargar_gb;
 
 var
   ram_enable:boolean;
+  gb_head:^tgb_head;
 
 implementation
 uses principal;
@@ -26,22 +42,32 @@ const
   gb_rom:tipo_roms=(n:'dmg_boot.bin';l:$100;p:0;crc:$59c8598e);
   gbc_rom:array[0..1] of tipo_roms=(
   (n:'gbc_boot.1';l:$100;p:0;crc:$779ea374),(n:'gbc_boot.2';l:$700;p:$200;crc:$f741807d));
+  GB_CLOCK=4194304;
 
 var
- scroll_x,scroll_y,stat,linea,lcd_control,bg_pal,sprt0_pal,sprt1_pal:byte;
+ scroll_x,scroll_y,stat,linea_cont_y,linea_actual,lcd_control,bg_pal,sprt0_pal,sprt1_pal:byte;
  tcontrol,tmodulo,mtimer,prog_timer,ly_compare,window_x,window_y:byte;
  wram_bank:array[0..7,0..$fff] of byte;
  vram_bank:array[0..1,0..$1fff] of byte;
  io_ram,sprt_ram,bg_prio:array[0..$ff] of byte;
  bios_rom:array[0..$8ff] of byte;
- bgc_pal,spc_pal:array[0..$1f] of word;
- enable_bios,rom_exist,colorgb,bgcolor_inc,spcolor_inc,lcd_ena,hdma_ena:boolean;
+ bgc_pal,spc_pal:array[0..$3f] of word;
+ enable_bios,rom_exist,bgcolor_inc,spcolor_inc,lcd_ena,hdma_ena:boolean;
  irq_ena,joystick,vram_nbank,wram_nbank,bgcolor_index,spcolor_index:byte;
  hdma_size,hdma_pos,dma_src,dma_dst:word;
  nombre_rom:string;
  hay_nvram,cartucho_cargado:boolean;
  gb_timer,sprites_time:byte;
  gameboy:tgameboy;
+
+procedure sprite_order;
+var
+  f:byte;
+begin
+for f:=0 to $27 do begin
+
+end;
+end;
 
 procedure draw_sprites(pri:byte);
 var
@@ -60,7 +86,7 @@ for f:=0 to $27 do begin
   pos_y:=sprt_ram[$00+(f*4)];
   if (((atrib and $80)<>pri) or (pos_y=0) or (pos_y>=160)) then continue;
   pos_y:=pos_y-16;
-  pos_linea:=linea-pos_y;
+  pos_linea:=linea_actual-pos_y;
   //Size
   size:=8 shl ((lcd_control and 4) shr 2);
   if (pos_linea<size) then begin
@@ -95,13 +121,16 @@ for f:=0 to $27 do begin
      if flipx then begin
         for x:=0 to 7 do begin
           pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-          if pval=0 then ptemp^:=paleta[max_colores]
-            else begin
-              if ((bg_prio[pos_x+x] and $3f)>f) then begin
+          if pval=0 then begin
+            ptemp^:=paleta[max_colores]
+          end else begin
+            if ((bg_prio[pos_x+x] and $3f)>f) then begin
                 ptemp^:=paleta[pval+pal];
                 bg_prio[pos_x+x]:=(bg_prio[pos_x+x] and $c0) or f;
-              end else ptemp^:=paleta[max_colores];
+            end else begin
+              ptemp^:=paleta[max_colores];
             end;
+          end;
           inc(ptemp);
         end;
         putpixel(0,0,8,punbuf,pant_sprites);
@@ -127,7 +156,7 @@ for f:=0 to $27 do begin
        pos_x:=0;
      end;
      if (pos_x+8)>160 then long_x:=160-pos_x;
-     actualiza_trozo(main_x,0,long_x,1,pant_sprites,pos_x,pos_y+pos_linea,long_x,1,2);
+     actualiza_trozo(main_x,0,long_x,1,pant_sprites,pos_x+7,pos_y+pos_linea,long_x,1,2);
   end;
 end;
 end;
@@ -135,22 +164,22 @@ end;
 procedure update_bg;
 var
   tile_addr,bg_addr:word;
-  f:byte;
-  x,tile_val1,tile_val2,y,pval,linea_pant:byte;
-  n2,long:integer;
+  f,x,tile_val1,tile_val2,y,pval,linea_pant:byte;
+  n2:integer;
   tile_mid:boolean;
   ptemp:pword;
 begin
-  linea_pant:=linea+scroll_y;
-  if (lcd_control and $8)<>0 then bg_addr:=$1c00
-    else bg_addr:=$1800;
-  if (lcd_control and $10)<>0 then begin
+  linea_pant:=linea_actual+scroll_y;
+  bg_addr:=$1800+((lcd_control and $8) shl 7);
+  tile_mid:=(lcd_control and $10)=0;
+  tile_addr:=$1000*byte(tile_mid); //Cuidado! Tiene signo despues
+  {if (lcd_control and $10)<>0 then begin
     tile_addr:=$0;
     tile_mid:=false;
   end else begin
     tile_addr:=$1000; //En realidad seria $800, pero tiene signo
     tile_mid:=true;
-  end;
+  end;}
   y:=(linea_pant and $7)*2;
   for f:=0 to 31 do begin
     if tile_mid then n2:=shortint(vram_bank[0,(bg_addr+f+((linea_pant div 8)*32)) and $1fff])
@@ -167,39 +196,29 @@ begin
     putpixel(f*8,0,8,punbuf,1);
   end; //del for f
   //Scroll X
-  if (scroll_x+160)>256 then begin
-    long:=256-scroll_x;
-    actualiza_trozo(scroll_x,0,long,1,1,0,linea,long,1,2);
-    actualiza_trozo(0,0,160-long,1,1,long,linea,160-long,1,2);
-  end else begin
-    actualiza_trozo(scroll_x,0,160,1,1,0,linea,160,1,2);
-  end;
+  if scroll_x<>0 then begin
+    actualiza_trozo(0,0,scroll_x,1,1,(256-scroll_x)+7,linea_actual,scroll_x,1,2);
+    actualiza_trozo(scroll_x,0,256-scroll_x,1,1,7,linea_actual,256-scroll_x,1,2);
+  end else actualiza_trozo(0,0,256,1,1,7,linea_actual,256,1,2);
 end;
 
 procedure update_window;
 var
   tile_addr,bg_addr:word;
-  f:byte;
-  x,tile_val1,tile_val2,y,pval,linea_pant:byte;
-  n2,long:integer;
+  f,x,tile_val1,tile_val2,y,pval,linea_pant:byte;
+  n2:integer;
   tile_mid:boolean;
   ptemp:pword;
 begin
-  if linea<window_y then exit;
-  linea_pant:=linea-window_y;
-  if (lcd_control and $40)<>0 then bg_addr:=$1c00
-    else bg_addr:=$1800;
-  if (lcd_control and $10)<>0 then begin
-    tile_addr:=$0;
-    tile_mid:=false;
-  end else begin
-    tile_addr:=$1000; //En realidad seria $800, pero tiene signo
-    tile_mid:=true;
-  end;
+  if ((linea_actual<window_y) or (window_x>166)) then exit;
+  linea_pant:=linea_actual-window_y;
+  bg_addr:=$1800+((lcd_control and $40) shl 4);
+  tile_mid:=(lcd_control and $10)=0;
+  tile_addr:=$1000*byte(tile_mid); //Cuidado! Tiene signo despues
   y:=(linea_pant and $7)*2;
   for f:=0 to 31 do begin
     if tile_mid then n2:=shortint(vram_bank[0,(bg_addr+f+((linea_pant div 8)*32)) and $1fff])
-      else n2:=byte(vram_bank[0,(bg_addr+f+((linea_pant div 8)*32)) and $1fff]);
+      else n2:=vram_bank[0,(bg_addr+f+((linea_pant div 8)*32)) and $1fff];
     tile_val1:=vram_bank[0,(n2*16+tile_addr+y) and $1fff];
     tile_val2:=vram_bank[0,(n2*16+tile_addr+1+y) and $1fff];
     ptemp:=punbuf;
@@ -210,14 +229,12 @@ begin
     end; //del for x
     putpixel(f*8,0,8,punbuf,1);
   end; //del for f
-  //Pos X
-  long:=160-(window_x-7);
-  actualiza_trozo(0,0,long,1,1,(window_x-7),linea,long,1,2);
+  actualiza_trozo(0,0,256,1,1,window_x,linea_actual,256,1,2);
 end;
 
 procedure update_video_gb;
 begin
-single_line(0,linea,0,160,2);
+single_line(7,linea_actual,0,160,2);
 if lcd_ena then begin
   fillchar(bg_prio[0],$100,$7f);
   if (lcd_control and 2)<>0 then draw_sprites($80);
@@ -231,12 +248,11 @@ end;
 procedure draw_sprites_gbc(pri:byte);
 var
   flipx,flipy:boolean;
-  f,x,pal,atrib,pval,spr_bank:byte;
+  n,f,x,pal,atrib,pval,spr_bank:byte;
   size,num_char,def_y,tile_val1,tile_val2,long_x,main_x:byte;
   pos_linea:word;
   ptemp:pword;
   pos_y,pos_x:integer;
-  n:byte;
 begin
 n:=0;
 sprites_time:=0;
@@ -245,7 +261,7 @@ for f:=0 to $27 do begin
   pos_y:=sprt_ram[$00+(f*4)];
   if (((atrib and $80)<>pri) or (pos_y=0) or (pos_y>=160)) then continue;
   pos_y:=pos_y-16;
-  pos_linea:=linea-pos_y;
+  pos_linea:=linea_actual-pos_y;
   //Size
   size:=8 shl ((lcd_control and 4) shr 2);
   if (pos_linea<size) then begin
@@ -320,7 +336,7 @@ for f:=0 to $27 do begin
        pos_x:=0;
      end;
      if (pos_x+8)>160 then long_x:=160-pos_x;
-     actualiza_trozo(main_x,0,long_x,1,pant_sprites,pos_x,pos_y+pos_linea,long_x,1,2);
+     actualiza_trozo(main_x,0,long_x,1,pant_sprites,pos_x+7,pos_y+pos_linea,long_x,1,2);
   end;
 end;
 end;
@@ -330,20 +346,14 @@ var
   tile_addr,bg_addr:word;
   f,atrib,tile_bank,tile_pal:byte;
   x,tile_val1,tile_val2,y,pval,linea_pant:byte;
-  n2,long:integer;
+  n2:integer;
   tile_mid:boolean;
   ptemp:pword;
 begin
-  linea_pant:=linea+scroll_y;
-  if (lcd_control and $8)<>0 then bg_addr:=$1c00
-    else bg_addr:=$1800;
-  if (lcd_control and $10)<>0 then begin
-    tile_addr:=$0;
-    tile_mid:=false;
-  end else begin
-    tile_addr:=$1000; //En realidad seria $800, pero tiene signo
-    tile_mid:=true;
-  end;
+  linea_pant:=linea_actual+scroll_y;
+  bg_addr:=$1800+((lcd_control and $8) shl 7);
+  tile_mid:=(lcd_control and $10)=0;
+  tile_addr:=$1000*byte(tile_mid); //Cuidado! Tiene signo despues
   for f:=0 to 31 do begin
     if tile_mid then n2:=shortint(vram_bank[0,bg_addr+(f+((linea_pant div 8)*32) and $3ff)])
       else n2:=byte(vram_bank[0,bg_addr+(f+((linea_pant div 8)*32) and $3ff)]);
@@ -377,11 +387,10 @@ begin
     putpixel(f*8,0,8,punbuf,1);
   end;
   //Scroll X
-  if (scroll_x+160)>256 then begin
-    long:=256-scroll_x;
-    actualiza_trozo(scroll_x,0,long,1,1,0,linea,long,1,2);
-    actualiza_trozo(0,0,160-long,1,1,long,linea,160-long,1,2);
-  end else actualiza_trozo(scroll_x,0,160,1,1,0,linea,160,1,2);
+  if scroll_x<>0 then begin
+    actualiza_trozo(0,0,scroll_x,1,1,(256-scroll_x)+7,linea_actual,scroll_x,1,2);
+    actualiza_trozo(scroll_x,0,256-scroll_x,1,1,7,linea_actual,256-scroll_x,1,2);
+  end else actualiza_trozo(0,0,256,1,1,7,linea_actual,256,1,2);
 end;
 
 procedure update_window_gbc;
@@ -389,21 +398,15 @@ var
   tile_addr,bg_addr:word;
   f,atrib,tile_bank,tile_pal:byte;
   x,tile_val1,tile_val2,y,pval,linea_pant:byte;
-  n2,long:integer;
+  n2:integer;
   tile_mid:boolean;
   ptemp:pword;
 begin
-  if linea<window_y then exit;
-  linea_pant:=linea-window_y;
-  if (lcd_control and $40)<>0 then bg_addr:=$1c00
-    else bg_addr:=$1800;
-  if (lcd_control and $10)<>0 then begin
-    tile_addr:=$0;
-    tile_mid:=false;
-  end else begin
-    tile_addr:=$1000; //En realidad seria $800, pero tiene signo
-    tile_mid:=true;
-  end;
+  if ((linea_actual<window_y) or (window_x>166)) then exit;
+  linea_pant:=linea_actual-window_y;
+  bg_addr:=$1800+((lcd_control and $40) shl 4);
+  tile_mid:=(lcd_control and $10)=0;
+  tile_addr:=$1000*byte(tile_mid); //Cuidado! Tiene signo despues
   for f:=0 to 31 do begin
     if tile_mid then n2:=shortint(vram_bank[0,(bg_addr+f+((linea_pant div 8)*32)) and $1fff])
       else n2:=byte(vram_bank[0,(bg_addr+f+((linea_pant div 8)*32)) and $1fff]);
@@ -431,13 +434,12 @@ begin
     putpixel(f*8,0,8,punbuf,1);
   end;
   //Pos X
-  long:=160-(window_x-7);
-  actualiza_trozo(0,0,long,1,1,(window_x-7),linea,long,1,2);
+  actualiza_trozo(0,0,256,1,1,window_x,linea_actual,256,1,2);
 end;
 
 procedure update_video_gbc;
 begin
-single_line(0,linea,bgc_pal[0],160,2);
+single_line(7,linea_actual,bgc_pal[0],160,2);
 if lcd_ena then begin
   if (lcd_control and 1)=0 then begin //bg and window loses priority
     update_bg_gbc;
@@ -461,22 +463,14 @@ var
 begin
 if event.arcade then begin
   tmp_in0:=marcade.in0;
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe)
-    else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd)
-    else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb)
-    else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7)
-    else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef)
-    else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df)
-    else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf)
-    else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f)
-    else marcade.in0:=(marcade.in0 or $80);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   if tmp_in0<>marcade.in0 then lr35902_0.joystick_req:=true;
 end;
 end;
@@ -485,6 +479,7 @@ procedure cerrar_gb;
 begin
 if hay_nvram then write_file(nombre_rom,@ram_bank[0,0],$2000);
 gameboy_sound_close;
+freemem(gb_head);
 end;
 
 function leer_io(direccion:byte):byte;
@@ -513,7 +508,7 @@ case direccion of
   $41:leer_io:=$80 or stat;
   $42:leer_io:=scroll_y;
   $43:leer_io:=scroll_x;
-  $44:leer_io:=linea;
+  $44:leer_io:=linea_cont_y;
   $45:leer_io:=ly_compare;
   $47:leer_io:=bg_pal;
   $48:leer_io:=sprt0_pal;
@@ -536,10 +531,9 @@ var
 begin
 io_ram[direccion]:=valor;
 case direccion of
-  $00:begin
-        if (valor and $20)=0 then joystick:=(valor and $f0) or (marcade.in0 shr 4);
-        if (valor and $10)=0 then joystick:=(valor and $f0) or (marcade.in0 and $f);
-      end;
+  $00:if (valor and $20)=0 then joystick:=(valor and $f0) or (marcade.in0 shr 4)
+          else if (valor and $10)=0 then joystick:=(valor and $f0) or (marcade.in0 and $f)
+            else joystick:=$3f;
   $01,$02:; //Serial
   $04:mtimer:=0;
   $05:prog_timer:=valor;
@@ -547,10 +541,10 @@ case direccion of
   $07:begin  //timer control
         tcontrol:=valor;
         case (valor and $3) of
-          0:timer[gb_timer].time_final:=4194304/4096;
-          1:timer[gb_timer].time_final:=4194304/262144;
-          2:timer[gb_timer].time_final:=4194304/65536;
-          3:timer[gb_timer].time_final:=4194304/16384;
+          0:timer[gb_timer].time_final:=GB_CLOCK/4096;
+          1:timer[gb_timer].time_final:=GB_CLOCK/262144;
+          2:timer[gb_timer].time_final:=GB_CLOCK/65536;
+          3:timer[gb_timer].time_final:=GB_CLOCK/16384;
         end;
         timer[gb_timer].actual_time:=0;
         timer[gb_timer].enabled:=(valor and $4)<>0;
@@ -563,24 +557,19 @@ case direccion of
         lr35902_0.joystick_req:=(valor and $10)<>0;
       end;
   $10..$26:gb_sound_w(direccion-$10,valor); //Sound
-  $30..$3f:gb_wave_w(direccion-$30,valor); //Sound Wav
+  $30..$3f:gb_wave_w(direccion and $f,valor); //Sound Wav
   $40:begin
         lcd_control:=valor;
-        if (((valor and $80)<>0) and not(lcd_ena)) then linea:=0;
         lcd_ena:=(valor and $80)<>0;
-        if not(lcd_ena) then begin
-          stat:=(stat and $fc) or 1;
-          linea:=0;
-        end;
       end;
   $41:stat:=(stat and $7) or (valor and $f8);
   $42:scroll_y:=valor;
   $43:scroll_x:=valor;
-  $44:linea:=0;
+  $44:linea_cont_y:=0;
   $45:ly_compare:=valor;
   $46:begin //DMA trans OAM
+        addrs:=valor shl 8;
         for f:=0 to $9f do begin
-          addrs:=(valor shl 8)+f;
           case addrs of
             $0000..$7fff:sprt_ram[f]:=memoria[addrs];
             $8000..$9fff:sprt_ram[f]:=vram_bank[0,addrs and $1fff];
@@ -590,6 +579,7 @@ case direccion of
             $fe00..$fe9f:sprt_ram[f]:=sprt_ram[addrs and $ff];
             $ff00..$ffff:sprt_ram[f]:=io_ram[addrs and $ff];
           end;
+          addrs:=addrs+1;
         end;
         lr35902_0.contador:=lr35902_0.contador+160;
       end;
@@ -649,17 +639,17 @@ case direccion of
         if lr35902_0.lcdstat_req  then tempb:=tempb or $2;
         if lr35902_0.timer_req  then tempb:=tempb or $4;
         if lr35902_0.serial_req then tempb:=tempb or $8;
-        if lr35902_0.joystick_req  then tempb:=tempb or $10;
+        if lr35902_0.joystick_req then tempb:=tempb or $10;
         leer_io_gbc:=tempb;
       end;
   $10..$26:leer_io_gbc:=gb_sound_r(direccion-$10); //Sound
 //  $27..$2f:leer_io_gbc:=io_ram[direccion];
-  $30..$3f:leer_io_gbc:=gb_wave_r(direccion-$30); //Sound Wav
+  $30..$3f:leer_io_gbc:=gb_wave_r(direccion and $f); //Sound Wav
   $40:leer_io_gbc:=lcd_control;
   $41:leer_io_gbc:=$80 or stat;
   $42:leer_io_gbc:=scroll_y;
   $43:leer_io_gbc:=scroll_x;
-  $44:leer_io_gbc:=linea;
+  $44:leer_io_gbc:=linea_cont_y;
   $45:leer_io_gbc:=ly_compare;
   $47:leer_io_gbc:=bg_pal;
   $48:leer_io_gbc:=sprt0_pal;
@@ -698,7 +688,7 @@ for f:=0 to (size-1) do begin
     $0000..$7fff:temp:=memoria[src_addr];
     $8000..$9fff:temp:=vram_bank[vram_nbank,src_addr and $1fff];
     $a000..$bfff:if @gb_mapper.ext_ram_getbyte<>nil then begin
-                    if ((ram_size<>0) and ram_enable) then temp:=gb_mapper.ext_ram_getbyte(src_addr);
+                    if ((gb_head.ram_size<>0) and ram_enable) then temp:=gb_mapper.ext_ram_getbyte(src_addr);
                end;
     $c000..$cfff,$e000..$efff:temp:=wram_bank[0,src_addr and $fff];
     $d000..$dfff,$f000..$fdff:temp:=wram_bank[wram_nbank,src_addr and $fff];
@@ -713,14 +703,13 @@ end;
 procedure escribe_io_gbc(direccion,valor:byte);
 var
   addrs:word;
-  f,temp:byte;
+  f:byte;
 begin
 io_ram[direccion]:=valor;
 case direccion of
-  $00:begin
-        if (valor and $20)=0 then joystick:=(valor and $f0) or (marcade.in0 shr 4);
-        if (valor and $10)=0 then joystick:=(valor and $f0) or (marcade.in0 and $f);
-      end;
+  $00:if (valor and $20)=0 then joystick:=(valor and $f0) or (marcade.in0 shr 4)
+          else if (valor and $10)=0 then joystick:=(valor and $f0) or (marcade.in0 and $f)
+            else joystick:=$3f;
   $01,$02:; //Serial
   $04:mtimer:=0;
   $05:prog_timer:=valor;
@@ -728,10 +717,10 @@ case direccion of
   $07:begin  //timer control
         tcontrol:=valor;
         case (valor and $3) of
-          0:timer[gb_timer].time_final:=4194304/4096;
-          1:timer[gb_timer].time_final:=4194304/262144;
-          2:timer[gb_timer].time_final:=4194304/65536;
-          3:timer[gb_timer].time_final:=4194304/16384;
+          0:timer[gb_timer].time_final:=GB_CLOCK/4096;
+          1:timer[gb_timer].time_final:=GB_CLOCK/262144;
+          2:timer[gb_timer].time_final:=GB_CLOCK/65536;
+          3:timer[gb_timer].time_final:=GB_CLOCK/16384;
         end;
         timer[gb_timer].actual_time:=0;
         timer[gb_timer].enabled:=(valor and $4)<>0;
@@ -745,35 +734,30 @@ case direccion of
       end;
   $10..$26:gb_sound_w(direccion-$10,valor); //Sound
   //$27..$2f:io_ram[direccion]:=valor;
-  $30..$3f:gb_wave_w(direccion-$30,valor); //Sound Wav
+  $30..$3f:gb_wave_w(direccion and $f,valor); //Sound Wav
   $40:begin
         lcd_control:=valor;
-        if (((valor and $80)<>0) and not(lcd_ena)) then linea:=0;
         lcd_ena:=(valor and $80)<>0;
-        if not(lcd_ena) then begin
-          stat:=(stat and $fc) or 1;
-          linea:=0;
-        end;
       end;
   $41:stat:=(stat and $7) or (valor and $f8);
   $42:scroll_y:=valor;
   $43:scroll_x:=valor;
-  $44:linea:=0;
+  $44:linea_cont_y:=0;
   $45:ly_compare:=valor;
   $46:begin //DMA trans OAM
         addrs:=valor shl 8;
         for f:=0 to $9f do begin
           case addrs of
-            $0000..$3fff:temp:=rom_bank[0,addrs+f];
-            $4000..$7fff:temp:=rom_bank[rom_nbank,(addrs+f) and $3fff];
-            $8000..$9fff:temp:=vram_bank[vram_nbank,(addrs+f) and $1fff];
-            $a000..$bfff:temp:=ram_bank[vram_nbank,(addrs+f) and $1fff];
-            $c000..$cfff,$e000..$efff:temp:=wram_bank[0,(addrs+f) and $fff];
-            $d000..$dfff,$f000..$fdff:temp:=wram_bank[wram_nbank,(addrs+f) and $fff];
-            $fe00..$fe9f:temp:=sprt_ram[(addrs+f) and $ff];
-            $ff00..$ffff:temp:=io_ram[(addrs+f) and $ff];
+            $0000..$3fff:sprt_ram[f]:=rom_bank[0,addrs];
+            $4000..$7fff:sprt_ram[f]:=rom_bank[rom_nbank,addrs and $3fff];
+            $8000..$9fff:sprt_ram[f]:=vram_bank[vram_nbank,addrs and $1fff];
+            $a000..$bfff:sprt_ram[f]:=ram_bank[vram_nbank,addrs and $1fff];
+            $c000..$cfff,$e000..$efff:sprt_ram[f]:=wram_bank[0,addrs and $fff];
+            $d000..$dfff,$f000..$fdff:sprt_ram[f]:=wram_bank[wram_nbank,addrs and $fff];
+            $fe00..$fe9f:sprt_ram[f]:=sprt_ram[addrs and $ff];
+            $ff00..$ffff:sprt_ram[f]:=io_ram[addrs and $ff];
           end;
-          sprt_ram[f]:=temp;
+          addrs:=addrs+1;
         end;
         lr35902_0.contador:=lr35902_0.contador+(160 shr lr35902_0.speed);
       end;
@@ -783,22 +767,20 @@ case direccion of
   $4a:window_y:=valor;
   $4b:window_x:=valor;
 //  $4c:io_ram[direccion]:=valor;  //????
-  $4d:if lr35902_0.speed<>(valor and 1) then lr35902_0.change_speed:=true;  //Cambiar velocidad
+  $4d:lr35902_0.change_speed:=(valor and 1)<>0;  //Cambiar velocidad
   $4f:vram_nbank:=valor and 1; //VRAM Bank
   $50:enable_bios:=(valor=0);  //enable/disable ROM
   $51:dma_src:=(dma_src and $ff) or (valor shl 8);
   $52:dma_src:=(dma_src and $ff00) or (valor and $f0);
   $53:dma_dst:=(dma_dst and $ff) or ((valor and $1f) shl 8);
   $54:dma_dst:=(dma_dst and $ff00) or (valor and $f0);
-  $55:begin
-        if (valor and $80)<>0 then begin
+  $55:if (valor and $80)<>0 then begin
           hdma_size:=(valor and $7f)+1;
           hdma_ena:=true;
           hdma_pos:=0;
-        end else begin
+      end else begin
           dma_trans((valor+1)*$10);
           lr35902_0.contador:=lr35902_0.contador+((valor+1)*8);
-        end;
       end;
   $56:;
   $68:begin
@@ -808,7 +790,7 @@ case direccion of
   $69:begin
         if (bgcolor_index and 1)<>0 then bgc_pal[bgcolor_index shr 1]:=(bgc_pal[bgcolor_index shr 1] and $ff) or ((valor and $7f) shl 8)
           else bgc_pal[bgcolor_index shr 1]:=(bgc_pal[bgcolor_index shr 1] and $7f00) or valor;
-        if bgcolor_inc then bgcolor_index:=bgcolor_index+1;
+        if bgcolor_inc then bgcolor_index:=(bgcolor_index+1) and $3f;
       end;
   $6a:begin
         spcolor_inc:=(valor and $80)<>0;
@@ -817,10 +799,12 @@ case direccion of
   $6b:begin
         if (spcolor_index and 1)<>0 then spc_pal[spcolor_index shr 1]:=(spc_pal[spcolor_index shr 1] and $ff) or ((valor and $7f) shl 8)
           else spc_pal[spcolor_index shr 1]:=(spc_pal[spcolor_index shr 1] and $7f00) or valor;
-        if spcolor_inc then spcolor_index:=spcolor_index+1;
+        if spcolor_inc then spcolor_index:=(spcolor_index+1) and $3f;
       end;
-  $70:if valor=0 then wram_nbank:=1
-        else wram_nbank:=valor and 7;
+  $70:begin
+        wram_nbank:=valor and 7;
+        if wram_nbank=0 then wram_nbank:=1;
+       end;
   $7e,$7f:;
 //  $80..$fe:io_ram[direccion]:=valor;  //high memory
   $ff:begin  //irq enable
@@ -838,34 +822,36 @@ end;
 procedure gb_principal;
 var
   frame_m:single;
-  f:byte;
 begin
 if not(cartucho_cargado) then exit;
 init_controls(false,false,false,true);
 frame_m:=lr35902_0.tframes;
 while EmuStatus=EsRuning do begin
-  linea:=0;
-  for f:=0 to 153 do begin
-    lr35902_0.run(frame_m);
-    frame_m:=frame_m+lr35902_0.tframes-lr35902_0.contador;
-    case f of
-        0..143:gameboy.video_render;
-        144:begin //Modo 1 + VBLANK IRQ
-              lr35902_0.vblank_req:=true;
-              lr35902_0.lcdstat_req:=((stat and $10)<>0) and ((stat and $3)<>1);
-              stat:=(stat and $fc) or $1;
-            end;
-    end;
-    linea:=linea+1;
-    if linea=ly_compare then begin
+  for linea_actual:=0 to 153 do begin
+    if linea_cont_y=ly_compare then begin
         lr35902_0.lcdstat_req:=(stat and $40)<>0;
         stat:=stat or $4;
-    end else begin
-       stat:=stat and $fb;
+    end else stat:=stat and $fb;
+    lr35902_0.run(frame_m);
+    frame_m:=frame_m+lr35902_0.tframes-lr35902_0.contador;
+    case linea_actual of
+        0..143:gameboy.video_render;  //Modos 2-3-0
+        144:begin //Modo 1 + VBLANK IRQ
+              //gameboy.video_render;
+              if lcd_ena then lr35902_0.vblank_req:=true;
+              lr35902_0.lcdstat_req:=((stat and $30)<>0) and ((stat and 3)<>1);
+              stat:=(stat and $fc) or $1;
+            end;
+        153:begin //Vuelvo a Modo 2
+              lr35902_0.lcdstat_req:=((stat and $20)<>0) and ((stat and 3)<>2);;
+              stat:=(stat and $fc) or $2;
+            end;
     end;
+    if linea_cont_y=153 then linea_cont_y:=0
+      else linea_cont_y:=linea_cont_y+1;
   end;
   eventos_gb;
-  actualiza_trozo_simple(0,0,160,144,2);
+  actualiza_trozo(7,0,160,144,2,0,0,160,144,pant_temp);
   video_sync;
 end;
 end;
@@ -875,7 +861,7 @@ begin
 case direccion of
   //ROM bank 0
   $0..$ff,$200..$8ff:if enable_bios then gb_getbyte:=bios_rom[direccion]
-    else gb_getbyte:=memoria[direccion];
+                        else gb_getbyte:=memoria[direccion];
   $0100..$1ff,$900..$3fff:gb_getbyte:=memoria[direccion];
   //ROM bank 1
   $4000..$7fff:gb_getbyte:=memoria[direccion];
@@ -883,7 +869,7 @@ case direccion of
   $8000..$9fff:gb_getbyte:=vram_bank[vram_nbank,direccion and $1fff];
   //external (cartridge) RAM
   $a000..$bfff:if @gb_mapper.ext_ram_getbyte<>nil then begin
-                    if ((ram_size<>0) and ram_enable) then gb_getbyte:=gb_mapper.ext_ram_getbyte(direccion);
+                    if ((gb_head.ram_size<>0) and ram_enable) then gb_getbyte:=gb_mapper.ext_ram_getbyte(direccion);
                end;
   //RAM bank 0
   $c000..$cfff,$e000..$efff:gb_getbyte:=wram_bank[0,direccion and $fff];
@@ -904,7 +890,7 @@ case direccion of
   $8000..$9fff:vram_bank[vram_nbank,direccion and $1fff]:=valor;
   //external (cartridge) RAM
   $a000..$bfff:if @gb_mapper.ext_ram_putbyte<>nil then begin
-                    if ((ram_size<>0) and ram_enable) then gb_mapper.ext_ram_putbyte(direccion,valor);
+                    if ((gb_head.ram_size<>0) and ram_enable) then gb_mapper.ext_ram_putbyte(direccion,valor);
                end;
   //RAM bank 0
   $c000..$cfff,$e000..$efff:wram_bank[0,direccion and $fff]:=valor;
@@ -920,6 +906,11 @@ end;
 //Sonido and timers
 procedure gb_despues_instruccion(estados_t:word);
 begin
+if lr35902_0.changed_speed then begin
+  lr35902_0.tframes:=((GB_CLOCK shl lr35902_0.speed)/154)/llamadas_maquina.fps_max;
+  sound_engine_change_clock(GB_CLOCK shl lr35902_0.speed);
+  lr35902_0.changed_speed:=false;
+end;
 if hdma_ena then begin
     dma_trans($10);
     lr35902_0.contador:=lr35902_0.contador+8;
@@ -928,25 +919,18 @@ if hdma_ena then begin
     hdma_pos:=hdma_pos+1;
     if hdma_pos>=hdma_size then hdma_ena:=false;
   end;
-if (linea>143) then exit;
-// Mode 2  2_____2_____2_____2_____2_____2___________________2____
-// Mode 3  _33____33____33____33____33____33__________________3___
-// Mode 0  ___000___000___000___000___000___000________________000
-// Mode 1  ____________________________________11111111111111_____
-if lr35902_0.contador<80 then begin
-    if  lcd_ena then begin
-      //mode 2 OAM,se genera una IRQ si cambia a 2, pero solo cuando cambia!!
-      lr35902_0.lcdstat_req:=(((stat and $20)<>0) and ((stat and $3)<>2));
-      stat:=(stat and $fc) or $2;
-    end;
-  end else begin //Mode 3
-    if ((lr35902_0.contador<(172+80+sprites_time)) or hdma_ena) then begin
-      if lcd_ena then stat:=(stat and $fc) or $3;
-      end else begin //H-Blank mode 0, se genera una IRQ si cambia a 0, pero solo cuando cambia!!
-          lr35902_0.lcdstat_req:=(((stat and $8)<>0) and ((stat and $3)<>0));
-          stat:=stat and $fc;
-      end;
+if (linea_actual>143) then exit;
+if lr35902_0.contador<(82 shl lr35902_0.speed) then begin //Mode 2
+  lr35902_0.lcdstat_req:=((stat and $20)<>0) and ((stat and 3)<>2);
+  stat:=(stat and $fc) or $2;
+end else begin //Mode 3
+  if ((lr35902_0.contador+sprites_time)<(252 shl lr35902_0.speed)) then begin
+    stat:=(stat and $fc) or $3;
+  end else begin
+    lr35902_0.lcdstat_req:=((stat and $8)<>0) and ((stat and 3)<>0);
+    stat:=stat and $fc;
   end;
+end;
 end;
 
 procedure gb_main_timer;
@@ -959,6 +943,8 @@ procedure reset_gb;
 var
   lr_reg:reg_lr;
 begin
+ lr35902_0.tframes:=(GB_CLOCK/154)/llamadas_maquina.fps_max;
+ sound_engine_change_clock(GB_CLOCK);
  lr35902_0.reset;
  reset_audio;
  gameboy_sound_reset;
@@ -974,7 +960,8 @@ begin
  ram_nbank:=0;
  vram_nbank:=0;
  wram_nbank:=1;
- linea:=0;
+ linea_cont_y:=0;
+ ly_compare:=$ff;
  irq_ena:=0;
  marcade.in0:=$ff;
  joystick:=$ff;
@@ -986,7 +973,7 @@ begin
    lr_reg.sp:=$fffe;
    lr_reg.f.z:=true;
    lr_reg.f.n:=false;
-   if colorgb then begin
+   if (gb_head.cgb_flag and $80)<>0 then begin
      lr_reg.a:=$11;
      lr_reg.f.h:=false;
      lr_reg.f.c:=false;
@@ -1045,27 +1032,36 @@ begin
   end;
 end;
 
+type
+  tgb_logo=packed record
+    none1:array[0..$103] of byte;
+    logo:array[0..$2f] of byte;
+  end;
+
 function abrir_gb:boolean;
+const
+  main_logo:array[0..$2f] of byte=(
+  $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83,$00,$0C,$00,$0D,
+  $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99,
+  $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E);
 var
   mal:boolean;
-  ncartucho,extension,nombre_file,RomFile:string;
+  extension,nombre_file,RomFile,dir:string;
   datos,ptemp:pbyte;
   longitud,crc:integer;
   f,h:word;
   colores:tpaleta;
-  cabecera:array[0..$14f] of byte;
-  tipo_rom:byte;
+  gb_logo:^tgb_logo;
 begin
   if not(OpenRom(StGb,RomFile)) then begin
     abrir_gb:=true;
     exit;
   end;
+  getmem(gb_logo,sizeof(tgb_logo));
   abrir_gb:=false;
   gameboy.read_io:=leer_io;
   gameboy.write_io:=escribe_io;
   gameboy.video_render:=update_video_gb;
-  colorgb:=false;
-  mal:=true;
   extension:=extension_fichero(RomFile);
   if extension='ZIP' then begin
     if not(search_file_from_zip(RomFile,'*.gb',nombre_file,longitud,crc,false)) then
@@ -1073,6 +1069,7 @@ begin
     getmem(datos,longitud);
     if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
       freemem(datos);
+      freemem(gb_logo);
       exit;
     end;
   end else begin
@@ -1081,14 +1078,28 @@ begin
     getmem(datos,longitud);
     if not(read_file(RomFile,datos,longitud)) then begin
       freemem(datos);
+      freemem(gb_logo);
       exit;
     end;
     nombre_file:=extractfilename(RomFile);
   end;
-  copymemory(@cabecera[0],datos,$150);
+  ptemp:=datos;
+  //Comprobar si hay una cabecera extra delante, detras me da igual...
+  copymemory(gb_logo,ptemp,sizeof(tgb_logo));
+  if (longitud mod $2000)<>0 then begin
+    mal:=true;
+    //Esta delante? --> No estara el logo de Nintendo
+    for f:=0 to $2f do begin
+       mal:=(main_logo[f]=gb_logo.logo[f]);
+       if not(mal) then break;
+    end;
+    if not(mal) then inc(ptemp,longitud mod $2000);
+  end;
+  inc(ptemp,sizeof(tgb_logo));
+  copymemory(gb_head,ptemp,sizeof(tgb_head));
+  dec(ptemp,sizeof(tgb_logo));
   //Is GBC?
-  if (cabecera[$143] and $80)<>0 then begin
-    colorgb:=true;
+  if (gb_head.cgb_flag and $80)<>0 then begin
     gameboy.read_io:=leer_io_gbc;
     gameboy.write_io:=escribe_io_gbc;
     gameboy.video_render:=update_video_gbc;
@@ -1096,36 +1107,30 @@ begin
   if hay_nvram then write_file(nombre_rom,@ram_bank[0,0],$2000);
   nombre_rom:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
   hay_nvram:=false;
-  rom_size:=(32 shl cabecera[$148]) div 16;
-  ram_size:=cabecera[$149];
-  tipo_rom:=cabecera[$147];
+  gb_head.rom_size:=(32 shl gb_head.rom_size) div 16;
+  if gb_head.rom_size=0 then gb_head.rom_size:=1;
   gb_mapper.ext_ram_getbyte:=nil;
   gb_mapper.ext_ram_putbyte:=nil;
   gb_mapper.rom_putbyte:=nil;
-  case tipo_rom of
-    0:begin //No mapper
-        ptemp:=datos;
-        copymemory(@memoria[0],ptemp,$4000);
-        inc(ptemp,$4000);
-        copymemory(@memoria[$4000],ptemp,$4000);
-        mal:=false;
-      end;
-    $01..$03:begin
-        ptemp:=datos;
-        for f:=0 to (rom_size-1) do begin
-          copymemory(@rom_bank[f,0],ptemp,$4000);
-          inc(ptemp,$4000);
-        end;
-        copymemory(@memoria[$0],@rom_bank[0,0],$4000);
-        copymemory(@memoria[$4000],@rom_bank[1,0],$4000);
+  for f:=0 to (gb_head.rom_size-1) do begin
+    copymemory(@rom_bank[f,0],ptemp,$4000);
+    inc(ptemp,$4000);
+  end;
+  //El banco 0+1 siempre es el mismo
+  copymemory(@memoria[$0],@rom_bank[0,0],$4000);
+  copymemory(@memoria[$4000],@rom_bank[1,0],$4000);
+  mal:=true;
+  case gb_head.cart_type of
+    0:mal:=false; //No mapper
+    $01..$03,$ff:begin  //mbc1 & HuC-1
         gb_mapper.rom_putbyte:=gb_putbyte_mbc1;
-        case tipo_rom of
-          1:; //No ext RAM
-          2:begin //ext RAM
+        case gb_head.cart_type of
+          1:;
+          2:begin //RAM
               gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc1;
               gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc1;
           end;
-          3:begin //ext RAM + NVRam
+          3,$ff:begin //RAM + Battery
               gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc1;
               gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc1;
               if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
@@ -1134,36 +1139,46 @@ begin
         end;
         mal:=false;
       end;
+      $05,$06:begin //mbc2
+        gb_mapper.rom_putbyte:=gb_putbyte_mbc2;
+        case gb_head.cart_type of
+          5:;
+          6:begin //RAM + Battery
+              gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc2;
+              gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc2;
+              if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+              hay_nvram:=true;
+          end;
+        end;
+        mal:=false;
+      end;
       $19..$1e:begin //mbc5
-          ptemp:=datos;
-          for f:=0 to (rom_size-1) do begin
-            copymemory(@rom_bank[f,0],ptemp,$4000);
-            inc(ptemp,$4000);
-          end;
-          copymemory(@memoria[$0],@rom_bank[0,0],$4000);
-          copymemory(@memoria[$4000],@rom_bank[1,0],$4000);
-          gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc5;
-          gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc5;
           gb_mapper.rom_putbyte:=gb_putbyte_mbc5;
-          if ((tipo_rom=$1a) or (tipo_rom=$1b) or (tipo_rom=$1d) or (tipo_rom=$1e)) then begin  //Cargar Batery RAM
-            gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc1;
-            gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc1;
-          end;
-          if ((tipo_rom=$1b) or (tipo_rom=$1e)) then begin  //Cargar Batery RAM
-            if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
-            hay_nvram:=true;
+          case gb_head.cart_type of
+            $19,$1c:;
+            $1a,$1d:begin //RAM
+                      gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc5;
+                      gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc5;
+                    end;
+            $1b,$1e:begin //RAM + Battery
+                      gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc5;
+                      gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc5;
+                      if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+                      hay_nvram:=true;
+                    end;
           end;
           mal:=false;
          end;
-      else MessageDlg('Mapper '+inttohex(tipo_rom,2)+' no implementado', mtInformation,[mbOk], 0);
+      else MessageDlg('Mapper '+inttohex(gb_head.cart_type,2)+' no implementado', mtInformation,[mbOk], 0);
   end;
+
   if not(mal) then begin
-    if colorgb then begin //GameBoy Color
-      ncartucho:='';
-      for f:=0 to 10 do ncartucho:=ncartucho+chr(cabecera[$134+f]);
+    if (gb_head.cgb_flag and $80)<>0 then begin //GameBoy Color
+      dir:=directory.arcade_list_roms[find_rom_multiple_dirs('gbcolor.zip')];
+      llamadas_maquina.open_file:=gb_head.title;
       rom_exist:=false;
-      if carga_rom_zip(Directory.Arcade_roms+'gbcolor.zip',gbc_rom[0].n,@bios_rom[0],gbc_rom[0].l,gbc_rom[0].crc,false) then
-        if rom_exist or carga_rom_zip(Directory.Arcade_roms+'gbcolor.zip',gbc_rom[1].n,@bios_rom[gbc_rom[1].p],gbc_rom[1].l,gbc_rom[1].crc,false) then rom_exist:=true;
+      if carga_rom_zip(dir+'gbcolor.zip',gbc_rom[0].n,@bios_rom[0],gbc_rom[0].l,gbc_rom[0].crc,false) then
+        if rom_exist or carga_rom_zip(dir+'gbcolor.zip',gbc_rom[1].n,@bios_rom[gbc_rom[1].p],gbc_rom[1].l,gbc_rom[1].crc,false) then rom_exist:=true;
       //Iniciar Paletas
       for h:=0 to $7fff do begin
         colores[h].r:=(h and $1F) shl 3;
@@ -1174,16 +1189,16 @@ begin
       for f:=0 to $1f do bgc_pal[f]:=$7fff;
       for f:=0 to $1f do spc_pal[f]:=0;
     end else begin
-      rom_exist:=carga_rom_zip(Directory.Arcade_roms+'gameboy.zip',gb_rom.n,@bios_rom[0],gb_rom.l,gb_rom.crc,false);
-      ncartucho:='';
-      for f:=0 to 15 do ncartucho:=ncartucho+chr(cabecera[$134+f]);
+      dir:=directory.arcade_list_roms[find_rom_multiple_dirs('gameboy.zip')];
+      rom_exist:=carga_rom_zip(dir+'gameboy.zip',gb_rom.n,@bios_rom[0],gb_rom.l,gb_rom.crc,false);
+      llamadas_maquina.open_file:=gb_head.title+gb_head.manu+ansichar(gb_head.cgb_flag);
     end;
-    llamadas_maquina.open_file:=ncartucho;
     abrir_gb:=true;
   end else llamadas_maquina.open_file:='';
   change_caption;
   cartucho_cargado:=true;
   freemem(datos);
+  freemem(gb_logo);
   reset_gb;
   directory.GameBoy:=ExtractFilePath(romfile);
 end;
@@ -1193,21 +1208,22 @@ begin
 iniciar_audio(true);
 //Pantallas:  principal+char y sprites
 screen_init(1,256,1,true);
-screen_init(2,160,144);
+screen_init(2,256+166+7,154);  //256 pantalla normal + 166 window + 7 de desplazamiento
 iniciar_video(160,144);
 //Main CPU
-lr35902_0:=cpu_lr.Create(4194304,154); //154 lineas, 456 estados t por linea
+lr35902_0:=cpu_lr.Create(GB_CLOCK,154); //154 lineas, 456 estados t por linea
 lr35902_0.change_ram_calls(gb_getbyte,gb_putbyte);
 lr35902_0.change_despues_instruccion(gb_despues_instruccion);
 lr35902_0.init_sound(gameboy_sound_update);
 //Timers internos de la GB
-init_timer(0,4194304/16384,gb_main_timer,true);
-gb_timer:=init_timer(0,4194304/4096,gb_prog_timer,false);
+init_timer(0,GB_CLOCK/16384,gb_main_timer,true);
+gb_timer:=init_timer(0,GB_CLOCK/4096,gb_prog_timer,false);
 //Sound Chips
 gameboy_sound_ini(freq_base_audio);
 //cargar roms
 hay_nvram:=false;
 //final
+getmem(gb_head,sizeof(tgb_head));
 iniciar_gb:=abrir_gb;
 end;
 

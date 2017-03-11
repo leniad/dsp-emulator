@@ -154,7 +154,7 @@ end;
 
 procedure TConfigSP.Button3Click(Sender: TObject);
 begin
-principal1.opendialog1.InitialDir:=Directory.Arcade_roms;
+principal1.opendialog1.InitialDir:=extractfiledir(Directory.spectrum_48);
 principal1.OpenDialog1.Filter:='ROM Files|*.rom;*.zip';
 if principal1.OpenDialog1.execute then Edit1.Text:=principal1.OpenDialog1.FileName;
 end;

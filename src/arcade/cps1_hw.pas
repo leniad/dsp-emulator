@@ -1036,8 +1036,8 @@ case main_vars.tipo_maquina of
         copymemory(@snd_rom[0,0],ptemp,$4000);inc(ptemp,$4000);
         copymemory(@snd_rom[1,0],ptemp,$4000);
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@ghouls_gfx1,'ghouls.zip',0,8)) then exit;
-        if not(cargar_roms_skip(memoria_temp,@ghouls_gfx2,'ghouls.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@ghouls_gfx1,'ghouls.zip',0)) then exit;
+        if not(cargar_roms64b_b(memoria_temp,@ghouls_gfx2,'ghouls.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$300000);
         //Chars
         convert_chars(memoria_temp,$c000);
@@ -1064,7 +1064,7 @@ case main_vars.tipo_maquina of
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@ffight_oki,'ffight.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@ffight_gfx1,'ffight.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@ffight_gfx1,'ffight.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$200000);
         //Chars
         convert_chars(memoria_temp,$8000);
@@ -1090,7 +1090,7 @@ case main_vars.tipo_maquina of
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@kod_oki,'kod.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@kod_gfx1,'kod.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@kod_gfx1,'kod.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1116,7 +1116,7 @@ case main_vars.tipo_maquina of
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@sf2_oki,'sf2.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@sf2_gfx1,'sf2.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@sf2_gfx1,'sf2.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$600000);
         //Chars
         convert_chars(memoria_temp,$18000);
@@ -1143,7 +1143,7 @@ case main_vars.tipo_maquina of
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@strider_oki,'strider.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@strider_gfx1,'strider.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@strider_gfx1,'strider.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1169,7 +1169,7 @@ case main_vars.tipo_maquina of
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@wonder3_oki,'3wonders.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@wonder3_gfx1,'3wonders.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@wonder3_gfx1,'3wonders.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1196,7 +1196,7 @@ case main_vars.tipo_maquina of
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@ccommando_oki,'captcomm.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@ccommando_gfx1,'captcomm.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@ccommando_gfx1,'captcomm.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1222,7 +1222,7 @@ case main_vars.tipo_maquina of
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@knights_oki,'knights.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@knights_gfx1,'knights.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@knights_gfx1,'knights.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1248,7 +1248,7 @@ case main_vars.tipo_maquina of
         //Cargar ADPCM ROMS
         if not(cargar_roms(oki_6295_0.get_rom_addr,@sf2ce_oki,'sf2ce.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@sf2ce_gfx1,'sf2ce.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@sf2ce_gfx1,'sf2ce.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$600000);
         //Chars
         convert_chars(memoria_temp,$18000);
@@ -1279,7 +1279,7 @@ case main_vars.tipo_maquina of
         //Cargar ROMS Qsound
         if not(cargar_roms(qsound_state.sample_rom,@dino_qsound1,'dino.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@dino_gfx1,'dino.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@dino_gfx1,'dino.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);
@@ -1311,7 +1311,7 @@ case main_vars.tipo_maquina of
         //Cargar ROMS Qsound
         if not(cargar_roms(qsound_state.sample_rom,@punisher_qsound1,'punisher.zip',0)) then exit;
         //convertir gfx (salen todos de los mismos datos)
-        if not(cargar_roms_skip_word(memoria_temp,@punisher_gfx1,'punisher.zip',0,8)) then exit;
+        if not(cargar_roms64b(memoria_temp,@punisher_gfx1,'punisher.zip',0)) then exit;
         cps1_gfx_decode(memoria_temp,$400000);
         //Chars
         convert_chars(memoria_temp,$10000);

@@ -19,7 +19,6 @@ type
     SpeedButton1: TSpeedButton;
     Label4: TLabel;
     d4: TEdit;
-    SpeedButton4: TSpeedButton;
     d5: TEdit;
     Label5: TLabel;
     TabSheet3: TTabSheet;
@@ -462,7 +461,7 @@ begin
   D1.Text:=Directory.Preview;
   D2.Text:=Directory.Arcade_samples;
   D3.Text:=Directory.Arcade_nvram;
-  D4.Text:=Directory.Arcade_roms;
+  D4.Text:=get_all_dirs;
   D5.Text:=Directory.Arcade_hi;
   D6.Text:=Directory.qsnapshot;
   //Componer todas las entradas
@@ -995,7 +994,8 @@ END;
 
 procedure TMConfig.Button1Click(Sender: TObject);
 var
-  tmp_var:byte;
+  tmp_var,f:byte;
+  temp_string:string;
 begin
   Directory.Preview:=D1.Text;
   if d1.Text[length(d1.Text)]<>main_vars.cadena_dir then Directory.Preview:=Directory.Preview+main_vars.cadena_dir;
@@ -1003,8 +1003,7 @@ begin
   if d2.Text[length(d2.Text)]<>main_vars.cadena_dir then Directory.Arcade_samples:=Directory.Arcade_samples+main_vars.cadena_dir;
   Directory.Arcade_nvram:=D3.Text;
   if d3.Text[length(d3.Text)]<>main_vars.cadena_dir then Directory.Arcade_nvram:=Directory.Arcade_nvram+main_vars.cadena_dir;
-  Directory.Arcade_roms:=D4.Text;
-  if d4.Text[length(d4.Text)]<>main_vars.cadena_dir then Directory.Arcade_roms:=Directory.Arcade_roms+main_vars.cadena_dir;
+  split_dirs(D4.Text);
   Directory.Arcade_hi:=D5.Text;
   if d5.Text[length(d5.Text)]<>main_vars.cadena_dir then Directory.Arcade_hi:=Directory.Arcade_hi+main_vars.cadena_dir;
   Directory.Arcade_hi:=D6.Text;

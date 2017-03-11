@@ -3,7 +3,7 @@ unit acercade;
 interface
 
 uses Classes,Graphics,Forms,Controls,StdCtrls,Buttons,ExtCtrls,lenguaje,
-     main_engine;
+     main_engine, Vcl.Imaging.GIFImg;
 
 type
   TAboutBox = class(TForm)
@@ -15,6 +15,7 @@ type
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
+    Image1: TImage;
     procedure OKButtonClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
@@ -38,6 +39,7 @@ procedure TAboutBox.FormShow(Sender: TObject);
 begin
 label1.Caption:='v'+dsp_version;
 aboutbox.caption:=leng[main_vars.idioma].archivo[3];
+(Image1.Picture.Graphic as TGIFImage).Animate:= True;
 end;
 
 end.

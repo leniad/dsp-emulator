@@ -12,8 +12,8 @@ implementation
 const
         //TMNT
         tmnt_rom:array[0..4] of tipo_roms=(
-        (n:'963-x23.j17';l:$20000;p:0;crc:$a9549004),(n:'963-x24.k17';l:$20000;p:$1;crc:$e5cc9067),
-        (n:'963-x21.j15';l:$10000;p:$40000;crc:$5789cf92),(n:'963-x22.k15';l:$10000;p:$40001;crc:$0a74e277),());
+        (n:'963-u23.j17';l:$20000;p:0;crc:$58bec748),(n:'963-u24.k17';l:$20000;p:$1;crc:$dce87c8d),
+        (n:'963-u21.j15';l:$10000;p:$40000;crc:$abce5ead),(n:'963-u22.k15';l:$10000;p:$40001;crc:$4ecc8d6b),());
         tmnt_sound:tipo_roms=(n:'963e20.g13';l:$8000;p:0;crc:$1692a6d6);
         tmnt_char:array[0..2] of tipo_roms=(
         (n:'963a28.h27';l:$80000;p:0;crc:$db4769a8),(n:'963a29.k27';l:$80000;p:$2;crc:$8069cd2e),());
@@ -27,14 +27,14 @@ const
         tmnt_k007232:tipo_roms=(n:'963a26.c13';l:$20000;p:0;crc:$e2ac3063);
         //Sunset Riders
         ssriders_rom:array[0..4] of tipo_roms=(
-        (n:'064eac02.8e';l:$40000;p:0;crc:$5a5425f4),(n:'064eac03.8g';l:$40000;p:$1;crc:$093c00fb),
+        (n:'064ebd02.8e';l:$40000;p:0;crc:$8deef9ac),(n:'064ebd03.8g';l:$40000;p:$1;crc:$2370c107),
         (n:'064eab04.10e';l:$20000;p:$80000;crc:$ef2315bd),(n:'064eab05.10g';l:$20000;p:$80001;crc:$51d6fbc4),());
         ssriders_sound:tipo_roms=(n:'064e01.2f';l:$10000;p:0;crc:$44b9bc52);
         ssriders_char:array[0..2] of tipo_roms=(
         (n:'064e12.16k';l:$80000;p:0;crc:$e2bdc619),(n:'064e11.12k';l:$80000;p:$2;crc:$2d8ca8b0),());
         ssriders_sprites:array[0..2] of tipo_roms=(
         (n:'064e09.7l';l:$100000;p:0;crc:$4160c372),(n:'064e07.3l';l:$100000;p:$2;crc:$64dd673c),());
-        ssriders_eeprom:tipo_roms=(n:'ssriders_eac.nv';l:$80;p:0;crc:$f6d641a7);
+        ssriders_eeprom:tipo_roms=(n:'ssriders_ebd.nv';l:$80;p:0;crc:$cbc903f6);
         ssriders_k053260:tipo_roms=(n:'064e06.1d';l:$100000;p:0;crc:$59810df9);
         //DIP
         tmnt_dip_a:array [0..1] of def_dip=(

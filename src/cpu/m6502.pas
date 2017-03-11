@@ -9,7 +9,7 @@ type
                 n,o_v,t,brk,dec,int,z,c:boolean;
         end;
         reg_m6502=record
-                old_pc,pc:word;
+                ppc,pc:word;
                 a,x,y:byte;
                 sp:byte;
                 p:band_m6502;
@@ -294,7 +294,7 @@ if self.pedir_reset<>CLEAR_LINE then begin
   self.contador:=trunc(maximo);
   exit;
 end;
-r.old_pc:=r.pc;
+r.ppc:=r.pc;
 self.read_dummy:=false;
 if not(self.after_ei) then begin
   if (self.pedir_nmi<>CLEAR_LINE) then self.estados_demas:=self.call_nmi
@@ -831,7 +831,7 @@ case instruccion of
             r.p.dec:=true;
           end;
       else
-        MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.old_pc,4), mtInformation,[mbOk], 0)
+        MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
 end; //del case!!
 tempw:=estados_t[self.tipo_cpu and $1,instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;

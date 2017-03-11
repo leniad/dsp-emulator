@@ -3,7 +3,7 @@ unit starforce_hw; //Senjyo
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,z80pio,z80daisy,main_engine,controls_engine,gfx_engine,sn_76496,
-     z80ctc,rom_engine,pal_engine,sound_engine,timer_engine;
+     z80ctc,rom_engine,pal_engine,sound_engine;
 
 procedure cargar_starforce;
 

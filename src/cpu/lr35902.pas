@@ -20,7 +20,7 @@ type
         destructor free;
       public
         speed:byte;
-        ime,change_speed:boolean;
+        ime,change_speed,changed_speed:boolean;
         vblank_ena,lcdstat_ena,timer_ena,joystick_ena,serial_ena:boolean;
         vblank_req,lcdstat_req,timer_req,joystick_req,serial_req:boolean;
         procedure reset;
@@ -28,7 +28,7 @@ type
         procedure set_internal_r(reg:preg_lr);
       private
         r:preg_lr;
-        after_ei,changed_speed,halt:boolean;
+        after_ei,halt:boolean;
         function read_word(direccion:word):word;
         function inc_8bit(val:byte):byte;
         function dec_8bit(val:byte):byte;
@@ -56,6 +56,7 @@ var
   lr35902_0:cpu_lr;
 
 implementation
+
 const
   gb_t:array[0..255] of byte=(
    4,12, 8, 8, 4, 4, 8, 4,20, 8, 8, 8, 4, 4, 8, 4,  //0
@@ -409,8 +410,8 @@ if not(self.after_ei) then begin
     if (self.vblank_ena and self.vblank_req) then begin //Vblank
       self.halt:=false;
       if self.ime then begin
-        self.vblank_req:=false;
         self.ime:=false;
+        self.vblank_req:=false;
         r.sp:=r.sp-2;
         self.putbyte(r.sp,r.pc and $ff);
         self.putbyte(r.sp+1,r.pc shr 8);
@@ -421,8 +422,8 @@ if not(self.after_ei) then begin
       if (self.lcdstat_ena and self.lcdstat_req) then begin //STAT
         self.halt:=false;
         if self.ime then begin
-          self.lcdstat_req:=false;
           self.ime:=false;
+          self.lcdstat_req:=false;
           r.sp:=r.sp-2;
           self.putbyte(r.sp,r.pc and $ff);
           self.putbyte(r.sp+1,r.pc shr 8);
@@ -433,8 +434,8 @@ if not(self.after_ei) then begin
         if (self.timer_ena and self.timer_req) then begin //Timers
           self.halt:=false;
           if self.ime then begin
-            self.timer_req:=false;
             self.ime:=false;
+            self.timer_req:=false;
             r.sp:=r.sp-2;
             self.putbyte(r.sp,r.pc and $ff);
             self.putbyte(r.sp+1,r.pc shr 8);
@@ -445,8 +446,8 @@ if not(self.after_ei) then begin
             if (self.joystick_ena and self.joystick_req) then begin //Joystick
               self.halt:=false;
               if self.ime then begin
-                self.joystick_req:=false;
                 self.ime:=false;
+                self.joystick_req:=false;
                 r.sp:=r.sp-2;
                 self.putbyte(r.sp,r.pc and $ff);
                 self.putbyte(r.sp+1,r.pc shr 8);
@@ -1345,7 +1346,7 @@ if not(self.halt) then begin
         r.pc:=r.pc+2;
         self.putbyte(tempw,r.a);
       end;
-  $EE:begin  // XOR A,nn
+  $ee:begin  // XOR A,nn
         xor_a(self.getbyte(r.pc));
         r.pc:=r.pc+1;
       end;
@@ -1427,7 +1428,7 @@ if not(self.halt) then begin
     else MessageDlg('Instruccion desconocida LR35902. PC= '+inttohex(oldpc,4)+' - '+inttohex(instruccion,2), mtInformation,[mbOk], 0);
  end; //Del case
 end;
-tempw:=(gb_t[instruccion]+self.estados_demas) shr self.speed;
+tempw:=gb_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
 update_timer(self.contador-old_contador,self.numero_cpu);
 self.despues_instruccion(tempw);

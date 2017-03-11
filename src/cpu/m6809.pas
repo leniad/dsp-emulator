@@ -615,27 +615,15 @@ case paginacion[instruccion] of
     else MessageDlg('Num CPU'+inttostr(self.numero_cpu)+' instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' OLD_PC='+inttohex(self.r.old_pc,10), mtInformation,[mbOk], 0)
 end;
 case instruccion of
-      $0,$60,$70:begin  //neg 4T
-                    temp:=self.getbyte(posicion);
-                    m680x_neg(@temp,@r.cc);
-                    self.putbyte(posicion,temp);
-                 end;
+      $0,$60,$70:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc));  //neg 4T
       $2,$3,$63,$73:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T ($2 es ilegal!!)
       $4,$64,$74:self.putbyte(posicion,m680x_lsr(self.getbyte(posicion),@r.cc)); //lsr 4T
       $6,$66,$76:self.putbyte(posicion,m680x_ror(self.getbyte(posicion),@r.cc)); //ror 4T
       $7,$67,$77:self.putbyte(posicion,m680x_asr(self.getbyte(posicion),@r.cc)); //asr 4T
       $8,$68,$78:self.putbyte(posicion,m680x_asl(self.getbyte(posicion),@r.cc)); //asl 4T
       $9,$69,$79:self.putbyte(posicion,m680x_rol(self.getbyte(posicion),@r.cc)); //rol 4T
-      $a,$6a,$7a:begin //dec 4T
-                    temp:=self.getbyte(posicion);
-                    m680x_dec(@temp,@r.cc);
-                    self.putbyte(posicion,temp);
-                 end;
-      $c,$6c,$7c:begin //inc 4T
-                    temp:=self.getbyte(posicion);
-                    m680x_inc(@temp,@r.cc);
-                    self.putbyte(posicion,temp);
-                 end;
+      $a,$6a,$7a:self.putbyte(posicion,m680x_dec(self.getbyte(posicion),@r.cc)); //dec 4T
+      $c,$6c,$7c:self.putbyte(posicion,m680x_inc(self.getbyte(posicion),@r.cc)); //inc 4T
       $d,$6d,$7d:m680x_tst(self.getbyte(posicion),@r.cc); //tst 3T
       $e,$6e,$7e:r.pc:=posicion;  //jmp 1T
       $f,$6f,$7f:begin //clr 4T
@@ -794,8 +782,7 @@ case instruccion of
             self.pon_pila(temp);
           end;
       $1d:begin //sex 2T
-            if (r.d.b and $80)<>0 then r.d.a:=$ff
-              else r.d.a:=0;
+            r.d.a:=$ff*(r.d.b shr 7);
             r.cc.n:=(r.d.w and $8000)<>0;
             r.cc.z:=(r.d.w=0);
       end;
@@ -994,15 +981,15 @@ case instruccion of
           r.cc.c:=(r.d.w and $80)<>0;
           r.cc.z:=(r.d.w=0);
       end;
-      $40:m680x_neg(@r.d.a,@r.cc); //nega 2T
+      $40:r.d.a:=m680x_neg(r.d.a,@r.cc); //nega 2T
       $43:r.d.a:=m680x_com(r.d.a,@r.cc);  //coma 2T
       $44:r.d.a:=m680x_lsr(r.d.a,@r.cc); //lsra 2T
       $46:r.d.a:=m680x_ror(r.d.a,@r.cc); //rora 2T
       $47:r.d.a:=m680x_asr(r.d.a,@r.cc); //asra 2T
       $48:r.d.a:=m680x_asl(r.d.a,@r.cc); //asla 2T
       $49:r.d.a:=m680x_rol(r.d.a,@r.cc);  //rola 2T
-      $4a:m680x_dec(@r.d.a,@r.cc); //deca 2T
-      $4c:m680x_inc(@r.d.a,@r.cc); //inca 2T
+      $4a:r.d.a:=m680x_dec(r.d.a,@r.cc); //deca 2T
+      $4c:r.d.a:=m680x_inc(r.d.a,@r.cc); //inca 2T
       $4d:m680x_tst(r.d.a,@r.cc); //tsta 2T
       $4f:begin //clra 2T
             r.d.a:=0;
@@ -1011,15 +998,15 @@ case instruccion of
             r.cc.v:=false;
             r.cc.c:=false;
           end;
-      $50:m680x_neg(@r.d.b,@r.cc);  //negb 2T
+      $50:r.d.b:=m680x_neg(r.d.b,@r.cc);  //negb 2T
       $53:r.d.b:=m680x_com(r.d.b,@r.cc);  //comb 2T
       $54:r.d.b:=m680x_lsr(r.d.b,@r.cc);   //lsrb 2T
       $56:r.d.b:=m680x_ror(r.d.b,@r.cc); //rorb 2T
       $57:r.d.b:=m680x_asr(r.d.b,@r.cc);  //asrb 2T
       $58:r.d.b:=m680x_asl(r.d.b,@r.cc);  //aslb 2T
       $59:r.d.b:=m680x_rol(r.d.b,@r.cc);  //rolb 2T
-      $5a:m680x_dec(@r.d.b,@r.cc);  //decb 2T
-      $5c:m680x_inc(@r.d.b,@r.cc);  //incb 2T
+      $5a:r.d.b:=m680x_dec(r.d.b,@r.cc);  //decb 2T
+      $5c:r.d.b:=m680x_inc(r.d.b,@r.cc);  //incb 2T
       $5d:m680x_tst(r.d.b,@r.cc); //tstb 2T
       $5f:begin //clrb 2T
             r.d.b:=0;

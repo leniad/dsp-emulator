@@ -1,7 +1,7 @@
 object joy_calibration: Tjoy_calibration
-  Left = 306
+  Left = 773
   Height = 236
-  Top = 140
+  Top = 192
   Width = 243
   BorderIcons = []
   BorderStyle = bsSingle
@@ -9,7 +9,7 @@ object joy_calibration: Tjoy_calibration
   ClientHeight = 236
   ClientWidth = 243
   OnShow = FormShow
-  LCLVersion = '1.5'
+  LCLVersion = '1.6.2.0'
   object Label1: TLabel
     Left = 35
     Height = 15

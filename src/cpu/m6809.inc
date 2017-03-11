@@ -1,13 +1,13 @@
-procedure m680x_neg(valor:pbyte;cc:pband_m6809);
+function m680x_neg(valor:byte;cc:pband_m6809):byte;
 var
   tempw:word;
 begin
-tempw:=-valor^;
+tempw:=-valor;
 cc.n:=(tempw and $80)<>0;
 cc.z:=(tempw and $ff)=0;
 cc.c:=(tempw and $100)<>0;
-cc.v:=((0 xor valor^ xor tempw xor (tempw shr 1)) and $80)<>0;
-valor^:=tempw;
+cc.v:=((0 xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_neg:=tempw;
 end;
 
 function m680x_com(valor:byte;cc:pband_m6809):byte;
@@ -37,8 +37,7 @@ function m680x_ror(valor:byte;cc:pband_m6809):byte;
 var
   temp:byte;
 begin
-if cc.c then temp:=(valor shr 1) or $80
-  else temp:=valor shr 1;
+temp:=(valor shr 1) or (byte(cc.c) shl 7);
 cc.c:=(valor and $1)<>0;
 cc.n:=(temp and $80)<>0;
 cc.z:=(temp=0);
@@ -72,8 +71,7 @@ function m680x_rol(valor:byte;cc:pband_m6809):byte;
 var
   tempw:word;
 begin
-if cc.c then tempw:=(valor shl 1) or 1
-  else tempw:=valor shl 1;
+tempw:=(valor shl 1) or byte(cc.c);
 cc.c:=(valor and $80)<>0;
 cc.v:=((valor xor valor xor tempw xor (tempw shr 1)) and $80)<>0;
 cc.n:=(tempw and $80)<>0;
@@ -81,26 +79,26 @@ cc.z:=(tempw and $ff)=0;
 m680x_rol:=tempw;
 end;
 
-procedure m680x_dec(valor:pbyte;cc:pband_m6809);
+function m680x_dec(valor:byte;cc:pband_m6809):byte;
 var
   tempw:word;
 begin
-tempw:=valor^-1;
+tempw:=valor-1;
 cc.z:=((tempw and $ff)=0);
 cc.n:=(tempw and $80)<>0;
-cc.v:=((valor^ xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
-valor^:=tempw;
+cc.v:=((valor xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_dec:=tempw;
 end;
 
-procedure m680x_inc(valor:pbyte;cc:pband_m6809);
+function m680x_inc(valor:byte;cc:pband_m6809):byte;
 var
   tempw:word;
 begin
-tempw:=valor^+1;
+tempw:=valor+1;
 cc.z:=((tempw and $ff)=0);
 cc.n:=(tempw and $80)<>0;
-cc.v:=((valor^ xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
-valor^:=tempw;
+cc.v:=((valor xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
+m680x_inc:=tempw;
 end;
 
 procedure m680x_tst(valor:byte;cc:pband_m6809);
@@ -138,8 +136,7 @@ function m680x_sbc(sub1,sub2:byte;cc:pband_m6809):byte;
 var
   tempw:word;
 begin
-if cc.c then tempw:=sub1-sub2-1
-  else tempw:=sub1-sub2;
+tempw:=sub1-sub2-byte(cc.c);
 cc.c:=(tempw and $100)<>0;
 cc.n:=(tempw and $80)<>0;
 cc.z:=(tempw and $ff)=0;
@@ -173,8 +170,7 @@ function m680x_adc(valor1,valor2:byte;cc:pband_m6809):byte;
 var
   tempw:word;
 begin
-if cc.c then tempw:=valor1+valor2+1
-  else tempw:=valor1+valor2;
+tempw:=valor1+valor2+byte(cc.c);
 cc.c:=(tempw and $100)<>0;
 cc.h:=((valor1 xor valor2 xor tempw) and $10)<>0;
 cc.n:=(tempw and $80)<>0;
@@ -223,7 +219,7 @@ function m680x_ld_st8(valor:byte;cc:pband_m6809):byte;
 begin
 cc.n:=(valor and $80)<>0;
 cc.z:=(valor=0);
-cc.v:=false;
+cc.v:=((0 xor valor xor valor xor (valor shr 1)) and $80)<>0;
 m680x_ld_st8:=valor;
 end;
 
@@ -231,7 +227,7 @@ function m680x_ld_st16(valor:word;cc:pband_m6809):word;
 begin
 cc.n:=(valor and $8000)<>0;
 cc.z:=(valor=0);
-cc.v:=false;
+cc.v:=((0 xor valor xor valor xor (valor shr 1)) and $8000)<>0;
 m680x_ld_st16:=valor;
 end;
 
@@ -308,6 +304,7 @@ function m680x_lsrd(valor:word;numero:byte;cc:pband_m6809):word;
 var
    tempw:word;
 begin
+tempw:=valor;
 if (numero<>0) then begin
    if (valor and (1 shl numero))<>0 then cc.c:=true
       else cc.c:=false;
@@ -323,6 +320,7 @@ function m680x_asld(valor:word;numero:byte;cc:pband_m6809):word;
 var
    tempw:word;
 begin
+tempw:=valor;
 if (numero<>0) then begin  //asld
    if (valor and ($10000 shr numero))<>0 then cc.c:=true
       else cc.c:=false;
@@ -358,22 +356,46 @@ cc.v:=((valor xor valor xor templ xor (templ shr 1)) and $8000)<>0;
 m680x_asl16:=templ;
 end;
 
+function m680x_asr16(valor:word;cc:pband_m6809):word;
+var
+  tempw:word;
+begin
+tempw:=(valor shr 1) or (valor and $8000);
+cc.n:=(tempw and $8000)<>0;
+cc.z:=(tempw=0);
+cc.c:=(valor and $1)<>0;
+m680x_asr16:=tempw;
+end;
+
 function m680x_abs16(valor:word;cc:pband_m6809):word;
 var
-  templ:dword;
+  tempw:word;
 begin
-templ:=dword(smallint(valor));
-cc.c:=(templ and $8000)<>0;
-cc.v:=((0 xor valor xor templ xor (templ shr 1)) and $8000)<>0;
-cc.n:=(templ and $8000)<>0;
-cc.z:=(templ and $ffff)=0;
-m680x_abs16:=abs(smallint(valor));
+tempw:=abs(smallint(valor));
+cc.c:=false;
+cc.v:=((0 xor valor xor tempw xor (tempw shr 1)) and $8000)<>0;
+cc.n:=false;
+cc.z:=(tempw=0);
+m680x_abs16:=tempw;
+end;
+
+function m680x_abs8(valor:byte;cc:pband_m6809):byte;
+var
+  tempb:byte;
+begin
+tempb:=abs(shortint(valor));
+cc.c:=false;
+cc.v:=((0 xor valor xor tempb xor (tempb shr 1)) and $80)<>0;
+cc.n:=false;
+cc.z:=(tempb=0);
+m680x_abs8:=tempb;
 end;
 
 function m680x_asrd(valor:word;numero:byte;cc:pband_m6809):word;
 var
    tempw:word;
 begin
+tempw:=valor;
 if (numero<>0) then begin
    if (valor and (1 shl numero))<>0 then cc.c:=true
       else cc.c:=false;

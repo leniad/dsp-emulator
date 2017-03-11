@@ -887,8 +887,6 @@ z80_0:=cpu_z80.create(3072000,264);
 z80_2:=cpu_z80.create(3072000,264);
 //Sub2 CPU
 z80_1:=cpu_z80.create(3072000,264);
-//Sound
-namco_snd_0:=namco_snd_chip.create(3);
 //IO's
 namcoio_51xx_init(@marcade.in0,@marcade.in1);
 case main_vars.tipo_maquina of
@@ -901,6 +899,8 @@ case main_vars.tipo_maquina of
           z80_2.change_ram_calls(galaga_sub_getbyte,galaga_putbyte);
           //Sub2
           z80_1.change_ram_calls(galaga_sub2_getbyte,galaga_putbyte);
+          //Sound
+          namco_snd_0:=namco_snd_chip.create(3);
           //Init IO's
           namco_06xx_init(0,IO51XX,NONE,NONE,IO54XX,namco_06xx_nmi);
           //Namco 54xx
@@ -950,6 +950,8 @@ case main_vars.tipo_maquina of
           z80_2.change_ram_calls(digdug_sub_getbyte,digdug_putbyte);
           //Sub2
           z80_1.change_ram_calls(digdug_sub2_getbyte,digdug_putbyte);
+          //Sound
+          namco_snd_0:=namco_snd_chip.create(3);
           //Init IO's
           namco_06xx_init(0,IO51XX,IO53XX,NONE,NONE,namco_06xx_nmi);
           //Namco 53XX
@@ -1005,8 +1007,10 @@ case main_vars.tipo_maquina of
           //Namco 54xx
           if not(namcoio_50xx_init('xevious.zip')) then exit;
           if not(namcoio_54xx_init('xevious.zip')) then exit;
-          load_samples('xevious.zip',@xevious_samples[0],num_samples_xevious);
           z80_0.init_sound(galaga_sound_update);
+          load_samples('xevious.zip',@xevious_samples[0],num_samples_xevious);
+          //Sound
+          namco_snd_0:=namco_snd_chip.create(3);
           //cargar roms
           if not(cargar_roms(@memoria[0],@xevious_rom[0],'xevious.zip',0)) then exit;
           if not(cargar_roms(@mem_snd[0],@xevious_sub,'xevious.zip',0)) then exit;

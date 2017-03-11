@@ -498,8 +498,6 @@ iniciar_video(256,224);
 z80_0:=cpu_z80.create(6000000,$100);
 //Misc CPU
 z80_1:=cpu_z80.create(6000000,$100);
-//Sound chip
-ym2203_0:=ym2203_chip.create(3000000,2);
 case main_vars.tipo_maquina of
   129:begin   //TNZS
         z80_0.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
@@ -511,6 +509,7 @@ case main_vars.tipo_maquina of
         z80_2.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
         z80_2.init_sound(tnzs_sound_update);
         //Sound Chips
+        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_irq_calls(snd_irq);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@tnzs_rom,'tnzs.zip',1)) then exit;
@@ -541,7 +540,8 @@ case main_vars.tipo_maquina of
         //Misc CPU
         z80_1.init_sound(tnzs_sound_update);
         z80_1.change_ram_calls(insectorx_misc_getbyte,insectorx_misc_putbyte);
-        //Sound Chips
+        //Sound chip
+        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
         //cargar roms
         if not(cargar_roms(@memoria_temp[0],@insectorx_rom,'insectx.zip',1)) then exit;

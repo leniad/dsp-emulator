@@ -73,15 +73,15 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=h6280_0.tframes;
-frame_s:=m6502_1.tframes;
+frame_s:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    //Main
    h6280_0.run(trunc(frame_m));
    frame_m:=frame_m+h6280_0.tframes-h6280_0.contador;
    //Sound
-   m6502_1.run(frame_s);
-   frame_s:=frame_s+m6502_1.tframes-m6502_1.contador;
+   m6502_0.run(frame_s);
+   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
    case f of
       247:begin
             h6280_0.set_irq_line(0,HOLD_LINE);
@@ -187,7 +187,7 @@ case direccion of
                    end;
   $150000:begin
               sound_latch:=valor;
-              m6502_1.change_nmi(PULSE_LINE);
+              m6502_0.change_nmi(PULSE_LINE);
           end;
   $160000:;
   $1f0000..$1f3fff:ram[direccion and $3fff]:=valor;
@@ -225,14 +225,14 @@ end;
 
 procedure snd_irq(irqstate:byte);
 begin
-  m6502_1.change_irq(irqstate);
+  m6502_0.change_irq(irqstate);
 end;
 
 //Main
 procedure reset_actfancer;
 begin
  h6280_0.reset;
- m6502_1.reset;
+ m6502_0.reset;
  ym3812_0.reset;
  ym2203_0.reset;
  oki_6295_0.reset;
@@ -269,9 +269,9 @@ deco_bac06_init(0,1,2,0,1,2,0,$100,$000,$000,$fff,$fff,$000,2,1,1);
 h6280_0:=cpu_h6280.create(21477200 div 3,$100);
 h6280_0.change_ram_calls(actfancer_getbyte,actfancer_putbyte);
 //Sound CPU
-m6502_1:=cpu_m6502.create(1500000,256,TCPU_M6502);
-m6502_1.change_ram_calls(actfancer_snd_getbyte,actfancer_snd_putbyte);
-m6502_1.init_sound(actfancer_sound_update);
+m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
+m6502_0.change_ram_calls(actfancer_snd_getbyte,actfancer_snd_putbyte);
+m6502_0.init_sound(actfancer_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.9);
 ym3812_0.change_irq_calls(snd_irq);
@@ -321,7 +321,6 @@ llamadas_maquina.bucle_general:=actfancer_principal;
 llamadas_maquina.iniciar:=iniciar_actfancer;
 llamadas_maquina.close:=cerrar_actfancer;
 llamadas_maquina.reset:=reset_actfancer;
-llamadas_maquina.fps_max:=60;
 end;
 
 end.

@@ -85,7 +85,7 @@ begin
 if fileexists(directory.Base+'dsp.ini') then begin
   fich_ini:=Tinifile.Create(directory.Base+'dsp.ini');
   //Diretorios de roms
-  Directory.Arcade_roms:=fich_ini.readString('Dir','arcade',directory.Base+'roms'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  split_dirs(fich_ini.readString('Dir','arcade',directory.Base+'roms'));
   Directory.Arcade_hi:=fich_ini.readString('dir','dir_hi',directory.Base+'hi'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Arcade_nvram:=fich_ini.readString('dir','dir_nvram',directory.Base+'nvram'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.qsnapshot:=fich_ini.readString('dir','qsnapshot',directory.Base+'qsnap'+main_vars.cadena_dir)+main_vars.cadena_dir;
@@ -217,7 +217,7 @@ end else begin
   Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
   Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
   Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
-  Directory.Arcade_roms:=directory.base+'roms'+main_vars.cadena_dir;
+  Directory.arcade_list_roms[0]:=directory.base+'roms'+main_vars.cadena_dir;
   Directory.Arcade_hi:=directory.base+'hi'+main_vars.cadena_dir;
   Directory.Arcade_nvram:=directory.base+'nvram'+main_vars.cadena_dir;
   Directory.Arcade_samples:=directory.base+'samples'+main_vars.cadena_dir;
@@ -317,27 +317,27 @@ end else begin
     arcade_input.joy_down[f]:=0;
   end;
 end;
-if directory.Nes='' then Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
-if Directory.GameBoy='' then Directory.GameBoy:=directory.base+'gameboy'+main_vars.cadena_dir;
-if Directory.Chip8='' then Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
-if Directory.sms='' then Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
-if Directory.coleco_snap='' then Directory.coleco_snap:=directory.base+'coleco'+main_vars.cadena_dir;
-if Directory.spectrum_image='' then Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
-if Directory.qsnapshot='' then Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
-if Directory.spectrum_48='' then Directory.spectrum_48:=directory.base+'roms'+main_vars.cadena_dir+'spectrum.zip';
-if Directory.spectrum_128='' then Directory.spectrum_128:=directory.base+'roms'+main_vars.cadena_dir+'spec128.zip';
-if Directory.spectrum_3='' then Directory.spectrum_3:=directory.base+'roms'+main_vars.cadena_dir+'plus3.zip';
-if Directory.Arcade_roms='' then Directory.Arcade_roms:=directory.base+'roms'+main_vars.cadena_dir;
-if directory.Arcade_hi='' then directory.Arcade_hi:=directory.base+'hi'+main_vars.cadena_dir;
-if directory.Arcade_nvram='' then directory.Arcade_nvram:=directory.base+'nvram'+main_vars.cadena_dir;
-if directory.Arcade_samples='' then directory.Arcade_samples:=directory.base+'samples'+main_vars.cadena_dir;
-if Directory.Preview='' then Directory.Preview:=directory.base+'preview'+main_vars.cadena_dir;
-if Directory.spectrum_tap_snap='' then directory.spectrum_tap_snap:=directory.base+'snap'+main_vars.cadena_dir;
-if Directory.spectrum_disk='' then Directory.spectrum_disk:=directory.base+'dsk'+main_vars.cadena_dir;
-if Directory.amstrad_tap='' then Directory.amstrad_tap:=directory.base+'cdt'+main_vars.cadena_dir;
-if Directory.amstrad_disk='' then Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
-if Directory.amstrad_snap='' then Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
-if Directory.amstrad_rom='' then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
+if ((directory.Nes='') or (directory.Nes=main_vars.cadena_dir)) then Directory.Nes:=directory.base+'nes'+main_vars.cadena_dir;
+if ((Directory.GameBoy='') or (directory.GameBoy=main_vars.cadena_dir)) then Directory.GameBoy:=directory.base+'gameboy'+main_vars.cadena_dir;
+if ((Directory.Chip8='') or (directory.Chip8=main_vars.cadena_dir)) then Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
+if ((Directory.sms='') or (directory.sms=main_vars.cadena_dir)) then Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
+if ((Directory.coleco_snap='') or (directory.coleco_snap=main_vars.cadena_dir)) then Directory.coleco_snap:=directory.base+'coleco'+main_vars.cadena_dir;
+if ((Directory.spectrum_image='') or (directory.spectrum_image=main_vars.cadena_dir)) then Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
+if ((Directory.qsnapshot='') or (directory.qsnapshot=main_vars.cadena_dir)) then Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
+if ((Directory.spectrum_48='') or (directory.spectrum_48=main_vars.cadena_dir)) then Directory.spectrum_48:=directory.base+'roms'+main_vars.cadena_dir+'spectrum.zip';
+if ((Directory.spectrum_128='') or (directory.spectrum_128=main_vars.cadena_dir)) then Directory.spectrum_128:=directory.base+'roms'+main_vars.cadena_dir+'spec128.zip';
+if ((Directory.spectrum_3='') or (directory.spectrum_3=main_vars.cadena_dir)) then Directory.spectrum_3:=directory.base+'roms'+main_vars.cadena_dir+'plus3.zip';
+if ((Directory.arcade_list_roms[0]='') or (Directory.arcade_list_roms[0]=main_vars.cadena_dir)) then Directory.arcade_list_roms[0]:=directory.base+'roms'+main_vars.cadena_dir;
+if ((directory.Arcade_hi='') or (directory.Arcade_hi=main_vars.cadena_dir)) then directory.Arcade_hi:=directory.base+'hi'+main_vars.cadena_dir;
+if ((directory.Arcade_nvram='') or (directory.Arcade_nvram=main_vars.cadena_dir)) then directory.Arcade_nvram:=directory.base+'nvram'+main_vars.cadena_dir;
+if ((directory.Arcade_samples='') or (directory.Arcade_samples=main_vars.cadena_dir)) then directory.Arcade_samples:=directory.base+'samples'+main_vars.cadena_dir;
+if ((Directory.Preview='') or (directory.Preview=main_vars.cadena_dir)) then Directory.Preview:=directory.base+'preview'+main_vars.cadena_dir;
+if ((Directory.spectrum_tap_snap='') or (directory.spectrum_tap_snap=main_vars.cadena_dir)) then directory.spectrum_tap_snap:=directory.base+'snap'+main_vars.cadena_dir;
+if ((Directory.spectrum_disk='') or (directory.spectrum_disk=main_vars.cadena_dir)) then Directory.spectrum_disk:=directory.base+'dsk'+main_vars.cadena_dir;
+if ((Directory.amstrad_tap='') or (directory.amstrad_tap=main_vars.cadena_dir)) then Directory.amstrad_tap:=directory.base+'cdt'+main_vars.cadena_dir;
+if ((Directory.amstrad_disk='') or (directory.amstrad_disk=main_vars.cadena_dir)) then Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
+if ((Directory.amstrad_snap='') or (directory.amstrad_snap=main_vars.cadena_dir)) then Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
+if ((Directory.amstrad_rom='') or( directory.amstrad_rom=main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
 end;
 
 function test_dir(cadena:string):string;
@@ -361,7 +361,7 @@ if @fich_ini=nil then begin
 end;
 fich_ini.WriteInteger('dsp','idioma',main_vars.idioma);
 //Inicializacion de Diretorios
-fich_ini.Writestring('dir','arcade',test_dir(Directory.Arcade_roms));
+fich_ini.Writestring('dir','arcade',get_all_dirs);
 fich_ini.Writestring('dir','dir_hi',test_dir(Directory.Arcade_hi));
 fich_ini.Writestring('dir','dir_nvram',test_dir(Directory.Arcade_nvram));
 fich_ini.Writestring('dir','dir_samples',test_dir(Directory.Arcade_samples));
@@ -784,7 +784,7 @@ begin
   load_file_from_zip_crc:=false;
   //Si no existe el ZIP -> Error
   if not(FileExists(nombre_zip)) then begin
-    MessageDlg(leng[main_vars.idioma].errores[2]+' "'+nombre_zip+'" ', mtError,[mbOk], 0);
+    MessageDlg(leng[main_vars.idioma].errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
     exit;
   end;
   find:=false;

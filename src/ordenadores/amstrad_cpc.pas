@@ -723,8 +723,6 @@ end;
 
 //Tape
 procedure amstrad_despues_instruccion(estados_t:word);
-var
-  amst_z80_reg:npreg_z80;
 begin
 if cinta_tzx.cargada then begin
   if (not(cpc_ppi.tape_motor) and cinta_tzx.play_once) then begin
@@ -746,8 +744,7 @@ if cinta_tzx.cargada then begin
       cinta_tzx.estados:=cinta_tzx.estados+estados_t;
       play_cinta_tzx;
   end else begin
-    amst_z80_reg:=z80_0.get_internal_r;
-    if ((amst_z80_reg.pc=$bc77) and not(cinta_tzx.play_once)) then begin
+    if ((z80_0.get_pc=$bc77) and not(cinta_tzx.play_once)) then begin
        cinta_tzx.play_once:=true;
        main_screen.rapido:=true;
        tape_window1.fPlayCinta(nil);

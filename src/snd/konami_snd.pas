@@ -10,7 +10,7 @@ type
     public
           sound_latch,pedir_irq:byte;
           z80:cpu_z80;
-          memoria:array[0..$5fff] of byte;
+          memoria:array[0..$83ff] of byte;
           procedure reset;
           procedure run(frame:word);
     private
@@ -20,26 +20,6 @@ type
           function portb_read:byte;
           function timer(frame:word):byte;
     end;
-
-function konamisnd0_porta:byte;
-function konamisnd0_portb:byte;
-procedure konamisnd_update;
-//Tipo timepilot
-function konamisnd_timeplt_getbyte(direccion:word):byte;
-procedure konamisnd_timeplt_putbyte(direccion:word;valor:byte);
-//Tipo jungler
-function konamisnd_jungler_getbyte(direccion:word):byte;
-procedure konamisnd_jungler_putbyte(direccion:word;valor:byte);
-//Tipo scramble
-function konamisnd_scramble_getbyte(direccion:word):byte;
-procedure konamisnd_scramble_putbyte(direccion:word;valor:byte);
-function konamisnd_scramble_inbyte(puerto:word):byte;
-procedure konamisnd_scramble_outbyte(puerto:word;valor:byte);
-//Tipo frogger
-function konamisnd_frogger_getbyte(direccion:word):byte;
-procedure konamisnd_frogger_putbyte(direccion:word;valor:byte);
-function konamisnd_frogger_inbyte(puerto:word):byte;
-procedure konamisnd_frogger_outbyte(puerto:word;valor:byte);
 
 var
   konamisnd_0:konamisnd_chip;
@@ -51,90 +31,6 @@ const
   TIPO_FROGGER=3;
 
 implementation
-
-constructor konamisnd_chip.create(amp,ntipo:byte;clock:integer;frame_div:word);
-begin
-self.tipo:=ntipo;
-self.z80:=cpu_z80.create(clock,frame_div);
-self.z80.init_sound(konamisnd_update);
-ay8910_0:=ay8910_chip.create(clock,AY8910,amp);
-ay8910_0.change_io_calls(konamisnd0_porta,konamisnd0_portb,nil,nil);
-ay8910_1:=ay8910_chip.create(clock,AY8910,amp);
-self.frame_s:=self.z80.tframes;
-case ntipo of
-  TIPO_TIMEPLT:self.z80.change_ram_calls(konamisnd_timeplt_getbyte,konamisnd_timeplt_putbyte);
-  TIPO_JUNGLER:self.z80.change_ram_calls(konamisnd_jungler_getbyte,konamisnd_jungler_putbyte);
-  TIPO_SCRAMBLE:begin
-                     self.z80.change_ram_calls(konamisnd_scramble_getbyte,konamisnd_scramble_putbyte);
-                     self.z80.change_io_calls(konamisnd_scramble_inbyte,konamisnd_scramble_outbyte);
-                end;
-  TIPO_FROGGER:begin
-                     self.z80.change_ram_calls(konamisnd_frogger_getbyte,konamisnd_frogger_putbyte);
-                     self.z80.change_io_calls(konamisnd_frogger_inbyte,konamisnd_frogger_outbyte);
-                end;
-end;
-end;
-
-destructor konamisnd_chip.free;
-begin
-  self.z80.free;
-end;
-
-procedure konamisnd_chip.reset;
-begin
-self.z80.reset;
-ay8910_0.reset;
-ay8910_1.reset;
-self.sound_latch:=0;
-self.frame:=0;
-self.clock:=0;
-self.last_cycles:=0;
-end;
-
-procedure konamisnd_chip.run(frame:word);
-begin
-self.frame:=frame;
-self.z80.change_irq(self.pedir_irq);
-self.z80.run(frame_s);
-self.frame_s:=self.frame_s+self.z80.tframes-self.z80.contador;
-self.pedir_irq:=self.z80.get_irq;
-end;
-
-function konamisnd_chip.portb_read:byte;
-begin
-if self.tipo=TIPO_FROGGER then portb_read:=BITSWAP8(self.timer(self.frame),7,6,3,4,5,2,1,0)
-   else portb_read:=self.timer(self.frame);
-end;
-
-function konamisnd_chip.timer(frame:word):byte;
-var
-   cycles:dword;
-   hibit:byte;
-begin
-cycles:=((self.z80.contador+round(frame*self.z80.tframes))*8) mod (16*16*2*8*5*2);
-hibit:=0;
-// separate the high bit from the others */
-if (cycles >= (16*16*2*8*5)) then begin
-   hibit:=1;
-   cycles:=cycles-16*16*2*8*5;
-end;
-// the top bits of the counter index map to various bits here */
-timer:=(hibit shl 7) or           // B7 is the output of the final divide-by-2 counter */
-		(BIT_n(cycles,14) shl 6) or // B6 is the high bit of the divide-by-5 counter */
-		(BIT_n(cycles,13) shl 5) or // B5 is the 2nd highest bit of the divide-by-5 counter */
-		(BIT_n(cycles,11) shl 4) or // B4 is the high bit of the divide-by-8 counter */
-		$0e;                        // assume remaining bits are high, except B0 which is grounded */
-end;
-
-function konamisnd0_porta:byte;
-begin
-  konamisnd0_porta:=konamisnd_0.sound_latch;
-end;
-
-function konamisnd0_portb:byte;
-begin
-  konamisnd0_portb:=konamisnd_0.portb_read;
-end;
 
 function konamisnd_timeplt_getbyte(direccion:word):byte;
 begin
@@ -245,10 +141,94 @@ case (puerto and $ff) of
 end;
 end;
 
+function konamisnd0_porta:byte;
+begin
+  konamisnd0_porta:=konamisnd_0.sound_latch;
+end;
+
+function konamisnd0_portb:byte;
+begin
+  konamisnd0_portb:=konamisnd_0.portb_read;
+end;
+
 procedure konamisnd_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
+end;
+
+constructor konamisnd_chip.create(amp,ntipo:byte;clock:integer;frame_div:word);
+begin
+self.tipo:=ntipo;
+self.z80:=cpu_z80.create(clock,frame_div);
+self.z80.init_sound(konamisnd_update);
+ay8910_0:=ay8910_chip.create(clock,AY8910,amp);
+ay8910_0.change_io_calls(konamisnd0_porta,konamisnd0_portb,nil,nil);
+ay8910_1:=ay8910_chip.create(clock,AY8910,amp);
+self.frame_s:=self.z80.tframes;
+case ntipo of
+  TIPO_TIMEPLT:self.z80.change_ram_calls(konamisnd_timeplt_getbyte,konamisnd_timeplt_putbyte);
+  TIPO_JUNGLER:self.z80.change_ram_calls(konamisnd_jungler_getbyte,konamisnd_jungler_putbyte);
+  TIPO_SCRAMBLE:begin
+                     self.z80.change_ram_calls(konamisnd_scramble_getbyte,konamisnd_scramble_putbyte);
+                     self.z80.change_io_calls(konamisnd_scramble_inbyte,konamisnd_scramble_outbyte);
+                end;
+  TIPO_FROGGER:begin
+                     self.z80.change_ram_calls(konamisnd_frogger_getbyte,konamisnd_frogger_putbyte);
+                     self.z80.change_io_calls(konamisnd_frogger_inbyte,konamisnd_frogger_outbyte);
+                end;
+end;
+end;
+
+destructor konamisnd_chip.free;
+begin
+  self.z80.free;
+end;
+
+procedure konamisnd_chip.reset;
+begin
+self.z80.reset;
+ay8910_0.reset;
+ay8910_1.reset;
+self.sound_latch:=0;
+self.frame:=0;
+self.clock:=0;
+self.last_cycles:=0;
+end;
+
+procedure konamisnd_chip.run(frame:word);
+begin
+self.frame:=frame;
+self.z80.change_irq(self.pedir_irq);
+self.z80.run(frame_s);
+self.frame_s:=self.frame_s+self.z80.tframes-self.z80.contador;
+self.pedir_irq:=self.z80.get_irq;
+end;
+
+function konamisnd_chip.portb_read:byte;
+begin
+if self.tipo=TIPO_FROGGER then portb_read:=BITSWAP8(self.timer(self.frame),7,6,3,4,5,2,1,0)
+   else portb_read:=self.timer(self.frame);
+end;
+
+function konamisnd_chip.timer(frame:word):byte;
+var
+   cycles:dword;
+   hibit:byte;
+begin
+cycles:=((self.z80.contador+round(frame*self.z80.tframes))*8) mod (16*16*2*8*5*2);
+hibit:=0;
+// separate the high bit from the others */
+if (cycles >= (16*16*2*8*5)) then begin
+   hibit:=1;
+   cycles:=cycles-16*16*2*8*5;
+end;
+// the top bits of the counter index map to various bits here */
+timer:=(hibit shl 7) or           // B7 is the output of the final divide-by-2 counter */
+		(BIT_n(cycles,14) shl 6) or // B6 is the high bit of the divide-by-5 counter */
+		(BIT_n(cycles,13) shl 5) or // B5 is the 2nd highest bit of the divide-by-5 counter */
+		(BIT_n(cycles,11) shl 4) or // B4 is the high bit of the divide-by-8 counter */
+		$0e;                        // assume remaining bits are high, except B0 which is grounded */
 end;
 
 end.

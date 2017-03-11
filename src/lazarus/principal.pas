@@ -12,7 +12,7 @@ uses lib_sdl2,{$IFDEF WINDOWS}windows,{$else}LCLType,{$endif}
      Graphics,Dialogs,Menus,ExtCtrls,ComCtrls,StdCtrls,Grids,Buttons,
      //misc
      sound_engine,lenguaje,controls_engine,main_engine,loadrom,config_general,
-     init_games,tape_window,
+     init_games,tape_window,timer_engine,
      //Devices
      vars_hide;
 
@@ -193,6 +193,8 @@ type
     ctribe1: TMenuItem;
     Asteroids1: TMenuItem;
     llander1: TMenuItem;
+    crushroller1: TMenuItem;
+    Vendetta1: TMenuItem;
     xevious1: TMenuItem;
     spacefb1: TMenuItem;
     trackfield1: TMenuItem;
@@ -495,7 +497,7 @@ if Savedialog1.execute then begin
           end;
   end;
   temp_s:=SDL_CreateRGBSurface(0,rect2.w,rect2.h,16,0,0,0,0);
-  SDL_UpperBlit(pantalla[0],@rect2,temp_s,@rect2);
+  SDL_LowerBlit(pantalla[0],@rect2,temp_s,@rect2);
   nombre2:=directory.Base+'temp.bmp';
   SDL_SaveBMP_RW(temp_s,SDL_RWFromFile(pointer(nombre2),'wb'), 1);
   SDL_FreeSurface(temp_s);
@@ -607,6 +609,8 @@ principal1.timer2.Enabled:=true;
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+   f:byte;
 begin
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
@@ -614,6 +618,13 @@ if cinta_tzx.cargada then vaciar_cintas;
 if ((addr(llamadas_maquina.close)<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
 file_ini_save;
+//Limpio todos los directorios
+for f:=0 to $ff do begin
+    if directory.arcade_list_roms[f]<>nil then begin
+       freemem(directory.arcade_list_roms[f]);
+       directory.arcade_list_roms[f]:=nil;
+    end;
+end;
 if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
 if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
 sdl_videoquit;
@@ -628,16 +639,17 @@ var
   nuevo:byte;
 begin
 if sender<>nil then nuevo:=Tmenuitem(sender).tag
-  else begin
-    nuevo:=main_screen.video_mode;
-    main_screen.video_mode:=255;
-  end;
-if main_screen.video_mode<>nuevo then main_screen.video_mode:=nuevo;
+  else exit;
+if main_screen.video_mode=nuevo then exit;
 if main_vars.driver_ok then begin
-   if nuevo=6 then pasar_pantalla_completa
-      else cambiar_video;
+    if nuevo=6 then pasar_pantalla_completa
+      else begin
+        main_screen.old_video_mode:=main_screen.video_mode;
+        main_screen.video_mode:=nuevo;
+        cambiar_video;
+        sync_all;
+      end;
 end;
-sync_all;
 end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
@@ -853,6 +865,7 @@ end;
 procedure Tprincipal1.Timer4Timer(Sender: TObject);
 begin
 timer4.Enabled:=false;
+if not(main_vars.driver_ok) then exit;
 EmuStatus:=EmuStatusTemp;
 timer1.Enabled:=true;
 sync_all;

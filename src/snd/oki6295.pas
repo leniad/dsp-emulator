@@ -1,7 +1,7 @@
 unit oki6295;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}
      math,dialogs,timer_engine,sysutils,sound_engine;
 
 const

@@ -3,8 +3,7 @@ unit spectrum_3;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,ay_8910,z80_sp,upd765,controls_engine,spectrum_128k,cargar_dsk,
-     forms,rom_engine,pal_engine,sound_engine,z80pio,disk_file_format,
-     misc_functions;
+     forms,rom_engine,pal_engine,sound_engine,z80pio;
 
 const
   plus3_rom:array[0..4] of tipo_roms=(

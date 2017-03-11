@@ -267,7 +267,9 @@ uses
   i8243 in '..\devices\i8243.pas',
   spacefirebird_hw in '..\arcade\spacefirebird_hw.pas',
   ajax_hw in '..\arcade\ajax_hw.pas',
-  k051316 in '..\devices\k051316.pas';
+  k051316 in '..\devices\k051316.pas',
+  vendetta_hw in '..\arcade\vendetta_hw.pas',
+  k054000 in '..\devices\k054000.pas';
 
 {$R *.res}
 

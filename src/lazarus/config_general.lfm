@@ -1,7 +1,7 @@
 object MConfig: TMConfig
-  Left = 379
+  Left = 1089
   Height = 476
-  Top = 159
+  Top = 352
   Width = 502
   BorderIcons = []
   BorderStyle = bsSingle
@@ -337,7 +337,7 @@ object MConfig: TMConfig
     object TabSheet2: TTabSheet
       Caption = 'Directory'
       ClientHeight = 367
-      ClientWidth = 391
+      ClientWidth = 472
       ImageIndex = 1
       object Label1: TLabel
         Left = 8
@@ -389,17 +389,6 @@ object MConfig: TMConfig
         MaxLength = 0
         TabOrder = 0
       end
-      object D4: TDirectoryEdit
-        Left = 8
-        Height = 21
-        Top = 32
-        Width = 360
-        ShowHidden = False
-        ButtonWidth = 23
-        NumGlyphs = 1
-        MaxLength = 0
-        TabOrder = 1
-      end
       object D5: TDirectoryEdit
         Left = 8
         Height = 21
@@ -409,7 +398,7 @@ object MConfig: TMConfig
         ButtonWidth = 23
         NumGlyphs = 1
         MaxLength = 0
-        TabOrder = 2
+        TabOrder = 1
       end
       object D2: TDirectoryEdit
         Left = 8
@@ -420,7 +409,7 @@ object MConfig: TMConfig
         ButtonWidth = 23
         NumGlyphs = 1
         MaxLength = 0
-        TabOrder = 3
+        TabOrder = 2
       end
       object Label2: TLabel
         Left = 8
@@ -444,7 +433,7 @@ object MConfig: TMConfig
         ButtonWidth = 23
         NumGlyphs = 1
         MaxLength = 0
-        TabOrder = 4
+        TabOrder = 3
       end
       object Label3: TLabel
         Left = 8
@@ -468,7 +457,7 @@ object MConfig: TMConfig
         ButtonWidth = 23
         NumGlyphs = 1
         MaxLength = 0
-        TabOrder = 5
+        TabOrder = 4
       end
       object Label12: TLabel
         Left = 8
@@ -482,6 +471,13 @@ object MConfig: TMConfig
         Font.Style = [fsBold]
         ParentColor = False
         ParentFont = False
+      end
+      object D4: TEdit
+        Left = 10
+        Height = 21
+        Top = 35
+        Width = 334
+        TabOrder = 5
       end
     end
     object TabSheet3: TTabSheet

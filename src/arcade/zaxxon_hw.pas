@@ -49,7 +49,6 @@ const
         zaxxon_sprites:array[0..3] of tipo_roms=(
         (n:'zaxxon11.u77';l:$2000;p:0;crc:$eaf0dd4b),(n:'zaxxon12.u78';l:$2000;p:$2000;crc:$1c5369c7),
         (n:'zaxxon13.u79';l:$2000;p:$4000;crc:$ab4e8a9a),());
-        zaxxon_sound:tipo_roms=(n:'tip_top_rom_17.u19';l:$2000;p:0;crc:$5024e673);
         zaxxon_tilemap:array[0..4] of tipo_roms=(
         (n:'zaxxon8.u91';l:$2000;p:0;crc:$28d65063),(n:'zaxxon7.u90';l:$2000;p:$2000;crc:$6284c200),
         (n:'zaxxon10.u93';l:$2000;p:$4000;crc:$a95e61fd),(n:'zaxxon9.u92';l:$2000;p:$6000;crc:$7e42691f),());
@@ -731,9 +730,7 @@ case main_vars.tipo_maquina of
         pia8255_0:=pia8255_chip.create;
         pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
         //Samples
-        if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon) then begin
-          z80_0.init_sound(zaxxon_sound_update);
-        end;
+        if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon) then z80_0.init_sound(zaxxon_sound_update);
         //cargar roms
         if not(cargar_roms(@memoria[0],@zaxxon_rom[0],'zaxxon.zip',0)) then exit;
         if not(cargar_roms(@memoria_temp[0],@zaxxon_char[0],'zaxxon.zip',0)) then exit;

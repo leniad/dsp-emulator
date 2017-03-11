@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 983
+  Left = 251
   Height = 198
-  Top = 433
+  Top = 285
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -1904,6 +1904,10 @@ object principal1: Tprincipal1
               Caption = 'Ms Pacman'
               OnClick = CambiarMaquina
             end
+            object crushroller1: TMenuItem
+              Caption = 'Crush Roller'
+              OnClick = CambiarMaquina
+            end
           end
           object GalaxianHardware1: TMenuItem
             Caption = 'Galaxian HW'
@@ -2577,6 +2581,10 @@ object principal1: Tprincipal1
           end
           object ajax1: TMenuItem
             Caption = 'Ajax'
+          end
+          object Vendetta1: TMenuItem
+            Caption = 'Vendetta'
+            OnClick = CambiarMaquina
           end
         end
         object M680001: TMenuItem

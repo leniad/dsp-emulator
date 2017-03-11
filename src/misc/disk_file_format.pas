@@ -1,7 +1,7 @@
 unit disk_file_format;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,ipf_disk,misc_functions;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}main_engine,misc_functions;
 
 function dsk_format(DrvNum:byte;longi_ini:dword;datos:pbyte):boolean;
 procedure clear_disk(drvnum:byte);

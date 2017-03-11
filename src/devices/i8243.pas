@@ -1,8 +1,7 @@
 unit i8243;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,cpu_misc;
+uses main_engine,cpu_misc;
 
 type
   i8243_chip=class

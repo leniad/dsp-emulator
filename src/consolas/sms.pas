@@ -289,6 +289,8 @@ begin
 end;
 
 function iniciar_sms:boolean;
+var
+  dir:string;
 begin
 iniciar_sms:=false;
 iniciar_audio(false);
@@ -307,7 +309,8 @@ z80_0.change_io_calls(sms_inbyte,sms_outbyte);
 z80_0.init_sound(sms_sound_update);
 //Mapper
 getmem(mapper_sms,sizeof(tmapper_sms));
-mapper_sms.bios_loaded:=carga_rom_zip(Directory.Arcade_roms+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
+dir:=directory.arcade_list_roms[find_rom_multiple_dirs('sms.zip')];
+mapper_sms.bios_loaded:=carga_rom_zip(dir+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
 if mapper_sms.bios_loaded then mapper_sms.bios_enabled:=file_data.sms_bios_enabled
   else mapper_sms.bios_loaded:=false;
 //VDP

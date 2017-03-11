@@ -97,10 +97,10 @@ for g:=0 to max_canales-1 do begin
   For f:=0 To max_audio_buffer-1 do begin
         getmem(cab_audio[g][f].lpData,sound_status.sample_final*2);
         cab_audio[g][f].dwBufferLength:=sound_status.sample_final*2;
-        cab_audio[g][f].dwUser :=0;
-        cab_audio[g][f].dwFlags := 0;
-        cab_audio[g][f].dwLoops := 0;
-        cab_audio[g][f].lpNext := nil;
+        cab_audio[g][f].dwUser:=0;
+        cab_audio[g][f].dwFlags:=0;
+        cab_audio[g][f].dwLoops:=0;
+        cab_audio[g][f].lpNext:=nil;
         if not(waveOutPrepareHeader(sound_status.audio[g],@cab_audio[g][f],uint(sizeof(WAVEHDR)))=0) then exit;
   end;
 end;
@@ -245,6 +245,7 @@ end;
 procedure sound_engine_change_clock(clock:single);
 begin
   timer[sound_engine_timer].time_final:=clock/FREQ_BASE_AUDIO;
+  sound_status.cpu_clock:=trunc(clock);
 end;
 
 procedure sound_update_internal;

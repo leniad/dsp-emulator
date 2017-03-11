@@ -1527,6 +1527,10 @@ object principal1: Tprincipal1
               Caption = 'Ms. Pac-Man'
               OnClick = CambiarMaquina
             end
+            object CrushRoller1: TMenuItem
+              Caption = 'Crush Roller'
+              OnClick = CambiarMaquina
+            end
           end
           object GalaxianHardware1: TMenuItem
             Caption = 'Galaxian HW'
@@ -2321,6 +2325,10 @@ object principal1: Tprincipal1
             Caption = 'Ajax'
             OnClick = CambiarMaquina
           end
+          object Vendetta1: TMenuItem
+            Caption = 'Vendetta'
+            OnClick = CambiarMaquina
+          end
         end
         object M680001: TMenuItem
           Caption = 'M68000'
@@ -2737,7 +2745,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C0101070028075C0420002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101070028077C0420002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

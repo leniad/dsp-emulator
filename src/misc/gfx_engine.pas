@@ -288,9 +288,11 @@ procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);inline;
 var
    punt:pword;
 begin
+//SDL_LockSurface(pantalla[sitio]);
 punt:=pantalla[sitio].pixels;
 inc(punt,(y*pantalla[sitio].w)+x);
 copymemory(punt,punbuf,cantidad shl 1);
+//SDL_UnlockSurface(pantalla[sitio]);
 end;
 
 procedure putpixel_gfx_int_32(x,y,cantidad:word;sitio:byte);inline;
@@ -902,11 +904,11 @@ pos_y:=pos_y and p_final[dest].sprite_mask_y;
 destino.y:=pos_y+ADD_SPRITE;
 destino.w:=x_size;
 destino.h:=y_size;
-SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -924,11 +926,11 @@ pos_y:=pos_y and p_final[dest].sprite_mask_y;
 destino.y:=pos_y+ADD_SPRITE;
 destino.w:=x_size;
 destino.h:=y_size;
-SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -946,11 +948,11 @@ destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;
 destino.y:=pos_y+ADD_SPRITE;
-SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -968,15 +970,15 @@ pos_y:=pos_y and p_final[dest].sprite_mask_y;
 destino.y:=pos_y+ADD_SPRITE;
 destino.w:=origen.w;
 destino.h:=origen.h;
-SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 end;
 origen.x:=(pos_x+scr_x) and p_final[src_over].scroll.mask_x;
 origen.y:=(pos_y+scr_y) and p_final[src_over].scroll.mask_y;
-SDL_UpperBlit(pantalla[src_over],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[src_over],@origen,pantalla[dest],@destino);
 end;
 
 procedure actualiza_gfx_sprite_zoom(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
@@ -994,11 +996,11 @@ destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;
 destino.y:=pos_y+ADD_SPRITE;
-SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -1016,11 +1018,11 @@ destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;
 destino.y:=pos_y+ADD_SPRITE;
-SDL_UpperBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+  SDL_LowerBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -1039,11 +1041,11 @@ destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;
 destino.y:=pos_y+ADD_SPRITE;
-SDL_UpperBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+  SDL_LowerBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
 end;
 end;
 

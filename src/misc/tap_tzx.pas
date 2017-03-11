@@ -110,7 +110,7 @@ function abrir_wav(data:pbyte;long:integer):boolean;
 function abrir_pzx(data:pbyte;long:integer):boolean;
 
 implementation
-uses principal,spectrum_48k,spectrum_128k,spectrum_3;
+uses spectrum_48k,spectrum_128k,spectrum_3;
 
 const
   tabla_tzx:array[1..8] of byte=(128,64,32,16,8,4,2,1);

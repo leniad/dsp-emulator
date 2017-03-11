@@ -75,6 +75,7 @@ procedure TFLoadRom.init_game_desc;
 var
   f,h,pos:word;
   pos_grid:integer;
+  test:string;
 begin
 with RomList do begin
   RowCount:=games_cont+1;
@@ -102,8 +103,11 @@ with RomList do begin
     end;
     Cells[0,f]:=games_desc[orden_games[f]].name;
     if games_desc[orden_games[f]].zip='' then cells[1,f]:='N/A'
-      else if fileexists(Directory.Arcade_roms+games_desc[orden_games[f]].zip+'.zip') then cells[1,f]:='YES'
-        else cells[1,f]:='NO';
+      else begin
+        test:=directory.arcade_list_roms[find_rom_multiple_dirs(games_desc[orden_games[f]].zip+'.zip')]^;
+        if fileexists(test+games_desc[orden_games[f]].zip+'.zip') then cells[1,f]:='YES'
+          else cells[1,f]:='NO';
+      end;
   end;
 end;
 end;
@@ -155,7 +159,15 @@ end;
 procedure TFLoadRom.BitBtn1Click(Sender: TObject);
 begin
 floadrom.close;
-if main_vars.tipo_maquina=65535 then exit;
+if not(main_vars.driver_ok) then begin
+  principal1.BitBtn2.Enabled:=false;
+  principal1.BitBtn3.Enabled:=false;
+  principal1.BitBtn5.Enabled:=false;
+  principal1.BitBtn6.Enabled:=false;
+  principal1.BitBtn19.Enabled:=false;
+  principal1.BitBtn8.Enabled:=false;
+  exit;
+end;
 //setfocus
 EmuStatus:=EmuStatusTemp;
 principal1.timer1.Enabled:=true;

@@ -1,7 +1,7 @@
 unit operationwolf_hw;
 
 interface
-uses lib_sdl2,{$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_2151,msm5205,
      taitosnd,rom_engine,pal_engine,sound_engine,opwolf_cchip;
 

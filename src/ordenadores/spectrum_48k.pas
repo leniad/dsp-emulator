@@ -64,7 +64,7 @@ cadena:=file_name_only(changefileext(extractfilename(Directory.spectrum_48),''))
 //Aqui utilizo la memoria de la CPU de sonido como buffer...
 if extension_fichero(Directory.spectrum_48)='ZIP' then rom_cargada:=carga_rom_zip(Directory.spectrum_48,cadena+'.ROM',@mem_snd[0],$4000,0,false)
   else begin
-    rom_cargada:=read_file(Directory.spectrum_48,@mem_snd,pos);
+    read_file(Directory.spectrum_48,@mem_snd,pos);
     rom_cargada:=(pos=$4000);
   end;
 //Si ha ido mal me quejo, si ha ido bien copio la ROM a la memoria

@@ -10,7 +10,7 @@ const
 
 type
     k053251_chip=class
-        constructor Create();
+        constructor Create;
         destructor free;
     public
         dirty_tmap:array[0..4] of boolean;
@@ -48,7 +48,7 @@ begin
 	SWAP(1,2);
 end;
 
-constructor k053251_chip.Create();
+constructor k053251_chip.Create;
 begin
 end;
 

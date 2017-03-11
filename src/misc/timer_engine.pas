@@ -32,7 +32,7 @@ procedure init_autofire;
 procedure close_autofire;
 
 implementation
-uses controls_engine,cpu_misc;
+uses controls_engine,cpu_misc,main_engine;
 
 var
   timer_count:integer;
@@ -147,6 +147,7 @@ procedure init_autofire;
 var
   f:byte;
 begin
+  if not(main_vars.driver_ok) then exit;
   if autofire_timer=$ff then autofire_timer:=init_timer(cpu_info[0].num_cpu,1,auto_fire,true);
   //Inicializao de nuevo la velocidad y que este encendido
   timer[autofire_timer].enabled:=true;

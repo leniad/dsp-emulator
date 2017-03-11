@@ -62,7 +62,7 @@ rect2.y:=0;
 rect2.w:=p_final[0].x;
 rect2.h:=p_final[0].y;
 temp_s:=SDL_CreateRGBSurface(0,rect2.w,rect2.h,16,0,0,0,0);
-SDL_UpperBlit(pantalla[1],@rect2,temp_s,@rect2);
+SDL_LowerBlit(pantalla[1],@rect2,temp_s,@rect2);
 nombre2:=directory.Base+'temp.bmp';
 SDL_SaveBMP_RW(temp_s,SDL_RWFromFile(pointer(nombre2),'wb'),1);
 SDL_FreeSurface(temp_s);

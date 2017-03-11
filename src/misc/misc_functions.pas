@@ -241,7 +241,7 @@ case Sistema of
          principal1.OpenDialog1.Filter:='CPC Tape or Snapshot (*.cdt;*.tzx;*.csw;*.wav;*.sna;*zip;)|*.cdt;*.tzx;*.csw;*.wav;*.sna;*.zip';
        end;
   StROM:begin
-         principal1.opendialog1.InitialDir:=Directory.Arcade_roms;
+         principal1.opendialog1.InitialDir:=Directory.arcade_list_roms[0];
          principal1.OpenDialog1.Filter:='ROM Files (*.rom;*.zip)|*.rom;*.zip';
        end;
   StAmstradROM:begin

@@ -1,7 +1,7 @@
 unit lenguaje;
 
 interface
-uses {$ifndef windows}LCLType,{$endif}main_engine;
+{$ifndef windows}uses LCLType;{$endif}
 
 const
       MAX_IDIOMAS=7-1;

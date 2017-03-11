@@ -159,7 +159,7 @@ begin
 //salto a subrutina (opcode $20) que tambien puede ir encriptado.
 temp_r:=m6502_0.get_internal_r;
 act_pc:=temp_r.pc;
-old_pc:=temp_r.old_pc;
+old_pc:=temp_r.ppc;
 if memoria_dec[old_pc]=$20 then act_pc:=memoria[old_pc+1]+256*memoria[old_pc+2];
 if ((act_pc and $0104)=$0104) then memoria_dec[act_pc]:=bitswap8(memoria[act_pc],6,5,3,4,2,7,1,0);
 end;

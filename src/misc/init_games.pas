@@ -29,7 +29,8 @@ uses sysutils,main_engine,rom_engine,rom_export,
   foodfight_hw,nemesis_hw,pirates_hw,junofirst_hw,gyruss_hw,freekick_hw,
   boogiewings_hw,pinballaction_hw,renegade_hw,tmnt_hw,gradius3_hw,
   spaceinvaders_hw,centipede_hw,karnov_hw,aliens_hw,thunderx_hw,simpsons_hw,
-  trackandfield_hw,hypersports_hw,megazone_hw,spacefirebird_hw,ajax_hw;
+  trackandfield_hw,hypersports_hw,megazone_hw,spacefirebird_hw,ajax_hw,
+  vendetta_hw;
 
 type
   tgame_desc=record
@@ -44,7 +45,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=239;
+  games_cont=241;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -281,6 +282,8 @@ const
   (name:'Xevious';year:'1982';snd:1;hi:false;zip:'xevious';grid:231;company:'Namco';rom:@xevious;samples:@xevious_samples),
   (name:'The Combatribes';year:'1990';snd:1;hi:false;zip:'ctribe';grid:232;company:'Technos';rom:@ctribe),
   (name:'Lunar Lander';year:'1979';snd:0;hi:false;zip:'llander';grid:233;company:'Atari';rom:@llander),
+  (name:'Crush Roller';year:'1981';snd:1;hi:false;zip:'crush';grid:234;company:'Alpha Denshi Co./Kural Samno Electric, Ltd.';rom:@crush),
+  (name:'Vendetta';year:'1991';snd:1;hi:false;zip:'vendetta';grid:235;company:'Konami';rom:@vendetta),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -537,6 +540,8 @@ case numero of
   231:principal1.CambiarMaquina(principal1.xevious1);
   232:principal1.CambiarMaquina(principal1.ctribe1);
   233:principal1.CambiarMaquina(principal1.llander1);
+  234:principal1.CambiarMaquina(principal1.crushroller1);
+  235:principal1.CambiarMaquina(principal1.vendetta1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -782,6 +787,8 @@ principal1.ajax1.checked:=false;
 principal1.xevious1.checked:=false;
 principal1.ctribe1.checked:=false;
 principal1.llander1.checked:=false;
+principal1.crushroller1.checked:=false;
+principal1.vendetta1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -857,7 +864,7 @@ case tmaquina of
   2,3:Cargar_Spectrum3;
   7,8,9:Cargar_amstrad_CPC;
   //arcade
-  10,88:Cargar_Pacman;
+  10,88,234:Cargar_Pacman;
   11,202:Cargar_Phoenix;
   12:Cargar_MS;
   13:Cargar_bombjack;
@@ -988,6 +995,7 @@ case tmaquina of
   228:Cargar_megazone;
   229:Cargar_spacefb;
   230:Cargar_ajax;
+  235:Cargar_vendetta;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1934,6 +1942,14 @@ end;
 if sender=principal1.llander1 then begin
   tipo:=233;
   principal1.llander1.Checked:=true;
+end;
+if sender=principal1.crushroller1 then begin
+  tipo:=234;
+  principal1.crushroller1.Checked:=true;
+end;
+if sender=principal1.vendetta1 then begin
+  tipo:=235;
+  principal1.vendetta1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

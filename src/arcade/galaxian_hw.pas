@@ -344,7 +344,7 @@ begin
   stars_blinking:=stars_blinking+1;
 end;
 
-procedure jumpbug_despues_instruccion;
+procedure jumpbug_sound;
 begin
   ay8910_0.update;
 end;
@@ -1092,7 +1092,7 @@ case main_vars.tipo_maquina of
       //funciones Z80
       z80_0.change_ram_calls(jumpbug_getbyte,jumpbug_putbyte);
       //chip de sonido
-      z80_0.init_sound(jumpbug_despues_instruccion);
+      z80_0.init_sound(jumpbug_sound);
       ay8910_0:=ay8910_chip.create(1500000,AY8910,1);
       //Timers
       init_timer(0,3072000*(0.693*(100000+2*10000)*0.00001),jumpbug_blinking,true);

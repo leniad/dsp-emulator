@@ -2,7 +2,7 @@ unit ajax_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,konami,m6809,main_engine,controls_engine,gfx_engine,rom_engine,
+     nz80,konami,m6809,main_engine,controls_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232,misc_functions,
      k051316,dialogs;
 

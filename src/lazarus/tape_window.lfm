@@ -16,7 +16,7 @@ object tape_window1: Ttape_window1
   Font.Quality = fqDraft
   OnClose = FormClose
   OnShow = FormShow
-  LCLVersion = '1.6.0.1'
+  LCLVersion = '1.6.2.0'
   object Edit1: TEdit
     Left = 18
     Height = 20
@@ -486,7 +486,7 @@ object tape_window1: Ttape_window1
     Options = [goVertLine, goHorzLine, goRowSelect]
     ParentFont = False
     ParentShowHint = False
-    RowCount = 3
+    RowCount = 1
     ScrollBars = ssAutoVertical
     ShowHint = True
     TabOrder = 4

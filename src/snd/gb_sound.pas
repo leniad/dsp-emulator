@@ -398,7 +398,7 @@ begin
   gb_sound_w_internal(NR52,$00);
 end;
 
-function sshr(num:integer;fac:byte):integer;
+function sshr(num:integer;fac:byte):integer;inline;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;
@@ -499,14 +499,14 @@ begin
       //       The problem is for GB frequencies above 2000 the frequency gets
       //       clipped. This is caused because gb_snd.snd_3.pos is never 0 at the test.
 			sample:=gb_snd.snd_regs[AUD3W0+(gb_snd.snd_3.offset div 2)];
-			if ((gb_snd.snd_3.offset mod 2)=0) then sample:=sample*16;
-			sample:=(sample and $F)-8;
+			if ((gb_snd.snd_3.offset mod 2)=0) then sample:=sample shr 4;
+			sample:=(sample and $f)-8;
 			if (gb_snd.snd_3.level<>0) then sample:=sshr(sample,(gb_snd.snd_3.level-1))
   			else sample:=0;
 			gb_snd.snd_3.pos:=gb_snd.snd_3.pos+1;
-			if (gb_snd.snd_3.pos>=((gb_snd.snd_3.period shr 21)+gb_snd.snd_3.duty)) then begin
+			if (gb_snd.snd_3.pos>=(dword(gb_snd.snd_3.period shr 21)+gb_snd.snd_3.duty)) then begin
 				gb_snd.snd_3.pos:=0;
-				if (gb_snd.snd_3.dutycount=((gb_snd.snd_3.period shr 16) mod 32)) then begin
+				if (gb_snd.snd_3.dutycount=(dword(gb_snd.snd_3.period shr 16) mod 32)) then begin
 					gb_snd.snd_3.duty:=gb_snd.snd_3.duty-1;
 				end;
 				gb_snd.snd_3.dutycount:=gb_snd.snd_3.dutycount+1;
@@ -517,12 +517,11 @@ begin
 					gb_snd.snd_3.dutycount:=0;
 				end;
 			end;
-
 			if ((gb_snd.snd_3.length<>0) and (gb_snd.snd_3.mode<>0)) then begin
 				gb_snd.snd_3.count:=gb_snd.snd_3.count+1;
 				if (gb_snd.snd_3.count>=gb_snd.snd_3.length ) then begin
 					gb_snd.snd_3.on_:=0;
-					gb_snd.snd_regs[NR52]:=gb_snd.snd_regs[NR52] and $FB;
+					gb_snd.snd_regs[NR52]:=gb_snd.snd_regs[NR52] and $fb;
 				end;
 			end;
 			if (gb_snd.snd_control.mode3_left<>0) then left:=left+sample;

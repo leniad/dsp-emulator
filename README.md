@@ -1,4 +1,45 @@
 ﻿#DSP Emulator status<br>
+<b>11/03/17 - DSP Emulator 0.17b2 Final. All binary and source updated.</b><br><pre>
+<pre>
+-All WIP previous enhacements
+-General
+    +Fixed a bug when entering the options menu without starting a driver (Thanks to FJ Marti)
+    +If a driver is not initialized when exiting the list, no buttons are displayed
+    +Added multiple directories for arcade ROMS separated by ';' (requested by Davide)
+    +Fixed enter full screen when changing from video menu
+    +K054000: Added protection chip
+    +K053246-K053247-K055673: Implemented functions to show sprites
+-GameBoy/GameBoy Color
+    +Rewritted the video functions
+    +Corrected read/write of MBC5 mapper extra memory
+    +Corrected the sound 'mode 3'
+    +Corrected reading of the joystick/buttons when ussing the IRQ
+    +Improved way to compare the current line that generates an IRQ
+    +Improved timings of the current line
+    +GameBoy Color
+        -Corrected the size of the palette records. Fixed when the palette pointer is automatically advanced
+        -Improved way to change speed
+    +Improved loading a cartridge with an extra header before the data
+    +Added mappers HuC-1 (to be confirmed) and MBC2
+-Pacman HW
+    +Added the rest of dipswitch
+    +Added screen rotation
+    +Crush Roller: Added driver with sound
+-Galaxian HW
+    +Fixed Scrambre sound, caused errors when closing the driver
+-TNZS HW
+    +Corrected audio initialization
+-TMNT HW
+    +TMNT: Changed the ROMS to 2 players version
+-The Simpsons
+    +Fixed video and audio
+    +Graphics problems (possible bug in the CPU)
+    +Changed the ROMS to the 2 Players version (requested by Davide)
+-Vendetta (requested by Davide)
+    +Added driver with sound
+</pre><br>
+Please read the 'Whats New' for details<br>
+<img src='http://img1.imagilive.com/0317/simpsons.png'><img src='http://img1.imagilive.com/0317/vendetta.png'><br><br>
 <b>22/01/17 - DSP Emulator 0.17b2 WIP. Updated source and windows 32bits binary</b><br>
 <pre>
 -General

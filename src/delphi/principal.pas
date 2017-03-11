@@ -375,6 +375,8 @@ type
     BitBtn3: TBitBtn;
     Asteroids1: TMenuItem;
     llander1: TMenuItem;
+    CrushRoller1: TMenuItem;
+    Vendetta1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -426,13 +428,15 @@ if not((Message.Msg=WM_SYSCOMMAND) and (Message.WParam=SC_KEYMENU)) then inherit
 end;
 
 procedure Tprincipal1.FormCreate(Sender: TObject);
+var
+  f:byte;
 begin
 //SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
 //SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
 Init_sdl_lib;
 EmuStatus:=EsStoped;
 main_vars.cadena_dir:='\';
-directory.Base:=extractfiledir(application.ExeName)+main_vars.cadena_dir;
+directory.Base:=extractfiledir(application.ExeName)+'\';
 file_ini_load;
 if not DirectoryExists(Directory.Preview) then CreateDir(Directory.Preview);
 if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_nvram);
@@ -543,6 +547,7 @@ end;
 procedure Tprincipal1.Timer4Timer(Sender: TObject);
 begin
 timer4.Enabled:=false;
+if not(main_vars.driver_ok) then exit;
 EmuStatus:=EmuStatusTemp;
 timer1.Enabled:=true;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
@@ -625,6 +630,8 @@ Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  f:byte;
 begin
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
@@ -632,6 +639,7 @@ if cinta_tzx.cargada then vaciar_cintas;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
 file_ini_save;
+for f:=0 to $ff do if directory.arcade_list_roms[f]<>'' then directory.arcade_list_roms[f]:='';
 if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
 if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
 SDL_DestroyWindow(window_render);
@@ -722,7 +730,7 @@ if Savedialog1.execute then begin
           end;
   end;
   temp_s:=SDL_CreateRGBSurface(0,rect2.w,rect2.h,16,0,0,0,0);
-  SDL_UpperBlit(pantalla[0],@rect2,temp_s,@rect2);
+  SDL_LowerBlit(pantalla[0],@rect2,temp_s,@rect2);
   nombre2:=directory.Base+'temp.bmp';
   SDL_SaveBMP_RW(temp_s,SDL_RWFromFile(pointer(nombre2),'wb'), 1);
   SDL_FreeSurface(temp_s);
@@ -783,16 +791,17 @@ var
   nuevo:byte;
 begin
 if sender<>nil then nuevo:=Tmenuitem(sender).tag
-  else begin
-    nuevo:=main_screen.video_mode;
-    main_screen.video_mode:=255;
-  end;
-if main_screen.video_mode<>nuevo then main_screen.video_mode:=nuevo;
+  else exit;
+if main_screen.video_mode=nuevo then exit;
 if main_vars.driver_ok then begin
     if nuevo=6 then pasar_pantalla_completa
-      else cambiar_video;
+      else begin
+        main_screen.old_video_mode:=main_screen.video_mode;
+        main_screen.video_mode:=nuevo;
+        cambiar_video;
+        Windows.SetFocus(child.Handle);
+      end;
 end;
-Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.fLoadCartucho(Sender: TObject);

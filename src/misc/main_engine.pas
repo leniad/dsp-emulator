@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        dsp_version='0.17b2WIP';
+        dsp_version='0.17b2';
         pant_sprites=20;
         pant_doble=21;
         pant_temp=23;
@@ -44,10 +44,10 @@ type
             //Coleco
             coleco_snap:String;
             //Dirs Arcade
-            Arcade_roms:String;
             Arcade_hi:string;
             Arcade_samples:string;
             Arcade_nvram:string;
+            arcade_list_roms:array[0..$ff] of string;
             //Dirs spectrum
             spectrum_48:String;
             spectrum_128:String;
@@ -105,8 +105,12 @@ procedure video_sync;
 //misc
 procedure change_caption;
 procedure reset_dsp;
-//linux misc
+//Multidirs
+function find_rom_multiple_dirs(rom_name:string):byte;
+procedure split_dirs(dir:string);
+function get_all_dirs:string;
 {$ifndef windows}
+//linux misc
 procedure copymemory(dest,source:pointer;size:integer);
 {$endif}
 
@@ -134,6 +138,78 @@ var
 
 implementation
 uses principal,controls_engine,cpu_misc;
+
+function find_rom_multiple_dirs(rom_name:string):byte;
+var
+  f,long:byte;
+begin
+for f:=0 to $ff do begin
+    if directory.arcade_list_roms[f]='' then begin
+       long:=f-1;
+       break;
+    end;
+end;
+for f:=0 to long do begin
+  if fileexists(directory.arcade_list_roms[f]+rom_name) then begin
+    find_rom_multiple_dirs:=f;
+    exit;
+  end;
+end;
+//Not found
+find_rom_multiple_dirs:=0;
+end;
+
+function test_dir(cadena:string):string;
+var
+   f:word;
+begin
+    for f:=length(cadena) downto 1 do
+       if cadena[f]<>main_vars.cadena_dir then break;
+    test_dir:=system.copy(cadena,1,f);
+end;
+
+procedure split_dirs(dir:string);
+var
+   f,long,old_pos:word;
+   total:byte;
+   test_str:ansistring;
+begin
+//Limpio todos los directorios
+for f:=0 to $ff do if directory.arcade_list_roms[f]<>'' then directory.arcade_list_roms[f]:='';
+//Check de vacio...
+if dir='' then begin
+   directory.arcade_list_roms[0]:=directory.Base+'roms'+main_vars.cadena_dir;
+   exit;
+end;
+//Divido el directorio
+long:=1;
+total:=0;
+old_pos:=1;
+for f:=1 to length(dir) do begin
+    if dir[f]=';' then begin
+       directory.arcade_list_roms[total]:=test_dir(copy(dir,old_pos,long-1))+main_vars.cadena_dir;
+       long:=1;
+       total:=total+1;
+       old_pos:=f+1;
+    end else long:=long+1;
+end;
+long:=long-1;
+//Comprobar si he llegado al final y debo pasarlo
+if long<>0 then directory.arcade_list_roms[total]:=test_dir(copy(dir,old_pos,long))+main_vars.cadena_dir;
+end;
+
+function get_all_dirs:string;
+var
+   f:byte;
+   res:string;
+begin
+res:='';
+for f:=0 to $ff do begin
+    if directory.arcade_list_roms[f]='' then break;
+    res:=res+test_dir(directory.arcade_list_roms[f])+';';
+end;
+get_all_dirs:=res;
+end;
 
 procedure cambiar_video;
 //Si el sistema usa la pantalla SDL arreglos visuales
@@ -265,7 +341,10 @@ for f:=1 to max_pant_visible do
     end;
     pantalla[f]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,16,0,0,0,0);
     //Y si son transparentes las creo
-    if p_final[f].trans then SDL_Setcolorkey(pantalla[f],1,set_trans_color);
+    if p_final[f].trans then begin
+      SDL_Setcolorkey(pantalla[f],1,set_trans_color);
+      //SDL_SetSurfaceRLE(pantalla[f],1);
+    end;
 end;
 sdl_showcursor(0);
 end;
@@ -306,6 +385,12 @@ begin
 if not(main_screen.pantalla_completa) then begin
   main_screen.old_video_mode:=main_screen.video_mode;
   main_screen.video_mode:=6;
+  principal1.n1x1.Checked:=false;
+  principal1.n2x1.Checked:=false;
+  principal1.scanlines1.Checked:=false;
+  principal1.scanlines2x1.Checked:=false;
+  principal1.n3x1.Checked:=false;
+  principal1.FullScreen1.Checked:=true;
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
   window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
@@ -358,7 +443,7 @@ origen.x:=o_x1;
 origen.y:=o_y1;
 origen.w:=o_x2;
 origen.h:=o_y2;
-SDL_UpperBlit(pantalla[sitio],@origen,pantalla[pant_temp],@origen);
+SDL_LowerBlit(pantalla[sitio],@origen,pantalla[pant_temp],@origen);
 end;
 
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);inline;
@@ -377,7 +462,7 @@ if p_final[dest].final_mix then begin
   destino.x:=destino.x+ADD_SPRITE;
   destino.y:=destino.y+ADD_SPRITE;
 end;
-SDL_UpperBlit(pantalla[sitio],@origen,pantalla[dest],@destino);
+SDL_LowerBlit(pantalla[sitio],@origen,pantalla[dest],@destino);
 end;
 
 procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
@@ -436,7 +521,7 @@ end else if main_screen.rol90_screen then begin
            destino.y:=0;
            destino.w:=pantalla[pant_temp].w;
            destino.h:=pantalla[pant_temp].h;
-           SDL_UpperBlit(pantalla[sitio],@origen,pantalla[pant_temp],@destino);
+           SDL_LowerBlit(pantalla[sitio],@origen,pantalla[pant_temp],@destino);
          end;
 end;
 
@@ -464,13 +549,13 @@ if main_screen.flip_main_screen then begin
   end;
   origen.w:=p_final[0].x;
   origen.h:=p_final[0].y;
-  SDL_UpperBlit(pantalla[pant_doble],@origen,pantalla[pant_temp],@origen);
+  SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[pant_temp],@origen);
 end;
 case main_screen.video_mode of
   1,6:begin
       origen.w:=pantalla[pant_temp].w;
       origen.h:=pantalla[pant_temp].h;
-      SDL_UpperBlit(pantalla[pant_temp],@origen,pantalla[0],@origen);
+      SDL_LowerBlit(pantalla[pant_temp],@origen,pantalla[0],@origen);
     end;
   2:begin
         for i:=0 to p_final[0].y-1 do begin
@@ -494,7 +579,7 @@ case main_screen.video_mode of
        end;
        origen.w:=p_final[0].x*2;
        origen.h:=p_final[0].y*2;
-       SDL_UpperBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
+       SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
     end;
   3:begin
         for i:=0 to ((p_final[0].y-1) shr 1) do begin
@@ -522,7 +607,7 @@ case main_screen.video_mode of
         end;
         origen.w:=p_final[0].x*2;
         origen.h:=p_final[0].y*2;
-        SDL_UpperBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
+        SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
     end;
   5:begin
         for i:=0 to p_final[0].y-1 do begin
@@ -548,7 +633,7 @@ case main_screen.video_mode of
         end;
         origen.w:=p_final[0].x*3;
         origen.h:=p_final[0].y*3;
-        SDL_UpperBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
+        SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[0],@origen);
         end;
   end;
 SDL_UpdateWindowSurface(window_render);

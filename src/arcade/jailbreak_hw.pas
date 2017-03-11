@@ -42,8 +42,7 @@ var
 procedure update_video_jailbreak;inline;
 var
   y,atrib:byte;
-  f,x:word;
-  nchar,color:word;
+  f,x,nchar,color:word;
 begin
 for f:=0 to $7ff do begin
     if gfx[0].buffer[f] then begin

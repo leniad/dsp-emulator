@@ -11,27 +11,17 @@ procedure cargar_simpsons;
 implementation
 const
         simpsons_rom:array[0..4] of tipo_roms=(
-        (n:'072-g02.16c';l:$20000;p:0;crc:$580ce1d6),(n:'072-g01.17c';l:$20000;p:$20000;crc:$9f843def),
-        (n:'072-j13.13c';l:$20000;p:$40000;crc:$aade2abd),(n:'072-j12.15c';l:$20000;p:$60000;crc:$479e12f2),());
-        simpsons_sound:tipo_roms=(n:'072-e03.6g';l:$20000;p:0;crc:$866b7a35);
+        (n:'072-g02.16c';l:$20000;p:0;crc:$580ce1d6),(n:'072-p01.17c';l:$20000;p:$20000;crc:$07ceeaea),
+        (n:'072-013.13c';l:$20000;p:$40000;crc:$8781105a),(n:'072-012.15c';l:$20000;p:$60000;crc:$244f9289),());
+        simpsons_sound:tipo_roms=(n:'072-g03.6g';l:$20000;p:0;crc:$76c1850c);
         simpsons_tiles:array[0..2] of tipo_roms=(
         (n:'072-b07.18h';l:$80000;p:0;crc:$ba1ec910),(n:'072-b06.16h';l:$80000;p:2;crc:$cf2bbcab),());
         simpsons_sprites:array[0..4] of tipo_roms=(
         (n:'072-b08.3n';l:$100000;p:0;crc:$7de500ad),(n:'072-b09.8n';l:$100000;p:2;crc:$aa085093),
         (n:'072-b10.12n';l:$100000;p:4;crc:$577dbd53),(n:'072-b11.16l';l:$100000;p:6;crc:$55fab05d),());
         simpsons_k053260:array[0..2] of tipo_roms=(
-        (n:'072-d05.1f';l:$100000;p:0;crc:$1397a73b),(n:'072-d04.1d';l:$40000;p:2;crc:$78778013),());
-        simpsons_eeprom:tipo_roms=(n:'simpsons.12c.nv';l:$80;p:0;crc:$ec3f0449);
-        //DIP
-        aliens_dip_a:array [0..2] of def_dip=(
-        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$02;dip_name:'4C 1C'),(dip_val:$05;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$04;dip_name:'3C 2C'),(dip_val:$01;dip_name:'4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$03;dip_name:'3C 4C'),(dip_val:$07;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$06;dip_name:'2C 5C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$09;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
-        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),(dip_val:$0;dip_name:'No Coin'))),());
-        aliens_dip_b:array [0..3] of def_dip=(
-        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$1;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        aliens_dip_c:array [0..1] of def_dip=(
-        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        (n:'072-d05.1f';l:$100000;p:0;crc:$1397a73b),(n:'072-d04.1d';l:$40000;p:$100000;crc:$78778013),());
+        simpsons_eeprom:tipo_roms=(n:'simpsons2p.12c.nv';l:$80;p:0;crc:$fbac4e30);
 
 var
  tiles_rom,sprite_rom,k053260_rom:pbyte;
@@ -41,6 +31,18 @@ var
  sound_rom_bank:array[0..7,0..$3fff] of byte;
  firq_enabled:boolean;
  sprite_ram:array[0..$7ff] of word;
+
+procedure simpsons_sprite_cb(var code:dword;var color:word;var priority_mask:word);
+var
+  pri:integer;
+begin
+	pri:=(color and $0f80) shr 6;   // ???????
+	if (pri<=layerpri[2]) then priority_mask:=0
+	  else if ((pri>layerpri[2]) and (pri<=layerpri[1])) then priority_mask:=1
+	    else if ((pri>layerpri[1]) and (pri<=layerpri[0])) then priority_mask:=2
+	      else priority_mask:=3;
+	color:=sprite_colorbase+(color and $001f);
+end;
 
 procedure simpsons_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
 begin
@@ -64,7 +66,6 @@ sprite_colorbase:=k053251_0.get_palette_index(K053251_CI1);
 layer_colorbase[0]:=k053251_0.get_palette_index(K053251_CI2);
 layer_colorbase[1]:=k053251_0.get_palette_index(K053251_CI3);
 layer_colorbase[2]:=k053251_0.get_palette_index(K053251_CI4);
-k052109_0.draw_tiles;
 sorted_layer[0]:=0;
 layerpri[0]:=k053251_0.get_priority(K053251_CI2);
 sorted_layer[1]:=1;
@@ -72,10 +73,27 @@ layerpri[1]:=k053251_0.get_priority(K053251_CI3);
 sorted_layer[2]:=2;
 layerpri[2]:=k053251_0.get_priority(K053251_CI4);
 konami_sortlayers3(@sorted_layer,@layerpri);
+if k053251_0.dirty_tmap[K053251_CI2] then begin
+  k052109_0.clean_video_buffer_layer(0);
+  k053251_0.dirty_tmap[K053251_CI2]:=false;
+end;
+if k053251_0.dirty_tmap[K053251_CI3] then begin
+  k052109_0.clean_video_buffer_layer(1);
+  k053251_0.dirty_tmap[K053251_CI3]:=false;
+end;
+if k053251_0.dirty_tmap[K053251_CI4] then begin
+  k052109_0.clean_video_buffer_layer(2);
+  k053251_0.dirty_tmap[K053251_CI4]:=false;
+end;
 fill_full_screen(4,bg_colorbase*16);
+k052109_0.draw_tiles;
+k053246_0.k053247_draw_sprites(3);
 k052109_0.draw_layer(sorted_layer[0],4);
+k053246_0.k053247_draw_sprites(2);
 k052109_0.draw_layer(sorted_layer[1],4);
+k053246_0.k053247_draw_sprites(1);
 k052109_0.draw_layer(sorted_layer[2],4);
+k053246_0.k053247_draw_sprites(0);
 actualiza_trozo_final(112,16,288,224,4);
 end;
 
@@ -89,7 +107,6 @@ if event.arcade then begin
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
@@ -98,9 +115,26 @@ if event.arcade then begin
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
+  //Service
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
 end;
+end;
+
+procedure simpsons_objdma;inline;
+var
+	f:byte;
+	dst:pword;
+begin
+	dst:=k053246_0.k053247_get_ram;
+  fillchar(dst^,$800*2,0);
+  for f:=0 to $ff do begin
+		if ((sprite_ram[f*8] and $80ff)<>0) then begin
+			copymemory(dst,@sprite_ram[f*8],$10);
+			inc(dst,8);
+		end;
+	end;
 end;
 
 procedure simpsons_principal;
@@ -120,12 +154,12 @@ while EmuStatus=EsRuning do begin
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=239 then begin
-                    update_video_simpsons;
                     if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
                     if k053246_0.is_irq_enabled then begin
-                       //simpsons_objdma();
+                       simpsons_objdma;
                        timer[sprite_timer].enabled:=true;
                     end;
+                    update_video_simpsons;
                   end;
     end;
     eventos_simpsons;
@@ -139,13 +173,13 @@ var
   tempw:word;
 begin
 case direccion of
-    0..$fff:if bank0_bank=0 then simpsons_getbyte:=k052109_0.read(direccion)
-                              else simpsons_getbyte:=buffer_paleta[direccion];
+    0..$fff:if bank0_bank=1 then simpsons_getbyte:=buffer_paleta[direccion]
+                else simpsons_getbyte:=k052109_0.read(direccion);
     $1000..$1fff:case direccion of
-                   $1f80:simpsons_getbyte:=$ff; //coin
+                   $1f80:simpsons_getbyte:=marcade.in2; //coin
                    $1f81:simpsons_getbyte:=$cf+(er5911_do_read shl 4)+(er5911_ready_read shl 5); //eeprom+service
-                   $1f90:simpsons_getbyte:=$ff; //p1
-                   $1f91:simpsons_getbyte:=$ff; //p2
+                   $1f90:simpsons_getbyte:=marcade.in0; //p1
+                   $1f91:simpsons_getbyte:=marcade.in1; //p2
                    $1f92:simpsons_getbyte:=$ff; //p3
                    $1f93:simpsons_getbyte:=$ff; //p4
                    $1fc4:begin
@@ -155,7 +189,7 @@ case direccion of
                    $1fc6..$1fc7:simpsons_getbyte:=k053260_0.main_read(direccion and $1);
                    $1fc8..$1fc9:simpsons_getbyte:=k053246_0.read(direccion and 1);
                    $1fca:; //Watchdog
-                   else simpsons_getbyte:=k052109_0.read(direccion)
+                      else simpsons_getbyte:=k052109_0.read(direccion)
               end;
     $2000..$3fff:if bank2000_bank=0 then simpsons_getbyte:=k052109_0.read(direccion)
                     else if (direccion>$2fff) then simpsons_getbyte:=memoria[direccion]
@@ -189,11 +223,11 @@ begin
 if direccion>$5fff then exit;
 case direccion of
     0..$fff:if bank0_bank=1 then begin
-                             if buffer_paleta[direccion]<>valor then begin
-                                buffer_paleta[direccion]:=valor;
-                                cambiar_color(direccion shr 1);
-                             end;
-                          end else k052109_0.write(direccion,valor);
+                if buffer_paleta[direccion]<>valor then begin
+                  buffer_paleta[direccion]:=valor;
+                  cambiar_color(direccion shr 1);
+                end;
+            end else k052109_0.write(direccion,valor);
     $1000..$1fff:case direccion of
                   $1fa0..$1fa7:k053246_0.write(direccion and $7,valor);
                   $1fb0..$1fbf:k053251_0.write(direccion and $f,valor);
@@ -244,7 +278,7 @@ end;
 procedure simpsons_nmi;
 begin
 timer[snd_timer].enabled:=false;
-z80_0.change_nmi(ASSERT_LINE);
+z80_0.change_nmi(CLEAR_LINE);
 end;
 
 procedure simpsons_snd_putbyte(direccion:word;valor:byte);
@@ -255,7 +289,7 @@ case direccion of
   $f800:ym2151_0.reg(valor);
   $f801:ym2151_0.write(valor);
   $fa00:begin
-             z80_0.change_nmi(CLEAR_LINE);
+             z80_0.change_nmi(ASSERT_LINE);
              timer[snd_timer].enabled:=true;
         end;
   $fc00..$fc2f:k053260_0.write(direccion and $3f,valor);
@@ -276,10 +310,13 @@ begin
  z80_0.reset;
  k052109_0.reset;
  k053251_0.reset;
+ k053246_0.reset;
+ k053260_0.reset;
  ym2151_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  bank0_bank:=0;
  bank2000_bank:=0;
  rom_bank1:=0;
@@ -319,10 +356,7 @@ for f:=0 to $3f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 //cargar sonido
 if not(cargar_roms(@temp_mem[0],@simpsons_sound,'simpsons.zip',1)) then exit;
 copymemory(@mem_snd[0],@temp_mem[0],$8000);
-copymemory(@sound_rom_bank[0,0],@temp_mem[$8000],$4000); //?????
-copymemory(@sound_rom_bank[1,0],@temp_mem[$8000],$4000);
-copymemory(@sound_rom_bank[2,0],@temp_mem[$8000],$4000);
-for f:=3 to 7 do copymemory(@sound_rom_bank[f,0],@temp_mem[$c000+((f-3)*$4000)],$4000);
+for f:=0 to 7 do copymemory(@sound_rom_bank[f,0],@temp_mem[f*$4000],$4000);
 //Main CPU
 konami_0:=cpu_konami.create(3000000,256);
 konami_0.change_ram_calls(simpsons_getbyte,simpsons_putbyte);
@@ -331,7 +365,7 @@ konami_0.change_set_lines(simpsons_bank);
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(simpsons_snd_getbyte,simpsons_snd_putbyte);
 z80_0.init_sound(simpsons_sound_update);
-snd_timer:=init_timer(konami_0.numero_cpu,25,simpsons_nmi,false);
+snd_timer:=init_timer(z80_0.numero_cpu,90,simpsons_nmi,false);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k053260_rom,$140000);
@@ -348,16 +382,10 @@ getmem(tiles_rom,$100000);
 if not(cargar_roms32b(tiles_rom,@simpsons_tiles,'simpsons.zip',0)) then exit;
 k052109_0:=k052109_chip.create(1,2,3,simpsons_cb,tiles_rom,$100000);
 getmem(sprite_rom,$400000);
-if not(cargar_roms32b(sprite_rom,@simpsons_sprites,'simpsons.zip',0)) then exit;
-k053246_0:=k053246_chip.create(4,nil,sprite_rom,$400000);
-sprite_timer:=init_timer(konami_0.numero_cpu,30,simpsons_sprites_firq,false);
-//DIP
-marcade.dswa:=$ff;
-marcade.dswa_val:=@aliens_dip_a;
-marcade.dswb:=$5e;
-marcade.dswb_val:=@aliens_dip_b;
-marcade.dswc:=$ff;
-marcade.dswc_val:=@aliens_dip_c;
+if not(cargar_roms64b(sprite_rom,@simpsons_sprites,'simpsons.zip',0)) then exit;
+k053246_0:=k053246_chip.create(4,simpsons_sprite_cb,sprite_rom,$400000);
+sprite_timer:=init_timer(konami_0.numero_cpu,90,simpsons_sprites_firq,false);
+k053246_0.k053247_start(0,16);
 //final
 reset_simpsons;
 iniciar_simpsons:=true;

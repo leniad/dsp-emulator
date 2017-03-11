@@ -20,9 +20,9 @@ function cargar_roms16b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cant
 function cargar_roms16w(sitio:pword;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 function cargar_roms32b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 function cargar_roms32b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-function cargar_roms_skip(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms,skip:byte):boolean;
+function cargar_roms64b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+function cargar_roms64b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 function cargar_roms_swap_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-function cargar_roms_skip_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms,skip:byte):boolean;
 
 function roms_load(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;roms_array:word):boolean;
 
@@ -65,6 +65,7 @@ var
   ptemp:pbyte;
   troms:ptipo_roms;
   roms_size:word;
+  dir:string;
 begin
 roms_load:=false;
 troms:=ctipo_roms;
@@ -72,8 +73,9 @@ roms_size:=roms_array div sizeof(tipo_roms);
 for f:=1 to roms_size do begin
     ptemp:=sitio;
     inc(ptemp,troms.p);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,ptemp,troms.l,integer(troms.crc))) then
-        if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,ptemp,troms.l,integer(troms.crc))) then
+        if not(carga_rom_zip(dir+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
     inc(troms);
 end;
 roms_load:=true;
@@ -84,6 +86,7 @@ var
   f:byte;
   ptemp:pbyte;
   troms:ptipo_roms;
+  dir:string;
 begin
 cargar_roms:=false;
 troms:=ctipo_roms;
@@ -91,8 +94,9 @@ f:=0;
 repeat
     ptemp:=sitio;
     inc(ptemp,troms.p);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,ptemp,troms.l,integer(troms.crc))) then
-        if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,ptemp,troms.l,integer(troms.crc))) then
+        if not(carga_rom_zip(dir+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
     inc(troms);
     inc(f);
 until ((troms.n='') or (f=cantidad_roms));
@@ -105,6 +109,7 @@ var
   ptemp,ptemp2:pbyte;
   troms:ptipo_roms;
   h:dword;
+  dir:string;
 begin
 cargar_roms_swap_word:=false;
 troms:=ctipo_roms;
@@ -112,8 +117,9 @@ f:=0;
 repeat
     ptemp:=sitio;
     inc(ptemp,troms.p);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,ptemp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,ptemp,troms.l,troms.crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
     ptemp2:=ptemp;
     for h:=0 to (troms.l div 2)-1 do begin
       v1:=ptemp2^;inc(ptemp2);
@@ -133,6 +139,7 @@ var
   ptemp,ptemp2,mem_temp:pbyte;
   troms:ptipo_roms;
   h:dword;
+  dir:string;
 begin
 cargar_roms16b:=false;
 troms:=ctipo_roms;
@@ -142,8 +149,9 @@ repeat
     ptemp2:=mem_temp;
     ptemp:=sitio;
     inc(ptemp,troms.p);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
     for h:=0 to (troms.l-1) do begin
       ptemp^:=ptemp2^;
       inc(ptemp2);
@@ -165,6 +173,7 @@ var
   h:dword;
   alto:boolean;
   valor:word;
+  dir:string;
 begin
 cargar_roms16w:=false;
 troms:=ctipo_roms;
@@ -175,8 +184,9 @@ repeat
     ptemp:=sitio;
     alto:=(troms.p and $1)<>0;
     inc(ptemp,troms.p shr 1);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
     for h:=0 to (troms.l-1) do begin
       if not(alto) then valor:=(ptemp2^ shl 8) or (ptemp^ and $ff)
         else valor:=ptemp2^ or (ptemp^ and $ff00);
@@ -197,6 +207,7 @@ var
   ptemp,ptemp2,mem_temp:pbyte;
   troms:ptipo_roms;
   h:dword;
+  dir:string;
 begin
 cargar_roms32b:=false;
 troms:=ctipo_roms;
@@ -206,8 +217,9 @@ repeat
     ptemp2:=mem_temp;
     ptemp:=sitio;
     inc(ptemp,troms.p);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
     for h:=0 to ((troms.l shr 1)-1) do begin
       ptemp^:=ptemp2^;
       inc(ptemp);
@@ -229,6 +241,7 @@ var
   ptemp,ptemp2,mem_temp:pbyte;
   troms:ptipo_roms;
   h:dword;
+  dir:string;
 begin
 cargar_roms32b_b:=false;
 troms:=ctipo_roms;
@@ -238,8 +251,9 @@ repeat
     ptemp2:=mem_temp;
     ptemp:=sitio;
     inc(ptemp,troms.p);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
     for h:=0 to (troms.l-1) do begin
       ptemp^:=ptemp2^;
       inc(ptemp,4);
@@ -252,15 +266,15 @@ until ((troms.n='') or (f=cantidad_roms));
 cargar_roms32b_b:=true;
 end;
 
-
-function cargar_roms_skip(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms,skip:byte):boolean;
+function cargar_roms64b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
 var
   f:byte;
   ptemp,ptemp2,mem_temp:pbyte;
   troms:ptipo_roms;
   h:dword;
+  dir:string;
 begin
-cargar_roms_skip:=false;
+cargar_roms64b:=false;
 troms:=ctipo_roms;
 f:=0;
 repeat
@@ -268,51 +282,53 @@ repeat
     ptemp2:=mem_temp;
     ptemp:=sitio;
     inc(ptemp,troms.p);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
-    for h:=0 to (troms.l-1) do begin
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
+    for h:=0 to ((troms.l shr 1)-1) do begin
       ptemp^:=ptemp2^;
-      inc(ptemp2);
-      inc(ptemp,skip);
-    end;
-    inc(troms);
-    inc(f);
-    freemem(mem_temp);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms_skip:=true;
-end;
-
-function cargar_roms_skip_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms,skip:byte):boolean;
-var
-  f:byte;
-  ptemp,ptemp2,mem_temp:pbyte;
-  troms:ptipo_roms;
-  h:dword;
-begin
-cargar_roms_skip_word:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    getmem(mem_temp,troms.l);
-    ptemp2:=mem_temp;
-    ptemp:=sitio;
-    inc(ptemp,troms.p);
-    if troms.crc<>0 then if not(carga_rom_zip_crc(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(Directory.Arcade_roms+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
-    for h:=0 to ((troms.l div 2)-1) do begin
-      ptemp^:=ptemp2^;
-      //word
       inc(ptemp);
       inc(ptemp2);
       ptemp^:=ptemp2^;
       inc(ptemp2);
-      inc(ptemp,skip-1);
+      inc(ptemp,7);
     end;
     inc(troms);
     inc(f);
     freemem(mem_temp);
 until ((troms.n='') or (f=cantidad_roms));
-cargar_roms_skip_word:=true;
+cargar_roms64b:=true;
+end;
+
+function cargar_roms64b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+var
+  f:byte;
+  ptemp,ptemp2,mem_temp:pbyte;
+  troms:ptipo_roms;
+  h:dword;
+  dir:string;
+begin
+cargar_roms64b_b:=false;
+troms:=ctipo_roms;
+f:=0;
+repeat
+    getmem(mem_temp,troms.l);
+    ptemp2:=mem_temp;
+    ptemp:=sitio;
+    inc(ptemp,troms.p);
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
+    for h:=0 to (troms.l-1) do begin
+      ptemp^:=ptemp2^;
+      inc(ptemp2);
+      inc(ptemp,8);
+    end;
+    inc(troms);
+    inc(f);
+    freemem(mem_temp);
+until ((troms.n='') or (f=cantidad_roms));
+cargar_roms64b_b:=true;
 end;
 
 end.

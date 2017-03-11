@@ -19,8 +19,6 @@ type
             function get_indexed:word;
             procedure trf(valor:byte);
             procedure trf_ex(valor:byte);
-            //opcodes
-            procedure abs8(valor:pbyte);
         end;
 
 var
@@ -41,7 +39,7 @@ const
       3, 3, 3, 3, 0, 3, 3, 3, 4, 4, 4, 4, 0, 4, 4, 4,  // 70
       1, 1, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 4,  // 80
       2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2, 4, 4,  // 90
-      2, 2, 4, 2, 0, 0, 2, 0, 1, 5, 7, 9, 3, 3, 2, 0,  // A0
+      2, 2, 4, 2, 0, 2, 2, 0, 1, 5, 7, 9, 3, 3, 2, 0,  // A0
       3, 2, 2,11,21,10, 1, 0, 2, 0, 0, 0, 2, 0, 2, 0,  // B0
       0, 0, 2, 2, 2, 2, 0, 2, 0, 2, 2, 2, 2, 2, 2, 1,  // C0
       1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // D0
@@ -60,24 +58,12 @@ const
         2, 2, 2, 2,$f, 2, 2, 2, 3, 3, 3, 3,$f, 3, 3, 3,  //70
         0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 4, 0,  //80
         0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 4, 0,  //90
-        0, 0, 4, 4,$f,$f, 4,$f, 4, 4, 2, 3, 2, 2, 0,$f,  //a0
+        0, 0, 4, 4,$f, 4, 4,$f, 4, 4, 2, 3, 2, 2, 0,$f,  //a0
         0, 0, 0, 0, 0, 0, 0,$f, 2,$f,$f,$f, 2,$f, 2,$f,  //b0
        $f,$f, 0, 4, 0, 4,$f, 4,$f, 4, 0, 4, 0, 0, 0, 0,  //c0
         0,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,  //d0
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,  //e0
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f); //f0
-
-procedure cpu_konami.abs8(valor:pbyte);
-var
-  tempw:word;
-begin
-tempw:=word(shortint(valor^));
-r.cc.c:=(tempw and $80)<>0;
-r.cc.v:=((0 xor valor^ xor tempw xor (tempw shr 1)) and $80)<>0;
-r.cc.n:=(tempw and $80)<>0;
-r.cc.z:=(tempw and $ff)=0;
-valor^:=abs(shortint(valor^));
-end;
 
 procedure cpu_konami.change_set_lines(tset_lines_call:tset_lines);
 begin
@@ -550,27 +536,15 @@ case instruccion of
      $83:r.d.a:=m680x_com(r.d.a,@r.cc); //coma 2T
      $84:r.d.b:=m680x_com(r.d.b,@r.cc); //comb 2T
      $85:self.putbyte(posicion,m680x_com(self.getbyte(posicion),@r.cc)); //com 4T
-     $86:m680x_neg(@r.d.a,@r.cc); //nega 2T
-     $87:m680x_neg(@r.d.b,@r.cc); //negb 2T
-     $88:begin  //neg 4T
-          tempb:=self.getbyte(posicion);
-          m680x_neg(@tempb,@r.cc);
-          self.putbyte(posicion,tempb);
-         end;
-     $89:m680x_inc(@r.d.a,@r.cc); //inca 2T
-     $8a:m680x_inc(@r.d.b,@r.cc); //incb 2T
-     $8b:begin //inc 4T
-            tempb:=self.getbyte(posicion);
-            m680x_inc(@tempb,@r.cc);
-            self.putbyte(posicion,tempb);
-         end;
-     $8c:m680x_dec(@r.d.a,@r.cc); //deca 2T
-     $8d:m680x_dec(@r.d.b,@r.cc); //decb 2T
-     $8e:begin //dec 4T
-            tempb:=self.getbyte(posicion);
-            m680x_dec(@tempb,@r.cc);
-            self.putbyte(posicion,tempb);
-         end;
+     $86:r.d.a:=m680x_neg(r.d.a,@r.cc); //nega 2T
+     $87:r.d.b:=m680x_neg(r.d.b,@r.cc); //negb 2T
+     $88:self.putbyte(posicion,m680x_neg(self.getbyte(posicion),@r.cc));  //neg 4T
+     $89:r.d.a:=m680x_inc(r.d.a,@r.cc); //inca 2T
+     $8a:r.d.b:=m680x_inc(r.d.b,@r.cc); //incb 2T
+     $8b:self.putbyte(posicion,m680x_inc(self.getbyte(posicion),@r.cc)); //inc 4T
+     $8c:r.d.a:=m680x_dec(r.d.a,@r.cc); //deca 2T
+     $8d:r.d.b:=m680x_dec(r.d.b,@r.cc); //decb 2T
+     $8e:self.putbyte(posicion,m680x_dec(self.getbyte(posicion),@r.cc)); //dec 4T
      $8f:r.pc:=self.pop_sw; //rts 4T
      $90:m680x_tst(r.d.a,@r.cc); //tsta 2T
      $91:m680x_tst(r.d.b,@r.cc); //tstb 2T
@@ -604,6 +578,7 @@ case instruccion of
      $a1:r.d.b:=m680x_rol(r.d.b,@r.cc); //rolb 2T
      $a2:self.putbyte(posicion,m680x_rol(self.getbyte(posicion),@r.cc)); //rol 4T
      $a3:self.putword(posicion,m680x_lsr16(self.getword(posicion),@r.cc)); //lsr16
+     $a5:self.putword(posicion,m680x_asr16(self.getword(posicion),@r.cc)); //asr16
      $a6:self.putword(posicion,m680x_asl16(self.getword(posicion),@r.cc)); //asl16
      $a8:r.pc:=posicion;  //jmp 1T
      $a9:begin //jsr 5T
@@ -621,7 +596,7 @@ case instruccion of
      $ac:begin //decbjnz
           tempw:=r.d.b-1;
           r.cc.z:=((tempw and $ff)=0);
-          r.cc.n:=(templ and $80)<>0;
+          r.cc.n:=(tempw and $80)<>0;
           r.cc.v:=((r.d.b xor 1 xor tempw xor (tempw shr 1)) and $80)<>0;
           r.d.b:=tempw;
           if not(r.cc.z) then r.pc:=r.pc+shortint(numero);
@@ -650,8 +625,7 @@ case instruccion of
 	          r.d.a:=tempw;
           end;
      $b2:begin //sex 2T
-          if (r.d.b and $80)<>0 then r.d.a:=$ff
-              else r.d.a:=0;
+          r.d.a:=$ff*(r.d.b shr 7);
           r.cc.n:=(r.d.w and $8000)<>0;
           r.cc.z:=(r.d.w=0);
          end;
@@ -711,8 +685,8 @@ case instruccion of
      $c9:self.putword(posicion,m680x_dec16(self.getword(posicion),@r.cc)); //dec16
      $ca:m680x_tst16(r.d.w,@r.cc); //tstd
      $cb:m680x_tst16(self.getword(posicion),@r.cc);
-     $cc:self.abs8(@r.d.a); //absa
-     $cd:self.abs8(@r.d.b); //absb
+     $cc:r.d.a:=m680x_abs8(r.d.a,@r.cc); //absa
+     $cd:r.d.b:=m680x_abs8(r.d.b,@r.cc); //absb
      $ce:r.d.w:=m680x_abs16(r.d.w,@r.cc); //absd
      $cf:while (r.u<>0) do begin //bset
             self.putbyte(r.x,r.d.a);
