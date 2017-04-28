@@ -1,4 +1,4 @@
-﻿#DSP Emulator status<br>
+﻿# DSP Emulator status #
 <b>28/04/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br><pre>
 -General
     +Lazarus
