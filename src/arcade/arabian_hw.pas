@@ -31,13 +31,13 @@ const
 var
  blitter:array[0..7] of byte;
  video_ram,converted_gfx:array[0..$ffff] of byte;
- punt:array[0..$ffff] of word;
  video_control,mcu_port_p,mcu_port_o:byte;
  mcu_port_r:array[0..3] of byte;
 
 procedure update_video_arabian;inline;
 var
   x,y:byte;
+  punt:array[0..$ffff] of word;
 begin
 for x:=0 to 255 do
   for y:=0 to 255 do
@@ -306,13 +306,14 @@ end;
 procedure create_palette;inline;
 var
   colores:tpaleta;
-  i,temp:word;
-  ena,enb,abhf,aghf,arhf,az,ar,ag,ab,bz,br,bg,bb,planea:byte;
+  i:word;
+  planea,enb:boolean;
+  ena,abhf,aghf,arhf,az,ar,ag,ab,bz,br,bg,bb:byte;
   rhi,rlo,ghi,glo,bhi,bbase:byte;
 begin
 for i:=0 to $1fff do begin
-		ena:=(i shr 12) and 1;
-		enb:=(i shr 11) and 1;
+		ena:=(i shr 12 )and 1;
+		enb:=(i and $200)<>0;
 		abhf:=((i shr 10) and 1) xor 1;
 		aghf:=((i shr 9) and 1) xor 1;
 		arhf:=((i shr 8) and 1) xor 1;
@@ -324,48 +325,33 @@ for i:=0 to $1fff do begin
 		br:=(i shr 2) and 1;
 		bg:=(i shr 1) and 1;
 		bb:=(i shr 0) and 1;
-		planea:=(az or ar or ag or ab) and ena;
-    //Red derivation
-    if planea<>0 then begin
+		planea:=((az or ar or ag or ab) and ena)<>0;
+    if planea then begin
+      //Red derivation
       rhi:=ar;
-    end else begin
-      if enb<>0 then rhi:=bz
-        else rhi:=0;
-    end;
-    if planea<>0 then begin
       if ((arhf xor 1) and az)<>0 then rlo:=0
         else rlo:=ar;
-    end else begin
-      if enb<>0 then rlo:=br
-        else rlo:=0;
-    end;
-    //Green Derivation
-    if planea<>0 then begin
-       ghi:=ag;
-    end else begin
-       if enb<>0 then ghi:=bb
-        else ghi:=0;
-    end;
-    if planea<>0 then begin
-       if ((aghf xor 1) and az)<>0 then glo:=0
+      //Green Derivation
+      ghi:=ag;
+      if ((aghf xor 1) and az)<>0 then glo:=0
         else glo:=ag;
     end else begin
-      if enb<>0 then glo:=bg
-        else glo:=0;
+      //Red derivation
+      rhi:=bz*byte(enb);
+      rlo:=br*byte(enb);
+      //Green Derivation
+      ghi:=bb*byte(enb);
+      glo:=bg*byte(enb);
     end;
     //Blue derivation
     bhi:=ab;
     if ((abhf xor 1) and az)<>0 then bbase:=0
       else bbase:=ab;
     //Paleta
-    if (rhi or rlo)<>0 then temp:=round((rhi*115.9)+(rlo*77.3)+63)
-      else temp:=round((rhi*115.9)+(rlo*77.3));
-    if temp>255 then temp:=255;
-    colores[i].r:=temp;
-    if (ghi or glo)<>0 then temp:=round((ghi*117.9588)+(glo*75.0411)+63)
-      else temp:=round((ghi*117.9588)+(glo*75.0411));
-    if temp>255 then temp:=255;
-    colores[i].g:=temp;
+    if (rhi or rlo)<>0 then colores[i].r:=round((rhi*115.7)+(rlo*77.3)+62)
+      else colores[i].r:=round((rhi*115.7)+(rlo*77.3));
+    if (ghi or glo)<>0 then colores[i].g:=round((ghi*117.9588)+(glo*75.0411)+62)
+      else colores[i].g:=round((ghi*117.9588)+(glo*75.0411));
 		colores[i].b:=(bhi*192)+(bbase*63);
 end;
 set_pal(colores,$2000);
@@ -376,26 +362,22 @@ var
   memoria_temp:array[0..$ffff] of byte;
 procedure convert_gfx_arabian;
 var
-  offs:word;
-  v1,v2,p1,p2,p3,p4:byte;
+  f:word;
+  v1,v2:byte;
 begin
-for offs:=0 to $3fff do begin
-		v1:=memoria_temp[offs];
-    v2:=memoria_temp[offs+$4000];
-		p1:=(v1 and $01) or ((v1 and $10) shr 3) or ((v2 and $01) shl 2) or ((v2 and $10) shr 1);
+for f:=0 to $3fff do begin
+		v1:=memoria_temp[f];
+    v2:=memoria_temp[f+$4000];
+		converted_gfx[f*4+3]:=(v1 and $01) or ((v1 and $10) shr 3) or ((v2 and $01) shl 2) or ((v2 and $10) shr 1);
 		v1:=v1 shr 1;
 		v2:=v2 shr 1;
-		p2:=(v1 and $01) or ((v1 and $10) shr 3) or ((v2 and $01) shl 2) or ((v2 and $10) shr 1);
+		converted_gfx[f*4+2]:=(v1 and $01) or ((v1 and $10) shr 3) or ((v2 and $01) shl 2) or ((v2 and $10) shr 1);
 		v1:=v1 shr 1;
 		v2:=v2 shr 1;
-		p3:=(v1 and $01) or ((v1 and $10) shr 3) or ((v2 and $01) shl 2) or ((v2 and $10) shr 1);
+		converted_gfx[f*4+1]:=(v1 and $01) or ((v1 and $10) shr 3) or ((v2 and $01) shl 2) or ((v2 and $10) shr 1);
 		v1:=v1 shr 1;
 		v2:=v2 shr 1;
-		p4:=(v1 and $01) or ((v1 and $10) shr 3) or ((v2 and $01) shl 2) or ((v2 and $10) shr 1);
-		converted_gfx[offs*4+3]:=p1;
-		converted_gfx[offs*4+2]:=p2;
-		converted_gfx[offs*4+1]:=p3;
-		converted_gfx[offs*4+0]:=p4;
+		converted_gfx[f*4+0]:=(v1 and $01) or ((v1 and $10) shr 3) or ((v2 and $01) shl 2) or ((v2 and $10) shr 1);
 end;
 end;
 begin

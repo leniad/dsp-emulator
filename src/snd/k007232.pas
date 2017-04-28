@@ -9,7 +9,7 @@ const
 type
   tk007232_call_back=procedure (valor:byte);
   k007232_chip=class(snd_chip_class)
-        constructor create(clock:dword;rom_adpcm:pbyte;size:dword;amplifi:single;call_back:tk007232_call_back);
+        constructor create(clock:dword;rom_adpcm:pbyte;size:dword;amplifi:single;call_back:tk007232_call_back;stereo:boolean=false);
         destructor free;
     public
         procedure update;
@@ -29,22 +29,26 @@ type
         rom:pbyte;
         out1,out2:integer;
         tsample_num2:byte;
+        stereo:boolean;
         procedure internal_update;
     end;
 
 procedure internal_update_k007232_0;
+procedure internal_update_k007232_1;
 
 var
   k007232_0,k007232_1:k007232_chip;
+  chips_total:integer=-1;
 
 implementation
 const
    BASE_SHIFT=12;
 
-constructor k007232_chip.create(clock:dword;rom_adpcm:pbyte;size:dword;amplifi:single;call_back:tk007232_call_back);
+constructor k007232_chip.create(clock:dword;rom_adpcm:pbyte;size:dword;amplifi:single;call_back:tk007232_call_back;stereo:boolean=false);
 var
   f:word;
 begin
+  chips_total:=chips_total+1;
 	// Set up the chips */
 	self.pcmlimit:=size;
   self.call_back:=call_back;
@@ -62,16 +66,21 @@ begin
 	self.vol[1,1]:=255;  // channel B output to output B */
   self.amp:=amplifi;
 	for f:=0 to $f do self.wreg[f]:=0;
-  self.ntimer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/128),internal_update_k007232_0,true);
+  case chips_total of
+    0:self.ntimer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/128),internal_update_k007232_0,true);
+    1:self.ntimer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/128),internal_update_k007232_1,true);
+  end;
   self.tsample_num:=init_channel;
   self.tsample_num2:=init_channel;
   self.rom:=rom_adpcm;
 	//KDAC_A_make_fncode;
   for f:=0 to $1ff do self.fncode[f]:=round((32 shl BASE_SHIFT)/($200-f));
+  self.stereo:=stereo;
 end;
 
 destructor k007232_chip.free;
 begin
+   chips_total:=chips_total-1;
 end;
 
 procedure k007232_chip.write(direccion,valor:byte);
@@ -165,9 +174,9 @@ for f:=0 to (KDAC_A_PCM_MAX-1) do begin
              if (((self.rom[old_addr] and $80)<>0) or (old_addr>=self.pcmlimit)) then begin // end of sample
 		if (self.wreg[$d] and (1 shl f))<>0 then begin // loop to the beginning
 	  	   self.start[f]:=((self.wreg[f*6+4] and 1) shl 16) or
-                                  (self.wreg[f*6+3] shl 8) or
+          (self.wreg[f*6+3] shl 8) or
 	 			  (self.wreg[f*6+2]) or
-                                  self.bank[f];
+           self.bank[f];
 	  	   addr:=self.start[f];
 		   self.address[f]:=0;
 		   old_addr:=addr; // skip loop
@@ -189,14 +198,29 @@ begin
   k007232_0.internal_update;
 end;
 
+procedure internal_update_k007232_1;
+begin
+  k007232_1.internal_update;
+end;
+
 procedure k007232_chip.update;
 begin
-  //Channel 1
-  tsample[self.tsample_num,sound_status.posicion_sonido]:=round(self.out1*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=round(self.out1*self.amp);
-  //Channel 2
-  tsample[self.tsample_num2,sound_status.posicion_sonido]:=round(self.out2*self.amp);
-  if sound_status.stereo then tsample[self.tsample_num2,sound_status.posicion_sonido+1]:=round(self.out2*self.amp);
+  if sound_status.stereo then begin
+    if self.stereo then begin
+      tsample[self.tsample_num,sound_status.posicion_sonido]:=round(self.out1*self.amp);
+      tsample[self.tsample_num,sound_status.posicion_sonido+1]:=round(self.out2*self.amp);
+    end else begin
+      tsample[self.tsample_num,sound_status.posicion_sonido]:=round(self.out1*self.amp);
+      tsample[self.tsample_num,sound_status.posicion_sonido+1]:=round(self.out1*self.amp);
+      tsample[self.tsample_num2,sound_status.posicion_sonido]:=round(self.out2*self.amp);
+      tsample[self.tsample_num2,sound_status.posicion_sonido+1]:=round(self.out2*self.amp);
+    end;
+  end else begin
+    //Channel 1
+    tsample[self.tsample_num,sound_status.posicion_sonido]:=round(self.out1*self.amp);
+    //Channel 2
+    tsample[self.tsample_num2,sound_status.posicion_sonido]:=round(self.out2*self.amp);
+  end;
 end;
 
 end.

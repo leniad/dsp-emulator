@@ -439,8 +439,7 @@ end;
 
 procedure TMConfig.Button1Click(Sender: TObject);
 var
-  tmp_var,f:byte;
-  temp_string:string;
+  tmp_var:byte;
 begin
   Directory.Preview:=D1.Text;
   if d1.Text[length(d1.Text)]<>main_vars.cadena_dir then Directory.Preview:=Directory.Preview+main_vars.cadena_dir;

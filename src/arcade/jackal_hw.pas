@@ -33,7 +33,7 @@ const
 
 var
  memoria_rom:array[0..1,0..$7fff] of byte;
- memoria_zram:array[0..1,0..$3f] of byte;
+ memoria_zram:array[0..1,0..$3f] of word;
  memoria_sprite,memoria_voram:array[0..1,0..$fff] of byte;
  banco,scroll_x,scroll_y,scroll_crt,sprite_crt,ram_bank,sprite_bank:byte;
  irq_enable:boolean;
@@ -91,7 +91,7 @@ begin
   end;
 end;
 
-procedure update_video_jackal;inline;
+procedure update_video_jackal;
 var
   x,y,f,nchar:word;
   atrib:byte;
@@ -111,9 +111,9 @@ end;
 if (scroll_crt and $2)<>0 then begin
   //horizontal 8 lineas independientes
   //eje X
-  if (scroll_crt and $4)<>0 then for f:=0 to 31 do scroll__x_part(1,2,255-memoria_zram[ram_bank,f],0,f*8,8);
+  if (scroll_crt and $4)<>0 then scroll__x_part2(1,2,8,@memoria_zram[ram_bank]);
   //Eje Y
-  if (scroll_crt and $8)<>0 then for f:=0 to 31 do scroll__y_part(1,2,255-memoria_zram[ram_bank,f],0,f*8,8);
+  if (scroll_crt and $8)<>0 then for f:=0 to 31 do scroll__y_part(1,2,memoria_zram[ram_bank,f],0,f*8,8);
 end else begin
   //Scroll total
   scroll_x_y(1,2,scroll_x,scroll_y);
@@ -190,7 +190,7 @@ case direccion of
   $13:jackal_getbyte:=marcade.in0+marcade.dswc;
   $14,$15:; //Torreta
   $18:jackal_getbyte:=marcade.dswb;  //dsw2
-  $20..$5f:jackal_getbyte:=memoria_zram[ram_bank,direccion-$20];
+  $20..$5f:jackal_getbyte:=255-memoria_zram[ram_bank,direccion-$20];
   $60..$1fff,$c000..$ffff:jackal_getbyte:=memoria[direccion];
   $2000..$2fff:jackal_getbyte:=memoria_voram[ram_bank,direccion and $fff];
   $3000..$3fff:jackal_getbyte:=memoria_sprite[sprite_bank,direccion and $fff];
@@ -215,7 +215,7 @@ case direccion of
           ram_bank:=(valor and $10) shr 4;
           sprite_bank:=(valor and $8) shr 3;
         end;
-  $20..$5f:memoria_zram[ram_bank,direccion-$20]:=valor;
+  $20..$5f:memoria_zram[ram_bank,direccion-$20]:=255-valor;
   $60..$1fff:memoria[direccion]:=valor;
   $2000..$2fff:if memoria_voram[ram_bank,direccion and $fff]<>valor then begin
                   memoria_voram[ram_bank,direccion and $fff]:=valor;

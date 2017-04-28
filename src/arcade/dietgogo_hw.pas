@@ -3,7 +3,7 @@ unit dietgogo_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,deco_104,
+     oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common,deco_104,
      misc_functions;
 
 procedure cargar_dietgo;
@@ -29,13 +29,12 @@ const
 var
  rom_opcode,rom_data:array[0..$3ffff] of word;
  ram:array[0..$7fff] of word;
- oki1_mem:pbyte;
 
 procedure update_video_dietgo;inline;
 begin
-update_pf_2(0,3,false);
-update_pf_1(0,3,true);
-deco16_sprites;
+deco16ic_0.update_pf_2(3,false);
+deco16ic_0.update_pf_1(3,true);
+deco_sprites_0.draw_sprites;
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
@@ -112,9 +111,9 @@ begin
 case direccion of
   $0..$7ffff:if m68000_0.opcode then dietgo_getword:=rom_opcode[direccion shr 1]
                   else dietgo_getword:=rom_data[direccion shr 1];
-  $210000..$210fff:dietgo_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
-  $212000..$212fff:dietgo_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
-  $280000..$2807ff:dietgo_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
+  $210000..$210fff:dietgo_getword:=deco16ic_0.pf1.data[(direccion and $fff) shr 1];
+  $212000..$212fff:dietgo_getword:=deco16ic_0.pf2.data[(direccion and $fff) shr 1];
+  $280000..$2807ff:dietgo_getword:=deco_sprites_0.ram[(direccion and $7ff) shr 1];
   $300000..$300bff:dietgo_getword:=buffer_paleta[(direccion and $fff) shr 1];
   $340000..$343fff:dietgo_getword:=dietgo_protection_region_0_104_r(direccion and $3fff);
   $380000..$38ffff:dietgo_getword:=ram[(direccion and $ffff) shr 1];
@@ -130,8 +129,8 @@ begin
   color.r:=buffer_paleta[(numero shl 1)+1] and $ff;
   set_pal_color(color,numero);
   case numero of
-    $000..$0ff:deco16ic_chip[0].dec16ic_buffer_color[1,(numero shr 4) and $f]:=true;
-    $100..$1ff:deco16ic_chip[0].dec16ic_buffer_color[2,(numero shr 4) and $f]:=true;
+    $000..$0ff:deco16ic_0.pf1.buffer_color[(numero shr 4) and $f]:=true;
+    $100..$1ff:deco16ic_0.pf2.buffer_color[(numero shr 4) and $f]:=true;
   end;
 end;
 
@@ -150,18 +149,18 @@ procedure dietgo_putword(direccion:dword;valor:word);
 begin
 if direccion<$80000 then exit;
 case direccion of
-  $200000..$20000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
+  $200000..$20000f:deco16ic_0.control_w((direccion and $f) shr 1,valor);
   $210000..$210fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
-                      deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
+                      deco16ic_0.pf1.data[(direccion and $fff) shr 1]:=valor;
+                      deco16ic_0.pf1.buffer[(direccion and $fff) shr 1]:=true
                    end;
   $212000..$212fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
-                      deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
+                      deco16ic_0.pf2.data[(direccion and $fff) shr 1]:=valor;
+                      deco16ic_0.pf2.buffer[(direccion and $fff) shr 1]:=true
                    end;
-  $220000..$2207ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
-  $222000..$2227ff:deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $7ff) shr 1]:=valor;
-  $280000..$2807ff:deco_sprite_ram[(direccion and $7ff) shr 1]:=valor;
+  $220000..$2207ff:deco16ic_0.pf1.rowscroll[(direccion and $7ff) shr 1]:=valor;
+  $222000..$2227ff:deco16ic_0.pf2.rowscroll[(direccion and $7ff) shr 1]:=valor;
+  $280000..$2807ff:deco_sprites_0.ram[(direccion and $7ff) shr 1]:=valor;
   $211000..$211fff,$213000..$213fff,$2c0002,$2c000a,$230000..$2300ff,$240000:;
   $300000..$300bff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                       buffer_paleta[(direccion and $fff) shr 1]:=valor;
@@ -178,21 +177,18 @@ begin
 end;
 
 procedure sound_bank_rom(valor:byte);
-var
-  temp:pbyte;
 begin
-  temp:=oki1_mem;
-  inc(temp,(valor and 1)*$40000);
-  copymemory(oki_6295_0.get_rom_addr,temp,$40000);
+  copymemory(oki_6295_0.get_rom_addr,@oki_rom[valor and 1],$40000);
 end;
 
 //Main
 procedure reset_dietgo;
 begin
  m68000_0.reset;
- reset_dec16ic(0);
+ deco16ic_0.reset;
+ deco_sprites_0.reset;
  main_deco104.reset;
- copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
+ copymemory(oki_6295_0.get_rom_addr,@oki_rom[0],$40000);
  deco16_snd_simple_reset;
  reset_audio;
  marcade.in0:=$FFFF;
@@ -212,20 +208,19 @@ const
   ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 	  8*32, 9*32,10*32,11*32,12*32,13*32,14*32,15*32 );
 var
-  memoria_temp:pbyte;
+  memoria_temp,ptemp:pbyte;
   memoria_temp_rom:pword;
 begin
 iniciar_dietgo:=false;
 iniciar_audio(false);
-init_dec16ic(0,1,2,$0,$0,$f,$f,0,1,0,16,dietgo_bank_callback,dietgo_bank_callback);
+deco16ic_0:=chip_16ic.create(1,2,$0,$0,$f,$f,0,1,0,16,dietgo_bank_callback,dietgo_bank_callback);
+deco_sprites_0:=tdeco16_sprite.create(2,3,304,$200,$3fff);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
 m68000_0:=cpu_m68000.create(14000000,$100);
 m68000_0.change_ram16_calls(dietgo_getword,dietgo_putword);
 //Sound CPU
-deco16_sprite_color_add:=$200;
-deco16_sprite_mask:=$3fff;
 deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
 getmem(memoria_temp,$200000);
 getmem(memoria_temp_rom,$80000);
@@ -235,8 +230,11 @@ deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode[0],@rom_data[0],$e9ba,$01,$19,$
 //cargar sonido
 if not(cargar_roms(@mem_snd[0],@dietgo_sound,'dietgo.zip',1)) then exit;
 //OKI rom
-getmem(oki1_mem,$80000);
-if not(cargar_roms(oki1_mem,@dietgo_oki,'dietgo.zip',1)) then exit;
+if not(cargar_roms(memoria_temp,@dietgo_oki,'dietgo.zip',1)) then exit;
+ptemp:=memoria_temp;
+copymemory(@oki_rom[0],ptemp,$40000);
+inc(ptemp,$40000);
+copymemory(@oki_rom[1],ptemp,$40000);
 //convertir chars
 if not(cargar_roms(memoria_temp,@dietgo_char,'dietgo.zip',1)) then exit;
 deco56_decrypt_gfx(memoria_temp,$100000);
@@ -269,18 +267,10 @@ reset_dietgo;
 iniciar_dietgo:=true;
 end;
 
-procedure cerrar_dietgo;
-begin
-close_dec16ic(0);
-if oki1_mem<>nil then freemem(oki1_mem);
-oki1_mem:=nil;
-end;
-
 procedure Cargar_dietgo;
 begin
 llamadas_maquina.bucle_general:=dietgo_principal;
 llamadas_maquina.iniciar:=iniciar_dietgo;
-llamadas_maquina.close:=cerrar_dietgo;
 llamadas_maquina.reset:=reset_dietgo;
 llamadas_maquina.fps_max:=58;
 end;

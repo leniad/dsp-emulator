@@ -393,9 +393,9 @@ case direccion of
         $3a0f:begin
                 if (xain_pri<>valor and $7) then begin
                   xain_pri:=valor and $7;
-                  fillchar(gfx[0].buffer[0],$400,0);
-                  fillchar(gfx[2].buffer[0],$400,0);
-                  fillchar(gfx[3].buffer[0],$400,0);
+                  fillchar(gfx[0].buffer[0],$400,1);
+                  fillchar(gfx[2].buffer[0],$400,1);
+                  fillchar(gfx[3].buffer[0],$400,1);
                 end;
                 banco_main:=(valor shr 3) and 1;
               end;

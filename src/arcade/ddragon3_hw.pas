@@ -138,8 +138,8 @@ for f:=$0 to $3ff do begin
     gfx[0].buffer[$400+f]:=false;
   end;
 end;
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 fill_full_screen(3,$600);
+fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
 procedure update_video_ddragon3;inline;

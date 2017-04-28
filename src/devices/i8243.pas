@@ -1,7 +1,7 @@
 unit i8243;
 
 interface
-uses main_engine,cpu_misc;
+uses cpu_misc;
 
 type
   i8243_chip=class

@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k053260,k053246_k053247_k055673,
-     k054000,k053251,misc_functions,timer_engine,eepromser;
+     k054000,k053251,timer_engine,eepromser;
 
 procedure cargar_vendetta;
 
@@ -86,6 +86,7 @@ if k053251_0.dirty_tmap[K053251_CI4] then begin
   k053251_0.dirty_tmap[K053251_CI4]:=false;
 end;
 k052109_0.draw_tiles;
+k053246_0.k053247_update_sprites;
 fill_full_screen(4,bg_colorbase*16);
 k053246_0.k053247_draw_sprites(3);
 k052109_0.draw_layer(sorted_layer[0],4);
@@ -302,7 +303,7 @@ screen_init(3,512,256,true);
 screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
-iniciar_audio(false);
+iniciar_audio(true);
 //cargar roms y ponerlas en su sitio...
 if not(roms_load(@temp_mem[0],@vendetta_rom,'vendetta.zip',sizeof(vendetta_rom))) then exit;
 copymemory(@memoria[$8000],@temp_mem[$38000],$8000);

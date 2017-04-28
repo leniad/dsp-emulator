@@ -226,8 +226,8 @@ end;
 {$ifdef fpc}
 if main_screen.rapido then SDL_ClearQueuedAudio(1);
 for h:=0 to (sound_status.sample_final-1) do sample_final[h]:=sample_final[h] div (sound_status.canales_usados+1);
-SDL_QueueAudio(1,@sample_final[0],sound_status.long_sample*2);
-fillchar(sample_final[0],long_max_audio,0);
+SDL_QueueAudio(1,@sample_final[0],sound_status.long_sample*sizeof(smallint));
+fillchar(sample_final[0],long_max_audio*sizeof(smallint),0);
 {$endif}
 sound_status.num_buffer:=sound_status.num_buffer+1;
 if sound_status.num_buffer=max_audio_buffer then sound_status.num_buffer:=0;

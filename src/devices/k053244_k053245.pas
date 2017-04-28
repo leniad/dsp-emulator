@@ -3,6 +3,9 @@ unit k053244_k053245;
 interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$ENDIF}gfx_engine;
 
+const
+  NUM_SPRITES=128;
+
 type
   t_k053245_cb=procedure(var code:word;var color:word;var priority:word);
 
@@ -15,6 +18,7 @@ procedure k053245_lsb_w(direccion,valor:word);
 function k053244_read(direccion:byte):byte;
 procedure k053244_write(direccion,valor:byte);
 procedure k05324x_sprites_draw(prioridad:byte);
+procedure k05324x_update_sprites;
 
 var
   k053245_cb:t_k053245_cb;
@@ -26,6 +30,7 @@ var
   sprite_rom:pbyte;
   sprite_size:dword;
   rombank,z_rejection,dx,dy:byte;
+  sorted_list:array[0..(NUM_SPRITES-1)] of integer;
 
 procedure k053245_init(spr_rom:pbyte;spr_size:dword;call_back:t_k053245_cb);
 const
@@ -99,11 +104,25 @@ begin
   if direccion=6 then copymemory(@buffer_ram,@k053245_ram,$400*2);
 end;
 
-procedure k05324x_sprites_draw(prioridad:byte);
-const
-  NUM_SPRITES=128;
+procedure k05324x_update_sprites;
 var
-	sortedlist:array[0..(NUM_SPRITES-1)] of integer;
+  offs:byte;
+  pri_code:word;
+begin
+for offs:=0 to (NUM_SPRITES-1) do sorted_list[offs]:=-1;
+// prebuild a sorted table */
+for offs:=0 to (NUM_SPRITES-1) do begin
+		pri_code:=buffer_ram[offs*8];
+		if (pri_code and $8000)<>0 then begin
+			pri_code:=pri_code and $007f;
+			if (((offs*8)<>0) and (pri_code=z_rejection)) then continue;
+			if (sorted_list[pri_code]=-1) then sorted_list[pri_code]:=offs*8;
+		end;
+end;
+end;
+
+procedure k05324x_sprites_draw(prioridad:byte);
+var
   size,w,h,x,y:byte;
 	pri_code,code,color,pri,spriteoffsX,spriteoffsY,c,ox,oy,sx,sy,zoom_x,zoom_y:word;
   //flipscreenX,flipscreenY,
@@ -115,18 +134,8 @@ begin
 	//flipscreenY:=(k053244_regs[5] and $02)<>0;
 	spriteoffsX:=(k053244_regs[0] shl 8) or k053244_regs[1];
 	spriteoffsY:=(k053244_regs[2] shl 8) or k053244_regs[3];
-	for offs:=0 to (NUM_SPRITES-1) do sortedlist[offs]:=-1;
-	// prebuild a sorted table */
-	for offs:=0 to $ff do begin
-		pri_code:=buffer_ram[offs*8];
-		if (pri_code and $8000)<>0 then begin
-			pri_code:=pri_code and $007f;
-			if (((offs*8)<>0) and (pri_code=z_rejection)) then continue;
-			if (sortedlist[pri_code]=-1) then sortedlist[pri_code]:=offs*8;
-		end;
-	end;
 	for pri_code:=0 to NUM_SPRITES-1 do begin
-		offs:=sortedlist[pri_code];
+		offs:=sorted_list[pri_code];
 		if (offs=-1) then continue;
 		code:=buffer_ram[offs+1];
 		code:=((code and $ffe1)+((code and $0010) shr 2)+((code and $0008) shl 1)

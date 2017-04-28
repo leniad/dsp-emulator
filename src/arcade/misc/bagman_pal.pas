@@ -91,9 +91,7 @@ begin
 	for row:=0 to 63 do begin
 		rowoffs:=row*32;
 		val:=1; //prepare for AND
-		for column:=0 to 31 do begin
-			if (fusemap[rowoffs+column]=0) then val:=val and columnvalue[column];
-		end;
+		for column:=0 to 31 do if (fusemap[rowoffs+column]=0) then val:=val and columnvalue[column];
 		andmap[row]:=val;
 	end;
   // I/O pin #19 */

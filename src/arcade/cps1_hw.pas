@@ -519,7 +519,7 @@ begin
   draw_layer(l2,l3=0);
   draw_layer(l3,false);
   actualiza_trozo_final(64,16,384,224,5);
-  fillchar(buffer_color,MAX_COLOR_BUFFER,0);
+  fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_cps1;

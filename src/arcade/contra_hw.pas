@@ -102,9 +102,9 @@ scroll_x_y(3,4,256-K007121_chip[0].control[$2],K007121_chip[0].control[$0]);
 draw_sprites(0);
 draw_sprites(1);
 //La pantalla final empieza en la posicion 16 y hay que pasarla a la visible en la 40...
-actualiza_trozo(16+ADD_SPRITE,0+ADD_SPRITE,224,256,4,0,40,224,256,pant_temp);
+actualiza_trozo(16+ADD_SPRITE,0+ADD_SPRITE,224,256,4,0,40,224,256,PANT_TEMP);
 //El texto empieza en la linea 16 pero hay que pasarlo a la linea 0 de la pantalla VISIBLE
-actualiza_trozo(16,0,224,256,1,0,0,224,256,pant_temp);
+actualiza_trozo(16,0,224,256,1,0,0,224,256,PANT_TEMP);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 

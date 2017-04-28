@@ -174,7 +174,6 @@ uses
   hu6280 in '..\cpu\hu6280.pas',
   cavemanninja_hw in '..\arcade\cavemanninja_hw.pas',
   tumblepop_hw in '..\arcade\tumblepop_hw.pas',
-  deco16ic in '..\arcade\misc\deco16ic.pas',
   deco_decr in '..\arcade\misc\deco_decr.pas',
   funkyjet_hw in '..\arcade\funkyjet_hw.pas',
   superburgertime_hw in '..\arcade\superburgertime_hw.pas',
@@ -269,7 +268,10 @@ uses
   ajax_hw in '..\arcade\ajax_hw.pas',
   k051316 in '..\devices\k051316.pas',
   vendetta_hw in '..\arcade\vendetta_hw.pas',
-  k054000 in '..\devices\k054000.pas';
+  k054000 in '..\devices\k054000.pas',
+  deco_16ic in '..\arcade\misc\deco_16ic.pas',
+  gauntlet_hw in '..\arcade\gauntlet_hw.pas',
+  sauro_hw in '..\arcade\sauro_hw.pas';
 
 {$R *.res}
 

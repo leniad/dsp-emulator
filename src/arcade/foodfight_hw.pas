@@ -171,7 +171,7 @@ case direccion of
                   $18000..$1bfff:ram2[(direccion and $fff) shr 1]:=valor;
                   $1c000..$1ffff:sprite_ram[(direccion and $ff) shr 1]:=valor;
                end;
-    $800000..$83ffff:begin
+    $800000..$83ffff:if bg_ram[(direccion and $7ff) shr 1]<>valor then begin
                         bg_ram[(direccion and $7ff) shr 1]:=valor;
                         gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                      end;

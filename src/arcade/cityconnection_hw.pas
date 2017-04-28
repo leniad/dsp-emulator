@@ -84,7 +84,8 @@ for f:=$fff downto 0 do begin
  end;
 end;
 actualiza_trozo(0,0,256,48,1,0,0,256,48,3);
-scroll__x_part(1,3,scroll_x,0,48,208);
+//scroll__x_part(1,3,scroll_x,0,48,208);
+scroll__x_part2(1,3,208,@scroll_x,0,0,48);
 for f:=$3f downto 0 do begin
     x:=memoria[$2803+(f*4)];
     y:=239-memoria[$2800+(f*4)];

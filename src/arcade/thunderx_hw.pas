@@ -251,6 +251,7 @@ end;
 procedure update_video_thunderx;
 begin
 k052109_0.draw_tiles;
+k051960_0.update_sprites;
 fill_full_screen(4,layer_colorbase[1]*16);
 k051960_0.draw_sprites(4,-1);
 if priority<>0 then begin

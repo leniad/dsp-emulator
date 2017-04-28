@@ -377,6 +377,9 @@ type
     llander1: TMenuItem;
     CrushRoller1: TMenuItem;
     Vendetta1: TMenuItem;
+    GauntletHW1: TMenuItem;
+    Gauntlet1: TMenuItem;
+    Sauro1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -639,7 +642,6 @@ if cinta_tzx.cargada then vaciar_cintas;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
 file_ini_save;
-for f:=0 to $ff do if directory.arcade_list_roms[f]<>'' then directory.arcade_list_roms[f]:='';
 if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
 if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
 SDL_DestroyWindow(window_render);

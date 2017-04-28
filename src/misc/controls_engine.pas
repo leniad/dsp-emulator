@@ -106,6 +106,19 @@ const
   KEYBOARD_NDOT=99;
   //Reservada la ultima para indicar que no hay tecla
   KEYBOARD_NONE=255;
+  {$ifndef fpc}
+  //Cursor del raton
+  cdata:array[0..31] of byte=(
+        0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0);
+  cmask:array[0..31] of byte=(
+        3,192,15,240,28,56,56,28,
+        113,142,225,135,193,131,206,115,
+        206,115,193,131,225,135,113,142,
+        56,28,28,56,15,240,3,192);
+  {$endif}
 
 type
     def_mouse = record
@@ -160,18 +173,6 @@ uses principal;
 var
    keystate:pbyte=nil;
    new_cursor:libsdlP_cursor;
-
-const
-    cdata:array[0..31] of byte=(
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0);
-    cmask:array[0..31] of byte=(
-        3,192,15,240,28,56,56,28,
-        113,142,225,135,193,131,206,115,
-        206,115,193,131,225,135,113,142,
-        56,28,28,56,15,240,3,192);
 
 procedure show_mouse_cursor;
 begin
@@ -451,6 +452,10 @@ begin
   event.arcade:=false;
   event.keyboard:=false;
   event.mouse:=false;
+  {$ifdef fpc}
+  if sdl_event.type_=libSDL_WINDOWEVENT then
+    if ((sdl_event.window.event<>libSDL_WINDOWEVENT_ENTER) and (sdl_event.window.event<>libSDL_WINDOWEVENT_LEAVE)) then SDL_ClearQueuedAudio(1);
+  {$endif}
   //Rellenar el teclado interno
   //principal1.statusbar1.panels[2].text:=inttostr(sdl_event.key.keysym.scancode);
   for f:=0 to $ff do

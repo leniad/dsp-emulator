@@ -3,7 +3,7 @@ unit boogiewings_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,deco_104,
+     oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common,deco_104,
      misc_functions,dialogs;
 
 procedure cargar_boogwing;
@@ -43,9 +43,9 @@ var
 
 procedure update_video_boogwing;inline;
 begin
-update_pf_2(0,3,false);
-update_pf_1(0,3,true);
-deco16_sprites;
+deco16ic_0.update_pf_2(3,false);
+deco16ic_0.update_pf_1(3,true);
+deco_sprites_0.draw_sprites;
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
@@ -123,9 +123,9 @@ begin
 case direccion of
   $0..$7ffff:if m68000_0.opcode then boogwing_getword:=rom_opcode[direccion shr 1]
                   else boogwing_getword:=rom_data[direccion shr 1];
-  $210000..$210fff:boogwing_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
-  $212000..$212fff:boogwing_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
-  $280000..$2807ff:boogwing_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
+  $210000..$210fff:boogwing_getword:=deco16ic_0.pf1.data[(direccion and $fff) shr 1];
+  $212000..$212fff:boogwing_getword:=deco16ic_0.pf2.data[(direccion and $fff) shr 1];
+  $280000..$2807ff:boogwing_getword:=deco_sprites_0.ram[(direccion and $7ff) shr 1];
   $300000..$300bff:boogwing_getword:=buffer_paleta[(direccion and $fff) shr 1];
   $340000..$343fff:boogwing_getword:=boogwing_protection_region_0_104_r(direccion and $3fff);
   $380000..$38ffff:boogwing_getword:=ram[(direccion and $ffff) shr 1];
@@ -141,8 +141,8 @@ begin
   color.r:=buffer_paleta[(numero shl 1)+1] and $ff;
   set_pal_color(color,numero);
   case numero of
-    $000..$0ff:deco16ic_chip[0].dec16ic_buffer_color[1,(numero shr 4) and $f]:=true;
-    $100..$1ff:deco16ic_chip[0].dec16ic_buffer_color[2,(numero shr 4) and $f]:=true;
+    $000..$0ff:deco16ic_0.pf1.buffer_color[(numero shr 4) and $f]:=true;
+    $100..$1ff:deco16ic_0.pf2.buffer_color[(numero shr 4) and $f]:=true;
   end;
 end;
 
@@ -161,18 +161,18 @@ procedure boogwing_putword(direccion:dword;valor:word);
 begin
 if direccion<$80000 then exit;
 case direccion of
-  $200000..$20000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
+  $200000..$20000f:deco16ic_0.control_w((direccion and $f) shr 1,valor);
   $210000..$210fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
-                      deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
+                      deco16ic_0.pf1.data[(direccion and $fff) shr 1]:=valor;
+                      deco16ic_0.pf1.buffer[(direccion and $fff) shr 1]:=true
                    end;
   $212000..$212fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
-                      deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
+                      deco16ic_0.pf2.data[(direccion and $fff) shr 1]:=valor;
+                      deco16ic_0.pf2.buffer[(direccion and $fff) shr 1]:=true
                    end;
-  $220000..$2207ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
-  $222000..$2227ff:deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $7ff) shr 1]:=valor;
-  $280000..$2807ff:deco_sprite_ram[(direccion and $7ff) shr 1]:=valor;
+  $220000..$2207ff:deco16ic_0.pf1.rowscroll[(direccion and $7ff) shr 1]:=valor;
+  $222000..$2227ff:deco16ic_0.pf2.rowscroll[(direccion and $7ff) shr 1]:=valor;
+  $280000..$2807ff:deco_sprites_0.ram[(direccion and $7ff) shr 1]:=valor;
   $211000..$211fff,$213000..$213fff,$2c0002,$2c000a,$230000..$2300ff,$240000:;
   $300000..$300bff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                       buffer_paleta[(direccion and $fff) shr 1]:=valor;
@@ -201,7 +201,7 @@ end;
 procedure reset_boogwing;
 begin
  m68000_0.reset;
- reset_dec16ic(0);
+ deco16ic_0.reset;
  main_deco104.reset;
  copymemory(oki_6295_0.get_rom_addr,oki1_mem,$40000);
  deco16_snd_simple_reset;
@@ -230,7 +230,8 @@ iniciar_boogwing:=false;
 if MessageDlg('Warning. This is a WIP driver, it''s not finished yet and bad things could happen!. Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 iniciar_audio(false);
 //Pantallas
-init_dec16ic(0,1,2,$0,$0,$f,$f,0,1,0,16,boogwing_bank_callback,boogwing_bank_callback);
+deco16ic_0:=chip_16ic.create(1,2,$0,$0,$f,$f,0,1,0,16,boogwing_bank_callback,boogwing_bank_callback);
+deco_sprites_0:=tdeco16_sprite.create(3,5,304,$200,$3fff);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
@@ -267,8 +268,6 @@ init_gfx(2,16,16,$4000);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*32,24,8,16,0);
 convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-deco16_sprite_color_add:=$200;
-deco16_sprite_mask:=$3fff;
 //Proteccion deco104
 main_deco104:=cpu_deco_104.create;
 main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;
@@ -284,7 +283,6 @@ end;
 
 procedure cerrar_boogwing;
 begin
-close_dec16ic(0);
 if oki1_mem<>nil then freemem(oki1_mem);
 if oki2_mem<>nil then freemem(oki2_mem);
 oki1_mem:=nil;

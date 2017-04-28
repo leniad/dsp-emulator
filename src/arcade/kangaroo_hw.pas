@@ -87,7 +87,7 @@ begin
      end;
 	end;
 putpixel(0,0,$20000,@punt[0],1);
-actualiza_trozo(8,0,240,512,1,0,0,240,512,pant_temp);
+actualiza_trozo(8,0,240,512,1,0,0,240,512,PANT_TEMP);
 end;
 
 procedure eventos_kangaroo;

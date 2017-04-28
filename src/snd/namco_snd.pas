@@ -244,7 +244,7 @@ begin
   for f:=0 to 7 do copymemory(temp,@self.voice[f],sizeof(tipo_voice));inc(temp,sizeof(tipo_voice));size:=size+sizeof(tipo_voice);
   copymemory(temp,@self.enabled,sizeof(boolean));inc(temp,sizeof(boolean));size:=size+sizeof(boolean);
   copymemory(temp,@self.regs,$40);inc(temp,$40);size:=size+$40;
-  copymemory(temp,@self.ram,$400);inc(temp,$400);size:=size+$400;
+  copymemory(temp,@self.ram,$400);size:=size+$400;
   save_snapshot:=size;
 end;
 
@@ -257,7 +257,7 @@ begin
   for f:=0 to 7 do copymemory(@self.voice[f],temp,sizeof(tipo_voice));inc(temp,sizeof(tipo_voice));
   copymemory(@self.enabled,temp,sizeof(boolean));inc(temp,sizeof(boolean));
   copymemory(@self.regs,temp,$40);inc(temp,$40);
-  copymemory(@self.ram,temp,$400);inc(temp,$400);
+  copymemory(@self.ram,temp,$400);
 end;
 
 procedure namco_63701x_start(clock:dword);

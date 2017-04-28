@@ -2,11 +2,11 @@ unit dec0_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m68000,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,ym_2203,ym_3812,oki6295,m6502,sound_engine,hu6280,misc_functions,
-     deco_bac06;
+     m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
+     ym_2203,ym_3812,oki6295,m6502,sound_engine,hu6280,misc_functions,
+     deco_bac06,mcs51;
 
-procedure cargar_dec0;
+procedure Cargar_dec0;
 
 implementation
 const
@@ -30,12 +30,24 @@ const
         (n:'ep11';l:$10000;p:$20000;crc:$62fa425a),(n:'ep10';l:$8000;p:$30000;crc:$cce3bd95),
         (n:'ep09';l:$10000;p:$40000;crc:$11bed656),(n:'ep08';l:$8000;p:$50000;crc:$c45c7b4c),
         (n:'ep13';l:$10000;p:$60000;crc:$8fca9f28),(n:'ep12';l:$8000;p:$70000;crc:$3cd1d0c3),());
+        robocop_dip:array [0..10] of def_dip=(
+        (mask:$0003;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$000c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0020;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0040;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0080;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0300;name:'Player Energy';number:4;dip:((dip_val:$100;dip_name:'Low'),(dip_val:$300;dip_name:'Medium'),(dip_val:$200;dip_name:'High'),(dip_val:$0;dip_name:'Very High'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c00;name:'Difficulty';number:4;dip:((dip_val:$800;dip_name:'Easy'),(dip_val:$c00;dip_name:'Normal'),(dip_val:$400;dip_name:'Hard'),(dip_val:$000;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1000;name:'Allow Continue';number:2;dip:((dip_val:$1000;dip_name:'Yes'),(dip_val:$0;dip_name:'No'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2000;name:'Bonus Stage Energy';number:2;dip:((dip_val:$0;dip_name:'Low'),(dip_val:$2000;dip_name:'High'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4000;name:'Brink Time';number:2;dip:((dip_val:$4000;dip_name:'Normal'),(dip_val:$0;dip_name:'Less'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Baddudes
         baddudes_rom:array[0..4] of tipo_roms=(
         (n:'ei04-1.3c';l:$10000;p:0;crc:$4bf158a7),(n:'ei01-1.3a';l:$10000;p:$1;crc:$74f5110c),
         (n:'ei06.6c';l:$10000;p:$40000;crc:$3ff8da57),(n:'ei03.6a';l:$10000;p:$40001;crc:$f8f2bd94),());
         baddudes_char:array[0..2] of tipo_roms=(
         (n:'ei25.15j';l:$8000;p:0;crc:$bcf59a69),(n:'ei26.16j';l:$8000;p:$8000;crc:$9aff67b8),());
+        baddudes_mcu:tipo_roms=(n:'ei31.9a';l:$1000;p:$0;crc:$2a8745d2);
         baddudes_sound:tipo_roms=(n:'ei07.8a';l:$8000;p:$8000;crc:$9fb1ef4b);
         baddudes_oki:tipo_roms=(n:'ei08.2c';l:$10000;p:0;crc:$3c87463e);
         baddudes_tiles1:array[0..4] of tipo_roms=(
@@ -48,6 +60,14 @@ const
         (n:'ei11.16a';l:$10000;p:$20000;crc:$3a77326c),(n:'ei12.17a';l:$8000;p:$30000;crc:$fea2a134),
         (n:'ei13.13c';l:$10000;p:$40000;crc:$e5ae2751),(n:'ei14.14c';l:$8000;p:$50000;crc:$e83c760a),
         (n:'ei09.13a';l:$10000;p:$60000;crc:$6901e628),(n:'ei10.14a';l:$8000;p:$70000;crc:$eeee8a1a),());
+        baddudes_dip:array [0..7] of def_dip=(
+        (mask:$0003;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$000c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0020;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0040;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0300;name:'Lives';number:4;dip:((dip_val:$100;dip_name:'1'),(dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'5'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c00;name:'Difficulty';number:4;dip:((dip_val:$800;dip_name:'Easy'),(dip_val:$c00;dip_name:'Normal'),(dip_val:$400;dip_name:'Hard'),(dip_val:$000;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1000;name:'Allow Continue';number:2;dip:((dip_val:$1000;dip_name:'Yes'),(dip_val:$0;dip_name:'No'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Hippodrome
         hippo_rom:array[0..4] of tipo_roms=(
         (n:'ew02';l:$10000;p:0;crc:$df0d7dc6),(n:'ew01';l:$10000;p:$1;crc:$d5670aa7),
@@ -68,25 +88,33 @@ const
         (n:'ew10';l:$10000;p:$20000;crc:$4c25dfe8),(n:'ew11';l:$10000;p:$30000;crc:$f2e007fc),
         (n:'ew06';l:$10000;p:$40000;crc:$e4bb8199),(n:'ew07';l:$10000;p:$50000;crc:$470b6989),
         (n:'ew17';l:$10000;p:$60000;crc:$8c97c757),(n:'ew12';l:$10000;p:$70000;crc:$a2d244bc),());
+        hippo_dip:array [0..8] of def_dip=(
+        (mask:$0003;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$000c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0020;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0040;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0300;name:'Lives';number:4;dip:((dip_val:$100;dip_name:'1'),(dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c00;name:'Difficulty';number:4;dip:((dip_val:$800;dip_name:'Easy'),(dip_val:$c00;dip_name:'Normal'),(dip_val:$400;dip_name:'Hard'),(dip_val:$000;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$3000;name:'Player & Enemy Energy';number:4;dip:((dip_val:$1000;dip_name:'Very Low'),(dip_val:$2000;dip_name:'Low'),(dip_val:$3000;dip_name:'Medium'),(dip_val:$0;dip_name:'High'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4000;name:'Enemy Power Decrease on Continue';number:2;dip:((dip_val:$4000;dip_name:'2 Dots'),(dip_val:$0;dip_name:'3 Dots'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 type
     tipo_update_video=procedure;
 
 var
  rom:array[0..$2ffff] of word;
- ram1:array[0..$17ff] of byte;
- ram2:array[0..$3fff] of byte;
- //pal_rg,pal_b:array[0..$7ff] of byte;
+ ram1:array[0..$fff] of word;
+ ram2:array[0..$1fff] of word;
  sound_latch,prioridad,hippodrm_lsb:byte;
  proc_update_video:tipo_update_video;
- vblank_val,dip_b:byte;
  //HU 6280
  robocop_mcu_rom:array[0..$1ff] of byte;
  mcu_ram:array[0..$1fff] of byte;
  mcu_shared_ram:array[0..$1fff] of byte;
  hippo_mcu_rom:array[0..$ffff] of byte;
  //8751
- i8751_return:word;
+ i8751_return,i8751_command:word;
+ i8751_ports:array[0..3] of byte;
 
 procedure update_video_robocop;
 var
@@ -94,101 +122,104 @@ var
 begin
 trans:=(prioridad and $4) shl 1;
 if (prioridad and 1)<>0 then begin
-  update_pf(2,1,false,false);
-  update_pf(3,2,true,false);
+  bac06_0.tile_2.update_pf(1,false,false);
+  bac06_0.tile_3.update_pf(2,true,false);
   //Pri pant
-  show_pf(2,4);
-  if (prioridad and $02)<>0 then sprites_deco_bac06($08,trans,3,4);
-  show_pf(3,4);
+  bac06_0.tile_2.show_pf;
+  if (prioridad and $02)<>0 then bac06_0.draw_sprites($8,trans,3);
+  bac06_0.tile_3.show_pf;
 end else begin  //invertidas
-  update_pf(3,2,false,false);
-  update_pf(2,1,true,false);
+  bac06_0.tile_3.update_pf(2,false,false);
+  bac06_0.tile_2.update_pf(1,true,false);
   //Pri pant
-  show_pf(3,4);
-  if (prioridad and $02)<>0 then sprites_deco_bac06($08,trans,3,4);
-  show_pf(2,4);
+  bac06_0.tile_3.show_pf;
+  if (prioridad and $02)<>0 then bac06_0.draw_sprites($8,trans,3);
+  bac06_0.tile_2.show_pf;
 end;
-if (prioridad and $02)<>0 then sprites_deco_bac06($08,trans xor $08,3,4)
-	else sprites_deco_bac06($00,$00,3,4);
+if (prioridad and $02)<>0 then bac06_0.draw_sprites($8,trans xor $08,3)
+	else bac06_0.draw_sprites(0,0,3);
 //chars
-update_pf(1,0,true,false);
-show_pf(1,4);
-actualiza_trozo_final(0,8,256,240,4);
+bac06_0.tile_1.update_pf(0,true,false);
+bac06_0.tile_1.show_pf;
+actualiza_trozo_final(0,8,256,240,7);
 end;
 
 procedure update_video_baddudes;
 begin
 if (prioridad and 1)=0 then begin
-  update_pf(2,1,false,true);
-  update_pf(3,2,true,true);
+  bac06_0.tile_2.update_pf(1,false,true);
+  bac06_0.tile_3.update_pf(2,true,true);
   //Pri pant
-  show_pf(2,4);
-  show_pf(3,4);
+  bac06_0.tile_2.show_pf;
+  bac06_0.tile_3.show_pf;
   //prioridades
-  if (prioridad and $2)<>0 then show_pf_pri(2,4);
-  sprites_deco_bac06(0,0,3,4);
-  if (prioridad and $4)<>0 then show_pf_pri(3,4);
+  if (prioridad and $2)<>0 then bac06_0.tile_2.show_pf_pri;
+  bac06_0.draw_sprites(0,0,3);
+  if (prioridad and $4)<>0 then bac06_0.tile_3.show_pf_pri;
 end else begin  //invertidas
-  update_pf(3,2,false,true);
-  update_pf(2,1,true,true);
+  bac06_0.tile_3.update_pf(2,false,true);
+  bac06_0.tile_2.update_pf(1,true,true);
   //Pri pant
-  show_pf(3,4);
-  show_pf(2,4);
+  bac06_0.tile_3.show_pf;
+  bac06_0.tile_2.show_pf;
   //prioridades
-  if (prioridad and $2)<>0 then show_pf_pri(3,4);
-  sprites_deco_bac06(0,0,3,4);
-  if (prioridad and $4)<>0 then show_pf_pri(2,4);
+  if (prioridad and $2)<>0 then bac06_0.tile_3.show_pf_pri;
+  bac06_0.draw_sprites(0,0,3);
+  if (prioridad and $4)<>0 then bac06_0.tile_2.show_pf_pri;
 end;
 //chars
-update_pf(1,0,true,false);
-show_pf(1,4);
-actualiza_trozo_final(0,8,256,240,4);
+bac06_0.tile_1.update_pf(0,true,false);
+bac06_0.tile_1.show_pf;
+actualiza_trozo_final(0,8,256,240,7);
 end;
 
 procedure update_video_hippo;
 begin
 if (prioridad and 1)<>0 then begin
-  update_pf(2,1,false,false);
-  update_pf(3,2,true,false);
+  bac06_0.tile_2.update_pf(1,false,false);
+  bac06_0.tile_3.update_pf(2,true,false);
   //Pri pant
-  show_pf(2,4);
-  show_pf(3,4);
+  bac06_0.tile_2.show_pf;
+  bac06_0.tile_3.show_pf;
 end else begin  //invertidas
-  update_pf(3,2,false,false);
-  update_pf(2,1,true,false);
+  bac06_0.tile_3.update_pf(2,false,false);
+  bac06_0.tile_2.update_pf(1,true,false);
   //Pri pant
-  show_pf(3,4);
-  show_pf(2,4);
+  bac06_0.tile_3.show_pf;
+  bac06_0.tile_2.show_pf;
 end;
-sprites_deco_bac06($00,$00,3,4);
+bac06_0.draw_sprites(0,0,3);
 //chars
-update_pf(1,0,true,false);
-show_pf(1,4);
-actualiza_trozo_final(0,8,256,240,4);
+bac06_0.tile_1.update_pf(0,true,false);
+bac06_0.tile_1.show_pf;
+actualiza_trozo_final(0,8,256,240,7);
 end;
 
 procedure eventos_dec0;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $Fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.but3[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $80);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
+  if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
+  if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
+  if arcade_input.but3[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $8000);
   //SYSTEM
+  if arcade_input.but4[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.but4[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
 end;
@@ -196,25 +227,28 @@ end;
 
 procedure dec0_principal;
 var
-  frame_m,frame_s:single;
+  frame_m,frame_s,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
+frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
    m6502_0.run(frame_s);
    frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
+   mcs51_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
    case f of
       255:begin
             m68000_0.irq[6]:=HOLD_LINE;
             proc_update_video;
-            vblank_val:=$80;
+            marcade.in1:=marcade.in1 or $80;
           end;
-      263:vblank_val:=0;
+      263:marcade.in1:=marcade.in1 and $7f;
    end;
  end;
  eventos_dec0;
@@ -243,9 +277,9 @@ while EmuStatus=EsRuning do begin
       255:begin
             m68000_0.irq[6]:=HOLD_LINE;
             proc_update_video;
-            vblank_val:=$80;
+            marcade.in1:=marcade.in1 or $80;
           end;
-      263:vblank_val:=0;
+      263:marcade.in1:=marcade.in1 and $7f;
    end;
  end;
  eventos_dec0;
@@ -253,7 +287,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure cambiar_color(numero:word);inline;
+procedure cambiar_color(numero:word);
 var
   color:tcolor;
 begin
@@ -262,9 +296,9 @@ begin
   color.b:=buffer_paleta[$400+numero] and $ff;
   set_pal_color(color,numero);
   case numero of
-    $000..$0ff:bac06_pf.buffer_color[1,numero shr 4]:=true;
-    $200..$2ff:bac06_pf.buffer_color[2,(numero shr 4) and $f]:=true;
-    $300..$3ff:bac06_pf.buffer_color[3,(numero shr 4) and $f]:=true;
+    $000..$0ff:bac06_0.tile_1.buffer_color[numero shr 4]:=true;
+    $200..$2ff:bac06_0.tile_2.buffer_color[(numero shr 4) and $f]:=true;
+    $300..$3ff:bac06_0.tile_3.buffer_color[(numero shr 4) and $f]:=true;
   end;
 end;
 
@@ -273,44 +307,20 @@ begin
 case direccion of
   $0..$5ffff:dec0_getword:=rom[direccion shr 1];
   $180000..$180fff:dec0_getword:=mcu_shared_ram[(direccion and $fff) shr 1];
-  $242800..$243fff:dec0_getword:=ram1[(direccion-$242800)+1] or (ram1[direccion-$242800] shl 8);
-  $244000..$245fff:dec0_getword:=bac06_pf.data[1,(direccion and $1fff) shr 1];
-  $24a000..$24a7ff:dec0_getword:=bac06_pf.data[2,(direccion and $7ff) shr 1];
-  $24d000..$24d7ff:dec0_getword:=bac06_pf.data[3,(direccion and $7ff) shr 1];
-  $30c000:dec0_getword:=(marcade.in2 shl 8)+marcade.in0;
-  $30c006,$30c00a:dec0_getword:=$ffff;
-  $30c002:dec0_getword:=marcade.in1+vblank_val;
-  $30c004:dec0_getword:=$ff00+dip_b;
+  $242800..$243fff:dec0_getword:=ram1[(direccion-$242800) shr 1];
+  $244000..$245fff:dec0_getword:=bac06_0.tile_1.data[(direccion and $1fff) shr 1];
+  $24a000..$24a7ff:dec0_getword:=bac06_0.tile_2.data[(direccion and $7ff) shr 1];
+  $24d000..$24d7ff:dec0_getword:=bac06_0.tile_3.data[(direccion and $7ff) shr 1];
+  $30c000:dec0_getword:=marcade.in0;
+  $30c002:dec0_getword:=marcade.in1;
+  $30c004:dec0_getword:=marcade.dswa;
+  $30c006:dec0_getword:=$ffff;
   $30c008:dec0_getword:=i8751_return;
   $310000..$3107ff:dec0_getword:=buffer_paleta[(direccion and $7ff) shr 1];
   $314000..$3147ff:dec0_getword:=buffer_paleta[((direccion and $7ff) shr 1)+$400];
-  $ff8000..$ffbfff:dec0_getword:=ram2[(direccion and $3fff)+1] or (ram2[direccion and $3fff] shl 8);
-  $ffc000..$ffcfff:dec0_getword:=sprite_ram_bac06[(direccion and $7ff)+1] or (sprite_ram_bac06[direccion and $7ff] shl 8);
+  $ff8000..$ffbfff:dec0_getword:=ram2[(direccion and $3fff) shr 1];
+  $ffc000..$ffcfff:dec0_getword:=buffer_sprites_w[(direccion and $7ff) shr 1];
 end;
-end;
-
-procedure dec0_i8751_write(valor:word);inline;
-begin
-	i8751_return:=0;
-	case valor of
-		$714:i8751_return:=$700;
-		$73b:i8751_return:=$701;
-		$72c:i8751_return:=$702;
-		$73f:i8751_return:=$703;
-		$755:i8751_return:=$704;
-		$722:i8751_return:=$705;
-		$72b:i8751_return:=$706;
-		$724:i8751_return:=$707;
-		$728:i8751_return:=$708;
-		$735:i8751_return:=$709;
-		$71d:i8751_return:=$70a;
-		$721:i8751_return:=$70b;
-		$73e:i8751_return:=$70c;
-		$761:i8751_return:=$70d;
-		$753:i8751_return:=$70e;
-		$75b:i8751_return:=$70f;
-	end;
-	m68000_0.irq[5]:=HOLD_LINE;
 end;
 
 procedure dec0_putword(direccion:dword;valor:word);
@@ -321,43 +331,46 @@ case direccion of
                         mcu_shared_ram[(direccion and $fff) shr 1]:=valor and $ff;
                         if ((direccion and $fff)=$ffe) then h6280_0.set_irq_line(0,HOLD_LINE);
                      end;
-    $240000..$240007:change_control0(1,(direccion and 7) shr 1,valor);
-    $240010..$240017:change_control1(1,(direccion and 7) shr 1,valor);
-    $242000..$24207f:bac06_pf.colscroll[1,(direccion and $7f) shr 1]:=valor;
-    $242400..$2427ff:bac06_pf.rowscroll[1,(direccion and $3ff) shr 1]:=valor;
-    $242800..$243fff:begin
-                      ram1[(direccion-$242800)+1]:=valor and $ff;
-                      ram1[direccion-$242800]:=valor shr 8;
-                   end;
+    $240000..$240007:bac06_0.tile_1.change_control0((direccion and 7) shr 1,valor);
+    $240010..$240017:bac06_0.tile_1.change_control1((direccion and 7) shr 1,valor);
+    $242000..$24207f:bac06_0.tile_1.colscroll[(direccion and $7f) shr 1]:=valor;
+    $242400..$2427ff:bac06_0.tile_1.rowscroll[(direccion and $3ff) shr 1]:=valor;
+    $242800..$243fff:ram1[(direccion-$242800) shr 1]:=valor;
     $244000..$245fff:begin
-                      bac06_pf.data[1,(direccion and $1fff) shr 1]:=valor;
+                      bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=valor;
                       gfx[0].buffer[(direccion and $1fff) shr 1]:=true;
                    end;
-    $246000..$246007:change_control0(2,(direccion and 7) shr 1,valor);
-    $246010..$246017:change_control1(2,(direccion and 7) shr 1,valor);
-    $248000..$24807f:bac06_pf.colscroll[2,(direccion and $7f) shr 1]:=valor;
-    $248400..$2487ff:bac06_pf.rowscroll[2,(direccion and $3ff) shr 1]:=valor;
+    $246000..$246007:bac06_0.tile_2.change_control0((direccion and 7) shr 1,valor);
+    $246010..$246017:bac06_0.tile_2.change_control1((direccion and 7) shr 1,valor);
+    $248000..$24807f:bac06_0.tile_2.colscroll[(direccion and $7f) shr 1]:=valor;
+    $248400..$2487ff:bac06_0.tile_2.rowscroll[(direccion and $3ff) shr 1]:=valor;
     $24a000..$24a7ff:begin
-                      bac06_pf.data[2,(direccion and $7ff) shr 1]:=valor;
+                      bac06_0.tile_2.data[(direccion and $7ff) shr 1]:=valor;
                       gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
                    end;
-    $24c000..$24c007:change_control0(3,(direccion and 7) shr 1,valor);
-    $24c010..$24c017:change_control1(3,(direccion and 7) shr 1,valor);
-    $24c800..$24c87f:bac06_pf.colscroll[3,(direccion and $7f) shr 1]:=valor;
-    $24cc00..$24cfff:bac06_pf.rowscroll[3,(direccion and $3ff) shr 1]:=valor;
+    $24c000..$24c007:bac06_0.tile_3.change_control0((direccion and 7) shr 1,valor);
+    $24c010..$24c017:bac06_0.tile_3.change_control1((direccion and 7) shr 1,valor);
+    $24c800..$24c87f:bac06_0.tile_3.colscroll[(direccion and $7f) shr 1]:=valor;
+    $24cc00..$24cfff:bac06_0.tile_3.rowscroll[(direccion and $3ff) shr 1]:=valor;
     $24d000..$24d7ff:begin
-                      bac06_pf.data[3,(direccion and $7ff) shr 1]:=valor;
+                      bac06_0.tile_3.data[(direccion and $7ff) shr 1]:=valor;
                       gfx[2].buffer[(direccion and $7ff) shr 1]:=true;
                    end;
     $30c010..$30c01f:case (direccion and $f) of
                         0:prioridad:=valor and $ff;
-                        2:copymemory(@buffer_sprites[0],@sprite_ram_bac06[0],$800);
+                        2:bac06_0.update_sprite_data(@buffer_sprites_w);
                         4:begin
                             sound_latch:=valor and $ff;
                             m6502_0.change_nmi(PULSE_LINE);
                           end;
-                        6:dec0_i8751_write(valor);
-                        $e:i8751_return:=0;
+                        6:begin
+                            i8751_command:=valor;
+                            if (i8751_ports[2] and 8)<>0 then mcs51_0.change_irq1(ASSERT_LINE);
+                          end;
+                       $e:begin
+                            i8751_command:=0;
+                            i8751_return:=0;
+                          end;
                    end;
     $310000..$3107ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                       buffer_paleta[(direccion and $7ff) shr 1]:=valor;
@@ -367,14 +380,8 @@ case direccion of
                       buffer_paleta[((direccion and $7ff) shr 1)+$400]:=valor;
                       cambiar_color((direccion and $7ff) shr 1);
                    end;
-    $ff8000..$ffbfff:begin
-                      ram2[(direccion and $3fff)+1]:=valor and $ff;
-                      ram2[direccion and $3fff]:=valor shr 8;
-                   end;
-    $ffc000..$ffcfff:begin
-                      sprite_ram_bac06[(direccion and $7ff)+1]:=valor and $ff;
-                      sprite_ram_bac06[direccion and $7ff]:=valor shr 8;
-                   end;
+    $ff8000..$ffbfff:ram2[(direccion and $3fff) shr 1]:=valor;
+    $ffc000..$ffcfff:buffer_sprites_w[(direccion and $7ff) shr 1]:=valor;
 end;
 end;
 
@@ -412,6 +419,48 @@ begin
   m6502_0.change_irq(irqstate);
 end;
 
+function in_port1:byte;
+begin
+  in_port1:=$ff;
+end;
+
+function in_port0:byte;
+var
+  res:byte;
+begin
+	res:=$ff;
+	// P0 connected to latches
+	if (i8751_ports[2] and $10)=0 then res:=res and (i8751_command shr 8);
+	if (i8751_ports[2] and $20)=0 then res:=res and (i8751_command and $ff);
+	in_port0:=res;
+end;
+
+procedure out_port0(valor:byte);
+begin
+  i8751_ports[0]:=valor;
+end;
+
+procedure out_port1(valor:byte);
+begin
+  i8751_ports[1]:=valor;
+end;
+
+procedure out_port3(valor:byte);
+begin
+  i8751_ports[3]:=valor;
+end;
+
+procedure out_port2(valor:byte);
+begin
+	if (((valor and 4)=0) and ((i8751_ports[2] and 4)<>0)) then m68000_0.irq[5]:=HOLD_LINE;
+	if (valor and 8)=0 then mcs51_0.change_irq1(CLEAR_LINE);
+	if (((valor and $40)<>0) and ((i8751_ports[2] and $40)=0)) then
+    i8751_return:=(i8751_return and $ff00) or i8751_ports[0];
+	if (((valor and $80)<>0) and ((i8751_ports[2] and $80)=0)) then
+    i8751_return:=(i8751_return and $00ff) or (i8751_ports[0] shl 8);
+	i8751_ports[2]:=valor;
+end;
+
 //Robocop
 function robocop_mcu_getbyte(direccion:dword):byte;
 begin
@@ -446,12 +495,12 @@ case direccion of
 	                    $92:hippo_mcu_getbyte:=$15;
                    end;
   $1a1000..$1a17ff:begin
-                      tempw:=bac06_pf.data[3,(direccion and $7ff) shr 1];
+                      tempw:=bac06_0.tile_3.data[(direccion and $7ff) shr 1];
                       if (direccion and 1)<>0 then hippo_mcu_getbyte:=tempw shr 8
                         else hippo_mcu_getbyte:=tempw;
                    end;
   $1f0000..$1f1fff:hippo_mcu_getbyte:=mcu_ram[direccion and $1fff];
-  $1ff402..$1ff403:hippo_mcu_getbyte:=vblank_val shr 7;
+  $1ff402..$1ff403:hippo_mcu_getbyte:=marcade.in1 shr 7;
 end;
 end;
 
@@ -463,19 +512,19 @@ if direccion<$10000 then exit;
 case direccion of
   $180000..$1800ff:mcu_shared_ram[direccion and $ff]:=valor;
   $1a0000..$1a0007:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_0[3,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_0[3,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control0(3,(direccion and 7) shr 1,tempw);
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.control_0[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_3.control_0[(direccion and 7) shr 1] and $ff00) or valor;
+                      bac06_0.tile_3.change_control0((direccion and 7) shr 1,tempw);
                    end;
   $1a0010..$1a001f:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_1[3,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_1[3,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control1(3,(direccion and 7) shr 1,tempw);
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.control_1[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_3.control_1[(direccion and 7) shr 1] and $ff00) or valor;
+                      bac06_0.tile_3.change_control1((direccion and 7) shr 1,tempw);
                    end;
   $1a1000..$1a17ff:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.data[3,(direccion and $7ff) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.data[3,(direccion and $7ff) shr 1] and $ff00) or valor;
-                      bac06_pf.data[3,(direccion and $7ff) shr 1]:=tempw;
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.data[(direccion and $7ff) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_3.data[(direccion and $7ff) shr 1] and $ff00) or valor;
+                      bac06_0.tile_3.data[(direccion and $7ff) shr 1]:=tempw;
                       gfx[2].buffer[(direccion and $7ff) shr 1]:=true;
                    end;
   $1d0000..$1d00ff:hippodrm_lsb:=valor;
@@ -490,18 +539,25 @@ begin
  m68000_0.reset;
  m6502_0.reset;
  case main_vars.tipo_maquina of
+  157:begin
+        mcs51_0.reset;
+        i8751_return:=0;
+        i8751_command:=0;
+        i8751_ports[0]:=0;
+        i8751_ports[1]:=0;
+        i8751_ports[2]:=0;
+        i8751_ports[3]:=0;
+      end;
   156,158:h6280_0.reset;
  end;
  ym3812_0.reset;
  ym2203_0.reset;
  oki_6295_0.reset;
- deco_bac06_reset(0);
+ bac06_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$7F;
- marcade.in2:=$FF;
+ marcade.in0:=$ffff;
+ marcade.in1:=$7f;
  sound_latch:=0;
- vblank_val:=0;
 end;
 
 function iniciar_dec0:boolean;
@@ -535,18 +591,7 @@ end;
 begin
 iniciar_dec0:=false;
 iniciar_audio(false);
-screen_init(1,1024,1024,true);
-screen_mod_scroll(1,1024,256,1023,1024,256,1023);
-screen_init(2,1024,1024,true);
-screen_mod_scroll(2,1024,256,1023,1024,256,1023);
-screen_init(3,1024,1024,true);
-screen_mod_scroll(3,1024,256,1023,1024,256,1023);
-screen_init(4,512,512,false,true);
-//Pantallas de prioridades
-screen_init(5,1024,1024,true);
-screen_init(6,1024,1024,true);
-iniciar_video(256,240);
-sprite_bac06_color:=$100;
+//El video se inicia en el chip bac06!!!
 //Main CPU
 m68000_0:=cpu_m68000.create(10000000,264);
 m68000_0.change_ram16_calls(dec0_getword,dec0_putword);
@@ -561,7 +606,7 @@ ym2203_0:=ym2203_chip.create(1500000);
 oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH);
 case main_vars.tipo_maquina of
   156:begin  //Robocop
-        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$fff,$7ff,$3ff,1,1,1);
+        bac06_0:=bac06_chip.create(false,true,true,$000,$200,$300,$fff,$7ff,$3ff,1,1,1,$100);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@robocop_rom[0],'robocop.zip',0)) then exit;
         //cargar sonido
@@ -585,14 +630,20 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@robocop_sprites,'robocop.zip',0)) then exit;
         convert_tiles(3,$1000);
         proc_update_video:=update_video_robocop;
-        dip_b:=$7f;
+        //Dip
+        marcade.dswa:=$ff7f;
+        marcade.dswa_val:=@robocop_dip;
       end;
   157:begin //Baddudes
-        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$7ff,$7ff,$3ff,1,1,1);
+        bac06_0:=bac06_chip.create(false,true,true,$000,$200,$300,$7ff,$7ff,$3ff,1,1,1,$100);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@baddudes_rom[0],'baddudes.zip',0)) then exit;
         //cargar sonido
         if not(cargar_roms(@mem_snd[0],@baddudes_sound,'baddudes.zip',1)) then exit;
+        //MCU
+        mcs51_0:=cpu_mcs51.create(8000000,264);
+        mcs51_0.change_io_calls(in_port0,in_port1,in_port1,in_port1,out_port0,out_port1,out_port2,out_port3);
+        if not(cargar_roms(mcs51_0.get_rom_addr,@baddudes_mcu,'baddudes.zip',1)) then exit;
         //OKI rom
         if not(cargar_roms(oki_6295_0.get_rom_addr,@baddudes_oki,'baddudes.zip',1)) then exit;
         //convertir chars
@@ -612,10 +663,12 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@baddudes_sprites,'baddudes.zip',0)) then exit;
         convert_tiles(3,$1000);
         proc_update_video:=update_video_baddudes;
-        dip_b:=$ff;
+        //Dip
+        marcade.dswa:=$ffff;
+        marcade.dswa_val:=@baddudes_dip;
       end;
   158:begin  //Hippodrome
-        deco_bac06_init(0,1,2,3,1,5,6,$000,$200,$300,$fff,$3ff,$3ff,1,1,1);
+        bac06_0:=bac06_chip.create(false,true,true,$000,$200,$300,$fff,$3ff,$3ff,1,1,1,$100);
         //cargar roms
         if not(cargar_roms16w(@rom[0],@hippo_rom[0],'hippodrm.zip',0)) then exit;
         //cargar sonido
@@ -644,17 +697,14 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@hippo_sprites,'hippodrm.zip',0)) then exit;
         convert_tiles(3,$1000);
         proc_update_video:=update_video_hippo;
-        dip_b:=$ff;
+        //Dip
+        marcade.dswa:=$ffff;
+        marcade.dswa_val:=@hippo_dip;
       end;
 end;
 //final
 reset_dec0;
 iniciar_dec0:=true;
-end;
-
-procedure cerrar_dec0;
-begin
-deco_bac06_close(0);
 end;
 
 procedure Cargar_dec0;
@@ -664,7 +714,6 @@ case main_vars.tipo_maquina of
   157:llamadas_maquina.bucle_general:=dec0_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_dec0;
-llamadas_maquina.close:=cerrar_dec0;
 llamadas_maquina.reset:=reset_dec0;
 llamadas_maquina.fps_max:=57.392103;
 end;

@@ -85,7 +85,7 @@ for f:=$7ff downto 0 do begin
   end;
 end;
 //hacer el scroll independiente linea a linea
-for f:=0 to 31 do scroll__x_part(1,2,scroll_lineas[f],0,f*8,8);
+scroll__x_part2(1,2,8,@scroll_lineas);
 //sprites
 for f:=0 to $2f do begin
   atrib2:=$d000+banco_sprites+(f*4);
@@ -97,7 +97,7 @@ for f:=0 to $2f do begin
   put_gfx_sprite_mask(nchar,color,(atrib and $10)<>0,(atrib and $20)<>0,1,0,$f);
   actualiza_gfx_sprite(x,y,2,1);
 end;
-for f:=0 to 31 do scroll__x_part(3,2,scroll_lineas[f],0,f*8,8);
+scroll__x_part2(3,2,8,@scroll_lineas);
 actualiza_trozo_final(8,16,240,224,2);
 end;
 

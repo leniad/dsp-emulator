@@ -9,7 +9,8 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      ay_8910,ym_3812,ym_2203,m6809,vlm_5030,m6502,pokey,m6805,sega_vdp,deco_104,
      deco_146,tms99xx,lr35902,mcs51,m680x,konami_snd,ppi8255,oki6295,dac,msm5205,
      mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,mcs48,k051316,
-     k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,timer_engine;
+     k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,deco_bac06,
+     deco_common,deco_16ic,timer_engine;
 
 procedure close_all_devices;
 begin
@@ -278,6 +279,22 @@ end;
 if main_deco146<>nil then begin
   main_deco146.free;
   main_deco146:=nil;
+end;
+if bac06_0<>nil then begin
+  bac06_0.free;
+  bac06_0:=nil;
+end;
+if deco_sprites_0<>nil then begin
+  deco_sprites_0.free;
+  deco_sprites_0:=nil;
+end;
+if deco16ic_0<>nil then begin
+  deco16ic_0.free;
+  deco16ic_0:=nil;
+end;
+if deco16ic_1<>nil then begin
+  deco16ic_1.free;
+  deco16ic_1:=nil;
 end;
 if tms_0<>nil then begin
   tms_0.free;

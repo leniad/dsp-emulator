@@ -53,6 +53,23 @@ const
   libSDL_WINDOWPOS_UNDEFINED=$1FFF0000;
   libSDL_WINDOW_FULLSCREEN=$00000001;
 
+  libSDL_WINDOWEVENT_SHOWN=1; {**< Window has been shown *}
+  libSDL_WINDOWEVENT_HIDDEN=2; {**< Window has been hidden *}
+  libSDL_WINDOWEVENT_EXPOSED=3; {**< Window has been exposed and should be redrawn *}
+  libSDL_WINDOWEVENT_MOVED=4; {**< Window has been moved to data1; data2 *}
+  libSDL_WINDOWEVENT_RESIZED=5; {**< Window has been resized to data1xdata2 *}
+  libSDL_WINDOWEVENT_SIZE_CHANGED=6; {**< The window size has changed; either as a result of an API call or through the system or user changing the window size. *}
+  libSDL_WINDOWEVENT_MINIMIZED=7; {**< Window has been minimized *}
+  libSDL_WINDOWEVENT_MAXIMIZED=8; {**< Window has been maximized *}
+  libSDL_WINDOWEVENT_RESTORED=9; {**< Window has been restored to normal size and position *}
+  libSDL_WINDOWEVENT_ENTER=10; {**< Window has gained mouse focus *}
+  libSDL_WINDOWEVENT_LEAVE=11; {**< Window has lost mouse focus *}
+  libSDL_WINDOWEVENT_FOCUS_GAINED=12; {**< Window has gained keyboard focus *}
+  libSDL_WINDOWEVENT_FOCUS_LOST=13; {**< Window has lost keyboard focus *}
+  libSDL_WINDOWEVENT_CLOSE=14; {**< The window manager requests that the window be closed *}
+  libSDL_WINDOWEVENT_TAKE_FOCUS=15; {**< Window is being offered a focus (should SetWindowInputFocus() on itself or a subwindow, or ignore) *}
+  libSDL_WINDOWEVENT_HIT_TEST=16; {**< Window had a hit test that wasn't SDL_HITTEST_NORMAL. *}
+
 {$I lib_sdl2.inc}
 
 var

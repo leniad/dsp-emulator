@@ -4,15 +4,25 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine,ym_2203,ym_2151,oki6295,hu6280,
      cpu_misc,main_engine;
 
+type
+  tdeco16_sprite=class
+    constructor create(gfx,pant:byte;global_x_size,color_add,mask:word);
+    destructor free;
+    public
+      ram:array[0..$3ff] of word;
+      procedure draw_sprites(pri:byte=0);
+      procedure reset;
+    private
+      global_x_size,color_add,mask:word;
+      gfx,pant:byte;
+  end;
+
 var
- deco_sprite_ram:array[0..$3ff] of word;
- deco16_global_x_size,deco16_sprite_color_add,deco16_sprite_mask:word;
  deco16_sound_latch:byte;
  snd_ram:array[0..$1fff] of byte;
+ oki_rom:array[0..1,0..$3ffff] of byte;
+ deco_sprites_0:tdeco16_sprite;
 
-//Sprites
-procedure deco16_sprites;
-procedure deco16_sprites_pri(pri:byte);
 //Sound
 procedure deco16_snd_simple_init(cpu_clock,sound_clock:dword;sound_bank:cpu_outport_call);
 procedure deco16_snd_simple_reset;
@@ -28,43 +38,25 @@ procedure deco16_snd_irq(irqstate:byte);
 
 implementation
 
-//sprites
-procedure deco16_sprites;
-var
-  f,color:byte;
-  y,x,nchar:word;
-  fx,fy:boolean;
-  multi,inc,mult:integer;
+constructor tdeco16_sprite.create(gfx,pant:byte;global_x_size,color_add,mask:word);
 begin
-for f:=0 to $ff do begin
-			nchar:=deco_sprite_ram[(f*4)+1];
-			y:=deco_sprite_ram[(f*4)+0];
-      if (((y and $1000)<>0) and ((main_vars.frames_sec and 1)<>0)) then continue;
-      x:=deco_sprite_ram[(f*4)+2];
-      color:=(x shr 9) and $1f;
-      fx:=(y and $2000)<>0;
-      fy:=(y and $4000)<>0;
-      multi:=(1 shl ((y and $0600) shr 9))-1;
-      x:=(304-x) and $1ff;
-      y:=(240-y) and $1ff;
-			nchar:=(nchar and not(multi)) and deco16_sprite_mask;
-      if fy then inc:=-1
-        else begin
-						nchar:=nchar+multi;
-						inc:=1;
-        end;
-      mult:=-16;
-      while (multi>=0) do begin
-        if nchar<>0 then begin
-          put_gfx_sprite(nchar-multi*inc,(color shl 4)+deco16_sprite_color_add,fx,fy,2);
-          actualiza_gfx_sprite(x,y+mult*multi,3,2);
-        end;
-        multi:=multi-1;
-      end;
-end;
+  self.global_x_size:=global_x_size;
+  self.color_add:=color_add;
+  self.mask:=mask;
+  self.gfx:=gfx;
+  self.pant:=pant;
 end;
 
-procedure deco16_sprites_pri(pri:byte);
+destructor tdeco16_sprite.free;
+begin
+end;
+
+procedure tdeco16_sprite.reset;
+begin
+  fillchar(self.ram,$400*2,0);
+end;
+
+procedure tdeco16_sprite.draw_sprites(pri:byte=0);
 var
   f,color:byte;
   y,x,nchar:word;
@@ -72,18 +64,17 @@ var
   multi,inc,mult:integer;
 begin
 for f:=0 to $ff do begin
-      x:=deco_sprite_ram[(f*4)+2];
+      x:=self.ram[(f*4)+2];
       if pri<>((x shr 8) and $c0) then continue;
-			nchar:=deco_sprite_ram[(f*4)+1];
-			y:=deco_sprite_ram[(f*4)+0];
+			y:=self.ram[(f*4)+0];
       if (((y and $1000)<>0) and ((main_vars.frames_sec and 1)<>0)) then continue;
       color:=(x shr 9) and $1f;
       fx:=(y and $2000)<>0;
       fy:=(y and $4000)<>0;
       multi:=(1 shl ((y and $0600) shr 9))-1;	// 1x, 2x, 4x, 8x height
-      x:=(deco16_global_x_size-x) and $1ff;
+      x:=(self.global_x_size-x) and $1ff;
       y:=(240-y) and $1ff;
-			nchar:=(nchar and not(multi)) and deco16_sprite_mask;
+			nchar:=(self.ram[(f*4)+1] and not(multi)) and self.mask;
       if fy then inc:=-1
         else begin
 						nchar:=nchar+multi;
@@ -92,8 +83,8 @@ for f:=0 to $ff do begin
       mult:=-16;
       while (multi>=0) do begin
         if nchar<>0 then begin
-          put_gfx_sprite(nchar-multi*inc,(color shl 4)+deco16_sprite_color_add,fx,fy,3);
-          actualiza_gfx_sprite(x,y+mult*multi,5,3);
+          put_gfx_sprite(nchar-multi*inc,(color shl 4)+self.color_add,fx,fy,self.gfx);
+          actualiza_gfx_sprite(x,y+mult*multi,self.pant,self.gfx);
         end;
         multi:=multi-1;
       end;
@@ -207,8 +198,7 @@ end;
 
 procedure deco16_snd_irq(irqstate:byte);
 begin
-  if irqstate=1 then h6280_0.set_irq_line(1,ASSERT_LINE)
-    else h6280_0.set_irq_line(1,CLEAR_LINE);
+  h6280_0.set_irq_line(1,irqstate);
 end;
 
 procedure deco16_simple_sound;

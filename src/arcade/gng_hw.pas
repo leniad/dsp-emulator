@@ -87,9 +87,9 @@ end;
 //chars
 actualiza_trozo(0,0,256,256,3,0,0,256,256,4);
 actualiza_trozo_final(0,16,256,224,4);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 //Actualiza buffer sprites
 copymemory(@buffer_sprites[0],@memoria[$1e00],$200);
+fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_gng;

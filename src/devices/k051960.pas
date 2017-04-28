@@ -3,6 +3,8 @@ unit k051960;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}gfx_engine,main_engine;
 
+const
+    NUM_SPRITES=128;
 type
   t_k051960_cb=procedure(var code:word;var color:word;var pri:word;var shadow:word);
   t_irq_call=procedure(state:byte);
@@ -16,6 +18,7 @@ type
       function k051937_read(direccion:word):byte;
       procedure k051937_write(direccion:word;valor:byte);
       procedure draw_sprites(min_priority,max_priority:integer);
+      procedure update_sprites;
       procedure change_irqs(irq_call,firq_call,nmi_call:t_irq_call);
       procedure update_line(line:word);
     private
@@ -27,6 +30,7 @@ type
       sprite_rom:pbyte;
       sprite_size,sprite_mask:dword;
       k051960_cb:t_k051960_cb;
+      sorted_list:array[0..(NUM_SPRITES)-1] of integer;
       irq_cb,firq_cb,nmi_cb:t_irq_call;
       function fetchromdata(direccion:word):byte;
     end;
@@ -174,26 +178,30 @@ begin
 	    end;
 end;
 
+procedure k051960_chip.update_sprites;
+var
+  f:byte;
+begin
+for f:=0 to (NUM_SPRITES)-1 do self.sorted_list[f]:=-1;
+for f:=0 to (NUM_SPRITES)-1 do
+  if (self.ram[f*8] and $80)<>0 then self.sorted_list[self.ram[f*8] and $7f]:=f*8;
+end;
+
 procedure k051960_chip.draw_sprites(min_priority,max_priority:integer);
 const
-  NUM_SPRITES=128;
 		xoffset:array[0..7] of byte=(0,1,4,5,16,17,20,21);
 		yoffset:array[0..7] of byte=(0,2,8,10,32,34,40,42);
 		width:array[0..7] of byte=(1,2,1,2,4,2,4,8);
 		height:array[0..7] of byte=(1,1,2,2,2,4,4,8);
 var
-  sortedlist:array[0..(NUM_SPRITES)-1] of integer;
   offs:integer;
   size,w,h,x,y,pri_code:byte;
   c,nchar,color,pri,shadow,zoom_x,zoom_y,ox,oy,sx,sy:word;
   flipx,flipy:boolean;
   zx,zy:single;
 begin
-  for offs:=0 to (NUM_SPRITES)-1 do sortedlist[offs]:=-1;
-	for offs:=0 to (NUM_SPRITES)-1 do
-		if (self.ram[offs*8] and $80)<>0 then sortedlist[self.ram[offs*8] and $7f]:=offs*8;
 	for pri_code:=0 to (NUM_SPRITES-1) do begin
-		offs:=sortedlist[pri_code];
+		offs:=self.sorted_list[pri_code];
 		if (offs=-1) then continue;
 		nchar:=self.ram[offs+2]+((self.ram[offs+1] and $1f) shl 8);
 		color:=self.ram[offs+3];

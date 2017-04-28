@@ -44,7 +44,7 @@ for y:=0 to 255 do begin
 		end;
 end;
 putpixel(0,0,$10000,@punt[0],1);
-actualiza_trozo(16,0,224,256,1,0,0,224,256,pant_temp);
+actualiza_trozo(16,0,224,256,1,0,0,224,256,PANT_TEMP);
 end;
 
 procedure eventos_tutankham;

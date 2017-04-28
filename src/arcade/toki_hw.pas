@@ -43,7 +43,7 @@ var
  scroll_x2:array[0..$ff] of word;
  prioridad_pant:boolean;
 
-procedure update_video_toki;
+procedure update_video_toki;inline;
 var
   f,color,sy,x,y,nchar,atrib,atrib2,atrib3:word;
 begin
@@ -83,7 +83,7 @@ for f:=0 to $3ff do begin
 end;
 if prioridad_pant then begin
   scroll_x_y(2,3,scroll_x1,scroll_y1);
-  for f:=0 to $ff do scroll__x_part(4,3,scroll_x2[f],scroll_y2,f,1);
+  scroll__x_part2(4,3,1,@scroll_x2,0,scroll_y2);
 end else begin
   scroll_x_y(4,3,scroll_x2_tmp,scroll_y2);
   scroll_x_y(2,3,scroll_x1,scroll_y1);
@@ -99,7 +99,7 @@ for f:=$ff downto 0 do begin
 			color:=(atrib3 shr 8) and $f0;
 			nchar:=(atrib3 and $fff)+((atrib2 and $8000) shr 3);
       put_gfx_sprite(nchar,color,(atrib and $100)<>0,false,1);
-      actualiza_gfx_sprite(x,y,3,1);
+      actualiza_gfx_sprite(x and $1ff,y and $1ff,3,1);
     end;
 end;
 actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
@@ -317,8 +317,7 @@ iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512,true);
 screen_mod_scroll(2,512,256,511,512,256,511);
-screen_init(3,256,256,false,true);
-screen_mod_sprites(3,512,512,$1ff,$1ff);
+screen_init(3,512,512,false,true);
 screen_init(4,512,512,true);
 screen_mod_scroll(4,512,256,511,512,256,511);
 iniciar_video(256,224);

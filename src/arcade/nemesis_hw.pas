@@ -77,7 +77,7 @@ const
                                           56*4*64,57*4*64,58*4*64,59*4*64,60*4*64,61*4*64,62*4*64,63*4*64);
         //Sprites
         sprite_data:array[0..7] of tipo_sprite=((width:32;height:32;char_type:4;mask:$7f),(width:16;height:32;char_type:5;mask:$ff),(width:32;height:16;char_type:2;mask:$ff),(width:64;height:64;char_type:7;mask:$1f),
-                                                (width:8;height:8;char_type:0;mask:$7ff),(width:16;height:8;char_type:6;mask:$3ff),(width:8;height:16;char_type:3;mask:$3ff),(width:16;height:16;char_type:1;mask:$ff));
+                                                (width:8;height:8;char_type:0;mask:$7ff),(width:16;height:8;char_type:6;mask:$3ff),(width:8;height:16;char_type:3;mask:$3ff),(width:16;height:16;char_type:1;mask:$1ff));
 
 
 var
@@ -577,8 +577,8 @@ case direccion of
             //main_screen.flip_main_screen:=(valor and $1)<>0;
             if (valor and $100)<>0 then z80_0.change_irq(HOLD_LINE);
          end;
-  $5e006:if byte(flipy_char)<>(valor and $1) then begin
-            flipy_char:=(valor and $1)<>0;
+  $5e006:if (flipy_char<>((valor and $1)=0)) then begin
+            flipy_char:=(valor and $1)=0;
             fillchar(recalc_char[0],8,1);
          end;
   $5e00e:irq4_on:=(valor and $100)<>0;

@@ -57,7 +57,7 @@ for x:=0 to $ff do begin
   end;
 end;
 putpixel(0,0,$10000,@pen[0],1);
-actualiza_trozo(32,0,224,256,1,0,0,224,256,pant_temp);
+actualiza_trozo(32,0,224,256,1,0,0,224,256,PANT_TEMP);
 end;
 
 procedure eventos_spaceinv;

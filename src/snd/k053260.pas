@@ -196,12 +196,15 @@ if self.posicion<>0 then begin
    if out2<-32767 then out2:=-32767
       else if out2>32767 then out2:=32767;
 end;
-//Channel 1
-tsample[self.tsample_num,sound_status.posicion_sonido]:=round(out1*self.amp);
-if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=round(out1*self.amp);
-//Channel 2
-tsample[self.tsample_num2,sound_status.posicion_sonido]:=round(out2*self.amp);
-if sound_status.stereo then tsample[self.tsample_num2,sound_status.posicion_sonido+1]:=round(out2*self.amp);
+if sound_status.stereo then begin
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=round(out1*self.amp);
+  tsample[self.tsample_num,sound_status.posicion_sonido+1]:=round(out2*self.amp);
+end else begin
+  //Channel 1
+  tsample[self.tsample_num,sound_status.posicion_sonido]:=round(out1*self.amp);
+  //Channel 2
+  tsample[self.tsample_num2,sound_status.posicion_sonido]:=round(out2*self.amp);
+end;
 self.posicion:=0;
 for f:=0 to 4 do begin
   self.buffer[0,f]:=0;
@@ -311,8 +314,7 @@ begin
 					m_start, m_length);
 
 	else }
-		if self.kadpcm then self.position:=1
-      else self.position:=0; // for kadpcm low bit is nybble offset, so must start at 1 due to preincrement
+		self.position:=byte(self.kadpcm); // for kadpcm low bit is nybble offset, so must start at 1 due to preincrement
 		self.counter:=$1000-CLOCKS_PER_SAMPLE; // force update on next sound_stream_update
 		self.output:=0;
 		self.is_playing:=true;
@@ -336,8 +338,7 @@ begin
 	while (self.counter>=$1000) do begin
 		self.counter:=self.counter-$1000+self.pitch;
     self.position:=self.position+1;
-    if self.kadpcm then bytepos:=self.position shr 1
-      else bytepos:=self.position shr 0;
+    bytepos:=self.position shr byte(self.kadpcm);
 		{Yes, _pre_increment. Playback must start 1 byte position after the
 		start address written to the register, or else ADPCM sounds will
 		have DC offsets (e.g. TMNT2 theme song) or will overflow and be
@@ -357,7 +358,7 @@ begin
 			end;
 		end;
 		romdata:=self.rom[self.start+bytepos];
-		if (self.kadpcm) then begin
+		if self.kadpcm then begin
 			if (self.position and 1)<>0 then romdata:=romdata shr 4; // decode low nybble, then high nybble
 			self.output:=self.output+kadpcm_table[romdata and $f];
     end else begin
@@ -374,13 +375,8 @@ var
 begin
 	offs:=self.start+self.position;
 	self.position:=(self.position+1) and $ffff;
-	if (offs>=self.rom_size) then begin
-		//logerror("%s: K053260: Attempting to read past the end of the ROM (offs = %06x, size = %06x)\n",
-		//			m_device->machine().describe_context(), offs, m_device->m_rom_size);
-		read_rom:=0;
-    exit;
-	end;
-	read_rom:=self.rom[offs];
+	if (offs>=self.rom_size) then read_rom:=0
+	  else read_rom:=self.rom[offs];
 end;
 
 end.

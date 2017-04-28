@@ -519,7 +519,7 @@ case dir of
         r.pc.l:=r.pc.l+2;
         exit;
       end;
-else MessageDlg('Mierda error de direccionamiento origen.w - '+inttostr(r.pc.l)+' - '+inttostr(dir), mtInformation,[mbOk], 0);
+else MessageDlg('Mierda error de direccionamiento origen.w - '+inttohex(r.pc.l,16)+' - '+inttohex(dir,16), mtInformation,[mbOk], 0);
 end;
 self.opcode:=false;
 leerdir_w:=self.getword(self.ea);
@@ -3132,7 +3132,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                                MessageDlg('Instruccion addx.b axy7 '+inttostr(r.pc.l), mtInformation,[mbOk], 0);
                              end;
                         else begin
-                          MessageDlg('Instruccion addx.b'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+                          MessageDlg('Instruccion addx.b '+inttohex(r.pc.l,16), mtInformation,[mbOk], 0);
                         end;
                       end;
                     end;

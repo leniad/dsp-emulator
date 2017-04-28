@@ -91,6 +91,7 @@ for f:=$1ff downto 0 do begin
 end;
 actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
 actualiza_trozo_final(0,16,256,224,3);
+fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_cabal;

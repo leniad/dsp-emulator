@@ -1,122 +1,51 @@
 What's New!!! DSP Emulator
 
-DSP 0.17b2 11/03/17
-**********
+DSP 0.18WIP 28/04/17
+***********
 - General
-    + Fixed a bug when entering the options menu without starting a driver (Thanks to FJ Marti)
-    + If a driver is not initialized when exiting the list, no buttons are displayed
-    + Added multiple directories for arcade ROMS separated by ';' (requested by Davide)
-    + Fixed enter full screen when changing from video menu
-    + K054000: Added protection chip
-    + K053246-K053247-K055673: Implemented functions to show sprites
-    + Autofire
-        - General options -> Autofire -> Enable/disable
-        - Independent for each button fot both players
-    + CPU: Unified functions in/out with read/write
-    + Tape Engine
-        - Improved handling of 1-byte blocks in TAP tapes
-        - Added control to avoid blocks of 0 length in TAP tapes
-        - Corrected the length of the message block of the TZX tapes
-    + After pressing F4 to record a snapshot, the recording screen no longer shows each time a key is pressed
-    + GFX engine: GFX functions optimizations, more speed
-    + UPD765
-        - Fixed next sector ID load function
-        - Fixed a stupid bug when reading a full track (Fixes Spectrum +3 'Platoon' and many others)
-        - Improved processing a track with 0 sectors (Corrects 'Tomahawk' from Spectrum +3)
-    + Disk loading: Fixed some problems selecting compressed files
-    + DSK files: Fixed track number asignation
-    + Cleaning and optimizations in many drivers (input, video, controls, etc)
-    + Namco sound
-        - Converted to clases
-        - Fixed some bugs
-        - Converted to standard audio functions
-    + M680X: Added internal RAM
-    + Deco 16ic: Converted playfield RAM to word, changed functions and drivers
-    + Mouse: Created new functions to standarize the cursor creation, show and hide
-    + M68000: Fixed carry flag on opcode roxr.l
-    + OKI 6295: Added snapshot functions
-    + Samples: Fixed a bug assigning the audio channel
-- Spectrum
-    + Added Fuller joystick, and improved descriptions of other types of joystick
-    + Fixed Cursor joystick, only works if selected
-    + Improved Kempston joystick
-- Amstrad CPC
-    + Fixed WAV tape file loading
-- GameBoy / GameBoy Color
-    + Rewritted the video functions
-    + Corrected read/write of MBC5 mapper extra memory
-    + Corrected the sound 'mode 3'
-    + Corrected reading of the joystick/buttons when ussing the IRQ
-    + Improved way to compare the current line that generates an IRQ
-    + Improved timings of the current line
-    + GameBoy Color
-        - Corrected the size of the palette records. Fixed when the palette pointer is automatically advanced
-        - Improved way to change speed
-    + Improved loading a cartridge with an extra header before the data
-    + Added mappers HuC-1 (to be confirmed) and MBC2
-- Pacman HW
-    + Added the rest of dipswitch
-    + Added screen rotation
-    + Crush Roller: Added driver with sound
-- Galaxian HW
-    + Fixed Scrambre sound, caused errors when closing the driver
-- Black Tiger
-    + Video optimizations
-- Asteroids HW
-    + Small audio optimizations
-    + A video rewrite needed!
-    + Asteroids: Small memory optimizations
-    + Lunar Lander: added driver, no sound
-- Express Raider
-    + ROMS updated to 'World V4'
-- Galaxian HW
-    + Moon Crest:
-        - Improved sound with samples
-        - Fixed a problem with chars/sprites
-- Gunsmoke HW
-    + Added dip switches to all games
-    + Added a simulated copy protections
-- Higemaru
-    + Added dip switches
-    + Added P2 controls
-- Iron Horse
-    + Added dip switches
-    + Small video optimizations
-- Jackal
-    + Added dip switches
-- Jr Pacman
-    + Added dip switches
-    + Fixed screen rotation
-    + Added P2 controls
-- Shoot Out
-    + Optimized sprites
-    + Implemented IRQ
-- Vulgus
-    + Added dip switches
-    + Added P2 controls
-- Vigilante
-    + Updated ROMS to version 'World E'
-    + Fixed background scroll
-- Space Firebird
-    + Fixed dip switches
-- TNZS HW
-    + Corrected audio initialization
-- Combat School
-    + Video optimizations, more speed
-    + Added dip switches
-- Twin Cobra HW
-    + Implemented video on/off
-- Double Dragon 3 HW
-    + Added snapshot functions
-    + Double Dragon 3
-        - Fixed scroll ('Egypt' screen)
-        - Fixed controls
-    + The Combatribes: Added driver with sound
-- TMNT HW
-    + TMNT: Changed the ROMS to 2 players version
-- The Simpsons
-    + Fixed video and audio
-    + Graphics problems (possible bug in the CPU)
-    + Changed the ROMS to the 2 Players version (requested by Davide)
-- Vendetta (requested by Davide)
-    + Added driver with sound
+    + Lazarus
+        - Fixed stereo sound
+        - Improved audio synchronization
+    + GFX
+        - Added final screen independent flip X or flip Y
+        - Improved scrolling by independent rows and / or columns
+        - Improved zoom sprites (no more graps)
+    + Deco BAC06
+        - Converted to classes
+        - Fixed bugs and more speed
+    + Deco 16IC: Converted to classes
+    + K051960, K05324x: Optimized sprites rendering
+    + K007232:
+        - Support of two simultaneous audio chips
+        - Fixed stereo support
+    + K053260: Fixed stereo support
+    + MCS51
+        - Corrected registers, mapped in memory
+        - Added more opcodes
+- Deco 0 HW
+    + Driver optimizations
+    + Added dipswitches
+    + Baddudes: Added i8751, protection patches removed
+- Caveman Ninja HW
+    + Fixed raster interrupts
+    + Robocop 2: Fixed video
+- Toki
+    + Fixed sprites
+- ActFancer
+    + Optimized driver
+    + Added dipswitches
+- Gradius III
+    + Changed sound to stereo
+- Simpsons
+    + Changed sound to stereo
+Vendetta
+    + Changed sound to stereo
+- Ajax
+    + Fixed audio (converted to stereo)
+    + Fixed video (missing k051316 zoom/rotate)
+    + Added controls
+    + Added dipswitches
+- Gauntlet HW
+    + Basic driver
+Sauro
+    + Added driver with sound, only missing ADPCM

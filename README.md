@@ -1,4 +1,54 @@
 ﻿#DSP Emulator status<br>
+<b>28/04/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br><pre>
+-General
+    +Lazarus
+        -Fixed stereo sound
+        -Improved audio synchronization
+    +GFX
+        -Added final screen independent flip X or flip Y
+        -Improved scrolling by independent rows and / or columns
+        -Improved zoom sprites (no more graps)
+    +Deco BAC06
+        -Converted to classes
+        -Fixed bugs and more speed
+    +Deco 16IC: Converted to classes
+    +K051960, K05324x: Optimized sprites rendering
+    +K007232:
+        -Support of two simultaneous audio chips
+        -Fixed stereo support
+    +K053260: Fixed stereo support
+    +MCS51
+        -Corrected registers, mapped in memory
+        -Added more opcodes
+-Deco 0 HW
+    +Driver optimizations
+    +Added dipswitches
+    +Baddudes: Added i8751, protection patches removed
+-Caveman Ninja HW
+    +Fixed raster interrupts
+    +Robocop 2: Fixed video
+-Toki
+    +Fixed sprites
+-ActFancer
+    +Optimized driver
+    +Added dipswitches
+-Gradius III
+    +Changed sound to stereo
+-Simpsons
+    +Changed sound to stereo
+-Vendetta
+    +Changed sound to stereo
+-Ajax
+    +Fixed audio (converted to stereo)
+    +Fixed video (missing k051316 zoom/rotate)
+    +Added controls
+    +Added dipswitches
+-Gauntlet HW
+    +Basic driver
+-Sauro
+    +Added driver with sound, only missing ADPCM
+</pre><br>
+<img src='http://img1.imagilive.com/0417/sauro.png'><br><br>
 <b>11/03/17 - DSP Emulator 0.17b2 Final. All binary and source updated.</b><br><pre>
 -All WIP previous enhacements
 -General

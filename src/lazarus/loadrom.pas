@@ -104,7 +104,7 @@ with RomList do begin
     Cells[0,f]:=games_desc[orden_games[f]].name;
     if games_desc[orden_games[f]].zip='' then cells[1,f]:='N/A'
       else begin
-        test:=directory.arcade_list_roms[find_rom_multiple_dirs(games_desc[orden_games[f]].zip+'.zip')]^;
+        test:=directory.arcade_list_roms[find_rom_multiple_dirs(games_desc[orden_games[f]].zip+'.zip')];
         if fileexists(test+games_desc[orden_games[f]].zip+'.zip') then cells[1,f]:='YES'
           else cells[1,f]:='NO';
       end;

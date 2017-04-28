@@ -87,6 +87,7 @@ if k053251_0.dirty_tmap[K053251_CI4] then begin
 end;
 fill_full_screen(4,bg_colorbase*16);
 k052109_0.draw_tiles;
+k053246_0.k053247_update_sprites;
 k053246_0.k053247_draw_sprites(3);
 k052109_0.draw_layer(sorted_layer[0],4);
 k053246_0.k053247_draw_sprites(2);
@@ -116,7 +117,7 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  //Service
+  //System
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
 end;
@@ -195,6 +196,7 @@ case direccion of
                     else if (direccion>$2fff) then simpsons_getbyte:=memoria[direccion]
                          else begin //k053247
                                   tempw:=(direccion and $fff) shr 1;
+                                  //simpsons_getbyte:=(sprite_ram[tempw] shr ((not(direccion) and 1)*8)) and $ff;
                                   if (direccion and 1)<>0 then simpsons_getbyte:=sprite_ram[tempw] and $ff
                                      else simpsons_getbyte:=sprite_ram[tempw] shr 8;
                               end;
@@ -348,7 +350,7 @@ screen_init(3,512,256,true);
 screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
-iniciar_audio(false);
+iniciar_audio(true);
 //cargar roms y ponerlas en su sitio...
 if not(cargar_roms(@temp_mem[0],@simpsons_rom[0],'simpsons.zip',0)) then exit;
 copymemory(@memoria[$8000],@temp_mem[$78000],$8000);

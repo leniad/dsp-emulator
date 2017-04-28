@@ -200,11 +200,11 @@ for f:=0 to $7ff do begin
     gfx[0].buffer[f]:=false;
   end;
 end;
-scroll__x_part(1,2,scroll_x,0,48,464);
+scroll__x_part2(1,2,464,@scroll_x,0,0,48);
 //Sprites
 draw_sprites(1,1,$1f,0,0);
 //La parte de arriba tiene prioridad sobre los sprites?
-scroll__x_part(3,2,scroll_x,0,48,464);
+scroll__x_part2(3,2,464,@scroll_x,0,0,48);
 actualiza_trozo(128,0,256,48,1,128,0,256,48,2);
 actualiza_trozo_final(128,0,256,256,2);
 end;

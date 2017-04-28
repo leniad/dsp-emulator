@@ -25,6 +25,16 @@ const
         (n:'06';l:$10000;p:$18000;crc:$8cb6dd87),(n:'07';l:$8000;p:$28000;crc:$dd345def),
         (n:'00';l:$10000;p:$30000;crc:$d50a9550),(n:'01';l:$8000;p:$40000;crc:$34935e93),
         (n:'04';l:$10000;p:$48000;crc:$bcf41795),(n:'05';l:$8000;p:$58000;crc:$d38b94aa),());
+        actfancer_dip_a:array [0..5] of def_dip=(
+        (mask:$03;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        actfancer_dip_b:array [0..3] of def_dip=(
+        (mask:$03;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'100'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0c;name:'Difficulty';number:4;dip:((dip_val:$4;dip_name:'Easy'),(dip_val:$c;dip_name:'Normal'),(dip_val:$8;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Bonus_Life';number:2;dip:((dip_val:$20;dip_name:'80K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom:array[0..$2ffff] of byte;
@@ -33,12 +43,12 @@ var
 
 procedure update_video_actfancer;inline;
 begin
-update_pf(1,1,false,false);
-update_pf(2,0,true,false);
-show_pf(1,3);
-sprites_deco_bac06(0,0,2,3);
-show_pf(2,3);
-actualiza_trozo_final(0,8,256,240,3);
+bac06_0.tile_1.update_pf(1,false,false);
+bac06_0.tile_2.update_pf(0,true,false);
+bac06_0.tile_1.show_pf;
+bac06_0.draw_sprites(0,0,2);
+bac06_0.tile_2.show_pf;
+actualiza_trozo_final(0,8,256,240,7);
 end;
 
 procedure eventos_actfancer;
@@ -103,21 +113,21 @@ begin
 case direccion of
   $000000..$02ffff:actfancer_getbyte:=rom[direccion];
   $062000..$063fff:begin
-                      tempw:=bac06_pf.data[1,(direccion and $1fff) shr 1];
+                      tempw:=bac06_0.tile_1.data[(direccion and $1fff) shr 1];
                       if (direccion and 1)<>0 then actfancer_getbyte:=tempw shr 8
                         else actfancer_getbyte:=tempw;
                    end;
   $072000..$0727ff:begin
-                      tempw:=bac06_pf.data[2,(direccion and $7ff) shr 1];
+                      tempw:=bac06_0.tile_2.data[(direccion and $7ff) shr 1];
                       if (direccion and 1)<>0 then actfancer_getbyte:=tempw shr 8
                         else actfancer_getbyte:=tempw;
                    end;
-  $100000..$1007ff:actfancer_getbyte:=sprite_ram_bac06[(direccion xor 1) and $7ff];
+  $100000..$1007ff:actfancer_getbyte:=buffer_sprites[direccion and $7ff];
   $120000..$1205ff:actfancer_getbyte:=buffer_paleta[direccion and $7ff];
   $130000:actfancer_getbyte:=marcade.in0;
   $130001:actfancer_getbyte:=marcade.in2;
-  $130002:actfancer_getbyte:=$ff;
-  $130003:actfancer_getbyte:=$ff;
+  $130002:actfancer_getbyte:=marcade.dswa;
+  $130003:actfancer_getbyte:=marcade.dswb;
   $140000:actfancer_getbyte:=marcade.in1;
   $1f0000..$1f3fff:actfancer_getbyte:=ram[direccion and $3fff];
 end;
@@ -136,8 +146,8 @@ begin
   dir:=dir shr 1;
   set_pal_color(color,dir);
   case dir of
-    $000..$0ff:bac06_pf.buffer_color[2,dir shr 4]:=true;
-    $100..$1ff:bac06_pf.buffer_color[1,(dir shr 4) and $f]:=true;
+    $000..$0ff:bac06_0.tile_2.buffer_color[dir shr 4]:=true;
+    $100..$1ff:bac06_0.tile_1.buffer_color[(dir shr 4) and $f]:=true;
   end;
 end;
 
@@ -148,39 +158,39 @@ begin
 if direccion<$30000 then exit;
 case direccion of
   $060000..$060007:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_0[1,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_0[1,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control0(1,(direccion and 7) shr 1,tempw);
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_1.control_0[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_1.control_0[(direccion and 7) shr 1] and $ff00) or valor;
+                      bac06_0.tile_1.change_control0((direccion and 7) shr 1,tempw);
                    end;
   $060010..$06001f:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_1[1,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_1[1,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control1(1,(direccion and 7) shr 1,tempw);
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_1.control_1[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_1.control_1[(direccion and 7) shr 1] and $ff00) or valor;
+                      bac06_0.tile_1.change_control1((direccion and 7) shr 1,tempw);
                    end;
   $062000..$063fff:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.data[1,(direccion and $1fff) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.data[1,(direccion and $1fff) shr 1] and $ff00) or valor;
-                      bac06_pf.data[1,(direccion and $1fff) shr 1]:=tempw;
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or valor;
+                      bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=tempw;
                       gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
                    end;
   $070000..$070007:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_0[2,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_0[2,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control0(2,(direccion and 7) shr 1,tempw);
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $ff00) or valor;
+                      bac06_0.tile_2.change_control0((direccion and 7) shr 1,tempw);
                    end;
   $070010..$07001f:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.control_1[2,(direccion and 7) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.control_1[2,(direccion and 7) shr 1] and $ff00) or valor;
-                      change_control1(2,(direccion and 7) shr 1,tempw);
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_2.control_1[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_2.control_1[(direccion and 7) shr 1] and $ff00) or valor;
+                      bac06_0.tile_2.change_control1((direccion and 7) shr 1,tempw);
                    end;
   $072000..$0727ff:begin
-                      if (direccion and 1)<>0 then tempw:=(bac06_pf.data[2,(direccion and $7ff) shr 1] and $00ff) or (valor shl 8)
-                        else tempw:=(bac06_pf.data[2,(direccion and $7ff) shr 1] and $ff00) or valor;
-                      bac06_pf.data[2,(direccion and $7ff) shr 1]:=tempw;
+                      if (direccion and 1)<>0 then tempw:=(bac06_0.tile_2.data[(direccion and $7ff) shr 1] and $00ff) or (valor shl 8)
+                        else tempw:=(bac06_0.tile_2.data[(direccion and $7ff) shr 1] and $ff00) or valor;
+                      bac06_0.tile_2.data[(direccion and $7ff) shr 1]:=tempw;
                       gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                    end;
-  $100000..$1007ff:sprite_ram_bac06[(direccion xor 1) and $7ff]:=valor;
-  $110000:copymemory(@buffer_sprites[0],@sprite_ram_bac06[0],$800);
+  $100000..$1007ff:buffer_sprites[direccion and $7ff]:=valor;
+  $110000:bac06_0.update_sprite_data(@buffer_sprites);
   $120000..$1205ff:if buffer_paleta[direccion and $7ff]<>valor then begin
                       buffer_paleta[direccion and $7ff]:=valor;
                       cambiar_color((direccion and $7fe));
@@ -236,11 +246,11 @@ begin
  ym3812_0.reset;
  ym2203_0.reset;
  oki_6295_0.reset;
- deco_bac06_reset(0);
+ bac06_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$7F;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$7f;
+ marcade.in2:=$ff;
  sound_latch:=0;
 end;
 
@@ -257,14 +267,8 @@ var
 begin
 iniciar_actfancer:=false;
 iniciar_audio(false);
-screen_init(1,2048,1024,true);
-screen_mod_scroll(1,2048,256,2047,1024,256,1023);
-screen_init(2,1024,1024,true);
-screen_mod_scroll(1,1024,256,1023,1024,256,1023);
-screen_init(3,512,512,false,true);
-iniciar_video(256,240);
-sprite_bac06_color:=$200;
-deco_bac06_init(0,1,2,0,1,2,0,$100,$000,$000,$fff,$fff,$000,2,1,1);
+//El video se inicia en el chip bac06!!!
+bac06_0:=bac06_chip.create(false,false,false,$100,$000,$000,$fff,$fff,$000,2,1,1,$200);
 //Main CPU
 h6280_0:=cpu_h6280.create(21477200 div 3,$100);
 h6280_0.change_ram_calls(actfancer_getbyte,actfancer_putbyte);
@@ -303,6 +307,11 @@ case main_vars.tipo_maquina of
         gfx[2].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,0,$18000*8,$30000*8,$48000*8);
         convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+        //Dip
+        marcade.dswa:=$7f;
+        marcade.dswa_val:=@actfancer_dip_a;
+        marcade.dswb:=$ff;
+        marcade.dswb_val:=@actfancer_dip_b;
       end;
 end;
 //final
@@ -310,16 +319,10 @@ reset_actfancer;
 iniciar_actfancer:=true;
 end;
 
-procedure cerrar_actfancer;
-begin
-deco_bac06_close(0);
-end;
-
 procedure Cargar_actfancer;
 begin
 llamadas_maquina.bucle_general:=actfancer_principal;
 llamadas_maquina.iniciar:=iniciar_actfancer;
-llamadas_maquina.close:=cerrar_actfancer;
 llamadas_maquina.reset:=reset_actfancer;
 end;
 

@@ -194,6 +194,9 @@ type
     Asteroids1: TMenuItem;
     llander1: TMenuItem;
     crushroller1: TMenuItem;
+    MenuItem33: TMenuItem;
+    gauntlet1: TMenuItem;
+    sauro1: TMenuItem;
     Vendetta1: TMenuItem;
     xevious1: TMenuItem;
     spacefb1: TMenuItem;
@@ -609,8 +612,6 @@ principal1.timer2.Enabled:=true;
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-var
-   f:byte;
 begin
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
@@ -618,13 +619,6 @@ if cinta_tzx.cargada then vaciar_cintas;
 if ((addr(llamadas_maquina.close)<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 reset_dsp;
 file_ini_save;
-//Limpio todos los directorios
-for f:=0 to $ff do begin
-    if directory.arcade_list_roms[f]<>nil then begin
-       freemem(directory.arcade_list_roms[f]);
-       directory.arcade_list_roms[f]:=nil;
-    end;
-end;
 if joystick_def[0]<>nil then close_joystick(arcade_input.num_joystick[0]);
 if joystick_def[1]<>nil then close_joystick(arcade_input.num_joystick[1]);
 sdl_videoquit;

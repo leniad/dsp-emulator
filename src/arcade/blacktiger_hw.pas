@@ -154,7 +154,9 @@ frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRuning do begin
-  {$ifdef speed_debug}QueryPerformanceCounter(cont1);{$endif}
+  {$ifdef speed_debug}
+  QueryPerformanceCounter(cont1);
+  {$endif}
   for f:=0 to $ff do begin
     //Main CPU
     z80_0.run(frame_m);
@@ -172,8 +174,10 @@ while EmuStatus=EsRuning do begin
     end;
   end;
   eventos_blktiger;
-  {$ifdef speed_debug}QueryPerformanceCounter(cont2);
-  principal1.statusbar1.panels[2].text:=inttostr(cont2-cont1);{$endif}
+  {$ifdef speed_debug}
+  QueryPerformanceCounter(cont2);
+  principal1.statusbar1.panels[2].text:=inttostr(cont2-cont1);
+  {$endif}
   video_sync;
 end;
 end;
@@ -247,7 +251,10 @@ case (puerto and $FF) of
   0:soundlatch:=valor;
   1:banco_rom:=valor and $F;
   4:begin
-      ch_on:=(valor and $80)=0;
+      if ch_on<>((valor and $80)=0) then begin
+         ch_on:=(valor and $80)=0;
+         if ch_on then fillchar(gfx[0].buffer,$400,1);
+      end;
       main_screen.flip_main_screen:=(valor and $40)<>0;
       z80_1.change_reset((valor and $20) shr 5);
     end;
@@ -272,7 +279,10 @@ case (puerto and $FF) of
       scroll_y:=(scroll_y and $ff) or (valor shl 8);
     end;
   $c:begin
-      bg_on:=(valor and $2)=0;
+      if bg_on<>((valor and $2)=0) then begin
+         bg_on:=(valor and $2)=0;
+         if bg_on then fillchar(gfx[2].buffer,$2000,1);
+      end;
       spr_on:=(valor and $4)=0;
      end;
   $d:scroll_bank:=(valor and 3) shl 12;
@@ -513,9 +523,9 @@ z80_1.init_sound(blktiger_sound_update);
 mcs51_0:=cpu_mcs51.create(6000000,256);
 mcs51_0.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(3579545);
+ym2203_0:=ym2203_chip.create(3579545,0.15,0.15);
 ym2203_0.change_irq_calls(snd_irq);
-ym2203_1:=ym2203_chip.create(3579545);
+ym2203_1:=ym2203_chip.create(3579545,0.15,0.15);
 //Timers
 timer_hs:=init_timer(z80_0.numero_cpu,10000,blk_hi_score,true);
 //cargar roms

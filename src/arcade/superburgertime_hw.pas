@@ -3,7 +3,7 @@ unit superburgertime_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     oki6295,sound_engine,hu6280,deco16ic,deco_common;
+     oki6295,sound_engine,hu6280,deco_16ic,deco_common;
 
 procedure cargar_supbtime;
 
@@ -24,9 +24,9 @@ var
 procedure update_video_supbtime;
 begin
 fill_full_screen(3,768);
-update_pf_2(0,3,true);
-deco16_sprites;
-update_pf_1(0,3,true);
+deco16ic_0.update_pf_2(3,true);
+deco_sprites_0.draw_sprites;
+deco16ic_0.update_pf_1(3,true);
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
@@ -88,15 +88,15 @@ begin
 case direccion of
   $0..$3ffff:supbtime_getword:=rom[direccion shr 1];
   $100000..$103fff:supbtime_getword:=ram[(direccion and $3fff) shr 1];
-  $120000..$1207ff:supbtime_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
+  $120000..$1207ff:supbtime_getword:=deco_sprites_0.ram[(direccion and $7ff) shr 1];
   $140000..$1407ff:supbtime_getword:=buffer_paleta[(direccion and $7ff) shr 1];
   $180000:supbtime_getword:=marcade.in0;
   $180004,$180006,$18000e:supbtime_getword:=$ffff;
   $180002:supbtime_getword:=$feff;
   $180008:supbtime_getword:=marcade.in1;
   $18000a,$18000c:supbtime_getword:=0;
-  $320000..$320fff:supbtime_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
-  $322000..$322fff:supbtime_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
+  $320000..$320fff:supbtime_getword:=deco16ic_0.pf1.data[(direccion and $fff) shr 1];
+  $322000..$322fff:supbtime_getword:=deco16ic_0.pf2.data[(direccion and $fff) shr 1];
 end;
 end;
 
@@ -109,8 +109,8 @@ begin
   color.r:=pal4bit(tmp_color);
   set_pal_color(color,numero);
   case numero of
-    $100..$1ff:deco16ic_chip[0].dec16ic_buffer_color[1,(numero shr 4) and $f]:=true;
-    $200..$2ff:deco16ic_chip[0].dec16ic_buffer_color[2,(numero shr 4) and $f]:=true;
+    $100..$1ff:deco16ic_0.pf1.buffer_color[(numero shr 4) and $f]:=true;
+    $200..$2ff:deco16ic_0.pf2.buffer_color[(numero shr 4) and $f]:=true;
   end;
 end;
 
@@ -120,7 +120,7 @@ if direccion<$40000 then exit;
 case direccion of
   $100000..$103fff:ram[(direccion and $3fff) shr 1]:=valor;
   $104000..$11ffff,$120800..$13ffff,$18000a..$18000d:;
-  $120000..$1207ff:deco_sprite_ram[(direccion and $7ff) shr 1]:=valor;
+  $120000..$1207ff:deco_sprites_0.ram[(direccion and $7ff) shr 1]:=valor;
   $140000..$1407ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                       buffer_paleta[(direccion and $7ff) shr 1]:=valor;
                       cambiar_color(valor,(direccion and $7ff) shr 1);
@@ -129,18 +129,18 @@ case direccion of
             deco16_sound_latch:=valor and $ff;
             h6280_0.set_irq_line(0,HOLD_LINE);
           end;
-  $300000..$30000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
+  $300000..$30000f:deco16ic_0.control_w((direccion and $f) shr 1,valor);
   $320000..$320fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
-                      deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
+                      deco16ic_0.pf1.data[(direccion and $fff) shr 1]:=valor;
+                      deco16ic_0.pf1.buffer[(direccion and $fff) shr 1]:=true
                    end;
   $321000..$321fff,$323000..$323fff:;
   $322000..$322fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
-                      deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
+                      deco16ic_0.pf2.data[(direccion and $fff) shr 1]:=valor;
+                      deco16ic_0.pf2.buffer[(direccion and $fff) shr 1]:=true
                    end;
-  $340000..$3407ff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $7ff) shr 1]:=valor;
-  $342000..$3427ff:deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $7ff) shr 1]:=valor;
+  $340000..$3407ff:deco16ic_0.pf1.rowscroll[(direccion and $7ff) shr 1]:=valor;
+  $342000..$3427ff:deco16ic_0.pf2.rowscroll[(direccion and $7ff) shr 1]:=valor;
 end;
 end;
 
@@ -148,7 +148,8 @@ end;
 procedure reset_supbtime;
 begin
  m68000_0.reset;
- reset_dec16ic(0);
+ deco16ic_0.reset;
+ deco_sprites_0.reset;
  deco16_snd_simple_reset;
  reset_audio;
  marcade.in0:=$ffff;
@@ -172,15 +173,14 @@ var
 begin
 iniciar_supbtime:=false;
 iniciar_audio(false);
-init_dec16ic(0,1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
+deco16ic_0:=chip_16ic.create(1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
+deco_sprites_0:=tdeco16_sprite.create(2,3,304,0,$1fff);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
 m68000_0:=cpu_m68000.create(14000000,$100);
 m68000_0.change_ram16_calls(supbtime_getword,supbtime_putword);
 //Sound CPU
-deco16_sprite_color_add:=0;
-deco16_sprite_mask:=$1fff;
 deco16_snd_simple_init(32220000 div 8,32220000,nil);
 getmem(memoria_temp,$100000);
 //cargar roms
@@ -212,16 +212,10 @@ reset_supbtime;
 iniciar_supbtime:=true;
 end;
 
-procedure cerrar_supbtime;
-begin
-close_dec16ic(0);
-end;
-
 procedure Cargar_supbtime;
 begin
 llamadas_maquina.bucle_general:=supbtime_principal;
 llamadas_maquina.iniciar:=iniciar_supbtime;
-llamadas_maquina.close:=cerrar_supbtime;
 llamadas_maquina.reset:=reset_supbtime;
 llamadas_maquina.fps_max:=58;
 end;

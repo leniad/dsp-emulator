@@ -180,12 +180,12 @@ for f:=$0 to $3ff do begin
     gfx[0].buffer[f]:=false;
   end;
 end;
-fillchar(buffer_color,$8,0);
 poner_sprites(2);
 poner_sprites(3);
 poner_sprites(1);
 actualiza_trozo(0,0,256,256,1,0,0,256,256,2);
 actualiza_trozo_final(0,16,256,224,2);
+fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_pow;

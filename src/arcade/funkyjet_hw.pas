@@ -3,7 +3,7 @@ unit funkyjet_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     oki6295,sound_engine,hu6280,deco16ic,deco_decr,deco_common,misc_functions,
+     oki6295,sound_engine,hu6280,deco_16ic,deco_decr,deco_common,misc_functions,
      deco_146;
 
 procedure cargar_funkyjet;
@@ -35,9 +35,9 @@ var
 procedure update_video_funkyjet;inline;
 begin
 //fill_full_screen(3,$200);
-update_pf_2(0,3,false);
-update_pf_1(0,3,true);
-deco16_sprites;
+deco16ic_0.update_pf_2(3,false);
+deco16ic_0.update_pf_1(3,true);
+deco_sprites_0.draw_sprites;
 actualiza_trozo_final(0,8,320,240,3);
 end;
 
@@ -113,12 +113,12 @@ case direccion of
   $0..$7ffff:funkyjet_getword:=rom[direccion shr 1];
   $120000..$1207ff:funkyjet_getword:=buffer_paleta[(direccion and $7ff) shr 1];
   $140000..$143fff:funkyjet_getword:=ram[(direccion and $3fff) shr 1];
-  $160000..$1607ff:funkyjet_getword:=deco_sprite_ram[(direccion and $7ff) shr 1];
+  $160000..$1607ff:funkyjet_getword:=deco_sprites_0.ram[(direccion and $7ff) shr 1];
   $180000..$1807ff:funkyjet_getword:=funkyjet_deco146_r(direccion and $7ff);//funkyjet_prot146(direccion and $7ff);
-  $320000..$320fff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1];
-  $322000..$322fff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1];
-  $340000..$340bff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $fff) shr 1];
-  $342000..$342bff:funkyjet_getword:=deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $fff) shr 1];
+  $320000..$320fff:funkyjet_getword:=deco16ic_0.pf1.data[(direccion and $fff) shr 1];
+  $322000..$322fff:funkyjet_getword:=deco16ic_0.pf2.data[(direccion and $fff) shr 1];
+  $340000..$340bff:funkyjet_getword:=deco16ic_0.pf1.rowscroll[(direccion and $fff) shr 1];
+  $342000..$342bff:funkyjet_getword:=deco16ic_0.pf2.rowscroll[(direccion and $fff) shr 1];
 end;
 end;
 
@@ -131,8 +131,8 @@ begin
   color.r:=pal4bit(tmp_color);
   set_pal_color(color,numero);
   case numero of
-    $100..$1ff:deco16ic_chip[0].dec16ic_buffer_color[1,(numero shr 4) and $f]:=true;
-    $200..$2ff:deco16ic_chip[0].dec16ic_buffer_color[2,(numero shr 4) and $f]:=true;
+    $100..$1ff:deco16ic_0.pf1.buffer_color[(numero shr 4) and $f]:=true;
+    $200..$2ff:deco16ic_0.pf2.buffer_color[(numero shr 4) and $f]:=true;
   end;
 end;
 
@@ -156,20 +156,20 @@ case direccion of
                       cambiar_color(valor,(direccion and $7ff) shr 1);
                    end;
   $140000..$143fff:ram[(direccion and $3fff) shr 1]:=valor;
-  $160000..$1607ff:deco_sprite_ram[(direccion and $7ff) shr 1]:=valor;
+  $160000..$1607ff:deco_sprites_0.ram[(direccion and $7ff) shr 1]:=valor;
   $180000..$1807ff:funkyjet_deco146_w(direccion and $7ff,valor);
   $184000,$188000,$1a0002,$1a0400,$1a0402:;
-  $300000..$30000f:dec16ic_pf_control_w(0,(direccion and $f) shr 1,valor);
+  $300000..$30000f:deco16ic_0.control_w((direccion and $f) shr 1,valor);
   $320000..$320fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[1,(direccion and $fff) shr 1]:=valor;
-                      deco16ic_chip[0].dec16ic_buffer[1,(direccion and $fff) shr 1]:=true
+                      deco16ic_0.pf1.data[(direccion and $fff) shr 1]:=valor;
+                      deco16ic_0.pf1.buffer[(direccion and $fff) shr 1]:=true
                    end;
   $322000..$322fff:begin
-                      deco16ic_chip[0].dec16ic_pf_data[2,(direccion and $fff) shr 1]:=valor;
-                      deco16ic_chip[0].dec16ic_buffer[2,(direccion and $fff) shr 1]:=true
+                      deco16ic_0.pf2.data[(direccion and $fff) shr 1]:=valor;
+                      deco16ic_0.pf2.buffer[(direccion and $fff) shr 1]:=true
                    end;
-  $340000..$340bff:deco16ic_chip[0].dec16ic_pf_rowscroll[1,(direccion and $fff) shr 1]:=valor;
-  $342000..$342bff:deco16ic_chip[0].dec16ic_pf_rowscroll[2,(direccion and $fff) shr 1]:=valor;
+  $340000..$340bff:deco16ic_0.pf1.rowscroll[(direccion and $fff) shr 1]:=valor;
+  $342000..$342bff:deco16ic_0.pf2.rowscroll[(direccion and $fff) shr 1]:=valor;
 end;
 end;
 
@@ -178,7 +178,8 @@ procedure reset_funkyjet;
 begin
  m68000_0.reset;
  main_deco146.reset;
- reset_dec16ic(0);
+ deco16ic_0.reset;
+ deco_sprites_0.reset;
  deco16_snd_simple_reset;
  reset_audio;
  marcade.in0:=$ffff;
@@ -198,15 +199,14 @@ var
 begin
 iniciar_funkyjet:=false;
 iniciar_audio(false);
-init_dec16ic(0,1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
+deco16ic_0:=chip_16ic.create(1,2,$100,$100,$f,$f,0,1,0,16,nil,nil);
+deco_sprites_0:=tdeco16_sprite.create(2,3,304,0,$1fff);
 screen_init(3,512,512,false,true);
 iniciar_video(320,240);
 //Main CPU
 m68000_0:=cpu_m68000.create(14000000,$100);
 m68000_0.change_ram16_calls(funkyjet_getword,funkyjet_putword);
 //Sound CPU
-deco16_sprite_color_add:=0;
-deco16_sprite_mask:=$1fff;
 deco16_snd_simple_init(32220000 div 4,32220000,nil);
 getmem(memoria_temp,$100000);
 //cargar roms
@@ -245,16 +245,10 @@ reset_funkyjet;
 iniciar_funkyjet:=true;
 end;
 
-procedure cerrar_funkyjet;
-begin
-close_dec16ic(0);
-end;
-
 procedure Cargar_funkyjet;
 begin
 llamadas_maquina.bucle_general:=funkyjet_principal;
 llamadas_maquina.iniciar:=iniciar_funkyjet;
-llamadas_maquina.close:=cerrar_funkyjet;
 llamadas_maquina.reset:=reset_funkyjet;
 llamadas_maquina.fps_max:=58;
 end;

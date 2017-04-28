@@ -33,7 +33,7 @@ const
 
 var
  tiles_rom,sprite_rom,k007232_rom:pbyte;
- sound_latch,sprite_colorbase,bank0_bank,rom_bank1:byte;
+ sound_latch,bank0_bank,rom_bank1:byte;
  layer_colorbase:array[0..2] of byte;
  rom_bank:array[0..19,0..$1fff] of byte;
  ram_bank:array[0..1,0..$3ff] of byte;
@@ -49,15 +49,16 @@ begin
 // The PROM allows for mixed priorities, where sprites would have */
 // priority over text but not on one or both of the other two planes. */
 case (color and $70) of
-     $10:pri:=0 ;      // over ABF */
+     $20,$60:pri:=7;  // over -, not ABF */
      $0:pri:=4;       //over AB, not F */
      $40:pri:=6;      // over A, not BF */
-     $20,$60:pri:=7;  // over -, not ABF */
+     $10:pri:=0 ;      // over ABF */
+     //No posibles debido a como pinta la pantalla el driver!!
      $50:pri:=2;      // over AF, not B */
      $30,$70:pri:=3;  // over F, not AB */
 end;
 code:=code or ((color and $80) shl 6);
-color:=sprite_colorbase+(color and $f);
+color:=16+(color and $f);
 shadow:=0;  // shadows are not used by this game
 end;
 
@@ -75,14 +76,13 @@ end;
 procedure update_video_aliens;
 begin
 k052109_0.draw_tiles;
+k051960_0.update_sprites;
 fill_full_screen(4,layer_colorbase[1]*16);
 k051960_0.draw_sprites(7,-1);
 k052109_0.draw_layer(1,4); //A
 k051960_0.draw_sprites(6,-1);
-k051960_0.draw_sprites(2,-1);
 k052109_0.draw_layer(2,4); //B
 k051960_0.draw_sprites(4,-1);
-k051960_0.draw_sprites(3,-1);
 k052109_0.draw_layer(0,4); //F
 k051960_0.draw_sprites(0,-1);
 actualiza_trozo_final(112,16,288,224,4);
@@ -309,7 +309,6 @@ k051960_0.change_irqs(aliens_k051960_cb,nil,nil);
 layer_colorbase[0]:=0;
 layer_colorbase[1]:=4;
 layer_colorbase[2]:=8;
-sprite_colorbase:=16;
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@aliens_dip_a;

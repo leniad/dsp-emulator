@@ -86,6 +86,7 @@ begin
 k052109_0.write($1d80,$10);
 k052109_0.write($1f00,$32);
 k052109_0.draw_tiles;
+k051960_0.update_sprites;
 fill_full_screen(4,0);
 if priority then begin
   k051960_0.draw_sprites(6,-1);
@@ -332,7 +333,7 @@ screen_init(3,512,256,true);
 screen_mod_scroll(3,512,512,511,256,256,255);
 screen_init(4,1024,1024,false,true);
 iniciar_video(320,224,true);
-iniciar_audio(false);
+iniciar_audio(true);
 //cargar roms
 if not(cargar_roms16w(@rom[0],@gradius3_rom[0],'gradius3.zip',0)) then exit;
 if not(cargar_roms16w(@rom_sub[0],@gradius3_rom_sub[0],'gradius3.zip',0)) then exit;
@@ -351,7 +352,7 @@ z80_0.init_sound(gradius3_sound_update);
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k007232_rom,$80000);
 if not(cargar_roms(k007232_rom,@gradius3_k007232,'gradius3.zip',0)) then exit;
-k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,gradius3_k007232_cb);
+k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,gradius3_k007232_cb,true);
 //Iniciar video
 k052109_0:=k052109_chip.create(1,2,3,gradius3_cb,pbyte(@ram_gfx[0]),$20000);
 getmem(sprite_rom,$200000);

@@ -20,15 +20,17 @@ type
               //sprites
               procedure k053247_start(dx:byte=0;dy:byte=0);
               procedure k053247_draw_sprites(prio:byte);
+              procedure k053247_update_sprites;
           private
               kx46_regs:array[0..7] of byte;
 	            kx47_regs:array[0..31] of word;
-              objcha_line:byte;
+              objcha_line,sprite_count:byte;
               rom:pbyte;
               rom_size,rom_mask,sprite_mask:dword;
               k053247_cb:t_k053247_cb;
               pant,dx,dy:byte;
               ram:array[0..$7ff] of word;
+              sorted_list:array[0..$ff] of word;
               z_rejection:integer;
               procedure k053247_draw_single_sprite_gxcore(code:dword;offs:word;color:word);
               procedure k053247_draw_yxloop_gx(height,width,ox,oy,code,color,xa,ya:integer;zoomx,zoomy:single;nozoom,mirrorx,mirrory,flipx,flipy:boolean);
@@ -298,66 +300,69 @@ begin
 		self.k053247_draw_yxloop_gx(height,width,ox+53-self.dx,oy-6-self.dy,code,color,xa,ya,zoomx,zoomy,nozoom,mirrorx,mirrory,flipx,flipy);
 end;
 
-procedure k053246_chip.k053247_draw_sprites(prio:byte);
+procedure k053246_chip.k053247_update_sprites;
 var
-  zcode:integer;
-  color,primask,temp,w,y,x,f,count:word;
-  sortedlist:array[0..$ff] of word;
-  code:dword;
+  count,f:byte;
 begin
-	zcode:=self.z_rejection;
-  count:=0;
-	if (zcode=-1) then begin
+count:=0;
+if (self.z_rejection=-1) then begin
 		for f:=0 to $ff do
 			if (self.ram[f*8] and $8000)<>0 then begin
-        sortedlist[count]:=f*8;
+        self.sorted_list[count]:=f*8;
         count:=count+1;
       end;
 	end else begin
 		for f:=0 to $ff do
-			if (((self.ram[f*8] and $8000)<>0) and ((self.ram[f*8] and $ff)<>zcode)) then begin
-        sortedlist[count]:=f*8;
+			if (((self.ram[f*8] and $8000)<>0) and ((self.ram[f*8] and $ff)<>self.z_rejection)) then begin
+        self.sorted_list[count]:=f*8;
         count:=count+1;
       end;
-	end;
-  if count=0 then exit;
-  w:=count;
-  count:=count-1;
+end;
+self.sprite_count:=count;
+end;
+
+procedure k053246_chip.k053247_draw_sprites(prio:byte);
+var
+  zcode:integer;
+  color,primask,temp,w,y,x,f:word;
+  code:dword;
+begin
+  if self.sprite_count=0 then exit;
   if ((self.kx47_regs[$c div 2] and $10)=0) then begin
 		// sort objects in decending order(smaller z closer) when OPSET PRI is clear
-		for y:=0 to count do begin
-			f:=sortedlist[y];
+		for y:=0 to (self.sprite_count-1) do begin
+			f:=sorted_list[y];
 			zcode:=self.ram[f] and $ff;
-			for x:=y+1 to (w-1) do begin
-				temp:=sortedlist[x];
+			for x:=y+1 to self.sprite_count do begin
+				temp:=sorted_list[x];
 				code:=self.ram[temp] and $ff;
 				if (zcode<=code) then begin
 					zcode:=code;
-					sortedlist[x]:=f;
+					sorted_list[x]:=f;
           f:=temp;
-					sortedlist[y]:=temp;
+					sorted_list[y]:=temp;
 				end;
 			end;
 		end;
 	end else begin
 		// sort objects in ascending order(bigger z closer) when OPSET PRI is set
-		for y:=0 to count do begin
-			f:=sortedlist[y];
+		for y:=0 to (self.sprite_count-1) do begin
+			f:=sorted_list[y];
 			zcode:=self.ram[f] and $ff;
-			for x:=y+1 to (w-1) do begin
-				temp:=sortedlist[x];
+			for x:=y+1 to self.sprite_count do begin
+				temp:=sorted_list[x];
 				code:=self.ram[temp] and $ff;
 				if (zcode>=code) then begin
 					zcode:=code;
-					sortedlist[x]:=f;
+					sorted_list[x]:=f;
           f:=temp;
-					sortedlist[y]:=temp;
+					sorted_list[y]:=temp;
 				end;
 			end;
 		end;
 	end;
-  for f:=0 to count do begin
-		w:=sortedlist[f];
+  for f:=0 to (self.sprite_count-1) do begin
+		w:=sorted_list[f];
 		code:=self.ram[w+1] and self.sprite_mask;
     color:=self.ram[w+6];
     //shadow:=color;

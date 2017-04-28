@@ -77,6 +77,7 @@ end;
 procedure update_video_tmnt;
 begin
 k052109_0.draw_tiles;
+k051960_0.update_sprites;
 fill_full_screen(4,0);
 k052109_0.draw_layer(2,4);
 if sprites_pri then k051960_0.draw_sprites(0,0);
@@ -292,6 +293,7 @@ if k053251_0.dirty_tmap[K053251_CI3] then begin
   k053251_0.dirty_tmap[K053251_CI3]:=false;
 end;
 k052109_0.draw_tiles;
+k05324x_update_sprites;
 fill_full_screen(4,bg_colorbase*16);
 k05324x_sprites_draw(3);
 k052109_0.draw_layer(sorted_layer[0],4);

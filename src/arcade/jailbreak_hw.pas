@@ -56,7 +56,7 @@ for f:=0 to $7ff do begin
     end;
 end;
 if scroll_dir then for f:=0 to 31 do scroll__y_part(1,2,scroll_lineas[f],0,f*8,8)
-  else for f:=0 to 31 do scroll__x_part(1,2,scroll_lineas[f],0,f*8,8);
+  else scroll__x_part2(1,2,8,@scroll_lineas);
 for f:=0 to $2f do begin
   atrib:=memoria[$1001+(f*4)];
   nchar:=memoria[$1000+(f*4)]+((atrib and $40) shl 2);

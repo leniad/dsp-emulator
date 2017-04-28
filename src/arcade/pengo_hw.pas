@@ -121,16 +121,16 @@ case direccion of
    $9041:namco_snd_0.enabled:=valor<>0;
    $9042:if pal_bank<>valor then begin
             pal_bank:=valor;
-            fillchar(gfx[0].buffer,$400,0);
+            fillchar(gfx[0].buffer,$400,1);
          end;
    $9043:main_screen.flip_main_screen:=(valor and 1)<>0;
    $9046:if colortable_bank<>valor then begin
              colortable_bank:=valor;
-             fillchar(gfx[0].buffer,$400,0);
+             fillchar(gfx[0].buffer,$400,1);
          end;
    $9047:if (gfx_bank<>(valor and $1)) then begin
              gfx_bank:=valor and $1;
-             fillchar(gfx[0].buffer,$400,0);
+             fillchar(gfx[0].buffer,$400,1);
          end;
 end;
 end;

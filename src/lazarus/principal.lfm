@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 251
+  Left = 947
   Height = 198
-  Top = 285
+  Top = 232
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -21,7 +21,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.6.2.0'
+  LCLVersion = '1.6.4.0'
   object Panel1: TPanel
     Left = 0
     Height = 33
@@ -2344,6 +2344,10 @@ object principal1: Tprincipal1
             Caption = 'Space Firebirds'
             OnClick = CambiarMaquina
           end
+          object sauro1: TMenuItem
+            Caption = 'Sauro'
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2581,6 +2585,7 @@ object principal1: Tprincipal1
           end
           object ajax1: TMenuItem
             Caption = 'Ajax'
+            OnClick = CambiarMaquina
           end
           object Vendetta1: TMenuItem
             Caption = 'Vendetta'
@@ -2918,6 +2923,13 @@ object principal1: Tprincipal1
             end
             object chelnov1: TMenuItem
               Caption = 'Chelnov'
+              OnClick = CambiarMaquina
+            end
+          end
+          object MenuItem33: TMenuItem
+            Caption = 'Gauntlet HW'
+            object gauntlet1: TMenuItem
+              Caption = 'Gauntlet'
               OnClick = CambiarMaquina
             end
           end

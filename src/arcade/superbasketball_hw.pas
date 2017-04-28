@@ -49,7 +49,7 @@ for f:=0 to $3ff do begin
 end;
 //La parte de arriba es fija...
 actualiza_trozo(0,0,256,48,1,0,0,256,48,2);
-scroll__x_part(1,2,scroll,0,48,208);
+scroll__x_part2(1,2,208,@scroll,0,0,48);
 offset:=(sprite_select and $1)*$100;
 for f:=0 to $3f do begin
   atrib:=memoria[$3801+offset+(f*4)];
