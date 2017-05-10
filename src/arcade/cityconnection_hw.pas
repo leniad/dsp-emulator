@@ -344,7 +344,6 @@ var
   memoria_temp:array[0..$17fff] of byte;
 const
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 256*8*8+0, 256*8*8+1, 256*8*8+2, 256*8*8+3 );
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   ps_x:array[0..7] of dword=(0, 1, 2, 3, 128*16*8+0, 128*16*8+1, 128*16*8+2, 128*16*8+3);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
             8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
@@ -377,13 +376,13 @@ if not(roms_load(@memoria_temp,@citycon_char,'citycon.zip',sizeof(citycon_char))
 init_gfx(0,8,8,256);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,4,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //tiles
 if not(roms_load(@memoria_temp,@citycon_tiles,'citycon.zip',sizeof(citycon_tiles))) then exit;
 init_gfx(1,8,8,3072);
 for f:=0 to $b do begin
   gfx_set_desc_data(4,12,8*8,4+($1000*f*8),0+($1000*f*8),($c000+($1000*f))*8+4,($c000+($1000*f))*8+0);
-  convert_gfx(1,$100*8*8*f,@memoria_temp,@pc_x,@pc_y,false,false);
+  convert_gfx(1,$100*8*8*f,@memoria_temp,@pc_x,@ps_y,false,false);
 end;
 if not(roms_load(@memoria_fondo,@citycon_fondo,'citycon.zip',sizeof(citycon_fondo))) then exit;
 //sprites

@@ -204,7 +204,6 @@ var
   f,mask:byte;
 const
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
@@ -226,7 +225,7 @@ if not(cargar_roms(@memoria[0],@centipede_rom[0],'centiped.zip',0)) then exit;
 if not(cargar_roms(@memoria_temp[0],@centipede_chars,'centiped.zip',0)) then exit;
 init_gfx(0,8,8,$100);
 gfx_set_desc_data(2,0,8*8,$100*8*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@ps_y[0],false,true);
 init_gfx(1,8,16,$80);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,$80*16*8,0);

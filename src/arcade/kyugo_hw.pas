@@ -263,8 +263,6 @@ var
   f,bit0,bit1,bit2,bit3:byte;
 const
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
   ps_x:array[0..15] of dword=(0,1,2,3,4,5,6,7,
 	  8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
   ps_y:array[0..15] of dword=(0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
@@ -300,12 +298,12 @@ if not(cargar_roms(@memoria_temp[0],@repulse_char,'repulse.zip',1)) then exit;
 init_gfx(0,8,8,$100);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8*2,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@ps_y[0],true,false);
 //convertir tiles
 if not(cargar_roms(@memoria_temp[0],@repulse_tiles[0],'repulse.zip',0)) then exit;
 init_gfx(1,8,8,$400);
 gfx_set_desc_data(3,0,8*8,0,$400*8*8,$400*8*8*2);
-convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pc_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@repulse_sprites[0],'repulse.zip',0)) then exit;
 init_gfx(2,16,16,$400);

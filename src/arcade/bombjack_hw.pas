@@ -331,12 +331,6 @@ end;
 
 function bombjack_iniciar:boolean;
 const
-      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
-      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
       pt_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
@@ -377,18 +371,18 @@ if not(cargar_roms(@memoria_temp[0],@bombjack_char[0],'bombjack.zip',0)) then ex
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0*8,512*8*8,512*2*8*8);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
+convert_gfx(0,0,@memoria_temp,@pt_x,@pt_y,true,false);
 //convertir chars16
 if not(cargar_roms(@memoria_temp,@bombjack_char16,'bombjack.zip',0)) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,0,1024*8*8,1024*2*8*8);
-convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
+convert_gfx(1,0,@memoria_temp,@pt_x,@pt_y,true,false);
 //sprites
 if not(cargar_roms(@memoria_temp,@bombjack_sprites,'bombjack.zip',0)) then exit;
 init_gfx(2,16,16,128);
 gfx[2].trans[0]:=true;
-convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
+convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,true,false);
 //sprites grandes
 init_gfx(3,32,32,32);
 gfx[3].trans[0]:=true;

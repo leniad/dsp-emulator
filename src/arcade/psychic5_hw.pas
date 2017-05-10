@@ -34,12 +34,12 @@ var
  mem_ram:array[0..2,0..$fff] of byte;
  banco_rom,banco_vram,sound_latch,bg_control:byte;
  title_screen:boolean;
- scroll_x,scroll_y:word;
+ scroll_x,scroll_y,sy1,sy2,sx1:word;
 
 procedure update_video_psychic5;inline;
 var
   f,color,nchar,x,y,clip_x,clip_y,clip_w,clip_h:word;
-  bg_clip_mode,sy1,sy2,sx1,attr,flip_x,spr1,spr2,spr3,spr4,sy1_old,sx1_old,sy2_old:byte;
+  bg_clip_mode,attr,flip_x,spr1,spr2,spr3,spr4,sy1_old,sx1_old,sy2_old:byte;
 begin
 //fondo
 if (bg_control and 1)<>0 then begin  //fondo activo?
@@ -97,7 +97,7 @@ if (bg_control and 1)<>0 then begin  //fondo activo?
 		    11,13:clip_w:=sx1;
 		  end;
       fill_full_screen(4,0);
-      actualiza_trozo(scroll_x+clip_y,(768-scroll_y)+clip_x,clip_h,clip_w,3,clip_y,clip_x,clip_h,clip_w,4);
+      actualiza_trozo((scroll_x+clip_y) and $1ff,((768-scroll_y)+clip_x) and $3ff,clip_h,clip_w,3,clip_y,clip_x,clip_h,clip_w,4);
   end;
 end else fill_full_screen(4,0);
 //sprites
@@ -451,12 +451,10 @@ var
       f:word;
       memoria_temp:array[0..$1ffff] of byte;
 const
-    pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28);
-    pc_y:array[0..7] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8);
     ps_x:array[0..15] of dword=(0, 4, 8, 12, 16, 20, 24, 28,
         64*8, 64*8+4, 64*8+8, 64*8+12, 64*8+16, 64*8+20, 64*8+24, 64*8+28);
-    ps_y:array[0..15] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8, 32*8,
-        36*8, 40*8, 44*8, 48*8, 52*8, 56*8, 60*8);
+    ps_y:array[0..15] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8,
+        32*8, 36*8, 40*8, 44*8, 48*8, 52*8, 56*8, 60*8);
 begin
 iniciar_psychic5:=false;
 iniciar_audio(false);
@@ -464,8 +462,7 @@ screen_init(1,256,256,true);
 screen_init(2,512,512,true);
 screen_init(3,512,1024);
 screen_mod_scroll(3,512,256,511,1024,256,1023);
-screen_init(4,256,256,false,true);
-screen_mod_sprites(4,512,0,$1ff,0);
+screen_init(4,512,256,false,true);
 iniciar_video(224,256);
 //Main CPU
 z80_0:=cpu_z80.create(6000000,256);
@@ -491,7 +488,7 @@ if not(cargar_roms(@memoria_temp[0],@psychic5_char,'psychic5.zip',1)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@psychic5_sprites[0],'psychic5.zip',0)) then exit;
 init_gfx(1,16,16,1024);

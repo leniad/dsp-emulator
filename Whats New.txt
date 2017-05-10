@@ -1,15 +1,16 @@
 What's New!!! DSP Emulator
 
-DSP 0.18WIP 28/04/17
-***********
+DSP 0.18 10/05/17
+********
 - General
     + Lazarus
         - Fixed stereo sound
         - Improved audio synchronization
     + GFX
         - Added final screen independent flip X or flip Y
-        - Improved scrolling by independent rows and / or columns
+        - Improved scrolling by independent rows and/or columns
         - Improved zoom sprites (no more graps)
+	- Added functions to rotate X axis and/or Y axis of a surface
     + Deco BAC06
         - Converted to classes
         - Fixed bugs and more speed
@@ -22,6 +23,8 @@ DSP 0.18WIP 28/04/17
     + MCS51
         - Corrected registers, mapped in memory
         - Added more opcodes
+- Psychic 5
+    + Fixed intro
 - Deco 0 HW
     + Driver optimizations
     + Added dipswitches
@@ -38,7 +41,7 @@ DSP 0.18WIP 28/04/17
     + Changed sound to stereo
 - Simpsons
     + Changed sound to stereo
-Vendetta
+- Vendetta
     + Changed sound to stereo
 - Ajax
     + Fixed audio (converted to stereo)
@@ -47,5 +50,9 @@ Vendetta
     + Added dipswitches
 - Gauntlet HW
     + Basic driver
-Sauro
+- Sauro
     + Added driver with sound, only missing ADPCM
+- Crazy Climber
+    + Added driver with sound
+- Return of Invaders
+    + Added driver with sound

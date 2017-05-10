@@ -532,8 +532,6 @@ function iniciar_dkong:boolean;
 var
   memoria_temp:array[0..$5fff] of byte;
 const
-      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
       ps_dkong_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 		  	  64*16*16+0, 64*16*16+1, 64*16*16+2, 64*16*16+3, 64*16*16+4, 64*16*16+5, 64*16*16+6, 64*16*16+7);
       ps_dkong3_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
@@ -545,7 +543,7 @@ procedure dkong_char_load(num_char:word);
 begin
   init_gfx(0,8,8,num_char);
   gfx_set_desc_data(2,0,8*8,num_char*8*8,0);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp[0],@ps_dkong_x[0],@ps_y[0],true,false);
 end;
 procedure dkong_sprites_load(num_spr:word);
 begin

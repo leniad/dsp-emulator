@@ -60,7 +60,7 @@ type
           procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
           procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte);
           procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised);
-          function get_pc:word;
+          function get_safe_pc:word;
           function get_internal_r:npreg_z80;
           procedure set_internal_r(r:npreg_z80);
           function save_snapshot(data:pbyte):word;
@@ -623,9 +623,9 @@ begin
   self.after_ei:=false;
 end;
 
-function cpu_z80.get_pc:word;
+function cpu_z80.get_safe_pc:word;
 begin
-  get_pc:=self.r.ppc;
+  get_safe_pc:=self.r.ppc;
 end;
 
 function cpu_z80.get_internal_r:npreg_z80;

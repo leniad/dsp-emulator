@@ -114,13 +114,11 @@ case direccion of
   $000000..$02ffff:actfancer_getbyte:=rom[direccion];
   $062000..$063fff:begin
                       tempw:=bac06_0.tile_1.data[(direccion and $1fff) shr 1];
-                      if (direccion and 1)<>0 then actfancer_getbyte:=tempw shr 8
-                        else actfancer_getbyte:=tempw;
+                      actfancer_getbyte:=tempw shr (8*(direccion and 1));
                    end;
   $072000..$0727ff:begin
                       tempw:=bac06_0.tile_2.data[(direccion and $7ff) shr 1];
-                      if (direccion and 1)<>0 then actfancer_getbyte:=tempw shr 8
-                        else actfancer_getbyte:=tempw;
+                      actfancer_getbyte:=tempw shr (8*(direccion and 1));
                    end;
   $100000..$1007ff:actfancer_getbyte:=buffer_sprites[direccion and $7ff];
   $120000..$1205ff:actfancer_getbyte:=buffer_paleta[direccion and $7ff];
@@ -256,8 +254,6 @@ end;
 
 function iniciar_actfancer:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   pt_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
   pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -294,7 +290,7 @@ case main_vars.tipo_maquina of
         init_gfx(0,8,8,$1000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,8*8,$08000*8,$18000*8,0,$10000*8);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+        convert_gfx(0,0,@memoria_temp[0],@pt_x[8],@pt_y[0],false,false);
         //tiles 1
         if not(cargar_roms(@memoria_temp[0],@actfancer_tiles,'actfancr.zip',0)) then exit;
         init_gfx(1,16,16,$c00);

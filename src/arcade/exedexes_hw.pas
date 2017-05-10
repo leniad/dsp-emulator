@@ -237,16 +237,12 @@ end;
 
 function iniciar_exedexes_hw:boolean;
 var
-      colores:tpaleta;
-      f:word;
-      memoria_temp:array[0..$7fff] of byte;
+    colores:tpaleta;
+    f:word;
+    memoria_temp:array[0..$7fff] of byte;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
-    ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
-			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
     pt_x:array[0..31] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			64*8+0, 64*8+1, 64*8+2, 64*8+3, 65*8+0, 65*8+1, 65*8+2, 65*8+3,
 			128*8+0, 128*8+1, 128*8+2, 128*8+3, 129*8+0, 129*8+1, 129*8+2, 129*8+3,
@@ -318,7 +314,7 @@ if not(cargar_roms(@mem_snd[0],@exedexes_snd_rom,'exedexes.zip')) then exit;
 if not(cargar_roms(@memoria_temp[0],@exedexes_char,'exedexes.zip')) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
 //tiles 32x32
 if not(cargar_roms(@memoria_temp[0],@exedexes_tiles1,'exedexes.zip')) then exit;
 init_gfx(1,32,32,64);
@@ -329,13 +325,13 @@ if not(cargar_roms(@memoria_temp[0],@exedexes_tiles2[0],'exedexes.zip',0)) then 
 init_gfx(2,16,16,256);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@pt_y[0],false,true);
 //convertir sprites
 if not(cargar_roms(@memoria_temp[0],@exedexes_sprites[0],'exedexes.zip',0)) then exit;
 init_gfx(3,16,16,256);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@pt_y[0],false,true);
 //poner la paleta y clut
 if not(cargar_roms(@memoria_temp[0],@exedexes_pal[0],'exedexes.zip',0)) then exit;
 for f:=0 to $ff do begin

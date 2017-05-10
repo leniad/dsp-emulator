@@ -271,7 +271,10 @@ uses
   k054000 in '..\devices\k054000.pas',
   deco_16ic in '..\arcade\misc\deco_16ic.pas',
   gauntlet_hw in '..\arcade\gauntlet_hw.pas',
-  sauro_hw in '..\arcade\sauro_hw.pas';
+  sauro_hw in '..\arcade\sauro_hw.pas',
+  crazyclimber_hw in '..\arcade\crazyclimber_hw.pas',
+  crazyclimber_hw_dac in '..\snd\crazyclimber_hw_dac.pas',
+  returnofinvaders_hw in '..\arcade\returnofinvaders_hw.pas';
 
 {$R *.res}
 

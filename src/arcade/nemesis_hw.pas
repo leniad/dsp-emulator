@@ -640,8 +640,7 @@ for f:=1 to 8 do begin
   //screen_init(f,512,512,true);
   //screen_mod_scroll(f,512,512,511,512,512,511);
 end;
-screen_init(9,512,256,false,true);
-screen_mod_sprites(9,1024,256,1023,255);
+screen_init(9,512,512,false,true);
 //screen_init(9,512,512,false,true);
 if main_vars.tipo_maquina=205 then main_screen.rot90_screen:=true;
 iniciar_video(256,224);
@@ -669,6 +668,7 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@mem_snd[0],@twinbee_sound,'twinbee.zip')) then exit;
         m68000_0.change_ram16_calls(gx400_getword,gx400_putword);
         z80_0.change_ram_calls(gx400_snd_getbyte,gx400_snd_putbyte);
+        main_screen.flip_main_x:=true;
   end;
 end;
 //graficos, solo los inicio, los cambia en tiempo real...

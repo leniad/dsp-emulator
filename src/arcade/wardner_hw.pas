@@ -430,11 +430,10 @@ end;
 
 function iniciar_wardnerhw:boolean;
 var
-      f:word;
-      memoria_temp:array[0..$3ffff] of byte;
-      rom:array[0..$fff] of word;
+    f:word;
+    memoria_temp:array[0..$3ffff] of byte;
+    rom:array[0..$fff] of word;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
     pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -490,17 +489,17 @@ if not(cargar_roms(@memoria_temp[0],@wardner_char[0],'wardner.zip',0)) then exit
 init_gfx(0,8,8,2048);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0*2048*8*8,1*2048*8*8,2*2048*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@pc_y[0],false,false);
 //convertir tiles fg
 if not(cargar_roms(@memoria_temp[0],@wardner_fg_tiles[0],'wardner.zip',0)) then exit;
 init_gfx(1,8,8,4096);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8,0*4096*8*8,1*4096*8*8,2*4096*8*8,3*4096*8*8);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@pc_y[0],false,false);
 //convertir tiles bg
 if not(cargar_roms(@memoria_temp[0],@wardner_bg_tiles[0],'wardner.zip',0)) then exit;
 init_gfx(2,8,8,4096);
-convert_gfx(2,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@pc_y[0],false,false);
 //convertir tiles sprites
 if not(cargar_roms(@memoria_temp[0],@wardner_sprites[0],'wardner.zip',0)) then exit;
 init_gfx(3,16,16,2048);

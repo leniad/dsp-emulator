@@ -265,8 +265,7 @@ iniciar_ms:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
 screen_mod_scroll(1,512,256,511,0,0,0);
-screen_init(2,256,256,false,true);
-screen_mod_sprites(2,512,0,$1ff,0);
+screen_init(2,256,512,false,true);
 screen_init(3,256,256,true);
 iniciar_video(240,256);
 //Main CPU

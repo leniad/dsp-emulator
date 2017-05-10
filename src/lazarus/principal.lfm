@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 947
+  Left = 939
   Height = 198
-  Top = 232
+  Top = 324
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -2346,6 +2346,14 @@ object principal1: Tprincipal1
           end
           object sauro1: TMenuItem
             Caption = 'Sauro'
+            OnClick = CambiarMaquina
+          end
+          object cclimber1: TMenuItem
+            Caption = 'Crazy Climber'
+            OnClick = CambiarMaquina
+          end
+          object retofinv1: TMenuItem
+            Caption = 'Return of invaders'
             OnClick = CambiarMaquina
           end
         end

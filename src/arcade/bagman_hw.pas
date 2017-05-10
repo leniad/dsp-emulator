@@ -208,15 +208,13 @@ const
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   resistances_rg:array[0..2] of integer=(1000,470,220);
   resistances_b:array[0..1] of integer=(470,220);
 procedure conv_chars(num_gfx:byte);
 begin
   init_gfx(num_gfx,8,8,$200);
   gfx_set_desc_data(2,0,8*8,0,512*8*8);
-  convert_gfx(num_gfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
 end;
 procedure conv_sprites;
 begin
@@ -229,8 +227,7 @@ begin
 iniciar_bagman:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_init(2,256,256,false,true);
-screen_mod_sprites(2,0,512,0,$1ff);
+screen_init(2,256,512,false,true);
 iniciar_video(224,256);
 //Main CPU
 z80_0:=cpu_z80.create(3072000,264);

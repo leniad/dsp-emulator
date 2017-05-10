@@ -1,4 +1,15 @@
 ﻿# DSP Emulator status #
+<b>10/05/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br><pre>
+-General
+    +GFX: Added functions to rotate X axis and/or Y axis of a surface
+-Psychic 5
+    +Fixed intro
+-Crazy Climber
+    +Added driver with sound
+-Return of Invaders
+    +Added driver with sound
+</pre><br>
+<img src='http://img1.imagilive.com/0517/crazyclimber.png'><img src='http://img1.imagilive.com/0517/returnoftheinvaders.png'><br><br>
 <b>28/04/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br><pre>
 -General
     +Lazarus

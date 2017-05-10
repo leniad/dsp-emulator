@@ -10,7 +10,6 @@ type
     public
       procedure run(maximo:integer);
       procedure change_retraso_call(retraso:tretraso;retraso_puerto:tretraso_puerto);
-      function get_pc:word;
     private
       retraso:tretraso;
       retraso_puerto:tretraso_puerto;
@@ -36,11 +35,6 @@ procedure cpu_z80_sp.change_retraso_call(retraso:tretraso;retraso_puerto:tretras
 begin
   self.retraso:=retraso;
   self.retraso_puerto:=retraso_puerto;
-end;
-
-function cpu_z80_sp.get_pc:word;
-begin
-  get_pc:=self.r.pc;
 end;
 
 procedure cpu_z80_sp.spec_outbyte(posicion:word;valor:byte);
@@ -114,6 +108,7 @@ begin
 irq_temp:=false;
 while self.contador<maximo do begin
 pcontador:=self.contador;
+self.r.ppc:=self.r.pc;
 if not(self.after_ei) then begin
   if self.daisy then irq_temp:=z80daisy_state;
   if (irq_temp or (self.pedir_irq<>CLEAR_LINE)) then self.call_irq;

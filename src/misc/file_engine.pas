@@ -136,6 +136,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   var_spectrum.audio_load:=(fich_ini.ReadInteger('spectrum','audioload',0)=1);
   var_spectrum.audio_128k:=fich_ini.ReadInteger('spectrum','audio_128k',0);
   var_spectrum.beeper_oversample:=fich_ini.ReadInteger('spectrum','beeper_oversample',1);
+  if ((var_spectrum.beeper_oversample<1) or (var_spectrum.beeper_oversample>5)) then var_spectrum.beeper_oversample:=1;
   ulaplus.enabled:=(fich_ini.ReadInteger('spectrum','ulaplus',0)=1);
   //Configuracion CPC
   for f:=0 to 6 do cpc_rom_slot[f]:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');

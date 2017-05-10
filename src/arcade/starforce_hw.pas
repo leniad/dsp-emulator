@@ -344,10 +344,6 @@ end;
 
 function iniciar_starforce:boolean;
 const
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
   pbs_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
@@ -356,8 +352,6 @@ const
 			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8,
 			64*8, 65*8, 66*8, 67*8, 68*8, 69*8, 70*8, 71*8,
 			80*8, 81*8, 82*8, 83*8, 84*8, 85*8, 86*8, 87*8);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
 var
   memoria_temp:array[0..$ffff] of byte;
 begin
@@ -398,7 +392,7 @@ if not(cargar_roms(@memoria_temp[0],@starforce_fg[0],'starforc.zip',0)) then exi
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0,512*8*8,2*512*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
 //big sprites
 if not(cargar_roms(@memoria_temp[0],@starforce_sprites[0],'starforc.zip',0)) then exit;
 init_gfx(2,32,32,128);
@@ -409,20 +403,20 @@ convert_gfx(2,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,0,512*16*16,2*512*16*16);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
 //bg1
 if not(cargar_roms(@memoria_temp[0],@starforce_bg1[0],'starforc.zip',0)) then exit;
 init_gfx(3,16,16,768);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(3,3,32*8,0,256*16*16,2*256*16*16);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(3,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
 //bg2
 if not(cargar_roms(@memoria_temp[0],@starforce_bg2[0],'starforc.zip',0)) then exit;
-convert_gfx(3,256*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(3,256*16*16,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
 //bg3
 if not(cargar_roms(@memoria_temp[0],@starforce_bg3[0],'starforc.zip',0)) then exit;
 gfx_set_desc_data(3,3,32*8,0,128*16*16,2*128*16*16);
-convert_gfx(3,512*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(3,512*16*16,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
 //DIP
 marcade.dswa:=$c0;
 marcade.dswa_val:=@starforce_dipa;

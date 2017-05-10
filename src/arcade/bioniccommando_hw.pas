@@ -312,8 +312,6 @@ function iniciar_bionicc:boolean;
 var
   memoria_temp:array[0..$3ffff] of byte;
 const
-  pc_x:array[0..7] of dword=(0,1,2,3,8,9,10,11);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16 );
   pf_x:array[0..15] of dword=(0,1,2,3, 8,9,10,11,
 		(8*4*8)+0,(8*4*8)+1,(8*4*8)+2,(8*4*8)+3,(8*4*8)+8,(8*4*8)+9,(8*4*8)+10,(8*4*8)+11);
   pf_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -355,13 +353,13 @@ if not(roms_load(@memoria_temp,@bionicc_char,'bionicc.zip',sizeof(bionicc_char))
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,128,4,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@pf_x,@pf_y,false,false);
 //convertir bg
 if not(roms_load(@memoria_temp,@bionicc_bg,'bionicc.zip',sizeof(bionicc_bg))) then exit;
 init_gfx(1,8,8,2048);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128,($8000*8)+4,$8000*8,4,0);
-convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(1,0,@memoria_temp,@pf_x,@pf_y,false,false);
 //convertir fg
 if not(roms_load(@memoria_temp,@bionicc_fg,'bionicc.zip',sizeof(bionicc_fg))) then exit;
 init_gfx(2,16,16,2048);

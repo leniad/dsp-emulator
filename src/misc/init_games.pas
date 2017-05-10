@@ -30,7 +30,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   boogiewings_hw,pinballaction_hw,renegade_hw,tmnt_hw,gradius3_hw,
   spaceinvaders_hw,centipede_hw,karnov_hw,aliens_hw,thunderx_hw,simpsons_hw,
   trackandfield_hw,hypersports_hw,megazone_hw,spacefirebird_hw,ajax_hw,
-  vendetta_hw,gauntlet_hw,sauro_hw;
+  vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw;
 
 type
   tgame_desc=record
@@ -45,7 +45,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=243;
+  games_cont=245;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -286,6 +286,8 @@ const
   (name:'Vendetta';year:'1991';snd:1;hi:false;zip:'vendetta';grid:235;company:'Konami';rom:@vendetta),
   (name:'Gauntlet';year:'1991';snd:1;hi:false;zip:'gauntlet';grid:236;company:'Atari';rom:@gauntlet),
   (name:'Sauro';year:'1987';snd:1;hi:false;zip:'sauro';grid:237;company:'Tecfri';rom:@sauro),
+  (name:'Clazy Climber';year:'1980';snd:1;hi:false;zip:'cclimber';grid:238;company:'Nichibutsu';rom:@cclimber),
+  (name:'Return of Invaders';year:'1985';snd:1;hi:false;zip:'retofinv';grid:239;company:'Taito';rom:@retofinv),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -546,6 +548,8 @@ case numero of
   235:principal1.CambiarMaquina(principal1.vendetta1);
   236:principal1.CambiarMaquina(principal1.gauntlet1);
   237:principal1.CambiarMaquina(principal1.sauro1);
+  238:principal1.CambiarMaquina(principal1.cclimber1);
+  239:principal1.CambiarMaquina(principal1.retofinv1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -795,6 +799,8 @@ principal1.crushroller1.checked:=false;
 principal1.vendetta1.checked:=false;
 principal1.gauntlet1.checked:=false;
 principal1.sauro1.checked:=false;
+principal1.cclimber1.checked:=false;
+principal1.retofinv1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1004,6 +1010,8 @@ case tmaquina of
   235:Cargar_vendetta;
   236:Cargar_gauntlet;
   237:Cargar_sauro;
+  238:Cargar_cclimber;
+  239:Cargar_retofinv;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1966,6 +1974,14 @@ end;
 if sender=principal1.sauro1 then begin
   tipo:=237;
   principal1.sauro1.Checked:=true;
+end;
+if sender=principal1.cclimber1 then begin
+  tipo:=238;
+  principal1.cclimber1.Checked:=true;
+end;
+if sender=principal1.retofinv1 then begin
+  tipo:=239;
+  principal1.retofinv1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

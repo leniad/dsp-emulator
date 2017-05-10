@@ -364,7 +364,6 @@ end;
 function iniciar_renegade:boolean;
 const
     pc_x:array[0..7] of dword=(1, 0, 65, 64, 129, 128, 193, 192);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     pt_x:array[0..15] of dword=(3, 2, 1, 0, 16*8+3, 16*8+2, 16*8+1, 16*8+0,
 		32*8+3,32*8+2 ,32*8+1 ,32*8+0 ,48*8+3 ,48*8+2 ,48*8+1 ,48*8+0);
     pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -410,7 +409,7 @@ if not(roms_load(@memoria_temp,@renegade_char,'renegade.zip',sizeof(renegade_cha
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2,4,6);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pt_y,false,false);
 //Cargar tiles
 if not(roms_load(@memoria_temp,@renegade_tiles,'renegade.zip',sizeof(renegade_tiles))) then exit;
 init_gfx(1,16,16,$800);

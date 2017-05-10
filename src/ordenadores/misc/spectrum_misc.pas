@@ -623,13 +623,13 @@ end;
 if cinta_tzx.cargada then begin
     if cinta_tzx.play_tape then begin
       if (var_spectrum.fastload and (cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque=$10) and not(cinta_tzx.en_pausa)) then begin
-        if (spec_z80.get_pc=$056b) then play_cinta_tap(spec_z80.get_internal_r);
+        if (spec_z80.get_safe_pc=$056b) then play_cinta_tap(spec_z80.get_internal_r);
       end else begin
         cinta_tzx.estados:=cinta_tzx.estados+estados_t;
         play_cinta_tzx;
       end;
     end else begin
-      if ((spec_z80.get_pc=$0556) and not(cinta_tzx.play_once)) then begin
+      if ((spec_z80.get_safe_pc=$0556) and not(cinta_tzx.play_once)) then begin
        cinta_tzx.play_once:=true;
        if not(cinta_tzx.es_tap) then main_screen.rapido:=true;
        tape_window1.fPlayCinta(nil);

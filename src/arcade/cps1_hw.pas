@@ -935,11 +935,6 @@ var
       memoria_temp,ptemp:pbyte;
       f:byte;
 const
-  pc_x1:array[0..7] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4);
-  pc_x2:array[0..7] of dword=(9*4, 8*4, 11*4, 10*4, 13*4, 12*4, 15*4, 14*4);
-  pc_y:array[0..7] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64);
-  pt_x:array[0..15] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4,
-                              9*4, 8*4,11*4,10*4,13*4,12*4,15*4,14*4);
   pt_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64,
                               8*64, 9*64,10*64,11*64,12*64,13*64,14*64,15*64);
   pt2_x:array[0..31] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4,
@@ -958,8 +953,8 @@ begin
   gfx[0].trans[15]:=true;
   gfx[1].trans[15]:=true;
   gfx_set_desc_data(4,0,64*8,0,1,2,3);
-  convert_gfx(0,0,memoria_temp,@pc_x1,@pc_y,false,false);
-  convert_gfx(1,0,memoria_temp,@pc_x2,@pc_y,false,false);
+  convert_gfx(0,0,memoria_temp,@pt2_x,@pt_y,false,false);
+  convert_gfx(1,0,memoria_temp,@pt2_x[8],@pt_y,false,false);
 end;
 
 procedure convert_tiles16(memoria_temp:pbyte;n:dword);
@@ -967,7 +962,7 @@ begin
   init_gfx(2,16,16,n);
   gfx[2].trans[15]:=true;
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(2,0,memoria_temp,@pt_x,@pt_y,false,false);
+  convert_gfx(2,0,memoria_temp,@pt2_x,@pt_y,false,false);
 end;
 
 procedure convert_tiles32(memoria_temp:pbyte;n:dword);

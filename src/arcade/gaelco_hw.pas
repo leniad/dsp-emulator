@@ -655,8 +655,7 @@ for f:=1 to pants do begin
   screen_mod_scroll(f,336,336,511,272,272,511);
 end;
 //Final
-screen_init(17,512,256,false,true);
-screen_mod_sprites(17,0,512,0,$1ff);
+screen_init(17,512,512,false,true);
 iniciar_video(320,240);
 marcade.dswa:=$00ff;
 case main_vars.tipo_maquina of

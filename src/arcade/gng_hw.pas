@@ -326,8 +326,6 @@ var
   f:word;
   memoria_temp:array[0..$1ffff] of byte;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3 );
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -374,7 +372,7 @@ if not(roms_load(@memoria_temp,@gng_char,'gng.zip',sizeof(gng_char))) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //sprites
 if not(roms_load(@memoria_temp,@gng_sprites,'gng.zip',sizeof(gng_sprites))) then exit;
 init_gfx(1,16,16,1024);

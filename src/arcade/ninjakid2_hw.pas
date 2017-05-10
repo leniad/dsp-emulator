@@ -480,8 +480,6 @@ var
   memoria_temp:array[0..$2ffff] of byte;
   mem_key:array[0..$1fff] of byte;
 const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
     pt_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
 			32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
     pt_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
@@ -509,7 +507,7 @@ begin
   lineswap_gfx_roms($8000,@memoria_temp[0],13);
   init_gfx(0,8,8,$400);
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
 procedure extract_gr2(size:dword;num:byte;size_gr:word);
 begin

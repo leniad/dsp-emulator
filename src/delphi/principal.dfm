@@ -1,13 +1,13 @@
 object principal1: Tprincipal1
-  Left = 256
-  Top = 192
+  Left = 583
+  Top = 294
   HelpType = htKeyword
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 292
+  ClientHeight = 373
   ClientWidth = 370
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -589,10 +589,11 @@ object principal1: Tprincipal1
     Left = 321
     Top = 33
     Width = 49
-    Height = 240
+    Height = 321
     Align = alRight
     TabOrder = 1
     Visible = False
+    ExplicitHeight = 140
     object BitBtn9: TBitBtn
       Left = 4
       Top = 44
@@ -1229,11 +1230,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 273
+    Top = 354
     Width = 370
     Height = 19
     Align = alBottom
     TabOrder = 2
+    ExplicitTop = 173
     DesignSize = (
       370
       19)
@@ -2053,6 +2055,16 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object cclimber1: TMenuItem
+            Caption = 'Crazy Climber'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
+          object retofinv1: TMenuItem
+            Caption = 'Return of Invaders'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2757,7 +2769,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807C80420002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807DC0420002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

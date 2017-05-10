@@ -554,8 +554,7 @@ case main_vars.tipo_maquina of
       screen_mod_scroll(1,256,256,255,512,256,511);
       screen_init(2,256,512,true);
       screen_mod_scroll(2,256,256,255,512,256,511);
-      screen_init(4,256,256,false,true);
-      screen_mod_sprites(4,0,512,0,$1ff);
+      screen_init(4,256,512,false,true);
   end;
 end;
 iniciar_video(224,256);

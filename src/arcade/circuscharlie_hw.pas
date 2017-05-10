@@ -218,7 +218,6 @@ var
   f:word;
   memoria_temp:array[0..$ffff] of byte;
 const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
     pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
     ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
 			8*4, 9*4, 10*4, 11*4, 12*4, 13*4, 14*4, 15*4);
@@ -254,7 +253,7 @@ if not(cargar_roms(@memoria_temp[0],@circusc_char[0],'circusc.zip',0)) then exit
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@pc_y[0],true,false);
 //sprites
 if not(cargar_roms(@memoria_temp[0],@circusc_sprites[0],'circusc.zip',0)) then exit;
 init_gfx(1,16,16,384);

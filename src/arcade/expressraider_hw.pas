@@ -286,8 +286,7 @@ var
 begin
 iniciar_expraid:=false;
 iniciar_audio(false);
-screen_init(1,256,256,false,true);
-screen_mod_sprites(1,512,0,$1ff,0);
+screen_init(1,512,256,false,true);
 screen_init(2,512,512);
 screen_init(3,512,512,true);
 screen_init(4,512,512,true);

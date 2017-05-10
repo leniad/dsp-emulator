@@ -230,8 +230,6 @@ var
   bit0,bit1,bit2,bit3:byte;
   memoria_temp:array[0..$ffff] of byte;
 const
-      pc_x:array[0..7] of dword=(0,1,2,3, 4,5,6,7);
-      pc_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
       ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 	128+0,128+1,128+2,128+3,128+4,128+5,128+6,128+7);
       ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -271,7 +269,7 @@ case main_vars.tipo_maquina of
         if not(cargar_roms(@memoria_temp[0],@freekick_chars[0],'freekick.zip',0)) then exit;
         init_gfx(0,8,8,$800);
         gfx_set_desc_data(3,0,8*8,$800*2*8*8,$800*1*8*8,$800*0*8*8);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+        convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
         //convertir sprites
         if not(cargar_roms(@memoria_temp[0],@freekick_sprites[0],'freekick.zip',0)) then exit;
         init_gfx(1,16,16,$200);

@@ -246,7 +246,6 @@ iniciar_yiear:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
-screen_mod_sprites(2,256,256,$ff,$ff);
 iniciar_video(256,224);
 //Main CPU
 m6809_0:=cpu_m6809.Create(1536000,$100);

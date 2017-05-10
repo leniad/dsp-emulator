@@ -744,7 +744,7 @@ if cinta_tzx.cargada then begin
       cinta_tzx.estados:=cinta_tzx.estados+estados_t;
       play_cinta_tzx;
   end else begin
-    if ((z80_0.get_pc=$bc77) and not(cinta_tzx.play_once)) then begin
+    if ((z80_0.get_safe_pc=$bc77) and not(cinta_tzx.play_once)) then begin
        cinta_tzx.play_once:=true;
        main_screen.rapido:=true;
        tape_window1.fPlayCinta(nil);

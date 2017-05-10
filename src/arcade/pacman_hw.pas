@@ -290,7 +290,7 @@ case direccion of
         $4c00..$4fff,$6c00..$6fff:crush_getbyte:=memoria[(direccion and $3ff)+$4c00];
         $5080..$50bf:begin
                         tempb:=marcade.dswa;
-                        if ((z80_0.get_pc=$1973) or (z80_0.get_pc=$2389)) then begin
+                        if ((z80_0.get_safe_pc=$1973) or (z80_0.get_safe_pc=$2389)) then begin
                           crush_getbyte:=tempb or $40;
                           exit;
                         end;
@@ -302,11 +302,11 @@ case direccion of
 	                      crush_getbyte:=tempb;
                      end;
         $50c0..$50cf:begin
-                        if (z80_0.get_pc=$040e) then begin
+                        if (z80_0.get_safe_pc=$040e) then begin
                           crush_getbyte:=$20;
                           exit;
                         end;
-	                      if ((z80_0.get_pc=$115e) or (z80_0.get_pc=$3ae2)) then begin
+	                      if ((z80_0.get_safe_pc=$115e) or (z80_0.get_safe_pc=$3ae2)) then begin
                           crush_getbyte:=0;
                           exit;
                         end;
@@ -479,8 +479,7 @@ begin
 iniciar_pacman:=false;
 iniciar_audio(false);
 screen_init(1,224,288);
-screen_init(2,256,288,false,true);
-screen_mod_sprites(2,0,512,0,$1ff);
+screen_init(2,256,512,false,true);
 iniciar_video(224,288);
 //Main CPU
 z80_0:=cpu_z80.create(3072000,264);

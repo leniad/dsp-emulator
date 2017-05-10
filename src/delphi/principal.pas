@@ -380,6 +380,8 @@ type
     GauntletHW1: TMenuItem;
     Gauntlet1: TMenuItem;
     Sauro1: TMenuItem;
+    cclimber1: TMenuItem;
+    retofinv1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

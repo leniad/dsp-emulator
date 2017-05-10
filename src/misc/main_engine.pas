@@ -101,6 +101,7 @@ procedure screen_mod_sprites(num:byte;sprite_end_x,sprite_end_y,sprite_mask_x,sp
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);
 procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
+procedure flip_surface(pant:byte;flipx,flipy:boolean);
 procedure video_sync;
 //misc
 procedure change_caption;
@@ -259,7 +260,7 @@ case main_screen.video_mode of
 end;
 //Si el video el *2 necesito una temporal
 if pantalla[pant_doble]<>nil then SDL_FreeSurface(pantalla[pant_doble]);
-pantalla[pant_doble]:=SDL_CreateRGBSurface(0,x,y,16,0,0,0,0);
+pantalla[pant_doble]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
 {$ifdef fpc}
 //En linux uso la pantalla de SDL...
 uses_sdl_window;
@@ -523,6 +524,62 @@ end else if main_screen.rol90_screen then begin
          end;
 end;
 
+procedure flip_surface(pant:byte;flipx,flipy:boolean);
+var
+  f,i,h:word;
+  punt,punt2:pword;
+  origen:libsdl_rect;
+begin
+origen.x:=0;
+origen.y:=0;
+origen.w:=p_final[pant].x;
+origen.h:=p_final[pant].y;
+if (flipx and flipy) then begin
+  h:=0;
+  for i:=p_final[pant].y-1 downto 0 do begin
+    punt:=pantalla[pant].pixels;
+    inc(punt,(i*pantalla[pant].pitch) shr 1);
+    punt2:=pantalla[pant_doble].pixels;
+    inc(punt2,((h*pantalla[pant_doble].pitch) shr 1)+(p_final[pant].x-1));
+    h:=h+1;
+    for f:=p_final[pant].x-1 downto 0 do begin
+      punt2^:=punt^;
+      inc(punt);
+      dec(punt2);
+    end;
+  end;
+  SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[pant],@origen);
+end else if flipx then begin
+            for i:=0 to p_final[pant].y-1 do begin
+              punt:=pantalla[pant].pixels;
+              inc(punt,(i*pantalla[pant].pitch) shr 1);
+              punt2:=pantalla[pant_doble].pixels;
+              inc(punt2,((i*pantalla[pant_doble].pitch) shr 1)+(p_final[pant].x)-1);
+              for f:=p_final[pant].x-1 downto 0 do begin
+                punt2^:=punt^;
+                inc(punt);
+                dec(punt2);
+              end;
+            end;
+            SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[pant],@origen);
+         end else if flipy then begin
+                      h:=0;
+                      for i:=p_final[pant].y-1 downto 0 do begin
+                        punt:=pantalla[pant].pixels;
+                        inc(punt,(i*pantalla[pant].pitch) shr 1);
+                        punt2:=pantalla[pant_doble].pixels;
+                        inc(punt2,(h*pantalla[pant_doble].pitch) shr 1);
+                        h:=h+1;
+                        for f:=0 to p_final[pant].x-1 do begin
+                          punt2^:=punt^;
+                          inc(punt);
+                          inc(punt2);
+                        end;
+                      end;
+                      SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[pant],@origen);
+                  end;
+end;
+
 procedure actualiza_video;
 var
   punt,punt2,punt3,punt4:pword;
@@ -549,7 +606,6 @@ if main_screen.flip_main_screen then begin
   origen.h:=p_final[0].y;
   SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[PANT_TEMP],@origen);
 end else if main_screen.flip_main_x then begin
-            h:=0;
             for i:=0 to p_final[0].y-1 do begin
               punt:=pantalla[PANT_TEMP].pixels;
               inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
