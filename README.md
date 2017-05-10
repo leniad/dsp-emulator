@@ -6,7 +6,7 @@
     +Fixed intro
 -Crazy Climber
     +Added driver with sound
--Return of Invaders
+-Return of the Invaders
     +Added driver with sound
 </pre><br>
 <img src='http://img1.imagilive.com/0517/crazyclimber.png'><img src='http://img1.imagilive.com/0517/returnoftheinvaders.png'><br><br>
@@ -17,14 +17,14 @@
         -Improved audio synchronization
     +GFX
         -Added final screen independent flip X or flip Y
-        -Improved scrolling by independent rows and / or columns
+        -Improved scrolling by independent rows and/or columns
         -Improved zoom sprites (no more graps)
     +Deco BAC06
         -Converted to classes
         -Fixed bugs and more speed
     +Deco 16IC: Converted to classes
     +K051960, K05324x: Optimized sprites rendering
-    +K007232:
+    +K007232
         -Support of two simultaneous audio chips
         -Fixed stereo support
     +K053260: Fixed stereo support
@@ -118,7 +118,7 @@ Please read the 'Whats New' for details<br>
     +Fixed Cursor joystick, only works if selected
     +Improved Kempston joystick
 -Galaxian HW
-    +Moon Crest:
+    +Moon Cresta
         -Improved sound with samples
         -Fixed a problem with chars/sprites
 </pre><br>
@@ -322,7 +322,7 @@ Merry Christmas and happy new year!<br>
 -Blockout
     +Fixed video
 -The Simpsons
-     +Added driver with sound, no sprites and many graphics problems
+    +Added driver with sound, no sprites and many graphics problems
 </pre><br>
 <b>26/05/16 - DSP Emulator 0.16b3 WIP. Source and Windows 32 WIP binary updated.</b><br><pre>
 -General
@@ -420,11 +420,11 @@ Many thanks to greatxerox and Davide.<br><br>
     +TAP format: Standardized opening files through data structures
     +TZX format: Standardized opening files through data structures
     +PZX format
-          -Standardized opening files through data structures
-          -Corrected data block
-          -Properly implemented very large pulses
+        -Standardized opening files through data structures
+        -Corrected data block
+        -Properly implemented very large pulses
 -Spectrum
-    + Mapped some missing special keys</pre>
+    +Mapped some missing special keys</pre>
 <b>22/03/16 - DSP Emulator 0.16b2 WIP source and Win32 updated.</b><pre>
 -Added to download some preview images
 -General
@@ -439,7 +439,7 @@ Many thanks to greatxerox and Davide.<br><br>
         -Fixed emulation of weak sectors
         -Fixed calculating the length of a track
         -Fixed the order of the tracks
-    +upd765 chip
+    +UPD765 chip
         -Fixed reading a sector ID (Corrects 'Tintin on the moon' Spectrum +3)
         -Fixed handling weak sectors (Corrects SpeedLock +3 protection)
         -Fixed attempt to read beyond the length of a sector (Corrects SpeedLock Amstrad CPC protection)
