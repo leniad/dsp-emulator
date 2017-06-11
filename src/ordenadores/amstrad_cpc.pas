@@ -725,7 +725,7 @@ end;
 procedure amstrad_despues_instruccion(estados_t:word);
 begin
 if cinta_tzx.cargada then begin
-  if (not(cpc_ppi.tape_motor) and cinta_tzx.play_once) then begin
+{  if (not(cpc_ppi.tape_motor) and cinta_tzx.play_once) then begin
     case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta+1].tipo_bloque of
       $22:begin
             cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
@@ -739,8 +739,8 @@ if cinta_tzx.cargada then begin
             tape_window1.fStopCinta(nil);
       end;
     end;
-  end;
-  if (cpc_ppi.tape_motor and cinta_tzx.play_tape) then begin
+  end;}
+  if ({cpc_ppi.tape_motor and }cinta_tzx.play_tape) then begin
       cinta_tzx.estados:=cinta_tzx.estados+estados_t;
       play_cinta_tzx;
   end else begin
@@ -1037,7 +1037,6 @@ llamadas_maquina.iniciar:=iniciar_cpc;
 llamadas_maquina.bucle_general:=cpc_main;
 llamadas_maquina.reset:=cpc_reset;
 llamadas_maquina.fps_max:=50.08;
-llamadas_maquina.velocidad_cpu:=4000000;
 llamadas_maquina.close:=cpc_close;
 llamadas_maquina.cintas:=amstrad_tapes;
 llamadas_maquina.cartuchos:=amstrad_loaddisk;

@@ -17,7 +17,7 @@ interface
 
 uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}grids,dialogs,main_engine,
      spectrum_misc,sysutils,lenguaje,misc_functions,tape_window,file_engine,
-     lenslock,samples;
+     lenslock,samples,sound_engine;
 
 const
     MAX_TZX=$fff;
@@ -194,7 +194,7 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
         $10,$11,$14:begin //cargas normal, turbo y datos puros
                    case cinta_tzx.estado_actual of
                         0:begin   //cabecera
-                            cinta_tzx.value:=cinta_tzx.value Xor 64;
+                            cinta_tzx.value:=cinta_tzx.value xor 64;
                             If tzx_temp<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].ltono_cab  Then begin
                                 tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
                                 tzx_temp:=tzx_temp+1;
@@ -207,7 +207,7 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                             end;
                           end;
                         1:begin  //sync 1
-                                cinta_tzx.value:=cinta_tzx.value Xor 64;
+                                cinta_tzx.value:=cinta_tzx.value xor 64;
                                 cinta_tzx.estado_actual:=2;
                                 tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lsinc2;
                           end;
@@ -240,7 +240,7 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                                         if (tzx_datos_p^ and 128)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
                                            else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
                                       end else begin   //pasar al otro bloque
-                                        tzx_estados_necesarios:= cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(llamadas_maquina.velocidad_cpu div 1000);
+                                        tzx_estados_necesarios:= cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
                                         cinta_tzx.en_pausa:=true;
                                       end;
                                   end;
@@ -304,7 +304,7 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                     cinta_tzx.bit_actual:=128;
                     if (tzx_datos_p^ and 128)<>0 then cinta_tzx.value:=$40 else cinta_tzx.value:=0;
                   end else begin   //pasar al otro bloque
-                    tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(llamadas_maquina.velocidad_cpu div 1000);
+                    tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
                     cinta_tzx.en_pausa:=true;
                   end;
                 end;
@@ -342,7 +342,7 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                         3:cinta_tzx.value:=$40;
                       end;
                     end else begin  //Se ha terminado... hago la pausa
-                      tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(llamadas_maquina.velocidad_cpu div 1000);
+                      tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
                       cinta_tzx.en_pausa:=true;
                     end;
                   end;
@@ -472,7 +472,7 @@ tzx_contador_datos:=0;
                 end;
             end;
         $20:begin //pausa
-                tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(llamadas_maquina.velocidad_cpu div 1000);
+                tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
                 if tzx_estados_necesarios=0 then tape_window1.fStopCinta(nil);
                 case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].inicial of
                     0:;
@@ -586,7 +586,7 @@ end;
 datos_totales_tzx:=datos_totales_tzx+cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque;
 bt:=z80_val.f;z80_val.f:=z80_val.f2;z80_val.f2:=bt;
 z80_val.pc:=$05e2;
-tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(llamadas_maquina.velocidad_cpu div 1000);
+tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
 cinta_tzx.en_pausa:=true;
 end;
 
@@ -777,7 +777,7 @@ getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
 zero_tape_data(0);
 cinta_tzx.datos_tzx[0].tipo_bloque:=$15;
 cinta_tzx.datos_tzx[0].lpausa:=0;
-cinta_tzx.datos_tzx[0].luno:=trunc(llamadas_maquina.velocidad_cpu/44100);
+cinta_tzx.datos_tzx[0].luno:=trunc(sound_status.cpu_clock/44100);
 cinta_tzx.datos_tzx[0].lbloque:=ltemp div 8;
 if (ltemp mod 8)<>0 then cinta_tzx.datos_tzx[0].lbloque:=cinta_tzx.datos_tzx[0].lbloque+1;
 cinta_tzx.datos_tzx[0].lbyte:=ltemp mod 8;
@@ -930,7 +930,7 @@ getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
 zero_tape_data(0);
 cinta_tzx.datos_tzx[0].tipo_bloque:=$15;
 cinta_tzx.datos_tzx[0].lpausa:=0;
-cinta_tzx.datos_tzx[0].luno:=trunc(llamadas_maquina.velocidad_cpu/sample_rate);
+cinta_tzx.datos_tzx[0].luno:=trunc(sound_status.cpu_clock/sample_rate);
 cinta_tzx.datos_tzx[0].lbyte:=8;
 cinta_tzx.datos_tzx[0].lbloque:=long_final;
 getmem(cinta_tzx.datos_tzx[0].datos,long_final);
@@ -1671,7 +1671,7 @@ while longitud<long do begin
     copymemory(pzx_pause,ptemp,4);
     cinta_tzx.datos_tzx[contador].tipo_bloque:=$20;
     inc(ptemp,4);
-    cinta_tzx.datos_tzx[contador].lpausa:=(pzx_pause.pause and $7fffffff) div (llamadas_maquina.velocidad_cpu div 1000);
+    cinta_tzx.datos_tzx[contador].lpausa:=(pzx_pause.pause and $7fffffff) div (sound_status.cpu_clock div 1000);
     getmem(cinta_tzx.datos_tzx[contador].datos,1);
     cinta_tzx.datos_tzx[contador].datos^:=pzx_pause.pause shr 31;
     cadena3:=leng[main_vars.idioma].cinta[9]; //Pausa

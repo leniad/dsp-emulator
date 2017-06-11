@@ -50,7 +50,7 @@ type
   end;
   npreg_z80=^nreg_z80;
   cpu_z80=class(cpu_class)
-          constructor create(clock:dword;frames_div:word);
+          constructor create(clock:dword;frames_div:single);
           destructor free;
         public
           daisy:boolean;
@@ -562,7 +562,7 @@ begin
   sbc_hl:=templ;
 end;
 
-constructor cpu_z80.create(clock:dword;frames_div:word);
+constructor cpu_z80.create(clock:dword;frames_div:single);
 begin
 getmem(self.r,sizeof(nreg_z80));
 fillchar(self.r^,sizeof(nreg_z80),0);

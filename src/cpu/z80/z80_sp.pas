@@ -1,7 +1,7 @@
 unit z80_sp;
 
 interface
-uses main_engine,nz80,z80daisy,vars_hide;
+uses main_engine,nz80,z80daisy,vars_hide,timer_engine;
 
 type
  tretraso=procedure(direccion:word);
@@ -1074,6 +1074,7 @@ case instruccion of
   end; {del case}
   cantidad_t:=self.contador-pcontador;
   spectrum_despues_instruccion(cantidad_t);
+  update_timer(cantidad_t,self.numero_cpu);
 end; {del while}
 end;
 

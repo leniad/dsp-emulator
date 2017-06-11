@@ -30,7 +30,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   boogiewings_hw,pinballaction_hw,renegade_hw,tmnt_hw,gradius3_hw,
   spaceinvaders_hw,centipede_hw,karnov_hw,aliens_hw,thunderx_hw,simpsons_hw,
   trackandfield_hw,hypersports_hw,megazone_hw,spacefirebird_hw,ajax_hw,
-  vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw;
+  vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510;
 
 type
   tgame_desc=record
@@ -45,7 +45,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=245;
+  games_cont=247;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -286,15 +286,18 @@ const
   (name:'Vendetta';year:'1991';snd:1;hi:false;zip:'vendetta';grid:235;company:'Konami';rom:@vendetta),
   (name:'Gauntlet';year:'1991';snd:1;hi:false;zip:'gauntlet';grid:236;company:'Atari';rom:@gauntlet),
   (name:'Sauro';year:'1987';snd:1;hi:false;zip:'sauro';grid:237;company:'Tecfri';rom:@sauro),
-  (name:'Clazy Climber';year:'1980';snd:1;hi:false;zip:'cclimber';grid:238;company:'Nichibutsu';rom:@cclimber),
-  (name:'Return of Invaders';year:'1985';snd:1;hi:false;zip:'retofinv';grid:239;company:'Taito';rom:@retofinv),
+  (name:'Crazy Climber';year:'1980';snd:1;hi:false;zip:'cclimber';grid:238;company:'Nichibutsu';rom:@cclimber),
+  (name:'Return of the Invaders';year:'1985';snd:1;hi:false;zip:'retofinv';grid:239;company:'Taito';rom:@retofinv),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
   (name:'GameBoy';year:'198X';snd:1;hi:false;zip:'gameboy';grid:1002;company:'Nintendo';rom:@gameboy),
   (name:'GameBoy Color';year:'198X';snd:1;hi:false;zip:'gbcolor';grid:1002;company:'Nintendo';rom:@gbcolor),
   (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-'),
-  (name:'Sega Master System';year:'1985';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_));
+  (name:'Sega Master System';year:'1985';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_),
+  //G&W
+  (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),
+  (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55));
 
 var
   orden_games:array[1..games_cont] of word;
@@ -555,6 +558,8 @@ case numero of
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
   1003:principal1.CambiarMaquina(principal1.CHIP81);
   1004:principal1.CambiarMaquina(principal1.SegaMS1);
+  2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
+  2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
 end;
 end;
 
@@ -807,6 +812,9 @@ principal1.colecovision1.Checked:=false;
 principal1.GameBoy1.Checked:=false;
 principal1.chip81.checked:=false;
 principal1.segams1.checked:=false;
+//gnw
+principal1.DonkeyKongjr1.checked:=false;
+principal1.DonkeyKongII1.checked:=false;
 end;
 
 procedure menus_false(driver:word);
@@ -865,6 +873,7 @@ case driver of
           principal1.BitBtn10.visible:=true; //Disco
           principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
        end;
+  2000:; //G&W
 end;
 end;
 
@@ -1018,6 +1027,8 @@ case tmaquina of
   1002:Cargar_gb;
   1003:Cargar_chip8;
   1004:Cargar_SMS;
+  //gnw
+  2000,2001:cargar_gnw_510;
 end;
 end;
 
@@ -2003,6 +2014,15 @@ end;
 if sender=principal1.segams1 then begin
   tipo:=1004;
   principal1.segams1.Checked:=true;
+end;
+//GNW
+if sender=principal1.DonkeyKongjr1 then begin
+  tipo:=2000;
+  principal1.DonkeyKongjr1.Checked:=true;
+end;
+if sender=principal1.DonkeyKongII1 then begin
+  tipo:=2001;
+  principal1.DonkeyKongII1.Checked:=true;
 end;
 //Buscar el nombre de la maquina
 for f:=1 to games_cont do begin

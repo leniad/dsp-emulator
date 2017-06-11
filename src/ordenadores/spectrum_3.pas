@@ -52,9 +52,6 @@ llamadas_maquina.cintas:=spectrum_tapes;
 llamadas_maquina.reset:=spec3_reset;
 llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.fps_max:=50.01;
-llamadas_maquina.velocidad_cpu:=3546895;
-var_spectrum.samples_audio:=llamadas_maquina.velocidad_cpu/freq_base_audio;
-var_spectrum.samples_beeper:=llamadas_maquina.velocidad_cpu/(freq_base_audio*var_spectrum.beeper_oversample);
 llamadas_maquina.configurar:=spectrum_config;
 end;
 
@@ -79,7 +76,7 @@ var
 begin
 iniciar_3:=false;
 //Iniciar el Z80 y pantalla
-if not(spec_comun) then exit;
+if not(spec_comun(3546895)) then exit;
 spec_z80.change_ram_calls(spec3_getbyte,spec3_putbyte);
 spec_z80.change_io_calls(spec3_inbyte,spec3_outbyte);
 spec_z80.change_retraso_call(spec3_retraso_memoria,spec3_retraso_puerto);

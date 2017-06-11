@@ -445,6 +445,7 @@ begin
   end;
   //video
   case main_screen.video_mode of
+    0:groupbox5.Enabled:=false;
     1:radiobutton16.Checked:=true;
     2:radiobutton17.Checked:=true;
     3:radiobutton18.Checked:=true;
@@ -1027,14 +1028,16 @@ begin
     sound_status.calidad_audio:=tmp_var;
     principal1.CambiaAudio(nil);
   end;
-  if radiobutton16.Checked then tmp_var:=1
-    else if radiobutton17.Checked then tmp_var:=2
-      else if radiobutton18.Checked then tmp_var:=3
-        else if radiobutton19.Checked then tmp_var:=4
-          else if radiobutton20.Checked then tmp_var:=5;
-  if tmp_var<>main_screen.video_mode then begin
-    main_screen.video_mode:=tmp_var;
-    principal1.CambiarVideo(nil);
+  if groupbox5.Enabled then begin
+    if radiobutton16.Checked then tmp_var:=1
+      else if radiobutton17.Checked then tmp_var:=2
+        else if radiobutton18.Checked then tmp_var:=3
+          else if radiobutton19.Checked then tmp_var:=4
+            else if radiobutton20.Checked then tmp_var:=5;
+    if tmp_var<>main_screen.video_mode then begin
+      main_screen.video_mode:=tmp_var;
+      principal1.CambiarVideo(nil);
+    end;
   end;
   main_vars.auto_exec:=checkbox2.Checked;
   main_vars.show_crc_error:=checkbox1.Checked;

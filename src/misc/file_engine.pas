@@ -132,11 +132,9 @@ if fileexists(directory.Base+'dsp.ini') then begin
   var_spectrum.tipo_joy:=fich_ini.ReadInteger('spectrum','joystick',0);
   borde.tipo:=fich_ini.ReadInteger('spectrum','border',0);
   mouse.tipo:=fich_ini.ReadInteger('spectrum','tipo_mouse',0);
-  var_spectrum.beeper_filter:=(fich_ini.ReadInteger('spectrum','beepfilter',0)=1);
   var_spectrum.audio_load:=(fich_ini.ReadInteger('spectrum','audioload',0)=1);
   var_spectrum.audio_128k:=fich_ini.ReadInteger('spectrum','audio_128k',0);
-  var_spectrum.beeper_oversample:=fich_ini.ReadInteger('spectrum','beeper_oversample',1);
-  if ((var_spectrum.beeper_oversample<1) or (var_spectrum.beeper_oversample>5)) then var_spectrum.beeper_oversample:=1;
+  var_spectrum.speaker_oversample:=(fich_ini.ReadInteger('spectrum','beeperoversample',0)=1);
   ulaplus.enabled:=(fich_ini.ReadInteger('spectrum','ulaplus',0)=1);
   //Configuracion CPC
   for f:=0 to 6 do cpc_rom_slot[f]:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
@@ -241,14 +239,13 @@ end else begin
   main_vars.x11:=false;
   //configuracion basica spectrum
   var_spectrum.audio_128k:=0;
-  var_spectrum.beeper_filter:=false;
   var_spectrum.audio_load:=true;
   var_spectrum.issue2:=true;
   var_spectrum.tipo_joy:=JKEMPSTON;
   borde.tipo:=1;
   mouse.tipo:=0;
-  var_spectrum.beeper_oversample:=1;
   ulaplus.enabled:=true;
+  var_spectrum.speaker_oversample:=false;
   //Configuracion CPC
   for f:=0 to 6 do cpc_rom_slot[f]:='';
   cpc_ga.cpc_model:=0;
@@ -396,10 +393,9 @@ fich_ini.WriteInteger('spectrum','issue',byte(var_spectrum.issue2));
 fich_ini.WriteInteger('spectrum','joystick',var_spectrum.tipo_joy);
 fich_ini.WriteInteger('spectrum','border',borde.tipo);
 fich_ini.WriteInteger('spectrum','tipo_mouse',mouse.tipo);
-fich_ini.WriteInteger('spectrum','beepfilter',byte(var_spectrum.beeper_filter));
 fich_ini.WriteInteger('spectrum','audioload',byte(var_spectrum.audio_load));
+fich_ini.WriteInteger('spectrum','beeperoversample',byte(var_spectrum.speaker_oversample));
 fich_ini.WriteInteger('spectrum','audio_128k',var_spectrum.audio_128k);
-fich_ini.WriteInteger('spectrum','beeper_oversample',var_spectrum.beeper_oversample);
 fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
 //Configuracion CPC
 for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom_slot[f]);

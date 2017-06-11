@@ -75,6 +75,9 @@ const
         gbcolor:array[0..2] of tipo_roms=(
         (n:'gbc_boot.1';l:$100;p:0;crc:$779ea374),(n:'gbc_boot.2';l:$700;p:$200;crc:$f741807d),());
         sms_:array[0..1] of tipo_roms=((n:'mpr-12808.ic2';l:$2000;p:0;crc:$0072ed54),());
+        //gnw
+        gnw_jr55:tipo_roms=(n:'jr55_cms54c_kms560';l:$1000;p:$0;crc:$46aed0ae);
+        gnw_dj101:tipo_roms=(n:'dj101';l:$1000;p:$0;crc:$8dcfb5d1);
         //Pacman
         pacman:array[0..9] of tipo_roms=(
         (n:'pacman.6e';l:$1000;p:0;crc:$c1e6ab10),(n:'pacman.6f';l:$1000;p:$1000;crc:$1a6fb2d4),

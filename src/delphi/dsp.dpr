@@ -274,7 +274,10 @@ uses
   sauro_hw in '..\arcade\sauro_hw.pas',
   crazyclimber_hw in '..\arcade\crazyclimber_hw.pas',
   crazyclimber_hw_dac in '..\snd\crazyclimber_hw_dac.pas',
-  returnofinvaders_hw in '..\arcade\returnofinvaders_hw.pas';
+  returnofinvaders_hw in '..\arcade\returnofinvaders_hw.pas',
+  sm510 in '..\cpu\sm510.pas',
+  gnw_video in '..\gnw\gnw_video.pas' {gnw_video_form},
+  gnw_510 in '..\gnw\gnw_510.pas';
 
 {$R *.res}
 
@@ -295,5 +298,6 @@ begin
   Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(TConfigCPC, ConfigCPC);
+  Application.CreateForm(Tgnw_video_form, gnw_video_form);
   Application.Run;
 end.

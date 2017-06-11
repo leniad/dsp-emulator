@@ -67,7 +67,7 @@ var
  dec_enable:boolean;
  read_events:tpacman_event;
 
-procedure update_video_pacman;inline;
+procedure update_video_pacman;
 var
   f,color,nchar,offs:word;
   sx,sy,atrib,x,y:byte;

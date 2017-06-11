@@ -197,6 +197,8 @@ type
     MenuItem33: TMenuItem;
     gauntlet1: TMenuItem;
     cclimber1: TMenuItem;
+    MenuItem34: TMenuItem;
+    donkeykongii1: TMenuItem;
     retofinv1: TMenuItem;
     sauro1: TMenuItem;
     Vendetta1: TMenuItem;
@@ -408,7 +410,6 @@ type
     procedure CambiaAudio(Sender: TObject);
     procedure fLoadCartucho(Sender: TObject);
     procedure LstRomsClick(Sender: TObject);
-    procedure MenuItem34Click(Sender: TObject);
     procedure Salir1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
@@ -793,11 +794,6 @@ EmuStatus:=EsPause;
 FLoadRom.Show;
 while FLoadRom.Showing do application.ProcessMessages;
 sync_all;
-end;
-
-procedure Tprincipal1.MenuItem34Click(Sender: TObject);
-begin
-
 end;
 
 procedure Tprincipal1.Salir1Click(Sender: TObject);

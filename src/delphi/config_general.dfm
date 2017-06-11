@@ -64,9 +64,7 @@ object MConfig: TMConfig
     object TabSheet1: TTabSheet
       Caption = 'Misc'
       ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitTop = 28
       object GroupBox3: TGroupBox
         Left = 6
         Top = 13
@@ -350,10 +348,6 @@ object MConfig: TMConfig
     object TabSheet2: TTabSheet
       Caption = 'Directory'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label1: TLabel
         Left = 3
         Top = 110
@@ -518,10 +512,6 @@ object MConfig: TMConfig
     object TabSheet3: TTabSheet
       Caption = 'Input'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 5
         Top = 13
@@ -1024,10 +1014,6 @@ object MConfig: TMConfig
     object TabSheet4: TTabSheet
       Caption = 'Main Keys'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label21: TLabel
         Left = 58
         Top = 40
@@ -1096,10 +1082,6 @@ object MConfig: TMConfig
     object ROM: TTabSheet
       Caption = 'ROM'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object BitBtn21: TBitBtn
         Left = 40
         Top = 32
@@ -1113,10 +1095,6 @@ object MConfig: TMConfig
     object Autofire: TTabSheet
       Caption = 'Autofire'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox8: TGroupBox
         Left = 32
         Top = 79

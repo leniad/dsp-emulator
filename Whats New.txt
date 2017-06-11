@@ -1,6 +1,6 @@
 What's New!!! DSP Emulator
 
-DSP 0.18 10/05/17
+DSP 0.18 11/06/17
 ********
 - General
     + Lazarus
@@ -16,13 +16,19 @@ DSP 0.18 10/05/17
         - Fixed bugs and more speed
     + Deco 16IC: Converted to classes
     + K051960, K05324x: Optimized sprites rendering
-    + K007232:
+    + K007232
         - Support of two simultaneous audio chips
         - Fixed stereo support
     + K053260: Fixed stereo support
     + MCS51
         - Corrected registers, mapped in memory
         - Added more opcodes
+    + SM510: Added new CPU
+- Spectrum
+    + Simplified and standardized speaker functions
+- Game and Watch
+    + Donkey Kong Jr: Added game with sound
+    + Donkey Kong II: Added game with sound
 - Psychic 5
     + Fixed intro
 - Deco 0 HW
@@ -54,5 +60,5 @@ DSP 0.18 10/05/17
     + Added driver with sound, only missing ADPCM
 - Crazy Climber
     + Added driver with sound
-- Return of Invaders
+- Return of the Invaders
     + Added driver with sound

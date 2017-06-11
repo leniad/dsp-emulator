@@ -69,7 +69,6 @@ type
            bucle_general,reset,close,grabar_snapshot,configurar,acepta_config:procedure;
            caption,open_file:string;
            fps_max:single;
-           velocidad_cpu:dword;
            save_qsnap,load_qsnap:procedure(nombre:string);
            end;
         tmain_screen=record
@@ -639,6 +638,7 @@ end else if main_screen.flip_main_x then begin
                       SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[PANT_TEMP],@origen);
                   end;
 case main_screen.video_mode of
+  0:exit;
   1,6:begin
       origen.w:=pantalla[PANT_TEMP].w;
       origen.h:=pantalla[PANT_TEMP].h;

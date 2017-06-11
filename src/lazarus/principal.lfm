@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 939
+  Left = 922
   Height = 198
-  Top = 324
+  Top = 259
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -2353,7 +2353,7 @@ object principal1: Tprincipal1
             OnClick = CambiarMaquina
           end
           object retofinv1: TMenuItem
-            Caption = 'Return of invaders'
+            Caption = 'Return of the invaders'
             OnClick = CambiarMaquina
           end
         end
@@ -2988,6 +2988,13 @@ object principal1: Tprincipal1
         end
         object SegaMS1: TMenuItem
           Caption = 'Sega Master System'
+          OnClick = CambiarMaquina
+        end
+      end
+      object MenuItem34: TMenuItem
+        Caption = 'Game && Watch'
+        object donkeykongii1: TMenuItem
+          Caption = 'Donkey Kong II'
           OnClick = CambiarMaquina
         end
       end

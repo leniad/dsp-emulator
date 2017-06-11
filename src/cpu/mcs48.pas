@@ -425,10 +425,6 @@ if self.pedir_reset<>CLEAR_LINE then begin
   self.contador:=trunc(maximo);
   exit;
 end;
-if r.pc=$34 then begin
-  r.pc:=0;
-  r.pc:=$34;
-end;
 self.update_regptr;
 estados_demas:=self.check_irqs;
 if (self.timecount_enabled<>0) then burn_cycles(estados_demas);

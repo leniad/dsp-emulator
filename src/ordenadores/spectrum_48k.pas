@@ -10,17 +10,8 @@ var
     rom_cambiada_48:boolean=false;
 
 procedure Cargar_Spectrum48K;
-function iniciar_48k:boolean;
-procedure spec48k_reset;
-//CPU
-procedure spectrum48_main;
-function spec48_getbyte(direccion:word):byte;
 procedure spec48_putbyte(direccion:word;valor:byte);
-function spec48_inbyte(puerto:word):byte;
 procedure spec48_outbyte(puerto:word;valor:byte);
-procedure spec48_retraso_memoria(direccion:word);
-procedure spec48_retraso_puerto(puerto:word);
-//Video
 procedure borde_48_full(linea:word);
 
 implementation
@@ -28,84 +19,6 @@ uses tap_tzx,spectrum_misc;
 var
     spec_16k:boolean;
     linea:word;
-
-procedure Cargar_Spectrum48K;
-begin
-if main_vars.tipo_maquina=0 then spec_16k:=false
-  else spec_16k:=true;
-llamadas_maquina.iniciar:=iniciar_48k;
-llamadas_maquina.bucle_general:=spectrum48_main;
-llamadas_maquina.cintas:=spectrum_tapes;
-llamadas_maquina.reset:=spec48k_reset;
-llamadas_maquina.grabar_snapshot:=grabar_spec;
-llamadas_maquina.fps_max:=50.08;
-llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.configurar:=spectrum_config;
-llamadas_maquina.velocidad_cpu:=3500000;
-var_spectrum.samples_audio:=llamadas_maquina.velocidad_cpu/freq_base_audio;
-var_spectrum.samples_beeper:=llamadas_maquina.velocidad_cpu/(freq_base_audio*var_spectrum.beeper_oversample);
-interface2.hay_if2:=false;
-end;
-
-function iniciar_48k:boolean;
-var
-  rom_cargada:boolean;
-  f,g,pos:integer;
-  h,m:byte;
-  cadena:string;
-begin
-iniciar_48k:=false;
-//Iniciar el Z80 y pantalla
-if not(spec_comun) then exit;
-spec_z80.change_retraso_call(spec48_retraso_memoria,spec48_retraso_puerto);
-spec_z80.change_ram_calls(spec48_getbyte,spec48_putbyte);
-spec_z80.change_io_calls(spec48_inbyte,spec48_outbyte);
-cadena:=file_name_only(changefileext(extractfilename(Directory.spectrum_48),''));
-//Aqui utilizo la memoria de la CPU de sonido como buffer...
-if extension_fichero(Directory.spectrum_48)='ZIP' then rom_cargada:=carga_rom_zip(Directory.spectrum_48,cadena+'.ROM',@mem_snd[0],$4000,0,false)
-  else begin
-    read_file(Directory.spectrum_48,@mem_snd,pos);
-    rom_cargada:=(pos=$4000);
-  end;
-//Si ha ido mal me quejo, si ha ido bien copio la ROM a la memoria
-if not(rom_cargada) then begin
-  MessageDlg(leng[main_vars.idioma].errores[0]+' "'+Directory.spectrum_48+'"', mtError,[mbOk], 0);
-  exit;
-end else copymemory(@memoria,@mem_snd,$4000);
-iniciar_audio(false);
-fillchar(var_spectrum.retraso,70000,0);
-f:=14335;  //24 del borde
-for h:=0 to 191 do begin
-  copymemory(@var_spectrum.retraso[f],@cmemory,128);
-  inc(f,224);
-end;
-pos:=14335; //deberia ser 14338
-fillchar(var_spectrum.ft_bus,70000*2,$ff);
-for h:=0 to 191 do begin
-  f:=$4000+((h mod $8)*$100);
-  g:=$5800;
-  for m:=0 to 15 do begin
-    var_spectrum.ft_bus[pos]:=f; //4000
-    inc(pos);inc(f);
-    var_spectrum.ft_bus[pos]:=g; //5800
-    inc(pos);inc(g);
-    var_spectrum.ft_bus[pos]:=f; //4001
-    inc(pos);inc(f);
-    var_spectrum.ft_bus[pos]:=g; //5801
-    inc(pos);inc(g);
-    inc(pos,4);  //idle
-  end;
-  inc(pos,96);
-end;
-spec48k_reset;
-iniciar_48k:=true;
-end;
-
-procedure spec48k_reset;
-begin
-reset_misc;
-fillchar(memoria[$4000],49152,0);
-end;
 
 procedure video48k(linea:word);
 var
@@ -390,6 +303,82 @@ if ((puerto=$ff3b) and ulaplus.enabled) then begin
   exit;
 end;
 if mouse.tipo=MAMX then z80pio_cd_ba_w(0,(puerto shr 5) and 3,valor);
+end;
+
+procedure spec48k_reset;
+begin
+reset_misc;
+fillchar(memoria[$4000],49152,0);
+end;
+
+function iniciar_48k:boolean;
+var
+  rom_cargada:boolean;
+  f,g,pos:integer;
+  h,m:byte;
+  cadena:string;
+begin
+iniciar_48k:=false;
+//Iniciar el Z80 y pantalla
+if not(spec_comun(3500000)) then exit;
+spec_z80.change_retraso_call(spec48_retraso_memoria,spec48_retraso_puerto);
+spec_z80.change_ram_calls(spec48_getbyte,spec48_putbyte);
+spec_z80.change_io_calls(spec48_inbyte,spec48_outbyte);
+//El audio se inicializa en 'spec_comun'
+cadena:=file_name_only(changefileext(extractfilename(Directory.spectrum_48),''));
+//Aqui utilizo la memoria de la CPU de sonido como buffer...
+if extension_fichero(Directory.spectrum_48)='ZIP' then rom_cargada:=carga_rom_zip(Directory.spectrum_48,cadena+'.ROM',@mem_snd[0],$4000,0,false)
+  else begin
+    read_file(Directory.spectrum_48,@mem_snd,pos);
+    rom_cargada:=(pos=$4000);
+  end;
+//Si ha ido mal me quejo, si ha ido bien copio la ROM a la memoria
+if not(rom_cargada) then begin
+  MessageDlg(leng[main_vars.idioma].errores[0]+' "'+Directory.spectrum_48+'"', mtError,[mbOk], 0);
+  exit;
+end else copymemory(@memoria,@mem_snd,$4000);
+iniciar_audio(false);
+fillchar(var_spectrum.retraso,70000,0);
+f:=14335;  //24 del borde
+for h:=0 to 191 do begin
+  copymemory(@var_spectrum.retraso[f],@cmemory,128);
+  inc(f,224);
+end;
+pos:=14335; //deberia ser 14338
+fillchar(var_spectrum.ft_bus,70000*2,$ff);
+for h:=0 to 191 do begin
+  f:=$4000+((h mod $8)*$100);
+  g:=$5800;
+  for m:=0 to 15 do begin
+    var_spectrum.ft_bus[pos]:=f; //4000
+    inc(pos);inc(f);
+    var_spectrum.ft_bus[pos]:=g; //5800
+    inc(pos);inc(g);
+    var_spectrum.ft_bus[pos]:=f; //4001
+    inc(pos);inc(f);
+    var_spectrum.ft_bus[pos]:=g; //5801
+    inc(pos);inc(g);
+    inc(pos,4);  //idle
+  end;
+  inc(pos,96);
+end;
+spec48k_reset;
+iniciar_48k:=true;
+end;
+
+procedure Cargar_Spectrum48K;
+begin
+if main_vars.tipo_maquina=0 then spec_16k:=false
+  else spec_16k:=true;
+llamadas_maquina.iniciar:=iniciar_48k;
+llamadas_maquina.bucle_general:=spectrum48_main;
+llamadas_maquina.cintas:=spectrum_tapes;
+llamadas_maquina.reset:=spec48k_reset;
+llamadas_maquina.grabar_snapshot:=grabar_spec;
+llamadas_maquina.fps_max:=50.08;
+llamadas_maquina.close:=spec_cerrar_comun;
+llamadas_maquina.configurar:=spectrum_config;
+interface2.hay_if2:=false;
 end;
 
 end.

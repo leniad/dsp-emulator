@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      principal,nz80,z80_sp,spectrum_128k,ay_8910,controls_engine,sysutils,
      forms,lenguaje,spectrum_48k,dialogs,spectrum_3,upd765,cargar_spec,
      gfx_engine,main_engine,graphics,pal_engine,sound_engine,tape_window,
-     z80pio,z80daisy,disk_file_format;
+     z80pio,z80daisy,disk_file_format,timer_engine;
 
 const
         tabla_scr:array[0..191] of word=(
@@ -102,11 +102,9 @@ type
     key_spec:array [0..255] of boolean;
     tipo_joy,joy_val:byte;
     //Audio
-    buffer_beeper:array[0..$5FFF] of word;
     posicion_beeper:word;
-    testados_sonido,testados_sonido_beeper,samples_audio,samples_beeper:single;
-    beeper_filter,audio_load:boolean;
-    altavoz,beeper_oversample,audio_128k,ear_channel:byte;
+    speaker_oversample,audio_load:boolean;
+    altavoz,audio_128k,ear_channel,speaker_timer:byte;
     //Memoria
     retraso:array[0..71000] of byte;
     marco:array[0..3] of byte;
@@ -126,7 +124,7 @@ procedure spectrum_config;
 function spectrum_mensaje:string;
 procedure borde_normal(linea:word);
 procedure eventos_spectrum;
-function spec_comun:boolean;
+function spec_comun(clock:dword):boolean;
 procedure spec_cerrar_comun;
 function spectrum_tapes:boolean;
 procedure grabar_spec;
@@ -413,19 +411,56 @@ if event.arcade then begin
 end;
 end;
 
-function spec_comun:boolean;
+//Audio!!
+procedure spectrum_beeper_sound;
+begin
+  tsample[var_spectrum.ear_channel,sound_status.posicion_sonido]:=var_spectrum.posicion_beeper shl (3+(3*byte(not(var_spectrum.speaker_oversample))));
+  var_spectrum.posicion_beeper:=0;
+end;
+
+procedure beeper_get;
+begin
+  var_spectrum.posicion_beeper:=var_spectrum.posicion_beeper+var_spectrum.altavoz+(cinta_tzx.value*byte(var_spectrum.audio_load)*byte(cinta_tzx.play_tape));
+end;
+
+procedure spectrum_ay8912_sound;
+var
+  audio:pinteger;
+  audio_buff:array[0..3] of integer;
+begin
+case var_spectrum.audio_128k of
+  0:tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=ay8910_0.update_internal^;
+  1,2:begin
+        audio:=ay8910_0.update_internal;
+        copymemory(@audio_buff[0],pbyte(audio),4*2);
+        tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=(audio_buff[1]*2+audio_buff[2]);
+        sound_status.posicion_sonido:=sound_status.posicion_sonido+1;
+        tsample[var_spectrum.ear_channel,sound_status.posicion_sonido]:=tsample[var_spectrum.ear_channel,sound_status.posicion_sonido-1];
+        tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=(audio_buff[3]*2+audio_buff[2]);
+      end;
+  end;
+end;
+
+function spec_comun(clock:dword):boolean;
 var
   colores:tpaleta;
   f:byte;
 begin
 spec_comun:=false;
-spec_z80:=cpu_z80_sp.create(1,1);
+spec_z80:=cpu_z80_sp.create(clock,llamadas_maquina.fps_max);
 if borde.tipo=2 then begin
   case main_vars.tipo_maquina of
     0,5:borde.borde_spectrum:=borde_48_full;
     1,2,3,4:borde.borde_spectrum:=borde_128_full;
   end;
 end else borde.borde_spectrum:=borde_normal;
+//Beeper audio (comun para todos)
+spec_z80.init_sound(spectrum_beeper_sound);
+var_spectrum.speaker_timer:=init_timer(spec_z80.numero_cpu,spec_z80.clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample)))),beeper_get,true);
+//AY8912
+case main_vars.tipo_maquina of
+  1,2,3,4:init_timer(spec_z80.numero_cpu,clock/FREQ_BASE_AUDIO,spectrum_ay8912_sound,true);
+end;
 principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
 principal1.BitBtn14.Glyph:=nil;
@@ -487,7 +522,6 @@ var_spectrum.altavoz:=0;
 cinta_tzx.value:=0;
 spec_z80.im2_lo:=$ff;
 fillchar(borde.buffer[0],78000,$80);
-fillchar(var_spectrum.buffer_beeper[0],$6000,0);
 //ULA+
 ulaplus.activa:=false;
 fillchar(ulaplus.paleta[0],64,0);
@@ -573,53 +607,10 @@ end;
 end;
 
 procedure spectrum_despues_instruccion(estados_t:byte);
-var
-  audio:pinteger;
-  audio_buff:array[0..3] of integer;
-  beeper,f,h:word;
 begin
 //Longitud de la IRQ probado con el Soldier of Fortune
 var_spectrum.irq_pos:=var_spectrum.irq_pos+estados_t;
 if ((var_spectrum.irq_pos>31) and (spec_z80.get_irq<>CLEAR_LINE)) then spec_z80.change_irq(CLEAR_LINE);
-if sound_status.hay_sonido then begin
-  var_spectrum.testados_sonido:=var_spectrum.testados_sonido+estados_t;
-  var_spectrum.testados_sonido_beeper:=var_spectrum.testados_sonido_beeper+estados_t;
-  if var_spectrum.testados_sonido_beeper>=var_spectrum.samples_beeper then begin
-    var_spectrum.testados_sonido_beeper:=var_spectrum.testados_sonido_beeper-var_spectrum.samples_beeper;
-    if ((cinta_tzx.play_tape and not(cinta_tzx.es_tap)) and var_spectrum.audio_load) then beeper:=cinta_tzx.value
-      else beeper:=var_spectrum.altavoz;
-    if beeper<>0 then var_spectrum.buffer_beeper[var_spectrum.posicion_beeper]:=$1fff
-        else var_spectrum.buffer_beeper[var_spectrum.posicion_beeper]:=0;
-    var_spectrum.posicion_beeper:=var_spectrum.posicion_beeper+1;
-  end;
-  if var_spectrum.testados_sonido>=var_spectrum.samples_audio then begin
-    var_spectrum.testados_sonido:=var_spectrum.testados_sonido-var_spectrum.samples_audio;
-    if ((main_vars.tipo_maquina<>0) and (main_vars.tipo_maquina<>5)) then begin
-      case var_spectrum.audio_128k of
-        0:tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=ay8910_0.update_internal^;
-        1,2:begin
-            audio:=ay8910_0.update_internal;
-            copymemory(@audio_buff[0],pbyte(audio),4*2);
-            tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=(audio_buff[1]*2+audio_buff[2]);
-            sound_status.posicion_sonido:=sound_status.posicion_sonido+1;
-            tsample[var_spectrum.ear_channel,sound_status.posicion_sonido]:=tsample[var_spectrum.ear_channel,sound_status.posicion_sonido-1];
-            tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=(audio_buff[3]*2+audio_buff[2]);
-          end;
-      end;
-    end;
-    if sound_status.posicion_sonido=(sound_status.long_sample-1) then begin
-      //Resampleado del beeper
-      for f:=0 to (sound_status.long_sample-1) do begin
-          beeper:=0;
-          for h:=0 to var_spectrum.beeper_oversample-1 do beeper:=beeper+(var_spectrum.buffer_beeper[(f*var_spectrum.beeper_oversample)+h]);
-          tsample[var_spectrum.ear_channel,f]:=beeper div var_spectrum.beeper_oversample;
-      end;
-      if var_spectrum.beeper_filter then for f:=1 to (sound_status.long_sample-1) do tsample[var_spectrum.ear_channel,f]:=(tsample[var_spectrum.ear_channel,f]+tsample[var_spectrum.ear_channel,f-1]) shr 1;
-      var_spectrum.posicion_beeper:=0;
-      play_sonido;
-    end else sound_status.posicion_sonido:=sound_status.posicion_sonido+1;
-  end;
-end;
 if cinta_tzx.cargada then begin
     if cinta_tzx.play_tape then begin
       if (var_spectrum.fastload and (cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque=$10) and not(cinta_tzx.en_pausa)) then begin

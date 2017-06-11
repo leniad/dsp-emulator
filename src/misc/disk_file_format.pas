@@ -291,7 +291,8 @@ var
 begin
   case main_vars.tipo_maquina of
       8,9:begin  //Comprobar algunas protecciones para poder parchearlas...
-            tempdw:=calc_crc(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].sector[0].data_length);
+            if dsk[drvnum].Tracks[0,0].data<>nil then tempdw:=calc_crc(dsk[drvnum].Tracks[0,0].data,dsk[drvnum].Tracks[0,0].sector[0].data_length)
+              else exit;
             case tempdw of
               $8c817e25,$4b616c83:dsk[drvnum].Tracks[0,40].sector[6].sector_size:=2; //Titus the fox
               $57a3276f:dsk[drvnum].Tracks[0,39].sector[10].sector_size:=0; //Prehistorik

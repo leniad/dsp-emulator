@@ -5,7 +5,7 @@ interface
 uses
   lib_sdl2,Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls,ComCtrls,lenguaje,spectrum_misc,main_engine,
-  sound_engine,z80pio,z80daisy,z80_sp,misc_functions;
+  sound_engine,z80pio,z80daisy,z80_sp,misc_functions,timer_engine;
 
 type
   TConfigSP = class(TForm)
@@ -33,9 +33,6 @@ type
     GroupBox10: TGroupBox;
     RadioButton21: TRadioButton;
     RadioButton22: TRadioButton;
-    GroupBox9: TGroupBox;
-    RadioButton17: TRadioButton;
-    RadioButton18: TRadioButton;
     GroupBox12: TGroupBox;
     GroupBox4: TGroupBox;
     RadioButton3: TRadioButton;
@@ -47,17 +44,13 @@ type
     RadioButton11: TRadioButton;
     RadioButton19: TRadioButton;
     RadioButton20: TRadioButton;
-    GroupBox13: TGroupBox;
-    TrackBar1: TTrackBar;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
     GroupBox14: TGroupBox;
     RadioButton23: TRadioButton;
     RadioButton24: TRadioButton;
     RadioButton25: TRadioButton;
+    GroupBox9: TGroupBox;
+    RadioButton17: TRadioButton;
+    RadioButton18: TRadioButton;
     procedure Button2Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -84,7 +77,6 @@ end;
 
 procedure TConfigSP.FormShow(Sender: TObject);
 begin
-TrackBar1.Position:=var_spectrum.beeper_oversample;
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then begin
     if var_spectrum.issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
     groupbox8.Enabled:=false;
@@ -124,10 +116,10 @@ end;
      2:radiobutton19.Checked:=true;
      3:radiobutton20.Checked:=true;
   end;
-  //Filtro Beeper
-  if var_spectrum.beeper_filter then radiobutton17.Checked:=true
+  //Speaker oversample
+  if var_spectrum.speaker_oversample then radiobutton17.Checked:=true
     else radiobutton18.Checked:=true;
-  //Audio load
+  //Tape audio
   if var_spectrum.audio_load then radiobutton21.Checked:=true
     else radiobutton22.Checked:=true;
   case main_vars.tipo_maquina of
@@ -188,7 +180,6 @@ with ConfigSP do begin
       1,2,3,4:borde.borde_spectrum:=borde_128_full;
     end;
   end;
-  var_spectrum.beeper_filter:=radiobutton17.Checked;
   var_spectrum.audio_load:=radiobutton21.Checked;
   if radiobutton10.Checked then mouse.tipo:=MNONE
     else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
@@ -207,6 +198,10 @@ with ConfigSP do begin
   if RadioButton14.Checked then new_audio:=0;
   if RadioButton15.Checked then new_audio:=1;
   if RadioButton16.Checked then new_audio:=2;
+  //Speaker oversample
+  var_spectrum.speaker_oversample:=(radiobutton17.Checked=true);
+  timer[var_spectrum.speaker_timer].time_final:=sound_status.cpu_clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample))));
+  timer[var_spectrum.speaker_timer].actual_time:=0;
   if new_audio<>var_spectrum.audio_128k then begin
     var_spectrum.audio_128k:=new_audio;
     close_audio;
@@ -230,9 +225,7 @@ with ConfigSP do begin
         necesita_reset:=true;
         end;
   end;
-  var_spectrum.beeper_oversample:=trackbar1.Position;
 end;
-var_spectrum.samples_beeper:=llamadas_maquina.velocidad_cpu/(freq_base_audio*var_spectrum.beeper_oversample);
 if necesita_reset then begin
   main_vars.driver_ok:=llamadas_maquina.iniciar;
   if not(main_vars.driver_ok) then begin

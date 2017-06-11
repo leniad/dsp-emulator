@@ -382,6 +382,9 @@ type
     Sauro1: TMenuItem;
     cclimber1: TMenuItem;
     retofinv1: TMenuItem;
+    GameandWatch1: TMenuItem;
+    DonkeyKongjr1: TMenuItem;
+    DonkeyKongII1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
