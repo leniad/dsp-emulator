@@ -2,12 +2,12 @@
 <b>11/06/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br>
 At last I have emulated (not simulated) two Game and Watch games!. Thanks to MAME for the ROMs and the info.<br><pre>
 -General
-    +SM510: Added new CPU
+    +SM510: Added new CPU
 -Spectrum
-    +Simplified and standardized speaker functions
+    +Simplified and standardized speaker functions
 -Game and Watch
-    +Donkey Kong Jr: Added game with sound
-    +Donkey Kong II: Added game with sound
+    +Donkey Kong Jr: Added game with sound
+    +Donkey Kong II: Added game with sound
 </pre><br>
 <img src='http://img1.imagilive.com/0617/gnw_dkongjr.png'><img src='http://img1.imagilive.com/0617/gnw_dkong2.png'><br><br>
 <b>10/05/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br><pre>
