@@ -1,4 +1,15 @@
 ﻿# DSP Emulator status #
+<b>11/06/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br>
+At last I have emulated (not simulated) two Game and Watch games!. Thanks to MAME for the ROMs and the info.<br><pre>
+-General
+    +SM510: Added new CPU
+-Spectrum
+    +Simplified and standardized speaker functions
+-Game and Watch
+    +Donkey Kong Jr: Added game with sound
+    +Donkey Kong II: Added game with sound
+</pre><br>
+<img src='http://img1.imagilive.com/0617/gnw_dkongjr.png'><img src='http://img1.imagilive.com/0617/gnw_dkong2.png'><br><br>
 <b>10/05/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br><pre>
 -General
     +GFX: Added functions to rotate X axis and/or Y axis of a surface
@@ -76,7 +87,7 @@
     +Corrected reading of the joystick/buttons when ussing the IRQ
     +Improved way to compare the current line that generates an IRQ
     +Improved timings of the current line
-    +GameBoy Color
+    +GameBoy Color
         -Corrected the size of the palette records. Fixed when the palette pointer is automatically advanced
         -Improved way to change speed
     +Improved loading a cartridge with an extra header before the data
@@ -96,7 +107,7 @@
     +Graphics problems (possible bug in the CPU)
     +Changed the ROMS to the 2 Players version (requested by Davide)
 -Vendetta (requested by Davide)
-    +Added driver with sound
+    +Added driver with sound
 </pre><br>
 Please read the 'Whats New' for details<br>
 <img src='http://img1.imagilive.com/0317/simpsons.png'><img src='http://img1.imagilive.com/0317/vendetta.png'><br><br>
