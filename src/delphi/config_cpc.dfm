@@ -5,7 +5,7 @@ object ConfigCPC: TConfigCPC
   BorderStyle = bsSingle
   Caption = 'Config CPC'
   ClientHeight = 420
-  ClientWidth = 457
+  ClientWidth = 586
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -85,7 +85,7 @@ object ConfigCPC: TConfigCPC
   object GroupBox2: TGroupBox
     Left = 8
     Top = 157
-    Width = 439
+    Width = 570
     Height = 194
     Caption = 'ROM Slots'
     TabOrder = 1
@@ -134,12 +134,12 @@ object ConfigCPC: TConfigCPC
     object Edit1: TEdit
       Left = 53
       Top = 21
-      Width = 297
+      Width = 428
       Height = 21
       TabOrder = 0
     end
     object Button1: TButton
-      Left = 356
+      Left = 487
       Top = 19
       Width = 33
       Height = 25
@@ -148,7 +148,7 @@ object ConfigCPC: TConfigCPC
       OnClick = Button1Click
     end
     object Button2: TButton
-      Left = 395
+      Left = 526
       Top = 19
       Width = 33
       Height = 25
@@ -159,12 +159,12 @@ object ConfigCPC: TConfigCPC
     object Edit2: TEdit
       Left = 53
       Top = 48
-      Width = 297
+      Width = 428
       Height = 21
       TabOrder = 3
     end
     object Button3: TButton
-      Left = 356
+      Left = 487
       Top = 46
       Width = 33
       Height = 25
@@ -173,7 +173,7 @@ object ConfigCPC: TConfigCPC
       OnClick = Button3Click
     end
     object Button4: TButton
-      Left = 395
+      Left = 526
       Top = 46
       Width = 33
       Height = 25
@@ -184,12 +184,12 @@ object ConfigCPC: TConfigCPC
     object Edit3: TEdit
       Left = 53
       Top = 75
-      Width = 297
+      Width = 428
       Height = 21
       TabOrder = 6
     end
     object Button5: TButton
-      Left = 356
+      Left = 487
       Top = 73
       Width = 33
       Height = 25
@@ -198,7 +198,7 @@ object ConfigCPC: TConfigCPC
       OnClick = Button5Click
     end
     object Button6: TButton
-      Left = 395
+      Left = 526
       Top = 73
       Width = 33
       Height = 25
@@ -209,12 +209,12 @@ object ConfigCPC: TConfigCPC
     object Edit4: TEdit
       Left = 53
       Top = 102
-      Width = 297
+      Width = 428
       Height = 21
       TabOrder = 9
     end
     object Button7: TButton
-      Left = 356
+      Left = 487
       Top = 100
       Width = 33
       Height = 25
@@ -223,7 +223,7 @@ object ConfigCPC: TConfigCPC
       OnClick = Button7Click
     end
     object Button8: TButton
-      Left = 395
+      Left = 526
       Top = 100
       Width = 33
       Height = 25
@@ -234,12 +234,12 @@ object ConfigCPC: TConfigCPC
     object Edit5: TEdit
       Left = 53
       Top = 129
-      Width = 297
+      Width = 428
       Height = 21
       TabOrder = 12
     end
     object Button9: TButton
-      Left = 356
+      Left = 487
       Top = 127
       Width = 33
       Height = 25
@@ -248,7 +248,7 @@ object ConfigCPC: TConfigCPC
       OnClick = Button9Click
     end
     object Button10: TButton
-      Left = 395
+      Left = 526
       Top = 127
       Width = 33
       Height = 25
@@ -259,12 +259,12 @@ object ConfigCPC: TConfigCPC
     object Edit6: TEdit
       Left = 53
       Top = 156
-      Width = 297
+      Width = 428
       Height = 21
       TabOrder = 15
     end
     object Button11: TButton
-      Left = 356
+      Left = 487
       Top = 154
       Width = 33
       Height = 25
@@ -273,7 +273,7 @@ object ConfigCPC: TConfigCPC
       OnClick = Button11Click
     end
     object Button12: TButton
-      Left = 395
+      Left = 526
       Top = 154
       Width = 33
       Height = 25
@@ -355,6 +355,30 @@ object ConfigCPC: TConfigCPC
       Caption = '4Mb'
       Enabled = False
       TabOrder = 2
+    end
+  end
+  object GroupBox4: TGroupBox
+    Left = 460
+    Top = 87
+    Width = 107
+    Height = 64
+    Caption = 'Tape Motor'
+    TabOrder = 6
+    object RadioButton9: TRadioButton
+      Left = 13
+      Top = 17
+      Width = 71
+      Height = 17
+      Caption = 'Enabled'
+      TabOrder = 0
+    end
+    object RadioButton10: TRadioButton
+      Left = 13
+      Top = 38
+      Width = 72
+      Height = 17
+      Caption = 'Disabled'
+      TabOrder = 1
     end
   end
 end

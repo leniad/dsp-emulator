@@ -1,7 +1,7 @@
 What's New!!! DSP Emulator
 
-DSP 0.18 11/06/17
-********
+DSP 0.18WIP 13/07/17
+***********
 - General
     + Lazarus
         - Fixed stereo sound
@@ -26,11 +26,22 @@ DSP 0.18 11/06/17
     + SM510: Added new CPU
 - Spectrum
     + Simplified and standardized speaker functions
+- Amstrad CPC
+    + Better CPC Z80 timings
+    + Added configuration for tape motor, you can select if it is used in the emulation of the virtual tape or not
+    + Improved video (registers, vsync, hsync, etc.)
+    + Improved memory management, 512Kb expansion it's working properly
+    + Improved interruptions
 - Game and Watch
     + Donkey Kong Jr: Added game with sound
     + Donkey Kong II: Added game with sound
+    + Added 'Mario Bros.', missing graphics
 - Psychic 5
     + Fixed intro
+- Super Darwin
+    + Added MCU, simulated protection removed
+    + Corrected palette and VBLANK
+    + Added 2nd player controls, dip switches and screen flip
 - Deco 0 HW
     + Driver optimizations
     + Added dipswitches

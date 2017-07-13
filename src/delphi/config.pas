@@ -199,7 +199,7 @@ with ConfigSP do begin
   if RadioButton15.Checked then new_audio:=1;
   if RadioButton16.Checked then new_audio:=2;
   //Speaker oversample
-  var_spectrum.speaker_oversample:=(radiobutton17.Checked=true);
+  var_spectrum.speaker_oversample:=radiobutton17.Checked;
   timer[var_spectrum.speaker_timer].time_final:=sound_status.cpu_clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample))));
   timer[var_spectrum.speaker_timer].actual_time:=0;
   if new_audio<>var_spectrum.audio_128k then begin

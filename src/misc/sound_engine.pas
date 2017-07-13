@@ -4,16 +4,16 @@ interface
 uses {$ifdef windows}windows,{$endif}{$ifndef fpc}mmsystem,{$endif}lib_sdl2,timer_engine,dialogs;
 
 const
-        max_audio_buffer=$f;
-        max_canales=9;
-        long_max_audio=1800;
-        freq_base_audio=44100;
+        MAX_AUDIO_BUFFER=$f;
+        MAX_CANALES=9;
+        LONG_MAX_AUDIO=1800;
+        FREQ_BASE_AUDIO=44100;
 
 type
         tipo_sonido=record
           posicion_sonido:word;
           {$ifndef fpc}
-          audio:array[0..max_canales-1] of HWAVEOUT;
+          audio:array[0..MAX_CANALES-1] of HWAVEOUT;
           {$endif}
           cpu_clock:dword;
           cpu_num:byte;
@@ -21,7 +21,7 @@ type
           long_sample,sample_final:word;
           canales_usados:integer;
           stereo,hay_sonido,hay_tsonido:boolean;
-          filter_call:array[0..max_canales-1] of procedure(canal:byte);
+          filter_call:array[0..MAX_CANALES-1] of procedure(canal:byte);
         end;
         snd_chip_class=class
           public
@@ -33,14 +33,14 @@ type
         end;
 
 var
-        tsample:array[0..max_canales-1,0..long_max_audio-1] of smallint;
+        tsample:array[0..MAX_CANALES-1,0..LONG_MAX_AUDIO-1] of smallint;
         sound_status:tipo_sonido;
         update_sound_proc:exec_type;
         sound_engine_timer:byte;
         {$ifndef fpc}
-        cab_audio:array[0..max_canales-1,0..max_audio_buffer-1] of wavehdr;
+        cab_audio:array[0..MAX_CANALES-1,0..MAX_AUDIO_BUFFER-1] of wavehdr;
         {$else}
-        sample_final:array[0..long_max_audio-1] of smallint;
+        sample_final:array[0..LONG_MAX_AUDIO-1] of smallint;
         {$endif}
 
 function iniciar_audio(stereo_sound:boolean):boolean;
@@ -80,7 +80,7 @@ end;
 fillchar(Format,SizeOf(TWaveFormatEx),0);
 Format.wFormatTag:=WAVE_FORMAT_PCM;
 Format.nChannels:=canales;
-Format.nSamplesPerSec:=44100;
+Format.nSamplesPerSec:=FREQ_BASE_AUDIO;
 case sound_status.calidad_audio of
   0:Format.nSamplesPerSec:=11025;
   1:Format.nSamplesPerSec:=22050;
@@ -92,9 +92,9 @@ Format.nAvgBytesPerSec:=Format.nSamplesPerSec*Format.nBlockAlign;
 format.cbSize:=0;
 sound_status.long_sample:=round(FREQ_BASE_AUDIO/llamadas_maquina.fps_max)*canales;
 sound_status.sample_final:=round(Format.nSamplesPerSec/llamadas_maquina.fps_max)*canales;
-for g:=0 to max_canales-1 do begin
+for g:=0 to MAX_CANALES-1 do begin
   if not((waveoutopen(@sound_status.audio[g],WAVE_MAPPER,@format,0,1,CALLBACK_NULL))=0) then exit;
-  For f:=0 To max_audio_buffer-1 do begin
+  For f:=0 To MAX_AUDIO_BUFFER-1 do begin
         getmem(cab_audio[g][f].lpData,sound_status.sample_final*2);
         cab_audio[g][f].dwBufferLength:=sound_status.sample_final*2;
         cab_audio[g][f].dwUser:=0;
@@ -114,9 +114,9 @@ var
   j,f:byte;
 begin
 if not(sound_status.hay_tsonido) then exit;
-for j:=0 to max_canales-1 do begin
+for j:=0 to MAX_CANALES-1 do begin
   waveOutReset(sound_status.audio[j]);
-  for f:=0 to max_audio_buffer-1 do begin
+  for f:=0 to MAX_AUDIO_BUFFER-1 do begin
     waveoutunprepareheader(sound_status.audio[j],@cab_audio[j][f],sizeof(cab_audio[j][f]));
     freemem(cab_audio[j][f].lpData);
     cab_audio[j][f].lpData:=nil;
@@ -143,7 +143,7 @@ end else begin
     canales:=1;
 end;
 sound_status.long_sample:=round(FREQ_BASE_AUDIO/llamadas_maquina.fps_max)*canales;
-audio_rate:=44100;
+audio_rate:=FREQ_BASE_AUDIO;
 case sound_status.calidad_audio of
   0:audio_rate:=11025;
   1:audio_rate:=22050;
@@ -220,17 +220,17 @@ for f:=0 to sound_status.canales_usados do begin
   {$else}
   for h:=0 to (sound_status.sample_final-1) do sample_final[h]:=sample_final[h]+tsample[f,h];
   {$endif}
-  fillchar(tsample[f],long_max_audio,0);
+  fillchar(tsample[f],LONG_MAX_AUDIO,0);
 end;
 end;
 {$ifdef fpc}
 if main_screen.rapido then SDL_ClearQueuedAudio(1);
 for h:=0 to (sound_status.sample_final-1) do sample_final[h]:=sample_final[h] div (sound_status.canales_usados+1);
 SDL_QueueAudio(1,@sample_final[0],sound_status.long_sample*sizeof(smallint));
-fillchar(sample_final[0],long_max_audio*sizeof(smallint),0);
+fillchar(sample_final[0],LONG_MAX_AUDIO*sizeof(smallint),0);
 {$endif}
 sound_status.num_buffer:=sound_status.num_buffer+1;
-if sound_status.num_buffer=max_audio_buffer then sound_status.num_buffer:=0;
+if sound_status.num_buffer=MAX_AUDIO_BUFFER then sound_status.num_buffer:=0;
 sound_status.posicion_sonido:=0;
 end;
 
@@ -265,13 +265,13 @@ var
 begin
 sound_status.posicion_sonido:=0;
 sound_status.num_buffer:=0;
-for f:=0 to (max_canales-1) do fillchar(tsample[f,0],long_max_audio,0);
+for f:=0 to (MAX_CANALES-1) do fillchar(tsample[f,0],LONG_MAX_AUDIO,0);
 end;
 
 function init_channel:byte;
 begin
   sound_status.canales_usados:=sound_status.canales_usados+1;
-  if sound_status.canales_usados>max_canales then MessageDlg('Utilizados mas canales de sonido de los disponibles!!', mtInformation,[mbOk], 0);
+  if sound_status.canales_usados>=MAX_CANALES then MessageDlg('Utilizados mas canales de sonido de los disponibles!!', mtInformation,[mbOk], 0);
   init_channel:=sound_status.canales_usados;
 end;
 

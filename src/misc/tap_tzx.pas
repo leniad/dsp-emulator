@@ -52,7 +52,6 @@ type
     file_name:array[0..9] of ansichar;
     info:array[0..6] of byte;
   end;
-
   tsimbolos=record
               valor:array[0..$ff] of word;
               flag,total_sym:byte;
@@ -121,16 +120,15 @@ var
  tzx_ultimo_bit,tzx_contador_loop:byte;
  tzx_temp,tzx_pulsos:dword;
  tzx_estados_necesarios:longword;
- tzx_datos_p:Pbyte;
-
+ tzx_datos_p:pbyte;
 
 function sacar_word(datos:pbyte):word;
 var
-  temp_w:word;
+  temp_b:byte;
 begin
-  temp_w:=datos^;
+  temp_b:=datos^;
   inc(datos);
-  sacar_word:=temp_w or (datos^ shl 8);
+  sacar_word:=temp_b or (datos^ shl 8);
 end;
 
 procedure zero_tape_data(num:word);
@@ -152,6 +150,9 @@ begin
   cinta_tzx.datos_tzx[num].crc32:=0;
   cinta_tzx.datos_tzx[num].checksum:=0;
   cinta_tzx.datos_tzx[num].inicial:=0;
+  cinta_tzx.datos_tzx[num].num_pulsos:=0;
+  cinta_tzx.datos_tzx[num].pulse_num:=0;
+  //Aqui deben ser cero los punteros de los pulsos, deben estar vacios de la funcion 'vacia cinta'
   for f:=0 to $ff do cinta_tzx.datos_tzx[num].pulsos_sym[f]:=nil;
 end;
 
@@ -595,36 +596,33 @@ var
   temp:word;
   f:byte;
 begin
-if not(tape_window1.Showing) then exit;
-if cinta_tzx.cargada then begin
-  cinta_tzx.en_pausa:=false;
-  cinta_tzx.cargada:=false;
-  if cinta_tzx.play_tape then cinta_tzx.play_tape:=false;
-  temp:=0;
-  while cinta_tzx.datos_tzx[temp]<>nil do begin
-        for f:=0 to $ff do begin
-          if cinta_tzx.datos_tzx[temp].pulsos_sym[f]<>nil then begin
-            freemem(cinta_tzx.datos_tzx[temp].pulsos_sym[f]);
-            cinta_tzx.datos_tzx[temp].pulsos_sym[f]:=nil;
-          end;
-        end;
-        if cinta_tzx.datos_tzx[temp].datos<>nil then begin
-          freemem(cinta_tzx.datos_tzx[temp].datos);
-          cinta_tzx.datos_tzx[temp].datos:=nil;
-        end;
-        freemem(cinta_tzx.datos_tzx[temp]);
-        cinta_tzx.datos_tzx[temp]:=nil;
-        temp:=temp+1;
-  end;
-  fillchar(cinta_tzx.indice_saltos,MAX_TZX*2,0);
-  fillchar(cinta_tzx.indice_select,MAX_TZX*2,0);
+if not(tape_window1.Showing) or not(cinta_tzx.cargada) then exit;
+temp:=0;
+while cinta_tzx.datos_tzx[temp]<>nil do begin
+  for f:=0 to $ff do
+    if cinta_tzx.datos_tzx[temp].pulsos_sym[f]<>nil then begin
+      freemem(cinta_tzx.datos_tzx[temp].pulsos_sym[f]);
+      cinta_tzx.datos_tzx[temp].pulsos_sym[f]:=nil;
+    end;
+    if cinta_tzx.datos_tzx[temp].datos<>nil then begin
+      freemem(cinta_tzx.datos_tzx[temp].datos);
+      cinta_tzx.datos_tzx[temp].datos:=nil;
+    end;
+    freemem(cinta_tzx.datos_tzx[temp]);
+    cinta_tzx.datos_tzx[temp]:=nil;
+    temp:=temp+1;
 end;
+fillchar(cinta_tzx.indice_saltos,MAX_TZX*2,0);
+fillchar(cinta_tzx.indice_select,MAX_TZX*2,0);
 cinta_tzx.es_tap:=false;
 cinta_tzx.indice_cinta:=0;
 llamadas_maquina.open_file:='';
 change_caption;
 tape_window1.stringgrid1.RowCount:=1;
 var_spectrum.sd_1:=false;
+cinta_tzx.en_pausa:=false;
+cinta_tzx.cargada:=false;
+cinta_tzx.play_tape:=false;
 if lenslock1.Showing then lenslock1.Close;
 lenslok.activo:=false;
 tape_window1.label2.caption:='';
@@ -635,7 +633,7 @@ var
   indice:integer;
 begin
 indice:=0;
-//comprobar LensLok
+//comprobar LensLok & sd1
 tape_window1.label2.caption:='';
 var_spectrum.sd_1:=false;
 lenslok.activo:=false;
@@ -668,7 +666,6 @@ while cinta_tzx.datos_tzx[indice].tipo_bloque<>$fe do begin
               lenslok.activo:=true;
               break;
              end;
-   $90152601:cinta_tzx.datos_tzx[indice].lbloque:=32; //Corrijo los cargadores de Amstrad de Opera
   end;
 indice:=indice+1;
 end;
@@ -777,7 +774,7 @@ getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
 zero_tape_data(0);
 cinta_tzx.datos_tzx[0].tipo_bloque:=$15;
 cinta_tzx.datos_tzx[0].lpausa:=0;
-cinta_tzx.datos_tzx[0].luno:=trunc(sound_status.cpu_clock/44100);
+cinta_tzx.datos_tzx[0].luno:=trunc(sound_status.cpu_clock/FREQ_BASE_AUDIO);
 cinta_tzx.datos_tzx[0].lbloque:=ltemp div 8;
 if (ltemp mod 8)<>0 then cinta_tzx.datos_tzx[0].lbloque:=cinta_tzx.datos_tzx[0].lbloque+1;
 cinta_tzx.datos_tzx[0].lbyte:=ltemp mod 8;

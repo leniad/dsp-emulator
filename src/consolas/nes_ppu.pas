@@ -129,7 +129,7 @@ for f:=0 to 63 do begin
             end;
           inc(ptemp);
         end;
-        putpixel(0,0,8,punbuf,pant_sprites);
+        putpixel(0,0,8,punbuf,PANT_SPRITES);
    end else begin
         for x:=7 downto 0 do begin
           punto:=(((tempb1 and (1 shl x)) shr x) and 1)+((((tempb2 and (1 shl x)) shr x) and 1) shl 1);
@@ -151,9 +151,9 @@ for f:=0 to 63 do begin
             end;
           inc(ptemp);
         end;
-        putpixel(0,0,8,punbuf,pant_sprites);
+        putpixel(0,0,8,punbuf,PANT_SPRITES);
    end;
-   actualiza_trozo(0,0,8,1,pant_sprites,pos_x,nes_linea,8,1,2);
+   actualiza_trozo(0,0,8,1,PANT_SPRITES,pos_x,nes_linea,8,1,2);
  end;
 end;
 end;

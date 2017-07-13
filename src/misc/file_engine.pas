@@ -140,6 +140,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   for f:=0 to 6 do cpc_rom_slot[f]:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
   cpc_ga.cpc_model:=fich_ini.ReadInteger('cpc','cpcmodel',0);
   cpc_ga.ram_exp:=fich_ini.ReadInteger('cpc','cpcramexp',0);
+  cpc_ppi.use_motor:=(fich_ini.ReadInteger('cpc','cpcmotor',0))<>0;
   //Configuracion SMS
   file_data.sms_is_pal:=(fich_ini.ReadInteger('sms','is_pal',1)=1);
   file_data.sms_bios_enabled:=(fich_ini.ReadInteger('sms','bios_enabled',0)=1);
@@ -250,6 +251,7 @@ end else begin
   for f:=0 to 6 do cpc_rom_slot[f]:='';
   cpc_ga.cpc_model:=0;
   cpc_ga.ram_exp:=0;
+  cpc_ppi.use_motor:=false;
   //Configuracion basica SMS
   file_data.sms_is_pal:=false;
   file_data.sms_bios_enabled:=true;
@@ -401,6 +403,7 @@ fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
 for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom_slot[f]);
 fich_ini.WriteInteger('cpc','cpcmodel',cpc_ga.cpc_model);
 fich_ini.WriteInteger('cpc','cpcramexp',cpc_ga.ram_exp);
+fich_ini.WriteInteger('cpc','cpcmotor',byte(cpc_ppi.use_motor));
 //Config SMS
 fich_ini.WriteInteger('sms','is_pal',byte(file_data.sms_is_pal));
 fich_ini.WriteInteger('sms','bios_enabled',byte(file_data.sms_bios_enabled));

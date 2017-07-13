@@ -149,13 +149,13 @@ while EmuStatus=EsRuning do begin
    m6805_0.run(frame_mcu);
    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
    case f of
+      63:marcade.dswb:=marcade.dswb or $40;
       111:m6502_0.change_nmi(PULSE_LINE);
       239:begin
             update_video_renegade;
             m6502_0.change_irq(HOLD_LINE);
             marcade.dswb:=marcade.dswb and $bf;
           end;
-      63:marcade.dswb:=marcade.dswb or $40;
    end;
  end;
  eventos_renegade;

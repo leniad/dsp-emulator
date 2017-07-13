@@ -1,4 +1,4 @@
-unit amstrad_cpc;
+﻿unit amstrad_cpc;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
@@ -7,9 +7,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc;
 
 const
-  ram_banks:array[0..7,0..3] of byte=(
-        (0,1,2,3),(0,1,2,7),(4,5,6,7),(0,3,2,7),
-        (0,4,2,3),(0,5,2,3),(0,6,2,3),(0,7,2,3));
   pantalla_alto=312;
   cpc464_rom:tipo_roms=(n:'cpc464.rom';l:$8000;p:0;crc:$40852f25);
   cpc464f_rom:tipo_roms=(n:'cpc464f.rom';l:$8000;p:0;crc:$17893d60);
@@ -21,17 +18,15 @@ const
   cpc6128sp_rom:tipo_roms=(n:'cpc6128sp.rom';l:$8000;p:0;crc:$2fa2e7d6);
   cpc6128d_rom:tipo_roms=(n:'cpc6128d.rom';l:$8000;p:0;crc:$4704685a);
   ams_rom:tipo_roms=(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd);
-  CANTIDAD_MEMORIA=1;
-  CANTIDAD_MEMORIA_MASK=7;
 
 type
   tcpc_crt=packed record
-              char_hsync,char_total:word;
+              char_hsync,char_total,hsync_time_ocurre:word;
               char_altura:byte;
               vsync_lines,vsync_cont:byte;
-              vsync_activo:boolean;
+              vsync_activo,hsync_activo:boolean;
               vsync_linea_ocurre:word;
-              scr_line_dir:array[0..(pantalla_alto-1)] of dword;
+              scr_line_dir:array[0..4095] of dword;
               lineas_total,lineas_borde,lineas_visible,pixel_visible:word;
               regs:array[0..31] of byte;
               reg:byte;
@@ -51,21 +46,24 @@ type
               tape_motor:boolean;
               ay_control,keyb_line:byte;
               keyb_val:array[0..9] of byte;
+              use_motor:boolean;
            end;
 
 var
-    cpc_mem:array[0..((8+(64*CANTIDAD_MEMORIA))-1),0..$3fff] of byte;
+    cpc_mem:array[0..31,0..$3fff] of byte;
     cpc_rom:array[0..15,0..$3fff] of byte;
     cpc_rom_slot:array[0..15] of string;
     cpc_low_rom:array[0..$3fff] of byte;
     cpc_crt:^tcpc_crt;
     cpc_ga:tcpc_ga;
-    cpc_ppi:^tcpc_ppi;
+    cpc_ppi:tcpc_ppi;
 
 procedure cargar_amstrad_CPC;
 procedure cpc_load_roms;
 //GA
-procedure write_ga(puerto:word;val:byte);
+procedure write_ga(val:byte);
+//PAL
+procedure write_pal(puerto:word;val:byte);
 //CRT
 procedure cpc_calcular_dir_scr;
 procedure cpc_calc_crt;
@@ -76,118 +74,8 @@ procedure port_c_write(valor:byte);
 
 implementation
 uses principal,tap_tzx,snapshot;
+
 const
-  TO1=7;
-  TO2=13;
-  z80_op:array[0..$ff] of byte=(
-  //0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-    4, 12,  8,  8,  4,  4,  8,  4,  4, 12,  8,  8,  4,  4,  8,  4,  //0
-   12, 12,  8,  8,  4,  4,  8,  4, 12, 12,  8,  8,  4,  4,  8,  4,  //10
-    8, 12, 20,  8,  4,  4,  8,  4,  8, 12, 20,  8,  4,  4,  8,  4,  //20
-    8, 12,TO2,  8, 12, 12, 12,  4,  8, 12, 16,  8,  4,  4,TO1,  4,  //30
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //40
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //50
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //60
-    8,  8,  8,  8,  8,  8,  4,  8,  4,  4,  4,  4,  4,  4,  8,  4,  //70
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //80
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //90
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //A0
-    4,  4,  4,  4,  4,  4,  8,  4,  4,  4,  4,  4,  4,  4,  8,  4,  //B0
-    8, 12, 12, 12, 12, 16,  8, 16,  8, 12, 12,  0, 12, 20,  8, 16,  //C0
-    8, 12, 12,  8, 12, 16,  8, 16,  8,  4, 12, 12, 12,  0,  8, 16,  //D0*
-    8, 12, 12, 24, 12, 16,TO1, 16,  8,  4, 12,  4, 12,  0,  8, 16,  //E0
-    8, 12, 12,  4, 12, 16,  8, 16,  8,  8, 12,  4, 12,  0,  8, 16); //F0
-
-  z80_op_cb:array[0..$ff] of byte=(
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //0
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //10
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //20
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //30
-    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //40
-    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //50
-    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //60
-    8,  8,  8,  8,  8,  8, 12,  8,  8,  8,  8,  8,  8,  8, 12,  8, //70
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8, //80
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8,
-    8,  8,  8,  8,  8,  8, 16,  8,  8,  8,  8,  8,  8,  8, 16,  8);
-    T1=12; //16
-    z80_op_ed:array[0..$ff] of byte=(
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //00
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //10
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //20
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //30
-       16,12,16,24, 8,16, 8,12,12,16,16,24, 8,16, 8,12,  //40
-       16,12,16,24, 8,16, 8,12,12,16,16,24, 8,16, 8,12,  //50
-       16,12,16,24, 8,16, 8,20,12,16,16,24, 8,16, 8,20,
-       16,12,16,24, 8,16, 8, 8,12,T1,16,24, 8,16, 8, 8,  //70
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //90
-       20,16,20,16, 8, 8, 8, 8,20,16,20,16, 8, 8, 8, 8,  //a0
-       20,16,20,16, 8, 8, 8, 8,20,16,20,16, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8);
-  z80_op_dd:array[0..$ff] of byte=(
-   //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-     8,16,12,12, 8, 8,12, 8, 8,16,12,12, 8, 8,12, 8,
-    16,16,12,12, 8, 8,12, 8,16,16,12,12, 8, 8,12, 8,
-    12,16,24,12, 8, 8,12, 8,12,16,24,12, 8, 8,12, 8,
-    12,16,20,12,24,24,24, 8,12,16,20,12, 8, 8,12, 8,
-     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-    20,20,20,20,20,20, 8,20, 8, 8, 8, 8, 8, 8,20, 8,
-     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-     8, 8, 8, 8, 8, 8,20, 8, 8, 8, 8, 8, 8, 8,20, 8,
-    12,16,16,16,16,20,12,20,12,16,16, 0,16,24,12,20, // cb -> cc_xycb */
-    12,16,16,12,16,20,12,20,12, 8,16,16,16, 8,12,20, // dd -> cc_xy again */
-    12,16,16,28,16,20,12,20,12, 8,16, 8,16, 8,12,20, // ed -> cc_ed */
-    12,16,16, 8,16,20,12,20,12,12,16, 8,16, 8,12,20); //F0
-  z80_op_ddcb:array[0..$ff] of byte=(
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-   24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-   24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-   24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-   28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28);
-
-   z80_op_ex:array[0..255] of byte=(
-  //0   1   2   3   4   5   6   7   8   9   a   b   c   d   e   f
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-    4,  0,  0,  0,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,  0,  0, //20
-    4,  0,  0,  0,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,  0,  0, //30
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //40
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //50
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //60
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //70
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //80
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //90
-    0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, //a0
-    4,  8,  4,  4,  0,  0,  0,  0,  4,  8,  4,  4,  0,  0,  0,  0, //b0
-    8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0, //c0
-    8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0, //d0
-    8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0, //e0
-    8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0,  8,  0,  0,  0);//f0
-
   cpc_paleta:array[0..31] of dword=(
         $808080,$808080,$00FF80,$FFFF80,
         $000080,$FF0080,$008080,$FF8080,
@@ -201,6 +89,7 @@ const
 
 var
    tape_sound_channel:byte;
+   linea_crt:word;
 
 procedure eventos_cpc;
 begin
@@ -325,17 +214,21 @@ if cpc_ga.video_change then begin
   cpc_ga.video_change:=false;
 end;
 cpc_ga.lines_count:=cpc_ga.lines_count+1;
+//Compruebo si llevo 52 lineas
+if (cpc_ga.lines_count>=52) then begin
+   cpc_ga.lines_count:=0;
+   z80_0.change_irq(ASSERT_LINE);
+end;
+//Estoy en un VSYNC?
 if (cpc_ga.lines_sync<>0) then begin
+  //SI --> Compruebo si llevo dos lineas desde la generacion del VSYNC
   cpc_ga.lines_sync:=cpc_ga.lines_sync-1;
   if (cpc_ga.lines_sync=0) then begin
-    if (cpc_ga.lines_count>=32) then z80_0.change_irq(PULSE_LINE)
-      else z80_0.change_irq(CLEAR_LINE);
+    //Si el contador es mayor de 32 lineas, genero IRQ
+    if (cpc_ga.lines_count>=32) then z80_0.change_irq(ASSERT_LINE);
+    //Borro el contador...
     cpc_ga.lines_count:=0;
   end;
-end;
-if (cpc_ga.lines_count>=52) then begin
-    cpc_ga.lines_count:=0;
-    z80_0.change_irq(PULSE_LINE);
 end;
 end;
 
@@ -363,12 +256,9 @@ var
   ma,addr:dword;
   x,y:word;
 begin
-if ((cpc_crt.regs[4]*cpc_crt.char_altura)+cpc_crt.regs[9])>pantalla_alto then exit;
 ma:=cpc_crt.regs[13] or ((cpc_crt.regs[12] and $3f) shl 8);
-          //  altura total en chars
-for y:=0 to cpc_crt.regs[4] do begin
-            //altura char
-  for x:=0 to cpc_crt.regs[9] do begin
+for y:=0 to (cpc_crt.regs[4] and $7f) do begin //  altura total en chars
+  for x:=0 to (cpc_crt.regs[9] and $1f) do begin //altura char en lineas
     addr:=((ma and $3ff) shl 1)+((ma and $3000) shl 2)+(x*$800);
     if addr>$ffff then addr:=addr-$4000;
     cpc_crt.scr_line_dir[x+(y*cpc_crt.char_altura)]:=addr;
@@ -379,21 +269,17 @@ end;
 
 procedure actualiza_linea(linea:word);
 var
- x:integer;
+ x,borde:word;
  addr:dword;
- marco:byte;
- val,p1,p2,p3,p4,p5,p6,p7,p8:byte;
- ptemp:pword;
- borde:dword;
+ marco,val,p1,p2,p3,p4,p5,p6,p7,p8:byte;
  temp1,temp2,temp3,temp4,temp5,temp6:byte;
+ ptemp:pword;
 begin
 borde:=(pantalla_largo-cpc_crt.pixel_visible) shr 1;
-single_line(0,linea+cpc_crt.lineas_borde,cpc_ga.pal[$10],borde,1);
 addr:=cpc_crt.scr_line_dir[linea];
 x:=0;
 while (x<cpc_crt.char_total) do begin
-  if x=cpc_crt.char_hsync then amstrad_ga_exec;
-  if x<cpc_crt.pixel_visible then begin
+  if ((x<cpc_crt.pixel_visible) and (x<cpc_crt.char_hsync)) then begin
     marco:=addr shr 14;
     val:=cpc_mem[cpc_ga.marco[marco and $3],addr and $3fff];
     addr:=addr+1;
@@ -475,20 +361,17 @@ while (x<cpc_crt.char_total) do begin
   end;
   x:=x+4;
 end;
-single_line(cpc_crt.pixel_visible+borde,linea+cpc_crt.lineas_borde,cpc_ga.pal[$10],borde,1);
 end;
 
-procedure draw_line(linea_crt:word);
+procedure draw_line;
 begin
-if ((linea_crt<cpc_crt.lineas_visible) and not(cpc_crt.vsync_activo)) then actualiza_linea(linea_crt)
-else begin
-  single_line(0,(linea_crt+cpc_crt.lineas_borde) mod pantalla_alto,cpc_ga.pal[$10],pantalla_largo,1);
-  amstrad_ga_exec;
-end;
+amstrad_ga_exec;
+single_line(0,(linea_crt+cpc_crt.lineas_borde) mod pantalla_alto,cpc_ga.pal[$10],pantalla_largo,1);
+if (linea_crt<cpc_crt.lineas_visible) then actualiza_linea(linea_crt);
 //Vsync
 if cpc_crt.vsync_activo then begin
-  if cpc_crt.vsync_cont=0 then cpc_crt.vsync_activo:=false
-    else cpc_crt.vsync_cont:=cpc_crt.vsync_cont-1;
+  cpc_crt.vsync_activo:=not(cpc_crt.vsync_cont=0);
+  cpc_crt.vsync_cont:=cpc_crt.vsync_cont-1;
 end;
 if (linea_crt=cpc_crt.vsync_linea_ocurre) then begin
   cpc_crt.vsync_cont:=cpc_crt.vsync_lines-1;
@@ -500,15 +383,15 @@ end;
 procedure cpc_main;
 var
   frame:single;
-  f:word;
 begin
 init_controls(false,true,true,false);
 frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-  for f:=0 to (pantalla_alto-1) do begin
+  for linea_crt:=0 to 311 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
-    draw_line(f);
+    draw_line;
+    cpc_crt.hsync_activo:=false;
   end;
   eventos_cpc;
   actualiza_trozo_simple(0,0,pantalla_largo,pantalla_alto,1);
@@ -534,9 +417,30 @@ begin
 cpc_mem[cpc_ga.marco[direccion shr 14],direccion and $3fff]:=valor;
 end;
 
-procedure write_ga(puerto:word;val:byte);
+procedure write_ga(val:byte);
 var
-  f:byte;
+  pagina:byte;
+begin
+case (val shr 6) of
+     $0:if (val and $10)=0 then cpc_ga.pen:=val and 15 //Select pen
+                else cpc_ga.pen:=$10; //Border
+     $1:cpc_ga.pal[cpc_ga.pen]:=val and 31;    //Change pen colour
+     $2:begin   //ROM banking and mode switch
+            cpc_ga.video_mode_new:=val and 3;
+            if (cpc_ga.video_mode<>cpc_ga.video_mode_new) then cpc_ga.video_change:=true;
+            cpc_ga.rom_low:=(val and 4)=0;
+            cpc_ga.rom_high:=(val and 8)=0;
+            if (val and $10)<>0 then begin
+               cpc_ga.lines_count:=0;
+               z80_0.change_irq(CLEAR_LINE);
+            end;
+        end;
+end;
+end;
+
+procedure write_pal(puerto:word;val:byte);
+var
+  pagina:byte;
 begin
 {if cpc_ga.ram_exp=2 then begin
   if (puerto and $7800)=$7800 then begin
@@ -548,73 +452,65 @@ begin
     exit;
   end;
 end;}
-case (val shr 6) of
-          $0:if (val and $10)=0 then cpc_ga.pen:=val and 15 //Select pen
-                else cpc_ga.pen:=$10; //Border
-          $1:cpc_ga.pal[cpc_ga.pen]:=val and 31;    //Change pen colour
-          $2:begin   //ROM banking and mode switch
-                cpc_ga.video_mode_new:=val and 3;
-                if (cpc_ga.video_mode<>cpc_ga.video_mode_new) then cpc_ga.video_change:=true;
-                cpc_ga.rom_low:=(val and 4)=0;
-                cpc_ga.rom_high:=(val and 8)=0;
-                if (val and $10)<>0 then begin
-                   cpc_ga.lines_count:=0;
-                   z80_0.change_irq(CLEAR_LINE);
-                end;
-            end;
-          3:if cpc_ga.ram_exp=1 then begin //Dk'tronics RAM expansion
-              {Como funciona...
-              Los bits 7 y 6 son 1 siempre (para indicar la funcion de mapeo de memoria
-              Los bits 5,4 y 3 indican el banco de 64K interno de la expansion
-                Bancos 0,1,2 y 3 RAM expansion
-                Bancos 4,5,6 y 7 SDISC
-              El bit 2 --> ??????
-              Los bits 1 y 0 indican el marco que hay que aplicar (del estandar del CPC). Dentro del
-                marco los numeros 0,1,2 y 3 son la memoria del CPC y los 4,5,6 y 7 son la memoria expandida}
-              copymemory(@cpc_ga.marco[0],@ram_banks[(val and 7),0],4);
-              for f:=0 to 3 do begin
-                if cpc_ga.marco[f]>3 then cpc_ga.marco[f]:=(4-cpc_ga.marco[f])+(((val shr 3) and 7)*4)+8;
-              end;
-              cpc_ga.marco_latch:=val and 7;
-            end else begin //C6128 RAM Bank only
-              if main_vars.tipo_maquina=9 then copymemory(@cpc_ga.marco[0],@ram_banks[(val and 7),0],4);
-              cpc_ga.marco_latch:=val and 7;
-            end;
-  end;
+if (val shr 6)=3 then begin
+   //bits 5,4 y 3 --> indican el banco de 64K
+   //bits 2, 1 y 0 --> funcion
+   cpc_ga.marco[0]:=0;
+   cpc_ga.marco[1]:=1;
+   cpc_ga.marco[2]:=2;
+   cpc_ga.marco[3]:=3;
+   pagina:=((val shr 3) and 7)*4;
+   case (val and 7) of
+        1:cpc_ga.marco[3]:=7+pagina;
+        2:begin
+               cpc_ga.marco[0]:=4+pagina;
+               cpc_ga.marco[1]:=5+pagina;
+               cpc_ga.marco[2]:=6+pagina;
+               cpc_ga.marco[3]:=7+pagina;
+          end;
+        3:begin
+               cpc_ga.marco[1]:=3;
+               cpc_ga.marco[3]:=7+pagina;
+          end;
+        4..7:cpc_ga.marco[1]:=pagina+(val and 3)+4;
+   end;
+   cpc_ga.marco_latch:=val and 7;
+end;
 end;
 
 procedure cpc_calc_crt;
 begin
 //altura char por linea
 cpc_crt.char_altura:=(cpc_crt.regs[9] and $1f)+1;
+//IMPORTANTE: El ancho de los chars SIEMPRE es 8 para calcular el resto de valores
 //chars totales
 cpc_crt.char_total:=(cpc_crt.regs[0]+1)*8;
-//char en el que ocurre el hsync
+//char en el que ocurre el hsync (ocurre en el paso a '0' de la señal)
 cpc_crt.char_hsync:=cpc_crt.regs[2]*8;
-if cpc_crt.char_hsync>(cpc_crt.regs[0]*8) then cpc_crt.char_hsync:=cpc_crt.regs[0]*8;
+//(cpc_crt.regs[3] and $f)
+cpc_crt.hsync_time_ocurre:=cpc_crt.char_hsync shr 1;
 //Total pixels por linea
 cpc_crt.pixel_visible:=cpc_crt.regs[1]*8;
-if cpc_crt.pixel_visible>cpc_crt.char_total then cpc_crt.pixel_visible:=cpc_crt.char_total;
-//Lineas de vsync+completar frame
-if (cpc_crt.regs[3] shr 4)=0 then cpc_crt.vsync_lines:=16
-   else cpc_crt.vsync_lines:=cpc_crt.regs[3] shr 4;
-//lineas visibles
-cpc_crt.lineas_visible:=(cpc_crt.regs[6] and $7f)*cpc_crt.char_altura;
-//lineas totales del video incluyendo las visibles
-cpc_crt.lineas_total:=((cpc_crt.regs[4] and $7f)+1)*cpc_crt.char_altura+(cpc_crt.regs[5] and $1f);
-if cpc_crt.lineas_total>pantalla_alto then cpc_crt.lineas_total:=pantalla_alto;
-if cpc_crt.lineas_visible>cpc_crt.lineas_total then cpc_crt.lineas_visible:=cpc_crt.lineas_total;
-cpc_crt.lineas_borde:=(cpc_crt.lineas_total-cpc_crt.lineas_visible) shr 1;
+if cpc_crt.pixel_visible>pantalla_largo then cpc_crt.pixel_visible:=pantalla_largo;
 //Linea donde ocurre el vsync
 cpc_crt.vsync_linea_ocurre:=(cpc_crt.regs[7] and $7f)*cpc_crt.char_altura;
-if cpc_crt.vsync_linea_ocurre>cpc_crt.lineas_total then cpc_crt.vsync_linea_ocurre:=cpc_crt.lineas_total;
+//Lineas de vsync
+cpc_crt.vsync_lines:=(cpc_crt.regs[3] shr 4)+1;
+//lineas visibles
+cpc_crt.lineas_visible:=(cpc_crt.regs[6] and $7f)*cpc_crt.char_altura;
+if cpc_crt.lineas_visible>pantalla_alto then cpc_crt.lineas_visible:=pantalla_alto;
+if cpc_crt.lineas_visible>cpc_crt.vsync_linea_ocurre then cpc_crt.lineas_visible:=cpc_crt.vsync_linea_ocurre;
+//lineas totales del video incluyendo las visibles
+cpc_crt.lineas_total:=((cpc_crt.regs[4] and $7f)+1)*cpc_crt.char_altura+(cpc_crt.regs[5] and $1f);
+if cpc_crt.lineas_visible<cpc_crt.lineas_total then cpc_crt.lineas_borde:=(pantalla_alto-cpc_crt.lineas_visible) shr 1
+   else cpc_crt.lineas_borde:=0;
 end;
 
 procedure write_crtc(port:word;val:byte);
 begin
-  case ((port and $300) shr 8) of
-    $00:cpc_crt.reg:=val and 31;
-    $01:if cpc_crt.regs[cpc_crt.reg]<>val then begin
+  case ((port and $100) shr 8) of
+    $0:cpc_crt.reg:=val and 31;
+    $1:if cpc_crt.regs[cpc_crt.reg]<>val then begin
           cpc_crt.regs[cpc_crt.reg]:=val;
           cpc_calc_crt;
           cpc_calcular_dir_scr;
@@ -624,21 +520,26 @@ end;
 
 procedure cpc_outbyte(puerto:word;valor:byte);
 begin
-if (puerto and $c000)=$4000 then write_ga(puerto,valor)
-  else if (puerto and $4000)=0 then write_crtc(puerto,valor)
+if (puerto and $8000)=0 then write_pal(puerto,valor);
+if (puerto and $c000)=$4000 then write_ga(valor)
+  else if (puerto and $4200)=0 then write_crtc(puerto,valor)
     else if (puerto and $2000)=0 then cpc_ga.rom_selected:=valor and $f
       else if (puerto and $1000)=0 then exit //printer
         else if (puerto and $0800)=0 then pia8255_0.write((puerto and $300) shr 8,valor)
           else if (puerto and $0581)=$101 then WriteFDCData(valor);
 end;
 
-function read_crtc(port:word):byte;inline;
+function read_crtc(port:word):byte;
 var
   res:byte;
 begin
 res:=$ff;
-if ((port and $300) shr 8)=0 then
-  if ((cpc_crt.reg>11) and (cpc_crt.reg<18)) then res:=cpc_crt.regs[cpc_crt.reg];
+if ((port and $100) shr 8)=0 then
+  case cpc_crt.reg of
+    10:res:=cpc_crt.regs[cpc_crt.reg] and $1f;
+    12,13:res:=0;
+    11,14..17:res:=cpc_crt.regs[cpc_crt.reg];
+  end;
 read_crtc:=res;
 end;
 
@@ -647,14 +548,10 @@ var
   res:byte;
 begin
 res:=$FF;
-if (puerto and $4000)=0 then res:=read_crtc(puerto)
+if (puerto and $4200)=$200 then res:=read_crtc(puerto)
   else if (puerto and $0800)=0 then res:=pia8255_0.read((puerto and $300) shr 8)
-    else if (puerto and $0480)=$0 then begin
-      case (puerto and $101) of
-        $100:res:=ReadFDCStatus;
-        $101:res:=ReadFDCData;
-      end;
-    end;
+    else if (puerto and $0581)=$100 then res:=ReadFDCStatus
+      else if (puerto and $0581)=$101 then res:=ReadFDCData;
 cpc_inbyte:=res;
 end;
 
@@ -703,7 +600,19 @@ procedure port_c_write(valor:byte);
 begin
 cpc_ppi.ay_control:=((valor and $c0) shr 6);
 update_ay;
-cpc_ppi.tape_motor:=(valor and $10)<>0;
+if cpc_ppi.tape_motor<>((valor and $10)<>0) then begin
+  cpc_ppi.tape_motor:=(valor and $10)<>0;
+  if (cinta_tzx.cargada and cpc_ppi.use_motor) then begin
+    if not(cpc_ppi.tape_motor) then begin
+      main_screen.rapido:=false;
+      tape_window1.fStopCinta(nil);
+    end else begin
+      main_screen.rapido:=true;
+      tape_window1.fPlayCinta(nil);
+      if not(cinta_tzx.play_once) then cinta_tzx.play_once:=true;
+    end;
+  end;
+end;
 cpc_ppi.keyb_line:=valor and $f;
 cpc_ppi.port_c_write_latch:=valor;
 end;
@@ -717,40 +626,27 @@ end;
 //Sound
 procedure amstrad_sound_update;
 begin
-tsample[tape_sound_channel,sound_status.posicion_sonido]:=cinta_tzx.value*$20;
+tsample[tape_sound_channel,sound_status.posicion_sonido]:=(cinta_tzx.value*$20)*byte(cinta_tzx.play_tape);
 ay8910_0.update;
 end;
 
 //Tape
 procedure amstrad_despues_instruccion(estados_t:word);
+var
+   est_final:byte;
 begin
-if cinta_tzx.cargada then begin
-{  if (not(cpc_ppi.tape_motor) and cinta_tzx.play_once) then begin
-    case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta+1].tipo_bloque of
-      $22:begin
-            cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
-            siguiente_bloque_tzx;
-          end;
-      $fe:begin
-            cinta_tzx.indice_cinta:=0;
-            tape_window1.StringGrid1.TopRow:=0;
-            siguiente_bloque_tzx;
-            cinta_tzx.play_once:=false;
-            tape_window1.fStopCinta(nil);
-      end;
-    end;
-  end;}
-  if ({cpc_ppi.tape_motor and }cinta_tzx.play_tape) then begin
-      cinta_tzx.estados:=cinta_tzx.estados+estados_t;
-      play_cinta_tzx;
-  end else begin
-    if ((z80_0.get_safe_pc=$bc77) and not(cinta_tzx.play_once)) then begin
-       cinta_tzx.play_once:=true;
-       main_screen.rapido:=true;
-       tape_window1.fPlayCinta(nil);
-    end;
-  end;
+//z80_0.get_safe_pc=$bc77
+if cinta_tzx.cargada and cinta_tzx.play_tape then begin
+   cinta_tzx.estados:=cinta_tzx.estados+estados_t;
+   play_cinta_tzx;
 end;
+//Añadir tiempos de espera...
+est_final:=((estados_t shr 2)+byte((estados_t and 3)<>0)) shl 2;
+z80_0.contador:=z80_0.contador+(est_final-estados_t);
+{if (((z80_0.contador+estados_t)>=cpc_crt.hsync_time_ocurre) and not(cpc_crt.hsync_activo)) then begin
+  cpc_crt.hsync_activo:=true;
+  amstrad_ga_exec;
+end;}
 end;
 
 function amstrad_tapes:boolean;
@@ -868,14 +764,16 @@ begin
   cpc_ga.video_mode:=0;
   cpc_ga.video_mode_new:=0;
   cpc_ga.video_change:=false;
-  //cpc_ga.dktronics no lo toco
   fillchar(cpc_ga.pal[0],16,0);
   cpc_ga.lines_count:=0;
   cpc_ga.lines_sync:=0;
   cpc_ga.rom_selected:=0;
   cpc_ga.rom_low:=true;
-  cpc_ga.rom_high:=false;
-  copymemory(@cpc_ga.marco[0],@ram_banks[0,0],4);
+  cpc_ga.rom_high:=true;
+  cpc_ga.marco[0]:=0;
+  cpc_ga.marco[1]:=1;
+  cpc_ga.marco[2]:=2;
+  cpc_ga.marco[3]:=3;
   cpc_ga.marco_latch:=0;
   //cpc_ga.cpc_model; no lo toco
   //CRT
@@ -883,7 +781,7 @@ begin
   cpc_crt.char_altura:=1;
   cpc_crt.lineas_total:=1;
   //PPI
-  fillchar(cpc_ppi^,sizeof(tcpc_ppi),0);
+  fillchar(cpc_ppi,sizeof(tcpc_ppi),0);
   fillchar(cpc_ppi.keyb_val[0],10,$FF);
 end;
 
@@ -995,7 +893,6 @@ screen_init(1,pantalla_largo,pantalla_alto);
 iniciar_video(pantalla_largo,pantalla_alto);
 //Inicializar dispositivos
 getmem(cpc_crt,sizeof(tcpc_crt));
-getmem(cpc_ppi,sizeof(tcpc_ppi));
 for f:=0 to 31 do begin
   colores[f].r:=cpc_paleta[f] shr 16;
   colores[f].g:=(cpc_paleta[f] shr 8) and $FF;
@@ -1006,7 +903,7 @@ z80_0:=cpu_z80.create(4000000,pantalla_alto);
 z80_0.change_ram_calls(cpc_getbyte,cpc_putbyte);
 z80_0.change_io_calls(cpc_inbyte,cpc_outbyte);
 z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80);
-z80_0.change_timmings(@z80_op,@z80_op_cb,@z80_op_dd,@z80_op_ddcb,@z80_op_ed,@z80_op_ex);
+//z80_0.change_timmings(@z80_op,@z80_op_cb,@z80_op_dd,@z80_op_ddcb,@z80_op_ed,@z80_op_ex);
 z80_0.init_sound(amstrad_sound_update);
 tape_sound_channel:=init_channel;
 //El CPC lee el teclado el puerto A del AY, pero el puerto B esta unido al A
@@ -1024,11 +921,9 @@ end;
 procedure cpc_close;
 begin
 if cpc_crt<>nil then freemem(cpc_crt);
-if cpc_ppi<>nil then freemem(cpc_ppi);
 clear_disk(0);
 clear_disk(1);
 cpc_crt:=nil;
-cpc_ppi:=nil;
 end;
 
 procedure Cargar_amstrad_CPC;

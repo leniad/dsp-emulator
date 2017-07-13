@@ -385,6 +385,7 @@ type
     GameandWatch1: TMenuItem;
     DonkeyKongjr1: TMenuItem;
     DonkeyKongII1: TMenuItem;
+    MarioBros1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -506,7 +507,7 @@ begin
 //Inicializa las ventanas
 timer2.Enabled:=false;
 Child:=TfrChild.Create(application);
-principal1.Caption:=principal1.Caption+dsp_version;
+principal1.Caption:=principal1.Caption+DSP_VERSION;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=$ffff;
 if not(main_vars.auto_exec) then begin
@@ -737,7 +738,7 @@ if Savedialog1.execute then begin
           end;
   end;
   temp_s:=SDL_CreateRGBSurface(0,rect2.w,rect2.h,16,0,0,0,0);
-  SDL_LowerBlit(pantalla[0],@rect2,temp_s,@rect2);
+  SDL_UpperBlit(pantalla[0],@rect2,temp_s,@rect2);
   nombre2:=directory.Base+'temp.bmp';
   SDL_SaveBMP_RW(temp_s,SDL_RWFromFile(pointer(nombre2),'wb'), 1);
   SDL_FreeSurface(temp_s);

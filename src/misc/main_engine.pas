@@ -7,12 +7,12 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        dsp_version='0.18WIP';
-        pant_sprites=20;
-        pant_doble=21;
+        DSP_VERSION='0.18WIP';
+        PANT_SPRITES=20;
+        PANT_DOBLE=21;
         PANT_TEMP=23;
-        pant_sprites_alpha=24;
-        max_pant_visible=19;
+        PANT_SPRITES_ALPHA=24;
+        MAX_PANT_VISIBLE=19;
         MAX_PANT_SPRITES=256;
 
         MAX_DIP_VALUES=$f;
@@ -258,8 +258,8 @@ case main_screen.video_mode of
   6:principal1.FullScreen1.checked:=true;
 end;
 //Si el video el *2 necesito una temporal
-if pantalla[pant_doble]<>nil then SDL_FreeSurface(pantalla[pant_doble]);
-pantalla[pant_doble]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
+if pantalla[PANT_DOBLE]<>nil then SDL_FreeSurface(pantalla[PANT_DOBLE]);
+pantalla[PANT_DOBLE]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
 {$ifdef fpc}
 //En linux uso la pantalla de SDL...
 uses_sdl_window;
@@ -321,14 +321,14 @@ cambiar_video;
 pantalla[PANT_TEMP]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0);
 //Creo la pantalla de los sprites
 if alpha then begin
-  pantalla[pant_sprites_alpha]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,32,$ff,$ff00,$ff0000,$ff000000);
+  pantalla[PANT_SPRITES_ALPHA]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,32,$ff,$ff00,$ff0000,$ff000000);
   getmem(punbuf_alpha,MAX_PUNBUF*2);
 end;
-pantalla[pant_sprites]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,16,0,0,0,0);
-SDL_Setcolorkey(pantalla[pant_sprites],1,set_trans_color);
+pantalla[PANT_SPRITES]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,16,0,0,0,0);
+SDL_Setcolorkey(pantalla[PANT_SPRITES],1,set_trans_color);
 paleta[max_colores]:=set_trans_color;
 //Pantallas restantes
-for f:=1 to max_pant_visible do
+for f:=1 to MAX_PANT_VISIBLE do
   if p_final[f].x<>0 then begin
     if p_final[f].final_mix then begin
       if p_final[f].sprite_end_x=0 then p_final[f].sprite_end_x:=p_final[f].x;
@@ -441,7 +441,7 @@ origen.x:=o_x1;
 origen.y:=o_y1;
 origen.w:=o_x2;
 origen.h:=o_y2;
-SDL_LowerBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@origen);
+SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@origen);
 end;
 
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);inline;
@@ -460,7 +460,7 @@ if p_final[dest].final_mix then begin
   destino.x:=destino.x+ADD_SPRITE;
   destino.y:=destino.y+ADD_SPRITE;
 end;
-SDL_LowerBlit(pantalla[sitio],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[sitio],@origen,pantalla[dest],@destino);
 end;
 
 procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
@@ -519,7 +519,7 @@ end else if main_screen.rol90_screen then begin
            destino.y:=0;
            destino.w:=pantalla[PANT_TEMP].w;
            destino.h:=pantalla[PANT_TEMP].h;
-           SDL_LowerBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@destino);
+           SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@destino);
          end;
 end;
 
@@ -538,8 +538,8 @@ if (flipx and flipy) then begin
   for i:=p_final[pant].y-1 downto 0 do begin
     punt:=pantalla[pant].pixels;
     inc(punt,(i*pantalla[pant].pitch) shr 1);
-    punt2:=pantalla[pant_doble].pixels;
-    inc(punt2,((h*pantalla[pant_doble].pitch) shr 1)+(p_final[pant].x-1));
+    punt2:=pantalla[PANT_DOBLE].pixels;
+    inc(punt2,((h*pantalla[PANT_DOBLE].pitch) shr 1)+(p_final[pant].x-1));
     h:=h+1;
     for f:=p_final[pant].x-1 downto 0 do begin
       punt2^:=punt^;
@@ -547,27 +547,27 @@ if (flipx and flipy) then begin
       dec(punt2);
     end;
   end;
-  SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[pant],@origen);
+  SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[pant],@origen);
 end else if flipx then begin
             for i:=0 to p_final[pant].y-1 do begin
               punt:=pantalla[pant].pixels;
               inc(punt,(i*pantalla[pant].pitch) shr 1);
-              punt2:=pantalla[pant_doble].pixels;
-              inc(punt2,((i*pantalla[pant_doble].pitch) shr 1)+(p_final[pant].x)-1);
+              punt2:=pantalla[PANT_DOBLE].pixels;
+              inc(punt2,((i*pantalla[PANT_DOBLE].pitch) shr 1)+(p_final[pant].x)-1);
               for f:=p_final[pant].x-1 downto 0 do begin
                 punt2^:=punt^;
                 inc(punt);
                 dec(punt2);
               end;
             end;
-            SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[pant],@origen);
+            SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[pant],@origen);
          end else if flipy then begin
                       h:=0;
                       for i:=p_final[pant].y-1 downto 0 do begin
                         punt:=pantalla[pant].pixels;
                         inc(punt,(i*pantalla[pant].pitch) shr 1);
-                        punt2:=pantalla[pant_doble].pixels;
-                        inc(punt2,(h*pantalla[pant_doble].pitch) shr 1);
+                        punt2:=pantalla[PANT_DOBLE].pixels;
+                        inc(punt2,(h*pantalla[PANT_DOBLE].pitch) shr 1);
                         h:=h+1;
                         for f:=0 to p_final[pant].x-1 do begin
                           punt2^:=punt^;
@@ -575,7 +575,7 @@ end else if flipx then begin
                           inc(punt2);
                         end;
                       end;
-                      SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[pant],@origen);
+                      SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[pant],@origen);
                   end;
 end;
 
@@ -592,8 +592,8 @@ if main_screen.flip_main_screen then begin
   for i:=p_final[0].y-1 downto 0 do begin
     punt:=pantalla[PANT_TEMP].pixels;
     inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-    punt2:=pantalla[pant_doble].pixels;
-    inc(punt2,((h*pantalla[pant_doble].pitch) shr 1)+(p_final[0].x-1));
+    punt2:=pantalla[PANT_DOBLE].pixels;
+    inc(punt2,((h*pantalla[PANT_DOBLE].pitch) shr 1)+(p_final[0].x-1));
     h:=h+1;
     for f:=p_final[0].x-1 downto 0 do begin
       punt2^:=punt^;
@@ -603,13 +603,13 @@ if main_screen.flip_main_screen then begin
   end;
   origen.w:=p_final[0].x;
   origen.h:=p_final[0].y;
-  SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[PANT_TEMP],@origen);
+  SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
 end else if main_screen.flip_main_x then begin
             for i:=0 to p_final[0].y-1 do begin
               punt:=pantalla[PANT_TEMP].pixels;
               inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-              punt2:=pantalla[pant_doble].pixels;
-              inc(punt2,((i*pantalla[pant_doble].pitch) shr 1)+(p_final[0].x-1));
+              punt2:=pantalla[PANT_DOBLE].pixels;
+              inc(punt2,((i*pantalla[PANT_DOBLE].pitch) shr 1)+(p_final[0].x-1));
               for f:=p_final[0].x-1 downto 0 do begin
                 punt2^:=punt^;
                 inc(punt);
@@ -618,14 +618,14 @@ end else if main_screen.flip_main_x then begin
             end;
             origen.w:=p_final[0].x;
             origen.h:=p_final[0].y;
-            SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[PANT_TEMP],@origen);
+            SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
          end else if main_screen.flip_main_y then begin
                       h:=0;
                       for i:=p_final[0].y-1 downto 0 do begin
                         punt:=pantalla[PANT_TEMP].pixels;
                         inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-                        punt2:=pantalla[pant_doble].pixels;
-                        inc(punt2,(h*pantalla[pant_doble].pitch) shr 1);
+                        punt2:=pantalla[PANT_DOBLE].pixels;
+                        inc(punt2,(h*pantalla[PANT_DOBLE].pitch) shr 1);
                         h:=h+1;
                         for f:=0 to p_final[0].x-1 do begin
                           punt2^:=punt^;
@@ -635,7 +635,7 @@ end else if main_screen.flip_main_x then begin
                       end;
                       origen.w:=p_final[0].x;
                       origen.h:=p_final[0].y;
-                      SDL_LowerBlit(pantalla[pant_doble],@origen,pantalla[PANT_TEMP],@origen);
+                      SDL_UpperBlit(pantalla[PANT_DOBLE],@origen,pantalla[PANT_TEMP],@origen);
                   end;
 case main_screen.video_mode of
   0:exit;
@@ -648,10 +648,10 @@ case main_screen.video_mode of
         for i:=0 to p_final[0].y-1 do begin
           punt:=pantalla[PANT_TEMP].pixels;
           inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-          punt2:=pantalla[pant_doble].pixels;
-          inc(punt2,((i*2)*pantalla[pant_doble].pitch) shr 1);
-          punt3:=pantalla[pant_doble].pixels;
-          inc(punt3,(((i*2)+1)*pantalla[pant_doble].pitch) shr 1);
+          punt2:=pantalla[PANT_DOBLE].pixels;
+          inc(punt2,((i*2)*pantalla[PANT_DOBLE].pitch) shr 1);
+          punt3:=pantalla[PANT_DOBLE].pixels;
+          inc(punt3,(((i*2)+1)*pantalla[PANT_DOBLE].pitch) shr 1);
           for f:=0 to p_final[0].x-1 do begin
               punt2^:=punt^;
               punt3^:=punt^;
@@ -672,8 +672,8 @@ case main_screen.video_mode of
         for i:=0 to ((p_final[0].y-1) shr 1) do begin
            punt:=pantalla[PANT_TEMP].pixels;
            inc(punt,((i*2)* pantalla[PANT_TEMP].pitch) shr 1);
-           punt2:=pantalla[pant_doble].pixels;
-           inc(punt2,((i*2)*pantalla[pant_doble].pitch) shr 1);
+           punt2:=pantalla[PANT_DOBLE].pixels;
+           inc(punt2,((i*2)*pantalla[PANT_DOBLE].pitch) shr 1);
            copymemory(punt2,punt,p_final[0].x*2);
         end;
         origen.w:=p_final[0].x;
@@ -684,8 +684,8 @@ case main_screen.video_mode of
         for i:=0 to p_final[0].y-1 do begin
            punt:=pantalla[PANT_TEMP].pixels;
            inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-           punt2:=pantalla[pant_doble].pixels;
-           inc(punt2,((i*2)*pantalla[pant_doble].pitch) shr 1);
+           punt2:=pantalla[PANT_DOBLE].pixels;
+           inc(punt2,((i*2)*pantalla[PANT_DOBLE].pitch) shr 1);
            for f:=0 to p_final[0].x-1 do begin
               punt2^:=punt^;
               inc(punt2);
@@ -702,12 +702,12 @@ case main_screen.video_mode of
         for i:=0 to p_final[0].y-1 do begin
            punt:=pantalla[PANT_TEMP].pixels;
            inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
-           punt2:=pantalla[pant_doble].pixels;
-           inc(punt2,((i*3)*pantalla[pant_doble].pitch) shr 1);
-           punt3:=pantalla[pant_doble].pixels;
-           inc(punt3,(((i*3)+1)*pantalla[pant_doble].pitch) shr 1);
-           punt4:=pantalla[pant_doble].pixels;
-           inc(punt4,(((i*3)+2)*pantalla[pant_doble].pitch) shr 1);
+           punt2:=pantalla[PANT_DOBLE].pixels;
+           inc(punt2,((i*3)*pantalla[PANT_DOBLE].pitch) shr 1);
+           punt3:=pantalla[PANT_DOBLE].pixels;
+           inc(punt3,(((i*3)+1)*pantalla[PANT_DOBLE].pitch) shr 1);
+           punt4:=pantalla[PANT_DOBLE].pixels;
+           inc(punt4,(((i*3)+2)*pantalla[PANT_DOBLE].pitch) shr 1);
            for f:=0 to p_final[0].x-1 do begin
               for h:=0 to 2 do begin
                 punt2^:=punt^;
@@ -725,7 +725,7 @@ case main_screen.video_mode of
         pant_final:=PANT_DOBLE;
         end;
   end;
-SDL_LowerBlit(pantalla[pant_final],@origen,pantalla[0],@origen);
+SDL_UpperBlit(pantalla[pant_final],@origen,pantalla[0],@origen);
 SDL_UpdateWindowSurface(window_render);
 end;
 

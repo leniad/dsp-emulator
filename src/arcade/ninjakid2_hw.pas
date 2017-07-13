@@ -121,8 +121,8 @@ if flipx then begin
       dec(post);
       inc(temp);
     end;
-    if flipy then putpixel(0,(15-y),16,punbuf,pant_sprites)
-      else putpixel(0,y,16,punbuf,pant_sprites);
+    if flipy then putpixel(0,(15-y),16,punbuf,PANT_SPRITES)
+      else putpixel(0,y,16,punbuf,PANT_SPRITES);
   end;
 end else begin
   pos:=gfx[2].datos;
@@ -139,8 +139,8 @@ end else begin
       inc(temp);
       inc(pos);
     end;
-    if flipy then putpixel(0,(15-y),16,punbuf,pant_sprites)
-      else putpixel(0,y,16,punbuf,pant_sprites);
+    if flipy then putpixel(0,(15-y),16,punbuf,PANT_SPRITES)
+      else putpixel(0,y,16,punbuf,PANT_SPRITES);
   end;
 end;
 end;
@@ -194,7 +194,7 @@ repeat
 					for x:=0 to big do begin
 						tile:=nchar xor (x shl 0) xor (y shl 1);
             put_gfx_sprite_nkid2(tile,color,flipx,flipy,sx+16*x,sy+16*y);
-            actualiza_trozo(0,0,gfx[2].x,gfx[2].y,pant_sprites,sx+16*x,sy+16*y,gfx[2].x,gfx[2].y,4);
+            actualiza_trozo(0,0,gfx[2].x,gfx[2].y,PANT_SPRITES,sx+16*x,sy+16*y,gfx[2].x,gfx[2].y,4);
             num_sprites:=num_sprites+1;
 					end;
     end;

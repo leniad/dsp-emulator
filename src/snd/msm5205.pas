@@ -96,12 +96,12 @@ begin
   case chips_total of
     0:begin
         self.timer_:=init_timer(sound_status.cpu_num,1,msm5205_internal_update_0,false);
-        init_timer(sound_status.cpu_num,sound_status.cpu_clock/freq_base_audio,msm5205_final_update_0,true);
+        init_timer(sound_status.cpu_num,sound_status.cpu_clock/FREQ_BASE_AUDIO,msm5205_final_update_0,true);
         msm5205_ComputeTables;
       end;
     1:begin
         self.timer_:=init_timer(sound_status.cpu_num,1,msm5205_internal_update_1,false);
-        init_timer(sound_status.cpu_num,sound_status.cpu_clock/freq_base_audio,msm5205_final_update_1,true);
+        init_timer(sound_status.cpu_num,sound_status.cpu_clock/FREQ_BASE_AUDIO,msm5205_final_update_1,true);
       end;
   end;
 	self.reset;

@@ -10,7 +10,7 @@ uses
   Forms, principal, acercade, LoadRom, config_general, redefine,
   cargar_dsk, tape_window, cargar_spec, lenslock, config, arcade_config, 
   joystick_calibration, config_sms, config_cpc, k053246_k053247_k055673, 
-cpu_misc, sauro_hw;
+cpu_misc, sauro_hw, gnw_video;
 
 {$IFDEF WINDOWS}
 {$IFDEF CPU32}
@@ -37,6 +37,8 @@ begin
   Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(Tconfigcpc, configcpc);
+  Application.CreateForm(Tgnw_video_form, gnw_video_form);
+  Application.CreateForm(Tgnw_video_form, gnw_video_form);
   Application.Run;
 end.
 

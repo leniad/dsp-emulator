@@ -86,14 +86,14 @@ end;
 procedure ay8910_chip.change_clock(clock:dword);
 begin
   self.clock:=clock;
-  self.UpdateStep:=trunc((STEP*freq_base_audio*8)/self.clock);
+  self.UpdateStep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
 end;
 
 constructor ay8910_chip.create(clock:integer;type_:byte;amp:single;internal:boolean=false);
 begin
   init_table;
   self.clock:=clock;
-  self.UpdateStep:=trunc((STEP*freq_base_audio*8)/self.clock);
+  self.UpdateStep:=trunc((STEP*FREQ_BASE_AUDIO*8)/self.clock);
   self.porta_read:=nil;
   self.portb_read:=nil;
   self.porta_write:=nil;

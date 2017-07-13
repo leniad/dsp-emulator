@@ -3,11 +3,12 @@ unit dec8_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,ym_2203,ym_3812,gfx_engine,
-     rom_engine,pal_engine,sound_engine,misc_functions;
+     rom_engine,pal_engine,sound_engine,misc_functions,mcs51,timer_engine;
 
 procedure cargar_dec8;
 
 implementation
+
 const
         srd_rom:array[0..1] of tipo_roms=(
         (n:'dy01-e.b14';l:$10000;p:$0;crc:$176e9299),(n:'dy00.b16';l:$10000;p:$10000;crc:$2bf6b461));
@@ -19,11 +20,24 @@ const
         (n:'dy07.h16';l:$8000;p:$0000;crc:$97eaba60),(n:'dy06.h14';l:$8000;p:$8000;crc:$c279541b),
         (n:'dy09.k13';l:$8000;p:$10000;crc:$d30d1745),(n:'dy08.k11';l:$8000;p:$18000;crc:$71d645fd),
         (n:'dy11.k16';l:$8000;p:$20000;crc:$fd9ccc5b),(n:'dy10.k14';l:$8000;p:$28000;crc:$88770ab8));
+        srd_mcu:tipo_roms=(n:'id8751h.mcu';l:$1000;p:0;crc:$11cd6ca4);
+        //Dip
+        srd_dip_a:array [0..5] of def_dip=(
+        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$3;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$1;dip_name:'1C 4C'),(dip_val:$0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$4;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$20;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        srd_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$1;dip_name:'1'),(dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'5'),(dip_val:$0;dip_name:'28'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Normal'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Bonus Life';number:2;dip:((dip_val:$10;dip_name:'Every 50K'),(dip_val:$0;dip_name:'Every 100K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'After Stage 10';number:2;dip:((dip_val:$20;dip_name:'Back to Stager 1'),(dip_val:$0;dip_name:'Game Over'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$80;dip_name:'No'),(dip_val:$0;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
   scroll_x,i8751_return,i8751_value:word;
-  rom_bank,coin1,sound_latch:byte;
-  old_val:boolean;
+  i8751_port0,mcu_irq_timer,rom_bank,sound_latch:byte;
   rom:array[0..5,0..$3fff] of byte;
   snd_dec:array[0..$7fff] of byte;
 
@@ -95,6 +109,7 @@ end;
 procedure eventos_dec8;
 begin
 if event.arcade then begin
+  //P1
   if arcade_input.right[0] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or 1;
   if arcade_input.left[0] then marcade.in0:=marcade.in0 and $fd else marcade.in0:=marcade.in0 or 2;
   if arcade_input.up[0] then marcade.in0:=marcade.in0 and $fb else marcade.in0:=marcade.in0 or 4;
@@ -103,19 +118,28 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
   if arcade_input.start[0] then marcade.in0:=marcade.in0 and $bf else marcade.in0:=marcade.in0 or $40;
   if arcade_input.start[1] then marcade.in0:=marcade.in0 and $7f else marcade.in0:=marcade.in0 or $80;
-  if (arcade_input.coin[0] and not(old_val)) then coin1:=coin1+1;
-  old_val:=arcade_input.coin[0];
+  //P2
+  if arcade_input.right[1] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or 1;
+  if arcade_input.left[1] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or 2;
+  if arcade_input.up[1] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or 4;
+  if arcade_input.down[1] then marcade.in1:=marcade.in1 and $f7 else marcade.in1:=marcade.in1 or 8;
+  if arcade_input.but0[1] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
+  if arcade_input.but1[1] then marcade.in1:=marcade.in1 and $df else marcade.in1:=marcade.in1 or $20;
+  //i8751
+  if arcade_input.coin[0] then marcade.in2:=marcade.in2 and $df else marcade.in2:=marcade.in2 or $20;
+  if arcade_input.coin[1] then marcade.in2:=marcade.in2 and $bf else marcade.in2:=marcade.in2 or $40;
 end;
 end;
 
 procedure principal_dec8;
 var
-  frame_m,frame_s:single;
+  frame_m,frame_s,frame_mcu:single;
   f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=m6502_0.tframes;
+frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
    //Main
@@ -124,13 +148,16 @@ while EmuStatus=EsRuning do begin
    //Sound
    m6502_0.run(frame_s);
    frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
+   //MCU
+   mcs51_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
    case f of
       247:begin
             m6809_0.change_nmi(PULSE_LINE);
             update_video_dec8;
-            marcade.in1:=marcade.in1 and $bf;
+            marcade.in1:=marcade.in1 or $40;
       end;
-      263:marcade.in1:=(marcade.in1 and $bf)+$40;
+      263:marcade.in1:=marcade.in1 and $bf;
    end;
  end;
  eventos_dec8;
@@ -146,49 +173,40 @@ case direccion of
    $2001:getbyte_dec8:=i8751_return and $ff;
    $2800..$288f:getbyte_dec8:=buffer_paleta[direccion and $ff];
    $3000..$308f:getbyte_dec8:=buffer_paleta[(direccion and $ff)+$100];
-   $3800:getbyte_dec8:=$7f;
+   $3800:getbyte_dec8:=marcade.dswa; //dsw0
    $3801:getbyte_dec8:=marcade.in0;
    $3802:getbyte_dec8:=marcade.in1;
-   $3803:getbyte_dec8:=$8f;
+   $3803:getbyte_dec8:=marcade.dswb; //dsw1
    $4000..$7fff:getbyte_dec8:=rom[rom_bank,direccion and $3fff];
 end;
 end;
 
-procedure evalue_i8751;inline;
-begin
-  i8751_return:=0;
-  if (i8751_value=$0000) then coin1:=0;
-	if (i8751_value=$3063) then i8751_return:=$9c;				// Protection - Japanese version */
-	if (i8751_value=$306b) then i8751_return:=$94;				// Protection - World version */
-	if ((i8751_value and $ff00)=$4000) then i8751_return:=i8751_value;	// Coinage settings */
-	if (i8751_value=$5000) then i8751_return:=((coin1 div 10) shl 4)+(coin1 mod 10);	// Coin request */
-	if (i8751_value=$6000) then begin  // Coin clear */
-    i8751_value:=$FFFF;
-    coin1:=coin1-1;
-  end;
-	if (i8751_value=$8000) then i8751_return:= $f580 +  0; // Boss #1: Snake + Bees */
-	if (i8751_value=$8001) then i8751_return:= $f580 + 30; // Boss #2: 4 Corners */
-	if (i8751_value=$8002) then i8751_return:= $f580 + 26; // Boss #3: Clock */
-	if (i8751_value=$8003) then i8751_return:= $f580 +  2; // Boss #4: Pyramid */
-	if (i8751_value=$8004) then i8751_return:= $f580 +  6; // Boss #5: Snake + Head Combo */
-	if (i8751_value=$8005) then i8751_return:= $f580 + 24; // Boss #6: LED Panels */
-	if (i8751_value=$8006) then i8751_return:= $f580 + 28; // Boss #7: Dragon */
-	if (i8751_value=$8007) then i8751_return:= $f580 + 32; // Boss #8: Teleport */
-	if (i8751_value=$8008) then i8751_return:= $f580 + 38; // Boss #9: Octopus (Pincer) */
-	if (i8751_value=$8009) then i8751_return:= $f580 + 40; // Boss #10: Bird */
-	if (i8751_value=$800a) then i8751_return:= $f580 + 42; // End Game(bad address?) */
-end;
-
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
+  bit0,bit1,bit2,bit3:byte;
 begin
   tmp_color:=buffer_paleta[dir];
-  color.r:=pal4bit(tmp_color);
-  color.g:=pal4bit(tmp_color shr 4);
+  //Red
+  bit0:=(tmp_color and 1) shr 0;
+  bit1:=(tmp_color and 2) shr 1;
+  bit2:=(tmp_color and 4) shr 2;
+  bit3:=(tmp_color and 8) shr 3;
+  color.r:=$03*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  //Green
+  bit0:=(tmp_color and $10) shr 4;
+  bit1:=(tmp_color and $20) shr 5;
+  bit2:=(tmp_color and $40) shr 6;
+  bit3:=(tmp_color and $80) shr 7;
+  color.g:=$03*bit0+$1f*bit1+$43*bit2+$8f*bit3;
+  //Blue
   tmp_color:=buffer_paleta[dir+$100];
-  color.b:=pal4bit(tmp_color);
+  bit0:=tmp_color and 1;
+  bit1:=(tmp_color and 2) shr 1;
+  bit2:=(tmp_color and 4) shr 2;
+  bit3:=(tmp_color and 8) shr 3;
+  color.b:=$03*bit0+$1f*bit1+$43*bit2+$8f*bit3;
   set_pal_color(color,dir);
   buffer_color[(dir shr 4) and $f]:=true;
 end;
@@ -208,13 +226,11 @@ case direccion of
                end;
   $1800:begin
           i8751_value:=(i8751_value and $ff) or (valor shl 8);
-          evalue_i8751;
+          mcs51_0.change_irq1(ASSERT_LINE);
+          timer[mcu_irq_timer].enabled:=true;
         end;
-  $1801:begin
-          i8751_value:=(i8751_value and $ff00) or valor;
-          evalue_i8751;
-        end;
-  $1802:i8751_return:=0;
+  $1801:i8751_value:=(i8751_value and $ff00) or valor;
+  $1802:;//i8751_return:=0;
   $1804:copymemory(@buffer_sprites[0],@memoria[$600],$200); //DMA
   $1805:begin
           rom_bank:=valor shr 5;
@@ -225,6 +241,7 @@ case direccion of
           sound_latch:=valor;
           m6502_0.change_nmi(PULSE_LINE);
         end;
+  $2001:main_screen.flip_main_screen:=valor<>0;
   $2800..$288f:if buffer_paleta[direccion and $ff]<>valor then begin
                   buffer_paleta[direccion and $ff]:=valor;
                   cambiar_color(direccion and $ff);
@@ -267,6 +284,43 @@ begin
   ym3812_0.update;
 end;
 
+//MCU
+function in_port0:byte;
+begin
+     in_port0:=i8751_port0;
+end;
+
+function in_port2:byte;
+begin
+     in_port2:=$ff;
+end;
+
+function in_port3:byte;
+begin
+     in_port3:=marcade.in2;
+end;
+
+procedure out_port0(valor:byte);
+begin
+     i8751_port0:=valor;
+end;
+
+procedure out_port2(valor:byte);
+begin
+  if (valor and $10)=0 then i8751_port0:=i8751_value shr 8;
+  if (valor and $20)=0 then i8751_port0:=i8751_value and $ff;
+  if (valor and $40)=0 then i8751_return:=(i8751_return and $ff) or (i8751_port0 shl 8);
+  if (valor and $80)=0 then i8751_return:=(i8751_return and $ff00) or i8751_port0;
+  if (valor and $4)=0 then m6809_0.change_irq(ASSERT_LINE);
+  if (valor and $2)=0 then m6809_0.change_irq(CLEAR_LINE);
+end;
+
+procedure i8751_irq;
+begin
+     timer[mcu_irq_timer].enabled:=false;
+     mcs51_0.change_irq1(CLEAR_LINE);
+end;
+
 procedure snd_irq(irqstate:byte);
 begin
   m6502_0.change_irq(irqstate);
@@ -277,16 +331,17 @@ procedure reset_dec8;
 begin
 m6809_0.reset;
 m6502_0.reset;
+mcs51_0.reset;
 ym2203_0.reset;
 ym3812_0.reset;
 marcade.in0:=$ff;
-marcade.in1:=$ff;
+marcade.in1:=$bf;  //VBlank off
 marcade.in2:=$ff;
 sound_latch:=0;
-old_val:=false;
 rom_bank:=0;
 i8751_return:=0;
 i8751_value:=0;
+i8751_port0:=0;
 scroll_x:=0;
 end;
 
@@ -321,6 +376,10 @@ m6809_0.change_ram_calls(getbyte_dec8,putbyte_dec8);
 m6502_0:=cpu_m6502.create(1500000,264,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_snd_dec8,putbyte_snd_dec8);
 m6502_0.init_sound(dec8_sound_update);
+//MCU
+mcs51_0:=cpu_mcs51.create(8000000,264);
+mcs51_0.change_io_calls(in_port0,nil,in_port2,in_port3,out_port0,nil,out_port2,nil);
+mcu_irq_timer:=init_timer(mcs51_0.numero_cpu,64,i8751_irq,false);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(1500000,0.5,0.5);
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.7);
@@ -337,6 +396,8 @@ copymemory(@rom[3,0],@memoria_temp[$1c000],$4000);
 //cargar roms audio y desencriptar
 if not(roms_load(@mem_snd,@srd_snd,'srdarwin.zip',sizeof(srd_snd))) then exit;
 for f:=$8000 to $ffff do snd_dec[f-$8000]:=bitswap8(mem_snd[f],7,5,6,4,3,2,1,0);
+//cargar ROM MCU
+if not(roms_load(mcs51_0.get_rom_addr,@srd_mcu,'srdarwin.zip',sizeof(srd_mcu))) then exit;
 //Cargar chars
 if not(roms_load(@memoria_temp,@srd_char,'srdarwin.zip',sizeof(srd_char))) then exit;
 init_gfx(0,8,8,$400);
@@ -359,6 +420,11 @@ init_gfx(2,16,16,$800);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,16*16,$10000*8,$20000*8,$0*8);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
+//DIP
+marcade.dswa:=$7f;
+marcade.dswb:=$ff;
+marcade.dswa_val:=@srd_dip_a;
+marcade.dswb_val:=@srd_dip_b;
 //final
 reset_dec8;
 iniciar_dec8:=true;

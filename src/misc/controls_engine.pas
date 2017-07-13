@@ -108,12 +108,12 @@ const
   KEYBOARD_NONE=255;
   {$ifndef fpc}
   //Cursor del raton
-  cdata:array[0..31] of byte=(
+  CDATA:array[0..31] of byte=(
         0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0);
-  cmask:array[0..31] of byte=(
+  CMASK:array[0..31] of byte=(
         3,192,15,240,28,56,56,28,
         113,142,225,135,193,131,206,115,
         206,115,193,131,225,135,113,142,
@@ -177,7 +177,7 @@ var
 procedure show_mouse_cursor;
 begin
 {$ifndef fpc}
-new_cursor:=sdl_createcursor(@cdata,@cmask,16,16,7,7);
+new_cursor:=sdl_createcursor(@CDATA,@CMASK,16,16,7,7);
 {$else}
 new_cursor:=sdl_createsystemcursor(3);
 {$endif}

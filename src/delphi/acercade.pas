@@ -37,7 +37,7 @@ end;
 
 procedure TAboutBox.FormShow(Sender: TObject);
 begin
-label1.Caption:='v'+dsp_version;
+label1.Caption:='v'+DSP_VERSION;
 aboutbox.caption:=leng[main_vars.idioma].archivo[3];
 (Image1.Picture.Graphic as TGIFImage).Animate:= True;
 end;

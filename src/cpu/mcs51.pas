@@ -217,15 +217,15 @@ procedure cpu_mcs51.reset;
 begin
   fillchar(self.ram[0],256,0);
   r.pc:=V_RESET;
-	self.ram[ADDR_SP]:=$7;
+  self.ram[ADDR_SP]:=$7;
   self.pon_pila(0);
   self.calc_parity:=false;
   self.rwm:=false;
   self.ram[ADDR_ACC]:=0;
-	self.ram[ADDR_B]:=0;
-	self.ram[ADDR_IP]:=0;
-	self.ram[ADDR_IE]:=0;
-	// set the port configurations to all 1's */
+  self.ram[ADDR_B]:=0;
+  self.ram[ADDR_IP]:=0;
+  self.ram[ADDR_IE]:=0;
+  // set the port configurations to all 1's */
   self.ram[ADDR_P3]:=$ff;
   if @self.out_port3<>nil then self.out_port3($ff);
   self.ram[ADDR_P2]:=$ff;
@@ -659,6 +659,11 @@ case instruccion of
 	      r.pc:=(r.pc and $f800) or ((instruccion and $e0) shl 3) or data;
       end;
   $02:r.pc:=(self.rom[r.pc] shl 8)+self.rom[r.pc+1]; //ljmp
+  $03:begin //rr_a
+        tempb:=self.ram[ADDR_ACC];
+        self.ram[ADDR_ACC]:=(tempb shr 1) or (tempb and 1) shl 7;
+        self.calc_parity:=true;
+      end;
   $04:begin //inc_a
         self.ram[ADDR_ACC]:=self.ram[ADDR_ACC]+1;
         self.calc_parity:=true;
@@ -707,7 +712,7 @@ case instruccion of
       end;
   $13:begin //rrc_a
         tempb:=self.ram[ADDR_ACC];
-	      self.ram[ADDR_ACC]:=(self.ram[ADDR_ACC] shr 1) or (byte(r.psw.c) shl 7);
+	self.ram[ADDR_ACC]:=(self.ram[ADDR_ACC] shr 1) or (byte(r.psw.c) shl 7);
         self.calc_parity:=true;
         r.psw.c:=(tempb and 1)<>0;
         self.ram[ADDR_psw]:=self.dame_pila;
@@ -763,6 +768,13 @@ case instruccion of
         self.ram[ADDR_ACC]:=tempb;  //Store 8 bit result of addtion in ACC
         self.calc_parity:=true;
       end;
+  $28..$2f:begin //add_a_r
+        data:=R_REG(instruccion and $7);         //Grab data from R0 - R7
+	tempb:=self.ram[ADDR_ACC]+data;          //Add data to accumulator
+	DO_ADD_FLAGS(self.ram[ADDR_ACC],data,0); //Set Flags
+	self.ram[ADDR_ACC]:=tempb;               //Store 8 bit result of addtion in ACC
+        self.calc_parity:=true;
+      end;
   $30:begin //jnb
         pos:=self.rom[r.pc];
         r.pc:=r.pc+1;	//Grab bit address
@@ -773,6 +785,13 @@ case instruccion of
   $32:begin //RETI
     	  self.pop_pc;
 	      self.clear_irqs;
+      end;
+  $33:begin //rlc_a
+         tempb:=self.ram[ADDR_ACC];
+         self.ram[ADDR_ACC]:=(tempb shl 1) or byte(r.psw.c);
+         r.psw.c:=(tempb and $80)<>0;
+         self.ram[ADDR_psw]:=self.dame_pila;
+         self.calc_parity:=true;
       end;
   $40:begin //jc
         pos:=self.rom[r.pc];
@@ -865,6 +884,11 @@ case instruccion of
         r.pc:=r.pc+1;
         r.pc:=r.pc+shortint(data);
       end;
+  $83:begin //movc_a_iapc
+        data:=self.rom[r.pc+self.ram[ADDR_ACC]];               //Move a byte from CODE(Program) Memory and store to ACC
+	self.ram[ADDR_ACC]:=data;  //Store 8 bit result of addtion in ACC
+        self.calc_parity:=true;
+      end;
   $85:begin //mov_mem_mem
 	      tempb:=self.rom[r.pc];		//Grab source data address
         r.pc:=r.pc+1;
@@ -904,11 +928,18 @@ case instruccion of
   $94:begin //subb_a_byte
         data:=self.rom[r.pc];
         r.pc:=r.pc+1;				//Grab data
-        if r.psw.c then tempb:=1
-          else tempb:=0;
-	      tempb2:=self.ram[ADDR_ACC]-data-tempb;	//Subtract data & carry flag from accumulator
-	      self.DO_SUB_FLAGS(self.ram[ADDR_ACC],data,tempb);		//Set Flags
-        self.ram[ADDR_ACC]:=tempb2;  //Store 8 bit result of addtion in ACC
+	tempb:=self.ram[ADDR_ACC]-data-byte(r.psw.c);	//Subtract data & carry flag from accumulator
+	self.DO_SUB_FLAGS(self.ram[ADDR_ACC],data,byte(r.psw.c));		//Set Flags
+        self.ram[ADDR_ACC]:=tempb;  //Store 8 bit result of addtion in ACC
+        self.calc_parity:=true;
+      end;
+  $95:begin //subb_a_mem
+        tempb2:=self.rom[r.pc];
+        r.pc:=r.pc+1;				//Grab data address
+        data:=IRAM_R(tempb2);              //Grab data from data address
+	tempb:=self.ram[ADDR_ACC]-data-byte(r.psw.c);	//Subtract data & carry flag from accumulator
+	self.DO_SUB_FLAGS(self.ram[ADDR_ACC],data,byte(r.psw.c));		//Set Flags
+        self.ram[ADDR_ACC]:=tempb;  //Store 8 bit result of addtion in ACC
         self.calc_parity:=true;
       end;
   $a2:begin  //mov_c_bitaddr
@@ -932,16 +963,18 @@ case instruccion of
       end;
   $b3:begin //cpl_c
         r.psw.c:=not(r.psw.c);
+        self.ram[ADDR_psw]:=self.dame_pila;
         self.calc_parity:=true;
       end;
   $b4:begin  //cjne_a_byte
         tempb:=self.rom[r.pc]; //Grab data
-	      pos:=self.rom[r.pc+1]; //Grab relative code address
+	pos:=self.rom[r.pc+1]; //Grab relative code address
         r.pc:=r.pc+2;
-	      if (self.ram[ADDR_ACC]<>tempb) then r.pc:=r.pc+shortint(pos); //Jump if values are not equal
-	      //Set carry flag to 1 if 1st compare value is < 2nd compare value
-	      r.psw.c:=self.ram[ADDR_ACC]<tempb;
+	if (self.ram[ADDR_ACC]<>tempb) then r.pc:=r.pc+shortint(pos); //Jump if values are not equal
+	//Set carry flag to 1 if 1st compare value is < 2nd compare value
+	r.psw.c:=self.ram[ADDR_ACC]<tempb;
         self.ram[ADDR_psw]:=self.dame_pila;
+        self.calc_parity:=true;
       end;
   $c0:begin //push
         pos:=self.rom[r.pc];
@@ -960,6 +993,7 @@ case instruccion of
   $c3:begin //clr_c
         r.psw.c:=false;
         self.ram[ADDR_psw]:=self.dame_pila;
+        self.calc_parity:=true;
       end;
   $c4:begin //swap_a
         tempb:=(self.ram[ADDR_ACC] and $0f) shl 4;			//Grab lo byte of ACC and move to hi
@@ -979,6 +1013,17 @@ case instruccion of
         self.rwm:=true;
         self.bit_address_w(pos,1);
         self.rwm:=false;
+      end;
+  $d4:begin //da_a
+        tempw:=self.ram[ADDR_ACC];
+	if (r.psw.a or ((tempw and $0f)>$09)) then tempw:=tempw+$06;
+	if (r.psw.c or ((tempw and $f0)>$90) or ((tempw and $ff00)<>0)) then tempw:=tempw+$60;
+	self.ram[ADDR_ACC]:=tempw and $ff;
+        self.calc_parity:=true;
+	if(tempw and $ff00)<>0 then begin
+          r.psw.c:=true;
+          self.ram[ADDR_psw]:=self.dame_pila;
+        end;
       end;
   $d5:begin //djnz_mem
         self.rwm:=true;

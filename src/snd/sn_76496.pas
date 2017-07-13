@@ -223,7 +223,7 @@ begin
 	STEP is a multiplier used to turn the fraction into a fixed point
 	number. }
   tmp:=SN_STEP*16;
-  tmp:=tmp*freq_base_audio;
+  tmp:=tmp*FREQ_BASE_AUDIO;
   self.UpdateStep:=round(tmp/self.clock);
 end;
 

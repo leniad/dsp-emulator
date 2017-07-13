@@ -21,7 +21,6 @@ type
     GroupBox10: TGroupBox;
     GroupBox11: TGroupBox;
     GroupBox12: TGroupBox;
-    GroupBox13: TGroupBox;
     GroupBox14: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
@@ -55,7 +54,6 @@ type
     RadioButton7: TRadioButton;
     RadioButton8: TRadioButton;
     RadioButton9: TRadioButton;
-    TrackBar1: TTrackBar;
     procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
@@ -100,7 +98,7 @@ with ConfigSP do begin
       1,2,3,4:borde.borde_spectrum:=borde_128_full;
     end;
   end;
-  var_spectrum.beeper_filter:=radiobutton17.Checked;
+  var_spectrum.speaker_oversample:=radiobutton17.Checked;
   var_spectrum.audio_load:=radiobutton21.Checked;
   if radiobutton10.Checked then mouse.tipo:=MNONE
      else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
@@ -136,9 +134,7 @@ with ConfigSP do begin
         necesita_reset:=true;
         end;
   end;
-  var_spectrum.beeper_oversample:=trackbar1.Position;
 end;
-var_spectrum.samples_beeper:=llamadas_maquina.velocidad_cpu/(freq_base_audio*var_spectrum.beeper_oversample);
 if necesita_reset then begin
   main_vars.driver_ok:=llamadas_maquina.iniciar;
   if not(main_vars.driver_ok) then principal1.Ejecutar1click(nil);
@@ -170,7 +166,6 @@ end;
 
 procedure TConfigSP.FormShow(Sender: TObject);
 begin
-TrackBar1.Position:=var_spectrum.beeper_oversample;
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then begin
     if var_spectrum.issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
     groupbox8.Enabled:=false;
@@ -211,8 +206,8 @@ end;
      MKEMPSTON:radiobutton19.Checked:=true;
      MAMX:radiobutton20.Checked:=true;
   end;
-  //Filtro Beeper
-  if var_spectrum.beeper_filter then radiobutton17.Checked:=true
+  //Speaker oversample
+  if var_spectrum.speaker_oversample then radiobutton17.Checked:=true
     else radiobutton18.Checked:=true;
   //Audio load
   if var_spectrum.audio_load then radiobutton21.Checked:=true

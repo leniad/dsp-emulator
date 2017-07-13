@@ -63,8 +63,8 @@ var
 implementation
 
 const
-  CONST_RE96=round(96000000/freq_base_audio);
-  CONST_RE24=round(24000000/freq_base_audio);
+  CONST_RE96=round(96000000/FREQ_BASE_AUDIO);
+  CONST_RE24=round(24000000/FREQ_BASE_AUDIO);
 
 constructor namco_snd_chip.create(num_voces:byte;wave_ram:boolean=false);
 begin

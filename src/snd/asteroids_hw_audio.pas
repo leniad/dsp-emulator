@@ -77,7 +77,7 @@ function explosion:integer;inline;
 begin
 	counter_exp:=counter_exp-12000;
 	while (counter_exp <= 0) do begin
-		counter_exp:=counter_exp+freq_base_audio; //samplerate
+		counter_exp:=counter_exp+FREQ_BASE_AUDIO; //samplerate
 		if (((polynome and $4000)=0) and ((polynome and $0040)=0)) then
 			polynome:= (polynome shl 1) or 1
 		else polynome:=polynome shl 1;
@@ -104,15 +104,15 @@ begin
 		// SHPSND filter */
 		counter_thr:=counter_thr-110;
 		while (counter_thr<= 0) do begin
-			counter_thr:=counter_thr+freq_base_audio;// samplerate;
+			counter_thr:=counter_thr+FREQ_BASE_AUDIO;// samplerate;
 			out_thr:=polynome and 1;
 		end;
 		if (out_thr<>0) then begin
 			if (amp_thr<VMAX) then
-				amp_thr:=amp_thr+round((VMAX - amp_thr) * 32768 / 32 / freq_base_audio + 1);
+				amp_thr:=amp_thr+round((VMAX - amp_thr)*32768/32/FREQ_BASE_AUDIO+1);
 		end	else begin
 			if (amp_thr>VMIN) then
-				amp_thr:=amp_thr - round(amp_thr * 32768 / 32 / freq_base_audio + 1);
+				amp_thr:=amp_thr - round(amp_thr*32768/32/FREQ_BASE_AUDIO+1);
 		end;
 		thrust:=amp_thr;
     exit;
@@ -125,7 +125,7 @@ begin
   if (thump_latch and $10)<>0 then begin
 		counter_thu:=counter_thu-thump_frequency;
 		while (counter_thu<= 0) do begin
-			counter_thu:=counter_thu+freq_base_audio;// samplerate;
+			counter_thu:=counter_thu+FREQ_BASE_AUDIO;// samplerate;
 			out_thu:=out_thu xor 1;
 		end;
 		if (out_thu<>0) then begin
@@ -152,8 +152,8 @@ begin
 				vco_counter_sau:=vco_counter_sau-NE555_T1(5600,10000,10e-6)
 			else vco_counter_sau:=vco_counter_sau-NE555_T1(5600,6000,10e-6);
 			if (vco_counter_sau<= 0) then begin
-				steps:=round(-vco_counter_sau / freq_base_audio) + 1;
-				vco_counter_sau:=vco_counter_sau+steps *freq_base_audio;
+				steps:=round(-vco_counter_sau/FREQ_BASE_AUDIO) + 1;
+				vco_counter_sau:=vco_counter_sau+steps *FREQ_BASE_AUDIO;
         vco_sau:=vco_sau+steps;
 				if (vco_sau >= VMAX*2/3) then begin
 					vco_sau:=round(VMAX*2/3);
@@ -165,8 +165,8 @@ begin
 				vco_counter_sau:=vco_counter_sau-NE555_T2(10000,10e-6)
 			else vco_counter_sau:=vco_counter_sau-NE555_T2(6000,10e-6);
 			if (vco_counter_sau <= 0) then begin
-				steps:=round(-vco_counter_sau / freq_base_audio) + 1;
-				vco_counter_sau:=vco_counter_sau+steps * freq_base_audio;
+				steps:=round(-vco_counter_sau / FREQ_BASE_AUDIO) + 1;
+				vco_counter_sau:=vco_counter_sau+steps * FREQ_BASE_AUDIO;
         vco_sau:=vco_sau-steps;
 				if (vco_sau <= VMAX*1/3 ) then begin
 					vco_sau:=round(VMIN*1/3);
@@ -183,7 +183,7 @@ begin
 			v5:= 11.3 - 1.66 - 5.0 * EXP_ast(vco_charge_sau,vco_sau) / 32768;
 		counter_sau:=counter_sau-trunc(2.4 * (12.0 - v5) / (10000 * 0.047e-6 * 12.0));
 		while (counter_sau<= 0) do begin
-			counter_sau:=counter_sau+freq_base_audio;
+			counter_sau:=counter_sau+FREQ_BASE_AUDIO;
 			out_sau:=out_sau xor 1;
 		end;
 		if (out_sau<>0) then begin
@@ -206,7 +206,7 @@ begin
 			// charge C38 (10u) through R54 (10K) from 5V to 12V */
 			vco_counter_sfi:=vco_counter_sfi-C38_CHARGE_TIME;
 			while (vco_counter_sfi<= 0) do begin
-				vco_counter_sfi:=vco_counter_sfi+freq_base_audio;// += samplerate;
+				vco_counter_sfi:=vco_counter_sfi+FREQ_BASE_AUDIO;// += samplerate;
         vco_sfi:=vco_sfi+1;
 				if (vco_sfi=VMAX*12/5 ) then break;
 			end;
@@ -217,7 +217,7 @@ begin
 			if (out_sfi<>0) then begin
 				amp_counter_sfi:=amp_counter_sfi-C39_DISCHARGE_TIME;
 				while (amp_counter_sfi<=0) do begin
-					amp_counter_sfi:=amp_counter_sfi+freq_base_audio;//= samplerate;
+					amp_counter_sfi:=amp_counter_sfi+FREQ_BASE_AUDIO;//= samplerate;
           amp_sfi:=amp_sfi-1;
 					if (amp_sfi=VMIN) then break;
 				end;
@@ -228,8 +228,8 @@ begin
 			 * discharge = 0.693 * 680 * 1e-6 = 4.7124e-4 -> 2122 Hz}
 			counter_sfi:=counter_sfi-2122;
 			if (counter_sfi<= 0 ) then begin
-				n:=round(-counter_sfi / freq_base_audio)+1;
-				counter_sfi:=counter_sfi+n * freq_base_audio;
+				n:=round(-counter_sfi / FREQ_BASE_AUDIO)+1;
+				counter_sfi:=counter_sfi+n * FREQ_BASE_AUDIO;
 				out_sfi:=0;
 			end;
 		end else begin
@@ -237,8 +237,8 @@ begin
 			 * charge 0.693 * (3300+680) * 1e-6 = 2.75814e-3 -> 363Hz}
 			counter_sfi:=counter_sfi-round(363 * 2 * (VMAX*12/5-vco_sfi) / 32768);
 			if (counter_sfi <= 0 ) then begin
-				n:=round(-counter_sfi / freq_base_audio)+1;
-				counter_sfi:=counter_sfi+n * freq_base_audio;
+				n:=round(-counter_sfi / FREQ_BASE_AUDIO)+1;
+				counter_sfi:=counter_sfi+n * FREQ_BASE_AUDIO;
 				out_sfi:=1;
 			end;
 		end;
@@ -266,7 +266,7 @@ begin
 			// charge C47 (1u) through R52 (33K) and Q3 from 5V to 12V */
 			vco_counter_shi:=vco_counter_shi-C47_CHARGE_TIME;
 			while (vco_counter_shi<=0) do begin
-				vco_counter_shi:=vco_counter_shi+freq_base_audio;
+				vco_counter_shi:=vco_counter_shi+FREQ_BASE_AUDIO;
         vco_shi:=vco_shi+1;
 				if (vco_shi= VMAX*12/5 ) then break;
 			end;
@@ -277,7 +277,7 @@ begin
 			if (out_shi<>0) then begin
 				amp_counter_shi:=amp_counter_shi-C48_DISCHARGE_TIME;
 				while (amp_counter_shi<= 0) do begin
-					amp_counter_shi:=amp_counter_shi+freq_base_audio;
+					amp_counter_shi:=amp_counter_shi+FREQ_BASE_AUDIO;
           amp_shi:=amp_shi-1;
 					if (amp_shi=VMIN ) then break;
 				end;
@@ -289,8 +289,8 @@ begin
 			 * discharge = 0.693 * 680 * 1e-6 = 4.7124e-4 -> 2122 Hz}
 			counter_shi:=counter_shi-2122;
 			if (counter_shi<= 0) then begin
-				n:=round(-counter_shi/freq_base_audio)+1;
-				counter_shi:=counter_shi+n*freq_base_audio;
+				n:=round(-counter_shi/FREQ_BASE_AUDIO)+1;
+				counter_shi:=counter_shi+n*FREQ_BASE_AUDIO;
 				out_shi:=0;
 			end;
 		end	else begin
@@ -298,8 +298,8 @@ begin
 			 * charge = 0.693 * (3300+680) * 1e-6) = 2.75814e-3 -> 363Hz}
 			counter_shi:=counter_shi-round(363 * 2 * (VMAX*12/5-vco_shi) / 32768);
 			if (counter_shi<= 0 ) then begin
-				n:=round(-counter_shi /freq_base_audio)+ 1;
-				counter_shi:=counter_shi+ n *freq_base_audio;
+				n:=round(-counter_shi /FREQ_BASE_AUDIO)+ 1;
+				counter_shi:=counter_shi+ n *FREQ_BASE_AUDIO;
 				out_shi:= 1;
 			end;
 		end;
@@ -320,7 +320,7 @@ begin
     if (sound_latch[LIFEEN]<>0) then begin
 		counter_lif:=counter_lif-3000;
 		while (counter_lif<= 0 ) do begin
-			counter_lif:=counter_lif+freq_base_audio;//= samplerate;
+			counter_lif:=counter_lif+FREQ_BASE_AUDIO;//= samplerate;
 			out_lif:=out_lif xor 1;
 		end;
 		if (out_lif<>0) then begin

@@ -51,6 +51,9 @@ type
     RadioButton8: TRadioButton;
     Edit7: TEdit;
     Button15: TButton;
+    GroupBox4: TGroupBox;
+    RadioButton9: TRadioButton;
+    RadioButton10: TRadioButton;
     procedure Button15Click(Sender: TObject);
     procedure Button13Click(Sender: TObject);
     procedure Button14Click(Sender: TObject);
@@ -94,6 +97,7 @@ lenslok.activo:=radiobutton12.Checked;
 if radiobutton5.Checked then cpc_ga.ram_exp:=0
   else if radiobutton6.Checked then cpc_ga.ram_exp:=1
     else if radiobutton7.Checked then cpc_ga.ram_exp:=2;
+cpc_ppi.use_motor:=radiobutton9.Checked;
 if lenslok.activo then lenslock1.Show;
 configcpc.Close;
 end;
@@ -228,6 +232,8 @@ case cpc_ga.ram_exp of
   1:radiobutton6.Checked:=true;
   2:radiobutton7.Checked:=true;
 end;
+if cpc_ppi.use_motor then radiobutton9.Checked:=true
+  else radiobutton10.Checked:=true;
 end;
 
 procedure TConfigCPC.Button10Click(Sender: TObject);

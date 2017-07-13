@@ -199,6 +199,8 @@ type
     cclimber1: TMenuItem;
     MenuItem34: TMenuItem;
     donkeykongii1: TMenuItem;
+    donkeykongjr1: TMenuItem;
+    mariobros1: TMenuItem;
     retofinv1: TMenuItem;
     sauro1: TMenuItem;
     Vendetta1: TMenuItem;
@@ -504,7 +506,7 @@ if Savedialog1.execute then begin
           end;
   end;
   temp_s:=SDL_CreateRGBSurface(0,rect2.w,rect2.h,16,0,0,0,0);
-  SDL_LowerBlit(pantalla[0],@rect2,temp_s,@rect2);
+  SDL_UpperBlit(pantalla[0],@rect2,temp_s,@rect2);
   nombre2:=directory.Base+'temp.bmp';
   SDL_SaveBMP_RW(temp_s,SDL_RWFromFile(pointer(nombre2),'wb'), 1);
   SDL_FreeSurface(temp_s);

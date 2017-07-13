@@ -86,8 +86,8 @@ if flipx then begin
       inc(temp);
       dec(post);
     end;
-    if flipy then putpixel(0,(15-y),16,punbuf,pant_sprites)
-      else putpixel(0,y,16,punbuf,pant_sprites);
+    if flipy then putpixel(0,(15-y),16,punbuf,PANT_SPRITES)
+      else putpixel(0,y,16,punbuf,PANT_SPRITES);
   end;
 end else begin
   for y:=0 to 15 do begin
@@ -105,8 +105,8 @@ end else begin
       inc(temp);
       inc(pos);
     end;
-    if flipy then putpixel(0,(15-y),16,punbuf,pant_sprites)
-      else putpixel(0,y,16,punbuf,pant_sprites);
+    if flipy then putpixel(0,(15-y),16,punbuf,PANT_SPRITES)
+      else putpixel(0,y,16,punbuf,PANT_SPRITES);
   end;
 end;
 end;

@@ -45,7 +45,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=247;
+  games_cont=248;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -297,7 +297,8 @@ const
   (name:'Sega Master System';year:'1985';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_),
   //G&W
   (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),
-  (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55));
+  (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55),
+  (name:'Mario Bros';year:'1983';snd:1;hi:false;zip:'gnw_mw56';grid:2002;company:'Nintendo';rom:@gnw_mw56));
 
 var
   orden_games:array[1..games_cont] of word;
@@ -560,6 +561,7 @@ case numero of
   1004:principal1.CambiarMaquina(principal1.SegaMS1);
   2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
   2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
+  2002:principal1.CambiarMaquina(principal1.MarioBros1);
 end;
 end;
 
@@ -815,6 +817,7 @@ principal1.segams1.checked:=false;
 //gnw
 principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
+principal1.MarioBros1.checked:=false;
 end;
 
 procedure menus_false(driver:word);
@@ -873,7 +876,7 @@ case driver of
           principal1.BitBtn10.visible:=true; //Disco
           principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
        end;
-  2000:; //G&W
+  2000..2002:; //G&W
 end;
 end;
 
@@ -1028,7 +1031,7 @@ case tmaquina of
   1003:Cargar_chip8;
   1004:Cargar_SMS;
   //gnw
-  2000,2001:cargar_gnw_510;
+  2000..2002:cargar_gnw_510;
 end;
 end;
 
@@ -2023,6 +2026,10 @@ end;
 if sender=principal1.DonkeyKongII1 then begin
   tipo:=2001;
   principal1.DonkeyKongII1.Checked:=true;
+end;
+if sender=principal1.MarioBros1 then begin
+  tipo:=2002;
+  principal1.MarioBros1.Checked:=true;
 end;
 //Buscar el nombre de la maquina
 for f:=1 to games_cont do begin

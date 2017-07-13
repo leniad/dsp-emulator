@@ -10,6 +10,7 @@ const
   MAX_GFX=8;
   ADD_SPRITE=64;
   MAX_COLOR_BUFFER=$200;
+
 type
   gfx_tipo=record
     x,y:byte;
@@ -673,7 +674,7 @@ for y:=0 to (cant_y-1) do begin
     inc(temp,dir_x);
     inc(pos);
   end;
-  putpixel_gfx_int(0,pos_y,cant_x,pant_sprites);
+  putpixel_gfx_int(0,pos_y,cant_x,PANT_SPRITES);
   pos_y:=pos_y+dir_y;
 end;
 end;
@@ -712,7 +713,7 @@ for y:=0 to (cant_y-1) do begin
     inc(temp,dir_x);
     inc(pos);
   end;
-  putpixel_gfx_int(0+x_diff,pos_y+y_diff,cant_x,pant_sprites);
+  putpixel_gfx_int(0+x_diff,pos_y+y_diff,cant_x,PANT_SPRITES);
   pos_y:=pos_y+dir_y;
 end;
 end;
@@ -752,7 +753,7 @@ for y:=0 to (cant_y-1) do begin
     inc(temp,dir_x);
     inc(pos);
   end;
-  putpixel_gfx_int(0,pos_y,cant_x,pant_sprites);
+  putpixel_gfx_int(0,pos_y,cant_x,PANT_SPRITES);
   pos_y:=pos_y+dir_y;
 end;
 end;
@@ -792,7 +793,7 @@ for y:=0 to (cant_y-1) do begin
     inc(temp,dir_x);
     inc(pos);
   end;
-  putpixel_gfx_int(0+x_diff,pos_y+y_diff,cant_x,pant_sprites);
+  putpixel_gfx_int(0+x_diff,pos_y+y_diff,cant_x,PANT_SPRITES);
   pos_y:=pos_y+dir_y;
 end;
 end;
@@ -811,7 +812,7 @@ pos:=gfx[ngfx].datos;
 inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 cant_x:=round(gfx[ngfx].x*zx);
 if ((gfx[ngfx].x*zx)-cant_x)>0 then cant_x:=cant_x+1;
-if cant_x>pantalla[pant_sprites].w then exit;
+if cant_x>pantalla[PANT_SPRITES].w then exit;
 if flipy then begin
   pos_y:=round(gfx[ngfx].y*zy);
   if ((gfx[ngfx].y*zy)-pos_y)>0 then pos_y:=pos_y+1;
@@ -843,8 +844,8 @@ for y:=0 to (gfx[ngfx].y-1) do begin
       inc(pos);
   end;
   zoom_y:=zoom_y+zy;
-  while ((zoom_y>0) and (pos_y<pantalla[pant_sprites].h)) do begin
-    putpixel_gfx_int(0,pos_y,cant_x,pant_sprites);
+  while ((zoom_y>0) and (pos_y<pantalla[PANT_SPRITES].h)) do begin
+    putpixel_gfx_int(0,pos_y,cant_x,PANT_SPRITES);
     zoom_y:=zoom_y-1;
     pos_y:=pos_y+dir_y;
   end;
@@ -887,7 +888,7 @@ for y:=0 to (cant_y-1) do begin
     inc(temp,dir_x);
     inc(pos);
   end;
-  putpixel_gfx_int_32(0,pos_y,cant_x,pant_sprites_alpha);
+  putpixel_gfx_int_32(0,pos_y,cant_x,PANT_SPRITES_ALPHA);
   pos_y:=pos_y+dir_y;
 end;
 end;
@@ -907,7 +908,7 @@ inc(pos,nchar*gfx[ngfx].x*gfx[ngfx].y);
 zoom_y:=0;
 cant_x:=round(gfx[ngfx].x*zx);
 if ((gfx[ngfx].x*zx)-cant_x)>0 then cant_x:=cant_x+1;
-if cant_x>pantalla[pant_sprites_alpha].w then exit;
+if cant_x>pantalla[PANT_SPRITES_ALPHA].w then exit;
 if flipy then begin
   pos_y:=round(gfx[ngfx].y*zy);
   if ((gfx[ngfx].y*zy)-pos_y)>0 then pos_y:=pos_y+1;
@@ -940,8 +941,8 @@ for y:=0 to (gfx[ngfx].y-1) do begin
       inc(pos);
   end;
   zoom_y:=zoom_y+zy;
-  while ((zoom_y>0) and (pos_y<pantalla[pant_sprites_alpha].h)) do begin
-    putpixel_gfx_int_32(0,pos_y,cant_x,pant_sprites_alpha);
+  while ((zoom_y>0) and (pos_y<pantalla[PANT_SPRITES_ALPHA].h)) do begin
+    putpixel_gfx_int_32(0,pos_y,cant_x,PANT_SPRITES_ALPHA);
     zoom_y:=zoom_y-1;
     pos_y:=pos_y+dir_y;
   end;
@@ -962,11 +963,11 @@ pos_y:=pos_y and p_final[dest].sprite_mask_y;
 destino.y:=pos_y+ADD_SPRITE;
 destino.w:=x_size;
 destino.h:=y_size;
-SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -984,11 +985,11 @@ pos_y:=pos_y and p_final[dest].sprite_mask_y;
 destino.y:=pos_y+ADD_SPRITE;
 destino.w:=x_size;
 destino.h:=y_size;
-SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -1006,11 +1007,11 @@ destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;
 destino.y:=pos_y+ADD_SPRITE;
-SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -1028,15 +1029,15 @@ pos_y:=pos_y and p_final[dest].sprite_mask_y;
 destino.y:=pos_y+ADD_SPRITE;
 destino.w:=origen.w;
 destino.h:=origen.h;
-SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 end;
 origen.x:=(pos_x+scr_x) and p_final[src_over].scroll.mask_x;
 origen.y:=(pos_y+scr_y) and p_final[src_over].scroll.mask_y;
-SDL_LowerBlit(pantalla[src_over],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[src_over],@origen,pantalla[dest],@destino);
 end;
 
 procedure actualiza_gfx_sprite_zoom(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
@@ -1056,13 +1057,13 @@ destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;
 destino.y:=pos_y+ADD_SPRITE;
-SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if destino.x<0 then destino.x:=0;
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
   if destino.y<0 then destino.y:=0;
-  SDL_LowerBlit(pantalla[pant_sprites],@origen,pantalla[dest],@destino);
+  SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -1080,11 +1081,11 @@ destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;
 destino.y:=pos_y+ADD_SPRITE;
-SDL_LowerBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[PANT_SPRITES_ALPHA],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_LowerBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+  SDL_UpperBlit(pantalla[PANT_SPRITES_ALPHA],@origen,pantalla[dest],@destino);
 end;
 end;
 
@@ -1105,13 +1106,13 @@ destino.w:=origen.w;
 destino.h:=origen.h;
 destino.x:=pos_x+ADD_SPRITE;
 destino.y:=pos_y+ADD_SPRITE;
-SDL_LowerBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+SDL_UpperBlit(pantalla[PANT_SPRITES_ALPHA],@origen,pantalla[dest],@destino);
 if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
   if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
   if destino.x<0 then destino.x:=0;
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
   if destino.y<0 then destino.y:=0;
-  SDL_LowerBlit(pantalla[pant_sprites_alpha],@origen,pantalla[dest],@destino);
+  SDL_UpperBlit(pantalla[PANT_SPRITES_ALPHA],@origen,pantalla[dest],@destino);
 end;
 end;
 

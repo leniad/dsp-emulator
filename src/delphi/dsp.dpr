@@ -66,7 +66,7 @@ uses
   spectrum_misc in '..\ordenadores\misc\spectrum_misc.pas',
   ym_3812 in '..\snd\ym_3812.pas',
   asteroids_hw_audio in '..\snd\asteroids_hw_audio.pas',
-  Ay_8910 in '..\snd\Ay_8910.pas',
+  ay_8910 in '..\snd\ay_8910.pas',
   dac in '..\snd\dac.pas',
   fm_2151 in '..\snd\fm_2151.pas',
   fmopl in '..\snd\fmopl.pas',
@@ -276,8 +276,9 @@ uses
   crazyclimber_hw_dac in '..\snd\crazyclimber_hw_dac.pas',
   returnofinvaders_hw in '..\arcade\returnofinvaders_hw.pas',
   sm510 in '..\cpu\sm510.pas',
-  gnw_video in '..\gnw\gnw_video.pas' {gnw_video_form},
-  gnw_510 in '..\gnw\gnw_510.pas';
+  gnw_video in 'gnw_video.pas' {gnw_video_form},
+  gnw_510 in '..\gnw\gnw_510.pas',
+  gnw_const in '..\gnw\gnw_const.pas';
 
 {$R *.res}
 

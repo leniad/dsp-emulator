@@ -316,7 +316,7 @@ copymemory(@buffer[0],datos,50);
 spec_z80_reg.bc.w:=(buffer[0] shl 8)+buffer[1];
 spec_z80_reg.bc2.w:=(buffer[2] shl 8)+buffer[3];
 spec_z80_reg.de.w:=(buffer[4] shl 8)+buffer[5];
-spec_z80_reg.de2.w:=(buffer[6] shl 8)+buffer[6];
+spec_z80_reg.de2.w:=(buffer[6] shl 8)+buffer[7];
 spec_z80_reg.hl.w:=(buffer[8] shl 8)+buffer[9];
 spec_z80_reg.hl2.w:=(buffer[10] shl 8)+buffer[11];
 spec_z80_reg.ix.w:=(buffer[12] shl 8)+buffer[13];
@@ -343,6 +343,9 @@ spec_z80_reg.f.n:=(buffer[27] and 2)<>0;
 spec_z80_reg.f.c:=(buffer[27] and 1)<>0;
 spec_z80_reg.pc:=(buffer[30] shl 8)+buffer[31];
 spec_z80_reg.sp:=(buffer[34] shl 8)+buffer[35];
+//Sonido (uso interno) 36 + 37
+temp:=(buffer[38] shl 8)+buffer[39];
+spec_z80_reg.halt_opcode:=(temp=1);
 temp:=(buffer[40] shl 8)+buffer[41];
 case temp of
   $0000:spec_z80_reg.im:=1;
@@ -370,7 +373,9 @@ var
   sp_regs:^tsp_regs;
 begin
 abrir_sp:=false;
-spectrum_change_model(0); //Solo puede ser 48K
+//Puede ser 16K o 48K
+if sp_regs.long<16385 then spectrum_change_model(5)
+   else spectrum_change_model(0);
 spec_z80_reg:=spec_z80.get_internal_r;
 getmem(sp_regs,38);
 copymemory(sp_regs,datos,38);inc(datos,38);
@@ -1397,9 +1402,9 @@ main_z80_reg.hl2.w:=cpc_sna.hl2;
 //GA
 cpc_ga.pen:=cpc_sna.ga_pen;
 copymemory(@cpc_ga.pal[0],@cpc_sna.ga_pal[0],17);
-write_ga(0,$80+(cpc_sna.ga_conf and $3f));
+write_ga($80+(cpc_sna.ga_conf and $3f));
 //RAM
-copymemory(@cpc_ga.marco[0],@ram_banks[(cpc_sna.ram_config and 7),0],4);
+write_pal(0,cpc_sna.ram_config);
 //CRT
 cpc_crt.vsync_cont:=0;
 cpc_crt.reg:=cpc_sna.crt_index and $1f;
@@ -1477,7 +1482,7 @@ case cpc_sna.version of
       if cpc_sna.version=3 then begin
         cpc_ga.lines_sync:=cpc_sna.ga_lines_sync;
         cpc_ga.lines_count:=cpc_sna.ga_lines_count;
-        if cpc_sna.irq<>0 then z80_0.change_irq(PULSE_LINE)
+        if cpc_sna.irq<>0 then z80_0.change_irq(ASSERT_LINE)
            else z80_0.change_irq(CLEAR_LINE);
         getmem(cpc_chunk,sizeof(tcpc_chunk));
         while position<>longitud do begin //Hay chunks??

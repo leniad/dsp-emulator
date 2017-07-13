@@ -109,7 +109,7 @@ begin
 	// assume /RESET and /START are both high */
 	self.reset_pin:=1;
 	self.start:=1;
-  self.resample_inc:=clock/4/freq_base_audio;
+  self.resample_inc:=clock/4/FREQ_BASE_AUDIO;
 	// toggle the reset line to finish the reset */
   self.tsample_num:=init_channel;
   self.amp:=amp;

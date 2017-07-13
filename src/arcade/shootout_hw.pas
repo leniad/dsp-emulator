@@ -38,23 +38,22 @@ begin
   -----x--    horizontal flip
   ------x-    flicker
   -------x    enable}
-for f:=0 to $7f do begin
- atrib:=memoria[$1801+(f*4)];
- if (((atrib and 1)=0) or ((atrib and 8)<>prioridad)) then continue;
- if (bflicker or ((atrib and $2)=0)) then begin
-    nchar:=memoria[$1803+(f*4)]+((atrib shl 3) and $700);
-    x:=240-memoria[$1802+(f*4)];
-    y:=240-memoria[$1800+(f*4)];
-    if (atrib and $10)<>0 then begin //tamaño doble
-      nchar:=nchar and $7fe;
-      put_gfx_sprite_diff(nchar,64,(atrib and $4)<>0,false,1,0,0);
-      put_gfx_sprite_diff(nchar+1,64,(atrib and $4)<>0,false,1,0,16);
-      actualiza_gfx_sprite_size(x,y-16,3,16,32);
-    end else begin
-      put_gfx_sprite(nchar,64,(atrib and $4)<>0,false,1);
-      actualiza_gfx_sprite(x,y,3,1);
-    end;
- end;
+for f:=$7f downto 0 do begin
+  atrib:=memoria[$1801+(f*4)];
+  if (((atrib and $1)=0) or ((atrib and 8)<>prioridad)) then continue;
+  if (((atrib and $2)=1) and (not(bflicker))) then exit;
+  nchar:=memoria[$1803+(f*4)]+((atrib shl 3) and $700);
+  x:=240-memoria[$1802+(f*4)];
+  y:=240-memoria[$1800+(f*4)];
+  if (atrib and $10)<>0 then begin //tamaño doble
+     nchar:=nchar and $7fe;
+     put_gfx_sprite_diff(nchar,64,(atrib and $4)<>0,false,1,0,0);
+     put_gfx_sprite_diff(nchar+1,64,(atrib and $4)<>0,false,1,0,16);
+     actualiza_gfx_sprite_size(x,y-16,3,16,32);
+  end else begin
+     put_gfx_sprite(nchar,64,(atrib and $4)<>0,false,1);
+     actualiza_gfx_sprite(x,y,3,1);
+  end;
 end;
 end;
 

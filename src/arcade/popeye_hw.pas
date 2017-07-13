@@ -20,9 +20,8 @@ const
         (n:'tpp2-v.1e';l:$2000;p:0;crc:$0f2cd853),(n:'tpp2-v.1f';l:$2000;p:$2000;crc:$888f3474),
         (n:'tpp2-v.1j';l:$2000;p:$4000;crc:$7e864668),(n:'tpp2-v.1k';l:$2000;p:$6000;crc:$49e1d170),());
         //Dip
-        popeye_dip_a:array [0..3] of def_dip=(
+        popeye_dip_a:array [0..2] of def_dip=(
         (mask:$f;name:'Coinage';number:9;dip:((dip_val:$8;dip_name:'6 Coin - 1 Credit'),(dip_val:$5;dip_name:'5 Coin - 1 Credit'),(dip_val:$9;dip_name:'4 Coin - 1 Credit'),(dip_val:$a;dip_name:'3 Coin - 1 Credit'),(dip_val:$d;dip_name:'2 Coin - 1 Credit'),(dip_val:$f;dip_name:'1 Coin - 1 Credit'),(dip_val:$e;dip_name:'1 Coin - 2 Credit'),(dip_val:$3;dip_name:'1 Coin - 3 Credit'),(dip_val:$0;dip_name:'Freeplay'),(),(),(),(),(),(),())),
-        (mask:$10;name:'Unknown';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$60;name:'Copyright';number:3;dip:((dip_val:$40;dip_name:'Nintendo'),(dip_val:$20;dip_name:'Nintendo Co.,Ltd'),(dip_val:$60;dip_name:'Nintendo of America'),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         popeye_dip_b:array [0..5] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'1 Live'),(dip_val:$2;dip_name:'2 Lives'),(dip_val:$1;dip_name:'3 Lives'),(dip_val:$0;dip_name:'4 Lives'),(),(),(),(),(),(),(),(),(),(),(),())),

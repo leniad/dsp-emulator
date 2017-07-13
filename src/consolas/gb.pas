@@ -133,7 +133,7 @@ for f:=0 to $27 do begin
           end;
           inc(ptemp);
         end;
-        putpixel(0,0,8,punbuf,pant_sprites);
+        putpixel(0,0,8,punbuf,PANT_SPRITES);
      end else begin
         for x:=7 downto 0 do begin
           pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
@@ -146,7 +146,7 @@ for f:=0 to $27 do begin
             end;
           inc(ptemp);
         end;
-        putpixel(0,0,8,punbuf,pant_sprites);
+        putpixel(0,0,8,punbuf,PANT_SPRITES);
      end;
      long_x:=8;
      main_x:=0;
@@ -156,7 +156,7 @@ for f:=0 to $27 do begin
        pos_x:=0;
      end;
      if (pos_x+8)>160 then long_x:=160-pos_x;
-     actualiza_trozo(main_x,0,long_x,1,pant_sprites,pos_x+7,pos_y+pos_linea,long_x,1,2);
+     actualiza_trozo(main_x,0,long_x,1,PANT_SPRITES,pos_x+7,pos_y+pos_linea,long_x,1,2);
   end;
 end;
 end;
@@ -310,7 +310,7 @@ for f:=0 to $27 do begin
             end;
           inc(ptemp);
         end;
-        putpixel(0,0,8,punbuf,pant_sprites);
+        putpixel(0,0,8,punbuf,PANT_SPRITES);
      end else begin
         for x:=7 downto 0 do begin
           pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
@@ -326,7 +326,7 @@ for f:=0 to $27 do begin
             end;
           inc(ptemp);
         end;
-        putpixel(0,0,8,punbuf,pant_sprites);
+        putpixel(0,0,8,punbuf,PANT_SPRITES);
      end;
      long_x:=8;
      main_x:=0;
@@ -336,7 +336,7 @@ for f:=0 to $27 do begin
        pos_x:=0;
      end;
      if (pos_x+8)>160 then long_x:=160-pos_x;
-     actualiza_trozo(main_x,0,long_x,1,pant_sprites,pos_x+7,pos_y+pos_linea,long_x,1,2);
+     actualiza_trozo(main_x,0,long_x,1,PANT_SPRITES,pos_x+7,pos_y+pos_linea,long_x,1,2);
   end;
 end;
 end;
@@ -1219,7 +1219,7 @@ lr35902_0.init_sound(gameboy_sound_update);
 init_timer(0,GB_CLOCK/16384,gb_main_timer,true);
 gb_timer:=init_timer(0,GB_CLOCK/4096,gb_prog_timer,false);
 //Sound Chips
-gameboy_sound_ini(freq_base_audio);
+gameboy_sound_ini(FREQ_BASE_AUDIO);
 //cargar roms
 hay_nvram:=false;
 //final

@@ -65,7 +65,7 @@ begin
   //Inicializo el state
   self.OPN.type_:=TYPE_YM2203;
   self.OPN.ST.clock:=clock;
-  self.OPN.ST.rate:=freq_base_audio;
+  self.OPN.ST.rate:=FREQ_BASE_AUDIO;
   self.tsample_num:=init_channel;
   self.opn.ST.IRQ_Handler:=nil;
   self.timer_adjust:=sound_status.cpu_clock/self.OPN.ST.clock;

@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 922
+  Left = 900
   Height = 198
-  Top = 259
+  Top = 220
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -2993,8 +2993,16 @@ object principal1: Tprincipal1
       end
       object MenuItem34: TMenuItem
         Caption = 'Game && Watch'
+        object donkeykongjr1: TMenuItem
+          Caption = 'Donkey Kong Jr'
+          OnClick = CambiarMaquina
+        end
         object donkeykongii1: TMenuItem
           Caption = 'Donkey Kong II'
+          OnClick = CambiarMaquina
+        end
+        object mariobros1: TMenuItem
+          Caption = 'Mario Bros'
           OnClick = CambiarMaquina
         end
       end

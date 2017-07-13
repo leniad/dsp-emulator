@@ -76,8 +76,9 @@ const
         (n:'gbc_boot.1';l:$100;p:0;crc:$779ea374),(n:'gbc_boot.2';l:$700;p:$200;crc:$f741807d),());
         sms_:array[0..1] of tipo_roms=((n:'mpr-12808.ic2';l:$2000;p:0;crc:$0072ed54),());
         //gnw
-        gnw_jr55:tipo_roms=(n:'jr55_cms54c_kms560';l:$1000;p:$0;crc:$46aed0ae);
-        gnw_dj101:tipo_roms=(n:'dj101';l:$1000;p:$0;crc:$8dcfb5d1);
+        gnw_jr55:array[0..1] of tipo_roms=((n:'jr55_cms54c_kms560';l:$1000;p:$0;crc:$46aed0ae),());
+        gnw_dj101:array[0..1] of tipo_roms=((n:'dj101';l:$1000;p:$0;crc:$8dcfb5d1),());
+        gnw_mw56:array[0..1] of tipo_roms=((n:'mw-56';l:$1000;p:$0;crc:$385e59da),());
         //Pacman
         pacman:array[0..9] of tipo_roms=(
         (n:'pacman.6e';l:$1000;p:0;crc:$c1e6ab10),(n:'pacman.6f';l:$1000;p:$1000;crc:$1a6fb2d4),
@@ -1070,13 +1071,14 @@ const
         (n:'darw_03.rom';l:$8000;p:0;crc:$57d0350d),(n:'darw_02.rom';l:$8000;p:$8000;crc:$559a71ab),
         (n:'darw_12.rom';l:$8000;p:$10000;crc:$faba5fef),(n:'darw_01.rom';l:$8000;p:$10000;crc:$15a16973),
         (n:'df.12';l:$100;p:0;crc:$89b952ef),(n:'df.13';l:$100;p:$100;crc:$d595e91d),());
-        srdarwin:array[0..12] of tipo_roms=(
+        srdarwin:array[0..13] of tipo_roms=(
         (n:'dy01-e.b14';l:$10000;p:$0;crc:$176e9299),(n:'dy00.b16';l:$10000;p:$10000;crc:$2bf6b461),
         (n:'dy03.b4';l:$10000;p:$0000;crc:$44f2a4f9),(n:'dy02.b5';l:$10000;p:$10000;crc:$522d9a9e),
         (n:'dy05.b6';l:$4000;p:$0000;crc:$8780e8a3),(n:'dy04.d7';l:$8000;p:$8000;crc:$2ae3591c),
         (n:'dy07.h16';l:$8000;p:$0000;crc:$97eaba60),(n:'dy06.h14';l:$8000;p:$8000;crc:$c279541b),
         (n:'dy09.k13';l:$8000;p:$10000;crc:$d30d1745),(n:'dy08.k11';l:$8000;p:$18000;crc:$71d645fd),
-        (n:'dy11.k16';l:$8000;p:$20000;crc:$fd9ccc5b),(n:'dy10.k14';l:$8000;p:$28000;crc:$88770ab8),());
+        (n:'dy11.k16';l:$8000;p:$20000;crc:$fd9ccc5b),(n:'dy10.k14';l:$8000;p:$28000;crc:$88770ab8),
+        (n:'id8751h.mcu';l:$1000;p:0;crc:$11cd6ca4),());
         //Double Dragon
         ddragon:array[0..21] of tipo_roms=(
         (n:'21j-1-5.26';l:$8000;p:$0;crc:$ae714964),(n:'21j-2-3.25';l:$8000;p:$8000;crc:$5779705e),
@@ -2266,7 +2268,7 @@ const
         (n:'cclimber.pr2';l:$20;p:$20;crc:$ab1940fa),(n:'cclimber.pr3';l:$20;p:$40;crc:$71317756),
         (n:'cc06';l:$800;p:0;crc:$481b64cc),(n:'cc05';l:$800;p:$1000;crc:$2c33b760),
         (n:'cc04';l:$800;p:$2000;crc:$332347cb),(n:'cc03';l:$800;p:$3000;crc:$4e4b3658),
-        (n:'cc02';l:$800;p:$0;crc:$de70babf),(n:'cc01';l:$800;p:$800;crc:$14178237),
+        (n:'cc02';l:$800;p:$0;crc:$14f3ecc9),(n:'cc01';l:$800;p:$800;crc:$21c0f9fb),
         (n:'cc13';l:$1000;p:$0;crc:$e0042f75),(n:'cc12';l:$1000;p:$1000;crc:$5da13aaa),());
         retofinv:array[0..17] of tipo_roms=(
         (n:'a37-03.70';l:$2000;p:$0;crc:$eae7459d),(n:'a37-02.71';l:$2000;p:$2000;crc:$72895e37),
@@ -2311,9 +2313,9 @@ writeln(fichero,'');
 writeln(fichero,'<datafile>');
 writeln(fichero,'  <header>');
 writeln(fichero,'    <name>DSP Emulator</name>');
-writeln(fichero,'    <description>DSP Emulator '+dsp_version+'</description>');
+writeln(fichero,'    <description>DSP Emulator '+DSP_VERSION+'</description>');
 writeln(fichero,'    <category>EMULATION</category>');
-writeln(fichero,'    <version>'+dsp_version+'</version>');
+writeln(fichero,'    <version>'+DSP_VERSION+'</version>');
 writeln(fichero,'    <date>'+DateToStr(date)+'</date>');
 writeln(fichero,'    <author>Leniad</author>');
 writeln(fichero,'    <email>leniad2@hotmail.com</email>');

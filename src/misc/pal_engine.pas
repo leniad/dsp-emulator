@@ -279,19 +279,19 @@ var
   colors:word;
 begin
 for colors:=0 to total_colors-1 do
-        paleta[colors]:=SDL_MapRGB(pantalla[pant_sprites].format, ppaleta[colors].r, ppaleta[colors].g, ppaleta[colors].b);
+        paleta[colors]:=SDL_MapRGB(pantalla[PANT_SPRITES].format, ppaleta[colors].r, ppaleta[colors].g, ppaleta[colors].b);
 end;
 
 procedure set_pal_color(pcolor:tcolor;pal_pos:word);inline;
 begin
-paleta[pal_pos]:=SDL_MapRGB(pantalla[pant_sprites].format, pcolor.r, pcolor.g, pcolor.b);
+paleta[pal_pos]:=SDL_MapRGB(pantalla[PANT_SPRITES].format, pcolor.r, pcolor.g, pcolor.b);
 end;
 
 procedure set_pal_color_alpha(pcolor:tcolor;pal_pos:word);inline;
 begin
-paleta[pal_pos]:=SDL_MapRGB(pantalla[pant_sprites].format, pcolor.r, pcolor.g, pcolor.b);
-paleta32[pal_pos]:=SDL_MapRGBA(pantalla[pant_sprites_alpha].format, pcolor.r, pcolor.g, pcolor.b,$ff);
-paleta_alpha[pal_pos]:=SDL_MapRGBA(pantalla[pant_sprites_alpha].format, pcolor.r, pcolor.g, pcolor.b,$80);
+paleta[pal_pos]:=SDL_MapRGB(pantalla[PANT_SPRITES].format, pcolor.r, pcolor.g, pcolor.b);
+paleta32[pal_pos]:=SDL_MapRGBA(pantalla[PANT_SPRITES_ALPHA].format, pcolor.r, pcolor.g, pcolor.b,$ff);
+paleta_alpha[pal_pos]:=SDL_MapRGBA(pantalla[PANT_SPRITES_ALPHA].format, pcolor.r, pcolor.g, pcolor.b,$80);
 end;
 
 end.

@@ -1,13 +1,13 @@
 object principal1: Tprincipal1
-  Left = 450
-  Top = 225
+  Left = 550
+  Top = 242
   HelpType = htKeyword
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 273
+  ClientHeight = 265
   ClientWidth = 370
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -589,7 +589,7 @@ object principal1: Tprincipal1
     Left = 321
     Top = 33
     Width = 49
-    Height = 221
+    Height = 213
     Align = alRight
     TabOrder = 1
     Visible = False
@@ -1229,7 +1229,7 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 254
+    Top = 246
     Width = 370
     Height = 19
     Align = alBottom
@@ -2749,6 +2749,10 @@ object principal1: Tprincipal1
           Caption = 'Donkey Kong II'
           OnClick = CambiarMaquina
         end
+        object MarioBros1: TMenuItem
+          Caption = 'Mario Bros'
+          OnClick = CambiarMaquina
+        end
       end
     end
     object uProcesador1: TMenuItem
@@ -2778,7 +2782,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807F00420002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807040520002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
