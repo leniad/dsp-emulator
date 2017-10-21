@@ -29,8 +29,8 @@ After some health problems (visit to the hospital included), I publish a new WIP
     +Athena: Added driver with sound
     +T.N.K III: Added driver with sound
 </pre><br>
-<img src='http://img1.imagilive.com/1017/tetris_atari.png'><img src='http://img1.imagilive.com/1017/ikari.png'><br>
-<img src='http://img1.imagilive.com/1017/athena.png'><img src='http://img1.imagilive.com/1017/tnk3.png'><br><br>
+<img src='http://img1.imagilive.com/1017/tetris_atari.png'><img src='http://img1.imagilive.com/1017/ikari.png'>
+<img src='http://img1.imagilive.com/1017/athena.png'><img src='http://img1.imagilive.com/1017/tnk3.png'><br>
 <b>13/07/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br>
 Enhanced Amstrad CPC emulation<br><pre>
 -Game and Watch
@@ -47,7 +47,7 @@ Enhanced Amstrad CPC emulation<br><pre>
     +Corrected palette and VBLANK
     +Added 2nd player controls, dip switches and screen flip
 </pre><br>
-<img src='http://img1.imagilive.com/0717/rex.png'><img src='http://img1.imagilive.com/0717/buggy.png'><img src='http://img1.imagilive.com/0717/helichopper.png'><br><br>
+<img src='http://img1.imagilive.com/0717/rex.png'><img src='http://img1.imagilive.com/0717/buggy.png'><img src='http://img1.imagilive.com/0717/helichopper.png'><br>
 <b>11/06/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br>
 At last I have emulated (not simulated) two Game and Watch games!. Thanks to MAME for the ROMs and the info.<br><pre>
 -General
@@ -58,7 +58,7 @@ At last I have emulated (not simulated) two Game and Watch games!. Thanks to MAM
     +Donkey Kong Jr: Added game with sound
     +Donkey Kong II: Added game with sound
 </pre><br>
-<img src='http://img1.imagilive.com/0617/gnw_dkongjr.png'><img src='http://img1.imagilive.com/0617/gnw_dkong2.png'><br><br>
+<img src='http://img1.imagilive.com/0617/gnw_dkongjr.png'><img src='http://img1.imagilive.com/0617/gnw_dkong2.png'><br>
 <b>10/05/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br><pre>
 -General
     +GFX: Added functions to rotate X axis and/or Y axis of a surface
@@ -69,7 +69,7 @@ At last I have emulated (not simulated) two Game and Watch games!. Thanks to MAM
 -Return of the Invaders
     +Added driver with sound
 </pre><br>
-<img src='http://img1.imagilive.com/0517/crazyclimber.png'><img src='http://img1.imagilive.com/0517/returnoftheinvaders.png'><br><br>
+<img src='http://img1.imagilive.com/0517/crazyclimber.png'><img src='http://img1.imagilive.com/0517/returnoftheinvaders.png'><br>
 <b>28/04/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br><pre>
 -General
     +Lazarus
@@ -159,7 +159,7 @@ At last I have emulated (not simulated) two Game and Watch games!. Thanks to MAM
     +Added driver with sound
 </pre><br>
 Please read the 'Whats New' for details<br>
-<img src='http://img1.imagilive.com/0317/simpsons.png'><img src='http://img1.imagilive.com/0317/vendetta.png'><br><br>
+<img src='http://img1.imagilive.com/0317/simpsons.png'><img src='http://img1.imagilive.com/0317/vendetta.png'><br>
 <b>22/01/17 - DSP Emulator 0.17b2 WIP. Updated source and windows 32bits binary</b><br>
 <pre>
 -General
