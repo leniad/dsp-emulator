@@ -18,7 +18,7 @@ After some health problems (visit to the hospital included), I publish a new WIP
     +Correct the size and data type of the NVRAM
 -Sega System 1/2
     +Fixed Z80 timmigs
-    +Added DIPs to all games and 2on player
+    +Added DIPs to all games and 2nd player
     +Improved sound IRQs
 -Mappy HW
     +Super Pacman: Fixed sprites
@@ -261,14 +261,14 @@ Merry Christmas and happy new year!<br>
     +Fixed a bug that if DSP is started with the ROMs list and no driver was selected, the emulator hangs (Thanks to FJ Marti)
     +Fixes to the ROMs/Samples file list exportation (Thanks to FJ Marti)
     +N2A03 
-        -Converted to CPU
-        -Converted to classes
+        -Converted to CPU
+        -Converted to classes
     +Taito Sound
-        -Converted to classes
-        -Integrated Z80 CPU
+        -Converted to classes
+        -Integrated Z80 CPU
     +Konami Sound
-        -Converted to classes
-        -Integrated Z80 CPU
+        -Converted to classes
+        -Integrated Z80 CPU
 -ExedExes
     +Added dipswitches
 -Express Raider
@@ -280,8 +280,8 @@ Merry Christmas and happy new year!<br>
 <b>15/10/16 - DSP Emulator 0.17b1. Win32 binary and source updated.</b><br><pre>
 -General
     +Namco IO
-        -Added 50XX control CPU
-        -Added 54XX sound CPU, using samples
+        -Added 50XX control CPU
+        -Added 54XX sound CPU, using samples
     +MB88XX CPU: Added opcodes $0f, $10, $1a, $20, $22, $2f and $48
     +Fixed folders load/save, now the correct last folder used for Spectrum, Amstrad, Coleco, NES, GB, etc is remembered
     +In general configuration menu, you can change preview images, samples, quick snapshot and NV-Ram folders. Removed NES, Coleco and GB folder change (useless now) 
