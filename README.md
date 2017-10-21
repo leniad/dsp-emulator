@@ -287,12 +287,12 @@ Merry Christmas and happy new year!<br>
     +In general configuration menu, you can change preview images, samples, quick snapshot and NV-Ram folders. Removed NES, Coleco and GB folder change (useless now) 
 -Spectrum
     +Z80 snapshot
-        -V1 - Fixed lenght of the compressed full memory block, I was ignoring the end mark
-        -V1 - Fixed buffer overflow, some times the snapshot data has more info that it's needed
-        -V2/V3 - Fixed uncompressed memory page inside of the data
-        -V2/V3 - Some checks to avoid bad snapshots
-        -V2/V3 - Now identify the correct Spectrum model
-        -V2/V3 - The preview image, now uses the active screen in 128k models
+        -V1 - Fixed lenght of the compressed full memory block, I was ignoring the end mark
+        -V1 - Fixed buffer overflow, some times the snapshot data has more info that it's needed
+        -V2/V3 - Fixed uncompressed memory page inside of the data
+        -V2/V3 - Some checks to avoid bad snapshots
+        -V2/V3 - Now identify the correct Spectrum model
+        -V2/V3 - The preview image, now uses the active screen in 128k models
 -Gun.Smoke HW
     +Gun.Smoke: Small video updates
     +1943: Fixed background scroll
@@ -342,9 +342,9 @@ Merry Christmas and happy new year!<br>
 <b>30/07/16 - DSP Emulator 0.17b1. Win32 binary and source updated.</b><br><pre>
 -General
     +Added support for IPF files natively without external libraries. 
-        -Many thanks to Jean Louis-Guerin (DrCoolZic) for the documententation 'http://info-coach.fr/atari/documents/_mydoc/IPF-Documentation.pdf'
-        -Many thanks also to Bruno Kukulcan and Yoan Courtois (Megachur) for some Amstrad CPC IPF files for testing.
--Updated languaje files with new messages
+        -Many thanks to Jean Louis-Guerin (DrCoolZic) for the documententation 'http://info-coach.fr/atari/documents/_mydoc/IPF-Documentation.pdf'
+        -Many thanks also to Bruno Kukulcan and Yoan Courtois (Megachur) for some Amstrad CPC IPF files for testing.
+        -Updated languaje files with new messages
 -Track & Field
     +Added driver with sound
 </pre><br>
