@@ -10,25 +10,25 @@ procedure cargar_gberet;
 implementation
 const
         //Green Beret
-        gberet_rom:array[0..3] of tipo_roms=(
+        gberet_rom:array[0..2] of tipo_roms=(
         (n:'577l03.10c';l:$4000;p:0;crc:$ae29e4ff),(n:'577l02.8c';l:$4000;p:$4000;crc:$240836a5),
-        (n:'577l01.7c';l:$4000;p:$8000;crc:$41fa3e1f),());
-        gberet_pal:array[0..3] of tipo_roms=(
+        (n:'577l01.7c';l:$4000;p:$8000;crc:$41fa3e1f));
+        gberet_pal:array[0..2] of tipo_roms=(
         (n:'577h09.2f';l:$20;p:0;crc:$c15e7c80),(n:'577h11.6f';l:$100;p:$20;crc:$2a1a992b),
-        (n:'577h10.5f';l:$100;p:$120;crc:$e9de1e53),());
+        (n:'577h10.5f';l:$100;p:$120;crc:$e9de1e53));
         gberet_char:tipo_roms=(n:'577l07.3f';l:$4000;p:0;crc:$4da7bd1b);
-        gberet_sprites:array[0..4] of tipo_roms=(
+        gberet_sprites:array[0..3] of tipo_roms=(
         (n:'577l06.5e';l:$4000;p:0;crc:$0f1cb0ca),(n:'577l05.4e';l:$4000;p:$4000;crc:$523a8b66),
-        (n:'577l08.4f';l:$4000;p:$8000;crc:$883933a4),(n:'577l04.3e';l:$4000;p:$c000;crc:$ccecda4c),());
+        (n:'577l08.4f';l:$4000;p:$8000;crc:$883933a4),(n:'577l04.3e';l:$4000;p:$c000;crc:$ccecda4c));
         //Mr Goemon
-        mrgoemon_rom:array[0..2] of tipo_roms=(
-        (n:'621d01.10c';l:$8000;p:0;crc:$b2219c56),(n:'621d02.12c';l:$8000;p:$8000;crc:$c3337a97),());
-        mrgoemon_pal:array[0..3] of tipo_roms=(
+        mrgoemon_rom:array[0..1] of tipo_roms=(
+        (n:'621d01.10c';l:$8000;p:0;crc:$b2219c56),(n:'621d02.12c';l:$8000;p:$8000;crc:$c3337a97));
+        mrgoemon_pal:array[0..2] of tipo_roms=(
         (n:'621a06.5f';l:$20;p:0;crc:$7c90de5f),(n:'621a08.7f';l:$100;p:$20;crc:$2fb244dd),
-        (n:'621a07.6f';l:$100;p:$120;crc:$3980acdc),());
+        (n:'621a07.6f';l:$100;p:$120;crc:$3980acdc));
         mrgoemon_char:tipo_roms=(n:'621a05.6d';l:$4000;p:0;crc:$f0a6dfc5);
-        mrgoemon_sprites:array[0..2] of tipo_roms=(
-        (n:'621d03.4d';l:$8000;p:0;crc:$66f2b973),(n:'621d04.5d';l:$8000;p:$8000;crc:$47df6301),());
+        mrgoemon_sprites:array[0..1] of tipo_roms=(
+        (n:'621d03.4d';l:$8000;p:0;crc:$66f2b973),(n:'621d04.5d';l:$8000;p:$8000;crc:$47df6301));
         //Dip
         gberet_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
@@ -331,37 +331,37 @@ case main_vars.tipo_maquina of
         //Timers
         timer_hs:=init_timer(z80_0.numero_cpu,10000,gberet_hi_score,true);
         //cargar roms
-        if not(cargar_roms(@memoria[0],@gberet_rom[0],'gberet.zip',0)) then exit;
+        if not(roms_load(@memoria,@gberet_rom,'gberet.zip',sizeof(gberet_rom))) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@gberet_char,'gberet.zip')) then exit;
+        if not(roms_load(@memoria_temp,@gberet_char,'gberet.zip',sizeof(gberet_char))) then exit;
         convert_chars;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@gberet_sprites[0],'gberet.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@gberet_sprites,'gberet.zip',sizeof(gberet_sprites))) then exit;
         convert_sprites;
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@gberet_pal[0],'gberet.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@gberet_pal,'gberet.zip',sizeof(gberet_pal))) then exit;
         marcade.dswb_val:=@gberet_dip_b;
   end;
   203:begin //Mr. Goemon
-        if not(cargar_roms(@memoria_temp[0],@mrgoemon_rom[0],'mrgoemon.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@mrgoemon_rom,'mrgoemon.zip',sizeof(mrgoemon_rom))) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$c000);
         for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$c000+(f*$800)],$800);
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@mrgoemon_char,'mrgoemon.zip')) then exit;
+        if not(roms_load(@memoria_temp,@mrgoemon_char,'mrgoemon.zip',sizeof(mrgoemon_char))) then exit;
         convert_chars;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@mrgoemon_sprites[0],'mrgoemon.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@mrgoemon_sprites,'mrgoemon.zip',sizeof(mrgoemon_sprites))) then exit;
         convert_sprites;
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@mrgoemon_pal[0],'mrgoemon.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@mrgoemon_pal,'mrgoemon.zip',sizeof(mrgoemon_pal))) then exit;
         marcade.dswb_val:=@mrgoemon_dip_b;
   end;
 end;
 for f:=0 to 31 do begin
     ctemp1:=memoria_temp[f];
-    colores[f].r:= $21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
-    colores[f].g:= $21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
-    colores[f].b:= 0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
+    colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
+    colores[f].g:=$21*((ctemp1 shr 3) and 1)+$47*((ctemp1 shr 4) and 1)+$97*((ctemp1 shr 5) and 1);
+    colores[f].b:=0+$47*((ctemp1 shr 6) and 1)+$97*((ctemp1 shr 7) and 1);
 end;
 set_pal(colores,32);
 //Poner el CLUT

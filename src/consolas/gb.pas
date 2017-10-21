@@ -11,6 +11,7 @@ type
             read_io:function (direccion:byte):byte;
             write_io:procedure (direccion:byte;valor:byte);
             video_render:procedure;
+            is_gbc:boolean;
   end;
   tgb_head=packed record
     title:array[0..10] of ansichar;
@@ -94,7 +95,7 @@ for f:=0 to $27 do begin
       if ((pos_x=0) or (pos_x>=168)) then continue;
       n:=n+1;
       if n=11 then exit;
-      sprites_time:=sprites_time+10;
+      sprites_time:=sprites_time+12;
       pos_x:=pos_x-8;
       //Paleta
       pal:=((atrib and $10) shr 2)+4;
@@ -269,7 +270,7 @@ for f:=0 to $27 do begin
       if ((pos_x=0) or (pos_x>=168)) then continue;
       n:=n+1;
       if n=11 then exit;
-      sprites_time:=sprites_time+10;
+      sprites_time:=sprites_time+12;
       pos_x:=pos_x-8;
       //Paleta
       pal:=(atrib and $7)*4;
@@ -303,7 +304,7 @@ for f:=0 to $27 do begin
               if (bg_prio[pos_x+x] and $80)<>0 then ptemp^:=paleta[max_colores]
                 else begin
                   if ((bg_prio[pos_x+x] and $3f)>f) then begin
-                    ptemp^:=paleta[spc_pal[pval+pal]];
+                    ptemp^:=paleta[(spc_pal[pval+pal]) and $7fff];
                     bg_prio[pos_x+x]:=(bg_prio[pos_x+x] and $c0) or f;
                   end else ptemp^:=paleta[max_colores];
                 end;
@@ -319,7 +320,7 @@ for f:=0 to $27 do begin
               if (bg_prio[pos_x+(7-x)] and $80)<>0 then ptemp^:=paleta[max_colores]
                 else begin
                   if ((bg_prio[pos_x+(7-x)] and $3f)>f) then begin
-                    ptemp^:=paleta[spc_pal[pval+pal]];
+                    ptemp^:=paleta[(spc_pal[pval+pal]) and $7fff];
                     bg_prio[pos_x+(7-x)]:=(bg_prio[pos_x+(7-x)] and $c0) or f;
                   end else ptemp^:=paleta[max_colores];
                 end;
@@ -369,7 +370,7 @@ begin
       for x:=0 to 7 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
         if (pval+tile_pal)<>0 then begin
-          ptemp^:=paleta[bgc_pal[pval+tile_pal]];
+          ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff];
           if (((atrib and $80)<>0) and (pval<>0)) then bg_prio[(f*8+x-scroll_x) and $ff]:=bg_prio[(f*8+x-scroll_x) and $ff] or $80;
         end else ptemp^:=paleta[max_colores];
         inc(ptemp);
@@ -378,7 +379,7 @@ begin
       for x:=7 downto 0 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
         if (pval+tile_pal)<>0 then begin
-          ptemp^:=paleta[bgc_pal[pval+tile_pal]];
+          ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff];
           if (((atrib and $80)<>0) and (pval<>0)) then bg_prio[(f*8+x-scroll_x) and $ff]:=bg_prio[(f*8+x-scroll_x) and $ff] or $80;
         end else ptemp^:=paleta[max_colores];
         inc(ptemp);
@@ -421,13 +422,13 @@ begin
     if (atrib and $20)<>0 then begin
       for x:=0 to 7 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-        ptemp^:=paleta[bgc_pal[pval+tile_pal]];
+        ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff];
         inc(ptemp);
       end;
     end else begin
       for x:=7 downto 0 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-        ptemp^:=paleta[bgc_pal[pval+tile_pal]];
+        ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff];
         inc(ptemp);
       end;
     end;
@@ -439,7 +440,7 @@ end;
 
 procedure update_video_gbc;
 begin
-single_line(7,linea_actual,bgc_pal[0],160,2);
+single_line(7,linea_actual,(bgc_pal[0] and $7fff),160,2);
 if lcd_ena then begin
   if (lcd_control and 1)=0 then begin //bg and window loses priority
     update_bg_gbc;
@@ -451,8 +452,8 @@ if lcd_ena then begin
     fillchar(bg_prio[0],$100,$7f);
     if (lcd_control and 2)<>0 then draw_sprites_gbc($80);
     update_bg_gbc;
-    if (lcd_control and $20)<>0 then update_window_gbc;
     if (lcd_control and 2)<>0 then draw_sprites_gbc($0);
+    if (lcd_control and $20)<>0 then update_window_gbc;
   end;
 end;
 end;
@@ -488,13 +489,13 @@ var
 begin
 case direccion of
   $00:leer_io:=joystick;
-  $01,$02:leer_io:=$ff; //Serial
+  $01,$02:leer_io:=$7f; //Serial
   $04:leer_io:=mtimer;
   $05:leer_io:=prog_timer;
   $06:leer_io:=tmodulo;
-  $07:leer_io:=tcontrol;
+  $07:leer_io:=$f8 or tcontrol;
   $0f:begin
-        tempb:=0;
+        tempb:=$e0;
         if lr35902_0.vblank_req then tempb:=tempb or $1;
         if lr35902_0.lcdstat_req  then tempb:=tempb or $2;
         if lr35902_0.timer_req  then tempb:=tempb or $4;
@@ -515,10 +516,11 @@ case direccion of
   $49:leer_io:=sprt1_pal;
   $4a:leer_io:=window_y;
   $4b:leer_io:=window_x;
-//  $80..$fe:leer_io:=io_ram[direccion];  //high memory
+  $80..$fe:leer_io:=io_ram[direccion];  //high memory
   $ff:leer_io:=irq_ena;
   else begin
     //MessageDlg('IO desconocida leer pos= '+inttohex(direccion and $ff,2), mtInformation,[mbOk], 0);
+    //leer_io:=$ff;
     leer_io:=io_ram[direccion];
   end;
 end;
@@ -529,17 +531,18 @@ var
   f:byte;
   addrs:word;
 begin
-io_ram[direccion]:=valor;
 case direccion of
-  $00:if (valor and $20)=0 then joystick:=(valor and $f0) or (marcade.in0 shr 4)
-          else if (valor and $10)=0 then joystick:=(valor and $f0) or (marcade.in0 and $f)
-            else joystick:=$3f;
+  $00:begin
+         joystick:=$cf or valor;
+         if (valor and $20)=0 then joystick:=joystick and ($f0 or (marcade.in0 shr 4));
+         if (valor and $10)=0 then joystick:=joystick and ($f0 or marcade.in0);
+      end;
   $01,$02:; //Serial
   $04:mtimer:=0;
   $05:prog_timer:=valor;
   $06:tmodulo:=valor;
   $07:begin  //timer control
-        tcontrol:=valor;
+        tcontrol:=valor and $7;
         case (valor and $3) of
           0:timer[gb_timer].time_final:=GB_CLOCK/4096;
           1:timer[gb_timer].time_final:=GB_CLOCK/262144;
@@ -607,8 +610,7 @@ case direccion of
   $4a:window_y:=valor;
   $4b:window_x:=valor;
   $50:enable_bios:=(valor=0);  //enable/disable ROM
-  $7e,$7f:;
-  $80..$fe:;  //high memory
+  $80..$fe:io_ram[direccion]:=valor;  //high memory
   $ff:begin  //irq enable
         irq_ena:=valor;
         lr35902_0.vblank_ena:=(valor and $1)<>0;
@@ -617,7 +619,8 @@ case direccion of
         lr35902_0.serial_ena:=(valor and $8)<>0;
         lr35902_0.joystick_ena:=(valor and $10)<>0;
       end;
-  //else MessageDlg('IO desconocida escribe pos= '+inttohex(direccion and $ff,2)+' - '+inttohex(valor,2), mtInformation,[mbOk], 0);
+  else io_ram[direccion]:=valor;
+  //MessageDlg('IO desconocida escribe pos= '+inttohex(direccion and $ff,2)+' - '+inttohex(valor,2), mtInformation,[mbOk], 0);
 end;
 end;
 
@@ -628,13 +631,13 @@ var
 begin
 case direccion of
   $00:leer_io_gbc:=joystick;
-  $01,$02:leer_io_gbc:=$ff; //Serial
+  $01,$02:leer_io_gbc:=$7f; //Serial
   $04:leer_io_gbc:=mtimer;
   $05:leer_io_gbc:=prog_timer;
   $06:leer_io_gbc:=tmodulo;
-  $07:leer_io_gbc:=tcontrol;
+  $07:leer_io_gbc:=$f8 or tcontrol;
   $0f:begin
-        tempb:=0;
+        tempb:=$e0;
         if lr35902_0.vblank_req then tempb:=tempb or $1;
         if lr35902_0.lcdstat_req  then tempb:=tempb or $2;
         if lr35902_0.timer_req  then tempb:=tempb or $4;
@@ -656,18 +659,18 @@ case direccion of
   $49:leer_io_gbc:=sprt1_pal;
   $4a:leer_io_gbc:=window_y;
   $4b:leer_io_gbc:=window_x;
-  $4d:if lr35902_0.change_speed then leer_io_gbc:=(lr35902_0.speed shl 7)+$7f
-        else leer_io_gbc:=(lr35902_0.speed shl 7)+$7e;
-  $4f:leer_io_gbc:=vram_nbank;
-  $55:if hdma_ena then leer_io_gbc:=$0
-        else leer_io_gbc:=$80;
+  $4d:leer_io_gbc:=(lr35902_0.speed shl 7)+$7e+byte(lr35902_0.change_speed);
+  $4f:leer_io_gbc:=$fe or vram_nbank;
+  $51..$54:leer_io_gbc:=$ff;
+  $55:if hdma_ena then leer_io_gbc:=hdma_pos
+        else leer_io_gbc:=$ff;
   $68:leer_io_gbc:=bgcolor_index;
   $69:if (bgcolor_index and 1)<>0 then leer_io_gbc:=bgc_pal[bgcolor_index shr 1] shr 8
         else leer_io_gbc:=bgc_pal[bgcolor_index shr 1] and $ff;
   $6a:leer_io_gbc:=spcolor_index;
   $6b:if (spcolor_index and 1)<>0 then leer_io_gbc:=spc_pal[spcolor_index shr 1] shr 8
         else leer_io_gbc:=spc_pal[spcolor_index shr 1] and $ff;
-  $70:leer_io_gbc:=wram_nbank;
+  $70:leer_io_gbc:=$f8 or wram_nbank;
   $80..$fe:leer_io_gbc:=io_ram[direccion];  //high memory
   $ff:leer_io_gbc:=irq_ena;
   else begin
@@ -687,9 +690,7 @@ for f:=0 to (size-1) do begin
   case src_addr of
     $0000..$7fff:temp:=memoria[src_addr];
     $8000..$9fff:temp:=vram_bank[vram_nbank,src_addr and $1fff];
-    $a000..$bfff:if @gb_mapper.ext_ram_getbyte<>nil then begin
-                    if ((gb_head.ram_size<>0) and ram_enable) then temp:=gb_mapper.ext_ram_getbyte(src_addr);
-               end;
+    $a000..$bfff:if @gb_mapper.ext_ram_getbyte<>nil then temp:=gb_mapper.ext_ram_getbyte(src_addr and $1fff);
     $c000..$cfff,$e000..$efff:temp:=wram_bank[0,src_addr and $fff];
     $d000..$dfff,$f000..$fdff:temp:=wram_bank[wram_nbank,src_addr and $fff];
     $fe00..$fe9f:temp:=sprt_ram[src_addr and $ff];
@@ -707,15 +708,17 @@ var
 begin
 io_ram[direccion]:=valor;
 case direccion of
-  $00:if (valor and $20)=0 then joystick:=(valor and $f0) or (marcade.in0 shr 4)
-          else if (valor and $10)=0 then joystick:=(valor and $f0) or (marcade.in0 and $f)
-            else joystick:=$3f;
+  $00:begin
+          joystick:=$cf or valor;
+          if (valor and $20)=0 then joystick:=joystick and ($d0 or (marcade.in0 shr 4));
+          if (valor and $10)=0 then joystick:=joystick and ($e0 or marcade.in0);
+      end;
   $01,$02:; //Serial
   $04:mtimer:=0;
   $05:prog_timer:=valor;
   $06:tmodulo:=valor;
   $07:begin  //timer control
-        tcontrol:=valor;
+        tcontrol:=valor and $7;
         case (valor and $3) of
           0:timer[gb_timer].time_final:=GB_CLOCK/4096;
           1:timer[gb_timer].time_final:=GB_CLOCK/262144;
@@ -751,7 +754,7 @@ case direccion of
             $0000..$3fff:sprt_ram[f]:=rom_bank[0,addrs];
             $4000..$7fff:sprt_ram[f]:=rom_bank[rom_nbank,addrs and $3fff];
             $8000..$9fff:sprt_ram[f]:=vram_bank[vram_nbank,addrs and $1fff];
-            $a000..$bfff:sprt_ram[f]:=ram_bank[vram_nbank,addrs and $1fff];
+            $a000..$bfff:if @gb_mapper.ext_ram_getbyte<>nil then sprt_ram[f]:=gb_mapper.ext_ram_getbyte(direccion and $1fff);
             $c000..$cfff,$e000..$efff:sprt_ram[f]:=wram_bank[0,addrs and $fff];
             $d000..$dfff,$f000..$fdff:sprt_ram[f]:=wram_bank[wram_nbank,addrs and $fff];
             $fe00..$fe9f:sprt_ram[f]:=sprt_ram[addrs and $ff];
@@ -759,7 +762,7 @@ case direccion of
           end;
           addrs:=addrs+1;
         end;
-        lr35902_0.contador:=lr35902_0.contador+(160 shr lr35902_0.speed);
+        lr35902_0.contador:=lr35902_0.contador+160;
       end;
   $47:bg_pal:=valor;
   $48:sprt0_pal:=valor;
@@ -780,7 +783,7 @@ case direccion of
           hdma_pos:=0;
       end else begin
           dma_trans((valor+1)*$10);
-          lr35902_0.contador:=lr35902_0.contador+((valor+1)*8);
+          lr35902_0.contador:=lr35902_0.contador+(32 shl lr35902_0.speed);
       end;
   $56:;
   $68:begin
@@ -788,8 +791,8 @@ case direccion of
         bgcolor_index:=valor and $3f;
       end;
   $69:begin
-        if (bgcolor_index and 1)<>0 then bgc_pal[bgcolor_index shr 1]:=(bgc_pal[bgcolor_index shr 1] and $ff) or ((valor and $7f) shl 8)
-          else bgc_pal[bgcolor_index shr 1]:=(bgc_pal[bgcolor_index shr 1] and $7f00) or valor;
+        if (bgcolor_index and 1)<>0 then bgc_pal[bgcolor_index shr 1]:=(bgc_pal[bgcolor_index shr 1] and $ff) or (valor shl 8)
+          else bgc_pal[bgcolor_index shr 1]:=(bgc_pal[bgcolor_index shr 1] and $ff00) or valor;
         if bgcolor_inc then bgcolor_index:=(bgcolor_index+1) and $3f;
       end;
   $6a:begin
@@ -797,8 +800,8 @@ case direccion of
         spcolor_index:=valor and $3f;
       end;
   $6b:begin
-        if (spcolor_index and 1)<>0 then spc_pal[spcolor_index shr 1]:=(spc_pal[spcolor_index shr 1] and $ff) or ((valor and $7f) shl 8)
-          else spc_pal[spcolor_index shr 1]:=(spc_pal[spcolor_index shr 1] and $7f00) or valor;
+        if (spcolor_index and 1)<>0 then spc_pal[spcolor_index shr 1]:=(spc_pal[spcolor_index shr 1] and $ff) or (valor shl 8)
+          else spc_pal[spcolor_index shr 1]:=(spc_pal[spcolor_index shr 1] and $ff00) or valor;
         if spcolor_inc then spcolor_index:=(spcolor_index+1) and $3f;
       end;
   $70:begin
@@ -827,28 +830,12 @@ if not(cartucho_cargado) then exit;
 init_controls(false,false,false,true);
 frame_m:=lr35902_0.tframes;
 while EmuStatus=EsRuning do begin
+  linea_cont_y:=0;
   for linea_actual:=0 to 153 do begin
-    if linea_cont_y=ly_compare then begin
-        lr35902_0.lcdstat_req:=(stat and $40)<>0;
-        stat:=stat or $4;
-    end else stat:=stat and $fb;
     lr35902_0.run(frame_m);
     frame_m:=frame_m+lr35902_0.tframes-lr35902_0.contador;
-    case linea_actual of
-        0..143:gameboy.video_render;  //Modos 2-3-0
-        144:begin //Modo 1 + VBLANK IRQ
-              //gameboy.video_render;
-              if lcd_ena then lr35902_0.vblank_req:=true;
-              lr35902_0.lcdstat_req:=((stat and $30)<>0) and ((stat and 3)<>1);
-              stat:=(stat and $fc) or $1;
-            end;
-        153:begin //Vuelvo a Modo 2
-              lr35902_0.lcdstat_req:=((stat and $20)<>0) and ((stat and 3)<>2);;
-              stat:=(stat and $fc) or $2;
-            end;
-    end;
-    if linea_cont_y=153 then linea_cont_y:=0
-      else linea_cont_y:=linea_cont_y+1;
+    if linea_actual<144 then gameboy.video_render;  //Modos 2-3-0
+    linea_cont_y:=linea_cont_y+1;
   end;
   eventos_gb;
   actualiza_trozo(7,0,160,144,2,0,0,160,144,pant_temp);
@@ -868,15 +855,20 @@ case direccion of
   //video ram
   $8000..$9fff:gb_getbyte:=vram_bank[vram_nbank,direccion and $1fff];
   //external (cartridge) RAM
-  $a000..$bfff:if @gb_mapper.ext_ram_getbyte<>nil then begin
-                    if ((gb_head.ram_size<>0) and ram_enable) then gb_getbyte:=gb_mapper.ext_ram_getbyte(direccion);
-               end;
+  $a000..$bfff:if @gb_mapper.ext_ram_getbyte<>nil then gb_getbyte:=gb_mapper.ext_ram_getbyte(direccion);
   //RAM bank 0
   $c000..$cfff,$e000..$efff:gb_getbyte:=wram_bank[0,direccion and $fff];
   //RAM bank 1
   $d000..$dfff,$f000..$fdff:gb_getbyte:=wram_bank[wram_nbank,direccion and $fff];
   //Sprites OAM
   $fe00..$fe9f:gb_getbyte:=sprt_ram[direccion and $ff];
+  $fea0..$feff:if not(gameboy.is_gbc) then gb_getbyte:=0
+                  else begin
+                        case (direccion and $ff) of
+                         $a0..$cf:gb_getbyte:=memoria[direccion];
+                         $d0..$ff:gb_getbyte:=memoria[$fec0+(direccion and $f)];
+                        end;
+                  end;
   //IO Ram
   $ff00..$ffff:gb_getbyte:=gameboy.read_io(direccion and $ff);
 end;
@@ -889,50 +881,183 @@ case direccion of
   //video ram
   $8000..$9fff:vram_bank[vram_nbank,direccion and $1fff]:=valor;
   //external (cartridge) RAM
-  $a000..$bfff:if @gb_mapper.ext_ram_putbyte<>nil then begin
-                    if ((gb_head.ram_size<>0) and ram_enable) then gb_mapper.ext_ram_putbyte(direccion,valor);
-               end;
+  $a000..$bfff:if @gb_mapper.ext_ram_putbyte<>nil then gb_mapper.ext_ram_putbyte(direccion,valor);
   //RAM bank 0
   $c000..$cfff,$e000..$efff:wram_bank[0,direccion and $fff]:=valor;
   //RAM bank 1
   $d000..$dfff,$f000..$fdff:wram_bank[wram_nbank,direccion and $fff]:=valor;
   //Sprites OAM
   $fe00..$fe9f:sprt_ram[direccion and $ff]:=valor;
+  $fea0..$feff:if gameboy.is_gbc then begin
+                  case (direccion and $ff) of
+                    $a0..$cf:memoria[direccion]:=valor;
+                    $d0..$ff:memoria[$fec0+(direccion and $f)]:=valor;
+                  end;
+               end;
   //IO Ram
   $ff00..$ffff:gameboy.write_io(direccion and $ff,valor);
 end;
 end;
 
-//Sonido and timers
 procedure gb_despues_instruccion(estados_t:word);
+var
+  lcd_compare,lcd_mode:boolean;
 begin
+lcd_compare:=false;
+lcd_mode:=false;
+case lr35902_0.contador of
+  4:begin
+      //LY compare
+      case linea_actual of
+        0:; //Noy hay comparacion!!!
+        1..153:if linea_actual=ly_compare then begin
+              lcd_compare:=(stat and $40)<>0;
+              stat:=stat or $4;
+           end else stat:=stat and $fb;
+      end;
+      case linea_actual of
+        0..143:begin
+                 lcd_mode:=((stat and $20)<>0) and ((stat and 3)<>2);
+                 stat:=(stat and $fc) or $2;
+               end;
+        144:begin
+              //IRQ
+              if lcd_ena then lr35902_0.vblank_req:=true;
+              //Status 1
+              lcd_mode:=((stat and $30)<>0) and ((stat and 3)<>1);
+              stat:=(stat and $fc) or $1;
+            end;
+      end;
+  end;
+  12:if (linea_actual=153) then begin
+        if ly_compare=0 then begin
+          lcd_compare:=(stat and $40)<>0;
+          stat:=stat or $4;
+        end else stat:=stat and $fb;
+  end;
+  80:if linea_actual<144 then stat:=(stat and $fc) or $3;
+  252..600:if ((linea_actual<144) and ((sprites_time+252)=lr35902_0.contador)) then begin
+                lcd_mode:=((stat and $8)<>0) and ((stat and 3)<>0);
+                stat:=stat and $fc;
+           end;
+end;
+lr35902_0.lcdstat_req:=lr35902_0.lcdstat_req or lcd_compare or lcd_mode;
+end;
+
+procedure gbc_despues_instruccion(estados_t:word);
+var
+  lcd_compare,lcd_mode:boolean;
+begin
+lcd_compare:=false;
+lcd_mode:=false;
 if lr35902_0.changed_speed then begin
   lr35902_0.tframes:=((GB_CLOCK shl lr35902_0.speed)/154)/llamadas_maquina.fps_max;
   sound_engine_change_clock(GB_CLOCK shl lr35902_0.speed);
   lr35902_0.changed_speed:=false;
 end;
-if hdma_ena then begin
-    dma_trans($10);
-    lr35902_0.contador:=lr35902_0.contador+8;
-    dma_src:=dma_src+$10;
-    dma_dst:=dma_dst+$10;
-    hdma_pos:=hdma_pos+1;
-    if hdma_pos>=hdma_size then hdma_ena:=false;
+if lr35902_0.speed<>0 then begin //Double speed
+  case lr35902_0.contador of
+    4:begin
+      //LY compare
+      case linea_actual of
+        0:; //Noy hay comparacion!!!
+        1..153:if linea_actual=ly_compare then begin
+              lcd_compare:=(stat and $40)<>0;
+              stat:=stat or $4;
+           end else stat:=stat and $fb;
+      end;
+      case linea_actual of
+        0..143:begin
+                 lcd_mode:=((stat and $20)<>0) and ((stat and 3)<>2);
+                 stat:=(stat and $fc) or $2;
+               end;
+        144:begin
+              //IRQ
+              if lcd_ena then lr35902_0.vblank_req:=true;
+              //Status 1
+              lcd_mode:=((stat and $30)<>0) and ((stat and 3)<>1);
+              stat:=(stat and $fc) or $1;
+            end;
+      end;
   end;
-if (linea_actual>143) then exit;
-if lr35902_0.contador<(82 shl lr35902_0.speed) then begin //Mode 2
-  lr35902_0.lcdstat_req:=((stat and $20)<>0) and ((stat and 3)<>2);
-  stat:=(stat and $fc) or $2;
-end else begin //Mode 3
-  if ((lr35902_0.contador+sprites_time)<(252 shl lr35902_0.speed)) then begin
-    stat:=(stat and $fc) or $3;
-  end else begin
-    lr35902_0.lcdstat_req:=((stat and $8)<>0) and ((stat and 3)<>0);
-    stat:=stat and $fc;
+  16:if (linea_actual=153) then begin
+        if ly_compare=0 then begin
+          lcd_compare:=(stat and $40)<>0;
+          stat:=stat or $4;
+        end else stat:=stat and $fb;
+  end;
+  160:if linea_actual<144 then stat:=(stat and $fc) or $3;
+  496..1200:if (linea_actual<144) then begin
+              if ((sprites_time+496)=lr35902_0.contador) then begin
+                lcd_mode:=((stat and $8)<>0) and ((stat and 3)<>0);
+                stat:=stat and $fc;
+              end;
+              if (lr35902_0.contador=616) then begin
+                if hdma_ena then begin
+                  dma_trans($10);
+                  dma_src:=dma_src+$10;
+                  dma_dst:=dma_dst+$10;
+                  hdma_pos:=hdma_pos+1;
+                  if hdma_pos=hdma_size then hdma_ena:=false;
+                  lr35902_0.contador:=lr35902_0.contador+16;
+              end;
+              end;
+            end;
+  end;
+end else begin
+  case lr35902_0.contador of
+    0:begin
+      //LY compare
+      case linea_actual of
+        0:; //Noy hay comparacion!!!
+        1..153:if linea_actual=ly_compare then begin
+              lcd_compare:=(stat and $40)<>0;
+              stat:=stat or $4;
+           end else stat:=stat and $fb;
+      end;
+      case linea_actual of
+        0..143:begin
+                 lcd_mode:=((stat and $20)<>0) and ((stat and 3)<>2);
+                 stat:=(stat and $fc) or $2;
+               end;
+        144:begin
+              //IRQ
+              if lcd_ena then lr35902_0.vblank_req:=true;
+              //Status 1
+              lcd_mode:=((stat and $30)<>0) and ((stat and 3)<>1);
+              stat:=(stat and $fc) or $1;
+            end;
+      end;
+  end;
+  8:if (linea_actual=153) then begin
+        if ly_compare=0 then begin
+          lcd_compare:=(stat and $40)<>0;
+          stat:=stat or $4;
+        end else stat:=stat and $fb;
+  end;
+  80:if linea_actual<144 then stat:=(stat and $fc) or $3;
+  248..600:if (linea_actual<144) then begin
+              if ((sprites_time+248)=lr35902_0.contador) then begin   //H-Blank
+                lcd_mode:=((stat and $8)<>0) and ((stat and 3)<>0);
+                stat:=stat and $fc;
+              end;
+              if (lr35902_0.contador=368) then begin
+                if hdma_ena then begin
+                  dma_trans($10);
+                  dma_src:=dma_src+$10;
+                  dma_dst:=dma_dst+$10;
+                  hdma_pos:=hdma_pos+1;
+                  if hdma_pos=hdma_size then hdma_ena:=false;
+                  lr35902_0.contador:=lr35902_0.contador+8;
+                end;
+              end;
+           end;
   end;
 end;
+lr35902_0.lcdstat_req:=lr35902_0.lcdstat_req or lcd_compare or lcd_mode;
 end;
 
+//Sonido and timers
 procedure gb_main_timer;
 begin
   mtimer:=mtimer+1;
@@ -956,7 +1081,8 @@ begin
  prog_timer:=0;
  rom_mode:=false;
  ram_enable:=false;
- rom_nbank:=1;
+ map_enable:=false;
+ rom_nbank:=0;
  ram_nbank:=0;
  vram_nbank:=0;
  wram_nbank:=1;
@@ -966,6 +1092,7 @@ begin
  marcade.in0:=$ff;
  joystick:=$ff;
  hdma_ena:=false;
+ lcd_control:=$80;
  lcd_ena:=true;
  if not(rom_exist) then begin
    enable_bios:=false;
@@ -1062,6 +1189,8 @@ begin
   gameboy.read_io:=leer_io;
   gameboy.write_io:=escribe_io;
   gameboy.video_render:=update_video_gb;
+  gameboy.is_gbc:=false;
+  lr35902_0.change_despues_instruccion(gb_despues_instruccion);
   extension:=extension_fichero(RomFile);
   if extension='ZIP' then begin
     if not(search_file_from_zip(RomFile,'*.gb',nombre_file,longitud,crc,false)) then
@@ -1103,6 +1232,8 @@ begin
     gameboy.read_io:=leer_io_gbc;
     gameboy.write_io:=escribe_io_gbc;
     gameboy.video_render:=update_video_gbc;
+    gameboy.is_gbc:=true;
+    lr35902_0.change_despues_instruccion(gbc_despues_instruccion);
   end;
   if hay_nvram then write_file(nombre_rom,@ram_bank[0,0],$2000);
   nombre_rom:=Directory.Arcade_nvram+ChangeFileExt(nombre_file,'.nv');
@@ -1122,21 +1253,23 @@ begin
   mal:=true;
   case gb_head.cart_type of
     0:mal:=false; //No mapper
-    $01..$03,$ff:begin  //mbc1 & HuC-1
-        gb_mapper.rom_putbyte:=gb_putbyte_mbc1;
-        case gb_head.cart_type of
-          1:;
-          2:begin //RAM
-              gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc1;
-              gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc1;
+    $01..$03:begin  //mbc1
+          gb_mapper.rom_putbyte:=gb_putbyte_mbc1;
+          case gb_head.cart_type of
+            1:;
+            2:begin //RAM
+                gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc1;
+                gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc1;
+              end;
+            3:begin //RAM + Battery
+                gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc1;
+                gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc1;
+                if gb_head.ram_size<>0 then begin
+                    if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+                    hay_nvram:=true;
+                end;
+            end;
           end;
-          3,$ff:begin //RAM + Battery
-              gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc1;
-              gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc1;
-              if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
-              hay_nvram:=true;
-          end;
-        end;
         mal:=false;
       end;
       $05,$06:begin //mbc2
@@ -1146,12 +1279,20 @@ begin
           6:begin //RAM + Battery
               gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc2;
               gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc2;
-              if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
-              hay_nvram:=true;
+              if gb_head.ram_size<>0 then begin
+                  if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+                  hay_nvram:=true;
+              end;
           end;
         end;
         mal:=false;
       end;
+      $0d:begin
+            gb_mapper.rom_putbyte:=gb_putbyte_mmm01;
+            gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mmm01;
+            gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mmm01;
+            mal:=false;
+          end;
       $19..$1e:begin //mbc5
           gb_mapper.rom_putbyte:=gb_putbyte_mbc5;
           case gb_head.cart_type of
@@ -1163,15 +1304,26 @@ begin
             $1b,$1e:begin //RAM + Battery
                       gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_mbc5;
                       gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_mbc5;
-                      if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
-                      hay_nvram:=true;
+                      if gb_head.ram_size<>0 then begin
+                          if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+                          hay_nvram:=true;
+                      end;
                     end;
           end;
           mal:=false;
          end;
+      $ff:begin //HuC-1
+            gb_mapper.rom_putbyte:=gb_putbyte_huc1;
+            gb_mapper.ext_ram_getbyte:=gb_get_ext_ram_huc1;
+            gb_mapper.ext_ram_putbyte:=gb_put_ext_ram_huc1;
+            if gb_head.ram_size<>0 then begin
+              if read_file_size(nombre_rom,longitud) then read_file(nombre_rom,@ram_bank[0,0],longitud);
+              hay_nvram:=true;
+            end;
+            mal:=false;
+          end;
       else MessageDlg('Mapper '+inttohex(gb_head.cart_type,2)+' no implementado', mtInformation,[mbOk], 0);
   end;
-
   if not(mal) then begin
     if (gb_head.cgb_flag and $80)<>0 then begin //GameBoy Color
       dir:=directory.arcade_list_roms[find_rom_multiple_dirs('gbcolor.zip')];
@@ -1213,7 +1365,6 @@ iniciar_video(160,144);
 //Main CPU
 lr35902_0:=cpu_lr.Create(GB_CLOCK,154); //154 lineas, 456 estados t por linea
 lr35902_0.change_ram_calls(gb_getbyte,gb_putbyte);
-lr35902_0.change_despues_instruccion(gb_despues_instruccion);
 lr35902_0.init_sound(gameboy_sound_update);
 //Timers internos de la GB
 init_timer(0,GB_CLOCK/16384,gb_main_timer,true);

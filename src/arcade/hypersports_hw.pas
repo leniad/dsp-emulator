@@ -45,7 +45,8 @@ var
 procedure update_video_hypersports;
 var
   x,y,atrib:byte;
-  f,nchar,color,scroll:word;
+  f,nchar,color:word;
+  scroll_x:array[0..$1f] of word;
 begin
 for f:=0 to $7ff do begin
    if gfx[0].buffer[f] then begin
@@ -58,10 +59,9 @@ for f:=0 to $7ff do begin
       gfx[0].buffer[f]:=false;
    end;
 end;
-for f:=0 to $1f do begin
-   scroll:=memoria[$10c0+(f*2)]+((memoria[$10c1+(f*2)] and 1) shl 8);
-   scroll__x_part(1,2,scroll,0,f*8,8);
-end;
+
+for f:=0 to $1f do scroll_x[f]:=memoria[$10c0+(f*2)]+((memoria[$10c1+(f*2)] and 1) shl 8);
+scroll__x_part2(1,2,8,@scroll_x);
 for f:=$1f downto 0 do begin
   atrib:=memoria[$1000+(f*4)];
   nchar:=memoria[$1002+(f*4)]+((atrib and $20) shl 3);

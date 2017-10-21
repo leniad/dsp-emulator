@@ -9,18 +9,18 @@ procedure cargar_ms;
 
 implementation
 const
-        ms_rom:array[0..6] of tipo_roms=(
+        ms_rom:array[0..5] of tipo_roms=(
         (n:'rom6.bin';l:$2000;p:$4000;crc:$7bd9c6cd),(n:'rom5.bin';l:$2000;p:$6000;crc:$a83f04a6),
         (n:'rom4.bin';l:$2000;p:$8000;crc:$46c73714),(n:'rom3.bin';l:$2000;p:$A000;crc:$34f8b8a3),
-        (n:'rom2.bin';l:$2000;p:$C000;crc:$bfd22cfc),(n:'rom1.bin';l:$2000;p:$E000;crc:$fb163e38),());
-        ms_char:array[0..6] of tipo_roms=(
+        (n:'rom2.bin';l:$2000;p:$C000;crc:$bfd22cfc),(n:'rom1.bin';l:$2000;p:$E000;crc:$fb163e38));
+        ms_char:array[0..5] of tipo_roms=(
         (n:'ms6';l:$2000;p:$0000;crc:$85c83806),(n:'ms9';l:$2000;p:$2000;crc:$b146c6ab),
         (n:'ms7';l:$2000;p:$4000;crc:$d025f84d),(n:'ms10';l:$2000;p:$6000;crc:$d85015b5),
-        (n:'ms8';l:$2000;p:$8000;crc:$53765d89),(n:'ms11';l:$2000;p:$A000;crc:$919ee527),());
-        ms_sprite:array[0..6] of tipo_roms=(
+        (n:'ms8';l:$2000;p:$8000;crc:$53765d89),(n:'ms11';l:$2000;p:$A000;crc:$919ee527));
+        ms_sprite:array[0..5] of tipo_roms=(
         (n:'ms12';l:$2000;p:$0000;crc:$72d8331d),(n:'ms13';l:$2000;p:$2000;crc:$845a1f9b),
         (n:'ms14';l:$2000;p:$4000;crc:$822874b0),(n:'ms15';l:$2000;p:$6000;crc:$4594e53c),
-        (n:'ms16';l:$2000;p:$8000;crc:$2f470b0f),(n:'ms17';l:$2000;p:$A000;crc:$38966d1b),());
+        (n:'ms16';l:$2000;p:$8000;crc:$2f470b0f),(n:'ms17';l:$2000;p:$A000;crc:$38966d1b));
         ms_pal:tipo_roms=(n:'ic61';l:$20;p:0;crc:$e802d6cf);
         //Dip
         ms_dip_a:array [0..3] of def_dip=(
@@ -186,11 +186,11 @@ begin
 if direccion>$3fff then exit;
 case direccion of
   0..$fff:memoria[direccion]:=valor;
-  $1000..$17ff:begin
+  $1000..$17ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
-  $1800..$1fff:begin
+  $1800..$1fff:if memoria[direccion]<>valor then begin
                   gfx[2].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
@@ -253,7 +253,6 @@ var
   memoria_temp:array[0..$bfff] of byte;
 const
     pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -276,27 +275,27 @@ m6502_0.init_sound(ms_sound_update);
 ay8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
 ay8910_1:=ay8910_chip.create(1500000,AY8910,0.3);
 //cargar roms
-if not(cargar_roms(@memoria[0],@ms_rom[0],'mystston.zip',0)) then exit;
+if not(roms_load(@memoria,@ms_rom,'mystston.zip',sizeof(ms_rom))) then exit;
 //Cargar chars
-if not(cargar_roms(@memoria_temp[0],@ms_char[0],'mystston.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@ms_char,'mystston.zip',sizeof(ms_char))) then exit;
 init_gfx(0,8,8,2048);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,$4000*8*2,$4000*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,true);
 //sprites
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,$4000*8*2,$4000*8,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //Cargar sprites fondo
-if not(cargar_roms(@memoria_temp[0],@ms_sprite[0],'mystston.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@ms_sprite,'mystston.zip',sizeof(ms_sprite))) then exit;
 init_gfx(2,16,16,512);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //poner la paleta
-if not(cargar_roms(@memoria_temp[0],@ms_pal,'mystston.zip',1)) then exit;
+if not(roms_load(@memoria_temp,@ms_pal,'mystston.zip',sizeof(ms_pal))) then exit;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances_rg[0],@weights_rg[0],0,4700,
-			2,@resistances_b[0],@weights_b[0],0,4700,
+			3,@resistances_rg,@weights_rg,0,4700,
+			2,@resistances_b,@weights_b,0,4700,
 			0,nil,nil,0,0);
 for f:=24 to 63 do begin
   buffer_paleta[f]:=memoria_temp[f-24];

@@ -1406,7 +1406,6 @@ write_ga($80+(cpc_sna.ga_conf and $3f));
 //RAM
 write_pal(0,cpc_sna.ram_config);
 //CRT
-cpc_crt.vsync_cont:=0;
 cpc_crt.reg:=cpc_sna.crt_index and $1f;
 for f:=0 to 17 do cpc_crt.regs[f]:=cpc_sna.crt_regs[f];
 cpc_calc_crt;

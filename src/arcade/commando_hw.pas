@@ -259,8 +259,8 @@ z80_1.init_sound(commando_sound_update);
 //IRQ Sound CPU
 init_timer(z80_1.numero_cpu,3000000/(4*60),commando_snd_irq,true);
 //Sound Chips
-YM2203_0:=ym2203_chip.create(1500000,2);
-YM2203_1:=ym2203_chip.create(1500000,2);
+YM2203_0:=ym2203_chip.create(1500000);
+YM2203_1:=ym2203_chip.create(1500000);
 //cargar y desencriptar las ROMS
 if not(roms_load(@memoria,@commando_rom,'commando.zip',sizeof(commando_rom))) then exit;
 memoria_dec[0]:=memoria[0];

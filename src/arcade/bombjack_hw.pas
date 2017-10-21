@@ -9,19 +9,19 @@ procedure cargar_bombjack;
 
 implementation
 const
-        bombjack_rom:array[0..5] of tipo_roms=(
+        bombjack_rom:array[0..4] of tipo_roms=(
         (n:'09_j01b.bin';l:$2000;p:0;crc:$c668dc30),(n:'10_l01b.bin';l:$2000;p:$2000;crc:$52a1e5fb),
         (n:'11_m01b.bin';l:$2000;p:$4000;crc:$b68a062a),(n:'12_n01b.bin';l:$2000;p:$6000;crc:$1d3ecee5),
-        (n:'13.1r';l:$2000;p:$c000;crc:$70e0244d),());
-        bombjack_char:array[0..3] of tipo_roms=(
+        (n:'13.1r';l:$2000;p:$c000;crc:$70e0244d));
+        bombjack_char:array[0..2] of tipo_roms=(
         (n:'03_e08t.bin';l:$1000;p:0;crc:$9f0470d5),(n:'04_h08t.bin';l:$1000;p:$1000;crc:$81ec12e6),
-        (n:'05_k08t.bin';l:$1000;p:$2000;crc:$e87ec8b1),());
-        bombjack_char16:array[0..3] of tipo_roms=(
+        (n:'05_k08t.bin';l:$1000;p:$2000;crc:$e87ec8b1));
+        bombjack_char16:array[0..2] of tipo_roms=(
         (n:'06_l08t.bin';l:$2000;p:0;crc:$51eebd89),(n:'07_n08t.bin';l:$2000;p:$2000;crc:$9dd98e9d),
-        (n:'08_r08t.bin';l:$2000;p:$4000;crc:$3155ee7d),());
-        bombjack_sprites:array[0..3] of tipo_roms=(
+        (n:'08_r08t.bin';l:$2000;p:$4000;crc:$3155ee7d));
+        bombjack_sprites:array[0..2] of tipo_roms=(
         (n:'16_m07b.bin';l:$2000;p:0;crc:$94694097),(n:'15_l07b.bin';l:$2000;p:$2000;crc:$013f58f2),
-        (n:'14_j07b.bin';l:$2000;p:$4000;crc:$101c858d),());
+        (n:'14_j07b.bin';l:$2000;p:$4000;crc:$101c858d));
         bombjack_tiles:tipo_roms=(n:'02_p04t.bin';l:$1000;p:0;crc:$398d4a02);
         bombjack_sonido:tipo_roms=(n:'01_h03t.bin';l:$2000;p:0;crc:$8407917d);
         //DIP
@@ -361,25 +361,25 @@ ay8910_0:=ay8910_chip.create(1500000,AY8910,0.13);
 ay8910_1:=ay8910_chip.create(1500000,AY8910,0.13);
 ay8910_2:=ay8910_chip.create(1500000,AY8910,0.13);
 //cargar roms
-if not(cargar_roms(@memoria[0],@bombjack_rom[0],'bombjack.zip',0)) then exit;
+if not(roms_load(@memoria,@bombjack_rom,'bombjack.zip',sizeof(bombjack_rom))) then exit;
 //cargar roms sonido
-if not(cargar_roms(@mem_snd[0],@bombjack_sonido,'bombjack.zip')) then exit;
+if not(roms_load(@mem_snd,@bombjack_sonido,'bombjack.zip',sizeof(bombjack_sonido))) then exit;
 //informacion adicional de las tiles
-if not(cargar_roms(@memoria_fondo[0],@bombjack_tiles,'bombjack.zip')) then exit;
+if not(roms_load(@memoria_fondo,@bombjack_tiles,'bombjack.zip',sizeof(bombjack_tiles))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@bombjack_char[0],'bombjack.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@bombjack_char,'bombjack.zip',sizeof(bombjack_char))) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0*8,512*8*8,512*2*8*8);
 convert_gfx(0,0,@memoria_temp,@pt_x,@pt_y,true,false);
 //convertir chars16
-if not(cargar_roms(@memoria_temp,@bombjack_char16,'bombjack.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@bombjack_char16,'bombjack.zip',sizeof(bombjack_char16))) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,0,1024*8*8,1024*2*8*8);
 convert_gfx(1,0,@memoria_temp,@pt_x,@pt_y,true,false);
 //sprites
-if not(cargar_roms(@memoria_temp,@bombjack_sprites,'bombjack.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@bombjack_sprites,'bombjack.zip',sizeof(bombjack_sprites))) then exit;
 init_gfx(2,16,16,128);
 gfx[2].trans[0]:=true;
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,true,false);
@@ -398,7 +398,7 @@ bombjack_reset;
 bombjack_iniciar:=true;
 end;
 
-procedure Cargar_bombjack;
+procedure cargar_bombjack;
 begin
 llamadas_maquina.iniciar:=bombjack_iniciar;
 llamadas_maquina.bucle_general:=bombjack_principal;

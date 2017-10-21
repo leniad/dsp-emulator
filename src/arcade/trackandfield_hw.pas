@@ -44,7 +44,8 @@ var
 procedure update_video_trackfield;inline;
 var
   x,y,atrib:byte;
-  f,nchar,color,scroll:word;
+  f,nchar,color:word;
+  scroll_x:array[0..$1f] of word;
 begin
 for f:=0 to $7ff do begin
    if gfx[0].buffer[f] then begin
@@ -57,10 +58,8 @@ for f:=0 to $7ff do begin
       gfx[0].buffer[f]:=false;
    end;
 end;
-for f:=0 to $1f do begin
-   scroll:=memoria[$1840+f]+((memoria[$1c40+f] and 1) shl 8);
-   scroll__x_part(1,2,scroll,0,f*8,8);
-end;
+for f:=0 to $1f do scroll_x[f]:=memoria[$1840+f]+((memoria[$1c40+f] and 1) shl 8);
+scroll__x_part2(1,2,8,@scroll_x);
 for f:=$1f downto 0 do begin
   atrib:=memoria[$1800+(f*2)];
   nchar:=memoria[$1c01+(f*2)]+((atrib and $20) shl 3);

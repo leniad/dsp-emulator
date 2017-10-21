@@ -35,7 +35,7 @@ var
  memoria_rom:array[0..9,0..$3FFF] of byte;
  video_circuit,bank_rom,prot_0,prot_1,vreg,sound_latch:byte;
  page_ram:array[0..1,0..$1fff] of byte;
- scroll_ram:array[0..1,0..$3f] of byte;
+ scroll_ram:array[0..1,0..$3f] of word;
  priority:boolean;
 
 procedure draw_sprites(bank:byte);inline;
@@ -51,14 +51,12 @@ var
   x,y,f,nchar,color:word;
   atrib:byte;
 procedure draw_chip(chip,pant1,pant2:byte);inline;
-var
-  f:byte;
 begin
 if (K007121_chip[chip].control[1] and 2)<>0 then begin
-    for f:=0 to 31 do begin
-      scroll__x_part(pant1,5,scroll_ram[1,f],0,f*8,8);
-      scroll__x_part(pant2,5,scroll_ram[1,f],0,f*8,8);
-    end;
+    //for f:=0 to 31 do begin
+    scroll__x_part2(pant1,5,8,@scroll_ram[1,0]);
+    scroll__x_part2(pant2,5,8,@scroll_ram[1,0]);
+    //end;
   end else begin
     scroll_x_y(pant1,5,K007121_chip[chip].control[0] or ((K007121_chip[chip].control[1] and 1) shl 8),K007121_chip[chip].control[2]);
     scroll_x_y(pant2,5,K007121_chip[chip].control[0] or ((K007121_chip[chip].control[1] and 1) shl 8),K007121_chip[chip].control[2]);
@@ -136,7 +134,8 @@ end else begin
   draw_sprites(0);
 end;
 //Text
-if (K007121_chip[0].control[$1] and 8)<>0 then for f:=0 to 31 do scroll__x_part(6,5,scroll_ram[0,32+f],0,f*8,8);
+if (K007121_chip[0].control[$1] and 8)<>0 then scroll__x_part2(6,5,8,@scroll_ram[0,32]);
+//for f:=0 to 31 do scroll__x_part(6,5,scroll_ram[0,32+f],0,f*8,8);
 //Crop
 if (K007121_chip[0].control[$3] and $40)<>0 then begin
   for f:=0 to $1f do begin

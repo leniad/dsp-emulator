@@ -10,17 +10,17 @@ procedure cargar_dkong;
 implementation
 const
         //Donkey Kong
-        dkong_rom:array[0..4] of tipo_roms=(
+        dkong_rom:array[0..3] of tipo_roms=(
         (n:'c_5et_g.bin';l:$1000;p:0;crc:$ba70b88b),(n:'c_5ct_g.bin';l:$1000;p:$1000;crc:$5ec461ec),
-        (n:'c_5bt_g.bin';l:$1000;p:$2000;crc:$1c97d324),(n:'c_5at_g.bin';l:$1000;p:$3000;crc:$b9005ac0),());
-        dkong_pal:array[0..3] of tipo_roms=(
+        (n:'c_5bt_g.bin';l:$1000;p:$2000;crc:$1c97d324),(n:'c_5at_g.bin';l:$1000;p:$3000;crc:$b9005ac0));
+        dkong_pal:array[0..2] of tipo_roms=(
         (n:'c-2k.bpr';l:$100;p:0;crc:$e273ede5),(n:'c-2j.bpr';l:$100;p:$100;crc:$d6412358),
-        (n:'v-5e.bpr';l:$100;p:$200;crc:$b869b8f5),());
-        dkong_char:array[0..2] of tipo_roms=(
-        (n:'v_5h_b.bin';l:$800;p:0;crc:$12c8c95d),(n:'v_3pt.bin';l:$800;p:$800;crc:$15e9c5e9),());
-        dkong_sprites:array[0..4] of tipo_roms=(
+        (n:'v-5e.bpr';l:$100;p:$200;crc:$b869b8f5));
+        dkong_char:array[0..1] of tipo_roms=(
+        (n:'v_5h_b.bin';l:$800;p:0;crc:$12c8c95d),(n:'v_3pt.bin';l:$800;p:$800;crc:$15e9c5e9));
+        dkong_sprites:array[0..3] of tipo_roms=(
         (n:'l_4m_b.bin';l:$800;p:0;crc:$59f8054d),(n:'l_4n_b.bin';l:$800;p:$800;crc:$672e4714),
-        (n:'l_4r_b.bin';l:$800;p:$1000;crc:$feaa59ee),(n:'l_4s_b.bin';l:$800;p:$1800;crc:$20f2ef7e),());
+        (n:'l_4r_b.bin';l:$800;p:$1000;crc:$feaa59ee),(n:'l_4s_b.bin';l:$800;p:$1800;crc:$20f2ef7e));
         num_samples=25;
         dk_samples:array[0..(num_samples-1)] of tipo_nombre_samples=(
         (nombre:'death.wav'),(nombre:'tune01.wav'),(nombre:'tune02.wav'),
@@ -38,17 +38,17 @@ const
         (mask:$70;name:'Coinage';number:8;dip:((dip_val:$70;dip_name:'5C 1C'),(dip_val:$50;dip_name:'4C 1C'),(dip_val:$30;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$20;dip_name:'1C 2C'),(dip_val:$40;dip_name:'1C 3C'),(dip_val:$40;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$80;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Donkey Kong Jr.
-        dkongjr_rom:array[0..3] of tipo_roms=(
+        dkongjr_rom:array[0..2] of tipo_roms=(
         (n:'dkj.5b';l:$2000;p:0;crc:$dea28158),(n:'dkj.5c';l:$2000;p:$2000;crc:$6fb5faf6),
-        (n:'dkj.5e';l:$2000;p:$4000;crc:$d042b6a8),());
-        dkongjr_pal:array[0..3] of tipo_roms=(
+        (n:'dkj.5e';l:$2000;p:$4000;crc:$d042b6a8));
+        dkongjr_pal:array[0..2] of tipo_roms=(
         (n:'c-2e.bpr';l:$100;p:0;crc:$463dc7ad),(n:'c-2f.bpr';l:$100;p:$100;crc:$47ba0042),
-        (n:'v-2n.bpr';l:$100;p:$200;crc:$dbf185bf),());
-        dkongjr_char:array[0..2] of tipo_roms=(
-        (n:'dkj.3n';l:$1000;p:0;crc:$8d51aca9),(n:'dkj.3p';l:$1000;p:$1000;crc:$4ef64ba5),());
-        dkongjr_sprites:array[0..4] of tipo_roms=(
+        (n:'v-2n.bpr';l:$100;p:$200;crc:$dbf185bf));
+        dkongjr_char:array[0..1] of tipo_roms=(
+        (n:'dkj.3n';l:$1000;p:0;crc:$8d51aca9),(n:'dkj.3p';l:$1000;p:$1000;crc:$4ef64ba5));
+        dkongjr_sprites:array[0..3] of tipo_roms=(
         (n:'v_7c.bin';l:$800;p:0;crc:$dc7f4164),(n:'v_7d.bin';l:$800;p:$800;crc:$0ce7dcf6),
-        (n:'v_7e.bin';l:$800;p:$1000;crc:$24d1ff17),(n:'v_7f.bin';l:$800;p:$1800;crc:$0f8c083f),());
+        (n:'v_7e.bin';l:$800;p:$1000;crc:$24d1ff17),(n:'v_7f.bin';l:$800;p:$1800;crc:$0f8c083f));
         num_samples_jr=22;
         dkjr_samples:array[0..(num_samples_jr-1)] of tipo_nombre_samples=(
         (nombre:'death.wav'),(nombre:'tune01.wav';restart:false;loop:true),
@@ -59,17 +59,17 @@ const
         (nombre:'tune14.wav'),(nombre:'ef01.wav';restart:true),(nombre:'ef02.wav';restart:true),(nombre:'ef03.wav';restart:true),
         (nombre:'ef04.wav'),(nombre:'ef05.wav'),(nombre:'ef06.wav'),(nombre:'ef07.wav'));
         //Donkey Kong 3
-        dkong3_rom:array[0..4] of tipo_roms=(
+        dkong3_rom:array[0..3] of tipo_roms=(
         (n:'dk3c.7b';l:$2000;p:0;crc:$38d5f38e),(n:'dk3c.7c';l:$2000;p:$2000;crc:$c9134379),
-        (n:'dk3c.7d';l:$2000;p:$4000;crc:$d22e2921),(n:'dk3c.7e';l:$2000;p:$8000;crc:$615f14b7),());
-        dkong3_pal:array[0..3] of tipo_roms=(
+        (n:'dk3c.7d';l:$2000;p:$4000;crc:$d22e2921),(n:'dk3c.7e';l:$2000;p:$8000;crc:$615f14b7));
+        dkong3_pal:array[0..2] of tipo_roms=(
         (n:'dkc1-c.1d';l:$200;p:0;crc:$df54befc),(n:'dkc1-c.1c';l:$200;p:$200;crc:$66a77f40),
-        (n:'dkc1-v.2n';l:$100;p:$400;crc:$50e33434),());
-        dkong3_char:array[0..2] of tipo_roms=(
-        (n:'dk3v.3n';l:$1000;p:0;crc:$415a99c7),(n:'dk3v.3p';l:$1000;p:$1000;crc:$25744ea0),());
-        dkong3_sprites:array[0..4] of tipo_roms=(
+        (n:'dkc1-v.2n';l:$100;p:$400;crc:$50e33434));
+        dkong3_char:array[0..1] of tipo_roms=(
+        (n:'dk3v.3n';l:$1000;p:0;crc:$415a99c7),(n:'dk3v.3p';l:$1000;p:$1000;crc:$25744ea0));
+        dkong3_sprites:array[0..3] of tipo_roms=(
         (n:'dk3v.7c';l:$1000;p:0;crc:$8ffa1737),(n:'dk3v.7d';l:$1000;p:$1000;crc:$9ac84686),
-        (n:'dk3v.7e';l:$1000;p:$2000;crc:$0c0af3fb),(n:'dk3v.7f';l:$1000;p:$3000;crc:$55c58662),());
+        (n:'dk3v.7e';l:$1000;p:$2000;crc:$0c0af3fb),(n:'dk3v.7f';l:$1000;p:$3000;crc:$55c58662));
         dkong3_snd1:tipo_roms=(n:'dk3c.5l';l:$2000;p:$e000;crc:$7ff88885);
         dkong3_snd2:tipo_roms=(n:'dk3c.6h';l:$2000;p:$e000;crc:$36d7200c);
         dk3_dip_a:array [0..2] of def_dip=(
@@ -543,7 +543,7 @@ procedure dkong_char_load(num_char:word);
 begin
   init_gfx(0,8,8,num_char);
   gfx_set_desc_data(2,0,8*8,num_char*8*8,0);
-  convert_gfx(0,0,@memoria_temp[0],@ps_dkong_x[0],@ps_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp,@ps_dkong_x,@ps_y,true,false);
 end;
 procedure dkong_sprites_load(num_spr:word);
 begin
@@ -551,8 +551,8 @@ begin
   gfx[1].trans[0]:=true;
   gfx_set_desc_data(2,0,16*8,num_spr*16*16,0);
   case main_vars.tipo_maquina of
-    15,168:convert_gfx(1,0,@memoria_temp[0],@ps_dkong_x[0],@ps_y[0],true,false);
-    169:convert_gfx(1,0,@memoria_temp[0],@ps_dkong3_x[0],@ps_y[0],true,false);
+    15,168:convert_gfx(1,0,@memoria_temp,@ps_dkong_x,@ps_y,true,false);
+    169:convert_gfx(1,0,@memoria_temp,@ps_dkong3_x,@ps_y,true,false);
   end;
 end;
 procedure pal_dkong;
@@ -600,19 +600,19 @@ case main_vars.tipo_maquina of
         z80_0:=cpu_z80.create(3072000,264);
         z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
         //cargar roms
-        if not(cargar_roms(@memoria[0],@dkong_rom[0],'dkong.zip',0)) then exit;
+        if not(roms_load(@memoria,@dkong_rom,'dkong.zip',sizeof(dkong_rom))) then exit;
         //samples
-        if load_samples('dkong.zip',@dk_samples[0],num_samples) then z80_0.init_sound(dkong_sound_update);
+        if load_samples('dkong.zip',@dk_samples,num_samples) then z80_0.init_sound(dkong_sound_update);
         audio_tunes:=dkong_tune_sound;
         audio_effects:=dkong_effects_sound;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@dkong_char[0],'dkong.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkong_char,'dkong.zip',sizeof(dkong_char))) then exit;
         dkong_char_load($100);
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@dkong_sprites[0],'dkong.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkong_sprites,'dkong.zip',sizeof(dkong_sprites))) then exit;
         dkong_sprites_load($80);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@dkong_pal[0],'dkong.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkong_pal,'dkong.zip',sizeof(dkong_pal))) then exit;
         pal_dkong;
         //DIP
         marcade.dswa:=$80;
@@ -623,7 +623,7 @@ case main_vars.tipo_maquina of
         z80_0:=cpu_z80.create(3072000,264);
         z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
         //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@dkongjr_rom[0],'dkongjr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkongjr_rom,'dkongjr.zip',sizeof(dkongjr_rom))) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$1000);
         copymemory(@memoria[$3000],@memoria_temp[$1000],$1000);
         copymemory(@memoria[$2000],@memoria_temp[$2000],$800);
@@ -635,17 +635,17 @@ case main_vars.tipo_maquina of
         copymemory(@memoria[$5000],@memoria_temp[$5000],$800);
         copymemory(@memoria[$1800],@memoria_temp[$5800],$800);
         //samples
-        if load_samples('dkongjr.zip',@dkjr_samples[0],num_samples_jr) then z80_0.init_sound(dkong_sound_update);
+        if load_samples('dkongjr.zip',@dkjr_samples,num_samples_jr) then z80_0.init_sound(dkong_sound_update);
         audio_tunes:=dkongjr_tune_sound;
         audio_effects:=dkongjr_effects_sound;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@dkongjr_char[0],'dkongjr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkongjr_char,'dkongjr.zip',sizeof(dkongjr_char))) then exit;
         dkong_char_load($200);
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@dkongjr_sprites[0],'dkongjr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkongjr_sprites,'dkongjr.zip',sizeof(dkongjr_sprites))) then exit;
         dkong_sprites_load($80);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@dkongjr_pal[0],'dkongjr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkongjr_pal,'dkongjr.zip',sizeof(dkongjr_pal))) then exit;
         pal_dkong;
         //DIP
         marcade.dswa:=$80;
@@ -656,23 +656,23 @@ case main_vars.tipo_maquina of
         z80_0:=cpu_z80.create(4000000,264);
         z80_0.change_ram_calls(dkong3_getbyte,dkong3_putbyte);
         //cargar roms
-        if not(cargar_roms(@memoria[0],@dkong3_rom[0],'dkong3.zip',0)) then exit;
+        if not(roms_load(@memoria,@dkong3_rom,'dkong3.zip',sizeof(dkong3_rom))) then exit;
         //sound 1
-        if not(cargar_roms(@mem_snd[0],@dkong3_snd1,'dkong3.zip')) then exit;
+        if not(roms_load(@mem_snd,@dkong3_snd1,'dkong3.zip',sizeof(dkong3_snd1))) then exit;
         n2a03_0:=cpu_n2a03.Create(1789772,264);
         n2a03_0.m6502.change_ram_calls(dkong3_snd1_getbyte,dkong3_snd1_putbyte);
         //sound 2
-        if not(cargar_roms(@mem_misc[0],@dkong3_snd2,'dkong3.zip')) then exit;
+        if not(roms_load(@mem_misc,@dkong3_snd2,'dkong3.zip',sizeof(dkong3_snd2))) then exit;
         n2a03_1:=cpu_n2a03.Create(1789772,264);
         n2a03_1.m6502.change_ram_calls(dkong3_snd2_getbyte,dkong3_snd2_putbyte);
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@dkong3_char[0],'dkong3.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkong3_char,'dkong3.zip',sizeof(dkong3_char))) then exit;
         dkong_char_load($200);
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@dkong3_sprites[0],'dkong3.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkong3_sprites,'dkong3.zip',sizeof(dkong3_sprites))) then exit;
         dkong_sprites_load($100);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@dkong3_pal[0],'dkong3.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@dkong3_pal,'dkong3.zip',sizeof(dkong3_pal))) then exit;
         pal_dkong3;
         //DIP
         marcade.dswa:=$0;
@@ -686,7 +686,7 @@ reset_dkong;
 iniciar_dkong:=true;
 end;
 
-procedure Cargar_dkong;
+procedure cargar_dkong;
 begin
 llamadas_maquina.iniciar:=iniciar_dkong;
 llamadas_maquina.reset:=reset_dkong;

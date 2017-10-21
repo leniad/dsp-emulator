@@ -12,7 +12,7 @@ type
         rmrd_line:byte;
         recalc_char:boolean;
         scroll_x:array[1..2,0..$ff] of word;
-        scroll_y:array[1..2,0..$1ff] of byte;
+        scroll_y:array[1..2,0..$1ff] of word;
         scroll_tipo:array[1..2] of byte;
         function read_msb(direccion:word):byte;
         function read_lsb(direccion:word):byte;
@@ -367,16 +367,13 @@ begin
 end;
 
 procedure k052109_chip.draw_layer(layer,final_screen:byte);
-var
-  f:word;
 begin
-f:=0;
 case layer of
   0:actualiza_trozo(0,0,512,256,self.pant[0],0,0,512,256,final_screen); //Esta es fija
   1,2:begin
       case self.scroll_tipo[layer] of
         0,1:scroll__x_part2(self.pant[layer],final_screen,1,@self.scroll_x[layer,0]);
-        2:for f:=0 to $1ff do scroll__y_part(self.pant[layer],final_screen,self.scroll_y[layer,f],self.scroll_x[layer,0],f,1);
+        2:scroll__y_part2(self.pant[layer],final_screen,1,@self.scroll_y[layer,0]);
         3:scroll_x_y(self.pant[layer],final_screen,self.scroll_x[layer,0],self.scroll_y[layer,0]);
       end;
     end;

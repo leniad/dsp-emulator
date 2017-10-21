@@ -202,7 +202,7 @@ scroll_mappy(3,5,scroll_x);
 actualiza_trozo_final(0,0,224,288,5);
 end;
 
-procedure draw_sprites_spacman;inline;
+procedure draw_sprites_spacman;
 var
   nchar,color,y:word;
   flipx,flipy:boolean;
@@ -591,6 +591,7 @@ screen_init(2,480,288);
 screen_init(3,480,288,true);
 screen_init(4,256,32,true);
 screen_init(5,512,512,false,true);
+screen_mod_sprites(5,256,512,255,511);
 iniciar_video(224,288);
 //Main CPU
 m6809_0:=cpu_m6809.Create(1536000,264);

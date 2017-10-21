@@ -39,6 +39,7 @@ var
  pedir_nmi,pedir_firq:boolean;
  sound_latch,charbank,palettebank:byte;
  spritebank:word;
+ scroll_x:array[0..$1f] of word;
 
 procedure update_video_ironhorse;inline;
 var
@@ -57,7 +58,8 @@ for f:=0 to $3ff do begin
     end;
 end;
 //Scroll linea a linea
-for f:=0 to 31 do scroll__x_part(1,2,memoria[$20+f],0,f*8,8);
+//for f:=0 to 31 do scroll__x_part(1,2,memoria[$20+f],0,f*8,8);
+scroll__x_part2(1,2,8,@scroll_x);
 for f:=0 to $32 do begin
 		x:=memoria[spritebank+3+(f*5)];
 		y:=memoria[spritebank+2+(f*5)];
@@ -160,7 +162,8 @@ end;
 function ironhorse_getbyte(direccion:word):byte;
 begin
 case direccion of
-    0..$df,$2000..$ffff:ironhorse_getbyte:=memoria[direccion];
+    0..$1f,$40..$df,$2000..$ffff:ironhorse_getbyte:=memoria[direccion];
+    $20..$3f:ironhorse_getbyte:=scroll_x[direccion and $1f];
     $900:ironhorse_getbyte:=marcade.dswc;  //dsw3
     $a00:ironhorse_getbyte:=marcade.dswb;  //dsw2
     $b00:ironhorse_getbyte:=marcade.dswa;  //dsw1
@@ -174,7 +177,7 @@ procedure ironhorse_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
 case direccion of
-  0..2,5..$df,$2800..$3fff:memoria[direccion]:=valor;
+  0..2,5..$1f,$40..$df,$2800..$3fff:memoria[direccion]:=valor;
   $3:begin
        if charbank<>(valor and $3) then begin
           charbank:=valor and $3;
@@ -186,6 +189,7 @@ case direccion of
        pedir_nmi:=(valor and $1)<>0;
        pedir_firq:=(valor and $4)<>0;
      end;
+  $20..$3f:scroll_x[direccion and $1f]:=valor;
   $800:sound_latch:=valor;
   $900:z80_0.change_irq(HOLD_LINE);
   $a00:if palettebank<>(valor and $7) then begin

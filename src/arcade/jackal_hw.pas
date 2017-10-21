@@ -113,7 +113,7 @@ if (scroll_crt and $2)<>0 then begin
   //eje X
   if (scroll_crt and $4)<>0 then scroll__x_part2(1,2,8,@memoria_zram[ram_bank]);
   //Eje Y
-  if (scroll_crt and $8)<>0 then for f:=0 to 31 do scroll__y_part(1,2,memoria_zram[ram_bank,f],0,f*8,8);
+  if (scroll_crt and $8)<>0 then scroll__y_part2(1,2,8,@memoria_zram[ram_bank]);
 end else begin
   //Scroll total
   scroll_x_y(1,2,scroll_x,scroll_y);

@@ -75,6 +75,7 @@ var
   x,y,atrib:byte;
   flipx,flipy:boolean;
   i:integer;
+  scroll_y:array[0..$1f] of word;
 begin
 fill_full_screen(1,0);
 for f:=$0 to $3ff do begin
@@ -88,7 +89,9 @@ for f:=$0 to $3ff do begin
     gfx[0].buffer[f]:=false;
   end;
 end;
-for f:=0 to 31 do scroll__y_part(2,1,255-memoria[$d000+(32*(f mod 4)+(f div 4))],0,f*8,8);
+for f:=0 to $1f do scroll_y[f]:=255-memoria[$d000+(32*(f mod 4)+(f div 4))];
+scroll__y_part2(2,1,8,@scroll_y);
+//for f:=0 to 31 do scroll__y_part(2,1,255-memoria[$d000+(32*(f mod 4)+(f div 4))],0,f*8,8);
 {abccdddd eeeeeeee fffghhhh iiiiiiii
  a enable?
  b size (0 = 8x8, 1 = 16x16)

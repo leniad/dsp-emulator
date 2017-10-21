@@ -8,34 +8,35 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure cargar_phoenix;
 
 implementation
+
 var
  banco_pal,scroll_y,banco:byte;
  mem_video:array[0..1,0..$fff] of byte;
 
 const
-        phoenix_rom:array[0..8] of tipo_roms=(
+        phoenix_rom:array[0..7] of tipo_roms=(
         (n:'ic45';l:$800;p:0;crc:$9f68086b),(n:'ic46';l:$800;p:$800;crc:$273a4a82),
         (n:'ic47';l:$800;p:$1000;crc:$3d4284b9),(n:'ic48';l:$800;p:$1800;crc:$cb5d9915),
         (n:'h5-ic49.5a';l:$800;p:$2000;crc:$a105e4e7),(n:'h6-ic50.6a';l:$800;p:$2800;crc:$ac5e9ec1),
-        (n:'h7-ic51.7a';l:$800;p:$3000;crc:$2eab35b4),(n:'h8-ic52.8a';l:$800;p:$3800;crc:$aff8e9c5),());
-        phoenix_char1:array[0..2] of tipo_roms=(
-        (n:'ic23.3d';l:$800;p:0;crc:$3c7e623f),(n:'ic24.4d';l:$800;p:$800;crc:$59916d3b),());
-        phoenix_char2:array[0..2] of tipo_roms=(
-        (n:'b1-ic39.3b';l:$800;p:0;crc:$53413e8f),(n:'b2-ic40.4b';l:$800;p:$800;crc:$0be2ba91),());
-        phoenix_pal:array[0..2] of tipo_roms=(
-        (n:'mmi6301.ic40';l:$100;p:0;crc:$79350b25),(n:'mmi6301.ic41';l:$100;p:$100;crc:$e176b768),());
+        (n:'h7-ic51.7a';l:$800;p:$3000;crc:$2eab35b4),(n:'h8-ic52.8a';l:$800;p:$3800;crc:$aff8e9c5));
+        phoenix_char1:array[0..1] of tipo_roms=(
+        (n:'ic23.3d';l:$800;p:0;crc:$3c7e623f),(n:'ic24.4d';l:$800;p:$800;crc:$59916d3b));
+        phoenix_char2:array[0..1] of tipo_roms=(
+        (n:'b1-ic39.3b';l:$800;p:0;crc:$53413e8f),(n:'b2-ic40.4b';l:$800;p:$800;crc:$0be2ba91));
+        phoenix_pal:array[0..1] of tipo_roms=(
+        (n:'mmi6301.ic40';l:$100;p:0;crc:$79350b25),(n:'mmi6301.ic41';l:$100;p:$100;crc:$e176b768));
         //Pleiads
-        pleiads_rom:array[0..8] of tipo_roms=(
+        pleiads_rom:array[0..7] of tipo_roms=(
         (n:'ic47.r1';l:$800;p:0;crc:$960212c8),(n:'ic48.r2';l:$800;p:$800;crc:$b254217c),
         (n:'ic47.bin';l:$800;p:$1000;crc:$87e700bb),(n:'ic48.bin';l:$800;p:$1800;crc:$2d5198d0),
         (n:'ic51.r5';l:$800;p:$2000;crc:$49c629bc),(n:'ic50.bin';l:$800;p:$2800;crc:$f1a8a00d),
-        (n:'ic53.r7';l:$800;p:$3000;crc:$b5f07fbc),(n:'ic52.bin';l:$800;p:$3800;crc:$b1b5a8a6),());
-        pleiads_char1:array[0..2] of tipo_roms=(
-        (n:'ic23.bin';l:$800;p:0;crc:$4e30f9e7),(n:'ic24.bin';l:$800;p:$800;crc:$5188fc29),());
-        pleiads_char2:array[0..2] of tipo_roms=(
-        (n:'ic39.bin';l:$800;p:0;crc:$85866607),(n:'ic40.bin';l:$800;p:$800;crc:$a841d511),());
-        pleiads_pal:array[0..2] of tipo_roms=(
-        (n:'7611-5.33';l:$100;p:0;crc:$e38eeb83),(n:'7611-5.26';l:$100;p:$100;crc:$7a1bcb1e),());
+        (n:'ic53.r7';l:$800;p:$3000;crc:$b5f07fbc),(n:'ic52.bin';l:$800;p:$3800;crc:$b1b5a8a6));
+        pleiads_char1:array[0..1] of tipo_roms=(
+        (n:'ic23.bin';l:$800;p:0;crc:$4e30f9e7),(n:'ic24.bin';l:$800;p:$800;crc:$5188fc29));
+        pleiads_char2:array[0..1] of tipo_roms=(
+        (n:'ic39.bin';l:$800;p:0;crc:$85866607),(n:'ic40.bin';l:$800;p:$800;crc:$a841d511));
+        pleiads_pal:array[0..1] of tipo_roms=(
+        (n:'7611-5.33';l:$100;p:0;crc:$e38eeb83),(n:'7611-5.26';l:$100;p:$100;crc:$7a1bcb1e));
         //Dip
         phoenix_dip_a:array [0..3] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -114,27 +115,28 @@ end;
 
 function phoenix_getbyte(direccion:word):byte;
 begin
-direccion:=direccion and $7FFF;
+direccion:=direccion and $7fff;
 case direccion of
-        0..$3fff:phoenix_getbyte:=memoria[direccion];
-        $4000..$4fff:phoenix_getbyte:=mem_video[banco,direccion and $fff];
-        $7000..$73FF:phoenix_getbyte:=marcade.in0;
-        $7800..$7bff:phoenix_getbyte:=marcade.dswa;
+  0..$3fff:phoenix_getbyte:=memoria[direccion];
+  $4000..$4fff:phoenix_getbyte:=mem_video[banco,direccion and $fff];
+  $7000..$73ff:phoenix_getbyte:=marcade.in0;
+  $7800..$7bff:phoenix_getbyte:=marcade.dswa;
 end;
 end;
 
 procedure phoenix_putbyte(direccion:word;valor:byte);
 begin
-direccion:=direccion and $7FFF;
+direccion:=direccion and $7fff;
 if direccion<$4000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $4000..$4fff:begin
+  $4000..$43ff:if mem_video[banco,direccion and $fff]<>valor then begin
                   mem_video[banco,direccion and $fff]:=valor;
-                  case direccion of
-                      $4000..$43ff:gfx[0].buffer[direccion and $3ff]:=true;
-                      $4800..$4bff:gfx[0].buffer[(direccion and $3ff)+$400]:=true;
-                  end;
+                  gfx[0].buffer[direccion and $3ff]:=true;
+               end;
+  $4400..$47ff,$4c00..$4fff:mem_video[banco,direccion and $fff]:=valor;
+  $4800..$4bff:if mem_video[banco,direccion and $fff]<>valor then begin
+                  mem_video[banco,direccion and $fff]:=valor;
+                  gfx[0].buffer[(direccion and $3ff)+$400]:=true;
                end;
   $5000..$53ff:begin
                   if banco<>(valor and 1) then begin
@@ -183,16 +185,17 @@ end;
 
 procedure pleiads_putbyte(direccion:word;valor:byte);
 begin
-direccion:=direccion and $7FFF;
+direccion:=direccion and $7fff;
 if direccion<$4000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-  $4000..$4fff:begin
+  $4000..$43ff:if mem_video[banco,direccion and $fff]<>valor then begin
                   mem_video[banco,direccion and $fff]:=valor;
-                  case direccion of
-                      $4000..$43ff:gfx[0].buffer[direccion and $3ff]:=true;
-                      $4800..$4bff:gfx[0].buffer[(direccion and $3ff)+$400]:=true;
-                  end;
+                  gfx[0].buffer[direccion and $3ff]:=true;
+               end;
+  $4400..$47ff,$4c00..$4fff:mem_video[banco,direccion and $fff]:=valor;
+  $4800..$4bff:if mem_video[banco,direccion and $fff]<>valor then begin
+                  mem_video[banco,direccion and $fff]:=valor;
+                  gfx[0].buffer[(direccion and $3ff)+$400]:=true;
                end;
   $5000..$53ff:begin
                   if banco<>(valor and 1) then begin
@@ -260,22 +263,22 @@ case main_vars.tipo_maquina of
   11:begin //Phoenix
         z80_0.change_ram_calls(phoenix_getbyte,phoenix_putbyte);
         //Chip sonido
-        tms36xx_start(372,0.21,@phoenix_dec[0]);
+        tms36xx_start(372,0.21,@phoenix_dec);
         phoenix_audio_start;
         //cargar roms
-        if not(cargar_roms(@memoria[0],@phoenix_rom[0],'phoenix.zip',0)) then exit;
+        if not(roms_load(@memoria,@phoenix_rom,'phoenix.zip',sizeof(phoenix_rom))) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@phoenix_char1[0],'phoenix.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@phoenix_char1,'phoenix.zip',sizeof(phoenix_char1))) then exit;
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,2,8*8,256*8*8,0);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
         //Segundo juego de chars
-        if not(cargar_roms(@memoria_temp[0],@phoenix_char2[0],'phoenix.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@phoenix_char2,'phoenix.zip',sizeof(phoenix_char2))) then exit;
         convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
         //poner paleta
-        if not(cargar_roms(@memoria_temp[0],@phoenix_pal[0],'phoenix.zip',0)) then exit;
-        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $60);
+        if not(roms_load(@memoria_temp,@phoenix_pal,'phoenix.zip',sizeof(phoenix_pal))) then exit;
+        for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3) and $18) or ((f shr 2) and $07) or (f and $60);
         //DIP
         marcade.dswa:=$e0;
         marcade.dswa_val:=@phoenix_dip_a;
@@ -283,21 +286,21 @@ case main_vars.tipo_maquina of
   202:begin //Pleiads
         z80_0.change_ram_calls(phoenix_getbyte,pleiads_putbyte);
         //Chip sonido
-        tms36xx_start(247,0.21,@pleiads_dec[0]);
+        tms36xx_start(247,0.21,@pleiads_dec);
         //phoenix_audio_start;
         //cargar roms
-        if not(cargar_roms(@memoria[0],@pleiads_rom[0],'pleiads.zip',0)) then exit;
+        if not(roms_load(@memoria,@pleiads_rom,'pleiads.zip',sizeof(pleiads_rom))) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@pleiads_char1[0],'pleiads.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@pleiads_char1,'pleiads.zip',sizeof(pleiads_char1))) then exit;
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,2,8*8,256*8*8,0);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
         //Segundo juego de chars
-        if not(cargar_roms(@memoria_temp[0],@pleiads_char2[0],'pleiads.zip',0)) then exit;
-        convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+        if not(roms_load(@memoria_temp,@pleiads_char2,'pleiads.zip',sizeof(pleiads_char2))) then exit;
+        convert_gfx(0,256*8*8,@memoria_temp,@pc_x,@pc_y,true,false);
         //poner paleta
-        if not(cargar_roms(@memoria_temp[0],@pleiads_pal[0],'pleiads.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@pleiads_pal,'pleiads.zip',sizeof(pleiads_pal))) then exit;
         for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $e0);
         //DIP
         marcade.dswa:=$e0;
@@ -308,9 +311,9 @@ for f:=0 to $ff do begin
     //paleta
     ctemp1:=memoria_temp[f];
     ctemp2:=memoria_temp[f+256];
-    colores[f].r:=$55*(ctemp1 and 1)+$AA*(ctemp2 and 1);
-    colores[f].g:=$55*((ctemp1 shr 2) and 1)+$AA*((ctemp2 shr 2) and 1);
-    colores[f].b:=$55*((ctemp1 shr 1) and 1)+$AA*((ctemp2 shr 1) and 1);
+    colores[f].r:=$55*(ctemp1 and 1)+$aa*(ctemp2 and 1);
+    colores[f].g:=$55*((ctemp1 shr 2) and 1)+$aa*((ctemp2 shr 2) and 1);
+    colores[f].b:=$55*((ctemp1 shr 1) and 1)+$aa*((ctemp2 shr 1) and 1);
 end;
 set_pal(colores,256);
 //final

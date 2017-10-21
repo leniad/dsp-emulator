@@ -21,10 +21,9 @@ const
         (n:'136037-113.1l';l:$8000;p:$10000;crc:$d497d0a8),(n:'136037-114.1mn';l:$8000;p:$18000;crc:$29ef9882),
         (n:'136037-115.2a';l:$8000;p:$20000;crc:$9510b898),(n:'136037-116.2b';l:$8000;p:$28000;crc:$11e0ac5b),
         (n:'136037-117.2l';l:$8000;p:$30000;crc:$29a5db41),(n:'136037-118.2mn';l:$8000;p:$30000;crc:$8bf3b263));
-        gauntlet_pal:array[0..4] of tipo_roms=(
-        (n:'tc1a_10f.bin';l:$100;p:0;crc:$ce07c544),(n:'tc1a_11f.bin';l:$100;p:$100;crc:$566d323a),
-        (n:'tc1a_12f.bin';l:$100;p:$200;crc:$7ea63946),(n:'tc2a_2g.bin';l:$100;p:$300;crc:$08609bad),
-        (n:'tc2a_4e.bin';l:$100;p:$400;crc:$2c43991f));
+        gauntlet_proms:array[0..2] of tipo_roms=(
+        (n:'74s472-136037-101.7u';l:$200;p:0;crc:$2964f76f),(n:'74s472-136037-102.5l';l:$200;p:$200;crc:$4d4fec6c),
+        (n:'74s287-136037-103.4r';l:$100;p:$400;crc:$6c5ccf08));
         //DIP
         gauntlet_dip:array [0..10] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$2;dip_name:'4'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -219,7 +218,7 @@ if not(roms_load(@mem_snd,@gauntlet_sound,'gauntlet.zip',sizeof(gauntlet_sound))
 m68000_0:=cpu_m68000.create(7000000,256);
 m68000_0.change_ram16_calls(gauntlet_getword,gauntlet_putword);
 //Sound CPU
-m6502_0:=cpu_m6502.create(1750000,256,TCPU_M6502);
+m6502_0:=cpu_m6502.create(14000000 div 8,256,TCPU_M6502);
 m6502_0.change_ram_calls(gauntlet_snd_getbyte,gauntlet_snd_putbyte);
 m6502_0.init_sound(gauntlet_sound_update);
 //Sound Chips

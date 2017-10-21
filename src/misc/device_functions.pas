@@ -10,7 +10,7 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      deco_146,tms99xx,lr35902,mcs51,m680x,konami_snd,ppi8255,oki6295,dac,msm5205,
      mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,mcs48,k051316,
      k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,deco_bac06,
-     deco_common,deco_16ic,timer_engine,sm510;
+     deco_common,deco_16ic,timer_engine,sm510,slapstic;
 
 procedure close_all_devices;
 begin
@@ -272,6 +272,10 @@ if k051316_0<>nil then begin
   k051316_0:=nil;
 end;
 //misc
+if slapstic_0<>nil then begin
+  slapstic_0.free;
+  slapstic_0:=nil;
+end;
 if vdp_0<>nil then begin
   vdp_0.free;
   vdp_0:=nil;

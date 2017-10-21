@@ -62,9 +62,8 @@ type
   tpacman_event=procedure;
 
 var
- irq_vblank:boolean;
+ irq_vblank,dec_enable:boolean;
  rom_decode:array[0..$bfff] of byte;
- dec_enable:boolean;
  read_events:tpacman_event;
 
 procedure update_video_pacman;
@@ -190,7 +189,7 @@ end;
 
 function pacman_getbyte(direccion:word):byte;
 begin
-direccion:=direccion and $7FFF;
+direccion:=direccion and $7fff;
 case direccion of
         0..$3fff:pacman_getbyte:=memoria[direccion];
         $4000..$47ff,$6000..$67ff:pacman_getbyte:=memoria[(direccion and $7ff)+$4000];
@@ -207,7 +206,7 @@ end;
 
 procedure pacman_putbyte(direccion:word;valor:byte);
 begin
-direccion:=direccion and $7FFF;
+direccion:=direccion and $7fff;
 case direccion of
         $4000..$47ff,$6000..$67ff:begin
                         memoria[(direccion and $7ff)+$4000]:=valor;
@@ -281,7 +280,7 @@ function crush_getbyte(direccion:word):byte;
 var
   tempb:byte;
 begin
-direccion:=direccion and $7FFF;
+direccion:=direccion and $7fff;
 case direccion of
         0..$3fff:if z80_0.opcode then crush_getbyte:=rom_decode[direccion]
                     else crush_getbyte:=memoria[direccion];
@@ -294,7 +293,7 @@ case direccion of
                           crush_getbyte:=tempb or $40;
                           exit;
                         end;
-                        case (direccion-$5080) of
+                        case (direccion and $3f) of
 		                        $1,$4:tempb:=tempb or $40;
 		                        $5:tempb:=tempb or $c0;
                             else tempb:=tempb and $3f;
@@ -310,7 +309,7 @@ case direccion of
                           crush_getbyte:=0;
                           exit;
                         end;
-	                      case (direccion-$50c0) of
+	                      case (direccion and $f) of
                           $0:crush_getbyte:=$1f;
                           $9:crush_getbyte:=$30;
                           $c:crush_getbyte:=0;
@@ -401,7 +400,7 @@ procedure mspacman_install_patches;
 var
   i:word;
 begin
-	// copy forty 8-byte patches into Pac-Man code */
+	// copy forty 8-byte patches into Pac-Man code
 	for i:=0 to 7 do begin
 		rom_decode[$0410+i]:=rom_decode[$8008+i];
 		rom_decode[$08E0+i]:=rom_decode[$81D8+i];
@@ -514,9 +513,9 @@ case main_vars.tipo_maquina of
         z80_0.change_ram_calls(mspacman_getbyte,mspacman_putbyte);
         //cargar y desencriptar roms
         if not(roms_load(@memoria,@mspacman_rom,'mspacman.zip',sizeof(mspacman_rom))) then exit;
-        copymemory(@rom_decode[0],@memoria[0],$1000);  // pacman.6e */
-        copymemory(@rom_decode[$1000],@memoria[$1000],$1000); // pacman.6f */
-        copymemory(@rom_decode[$2000],@memoria[$2000],$1000); // pacman.6h */
+        copymemory(@rom_decode[0],@memoria[0],$1000);  // pacman.6e
+        copymemory(@rom_decode[$1000],@memoria[$1000],$1000); // pacman.6f
+        copymemory(@rom_decode[$2000],@memoria[$2000],$1000); // pacman.6h
         for f:=0 to $fff do
       		rom_decode[$3000+f]:=BITSWAP8(memoria[$b000+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt u7 */
 	      for f:=0 to $7ff do begin
@@ -524,9 +523,9 @@ case main_vars.tipo_maquina of
 		      rom_decode[$8800+f]:=BITSWAP8(memoria[$9800+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt half of u6 */
 		      rom_decode[$9000+f]:=BITSWAP8(memoria[$9000+BITSWAP16(f,15,14,13,12,11,3,7,9,10,8,6,5,4,2,1,0)],0,4,5,7,6,3,2,1);	// decrypt half of u6 */
 	      end;
-        copymemory(@rom_decode[$9800],@memoria[$1800],$800); // mirror of pacman.6f high */
-        copymemory(@rom_decode[$a000],@memoria[$2000],$1000); // mirror of pacman.6h */
-        copymemory(@rom_decode[$b000],@memoria[$3000],$1000); // mirror of pacman.6j */
+        copymemory(@rom_decode[$9800],@memoria[$1800],$800); // mirror of pacman.6f high
+        copymemory(@rom_decode[$a000],@memoria[$2000],$1000); // mirror of pacman.6h
+        copymemory(@rom_decode[$b000],@memoria[$3000],$1000); // mirror of pacman.6j
         mspacman_install_patches;
         //cargar sonido & iniciar_sonido
         if not(roms_load(namco_snd_0.get_wave_dir,@pacman_sound,'mspacman.zip',sizeof(pacman_sound))) then exit;

@@ -73,11 +73,11 @@ var
  collision_reg:array[0..3] of byte;
  scroll:array[0..5] of byte;
  colorbank:array[0..1] of byte;
- scroll_y:array[0..$5f] of byte;
+ scroll_y:array[0..$5f] of word;
  draw_order:array[0..31,0..3] of byte;
  gfx_pos:word;
  video_priority,soundlatch,rom_bank,video_mode,dac_out,dac_vol,
- input_port_4_f0,sprite_offset:byte;
+ input_port_4_f0:byte;
  sndnmi_disable,rechars1,rechars2:boolean;
  gfx_back_buf,gfx_mid_buf,gfx_front_buf:array[0..$3ff] of boolean;
  //mcu
@@ -104,14 +104,14 @@ begin
   convert_gfx(3,0,@memoria[$a800],@ps_x[0],@ps_y[0],false,false);
 end;
 
-function get_sprite_xy(offs:word;sx,sy:pbyte):boolean;
+function get_sprite_xy(offs:word;sx,sy:pbyte;sprite_offset:byte):boolean;
 begin
 	sx^:=memoria[$d100+sprite_offset+offs+0]-1;
 	sy^:=240-memoria[$d100+sprite_offset+offs+1];
 	get_sprite_xy:=(sy^)<240;
 end;
 
-procedure taitosj_putsprites;
+procedure taitosj_putsprites(sprite_offset:byte);
 var
   f,sx,sy,nchar,which,atrib,ngfx:byte;
   offs,color:word;
@@ -122,7 +122,7 @@ for f:=$1f downto 0 do begin
   which:=(f-1) and $1f;    // move last sprite at the head of the list */
   offs:=which*4;
   if ((which>=$10) and (which<=$17)) then continue;   // no sprites here */
-  if (get_sprite_xy(offs,@sx,@sy)) then begin
+  if (get_sprite_xy(offs,@sx,@sy,sprite_offset)) then begin
         atrib:=memoria[$d100+sprite_offset+offs+2];
 				nchar:=memoria[$d100+sprite_offset+offs+3] and $3f;
         if (memoria[$d100+sprite_offset+offs+3] and $40)<>0 then ngfx:=3
@@ -136,10 +136,10 @@ for f:=$1f downto 0 do begin
 end;
 end;
 
-procedure update_video_taitosj;inline;
+procedure update_video_taitosj;
 var
   color_back,color_mid,color_front,gfx_back,gfx_mid,gfx_front,nchar,layer:byte;
-  f,scr_y,x,y:word;
+  f,x,y:word;
 begin
 if rechars1 then begin
   conv_chars1;
@@ -187,34 +187,33 @@ fill_full_screen(4,(colorbank[1] and $07) shl 3);
 for f:=0 to 3 do begin
   layer:=draw_order[video_priority and $1f,f];
   case layer of
-    0:if (video_mode and $80)<>0 then begin
-          if (video_mode and $4)<>0 then sprite_offset:=$80
-            else sprite_offset:=$0;
-          taitosj_putsprites;
-      end;
+    0:if (video_mode and $80)<>0 then taitosj_putsprites((video_mode and $4) shl 5);
     1:if (video_mode and $10)<>0 then begin
           x:=scroll[0];
           x:=(x and $f8)+((x+3) and 7)+8;
-          for y:=0 to 31 do begin
+          scroll__y_part2(1,4,8,@scroll_y,x,scroll[1]);
+          {for y:=0 to 31 do begin
             scr_y:=scroll_y[y]+scroll[1];
             scroll__y_part(1,4,scr_y,x,y*8,8);
-          end;
+          end;}
       end;
     2:if (video_mode and $20)<>0 then begin
           x:=scroll[2];
           x:=(x and $f8)+((x+1) and 7)+10;
-          for y:=0 to 31 do begin
+          scroll__y_part2(2,4,8,@scroll_y[32],x,scroll[3]);
+          {for y:=0 to 31 do begin
             scr_y:=scroll_y[32+y]+scroll[3];
             scroll__y_part(2,4,scr_y,x,y*8,8);
-          end;
+          end;}
       end;
     3:if (video_mode and $40)<>0 then begin
           x:=scroll[4];
           x:=(x and $f8)+((x-1) and 7)+12;
-          for y:=0 to 31 do begin
+          scroll__y_part2(3,4,8,@scroll_y[64],x,scroll[5]);
+          {for y:=0 to 31 do begin
             scr_y:=scroll_y[64+y]+scroll[5];
             scroll__y_part(3,4,scr_y,x,y*8,8);
-          end;
+          end;}
       end;
   end;
 end;
@@ -615,7 +614,6 @@ rechars1:=false;
 rechars2:=false;
 rom_bank:=0;
 video_mode:=0;
-sprite_offset:=0;
 dac_vol:=0;
 input_port_4_f0:=0;
 //mcu

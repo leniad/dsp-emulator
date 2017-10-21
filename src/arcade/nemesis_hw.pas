@@ -187,6 +187,7 @@ var
   f,x,y,nchar,color:word;
   flipx,flipy:boolean;
   mask,layer,pant,h:byte;
+  scroll_x1,scroll_x2:array[0..$ff] of word;
 begin
 fill_full_screen(9,0);
 if recalc_char[0] then char_calc(0);
@@ -253,23 +254,23 @@ for f:=0 to $7ff do begin
     end;
 end;
 for f:=0 to $ff do begin
-  //1
-  scroll__x_part(1,9,(xscroll_2[f] and $ff)+((xscroll_2[f+$100] and $1) shl 8),0,f,1);
-  scroll__x_part(5,9,(xscroll_1[f] and $ff)+((xscroll_1[f+$100] and $1) shl 8),0,f,1);
-  //2
-  scroll__x_part(2,9,(xscroll_2[f] and $ff)+((xscroll_2[f+$100] and $1) shl 8),0,f,1);
-  scroll__x_part(6,9,(xscroll_1[f] and $ff)+((xscroll_1[f+$100] and $1) shl 8),0,f,1);
+  scroll_x1[f]:=(xscroll_1[f] and $ff)+((xscroll_1[f+$100] and $1) shl 8);
+  scroll_x2[f]:=(xscroll_2[f] and $ff)+((xscroll_2[f+$100] and $1) shl 8);
 end;
+//1
+scroll__x_part2(1,9,1,@scroll_x2);
+scroll__x_part2(5,9,1,@scroll_x1);
+//2
+scroll__x_part2(2,9,1,@scroll_x2);
+scroll__x_part2(6,9,1,@scroll_x1);
 //Sprites
 draw_sprites;
-for f:=0 to $ff do begin
-  //3
-  scroll__x_part(3,9,(xscroll_2[f] and $ff)+((xscroll_2[f+$100] and $1) shl 8),0,f,1);
-  scroll__x_part(7,9,(xscroll_1[f] and $ff)+((xscroll_1[f+$100] and $1) shl 8),0,f,1);
-  //4
-  scroll__x_part(4,9,(xscroll_2[f] and $ff)+((xscroll_2[f+$100] and $1) shl 8),0,f,1);
-  scroll__x_part(8,9,(xscroll_1[f] and $ff)+((xscroll_1[f+$100] and $1) shl 8),0,f,1);
-end;
+//3
+scroll__x_part2(3,9,1,@scroll_x2);
+scroll__x_part2(7,9,1,@scroll_x1);
+//4
+scroll__x_part2(4,9,1,@scroll_x2);
+scroll__x_part2(8,9,1,@scroll_x1);
 actualiza_trozo_final(0,16,256,224,9);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;

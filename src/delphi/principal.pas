@@ -386,6 +386,11 @@ type
     DonkeyKongjr1: TMenuItem;
     DonkeyKongII1: TMenuItem;
     MarioBros1: TMenuItem;
+    TetrisAtari1: TMenuItem;
+    SNK1: TMenuItem;
+    Ikari1: TMenuItem;
+    Athena1: TMenuItem;
+    tnk31: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

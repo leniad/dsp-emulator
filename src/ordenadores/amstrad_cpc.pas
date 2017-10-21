@@ -30,10 +30,11 @@ type
               lineas_total,lineas_borde,lineas_visible,pixel_visible:word;
               regs:array[0..31] of byte;
               reg:byte;
+
+              h_ctr,r_ctr,v_ctr,h_syn,h_syn_ctr,v_syn,v_syn_ctr:word;
            end;
   tcpc_ga=packed record
-              pen,video_mode,video_mode_new:byte;
-              video_change:boolean;
+              pen,video_mode:byte;
               pal:array[0..16] of byte;
               lines_count,lines_sync,rom_selected:byte;
               rom_low,rom_high:boolean;
@@ -209,18 +210,9 @@ end;
 
 procedure amstrad_ga_exec;
 begin
-if cpc_ga.video_change then begin
-  cpc_ga.video_mode:=cpc_ga.video_mode_new;
-  cpc_ga.video_change:=false;
-end;
-cpc_ga.lines_count:=cpc_ga.lines_count+1;
-//Compruebo si llevo 52 lineas
-if (cpc_ga.lines_count>=52) then begin
-   cpc_ga.lines_count:=0;
-   z80_0.change_irq(ASSERT_LINE);
-end;
+cpc_ga.lines_count:=(cpc_ga.lines_count+1) mod 53;
 //Estoy en un VSYNC?
-if (cpc_ga.lines_sync<>0) then begin
+if (cpc_ga.lines_sync>0) then begin
   //SI --> Compruebo si llevo dos lineas desde la generacion del VSYNC
   cpc_ga.lines_sync:=cpc_ga.lines_sync-1;
   if (cpc_ga.lines_sync=0) then begin
@@ -228,6 +220,12 @@ if (cpc_ga.lines_sync<>0) then begin
     if (cpc_ga.lines_count>=32) then z80_0.change_irq(ASSERT_LINE);
     //Borro el contador...
     cpc_ga.lines_count:=0;
+  end;
+end else begin
+  //Compruebo si llevo 52 lineas
+  if (cpc_ga.lines_count=52) then begin
+    cpc_ga.lines_count:=0;
+    z80_0.change_irq(ASSERT_LINE);
   end;
 end;
 end;
@@ -253,15 +251,13 @@ Ancho TOTAL = (R0+1)*8 = 64*8 = 512 pixels}
 
 procedure cpc_calcular_dir_scr;
 var
-  ma,addr:dword;
-  x,y:word;
+  ma,addr,x,y:word;
 begin
 ma:=cpc_crt.regs[13] or ((cpc_crt.regs[12] and $3f) shl 8);
-for y:=0 to (cpc_crt.regs[4] and $7f) do begin //  altura total en chars
-  for x:=0 to (cpc_crt.regs[9] and $1f) do begin //altura char en lineas
-    addr:=((ma and $3ff) shl 1)+((ma and $3000) shl 2)+(x*$800);
-    if addr>$ffff then addr:=addr-$4000;
-    cpc_crt.scr_line_dir[x+(y*cpc_crt.char_altura)]:=addr;
+for x:=0 to (cpc_crt.regs[4] and $7f) do begin //  altura total en chars
+  for y:=0 to (cpc_crt.regs[9] and $1f) do begin //altura char en lineas
+    addr:=(((ma and $3ff) shl 1)+((ma and $3000) shl 2)+(y*$800)) and $ffff;
+    cpc_crt.scr_line_dir[y+(x*cpc_crt.char_altura)]:=addr;
   end;
   ma:=ma+cpc_crt.regs[1];
 end;
@@ -269,8 +265,7 @@ end;
 
 procedure actualiza_linea(linea:word);
 var
- x,borde:word;
- addr:dword;
+ x,borde,addr:word;
  marco,val,p1,p2,p3,p4,p5,p6,p7,p8:byte;
  temp1,temp2,temp3,temp4,temp5,temp6:byte;
  ptemp:pword;
@@ -279,11 +274,10 @@ borde:=(pantalla_largo-cpc_crt.pixel_visible) shr 1;
 addr:=cpc_crt.scr_line_dir[linea];
 x:=0;
 while (x<cpc_crt.char_total) do begin
-  if ((x<cpc_crt.pixel_visible) and (x<cpc_crt.char_hsync)) then begin
+  if (x<cpc_crt.pixel_visible) then begin
     marco:=addr shr 14;
     val:=cpc_mem[cpc_ga.marco[marco and $3],addr and $3fff];
-    addr:=addr+1;
-    if addr>$ffff then addr:=addr-$4000;
+    addr:=(addr+1) and $ffff;
     case cpc_ga.video_mode of
       0:begin
           // 1 5 3 7    0 4 2 6
@@ -365,11 +359,10 @@ end;
 
 procedure draw_line;
 begin
-amstrad_ga_exec;
 single_line(0,(linea_crt+cpc_crt.lineas_borde) mod pantalla_alto,cpc_ga.pal[$10],pantalla_largo,1);
 if (linea_crt<cpc_crt.lineas_visible) then actualiza_linea(linea_crt);
 //Vsync
-if cpc_crt.vsync_activo then begin
+{if cpc_crt.vsync_activo then begin
   cpc_crt.vsync_activo:=not(cpc_crt.vsync_cont=0);
   cpc_crt.vsync_cont:=cpc_crt.vsync_cont-1;
 end;
@@ -377,7 +370,7 @@ if (linea_crt=cpc_crt.vsync_linea_ocurre) then begin
   cpc_crt.vsync_cont:=cpc_crt.vsync_lines-1;
   cpc_ga.lines_sync:=3;
   cpc_crt.vsync_activo:=true;
-end;
+end;}
 end;
 
 procedure cpc_main;
@@ -387,12 +380,8 @@ begin
 init_controls(false,true,true,false);
 frame:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-  for linea_crt:=0 to 311 do begin
-    z80_0.run(frame);
-    frame:=frame+z80_0.tframes-z80_0.contador;
-    draw_line;
-    cpc_crt.hsync_activo:=false;
-  end;
+  z80_0.run(frame);
+  frame:=frame+z80_0.tframes-z80_0.contador;
   eventos_cpc;
   actualiza_trozo_simple(0,0,pantalla_largo,pantalla_alto,1);
   video_sync;
@@ -426,8 +415,7 @@ case (val shr 6) of
                 else cpc_ga.pen:=$10; //Border
      $1:cpc_ga.pal[cpc_ga.pen]:=val and 31;    //Change pen colour
      $2:begin   //ROM banking and mode switch
-            cpc_ga.video_mode_new:=val and 3;
-            if (cpc_ga.video_mode<>cpc_ga.video_mode_new) then cpc_ga.video_change:=true;
+            cpc_ga.video_mode:=val and 3;
             cpc_ga.rom_low:=(val and 4)=0;
             cpc_ga.rom_high:=(val and 8)=0;
             if (val and $10)<>0 then begin
@@ -479,6 +467,8 @@ end;
 end;
 
 procedure cpc_calc_crt;
+var
+  char_hsync:word;
 begin
 //altura char por linea
 cpc_crt.char_altura:=(cpc_crt.regs[9] and $1f)+1;
@@ -486,22 +476,21 @@ cpc_crt.char_altura:=(cpc_crt.regs[9] and $1f)+1;
 //chars totales
 cpc_crt.char_total:=(cpc_crt.regs[0]+1)*8;
 //char en el que ocurre el hsync (ocurre en el paso a '0' de la señal)
-cpc_crt.char_hsync:=cpc_crt.regs[2]*8;
-//(cpc_crt.regs[3] and $f)
-cpc_crt.hsync_time_ocurre:=cpc_crt.char_hsync shr 1;
+char_hsync:=cpc_crt.regs[2]*8;
 //Total pixels por linea
-cpc_crt.pixel_visible:=cpc_crt.regs[1]*8;
+if cpc_crt.regs[1]<48 then cpc_crt.pixel_visible:=cpc_crt.regs[1]*8
+  else cpc_crt.pixel_visible:=48*8;
 if cpc_crt.pixel_visible>pantalla_largo then cpc_crt.pixel_visible:=pantalla_largo;
+if cpc_crt.pixel_visible>char_hsync then cpc_crt.pixel_visible:=char_hsync;
 //Linea donde ocurre el vsync
 cpc_crt.vsync_linea_ocurre:=(cpc_crt.regs[7] and $7f)*cpc_crt.char_altura;
-//Lineas de vsync
-cpc_crt.vsync_lines:=(cpc_crt.regs[3] shr 4)+1;
 //lineas visibles
-cpc_crt.lineas_visible:=(cpc_crt.regs[6] and $7f)*cpc_crt.char_altura;
+if (cpc_crt.regs[6] and $7f)<39 then cpc_crt.lineas_visible:=(cpc_crt.regs[6] and $7f)*cpc_crt.char_altura
+  else cpc_crt.lineas_visible:=39*cpc_crt.char_altura;
 if cpc_crt.lineas_visible>pantalla_alto then cpc_crt.lineas_visible:=pantalla_alto;
 if cpc_crt.lineas_visible>cpc_crt.vsync_linea_ocurre then cpc_crt.lineas_visible:=cpc_crt.vsync_linea_ocurre;
 //lineas totales del video incluyendo las visibles
-cpc_crt.lineas_total:=((cpc_crt.regs[4] and $7f)+1)*cpc_crt.char_altura+(cpc_crt.regs[5] and $1f);
+cpc_crt.lineas_total:=((cpc_crt.regs[4] and $7f)+1)*cpc_crt.char_altura;
 if cpc_crt.lineas_visible<cpc_crt.lineas_total then cpc_crt.lineas_borde:=(pantalla_alto-cpc_crt.lineas_visible) shr 1
    else cpc_crt.lineas_borde:=0;
 end;
@@ -558,7 +547,7 @@ end;
 function amstrad_raised_z80:byte;
 begin
   cpc_ga.lines_count:=cpc_ga.lines_count and $1f;
-  amstrad_raised_z80:=2;
+  amstrad_raised_z80:=0;
   z80_0.change_irq(CLEAR_LINE);
 end;
 
@@ -587,7 +576,7 @@ end;
 // bit 7 cassete data
 function port_b_read:byte;
 begin
-port_b_read:=$7e or (cinta_tzx.value shl 1) or byte(cpc_crt.vsync_activo);
+port_b_read:=$7e or (cinta_tzx.value shl 1) or cpc_crt.v_syn;//}byte(cpc_crt.vsync_activo);
 end;
 
 procedure port_a_write(valor:byte);
@@ -630,10 +619,71 @@ tsample[tape_sound_channel,sound_status.posicion_sonido]:=(cinta_tzx.value*$20)*
 ay8910_0.update;
 end;
 
-//Tape
+procedure clock_crt;
+var
+   old_h_syn,old_v_syn:word;
+begin
+   old_h_syn:=cpc_crt.h_syn;
+   old_v_syn:=cpc_crt.v_syn;
+  //h_syn_ctr --> Cuantos CHARS son necesarios para el HBLANK, durante este periodo el HBLANK esta activo
+  //              Se decrementa cada vez hasta 0 y entonces se desactiva el HBLANK
+  //              El valor se coje del REG[3] (los cuatro bits de abajo), y si es 0 se coje 16
+  //v_syn_ctr --> Cuantas LINEAS necesita el VBLANK, durante este periodo el VBLANK esta activo
+  //              Se decrementa hasta 0 y entonces VBLANK 0
+  //              El valor se coje del REG[3] (los cuatro bits de arriba), y si es 0 se coje 16
+  //h_sync --> HBLANK activo
+  //v_sync --> VBLANK activo
+  //h_ctr --> Cantidad de chars que llevo, si son iguales al REG[0]+1 !! lo pongo a 0.
+  //          Miro el control vertical (v_syn_ctr), si es mayor que 0, le resto 1 y miro si es cero, de serlo desactivo VBLANK
+  //          Le sumo uno al raster control (r_ctr). Compruebo si es igual al REG[9]+1 !!, de serlo pongo a 0 el r_ctr y sumo uno al control vertical, comparo v_ctr al REG[4]+1 !! y de ser igual pongo a 0 el v_ctr
+  //v_ctr --> Control vertical
+  //r_ctr --> Control raster
+  //Al terminar todo miro si ha cambiado el estado del v_sync o del h_sync (guardandome antes de las operaciones el valor) y de ser asi, llamo a la funcion correspondiente
+  if (cpc_crt.h_syn_ctr>0) then begin
+    cpc_crt.h_syn_ctr:=cpc_crt.h_syn_ctr-1;
+    if (cpc_crt.h_syn_ctr=0) then cpc_crt.h_syn:=0;
+  end;
+  cpc_crt.h_ctr:=(cpc_crt.h_ctr+1) and $ff;
+  if (cpc_crt.h_ctr=(cpc_crt.regs[0]+1)) then begin // Horiz. Total
+    cpc_crt.h_ctr:=0;
+    if (cpc_crt.v_syn_ctr>0) then begin
+      cpc_crt.v_syn_ctr:=cpc_crt.v_syn_ctr-1;
+      if (cpc_crt.v_syn_ctr=0) then cpc_crt.v_syn:=0;
+    end;
+    cpc_crt.r_ctr:=(cpc_crt.r_ctr+1) and $1f;
+    if (cpc_crt.r_ctr=((cpc_crt.regs[9] and $1f)+1)) then begin // Raster Total
+      cpc_crt.r_ctr:=0;
+      cpc_crt.v_ctr:=(cpc_crt.v_ctr+1) and $7f;
+      if (cpc_crt.v_ctr=((cpc_crt.regs[4]and $7f)+1)) then cpc_crt.v_ctr:=0; // Verti. Total
+    end;
+  end;
+  if ((cpc_crt.h_syn=0) and (cpc_crt.h_ctr=cpc_crt.regs[2])) then begin //Horiz. Sync Pos.
+    cpc_crt.h_syn:=1;
+    cpc_crt.h_syn_ctr:=cpc_crt.regs[3] and $f;
+    if cpc_crt.h_syn_ctr=0 then cpc_crt.h_syn_ctr:=16;
+  end;
+  if ((cpc_crt.v_syn=0) and (cpc_crt.v_ctr=(cpc_crt.regs[7] and $7f))) then begin // Verti. Sync Pos.
+    cpc_crt.v_syn:=1;
+    cpc_crt.v_syn_ctr:=cpc_crt.regs[3] shr 4;
+    if cpc_crt.v_syn_ctr=0 then cpc_crt.v_syn_ctr:=16;
+  end;
+  //Vsync
+  if (cpc_crt.v_syn<>old_v_syn) then begin
+    if cpc_crt.v_syn<>0 then cpc_ga.lines_sync:=3;
+  end;
+  //Hsync
+  if (cpc_crt.h_syn<>old_h_syn) then begin
+     if cpc_crt.h_syn<>0 then begin
+      amstrad_ga_exec;
+      draw_line;
+      linea_crt:=(linea_crt+1) mod 312;
+     end;
+  end;
+end;
+
 procedure amstrad_despues_instruccion(estados_t:word);
 var
-   est_final:byte;
+   f,est_final:byte;
 begin
 //z80_0.get_safe_pc=$bc77
 if cinta_tzx.cargada and cinta_tzx.play_tape then begin
@@ -641,12 +691,10 @@ if cinta_tzx.cargada and cinta_tzx.play_tape then begin
    play_cinta_tzx;
 end;
 //Añadir tiempos de espera...
-est_final:=((estados_t shr 2)+byte((estados_t and 3)<>0)) shl 2;
+est_final:=(estados_t+3) and $fc;
 z80_0.contador:=z80_0.contador+(est_final-estados_t);
-{if (((z80_0.contador+estados_t)>=cpc_crt.hsync_time_ocurre) and not(cpc_crt.hsync_activo)) then begin
-  cpc_crt.hsync_activo:=true;
-  amstrad_ga_exec;
-end;}
+//Clock a el video...
+for f:=1 to (est_final div 4) do clock_crt;
 end;
 
 function amstrad_tapes:boolean;
@@ -759,11 +807,10 @@ begin
   if cinta_tzx.cargada then cinta_tzx.play_once:=false;
   cinta_tzx.value:=0;
   ResetFDC;
+  linea_crt:=0;
   //Init GA
   cpc_ga.pen:=0;
   cpc_ga.video_mode:=0;
-  cpc_ga.video_mode_new:=0;
-  cpc_ga.video_change:=false;
   fillchar(cpc_ga.pal[0],16,0);
   cpc_ga.lines_count:=0;
   cpc_ga.lines_sync:=0;
@@ -780,6 +827,23 @@ begin
   fillchar(cpc_crt^,sizeof(tcpc_crt),0);
   cpc_crt.char_altura:=1;
   cpc_crt.lineas_total:=1;
+  cpc_crt.regs[0]:=63;
+  cpc_crt.regs[1]:=40;
+  cpc_crt.regs[2]:=46;
+  cpc_crt.regs[3]:=142;
+  cpc_crt.regs[4]:=38;
+  cpc_crt.regs[5]:=0;
+  cpc_crt.regs[6]:=25;
+  cpc_crt.regs[7]:=30;
+  cpc_crt.regs[8]:=0;
+  cpc_crt.regs[9]:=7;
+  cpc_crt.regs[10]:=0;
+  cpc_crt.regs[11]:=0;
+  cpc_crt.regs[12]:=48;
+  cpc_crt.regs[13]:=0;
+  cpc_crt.regs[14]:=192;
+  cpc_calc_crt;
+  cpc_calcular_dir_scr;
   //PPI
   fillchar(cpc_ppi,sizeof(tcpc_ppi),0);
   fillchar(cpc_ppi.keyb_val[0],10,$FF);
@@ -899,11 +963,10 @@ for f:=0 to 31 do begin
   colores[f].b:=cpc_paleta[f] and $FF;
 end;
 set_pal(colores,32);
-z80_0:=cpu_z80.create(4000000,pantalla_alto);
+z80_0:=cpu_z80.create(4000000,1);
 z80_0.change_ram_calls(cpc_getbyte,cpc_putbyte);
 z80_0.change_io_calls(cpc_inbyte,cpc_outbyte);
 z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80);
-//z80_0.change_timmings(@z80_op,@z80_op_cb,@z80_op_dd,@z80_op_ddcb,@z80_op_ed,@z80_op_ex);
 z80_0.init_sound(amstrad_sound_update);
 tape_sound_channel:=init_channel;
 //El CPC lee el teclado el puerto A del AY, pero el puerto B esta unido al A
@@ -931,7 +994,7 @@ begin
 llamadas_maquina.iniciar:=iniciar_cpc;
 llamadas_maquina.bucle_general:=cpc_main;
 llamadas_maquina.reset:=cpc_reset;
-llamadas_maquina.fps_max:=50.08;
+llamadas_maquina.fps_max:=50.080128205;
 llamadas_maquina.close:=cpc_close;
 llamadas_maquina.cintas:=amstrad_tapes;
 llamadas_maquina.cartuchos:=amstrad_loaddisk;

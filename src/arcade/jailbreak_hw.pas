@@ -55,7 +55,7 @@ for f:=0 to $7ff do begin
       gfx[0].buffer[f]:=false;
     end;
 end;
-if scroll_dir then for f:=0 to 31 do scroll__y_part(1,2,scroll_lineas[f],0,f*8,8)
+if scroll_dir then scroll__y_part2(1,2,8,@scroll_lineas)
   else scroll__x_part2(1,2,8,@scroll_lineas);
 for f:=0 to $2f do begin
   atrib:=memoria[$1001+(f*4)];

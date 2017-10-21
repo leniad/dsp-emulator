@@ -201,6 +201,11 @@ type
     donkeykongii1: TMenuItem;
     donkeykongjr1: TMenuItem;
     mariobros1: TMenuItem;
+    MenuItem35: TMenuItem;
+    ikari1: TMenuItem;
+    athena1: TMenuItem;
+    tnk31: TMenuItem;
+    tetrisatari1: TMenuItem;
     retofinv1: TMenuItem;
     sauro1: TMenuItem;
     Vendetta1: TMenuItem;

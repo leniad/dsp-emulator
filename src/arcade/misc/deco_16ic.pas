@@ -160,9 +160,11 @@ end;
 case (self.control[6] and $60) of
   $00:scroll_x_y(self.pf1.pant,screen,self.control[1],self.control[2]);
   $20:begin //col_scroll
+        //scroll_x_y(self.pf1.pant,screen,self.control[1],self.control[2]);
         cols:=8 shl (self.control[5] and $7);
         atrib:=1024 div cols;
-        for f:=0 to cols-1 do scroll__y_part(self.pf1.pant,screen,self.control[2]+self.pf1.rowscroll[f+$200],self.control[1],f*atrib,atrib);
+        scroll__y_part2(self.pf1.pant,screen,atrib,@self.pf1.rowscroll[$200],self.control[1],self.control[2]);
+        //for f:=0 to cols-1 do scroll__y_part(self.pf1.pant,screen,self.control[2]+self.pf1.rowscroll[f+$200],self.control[1],f*atrib,atrib);
   end;
   $40:begin //row_scroll
         rows:=512 shr ((self.control[5] shr 3) and $f);
@@ -221,7 +223,8 @@ case ((self.control[6] shr 8) and $60) of
   $20:begin //col_scroll
         cols:=8 shl ((self.control[5] shr 8) and $7);
         atrib:=1024 div cols;
-        for f:=0 to cols-1 do scroll__y_part(self.pf2.pant,screen,self.control[4]+self.pf2.rowscroll[f+$200],self.control[3],f*atrib,atrib);
+        scroll__y_part2(self.pf2.pant,screen,atrib,@self.pf2.rowscroll[$200],self.control[3],self.control[4]);
+        //for f:=0 to cols-1 do scroll__y_part(self.pf2.pant,screen,self.control[4]+self.pf2.rowscroll[f+$200],self.control[3],f*atrib,atrib);
   end;
   $40:begin //row_scroll
         rows:=512 shr (((self.control[5] shr 8) shr 3) and $f);

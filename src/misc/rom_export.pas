@@ -1931,13 +1931,13 @@ const
         blockout:array[0..4] of tipo_roms=(
         (n:'bo29a0-2.bin';l:$20000;p:0;crc:$b0103427),(n:'bo29a1-2.bin';l:$20000;p:$1;crc:$5984d5a2),
         (n:'bo29e3-0.bin';l:$8000;p:0;crc:$3ea01f78),(n:'bo29e2-0.bin';l:$20000;p:0;crc:$15c5a99d),());
-        foodf:array[0..11] of tipo_roms=(
+        foodf:array[0..12] of tipo_roms=(
         (n:'136020-301.8c';l:$2000;p:1;crc:$dfc3d5a8),(n:'136020-302.9c';l:$2000;p:$0;crc:$ef92dc5c),
         (n:'136020-303.8d';l:$2000;p:$4001;crc:$64b93076),(n:'136020-204.9d';l:$2000;p:$4000;crc:$ea596480),
         (n:'136020-305.8e';l:$2000;p:$8001;crc:$e6cff1b1),(n:'136020-306.9e';l:$2000;p:$8000;crc:$95159a3e),
         (n:'136020-307.8f';l:$2000;p:$c001;crc:$17828dbb),(n:'136020-208.9f';l:$2000;p:$c000;crc:$608690c9),
-        (n:'136020-109.6lm';l:$2000;p:0;crc:$c13c90eb),
-        (n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),(n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf),());
+        (n:'136020-109.6lm';l:$2000;p:0;crc:$c13c90eb),(n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),
+        (n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf),(n:'foodf.nv';l:$100;p:0;crc:$a4186b13),());
         nemesis:array[0..11] of tipo_roms=(
         (n:'456-d01.12a';l:$8000;p:0;crc:$35ff1aaa),(n:'456-d05.12c';l:$8000;p:$1;crc:$23155faa),
         (n:'456-d02.13a';l:$8000;p:$10000;crc:$ac0cf163),(n:'456-d06.13c';l:$8000;p:$10001;crc:$023f22a9),
@@ -2280,6 +2280,35 @@ const
         (n:'a37-13.11';l:$2000;p:$6000;crc:$00ca6b3d),(n:'a37-06.13';l:$100;p:$0;crc:$e9643b8b),
         (n:'a37-07.4';l:$100;p:$100;crc:$e8f34e11),(n:'a37-08.3';l:$100;p:$200;crc:$50030af0),
         (n:'82s191n';l:$800;p:$300;crc:$93c891e3),());
+        ikari:array[0..20] of tipo_roms=(
+        (n:'1.rom';l:$10000;p:0;crc:$52a8b2dd),(n:'2.rom';l:$10000;p:0;crc:$45364d55),
+        (n:'3.rom';l:$10000;p:0;crc:$56a26699),(n:'7.rom';l:$4000;p:0;crc:$a7eb4917),
+        (n:'17.rom';l:$8000;p:0;crc:$e0dba976),(n:'18.rom';l:$8000;p:$8000;crc:$24947d5f),
+        (n:'19.rom';l:$8000;p:$10000;crc:$9ee59e91),(n:'20.rom';l:$8000;p:$18000;crc:$5da7ec1a),
+        (n:'8.rom';l:$8000;p:0;crc:$9827c14a),(n:'9.rom';l:$8000;p:$8000;crc:$545c790c),
+        (n:'10.rom';l:$8000;p:$10000;crc:$ec9ba07e),(n:'11.rom';l:$8000;p:0;crc:$5c75ea8f),
+        (n:'14.rom';l:$8000;p:$8000;crc:$3293fde4),(n:'12.rom';l:$8000;p:$10000;crc:$95138498),
+        (n:'15.rom';l:$8000;p:$18000;crc:$65a61c99),(n:'13.rom';l:$8000;p:$20000;crc:$315383d7),
+        (n:'16.rom';l:$8000;p:$28000;crc:$e9b03e07),(n:'7122er.prm';l:$400;p:0;crc:$b9bf2c2c),
+        (n:'7122eg.prm';l:$400;p:$800;crc:$0703a770),(n:'7122eb.prm';l:$400;p:$1000;crc:$0a11cdde),());
+        athena:array[0..14] of tipo_roms=(
+        (n:'up02_p4.rom';l:$4000;p:0;crc:$900a113c),(n:'up02_m4.rom';l:$4000;p:$8000;crc:$61c69474),
+        (n:'up02_p8.rom';l:$4000;p:0;crc:$df50af7e),(n:'up02_m8.rom';l:$4000;p:$8000;crc:$f3c933df),
+        (n:'up02_g6.rom';l:$4000;p:0;crc:$42dbe029),(n:'up02_k6.rom';l:$8000;p:$4000;crc:$596f1c8a),
+        (n:'up01_d2.rom';l:$4000;p:0;crc:$18b4bcca),(n:'up01_b2.rom';l:$8000;p:0;crc:$f269c0eb),
+        (n:'up01_p2.rom';l:$8000;p:0;crc:$c63a871f),(n:'up01_s2.rom';l:$8000;p:$8000;crc:$760568d8),
+        (n:'up01_t2.rom';l:$8000;p:$10000;crc:$57b35c73),(n:'up02_c2.rom';l:$400;p:0;crc:$294279ae),
+        (n:'up02_b1.rom';l:$400;p:$400;crc:$d25c9099),(n:'up02_c1.rom';l:$400;p:$800;crc:$a4a4e7dc),());
+        tnk3:array[0..17] of tipo_roms=(
+        (n:'tnk3-p1.bin';l:$4000;p:0;crc:$0d2a8ca9),(n:'tnk3-p2.bin';l:$4000;p:$4000;crc:$0ae0a483),
+        (n:'tnk3-p3.bin';l:$4000;p:$8000;crc:$d16dd4db),(n:'tnk3-p4.bin';l:$4000;p:0;crc:$01b45a90),
+        (n:'tnk3-p5.bin';l:$4000;p:$4000;crc:$60db6667),(n:'tnk3-p6.bin';l:$4000;p:$8000;crc:$4761fde7),
+        (n:'tnk3-p10.bin';l:$4000;p:0;crc:$7bf0a517),(n:'tnk3-p11.bin';l:$4000;p:$4000;crc:$0569ce27),
+        (n:'tnk3-p14.bin';l:$2000;p:0;crc:$1fd18c43),(n:'tnk3-p12.bin';l:$4000;p:0;crc:$ff495a16),
+        (n:'tnk3-p13.bin';l:$4000;p:$4000;crc:$f8344843),(n:'tnk3-p7.bin';l:$4000;p:0;crc:$06b92c88),
+        (n:'tnk3-p8.bin';l:$4000;p:$4000;crc:$63d0e2eb),(n:'tnk3-p9.bin';l:$4000;p:$8000;crc:$872e3fac),
+        (n:'7122.2';l:$400;p:0;crc:$34c06bc6),(n:'7122.1';l:$400;p:$400;crc:$6d0ac66a),
+        (n:'7122.0';l:$400;p:$800;crc:$4662b4c8),());
 
 implementation
 uses principal,init_games;

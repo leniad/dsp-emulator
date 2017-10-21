@@ -143,6 +143,7 @@ type
         function read(offset:word):byte;
         procedure write(offset:word;data:byte);
         procedure change_pot(pot0,pot1,pot2,pot3,pot4,pot5,pot6,pot7:single_pot);
+        procedure change_all_pot(pot_all:serin_allpot);
         //function save_snapshot(data:pbyte):word;
         //procedure load_snapshot(data:pbyte);
       private
@@ -218,6 +219,11 @@ begin
   self.pot5_r_cb:=pot5;
   self.pot6_r_cb:=pot6;
   self.pot7_r_cb:=pot7;
+end;
+
+procedure pokey_chip.change_all_pot(pot_all:serin_allpot);
+begin
+  self.allpot_r_cb:=pot_all;
 end;
 
 procedure pokey_chip.update_internal;
@@ -518,10 +524,10 @@ end;
 
 function pokey_chip.read(offset:word):byte;
 var
-  data,pot:integer;
+  data,pot:byte;
 begin
 	synchronize(SYNC_NOOP,0,self.number); // force resync */
-	case (offset and 15) of
+	case (offset and $f) of
 	  POT0_C,POT1_C,POT2_C,POT3_C,POT4_C,POT5_C,POT6_C,POT7_C:begin
 		    pot:=offset and 7;
 		    if ((self.ALLPOT and (1 shl pot))<>0) then begin

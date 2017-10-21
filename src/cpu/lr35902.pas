@@ -1429,9 +1429,11 @@ if not(self.halt) then begin
  end; //Del case
 end;
 tempw:=gb_t[instruccion]+self.estados_demas;
-self.contador:=self.contador+tempw;
+for tempb:=1 to (tempw div 4) do begin
+  self.despues_instruccion(tempw);
+  self.contador:=self.contador+4;
+end;
 update_timer(self.contador-old_contador,self.numero_cpu);
-self.despues_instruccion(tempw);
 end; //Del while
 end;
 

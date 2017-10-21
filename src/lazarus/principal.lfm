@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
   Left = 900
-  Height = 198
-  Top = 220
+  Height = 206
+  Top = 212
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -9,7 +9,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 178
+  ClientHeight = 186
   ClientWidth = 341
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -953,12 +953,12 @@ object principal1: Tprincipal1
   end
   object Panel2: TPanel
     Left = 8
-    Height = 126
+    Height = 134
     Top = 33
     Width = 333
     Align = alRight
     Anchors = [akTop, akBottom]
-    ClientHeight = 126
+    ClientHeight = 134
     ClientWidth = 333
     TabOrder = 2
     Visible = False
@@ -1620,7 +1620,7 @@ object principal1: Tprincipal1
   object Panel5: TPanel
     Left = 0
     Height = 19
-    Top = 159
+    Top = 167
     Width = 341
     Align = alBottom
     ClientHeight = 19
@@ -2356,6 +2356,21 @@ object principal1: Tprincipal1
             Caption = 'Return of the invaders'
             OnClick = CambiarMaquina
           end
+          object MenuItem35: TMenuItem
+            Caption = 'SNK HW'
+            object ikari1: TMenuItem
+              Caption = 'Ikari Warriors'
+              OnClick = CambiarMaquina
+            end
+            object athena1: TMenuItem
+              Caption = 'Athena'
+              OnClick = CambiarMaquina
+            end
+            object tnk31: TMenuItem
+              Caption = 'T.N.K'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2393,6 +2408,10 @@ object principal1: Tprincipal1
           end
           object centipede1: TMenuItem
             Caption = 'Centipede'
+            OnClick = CambiarMaquina
+          end
+          object tetrisatari1: TMenuItem
+            Caption = 'Tetris (Atari)'
             OnClick = CambiarMaquina
           end
         end

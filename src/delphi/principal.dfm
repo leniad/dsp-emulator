@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 265
+  ClientHeight = 332
   ClientWidth = 370
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -589,10 +589,11 @@ object principal1: Tprincipal1
     Left = 321
     Top = 33
     Width = 49
-    Height = 213
+    Height = 280
     Align = alRight
     TabOrder = 1
     Visible = False
+    ExplicitHeight = 113
     object BitBtn9: TBitBtn
       Left = 4
       Top = 44
@@ -1229,11 +1230,12 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 246
+    Top = 313
     Width = 370
     Height = 19
     Align = alBottom
     TabOrder = 2
+    ExplicitTop = 146
     DesignSize = (
       370
       19)
@@ -2063,6 +2065,22 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object SNK1: TMenuItem
+            Caption = 'SNK'
+            GroupIndex = 1
+            object Ikari1: TMenuItem
+              Caption = 'Ikari Warriors'
+              OnClick = CambiarMaquina
+            end
+            object Athena1: TMenuItem
+              Caption = 'Athena'
+              OnClick = CambiarMaquina
+            end
+            object tnk31: TMenuItem
+              Caption = 'T.N.K III'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2106,6 +2124,11 @@ object principal1: Tprincipal1
           end
           object Centipede1: TMenuItem
             Caption = 'Centipede'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
+          object TetrisAtari1: TMenuItem
+            Caption = 'Tetris (Atari)'
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
@@ -2782,7 +2805,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807040520002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807180520002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

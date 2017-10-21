@@ -390,13 +390,13 @@ type
 	  lfo_am_depth:byte;
 	  lfo_pm_depth_range:byte;
 	  lfo_am_cnt:dword;
-	  lfo_am_inc:single;
+	  lfo_am_inc:dword;
 	  lfo_pm_cnt:dword;
-	  lfo_pm_inc:single;
+	  lfo_pm_inc:dword;
 
 	  noise_rng:dword;				// 23 bit noise shift register  */
 	  noise_p:dword;				// current noise 'phase'        */
-	  noise_f:single;				// current noise period         */
+	  noise_f:dword;				// current noise period         */
 
 	  wavesel:byte;				// waveform select enable flag  */
 
@@ -423,6 +423,7 @@ type
 	  rate:dword;					// sampling rate (Hz)           */
 	  freqbase:single;				// frequency base               */
 	  TimerBase:single;			// Timer base time (==sampling time)*/
+    phase_modulation:integer;    // phase modulation input (SLOT 2) */
     LFO_AM:dword;
     LFO_PM:integer;
     output:integer;
@@ -431,7 +432,6 @@ type
 
 var
   SLOT7_1,SLOT7_2,SLOT8_1,SLOT8_2:pOPL_SLOT;
-  phase_modulation:integer;	// phase modulation input (SLOT 2) */
   tl_tab:array[0..(TL_TAB_LEN-1)] of integer;
   ksl_tab:array[0..(8*16)-1] of single;
   mul_tab:array[0..15] of integer;
@@ -558,12 +558,12 @@ begin
 
 	// Amplitude modulation: 27 output levels (triangle waveform); 1 level takes one of: 192, 256 or 448 samples */
 	// One entry from LFO_AM_TABLE lasts for 64 samples */
-	OPL.lfo_am_inc:=(1.0 / 64.0 ) * (1 shl LFO_SH) * OPL.freqbase;
+	OPL.lfo_am_inc:=trunc((1.0 / 64.0 ) * (1 shl LFO_SH) * OPL.freqbase);
 
 	// Vibrato: 8 output levels (triangle waveform); 1 level takes 1024 samples */
-	OPL.lfo_pm_inc:=(1.0 / 1024.0)*(1 shl LFO_SH)*OPL.freqbase;
+	OPL.lfo_pm_inc:=trunc((1.0 / 1024.0)*(1 shl LFO_SH)*OPL.freqbase);
 	// Noise generator: a step takes 1 sample */
-	OPL.noise_f:=(1.0 / 1.0) * (1 shl FREQ_SH) * OPL.freqbase;
+	OPL.noise_f:=trunc((1.0 / 1.0) * (1 shl FREQ_SH) * OPL.freqbase);
 
 	OPL.eg_timer_add:=(1 shl EG_SH)  * OPL.freqbase;
 	OPL.eg_timer_overflow:= ( 1 ) * (1 shl EG_SH);
@@ -1008,7 +1008,7 @@ begin
           else CH.SLOT[SLOT1].FB:=0;
 		    CH.SLOT[SLOT1].CON:= v and 1;
         if CH.SLOT[SLOT1].CON<>0 then CH.SLOT[SLOT1].connect1:=@output
-          else CH.SLOT[SLOT1].connect1:=@phase_modulation;
+          else CH.SLOT[SLOT1].connect1:=@OPL.phase_modulation;
         end;
    $e0:begin // waveform select */
 		    // simply ignore write to the waveform select register if selecting not enabled in test register */
@@ -1028,13 +1028,13 @@ var
   temp:byte;
 begin
 	// LFO */
-	OPL.lfo_am_cnt:=trunc(OPL.lfo_am_cnt+OPL.lfo_am_inc);
+	OPL.lfo_am_cnt:=OPL.lfo_am_cnt+OPL.lfo_am_inc;
 	if OPL.lfo_am_cnt>=cardinal(LFO_AM_TAB_ELEMENTS shl LFO_SH) then //lfo_am_table is 210 elements long */
-		OPL.lfo_am_cnt:=OPL.lfo_am_cnt-(LFO_AM_TAB_ELEMENTS shl LFO_SH);
+		OPL.lfo_am_cnt:=OPL.lfo_am_cnt-cardinal(LFO_AM_TAB_ELEMENTS shl LFO_SH);
   temp:=lfo_am_table[OPL.lfo_am_cnt shr LFO_SH];
 	if (OPL.lfo_am_depth<>0) then	OPL.LFO_AM:=temp
 	  else OPL.LFO_AM:=temp shr 2;
-	OPL.lfo_pm_cnt:=trunc(OPL.lfo_pm_cnt+OPL.lfo_pm_inc);
+	OPL.lfo_pm_cnt:=OPL.lfo_pm_cnt+OPL.lfo_pm_inc;
 	OPL.LFO_PM:=((OPL.lfo_pm_cnt shr LFO_SH) and 7) or OPL.lfo_pm_depth_range;
 end;
 
@@ -1143,7 +1143,7 @@ begin
     *
     *   Simply use bit 22 as the noise output.}
 
-	OPL.noise_p:=trunc(OPL.noise_p+OPL.noise_f);
+	OPL.noise_p:=OPL.noise_p+OPL.noise_f;
 	i:=OPL.noise_p shr FREQ_SH;		// number of events (shifts of the shift register) */
 	OPL.noise_p:=OPL.noise_p and FREQ_MASK;
 	while (i>0) do begin
@@ -1199,7 +1199,7 @@ var
 	env:cardinal;
 	out_:integer;
 begin
-	phase_modulation:= 0;
+	OPL.phase_modulation:=0;
 	// SLOT 1 */
 	SLOT:=CH.SLOT[SLOT1];
 	env:= volume_calc(OPL,SLOT);
@@ -1215,7 +1215,7 @@ begin
 	SLOT:=CH.SLOT[SLOT2];
 	env:= volume_calc(OPL,SLOT);
 	if (env<ENV_QUIET ) then
-		OPL.output:=OPL.output+op_calc(SLOT.Cnt, env, phase_modulation, SLOT.wavetable);
+		OPL.output:=OPL.output+op_calc(SLOT.Cnt, env, OPL.phase_modulation, SLOT.wavetable);
 end;
 
 procedure OPL_CALC_RH(OPL:pFM_OPL;noise:cardinal);
@@ -1233,7 +1233,7 @@ begin
           when connect = 1 _only_ operator 2 is present on output (op2->out), operator 1 is ignored
       - output sample always is multiplied by 2}
 
-	phase_modulation:=0;
+	OPL.phase_modulation:=0;
 	// SLOT 1 */
 	SLOT:=OPL.P_CH[6].SLOT[SLOT1];
 	env:=volume_calc(OPL,SLOT);
@@ -1241,7 +1241,7 @@ begin
 	out_:= SLOT.op1_out[0] + SLOT.op1_out[1];
 	SLOT.op1_out[0]:= SLOT.op1_out[1];
 
-	if (SLOT.CON=0) then phase_modulation:=SLOT.op1_out[0];
+	if (SLOT.CON=0) then OPL.phase_modulation:=SLOT.op1_out[0];
 	// else ignore output of operator 1 */
 
 	SLOT.op1_out[1]:=0;
@@ -1254,7 +1254,7 @@ begin
 	SLOT:=OPL.P_CH[6].SLOT[SLOT2];
 	env:=volume_calc(OPL,SLOT);
 	if (env < ENV_QUIET ) then
-		OPL.output:=OPL.output+op_calc(SLOT.Cnt, env, phase_modulation, SLOT.wavetable) * 2;
+		OPL.output:=OPL.output+op_calc(SLOT.Cnt, env,OPL.phase_modulation, SLOT.wavetable) * 2;
 	// Phase generation is based on: */
 	// HH  (13) channel 7->slot 1 combined with channel 8->slot 2 (same combination as TOP CYMBAL but different output phases) */
 	// SD  (16) channel 7->slot 1 */

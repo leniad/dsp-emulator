@@ -34,6 +34,7 @@ const
 var
  nmi_mask:boolean;
  mem_decode:array[0..$5fff] of byte;
+ scroll_y:array[0..$1f] of word;
 
 procedure draw_sprites;inline;
 var
@@ -99,7 +100,8 @@ if bs_changed then flip_surface(2,flipx,flipy);
 x:=memoria[$98df]-$8-(byte(flipx)*$80)-(byte(main_screen.flip_main_screen)*$27);
 y:=memoria[$98de]-(byte(flipy)*$80);
 //Poner todo en su sitio
-for f:=0 to 31 do scroll__y_part(1,3,memoria[$9800+f],0,f*8,8);
+scroll__y_part2(1,3,8,@scroll_y);
+//for f:=0 to 31 do scroll__y_part(1,3,memoria[$9800+f],0,f*8,8);
 if (memoria[$98dc] and 1)<>0 then begin
   scroll_x_y(2,3,x,y);
   draw_sprites;
@@ -166,8 +168,9 @@ begin
 case direccion of
   $0..$5fff:if z80_0.opcode then cclimber_getbyte:=mem_decode[direccion]
               else cclimber_getbyte:=memoria[direccion];
-  $6000..$6bff,$8000..$83ff,$8800..$8bff,$9800..$9fff:cclimber_getbyte:=memoria[direccion];
+  $6000..$6bff,$8000..$83ff,$8800..$8bff,$9820..$9fff:cclimber_getbyte:=memoria[direccion];
   $9000..$97ff:cclimber_getbyte:=memoria[$9000+(direccion and $3ff)];
+  $9800..$981f:cclimber_getbyte:=scroll_y[direccion and $1f];
   $a000:cclimber_getbyte:=marcade.in0;
   $a800:cclimber_getbyte:=marcade.in1;
   $b000:cclimber_getbyte:=marcade.dswa;
@@ -179,7 +182,7 @@ procedure cclimber_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$6000 then exit;
 case direccion of
-   $6000..$6bff,$8000..$83ff,$8900..$8bff,$9800..$98dc,$98de..$9bff:memoria[direccion]:=valor;
+   $6000..$6bff,$8000..$83ff,$8900..$8bff,$9820..$98dc,$98de..$9bff:memoria[direccion]:=valor;
    $8800..$88ff:if memoria[direccion]<>valor then begin
                   memoria[direccion]:=valor;
                   gfx[2].buffer[direccion and $ff]:=true;
@@ -188,6 +191,7 @@ case direccion of
                   memoria[$9000+(direccion and $3ff)]:=valor;
                   gfx[0].buffer[direccion and $3ff]:=true;
                 end;
+   $9800..$981f:scroll_y[direccion and $1f]:=valor;
    $98dd:if memoria[$98dd]<>valor then begin
             fillchar(gfx[2].buffer,$400,1);
             memoria[$98dd]:=valor;

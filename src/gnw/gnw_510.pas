@@ -2,8 +2,8 @@
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     sm510,main_engine,controls_engine,rom_engine,sound_engine,timer_engine,
-     gnw_const,gnw_video,gfx_engine,pal_engine,graphics;
+     sm510,main_engine,controls_engine,rom_engine,sound_engine,gnw_const,
+     gnw_video,gfx_engine,pal_engine,graphics;
 
 procedure cargar_gnw_510;
 

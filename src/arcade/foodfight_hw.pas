@@ -15,9 +15,9 @@ const
         (n:'136020-305.8e';l:$2000;p:$8001;crc:$e6cff1b1),(n:'136020-306.9e';l:$2000;p:$8000;crc:$95159a3e),
         (n:'136020-307.8f';l:$2000;p:$c001;crc:$17828dbb),(n:'136020-208.9f';l:$2000;p:$c000;crc:$608690c9),());
         foodf_char:tipo_roms=(n:'136020-109.6lm';l:$2000;p:0;crc:$c13c90eb);
-        foodf_sprites:array[0..2] of tipo_roms=(
-        (n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),(n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf),());
-        //foodf_prom:tipo_roms=(n:'136020-112.2p';l:$100;p:0;crc:$0aa962d6);
+        foodf_sprites:array[0..1] of tipo_roms=(
+        (n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),(n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf));
+        foodf_nvram:tipo_roms=(n:'foodf.nv';l:$100;p:0;crc:$a4186b13);
         //DIP
         foodf_dip:array [0..4] of def_dip=(
         (mask:$7;name:'Bonus Coins';number:5;dip:((dip_val:$0;dip_name:'None'),(dip_val:$5;dip_name:'1 for every 2'),(dip_val:$2;dip_name:'1 for every 4'),(dip_val:$1;dip_name:'1 for every 5'),(dip_val:$6;dip_name:'2 for every 4'),(),(),(),(),(),(),(),(),(),(),())),
@@ -30,7 +30,7 @@ var
  ram,ram2:array[0..$7ff] of word;
  sprite_ram:array[0..$7f] of word;
  bg_ram:array[0..$3ff] of word;
- nvram:array[0..$ff] of word;
+ nvram:array[0..$ff] of byte;
  rweights,gweights,bweights:array[0..2] of single;
  analog_data:array[0..7] of byte;
  analog_select:byte;
@@ -175,7 +175,7 @@ case direccion of
                         bg_ram[(direccion and $7ff) shr 1]:=valor;
                         gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                      end;
-    $900000..$93ffff:nvram[(direccion and $1ff) shr 1]:=valor;
+    $900000..$93ffff:nvram[(direccion and $1ff) shr 1]:=valor and $ff;
     $940000..$97ffff:case (direccion and $1ffff) of
                   $4000..$7fff:analog_select:=(direccion and $7) xor 3; //write analog
                   $8000..$bfff:begin
@@ -221,7 +221,6 @@ var
   longitud:integer;
 const
   pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
   ps_x:array[0..15] of dword=(8*16+0, 8*16+1, 8*16+2, 8*16+3, 8*16+4, 8*16+5, 8*16+6, 8*16+7, 0, 1, 2, 3, 4, 5, 6, 7);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
   resistances:array[0..2] of integer=(1000,470,220);
@@ -245,28 +244,29 @@ pokey_0.change_pot(foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,f
 pokey_1:=pokey_chip.create(1,trunc(12096000/2/10));
 pokey_2:=pokey_chip.create(2,trunc(12096000/2/10));
 //cargar roms
-if not(cargar_roms16w(@rom[0],@foodf_rom[0],'foodf.zip',0)) then exit;
+if not(cargar_roms16w(@rom,@foodf_rom,'foodf.zip',0)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@foodf_char,'foodf.zip')) then exit;
+if not(roms_load(@memoria_temp,@foodf_char,'foodf.zip',sizeof(foodf_char))) then exit;
 init_gfx(0,8,8,$200);
 gfx_set_desc_data(2,0,8*16,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@foodf_sprites[0],'foodf.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@foodf_sprites,'foodf.zip',sizeof(foodf_sprites))) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,8*32,$100*8*32,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //paleta
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances[0],@rweights[0],0,0,
-			3,@resistances[0],@gweights[0],0,0,
-			2,@resistances[1],@bweights[0],0,0);
+			3,@resistances[0],@rweights,0,0,
+			3,@resistances[0],@gweights,0,0,
+			2,@resistances[1],@bweights,0,0);
 //DIP
 marcade.dswa:=$0;
 marcade.dswa_val:=@foodf_dip;
 //NVRAM
-if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Directory.Arcade_nvram+'foodf.nv',@nvram[0],longitud);
+if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Directory.Arcade_nvram+'foodf.nv',@nvram,longitud)
+  else if not(roms_load(@nvram,@foodf_nvram,'foodf.zip',sizeof(foodf_nvram))) then exit;
 //final
 reset_foodf;
 iniciar_foodf:=true;
@@ -274,7 +274,7 @@ end;
 
 procedure cerrar_foodf;
 begin
-write_file(Directory.Arcade_nvram+'foodf.nv',@nvram[0],$200);
+write_file(Directory.Arcade_nvram+'foodf.nv',@nvram,$100);
 end;
 
 procedure Cargar_foodf;

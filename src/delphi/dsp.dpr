@@ -278,7 +278,11 @@ uses
   sm510 in '..\cpu\sm510.pas',
   gnw_video in 'gnw_video.pas' {gnw_video_form},
   gnw_510 in '..\gnw\gnw_510.pas',
-  gnw_const in '..\gnw\gnw_const.pas';
+  gnw_const in '..\gnw\gnw_const.pas',
+  m6845 in '..\devices\m6845.pas',
+  tetris_atari_hw in '..\arcade\tetris_atari_hw.pas',
+  slapstic in '..\arcade\misc\slapstic.pas',
+  snk_hw in '..\arcade\snk_hw.pas';
 
 {$R *.res}
 
