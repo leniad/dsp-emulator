@@ -2,32 +2,32 @@
 <b>21/10/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br>
 After some health problems (visit to the hospital included), I publish a new WIP update<br><pre>
 -General
-    +Slapstic: Added Atari Protection device
-    +Pokey: Added the function to define ALL_POT call
-    +Improved column scroll function
-    +Added a specific function for shadow sprites
+    +Slapstic: Added Atari Protection device
+    +Pokey: Added the function to define ALL_POT call
+    +Improved column scroll function
+    +Added a specific function for shadow sprites
 -Gameboy / Gameboy Color
-    +Improved video timmings
-    +Corrected colors in GBC
-    +Fixed some control bits (Serial, IRQ, Joystick, etc.)
-    +Corrected the function that compares line Y
-    +Fixed HDMA functions in GBC
-    +Improved HU-C1 and MMMM01 mappers
+    +Improved video timmings
+    +Corrected colors in GBC
+    +Fixed some control bits (Serial, IRQ, Joystick, etc.)
+    +Corrected the function that compares line Y
+    +Fixed HDMA functions in GBC
+    +Improved HU-C1 and MMMM01 mappers
 -Food Fight
-    +Added default NVRAM load
-    +Correct the size and data type of the NVRAM
+    +Added default NVRAM load
+    +Correct the size and data type of the NVRAM
 -Sega System 1/2
-    +Fixed Z80 timmigs
-    +Added DIPs to all games and 2on player
-    +Improved sound IRQs
+    +Fixed Z80 timmigs
+    +Added DIPs to all games and 2on player
+    +Improved sound IRQs
 -Mappy HW
-    +Super Pacman: Fixed sprites
+    +Super Pacman: Fixed sprites
 -Tetris (Atari)
-    +Added driver with sound
+    +Added driver with sound
 -SNK HW
-    +Ikari Warriors: Added driver with sound
-    +Athena: Added driver with sound
-    +T.N.K III: Added driver with sound
+    +Ikari Warriors: Added driver with sound
+    +Athena: Added driver with sound
+    +T.N.K III: Added driver with sound
 </pre><br>
 <img src='http://img1.imagilive.com/1017/tetris_atari.png'><img src='http://img1.imagilive.com/1017/ikari.png'><br>
 <img src='http://img1.imagilive.com/1017/athena.png'><img src='http://img1.imagilive.com/1017/tnk3.png'><br><br>
@@ -35,7 +35,7 @@ After some health problems (visit to the hospital included), I publish a new WIP
 Enhanced Amstrad CPC emulation<br><pre>
 -Game and Watch
     +Added 'Mario Bros.', missing graphics
-    +Better sound emulation
+    +Better sound emulation
 -Amstrad CPC
     +Better CPC Z80 timings
     +Added configuration for tape motor, you can select if it is used in the emulation of the virtual tape or not
