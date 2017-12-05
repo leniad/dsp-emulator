@@ -407,8 +407,6 @@ cpc_mem[cpc_ga.marco[direccion shr 14],direccion and $3fff]:=valor;
 end;
 
 procedure write_ga(val:byte);
-var
-  pagina:byte;
 begin
 case (val shr 6) of
      $0:if (val and $10)=0 then cpc_ga.pen:=val and 15 //Select pen

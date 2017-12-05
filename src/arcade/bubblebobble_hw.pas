@@ -128,10 +128,12 @@ while EmuStatus=EsRuning do begin
   //mcu
   m6800_0.run(frame_mcu);
   frame_mcu:=frame_mcu+m6800_0.tframes-m6800_0.contador;
-  if f=239 then begin
-    z80_1.change_irq(HOLD_LINE);
-    m6800_0.change_irq(HOLD_LINE);
-    update_video_bublbobl;
+  case f of
+    15:update_video_bublbobl;
+    239:begin
+          z80_1.change_irq(HOLD_LINE);
+          m6800_0.change_irq(HOLD_LINE);
+        end;
   end;
  end;
  eventos_bublbobl;

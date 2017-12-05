@@ -134,11 +134,9 @@ while EmuStatus=EsRuning do begin
     //Sound CPU
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
-        update_video_gng;
-        m6809_0.change_irq(HOLD_LINE);
-    end;
+    if f=239 then m6809_0.change_irq(HOLD_LINE);
   end;
+  update_video_gng;
   eventos_gng;
   video_sync;
 end;

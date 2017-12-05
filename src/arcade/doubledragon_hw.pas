@@ -181,12 +181,12 @@ while EmuStatus=EsRuning do begin
     frame_snd:=frame_snd+m6809_0.tframes-m6809_0.contador;
     //video
     case ddragon_scanline[f] of
-      $8:marcade.in2:=marcade.in2 and $f7;
+      $8:begin
+          marcade.in2:=marcade.in2 and $f7;
+          update_video_ddragon;
+         end;
       $e8:marcade.in2:=marcade.in2 or 8;
-      $f8:begin
-            update_video_ddragon;
-            hd6309_0.change_nmi(ASSERT_LINE);
-          end;
+      $f8:hd6309_0.change_nmi(ASSERT_LINE);
     end;
     if ((ddragon_scanline[f] and $8)<>0) then hd6309_0.change_firq(ASSERT_LINE);
   end;
@@ -419,12 +419,12 @@ while EmuStatus=EsRuning do begin
     frame_snd:=frame_snd+z80_1.tframes-z80_1.contador;
     //video
     case ddragon_scanline[f] of
-      $8:marcade.in2:=marcade.in2 and $f7;
-      $e8:marcade.in2:=marcade.in2 or 8;
-      $f8:begin
+      $8:begin
+            marcade.in2:=marcade.in2 and $f7;
             update_video_ddragon;
-            hd6309_0.change_nmi(ASSERT_LINE);
-          end;
+         end;
+      $e8:marcade.in2:=marcade.in2 or 8;
+      $f8:hd6309_0.change_nmi(ASSERT_LINE);
     end;
     if ((ddragon_scanline[f] and $8)<>0) then hd6309_0.change_firq(ASSERT_LINE);
   end;

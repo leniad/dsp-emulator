@@ -82,8 +82,8 @@ while EmuStatus=EsRuning do begin
     mb88xx_0.run(frame_s);
     frame_s:=frame_s+mb88xx_0.tframes-mb88xx_0.contador;
     if f=244 then begin
-      z80_0.change_irq(HOLD_LINE);
       update_video_arabian;
+      z80_0.change_irq(HOLD_LINE);
     end;
   end;
   eventos_arabian;

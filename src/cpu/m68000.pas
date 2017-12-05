@@ -26,6 +26,7 @@ unit m68000;
 02/08/14   Corregido STOP
 14/09/14   Añadida asl.w
 12/10/14   Revisados los opcodes $Exxx
+07/11/17   Añadido roxl.w
 }
 
 interface
@@ -47,7 +48,7 @@ type
         end;
         preg_m68000=^reg_m68000;
         cpu_m68000=class(cpu_class)
-            constructor create(clock:dword;frames_div:word);
+            constructor create(clock:dword;frames_div:word;tipo:byte=0);
             destructor free;
           public
             getword_:tgetword;
@@ -63,7 +64,7 @@ type
             function save_snapshot(data:pbyte):word;
             procedure load_snapshot(data:pbyte);
           private
-            //r:preg_m68000;
+            tipo:byte;
             ea:dword;
             prefetch:boolean;
             temp:dparejas;
@@ -90,6 +91,10 @@ type
 
 var
     m68000_0,m68000_1:cpu_m68000;
+
+const
+  T68000=0;
+  T68010=1;
 
 implementation
 const
@@ -124,13 +129,14 @@ const
 
   addr_mask=$fffffe;
 
-constructor cpu_m68000.create(clock:dword;frames_div:word);
+constructor cpu_m68000.create(clock:dword;frames_div:word;tipo:byte=0);
 begin
 getmem(self.r,sizeof(reg_m68000));
 fillchar(self.r^,sizeof(reg_m68000),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+self.tipo:=tipo;
 end;
 
 destructor cpu_m68000.free;
@@ -937,6 +943,10 @@ for f:=7 downto 1 do begin
       self.contador:=self.contador+44;
       tempw:=coger_band(self.r);
       self.poner_band(tempw or $2000);
+      if self.tipo=T68010 then begin
+        r.sp.l:=r.sp.l-2;
+        self.putword(r.sp.l,f shl 2);
+      end;
       r.sp.l:=r.sp.l-6;
       self.putword(r.sp.l,tempw);
       self.putword(r.sp.l+2,r.pc.wh);
@@ -1484,6 +1494,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
           $08:begin // # clr.b
                 if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                   else self.contador:=self.contador+4;
+                if self.tipo=T68000 then self.getbyte(self.ea);
                 self.ponerdir_b(dir,0);
                 r.cc.n:=false;
                 r.cc.v:=false;
@@ -1493,6 +1504,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
           $09:begin // # clr.w
                 if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                   else self.contador:=self.contador+4;
+                if self.tipo=T68000 then self.getword(self.ea);
                 self.ponerdir_w(dir,0);
                 r.cc.n:=false;
                 r.cc.v:=false;
@@ -1502,6 +1514,10 @@ case (instruccion shr 12) of //cojo solo el primer nibble
           $0a:begin // # clr.l
                 if (dir shr 3)<>0 then self.contador:=self.contador+12+calc_ea_t_l(dir)
                   else self.contador:=self.contador+6;
+                if self.tipo=T68000 then begin
+                  self.getword(self.ea);
+                  self.getword(self.ea+2);
+                end;
                 self.ponerdir_l(dir,0);
                 r.cc.n:=false;
                 r.cc.v:=false;
@@ -2220,13 +2236,26 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                   end;
               $33:begin  // # rte
                     if r.cc.s then begin
-                      self.prefetch:=false;
-                      self.contador:=self.contador+20;
-                      tempw:=self.getword(r.sp.l);
-                      r.pc.wh:=self.getword(r.sp.l+2);
-                      r.pc.wl:=self.getword(r.sp.l+4);
-                      r.sp.l:=r.sp.l+6;
-                      self.poner_band(tempw);
+                      if self.tipo=T68000 then begin
+                        self.prefetch:=false;
+                        self.contador:=self.contador+20;
+                        tempw:=self.getword(r.sp.l);
+                        r.pc.wh:=self.getword(r.sp.l+2);
+                        r.pc.wl:=self.getword(r.sp.l+4);
+                        r.sp.l:=r.sp.l+6;
+                        self.poner_band(tempw);
+                      end else begin //M68010
+                        tempw:=self.getword(r.a[7].l+2) shr 12;
+                        if tempw=0 then begin
+                          self.prefetch:=false;
+                          self.contador:=self.contador+20;
+                          tempw:=self.getword(r.sp.l);
+                          r.pc.wh:=self.getword(r.sp.l+2);
+                          r.pc.wl:=self.getword(r.sp.l+4);
+                          r.sp.l:=r.sp.l+8; //Añado una palabra mas por el formatword
+                          self.poner_band(tempw);
+                        end else MessageDlg('Mierda error de format word en rte'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+                      end;
                     end else MessageDlg('Mierda error de privilegio rte'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
                   end;
               $35:begin // # rts
@@ -3271,6 +3300,19 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.x:=r.cc.c;
                     r.cc.v:=false;
                  end;
+               $5:begin //roxl.w Añadido el 05/11/17
+                    self.contador:=self.contador+8;
+                    tempw:=self.leerdir_w(dir);
+	                  //uint32_t res = ROL_17(src | (XFLAG_AS_1(mc68kcpu) << 16), 1);
+                    templ2:=tempw or (byte(r.cc.x) shl 16);
+                    templ:=(templ2 shl 1) or (templ2 shr 16);
+                    self.ponerdir_w2(dir,templ and $ffff);
+                    r.cc.n:=(templ and $8000)<>0;
+                    r.cc.z:=(templ and $ffff)=0;
+                    r.cc.c:=(templ and $10000)<>0;
+                    r.cc.x:=r.cc.c;
+                    r.cc.v:=false;
+                  end;
                $7:begin //rol.w
                     self.contador:=self.contador+8;
                     tempw:=self.leerdir_w(dir);

@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 332
+  ClientHeight = 292
   ClientWidth = 370
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -589,11 +589,10 @@ object principal1: Tprincipal1
     Left = 321
     Top = 33
     Width = 49
-    Height = 280
+    Height = 240
     Align = alRight
     TabOrder = 1
     Visible = False
-    ExplicitHeight = 113
     object BitBtn9: TBitBtn
       Left = 4
       Top = 44
@@ -1230,12 +1229,11 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 313
+    Top = 273
     Width = 370
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 146
     DesignSize = (
       370
       19)
@@ -2709,6 +2707,17 @@ object principal1: Tprincipal1
               Caption = 'Gauntlet'
               OnClick = CambiarMaquina
             end
+            object Gaunt21: TMenuItem
+              Caption = 'Gauntlet II'
+              OnClick = CambiarMaquina
+            end
+          end
+          object AtariSystem11: TMenuItem
+            Caption = 'Atari System 1'
+            object peterpak1: TMenuItem
+              Caption = 'Peter Pack Rat'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object NEC1: TMenuItem
@@ -2805,7 +2814,7 @@ object principal1: Tprincipal1
     Left = 24
     Top = 64
     Bitmap = {
-      494C010107002807180520002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807200520002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

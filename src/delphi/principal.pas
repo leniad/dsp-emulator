@@ -391,6 +391,9 @@ type
     Ikari1: TMenuItem;
     Athena1: TMenuItem;
     tnk31: TMenuItem;
+    AtariSystem11: TMenuItem;
+    peterpak1: TMenuItem;
+    Gaunt21: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

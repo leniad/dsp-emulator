@@ -180,7 +180,7 @@ pokey_1.reset;
 marcade.in0:=$40;
 marcade.in1:=0;
 rom_bank:=slapstic_0.current_bank and 1;
-copymemory(@memoria[$4000],@rom_mem[rom_bank,0],$4000);
+copymemory(@memoria[$4000],@rom_mem[1,0],$4000);
 nvram_write_enable:=false;
 end;
 

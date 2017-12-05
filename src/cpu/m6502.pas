@@ -169,7 +169,7 @@ self.contador:=0;
 r.p.n:=false;
 r.p.o_v:=false;
 r.p.t:=true;
-r.p.brk:=true;
+r.p.brk:=false;
 r.p.dec:=false;
 r.p.int:=true;
 r.p.z:=false;
@@ -290,9 +290,11 @@ old_contador:=self.contador;
 if self.pedir_reset<>CLEAR_LINE then begin
   tempb:=self.pedir_reset;
   self.reset;
-  if tempb=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
-  self.contador:=trunc(maximo);
-  exit;
+  if tempb=ASSERT_LINE then begin
+    self.pedir_reset:=ASSERT_LINE;
+    self.contador:=trunc(maximo);
+    exit;
+  end;
 end;
 r.ppc:=r.pc;
 self.read_dummy:=false;

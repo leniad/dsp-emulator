@@ -168,12 +168,12 @@ while EmuStatus=EsRuning do begin
     mcs51_0.run(frame_mcu);
     frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
     if f=239 then begin
-      update_video_blktiger;
       z80_0.change_irq(HOLD_LINE);
       copymemory(@buffer_sprites,@memoria[$fe00],$200);
     end;
   end;
   eventos_blktiger;
+  update_video_blktiger;
   {$ifdef speed_debug}
   QueryPerformanceCounter(cont2);
   principal1.statusbar1.panels[2].text:=inttostr(cont2-cont1);

@@ -282,7 +282,9 @@ uses
   m6845 in '..\devices\m6845.pas',
   tetris_atari_hw in '..\arcade\tetris_atari_hw.pas',
   slapstic in '..\arcade\misc\slapstic.pas',
-  snk_hw in '..\arcade\snk_hw.pas';
+  snk_hw in '..\arcade\snk_hw.pas',
+  atari_system1 in '..\arcade\atari_system1.pas',
+  atari_mo in '..\arcade\misc\atari_mo.pas';
 
 {$R *.res}
 

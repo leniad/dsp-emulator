@@ -31,7 +31,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   spaceinvaders_hw,centipede_hw,karnov_hw,aliens_hw,thunderx_hw,simpsons_hw,
   trackandfield_hw,hypersports_hw,megazone_hw,spacefirebird_hw,ajax_hw,
   vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510,
-  tetris_atari_hw,snk_hw;
+  tetris_atari_hw,snk_hw,atari_system1;
 
 type
   tgame_desc=record
@@ -46,7 +46,7 @@ type
             end;
 const
   sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=252;
+  games_cont=254;
   games_desc:array[1..games_cont] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -285,14 +285,16 @@ const
   (name:'Lunar Lander';year:'1979';snd:0;hi:false;zip:'llander';grid:233;company:'Atari';rom:@llander),
   (name:'Crush Roller';year:'1981';snd:1;hi:false;zip:'crush';grid:234;company:'Alpha Denshi Co./Kural Samno Electric, Ltd.';rom:@crush),
   (name:'Vendetta';year:'1991';snd:1;hi:false;zip:'vendetta';grid:235;company:'Konami';rom:@vendetta),
-  (name:'Gauntlet';year:'1991';snd:1;hi:false;zip:'gauntlet';grid:236;company:'Atari';rom:@gauntlet),
+  (name:'Gauntlet';year:'1985';snd:1;hi:false;zip:'gauntlet2p';grid:236;company:'Atari';rom:@gauntlet2p),
   (name:'Sauro';year:'1987';snd:1;hi:false;zip:'sauro';grid:237;company:'Tecfri';rom:@sauro),
   (name:'Crazy Climber';year:'1980';snd:1;hi:false;zip:'cclimber';grid:238;company:'Nichibutsu';rom:@cclimber),
   (name:'Return of the Invaders';year:'1985';snd:1;hi:false;zip:'retofinv';grid:239;company:'Taito';rom:@retofinv),
-  (name:'Tetris';year:'1988';snd:1;hi:false;zip:'atetris';grid:240;company:'Atari Games';rom:@tetris),
+  (name:'Tetris';year:'1988';snd:1;hi:false;zip:'atetris';grid:240;company:'Atari Games';rom:@tetris_atari),
   (name:'Ikari Warriors';year:'1986';snd:1;hi:false;zip:'ikari';grid:241;company:'SNK';rom:@ikari),
   (name:'Athena';year:'1986';snd:1;hi:false;zip:'athena';grid:242;company:'SNK';rom:@athena),
   (name:'T.N.K III';year:'1986';snd:1;hi:false;zip:'tnk3';grid:243;company:'SNK';rom:@tnk3),
+  (name:'Peter Pack Rat';year:'1984';snd:1;hi:false;zip:'peterpak';grid:244;company:'Atari';rom:@peterpak),
+  (name:'Gauntlet II';year:'1986';snd:1;hi:false;zip:'gaunt2';grid:245;company:'Atari';rom:@gaunt2),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -563,6 +565,8 @@ case numero of
   241:principal1.CambiarMaquina(principal1.ikari1);
   242:principal1.CambiarMaquina(principal1.athena1);
   243:principal1.CambiarMaquina(principal1.tnk31);
+  244:principal1.CambiarMaquina(principal1.peterpak1);
+  245:principal1.CambiarMaquina(principal1.gaunt21);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -821,6 +825,8 @@ principal1.tetrisatari1.Checked:=false;
 principal1.ikari1.Checked:=false;
 principal1.athena1.Checked:=false;
 principal1.tnk31.Checked:=false;
+principal1.peterpak1.Checked:=false;
+principal1.gaunt21.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1033,12 +1039,13 @@ case tmaquina of
   229:Cargar_spacefb;
   230:Cargar_ajax;
   235:Cargar_vendetta;
-  236:Cargar_gauntlet;
+  236,245:Cargar_gauntlet;
   237:Cargar_sauro;
   238:Cargar_cclimber;
   239:Cargar_retofinv;
   240:Cargar_tetris;
   241,242,243:Cargar_snk;
+  244:Cargar_atari_sys1;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2027,6 +2034,14 @@ end;
 if sender=principal1.tnk31 then begin
   tipo:=243;
   principal1.tnk31.Checked:=true;
+end;
+if sender=principal1.peterpak1 then begin
+  tipo:=244;
+  principal1.peterpak1.Checked:=true;
+end;
+if sender=principal1.gaunt21 then begin
+  tipo:=245;
+  principal1.gaunt21.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

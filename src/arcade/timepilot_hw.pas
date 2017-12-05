@@ -85,7 +85,7 @@ while EmuStatus=EsRuning do begin
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //Sound
     konamisnd_0.run(scan_line);
-    if (scan_line=244) then if nmi_enable then z80_0.change_nmi(ASSERT_LINE);
+    if ((scan_line=244) and nmi_enable) then z80_0.change_nmi(ASSERT_LINE);
   end;
   update_video_timepilot;
   eventos_timepilot;

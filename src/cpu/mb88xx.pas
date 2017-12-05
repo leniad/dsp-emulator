@@ -274,9 +274,11 @@ begin
 if self.pedir_reset<>CLEAR_LINE then begin
   tempb:=self.pedir_reset;
   self.reset;
-  if tempb=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
-  self.contador:=trunc(maximo);
-  exit;
+  if tempb=ASSERT_LINE then begin
+    self.pedir_reset:=ASSERT_LINE;
+    self.contador:=trunc(maximo);
+    exit;
+  end;
 end;
 self.contador:=0;
 while self.contador<maximo do begin

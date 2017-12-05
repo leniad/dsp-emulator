@@ -143,6 +143,7 @@ type
     CheckBox14: TCheckBox;
     CheckBox15: TCheckBox;
     CheckBox16: TCheckBox;
+    SpeedButton4: TSpeedButton;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -828,7 +829,7 @@ end;
 
 procedure TMConfig.SpeedButton4Click(Sender: TObject);
 begin
-  d4.Text:=BrowseForFolder(d4.text,label4.Caption);
+  d4.Text:=d4.Text+BrowseForFolder(d4.text,label4.Caption);
 end;
 
 procedure TMConfig.SpeedButton5Click(Sender: TObject);

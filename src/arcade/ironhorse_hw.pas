@@ -10,16 +10,16 @@ procedure cargar_ironhorse;
 
 implementation
 const
-        ironhorse_rom:array[0..2] of tipo_roms=(
-        (n:'13c_h03.bin';l:$8000;p:$4000;crc:$24539af1),(n:'12c_h02.bin';l:$4000;p:$c000;crc:$fab07f86),());
-        ironhorse_snd:tipo_roms=(n:'10c_h01.bin';l:$4000;p:0;crc:$2b17930f);
+        ironhorse_rom:array[0..1] of tipo_roms=(
+        (n:'560_k03.13c';l:$8000;p:$4000;crc:$395351b4),(n:'560_k02.12c';l:$4000;p:$c000;crc:$1cff3d59));
+        ironhorse_snd:tipo_roms=(n:'560_h01.10c';l:$4000;p:0;crc:$2b17930f);
         ironhorse_gfx:array[0..4] of tipo_roms=(
-        (n:'08f_h06.bin';l:$8000;p:0;crc:$f21d8c93),(n:'07f_h05.bin';l:$8000;p:$1;crc:$60107859),
-        (n:'09f_h07.bin';l:$8000;p:$10000;crc:$c761ec73),(n:'06f_h04.bin';l:$8000;p:$10001;crc:$c1486f61),());
-        ironhorse_pal:array[0..5] of tipo_roms=(
+        (n:'560_h06.08f';l:$8000;p:0;crc:$f21d8c93),(n:'560_h05.07f';l:$8000;p:$1;crc:$60107859),
+        (n:'560_h07.09f';l:$8000;p:$10000;crc:$c761ec73),(n:'560_h04.06f';l:$8000;p:$10001;crc:$c1486f61),());
+        ironhorse_pal:array[0..4] of tipo_roms=(
         (n:'03f_h08.bin';l:$100;p:0;crc:$9f6ddf83),(n:'04f_h09.bin';l:$100;p:$100;crc:$e6773825),
         (n:'05f_h10.bin';l:$100;p:$200;crc:$30a57860),(n:'10f_h12.bin';l:$100;p:$300;crc:$5eb33e73),
-        (n:'10f_h11.bin';l:$100;p:$400;crc:$a63e37d8),());
+        (n:'10f_h11.bin';l:$100;p:$400;crc:$a63e37d8));
         //Dip
         ironhorse_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
@@ -58,14 +58,13 @@ for f:=0 to $3ff do begin
     end;
 end;
 //Scroll linea a linea
-//for f:=0 to 31 do scroll__x_part(1,2,memoria[$20+f],0,f*8,8);
 scroll__x_part2(1,2,8,@scroll_x);
 for f:=0 to $32 do begin
 		x:=memoria[spritebank+3+(f*5)];
 		y:=memoria[spritebank+2+(f*5)];
     atrib:=memoria[spritebank+1+(f*5)];
     nchar:=(memoria[spritebank+(f*5)] shl 2)+((atrib and $03) shl 10)+((atrib and $0c) shr 2);
-		color:=((((atrib and $f0) shr 4) + 16*palettebank) shl 4)+$800;
+		color:=((((atrib and $f0) shr 4)+16*palettebank) shl 4)+$800;
     atrib:=memoria[spritebank+4+(f*5)];
     flipx:=(atrib and $20) shr 5;
     flipy:=(atrib and $40) shr 5;
@@ -131,7 +130,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure ironhorse_principal; 
+procedure ironhorse_principal;
 var
   frame_m,frame_s:single;
   f:byte;
@@ -148,12 +147,12 @@ while EmuStatus=EsRuning do begin
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if f=240 then begin
-      update_video_ironhorse;
       if pedir_firq then m6809_0.change_firq(HOLD_LINE);
     end else begin
       if ((((f+16) mod 64)=0) and pedir_nmi) then m6809_0.change_nmi(PULSE_LINE);
     end;
   end;
+  update_video_ironhorse;
   eventos_ironhorse;
   video_sync;
 end;
@@ -244,9 +243,9 @@ begin
  z80_0.reset;
  ym2203_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  pedir_nmi:=false;
  charbank:=0;
  sound_latch:=0;
@@ -255,13 +254,13 @@ end;
 
 function iniciar_ironhorse:boolean;
 var
-      colores:tpaleta;
-      valor,j:byte;
-      f,valor2:word;
-      memoria_temp:array[0..$1ffff] of byte;
+  colores:tpaleta;
+  valor,j:byte;
+  f,valor2:word;
+  memoria_temp:array[0..$1ffff] of byte;
 const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
+  pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
+  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
 begin
 iniciar_ironhorse:=false;
 iniciar_audio(false);
@@ -280,17 +279,17 @@ z80_0.init_sound(ironhorse_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3072000);
 //cargar roms
-if not(cargar_roms(@memoria[0],@ironhorse_rom[0],'ironhors.zip',0)) then exit;
+if not(roms_load(@memoria,@ironhorse_rom,'ironhors.zip',sizeof(ironhorse_rom))) then exit;
 //roms sonido
-if not(cargar_roms(@mem_snd[0],@ironhorse_snd,'ironhors.zip',1)) then exit;
+if not(roms_load(@mem_snd,@ironhorse_snd,'ironhors.zip',sizeof(ironhorse_snd))) then exit;
 //convertir chars
-if not(cargar_roms16b(@memoria_temp[0],@ironhorse_gfx[0],'ironhors.zip',0)) then exit;
+if not(cargar_roms16b(@memoria_temp,@ironhorse_gfx,'ironhors.zip',0)) then exit;
 init_gfx(0,8,8,$1000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@ironhorse_pal[0],'ironhors.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@ironhorse_pal,'ironhors.zip',sizeof(ironhorse_pal))) then exit;
 for f:=0 to $ff do begin
   colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
   colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] shr 4);

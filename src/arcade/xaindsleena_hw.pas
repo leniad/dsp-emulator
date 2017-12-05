@@ -245,12 +245,12 @@ while EmuStatus=EsRuning do begin
     frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
     //video
     case xain_scanline[f] of
-      $8:vblank:=0;
-      $f7:vblank:=$20;
-      $f8:begin
+      $8:begin
+            vblank:=0;
             update_video_xain;
-            m6809_0.change_nmi(ASSERT_LINE);
-          end;
+         end;
+      $f7:vblank:=$20;
+      $f8:m6809_0.change_nmi(ASSERT_LINE);
     end;
     if ((xain_scanline[f] and $f)=8) then m6809_0.change_firq(ASSERT_LINE);
   end;

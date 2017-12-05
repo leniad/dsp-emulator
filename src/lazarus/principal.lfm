@@ -2959,6 +2959,17 @@ object principal1: Tprincipal1
               Caption = 'Gauntlet'
               OnClick = CambiarMaquina
             end
+            object gaunt21: TMenuItem
+              Caption = 'Gauntlet II'
+              OnClick = CambiarMaquina
+            end
+          end
+          object MenuItem36: TMenuItem
+            Caption = 'Atari System 1 HW'
+            object peterpak1: TMenuItem
+              Caption = 'Peter Pakrat'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object MenuItem11: TMenuItem

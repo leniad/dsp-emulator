@@ -32,6 +32,7 @@ function pal1bit(bits:byte):byte;
 function pal2bit(bits:byte):byte;
 function pal3bit(bits:byte):byte;
 function pal4bit(bits:byte):byte;
+function pal4bit_i(bits,i:byte):byte;
 function pal5bit(bits:byte):byte;
 //Palette functions
 procedure set_pal(ppaleta:tpaleta;total_colors:word);
@@ -265,6 +266,13 @@ function pal4bit(bits:byte):byte;inline;
 begin
 	bits:=bits and $f;
 	pal4bit:=(bits shl 4) or bits;
+end;
+
+function pal4bit_i(bits,i:byte):byte;
+const
+  ztable:array[0..15] of byte=($0,$3,$4,$5,$6,$7,$8,$9,$a,$b,$c,$d,$e,$f,$10,$11);
+begin
+	pal4bit_i:=(bits and $f)*ztable[i];
 end;
 
 function pal5bit(bits:byte):byte;inline;

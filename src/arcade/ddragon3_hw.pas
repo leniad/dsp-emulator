@@ -251,10 +251,12 @@ while EmuStatus=EsRuning do begin
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     if ((f mod 16)=0) then m68000_0.irq[5]:=ASSERT_LINE;
     case f of
-          8:vblank:=0;
+          7:begin
+              vblank:=0;
+              video_update_dd3;
+            end;
         247:begin
               m68000_0.irq[6]:=ASSERT_LINE;
-              video_update_dd3;
               vblank:=1;
             end;
     end;

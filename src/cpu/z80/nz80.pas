@@ -775,9 +775,11 @@ pestados:=self.contador;
 if self.pedir_reset<>CLEAR_LINE then begin
   temp:=self.pedir_reset;
   self.reset;
-  if temp=ASSERT_LINE then self.pedir_reset:=ASSERT_LINE;
-  self.contador:=trunc(maximo);
-  exit;
+  if temp=ASSERT_LINE then begin
+    self.pedir_reset:=ASSERT_LINE;
+    self.contador:=trunc(maximo);
+    exit;
+  end;
 end;
 r.ppc:=r.pc;
 self.estados_demas:=0;

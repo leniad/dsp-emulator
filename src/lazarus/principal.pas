@@ -204,6 +204,9 @@ type
     MenuItem35: TMenuItem;
     ikari1: TMenuItem;
     athena1: TMenuItem;
+    MenuItem36: TMenuItem;
+    gaunt21: TMenuItem;
+    peterpak1: TMenuItem;
     tnk31: TMenuItem;
     tetrisatari1: TMenuItem;
     retofinv1: TMenuItem;

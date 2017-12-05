@@ -1,7 +1,7 @@
 object MConfig: TMConfig
-  Left = 1089
+  Left = 473
   Height = 476
-  Top = 352
+  Top = 234
   Width = 502
   BorderIcons = []
   BorderStyle = bsSingle
@@ -17,7 +17,7 @@ object MConfig: TMConfig
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '1.6.2.0'
+  LCLVersion = '1.6.4.0'
   object Button1: TButton
     Left = 96
     Height = 41
@@ -41,8 +41,8 @@ object MConfig: TMConfig
     Height = 393
     Top = 8
     Width = 480
-    ActivePage = TabSheet1
-    TabIndex = 0
+    ActivePage = TabSheet2
+    TabIndex = 1
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Misc'
