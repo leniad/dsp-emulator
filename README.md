@@ -1,4 +1,23 @@
 ﻿# DSP Emulator status #
+<b>05/12/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br>
+New WIP update! Gauntlet HW completed!<br><pre>
+-General
+    +CPU engine: Fixed reset state when is asserted (not pulsed)
+    +M6502 CPU: Set BRK flag disabled on reset
+    +M68000: Added M68010, and changed some opcodes
+    +Slapstic: Enhanced some functions, added more revisions
+    +Atari MO: Added Atari sprite system
+    +Palette engine: added a function for 4bits+intensity palette generator
+-Iron Horse
+    +Updated to version K
+-Gauntlet HW
+    +Gauntlet: Completed driver, added video, sprites, audio and controls
+    +Gauntlet II: Added driver with sound
+-Atari System I
+    +Peter Pakrat: Basic driver
+</pre><br>
+<img src='http://img1.imagilive.com/1217/gauntlet.png'><img src='http://img1.imagilive.com/1217/gauntlet_play.png'><br>
+<img src='http://img1.imagilive.com/1217/gauntlet2.png'><img src='http://img1.imagilive.com/1217/gauntlet2_play.png'><br>
 <b>21/10/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br>
 After some health problems (visit to the hospital included), I publish a new WIP update<br><pre>
 -General
@@ -171,7 +190,7 @@ Please read the 'Whats New' for details<br>
         -Improved handling of 1-byte blocks in TAP tapes
         -Added control to avoid blocks of 0 length in TAP tapes
         -Corrected the length of the message block of the TZX tapes
-    +After pressing F4 to record a snapshot, the recording screen no longer shows each time a key is pressed
+    +After pressing F4 to record a snapshot, the file select screen no longer is shown each time a key is pressed
     +UPD765: Improved processing a track with 0 sectors (Corrects 'Tomahawk' from Spectrum +3)
 -Spectrum
     +Added Fuller joystick, and improved descriptions of other types of joystick
