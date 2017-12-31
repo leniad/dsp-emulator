@@ -2,23 +2,23 @@
 <b>31/12/17 - DSP Emulator 0.18 Final. Source and all binaries updated.</b><br>
 All previous changes and...<br><pre>
 -General
-    +Lazarus: Changed then way SDL library initializes the audio, using the newer functions
-    +Better Open/Save dialogs. Now work the last directory used for each system
-    +Changed where and when the SDL library is initializated
+    +Lazarus: Changed then way SDL library initializes the audio, using the newer functions
+    +Better Open/Save dialogs. Now work the last directory used for each system
+    +Changed where and when the SDL library is initializated
 -NES
-    +Fixed mappers 1, 4, 12, 67 and 68
-    +Added mappers mmc6, 11 and 147
+    +Fixed mappers 1, 4, 12, 67 and 68
+    +Added mappers mmc6, 11 and 147
 -Contra
-    +Added DIPs switches
+    +Added DIPs switches
 -Knuckle Joe
-    +Added DIPs switches and 2nd player
+    +Added DIPs switches and 2nd player
 -Super Basketball
-    +Added DIPs switches and 2nd player
+    +Added DIPs switches and 2nd player
 -Iron Horse
-    +Updated to version K
-</pre><br>
+    +Updated to version K
+</pre>
 Please read the 'Whats New' for a full list of changes<br>
-Merry Christmas and happy new year!<br>
+Merry Christmas and happy new year!<br><br>
 <b>05/12/17 - DSP Emulator 0.18WIP. Win32 binary and source updated.</b><br>
 New WIP update! Gauntlet HW completed!<br><pre>
 -General
