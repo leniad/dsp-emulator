@@ -11,15 +11,15 @@ implementation
 
 const
         //JR. Pac-man
-        jrpacman_rom:array[0..5] of tipo_roms=(
+        jrpacman_rom:array[0..4] of tipo_roms=(
         (n:'jrp8d.bin';l:$2000;p:0;crc:$e3fa972e),(n:'jrp8e.bin';l:$2000;p:$2000;crc:$ec889e94),
         (n:'jrp8h.bin';l:$2000;p:$8000;crc:$35f1fc6e),(n:'jrp8j.bin';l:$2000;p:$a000;crc:$9737099e),
-        (n:'jrp8k.bin';l:$2000;p:$c000;crc:$5252dd97),());
-        jrpacman_pal:array[0..3] of tipo_roms=(
+        (n:'jrp8k.bin';l:$2000;p:$c000;crc:$5252dd97));
+        jrpacman_pal:array[0..2] of tipo_roms=(
         (n:'jrprom.9e';l:$100;p:$0;crc:$029d35c4),(n:'jrprom.9f';l:$100;p:$100;crc:$eee34a79),
-        (n:'jrprom.9p';l:$100;p:$200;crc:$9f6ea9d8),());
-        jrpacman_char:array[0..2] of tipo_roms=(
-        (n:'jrp2c.bin';l:$2000;p:0;crc:$0527ff9b),(n:'jrp2e.bin';l:$2000;p:$2000;crc:$73477193),());
+        (n:'jrprom.9p';l:$100;p:$200;crc:$9f6ea9d8));
+        jrpacman_char:array[0..1] of tipo_roms=(
+        (n:'jrp2c.bin';l:$2000;p:0;crc:$0527ff9b),(n:'jrp2e.bin';l:$2000;p:$2000;crc:$73477193));
         jrpacman_sound:tipo_roms=(n:'jrprom.7p';l:$100;p:0;crc:$a9cc86bf);
         //DIP
         jrpacman_dip_a:array [0..1] of def_dip=(
@@ -33,7 +33,7 @@ const
         (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$40;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- irq_vblank,bg_prio,flip_screen:boolean;
+ irq_vblank,bg_prio:boolean;
  gfx_bank,colortable_bank,pal_bank,scroll_x,sprite_bank:byte;
 
 procedure draw_sprites;inline;
@@ -53,7 +53,7 @@ for f:=7 downto 0 do begin
   atrib:=memoria[$4ff0+(f*2)];
   nchar:=(atrib shr 2)+(sprite_bank shl 6);
   color:=((memoria[$4ff1+(f*2)] and $1f) or (colortable_bank shl 5) or (pal_bank shl 6)) shl 2;
-  if flip_screen then begin
+  if main_screen.flip_main_screen then begin
     atrib:=atrib xor 3;
     x:=memoria[$5060+(f*2)]-31;
     y:=memoria[$5061+(f*2)];
@@ -176,10 +176,7 @@ case direccion of
         $4800..$4fff,$5060..$506f:memoria[direccion]:=valor;
         $5000:irq_vblank:=valor<>0;
         $5001:namco_snd_0.enabled:=(valor and 1)<>0;
-        $5003:begin
-                flip_screen:=(valor and $1)<>0;
-                main_screen.flip_main_screen:=flip_screen;
-              end;
+        $5003:main_screen.flip_main_screen:=(valor and $1)<>0;
         $5040..$505f:namco_snd_0.regs[direccion and $1f]:=valor;
         $5070:if pal_bank<>valor then begin
                 pal_bank:=valor;
@@ -227,7 +224,6 @@ begin
  scroll_x:=0;
  sprite_bank:=0;
  bg_prio:=true;
- flip_screen:=false;
 end;
 
 function iniciar_jrpacman:boolean;
@@ -248,7 +244,6 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
   pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   resistances:array[0..2] of integer=(1000,470,220);
   //Proteccion
   table:array[0..79] of tipo_table_dec=(
@@ -276,7 +271,7 @@ begin
 iniciar_jrpacman:=false;
 iniciar_audio(false);
 screen_init(1,432,288,true);
-screen_mod_scroll(1,432,256,511,0,0,0);
+screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,224,288,false,true);
 screen_mod_sprites(2,256,512,$ff,$1ff);
 iniciar_video(224,288);
@@ -287,7 +282,7 @@ z80_0.change_io_calls(nil,jrpacman_outbyte);
 z80_0.init_sound(jrpacman_sound_update);
 namco_snd_0:=namco_snd_chip.create(3);
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@jrpacman_rom[0],'jrpacman.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@jrpacman_rom,'jrpacman.zip',sizeof(jrpacman_rom))) then exit;
 a:=0;
 for f:=0 to 79 do begin
 		for h:=0 to table[f].count-1 do begin
@@ -296,23 +291,23 @@ for f:=0 to 79 do begin
     end;
 end;
 //cargar sonido & iniciar_sonido
-if not(cargar_roms(namco_snd_0.get_wave_dir,@jrpacman_sound,'jrpacman.zip',1)) then exit;
+if not(roms_load(namco_snd_0.get_wave_dir,@jrpacman_sound,'jrpacman.zip',sizeof(jrpacman_sound))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@jrpacman_char[0],'jrpacman.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@jrpacman_char,'jrpacman.zip',sizeof(jrpacman_char))) then exit;
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,true,false);
 //convertir sprites
 init_gfx(1,16,16,$80);
 gfx_set_desc_data(2,0,64*8,0,4);
-convert_gfx(1,0,@memoria_temp[$2000],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp[$2000],@ps_x,@ps_y,true,false);
 //poner la paleta
-if not(cargar_roms(@memoria_temp[0],@jrpacman_pal[0],'jrpacman.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@jrpacman_pal,'jrpacman.zip',sizeof(jrpacman_pal))) then exit;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances[0],@rweights[0],0,0,
-			3,@resistances[0],@gweights[0],0,0,
-	    2,@resistances[1],@bweights[0],0,0);
+			3,@resistances[0],@rweights,0,0,
+			3,@resistances[0],@gweights,0,0,
+	    2,@resistances[1],@bweights,0,0);
 for f:=0 to $ff do begin
   h:=(memoria_temp[f] and $f)+((memoria_temp[f+$100] and $f) shl 4);
 	// red component */

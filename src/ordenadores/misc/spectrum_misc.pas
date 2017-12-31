@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      principal,nz80,z80_sp,spectrum_128k,ay_8910,controls_engine,sysutils,
      forms,lenguaje,spectrum_48k,dialogs,spectrum_3,upd765,cargar_spec,
      gfx_engine,main_engine,graphics,pal_engine,sound_engine,tape_window,
-     z80pio,z80daisy,disk_file_format,timer_engine;
+     z80pio,z80daisy,disk_file_format,timer_engine,misc_functions;
 
 const
         tabla_scr:array[0..191] of word=(
@@ -580,13 +580,10 @@ procedure grabar_spec;
 var
   nombre:string;
   correcto:boolean;
+  indice:byte;
 begin
-principal1.savedialog1.InitialDir:=Directory.spectrum_tap_snap;
-if ((main_vars.tipo_maquina=2) or (main_vars.tipo_maquina=3)) then principal1.saveDialog1.Filter := 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP'
-  else principal1.saveDialog1.Filter := 'SZX Format (*.SZX)|*.SZX|Z80 Format (*.Z80)|*.Z80|DSP Format (*.DSP)|*.DSP|SNA Format (*.SNA)|*.SNA';
-if principal1.savedialog1.execute then begin
-        nombre:=principal1.savedialog1.FileName;
-        case principal1.SaveDialog1.FilterIndex of
+if SaveRom(StSpectrum,nombre,indice) then begin
+        case indice of
           1:nombre:=changefileext(nombre,'.szx');
           2:nombre:=changefileext(nombre,'.z80');
           3:nombre:=changefileext(nombre,'.dsp');
@@ -595,14 +592,14 @@ if principal1.savedialog1.execute then begin
         if FileExists(nombre) then begin
             if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
         end;
-        case principal1.SaveDialog1.FilterIndex of
+        case indice of
           1:correcto:=grabar_szx(nombre);
           2:correcto:=grabar_z80(nombre,false);
           3:correcto:=grabar_z80(nombre,true);
           4:correcto:=grabar_sna(nombre);
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0)
-          else Directory.spectrum_tap_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
+          else Directory.spectrum_tap_snap:=extractfiledir(nombre)+main_vars.cadena_dir;
 end;
 end;
 

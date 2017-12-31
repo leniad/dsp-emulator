@@ -9,14 +9,14 @@ procedure cargar_jackal;
 
 implementation
 const
-        jackal_rom:array[0..2] of tipo_roms=(
-        (n:'j-v02.rom';l:$10000;p:$0;crc:$0b7e0584),(n:'j-v03.rom';l:$4000;p:$10000;crc:$3e0dfb83),());
-        jackal_proms:array[0..2] of tipo_roms=(
-        (n:'631r08.bpr';l:$100;p:0;crc:$7553a172),(n:'631r09.bpr';l:$100;p:$100;crc:$a74dd86c),());
+        jackal_rom:array[0..1] of tipo_roms=(
+        (n:'j-v02.rom';l:$10000;p:$0;crc:$0b7e0584),(n:'j-v03.rom';l:$4000;p:$10000;crc:$3e0dfb83));
         jackal_chars:array[0..4] of tipo_roms=(
         (n:'631t04.bin';l:$20000;p:0;crc:$457f42f0),(n:'631t05.bin';l:$20000;p:$1;crc:$732b3fc1),
         (n:'631t06.bin';l:$20000;p:$40000;crc:$2d10e56e),(n:'631t07.bin';l:$20000;p:$40001;crc:$4961c397),());
         jackal_sound:tipo_roms=(n:'631t01.bin';l:$8000;p:$8000;crc:$b189af6a);
+        jackal_proms:array[0..1] of tipo_roms=(
+        (n:'631r08.bpr';l:$100;p:0;crc:$7553a172),(n:'631r09.bpr';l:$100;p:$100;crc:$a74dd86c));
         //Dip
         jackal_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
@@ -53,7 +53,7 @@ begin
   flipx:=(attr and $40)<>0;
   flipy_v:=(attr and $20) shr 1;
   flipx_v:=(attr and $40) shr 2;
-  color:=(sn2 and $f0)+((bank+1)*$100);
+  color:=(sn2 and $f0)+(bank*$100);
   if (attr and $c)<>0 then begin    // half-size sprite
 			nchar:=(sn1*4+((sn2 and (8+4)) shr 2)+((sn2 and (2+1)) shl 10))+(bank*4096);
 			case (attr and $c) of
@@ -91,7 +91,7 @@ begin
   end;
 end;
 
-procedure update_video_jackal;
+procedure update_video_jackal;inline;
 var
   x,y,f,nchar:word;
   atrib:byte;
@@ -102,7 +102,7 @@ for f:=$0 to $3ff do begin
       x:=31-(f div 32);
       y:=f mod 32;
       atrib:=memoria_voram[ram_bank,f];
-      nchar:=memoria_voram[ram_bank,$400+f]+((atrib and $c0) shl 2) + ((atrib and $30) shl 6);
+      nchar:=memoria_voram[ram_bank,$400+f]+((atrib and $c0) shl 2)+((atrib and $30) shl 6);
       put_gfx_flip(x*8,y*8,nchar,0,1,0,(atrib and $20)<>0,(atrib and $10)<>0);
       gfx[0].buffer[f]:=false;
     end;
@@ -119,13 +119,8 @@ end else begin
   scroll_x_y(1,2,scroll_x,scroll_y);
 end;
 //sprites
-if (sprite_crt and $8)<>0 then begin
-  for f:=0 to 48 do draw_sprites(1,$800+f*5);
-  for f:=0 to $ff do draw_sprites(0,$800+f*5);
-end else begin
-  for f:=0 to 48 do draw_sprites(1,f*5);
-  for f:=0 to $ff do draw_sprites(0,f*5);
-end;
+for f:=0 to 48 do draw_sprites(1,(sprite_crt and $8)*$100+f*5);
+for f:=0 to $ff do draw_sprites(0,(sprite_crt and $8)*$100+f*5);
 actualiza_trozo_final(16,8,224,240,2);
 end;
 
@@ -202,7 +197,7 @@ procedure jackal_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$3fff then exit;
 case direccion of
-  $0:scroll_x:=255-valor;
+  $0:scroll_x:=not(valor);
   $1:scroll_y:=valor;
   $2:scroll_crt:=valor;
   $3:sprite_crt:=valor;
@@ -246,7 +241,9 @@ begin
   color.b:=pal5bit(data shr 10);
   dir:=dir shr 1;
   set_pal_color(color,dir);
-  if dir>255 then fillchar(gfx[0].buffer[0],$400,1);
+  //Si el color es de los chars, reseteo todo el buffer, al tener 8 bits de profundidad de
+  //color no cambia en cuando lo pinta
+  if ((dir>$ff) and (dir<$200)) then fillchar(gfx[0].buffer,$400,1);
 end;
 
 procedure sound_putbyte(direccion:word;valor:byte);
@@ -292,8 +289,6 @@ var
   f:word;
   memoria_temp:array[0..$7ffff] of byte;
 const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
     ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
 			32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
     ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
@@ -307,45 +302,48 @@ screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,512,false,true);
 iniciar_video(224,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,256);
+m6809_0:=cpu_m6809.Create(18432000 div 12,256,TCPU_MC6809E);
 m6809_0.change_ram_calls(jackal_getbyte,jackal_putbyte);
 //Sound CPU
-m6809_1:=cpu_m6809.Create(1536000,256);
+m6809_1:=cpu_m6809.Create(18432000 div 12,256,TCPU_MC6809E);
 m6809_1.change_ram_calls(sound_getbyte,sound_putbyte);
 m6809_1.init_sound(sound_instruccion);
 //Audio chips
 ym2151_0:=ym2151_Chip.create(3579545,0.5);
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@jackal_rom[0],'jackal.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@jackal_rom,'jackal.zip',sizeof(jackal_rom))) then exit;
 //Pongo las ROMs en su banco
 copymemory(@memoria[$c000],@memoria_temp[$10000],$4000);
 copymemory(@memoria_rom[0,0],@memoria_temp[0],$8000);
 copymemory(@memoria_rom[1,0],@memoria_temp[$8000],$8000);
 //Cargar Sound
-if not(cargar_roms(@mem_snd[0],@jackal_sound,'jackal.zip',1)) then exit;
+if not(roms_load(@mem_snd,@jackal_sound,'jackal.zip',sizeof(jackal_sound))) then exit;
 //convertir chars
-if not(cargar_roms16b(@memoria_temp[0],@jackal_chars,'jackal.zip',0)) then exit;
+if not(cargar_roms16b(@memoria_temp,@jackal_chars,'jackal.zip',0)) then exit;
 init_gfx(0,8,8,4096);
 gfx_set_desc_data(8,0,32*8,0,1,2,3,$40000*8+0,$40000*8+1,$40000*8+2,$40000*8+3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
-//sprites 8
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,true,false);
+//sprites
 init_gfx(1,8,8,4096*2);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,2,32*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[$20000],@pc_x[0],@pc_y[0],true,false);
-convert_gfx(1,4096*8*8,@memoria_temp[$60000],@pc_x[0],@pc_y[0],true,false);
-//tiles
+convert_gfx(1,0,@memoria_temp[$20000],@ps_x,@ps_y,true,false);
+convert_gfx(1,4096*8*8,@memoria_temp[$60000],@ps_x,@ps_y,true,false);
+//sprites x2
 init_gfx(2,16,16,1024*2);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,2,32*32,0,1,2,3);
-convert_gfx(2,0,@memoria_temp[$20000],@ps_x[0],@ps_y[0],true,false);
-convert_gfx(2,1024*16*16,@memoria_temp[$60000],@ps_x[0],@ps_y[0],true,false);
-//Color lookup
-if not(cargar_roms(@memoria_temp[0],@jackal_proms,'jackal.zip',0)) then exit;
+convert_gfx(2,0,@memoria_temp[$20000],@ps_x,@ps_y,true,false);
+convert_gfx(2,1024*16*16,@memoria_temp[$60000],@ps_x,@ps_y,true,false);
+//Color lookup chars
 for f:=0 to $ff do gfx[0].colores[f]:=f or $100;
-for f:=$100 to $1ff do gfx[1].colores[f]:=memoria_temp[f-$100] and $0f;
-for f:=$200 to $2ff do gfx[1].colores[f]:=(memoria_temp[f-$100] and $0f) or $10;
-copymemory(@gfx[2].colores,@gfx[1].colores,2048*2);
+//Color lookup sprites
+if not(roms_load(@memoria_temp,@jackal_proms,'jackal.zip',sizeof(jackal_proms))) then exit;
+//0..$ff --> banco 0 --> valor
+//$100..$1ff --> banco 1 --> valor+$10
+for f:=$0 to $1ff do gfx[1].colores[f]:=memoria_temp[f] and $0f+((f shr 8)*$10);
+//sprites x2
+copymemory(@gfx[2].colores,@gfx[1].colores,$200*2);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$5f;

@@ -12,7 +12,7 @@ uses lib_sdl2,{$IFDEF WINDOWS}windows,{$else}LCLType,{$endif}
      Graphics,Dialogs,Menus,ExtCtrls,ComCtrls,StdCtrls,Grids,Buttons,
      //misc
      sound_engine,lenguaje,controls_engine,main_engine,loadrom,config_general,
-     init_games,tape_window,timer_engine,
+     init_games,tape_window,timer_engine,misc_functions,
      //Devices
      vars_hide;
 
@@ -402,9 +402,7 @@ type
     Salir1: TMenuItem;
     uProcesador1: TMenuItem;
     Opciones1: TMenuItem;
-    OpenDialog1: TOpenDialog;
     Panel1: TPanel;
-    SaveDialog1: TSaveDialog;
     Timer1: TTimer;
     Timer2: TTimer;
     procedure Acercade1Click(Sender: TObject);
@@ -437,7 +435,7 @@ type
   public
     { public declarations }
   end;
-  procedure sync_all;inline;
+  procedure sync_all;
 
 var
   principal1: Tprincipal1;
@@ -451,14 +449,14 @@ var
   status_bitmap:tbitmap;
 
 { Tprincipal1 }
-procedure sync_all;inline;
+procedure sync_all;
 begin
 if window_render<>nil then begin
    if not(main_screen.pantalla_completa) then sdl_raisewindow(window_render);
    cont_sincroniza:=sdl_getticks();
    valor_sync:=1000/llamadas_maquina.fps_max;
    cont_micro:=valor_sync;
-   SDL_ClearQueuedAudio(1);
+   SDL_ClearQueuedAudio(sound_device);
 end;
 end;
 
@@ -466,6 +464,7 @@ procedure Tprincipal1.fSaveGIF(Sender: TObject);
 var
   r:integer;
   nombre:string;
+  indice:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlp_Surface;
@@ -477,13 +476,8 @@ begin
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-SaveDialog1.InitialDir:=Directory.spectrum_image;
-SaveDialog1.FileName:=llamadas_maquina.caption;
-SaveDialog1.Filter:='Imagen PNG(*.PNG)|*.png|Imagen JPG(*.JPG)|*.jpg|Imagen GIF(*.GIF)|*.gif';
-SaveDialog1.FilterIndex:=2;
-if Savedialog1.execute then begin
-  nombre:=savedialog1.FileName;
-  case SaveDialog1.FilterIndex of
+if SaveRom(StBitmap,nombre,indice) then begin
+  case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
     3:nombre:=ChangeFileExt(nombre,'.gif');
@@ -496,7 +490,7 @@ if Savedialog1.execute then begin
     end;
     deletefile(nombre);
   end;
-  Directory.spectrum_image:=extractfiledir(savedialog1.FileName)+main_vars.cadena_dir;
+  Directory.spectrum_image:=extractfiledir(nombre)+main_vars.cadena_dir;
   rect2.x:=0;
   rect2.y:=0;
   case main_screen.video_mode of
@@ -521,7 +515,7 @@ if Savedialog1.execute then begin
   imagen1:=tbitmap.Create;
   imagen1.LoadFromFile(nombre2);
   deletefile(nombre2);
-  case SaveDialog1.FilterIndex of
+  case indice of
     1:begin //png
          PNG:=TPortableNetworkGraphic.Create;
          PNG.Assign(imagen1);
@@ -618,8 +612,10 @@ for f:=length(cadena) downto 1 do begin
 end;
 directory.Base:=copy(cadena,1,f);
 {$endif}
-if not DirectoryExists(directory.Base+'preview'+main_vars.cadena_dir) then CreateDir(directory.Base+'preview');
 file_ini_load;
+if not DirectoryExists(Directory.Preview) then CreateDir(Directory.Preview);
+if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_nvram);
+if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
 leer_idioma;
 principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
@@ -724,13 +720,13 @@ if emustatus=EsRuning then begin
    principal1.imagelist2.GetBitmap(5,principal1.BitBtn3.Glyph);
    timer1.Enabled:=false;
    EmuStatus:=EsPause;
-   SDL_ClearQueuedAudio(1);
-   SDL_PauseAudio(1);
+   SDL_ClearQueuedAudio(sound_device);
+   SDL_PauseAudioDevice(sound_device,1);
 end else begin
    principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
    EmuStatus:=EsRuning;
    timer1.Enabled:=true;
-   SDL_PauseAudio(0);
+   SDL_PauseAudioDevice(sound_device,0);
    sync_all;
 end;
 if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
@@ -743,7 +739,7 @@ valor_sync:=1000/(llamadas_maquina.fps_max/(main_vars.vactual+1));
 //if not(main_screen.pantalla_completa) then sdl_raisewindow(window_render);
 cont_sincroniza:=sdl_getticks();
 cont_micro:=valor_sync;
-SDL_ClearQueuedAudio(1);
+SDL_ClearQueuedAudio(sound_device);
 end;
 
 procedure Tprincipal1.fFast(Sender: TObject);
@@ -816,6 +812,8 @@ var
   tipo:word;
 begin
 timer2.Enabled:=false;
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
+  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
 principal1.Caption:=principal1.Caption+dsp_version;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=$ffff;

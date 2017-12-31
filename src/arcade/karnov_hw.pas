@@ -16,16 +16,16 @@ const
         (n:'dn06-5';l:$10000;p:$40000;crc:$29d64e42),(n:'dn09-5';l:$10000;p:$40001;crc:$072d7c49),());
         karnov_sound:tipo_roms=(n:'dn05-5';l:$8000;p:$8000;crc:$fa1a31a8);
         karnov_char:tipo_roms=(n:'dn00-';l:$8000;p:$0;crc:$0ed77c6d);
-        karnov_tiles:array[0..4] of tipo_roms=(
+        karnov_tiles:array[0..3] of tipo_roms=(
         (n:'dn04-';l:$10000;p:0;crc:$a9121653),(n:'dn01-';l:$10000;p:$10000;crc:$18697c9e),
-        (n:'dn03-';l:$10000;p:$20000;crc:$90d9dd9c),(n:'dn02-';l:$10000;p:$30000;crc:$1e04d7b9),());
-        karnov_sprites:array[0..8] of tipo_roms=(
+        (n:'dn03-';l:$10000;p:$20000;crc:$90d9dd9c),(n:'dn02-';l:$10000;p:$30000;crc:$1e04d7b9));
+        karnov_sprites:array[0..7] of tipo_roms=(
         (n:'dn12-';l:$10000;p:$00000;crc:$9806772c),(n:'dn14-5';l:$8000;p:$10000;crc:$ac9e6732),
         (n:'dn13-';l:$10000;p:$20000;crc:$a03308f9),(n:'dn15-5';l:$8000;p:$30000;crc:$8933fcb8),
         (n:'dn16-';l:$10000;p:$40000;crc:$55e63a11),(n:'dn17-5';l:$8000;p:$50000;crc:$b70ae950),
-        (n:'dn18-';l:$10000;p:$60000;crc:$2ad53213),(n:'dn19-5';l:$8000;p:$70000;crc:$8fd4fa40),());
-        karnov_proms:array[0..2] of tipo_roms=(
-        (n:'karnprom.21';l:$400;p:$0;crc:$aab0bb93),(n:'karnprom.20';l:$400;p:$400;crc:$02f78ffb),());
+        (n:'dn18-';l:$10000;p:$60000;crc:$2ad53213),(n:'dn19-5';l:$8000;p:$70000;crc:$8fd4fa40));
+        karnov_proms:array[0..1] of tipo_roms=(
+        (n:'karnprom.21';l:$400;p:$0;crc:$aab0bb93),(n:'karnprom.20';l:$400;p:$400;crc:$02f78ffb));
         //Chelnov
         chelnov_rom:array[0..6] of tipo_roms=(
         (n:'ee08-e.j16';l:$10000;p:0;crc:$8275cc3a),(n:'ee11-e.j19';l:$10000;p:$1;crc:$889e40a0),
@@ -33,14 +33,14 @@ const
         (n:'ee06-e.j13';l:$10000;p:$40000;crc:$55acafdb),(n:'ee09-e.j17';l:$10000;p:$40001;crc:$303e252c),());
         chelnov_sound:tipo_roms=(n:'ee05-.f3';l:$8000;p:$8000;crc:$6a8936b4);
         chelnov_char:tipo_roms=(n:'ee00-e.c5';l:$8000;p:$0;crc:$e06e5c6b);
-        chelnov_tiles:array[0..4] of tipo_roms=(
+        chelnov_tiles:array[0..3] of tipo_roms=(
         (n:'ee04-.d18';l:$10000;p:0;crc:$96884f95),(n:'ee01-.c15';l:$10000;p:$10000;crc:$f4b54057),
-        (n:'ee03-.d15';l:$10000;p:$20000;crc:$7178e182),(n:'ee02-.c18';l:$10000;p:$30000;crc:$9d7c45ae),());
-        chelnov_sprites:array[0..4] of tipo_roms=(
+        (n:'ee03-.d15';l:$10000;p:$20000;crc:$7178e182),(n:'ee02-.c18';l:$10000;p:$30000;crc:$9d7c45ae));
+        chelnov_sprites:array[0..3] of tipo_roms=(
         (n:'ee12-.f8';l:$10000;p:$00000;crc:$9b1c53a5),(n:'ee13-.f9';l:$10000;p:$20000;crc:$72b8ae3e),
-        (n:'ee14-.f13';l:$10000;p:$40000;crc:$d8f4bbde),(n:'ee15-.f15';l:$10000;p:$60000;crc:$81e3e68b),());
-        chelnov_proms:array[0..2] of tipo_roms=(
-        (n:'ee21.k8';l:$400;p:$0;crc:$b1db6586),(n:'ee20.l6';l:$400;p:$400;crc:$41816132),());
+        (n:'ee14-.f13';l:$10000;p:$40000;crc:$d8f4bbde),(n:'ee15-.f15';l:$10000;p:$60000;crc:$81e3e68b));
+        chelnov_proms:array[0..1] of tipo_roms=(
+        (n:'ee21.k8';l:$400;p:$0;crc:$b1db6586),(n:'ee20.l6';l:$400;p:$400;crc:$41816132));
         //DIP
         karnov_dip:array [0..9] of def_dip=(
         (mask:$3;name:'Coin A';number:4;dip:((dip_val:0;dip_name:'2C 1C'),(dip_val:3;dip_name:'1C 1C'),(dip_val:2;dip_name:'1C 2C'),(dip_val:1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -89,7 +89,7 @@ if (valor=$400) then i8751_return:=$4000; // Get The Map... */
 if (valor=$402) then i8751_return:=$40a6; // Ancient Ruins */
 if (valor=$403) then i8751_return:=$4054; // Forest... */
 if (valor=$404) then i8751_return:=$40de; // ^Rocky hills */
-if (valor=$405) then i8751_return:=4182; // Sea */
+if (valor=$405) then i8751_return:=$4182; // Sea */
 if (valor=$406) then i8751_return:=$41ca; // Town */
 if (valor=$407) then i8751_return:=$421e; // Desert */
 if (valor=$401) then i8751_return:=$4138; // ^Whistling wind */
@@ -231,8 +231,8 @@ if event.arcade then begin
      if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
      if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   end else begin
-     if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-     if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
+     if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+     if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   end;
 end;
 end;
@@ -496,7 +496,6 @@ end;
 function iniciar_karnov:boolean;
 const
   pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -512,7 +511,7 @@ begin
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,$6000*8,$4000*8,$2000*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@ps_y[0],false,false);
 end;
 
 procedure convert_tiles(num_gfx,mul:byte);
@@ -545,20 +544,20 @@ ym2203_0:=ym2203_chip.create(1500000,0.25,0.25);
 case main_vars.tipo_maquina of
   219:begin  //Karnov
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@karnov_rom[0],'karnov.zip',0)) then exit;
+        if not(cargar_roms16w(@rom,@karnov_rom,'karnov.zip',0)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@karnov_sound,'karnov.zip',1)) then exit;
+        if not(roms_load(@mem_snd,@karnov_sound,'karnov.zip',sizeof(karnov_sound))) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@karnov_char,'karnov.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,@karnov_char,'karnov.zip',sizeof(karnov_char))) then exit;
         convert_chars;
         //tiles
-        if not(cargar_roms(@memoria_temp[0],@karnov_tiles,'karnov.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@karnov_tiles,'karnov.zip',sizeof(karnov_tiles))) then exit;
         convert_tiles(1,1);
         //sprites
-        if not(cargar_roms(@memoria_temp[0],@karnov_sprites,'karnov.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@karnov_sprites,'karnov.zip',sizeof(karnov_sprites))) then exit;
         convert_tiles(2,2);
         //Paleta
-        if not(cargar_roms(@memoria_temp[0],@karnov_proms,'karnov.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@karnov_proms,'karnov.zip',sizeof(karnov_proms))) then exit;
         //DIP
         marcade.dswa:=$ffbf;
         marcade.dswa_val:=@karnov_dip;
@@ -567,20 +566,20 @@ case main_vars.tipo_maquina of
       end;
   220:begin  //Karnov
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@chelnov_rom[0],'chelnov.zip',0)) then exit;
+        if not(cargar_roms16w(@rom,@chelnov_rom,'chelnov.zip',0)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@chelnov_sound,'chelnov.zip',1)) then exit;
+        if not(roms_load(@mem_snd,@chelnov_sound,'chelnov.zip',sizeof(chelnov_sound))) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@chelnov_char,'chelnov.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,@chelnov_char,'chelnov.zip',sizeof(chelnov_char))) then exit;
         convert_chars;
         //tiles
-        if not(cargar_roms(@memoria_temp[0],@chelnov_tiles,'chelnov.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@chelnov_tiles,'chelnov.zip',sizeof(chelnov_tiles))) then exit;
         convert_tiles(1,1);
         //sprites
-        if not(cargar_roms(@memoria_temp[0],@chelnov_sprites,'chelnov.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@chelnov_sprites,'chelnov.zip',sizeof(chelnov_sprites))) then exit;
         convert_tiles(2,2);
         //Paleta
-        if not(cargar_roms(@memoria_temp[0],@chelnov_proms,'chelnov.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@chelnov_proms,'chelnov.zip',sizeof(chelnov_proms))) then exit;
         //DIP
         marcade.dswa:=$ff7f;
         marcade.dswa_val:=@chelnov_dip;
@@ -622,6 +621,5 @@ llamadas_maquina.bucle_general:=karnov_principal;
 llamadas_maquina.iniciar:=iniciar_karnov;
 llamadas_maquina.reset:=reset_karnov;
 end;
-
 
 end.

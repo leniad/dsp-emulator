@@ -134,9 +134,11 @@ while EmuStatus=EsRuning do begin
     //Sound CPU
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then m6809_0.change_irq(HOLD_LINE);
+    if f=239 then begin
+        update_video_gng;
+        m6809_0.change_irq(HOLD_LINE);
+    end;
   end;
-  update_video_gng;
   eventos_gng;
   video_sync;
 end;
@@ -196,7 +198,7 @@ case direccion of
   $3b0a:scroll_y:=(scroll_y and $100) or valor;
   $3b0b:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
   $3d00:main_screen.flip_main_screen:=(valor and 1)=0;
-  $3e00:banco:=valor and 7;
+  $3e00:banco:=valor mod 5;
 end;
 end;
 
@@ -345,7 +347,7 @@ screen_init(3,256,256,true); //Chars
 screen_init(4,512,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,256);
+m6809_0:=cpu_m6809.Create(1500000,256,TCPU_M6809);
 m6809_0.change_ram_calls(gng_getbyte,gng_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3000000,256);

@@ -250,8 +250,6 @@ var
     memoria_temp:array[0..$bfff] of byte;
     bit0,bit1,bit2,bit3:byte;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -289,7 +287,7 @@ if not(roms_load(@memoria_temp,@vulgus_char,'vulgus.zip',sizeof(vulgus_char))) t
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //convertir sprites
 if not(roms_load(@memoria_temp,@vulgus_sprites,'vulgus.zip',sizeof(vulgus_sprites))) then exit;
 init_gfx(1,16,16,$100);

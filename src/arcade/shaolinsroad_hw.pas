@@ -9,17 +9,17 @@ procedure cargar_shaolin;
 
 implementation
 const
-        shaolin_rom:array[0..3] of tipo_roms=(
+        shaolin_rom:array[0..2] of tipo_roms=(
         (n:'477-l03.d9';l:$2000;p:$6000;crc:$2598dfdd),(n:'477-l04.d10';l:$4000;p:$8000;crc:$0cf0351a),
-        (n:'477-l05.d11';l:$4000;p:$c000;crc:$654037f8),());
-        shaolin_char:array[0..2] of tipo_roms=(
-        (n:'shaolins.a10';l:$2000;p:0;crc:$ff18a7ed),(n:'shaolins.a11';l:$2000;p:$2000;crc:$5f53ae61),());
-        shaolin_sprites:array[0..2] of tipo_roms=(
-        (n:'477-k02.h15';l:$4000;p:0;crc:$b94e645b),(n:'477-k01.h14';l:$4000;p:$4000;crc:$61bbf797),());
-        shaolin_pal:array[0..5] of tipo_roms=(
+        (n:'477-l05.d11';l:$4000;p:$c000;crc:$654037f8));
+        shaolin_char:array[0..1] of tipo_roms=(
+        (n:'shaolins.a10';l:$2000;p:0;crc:$ff18a7ed),(n:'shaolins.a11';l:$2000;p:$2000;crc:$5f53ae61));
+        shaolin_sprites:array[0..1] of tipo_roms=(
+        (n:'477-k02.h15';l:$4000;p:0;crc:$b94e645b),(n:'477-k01.h14';l:$4000;p:$4000;crc:$61bbf797));
+        shaolin_pal:array[0..4] of tipo_roms=(
         (n:'477j10.a12';l:$100;p:$0;crc:$b09db4b4),(n:'477j11.a13';l:$100;p:$100;crc:$270a2bf3),
         (n:'477j12.a14';l:$100;p:$200;crc:$83e95ea8),(n:'477j09.b8';l:$100;p:$300;crc:$aa900724),
-        (n:'477j08.f16';l:$100;p:$400;crc:$80009cf5),());
+        (n:'477j08.f16';l:$100;p:$400;crc:$80009cf5));
         //Dip
         shaolin_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -40,8 +40,7 @@ var
 
 procedure update_video_shaolin;inline;
 var
-  x,y,f:word;
-  color,nchar:word;
+  x,y,f,color,nchar:word;
   atrib:byte;
 begin
 for f:=0 to $3ff do begin
@@ -60,11 +59,11 @@ actualiza_trozo(0,0,256,32,1,0,0,256,32,2);
 for f:=$17 downto 0 do if ((memoria[$3100+(f*32)]<>0) and (memoria[$3106+(f*32)]<>0)) then begin
   atrib:=memoria[$3109+(f*32)];
   color:=((atrib and $f)+($10*banco_pal)) shl 4;
-  x:=memoria[$3104+(f*32)];
+  x:=memoria[$3104+(f*32)]-8;
   y:=240-memoria[$3106+(f*32)];
   nchar:=memoria[$3108+(f*32)];
   put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)=0,1);
-  actualiza_gfx_sprite(x-8,y,2,1);
+  actualiza_gfx_sprite(x,y,2,1);
 end;
 actualiza_trozo_final(16,0,224,256,2);
 end;
@@ -143,7 +142,7 @@ case direccion of
   $1800:banco_pal:=valor and $7;
   $2000:scroll:=not(valor);
   $2800..$2bff,$3000..$33ff:memoria[direccion]:=valor;
-  $3800..$3fff:begin
+  $3800..$3fff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
@@ -227,14 +226,12 @@ end;
 
 function iniciar_shaolin:boolean;
 var
-      colores:tpaleta;
-      f:word;
-      bit0,bit1,bit2,bit3:byte;
-      memoria_temp:array[0..$7fff] of byte;
-      rweights,gweights,bweights:array[0..3] of single;
+  colores:tpaleta;
+  f:word;
+  bit0,bit1,bit2,bit3:byte;
+  memoria_temp:array[0..$7fff] of byte;
+  rweights,gweights,bweights:array[0..3] of single;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -244,31 +241,31 @@ begin
 iniciar_shaolin:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,0,0,0);
+screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_MC6809E);
 m6809_0.change_ram_calls(shaolin_getbyte,shaolin_putbyte);
 m6809_0.init_sound(shaolin_sound);
 //Sound Chip
-sn_76496_0:=sn76496_chip.Create(1536000);
-sn_76496_1:=sn76496_chip.Create(3072000);
+sn_76496_0:=sn76496_chip.Create(18432000 div 12);
+sn_76496_1:=sn76496_chip.Create(18432000 div 6);
 //cargar roms
-if not(cargar_roms(@memoria[0],@shaolin_rom[0],'shaolins.zip',0)) then exit;
+if not(roms_load(@memoria,@shaolin_rom,'shaolins.zip',sizeof(shaolin_rom))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@shaolin_char[0],'shaolins.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@shaolin_char,'shaolins.zip',sizeof(shaolin_char))) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,16*8,512*16*8+4,512*16*8+0,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@shaolin_sprites[0],'shaolins.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@shaolin_sprites,'shaolins.zip',sizeof(shaolin_sprites))) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,256*64*8+4,256*64*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@shaolin_pal[0],'shaolins.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@shaolin_pal,'shaolins.zip',sizeof(shaolin_pal))) then exit;
 compute_resistor_weights(0,	255, -1.0,
 			4,@resistances[0],@rweights[0],470,0,
 			4,@resistances[0],@gweights[0],470,0,

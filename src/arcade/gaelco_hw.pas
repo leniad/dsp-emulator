@@ -664,7 +664,7 @@ case main_vars.tipo_maquina of
       m68000_0:=cpu_m68000.create(10000000,$200);
       m68000_0.change_ram16_calls(bigk_getword,bigk_putword);
       //Sound CPU
-      m6809_0:=cpu_m6809.Create(2216750,$200);
+      m6809_0:=cpu_m6809.Create(2216750,$200,TCPU_M6809);
       m6809_0.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
       m6809_0.init_sound(bigk_sound_update);
       //Sound Chips

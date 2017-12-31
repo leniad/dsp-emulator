@@ -63,6 +63,10 @@ object MConfig: TMConfig
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Misc'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GroupBox3: TGroupBox
         Left = 6
         Top = 13
@@ -346,6 +350,10 @@ object MConfig: TMConfig
     object TabSheet2: TTabSheet
       Caption = 'Directory'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Label1: TLabel
         Left = 3
         Top = 110

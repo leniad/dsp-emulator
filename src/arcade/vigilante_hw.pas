@@ -315,12 +315,12 @@ begin
 iniciar_vigilante:=false;
 iniciar_audio(true);
 screen_init(1,512,256,true);
-screen_mod_scroll(1,512,256+128,511,0,0,255);
+screen_mod_scroll(1,512,256+128,511,256,256,255);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,256+128,511,0,0,255);
+screen_mod_scroll(2,512,256+128,511,256,256,255);
 screen_init(3,512,512,false,true);
 screen_init(4,512*4,256);
-screen_mod_scroll(4,2048,512,2047,0,0,255);
+screen_mod_scroll(4,2048,512,2047,256,256,255);
 iniciar_video(256,256);
 //Main CPU
 z80_0:=cpu_z80.create(3579645,256);

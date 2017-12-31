@@ -838,6 +838,7 @@ end; //del case!!
 tempw:=estados_t[self.tipo_cpu and $1,instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
 update_timer(self.contador-old_contador,self.numero_cpu);
+if @self.despues_instruccion<>nil then self.despues_instruccion(tempw);
 end; //del while!!
 end;
 

@@ -1,7 +1,7 @@
 unit controls_engine;
 
 interface
-uses lib_sdl2,main_engine,timer_engine{$ifdef windows},windows{$endif},sysutils;
+uses lib_sdl2,main_engine,timer_engine{$ifdef fpc},sound_engine{$endif}{$ifdef windows},windows{$endif},sysutils;
 
 const
   NUM_PLAYERS=2-1;
@@ -454,7 +454,7 @@ begin
   event.mouse:=false;
   {$ifdef fpc}
   if sdl_event.type_=libSDL_WINDOWEVENT then
-    if ((sdl_event.window.event<>libSDL_WINDOWEVENT_ENTER) and (sdl_event.window.event<>libSDL_WINDOWEVENT_LEAVE)) then SDL_ClearQueuedAudio(1);
+    if ((sdl_event.window.event<>libSDL_WINDOWEVENT_ENTER) and (sdl_event.window.event<>libSDL_WINDOWEVENT_LEAVE)) then SDL_ClearQueuedAudio(sound_device);
   {$endif}
   //Rellenar el teclado interno
   //principal1.statusbar1.panels[2].text:=inttostr(sdl_event.key.keysym.scancode);

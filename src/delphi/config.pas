@@ -152,7 +152,6 @@ end;
 
 procedure TConfigSP.Button1Click(Sender: TObject);
 var
-  cadena:string;
   new_audio:byte;
   necesita_reset:boolean;
 begin
@@ -210,7 +209,6 @@ with ConfigSP do begin
       1,2:iniciar_audio(true);
     end;
   end;
-  cadena:=changefileext(extractfilename(edit1.text),'');
   case main_vars.tipo_maquina of
     0,5:if Edit1.text<>Directory.spectrum_48 then begin
         Directory.spectrum_48:=Edit1.text;
@@ -228,9 +226,7 @@ with ConfigSP do begin
 end;
 if necesita_reset then begin
   main_vars.driver_ok:=llamadas_maquina.iniciar;
-  if not(main_vars.driver_ok) then begin
-    principal1.Ejecutar1click(nil);
-  end;
+  if not(main_vars.driver_ok) then principal1.Ejecutar1click(nil);
 end;
 ulaplus.enabled:=radiobutton23.checked;
 close;

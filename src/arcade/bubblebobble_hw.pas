@@ -359,7 +359,7 @@ z80_2:=cpu_z80.create(3000000,264);
 z80_2.change_ram_calls(bbsnd_getbyte,bbsnd_putbyte);
 z80_2.init_sound(bb_sound_update);
 //MCU
-m6800_0:=cpu_m6800.create(4000000,264,CPU_M6801);
+m6800_0:=cpu_m6800.create(4000000,264,TCPU_M6801);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3000000,0.25,0.25);

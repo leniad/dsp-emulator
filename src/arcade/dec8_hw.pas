@@ -370,7 +370,7 @@ screen_mod_scroll(3,0,0,0,512,256,511);
 screen_init(4,256,512,false,true);
 iniciar_video(240,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(2000000,264);
+m6809_0:=cpu_m6809.Create(2000000,264,TCPU_M6809);
 m6809_0.change_ram_calls(getbyte_dec8,putbyte_dec8);
 //Sound CPU
 m6502_0:=cpu_m6502.create(1500000,264,TCPU_M6502);

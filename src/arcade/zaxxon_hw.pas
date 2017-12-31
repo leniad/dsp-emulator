@@ -10,22 +10,22 @@ procedure cargar_zaxxon;
 implementation
 const
         //Congo
-        congo_rom:array[0..4] of tipo_roms=(
+        congo_rom:array[0..3] of tipo_roms=(
         (n:'congo_rev_c_rom1.u21';l:$2000;p:0;crc:$09355b5b),(n:'congo_rev_c_rom2a.u22';l:$2000;p:$2000;crc:$1c5e30ae),
-        (n:'congo_rev_c_rom3.u23';l:$2000;p:$4000;crc:$5ee1132c),(n:'congo_rev_c_rom4.u24';l:$2000;p:$6000;crc:$5332b9bf),());
-        congo_pal:array[0..2] of tipo_roms=(
-        (n:'mr019.u87';l:$100;p:0;crc:$b788d8ae),(n:'mr019.u87';l:$100;p:$100;crc:$b788d8ae),());
+        (n:'congo_rev_c_rom3.u23';l:$2000;p:$4000;crc:$5ee1132c),(n:'congo_rev_c_rom4.u24';l:$2000;p:$6000;crc:$5332b9bf));
+        congo_pal:array[0..1] of tipo_roms=(
+        (n:'mr019.u87';l:$100;p:0;crc:$b788d8ae),(n:'mr019.u87';l:$100;p:$100;crc:$b788d8ae));
         congo_char:tipo_roms=(n:'tip_top_rom_5.u76';l:$1000;p:0;crc:$7bf6ba2b);
-        congo_bg:array[0..3] of tipo_roms=(
+        congo_bg:array[0..2] of tipo_roms=(
         (n:'tip_top_rom_8.u93';l:$2000;p:0;crc:$db99a619),(n:'tip_top_rom_9.u94';l:$2000;p:$2000;crc:$93e2309e),
-        (n:'tip_top_rom_10.u95';l:$2000;p:$4000;crc:$f27a9407),());
-        congo_sprites:array[0..6] of tipo_roms=(
+        (n:'tip_top_rom_10.u95';l:$2000;p:$4000;crc:$f27a9407));
+        congo_sprites:array[0..5] of tipo_roms=(
         (n:'tip_top_rom_12.u78';l:$2000;p:0;crc:$15e3377a),(n:'tip_top_rom_13.u79';l:$2000;p:$2000;crc:$1d1321c8),
         (n:'tip_top_rom_11.u77';l:$2000;p:$4000;crc:$73e2709f),(n:'tip_top_rom_14.u104';l:$2000;p:$6000;crc:$bf9169fe),
-        (n:'tip_top_rom_16.u106';l:$2000;p:$8000;crc:$cb6d5775),(n:'tip_top_rom_15.u105';l:$2000;p:$a000;crc:$7b15a7a4),());
+        (n:'tip_top_rom_16.u106';l:$2000;p:$8000;crc:$cb6d5775),(n:'tip_top_rom_15.u105';l:$2000;p:$a000;crc:$7b15a7a4));
         congo_sound:tipo_roms=(n:'tip_top_rom_17.u19';l:$2000;p:0;crc:$5024e673);
-        congo_tilemap:array[0..2] of tipo_roms=(
-        (n:'congo6.u57';l:$2000;p:0;crc:$d637f02b),(n:'congo7.u58';l:$2000;p:$2000;crc:$80927943),());
+        congo_tilemap:array[0..1] of tipo_roms=(
+        (n:'congo6.u57';l:$2000;p:0;crc:$d637f02b),(n:'congo7.u58';l:$2000;p:$2000;crc:$80927943));
         num_samples_congo=5;
         congo_samples:array[0..(num_samples_congo-1)] of tipo_nombre_samples=(
         (nombre:'gorilla.wav';restart:true),(nombre:'bass.wav'),(nombre:'congal.wav'),(nombre:'congah.wav'),(nombre:'rim.wav'));
@@ -36,22 +36,22 @@ const
         (mask:$40;name:'Sound';number:2;dip:((dip_val:$40;dip_name:'On'),(dip_val:$0;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Zaxxon
-        zaxxon_rom:array[0..3] of tipo_roms=(
+        zaxxon_rom:array[0..2] of tipo_roms=(
         (n:'zaxxon3.u27';l:$2000;p:0;crc:$6e2b4a30),(n:'zaxxon2.u28';l:$2000;p:$2000;crc:$1c9ea398),
-        (n:'zaxxon1.u29';l:$1000;p:$4000;crc:$1c123ef9),());
-        zaxxon_pal:array[0..2] of tipo_roms=(
-        (n:'zaxxon.u98';l:$100;p:0;crc:$6cc6695b),(n:'zaxxon.u72';l:$100;p:$100;crc:$deaa21f7),());
-        zaxxon_char:array[0..2] of tipo_roms=(
-        (n:'zaxxon14.u68';l:$800;p:0;crc:$07bf8c52),(n:'zaxxon15.u69';l:$800;p:$800;crc:$c215edcb),());
-        zaxxon_bg:array[0..3] of tipo_roms=(
+        (n:'zaxxon1.u29';l:$1000;p:$4000;crc:$1c123ef9));
+        zaxxon_pal:array[0..1] of tipo_roms=(
+        (n:'zaxxon.u98';l:$100;p:0;crc:$6cc6695b),(n:'zaxxon.u72';l:$100;p:$100;crc:$deaa21f7));
+        zaxxon_char:array[0..1] of tipo_roms=(
+        (n:'zaxxon14.u68';l:$800;p:0;crc:$07bf8c52),(n:'zaxxon15.u69';l:$800;p:$800;crc:$c215edcb));
+        zaxxon_bg:array[0..2] of tipo_roms=(
         (n:'zaxxon6.u113';l:$2000;p:0;crc:$6e07bb68),(n:'zaxxon5.u112';l:$2000;p:$2000;crc:$0a5bce6a),
-        (n:'zaxxon4.u111';l:$2000;p:$4000;crc:$a5bf1465),());
-        zaxxon_sprites:array[0..3] of tipo_roms=(
+        (n:'zaxxon4.u111';l:$2000;p:$4000;crc:$a5bf1465));
+        zaxxon_sprites:array[0..2] of tipo_roms=(
         (n:'zaxxon11.u77';l:$2000;p:0;crc:$eaf0dd4b),(n:'zaxxon12.u78';l:$2000;p:$2000;crc:$1c5369c7),
-        (n:'zaxxon13.u79';l:$2000;p:$4000;crc:$ab4e8a9a),());
-        zaxxon_tilemap:array[0..4] of tipo_roms=(
+        (n:'zaxxon13.u79';l:$2000;p:$4000;crc:$ab4e8a9a));
+        zaxxon_tilemap:array[0..3] of tipo_roms=(
         (n:'zaxxon8.u91';l:$2000;p:0;crc:$28d65063),(n:'zaxxon7.u90';l:$2000;p:$2000;crc:$6284c200),
-        (n:'zaxxon10.u93';l:$2000;p:$4000;crc:$a95e61fd),(n:'zaxxon9.u92';l:$2000;p:$6000;crc:$7e42691f),());
+        (n:'zaxxon10.u93';l:$2000;p:$4000;crc:$a95e61fd),(n:'zaxxon9.u92';l:$2000;p:$6000;crc:$7e42691f));
         num_samples_zaxxon=12;
         zaxxon_samples:array[0..(num_samples_zaxxon-1)] of tipo_nombre_samples=(
         (nombre:'03.wav';restart:false),(nombre:'02.wav';restart:true),(nombre:'01.wav';restart:true),
@@ -231,8 +231,7 @@ end;
 procedure congo_putbyte(direccion:word;valor:byte);
 var
   saddr:word;
-  daddr:byte;
-  count:integer;
+  count,daddr:byte;
 begin
 if direccion<$7fff then exit;
 case direccion of
@@ -260,7 +259,7 @@ case direccion of
 	                      $23:bg_color:=(valor and 1)*$80; //zaxxon_bg_color_w
 	                      $26:begin
                               congo_fg_bank:=(valor and 1) shl 8;
-                              fillchar(gfx[0].buffer[0],$400,1);
+                              fillchar(gfx[0].buffer,$400,1);
                             end;
 	                      $27:begin//congo_color_bank_w
                               congo_color_bank:=valor and 1;
@@ -271,18 +270,16 @@ case direccion of
 	                      $30..$32:congo_sprite[direccion and $3]:=valor; //congo_sprite_custom_w
                         $33:if (valor=1) then begin
                                 saddr:=congo_sprite[0] or (congo_sprite[1] shl 8);
-		                            count:=congo_sprite[2];
 		                            // count cycles (just a guess) */
                                 z80_0.contador:=z80_0.contador+(count*5);
 		                            // this is just a guess; the chip is hardwired to the spriteram */
-		                            while (count>=0) do begin
+		                            for count:=0 to congo_sprite[2] do begin
                             			daddr:=memoria[saddr+0]*4;
 			                            buffer_sprites[(daddr+0) and $ff]:=memoria[saddr+1];
                                   buffer_sprites[(daddr+1) and $ff]:=memoria[saddr+2];
 			                            buffer_sprites[(daddr+2) and $ff]:=memoria[saddr+3];
                                   buffer_sprites[(daddr+3) and $ff]:=memoria[saddr+4];
 			                            saddr:=saddr+$20;
-                                  count:=count-1;
                                 end;
                             end;
 	                      $38..$3f:sound_latch:=valor; //soundlatch_w
@@ -585,10 +582,10 @@ begin
  fg_color:=0;
  bg_enable:=false;
  bg_position:=0;
- fillchar(congo_sprite[0],3,0);
- fillchar(coin_enable[0],3,0);
- fillchar(coin_status[0],3,0);
- fillchar(coin_press[0],2,0);
+ fillchar(congo_sprite,3,0);
+ fillchar(coin_enable,3,0);
+ fillchar(coin_status,3,0);
+ fillchar(coin_press,2,0);
  sound_latch:=0;
 end;
 
@@ -604,21 +601,19 @@ const
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8,
 			64*8, 65*8, 66*8, 67*8, 68*8, 69*8, 70*8, 71*8,
 			96*8, 97*8, 98*8, 99*8, 100*8, 101*8, 102*8, 103*8);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   resistances:array[0..2] of integer=(1000,470,220);
 procedure conv_chars;
 begin
   init_gfx(0,8,8,256);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(2,0,8*8,256*8*8,0);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 procedure conv_background;
 begin
   init_gfx(1,8,8,1024);
   gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
-  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 procedure conv_static_background(size:word);
 var
@@ -647,7 +642,7 @@ begin
   init_gfx(2,32,32,size);
   gfx[2].trans[0]:=true;
   gfx_set_desc_data(3,0,128*8,2*size*128*8,128*size*8,0);
-  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 procedure convert_palette(size:word);
 var
@@ -657,27 +652,27 @@ var
   rweights,gweights,bweights:array[0..2] of single;
 begin
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances[0],@rweights[0],470,0,
-			3,@resistances[0],@gweights[0],470,0,
-			2,@resistances[1],@bweights[0],470,0);
+			3,@resistances[0],@rweights,470,0,
+			3,@resistances[0],@gweights,470,0,
+			2,@resistances[1],@bweights,470,0);
 for f:=0 to (size-1) do begin
 		// red component */
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
-		colores[f].r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
+		colores[f].r:=combine_3_weights(@rweights,bit0,bit1,bit2);
 		// green component */
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
-		colores[f].g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
+		colores[f].g:=combine_3_weights(@gweights,bit0,bit1,bit2);
 		// blue component */
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
-		colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
+		colores[f].b:=combine_2_weights(@bweights,bit0,bit1);
 end;
 set_pal(colores,size);
-copymemory(@pal_src[0],@memoria_temp[$100],$100);
+copymemory(@pal_src,@memoria_temp[$100],$100);
 end;
 begin
 iniciar_zaxxon:=false;
@@ -698,26 +693,26 @@ case main_vars.tipo_maquina of
         pia8255_0:=pia8255_chip.create;
         pia8255_0.change_ports(ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
         //Samples
-        load_samples('congo.zip',@congo_samples[0],num_samples_congo);
+        load_samples('congo.zip',@congo_samples,num_samples_congo);
         z80_1.init_sound(congo_sound_update);
         sn_76496_0:=sn76496_chip.Create(4000000);
         sn_76496_1:=sn76496_chip.Create(1000000);
         //cargar roms
-        if not(cargar_roms(@memoria[0],@congo_rom[0],'congo.zip',0)) then exit;
+        if not(roms_load(@memoria,@congo_rom,'congo.zip',sizeof(congo_rom))) then exit;
         //cargar sonido & iniciar_sonido
-        if not(cargar_roms(@mem_snd[0],@congo_sound,'congo.zip')) then exit;
-        if not(cargar_roms(@memoria_temp[0],@congo_char,'congo.zip')) then exit;
+        if not(roms_load(@mem_snd,@congo_sound,'congo.zip',sizeof(congo_sound))) then exit;
+        if not(roms_load(@memoria_temp,@congo_char,'congo.zip',sizeof(congo_char))) then exit;
         conv_chars;
-        if not(cargar_roms(@memoria_temp[0],@congo_bg[0],'congo.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@congo_bg,'congo.zip',sizeof(congo_bg))) then exit;
         conv_background;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@congo_sprites[0],'congo.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@congo_sprites,'congo.zip',sizeof(congo_sprites))) then exit;
         conv_sprites($80);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@congo_pal[0],'congo.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@congo_pal,'congo.zip',sizeof(congo_pal))) then exit;
         convert_palette($200);
         //backgroud
-        if not(cargar_roms(@memoria_temp[0],@congo_tilemap[0],'congo.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@congo_tilemap,'congo.zip',sizeof(congo_tilemap))) then exit;
         conv_static_background($2000);
         //DIP
         marcade.dswa:=$77;
@@ -730,21 +725,21 @@ case main_vars.tipo_maquina of
         pia8255_0:=pia8255_chip.create;
         pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
         //Samples
-        if load_samples('zaxxon.zip',@zaxxon_samples[0],num_samples_zaxxon) then z80_0.init_sound(zaxxon_sound_update);
+        if load_samples('zaxxon.zip',@zaxxon_samples,num_samples_zaxxon) then z80_0.init_sound(zaxxon_sound_update);
         //cargar roms
-        if not(cargar_roms(@memoria[0],@zaxxon_rom[0],'zaxxon.zip',0)) then exit;
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_char[0],'zaxxon.zip',0)) then exit;
+        if not(roms_load(@memoria,@zaxxon_rom,'zaxxon.zip',sizeof(zaxxon_rom))) then exit;
+        if not(roms_load(@memoria_temp,@zaxxon_char,'zaxxon.zip',sizeof(zaxxon_char))) then exit;
         conv_chars;
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_bg[0],'zaxxon.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@zaxxon_bg,'zaxxon.zip',sizeof(zaxxon_bg))) then exit;
         conv_background;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_sprites[0],'zaxxon.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@zaxxon_sprites,'zaxxon.zip',sizeof(zaxxon_sprites))) then exit;
         conv_sprites($40);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_pal[0],'zaxxon.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@zaxxon_pal,'zaxxon.zip',sizeof(zaxxon_pal))) then exit;
         convert_palette($100);
         //Background
-        if not(cargar_roms(@memoria_temp[0],@zaxxon_tilemap[0],'zaxxon.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,@zaxxon_tilemap,'zaxxon.zip',sizeof(zaxxon_tilemap))) then exit;
         conv_static_background($4000);
         //DIP
         marcade.dswa:=$7f;

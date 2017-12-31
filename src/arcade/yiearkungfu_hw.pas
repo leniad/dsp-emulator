@@ -9,13 +9,13 @@ procedure cargar_yiear;
 
 implementation
 const
-        yiear_rom:array[0..2] of tipo_roms=(
-        (n:'i08.10d';l:$4000;p:$8000;crc:$e2d7458b),(n:'i07.8d';l:$4000;p:$c000;crc:$7db7442e),());
-        yiear_char:array[0..2] of tipo_roms=((n:'g16_1.bin';l:$2000;p:0;crc:$b68fd91d),
-        (n:'g15_2.bin';l:$2000;p:$2000;crc:$d9b167c6),());
-        yiear_sprites:array[0..4] of tipo_roms=(
+        yiear_rom:array[0..1] of tipo_roms=(
+        (n:'i08.10d';l:$4000;p:$8000;crc:$e2d7458b),(n:'i07.8d';l:$4000;p:$c000;crc:$7db7442e));
+        yiear_char:array[0..1] of tipo_roms=((n:'g16_1.bin';l:$2000;p:0;crc:$b68fd91d),
+        (n:'g15_2.bin';l:$2000;p:$2000;crc:$d9b167c6));
+        yiear_sprites:array[0..3] of tipo_roms=(
         (n:'g04_5.bin';l:$4000;p:0;crc:$45109b29),(n:'g03_6.bin';l:$4000;p:$4000;crc:$1d650790),
-        (n:'g06_3.bin';l:$4000;p:$8000;crc:$e6aa945b),(n:'g05_4.bin';l:$4000;p:$c000;crc:$cc187c22),());
+        (n:'g06_3.bin';l:$4000;p:$8000;crc:$e6aa945b),(n:'g05_4.bin';l:$4000;p:$c000;crc:$cc187c22));
         yiear_pal:tipo_roms=(n:'yiear.clr';l:$20;p:$0;crc:$c283d71f);
         yiear_vlm:tipo_roms=(n:'a12_9.bin';l:$2000;p:$0;crc:$f75a1539);
         //Dip
@@ -236,7 +236,6 @@ var
     memoria_temp:array[0..$ffff] of byte;
 const
     pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(0*8*8+0, 0*8*8+1, 0*8*8+2, 0*8*8+3, 1*8*8+0, 1*8*8+1, 1*8*8+2, 1*8*8+3,
 	  2*8*8+0, 2*8*8+1, 2*8*8+2, 2*8*8+3, 3*8*8+0, 3*8*8+1, 3*8*8+2, 3*8*8+3);
     ps_y:array[0..15] of dword=(0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
@@ -248,31 +247,31 @@ screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(yiear_getbyte,yiear_putbyte);
 m6809_0.init_sound(yiear_sound_update);
 //Sound Chip
-sn_76496_0:=sn76496_chip.Create(1536000);
+sn_76496_0:=sn76496_chip.Create(18432000 div 8);
 //cargar rom sonido
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,2);
-if not(cargar_roms(vlm5030_0.get_rom_addr,@yiear_vlm,'yiear.zip')) then exit;
+if not(roms_load(vlm5030_0.get_rom_addr,@yiear_vlm,'yiear.zip',sizeof(yiear_vlm))) then exit;
 //NMI sonido
 init_timer(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,true);
 //cargar roms
-if not(cargar_roms(@memoria,@yiear_rom,'yiear.zip',0)) then exit;
+if not(roms_load(@memoria,@yiear_rom,'yiear.zip',sizeof(yiear_rom))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp,@yiear_char,'yiear.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@yiear_char,'yiear.zip',sizeof(yiear_char))) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,16*8,4,0,$2000*8+4,$2000*8+0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp,@yiear_sprites,'yiear.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@yiear_sprites,'yiear.zip',sizeof(yiear_sprites))) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,4,0,$8000*8+4,$8000*8+0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //paleta
-if not(cargar_roms(@memoria_temp,@yiear_pal,'yiear.zip')) then exit;
+if not(roms_load(@memoria_temp,@yiear_pal,'yiear.zip',sizeof(yiear_pal))) then exit;
 for f:=0 to 31 do begin
   ctemp1:=memoria_temp[f] and 1;
   ctemp2:=(memoria_temp[f] shr 1) and 1;

@@ -169,7 +169,7 @@ screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0:=cpu_m6809.Create(1536000,$100,TCPU_M6809);
 m6809_0.change_ram_calls(rocnrope_getbyte,rocnrope_putbyte);
 //Sound Chip
 konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);

@@ -273,17 +273,17 @@ iniciar_sonson:=false;
 iniciar_audio(false);
 screen_init(1,256,256,false,true);
 screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,0,0,0);
+screen_mod_scroll(2,256,256,255,256,256,255);
 iniciar_video(240,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(2000000,256);
+m6809_0:=cpu_m6809.Create(12000000 div 8,256,TCPU_M6809);
 m6809_0.change_ram_calls(sonson_getbyte,sonson_putbyte);
 //Sound CPU
-m6809_1:=cpu_m6809.Create(2000000,256);
+m6809_1:=cpu_m6809.Create(12000000 div 8,256,TCPU_M6809);
 m6809_1.change_ram_calls(ssonson_getbyte,ssonson_putbyte);
 m6809_1.init_sound(sonson_sound_update);
 //IRQ Sound CPU
-init_timer(1,2000000/(4*60),sonson_snd_irq,true);
+init_timer(1,(12000000/8)/(4*60),sonson_snd_irq,true);
 //Sound Chip
 AY8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
 AY8910_1:=ay8910_chip.create(1500000,AY8910,0.3);

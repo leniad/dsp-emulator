@@ -9,23 +9,23 @@ procedure cargar_kyugo_hw;
 
 implementation
 const
-        repulse_rom:array[0..3] of tipo_roms=(
+        repulse_rom:array[0..2] of tipo_roms=(
         (n:'repulse.b5';l:$2000;p:0;crc:$fb2b7c9d),(n:'repulse.b6';l:$2000;p:$2000;crc:$99129918),
-        (n:'7.j4';l:$2000;p:$4000;crc:$57a8e900),());
-        repulse_snd:array[0..4] of tipo_roms=(
+        (n:'7.j4';l:$2000;p:$4000;crc:$57a8e900));
+        repulse_snd:array[0..3] of tipo_roms=(
         (n:'1.f2';l:$2000;p:0;crc:$c485c621),(n:'2.h2';l:$2000;p:$2000;crc:$b3c6a886),
-        (n:'3.j2';l:$2000;p:$4000;crc:$197e314c),(n:'repulse.b4';l:$2000;p:$6000;crc:$86b267f3),());
+        (n:'3.j2';l:$2000;p:$4000;crc:$197e314c),(n:'repulse.b4';l:$2000;p:$6000;crc:$86b267f3));
         repulse_char:tipo_roms=(n:'repulse.a11';l:$1000;p:0;crc:$8e1de90a);
-        repulse_tiles:array[0..3] of tipo_roms=(
+        repulse_tiles:array[0..2] of tipo_roms=(
         (n:'15.9h';l:$2000;p:0;crc:$c9213469),(n:'16.10h';l:$2000;p:$2000;crc:$7de5d39e),
-        (n:'17.11h';l:$2000;p:$4000;crc:$0ba5f72c),());
-        repulse_sprites:array[0..6] of tipo_roms=(
+        (n:'17.11h';l:$2000;p:$4000;crc:$0ba5f72c));
+        repulse_sprites:array[0..5] of tipo_roms=(
         (n:'8.6a';l:$4000;p:0;crc:$0e9f757e),(n:'9.7a';l:$4000;p:$4000;crc:$f7d2e650),
         (n:'10.8a';l:$4000;p:$8000;crc:$e717baf4),(n:'11.9a';l:$4000;p:$c000;crc:$04b2250b),
-        (n:'12.10a';l:$4000;p:$10000;crc:$d110e140),(n:'13.11a';l:$4000;p:$14000;crc:$8fdc713c),());
-        repulse_prom:array[0..3] of tipo_roms=(
+        (n:'12.10a';l:$4000;p:$10000;crc:$d110e140),(n:'13.11a';l:$4000;p:$14000;crc:$8fdc713c));
+        repulse_prom:array[0..2] of tipo_roms=(
         (n:'b.1j';l:$100;p:0;crc:$3ea35431),(n:'g.1h';l:$100;p:$100;crc:$acd7a69e),
-        (n:'r.1f';l:$100;p:$200;crc:$b7f48b41),());
+        (n:'r.1f';l:$100;p:$200;crc:$b7f48b41));
 
 var
   scroll_x:word;
@@ -54,8 +54,7 @@ end;
 
 procedure update_video_kyugo_hw;inline;
 var
-  f,x,y:word;
-  nchar,atrib,color:word;
+  f,x,y,nchar,atrib,color:word;
 begin
 for f:=0 to $7ff do begin
   //background
@@ -145,11 +144,11 @@ procedure kyugo_putbyte(direccion:word;valor:byte);
 begin
 if direccion<$8000 then exit;
 case direccion of
-    $8000..$8fff:begin
+    $8000..$8fff:if memoria[direccion]<>valor then begin
                     gfx[1].buffer[direccion and $7ff]:=true;
                     memoria[direccion]:=valor;
                  end;
-    $9000..$97ff:begin
+    $9000..$97ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $7ff]:=true;
                     memoria[direccion]:=valor;
                  end;
@@ -167,7 +166,7 @@ case direccion of
               fillchar(gfx[1].buffer[0],$800,1);
             end;
           end;
-    $b800:scroll_y:=255-valor;
+    $b800:scroll_y:=not(valor);
 end;
 end;
 
@@ -290,28 +289,28 @@ ay8910_0:=ay8910_chip.create(1536000,AY8910,0.3);
 ay8910_0.change_io_calls(kyugo_porta_r,kyugo_portb_r,nil,nil);
 ay8910_1:=ay8910_chip.create(1536000,AY8910,0.3);
 //cargar roms
-if not(cargar_roms(@memoria[0],@repulse_rom[0],'repulse.zip',0)) then exit;
+if not(roms_load(@memoria,@repulse_rom,'repulse.zip',sizeof(repulse_rom))) then exit;
 //cargar roms snd
-if not(cargar_roms(@mem_snd[0],@repulse_snd[0],'repulse.zip',0)) then exit;
+if not(roms_load(@mem_snd,@repulse_snd,'repulse.zip',sizeof(repulse_snd))) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@repulse_char,'repulse.zip',1)) then exit;
+if not(roms_load(@memoria_temp,@repulse_char,'repulse.zip',sizeof(repulse_char))) then exit;
 init_gfx(0,8,8,$100);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8*2,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@ps_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,true,false);
 //convertir tiles
-if not(cargar_roms(@memoria_temp[0],@repulse_tiles[0],'repulse.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@repulse_tiles,'repulse.zip',sizeof(repulse_tiles))) then exit;
 init_gfx(1,8,8,$400);
 gfx_set_desc_data(3,0,8*8,0,$400*8*8,$400*8*8*2);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@repulse_sprites[0],'repulse.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@repulse_sprites,'repulse.zip',sizeof(repulse_sprites))) then exit;
 init_gfx(2,16,16,$400);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,16*16,0,$400*16*16,$400*16*16*2);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@repulse_prom[0],'repulse.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@repulse_prom,'repulse.zip',sizeof(repulse_prom))) then exit;
 for f:=0 to $ff do begin
   bit0:=(memoria_temp[f] shr 0) and 1;
   bit1:=(memoria_temp[f] shr 1) and 1;

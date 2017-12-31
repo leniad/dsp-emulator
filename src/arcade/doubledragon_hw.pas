@@ -636,13 +636,13 @@ iniciar_video(256,240);
 case main_vars.tipo_maquina of
   92:begin
         //Main CPU
-        hd6309_0:=cpu_hd6309.create(12000000,272);
+        hd6309_0:=cpu_hd6309.create(12000000,272,TCPU_HD6309);
         hd6309_0.change_ram_calls(ddragon_getbyte,ddragon_putbyte);
         //Sub CPU
-        m6800_0:=cpu_m6800.create(6000000,272,cpu_hd63701);
+        m6800_0:=cpu_m6800.create(6000000,272,TCPU_HD63701);
         m6800_0.change_ram_calls(ddragon_sub_getbyte,ddragon_sub_putbyte);
         //Sound CPU
-        m6809_0:=cpu_m6809.Create(1500000,272);
+        m6809_0:=cpu_m6809.Create(1500000,272,TCPU_M6809);
         m6809_0.change_ram_calls(ddragon_snd_getbyte,ddragon_snd_putbyte);
         m6809_0.init_sound(ddragon_sound_update);
         //Sound Chips
@@ -674,7 +674,7 @@ case main_vars.tipo_maquina of
      end;
   96:begin
         //Main CPU
-        hd6309_0:=cpu_hd6309.create(12000000,272);
+        hd6309_0:=cpu_hd6309.create(12000000,272,TCPU_HD6309);
         hd6309_0.change_ram_calls(ddragon2_getbyte,ddragon2_putbyte);
         //Sub CPU
         z80_0:=cpu_z80.create(4000000,272);

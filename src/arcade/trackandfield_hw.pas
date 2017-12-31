@@ -305,11 +305,11 @@ begin
 iniciar_trackfield:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,0,0,0);
+screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 12,$100);
+m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(trackfield_getbyte,trackfield_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(14318180 div 4,$100);

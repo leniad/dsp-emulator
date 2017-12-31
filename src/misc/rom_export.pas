@@ -1,7 +1,7 @@
 unit rom_export;
 
 interface
-uses rom_engine,dialogs,main_engine,sysutils,lenguaje;
+uses rom_engine,dialogs,main_engine,sysutils,lenguaje,misc_functions;
 
 type
   tsample_file=record
@@ -2337,17 +2337,14 @@ const
         (n:'136043-1109.7a';l:$8000;p:$40000;crc:$58a0a9a3),(n:'136043-1110.7b';l:$8000;p:$40001;crc:$658f0da8),
         (n:'136043-1121.6a';l:$8000;p:$50000;crc:$ae301bba),(n:'136043-1122.6b';l:$8000;p:$50001;crc:$e94aaa8a),
         (n:'136043-1120.16r';l:$4000;p:$4000;crc:$5c731006),(n:'136043-1119.16s';l:$8000;p:$8000;crc:$dc3591e7),
-        (n:'136043-1104.6p';l:$2000;p:0;crc:$1343cf6f),
-        (n:'136043-1111.1a';l:$8000;p:0;crc:$91700f33),(n:'136037-112.1b';l:$8000;p:$8000;crc:$869330be),
-        (n:'136043-1123.1c';l:$4000;p:$10000;crc:$d497d0a8),
-        (n:'136043-1113.1l';l:$8000;p:$18000;crc:$9510b898),(n:'136037-114.1mn';l:$8000;p:$20000;crc:$11e0ac5b),
-        (n:'136043-1124.1p';l:$4000;p:$28000;crc:$29a5db41),
-        (n:'136043-1115.2a';l:$8000;p:$30000;crc:$91700f33),(n:'136037-116.2b';l:$8000;p:$38000;crc:$869330be),
-        (n:'136043-1125.2c';l:$8000;p:$40000;crc:$d497d0a8),
-        (n:'136043-1117.2l';l:$8000;p:$48000;crc:$9510b898),(n:'136037-118.2mn';l:$8000;p:$50000;crc:$11e0ac5b),
-        (n:'136043-1126.2p';l:$4000;p:$58000;crc:$29a5db41),
-        (n:'74s472-136037-101.7u';l:$200;p:0;crc:$2964f76f),(n:'74s472-136037-102.5l';l:$200;p:$200;crc:$4d4fec6c),
-        (n:'74s287-136037-103.4r';l:$100;p:$400;crc:$6c5ccf08),());
+        (n:'136043-1104.6p';l:$2000;p:0;crc:$1343cf6f),(n:'136043-1111.1a';l:$8000;p:0;crc:$09df6e23),
+        (n:'136037-112.1b';l:$8000;p:$8000;crc:$869330be),(n:'136043-1123.1c';l:$4000;p:$10000;crc:$e4c98f01),
+        (n:'136043-1113.1l';l:$8000;p:$18000;crc:$33cb476e),(n:'136037-114.1mn';l:$8000;p:$20000;crc:$29ef9882),
+        (n:'136043-1124.1p';l:$4000;p:$28000;crc:$c4857879),(n:'136043-1115.2a';l:$8000;p:$30000;crc:$f71e2503),
+        (n:'136037-116.2b';l:$8000;p:$38000;crc:$11e0ac5b),(n:'136043-1125.2c';l:$4000;p:$40000;crc:$d9c2c2d1),
+        (n:'136043-1117.2l';l:$8000;p:$48000;crc:$9e30b2e9),(n:'136037-118.2mn';l:$8000;p:$50000;crc:$8bf3b263),
+        (n:'136043-1126.2p';l:$4000;p:$58000;crc:$a32c732a),(n:'74s472-136037-101.7u';l:$200;p:0;crc:$2964f76f),
+        (n:'74s472-136037-102.5l';l:$200;p:$200;crc:$4d4fec6c),(n:'74s287-136037-103.4r';l:$100;p:$400;crc:$6c5ccf08),());
 
 implementation
 uses principal,init_games;
@@ -2360,11 +2357,9 @@ var
   rom_file:ptipo_roms;
   sample_file:ptsample_file;
   nombre_fichero:string;
+  indice:byte;
 begin
-principal1.saveDialog1.Filter:='DAT File (*.dat)|*.dat';
-principal1.saveDialog1.FileName:='dsp_roms_dat.dat';
-if not(principal1.savedialog1.execute) then exit;
-nombre_fichero:=principal1.saveDialog1.FileName;
+if not(SaveRom(StExport,nombre_fichero,indice)) then exit;
 if FileExists(nombre_fichero) then begin                                         //Respuesta 'NO' es 7
   if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 end;

@@ -375,7 +375,7 @@ begin
 iniciar_renegade:=false;
 iniciar_audio(false);
 screen_init(1,1024,256);
-screen_mod_scroll(1,1024,256,1023,0,0,0);
+screen_mod_scroll(1,1024,256,1023,256,256,255);
 screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(240,240);
@@ -383,7 +383,7 @@ iniciar_video(240,240);
 m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
 m6502_0.change_ram_calls(getbyte_renegade,putbyte_renegade);
 //Sound CPU
-m6809_0:=cpu_m6809.Create(1500000,256);
+m6809_0:=cpu_m6809.Create(1500000,256,TCPU_M6809);
 m6809_0.change_ram_calls(getbyte_snd_renegade,putbyte_snd_renegade);
 m6809_0.init_sound(renegade_sound_update);
 //MCU CPU

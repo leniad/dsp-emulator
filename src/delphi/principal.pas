@@ -11,7 +11,7 @@ uses
   jpeg,gifimg,pngimage,
   //misc
   poke_spectrum,main_engine,sound_engine,tape_window,lenguaje,init_games,
-  controls_engine,LoadRom,config_general,timer_engine,
+  controls_engine,LoadRom,config_general,timer_engine,misc_functions,
   //other...
   vars_hide;
 
@@ -72,7 +72,6 @@ type
     Mikie1: TMenuItem;
     Shaolin1: TMenuItem;
     Yiear1: TMenuItem;
-    SaveDialog1: TSaveDialog;
     AsteroidsHW1: TMenuItem;
     Z801: TMenuItem;
     M65021: TMenuItem;
@@ -240,7 +239,6 @@ type
     P471: TMenuItem;
     RodLand1: TMenuItem;
     SaintDragon1: TMenuItem;
-    OpenDialog1: TOpenDialog;
     TimePilot1: TMenuItem;
     Timer4: TTimer;
     Pengo1: TMenuItem;
@@ -514,6 +512,9 @@ var
 begin
 //Inicializa las ventanas
 timer2.Enabled:=false;
+//Inicializo SDL
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
+  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
 Child:=TfrChild.Create(application);
 principal1.Caption:=principal1.Caption+DSP_VERSION;
 tipo:=main_vars.tipo_maquina;
@@ -698,6 +699,7 @@ procedure Tprincipal1.fSaveGif(Sender: TObject);
 var
   r:integer;
   nombre:string;
+  indice:byte;
   nombre2:ansistring;
   rect2:libsdl_rect;
   temp_s:libsdlP_Surface;
@@ -709,13 +711,8 @@ begin
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-SaveDialog1.InitialDir:=Directory.spectrum_image;
-SaveDialog1.FileName:=llamadas_maquina.caption;
-SaveDialog1.Filter:='Imagen PNG(*.PNG)|*.png|Imagen JPG(*.JPG)|*.jpg|Imagen GIF(*.GIF)|*.gif';
-SaveDialog1.FilterIndex:=2;
-if Savedialog1.execute then begin
-  nombre:=savedialog1.FileName;
-  case SaveDialog1.FilterIndex of
+if SaveRom(StBitmap,nombre,indice) then begin
+  case indice of
     1:nombre:=ChangeFileExt(nombre,'.png');
     2:nombre:=ChangeFileExt(nombre,'.jpg');
     3:nombre:=ChangeFileExt(nombre,'.gif');
@@ -728,7 +725,7 @@ if Savedialog1.execute then begin
     end;
     deletefile(nombre);
   end;
-  Directory.spectrum_image:=extractfiledir(savedialog1.FileName)+main_vars.cadena_dir;
+  Directory.spectrum_image:=extractfiledir(nombre)+main_vars.cadena_dir;
   rect2.x:=0;
   rect2.y:=0;
   case main_screen.video_mode of
@@ -753,7 +750,7 @@ if Savedialog1.execute then begin
   imagen1:=tbitmap.Create;
   imagen1.LoadFromFile(nombre2);
   deletefile(nombre2);
-  case SaveDialog1.FilterIndex of
+  case indice of
     1:begin //png
          PNG:=TPngImage.Create;
          PNG.Assign(imagen1);

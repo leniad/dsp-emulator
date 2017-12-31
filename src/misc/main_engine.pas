@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.18WIP';
+        DSP_VERSION='0.18';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_TEMP=23;
@@ -267,17 +267,12 @@ uses_sdl_window;
 child.clientWidth:=x;
 child.clientHeight:=y;
 x:=child.width;
+if x<310 then x:=310;
 case main_vars.tipo_maquina of
-  10..999:begin
-               if x<260 then x:=260;
-               x:=x+10;
-          end;
-    else begin
-              if x<260 then x:=260;
-              x:=x+60;
-         end;
+  10..999:x:=x+10;
+    else x:=x+60;
 end;
-fix_screen_pos(x,child.height+60);
+fix_screen_pos(x,child.height+70);
 if principal1.Panel2.visible then x:=x-60;
 child.Left:=(x-child.width) div 2;
 {$endif}
@@ -299,8 +294,6 @@ var
   handle_:integer;
   {$endif}
 begin
-if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
-  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
 //Puntero general del pixels
 getmem(punbuf,MAX_PUNBUF);
 //creo la pantalla general

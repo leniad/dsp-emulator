@@ -205,15 +205,15 @@ begin
 iniciar_jailbreak:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,0,0,0);
+screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,$100);
+m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(jailbreak_getbyte,jailbreak_putbyte);
 m6809_0.init_sound(jailbreak_sound);
 //Sound Chip
-sn_76496_0:=sn76496_chip.Create(1536000);
+sn_76496_0:=sn76496_chip.Create(18432000 div 12);
 //cargar rom sonido
 vlm5030_0:=vlm5030_chip.Create(3579545,$4000,2);
 if not(cargar_roms(@memoria_temp[0],@jailbreak_vlm,'jailbrek.zip')) then exit;

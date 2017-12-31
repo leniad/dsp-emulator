@@ -41,6 +41,7 @@ var
         cab_audio:array[0..MAX_CANALES-1,0..MAX_AUDIO_BUFFER-1] of wavehdr;
         {$else}
         sample_final:array[0..LONG_MAX_AUDIO-1] of smallint;
+        sound_device:libSDL_AudioDeviceID;
         {$endif}
 
 function iniciar_audio(stereo_sound:boolean):boolean;
@@ -151,17 +152,18 @@ case sound_status.calidad_audio of
 end;
 sound_status.sample_final:=round(audio_rate/llamadas_maquina.fps_max)*canales;
 wanted.freq:=audio_rate;
-wanted.padding:=0;
 wanted.format:=libAUDIO_S16;
 wanted.channels:=canales;
 wanted.samples:=sound_status.sample_final;
-wanted.silence:=0; //wanted.size:=sound_status.sample_final*2;
-wanted.size_:=0;
+wanted.silence:=0;
+wanted.size_:=0; //wanted.size:=sound_status.sample_final*2;
 wanted.callback:=nil;//sound_call_back;
 wanted.userdata:=nil;
-if (SDL_OpenAudio(@wanted,@have)<>0) then exit;
-SDL_PauseAudio(0);
-SDL_ClearQueuedAudio(1);
+wanted.padding:=0;
+sound_device:=SDL_OpenAudioDevice(nil,0,@wanted,@have,0);
+if (sound_device=0) then exit;
+SDL_PauseAudioDevice(sound_device,0);
+SDL_ClearQueuedAudio(sound_device);
 sound_status.hay_tsonido:=true;
 reset_audio;
 iniciar_audio:=true;
@@ -169,7 +171,7 @@ end;
 
 procedure close_audio;
 begin
-SDL_CloseAudio;
+SDL_CloseAudioDevice(sound_device);
 end;
 {$endif}
 
@@ -224,9 +226,9 @@ for f:=0 to sound_status.canales_usados do begin
 end;
 end;
 {$ifdef fpc}
-if main_screen.rapido then SDL_ClearQueuedAudio(1);
+if main_screen.rapido then SDL_ClearQueuedAudio(sound_device);
 for h:=0 to (sound_status.sample_final-1) do sample_final[h]:=sample_final[h] div (sound_status.canales_usados+1);
-SDL_QueueAudio(1,@sample_final[0],sound_status.long_sample*sizeof(smallint));
+SDL_QueueAudio(sound_device,@sample_final[0],sound_status.long_sample*sizeof(smallint));
 fillchar(sample_final[0],LONG_MAX_AUDIO*sizeof(smallint),0);
 {$endif}
 sound_status.num_buffer:=sound_status.num_buffer+1;

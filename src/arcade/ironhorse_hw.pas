@@ -265,11 +265,11 @@ begin
 iniciar_ironhorse:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,256,256,255,0,0,0);
+screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(3072000,$100);
+m6809_0:=cpu_m6809.Create(18432000 div 6,$100,TCPU_M6809);
 m6809_0.change_ram_calls(ironhorse_getbyte,ironhorse_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3072000,$100);

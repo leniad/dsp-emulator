@@ -315,10 +315,10 @@ begin
 iniciar_gberet:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,0,0,0);
+screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 screen_init(3,512,256,true,false);
-screen_mod_scroll(3,512,256,511,0,0,0);
+screen_mod_scroll(3,512,256,511,256,256,255);
 iniciar_video(240,224);
 //Main CPU
 z80_0:=cpu_z80.create(3072000,256);

@@ -15,15 +15,15 @@ object load_dsk: Tload_dsk
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '1.6.2.0'
+  LCLVersion = '1.8.0.6'
   object GroupBox1: TGroupBox
     Left = 8
     Height = 192
     Top = 208
     Width = 576
     Caption = 'Contenido ZIP / Inside ZIP'
-    ClientHeight = 174
-    ClientWidth = 572
+    ClientHeight = 178
+    ClientWidth = 574
     TabOrder = 0
     object StringGrid1: TStringGrid
       Left = 6
@@ -67,6 +67,7 @@ object load_dsk: Tload_dsk
     OnKeyUp = FileListBox1KeyUp
     TabOrder = 1
     TabStop = False
+    TopIndex = -1
   end
   object Button1: TButton
     Left = 487
@@ -88,8 +89,8 @@ object load_dsk: Tload_dsk
   end
   object DirectoryEdit1: TDirectoryEdit
     Left = 8
-    Height = 21
-    Top = 16
+    Height = 30
+    Top = 8
     Width = 468
     ShowHidden = False
     ButtonWidth = 23

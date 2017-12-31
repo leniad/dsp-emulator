@@ -10,6 +10,7 @@ type
     tllamadas_nes=record
            read_expansion:function(direccion:word):byte;
            write_expansion:procedure(direccion:word;valor:byte);
+           read_extra_ram:function(direccion:word):byte;
            write_extra_ram:procedure(direccion:word;valor:byte);
            write_rom:procedure(direccion:word;valor:byte);
            line_counter:procedure;
@@ -124,7 +125,12 @@ begin
               n2a03_0.m6502.run(frame);
               frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
             end;
-          240,242..260:begin //240,242..260
+           240:begin //240,242..260
+                n2a03_0.m6502.run(frame);
+                frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
+                if (@llamadas_nes.line_counter<>nil) then llamadas_nes.line_counter;
+              end;
+           242..260:begin //240,242..260
                 n2a03_0.m6502.run(frame);
                 frame:=frame+n2a03_0.m6502.tframes-n2a03_0.m6502.contador;
               end;
@@ -145,7 +151,6 @@ begin
            end;
       end;
     end;
-    //open_bus:=0;
     eventos_nes;
     actualiza_trozo_simple(0,0,256,240,2);
     video_sync;
@@ -155,7 +160,7 @@ end;
 function nes_getbyte(direccion:word):byte;
 begin
   case direccion of
-    $0..$1FFF:nes_getbyte:=memoria[direccion and $7FF];
+    $0..$1fff:nes_getbyte:=memoria[direccion and $7ff];
     $2000..$3fff:begin
                 case (direccion and 7) of
                   $2:begin
@@ -186,8 +191,9 @@ begin
           end;
     $4020..$5fff:if @llamadas_nes.read_expansion<>nil then nes_getbyte:=llamadas_nes.read_expansion(direccion) //Expansion Area
                     else nes_getbyte:=direccion shr 8;
-    $6000..$7fff:if sram_enable then nes_getbyte:=memoria[direccion] //SRAM Area
-                    else nes_getbyte:=open_bus;
+    $6000..$7fff:if @llamadas_nes.read_extra_ram<>nil then nes_getbyte:=llamadas_nes.read_extra_ram(direccion)
+                    else if sram_enable then nes_getbyte:=memoria[direccion] //SRAM Area
+                            else nes_getbyte:=open_bus;
     $8000..$ffff:nes_getbyte:=memoria[direccion]; // PRG-ROM Area
   end;
 end;
@@ -195,7 +201,7 @@ end;
 procedure nes_putbyte(direccion:word;valor:byte);
 begin
   case direccion of
-    0..$1FFF:memoria[direccion and $7FF]:=valor;
+    0..$1fff:memoria[direccion and $7ff]:=valor;
     $2000..$3FFF:begin
         open_bus:=valor;
         case (direccion and 7) of
@@ -245,11 +251,8 @@ begin
                 val_4016:=valor and 1;
               end;
         $4020..$5fff:if @llamadas_nes.write_expansion<>nil then llamadas_nes.write_expansion(direccion,valor); //Expansion Area
-        $6000..$7fff:if @llamadas_nes.write_extra_ram=nil then begin
-                        if sram_enable then memoria[direccion]:=valor; //SRAM Area
-                     end else begin
-                          llamadas_nes.write_extra_ram(direccion,valor);
-                     end;
+        $6000..$7fff:if @llamadas_nes.write_extra_ram<>nil then llamadas_nes.write_extra_ram(direccion,valor)
+                        else if sram_enable then memoria[direccion]:=valor;
         $8000..$ffff:if @llamadas_nes.write_rom<>nil then llamadas_nes.write_rom(direccion,valor); //PRG-ROM Area
   end;
 end;
@@ -274,36 +277,54 @@ begin
   joy2_read:=0;
   open_bus:=$FF;
   val_4016:=0;
+  mapper_nes.latch1:=0;
+  mapper_nes.latch2:=0;
+  mapper_nes.counter:=0;
+  mapper_nes.serial_cnt:=0;
 end;
 
 procedure llamadas_mapper(mapper:word);
 begin
+n2a03_0.m6502.change_despues_instruccion(nil);
   case mapper of
       0:;
-      1:llamadas_nes.write_rom:=mapper_1_write_rom;
+      1:begin
+          llamadas_nes.write_rom:=mapper_1_write_rom;
+          n2a03_0.m6502.change_despues_instruccion(mapper_1_irq);
+        end;
       2:llamadas_nes.write_rom:=mapper_2_write_rom;
       3:llamadas_nes.write_rom:=mapper_3_write_rom;
       4:begin
           llamadas_nes.write_rom:=mapper_4_write_rom;
           llamadas_nes.line_counter:=mapper_4_line;
+          llamadas_nes.write_extra_ram:=mapper_4_wram_write;
         end;
       7:llamadas_nes.write_rom:=mapper_7_write_rom;
       9:begin
           llamadas_nes.write_rom:=mapper_9_write_rom;
           mapper_nes.ppu_read:=mapper_9_ppu_read;
         end;
+      11:llamadas_nes.write_rom:=mapper_11_write_rom;
       12:begin
           llamadas_nes.line_counter:=mapper_4_line;
           llamadas_nes.write_rom:=mapper_12_write_rom;
           llamadas_nes.write_expansion:=mapper_12_write_rom;
         end;
       66:llamadas_nes.write_rom:=mapper_66_write_rom;
-      67:llamadas_nes.write_rom:=mapper_67_write_rom;
+      67:begin
+          llamadas_nes.write_rom:=mapper_67_write_rom;
+          n2a03_0.m6502.change_despues_instruccion(mapper_67_irq);
+         end;
       68:llamadas_nes.write_rom:=mapper_68_write_rom;
       71:llamadas_nes.write_rom:=mapper_71_write_rom;
       87:llamadas_nes.write_extra_ram:=mapper_87_write_rom;
       93:llamadas_nes.write_rom:=mapper_93_write_rom;
       94:llamadas_nes.write_rom:=mapper_94_write_rom;
+     147:begin
+            llamadas_nes.write_expansion:=mapper_147_write_rom;
+            llamadas_nes.write_extra_ram:=mapper_147_write_rom;
+            llamadas_nes.write_rom:=mapper_147_write_rom;
+         end;
      180:llamadas_nes.write_rom:=mapper_180_write_rom;
      185:llamadas_nes.write_rom:=mapper_185_write_rom;
   end;
@@ -321,11 +342,13 @@ var
   ptemp:pbyte;
   f:byte;
   mapper:word;
+  crc32:integer;
 begin
   abrir_cartucho:=false;
   ptemp:=datos;
   getmem(nes_header,sizeof(tnes_header));
   copymemory(nes_header,ptemp,$10);
+  crc32:=calc_crc(ptemp,longitud);
   inc(ptemp,$10);
   if ((nes_header.magic<>'NES') and (nes_header.magic2<>$1a)) then exit;
   llamadas_nes.read_expansion:=nil;
@@ -335,7 +358,6 @@ begin
   llamadas_nes.write_rom:=nil;
   mapper_nes.ppu_read:=nil;
   fillchar(mapper_nes.reg,4,0);
-  sram_enable:=false;
   //Hay trainer, de momento lo ignoro...
   if (nes_header.flags6 and 4)<>0 then begin
     inc(ptemp,$200);
@@ -386,13 +408,13 @@ begin
     else if (nes_header.flags6 and 1)=0 then ppu_nes.mirror:=MIRROR_HORIZONTAL  //Horizontal
       else ppu_nes.mirror:=MIRROR_VERTICAL;  //Vertical
   //Poner llamadas del mapper
+  ppu_nes.enable_write:=false;
   llamadas_mapper(mapper);
   case mapper of
       0,3,7,66,87,185:abrir_cartucho:=true; //Nada mas que hacer...
       1:begin
-          copymemory(@memoria[$c000],@mapper_nes.prg[(mapper_nes.last_prg-1),0],$4000);
-          mapper_nes.reg[0]:=$1f;
-          sram_enable:=true;
+          copymemory(@memoria[$c000],@mapper_nes.prg[$f mod mapper_nes.last_prg,0],$4000);
+          mapper_nes.reg[0]:=$c;
           abrir_cartucho:=true;
         end;
       2,67,68,71,93,94,180:begin
@@ -412,13 +434,21 @@ begin
           mapper_nes.dreg[6]:=0;
           mapper_nes.dreg[7]:=1;
           abrir_cartucho:=true;
+          if ((crc32=$3fc29044) or (crc32=$2ed79b73) or (crc32=$76124d08)) then begin
+            llamadas_nes.read_extra_ram:=mapper_mmc6_wram_read;
+            llamadas_nes.write_extra_ram:=mapper_mmc6_wram_write;
+            llamadas_nes.write_rom:=mapper_mmc6_write_rom;
+          end;
         end;
       9:begin
           copymemory(@memoria[$8000],@mapper_nes.prg[mapper_nes.last_prg-2,0],$4000);
           copymemory(@memoria[$c000],@mapper_nes.prg[mapper_nes.last_prg-1,0],$4000);
-          sram_enable:=false;
           abrir_cartucho:=true;
         end;
+      11,147:begin
+              copymemory(@memoria[$c000],@mapper_nes.prg[1,0],$4000);
+              abrir_cartucho:=true;
+            end;
       //221:llamadas_nes.write_rom:=mapper_221_write_rom;
       else MessageDlg('NES: Mapper unknown!!! - Type: '+inttostr(mapper), mtError,[mbOk], 0);
   end;

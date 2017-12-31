@@ -2,8 +2,8 @@ unit volfied_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     m68000,main_engine,controls_engine,gfx_engine,ym_2203,
-     taitosnd,rom_engine,pal_engine,sound_engine,volfied_cchip;
+     m68000,main_engine,controls_engine,gfx_engine,ym_2203,taitosnd,rom_engine,
+     pal_engine,sound_engine,volfied_cchip;
 
 procedure cargar_volfied;
 
@@ -41,7 +41,7 @@ var
  ram1,ram3:array[0..$1fff] of word;
  spritebank:byte;
 
-procedure update_video_volfied;
+procedure update_video_volfied;inline;
 var
   x,y,nchar,atrib,color:word;
   p:dword;
@@ -106,18 +106,18 @@ init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=tc0140syt_0.z80.tframes;
 while EmuStatus=EsRuning do begin
- for f:=0 to $ff do begin
-  //Main CPU
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //Sound CPU
-  tc0140syt_0.z80.run(frame_s);
-  frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
-  if f=247 then begin
-    update_video_volfied;
-    m68000_0.irq[4]:=HOLD_LINE;
-  end;
- end;
+    for f:=0 to $ff do begin
+      //Main CPU
+      m68000_0.run(frame_m);
+      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+      //Sound CPU
+      tc0140syt_0.z80.run(frame_s);
+      frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
+      if f=247 then begin
+        update_video_volfied;
+        m68000_0.irq[4]:=HOLD_LINE;
+      end;
+    end;
  eventos_volfied;
  video_sync;
 end;
@@ -177,7 +177,7 @@ case direccion of
   $0..$87ff:volfied_snd_getbyte:=mem_snd[direccion];
   $8801:volfied_snd_getbyte:=tc0140syt_0.slave_comm_r;
   $9000:volfied_snd_getbyte:=ym2203_0.status;
-  $9001:volfied_snd_getbyte:=ym2203_0.Read;
+  $9001:volfied_snd_getbyte:=ym2203_0.read;
 end;
 end;
 

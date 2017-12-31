@@ -847,13 +847,11 @@ principal1.BitBtn11.visible:=false; //Save Snapshot
 principal1.BitBtn9.visible:=false; //Load Snapshot
 principal1.BitBtn12.visible:=false; //Poke
 principal1.BitBtn14.visible:=false; //Fast
-principal1.BitBtn8.visible:=false; //Config arcade
 principal1.Panel2.visible:=false; //Lateral
 principal1.BitBtn2.Enabled:=true;
 principal1.BitBtn3.Enabled:=true; //Play/Pause
 principal1.BitBtn5.Enabled:=true;
 principal1.BitBtn6.Enabled:=true;
-principal1.BitBtn8.Enabled:=true;
 principal1.BitBtn19.Enabled:=true;
 principal1.BitBtn1.Enabled:=true;
 principal1.BitBtn9.Enabled:=true;
@@ -861,6 +859,7 @@ principal1.BitBtn10.Enabled:=true;
 principal1.BitBtn11.Enabled:=true;
 principal1.BitBtn12.Enabled:=true;
 principal1.BitBtn14.Enabled:=true;
+principal1.BitBtn8.enabled:=false; //Arcade config
 case driver of
   0..6:begin
           principal1.Panel2.visible:=true;
@@ -880,7 +879,7 @@ case driver of
           principal1.BitBtn11.visible:=true; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
-  10..999:principal1.BitBtn8.visible:=true;  //Arcade
+  10..999:principal1.BitBtn8.enabled:=true;  //Arcade
   1000,1002,1003:begin //NES y Gameboy
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Disco

@@ -84,7 +84,6 @@ for f:=$fff downto 0 do begin
  end;
 end;
 actualiza_trozo(0,0,256,48,1,0,0,256,48,3);
-//scroll__x_part(1,3,scroll_x,0,48,208);
 scroll__x_part2(1,3,208,@scroll_x,0,0,48);
 for f:=$3f downto 0 do begin
     x:=memoria[$2803+(f*4)];
@@ -351,22 +350,22 @@ begin
 iniciar_citycon:=false;
 iniciar_audio(false);
 screen_init(1,1024,256,true);
-screen_mod_scroll(1,1024,256,1023,0,0,0);
+screen_mod_scroll(1,1024,256,1023,256,256,255);
 screen_init(2,1024,256);
-screen_mod_scroll(2,1024,256,1023,0,0,0);
+screen_mod_scroll(2,1024,256,1023,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(2048000,$100);
+m6809_0:=cpu_m6809.Create(8000000,$100,TCPU_MC6809);
 m6809_0.change_ram_calls(citycon_getbyte,citycon_putbyte);
 //Sound CPU
-m6809_1:=cpu_m6809.Create(640000,$100);
+m6809_1:=cpu_m6809.Create(2000000 div 3,$100,TCPU_MC6809E); //???
 m6809_1.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
 m6809_1.init_sound(citycon_sound_update);
 //Sound Chip
-ym2203_0:=ym2203_chip.create(1250000,0.2,0.4);
+ym2203_0:=ym2203_chip.create(20000000 div 16,0.2,0.4);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
-AY8910_0:=ay8910_chip.create(1250000,AY8910,0.40);
+ay8910_0:=ay8910_chip.create(20000000 div 16,AY8910,0.40);
 //cargar roms
 if not(roms_load(@memoria,@citycon_rom,'citycon.zip',sizeof(citycon_rom))) then exit;
 //Cargar Sound

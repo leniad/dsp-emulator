@@ -269,10 +269,10 @@ screen_init(2,256,256,true);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,256);
+m6809_0:=cpu_m6809.Create(1536000,256,TCPU_M6809);
 m6809_0.change_ram_calls(tp84_getbyte,tp84_putbyte);
 //Second CPU
-m6809_1:=cpu_m6809.Create(1536000,256);
+m6809_1:=cpu_m6809.Create(1536000,256,TCPU_M6809);
 m6809_1.change_ram_calls(cpu2_tp84_getbyte,cpu2_tp84_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,$100);

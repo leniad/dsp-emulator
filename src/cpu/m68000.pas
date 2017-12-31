@@ -93,8 +93,8 @@ var
     m68000_0,m68000_1:cpu_m68000;
 
 const
-  T68000=0;
-  T68010=1;
+  TCPU_68000=0;
+  TCPU_68010=1;
 
 implementation
 const
@@ -943,7 +943,7 @@ for f:=7 downto 1 do begin
       self.contador:=self.contador+44;
       tempw:=coger_band(self.r);
       self.poner_band(tempw or $2000);
-      if self.tipo=T68010 then begin
+      if self.tipo=TCPU_68010 then begin
         r.sp.l:=r.sp.l-2;
         self.putword(r.sp.l,f shl 2);
       end;
@@ -1494,7 +1494,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
           $08:begin // # clr.b
                 if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                   else self.contador:=self.contador+4;
-                if self.tipo=T68000 then self.getbyte(self.ea);
+                if self.tipo=TCPU_68000 then self.getbyte(self.ea);
                 self.ponerdir_b(dir,0);
                 r.cc.n:=false;
                 r.cc.v:=false;
@@ -1504,7 +1504,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
           $09:begin // # clr.w
                 if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                   else self.contador:=self.contador+4;
-                if self.tipo=T68000 then self.getword(self.ea);
+                if self.tipo=TCPU_68000 then self.getword(self.ea);
                 self.ponerdir_w(dir,0);
                 r.cc.n:=false;
                 r.cc.v:=false;
@@ -1514,7 +1514,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
           $0a:begin // # clr.l
                 if (dir shr 3)<>0 then self.contador:=self.contador+12+calc_ea_t_l(dir)
                   else self.contador:=self.contador+6;
-                if self.tipo=T68000 then begin
+                if self.tipo=TCPU_68000 then begin
                   self.getword(self.ea);
                   self.getword(self.ea+2);
                 end;
@@ -2236,7 +2236,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                   end;
               $33:begin  // # rte
                     if r.cc.s then begin
-                      if self.tipo=T68000 then begin
+                      if self.tipo=TCPU_68000 then begin
                         self.prefetch:=false;
                         self.contador:=self.contador+20;
                         tempw:=self.getword(r.sp.l);

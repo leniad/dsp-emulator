@@ -692,8 +692,8 @@ screen_init(3,512,512,true);
 case main_vars.tipo_maquina of
   42:begin
         x:=256;
-        screen_mod_scroll(1,512,256+128,511,0,0,0);
-        screen_mod_scroll(3,512,256+128,511,0,0,0);
+        screen_mod_scroll(1,512,256+128,511,512,512,511);
+        screen_mod_scroll(3,512,256+128,511,512,512,511);
      end;
   72,73:begin
           x:=384;
@@ -703,7 +703,7 @@ case main_vars.tipo_maquina of
 end;
 iniciar_video(x,256);
 //Sound CPU
-m6800_0:=cpu_m6800.create(3579545,$100,CPU_M6803);
+m6800_0:=cpu_m6800.create(3579545,$100,TCPU_M6803);
 m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 m6800_0.init_sound(irem_m62_play_sound);

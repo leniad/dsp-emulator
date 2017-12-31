@@ -9,18 +9,18 @@ procedure cargar_junofrst;
 
 implementation
 const
-        junofrst_rom:array[0..3] of tipo_roms=(
+        junofrst_rom:array[0..2] of tipo_roms=(
         (n:'jfa_b9.bin';l:$2000;p:$a000;crc:$f5a7ab9d),(n:'jfb_b10.bin';l:$2000;p:$c000;crc:$f20626e0),
-        (n:'jfc_a10.bin';l:$2000;p:$e000;crc:$1e7744a7),());
-        junofrst_bank_rom:array[0..6] of tipo_roms=(
+        (n:'jfc_a10.bin';l:$2000;p:$e000;crc:$1e7744a7));
+        junofrst_bank_rom:array[0..5] of tipo_roms=(
         (n:'jfc1_a4.bin';l:$2000;p:$0;crc:$03ccbf1d),(n:'jfc2_a5.bin';l:$2000;p:$2000;crc:$cb372372),
         (n:'jfc3_a6.bin';l:$2000;p:$4000;crc:$879d194b),(n:'jfc4_a7.bin';l:$2000;p:$6000;crc:$f28af80b),
-        (n:'jfc5_a8.bin';l:$2000;p:$8000;crc:$0539f328),(n:'jfc6_a9.bin';l:$2000;p:$a000;crc:$1da2ad6e),());
+        (n:'jfc5_a8.bin';l:$2000;p:$8000;crc:$0539f328),(n:'jfc6_a9.bin';l:$2000;p:$a000;crc:$1da2ad6e));
         junofrst_sound:tipo_roms=(n:'jfs1_j3.bin';l:$1000;p:0;crc:$235a2893);
         junofrst_sound_sub:tipo_roms=(n:'jfs2_p4.bin';l:$1000;p:0;crc:$d0fa5d5f);
-        junofrst_blit:array[0..3] of tipo_roms=(
+        junofrst_blit:array[0..2] of tipo_roms=(
         (n:'jfs3_c7.bin';l:$2000;p:$0;crc:$aeacf6db),(n:'jfs4_d7.bin';l:$2000;p:$2000;crc:$206d954c),
-        (n:'jfs5_e7.bin';l:$2000;p:$4000;crc:$1eb87a6e),());
+        (n:'jfs5_e7.bin';l:$2000;p:$4000;crc:$1eb87a6e));
         //Dip
         junofrst_dip_a:array [0..1] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),());
@@ -54,7 +54,7 @@ for y:=0 to 255 do begin
       punt[y*256+x]:=paleta[shifted and $0f];
 		end;
 end;
-putpixel(0,0,$10000,@punt[0],1);
+putpixel(0,0,$10000,@punt,1);
 actualiza_trozo(16,0,224,256,1,0,0,224,256,PANT_TEMP);
 end;
 
@@ -268,7 +268,7 @@ begin
  marcade.in2:=$ff;
  irq_enable:=false;
  fillchar(punt,$20000,0);
- fillchar(blit_data[0],4,0);
+ fillchar(blit_data,4,0);
  xorx:=0;
  xory:=0;
  last_snd_val:=0;
@@ -289,7 +289,7 @@ iniciar_audio(false);
 screen_init(1,256,256);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,$100);
+m6809_0:=cpu_m6809.Create(1500000,$100,TCPU_M6809);
 m6809_0.change_ram_calls(junofrst_getbyte,junofrst_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(1789750,$100);
@@ -304,18 +304,18 @@ ay8910_0:=ay8910_chip.create(1789750,AY8910,0.3);
 ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);
 dac_0:=dac_chip.Create(0.5);
 //cargar roms
-if not(cargar_roms(@memoria[0],@junofrst_rom[0],'junofrst.zip',0)) then exit;
-konami1_decode(@memoria[$a000],@mem_opcodes[0],$6000);
-if not(cargar_roms(@memoria_temp[0],@junofrst_bank_rom[0],'junofrst.zip',0)) then exit;
-konami1_decode(@memoria_temp[$0],@memoria_temp_bank[0],$c000);
+if not(roms_load(@memoria,@junofrst_rom,'junofrst.zip',sizeof(junofrst_rom))) then exit;
+konami1_decode(@memoria[$a000],@mem_opcodes,$6000);
+if not(roms_load(@memoria_temp,@junofrst_bank_rom,'junofrst.zip',sizeof(junofrst_bank_rom))) then exit;
+konami1_decode(@memoria_temp,@memoria_temp_bank,$c000);
 for f:=0 to $f do begin
   copymemory(@rom_bank[f,0],@memoria_temp[f*$1000],$1000);
   copymemory(@rom_bank_dec[f,0],@memoria_temp_bank[f*$1000],$1000);
 end;
-if not(cargar_roms(@blit_mem[0],@junofrst_blit[0],'junofrst.zip',0)) then exit;
+if not(roms_load(@blit_mem,@junofrst_blit,'junofrst.zip',sizeof(junofrst_blit))) then exit;
 //Cargar roms sound
-if not(cargar_roms(@mem_snd[0],@junofrst_sound,'junofrst.zip')) then exit;
-if not(cargar_roms(@mem_snd_sub[0],@junofrst_sound_sub,'junofrst.zip',1)) then exit;
+if not(roms_load(@mem_snd,@junofrst_sound,'junofrst.zip',sizeof(junofrst_sound))) then exit;
+if not(roms_load(@mem_snd_sub,@junofrst_sound_sub,'junofrst.zip',sizeof(junofrst_sound_sub))) then exit;
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$7b;

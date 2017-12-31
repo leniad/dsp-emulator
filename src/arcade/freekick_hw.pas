@@ -262,22 +262,22 @@ case main_vars.tipo_maquina of
         pia8255_1:=pia8255_chip.create;
         pia8255_1.change_ports(ppi1_a_read,ppi1_b_read,ppi1_c_read,nil,nil,nil);
         //cargar roms
-        if not(cargar_roms(@memoria[0],@freekick_rom,'freekick.zip')) then exit;
+        if not(cargar_roms(@memoria,@freekick_rom,'freekick.zip')) then exit;
         //snd rom
-        if not(cargar_roms(@snd_rom[0],@freekick_sound_data,'freekick.zip')) then exit;
+        if not(cargar_roms(@snd_rom,@freekick_sound_data,'freekick.zip')) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@freekick_chars[0],'freekick.zip',0)) then exit;
+        if not(cargar_roms(@memoria_temp,@freekick_chars[0],'freekick.zip',0)) then exit;
         init_gfx(0,8,8,$800);
         gfx_set_desc_data(3,0,8*8,$800*2*8*8,$800*1*8*8,$800*0*8*8);
-        convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+        convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,true);
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@freekick_sprites[0],'freekick.zip',0)) then exit;
+        if not(cargar_roms(@memoria_temp,@freekick_sprites,'freekick.zip',0)) then exit;
         init_gfx(1,16,16,$200);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(3,0,16*16,$200*0*16*16,$200*2*16*16,$200*1*16*16);
-        convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+        convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@freekick_pal[0],'freekick.zip',0)) then exit;
+        if not(cargar_roms(@memoria_temp,@freekick_pal,'freekick.zip',0)) then exit;
         //DIP
         marcade.dswa:=$bf;
         marcade.dswb:=$ff;

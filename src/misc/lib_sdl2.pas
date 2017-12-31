@@ -122,11 +122,14 @@ var
   SDL_SetWindowTitle:procedure(window:libsdlP_Window;const title:PAnsiChar);cdecl;
   SDL_RaiseWindow:procedure (window: libsdlP_Window);cdecl;
   //Audio
-  SDL_OpenAudio:function(desired:libsdlp_AudioSpec;obtained:libsdlp_AudioSpec):Integer;cdecl;
-  SDL_CloseAudio:procedure;cdecl;
+  //SDL_OpenAudio:function(desired:libsdlp_AudioSpec;obtained:libsdlp_AudioSpec):Integer;cdecl;
+  //SDL_CloseAudio:procedure;cdecl;
+  //SDL_PauseAudio:procedure (pause_on: Integer);cdecl;
   SDL_QueueAudio:function (dev:libsdl_AudioDeviceID;const data:pointer;len:Cardinal):Integer;cdecl;
-  SDL_PauseAudio:procedure (pause_on: Integer);cdecl;
   SDL_ClearQueuedAudio:procedure (dev:libsdl_AudioDeviceID);cdecl;
+  SDL_OpenAudioDevice:function (const device:PAnsiChar;iscapture:integer;desired:libsdlp_AudioSpec;obtained:libsdlp_AudioSpec;allowed_changes:integer):libsdl_AudioDeviceID;cdecl;
+  SDL_CloseAudioDevice:procedure (dev:libSDL_AudioDeviceID);cdecl;
+  SDL_PauseAudioDevice:procedure (dev:libSDL_AudioDeviceID;pause_on:integer);cdecl;
   {$endif}
 
 implementation
@@ -208,11 +211,14 @@ end;
 @SDL_SetWindowTitle:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowTitle');
 @SDL_RaiseWindow:=GetProcAddress(sdl_dll_Handle,'SDL_RaiseWindow');
 //Audio
-@SDL_OpenAudio:=GetProcAddress(sdl_dll_Handle,'SDL_OpenAudio');
-@SDL_CloseAudio:=GetProcAddress(sdl_dll_Handle,'SDL_CloseAudio');
+//@SDL_OpenAudio:=GetProcAddress(sdl_dll_Handle,'SDL_OpenAudio');
+//@SDL_CloseAudio:=GetProcAddress(sdl_dll_Handle,'SDL_CloseAudio');
+//@SDL_PauseAudio:=GetProcAddress(sdl_dll_Handle,'SDL_PauseAudio');
 @SDL_QueueAudio:=GetProcAddress(sdl_dll_Handle,'SDL_QueueAudio');
-@SDL_PauseAudio:=GetProcAddress(sdl_dll_Handle,'SDL_PauseAudio');
 @SDL_ClearQueuedAudio:=GetProcAddress(sdl_dll_Handle,'SDL_ClearQueuedAudio');
+@SDL_OpenAudioDevice:=GetProcAddress(sdl_dll_Handle,'SDL_OpenAudioDevice');
+@SDL_CloseAudioDevice:=GetProcAddress(sdl_dll_Handle,'SDL_CloseAudioDevice');
+@SDL_PauseAudioDevice:=GetProcAddress(sdl_dll_Handle,'SDL_PauseAudioDevice');
 {$endif}
 end;
 

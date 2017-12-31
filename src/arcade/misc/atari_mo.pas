@@ -155,7 +155,7 @@ end;
 	compute_log:=log;
 end;
 
-function round_to_powerof2(value:integer):integeR;
+function round_to_powerof2(value:integer):integer;
 var
   log:integer;
 begin
@@ -438,7 +438,6 @@ begin
 	// note the last entry
 	self.activelast:=current;
 end;
-
 
 procedure tatari_mo.draw(xscroll,yscroll:word;prio:byte);
 var

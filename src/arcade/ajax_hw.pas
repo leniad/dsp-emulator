@@ -2,7 +2,7 @@ unit ajax_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,konami,m6809,main_engine,controls_engine,rom_engine,pal_engine,
+     nz80,konami,hd6309,main_engine,controls_engine,rom_engine,pal_engine,
      sound_engine,ym_2151,k052109,k051960,k007232,k051316,dialogs;
 
 procedure cargar_ajax;
@@ -160,7 +160,7 @@ var
 begin
 init_controls(false,false,false,true);
 frame_m:=konami_0.tframes;
-frame_sub:=m6809_0.tframes;
+frame_sub:=hd6309_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
     for f:=0 to $ff do begin
@@ -168,8 +168,8 @@ while EmuStatus=EsRuning do begin
       konami_0.run(frame_m);
       frame_m:=frame_m+konami_0.tframes-konami_0.contador;
       //sub
-      m6809_0.run(frame_sub);
-      frame_sub:=frame_sub+m6809_0.tframes-m6809_0.contador;
+      hd6309_0.run(frame_sub);
+      frame_sub:=frame_sub+hd6309_0.tframes-hd6309_0.contador;
       //sound
       z80_0.run(frame_s);
       frame_s:=frame_s+z80_0.tframes-z80_0.contador;
@@ -222,7 +222,7 @@ begin
 if direccion>$5fff then exit;
 case direccion of
    0..$1c0:case ((direccion and $1c0) shr 6) of
-              0:if (direccion=0) then if (sub_firq_enable) then m6809_0.change_firq(HOLD_LINE);
+              0:if (direccion=0) then if (sub_firq_enable) then hd6309_0.change_firq(HOLD_LINE);
               1:z80_0.change_irq(HOLD_LINE);
               2:sound_latch:=valor;
               3:begin
@@ -319,7 +319,7 @@ end;
 procedure reset_ajax;
 begin
  konami_0.reset;
- m6809_0.reset;
+ hd6309_0.reset;
  z80_0.reset;
  k052109_0.reset;
  ym2151_0.reset;
@@ -368,8 +368,8 @@ if not(cargar_roms(@mem_snd[0],@ajax_sound,'ajax.zip',1)) then exit;
 konami_0:=cpu_konami.create(3000000,256);
 konami_0.change_ram_calls(ajax_getbyte,ajax_putbyte);
 //Sub CPU
-m6809_0:=cpu_m6809.create(3000000,256);
-m6809_0.change_ram_calls(ajax_sub_getbyte,ajax_sub_putbyte);
+hd6309_0:=cpu_hd6309.create(3000000,256,TCPU_HD6309E);
+hd6309_0.change_ram_calls(ajax_sub_getbyte,ajax_sub_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(ajax_snd_getbyte,ajax_snd_putbyte);

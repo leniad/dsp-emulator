@@ -233,7 +233,7 @@ buffer[1]:=scroll shr 8;
 buffer[2]:=sound_command;
 buffer[3]:=rom_bank;
 buffer[4]:=palette_bank;
-savedata_qsnapshot(@buffer[0],5);
+savedata_qsnapshot(@buffer,5);
 freemem(data);
 close_qsnapshot;
 end;
@@ -259,7 +259,7 @@ ay8910_1.load_snapshot(data);
 loaddata_qsnapshot(@memoria[$c000]);
 loaddata_qsnapshot(@mem_snd[$4000]);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 scroll:=buffer[0] or (buffer[1] shl 8);
 sound_command:=buffer[2];
 rom_bank:=buffer[3];
@@ -290,8 +290,6 @@ var
       f:word;
       memoria_temp:array[0..$17fff] of byte;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			16*16+0, 16*16+1, 16*16+2, 16*16+3, 16*16+8+0, 16*16+8+1, 16*16+8+2, 16*16+8+3);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -305,7 +303,7 @@ iniciar_hw1942:=false;
 iniciar_audio(false);
 screen_init(1,256,512,false,true);
 screen_init(2,256,512);
-screen_mod_scroll(2,0,0,0,512,256,511);
+screen_mod_scroll(2,256,256,255,512,256,511);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
@@ -331,7 +329,7 @@ if not(roms_load(@memoria_temp,@hw1942_char,'1942.zip',sizeof(hw1942_char))) the
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //convertir sprites
 if not(roms_load(@memoria_temp,@hw1942_sprites,'1942.zip',sizeof(hw1942_sprites))) then exit;
 init_gfx(1,16,16,$200);

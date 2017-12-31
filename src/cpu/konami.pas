@@ -2,12 +2,13 @@ unit konami;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     main_engine,dialogs,sysutils,timer_engine,m6809;
+     main_engine,dialogs,sysutils,timer_engine,m6809,cpu_misc;
 
 type
         tset_lines=procedure (valor:byte);
         cpu_konami=class(cpu_m6809)
           public
+            constructor create(clock:dword;frames_div:word);
             procedure run(maximo:single);
             procedure change_set_lines(tset_lines_call:tset_lines);
           private
@@ -64,6 +65,15 @@ const
         0,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,  //d0
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,  //e0
        $f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f,$f); //f0
+
+constructor cpu_konami.create(clock:dword;frames_div:word);
+begin
+getmem(self.r,sizeof(reg_m6809));
+fillchar(self.r^,sizeof(reg_m6809),0);
+self.numero_cpu:=cpu_main_init(clock);
+self.clock:=clock;
+self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+end;
 
 procedure cpu_konami.change_set_lines(tset_lines_call:tset_lines);
 begin

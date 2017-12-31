@@ -9,23 +9,35 @@ procedure cargar_knjoe;
 
 implementation
 const
-        knjoe_rom:array[0..3] of tipo_roms=(
+        knjoe_rom:array[0..2] of tipo_roms=(
         (n:'kj-1.bin';l:$4000;p:0;crc:$4e4f5ff2),(n:'kj-2.bin';l:$4000;p:$4000;crc:$cb11514b),
-        (n:'kj-3.bin';l:$4000;p:$8000;crc:$0f50697b),());
-        knjoe_pal:array[0..5] of tipo_roms=(
+        (n:'kj-3.bin';l:$4000;p:$8000;crc:$0f50697b));
+        knjoe_pal:array[0..4] of tipo_roms=(
         (n:'kjclr1.bin';l:$100;p:0;crc:$c3378ac2),(n:'kjclr2.bin';l:$100;p:$100;crc:$2126da97),
         (n:'kjclr3.bin';l:$100;p:$200;crc:$fde62164),(n:'kjprom5.bin';l:$20;p:$300;crc:$5a81dd9f),
-        (n:'kjprom4.bin';l:$100;p:$320;crc:$48dc2066),());
-        knjoe_sprites:array[0..3] of tipo_roms=(
+        (n:'kjprom4.bin';l:$100;p:$320;crc:$48dc2066));
+        knjoe_sprites:array[0..2] of tipo_roms=(
         (n:'kj-4.bin';l:$8000;p:0;crc:$a499ea10),(n:'kj-6.bin';l:$8000;p:$8000;crc:$815f5c0a),
-        (n:'kj-5.bin';l:$8000;p:$10000;crc:$11111759),());
-        knjoe_sprites2:array[0..3] of tipo_roms=(
+        (n:'kj-5.bin';l:$8000;p:$10000;crc:$11111759));
+        knjoe_sprites2:array[0..2] of tipo_roms=(
         (n:'kj-7.bin';l:$4000;p:0;crc:$121fcccb),(n:'kj-9.bin';l:$4000;p:$4000;crc:$affbe3eb),
-        (n:'kj-8.bin';l:$4000;p:$8000;crc:$e057e72a),());
-        knjoe_tiles:array[0..3] of tipo_roms=(
+        (n:'kj-8.bin';l:$4000;p:$8000;crc:$e057e72a));
+        knjoe_tiles:array[0..2] of tipo_roms=(
         (n:'kj-10.bin';l:$4000;p:0;crc:$74d3ba33),(n:'kj-11.bin';l:$4000;p:$4000;crc:$8ea01455),
-        (n:'kj-12.bin';l:$4000;p:$8000;crc:$33367c41),());
+        (n:'kj-12.bin';l:$4000;p:$8000;crc:$33367c41));
         knjoe_sound:tipo_roms=(n:'kj-13.bin';l:$2000;p:$6000;crc:$0a0be3f5);
+        //Dip
+        knjoe_dip_a:array [0..4] of def_dip=(
+        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$4;dip_name:'4C 1C'),(dip_val:$2;dip_name:'3C 1C'),(dip_val:$6;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$3;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$1;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$18;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Infinite Energy';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Free Play (not working)';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        knjoe_dip_b:array [0..5] of def_dip=(
+        (mask:$2;name:'Cabinet';number:2;dip:((dip_val:$2;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Lives';number:2;dip:((dip_val:$4;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'10K 20K+'),(dip_val:$10;dip_name:'20K 40K+'),(dip_val:$8;dip_name:'30K 60K+'),(dip_val:$0;dip_name:'40K 80K+'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Medium'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sound';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  sound_command,val_port1,val_port2,tile_bank,sprite_bank:byte;
@@ -73,16 +85,25 @@ end;
 procedure eventos_knjoe;
 begin
 if event.arcade then begin
+  //P1
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  //System
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  //P2
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
 end;
 end;
 
@@ -115,10 +136,10 @@ begin
 case direccion of
   $0..$cfff,$e800..$ffff:knjoe_getbyte:=memoria[direccion];
   $d800:knjoe_getbyte:=marcade.in0;
-  $d803:knjoe_getbyte:=$ff;
   $d801:knjoe_getbyte:=marcade.in1;
-  $d802:knjoe_getbyte:=$ff;
-  $d804:knjoe_getbyte:=$7f;
+  $d802:knjoe_getbyte:=marcade.in2;
+  $d803:knjoe_getbyte:=marcade.dswa;
+  $d804:knjoe_getbyte:=marcade.dswb;
 end;
 end;
 
@@ -137,9 +158,10 @@ case direccion of
     $d801:begin
             if tile_bank<>(valor and $10) then begin
               tile_bank:=valor and $10;
-              fillchar(gfx[0].buffer[0],$800,1);
+              fillchar(gfx[0].buffer,$800,1);
             end;
             sprite_bank:=1+((valor and $04) shr 2);
+            main_screen.flip_main_screen:=(valor and $1)<>0;
           end;
     $d802:sn_76496_0.Write(valor);
     $d803:sn_76496_1.Write(valor);
@@ -225,8 +247,9 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  sound_command:=0;
  val_port1:=0;
  val_port2:=0;
@@ -246,13 +269,12 @@ const
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7 );
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
   pc_y:array[0..7] of dword=(7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8);
 begin
 iniciar_knjoe:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
-screen_mod_scroll(1,512,256,511,0,0,0);
+screen_mod_scroll(1,512,256,511,256,256,255);
 screen_init(2,512,256,false,true);
 screen_mod_sprites(2,256,0,$ff,0);
 iniciar_video(240,256);
@@ -260,7 +282,7 @@ iniciar_video(240,256);
 z80_0:=cpu_z80.create(6000000,256);
 z80_0.change_ram_calls(knjoe_getbyte,knjoe_putbyte);
 //Sound CPU
-m6800_0:=cpu_m6800.create(3579545,256,CPU_M6803);
+m6800_0:=cpu_m6800.create(3579545,256,TCPU_M6803);
 m6800_0.change_ram_calls(snd_getbyte,snd_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,out_port1,out_port2,nil,nil);
 m6800_0.init_sound(knjoe_sound_update);
@@ -269,31 +291,31 @@ ay8910_0:=ay8910_chip.create(3579545 div 4,AY8910,1);
 ay8910_0.change_io_calls(ay0_porta_r,nil,nil,nil);
 sn_76496_0:=sn76496_chip.Create(3579545);
 sn_76496_1:=sn76496_chip.Create(3579545);
-//Timers
+//Timers (Se divide por cuatro, por que internamente el M6800 va dividido!!!
 init_timer(m6800_0.numero_cpu,3579545/4/3970,knjoe_snd_nmi,true);
 //cargar roms y ponerlas en sus bancos
-if not(cargar_roms(@memoria[0],@knjoe_rom[0],'kncljoe.zip',0)) then exit;
+if not(roms_load(@memoria,@knjoe_rom,'kncljoe.zip',sizeof(knjoe_rom))) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@knjoe_sound,'kncljoe.zip')) then exit;
+if not(roms_load(@mem_snd,@knjoe_sound,'kncljoe.zip',sizeof(knjoe_sound))) then exit;
 //convertir tiles
-if not(cargar_roms(@memoria_temp[0],@knjoe_tiles[0],'kncljoe.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@knjoe_tiles,'kncljoe.zip',sizeof(knjoe_tiles))) then exit;
 init_gfx(0,8,8,$800);
 gfx_set_desc_data(3,0,8*8,2*$800*8*8,$800*8*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@knjoe_sprites[0],'kncljoe.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@knjoe_sprites,'kncljoe.zip',sizeof(knjoe_sprites))) then exit;
 init_gfx(1,16,16,$400);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*$400*32*8,$400*32*8,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir sprites 2
-if not(cargar_roms(@memoria_temp[0],@knjoe_sprites2[0],'kncljoe.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@knjoe_sprites2,'kncljoe.zip',sizeof(knjoe_sprites2))) then exit;
 init_gfx(2,16,16,$200);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*$200*32*8,$200*32*8,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //poner la paleta
-if not(cargar_roms(@memoria_temp[0],@knjoe_pal[0],'kncljoe.zip',0)) then exit;
+if not(roms_load(@memoria_temp,@knjoe_pal,'kncljoe.zip',sizeof(knjoe_pal))) then exit;
 for f:=0 to $7f do begin
     colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
     colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
@@ -320,6 +342,11 @@ for f:=0 to $7f do begin
   gfx[1].colores[f]:=(memoria_temp[f+$320] and $0f)+$80;
   gfx[2].colores[f]:=(memoria_temp[f+$320] and $0f)+$80;
 end;
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$7f;
+marcade.dswa_val:=@knjoe_dip_a;
+marcade.dswb_val:=@knjoe_dip_b;
 //final
 reset_knjoe;
 iniciar_knjoe:=true;

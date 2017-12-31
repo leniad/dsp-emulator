@@ -28,7 +28,7 @@ type
         end;
         preg_hd6309=^reg_hd6309;
         cpu_hd6309=class(cpu_class)
-                constructor create(clock:dword;frames_div:word);
+                constructor create(clock:dword;frames_div:word;tipo:byte);
                 destructor free;
             public
                 procedure reset;
@@ -49,16 +49,26 @@ type
 var
     hd6309_0:cpu_hd6309;
 
+const
+    TCPU_HD6309=0;
+    TCPU_HD6309E=1;
+
 implementation
 
-constructor cpu_hd6309.create(clock:dword;frames_div:word);
+constructor cpu_hd6309.create(clock:dword;frames_div:word;tipo:byte);
+var
+  divisor:byte;
 begin
 getmem(self.r,sizeof(reg_hd6309));
 fillchar(self.r^,sizeof(reg_hd6309),0);
-self.numero_cpu:=cpu_main_init(clock div 4);
-self.clock:=clock div 4;
-self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
-self.internal_m6809:=cpu_m6809.create(clock div 4,frames_div);
+case tipo of
+  TCPU_HD6309:divisor:=4;
+  TCPU_HD6309E:divisor:=1;
+end;
+self.numero_cpu:=cpu_main_init(clock div divisor);
+self.clock:=clock div divisor;
+self.tframes:=(clock/divisor/frames_div)/llamadas_maquina.fps_max;
+self.internal_m6809:=cpu_m6809.create(clock div divisor,frames_div,TCPU_M6809);
 end;
 
 procedure cpu_hd6309.change_ram_calls(getbyte:tgetbyte;putbyte:tputbyte);

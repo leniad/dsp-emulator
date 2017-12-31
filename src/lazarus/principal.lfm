@@ -1,7 +1,7 @@
 object principal1: Tprincipal1
-  Left = 900
+  Left = 292
   Height = 206
-  Top = 212
+  Top = 218
   Width = 341
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
@@ -21,22 +21,22 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.6.4.0'
+  LCLVersion = '1.8.0.6'
   object Panel1: TPanel
     Left = 0
-    Height = 33
+    Height = 43
     Top = 0
     Width = 341
     Align = alTop
-    ClientHeight = 33
+    ClientHeight = 43
     ClientWidth = 341
     TabOrder = 0
     object BitBtn2: TBitBtn
       Left = 5
-      Height = 29
+      Height = 40
       Hint = 'Reset'
       Top = 1
-      Width = 29
+      Width = 40
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
         1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -101,7 +101,6 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00
       }
-      Layout = blGlyphTop
       OnClick = Reset1Click
       ParentShowHint = False
       ShowHint = True
@@ -110,10 +109,12 @@ object principal1: Tprincipal1
     end
     object BitBtn3: TBitBtn
       Left = 46
-      Height = 29
+      Height = 40
       Hint = 'Play'
       Top = 1
-      Width = 29
+      Width = 40
+      Layout = blGlyphTop
+      Margin = 0
       OnClick = Ejecutar1Click
       ParentShowHint = False
       ShowHint = True
@@ -121,11 +122,12 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn5: TBitBtn
-      Left = 121
-      Height = 29
+      Left = 96
+      Height = 40
       Hint = 'Slow'
       Top = 1
-      Width = 29
+      Width = 40
+      BorderSpacing.Left = 1
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
         1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -190,6 +192,8 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00
       }
+      Layout = blGlyphTop
+      Margin = 0
       OnClick = fSlow
       ParentShowHint = False
       ShowHint = True
@@ -197,11 +201,11 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn6: TBitBtn
-      Left = 157
-      Height = 29
+      Left = 136
+      Height = 40
       Hint = 'Fastest'
       Top = 1
-      Width = 29
+      Width = 40
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
         1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -273,11 +277,11 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object btncfg: TBitBtn
-      Left = 195
-      Height = 29
+      Left = 176
+      Height = 40
       Hint = 'Config DSP'
       Top = 1
-      Width = 29
+      Width = 40
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
         1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -349,11 +353,11 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn19: TBitBtn
-      Left = 231
-      Height = 29
+      Left = 296
+      Height = 40
       Hint = 'Save Image'
-      Top = 0
-      Width = 29
+      Top = 1
+      Width = 40
       Glyph.Data = {
         EE070000424DEE070000000000003600000028000000190000001A0000000100
         180000000000B807000000000000000000000000000000000000FFFFFFFFFFFF
@@ -427,11 +431,11 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn8: TBitBtn
-      Left = 267
-      Height = 29
+      Left = 216
+      Height = 40
       Hint = 'Config Dip Switch'
       Top = 1
-      Width = 29
+      Width = 40
       Glyph.Data = {
         C6060000424DC60600000000000036000000280000001A000000150000000100
         18000000000090060000C40E0000C40E00000000000000000000FFFFFFFFFFFF
@@ -496,11 +500,11 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn13: TBitBtn
-      Left = 304
-      Height = 29
+      Left = 256
+      Height = 40
       Hint = 'Change Driver'
-      Top = 0
-      Width = 29
+      Top = 1
+      Width = 40
       Glyph.Data = {
         56080000424D560800000000000036000000280000001A0000001A0000000100
         1800000000002008000000000000000000000000000000000000FFFFFFFFFFFF
@@ -953,12 +957,12 @@ object principal1: Tprincipal1
   end
   object Panel2: TPanel
     Left = 8
-    Height = 134
-    Top = 33
+    Height = 124
+    Top = 43
     Width = 333
     Align = alRight
     Anchors = [akTop, akBottom]
-    ClientHeight = 134
+    ClientHeight = 124
     ClientWidth = 333
     TabOrder = 2
     Visible = False
@@ -1526,10 +1530,10 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn1: TBitBtn
-      Left = 6
+      Left = 11
       Height = 41
       Hint = 'Config'
-      Top = 3
+      Top = 8
       Width = 41
       Glyph.Data = {
         7E090000424D7E0900000000000036000000280000001D0000001B0000000100
@@ -1703,8 +1707,8 @@ object principal1: Tprincipal1
     end
   end
   object MainMenu1: TMainMenu
-    left = 48
-    top = 88
+    left = 120
+    top = 96
     object Archivo1: TMenuItem
       Caption = 'Archivo'
       object LstRoms: TMenuItem
@@ -3055,8 +3059,8 @@ object principal1: Tprincipal1
   object ImageList2: TImageList
     Height = 32
     Width = 32
-    left = 16
-    top = 88
+    left = 72
+    top = 96
     Bitmap = {
       4C69070000002000000020000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -3969,14 +3973,6 @@ object principal1: Tprincipal1
     OnTimer = Timer2Timer
     left = 240
     top = 96
-  end
-  object SaveDialog1: TSaveDialog
-    left = 128
-    top = 88
-  end
-  object OpenDialog1: TOpenDialog
-    left = 160
-    top = 88
   end
   object Timer4: TTimer
     Enabled = False

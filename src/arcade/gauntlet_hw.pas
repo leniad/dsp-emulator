@@ -84,12 +84,11 @@ var
  ram:array[0..$1fff] of word;
  ram2:array[0..$5fff] of word;
  eeprom_ram:array[0..$7ff] of byte;
- rom_bank,vblank:byte;
  write_eeprom,sound_to_main_ready,main_to_sound_ready:boolean;
- sound_to_main_data,main_to_sound_data:byte;
+ cpu_sync,rom_bank,vblank,sound_to_main_data,main_to_sound_data:byte;
  scroll_x,sound_reset_val:word;
 
-procedure update_video_gauntlet;
+procedure update_video_gauntlet;inline;
 var
   f,color,x,y,nchar,atrib,scroll_y:word;
   tile_bank:byte;
@@ -173,22 +172,19 @@ frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
  sound_irq:=0;
- for f:=0 to 5239 do begin
+ for f:=0 to (262*cpu_sync)-1 do begin
   //main
   m68000_0.run(frame_m);
   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
   //sound
   m6502_0.run(frame_s);
   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
-  case f of
-    4799:begin  //VBLANK
+  if f=(239*cpu_sync) then begin  //VBLANK
           update_video_gauntlet;
           vblank:=$0;
           m68000_0.irq[4]:=ASSERT_LINE;
-        end;
-    5239:vblank:=$40;
-  end;
-  if (f mod 20)=0 then begin
+    end else if f=(261*cpu_sync) then vblank:=$40;
+  if (f mod cpu_sync)=0 then begin
     case sound_irq of
       0,64,128,192,256:m6502_0.change_irq(CLEAR_LINE);
       32,96,160,224:m6502_0.change_irq(ASSERT_LINE);
@@ -233,7 +229,6 @@ procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
 begin
-  //tmp_color:=random($ffff);
   color.r:=pal4bit_i(tmp_color shr 8,tmp_color shr 12);
   color.g:=pal4bit_i(tmp_color shr 4,tmp_color shr 12);
   color.b:=pal4bit_i(tmp_color,tmp_color shr 12);
@@ -243,7 +238,6 @@ begin
     $100..$3ff:buffer_color[$40+(numero shr 4) and $7]:=true;
   end;
 end;
-
 
 procedure gauntlet_putword(direccion:dword;valor:word);
 var
@@ -378,15 +372,12 @@ begin
  scroll_x:=0;
  rom_bank:=slapstic_0.current_bank;
  main_to_sound_ready:=false;
+ sound_to_main_ready:=false;
  sound_to_main_data:=0;
  main_to_sound_data:=0;
  sound_reset_val:=1;
  vblank:=$40;
  write_eeprom:=false;
- //Sound reset
- sound_to_main_ready:=false;
- m68000_0.irq[6]:=CLEAR_LINE;
- m6502_0.change_reset(PULSE_LINE);
 end;
 
 function iniciar_gauntlet:boolean;
@@ -431,11 +422,15 @@ screen_mod_scroll(4,512,512,511,512,256,511);
 //Final
 screen_init(5,512,512,false,true);
 iniciar_video(336,240);
+case main_vars.tipo_maquina of
+  236:cpu_sync:=10;
+  245:cpu_sync:=25;
+end;
 //Main CPU
-m68000_0:=cpu_m68000.create(14318180 div 2,5240,T68010);
+m68000_0:=cpu_m68000.create(14318180 div 2,262*cpu_sync,TCPU_68010);
 m68000_0.change_ram16_calls(gauntlet_getword,gauntlet_putword);
 //Sound CPU
-m6502_0:=cpu_m6502.create(14318180 div 8,5240,TCPU_M6502);
+m6502_0:=cpu_m6502.create(14318180 div 8,262*cpu_sync,TCPU_M6502);
 m6502_0.change_ram_calls(gauntlet_snd_getbyte,gauntlet_snd_putbyte);
 m6502_0.init_sound(gauntlet_sound_update);
 //Sound Chips
@@ -504,7 +499,7 @@ end;
 atari_mo_0:=tatari_mo.create(@ram2[$5f80 shr 1],@ram2[$2000 shr 1],gauntlet_mo_config,5,336+8,240+8);
 // modify the motion object code lookup table to account for the code XOR
 temp:=atari_mo_0.get_codelookup;
-for f:=0 to (32768-1) do begin
+for f:=0 to $7fff do begin
   temp^:=temp^ xor $800;
   inc(temp);
 end;

@@ -250,24 +250,22 @@ procedure coleco_grabar_snapshot;
 var
   nombre:string;
   correcto:boolean;
+  indice:byte;
 begin
-principal1.savedialog1.InitialDir:=Directory.coleco_snap;
-principal1.saveDialog1.Filter := 'DSP Format (*.dsp)|*.dsp|CSN Format (*.csn)|*.csn';
-if principal1.savedialog1.execute then begin
-        nombre:=principal1.savedialog1.FileName;
-        case principal1.SaveDialog1.FilterIndex of
+if SaveRom(StColecovision,nombre,indice) then begin
+        case indice of
           1:nombre:=changefileext(nombre,'.dsp');
           2:nombre:=changefileext(nombre,'.csn');
         end;
         if FileExists(nombre) then begin                                         //Respuesta 'NO' es 7
             if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
         end;
-        case principal1.SaveDialog1.FilterIndex of
+        case indice of
           1,2:correcto:=grabar_coleco_snapshot(nombre);
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end else exit;
-Directory.coleco_snap:=extractfiledir(principal1.savedialog1.FileName);
+Directory.coleco_snap:=extractfiledir(nombre);
 end;
 
 function iniciar_coleco:boolean;

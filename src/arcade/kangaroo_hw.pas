@@ -93,11 +93,19 @@ end;
 procedure eventos_kangaroo;
 begin
 if event.arcade then begin
+  //P1
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $Fb);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $F7);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
+  //P2
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ef);
+  //System
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
@@ -263,9 +271,9 @@ savedata_com_qsnapshot(@mem_snd[$1000],$f000);
 buffer[0]:=sound_latch;
 buffer[1]:=mcu_clock;
 buffer[2]:=rom_bank;
-savedata_qsnapshot(@buffer[0],3);
-savedata_com_qsnapshot(@video_control[0],$10);
-savedata_com_qsnapshot(@video_ram[0],$4000*4);
+savedata_qsnapshot(@buffer,3);
+savedata_com_qsnapshot(@video_control,$10);
+savedata_com_qsnapshot(@video_ram,$4000*4);
 freemem(data);
 close_qsnapshot;
 end;
@@ -289,12 +297,12 @@ ay8910_0.load_snapshot(data);
 loaddata_qsnapshot(@memoria[$6000]);
 loaddata_qsnapshot(@mem_snd[$1000]);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 sound_latch:=buffer[0];
 mcu_clock:=buffer[1];
 rom_bank:=buffer[2];
-loaddata_qsnapshot(@video_control[0]);
-loaddata_qsnapshot(@video_ram[0]);
+loaddata_qsnapshot(@video_control);
+loaddata_qsnapshot(@video_ram);
 freemem(data);
 close_qsnapshot;
 end;
@@ -311,8 +319,8 @@ begin
  marcade.in1:=0;
  marcade.in2:=0;
  sound_latch:=0;
- fillchar(video_control[0],$10,0);
- fillchar(video_ram[0],256*64*4,0);
+ fillchar(video_control,$10,0);
+ fillchar(video_ram,256*64*4,0);
  mcu_clock:=0;
  rom_bank:=0;
 end;
@@ -328,15 +336,15 @@ iniciar_audio(false);
 screen_init(1,256,512);
 iniciar_video(240,512);
 //Main CPU
-z80_0:=cpu_z80.create(2500000,260);
+z80_0:=cpu_z80.create(10000000 div 4,260);
 z80_0.change_ram_calls(kangaroo_getbyte,kangaroo_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(1250000,260);
+z80_1:=cpu_z80.create(10000000 div 8,260);
 z80_1.change_ram_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
 z80_1.change_io_calls(kangaroo_snd_getbyte,kangaroo_snd_putbyte);
 z80_1.init_sound(kangaroo_sound_update);
 //Sound chip
-ay8910_0:=ay8910_chip.create(1250000,AY8910,0.5);
+ay8910_0:=ay8910_chip.create(10000000 div 8,AY8910,0.5);
 //cargar roms
 if not(roms_load(@memoria,@kangaroo_rom,'kangaroo.zip',sizeof(kangaroo_rom))) then exit;
 //cargar roms snd

@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, ComCtrls,spectrum_misc,sound_engine,main_engine,lenguaje,lib_sdl2;
+  StdCtrls, ComCtrls,spectrum_misc,sound_engine,main_engine,lenguaje,lib_sdl2,
+  z80pio,z80daisy,z80_sp,timer_engine,misc_functions;
 
 type
 
@@ -47,6 +48,7 @@ type
     RadioButton22: TRadioButton;
     RadioButton23: TRadioButton;
     RadioButton24: TRadioButton;
+    RadioButton25: TRadioButton;
     RadioButton3: TRadioButton;
     RadioButton4: TRadioButton;
     RadioButton5: TRadioButton;
@@ -84,7 +86,11 @@ with ConfigSP do begin
   if radiobutton3.Checked then var_spectrum.tipo_joy:=JKEMPSTON
      else if radiobutton4.Checked then var_spectrum.tipo_joy:=JCURSOR
           else if radiobutton5.Checked then var_spectrum.tipo_joy:=JSINCLAIR1
-               else if radiobutton6.Checked then var_spectrum.tipo_joy:=JSINCLAIR2;
+               else if radiobutton6.Checked then var_spectrum.tipo_joy:=JSINCLAIR2
+                    else if radiobutton25.Checked then begin
+                         var_spectrum.tipo_joy:=JFULLER;
+                         var_spectrum.joy_val:=$ff;
+                    end;
   if radiobutton7.checked then borde.tipo:=0;
   if RadioButton8.Checked then begin
     borde.tipo:=1;
@@ -106,12 +112,21 @@ with ConfigSP do begin
                else if radiobutton20.Checked then mouse.tipo:=MAMX;
   if (mouse.tipo<>MNONE) then sdl_showcursor(1)
     else sdl_showcursor(0);
+  if mouse.tipo=3 then begin
+    z80pio_init(0,pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
+    z80daisy_init(Z80_PIO_TYPE,Z80_DAISY_NONE,Z80_DAISY_NONE,0,0,0);
+    z80pio_reset(0);
+    spec_z80.daisy:=true;
+  end;
   lenslok.activo:=radiobutton12.Checked;
-  if lenslok.activo then lenslock1.Show
-    else lenslock1.Hide;
+  if lenslok.activo then lenslock1.Show;
   if RadioButton14.Checked then new_audio:=0;
   if RadioButton15.Checked then new_audio:=1;
   if RadioButton16.Checked then new_audio:=2;
+  //Speaker oversample
+  var_spectrum.speaker_oversample:=radiobutton17.Checked;
+  timer[var_spectrum.speaker_timer].time_final:=sound_status.cpu_clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample))));
+  timer[var_spectrum.speaker_timer].actual_time:=0;
   if new_audio<>var_spectrum.audio_128k then begin
     var_spectrum.audio_128k:=new_audio;
     close_audio;
@@ -149,14 +164,13 @@ close;
 end;
 
 procedure TConfigSP.Button3Click(Sender: TObject);
+var
+   file_name:string;
 begin
-principal1.opendialog1.InitialDir:=extractfiledir(Directory.spectrum_48);
-principal1.OpenDialog1.Filter:='ROM Files|*.rom;*.zip';
-if principal1.OpenDialog1.execute then Edit1.Text:=principal1.OpenDialog1.FileName;
+if OpenRom(StROM,file_name) then Edit1.Text:=file_name;
 end;
 
-procedure TConfigSP.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
-  );
+procedure TConfigSP.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 case key of
   13:Button1Click(nil);

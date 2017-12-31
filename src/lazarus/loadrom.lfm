@@ -16,15 +16,15 @@ object FLoadRom: TFLoadRom
   Font.Quality = fqDraft
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '1.6.2.0'
+  LCLVersion = '1.8.0.6'
   object GroupBox1: TGroupBox
     Left = 261
     Height = 311
     Top = 143
     Width = 289
     Caption = 'Preview'
-    ClientHeight = 293
-    ClientWidth = 285
+    ClientHeight = 297
+    ClientWidth = 287
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Tahoma'
@@ -92,8 +92,8 @@ object FLoadRom: TFLoadRom
     Top = 8
     Width = 281
     Caption = 'Driver Info'
-    ClientHeight = 111
-    ClientWidth = 277
+    ClientHeight = 115
+    ClientWidth = 279
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Tahoma'
@@ -104,7 +104,7 @@ object FLoadRom: TFLoadRom
       Left = 8
       Height = 13
       Top = 16
-      Width = 29
+      Width = 30
       Caption = 'Year:'
       ParentColor = False
     end
@@ -112,7 +112,7 @@ object FLoadRom: TFLoadRom
       Left = 8
       Height = 13
       Top = 44
-      Width = 97
+      Width = 110
       Caption = 'Hi Score Support:'
       ParentColor = False
     end
@@ -120,7 +120,7 @@ object FLoadRom: TFLoadRom
       Left = 8
       Height = 13
       Top = 30
-      Width = 38
+      Width = 44
       Caption = 'Sound:'
       ParentColor = False
     end
@@ -156,7 +156,7 @@ object FLoadRom: TFLoadRom
       Left = 8
       Height = 13
       Top = 58
-      Width = 56
+      Width = 61
       Caption = 'Company:'
       ParentColor = False
     end

@@ -770,23 +770,21 @@ procedure grabar_amstrad;
 var
   nombre:string;
   correcto:boolean;
+  indice:byte;
 begin
-principal1.savedialog1.InitialDir:=Directory.amstrad_snap;
-principal1.saveDialog1.Filter := 'SNA Format (*.SNA)|*.SNA';
-if principal1.savedialog1.execute then begin
-        nombre:=principal1.savedialog1.FileName;
-        case principal1.SaveDialog1.FilterIndex of
+if SaveRom(StAmstrad,nombre,indice) then begin
+        case indice of
           1:nombre:=changefileext(nombre,'.sna');
         end;
         if FileExists(nombre) then begin
             if MessageDlg(leng[main_vars.idioma].mensajes[3], mtWarning, [mbYes]+[mbNo],0)=7 then exit;
         end;
-        case principal1.SaveDialog1.FilterIndex of
+        case indice of
           1:correcto:=grabar_amstrad_sna(nombre);
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end;
-Directory.amstrad_snap:=extractfiledir(principal1.savedialog1.FileName)+main_vars.cadena_dir;
+Directory.amstrad_snap:=extractfiledir(nombre)+main_vars.cadena_dir;
 end;
 
 procedure cpc_config_call;

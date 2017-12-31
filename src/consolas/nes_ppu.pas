@@ -10,7 +10,7 @@ type
       control1,control2,status,sprite_ram_pos:byte;
       sprite_ram:array[0..$ff] of byte;
       pos_bg,pos_spt,sprite0_hit_pos:byte;
-      dir_first,chr_rom,sprite0_hit,sprite_over_flow:boolean;
+      dir_first,chr_rom,sprite0_hit,sprite_over_flow,disable_chr,enable_write:boolean;
       mem:array [0..$3fff] of byte;
       mem_single:array [0..1,0..$fff] of byte;
       address_temp,address:word;
@@ -49,7 +49,8 @@ uses nes,nes_mappers;
 function ppu_read_mem(address:word):byte;
 begin
 case address of
-  $0..$1fff:ppu_read_mem:=ppu_nes.mem[address];
+  $0..$1fff:if not(ppu_nes.disable_chr) then ppu_read_mem:=ppu_nes.mem[address]
+              else ppu_read_mem:=address and $ff;
   $2000..$3eff:case ppu_nes.mirror of
                     MIRROR_HORIZONTAL:case (address and $c00) of
                                         $000,$400:ppu_read_mem:=ppu_nes.mem[$2000+(address and $3ff)];
@@ -66,7 +67,6 @@ case address of
   $3f00..$3fff:ppu_read_mem:=ppu_nes.mem[(ppu_nes.address and $1F)+$3f00]; //Palete
 end;
 end;
-
 
 procedure putsprites(nes_linea:word;pri:byte;var nsprites:byte);
 var
@@ -224,7 +224,6 @@ begin
     putpixel(0,0,256+ppu_nes.tile_x_offset,punbuf,1);
 end;
 
-
 procedure ppu_end_linea;
 var
   newfinescroll:word;
@@ -287,15 +286,6 @@ var
 begin
 ret:=ppu_nes.buffer_read;
 ppu_nes.buffer_read:=ppu_read_mem(ppu_nes.address);
-{case ppu_nes.address of
-  $0..$1fff:if ppu_nes.chr_rom then ppu_nes.buffer_read:=ppu_nes.mem[ppu_nes.address]
-              else ppu_nes.buffer_read:=random(256);
-  $3f00..$3fff:begin
-                  ppu_nes.buffer_read:=ppu_nes.mem[(ppu_nes.address and $1F)+$3f00];
-                  ret:=ppu_nes.mem[(ppu_nes.address and $1F)+$3f00]; //Palete
-                end;
-  else ppu_nes.buffer_read:=ppu_read_mem(ppu_nes.address);
-end;}
 if (ppu_nes.control1 and $4)=$4 then ppu_nes.address:=(ppu_nes.address+32) and $3fff
   else ppu_nes.address:=(ppu_nes.address+1) and $3fff;
 ppu_read:=ret;
@@ -304,7 +294,7 @@ end;
 procedure ppu_write(valor:byte);
 begin
 case ppu_nes.address of
-  $0..$1fff:if not(ppu_nes.chr_rom) then ppu_nes.mem[ppu_nes.address]:=valor;
+  $0..$1fff:if not(ppu_nes.disable_chr) then ppu_nes.mem[ppu_nes.address]:=valor;
   $2000..$3eff:case ppu_nes.mirror of
                     MIRROR_HORIZONTAL:case (ppu_nes.address and $c00) of
                                         $000,$400:begin
@@ -365,6 +355,7 @@ ppu_nes.address:=0;
 if not(ppu_nes.chr_rom) then fillchar(ppu_nes.mem[$0],$2000,0);
 ppu_nes.dir_first:=false;
 ppu_nes.sprite0_hit:=false;
+ppu_nes.disable_chr:=false;
 end;
 
 procedure nes_init_palette;

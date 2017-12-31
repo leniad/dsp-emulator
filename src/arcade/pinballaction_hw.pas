@@ -277,9 +277,9 @@ begin
 iniciar_pinballaction:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
-screen_mod_scroll(1,0,0,0,256,256,255);
+screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,0,0,0,256,256,255);
+screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU

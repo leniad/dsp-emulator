@@ -384,18 +384,18 @@ begin
 iniciar_pacland:=false;
 iniciar_audio(false);
 screen_init(1,512,256,true);
-screen_mod_scroll(1,512,512,511,0,0,0);
+screen_mod_scroll(1,512,512,511,256,256,255);
 screen_init(2,512,256,true);
-screen_mod_scroll(2,512,512,511,0,0,0);
+screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,false,true);
 screen_init(4,512,256,true);
-screen_mod_scroll(4,512,512,511,0,0,0);
+screen_mod_scroll(4,512,512,511,256,256,255);
 iniciar_video(288,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,256);
+m6809_0:=cpu_m6809.Create(1536000,256,TCPU_M6809);
 m6809_0.change_ram_calls(pacland_getbyte,pacland_putbyte);
 //MCU CPU
-m6800_0:=cpu_m6800.create(6144000,$100,cpu_hd63701);
+m6800_0:=cpu_m6800.create(6144000,$100,TCPU_HD63701);
 m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
 m6800_0.init_sound(pacland_sound_update);

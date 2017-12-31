@@ -12,8 +12,9 @@ implementation
 
 type
   tstars=record
-          x,y,color:word;
-  end;
+            x,y,color:word;
+         end;
+
 const
         //Galaxian
         galaxian_rom:array[0..5] of tipo_roms=(
@@ -1267,9 +1268,9 @@ case main_vars.tipo_maquina of
   14:begin
       llamadas_maquina.bucle_general:=frogger_principal;
       eventos_hardware_galaxian:=eventos_frogger;
-      calc_nchar:=galaxian_calc_nchar; //no usado
-      calc_sprite:=galaxian_calc_sprite;  //no usado
-      draw_stars:=stars_galaxian;  //no usado
+      calc_nchar:=nil;
+      calc_sprite:=nil;
+      draw_stars:=nil;
       galaxian_update_video:=update_video_frogger;
      end;
   47:begin

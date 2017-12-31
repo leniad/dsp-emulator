@@ -425,9 +425,9 @@ screen_mod_scroll(3,512,256,511,512,256,511);
 screen_init(4,512,512,false,true);
 iniciar_video(240,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,272);
+m6809_0:=cpu_m6809.Create(1500000,272,TCPU_M6809);
 //Sound CPU
-m6809_1:=cpu_m6809.Create(1500000,272);
+m6809_1:=cpu_m6809.Create(1500000,272,TCPU_M6809);
 m6809_1.change_ram_calls(brkthru_snd_getbyte,brkthru_snd_putbyte);
 m6809_1.init_sound(brkthru_sound_update);
 //Sound Chip

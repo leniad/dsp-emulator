@@ -53,14 +53,14 @@ object principal1: Tprincipal1
     Left = 0
     Top = 0
     Width = 370
-    Height = 33
+    Height = 42
     Align = alTop
     TabOrder = 0
     object BitBtn2: TBitBtn
-      Left = 66
-      Top = 2
-      Width = 29
-      Height = 29
+      Left = 10
+      Top = 1
+      Width = 38
+      Height = 38
       Hint = 'Reset'
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
@@ -130,10 +130,10 @@ object principal1: Tprincipal1
       OnClick = Reset1Click
     end
     object BitBtn5: TBitBtn
-      Left = 136
-      Top = 2
-      Width = 29
-      Height = 29
+      Left = 97
+      Top = 1
+      Width = 38
+      Height = 38
       Hint = 'Decrease Speed'
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
@@ -203,10 +203,10 @@ object principal1: Tprincipal1
       OnClick = fSlow
     end
     object BitBtn6: TBitBtn
-      Left = 165
-      Top = 2
-      Width = 29
-      Height = 29
+      Left = 141
+      Top = 1
+      Width = 38
+      Height = 38
       Hint = 'Fastest Speed'
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
@@ -276,10 +276,10 @@ object principal1: Tprincipal1
       OnClick = fFast
     end
     object btncfg: TBitBtn
-      Left = 201
-      Top = 2
-      Width = 29
-      Height = 29
+      Left = 177
+      Top = 1
+      Width = 38
+      Height = 38
       Hint = 'General Config'
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
@@ -349,10 +349,10 @@ object principal1: Tprincipal1
       OnClick = fConfigurar_general
     end
     object BitBtn8: TBitBtn
-      Left = 271
-      Top = 2
-      Width = 29
-      Height = 29
+      Left = 255
+      Top = 1
+      Width = 38
+      Height = 38
       Hint = 'Config Dip Switch'
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
@@ -422,10 +422,10 @@ object principal1: Tprincipal1
       OnClick = fConfigurar
     end
     object BitBtn19: TBitBtn
-      Left = 236
-      Top = 2
-      Width = 29
-      Height = 29
+      Left = 299
+      Top = 1
+      Width = 38
+      Height = 38
       Hint = 'Save Image'
       Glyph.Data = {
         EE070000424DEE070000000000003600000028000000190000001A0000000100
@@ -497,10 +497,10 @@ object principal1: Tprincipal1
       OnClick = fSaveGIF
     end
     object BitBtn13: TBitBtn
-      Left = 303
-      Top = 2
-      Width = 29
-      Height = 29
+      Left = 221
+      Top = 1
+      Width = 38
+      Height = 38
       Hint = 'Change Driver'
       Glyph.Data = {
         56080000424D560800000000000036000000280000001A0000001A0000000100
@@ -575,10 +575,10 @@ object principal1: Tprincipal1
       OnClick = LstRomsClick
     end
     object BitBtn3: TBitBtn
-      Left = 101
-      Top = 2
-      Width = 29
-      Height = 29
+      Left = 53
+      Top = 1
+      Width = 38
+      Height = 38
       Hint = 'Play/Pause'
       TabOrder = 7
       TabStop = False
@@ -587,9 +587,9 @@ object principal1: Tprincipal1
   end
   object Panel2: TPanel
     Left = 321
-    Top = 33
+    Top = 42
     Width = 49
-    Height = 240
+    Height = 231
     Align = alRight
     TabOrder = 1
     Visible = False
@@ -1312,7 +1312,7 @@ object principal1: Tprincipal1
   object MainMenu1: TMainMenu
     AutoHotkeys = maManual
     Left = 80
-    Top = 72
+    Top = 80
     object Archivo1: TMenuItem
       Caption = 'Archivo'
       object Idioma1: TMenuItem
@@ -2805,16 +2805,16 @@ object principal1: Tprincipal1
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    Left = 16
-    Top = 152
+    Left = 136
+    Top = 80
   end
   object ImageList2: TImageList
     Height = 32
     Width = 32
-    Left = 24
-    Top = 64
+    Left = 40
+    Top = 80
     Bitmap = {
-      494C010107002807200520002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807300520002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -3877,34 +3877,25 @@ object principal1: Tprincipal1
       FFFFFFFFFFFFFFFFC1F0000383F01F8300000000000000000000000000000000
       000000000000}
   end
-  object SaveDialog1: TSaveDialog
-    Left = 16
-    Top = 104
-  end
   object Timer2: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer2Timer
-    Left = 48
-    Top = 152
-  end
-  object OpenDialog1: TOpenDialog
-    Options = [ofNoChangeDir, ofFileMustExist]
-    Left = 48
-    Top = 104
+    Left = 168
+    Top = 80
   end
   object Timer4: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer4Timer
-    Left = 112
-    Top = 152
+    Left = 232
+    Top = 80
   end
   object Timer3: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer3Timer
-    Left = 80
-    Top = 152
+    Left = 200
+    Top = 80
   end
 end

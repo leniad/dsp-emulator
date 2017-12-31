@@ -594,9 +594,9 @@ screen_init(5,512,512,false,true);
 screen_mod_sprites(5,256,512,255,511);
 iniciar_video(224,288);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,264);
+m6809_0:=cpu_m6809.Create(1536000,264,TCPU_M6809);
 //Sound CPU
-m6809_1:=cpu_m6809.Create(1536000,264);
+m6809_1:=cpu_m6809.Create(1536000,264,TCPU_M6809);
 m6809_1.change_ram_calls(sound_getbyte,sound_putbyte);
 m6809_1.init_sound(mappy_sound_update);
 namco_snd_0:=namco_snd_chip.create(8);

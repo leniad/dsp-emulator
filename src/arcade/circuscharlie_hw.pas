@@ -227,13 +227,13 @@ begin
 iniciar_circusc:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
-screen_mod_scroll(1,256,256,255,0,0,0);
+screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256);
-screen_mod_scroll(2,256,256,255,0,0,0);
+screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(2048000,$100);
+m6809_0:=cpu_m6809.Create(2048000,$100,TCPU_M6809);
 m6809_0.change_ram_calls(circusc_getbyte,circusc_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,$100);

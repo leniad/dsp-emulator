@@ -262,19 +262,19 @@ iniciar_mikie:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,true);
-screen_mod_scroll(2,0,0,255,0,0,255);
+screen_mod_scroll(2,256,256,255,256,256,255);
 screen_init(3,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,256);
+m6809_0:=cpu_m6809.Create(18432000 div 12,256,TCPU_M6809);
 m6809_0.change_ram_calls(mikie_getbyte,mikie_putbyte);
 //Sound CPU
-z80_0:=cpu_z80.create(3579545,256);
+z80_0:=cpu_z80.create(14318180 div 4,256);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(sound_update);
 //Sound Chip
-sn_76496_0:=sn76496_chip.Create(1789772);
-sn_76496_1:=sn76496_chip.Create(3579545);
+sn_76496_0:=sn76496_chip.Create(14318180 div 8);
+sn_76496_1:=sn76496_chip.Create(14318180 div 4);
 //cargar roms
 if not(cargar_roms(@memoria[0],@mikie_rom[0],'mikie.zip',0)) then exit;
 //cargar rom sonido
@@ -339,6 +339,7 @@ llamadas_maquina.bucle_general:=mikie_principal;
 llamadas_maquina.reset:=reset_mikie;
 llamadas_maquina.save_qsnap:=mikie_qsave;
 llamadas_maquina.load_qsnap:=mikie_qload;
+llamadas_maquina.fps_max:=60.59;
 end;
 
 end.

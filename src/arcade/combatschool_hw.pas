@@ -368,7 +368,7 @@ screen_init(6,256,256,true); //Text
 screen_mod_scroll(6,256,256,255,256,256,255);
 iniciar_video(256,224);
 //Main CPU
-hd6309_0:=cpu_hd6309.create(12000000,$100);
+hd6309_0:=cpu_hd6309.create(12000000,$100,TCPU_HD6309);
 hd6309_0.change_ram_calls(combatsc_getbyte,combatsc_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,$100);

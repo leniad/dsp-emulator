@@ -607,7 +607,6 @@ begin
       combobox12.Visible:=true;
       combobox13.Visible:=true;
       combobox14.Visible:=true;
-      bitbtn8.enabled:=true;
       if SDL_JoystickNumHats(joystick_def[1])<>0 then begin
         radiobutton23.Enabled:=true;
         radiobutton24.Enabled:=true;

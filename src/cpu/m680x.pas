@@ -5,9 +5,9 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,dialogs,sysutils,timer_engine,vars_hide,cpu_misc;
 
 const
-  CPU_M6801=1;
-  CPU_M6803=3;
-  CPU_HD63701=10;
+  TCPU_M6801=1;
+  TCPU_M6803=3;
+  TCPU_HD63701=10;
 
 type
         band_m6800=record
@@ -350,8 +350,8 @@ self.numero_cpu:=cpu_main_init(clock div 4);
 self.clock:=clock div 4;
 self.tipo_cpu:=tipo_cpu;
 case tipo_cpu of
-  cpu_m6801,cpu_m6803:copymemory(@estados_t[0],@ciclos_6803[0],$100);
-  cpu_hd63701:copymemory(@estados_t[0],@ciclos_63701[0],$100);
+  TCPU_M6801,TCPU_M6803:copymemory(@estados_t[0],@ciclos_6803[0],$100);
+  TCPU_HD63701:copymemory(@estados_t[0],@ciclos_63701[0],$100);
     else MessageDlg('Tipo M680X desconocido', mtInformation,[mbOk], 0)
 end;
 self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
@@ -1020,7 +1020,7 @@ case instruccion of
        r.cc.z:=((templ and $ffff)=0);
        r.cc.n:=(templ and $8000)<>0;
        r.cc.v:=((r.x xor numerow xor templ xor (templ shr 1)) and $8000)<>0;
-       if self.tipo_cpu=CPU_M6803 then r.cc.c:=(templ and $10000)<>0;
+       if self.tipo_cpu=TCPU_M6803 then r.cc.c:=(templ and $10000)<>0;
       end;
   $8d:begin //bsr
        self.pushw(r.pc);
@@ -1092,7 +1092,7 @@ end; //del case
 tempb:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempb;
 update_timer(tempb,self.numero_cpu);
-if self.tipo_cpu=cpu_hd63701 then begin
+if self.tipo_cpu=TCPU_HD63701 then begin
   self.ctd.l:=self.ctd.l+tempb;
   if (self.ctd.l>=self.timer_next) then self.check_timer_event;
 end;

@@ -297,7 +297,7 @@ m6502_0:=cpu_m6502.create(1500000,262,TCPU_DECO16);
 m6502_0.change_ram_calls(getbyte_expraid,putbyte_expraid);
 m6502_0.change_io_calls(nil,get_io_expraid);
 //Sound CPU
-m6809_0:=cpu_m6809.Create(1500000,262);
+m6809_0:=cpu_m6809.Create(1500000,262,TCPU_M6809);
 m6809_0.change_ram_calls(getbyte_snd_expraid,putbyte_snd_expraid);
 m6809_0.init_sound(expraid_sound_update);
 //Sound Chip

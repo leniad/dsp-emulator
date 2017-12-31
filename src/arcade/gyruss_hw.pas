@@ -325,7 +325,7 @@ iniciar_video(224,256);
 z80_0:=cpu_z80.create(trunc(18432000/6),256);
 z80_0.change_ram_calls(gyruss_getbyte,gyruss_putbyte);
 //Sub CPU
-m6809_0:=cpu_m6809.Create(trunc(18432000/12),256);
+m6809_0:=cpu_m6809.Create(trunc(18432000/12),256,TCPU_M6809);
 m6809_0.change_ram_calls(gyruss_sub_getbyte,gyruss_sub_putbyte);
 //Sound CPU
 z80_1:=cpu_z80.create(trunc(14318180/4),256);
