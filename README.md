@@ -15,7 +15,7 @@ All previous changes and...<br><pre>
 -Super Basketball
     +Added DIPs switches and 2nd player
 -Iron Horse
-    +Updated to version K                                                                                                                                                                                         #
+    +Updated to version K
 </pre>
 Please read the 'Whats New' for a full list of changes<br>
 Merry Christmas and happy new year!<br><br>
