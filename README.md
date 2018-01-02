@@ -1,4 +1,4 @@
-﻿# DSP Emulator status                                                                                                                                                           |#
+﻿# DSP Emulator status                                                                                                                                                           - #
 <b>31/12/17 - DSP Emulator 0.18 Final. Source and all binaries updated.</b><br>
 All previous changes and...<br><pre>
 -General
