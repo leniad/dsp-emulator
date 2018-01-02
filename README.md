@@ -1,4 +1,4 @@
-﻿# DSP Emulator status                                                                                                                                                           - #
+﻿# DSP Emulator status #
 <b>31/12/17 - DSP Emulator 0.18 Final. Source and all binaries updated.</b><br>
 All previous changes and...<br><pre>
 -General
@@ -197,7 +197,7 @@ At last I have emulated (not simulated) two Game and Watch games!. Thanks to MAM
 </pre><br>
 Please read the 'Whats New' for details<br>
 <img src='http://img1.imagilive.com/0317/simpsons.png'><img src='http://img1.imagilive.com/0317/vendetta.png'><br>
-<b>22/01/17 - DSP Emulator 0.17b2 WIP. Updated source and windows 32bits binary</b><br>
+<b>22/01/17 - DSP Emulator 0.17b2 WIP. Updated source and windows 32bits binary!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!</b><br>
 <pre>
 -General
     +Autofire
