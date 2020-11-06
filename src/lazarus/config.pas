@@ -22,6 +22,7 @@ type
     GroupBox10: TGroupBox;
     GroupBox11: TGroupBox;
     GroupBox12: TGroupBox;
+    GroupBox13: TGroupBox;
     GroupBox14: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox3: TGroupBox;
@@ -49,6 +50,8 @@ type
     RadioButton23: TRadioButton;
     RadioButton24: TRadioButton;
     RadioButton25: TRadioButton;
+    RadioButton26: TRadioButton;
+    RadioButton27: TRadioButton;
     RadioButton3: TRadioButton;
     RadioButton4: TRadioButton;
     RadioButton5: TRadioButton;
@@ -84,13 +87,10 @@ necesita_reset:=false;
 with ConfigSP do begin
   var_spectrum.issue2:=radiobutton1.Checked;
   if radiobutton3.Checked then var_spectrum.tipo_joy:=JKEMPSTON
-     else if radiobutton4.Checked then var_spectrum.tipo_joy:=JCURSOR
-          else if radiobutton5.Checked then var_spectrum.tipo_joy:=JSINCLAIR1
-               else if radiobutton6.Checked then var_spectrum.tipo_joy:=JSINCLAIR2
-                    else if radiobutton25.Checked then begin
-                         var_spectrum.tipo_joy:=JFULLER;
-                         var_spectrum.joy_val:=$ff;
-                    end;
+    else if radiobutton4.Checked then var_spectrum.tipo_joy:=JCURSOR
+      else if radiobutton5.Checked then var_spectrum.tipo_joy:=JSINCLAIR1
+        else if radiobutton6.Checked then var_spectrum.tipo_joy:=JSINCLAIR2
+          else if radiobutton25.Checked then var_spectrum.tipo_joy:=JFULLER;
   if radiobutton7.checked then borde.tipo:=0;
   if RadioButton8.Checked then begin
     borde.tipo:=1;
@@ -104,13 +104,14 @@ with ConfigSP do begin
       1,2,3,4:borde.borde_spectrum:=borde_128_full;
     end;
   end;
-  var_spectrum.speaker_oversample:=radiobutton17.Checked;
   var_spectrum.audio_load:=radiobutton21.Checked;
+  var_spectrum.turbo_sound:=radiobutton26.checked;
+  if not(var_spectrum.turbo_sound) then var_spectrum.ay_select:=0;
   if radiobutton10.Checked then mouse.tipo:=MNONE
-     else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
-          else if radiobutton19.Checked then mouse.tipo:=MKEMPSTON
-               else if radiobutton20.Checked then mouse.tipo:=MAMX;
-  if (mouse.tipo<>MNONE) then sdl_showcursor(1)
+    else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
+      else if radiobutton19.Checked then mouse.tipo:=MKEMPSTON
+        else if radiobutton20.Checked then mouse.tipo:=MAMX;
+  if (mouse.tipo<>0) then sdl_showcursor(1)
     else sdl_showcursor(0);
   if mouse.tipo=3 then begin
     z80pio_init(0,pio_int_main,pio_read_porta,nil,nil,pio_read_portb,nil,nil);
@@ -125,8 +126,8 @@ with ConfigSP do begin
   if RadioButton16.Checked then new_audio:=2;
   //Speaker oversample
   var_spectrum.speaker_oversample:=radiobutton17.Checked;
-  timer[var_spectrum.speaker_timer].time_final:=sound_status.cpu_clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample))));
-  timer[var_spectrum.speaker_timer].actual_time:=0;
+  timers.timer[var_spectrum.speaker_timer].time_final:=sound_status.cpu_clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample))));
+  timers.reset(var_spectrum.speaker_timer);
   if new_audio<>var_spectrum.audio_128k then begin
     var_spectrum.audio_128k:=new_audio;
     close_audio;
@@ -183,6 +184,7 @@ begin
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then begin
     if var_spectrum.issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
     groupbox8.Enabled:=false;
+    groupbox13.Enabled:=false;
     radiobutton14.Enabled:=false;
     radiobutton15.Enabled:=false;
     radiobutton16.Enabled:=false;
@@ -199,12 +201,11 @@ end else begin
     radiobutton16.Enabled:=true;
 end;
   //Las otras opciones
-  case var_spectrum.tipo_joy of
-       JKEMPSTON:radiobutton3.checked:=true;
-       JCURSOR:radiobutton4.checked:=true;
-       JSINCLAIR1:radiobutton5.checked:=true;
-       JSINCLAIR2:radiobutton6.checked:=true;
-  end;
+  if var_spectrum.tipo_joy=JKEMPSTON then radiobutton3.checked:=true
+    else if var_spectrum.tipo_joy=JCURSOR then radiobutton4.checked:=true
+      else if var_spectrum.tipo_joy=JSINCLAIR1 then radiobutton5.checked:=true
+        else if var_spectrum.tipo_joy=JSINCLAIR2 then radiobutton6.checked:=true
+          else if var_spectrum.tipo_joy=JFULLER then radiobutton25.checked:=true;
   if ulaplus.enabled then radiobutton23.Checked:=true
     else radiobutton24.Checked:=true;
   //emulacion del borde
@@ -215,17 +216,20 @@ end;
   end;
   //Seleccion de raton
   case mouse.tipo of
-     MNONE:radiobutton10.Checked:=true;
-     MGUNSTICK:radiobutton11.Checked:=true;
-     MKEMPSTON:radiobutton19.Checked:=true;
-     MAMX:radiobutton20.Checked:=true;
+     0:radiobutton10.Checked:=true;
+     1:radiobutton11.Checked:=true;
+     2:radiobutton19.Checked:=true;
+     3:radiobutton20.Checked:=true;
   end;
   //Speaker oversample
   if var_spectrum.speaker_oversample then radiobutton17.Checked:=true
     else radiobutton18.Checked:=true;
-  //Audio load
+  //Tape audio
   if var_spectrum.audio_load then radiobutton21.Checked:=true
     else radiobutton22.Checked:=true;
+  //Turbo Sound
+  if var_spectrum.turbo_sound then radiobutton26.Checked:=true
+    else radiobutton27.Checked:=true;
   case main_vars.tipo_maquina of
     0,5:edit1.Text:=Directory.spectrum_48;
     1,4:edit1.Text:=Directory.spectrum_128;

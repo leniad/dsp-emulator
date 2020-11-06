@@ -77,13 +77,13 @@ end;
 procedure eventos_phoenix;
 begin
 if event.arcade then begin
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $FE) else marcade.in0:=(marcade.in0 or 1);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $FD) else marcade.in0:=(marcade.in0 or 2);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $FB) else marcade.in0:=(marcade.in0 or 4);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $DF) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $BF) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $7F) else marcade.in0:=(marcade.in0 or $80);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $EF) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
 end;
 end;
 
@@ -127,8 +127,8 @@ end;
 procedure phoenix_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7fff;
-if direccion<$4000 then exit;
 case direccion of
+  0..$3fff:;
   $4000..$43ff:if mem_video[banco,direccion and $fff]<>valor then begin
                   mem_video[banco,direccion and $fff]:=valor;
                   gfx[0].buffer[direccion and $3ff]:=true;
@@ -186,8 +186,8 @@ end;
 procedure pleiads_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7fff;
-if direccion<$4000 then exit;
 case direccion of
+  0..$3fff:;
   $4000..$43ff:if mem_video[banco,direccion and $fff]<>valor then begin
                   mem_video[banco,direccion and $fff]:=valor;
                   gfx[0].buffer[direccion and $3ff]:=true;
@@ -266,18 +266,18 @@ case main_vars.tipo_maquina of
         tms36xx_start(372,0.21,@phoenix_dec);
         phoenix_audio_start;
         //cargar roms
-        if not(roms_load(@memoria,@phoenix_rom,'phoenix.zip',sizeof(phoenix_rom))) then exit;
+        if not(roms_load(@memoria,phoenix_rom)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@phoenix_char1,'phoenix.zip',sizeof(phoenix_char1))) then exit;
+        if not(roms_load(@memoria_temp,phoenix_char1)) then exit;
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,2,8*8,256*8*8,0);
         convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
         //Segundo juego de chars
-        if not(roms_load(@memoria_temp,@phoenix_char2,'phoenix.zip',sizeof(phoenix_char2))) then exit;
+        if not(roms_load(@memoria_temp,phoenix_char2)) then exit;
         convert_gfx(0,256*8*8,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
         //poner paleta
-        if not(roms_load(@memoria_temp,@phoenix_pal,'phoenix.zip',sizeof(phoenix_pal))) then exit;
+        if not(roms_load(@memoria_temp,phoenix_pal)) then exit;
         for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3) and $18) or ((f shr 2) and $07) or (f and $60);
         //DIP
         marcade.dswa:=$e0;
@@ -289,18 +289,18 @@ case main_vars.tipo_maquina of
         tms36xx_start(247,0.21,@pleiads_dec);
         //phoenix_audio_start;
         //cargar roms
-        if not(roms_load(@memoria,@pleiads_rom,'pleiads.zip',sizeof(pleiads_rom))) then exit;
+        if not(roms_load(@memoria,pleiads_rom)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@pleiads_char1,'pleiads.zip',sizeof(pleiads_char1))) then exit;
+        if not(roms_load(@memoria_temp,pleiads_char1)) then exit;
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,2,8*8,256*8*8,0);
         convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
         //Segundo juego de chars
-        if not(roms_load(@memoria_temp,@pleiads_char2,'pleiads.zip',sizeof(pleiads_char2))) then exit;
+        if not(roms_load(@memoria_temp,pleiads_char2)) then exit;
         convert_gfx(0,256*8*8,@memoria_temp,@pc_x,@pc_y,true,false);
         //poner paleta
-        if not(roms_load(@memoria_temp,@pleiads_pal,'pleiads.zip',sizeof(pleiads_pal))) then exit;
+        if not(roms_load(@memoria_temp,pleiads_pal)) then exit;
         for f:=0 to $ff do gfx[0].colores[f]:=((f shl 3 ) and $18) or ((f shr 2) and $07) or (f and $e0);
         //DIP
         marcade.dswa:=$e0;

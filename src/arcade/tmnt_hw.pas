@@ -11,29 +11,29 @@ procedure cargar_tmnt;
 implementation
 const
         //TMNT
-        tmnt_rom:array[0..4] of tipo_roms=(
+        tmnt_rom:array[0..3] of tipo_roms=(
         (n:'963-u23.j17';l:$20000;p:0;crc:$58bec748),(n:'963-u24.k17';l:$20000;p:$1;crc:$dce87c8d),
-        (n:'963-u21.j15';l:$10000;p:$40000;crc:$abce5ead),(n:'963-u22.k15';l:$10000;p:$40001;crc:$4ecc8d6b),());
+        (n:'963-u21.j15';l:$10000;p:$40000;crc:$abce5ead),(n:'963-u22.k15';l:$10000;p:$40001;crc:$4ecc8d6b));
         tmnt_sound:tipo_roms=(n:'963e20.g13';l:$8000;p:0;crc:$1692a6d6);
-        tmnt_char:array[0..2] of tipo_roms=(
-        (n:'963a28.h27';l:$80000;p:0;crc:$db4769a8),(n:'963a29.k27';l:$80000;p:$2;crc:$8069cd2e),());
-        tmnt_sprites:array[0..4] of tipo_roms=(
+        tmnt_char:array[0..1] of tipo_roms=(
+        (n:'963a28.h27';l:$80000;p:0;crc:$db4769a8),(n:'963a29.k27';l:$80000;p:$2;crc:$8069cd2e));
+        tmnt_sprites:array[0..3] of tipo_roms=(
         (n:'963a17.h4';l:$80000;p:0;crc:$b5239a44),(n:'963a15.k4';l:$80000;p:$2;crc:$1f324eed),
-        (n:'963a18.h6';l:$80000;p:$100000;crc:$dd51adef),(n:'963a16.k6';l:$80000;p:$100002;crc:$d4bd9984),());
-        tmnt_prom:array[0..2] of tipo_roms=(
-        (n:'963a30.g7';l:$100;p:0;crc:$abd82680),(n:'963a31.g19';l:$100;p:$100;crc:$f8004a1c),());
+        (n:'963a18.h6';l:$80000;p:$100000;crc:$dd51adef),(n:'963a16.k6';l:$80000;p:$100002;crc:$d4bd9984));
+        tmnt_prom:array[0..1] of tipo_roms=(
+        (n:'963a30.g7';l:$100;p:0;crc:$abd82680),(n:'963a31.g19';l:$100;p:$100;crc:$f8004a1c));
         tmnt_upd:tipo_roms=(n:'963a27.d18';l:$20000;p:0;crc:$2dfd674b);
         tmnt_title:tipo_roms=(n:'963a25.d5';l:$80000;p:0;crc:$fca078c7);
         tmnt_k007232:tipo_roms=(n:'963a26.c13';l:$20000;p:0;crc:$e2ac3063);
         //Sunset Riders
-        ssriders_rom:array[0..4] of tipo_roms=(
+        ssriders_rom:array[0..3] of tipo_roms=(
         (n:'064ebd02.8e';l:$40000;p:0;crc:$8deef9ac),(n:'064ebd03.8g';l:$40000;p:$1;crc:$2370c107),
-        (n:'064eab04.10e';l:$20000;p:$80000;crc:$ef2315bd),(n:'064eab05.10g';l:$20000;p:$80001;crc:$51d6fbc4),());
+        (n:'064eab04.10e';l:$20000;p:$80000;crc:$ef2315bd),(n:'064eab05.10g';l:$20000;p:$80001;crc:$51d6fbc4));
         ssriders_sound:tipo_roms=(n:'064e01.2f';l:$10000;p:0;crc:$44b9bc52);
-        ssriders_char:array[0..2] of tipo_roms=(
-        (n:'064e12.16k';l:$80000;p:0;crc:$e2bdc619),(n:'064e11.12k';l:$80000;p:$2;crc:$2d8ca8b0),());
-        ssriders_sprites:array[0..2] of tipo_roms=(
-        (n:'064e09.7l';l:$100000;p:0;crc:$4160c372),(n:'064e07.3l';l:$100000;p:$2;crc:$64dd673c),());
+        ssriders_char:array[0..1] of tipo_roms=(
+        (n:'064e12.16k';l:$80000;p:0;crc:$e2bdc619),(n:'064e11.12k';l:$80000;p:$2;crc:$2d8ca8b0));
+        ssriders_sprites:array[0..1] of tipo_roms=(
+        (n:'064e09.7l';l:$100000;p:0;crc:$4160c372),(n:'064e07.3l';l:$100000;p:$2;crc:$64dd673c));
         ssriders_eeprom:tipo_roms=(n:'ssriders_ebd.nv';l:$80;p:0;crc:$cbc903f6);
         ssriders_k053260:tipo_roms=(n:'064e06.1d';l:$100000;p:0;crc:$59810df9);
         //DIP
@@ -658,27 +658,27 @@ case main_vars.tipo_maquina of
         z80_0.change_ram_calls(tmnt_snd_getbyte,tmnt_snd_putbyte);
         z80_0.init_sound(tmnt_sound_update);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@tmnt_rom[0],'tmnt.zip',0)) then exit;
+        if not(roms_load16w(@rom,tmnt_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@tmnt_sound,'tmnt.zip',1)) then exit;
+        if not(roms_load(@mem_snd,tmnt_sound)) then exit;
         //Sound Chips
         ym2151_0:=ym2151_chip.create(3579545);
         upd7759_0:=upd7759_chip.create(640000,0.6);
         getmem(k007232_rom,$20000);
-        if not(cargar_roms(k007232_rom,@tmnt_k007232,'tmnt.zip',1)) then exit;
+        if not(roms_load(k007232_rom,tmnt_k007232)) then exit;
         k007232_0:=k007232_chip.create(3579545,k007232_rom,$20000,0.20,tmnt_k007232_cb);
-        if not(cargar_roms(upd7759_0.get_rom_addr,@tmnt_upd,'tmnt.zip',1)) then exit;
+        if not(roms_load(upd7759_0.get_rom_addr,tmnt_upd)) then exit;
         getmem(ptemp,$80000);
         getmem(ptempw,$80000*3);
-        if not(cargar_roms(ptemp,@tmnt_title,'tmnt.zip',1)) then exit;
+        if not(roms_load(ptemp,tmnt_title)) then exit;
         load_samples_raw(ptempw,decode_sample(ptemp,ptempw),false,false);
         freemem(ptemp);
         freemem(ptempw);
         //Iniciar video
         getmem(char_rom,$100000);
-        if not(cargar_roms32b(char_rom,@tmnt_char,'tmnt.zip',0)) then exit;
+        if not(roms_load32b(char_rom,tmnt_char)) then exit;
         //Ordenar
-        for f:=0 to $3FFFF do begin
+        for f:=0 to $3ffff do begin
           tempdw:=char_rom[(f*4)+0];
           tempdw:=tempdw or (char_rom[(f*4)+1] shl 8);
           tempdw:=tempdw or (char_rom[(f*4)+2] shl 16);
@@ -692,10 +692,10 @@ case main_vars.tipo_maquina of
         k052109_0:=k052109_chip.create(1,2,3,tmnt_cb,char_rom,$100000);
         //Init sprites
         getmem(sprite_rom,$200000);
-        if not(cargar_roms32b(sprite_rom,@tmnt_sprites,'tmnt.zip',0)) then exit;
-        if not(cargar_roms(@mem_temp[0],@tmnt_prom,'tmnt.zip',0)) then exit;
+        if not(roms_load32b(sprite_rom,tmnt_sprites)) then exit;
+        if not(roms_load(@mem_temp,tmnt_prom)) then exit;
         //Ordenar
-        for f:=0 to $7FFFF do begin
+        for f:=0 to $7ffff do begin
           tempdw:=sprite_rom[(f*4)+0];
           tempdw:=tempdw or (sprite_rom[(f*4)+1] shl 8);
           tempdw:=tempdw or (sprite_rom[(f*4)+2] shl 16);
@@ -731,27 +731,27 @@ case main_vars.tipo_maquina of
         z80_0.change_ram_calls(ssriders_snd_getbyte,ssriders_snd_putbyte);
         z80_0.init_sound(ssriders_sound_update);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@ssriders_rom[0],'ssriders.zip',0)) then exit;
+        if not(roms_load16w(@rom,ssriders_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@ssriders_sound,'ssriders.zip',1)) then exit;
+        if not(roms_load(@mem_snd,ssriders_sound)) then exit;
         //Sound Chips
         ym2151_0:=ym2151_chip.create(3579545);
         getmem(k053260_rom,$100000);
-        if not(cargar_roms(k053260_rom,@ssriders_k053260,'ssriders.zip',1)) then exit;
+        if not(roms_load(k053260_rom,ssriders_k053260)) then exit;
         k053260_0:=tk053260_chip.create(3579545,k053260_rom,$100000,0.70);
         //Iniciar video
         getmem(char_rom,$100000);
-        if not(cargar_roms32b(char_rom,@ssriders_char,'ssriders.zip',0)) then exit;
+        if not(roms_load32b(char_rom,ssriders_char)) then exit;
         k052109_0:=k052109_chip.create(1,2,3,tmnt_cb,char_rom,$100000);
         //Init sprites
         getmem(sprite_rom,$200000);
-        if not(cargar_roms32b(sprite_rom,@ssriders_sprites,'ssriders.zip',0)) then exit;
+        if not(roms_load32b(sprite_rom,ssriders_sprites)) then exit;
         k053245_init(sprite_rom,$200000,ssriders_sprite_cb);
         //Prioridades
         k053251_0:=k053251_chip.create;
         //eeprom
         eepromser_init(ER5911,8);
-        if not(cargar_roms(@mem_temp[0],@ssriders_eeprom,'ssriders.zip',1)) then exit;
+        if not(roms_load(@mem_temp,ssriders_eeprom)) then exit;
         eepromser_load_data(@mem_temp[0],$80);
   end;
 end;

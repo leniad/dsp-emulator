@@ -990,7 +990,7 @@ if (self.timer_status<>0) then begin
 				self.set_irq_line(2,ASSERT_LINE);
   end;
 end;
-update_timer(tempc,self.numero_cpu);
+timers.update(tempc,self.numero_cpu);
 end;
 end;
 

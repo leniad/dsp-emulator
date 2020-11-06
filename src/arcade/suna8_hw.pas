@@ -10,41 +10,44 @@ procedure cargar_suna_hw;
 implementation
 const
         //Hard Head
-        hardhead_rom:array[0..8] of tipo_roms=(
+        hardhead_rom:array[0..7] of tipo_roms=(
         (n:'p1';l:$8000;p:0;crc:$c6147926),(n:'p2';l:$8000;p:$8000;crc:$faa2cf9a),
         (n:'p3';l:$8000;p:$10000;crc:$3d24755e),(n:'p4';l:$8000;p:$18000;crc:$0241ac79),
         (n:'p7';l:$8000;p:$20000;crc:$beba8313),(n:'p8';l:$8000;p:$28000;crc:$211a9342),
-        (n:'p9';l:$8000;p:$30000;crc:$2ad430c4),(n:'p10';l:$8000;p:$38000;crc:$b6894517),());
-        hardhead_sprites:array[0..8] of tipo_roms=(
+        (n:'p9';l:$8000;p:$30000;crc:$2ad430c4),(n:'p10';l:$8000;p:$38000;crc:$b6894517));
+        hardhead_sprites:array[0..7] of tipo_roms=(
         (n:'p5';l:$8000;p:$0;crc:$e9aa6fba),(n:'p5';l:$8000;p:$8000;crc:$e9aa6fba),
         (n:'p6';l:$8000;p:$10000;crc:$15d5f5dd),(n:'p6';l:$8000;p:$18000;crc:$15d5f5dd),
         (n:'p11';l:$8000;p:$20000;crc:$055f4c29),(n:'p11';l:$8000;p:$28000;crc:$055f4c29),
-        (n:'p12';l:$8000;p:$30000;crc:$9582e6db),(n:'p12';l:$8000;p:$38000;crc:$9582e6db),());
+        (n:'p12';l:$8000;p:$30000;crc:$9582e6db),(n:'p12';l:$8000;p:$38000;crc:$9582e6db));
         hardhead_dac:tipo_roms=(n:'p14';l:$8000;p:0;crc:$41314ac1);
         hardhead_sound:tipo_roms=(n:'p13';l:$8000;p:0;crc:$493c0b41);
         //Hard Head 2
-        hardhead2_rom:array[0..5] of tipo_roms=(
+        hardhead2_rom:array[0..4] of tipo_roms=(
         (n:'hrd-hd9';l:$8000;p:0;crc:$69c4c307),(n:'hrd-hd10';l:$10000;p:$10000;crc:$77ec5b0a),
         (n:'hrd-hd11';l:$10000;p:$20000;crc:$12af8f8e),(n:'hrd-hd12';l:$10000;p:$30000;crc:$35d13212),
-        (n:'hrd-hd13';l:$10000;p:$40000;crc:$3225e7d7),());
-        hardhead2_sprites:array[0..8] of tipo_roms=(
+        (n:'hrd-hd13';l:$10000;p:$40000;crc:$3225e7d7));
+        hardhead2_sprites:array[0..7] of tipo_roms=(
         (n:'hrd-hd1';l:$10000;p:$0;crc:$7e7b7a58),(n:'hrd-hd2';l:$10000;p:$10000;crc:$303ec802),
         (n:'hrd-hd3';l:$10000;p:$20000;crc:$3353b2c7),(n:'hrd-hd4';l:$10000;p:$30000;crc:$dbc1f9c1),
         (n:'hrd-hd5';l:$10000;p:$40000;crc:$f738c0af),(n:'hrd-hd6';l:$10000;p:$50000;crc:$bf90d3ca),
-        (n:'hrd-hd7';l:$10000;p:$60000;crc:$992ce8cb),(n:'hrd-hd8';l:$10000;p:$70000;crc:$359597a4),());
+        (n:'hrd-hd7';l:$10000;p:$60000;crc:$992ce8cb),(n:'hrd-hd8';l:$10000;p:$70000;crc:$359597a4));
         hardhead2_pcm:tipo_roms=(n:'hrd-hd15';l:$10000;p:0;crc:$bcbd88c3);
         hardhead2_sound:tipo_roms=(n:'hrd-hd14';l:$8000;p:0;crc:$79a3be51);
 var
- rom_bank:array[0..$f,0..$3FFF] of byte;
- suna_dac:array[0..$7fff] of word;
+ rom_bank:array[0..$f,0..$3fff] of byte;
+ suna_dac:array[0..$ffff] of word;
  mem_opcodes:array[0..$7fff] of byte;
  ram_bank:array[0..1,0..$17ff] of byte;
  sprite_bank:array[0..$3fff] of byte;
- banco_rom,banco_sprite,banco_ram,num_sample:byte;
+ banco_rom,banco_sprite,banco_ram:byte;
  soundlatch,soundlatch2,protection_val,hardhead_ip:byte;
- rear_scroll,scroll_x,dac_pos,dac_count:word;
- dac_play,haz_nmi:boolean;
+ rear_scroll,scroll_x:word;
+ haz_nmi:boolean;
  dac_timer,dac_tsample:byte;
+ //DAC
+ dac_play,dac_sample,dac_index:byte;
+ dac_value,dac_pos:word;
 
 //Hard Head
 procedure update_video_hardhead;inline;
@@ -136,6 +139,7 @@ end;
 procedure eventos_suna_hw;
 begin
 if event.arcade then begin
+  //P1
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
@@ -144,6 +148,7 @@ if event.arcade then begin
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P2
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or 2);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
@@ -186,6 +191,8 @@ var
   res_prot:byte;
 begin
 case direccion of
+  0..$7fff,$c000..$d7ff,$e000..$ffff:hardhead_getbyte:=memoria[direccion];
+  $d800..$d9ff:hardhead_getbyte:=buffer_paleta[direccion and $1ff];
   $8000..$bfff:hardhead_getbyte:=rom_bank[banco_rom,(direccion and $3fff)];
   $da00:case hardhead_ip of //DIP's
           0:hardhead_getbyte:=marcade.in0;
@@ -195,19 +202,16 @@ case direccion of
         end;
   $da80:hardhead_getbyte:=soundlatch2;
   $dd80..$ddff:begin  //proteccion
+                  if (not(direccion) and $20)<>0 then res_prot:=$20
+                      else res_prot:=0;
                   if (protection_val and $80)<>0 then begin
-                    if (not(direccion and $7f) and $20)<>0 then res_prot:=$20
-                      else res_prot:=0;
-                    if (protection_val and $04)<>0 then res_prot:=res_prot or $80;
-                    if (protection_val and $01)<>0 then res_prot:=res_prot or $4;
+                    if (protection_val and $4)<>0 then res_prot:=res_prot or $80;
+                    if (protection_val and $1)<>0 then res_prot:=res_prot or $4;
                   end else begin
-                    if (not(direccion and $7f) and $20)<>0 then res_prot:=$20
-                      else res_prot:=0;
-                    if (((direccion and $7f) xor protection_val) and $1)<>0 then res_prot:=res_prot or $84;
+                    if ((direccion xor protection_val) and $1)<>0 then res_prot:=res_prot or $84;
                   end;
                   hardhead_getbyte:=res_prot;
                end;
-    else hardhead_getbyte:=memoria[direccion];
 end;
 end;
 
@@ -226,9 +230,9 @@ end;
 
 procedure hardhead_putbyte(direccion:word;valor:byte);
 begin
-if (direccion<$c000) then exit;
-memoria[direccion]:=valor;
 case direccion of
+    0..$bfff:;
+    $c000..$d7ff,$e000..$ffff:memoria[direccion]:=valor;
     $d800..$d9ff:if buffer_paleta[direccion and $1ff]<>valor then begin
                     buffer_paleta[direccion and $1ff]:=valor;
                     cambiar_color(direccion and $1fe);
@@ -236,29 +240,31 @@ case direccion of
     $da00:hardhead_ip:=valor;
     $da80:banco_rom:=valor and $f;
     $db00:soundlatch:=valor;
+    $db80:; //Flip Screen
     $dd80..$ddff:if (valor and $80)<>0 then	protection_val:=valor //proteccion
-                    else protection_val:=(direccion and $7f) and 1;
+                    else protection_val:=direccion and 1;
 end;
 end;
 
 function hardhead_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$c000..$c7ff:hardhead_snd_getbyte:=mem_snd[direccion];
+  $a000:hardhead_snd_getbyte:=ym3812_0.read;
   $c800:hardhead_snd_getbyte:=ym3812_0.status;
   $d800:hardhead_snd_getbyte:=soundlatch;
-  else hardhead_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure hardhead_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  0..$7fff:;
   $a000:ym3812_0.control(valor);
   $a001:ym3812_0.write(valor);
-  $a002:ay8910_0.Control(valor);
-  $a003:ay8910_0.Write(valor);
+  $a002:ay8910_0.control(valor);
+  $a003:ay8910_0.write(valor);
+  $c000..$c7ff:mem_snd[direccion]:=valor;
   $d000:soundlatch2:=valor;
 end;
 end;
@@ -267,7 +273,7 @@ procedure snd_despues_instruccion;
 begin
   ym3812_0.update;
   ay8910_0.update;
-  if dac_play then tsample[dac_tsample,sound_status.posicion_sonido]:=suna_dac[dac_pos];
+  tsample[dac_tsample,sound_status.posicion_sonido]:=dac_value;
 end;
 
 procedure hardhead_snd;
@@ -277,36 +283,32 @@ end;
 
 procedure hardhead_portaw(valor:byte);
 begin
- if (valor<>0) then begin
-		if (not(valor) and $10)<>0 then begin
-      dac_count:=0;
-      dac_pos:=$800*num_sample;
-      timer[dac_timer].enabled:=true;
-      dac_play:=true;
-    end else begin
-    if (not(valor) and $08)<>0 then begin
-			num_sample:=num_sample and $3;
-      dac_count:=0;
-      dac_pos:=$800*(num_sample+7);
-      timer[dac_timer].enabled:=true;
-      dac_play:=true;
-    end;
-   end;
- end;
+  // At boot: ff (ay reset) -> 00 (game writes ay enable) -> f9 (game writes to port A).
+	// Then game writes f9 -> f1 -> f9. Is bit 3 stop/reset?
+	if ((dac_play=$e9) and (valor=$f9)) then begin
+		dac_index:=dac_sample and $f;
+    dac_pos:=0;
+    timers.enabled(dac_timer,true);
+  end	else if ((dac_play=$b9) and (valor=$f9)) then begin // second sample rom
+		dac_index:=((dac_sample shr 4) and $f)+$10;
+    dac_pos:=0;
+    timers.enabled(dac_timer,true);
+  end;
+	dac_play:=valor;
 end;
 
 procedure hardhead_portbw(valor:byte);
 begin
-  num_sample:=valor and $f;
+  dac_sample:=valor;
 end;
 
 procedure dac_sound;
 begin
+  dac_value:=suna_dac[dac_pos+dac_index*$1000];
   dac_pos:=dac_pos+1;
-  dac_count:=dac_count+1;
-  if dac_count=$800 then begin
-    timer[dac_timer].enabled:=false;
-    dac_play:=false;
+  if dac_pos=$1000 then begin
+    timers.enabled(dac_timer,false);
+    dac_value:=0;
   end;
 end;
 
@@ -497,9 +499,11 @@ begin
  soundlatch:=0;
  soundlatch2:=0;
  hardhead_ip:=0;
- num_sample:=0;
+ dac_sample:=0;
+ dac_play:=0;
+ dac_value:=0;
+ dac_index:=0;
  dac_pos:=0;
- dac_play:=false;
 end;
 
 function iniciar_suna_hw:boolean;
@@ -522,6 +526,7 @@ const
 var
   f,addr:dword;
   valor,table:byte;
+  tempw:word;
   mem_final:array[0..$4ffff] of byte;
   memoria_temp:array[0..$7ffff] of byte;
 begin
@@ -538,15 +543,15 @@ case main_vars.tipo_maquina of
         z80_1:=cpu_z80.create(3000000,256);
         z80_1.change_ram_calls(hardhead_snd_getbyte,hardhead_snd_putbyte);
         z80_1.init_sound(snd_despues_instruccion);
-        init_timer(z80_1.numero_cpu,3000000/(60*4),hardhead_snd,true);
+        timers.init(z80_1.numero_cpu,3000000/(60*4),hardhead_snd,nil,true);
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(2000000,AY8910,0.3);
+        ay8910_0:=ay8910_chip.create(2000000,AY8910,0.8);
         ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
-        //Y para el DAC
-        dac_timer:=init_timer(z80_1.numero_cpu,3000000/4000,dac_sound,false);
+        //Y para el DAC 8Khz
+        dac_timer:=timers.init(z80_1.numero_cpu,3000000/8000,dac_sound,nil,false);
         //cargar roms y rom en bancos
-        if not(cargar_roms(@memoria_temp[0],@hardhead_rom[0],'hardhead.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,hardhead_rom)) then exit;
         for f:=0 to $f do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
         for f:=0 to $7fff do begin
         		table:=((f and $0c00) shr 10) or ((f and $4000) shr 12);
@@ -554,18 +559,23 @@ case main_vars.tipo_maquina of
               else memoria[f]:=memoria_temp[f];
         end;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@hardhead_sound,'hardhead.zip',1)) then exit;
-        if not(cargar_roms(@memoria_temp[0],@hardhead_dac,'hardhead.zip',1)) then exit;
-        //Convierto los samples a algo digno...
-        for f:=0 to $7fff do suna_dac[f]:=(memoria_temp[f] xor $80)*$100;
+        if not(roms_load(@mem_snd,hardhead_sound)) then exit;
+        if not(roms_load(@memoria_temp,hardhead_dac)) then exit;
+        //Convierto los samples
+        for f:=0 to $7fff do begin
+          tempw:=((memoria_temp[f] and $f))*$100;
+          suna_dac[f*2]:=tempw;
+          tempw:=((memoria_temp[f] shr 4))*$100;
+          suna_dac[(f*2)+1]:=tempw;
+        end;
         dac_tsample:=init_channel;
         //convertir sprites e invertirlos, solo hay sprites!!
-        if not(cargar_roms(@memoria_temp[0],@hardhead_sprites[0],'hardhead.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,hardhead_sprites)) then exit;
         for f:=0 to $3ffff do memoria_temp[f]:=not(memoria_temp[f]);
         init_gfx(0,8,8,$2000);
         gfx[0].trans[15]:=true;
         gfx_set_desc_data(4,0,8*8*2,$20000*8+0,$20000*8+4,0,4);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+        convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
      end;
      68:begin
         //Main CPU
@@ -579,7 +589,7 @@ case main_vars.tipo_maquina of
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
         ay8910_0:=ay8910_chip.create(2000000,AY8910,0.3);
         //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@hardhead2_rom[0],'hardhea2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,hardhead2_rom)) then exit;
         //desencriptarlas
         //Primero muevo los datos a su sitio
         for f:=0 to $4ffff do begin
@@ -604,10 +614,10 @@ case main_vars.tipo_maquina of
             else memoria[f]:=memoria_temp[f];
         end;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@hardhead2_sound,'hardhea2.zip',1)) then exit;
-        if not(cargar_roms(@suna_dac[0],@hardhead2_pcm,'hardhea2.zip',1)) then exit;
+        if not(roms_load(@mem_snd,hardhead2_sound)) then exit;
+        if not(roms_load(@suna_dac,hardhead2_pcm)) then exit;
         //convertir sprites e invertirlos, solo hay sprites!!
-        if not(cargar_roms(@memoria_temp[0],@hardhead2_sprites[0],'hardhea2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,hardhead2_sprites)) then exit;
         for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]);
         init_gfx(0,8,8,$4000);
         gfx[0].trans[15]:=true;

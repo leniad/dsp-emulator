@@ -51,6 +51,9 @@ type
     GroupBox9: TGroupBox;
     RadioButton17: TRadioButton;
     RadioButton18: TRadioButton;
+    GroupBox13: TGroupBox;
+    RadioButton26: TRadioButton;
+    RadioButton27: TRadioButton;
     procedure Button2Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -80,6 +83,7 @@ begin
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then begin
     if var_spectrum.issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
     groupbox8.Enabled:=false;
+    groupbox13.Enabled:=false;
     radiobutton14.Enabled:=false;
     radiobutton15.Enabled:=false;
     radiobutton16.Enabled:=false;
@@ -122,6 +126,9 @@ end;
   //Tape audio
   if var_spectrum.audio_load then radiobutton21.Checked:=true
     else radiobutton22.Checked:=true;
+  //Turbo Sound
+  if var_spectrum.turbo_sound then radiobutton26.Checked:=true
+    else radiobutton27.Checked:=true;
   case main_vars.tipo_maquina of
     0,5:edit1.Text:=Directory.spectrum_48;
     1,4:edit1.Text:=Directory.spectrum_128;
@@ -162,10 +169,7 @@ with ConfigSP do begin
     else if radiobutton4.Checked then var_spectrum.tipo_joy:=JCURSOR
       else if radiobutton5.Checked then var_spectrum.tipo_joy:=JSINCLAIR1
         else if radiobutton6.Checked then var_spectrum.tipo_joy:=JSINCLAIR2
-          else if radiobutton25.Checked then begin
-            var_spectrum.tipo_joy:=JFULLER;
-            var_spectrum.joy_val:=$ff;
-          end;
+          else if radiobutton25.Checked then var_spectrum.tipo_joy:=JFULLER;
   if radiobutton7.checked then borde.tipo:=0;
   if RadioButton8.Checked then begin
     borde.tipo:=1;
@@ -180,6 +184,8 @@ with ConfigSP do begin
     end;
   end;
   var_spectrum.audio_load:=radiobutton21.Checked;
+  var_spectrum.turbo_sound:=radiobutton26.checked;
+  if not(var_spectrum.turbo_sound) then var_spectrum.ay_select:=0;
   if radiobutton10.Checked then mouse.tipo:=MNONE
     else if radiobutton11.Checked then mouse.tipo:=MGUNSTICK
       else if radiobutton19.Checked then mouse.tipo:=MKEMPSTON
@@ -199,8 +205,8 @@ with ConfigSP do begin
   if RadioButton16.Checked then new_audio:=2;
   //Speaker oversample
   var_spectrum.speaker_oversample:=radiobutton17.Checked;
-  timer[var_spectrum.speaker_timer].time_final:=sound_status.cpu_clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample))));
-  timer[var_spectrum.speaker_timer].actual_time:=0;
+  timers.timer[var_spectrum.speaker_timer].time_final:=sound_status.cpu_clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample))));
+  timers.reset(var_spectrum.speaker_timer);
   if new_audio<>var_spectrum.audio_128k then begin
     var_spectrum.audio_128k:=new_audio;
     close_audio;

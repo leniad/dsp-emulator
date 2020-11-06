@@ -15,7 +15,7 @@ type
   gfx_tipo=record
     x,y:byte;
     datos:pbyte;
-    colores:array[0..max_colores-1] of word;
+    colores:array[0..MAX_COLORES-1] of word;
     trans:array[0..$1f] of boolean;
     shadow:array[0..$1f] of boolean;
     alpha:array[0..$1f] of boolean;
@@ -33,6 +33,7 @@ var
 //GFX
 procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
 procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
+procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;n:dword);
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
 //GFX put
 procedure put_gfx(pos_x,pos_y,nchar,color:word;screen,ngfx:byte);
@@ -57,18 +58,17 @@ procedure put_gfx_sprite_alpha(nchar:dword;color:word;flipx,flipy:boolean;ngfx:b
 //Sprites Update
 procedure actualiza_gfx_sprite_zoom_alpha(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 procedure actualiza_gfx_sprite(pos_x,pos_y:word;dest,ngfx:byte);
-procedure actualiza_gfx_sprite_over(pos_x,pos_y:word;dest,ngfx,src_over:byte;scr_x,scr_y:word);
 procedure actualiza_gfx_sprite_size(pos_x,pos_y:word;dest:byte;x_size,y_size:word);
 procedure actualiza_gfx_sprite_size_pos(pos_x,pos_y:word;dest:byte;x_size,y_size,ipos_x,ipos_y:word);
 procedure actualiza_gfx_sprite_zoom(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 procedure actualiza_gfx_sprite_alpha(pos_x,pos_y:word;dest,ngfx:byte);
 //Scroll
-procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0);
+procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0;adj_x:word=0;adj_y:word=0);
 procedure scroll__x(porigen,pdestino:byte;scroll_x:word);
 procedure scroll__x_part(porigen,pdestino:byte;scroll_x,scroll_y:word;orgy,sizey:word);
-procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0;inc_y:word=0);
+procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0;inc_y:word=0);
 procedure scroll__y(porigen,pdestino:byte;scroll_y:word);
-procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0;inc_x:word=0);
+procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0);
 procedure scroll_xy_part(porigen,pdestino:byte;long_bloque_x,long_bloque_y:word;posicion_x,posicion_y:pword;scroll_x,scroll_y:word);
 //Basic draw functions
 procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);
@@ -111,7 +111,7 @@ begin
   fillchar(gfx[num].shadow[0],$20,0);
   fillchar(gfx[num].alpha[0],$20,0);
   for f:=0 to 4 do fillchar(gfx[num].trans_alt[f],$20,0);
-  for f:=0 to max_colores-1 do gfx[num].colores[f]:=f;
+  for f:=0 to MAX_COLORES-1 do gfx[num].colores[f]:=f;
   getmem(gfx[num].datos,num_elements*x_size*y_size);
 end;
 
@@ -201,33 +201,62 @@ for n:=0 to elements do begin
 end;
 end;
 
+procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;n:dword);
+var
+  oct,b0,o,i,bit_pixel:byte;
+  SpriteNbr,ind:dword;
+  temp_cx:pdword;
+  ngfx:pgfx;
+begin
+ngfx:=@gfx[num_gfx];
+ind:=n*ngfx.y*ngfx.x;
+temp_cx:=cx;
+SpriteNbr:=n*des_gfx.long_sprites;
+for o:=0 to (ngfx.y-1) do begin
+    cx:=temp_cx;
+		for i:=0 to (ngfx.x-1) do begin
+        oct:=0;
+        for bit_pixel:=0 to (des_gfx.bit_pixel-1) do begin
+            b0:=GetBit(des_gfx.pos_planos[bit_pixel]+Cy^+Cx^+SpriteNbr,SpriteRom);
+            oct:=oct or (b0 shl (des_gfx.bit_pixel-1-bit_pixel));
+        end;
+        ngfx.datos[ind+increment]:=oct;
+        ind:=ind+1;
+        inc(cx);
+    end;  //del i
+    inc(cy);
+end; //del o
+if rot90 then Rotater(n,ngfx,increment);
+if rol90 then Rotatel(n,ngfx,increment);
+end;
+
 //Scroll functions
-procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0);
+procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0;adj_x:word=0;adj_y:word=0);
 var
   long_x,long_y,long_x2,long_y2:word;
 begin
 scroll_x:=scroll_x and p_final[porigen].scroll.mask_x;
 scroll_y:=scroll_y and p_final[porigen].scroll.mask_y;
-if ((scroll_x+p_final[porigen].scroll.max_x)>=p_final[porigen].scroll.long_x) then long_x:=p_final[porigen].scroll.long_x-scroll_x
+if ((scroll_x+p_final[porigen].scroll.max_x)>p_final[porigen].scroll.long_x) then long_x:=p_final[porigen].scroll.long_x-scroll_x
   else long_x:=p_final[porigen].scroll.max_x;
-if ((scroll_y+p_final[porigen].scroll.max_y)>=p_final[porigen].scroll.long_y) then long_y:=p_final[porigen].scroll.long_y-scroll_y
+if ((scroll_y+p_final[porigen].scroll.max_y)>p_final[porigen].scroll.long_y) then long_y:=p_final[porigen].scroll.long_y-scroll_y
   else long_y:=p_final[porigen].scroll.max_y;
 long_x2:=p_final[porigen].scroll.max_x-long_x;
 long_y2:=p_final[porigen].scroll.max_y-long_y;
 actualiza_trozo(scroll_x,scroll_y,long_x,long_y,porigen,diff_x,diff_y,long_x,long_y,pdestino);
-if long_x<p_final[porigen].scroll.max_x then actualiza_trozo(0,scroll_y,long_x2,long_y,porigen,long_x+diff_x,diff_y,long_x2,long_y,pdestino);
-if long_y<p_final[porigen].scroll.max_y then actualiza_trozo(scroll_x,0,long_x,long_y2,porigen,diff_x,long_y+diff_y,long_x,long_y2,pdestino);
+if long_x<p_final[porigen].scroll.max_x then actualiza_trozo(adj_x,scroll_y,long_x2,long_y,porigen,long_x+diff_x,diff_y,long_x2,long_y,pdestino);
+if long_y<p_final[porigen].scroll.max_y then actualiza_trozo(scroll_x,adj_y,long_x,long_y2,porigen,diff_x,long_y+diff_y,long_x,long_y2,pdestino);
 if ((long_x<p_final[porigen].scroll.max_x) and (long_y<p_final[porigen].scroll.max_y)) then
-  actualiza_trozo(0,0,long_x2,long_y2,porigen,long_x+diff_x,long_y+diff_y,long_x2,long_y2,pdestino);
+  actualiza_trozo(adj_x,adj_y,long_x2,long_y2,porigen,long_x+diff_x,long_y+diff_y,long_x2,long_y2,pdestino);
 end;
 
 procedure scroll__x(porigen,pdestino:byte;scroll_x:word);
 var
   long_x,long_x2,long_y:word;
 begin
-long_y:=256;//p_final[0].y;
+long_y:=p_final[porigen].scroll.max_y;
 scroll_x:=scroll_x and p_final[porigen].scroll.mask_x;
-if ((scroll_x+p_final[porigen].scroll.max_x)>=p_final[porigen].scroll.long_x) then begin
+if ((scroll_x+p_final[porigen].scroll.max_x)>p_final[porigen].scroll.long_x) then begin
   long_x:=p_final[porigen].scroll.long_x-scroll_x;
   long_x2:=p_final[porigen].scroll.max_x-long_x;
   actualiza_trozo(0,0,long_x2,long_y,porigen,long_x,0,long_x2,long_y,pdestino);
@@ -241,7 +270,7 @@ procedure scroll__y(porigen,pdestino:byte;scroll_y:word);
 var
   long_x,long_y,long_y2:word;
 begin
-long_x:=256;//p_final[0].x;
+long_x:=p_final[porigen].scroll.max_x;
 scroll_y:=scroll_y and p_final[porigen].scroll.mask_y;
 if ((scroll_y+p_final[porigen].scroll.max_y)>p_final[porigen].scroll.long_y) then begin
   long_y:=p_final[porigen].scroll.long_y-scroll_y;
@@ -271,45 +300,57 @@ end;
 actualiza_trozo(scroll_x,orgy,long_x,sizey,porigen,0,scroll_y2,long_x,sizey,pdestino);
 end;
 
-procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0;inc_y:word=0);
+procedure scroll__x_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_x:pword;scroll_x:word=0;scroll_y:word=0;inc_y:word=0);
 var
-  pos_x,long_bloque_y:word;
+  pos_y:word;
   temp_pos_x:pword;
-  posicion_x_def,posicion_y_def:word;
-  long_def_x:word;
+  posicion_x_def,posicion_y_def,size_of_y,long_x,long_x2:word;
 begin
-long_bloque_y:=p_final[porigen].scroll.max_x;
 temp_pos_x:=posicion_x;
-pos_x:=inc_y;
-while (pos_x<p_final[porigen].scroll.max_x) do begin
+pos_y:=inc_y;
+while (pos_y<p_final[porigen].scroll.max_x) do begin
     posicion_x_def:=(temp_pos_x^+scroll_x) and p_final[porigen].scroll.mask_x;
-    posicion_y_def:=(pos_x+scroll_y) and p_final[porigen].scroll.mask_y;
-    if (posicion_x_def+long_bloque_y)>p_final[porigen].scroll.mask_x then long_def_x:=p_final[porigen].scroll.mask_x-posicion_x_def
-      else long_def_x:=long_bloque_y;
-    actualiza_trozo(posicion_x_def,posicion_y_def,long_def_x,long_bloque_x,porigen,0,pos_x,long_def_x,long_bloque_x,pdestino);
-    if long_def_x<long_bloque_y then actualiza_trozo(0,posicion_y_def,long_bloque_y-long_def_x,long_bloque_x,porigen,long_def_x,pos_x,long_bloque_y-long_def_x,long_bloque_x,pdestino);
-    pos_x:=pos_x+long_bloque_x;
+    posicion_y_def:=(pos_y+scroll_y) and p_final[porigen].scroll.mask_y;
+    if ((posicion_y_def+long_bloque_y)>p_final[porigen].scroll.max_y) then size_of_y:=p_final[porigen].scroll.max_y-posicion_y_def
+      else size_of_y:=long_bloque_y;
+    if ((posicion_x_def+p_final[porigen].scroll.max_x)>p_final[porigen].scroll.long_x) then begin
+      long_x:=p_final[porigen].scroll.long_x-posicion_x_def;
+      long_x2:=p_final[porigen].scroll.max_x-long_x;
+      actualiza_trozo(0,posicion_y_def,long_x2,size_of_y,porigen,long_x,pos_y,long_x2,size_of_y,pdestino);
+      if (size_of_y<>long_bloque_y) then actualiza_trozo(0,0,long_x2,long_bloque_y-size_of_y,porigen,long_x,pos_y+size_of_y,long_x2,size_of_y,pdestino);
+    end else begin
+      long_x:=p_final[porigen].scroll.max_x;
+    end;
+    actualiza_trozo(posicion_x_def,posicion_y_def,long_x,size_of_y,porigen,0,pos_y,long_x,size_of_y,pdestino);
+    if (size_of_y<>long_bloque_y) then actualiza_trozo(posicion_x_def,0,long_x,long_bloque_y-size_of_y,porigen,0,pos_y+size_of_y,long_x,size_of_y,pdestino);
+    pos_y:=pos_y+long_bloque_y;
     inc(temp_pos_x);
 end;
 end;
 
-procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_y:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0;inc_x:word=0);
+procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0);
 var
-  pos_y,long_bloque_x,long_def_y:word;
+  pos_x,long_y,long_y2,posicion_x_def,posicion_y_def,size_of_x:word;
   temp_pos_y:pword;
-  posicion_y_def,posicion_x_def:word;
 begin
-long_bloque_x:=p_final[porigen].scroll.max_y;
 temp_pos_y:=posicion_y;
-pos_y:=inc_x;
-while (pos_y<p_final[porigen].scroll.max_x) do begin
+pos_x:=0;
+while (pos_x<p_final[porigen].scroll.max_x) do begin
     posicion_y_def:=(temp_pos_y^+scroll_y) and p_final[porigen].scroll.mask_y;
-    posicion_x_def:=(pos_y+scroll_x) and p_final[porigen].scroll.mask_x;
-    if (posicion_y_def+long_bloque_x)>p_final[porigen].scroll.mask_y then long_def_y:=p_final[porigen].scroll.mask_y-posicion_y_def
-      else long_def_y:=long_bloque_x;
-    actualiza_trozo(posicion_x_def,posicion_y_def,long_bloque_y,long_def_y,porigen,pos_y,0,long_bloque_y,long_def_y,pdestino);
-    if long_def_y<long_bloque_x then actualiza_trozo(posicion_x_def,0,long_bloque_y,long_bloque_x-long_def_y,porigen,pos_y,long_def_y,long_bloque_y,long_bloque_x-long_def_y,pdestino);
-    pos_y:=pos_y+long_bloque_y;
+    posicion_x_def:=(pos_x+scroll_x) and p_final[porigen].scroll.mask_x;
+    if ((posicion_x_def+long_bloque_x)>p_final[porigen].scroll.max_x) then size_of_x:=p_final[porigen].scroll.max_x-posicion_x_def
+      else size_of_x:=long_bloque_x;
+    if ((posicion_y_def+p_final[porigen].scroll.max_y)>p_final[porigen].scroll.long_y) then begin
+      long_y:=p_final[porigen].scroll.long_y-posicion_y_def;
+      long_y2:=p_final[porigen].scroll.max_y-long_y;
+      actualiza_trozo(posicion_x_def,0,size_of_x,long_y2,porigen,pos_x,long_y,size_of_x,long_y2,pdestino);
+      if size_of_x<>long_bloque_x then actualiza_trozo(0,0,long_bloque_x-size_of_x,long_y2,porigen,pos_x+size_of_x,long_y,size_of_x,long_y2,pdestino);
+    end else begin
+      long_y:=p_final[porigen].scroll.max_y;
+    end;
+    actualiza_trozo(posicion_x_def,posicion_y_def,size_of_x,long_y,porigen,pos_x,0,size_of_x,long_y,pdestino);
+    if size_of_x<>long_bloque_x then actualiza_trozo(0,posicion_y_def,long_bloque_x-size_of_x,long_y,porigen,pos_x+size_of_x,0,size_of_x,long_y,pdestino);
+    pos_x:=pos_x+long_bloque_x;
     inc(temp_pos_y);
 end;
 end;
@@ -394,7 +435,7 @@ for y:=0 to (gfx[ngfx].y-1) do begin
   temp:=punbuf;
   for x:=0 to (gfx[ngfx].x-1) do begin
     if not(gfx[ngfx].trans[pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(pos);
     inc(temp);
   end;
@@ -414,7 +455,7 @@ for y:=0 to (gfx[ngfx].y-1) do begin
   temp:=punbuf;
   for x:=0 to (gfx[ngfx].x-1) do begin
     if not(gfx[ngfx].trans_alt[index][pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(pos);
     inc(temp);
   end;
@@ -456,7 +497,7 @@ procedure put_gfx_block_trans(pos_x,pos_y:word;screen,size_x,size_y:byte);
 var
   y:byte;
 begin
-fillword(punbuf,size_x,paleta[max_colores]);
+fillword(punbuf,size_x,paleta[MAX_COLORES]);
 for y:=0 to (size_y-1) do putpixel_gfx_int(pos_x,pos_y+y,size_x,screen);
 end;
 
@@ -482,7 +523,7 @@ for y:=0 to (gfx[ngfx].y-1) do begin
   for x:=0 to (gfx[ngfx].x-1) do begin
     punto:=gfx[ngfx].colores[pos^+color];
     if (punto and mask)<>trans then temp^:=paleta[punto]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(pos);
     inc(temp);
   end;
@@ -521,7 +562,7 @@ for y:=0 to (cant_y-1) do begin
   for x:=0 to (cant_x-1) do begin
     punto:=gfx[ngfx].colores[pos^+color];
     if (punto and mask)<>trans then temp^:=paleta[punto]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(pos);
     inc(temp,dir_x);
   end;
@@ -598,7 +639,7 @@ for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
     if not(gfx[ngfx].trans[pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(pos);
     inc(temp,dir_x);
   end;
@@ -637,7 +678,7 @@ for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
     if not(gfx[ngfx].trans_alt[trans_index][pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-       else temp^:=paleta[max_colores];
+       else temp^:=paleta[MAX_COLORES];
     inc(pos);
     inc(temp,dir_x);
   end;
@@ -676,7 +717,7 @@ for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
     if not(gfx[ngfx].trans[pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(temp,dir_x);
     inc(pos);
   end;
@@ -715,7 +756,7 @@ for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
     if not(gfx[ngfx].trans[pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(temp,dir_x);
     inc(pos);
   end;
@@ -755,7 +796,7 @@ for y:=0 to (cant_y-1) do begin
   for x:=0 to (cant_x-1) do begin
     punto:=gfx[ngfx].colores[pos^+color];
     if (punto and mask)<>trans then temp^:=paleta[punto]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(temp,dir_x);
     inc(pos);
   end;
@@ -795,7 +836,7 @@ for y:=0 to (cant_y-1) do begin
   for x:=0 to (cant_x-1) do begin
     punto:=gfx[ngfx].colores[pos^+color];
     if (punto and mask)<>trans then temp^:=paleta[punto]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(temp,dir_x);
     inc(pos);
   end;
@@ -843,7 +884,7 @@ for y:=0 to (gfx[ngfx].y-1) do begin
       zoom_x:=zoom_x+zx;
       while zoom_x>0 do begin
         if not(gfx[ngfx].trans[pos^]) then temp^:=paleta[gfx[ngfx].colores[pos^+color]]
-          else temp^:=paleta[max_colores];
+          else temp^:=paleta[MAX_COLORES];
         inc(temp,dir_x);
         zoom_x:=zoom_x-1;
       end;
@@ -887,7 +928,7 @@ end;
 for y:=0 to (cant_y-1) do begin
   temp:=temp2;
   for x:=0 to (cant_x-1) do begin
-    if gfx[ngfx].trans[pos^] then temp^:=paleta[max_colores]
+    if gfx[ngfx].trans[pos^] then temp^:=paleta[MAX_COLORES]
       else if gfx[ngfx].shadow[pos^] then temp^:=paleta[shadow_color]
         else temp^:=paleta[gfx[ngfx].colores[pos^+color]];
     inc(temp,dir_x);
@@ -930,7 +971,7 @@ for y:=0 to (cant_y-1) do begin
     if not(gfx[ngfx].trans[pos^]) then begin
       if gfx[ngfx].alpha[pos^] then temp^:=paleta_alpha[gfx[ngfx].colores[pos^+color]]
         else temp^:=paleta32[gfx[ngfx].colores[pos^+color]];
-    end else temp^:=paleta32[max_colores];
+    end else temp^:=paleta32[MAX_COLORES];
     inc(temp,dir_x);
     inc(pos);
   end;
@@ -980,7 +1021,7 @@ for y:=0 to (gfx[ngfx].y-1) do begin
         if not(gfx[ngfx].trans[pos^]) then begin
           if gfx[ngfx].alpha[pos^] then temp^:=paleta_alpha[gfx[ngfx].colores[pos^+color]]
             else temp^:=paleta32[gfx[ngfx].colores[pos^+color]];
-        end else temp^:=paleta32[max_colores];
+        end else temp^:=paleta32[MAX_COLORES];
         inc(temp,dir_x);
         zoom_x:=zoom_x-1;
       end;
@@ -1059,31 +1100,6 @@ if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].
   if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
   SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
 end;
-end;
-
-procedure actualiza_gfx_sprite_over(pos_x,pos_y:word;dest,ngfx,src_over:byte;scr_x,scr_y:word);
-var
-  origen,destino:libsdl_rect;
-begin
-origen.x:=0;
-origen.y:=0;
-origen.w:=gfx[ngfx].x;
-origen.h:=gfx[ngfx].y;
-pos_x:=pos_x and p_final[dest].sprite_mask_x;
-destino.x:=pos_x+ADD_SPRITE;
-pos_y:=pos_y and p_final[dest].sprite_mask_y;
-destino.y:=pos_y+ADD_SPRITE;
-destino.w:=origen.w;
-destino.h:=origen.h;
-SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
-if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
-  if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
-  if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
-end;
-origen.x:=(pos_x+scr_x) and p_final[src_over].scroll.mask_x;
-origen.y:=(pos_y+scr_y) and p_final[src_over].scroll.mask_y;
-SDL_UpperBlit(pantalla[src_over],@origen,pantalla[dest],@destino);
 end;
 
 procedure actualiza_gfx_sprite_zoom(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
@@ -1179,7 +1195,7 @@ var
 begin
 punt:=pantalla[pant].pixels;
 inc(punt,((y*pantalla[pant].pitch) shr 1)+x);
-fillword(punt,longitud,paleta[color]);
+fillword(punt,longitud,color);
 end;
 
 procedure draw_line(x0,y0,x1,y1:integer;color:word;pant:byte);inline;

@@ -55,20 +55,21 @@ for f:=7 downto 0 do begin
   color:=((memoria[$4ff1+(f*2)] and $1f) or (colortable_bank shl 5) or (pal_bank shl 6)) shl 2;
   if main_screen.flip_main_screen then begin
     atrib:=atrib xor 3;
-    x:=memoria[$5060+(f*2)]-31;
+    x:=memoria[$5060+(f*2)]-32;
     y:=memoria[$5061+(f*2)];
   end else begin
-    x:=240-memoria[$5060+(f*2)];
+    x:=240-memoria[$5060+(f*2)]-1;
     y:=272-memoria[$5061+(f*2)];
   end;
   put_gfx_sprite_mask(nchar,color,(atrib and 2)<>0,(atrib and 1)<>0,1,0,$f);
-  actualiza_gfx_sprite((x-1) and $ff,y,2,1);
+  if ((f=0) or (f=1)) then actualiza_gfx_sprite((x-1) and $ff,y,2,1)
+     else actualiza_gfx_sprite(x and $ff,y,2,1);
 end;
 end;
 
 procedure update_video_jrpacman;inline;
 var
-  f,color,nchar,offs,color_index:word;
+  color,nchar,offs,color_index:word;
   sx,sy,x,y:byte;
 begin
 for x:=0 to 53 do begin
@@ -90,14 +91,14 @@ for x:=0 to 53 do begin
   end;
 end;
 if bg_prio then begin
-  for f:=2 to 33 do scroll__x_part(1,2,scroll_x,0,f*8,8);
+  scroll__x_part(1,2,scroll_x,0,16,256);
   actualiza_trozo(208,0,224,16,1,0,0,224,16,2);
   actualiza_trozo(208,272,224,16,1,0,272,224,16,2);
   draw_sprites;
 end else begin
   fill_full_screen(2,$3ff);
   draw_sprites;
-  for f:=2 to 33 do scroll__x_part(1,2,scroll_x,0,f*8,8);
+  scroll__x_part(1,2,scroll_x,0,16,256);
   actualiza_trozo(208,0,224,16,1,0,0,224,16,2);
   actualiza_trozo(208,272,224,16,1,0,272,224,16,2);
 end;
@@ -282,18 +283,18 @@ z80_0.change_io_calls(nil,jrpacman_outbyte);
 z80_0.init_sound(jrpacman_sound_update);
 namco_snd_0:=namco_snd_chip.create(3);
 //cargar roms
-if not(roms_load(@memoria_temp,@jrpacman_rom,'jrpacman.zip',sizeof(jrpacman_rom))) then exit;
+if not(roms_load(@memoria_temp,jrpacman_rom)) then exit;
 a:=0;
 for f:=0 to 79 do begin
-		for h:=0 to table[f].count-1 do begin
-			memoria[a]:=memoria_temp[a] xor table[f].val;
-      a:=a+1;
+    for h:=0 to table[f].count-1 do begin
+        memoria[a]:=memoria_temp[a] xor table[f].val;
+        a:=a+1;
     end;
 end;
 //cargar sonido & iniciar_sonido
-if not(roms_load(namco_snd_0.get_wave_dir,@jrpacman_sound,'jrpacman.zip',sizeof(jrpacman_sound))) then exit;
+if not(roms_load(namco_snd_0.get_wave_dir,jrpacman_sound)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@jrpacman_char,'jrpacman.zip',sizeof(jrpacman_char))) then exit;
+if not(roms_load(@memoria_temp,jrpacman_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,0,4);
@@ -303,10 +304,10 @@ init_gfx(1,16,16,$80);
 gfx_set_desc_data(2,0,64*8,0,4);
 convert_gfx(1,0,@memoria_temp[$2000],@ps_x,@ps_y,true,false);
 //poner la paleta
-if not(roms_load(@memoria_temp,@jrpacman_pal,'jrpacman.zip',sizeof(jrpacman_pal))) then exit;
+if not(roms_load(@memoria_temp,jrpacman_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances[0],@rweights,0,0,
-			3,@resistances[0],@gweights,0,0,
+			3,@resistances,@rweights,0,0,
+			3,@resistances,@gweights,0,0,
 	    2,@resistances[1],@bweights,0,0);
 for f:=0 to $ff do begin
   h:=(memoria_temp[f] and $f)+((memoria_temp[f+$100] and $f) shl 4);

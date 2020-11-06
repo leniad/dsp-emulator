@@ -2,14 +2,14 @@ object configcpc: Tconfigcpc
   Left = 287
   Height = 452
   Top = 146
-  Width = 499
+  Width = 621
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Config CPC'
   ClientHeight = 452
-  ClientWidth = 499
+  ClientWidth = 621
   OnShow = FormShow
-  LCLVersion = '1.7'
+  LCLVersion = '1.8.4.0'
   object GroupBox1: TGroupBox
     Left = 20
     Height = 163
@@ -80,55 +80,55 @@ object configcpc: Tconfigcpc
     Left = 20
     Height = 198
     Top = 184
-    Width = 460
+    Width = 580
     Caption = 'ROM Slots'
     ClientHeight = 178
-    ClientWidth = 456
+    ClientWidth = 576
     TabOrder = 1
     object Edit1: TEdit
       Left = 56
       Height = 23
       Top = 8
-      Width = 297
+      Width = 424
       TabOrder = 0
     end
     object Edit2: TEdit
       Left = 56
       Height = 23
       Top = 37
-      Width = 297
+      Width = 424
       TabOrder = 1
     end
     object Edit3: TEdit
       Left = 56
       Height = 23
       Top = 64
-      Width = 297
+      Width = 424
       TabOrder = 2
     end
     object Edit4: TEdit
       Left = 56
       Height = 23
       Top = 89
-      Width = 297
+      Width = 425
       TabOrder = 3
     end
     object Edit5: TEdit
       Left = 56
       Height = 23
       Top = 117
-      Width = 297
+      Width = 424
       TabOrder = 4
     end
     object Edit6: TEdit
       Left = 56
       Height = 23
       Top = 143
-      Width = 297
+      Width = 424
       TabOrder = 5
     end
     object Button1: TButton
-      Left = 356
+      Left = 496
       Height = 25
       Top = 8
       Width = 33
@@ -137,7 +137,7 @@ object configcpc: Tconfigcpc
       TabOrder = 6
     end
     object Button2: TButton
-      Left = 395
+      Left = 535
       Height = 25
       Top = 8
       Width = 33
@@ -146,7 +146,7 @@ object configcpc: Tconfigcpc
       TabOrder = 7
     end
     object Button3: TButton
-      Left = 356
+      Left = 496
       Height = 25
       Top = 35
       Width = 33
@@ -155,7 +155,7 @@ object configcpc: Tconfigcpc
       TabOrder = 8
     end
     object Button4: TButton
-      Left = 395
+      Left = 535
       Height = 25
       Top = 35
       Width = 33
@@ -164,7 +164,7 @@ object configcpc: Tconfigcpc
       TabOrder = 9
     end
     object Button5: TButton
-      Left = 356
+      Left = 496
       Height = 25
       Top = 62
       Width = 33
@@ -173,7 +173,7 @@ object configcpc: Tconfigcpc
       TabOrder = 10
     end
     object Button6: TButton
-      Left = 395
+      Left = 535
       Height = 25
       Top = 62
       Width = 33
@@ -182,7 +182,7 @@ object configcpc: Tconfigcpc
       TabOrder = 11
     end
     object Button8: TButton
-      Left = 395
+      Left = 535
       Height = 25
       Top = 89
       Width = 33
@@ -191,7 +191,7 @@ object configcpc: Tconfigcpc
       TabOrder = 12
     end
     object Button7: TButton
-      Left = 356
+      Left = 496
       Height = 25
       Top = 89
       Width = 33
@@ -200,7 +200,7 @@ object configcpc: Tconfigcpc
       TabOrder = 13
     end
     object Button9: TButton
-      Left = 356
+      Left = 496
       Height = 25
       Top = 116
       Width = 33
@@ -209,7 +209,7 @@ object configcpc: Tconfigcpc
       TabOrder = 14
     end
     object Button10: TButton
-      Left = 395
+      Left = 535
       Height = 25
       Top = 116
       Width = 33
@@ -218,7 +218,7 @@ object configcpc: Tconfigcpc
       TabOrder = 15
     end
     object Button12: TButton
-      Left = 395
+      Left = 535
       Height = 25
       Top = 143
       Width = 33
@@ -227,7 +227,7 @@ object configcpc: Tconfigcpc
       TabOrder = 16
     end
     object Button11: TButton
-      Left = 356
+      Left = 496
       Height = 25
       Top = 143
       Width = 33
@@ -285,7 +285,7 @@ object configcpc: Tconfigcpc
     end
   end
   object Button13: TButton
-    Left = 96
+    Left = 152
     Height = 49
     Top = 392
     Width = 105
@@ -294,7 +294,7 @@ object configcpc: Tconfigcpc
     TabOrder = 2
   end
   object Button14: TButton
-    Left = 280
+    Left = 376
     Height = 49
     Top = 392
     Width = 105

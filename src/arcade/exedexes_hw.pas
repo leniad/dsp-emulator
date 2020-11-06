@@ -9,23 +9,23 @@ procedure cargar_exedexes_hw;
 
 implementation
 const
-        exedexes_rom:array[0..3] of tipo_roms=(
+        exedexes_rom:array[0..2] of tipo_roms=(
         (n:'11m_ee04.bin';l:$4000;p:0;crc:$44140dbd),(n:'10m_ee03.bin';l:$4000;p:$4000;crc:$bf72cfba),
-        (n:'09m_ee02.bin';l:$4000;p:$8000;crc:$7ad95e2f),());
+        (n:'09m_ee02.bin';l:$4000;p:$8000;crc:$7ad95e2f));
         exedexes_snd_rom:tipo_roms=(n:'11e_ee01.bin';l:$4000;p:0;crc:$73cdf3b2);
-        exedexes_pal:array[0..8] of tipo_roms=(
+        exedexes_pal:array[0..7] of tipo_roms=(
         (n:'02d_e-02.bin';l:$100;p:0;crc:$8d0d5935),(n:'03d_e-03.bin';l:$100;p:$100;crc:$d3c17efc),
         (n:'04d_e-04.bin';l:$100;p:$200;crc:$58ba964c),(n:'06f_e-05.bin';l:$100;p:$300;crc:$35a03579),
         (n:'l04_e-10.bin';l:$100;p:$400;crc:$1dfad87a),(n:'c04_e-07.bin';l:$100;p:$500;crc:$850064e0),
-        (n:'l09_e-11.bin';l:$100;p:$600;crc:$2bb68710),(n:'l10_e-12.bin';l:$100;p:$700;crc:$173184ef),());
+        (n:'l09_e-11.bin';l:$100;p:$600;crc:$2bb68710),(n:'l10_e-12.bin';l:$100;p:$700;crc:$173184ef));
         exedexes_char:tipo_roms=(n:'05c_ee00.bin';l:$2000;p:0;crc:$cadb75bd);
-        exedexes_sprites:array[0..2] of tipo_roms=(
-        (n:'j11_ee10.bin';l:$4000;p:0;crc:$bc83e265),(n:'j12_ee11.bin';l:$4000;p:$4000;crc:$0e0f300d),());
+        exedexes_sprites:array[0..1] of tipo_roms=(
+        (n:'j11_ee10.bin';l:$4000;p:0;crc:$bc83e265),(n:'j12_ee11.bin';l:$4000;p:$4000;crc:$0e0f300d));
         exedexes_tiles1:tipo_roms=(n:'h01_ee08.bin';l:$4000;p:0;crc:$96a65c1d);
-        exedexes_tiles2:array[0..2] of tipo_roms=(
-        (n:'a03_ee06.bin';l:$4000;p:0;crc:$6039bdd1),(n:'a02_ee05.bin';l:$4000;p:$4000;crc:$b32d8252),());
-        exedexes_tilesbg_pos:array[0..2] of tipo_roms=(
-        (n:'c01_ee07.bin';l:$4000;p:0;crc:$3625a68d),(n:'h04_ee09.bin';l:$2000;p:$4000;crc:$6057c907),());
+        exedexes_tiles2:array[0..1] of tipo_roms=(
+        (n:'a03_ee06.bin';l:$4000;p:0;crc:$6039bdd1),(n:'a02_ee05.bin';l:$4000;p:$4000;crc:$b32d8252));
+        exedexes_tilesbg_pos:array[0..1] of tipo_roms=(
+        (n:'c01_ee07.bin';l:$4000;p:0;crc:$3625a68d),(n:'h04_ee09.bin';l:$2000;p:$4000;crc:$6057c907));
         exedexes_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Lives';number:4;dip:((dip_val:$8;dip_name:'1'),(dip_val:$4;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -88,7 +88,7 @@ if chon then begin //chars activos
   actualiza_trozo(0,0,256,256,3,0,0,256,256,4);
 end;
 actualiza_trozo_final(16,0,224,256,4);
-copymemory(@buffer_sprites[0],@memoria[$f000],$1000);
+copymemory(@buffer_sprites,@memoria[$f000],$1000);
 end;
 
 procedure eventos_exedexes;
@@ -160,8 +160,8 @@ end;
 
 procedure exedexes_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+  0..$bfff:; //ROM
   $c800:sound_command:=valor;
   $c804:chon:=(valor and $80)<>0;
   $d000..$d7ff:if memoria[direccion]<>valor then begin
@@ -194,8 +194,8 @@ end;
 
 procedure exedexes_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
 case direccion of
+  0..$3fff:; //ROM
   $4000..$47ff:mem_snd[direccion]:=valor;
   $8000:ay8910_0.Control(valor);
   $8001:ay8910_0.Write(valor);
@@ -225,8 +225,8 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
  marcade.in2:=$ff;
  scroll_x:=0;
  scroll_y:=0;
@@ -305,35 +305,35 @@ z80_1.init_sound(exedexes_sound);
 AY8910_0:=ay8910_chip.create(1500000,AY8910,0.1);
 sn_76496_0:=sn76496_chip.Create(3000000,0.36);
 sn_76496_1:=sn76496_chip.Create(3000000,0.36);
-init_timer(z80_1.numero_cpu,3000000/(4*60),exedexes_snd_irq,true);
+timers.init(z80_1.numero_cpu,3000000/(4*60),exedexes_snd_irq,nil,true);
 //cargar roms
-if not(cargar_roms(@memoria[0],@exedexes_rom[0],'exedexes.zip',0)) then exit;
+if not(roms_load(@memoria,exedexes_rom)) then exit;
 //cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@exedexes_snd_rom,'exedexes.zip')) then exit;
+if not(roms_load(@mem_snd,exedexes_snd_rom)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@exedexes_char,'exedexes.zip')) then exit;
+if not(roms_load(@memoria_temp,exedexes_char)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //tiles 32x32
-if not(cargar_roms(@memoria_temp[0],@exedexes_tiles1,'exedexes.zip')) then exit;
+if not(roms_load(@memoria_temp,exedexes_tiles1)) then exit;
 init_gfx(1,32,32,64);
 gfx_set_desc_data(2,0,256*8,0,4);
-convert_gfx(1,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,true);
+convert_gfx(1,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //tiles 16x16
-if not(cargar_roms(@memoria_temp[0],@exedexes_tiles2[0],'exedexes.zip',0)) then exit;
+if not(roms_load(@memoria_temp,exedexes_tiles2)) then exit;
 init_gfx(2,16,16,256);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@pt_y[0],false,true);
+convert_gfx(2,0,@memoria_temp,@ps_x,@pt_y,false,true);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@exedexes_sprites[0],'exedexes.zip',0)) then exit;
+if not(roms_load(@memoria_temp,exedexes_sprites)) then exit;
 init_gfx(3,16,16,256);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@pt_y[0],false,true);
+convert_gfx(3,0,@memoria_temp,@ps_x,@pt_y,false,true);
 //poner la paleta y clut
-if not(cargar_roms(@memoria_temp[0],@exedexes_pal[0],'exedexes.zip',0)) then exit;
+if not(roms_load(@memoria_temp,exedexes_pal)) then exit;
 for f:=0 to $ff do begin
     colores[f].r:=pal4bit(memoria_temp[f]);
     colores[f].g:=pal4bit(memoria_temp[f+$100]);
@@ -347,7 +347,7 @@ for f:=0 to $ff do begin
   gfx[3].colores[f]:=memoria_temp[$600+f]+(memoria_temp[$700+f] shl  4)+$80;
 end;
 //El fondo es fijo, no cambia lo pongo despues de la paleta
-if not(cargar_roms(@memoria_temp[0],@exedexes_tilesbg_pos[0],'exedexes.zip',0)) then exit;
+if not(roms_load(@memoria_temp,exedexes_tilesbg_pos)) then exit;
 poner_bg;
 poner_fg;
 //DIP

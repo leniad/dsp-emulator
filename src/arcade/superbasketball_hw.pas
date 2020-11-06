@@ -140,7 +140,6 @@ end;
 
 procedure sbasketb_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$5fff then exit;
 case direccion of
   $2000..$2fff,$3800..$3bff:memoria[direccion]:=valor;
   $3000..$37ff:if memoria[direccion]<>valor then begin
@@ -154,6 +153,7 @@ case direccion of
   $3d00:sound_latch:=valor;
   $3d80:z80_0.change_irq(HOLD_LINE);
   $3f80:scroll_x:=not(valor);
+  $6000..$ffff:; //ROM
 end;
 end;
 
@@ -175,8 +175,8 @@ procedure sbasketb_snd_putbyte(direccion:word;valor:byte);
 var
   changes,offset:word;
 begin
-if direccion<$2000 then exit;
 case direccion of
+    0..$1fff:; //ROM
     $4000..$43ff:mem_snd[direccion]:=valor;
     $a000:vlm5030_0.data_w(valor);
     $c000..$dfff:begin
@@ -234,7 +234,7 @@ buffer[5]:=sbasketb_palettebank;
 buffer[6]:=sprite_select;
 buffer[7]:=last_addr and $ff;
 buffer[8]:=last_addr shr 8;
-savedata_qsnapshot(@buffer[0],9);
+savedata_qsnapshot(@buffer,9);
 freemem(data);
 close_qsnapshot;
 end;
@@ -326,26 +326,26 @@ z80_0.init_sound(sbasketb_sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(1789772);
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,4);
-if not(roms_load(vlm5030_0.get_rom_addr,@sbasketb_vlm,'sbasketb.zip',sizeof(sbasketb_vlm))) then exit;
+if not(roms_load(vlm5030_0.get_rom_addr,sbasketb_vlm)) then exit;
 dac_0:=dac_chip.Create(0.80);
 //cargar roms
-if not(roms_load(@memoria,@sbasketb_rom,'sbasketb.zip',sizeof(sbasketb_rom))) then exit;
+if not(roms_load(@memoria,sbasketb_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes,$a000);
 //cargar snd roms
-if not(roms_load(@mem_snd,@sbasketb_snd,'sbasketb.zip',sizeof(sbasketb_snd))) then exit;
+if not(roms_load(@mem_snd,sbasketb_snd)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@sbasketb_char,'sbasketb.zip',sizeof(sbasketb_char))) then exit;
+if not(roms_load(@memoria_temp,sbasketb_char)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,8*4*8,0,1,2,3);
 convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,true,false);
 //sprites
-if not(roms_load(@memoria_temp,@sbasketb_sprites,'sbasketb.zip',sizeof(sbasketb_sprites))) then exit;
+if not(roms_load(@memoria_temp,sbasketb_sprites)) then exit;
 init_gfx(1,16,16,384);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*4*8,0,1,2,3);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //paleta
-if not(roms_load(@memoria_temp,@sbasketb_pal,'sbasketb.zip',sizeof(sbasketb_pal))) then exit;
+if not(roms_load(@memoria_temp,sbasketb_pal)) then exit;
 for f:=0 to $ff do begin
   colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
   colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] shr 4);

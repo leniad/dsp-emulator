@@ -218,7 +218,7 @@ begin
 	// Create pan table
 	for f:=0 to 32 do qsound_state.pan_table[f]:=round((256/sqrt(32))*sqrt(f));
   qsound_state.sample_rom_length:=sample_size-1;
-  init_timer(1,sound_status.cpu_clock/(4000000/QSOUND_CLOCKDIV),qsound_update_internal,true);  //Aprox 24.096Hz
+  timers.init(1,sound_status.cpu_clock/(4000000/QSOUND_CLOCKDIV),qsound_update_internal,nil,true);  //Aprox 24.096Hz
   qsound_state.tsample:=init_channel;
 end;
 

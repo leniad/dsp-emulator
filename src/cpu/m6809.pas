@@ -104,10 +104,10 @@ const
         7, 7, 7,$a, 7, 7, 7, 3, 7, 7, 7, 7,$a, 3,$a, 3); //f0
 
     m6809t_1X:array[0..255] of byte=(
-      //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  Instrucciones $10 (+1)
+      //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  Instrucciones $10 y $11 (+1)
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10
-        0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 0, 0, // 20
+        0, 0, 5, 5, 5, 5, 5, 5, 0, 0, 5, 5, 5, 5, 0, 5, // 20
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 30
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 40
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50
@@ -126,7 +126,7 @@ const
       //0 1 2 3 4 5 6 7 8 9 a b c d e f
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //00
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //10
-        0,0,3,3,3,3,3,3,0,0,3,3,3,3,0,0,  //20
+        0,0,3,3,3,3,3,3,0,0,3,3,3,3,0,3,  //20
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //30
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //40
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,  //50
@@ -644,13 +644,13 @@ case instruccion of
           r.cc.c:=false;
           r.cc.z:=true;
       end;
-      $10:begin  //Intrucciones $10XX
+      $10,$11:begin  //Intrucciones $10 y $11
             self.opcode:=true;
             instruccion2:=self.getbyte(r.pc);
             self.opcode:=false;
             r.pc:=r.pc+1;
             case pag_1X[instruccion2] of
-                0:MessageDlg('Num CPU '+inttostr(self.numero_cpu)+' instruccion $10: '+inttohex(instruccion2,2)+' desconocida. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
+                0:MessageDlg('Num CPU '+inttostr(self.numero_cpu)+' instruccion '+inttohex(instruccion,2)+': '+inttohex(instruccion2,2)+' desconocida. PC='+inttohex(r.old_pc,10), mtInformation,[mbOk], 0);
                 1:begin //direct page
                     posicion:=(r.dp shl 8)+self.getbyte(r.pc);
                     r.pc:=r.pc+1;
@@ -672,91 +672,67 @@ case instruccion of
                      posicion:=self.getword(posicion);
                   end;
             end;
-            case instruccion2 of
-              $22:if not(r.cc.c or r.cc.z) then begin //lbhi
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $23:if (r.cc.c or r.cc.z) then begin //bls
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $24:if not(r.cc.c) then begin //lbcc
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $25:if r.cc.c then begin //lbcs
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $26:if not(r.cc.z) then begin //lbne
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $27:if r.cc.z then begin //lbeq
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $2a:if not(r.cc.n) then begin //lbpl
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $2b:if r.cc.n then begin //bmi
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $2c:if (not(r.cc.n)=not(r.cc.v)) then begin //bge
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $2d:if not(not(r.cc.n)=not(r.cc.v)) then begin //bnge
-                    r.pc:=r.pc+smallint(posicion);
-                    self.estados_demas:=self.estados_demas+1;
-                  end;
-              $83,$93,$a3,$b3:m680x_sub16(r.d.w,posicion,@r.cc);  //cmpd
-              $8c,$9c,$ac,$bc:m680x_sub16(r.y,posicion,@r.cc);  //cmpy
-              $8e,$9e,$ae,$be:r.y:=m680x_ld_st16(posicion,@r.cc);  //LDY
-                  $9f,$af,$bf:self.putword(posicion,m680x_ld_st16(r.y,@r.cc)); //STY
-              $ce,$de,$ee,$fe:begin  //LDS
-                    r.s:=m680x_ld_st16(posicion,@r.cc);
-                    r.pila_init:=true;
-                  end;
-                  $df,$ef,$ff:self.putword(posicion,m680x_ld_st16(r.s,@r.cc)); //sts
-            end;
-            self.estados_demas:=self.estados_demas+m6809t_1X[instruccion2];
-          end;
-      $11:begin
-            self.opcode:=true;
-            instruccion2:=self.getbyte(r.pc);
-            self.opcode:=false;
-            r.pc:=r.pc+1;
-            case pag_1X[instruccion2] of
-                0:MessageDlg('Instruccion $11: '+inttohex(instruccion2,2)+' desconocida. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
-                1:begin //direct page
-                    posicion:=(r.dp shl 8)+self.getbyte(r.pc);
-                    r.pc:=r.pc+1;
-                  end;
-                3:begin  //extendido
-                     posicion:=self.getword(r.pc);
-                     r.pc:=r.pc+2;
-                  end;
-                4:posicion:=self.get_indexed;
-                5:begin //direct page word
-                    posicion:=(r.dp shl 8)+self.getbyte(r.pc);
-                    r.pc:=r.pc+1;
-                    posicion:=self.getword(posicion);
-                  end;
-                6:posicion:=self.getword(self.get_indexed); //indexado word
-                7:begin  //extendido word
-                     posicion:=self.getword(r.pc);
-                     r.pc:=r.pc+2;
-                     posicion:=self.getword(posicion);
-                  end;
-            end;
-            case instruccion2 of
-              $3c,$3d:MessageDlg('Num CPU'+inttostr(self.numero_cpu)+'Intento de cambiar a HD6309!!. PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0);
-              $83,$93,$a3,$b3:m680x_sub16(r.u,posicion,@r.cc);  //cmpu
-              $8c:m680x_sub16(r.s,posicion,@r.cc); //cmps
+            if instruccion=$10 then begin
+              case instruccion2 of
+                $22:if not(r.cc.c or r.cc.z) then begin //lbhi
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+                $23:if (r.cc.c or r.cc.z) then begin //bls
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+               $24:if not(r.cc.c) then begin //lbcc
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+                $25:if r.cc.c then begin //lbcs
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+               $26:if not(r.cc.z) then begin //lbne
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+                $27:if r.cc.z then begin //lbeq
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+               $2a:if not(r.cc.n) then begin //lbpl
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+                $2b:if r.cc.n then begin //bmi
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+                $2c:if (not(r.cc.n)=not(r.cc.v)) then begin //bge
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+                $2d:if not(not(r.cc.n)=not(r.cc.v)) then begin //bnge
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+               $2f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then begin //ble
+                      r.pc:=r.pc+smallint(posicion);
+                      self.estados_demas:=self.estados_demas+1;
+                    end;
+                $83,$93,$a3,$b3:m680x_sub16(r.d.w,posicion,@r.cc);  //cmpd
+                $8c,$9c,$ac,$bc:m680x_sub16(r.y,posicion,@r.cc);  //cmpy
+                $8e,$9e,$ae,$be:r.y:=m680x_ld_st16(posicion,@r.cc);  //LDY
+                $9f,$af,$bf:self.putword(posicion,m680x_ld_st16(r.y,@r.cc)); //STY
+                $ce,$de,$ee,$fe:begin  //LDS
+                                  r.s:=m680x_ld_st16(posicion,@r.cc);
+                                  r.pila_init:=true;
+                                end;
+                $df,$ef,$ff:self.putword(posicion,m680x_ld_st16(r.s,@r.cc)); //sts
+              end;
+            end else begin //Instruccionas $11
+              case instruccion2 of
+                $83,$93,$a3,$b3:m680x_sub16(r.u,posicion,@r.cc);  //cmpu
+                $8c:m680x_sub16(r.s,posicion,@r.cc); //cmps
+              end;
             end;
             self.estados_demas:=self.estados_demas+m6809t_1X[instruccion2];
           end;
@@ -1068,7 +1044,7 @@ case instruccion of
 end; //del case!!
 tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
-update_timer(tempw,self.numero_cpu);
+timers.update(tempw,self.numero_cpu);
 end; //del while!!
 end;
 

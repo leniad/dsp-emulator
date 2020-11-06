@@ -27,6 +27,7 @@ unit m68000;
 14/09/14   Añadida asl.w
 12/10/14   Revisados los opcodes $Exxx
 07/11/17   Añadido roxl.w
+15/07/20   Añadido move.w opcode $32 direccionamiento $3b
 }
 
 interface
@@ -63,14 +64,14 @@ type
             procedure change_ram16_calls(getword:tgetword;putword:tputword);
             function save_snapshot(data:pbyte):word;
             procedure load_snapshot(data:pbyte);
+            function getbyte(addr:dword):byte;
+            procedure putbyte(addr:dword;val:byte);
           private
             tipo:byte;
             ea:dword;
             prefetch:boolean;
             temp:dparejas;
             procedure poner_band(pila:word);
-            function getbyte(addr:dword):byte;
-            procedure putbyte(addr:dword;val:byte);
             function getword(addr:dword):word;
             procedure putword(addr:dword;val:word);
             //byte
@@ -323,10 +324,12 @@ case dir of
   $10..$17:self.ea:=r.a[dir and $7].l;  //Registro indirecto AX (An)
   $18..$1f:begin  //indirecto con postincremento (An)+
               self.ea:=r.a[dir and $7].l;
-              r.a[dir and $7].l:=self.ea+1;
+              if (dir and 7)=7 then r.a[7].l:=self.ea+2
+                else r.a[dir and $7].l:=self.ea+1;
            end;
   $20..$27:begin //AX predecremento -(An)
-              r.a[(dir and $7)].l:=r.a[(dir and $7)].l-1;
+              if (dir and $7)=7 then r.a[7].l:=r.a[7].l-2
+                else r.a[(dir and $7)].l:=r.a[(dir and $7)].l-1;
               self.ea:=r.a[dir and $7].l;
            end;
   $28..$2f:begin  //AX indirecto con desplazamiento d(An)
@@ -395,7 +398,7 @@ case des of
            $28..$2f,  ////AX indirecto con desplazamiento
            $30..$37,  //AX indirecto indexado con desplazamiento
            $38,$39:self.putbyte(self.ea,res);
-           else MessageDlg('Mierda direccionamiento poner_b2 - '+inttohex(des,2)+' - '+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
+           else MessageDlg('Mierda direccionamiento poner_b2 - '+inttohex(des,2)+' - '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
         end;
 end;
 
@@ -416,10 +419,14 @@ case des of
            $10..$17:self.ea:=r.a[des and $7].l;  //Registro indirecto AX
            $18..$1f:begin  //indirecto con postincremento
                       self.ea:=r.a[des and $7].l;
-                      r.a[des and $7].l:=r.a[des and $7].l+1;
+                      //Esto es una excepcion A/ siempre es par!!
+                      if (des and 7)=7 then r.a[7].l:=r.a[7].l+2
+                        else r.a[des and $7].l:=r.a[des and $7].l+1;
                     end;
            $20..$27:begin //AX predecremento
-                      r.a[(des and $7)].l:=r.a[(des and $7)].l-1;
+                      //Excepcion!!
+                      if (des and 7)=7 then r.a[7].l:=r.a[7].l-2
+                        else r.a[(des and $7)].l:=r.a[(des and $7)].l-1;
                       self.ea:=r.a[(des and $7)].l;
                     end;
            $28..$2f:begin  ////AX indirecto con desplazamiento
@@ -880,7 +887,6 @@ if dest=39 then res:=res+4;
 calc_move_t_l:=res;
 end;
 
-
 function calc_ea_t_bw(dir:byte):byte;
 begin
 case dir of
@@ -965,8 +971,8 @@ if self.halt then begin
   exit;
 end;
 self.opcode:=true;
-instruccion:=self.getword(r.pc.l);
 r.ppc:=r.pc;
+instruccion:=self.getword(r.pc.l);
 r.pc.l:=r.pc.l+2;
 dir:=instruccion and $3f;
 dest:=(instruccion shr 9) and 7;
@@ -1466,6 +1472,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
         r.cc.z:=(tempw=0);
       end;
    $4:case (instruccion shr 6) and $3f of
+          //00 neg.b
+          //01 neg.w
           $02:begin // # negx.l Añadido 13/07
                 if (dir shr 3)<>0 then self.contador:=self.contador+12+calc_ea_t_l(dir)
                   else self.contador:=self.contador+6;
@@ -1483,6 +1491,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                   else self.contador:=self.contador+8+calc_ea_t_bw(dir);
                 self.ponerdir_w(dir,coger_band(self.r));
               end;
+          //4,5 ??
+          //6,e,16,1e,26,2e,36,3e chk
           $7,$f,$17,$1f,$27,$2f,$37,$3f:begin // # lea
                 r.a[dest].l:=self.leerdir_ea(dir);
                 case dir of
@@ -1524,6 +1534,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 r.cc.c:=false;
                 r.cc.z:=true;
               end;
+          //b, c, d ??
           $10:begin  // # neg.b
                 if (dir shr 3)<>0 then self.contador:=self.contador+8+calc_ea_t_bw(dir)
                   else self.contador:=self.contador+4;
@@ -1963,20 +1974,20 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                 tempw:=self.getword(r.pc.l);
                 r.pc.l:=r.pc.l+2;
                 tempw2:=tempw;
-                  tempb2:=0;
-                  for tempb:=0 to 15 do begin
+                tempb2:=0;
+                for tempb:=0 to 15 do begin
                     if (tempw2 and 1)<>0 then tempb2:=tempb2+1;
                     tempw2:=tempw2 shr 1;
-                  end;
-                  self.contador:=self.contador+(tempb2 shl 2);
-                  case dir of
+                end;
+                self.contador:=self.contador+(tempb2 shl 2);
+                case dir of
                     $10..$1f:self.contador:=self.contador+12;
                     $28..$2f,$38,$3a:self.contador:=self.contador+16;
                     $30..$37,$3b:self.contador:=self.contador+18;
                     $39:self.contador:=self.contador+20;
-                  end;
+                end;
                 case dir of
-                  $10..$17,$28..$37,$39:begin
+                  $10..$17,$28..$37,$39,$3b:begin  //3b añadido 15/07/20
                             templ:=self.leerdir_ea(dir);
                             if (tempw and $0001)<>0 then begin
                               r.d[0].l:=smallint(self.getword(templ));
@@ -2530,12 +2541,12 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               self.contador:=self.contador+140+calc_ea_t_bw(dir);
               tempw:=self.leerdir_w(dir);
               if tempw<>0 then begin
+                  r.cc.c:=false;
                   templ:=r.d[dest].l div tempw;
                   if(templ<$10000) then begin
-              			r.cc.z:=(templ<>0);
+              	    r.cc.z:=(templ<>0);
                     r.cc.n:=(templ and $8000)<>0;
-              			r.cc.v:=false;
-              			r.cc.c:=false;
+              	    r.cc.v:=false;
                     templ2:=r.d[dest].l mod tempw;
                     templ3:=(templ and $ffff) or ((templ2 and $ffff) shl 16);
                     r.d[dest].l:=templ3;
@@ -2645,21 +2656,20 @@ case (instruccion shr 12) of //cojo solo el primer nibble
               divisor:=smallint(self.leerdir_w(dir));
               if divisor<>0 then begin
                   templ:=r.d[dest].l;
+                  r.cc.c:=false;
                   if ((templ=$80000000) and (divisor=-1)) then begin
               			r.cc.z:=true;
               			r.cc.n:=false;
               			r.cc.v:=false;
-                    r.cc.c:=false;
               			r.d[dest].l:=0;
                   end else begin
   		              quotient:=integer(templ) div divisor;
 	  	              remainder:=integer(templ) mod divisor;
 		                if (quotient=smallint(quotient)) then begin
-                      r.cc.z:=(quotient<>0);
-                      r.cc.n:=(quotient and $8000)<>0;
-                      r.cc.v:=false;
-                      r.cc.c:=false;
-                			r.d[dest].l:=((quotient and $ffff) or (remainder shl 16)) and $ffffffff;
+                                    r.cc.z:=(quotient<>0);
+                                    r.cc.n:=(quotient and $8000)<>0;
+                                    r.cc.v:=false;
+                                    r.d[dest].l:=((quotient and $ffff) or (remainder shl 16)) and $ffffffff;
 		                end else r.cc.v:=true;
                   end;
               end else begin
@@ -3303,7 +3313,6 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                $5:begin //roxl.w Añadido el 05/11/17
                     self.contador:=self.contador+8;
                     tempw:=self.leerdir_w(dir);
-	                  //uint32_t res = ROL_17(src | (XFLAG_AS_1(mc68kcpu) << 16), 1);
                     templ2:=tempw or (byte(r.cc.x) shl 16);
                     templ:=(templ2 shl 1) or (templ2 shr 16);
                     self.ponerdir_w2(dir,templ and $ffff);
@@ -3628,7 +3637,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
    else MessageDlg('Instruccion: '+inttostr(instruccion)+' (primer nibble). PC='+inttostr(r.pc.l), mtInformation,[mbOk], 0);
 end;
 //if r.prefetch then self.contador:=self.contador-4;
-update_timer(self.contador-pcontador,self.numero_cpu);
+timers.update(self.contador-pcontador,self.numero_cpu);
 self.prefetch:=true;
 end;  //del while
 end;

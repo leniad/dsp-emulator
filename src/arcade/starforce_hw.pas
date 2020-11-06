@@ -9,24 +9,24 @@ procedure cargar_starforce;
 
 implementation
 const
-        starforce_rom:array[0..2] of tipo_roms=(
-        (n:'starforc.3';l:$4000;p:0;crc:$8ba27691),(n:'starforc.2';l:$4000;p:$4000;crc:$0fc4d2d6),());
-        starforce_fg:array[0..3] of tipo_roms=(
+        starforce_rom:array[0..1] of tipo_roms=(
+        (n:'starforc.3';l:$4000;p:0;crc:$8ba27691),(n:'starforc.2';l:$4000;p:$4000;crc:$0fc4d2d6));
+        starforce_fg:array[0..2] of tipo_roms=(
         (n:'starforc.7';l:$1000;p:0;crc:$f4803339),(n:'starforc.8';l:$1000;p:$1000;crc:$96979684),
-        (n:'starforc.9';l:$1000;p:$2000;crc:$eead1d5c),());
-        starforce_bg1:array[0..3] of tipo_roms=(
+        (n:'starforc.9';l:$1000;p:$2000;crc:$eead1d5c));
+        starforce_bg1:array[0..2] of tipo_roms=(
         (n:'starforc.15';l:$2000;p:0;crc:$c3bda12f),(n:'starforc.14';l:$2000;p:$2000;crc:$9e9384fe),
-        (n:'starforc.13';l:$2000;p:$4000;crc:$84603285),());
-        starforce_bg2:array[0..3] of tipo_roms=(
+        (n:'starforc.13';l:$2000;p:$4000;crc:$84603285));
+        starforce_bg2:array[0..2] of tipo_roms=(
         (n:'starforc.12';l:$2000;p:0;crc:$fdd9e38b),(n:'starforc.11';l:$2000;p:$2000;crc:$668aea14),
-        (n:'starforc.10';l:$2000;p:$4000;crc:$c62a19c1),());
-        starforce_bg3:array[0..3] of tipo_roms=(
+        (n:'starforc.10';l:$2000;p:$4000;crc:$c62a19c1));
+        starforce_bg3:array[0..2] of tipo_roms=(
         (n:'starforc.18';l:$1000;p:0;crc:$6455c3ad),(n:'starforc.17';l:$1000;p:$1000;crc:$68c60d0f),
-        (n:'starforc.16';l:$1000;p:$2000;crc:$ce20b469),());
+        (n:'starforc.16';l:$1000;p:$2000;crc:$ce20b469));
         starforce_sound:tipo_roms=(n:'starforc.1';l:$2000;p:0;crc:$2735bb22);
-        starforce_sprites:array[0..3] of tipo_roms=(
+        starforce_sprites:array[0..2] of tipo_roms=(
         (n:'starforc.6';l:$4000;p:0;crc:$5468a21d),(n:'starforc.5';l:$4000;p:$4000;crc:$f71717f8),
-        (n:'starforc.4';l:$4000;p:$8000;crc:$dd9d68a4),());
+        (n:'starforc.4';l:$4000;p:$8000;crc:$dd9d68a4));
         //DIP
         starforce_dipa:array [0..5] of def_dip=(
         (mask:$3;name:'Coin A';number:4;dip:((dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$3;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -384,39 +384,39 @@ sn_76496_0:=sn76496_chip.Create(2000000);
 sn_76496_1:=sn76496_chip.Create(2000000);
 sn_76496_2:=sn76496_chip.Create(2000000);
 //cargar roms
-if not(cargar_roms(@memoria[0],@starforce_rom[0],'starforc.zip',0)) then exit;
+if not(roms_load(@memoria,starforce_rom)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@starforce_sound,'starforc.zip',1)) then exit;
+if not(roms_load(@mem_snd,starforce_sound)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@starforce_fg[0],'starforc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,starforce_fg)) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0,512*8*8,2*512*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
 //big sprites
-if not(cargar_roms(@memoria_temp[0],@starforce_sprites[0],'starforc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,starforce_sprites)) then exit;
 init_gfx(2,32,32,128);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,128*8,0,128*32*32,2*128*32*32);
-convert_gfx(2,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
+convert_gfx(2,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
 //sprites
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,0,512*16*16,2*512*16*16);
-convert_gfx(1,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
 //bg1
-if not(cargar_roms(@memoria_temp[0],@starforce_bg1[0],'starforc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,starforce_bg1)) then exit;
 init_gfx(3,16,16,768);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(3,3,32*8,0,256*16*16,2*256*16*16);
-convert_gfx(3,0,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
+convert_gfx(3,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
 //bg2
-if not(cargar_roms(@memoria_temp[0],@starforce_bg2[0],'starforc.zip',0)) then exit;
-convert_gfx(3,256*16*16,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
+if not(roms_load(@memoria_temp,starforce_bg2)) then exit;
+convert_gfx(3,256*16*16,@memoria_temp,@pbs_x,@pbs_y,true,false);
 //bg3
-if not(cargar_roms(@memoria_temp[0],@starforce_bg3[0],'starforc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,starforce_bg3)) then exit;
 gfx_set_desc_data(3,3,32*8,0,128*16*16,2*128*16*16);
-convert_gfx(3,512*16*16,@memoria_temp[0],@pbs_x[0],@pbs_y[0],true,false);
+convert_gfx(3,512*16*16,@memoria_temp,@pbs_x,@pbs_y,true,false);
 //DIP
 marcade.dswa:=$c0;
 marcade.dswa_val:=@starforce_dipa;

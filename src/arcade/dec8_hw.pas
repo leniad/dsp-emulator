@@ -43,9 +43,8 @@ var
 
 procedure draw_sprites(pri:byte);inline;
 var
-  f,nchar:word;
+  x,y,f,nchar:word;
   color,atrib:byte;
-  x,y:word;
   flipy:boolean;
 begin
   for f:=0 to $7f do begin
@@ -71,8 +70,7 @@ end;
 
 procedure update_video_dec8;inline;
 var
-  f,nchar,color,atrib:word;
-  x,y:word;
+  f,nchar,color,atrib,x,y:word;
 begin
 for f:=0 to $1ff do begin
     atrib:=memoria[$1400+(f*2)];
@@ -213,7 +211,6 @@ end;
 
 procedure putbyte_dec8(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   0..$7ff,$c00..$13ff:memoria[direccion]:=valor;
   $800..$bff:if memoria[direccion]<>valor then begin
@@ -227,7 +224,7 @@ case direccion of
   $1800:begin
           i8751_value:=(i8751_value and $ff) or (valor shl 8);
           mcs51_0.change_irq1(ASSERT_LINE);
-          timer[mcu_irq_timer].enabled:=true;
+          timers.enabled(mcu_irq_timer,true);
         end;
   $1801:i8751_value:=(i8751_value and $ff00) or valor;
   $1802:;//i8751_return:=0;
@@ -250,6 +247,7 @@ case direccion of
                   buffer_paleta[(direccion and $ff)+$100]:=valor;
                   cambiar_color(direccion and $ff);
                end;
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -268,13 +266,13 @@ end;
 
 procedure putbyte_snd_dec8(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
   0..$5ff:mem_snd[direccion]:=valor;
   $2000:ym2203_0.control(valor);
   $2001:ym2203_0.write(valor);
   $4000:ym3812_0.control(valor);
   $4001:ym3812_0.write(valor);
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -287,22 +285,22 @@ end;
 //MCU
 function in_port0:byte;
 begin
-     in_port0:=i8751_port0;
+  in_port0:=i8751_port0;
 end;
 
 function in_port2:byte;
 begin
-     in_port2:=$ff;
+  in_port2:=$ff;
 end;
 
 function in_port3:byte;
 begin
-     in_port3:=marcade.in2;
+  in_port3:=marcade.in2;
 end;
 
 procedure out_port0(valor:byte);
 begin
-     i8751_port0:=valor;
+  i8751_port0:=valor;
 end;
 
 procedure out_port2(valor:byte);
@@ -317,8 +315,8 @@ end;
 
 procedure i8751_irq;
 begin
-     timer[mcu_irq_timer].enabled:=false;
-     mcs51_0.change_irq1(CLEAR_LINE);
+  timers.enabled(mcu_irq_timer,false);
+  mcs51_0.change_irq1(CLEAR_LINE);
 end;
 
 procedure snd_irq(irqstate:byte);
@@ -348,14 +346,12 @@ end;
 function iniciar_dec8:boolean;
 const
     pc_x:array[0..7] of dword=($2000*8+0, $2000*8+1, $2000*8+2, $2000*8+3, 0, 1, 2, 3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(16*8, 1+(16*8), 2+(16*8), 3+(16*8), 4+(16*8), 5+(16*8), 6+(16*8), 7+(16*8),
 		0,1,2,3,4,5,6,7);
-    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8);
+    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,
+        8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8);
     pt_x:array[0..15] of dword=(0, 1, 2, 3, 1024*8*8+0, 1024*8*8+1, 1024*8*8+2, 1024*8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+1024*8*8+0, 16*8+1024*8*8+1, 16*8+1024*8*8+2, 16*8+1024*8*8+3);
-    pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 var
   f:word;
   memoria_temp,memoria_temp2:array[0..$3ffff] of byte;
@@ -364,9 +360,9 @@ iniciar_dec8:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,256,512);
-screen_mod_scroll(2,0,0,0,512,256,511);
+screen_mod_scroll(2,256,256,255,512,256,511);
 screen_init(3,256,512,true);
-screen_mod_scroll(3,0,0,0,512,256,511);
+screen_mod_scroll(3,256,256,255,512,256,511);
 screen_init(4,256,512,false,true);
 iniciar_video(240,256);
 //Main CPU
@@ -379,13 +375,13 @@ m6502_0.init_sound(dec8_sound_update);
 //MCU
 mcs51_0:=cpu_mcs51.create(8000000,264);
 mcs51_0.change_io_calls(in_port0,nil,in_port2,in_port3,out_port0,nil,out_port2,nil);
-mcu_irq_timer:=init_timer(mcs51_0.numero_cpu,64,i8751_irq,false);
+mcu_irq_timer:=timers.init(mcs51_0.numero_cpu,64,i8751_irq,nil,false);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(1500000,0.5,0.5);
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.7);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms y ponerlas en su sitio
-if not(roms_load(@memoria_temp,@srd_rom,'srdarwin.zip',sizeof(srd_rom))) then exit;
+if not(roms_load(@memoria_temp,srd_rom)) then exit;
 copymemory(@rom[4,0],@memoria_temp[0],$4000);
 copymemory(@rom[5,0],@memoria_temp[$4000],$4000);
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
@@ -394,18 +390,18 @@ copymemory(@rom[1,0],@memoria_temp[$14000],$4000);
 copymemory(@rom[2,0],@memoria_temp[$18000],$4000);
 copymemory(@rom[3,0],@memoria_temp[$1c000],$4000);
 //cargar roms audio y desencriptar
-if not(roms_load(@mem_snd,@srd_snd,'srdarwin.zip',sizeof(srd_snd))) then exit;
+if not(roms_load(@mem_snd,srd_snd)) then exit;
 for f:=$8000 to $ffff do snd_dec[f-$8000]:=bitswap8(mem_snd[f],7,5,6,4,3,2,1,0);
 //cargar ROM MCU
-if not(roms_load(mcs51_0.get_rom_addr,@srd_mcu,'srdarwin.zip',sizeof(srd_mcu))) then exit;
+if not(roms_load(mcs51_0.get_rom_addr,srd_mcu)) then exit;
 //Cargar chars
-if not(roms_load(@memoria_temp,@srd_char,'srdarwin.zip',sizeof(srd_char))) then exit;
+if not(roms_load(@memoria_temp,srd_char)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,4);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,true);
 //Cargar tiles y ponerlas en su sitio
-if not(roms_load(@memoria_temp,@srd_tiles,'srdarwin.zip',sizeof(srd_tiles))) then exit;
+if not(roms_load(@memoria_temp,srd_tiles)) then exit;
 for f:=0 to 3 do begin
   copymemory(@memoria_temp2[$10000*f],@memoria_temp[$4000*f],$4000);
   copymemory(@memoria_temp2[$8000+($10000*f)],@memoria_temp[$10000+($4000*f)],$4000);
@@ -413,9 +409,9 @@ end;
 init_gfx(1,16,16,$400);
 for f:=0 to 7 do gfx[1].trans[f]:=true;
 gfx_set_desc_data(4,4,32*8,$8000*8,$8000*8+4,0,4);
-for f:=0 to 3 do convert_gfx(1,$100*f*16*16,@memoria_temp2[$10000*f],@pt_x,@pt_y,false,true);
+for f:=0 to 3 do convert_gfx(1,$100*f*16*16,@memoria_temp2[$10000*f],@pt_x,@ps_y,false,true);
 //Cargar sprites
-if not(roms_load(@memoria_temp,@srd_sprites,'srdarwin.zip',sizeof(srd_sprites))) then exit;
+if not(roms_load(@memoria_temp,srd_sprites)) then exit;
 init_gfx(2,16,16,$800);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,16*16,$10000*8,$20000*8,$0*8);

@@ -51,9 +51,6 @@ type
     RadioButton8: TRadioButton;
     Edit7: TEdit;
     Button15: TButton;
-    GroupBox4: TGroupBox;
-    RadioButton9: TRadioButton;
-    RadioButton10: TRadioButton;
     procedure Button15Click(Sender: TObject);
     procedure Button13Click(Sender: TObject);
     procedure Button14Click(Sender: TObject);
@@ -97,7 +94,6 @@ lenslok.activo:=radiobutton12.Checked;
 if radiobutton5.Checked then cpc_ga.ram_exp:=0
   else if radiobutton6.Checked then cpc_ga.ram_exp:=1
     else if radiobutton7.Checked then cpc_ga.ram_exp:=2;
-cpc_ppi.use_motor:=radiobutton9.Checked;
 if lenslok.activo then lenslock1.Show;
 configcpc.Close;
 end;
@@ -121,7 +117,7 @@ if OpenRom(StAmstradROM,file_name) then begin
     5:configcpc.Edit5.Text:=file_name;
     6:configcpc.Edit6.Text:=file_name;
   end;
-  cpc_rom_slot[number]:=file_name;
+  cpc_rom[number].name:=file_name;
 end;
 end;
 
@@ -136,7 +132,7 @@ case number of
   5:configcpc.Edit5.Text:='';
   6:configcpc.Edit6.Text:='';
 end;
-cpc_rom_slot[number]:='';
+cpc_rom[number].name:='';
 end;
 
 procedure TConfigCPC.Button15Click(Sender: TObject);
@@ -217,13 +213,13 @@ case main_vars.tipo_maquina of
       end;
     end;
 end;
-Edit7.Text:=cpc_rom_slot[0];
-Edit1.Text:=cpc_rom_slot[1];
-Edit2.Text:=cpc_rom_slot[2];
-Edit3.Text:=cpc_rom_slot[3];
-Edit4.Text:=cpc_rom_slot[4];
-Edit5.Text:=cpc_rom_slot[5];
-Edit6.Text:=cpc_rom_slot[6];
+Edit7.Text:=cpc_rom[0].name;
+Edit1.Text:=cpc_rom[1].name;
+Edit2.Text:=cpc_rom[2].name;
+Edit3.Text:=cpc_rom[3].name;
+Edit4.Text:=cpc_rom[4].name;
+Edit5.Text:=cpc_rom[5].name;
+Edit6.Text:=cpc_rom[6].name;
 //Lenslock
 if lenslok.activo then radiobutton12.Checked:=true
   else radiobutton13.Checked:=true;
@@ -232,8 +228,6 @@ case cpc_ga.ram_exp of
   1:radiobutton6.Checked:=true;
   2:radiobutton7.Checked:=true;
 end;
-if cpc_ppi.use_motor then radiobutton9.Checked:=true
-  else radiobutton10.Checked:=true;
 end;
 
 procedure TConfigCPC.Button10Click(Sender: TObject);

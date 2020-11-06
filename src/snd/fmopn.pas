@@ -194,10 +194,8 @@ const
     18,18,18,18,18,18,18,18,
 
     // rates 00-11
-    //Nuevo 29/08/08 0,1,2,3, 0,1,2,3,
-    18,18,0,0,
-    0,0,2,2,
-
+    0,1,2,3,
+    0,1,2,3,
     0,1,2,3,
     0,1,2,3,
     0,1,2,3,
@@ -727,15 +725,14 @@ procedure init_timetables(ST:pfm_state;dttable:pbyte);
 var
 	i,d:integer;
 	rate,divisor:single;
-  dt_pos:pbyte;
+  tempb:byte;
 begin
 	// DeTune table
 	for d:=0 to 3 do begin
 		for i:=0 to 31 do begin
-      dt_pos:=dttable;
-      inc(dt_pos,d*32+i);
+      tempb:=dttable[d*32+i];
       divisor:=(1 shl 20);
-			rate:=dt_pos^*SIN_LEN*ST.freqbase*(1 shl FREQ_SH);
+			rate:=tempb*SIN_LEN*ST.freqbase*(1 shl FREQ_SH);
       rate:=rate/divisor;
 			ST.dt_tab[d][i]:=trunc(rate);
 			ST.dt_tab[d+4][i]:=-trunc(rate);
@@ -1054,7 +1051,7 @@ var
 	swap_flag:dword;
 	i:dword;
   SLOT:pfm_slot;
-  tmp:integer;
+  tmp:single;
 begin
 	i:=4; // four operators per channel
   while i<>0 do begin
@@ -1063,10 +1060,10 @@ begin
 		case SLOT.state of
 		  EG_ATT:begin		// attack phase
 			  if ((OPN.eg_cnt and ((1 shl SLOT.eg_sh_ar)-1))=0) then begin
-          tmp:=eg_inc[SLOT.eg_sel_ar+((OPN.eg_cnt shr SLOT.eg_sh_ar) and 7)];
+          tmp:=(not(SLOT.volume)*eg_inc[SLOT.eg_sel_ar+((OPN.eg_cnt shr SLOT.eg_sh_ar) and 7)])/16;
           //Por raro que parezca Delphi no hace bien el shr con simbolo!!!
           //Lo hago asi para conservar el simbolo!!!!
-				  SLOT.volume:=SLOT.volume+((not(SLOT.volume)*tmp) div 16);
+				  SLOT.volume:=trunc(SLOT.volume+tmp);
 				  if (SLOT.volume<=MIN_ATT_INDEX) then begin
 					  SLOT.volume:=MIN_ATT_INDEX;
 					  SLOT.state:=EG_DEC;
@@ -1170,8 +1167,8 @@ begin
 		  // non-standard sinus
 		  m:=sin(((i*2)+1)*M_PI/SIN_LEN); // checked against the real chip
 		  // we never reach zero here due to ((i*2)+1)
-		  if (m>0.0) then o:=8*log10(1.0/m)/log10(2)	// convert to 'decibels'
-		    else o:=8*log10(-1.0/m)/log10(2);	// convert to 'decibels'
+		  if (m>0.0) then o:=8*ln(1.0/m)/ln(2)	// convert to 'decibels'
+		    else o:=8*ln(-1.0/m)/ln(2);	// convert to 'decibels'
 		  o:=o/(ENV_STEP/4);
 		  n:=trunc(2.0*o);
 		  if (n and 1)<>0 then n:=(n shr 1)+1 // round to nearest

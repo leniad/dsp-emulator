@@ -76,7 +76,7 @@ var
   f:byte;
 begin
   for f:=0 to 3 do self.voice[f]:=tKDSC_Voice.create(rom,size);
-  self.ntimer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/CLOCKS_PER_SAMPLE),internal_update_k053260,true);
+  self.ntimer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/CLOCKS_PER_SAMPLE),internal_update_k053260,nil,true);
   self.tsample_num:=init_channel;
   self.tsample_num2:=init_channel;
   self.amp:=amp;

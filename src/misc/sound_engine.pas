@@ -33,19 +33,20 @@ type
         end;
 
 var
-        tsample:array[0..MAX_CANALES-1,0..LONG_MAX_AUDIO-1] of smallint;
         sound_status:tipo_sonido;
-        update_sound_proc:exec_type;
+        update_sound_proc:exec_type_simple;
         sound_engine_timer:byte;
         {$ifndef fpc}
+        tsample:array[0..MAX_CANALES-1,0..LONG_MAX_AUDIO-1] of smallint;
         cab_audio:array[0..MAX_CANALES-1,0..MAX_AUDIO_BUFFER-1] of wavehdr;
         {$else}
-        sample_final:array[0..LONG_MAX_AUDIO-1] of smallint;
         sound_device:libSDL_AudioDeviceID;
+        tsample:array[0..MAX_CANALES-1,0..LONG_MAX_AUDIO-1] of integer;
+        sample_final:array[0..LONG_MAX_AUDIO-1] of smallint;
         {$endif}
 
 function iniciar_audio(stereo_sound:boolean):boolean;
-procedure sound_engine_init(num_cpu:byte;clock:dword;update_call:exec_type);
+procedure sound_engine_init(num_cpu:byte;clock:dword;update_call:exec_type_simple);
 procedure sound_engine_change_clock(clock:single);
 procedure reset_audio;
 procedure play_sonido;
@@ -177,7 +178,7 @@ end;
 
 procedure play_sonido;
 var
-  f:integer;
+  f{$ifdef fpc},j{$endif}:integer;
   g,h:word;
 begin
 if ((sound_status.hay_tsonido) and (sound_status.hay_sonido)) then begin
@@ -187,28 +188,28 @@ for f:=0 to sound_status.canales_usados do begin
   case sound_status.calidad_audio of
     0:if sound_status.stereo then begin
         g:=0;
-        while g<sound_status.sample_final do begin
+        while g<sound_status.long_sample do begin
           tsample[f,g]:=(tsample[f,h]+tsample[f,h+2]+tsample[f,h+4]+tsample[f,h+6]) shr 2;
           tsample[f,g+1]:=(tsample[f,h+1]+tsample[f,h+3]+tsample[f,h+5]+tsample[f,h+7]) shr 2;
           h:=h+8;
           g:=g+2;
         end;
       end else begin
-         for g:=0 to (sound_status.sample_final-1) do begin
+         for g:=0 to (sound_status.long_sample-1) do begin
           tsample[f,g]:=(tsample[f,h]+tsample[f,h+1]+tsample[f,h+2]+tsample[f,h+3]) shr 2;
           h:=h+4;
          end;
       end;
     1:if sound_status.stereo then begin
           g:=0;
-          while g<sound_status.sample_final do begin
+          while g<sound_status.long_sample do begin
             tsample[f,g]:=(tsample[f,h]+tsample[f,h+2]) shr 1;
             tsample[f,g+1]:=(tsample[f,h+1]+tsample[f,h+3]) shr 1;
             h:=h+4;
             g:=g+2;
           end;
        end else begin
-          for g:=0 to (sound_status.sample_final-1) do begin
+          for g:=0 to (sound_status.long_sample-1) do begin
             tsample[f,g]:=(tsample[f,h]+tsample[f,h+1]) shr 1;
             h:=h+2;
           end;
@@ -217,36 +218,42 @@ for f:=0 to sound_status.canales_usados do begin
   end;
   if @sound_status.filter_call[f]<>nil then sound_status.filter_call[f](f);
   {$ifndef fpc}
-  copymemory(cab_audio[f][sound_status.num_buffer].lpData,@tsample[f],sound_status.sample_final*2);
+  copymemory(cab_audio[f][sound_status.num_buffer].lpData,@tsample[f],sound_status.sample_final*sizeof(smallint));
   waveOutWrite(sound_status.audio[f],@cab_audio[f][sound_status.num_buffer],sizeof(WAVEHDR));
-  {$else}
-  for h:=0 to (sound_status.sample_final-1) do sample_final[h]:=sample_final[h]+tsample[f,h];
+  fillchar(tsample[f],LONG_MAX_AUDIO*sizeof(smallint),0);
   {$endif}
-  fillchar(tsample[f],LONG_MAX_AUDIO,0);
-end;
+  end;
 end;
 {$ifdef fpc}
 if main_screen.rapido then SDL_ClearQueuedAudio(sound_device);
-for h:=0 to (sound_status.sample_final-1) do sample_final[h]:=sample_final[h] div (sound_status.canales_usados+1);
-SDL_QueueAudio(sound_device,@sample_final[0],sound_status.long_sample*sizeof(smallint));
-fillchar(sample_final[0],LONG_MAX_AUDIO*sizeof(smallint),0);
-{$endif}
+for h:=0 to (sound_status.sample_final-1) do begin
+    j:=0;
+    for f:=0 to sound_status.canales_usados do j:=j+tsample[f,h];
+    j:=j div (sound_status.canales_usados+1);
+    if j<-32767 then j:=-32767
+       else if j>32768 then j:=32768;
+    sample_final[h]:=j;
+end;
+SDL_QueueAudio(sound_device,@sample_final[0],sound_status.sample_final*sizeof(smallint));
+for f:=0 to sound_status.canales_usados do fillchar(tsample[f],LONG_MAX_AUDIO*sizeof(integer),0);
+{$else}
 sound_status.num_buffer:=sound_status.num_buffer+1;
 if sound_status.num_buffer=MAX_AUDIO_BUFFER then sound_status.num_buffer:=0;
+{$endif}
 sound_status.posicion_sonido:=0;
 end;
 
-procedure sound_engine_init(num_cpu:byte;clock:dword;update_call:exec_type);
+procedure sound_engine_init(num_cpu:byte;clock:dword;update_call:exec_type_simple);
 begin
   sound_status.cpu_clock:=clock;
   sound_status.cpu_num:=num_cpu;
-  sound_engine_timer:=init_timer(num_cpu,clock/FREQ_BASE_AUDIO,sound_update_internal,true);
+  sound_engine_timer:=timers.init(num_cpu,clock/FREQ_BASE_AUDIO,sound_update_internal,nil,true);
   update_sound_proc:=update_call;
 end;
 
 procedure sound_engine_change_clock(clock:single);
 begin
-  timer[sound_engine_timer].time_final:=clock/FREQ_BASE_AUDIO;
+  timers.timer[sound_engine_timer].time_final:=clock/FREQ_BASE_AUDIO;
   sound_status.cpu_clock:=trunc(clock);
 end;
 

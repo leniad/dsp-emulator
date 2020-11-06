@@ -76,10 +76,7 @@ procedure z80ctc_reset(num:byte);
 function z80ctc_irq_state(num:byte):byte;
 function z80ctc_irq_ack(num:byte):byte;
 procedure z80ctc_irq_reti(num:byte);
-procedure ctc_chan_00;
-procedure ctc_chan_01;
-procedure ctc_chan_02;
-procedure ctc_chan_03;
+procedure ctc_channnel(index:byte);
 procedure z80ctc_trg00_w(data:byte);
 procedure z80ctc_trg01_w(data:byte);
 procedure z80ctc_trg02_w(data:byte);
@@ -117,7 +114,7 @@ procedure chanel_reset(ctc_channel:ptipo_ctc_channel);
 begin
 	ctc_channel.m_mode:=RESET_ACTIVE;
 	ctc_channel.m_tconst:=$100;
-  timer[ctc_channel.m_timer].enabled:=false;
+  timers.enabled(ctc_channel.m_timer,false);
 	ctc_channel.m_int_state:=0;
 end;
 
@@ -140,12 +137,7 @@ begin
 	ctc_channel:=z80_ctc[num].ctc_channel[index];
 	ctc_channel.m_zc:=write_line;
 	ctc_channel.m_notimer:=notimer;
-  case index of
-    0:ctc_channel.m_timer:=init_timer(num_cpu,0,ctc_chan_00,false);
-    1:ctc_channel.m_timer:=init_timer(num_cpu,0,ctc_chan_01,false);
-    2:ctc_channel.m_timer:=init_timer(num_cpu,0,ctc_chan_02,false);
-    3:ctc_channel.m_timer:=init_timer(num_cpu,0,ctc_chan_03,false);
-  end;
+  ctc_channel.m_timer:=timers.init(num_cpu,0,nil,ctc_channnel,false,index);
 end;
 
 procedure z80ctc_init(num,num_cpu:byte;clock,clock_cpu:single;m_notimer:byte;intr:cpu_outport_call;m_zc0,m_zc1,m_zc2:cpu_outport_call);
@@ -244,24 +236,9 @@ begin
 	ctc_channel.m_down:=ctc_channel.m_tconst;
 end;
 
-procedure ctc_chan_00;
+procedure ctc_channnel(index:byte);
 begin
-  timer_callback(0,0);
-end;
-
-procedure ctc_chan_01;
-begin
-  timer_callback(0,1);
-end;
-
-procedure ctc_chan_02;
-begin
-  timer_callback(0,2);
-end;
-
-procedure ctc_chan_03;
-begin
-  timer_callback(0,3);
+  timer_callback(0,index);
 end;
 
 function period(num:byte;ctc_channel:ptipo_ctc_channel):single;
@@ -301,10 +278,10 @@ begin
 			if (((ctc_channel.m_mode and WAITING_FOR_TRIG)<>0) and ((ctc_channel.m_mode and MODE)=MODE_TIMER)) then begin
 				if not(ctc_channel.m_notimer) then begin
 					curperiod:=period(num,ctc_channel);
-          timer[ctc_channel.m_timer].time_final:=curperiod/z80_ctc[num].clock_cpu;
-          timer[ctc_channel.m_timer].enabled:=true;
+          timers.timer[ctc_channel.m_timer].time_final:=curperiod/z80_ctc[num].clock_cpu;
+          timers.enabled(ctc_channel.m_timer,true);
 				end else begin
-          timer[ctc_channel.m_timer].enabled:=false;
+          timers.enabled(ctc_channel.m_timer,false);
         end;
 			end;
 			// we're no longer waiting
@@ -345,8 +322,8 @@ begin
 	// else compute the down counter value
     if ((ctc_channel.m_mode and PRESCALER)=PRESCALER_16) then period:=z80_ctc[num].m_period16
       else period:=z80_ctc[num].m_period256;
-		if (@timer[ctc_channel.m_timer].execute<>nil) then
-      ctc_read:=trunc(timer[ctc_channel.m_timer].actual_time/period) and $ff
+		if (@timers.timer[ctc_channel.m_timer].execute_param<>nil) then
+      ctc_read:=trunc(timers.timer[ctc_channel.m_timer].actual_time/period) and $ff
 		else ctc_read:=0;
 	end;
 end;
@@ -372,9 +349,9 @@ begin
 			if ((ctc_channel.m_mode and TRIGGER)=TRIGGER_AUTO) then begin
 				if not(ctc_channel.m_notimer) then begin
 					curperiod:=period(num,ctc_channel);
-          timer[ctc_channel.m_timer].time_final:=curperiod/z80_ctc[num].clock_cpu;
-          timer[ctc_channel.m_timer].enabled:=true;
-				end else timer[ctc_channel.m_timer].enabled:=false;
+          timers.timer[ctc_channel.m_timer].time_final:=curperiod/z80_ctc[num].clock_cpu;
+          timers.enabled(ctc_channel.m_timer,true);
+				end else timers.enabled(ctc_channel.m_timer,false);
 			end else
 			// else set the bit indicating that we're waiting for the appropriate trigger
 				ctc_channel.m_mode:=ctc_channel.m_mode or WAITING_FOR_TRIG;
@@ -390,7 +367,7 @@ begin
 		ctc_channel.m_mode:=data;
 		// if we're being reset, clear out any pending timers for this channel
 		if ((data and RESET)=RESET_ACTIVE) then begin
-			timer[ctc_channel.m_timer].enabled:=false;
+			timers.enabled(ctc_channel.m_timer,false);
     end;
   end;
 end;

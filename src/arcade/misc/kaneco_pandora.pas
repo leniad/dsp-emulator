@@ -4,46 +4,60 @@ interface
 uses gfx_engine,misc_functions;
 
 type
-  pandora_type=record
-    sprite_ram:array[0..$fff] of byte;
-    bg_color:byte;
-    clear_screen:boolean;
-    mask_nchar:word;
-    color_offset:word;
+  pandora_gfx=class
+    constructor create(sprite_mask,color_offset:word;clear_screen:boolean);
+    destructor free;
+    public
+      procedure reset;
+      procedure update_video(screen,ngfx:byte);
+      //Read/write 8 bits
+      procedure spriteram_w8(offset:word;data:byte);
+      function spriteram_r8(offset:word):byte;
+      procedure spriteram_w16(offset:word;data:byte);
+      function spriteram_r16(offset:word):byte;
+    private
+      sprite_ram:array[0..$fff] of byte;
+      bg_color:byte;
+      clear_screen:boolean;
+      mask_nchar:word;
+      color_offset:word;
   end;
 
-procedure pandora_reset;
-procedure pandora_update_video(screen,ngfx:byte);
-//Read/write 8 bits
-procedure pandora_spriteram_w(offset:word;data:byte);
-function pandora_spriteram_r(offset:word):byte;
-
 var
-  pandora:pandora_type;
+  pandora_0:pandora_gfx;
 
 implementation
 
-procedure pandora_reset;
+constructor pandora_gfx.create(sprite_mask,color_offset:word;clear_screen:boolean);
 begin
-  pandora.bg_color:=0;
-  fillchar(pandora.sprite_ram[0],$1000,0);
+  self.mask_nchar:=sprite_mask;
+  self.color_offset:=color_offset;
+  self.clear_screen:=clear_screen;
 end;
 
-procedure pandora_update_video(screen,ngfx:byte);
-var
-  f:word;
-  color:word;
-  sx,sy,x,y,nchar,atrib:word;
+destructor pandora_gfx.free;
 begin
-if pandora.clear_screen then fill_full_screen(screen,pandora.bg_color);
+end;
+
+procedure pandora_gfx.reset;
+begin
+  self.bg_color:=0;
+  fillchar(self.sprite_ram,$1000,0);
+end;
+
+procedure pandora_gfx.update_video(screen,ngfx:byte);
+var
+  f,color,sx,sy,x,y,nchar,atrib:word;
+begin
+if self.clear_screen then fill_full_screen(screen,self.bg_color);
 x:=0;
 y:=0;
 for f:=0 to $1ff do begin
-  atrib:=pandora.sprite_ram[(f*8)+7];
-  nchar:=((atrib and $3f) shl 8)+pandora.sprite_ram[(f*8)+6];
-  sx:=pandora.sprite_ram[(f*8)+4];
-	sy:=pandora.sprite_ram[(f*8)+5];
-  color:=pandora.sprite_ram[(f*8)+3];
+  atrib:=self.sprite_ram[(f*8)+7];
+  nchar:=((atrib and $3f) shl 8)+self.sprite_ram[(f*8)+6];
+  sx:=self.sprite_ram[(f*8)+4];
+	sy:=self.sprite_ram[(f*8)+5];
+  color:=self.sprite_ram[(f*8)+3];
   sx:=sx+((color and 1) shl 8);
   sy:=sy+((color and 2) shl 7);
   if (color and 4)<>0 then begin
@@ -54,23 +68,33 @@ for f:=0 to $1ff do begin
 			y:=sy and $1ff;
   end;
   if nchar=0 then continue;
-  put_gfx_sprite(nchar and pandora.mask_nchar,(color and $f0)+pandora.color_offset,(atrib and $80)<>0,(atrib and $40)<>0,ngfx);
+  put_gfx_sprite(nchar and self.mask_nchar,(color and $f0)+self.color_offset,(atrib and $80)<>0,(atrib and $40)<>0,ngfx);
   actualiza_gfx_sprite(x,y,screen,ngfx);
 end;
 end;
 
-procedure pandora_spriteram_w(offset:word;data:byte);
+procedure pandora_gfx.spriteram_w8(offset:word;data:byte);
 begin
 	// it's either hooked up oddly on this, or on the 16-bit games
 	// either way, we swap the address lines so that the spriteram is in the same format
 	offset:=BITSWAP16(offset,15,14,13,12,11,7,6,5,4,3,2,1,0,10,9,8);
-	pandora.sprite_ram[offset]:=data;
+	self.sprite_ram[offset]:=data;
 end;
 
-function pandora_spriteram_r(offset:word):byte;
+function pandora_gfx.spriteram_r8(offset:word):byte;
 begin
 	offset:=BITSWAP16(offset,15,14,13,12,11,7,6,5,4,3,2,1,0,10,9,8);
-	pandora_spriteram_r:=pandora.sprite_ram[offset];
+	spriteram_r8:=self.sprite_ram[offset];
+end;
+
+procedure pandora_gfx.spriteram_w16(offset:word;data:byte);
+begin
+  self.sprite_ram[offset shr 1]:=data;
+end;
+
+function pandora_gfx.spriteram_r16(offset:word):byte;
+begin
+  spriteram_r16:=self.sprite_ram[offset shr 1];
 end;
 
 end.

@@ -10,53 +10,85 @@ procedure cargar_hlwings;
 implementation
 const
         //legendary wings
-        lwings_rom:array[0..3] of tipo_roms=(
+        lwings_rom:array[0..2] of tipo_roms=(
         (n:'6c_lw01.bin';l:$8000;p:0;crc:$b55a7f60),(n:'7c_lw02.bin';l:$8000;p:$8000;crc:$a5efbb1b),
-        (n:'9c_lw03.bin';l:$8000;p:$10000;crc:$ec5cc201),());
+        (n:'9c_lw03.bin';l:$8000;p:$10000;crc:$ec5cc201));
         lwings_snd_rom:tipo_roms=(n:'11e_lw04.bin';l:$8000;p:0;crc:$a20337a2);
         lwings_char:tipo_roms=(n:'9h_lw05.bin';l:$4000;p:0;crc:$091d923c);
-        lwings_sprites:array[0..4] of tipo_roms=(
+        lwings_sprites:array[0..3] of tipo_roms=(
         (n:'3j_lw17.bin';l:$8000;p:0;crc:$5ed1bc9b),(n:'1j_lw11.bin';l:$8000;p:$8000;crc:$2a0790d6),
-        (n:'3h_lw16.bin';l:$8000;p:$10000;crc:$e8834006),(n:'1h_lw10.bin';l:$8000;p:$18000;crc:$b693f5a5),());
-        lwings_tiles:array[0..8] of tipo_roms=(
+        (n:'3h_lw16.bin';l:$8000;p:$10000;crc:$e8834006),(n:'1h_lw10.bin';l:$8000;p:$18000;crc:$b693f5a5));
+        lwings_tiles:array[0..7] of tipo_roms=(
         (n:'3e_lw14.bin';l:$8000;p:0;crc:$5436392c),(n:'1e_lw08.bin';l:$8000;p:$8000;crc:$b491bbbb),
         (n:'3d_lw13.bin';l:$8000;p:$10000;crc:$fdd1908a),(n:'1d_lw07.bin';l:$8000;p:$18000;crc:$5c73d406),
         (n:'3b_lw12.bin';l:$8000;p:$20000;crc:$32e17b3c),(n:'1b_lw06.bin';l:$8000;p:$28000;crc:$52e533c1),
-        (n:'3f_lw15.bin';l:$8000;p:$30000;crc:$99e134ba),(n:'1f_lw09.bin';l:$8000;p:$38000;crc:$c8f28777),());
+        (n:'3f_lw15.bin';l:$8000;p:$30000;crc:$99e134ba),(n:'1f_lw09.bin';l:$8000;p:$38000;crc:$c8f28777));
         //section Z
-        sectionz_rom:array[0..3] of tipo_roms=(
+        sectionz_rom:array[0..2] of tipo_roms=(
         (n:'6c_sz01.bin';l:$8000;p:0;crc:$69585125),(n:'7c_sz02.bin';l:$8000;p:$8000;crc:$22f161b8),
-        (n:'9c_sz03.bin';l:$8000;p:$10000;crc:$4c7111ed),());
+        (n:'9c_sz03.bin';l:$8000;p:$10000;crc:$4c7111ed));
         sectionz_snd_rom:tipo_roms=(n:'11e_sz04.bin';l:$8000;p:0;crc:$a6073566);
         sectionz_char:tipo_roms=(n:'9h_sz05.bin';l:$4000;p:0;crc:$3173ba2e);
-        sectionz_sprites:array[0..4] of tipo_roms=(
+        sectionz_sprites:array[0..3] of tipo_roms=(
         (n:'3j_sz17.bin';l:$8000;p:0;crc:$8df7b24a),(n:'1j_sz11.bin';l:$8000;p:$8000;crc:$685d4c54),
-        (n:'3h_sz16.bin';l:$8000;p:$10000;crc:$500ff2bb),(n:'1h_sz10.bin';l:$8000;p:$18000;crc:$00b3d244),());
-        sectionz_tiles:array[0..8] of tipo_roms=(
+        (n:'3h_sz16.bin';l:$8000;p:$10000;crc:$500ff2bb),(n:'1h_sz10.bin';l:$8000;p:$18000;crc:$00b3d244));
+        sectionz_tiles:array[0..7] of tipo_roms=(
         (n:'3e_sz14.bin';l:$8000;p:0;crc:$63782e30),(n:'1e_sz08.bin';l:$8000;p:$8000;crc:$d57d9f13),
         (n:'3d_sz13.bin';l:$8000;p:$10000;crc:$1b3d4d7f),(n:'1d_sz07.bin';l:$8000;p:$18000;crc:$f5b3a29f),
         (n:'3b_sz12.bin';l:$8000;p:$20000;crc:$11d47dfd),(n:'1b_sz06.bin';l:$8000;p:$28000;crc:$df703b68),
-        (n:'3f_sz15.bin';l:$8000;p:$30000;crc:$36bb9bf7),(n:'1f_sz09.bin';l:$8000;p:$38000;crc:$da8f06c9),());
+        (n:'3f_sz15.bin';l:$8000;p:$30000;crc:$36bb9bf7),(n:'1f_sz09.bin';l:$8000;p:$38000;crc:$da8f06c9));
         //y mi favorito... TROJAN!!!, pues no me he dajao pasta ni na...
-        trojan_rom:array[0..3] of tipo_roms=(
+        trojan_rom:array[0..2] of tipo_roms=(
         (n:'t4';l:$8000;p:0;crc:$c1bbeb4e),(n:'t6';l:$8000;p:$8000;crc:$d49592ef),
-        (n:'tb05.bin';l:$8000;p:$10000;crc:$9273b264),());
+        (n:'tb05.bin';l:$8000;p:$10000;crc:$9273b264));
         trojan_snd_rom:tipo_roms=(n:'tb02.bin';l:$8000;p:0;crc:$21154797);
         trojan_adpcm:tipo_roms=(n:'tb01.bin';l:$4000;p:0;crc:$1c0f91b2);
         trojan_char:tipo_roms=(n:'tb03.bin';l:$4000;p:0;crc:$581a2b4c);
-        trojan_sprites:array[0..8] of tipo_roms=(
+        trojan_sprites:array[0..7] of tipo_roms=(
         (n:'tb18.bin';l:$8000;p:0;crc:$862c4713),(n:'tb16.bin';l:$8000;p:$8000;crc:$d86f8cbd),
         (n:'tb17.bin';l:$8000;p:$10000;crc:$12a73b3f),(n:'tb15.bin';l:$8000;p:$18000;crc:$bb1a2769),
         (n:'tb22.bin';l:$8000;p:$20000;crc:$39daafd4),(n:'tb20.bin';l:$8000;p:$28000;crc:$94615d2a),
-        (n:'tb21.bin';l:$8000;p:$30000;crc:$66c642bd),(n:'tb19.bin';l:$8000;p:$38000;crc:$81d5ab36),());
-        trojan_tiles:array[0..8] of tipo_roms=(
+        (n:'tb21.bin';l:$8000;p:$30000;crc:$66c642bd),(n:'tb19.bin';l:$8000;p:$38000;crc:$81d5ab36));
+        trojan_tiles:array[0..7] of tipo_roms=(
         (n:'tb13.bin';l:$8000;p:0;crc:$285a052b),(n:'tb09.bin';l:$8000;p:$8000;crc:$aeb693f7),
         (n:'tb12.bin';l:$8000;p:$10000;crc:$dfb0fe5c),(n:'tb08.bin';l:$8000;p:$18000;crc:$d3a4c9d1),
         (n:'tb11.bin';l:$8000;p:$20000;crc:$00f0f4fd),(n:'tb07.bin';l:$8000;p:$28000;crc:$dff2ee02),
-        (n:'tb14.bin';l:$8000;p:$30000;crc:$14bfac18),(n:'tb10.bin';l:$8000;p:$38000;crc:$71ba8a6d),());
-        trojan_tiles2:array[0..2] of tipo_roms=(
-        (n:'tb25.bin';l:$8000;p:0;crc:$6e38c6fa),(n:'tb24.bin';l:$8000;p:$8000;crc:$14fc6cf2),());
+        (n:'tb14.bin';l:$8000;p:$30000;crc:$14bfac18),(n:'tb10.bin';l:$8000;p:$38000;crc:$71ba8a6d));
+        trojan_tiles2:array[0..1] of tipo_roms=(
+        (n:'tb25.bin';l:$8000;p:0;crc:$6e38c6fa),(n:'tb24.bin';l:$8000;p:$8000;crc:$14fc6cf2));
         trojan_tile_map:tipo_roms=(n:'tb23.bin';l:$8000;p:0;crc:$eda13c0e);
+        //DIP LW
+        lwings_dip_a:array [0..4] of def_dip=(
+        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$c;dip_name:'3'),(dip_val:$4;dip_name:'4'),(dip_val:$8;dip_name:'5'),(dip_val:$0;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 4C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$40;dip_name:'1C 2C'),(dip_val:$80;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        lwings_dip_b:array [0..4] of def_dip=(
+        (mask:$6;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$6;dip_name:'Medium'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$10;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$e0;name:'Bonus Life';number:8;dip:((dip_val:$e0;dip_name:'20k 50k+'),(dip_val:$60;dip_name:'20k 60k+'),(dip_val:$a0;dip_name:'20k 70k+'),(dip_val:$20;dip_name:'30k 60k+'),(dip_val:$c0;dip_name:'30k 70k+'),(dip_val:$40;dip_name:'30k 80k+'),(dip_val:$80;dip_name:'40k 100k+'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),());
+        //DIP section Z
+        sectionz_dip_a:array [0..4] of def_dip=(
+        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$4;dip_name:'2'),(dip_val:$c;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 4C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$40;dip_name:'1C 2C'),(dip_val:$80;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        sectionz_dip_b:array [0..4] of def_dip=(
+        (mask:$1;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$1;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$6;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$6;dip_name:'Normal'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Bonus Life';number:8;dip:((dip_val:$38;dip_name:'20k 50k'),(dip_val:$18;dip_name:'20k 60k'),(dip_val:$28;dip_name:'20k 70k'),(dip_val:$8;dip_name:'30k 60k'),(dip_val:$30;dip_name:'30k 70k'),(dip_val:$10;dip_name:'30k 80k'),(dip_val:$20;dip_name:'40k 100k'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Cabinet';number:3;dip:((dip_val:$0;dip_name:'Upright One Player'),(dip_val:$40;dip_name:'Upright Two Player'),(dip_val:$c0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        //DIP trojan
+        trojan_dip_a:array [0..2] of def_dip=(
+        (mask:$3;name:'Cabinet';number:3;dip:((dip_val:$0;dip_name:'Upright One Player'),(dip_val:$2;dip_name:'Upright Two Player'),(dip_val:$3;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1c;name:'Bonus Life';number:8;dip:((dip_val:$10;dip_name:'20k 60k'),(dip_val:$c;dip_name:'20k 70k'),(dip_val:$8;dip_name:'20k 80k'),(dip_val:$1c;dip_name:'30k 60k'),(dip_val:$18;dip_name:'30k 70k'),(dip_val:$14;dip_name:'30k 80k'),(dip_val:$4;dip_name:'40k 80k'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),())),());
+        trojan_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$4;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$20;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$80;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  scroll_x,scroll_y:word;
@@ -96,8 +128,7 @@ end;
 
 procedure update_video_lw;inline;
 var
-  f,color,nchar:word;
-  x,y:word;
+  f,color,nchar,x,y:word;
   attr:byte;
 begin
 for f:=$3ff downto 0 do begin
@@ -126,7 +157,7 @@ scroll_x_y(2,1,scroll_y,scroll_x);
 for f:=$7f downto 0 do begin
     x:=(buffer_sprites[3+(f*4)]+((buffer_sprites[1+(f*4)] and $1) shl 8));
     y:=buffer_sprites[2+(f*4)];
-    if (x or y)<>0 then begin
+    if ((x or y)<>0) then begin
       attr:=buffer_sprites[1+(f*4)];
       nchar:=buffer_sprites[(f*4)]+((attr and $c0) shl 2);
       color:=(attr and $38) shl 1;
@@ -176,7 +207,8 @@ case direccion of
   $f808:lwings_getbyte:=marcade.in0;
   $f809:lwings_getbyte:=marcade.in1;
   $f80a:lwings_getbyte:=marcade.in2;
-  $f80b..$f80c:lwings_getbyte:=$ff;
+  $f80b:lwings_getbyte:=marcade.dswa;
+  $f80c:lwings_getbyte:=marcade.dswb;
 end;
 end;
 
@@ -199,8 +231,8 @@ end;
 
 procedure lwings_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+    0..$bfff:;
     $c000..$dfff:memoria[direccion]:=valor;
     $e000..$e7ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
@@ -222,6 +254,7 @@ case direccion of
     $f80e:begin
             bank:=(valor and $6) shr 1;
             irq_ena:=(valor and $8)<>0;
+            main_screen.flip_main_screen:=(valor and $1)=0;
           end;
 end;
 end;
@@ -237,8 +270,8 @@ end;
 
 procedure lwings_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:;
   $c000..$c7ff:mem_snd[direccion]:=valor;
   $e000:ym2203_0.Control(valor);
   $e001:ym2203_0.Write(valor);
@@ -261,10 +294,8 @@ end;
 //trojan
 procedure update_video_trojan;inline;
 var
-        f,color,nchar:word;
-        x,y:word;
-        attr:byte;
-        tile_index,offsy:word;
+  f,color,nchar,x,y,tile_index,offsy:word;
+  attr:byte;
 begin
 //final 1  512x512 (por sprites)
 //tiles 2  512x512 pri 0
@@ -329,7 +360,7 @@ end;
 scroll_x_y(4,1,scroll_x,scroll_y);
 actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
 actualiza_trozo_final(0,8,256,240,1);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure trojan_principal;
@@ -383,8 +414,8 @@ end;
 
 procedure trojan_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+    0..$bfff:;
     $c000..$dfff:memoria[direccion]:=valor;
     $e000..$e7ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
@@ -412,27 +443,24 @@ case direccion of
     $f80e:begin
             bank:=(valor and $6) shr 1;
             irq_ena:=(valor and $8)<>0;
+            main_screen.flip_main_screen:=(valor and $1)=0;
           end;
 end;
 end;
 
 function trojan_inbyte(puerto:word):byte;
 begin
-case (puerto and $ff) of
-  $0:trojan_inbyte:=sound_command2;
-end;
+if (puerto and $ff)=0 then trojan_inbyte:=sound_command2;
 end;
 
 procedure trojan_outbyte(puerto:word;valor:byte);
 begin
 //ADPCM
-case (puerto and $ff) of
-  $1:begin
-        msm_5205_0.reset_w((valor shr 7) and 1);
-        msm_5205_0.data_w(valor);
-        msm_5205_0.vclk_w(1);
-	      msm_5205_0.vclk_w(0);
-     end;
+if (puerto and $ff)=$1 then begin
+    msm_5205_0.reset_w((valor shr 7) and 1);
+    msm_5205_0.data_w(valor);
+    msm_5205_0.vclk_w(1);
+    msm_5205_0.vclk_w(0);
 end;
 end;
 
@@ -460,18 +488,18 @@ begin
  YM2203_0.reset;
  YM2203_1.reset;
  if main_vars.tipo_maquina=61 then begin
-  z80_2.reset;
-  msm_5205_0.reset;
+    z80_2.reset;
+    msm_5205_0.reset;
  end;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$f;
  scroll_x:=0;
  scroll_y:=0;
  irq_ena:=true;
- //trjoan
- image:=$FF;
+ //trojan
+ image:=$ff;
  pintar_image:=true;
  scroll_x2:=0;
 end;
@@ -481,8 +509,6 @@ var
     f:word;
     memoria_temp:array[0..$3ffff] of byte;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -496,22 +522,21 @@ begin
   init_gfx(0,8,8,1024);
   gfx[0].trans[3]:=true;
   gfx_set_desc_data(2,0,16*8,0,4);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 procedure convert_sprites_lw;
 begin
   init_gfx(1,16,16,1024);
   gfx[1].trans[15]:=true;
   gfx_set_desc_data(4,0,64*8,$10000*8+4,$10000*8+0,4,0);
-  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 procedure convert_tiles_lw;
 begin
   init_gfx(2,16,16,$800);
   gfx_set_desc_data(4,0,32*8,$30000*8,$20000*8,$10000*8,$0*8);
-  convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 end;
-
 begin
 iniciar_lwings:=false;
 iniciar_audio(false);
@@ -524,7 +549,7 @@ screen_init(2,512,512);
 screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 case main_vars.tipo_maquina of
-  59:main_screen.rol90_screen:=true;
+  59:main_screen.rot90_screen:=true;
   61:begin
       //La pantallas 2 (la cambio) y 4 son transparentes
       screen_init(2,512,512,true);
@@ -539,49 +564,59 @@ iniciar_video(256,240);
 //Sound CPU
 z80_1:=cpu_z80.create(3000000,256);
 z80_1.init_sound(lwings_sound_update);
-init_timer(z80_1.numero_cpu,3000000/222,lwings_snd_irq,true);
+timers.init(z80_1.numero_cpu,3000000/222,lwings_snd_irq,nil,true);
 z80_1.change_ram_calls(lwings_snd_getbyte,lwings_snd_putbyte);
 //Sound Chips
-ym2203_0:=ym2203_chip.create(1500000,0.20,0.10);
-ym2203_1:=ym2203_chip.create(1500000,0.20,0.10);
+ym2203_0:=ym2203_chip.create(1500000,0.10,0.20);
+ym2203_1:=ym2203_chip.create(1500000,0.10,0.20);
 case main_vars.tipo_maquina of
   59:begin
         //Main CPU
         z80_0:=cpu_z80.create(6000000,256);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
-        if not(cargar_roms(@memoria_temp[0],@lwings_rom[0],'lwings.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        if not(roms_load(@memoria_temp,lwings_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
         //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@lwings_snd_rom,'lwings.zip',1)) then exit;
+        if not(roms_load(@mem_snd,lwings_snd_rom)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@lwings_char,'lwings.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,lwings_char)) then exit;
         convert_chars_lw;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@lwings_sprites[0],'lwings.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,lwings_sprites)) then exit;
         convert_sprites_lw;
         //tiles
-        if not(cargar_roms(@memoria_temp[0],@lwings_tiles[0],'lwings.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,lwings_tiles)) then exit;
         convert_tiles_lw;
+        //DIP
+        marcade.dswa:=$ff;
+        marcade.dswb:=$ff;
+        marcade.dswa_val:=@lwings_dip_a;
+        marcade.dswb_val:=@lwings_dip_b;
      end;
   60:begin
         //Main CPU
-        z80_0:=cpu_z80.create(6000000,256);
+        z80_0:=cpu_z80.create(3000000,256);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
-        if not(cargar_roms(@memoria_temp[0],@sectionz_rom[0],'sectionz.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        if not(roms_load(@memoria_temp,sectionz_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
         //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@sectionz_snd_rom,'sectionz.zip',1)) then exit;
+        if not(roms_load(@mem_snd,sectionz_snd_rom)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@sectionz_char,'sectionz.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,sectionz_char)) then exit;
         convert_chars_lw;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@sectionz_sprites[0],'sectionz.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,sectionz_sprites)) then exit;
         convert_sprites_lw;
         //tiles
-        if not(cargar_roms(@memoria_temp[0],@sectionz_tiles[0],'sectionz.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,sectionz_tiles)) then exit;
         convert_tiles_lw;
+        //DIP
+        marcade.dswa:=$ff;
+        marcade.dswb:=$3f;
+        marcade.dswa_val:=@sectionz_dip_a;
+        marcade.dswb_val:=@sectionz_dip_b;
       end;
   61:begin
         //Main CPU
@@ -591,37 +626,42 @@ case main_vars.tipo_maquina of
         z80_2:=cpu_z80.create(3000000,256);
         z80_2.change_ram_calls(trojan_misc_getbyte,trojan_misc_putbyte);
         z80_2.change_io_calls(trojan_inbyte,trojan_outbyte);
-        msm_5205_0:=MSM5205_chip.create(445000,MSM5205_SEX_4B,0.50,nil);
-        init_timer(z80_2.numero_cpu,3000000/4000,trojan_adpcm_instruccion,true);
+        msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,0.50,nil);
+        timers.init(z80_2.numero_cpu,3000000/4000,trojan_adpcm_instruccion,nil,true);
         //Graficos
-        if not(cargar_roms(@memoria_temp[0],@trojan_rom[0],'trojan.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        if not(roms_load(@memoria_temp,trojan_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
         //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@trojan_snd_rom,'trojan.zip',1)) then exit;
-        if not(cargar_roms(@mem_adpcm[0],@trojan_adpcm,'trojan.zip',1)) then exit;
+        if not(roms_load(@mem_snd,trojan_snd_rom)) then exit;
+        if not(roms_load(@mem_adpcm,trojan_adpcm)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@trojan_char,'trojan.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,trojan_char)) then exit;
         convert_chars_lw;
         //convertir sprites, tiene mas sprites...
-        if not(cargar_roms(@memoria_temp[0],@trojan_sprites[0],'trojan.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,trojan_sprites)) then exit;
         init_gfx(1,16,16,2048);
         gfx[1].trans[15]:=true;
         gfx_set_desc_data(4,0,64*8,$20000*8+4,$20000*8+0,4,0);
-        convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+        convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //tiles
-        if not(cargar_roms(@memoria_temp[0],@trojan_tiles[0],'trojan.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,trojan_tiles)) then exit;
         convert_tiles_lw;
         for f:=0 to 6 do gfx[2].trans_alt[0,f]:=true;
         for f:=12 to 15 do gfx[2].trans_alt[0,f]:=true;
         gfx[2].trans[0]:=true;
         //tiles 2
-        if not(cargar_roms(@memoria_temp[0],@trojan_tiles2[0],'trojan.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,trojan_tiles2)) then exit;
         init_gfx(3,16,16,$200);
         gfx_set_desc_data(4,0,64*8,$8000*8+0,$8000*8+4,0,4);
-        convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+        convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //Map
-        if not(cargar_roms(@trojan_map[0],@trojan_tile_map,'trojan.zip',1)) then exit;
+        if not(roms_load(@trojan_map,trojan_tile_map)) then exit;
+        //DIP
+        marcade.dswa:=$fc;
+        marcade.dswb:=$ff;
+        marcade.dswa_val:=@trojan_dip_a;
+        marcade.dswb_val:=@trojan_dip_b;
       end;
 end;
 //final
@@ -632,7 +672,11 @@ end;
 procedure Cargar_hlwings;
 begin
 case main_vars.tipo_maquina of
-  59,60:llamadas_maquina.bucle_general:=lwings_principal;
+  59:llamadas_maquina.bucle_general:=lwings_principal;
+  60:begin
+      llamadas_maquina.bucle_general:=lwings_principal;
+      llamadas_maquina.fps_max:=55.37;
+     end;
   61:llamadas_maquina.bucle_general:=trojan_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_lwings;

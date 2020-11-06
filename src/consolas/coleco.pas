@@ -28,22 +28,6 @@ var
 
 procedure eventos_coleco;
 begin
-if event.arcade then begin
-   //P1
-   if arcade_input.up[0] then joystick[0]:=(joystick[0] and $fe) else joystick[0]:=(joystick[0] or 1);
-   if arcade_input.right[0] then joystick[0]:=(joystick[0] and $fd) else joystick[0]:=(joystick[0] or 2);
-   if arcade_input.down[0] then joystick[0]:=(joystick[0] and $fb) else joystick[0]:=(joystick[0] or 4);
-   if arcade_input.left[0] then joystick[0]:=(joystick[0] and $f7) else joystick[0]:=(joystick[0] or 8);
-   if arcade_input.but0[0] then joystick[0]:=(joystick[0] and $bf) else joystick[0]:=(joystick[0] or $40);
-   if arcade_input.but1[0] then keypad[0]:=(keypad[0] and $bfff) else keypad[0]:=(keypad[0] or $4000);
-   //P2
-   if arcade_input.up[1] then joystick[1]:=(joystick[1] and $fe) else joystick[1]:=(joystick[1] or 1);
-   if arcade_input.right[1] then joystick[1]:=(joystick[1] and $fd) else joystick[1]:=(joystick[1] or 2);
-   if arcade_input.down[1] then joystick[1]:=(joystick[1] and $fb) else joystick[1]:=(joystick[1] or 4);
-   if arcade_input.left[1] then joystick[1]:=(joystick[1] and $f7) else joystick[1]:=(joystick[1] or 8);
-   if arcade_input.but0[1] then joystick[1]:=(joystick[1] and $bf) else joystick[1]:=(joystick[1] or $40);
-   if arcade_input.but1[1] then keypad[1]:=(keypad[1] and $bfff) else keypad[1]:=(keypad[1] or $4000);
-end;
 if event.keyboard then begin
    //P1
    if keyboard[KEYBOARD_0] then keypad[0]:=(keypad[0] and $fffe) else keypad[0]:=(keypad[0] or $0001);
@@ -71,6 +55,22 @@ if event.keyboard then begin
    if keyboard[KEYBOARD_O] then keypad[1]:=(keypad[1] and $fdff) else keypad[1]:=(keypad[1] or $0200);
    if keyboard[KEYBOARD_Z] then keypad[1]:=(keypad[1] and $fbff) else keypad[1]:=(keypad[1] or $0400);
    if keyboard[KEYBOARD_X] then keypad[1]:=(keypad[1] and $f7ff) else keypad[1]:=(keypad[1] or $0800);
+end;
+if event.arcade then begin
+   //P1
+   if arcade_input.up[0] then joystick[0]:=(joystick[0] and $fe) else joystick[0]:=(joystick[0] or 1);
+   if arcade_input.right[0] then joystick[0]:=(joystick[0] and $fd) else joystick[0]:=(joystick[0] or 2);
+   if arcade_input.down[0] then joystick[0]:=(joystick[0] and $fb) else joystick[0]:=(joystick[0] or 4);
+   if arcade_input.left[0] then joystick[0]:=(joystick[0] and $f7) else joystick[0]:=(joystick[0] or 8);
+   if arcade_input.but0[0] then joystick[0]:=(joystick[0] and $bf) else joystick[0]:=(joystick[0] or $40);
+   if arcade_input.but1[0] then keypad[0]:=(keypad[0] and $bfff) else keypad[0]:=(keypad[0] or $4000);
+   //P2
+   if arcade_input.up[1] then joystick[1]:=(joystick[1] and $fe) else joystick[1]:=(joystick[1] or 1);
+   if arcade_input.right[1] then joystick[1]:=(joystick[1] and $fd) else joystick[1]:=(joystick[1] or 2);
+   if arcade_input.down[1] then joystick[1]:=(joystick[1] and $fb) else joystick[1]:=(joystick[1] or 4);
+   if arcade_input.left[1] then joystick[1]:=(joystick[1] and $f7) else joystick[1]:=(joystick[1] or 8);
+   if arcade_input.but0[1] then joystick[1]:=(joystick[1] and $bf) else joystick[1]:=(joystick[1] or $40);
+   if arcade_input.but1[1] then keypad[1]:=(keypad[1] and $bfff) else keypad[1]:=(keypad[1] or $4000);
 end;
 end;
 
@@ -284,7 +284,7 @@ tms_0:=tms99xx_chip.create(1,coleco_interrupt);
 //Chip Sonido
 sn_76496_0:=sn76496_chip.Create(3579545);
 //cargar roms
-if not(cargar_roms(@memoria[0],@coleco_bios,'coleco.zip',1)) then exit;
+if not(roms_load(@memoria,coleco_bios)) then exit;
 //final
 reset_coleco;
 iniciar_coleco:=true;

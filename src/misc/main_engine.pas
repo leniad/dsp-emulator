@@ -7,9 +7,10 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.18';
+        DSP_VERSION='0.18b2';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
+        PANT_AUX=22;
         PANT_TEMP=23;
         PANT_SPRITES_ALPHA=24;
         MAX_PANT_VISIBLE=19;
@@ -35,22 +36,23 @@ type
             vactual:byte;
             service1,driver_ok,auto_exec,show_crc_error,center_screen,x11:boolean;
         end;
-        TDirectory=Record
+        TDirectory=record
             Base:string;
-            Nes:String;
-            GameBoy:String;
-            Chip8:String;
-            sms:String;
+            Nes:string;
+            GameBoy:string;
+            Chip8:string;
+            sms:string;
+            sg1000:string;
             //Coleco
-            coleco_snap:String;
+            coleco_snap:string;
             //Dirs Arcade
             Arcade_hi:string;
             Arcade_samples:string;
             Arcade_nvram:string;
             arcade_list_roms:array[0..$ff] of string;
             //Dirs spectrum
-            spectrum_48:String;
-            spectrum_128:String;
+            spectrum_48:string;
+            spectrum_128:string;
             spectrum_3:string;
             spectrum_tap_snap:string;
             spectrum_disk:string;
@@ -60,8 +62,11 @@ type
             amstrad_disk:string;
             amstrad_snap:string;
             amstrad_rom:string;
+            //Dirs C64
+            c64_tap:string;
+            c64_disk:string;
             //Misc
-            Preview:String;
+            Preview:string;
             qsnapshot:string;
         end;
         tllamadas_globales = record
@@ -137,7 +142,7 @@ var
         memoria,mem_snd,mem_misc:array[0..$ffff] of byte;
 
 implementation
-uses principal,controls_engine,cpu_misc;
+uses principal,controls_engine,cpu_misc,tap_tzx;
 
 function find_rom_multiple_dirs(rom_name:string):byte;
 var
@@ -215,24 +220,24 @@ procedure cambiar_video;
 procedure uses_sdl_window;
 begin
 case main_vars.tipo_maquina of
-     0..9,1000..1003:begin
-             fix_screen_pos(350,110);
-             principal1.Panel2.width:=350;
+     0..9,1000..1003,3000:begin
+             fix_screen_pos(400,110);
+             principal1.Panel2.width:=400;
              principal1.Panel2.height:=49;
              principal1.Panel2.Align:=alLeft;
              principal1.Panel2.Anchors:=[akTop,akLeft,akRight];
              principal1.BitBtn1.top:=4;
-             principal1.BitBtn1.left:=22;
+             principal1.BitBtn1.left:=62;
              principal1.BitBtn9.top:=4;
-             principal1.BitBtn9.left:=64;
+             principal1.BitBtn9.left:=104;
              principal1.BitBtn10.top:=4;
-             principal1.BitBtn10.left:=106;
+             principal1.BitBtn10.left:=146;
              principal1.BitBtn11.top:=4;
-             principal1.BitBtn11.left:=151;
+             principal1.BitBtn11.left:=191;
              principal1.BitBtn12.top:=4;
-             principal1.BitBtn12.left:=199;
+             principal1.BitBtn12.left:=239;
              principal1.BitBtn14.top:=4;
-             principal1.BitBtn14.left:=246;
+             principal1.BitBtn14.left:=286;
           end;
      else fix_screen_pos(350,70);
 end;
@@ -257,9 +262,6 @@ case main_screen.video_mode of
   5:principal1.n3x1.Checked:=true;
   6:principal1.FullScreen1.checked:=true;
 end;
-//Si el video el *2 necesito una temporal
-if pantalla[PANT_DOBLE]<>nil then SDL_FreeSurface(pantalla[PANT_DOBLE]);
-pantalla[PANT_DOBLE]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
 {$ifdef fpc}
 //En linux uso la pantalla de SDL...
 uses_sdl_window;
@@ -285,6 +287,9 @@ end;
 SDL_SetWindowSize(window_render,x,y);
 if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
 pantalla[0]:=SDL_GetWindowSurface(window_render);
+//Si el video el *2 necesito una temporal
+if pantalla[PANT_DOBLE]<>nil then SDL_FreeSurface(pantalla[PANT_DOBLE]);
+pantalla[PANT_DOBLE]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
 end;
 
 procedure iniciar_video(x,y:word;alpha:boolean=false);
@@ -318,13 +323,13 @@ if alpha then begin
   getmem(punbuf_alpha,MAX_PUNBUF*2);
 end;
 pantalla[PANT_SPRITES]:=SDL_CreateRGBSurface(0,MAX_PANT_SPRITES,MAX_PANT_SPRITES,16,0,0,0,0);
-SDL_Setcolorkey(pantalla[PANT_SPRITES],1,set_trans_color);
-paleta[max_colores]:=set_trans_color;
+SDL_Setcolorkey(pantalla[PANT_SPRITES],1,SET_TRANS_COLOR);
+paleta[MAX_COLORES]:=SET_TRANS_COLOR;
 //Pantallas restantes
 for f:=1 to MAX_PANT_VISIBLE do
   if p_final[f].x<>0 then begin
     if p_final[f].final_mix then begin
-      if p_final[f].sprite_end_x=0 then p_final[f].sprite_end_x:=p_final[f].x;
+        if p_final[f].sprite_end_x=0 then p_final[f].sprite_end_x:=p_final[f].x;
       if p_final[f].sprite_mask_x=0 then p_final[f].sprite_mask_x:=p_final[f].x-1;
       if p_final[f].sprite_end_y=0 then p_final[f].sprite_end_y:=p_final[f].y;
       if p_final[f].sprite_mask_y=0 then p_final[f].sprite_mask_y:=p_final[f].y-1;
@@ -335,7 +340,7 @@ for f:=1 to MAX_PANT_VISIBLE do
     if p_final[f].scroll.mask_y=0 then p_final[f].scroll.mask_y:=$ffff;
     pantalla[f]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,16,0,0,0,0);
     //Y si son transparentes las creo
-    if p_final[f].trans then SDL_Setcolorkey(pantalla[f],1,set_trans_color);
+    if p_final[f].trans then SDL_Setcolorkey(pantalla[f],1,SET_TRANS_COLOR);
 end;
 sdl_showcursor(0);
 end;
@@ -429,12 +434,37 @@ end;
 procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);inline;
 var
   origen:libsdl_rect;
+  y,x:word;
+  porig,pdest:pword;
+  orig_p,dest_p:dword;
 begin
-origen.x:=o_x1;
-origen.y:=o_y1;
-origen.w:=o_x2;
-origen.h:=o_y2;
-SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@origen);
+if main_screen.rot90_screen then begin
+  //Muevo desde la normal a la final rotada
+  orig_p:=pantalla[sitio].pitch shr 1;  //Cantidad de bytes por fila
+  dest_p:=pantalla[PANT_TEMP].pitch shr 1; //Cantidad de bytes por fila
+  for y:=0 to (o_y2-1) do begin
+    //Origen
+    porig:=pantalla[sitio].pixels; //Apunto a los pixels
+    inc(porig,((y+o_y1)*orig_p)+o_x1); //Muevo el puntero al primer punto de la linea y le añado el recorte
+    //Destino
+    pdest:=pantalla[PANT_TEMP].pixels; //Apunto a los pixels
+    inc(pdest,dest_p-(y+1));  //Muevo el cursor al ultimo punto de la columna
+    for x:=0 to (o_x2-1) do begin
+      //Pongo el pixel
+      pdest^:=porig^;
+      //Avanzo en la fila de origen
+      inc(porig);
+      //Avanzo la columna de origen
+      inc(pdest,dest_p);
+    end;
+  end;
+end else begin
+    origen.x:=o_x1;
+    origen.y:=o_y1;
+    origen.w:=o_x2;
+    origen.h:=o_y2;
+    SDL_UpperBlit(pantalla[sitio],@origen,pantalla[PANT_TEMP],@origen);
+end;
 end;
 
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);inline;
@@ -811,8 +841,10 @@ main_screen.flip_main_x:=false;
 main_screen.flip_main_y:=false;
 main_screen.rapido:=false;
 close_all_devices;
+cinta_tzx.tape_stop:=nil;
+cinta_tzx.tape_start:=nil;
 hide_mouse_cursor;
-reset_timer;
+timers.clear;
 marcade.dswa_val:=nil;
 marcade.dswb_val:=nil;
 marcade.dswc_val:=nil;

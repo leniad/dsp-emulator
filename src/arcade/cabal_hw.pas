@@ -9,20 +9,20 @@ procedure cargar_cabal;
 
 implementation
 const
-        cabal_rom:array[0..4] of tipo_roms=(
+        cabal_rom:array[0..3] of tipo_roms=(
         (n:'13.7h';l:$10000;p:0;crc:$00abbe0c),(n:'11.6h';l:$10000;p:$1;crc:$44736281),
-        (n:'12.7j';l:$10000;p:$20000;crc:$d763a47c),(n:'10.6j';l:$10000;p:$20001;crc:$96d5e8af),());
+        (n:'12.7j';l:$10000;p:$20000;crc:$d763a47c),(n:'10.6j';l:$10000;p:$20001;crc:$96d5e8af));
         cabal_char:tipo_roms=(n:'5-6s';l:$4000;p:0;crc:$6a76955a);
-        cabal_sprites:array[0..8] of tipo_roms=(
+        cabal_sprites:array[0..7] of tipo_roms=(
         (n:'sp_rom1.bin';l:$10000;p:0;crc:$34d3cac8),(n:'sp_rom2.bin';l:$10000;p:$1;crc:$4e49c28e),
         (n:'sp_rom3.bin';l:$10000;p:$20000;crc:$7065e840),(n:'sp_rom4.bin';l:$10000;p:$20001;crc:$6a0e739d),
         (n:'sp_rom5.bin';l:$10000;p:$40000;crc:$0e1ec30e),(n:'sp_rom6.bin';l:$10000;p:$40001;crc:$581a50c1),
-        (n:'sp_rom7.bin';l:$10000;p:$60000;crc:$55c44764),(n:'sp_rom8.bin';l:$10000;p:$60001;crc:$702735c9),());
-        cabal_tiles:array[0..8] of tipo_roms=(
+        (n:'sp_rom7.bin';l:$10000;p:$60000;crc:$55c44764),(n:'sp_rom8.bin';l:$10000;p:$60001;crc:$702735c9));
+        cabal_tiles:array[0..7] of tipo_roms=(
         (n:'bg_rom1.bin';l:$10000;p:0;crc:$1023319b),(n:'bg_rom2.bin';l:$10000;p:$1;crc:$3b6d2b09),
         (n:'bg_rom3.bin';l:$10000;p:$20000;crc:$420b0801),(n:'bg_rom4.bin';l:$10000;p:$20001;crc:$77bc7a60),
         (n:'bg_rom5.bin';l:$10000;p:$40000;crc:$543fcb37),(n:'bg_rom6.bin';l:$10000;p:$40001;crc:$0bc50075),
-        (n:'bg_rom7.bin';l:$10000;p:$60000;crc:$d28d921e),(n:'bg_rom8.bin';l:$10000;p:$60001;crc:$67e4fe47),());
+        (n:'bg_rom7.bin';l:$10000;p:$60000;crc:$d28d921e),(n:'bg_rom8.bin';l:$10000;p:$60001;crc:$67e4fe47));
         cabal_sound:array[0..1] of tipo_roms=(
         (n:'4-3n';l:$2000;p:0;crc:$4038eff2),(n:'3-3p';l:$8000;p:$8000;crc:$d9defcbf));
         cabal_adpcm:array[0..1] of tipo_roms=(
@@ -91,7 +91,7 @@ for f:=$1ff downto 0 do begin
 end;
 actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
 actualiza_trozo_final(0,16,256,224,3);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_cabal;
@@ -181,8 +181,8 @@ end;
 
 procedure cabal_putword(direccion:dword;valor:word);
 begin
-if direccion<$40000 then exit;
 case direccion of
+  0..$3ffff:; //ROM
   $40000..$4ffff:main_ram[(direccion and $ffff) shr 1]:=valor;
   $60000..$607ff:if fg_ram[(direccion and $7ff) shr 1]<>valor then begin
                     fg_ram[(direccion and $7ff) shr 1]:=valor;
@@ -218,8 +218,8 @@ end;
 
 procedure cabal_snd_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$2000) or (direccion>$7fff)) then exit;
 case direccion of
+  0..$1fff,$8000..$ffff:; //ROM
   $2000..$27ff:mem_snd[direccion]:=valor;
   $4001,$4002:;
   $4003:seibu_update_irq_lines(RST18_CLEAR);
@@ -292,28 +292,28 @@ z80_1.init_sound(cabal_sound_act);
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(snd_irq);
 //cargar roms
-if not(cargar_roms16w(@rom,@cabal_rom,'cabal.zip',0)) then exit;
+if not(roms_load16w(@rom,cabal_rom)) then exit;
 //cargar sonido
-if not(roms_load(@memoria_temp,@cabal_sound,'cabal.zip',sizeof(cabal_sound))) then exit;
+if not(roms_load(@memoria_temp,cabal_sound)) then exit;
 decript_seibu_sound(@memoria_temp,@decrypt,@mem_snd);
 copymemory(@mem_snd[$8000],@memoria_temp[$8000],$8000);
 //adpcm
-if not(roms_load(@memoria_temp,@cabal_adpcm,'cabal.zip',sizeof(cabal_adpcm))) then exit;
+if not(roms_load(@memoria_temp,cabal_adpcm)) then exit;
 seibu_adpcm_init(@memoria_temp);
 //convertir chars
-if not(roms_load(@memoria_temp,@cabal_char,'cabal.zip',sizeof(cabal_char))) then exit;
+if not(roms_load(@memoria_temp,cabal_char)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,0,4);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
-if not(cargar_roms16b(@memoria_temp,@cabal_sprites,'cabal.zip',0)) then exit;
+if not(roms_load16b(@memoria_temp,cabal_sprites)) then exit;
 init_gfx(1,16,16,$1000);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms16b(@memoria_temp,@cabal_tiles,'cabal.zip',0)) then exit;
+if not(roms_load16b(@memoria_temp,cabal_tiles)) then exit;
 init_gfx(2,16,16,$1000);
 gfx_set_desc_data(4,0,64*16,2*4,3*4,0*4,1*4);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);

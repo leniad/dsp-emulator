@@ -128,7 +128,6 @@ end;
 
 procedure putbyte_tetris(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   0..$fff:memoria[direccion]:=valor;
   $1000..$1fff:if memoria[direccion]<>valor then begin
@@ -151,6 +150,7 @@ case direccion of
    $3400..$37ff:nvram_write_enable:=true;
    $3800..$3bff:m6502_0.change_irq(CLEAR_LINE);
    $3c00..$3fff:; //coincount
+   $4000..$ffff:; //ROM
 end;
 end;
 
@@ -212,12 +212,12 @@ pokey_1.change_all_pot(tetris_pokey_1);
 if read_file_size(Directory.Arcade_nvram+'tetrisa.nv',longitud) then read_file(Directory.Arcade_nvram+'tetrisa.nv',@nv_ram[0],longitud)
   else for longitud:=0 to $1ff do nv_ram[longitud]:=$ff;
 //cargar roms
-if not(roms_load(@memoria_temp,@tetris_rom,'atetris.zip',sizeof(tetris_rom))) then exit;
+if not(roms_load(@memoria_temp,tetris_rom)) then exit;
 copymemory(@rom_mem[0,0],@memoria_temp[$0],$4000);
 copymemory(@rom_mem[1,0],@memoria_temp[$4000],$4000);
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 //Cargar chars
-if not(roms_load(@memoria_temp,@tetris_gfx,'atetris.zip',sizeof(tetris_gfx))) then exit;
+if not(roms_load(@memoria_temp,tetris_gfx)) then exit;
 init_gfx(0,8,8,$800);
 gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);

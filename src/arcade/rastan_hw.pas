@@ -9,17 +9,17 @@ procedure cargar_rastan;
 
 implementation
 const
-        rastan_rom:array[0..6] of tipo_roms=(
-        (n:'b04-35.19';l:$10000;p:0;crc:$1c91dbb1),(n:'b04-37.07';l:$10000;p:$1;crc:$ecf20bdd),
-        (n:'b04-40.20';l:$10000;p:$20000;crc:$0930d4b3),(n:'b04-39.08';l:$10000;p:$20001;crc:$d95ade5e),
-        (n:'b04-42.21';l:$10000;p:$40000;crc:$1857a7cb),(n:'b04-43.09';l:$10000;p:$40001;crc:$c34b9152),());
-        rastan_char:array[0..4] of tipo_roms=(
+        rastan_rom:array[0..5] of tipo_roms=(
+        (n:'b04-38.19';l:$10000;p:0;crc:$1c91dbb1),(n:'b04-37.7';l:$10000;p:$1;crc:$ecf20bdd),
+        (n:'b04-40.20';l:$10000;p:$20000;crc:$0930d4b3),(n:'b04-39.8';l:$10000;p:$20001;crc:$d95ade5e),
+        (n:'b04-42.21';l:$10000;p:$40000;crc:$1857a7cb),(n:'b04-43-1.9';l:$10000;p:$40001;crc:$ca4702ff));
+        rastan_char:array[0..3] of tipo_roms=(
         (n:'b04-01.40';l:$20000;p:0;crc:$cd30de19),(n:'b04-03.39';l:$20000;p:$20000;crc:$ab67e064),
-        (n:'b04-02.67';l:$20000;p:$40000;crc:$54040fec),(n:'b04-04.66';l:$20000;p:$60000;crc:$94737e93),());
+        (n:'b04-02.67';l:$20000;p:$40000;crc:$54040fec),(n:'b04-04.66';l:$20000;p:$60000;crc:$94737e93));
         rastan_sound:tipo_roms=(n:'b04-19.49';l:$10000;p:0;crc:$ee81fdd8);
-        rastan_sprites:array[0..4] of tipo_roms=(
+        rastan_sprites:array[0..3] of tipo_roms=(
         (n:'b04-05.15';l:$20000;p:0;crc:$c22d94ac),(n:'b04-07.14';l:$20000;p:$20000;crc:$b5632a51),
-        (n:'b04-06.28';l:$20000;p:$40000;crc:$002ccf39),(n:'b04-08.27';l:$20000;p:$60000;crc:$feafca05),());
+        (n:'b04-06.28';l:$20000;p:$40000;crc:$002ccf39),(n:'b04-08.27';l:$20000;p:$60000;crc:$feafca05));
         rastan_adpcm:tipo_roms=(n:'b04-20.76';l:$10000;p:0;crc:$fd1a34cc);
 
 var
@@ -31,7 +31,7 @@ var
  ram2:array [0..$7fff] of word;
  adpcm:array[0..$ffff] of byte;
 
-procedure update_video_rastan;inline;
+procedure update_video_rastan;
 var
   f,x,y,nchar,atrib,color:word;
   flipx,flipy:boolean;
@@ -77,7 +77,7 @@ for f:=$ff downto 0 do begin
   end;
 end;
 actualiza_trozo_final(16,8,320,240,3);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_rastan;
@@ -153,8 +153,8 @@ end;
 
 procedure rastan_putword(direccion:dword;valor:word);
 begin
-if direccion<$60000 then exit;
 case direccion of
+      0..$5ffff:; //ROM
       $10c000..$10ffff:ram1[(direccion and $3fff) shr 1]:=valor;
       $200000..$200fff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                             buffer_paleta[(direccion and $fff) shr 1]:=valor;
@@ -194,8 +194,8 @@ end;
 
 procedure rastan_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$8fff:mem_snd[direccion]:=valor;
   $9000:ym2151_0.reg(valor);
   $9001:ym2151_0.write(valor);
@@ -245,8 +245,8 @@ begin
  YM2151_0.reset;
  msm_5205_0.reset;
  reset_audio;
- marcade.in0:=$1F;
- marcade.in1:=$fF;
+ marcade.in0:=$1f;
+ marcade.in1:=$ff;
  sound_bank:=0;
  scroll_x1:=0;
  scroll_y1:=0;
@@ -258,7 +258,6 @@ end;
 
 function iniciar_rastan:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 4, $40000*8+0 ,$40000*8+4, 8+0, 8+4, $40000*8+8+0, $40000*8+8+4);
   pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
   ps_x:array[0..15] of dword=(0, 4, $40000*8+0 ,$40000*8+4,	8+0, 8+4, $40000*8+8+0, $40000*8+8+4,
               	16+0, 16+4, $40000*8+16+0, $40000*8+16+4,24+0, 24+4, $40000*8+24+0, $40000*8+24+4);
@@ -288,28 +287,28 @@ ym2151_0:=ym2151_chip.create(4000000);
 ym2151_0.change_port_func(sound_bank_rom);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@rastan_rom[0],'rastan.zip',0)) then exit;
+if not(roms_load16w(@rom,rastan_rom)) then exit;
 //rom[$05FF9F]:=$fa;  //Cheeeeeeeeat
 //cargar sonido+ponerlas en su banco+adpcm
-if not(cargar_roms(@memoria_temp[0],@rastan_sound,'rastan.zip')) then exit;
+if not(roms_load(@memoria_temp,rastan_sound)) then exit;
 copymemory(@mem_snd[0],@memoria_temp[0],$4000);
 copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
 copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
 copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
 copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
-if not(cargar_roms(@adpcm[0],@rastan_adpcm,'rastan.zip')) then exit;
+if not(roms_load(@adpcm,rastan_adpcm)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@rastan_char[0],'rastan.zip',0)) then exit;
+if not(roms_load(@memoria_temp,rastan_char)) then exit;
 init_gfx(0,8,8,$4000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,16*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@rastan_sprites[0],'rastan.zip',0)) then exit;
+if not(roms_load(@memoria_temp,rastan_sprites)) then exit;
 init_gfx(1,16,16,$1000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //final
 reset_rastan;
 iniciar_rastan:=true;

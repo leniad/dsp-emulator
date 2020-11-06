@@ -13,56 +13,56 @@ type
 const
         //Rolling Thunder
         rthunder_rom:tipo_roms=(n:'rt3_1b.9c';l:$8000;p:$8000;crc:$7d252a1b);
-        rthunder_rom_bank:array[0..4] of tipo_roms=(
+        rthunder_rom_bank:array[0..3] of tipo_roms=(
         (n:'rt1_17.f1';l:$10000;p:0;crc:$766af455),(n:'rt1_18.h1';l:$10000;p:$10000;crc:$3f9f2f5d),
-        (n:'rt3_19.k1';l:$10000;p:$20000;crc:$c16675e9),(n:'rt3_20.m1';l:$10000;p:$30000;crc:$c470681b),());
-        rthunder_sub_rom:array[0..2] of tipo_roms=(
-        (n:'rt3_2b.12c';l:$8000;p:$0;crc:$a7ea46ee),(n:'rt3_3.12d';l:$8000;p:$8000;crc:$a13f601c),());
-        rthunder_chars:array[0..2] of tipo_roms=(
-        (n:'rt1_7.7r';l:$10000;p:0;crc:$a85efa39),(n:'rt1_8.7s';l:$8000;p:$10000;crc:$f7a95820),());
-        rthunder_tiles:array[0..2] of tipo_roms=(
-        (n:'rt1_5.4r';l:$8000;p:0;crc:$d0fc470b),(n:'rt1_6.4s';l:$4000;p:$8000;crc:$6b57edb2),());
-        rthunder_sprites:array[0..8] of tipo_roms=(
+        (n:'rt3_19.k1';l:$10000;p:$20000;crc:$c16675e9),(n:'rt3_20.m1';l:$10000;p:$30000;crc:$c470681b));
+        rthunder_sub_rom:array[0..1] of tipo_roms=(
+        (n:'rt3_2b.12c';l:$8000;p:$0;crc:$a7ea46ee),(n:'rt3_3.12d';l:$8000;p:$8000;crc:$a13f601c));
+        rthunder_chars:array[0..1] of tipo_roms=(
+        (n:'rt1_7.7r';l:$10000;p:0;crc:$a85efa39),(n:'rt1_8.7s';l:$8000;p:$10000;crc:$f7a95820));
+        rthunder_tiles:array[0..1] of tipo_roms=(
+        (n:'rt1_5.4r';l:$8000;p:0;crc:$d0fc470b),(n:'rt1_6.4s';l:$4000;p:$8000;crc:$6b57edb2));
+        rthunder_sprites:array[0..7] of tipo_roms=(
         (n:'rt1_9.12h';l:$10000;p:0;crc:$8e070561),(n:'rt1_10.12k';l:$10000;p:$10000;crc:$cb8fb607),
         (n:'rt1_11.12l';l:$10000;p:$20000;crc:$2bdf5ed9),(n:'rt1_12.12m';l:$10000;p:$30000;crc:$e6c6c7dc),
         (n:'rt1_13.12p';l:$10000;p:$40000;crc:$489686d7),(n:'rt1_14.12r';l:$10000;p:$50000;crc:$689e56a8),
-        (n:'rt1_15.12t';l:$10000;p:$60000;crc:$1d8bf2ca),(n:'rt1_16.12u';l:$10000;p:$70000;crc:$1bbcf37b),());
-        rthunder_mcu:array[0..2] of tipo_roms=(
-        (n:'rt3_4.6b';l:$8000;p:$4000;crc:$00cf293f),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),());
-        rthunder_prom:array[0..5] of tipo_roms=(
+        (n:'rt1_15.12t';l:$10000;p:$60000;crc:$1d8bf2ca),(n:'rt1_16.12u';l:$10000;p:$70000;crc:$1bbcf37b));
+        rthunder_mcu:array[0..1] of tipo_roms=(
+        (n:'rt3_4.6b';l:$8000;p:$4000;crc:$00cf293f),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        rthunder_prom:array[0..4] of tipo_roms=(
         (n:'rt1-1.3r';l:$200;p:$0;crc:$8ef3bb9d),(n:'rt1-2.3s';l:$200;p:$200;crc:$6510a8f2),
         (n:'rt1-3.4v';l:$800;p:$400;crc:$95c7d944),(n:'rt1-4.5v';l:$800;p:$c00;crc:$1391fec9),
-        (n:'rt1-5.6u';l:$20;p:$1400;crc:$e4130804),());
-        rthunder_adpcm:array[0..2] of tipo_roms=(
-        (n:'rt1_21.f3';l:$10000;p:$0;crc:$454968f3),(n:'rt2_22.h3';l:$10000;p:$20000;crc:$fe963e72),());
+        (n:'rt1-5.6u';l:$20;p:$1400;crc:$e4130804));
+        rthunder_adpcm:array[0..1] of tipo_roms=(
+        (n:'rt1_21.f3';l:$10000;p:$0;crc:$454968f3),(n:'rt2_22.h3';l:$10000;p:$20000;crc:$fe963e72));
         //Hopping Mappy
         hopmappy_rom:tipo_roms=(n:'hm1_1.9c';l:$8000;p:$8000;crc:$1a83914e);
         hopmappy_sub_rom:tipo_roms=(n:'hm1_2.12c';l:$4000;p:$c000;crc:$c46cda65);
         hopmappy_chars:tipo_roms=(n:'hm1_6.7r';l:$4000;p:$0;crc:$fd0e8887);
         hopmappy_tiles:tipo_roms=(n:'hm1_5.4r';l:$4000;p:$0;crc:$9c4f31ae);
         hopmappy_sprites:tipo_roms=(n:'hm1_4.12h';l:$8000;p:$0;crc:$78719c52);
-        hopmappy_mcu:array[0..2] of tipo_roms=(
-        (n:'hm1_3.6b';l:$2000;p:$8000;crc:$6496e1db),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),());
-        hopmappy_prom:array[0..5] of tipo_roms=(
+        hopmappy_mcu:array[0..1] of tipo_roms=(
+        (n:'hm1_3.6b';l:$2000;p:$8000;crc:$6496e1db),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        hopmappy_prom:array[0..4] of tipo_roms=(
         (n:'hm1-1.3r';l:$200;p:$0;crc:$cc801088),(n:'hm1-2.3s';l:$200;p:$200;crc:$a1cb71c5),
         (n:'hm1-3.4v';l:$800;p:$400;crc:$e362d613),(n:'hm1-4.5v';l:$800;p:$c00;crc:$678252b4),
-        (n:'hm1-5.6u';l:$20;p:$1400;crc:$475bf500),());
+        (n:'hm1-5.6u';l:$20;p:$1400;crc:$475bf500));
         //Sky Kid Deluxe
-        skykiddx_rom:array[0..2] of tipo_roms=(
-        (n:'sk3_1b.9c';l:$8000;p:$0;crc:$767b3514),(n:'sk3_2.9d';l:$8000;p:$8000;crc:$74b8f8e2),());
+        skykiddx_rom:array[0..1] of tipo_roms=(
+        (n:'sk3_1b.9c';l:$8000;p:$0;crc:$767b3514),(n:'sk3_2.9d';l:$8000;p:$8000;crc:$74b8f8e2));
         skykiddx_sub_rom:tipo_roms=(n:'sk3_3.12c';l:$8000;p:$8000;crc:$6d1084c4);
-        skykiddx_chars:array[0..2] of tipo_roms=(
-        (n:'sk3_9.7r';l:$8000;p:$0;crc:$48675b17),(n:'sk3_10.7s';l:$4000;p:$8000;crc:$7418465a),());
-        skykiddx_tiles:array[0..2] of tipo_roms=(
-        (n:'sk3_7.4r';l:$8000;p:$0;crc:$4036b735),(n:'sk3_8.4s';l:$4000;p:$8000;crc:$044bfd21),());
-        skykiddx_sprites:array[0..2] of tipo_roms=(
-        (n:'sk3_5.12h';l:$8000;p:$0;crc:$5c7d4399),(n:'sk3_6.12k';l:$8000;p:$8000;crc:$c908a3b2),());
-        skykiddx_mcu:array[0..2] of tipo_roms=(
-        (n:'sk3_4.6b';l:$4000;p:$8000;crc:$e6cae2d6),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),());
-        skykiddx_prom:array[0..5] of tipo_roms=(
+        skykiddx_chars:array[0..1] of tipo_roms=(
+        (n:'sk3_9.7r';l:$8000;p:$0;crc:$48675b17),(n:'sk3_10.7s';l:$4000;p:$8000;crc:$7418465a));
+        skykiddx_tiles:array[0..1] of tipo_roms=(
+        (n:'sk3_7.4r';l:$8000;p:$0;crc:$4036b735),(n:'sk3_8.4s';l:$4000;p:$8000;crc:$044bfd21));
+        skykiddx_sprites:array[0..1] of tipo_roms=(
+        (n:'sk3_5.12h';l:$8000;p:$0;crc:$5c7d4399),(n:'sk3_6.12k';l:$8000;p:$8000;crc:$c908a3b2));
+        skykiddx_mcu:array[0..1] of tipo_roms=(
+        (n:'sk3_4.6b';l:$4000;p:$8000;crc:$e6cae2d6),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        skykiddx_prom:array[0..4] of tipo_roms=(
         (n:'sk3-1.3r';l:$200;p:$0;crc:$9e81dedd),(n:'sk3-2.3s';l:$200;p:$200;crc:$cbfec4dd),
         (n:'sk3-3.4v';l:$800;p:$400;crc:$81714109),(n:'sk3-4.5v';l:$800;p:$c00;crc:$1bf25acc),
-        (n:'sk3-5.6u';l:$20;p:$1400;crc:$e4130804),());
+        (n:'sk3-5.6u';l:$20;p:$1400;crc:$e4130804));
 
 var
  rom_bank:array[0..$1f,0..$1fff] of byte;
@@ -272,19 +272,29 @@ end;
 function system86_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$3fff,$4400..$5fff,$8000..$ffff:system86_getbyte:=memoria[direccion];
   $4000..$43ff:system86_getbyte:=namco_snd_0.namcos1_cus30_r(direccion and $3ff);
   $6000..$7fff:system86_getbyte:=rom_bank[rom_nbank,direccion and $1fff];
-  else system86_getbyte:=memoria[direccion];
 end;
 end;
 
 procedure system86_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$1fff:if memoria[direccion]<>valor then gfx[0].buffer[direccion shr 1]:=true;
-  $2000..$3fff:if memoria[direccion]<>valor then gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
+  0..$1fff:if memoria[direccion]<>valor then begin
+              gfx[0].buffer[direccion shr 1]:=true;
+              memoria[direccion]:=valor;
+           end;
+  $2000..$3fff:if memoria[direccion]<>valor then begin
+              gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
+              memoria[direccion]:=valor;
+           end;
   $4000..$43ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
-  $5ff2:copy_sprites:=true;
+  $4400..$5ff1,$5ff3..$5fff:memoria[direccion]:=valor;
+  $5ff2:begin
+            copy_sprites:=true;
+            memoria[direccion]:=valor;
+        end;
   $8400:m6809_0.change_irq(CLEAR_LINE);
   $8800..$8fff:tile_bank:=bit_n(direccion,10);
   $9000:begin
@@ -313,24 +323,30 @@ case direccion of
   $9405:scroll_x[3]:=(scroll_x[3] and $ff00) or valor;
   $9406:scroll_y[3]:=valor;
   $a000:back_color:=valor;
+  //TODO LO DEMAS ROM
 end;
-if direccion<$6000 then memoria[direccion]:=valor;
 end;
 
 //Rolling Thunder
 procedure rthunder_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$1fff:if memoria[direccion]<>valor then gfx[0].buffer[direccion shr 1]:=true;
-  $2000..$3fff:if memoria[direccion]<>valor then gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
+  0..$1fff:if memoria[direccion]<>valor then begin
+              gfx[0].buffer[direccion shr 1]:=true;
+              memoria[direccion]:=valor;
+           end;
+  $2000..$3fff:if memoria[direccion]<>valor then begin
+              gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
+              memoria[direccion]:=valor;
+           end;
   $4000..$43ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
-  $5ff2:copy_sprites:=true;
-  $6000..$7fff:begin
-                 case ((direccion and $1e00) shr 9) of
+  $4400..$5fff:begin
+                  memoria[direccion]:=valor;
+                  if direccion=$5ff2 then copy_sprites:=true;
+               end;
+  $6000..$7fff:case ((direccion and $1e00) shr 9) of
     		            0,1,2,3:namco_63701x_w((direccion and $1e00) shr 9,valor);
 		                4:rom_nbank:=valor and $1f;
-                 end;
-                 exit;
                end;
   $8400:m6809_0.change_irq(CLEAR_LINE);
   $8800..$8fff:tile_bank:=bit_n(direccion,10);
@@ -360,7 +376,6 @@ case direccion of
   $9406:scroll_y[3]:=valor;
   $a000:back_color:=valor;
 end;
-if direccion<$6000 then memoria[direccion]:=valor;
 end;
 
 function rthunder_sub_getbyte(direccion:word):byte;
@@ -477,9 +492,9 @@ begin
  ym2151_0.reset;
  if main_vars.tipo_maquina=124 then namco_63701x_reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$f;
  rom_nbank:=0;
  rom_sub_nbank:=0;
  for f:=0 to 3 do scroll_y[f]:=0;
@@ -536,7 +551,7 @@ begin
   init_gfx(0,8,8,num);
   gfx[0].trans[7]:=true;
   gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 end;
 procedure convert_tiles(num:word);
 begin
@@ -544,14 +559,14 @@ begin
   init_gfx(1,8,8,num);
   gfx[1].trans[7]:=true;
   gfx_set_desc_data(3,0,8*8,2*num*8*8,num*8*8,0);
-  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,false);
 end;
 procedure convert_sprites(num:word);
 begin
   init_gfx(2,32,32,num);
   gfx[2].trans[15]:=true;
   gfx_set_desc_data(4,0,64*64,0,1,2,3);
-  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
   bank_sprites:=num div 8;
 end;
 begin
@@ -583,90 +598,90 @@ ym2151_0:=ym2151_chip.create(3579580,0.4);
 case main_vars.tipo_maquina of
     124:begin
             //cargar roms main CPU
-            if not(cargar_roms(@memoria[$0],@rthunder_rom,'rthunder.zip',1)) then exit;
+            if not(roms_load(@memoria,rthunder_rom)) then exit;
             m6809_0.change_ram_calls(system86_getbyte,rthunder_putbyte);
             //Pongo las ROMs en su banco
-            if not(cargar_roms(@memoria_temp[0],@rthunder_rom_bank[0],'rthunder.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,rthunder_rom_bank)) then exit;
             for f:=0 to $1f do copymemory(@rom_bank[f,0],@memoria_temp[f*$2000],$2000);
             //cargar roms sub CPU
-            if not(cargar_roms(@memoria_temp[0],@rthunder_sub_rom[0],'rthunder.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,rthunder_sub_rom)) then exit;
             m6809_1.change_ram_calls(rthunder_sub_getbyte,rthunder_sub_putbyte);
             //Pongo las ROMs en su banco
             copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
             for f:=0 to $3 do copymemory(@rom_sub_bank[f,0],@memoria_temp[(f*$2000)+$8000],$2000);
             //Cargar MCU
-            if not(cargar_roms(@mem_snd[0],@rthunder_mcu[0],'rthunder.zip',0)) then exit;
+            if not(roms_load(@mem_snd,rthunder_mcu)) then exit;
             //Cargar ADPCM
             namco_63701x_start(6000000);
-            if not(cargar_roms(namco_63701_rom,@rthunder_adpcm,'rthunder.zip',0)) then exit;
+            if not(roms_load(namco_63701_rom,rthunder_adpcm)) then exit;
             //convertir chars
-            if not(cargar_roms(@memoria_temp[0],@rthunder_chars[0],'rthunder.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,rthunder_chars)) then exit;
             convert_data($18000);
             convert_chars($1000);
             //tiles
-            if not(cargar_roms(@memoria_temp[0],@rthunder_tiles[0],'rthunder.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,rthunder_tiles)) then exit;
             convert_data($c000);
             convert_tiles($800);
             //sprites
-            if not(cargar_roms(@memoria_temp[0],@rthunder_sprites[0],'rthunder.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,rthunder_sprites)) then exit;
             convert_sprites($400);
             //Paleta
-            if not(cargar_roms(@memoria_temp[0],@rthunder_prom[0],'rthunder.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,rthunder_prom)) then exit;
             dip_2:=$f9;
             update_video_system86:=rthunder_video;
     end;
     125:begin
             //cargar roms main CPU
-            if not(cargar_roms(@memoria[$0],@hopmappy_rom,'hopmappy.zip',1)) then exit;
+            if not(roms_load(@memoria,hopmappy_rom)) then exit;
             m6809_0.change_ram_calls(system86_getbyte,system86_putbyte);
             //cargar roms sub CPU
-            if not(cargar_roms(@mem_misc[0],@hopmappy_sub_rom,'hopmappy.zip',1)) then exit;
+            if not(roms_load(@mem_misc,hopmappy_sub_rom)) then exit;
             m6809_1.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
             //Cargar MCU
-            if not(cargar_roms(@mem_snd[0],@hopmappy_mcu[0],'hopmappy.zip',0)) then exit;
+            if not(roms_load(@mem_snd,hopmappy_mcu)) then exit;
             //convertir chars
             fillchar(memoria_temp[0],$6000,0);
-            if not(cargar_roms(@memoria_temp[0],@hopmappy_chars,'hopmappy.zip',1)) then exit;
+            if not(roms_load(@memoria_temp,hopmappy_chars)) then exit;
             convert_data($6000);
             init_gfx(0,8,8,$400);
             convert_chars($400);
             //tiles
             fillchar(memoria_temp[0],$6000,0);
-            if not(cargar_roms(@memoria_temp[0],@hopmappy_tiles,'hopmappy.zip',1)) then exit;
+            if not(roms_load(@memoria_temp,hopmappy_tiles)) then exit;
             convert_data($6000);
             convert_tiles($400);
             //sprites
-            if not(cargar_roms(@memoria_temp[0],@hopmappy_sprites,'hopmappy.zip',1)) then exit;
+            if not(roms_load(@memoria_temp,hopmappy_sprites)) then exit;
             convert_sprites($200);
             //Paleta
-            if not(cargar_roms(@memoria_temp[0],@hopmappy_prom[0],'hopmappy.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,hopmappy_prom)) then exit;
             dip_2:=$ff;
             update_video_system86:=rthunder_video;
     end;
     126:begin
             //cargar roms main CPU
-            if not(cargar_roms(@memoria_temp[$0],@skykiddx_rom[0],'skykiddx.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,skykiddx_rom)) then exit;
             copymemory(@memoria[$8000],@memoria_temp[0],$8000);
             for f:=0 to 3 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
             m6809_0.change_ram_calls(system86_getbyte,system86_putbyte);
             //cargar roms sub CPU
-            if not(cargar_roms(@mem_misc[0],@skykiddx_sub_rom,'skykiddx.zip',1)) then exit;
+            if not(roms_load(@mem_misc,skykiddx_sub_rom)) then exit;
             m6809_1.change_ram_calls(hopmappy_sub_getbyte,hopmappy_sub_putbyte);
             //Cargar MCU
-            if not(cargar_roms(@mem_snd[0],@skykiddx_mcu[0],'skykiddx.zip',0)) then exit;
+            if not(roms_load(@mem_snd,skykiddx_mcu)) then exit;
             //convertir chars
-            if not(cargar_roms(@memoria_temp[0],@skykiddx_chars[0],'skykiddx.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,skykiddx_chars)) then exit;
             convert_data($c000);
             convert_chars($800);
             //tiles
-            if not(cargar_roms(@memoria_temp[0],@skykiddx_tiles[0],'skykiddx.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,skykiddx_tiles)) then exit;
             convert_data($c000);
             convert_tiles($800);
             //sprites
-            if not(cargar_roms(@memoria_temp[0],@skykiddx_sprites[0],'skykiddx.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,skykiddx_sprites)) then exit;
             convert_sprites($200);
             //Paleta
-            if not(cargar_roms(@memoria_temp[0],@skykiddx_prom[0],'skykiddx.zip',0)) then exit;
+            if not(roms_load(@memoria_temp,skykiddx_prom)) then exit;
             dip_2:=$ff;
             update_video_system86:=skykiddx_video;
     end;

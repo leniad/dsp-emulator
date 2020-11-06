@@ -13,11 +13,11 @@ const
         //vendetta
         vendetta_rom:tipo_roms=(n:'081u01';l:$40000;p:0;crc:$b4d9ade5);
         vendetta_sound:tipo_roms=(n:'081b02';l:$10000;p:0;crc:$4c604d9b);
-        vendetta_tiles:array[0..2] of tipo_roms=(
-        (n:'081a09';l:$80000;p:0;crc:$b4c777a9),(n:'081a08';l:$80000;p:2;crc:$272ac8d9),());
-        vendetta_sprites:array[0..4] of tipo_roms=(
+        vendetta_tiles:array[0..1] of tipo_roms=(
+        (n:'081a09';l:$80000;p:0;crc:$b4c777a9),(n:'081a08';l:$80000;p:2;crc:$272ac8d9));
+        vendetta_sprites:array[0..3] of tipo_roms=(
         (n:'081a04';l:$100000;p:0;crc:$464b9aa4),(n:'081a05';l:$100000;p:2;crc:$4e173759),
-        (n:'081a06';l:$100000;p:4;crc:$e9fe6d80),(n:'081a07';l:$100000;p:6;crc:$8a22b29a),());
+        (n:'081a06';l:$100000;p:4;crc:$e9fe6d80),(n:'081a07';l:$100000;p:6;crc:$8a22b29a));
         vendetta_k053260:tipo_roms=(n:'081a03';l:$100000;p:0;crc:$14b6baea);
         vendetta_eeprom:tipo_roms=(n:'vendetta.nv';l:$80;p:0;crc:$fbac4e30);
         //DIP
@@ -191,8 +191,8 @@ end;
 
 procedure vendetta_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$2000) or (direccion>$7fff)) then exit;
 case direccion of
+    0..$1fff,$8000..$ffff:; //ROM
     $2000..$3fff:memoria[direccion]:=valor;
     $4000..$4fff:if video_bank=0 then k052109_0.write(direccion and $fff,valor)
                     else k053246_0.k053247_w(direccion and $fff,valor);
@@ -243,14 +243,14 @@ end;
 
 procedure vendetta_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$f000 then exit;
 case direccion of
+  0..$efff:; //ROM
   $f000..$f7ff:mem_snd[direccion]:=valor;
   $f800:ym2151_0.reg(valor);
   $f801:ym2151_0.write(valor);
   $fa00:begin
           z80_0.change_nmi(ASSERT_LINE);
-          timer[timer_n].enabled:=true;
+          timers.enabled(timer_n,true);
         end;
   $fc00..$fc2f:k053260_0.write(direccion and $3f,valor);
 end;
@@ -258,7 +258,7 @@ end;
 
 procedure vendetta_clear_nmi;
 begin
-  timer[timer_n].enabled:=false;
+  timers.enabled(timer_n,false);
   z80_0.change_nmi(CLEAR_LINE);
 end;
 
@@ -305,11 +305,11 @@ screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
 iniciar_audio(true);
 //cargar roms y ponerlas en su sitio...
-if not(roms_load(@temp_mem[0],@vendetta_rom,'vendetta.zip',sizeof(vendetta_rom))) then exit;
+if not(roms_load(@temp_mem,vendetta_rom)) then exit;
 copymemory(@memoria[$8000],@temp_mem[$38000],$8000);
 for f:=0 to 27 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 //cargar sonido
-if not(roms_load(@mem_snd[0],@vendetta_sound,'vendetta.zip',sizeof(vendetta_sound))) then exit;
+if not(roms_load(@mem_snd,vendetta_sound)) then exit;
 //Main CPU
 konami_0:=cpu_konami.create(3000000,256);
 konami_0.change_ram_calls(vendetta_getbyte,vendetta_putbyte);
@@ -318,11 +318,11 @@ konami_0.change_set_lines(vendetta_bank);
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(vendetta_snd_getbyte,vendetta_snd_putbyte);
 z80_0.init_sound(vendetta_sound_update);
-timer_n:=init_timer(z80_0.numero_cpu,90,vendetta_clear_nmi,false);
+timer_n:=timers.init(z80_0.numero_cpu,90,vendetta_clear_nmi,nil,false);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k053260_rom,$100000);
-if not(roms_load(k053260_rom,@vendetta_k053260,'vendetta.zip',sizeof(vendetta_k053260))) then exit;
+if not(roms_load(k053260_rom,vendetta_k053260)) then exit;
 k053260_0:=tk053260_chip.create(3579545,k053260_rom,$100000,0.70);
 //Iniciar video
 layer_colorbase[0]:=0;
@@ -336,17 +336,17 @@ sprite_colorbase:=0;
 k053251_0:=k053251_chip.create;
 //tiles
 getmem(tiles_rom,$100000);
-if not(cargar_roms32b(tiles_rom,@vendetta_tiles,'vendetta.zip',0)) then exit;
+if not(roms_load32b(tiles_rom,vendetta_tiles)) then exit;
 k052109_0:=k052109_chip.create(1,2,3,vendetta_cb,tiles_rom,$100000);
 //sprites
 getmem(sprite_rom,$400000);
-if not(cargar_roms64b(sprite_rom,@vendetta_sprites,'vendetta.zip',0)) then exit;
+if not(roms_load64b(sprite_rom,vendetta_sprites)) then exit;
 k053246_0:=k053246_chip.create(4,vendetta_sprite_cb,sprite_rom,$400000);
 k053246_0.k053247_start;
 //eeprom
 eepromser_init(ER5911,8);
-if not(cargar_roms(@temp_mem[0],@vendetta_eeprom,'vendetta.zip',1)) then exit;
-eepromser_load_data(@temp_mem[0],$80);
+if not(roms_load(@temp_mem,vendetta_eeprom)) then exit;
+eepromser_load_data(@temp_mem,$80);
 //protection
 k054000_0:=k054000_chip.create;
 //DIP

@@ -10,24 +10,24 @@ procedure cargar_pirates;
 implementation
 const
         //Pirates
-        pirates_rom:array[0..2] of tipo_roms=(
-        (n:'r_449b.bin';l:$80000;p:0;crc:$224aeeda),(n:'l_5c1e.bin';l:$80000;p:$1;crc:$46740204),());
-        pirates_gfx:array[0..4] of tipo_roms=(
+        pirates_rom:array[0..1] of tipo_roms=(
+        (n:'r_449b.bin';l:$80000;p:0;crc:$224aeeda),(n:'l_5c1e.bin';l:$80000;p:$1;crc:$46740204));
+        pirates_gfx:array[0..3] of tipo_roms=(
         (n:'p4_4d48.bin';l:$80000;p:0;crc:$89fda216),(n:'p2_5d74.bin';l:$80000;p:$80000;crc:$40e069b4),
-        (n:'p1_7b30.bin';l:$80000;p:$100000;crc:$26d78518),(n:'p8_9f4f.bin';l:$80000;p:$180000;crc:$f31696ea),());
-        pirates_sprites:array[0..4] of tipo_roms=(
+        (n:'p1_7b30.bin';l:$80000;p:$100000;crc:$26d78518),(n:'p8_9f4f.bin';l:$80000;p:$180000;crc:$f31696ea));
+        pirates_sprites:array[0..3] of tipo_roms=(
         (n:'s1_6e89.bin';l:$80000;p:0;crc:$c78a276f),(n:'s2_6df3.bin';l:$80000;p:$80000;crc:$9f0bad96),
-        (n:'s4_fdcc.bin';l:$80000;p:$100000;crc:$8916ddb5),(n:'s8_4b7c.bin';l:$80000;p:$180000;crc:$1c41bd2c),());
+        (n:'s4_fdcc.bin';l:$80000;p:$100000;crc:$8916ddb5),(n:'s8_4b7c.bin';l:$80000;p:$180000;crc:$1c41bd2c));
         pirates_oki:tipo_roms=(n:'s89_49d4.bin';l:$80000;p:0;crc:$63a739ec);
         //Genix Family
-        genix_rom:array[0..2] of tipo_roms=(
-        (n:'1.15';l:$80000;p:0;crc:$d26abfb0),(n:'2.16';l:$80000;p:$1;crc:$a14a25b4),());
-        genix_gfx:array[0..4] of tipo_roms=(
+        genix_rom:array[0..1] of tipo_roms=(
+        (n:'1.15';l:$80000;p:0;crc:$d26abfb0),(n:'2.16';l:$80000;p:$1;crc:$a14a25b4));
+        genix_gfx:array[0..3] of tipo_roms=(
         (n:'7.34';l:$40000;p:0;crc:$58da8aac),(n:'9.35';l:$40000;p:$80000;crc:$96bad9a8),
-        (n:'8.48';l:$40000;p:$100000;crc:$0ddc58b6),(n:'10.49';l:$40000;p:$180000;crc:$2be308c5),());
-        genix_sprites:array[0..4] of tipo_roms=(
+        (n:'8.48';l:$40000;p:$100000;crc:$0ddc58b6),(n:'10.49';l:$40000;p:$180000;crc:$2be308c5));
+        genix_sprites:array[0..3] of tipo_roms=(
         (n:'6.69';l:$40000;p:0;crc:$b8422af7),(n:'5.70';l:$40000;p:$80000;crc:$e46125c5),
-        (n:'4.71';l:$40000;p:$100000;crc:$7a8ed21b),(n:'3.72';l:$40000;p:$180000;crc:$f78bd6ca),());
+        (n:'4.71';l:$40000;p:$100000;crc:$7a8ed21b),(n:'3.72';l:$40000;p:$180000;crc:$f78bd6ca));
         genix_oki:tipo_roms=(n:'0.31';l:$80000;p:0;crc:$80d087bc);
 
 var
@@ -356,37 +356,37 @@ case main_vars.tipo_maquina of
   206:begin //Pirates
         m68000_0.change_ram16_calls(pirates_getword,pirates_putword);
         //OKI snd
-        if not(cargar_roms(ptempb,@pirates_oki,'pirates.zip')) then exit;
+        if not(roms_load(ptempb,pirates_oki)) then exit;
         decr_and_load_oki;
         //cargar roms
         getmem(ptempw,$100000);
-        if not(cargar_roms16w(ptempw,@pirates_rom[0],'pirates.zip',0)) then exit;
+        if not(roms_load16w(ptempw,pirates_rom)) then exit;
         decr_and_load_rom;
         freemem(ptempw);
         //Protection patch
         rom[$62c0 shr 1]:=$6006;
         //cargar gfx
-        if not(cargar_roms(ptempb,@pirates_gfx[0],'pirates.zip',0)) then exit;
+        if not(roms_load(ptempb,pirates_gfx)) then exit;
         decr_and_load_gfx;
         //sprites
-        if not(cargar_roms(ptempb,@pirates_sprites[0],'pirates.zip',0)) then exit;
+        if not(roms_load(ptempb,pirates_sprites)) then exit;
         decr_and_load_sprites;
       end;
   207:begin //Genix Family
         m68000_0.change_ram16_calls(genix_getword,pirates_putword);
         //OKI snd
-        if not(cargar_roms(ptempb,@genix_oki,'genix.zip')) then exit;
+        if not(roms_load(ptempb,genix_oki)) then exit;
         decr_and_load_oki;
         //cargar roms
         getmem(ptempw,$100000);
-        if not(cargar_roms16w(ptempw,@genix_rom[0],'genix.zip',0)) then exit;
+        if not(roms_load16w(ptempw,genix_rom)) then exit;
         decr_and_load_rom;
         freemem(ptempw);
         //cargar gfx
-        if not(cargar_roms(ptempb,@genix_gfx[0],'genix.zip',0)) then exit;
+        if not(roms_load(ptempb,genix_gfx)) then exit;
         decr_and_load_gfx;
         //sprites
-        if not(cargar_roms(ptempb,@genix_sprites[0],'genix.zip',0)) then exit;
+        if not(roms_load(ptempb,genix_sprites)) then exit;
         decr_and_load_sprites;
       end;
 end;

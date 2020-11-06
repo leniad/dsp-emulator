@@ -33,6 +33,7 @@ type
         procedure internal_update;
     end;
 
+procedure internal_update_k007232(index:byte);
 procedure internal_update_k007232_0;
 procedure internal_update_k007232_1;
 
@@ -66,10 +67,7 @@ begin
 	self.vol[1,1]:=255;  // channel B output to output B */
   self.amp:=amplifi;
 	for f:=0 to $f do self.wreg[f]:=0;
-  case chips_total of
-    0:self.ntimer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/128),internal_update_k007232_0,true);
-    1:self.ntimer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/128),internal_update_k007232_1,true);
-  end;
+  self.ntimer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/128),nil,internal_update_k007232,true,chips_total);
   self.tsample_num:=init_channel;
   self.tsample_num2:=init_channel;
   self.rom:=rom_adpcm;
@@ -191,6 +189,14 @@ for f:=0 to (KDAC_A_PCM_MAX-1) do begin
        self.out2:=self.out2+(((self.rom[addr] and $7f)-$40)*volB);
     end;
 end;
+end;
+
+procedure internal_update_k007232(index:byte);
+begin
+  case index of
+    0:k007232_0.internal_update;
+    1:k007232_1.internal_update;
+  end;
 end;
 
 procedure internal_update_k007232_0;

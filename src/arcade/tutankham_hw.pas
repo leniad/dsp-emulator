@@ -9,7 +9,7 @@ procedure cargar_tutankham;
 
 implementation
 const
-        tutan_rom:array[0..15] of tipo_roms=(
+        tutan_rom:array[0..14] of tipo_roms=(
         (n:'m1.1h';l:$1000;p:$0;crc:$da18679f),(n:'m2.2h';l:$1000;p:$1000;crc:$a0f02c85),
         (n:'3j.3h';l:$1000;p:$2000;crc:$ea03a1ab),(n:'m4.4h';l:$1000;p:$3000;crc:$bd06fad0),
         (n:'m5.5h';l:$1000;p:$4000;crc:$bf9fd9b0),(n:'j6.6h';l:$1000;p:$5000;crc:$fe079c5b),
@@ -17,20 +17,31 @@ const
         (n:'c3.3i';l:$1000;p:$8000;crc:$a10d4444),(n:'c4.4i';l:$1000;p:$9000;crc:$58cd143c),
         (n:'c5.5i';l:$1000;p:$a000;crc:$d7e7ae95),(n:'c6.6i';l:$1000;p:$b000;crc:$91f62b82),
         (n:'c7.7i';l:$1000;p:$c000;crc:$afd0a81f),(n:'c8.8i';l:$1000;p:$d000;crc:$dabb609b),
-        (n:'c9.9i';l:$1000;p:$e000;crc:$8ea9c6a6),());
-        tutan_sound:array[0..2] of tipo_roms=(
-        (n:'s1.7a';l:$1000;p:0;crc:$b52d01fa),(n:'s2.8a';l:$1000;p:$1000;crc:$9db5c0ce),());
+        (n:'c9.9i';l:$1000;p:$e000;crc:$8ea9c6a6));
+        tutan_sound:array[0..1] of tipo_roms=(
+        (n:'s1.7a';l:$1000;p:0;crc:$b52d01fa),(n:'s2.8a';l:$1000;p:$1000;crc:$9db5c0ce));
+        //Dip
+        tutan_dip_a:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
+        (mask:$f0;name:'Coin B';number:15;dip:((dip_val:$20;dip_name:'4C 1C'),(dip_val:$50;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$40;dip_name:'3C 2C'),(dip_val:$10;dip_name:'4C 3C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$30;dip_name:'3C 4C'),(dip_val:$70;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$60;dip_name:'2C 5C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$a0;dip_name:'1C 6C'),(dip_val:$90;dip_name:'1C 7C'),())),());
+        tutan_dip_b:array [0..6] of def_dip=(
+        (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$0;dip_name:'255'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$8;dip_name:'30K'),(dip_val:$0;dip_name:'40K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Difficulty';number:4;dip:((dip_val:$30;dip_name:'Easy'),(dip_val:$20;dip_name:'Normal'),(dip_val:$10;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flash Bomb';number:2;dip:((dip_val:$40;dip_name:'1 per Life'),(dip_val:$0;dip_name:'1 per Game'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  irq_enable:boolean;
  xorx,xory,rom_nbank,scroll_y:byte;
  rom_bank:array[0..$f,0..$fff] of byte;
- punt:array[0..$ffff] of word;
 
 procedure update_video_tutankham;inline;
 var
   y,x:word;
   effx,yscroll,effy,vrambyte,shifted:byte;
+  punt:array[0..$ffff] of word;
 begin
 for y:=0 to 255 do begin
 		for x:=0 to 255 do begin
@@ -43,7 +54,7 @@ for y:=0 to 255 do begin
       punt[y*256+x]:=paleta[shifted and $0f];
 		end;
 end;
-putpixel(0,0,$10000,@punt[0],1);
+putpixel(0,0,$10000,@punt,1);
 actualiza_trozo(16,0,224,256,1,0,0,224,256,PANT_TEMP);
 end;
 
@@ -106,11 +117,11 @@ begin
 case direccion of
   0..$7fff,$8100,$8800..$8fff,$a000..$ffff:tutankham_getbyte:=memoria[direccion];
   $8000..$80ff:tutankham_getbyte:=buffer_paleta[direccion and $f];
-  $8160..$816f:tutankham_getbyte:=$7b;
+  $8160..$816f:tutankham_getbyte:=marcade.dswb;
   $8180..$818f:tutankham_getbyte:=marcade.in0;
   $81a0..$81af:tutankham_getbyte:=marcade.in1;
   $81c0..$81cf:tutankham_getbyte:=marcade.in2;
-  $81e0..$81ef:tutankham_getbyte:=$ff;
+  $81e0..$81ef:tutankham_getbyte:=marcade.dswa;
   $9000..$9fff:tutankham_getbyte:=rom_bank[rom_nbank,direccion and $fff];
 end;
 end;
@@ -119,7 +130,6 @@ procedure tutankham_putbyte(direccion:word;valor:byte);
 var
   color:tcolor;
 begin
-if direccion>$8fff then exit;
 case direccion of
   0..$7fff,$8800..$8fff:memoria[direccion]:=valor;
   $8000..$80ff:begin
@@ -143,6 +153,7 @@ case direccion of
   $8300..$83ff:rom_nbank:=valor and $f;
   $8600..$86ff:konamisnd_0.pedir_irq:=HOLD_LINE;
   $8700..$87ff:konamisnd_0.sound_latch:=valor;
+  $9000..$ffff:; //ROM
 end;
 end;
 
@@ -152,9 +163,9 @@ begin
  m6809_0.reset;
  reset_audio;
  konamisnd_0.reset;
- marcade.in0:=$fF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  irq_enable:=false;
 end;
 
@@ -173,11 +184,16 @@ m6809_0:=cpu_m6809.Create(1536000,$100,TCPU_M6809);
 m6809_0.change_ram_calls(tutankham_getbyte,tutankham_putbyte);
 //Sound Chip
 konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
-if not(cargar_roms(@konamisnd_0.memoria[0],@tutan_sound[0],'tutankhm.zip',0)) then exit;
+if not(roms_load(@konamisnd_0.memoria,tutan_sound)) then exit;
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@tutan_rom[0],'tutankhm.zip',0)) then exit;
+if not(roms_load(@memoria_temp,tutan_rom)) then exit;
 copymemory(@memoria[$a000],@memoria_temp[0],$6000);
 for f:=0 to 8 do copymemory(@rom_bank[f,0],@memoria_temp[$6000+(f*$1000)],$1000);
+//DIP
+marcade.dswa:=$ff;
+marcade.dswb:=$7b;
+marcade.dswa_val:=@tutan_dip_a;
+marcade.dswb_val:=@tutan_dip_b;
 //final
 reset_tutankham;
 iniciar_tutankham:=true;

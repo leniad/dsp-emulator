@@ -144,9 +144,11 @@ end;
 end;
 
 procedure knjoe_putbyte(direccion:word;valor:byte);
+var
+  tempb:byte;
 begin
-if direccion<$c000 then exit;
 case direccion of
+    0..$bfff:;
     $c000..$cfff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[(direccion and $fff) shr 1]:=true;
                     memoria[direccion]:=valor;
@@ -156,11 +158,16 @@ case direccion of
     $d800:if ((valor and $80)=0) then sound_command:=valor and $7f
           	else m6800_0.change_irq(ASSERT_LINE);
     $d801:begin
-            if tile_bank<>(valor and $10) then begin
-              tile_bank:=valor and $10;
+            tempb:=valor and $10;
+            if tile_bank<>tempb then begin
+              tile_bank:=tempb;
               fillchar(gfx[0].buffer,$800,1);
             end;
-            sprite_bank:=1+((valor and $04) shr 2);
+            tempb:=1+((valor and $04) shr 2);
+            if sprite_bank<>tempb then begin
+              sprite_bank:=tempb;
+              fillchar(memoria[$f100],$180,0);
+            end;
             main_screen.flip_main_screen:=(valor and $1)<>0;
           end;
     $d802:sn_76496_0.Write(valor);
@@ -182,10 +189,10 @@ end;
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7fff;
-if direccion>$1fff then exit;
 case direccion of
   $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $1000..$1fff:m6800_0.change_irq(CLEAR_LINE);
+  $2000..$7fff:;
 end;
 end;
 
@@ -292,30 +299,30 @@ ay8910_0.change_io_calls(ay0_porta_r,nil,nil,nil);
 sn_76496_0:=sn76496_chip.Create(3579545);
 sn_76496_1:=sn76496_chip.Create(3579545);
 //Timers (Se divide por cuatro, por que internamente el M6800 va dividido!!!
-init_timer(m6800_0.numero_cpu,3579545/4/3970,knjoe_snd_nmi,true);
+timers.init(m6800_0.numero_cpu,3579545/4/3970,knjoe_snd_nmi,nil,true);
 //cargar roms y ponerlas en sus bancos
-if not(roms_load(@memoria,@knjoe_rom,'kncljoe.zip',sizeof(knjoe_rom))) then exit;
+if not(roms_load(@memoria,knjoe_rom)) then exit;
 //cargar sonido
-if not(roms_load(@mem_snd,@knjoe_sound,'kncljoe.zip',sizeof(knjoe_sound))) then exit;
+if not(roms_load(@mem_snd,knjoe_sound)) then exit;
 //convertir tiles
-if not(roms_load(@memoria_temp,@knjoe_tiles,'kncljoe.zip',sizeof(knjoe_tiles))) then exit;
+if not(roms_load(@memoria_temp,knjoe_tiles)) then exit;
 init_gfx(0,8,8,$800);
 gfx_set_desc_data(3,0,8*8,2*$800*8*8,$800*8*8,0);
 convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,false,false);
 //convertir sprites
-if not(roms_load(@memoria_temp,@knjoe_sprites,'kncljoe.zip',sizeof(knjoe_sprites))) then exit;
+if not(roms_load(@memoria_temp,knjoe_sprites)) then exit;
 init_gfx(1,16,16,$400);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*$400*32*8,$400*32*8,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir sprites 2
-if not(roms_load(@memoria_temp,@knjoe_sprites2,'kncljoe.zip',sizeof(knjoe_sprites2))) then exit;
+if not(roms_load(@memoria_temp,knjoe_sprites2)) then exit;
 init_gfx(2,16,16,$200);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*$200*32*8,$200*32*8,0);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //poner la paleta
-if not(roms_load(@memoria_temp,@knjoe_pal,'kncljoe.zip',sizeof(knjoe_pal))) then exit;
+if not(roms_load(@memoria_temp,knjoe_pal)) then exit;
 for f:=0 to $7f do begin
     colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
     colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);

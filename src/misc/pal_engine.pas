@@ -6,8 +6,8 @@ uses {$IFDEF windows}windows,{$ENDIF}lib_sdl2;
 const
     MAX_NETS=3;
     MAX_RES_PER_NET=18;
-    set_trans_color=$1;
-    max_colores=$8000;
+    SET_TRANS_COLOR=$1;
+    MAX_COLORES=$8000;
 type
   tcolor=record
                 r,g,b:byte;
@@ -15,9 +15,9 @@ type
          end;
   tpaleta=array[0..max_colores] of tcolor;
 var
-  paleta,buffer_paleta:array[0..max_colores] of word;
-  paleta32,paleta_alpha:array[0..max_colores] of dword;
-  buffer_color:array[0..max_colores] of boolean;
+  paleta,buffer_paleta:array[0..MAX_COLORES] of word;
+  paleta32,paleta_alpha:array[0..MAX_COLORES] of dword;
+  buffer_color:array[0..MAX_COLORES] of boolean;
 
 procedure compute_resistor_weights(
 	minval,maxval:integer;scaler:single;
@@ -34,10 +34,12 @@ function pal3bit(bits:byte):byte;
 function pal4bit(bits:byte):byte;
 function pal4bit_i(bits,i:byte):byte;
 function pal5bit(bits:byte):byte;
+function pal6bit(bits:byte):byte;
 //Palette functions
 procedure set_pal(ppaleta:tpaleta;total_colors:word);
 procedure set_pal_color(pcolor:tcolor;pal_pos:word);
 procedure set_pal_color_alpha(pcolor:tcolor;pal_pos:word);
+function convert_pal_color(pcolor:tcolor):word;
 
 implementation
 uses main_engine;
@@ -281,6 +283,12 @@ begin
 	pal5bit:=(bits shl 3) or (bits shr 2);
 end;
 
+function pal6bit(bits:byte):byte;
+begin
+  bits:=bits and $3f;
+  pal6bit:=(bits shl 2) or (bits shr 4);
+end;
+
 //Palette functions
 procedure set_pal(ppaleta:tpaleta;total_colors:word);inline;
 var
@@ -293,6 +301,11 @@ end;
 procedure set_pal_color(pcolor:tcolor;pal_pos:word);inline;
 begin
 paleta[pal_pos]:=SDL_MapRGB(pantalla[PANT_SPRITES].format, pcolor.r, pcolor.g, pcolor.b);
+end;
+
+function convert_pal_color(pcolor:tcolor):word;inline;
+begin
+convert_pal_color:=SDL_MapRGB(pantalla[PANT_SPRITES].format, pcolor.r, pcolor.g, pcolor.b);
 end;
 
 procedure set_pal_color_alpha(pcolor:tcolor;pal_pos:word);inline;

@@ -35,10 +35,10 @@ object load_spec: Tload_spec
     TabOrder = 1
   end
   object FileListBox1: TFileListBox
-    Left = 16
-    Top = 216
-    Width = 281
-    Height = 277
+    Left = 303
+    Top = 8
+    Width = 299
+    Height = 409
     ItemHeight = 13
     TabOrder = 2
     OnClick = FileListBox1Click
@@ -64,8 +64,8 @@ object load_spec: Tload_spec
     OnClick = Button2Click
   end
   object GroupBox1: TGroupBox
-    Left = 321
-    Top = 33
+    Left = 16
+    Top = 216
     Width = 281
     Height = 255
     Caption = 'Info'

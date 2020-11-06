@@ -10,17 +10,17 @@ procedure cargar_ajax;
 implementation
 const
         //ajax
-        ajax_rom:array[0..2] of tipo_roms=(
-        (n:'770_m01.n11';l:$10000;p:0;crc:$4a64e53a),(n:'770_l02.n12';l:$10000;p:$10000;crc:$ad7d592b),());
-        ajax_sub:array[0..2] of tipo_roms=(
-        (n:'770_l05.i16';l:$8000;p:0;crc:$ed64fbb2),(n:'770_f04.g16';l:$10000;p:$8000;crc:$e0e4ec9c),());
+        ajax_rom:array[0..1] of tipo_roms=(
+        (n:'770_m01.n11';l:$10000;p:0;crc:$4a64e53a),(n:'770_l02.n12';l:$10000;p:$10000;crc:$ad7d592b));
+        ajax_sub:array[0..1] of tipo_roms=(
+        (n:'770_l05.i16';l:$8000;p:0;crc:$ed64fbb2),(n:'770_f04.g16';l:$10000;p:$8000;crc:$e0e4ec9c));
         ajax_sound:tipo_roms=(n:'770_h03.f16';l:$8000;p:0;crc:$2ffd2afc);
-        ajax_tiles:array[0..8] of tipo_roms=(
+        ajax_tiles:array[0..7] of tipo_roms=(
         (n:'770c13-a.f3';l:$10000;p:0;crc:$4ef6fff2),(n:'770c13-c.f4';l:$10000;p:1;crc:$97ffbab6),
         (n:'770c12-a.f5';l:$10000;p:2;crc:$6c0ade68),(n:'770c12-c.f6';l:$10000;p:3;crc:$61fc39cc),
         (n:'770c13-b.e3';l:$10000;p:$40000;crc:$86fdd706),(n:'770c13-d.e4';l:$10000;p:$40001;crc:$7d7acb2d),
-        (n:'770c12-b.e5';l:$10000;p:$40002;crc:$5f221cc6),(n:'770c12-d.e6';l:$10000;p:$40003;crc:$f1edb2f4),());
-        ajax_sprites:array[0..16] of tipo_roms=(
+        (n:'770c12-b.e5';l:$10000;p:$40002;crc:$5f221cc6),(n:'770c12-d.e6';l:$10000;p:$40003;crc:$f1edb2f4));
+        ajax_sprites:array[0..15] of tipo_roms=(
         (n:'770c09-a.f8';l:$10000;p:0;crc:$76690fb8),(n:'770c09-e.f9';l:$10000;p:1;crc:$17b482c9),
         (n:'770c08-a.f10';l:$10000;p:2;crc:$efd29a56),(n:'770c08-e.f11';l:$10000;p:3;crc:$6d43afde),
         (n:'770c09-b.e8';l:$10000;p:$40000;crc:$cd1709d1),(n:'770c09-f.e9';l:$10000;p:$40001;crc:$cba4b47e),
@@ -28,17 +28,17 @@ const
         (n:'770c09-c.d8';l:$10000;p:$80000;crc:$bfd080b8),(n:'770c09-g.d9';l:$10000;p:$80001;crc:$77d58ea0),
         (n:'770c08-c.d10';l:$10000;p:$80002;crc:$28e7088f),(n:'770c08-g.d11';l:$10000;p:$80003;crc:$17da8f6d),
         (n:'770c09-d.c8';l:$10000;p:$c0000;crc:$6f955600),(n:'770c09-h.c9';l:$10000;p:$c0001;crc:$494a9090),
-        (n:'770c08-d.c10';l:$10000;p:$c0002;crc:$91591777),(n:'770c08-h.c11';l:$10000;p:$c0003;crc:$d97d4b15),());
-        ajax_road:array[0..2] of tipo_roms=(
-        (n:'770c06.f4';l:$40000;p:0;crc:$d0c592ee),(n:'770c07.h4';l:$40000;p:$40000;crc:$0b399fb1),());
-        ajax_k007232_1:array[0..4] of tipo_roms=(
+        (n:'770c08-d.c10';l:$10000;p:$c0002;crc:$91591777),(n:'770c08-h.c11';l:$10000;p:$c0003;crc:$d97d4b15));
+        ajax_road:array[0..1] of tipo_roms=(
+        (n:'770c06.f4';l:$40000;p:0;crc:$d0c592ee),(n:'770c07.h4';l:$40000;p:$40000;crc:$0b399fb1));
+        ajax_k007232_1:array[0..3] of tipo_roms=(
         (n:'770c10-a.a7';l:$10000;p:0;crc:$e45ec094),(n:'770c10-b.a6';l:$10000;p:$10000;crc:$349db7d3),
-        (n:'770c10-c.a5';l:$10000;p:$20000;crc:$71cb1f05),(n:'770c10-d.a4';l:$10000;p:$30000;crc:$e8ab1844),());
-        ajax_k007232_2:array[0..8] of tipo_roms=(
+        (n:'770c10-c.a5';l:$10000;p:$20000;crc:$71cb1f05),(n:'770c10-d.a4';l:$10000;p:$30000;crc:$e8ab1844));
+        ajax_k007232_2:array[0..7] of tipo_roms=(
         (n:'770c06.f4';l:$10000;p:0;crc:$8cccd9e0),(n:'770c07.h4';l:$10000;p:$10000;crc:$0af2fedd),
         (n:'770c06.f4';l:$10000;p:$20000;crc:$7471f24a),(n:'770c07.h4';l:$10000;p:$30000;crc:$a58be323),
         (n:'770c06.f4';l:$10000;p:$40000;crc:$dd553541),(n:'770c07.h4';l:$10000;p:$50000;crc:$3f78bd0f),
-        (n:'770c06.f4';l:$10000;p:$60000;crc:$078c51b2),(n:'770c07.h4';l:$10000;p:$70000;crc:$7300c2e1),());
+        (n:'770c06.f4';l:$10000;p:$60000;crc:$078c51b2),(n:'770c07.h4';l:$10000;p:$70000;crc:$7300c2e1));
         //DIP
         ajax_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$02;dip_name:'4C 1C'),(dip_val:$05;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$04;dip_name:'3C 2C'),(dip_val:$01;dip_name:'4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$03;dip_name:'3C 4C'),(dip_val:$07;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$06;dip_name:'2C 5C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$09;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
@@ -219,7 +219,6 @@ end;
 
 procedure ajax_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$5fff then exit;
 case direccion of
    0..$1c0:case ((direccion and $1c0) shr 6) of
               0:if (direccion=0) then if (sub_firq_enable) then hd6309_0.change_firq(HOLD_LINE);
@@ -238,6 +237,7 @@ case direccion of
                        cambiar_color((direccion and $fff) shr 1);
                     end;
    $2000..$5fff:memoria[direccion]:=valor;
+   $6000..$ffff:; //ROM
 end;
 end;
 
@@ -256,7 +256,6 @@ end;
 
 procedure ajax_sub_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
   0..$7ff:k051316_0.write(direccion,valor);
   $800..$807:;
@@ -273,6 +272,7 @@ case direccion of
         end;
   $2000..$3fff:memoria[direccion]:=valor;
   $4000..$7fff:k052109_0.write(direccion and $3fff,valor);
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -296,8 +296,8 @@ end;
 
 procedure ajax_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$87ff:mem_snd[direccion]:=valor;
   $9000:ajax_snd_bankswitch(valor);
   $a000..$a00d:k007232_0.write(direccion and $f,valor);
@@ -353,17 +353,17 @@ screen_init(5,1024,1024,false,true);
 iniciar_video(304,224,true);
 iniciar_audio(true);
 //cargar roms y ponerlas en su sitio...
-if not(cargar_roms(@temp_mem[0],@ajax_rom[0],'ajax.zip',0)) then exit;
+if not(roms_load(@temp_mem,ajax_rom)) then exit;
 copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
 for f:=0 to 3 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 for f:=0 to 7 do copymemory(@rom_bank[4+f,0],@temp_mem[$10000+(f*$2000)],$2000);
 //cargar roms de la sub cpu y ponerlas en su sitio...
-if not(cargar_roms(@temp_mem[0],@ajax_sub[0],'ajax.zip',0)) then exit;
+if not(roms_load(@temp_mem,ajax_sub)) then exit;
 copymemory(@mem_misc[$a000],@temp_mem[$2000],$6000);
 copymemory(@rom_sub_bank[8,0],@temp_mem[0],$2000);
 for f:=0 to 7 do copymemory(@rom_sub_bank[f,0],@temp_mem[$8000+(f*$2000)],$2000);
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@ajax_sound,'ajax.zip',1)) then exit;
+if not(roms_load(@mem_snd,ajax_sound)) then exit;
 //Main CPU
 konami_0:=cpu_konami.create(3000000,256);
 konami_0.change_ram_calls(ajax_getbyte,ajax_putbyte);
@@ -377,17 +377,17 @@ z80_0.init_sound(ajax_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k007232_1_rom,$40000);
-if not(cargar_roms(k007232_1_rom,@ajax_k007232_1,'ajax.zip',0)) then exit;
+if not(roms_load(k007232_1_rom,ajax_k007232_1)) then exit;
 k007232_0:=k007232_chip.create(3579545,k007232_1_rom,$40000,0.20,ajax_k007232_cb_0);
 getmem(k007232_2_rom,$80000);
-if not(cargar_roms(k007232_2_rom,@ajax_k007232_2,'ajax.zip',0)) then exit;
+if not(roms_load(k007232_2_rom,ajax_k007232_2)) then exit;
 k007232_1:=k007232_chip.create(3579545,k007232_2_rom,$80000,0.50,ajax_k007232_cb_1,true);
 //Iniciar video
 getmem(tiles_rom,$80000);
-if not(cargar_roms32b_b(tiles_rom,@ajax_tiles,'ajax.zip',0)) then exit;
+if not(roms_load32b_b(tiles_rom,ajax_tiles)) then exit;
 k052109_0:=k052109_chip.create(1,2,3,ajax_cb,tiles_rom,$80000);
 getmem(sprite_rom,$100000);
-if not(cargar_roms32b_b(sprite_rom,@ajax_sprites,'ajax.zip',0)) then exit;
+if not(roms_load32b_b(sprite_rom,ajax_sprites)) then exit;
 k051960_0:=k051960_chip.create(5,sprite_rom,$100000,ajax_sprite_cb,2);
 k051960_0.change_irqs(ajax_k051960_cb,nil,nil);
 k051316_0:=k051316_chip.create(4,nil,nil,1);

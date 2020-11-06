@@ -74,13 +74,9 @@ for f:=$7ff downto 0 do begin
     atrib:=memoria[f+$c000];
     color:=(atrib and $f) shl 4;
     nchar:=memoria[f+$c800]+((atrib and $40) shl 2);
-    if (atrib and $80)<>0 then begin
-      put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $10)<>0,(atrib and $20)<>0);
-      put_gfx_block_trans(x*8,y*8,3,8,8);
-    end else begin
-      put_gfx_block(x*8,y*8,1,8,8,0);
-      put_gfx_mask_flip(x*8,y*8,nchar,color,3,0,0,$f,(atrib and $10)<>0,(atrib and $20)<>0);
-    end;
+    put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $10)<>0,(atrib and $20)<>0);
+    if (atrib and $80)<>0 then put_gfx_block_trans(x*8,y*8,3,8,8)
+      else put_gfx_mask_flip(x*8,y*8,nchar,color,3,0,0,$f,(atrib and $10)<>0,(atrib and $20)<>0);
     gfx[0].buffer[f]:=false;
   end;
 end;
@@ -162,8 +158,8 @@ procedure gberet_putbyte(direccion:word;valor:byte);
 var
   ack_mask:byte;
 begin
-if ((direccion<$c000) or (direccion>$f7ff)) then exit;
 case direccion of
+        0..$bfff,$f800..$ffff:; //ROM
         $c000..$cfff:if memoria[direccion]<>valor then begin
                         gfx[0].buffer[direccion and $7ff]:=true;
                         memoria[direccion]:=valor;
@@ -203,7 +199,7 @@ begin
 if ((memoria[$db06]=3) and (memoria[$db07]=$30) and (memoria[$db08]=0) and (memoria[$db0b]=$1c)) then begin
     load_hi('gberet.hi',@memoria[$d900],60);
     copymemory(@memoria[$db06],@memoria[$d900],3);
-    timer[timer_hs].enabled:=false;
+    timers.enabled(timer_hs,false);
 end;
 end;
 
@@ -227,14 +223,14 @@ savedata_qsnapshot(data,size);
 //MEM
 savedata_com_qsnapshot(@memoria[$c000],$4000);
 //MISC
-savedata_com_qsnapshot(@scroll_lineas[0],$20*2);
+savedata_com_qsnapshot(@scroll_lineas,$20*2);
 buffer[0]:=interrupt_mask;
 buffer[1]:=interrupt_ticks;
 buffer[2]:=sound_latch;
 buffer[3]:=banco_sprites and $ff;
 buffer[4]:=banco_sprites shr 8;
 buffer[5]:=rom_bank;
-savedata_qsnapshot(@buffer[0],6);
+savedata_qsnapshot(@buffer,6);
 freemem(data);
 close_qsnapshot;
 end;
@@ -257,8 +253,8 @@ loaddata_qsnapshot(data);
 sn_76496_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[$c000]);
-loaddata_qsnapshot(@scroll_lineas[0]);
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@scroll_lineas);
+loaddata_qsnapshot(@buffer);
 //MISC
 interrupt_mask:=buffer[0];
 interrupt_ticks:=buffer[1];
@@ -268,7 +264,7 @@ banco_sprites:=banco_sprites or (buffer[4] shl 8);
 rom_bank:=buffer[5];
 freemem(data);
 close_qsnapshot;
-fillchar(gfx[0].buffer[0],$800,1);
+fillchar(gfx[0].buffer,$800,1);
 end;
 
 //Main
@@ -277,9 +273,9 @@ begin
  z80_0.reset;
  sn_76496_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  banco_sprites:=0;
  interrupt_mask:=0;
  interrupt_ticks:=0;
@@ -303,13 +299,13 @@ procedure convert_chars;
 begin
   init_gfx(0,8,8,512);
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 procedure convert_sprites;
 begin
   init_gfx(1,16,16,512);
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 begin
 iniciar_gberet:=false;
@@ -329,31 +325,31 @@ sn_76496_0:=sn76496_chip.Create(1536000);
 case main_vars.tipo_maquina of
   17:begin //Green Beret
         //Timers
-        timer_hs:=init_timer(z80_0.numero_cpu,10000,gberet_hi_score,true);
+        timer_hs:=timers.init(z80_0.numero_cpu,10000,gberet_hi_score,nil,true);
         //cargar roms
-        if not(roms_load(@memoria,@gberet_rom,'gberet.zip',sizeof(gberet_rom))) then exit;
+        if not(roms_load(@memoria,gberet_rom)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@gberet_char,'gberet.zip',sizeof(gberet_char))) then exit;
+        if not(roms_load(@memoria_temp,gberet_char)) then exit;
         convert_chars;
         //convertir sprites
-        if not(roms_load(@memoria_temp,@gberet_sprites,'gberet.zip',sizeof(gberet_sprites))) then exit;
+        if not(roms_load(@memoria_temp,gberet_sprites)) then exit;
         convert_sprites;
         //poner la paleta
-        if not(roms_load(@memoria_temp,@gberet_pal,'gberet.zip',sizeof(gberet_pal))) then exit;
+        if not(roms_load(@memoria_temp,gberet_pal)) then exit;
         marcade.dswb_val:=@gberet_dip_b;
   end;
   203:begin //Mr. Goemon
-        if not(roms_load(@memoria_temp,@mrgoemon_rom,'mrgoemon.zip',sizeof(mrgoemon_rom))) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$c000);
+        if not(roms_load(@memoria_temp,mrgoemon_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$c000);
         for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$c000+(f*$800)],$800);
         //convertir chars
-        if not(roms_load(@memoria_temp,@mrgoemon_char,'mrgoemon.zip',sizeof(mrgoemon_char))) then exit;
+        if not(roms_load(@memoria_temp,mrgoemon_char)) then exit;
         convert_chars;
         //convertir sprites
-        if not(roms_load(@memoria_temp,@mrgoemon_sprites,'mrgoemon.zip',sizeof(mrgoemon_sprites))) then exit;
+        if not(roms_load(@memoria_temp,mrgoemon_sprites)) then exit;
         convert_sprites;
         //poner la paleta
-        if not(roms_load(@memoria_temp,@mrgoemon_pal,'mrgoemon.zip',sizeof(mrgoemon_pal))) then exit;
+        if not(roms_load(@memoria_temp,mrgoemon_pal)) then exit;
         marcade.dswb_val:=@mrgoemon_dip_b;
   end;
 end;

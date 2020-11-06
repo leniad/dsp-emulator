@@ -233,8 +233,8 @@ var
   saddr:word;
   count,daddr:byte;
 begin
-if direccion<$7fff then exit;
 case direccion of
+        0..$7fff:; //ROM
         $8000..$8fff:memoria[direccion]:=valor;
         $a000..$bfff:if memoria[(direccion and $7ff)+$a000]<>valor then begin
                         memoria[(direccion and $7ff)+$a000]:=valor;
@@ -298,9 +298,9 @@ end;
 
 procedure snd_congo_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$2000 then exit;
 mem_snd[direccion]:=valor;
 case direccion of
+  0..$1fff:; //ROM
   $4000..$5fff:mem_snd[$4000+(direccion and $7ff)]:=valor;
   $6000..$7fff:sn_76496_0.Write(valor);
   $8000..$9fff:pia8255_0.write(direccion and $3,valor);
@@ -459,8 +459,8 @@ end;
 
 procedure zaxxon_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$6000 then exit;
 case direccion of
+    0..$5fff:; //ROM
     $6000..$6fff:memoria[direccion]:=valor;
     $8000..$9fff:if memoria[(direccion and $3ff)+$8000]<>valor then begin
                     memoria[(direccion and $3ff)+$8000]:=valor;
@@ -652,8 +652,8 @@ var
   rweights,gweights,bweights:array[0..2] of single;
 begin
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances[0],@rweights,470,0,
-			3,@resistances[0],@gweights,470,0,
+			3,@resistances,@rweights,470,0,
+			3,@resistances,@gweights,470,0,
 			2,@resistances[1],@bweights,470,0);
 for f:=0 to (size-1) do begin
 		// red component */
@@ -689,7 +689,7 @@ case main_vars.tipo_maquina of
         //Sound
         z80_1:=cpu_z80.create(4000000,264);
         z80_1.change_ram_calls(snd_congo_getbyte,snd_congo_putbyte);
-        init_timer(z80_1.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,true);
+        timers.init(z80_1.numero_cpu,4000000/(4000000/16/16/16/4),congo_sound_irq,nil,true);
         pia8255_0:=pia8255_chip.create;
         pia8255_0.change_ports(ppi8255_congo_rporta,nil,nil,nil,ppi8255_congo_wportb,ppi8255_congo_wportc);
         //Samples
@@ -698,21 +698,21 @@ case main_vars.tipo_maquina of
         sn_76496_0:=sn76496_chip.Create(4000000);
         sn_76496_1:=sn76496_chip.Create(1000000);
         //cargar roms
-        if not(roms_load(@memoria,@congo_rom,'congo.zip',sizeof(congo_rom))) then exit;
+        if not(roms_load(@memoria,congo_rom)) then exit;
         //cargar sonido & iniciar_sonido
-        if not(roms_load(@mem_snd,@congo_sound,'congo.zip',sizeof(congo_sound))) then exit;
-        if not(roms_load(@memoria_temp,@congo_char,'congo.zip',sizeof(congo_char))) then exit;
+        if not(roms_load(@mem_snd,congo_sound)) then exit;
+        if not(roms_load(@memoria_temp,congo_char)) then exit;
         conv_chars;
-        if not(roms_load(@memoria_temp,@congo_bg,'congo.zip',sizeof(congo_bg))) then exit;
+        if not(roms_load(@memoria_temp,congo_bg)) then exit;
         conv_background;
         //convertir sprites
-        if not(roms_load(@memoria_temp,@congo_sprites,'congo.zip',sizeof(congo_sprites))) then exit;
+        if not(roms_load(@memoria_temp,congo_sprites)) then exit;
         conv_sprites($80);
         //poner la paleta
-        if not(roms_load(@memoria_temp,@congo_pal,'congo.zip',sizeof(congo_pal))) then exit;
+        if not(roms_load(@memoria_temp,congo_pal)) then exit;
         convert_palette($200);
         //backgroud
-        if not(roms_load(@memoria_temp,@congo_tilemap,'congo.zip',sizeof(congo_tilemap))) then exit;
+        if not(roms_load(@memoria_temp,congo_tilemap)) then exit;
         conv_static_background($2000);
         //DIP
         marcade.dswa:=$77;
@@ -727,19 +727,19 @@ case main_vars.tipo_maquina of
         //Samples
         if load_samples('zaxxon.zip',@zaxxon_samples,num_samples_zaxxon) then z80_0.init_sound(zaxxon_sound_update);
         //cargar roms
-        if not(roms_load(@memoria,@zaxxon_rom,'zaxxon.zip',sizeof(zaxxon_rom))) then exit;
-        if not(roms_load(@memoria_temp,@zaxxon_char,'zaxxon.zip',sizeof(zaxxon_char))) then exit;
+        if not(roms_load(@memoria,zaxxon_rom)) then exit;
+        if not(roms_load(@memoria_temp,zaxxon_char)) then exit;
         conv_chars;
-        if not(roms_load(@memoria_temp,@zaxxon_bg,'zaxxon.zip',sizeof(zaxxon_bg))) then exit;
+        if not(roms_load(@memoria_temp,zaxxon_bg)) then exit;
         conv_background;
         //convertir sprites
-        if not(roms_load(@memoria_temp,@zaxxon_sprites,'zaxxon.zip',sizeof(zaxxon_sprites))) then exit;
+        if not(roms_load(@memoria_temp,zaxxon_sprites)) then exit;
         conv_sprites($40);
         //poner la paleta
-        if not(roms_load(@memoria_temp,@zaxxon_pal,'zaxxon.zip',sizeof(zaxxon_pal))) then exit;
+        if not(roms_load(@memoria_temp,zaxxon_pal)) then exit;
         convert_palette($100);
         //Background
-        if not(roms_load(@memoria_temp,@zaxxon_tilemap,'zaxxon.zip',sizeof(zaxxon_tilemap))) then exit;
+        if not(roms_load(@memoria_temp,zaxxon_tilemap)) then exit;
         conv_static_background($4000);
         //DIP
         marcade.dswa:=$7f;

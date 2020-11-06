@@ -15,18 +15,17 @@ type
 
 function carga_rom_zip(nombre_zip,nombre_rom:string;donde:pbyte;longitud,crc:integer;warning:boolean):boolean;
 function carga_rom_zip_crc(nombre_zip,nombre_rom:string;donde:pointer;longitud,crc:integer):boolean;
-function cargar_roms(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte=1):boolean;
-function cargar_roms16b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-function cargar_roms16w(sitio:pword;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-function cargar_roms32b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-function cargar_roms32b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-function cargar_roms64b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-function cargar_roms64b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-function cargar_roms_swap_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-
-function roms_load(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;roms_array:word):boolean;
+function roms_load(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load16b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load16w(sitio:pword;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load32b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load32b_b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load64b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load_swap_word(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load64b_b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 
 implementation
+uses init_games;
 
 function carga_rom_zip(nombre_zip,nombre_rom:string;donde:pbyte;longitud,crc:integer;warning:boolean):boolean;
 var
@@ -59,168 +58,130 @@ end;
 carga_rom_zip_crc:=true;
 end;
 
-function roms_load(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;roms_array:word):boolean;
+function roms_load(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 var
-  f:byte;
   ptemp:pbyte;
-  troms:ptipo_roms;
-  roms_size:word;
-  dir:string;
+  f,roms_size:word;
+  nombre_zip,dir:string;
 begin
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
 roms_load:=false;
-troms:=ctipo_roms;
-roms_size:=roms_array div sizeof(tipo_roms);
-for f:=1 to roms_size do begin
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
     ptemp:=sitio;
-    inc(ptemp,troms.p);
+    inc(ptemp,ctipo_roms[f].p);
     dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,ptemp,troms.l,integer(troms.crc))) then
-        if not(carga_rom_zip(dir+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
-    inc(troms);
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,integer(ctipo_roms[f].crc))) then
+        if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
 end;
 roms_load:=true;
 end;
 
-function cargar_roms(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte=1):boolean;
+function roms_load16b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 var
-  f:byte;
-  ptemp:pbyte;
-  troms:ptipo_roms;
-  dir:string;
-begin
-cargar_roms:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    ptemp:=sitio;
-    inc(ptemp,troms.p);
-    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,ptemp,troms.l,integer(troms.crc))) then
-        if not(carga_rom_zip(dir+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
-    inc(troms);
-    inc(f);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms:=true;
-end;
-
-function cargar_roms_swap_word(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-var
-  f,v1,v2:byte;
-  ptemp,ptemp2:pbyte;
-  troms:ptipo_roms;
-  h:dword;
-  dir:string;
-begin
-cargar_roms_swap_word:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    ptemp:=sitio;
-    inc(ptemp,troms.p);
-    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,ptemp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(dir+nombre_zip,troms.n,ptemp,troms.l,troms.crc,true)) then exit;
-    ptemp2:=ptemp;
-    for h:=0 to (troms.l div 2)-1 do begin
-      v1:=ptemp2^;inc(ptemp2);
-      v2:=ptemp2^;dec(ptemp2);
-      ptemp2^:=v2;inc(ptemp2);
-      ptemp2^:=v1;inc(ptemp2);
-    end;
-    inc(troms);
-    inc(f);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms_swap_word:=true;
-end;
-
-function cargar_roms16b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
-var
-  f:byte;
   ptemp,ptemp2,mem_temp:pbyte;
-  troms:ptipo_roms;
   h:dword;
-  dir:string;
+  nombre_zip,dir:string;
+  f,roms_size:word;
 begin
-cargar_roms16b:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    getmem(mem_temp,troms.l);
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+roms_load16b:=false;
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
+    //Creo un puntero byte
+    getmem(mem_temp,ctipo_roms[f].l);
+    //Cargo los datos como byte
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
+    //Los convierto a word
     ptemp2:=mem_temp;
     ptemp:=sitio;
-    inc(ptemp,troms.p);
-    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
-    for h:=0 to (troms.l-1) do begin
+    inc(ptemp,ctipo_roms[f].p);
+    for h:=0 to (ctipo_roms[f].l-1) do begin
       ptemp^:=ptemp2^;
       inc(ptemp2);
       inc(ptemp,2);
     end;
-    inc(troms);
-    inc(f);
     freemem(mem_temp);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms16b:=true;
+end;
+roms_load16b:=true;
 end;
 
-function cargar_roms16w(sitio:pword;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+function roms_load16w(sitio:pword;const ctipo_roms:array of tipo_roms):boolean;
 var
-  f:byte;
   ptemp:pword;
   ptemp2,mem_temp:pbyte;
-  troms:ptipo_roms;
   h:dword;
   alto:boolean;
-  valor:word;
-  dir:string;
+  f,roms_size,valor:word;
+  nombre_zip,dir:string;
 begin
-cargar_roms16w:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    getmem(mem_temp,troms.l);
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+roms_load16w:=false;
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
+    //Cargo los datos en tipo byte
+    getmem(mem_temp,ctipo_roms[f].l);
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
+    //Y ahora los pongo como word
     ptemp2:=mem_temp;
     ptemp:=sitio;
-    alto:=(troms.p and $1)<>0;
-    inc(ptemp,troms.p shr 1);
-    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
-    for h:=0 to (troms.l-1) do begin
+    alto:=(ctipo_roms[f].p and $1)<>0;
+    inc(ptemp,ctipo_roms[f].p shr 1);
+    for h:=0 to (ctipo_roms[f].l-1) do begin
       if not(alto) then valor:=(ptemp2^ shl 8) or (ptemp^ and $ff)
         else valor:=ptemp2^ or (ptemp^ and $ff00);
       ptemp^:=valor;
       inc(ptemp2);
       inc(ptemp);
     end;
-    inc(troms);
-    inc(f);
     freemem(mem_temp);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms16w:=true;
+end;
+roms_load16w:=true;
 end;
 
-function cargar_roms32b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+function roms_load32b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 var
-  f:byte;
   ptemp,ptemp2,mem_temp:pbyte;
-  troms:ptipo_roms;
-  h:dword;
-  dir:string;
+  f,h:dword;
+  nombre_zip,dir:string;
+  roms_size:word;
 begin
-cargar_roms32b:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    getmem(mem_temp,troms.l);
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+roms_load32b:=false;
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
+    getmem(mem_temp,ctipo_roms[f].l);
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
     ptemp2:=mem_temp;
     ptemp:=sitio;
-    inc(ptemp,troms.p);
-    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
-    for h:=0 to ((troms.l shr 1)-1) do begin
+    inc(ptemp,ctipo_roms[f].p);
+    for h:=0 to ((ctipo_roms[f].l shr 1)-1) do begin
       ptemp^:=ptemp2^;
       inc(ptemp);
       inc(ptemp2);
@@ -228,64 +189,68 @@ repeat
       inc(ptemp2);
       inc(ptemp,3);
     end;
-    inc(troms);
-    inc(f);
     freemem(mem_temp);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms32b:=true;
+end;
+roms_load32b:=true;
 end;
 
-function cargar_roms32b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+function roms_load32b_b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 var
-  f:byte;
+  roms_size,f:word;
   ptemp,ptemp2,mem_temp:pbyte;
-  troms:ptipo_roms;
   h:dword;
-  dir:string;
+  nombre_zip,dir:string;
 begin
-cargar_roms32b_b:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    getmem(mem_temp,troms.l);
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+roms_load32b_b:=false;
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
+    getmem(mem_temp,ctipo_roms[f].l);
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
     ptemp2:=mem_temp;
     ptemp:=sitio;
-    inc(ptemp,troms.p);
-    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
-    for h:=0 to (troms.l-1) do begin
+    inc(ptemp,ctipo_roms[f].p);
+    for h:=0 to (ctipo_roms[f].l-1) do begin
       ptemp^:=ptemp2^;
       inc(ptemp,4);
       inc(ptemp2);
     end;
-    inc(troms);
-    inc(f);
     freemem(mem_temp);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms32b_b:=true;
+end;
+roms_load32b_b:=true;
 end;
 
-function cargar_roms64b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+function roms_load64b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 var
-  f:byte;
+  roms_size,f:word;
   ptemp,ptemp2,mem_temp:pbyte;
-  troms:ptipo_roms;
   h:dword;
-  dir:string;
+  nombre_zip,dir:string;
 begin
-cargar_roms64b:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    getmem(mem_temp,troms.l);
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+roms_load64b:=false;
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
+    getmem(mem_temp,ctipo_roms[f].l);
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
     ptemp2:=mem_temp;
     ptemp:=sitio;
-    inc(ptemp,troms.p);
-    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
-    for h:=0 to ((troms.l shr 1)-1) do begin
+    inc(ptemp,ctipo_roms[f].p);
+    for h:=0 to ((ctipo_roms[f].l shr 1)-1) do begin
       ptemp^:=ptemp2^;
       inc(ptemp);
       inc(ptemp2);
@@ -293,42 +258,74 @@ repeat
       inc(ptemp2);
       inc(ptemp,7);
     end;
-    inc(troms);
-    inc(f);
     freemem(mem_temp);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms64b:=true;
+end;
+roms_load64b:=true;
 end;
 
-function cargar_roms64b_b(sitio:pbyte;ctipo_roms:ptipo_roms;nombre_zip:string;cantidad_roms:byte):boolean;
+function roms_load_swap_word(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 var
-  f:byte;
-  ptemp,ptemp2,mem_temp:pbyte;
-  troms:ptipo_roms;
-  h:dword;
-  dir:string;
+  v1,v2:byte;
+  ptemp,ptemp2:pbyte;
+  roms_size,f,h:dword;
+  nombre_zip,dir:string;
 begin
-cargar_roms64b_b:=false;
-troms:=ctipo_roms;
-f:=0;
-repeat
-    getmem(mem_temp,troms.l);
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+roms_load_swap_word:=false;
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
+    ptemp:=sitio;
+    inc(ptemp,ctipo_roms[f].p);
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,ptemp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
+    ptemp2:=ptemp;
+    for h:=0 to (ctipo_roms[f].l div 2)-1 do begin
+      v1:=ptemp2^;inc(ptemp2);
+      v2:=ptemp2^;dec(ptemp2);
+      ptemp2^:=v2;inc(ptemp2);
+      ptemp2^:=v1;inc(ptemp2);
+    end;
+end;
+roms_load_swap_word:=true;
+end;
+
+function roms_load64b_b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+var
+  roms_size,f:word;
+  ptemp,ptemp2,mem_temp:pbyte;
+  h:dword;
+  nombre_zip,dir:string;
+begin
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+roms_load64b_b:=false;
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
+    getmem(mem_temp,ctipo_roms[f].l);
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
     ptemp2:=mem_temp;
     ptemp:=sitio;
-    inc(ptemp,troms.p);
-    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
-    if troms.crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc)) then
-      if not(carga_rom_zip(dir+nombre_zip,troms.n,mem_temp,troms.l,troms.crc,true)) then exit;
-    for h:=0 to (troms.l-1) do begin
+    inc(ptemp,ctipo_roms[f].p);
+    for h:=0 to (ctipo_roms[f].l-1) do begin
       ptemp^:=ptemp2^;
       inc(ptemp2);
       inc(ptemp,8);
     end;
-    inc(troms);
-    inc(f);
     freemem(mem_temp);
-until ((troms.n='') or (f=cantidad_roms));
-cargar_roms64b_b:=true;
+end;
+roms_load64b_b:=true;
 end;
 
 end.

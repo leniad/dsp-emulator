@@ -135,10 +135,10 @@ procedure eventos_ladybug;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
@@ -146,10 +146,10 @@ if event.arcade then begin
   if arcade_input.but1[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   //P2
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   //SYS
   if arcade_input.coin[0] then z80_0.change_nmi(ASSERT_LINE) else z80_0.change_nmi(CLEAR_LINE);
@@ -194,8 +194,8 @@ end;
 
 procedure ladybug_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$6000 then exit;
 case direccion of
+  0..$5fff:;
   $6000..$73ff:memoria[direccion]:=valor;
   $a000:main_screen.flip_main_screen:=(valor and 1)<>0;
   $b000..$bfff:sn_76496_0.Write(valor);
@@ -259,15 +259,15 @@ sn_76496_1:=sn76496_chip.Create(4000000);
 case main_vars.tipo_maquina of
   34:begin //Lady bug
         //cargar roms
-        if not(roms_load(@memoria,@ladybug_rom,'ladybug.zip',sizeof(ladybug_rom))) then exit;
+        if not(roms_load(@memoria,ladybug_rom)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@ladybug_char,'ladybug.zip',sizeof(ladybug_char))) then exit;
+        if not(roms_load(@memoria_temp,ladybug_char)) then exit;
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,0,8*8,0,512*8*8);
         convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
         //convertir sprites
-        if not(roms_load(@memoria_temp,@ladybug_sprites,'ladybug.zip',sizeof(ladybug_sprites))) then exit;
+        if not(roms_load(@memoria_temp,ladybug_sprites)) then exit;
         init_gfx(1,16,16,128);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(2,0,64*8,1,0);
@@ -283,19 +283,19 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@ladybug_dip_a;
         marcade.dswb_val:=@ladybug_dip_b;
         //poner la paleta
-        if not(roms_load(@memoria_temp,@ladybug_pal,'ladybug.zip',sizeof(ladybug_pal))) then exit;
+        if not(roms_load(@memoria_temp,ladybug_pal)) then exit;
   end;
   200:begin //SnapJack
         //cargar roms
-        if not(roms_load(@memoria,@snapjack_rom,'snapjack.zip',sizeof(snapjack_rom))) then exit;
+        if not(roms_load(@memoria,snapjack_rom)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@snapjack_char,'snapjack.zip',sizeof(snapjack_char))) then exit;
+        if not(roms_load(@memoria_temp,snapjack_char)) then exit;
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,0,8*8,0,512*8*8);
         convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
         //convertir sprites
-        if not(roms_load(@memoria_temp,@snapjack_sprites,'snapjack.zip',sizeof(snapjack_sprites))) then exit;
+        if not(roms_load(@memoria_temp,snapjack_sprites)) then exit;
         init_gfx(1,16,16,128);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(2,0,64*8,1,0);
@@ -311,19 +311,19 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@snapjack_dip_a;
         marcade.dswb_val:=@snapjack_dip_b;
         //poner la paleta
-        if not(roms_load(@memoria_temp,@snapjack_pal,'snapjack.zip',sizeof(snapjack_pal))) then exit;
+        if not(roms_load(@memoria_temp,snapjack_pal)) then exit;
   end;
   201:begin //Cosmic Avenger
         //cargar roms
-        if not(roms_load(@memoria,@cavenger_rom,'cavenger.zip',sizeof(cavenger_rom))) then exit;
+        if not(roms_load(@memoria,cavenger_rom)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@cavenger_char,'cavenger.zip',sizeof(cavenger_char))) then exit;
+        if not(roms_load(@memoria_temp,cavenger_char)) then exit;
         init_gfx(0,8,8,512);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,0,8*8,0,512*8*8);
         convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
         //convertir sprites
-        if not(roms_load(@memoria_temp,@cavenger_sprites,'cavenger.zip',sizeof(cavenger_sprites))) then exit;
+        if not(roms_load(@memoria_temp,cavenger_sprites)) then exit;
         init_gfx(1,16,16,128);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(2,0,64*8,1,0);
@@ -339,7 +339,7 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@cavenger_dip_a;
         marcade.dswb_val:=@ladybug_dip_b;
         //poner la paleta
-        if not(roms_load(@memoria_temp,@cavenger_pal,'cavenger.zip',sizeof(cavenger_pal))) then exit;
+        if not(roms_load(@memoria_temp,cavenger_pal)) then exit;
   end;
 end;
 compute_resistor_weights(0,	255, -1.0,

@@ -9,8 +9,8 @@ procedure cargar_blockout;
 
 implementation
 const
-        blockout_rom:array[0..2] of tipo_roms=(
-        (n:'bo29a0-2.bin';l:$20000;p:0;crc:$b0103427),(n:'bo29a1-2.bin';l:$20000;p:$1;crc:$5984d5a2),());
+        blockout_rom:array[0..1] of tipo_roms=(
+        (n:'bo29a0-2.bin';l:$20000;p:0;crc:$b0103427),(n:'bo29a1-2.bin';l:$20000;p:$1;crc:$5984d5a2));
         blockout_sound:tipo_roms=(n:'bo29e3-0.bin';l:$8000;p:0;crc:$3ea01f78);
         blockout_oki:tipo_roms=(n:'bo29e2-0.bin';l:$20000;p:0;crc:$15c5a99d);
         //DIP
@@ -37,9 +37,9 @@ var
   punt:array[0..319] of word;
   front,back:word;
 begin
-fill_full_screen(2,max_colores);
+fill_full_screen(2,MAX_COLORES);
 for y:=0 to $ff do begin
-  fillword(@punt[0],320,paleta[max_colores]);
+  fillword(@punt[0],320,paleta[MAX_COLORES]);
   for x:=0 to $27 do begin
     atrib:=fvideo_ram[(y*64+x)*2];
     if (atrib<>0) then begin
@@ -78,28 +78,28 @@ procedure eventos_blockout;inline;
 begin
 if event.arcade then begin
   //p1
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.but3[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  if arcade_input.but0[0] then marcade.dswa:=(marcade.dswa and $bf) else marcade.dswa:=(marcade.dswa or $40);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but3[0] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $ff7f) else marcade.in1:=(marcade.in1 or $80);
+  if arcade_input.but0[0] then marcade.dswa:=(marcade.dswa and $ffbf) else marcade.dswa:=(marcade.dswa or $40);
   //p2
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.but3[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
-  if arcade_input.but0[1] then marcade.dswa:=(marcade.dswa and $7f) else marcade.dswa:=(marcade.dswa or $80);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fff7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ffef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $ffdf) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.but3[1] then marcade.in2:=(marcade.in2 and $ffbf) else marcade.in2:=(marcade.in2 or $40);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ff7f) else marcade.in2:=(marcade.in2 or $80);
+  if arcade_input.but0[1] then marcade.dswa:=(marcade.dswa and $ff7f) else marcade.dswa:=(marcade.dswa or $80);
   //system
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
 end;
 end;
 
@@ -180,8 +180,8 @@ end;
 
 procedure blockout_putword(direccion:dword;valor:word);
 begin
-if direccion<$40000 then exit;
 case direccion of
+    0..$3ffff:; //ROM
     $100010:m68000_0.irq[6]:=CLEAR_LINE;
     $100012:m68000_0.irq[5]:=CLEAR_LINE;
     $100014:begin
@@ -219,8 +219,8 @@ end;
 
 procedure blockout_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$87ff:mem_snd[direccion]:=valor;
   $8800:ym2151_0.reg(valor);
   $8801:ym2151_0.write(valor);
@@ -247,9 +247,9 @@ begin
  ym2151_0.reset;
  oki_6295_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
+ marcade.in1:=$ffff;
  sound_latch:=0;
  fillchar(video_ram_buff,$20000,1);
 end;
@@ -274,15 +274,15 @@ z80_0.init_sound(blockout_sound_update);
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH);
-if not(cargar_roms(oki_6295_0.get_rom_addr,@blockout_oki,'blockout.zip',1)) then exit;
+if not(roms_load(oki_6295_0.get_rom_addr,blockout_oki)) then exit;
 //cargar roms
-if not(cargar_roms16w(@rom[0],@blockout_rom[0],'blockout.zip',0)) then exit;
+if not(roms_load16w(@rom,blockout_rom)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@blockout_sound,'blockout.zip')) then exit;
+if not(roms_load(@mem_snd,blockout_sound)) then exit;
 //DIP
-marcade.dswa:=$ff;
+marcade.dswa:=$ffff;
 marcade.dswa_val:=@blockout_dipa;
-marcade.dswb:=$ff;
+marcade.dswb:=$ffff;
 marcade.dswb_val:=@blockout_dipb;
 //final
 reset_blockout;

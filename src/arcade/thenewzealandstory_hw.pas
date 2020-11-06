@@ -13,11 +13,11 @@ const
         tnzs_rom:tipo_roms=(n:'b53-24.1';l:$20000;p:0;crc:$d66824c6);
         tnzs_sub:tipo_roms=(n:'b53-25.3';l:$10000;p:0;crc:$d6ac4e71);
         tnzs_audio:tipo_roms=(n:'b53-26.34';l:$10000;p:0;crc:$cfd5649c);
-        tnzs_gfx:array[0..8] of tipo_roms=(
+        tnzs_gfx:array[0..7] of tipo_roms=(
         (n:'b53-16.8';l:$20000;p:0;crc:$c3519c2a),(n:'b53-17.7';l:$20000;p:$20000;crc:$2bf199e8),
         (n:'b53-18.6';l:$20000;p:$40000;crc:$92f35ed9),(n:'b53-19.5';l:$20000;p:$60000;crc:$edbb9581),
         (n:'b53-22.4';l:$20000;p:$80000;crc:$59d2aef6),(n:'b53-23.3';l:$20000;p:$a0000;crc:$74acfb9b),
-        (n:'b53-20.2';l:$20000;p:$c0000;crc:$095d0dc0),(n:'b53-21.1';l:$20000;p:$e0000;crc:$9800c54d),());
+        (n:'b53-20.2';l:$20000;p:$c0000;crc:$095d0dc0),(n:'b53-21.1';l:$20000;p:$e0000;crc:$9800c54d));
         //Dip
         tnzs_dip_a:array [0..5] of def_dip=(
         (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$1;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -33,19 +33,20 @@ const
         //Insector X
         insectorx_rom:tipo_roms=(n:'b97-03.u32';l:$20000;p:0;crc:$18eef387);
         insectorx_sub:tipo_roms=(n:'b97-07.u38';l:$10000;p:0;crc:$324b28c9);
-        insectorx_gfx:array[0..2] of tipo_roms=(
-        (n:'b97-01.u1';l:$80000;p:0;crc:$d00294b1),(n:'b97-02.u2';l:$80000;p:$80000;crc:$db5a7434),());
+        insectorx_gfx:array[0..1] of tipo_roms=(
+        (n:'b97-01.u1';l:$80000;p:0;crc:$d00294b1),(n:'b97-02.u2';l:$80000;p:$80000;crc:$db5a7434));
         //Dip
         insectorx_dip_a:array [0..5] of def_dip=(
         (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$1;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$2;name:'Flip_Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Demo_Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'4 Coin 1 Credit'),(dip_val:$10;dip_name:'3 Coin 1 Credit'),(dip_val:$20;dip_name:'2 Coin 1 Credit'),(dip_val:$30;dip_name:'1 Coin 1 Credit'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$c0;dip_name:'1 Coin 2 Credit'),(dip_val:$80;dip_name:'1 Coin 3 Credit'),(dip_val:$40;dip_name:'1 Coin 4 Credit'),(dip_val:$0;dip_name:'1 Coin 6 Credit'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$10;dip_name:'3C 1C'),(dip_val:$20;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$c0;dip_name:'1C 2C'),(dip_val:$80;dip_name:'1C 3C'),(dip_val:$40;dip_name:'1C 4C'),(dip_val:$0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
         insectorx_dip_b:array [0..3] of def_dip=(
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$3;dip_name:'Medium'),(dip_val:$2;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$8;dip_name:'40k 240k 200k+'),(dip_val:$c;dip_name:'60k 360k 300k+'),(dip_val:$4;dip_name:'100k 500k 400k+'),(dip_val:$0;dip_name:'150k 650k 500k+'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$10;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        CPU_SYNC=64;
 
 var
  main_bank,misc_bank,sound_latch,bg_flag:byte;
@@ -175,6 +176,7 @@ procedure tnzs_principal;
 var
   f:word;
   frame_m,frame_s,frame_misc:single;
+  h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
@@ -182,20 +184,22 @@ frame_s:=z80_1.tframes;
 frame_misc:=z80_2.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    //main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //sub
-    z80_1.run(frame_misc);
-    frame_misc:=frame_misc+z80_1.tframes-z80_1.contador;
-    //snd
-    z80_2.run(frame_s);
-    frame_s:=frame_s+z80_2.tframes-z80_2.contador;
+    for h:=1 to CPU_SYNC do begin
+      //main
+      z80_0.run(frame_m);
+      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+      //sub
+      z80_1.run(frame_misc);
+      frame_misc:=frame_misc+z80_1.tframes-z80_1.contador;
+      //snd
+      z80_2.run(frame_s);
+      frame_s:=frame_s+z80_2.tframes-z80_2.contador;
+    end;
     if f=239 then begin
       z80_0.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
       update_video_tnzs;
     end;
-    if f=247 then z80_1.change_irq(HOLD_LINE);
   end;
 	if (not(obj_control[1]) and $20)<>0 then begin
 		if (obj_control[1] and $40)<>0 then begin
@@ -223,8 +227,8 @@ end;
 
 procedure tnzs_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+   0..$7fff:; //ROM
    $8000..$bfff:if main_bank<2 then main_rom[main_bank,direccion and $3fff]:=valor;
    $c000..$f2ff:memoria[direccion]:=valor;
    $f300..$f3ff:begin
@@ -269,8 +273,8 @@ end;
 
 procedure tnzs_misc_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$a000 then exit;
 case direccion of
+  0..$9fff:; //ROM
   $a000:misc_bank:=valor and $3;
   $b004:begin
           sound_latch:=valor;
@@ -294,8 +298,8 @@ end;
 
 procedure tnzs_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $c000..$dfff:mem_snd[direccion]:=valor;
 end;
 end;
@@ -352,18 +356,21 @@ procedure insectorx_principal;
 var
   f:word;
   frame_m,frame_misc:single;
+  h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_misc:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    //main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //sub
-    z80_1.run(frame_misc);
-    frame_misc:=frame_misc+z80_1.tframes-z80_1.contador;
+    for h:=1 to CPU_SYNC do begin
+      //main
+      z80_0.run(frame_m);
+      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+      //sub
+      z80_1.run(frame_misc);
+      frame_misc:=frame_misc+z80_1.tframes-z80_1.contador;
+    end;
     if f=239 then begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
@@ -397,8 +404,8 @@ end;
 
 procedure insectorx_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+   0..$7fff:; //ROM
    $8000..$bfff:if main_bank<2 then main_rom[main_bank,direccion and $3fff]:=valor;
    $c000..$f2ff:memoria[direccion]:=valor;
    $f300..$f3ff:begin
@@ -435,8 +442,8 @@ end;
 
 procedure insectorx_misc_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$a000 then exit;
 case direccion of
+  0..$9fff:; //ROM
   $a000:misc_bank:=valor and $3;
   $b000:ym2203_0.Control(valor);
   $b001:ym2203_0.Write(valor);
@@ -477,7 +484,7 @@ end;
 
 function iniciar_tnzs:boolean;
 var
-  f:word;
+  f:byte;
   memoria_temp:array[0..$1ffff] of byte;
   mem_temp:pbyte;
 const
@@ -495,16 +502,16 @@ iniciar_audio(false);
 screen_init(1,512,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,$100);
+z80_0:=cpu_z80.create(6000000,$100*CPU_SYNC);
 //Misc CPU
-z80_1:=cpu_z80.create(6000000,$100);
+z80_1:=cpu_z80.create(6000000,$100*CPU_SYNC);
 case main_vars.tipo_maquina of
   129:begin   //TNZS
         z80_0.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
         //Misc CPU
         z80_1.change_ram_calls(tnzs_misc_getbyte,tnzs_misc_putbyte);
         //Sound CPU
-        z80_2:=cpu_z80.create(6000000,$100);
+        z80_2:=cpu_z80.create(6000000,$100*CPU_SYNC);
         z80_2.change_ram_calls(tnzs_snd_getbyte,tnzs_snd_putbyte);
         z80_2.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
         z80_2.init_sound(tnzs_sound_update);
@@ -512,22 +519,22 @@ case main_vars.tipo_maquina of
         ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_irq_calls(snd_irq);
         //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@tnzs_rom,'tnzs.zip',1)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        if not(roms_load(@memoria_temp,tnzs_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$8000);
         for f:=0 to 5 do copymemory(@main_rom[f+2,0],@memoria_temp[$8000+(f*$4000)],$4000);
         //cargar ROMS misc
-        if not(cargar_roms(@memoria_temp[0],@tnzs_sub,'tnzs.zip',1)) then exit;
-        copymemory(@mem_misc[0],@memoria_temp[0],$8000);
+        if not(roms_load(@memoria_temp,tnzs_sub)) then exit;
+        copymemory(@mem_misc,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
         //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@tnzs_audio,'tnzs.zip',1)) then exit;
+        if not(roms_load(@mem_snd,tnzs_audio)) then exit;
         //convertir chars
         getmem(mem_temp,$100000);
-        if not(cargar_roms(mem_temp,@tnzs_gfx[0],'tnzs.zip',0)) then exit;
+        if not(roms_load(mem_temp,tnzs_gfx)) then exit;
         init_gfx(0,16,16,$2000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,$2000*32*8*3,$2000*32*8*2,$2000*32*8,0);
-        convert_gfx(0,0,mem_temp,@pt_x[0],@pt_y[0],false,false);
+        convert_gfx(0,0,mem_temp,@pt_x,@pt_y,false,false);
         freemem(mem_temp);
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;
@@ -544,20 +551,20 @@ case main_vars.tipo_maquina of
         ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
         //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@insectorx_rom,'insectx.zip',1)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$8000);
+        if not(roms_load(@memoria_temp,insectorx_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$8000);
         for f:=0 to 5 do copymemory(@main_rom[f+2,0],@memoria_temp[$8000+(f*$4000)],$4000);
         //cargar ROMS misc
-        if not(cargar_roms(@memoria_temp[0],@insectorx_sub,'insectx.zip',1)) then exit;
-        copymemory(@mem_misc[0],@memoria_temp[0],$8000);
+        if not(roms_load(@memoria_temp,insectorx_sub)) then exit;
+        copymemory(@mem_misc,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
         //convertir chars
         getmem(mem_temp,$100000);
-        if not(cargar_roms(mem_temp,@insectorx_gfx[0],'insectx.zip',0)) then exit;
+        if not(roms_load(mem_temp,insectorx_gfx)) then exit;
         init_gfx(0,16,16,$2000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,64*8,8,0,$2000*64*8+8,$2000*64*8+0);
-        convert_gfx(0,0,mem_temp,@pt2_x[0],@pt2_y[0],false,false);
+        convert_gfx(0,0,mem_temp,@pt2_x,@pt2_y,false,false);
         freemem(mem_temp);
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;

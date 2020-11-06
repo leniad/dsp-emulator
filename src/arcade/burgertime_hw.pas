@@ -257,7 +257,6 @@ end;
 
 procedure putbyte_snd_btime(direccion:word;valor:byte);
 begin
-if direccion>$dfff then exit;
 case direccion of
     0..$1fff:mem_snd[direccion and $3ff]:=valor;
     $2000..$3fff:ay8910_0.Write(valor);
@@ -265,6 +264,7 @@ case direccion of
     $6000..$7fff:ay8910_1.Write(valor);
     $8000..$9fff:ay8910_1.Control(valor);
     $c000..$dfff:haz_nmi:=valor<>0;
+    $e000..$ffff:; //ROM
 end;
 end;
 
@@ -292,8 +292,6 @@ end;
 
 function iniciar_btime:boolean;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -318,27 +316,27 @@ m6502_1.init_sound(btime_sound_update);
 AY8910_0:=ay8910_chip.create(1500000,AY8910,1);
 AY8910_1:=ay8910_chip.create(1500000,AY8910,1);
 //cargar roms
-if not(roms_load(@memoria,@btime_rom,'btime.zip',sizeof(btime_rom))) then exit;
+if not(roms_load(@memoria,btime_rom)) then exit;
 copymemory(@memoria_dec,@memoria,$10000);
 //cargar roms audio
-if not(roms_load(@mem_snd,@btime_snd,'btime.zip',sizeof(btime_snd))) then exit;
+if not(roms_load(@mem_snd,btime_snd)) then exit;
 //Cargar chars
-if not(roms_load(@memoria_temp,@btime_char,'btime.zip',sizeof(btime_char))) then exit;
+if not(roms_load(@memoria_temp,btime_char)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,2*1024*8*8,1024*8*8,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
+convert_gfx(0,0,@memoria_temp,@ps_x[8],@ps_y,false,true);
 //sprites
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*256*16*16,256*16*16,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //Cargar tiles
-if not(roms_load(@memoria_temp,@btime_tiles,'btime.zip',sizeof(btime_tiles))) then exit;
+if not(roms_load(@memoria_temp,btime_tiles)) then exit;
 init_gfx(2,16,16,64);
 gfx_set_desc_data(3,0,32*8,2*64*16*16,64*16*16,0);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
-if not(roms_load(@mem_tiles,@btime_tiles_mem,'btime.zip',sizeof(btime_tiles_mem))) then exit;
+if not(roms_load(@mem_tiles,btime_tiles_mem)) then exit;
 //DIP
 marcade.dswa:=$3f;
 marcade.dswb:=$eb;

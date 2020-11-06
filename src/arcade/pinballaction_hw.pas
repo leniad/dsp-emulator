@@ -8,19 +8,19 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure cargar_pinballaction;
 
 const
-        pinballaction_rom:array[0..3] of tipo_roms=(
+        pinballaction_rom:array[0..2] of tipo_roms=(
         (n:'b-p7.bin';l:$4000;p:0;crc:$8d6dcaae),(n:'b-n7.bin';l:$4000;p:$4000;crc:$d54d5402),
-        (n:'b-l7.bin';l:$2000;p:$8000;crc:$e7412d68),());
+        (n:'b-l7.bin';l:$2000;p:$8000;crc:$e7412d68));
         pinballaction_sound:tipo_roms=(n:'a-e3.bin';l:$2000;p:0;crc:$0e53a91f);
-        pinballaction_chars:array[0..3] of tipo_roms=(
+        pinballaction_chars:array[0..2] of tipo_roms=(
         (n:'a-s6.bin';l:$2000;p:0;crc:$9a74a8e1),(n:'a-s7.bin';l:$2000;p:$2000;crc:$5ca6ad3c),
-        (n:'a-s8.bin';l:$2000;p:$4000;crc:$9f00b757),());
-        pinballaction_sprites:array[0..3] of tipo_roms=(
+        (n:'a-s8.bin';l:$2000;p:$4000;crc:$9f00b757));
+        pinballaction_sprites:array[0..2] of tipo_roms=(
         (n:'b-c7.bin';l:$2000;p:0;crc:$d1795ef5),(n:'b-d7.bin';l:$2000;p:$2000;crc:$f28df203),
-        (n:'b-f7.bin';l:$2000;p:$4000;crc:$af6e9817),());
-        pinballaction_tiles:array[0..4] of tipo_roms=(
+        (n:'b-f7.bin';l:$2000;p:$4000;crc:$af6e9817));
+        pinballaction_tiles:array[0..3] of tipo_roms=(
         (n:'a-j5.bin';l:$4000;p:0;crc:$21efe866),(n:'a-j6.bin';l:$4000;p:$4000;crc:$7f984c80),
-        (n:'a-j7.bin';l:$4000;p:$8000;crc:$df69e51b),(n:'a-j8.bin';l:$4000;p:$c000;crc:$0094cb8b),());
+        (n:'a-j7.bin';l:$4000;p:$8000;crc:$df69e51b),(n:'a-j8.bin';l:$4000;p:$c000;crc:$0094cb8b));
         //DIP
         pinballaction_dipa:array [0..5] of def_dip=(
         (mask:$3;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -171,8 +171,8 @@ end;
 
 procedure pinballaction_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+    0..$7fff:;
     $8000..$cfff,$e000..$e07f:memoria[direccion]:=valor;
     $d000..$d7ff:begin //chars
                     memoria[direccion]:=valor;
@@ -207,8 +207,8 @@ end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$2000 then exit;
 case direccion of
+  0..$1fff:;
   $4000..$47ff:mem_snd[direccion]:=valor;
 end;
 end;
@@ -227,8 +227,8 @@ end;
 
 procedure pbaction_sound_irq;
 begin
-z80_1.change_irq(HOLD_LINE);
-z80_1.im2_lo:=2;
+  z80_1.change_irq(HOLD_LINE);
+  z80_1.im2_lo:=2;
 end;
 
 procedure pinballaction_sound_update;
@@ -257,10 +257,6 @@ end;
 
 function iniciar_pinballaction:boolean;
 const
-  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
-			64, 65, 66, 67, 68, 69, 70, 71);
-  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			128+(8*0), 128+(8*1), 128+(8*2), 128+(8*3), 128+(8*4), 128+(8*5), 128+(8*6), 128+(8*7));
   psd_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
       64, 65, 66, 67, 68, 69, 70, 71,
       256,257,258,259,260,261,262,263,
@@ -269,8 +265,6 @@ const
 			128+(8*0), 128+(8*1), 128+(8*2), 128+(8*3), 128+(8*4), 128+(8*5), 128+(8*6), 128+(8*7),
       512+(8*0), 512+(8*1), 512+(8*2), 512+(8*3), 512+(8*4), 512+(8*5), 512+(8*6), 512+(8*7),
       640+(8*0), 640+(8*1), 640+(8*2), 640+(8*3), 640+(8*4), 640+(8*5), 640+(8*6), 640+(8*7));
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
 var
   memoria_temp:array[0..$ffff] of byte;
 begin
@@ -290,32 +284,32 @@ z80_1:=cpu_z80.create(3072000,$100);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(nil,snd_outbyte);
 z80_1.init_sound(pinballaction_sound_update);
-init_timer(z80_1.numero_cpu,3072000/(2*60),pbaction_sound_irq,true);
+timers.init(z80_1.numero_cpu,3072000/(2*60),pbaction_sound_irq,nil,true);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(1500000,AY8910,0.25);
 ay8910_1:=ay8910_chip.create(1500000,AY8910,0.25);
 ay8910_2:=ay8910_chip.create(1500000,AY8910,0.25);
 //cargar roms
-if not(cargar_roms(@memoria,@pinballaction_rom,'pbaction.zip',0)) then exit;
+if not(roms_load(@memoria,pinballaction_rom)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd,@pinballaction_sound,'pbaction.zip')) then exit;
+if not(roms_load(@mem_snd,pinballaction_sound)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp,@pinballaction_chars,'pbaction.zip',0)) then exit;
+if not(roms_load(@memoria_temp,pinballaction_chars)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,$400*0*8*8,$400*1*8*8,$400*2*8*8);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
+convert_gfx(0,0,@memoria_temp,@psd_x,@psd_y,true,false);
 //tiles
-if not(cargar_roms(@memoria_temp,@pinballaction_tiles,'pbaction.zip',0)) then exit;
+if not(roms_load(@memoria_temp,pinballaction_tiles)) then exit;
 init_gfx(1,8,8,$800);
 gfx_set_desc_data(4,0,8*8,$800*0*8*8,$800*1*8*8,$800*2*8*8,$800*3*8*8);
-convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,true,false);
+convert_gfx(1,0,@memoria_temp,@psd_x,@psd_y,true,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp,@pinballaction_sprites,'pbaction.zip',0)) then exit;
+if not(roms_load(@memoria_temp,pinballaction_sprites)) then exit;
 init_gfx(2,16,16,$100);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,$100*0*8*32,$100*1*8*32,$100*2*8*32);
-convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
+convert_gfx(2,0,@memoria_temp,@psd_x,@psd_y,true,false);
 //convertir sprites double
 init_gfx(3,32,32,$20);
 gfx[3].trans[0]:=true;

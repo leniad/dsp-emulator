@@ -174,14 +174,14 @@ case direccion of
   $a000:cclimber_getbyte:=marcade.in0;
   $a800:cclimber_getbyte:=marcade.in1;
   $b000:cclimber_getbyte:=marcade.dswa;
-  $b800:cclimber_getbyte:=marcade.dswb+marcade.in2;
+  $b800:cclimber_getbyte:=marcade.dswb or marcade.in2;
 end;
 end;
 
 procedure cclimber_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$6000 then exit;
 case direccion of
+   0..$5fff:; //ROM
    $6000..$6bff,$8000..$83ff,$8900..$8bff,$9820..$98dc,$98de..$9bff:memoria[direccion]:=valor;
    $8800..$88ff:if memoria[direccion]<>valor then begin
                   memoria[direccion]:=valor;
@@ -309,12 +309,12 @@ ay8910_0:=ay8910_chip.create(3072000 div 2,AY8910,1);
 ay8910_0.change_io_calls(nil,nil,cclimber_porta_write,nil);
 cclimber_audio:=tcclimber_audio.create;
 //cargar y desencriptar las ROMS
-if not(roms_load(@memoria,@cclimber_rom,'cclimber.zip',sizeof(cclimber_rom))) then exit;
+if not(roms_load(@memoria,cclimber_rom)) then exit;
 cclimber_decode;
 //samples
-if not(roms_load(cclimber_audio.get_rom_addr,@cclimber_samples,'cclimber.zip',sizeof(cclimber_samples))) then exit;
+if not(roms_load(cclimber_audio.get_rom_addr,cclimber_samples)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@cclimber_char,'cclimber.zip',sizeof(cclimber_char))) then exit;
+if not(roms_load(@memoria_temp,cclimber_char)) then exit;
 init_gfx(0,8,8,$400);
 gfx_set_desc_data(2,0,8*8,0,$400*8*8);
 convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
@@ -323,31 +323,31 @@ init_gfx(1,16,16,$100);
 gfx_set_desc_data(2,0,32*8,0,$100*8*32);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //big sprites
-if not(roms_load(@memoria_temp,@cclimber_bigsprites,'cclimber.zip',sizeof(cclimber_bigsprites))) then exit;
+if not(roms_load(@memoria_temp,cclimber_bigsprites)) then exit;
 init_gfx(2,8,8,$100);
 gfx_set_desc_data(2,0,8*8,0,$100*8*8);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //poner la paleta
-if not(roms_load(@memoria_temp,@cclimber_pal,'cclimber.zip',sizeof(cclimber_pal))) then exit;
+if not(roms_load(@memoria_temp,cclimber_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances_rg[0],@rg_weights[0],0,0,
-			3,@resistances_b[0],@b_weights[0],0,0,
+			3,@resistances_rg,@rg_weights,0,0,
+			3,@resistances_b,@b_weights,0,0,
 			0,nil,nil,0,0);
 for f:=0 to $5f do begin
 		// red component */
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
-		colores[f].r:=combine_3_weights(@rg_weights[0], bit0, bit1, bit2);
+		colores[f].r:=combine_3_weights(@rg_weights, bit0, bit1, bit2);
 		// green component */
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
-		colores[f].g:=combine_3_weights(@rg_weights[0], bit0, bit1, bit2);
+		colores[f].g:=combine_3_weights(@rg_weights, bit0, bit1, bit2);
 		// blue component */
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
-		colores[f].b:=combine_2_weights(@b_weights[0], bit0, bit1);
+		colores[f].b:=combine_2_weights(@b_weights, bit0, bit1);
 end;
 set_pal(colores,$60);
 //DIP
@@ -360,7 +360,7 @@ reset_cclimber;
 iniciar_cclimber:=true;
 end;
 
-procedure Cargar_cclimber;
+procedure cargar_cclimber;
 begin
 llamadas_maquina.iniciar:=iniciar_cclimber;
 llamadas_maquina.bucle_general:=cclimber_principal;

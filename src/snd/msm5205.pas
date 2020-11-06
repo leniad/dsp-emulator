@@ -15,7 +15,7 @@ const
 
 type
   MSM5205_chip=class(snd_chip_class)
-        constructor create(clock:dword;select:byte;amp:single;snd_timer_call:exec_type);
+        constructor create(clock:dword;select:byte;amp:single;snd_timer_call:exec_type_simple);
         destructor free;
       public
         procedure reset;
@@ -42,10 +42,8 @@ type
 var
   msm_5205_0,msm_5205_1:MSM5205_chip;
 
-procedure msm5205_internal_update_0;
-procedure msm5205_internal_update_1;
-procedure msm5205_final_update_0;
-procedure msm5205_final_update_1;
+procedure msm5205_internal_update(index:byte);
+procedure msm5205_final_update(index:byte);
 procedure msm5205_ComputeTables;
 function msm5205_clock(val:integer;var step:integer;signal:integer):integer;
 
@@ -83,7 +81,7 @@ begin
 	end;
 end;
 
-constructor MSM5205_chip.Create(clock:dword;select:byte;amp:single;snd_timer_call:exec_type);
+constructor MSM5205_chip.Create(clock:dword;select:byte;amp:single;snd_timer_call:exec_type_simple);
 begin
   chips_total:=chips_total+1;
   self.prescaler:=$ff;
@@ -93,17 +91,9 @@ begin
   self.select:=select;
   self.tsample_:=init_channel;
   self.external_call:=snd_timer_call;
-  case chips_total of
-    0:begin
-        self.timer_:=init_timer(sound_status.cpu_num,1,msm5205_internal_update_0,false);
-        init_timer(sound_status.cpu_num,sound_status.cpu_clock/FREQ_BASE_AUDIO,msm5205_final_update_0,true);
-        msm5205_ComputeTables;
-      end;
-    1:begin
-        self.timer_:=init_timer(sound_status.cpu_num,1,msm5205_internal_update_1,false);
-        init_timer(sound_status.cpu_num,sound_status.cpu_clock/FREQ_BASE_AUDIO,msm5205_final_update_1,true);
-      end;
-  end;
+  self.timer_:=timers.init(sound_status.cpu_num,1,nil,msm5205_internal_update,false,chips_total);
+  timers.init(sound_status.cpu_num,sound_status.cpu_clock/FREQ_BASE_AUDIO,nil,msm5205_final_update,true,chips_total);
+  if chips_total=0 then msm5205_ComputeTables;
 	self.reset;
 end;
 
@@ -137,9 +127,9 @@ begin
 		self.prescaler:=prescaler;
 		// timer set */
     if (prescaler<>0) then begin
-  			timer[self.timer_].time_final:=sound_status.cpu_clock/(self.clock/prescaler);
-        timer[self.timer_].enabled:=true;
-  		end else timer[self.timer_].enabled:=false;
+  			timers.timer[self.timer_].time_final:=sound_status.cpu_clock/(self.clock/prescaler);
+        timers.enabled(self.timer_,true);
+  		end else timers.enabled(self.timer_,false);
   end;
 	if (self.bitwidth<>bitwidth) then self.bitwidth:=bitwidth;
 end;
@@ -199,29 +189,28 @@ begin
   end;
 end;
 
-procedure msm5205_internal_update_0;
+procedure msm5205_internal_update(index:byte);
 begin
-  msm5205_stream_update(0);
-  //Slave!!
-  if msm_5205_1<>nil then
-   if msm_5205_1.prescaler=0 then msm5205_stream_update(1);
+  case index of
+    0:begin
+        msm5205_stream_update(0);
+        //Slave!!
+        if msm_5205_1<>nil then if msm_5205_1.prescaler=0 then msm5205_stream_update(1);
+    end;
+    1:msm5205_stream_update(1);
+  end;
 end;
 
-procedure msm5205_internal_update_1;
+procedure msm5205_final_update(index:byte);
+var
+  chip:MSM5205_chip;
 begin
-  msm5205_stream_update(1);
-end;
-
-procedure msm5205_final_update_0;
-begin
-  tsample[msm_5205_0.tsample_,sound_status.posicion_sonido]:=trunc((msm_5205_0.signal shl 4)*msm_5205_0.amp);
-  if sound_status.stereo then tsample[msm_5205_0.tsample_,sound_status.posicion_sonido+1]:=round((msm_5205_0.signal shl 4)*msm_5205_0.amp);
-end;
-
-procedure msm5205_final_update_1;
-begin
-  tsample[msm_5205_1.tsample_,sound_status.posicion_sonido]:=trunc((msm_5205_1.signal shl 4)*msm_5205_1.amp);
-  if sound_status.stereo then tsample[msm_5205_1.tsample_,sound_status.posicion_sonido+1]:=round((msm_5205_1.signal shl 4)*msm_5205_1.amp);
+  case index of
+    0:chip:=msm_5205_0;
+    1:chip:=msm_5205_1;
+  end;
+  tsample[chip.tsample_,sound_status.posicion_sonido]:=trunc((chip.signal shl 4)*chip.amp);
+  if sound_status.stereo then tsample[chip.tsample_,sound_status.posicion_sonido+1]:=round((chip.signal shl 4)*chip.amp);
 end;
 
 end.

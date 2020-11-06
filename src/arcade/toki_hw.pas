@@ -9,17 +9,17 @@ procedure cargar_toki;
 
 implementation
 const
-        toki_rom:array[0..4] of tipo_roms=(
+        toki_rom:array[0..3] of tipo_roms=(
         (n:'l10_6.bin';l:$20000;p:0;crc:$94015d91),(n:'k10_4e.bin';l:$20000;p:$1;crc:$531bd3ef),
-        (n:'tokijp.005';l:$10000;p:$40000;crc:$d6a82808),(n:'tokijp.003';l:$10000;p:$40001;crc:$a01a5b10),());
-        toki_char:array[0..2] of tipo_roms=(
-        (n:'tokijp.001';l:$10000;p:0;crc:$8aa964a2),(n:'tokijp.002';l:$10000;p:$10000;crc:$86e87e48),());
-        toki_sprites:array[0..2] of tipo_roms=(
-        (n:'toki.ob1';l:$80000;p:0;crc:$a27a80ba),(n:'toki.ob2';l:$80000;p:$80000;crc:$fa687718),());
+        (n:'tokijp.005';l:$10000;p:$40000;crc:$d6a82808),(n:'tokijp.003';l:$10000;p:$40001;crc:$a01a5b10));
+        toki_char:array[0..1] of tipo_roms=(
+        (n:'tokijp.001';l:$10000;p:0;crc:$8aa964a2),(n:'tokijp.002';l:$10000;p:$10000;crc:$86e87e48));
+        toki_sprites:array[0..1] of tipo_roms=(
+        (n:'toki.ob1';l:$80000;p:0;crc:$a27a80ba),(n:'toki.ob2';l:$80000;p:$80000;crc:$fa687718));
         toki_tiles1:tipo_roms=(n:'toki.bk1';l:$80000;p:0;crc:$fdaa5f4b);
         toki_tiles2:tipo_roms=(n:'toki.bk2';l:$80000;p:0;crc:$d86ac664);
-        toki_sound:array[0..2] of tipo_roms=(
-        (n:'tokijp.008';l:$2000;p:0;crc:$6c87c4c5),(n:'tokijp.007';l:$10000;p:$10000;crc:$a67969c4),());
+        toki_sound:array[0..1] of tipo_roms=(
+        (n:'tokijp.008';l:$2000;p:0;crc:$6c87c4c5),(n:'tokijp.007';l:$10000;p:$10000;crc:$a67969c4));
         toki_adpcm:tipo_roms=(n:'tokijp.009';l:$20000;p:0;crc:$ae7a6b8b);
         toki_dip:array [0..9] of def_dip=(
         (mask:$1f;name:'Coinage';number:16;dip:((dip_val:$15;dip_name:'6C 1C'),(dip_val:$17;dip_name:'5C 1C'),(dip_val:$19;dip_name:'4C 1C'),(dip_val:$1b;dip_name:'3C 1C'),(dip_val:$3;dip_name:'8C 3C'),(dip_val:$1d;dip_name:'2C 1C'),(dip_val:$5;dip_name:'5C 3C'),(dip_val:$7;dip_name:'3C 2C'),(dip_val:$1f;dip_name:'1C 1C'),(dip_val:$9;dip_name:'2C 3C'),(dip_val:$13;dip_name:'1C 2C'),(dip_val:$11;dip_name:'1C 3C'),(dip_val:$f;dip_name:'1C 4C'),(dip_val:$d;dip_name:'1C 5C'),(dip_val:$b;dip_name:'1C 6C'),(dip_val:$1e;dip_name:'A 1C 1C/B 1/2'))),
@@ -188,8 +188,8 @@ end;
 
 procedure toki_putword(direccion:dword;valor:word);
 begin
-if direccion<$60000 then exit;
 case direccion of
+  0..$5ffff:; //ROM
   $60000..$6dfff:ram[(direccion and $ffff) shr 1]:=valor;
   $6e000..$6e7ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                     buffer_paleta[(direccion and $7ff) shr 1]:=valor;
@@ -248,8 +248,8 @@ end;
 
 procedure toki_snd_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$2000) or (direccion>$7fff)) then exit;
 case direccion of
+  0..$1fff,$8000..$ffff:; //ROM
   $2000..$27ff:mem_snd[direccion]:=valor;
   $4000:begin
           main2sub_pending:=false;
@@ -288,8 +288,8 @@ begin
  oki_6295_0.reset;
  seibu_reset;
  reset_audio;
- marcade.in0:=$FFFF;
- marcade.in1:=$FF;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ff;
  marcade.in2:=0;
  scroll_x1:=0;
  scroll_y1:=0;
@@ -333,41 +333,41 @@ z80_1.init_sound(toki_sound_update);
 ym3812_0:=ym3812_chip.create(YM3812_FM,3579545);
 ym3812_0.change_irq_calls(snd_irq);
 oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.40);
-if not(cargar_roms(@memoria_temp2[0],@toki_adpcm,'toki.zip',1)) then exit;
+if not(roms_load(@memoria_temp2,toki_adpcm)) then exit;
 ptemp:=oki_6295_0.get_rom_addr;
 for f:=0 to $1ffff do begin
   ptemp^:=memoria_temp2[BITSWAP24(f,23,22,21,20,19,18,17,16,13,14,15,12,11,10,9,8,7,6,5,4,3,2,1,0)];
   inc(ptemp);
 end;
 //cargar roms
-if not(cargar_roms16w(@rom[0],@toki_rom[0],'toki.zip',0)) then exit;
+if not(roms_load16w(@rom,toki_rom)) then exit;
 //cargar sonido, desencriptar y poner bancos
-if not(cargar_roms(memoria_temp,@toki_sound,'toki.zip',0)) then exit;
-decript_seibu_sound(memoria_temp,@decrypt[0],@mem_snd[0]);
+if not(roms_load(memoria_temp,toki_sound)) then exit;
+decript_seibu_sound(memoria_temp,@decrypt,@mem_snd);
 ptemp:=memoria_temp;
 inc(ptemp,$10000);copymemory(@sound_rom[0,0],ptemp,$8000);
 inc(ptemp,$8000);copymemory(@sound_rom[1,0],ptemp,$8000);
 //convertir chars
-if not(cargar_roms(memoria_temp,@toki_char,'toki.zip',0)) then exit;
+if not(roms_load(memoria_temp,toki_char)) then exit;
 init_gfx(0,8,8,4096);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,16*8,4096*16*8+0,4096*16*8+4,0,4);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
-if not(cargar_roms(memoria_temp,@toki_sprites,'toki.zip',0)) then exit;
+if not(roms_load(memoria_temp,toki_sprites)) then exit;
 init_gfx(1,16,16,8192);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,2*4,3*4,0*4,1*4);
-convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms(memoria_temp,@toki_tiles1,'toki.zip',1)) then exit;
+if not(roms_load(memoria_temp,toki_tiles1)) then exit;
 init_gfx(2,16,16,4096);
 gfx[2].trans[15]:=true;
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
-if not(cargar_roms(memoria_temp,@toki_tiles2,'toki.zip',1)) then exit;
+convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
+if not(roms_load(memoria_temp,toki_tiles2)) then exit;
 init_gfx(3,16,16,4096);
 gfx[3].trans[15]:=true;
-convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(3,0,memoria_temp,@ps_x,@ps_y,false,false);
 //DIP
 marcade.dswa:=$ffdf;
 marcade.dswa_val:=@toki_dip;

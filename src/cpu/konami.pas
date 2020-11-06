@@ -713,7 +713,7 @@ case instruccion of
 end;
 tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
-update_timer(tempw,self.numero_cpu);
+timers.update(tempw,self.numero_cpu);
 end; //Del while
 end;
 

@@ -5,68 +5,89 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,namcoio_06xx_5xxx,
      rom_engine,pal_engine,sound_engine,galaga_stars_const,samples,misc_functions;
 
-procedure cargar_Galagahw;
+procedure cargar_galagahw;
 
 implementation
 const
         //Galaga
-        galaga_rom:array[0..4] of tipo_roms=(
+        galaga_rom:array[0..3] of tipo_roms=(
         (n:'gg1_1b.3p';l:$1000;p:0;crc:$ab036c9f),(n:'gg1_2b.3m';l:$1000;p:$1000;crc:$d9232240),
-        (n:'gg1_3.2m';l:$1000;p:$2000;crc:$753ce503),(n:'gg1_4b.2l';l:$1000;p:$3000;crc:$499fcc76),());
+        (n:'gg1_3.2m';l:$1000;p:$2000;crc:$753ce503),(n:'gg1_4b.2l';l:$1000;p:$3000;crc:$499fcc76));
         galaga_sub:tipo_roms=(n:'gg1_5b.3f';l:$1000;p:0;crc:$bb5caae3);
         galaga_sub2:tipo_roms=(n:'gg1_7b.2c';l:$1000;p:0;crc:$d016686b);
-        galaga_prom:array[0..3] of tipo_roms=(
+        galaga_prom:array[0..2] of tipo_roms=(
         (n:'prom-5.5n';l:$20;p:0;crc:$54603c6b),(n:'prom-4.2n';l:$100;p:$20;crc:$59b6edab),
-        (n:'prom-3.1c';l:$100;p:$120;crc:$4a04bb6b),());
+        (n:'prom-3.1c';l:$100;p:$120;crc:$4a04bb6b));
         galaga_char:tipo_roms=(n:'gg1_9.4l';l:$1000;p:0;crc:$58b2f47c);
         galaga_sound:tipo_roms=(n:'prom-1.1d';l:$100;p:0;crc:$7a2815b4);
-        galaga_sprites:array[0..2] of tipo_roms=(
-        (n:'gg1_11.4d';l:$1000;p:0;crc:$ad447c80),(n:'gg1_10.4f';l:$1000;p:$1000;crc:$dd6f1afc),());
+        galaga_sprites:array[0..1] of tipo_roms=(
+        (n:'gg1_11.4d';l:$1000;p:0;crc:$ad447c80),(n:'gg1_10.4f';l:$1000;p:$1000;crc:$dd6f1afc));
         num_samples_galaga=2;
         galaga_samples:array[0..(num_samples_galaga-1)] of tipo_nombre_samples=(
         (nombre:'bang.wav'),(nombre:'init.wav'));
         //Dig Dug
-        digdug_rom:array[0..4] of tipo_roms=(
+        digdug_rom:array[0..3] of tipo_roms=(
         (n:'dd1a.1';l:$1000;p:0;crc:$a80ec984),(n:'dd1a.2';l:$1000;p:$1000;crc:$559f00bd),
-        (n:'dd1a.3';l:$1000;p:$2000;crc:$8cbc6fe1),(n:'dd1a.4';l:$1000;p:$3000;crc:$d066f830),());
-        digdug_sub:array[0..2] of tipo_roms=(
-        (n:'dd1a.5';l:$1000;p:0;crc:$6687933b),(n:'dd1a.6';l:$1000;p:$1000;crc:$843d857f),());
+        (n:'dd1a.3';l:$1000;p:$2000;crc:$8cbc6fe1),(n:'dd1a.4';l:$1000;p:$3000;crc:$d066f830));
+        digdug_sub:array[0..1] of tipo_roms=(
+        (n:'dd1a.5';l:$1000;p:0;crc:$6687933b),(n:'dd1a.6';l:$1000;p:$1000;crc:$843d857f));
         digdug_sub2:tipo_roms=(n:'dd1.7';l:$1000;p:0;crc:$a41bce72);
-        digdug_prom:array[0..3] of tipo_roms=(
+        digdug_prom:array[0..2] of tipo_roms=(
         (n:'136007.113';l:$20;p:0;crc:$4cb9da99),(n:'136007.111';l:$100;p:$20;crc:$00c7c419),
-        (n:'136007.112';l:$100;p:$120;crc:$e9b3e08e),());
+        (n:'136007.112';l:$100;p:$120;crc:$e9b3e08e));
         digdug_sound:tipo_roms=(n:'136007.110';l:$100;p:0;crc:$7a2815b4);
         digdug_chars:tipo_roms=(n:'dd1.9';l:$800;p:0;crc:$f14a6fe1);
-        digdug_sprites:array[0..4] of tipo_roms=(
+        digdug_sprites:array[0..3] of tipo_roms=(
         (n:'dd1.15';l:$1000;p:0;crc:$e22957c8),(n:'dd1.14';l:$1000;p:$1000;crc:$2829ec99),
-        (n:'dd1.13';l:$1000;p:$2000;crc:$458499e9),(n:'dd1.12';l:$1000;p:$3000;crc:$c58252a0),());
+        (n:'dd1.13';l:$1000;p:$2000;crc:$458499e9),(n:'dd1.12';l:$1000;p:$3000;crc:$c58252a0));
         digdug_chars2:tipo_roms=(n:'dd1.11';l:$1000;p:0;crc:$7b383983);
         digdug_background:tipo_roms=(n:'dd1.10b';l:$1000;p:0;crc:$2cf399c2);
         //Xevious
-        xevious_rom:array[0..4] of tipo_roms=(
+        xevious_rom:array[0..3] of tipo_roms=(
         (n:'xvi_1.3p';l:$1000;p:0;crc:$09964dda),(n:'xvi_2.3m';l:$1000;p:$1000;crc:$60ecce84),
-        (n:'xvi_3.2m';l:$1000;p:$2000;crc:$79754b7d),(n:'xvi_4.2l';l:$1000;p:$3000;crc:$c7d4bbf0),());
-        xevious_sub:array[0..2] of tipo_roms=(
-        (n:'xvi_5.3f';l:$1000;p:$0;crc:$c85b703f),(n:'xvi_6.3j';l:$1000;p:$1000;crc:$e18cdaad),());
+        (n:'xvi_3.2m';l:$1000;p:$2000;crc:$79754b7d),(n:'xvi_4.2l';l:$1000;p:$3000;crc:$c7d4bbf0));
+        xevious_sub:array[0..1] of tipo_roms=(
+        (n:'xvi_5.3f';l:$1000;p:$0;crc:$c85b703f),(n:'xvi_6.3j';l:$1000;p:$1000;crc:$e18cdaad));
         xevious_sub2:tipo_roms=(n:'xvi_7.2c';l:$1000;p:0;crc:$dd35cf1c);
-        xevious_prom:array[0..7] of tipo_roms=(
+        xevious_prom:array[0..6] of tipo_roms=(
         (n:'xvi-8.6a';l:$100;p:0;crc:$5cc2727f),(n:'xvi-9.6d';l:$100;p:$100;crc:$5c8796cc),
         (n:'xvi-10.6e';l:$100;p:$200;crc:$3cb60975),(n:'xvi-7.4h';l:$200;p:$300;crc:$22d98032),
         (n:'xvi-6.4f';l:$200;p:$500;crc:$3a7599f0),(n:'xvi-4.3l';l:$200;p:$700;crc:$fd8b9d91),
-        (n:'xvi-5.3m';l:$200;p:$900;crc:$bf906d82),());
+        (n:'xvi-5.3m';l:$200;p:$900;crc:$bf906d82));
         xevious_sound:tipo_roms=(n:'xvi-2.7n';l:$100;p:0;crc:$550f06bc);
         xevious_char:tipo_roms=(n:'xvi_12.3b';l:$1000;p:0;crc:$088c8b26);
-        xevious_sprites:array[0..4] of tipo_roms=(
+        xevious_sprites:array[0..3] of tipo_roms=(
         (n:'xvi_15.4m';l:$2000;p:0;crc:$dc2c0ecb),(n:'xvi_17.4p';l:$2000;p:$2000;crc:$dfb587ce),
-        (n:'xvi_16.4n';l:$1000;p:$4000;crc:$605ca889),(n:'xvi_18.4r';l:$2000;p:$5000;crc:$02417d19),());
-        xevious_bg:array[0..2] of tipo_roms=(
-        (n:'xvi_13.3c';l:$1000;p:$0;crc:$de60ba25),(n:'xvi_14.3d';l:$1000;p:$1000;crc:$535cdbbc),());
-        xevious_bg_tiles:array[0..3] of tipo_roms=(
+        (n:'xvi_16.4n';l:$1000;p:$4000;crc:$605ca889),(n:'xvi_18.4r';l:$2000;p:$5000;crc:$02417d19));
+        xevious_bg:array[0..1] of tipo_roms=(
+        (n:'xvi_13.3c';l:$1000;p:$0;crc:$de60ba25),(n:'xvi_14.3d';l:$1000;p:$1000;crc:$535cdbbc));
+        xevious_bg_tiles:array[0..2] of tipo_roms=(
         (n:'xvi_9.2a';l:$1000;p:0;crc:$57ed9879),(n:'xvi_10.2b';l:$2000;p:$1000;crc:$ae3ba9e5),
-        (n:'xvi_11.2c';l:$1000;p:$3000;crc:$31e244dd),());
+        (n:'xvi_11.2c';l:$1000;p:$3000;crc:$31e244dd));
         num_samples_xevious=2;
         xevious_samples:array[0..(num_samples_xevious-1)] of tipo_nombre_samples=(
-        (nombre:'explo1.wav'),(nombre:'explo2.wav'));
+        (nombre:'explo2.wav'),(nombre:'explo1.wav'));
+        //Bosconian
+        bosco_rom:array[0..3] of tipo_roms=(
+        (n:'bos3_1.3n';l:$1000;p:0;crc:$96021267),(n:'bos1_2.3m';l:$1000;p:$1000;crc:$2d8f3ebe),
+        (n:'bos1_3.3l';l:$1000;p:$2000;crc:$c80ccfa5),(n:'bos1_4b.3k';l:$1000;p:$3000;crc:$a3f7f4ab));
+        bosco_sub:array[0..1] of tipo_roms=(
+        (n:'bos1_5c.3j';l:$1000;p:$0;crc:$a7c8e432),(n:'bos3_6.3h';l:$1000;p:$1000;crc:$4543cf82));
+        bosco_sub2:tipo_roms=(n:'bos1_7.3e';l:$1000;p:0;crc:$d45a4911);
+        bosco_char:tipo_roms=(n:'bos1_14.5d';l:$1000;p:0;crc:$a956d3c5);
+        bosco_sprites:tipo_roms=(n:'bos1_13.5e';l:$1000;p:0;crc:$e869219c);
+        bosco_dots:tipo_roms=(n:'bos1-4.2r';l:$100;p:0;crc:$9b69b543);
+        bosco_prom:array[0..3] of tipo_roms=(
+        (n:'bos1-6.6b';l:$20;p:0;crc:$d2b96fb0),(n:'bos1-5.4m';l:$100;p:$20;crc:$4e15d59c),
+        (n:'bos1-3.2d';l:$20;p:$120;crc:$b88d5ba9),(n:'bos1-7.7h';l:$20;p:$140;crc:$87d61353));
+        bosco_snd:tipo_roms=(n:'bos1-1.1d';l:$100;p:$0;crc:$de2316c6);
+        bosco_52xx:array[0..2] of tipo_roms=(
+        (n:'bos1_9.5n';l:$1000;p:$0;crc:$09acc978),(n:'bos1_10.5m';l:$1000;p:$1000;crc:$e571e959),
+        (n:'bos1_11.5k';l:$1000;p:$2000;crc:$17ac9511));
+        num_samples_bosco=3;
+        bosco_samples:array[0..(num_samples_bosco-1)] of tipo_nombre_samples=(
+        (nombre:'bigbang.wav'),(nombre:'midbang.wav'),(nombre:'shot.wav';restart:true;loop:false));
+        MAX_STARS=252;
 
 var
  main_irq,sub_irq,sub2_nmi:boolean;
@@ -145,8 +166,6 @@ begin
 end;
 
 procedure draw_stars;inline;
-const
-  MAX_STARS=252;
 var
   star_cntr,set_a,set_b:byte;
   x,y,color:word;
@@ -218,13 +237,12 @@ end;
 procedure galaga_principal;
 var
   frame_m,frame_s1,frame_s2:single;
-  f,scanline:word;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s1:=z80_2.tframes;
 frame_s2:=z80_1.tframes;
-scanline:=63;
 while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     //Main CPU
@@ -237,16 +255,14 @@ while EmuStatus=EsRuning do begin
     z80_1.run(frame_s2);
     frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
     run_namco_54xx;
-    if (f=scanline) then begin
-        if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
-        scanline:=scanline+128;
-	      if (scanline>=272) then scanline:=63;
-    end;
-    if f=223 then begin
-        if main_irq then z80_0.change_irq(ASSERT_LINE);
-        if sub_irq then z80_2.change_irq(ASSERT_LINE);
-        update_video_galaga;
-        copymemory(@buffer_sprites[0],@memoria[$fe00],$200);
+    case f of
+      63,191:if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
+      223:begin
+            if main_irq then z80_0.change_irq(ASSERT_LINE);
+            if sub_irq then z80_2.change_irq(ASSERT_LINE);
+            update_video_galaga;
+            copymemory(@buffer_sprites,@memoria[$fe00],$200);
+      end;
     end;
   end;
   eventos_galaga;
@@ -270,11 +286,11 @@ case dir of
 			 end;
 		$2:sub2_nmi:=(bit=0);	// NMION */
 		$3:if (bit<>0) then begin  // RESET */
-          z80_2.change_reset(CLEAR_LINE);
           z80_1.change_reset(CLEAR_LINE);
+          z80_2.change_reset(CLEAR_LINE);
        end else begin
-          z80_2.change_reset(ASSERT_LINE);
           z80_1.change_reset(ASSERT_LINE);
+          z80_2.change_reset(ASSERT_LINE);
        end;
 		$4:; //n.c.
     $05:custom_mod:=(custom_mod and $fe) or (bit shl 0);	// MOD 0
@@ -285,13 +301,13 @@ end;
 
 procedure galaga_putbyte(direccion:word;valor:byte);
 begin
-if (direccion<$4000) then exit;
 case direccion of
+    0..$3fff:; //ROM
     $6800..$681f:namco_snd_0.regs[direccion and $1f]:=valor;
     $6820..$6827:galaga_latch(direccion and $7,valor);
     $7000..$70ff:namco_06xx_data_w(direccion and $ff,0,valor);
-    $7100..$7100:namco_06xx_ctrl_w(0,valor);
-    $8000..$87ff:begin
+    $7100:namco_06xx_ctrl_w(0,valor);
+    $8000..$87ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;
                  end;
@@ -309,34 +325,20 @@ case direccion of
   $6803:galaga_getbyte:=$0;
   $6805,$6806:galaga_getbyte:=$2;
   $7000..$70ff:galaga_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:galaga_getbyte:=namco_06xx_ctrl_r(0);
+  $7100:galaga_getbyte:=namco_06xx_ctrl_r(0);
 end;
 end;
 
 function galaga_sub_getbyte(direccion:word):byte;
 begin
-case direccion of
-  $0..$3fff:galaga_sub_getbyte:=mem_snd[direccion];
-  $6800..$6802,$6804,$6807:galaga_sub_getbyte:=$3; //Leer DSW A y B
-  $6803:galaga_sub_getbyte:=$0;
-  $6805,$6806:galaga_sub_getbyte:=$2;
-  $7000..$70ff:galaga_sub_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:galaga_sub_getbyte:=namco_06xx_ctrl_r(0);
-  $8800..$8bff,$9000..$93ff,$9800..$9bff:galaga_sub_getbyte:=memoria[direccion];
-end;
+if direccion<$4000 then galaga_sub_getbyte:=mem_snd[direccion]
+  else galaga_sub_getbyte:=galaga_getbyte(direccion);
 end;
 
 function galaga_sub2_getbyte(direccion:word):byte;
 begin
-case direccion of
-  $0..$3fff:galaga_sub2_getbyte:=mem_misc[direccion];
-  $6800..$6802,$6804,$6807:galaga_sub2_getbyte:=$3; //Leer DSW A y B
-  $6803:galaga_sub2_getbyte:=$0;
-  $6805,$6806:galaga_sub2_getbyte:=$2;
-  $7000..$70ff:galaga_sub2_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:galaga_sub2_getbyte:=namco_06xx_ctrl_r(0);
-  $8800..$8bff,$9000..$93ff,$9800..$9bff:galaga_sub2_getbyte:=memoria[direccion];
-end;
+if direccion<$4000 then galaga_sub2_getbyte:=mem_misc[direccion]
+  else galaga_sub2_getbyte:=galaga_getbyte(direccion);
 end;
 
 //DigDug
@@ -427,13 +429,12 @@ end;
 procedure digdug_principal;
 var
   frame_m,frame_s1,frame_s2:single;
-  f,scanline:word;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s1:=z80_2.tframes;
 frame_s2:=z80_1.tframes;
-scanline:=63;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
   //Main CPU
@@ -447,15 +448,13 @@ while EmuStatus=EsRuning do begin
   frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
   //IO's
   run_namco_53xx;
-  if (f=scanline) then begin
-    if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
-    scanline:=scanline+128;
-	  if (scanline>=272) then scanline:=63;
-  end;
-  if f=223 then begin
-    if main_irq then z80_0.change_irq(ASSERT_LINE);
-    if sub_irq then z80_2.change_irq(ASSERT_LINE);
-    update_video_digdug;
+  case f of
+    63,191:if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
+    223:begin
+          if main_irq then z80_0.change_irq(ASSERT_LINE);
+          if sub_irq then z80_2.change_irq(ASSERT_LINE);
+          update_video_digdug;
+    end;
   end;
  end;
  eventos_galaga;
@@ -468,13 +467,13 @@ procedure digdug_putbyte(direccion:word;valor:byte);
 var
   mask,shift:byte;
 begin
-if (direccion<$4000) then exit;
 case direccion of
+    0..$3fff:; //ROM
     $6800..$681f:namco_snd_0.regs[direccion and $1f]:=valor;
     $6820..$6827:galaga_latch(direccion and $7,valor);
     $7000..$70ff:namco_06xx_data_w(direccion and $ff,0,valor);
-    $7100..$7100:namco_06xx_ctrl_w(0,valor);
-    $8000..$83ff:begin
+    $7100:namco_06xx_ctrl_w(0,valor);
+    $8000..$83ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;
                  end;
@@ -513,7 +512,7 @@ begin
 case direccion of
   0..$3fff,$8000..$8bff,$9000..$93ff,$9800..$9bff:digdug_getbyte:=memoria[direccion];
   $7000..$70ff:digdug_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:digdug_getbyte:=namco_06xx_ctrl_r(0);
+  $7100:digdug_getbyte:=namco_06xx_ctrl_r(0);
   $b800..$b83f:digdug_getbyte:=memoria[direccion]; //eeprom
 end;
 end;
@@ -521,24 +520,15 @@ end;
 //Sub1 CPU
 function digdug_sub_getbyte(direccion:word):byte;
 begin
-case direccion of
-  $0..$3fff:digdug_sub_getbyte:=mem_snd[direccion];
-  $7000..$70ff:digdug_sub_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:digdug_sub_getbyte:=namco_06xx_ctrl_r(0);
-  $8000..$8bff,$9000..$93ff,$9800..$9bff:digdug_sub_getbyte:=memoria[direccion];
-  $b800..$b83f:digdug_sub_getbyte:=memoria[direccion]; //eeprom
+if direccion<$4000 then digdug_sub_getbyte:=mem_snd[direccion]
+  else digdug_sub_getbyte:=digdug_getbyte(direccion);
 end;
-end;
+
 //Sub2 CPU
 function digdug_sub2_getbyte(direccion:word):byte;
 begin
-case direccion of
-  $0..$3fff:digdug_sub2_getbyte:=mem_misc[direccion];
-  $7000..$70ff:digdug_sub2_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:digdug_sub2_getbyte:=namco_06xx_ctrl_r(0);
-  $8000..$8bff,$9000..$93ff,$9800..$9bff:digdug_sub2_getbyte:=memoria[direccion];
-  $b800..$b83f:digdug_sub2_getbyte:=memoria[direccion]; //eeprom
-end;
+if direccion<$4000 then digdug_sub2_getbyte:=mem_misc[direccion]
+  else digdug_sub2_getbyte:=digdug_getbyte(direccion);
 end;
 
 procedure digdug_sound_update;
@@ -623,22 +613,21 @@ for f:=0 to $7ff do begin
         gfx[1].buffer[f]:=false;
     end;
 end;
-scroll_x_y(2,3,scrolly_bg+20,scrollx_bg+20);
+scroll_x_y(2,3,scrolly_bg+20,scrollx_bg+20,0,0,0,1);
 draw_sprites_xevious;
-scroll_x_y(1,3,scrolly_fg+18,scrollx_fg+32);
+scroll_x_y(1,3,scrolly_fg+18,scrollx_fg+32,0,0,0,1);
 actualiza_trozo_final(0,0,224,288,3);
 end;
 
 procedure xevious_principal;
 var
   frame_m,frame_s1,frame_s2:single;
-  f,scanline:word;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s1:=z80_2.tframes;
 frame_s2:=z80_1.tframes;
-scanline:=63;
 while EmuStatus=EsRuning do begin
  for f:=0 to 263 do begin
   //Main CPU
@@ -651,17 +640,15 @@ while EmuStatus=EsRuning do begin
   z80_1.run(frame_s2);
   frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
   //IO's
-  run_namco_50xx;
+  run_namco_50xx(0);
   run_namco_54xx;
-  if (f=scanline) then begin
-    if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
-    scanline:=scanline+128;
-	  if (scanline>=272) then scanline:=63;
-  end;
-  if f=223 then begin
-    if main_irq then z80_0.change_irq(ASSERT_LINE);
-    if sub_irq then z80_2.change_irq(ASSERT_LINE);
-    update_video_xevious;
+  case f of
+    63,191:if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
+    223:begin
+          if main_irq then z80_0.change_irq(ASSERT_LINE);
+          if sub_irq then z80_2.change_irq(ASSERT_LINE);
+          update_video_xevious;
+    end;
   end;
  end;
  eventos_galaga;
@@ -674,30 +661,30 @@ procedure xevious_putbyte(direccion:word;valor:byte);
 var
   scroll:word;
 begin
-if (direccion<$4000) then exit;
 case direccion of
+    0..$3fff:; //ROM
     $6800..$681f:namco_snd_0.regs[direccion and $1f]:=valor;
     $6820..$6827:galaga_latch(direccion and $7,valor);
     $6830:;
     $7000..$70ff:namco_06xx_data_w(direccion and $ff,0,valor);
-    $7100..$7100:namco_06xx_ctrl_w(0,valor);
+    $7100:namco_06xx_ctrl_w(0,valor);
     $7800..$87ff,$9000..$97ff,$a000..$a7ff:memoria[direccion]:=valor;
-    $b000..$b7ff,$c000..$c7ff:begin
+    $b000..$b7ff,$c000..$c7ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $7ff]:=true;
                     memoria[direccion]:=valor;
                  end;
-    $b800..$bfff,$c800..$cfff:begin
+    $b800..$bfff,$c800..$cfff:if memoria[direccion]<>valor then begin
                     gfx[1].buffer[direccion and $7ff]:=true;
                     memoria[direccion]:=valor;
                  end;
     $d000..$d07f:begin
                  scroll:=valor+((direccion and 1) shl 8);   // A0 -> D8
                  case ((direccion and $f0) shr 4) of
-                  0:scrollx_bg:=scroll;
-                  1:scrollx_fg:=scroll;
-                  2:scrolly_bg:=scroll;
-                  3:scrolly_fg:=scroll;
-                  7:main_screen.flip_main_screen:=(scroll and 1)<>0;
+                    0:scrollx_bg:=scroll;
+                    1:scrollx_fg:=scroll;
+                    2:scrolly_bg:=scroll;
+                    3:scrolly_fg:=scroll;
+                    7:main_screen.flip_main_screen:=(scroll and 1)<>0;
                  end;
                  end;
     $f000..$ffff:xevious_bs[direccion and 1]:=valor;
@@ -746,7 +733,7 @@ case direccion of
   0..$3fff,$7800..$87ff,$9000..$97ff,$a000..$a7ff,$b000..$cfff:xevious_getbyte:=memoria[direccion];
   $6800..$6807:xevious_getbyte:=xevious_dip(direccion);
   $7000..$70ff:xevious_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:xevious_getbyte:=namco_06xx_ctrl_r(0);
+  $7100:xevious_getbyte:=namco_06xx_ctrl_r(0);
   $f000..$ffff:xevious_getbyte:=xevious_bb_r(direccion);
 end;
 end;
@@ -754,33 +741,223 @@ end;
 //Sub1 CPU
 function xevious_sub_getbyte(direccion:word):byte;
 begin
-case direccion of
-  0..$3fff:xevious_sub_getbyte:=mem_snd[direccion];
-  $7800..$87ff,$9000..$97ff,$a000..$a7ff,$b000..$cfff:xevious_sub_getbyte:=memoria[direccion];
-  $6800..$6807:xevious_sub_getbyte:=xevious_dip(direccion);
-  $7000..$70ff:xevious_sub_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:xevious_sub_getbyte:=namco_06xx_ctrl_r(0);
-  $f000..$ffff:xevious_sub_getbyte:=xevious_bb_r(direccion);
-end;
+if direccion<$4000 then xevious_sub_getbyte:=mem_snd[direccion]
+  else xevious_sub_getbyte:=xevious_getbyte(direccion);
 end;
 
 //Sub2 CPU
 function xevious_sub2_getbyte(direccion:word):byte;
 begin
-case direccion of
-  0..$3fff:xevious_sub2_getbyte:=mem_misc[direccion];
-  $7800..$87ff,$9000..$97ff,$a000..$a7ff,$b000..$cfff:xevious_sub2_getbyte:=memoria[direccion];
-  $6800..$6807:xevious_sub2_getbyte:=xevious_dip(direccion);
-  $7000..$70ff:xevious_sub2_getbyte:=namco_06xx_data_r(direccion and $ff,0);
-  $7100..$7100:xevious_sub2_getbyte:=namco_06xx_ctrl_r(0);
-  $f000..$ffff:xevious_sub2_getbyte:=xevious_bb_r(direccion);
+if direccion<$4000 then xevious_sub2_getbyte:=mem_misc[direccion]
+  else xevious_sub2_getbyte:=xevious_getbyte(direccion);
 end;
+
+//Bosconian
+procedure update_stars_bosco;
+const
+  speedsx:array[0..7] of integer=(-1, -2, -3, 0, 3, 2, 1, 0 );
+  speedsy:array[0..7] of integer=( 0, -1, -2, -3, 0, 3, 2, 1 );
+begin
+	scrollx_bg:=scrollx_bg+(speedsx[galaga_starcontrol[0] and $7]);
+  scrolly_bg:=scrolly_bg+(speedsy[(galaga_starcontrol[0] and $38) shr 3]);
+end;
+
+procedure draw_stars_bosco;
+var
+  x,y,star_cntr,set_a,set_b:byte;
+  color:word;
+begin
+set_a:=galaga_starcontrol[1] and 1;
+set_b:=(galaga_starcontrol[2] and 1) or $2;
+for star_cntr:=0 to (MAX_STARS-1) do begin
+  if ((set_a=star_seed_tab[star_cntr].set_) or (set_b=star_seed_tab[star_cntr].set_)) then begin
+    y:=(star_seed_tab[star_cntr].y+scrolly_bg) mod 256;
+    x:=(star_seed_tab[star_cntr].x+scrollx_bg) mod 256;
+    color:=paleta[32+star_seed_tab[star_cntr].col];
+    putpixel(x,y,1,@color,4);
+  end;
+end;
+end;
+
+procedure update_video_bosco;
+var
+  f,pos,x,y:word;
+  color,nchar,atrib:byte;
+  flipx,flipy:boolean;
+begin
+fill_full_screen(4,100);
+draw_stars_bosco;
+for f:=0 to $3ff do begin
+    if gfx[0].buffer[f+$400] then begin
+      y:=f div 32;
+      x:=f mod 32;
+      atrib:=memoria[$8c00+f];
+      nchar:=memoria[$8400+f];
+      color:=(atrib and $3f) shl 2;
+      flipx:=(atrib and $40)=0;
+      flipy:=(atrib and $80)<>0;
+      put_gfx_mask_flip(x*8,y*8,nchar,color,1,0,$f,$f,flipx,flipy);
+      gfx[0].buffer[f+$400]:=false;
+    end;
+end;
+//radar
+for x:=0 to 7 do begin
+  for y:=0 to 31 do begin
+	    pos:=x+(y shl 5);
+      if gfx[0].buffer[pos] then begin
+        atrib:=memoria[$8800+pos];
+        nchar:=memoria[$8000+pos];
+        color:=(atrib and $3f) shl 2;
+        put_gfx_flip(x*8,y*8,nchar,color,2,0,(atrib and $40)=0,(atrib and $80)<>0);
+        gfx[0].buffer[pos]:=false;
+      end;
+  end;
+end;
+scroll_x_y(4,3,scrollx_bg,scrolly_bg);
+scroll_x_y(1,3,scrollx_bg,scrolly_bg);
+//sprites
+for f:=0 to 5 do begin
+  x:=memoria[$83d5+(f*2)]-1;
+  y:=240-memoria[$8bd4+(f*2)];
+  flipx:=(memoria[$83d4+(f*2)] and 1)<>0;
+	flipy:=(memoria[$83d4+(f*2)] and 2)<>0;
+	color:=(memoria[$8bd5+(f*2)] and $3f) shl 2;
+  nchar:=(memoria[$83d4+(f*2)] and $fc) shr 2;
+  put_gfx_sprite_mask(nchar,color,flipx,flipy,1,$f,$f);
+  actualiza_gfx_sprite(x,y,3,1);
+end;
+actualiza_trozo(32,0,32,256,2,221,0,32,256,3);
+actualiza_trozo(0,0,32,256,2,253,0,32,256,3);
+//dots
+for f:=4 to $f do begin
+		x:=memoria[$83f0+f]+((not(memoria[$9800+f]) and $01) shl 8)-2;
+		y:=251-memoria[$8bf0+f];
+    nchar:=((memoria[$9800+f] and $0e) shr 1) xor $07;
+    put_gfx_sprite(nchar,0,false,false,2);
+    actualiza_gfx_sprite(x,y,3,2);
+end;
+actualiza_trozo_final(0,16,285,224,3);
+update_stars_bosco;
+end;
+
+procedure eventos_bosco;
+begin
+if event.arcade then begin
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but1[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+end;
+end;
+
+procedure bosco_sound_update;
+begin
+  samples_update;
+  namco_snd_0.update;
+end;
+
+procedure bosco_principal;
+var
+  frame_m,frame_s1,frame_s2:single;
+  f:word;
+begin
+init_controls(false,false,false,true);
+frame_m:=z80_0.tframes;
+frame_s1:=z80_2.tframes;
+frame_s2:=z80_1.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to 263 do begin
+    //Main CPU
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    //Sub CPU
+    z80_2.run(frame_s1);
+    frame_s1:=frame_s1+z80_2.tframes-z80_2.contador;
+    //Sub 2 CPU
+    z80_1.run(frame_s2);
+    frame_s2:=frame_s2+z80_1.tframes-z80_1.contador;
+    run_namco_50xx(0);
+    run_namco_50xx(1);
+    run_namco_54xx;
+    case f of
+      63,191:if sub2_nmi then z80_1.change_nmi(PULSE_LINE);
+      223:begin
+            if main_irq then z80_0.change_irq(ASSERT_LINE);
+            if sub_irq then z80_2.change_irq(ASSERT_LINE);
+            update_video_bosco;
+          end;
+    end;
+  end;
+  eventos_bosco;
+  video_sync;
+end;
+end;
+
+procedure bosco_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+    0..$3fff:; //ROM
+    $6800..$681f:namco_snd_0.regs[direccion and $1f]:=valor;
+    $6820..$6827:galaga_latch(direccion and $7,valor);
+    $7000..$70ff:namco_06xx_data_w(direccion and $ff,0,valor);
+    $7100:namco_06xx_ctrl_w(0,valor);
+    $8000..$8fff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $7ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+    $7800..$7fff,$9800..$980f:memoria[direccion]:=valor;
+    $9000..$90ff:namco_06xx_data_w(direccion and $ff,1,valor);
+    $9100:namco_06xx_ctrl_w(1,valor);
+    $9810:scrollx_bg:=valor;
+    $9820:scrolly_bg:=valor;
+    $9830:galaga_starcontrol[0]:=valor; //starcontrol
+    $9870:main_screen.flip_main_screen:=(valor and 1)=0;
+    $9874:galaga_starcontrol[1]:=valor; //bosco_starblink 0
+    $9875:galaga_starcontrol[2]:=valor; //bosco_starblink 1
+end;
+end;
+
+function bosco_getbyte(direccion:word):byte;
+begin
+  case direccion of
+      0..$3fff,$7800..$8fff:bosco_getbyte:=memoria[direccion];
+      $6800..$6802,$6805,$6807:bosco_getbyte:=$3; //Leer DSW A y B
+      $6803:bosco_getbyte:=$0;
+      $6804,$6806:bosco_getbyte:=$2;
+      $7000..$70ff:bosco_getbyte:=namco_06xx_data_r(direccion and $ff,0);
+      $7100:bosco_getbyte:=namco_06xx_ctrl_r(0);
+      $9000..$90ff:bosco_getbyte:=namco_06xx_data_r(direccion and $ff,1);
+      $9100:bosco_getbyte:=namco_06xx_ctrl_r(1);
+  end;
+end;
+
+function bosco_sub_getbyte(direccion:word):byte;
+begin
+if direccion<$4000 then bosco_sub_getbyte:=mem_snd[direccion]
+  else bosco_sub_getbyte:=bosco_getbyte(direccion);
+end;
+
+function bosco_sub2_getbyte(direccion:word):byte;
+begin
+if direccion<$4000 then bosco_sub2_getbyte:=mem_misc[direccion]
+  else bosco_sub2_getbyte:=bosco_getbyte(direccion);
 end;
 
 //Namco IO
 procedure namco_06xx_nmi;
 begin
   z80_0.change_nmi(PULSE_LINE);
+end;
+
+procedure namco_06xx_sub_nmi;
+begin
+  z80_2.change_nmi(PULSE_LINE);
 end;
 
 //Main
@@ -791,6 +968,9 @@ begin
  z80_0.reset;
  z80_2.reset;
  z80_1.reset;
+ namco_snd_0.reset;
+ reset_audio;
+ namcoio_06xx_reset(0);
  case main_vars.tipo_maquina of
     65:begin
           namcoio_51xx_reset(false);
@@ -811,7 +991,7 @@ begin
           bg_repaint:=true;
        end;
    231:begin
-          namcoio_50xx_reset;
+          namcoio_50xx_reset(0);
           namcoio_51xx_reset(true);
           namcoio_54xx_reset;
           scrollx_bg:=0;
@@ -821,10 +1001,18 @@ begin
           xevious_bs[0]:=0;
           xevious_bs[1]:=0;
        end;
+   250:begin
+          namcoio_50xx_reset(0);
+          namcoio_50xx_reset(1);
+          namcoio_51xx_reset(false);
+          namcoio_54xx_reset;
+          reset_samples;
+          for f:=0 to 5 do galaga_starcontrol[f]:=0;
+          scrollx_bg:=0;
+          scrolly_bg:=0;
+          namcoio_06xx_reset(1);
+       end;
  end;
- namco_snd_0.reset;
- reset_audio;
- namcoio_06xx_reset(0);
  main_irq:=false;
  sub_irq:=false;
  sub2_nmi:=false;
@@ -836,51 +1024,65 @@ end;
 
 function iniciar_galagahw:boolean;
 var
-      colores:tpaleta;
-      f:word;
-      ctemp0,ctemp1,ctemp2,ctemp3:byte;
-      memoria_temp:array[0..$9fff] of byte;
+  colores:tpaleta;
+  f:word;
+  ctemp0,ctemp1,ctemp2,ctemp3:byte;
+  memoria_temp:array[0..$9fff] of byte;
 const
   map:array[0..3] of byte=($00,$47,$97,$de);
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
 			24*8+0, 24*8+1, 24*8+2, 24*8+3);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+  ps_x_bosco:array[0..15] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
+			24*8+0, 24*8+1, 24*8+2, 24*8+3, 0, 1, 2, 3);
   pc_x_digdug:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   pc_x_xevious:array[0..7] of dword=(0,1,2,3,4,5,6,7);
+  pc_x_galaga:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3,  0, 1, 2, 3);
+  pc_x_dot:array[0..3] of dword=(3*8, 2*8, 1*8, 0*8);
+  pc_y_dot:array[0..3] of dword=(3*32, 2*32, 1*32, 0*32);
 
 procedure galaga_chr(ngfx:byte;num:word);
-const
-  pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3,  0, 1, 2, 3);
 begin
 init_gfx(ngfx,8,8,num);
 gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(ngfx,0,@memoria_temp,@pc_x_galaga,@ps_y,true,false);
 end;
 
 procedure galaga_spr(num:word);
 begin
 init_gfx(1,16,16,num);
 gfx_set_desc_data(2,0,64*8,0,4);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 
 begin
 iniciar_galagahw:=false;
 iniciar_audio(false);
-if main_vars.tipo_maquina<>231 then begin
-  screen_init(1,224,288,true);
-  screen_init(2,256,512,false,true);
-  screen_init(3,224,288);
-end else begin
-  screen_init(1,256,512,true);
-  screen_mod_scroll(1,256,256,255,512,512,511);
-  screen_init(2,256,512,true);
-  screen_mod_scroll(2,256,256,255,512,512,511);
-  screen_init(3,256,512,false,true);
+case main_vars.tipo_maquina of
+  65,167:begin
+          screen_init(1,224,288,true);
+          screen_init(2,256,512,false,true);
+          screen_init(3,224,288);
+        end;
+  231:begin
+            screen_init(1,256,512,true);
+            screen_mod_scroll(1,256,256,255,512,512,511);
+            screen_init(2,256,512,true);
+            screen_mod_scroll(2,256,256,255,512,512,511);
+            screen_init(3,256,512,false,true);
+          end;
+  250:begin
+            screen_init(1,256,256,true);
+            screen_mod_scroll(1,256,256,255,256,256,255);
+            screen_init(2,64,256,true);
+            screen_init(3,512,512,false,true);
+            screen_init(4,256,256);
+            screen_mod_scroll(4,256,256,255,256,256,255);
+          end;
 end;
-iniciar_video(224,288);
+if main_vars.tipo_maquina<>250 then iniciar_video(224,288)
+  else iniciar_video(285,224);
 //Main CPU
 z80_0:=cpu_z80.create(3072000,264);
 //Sub CPU
@@ -905,21 +1107,21 @@ case main_vars.tipo_maquina of
           namco_06xx_init(0,IO51XX,NONE,NONE,IO54XX,namco_06xx_nmi);
           //Namco 54xx
           if not(namcoio_54xx_init('galaga.zip')) then exit;
-          load_samples('galaga.zip',@galaga_samples[0],num_samples_galaga);
+          load_samples('galaga.zip',@galaga_samples,num_samples_galaga);
           //cargar roms
-          if not(cargar_roms(@memoria[0],@galaga_rom[0],'galaga.zip',0)) then exit;
-          if not(cargar_roms(@mem_snd[0],@galaga_sub,'galaga.zip',1)) then exit;
-          if not(cargar_roms(@mem_misc[0],@galaga_sub2,'galaga.zip',1)) then exit;
+          if not(roms_load(@memoria,galaga_rom)) then exit;
+          if not(roms_load(@mem_snd,galaga_sub)) then exit;
+          if not(roms_load(@mem_misc,galaga_sub2)) then exit;
           //cargar sonido & iniciar_sonido
-          if not(cargar_roms(namco_snd_0.get_wave_dir,@galaga_sound,'galaga.zip',1)) then exit;
+          if not(roms_load(namco_snd_0.get_wave_dir,galaga_sound)) then exit;
           //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@galaga_char,'galaga.zip',1)) then exit;
+          if not(roms_load(@memoria_temp,galaga_char)) then exit;
           galaga_chr(0,$100);
           //convertir sprites
-          if not(cargar_roms(@memoria_temp[0],@galaga_sprites[0],'galaga.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,galaga_sprites)) then exit;
           galaga_spr($80);
           //poner la paleta
-          if not(cargar_roms(@memoria_temp[0],@galaga_prom[0],'galaga.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,galaga_prom)) then exit;
           for f:=0 to $1f do begin
               ctemp1:=memoria_temp[f];
               colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
@@ -957,26 +1159,26 @@ case main_vars.tipo_maquina of
           //Namco 53XX
           if not(namcoio_53xx_init(namco_53xx_k_r,namco_53xx_r_r,'digdug.zip')) then exit;
           //cargar roms
-          if not(cargar_roms(@memoria[0],@digdug_rom[0],'digdug.zip',0)) then exit;
-          if not(cargar_roms(@mem_snd[0],@digdug_sub,'digdug.zip',0)) then exit;
-          if not(cargar_roms(@mem_misc[0],@digdug_sub2,'digdug.zip',1)) then exit;
+          if not(roms_load(@memoria,digdug_rom)) then exit;
+          if not(roms_load(@mem_snd,digdug_sub)) then exit;
+          if not(roms_load(@mem_misc,digdug_sub2)) then exit;
           //cargar sonido & iniciar_sonido
-          if not(cargar_roms(namco_snd_0.get_wave_dir,@digdug_sound,'digdug.zip',1)) then exit;
+          if not(roms_load(namco_snd_0.get_wave_dir,digdug_sound)) then exit;
           //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@digdug_chars,'digdug.zip',1)) then exit;
+          if not(roms_load(@memoria_temp,digdug_chars)) then exit;
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(1,0,8*8,0);
-          convert_gfx(0,0,@memoria_temp[$0],@pc_x_digdug[0],@pc_y[0],true,false);
+          convert_gfx(0,0,@memoria_temp,@pc_x_digdug,@ps_y,true,false);
           //sprites
-          if not(cargar_roms(@memoria_temp[0],@digdug_sprites,'digdug.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,digdug_sprites)) then exit;
           galaga_spr($100);
           //Background
-          if not(cargar_roms(@digdug_bg[0],@digdug_background,'digdug.zip',1)) then exit;
-          if not(cargar_roms(@memoria_temp[0],@digdug_chars2,'digdug.zip',1)) then exit;
+          if not(roms_load(@digdug_bg,digdug_background)) then exit;
+          if not(roms_load(@memoria_temp,digdug_chars2)) then exit;
           galaga_chr(2,$100);
           //poner la paleta
-          if not(cargar_roms(@memoria_temp[0],@digdug_prom[0],'digdug.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,digdug_prom)) then exit;
           for f:=0 to $1f do begin
               ctemp1:=memoria_temp[f];
               colores[f].r:=$21*(ctemp1 and 1)+$47*((ctemp1 shr 1) and 1)+$97*((ctemp1 shr 2) and 1);
@@ -1003,41 +1205,41 @@ case main_vars.tipo_maquina of
           //Sub2
           z80_1.change_ram_calls(xevious_sub2_getbyte,xevious_putbyte);
           //Init IO's
-          namco_06xx_init(0,IO51XX,NONE,IO50XX,IO54XX,namco_06xx_nmi);
+          namco_06xx_init(0,IO51XX,NONE,IO50XX_0,IO54XX,namco_06xx_nmi);
           //Namco 54xx
-          if not(namcoio_50xx_init('xevious.zip')) then exit;
+          if not(namcoio_50xx_init(0,'xevious.zip')) then exit;
           if not(namcoio_54xx_init('xevious.zip')) then exit;
           z80_0.init_sound(galaga_sound_update);
-          load_samples('xevious.zip',@xevious_samples[0],num_samples_xevious);
+          load_samples('xevious.zip',@xevious_samples,num_samples_xevious);
           //Sound
           namco_snd_0:=namco_snd_chip.create(3);
           //cargar roms
-          if not(cargar_roms(@memoria[0],@xevious_rom[0],'xevious.zip',0)) then exit;
-          if not(cargar_roms(@mem_snd[0],@xevious_sub,'xevious.zip',0)) then exit;
-          if not(cargar_roms(@mem_misc[0],@xevious_sub2,'xevious.zip',1)) then exit;
+          if not(roms_load(@memoria,xevious_rom)) then exit;
+          if not(roms_load(@mem_snd,xevious_sub)) then exit;
+          if not(roms_load(@mem_misc,xevious_sub2)) then exit;
           //cargar sonido & iniciar_sonido
-          if not(cargar_roms(namco_snd_0.get_wave_dir,@xevious_sound,'xevious.zip',1)) then exit;
+          if not(roms_load(namco_snd_0.get_wave_dir,xevious_sound)) then exit;
           //chars
-          if not(cargar_roms(@memoria_temp[0],@xevious_char,'xevious.zip',1)) then exit;
+          if not(roms_load(@memoria_temp,xevious_char)) then exit;
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(1,0,8*8,0);
-          convert_gfx(0,0,@memoria_temp[$0],@pc_x_xevious[0],@pc_y[0],true,false);
+          convert_gfx(0,0,@memoria_temp,@pc_x_xevious,@ps_y,true,false);
           //convertir sprites
-          fillchar(memoria_temp[0],$a000,0);
-          if not(cargar_roms(@memoria_temp[0],@xevious_sprites[0],'xevious.zip',0)) then exit;
+          fillchar(memoria_temp,$a000,0);
+          if not(roms_load(@memoria_temp,xevious_sprites)) then exit;
           for f:=0 to $1fff do memoria_temp[f+$7000]:=memoria_temp[f+$5000] shr 4;
           init_gfx(2,16,16,$140);
           gfx_set_desc_data(3,0,64*8,($140*64*8)+4,0,4);
-          convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+          convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
           //tiles
-          if not(cargar_roms(@xevious_tiles[0],@xevious_bg_tiles[0],'xevious.zip',0)) then exit;
-          if not(cargar_roms(@memoria_temp[0],@xevious_bg[0],'xevious.zip',0)) then exit;
+          if not(roms_load(@xevious_tiles,xevious_bg_tiles)) then exit;
+          if not(roms_load(@memoria_temp,xevious_bg)) then exit;
           init_gfx(1,8,8,$200);
           gfx_set_desc_data(2,0,8*8,0,$200*8*8);
-          convert_gfx(1,0,@memoria_temp[$0],@pc_x_xevious[0],@pc_y[0],true,false);
+          convert_gfx(1,0,@memoria_temp,@pc_x_xevious,@ps_y,true,false);
           //poner la paleta
-          if not(cargar_roms(@memoria_temp[0],@xevious_prom[0],'xevious.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,xevious_prom)) then exit;
           for f:=0 to $ff do begin
               ctemp0:=(memoria_temp[f] shr 0) and 1;
               ctemp1:=(memoria_temp[f] shr 1) and 1;
@@ -1058,13 +1260,85 @@ case main_vars.tipo_maquina of
           set_pal(colores,256);
           //CLUT
           for f:=0 to $ff do if (f mod 2)<>0 then gfx[0].colores[f]:=f shr 1
-                                else gfx[0].colores[f]:=$80;
+            else gfx[0].colores[f]:=$80;
           for f:=0 to $1ff do begin
             gfx[1].colores[f]:=(memoria_temp[$300+f] and $f) or ((memoria_temp[$500+f] and $f) shl 4);
             ctemp0:=(memoria_temp[$700+f] and $f) or ((memoria_temp[$900+f] and $f) shl 4);
             if (ctemp0 and $80)<>0 then gfx[2].colores[f]:=ctemp0 and $7f
               else gfx[2].colores[f]:=$80;
           end;
+       end;
+    250:begin  //Bosconian
+          //CPU's
+          //Main
+          z80_0.change_ram_calls(bosco_getbyte,bosco_putbyte);
+          //Sub1
+          z80_2.change_ram_calls(bosco_sub_getbyte,bosco_putbyte);
+          //Sub2
+          z80_1.change_ram_calls(bosco_sub2_getbyte,bosco_putbyte);
+          //Init IO's
+          namco_06xx_init(0,IO51XX,NONE,IO50XX_0,IO54XX,namco_06xx_nmi);
+          namco_06xx_init(1,IO50XX_1,NONE{IO52XX},NONE,NONE,namco_06xx_sub_nmi);
+          //Namco 54xx
+          if not(namcoio_50xx_init(0,'bosco.zip')) then exit;
+          if not(namcoio_50xx_init(1,'bosco.zip')) then exit;
+          if not(namcoio_54xx_init('bosco.zip')) then exit;
+          z80_0.init_sound(galaga_sound_update);
+          load_samples('bosco.zip',@bosco_samples,num_samples_bosco,0.25);
+          //Sound
+          namco_snd_0:=namco_snd_chip.create(3);
+          //cargar roms
+          if not(roms_load(@memoria,bosco_rom)) then exit;
+          if not(roms_load(@mem_snd,bosco_sub)) then exit;
+          if not(roms_load(@mem_misc,bosco_sub2)) then exit;
+          //cargar sonido & iniciar_sonido
+          if not(roms_load(namco_snd_0.get_wave_dir,bosco_snd)) then exit;
+          //chars
+          if not(roms_load(@memoria_temp,bosco_char)) then exit;
+          init_gfx(0,8,8,$100);
+          gfx_set_desc_data(2,0,16*8,0,4);
+          convert_gfx(0,0,@memoria_temp,@pc_x_galaga,@ps_y,false,false);
+          //convertir sprites
+          if not(roms_load(@memoria_temp,bosco_sprites)) then exit;
+          init_gfx(1,16,16,$40);
+          gfx_set_desc_data(2,0,64*8,0,4);
+          convert_gfx(1,0,@memoria_temp,@ps_x_bosco,@ps_y,false,false);
+          //convertir disparos
+          if not(roms_load(@memoria_temp,bosco_dots)) then exit;
+          init_gfx(2,4,4,8);
+          gfx[2].trans[3]:=true;
+          gfx_set_desc_data(2,0,16*8,6,7);
+          convert_gfx(2,0,@memoria_temp,@pc_x_dot,@pc_y_dot,false,false);
+          //poner la paleta
+          if not(roms_load(@memoria_temp,bosco_prom)) then exit;
+          for f:=0 to $1f do begin
+              ctemp0:=(memoria_temp[f] shr 0) and 1;
+              ctemp1:=(memoria_temp[f] shr 1) and 1;
+              ctemp2:=(memoria_temp[f] shr 2) and 1;
+              colores[f].r:=$21*ctemp0+$47*ctemp1+$97*ctemp2;
+              ctemp0:=(memoria_temp[f] shr 3) and 1;
+              ctemp1:=(memoria_temp[f] shr 4) and 1;
+              ctemp2:=(memoria_temp[f] shr 5) and 1;
+              colores[f].g:=$21*ctemp0+$47*ctemp1+$97*ctemp2;
+              ctemp1:=(memoria_temp[f] shr 6) and 1;
+              ctemp2:=(memoria_temp[f] shr 7) and 1;
+              colores[f].b:=0+$47*ctemp1+$97*ctemp2;
+          end;
+          for f:=0 to 63 do begin
+		        ctemp0:=(f shr 0) and $03;
+		        colores[f+32].r:=map[ctemp0];
+		        ctemp0:=(f shr 2) and $03;
+		        colores[f+32].g:=map[ctemp0];
+		        ctemp0:=(f shr 4) and $03;
+		        colores[f+32].b:=map[ctemp0];
+          end;
+          set_pal(colores,32+64);
+          //CLUT
+          for f:=0 to $ff do begin
+            gfx[0].colores[f]:=(memoria_temp[f+$20] and $f)+$10;
+            gfx[1].colores[f]:=memoria_temp[f+$20] and $f;
+          end;
+          for f:=0 to 3 do gfx[2].colores[f]:=31-f;
        end;
 end;
 //final
@@ -1078,19 +1352,25 @@ case main_vars.tipo_maquina of
   65:namco_54xx_close;
   167:namco_53xx_close;
   231:begin
-        namco_50xx_close;
+        namco_50xx_close(0);
+        namco_54xx_close;
+      end;
+  250:begin
+        namco_50xx_close(0);
+        namco_50xx_close(1);
         namco_54xx_close;
       end;
 end;
 end;
 
-procedure Cargar_galagahw;
+procedure cargar_galagahw;
 begin
 llamadas_maquina.iniciar:=iniciar_galagahw;
 case main_vars.tipo_maquina of
   65:llamadas_maquina.bucle_general:=galaga_principal;
   167:llamadas_maquina.bucle_general:=digdug_principal;
   231:llamadas_maquina.bucle_general:=xevious_principal;
+  250:llamadas_maquina.bucle_general:=bosco_principal;
 end;
 llamadas_maquina.close:=cerrar_galagahw;
 llamadas_maquina.reset:=reset_galagahw;

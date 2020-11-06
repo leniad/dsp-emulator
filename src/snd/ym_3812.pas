@@ -16,10 +16,11 @@ type
      function read:byte;
      procedure timer_handler(timer_num:byte;period:single);
      procedure change_irq_calls(irq_func:cpu_outport_call);
+     function save_snapshot(data:pbyte):word;
+     procedure load_snapshot(data:pbyte);
   private
      OPL:pfm_opl;
      num,timer1,timer2:byte;
-     procedure init_timers;
   end;
 const
   YM3812_FM=0;
@@ -27,6 +28,8 @@ const
 var
   ym3812_0,ym3812_1:ym3812_chip;
 
+procedure ym3812_timer1(index:byte);
+procedure ym3812_timer2(index:byte);
 procedure ym3812_timer1_0;
 procedure ym3812_timer2_0;
 procedure ym3812_timer1_1;
@@ -36,19 +39,14 @@ implementation
 var
   chips_total:integer=-1;
 
-procedure ym3812_chip.init_timers;
+function ym3812_chip.save_snapshot(data:pbyte):word;
 begin
-  //Timers
-  case self.num of
-    0:begin
-        self.timer1:=init_timer(sound_status.cpu_num,1,ym3812_timer1_0,false);
-        self.timer2:=init_timer(sound_status.cpu_num,1,ym3812_timer2_0,false);
-      end;
-    1:begin
-        self.timer1:=init_timer(sound_status.cpu_num,1,ym3812_timer1_1,false);
-        self.timer2:=init_timer(sound_status.cpu_num,1,ym3812_timer2_1,false);
-      end;
-  end;
+  save_snapshot:=1;
+end;
+
+procedure ym3812_chip.load_snapshot(data:pbyte);
+begin
+
 end;
 
 constructor ym3812_chip.create(type_:byte;clock:dword;amp:single=1);
@@ -67,7 +65,8 @@ begin
   end;
   self.tsample_num:=init_channel;
   self.amp:=amp;
-  self.init_timers;
+  self.timer1:=timers.init(sound_status.cpu_num,1,nil,ym3812_timer1,false,chips_total);
+  self.timer2:=timers.init(sound_status.cpu_num,1,nil,ym3812_timer2,false,chips_total);
 end;
 
 destructor ym3812_chip.free;
@@ -90,12 +89,6 @@ procedure ym3812_chip.update;
 var
   lt:integer;
 begin
-  // rhythm slots */
-  SLOT7_1:=self.OPL.P_CH[7].SLOT[SLOT1];
-  SLOT7_2:=self.OPL.P_CH[7].SLOT[SLOT2];
-  SLOT8_1:=self.OPL.P_CH[8].SLOT[SLOT1];
-  SLOT8_2:=self.OPL.P_CH[8].SLOT[SLOT2];
-
   self.OPL.output:=0;
   advance_lfo(self.OPL);
   // FM part */
@@ -112,8 +105,7 @@ begin
   end else begin		// Rhythm part */
       OPL_CALC_RH(self.OPL,self.OPL.noise_rng and 1);
   end;
-  lt:=trunc(self.OPL.output*self.amp);
-  //lt:=lt shr FINAL_SH;
+  lt:=trunc((self.OPL.output shl 1)*self.amp);
   // limit check */
   if lt>$7fff then lt:=$7fff;
   if lt<-$7fff then lt:=-$7fff;
@@ -146,16 +138,32 @@ end;
 procedure ym3812_chip.timer_handler(timer_num:byte;period:single);
 begin
   case timer_num of
-    0:if period=0 then timer[self.timer1].enabled:=false
+    0:if period=0 then timers.enabled(self.timer1,false)
         else begin
-          timer[self.timer1].time_final:=period;
-          timer[self.timer1].enabled:=true;
+          timers.timer[self.timer1].time_final:=period;
+          timers.enabled(self.timer1,true);
         end;
-    1:if period=0 then timer[self.timer2].enabled:=false
+    1:if period=0 then timers.enabled(self.timer2,false)
         else begin
-          timer[self.timer2].time_final:=period;
-          timer[self.timer2].enabled:=true;
+          timers.timer[self.timer2].time_final:=period;
+          timers.enabled(self.timer2,true);
         end;
+  end;
+end;
+
+procedure ym3812_timer1(index:byte);
+begin
+  case index of
+    0:OPLTimerOver(0,ym3812_0.OPL,0);
+    1:OPLTimerOver(0,ym3812_1.OPL,0);
+  end;
+end;
+
+procedure ym3812_timer2(index:byte);
+begin
+  case index of
+    0:OPLTimerOver(0,ym3812_0.OPL,1);
+    1:OPLTimerOver(0,ym3812_1.OPL,1);
   end;
 end;
 

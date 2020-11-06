@@ -126,7 +126,6 @@ end;
 
 procedure yiear_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
   $4000:begin
           irq_ena:=(valor and $4)<>0;
@@ -145,6 +144,7 @@ case direccion of
                   gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                   memoria[direccion]:=valor;
                end;
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -181,7 +181,7 @@ savedata_com_qsnapshot(@memoria[$0],$8000);
 buffer[0]:=byte(irq_ena);
 buffer[1]:=byte(nmi_ena);
 buffer[2]:=sound_latch;
-savedata_qsnapshot(@buffer[0],3);
+savedata_qsnapshot(@buffer,3);
 freemem(data);
 close_qsnapshot;
 end;
@@ -204,14 +204,14 @@ vlm5030_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[0]);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 irq_ena:=buffer[0]<>0;
 nmi_ena:=buffer[1]<>0;
 sound_latch:=buffer[2];
 freemem(data);
 close_qsnapshot;
 //END
-fillchar(gfx[0].buffer[0],$400,1);
+fillchar(gfx[0].buffer,$400,1);
 end;
 
 //Main
@@ -221,9 +221,9 @@ begin
  sn_76496_0.reset;
  vlm5030_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  irq_ena:=false;
  nmi_ena:=false;
  sound_latch:=0;
@@ -251,27 +251,27 @@ m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(yiear_getbyte,yiear_putbyte);
 m6809_0.init_sound(yiear_sound_update);
 //Sound Chip
-sn_76496_0:=sn76496_chip.Create(18432000 div 8);
+sn_76496_0:=sn76496_chip.Create(18432000 div 12);
 //cargar rom sonido
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,2);
-if not(roms_load(vlm5030_0.get_rom_addr,@yiear_vlm,'yiear.zip',sizeof(yiear_vlm))) then exit;
+if not(roms_load(vlm5030_0.get_rom_addr,yiear_vlm)) then exit;
 //NMI sonido
-init_timer(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,true);
+timers.init(m6809_0.numero_cpu,1536000/480,yiear_snd_nmi,nil,true);
 //cargar roms
-if not(roms_load(@memoria,@yiear_rom,'yiear.zip',sizeof(yiear_rom))) then exit;
+if not(roms_load(@memoria,yiear_rom)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@yiear_char,'yiear.zip',sizeof(yiear_char))) then exit;
+if not(roms_load(@memoria_temp,yiear_char)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,16*8,4,0,$2000*8+4,$2000*8+0);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //sprites
-if not(roms_load(@memoria_temp,@yiear_sprites,'yiear.zip',sizeof(yiear_sprites))) then exit;
+if not(roms_load(@memoria_temp,yiear_sprites)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,4,0,$8000*8+4,$8000*8+0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //paleta
-if not(roms_load(@memoria_temp,@yiear_pal,'yiear.zip',sizeof(yiear_pal))) then exit;
+if not(roms_load(@memoria_temp,yiear_pal)) then exit;
 for f:=0 to 31 do begin
   ctemp1:=memoria_temp[f] and 1;
   ctemp2:=(memoria_temp[f] shr 1) and 1;
@@ -299,7 +299,7 @@ reset_yiear;
 iniciar_yiear:=true;
 end;
 
-procedure Cargar_yiear;
+procedure cargar_yiear;
 begin
 llamadas_maquina.iniciar:=iniciar_yiear;
 llamadas_maquina.bucle_general:=yiear_principal;

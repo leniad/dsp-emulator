@@ -35,7 +35,7 @@ track_type=record
   filler:byte;
   track_lenght:word;
   data:pbyte;
-  sector:array[0..28] of sector_info_type;
+  sector:array[0..63] of sector_info_type;
 end;
 
 DskImg=record
@@ -98,7 +98,7 @@ var
   dsk_header:^tdsk_header;
   dsk_track:^tdsk_track;
   dsk_sector:^tdsk_sector;
-  f,side_count,track_count,old_track_count:byte;
+  f,side_num,track_num:byte;
   longi,track_long,long_temp:dword;
   sector_count:integer;
 begin
@@ -126,15 +126,13 @@ begin
    dsk[drvnum].DiskHeader.nbof_tracks:=dsk_header.tracks;
    dsk[drvnum].DiskHeader.nbof_heads:=dsk_header.sides;
    f:=0;
-   for track_count:=0 to (dsk_header.tracks-1) do begin
-     for side_count:=0 to (dsk_header.sides-1) do begin
-         dsk[DrvNum].DiskHeader.track_size_table[side_count,track_count]:=dsk_header.track_size_map[f];
+   for track_num:=0 to (dsk_header.tracks-1) do begin
+     for side_num:=0 to (dsk_header.sides-1) do begin
+         dsk[DrvNum].DiskHeader.track_size_table[side_num,track_num]:=dsk_header.track_size_map[f];
          f:=f+1;
      end;
    end;
    //Disk Tracks
-   track_count:=0;
-   side_count:=0;
    while longi<longi_ini do begin
            //Me posiciono en los datos, la cabecera del track siempre ocupa 256bytes
            ptemp:=puntero;
@@ -149,44 +147,38 @@ begin
            end;
            primer_sector:=true;
            posicion:=0;
-           old_track_count:=track_count;
            //Sectores
            for sector_count:=0 to (dsk_track.number_of_sectors-1) do begin
               copymemory(dsk_sector,ptemp,8);
               inc(ptemp,8);
               //Comprobar el track que es...
               if primer_sector then begin
-                if track_count<>dsk_track.track then begin
-                  //if dsk_track.track=dsk_sector.track then
-                  track_count:=dsk_track.track
-                  //  else track_count:=dsk_sector.track;
-                end;
-                dsk[DrvNum].Tracks[side_count,track_count].track_number:=dsk_track.track;
-                dsk[DrvNum].Tracks[side_count,track_count].side_number:=dsk_track.side;
-                dsk[DrvNum].Tracks[side_count,track_count].data_rate:=dsk_track.data_rate;
-                dsk[DrvNum].Tracks[side_count,track_count].recording_mode:=dsk_track.record_mode;
-                dsk[DrvNum].Tracks[side_count,track_count].sector_size:=dsk_track.sector_size;
-                dsk[DrvNum].Tracks[side_count,track_count].number_sector:=dsk_track.number_of_sectors;
-                dsk[DrvNum].Tracks[side_count,track_count].GAP3:=dsk_track.gap;
-                dsk[DrvNum].Tracks[side_count,track_count].filler:=dsk_track.filler;
+                dsk[DrvNum].Tracks[dsk_track.side,dsk_track.track].track_number:=dsk_track.track;
+                dsk[DrvNum].Tracks[dsk_track.side,dsk_track.track].side_number:=dsk_track.side;
+                dsk[DrvNum].Tracks[dsk_track.side,dsk_track.track].data_rate:=dsk_track.data_rate;
+                dsk[DrvNum].Tracks[dsk_track.side,dsk_track.track].recording_mode:=dsk_track.record_mode;
+                dsk[DrvNum].Tracks[dsk_track.side,dsk_track.track].sector_size:=dsk_track.sector_size;
+                dsk[DrvNum].Tracks[dsk_track.side,dsk_track.track].number_sector:=dsk_track.number_of_sectors;
+                dsk[DrvNum].Tracks[dsk_track.side,dsk_track.track].GAP3:=dsk_track.gap;
+                dsk[DrvNum].Tracks[dsk_track.side,dsk_track.track].filler:=dsk_track.filler;
                 primer_sector:=false;
               end;
-              dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].track:=dsk_sector.track;
-              dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].head:=dsk_sector.side;
-              dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].sector:=dsk_sector.id;
-              dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].sector_size:=dsk_sector.size;
-              dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].status1:=dsk_sector.status1;
-              dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].status2:=dsk_sector.status2;
+              dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].track:=dsk_sector.track;
+              dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].head:=dsk_sector.side;
+              dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].sector:=dsk_sector.id;
+              dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].sector_size:=dsk_sector.size;
+              dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].status1:=dsk_sector.status1;
+              dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].status2:=dsk_sector.status2;
               //Calcular la longitud del sector
-              if not(estandar) then dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].data_length:=dsk_sector.length
-                 else dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].data_length:=1 shl (dsk_sector.size+7);
-              dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].posicion_data:=posicion;
-              inc(posicion,dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].data_length);
+              if not(estandar) then dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].data_length:=dsk_sector.length
+                 else dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].data_length:=1 shl (dsk_sector.size+7);
+              dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].posicion_data:=posicion;
+              inc(posicion,dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].data_length);
               //Weak sectors
-              tempw:=dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].data_length div (1 shl (dsk_sector.size+7));
+              tempw:=dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].data_length div (1 shl (dsk_sector.size+7));
               if (tempw>1) then begin
                  if tempw>4 then tempw:=4;
-                 dsk[drvnum].Tracks[side_count,track_count].sector[sector_count].multi:=true;
+                 dsk[drvnum].Tracks[dsk_track.side,dsk_track.track].sector[sector_count].multi:=true;
                  dsk[drvnum].cont_multi:=tempw;
                  dsk[drvnum].max_multi:=tempw;
                  hay_multi:=true;
@@ -194,6 +186,9 @@ begin
            end; //sectors
            //Primero muevo el puntero hasta el final de la cabecera, que siempre ocupa 256bytes
            inc(puntero,$100);inc(longi,$100);
+           //Me guardo la cara y el track del disco, que ahora los voy a borrar...
+           side_num:=dsk_track.side;
+           track_num:=dsk_track.track;
            //Ahora la longitud del track... No encuentro una forma decente de cuadrar la longitud del fichero con lo que dicen los datos... busco directemente
            ptemp:=puntero;
            salir:=false;
@@ -213,21 +208,16 @@ begin
                 end;
               end;
            end;
-           if dsk[DrvNum].DiskHeader.track_size_table[side_count,track_count]<>0 then begin
-              dsk[drvnum].Tracks[side_count,track_count].track_lenght:=256*(dsk[DrvNum].DiskHeader.track_size_table[side_count,track_count]-1);
+           if dsk[DrvNum].DiskHeader.track_size_table[side_num,track_num]<>0 then begin
+              dsk[drvnum].Tracks[side_num,track_num].track_lenght:=256*(dsk[DrvNum].DiskHeader.track_size_table[side_num,track_num]-1);
            end else begin
-              if not(estandar) then dsk[drvnum].Tracks[side_count,track_count].track_lenght:=track_long
-                else dsk[drvnum].Tracks[side_count,track_count].track_lenght:=dsk_header.track_size;
+              if not(estandar) then dsk[drvnum].Tracks[side_num,track_num].track_lenght:=track_long
+                else dsk[drvnum].Tracks[side_num,track_num].track_lenght:=dsk_header.track_size;
            end;
-           getmem(dsk[drvnum].Tracks[side_count,track_count].data,track_long);
-           copymemory(dsk[drvnum].Tracks[side_count,track_count].data,puntero,track_long);
+           getmem(dsk[drvnum].Tracks[side_num,track_num].data,track_long);
+           copymemory(dsk[drvnum].Tracks[side_num,track_num].data,puntero,track_long);
            inc(puntero,track_long);
            inc(longi,track_long);
-           side_count:=side_count+1;
-           if side_count=dsk_header.sides then begin
-             side_count:=0;
-             track_count:=old_track_count+1;
-           end;
    end; //del while
    check_protections(drvnum,hay_multi);
    dsk[drvnum].abierto:=true;

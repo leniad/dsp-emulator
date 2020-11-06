@@ -562,7 +562,7 @@ end;
 
 procedure rbisland_init_cchip(num,extra:byte);
 begin
-  init_timer(num,8000000/60,rbisland_timer,true);
+  timers.init(num,8000000/60,rbisland_timer,nil,true);
   extra_version:=extra;
   //bank4
   crom_bank4[0].data:=@crom_bank4_world0[0];crom_bank4[0].size:=136;

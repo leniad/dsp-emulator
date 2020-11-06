@@ -3,7 +3,7 @@
 interface
 
 uses
-  Classes,SysUtils,dialogs{$IFDEF WINDOWS},windows{$else},dynlibs,xlib{$endif};
+  Classes,SysUtils,dialogs{$IFDEF WINDOWS},windows{$else},dynlibs{$ifndef darwin},xlib{$endif}{$endif};
 
 procedure Init_sdl_lib;
 procedure close_sdl_lib;
@@ -52,6 +52,8 @@ const
   libSDL_INIT_AUDIO=$00000010;
   libSDL_WINDOWPOS_UNDEFINED=$1FFF0000;
   libSDL_WINDOW_FULLSCREEN=$00000001;
+  libSDL_WINDOW_OPENGL=$0000002;
+  libSDL_WINDOW_FULLSCREEN_DESKTOP=libSDL_WINDOW_FULLSCREEN or $1000;
 
   libSDL_WINDOWEVENT_SHOWN=1; {**< Window has been shown *}
   libSDL_WINDOWEVENT_HIDDEN=2; {**< Window has been hidden *}

@@ -76,20 +76,21 @@ end;
 scroll_x_y(1,4,scroll_x,scroll_y);
 //sprites
 for f:=$7f downto 0 do begin
-  atrib:=buffer_sprites[(f shl 2)+1];
-  nchar:=buffer_sprites[f shl 2]+((atrib shl 2) and $300);
-  color:=(atrib and $30)+64;
-  x:=buffer_sprites[$3+(f shl 2)]+((atrib and $1) shl 8);
-  y:=buffer_sprites[$2+(f shl 2)];
-  put_gfx_sprite(nchar,color,(atrib and 4)<>0,(atrib and 8)<>0,1);
-  actualiza_gfx_sprite_over(x,y,4,1,2,scroll_x,scroll_y);
+    atrib:=buffer_sprites[(f shl 2)+1];
+    nchar:=buffer_sprites[f shl 2]+((atrib shl 2) and $300);
+    color:=(atrib and $30)+64;
+    x:=buffer_sprites[$3+(f shl 2)]+((atrib and $1) shl 8);
+    y:=buffer_sprites[$2+(f shl 2)];
+    put_gfx_sprite(nchar,color,(atrib and 4)<>0,(atrib and 8)<>0,1);
+    actualiza_gfx_sprite(x,y,4,1);
 end;
+scroll_x_y(2,4,scroll_x,scroll_y);
+//Actualiza buffer sprites
+copymemory(@buffer_sprites,@memoria[$1e00],$200);
 //chars
 actualiza_trozo(0,0,256,256,3,0,0,256,256,4);
 actualiza_trozo_final(0,16,256,224,4);
-//Actualiza buffer sprites
-copymemory(@buffer_sprites[0],@memoria[$1e00],$200);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_gng;
@@ -177,7 +178,6 @@ end;
 
 procedure gng_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   0..$1fff:memoria[direccion]:=valor;
   $2000..$27ff:if memoria[direccion]<>valor then begin
@@ -199,6 +199,7 @@ case direccion of
   $3b0b:scroll_y:=(scroll_y and $ff) or ((valor and 1) shl 8);
   $3d00:main_screen.flip_main_screen:=(valor and 1)=0;
   $3e00:banco:=valor mod 5;
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -206,14 +207,14 @@ function sound_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$7fff,$c000..$c7ff:sound_getbyte:=mem_snd[direccion];
-  $c800:sound_getbyte:=soundlatch
+  $c800:sound_getbyte:=soundlatch;
 end;
 end;
 
 procedure sound_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $c000..$c7ff:mem_snd[direccion]:=valor;
   $e000:ym2203_0.Control(valor);
   $e001:ym2203_0.Write(valor);
@@ -224,8 +225,8 @@ end;
 
 procedure gng_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
 end;
 
 procedure gng_snd_irq;
@@ -262,8 +263,8 @@ buffer[3]:=scroll_x shr 8;
 buffer[4]:=scroll_y and $ff;
 buffer[5]:=scroll_y shr 8;
 savedata_qsnapshot(@buffer[0],6);
-savedata_com_qsnapshot(@buffer_sprites[0],$200);
-savedata_com_qsnapshot(@buffer_paleta[0],$200*2);
+savedata_com_qsnapshot(@buffer_sprites,$200);
+savedata_com_qsnapshot(@buffer_paleta,$200*2);
 freemem(data);
 close_qsnapshot;
 end;
@@ -290,13 +291,13 @@ ym2203_1.load_snapshot(data);
 loaddata_qsnapshot(@memoria[0]);
 loaddata_qsnapshot(@mem_snd[$8000]);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 banco:=buffer[0];
 soundlatch:=buffer[1];
 scroll_x:=buffer[2] or (buffer[3] shl 8);
 scroll_y:=buffer[4] or (buffer[5] shl 8);
-loaddata_qsnapshot(@buffer_sprites[0]);
-loaddata_qsnapshot(@buffer_paleta[0]);
+loaddata_qsnapshot(@buffer_sprites);
+loaddata_qsnapshot(@buffer_paleta);
 freemem(data);
 close_qsnapshot;
 //END
@@ -312,9 +313,9 @@ begin
  ym2203_1.reset;
  reset_audio;
  banco:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  soundlatch:=0;
  scroll_x:=0;
  scroll_y:=0;
@@ -354,33 +355,33 @@ z80_0:=cpu_z80.create(3000000,256);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(gng_sound_update);
 //IRQ Sound CPU
-init_timer(z80_0.numero_cpu,3000000/(4*60),gng_snd_irq,true);
+timers.init(z80_0.numero_cpu,3000000/(4*60),gng_snd_irq,nil,true);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(1500000,0.2);
 ym2203_1:=ym2203_chip.create(1500000,0.2);
 //cargar roms
-if not(roms_load(@memoria_temp,@gng_rom,'gng.zip',sizeof(gng_rom))) then exit;
+if not(roms_load(@memoria_temp,gng_rom)) then exit;
 //Pongo las ROMs en su banco
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2000);
 copymemory(@memoria[$6000],@memoria_temp[$6000],$2000);
 copymemory(@memoria_rom[4,0],@memoria_temp[$4000],$2000);
 //Cargar Sound
-if not(roms_load(@mem_snd,@gng_sound,'gng.zip',sizeof(gng_sound))) then exit;
+if not(roms_load(@mem_snd,gng_sound)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@gng_char,'gng.zip',sizeof(gng_char))) then exit;
+if not(roms_load(@memoria_temp,gng_char)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
 convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //sprites
-if not(roms_load(@memoria_temp,@gng_sprites,'gng.zip',sizeof(gng_sprites))) then exit;
+if not(roms_load(@memoria_temp,gng_sprites)) then exit;
 init_gfx(1,16,16,1024);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(roms_load(@memoria_temp,@gng_tiles,'gng.zip',sizeof(gng_tiles))) then exit;
+if not(roms_load(@memoria_temp,gng_tiles)) then exit;
 init_gfx(2,16,16,1024);
 gfx[2].trans[0]:=true;
 gfx[2].trans[6]:=true;

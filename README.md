@@ -1,4 +1,20 @@
 ﻿# DSP Emulator status #
+<b>06/11/20 - DSP Emulator 0.18b2 Final. Almost three years have passed since the last update! Updated Win32 binary and source code.
+The executables for Linux and Mac this time are not compiled, if someone needs them let me know..</b><br>
+Many, many changes. The most important are:<br><pre>
+-General
+    +YM2203/YM2151/YM3812: Fixed (finally!) the FM sound, improves a lot Shinobi, Rastan, Ghost'n Goblins, Snow Bros...
+    +CPU's: Added some CPU's, many fixes and new opcodes
+-8bit computer
+    +Spectrum: 100% emulated 'floating bus', added 'Turbo sound'..
+    +Commodore 64: Added a initial driver
+-Consoles
+    +NES: Fixed many video issues, added many mappers...
+    +Sega Master System: Improved driver, almost 100% working games
+-Arcade
+    +Added some MCUs to emulate protections, added 24 new games, added dipswitches...
+</pre>
+All changes in 'Whatsnew.txt'. Some snapshots later<br><br>
 <b>31/12/17 - DSP Emulator 0.18 Final. Source and all binaries updated.</b><br>
 All previous changes and...<br><pre>
 -General
@@ -197,7 +213,7 @@ At last I have emulated (not simulated) two Game and Watch games!. Thanks to MAM
 </pre><br>
 Please read the 'Whats New' for details<br>
 <img src='http://img1.imagilive.com/0317/simpsons.png'><img src='http://img1.imagilive.com/0317/vendetta.png'><br>
-<b>22/01/17 - DSP Emulator 0.17b2 WIP. Updated source and windows 32bits binary!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!</b><br>
+<b>22/01/17 - DSP Emulator 0.17b2 WIP. Updated source and windows 32bits binary</b><br>
 <pre>
 -General
     +Autofire

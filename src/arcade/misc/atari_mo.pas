@@ -71,8 +71,11 @@ type
                     uppershift:word;       // upper shift
               end;
           public
-            procedure draw(xscroll,yscroll:word;prio:byte);
+            procedure draw(xscroll,yscroll:word;prio:integer);
+            procedure set_bank(bank:dword);
             function get_codelookup:pword;
+            function get_colorlookup:pword;
+            function get_gfxlookup:pbyte;
           private
             xmax,ymax:word;
             screen:byte;
@@ -119,6 +122,7 @@ type
 	          codelookup:pword;       // lookup table for codes
 	          colorlookup:pword;       // lookup table for colors
 	          gfxlookup:pbyte;         // lookup table for graphics
+            codesize:dword;
 
             activelist:array[0..(MAX_PER_BANK*40)-1] of word; // active list
             activelast:pword;           // last entry in the active list
@@ -126,7 +130,7 @@ type
             last_xpos:dword;          // (during processing) the previous X position
             next_xpos:dword;          // (during processing) the next X position
 	          //required_device<gfxdecode_device> m_gfxdecode;
-            procedure render_object(entry:pword;xscroll,yscroll:word;prio:byte);
+            procedure render_object(entry:pword;xscroll,yscroll:word;prio:integer);
             procedure build_active_list(link:word);
           end;
 
@@ -135,7 +139,7 @@ var
 
 implementation
 
-function compute_log(value:integer):integer;
+function compute_log(value:integer):integer;inline;
 var
   log:integer;
 begin
@@ -155,7 +159,7 @@ end;
 	compute_log:=log;
 end;
 
-function round_to_powerof2(value:integer):integer;
+function round_to_powerof2(value:integer):integer;inline;
 var
   log:integer;
 begin
@@ -174,7 +178,7 @@ end;
 
 constructor tatari_mo.create(slip_ram:pword;sprite_ram:pword;config:atari_motion_objects_config;screen:byte;xmax,ymax:word);
 var
-  codesize,colorsize,i,gfxsize:integer;
+  colorsize,i,gfxsize:integer;
   temp:pword;
   tempb:pbyte;
 begin
@@ -229,13 +233,14 @@ begin
 	if self.config.slipheight<>0 then self.slipshift:=compute_log(self.config.slipheight)
     else self.slipshift:=0;
 	self.slipramsize:=self.bitmapheight shr self.slipshift;
-	self.sliprammask:=self.slipramsize - 1;
-	if (self.config.maxperline=0) then self.config.maxperline:=MAX_PER_BANK;
+	self.sliprammask:=self.slipramsize-1;
+	if (self.config.maxperline=0) then self.config.maxperline:=MAX_PER_BANK
+    else self.config.maxperline:=self.config.maxperline+1; //PQ?!?!?!?!?! Si no pongo esto Atari SYS1 no muestra algunos sprites...
 	// allocate and initialize the code lookup
-	codesize:=round_to_powerof2(self.codemask.mask);
-	getmem(self.codelookup,codesize*2);
+	self.codesize:=round_to_powerof2(self.codemask.mask);
+	getmem(self.codelookup,self.codesize*2);
   temp:=self.codelookup;
-	for i:=0 to (codesize-1) do begin
+	for i:=0 to (self.codesize-1) do begin
     temp^:=i;
     inc(temp);
   end;
@@ -248,11 +253,12 @@ begin
     inc(temp);
   end;
 	// allocate and the gfx lookup
-	gfxsize:=codesize div 256;
+	gfxsize:=self.codesize div 256;
 	getmem(self.gfxlookup,gfxsize);
   tempb:=self.gfxlookup;
 	for i:=0 to (gfxsize-1) do begin
 		tempb^:=self.config.gfxindex;
+    inc(tempb);
   end;
 end;
 
@@ -277,9 +283,24 @@ begin
   freemem(gfxlookup);
 end;
 
+procedure tatari_mo.set_bank(bank:dword);
+begin
+  self.bank:=bank;
+end;
+
 function tatari_mo.get_codelookup:pword;
 begin
   get_codelookup:=self.codelookup;
+end;
+
+function tatari_mo.get_colorlookup:pword;
+begin
+  get_colorlookup:=self.colorlookup;
+end;
+
+function tatari_mo.get_gfxlookup:pbyte;
+begin
+  get_gfxlookup:=self.gfxlookup;
 end;
 
 //sprite parameter
@@ -390,7 +411,6 @@ begin
   inc(bankbase,self.bank shl (self.entrybits+2));
 	current:=@self.activelist[0];
 	// visit all the motion objects and copy their data into the display list
-	//for f:=0 to (MAX_PER_BANK-1) do visited[f]:=0;
   fillchar(visited[0],MAX_PER_BANK,0);
 	for f:=0 to (self.config.maxperline-1) do begin
 		// copy the current entry into the list
@@ -439,7 +459,7 @@ begin
 	self.activelast:=current;
 end;
 
-procedure tatari_mo.draw(xscroll,yscroll:word;prio:byte);
+procedure tatari_mo.draw(xscroll,yscroll:word;prio:integer);
 var
   step:integer;
   current,first,last,temp:pword;
@@ -489,18 +509,23 @@ begin
 	end;
 end;
 
-procedure tatari_mo.render_object(entry:pword;xscroll,yscroll:word;prio:byte);
+procedure tatari_mo.render_object(entry:pword;xscroll,yscroll:word;prio:integer);
 var
   priority,code,color,rawcode:word;
   xpos,ypos,xadv,yadv,sx,sy:integer;
   temp:pword;
   vflip,hflip:boolean;
   x,y,width,height:byte;
+  numero_gfx:byte;
+  tempb:pbyte;
 begin
   priority:=self.prioritymask.extract(entry);
-  if priority<>prio then exit;
+  if ((priority<>prio) and (prio<>-1)) then exit;
 	// select the gfx element and save off key information
  	rawcode:=self.codemask.extract(entry);
+  tempb:=self.gfxlookup;
+  inc(tempb,rawcode shr 8);
+  numero_gfx:=tempb^;
 	// extract data from the various words
   temp:=self.codelookup;
   inc(temp,rawcode);
@@ -558,8 +583,8 @@ begin
         sx:=xpos;
 				for x:=0 to (width-1) do begin
           if (((sx<self.xmax) or (sx>503)) and ((sy<self.ymax) or (sy>503))) then begin
-            put_gfx_sprite(code,color,hflip,vflip,self.config.gfxindex);
-            actualiza_gfx_sprite(sx,sy,self.screen,self.config.gfxindex);
+            put_gfx_sprite(code,color,hflip,vflip,numero_gfx);
+            actualiza_gfx_sprite(sx,sy,self.screen,numero_gfx);
           end;
           sx:=sx+xadv;
           code:=code+1;
@@ -576,8 +601,8 @@ begin
 				for y:=0 to (height-1) do begin
 					// draw the sprite
           if (((sx<self.xmax) or (sx>503)) and ((sy<self.ymax) or (sy>503))) then begin
-            put_gfx_sprite(code,color,hflip,vflip,self.config.gfxindex);
-            actualiza_gfx_sprite(sx,sy,self.screen,self.config.gfxindex);
+            put_gfx_sprite(code,color,hflip,vflip,numero_gfx);
+            actualiza_gfx_sprite(sx,sy,self.screen,numero_gfx);
           end;
           sy:=sy+yadv;
           code:=code+1;

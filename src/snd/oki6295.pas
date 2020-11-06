@@ -48,8 +48,7 @@ type
             procedure stream_update;
       end;
 
-procedure internal_update_oki6295_0;
-procedure internal_update_oki6295_1;
+procedure internal_update_oki6295(index:byte);
 
 var
     oki_6295_0,oki_6295_1:snd_okim6295;
@@ -109,7 +108,7 @@ begin
   end;
 end;
 
-constructor snd_okim6295.Create(clock:dword;pin7:byte;amp:single=1);
+constructor snd_okim6295.create(clock:dword;pin7:byte;amp:single=1);
 begin
   chips_total:=chips_total+1;
   getmem(self.rom,$40000);
@@ -118,10 +117,7 @@ begin
   self.tsample_num:=init_channel;
   self.amp:=amp;
   self.clock:=clock;
-  case chips_total of
-      0:self.ntimer:=init_timer(sound_status.cpu_num,1,internal_update_oki6295_0,true);
-      1:self.ntimer:=init_timer(sound_status.cpu_num,1,internal_update_oki6295_1,true);
-  end;
+  self.ntimer:=timers.init(sound_status.cpu_num,1,nil,internal_update_oki6295,true,chips_total);
   self.change_pin7(pin7);
 	// initialize the voices */
   self.reset;
@@ -179,7 +175,7 @@ end;
 
 function snd_okim6295.clock_adpcm(num_voice,nibble:byte):integer;
 begin
-	self.voice[num_voice].adpcm.signal:=self.voice[num_voice].adpcm.signal+round(diff_lookup[self.voice[num_voice].adpcm.step*16+(nibble and 15)]);
+	self.voice[num_voice].adpcm.signal:=self.voice[num_voice].adpcm.signal+trunc(diff_lookup[self.voice[num_voice].adpcm.step*16+(nibble and 15)]);
 	// clamp to the maximum */
 	if (self.voice[num_voice].adpcm.signal>2047) then self.voice[num_voice].adpcm.signal:=2047
 	  else if (self.voice[num_voice].adpcm.signal<-2048) then self.voice[num_voice].adpcm.signal:=-2048;
@@ -194,7 +190,7 @@ end;
 function snd_okim6295.generate_adpcm(num_voice:byte):integer;
 var
   nibble:byte;
-  base,sample,count:integer;
+  base,sample,count:dword;
   ptemp:pbyte;
 begin
   base:=self.voice[num_voice].base_offset;
@@ -213,7 +209,7 @@ begin
   self.voice[num_voice].sample:=sample;
   // output to the buffer, scaling by the volume */
   //signal in range -2048..2047, volume in range 2..32 => signal * volume / 2 in range -32768..32767 */
-  generate_adpcm:=trunc(((self.clock_adpcm(num_voice,nibble)*(self.voice[num_voice].volume shr 1)))*self.amp);
+  generate_adpcm:=round(((self.clock_adpcm(num_voice,nibble)*(self.voice[num_voice].volume shr 1)))*self.amp);
 end;
 
 procedure snd_okim6295.reset;
@@ -240,7 +236,7 @@ var
 begin
   if pin7=OKIM6295_PIN7_HIGH then divisor:=132
     else divisor:=165;
-  timer[self.ntimer].time_final:=sound_status.cpu_clock/(self.clock/divisor);
+  timers.timer[self.ntimer].time_final:=sound_status.cpu_clock/(self.clock/divisor);
 end;
 
 function snd_okim6295.read:byte;
@@ -332,14 +328,12 @@ begin
     else if self.out_>32767 then self.out_:=32767;
 end;
 
-procedure internal_update_oki6295_0;
+procedure internal_update_oki6295(index:byte);
 begin
-  oki_6295_0.stream_update;
-end;
-
-procedure internal_update_oki6295_1;
-begin
-  oki_6295_1.stream_update;
+  case index of
+    0:oki_6295_0.stream_update;
+    1:oki_6295_1.stream_update;
+  end;
 end;
 
 procedure snd_okim6295.update;

@@ -77,7 +77,7 @@ type
   tinterface2_spectrum=record
     retraso:dword;
     cargado,hay_if2:boolean;
-    rom:array[0..$7FFF] of byte;
+    rom:array[0..$7fff] of byte;
   end;
   tborde_spectrum=record
     borde_spectrum:procedure(linea:word);
@@ -93,8 +93,8 @@ type
     //Video
     buffer_video:array[0..6143] of boolean;
     flash,pantalla_128k,old_7ffd:byte;
-    ft_bus:array[0..71000] of word;
     haz_flash:boolean;
+    atrib_scr:array[0..191] of word;
     //Keyboard
     key6_0,keyY_P,key1_5,keyQ_T,keyH_ENT,keyCAPS_V,keyA_G,keyB_SPC:byte;
     kb_0,kb_1,kb_2,kb_3,kb_4:boolean;
@@ -103,8 +103,8 @@ type
     tipo_joy,joy_val:byte;
     //Audio
     posicion_beeper:word;
-    speaker_oversample,audio_load:boolean;
-    altavoz,audio_128k,ear_channel,speaker_timer:byte;
+    speaker_oversample,audio_load,turbo_sound:boolean;
+    altavoz,audio_128k,ear_channel,speaker_timer,ay_select:byte;
     //Memoria
     retraso:array[0..71000] of byte;
     marco:array[0..3] of byte;
@@ -148,7 +148,7 @@ begin
 if mouse.gs_activa then begin
     mouse.gs_activa:=false;
     var_spectrum.key6_0:=var_spectrum.key6_0 or 4;
-    var_spectrum.joy_val:=(var_spectrum.joy_val and $FB);
+    var_spectrum.joy_val:=(var_spectrum.joy_val and $fb);
     mouse.lg_val:=mouse.lg_val and $ef;
 end;
 case main_vars.tipo_maquina of
@@ -158,7 +158,7 @@ case main_vars.tipo_maquina of
 end;
 if ((gs_temp=63) or (gs_temp=127)) then begin
   mouse.gs_activa:=true;
-  var_spectrum.key6_0:=var_spectrum.key6_0 And $FB;
+  var_spectrum.key6_0:=var_spectrum.key6_0 and $fb;
   var_spectrum.joy_val:=(var_spectrum.joy_val or 4);
   mouse.lg_val:=mouse.lg_val or $10;
 end;
@@ -181,13 +181,13 @@ borde.buffer[linea]:=borde.color;
 linea_actual:=linea-15;
 case linea of
         15..62,255..302:begin
-                          single_line(0,linea_actual,borde.color,352,1);
+                          single_line(0,linea_actual,paleta[borde.color],352,1);
                           actualiza_trozo_simple(0,linea_actual,352,1,1);
                         end;
         63..254:begin
-                    single_line(0,linea_actual,borde.color,48,1);
+                    single_line(0,linea_actual,paleta[borde.color],48,1);
                     actualiza_trozo_simple(0,linea_actual,48,1,1);
-                    single_line(304,linea_actual,borde.color,48,1);
+                    single_line(304,linea_actual,paleta[borde.color],48,1);
                     actualiza_trozo_simple(304,linea_actual,48,1,1);
                 end;
         else exit;
@@ -215,7 +215,7 @@ if (event.mouse and (mouse.tipo<>MNONE)) then begin
            mouse.lg_val:=mouse.lg_val and $df;
         end else begin
           var_spectrum.key6_0:=(var_spectrum.key6_0 or 1);
-          var_spectrum.joy_val:=(var_spectrum.joy_val and $EF);
+          var_spectrum.joy_val:=(var_spectrum.joy_val and $ef);
           mouse.lg_val:=mouse.lg_val or $20;
         end;
       end;
@@ -226,9 +226,9 @@ if (event.mouse and (mouse.tipo<>MNONE)) then begin
         if raton.x<48 then mouse.x:=0
           else if raton.x>303 then mouse.x:=$ff
             else mouse.x:=raton.x-48;
-        if raton.button2 then mouse.botones:=mouse.botones and $FE
+        if raton.button2 then mouse.botones:=mouse.botones and $fe
           else mouse.botones:=mouse.botones or 1;
-        if raton.button1 then mouse.botones:=mouse.botones and $FD
+        if raton.button1 then mouse.botones:=mouse.botones and $fd
           else mouse.botones:=mouse.botones or 2;
       end;
     MAMX:begin
@@ -413,14 +413,19 @@ end;
 
 //Audio!!
 procedure spectrum_beeper_sound;
+var
+  res:smallint;
 begin
-  tsample[var_spectrum.ear_channel,sound_status.posicion_sonido]:=var_spectrum.posicion_beeper shl (3+(3*byte(not(var_spectrum.speaker_oversample))));
+  res:=(var_spectrum.posicion_beeper+(cinta_tzx.value*byte(var_spectrum.audio_load)*byte(cinta_tzx.play_tape))) shl (4+(3*byte(not(var_spectrum.speaker_oversample))));
+  tsample[var_spectrum.ear_channel,sound_status.posicion_sonido]:=res;
+  //Copio el contenido del speaker para emular el stereo
+  if sound_status.stereo then tsample[var_spectrum.ear_channel,sound_status.posicion_sonido+1]:=res;
   var_spectrum.posicion_beeper:=0;
 end;
 
 procedure beeper_get;
 begin
-  var_spectrum.posicion_beeper:=var_spectrum.posicion_beeper+var_spectrum.altavoz+(cinta_tzx.value*byte(var_spectrum.audio_load)*byte(cinta_tzx.play_tape));
+  var_spectrum.posicion_beeper:=var_spectrum.posicion_beeper+var_spectrum.altavoz;
 end;
 
 procedure spectrum_ay8912_sound;
@@ -428,16 +433,33 @@ var
   audio:pinteger;
   audio_buff:array[0..3] of integer;
 begin
+audio:=ay8910_0.update_internal;
+copymemory(@audio_buff[0],pbyte(audio),4*sizeof(integer));
 case var_spectrum.audio_128k of
-  0:tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=ay8910_0.update_internal^;
-  1,2:begin
-        audio:=ay8910_0.update_internal;
-        copymemory(@audio_buff[0],pbyte(audio),4*2);
-        tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=(audio_buff[1]*2+audio_buff[2]);
-        sound_status.posicion_sonido:=sound_status.posicion_sonido+1;
-        tsample[var_spectrum.ear_channel,sound_status.posicion_sonido]:=tsample[var_spectrum.ear_channel,sound_status.posicion_sonido-1];
-        tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=(audio_buff[3]*2+audio_buff[2]);
+  0:tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=audio_buff[0];
+  1:begin
+        tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=audio_buff[1]*2+audio_buff[2];
+        tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido+1]:=audio_buff[3]*2+audio_buff[2];
       end;
+  2:begin
+        tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido]:=audio_buff[1]*2+audio_buff[3];
+        tsample[ay8910_0.get_sample_num,sound_status.posicion_sonido+1]:=audio_buff[2]*2+audio_buff[3];
+      end;
+  end;
+if var_spectrum.turbo_sound then begin
+  audio:=ay8910_1.update_internal;
+  copymemory(@audio_buff[0],pbyte(audio),4*sizeof(integer));
+  case var_spectrum.audio_128k of
+    0:tsample[ay8910_1.get_sample_num,sound_status.posicion_sonido]:=audio_buff[0];
+    1:begin
+          tsample[ay8910_1.get_sample_num,sound_status.posicion_sonido]:=audio_buff[1]*2+audio_buff[2];
+          tsample[ay8910_1.get_sample_num,sound_status.posicion_sonido+1]:=audio_buff[3]*2+audio_buff[2];
+        end;
+    2:begin
+          tsample[ay8910_1.get_sample_num,sound_status.posicion_sonido]:=audio_buff[1]*2+audio_buff[3];
+          tsample[ay8910_1.get_sample_num,sound_status.posicion_sonido+1]:=audio_buff[2]*2+audio_buff[3];
+        end;
+    end;
   end;
 end;
 
@@ -447,6 +469,7 @@ var
   f:byte;
 begin
 spec_comun:=false;
+TZX_CLOCK:=clock div 1000;
 spec_z80:=cpu_z80_sp.create(clock,llamadas_maquina.fps_max);
 if borde.tipo=2 then begin
   case main_vars.tipo_maquina of
@@ -456,10 +479,10 @@ if borde.tipo=2 then begin
 end else borde.borde_spectrum:=borde_normal;
 //Beeper audio (comun para todos)
 spec_z80.init_sound(spectrum_beeper_sound);
-var_spectrum.speaker_timer:=init_timer(spec_z80.numero_cpu,spec_z80.clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample)))),beeper_get,true);
+var_spectrum.speaker_timer:=timers.init(spec_z80.numero_cpu,spec_z80.clock/(FREQ_BASE_AUDIO*(1+(7*byte(var_spectrum.speaker_oversample)))),beeper_get,nil,true);
 //AY8912
 case main_vars.tipo_maquina of
-  1,2,3,4:init_timer(spec_z80.numero_cpu,clock/FREQ_BASE_AUDIO,spectrum_ay8912_sound,true);
+  1,2,3,4:timers.init(spec_z80.numero_cpu,clock/FREQ_BASE_AUDIO,spectrum_ay8912_sound,nil,true);
 end;
 principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
@@ -472,11 +495,13 @@ tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
 screen_init(1,352,288);
 iniciar_video(352,288);
+//Direccion atributos
+for f:=0 to 191 do var_spectrum.atrib_scr[f]:=6144+(32*(f div 8));
 //Paleta general
 for f:=0 to 15 do begin
   colores[f].b:=spec_paleta[f] shr 16;
-  colores[f].g:=(spec_paleta[f] shr 8) and $FF;
-  colores[f].r:=spec_paleta[f] and $FF;
+  colores[f].g:=(spec_paleta[f] shr 8) and $ff;
+  colores[f].r:=spec_paleta[f] and $ff;
 end;
 //los colores iniciales de la ULA+
 for f:=16 to 79 do begin
@@ -505,20 +530,11 @@ end else if dsk[0].abierto then begin
             llamadas_maquina.open_file:=dsk[0].ImageName;
          end else llamadas_maquina.open_file:='';
 change_caption;
-var_spectrum.key6_0:=$ff;
-var_spectrum.keyY_P:=$ff;
-var_spectrum.keyQ_T:=$ff;
-var_spectrum.key1_5:=$ff;
-var_spectrum.keyH_ENT:=$ff;
-var_spectrum.keyA_G:=$FF;
-var_spectrum.keyCAPS_V:=$FF;
-var_spectrum.keyB_SPC:=$FF;
-if var_spectrum.tipo_joy<>JFULLER then var_spectrum.joy_val:=0
-  else var_spectrum.joy_val:=$ff;
 mouse.lg_val:=$20;
 var_spectrum.flash:=0;
 var_spectrum.irq_pos:=0;
 var_spectrum.altavoz:=0;
+var_spectrum.ay_select:=0;
 cinta_tzx.value:=0;
 spec_z80.im2_lo:=$ff;
 fillchar(borde.buffer[0],78000,$80);
@@ -526,6 +542,14 @@ fillchar(borde.buffer[0],78000,$80);
 ulaplus.activa:=false;
 fillchar(ulaplus.paleta[0],64,0);
 ulaplus.last_reg:=0;
+var_spectrum.key6_0:=$ff;
+var_spectrum.key1_5:=$ff;
+var_spectrum.keyY_P:=$ff;
+var_spectrum.keyQ_T:=$ff;
+var_spectrum.keyH_ENT:=$ff;
+var_spectrum.keyCAPS_V:=$ff;
+var_spectrum.keyA_G:=$ff;
+var_spectrum.keyB_SPC:=$ff;
 var_spectrum.kb_0:=false;
 var_spectrum.kb_1:=false;
 var_spectrum.kb_2:=false;
@@ -549,7 +573,7 @@ mouse.x:=0;
 mouse.y:=0;
 mouse.x_act:=0;
 mouse.y_act:=0;
-mouse.botones:=$FF;
+mouse.botones:=$ff;
 mouse.data_a:=0;
 mouse.data_b:=0;
 if interface2.hay_if2 then begin
@@ -613,8 +637,7 @@ if cinta_tzx.cargada then begin
       if (var_spectrum.fastload and (cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque=$10) and not(cinta_tzx.en_pausa)) then begin
         if (spec_z80.get_safe_pc=$056b) then play_cinta_tap(spec_z80.get_internal_r);
       end else begin
-        cinta_tzx.estados:=cinta_tzx.estados+estados_t;
-        play_cinta_tzx;
+        play_cinta_tzx(estados_t);
       end;
     end else begin
       if ((spec_z80.get_safe_pc=$0556) and not(cinta_tzx.play_once)) then begin

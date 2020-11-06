@@ -10,19 +10,19 @@ procedure cargar_funkyjet;
 
 implementation
 const
-        funkyjet_rom:array[0..2] of tipo_roms=(
-        (n:'jk00.12f';l:$40000;p:0;crc:$712089c1),(n:'jk01.13f';l:$40000;p:$1;crc:$be3920d7),());
+        funkyjet_rom:array[0..1] of tipo_roms=(
+        (n:'jk00.12f';l:$40000;p:0;crc:$712089c1),(n:'jk01.13f';l:$40000;p:$1;crc:$be3920d7));
         funkyjet_sound:tipo_roms=(n:'jk02.16f';l:$10000;p:$0;crc:$748c0bd8);
         funkyjet_char:tipo_roms=(n:'mat02';l:$80000;p:0;crc:$e4b94c7e);
         funkyjet_oki:tipo_roms=(n:'jk03.15h';l:$20000;p:0;crc:$69a0eaf7);
-        funkyjet_sprites:array[0..2] of tipo_roms=(
-        (n:'mat01';l:$80000;p:0;crc:$24093a8d),(n:'mat00';l:$80000;p:$80000;crc:$fbda0228),());
+        funkyjet_sprites:array[0..1] of tipo_roms=(
+        (n:'mat01';l:$80000;p:0;crc:$24093a8d),(n:'mat00';l:$80000;p:$80000;crc:$fbda0228));
         funkyjet_dip_a:array [0..9] of def_dip=(
-        (mask:$00e0;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3 Coin - 1 Credit'),(dip_val:$80;dip_name:'2 Coin - 1 Credit'),(dip_val:$e0;dip_name:'1 Coin - 1 Credit'),(dip_val:$60;dip_name:'1 Coin - 2 Credit'),(dip_val:$a0;dip_name:'1 Coin - 3 Credit'),(dip_val:$20;dip_name:'1 Coin - 4 Credit'),(dip_val:$c0;dip_name:'1 Coin - 5 Credit'),(dip_val:$40;dip_name:'1 Coin - 6 Credit'),(),(),(),(),(),(),(),())),
-        (mask:$001c;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3 Coin - 1 Credit'),(dip_val:$10;dip_name:'2 Coin - 1 Credit'),(dip_val:$1c;dip_name:'1 Coin - 1 Credit'),(dip_val:$0c;dip_name:'1 Coin - 2 Credit'),(dip_val:$14;dip_name:'1 Coin - 3 Credit'),(dip_val:$04;dip_name:'1 Coin - 4 Credit'),(dip_val:$18;dip_name:'1 Coin - 5 Credit'),(dip_val:$08;dip_name:'1 Coin - 6 Credit'),(),(),(),(),(),(),(),())),
         (mask:$0002;name:'Flip Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$001c;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$1c;dip_name:'1C 1C'),(dip_val:$0c;dip_name:'1C 2C'),(dip_val:$14;dip_name:'1C 3C'),(dip_val:$04;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(dip_val:$08;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$00e0;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$e0;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 5C'),(dip_val:$40;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
         (mask:$0100;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$100;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$0200;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$200;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$0200;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$200;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$0400;name:'Free Play';number:2;dip:((dip_val:$400;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$0800;name:'Flip Screen';number:2;dip:((dip_val:$800;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$3000;name:'Difficulty';number:4;dip:((dip_val:$1000;dip_name:'Easy'),(dip_val:$3000;dip_name:'Normal'),(dip_val:$2000;dip_name:'Hard'),(dip_val:$0000;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -149,8 +149,8 @@ end;
 
 procedure funkyjet_putword(direccion:dword;valor:word);
 begin
-if direccion<$80000 then exit;
 case direccion of
+  0..$7ffff:; //ROM
   $120000..$1207ff:if (buffer_paleta[(direccion and $7ff) shr 1]<>valor) then begin
                       buffer_paleta[(direccion and $7ff) shr 1]:=valor;
                       cambiar_color(valor,(direccion and $7ff) shr 1);
@@ -188,8 +188,6 @@ end;
 
 function iniciar_funkyjet:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
   pt_x:array[0..15] of dword=(32*8+0, 32*8+1, 32*8+2, 32*8+3, 32*8+4, 32*8+5, 32*8+6, 32*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
   pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -210,29 +208,29 @@ m68000_0.change_ram16_calls(funkyjet_getword,funkyjet_putword);
 deco16_snd_simple_init(32220000 div 4,32220000,nil);
 getmem(memoria_temp,$100000);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@funkyjet_rom[0],'funkyjet.zip',0)) then exit;
+if not(roms_load16w(@rom,funkyjet_rom)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@funkyjet_sound,'funkyjet.zip',1)) then exit;
+if not(roms_load(@mem_snd,funkyjet_sound)) then exit;
 //OKI rom
-if not(cargar_roms(oki_6295_0.get_rom_addr,@funkyjet_oki,'funkyjet.zip',1)) then exit;
+if not(roms_load(oki_6295_0.get_rom_addr,funkyjet_oki)) then exit;
 //convertir chars
-if not(cargar_roms(memoria_temp,@funkyjet_char,'funkyjet.zip',1)) then exit;
+if not(roms_load(memoria_temp,funkyjet_char)) then exit;
 deco74_decrypt_gfx(memoria_temp,$80000);
 init_gfx(0,8,8,$4000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,16*8,$4000*16*8+8,$4000*16*8+0,8,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pt_x[8],@pt_y,false,false);
 //Tiles
 init_gfx(1,16,16,$1000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$1000*64*8+8,$1000*64*8+0,8,0);
-convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@pt_x,@pt_y,false,false);
 //Sprites
-if not(cargar_roms(memoria_temp,@funkyjet_sprites[0],'funkyjet.zip',0)) then exit;
+if not(roms_load(memoria_temp,funkyjet_sprites)) then exit;
 init_gfx(2,16,16,$2000);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$2000*64*8+8,$2000*64*8+0,8,0);
-convert_gfx(2,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@pt_x,@pt_y,false,false);
 //Deco 146
 main_deco146:=cpu_deco_146.create;
 main_deco146.SET_INTERFACE_SCRAMBLE_INTERLEAVE;

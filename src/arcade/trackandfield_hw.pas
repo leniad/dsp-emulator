@@ -9,19 +9,19 @@ procedure cargar_trackfield;
 
 implementation
 const
-        trackfield_rom:array[0..5] of tipo_roms=(
+        trackfield_rom:array[0..4] of tipo_roms=(
         (n:'a01_e01.bin';l:$2000;p:$6000;crc:$2882f6d4),(n:'a02_e02.bin';l:$2000;p:$8000;crc:$1743b5ee),
         (n:'a03_k03.bin';l:$2000;p:$a000;crc:$6c0d1ee9),(n:'a04_e04.bin';l:$2000;p:$c000;crc:$21d6c448),
-        (n:'a05_e05.bin';l:$2000;p:$e000;crc:$f08c7b7e),());
-        trackfield_char:array[0..3] of tipo_roms=(
+        (n:'a05_e05.bin';l:$2000;p:$e000;crc:$f08c7b7e));
+        trackfield_char:array[0..2] of tipo_roms=(
         (n:'h16_e12.bin';l:$2000;p:0;crc:$50075768),(n:'h15_e11.bin';l:$2000;p:$2000;crc:$dda9e29f),
-        (n:'h14_e10.bin';l:$2000;p:$4000;crc:$c2166a5c),());
-        trackfield_sprites:array[0..4] of tipo_roms=(
+        (n:'h14_e10.bin';l:$2000;p:$4000;crc:$c2166a5c));
+        trackfield_sprites:array[0..3] of tipo_roms=(
         (n:'c11_d06.bin';l:$2000;p:0;crc:$82e2185a),(n:'c12_d07.bin';l:$2000;p:$2000;crc:$800ff1f1),
-        (n:'c13_d08.bin';l:$2000;p:$4000;crc:$d9faf183),(n:'c14_d09.bin';l:$2000;p:$6000;crc:$5886c802),());
-        trackfield_pal:array[0..3] of tipo_roms=(
+        (n:'c13_d08.bin';l:$2000;p:$4000;crc:$d9faf183),(n:'c14_d09.bin';l:$2000;p:$6000;crc:$5886c802));
+        trackfield_pal:array[0..2] of tipo_roms=(
         (n:'361b16.f1';l:$20;p:$0;crc:$d55f30b5),(n:'361b17.b16';l:$100;p:$20;crc:$d2ba4d32),
-        (n:'361b18.e15';l:$100;p:$120;crc:$053e5861),());
+        (n:'361b18.e15';l:$100;p:$120;crc:$053e5861));
         trackfield_vlm:tipo_roms=(n:'c9_d15.bin';l:$2000;p:$0;crc:$f546a56b);
         trackfield_snd:tipo_roms=(n:'c2_d13.bin';l:$2000;p:$0;crc:$95bf79b6);
         trackfield_dip_a:array [0..1] of def_dip=(
@@ -133,7 +133,6 @@ end;
 
 procedure trackfield_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$5FFF then exit;
 case direccion of
   $1080..$10ff:case (direccion and 7) of
                   0:main_screen.flip_main_screen:=(valor and $1)<>0;
@@ -146,6 +145,7 @@ case direccion of
                    gfx[0].buffer[direccion and $7ff]:=true;
                    memoria[direccion]:=valor;
                end;
+  $6000..$ffff:; //ROM
 end;
 end;
 
@@ -164,8 +164,8 @@ procedure trackfield_snd_putbyte(direccion:word;valor:byte);
 var
   changes,offset:integer;
 begin
-if direccion<$2000 then exit;
 case direccion of
+    0..$1fff:; //ROM
     $4000..$4fff:mem_snd[$4000+(direccion and $3ff)]:=valor;
     $a000..$bfff:chip_latch:=valor;
     $c000..$dfff:sn_76496_0.Write(chip_latch);
@@ -214,7 +214,7 @@ savedata_qsnapshot(data,size);
 size:=dac_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[0],$6000);
+savedata_com_qsnapshot(@memoria,$6000);
 savedata_com_qsnapshot(@mem_snd[$2000],$e000);
 //MISC
 buffer[0]:=byte(irq_ena);
@@ -222,7 +222,7 @@ buffer[1]:=sound_latch;
 buffer[2]:=chip_latch;
 buffer[3]:=last_addr and $ff;
 buffer[4]:=last_addr shr 8;
-savedata_qsnapshot(@buffer[0],5);
+savedata_qsnapshot(@buffer,5);
 freemem(data);
 close_qsnapshot;
 end;
@@ -247,10 +247,10 @@ vlm5030_0.load_snapshot(data);
 loaddata_qsnapshot(data);
 dac_0.load_snapshot(data);
 //MEM
-loaddata_qsnapshot(@memoria[0]);
+loaddata_qsnapshot(@memoria);
 loaddata_qsnapshot(@mem_snd[$2000]);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 irq_ena:=buffer[0]<>0;
 sound_latch:=buffer[1];
 chip_latch:=buffer[2];
@@ -258,7 +258,7 @@ last_addr:=buffer[3] or (buffer[4] shl 8);
 freemem(data);
 close_qsnapshot;
 //end
-fillchar(gfx[0].buffer[0],$800,1);
+fillchar(gfx[0].buffer,$800,1);
 end;
 
 //Main
@@ -318,45 +318,45 @@ z80_0.init_sound(trackfield_sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(14318180 div 8);
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,4);
-if not(cargar_roms(vlm5030_0.get_rom_addr,@trackfield_vlm,'trackfld.zip',1)) then exit;
+if not(roms_load(vlm5030_0.get_rom_addr,trackfield_vlm)) then exit;
 dac_0:=dac_chip.Create(0.80);
-if not(cargar_roms(@memoria[0],@trackfield_rom[0],'trackfld.zip',0)) then exit;
-konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
+if not(roms_load(@memoria,trackfield_rom)) then exit;
+konami1_decode(@memoria[$6000],@mem_opcodes,$a000);
 //NV ram
 if read_file_size(Directory.Arcade_nvram+'trackfield.nv',longitud) then read_file(Directory.Arcade_nvram+'trackfield.nv',@memoria[$2800],longitud);
-if not(cargar_roms(@mem_snd[0],@trackfield_snd,'trackfld.zip',1)) then exit;
+if not(roms_load(@mem_snd,trackfield_snd)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@trackfield_char,'trackfld.zip',0)) then exit;
+if not(roms_load(@memoria_temp,trackfield_char)) then exit;
 init_gfx(0,8,8,$300);
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@trackfield_sprites[0],'trackfld.zip',0)) then exit;
+if not(roms_load(@memoria_temp,trackfield_sprites)) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,($100*64*8)+4,$100*64*8,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@trackfield_pal[0],'trackfld.zip',0)) then exit;
+if not(roms_load(@memoria_temp,trackfield_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances_rg[0],@rweights[0],1000,0,
-			3,@resistances_rg[0],@gweights[0],1000,0,
-			2,@resistances_b[0],@bweights[0],1000,0);
+			3,@resistances_rg,@rweights,1000,0,
+			3,@resistances_rg,@gweights,1000,0,
+			2,@resistances_b,@bweights,1000,0);
 for f:=0 to $1f do begin
 		// red component */
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
-		colores[f].r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
+		colores[f].r:=combine_3_weights(@rweights, bit0, bit1, bit2);
 		// green component */
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
-		colores[f].g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
+		colores[f].g:=combine_3_weights(@gweights, bit0, bit1, bit2);
 		// blue component */
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
-		colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
+		colores[f].b:=combine_2_weights(@bweights, bit0, bit1);
 end;
 set_pal(colores,$20);
 for f:=0 to $ff do begin

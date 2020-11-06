@@ -40,7 +40,7 @@ var
 begin
 pos:=cclimber_audio.start+cclimber_audio.pos;
 if ((pos>$1fff) or (cclimber_audio.rom[pos]=$70)) then begin
-  timer[cclimber_audio.timer_num].enabled:=false;
+  timers.enabled(cclimber_audio.timer_num,false);
   cclimber_audio.out_:=0;
   exit;
 end;
@@ -63,7 +63,7 @@ end;
 constructor tcclimber_audio.create;
 begin
   self.tsample_num:=init_channel;
-  timer_num:=init_timer(sound_status.cpu_num,1,cclimer_update_internal,false);
+  timer_num:=timers.init(sound_status.cpu_num,1,cclimer_update_internal,nil,false);
   self.reset;
 end;
 
@@ -73,7 +73,7 @@ end;
 
 procedure tcclimber_audio.reset;
 begin
-  timer[self.timer_num].enabled:=false;
+  timers.enabled(self.timer_num,false);
 end;
 
 procedure tcclimber_audio.change_sample(valor:byte);
@@ -84,7 +84,7 @@ end;
 procedure tcclimber_audio.change_freq(valor:byte);
 begin
   self.sample_freq:=3072000/4/(256-valor);
-  timer[self.timer_num].time_final:=3072000/self.sample_freq;
+  timers.timer[self.timer_num].time_final:=3072000/self.sample_freq;
 end;
 
 procedure tcclimber_audio.change_volume(valor:byte);
@@ -94,7 +94,7 @@ end;
 
 procedure tcclimber_audio.trigger_w;
 begin
-  timer[self.timer_num].enabled:=true;
+  timers.enabled(self.timer_num,true);
   self.pos:=0;
   up_down:=false;
 end;

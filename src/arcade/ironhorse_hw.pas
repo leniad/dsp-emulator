@@ -13,9 +13,9 @@ const
         ironhorse_rom:array[0..1] of tipo_roms=(
         (n:'560_k03.13c';l:$8000;p:$4000;crc:$395351b4),(n:'560_k02.12c';l:$4000;p:$c000;crc:$1cff3d59));
         ironhorse_snd:tipo_roms=(n:'560_h01.10c';l:$4000;p:0;crc:$2b17930f);
-        ironhorse_gfx:array[0..4] of tipo_roms=(
+        ironhorse_gfx:array[0..3] of tipo_roms=(
         (n:'560_h06.08f';l:$8000;p:0;crc:$f21d8c93),(n:'560_h05.07f';l:$8000;p:$1;crc:$60107859),
-        (n:'560_h07.09f';l:$8000;p:$10000;crc:$c761ec73),(n:'560_h04.06f';l:$8000;p:$10001;crc:$c1486f61),());
+        (n:'560_h07.09f';l:$8000;p:$10000;crc:$c761ec73),(n:'560_h04.06f';l:$8000;p:$10001;crc:$c1486f61));
         ironhorse_pal:array[0..4] of tipo_roms=(
         (n:'03f_h08.bin';l:$100;p:0;crc:$9f6ddf83),(n:'04f_h09.bin';l:$100;p:$100;crc:$e6773825),
         (n:'05f_h10.bin';l:$100;p:$200;crc:$30a57860),(n:'10f_h12.bin';l:$100;p:$300;crc:$5eb33e73),
@@ -43,8 +43,9 @@ var
 
 procedure update_video_ironhorse;inline;
 var
-  x,y,atrib,flipx,flipy,a,b,c,d:byte;
+  x,y,atrib,a,b,c,d:byte;
   f,nchar,color:word;
+  flipx,flipy:boolean;
 begin
 for f:=0 to $3ff do begin
     if gfx[0].buffer[f] then begin
@@ -66,36 +67,36 @@ for f:=0 to $32 do begin
     nchar:=(memoria[spritebank+(f*5)] shl 2)+((atrib and $03) shl 10)+((atrib and $0c) shr 2);
 		color:=((((atrib and $f0) shr 4)+16*palettebank) shl 4)+$800;
     atrib:=memoria[spritebank+4+(f*5)];
-    flipx:=(atrib and $20) shr 5;
-    flipy:=(atrib and $40) shr 5;
+    flipx:=((atrib and $20) shr 5)<>0;
+    flipy:=((atrib and $40) shr 5)<>0;
     case (atrib and $c) of
       $0:begin  //16x16
-          a:=(0 xor flipx) xor flipy;
-          b:=(1 xor flipx) xor flipy;
-          c:=(2 xor flipx) xor flipy;
-          d:=(3 xor flipx) xor flipy;
-          put_gfx_sprite_diff(nchar+a,color,flipx<>0,flipy<>0,0,0,0);
-          put_gfx_sprite_diff(nchar+b,color,flipx<>0,flipy<>0,0,8,0);
-          put_gfx_sprite_diff(nchar+c,color,flipx<>0,flipy<>0,0,0,8);
-          put_gfx_sprite_diff(nchar+d,color,flipx<>0,flipy<>0,0,8,8);
+          a:=(0 xor byte(flipx)) xor byte(flipy);
+          b:=(1 xor byte(flipx)) xor byte(flipy);
+          c:=(2 xor byte(flipx)) xor byte(flipy);
+          d:=(3 xor byte(flipx)) xor byte(flipy);
+          put_gfx_sprite_diff(nchar+a,color,flipx,flipy,0,0,0);
+          put_gfx_sprite_diff(nchar+b,color,flipx,flipy,0,8,0);
+          put_gfx_sprite_diff(nchar+c,color,flipx,flipy,0,0,8);
+          put_gfx_sprite_diff(nchar+d,color,flipx,flipy,0,8,8);
           actualiza_gfx_sprite_size(x,y,2,16,16);
         end;
       $4:begin  //16x8
-          a:=0 xor flipx;
-          b:=1 xor flipx;
-          put_gfx_sprite_diff(nchar+a,color,flipx<>0,flipy<>0,0,0,0);
-          put_gfx_sprite_diff(nchar+b,color,flipx<>0,flipy<>0,0,8,0);
+          a:=0 xor byte(flipx);
+          b:=1 xor byte(flipx);
+          put_gfx_sprite_diff(nchar+a,color,flipx,flipy,0,0,0);
+          put_gfx_sprite_diff(nchar+b,color,flipx,flipy,0,8,0);
           actualiza_gfx_sprite_size(x,y,2,16,8);
          end;
       $8:begin  //8x16
-          a:=0 xor flipy;
-          b:=2 xor flipy;
-          put_gfx_sprite_diff(nchar+a,color,flipx<>0,flipy<>0,0,0,0);
-          put_gfx_sprite_diff(nchar+b,color,flipx<>0,flipy<>0,0,0,8);
+          a:=0 xor byte(flipy);
+          b:=2 xor byte(flipy);
+          put_gfx_sprite_diff(nchar+a,color,flipx,flipy,0,0,0);
+          put_gfx_sprite_diff(nchar+b,color,flipx,flipy,0,0,8);
           actualiza_gfx_sprite_size(x,y,2,8,16);
          end;
       $c:begin //8x8
-          put_gfx_sprite_mask(nchar,color,flipx<>0,flipy<>0,0,0,$f);
+          put_gfx_sprite_mask(nchar,color,flipx,flipy,0,0,$f);
           actualiza_gfx_sprite(x,y,2,0);
          end;
     end;
@@ -134,10 +135,12 @@ procedure ironhorse_principal;
 var
   frame_m,frame_s:single;
   f:byte;
+  frame:boolean;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
+frame:=false;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
     //main
@@ -146,15 +149,18 @@ while EmuStatus=EsRuning do begin
     //snd
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=240 then begin
-      if pedir_firq then m6809_0.change_firq(HOLD_LINE);
-    end else begin
-      if ((((f+16) mod 64)=0) and pedir_nmi) then m6809_0.change_nmi(PULSE_LINE);
+    case f of
+      47,111,175:if pedir_nmi then m6809_0.change_nmi(PULSE_LINE);
+      239:begin
+            if (pedir_firq and frame) then m6809_0.change_firq(HOLD_LINE);
+            if pedir_nmi then m6809_0.change_nmi(PULSE_LINE);
+          end;
     end;
   end;
   update_video_ironhorse;
   eventos_ironhorse;
   video_sync;
+  frame:=not(frame);
 end;
 end;
 
@@ -174,7 +180,6 @@ end;
 
 procedure ironhorse_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   0..2,5..$1f,$40..$df,$2800..$3fff:memoria[direccion]:=valor;
   $3:begin
@@ -200,7 +205,7 @@ case direccion of
                 gfx[0].buffer[direccion and $3ff]:=true;
                 memoria[direccion]:=valor;
                end;
-
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -214,8 +219,10 @@ end;
 
 procedure ironhorse_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
-mem_snd[direccion]:=valor;
+case direccion of
+  0..$3fff:;  //ROM
+  $4000..$43ff:mem_snd[direccion]:=valor;
+end;
 end;
 
 function ironhorse_snd_inbyte(puerto:word):byte;
@@ -247,9 +254,11 @@ begin
  marcade.in1:=$ff;
  marcade.in2:=$ff;
  pedir_nmi:=false;
+ pedir_firq:=false;
  charbank:=0;
  sound_latch:=0;
  spritebank:=$3800;
+ palettebank:=0;
 end;
 
 function iniciar_ironhorse:boolean;
@@ -269,7 +278,7 @@ screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(240,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 6,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(ironhorse_getbyte,ironhorse_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3072000,$100);
@@ -279,17 +288,17 @@ z80_0.init_sound(ironhorse_sound_update);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3072000);
 //cargar roms
-if not(roms_load(@memoria,@ironhorse_rom,'ironhors.zip',sizeof(ironhorse_rom))) then exit;
+if not(roms_load(@memoria,ironhorse_rom)) then exit;
 //roms sonido
-if not(roms_load(@mem_snd,@ironhorse_snd,'ironhors.zip',sizeof(ironhorse_snd))) then exit;
+if not(roms_load(@mem_snd,ironhorse_snd)) then exit;
 //convertir chars
-if not(cargar_roms16b(@memoria_temp,@ironhorse_gfx,'ironhors.zip',0)) then exit;
+if not(roms_load16b(@memoria_temp,ironhorse_gfx)) then exit;
 init_gfx(0,8,8,$1000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //paleta
-if not(roms_load(@memoria_temp,@ironhorse_pal,'ironhors.zip',sizeof(ironhorse_pal))) then exit;
+if not(roms_load(@memoria_temp,ironhorse_pal)) then exit;
 for f:=0 to $ff do begin
   colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
   colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] shr 4);
@@ -321,7 +330,7 @@ begin
 llamadas_maquina.iniciar:=iniciar_ironhorse;
 llamadas_maquina.bucle_general:=ironhorse_principal;
 llamadas_maquina.reset:=reset_ironhorse;
-llamadas_maquina.fps_max:=30;
+llamadas_maquina.fps_max:=61;
 end;
 
 end.

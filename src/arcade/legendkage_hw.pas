@@ -9,21 +9,38 @@ procedure cargar_lk_hw;
 
 implementation
 const
-        lk_rom:array[0..2] of tipo_roms=(
-        (n:'a54-01-2.37';l:$8000;p:0;crc:$60fd9734),(n:'a54-02-2.38';l:$8000;p:$8000;crc:$878a25ce),());
+        lk_rom:array[0..1] of tipo_roms=(
+        (n:'a54-01-2.37';l:$8000;p:0;crc:$60fd9734),(n:'a54-02-2.38';l:$8000;p:$8000;crc:$878a25ce));
         lk_snd:tipo_roms=(n:'a54-04.54';l:$8000;p:0;crc:$541faf9a);
         lk_mcu:tipo_roms=(n:'a54-09.53';l:$800;p:0;crc:$0e8b8846);
         lk_data:tipo_roms=(n:'a54-03.51';l:$4000;p:0;crc:$493e76d8);
-        lk_char:array[0..4] of tipo_roms=(
+        lk_char:array[0..3] of tipo_roms=(
         (n:'a54-05-1.84';l:$4000;p:0;crc:$0033c06a),(n:'a54-06-1.85';l:$4000;p:$4000;crc:$9f04d9ad),
-        (n:'a54-07-1.86';l:$4000;p:$8000;crc:$b20561a4),(n:'a54-08-1.87';l:$4000;p:$c000;crc:$3ff3b230),());
+        (n:'a54-07-1.86';l:$4000;p:$8000;crc:$b20561a4),(n:'a54-08-1.87';l:$4000;p:$c000;crc:$3ff3b230));
+        //Dip
+        lk_dip_a:array [0..5] of def_dip=(
+        (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'200k 700k 500k+'),(dip_val:$2;dip_name:'200k 900k 700k+'),(dip_val:$1;dip_name:'300k 1000k 700k+'),(dip_val:$0;dip_name:'300k 1300k 1000k+'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Free Play';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Lives';number:4;dip:((dip_val:$18;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$8;dip_name:'5'),(dip_val:$0;dip_name:'255 (Cheat)'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Flip Screen';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        lk_dip_b:array [0..2] of def_dip=(
+        (mask:$f;name:'Coin A';number:16;dip:((dip_val:$f;dip_name:'9C 1C'),(dip_val:$e;dip_name:'8C 1C'),(dip_val:$d;dip_name:'7C 1C'),(dip_val:$c;dip_name:'6C 1C'),(dip_val:$b;dip_name:'5C 1C'),(dip_val:$a;dip_name:'4C 1C'),(dip_val:$9;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(dip_val:$2;dip_name:'1C 3C'),(dip_val:$3;dip_name:'1C 4C'),(dip_val:$4;dip_name:'1C 5C'),(dip_val:$5;dip_name:'1C 6C'),(dip_val:$6;dip_name:'1C 7C'),(dip_val:$7;dip_name:'1C 8C'))),
+        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$f0;dip_name:'9C 1C'),(dip_val:$e0;dip_name:'8C 1C'),(dip_val:$d0;dip_name:'7C 1C'),(dip_val:$c0;dip_name:'6C 1C'),(dip_val:$b0;dip_name:'5C 1C'),(dip_val:$a0;dip_name:'4C 1C'),(dip_val:$90;dip_name:'3C 1C'),(dip_val:$80;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 2C'),(dip_val:$20;dip_name:'1C 3C'),(dip_val:$30;dip_name:'1C 4C'),(dip_val:$40;dip_name:'1C 5C'),(dip_val:$50;dip_name:'1C 6C'),(dip_val:$60;dip_name:'1C 7C'),(dip_val:$70;dip_name:'1C 8C'))),());
+        lk_dip_c:array [0..6] of def_dip=(
+        (mask:$2;name:'Initial Season';number:2;dip:((dip_val:$2;dip_name:'Spring'),(dip_val:$0;dip_name:'Winter'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Difficulty';number:2;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Coinage Display';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$10;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Year Display';number:2;dip:((dip_val:$0;dip_name:'1985'),(dip_val:$20;dip_name:'MCMLXXXIV'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Invulnerability (Cheat)';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Coin Slots';number:2;dip:((dip_val:$0;dip_name:'1'),(dip_val:$80;dip_name:'2'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- scroll_txt_x,scroll_txt_y,scroll_fg_x,scroll_fg_y,scroll_bg_x,scroll_bg_y:byte;
+ scroll_val:array[0..5] of byte;
  mem_data:array[0..$3fff] of byte;
- sound_cmd,color_bnk,tipo_pant:byte;
+ sound_cmd,color_bnk:byte;
  bg_bank,fg_bank:word;
- snd_nmi,pending_nmi,prioridad_fg:boolean;
+ snd_nmi,prioridad_fg,pant_enable:boolean;
  //mcu
  mcu_mem:array[0..$7ff] of byte;
  port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
@@ -64,12 +81,12 @@ begin
 	end;
 end;
 
-procedure update_video_lk_hw;inline;
+procedure update_video_lk_hw;
 var
-  f,x,y:word;
-  nchar:word;
+  x,y:byte;
+  f,nchar:word;
 begin
-if (tipo_pant)=$f0 then begin
+if pant_enable then begin
   for f:=0 to $3ff do begin
     //BG
     if gfx[0].buffer[$400+f] then begin
@@ -87,52 +104,55 @@ if (tipo_pant)=$f0 then begin
       put_gfx_trans(x*8,y*8,nchar,$200+color_bnk,3,0);
       gfx[0].buffer[$800+f]:=false;
     end;
-    //TXT
-    if gfx[0].buffer[f] then begin
-      x:=f mod 32;
-      y:=f div 32;
-      nchar:=memoria[$f400+f];
-      put_gfx_trans(x*8,y*8,nchar,$110,1,0);
-      gfx[0].buffer[f]:=false;
-    end;
   end;
-  scroll_x_y(2,4,scroll_bg_x,scroll_bg_y);
+  scroll_x_y(2,4,scroll_val[4]+5,scroll_val[5]);
   if prioridad_fg then begin
-    scroll_x_y(3,4,scroll_fg_x,scroll_fg_y);
+    scroll_x_y(3,4,scroll_val[2]+3,scroll_val[3]);
     draw_sprites(0);
   end else begin
     draw_sprites(0);
-    scroll_x_y(3,4,scroll_fg_x,scroll_fg_y);
+    scroll_x_y(3,4,scroll_val[2]+3,scroll_val[3]);
   end;
-end else begin
-  for f:=0 to $3ff do begin
-    if gfx[0].buffer[f] then begin
-      x:=f mod 32;
-      y:=f div 32;
-      nchar:=memoria[$f400+f];
-      put_gfx(x*8,y*8,nchar,$110,1,0);
-      gfx[0].buffer[f]:=false;
-    end;
+end else begin //BG y FG ocultas
+  fill_full_screen(4,$400);
+  draw_sprites(0);
+end;
+for f:=0 to $3ff do begin
+  if gfx[0].buffer[f] then begin
+    x:=f mod 32;
+    y:=f div 32;
+    nchar:=memoria[$f400+f];
+    put_gfx_trans(x*8,y*8,nchar,$110,1,0);
+    gfx[0].buffer[f]:=false;
   end;
 end;
 draw_sprites($80);
-scroll_x_y(1,4,scroll_txt_x,scroll_txt_y);
+scroll_x_y(1,4,scroll_val[0]+1,scroll_val[1]);
 actualiza_trozo_final(16,16,240,224,4);
 end;
 
 procedure eventos_lk_hw;
 begin
 if event.arcade then begin
+  //P1
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  //P2
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $Fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  //SYS
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
 end;
 end;
 
@@ -166,33 +186,33 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function lkage_mcu_status_r:byte;
+function lk_getbyte(direccion:word):byte;
 var
   res:byte;
 begin
-	res:=0;
-	// bit 0 = when 1, mcu is ready to receive data from main cpu */
-	// bit 1 = when 1, mcu has sent data to the main cpu */
-	if (main_sent=0) then res:=res or $01;
-	if (mcu_sent<>0) then res:=res or $02;
-  lkage_mcu_status_r:=res;
-end;
-
-function lk_getbyte(direccion:word):byte;
-begin
 case direccion of
+  0..$e7ff,$f000..$f003,$f0a0..$f0a3,$f400..$ffff:lk_getbyte:=memoria[direccion];
+  $e800..$efff:lk_getbyte:=buffer_paleta[direccion and $7ff];
+  $f061:lk_getbyte:=$ff;
   $f062:begin
           mcu_sent:=0;
 	        lk_getbyte:=from_mcu;
         end;
-  $f080:lk_getbyte:=$7f;
-  $f081:lk_getbyte:=$00;
-  $f082:lk_getbyte:=$ff;
+  $f080:lk_getbyte:=marcade.dswa;
+  $f081:lk_getbyte:=marcade.dswb;
+  $f082:lk_getbyte:=marcade.dswc;
   $f083:lk_getbyte:=marcade.in0;
   $f084:lk_getbyte:=marcade.in1;
-  $f086:lk_getbyte:=$ff;
-  $f087:lk_getbyte:=lkage_mcu_status_r;
-  else lk_getbyte:=memoria[direccion];
+  $f086:lk_getbyte:=marcade.in2;
+  $f087:begin
+            res:=0;
+          	// bit 0 = when 1, mcu is ready to receive data from main cpu */
+          	// bit 1 = when 1, mcu has sent data to the main cpu */
+          	if (main_sent=0) then res:=res or $01;
+          	if (mcu_sent<>0) then res:=res or $02;
+            lk_getbyte:=res;
+        end;
+  $f0c0..$f0c5:lk_getbyte:=scroll_val[direccion and $7];
 end;
 end;
 
@@ -219,57 +239,62 @@ procedure lk_putbyte(direccion:word;valor:byte);
 var
   bank:word;
 begin
-if direccion<$e000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+  0..$dfff:;
+  $e000..$e7ff,$f0a0..$f0a3,$f100..$f15f:memoria[direccion]:=valor;
   $e800..$efff:if buffer_paleta[direccion and $7ff]<>valor then begin
                   buffer_paleta[direccion and $7ff]:=valor;
                   cambiar_color(direccion and $7fe);
                end;
-  $f000:begin
-          if (valor and $4)<>0 then bank:=$100
-            else bank:=0;
-          if fg_bank<>bank then begin
-            fg_bank:=bank;
-            fillchar(gfx[0].buffer[$800],$400,1);
-          end;
-        end;
-  $f001:begin
-          prioridad_fg:=(valor and $2)<>0;
-          if (valor and $8)<>0 then bank:=$100*5
-            else bank:=$100*1;
-          if bg_bank<>bank then begin
-            bg_bank:=bank;
-            fillchar(gfx[0].buffer[$400],$400,1);
-          end;
-          if color_bnk<>(valor and $f0) then begin
-            color_bnk:=valor and $f0;
-            fillchar(gfx[0].buffer[$400],$800,1);
-          end;
-        end;
-  $f002:if tipo_pant<>(valor and $f0) then begin
-            tipo_pant:=valor and $f0;
-            fillchar(gfx[0].buffer[0],$c00,1);
-          end;
-  $f060:begin
-          if snd_nmi then z80_1.change_nmi(PULSE_LINE)
-            else pending_nmi:=true;
+  $f000..$f003:begin
+                  memoria[direccion]:=valor;
+                  case (direccion and $3) of
+                    0:begin
+                        bank:=(valor and $4) shl 6;
+                        if fg_bank<>bank then begin
+                          fg_bank:=bank;
+                          fillchar(gfx[0].buffer[$800],$400,1);
+                        end;
+                      end;
+                    1:begin
+                        prioridad_fg:=(valor and $2)<>0;
+                        if (valor and $8)<>0 then bank:=$100*5
+                          else bank:=$100*1;
+                        if bg_bank<>bank then begin
+                          bg_bank:=bank;
+                          fillchar(gfx[0].buffer[$400],$400,1);
+                        end;
+                        if color_bnk<>(valor and $f0) then begin
+                          color_bnk:=valor and $f0;
+                          fillchar(gfx[0].buffer[$400],$800,1);
+                        end;
+                      end;
+                    2:pant_enable:=(valor and $f0)<>0;
+                  end;
+               end;
+  $f060:if not(snd_nmi) then begin
           sound_cmd:=valor;
+          z80_1.change_nmi(ASSERT_LINE);
+          snd_nmi:=false;
         end;
   $f062:begin
           from_main:=valor;
 	        main_sent:=1;
           m6805_0.irq_request(0,ASSERT_LINE);
         end;
-  $f0c0:scroll_txt_x:=valor+1;
-  $f0c1:scroll_txt_y:=valor;
-  $f0c2:scroll_fg_x:=valor+3;
-  $f0c3:scroll_fg_y:=valor;
-  $f0c4:scroll_bg_x:=valor+5;
-  $f0c5:scroll_bg_y:=valor;
-  $f400..$f7ff:gfx[0].buffer[direccion and $3ff]:=true;
-  $f800..$fbff:gfx[0].buffer[$800+(direccion and $3ff)]:=true;
-  $fc00..$ffff:gfx[0].buffer[$400+(direccion and $3ff)]:=true;
+  $f0c0..$f0c5:scroll_val[direccion and $7]:=valor;
+  $f400..$f7ff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $f800..$fbff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[$800+(direccion and $3ff)]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $fc00..$ffff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[$400+(direccion and $3ff)]:=true;
+                  memoria[direccion]:=valor;
+               end;
 end;
 end;
 
@@ -284,32 +309,28 @@ end;
 function snd_lk_hw_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$87ff:snd_lk_hw_getbyte:=mem_snd[direccion];
   $9000:snd_lk_hw_getbyte:=ym2203_0.status;
   $9001:snd_lk_hw_getbyte:=ym2203_0.read;
   $a000:snd_lk_hw_getbyte:=ym2203_1.status;
   $a001:snd_lk_hw_getbyte:=ym2203_1.read;
   $b000:snd_lk_hw_getbyte:=sound_cmd;
-    else snd_lk_hw_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure snd_lk_hw_putbyte(direccion:word;valor:byte);
 begin
-if (direccion<$8000) then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  0..$7fff:;
+  $8000..$87ff:mem_snd[direccion]:=valor;
   $9000:ym2203_0.control(valor);
   $9001:ym2203_0.write(valor);
   $a000:ym2203_1.control(valor);
   $a001:ym2203_1.write(valor);
-  $b001:begin
-          snd_nmi:=true;
-          if pending_nmi then begin
-              pending_nmi:=false;
-              z80_1.change_nmi(PULSE_LINE);
-          end;
+  $b002:begin
+          z80_1.change_nmi(CLEAR_LINE);
+          snd_nmi:=false;
         end;
-  $b002:snd_nmi:=false;
 end;
 end;
 
@@ -325,15 +346,13 @@ case direccion of
     	if (mcu_sent=0) then port_c_in:=port_c_in or $02;
     	mcu_lk_hw_getbyte:=(port_c_out and ddr_c) or (port_c_in and not(ddr_c));
     end;
-  else mcu_lk_hw_getbyte:=mcu_mem[direccion];
+  3..$7ff:mcu_lk_hw_getbyte:=mcu_mem[direccion];
 end;
 end;
 
 procedure mcu_lk_hw_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7ff;
-if direccion>$7f then exit;
-mcu_mem[direccion]:=valor;
 case direccion of
   0:port_a_out:=valor;
 	1:begin
@@ -352,6 +371,8 @@ case direccion of
 	4:ddr_a:=valor;
 	5:ddr_b:=valor;
 	6:ddr_c:=valor;
+  3,7..$7f:mcu_mem[direccion]:=valor;
+  $80..$7ff:;
 end;
 end;
 
@@ -362,8 +383,8 @@ end;
 
 procedure lk_hw_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
 end;
 
 //Main
@@ -375,22 +396,17 @@ begin
  ym2203_0.reset;
  ym2203_1.reset;
  reset_audio;
- scroll_txt_x:=0;
- scroll_fg_x:=0;
- scroll_bg_x:=0;
- scroll_txt_y:=0;
- scroll_fg_y:=0;
- scroll_bg_y:=0;
+ fillchar(scroll_val[0],5,0);
  marcade.in0:=$0b;
  marcade.in1:=$ff;
- snd_nmi:=false;
- pending_nmi:=false;
+ marcade.in2:=$ff;
  sound_cmd:=0;
  color_bnk:=0;
- tipo_pant:=$f0;
+ pant_enable:=false;
  bg_bank:=0;
  fg_bank:=0;
  prioridad_fg:=false;
+ snd_nmi:=false;
  //mcu
  port_a_in:=0;
  port_a_out:=0;
@@ -411,8 +427,6 @@ function iniciar_lk_hw:boolean;
 var
   memoria_temp:array[0..$ffff] of byte;
 const
-  pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   ps_x:array[0..15] of dword=(7, 6, 5, 4, 3, 2, 1, 0,
     64+7, 64+6, 64+5, 64+4, 64+3, 64+2, 64+1, 64+0);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -444,24 +458,31 @@ ym2203_0:=ym2203_chip.create(4000000);
 ym2203_0.change_irq_calls(snd_irq);
 ym2203_1:=ym2203_chip.create(4000000);
 //cargar roms
-if not(cargar_roms(@memoria[0],@lk_rom[0],'lkage.zip',0)) then exit;
+if not(roms_load(@memoria,lk_rom)) then exit;
 //cargar roms snd
-if not(cargar_roms(@mem_snd[0],@lk_snd,'lkage.zip')) then exit;
+if not(roms_load(@mem_snd,lk_snd)) then exit;
 //cargar roms mcu
-if not(cargar_roms(@mcu_mem[0],@lk_mcu,'lkage.zip')) then exit;
+if not(roms_load(@mcu_mem,lk_mcu)) then exit;
 //cargar data
-if not(cargar_roms(@mem_data[0],@lk_data,'lkage.zip')) then exit;
+if not(roms_load(@mem_data,lk_data)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@lk_char[0],'lkage.zip',0)) then exit;
+if not(roms_load(@memoria_temp,lk_char)) then exit;
 init_gfx(0,8,8,$800);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8,$800*8*8*1,$800*8*8*0,$800*8*8*3,$800*8*8*2);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir sprites
 init_gfx(1,16,16,$200);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,$200*32*8*1,$200*32*8*0,$200*32*8*3,$200*32*8*2);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
+//DIP
+marcade.dswa:=$7f;
+marcade.dswb:=$0;
+marcade.dswc:=$ff;
+marcade.dswa_val:=@lk_dip_a;
+marcade.dswb_val:=@lk_dip_b;
+marcade.dswc_val:=@lk_dip_c;
 reset_lk_hw;
 iniciar_lk_hw:=true;
 end;

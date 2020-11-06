@@ -266,14 +266,19 @@ if self.pedir_halt<>CLEAR_LINE then begin
   exit;
 end;
 self.estados_demas:=0;
-//comprobar irq's
-if (self.pedir_irq<>CLEAR_LINE) then begin
-  if ((instruccion.h<>$6d) and ((instruccion.h and $e0)<>$80) and (instruccion.w<>$7f82)) then self.estados_demas:=self.ext_irq;
-end;
 self.opcode:=true;
 instruccion.w:=self.rom[r.pc.w];
-r.pc.w:=r.pc.w+1;
 self.opcode:=false;
+//comprobar irq's
+if (self.pedir_irq<>CLEAR_LINE) then begin
+  if ((instruccion.h<>$6d) and ((instruccion.h and $e0)<>$80) and (instruccion.w<>$7f82)) then begin
+      self.estados_demas:=self.ext_irq;
+      self.opcode:=true;
+      instruccion.w:=self.rom[r.pc.w];
+      self.opcode:=false;
+  end;
+end;
+r.pc.w:=r.pc.w+1;
 case instruccion.h of
   $00..$0f:begin  //add_sh
               r.oldacc.l:=r.acc.l;

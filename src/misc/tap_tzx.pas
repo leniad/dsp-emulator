@@ -1,6 +1,13 @@
 unit tap_tzx;
 
 {
+ - Version 3.5.2
+     - Cambiado el calculo de la pausa... Los estados T se basan en los 3.5Mhz del spectrum
+     - En la funcion 'play_cinsta_tzx' se suman los estados T, no hay que hacerlo manualmente
+     - La variable lpausa ahora el dword, y ya no se calcula cuando avanza la cinta, se calcula antes
+ - Version 3.5.1
+     - Arreglado el ultimo bloque en Lazarus
+     - Si el grupo no esta cerrado al final de la cinta, lo cierro
  - Version 3.5
      - Mejoradas las cargas de los formatos, ahora uso bloques de datos
      - PZX
@@ -20,7 +27,7 @@ uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}grids,dialogs,main_engine,
      lenslock,samples,sound_engine;
 
 const
-    MAX_TZX=$fff;
+    MAX_TZX=$3fff;
 
 type
   tcsw_header=packed record
@@ -57,6 +64,12 @@ type
               flag,total_sym:byte;
             end;
   ptsimbolos=^tsimbolos;
+  ttap_c64=packed record
+    header:array[0..11] of ansichar;
+    version:byte;
+    expansion:dword;
+    size_:array[0..3] of byte;
+  end;
   tipo_datos_tzx=record
            tipo_bloque:byte;
            lcabecera:word;
@@ -66,19 +79,22 @@ type
            luno:word;
            ltono_cab:word;
            lbyte:byte;
-           lpausa:word;
+           lpausa:dword;
            lbloque:dword;
            salta_bloque:smallint;
            datos:Pbyte;
            crc32:dword;
            checksum:byte;
-           pulsos_sym:array[0..$FF] of ptsimbolos;
+           pulsos_sym:array[0..$ff] of ptsimbolos;
            num_pulsos:word;
            pulse_num:byte;
-           inicial:byte;
+           initial_val:byte;
           end;
   ptipo_datos_tzx=^tipo_datos_tzx;
   tipo_cinta_tzx=record
+            {$ifdef fpc}
+            click_falso:boolean;
+            {$endif}
             es_tap:boolean;
             play_tape:boolean;
             cargada:boolean;
@@ -87,32 +103,33 @@ type
             grupo:boolean;
             indice_cinta:word;
             estado_actual,bit_actual:byte;
-            estados:dword;
+            estados:integer;
             datos_tzx:array[0..MAX_TZX] of ptipo_datos_tzx;
             indice_saltos,indice_select:array[0..MAX_TZX] of word;
             value:byte;
             name:string;
+            tape_start:procedure;
+            tape_stop:procedure;
           end;
 
 var
  cinta_tzx:tipo_cinta_tzx;
  datos_totales_tzx:dword;
+ TZX_CLOCK:word=3500;
 
 procedure vaciar_cintas;
 procedure play_cinta_tap(z80_val:npreg_z80);
-procedure play_cinta_tzx;
+procedure play_cinta_tzx(avanza_estados:byte);
 procedure siguiente_bloque_tzx;
 function abrir_tap(datos:pbyte;long:integer):boolean;
 function abrir_tzx(data:pbyte;long:integer):boolean;
 function abrir_csw(data:pbyte;long:integer):boolean;
 function abrir_wav(data:pbyte;long:integer):boolean;
 function abrir_pzx(data:pbyte;long:integer):boolean;
+function abrir_c64_tap(data:pbyte;long:integer):boolean;
 
 implementation
 uses spectrum_48k,spectrum_128k,spectrum_3;
-
-const
-  tabla_tzx:array[1..8] of byte=(128,64,32,16,8,4,2,1);
 
 var
  indice_vuelta,indice_llamadas:word;
@@ -142,16 +159,16 @@ begin
   cinta_tzx.datos_tzx[num].lcero:=0;
   cinta_tzx.datos_tzx[num].luno:=0;
   cinta_tzx.datos_tzx[num].ltono_cab:=0;
-  cinta_tzx.datos_tzx[num].lbyte:=0;
+  cinta_tzx.datos_tzx[num].lbyte:=8;
   cinta_tzx.datos_tzx[num].lpausa:=0;
   cinta_tzx.datos_tzx[num].lbloque:=0;
   cinta_tzx.datos_tzx[num].salta_bloque:=0;
   cinta_tzx.datos_tzx[num].datos:=nil;
   cinta_tzx.datos_tzx[num].crc32:=0;
   cinta_tzx.datos_tzx[num].checksum:=0;
-  cinta_tzx.datos_tzx[num].inicial:=0;
   cinta_tzx.datos_tzx[num].num_pulsos:=0;
   cinta_tzx.datos_tzx[num].pulse_num:=0;
+  cinta_tzx.datos_tzx[num].initial_val:=0;
   //Aqui deben ser cero los punteros de los pulsos, deben estar vacios de la funcion 'vacia cinta'
   for f:=0 to $ff do cinta_tzx.datos_tzx[num].pulsos_sym[f]:=nil;
 end;
@@ -172,12 +189,10 @@ begin
   end;
 end;
 
-procedure play_cinta_tzx;
-var
-  temp_jump:smallint;
-  ptemp:pbyte;
+procedure play_cinta_tzx(avanza_estados:byte);
 begin
-if cinta_tzx.estados<=tzx_estados_necesarios then exit;
+cinta_tzx.estados:=cinta_tzx.estados+avanza_estados;
+if cinta_tzx.estados<tzx_estados_necesarios then exit;
 main_vars.mensaje_principal:='    '+leng[main_vars.idioma].mensajes[1]+': '+inttostr(datos_totales_tzx);
 cinta_tzx.estados:=cinta_tzx.estados-tzx_estados_necesarios;
 if cinta_tzx.en_pausa then begin
@@ -195,8 +210,8 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
         $10,$11,$14:begin //cargas normal, turbo y datos puros
                    case cinta_tzx.estado_actual of
                         0:begin   //cabecera
-                            cinta_tzx.value:=cinta_tzx.value xor 64;
-                            If tzx_temp<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].ltono_cab  Then begin
+                            cinta_tzx.value:=cinta_tzx.value xor $40;
+                            if tzx_temp<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].ltono_cab then begin
                                 tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
                                 tzx_temp:=tzx_temp+1;
                             end else begin
@@ -204,25 +219,28 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                                 if tzx_datos_p<>nil then begin
                                   cinta_tzx.estado_actual:=1;
                                   tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lsinc1;
-                                end else cinta_tzx.estado_actual:=4;
+                                end else begin
+                                  cinta_tzx.en_pausa:=true;
+                                  tzx_estados_necesarios:= cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
+                                end;
                             end;
                           end;
                         1:begin  //sync 1
-                                cinta_tzx.value:=cinta_tzx.value xor 64;
+                                cinta_tzx.value:=cinta_tzx.value xor $40;
                                 cinta_tzx.estado_actual:=2;
                                 tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lsinc2;
                           end;
                         2:begin  //sync 2
-                                cinta_tzx.value:=cinta_tzx.value Xor 64;
+                                cinta_tzx.value:=cinta_tzx.value xor $40;
                                 cinta_tzx.estado_actual:=3;
-                                if (tzx_datos_p^ and 128)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
-                                        else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
-                                cinta_tzx.bit_actual:=128;
+                                if (tzx_datos_p^ and $80)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
+                                  else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
+                                cinta_tzx.bit_actual:=$80;
                                 tzx_pulsos:=2;
                                 tzx_ultimo_bit:=1;
                           end;
                         3:begin  //datos
-                                cinta_tzx.value:=cinta_tzx.value Xor 64;
+                                cinta_tzx.value:=cinta_tzx.value xor $40;
                                 tzx_pulsos:=tzx_pulsos-1; //hago la forma de la onda
                                 if tzx_pulsos=0 then begin
                                   if cinta_tzx.bit_actual>tzx_ultimo_bit then begin //no estoy en el ultimo bit
@@ -234,27 +252,28 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                                       tzx_contador_datos:=tzx_contador_datos+1;
                                       datos_totales_tzx:=datos_totales_tzx+1;
                                       inc(tzx_datos_p); //incremento el byte en los datos
-                                      if tzx_contador_datos<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque then begin  {¿se ha acabado?}
-                                        if tzx_contador_datos=(cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque-1) then tzx_ultimo_bit:=tabla_tzx[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbyte] else tzx_ultimo_bit:=1;
-                                        cinta_tzx.bit_actual:=128;
+                                      if tzx_contador_datos<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque then begin //se ha acabado?
+                                        //Es el ultimo bit?
+                                        if tzx_contador_datos=(cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque-1) then tzx_ultimo_bit:=1 shl (8-cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbyte);
+                                        cinta_tzx.bit_actual:=$80;
                                         tzx_pulsos:=2;
-                                        if (tzx_datos_p^ and 128)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
+                                        if (tzx_datos_p^ and $80)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
                                            else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
                                       end else begin   //pasar al otro bloque
-                                        tzx_estados_necesarios:= cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
+                                        tzx_estados_necesarios:= cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
                                         cinta_tzx.en_pausa:=true;
                                       end;
                                   end;
-                                end else if (tzx_datos_p^ and cinta_tzx.bit_actual)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
-                                           else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
-                                           //no ha completado la onda
+                                end else begin  //no ha completado la onda
+                                  if (tzx_datos_p^ and cinta_tzx.bit_actual)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
+                                    else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
+                                end;
                           end;
-                        4:cinta_tzx.en_pausa:=true;
                    end; //del estado_actual
                  end;
         $12:begin //tono puro
-                cinta_tzx.value:=cinta_tzx.value Xor 64;
-                If tzx_temp<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].ltono_cab Then begin
+                cinta_tzx.value:=cinta_tzx.value xor $40;
+                if tzx_temp<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].ltono_cab then begin
                         tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
                         tzx_temp:=tzx_temp+1;
                 end else begin
@@ -263,28 +282,11 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                 end;
             end;
          $13:begin //secuencia de pulsos
-                cinta_tzx.value:=cinta_tzx.value Xor 64;
+                cinta_tzx.value:=cinta_tzx.value xor $40;
                 if tzx_pulsos<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque then begin
                         tzx_pulsos:=tzx_pulsos+1;
                         tzx_estados_necesarios:=sacar_word(tzx_datos_p);
                         inc(tzx_datos_p,2);
-                        case tzx_estados_necesarios of
-                          $FFFD:begin  //mismo pulso
-                                 cinta_tzx.value:=cinta_tzx.value xor $40;
-                                 tzx_estados_necesarios:=sacar_word(tzx_datos_p);
-                                 inc(tzx_datos_p,2);
-                                end;
-                          $FFFE:begin  //forzar 0
-                                 cinta_tzx.value:=$0;
-                                 tzx_estados_necesarios:=sacar_word(tzx_datos_p);
-                                 inc(tzx_datos_p,2);
-                                end;
-                          $FFFF:begin //forzar 1
-                                 cinta_tzx.value:=$40;
-                                 tzx_estados_necesarios:=sacar_word(tzx_datos_p);
-                                 inc(tzx_datos_p,2);
-                                end;
-                        end;
                 end else begin
                   cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
                   siguiente_bloque_tzx;
@@ -294,18 +296,18 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                 if cinta_tzx.bit_actual>tzx_ultimo_bit then begin //no estoy en el ultimo bit
                   tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno;
                   cinta_tzx.bit_actual:=cinta_tzx.bit_actual shr 1; //pillo el siguiente
-                  if (tzx_datos_p^ and cinta_tzx.bit_actual)<>0 then cinta_tzx.value:=$40 else cinta_tzx.value:=0;
+                  cinta_tzx.value:=$40*byte((tzx_datos_p^ and cinta_tzx.bit_actual)<>0);
                 end else begin //estoy en el ultimo bit
                   tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno;
                   tzx_contador_datos:=tzx_contador_datos+1;
                   datos_totales_tzx:=datos_totales_tzx+1;
                   inc(tzx_datos_p); //incremento el byte en los datos
                   if tzx_contador_datos<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque then begin  //¿se ha acabado?
-                    if tzx_contador_datos=(cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque-1) then tzx_ultimo_bit:=tabla_tzx[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbyte] else tzx_ultimo_bit:=1;
-                    cinta_tzx.bit_actual:=128;
-                    if (tzx_datos_p^ and 128)<>0 then cinta_tzx.value:=$40 else cinta_tzx.value:=0;
+                    if tzx_contador_datos=(cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque-1) then tzx_ultimo_bit:=1 shl (8-cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbyte);
+                    cinta_tzx.bit_actual:=$80;
+                    if (tzx_datos_p^ and $80)<>0 then cinta_tzx.value:=$40 else cinta_tzx.value:=0;
                   end else begin   //pasar al otro bloque
-                    tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
+                    tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
                     cinta_tzx.en_pausa:=true;
                   end;
                 end;
@@ -336,14 +338,14 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                       cinta_tzx.bit_actual:=calcular_bit_actual_inicial(cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].num_pulsos);
                       tzx_pulsos:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulsos_sym[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulse_num].total_sym;
                       tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulsos_sym[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulse_num].valor[tzx_pulsos];
-                      case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulsos_sym[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulse_num].flag of
+                      case (cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulsos_sym[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulse_num].flag and 3) of
                         0:;
-                        1:cinta_tzx.value:=cinta_tzx.value Xor 64;
+                        1:cinta_tzx.value:=cinta_tzx.value xor $40;
                         2:cinta_tzx.value:=0;
                         3:cinta_tzx.value:=$40;
                       end;
                     end else begin  //Se ha terminado... hago la pausa
-                      tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
+                      tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
                       cinta_tzx.en_pausa:=true;
                     end;
                   end;
@@ -352,28 +354,19 @@ case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
                   tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulsos_sym[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].pulse_num].valor[tzx_pulsos];
                 end;
             end;
-        $23:begin  //saltar a bloque
-                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].salta_bloque;
+        $20:begin //pausa
+                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
                 siguiente_bloque_tzx;
             end;
-        $26:begin  //Call sequence
-              if indice_llamadas<cinta_tzx.datos_tzx[indice_vuelta].lbloque then begin
-                ptemp:=cinta_tzx.datos_tzx[indice_vuelta].datos;
-                inc(ptemp,indice_llamadas*2);
-                temp_jump:=smallint(sacar_word(ptemp));
-                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+temp_jump;
-                indice_llamadas:=indice_llamadas+1;
-              end else cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
-              siguiente_bloque_tzx;
-            end;
-         $f3:begin //secuencia de pulsos grandes
-                cinta_tzx.value:=cinta_tzx.value Xor 64;
+        $f3:begin //secuencia de pulsos grandes
+                cinta_tzx.value:=cinta_tzx.value xor 64;
                 if tzx_pulsos<cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque then begin
                         tzx_pulsos:=tzx_pulsos+1;
                         tzx_estados_necesarios:=sacar_word(tzx_datos_p);
                         inc(tzx_datos_p,2);
                         tzx_estados_necesarios:=tzx_estados_necesarios or (sacar_word(tzx_datos_p) shl 16);
                         inc(tzx_datos_p,2);
+                        datos_totales_tzx:=datos_totales_tzx+1;
                 end else begin
                   cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
                   siguiente_bloque_tzx;
@@ -392,6 +385,7 @@ var
    f:byte;
    cadena:string;
    ptemp:pbyte;
+   temp_jump:smallint;
 begin
 if not(cinta_tzx.grupo) then begin
   datos_totales_tzx:=0;
@@ -402,56 +396,54 @@ if not(cinta_tzx.grupo) then begin
     p.Bottom:=p.top;
     tape_window1.stringgrid1.Selection:=p;
     tape_window1.StringGrid1.Refresh;
+  {$else}
+    cinta_tzx.click_falso:=true;
+    tape_window1.StringGrid1.row:=cinta_tzx.indice_saltos[cinta_tzx.indice_cinta];
+    if ((tape_window1.StringGrid1.Row>6) and (tape_window1.StringGrid1.Row<(tape_window1.StringGrid1.RowCount-6)) and (tzx_contador_loop=0)) then tape_window1.StringGrid1.TopRow:=tape_window1.StringGrid1.Row-4;
+    cinta_tzx.click_falso:=false;
   {$endif}
 end;
-cinta_tzx.estados:=0;
 cinta_tzx.en_pausa:=false;
 tzx_temp:=0;
 tzx_datos_p:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos;
 tzx_contador_datos:=0;
-  case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
+case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].tipo_bloque of
       $10,$11:begin //datos normal y turbo
-                   tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
-                   cinta_tzx.estado_actual:=0;
-                 end;
+                 tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
+                 cinta_tzx.estado_actual:=0;
+              end;
         $12:begin  //tono puro
-                   tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
-                   tzx_temp:=1;
-                 end;
+                tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcabecera;
+                tzx_temp:=1;
+            end;
         $13:begin  //secuencias de pulsos
+                case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].initial_val of
+                      0:;
+                      1:cinta_tzx.value:=cinta_tzx.value xor $40;
+                      2:cinta_tzx.value:=0;
+                      3:cinta_tzx.value:=$40;
+                end;
                 tzx_estados_necesarios:=sacar_word(tzx_datos_p);
                 inc(tzx_datos_p,2);
-                case tzx_estados_necesarios of
-                  $FFFD:begin  //mismo pulso
-                         cinta_tzx.value:=cinta_tzx.value xor $40;
-                         tzx_estados_necesarios:=sacar_word(tzx_datos_p);
-                         inc(tzx_datos_p,2);
-                        end;
-                  $FFFE:begin  //forzar 0
-                         cinta_tzx.value:=0;
-                         tzx_estados_necesarios:=sacar_word(tzx_datos_p);
-                         inc(tzx_datos_p,2);
-                        end;
-                  $FFFF:begin //forzar 1
-                         cinta_tzx.value:=$40;
-                         tzx_estados_necesarios:=sacar_word(tzx_datos_p);
-                         inc(tzx_datos_p,2);
-                        end;
-                  end;
                 tzx_pulsos:=1;
             end;
         $14:begin //datos puros
                 cinta_tzx.estado_actual:=3;
-                if (tzx_datos_p^ and 128)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
-                        else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
-                cinta_tzx.bit_actual:=128;
+                if (tzx_datos_p^ and $80)<>0 then tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno
+                    else tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lcero;
+                cinta_tzx.bit_actual:=$80;
                 tzx_pulsos:=2;
-                if (cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque-1)=0 then tzx_ultimo_bit:=tabla_tzx[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbyte] else tzx_ultimo_bit:=1;
+                //Si la longitud del bloque solo es 1 byte, puede ser que sean solo bits..
+                if (cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque=1) then tzx_ultimo_bit:=1 shl (8-cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbyte)
+                  else tzx_ultimo_bit:=1; //No son bits, es un byte entero
             end;
         $15:begin //direct recording
                 tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].luno;
-                cinta_tzx.bit_actual:=128;
-                if (cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque-1)=0 then tzx_ultimo_bit:=tabla_tzx[cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbyte] else tzx_ultimo_bit:=1;
+                cinta_tzx.value:=$40*byte((tzx_datos_p^ and $80)<>0);
+                cinta_tzx.bit_actual:=$80;
+                //Si la longitud del bloque solo es 1 byte, puede ser que sean solo bits..
+                if (cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque=1) then tzx_ultimo_bit:=1 shl (8-cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbyte)
+                  else tzx_ultimo_bit:=1; //No son bits, es un byte entero
             end;
         $19:begin //datos especiales
                 //Calcular el simbolo
@@ -466,42 +458,28 @@ tzx_contador_datos:=0;
                       2:cinta_tzx.value:=0;
                       3:cinta_tzx.value:=$40;
                 end;
-                case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].inicial of
-                  0:;
-                  1:cinta_tzx.value:=0;
-                  2:cinta_tzx.value:=$40;
-                end;
             end;
         $20:begin //pausa
-                tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
-                if tzx_estados_necesarios=0 then tape_window1.fStopCinta(nil);
-                case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].inicial of
-                    0:;
-                    1:cinta_tzx.value:=0;
+                tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
+                if tzx_estados_necesarios=0 then begin
+                   tape_window1.fStopCinta(nil);
+                   cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                   siguiente_bloque_tzx;
                 end;
             end;
         $21:begin //inicio grupo
                 cinta_tzx.grupo:=true;
-                tzx_estados_necesarios:=0;
+                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                siguiente_bloque_tzx;
             end;
         $22:begin //fin grupo
                 cinta_tzx.grupo:=false;
-                tzx_estados_necesarios:=0;
+                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                siguiente_bloque_tzx;
             end;
-        $28,$30,$32,$33,$35,$23,$5a:tzx_estados_necesarios:=0;
-        $2b:begin //Set signal level
-              tzx_estados_necesarios:=0;
-              if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos^=0 then cinta_tzx.value:=$40
-                 else cinta_tzx.value:=0;
-            end;
-        $31:begin
-              cadena:='';
-              ptemp:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos;
-              for f:=1 to cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque do begin
-                cadena:=cadena+chr(ptemp^);
-                inc(ptemp);
-              end;
-              MessageDlg(cadena, mtInformation,[mbOk], 0);
+        $23:begin //salta posicion
+                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].salta_bloque;
+                siguiente_bloque_tzx;
             end;
         $24:begin //loop start
                 tzx_contador_loop:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque;
@@ -518,19 +496,62 @@ tzx_contador_datos:=0;
                   siguiente_bloque_tzx;
                 end;
             end;
-        $26:begin
+        $26:begin //call sequence
              indice_vuelta:=cinta_tzx.indice_cinta;
              indice_llamadas:=0;
-             tzx_estados_necesarios:=0;
+             ptemp:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos;
+             temp_jump:=smallint(sacar_word(ptemp));
+             cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+temp_jump;
+             siguiente_bloque_tzx;
             end;
-        $27:begin
+        $27:begin //return call sequence
               if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta+1].tipo_bloque=$22 then cinta_tzx.grupo:=false;
-              cinta_tzx.indice_cinta:=indice_vuelta;
-              tzx_estados_necesarios:=0;
+              indice_llamadas:=indice_llamadas+1;
+              //Hay mas llamadas dentro de la sequencia??
+              if indice_llamadas<cinta_tzx.datos_tzx[indice_vuelta].lbloque then begin
+                ptemp:=cinta_tzx.datos_tzx[indice_vuelta].datos;
+                inc(ptemp,indice_llamadas*2);
+                temp_jump:=smallint(sacar_word(ptemp));
+                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+temp_jump;
+                indice_llamadas:=indice_llamadas+1;
+              end else begin
+                cinta_tzx.indice_cinta:=indice_vuelta+1;
+              end;
+              siguiente_bloque_tzx;
+            end;
+        $28,$30,$32,$33,$35,$5a:begin
+                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                siguiente_bloque_tzx;
             end;
         $2a:if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then tape_window1.fStopCinta(nil) //stop if 48K
-              else tzx_estados_necesarios:=0;
+              else begin
+                cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+                siguiente_bloque_tzx;
+              end;
+        $2b:begin //Set signal level
+              if cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos^<>0 then cinta_tzx.value:=$40
+                 else cinta_tzx.value:=0;
+              cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+              siguiente_bloque_tzx;
+            end;
+        $31:begin
+              cadena:='';
+              ptemp:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].datos;
+              for f:=1 to cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque do begin
+                cadena:=cadena+chr(ptemp^);
+                inc(ptemp);
+              end;
+              MessageDlg(cadena, mtInformation,[mbOk], 0);
+              cinta_tzx.indice_cinta:=cinta_tzx.indice_cinta+1;
+              siguiente_bloque_tzx;
+            end;
         $f3:begin  //secuencias de pulsos muy grandes
+                case cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].initial_val of
+                      0:;
+                      1:cinta_tzx.value:=cinta_tzx.value xor $40;
+                      2:cinta_tzx.value:=0;
+                      3:cinta_tzx.value:=$40;
+                end;
                 tzx_estados_necesarios:=sacar_word(tzx_datos_p);
                 inc(tzx_datos_p,2);
                 tzx_estados_necesarios:=tzx_estados_necesarios or (sacar_word(tzx_datos_p) shl 16);
@@ -545,12 +566,6 @@ tzx_contador_datos:=0;
               tape_window1.fStopCinta(nil);
             end;
       end;
-{$ifdef fpc}
-if not(cinta_tzx.grupo) then begin
-    tape_window1.StringGrid1.row:=cinta_tzx.indice_saltos[cinta_tzx.indice_cinta];
-    if ((tape_window1.StringGrid1.Row>6) and (tape_window1.StringGrid1.Row<(tape_window1.StringGrid1.RowCount-6)) and (tzx_contador_loop=0)) then tape_window1.StringGrid1.TopRow:=tape_window1.StringGrid1.Row-4;
-end;
-{$endif}
 end;
 
 procedure play_cinta_tap(z80_val:npreg_z80);
@@ -587,7 +602,7 @@ end;
 datos_totales_tzx:=datos_totales_tzx+cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lbloque;
 bt:=z80_val.f;z80_val.f:=z80_val.f2;z80_val.f2:=bt;
 z80_val.pc:=$05e2;
-tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa*(sound_status.cpu_clock div 1000);
+tzx_estados_necesarios:=cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].lpausa;
 cinta_tzx.en_pausa:=true;
 end;
 
@@ -623,6 +638,9 @@ var_spectrum.sd_1:=false;
 cinta_tzx.en_pausa:=false;
 cinta_tzx.cargada:=false;
 cinta_tzx.play_tape:=false;
+{$ifdef fpc}
+cinta_tzx.click_falso:=false;
+{$endif}
 if lenslock1.Showing then lenslock1.Close;
 lenslok.activo:=false;
 tape_window1.label2.caption:='';
@@ -693,42 +711,41 @@ vaciar_cintas;
 indice:=0;       //posicion de la cinta
 longitud:=0;   //longitud que llevo
 while longitud<long do begin
+        //Recojo los datos
+        copymemory(tap_header,datos,20);
+        //Avanzo hasta los datos (quito la longitud que no es del Spectrum)
+        inc(datos,2);inc(longitud,2);
+        //Control de errores! Si la longitud es 0 que se salga!!
+        if tap_header.size=0 then break;
+        //Creo los datos en la cinta
         getmem(cinta_tzx.datos_tzx[indice],sizeof(tipo_datos_tzx));
         zero_tape_data(indice);
+        //Pongo los datos del bloque
         cinta_tzx.datos_tzx[indice].tipo_bloque:=$10;
-        cinta_tzx.datos_tzx[indice].lpausa:=2000;
+        cinta_tzx.datos_tzx[indice].lpausa:=2000*TZX_CLOCK;
         cinta_tzx.datos_tzx[indice].lcabecera:=2168;
         cinta_tzx.datos_tzx[indice].lsinc1:=667;
         cinta_tzx.datos_tzx[indice].lsinc2:=735;
         cinta_tzx.datos_tzx[indice].lcero:=855;
         cinta_tzx.datos_tzx[indice].luno:=1710;
         cinta_tzx.datos_tzx[indice].lbyte:=8;
-        //Recojo los datos
-        copymemory(tap_header,datos,20);
-        //Control de errores! Si la longitud es 0 que se salga!!
-        if tap_header.size=0 then break;
-        //Avanzo hasta los datos (quito la longitud que no es del Spectrum)
-        inc(datos,2);inc(longitud,2);
         cinta_tzx.datos_tzx[indice].lbloque:=tap_header.size;
         if tap_header.flag=0 then cinta_tzx.datos_tzx[indice].ltono_cab:=8064
           else cinta_tzx.datos_tzx[indice].ltono_cab:=3220;
-        if tap_header.size>0 then getmem(cinta_tzx.datos_tzx[indice].datos,tap_header.size)
-          else getmem(cinta_tzx.datos_tzx[indice].datos,1);
+        getmem(cinta_tzx.datos_tzx[indice].datos,tap_header.size);
         copymemory(cinta_tzx.datos_tzx[indice].datos,datos,tap_header.size);
         cinta_tzx.datos_tzx[indice].crc32:=calc_crc(cinta_tzx.datos_tzx[indice].datos,tap_header.size);
         //Avanzo el resto, menos uno, para ir al final y poner el checksum
         inc(datos,tap_header.size-1);inc(longitud,tap_header.size);
-        if tap_header.size>1 then begin
-          cinta_tzx.datos_tzx[indice].checksum:=datos^;
-          inc(datos);
-        end else cinta_tzx.datos_tzx[indice].checksum:=$ff;
-        //Pongo los datos del bloque si la longitud del bloque es mayor que 20!
-        if tap_header.size>18 then begin
-          case tap_header.flag of
-            $00:cadena:=leng[main_vars.idioma].cinta[0]+': '+tap_header.file_name; //cabecera
+        cinta_tzx.datos_tzx[indice].checksum:=datos^;
+        inc(datos);
+        //Por defecto pongo como nombre 'datos'
+        cadena:=leng[main_vars.idioma].cinta[2];
+        case tap_header.flag of
+            $00:if tap_header.size>18 then begin //Pongo el nombre si hay mas de 18!
+                  cadena:=leng[main_vars.idioma].cinta[0]+': '+tap_header.file_name; //cabecera
+                end;
             $ff:cadena:=leng[main_vars.idioma].cinta[1]; //bytes
-              else cadena:=leng[main_vars.idioma].cinta[2]; //datos
-          end;
         end;
         tape_window1.stringgrid1.Cells[0,indice]:=cadena;
         tape_window1.stringgrid1.Cells[1,indice]:=inttostr(tap_header.size);
@@ -774,7 +791,7 @@ getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
 zero_tape_data(0);
 cinta_tzx.datos_tzx[0].tipo_bloque:=$15;
 cinta_tzx.datos_tzx[0].lpausa:=0;
-cinta_tzx.datos_tzx[0].luno:=trunc(sound_status.cpu_clock/FREQ_BASE_AUDIO);
+cinta_tzx.datos_tzx[0].luno:=trunc((TZX_CLOCK*1000)/FREQ_BASE_AUDIO);
 cinta_tzx.datos_tzx[0].lbloque:=ltemp div 8;
 if (ltemp mod 8)<>0 then cinta_tzx.datos_tzx[0].lbloque:=cinta_tzx.datos_tzx[0].lbloque+1;
 cinta_tzx.datos_tzx[0].lbyte:=ltemp mod 8;
@@ -782,18 +799,18 @@ getmem(cinta_tzx.datos_tzx[0].datos,cinta_tzx.datos_tzx[0].lbloque);
 ptemp_b:=cinta_tzx.datos_tzx[0].datos;
 //Descomprimir los datos
 ptemp_w2:=ptemp_w;
-pos:=0;
+pos:=8;
 vtemp:=0;
 for f:=0 to (ltemp-1) do begin
   temp_w:=ptemp_w2^;
   inc(ptemp_w2);
-  if (temp_w and $8000)<>0 then vtemp:=vtemp or tabla_tzx[pos+1];
-  pos:=pos+1;
-  if pos=8 then begin
+  if (temp_w and $8000)<>0 then vtemp:=vtemp or (1 shl (pos-1));
+  pos:=pos-1;
+  if pos=0 then begin
     ptemp_b^:=vtemp;
     inc(ptemp_b);
     vtemp:=0;
-    pos:=0;
+    pos:=8;
   end;
 end;
 if pos<>0 then ptemp_b^:=vtemp;
@@ -927,7 +944,7 @@ getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
 zero_tape_data(0);
 cinta_tzx.datos_tzx[0].tipo_bloque:=$15;
 cinta_tzx.datos_tzx[0].lpausa:=0;
-cinta_tzx.datos_tzx[0].luno:=trunc(sound_status.cpu_clock/sample_rate);
+cinta_tzx.datos_tzx[0].luno:=trunc((TZX_CLOCK*1000)/sample_rate);
 cinta_tzx.datos_tzx[0].lbyte:=8;
 cinta_tzx.datos_tzx[0].lbloque:=long_final;
 getmem(cinta_tzx.datos_tzx[0].datos,long_final);
@@ -1024,8 +1041,8 @@ var
   tempb,selector:byte;
   fin_grupo:boolean;
   crc_grupo:dword;
-  pulsos:array[0..$FFFF] of word;
-  simbolos:array[0..$1F] of tsimbolos;
+  pulsos:array[0..$ffff] of word;
+  simbolos:array[0..$1f] of tsimbolos;
   tzx_cpc_header:^ttzx_cpc_header;
   tzx_header:^ttzx_header;
   tap_header:^ttap_header;
@@ -1069,7 +1086,7 @@ while longitud<long do begin
                           copymemory(tzx_type_10,data,4);
                           inc(data,4);inc(longitud,4);
                           cinta_tzx.datos_tzx[temp].tipo_bloque:=$10;
-                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_10.pause;
+                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_10.pause*TZX_CLOCK;
                           cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_10.size;
                           cinta_tzx.datos_tzx[temp].lcabecera:=2168;
                           cinta_tzx.datos_tzx[temp].lsinc1:=667;
@@ -1112,8 +1129,8 @@ while longitud<long do begin
                           cinta_tzx.datos_tzx[temp].luno:=tzx_type_11.one_bit;
                           cinta_tzx.datos_tzx[temp].ltono_cab:=tzx_type_11.pilot_length;
                           cinta_tzx.datos_tzx[temp].lbyte:=tzx_type_11.last_byte;
-                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_11.pause;
-                          cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_11.size1+(tzx_type_11.size2*65536);
+                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_11.pause*TZX_CLOCK;
+                          cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_11.size1+(tzx_type_11.size2 shl 16);
                           freemem(tzx_type_11);
                           inc(data,18);inc(longitud,18);
                           getmem(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
@@ -1165,8 +1182,8 @@ while longitud<long do begin
                           cinta_tzx.datos_tzx[temp].lcero:=tzx_type_14.zero_bit;
                           cinta_tzx.datos_tzx[temp].luno:=tzx_type_14.one_bit;
                           cinta_tzx.datos_tzx[temp].lbyte:=tzx_type_14.last_byte;
-                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_14.pause;
-                          cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_14.size1+(tzx_type_14.size2*65536);
+                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_14.pause*TZX_CLOCK;
+                          cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_14.size1+(tzx_type_14.size2 shl 16);
                           freemem(tzx_type_14);
                           getmem(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,cinta_tzx.datos_tzx[temp].lbloque);
@@ -1180,9 +1197,9 @@ while longitud<long do begin
                           copymemory(tzx_type_15,data,8);
                           inc(data,8);inc(longitud,8);
                           cinta_tzx.datos_tzx[temp].luno:=tzx_type_15.tstates;
-                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_15.pause;
+                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_15.pause*TZX_CLOCK;
                           cinta_tzx.datos_tzx[temp].lbyte:=tzx_type_15.last_byte;
-                          cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_15.size1+(tzx_type_15.size2*65536);
+                          cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_15.size1+(tzx_type_15.size2 shl 16);
                           freemem(tzx_type_15);
                           getmem(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
                           copymemory(cinta_tzx.datos_tzx[temp].datos,data,cinta_tzx.datos_tzx[temp].lbloque);
@@ -1200,13 +1217,15 @@ while longitud<long do begin
                           //asd
                           if tzx_type_19.asd=0 then asd_tzx:=256
                             else asd_tzx:=tzx_type_19.asd;
-                          //Creo grupo
-                          cinta_tzx.datos_tzx[temp].tipo_bloque:=$21;
-                          getmem(cinta_tzx.datos_tzx[temp].datos,1);
-                          nombre_grupo:=leng[main_vars.idioma].cinta[10]+': Generalized Data';
-                          inicio_grupo:=temp;
-                          cinta_tzx.indice_saltos[temp]:=contador;
-                          inc(temp);
+                          //Creo grupo si no estoy dentro de otro!!!
+                          if not(cinta_tzx.grupo) then begin
+                            cinta_tzx.datos_tzx[temp].tipo_bloque:=$21;
+                            getmem(cinta_tzx.datos_tzx[temp].datos,1);
+                            cadena:=leng[main_vars.idioma].cinta[10]+': Generalized Data';
+                            inicio_grupo:=temp;
+                            cinta_tzx.indice_saltos[temp]:=contador;
+                            inc(temp);
+                          end;
                           //PILOT
                           //Si no hay simbolos no cojo nada
                           if tzx_type_19.totp<>0 then begin
@@ -1220,26 +1239,11 @@ while longitud<long do begin
                                 end;
                             end;
                             //Y ahora relaciono repeticiones con simbolos
-                            pulsos_total:=0;
                             for f:=1 to tzx_type_19.totp do begin
+                              pulsos_total:=0;
                               //¿que simbolo es?
                               tempb:=data^;
                               inc(data);inc(longitud);
-                              //ver si el simbolo tiene flag
-                              case simbolos[tempb].flag of
-                                1:begin
-                                     pulsos[pulsos_total]:=$FFFD;
-                                     inc(pulsos_total);
-                                  end;
-                                2:begin
-                                     pulsos[pulsos_total]:=$FFFE;
-                                     inc(pulsos_total);
-                                  end;
-                                3:begin
-                                     pulsos[pulsos_total]:=$FFFF;
-                                     inc(pulsos_total);
-                                  end;
-                              end;
                               //cuantas veces lo repito?
                               copymemory(@tempw,data,2);
                               inc(data,2);inc(longitud,2);
@@ -1249,19 +1253,22 @@ while longitud<long do begin
                                   if pulsos[pulsos_total]<>0 then inc(pulsos_total);
                                 end;
                               end;
+                              //Y ahora lo convierto en un bloque de pulsos
+                              if pulsos_total<>0 then begin
+                                getmem(cinta_tzx.datos_tzx[temp],sizeof(tipo_datos_tzx));
+                                zero_tape_data(temp);
+                                getmem(cinta_tzx.datos_tzx[temp].datos,pulsos_total*2);
+                                copymemory(cinta_tzx.datos_tzx[temp].datos,@pulsos[0],pulsos_total*2);
+                                cinta_tzx.datos_tzx[temp].lbloque:=pulsos_total;
+                                cinta_tzx.datos_tzx[temp].tipo_bloque:=$13;
+                                cinta_tzx.datos_tzx[temp].initial_val:=simbolos[tempb].flag;
+                                cinta_tzx.datos_tzx[temp].crc32:=calc_crc(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
+                                cinta_tzx.indice_saltos[temp]:=contador;
+                                inc(temp);
+                              end;
                             end;
-                            //Y ahora lo convierto en un bloque de pulsos
-                            getmem(cinta_tzx.datos_tzx[temp],sizeof(tipo_datos_tzx));
-                            zero_tape_data(temp);
-                            getmem(cinta_tzx.datos_tzx[temp].datos,pulsos_total*2);
-                            copymemory(cinta_tzx.datos_tzx[temp].datos,@pulsos[0],pulsos_total*2);
-                            cinta_tzx.datos_tzx[temp].lbloque:=pulsos_total;
-                            cinta_tzx.datos_tzx[temp].tipo_bloque:=$13;
-                            cinta_tzx.datos_tzx[temp].crc32:=calc_crc(cinta_tzx.datos_tzx[temp].datos,cinta_tzx.datos_tzx[temp].lbloque);
-                            long_final:=0;
-                            cinta_tzx.indice_saltos[temp]:=contador;
-                            inc(temp);
                           end;
+                          if not(cinta_tzx.grupo) then long_final:=0;
                           //DATOS
                           if tzx_type_19.totd<>0 then begin
                             getmem(cinta_tzx.datos_tzx[temp],sizeof(tipo_datos_tzx));
@@ -1280,7 +1287,8 @@ while longitud<long do begin
                             end;
                             cinta_tzx.datos_tzx[temp].num_pulsos:=asd_tzx;
                             case asd_tzx of
-                              2:cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_19.totd div 8;
+                              2:if (tzx_type_19.totd mod 8)<>0 then cinta_tzx.datos_tzx[temp].lbloque:=(tzx_type_19.totd div 8)+1
+                                  else cinta_tzx.datos_tzx[temp].lbloque:=(tzx_type_19.totd div 8);
                               256:cinta_tzx.datos_tzx[temp].lbloque:=tzx_type_19.totd;
                                 else MessageDlg('Simbolos div extraño!! '+inttostr(asd_tzx), mtInformation,[mbOk], 0);
                             end;
@@ -1291,14 +1299,16 @@ while longitud<long do begin
                             inc(longitud,cinta_tzx.datos_tzx[temp].lbloque);
                             long_final:=long_final+cinta_tzx.datos_tzx[temp].lbloque;
                             cinta_tzx.indice_saltos[temp]:=contador;
-                            cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_19.pause;
-                            inc(temp);
+                            cinta_tzx.datos_tzx[temp].lpausa:=tzx_type_19.pause*TZX_CLOCK;
+                            if not(cinta_tzx.grupo) then temp:=temp+1;
                           end;
-                          getmem(cinta_tzx.datos_tzx[temp],sizeof(tipo_datos_tzx));
-                          zero_tape_data(temp);
-                          cinta_tzx.datos_tzx[temp].tipo_bloque:=$22;
-                          getmem(cinta_tzx.datos_tzx[temp].datos,1);
-                          fin_grupo:=true;
+                          if not(cinta_tzx.grupo) then begin
+                            getmem(cinta_tzx.datos_tzx[temp],sizeof(tipo_datos_tzx));
+                            zero_tape_data(temp);
+                            cinta_tzx.datos_tzx[temp].tipo_bloque:=$22;
+                            getmem(cinta_tzx.datos_tzx[temp].datos,1);
+                            fin_grupo:=true;
+                          end;
                           freemem(tzx_type_19);
                     end;
                     $20:begin //pausa
@@ -1307,7 +1317,7 @@ while longitud<long do begin
                           inc(data,2);inc(longitud,2);
                           cinta_tzx.datos_tzx[temp].tipo_bloque:=$20;
                           cinta_tzx.datos_tzx[temp].lcabecera:=0;
-                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_gen_word.valor;
+                          cinta_tzx.datos_tzx[temp].lpausa:=tzx_gen_word.valor*TZX_CLOCK;
                           getmem(cinta_tzx.datos_tzx[temp].datos,1);
                           if not(cinta_tzx.grupo) then begin
                             if tzx_gen_word.valor=0 then begin
@@ -1494,7 +1504,7 @@ while longitud<long do begin
                     end;
                     else begin
                             MessageDlg('Bloque TZX desconocido: '+inttohex(selector,2), mtInformation,[mbOk], 0);
-                            exit;
+                            //exit;
                     end;
                 end; //del case
         cinta_tzx.indice_saltos[temp]:=contador;
@@ -1515,8 +1525,7 @@ while longitud<long do begin
         if fin_grupo then begin
           tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
           fin_grupo:=false;
-          tape_window1.stringgrid1.Cells[0,contador]:=nombre_grupo;
-          //tape_window1.stringgrid1.Cells[2,contador]:=inttohex(crc_grupo,8);
+          tape_window1.stringgrid1.Cells[0,contador]:=cadena;
           cinta_tzx.indice_select[contador]:=inicio_grupo;
           cinta_tzx.datos_tzx[temp].crc32:=crc_grupo;
           inc(contador);
@@ -1524,6 +1533,19 @@ while longitud<long do begin
         end;
         inc(temp);
 end; //del while not
+//Si al final de la cinta, no esta cerrado el grupo --> Lo cierro...
+if cinta_tzx.grupo then begin
+  tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
+  tape_window1.stringgrid1.Cells[0,contador]:=nombre_grupo;
+  cinta_tzx.indice_select[contador]:=inicio_grupo;
+  getmem(cinta_tzx.datos_tzx[temp],sizeof(tipo_datos_tzx));
+  zero_tape_data(temp);
+  cinta_tzx.datos_tzx[temp].tipo_bloque:=$22;
+  getmem(cinta_tzx.datos_tzx[temp].datos,1);
+  cinta_tzx.grupo:=false;
+  cinta_tzx.datos_tzx[temp].crc32:=crc_grupo;
+  inc(temp);
+end;
 freemem(tzx_header);
 //Creo el bloque final
 tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount-1;
@@ -1555,15 +1577,16 @@ type
 
 function abrir_pzx(data:pbyte;long:integer):boolean;
 const
-  MAX_PULSES=$1000;
+  MAX_PULSES=$3000;
 var
   cadena2,cadena3:string;
   longitud:integer;
   pulsos_long:array[0..(MAX_PULSES-1)] of dword;
-  datos_ok:boolean;
+  datos_ok,set_signal:boolean;
   tempw,contador,pulse_count,puls_total_long:word;
-  f,tempdw,pulse_length,pzx_tail:dword;
+  f,tempdw,pulse_length,tail_pulse:dword;
   ptemp:pbyte;
+  init_ear,set_data_signal:byte;
   pzx_header:^tpzx_header;
   pzx_pulse:^tpzx_pulse;
   pzx_data:^tpzx_data;
@@ -1603,11 +1626,13 @@ while longitud<long do begin
   ptemp:=data;
   inc(data,pzx_header.size);inc(longitud,pzx_header.size);  //La incremento
   datos_ok:=false;
+  set_signal:=false;
+  set_data_signal:=0;
   if pzx_header.name='PULS' then begin
     tempdw:=0;
     puls_total_long:=0;
+    init_ear:=0;
     getmem(pzx_pulse,sizeof(tpzx_pulse));
-    cinta_tzx.datos_tzx[contador].inicial:=1;
     while tempdw<pzx_header.size do begin
       //Cojo el contador
       copymemory(pzx_pulse,ptemp,6);
@@ -1625,30 +1650,36 @@ while longitud<long do begin
         pulse_length:=((pulse_length and $7fff) shl 16) or pzx_pulse.duration2;
         inc(ptemp,2);inc(tempdw,2);
       end;
-      //Creo un bloque de pulsos en la cinta...
-      for f:=1 to pulse_count do begin
-        pulsos_long[puls_total_long]:=pulse_length;
-        //Si es muy grande, creo un bloque y vuelvo a empezar...
-        if puls_total_long=(MAX_PULSES-1) then begin
-          getmem(cinta_tzx.datos_tzx[contador].datos,MAX_PULSES*4);
-          copymemory(cinta_tzx.datos_tzx[contador].datos,@pulsos_long[0],MAX_PULSES*4);
-          cinta_tzx.datos_tzx[contador].lbloque:=MAX_PULSES;
-          cinta_tzx.datos_tzx[contador].tipo_bloque:=$F3;
-          cinta_tzx.indice_saltos[contador]:=contador;
-          cinta_tzx.indice_select[contador]:=contador;
-          cinta_tzx.datos_tzx[contador].crc32:=calc_crc(cinta_tzx.datos_tzx[contador].datos,MAX_PULSES);
-          tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
-          tape_window1.stringgrid1.Cells[1,contador]:=' ';
-          tape_window1.stringgrid1.Cells[0,contador]:=leng[main_vars.idioma].cinta[5];
-          puls_total_long:=0;
-          //Otro bloque...
-          inc(contador);
-          getmem(cinta_tzx.datos_tzx[contador],sizeof(tipo_datos_tzx));
-          zero_tape_data(contador);
-        end else puls_total_long:=puls_total_long+1;
+      //Si la longitud del bloque es 0 es que quiere empezar con valor 1 en el ear
+      if pulse_length<>0 then begin
+        //Creo un bloque de pulsos en la cinta...
+        for f:=1 to pulse_count do begin
+          pulsos_long[puls_total_long]:=pulse_length;
+          //Si es muy grande, creo un bloque y vuelvo a empezar...
+          if puls_total_long=(MAX_PULSES-1) then begin
+            getmem(cinta_tzx.datos_tzx[contador].datos,MAX_PULSES*4);
+            copymemory(cinta_tzx.datos_tzx[contador].datos,@pulsos_long[0],MAX_PULSES*4);
+            cinta_tzx.datos_tzx[contador].lbloque:=MAX_PULSES;
+            cinta_tzx.datos_tzx[contador].tipo_bloque:=$F3;
+            cinta_tzx.indice_saltos[contador]:=contador;
+            cinta_tzx.indice_select[contador]:=contador;
+            cinta_tzx.datos_tzx[contador].crc32:=calc_crc(cinta_tzx.datos_tzx[contador].datos,MAX_PULSES);
+            tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
+            tape_window1.stringgrid1.Cells[1,contador]:=' ';
+            tape_window1.stringgrid1.Cells[0,contador]:=leng[main_vars.idioma].cinta[5];
+            puls_total_long:=0;
+            //Otro bloque...
+            inc(contador);
+            getmem(cinta_tzx.datos_tzx[contador],sizeof(tipo_datos_tzx));
+            zero_tape_data(contador);
+          end else puls_total_long:=puls_total_long+1;
+        end;
+      end else begin  //Si la durecion es 0 cambio el ear
+        init_ear:=1;
       end;
     end;
     //Ya he terminado de coger los datos, resto de datos en un ultimo bloque
+    cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].initial_val:=init_ear;
     getmem(cinta_tzx.datos_tzx[contador].datos,puls_total_long*4);
     copymemory(cinta_tzx.datos_tzx[contador].datos,@pulsos_long[0],puls_total_long*4);
     cinta_tzx.datos_tzx[contador].lbloque:=puls_total_long;
@@ -1666,40 +1697,40 @@ while longitud<long do begin
   if pzx_header.name='PAUS' then begin
     getmem(pzx_pause,sizeof(tpzx_pause));
     copymemory(pzx_pause,ptemp,4);
-    cinta_tzx.datos_tzx[contador].tipo_bloque:=$20;
     inc(ptemp,4);
-    cinta_tzx.datos_tzx[contador].lpausa:=(pzx_pause.pause and $7fffffff) div (sound_status.cpu_clock div 1000);
-    getmem(cinta_tzx.datos_tzx[contador].datos,1);
-    cinta_tzx.datos_tzx[contador].datos^:=pzx_pause.pause shr 31;
+    //Set pause
+    cinta_tzx.datos_tzx[contador].tipo_bloque:=$20;
+    cinta_tzx.datos_tzx[contador].lpausa:=pzx_pause.pause and $7fffffff;
     cadena3:=leng[main_vars.idioma].cinta[9]; //Pausa
-    cadena2:=inttostr(cinta_tzx.datos_tzx[contador].lpausa)+'ms.';
+    cadena2:=inttostr(cinta_tzx.datos_tzx[contador].lpausa div TZX_CLOCK)+'ms.';
     datos_ok:=true;
+    set_signal:=true;
+    set_data_signal:=pzx_pause.pause shr 31;
   end;
   if pzx_header.name='DATA' then begin
     getmem(pzx_data,sizeof(tpzx_data));
+    copymemory(pzx_data,ptemp,8);
+    inc(ptemp,8);
+    set_signal:=true;
+    set_data_signal:=pzx_data.bit_count shr 31;
+    pzx_data.bit_count:=pzx_data.bit_count and $7FFFFFFF;
     //Solo hay dos simbolos
     getmem(cinta_tzx.datos_tzx[contador].pulsos_sym[0],sizeof(tsimbolos));
     fillchar(cinta_tzx.datos_tzx[contador].pulsos_sym[0]^,sizeof(tsimbolos),0);
     getmem(cinta_tzx.datos_tzx[contador].pulsos_sym[1],sizeof(tsimbolos));
     fillchar(cinta_tzx.datos_tzx[contador].pulsos_sym[1]^,sizeof(tsimbolos),0);
     cinta_tzx.datos_tzx[contador].num_pulsos:=2;
-    copymemory(pzx_data,ptemp,8);
-    inc(ptemp,8);
-    //pulsos finales, los creo despues de arreglar las vistas...
-    pzx_tail:=pzx_data.tail;
-    //Bit 0-30 longitud el bit 31 valor inicial del ear... NO FUNCIONA SI LO PONGO!!
-    {if (pzx_data.bit_count and $80000000)<>0 then cinta_tzx.datos_tzx[contador].inicial:=2
-      else cinta_tzx.datos_tzx[contador].inicial:=1;}
-    pzx_data.bit_count:=pzx_data.bit_count and $7FFFFFFF;
     //pulsos para formar la longitud del 0
     cinta_tzx.datos_tzx[contador].pulsos_sym[0].total_sym:=pzx_data.p0;
-    for f:=1 to pzx_data.p0 do begin
+    cinta_tzx.datos_tzx[contador].pulsos_sym[0].flag:=0;
+    for f:=pzx_data.p0 downto 1 do begin
       cinta_tzx.datos_tzx[contador].pulsos_sym[0].valor[f]:=sacar_word(ptemp);
       inc(ptemp,2);
     end;
     //pulsos para formar la longitud del 1
     cinta_tzx.datos_tzx[contador].pulsos_sym[1].total_sym:=pzx_data.p1;
-    for f:=1 to pzx_data.p1 do begin
+    cinta_tzx.datos_tzx[contador].pulsos_sym[1].flag:=0;
+    for f:=pzx_data.p1 downto 1 do begin
       cinta_tzx.datos_tzx[contador].pulsos_sym[1].valor[f]:=sacar_word(ptemp);
       inc(ptemp,2);
     end;
@@ -1716,6 +1747,7 @@ while longitud<long do begin
     cadena3:='Generalized Data';
     freemem(pzx_data);
     datos_ok:=true;
+    tail_pulse:=0;//pzx_data.tail;
   end;
   if pzx_header.name='BRWS' then begin
     cinta_tzx.datos_tzx[contador].tipo_bloque:=$30;
@@ -1767,23 +1799,34 @@ while longitud<long do begin
       else tape_window1.stringgrid1.Cells[1,contador]:=cadena2;
   cadena2:='';
   tape_window1.stringgrid1.Cells[0,contador]:=cadena3;
-  //Tail del data...
-    if pzx_tail<>0 then begin
-      inc(contador);
-      getmem(cinta_tzx.datos_tzx[contador],sizeof(tipo_datos_tzx));
-      zero_tape_data(contador);
-      getmem(cinta_tzx.datos_tzx[contador].datos,4);
-      copymemory(cinta_tzx.datos_tzx[contador].datos,@pzx_tail,4);
-      cinta_tzx.datos_tzx[contador].lbloque:=1;
-      cinta_tzx.datos_tzx[contador].tipo_bloque:=$F3;
-      cinta_tzx.indice_saltos[contador]:=contador;
-      cinta_tzx.indice_select[contador]:=contador;
-      tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
-      tape_window1.stringgrid1.Cells[1,contador]:=' ';
-      tape_window1.stringgrid1.Cells[0,contador]:='Tail Pulse';
-      pzx_tail:=0;
-    end;
   inc(contador);
+  {//Set signal level
+  if set_data_signal<>0 then begin
+    getmem(cinta_tzx.datos_tzx[contador],sizeof(tipo_datos_tzx));
+    zero_tape_data(contador);
+    cinta_tzx.datos_tzx[contador].tipo_bloque:=$2b;
+    getmem(cinta_tzx.datos_tzx[contador].datos,1);
+    cinta_tzx.datos_tzx[contador].datos^:=set_data_signal;
+    tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
+    tape_window1.stringgrid1.Cells[0,contador]:='Set Signal Level';
+    contador:=contador+1;
+  end;}
+  //Tail del data...
+  if tail_pulse<>0 then begin
+    getmem(cinta_tzx.datos_tzx[contador],sizeof(tipo_datos_tzx));
+    zero_tape_data(contador);
+    getmem(cinta_tzx.datos_tzx[contador].datos,sizeof(tail_pulse));
+    copymemory(cinta_tzx.datos_tzx[contador].datos,@tail_pulse,sizeof(tail_pulse));
+    cinta_tzx.datos_tzx[cinta_tzx.indice_cinta].initial_val:=0;
+    cinta_tzx.datos_tzx[contador].lbloque:=1;
+    cinta_tzx.datos_tzx[contador].tipo_bloque:=$f3;
+    cinta_tzx.indice_saltos[contador]:=contador;
+    cinta_tzx.indice_select[contador]:=contador;
+    tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount+1;
+    tape_window1.stringgrid1.Cells[1,contador]:=' ';
+    tape_window1.stringgrid1.Cells[0,contador]:='Tail Pulse';
+    contador:=contador+1;
+  end;
 end; //fin del while
 //final
 tape_window1.stringgrid1.RowCount:=tape_window1.stringgrid1.RowCount-1;
@@ -1799,6 +1842,78 @@ cinta_tzx.value:=$0;
 siguiente_bloque_tzx;
 abrir_pzx:=true;
 analizar_tzx;
+end;
+
+function abrir_c64_tap(data:pbyte;long:integer):boolean;
+var
+  tap_c64:^ttap_c64;
+  contador,longitud:integer;
+  tempb:byte;
+  tempw1,tempw2:pword;
+  temp_data:pbyte;
+  pulsos:dword;
+begin
+abrir_c64_tap:=false;
+if data=nil then exit;
+vaciar_cintas;
+temp_data:=data;
+cinta_tzx.grupo:=false;
+getmem(tap_c64,sizeof(ttap_c64));
+copymemory(tap_c64,temp_data,sizeof(ttap_c64));
+inc(temp_data,sizeof(ttap_c64));longitud:=sizeof(ttap_c64);
+if tap_c64.header<>'C64-TAPE-RAW' then begin
+  freemem(tap_c64);
+  exit;
+end;
+contador:=0;
+getmem(tempw1,$1000000);
+tempw2:=tempw1;
+while longitud<long do begin
+  tempb:=temp_data^;
+  inc(temp_data);inc(longitud);
+  if tempb=0 then begin
+    case tap_c64.version of
+      0:pulsos:=256*8;
+      1:begin
+          pulsos:=temp_data^;
+          inc(temp_data);inc(longitud);
+          pulsos:=pulsos or (temp_data^ shl 8);
+          inc(temp_data);inc(longitud);
+          pulsos:=pulsos or (temp_data^ shl 16);
+          inc(temp_data);inc(longitud);
+        end;
+    end;
+  end else pulsos:=tempb*8;
+  tempw2^:=pulsos and $ffff;
+  inc(tempw2);
+  tempw2^:=pulsos shr 16;
+  inc(tempw2);
+  inc(contador);
+end;
+contador:=contador-1;
+getmem(cinta_tzx.datos_tzx[0],sizeof(tipo_datos_tzx));
+zero_tape_data(0);
+cinta_tzx.datos_tzx[0].tipo_bloque:=$f3;
+cinta_tzx.datos_tzx[0].lbloque:=contador;
+getmem(cinta_tzx.datos_tzx[0].datos,contador*4);
+copymemory(cinta_tzx.datos_tzx[0].datos,tempw1,contador*4);
+freemem(tempw1);
+//Pongo la info
+tape_window1.stringgrid1.RowCount:=1;
+tape_window1.stringgrid1.Cells[0,0]:='C64 Tape';
+tape_window1.stringgrid1.Cells[1,0]:=inttostr(contador);
+//Creo el bloque final
+getmem(cinta_tzx.datos_tzx[1],sizeof(tipo_datos_tzx));
+zero_tape_data(1);
+cinta_tzx.datos_tzx[1].tipo_bloque:=$fe;
+cinta_tzx.datos_tzx[1].lbloque:=1;
+getmem(cinta_tzx.datos_tzx[1].datos,1);
+//Valores finales
+cinta_tzx.play_tape:=false;
+cinta_tzx.cargada:=true;
+cinta_tzx.value:=$0;
+siguiente_bloque_tzx;
+abrir_c64_tap:=true;
 end;
 
 end.

@@ -235,7 +235,7 @@ end;
 
 procedure update_video_gb;
 begin
-single_line(7,linea_actual,0,160,2);
+single_line(7,linea_actual,paleta[0],160,2);
 if lcd_ena then begin
   fillchar(bg_prio[0],$100,$7f);
   if (lcd_control and 2)<>0 then draw_sprites($80);
@@ -440,7 +440,7 @@ end;
 
 procedure update_video_gbc;
 begin
-single_line(7,linea_actual,(bgc_pal[0] and $7fff),160,2);
+single_line(7,linea_actual,paleta[(bgc_pal[0] and $7fff)],160,2);
 if lcd_ena then begin
   if (lcd_control and 1)=0 then begin //bg and window loses priority
     update_bg_gbc;
@@ -544,13 +544,12 @@ case direccion of
   $07:begin  //timer control
         tcontrol:=valor and $7;
         case (valor and $3) of
-          0:timer[gb_timer].time_final:=GB_CLOCK/4096;
-          1:timer[gb_timer].time_final:=GB_CLOCK/262144;
-          2:timer[gb_timer].time_final:=GB_CLOCK/65536;
-          3:timer[gb_timer].time_final:=GB_CLOCK/16384;
+          0:timers.timer[gb_timer].time_final:=GB_CLOCK/4096;
+          1:timers.timer[gb_timer].time_final:=GB_CLOCK/262144;
+          2:timers.timer[gb_timer].time_final:=GB_CLOCK/65536;
+          3:timers.timer[gb_timer].time_final:=GB_CLOCK/16384;
         end;
-        timer[gb_timer].actual_time:=0;
-        timer[gb_timer].enabled:=(valor and $4)<>0;
+        timers.enabled(gb_timer,(valor and $4)<>0);
       end;
   $0f:begin //irq request
         lr35902_0.vblank_req:=(valor and $1)<>0;
@@ -720,13 +719,12 @@ case direccion of
   $07:begin  //timer control
         tcontrol:=valor and $7;
         case (valor and $3) of
-          0:timer[gb_timer].time_final:=GB_CLOCK/4096;
-          1:timer[gb_timer].time_final:=GB_CLOCK/262144;
-          2:timer[gb_timer].time_final:=GB_CLOCK/65536;
-          3:timer[gb_timer].time_final:=GB_CLOCK/16384;
+          0:timers.timer[gb_timer].time_final:=GB_CLOCK/4096;
+          1:timers.timer[gb_timer].time_final:=GB_CLOCK/262144;
+          2:timers.timer[gb_timer].time_final:=GB_CLOCK/65536;
+          3:timers.timer[gb_timer].time_final:=GB_CLOCK/16384;
         end;
-        timer[gb_timer].actual_time:=0;
-        timer[gb_timer].enabled:=(valor and $4)<>0;
+        timers.enabled(gb_timer,(valor and $4)<>0);
       end;
   $0f:begin //irq request
         lr35902_0.vblank_req:=(valor and $1)<>0;
@@ -1367,8 +1365,8 @@ lr35902_0:=cpu_lr.Create(GB_CLOCK,154); //154 lineas, 456 estados t por linea
 lr35902_0.change_ram_calls(gb_getbyte,gb_putbyte);
 lr35902_0.init_sound(gameboy_sound_update);
 //Timers internos de la GB
-init_timer(0,GB_CLOCK/16384,gb_main_timer,true);
-gb_timer:=init_timer(0,GB_CLOCK/4096,gb_prog_timer,false);
+timers.init(0,GB_CLOCK/16384,gb_main_timer,nil,true);
+gb_timer:=timers.init(0,GB_CLOCK/4096,gb_prog_timer,nil,false);
 //Sound Chips
 gameboy_sound_ini(FREQ_BASE_AUDIO);
 //cargar roms

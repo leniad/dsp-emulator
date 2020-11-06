@@ -156,7 +156,7 @@ begin
 	self.address_mask:=rom_size-1;
   self.tsample_num:=init_channel;
   //timer interno
-  init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/440),vlm5030_update_stream,true);
+  timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/440),vlm5030_update_stream,nil,true);
   self.out_:=0;
 end;
 

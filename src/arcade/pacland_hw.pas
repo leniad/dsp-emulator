@@ -77,11 +77,11 @@ if flipx then begin
       punto:=gfx[2].colores[post^+color];
       case pri of
         0:if punto<$80 then temp^:=paleta[punto]
-            else temp^:=paleta[max_colores];
+            else temp^:=paleta[MAX_COLORES];
         1:if (punto and $7f)<>$7f then temp^:=paleta[punto]
-            else temp^:=paleta[max_colores];
+            else temp^:=paleta[MAX_COLORES];
         2:if ((punto>$ef) and (punto<>$ff)) then temp^:=paleta[punto]
-            else temp^:=paleta[max_colores];
+            else temp^:=paleta[MAX_COLORES];
       end;
       inc(temp);
       dec(post);
@@ -96,11 +96,11 @@ end else begin
       punto:=gfx[2].colores[pos^+color];
       case pri of
         0:if punto<$80 then temp^:=paleta[punto]
-            else temp^:=paleta[max_colores];
+            else temp^:=paleta[MAX_COLORES];
         1:if (punto and $7f)<>$7f then temp^:=paleta[punto]
-            else temp^:=paleta[max_colores];
+            else temp^:=paleta[MAX_COLORES];
         2:if ((punto>$ef) and (punto<>$ff)) then temp^:=paleta[punto]
-            else temp^:=paleta[max_colores];
+            else temp^:=paleta[MAX_COLORES];
       end;
       inc(temp);
       inc(pos);
@@ -173,7 +173,7 @@ for y:=0 to (cant_y-1) do begin
   for x:=0 to (cant_x-1) do begin
     punto:=gfx[ngfx].colores[pos^+color];
     if (punto and $7f)<$7f then temp^:=paleta[punto]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(pos);
     inc(temp,dir_x);
   end;
@@ -375,7 +375,6 @@ var
   memoria_temp:array[0..$17fff] of byte;
 const
     pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 );
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -400,32 +399,32 @@ m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 m6800_0.change_io_calls(in_port1,in_port2,nil,nil,nil,nil,nil,nil);
 m6800_0.init_sound(pacland_sound_update);
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@pacland_rom[0],'pacland.zip',0)) then exit;
+if not(roms_load(@memoria_temp,pacland_rom)) then exit;
 //Pongo las ROMs en su banco
 copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
 for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
 //Cargar MCU
-if not(cargar_roms(@mem_snd[0],@pacland_mcu[0],'pacland.zip',0)) then exit;
+if not(roms_load(@mem_snd,pacland_mcu)) then exit;
 namco_snd_0:=namco_snd_chip.create(8,true);
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@pacland_char,'pacland.zip',1)) then exit;
+if not(roms_load(@memoria_temp,pacland_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms(@memoria_temp[0],@pacland_tiles,'pacland.zip',1)) then exit;
+if not(roms_load(@memoria_temp,pacland_tiles)) then exit;
 init_gfx(1,8,8,$200);
 gfx_set_desc_data(2,0,16*8,0,4);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@pacland_sprites[0],'pacland.zip',0)) then exit;
+if not(roms_load(@memoria_temp,pacland_sprites)) then exit;
 init_gfx(2,16,16,$200);
 gfx_set_desc_data(4,0,64*8,0,4,$200*64*8+0,$200*64*8+4);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //Paleta
-if not(cargar_roms(@memoria_temp[0],@pacland_prom[0],'pacland.zip',0)) then exit;
-copymemory(@pal_proms[0],@memoria_temp[0],$800);
+if not(roms_load(@memoria_temp,pacland_prom)) then exit;
+copymemory(@pal_proms,@memoria_temp,$800);
 // tiles/sprites color table
 for f:=$0 to $3ff do begin
   gfx[0].colores[f]:=memoria_temp[$800+f];

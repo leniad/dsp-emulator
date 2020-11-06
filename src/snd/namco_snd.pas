@@ -265,7 +265,7 @@ begin
 getmem(namco_63701_rom,$40000);
 namco_63701[0].tsample:=init_channel;
 namco_63701[1].tsample:=init_channel;
-namco_63701[0].timer:=init_timer(sound_status.cpu_num,sound_status.cpu_clock/(clock/1000),namco_63701x_internal_update,true);
+namco_63701[0].timer:=timers.init(sound_status.cpu_num,sound_status.cpu_clock/(clock/1000),namco_63701x_internal_update,nil,true);
 end;
 
 procedure namco_63701x_close;

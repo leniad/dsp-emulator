@@ -43,6 +43,7 @@ type
     ImageList2: TImageList;
     Label1: TLabel;
     Label2: TLabel;
+    leds20111: TMenuItem;
     MainMenu1: TMainMenu;
     Archivo1: TMenuItem;
     Emulacion1: TMenuItem;
@@ -206,6 +207,43 @@ type
     athena1: TMenuItem;
     MenuItem36: TMenuItem;
     gaunt21: TMenuItem;
+    MenuItem37: TMenuItem;
+    defender1: TMenuItem;
+    ddragon_sh1: TMenuItem;
+    mayday1: TMenuItem;
+    colony71: TMenuItem;
+    Bosconian1: TMenuItem;
+    FantasyZone21: TMenuItem;
+    Amazon1: TMenuItem;
+    GalivanHW1: TMenuItem;
+    Galivan1: TMenuItem;
+    dangar1: TMenuItem;
+    gwarrior1: TMenuItem;
+    indydoom1: TMenuItem;
+    MarbleMadness1: TMenuItem;
+    BadLands1: TMenuItem;
+    lastduelhw: TMenuItem;
+    lasduel1: TMenuItem;
+    madgear1: TMenuItem;
+    lastduel1: TMenuItem;
+    c641: TMenuItem;
+    gigas1: TMenuItem;
+    gigasm21: TMenuItem;
+    pbillrd1: TMenuItem;
+    omega1: TMenuItem;
+    Salamander1: TMenuItem;
+    TerraCre1: TMenuItem;
+    SpeakandRescue1: TMenuItem;
+    riddleofp1: TMenuItem;
+    OpaOpa1: TMenuItem;
+    tetrisse1: TMenuItem;
+    transformer1: TMenuItem;
+    segasysteme1: TMenuItem;
+    Route16HW1: TMenuItem;
+    HangOnJr1: TMenuItem;
+    SlapShooter1: TMenuItem;
+    Route161: TMenuItem;
+    sg10001: TMenuItem;
     peterpak1: TMenuItem;
     tnk31: TMenuItem;
     tetrisatari1: TMenuItem;
@@ -356,7 +394,7 @@ type
     TigerRoad1: TMenuItem;
     TigerRoadHW1: TMenuItem;
     Prehisle1: TMenuItem;
-    TerraCre1: TMenuItem;
+    TerraCreHW1: TMenuItem;
     SuperBasketball1: TMenuItem;
     SonSon1: TMenuItem;
     Yiear1: TMenuItem;
@@ -599,6 +637,7 @@ main_vars.cadena_dir:='\';
 main_vars.cadena_dir:='/';
 {$endif}
 Init_sdl_lib;
+timers:=timer_eng.create;
 status_bitmap:=TBitmap.Create;
 EmuStatus:=EsStoped;
 directory.Base:=extractfiledir(application.ExeName)+main_vars.cadena_dir;
@@ -837,13 +876,14 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.enabled:=false;
-main_vars.tipo_maquina:=tipo_new;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
+main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
 //focus
-if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar
-  else main_vars.driver_ok:=false;
+main_vars.driver_ok:=false;
+if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
+timers.autofire_init;
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
   principal1.timer1.Enabled:=false;
@@ -860,8 +900,6 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn14.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
 end else begin
-  if autofire_general then init_autofire
-    else close_autofire;
   principal1.timer1.Enabled:=true;
   sync_all;
   principal1.ejecutar1click(nil);

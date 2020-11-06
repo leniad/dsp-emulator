@@ -371,16 +371,16 @@ mcs48_0.change_ram_calls(spacefb_snd_getbyte,nil);
 mcs48_0.change_io_calls(spacefb_snd_inport,spacefb_snd_outport);
 mcs48_0.init_sound(spacefb_sound_update);
 //cargar roms
-if not(roms_load(@memoria,@spacefb_rom,'spacefb.zip',sizeof(spacefb_rom))) then exit;
+if not(roms_load(@memoria,spacefb_rom)) then exit;
 //Cargar MCU
-if not(roms_load(@mem_snd_mcu,@spacefb_mcu,'spacefb.zip',sizeof(spacefb_mcu))) then exit;
+if not(roms_load(@mem_snd_mcu,spacefb_mcu)) then exit;
 //Sound
 load_samples('spacefb.zip',@spacefb_samples,num_samples);
 dac_0:=dac_chip.Create(0.5);
 //Cargar GFX and proms
-if not(roms_load(@gfx1,@spacefb_gfx,'spacefb.zip',sizeof(spacefb_gfx))) then exit;
-if not(roms_load(@gfx2,@spacefb_bullet,'spacefb.zip',sizeof(spacefb_bullet))) then exit;
-if not(roms_load(@prom,@spacefb_prom,'spacefb.zip',sizeof(spacefb_prom))) then exit;
+if not(roms_load(@gfx1,spacefb_gfx)) then exit;
+if not(roms_load(@gfx2,spacefb_bullet)) then exit;
+if not(roms_load(@prom,spacefb_prom)) then exit;
 //DIP
 marcade.dswa:=$20;
 marcade.dswa_val:=@spacefb_dip;

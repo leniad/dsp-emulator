@@ -10,39 +10,39 @@ procedure cargar_gaelco_hw;
 implementation
 const
         //Big Karnak
-        bigkarnak_rom:array[0..2] of tipo_roms=(
-        (n:'d16';l:$40000;p:0;crc:$44fb9c73),(n:'d19';l:$40000;p:$1;crc:$ff79dfdd),());
+        bigkarnak_rom:array[0..1] of tipo_roms=(
+        (n:'d16';l:$40000;p:0;crc:$44fb9c73),(n:'d19';l:$40000;p:$1;crc:$ff79dfdd));
         bigkarnak_sound:tipo_roms=(n:'d5';l:$10000;p:0;crc:$3b73b9c5);
-        bigkarnak_gfx:array[0..8] of tipo_roms=(
+        bigkarnak_gfx:array[0..7] of tipo_roms=(
         (n:'h5' ;l:$80000;p:$0;crc:$20e239ff),(n:'h5'; l:$80000;p:$80000;crc:$20e239ff),
         (n:'h10';l:$80000;p:$100000;crc:$ab442855),(n:'h10';l:$80000;p:$180000;crc:$ab442855),
         (n:'h8' ;l:$80000;p:$200000;crc:$83dce5a3),(n:'h8'; l:$80000;p:$280000;crc:$83dce5a3),
-        (n:'h6' ;l:$80000;p:$300000;crc:$24e84b24),(n:'h6'; l:$80000;p:$380000;crc:$24e84b24),());
+        (n:'h6' ;l:$80000;p:$300000;crc:$24e84b24),(n:'h6'; l:$80000;p:$380000;crc:$24e84b24));
         bigkarnak_adpcm:tipo_roms=(n:'d1';l:$40000;p:0;crc:$26444ad1);
         //Thunder Hoop
-        thoop_rom:array[0..2] of tipo_roms=(
-        (n:'th18dea1.040';l:$80000;p:0;crc:$59bad625),(n:'th161eb4.020';l:$40000;p:$1;crc:$6add61ed),());
-        thoop_gfx:array[0..4] of tipo_roms=(
+        thoop_rom:array[0..1] of tipo_roms=(
+        (n:'th18dea1.040';l:$80000;p:0;crc:$59bad625),(n:'th161eb4.020';l:$40000;p:$1;crc:$6add61ed));
+        thoop_gfx:array[0..3] of tipo_roms=(
         (n:'c09' ;l:$100000;p:$0;crc:$06f0edbf),(n:'c10'; l:$100000;p:$100000;crc:$2d227085),
-        (n:'c11';l:$100000;p:$200000;crc:$7403ef7e),(n:'c12';l:$100000;p:$300000;crc:$29a5ca36),());
+        (n:'c11';l:$100000;p:$200000;crc:$7403ef7e),(n:'c12';l:$100000;p:$300000;crc:$29a5ca36));
         thoop_adpcm:tipo_roms=(n:'sound';l:$100000;p:0;crc:$99f80961);
         //Squash
-        squash_rom:array[0..2] of tipo_roms=(
-        (n:'squash.d18';l:$20000;p:0;crc:$ce7aae96),(n:'squash.d16';l:$20000;p:$1;crc:$8ffaedd7),());
-        squash_gfx:array[0..4] of tipo_roms=(
+        squash_rom:array[0..1] of tipo_roms=(
+        (n:'squash.d18';l:$20000;p:0;crc:$ce7aae96),(n:'squash.d16';l:$20000;p:$1;crc:$8ffaedd7));
+        squash_gfx:array[0..3] of tipo_roms=(
         (n:'squash.c09' ;l:$80000;p:$0;crc:$0bb91c69),(n:'squash.c10'; l:$80000;p:$80000;crc:$892a035c),
-        (n:'squash.c11';l:$80000;p:$100000;crc:$9e19694d),(n:'squash.c12';l:$80000;p:$180000;crc:$5c440645),());
+        (n:'squash.c11';l:$80000;p:$100000;crc:$9e19694d),(n:'squash.c12';l:$80000;p:$180000;crc:$5c440645));
         squash_adpcm:tipo_roms=(n:'squash.d01';l:$80000;p:0;crc:$a1b9651b);
         //Biomechanical Toy
-        biomtoy_rom:array[0..2] of tipo_roms=(
-        (n:'d18';l:$80000;p:0;crc:$4569ce64),(n:'d16';l:$80000;p:$1;crc:$739449bd),());
-        biomtoy_gfx:array[0..8] of tipo_roms=(
+        biomtoy_rom:array[0..1] of tipo_roms=(
+        (n:'d18';l:$80000;p:0;crc:$4569ce64),(n:'d16';l:$80000;p:$1;crc:$739449bd));
+        biomtoy_gfx:array[0..7] of tipo_roms=(
         (n:'h6' ;l:$80000;p:$0;crc:$9416a729),(n:'j6'; l:$80000;p:$80000;crc:$e923728b),
         (n:'h7';l:$80000;p:$100000;crc:$9c984d7b),(n:'j7';l:$80000;p:$180000;crc:$0e18fac2),
         (n:'h9' ;l:$80000;p:$200000;crc:$8c1f6718),(n:'j9'; l:$80000;p:$280000;crc:$1c93f050),
-        (n:'h10';l:$80000;p:$300000;crc:$aca1702b),(n:'j10';l:$80000;p:$380000;crc:$8e3e96cc),());
-        biomtoy_adpcm:array[0..2] of tipo_roms=(
-        (n:'c1';l:$80000;p:0;crc:$0f02de7e),(n:'c3';l:$80000;p:$80000;crc:$914e4bbc),());
+        (n:'h10';l:$80000;p:$300000;crc:$aca1702b),(n:'j10';l:$80000;p:$380000;crc:$8e3e96cc));
+        biomtoy_adpcm:array[0..1] of tipo_roms=(
+        (n:'c1';l:$80000;p:0;crc:$0f02de7e),(n:'c3';l:$80000;p:$80000;crc:$914e4bbc));
         //DIP
         gaelco_dip:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:11;dip:((dip_val:$07;dip_name:'4C 1C'),(dip_val:$08;dip_name:'3C 1C'),(dip_val:$09;dip_name:'2C 1C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$06;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$00;dip_name:'Free Play (If Coin B too)'),(),(),(),(),())),
@@ -80,7 +80,7 @@ const
         biomtoy_dsw_2:array [0..4] of def_dip=(
         (mask:$1;name:'Service';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Lives';number:4;dip:((dip_val:$20;dip_name:'0'),(dip_val:$10;dip_name:'1'),(dip_val:$30;dip_name:'2'),(dip_val:$0;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$20;dip_name:'1'),(dip_val:$10;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$0;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$40;dip_name:'Easy'),(dip_val:$c0;dip_name:'Normal'),(dip_val:$80;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
@@ -100,10 +100,10 @@ var
 begin
 	for i:=$1 to $1ff do begin
     attr:=sprite_ram[(i*4)-1];
-    if (attr and $ff)=$f0 then continue;
+    if (attr and $ff)=$f0 then continue;  //el sprite no se va a ver...
     attr2:=sprite_ram[(i*4)+1];
     color:=(attr2 and $7e00) shr 9;
-    if ((color shr 3) and 7)=7 then priority:=4
+    if (color>=$38) then priority:=4
       else priority:=(attr and $3000) shr 12;
     if pri<>priority then continue;
     y:=240-(attr and $ff);
@@ -117,7 +117,7 @@ begin
       actualiza_gfx_sprite(x,y,17,0);
     end else begin
       nchar:=nchar and $fffc;
-      a:=((attr shr 13) and 2)+(attr shr 15);
+      a:=(byte(flipx) shl 1) or byte(flipy);
       put_gfx_sprite_diff((nchar+0) xor a,color,flipx,flipy,0,0,0);
       put_gfx_sprite_diff((nchar+2) xor a,color,flipx,flipy,0,8,0);
       put_gfx_sprite_diff((nchar+1) xor a,color,flipx,flipy,0,0,8);
@@ -147,13 +147,12 @@ for f:=0 to $164 do begin
    pant:=((atrib2 shr 6) and $3)+1;
    atrib1:=video_ram[$0+(pos*2)];
    nchar:=$4000+((atrib1 and $fffc) shr 2);
+   put_gfx_trans_flip(x*16,y*16,nchar,color shl 4,pant,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0);
+   if pant<>4 then put_gfx_trans_flip_alt(x*16,y*16,nchar,color shl 4,pant+4,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0,pant);
    for h:=1 to 4 do
       if (h<>pant) then begin
         put_gfx_block_trans(x*16,y*16,h,16,16);
-        put_gfx_block_trans(x*16,y*16,h+4,16,16)
-      end else begin
-        put_gfx_trans_flip_alt(x*16,y*16,nchar,color shl 4,pant,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0,0);
-        put_gfx_trans_flip_alt(x*16,y*16,nchar,color shl 4,pant+4,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0,1);
+        if h<>4 then put_gfx_block_trans(x*16,y*16,h+4,16,16)
       end;
    gfx[1].buffer[pos]:=false;
  end;
@@ -169,13 +168,12 @@ for f:=0 to $164 do begin
   pant:=((atrib2 shr 6) and $3)+9;
   atrib1:=video_ram[$800+(pos*2)];
   nchar:=$4000+((atrib1 and $fffc) shr 2);
+  put_gfx_trans_flip(x*16,y*16,nchar,color shl 4,pant,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0);
+  if pant<>12 then put_gfx_trans_flip_alt(x*16,y*16,nchar,color shl 4,pant+4,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0,pant-8);
   for h:=9 to 12 do
     if (h<>pant) then begin
       put_gfx_block_trans(x*16,y*16,h,16,16);
-      put_gfx_block_trans(x*16,y*16,h+4,16,16);
-    end else begin
-      put_gfx_trans_flip_alt(x*16,y*16,nchar,color shl 4,pant,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0,0);
-      put_gfx_trans_flip_alt(x*16,y*16,nchar,color shl 4,pant+4,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0,1);
+      if h<>12 then put_gfx_block_trans(x*16,y*16,h+4,16,16);
     end;
   gfx[1].buffer[pos+$400]:=false;
  end;
@@ -186,26 +184,26 @@ procedure update_video_bigk;inline;
 begin
 fill_full_screen(17,0);
 draw_all_bigk;
-scroll_x_y(4,17,scroll_x0 and $f,scroll_y0 and $f);
-scroll_x_y(12,17,scroll_x1 and $f,scroll_y1 and $f);
+scroll_x_y(4,17,scroll_x0 and $f,scroll_y0 and $f);  //PRI0
+scroll_x_y(12,17,scroll_x1 and $f,scroll_y1 and $f); //PRI0
 draw_sprites_bk(3);
-scroll_x_y(8,17,scroll_x0 and $f,scroll_y0 and $f);
-scroll_x_y(16,17,scroll_x1 and $f,scroll_y1 and $f);
-scroll_x_y(3,17,scroll_x0 and $f,scroll_y0 and $f);
-scroll_x_y(11,17,scroll_x1 and $f,scroll_y1 and $f);
+//scroll_x_y(8,17,scroll_x0 and $f,scroll_y0 and $f); //Totalmente transparente!
+//scroll_x_y(16,17,scroll_x1 and $f,scroll_y1 and $f); //Totalmente transparente!
+scroll_x_y(3,17,scroll_x0 and $f,scroll_y0 and $f);  //PRI1
+scroll_x_y(11,17,scroll_x1 and $f,scroll_y1 and $f); //PRI1
 draw_sprites_bk(2);
-scroll_x_y(7,17,scroll_x0 and $f,scroll_y0 and $f);
-scroll_x_y(15,17,scroll_x1 and $f,scroll_y1 and $f);
-scroll_x_y(2,17,scroll_x0 and $f,scroll_y0 and $f);
+scroll_x_y(7,17,scroll_x0 and $f,scroll_y0 and $f); //PRI1 encima sprites
+scroll_x_y(15,17,scroll_x1 and $f,scroll_y1 and $f); //PRI1 encima sprites
+scroll_x_y(2,17,scroll_x0 and $f,scroll_y0 and $f); //PRI2
+scroll_x_y(10,17,scroll_x1 and $f,scroll_y1 and $f); //PRI2
 draw_sprites_bk(1);
-scroll_x_y(10,17,scroll_x1 and $f,scroll_y1 and $f);
-scroll_x_y(6,17,scroll_x0 and $f,scroll_y0 and $f);
-scroll_x_y(14,17,scroll_x1 and $f,scroll_y1 and $f);
-scroll_x_y(1,17,scroll_x0 and $f,scroll_y0 and $f);
+scroll_x_y(6,17,scroll_x0 and $f,scroll_y0 and $f); //PRI2 encima sprites
+scroll_x_y(14,17,scroll_x1 and $f,scroll_y1 and $f); //PRI2 encima sprites
+scroll_x_y(1,17,scroll_x0 and $f,scroll_y0 and $f); //PRI3
+scroll_x_y(9,17,scroll_x1 and $f,scroll_y1 and $f); //PRI3
 draw_sprites_bk(0);
-scroll_x_y(9,17,scroll_x1 and $f,scroll_y1 and $f);
-scroll_x_y(5,17,scroll_x0 and $f,scroll_y0 and $f);
-scroll_x_y(13,17,scroll_x1 and $f,scroll_y1 and $f);
+scroll_x_y(5,17,scroll_x0 and $f,scroll_y0 and $f); //PRI3 encima sprites
+scroll_x_y(13,17,scroll_x1 and $f,scroll_y1 and $f); //PRI3 encima sprites
 draw_sprites_bk(4);
 actualiza_trozo_final(0,16,320,240,17);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
@@ -268,8 +266,8 @@ while EmuStatus=EsRuning do begin
       update_video_bigk;
     end;
   end;
- eventos_gaelco_hw;
- video_sync;
+  eventos_gaelco_hw;
+  video_sync;
 end;
 end;
 
@@ -291,13 +289,13 @@ end;
 
 procedure bigk_putword(direccion:dword;valor:word);
 begin
-if direccion<$80000 then exit;
 case direccion of
-    $100000..$100fff:begin
+    0..$7ffff:; //ROM
+    $100000..$100fff:if video_ram[(direccion and $fff) shr 1]<>valor then begin
                       video_ram[(direccion and $fff) shr 1]:=valor;
                       gfx[1].buffer[(direccion and $fff) div 4]:=true;
                    end;
-    $101000..$101fff:begin
+    $101000..$101fff:if video_ram[(direccion and $1fff) shr 1]<>valor then begin
                       video_ram[(direccion and $1fff) shr 1]:=valor;
                       gfx[1].buffer[((direccion and $fff) shr 2)+$400]:=true;
                    end;
@@ -336,25 +334,24 @@ end;
 function bigk_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7ff,$c00..$ffff:bigk_snd_getbyte:=mem_snd[direccion];
   $800,$801:bigk_snd_getbyte:=oki_6295_0.read;
   $a00:bigk_snd_getbyte:=ym3812_0.status;
   $b00:bigk_snd_getbyte:=sound_latch;
-    else bigk_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure bigk_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$bff then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+    0..$7ff:mem_snd[direccion]:=valor;
     $800,$801:oki_6295_0.write(valor);
     $a00:ym3812_0.control(valor);
     $a01:ym3812_0.write(valor);
+    $c00..$ffff:; //ROM
 end;
 end;
 
-//Sonido
 procedure bigk_sound_update;
 begin
   ym3812_0.update;
@@ -370,7 +367,7 @@ var
 begin
 	for i:=$1 to $1ff do begin
     attr:=sprite_ram[(i*4)-1];
-    if (attr and $ff)=$f0 then continue;
+    if (attr and $ff)=$f0 then continue;  //El sprite no se va a ver
     priority:=(attr shr 12) and $3;
     if pri<>priority then continue;
     attr2:=sprite_ram[(i*4)+1];
@@ -386,7 +383,7 @@ begin
       actualiza_gfx_sprite(x,y,17,0);
     end else begin
       nchar:=nchar and $fffc;
-      a:=((attr shr 13) and 2)+(attr shr 15);
+      a:=(byte(flipx) shl 1) or byte(flipy);
       put_gfx_sprite_diff((nchar+0) xor a,color,flipx,flipy,0,0,0);
       put_gfx_sprite_diff((nchar+2) xor a,color,flipx,flipy,0,8,0);
       put_gfx_sprite_diff((nchar+1) xor a,color,flipx,flipy,0,0,8);
@@ -416,9 +413,8 @@ for f:=0 to $164 do begin
    pant:=((atrib2 shr 6) and $3)+1;
    atrib1:=video_ram[$0+(pos*2)];
    nchar:=$4000+((atrib1 and $fffc) shr 2);
-   for h:=1 to 4 do
-      if (h<>pant) then put_gfx_block_trans(x*16,y*16,h,16,16)
-          else put_gfx_trans_flip(x*16,y*16,nchar,color shl 4,pant,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0);
+   put_gfx_trans_flip(x*16,y*16,nchar,color shl 4,pant,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0);
+   for h:=1 to 4 do if (h<>pant) then put_gfx_block_trans(x*16,y*16,h,16,16);
    gfx[1].buffer[pos]:=false;
  end;
  //Draw Front
@@ -433,9 +429,8 @@ for f:=0 to $164 do begin
   pant:=((atrib2 shr 6) and $3)+5;
   atrib1:=video_ram[$800+(pos*2)];
   nchar:=$4000+((atrib1 and $fffc) shr 2);
-  for h:=5 to 8 do
-   if (h<>pant) then put_gfx_block_trans(x*16,y*16,h,16,16)
-      else put_gfx_trans_flip(x*16,y*16,nchar,color shl 4,pant,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0);
+  put_gfx_trans_flip(x*16,y*16,nchar,color shl 4,pant,1,(atrib1 and 1)<>0,(atrib1 and 2)<>0);
+  for h:=5 to 8 do if (h<>pant) then put_gfx_block_trans(x*16,y*16,h,16,16);
   gfx[1].buffer[pos+$400]:=false;
  end;
 end;
@@ -493,7 +488,7 @@ case direccion of
     $700002:thoop_getword:=marcade.dswa;
     $700004:thoop_getword:=marcade.in0;
     $700006:thoop_getword:=marcade.in1;
-    $70000e:thoop_getword:=oki_6295_0.read; //OKI
+    $70000e:thoop_getword:=oki_6295_0.read;
     $ff0000..$ffffff:thoop_getword:=main_ram[(direccion and $ffff) shr 1];
 end;
 end;
@@ -503,17 +498,21 @@ var
   dec:word;
   ptemp:pbyte;
 begin
-if direccion<$100000 then exit;
 case direccion of
+    0..$fffff:; //ROM
     $100000..$100fff:begin
                       dec:=gaelco_dec((direccion and $fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
-                      video_ram[(direccion and $fff) shr 1]:=dec;
-                      gfx[1].buffer[(direccion and $fff) shr 2]:=true;
+                      if video_ram[(direccion and $fff) shr 1]<>dec then begin
+                        video_ram[(direccion and $fff) shr 1]:=dec;
+                        gfx[1].buffer[(direccion and $fff) shr 2]:=true;
+                      end;
                    end;
     $101000..$101fff:begin
                       dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
-                      video_ram[(direccion and $1fff) shr 1]:=dec;
-                      gfx[1].buffer[((direccion and $fff) shr 2)+$400]:=true;
+                      if video_ram[(direccion and $1fff) shr 1]<>dec then begin
+                        video_ram[(direccion and $1fff) shr 1]:=dec;
+                        gfx[1].buffer[((direccion and $fff) shr 2)+$400]:=true;
+                      end;
                    end;
     $102000..$103fff:begin
                         dec:=gaelco_dec((direccion and $1fff) shr 1,valor,gaelco_dec_val,$4228,m68000_0.r.pc.l);
@@ -546,7 +545,7 @@ case direccion of
              inc(ptemp,$30000);
              copymemory(ptemp,@oki_rom[(valor and $f),0],$10000);
           end;
-    $70000e:oki_6295_0.write(valor); //OKI
+    $70000e:oki_6295_0.write(valor);
     $ff0000..$ffffff:main_ram[(direccion and $ffff) shr 1]:=valor;
   end;
 end;
@@ -556,13 +555,13 @@ procedure biomtoy_putword(direccion:dword;valor:word);
 var
   ptemp:pbyte;
 begin
-if direccion<$100000 then exit;
 case direccion of
-    $100000..$100fff:begin
+    0..$fffff:; //ROM
+    $100000..$100fff:if video_ram[(direccion and $fff) shr 1]<>valor then begin
                       video_ram[(direccion and $fff) shr 1]:=valor;
                       gfx[1].buffer[(direccion and $fff) shr 2]:=true;
                    end;
-    $101000..$101fff:begin
+    $101000..$101fff:if video_ram[(direccion and $1fff) shr 1]<>valor then begin
                       video_ram[(direccion and $1fff) shr 1]:=valor;
                       gfx[1].buffer[((direccion and $fff) shr 2)+$400]:=true;
                    end;
@@ -609,13 +608,13 @@ procedure reset_gaelco_hw;
 begin
  m68000_0.reset;
  if main_vars.tipo_maquina=78 then begin
-  m6809_0.reset;
-  ym3812_0.reset;
+    m6809_0.reset;
+    ym3812_0.reset;
  end;
  oki_6295_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
  scroll_x0:=1;
  scroll_y0:=1;
  scroll_x1:=1;
@@ -625,11 +624,9 @@ end;
 
 function iniciar_gaelco_hw:boolean;
 var
-      ptemp,ptemp2,ptemp3,memoria_temp:pbyte;
-      f,pants:byte;
+  ptemp,ptemp2,ptemp3,memoria_temp:pbyte;
+  f,pants:byte;
 const
-  ps_x:array[0..7] of dword=(0,1,2,3,4,5,6,7);
-  ps_y:array[0..7] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8);
   pt_x:array[0..15] of dword=(0,1,2,3,4,5,6,7, 16*8+0,16*8+1,16*8+2,16*8+3,16*8+4,16*8+5,16*8+6,16*8+7);
   pt_y:array[0..15] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8, 8*8,9*8,10*8,11*8,12*8,13*8,14*8,15*8);
 procedure convert_sprites;
@@ -637,18 +634,25 @@ begin
   init_gfx(0,8,8,$20000);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(4,0,8*8,0*$100000*8,1*$100000*8,2*$100000*8,3*$100000*8);
-  convert_gfx(0,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(0,0,memoria_temp,@pt_x,@pt_y,false,false);
 end;
 procedure convert_tiles;
+var
+  f:byte;
 begin
   init_gfx(1,16,16,$8000);
+  gfx[1].trans[0]:=true;
+  for f:=1 to 3 do gfx[1].trans_alt[f,0]:=true;
+  for f:=8 to 15 do gfx[1].trans_alt[1,f]:=true;
+  for f:=4 to 15 do gfx[1].trans_alt[2,f]:=true;
+  for f:=2 to 15 do gfx[1].trans_alt[3,f]:=true;
   gfx_set_desc_data(4,0,32*8,0*$100000*8,1*$100000*8,2*$100000*8,3*$100000*8);
-  convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(1,0,memoria_temp,@pt_x,@pt_y,false,false);
 end;
 begin
 iniciar_gaelco_hw:=false;
 iniciar_audio(false);
-if main_vars.tipo_maquina=78 then pants:=16
+if main_vars.tipo_maquina=78 then pants:=15
   else pants:=8;
 for f:=1 to pants do begin
   screen_init(f,336,272,true);
@@ -658,63 +662,53 @@ end;
 screen_init(17,512,512,false,true);
 iniciar_video(320,240);
 marcade.dswa:=$00ff;
+//Main CPU
+m68000_0:=cpu_m68000.create(12000000,$200);
+getmem(memoria_temp,$400000);
 case main_vars.tipo_maquina of
   78:begin  //Big Karnak
       //Main CPU
-      m68000_0:=cpu_m68000.create(10000000,$200);
+      if not(roms_load16w(@rom,bigkarnak_rom)) then exit;
       m68000_0.change_ram16_calls(bigk_getword,bigk_putword);
       //Sound CPU
-      m6809_0:=cpu_m6809.Create(2216750,$200,TCPU_M6809);
+      if not(roms_load(@mem_snd,bigkarnak_sound)) then exit;
+      m6809_0:=cpu_m6809.Create(2000000,$200,TCPU_M6809);
       m6809_0.change_ram_calls(bigk_snd_getbyte,bigk_snd_putbyte);
       m6809_0.init_sound(bigk_sound_update);
       //Sound Chips
-      ym3812_0:=ym3812_chip.create(YM3812_FM,3580000);
+      ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
       oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,1);
       //Cargar ADPCM ROMS
-      if not(cargar_roms(oki_6295_0.get_rom_addr,@bigkarnak_adpcm,'bigkarnk.zip',1)) then exit;
-      //cargar roms
-      if not(cargar_roms16w(@rom[0],@bigkarnak_rom[0],'bigkarnk.zip',0)) then exit;
-      //cargar sonido
-      if not(cargar_roms(@mem_snd[0],@bigkarnak_sound,'bigkarnk.zip',1)) then exit;
-      //convertir chars
-      getmem(memoria_temp,$400000);
+      if not(roms_load(oki_6295_0.get_rom_addr,bigkarnak_adpcm)) then exit;
       //Sprites
-      if not(cargar_roms(memoria_temp,@bigkarnak_gfx[0],'bigkarnk.zip',0)) then exit;
+      if not(roms_load(memoria_temp,bigkarnak_gfx)) then exit;
       convert_sprites;
       //Tiles
       convert_tiles;
-      gfx[1].trans_alt[0,0]:=true;
-      gfx[1].trans_alt[1,0]:=true;
-      for f:=8 to 15 do gfx[1].trans_alt[1,f]:=true;
-      freemem(memoria_temp);
       marcade.dswb:=$00ce;
       marcade.dswc:=$00ff;
       marcade.dswa_val:=@gaelco_dip;
       marcade.dswb_val:=@bigkarnak_dsw_2;
       marcade.dswc_val:=@bigkarnak_dsw_3;
-  end;
+     end;
   101:begin  //Thunder Hoop
         //Main CPU
-        m68000_0:=cpu_m68000.create(12000000,$200);
+        if not(roms_load16w(@rom,thoop_rom)) then exit;
         m68000_0.change_ram16_calls(thoop_getword,thoop_putword);
         m68000_0.init_sound(thoop_sound_update);
         //Sound Chips
         oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS
-        getmem(memoria_temp,$400000);
-        if not(cargar_roms(memoria_temp,@thoop_adpcm,'thoop.zip',1)) then exit;
+        if not(roms_load(memoria_temp,thoop_adpcm)) then exit;
         copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
         ptemp2:=memoria_temp;
         for f:=0 to $f do begin
            copymemory(@oki_rom[f,0],ptemp2,$10000);
            inc(ptemp2,$10000);
         end;
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@thoop_rom[0],'thoop.zip',0)) then exit;
-        //convertir chars
-        getmem(ptemp,$400000);
         //Sprites
-        if not(cargar_roms(ptemp,@thoop_gfx[0],'thoop.zip',0)) then exit;
+        getmem(ptemp,$400000);
+        if not(roms_load(ptemp,thoop_gfx)) then exit;
         //Ordenar los GFX
         ptemp3:=ptemp;
         for f:=3 downto 0 do begin
@@ -727,35 +721,29 @@ case main_vars.tipo_maquina of
         convert_sprites;
         //Tiles
         convert_tiles;
-        gfx[1].trans[0]:=true;
-        freemem(memoria_temp);
         gaelco_dec_val:=$e;
         marcade.dswb:=$00cf;
         marcade.dswa_val:=@thoop_dsw_1;
         marcade.dswb_val:=@thoop_dsw_2;
       end;
-      173:begin  //Squash
+  173:begin  //Squash
         //Main CPU
-        m68000_0:=cpu_m68000.create(12000000,$200);
+        if not(roms_load16w(@rom,squash_rom)) then exit;
         m68000_0.change_ram16_calls(thoop_getword,thoop_putword);
         m68000_0.init_sound(thoop_sound_update);
         //Sound Chips
         oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS
-        getmem(memoria_temp,$400000);
-        if not(cargar_roms(memoria_temp,@squash_adpcm,'squash.zip',1)) then exit;
+        if not(roms_load(memoria_temp,squash_adpcm)) then exit;
         copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
         ptemp2:=memoria_temp;
         for f:=0 to $7 do begin
            copymemory(@oki_rom[f,0],ptemp2,$10000);
            inc(ptemp2,$10000);
         end;
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@squash_rom[0],'squash.zip',0)) then exit;
-        //convertir chars
-        getmem(ptemp,$400000);
         //Sprites
-        if not(cargar_roms(ptemp,@squash_gfx[0],'squash.zip',0)) then exit;
+        getmem(ptemp,$400000);
+        if not(roms_load(ptemp,squash_gfx)) then exit;
         //Ordenar los GFX
         ptemp3:=ptemp;
         for f:=3 downto 0 do begin
@@ -766,35 +754,29 @@ case main_vars.tipo_maquina of
         convert_sprites;
         //Tiles
         convert_tiles;
-        gfx[1].trans[0]:=true;
-        freemem(memoria_temp);
         gaelco_dec_val:=$f;
         marcade.dswb:=$00df;
         marcade.dswa_val:=@squash_dsw_1;
         marcade.dswb_val:=@squash_dsw_2;
       end;
-      174:begin  //Biomechanical Toy
+  174:begin  //Biomechanical Toy
         //Main CPU
-        m68000_0:=cpu_m68000.create(12000000,$200);
+        if not(roms_load16w(@rom,biomtoy_rom)) then exit;
         m68000_0.change_ram16_calls(thoop_getword,biomtoy_putword);
         m68000_0.init_sound(thoop_sound_update);
         //Sound Chips
         oki_6295_0:=snd_okim6295.Create(1056000,OKIM6295_PIN7_HIGH,2);
         //Cargar ADPCM ROMS
-        getmem(memoria_temp,$400000);
-        if not(cargar_roms(memoria_temp,@biomtoy_adpcm,'biomtoy.zip',0)) then exit;
+        if not(roms_load(memoria_temp,biomtoy_adpcm)) then exit;
         copymemory(oki_6295_0.get_rom_addr,memoria_temp,$40000);
         ptemp2:=memoria_temp;
         for f:=0 to $f do begin
            copymemory(@oki_rom[f,0],ptemp2,$10000);
            inc(ptemp2,$10000);
         end;
-        //cargar roms
-        if not(cargar_roms16w(@rom[0],@biomtoy_rom[0],'biomtoy.zip',0)) then exit;
-        //convertir chars
-        getmem(ptemp,$400000);
         //Sprites
-        if not(cargar_roms(ptemp,@biomtoy_gfx[0],'biomtoy.zip',0)) then exit;
+        getmem(ptemp,$400000);
+        if not(roms_load(ptemp,biomtoy_gfx)) then exit;
         //Ordenar los GFX
         ptemp3:=ptemp; //orig
         for f:=0 to 3 do begin
@@ -807,13 +789,12 @@ case main_vars.tipo_maquina of
         convert_sprites;
         //Tiles
         convert_tiles;
-        gfx[1].trans[0]:=true;
-        freemem(memoria_temp);
         marcade.dswb:=$00fb;
         marcade.dswa_val:=@gaelco_dip;
         marcade.dswb_val:=@biomtoy_dsw_2;
       end;
 end;
+freemem(memoria_temp);
 //final
 reset_gaelco_hw;
 iniciar_gaelco_hw:=true;

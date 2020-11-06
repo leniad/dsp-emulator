@@ -96,6 +96,7 @@ const
         (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$80;dip_name:'No'),(dip_val:$0;dip_name:'5 Times'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         tnk3_dip_c:array [0..1] of def_dip=(
         (mask:$c1;name:'Bonus Life';number:7;dip:((dip_val:$c1;dip_name:'20K 60K 60K+'),(dip_val:$81;dip_name:'40K 90K 90K+'),(dip_val:$41;dip_name:'50K 120K 120K+'),(dip_val:$c0;dip_name:'20K 60K'),(dip_val:$80;dip_name:'40K 90K'),(dip_val:$40;dip_name:'50K 120K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),())),());
+         CPU_SYNC=5;
 
 type
   snk_proc_generico=procedure;
@@ -397,23 +398,25 @@ end;
 procedure snk_principal;
 var
   frame_m,frame_sub,frame_snd:single;
-  f:word;
+  h,f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_sub:=z80_1.tframes;
 frame_snd:=z80_2.tframes;
 while EmuStatus=EsRuning do begin
-  for f:=0 to 4479 do begin
-    //Main
-    z80_0.run(frame_m);
-    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-    //Sub
-    z80_1.run(frame_sub);
-    frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
-    //snd
-    z80_2.run(frame_snd);
-    frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
+  for f:=0 to 223 do begin
+    for h:=1 to CPU_SYNC do begin
+        //Main
+        z80_0.run(frame_m);
+        frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+        //Sub
+        z80_1.run(frame_sub);
+        frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
+        //snd
+        z80_2.run(frame_snd);
+        frame_snd:=frame_snd+z80_2.tframes-z80_2.contador;
+    end;
     if f=0 then begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
@@ -483,7 +486,7 @@ case direccion of
   $c400:begin  //soundlatch_w
           sound_latch:=valor;
           sound_status:=sound_status or 8 or 4;
-          timer[timer_sound].enabled:=true;
+          timers.enabled(timer_sound,true);
         end;
   $c700:z80_0.change_nmi(CLEAR_LINE); //cpa_nmi_ack
   $c800:scroll_y:=(scroll_y and $100) or valor;  //snk_bg_scrolly_w
@@ -614,7 +617,7 @@ case direccion of
   $c400:begin  //soundlatch_w
           sound_latch:=valor;
           sound_status:=sound_status or 8 or 4;
-          timer[timer_sound].enabled:=true;
+          timers.enabled(timer_sound,true);
         end;
   $c700:z80_0.change_nmi(CLEAR_LINE); //cpua_nmi_ack
   $c800:begin   //tnk3_videoattrs_w
@@ -701,19 +704,19 @@ case direccion of
   $f800:begin //snk_sound_status_w
           if (valor and $10)=0 then begin
             sound_status:=sound_status and $fe;
-            timer[timer_sound].enabled:=true;
+            timers.enabled(timer_sound,true);
           end;
           if (valor and $20)=0 then begin
             sound_status:=sound_status and $fd;
-            timer[timer_sound].enabled:=true;
+            timers.enabled(timer_sound,true);
           end;
           if (valor and $40)=0 then begin
             sound_status:=sound_status and $fb;
-            timer[timer_sound].enabled:=true;
+            timers.enabled(timer_sound,true);
           end;
           if (valor and $80)=0 then begin
             sound_status:=sound_status and $f7;
-            timer[timer_sound].enabled:=true;
+            timers.enabled(timer_sound,true);
           end;
         end;
 end;
@@ -723,7 +726,7 @@ procedure snd_irq1(irqstate:byte);
 begin
 if irqstate<>0 then begin
   sound_status:=sound_status or 1;
-  timer[timer_sound].enabled:=true;
+  timers.enabled(timer_sound,true);
 end;
 end;
 
@@ -731,7 +734,7 @@ procedure snd_irq2(irqstate:byte);
 begin
 if irqstate<>0 then begin
   sound_status:=sound_status or 2;
-  timer[timer_sound].enabled:=true;
+  timers.enabled(timer_sound,true);
 end;
 end;
 
@@ -743,7 +746,7 @@ end;
 
 procedure snk_snd_irq;
 begin
-timer[timer_sound].enabled:=false;
+timers.enabled(timer_sound,false);
 if (sound_status and $b)<>0 then z80_2.change_irq(ASSERT_LINE)
   else z80_2.change_irq(CLEAR_LINE);
 end;
@@ -756,18 +759,18 @@ case direccion of
   $c000:begin //tnk3_busy_clear_r
            sound_latch:=0;
            sound_status:=sound_status and $fb;
-           timer[timer_sound].enabled:=true;
+           timers.enabled(timer_sound,true);
            tnk3_snd_getbyte:=$ff;
         end;
 	$e000:tnk3_snd_getbyte:=ym3812_0.status;
   $e004:begin //tnk3_cmdirq_ack_r
            sound_status:=sound_status and $f7;
-           timer[timer_sound].enabled:=true;
+           timers.enabled(timer_sound,true);
            tnk3_snd_getbyte:=$ff;
         end;
   $e006:begin //tnk3_ymirq_ack_r
            sound_status:=sound_status and $fe;
-           timer[timer_sound].enabled:=true;
+           timers.enabled(timer_sound,true);
            tnk3_snd_getbyte:=$ff;
         end;
 end;
@@ -887,10 +890,10 @@ end;
 //IMPORTANTE!!! Para que las 3 CPUs funcionen correctamente, es necesario que se ejecuten pocas instrucciones
 //cada vez para que se sincronicen mejor, si no, por ejemplo nada mas arrancar la CPU 2 no carga la pila y la CPU 1
 //genera una NMI...
-z80_0:=cpu_z80.create(3350000,4480);
-z80_1:=cpu_z80.create(3350000,4480);
-z80_2:=cpu_z80.create(4000000,4480);
-timer_sound:=init_timer(z80_2.numero_cpu,120,snk_snd_irq,false);
+z80_0:=cpu_z80.create(3350000,224*CPU_SYNC);
+z80_1:=cpu_z80.create(3350000,224*CPU_SYNC);
+z80_2:=cpu_z80.create(4000000,224*CPU_SYNC);
+timer_sound:=timers.init(z80_2.numero_cpu,120,snk_snd_irq,nil,false);
 case main_vars.tipo_maquina of
   241:begin //Ikari Warriors
         update_video_snk:=update_video_ikari;
@@ -906,36 +909,36 @@ case main_vars.tipo_maquina of
         ym3812_1:=ym3812_chip.create(YM3526_FM,4000000,2);
         ym3812_1.change_irq_calls(snd_irq2);
         //cargar roms
-        if not(roms_load(@memoria,@ikari_main,'ikari.zip',sizeof(ikari_main))) then exit;
-        if not(roms_load(@mem_misc,@ikari_sub,'ikari.zip',sizeof(ikari_sub))) then exit;
-        if not(roms_load(@mem_snd,@ikari_snd,'ikari.zip',sizeof(ikari_snd))) then exit;
+        if not(roms_load(@memoria,ikari_main)) then exit;
+        if not(roms_load(@mem_misc,ikari_sub)) then exit;
+        if not(roms_load(@mem_snd,ikari_snd)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@ikari_gfx1,'ikari.zip',sizeof(ikari_gfx1))) then exit;
+        if not(roms_load(@memoria_temp,ikari_gfx1)) then exit;
         init_gfx(0,8,8,$200);
         gfx[0].trans[15]:=true;
         gfx_set_desc_data(4,0,32*8,0,1,2,3);
         convert_gfx(0,0,@memoria_temp,@pb_x,@pc_y,false,true);
         //convertir bg
-        if not(roms_load(@memoria_temp,@ikari_gfx2,'ikari.zip',sizeof(ikari_gfx2))) then exit;
+        if not(roms_load(@memoria_temp,ikari_gfx2)) then exit;
         init_gfx(1,16,16,$400);
         gfx_set_desc_data(4,0,64*16,0,1,2,3);
         convert_gfx(1,0,@memoria_temp,@pb_x,@pb_y,false,true);
         //sprite 16
-        if not(roms_load(@memoria_temp,@ikari_sprite16,'ikari.zip',sizeof(ikari_sprite16))) then exit;
+        if not(roms_load(@memoria_temp,ikari_sprite16)) then exit;
         init_gfx(2,16,16,$400);
         gfx[2].trans[7]:=true;
         gfx[2].shadow[6]:=true;
         gfx_set_desc_data(3,0,16*16,2*1024*256,1*1024*256,0*1024*256);
         convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
         //sprite 32
-        if not(roms_load(@memoria_temp,@ikari_sprite32,'ikari.zip',sizeof(ikari_sprite32))) then exit;
+        if not(roms_load(@memoria_temp,ikari_sprite32)) then exit;
         init_gfx(3,32,32,$200);
         gfx[3].trans[7]:=true;
         gfx[3].shadow[6]:=true;
         gfx_set_desc_data(3,0,16*32*2,2*2048*256,1*2048*256,0*2048*256);
         convert_gfx(3,0,@memoria_temp,@ps_x,@pc_y,false,true);
         //pal
-        if not(roms_load(@memoria_temp,@ikari_proms,'ikari.zip',sizeof(ikari_proms))) then exit;
+        if not(roms_load(@memoria_temp,ikari_proms)) then exit;
         for f:=0 to $3ff do begin
 		      colores[f].r:=pal4bit(memoria_temp[f]);
 		      colores[f].g:=pal4bit(memoria_temp[f+$400]);
@@ -964,29 +967,29 @@ case main_vars.tipo_maquina of
         ym3812_1:=ym3812_chip.create(YM3526_FM,4000000,2);
         ym3812_1.change_irq_calls(snd_irq2);
         //cargar roms
-        if not(roms_load(@memoria,@athena_main,'athena.zip',sizeof(athena_main))) then exit;
-        if not(roms_load(@mem_misc,@athena_sub,'athena.zip',sizeof(athena_sub))) then exit;
-        if not(roms_load(@mem_snd,@athena_snd,'athena.zip',sizeof(athena_snd))) then exit;
+        if not(roms_load(@memoria,athena_main)) then exit;
+        if not(roms_load(@mem_misc,athena_sub)) then exit;
+        if not(roms_load(@mem_snd,athena_snd)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@athena_gfx1,'athena.zip',sizeof(athena_gfx1))) then exit;
+        if not(roms_load(@memoria_temp,athena_gfx1)) then exit;
         init_gfx(0,8,8,$200);
         gfx[0].trans[15]:=true;
         gfx_set_desc_data(4,0,32*8,0,1,2,3);
         convert_gfx(0,0,@memoria_temp,@pb_x,@pc_y,false,false);
         //convertir bg
-        if not(roms_load(@memoria_temp,@athena_gfx2,'athena.zip',sizeof(athena_gfx2))) then exit;
+        if not(roms_load(@memoria_temp,athena_gfx2)) then exit;
         init_gfx(1,8,8,$400);
         gfx_set_desc_data(4,0,32*8,0,1,2,3);
         convert_gfx(1,0,@memoria_temp,@pb_x,@pc_y,false,false);
         //sprite 16
-        if not(roms_load(@memoria_temp,@athena_sprite16,'athena.zip',sizeof(athena_sprite16))) then exit;
+        if not(roms_load(@memoria_temp,athena_sprite16)) then exit;
         init_gfx(2,16,16,$400);
         gfx[2].trans[7]:=true;
         gfx[2].shadow[6]:=true;
         gfx_set_desc_data(3,0,16*16,2*1024*256,1*1024*256,0*1024*256);
         convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //pal
-        if not(roms_load(@memoria_temp,@athena_proms,'athena.zip',sizeof(athena_proms))) then exit;
+        if not(roms_load(@memoria_temp,athena_proms)) then exit;
         tank3_pal;
         marcade.dswa:=$39;
         marcade.dswb:=$cb;
@@ -1008,30 +1011,30 @@ case main_vars.tipo_maquina of
         ym3812_0:=ym3812_chip.create(YM3526_FM,4000000,2);
         ym3812_0.change_irq_calls(snd_irq1);
         //cargar roms
-        if not(roms_load(@memoria,@tnk3_main,'tnk3.zip',sizeof(tnk3_main))) then exit;
-        if not(roms_load(@mem_misc,@tnk3_sub,'tnk3.zip',sizeof(tnk3_sub))) then exit;
-        if not(roms_load(@mem_snd,@tnk3_snd,'tnk3.zip',sizeof(tnk3_snd))) then exit;
+        if not(roms_load(@memoria,tnk3_main)) then exit;
+        if not(roms_load(@mem_misc,tnk3_sub)) then exit;
+        if not(roms_load(@mem_snd,tnk3_snd)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@tnk3_gfx1,'tnk3.zip',sizeof(tnk3_gfx1))) then exit;
+        if not(roms_load(@memoria_temp,tnk3_gfx1)) then exit;
         copymemory(@memoria_temp[$2000],@memoria_temp,$2000);
         init_gfx(0,8,8,$200);
         gfx[0].trans[15]:=true;
         gfx_set_desc_data(4,0,32*8,0,1,2,3);
         convert_gfx(0,0,@memoria_temp,@pb_x,@pc_y,false,false);
         //convertir bg
-        if not(roms_load(@memoria_temp,@tnk3_gfx2,'tnk3.zip',sizeof(tnk3_gfx2))) then exit;
+        if not(roms_load(@memoria_temp,tnk3_gfx2)) then exit;
         init_gfx(1,8,8,$400);
         gfx_set_desc_data(4,0,32*8,0,1,2,3);
         convert_gfx(1,0,@memoria_temp,@pb_x,@pc_y,false,false);
         //sprite 16
-        if not(roms_load(@memoria_temp,@tnk3_sprite16,'tnk3.zip',sizeof(tnk3_sprite16))) then exit;
+        if not(roms_load(@memoria_temp,tnk3_sprite16)) then exit;
         init_gfx(2,16,16,$200);
         gfx[2].trans[7]:=true;
         gfx[2].shadow[6]:=true;
         gfx_set_desc_data(3,0,16*16,2*512*256,1*512*256,0*512*256);
         convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
         //pal
-        if not(roms_load(@memoria_temp,@tnk3_proms,'tnk3.zip',sizeof(tnk3_proms))) then exit;
+        if not(roms_load(@memoria_temp,tnk3_proms)) then exit;
         tank3_pal;
         marcade.dswa:=$3d;
         marcade.dswb:=$76;

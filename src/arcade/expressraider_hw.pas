@@ -3,27 +3,27 @@ unit expressraider_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,ym_2203,ym_3812,gfx_engine,
-     rom_engine,pal_engine,sound_engine;
+     rom_engine,pal_engine,sound_engine,qsnapshot;
 
 procedure cargar_expraid;
 
 implementation
 const
-        expraid_rom:array[0..2] of tipo_roms=(
-        (n:'cz01-2e.16b';l:$4000;p:$4000;crc:$a0ae6756),(n:'cz00-4e.15a';l:$8000;p:$8000;crc:$910f6ccc),());
+        expraid_rom:array[0..1] of tipo_roms=(
+        (n:'cz01-2e.16b';l:$4000;p:$4000;crc:$a0ae6756),(n:'cz00-4e.15a';l:$8000;p:$8000;crc:$910f6ccc));
         expraid_char:tipo_roms=(n:'cz07.5b';l:$4000;p:$0000;crc:$686bac23);
-        expraid_tiles:array[0..3] of tipo_roms=(
+        expraid_tiles:array[0..2] of tipo_roms=(
         (n:'cz04.8e';l:$8000;p:$0000;crc:$643a1bd3),(n:'cz05.8f';l:$8000;p:$10000;crc:$c44570bf),
-        (n:'cz06.8h';l:$8000;p:$18000;crc:$b9bb448b),());
+        (n:'cz06.8h';l:$8000;p:$18000;crc:$b9bb448b));
         expraid_snd:tipo_roms=(n:'cz02-1.2a';l:$8000;p:$8000;crc:$552e6112);
         expraid_tiles_mem:tipo_roms=(n:'cz03.12d';l:$8000;p:$0000;crc:$6ce11971);
-        expraid_sprites:array[0..6] of tipo_roms=(
+        expraid_sprites:array[0..5] of tipo_roms=(
         (n:'cz09.16h';l:$8000;p:$0000;crc:$1ed250d1),(n:'cz08.14h';l:$8000;p:$8000;crc:$2293fc61),
         (n:'cz13.16k';l:$8000;p:$10000;crc:$7c3bfd00),(n:'cz12.14k';l:$8000;p:$18000;crc:$ea2294c8),
-        (n:'cz11.13k';l:$8000;p:$20000;crc:$b7418335),(n:'cz10.11k';l:$8000;p:$28000;crc:$2f611978),());
-        expraid_proms:array[0..4] of tipo_roms=(
+        (n:'cz11.13k';l:$8000;p:$20000;crc:$b7418335),(n:'cz10.11k';l:$8000;p:$28000;crc:$2f611978));
+        expraid_proms:array[0..3] of tipo_roms=(
         (n:'cy-17.5b';l:$100;p:$000;crc:$da31dfbc),(n:'cy-16.6b';l:$100;p:$100;crc:$51f25b4c),
-        (n:'cy-15.7b';l:$100;p:$200;crc:$a6168d7f),(n:'cy-14.9b';l:$100;p:$300;crc:$52aad300),());
+        (n:'cy-15.7b';l:$100;p:$200;crc:$a6168d7f),(n:'cy-14.9b';l:$100;p:$300;crc:$52aad300));
         expraid_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$1;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$4;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -176,7 +176,6 @@ end;
 
 procedure putbyte_expraid(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   0..$7ff:memoria[direccion]:=valor;
   $800..$fff:if memoria[direccion]<>valor then begin
@@ -190,8 +189,8 @@ case direccion of
         end;
   $2002:main_screen.flip_main_screen:=(valor and $1)<>0;
   $2800..$2803:if bg_tiles[direccion and $3]<>(valor and $3f) then begin
-                bg_tiles[direccion and $3]:=valor and $3f;
-                bg_tiles_cam[direccion and $3]:=true;
+                  bg_tiles[direccion and $3]:=valor and $3f;
+                  bg_tiles_cam[direccion and $3]:=true;
                end;
   $2804:scroll_y:=valor;
   $2805:scroll_x:=valor;
@@ -201,6 +200,7 @@ case direccion of
           $80:prot_val:=prot_val+1;
           $90:prot_val:=0;
         end;
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -225,13 +225,13 @@ end;
 
 procedure putbyte_snd_expraid(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
   0..$1fff:mem_snd[direccion]:=valor;
   $2000:ym2203_0.control(valor);
   $2001:ym2203_0.write(valor);
   $4000:ym3812_0.control(valor);
   $4001:ym3812_0.write(valor);
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -247,6 +247,92 @@ begin
 end;
 
 //Main
+procedure expraid_qsave(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..15] of byte;
+  size:word;
+begin
+open_qsnapshot_save('expressraider'+nombre);
+getmem(data,20000);
+//CPU
+size:=m6502_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+size:=m6809_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND
+size:=ym2203_0.save_snapshot(data);
+savedata_com_qsnapshot(data,size);
+size:=ym3812_0.save_snapshot(data);
+savedata_com_qsnapshot(data,size);
+//MEM
+savedata_com_qsnapshot(@memoria[0],$4000);
+savedata_com_qsnapshot(@mem_snd[0],$8000);
+//MISC
+buffer[0]:=vb;
+buffer[1]:=prot_val;
+buffer[2]:=sound_latch;
+buffer[3]:=scroll_x;
+buffer[4]:=scroll_y;
+buffer[5]:=scroll_x2;
+buffer[6]:=bg_tiles[0];
+buffer[7]:=bg_tiles[1];
+buffer[8]:=bg_tiles[2];
+buffer[9]:=bg_tiles[3];
+buffer[10]:=byte(bg_tiles_cam[0]);
+buffer[11]:=byte(bg_tiles_cam[1]);
+buffer[12]:=byte(bg_tiles_cam[2]);
+buffer[13]:=byte(bg_tiles_cam[3]);
+buffer[14]:=byte(old_val);
+buffer[15]:=byte(old_val2);
+savedata_qsnapshot(@buffer,16);
+freemem(data);
+close_qsnapshot;
+end;
+
+procedure expraid_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..15] of byte;
+begin
+if not(open_qsnapshot_load('expressraider'+nombre)) then exit;
+getmem(data,20000);
+//CPU
+loaddata_qsnapshot(data);
+m6502_0.load_snapshot(data);
+loaddata_qsnapshot(data);
+m6809_0.load_snapshot(data);
+//SND
+loaddata_qsnapshot(data);
+ym2203_0.load_snapshot(data);
+loaddata_qsnapshot(data);
+ym3812_0.load_snapshot(data);
+//MEM
+loaddata_qsnapshot(@memoria);
+loaddata_qsnapshot(@mem_snd);
+//MISC
+vb:=buffer[0];
+prot_val:=buffer[1];
+sound_latch:=buffer[2];
+scroll_x:=buffer[3];
+scroll_y:=buffer[4];
+scroll_x2:=buffer[5];
+bg_tiles[0]:=buffer[6];
+bg_tiles[1]:=buffer[7];
+bg_tiles[2]:=buffer[8];
+bg_tiles[3]:=buffer[9];
+bg_tiles_cam[0]:=buffer[10]<>0;
+bg_tiles_cam[1]:=buffer[11]<>0;
+bg_tiles_cam[2]:=buffer[12]<>0;
+bg_tiles_cam[3]:=buffer[13]<>0;
+old_val:=buffer[14]<>0;
+old_val2:=buffer[15]<>0;
+freemem(data);
+close_qsnapshot;
+//END
+fillchar(gfx[0].buffer,$400,1);
+end;
+
 procedure reset_expraid;
 begin
 m6502_0.reset;
@@ -269,19 +355,15 @@ end;
 function iniciar_expraid:boolean;
 const
     pc_x:array[0..7] of dword=(0+($2000*8),1+($2000*8), 2+($2000*8), 3+($2000*8), 0, 1, 2, 3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(128+0, 128+1, 128+2, 128+3, 128+4, 128+5, 128+6, 128+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
     pt_x:array[0..15] of dword=(0, 1, 2, 3, 1024*32*2,1024*32*2+1,1024*32*2+2,1024*32*2+3,
 		128+0,128+1,128+2,128+3,128+1024*32*2,128+1024*32*2+1,128+1024*32*2+2,128+1024*32*2+3);
-    pt_y:array[0..15] of dword=(0*8,1*8,2*8,3*8,4*8,5*8,6*8,7*8,
-		64+0*8,64+1*8,64+2*8,64+3*8,64+4*8,64+5*8,64+6*8,64+7*8);
 var
   colores:tpaleta;
-  f:word;
-  i,offs:integer;
+  f,offs:byte;
   memoria_temp:array[0..$2ffff] of byte;
 begin
 iniciar_expraid:=false;
@@ -305,45 +387,43 @@ ym2203_0:=ym2203_chip.create(1500000,0.3,0.3);
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,0.6);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
-if not(cargar_roms(@memoria,@expraid_rom,'exprraid.zip',0)) then exit;
+if not(roms_load(@memoria,expraid_rom)) then exit;
 //cargar roms audio
-if not(cargar_roms(@mem_snd,@expraid_snd,'exprraid.zip')) then exit;
+if not(roms_load(@mem_snd,expraid_snd)) then exit;
 //Cargar chars
-if not(cargar_roms(@memoria_temp,@expraid_char,'exprraid.zip')) then exit;
+if not(roms_load(@memoria_temp,expraid_char)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,4);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp,@expraid_sprites,'exprraid.zip',0)) then exit;
+if not(roms_load(@memoria_temp,expraid_sprites)) then exit;
 init_gfx(1,16,16,2048);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,2*2048*32*8,2048*32*8,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //Cargar tiles
-if not(cargar_roms(@memoria_temp,@expraid_tiles,'exprraid.zip',0)) then exit;
+if not(roms_load(@memoria_temp,expraid_tiles)) then exit;
 //Mover los datos de los tiles para poder usar las rutinas de siempre...
-i:=$8000-$1000;
-offs:=$10000-$1000;
-repeat
-  copymemory(@memoria_temp[offs],@memoria_temp[i],$1000);
-	offs:=offs-$1000;
-  copymemory(@memoria_temp[offs],@memoria_temp[i],$1000);
-  offs:=offs-$1000;
-	i:=i-$1000;
-until (i<0);
+offs:=$10-$1;
+for f:=$7 downto 0 do begin
+  copymemory(@memoria_temp[offs*$1000],@memoria_temp[f*$1000],$1000);
+	offs:=offs-$1;
+  copymemory(@memoria_temp[offs*$1000],@memoria_temp[f*$1000],$1000);
+  offs:=offs-$1;
+end;
 init_gfx(2,16,16,1024);
 gfx[2].trans[0]:=true;
 for f:=0 to 3 do begin
   gfx_set_desc_data(3,8,32*8,4+(f*$4000)*8,($10000+f*$4000)*8+0,($10000+f*$4000)*8+4);
-  convert_gfx(2,f*$100*16*16,@memoria_temp,@pt_x,@pt_y,false,false);
+  convert_gfx(2,f*$100*16*16,@memoria_temp,@pt_x,@ps_y,false,false);
   gfx_set_desc_data(3,8,32*8,0+(f*$4000)*8,($11000+f*$4000)*8+0,($11000+f*$4000)*8+4);
-  convert_gfx(2,(f*$100*16*16)+($80*16*16),@memoria_temp,@pt_x,@pt_y,false,false);
+  convert_gfx(2,(f*$100*16*16)+($80*16*16),@memoria_temp,@pt_x,@ps_y,false,false);
 end;
-if not(cargar_roms(@mem_tiles,@expraid_tiles_mem,'exprraid.zip')) then exit;
+if not(roms_load(@mem_tiles,expraid_tiles_mem)) then exit;
 //Paleta
-if not(cargar_roms(@memoria_temp,@expraid_proms,'exprraid.zip',0)) then exit;
-for f:=0 to 255 do begin
+if not(roms_load(@memoria_temp,expraid_proms)) then exit;
+for f:=0 to $ff do begin
   colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
   colores[f].g:=((memoria_temp[f+$100] and $f) shl 4) or (memoria_temp[f+$100] and $f);
   colores[f].b:=((memoria_temp[f+$200] and $f) shl 4) or (memoria_temp[f+$200] and $f);
@@ -365,6 +445,8 @@ llamadas_maquina.iniciar:=iniciar_expraid;
 llamadas_maquina.bucle_general:=principal_expraid;
 llamadas_maquina.reset:=reset_expraid;
 llamadas_maquina.fps_max:=59.637405;
+llamadas_maquina.save_qsnap:=expraid_qsave;
+llamadas_maquina.load_qsnap:=expraid_qload;
 end;
 
 end.

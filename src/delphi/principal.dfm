@@ -1494,6 +1494,10 @@ object principal1: Tprincipal1
             OnClick = CambiarMaquina
           end
         end
+        object c641: TMenuItem
+          Caption = 'Commodore 64'
+          OnClick = CambiarMaquina
+        end
       end
       object Arcade1: TMenuItem
         Caption = 'Arcade'
@@ -1802,6 +1806,10 @@ object principal1: Tprincipal1
               Caption = 'Xevious'
               OnClick = CambiarMaquina
             end
+            object Bosconian1: TMenuItem
+              Caption = 'Bosconian'
+              OnClick = CambiarMaquina
+            end
           end
           object SunaHardware1: TMenuItem
             Caption = 'Suna HW'
@@ -2032,6 +2040,22 @@ object principal1: Tprincipal1
               Caption = 'Free Kick'
               OnClick = CambiarMaquina
             end
+            object Gigas1: TMenuItem
+              Caption = 'Gigas'
+              OnClick = CambiarMaquina
+            end
+            object Gigasm21: TMenuItem
+              Caption = 'Gigas Mark II'
+              OnClick = CambiarMaquina
+            end
+            object Omega1: TMenuItem
+              Caption = 'Omega'
+              OnClick = CambiarMaquina
+            end
+            object pbillrd1: TMenuItem
+              Caption = 'Perfect Billard'
+              OnClick = CambiarMaquina
+            end
           end
           object pbaction1: TMenuItem
             Caption = 'Pinball Action'
@@ -2076,6 +2100,62 @@ object principal1: Tprincipal1
             end
             object tnk31: TMenuItem
               Caption = 'T.N.K III'
+              OnClick = CambiarMaquina
+            end
+          end
+          object SegaSystemE1: TMenuItem
+            Caption = 'Sega System E'
+            GroupIndex = 1
+            object HangOnJr1: TMenuItem
+              Caption = 'HangOn Jr.'
+              OnClick = CambiarMaquina
+            end
+            object SlapShooter1: TMenuItem
+              Caption = 'Slap Shooter'
+              OnClick = CambiarMaquina
+            end
+            object FantasyZone21: TMenuItem
+              Caption = 'Fantasy Zone II - The Tears of Opa-Opa'
+              OnClick = CambiarMaquina
+            end
+            object OpaOpa1: TMenuItem
+              Caption = 'Opa-Opa'
+              OnClick = CambiarMaquina
+            end
+            object tetrisse1: TMenuItem
+              Caption = 'Tetris'
+              OnClick = CambiarMaquina
+            end
+            object transformer1: TMenuItem
+              Caption = 'Transformer'
+              OnClick = CambiarMaquina
+            end
+            object riddleofp1: TMenuItem
+              Caption = 'Riddle of Pythagoras'
+              OnClick = CambiarMaquina
+            end
+          end
+          object Route16HW1: TMenuItem
+            Caption = 'Route 16 HW'
+            GroupIndex = 1
+            object Route161: TMenuItem
+              Caption = 'Route 16'
+              OnClick = CambiarMaquina
+            end
+            object SpeakandRescue1: TMenuItem
+              Caption = 'Speak and Rescue'
+              OnClick = CambiarMaquina
+            end
+          end
+          object GalivanHW1: TMenuItem
+            Caption = 'Galivan HW'
+            GroupIndex = 1
+            object Galivan1: TMenuItem
+              Caption = 'Cosmo Police Galivan'
+              OnClick = CambiarMaquina
+            end
+            object Dangar1: TMenuItem
+              Caption = 'Ufo Robo Dangar'
               OnClick = CambiarMaquina
             end
           end
@@ -2306,6 +2386,22 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object WilliamsHW1: TMenuItem
+            Caption = 'Williams HW'
+            GroupIndex = 1
+            object Defender1: TMenuItem
+              Caption = 'Defender'
+              OnClick = CambiarMaquina
+            end
+            object Mayday1: TMenuItem
+              Caption = 'Mayday'
+              OnClick = CambiarMaquina
+            end
+            object Colony71: TMenuItem
+              Caption = 'Colony 7'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object HD63091: TMenuItem
           Caption = 'HD6309'
@@ -2314,6 +2410,10 @@ object principal1: Tprincipal1
             Caption = 'Double Dragon HW'
             object ddragon1: TMenuItem
               Caption = 'Double Dragon'
+              OnClick = CambiarMaquina
+            end
+            object ddragon_sh1: TMenuItem
+              Caption = 'Double Dragon (Speed Hack)'
               OnClick = CambiarMaquina
             end
             object ddragon21: TMenuItem
@@ -2369,9 +2469,16 @@ object principal1: Tprincipal1
         object M680001: TMenuItem
           Caption = 'M68000'
           GroupIndex = 1
-          object TerraCre1: TMenuItem
-            Caption = 'Terra Cresta'
-            OnClick = CambiarMaquina
+          object TerraCreHW1: TMenuItem
+            Caption = 'Terra Cresta HW'
+            object TerraCre1: TMenuItem
+              Caption = 'Terra Cresta'
+              OnClick = CambiarMaquina
+            end
+            object Amazon1: TMenuItem
+              Caption = 'Soldier Girl Amazon'
+              OnClick = CambiarMaquina
+            end
           end
           object Prehisle1: TMenuItem
             Caption = 'Prehistoric Isle in 1930'
@@ -2659,6 +2766,14 @@ object principal1: Tprincipal1
               Caption = 'Twinbee'
               OnClick = CambiarMaquina
             end
+            object gwarrior1: TMenuItem
+              Caption = 'Galactic Warriors'
+              OnClick = CambiarMaquina
+            end
+            object Salamander1: TMenuItem
+              Caption = 'Salamander'
+              OnClick = CambiarMaquina
+            end
           end
           object PiratesHW1: TMenuItem
             Caption = 'Pirates HW'
@@ -2718,6 +2833,33 @@ object principal1: Tprincipal1
               Caption = 'Peter Pack Rat'
               OnClick = CambiarMaquina
             end
+            object indydoom1: TMenuItem
+              Caption = 'Indiana Jones and the Temple of Doom'
+              OnClick = CambiarMaquina
+            end
+            object MarbleMadness1: TMenuItem
+              Caption = 'Marble Madness'
+              OnClick = CambiarMaquina
+            end
+          end
+          object BadLands1: TMenuItem
+            Caption = 'Bad Lands'
+            OnClick = CambiarMaquina
+          end
+          object LastDuelHW1: TMenuItem
+            Caption = 'Last Duel HW'
+            object LastDuel1: TMenuItem
+              Caption = 'Last Duel'
+              OnClick = CambiarMaquina
+            end
+            object MadGear1: TMenuItem
+              Caption = 'Mad Gear'
+              OnClick = CambiarMaquina
+            end
+            object leds20111: TMenuItem
+              Caption = 'Led Storm Rally 2011'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object NEC1: TMenuItem
@@ -2770,6 +2912,10 @@ object principal1: Tprincipal1
           Caption = 'Sega Master System'
           OnClick = CambiarMaquina
         end
+        object SG10001: TMenuItem
+          Caption = 'SG-1000'
+          OnClick = CambiarMaquina
+        end
       end
       object GameandWatch1: TMenuItem
         Caption = 'Game && Watch'
@@ -2814,7 +2960,7 @@ object principal1: Tprincipal1
     Left = 40
     Top = 80
     Bitmap = {
-      494C010107002807300520002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107002807040020002000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000800000004000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

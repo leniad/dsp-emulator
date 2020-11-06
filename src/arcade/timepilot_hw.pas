@@ -9,15 +9,15 @@ procedure cargar_timepilot;
 
 implementation
 const
-    timepilot_rom:array[0..3] of tipo_roms=(
+    timepilot_rom:array[0..2] of tipo_roms=(
     (n:'tm1';l:$2000;p:0;crc:$1551f1b9),(n:'tm2';l:$2000;p:$2000;crc:$58636cb5),
-    (n:'tm3';l:$2000;p:$4000;crc:$ff4e0d83),());
+    (n:'tm3';l:$2000;p:$4000;crc:$ff4e0d83));
     timepilot_char:tipo_roms=(n:'tm6';l:$2000;p:0;crc:$c2507f40);
-    timepilot_sprt:array[0..2] of tipo_roms=(
-    (n:'tm4';l:$2000;p:0;crc:$7e437c3e),(n:'tm5';l:$2000;p:$2000;crc:$e8ca87b9),());
-    timepilot_pal:array[0..4] of tipo_roms=(
+    timepilot_sprt:array[0..1] of tipo_roms=(
+    (n:'tm4';l:$2000;p:0;crc:$7e437c3e),(n:'tm5';l:$2000;p:$2000;crc:$e8ca87b9));
+    timepilot_pal:array[0..3] of tipo_roms=(
     (n:'timeplt.b4';l:$20;p:0;crc:$34c91839),(n:'timeplt.b5';l:$20;p:$20;crc:$463b2b07),
-    (n:'timeplt.e9';l:$100;p:$40;crc:$4bbb2150),(n:'timeplt.e12';l:$100;p:$140;crc:$f7b7663e),());
+    (n:'timeplt.e9';l:$100;p:$40;crc:$4bbb2150),(n:'timeplt.e12';l:$100;p:$140;crc:$f7b7663e));
     timepilot_sound:tipo_roms=(n:'tm7';l:$1000;p:0;crc:$d66da813);
 
 var
@@ -50,8 +50,9 @@ for f:=$1f downto $8 do begin
   x:=memoria[$b401+(f*2)]-1;
   y:=memoria[$b000+(f*2)];
   put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)=0,1);
-  actualiza_gfx_sprite_over(x,y,3,1,2,0,0);
+  actualiza_gfx_sprite(x,y,3,1);
 end;
+actualiza_trozo(0,32,256,224,2,0,32,256,224,3);
 actualiza_trozo(0,0,256,32,1,0,0,256,32,3);
 actualiza_trozo(0,248,256,8,1,0,248,256,8,3);
 actualiza_trozo_final(16,0,256,256,3);
@@ -114,9 +115,9 @@ end;
 
 procedure timepilot_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$6000 then exit;
 case direccion of
-    $a000..$a7ff:begin
+    0..$5fff:;
+    $a000..$a7ff:if memoria[direccion]<>valor then begin
                     memoria[direccion]:=valor;
                     gfx[0].buffer[direccion and $3ff]:=true;
                  end;
@@ -156,17 +157,14 @@ end;
 
 function timepilot_iniciar:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3,8*8+0,8*8+1,8*8+2,8*8+3);
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0,8*8+1,8*8+2,8*8+3,
 			16*8+0,16*8+1,16*8+2,16*8+3,24*8+0,24*8+1,24*8+2,24*8+3);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
 var
-        colores:tpaleta;
-        f:word;
-        bit0,bit1,bit2,bit3,bit4:byte;
-        memoria_temp:array[0..$3fff] of byte;
+  colores:tpaleta;
+  f,bit0,bit1,bit2,bit3,bit4:byte;
+  memoria_temp:array[0..$3fff] of byte;
 begin
 timepilot_iniciar:=false;
 iniciar_audio(false);
@@ -180,23 +178,23 @@ z80_0:=cpu_z80.create(3072000,256);
 z80_0.change_ram_calls(timepilot_getbyte,timepilot_putbyte);
 //Sound Chip
 konamisnd_0:=konamisnd_chip.create(2,TIPO_TIMEPLT,1789772,256);
-if not(cargar_roms(@konamisnd_0.memoria[0],@timepilot_sound,'timeplt.zip')) then exit;
+if not(roms_load(@konamisnd_0.memoria,timepilot_sound)) then exit;
 //Cargar las roms...
-if not(cargar_roms(@memoria[0],@timepilot_rom[0],'timeplt.zip',0)) then exit;
+if not(roms_load(@memoria,timepilot_rom)) then exit;
 //cargar chars
-if not(cargar_roms(@memoria_temp[0],@timepilot_char,'timeplt.zip')) then exit;
+if not(roms_load(@memoria_temp,timepilot_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //cargar sprites
-if not(cargar_roms(@memoria_temp[0],@timepilot_sprt[0],'timeplt.zip',0)) then exit;
+if not(roms_load(@memoria_temp,timepilot_sprt)) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,64*8,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //paleta de colores
-if not(cargar_roms(@memoria_temp[0],@timepilot_pal[0],'timeplt.zip',0)) then exit;
+if not(roms_load(@memoria_temp,timepilot_pal)) then exit;
 for f:=0 to 31 do begin
 		bit0:= (memoria_temp[f+$20] shr 1) and $01;
 		bit1:= (memoria_temp[f+$20] shr 2) and $01;

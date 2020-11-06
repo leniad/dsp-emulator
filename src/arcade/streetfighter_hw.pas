@@ -9,40 +9,54 @@ procedure cargar_sfighter;
 
 implementation
 const
-        sfighter_rom:array[0..6] of tipo_roms=(
-        (n:'sfe-19';l:$10000;p:0;crc:$8346c3ca),(n:'sfe-22';l:$10000;p:$1;crc:$3a4bfaa8),
-        (n:'sfe-20';l:$10000;p:$20000;crc:$b40e67ee),(n:'sfe-23';l:$10000;p:$20001;crc:$477c3d5b),
-        (n:'sfe-21';l:$10000;p:$40000;crc:$2547192b),(n:'sfe-24';l:$10000;p:$40001;crc:$79680f4e),());
-        sfighter_char:tipo_roms=(n:'sf-27.bin';l:$4000;p:0;crc:$2b09b36d);
-        sfighter_bg:array[0..4] of tipo_roms=(
-        (n:'sf-39.bin';l:$20000;p:0;crc:$cee3d292),(n:'sf-38.bin';l:$20000;p:$20000;crc:$2ea99676),
-        (n:'sf-41.bin';l:$20000;p:$40000;crc:$e0280495),(n:'sf-40.bin';l:$20000;p:$60000;crc:$c70b30de),());
-        sfighter_fg:array[0..8] of tipo_roms=(
-        (n:'sf-25.bin';l:$20000;p:0;crc:$7f23042e),(n:'sf-28.bin';l:$20000;p:$20000;crc:$92f8b91c),
-        (n:'sf-30.bin';l:$20000;p:$40000;crc:$b1399856),(n:'sf-34.bin';l:$20000;p:$60000;crc:$96b6ae2e),
-        (n:'sf-26.bin';l:$20000;p:$80000;crc:$54ede9f5),(n:'sf-29.bin';l:$20000;p:$a0000;crc:$f0649a67),
-        (n:'sf-31.bin';l:$20000;p:$c0000;crc:$8f4dd71a),(n:'sf-35.bin';l:$20000;p:$e0000;crc:$70c00fb4),());
-        sfighter_tile_map1:array[0..2] of tipo_roms=(
-        (n:'sf-37.bin';l:$10000;p:0;crc:$23d09d3d),(n:'sf-36.bin';l:$10000;p:$10000;crc:$ea16df6c),());
-        sfighter_tile_map2:array[0..2] of tipo_roms=(
-        (n:'sf-32.bin';l:$10000;p:$0;crc:$72df2bd9),(n:'sf-33.bin';l:$10000;p:$10000;crc:$3e99d3d5),());
-        sfighter_sprites:array[0..14] of tipo_roms=(
-        (n:'sf-15.bin';l:$20000;p:0;crc:$fc0113db),(n:'sf-16.bin';l:$20000;p:$20000;crc:$82e4a6d3),
-        (n:'sf-11.bin';l:$20000;p:$40000;crc:$e112df1b),(n:'sf-12.bin';l:$20000;p:$60000;crc:$42d52299),
-        (n:'sf-07.bin';l:$20000;p:$80000;crc:$49f340d9),(n:'sf-08.bin';l:$20000;p:$a0000;crc:$95ece9b1),
-        (n:'sf-03.bin';l:$20000;p:$c0000;crc:$5ca05781),(n:'sf-17.bin';l:$20000;p:$e0000;crc:$69fac48e),
-        (n:'sf-18.bin';l:$20000;p:$100000;crc:$71cfd18d),(n:'sf-13.bin';l:$20000;p:$120000;crc:$fa2eb24b),
-        (n:'sf-14.bin';l:$20000;p:$140000;crc:$ad955c95),(n:'sf-09.bin';l:$20000;p:$160000;crc:$41b73a31),
-        (n:'sf-10.bin';l:$20000;p:$180000;crc:$91c41c50),(n:'sf-05.bin';l:$20000;p:$1a0000;crc:$538c7cbe),());
-        sfighter_snd:tipo_roms=(n:'sf-02.bin';l:$8000;p:0;crc:$4a9ac534);
-        sfighter_msm:array[0..2] of tipo_roms=(
-        (n:'sfu-00';l:$20000;p:$0;crc:$a7cce903),(n:'sf-01.bin';l:$20000;p:$20000;crc:$86e0f0d5),());
-        scale:array[0..7] of byte =($00,$40,$e0,$fe,$fe,$fe,$fe,$fe);
+        sfighter_rom:array[0..5] of tipo_roms=(
+        (n:'sfd-19.2a';l:$10000;p:0;crc:$faaf6255),(n:'sfd-22.2c';l:$10000;p:$1;crc:$e1fe3519),
+        (n:'sfd-20.3a';l:$10000;p:$20000;crc:$44b915bd),(n:'sfd-23.3c';l:$10000;p:$20001;crc:$79c43ff8),
+        (n:'sfd-21.4a';l:$10000;p:$40000;crc:$e8db799b),(n:'sfd-24.4c';l:$10000;p:$40001;crc:$466a3440));
+        sfighter_snd:tipo_roms=(n:'sf-02.7k';l:$8000;p:0;crc:$4a9ac534);
+        sfighter_msm:array[0..1] of tipo_roms=(
+        (n:'sfu-00.1h';l:$20000;p:$0;crc:$a7cce903),(n:'sf-01.1k';l:$20000;p:$20000;crc:$86e0f0d5));
+        sfighter_char:tipo_roms=(n:'sf-27.4d';l:$4000;p:0;crc:$2b09b36d);
+        sfighter_bg:array[0..3] of tipo_roms=(
+        (n:'sf-39.2k';l:$20000;p:0;crc:$cee3d292),(n:'sf-38.1k';l:$20000;p:$20000;crc:$2ea99676),
+        (n:'sf-41.4k';l:$20000;p:$40000;crc:$e0280495),(n:'sf-40.3k';l:$20000;p:$60000;crc:$c70b30de));
+        sfighter_fg:array[0..7] of tipo_roms=(
+        (n:'sf-25.1d';l:$20000;p:0;crc:$7f23042e),(n:'sf-28.1e';l:$20000;p:$20000;crc:$92f8b91c),
+        (n:'sf-30.1g';l:$20000;p:$40000;crc:$b1399856),(n:'sf-34.1h';l:$20000;p:$60000;crc:$96b6ae2e),
+        (n:'sf-26.2d';l:$20000;p:$80000;crc:$54ede9f5),(n:'sf-29.2e';l:$20000;p:$a0000;crc:$f0649a67),
+        (n:'sf-31.2g';l:$20000;p:$c0000;crc:$8f4dd71a),(n:'sf-35.2h';l:$20000;p:$e0000;crc:$70c00fb4));
+        sfighter_sprites:array[0..13] of tipo_roms=(
+        (n:'sf-15.1m';l:$20000;p:0;crc:$fc0113db),(n:'sf-16.2m';l:$20000;p:$20000;crc:$82e4a6d3),
+        (n:'sf-11.1k';l:$20000;p:$40000;crc:$e112df1b),(n:'sf-12.2k';l:$20000;p:$60000;crc:$42d52299),
+        (n:'sf-07.1h';l:$20000;p:$80000;crc:$49f340d9),(n:'sf-08.2h';l:$20000;p:$a0000;crc:$95ece9b1),
+        (n:'sf-03.1f';l:$20000;p:$c0000;crc:$5ca05781),(n:'sf-17.3m';l:$20000;p:$e0000;crc:$69fac48e),
+        (n:'sf-18.4m';l:$20000;p:$100000;crc:$71cfd18d),(n:'sf-13.3k';l:$20000;p:$120000;crc:$fa2eb24b),
+        (n:'sf-14.4k';l:$20000;p:$140000;crc:$ad955c95),(n:'sf-09.3h';l:$20000;p:$160000;crc:$41b73a31),
+        (n:'sf-10.4h';l:$20000;p:$180000;crc:$91c41c50),(n:'sf-05.3f';l:$20000;p:$1a0000;crc:$538c7cbe));
+        sfighter_tile_map1:array[0..1] of tipo_roms=(
+        (n:'sf-37.4h';l:$10000;p:0;crc:$23d09d3d),(n:'sf-36.3h';l:$10000;p:$10000;crc:$ea16df6c));
+        sfighter_tile_map2:array[0..1] of tipo_roms=(
+        (n:'sf-32.3g';l:$10000;p:$0;crc:$72df2bd9),(n:'sf-33.4g';l:$10000;p:$10000;crc:$3e99d3d5));
+        //Dip
+        sfighter_dip_a:array [0..7] of def_dip=(
+        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 6C'),(),(),(),(),(),(),(),())),
+        (mask:$100;name:'Flip Screen';number:2;dip:((dip_val:$100;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$200;name:'Attract Music';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$200;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1000;name:'Speed';number:2;dip:((dip_val:$0;dip_name:'Slow'),(dip_val:$1000;dip_name:'Normal'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2000;name:'Demo Sounds';number:2;dip:((dip_val:$2000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4000;name:'Freeze';number:2;dip:((dip_val:$4000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        sfighter_dip_b:array [0..5] of def_dip=(
+        (mask:$7;name:'Game Continuation';number:6;dip:((dip_val:$7;dip_name:'5th Stage Maximum'),(dip_val:$6;dip_name:'4th Stage Maximum'),(dip_val:$5;dip_name:'3th Stage Maximum'),(dip_val:$4;dip_name:'2th Stage Maximum'),(dip_val:$3;dip_name:'1th Stage Maximum'),(dip_val:$2;dip_name:'None'),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Round Time Count';number:4;dip:((dip_val:$18;dip_name:'100'),(dip_val:$10;dip_name:'150'),(dip_val:$8;dip_name:'200'),(dip_val:$0;dip_name:'250'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Normal'),(dip_val:$40;dip_name:'Easy'),(dip_val:$20;dip_name:'Difficult'),(dip_val:$0;dip_name:'Very Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$380;name:'Buy-In Feature';number:6;dip:((dip_val:$380;dip_name:'5th Stage Maximum'),(dip_val:$300;dip_name:'4th Stage Maximum'),(dip_val:$280;dip_name:'3th Stage Maximum'),(dip_val:$200;dip_name:'2th Stage Maximum'),(dip_val:$180;dip_name:'1th Stage Maximum'),(dip_val:$80;dip_name:'None'),(),(),(),(),(),(),(),(),(),())),
+        (mask:$400;name:'Number of Countries Selected';number:2;dip:((dip_val:$400;dip_name:'2'),(dip_val:$0;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom:array[0..$2ffff] of word;
- ram1:array[0..$fff] of byte;
- ram3:array[0..$7fff] of byte;
+ ram1:array[0..$7ff] of word;
+ ram3:array[0..$3fff] of word;
  rom_misc:array[0..7,0..$7fff] of byte;
  scroll_bg,scroll_fg:word;
  bg_paint,fg_paint,bg_act,fg_act,char_act,sp_act:boolean;
@@ -53,7 +67,7 @@ procedure update_video_sfighter;
 var
   f,x,y,nchar,atrib,color,pos,nchar1,nchar2,nchar3,nchar4:word;
   flipx,flipy:boolean;
-function sf_invert(char:word):word;
+function sf_invert(char:word):word;inline;
 const
   delta:array[0..3] of byte=($00,$18,$18,$00);
 begin
@@ -97,35 +111,33 @@ end;
 //Sprites
 if sp_act then begin
   for f:=$7f downto 0 do begin
-    nchar:=(((ram3[$6000+(f*$20)] and $3f) shl 8) or ram3[$6001+(f*$20)]);
-    atrib:=(ram3[$6002+(f*$20)] shl 8) or ram3[$6003+(f*$20)];
+    nchar:=ram3[($6000+(f*$20)) shr 1] and $3fff;
+    atrib:=ram3[($6002+(f*$20)) shr 1];
     color:=((atrib and $f) shl 4)+512;
-    flipx:=(atrib and $0100)<>0;
-    flipy:=(atrib and $0200)<>0;
+    flipx:=(atrib and $100)<>0;
+    flipy:=(atrib and $200)<>0;
+    y:=ram3[($6004+(f*$20)) shr 1];
+    x:=ram3[($6006+(f*$20)) shr 1];
     if (atrib and $400)<>0 then begin
       nchar1:=nchar;
       nchar2:=nchar+1;
       nchar3:=nchar+16;
       nchar4:=nchar+17;
       if flipx then begin
-        x:=nchar2;nchar2:=nchar1;nchar1:=x;
-        x:=nchar4;nchar4:=nchar3;nchar3:=x;
+        pos:=nchar2;nchar2:=nchar1;nchar1:=pos;
+        pos:=nchar4;nchar4:=nchar3;nchar3:=pos;
       end;
       if flipy then begin
-        x:=nchar3;nchar3:=nchar1;nchar1:=x;
-        x:=nchar2;nchar2:=nchar4;nchar4:=x;
+        pos:=nchar3;nchar3:=nchar1;nchar1:=pos;
+        pos:=nchar2;nchar2:=nchar4;nchar4:=pos;
       end;
       put_gfx_sprite_diff(sf_invert(nchar1),color,flipx,flipy,3,0,0);
       put_gfx_sprite_diff(sf_invert(nchar2),color,flipx,flipy,3,16,0);
       put_gfx_sprite_diff(sf_invert(nchar3),color,flipx,flipy,3,0,16);
       put_gfx_sprite_diff(sf_invert(nchar4),color,flipx,flipy,3,16,16);
-      y:=(ram3[$6004+(f*$20)] shl 8) or ram3[$6005+(f*$20)];
-      x:=(ram3[$6006+(f*$20)] shl 8) or ram3[$6007+(f*$20)];
       actualiza_gfx_sprite_size(x,y,1,32,32);
     end else begin
       put_gfx_sprite(sf_invert(nchar),color,flipx,flipy,3);
-      y:=(ram3[$6004+(f*$20)] shl 8) or ram3[$6005+(f*$20)];
-      x:=(ram3[$6006+(f*$20)] shl 8) or ram3[$6007+(f*$20)];
       actualiza_gfx_sprite(x,y,1,3);
     end;
   end;
@@ -136,7 +148,7 @@ if char_act then begin
     if gfx[0].buffer[f] then begin
       x:=f mod 64;
       y:=f div 64;
-      atrib:=(ram1[(f*2)] shl 8) or ram1[$1+(f*2)];
+      atrib:=ram1[f];
       nchar:=atrib and $3ff;
       color:=(atrib shr 12) shl 2;
       flipx:=(atrib and $400)<>0;
@@ -153,35 +165,32 @@ end;
 procedure eventos_sfighter;
 begin
 if event.arcade then begin
-  //P1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  //P2
-  if arcade_input.up[1] then marcade.in7:=(marcade.in7 and $F7) else marcade.in7:=(marcade.in7 or $8);
-  if arcade_input.down[1] then marcade.in7:=(marcade.in7 and $fb) else marcade.in7:=(marcade.in7 or $4);
-  if arcade_input.left[1] then marcade.in7:=(marcade.in7 and $Fd) else marcade.in7:=(marcade.in7 or $2);
-  if arcade_input.right[1] then marcade.in7:=(marcade.in7 and $fe) else marcade.in7:=(marcade.in7 or $1);
-  //Misc
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  //P2
-  if arcade_input.but0[0] then marcade.in3:=(marcade.in3 or $1) else marcade.in3:=(marcade.in3 and $fe);
-  if arcade_input.but1[0] then marcade.in3:=(marcade.in3 or $2) else marcade.in3:=(marcade.in3 and $fd);
-  if arcade_input.but2[0] then marcade.in3:=(marcade.in3 or $4) else marcade.in3:=(marcade.in3 and $fb);
-  if arcade_input.but3[0] then marcade.in4:=(marcade.in4 or $1) else marcade.in4:=(marcade.in4 and $fe);
-  if arcade_input.but4[0] then marcade.in4:=(marcade.in4 or $2) else marcade.in4:=(marcade.in4 and $fd);
-  if arcade_input.but5[0] then marcade.in4:=(marcade.in4 or $4) else marcade.in4:=(marcade.in4 and $fb);
-  //P2
-  if arcade_input.but0[1] then marcade.in5:=(marcade.in5 or $1) else marcade.in5:=(marcade.in5 and $fe);
-  if arcade_input.but1[1] then marcade.in5:=(marcade.in5 or $2) else marcade.in5:=(marcade.in5 and $fd);
-  if arcade_input.but2[1] then marcade.in5:=(marcade.in5 or $4) else marcade.in5:=(marcade.in5 and $fb);
-  if arcade_input.but3[1] then marcade.in6:=(marcade.in6 or $1) else marcade.in6:=(marcade.in6 and $fe);
-  if arcade_input.but4[1] then marcade.in6:=(marcade.in6 or $2) else marcade.in6:=(marcade.in6 and $fd);
-  if arcade_input.but5[1] then marcade.in6:=(marcade.in6 or $4) else marcade.in6:=(marcade.in6 and $fb);
+  //P1 P2
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but3[0] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
+  if arcade_input.but4[0] then marcade.in1:=(marcade.in1 and $ff7f) else marcade.in1:=(marcade.in1 or $80);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $feff) else marcade.in1:=(marcade.in1 or $100);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fdff) else marcade.in1:=(marcade.in1 or $200);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fbff) else marcade.in1:=(marcade.in1 or $400);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $f7ff) else marcade.in1:=(marcade.in1 or $800);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $efff) else marcade.in1:=(marcade.in1 or $1000);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $dfff) else marcade.in1:=(marcade.in1 or $2000);
+  if arcade_input.but3[1] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
+  if arcade_input.but4[1] then marcade.in1:=(marcade.in1 and $7fff) else marcade.in1:=(marcade.in1 or $8000);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.but5[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.but5[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
+  if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  //SYSTEM
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or 1);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or 2);
 end;
 end;
 
@@ -219,17 +228,16 @@ function sfighter_getword(direccion:dword):word;
 begin
 case direccion of
   0..$4ffff:sfighter_getword:=rom[direccion shr 1];
-  $800000..$800fff:sfighter_getword:=ram1[(direccion+1) and $fff] or (ram1[direccion and $fff] shl 8);
+  $800000..$800fff:sfighter_getword:=ram1[(direccion and $fff) shr 1];
   $b00000..$b007ff:sfighter_getword:=buffer_paleta[(direccion and $7ff) shr 1];
-  $c00000:sfighter_getword:=$ff00+marcade.in0;  //coins
-  $c00002:sfighter_getword:=(marcade.in7 shl 8)+marcade.in1;  //marcade.in0
-  $c00004:sfighter_getword:=(0 shl 8)+scale[marcade.in3];
-  $c00006:sfighter_getword:=(0 shl 8)+scale[marcade.in4];
-  $c00008:sfighter_getword:=$dfff;
-  $c0000a,$c0000e:sfighter_getword:=$ffff;
-  $c0000c:sfighter_getword:=$ff00+marcade.in2;
+  $c00000:sfighter_getword:=marcade.in0;  //IN0
+  $c00002:sfighter_getword:=marcade.in1;  //IN1
+  $c00004,$c00006,$c0000e:sfighter_getword:=$ffff;
+  $c00008:sfighter_getword:=marcade.dswa;  //DSW1
+  $c0000a:sfighter_getword:=marcade.dswb;  //DSW2
+  $c0000c:sfighter_getword:=marcade.in2;  //SYSTEM
   $c0001a:sfighter_getword:=(byte(char_act) shl 3)+(byte(bg_act) shl 5)+(byte(fg_act) shl 6)+(byte(sp_act) shl 7);
-  $ff8000..$ffffff:sfighter_getword:=ram3[(direccion+1) and $7fff] or (ram3[direccion and $7fff] shl 8);
+  $ff8000..$ffffff:sfighter_getword:=ram3[(direccion and $7fff) shr 1];
 end;
 end;
 
@@ -249,11 +257,10 @@ end;
 
 procedure sfighter_putword(direccion:dword;valor:word);
 begin
-if direccion<$50000 then exit;
 case direccion of
-    $800000..$800fff:begin
-                    ram1[(direccion and $fff)+1]:=valor and $ff;
-                    ram1[direccion and $fff]:=valor shr 8;
+    0..$4ffff:; //ROM
+    $800000..$800fff:if ram1[(direccion and $fff) shr 1]<>valor then begin
+                    ram1[(direccion and $fff) shr 1]:=valor;
                     gfx[0].buffer[(direccion and $fff) shr 1]:=true;
                    end;
     $b00000..$b007ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
@@ -262,14 +269,15 @@ case direccion of
                    end;
     $c00016,$c00010:;
     $c00014:if valor<>scroll_fg then begin
+              if abs((scroll_fg and $fff0)-(valor and $fff0))>$f then fg_paint:=true;
               scroll_fg:=valor;
-              fg_paint:=true;
           end;
     $c00018:if valor<>scroll_bg then begin
+              if abs((scroll_bg and $fff0)-(valor and $fff0))>$f then bg_paint:=true;
               scroll_bg:=valor;
-              bg_paint:=true;
           end;
     $c0001a:begin
+              main_screen.flip_main_screen:=(valor and $4)<>0;
               char_act:=(valor and $8)<>0;
               bg_act:=(valor and $20)<>0;
               fg_act:=(valor and $40)<>0;
@@ -279,10 +287,7 @@ case direccion of
               soundlatch:=valor and $ff;
               z80_1.change_nmi(PULSE_LINE);
             end;
-    $ff8000..$ffffff:begin
-                        ram3[(direccion and $7fff)+1]:=valor and $ff;
-                        ram3[direccion and $7fff]:=valor shr 8;
-                     end;
+    $ff8000..$ffffff:ram3[(direccion and $7fff) shr 1]:=valor;
 end;
 end;
 
@@ -290,19 +295,19 @@ end;
 function sf_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$7fff,$c000..$c7ff:sf_snd_getbyte:=mem_snd[direccion];
   $c800:sf_snd_getbyte:=soundlatch;
   $e001:sf_snd_getbyte:=ym2151_0.status;
-  else sf_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure sf_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$7fff:exit;
+  0..$7fff:; //ROM
+  $c000..$c7ff:mem_snd[direccion]:=valor;
   $e000:ym2151_0.reg(valor);
   $e001:ym2151_0.write(valor);
-    else mem_snd[direccion]:=valor;
 end;
 end;
 
@@ -320,9 +325,7 @@ end;
 
 function sf_misc_inbyte(puerto:word):byte;
 begin
-case (puerto and $ff) of
-  1:sf_misc_inbyte:=soundlatch;
-end;
+if (puerto and $ff)=1 then sf_misc_inbyte:=soundlatch;
 end;
 
 procedure sf_misc_outbyte(puerto:word;valor:byte);
@@ -354,7 +357,7 @@ begin
   ym2151_0.update;
 end;
 
-procedure sf_adpcm_instruccion;
+procedure sf_adpcm_timer;
 begin
   z80_0.change_irq(HOLD_LINE);
 end;
@@ -369,14 +372,9 @@ begin
  msm_5205_0.reset;
  msm_5205_1.reset;
  reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- marcade.in7:=$ff;
- marcade.in2:=$7f;
- marcade.in3:=0;
- marcade.in4:=0;
- marcade.in5:=0;
- marcade.in6:=0;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
+ marcade.in2:=$ff7f;
  scroll_bg:=0;
  scroll_fg:=0;
  bg_paint:=false;
@@ -390,8 +388,6 @@ end;
 
 function iniciar_sfighter:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			16*16+0, 16*16+1, 16*16+2, 16*16+3, 16*16+8+0, 16*16+8+1, 16*16+8+2, 16*16+8+3);
   ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -418,55 +414,60 @@ z80_1.init_sound(sound_instruccion);
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(sf_misc_getbyte,sf_misc_putbyte);
 z80_0.change_io_calls(sf_misc_inbyte,sf_misc_outbyte);
-init_timer(z80_0.numero_cpu,3579545/8000,sf_adpcm_instruccion,true);
+timers.init(z80_0.numero_cpu,3579545/8000,sf_adpcm_timer,nil,true);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 msm_5205_0:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
 msm_5205_1:=MSM5205_chip.create(384000,MSM5205_SEX_4B,2,nil);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@sfighter_rom[0],'sf.zip',0)) then exit;
+if not(roms_load16w(@rom,sfighter_rom)) then exit;
 //Sound CPUs
-if not(cargar_roms(@mem_snd[0],@sfighter_snd,'sf.zip',1)) then exit;
+if not(roms_load(@mem_snd,sfighter_snd)) then exit;
 getmem(memoria_temp,$200000);
-if not(cargar_roms(memoria_temp,@sfighter_msm,'sf.zip',0)) then exit;
+if not(roms_load(memoria_temp,sfighter_msm)) then exit;
 ptemp:=memoria_temp;
 for f:=0 to 7 do begin
   copymemory(@rom_misc[f,0],ptemp,$8000);
   inc(ptemp,$8000);
 end;
 //convertir chars
-if not(cargar_roms(memoria_temp,@sfighter_char,'sf.zip',1)) then exit;
+if not(roms_load(memoria_temp,sfighter_char)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,false);
 //convertir bg y cargar tile maps
-if not(cargar_roms(memoria_temp,@sfighter_bg[0],'sf.zip',0)) then exit;
-if not(cargar_roms(@ram_tile_map1[0],@sfighter_tile_map1[0],'sf.zip',0)) then exit;
+if not(roms_load(memoria_temp,sfighter_bg)) then exit;
+if not(roms_load(@ram_tile_map1,sfighter_tile_map1)) then exit;
 init_gfx(1,16,16,$1000);
 gfx_set_desc_data(4,0,64*8,4,0,$40000*8+4,$40000*8+0);
-convert_gfx(1,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 //convertir fg y cargar tile maps
-if not(cargar_roms(memoria_temp,@sfighter_fg[0],'sf.zip',0)) then exit;
-if not(cargar_roms(@ram_tile_map2[0],@sfighter_tile_map2[0],'sf.zip',0)) then exit;
+if not(roms_load(memoria_temp,sfighter_fg)) then exit;
+if not(roms_load(@ram_tile_map2,sfighter_tile_map2)) then exit;
 init_gfx(2,16,16,$2000);
 gfx[2].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,4,0,$80000*8+4,$80000*8+0);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
 //sprites
-if not(cargar_roms(memoria_temp,@sfighter_sprites[0],'sf.zip',0)) then exit;
+if not(roms_load(memoria_temp,sfighter_sprites)) then exit;
 init_gfx(3,16,16,$4000);
 gfx[3].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,4,0,$e0000*8+4,$e0000*8+0);
 convert_gfx(3,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+//DIP
+marcade.dswa:=$dfff;
+marcade.dswb:=$ffff;
+marcade.dswa_val:=@sfighter_dip_a;
+marcade.dswb_val:=@sfighter_dip_b;
 //final
 freemem(memoria_temp);
 reset_sfighter;
 iniciar_sfighter:=true;
 end;
 
-procedure Cargar_sfighter;
+procedure cargar_sfighter;
 begin
 llamadas_maquina.iniciar:=iniciar_sfighter;
 llamadas_maquina.bucle_general:=sfighter_principal;

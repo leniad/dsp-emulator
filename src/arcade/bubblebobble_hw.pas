@@ -9,16 +9,16 @@ procedure cargar_bublbobl;
 
 implementation
 const
-        bublbobl_rom:array[0..2] of tipo_roms=(
-        (n:'a78-06-1.51';l:$8000;p:0;crc:$567934b6),(n:'a78-05-1.52';l:$10000;p:$8000;crc:$9f8ee242),());
+        bublbobl_rom:array[0..1] of tipo_roms=(
+        (n:'a78-06-1.51';l:$8000;p:0;crc:$567934b6),(n:'a78-05-1.52';l:$10000;p:$8000;crc:$9f8ee242));
         bublbobl_rom2:tipo_roms=(n:'a78-08.37';l:$8000;p:0;crc:$ae11a07b);
-        bublbobl_chars:array[0..12] of tipo_roms=(
+        bublbobl_chars:array[0..11] of tipo_roms=(
         (n:'a78-09.12';l:$8000;p:0;crc:$20358c22),(n:'a78-10.13';l:$8000;p:$8000;crc:$930168a9),
         (n:'a78-11.14';l:$8000;p:$10000;crc:$9773e512),(n:'a78-12.15';l:$8000;p:$18000;crc:$d045549b),
         (n:'a78-13.16';l:$8000;p:$20000;crc:$d0af35c5),(n:'a78-14.17';l:$8000;p:$28000;crc:$7b5369a8),
         (n:'a78-15.30';l:$8000;p:$40000;crc:$6b61a413),(n:'a78-16.31';l:$8000;p:$48000;crc:$b5492d97),
         (n:'a78-17.32';l:$8000;p:$50000;crc:$d69762d5),(n:'a78-18.33';l:$8000;p:$58000;crc:$9f243b68),
-        (n:'a78-19.34';l:$8000;p:$60000;crc:$66e9438c),(n:'a78-20.35';l:$8000;p:$68000;crc:$9ef863ad),());
+        (n:'a78-19.34';l:$8000;p:$60000;crc:$66e9438c),(n:'a78-20.35';l:$8000;p:$68000;crc:$9ef863ad));
         bublbobl_snd: tipo_roms=(n:'a78-07.46';l:$8000;p:0;crc:$4f9a26e8);
         bublbobl_prom: tipo_roms=(n:'a71-25.41';l:$100;p:0;crc:$2d0f8545);
         bublbobl_mcu_rom:tipo_roms=(n:'a78-01.17';l:$1000;p:$0;crc:$b1bfb53d);
@@ -29,18 +29,17 @@ const
         (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Coin A';number:4;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$20;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$80;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        bublbobl_dip_b:array [0..5] of def_dip=(
+        bublbobl_dip_b:array [0..4] of def_dip=(
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$8;dip_name:'20K 80K 300K'),(dip_val:$c;dip_name:'30K 100K 400K'),(dip_val:$4;dip_name:'40K 200K 500K'),(dip_val:$0;dip_name:'50K 250K 500K'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$10;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$40;name:'Unknown';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'ROM Type';number:2;dip:((dip_val:$80;dip_name:'IC52=512kb, IC53=none'),(dip_val:$0;dip_name:'IC52=256kb, IC53=256kb'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
- memoria_rom:array [0..3,$0..$3FFF] of byte;
+ memoria_rom:array [0..3,$0..$3fff] of byte;
  mem_mcu:array[0..$fff] of byte;
  mem_prom:array[0..$ff] of byte;
  banco_rom,sound_stat,sound_latch:byte;
- sound_nmi,pending_nmi,video_enable:boolean;
+ sound_nmi,video_enable:boolean;
  ddr1,ddr2,ddr3,ddr4:byte;
  port1_in,port1_out,port2_in,port2_out,port3_in,port3_out,port4_in,port4_out:byte;
 
@@ -89,18 +88,21 @@ end;
 procedure eventos_bublbobl;
 begin
 if event.arcade then begin
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  //P1
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
+  //P2
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
+  //SYS
   if arcade_input.coin[0] then  marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
   if arcade_input.coin[1] then  marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
 end;
 end;
 
@@ -155,22 +157,18 @@ end;
 
 procedure bbsnd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$8fff:mem_snd[direccion]:=valor;
   $9000:ym2203_0.control(valor);
   $9001:ym2203_0.write(valor);
   $a000:YM3812_0.control(valor);
   $a001:YM3812_0.write(valor);
   $b000:sound_stat:=valor;
-  $b001:begin
-          sound_nmi:=true;
-          if pending_nmi then begin
-              pending_nmi:=false;
-              z80_2.change_nmi(PULSE_LINE);
-          end;
+  $b002:begin
+          sound_nmi:=false;
+          z80_2.change_nmi(CLEAR_LINE);
         end;
-  $b002:sound_nmi:=false;
 end;
 end;
 
@@ -199,17 +197,17 @@ end;
 
 procedure bublbobl_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+        0..$bfff:; //ROM
         $c000..$f7ff,$fc00..$ffff:memoria[direccion]:=valor;
         $f800..$f9ff:if buffer_paleta[direccion and $1ff]<>valor then begin
                         buffer_paleta[direccion and $1ff]:=valor;
                         cambiar_color(direccion and $1fe);
                      end;
-        $fa00:begin
-                if sound_nmi then z80_2.change_nmi(PULSE_LINE)
-                  else pending_nmi:=true;
+        $fa00:if not(sound_nmi) then begin
+                z80_2.change_nmi(ASSERT_LINE);
                 sound_latch:=valor;
+                sound_nmi:=true;
               end;
         $fa03:if valor<>0 then z80_2.change_reset(ASSERT_LINE)
                 else z80_2.change_reset(CLEAR_LINE);
@@ -235,16 +233,16 @@ end;
 
 procedure bb_misc_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $e000..$f7ff:memoria[direccion]:=valor;
 end;
 end;
 
 procedure bb_sound_update;
 begin
-  ym2203_0.Update;
-  YM3812_0.update;
+  ym2203_0.update;
+  ym3812_0.update;
 end;
 
 procedure snd_irq(irqstate:byte);
@@ -275,7 +273,6 @@ procedure mcu_putbyte(direccion:word;valor:byte);
 var
   address:word;
 begin
-if direccion>$efff then exit;
 case direccion of
   $0:ddr1:=valor;
   $1:ddr2:=valor;
@@ -311,6 +308,7 @@ case direccion of
   $6:port3_out:=valor;
   $7:port4_out:=valor;
   $40..$ff:m6800_0.internal_ram[direccion]:=valor;
+  $f000..$ffff:; //ROM
 end;
 end;
 
@@ -322,14 +320,13 @@ begin
  z80_2.reset;
  m6800_0.reset;
  ym2203_0.reset;
- YM3812_0.reset;
+ ym3812_0.reset;
  reset_audio;
  banco_rom:=0;
  sound_nmi:=false;
- pending_nmi:=false;
  sound_stat:=0;
  marcade.in0:=$b3;
- marcade.in1:=$FF;
+ marcade.in1:=$ff;
  marcade.in2:=$ff;
  sound_latch:=0;
  ddr1:=0;ddr2:=0;ddr3:=0;ddr4:=0;
@@ -365,26 +362,27 @@ m6800_0.change_ram_calls(mcu_getbyte,mcu_putbyte);
 ym2203_0:=ym2203_chip.create(3000000,0.25,0.25);
 ym2203_0.change_irq_calls(snd_irq);
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000,0.5);
+ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@bublbobl_rom[0],'bublbobl.zip',0)) then exit;
+if not(roms_load(@memoria_temp,bublbobl_rom)) then exit;
 //poner las roms y los bancos de rom
 copymemory(@memoria[0],@memoria_temp[0],$8000);
 for f:=0 to 3 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Segunda CPU
-if not(cargar_roms(@mem_misc[0],@bublbobl_rom2,'bublbobl.zip',1)) then exit;
+if not(roms_load(@mem_misc,bublbobl_rom2)) then exit;
 //MCU
-if not(cargar_roms(@mem_mcu[0],@bublbobl_mcu_rom,'bublbobl.zip',1)) then exit;
+if not(roms_load(@mem_mcu,bublbobl_mcu_rom)) then exit;
 //sonido
-if not(cargar_roms(@mem_snd[0],@bublbobl_snd,'bublbobl.zip',1)) then exit;
+if not(roms_load(@mem_snd,bublbobl_snd)) then exit;
 //proms video
-if not(cargar_roms(@mem_prom[0],@bublbobl_prom,'bublbobl.zip',1)) then exit;
+if not(roms_load(@mem_prom,bublbobl_prom)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@bublbobl_chars,'bublbobl.zip',0)) then exit;
+if not(roms_load(@memoria_temp,bublbobl_chars)) then exit;
 for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]); //invertir las roms
 init_gfx(0,8,8,$4000);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,16*8,0,4,$4000*16*8+0,$4000*16*8+4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //DIP
 marcade.dswa:=$fe;
 marcade.dswb:=$ff;

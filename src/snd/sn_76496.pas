@@ -14,6 +14,7 @@ type
       procedure reset;
       function save_snapshot(data:pbyte):word;
       procedure load_snapshot(data:pbyte);
+      procedure change_clock(clock:dword);
     private
     	UpdateStep:dword;
     	VolTable:array[0..15] of integer;	// volume table
@@ -64,6 +65,12 @@ type
         RNG:cardinal;
         NoiseFB:integer;
     end;
+
+procedure sn76496_chip.change_clock(clock:dword);
+begin
+  self.clock:=clock;
+  self.resample;
+end;
 
 function sn76496_chip.save_snapshot(data:pbyte):word;
 var

@@ -1,7 +1,7 @@
 object load_dsk: Tload_dsk
   Left = 183
   Top = 154
-  Caption = 'Open/Abrir DSK'
+  Caption = 'Open/Abrir Disk'
   ClientHeight = 465
   ClientWidth = 699
   Color = clBtnFace
@@ -75,7 +75,6 @@ object load_dsk: Tload_dsk
     Height = 257
     TabStop = False
     ItemHeight = 13
-    Mask = '*.zip;*.dsk;*.ipf'
     TabOrder = 3
     OnClick = FileListBox1Click
     OnDblClick = FileListBox1DblClick

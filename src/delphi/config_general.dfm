@@ -63,10 +63,6 @@ object MConfig: TMConfig
     TabOrder = 2
     object TabSheet1: TTabSheet
       Caption = 'Misc'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox3: TGroupBox
         Left = 6
         Top = 13
@@ -81,7 +77,7 @@ object MConfig: TMConfig
         TabOrder = 0
         object RadioButton6: TRadioButton
           Left = 35
-          Top = 28
+          Top = 33
           Width = 105
           Height = 17
           Caption = 'English'
@@ -95,7 +91,7 @@ object MConfig: TMConfig
         end
         object RadioButton5: TRadioButton
           Left = 35
-          Top = 9
+          Top = 14
           Width = 105
           Height = 17
           Caption = 'Castellano'
@@ -109,7 +105,7 @@ object MConfig: TMConfig
         end
         object RadioButton7: TRadioButton
           Left = 35
-          Top = 46
+          Top = 51
           Width = 105
           Height = 17
           Caption = 'Catal'#224
@@ -123,7 +119,7 @@ object MConfig: TMConfig
         end
         object RadioButton8: TRadioButton
           Left = 35
-          Top = 64
+          Top = 69
           Width = 105
           Height = 17
           Caption = 'Francais'
@@ -137,7 +133,7 @@ object MConfig: TMConfig
         end
         object RadioButton9: TRadioButton
           Left = 35
-          Top = 82
+          Top = 87
           Width = 105
           Height = 17
           Caption = 'German'
@@ -151,7 +147,7 @@ object MConfig: TMConfig
         end
         object RadioButton10: TRadioButton
           Left = 35
-          Top = 100
+          Top = 105
           Width = 105
           Height = 17
           Caption = 'Brazil'
@@ -165,7 +161,7 @@ object MConfig: TMConfig
         end
         object RadioButton11: TRadioButton
           Left = 35
-          Top = 118
+          Top = 123
           Width = 105
           Height = 17
           Caption = 'Italian'
@@ -306,7 +302,7 @@ object MConfig: TMConfig
         Left = 6
         Top = 249
         Width = 378
-        Height = 66
+        Height = 80
         Caption = 'Misc'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -327,7 +323,7 @@ object MConfig: TMConfig
         end
         object CheckBox1: TCheckBox
           Left = 29
-          Top = 29
+          Top = 31
           Width = 338
           Height = 17
           TabStop = False
@@ -337,7 +333,7 @@ object MConfig: TMConfig
         end
         object CheckBox3: TCheckBox
           Left = 29
-          Top = 46
+          Top = 52
           Width = 338
           Height = 17
           TabStop = False
@@ -350,10 +346,6 @@ object MConfig: TMConfig
     object TabSheet2: TTabSheet
       Caption = 'Directory'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label1: TLabel
         Left = 3
         Top = 110
@@ -526,10 +518,6 @@ object MConfig: TMConfig
     object TabSheet3: TTabSheet
       Caption = 'Input'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox1: TGroupBox
         Left = 5
         Top = 13
@@ -1032,10 +1020,6 @@ object MConfig: TMConfig
     object TabSheet4: TTabSheet
       Caption = 'Main Keys'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Label21: TLabel
         Left = 58
         Top = 40
@@ -1104,10 +1088,6 @@ object MConfig: TMConfig
     object ROM: TTabSheet
       Caption = 'ROM'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object BitBtn21: TBitBtn
         Left = 40
         Top = 32
@@ -1121,10 +1101,6 @@ object MConfig: TMConfig
     object Autofire: TTabSheet
       Caption = 'Autofire'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object GroupBox8: TGroupBox
         Left = 32
         Top = 79

@@ -96,8 +96,8 @@ fillchar(self.r^,sizeof(reg_sm510),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock div 2;
 self.tframes:=clock/2/llamadas_maquina.fps_max/frames;
-self.div_timer:=init_timer(self.numero_cpu,clock/clock,div_timer_cb_0,true);
-self.lcd_timer:=init_timer(self.numero_cpu,clock/$200,lcd_timer_cb_0,true);
+self.div_timer:=timers.init(self.numero_cpu,clock/clock,div_timer_cb_0,nil,true);
+self.lcd_timer:=timers.init(self.numero_cpu,clock/$200,lcd_timer_cb_0,nil,true);
 self.r.pc:=0;
 self.r.old_pc:=0;
 self.op:=0;
@@ -482,7 +482,7 @@ end else begin
 end;
 self.sbm:=(self.op=$02);
 self.contador:=self.contador+estados_demas;
-update_timer(estados_demas,self.numero_cpu);
+timers.update(estados_demas,self.numero_cpu);
 end;
 end;
 

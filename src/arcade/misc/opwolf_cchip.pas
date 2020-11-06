@@ -270,8 +270,8 @@ end;
 
 procedure opwolf_init_cchip(num:byte);
 begin
-  init_timer(num,8000000/60,opwolf_timer,true);
-  cc_timer:=init_timer(num,80000,opwolf_timer_callback,false);
+  timers.init(num,8000000/60,opwolf_timer,nil,true);
+  cc_timer:=timers.init(num,80000,opwolf_timer_callback,nil,false);
 end;
 
 function opwolf_cchip_data_r(direccion:word):word;
@@ -455,7 +455,7 @@ begin
 	if ((cchip_ram[$7a]=0) and (cchip_last_7a<>0) and (current_cmd<>$f5)) then begin
 		// Simulate time for command to execute (exact timing unknown, this is close)
 		current_cmd:=$f5;
-    timer[cc_timer].enabled:=true;
+    timers.enabled(cc_timer,true);
 	end;
 	cchip_last_7a:=cchip_ram[$7a];
 	// This seems to some kind of periodic counter - results are expected
@@ -473,7 +473,7 @@ procedure opwolf_timer_callback;
 var
   i,level:byte;
 begin
-timer[cc_timer].enabled:=false;
+timers.enabled(cc_timer,false);
 if (current_cmd=$f5) then begin
 		level:=cchip_ram[$1b];
 		for i:=0 to $cb do begin

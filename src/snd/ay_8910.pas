@@ -114,10 +114,10 @@ procedure ay8910_chip.reset;
     i:byte;
 begin
     self.latch:=0;
-    self.OutputA := 0;
-    self.OutputB := 0;
-    self.OutputC := 0;
-    self.OutputN := $FF;
+    self.OutputA:= 0;
+    self.OutputB:= 0;
+    self.OutputC:= 0;
+    self.OutputN:= $FF;
     self.RNG:=1;
     self.lastenable:=-1;
   For i := 0 To 13 do self.AYWriteReg(i,0);
@@ -125,6 +125,7 @@ end;
 
 destructor ay8910_chip.free;
 begin
+
 end;
 
 function ay8910_chip.save_snapshot(data:pbyte):word;

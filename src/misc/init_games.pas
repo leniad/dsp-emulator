@@ -3,9 +3,9 @@ unit init_games;
 interface
 uses sysutils,main_engine,rom_engine,rom_export,
   //Computer
-  spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,
+  spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,commodore64,
   //Console
-  nes,coleco,gb,sms,
+  nes,coleco,gb,sms,sg1000,
   //Arcade
   phoenix_hw,bombjack_hw,pacman_hw,mysteriousstones_hw,donkeykong_hw,
   greenberet_hw,blacktiger_hw,commando_hw,gng_hw,mikie_hw,shaolinsroad_hw,
@@ -21,8 +21,8 @@ uses sysutils,main_engine,rom_engine,rom_export,
   cps1_hw,system16a_hw,timepilot84_hw,tutankham_hw,pang_hw,ninjakid2_hw,
   skykid_hw,system86_hw,rocnrope_hw,kyugo_hw,thenewzealandstory_hw,pacland_hw,
   mariobros_hw,solomonkey_hw,combatschool_hw,heavyunit_hw,snk68_hw,megasys1_hw,
-  timepilot_hw,pengo_hw,twincobra_hw,jrpacman_hw,dec0_hw,tumblepop_hw,
-  funkyjet_hw,superburgertime_hw,cavemanninja_hw,dietgogo_hw,actfancer_hw,
+  timepilot_hw,pengo_hw,twincobra_hw,jrpacman_hw,dec0_hw,funkyjet_hw,
+  superburgertime_hw,cavemanninja_hw,dietgogo_hw,actfancer_hw,
   arabian_hw,higemaru_hw,bagman_hw,chip8_hw,zaxxon_hw,kangaroo_hw,
   bioniccommando_hw,wwfsuperstars_hw,rainbowislands_hw,volfied_hw,
   operationwolf_hw,outrun_hw,taitosj_hw,vulgus_hw,ddragon3_hw,blockout_hw,
@@ -31,7 +31,8 @@ uses sysutils,main_engine,rom_engine,rom_export,
   spaceinvaders_hw,centipede_hw,karnov_hw,aliens_hw,thunderx_hw,simpsons_hw,
   trackandfield_hw,hypersports_hw,megazone_hw,spacefirebird_hw,ajax_hw,
   vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510,
-  tetris_atari_hw,snk_hw,atari_system1;
+  tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
+  badlands_hw,galivan_hw,lastduel_hw;
 
 type
   tgame_desc=record
@@ -45,9 +46,9 @@ type
               samples:ptsample_file;
             end;
 const
-  sound_tipo:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  games_cont=254;
-  games_desc:array[1..games_cont] of tgame_desc=(
+  SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
+  GAMES_CONT=285;
+  GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
   (name:'Spectrum 128K';year:'1986';snd:1;hi:false;zip:'spec128';grid:1;company:'Sinclair';rom:@spec128),
@@ -58,6 +59,7 @@ const
   (name:'Amstrad CPC 464';year:'1984';snd:1;hi:false;zip:'cpc464';grid:7;company:'Amstrad';rom:@cpc464),
   (name:'Amstrad CPC 664';year:'1984';snd:1;hi:false;zip:'cpc664';grid:8;company:'Amstrad';rom:@cpc664),
   (name:'Amstrad CPC 6128';year:'1985';snd:1;hi:false;zip:'cpc6128';grid:9;company:'Amstrad';rom:@cpc6128),
+  (name:'Commodore 64';year:'1982';snd:1;hi:false;zip:'c64';grid:3000;company:'Commodore';rom:@c64),
   //Arcade
   (name:'Pacman';year:'1980';snd:1;hi:false;zip:'pacman';grid:10;company:'Namco';rom:@pacman),
   (name:'Phoenix';year:'1980';snd:1;hi:false;zip:'phoenix';grid:11;company:'Amstar Electronics';rom:@phoenix),
@@ -90,7 +92,7 @@ const
   (name:'Tehkan World Cup';year:'1985';snd:1;hi:false;zip:'tehkanwc';grid:38;company:'Tehkan';rom:@tehkanwc),
   (name:'Popeye';year:'1982';snd:1;hi:false;zip:'popeye';grid:39;company:'Nintendo';rom:@popeye),
   (name:'Psychic 5';year:'1987';snd:1;hi:false;zip:'psychic5';grid:40;company:'Jaleco';rom:@psychic5),
-  (name:'Terra Cresta';year:'198X';snd:1;hi:false;zip:'terracre';grid:41;company:'Nichibutsu';rom:@terracre),
+  (name:'Terra Cresta';year:'1985';snd:1;hi:false;zip:'terracre';grid:41;company:'Nichibutsu';rom:@terracre),
   (name:'Kung-Fu Master';year:'1987';snd:1;hi:false;zip:'kungfum';grid:42;company:'Irem';rom:@kungfum),
   (name:'Shoot Out';year:'1985';snd:1;hi:false;zip:'shootout';grid:43;company:'Data East';rom:@shootout),
   (name:'Vigilante';year:'1988';snd:1;hi:false;zip:'vigilant';grid:44;company:'Irem';rom:@vigilant),
@@ -295,20 +297,50 @@ const
   (name:'T.N.K III';year:'1986';snd:1;hi:false;zip:'tnk3';grid:243;company:'SNK';rom:@tnk3),
   (name:'Peter Pack Rat';year:'1984';snd:1;hi:false;zip:'peterpak';grid:244;company:'Atari';rom:@peterpak),
   (name:'Gauntlet II';year:'1986';snd:1;hi:false;zip:'gaunt2';grid:245;company:'Atari';rom:@gaunt2),
+  (name:'Defender';year:'1980';snd:1;hi:false;zip:'defender';grid:246;company:'Williams';rom:@defender),
+  (name:'Double Dragon (SpeedHack)';year:'1987';snd:1;hi:false;zip:'ddragon';grid:247;company:'Taito';rom:@ddragon),
+  (name:'Mayday';year:'1980';snd:1;hi:false;zip:'mayday';grid:248;company:'Williams';rom:@mayday),
+  (name:'Colony 7';year:'1981';snd:1;hi:false;zip:'colony7';grid:249;company:'Williams';rom:@colony7),
+  (name:'Bosconian';year:'1981';snd:1;hi:false;zip:'bosco';grid:250;company:'Namco';rom:@bosco),
+  (name:'HangOn Jr.';year:'1985';snd:1;hi:false;zip:'hangonjr';grid:251;company:'Sega';rom:@hangonjr),
+  (name:'Slap Shooter';year:'1986';snd:1;hi:false;zip:'slapshtr';grid:252;company:'Sega';rom:@slapshtr),
+  (name:'Fantasy Zone II: The Tears of Opa-Opa';year:'1988';snd:1;hi:false;zip:'fantzn2';grid:253;company:'Sega';rom:@fantzn2),
+  (name:'Opa Opa';year:'1987';snd:1;hi:false;zip:'opaopa';grid:254;company:'Sega';rom:@opaopa),
+  (name:'Tetris';year:'1988';snd:1;hi:false;zip:'tetrisse';grid:255;company:'Sega';rom:@tetrisse),
+  (name:'Transformer';year:'1986';snd:1;hi:false;zip:'transfrm';grid:256;company:'Sega';rom:@transfrm),
+  (name:'Riddle of Pythagoras';year:'1986';snd:1;hi:false;zip:'ridleofp';grid:257;company:'Sega';rom:@ridleofp),
+  (name:'Route 16';year:'1981';snd:1;hi:false;zip:'route16';grid:258;company:'Sun Electronics';rom:@route16),
+  (name:'Speak & Rescue';year:'1980';snd:1;hi:false;zip:'speakres';grid:259;company:'Sun Electronics';rom:@speakres),
+  (name:'Galactic Warriors';year:'1985';snd:1;hi:false;zip:'gwarrior';grid:260;company:'Konami';rom:@gwarrior),
+  (name:'Salamander';year:'1986';snd:1;hi:false;zip:'salamand';grid:261;company:'Konami';rom:@salamander),
+  (name:'Bad Lands';year:'1989';snd:1;hi:false;zip:'badlands';grid:262;company:'Atari';rom:@badlands),
+  (name:'Indiana Jones and the Temple of Doom';year:'1985';snd:1;hi:false;zip:'indytemp';grid:263;company:'Atari';rom:@indytemp),
+  (name:'Marble Madness';year:'1984';snd:1;hi:false;zip:'marble';grid:264;company:'Atari';rom:@marble),
+  (name:'Soldier Girl Amazon';year:'1986';snd:1;hi:false;zip:'amazon';grid:265;company:'Nichibutsu';rom:@amazon),
+  (name:'Cosmo Police Galivan';year:'1985';snd:1;hi:false;zip:'galivan';grid:266;company:'Nichibutsu';rom:@galivan),
+  (name:'Ufo Robo Dangar';year:'1986';snd:1;hi:false;zip:'dangar';grid:267;company:'Nichibutsu';rom:@dangar),
+  (name:'Last Duel';year:'1988';snd:1;hi:false;zip:'lastduel';grid:268;company:'Capcom';rom:@lastduel),
+  (name:'Mad Gear';year:'1989';snd:1;hi:false;zip:'madgear';grid:269;company:'Capcom';rom:@madgear),
+  (name:'Led Storm Rally 2011';year:'1989';snd:1;hi:false;zip:'leds2011';grid:270;company:'Capcom';rom:@leds2011),
+  (name:'Gigas';year:'1986';snd:1;hi:false;zip:'gigas';grid:271;company:'Sega';rom:@gigas),
+  (name:'Gigas Mark II';year:'1986';snd:1;hi:false;zip:'gigasm2';grid:272;company:'Sega';rom:@gigasm2),
+  (name:'Omega';year:'1986';snd:1;hi:false;zip:'omega';grid:273;company:'Nihon System';rom:@omega),
+  (name:'Perfect Billard';year:'1987';snd:1;hi:false;zip:'pbillrd';grid:274;company:'Nihon System';rom:@pbillrd),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
   (name:'GameBoy';year:'198X';snd:1;hi:false;zip:'gameboy';grid:1002;company:'Nintendo';rom:@gameboy),
   (name:'GameBoy Color';year:'198X';snd:1;hi:false;zip:'gbcolor';grid:1002;company:'Nintendo';rom:@gbcolor),
   (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-'),
-  (name:'Sega Master System';year:'1985';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_),
+  (name:'Sega Master System';year:'1986';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_),
+  (name:'SC-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega'),
   //G&W
   (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),
   (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55),
   (name:'Mario Bros';year:'1983';snd:1;hi:false;zip:'gnw_mw56';grid:2002;company:'Nintendo';rom:@gnw_mw56));
 
 var
-  orden_games:array[1..games_cont] of word;
+  orden_games:array[1..GAMES_CONT] of word;
 
 procedure load_game(numero:word);
 procedure todos_false;
@@ -331,6 +363,7 @@ case numero of
   7:principal1.CambiarMaquina(principal1.cpc1);
   8:principal1.CambiarMaquina(principal1.cpc6641);
   9:principal1.CambiarMaquina(principal1.cpc61281);
+  3000:principal1.CambiarMaquina(principal1.c641);
   10:principal1.CambiarMaquina(principal1.Pacman1);
   11:principal1.CambiarMaquina(principal1.Phoenix1);
   12:principal1.CambiarMaquina(principal1.MisteriousStone1);
@@ -567,11 +600,41 @@ case numero of
   243:principal1.CambiarMaquina(principal1.tnk31);
   244:principal1.CambiarMaquina(principal1.peterpak1);
   245:principal1.CambiarMaquina(principal1.gaunt21);
+  246:principal1.CambiarMaquina(principal1.defender1);
+  247:principal1.CambiarMaquina(principal1.ddragon_sh1);
+  248:principal1.CambiarMaquina(principal1.mayday1);
+  249:principal1.CambiarMaquina(principal1.colony71);
+  250:principal1.CambiarMaquina(principal1.bosconian1);
+  251:principal1.CambiarMaquina(principal1.hangonjr1);
+  252:principal1.CambiarMaquina(principal1.slapshooter1);
+  253:principal1.CambiarMaquina(principal1.fantasyzone21);
+  254:principal1.CambiarMaquina(principal1.opaopa1);
+  255:principal1.CambiarMaquina(principal1.tetrisse1);
+  256:principal1.CambiarMaquina(principal1.transformer1);
+  257:principal1.CambiarMaquina(principal1.riddleofp1);
+  258:principal1.CambiarMaquina(principal1.route161);
+  259:principal1.CambiarMaquina(principal1.speakandrescue1);
+  260:principal1.CambiarMaquina(principal1.gwarrior1);
+  261:principal1.CambiarMaquina(principal1.salamander1);
+  262:principal1.CambiarMaquina(principal1.badlands1);
+  263:principal1.CambiarMaquina(principal1.indydoom1);
+  264:principal1.CambiarMaquina(principal1.marblemadness1);
+  265:principal1.CambiarMaquina(principal1.amazon1);
+  266:principal1.CambiarMaquina(principal1.galivan1);
+  267:principal1.CambiarMaquina(principal1.dangar1);
+  268:principal1.CambiarMaquina(principal1.lastduel1);
+  269:principal1.CambiarMaquina(principal1.madgear1);
+  270:principal1.CambiarMaquina(principal1.leds20111);
+  271:principal1.CambiarMaquina(principal1.gigas1);
+  272:principal1.CambiarMaquina(principal1.gigasm21);
+  273:principal1.CambiarMaquina(principal1.omega1);
+  274:principal1.CambiarMaquina(principal1.pbillrd1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
   1003:principal1.CambiarMaquina(principal1.CHIP81);
   1004:principal1.CambiarMaquina(principal1.SegaMS1);
+  1005:principal1.CambiarMaquina(principal1.SG10001);
   2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
   2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
   2002:principal1.CambiarMaquina(principal1.MarioBros1);
@@ -590,6 +653,7 @@ principal1.Spectrum16k1.Checked:=false;
 principal1.CPC1.Checked:=false;
 principal1.CPC6641.Checked:=false;
 principal1.CPC61281.Checked:=false;
+principal1.c641.Checked:=false;
 //Arcade
 principal1.phoenix1.Checked:=false;
 principal1.bombjack1.Checked:=false;
@@ -827,12 +891,42 @@ principal1.athena1.Checked:=false;
 principal1.tnk31.Checked:=false;
 principal1.peterpak1.Checked:=false;
 principal1.gaunt21.Checked:=false;
+principal1.defender1.Checked:=false;
+principal1.ddragon_sh1.Checked:=false;
+principal1.mayday1.Checked:=false;
+principal1.colony71.Checked:=false;
+principal1.bosconian1.Checked:=false;
+principal1.hangonjr1.Checked:=false;
+principal1.slapshooter1.Checked:=false;
+principal1.fantasyzone21.Checked:=false;
+principal1.opaopa1.Checked:=false;
+principal1.tetrisse1.Checked:=false;
+principal1.transformer1.Checked:=false;
+principal1.riddleofp1.Checked:=false;
+principal1.route161.Checked:=false;
+principal1.speakandrescue1.Checked:=false;
+principal1.gwarrior1.Checked:=false;
+principal1.salamander1.Checked:=false;
+principal1.badlands1.Checked:=false;
+principal1.indydoom1.Checked:=false;
+principal1.marblemadness1.Checked:=false;
+principal1.amazon1.Checked:=false;
+principal1.galivan1.Checked:=false;
+principal1.dangar1.Checked:=false;
+principal1.lastduel1.Checked:=false;
+principal1.madgear1.Checked:=false;
+principal1.leds20111.Checked:=false;
+principal1.gigas1.Checked:=false;
+principal1.gigasm21.Checked:=false;
+principal1.omega1.Checked:=false;
+principal1.pbillrd1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
 principal1.GameBoy1.Checked:=false;
 principal1.chip81.checked:=false;
 principal1.segams1.checked:=false;
+principal1.sg10001.checked:=false;
 //gnw
 principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
@@ -874,17 +968,24 @@ case driver of
   7..9:begin  //Amstrad CPC
           principal1.Panel2.visible:=true;
           principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
-          principal1.BitBtn10.visible:=true; //Disco
           principal1.BitBtn10.enabled:=(driver<>7); //Disco
           principal1.BitBtn11.visible:=true; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
-  10..999:principal1.BitBtn8.enabled:=true;  //Arcade
-  1000,1002,1003:begin //NES y Gameboy
+  3000:begin //C64
           principal1.Panel2.visible:=true;
+          principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
           principal1.BitBtn10.visible:=true; //Disco
+          principal1.BitBtn11.visible:=true; //Save Snapshot
+          principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
-  1001:begin //Coleco y Chip8
+  10..999:principal1.BitBtn8.enabled:=true;  //Arcade
+  1000,1002,1003,1005:begin //NES, Chip8, Gameboy, GBC y SC-1000
+          principal1.Panel2.visible:=true;
+          principal1.BitBtn10.visible:=true;
+          principal1.BitBtn11.visible:=false;
+       end;
+  1001:begin //Coleco
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Disco
           principal1.BitBtn11.visible:=true; //Load Snapshot
@@ -905,6 +1006,7 @@ case tmaquina of
   1,4:Cargar_Spectrum128K;
   2,3:Cargar_Spectrum3;
   7,8,9:Cargar_amstrad_CPC;
+  3000:Cargar_c64;
   //arcade
   10,88,234:Cargar_Pacman;
   11,202:Cargar_Phoenix;
@@ -934,7 +1036,7 @@ case tmaquina of
   38:Cargar_tehkanwc;
   39:Cargar_popeye;
   40:Cargar_psychic5;
-  41:Cargar_terracre;
+  41,265:Cargar_terracre;
   42,72,73,74,75:Cargar_irem_m62;
   43:Cargar_shootout;
   44:Cargar_vigilante;
@@ -949,7 +1051,7 @@ case tmaquina of
   58:Cargar_rastan;
   59,60,61:Cargar_hlwings;
   62:Cargar_SFighter;
-  65,167,231:Cargar_galagahw;
+  65,167,231,250:Cargar_galagahw;
   66:Cargar_xain;
   67,68:Cargar_suna_hw;
   69,71:Cargar_nmk16;
@@ -965,7 +1067,7 @@ case tmaquina of
   87,190,191:Cargar_irem_m72;
   89,90:Cargar_brkthru;
   91:Cargar_dec8;
-  92,96:Cargar_ddragon;
+  92,96,247:Cargar_ddragon;
   93:Cargar_mrdo;
   94,95:Cargar_epos_hw;
   98,99:Cargar_sf_hw;
@@ -994,9 +1096,8 @@ case tmaquina of
   146,147:Cargar_twincobra;
   148:Cargar_JrPacman;
   156,157,158:Cargar_DEC0;
-  159:Cargar_tumblep;
   160:Cargar_funkyjet;
-  161:Cargar_supbtime;
+  159,161:Cargar_supbtime;
   162,163:Cargar_cninja;
   164:Cargar_Dietgo;
   165:Cargar_actfancer;
@@ -1016,12 +1117,12 @@ case tmaquina of
   196,232:Cargar_ddragon3;
   197:Cargar_blockout;
   199:Cargar_foodf;
-  204,205:Cargar_nemesis;
+  204,205,260,261:Cargar_nemesis;
   206,207:Cargar_pirates;
   208:Cargar_junofrst;
   209:Cargar_gyruss;
   210:Cargar_boogwing;
-  211:Cargar_freekick;
+  211,271,272,273,274:Cargar_freekick;
   212:Cargar_pinballaction;
   213:Cargar_renegade;
   214,215:Cargar_tmnt;
@@ -1044,13 +1145,20 @@ case tmaquina of
   239:Cargar_retofinv;
   240:Cargar_tetris;
   241,242,243:Cargar_snk;
-  244:Cargar_atari_sys1;
+  244,263,264:Cargar_atari_sys1;
+  246,248,249:Cargar_williams;
+  251,252,253,254,255,256,257:Cargar_systeme;
+  258,259:cargar_route16_hw;
+  262:cargar_badlands;
+  266,267:cargar_galivan;
+  268,269,270:cargar_lastduel;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
   1002:Cargar_gb;
   1003:Cargar_chip8;
   1004:Cargar_SMS;
+  1005:Cargar_sg;
   //gnw
   2000..2002:cargar_gnw_510;
 end;
@@ -1096,6 +1204,10 @@ end;
 if sender=principal1.CPC61281 then begin
   tipo:=9;
   principal1.CPC61281.Checked:=true;
+end;
+if sender=principal1.c641 then begin
+  tipo:=3000;
+  principal1.c641.Checked:=true;
 end;
 //Arcade
 if sender=principal1.Pacman1 then begin
@@ -2042,6 +2154,122 @@ if sender=principal1.gaunt21 then begin
   tipo:=245;
   principal1.gaunt21.Checked:=true;
 end;
+if sender=principal1.defender1 then begin
+  tipo:=246;
+  principal1.defender1.Checked:=true;
+end;
+if sender=principal1.ddragon_sh1 then begin
+  tipo:=247;
+  principal1.ddragon_sh1.Checked:=true;
+end;
+if sender=principal1.mayday1 then begin
+  tipo:=248;
+  principal1.mayday1.Checked:=true;
+end;
+if sender=principal1.colony71 then begin
+  tipo:=249;
+  principal1.colony71.Checked:=true;
+end;
+if sender=principal1.bosconian1 then begin
+  tipo:=250;
+  principal1.bosconian1.Checked:=true;
+end;
+if sender=principal1.hangonjr1 then begin
+  tipo:=251;
+  principal1.hangonjr1.Checked:=true;
+end;
+if sender=principal1.slapshooter1 then begin
+  tipo:=252;
+  principal1.slapshooter1.Checked:=true;
+end;
+if sender=principal1.fantasyzone21 then begin
+  tipo:=253;
+  principal1.fantasyzone21.Checked:=true;
+end;
+if sender=principal1.opaopa1 then begin
+  tipo:=254;
+  principal1.opaopa1.Checked:=true;
+end;
+if sender=principal1.tetrisse1 then begin
+  tipo:=255;
+  principal1.tetrisse1.Checked:=true;
+end;
+if sender=principal1.transformer1 then begin
+  tipo:=256;
+  principal1.transformer1.Checked:=true;
+end;
+if sender=principal1.riddleofp1 then begin
+  tipo:=257;
+  principal1.riddleofp1.Checked:=true;
+end;
+if sender=principal1.route161 then begin
+  tipo:=258;
+  principal1.route161.Checked:=true;
+end;
+if sender=principal1.speakandrescue1 then begin
+  tipo:=259;
+  principal1.speakandrescue1.Checked:=true;
+end;
+if sender=principal1.gwarrior1 then begin
+  tipo:=260;
+  principal1.gwarrior1.Checked:=true;
+end;
+if sender=principal1.salamander1 then begin
+  tipo:=261;
+  principal1.salamander1.Checked:=true;
+end;
+if sender=principal1.badlands1 then begin
+  tipo:=262;
+  principal1.badlands1.Checked:=true;
+end;
+if sender=principal1.indydoom1 then begin
+  tipo:=263;
+  principal1.indydoom1.Checked:=true;
+end;
+if sender=principal1.marblemadness1 then begin
+  tipo:=264;
+  principal1.marblemadness1.Checked:=true;
+end;
+if sender=principal1.amazon1 then begin
+  tipo:=265;
+  principal1.amazon1.Checked:=true;
+end;
+if sender=principal1.galivan1 then begin
+  tipo:=266;
+  principal1.galivan1.Checked:=true;
+end;
+if sender=principal1.dangar1 then begin
+  tipo:=267;
+  principal1.dangar1.Checked:=true;
+end;
+if sender=principal1.lastduel1 then begin
+  tipo:=268;
+  principal1.lastduel1.Checked:=true;
+end;
+if sender=principal1.madgear1 then begin
+  tipo:=269;
+  principal1.madgear1.Checked:=true;
+end;
+if sender=principal1.leds20111 then begin
+  tipo:=270;
+  principal1.leds20111.Checked:=true;
+end;
+if sender=principal1.gigas1 then begin
+  tipo:=271;
+  principal1.gigas1.Checked:=true;
+end;
+if sender=principal1.gigasm21 then begin
+  tipo:=272;
+  principal1.gigasm21.Checked:=true;
+end;
+if sender=principal1.omega1 then begin
+  tipo:=273;
+  principal1.omega1.Checked:=true;
+end;
+if sender=principal1.pbillrd1 then begin
+  tipo:=274;
+  principal1.pbillrd1.Checked:=true;
+end;
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;
@@ -2062,6 +2290,10 @@ end;
 if sender=principal1.segams1 then begin
   tipo:=1004;
   principal1.segams1.Checked:=true;
+end;
+if sender=principal1.sg10001 then begin
+  tipo:=1005;
+  principal1.sg10001.Checked:=true;
 end;
 //GNW
 if sender=principal1.DonkeyKongjr1 then begin

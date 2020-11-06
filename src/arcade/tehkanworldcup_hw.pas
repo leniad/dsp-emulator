@@ -33,6 +33,7 @@ const
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Normal'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$4;name:'Timer Speed';number:2;dip:((dip_val:$4;dip_name:'60/60'),(dip_val:$0;dip_name:'55/60'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$8;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        CPU_SYNC=4;
 
 var
  scroll_x,adpcm_pos,adpcm_data:word;
@@ -92,11 +93,11 @@ end;
 procedure eventos_tehkanwc;
 begin
 if event.arcade then begin
-  //Player 1
+  //P1
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  //Player 2
+  //P2
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  //Rest
+  //SYS
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or 1);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or 2);
   if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or 4);
@@ -107,32 +108,34 @@ end;
 procedure tehkanwc_principal;
 var
   frame_m,frame_s,frame_m2:single;
-  f:word;
+  f,h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_m2:=z80_1.tframes;
 frame_s:=z80_2.tframes;
 while EmuStatus=EsRuning do begin
- for f:=0 to $1ff do begin
-  //CPU 1
-  z80_0.run(frame_m);
-  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-  //CPU 2
-  z80_1.run(frame_m2);
-  frame_m2:=frame_m2+z80_1.tframes-z80_1.contador;
-  //CPU Sound
-  z80_2.run(frame_s);
-  frame_s:=frame_s+z80_2.tframes-z80_2.contador;
-  if f=479 then begin
-     z80_0.change_irq(HOLD_LINE);
-     z80_1.change_irq(HOLD_LINE);
-     z80_2.change_irq(HOLD_LINE);
-     update_video_tehkanwc;
+  for f:=0 to $ff do begin
+    for h:=1 to CPU_SYNC do begin
+      //CPU 1
+      z80_0.run(frame_m);
+      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+      //CPU 2
+      z80_1.run(frame_m2);
+      frame_m2:=frame_m2+z80_1.tframes-z80_1.contador;
+      //CPU Sound
+      z80_2.run(frame_s);
+      frame_s:=frame_s+z80_2.tframes-z80_2.contador;
+    end;
+    if f=239 then begin
+      z80_0.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
+      z80_2.change_irq(HOLD_LINE);
+      update_video_tehkanwc;
+    end;
   end;
- end;
- eventos_tehkanwc;
- video_sync;
+  eventos_tehkanwc;
+  video_sync;
 end;
 end;
 
@@ -156,8 +159,8 @@ end;
 
 procedure mem_shared_w(direccion:word;valor:byte);inline;
 begin
-memoria[direccion+$c800]:=valor;
-case direccion of
+memoria[direccion]:=valor;
+case (direccion-$c800) of
     $800..$fff:gfx[0].buffer[direccion and $3ff]:=true;
     $1000..$17ff:if buffer_paleta[direccion and $7ff]<>valor then begin
                     buffer_paleta[direccion and $7ff]:=valor;
@@ -174,12 +177,12 @@ function tehkanwc_getbyte(direccion:word):byte;
 begin
 case direccion of
   $0..$ec02:tehkanwc_getbyte:=memoria[direccion];
-  $f800:tehkanwc_getbyte:=track0[0]-analog.x[0];
-  $f801:tehkanwc_getbyte:=track0[1]-analog.y[0];
+  $f800:tehkanwc_getbyte:=track0[0]-analog.c[0].x[0];
+  $f801:tehkanwc_getbyte:=track0[1]-analog.c[0].y[0];
   $f802,$f806:tehkanwc_getbyte:=marcade.in2;
   $f803:tehkanwc_getbyte:=marcade.in0;
-  $f810:tehkanwc_getbyte:=track1[0]-analog.x[1];
-  $f811:tehkanwc_getbyte:=track1[1]-analog.y[1];
+  $f810:tehkanwc_getbyte:=track1[0]-analog.c[0].x[1];
+  $f811:tehkanwc_getbyte:=track1[1]-analog.c[0].y[1];
   $f813:tehkanwc_getbyte:=marcade.in1;
   $f820:tehkanwc_getbyte:=sound_latch2;
   $f840:tehkanwc_getbyte:=marcade.dswa;
@@ -191,10 +194,10 @@ end;
 
 procedure tehkanwc_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+    0..$bfff:;
     $c000..$c7ff:memoria[direccion]:=valor;
-    $c800..$ec02:mem_shared_w(direccion-$c800,valor);
+    $c800..$ec02:mem_shared_w(direccion,valor);
     $f800:track0[0]:=valor;
     $f801:track0[1]:=valor;
     $f810:track1[0]:=valor;
@@ -219,10 +222,10 @@ end;
 
 procedure tehkanwc_misc_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+    0..$7fff:;
     $8000..$c7ff:mem_misc[direccion]:=valor;
-    $c800..$ec02:mem_shared_w(direccion-$c800,valor);
+    $c800..$ec02:mem_shared_w(direccion,valor);
 end;
 end;
 
@@ -236,8 +239,8 @@ end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
 case direccion of
+  0..$3fff:;
   $4000..$47ff:mem_snd[direccion]:=valor;
   $8001:msm_5205_0.reset_w((valor xor $1) and 1);
   $8003:z80_2.change_nmi(CLEAR_LINE);
@@ -328,8 +331,6 @@ const
 			8*32+1*4, 8*32+0*4, 8*32+3*4, 8*32+2*4, 8*32+5*4, 8*32+4*4, 8*32+7*4, 8*32+6*4);
   ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 			16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32);
-  pc_x:array[0..7] of dword=(1*4, 0*4, 3*4, 2*4, 5*4, 4*4, 7*4, 6*4);
-  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
 var
   memoria_temp:array[0..$ffff] of byte;
 begin
@@ -342,15 +343,16 @@ screen_init(3,256,256,true);
 screen_init(4,256,256,true);
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(4608000,$200);
+z80_0:=cpu_z80.create(4608000,$100*CPU_SYNC);
 z80_0.change_ram_calls(tehkanwc_getbyte,tehkanwc_putbyte);
 //Misc CPU
-z80_1:=cpu_z80.create(4608000,$200);
+z80_1:=cpu_z80.create(4608000,$100*CPU_SYNC);
 z80_1.change_ram_calls(tehkanwc_misc_getbyte,tehkanwc_misc_putbyte);
 //analog
-init_analog(z80_0.numero_cpu,z80_0.clock,100,10,0,63,-63,true);
+init_analog(z80_0.numero_cpu,z80_0.clock);
+analog_0(100,10,0,63,-63,true);
 //Sound CPU
-z80_2:=cpu_z80.create(4608000,$200);
+z80_2:=cpu_z80.create(4608000,$100*CPU_SYNC);
 z80_2.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_2.change_io_calls(snd_inbyte,snd_outbyte);
 z80_2.init_sound(tehkanwc_sound_update);
@@ -359,29 +361,29 @@ ay8910_0:=ay8910_chip.create(1536000,AY8910,0.50);
 ay8910_0.change_io_calls(nil,nil,tehkan_porta_write,tehkan_portb_write);
 ay8910_1:=ay8910_chip.create(1536000,AY8910,0.50);
 ay8910_1.change_io_calls(tehkan_porta_read,tehkan_portb_read,nil,nil);
-msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.45,msm5205_sound);
+msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S96_4B,0.2,msm5205_sound);
 //cargar roms
-if not(cargar_roms(@memoria,@tehkanwc_rom,'tehkanwc.zip',0)) then exit;
+if not(roms_load(@memoria,tehkanwc_rom)) then exit;
 //cargar cpu 2
-if not(cargar_roms(@mem_misc,@tehkanwc_cpu2,'tehkanwc.zip')) then exit;
+if not(roms_load(@mem_misc,tehkanwc_cpu2)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd,@tehkanwc_sound,'tehkanwc.zip')) then exit;
+if not(roms_load(@mem_snd,tehkanwc_sound)) then exit;
 //Cargar ADPCM
-if not(cargar_roms(@mem_adpcm,@tehkanwc_adpcm,'tehkanwc.zip')) then exit;
+if not(roms_load(@mem_adpcm,tehkanwc_adpcm)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp,@tehkanwc_chars,'tehkanwc.zip')) then exit;
+if not(roms_load(@memoria_temp,tehkanwc_chars)) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp,@tehkanwc_sprites,'tehkanwc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,tehkanwc_sprites)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms(@memoria_temp,@tehkanwc_tiles,'tehkanwc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,tehkanwc_tiles)) then exit;
 init_gfx(2,16,8,1024);
 gfx_set_desc_data(4,0,64*8,0,1,2,3);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);

@@ -9,14 +9,14 @@ procedure cargar_psychic5;
 
 implementation
 const
-        psychic5_rom:array[0..2] of tipo_roms=(
-        (n:'myp5d';l:$8000;p:0;crc:$1d40a8c7),(n:'myp5e';l:$10000;p:$8000;crc:$2fa7e8c0),());
+        psychic5_rom:array[0..1] of tipo_roms=(
+        (n:'myp5d';l:$8000;p:0;crc:$1d40a8c7),(n:'myp5e';l:$10000;p:$8000;crc:$2fa7e8c0));
         psychic5_snd_rom:tipo_roms=(n:'myp5a';l:$10000;p:0;crc:$6efee094);
         psychic5_char:tipo_roms=(n:'p5f';l:$8000;p:0;crc:$04d7e21c);
-        psychic5_sprites:array[0..2] of tipo_roms=(
-        (n:'p5b';l:$10000;p:0;crc:$7e3f87d4),(n:'p5c';l:$10000;p:$10000;crc:$8710fedb),());
-        psychic5_tiles:array[0..2] of tipo_roms=(
-        (n:'myp5g';l:$10000;p:0;crc:$617b074b),(n:'myp5h';l:$10000;p:$10000;crc:$a9dfbe67),());
+        psychic5_sprites:array[0..1] of tipo_roms=(
+        (n:'p5b';l:$10000;p:0;crc:$7e3f87d4),(n:'p5c';l:$10000;p:$10000;crc:$8710fedb));
+        psychic5_tiles:array[0..1] of tipo_roms=(
+        (n:'myp5g';l:$10000;p:0;crc:$617b074b),(n:'myp5h';l:$10000;p:$10000;crc:$a9dfbe67));
         //Dip
         psychic5_dip_a:array [0..5] of def_dip=(
         (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -32,14 +32,14 @@ const
 var
  mem_rom:array[0..3,0..$3fff] of byte;
  mem_ram:array[0..2,0..$fff] of byte;
- banco_rom,banco_vram,sound_latch,bg_control:byte;
+ bg_clip_mode,banco_rom,banco_vram,sound_latch,bg_control:byte;
  title_screen:boolean;
  scroll_x,scroll_y,sy1,sy2,sx1:word;
 
-procedure update_video_psychic5;inline;
+procedure update_video_psychic5;
 var
   f,color,nchar,x,y,clip_x,clip_y,clip_w,clip_h:word;
-  bg_clip_mode,attr,flip_x,spr1,spr2,spr3,spr4,sy1_old,sx1_old,sy2_old:byte;
+  attr,flip_x,spr1,spr2,spr3,spr4,sy1_old,sx1_old,sy2_old:byte;
 begin
 //fondo
 if (bg_control and 1)<>0 then begin  //fondo activo?
@@ -139,31 +139,55 @@ for f:=0 to $3ff do begin
 end;
 actualiza_trozo(0,0,256,256,1,0,0,256,256,4);
 actualiza_trozo_final(16,0,224,256,4);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_psychic5;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   //P2
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
   //SYSTEM
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+end;
+if event.arcade then begin
+  marcade.in0:=$ff;
+  marcade.in1:=$ff;
+  marcade.in2:=$ff;
+  //P1
+  if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fd;
+  if arcade_input.right[0] then marcade.in1:=marcade.in1 and $fe;
+  if arcade_input.up[0] then marcade.in1:=marcade.in1 and $f7;
+  if arcade_input.but0[0] then marcade.in1:=marcade.in1 and $ef;
+  if arcade_input.but1[0] then marcade.in1:=marcade.in1 and $df;
+  if arcade_input.down[0] then marcade.in1:=marcade.in1 and $fb;
+  //P2
+  if arcade_input.left[1] then marcade.in2:=marcade.in2 and $fd;
+  if arcade_input.right[1] then marcade.in2:=marcade.in2 and $fe;
+  if arcade_input.up[1] then marcade.in2:=marcade.in2 and $f7;
+  if arcade_input.but0[1] then marcade.in2:=marcade.in2 and $ef;
+  if arcade_input.but1[1] then marcade.in2:=marcade.in2 and $df;
+  if arcade_input.down[1] then marcade.in2:=marcade.in2 and $fb;
+  //SYSTEM
+  if arcade_input.start[0] then marcade.in0:=marcade.in0 and $fe;
+  if arcade_input.start[1] then marcade.in0:=marcade.in0 and $fd;
+  if arcade_input.coin[0] then marcade.in0:=marcade.in0 and $bf;
+  if arcade_input.coin[1] then marcade.in0:=marcade.in0 and $7f;
 end;
 end;
 
@@ -188,7 +212,7 @@ while EmuStatus=EsRuning do begin
          z80_0.im0:=$cf;
          z80_0.change_irq(HOLD_LINE);
         end;
-      240:begin //rst 10
+      239:begin //rst 10
           z80_0.im0:=$d7 ;
           z80_0.change_irq(HOLD_LINE);
           update_video_psychic5;
@@ -305,8 +329,8 @@ end;
 
 procedure psychic5_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+  0..$bfff:;
   $c000..$dfff:ram_paginada_w(direccion and $1fff,valor);
   $e000..$efff,$f200..$ffff:memoria[direccion]:=valor;
   $f000:sound_latch:=valor;
@@ -327,15 +351,15 @@ end;
 
 procedure psychic5_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:;
   $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
 end;
 
 procedure psychic5_outbyte(puerto:word;valor:byte);
 begin
-case (puerto and $FF) of
+case (puerto and $ff) of
   0:ym2203_0.control(valor);
   1:ym2203_0.write(valor);
   $80:ym2203_1.control(valor);
@@ -384,8 +408,8 @@ buffer[1]:=banco_vram;
 buffer[2]:=byte(title_screen);
 buffer[3]:=sound_latch;
 buffer[4]:=bg_control;
-savedata_qsnapshot(@buffer[0],5);
-savedata_com_qsnapshot(@buffer_paleta[0],$600*2);
+savedata_qsnapshot(@buffer,5);
+savedata_com_qsnapshot(@buffer_paleta,$600*2);
 freemem(data);
 close_qsnapshot;
 end;
@@ -421,7 +445,7 @@ banco_vram:=buffer[1];
 title_screen:=buffer[2]<>0;
 sound_latch:=buffer[3];
 bg_control:=buffer[4];
-loaddata_qsnapshot(@buffer_paleta[0]);
+loaddata_qsnapshot(@buffer_paleta);
 freemem(data);
 close_qsnapshot;
 //END
@@ -436,20 +460,21 @@ begin
  YM2203_0.reset;
  YM2203_1.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  banco_rom:=0;
  banco_vram:=0;
  sound_latch:=0;
  title_screen:=false;
  bg_control:=0;
+ bg_clip_mode:=0;
 end;
 
 function iniciar_psychic5:boolean;
 var
-      f:word;
-      memoria_temp:array[0..$1ffff] of byte;
+    f:word;
+    memoria_temp:array[0..$1ffff] of byte;
 const
     ps_x:array[0..15] of dword=(0, 4, 8, 12, 16, 20, 24, 28,
         64*8, 64*8+4, 64*8+8, 64*8+12, 64*8+16, 64*8+20, 64*8+24, 64*8+28);
@@ -462,7 +487,7 @@ screen_init(1,256,256,true);
 screen_init(2,512,512,true);
 screen_init(3,512,1024);
 screen_mod_scroll(3,512,256,511,1024,256,1023);
-screen_init(4,512,256,false,true);
+screen_init(4,512,512,false,true);
 iniciar_video(224,256);
 //Main CPU
 z80_0:=cpu_z80.create(6000000,256);
@@ -477,28 +502,28 @@ YM2203_0:=ym2203_chip.create(1500000,1,0.75);
 ym2203_0.change_irq_calls(snd_irq);
 YM2203_1:=ym2203_chip.create(1500000,1,0.75);
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@psychic5_rom[0],'psychic5.zip',0)) then exit;
+if not(roms_load(@memoria_temp,psychic5_rom)) then exit;
 //Poner las ROMS en sus bancos
-copymemory(@memoria[0],@memoria_temp[0],$8000);
+copymemory(@memoria,@memoria_temp,$8000);
 for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@psychic5_snd_rom,'psychic5.zip',1)) then exit;
+if not(roms_load(@mem_snd,psychic5_snd_rom)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@psychic5_char,'psychic5.zip',1)) then exit;
+if not(roms_load(@memoria_temp,psychic5_char)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[15]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@psychic5_sprites[0],'psychic5.zip',0)) then exit;
+if not(roms_load(@memoria_temp,psychic5_sprites)) then exit;
 init_gfx(1,16,16,1024);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //convertir tiles
-if not(cargar_roms(@memoria_temp[0],@psychic5_tiles[0],'psychic5.zip',0)) then exit;
+if not(roms_load(@memoria_temp,psychic5_tiles)) then exit;
 init_gfx(2,16,16,1024);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //DIP
 marcade.dswa:=$ef;
 marcade.dswb:=$ff;

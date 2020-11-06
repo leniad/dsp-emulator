@@ -10,20 +10,23 @@ procedure cargar_retofinv;
 implementation
 const
         retofinv_rom:array[0..2] of tipo_roms=(
-        (n:'a37-03.70';l:$2000;p:$0;crc:$eae7459d),(n:'a37-02.71';l:$2000;p:$2000;crc:$72895e37),
-        (n:'a37-01.72';l:$2000;p:$4000;crc:$505dd20b));
-        retofinv_sub:tipo_roms=(n:'a37-04.62';l:$2000;p:$0;crc:$d2899cc1);
-        retofinv_snd:tipo_roms=(n:'a37-05.17';l:$2000;p:$0;crc:$9025abea);
-        retofinv_mcu:tipo_roms=(n:'a37-09.37';l:$800;p:$0;crc:$79bd6ded);
-        retofinv_char:tipo_roms=(n:'a37-16.61';l:$2000;p:$0;crc:$4e3f501c);
+        (n:'a37__03.ic70';l:$2000;p:$0;crc:$eae7459d),(n:'a37__02.ic71';l:$2000;p:$2000;crc:$72895e37),
+        (n:'a37__01.ic72';l:$2000;p:$4000;crc:$505dd20b));
+        retofinv_sub:tipo_roms=(n:'a37__04.ic62';l:$2000;p:$0;crc:$d2899cc1);
+        retofinv_snd:tipo_roms=(n:'a37__05.ic17';l:$2000;p:$0;crc:$9025abea);
+        retofinv_mcu:tipo_roms=(n:'a37__09.ic37';l:$800;p:$0;crc:$6a6d008d);
+        retofinv_char:tipo_roms=(n:'a37__16.gfxboard.ic61';l:$2000;p:$0;crc:$4e3f501c);
         retofinv_tiles:array[0..1] of tipo_roms=(
-        (n:'a37-14.55';l:$2000;p:0;crc:$ef7f8651),(n:'a37-15.56';l:$2000;p:$2000;crc:$03b40905));
+        (n:'a37__14.gfxboard.ic55';l:$2000;p:0;crc:$ef7f8651),(n:'a37__15.gfxboard.ic56';l:$2000;p:$2000;crc:$03b40905));
         retofinv_sprites:array[0..3] of tipo_roms=(
-        (n:'a37-10.8';l:$2000;p:$0;crc:$6afdeec8),(n:'a37-11.9';l:$2000;p:$2000;crc:$d3dc9da3),
-        (n:'a37-12.10';l:$2000;p:$4000;crc:$d10b2eed),(n:'a37-13.11';l:$2000;p:$6000;crc:$00ca6b3d));
-        retofinv_proms:array[0..3] of tipo_roms=(
-        (n:'a37-06.13';l:$100;p:$0;crc:$e9643b8b),(n:'a37-07.4';l:$100;p:$100;crc:$e8f34e11),
-        (n:'a37-08.3';l:$100;p:$200;crc:$50030af0),(n:'82s191n';l:$800;p:$300;crc:$93c891e3));
+        (n:'a37__10.gfxboard.ic8';l:$2000;p:$0;crc:$6afdeec8),(n:'a37__11.gfxboard.ic9';l:$2000;p:$2000;crc:$d3dc9da3),
+        (n:'a37__12.gfxboard.ic10';l:$2000;p:$4000;crc:$d10b2eed),(n:'a37__13.gfxboard.ic11';l:$2000;p:$6000;crc:$00ca6b3d));
+        retofinv_proms:array[0..2] of tipo_roms=(
+        (n:'a37-06.ic13';l:$100;p:$0;crc:$e9643b8b),(n:'a37-07.ic4';l:$100;p:$100;crc:$e8f34e11),
+        (n:'a37-08.ic3';l:$100;p:$200;crc:$50030af0));
+        retofinv_clut:array[0..3] of tipo_roms=(
+        (n:'a37-17.gfxboard.ic36';l:$400;p:$0;crc:$c63cf10e),(n:'a37-18.gfxboard.ic37';l:$400;p:$800;crc:$6db07bd1),
+        (n:'a37-19.gfxboard.ic83';l:$400;p:$400;crc:$a92aea27),(n:'a37-20.gfxboard.ic84';l:$400;p:$c00;crc:$77a7aaf6));
         //Dip
         retofinv_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Bonus Life';number:4;dip:((dip_val:$3;dip_name:'30K 80K 80K+'),(dip_val:$2;dip_name:'30K 80K'),(dip_val:$1;dip_name:'30K'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -77,11 +80,20 @@ for f:=0 to $3f do begin
     nchar:=memoria[$8f80+(f*2)];
     color:=(memoria[$8f81+(f*2)] and $3f) shl 4;
     atrib:=memoria[$9f80+(f*2)];
-    x:=((memoria[$9780+(f*2)] shl 1)+((atrib and $80) shr 7))-15;
-    y:=((memoria[$9781+(f*2)] shl 1)+((memoria[$9f81+(f*2)] and $80) shr 7))-39;
+    size_sprite:=(atrib and $c) shr 2;
+    if not(main_screen.flip_main_screen) then begin
+      y:=((memoria[$9781+(f*2)] shl 1)+((memoria[$9f81+(f*2)] and $80) shr 7))-39;
+      x:=((memoria[$9780+(f*2)] shl 1)+((atrib and $80) shr 7))-17;
+    end else begin
+      y:=255-((memoria[$9781+(f*2)] shl 1)+((memoria[$9f81+(f*2)] and $80) shr 7))+56;
+      x:=255-((memoria[$9780+(f*2)] shl 1)+((atrib and $80) shr 7))-31;
+      if (size_sprite<>0) then begin
+        x:=x-16;
+        if (size_sprite<>1) then y:=y-16;
+      end;
+    end;
     flip_x:=(atrib and $2)<>0;
     flip_y:=(atrib and $1)<>0;
-    size_sprite:=(atrib and $c) shr 2;
     nchar:=nchar and not(size_sprite);
     case size_sprite of
          0:begin //16x16
@@ -142,28 +154,24 @@ frame_sub:=z80_1.tframes;
 frame_s:=z80_2.tframes;
 frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRuning do begin
- for f:=0 to $df do begin
-   z80_0.run(frame_m);
-   frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-   //Sub
-   z80_1.run(frame_sub);
-   frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
-   //Sound
-   z80_2.run(frame_s);
-   frame_s:=frame_s+z80_2.tframes-z80_2.contador;
-   //mcu
-   m6805_0.run(frame_mcu);
-   frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
-   case f of
-      $df:begin
-               if main_vblank then z80_0.change_irq(ASSERT_LINE);
-               if sub_vblank then z80_1.change_irq(ASSERT_LINE);
-               update_video_retofinv;
-          end;
-   end;
- end;
- eventos_retofinv;
- video_sync;
+    for f:=0 to 223 do begin
+        z80_0.run(frame_m);
+        frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+        //Sub
+        z80_1.run(frame_sub);
+        frame_sub:=frame_sub+z80_1.tframes-z80_1.contador;
+        //Sound
+        z80_2.run(frame_s);
+        frame_s:=frame_s+z80_2.tframes-z80_2.contador;
+        //mcu
+        m6805_0.run(frame_mcu);
+        frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
+    end;
+    if main_vblank then z80_0.change_irq(ASSERT_LINE);
+    if sub_vblank then z80_1.change_irq(ASSERT_LINE);
+    update_video_retofinv;
+    eventos_retofinv;
+    video_sync;
 end;
 end;
 
@@ -189,14 +197,14 @@ end;
 
 procedure putbyte_retofinv(direccion:word;valor:byte);
 begin
-if (direccion<$8000) then exit;
 case direccion of
-  $8000..$87ff:begin
+  0..$7fff:; //ROM
+  $8000..$87ff:if memoria[direccion]<>valor then begin
                   memoria[direccion]:=valor;
                   gfx[0].buffer[direccion and $3ff]:=true;
                end;
   $8800..$9fff:memoria[direccion]:=valor;
-  $a000..$a7ff:begin
+  $a000..$a7ff:if memoria[direccion]<>valor then begin
                   memoria[direccion]:=valor;
                   gfx[1].buffer[direccion and $3ff]:=true;
                end;
@@ -242,17 +250,9 @@ end;
 
 procedure putbyte_sub_retofinv(direccion:word;valor:byte);
 begin
-if (direccion<$2000) then exit;
 case direccion of
-  $8000..$87ff:begin
-                  memoria[direccion]:=valor;
-                  gfx[0].buffer[direccion and $3ff]:=true;
-               end;
-  $8800..$9fff:memoria[direccion]:=valor;
-  $a000..$a7ff:begin
-                  memoria[direccion]:=valor;
-                  gfx[1].buffer[direccion and $3ff]:=true;
-               end;
+  0..$1fff:; //ROM
+  $8000..$a7ff:putbyte_retofinv(direccion,valor);
   $c804:begin
            sub_vblank:=(valor and 1)<>0;
            if not(sub_vblank) then z80_1.change_irq(CLEAR_LINE);
@@ -270,8 +270,8 @@ end;
 
 procedure putbyte_snd_retofinv(direccion:word;valor:byte);
 begin
-if ((direccion<$2000) or (direccion>$dfff)) then exit;
 case direccion of
+  0..$1fff,$e000..$ffff:; //ROM
   $2000..$27ff:mem_snd[direccion]:=valor;
   $6000:sound_return:=valor;
   $8000:sn_76496_0.Write(valor);
@@ -296,7 +296,6 @@ end;
 procedure retofinv_mcu_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7ff;
-if direccion>$7f then exit;
 case direccion of
   0:port_a_out:=valor;
   1:begin
@@ -316,6 +315,7 @@ case direccion of
   5:ddr_b:=valor;
   6:ddr_c:=valor;
   $10..$7f:mcu_mem[direccion]:=valor;
+  $80..$7ff:; //ROM
 end;
 end;
 
@@ -366,8 +366,8 @@ end;
 function iniciar_retofinv:boolean;
 const
     pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
-			24*8+0, 24*8+1, 24*8+2, 24*8+3);
+    ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
+      16*8+0, 16*8+1, 16*8+2, 16*8+3,	24*8+0, 24*8+1, 24*8+2, 24*8+3);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
 var
@@ -391,7 +391,7 @@ z80_1.change_ram_calls(getbyte_sub_retofinv,putbyte_sub_retofinv);
 z80_2:=cpu_z80.Create(18432000 div 6,224);
 z80_2.change_ram_calls(getbyte_snd_retofinv,putbyte_snd_retofinv);
 z80_2.init_sound(retofinv_sound_update);
-init_timer(z80_2.numero_cpu,(18432000 div 6)/(2*60),retofinv_snd_nmi,true);
+timers.init(z80_2.numero_cpu,(18432000 div 6)/(2*60),retofinv_snd_nmi,nil,true);
 //MCU CPU
 m6805_0:=cpu_m6805.create(18432000 div 6,224,tipo_m68705);
 m6805_0.change_ram_calls(retofinv_mcu_getbyte,retofinv_mcu_putbyte);
@@ -399,42 +399,45 @@ m6805_0.change_ram_calls(retofinv_mcu_getbyte,retofinv_mcu_putbyte);
 sn_76496_0:=sn76496_chip.Create(18432000 div 6);
 sn_76496_1:=sn76496_chip.Create(18432000 div 6);
 //cargar roms
-if not(roms_load(@memoria,@retofinv_rom,'retofinv.zip',sizeof(retofinv_rom))) then exit;
-if not(roms_load(@mem_misc,@retofinv_sub,'retofinv.zip',sizeof(retofinv_sub))) then exit;
+if not(roms_load(@memoria,retofinv_rom)) then exit;
+if not(roms_load(@mem_misc,retofinv_sub)) then exit;
 //cargar roms audio
-if not(roms_load(@mem_snd,@retofinv_snd,'retofinv.zip',sizeof(retofinv_snd))) then exit;
+if not(roms_load(@mem_snd,retofinv_snd)) then exit;
 //cargar roms mcu
-if not(roms_load(@mcu_mem,@retofinv_mcu,'retofinv.zip',sizeof(retofinv_mcu))) then exit;
+if not(roms_load(@mcu_mem,retofinv_mcu)) then exit;
 //Cargar chars
-if not(roms_load(@memoria_temp,@retofinv_char,'retofinv.zip',sizeof(retofinv_char))) then exit;
+if not(roms_load(@memoria_temp,retofinv_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx_set_desc_data(1,0,8*8,0);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,true,false);
 //Cargar tiles
-if not(roms_load(@memoria_temp,@retofinv_tiles,'retofinv.zip',sizeof(retofinv_tiles))) then exit;
+if not(roms_load(@memoria_temp,retofinv_tiles)) then exit;
 init_gfx(1,8,8,$200);
 gfx_set_desc_data(4,0,16*8,0,($200*16*8)+4,$200*16*8,4);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //sprites
-if not(roms_load(@memoria_temp,@retofinv_sprites,'retofinv.zip',sizeof(retofinv_sprites))) then exit;
+if not(roms_load(@memoria_temp,retofinv_sprites)) then exit;
 init_gfx(2,16,16,$100);
 gfx_set_desc_data(4,0,64*8,0,($100*64*8)+4,$100*64*8,4);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //pal
-if not(roms_load(@memoria_temp,@retofinv_proms,'retofinv.zip',sizeof(retofinv_proms))) then exit;
+if not(roms_load(@memoria_temp,retofinv_proms)) then exit;
 for f:=0 to $ff do begin
     colores[f].r:=pal4bit(memoria_temp[f+$000]);
     colores[f].g:=pal4bit(memoria_temp[f+$100]);
     colores[f].b:=pal4bit(memoria_temp[f+$200]);
 end;
 set_pal(colores,$100);
+//CLUT
+if not(roms_load(@memoria_temp,retofinv_clut)) then exit;
 for f:=0 to $1ff do begin
     if (f and 1)<>0 then gfx[0].colores[f]:=f shr 1
        else gfx[0].colores[f]:=0;
 end;
+for f:=0 to $7ff do memoria_temp[$1000+f]:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[$800+f] and $f);
 for f:=0 to $7ff do begin
-    gfx[1].colores[f]:=bitswap8(memoria_temp[$300+f],4,5,6,7,3,2,1,0);
-    gfx[2].colores[f]:=bitswap8(memoria_temp[$300+f],4,5,6,7,3,2,1,0);
+    gfx[1].colores[f]:=memoria_temp[$1000+bitswap16(f,15,14,13,12,11,10,9,8,7,6,5,4,3,0,1,2)];
+    gfx[2].colores[f]:=memoria_temp[$1000+bitswap16(f,15,14,13,12,11,10,9,8,7,6,5,4,3,0,1,2)];
 end;
 //Dip
 marcade.dswa:=$6f;
@@ -453,6 +456,7 @@ begin
 llamadas_maquina.iniciar:=iniciar_retofinv;
 llamadas_maquina.bucle_general:=principal_retofinv;
 llamadas_maquina.reset:=reset_retofinv;
+llamadas_maquina.fps_max:=60.58;
 end;
 
 end.

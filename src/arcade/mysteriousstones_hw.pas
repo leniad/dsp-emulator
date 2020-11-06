@@ -3,7 +3,7 @@ unit mysteriousstones_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
-     pal_engine,sound_engine;
+     pal_engine,sound_engine,qsnapshot;
 
 procedure cargar_ms;
 
@@ -11,8 +11,8 @@ implementation
 const
         ms_rom:array[0..5] of tipo_roms=(
         (n:'rom6.bin';l:$2000;p:$4000;crc:$7bd9c6cd),(n:'rom5.bin';l:$2000;p:$6000;crc:$a83f04a6),
-        (n:'rom4.bin';l:$2000;p:$8000;crc:$46c73714),(n:'rom3.bin';l:$2000;p:$A000;crc:$34f8b8a3),
-        (n:'rom2.bin';l:$2000;p:$C000;crc:$bfd22cfc),(n:'rom1.bin';l:$2000;p:$E000;crc:$fb163e38));
+        (n:'rom4.bin';l:$2000;p:$8000;crc:$46c73714),(n:'rom3.bin';l:$2000;p:$a000;crc:$34f8b8a3),
+        (n:'rom2.bin';l:$2000;p:$c000;crc:$bfd22cfc),(n:'rom1.bin';l:$2000;p:$e000;crc:$fb163e38));
         ms_char:array[0..5] of tipo_roms=(
         (n:'ms6';l:$2000;p:$0000;crc:$85c83806),(n:'ms9';l:$2000;p:$2000;crc:$b146c6ab),
         (n:'ms7';l:$2000;p:$4000;crc:$d025f84d),(n:'ms10';l:$2000;p:$6000;crc:$d85015b5),
@@ -65,8 +65,7 @@ end;
 
 procedure update_video_ms;inline;
 var
-  f,nchar,color:word;
-  x,y:word;
+  f,nchar,color,x,y:word;
   atrib:byte;
 begin
 for f:=0 to $1ff do begin
@@ -183,7 +182,6 @@ procedure putbyte_ms(direccion:word;valor:byte);
 var
   temp:byte;
 begin
-if direccion>$3fff then exit;
 case direccion of
   0..$fff:memoria[direccion]:=valor;
   $1000..$17ff:if memoria[direccion]<>valor then begin
@@ -223,7 +221,8 @@ case direccion of
                           if (direccion and $1f)>=$10 then fillchar(gfx[2].buffer[0],$400,1);
                          end;
               end;
-      end;
+  $4000..$ffff:; //ROM
+end;
 end;
 
 procedure ms_sound_update;
@@ -233,6 +232,69 @@ begin
 end;
 
 //Main
+procedure ms_qsave(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..5] of byte;
+  size:word;
+begin
+open_qsnapshot_save('mysteriousstones'+nombre);
+getmem(data,20000);
+//CPU
+size:=m6502_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND
+size:=ay8910_0.save_snapshot(data);
+savedata_com_qsnapshot(data,size);
+size:=ay8910_1.save_snapshot(data);
+savedata_com_qsnapshot(data,size);
+//MEM
+savedata_com_qsnapshot(@memoria,$4000);
+//MISC
+buffer[0]:=scroll;
+buffer[1]:=soundlatch;
+buffer[2]:=last;
+buffer[3]:=char_color;
+buffer[4]:=video_page and $ff;
+buffer[5]:=video_page shr 8;
+savedata_qsnapshot(@buffer,6);
+freemem(data);
+close_qsnapshot;
+end;
+
+procedure ms_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..5] of byte;
+  f:word;
+begin
+if not(open_qsnapshot_load('mysteriousstones'+nombre)) then exit;
+getmem(data,20000);
+//CPU
+loaddata_qsnapshot(data);
+m6502_0.load_snapshot(data);
+//SND
+loaddata_qsnapshot(data);
+ay8910_0.load_snapshot(data);
+loaddata_qsnapshot(data);
+ay8910_1.load_snapshot(data);
+//MEM
+loaddata_qsnapshot(@memoria);
+//MISC
+scroll:=buffer[0];
+soundlatch:=buffer[1];
+last:=buffer[2];
+char_color:=buffer[3];
+video_page:=buffer[4] or (buffer[5] shl 8);
+freemem(data);
+close_qsnapshot;
+//END
+fillchar(gfx[0].buffer,$400,1);
+fillchar(gfx[2].buffer,$1000,1);
+for f:=0 to $1f do cambiar_color(f);
+
+end;
+
 procedure reset_ms;
 begin
 m6502_0.reset;
@@ -252,7 +314,6 @@ var
   f:byte;
   memoria_temp:array[0..$bfff] of byte;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
     ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -275,24 +336,24 @@ m6502_0.init_sound(ms_sound_update);
 ay8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
 ay8910_1:=ay8910_chip.create(1500000,AY8910,0.3);
 //cargar roms
-if not(roms_load(@memoria,@ms_rom,'mystston.zip',sizeof(ms_rom))) then exit;
+if not(roms_load(@memoria,ms_rom)) then exit;
 //Cargar chars
-if not(roms_load(@memoria_temp,@ms_char,'mystston.zip',sizeof(ms_char))) then exit;
+if not(roms_load(@memoria_temp,ms_char)) then exit;
 init_gfx(0,8,8,2048);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,$4000*8*2,$4000*8,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,true);
+convert_gfx(0,0,@memoria_temp,@ps_x[8],@ps_y,false,true);
 //sprites
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,$4000*8*2,$4000*8,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //Cargar sprites fondo
-if not(roms_load(@memoria_temp,@ms_sprite,'mystston.zip',sizeof(ms_sprite))) then exit;
+if not(roms_load(@memoria_temp,ms_sprite)) then exit;
 init_gfx(2,16,16,512);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //poner la paleta
-if not(roms_load(@memoria_temp,@ms_pal,'mystston.zip',sizeof(ms_pal))) then exit;
+if not(roms_load(@memoria_temp,ms_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
 			3,@resistances_rg,@weights_rg,0,4700,
 			2,@resistances_b,@weights_b,0,4700,
@@ -320,6 +381,8 @@ llamadas_maquina.iniciar:=iniciar_ms;
 llamadas_maquina.bucle_general:=principal_ms;
 llamadas_maquina.reset:=reset_ms;
 llamadas_maquina.fps_max:=((12000000/256)/3)/272;
+llamadas_maquina.save_qsnap:=ms_qsave;
+llamadas_maquina.load_qsnap:=ms_qload;
 end;
 
 end.

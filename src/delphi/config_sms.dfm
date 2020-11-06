@@ -37,49 +37,33 @@ object SMSConfig: TSMSConfig
   object GroupBox1: TGroupBox
     Left = 24
     Top = 24
-    Width = 89
-    Height = 73
+    Width = 161
+    Height = 113
     Caption = 'Video'
     TabOrder = 0
     object RadioButton1: TRadioButton
       Left = 16
-      Top = 24
-      Width = 97
+      Top = 25
+      Width = 137
       Height = 17
-      Caption = 'NTSC'
+      Caption = 'Japan/Korea (NTSC)'
       TabOrder = 0
     end
     object RadioButton2: TRadioButton
       Left = 16
       Top = 48
-      Width = 97
+      Width = 121
       Height = 17
-      Caption = 'PAL'
+      Caption = 'Europe/Australia (PAL)'
       TabOrder = 1
     end
-  end
-  object GroupBox2: TGroupBox
-    Left = 168
-    Top = 24
-    Width = 89
-    Height = 73
-    Caption = 'BIOS'
-    TabOrder = 1
     object RadioButton3: TRadioButton
       Left = 16
-      Top = 24
+      Top = 71
       Width = 97
       Height = 17
-      Caption = 'Enabled'
-      TabOrder = 0
-    end
-    object RadioButton4: TRadioButton
-      Left = 16
-      Top = 48
-      Width = 96
-      Height = 17
-      Caption = 'Disabled'
-      TabOrder = 1
+      Caption = 'US/Brazil (NTSC)'
+      TabOrder = 2
     end
   end
 end

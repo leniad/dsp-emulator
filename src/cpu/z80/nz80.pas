@@ -57,7 +57,7 @@ type
           im2_lo,im0:byte;
           procedure reset;
           procedure run(maximo:single);
-          procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
+          //procedure change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
           procedure change_io_calls(in_port:tgetbyte;out_port:tputbyte);
           procedure change_misc_calls(despues_instruccion:tdespues_instruccion;raised_z80:type_raised);
           function get_safe_pc:word;
@@ -98,7 +98,7 @@ type
           function adc_hl(valor:word):word;
           function sbc_hl(valor:word):word;
         private
-          z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
+          //z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
           raised_z80:type_raised;
           function call_nmi:byte;
           function call_irq:byte;
@@ -114,7 +114,7 @@ var
 
 implementation
 const
-        z80t_m:array[0..255] of byte=(
+        z80t:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
         4,10, 7, 6, 4, 4, 7, 4, 4,11, 7, 6, 4, 4, 7, 4,  //0                          *
         8,10, 7, 6, 4, 4, 7, 4,12,11, 7, 6, 4, 4, 7, 4,  //10
@@ -133,7 +133,7 @@ const
         5,10,10,19,10,11, 7,11, 5, 4,10, 4,10, 0, 7,11,  //E0
         5,10,10, 4,10,11, 7,11, 5, 6,10, 4,10, 0, 7,11); //F0
 
-         z80t_cb_m:array[0..255] of byte=(
+         z80t_cb:array[0..255] of byte=(
       //0 1 2 3 4 5  6 7 8 9 a b c d  e f
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
@@ -152,7 +152,7 @@ const
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
         8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8);
 
-        z80t_dd_m:array[0..255] of byte=( //cb_xy
+        z80t_dd:array[0..255] of byte=( //cb_xy
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
         8,14,11,10, 8, 8,11, 8, 8,15,11,10, 8, 8,11, 8,
        12,14,11,10, 8, 8,11, 8,16,15,11,10, 8, 8,11, 8,
@@ -160,18 +160,18 @@ const
        11,14,17,10,23,23,19, 8,11,15,17,10, 8, 8,11, 8,
         8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
         8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
-	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
+      	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
        19,19,19,19,19,19, 8,19, 8, 8, 8, 8, 8, 8,19, 8,
-	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
-	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
-	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
-	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
-	9,14,14,14,14,15,11,15, 9,14,14, 0,14,21,11,15,
-	9,14,14,15,14,15,11,15, 9, 8,14,15,14, 4,11,15,
-	9,14,14,23,14,15,11,15, 9, 8,14, 8,14, 4,11,15,
-	9,14,14, 8,14,15,11,15, 9,10,14, 8,14, 4,11,15);
+      	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
+      	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
+      	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
+      	8, 8, 8, 8, 8, 8,19, 8, 8, 8, 8, 8, 8, 8,19, 8,
+      	9,14,14,14,14,15,11,15, 9,14,14, 0,14,21,11,15,
+      	9,14,14,15,14,15,11,15, 9, 8,14,15,14, 4,11,15,
+      	9,14,14,23,14,15,11,15, 9, 8,14, 8,14, 4,11,15,
+      	9,14,14, 8,14,15,11,15, 9,10,14, 8,14, 4,11,15);
 
-        z80t_ddcb_m:array[0..255] of byte=(
+        z80t_ddcb:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
@@ -190,7 +190,7 @@ const
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
         23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23);
 
-        z80t_ed_m:array[0..255] of byte=(
+        z80t_ed:array[0..255] of byte=(
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //00
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,  //10
@@ -209,7 +209,7 @@ const
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
         8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8); //F0
 
-        z80t_ex_m:array[0..255] of byte=(
+        z80t_ex:array[0..255] of byte=(
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	      5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // DJNZ
 	      5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, // JR NZ/JR Z
@@ -231,40 +231,40 @@ const
 procedure cpu_z80.and_a(valor:byte);
 begin
  r.a:=r.a and valor;
- r.f.s:=(r.a and $80)<>0; {modificar signo}
- r.f.z:=(r.a=0); {modificar si es zero}
- r.f.bit5:=(r.a and $20) <> 0;
- r.f.h:=true; {bit de signo nibble}
- r.f.bit3:=(r.a and 8) <> 0;
- r.f.p_v:=paridad[r.a]; {modificar si paridad}
- r.f.n:=false; {la bandera de suma}
- r.f.c:=false; {modificar carry}
+ r.f.s:=(r.a and $80)<>0;
+ r.f.z:=(r.a=0);
+ r.f.bit5:=(r.a and $20)<>0;
+ r.f.h:=true;
+ r.f.bit3:=(r.a and 8)<>0;
+ r.f.p_v:=paridad[r.a];
+ r.f.n:=false;
+ r.f.c:=false;
 end;
 
 procedure cpu_z80.or_a(valor:byte);
 begin
  r.a:=r.a or valor;
- r.f.s:=(r.a and $80) <> 0; {modificar signo}
- r.f.z:=(r.a=0); {modificar si es zero}
- r.f.bit5:=(r.a and $20) <> 0;
- r.f.h:=false; {bit de signo nibble}
- r.f.bit3:=(r.a and 8) <> 0;
- r.f.p_v:=paridad[r.a]; {modificar si paridad}
- r.f.n:=false; {la bandera de suma}
- r.f.c:=false; {modificar carry}
+ r.f.s:=(r.a and $80)<>0;
+ r.f.z:=(r.a=0);
+ r.f.bit5:=(r.a and $20)<>0;
+ r.f.h:=false;
+ r.f.bit3:=(r.a and 8)<>0;
+ r.f.p_v:=paridad[r.a];
+ r.f.n:=false;
+ r.f.c:=false;
 end;
 
 procedure cpu_z80.xor_a(valor:byte);
 begin
  r.a:=r.a xor valor;
- r.f.s:=(r.a and $80)<>0; {modificar signo}
- r.f.z:=(r.a=0); {modificar si es zero}
- r.f.bit5:=(r.a and $20) <> 0;
- r.f.h:= false; {bit de signo nibble}
- r.f.bit3:=(r.a and 8) <> 0 ;
- r.f.p_v:=paridad[r.a]; {modificar si paridad}
- r.f.n:=false; {la bandera de suma}
- r.f.c:=false; {modificar carry}
+ r.f.s:=(r.a and $80)<>0;
+ r.f.z:=(r.a=0);
+ r.f.bit5:=(r.a and $20)<>0;
+ r.f.h:= false;
+ r.f.bit3:=(r.a and 8)<>0 ;
+ r.f.p_v:=paridad[r.a];
+ r.f.n:=false;
+ r.f.c:=false;
 end;
 
 procedure cpu_z80.cp_a(valor:byte);
@@ -272,14 +272,14 @@ var
   temp:byte;
 begin
  temp:=r.a-valor;
- r.f.s:=(temp and $80) <>0; {modificar signo}
- r.f.z:=(temp=0); {modificar si es zero}
+ r.f.s:=(temp and $80)<>0;
+ r.f.z:=(temp=0);
  r.f.bit5:=(valor and $20)<>0;
- r.f.h:=(((r.a and $0F) - (valor and $0F)) and $10) <> 0;
+ r.f.h:=(((r.a and $f)-(valor and $f)) and $10)<>0;
  r.f.bit3:=(valor and 8)<>0;
- r.f.p_v:=((r.a xor valor) and (r.a xor temp) and $80) <>0; {desbordamiento}
- r.f.n:=true; {la bandera de resta}
- r.f.c:=(r.a-valor)<0;  {carry}
+ r.f.p_v:=((r.a xor valor) and (r.a xor temp) and $80)<>0;
+ r.f.n:=true;
+ r.f.c:=(r.a-valor)<0;
 end;
 
 function cpu_z80.sra_8(valor:byte):byte;
@@ -395,7 +395,7 @@ function cpu_z80.dec_8(valor:byte):byte;
 var
   tempb:byte;
 begin
- r.f.h:=(((valor and $F)-1) and $10)<>0;
+ r.f.h:=(((valor and $f)-1) and $10)<>0;
  r.f.p_v:=(valor=$80);
  tempb:=valor-1;
  r.f.s:=(tempb and $80)<>0;
@@ -410,7 +410,7 @@ function cpu_z80.inc_8(valor:byte):byte;
 var
   tempb:byte;
 begin
- r.f.h:=(((valor and $0F)+1) and $10)<>0;
+ r.f.h:=(((valor and $f)+1) and $10)<>0;
  r.f.p_v:=(valor=$7f);
  tempb:=valor+1;
  r.f.s:=(tempb and $80)<>0;
@@ -426,12 +426,12 @@ var
   temp:byte;
 begin
  temp:=r.a+valor;
- r.f.p_v:=(((r.a Xor (Not (valor))) And $0ffff) And (r.a Xor temp) And $80) <> 0;
- r.f.h :=(((r.a And 15) + (valor And 15)) And 16) <> 0;
- r.f.s:= (temp and $80) <>0;
+ r.f.p_v:=(((r.a Xor (not valor)) and $ffff) and (r.a xor temp) and $80)<>0;
+ r.f.h :=(((r.a and $f)+(valor and $f)) and $10) <> 0;
+ r.f.s:= (temp and $80)<>0;
  r.f.z:=(temp=0);
- r.f.bit5:=(temp and $20) <>0;
- r.f.bit3:=(temp and 8) <>0;
+ r.f.bit5:=(temp and $20)<>0;
+ r.f.bit3:=(temp and 8)<>0;
  r.f.n:=false;
  r.f.c:=((r.a+valor) and $100)<>0;
  r.a:=temp;
@@ -443,31 +443,32 @@ var
 begin
  carry:=byte(r.f.c);
  temp:=r.a+valor+carry;
- r.f.p_v:=(((r.a Xor (Not valor)) And $0ffff) And ((r.a Xor temp) And 128)) <> 0;
- r.f.h:=(((r.a And 15) + (valor And 15) + carry) And 16) <> 0;
- r.f.s:= (temp and $80) <>0; {modificar signo}
- r.f.z:=(temp=0); {modificar si es zero}
- r.f.bit5:=(temp and 32) <>0;
- r.f.bit3:=(temp and 8) <>0;
- r.f.n:=false; {la bandera de suma}
- r.f.c:=((r.a+valor+carry) and $100)<>0;       {modificar carry}
+ r.f.p_v:=(((r.a xor (not valor)) and $ffff) and ((r.a xor temp) and $80))<>0;
+ r.f.h:=(((r.a and $f)+(valor And $f)+carry) and $10)<>0;
+ r.f.s:= (temp and $80)<>0;
+ r.f.z:=(temp=0);
+ r.f.bit5:=(temp and $20)<>0;
+ r.f.bit3:=(temp and 8)<>0;
+ r.f.n:=false;
+ r.f.c:=((r.a+valor+carry) and $100)<>0;
  r.a:=temp;
 end;
 
 procedure cpu_z80.sub_8(valor:byte);
 var
-  temp,temp2:integer;
+  temp:byte;
+  temp2:word;
 begin
  temp2:=r.a-valor;
- temp:=temp2 and $FF;
- r.f.h:=(((r.a and $0f) - (valor and $0f)) and $10) <> 0;
- r.f.p_v:=(((r.a xor valor) and (r.a xor temp)) and 128) <>0; {desbordamiento}
- r.f.s:= (temp and $80) <>0; {modificar signo}
- r.f.z:=(temp=0); {modificar si es zero}
- r.f.bit5:=(temp and 32) <>0;
- r.f.bit3:=(temp and 8) <> 0;
- r.f.n:=true; {la bandera de resta}
- r.f.c:=(temp2 and $100)<>0;  {carry}
+ temp:=temp2 and $ff;
+ r.f.h:=(((r.a and $0f)-(valor and $0f)) and $10)<>0;
+ r.f.p_v:=(((r.a xor valor) and (r.a xor temp)) and $80)<>0;
+ r.f.s:= (temp and $80)<>0;
+ r.f.z:=(temp=0);
+ r.f.bit5:=(temp and $20)<>0;
+ r.f.bit3:=(temp and 8)<>0;
+ r.f.n:=true;
+ r.f.c:=(temp2 and $100)<>0;
  r.a:=temp;
 end;
 
@@ -477,14 +478,14 @@ var
 begin
  carry:=byte(r.f.c);
  temp:=r.a-valor-carry;
- r.f.h:=(((r.a and $0f) - (valor and $0f) - carry) and $10) <> 0;
- r.f.p_v:=(((r.a xor valor) and (r.a xor temp)) and $80) <>0; {desbordamiento}
- r.f.s:= (temp and $80) <>0; {modificar signo}
- r.f.z:=(temp=0); {modificar si es zero}
- r.f.bit5:=(temp and $20) <>0;
- r.f.bit3:=(temp and 8) <>0;
- r.f.n:=true; {la bandera de resta}
- r.f.c:=((r.a-valor-carry) and $100)<>0;       {modificar carry}
+ r.f.h:=(((r.a and $0f)-(valor and $0f)-carry) and $10)<>0;
+ r.f.p_v:=(((r.a xor valor) and (r.a xor temp)) and $80)<>0;
+ r.f.s:= (temp and $80)<>0;
+ r.f.z:=(temp=0);
+ r.f.bit5:=(temp and $20)<>0;
+ r.f.bit3:=(temp and 8)<>0;
+ r.f.n:=true;
+ r.f.c:=((r.a-valor-carry) and $100)<>0;
  r.a:=temp;
 end;
 
@@ -496,7 +497,7 @@ r.f.s:=false;
 r.f.z:=not((valor and (1 shl bit))<>0);
 r.f.p_v:=r.f.z;
 r.f.bit5:=(valor and $20)<>0;
-r.f.bit3:=(valor and 8)<>0;
+r.f.bit3:=(valor and $8)<>0;
 end;
 
 procedure cpu_z80.bit_7(valor:byte);
@@ -507,7 +508,7 @@ r.f.n:=false;
 r.f.p_v:=r.f.z;
 r.f.s:=(valor and $80)<>0;
 r.f.bit5:=(valor and $20)<>0;
-r.f.bit3:=(valor and 8)<>0;
+r.f.bit3:=(valor and $8)<>0;
 end;
 
 function cpu_z80.add_16(valor1,valor2:word):word;
@@ -519,7 +520,7 @@ begin
   r.f.bit3:=(templ and $800)<>0;
   r.f.bit5:=(templ and $2000)<>0;
   r.f.c:=(templ and $10000)<>0;
-  r.f.h:=(((valor1 and $FFF)+(valor2 and $FFF)) and $1000)<>0;
+  r.f.h:=(((valor1 and $fff)+(valor2 and $fff)) and $1000)<>0;
   r.f.n:=False;
   add_16:=templ;
 end;
@@ -532,14 +533,14 @@ begin
  carry:=byte(r.f.c);
  templ:=r.hl.w+valor+carry;
  r.wz:=r.hl.w+1;
- r.f.p_v:=((r.hl.w xor ((not valor) and $FFFF)) and (r.hl.w xor templ) and $8000)<>0;
- r.f.h:=(((r.hl.w and $FFF)+(valor and $FFF)+carry) and $1000)<>0;
- r.f.s:=(templ and $8000)<>0;
- r.f.z:=(templ=0);
- r.f.bit5:=(templ and $2000)<>0;
- r.f.bit3:=(templ and $800)<>0;
+ r.f.h:=((r.hl.w xor templ xor valor) and $1000)<>0;
  r.f.n:=false;
  r.f.c:=(templ and $10000)<>0;
+ r.f.s:=(templ and $8000)<>0;
+ r.f.bit5:=(templ and $2000)<>0;
+ r.f.bit3:=(templ and $800)<>0;
+ r.f.z:=((templ and $ffff)=0);
+ r.f.p_v:=((valor xor r.hl.w xor $8000) and (valor xor templ) and $8000)<>0;
  adc_hl:=templ;
 end;
 
@@ -551,14 +552,14 @@ begin
   carry:=byte(r.f.c);
   r.wz:=r.hl.w+1;
   templ:=r.hl.w-valor-carry;
+  r.f.h:=((r.hl.w xor templ xor valor) and $1000)<>0;
+  r.f.n:=true;
   r.f.s:=(templ and $8000)<>0;
   r.f.bit3:=(templ and $800)<>0;
   r.f.bit5:=(templ and $2000)<>0;
-  r.f.z:=(templ=0);
+  r.f.z:=((templ and $ffff)=0);
   r.f.c:=(templ and $10000)<>0;
-  r.f.P_V:=((r.hl.w xor valor) and (r.hl.w xor templ) and $8000)<>0;
-  r.f.h:=(((r.hl.w and $FFF)-(valor and $FFF)-carry) and $1000)<>0;
-  r.f.n:=True;
+  r.f.P_V:=((valor xor r.hl.w) and (r.hl.w xor templ) and $8000)<>0;
   sbc_hl:=templ;
 end;
 
@@ -573,22 +574,6 @@ self.in_port:=nil;
 self.out_port:=nil;
 self.despues_instruccion:=nil;
 self.raised_z80:=nil;
-copymemory(@z80t[0],@z80t_m[0],$100);
-copymemory(@z80t_cb[0],@z80t_cb_m[0],$100);
-copymemory(@z80t_dd[0],@z80t_dd_m[0],$100);
-copymemory(@z80t_ddcb[0],@z80t_ddcb_m[0],$100);
-copymemory(@z80t_ed[0],@z80t_ed_m[0],$100);
-copymemory(@z80t_ex[0],@z80t_ex_m[0],$100);
-end;
-
-procedure cpu_z80.change_timmings(z80t_set,z80t_cb_set,z80t_dd_set,z80t_ddcb_set,z80t_ed_set,z80t_ex_set:pbyte);
-begin
-if z80t_set<>nil then copymemory(@self.z80t[0],@z80t_set[0],$100);
-if z80t_cb_set<>nil then copymemory(@self.z80t_cb[0],@z80t_cb_set[0],$100);
-if z80t_dd_set<>nil then copymemory(@self.z80t_dd[0],@z80t_dd_set[0],$100);
-if z80t_ddcb_set<>nil then copymemory(@self.z80t_ddcb[0],@z80t_ddcb_set[0],$100);
-if z80t_ed_set<>nil then copymemory(@self.z80t_ed[0],@z80t_ed_set[0],$100);
-if z80t_ex_set<>nil then copymemory(@self.z80t_ex[0],@z80t_ex_set[0],$100);
 end;
 
 destructor cpu_z80.free;
@@ -861,7 +846,7 @@ case instruccion of
                 if r.bc.h<>0 then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                         r.wz:=r.pc;
                 end;
             end;
@@ -922,7 +907,7 @@ case instruccion of
                 if not(r.f.z) then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                         r.wz:=r.pc;
                 end;
             end;
@@ -970,7 +955,7 @@ case instruccion of
                 if r.f.z then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                         r.wz:=r.pc;
                 end;
             end;
@@ -1002,7 +987,7 @@ case instruccion of
                 if not(r.f.c) then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                         r.wz:=r.pc;
                 end;
             end;
@@ -1043,7 +1028,7 @@ case instruccion of
                 if r.f.c then begin
                         temp:=self.getbyte(r.pc-1);
                         r.pc:=r.pc+shortint(temp);
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                         r.wz:=r.pc;
                 end;
             end;
@@ -1210,7 +1195,7 @@ case instruccion of
         $c0:if not(r.f.z) then begin //ret NZ
                 r.pc:=self.pop_sp;
                 r.wz:=r.pc;
-                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
              end;
         $c1:r.bc.w:=self.pop_sp;  {pop BC}
         $c2:begin  //jp NZ,nn
@@ -1234,7 +1219,7 @@ case instruccion of
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
                 r.wz:=r.pc;
              end;
@@ -1252,7 +1237,7 @@ case instruccion of
         $c8:if r.f.z then begin //ret Z
                 r.pc:=self.pop_sp;
                 r.wz:=r.pc;
-                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
              end;
         $c9:begin //ret
                 r.pc:=pop_sp;
@@ -1274,7 +1259,7 @@ case instruccion of
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
                 r.wz:=r.pc;
              end;
@@ -1299,7 +1284,7 @@ case instruccion of
         $d0:if not(r.f.c) then begin //ret NC
                 r.pc:=pop_sp;
                 r.wz:=r.pc;
-                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
              end;
         $d1:r.de.w:=pop_sp;  {pop DE}
         $d2:begin  //jp NC,nn
@@ -1324,7 +1309,7 @@ case instruccion of
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
                 r.wz:=r.pc;
              end;
@@ -1342,7 +1327,7 @@ case instruccion of
         $d8:if r.f.c then begin //ret C
                 r.pc:=pop_sp;
                 r.wz:=r.pc;
-                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
              end;
         $d9:begin {exx}
                 posicion:=r.bc;
@@ -1378,7 +1363,7 @@ case instruccion of
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
                 r.wz:=r.pc;
              end;
@@ -1396,7 +1381,7 @@ case instruccion of
         $e0:if not(r.f.p_v) then begin //ret PO
                 r.pc:=self.pop_sp;
                 r.wz:=r.pc;
-                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
              end;
         $e1:r.hl.w:=pop_sp;  {pop HL}
         $e2:begin //jp PO,nn
@@ -1420,7 +1405,7 @@ case instruccion of
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
                 r.wz:=r.pc;
              end;
@@ -1438,7 +1423,7 @@ case instruccion of
         $e8:if r.f.p_v then begin //ret PE
                 r.pc:=pop_sp;
                 r.wz:=r.pc;
-                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
              end;
         $e9:r.pc:=r.hl.w; {jp (HL)}
         $ea:begin //jp PE,nn
@@ -1461,7 +1446,7 @@ case instruccion of
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
                 r.wz:=r.pc;
              end;
@@ -1479,7 +1464,7 @@ case instruccion of
         $f0:if not(r.f.s) then begin //ret NP
                 r.pc:=self.pop_sp;
                 r.wz:=r.pc;
-                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
              end;
         $f1:begin  {pop AF}
                 posicion.w:=pop_sp;
@@ -1512,7 +1497,7 @@ case instruccion of
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
                 r.wz:=r.pc;
              end;
@@ -1541,7 +1526,7 @@ case instruccion of
         $f8:if r.f.s then begin //ret M
                 r.pc:=self.pop_sp;
                 r.wz:=r.pc;
-                self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
              end;
         $f9:r.sp:=r.hl.w; {ld SP,HL}
         $fa:begin  //jp M,nn
@@ -1564,7 +1549,7 @@ case instruccion of
                         posicion.h:=self.getbyte(r.pc-1);
                         posicion.l:=self.getbyte(r.pc-2);
                         r.pc:=posicion.w;
-                        self.estados_demas:=self.estados_demas+self.z80t_ex[instruccion];
+                        self.estados_demas:=self.estados_demas+z80t_ex[instruccion];
                 end;
                 r.wz:=r.pc;
              end;
@@ -1580,10 +1565,10 @@ case instruccion of
                 r.wz:=$38;
              end;
 end; {del case}
-cantidad_t:=self.z80t[instruccion]+self.estados_demas;
+cantidad_t:=z80t[instruccion]+self.estados_demas;
 if @self.despues_instruccion<>nil then self.despues_instruccion(cantidad_t);
 self.contador:=self.contador+cantidad_t;
-update_timer(self.contador-pestados,self.numero_cpu);
+timers.update(self.contador-pestados,self.numero_cpu);
 end; {del while}
 end;
 
@@ -1700,8 +1685,8 @@ case instruccion of
         $45:bit_8(0,r.hl.l);  {bit 0,L}
         $46:begin //bit 0,(HL)
               bit_8(0,self.getbyte(r.hl.w));
-              r.f.bit5:=(r.wz and $20)<>0;
-              r.f.bit3:=(r.wz and 8)<>0;
+              r.f.bit5:=(r.wz and $2000)<>0;
+              r.f.bit3:=(r.wz and $800)<>0;
             end;
         $47:bit_8(0,r.a);  {bit 0,A}
         $48:bit_8(1,r.bc.h);  {bit 1,B}
@@ -1712,8 +1697,8 @@ case instruccion of
         $4d:bit_8(1,r.hl.l);  {bit 1,L}
         $4e:begin //bit 1,(HL)
               bit_8(1,self.getbyte(r.hl.w));
-              r.f.bit5:=(r.wz and $20)<>0;
-              r.f.bit3:=(r.wz and 8)<>0;
+              r.f.bit5:=(r.wz and $2000)<>0;
+              r.f.bit3:=(r.wz and $800)<>0;
             end;
         $4f:bit_8(1,r.a);  {bit 1,A}
         $50:bit_8(2,r.bc.h);  {bit 2,B}
@@ -1724,8 +1709,8 @@ case instruccion of
         $55:bit_8(2,r.hl.l);  {bit 2,L}
         $56:begin //bit 2,(HL)
               bit_8(2,self.getbyte(r.hl.w));
-              r.f.bit5:=(r.wz and $20)<>0;
-              r.f.bit3:=(r.wz and 8)<>0;
+              r.f.bit5:=(r.wz and $2000)<>0;
+              r.f.bit3:=(r.wz and $800)<>0;
             end;
         $57:bit_8(2,r.a);  {bit 2,A}
         $58:bit_8(3,r.bc.h);  {bit 3,B}
@@ -1736,8 +1721,8 @@ case instruccion of
         $5d:bit_8(3,r.hl.l);  {bit 3,L}
         $5e:begin //bit 3,(HL)
               bit_8(3,self.getbyte(r.hl.w));
-              r.f.bit5:=(r.wz and $20)<>0;
-              r.f.bit3:=(r.wz and 8)<>0;
+              r.f.bit5:=(r.wz and $2000)<>0;
+              r.f.bit3:=(r.wz and $800)<>0;
             end;
         $5f:bit_8(3,r.a);  {bit 3,A}
         $60:bit_8(4,r.bc.h);  {bit 4,B}
@@ -1748,8 +1733,8 @@ case instruccion of
         $65:bit_8(4,r.hl.l);  {bit 4,L}
         $66:begin //bit 4,(HL)
               bit_8(4,self.getbyte(r.hl.w));
-              r.f.bit5:=(r.wz and $20)<>0;
-              r.f.bit3:=(r.wz and 8)<>0;
+              r.f.bit5:=(r.wz and $2000)<>0;
+              r.f.bit3:=(r.wz and $800)<>0;
             end;
         $67:bit_8(4,r.a);  {bit 4,A}
         $68:bit_8(5,r.bc.h);  {bit 5,B}
@@ -1760,8 +1745,8 @@ case instruccion of
         $6d:bit_8(5,r.hl.l);  {bit 5,L}
         $6e:begin //bit 5,(HL)
               bit_8(5,self.getbyte(r.hl.w));
-              r.f.bit5:=(r.wz and $20)<>0;
-              r.f.bit3:=(r.wz and 8)<>0;
+              r.f.bit5:=(r.wz and $2000)<>0;
+              r.f.bit3:=(r.wz and $800)<>0;
             end;
         $6f:bit_8(5,r.a);  {bit 5,A}
         $70:bit_8(6,r.bc.h);  {bit 6,B}
@@ -1772,8 +1757,8 @@ case instruccion of
         $75:bit_8(6,r.hl.l);  {bit 6,L}
         $76:begin //bit 6,(HL)
               bit_8(6,self.getbyte(r.hl.w));
-              r.f.bit5:=(r.wz and $20)<>0;
-              r.f.bit3:=(r.wz and 8)<>0;
+              r.f.bit5:=(r.wz and $2000)<>0;
+              r.f.bit3:=(r.wz and $800)<>0;
             end;
         $77:bit_8(6,r.a);  {bit 6,A}
         $78:bit_7(r.bc.h);  {bit 7,B}
@@ -1784,8 +1769,8 @@ case instruccion of
         $7d:bit_7(r.hl.l);  {bit 7,L}
         $7e:begin //bit 7,(HL)
               bit_7(self.getbyte(r.hl.w));
-              r.f.bit5:=(r.wz and $20)<>0;
-              r.f.bit3:=(r.wz and 8)<>0;
+              r.f.bit5:=(r.wz and $2000)<>0;
+              r.f.bit3:=(r.wz and $800)<>0;
             end;
         $7f:bit_7(r.a);  {bit 7,A}
         $80:r.bc.h:=(r.bc.h and $fe); {res 0,B}
@@ -1965,7 +1950,7 @@ case instruccion of
              end;
         $ff:r.a:=r.a or $80; {set 7,A}
 end;
-exec_cb:=self.z80t_cb[instruccion];
+exec_cb:=z80t_cb[instruccion];
 end;
 
 function cpu_z80.exec_dd_fd(tipo:boolean):byte;
@@ -2250,6 +2235,7 @@ case instruccion of
                 temp:=self.getbyte(temp2);
                 cp_a(temp);
         end;
+        $dd,$fd:estados_demas:=estados_demas+self.exec_dd_cb(tipo);
         $cb:estados_dd_cb:=self.exec_dd_cb(tipo);
         $e1:registro.w:=self.pop_sp;  {pop IX}
         $e3:begin   {ex (SP),IX}
@@ -2263,7 +2249,7 @@ case instruccion of
         $f9:r.sp:=registro^.w; {ld SP,IX}
         else r.pc:=r.pc-1;
 end;
-exec_dd_fd:=self.z80t_dd[instruccion]+estados_dd_cb;
+exec_dd_fd:=z80t_dd[instruccion]+estados_dd_cb;
 end;
 
 function cpu_z80.exec_dd_cb(tipo:boolean):byte;
@@ -3153,7 +3139,7 @@ case instruccion of
                  self.putbyte(temp2,r.a);
             end;
 end;
-exec_dd_cb:=self.z80t_ddcb[instruccion];
+exec_dd_cb:=z80t_ddcb[instruccion];
 end;
 
 function cpu_z80.exec_ed:byte;
@@ -3569,7 +3555,7 @@ case instruccion of
                  if (r.bc.w<>0) then begin
                         r.pc:=r.pc-2;
                         r.wz:=r.pc+1;
-                        estados_demas:=self.z80t_ex[instruccion];
+                        estados_demas:=z80t_ex[instruccion];
                  end;
                  r.f.p_v:=(r.bc.w<>0);
                  r.f.n:=false;
@@ -3593,7 +3579,7 @@ case instruccion of
                 r.f.bit5:=((temp-((temp3 and 16) shr 4)) and 2)<>0;
                 r.f.bit3:=((temp-((temp3 shr 4) and 1)) and 8)<>0;
                 If (r.f.p_v and not(r.f.z)) then begin
-                  estados_demas:=self.z80t_ex[instruccion];
+                  estados_demas:=z80t_ex[instruccion];
                   r.pc:=r.pc-2;
                   r.wz:=r.pc+1;
                 end;
@@ -3616,7 +3602,7 @@ case instruccion of
                 r.f.s:=(r.bc.h and $80)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=self.z80t_ex[instruccion];
+                  estados_demas:=z80t_ex[instruccion];
                 end;
            end;
         $b3:begin //otir añadido el dia 18-09-04
@@ -3633,10 +3619,9 @@ case instruccion of
                 r.f.z:=(r.bc.h=0);
                 r.f.bit5:=(r.bc.h and $20)<>0;
                 r.f.bit3:=(r.bc.h and 8)<>0;
-                r.f.z:=(r.bc.h and $80)<>0;
                 if r.bc.h<>0 then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=self.z80t_ex[instruccion];
+                  estados_demas:=z80t_ex[instruccion];
                 end;
             end;
         { $b4..$b7:nop*2}
@@ -3653,7 +3638,7 @@ case instruccion of
                 r.f.bit3:=((r.a+temp) and $8)<>0;
                 if (r.bc.w<>0) then begin
                   r.pc:=r.pc-2;
-                  estados_demas:=self.z80t_ex[instruccion];
+                  estados_demas:=z80t_ex[instruccion];
                   r.wz:=r.pc+1;
                 end;
              end;
@@ -3673,7 +3658,7 @@ case instruccion of
                  r.f.bit3:=((temp-((temp3 shr 4) and 1)) and 8)<>0;
                  if r.f.p_v and not(r.f.z) then begin
                      r.pc:=r.pc-2;
-                     estados_demas:=self.z80t_ex[instruccion];
+                     estados_demas:=z80t_ex[instruccion];
                      r.wz:=r.pc+1;
                  end;
              end;
@@ -3693,7 +3678,7 @@ case instruccion of
                  r.f.bit3:=(r.bc.h and 8)<>0;
                  r.f.s:=(r.bc.h and $80)<>0;
                  if (r.bc.h<>0) then begin
-                        estados_demas:=self.z80t_ex[instruccion];
+                        estados_demas:=z80t_ex[instruccion];
                         dec(r.pc,2);
                  end;
                  r.hl.w:=r.hl.w-1;
@@ -3714,12 +3699,12 @@ case instruccion of
                 r.f.bit3:=(r.bc.h and 8)<>0;
                 r.f.s:=(r.bc.h and $80)<>0;
                 if (r.bc.h<>0) then begin
-                    estados_demas:=self.z80t_ex[instruccion];
+                    estados_demas:=z80t_ex[instruccion];
                     dec(r.pc,2);
                 end;
             end;
 end;
-exec_ed:=self.z80t_ed[instruccion]+estados_demas;
+exec_ed:=z80t_ed[instruccion]+estados_demas;
 end;
 
 end.

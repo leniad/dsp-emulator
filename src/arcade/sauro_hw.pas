@@ -143,8 +143,8 @@ end;
 
 procedure sauro_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$e000 then exit;
 case direccion of
+   0..$dfff:; //ROM
    $e000..$ebff:memoria[direccion]:=valor; //NVRAM + Sprite ram
    $f000..$f7ff:if memoria[direccion]<>valor then begin  //Video + color ram 1 BG
                      memoria[direccion]:=valor;
@@ -199,8 +199,8 @@ end;
 
 procedure sauro_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$87ff:mem_snd[direccion]:=valor;
   $a000:; //adpcm
   $c000:ym3812_0.control(valor);
@@ -264,31 +264,31 @@ z80_1:=cpu_z80.create(4000000,256);
 z80_1.change_ram_calls(sauro_snd_getbyte,sauro_snd_putbyte);
 z80_1.init_sound(sauro_sound_update);
 //IRQ Sound CPU
-init_timer(z80_1.numero_cpu,4000000/(8*60),sauro_snd_irq,true);
+timers.init(z80_1.numero_cpu,4000000/(8*60),sauro_snd_irq,nil,true);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,2500000);
 //cargar las ROMS
-if not(roms_load(@memoria,@sauro_rom,'sauro.zip',sizeof(sauro_rom))) then exit;
+if not(roms_load(@memoria,sauro_rom)) then exit;
 //cargar ROMS sonido
-if not(roms_load(@mem_snd,@sauro_snd_rom,'sauro.zip',sizeof(sauro_snd_rom))) then exit;
+if not(roms_load(@mem_snd,sauro_snd_rom)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@sauro_char_bg,'sauro.zip',sizeof(sauro_char_bg))) then exit;
+if not(roms_load(@memoria_temp,sauro_char_bg)) then exit;
 init_gfx(0,8,8,2048);
 gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
-if not(roms_load(@memoria_temp,@sauro_char_fg,'sauro.zip',sizeof(sauro_char_fg))) then exit;
+if not(roms_load(@memoria_temp,sauro_char_fg)) then exit;
 init_gfx(1,8,8,2048);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
 convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //convertir sprites
-if not(roms_load(@memoria_temp,@sauro_sprites,'sauro.zip',sizeof(sauro_sprites))) then exit;
+if not(roms_load(@memoria_temp,sauro_sprites)) then exit;
 init_gfx(2,16,16,1024);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,16*16,0,1,2,3);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //poner la paleta
-if not(roms_load(@memoria_temp,@sauro_pal,'sauro.zip',sizeof(sauro_pal))) then exit;
+if not(roms_load(@memoria_temp,sauro_pal)) then exit;
 for f:=0 to $3ff do begin
   colores[f].r:=pal4bit(memoria_temp[f]);
   colores[f].g:=pal4bit(memoria_temp[f+$400]);

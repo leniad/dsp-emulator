@@ -9,18 +9,18 @@ procedure cargar_mrdo;
 
 implementation
 const
-        mrdo_rom:array[0..4] of tipo_roms=(
+        mrdo_rom:array[0..3] of tipo_roms=(
         (n:'a4-01.bin';l:$2000;p:0;crc:$03dcfba2),(n:'c4-02.bin';l:$2000;p:$2000;crc:$0ecdd39c),
-        (n:'e4-03.bin';l:$2000;p:$4000;crc:$358f5dc2),(n:'f4-04.bin';l:$2000;p:$6000;crc:$f4190cfc),());
-        mrdo_pal:array[0..3] of tipo_roms=(
+        (n:'e4-03.bin';l:$2000;p:$4000;crc:$358f5dc2),(n:'f4-04.bin';l:$2000;p:$6000;crc:$f4190cfc));
+        mrdo_pal:array[0..2] of tipo_roms=(
         (n:'u02--2.bin';l:$20;p:0;crc:$238a65d7),(n:'t02--3.bin';l:$20;p:$20;crc:$ae263dc0),
-        (n:'f10--1.bin';l:$20;p:$40;crc:$16ee4ca2),());
-        mrdo_char1:array[0..2] of tipo_roms=(
-        (n:'s8-09.bin';l:$1000;p:0;crc:$aa80c5b6),(n:'u8-10.bin';l:$1000;p:$1000;crc:$d20ec85b),());
-        mrdo_char2:array[0..2] of tipo_roms=(
-        (n:'r8-08.bin';l:$1000;p:0;crc:$dbdc9ffa),(n:'n8-07.bin';l:$1000;p:$1000;crc:$4b9973db),());
-        mrdo_sprites:array[0..2] of tipo_roms=(
-        (n:'h5-05.bin';l:$1000;p:0;crc:$e1218cc5),(n:'k5-06.bin';l:$1000;p:$1000;crc:$b1f68b04),());
+        (n:'f10--1.bin';l:$20;p:$40;crc:$16ee4ca2));
+        mrdo_char1:array[0..1] of tipo_roms=(
+        (n:'s8-09.bin';l:$1000;p:0;crc:$aa80c5b6),(n:'u8-10.bin';l:$1000;p:$1000;crc:$d20ec85b));
+        mrdo_char2:array[0..1] of tipo_roms=(
+        (n:'r8-08.bin';l:$1000;p:0;crc:$dbdc9ffa),(n:'n8-07.bin';l:$1000;p:$1000;crc:$4b9973db));
+        mrdo_sprites:array[0..1] of tipo_roms=(
+        (n:'h5-05.bin';l:$1000;p:0;crc:$e1218cc5),(n:'k5-06.bin';l:$1000;p:$1000;crc:$b1f68b04));
 var
   scroll_x,scroll_y:byte;
 
@@ -29,11 +29,10 @@ var
   f,x,y,color,nchar:word;
   atrib:byte;
 begin
-//Es MUY IMPORTANTE este orden para poder pintar correctamente la pantalla!!!
 for f:=$0 to $3ff do begin
-  if ((gfx[1].buffer[f])) then begin
-    x:=f div 32;
-    y:=31-(f mod 32);
+  x:=f div 32;
+  y:=31-(f mod 32);
+  if gfx[1].buffer[f] then begin
     atrib:=memoria[$8000+f];
     nchar:=memoria[$8400+f]+(atrib and $80) shl 1;
     color:=(atrib and $3f) shl 2;
@@ -46,25 +45,22 @@ for f:=$0 to $3ff do begin
     end;
     gfx[1].buffer[f]:=false;
     end;
-end;
-scroll_x_y(1,2,scroll_x,scroll_y);
-for f:=$0 to $3ff do begin
  atrib:=memoria[$8800+f];
  if ((gfx[0].buffer[f]) or ((atrib and $40)<>0)) then begin
-   x:=f div 32;
-   y:=31-(f mod 32);
-   nchar:=memoria[$8c00+f]+(atrib and $80) shl 1;
-   color:=(atrib and $3f) shl 2;
-   if (atrib and $40)<>0 then begin
-    put_gfx(x*8,y*8,nchar,color,2,0);
-    put_gfx_block_trans(x*8,y*8,5,8,8);
-   end else begin
-    put_gfx_block_trans(x*8,y*8,2,8,8);
-    put_gfx_trans(x*8,y*8,nchar,color,5,0);
-   end;
-   gfx[0].buffer[f]:=false;
+    nchar:=memoria[$8c00+f]+(atrib and $80) shl 1;
+    color:=(atrib and $3f) shl 2;
+    if (atrib and $40)<>0 then begin
+      put_gfx(x*8,y*8,nchar,color,2,0);
+      put_gfx_block_trans(x*8,y*8,5,8,8);
+    end else begin
+      put_gfx_block_trans(x*8,y*8,2,8,8);
+      put_gfx_trans(x*8,y*8,nchar,color,5,0);
+    end;
+    gfx[0].buffer[f]:=false;
  end;
 end;
+//Es MUY IMPORTANTE este orden para poder pintar correctamente la pantalla!!!
+scroll_x_y(1,3,scroll_x,scroll_y);
 actualiza_trozo(0,0,256,256,2,0,0,256,256,3);
 scroll_x_y(4,3,scroll_x,scroll_y);
 actualiza_trozo(0,0,256,256,5,0,0,256,256,3);
@@ -87,8 +83,8 @@ begin
 if event.arcade then begin
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
@@ -97,7 +93,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure mrdo_principal; 
+procedure mrdo_principal;
 var
   frame_m:single;
   f:word;
@@ -137,8 +133,8 @@ end;
 
 procedure mrdo_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+   0..$7fff:;
    $8000..$87ff:begin
                      gfx[1].buffer[direccion and $3ff]:=true;
                      memoria[direccion]:=valor;
@@ -156,7 +152,7 @@ case direccion of
 end;
 end;
 
-procedure mrdo_despues_instruccion;
+procedure mrdo_update_sound;
 begin
   sn_76496_0.Update;
   sn_76496_1.Update;
@@ -169,30 +165,29 @@ begin
  sn_76496_0.reset;
  sn_76496_1.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  scroll_x:=0;
  scroll_y:=0;
 end;
 
 function iniciar_mrdo:boolean;
 var
-      memoria_temp:array[0..$1fff] of byte;
+  memoria_temp:array[0..$1fff] of byte;
 const
-      pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-      pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      ps_x:array[0..15] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0,
-			16+3, 16+2, 16+1, 16+0, 24+3, 24+2, 24+1, 24+0);
-      ps_y:array[0..15] of dword=(0*16, 2*16, 4*16, 6*16, 8*16, 10*16, 12*16, 14*16,
+  pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
+  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
+  ps_x:array[0..15] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0,
+      16+3, 16+2, 16+1, 16+0, 24+3, 24+2, 24+1, 24+0);
+  ps_y:array[0..15] of dword=(0*16, 2*16, 4*16, 6*16, 8*16, 10*16, 12*16, 14*16,
 			16*16, 18*16, 20*16, 22*16, 24*16, 26*16, 28*16, 30*16);
 procedure calc_paleta;
 var
   pot:array[0..15] of single;
 	weight:array[0..15] of byte;
   par:single;
-  f:byte;
-  a1,a2,bits0,bits1:byte;
+  f,a1,a2,bits0,bits1:byte;
   colores:tpaleta;
 const
   R1=150;
@@ -225,7 +220,7 @@ begin
 		colores[f].g:=weight[bits0 + (bits1 shl 2)];
     bits0:=(memoria_temp[a1] shr 4) and $03;
 		bits1:=(memoria_temp[a2] shr 4) and $03;
-		colores[f].b:=weight[bits0 + (bits1 shl 2)];
+		colores[f].b:=weight[bits0+(bits1 shl 2)];
   end;
   set_pal(colores,$100);
   //CLUT sprites
@@ -250,32 +245,32 @@ iniciar_video(192,240);
 //Main CPU
 z80_0:=cpu_z80.create(4100000,262);
 z80_0.change_ram_calls(mrdo_getbyte,mrdo_putbyte);
-z80_0.init_sound(mrdo_despues_instruccion);
+z80_0.init_sound(mrdo_update_sound);
 //Sound Chips
 sn_76496_0:=sn76496_chip.Create(4100000);
 sn_76496_1:=sn76496_chip.Create(4100000);
 //cargar roms
-if not(cargar_roms(@memoria[0],@mrdo_rom[0],'mrdo.zip',0)) then exit;
+if not(roms_load(@memoria,mrdo_rom)) then exit;
 //convertir chars fg
-if not(cargar_roms(@memoria_temp[0],@mrdo_char1[0],'mrdo.zip',0)) then exit;
+if not(roms_load(@memoria_temp,mrdo_char1)) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,512*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,true);
 //convertir chars bg
-if not(cargar_roms(@memoria_temp[0],@mrdo_char2[0],'mrdo.zip',0)) then exit;
+if not(roms_load(@memoria_temp,mrdo_char2)) then exit;
 init_gfx(1,8,8,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0,512*8*8);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,true);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@mrdo_sprites[0],'mrdo.zip',0)) then exit;
+if not(roms_load(@memoria_temp,mrdo_sprites)) then exit;
 init_gfx(2,16,16,128);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(2,0,64*8,4,0);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //poner la paleta
-if not(cargar_roms(@memoria_temp[0],@mrdo_pal[0],'mrdo.zip',0)) then exit;
+if not(roms_load(@memoria_temp,mrdo_pal)) then exit;
 calc_paleta;
 //final
 reset_mrdo;

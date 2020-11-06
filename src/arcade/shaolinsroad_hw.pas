@@ -131,7 +131,6 @@ end;
 
 procedure shaolin_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   $0:begin
         main_screen.flip_main_screen:=(valor and 1)<>0;
@@ -146,6 +145,7 @@ case direccion of
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -172,12 +172,12 @@ savedata_qsnapshot(data,size);
 size:=sn_76496_1.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[$0],$4000);
+savedata_com_qsnapshot(@memoria,$4000);
 //MISC
 buffer[0]:=banco_pal;
 buffer[1]:=scroll;
 buffer[2]:=byte(pedir_nmi);
-savedata_qsnapshot(@buffer[0],3);
+savedata_qsnapshot(@buffer,3);
 freemem(data);
 close_qsnapshot;
 end;
@@ -198,16 +198,16 @@ sn_76496_0.load_snapshot(data);
 loaddata_qsnapshot(data);
 sn_76496_1.load_snapshot(data);
 //MEM
-loaddata_qsnapshot(@memoria[0]);
+loaddata_qsnapshot(@memoria);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 banco_pal:=buffer[0];
 scroll:=buffer[1];
 byte(pedir_nmi):=buffer[2];
 freemem(data);
 close_qsnapshot;
 //END
-fillchar(gfx[0].buffer[0],$400,1);
+fillchar(gfx[0].buffer,$400,1);
 end;
 
 //Main
@@ -218,9 +218,9 @@ begin
  sn_76496_1.reset;
  reset_audio;
  banco_pal:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  pedir_nmi:=false;
 end;
 
@@ -252,20 +252,20 @@ m6809_0.init_sound(shaolin_sound);
 sn_76496_0:=sn76496_chip.Create(18432000 div 12);
 sn_76496_1:=sn76496_chip.Create(18432000 div 6);
 //cargar roms
-if not(roms_load(@memoria,@shaolin_rom,'shaolins.zip',sizeof(shaolin_rom))) then exit;
+if not(roms_load(@memoria,shaolin_rom)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@shaolin_char,'shaolins.zip',sizeof(shaolin_char))) then exit;
+if not(roms_load(@memoria_temp,shaolin_char)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(4,0,16*8,512*16*8+4,512*16*8+0,4,0);
 convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //sprites
-if not(roms_load(@memoria_temp,@shaolin_sprites,'shaolins.zip',sizeof(shaolin_sprites))) then exit;
+if not(roms_load(@memoria_temp,shaolin_sprites)) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,256*64*8+4,256*64*8+0,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //paleta
-if not(roms_load(@memoria_temp,@shaolin_pal,'shaolins.zip',sizeof(shaolin_pal))) then exit;
+if not(roms_load(@memoria_temp,shaolin_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
 			4,@resistances[0],@rweights[0],470,0,
 			4,@resistances[0],@gweights[0],470,0,

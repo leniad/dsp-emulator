@@ -10,21 +10,21 @@ procedure cargar_boogwing;
 
 implementation
 const
-        boogwing_rom:array[0..4] of tipo_roms=(
+        boogwing_rom:array[0..3] of tipo_roms=(
         (n:'kn_00-2.2b';l:$40000;p:0;crc:$e38892b9),(n:'kn_02-2.2e';l:$40000;p:$1;crc:$8426efef),
-        (n:'kn_01-2.4b';l:$40000;p:$80000;crc:$3ad4b54c),(n:'kn_03-2.4e';l:$40000;p:$80001;crc:$10b61f4a),());
+        (n:'kn_01-2.4b';l:$40000;p:$80000;crc:$3ad4b54c),(n:'kn_03-2.4e';l:$40000;p:$80001;crc:$10b61f4a));
         boogwing_sound:tipo_roms=(n:'km06.18p';l:$10000;p:$0;crc:$3e8bc4e1);
-        boogwing_char1:array[0..2] of tipo_roms=(
-        (n:'km05.9e';l:$10000;p:0;crc:$d10aef95),(n:'km04.8e';l:$10000;p:$1;crc:$329323a8),());
-        boogwing_char2:array[0..2] of tipo_roms=(
-        (n:'mbd-01.9b';l:$100000;p:0;crc:$d7de4f4b),(n:'mbd-00.8b';l:$100000;p:$100000;crc:$adb20ba9),());
-        boogwing_char3:array[0..2] of tipo_roms=(
-        (n:'mbd-03.13b';l:$100000;p:0;crc:$cf798f2c),(n:'mbd-04.14b';l:$100000;p:$100000;crc:$d9764d0b),());
+        boogwing_char1:array[0..1] of tipo_roms=(
+        (n:'km05.9e';l:$10000;p:0;crc:$d10aef95),(n:'km04.8e';l:$10000;p:$1;crc:$329323a8));
+        boogwing_char2:array[0..1] of tipo_roms=(
+        (n:'mbd-01.9b';l:$100000;p:0;crc:$d7de4f4b),(n:'mbd-00.8b';l:$100000;p:$100000;crc:$adb20ba9));
+        boogwing_char3:array[0..1] of tipo_roms=(
+        (n:'mbd-03.13b';l:$100000;p:0;crc:$cf798f2c),(n:'mbd-04.14b';l:$100000;p:$100000;crc:$d9764d0b));
         boogwing_char4:tipo_roms=(n:'mbd-02.10e';l:$80000;p:0;crc:$b25aa721);
-        boogwing_sprites1:array[0..2] of tipo_roms=(
-        (n:'mbd-05.16b';l:$200000;p:1;crc:$1768c66a),(n:'mbd-06.17b';l:$200000;p:$0;crc:$7750847a),());
-        boogwing_sprites2:array[0..2] of tipo_roms=(
-        (n:'mbd-07.18b';l:$200000;p:1;crc:$241faac1),(n:'mbd-08.19b';l:$200000;p:$0;crc:$f13b1e56),());
+        boogwing_sprites1:array[0..1] of tipo_roms=(
+        (n:'mbd-05.16b';l:$200000;p:1;crc:$1768c66a),(n:'mbd-06.17b';l:$200000;p:$0;crc:$7750847a));
+        boogwing_sprites2:array[0..1] of tipo_roms=(
+        (n:'mbd-07.18b';l:$200000;p:1;crc:$241faac1),(n:'mbd-08.19b';l:$200000;p:$0;crc:$f13b1e56));
         boogwing_oki1:tipo_roms=(n:'mbd-10.17p';l:$80000;p:0;crc:$f159f76a);
         boogwing_oki2:tipo_roms=(n:'mbd-09.16p';l:$80000;p:0;crc:$f44f2f87);
         boogwing_dip_a:array [0..7] of def_dip=(
@@ -242,15 +242,15 @@ deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
 getmem(memoria_temp,$200000);
 getmem(memoria_temp_rom,$100000);
 //cargar roms
-if not(cargar_roms16w(memoria_temp_rom,@boogwing_rom[0],'boogwing.zip',0)) then exit;
-deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode[0],@rom_data[0],$42ba,$0,$18,$100000);
+if not(roms_load16w(memoria_temp_rom,boogwing_rom)) then exit;
+deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode,@rom_data,$42ba,$0,$18,$100000);
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@boogwing_sound,'boogwing.zip',1)) then exit;
+if not(roms_load(@mem_snd,boogwing_sound)) then exit;
 //OKI rom
 getmem(oki1_mem,$80000);
-if not(cargar_roms(oki1_mem,@boogwing_oki1,'boogwing.zip',1)) then exit;
+if not(roms_load(oki1_mem,boogwing_oki1)) then exit;
 getmem(oki2_mem,$80000);
-if not(cargar_roms(oki2_mem,@boogwing_oki2,'boogwing.zip',1)) then exit;
+if not(roms_load(oki2_mem,boogwing_oki2)) then exit;
 //convertir chars
 //if not(cargar_roms16w(memoria_temp,@boogwing_char1,'boogwing.zip',1)) then exit;
 deco56_decrypt_gfx(memoria_temp,$20000);

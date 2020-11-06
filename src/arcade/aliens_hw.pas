@@ -3,22 +3,22 @@ unit aliens_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,main_engine,controls_engine,gfx_engine,rom_engine,
-     pal_engine,sound_engine,ym_2151,k052109,k051960,k007232,misc_functions;
+     pal_engine,sound_engine,ym_2151,k052109,k051960,k007232;
 
 procedure cargar_aliens;
 
 implementation
 const
         //aliens
-        aliens_rom:array[0..2] of tipo_roms=(
-        (n:'875_j01.c24';l:$20000;p:0;crc:$6a529cd6),(n:'875_j02.e24';l:$10000;p:$20000;crc:$56c20971),());
+        aliens_rom:array[0..1] of tipo_roms=(
+        (n:'875_j01.c24';l:$20000;p:0;crc:$6a529cd6),(n:'875_j02.e24';l:$10000;p:$20000;crc:$56c20971));
         aliens_sound:tipo_roms=(n:'875_b03.g04';l:$8000;p:0;crc:$1ac4d283);
-        aliens_tiles:array[0..4] of tipo_roms=(
+        aliens_tiles:array[0..3] of tipo_roms=(
         (n:'875b11.k13';l:$80000;p:0;crc:$89c5c885),(n:'875b12.k19';l:$80000;p:2;crc:$ea6bdc17),
-        (n:'875b07.j13';l:$40000;p:$100000;crc:$e9c56d66),(n:'875b08.j19';l:$40000;p:$100002;crc:$f9387966),());
-        aliens_sprites:array[0..4] of tipo_roms=(
+        (n:'875b07.j13';l:$40000;p:$100000;crc:$e9c56d66),(n:'875b08.j19';l:$40000;p:$100002;crc:$f9387966));
+        aliens_sprites:array[0..3] of tipo_roms=(
         (n:'875b10.k08';l:$80000;p:0;crc:$0b1035b1),(n:'875b09.k02';l:$80000;p:2;crc:$e76b3c19),
-        (n:'875b06.j08';l:$40000;p:$100000;crc:$081a0566),(n:'875b05.j02';l:$40000;p:$100002;crc:$19a261f2),());
+        (n:'875b06.j08';l:$40000;p:$100000;crc:$081a0566),(n:'875b05.j02';l:$40000;p:$100002;crc:$19a261f2));
         aliens_k007232:tipo_roms=(n:'875b04.e05';l:$40000;p:0;crc:$4e209ac8);
         //DIP
         aliens_dip_a:array [0..2] of def_dip=(
@@ -93,18 +93,18 @@ begin
 if event.arcade then begin
   //P1
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
@@ -175,7 +175,6 @@ end;
 
 procedure aliens_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
     0..$3ff:begin
                  ram_bank[bank0_bank,direccion]:=valor;
@@ -205,6 +204,7 @@ case direccion of
                                       else k051960_0.write(direccion-$3c00,valor);
                          end;
                  end;
+    $8000..$ffff:; //ROM
 end;
 end;
 
@@ -225,8 +225,8 @@ end;
 
 procedure aliens_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$87ff:mem_snd[direccion]:=valor;
   $a000:ym2151_0.reg(valor);
   $a001:ym2151_0.write(valor);
@@ -238,7 +238,7 @@ procedure aliens_snd_bankswitch(valor:byte);
 begin
 // b1: bank for chanel A */
 // b0: bank for chanel B */
-k007232_0.set_bank(BIT_n(valor,1),BIT_n(valor,0));
+k007232_0.set_bank((valor shr 1) and 1,valor and 1);
 end;
 
 procedure aliens_sound_update;
@@ -256,8 +256,8 @@ begin
  ym2151_0.reset;
  k051960_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
  sound_latch:=0;
  bank0_bank:=0;
  rom_bank1:=0;
@@ -279,11 +279,11 @@ screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
 iniciar_audio(false);
 //cargar roms y ponerlas en su sitio...
-if not(cargar_roms(@temp_mem[0],@aliens_rom[0],'aliens.zip',0)) then exit;
+if not(roms_load(@temp_mem,aliens_rom)) then exit;
 copymemory(@memoria[$8000],@temp_mem[$28000],$8000);
 for f:=0 to 19 do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@aliens_sound,'aliens.zip',1)) then exit;
+if not(roms_load(@mem_snd,aliens_sound)) then exit;
 //Main CPU
 konami_0:=cpu_konami.create(3000000,256);
 konami_0.change_ram_calls(aliens_getbyte,aliens_putbyte);
@@ -296,14 +296,14 @@ z80_0.init_sound(aliens_sound_update);
 ym2151_0:=ym2151_chip.create(3579545);
 ym2151_0.change_port_func(aliens_snd_bankswitch);
 getmem(k007232_rom,$40000);
-if not(cargar_roms(k007232_rom,@aliens_k007232,'aliens.zip',1)) then exit;
+if not(roms_load(k007232_rom,aliens_k007232)) then exit;
 k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,aliens_k007232_cb);
 //Iniciar video
 getmem(tiles_rom,$200000);
-if not(cargar_roms32b(tiles_rom,@aliens_tiles,'aliens.zip',0)) then exit;
+if not(roms_load32b(tiles_rom,aliens_tiles)) then exit;
 k052109_0:=k052109_chip.create(1,2,3,aliens_cb,tiles_rom,$200000);
 getmem(sprite_rom,$200000);
-if not(cargar_roms32b(sprite_rom,@aliens_sprites,'aliens.zip',0)) then exit;
+if not(roms_load32b(sprite_rom,aliens_sprites)) then exit;
 k051960_0:=k051960_chip.create(4,sprite_rom,$200000,aliens_sprite_cb,2);
 k051960_0.change_irqs(aliens_k051960_cb,nil,nil);
 layer_colorbase[0]:=0;

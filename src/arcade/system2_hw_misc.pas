@@ -216,7 +216,7 @@ z80_0.change_misc_calls(system1_delay,nil);
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
 z80_1.init_sound(system1_sound_update);
-init_timer(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_sound_irq,true);
+timers.init(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_sound_irq,nil,true);
 //PPI 8255
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,system1_port_a_write,system1_port_b_write,system1_port_c_write);
@@ -227,7 +227,7 @@ sn_76496_1:=sn76496_chip.Create(4000000);
 case main_vars.tipo_maquina of
   37:begin
       //cargar roms
-      if not(roms_load(@memoria_temp,@wbml_rom,'wbml.zip',sizeof(wbml_rom))) then exit;
+      if not(roms_load(@memoria_temp,wbml_rom)) then exit;
       //poner en su sitio las ROMS opcodes y datos
       copymemory(@mem_dec,@memoria_temp[0],$8000); //opcodes
       copymemory(@memoria,@memoria_temp[$8000],$8000);  //datos
@@ -241,15 +241,15 @@ case main_vars.tipo_maquina of
       copymemory(@roms_dec[3,0],@memoria_temp[$24000],$4000);
       copymemory(@roms[3,0],@memoria_temp[$2c000],$4000);
       //cargar sonido
-      if not(roms_load(@mem_snd,@wbml_sound,'wbml.zip',sizeof(wbml_sound))) then exit;
+      if not(roms_load(@mem_snd,wbml_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@wbml_char,'wbml.zip',sizeof(wbml_char))) then exit;
+      if not(roms_load(@memoria_temp,wbml_char)) then exit;
       convert_gfx_system2;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@wbml_sprites,'wbml.zip',sizeof(wbml_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,wbml_sprites)) then exit;
       //Cargar PROMS
-      if not(roms_load(@memoria_proms,@wbml_proms,'wbml.zip',sizeof(wbml_proms))) then exit;
-      if not(roms_load(@lookup_memory,@wbml_video_prom,'wbml.zip',sizeof(wbml_video_prom))) then exit;
+      if not(roms_load(@memoria_proms,wbml_proms)) then exit;
+      if not(roms_load(@lookup_memory,wbml_video_prom)) then exit;
       type_row_scroll:=false;
       //dip
       marcade.dswa:=$fe;
@@ -257,7 +257,7 @@ case main_vars.tipo_maquina of
      end;
   151:begin  //Choplifter
       //cargar roms
-      if not(roms_load(@memoria_temp,@choplift_rom,'choplift.zip',sizeof(choplift_rom))) then exit;
+      if not(roms_load(@memoria_temp,choplift_rom)) then exit;
       //poner en su sitio las ROMS opcodes y datos
       copymemory(@mem_dec,@memoria_temp[0],$8000); //opcodes
       copymemory(@memoria,@memoria_temp[0],$8000);  //datos
@@ -271,15 +271,15 @@ case main_vars.tipo_maquina of
       copymemory(@roms_dec[3,0],@memoria_temp[$14000],$4000);
       copymemory(@roms[3,0],@memoria_temp[$14000],$4000);
       //cargar sonido
-      if not(roms_load(@mem_snd,@choplift_sound,'choplift.zip',sizeof(choplift_sound))) then exit;
+      if not(roms_load(@mem_snd,choplift_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@choplift_char,'choplift.zip',sizeof(choplift_char))) then exit;
+      if not(roms_load(@memoria_temp,choplift_char)) then exit;
       convert_gfx_system2;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@choplift_sprites,'choplift.zip',sizeof(choplift_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,choplift_sprites)) then exit;
       //Cargar PROMS
-      if not(roms_load(@memoria_proms,@choplift_proms,'choplift.zip',sizeof(choplift_proms))) then exit;
-      if not(roms_load(@lookup_memory,@choplift_video_prom,'choplift.zip',sizeof(choplift_video_prom))) then exit;
+      if not(roms_load(@memoria_proms,choplift_proms)) then exit;
+      if not(roms_load(@lookup_memory,choplift_video_prom)) then exit;
       type_row_scroll:=true;
       marcade.dswa:=$dc;
       marcade.dswa_val:=@choplift_dip_a;

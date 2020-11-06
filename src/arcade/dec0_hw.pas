@@ -6,30 +6,30 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      ym_2203,ym_3812,oki6295,m6502,sound_engine,hu6280,misc_functions,
      deco_bac06,mcs51;
 
-procedure Cargar_dec0;
+procedure cargar_dec0;
 
 implementation
 const
         //Robocop
-        robocop_rom:array[0..4] of tipo_roms=(
+        robocop_rom:array[0..3] of tipo_roms=(
         (n:'ep05-4.11c';l:$10000;p:0;crc:$29c35379),(n:'ep01-4.11b';l:$10000;p:$1;crc:$77507c69),
-        (n:'ep04-3';l:$10000;p:$20000;crc:$39181778),(n:'ep00-3';l:$10000;p:$20001;crc:$e128541f),());
+        (n:'ep04-3';l:$10000;p:$20000;crc:$39181778),(n:'ep00-3';l:$10000;p:$20001;crc:$e128541f));
         robocop_mcu:tipo_roms=(n:'en_24_mb7124e.a2';l:$200;p:$0;crc:$b8e2ca98);
-        robocop_char:array[0..2] of tipo_roms=(
-        (n:'ep23';l:$10000;p:0;crc:$a77e4ab1),(n:'ep22';l:$10000;p:$10000;crc:$9fbd6903),());
+        robocop_char:array[0..1] of tipo_roms=(
+        (n:'ep23';l:$10000;p:0;crc:$a77e4ab1),(n:'ep22';l:$10000;p:$10000;crc:$9fbd6903));
         robocop_sound:tipo_roms=(n:'ep03-3';l:$8000;p:$8000;crc:$5b164b24);
         robocop_oki:tipo_roms=(n:'ep02';l:$10000;p:0;crc:$711ce46f);
-        robocop_tiles1:array[0..4] of tipo_roms=(
+        robocop_tiles1:array[0..3] of tipo_roms=(
         (n:'ep20';l:$10000;p:0;crc:$1d8d38b8),(n:'ep21';l:$10000;p:$10000;crc:$187929b2),
-        (n:'ep18';l:$10000;p:$20000;crc:$b6580b5e),(n:'ep19';l:$10000;p:$30000;crc:$9bad01c7),());
-        robocop_tiles2:array[0..4] of tipo_roms=(
+        (n:'ep18';l:$10000;p:$20000;crc:$b6580b5e),(n:'ep19';l:$10000;p:$30000;crc:$9bad01c7));
+        robocop_tiles2:array[0..3] of tipo_roms=(
         (n:'ep14';l:$8000;p:0;crc:$ca56ceda),(n:'ep15';l:$8000;p:$8000;crc:$a945269c),
-        (n:'ep16';l:$8000;p:$10000;crc:$e7fa4d58),(n:'ep17';l:$8000;p:$18000;crc:$84aae89d),());
-        robocop_sprites:array[0..8] of tipo_roms=(
+        (n:'ep16';l:$8000;p:$10000;crc:$e7fa4d58),(n:'ep17';l:$8000;p:$18000;crc:$84aae89d));
+        robocop_sprites:array[0..7] of tipo_roms=(
         (n:'ep07';l:$10000;p:$00000;crc:$495d75cf),(n:'ep06';l:$8000;p:$10000;crc:$a2ae32e2),
         (n:'ep11';l:$10000;p:$20000;crc:$62fa425a),(n:'ep10';l:$8000;p:$30000;crc:$cce3bd95),
         (n:'ep09';l:$10000;p:$40000;crc:$11bed656),(n:'ep08';l:$8000;p:$50000;crc:$c45c7b4c),
-        (n:'ep13';l:$10000;p:$60000;crc:$8fca9f28),(n:'ep12';l:$8000;p:$70000;crc:$3cd1d0c3),());
+        (n:'ep13';l:$10000;p:$60000;crc:$8fca9f28),(n:'ep12';l:$8000;p:$70000;crc:$3cd1d0c3));
         robocop_dip:array [0..10] of def_dip=(
         (mask:$0003;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$000c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -42,24 +42,24 @@ const
         (mask:$2000;name:'Bonus Stage Energy';number:2;dip:((dip_val:$0;dip_name:'Low'),(dip_val:$2000;dip_name:'High'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$4000;name:'Brink Time';number:2;dip:((dip_val:$4000;dip_name:'Normal'),(dip_val:$0;dip_name:'Less'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Baddudes
-        baddudes_rom:array[0..4] of tipo_roms=(
+        baddudes_rom:array[0..3] of tipo_roms=(
         (n:'ei04-1.3c';l:$10000;p:0;crc:$4bf158a7),(n:'ei01-1.3a';l:$10000;p:$1;crc:$74f5110c),
-        (n:'ei06.6c';l:$10000;p:$40000;crc:$3ff8da57),(n:'ei03.6a';l:$10000;p:$40001;crc:$f8f2bd94),());
-        baddudes_char:array[0..2] of tipo_roms=(
-        (n:'ei25.15j';l:$8000;p:0;crc:$bcf59a69),(n:'ei26.16j';l:$8000;p:$8000;crc:$9aff67b8),());
+        (n:'ei06.6c';l:$10000;p:$40000;crc:$3ff8da57),(n:'ei03.6a';l:$10000;p:$40001;crc:$f8f2bd94));
+        baddudes_char:array[0..1] of tipo_roms=(
+        (n:'ei25.15j';l:$8000;p:0;crc:$bcf59a69),(n:'ei26.16j';l:$8000;p:$8000;crc:$9aff67b8));
         baddudes_mcu:tipo_roms=(n:'ei31.9a';l:$1000;p:$0;crc:$2a8745d2);
         baddudes_sound:tipo_roms=(n:'ei07.8a';l:$8000;p:$8000;crc:$9fb1ef4b);
         baddudes_oki:tipo_roms=(n:'ei08.2c';l:$10000;p:0;crc:$3c87463e);
-        baddudes_tiles1:array[0..4] of tipo_roms=(
+        baddudes_tiles1:array[0..3] of tipo_roms=(
         (n:'ei18.14d';l:$10000;p:0;crc:$05cfc3e5),(n:'ei20.17d';l:$10000;p:$10000;crc:$e11e988f),
-        (n:'ei22.14f';l:$10000;p:$20000;crc:$b893d880),(n:'ei24.17f';l:$10000;p:$30000;crc:$6f226dda),());
-        baddudes_tiles2:array[0..2] of tipo_roms=(
-        (n:'ei30.9j';l:$10000;p:$20000;crc:$982da0d1),(n:'ei28.9f';l:$10000;p:$30000;crc:$f01ebb3b),());
-        baddudes_sprites:array[0..8] of tipo_roms=(
+        (n:'ei22.14f';l:$10000;p:$20000;crc:$b893d880),(n:'ei24.17f';l:$10000;p:$30000;crc:$6f226dda));
+        baddudes_tiles2:array[0..1] of tipo_roms=(
+        (n:'ei30.9j';l:$10000;p:$20000;crc:$982da0d1),(n:'ei28.9f';l:$10000;p:$30000;crc:$f01ebb3b));
+        baddudes_sprites:array[0..7] of tipo_roms=(
         (n:'ei15.16c';l:$10000;p:$00000;crc:$a38a7d30),(n:'ei16.17c';l:$8000;p:$10000;crc:$17e42633),
         (n:'ei11.16a';l:$10000;p:$20000;crc:$3a77326c),(n:'ei12.17a';l:$8000;p:$30000;crc:$fea2a134),
         (n:'ei13.13c';l:$10000;p:$40000;crc:$e5ae2751),(n:'ei14.14c';l:$8000;p:$50000;crc:$e83c760a),
-        (n:'ei09.13a';l:$10000;p:$60000;crc:$6901e628),(n:'ei10.14a';l:$8000;p:$70000;crc:$eeee8a1a),());
+        (n:'ei09.13a';l:$10000;p:$60000;crc:$6901e628),(n:'ei10.14a';l:$8000;p:$70000;crc:$eeee8a1a));
         baddudes_dip:array [0..7] of def_dip=(
         (mask:$0003;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$000c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -69,25 +69,25 @@ const
         (mask:$0c00;name:'Difficulty';number:4;dip:((dip_val:$800;dip_name:'Easy'),(dip_val:$c00;dip_name:'Normal'),(dip_val:$400;dip_name:'Hard'),(dip_val:$000;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$1000;name:'Allow Continue';number:2;dip:((dip_val:$1000;dip_name:'Yes'),(dip_val:$0;dip_name:'No'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Hippodrome
-        hippo_rom:array[0..4] of tipo_roms=(
+        hippo_rom:array[0..3] of tipo_roms=(
         (n:'ew02';l:$10000;p:0;crc:$df0d7dc6),(n:'ew01';l:$10000;p:$1;crc:$d5670aa7),
-        (n:'ew05';l:$10000;p:$20000;crc:$c76d65ec),(n:'ew00';l:$10000;p:$20001;crc:$e9b427a6),());
+        (n:'ew05';l:$10000;p:$20000;crc:$c76d65ec),(n:'ew00';l:$10000;p:$20001;crc:$e9b427a6));
         hippo_mcu:tipo_roms=(n:'ew08';l:$10000;p:$0;crc:$53010534);
-        hippo_char:array[0..2] of tipo_roms=(
-        (n:'ew14';l:$10000;p:0;crc:$71ca593d),(n:'ew13';l:$10000;p:$10000;crc:$86be5fa7),());
+        hippo_char:array[0..1] of tipo_roms=(
+        (n:'ew14';l:$10000;p:0;crc:$71ca593d),(n:'ew13';l:$10000;p:$10000;crc:$86be5fa7));
         hippo_sound:tipo_roms=(n:'ew04';l:$8000;p:$8000;crc:$9871b98d);
         hippo_oki:tipo_roms=(n:'ew03';l:$10000;p:0;crc:$b606924d);
-        hippo_tiles1:array[0..4] of tipo_roms=(
+        hippo_tiles1:array[0..3] of tipo_roms=(
         (n:'ew19';l:$8000;p:0;crc:$6b80d7a3),(n:'ew18';l:$8000;p:$8000;crc:$78d3d764),
-        (n:'ew20';l:$8000;p:$10000;crc:$ce9f5de3),(n:'ew21';l:$8000;p:$18000;crc:$487a7ba2),());
-        hippo_tiles2:array[0..4] of tipo_roms=(
+        (n:'ew20';l:$8000;p:$10000;crc:$ce9f5de3),(n:'ew21';l:$8000;p:$18000;crc:$487a7ba2));
+        hippo_tiles2:array[0..3] of tipo_roms=(
         (n:'ew24';l:$8000;p:0;crc:$4e1bc2a4),(n:'ew25';l:$8000;p:$8000;crc:$9eb47dfb),
-        (n:'ew23';l:$8000;p:$10000;crc:$9ecf479e),(n:'ew22';l:$8000;p:$18000;crc:$e55669aa),());
-        hippo_sprites:array[0..8] of tipo_roms=(
+        (n:'ew23';l:$8000;p:$10000;crc:$9ecf479e),(n:'ew22';l:$8000;p:$18000;crc:$e55669aa));
+        hippo_sprites:array[0..7] of tipo_roms=(
         (n:'ew15';l:$10000;p:$00000;crc:$95423914),(n:'ew16';l:$10000;p:$10000;crc:$96233177),
         (n:'ew10';l:$10000;p:$20000;crc:$4c25dfe8),(n:'ew11';l:$10000;p:$30000;crc:$f2e007fc),
         (n:'ew06';l:$10000;p:$40000;crc:$e4bb8199),(n:'ew07';l:$10000;p:$50000;crc:$470b6989),
-        (n:'ew17';l:$10000;p:$60000;crc:$8c97c757),(n:'ew12';l:$10000;p:$70000;crc:$a2d244bc),());
+        (n:'ew17';l:$10000;p:$60000;crc:$8c97c757),(n:'ew12';l:$10000;p:$70000;crc:$a2d244bc));
         hippo_dip:array [0..8] of def_dip=(
         (mask:$0003;name:'Coin A';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$000c;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$4;dip_name:'2C 1C'),(dip_val:$c;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -98,19 +98,15 @@ const
         (mask:$3000;name:'Player & Enemy Energy';number:4;dip:((dip_val:$1000;dip_name:'Very Low'),(dip_val:$2000;dip_name:'Low'),(dip_val:$3000;dip_name:'Medium'),(dip_val:$0;dip_name:'High'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$4000;name:'Enemy Power Decrease on Continue';number:2;dip:((dip_val:$4000;dip_name:'2 Dots'),(dip_val:$0;dip_name:'3 Dots'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-type
-    tipo_update_video=procedure;
-
 var
  rom:array[0..$2ffff] of word;
  ram1:array[0..$fff] of word;
  ram2:array[0..$1fff] of word;
  sound_latch,prioridad,hippodrm_lsb:byte;
- proc_update_video:tipo_update_video;
+ proc_update_video:procedure;
  //HU 6280
  robocop_mcu_rom:array[0..$1ff] of byte;
- mcu_ram:array[0..$1fff] of byte;
- mcu_shared_ram:array[0..$1fff] of byte;
+ mcu_ram,mcu_shared_ram:array[0..$1fff] of byte;
  hippo_mcu_rom:array[0..$ffff] of byte;
  //8751
  i8751_return,i8751_command:word;
@@ -198,7 +194,7 @@ end;
 procedure eventos_dec0;
 begin
 if event.arcade then begin
-  //P1
+  //P1+P2
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
@@ -216,16 +212,16 @@ if event.arcade then begin
   if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
   if arcade_input.but3[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $8000);
   //SYSTEM
-  if arcade_input.but4[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.but4[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but4[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.but4[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
 end;
 end;
 
-procedure dec0_principal;
+procedure baddudes_principal;
 var
   frame_m,frame_s,frame_mcu:single;
   f:word;
@@ -256,7 +252,39 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-procedure dec0_h6280_principal;
+procedure hippodrome_principal;
+var
+  frame_m,frame_s,frame_mcu:single;
+  f:word;
+begin
+init_controls(false,false,false,true);
+frame_m:=m68000_0.tframes;
+frame_s:=m6502_0.tframes;
+frame_mcu:=h6280_0.tframes;
+while EmuStatus=EsRuning do begin
+ for f:=0 to 263 do begin
+   m68000_0.run(frame_m);
+   frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+   m6502_0.run(frame_s);
+   frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
+   h6280_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+h6280_0.tframes-h6280_0.contador;
+   case f of
+      255:begin
+            m68000_0.irq[6]:=HOLD_LINE;
+            h6280_0.set_irq_line(0,HOLD_LINE);
+            proc_update_video;
+            marcade.in1:=marcade.in1 or $80;
+          end;
+      263:marcade.in1:=marcade.in1 and $7f;
+   end;
+ end;
+ eventos_dec0;
+ video_sync;
+end;
+end;
+
+procedure robocop_principal;
 var
   frame_m,frame_s,frame_mcu:single;
   f:word;
@@ -325,8 +353,8 @@ end;
 
 procedure dec0_putword(direccion:dword;valor:word);
 begin
-if direccion<$60000 then exit;
 case direccion of
+    0..$5ffff:; //ROM
     $180000..$180fff:begin
                         mcu_shared_ram[(direccion and $fff) shr 1]:=valor and $ff;
                         if ((direccion and $fff)=$ffe) then h6280_0.set_irq_line(0,HOLD_LINE);
@@ -336,7 +364,7 @@ case direccion of
     $242000..$24207f:bac06_0.tile_1.colscroll[(direccion and $7f) shr 1]:=valor;
     $242400..$2427ff:bac06_0.tile_1.rowscroll[(direccion and $3ff) shr 1]:=valor;
     $242800..$243fff:ram1[(direccion-$242800) shr 1]:=valor;
-    $244000..$245fff:begin
+    $244000..$245fff:if bac06_0.tile_1.data[(direccion and $1fff) shr 1]<>valor then begin
                       bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=valor;
                       gfx[0].buffer[(direccion and $1fff) shr 1]:=true;
                    end;
@@ -344,7 +372,7 @@ case direccion of
     $246010..$246017:bac06_0.tile_2.change_control1((direccion and 7) shr 1,valor);
     $248000..$24807f:bac06_0.tile_2.colscroll[(direccion and $7f) shr 1]:=valor;
     $248400..$2487ff:bac06_0.tile_2.rowscroll[(direccion and $3ff) shr 1]:=valor;
-    $24a000..$24a7ff:begin
+    $24a000..$24a7ff:if bac06_0.tile_2.data[(direccion and $7ff) shr 1]<>valor then begin
                       bac06_0.tile_2.data[(direccion and $7ff) shr 1]:=valor;
                       gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
                    end;
@@ -352,7 +380,7 @@ case direccion of
     $24c010..$24c017:bac06_0.tile_3.change_control1((direccion and 7) shr 1,valor);
     $24c800..$24c87f:bac06_0.tile_3.colscroll[(direccion and $7f) shr 1]:=valor;
     $24cc00..$24cfff:bac06_0.tile_3.rowscroll[(direccion and $3ff) shr 1]:=valor;
-    $24d000..$24d7ff:begin
+    $24d000..$24d7ff:if bac06_0.tile_3.data[(direccion and $7ff) shr 1]<>valor then begin
                       bac06_0.tile_3.data[(direccion and $7ff) shr 1]:=valor;
                       gfx[2].buffer[(direccion and $7ff) shr 1]:=true;
                    end;
@@ -388,22 +416,22 @@ end;
 function dec0_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$5ff,$8000..$ffff:dec0_snd_getbyte:=mem_snd[direccion];
   $3000:dec0_snd_getbyte:=sound_latch;
   $3800:dec0_snd_getbyte:=oki_6295_0.read;
-  $0000..$05ff,$8000..$ffff:dec0_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure dec0_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
-  $0000..$05ff:mem_snd[direccion]:=valor;
-  $0800:ym2203_0.Control(valor);
-  $0801:ym2203_0.Write(valor);
+  0..$5ff:mem_snd[direccion]:=valor;
+  $800:ym2203_0.Control(valor);
+  $801:ym2203_0.Write(valor);
   $1000:ym3812_0.control(valor);
   $1001:ym3812_0.write(valor);
   $3800:oki_6295_0.write(valor);
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -465,7 +493,7 @@ end;
 function robocop_mcu_getbyte(direccion:dword):byte;
 begin
 case direccion of
-  $001e00..$001fff:robocop_mcu_getbyte:=robocop_mcu_rom[direccion and $1ff];
+  $1e00..$1fff:robocop_mcu_getbyte:=robocop_mcu_rom[direccion and $1ff];
   $1f0000..$1f1fff:robocop_mcu_getbyte:=mcu_ram[direccion and $1fff];
   $1f2000..$1f3fff:robocop_mcu_getbyte:=mcu_shared_ram[direccion and $1fff];
 end;
@@ -473,8 +501,8 @@ end;
 
 procedure robocop_mcu_putbyte(direccion:dword;valor:byte);
 begin
-if direccion<$10000 then exit;
 case direccion of
+  0..$ffff:; //ROM
   $1f0000..$1f1fff:mcu_ram[direccion and $1fff]:=valor;
   $1f2000..$1f3fff:mcu_shared_ram[direccion and $1fff]:=valor;
   $1ff400..$1ff403:h6280_0.irq_status_w(direccion and $3,valor);
@@ -508,8 +536,8 @@ procedure hippo_mcu_putbyte(direccion:dword;valor:byte);
 var
   tempw:word;
 begin
-if direccion<$10000 then exit;
 case direccion of
+  0..$ffff:; //ROM
   $180000..$1800ff:mcu_shared_ram[direccion and $ff]:=valor;
   $1a0000..$1a0007:begin
                       if (direccion and 1)<>0 then tempw:=(bac06_0.tile_3.control_0[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
@@ -556,7 +584,7 @@ begin
  bac06_0.reset;
  reset_audio;
  marcade.in0:=$ffff;
- marcade.in1:=$7f;
+ marcade.in1:=$ff7f;
  sound_latch:=0;
 end;
 
@@ -575,7 +603,7 @@ begin
 init_gfx(0,8,8,ch_num);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8,0,ch_num*8*8*2,ch_num*8*8*1,ch_num*8*8*3);
-convert_gfx(0,0,@memoria_temp[0],@ps_x[8],@ps_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x[8],@ps_y,false,false);
 end;
 
 procedure convert_tiles(num_gfx:byte;tl_num:word);
@@ -583,7 +611,7 @@ begin
 init_gfx(num_gfx,16,16,tl_num);
 gfx[num_gfx].trans[0]:=true;
 gfx_set_desc_data(4,0,16*16,tl_num*16*16*1,tl_num*16*16*3,tl_num*16*16*0,tl_num*16*16*2);
-convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(num_gfx,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 
 begin
@@ -606,26 +634,26 @@ case main_vars.tipo_maquina of
   156:begin  //Robocop
         bac06_0:=bac06_chip.create(false,true,true,$000,$200,$300,$fff,$7ff,$3ff,1,1,1,$100);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@robocop_rom[0],'robocop.zip',0)) then exit;
+        if not(roms_load16w(@rom,robocop_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@robocop_sound,'robocop.zip',1)) then exit;
+        if not(roms_load(@mem_snd,robocop_sound)) then exit;
         //MCU
         h6280_0:=cpu_h6280.create(21477200 div 16,264);
         h6280_0.change_ram_calls(robocop_mcu_getbyte,robocop_mcu_putbyte);
-        if not(cargar_roms(@robocop_mcu_rom[0],@robocop_mcu,'robocop.zip',1)) then exit;
+        if not(roms_load(@robocop_mcu_rom,robocop_mcu)) then exit;
         //OKI rom
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@robocop_oki,'robocop.zip',1)) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,robocop_oki)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@robocop_char,'robocop.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,robocop_char)) then exit;
         convert_chars($1000);
         //tiles 1
-        if not(cargar_roms(@memoria_temp[0],@robocop_tiles1,'robocop.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,robocop_tiles1)) then exit;
         convert_tiles(1,$800);
         //tiles 2
-        if not(cargar_roms(@memoria_temp[0],@robocop_tiles2,'robocop.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,robocop_tiles2)) then exit;
         convert_tiles(2,$400);
         //sprites
-        if not(cargar_roms(@memoria_temp[0],@robocop_sprites,'robocop.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,robocop_sprites)) then exit;
         convert_tiles(3,$1000);
         proc_update_video:=update_video_robocop;
         //Dip
@@ -635,30 +663,30 @@ case main_vars.tipo_maquina of
   157:begin //Baddudes
         bac06_0:=bac06_chip.create(false,true,true,$000,$200,$300,$7ff,$7ff,$3ff,1,1,1,$100);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@baddudes_rom[0],'baddudes.zip',0)) then exit;
+        if not(roms_load16w(@rom,baddudes_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@baddudes_sound,'baddudes.zip',1)) then exit;
+        if not(roms_load(@mem_snd,baddudes_sound)) then exit;
         //MCU
         mcs51_0:=cpu_mcs51.create(8000000,264);
         mcs51_0.change_io_calls(in_port0,in_port1,in_port1,in_port1,out_port0,out_port1,out_port2,out_port3);
-        if not(cargar_roms(mcs51_0.get_rom_addr,@baddudes_mcu,'baddudes.zip',1)) then exit;
+        if not(roms_load(mcs51_0.get_rom_addr,baddudes_mcu)) then exit;
         //OKI rom
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@baddudes_oki,'baddudes.zip',1)) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,baddudes_oki)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@baddudes_char,'baddudes.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,baddudes_char)) then exit;
         convert_chars($800);
         //tiles 1
-        if not(cargar_roms(@memoria_temp[0],@baddudes_tiles1,'baddudes.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,baddudes_tiles1)) then exit;
         convert_tiles(1,$800);
         //tiles 2, ordenar
-        if not(cargar_roms(@memoria_temp[0],@baddudes_tiles2,'baddudes.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,baddudes_tiles2)) then exit;
         copymemory(@memoria_temp[$8000],@memoria_temp[$20000],$8000);
         copymemory(@memoria_temp[$0],@memoria_temp[$28000],$8000);
         copymemory(@memoria_temp[$18000],@memoria_temp[$30000],$8000);
         copymemory(@memoria_temp[$10000],@memoria_temp[$38000],$8000);
         convert_tiles(2,$400);
         //sprites
-        if not(cargar_roms(@memoria_temp[0],@baddudes_sprites,'baddudes.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,baddudes_sprites)) then exit;
         convert_tiles(3,$1000);
         proc_update_video:=update_video_baddudes;
         //Dip
@@ -668,31 +696,31 @@ case main_vars.tipo_maquina of
   158:begin  //Hippodrome
         bac06_0:=bac06_chip.create(false,true,true,$000,$200,$300,$fff,$3ff,$3ff,1,1,1,$100);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@hippo_rom[0],'hippodrm.zip',0)) then exit;
+        if not(roms_load16w(@rom,hippo_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@hippo_sound,'hippodrm.zip',1)) then exit;
+        if not(roms_load(@mem_snd,hippo_sound)) then exit;
         //MCU+decrypt
         h6280_0:=cpu_h6280.create(21477200 div 16,264);
         h6280_0.change_ram_calls(hippo_mcu_getbyte,hippo_mcu_putbyte);
-        if not(cargar_roms(@hippo_mcu_rom[0],@hippo_mcu,'hippodrm.zip',1)) then exit;
+        if not(roms_load(@hippo_mcu_rom,hippo_mcu)) then exit;
         for f:=0 to $ffff do hippo_mcu_rom[f]:=bitswap8(hippo_mcu_rom[f],0,6,5,4,3,2,1,7);
         hippo_mcu_rom[$189]:=$60; // RTS prot area
 	      hippo_mcu_rom[$1af]:=$60; // RTS prot area
 	      hippo_mcu_rom[$1db]:=$60; // RTS prot area
 	      hippo_mcu_rom[$21a]:=$60; // RTS prot area
         //OKI rom
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@hippo_oki,'hippodrm.zip',1)) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,hippo_oki)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@hippo_char,'hippodrm.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,hippo_char)) then exit;
         convert_chars($1000);
         //tiles 1
-        if not(cargar_roms(@memoria_temp[0],@hippo_tiles1,'hippodrm.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,hippo_tiles1)) then exit;
         convert_tiles(1,$400);
         //tiles 2
-        if not(cargar_roms(@memoria_temp[0],@hippo_tiles2,'hippodrm.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,hippo_tiles2)) then exit;
         convert_tiles(2,$400);
         //sprites
-        if not(cargar_roms(@memoria_temp[0],@hippo_sprites,'hippodrm.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,hippo_sprites)) then exit;
         convert_tiles(3,$1000);
         proc_update_video:=update_video_hippo;
         //Dip
@@ -705,11 +733,12 @@ reset_dec0;
 iniciar_dec0:=true;
 end;
 
-procedure Cargar_dec0;
+procedure cargar_dec0;
 begin
 case main_vars.tipo_maquina of
-  156,158:llamadas_maquina.bucle_general:=dec0_h6280_principal;
-  157:llamadas_maquina.bucle_general:=dec0_principal;
+  156:llamadas_maquina.bucle_general:=robocop_principal;
+  157:llamadas_maquina.bucle_general:=baddudes_principal;
+  158:llamadas_maquina.bucle_general:=hippodrome_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_dec0;
 llamadas_maquina.reset:=reset_dec0;

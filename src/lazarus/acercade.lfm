@@ -1,41 +1,49 @@
 object Aboutbox: TAboutbox
   Left = 284
-  Height = 201
+  Height = 251
   Top = 191
-  Width = 233
+  Width = 291
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Acerca de...'
-  ClientHeight = 201
-  ClientWidth = 233
+  ClientHeight = 251
+  ClientWidth = 291
+  DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
-  Font.Height = -11
+  Font.Height = -14
   Font.Name = 'Tahoma'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '1.6.2.0'
+  LCLVersion = '2.0.8.0'
   object Panel1: TPanel
-    Left = 8
-    Height = 150
-    Top = 8
-    Width = 213
+    Left = 10
+    Height = 188
+    Top = 10
+    Width = 266
     BevelInner = bvRaised
     BevelOuter = bvLowered
-    ClientHeight = 150
-    ClientWidth = 213
+    ClientHeight = 188
+    ClientWidth = 266
     Color = cl3DLight
     DragCursor = crHandPoint
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -14
+    Font.Name = 'Tahoma'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
     ParentColor = False
+    ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 0
     object ProgramIcon: TImage
-      Left = 30
-      Height = 33
-      Top = 16
-      Width = 33
+      Left = 38
+      Height = 41
+      Top = 20
+      Width = 41
       Picture.Data = {
         055449636F6EBE0C00000000010001002020000001001800A80C000016000000
         2800000020000000400000000100180000000000000C00000000000000000000
@@ -144,48 +152,83 @@ object Aboutbox: TAboutbox
       Stretch = True
     end
     object ProductName: TLabel
-      Left = 80
-      Height = 13
-      Top = 16
-      Width = 64
+      Left = 100
+      Height = 17
+      Top = 20
+      Width = 85
       Caption = 'DSP Emulator'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Tahoma'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       ParentColor = False
+      ParentFont = False
     end
     object Copyright: TLabel
-      Left = 30
-      Height = 13
-      Top = 80
-      Width = 136
-      Caption = 'Copyright Leniad 2002-2017'
+      Left = 38
+      Height = 17
+      Top = 100
+      Width = 177
+      Caption = 'Copyright Leniad 2002-2020'
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Tahoma'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       ParentColor = False
+      ParentFont = False
     end
     object Label1: TLabel
-      Left = 80
+      Left = 100
       Height = 1
-      Top = 40
+      Top = 50
       Width = 1
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Tahoma'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       ParentColor = False
+      ParentFont = False
     end
     object Label2: TLabel
-      Left = 51
-      Height = 13
-      Top = 99
-      Width = 102
+      Left = 64
+      Height = 17
+      Top = 124
+      Width = 130
       Caption = 'Dedicado a mi familia '
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Tahoma'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       ParentColor = False
+      ParentFont = False
     end
     object Label3: TLabel
-      Left = 31
-      Height = 13
-      Top = 118
-      Width = 129
+      Left = 39
+      Height = 17
+      Top = 148
+      Width = 165
       Caption = 'MªCarmen - Daniel - Laura '
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Tahoma'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       ParentColor = False
+      ParentFont = False
     end
     object Image1: TImage
-      Left = 160
+      Left = 200
       Height = 69
-      Top = 8
+      Top = 10
       Width = 47
       AutoSize = True
       Picture.Data = {
@@ -219,14 +262,21 @@ object Aboutbox: TAboutbox
     end
   end
   object OKButton: TButton
-    Left = 72
-    Height = 25
-    Top = 160
-    Width = 75
+    Left = 90
+    Height = 31
+    Top = 200
+    Width = 94
     Caption = 'OK'
     Default = True
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -14
+    Font.Name = 'Tahoma'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
     ModalResult = 1
     OnClick = OKButtonClick
+    ParentFont = False
     TabOrder = 1
   end
 end

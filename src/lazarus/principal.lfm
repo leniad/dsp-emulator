@@ -1,19 +1,20 @@
 object principal1: Tprincipal1
-  Left = 292
-  Height = 206
-  Top = 218
-  Width = 341
+  Left = 314
+  Height = 258
+  Top = 242
+  Width = 426
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
   ActiveControl = Panel1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 186
-  ClientWidth = 341
+  ClientHeight = 233
+  ClientWidth = 426
+  DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
-  Font.Height = -11
+  Font.Height = -14
   Font.Name = 'Sans'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
@@ -21,22 +22,35 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '1.8.0.6'
+  LCLVersion = '2.0.8.0'
   object Panel1: TPanel
     Left = 0
     Height = 43
     Top = 0
-    Width = 341
+    Width = 426
     Align = alTop
     ClientHeight = 43
-    ClientWidth = 341
+    ClientWidth = 426
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -14
+    Font.Name = 'Sans'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
     TabOrder = 0
     object BitBtn2: TBitBtn
-      Left = 5
+      Left = 6
       Height = 40
       Hint = 'Reset'
       Top = 1
       Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
         1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -101,33 +115,47 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00
       }
+      Layout = blGlyphTop
       OnClick = Reset1Click
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
       TabStop = False
     end
     object BitBtn3: TBitBtn
-      Left = 46
+      Left = 58
       Height = 40
       Hint = 'Play'
       Top = 1
       Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Layout = blGlyphTop
-      Margin = 0
       OnClick = Ejecutar1Click
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
       TabStop = False
     end
     object BitBtn5: TBitBtn
-      Left = 96
+      Left = 120
       Height = 40
       Hint = 'Slow'
       Top = 1
       Width = 40
       BorderSpacing.Left = 1
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
         1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -193,19 +221,25 @@ object principal1: Tprincipal1
         FFFFFFFFFF00
       }
       Layout = blGlyphTop
-      Margin = 0
       OnClick = fSlow
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
       TabStop = False
     end
     object BitBtn6: TBitBtn
-      Left = 136
+      Left = 170
       Height = 40
       Hint = 'Fastest'
       Top = 1
       Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
         1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -270,18 +304,26 @@ object principal1: Tprincipal1
         FF6351B56351B56351B56351B56351B56351B55A45B5FFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00
       }
+      Layout = blGlyphTop
       OnClick = fFast
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
       TabStop = False
     end
     object btncfg: TBitBtn
-      Left = 176
+      Left = 220
       Height = 40
       Hint = 'Config DSP'
       Top = 1
       Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         A2070000424DA207000000000000360000002800000019000000190000000100
         1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -346,18 +388,26 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFF00
       }
+      Layout = blGlyphTop
       OnClick = fConfigurar_general
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
       TabStop = False
     end
     object BitBtn19: TBitBtn
-      Left = 296
+      Left = 370
       Height = 40
       Hint = 'Save Image'
       Top = 1
       Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         EE070000424DEE070000000000003600000028000000190000001A0000000100
         180000000000B807000000000000000000000000000000000000FFFFFFFFFFFF
@@ -424,18 +474,26 @@ object principal1: Tprincipal1
         AC99A8AC99A8ACFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00
       }
+      Layout = blGlyphTop
       OnClick = fSaveGIF
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 5
       TabStop = False
     end
     object BitBtn8: TBitBtn
-      Left = 216
+      Left = 270
       Height = 40
       Hint = 'Config Dip Switch'
       Top = 1
       Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         C6060000424DC60600000000000036000000280000001A000000150000000100
         18000000000090060000C40E0000C40E00000000000000000000FFFFFFFFFFFF
@@ -493,18 +551,26 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFF0000
       }
+      Layout = blGlyphTop
       OnClick = BitBtn8Click
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 6
       TabStop = False
     end
     object BitBtn13: TBitBtn
-      Left = 256
+      Left = 320
       Height = 40
       Hint = 'Change Driver'
       Top = 1
       Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         56080000424D560800000000000036000000280000001A0000001A0000000100
         1800000000002008000000000000000000000000000000000000FFFFFFFFFFFF
@@ -574,7 +640,9 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000
       }
+      Layout = blGlyphTop
       OnClick = LstRomsClick
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 7
@@ -582,17 +650,17 @@ object principal1: Tprincipal1
     end
   end
   object GroupBox1: TGroupBox
-    Left = 416
-    Height = 325
-    Top = 56
-    Width = 323
+    Left = 520
+    Height = 406
+    Top = 70
+    Width = 404
     Caption = 'CINTA'
-    ClientHeight = 307
-    ClientWidth = 319
+    ClientHeight = 384
+    ClientWidth = 400
     Color = clBtnFace
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -11
+    Font.Height = -14
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
@@ -601,27 +669,27 @@ object principal1: Tprincipal1
     TabOrder = 1
     Visible = False
     object Label1: TLabel
-      Left = 48
-      Height = 13
-      Top = 53
-      Width = 213
+      Left = 60
+      Height = 16
+      Top = 66
+      Width = 266
       Alignment = taCenter
       AutoSize = False
-      Font.Height = -13
+      Font.Height = -16
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 45
-      Height = 13
-      Top = 306
-      Width = 185
+      Left = 56
+      Height = 16
+      Top = 382
+      Width = 231
       Alignment = taCenter
       AutoSize = False
       Font.Color = clRed
-      Font.Height = -13
+      Font.Height = -16
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentColor = False
@@ -629,16 +697,16 @@ object principal1: Tprincipal1
     end
     object StringGrid1: TStringGrid
       Cursor = crHandPoint
-      Left = 15
-      Height = 194
-      Top = 113
-      Width = 288
+      Left = 19
+      Height = 242
+      Top = 141
+      Width = 360
       ColCount = 4
-      DefaultColWidth = 10
-      DefaultRowHeight = 15
+      DefaultColWidth = 12
+      DefaultRowHeight = 19
       FixedCols = 0
       FixedRows = 0
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'MS Sans Serif'
       Options = [goVertLine, goHorzLine, goRowSelect]
       ParentFont = False
@@ -648,21 +716,13 @@ object principal1: Tprincipal1
       ShowHint = True
       TabOrder = 1
       TabStop = False
-      TitleFont.Height = -11
-      TitleFont.Name = 'MS Sans Serif'
-      ColWidths = (
-        15
-        157
-        47
-        61
-      )
     end
     object Edit1: TEdit
-      Left = 15
-      Height = 24
-      Top = 67
-      Width = 289
-      Font.Height = -13
+      Left = 19
+      Height = 28
+      Top = 84
+      Width = 361
+      Font.Height = -16
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
@@ -671,15 +731,15 @@ object principal1: Tprincipal1
       TabOrder = 2
     end
     object StringGrid2: TStringGrid
-      Left = 16
-      Height = 20
-      Top = 93
-      Width = 288
+      Left = 20
+      Height = 25
+      Top = 116
+      Width = 360
       ColCount = 4
-      DefaultColWidth = 10
-      DefaultRowHeight = 15
+      DefaultColWidth = 12
+      DefaultRowHeight = 19
       FixedCols = 0
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'MS Sans Serif'
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowMoving, goRowSelect]
       ParentFont = False
@@ -687,28 +747,33 @@ object principal1: Tprincipal1
       ScrollBars = ssNone
       TabOrder = 0
       TabStop = False
-      TitleFont.Height = -11
-      TitleFont.Name = 'MS Sans Serif'
-      ColWidths = (
-        15
-        158
-        46
-        61
-      )
     end
     object Panel3: TPanel
-      Left = 8
-      Height = 41
-      Top = 12
-      Width = 296
-      ClientHeight = 41
-      ClientWidth = 296
+      Left = 10
+      Height = 51
+      Top = 15
+      Width = 370
+      ClientHeight = 51
+      ClientWidth = 370
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Tahoma'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
       TabOrder = 3
       object BitBtn15: TBitBtn
-        Left = 40
-        Height = 37
+        Left = 50
+        Height = 46
         Top = 2
-        Width = 37
+        Width = 46
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -14
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
         Glyph.Data = {
           A2070000424DA207000000000000360000002800000019000000190000000100
           1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -773,13 +838,20 @@ object principal1: Tprincipal1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFF00
         }
+        ParentFont = False
         TabOrder = 0
       end
       object BitBtn16: TBitBtn
-        Left = 132
-        Height = 37
+        Left = 165
+        Height = 46
         Top = 2
-        Width = 37
+        Width = 46
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -14
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
         Glyph.Data = {
           A2070000424DA207000000000000360000002800000019000000190000000100
           1800000000006C07000000000000000000000000000000000000FFFFFFFFFFFF
@@ -844,13 +916,20 @@ object principal1: Tprincipal1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFF00
         }
+        ParentFont = False
         TabOrder = 1
       end
       object BitBtn17: TBitBtn
-        Left = 217
-        Height = 37
+        Left = 271
+        Height = 46
         Top = 2
-        Width = 37
+        Width = 46
+        Font.CharSet = ANSI_CHARSET
+        Font.Color = clBlack
+        Font.Height = -14
+        Font.Name = 'Tahoma'
+        Font.Pitch = fpVariable
+        Font.Quality = fqDraft
         Glyph.Data = {
           360C0000424D360C000000000000360000002800000020000000200000000100
           180000000000000C0000120B0000120B00000000000000000000FFFFFFFFFFFF
@@ -951,27 +1030,41 @@ object principal1: Tprincipal1
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
           FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         }
+        ParentFont = False
         TabOrder = 2
       end
     end
   end
   object Panel2: TPanel
-    Left = 8
-    Height = 124
+    Left = 10
+    Height = 166
     Top = 43
-    Width = 333
+    Width = 416
     Align = alRight
     Anchors = [akTop, akBottom]
-    ClientHeight = 124
-    ClientWidth = 333
+    ClientHeight = 166
+    ClientWidth = 416
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -14
+    Font.Name = 'Sans'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
     TabOrder = 2
     Visible = False
     object BitBtn9: TBitBtn
-      Left = 64
-      Height = 41
+      Left = 80
+      Height = 40
       Hint = 'Open Snapshot'
-      Top = 8
-      Width = 41
+      Top = 10
+      Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C000000000000000000000000000000000000FFFFFFFFFFFF
@@ -1074,17 +1167,24 @@ object principal1: Tprincipal1
       }
       Layout = blGlyphTop
       OnClick = fLoadCinta
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
       TabStop = False
     end
     object BitBtn10: TBitBtn
-      Left = 120
-      Height = 41
+      Left = 150
+      Height = 40
       Hint = 'Open Disk'
-      Top = 8
-      Width = 41
+      Top = 10
+      Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C0000C40E0000C40E00000000000000000000FFFFFF000000
@@ -1187,17 +1287,24 @@ object principal1: Tprincipal1
       }
       Layout = blGlyphTop
       OnClick = fLoadCartucho
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
       TabStop = False
     end
     object BitBtn11: TBitBtn
-      Left = 176
-      Height = 41
+      Left = 220
+      Height = 40
       Hint = 'Save Snapshot'
-      Top = 8
-      Width = 41
+      Top = 10
+      Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C000064000000640000000000000000000000FFFFFFFFFFFF
@@ -1300,17 +1407,24 @@ object principal1: Tprincipal1
       }
       Layout = blGlyphTop
       OnClick = fSaveSnapShot
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
       TabStop = False
     end
     object BitBtn12: TBitBtn
-      Left = 224
-      Height = 41
+      Left = 280
+      Height = 40
       Hint = 'Poke Memory'
-      Top = 8
-      Width = 41
+      Top = 10
+      Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C000000000000000000000000000000000000FFFFFFFFFFFF
@@ -1411,18 +1525,26 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
+      Layout = blGlyphTop
       OnClick = BitBtn12Click
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
       TabStop = False
     end
     object BitBtn14: TBitBtn
-      Left = 272
-      Height = 41
+      Left = 340
+      Height = 40
       Hint = 'Fast Load'
-      Top = 8
-      Width = 41
+      Top = 10
+      Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
         180000000000000C000000000000000000000000000000000000FFFFFFFFFFFF
@@ -1523,18 +1645,26 @@ object principal1: Tprincipal1
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       }
+      Layout = blGlyphTop
       OnClick = BitBtn14Click
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
       TabStop = False
     end
     object BitBtn1: TBitBtn
-      Left = 11
-      Height = 41
+      Left = 14
+      Height = 40
       Hint = 'Config'
-      Top = 8
-      Width = 41
+      Top = 10
+      Width = 40
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Glyph.Data = {
         7E090000424D7E0900000000000036000000280000001D0000001B0000000100
         18000000000048090000C40E0000C40E00000000000000000000F5F5F5F5F5F5
@@ -1614,7 +1744,9 @@ object principal1: Tprincipal1
         F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5F5
         F500
       }
+      Layout = blGlyphTop
       OnClick = BitBtn8Click
+      ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 5
@@ -1623,18 +1755,25 @@ object principal1: Tprincipal1
   end
   object Panel5: TPanel
     Left = 0
-    Height = 19
-    Top = 167
-    Width = 341
+    Height = 24
+    Top = 209
+    Width = 426
     Align = alBottom
-    ClientHeight = 19
-    ClientWidth = 341
+    ClientHeight = 24
+    ClientWidth = 426
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -14
+    Font.Name = 'Sans'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
     TabOrder = 3
     object Image1: TImage
-      Left = 316
-      Height = 19
+      Left = 395
+      Height = 24
       Top = 0
-      Width = 25
+      Width = 31
       Anchors = [akRight, akBottom]
       Center = True
       Picture.Data = {
@@ -1684,31 +1823,38 @@ object principal1: Tprincipal1
     end
     object StatusBar1: TStatusBar
       Left = 0
-      Height = 19
-      Top = 0
-      Width = 304
+      Height = 26
+      Top = -2
+      Width = 391
       Align = alNone
       Anchors = [akLeft, akBottom]
       AutoSize = False
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
       Panels = <      
         item
           Alignment = taCenter
-          Width = 60
+          Width = 75
         end      
         item
           Alignment = taCenter
-          Width = 100
+          Width = 125
         end      
         item
-          Width = 168
+          Width = 210
         end>
+      ParentFont = False
       SimpleText = 'hey'
       SimplePanel = False
     end
   end
   object MainMenu1: TMainMenu
-    left = 120
-    top = 96
+    left = 150
+    top = 120
     object Archivo1: TMenuItem
       Caption = 'Archivo'
       object LstRoms: TMenuItem
@@ -1877,6 +2023,10 @@ object principal1: Tprincipal1
             Caption = 'CPC 6128'
             OnClick = CambiarMaquina
           end
+        end
+        object c641: TMenuItem
+          Caption = 'Commodore 64'
+          OnClick = CambiarMaquina
         end
       end
       object Arcade1: TMenuItem
@@ -2138,6 +2288,10 @@ object principal1: Tprincipal1
               Caption = 'Xevious'
               OnClick = CambiarMaquina
             end
+            object Bosconian1: TMenuItem
+              Caption = 'Bosconian'
+              OnClick = CambiarMaquina
+            end
           end
           object sunahw1: TMenuItem
             Caption = 'Suna HW'
@@ -2335,6 +2489,22 @@ object principal1: Tprincipal1
               Caption = 'Free Kick'
               OnClick = CambiarMaquina
             end
+            object gigas1: TMenuItem
+              Caption = 'Gigas'
+              OnClick = CambiarMaquina
+            end
+            object gigasm21: TMenuItem
+              Caption = 'Gigas Mask II'
+              OnClick = CambiarMaquina
+            end
+            object omega1: TMenuItem
+              Caption = 'Omega'
+              OnClick = CambiarMaquina
+            end
+            object pbillrd1: TMenuItem
+              Caption = 'Perfect Billard'
+              OnClick = CambiarMaquina
+            end
           end
           object pbaction1: TMenuItem
             Caption = 'Pinball Action'
@@ -2372,6 +2542,59 @@ object principal1: Tprincipal1
             end
             object tnk31: TMenuItem
               Caption = 'T.N.K'
+              OnClick = CambiarMaquina
+            end
+          end
+          object segasysteme1: TMenuItem
+            Caption = 'Sega System E'
+            object HangOnJr1: TMenuItem
+              Caption = 'HangOn Jr.'
+              OnClick = CambiarMaquina
+            end
+            object SlapShooter1: TMenuItem
+              Caption = 'Slap Shooter'
+              OnClick = CambiarMaquina
+            end
+            object FantasyZone21: TMenuItem
+              Caption = 'Fantasy Zone II - The Tears of Opa-Opa'
+              OnClick = CambiarMaquina
+            end
+            object OpaOpa1: TMenuItem
+              Caption = 'Opa-Opa'
+              OnClick = CambiarMaquina
+            end
+            object tetrisse1: TMenuItem
+              Caption = 'Tetris'
+              OnClick = CambiarMaquina
+            end
+            object transformer1: TMenuItem
+              Caption = 'Transformer'
+              OnClick = CambiarMaquina
+            end
+            object riddleofp1: TMenuItem
+              Caption = 'Riddle of Pythagoras'
+              OnClick = CambiarMaquina
+            end
+          end
+          object Route16HW1: TMenuItem
+            Caption = 'Route 16 HW'
+            object Route161: TMenuItem
+              Caption = 'Route 16'
+              OnClick = CambiarMaquina
+            end
+            object SpeakandRescue1: TMenuItem
+              Caption = 'Speak and Rescue'
+              OnClick = CambiarMaquina
+            end
+          end
+          object GalivanHW1: TMenuItem
+            Caption = 'Galivan HW'
+            object Galivan1: TMenuItem
+              Caption = 'Cosmo Police Galivan'
+              OnClick = CambiarMaquina
+            end
+            object dangar1: TMenuItem
+              Caption = 'Ufo Robo Dangar'
               OnClick = CambiarMaquina
             end
           end
@@ -2566,6 +2789,21 @@ object principal1: Tprincipal1
             Caption = 'Megazone'
             OnClick = CambiarMaquina
           end
+          object MenuItem37: TMenuItem
+            Caption = 'Williams HW'
+            object defender1: TMenuItem
+              Caption = 'Defender'
+              OnClick = CambiarMaquina
+            end
+            object mayday1: TMenuItem
+              Caption = 'Mayday'
+              OnClick = CambiarMaquina
+            end
+            object colony71: TMenuItem
+              Caption = 'Colony 7'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object MenuItem10: TMenuItem
           Caption = 'HD6309'
@@ -2574,6 +2812,9 @@ object principal1: Tprincipal1
             object ddragon1: TMenuItem
               Caption = 'Double Dragon'
               OnClick = CambiarMaquina
+            end
+            object ddragon_sh1: TMenuItem
+              Caption = 'Double Dragon (Speed Hack)'
             end
             object ddragon21: TMenuItem
               Caption = 'Double Dragon II'
@@ -2625,9 +2866,16 @@ object principal1: Tprincipal1
         end
         object M680001: TMenuItem
           Caption = 'M68000'
-          object TerraCre1: TMenuItem
-            Caption = 'Terra Cresta'
-            OnClick = CambiarMaquina
+          object TerraCreHW1: TMenuItem
+            Caption = 'Terra Cresta HW'
+            object TerraCre1: TMenuItem
+              Caption = 'Terra Cresta'
+              OnClick = CambiarMaquina
+            end
+            object Amazon1: TMenuItem
+              Caption = 'Soldier Girl Amazon'
+              OnClick = CambiarMaquina
+            end
           end
           object Prehisle1: TMenuItem
             Caption = 'Prehistoric Isle in 1930'
@@ -2911,6 +3159,14 @@ object principal1: Tprincipal1
               Caption = 'TwinBee'
               OnClick = CambiarMaquina
             end
+            object gwarrior1: TMenuItem
+              Caption = 'Galactic Warriors'
+              OnClick = CambiarMaquina
+            end
+            object Salamander1: TMenuItem
+              Caption = 'Salamander'
+              OnClick = CambiarMaquina
+            end
           end
           object MenuItem27: TMenuItem
             Caption = 'Pirates HW'
@@ -2974,6 +3230,33 @@ object principal1: Tprincipal1
               Caption = 'Peter Pakrat'
               OnClick = CambiarMaquina
             end
+            object indydoom1: TMenuItem
+              Caption = 'Indiana Jones and the Temple of Doom'
+              OnClick = CambiarMaquina
+            end
+            object MarbleMadness1: TMenuItem
+              Caption = 'Marble Madness'
+              OnClick = CambiarMaquina
+            end
+          end
+          object BadLands1: TMenuItem
+            Caption = 'Bad Lands'
+            OnClick = CambiarMaquina
+          end
+          object lastduelhw: TMenuItem
+            Caption = 'Last Duel HW'
+            object lastduel1: TMenuItem
+              Caption = 'Last Duel'
+              OnClick = CambiarMaquina
+            end
+            object madgear1: TMenuItem
+              Caption = 'Mad Gear'
+              OnClick = CambiarMaquina
+            end
+            object leds20111: TMenuItem
+              Caption = 'Led Storm Rally 2011'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object MenuItem11: TMenuItem
@@ -3024,6 +3307,9 @@ object principal1: Tprincipal1
           Caption = 'Sega Master System'
           OnClick = CambiarMaquina
         end
+        object sg10001: TMenuItem
+          Caption = 'SG-1000'
+        end
       end
       object MenuItem34: TMenuItem
         Caption = 'Game && Watch'
@@ -3059,8 +3345,8 @@ object principal1: Tprincipal1
   object ImageList2: TImageList
     Height = 32
     Width = 32
-    left = 72
-    top = 96
+    left = 90
+    top = 120
     Bitmap = {
       4C69070000002000000020000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -3964,28 +4250,28 @@ object principal1: Tprincipal1
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    left = 208
-    top = 96
+    left = 260
+    top = 120
   end
   object Timer2: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer2Timer
-    left = 240
-    top = 96
+    left = 300
+    top = 120
   end
   object Timer4: TTimer
     Enabled = False
     Interval = 300
     OnTimer = Timer4Timer
-    left = 304
-    top = 96
+    left = 380
+    top = 120
   end
   object Timer3: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer3Timer
-    left = 268
-    top = 96
+    left = 335
+    top = 120
   end
 end

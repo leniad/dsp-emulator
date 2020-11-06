@@ -9,17 +9,29 @@ procedure cargar_solomon;
 
 implementation
 const
-        solomon_rom:array[0..3] of tipo_roms=(
+        solomon_rom:array[0..2] of tipo_roms=(
         (n:'6.3f';l:$4000;p:0;crc:$645eb0f3),(n:'7.3h';l:$8000;p:$4000;crc:$1bf5c482),
-        (n:'8.3jk';l:$8000;p:$c000;crc:$0a6cdefc),());
+        (n:'8.3jk';l:$8000;p:$c000;crc:$0a6cdefc));
         solomon_snd_rom:tipo_roms=(n:'1.3jk';l:$4000;p:0;crc:$fa6e562e);
-        solomon_chars:array[0..2] of tipo_roms=(
-        (n:'12.3t';l:$8000;p:$0;crc:$b371291c),(n:'11.3r';l:$8000;p:$8000;crc:$6f94d2af),());
-        solomon_sprites:array[0..4] of tipo_roms=(
+        solomon_chars:array[0..1] of tipo_roms=(
+        (n:'12.3t';l:$8000;p:$0;crc:$b371291c),(n:'11.3r';l:$8000;p:$8000;crc:$6f94d2af));
+        solomon_sprites:array[0..3] of tipo_roms=(
         (n:'2.5lm';l:$4000;p:0;crc:$80fa2be3),(n:'3.6lm';l:$4000;p:$4000;crc:$236106b4),
-        (n:'4.7lm';l:$4000;p:$8000;crc:$088fe5d9),(n:'5.8lm';l:$4000;p:$c000;crc:$8366232a),());
-        solomon_tiles:array[0..2] of tipo_roms=(
-        (n:'10.3p';l:$8000;p:$0;crc:$8310c2a1),(n:'9.3m';l:$8000;p:$8000;crc:$ab7e6c42),());
+        (n:'4.7lm';l:$4000;p:$8000;crc:$088fe5d9),(n:'5.8lm';l:$4000;p:$c000;crc:$8366232a));
+        solomon_tiles:array[0..1] of tipo_roms=(
+        (n:'10.3p';l:$8000;p:$0;crc:$8310c2a1),(n:'9.3m';l:$8000;p:$8000;crc:$ab7e6c42));
+        //Dip
+        solomon_dip_a:array [0..5] of def_dip=(
+        (mask:$1;name:'Demo Sound';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Cabinet';number:2;dip:((dip_val:$2;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$c;dip_name:'2'),(dip_val:$0;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$4;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin B';number:4;dip:((dip_val:$20;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$10;dip_name:'1C 2C'),(dip_val:$30;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin A';number:4;dip:((dip_val:$80;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$40;dip_name:'1C 2C'),(dip_val:$c0;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        solomon_dip_b:array [0..4] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(dip_val:$1;dip_name:'Harder'),(dip_val:$3;dip_name:'Difficult'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Time Speed';number:4;dip:((dip_val:$8;dip_name:'Slow'),(dip_val:$0;dip_name:'Normal'),(dip_val:$4;dip_name:'Faster'),(dip_val:$c;dip_name:'Fastest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Extra';number:2;dip:((dip_val:$0;dip_name:'Normal'),(dip_val:$10;dip_name:'Difficult'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$e0;name:'Bonus Life';number:8;dip:((dip_val:$0;dip_name:'30K 200K 500K'),(dip_val:$80;dip_name:'100K 300K 800K'),(dip_val:$40;dip_name:'30K 200K'),(dip_val:$c0;dip_name:'100K 300K'),(dip_val:$20;dip_name:'30K'),(dip_val:$a0;dip_name:'100K'),(dip_val:$60;dip_name:'200K'),(dip_val:$e0;dip_name:'None'),(),(),(),(),(),(),(),())),());
 
 var
  sound_latch:byte;
@@ -65,7 +77,7 @@ for f:=$1f downto 0 do begin
     actualiza_gfx_sprite(x,y,3,2);
 end;
 actualiza_trozo_final(0,16,256,224,3);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_solomon;
@@ -125,6 +137,8 @@ var
   z80_0_reg:npreg_z80;
 begin
 case direccion of
+  0..$e07f,$f000..$ffff:solomon_getbyte:=memoria[direccion];
+  $e400..$e5ff:solomon_getbyte:=buffer_paleta[direccion and $1ff];
   $e600:solomon_getbyte:=marcade.in0;
   $e601:solomon_getbyte:=marcade.in1;
   $e602:solomon_getbyte:=marcade.in2;
@@ -133,9 +147,9 @@ case direccion of
           if (z80_0_reg.pc=$4cf0) then solomon_getbyte:=z80_0_reg.bc.w and $08 //proteccion ???
             else solomon_getbyte:=0;
         end;
-  $e604:solomon_getbyte:=2;
-  $e605:solomon_getbyte:=0;
-  else solomon_getbyte:=memoria[direccion];
+  $e604:solomon_getbyte:=marcade.dswa;
+  $e605:solomon_getbyte:=marcade.dswb;
+  $e606:;
 end;
 end;
 
@@ -159,16 +173,23 @@ end;
 
 procedure solomon_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
-   $d000..$d7ff:gfx[0].buffer[direccion and $3ff]:=true;
-   $d800..$dfff:gfx[1].buffer[direccion and $3ff]:=true;
+   0..$bfff:; //ROM
+   $c000..$cfff,$e000..$e07f:memoria[direccion]:=valor;
+   $d000..$d7ff:if (valor<>memoria[direccion]) then begin
+                    gfx[0].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                end;
+   $d800..$dfff:if (valor<>memoria[direccion]) then begin
+                    gfx[1].buffer[direccion and $3ff]:=true;
+                    memoria[direccion]:=valor;
+                end;
    $e400..$e5ff:if buffer_paleta[direccion and $1ff]<>valor then begin
                     buffer_paleta[direccion and $1ff]:=valor;
                     cambiar_color(direccion and $1fe);
                 end;
    $e600:nmi_enable:=valor<>0;
+   $e604:main_screen.flip_main_screen:=(valor and 1)<>0;
    $e800:begin
             sound_latch:=valor;
             z80_1.change_nmi(PULSE_LINE);
@@ -207,7 +228,7 @@ begin
   z80_1.change_irq(HOLD_LINE);
 end;
 
-procedure solomon_despues_instruccion;
+procedure solomon_sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
@@ -254,36 +275,41 @@ z80_0.change_ram_calls(solomon_getbyte,solomon_putbyte);
 z80_1:=cpu_z80.create(3072000,256);
 z80_1.change_ram_calls(solomon_snd_getbyte,solomon_snd_putbyte);
 z80_1.change_io_calls(nil,solomon_snd_outbyte);
-z80_1.init_sound(solomon_despues_instruccion);
-init_timer(z80_1.numero_cpu,3072000/(60*2),solomon_snd_irq,true);
+z80_1.init_sound(solomon_sound_update);
+timers.init(z80_1.numero_cpu,3072000/(60*2),solomon_snd_irq,nil,true);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(1500000,AY8910,0.12);
-AY8910_1:=ay8910_chip.create(1500000,AY8910,0.12);
-AY8910_2:=ay8910_chip.create(1500000,AY8910,0.12);
+AY8910_0:=ay8910_chip.create(1500000,AY8910,0.5);
+AY8910_1:=ay8910_chip.create(1500000,AY8910,0.5);
+AY8910_2:=ay8910_chip.create(1500000,AY8910,0.5);
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@solomon_rom[0],'solomon.zip',0)) then exit;
-copymemory(@memoria[0],@memoria_temp[0],$4000);
+if not(roms_load(@memoria_temp,solomon_rom)) then exit;
+copymemory(@memoria,@memoria_temp,$4000);
 copymemory(@memoria[$4000],@memoria_temp[$8000],$4000);
 copymemory(@memoria[$8000],@memoria_temp[$4000],$4000);
 copymemory(@memoria[$f000],@memoria_temp[$c000],$1000);
 //cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@solomon_snd_rom,'solomon.zip',1)) then exit;
+if not(roms_load(@mem_snd,solomon_snd_rom)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@solomon_chars[0],'solomon.zip',0)) then exit;
+if not(roms_load(@memoria_temp,solomon_chars)) then exit;
 init_gfx(0,8,8,$800);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //tiles
-if not(cargar_roms(@memoria_temp[0],@solomon_tiles[0],'solomon.zip',0)) then exit;
+if not(roms_load(@memoria_temp,solomon_tiles)) then exit;
 init_gfx(1,8,8,$800);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@solomon_sprites[0],'solomon.zip',0)) then exit;
+if not(roms_load(@memoria_temp,solomon_sprites)) then exit;
 init_gfx(2,16,16,$400);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,512*32*8,2*512*32*8,3*512*32*8);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
+//DIP
+marcade.dswa:=2;
+marcade.dswa_val:=@solomon_dip_a;
+marcade.dswb:=0;
+marcade.dswb_val:=@solomon_dip_b;
 //final
 reset_solomon;
 iniciar_solomon:=true;

@@ -180,8 +180,7 @@ const
 		  ( 2,4,0,6 ), ( 4,0,2,6 ), ( 2,0,4,6 ), ( 0,2,4,6 ));
 var
   a:word;
-  row:byte;
-  src,tbl0,tbl1,tbl2,tbl3:byte;
+  row,src,tbl0,tbl1,tbl2,tbl3:byte;
 begin
     for a:=0 to $7fff do begin
 		  src:=memoria[a];
@@ -357,16 +356,16 @@ scroll_x:=0;
 scroll_y:=0;
 system1_videomode:=0;
 //Clear all
-fillchar(bg_ram[0],$4000,0);
-fillchar(bg_ram_w[0],$2000,0);
-fillchar(sprites_final_screen[0],$20000,0);
+fillchar(bg_ram,$4000,0);
+fillchar(bg_ram_w,$2000,0);
+fillchar(sprites_final_screen,$20000,0);
 fillchar(final_screen[0,0],8*$10000*2,0);
-fillchar(bgpixmaps[0],4,0);
+fillchar(bgpixmaps,4,0);
 sprite_offset:=0;
 yscroll:=0;
 fillchar(xscroll,$20*2,0);
-fillchar(sprite_collide[0],$400,0);
-fillchar(mix_collide[0],$40,0);
+fillchar(sprite_collide,$400,0);
+fillchar(mix_collide,$40,0);
 end;
 
 function iniciar_system1:boolean;
@@ -376,7 +375,7 @@ procedure convert_gfx_system1;
 begin
   init_gfx(0,8,8,2048);
   gfx_set_desc_data(3,0,8*8,0,$4000*8,$8000*8);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 end;
 
 begin
@@ -398,7 +397,7 @@ z80_0.change_misc_calls(system1_delay,nil);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.init_sound(system1_sound_update);
-init_timer(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_sound_irq,true);
+timers.init(z80_1.numero_cpu,4000000/llamadas_maquina.fps_max/(260/64),system1_sound_irq,nil,true);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(2000000,0.5);
 sn_76496_1:=sn76496_chip.Create(4000000);
@@ -406,17 +405,17 @@ sprite_num_banks:=1;
 case main_vars.tipo_maquina of
   27:begin //Pitfall II
       //cargar roms
-      if not(roms_load(@memoria,@pitfall2_rom,'pitfall2.zip',sizeof(pitfall2_rom))) then exit;
+      if not(roms_load(@memoria,pitfall2_rom)) then exit;
       decrypt_sega(@memoria,@mem_dec,0); //Sega Decypt
       //cargar sonido
-      if not(roms_load(@mem_snd,@pitfall2_sound,'pitfall2.zip',sizeof(pitfall2_sound))) then exit;
+      if not(roms_load(@mem_snd,pitfall2_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@pitfall2_char,'pitfall2.zip',sizeof(pitfall2_char))) then exit;
+      if not(roms_load(@memoria_temp,pitfall2_char)) then exit;
       convert_gfx_system1;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@pitfall2_sprites,'pitfall2.zip',sizeof(pitfall2_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,pitfall2_sprites)) then exit;
       //Cargar PROM
-      if not(roms_load(@lookup_memory,@pitfall2_video_prom,'pitfall2.zip',sizeof(pitfall2_video_prom))) then exit;
+      if not(roms_load(@lookup_memory,pitfall2_video_prom)) then exit;
       //dip
       marcade.dswa:=$ff;
       marcade.dswa_val:=@system1_dip_credit;
@@ -426,17 +425,17 @@ case main_vars.tipo_maquina of
   35:begin  //Teddy Boy Blues
       sprite_num_banks:=2;
       //cargar roms
-      if not(roms_load(@memoria,@teddy_rom,'teddybb.zip',sizeof(teddy_rom))) then exit;
+      if not(roms_load(@memoria,teddy_rom)) then exit;
       decrypt_sega(@memoria,@mem_dec,1); //Sega Decypt
       //cargar sonido
-      if not(roms_load(@mem_snd,@teddy_sound,'teddybb.zip',sizeof(teddy_sound))) then exit;
+      if not(roms_load(@mem_snd,teddy_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@teddy_char,'teddybb.zip',sizeof(teddy_char))) then exit;
+      if not(roms_load(@memoria_temp,teddy_char)) then exit;
       convert_gfx_system1;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@teddy_sprites,'teddybb.zip',sizeof(teddy_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,teddy_sprites)) then exit;
       //Cargar PROM
-      if not(roms_load(@lookup_memory,@teddy_video_prom,'teddybb.zip',sizeof(teddy_video_prom))) then exit;
+      if not(roms_load(@lookup_memory,teddy_video_prom)) then exit;
       //dip
       marcade.dswa:=$ff;
       marcade.dswa_val:=@system1_dip_credit;
@@ -446,17 +445,17 @@ case main_vars.tipo_maquina of
   36:begin  //Wonder boy
       sprite_num_banks:=2;
       //cargar roms
-      if not(roms_load(@memoria,@wboy_rom,'wboy.zip',sizeof(wboy_rom))) then exit;
+      if not(roms_load(@memoria,wboy_rom)) then exit;
       decodifica_wonder_boy;
       //cargar sonido
-      if not(roms_load(@mem_snd,@wboy_sound,'wboy.zip',sizeof(wboy_sound))) then exit;
+      if not(roms_load(@mem_snd,wboy_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@wboy_char,'wboy.zip',sizeof(wboy_char))) then exit;
+      if not(roms_load(@memoria_temp,wboy_char)) then exit;
       convert_gfx_system1;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@wboy_sprites,'wboy.zip',sizeof(wboy_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,wboy_sprites)) then exit;
       //Cargar PROM
-      if not(roms_load(@lookup_memory,@wboy_video_prom,'wboy.zip',sizeof(wboy_video_prom))) then exit;
+      if not(roms_load(@lookup_memory,wboy_video_prom)) then exit;
       //dip
       marcade.dswa:=$ff;
       marcade.dswa_val:=@system1_dip_credit;
@@ -465,17 +464,17 @@ case main_vars.tipo_maquina of
      end;
   152:begin  //Mr Viking
       //cargar roms
-      if not(roms_load(@memoria,@mrviking_rom,'mrviking.zip',sizeof(mrviking_rom))) then exit;
-      decrypt_sega(@memoria,@mem_dec[0],3); //Sega Decypt
+      if not(roms_load(@memoria,mrviking_rom)) then exit;
+      decrypt_sega(@memoria,@mem_dec,3); //Sega Decypt
       //cargar sonido
-      if not(roms_load(@mem_snd,@mrviking_sound,'mrviking.zip',sizeof(mrviking_sound))) then exit;
+      if not(roms_load(@mem_snd,mrviking_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@mrviking_char,'mrviking.zip',sizeof(mrviking_char))) then exit;
+      if not(roms_load(@memoria_temp,mrviking_char)) then exit;
       convert_gfx_system1;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@mrviking_sprites,'mrviking.zip',sizeof(mrviking_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,mrviking_sprites)) then exit;
       //Cargar PROM
-      if not(roms_load(@lookup_memory,@mrviking_video_prom,'mrviking.zip',sizeof(mrviking_video_prom))) then exit;
+      if not(roms_load(@lookup_memory,mrviking_video_prom)) then exit;
       //dip
       marcade.dswa:=$ff;
       marcade.dswa_val:=@system1_dip_credit;
@@ -485,17 +484,17 @@ case main_vars.tipo_maquina of
   153:begin  //Sega Ninja
       sprite_num_banks:=2;
       //cargar roms
-      if not(roms_load(@memoria,@seganinj_rom,'seganinj.zip',sizeof(seganinj_rom))) then exit;
-      decrypt_sega(@memoria[0],@mem_dec[0],4); //Sega Decypt
+      if not(roms_load(@memoria,seganinj_rom)) then exit;
+      decrypt_sega(@memoria,@mem_dec,4); //Sega Decypt
       //cargar sonido
-      if not(roms_load(@mem_snd,@seganinj_sound,'seganinj.zip',sizeof(seganinj_sound))) then exit;
+      if not(roms_load(@mem_snd,seganinj_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@seganinj_char,'seganinj.zip',sizeof(seganinj_char))) then exit;
+      if not(roms_load(@memoria_temp,seganinj_char)) then exit;
       convert_gfx_system1;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@seganinj_sprites,'seganinj.zip',sizeof(seganinj_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,seganinj_sprites)) then exit;
       //Cargar PROM
-      if not(roms_load(@lookup_memory,@seganinj_video_prom,'seganinj.zip',sizeof(seganinj_video_prom))) then exit;
+      if not(roms_load(@lookup_memory,seganinj_video_prom)) then exit;
       //dip
       marcade.dswa:=$ff;
       marcade.dswa_val:=@system1_dip_credit;
@@ -504,17 +503,17 @@ case main_vars.tipo_maquina of
      end;
   154:begin  //Up and Down
       //cargar roms
-      if not(roms_load(@memoria,@upndown_rom,'upndown.zip',sizeof(upndown_rom))) then exit;
-      decrypt_sega(@memoria,@mem_dec[0],5); //Sega Decypt
+      if not(roms_load(@memoria,upndown_rom)) then exit;
+      decrypt_sega(@memoria,@mem_dec,5); //Sega Decypt
       //cargar sonido
-      if not(roms_load(@mem_snd,@upndown_sound,'upndown.zip',sizeof(upndown_sound))) then exit;
+      if not(roms_load(@mem_snd,upndown_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@upndown_char,'upndown.zip',sizeof(upndown_char))) then exit;
+      if not(roms_load(@memoria_temp,upndown_char)) then exit;
       convert_gfx_system1;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@upndown_sprites,'upndown.zip',sizeof(upndown_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,upndown_sprites)) then exit;
       //Cargar PROM
-      if not(roms_load(@lookup_memory,@upndown_video_prom,'upndown.zip',sizeof(upndown_video_prom))) then exit;
+      if not(roms_load(@lookup_memory,upndown_video_prom)) then exit;
       //dip
       marcade.dswa:=$ff;
       marcade.dswb_val:=@system1_dip_credit;
@@ -523,17 +522,17 @@ case main_vars.tipo_maquina of
      end;
   155:begin  //Flicky
       //cargar roms
-      if not(roms_load(@memoria,@flicky_rom,'flicky.zip',sizeof(flicky_rom))) then exit;
-      decrypt_sega(@memoria,@mem_dec[0],6); //Sega Decypt
+      if not(roms_load(@memoria,flicky_rom)) then exit;
+      decrypt_sega(@memoria,@mem_dec,6); //Sega Decypt
       //cargar sonido
-      if not(roms_load(@mem_snd,@flicky_sound,'flicky.zip',sizeof(flicky_sound))) then exit;
+      if not(roms_load(@mem_snd,flicky_sound)) then exit;
       //convertir chars
-      if not(roms_load(@memoria_temp,@flicky_char,'flicky.zip',sizeof(flicky_char))) then exit;
+      if not(roms_load(@memoria_temp,flicky_char)) then exit;
       convert_gfx_system1;
       //Meter los sprites en memoria
-      if not(roms_load(@memoria_sprites,@flicky_sprites,'flicky.zip',sizeof(flicky_sprites))) then exit;
+      if not(roms_load(@memoria_sprites,flicky_sprites)) then exit;
       //Cargar PROM
-      if not(roms_load(@lookup_memory,@flicky_video_prom,'flicky.zip',sizeof(flicky_video_prom))) then exit;
+      if not(roms_load(@lookup_memory,flicky_video_prom)) then exit;
       //dip
       marcade.dswa:=$ff;
       marcade.dswa_val:=@system1_dip_credit;

@@ -5,7 +5,7 @@ interface
 uses
   Windows, SysUtils, Variants, Classes,Forms,Vcl.Controls,Dialogs, Grids,
   StdCtrls, FileCtrl,upd765,main_engine,lenguaje,misc_functions,
-  file_engine,disk_file_format,ipf_disk;
+  file_engine,disk_file_format,ipf_disk,d64_file_format;
 
 type
   Tload_dsk = class(TForm)
@@ -48,6 +48,7 @@ datos_dsk:=nil;
 case main_vars.tipo_maquina of
   2:Directory.spectrum_disk:=FileListBox1.Directory+main_vars.cadena_dir;
   8,9:Directory.amstrad_disk:=FileListBox1.Directory+main_vars.cadena_dir;
+  3000:Directory.c64_disk:=FileListBox1.Directory+main_vars.cadena_dir;
 end;
 ultima_posicion:=filelistbox1.ItemIndex;
 load_dsk.close;
@@ -73,7 +74,6 @@ end;
 load_dsk.stringgrid1.RowCount:=2;
 end;
 
-
 procedure Tload_dsk.DirectoryListBox1Change(Sender: TObject);
 begin
 clear_all;
@@ -83,7 +83,7 @@ procedure Tload_dsk.FileListBox1Click(Sender: TObject);
 var
   f:word;
   longitud,crc:integer;
-  nothing1,nothing2:boolean;
+  nothing1,nothing2,nothing3:boolean;
   file_inside_zip:string;
 begin
 file_name:=filelistbox1.FileName;
@@ -93,16 +93,27 @@ f:=1;
 if file_extension='ZIP' then begin
   nothing1:=true;
   nothing2:=true;
+  nothing3:=true;
   //Primero busco los DSK
-  if search_file_from_zip(file_name,'*.dsk',file_inside_zip,longitud,crc,false) then begin
-    repeat
-       stringgrid1.Cells[0,f]:=file_inside_zip;
-       stringgrid1.Cells[1,f]:=inttostr(longitud);
-       inc(f);
-       stringgrid1.RowCount:=stringgrid1.RowCount+1;
-    until not(find_next_file_zip(file_inside_zip,longitud,crc));
-    nothing1:=false;
-  end;
+  if main_vars.tipo_maquina=3000 then begin
+    if search_file_from_zip(file_name,'*.d64',file_inside_zip,longitud,crc,false) then begin
+      repeat
+         stringgrid1.Cells[0,f]:=file_inside_zip;
+         stringgrid1.Cells[1,f]:=inttostr(longitud);
+         inc(f);
+         stringgrid1.RowCount:=stringgrid1.RowCount+1;
+      until not(find_next_file_zip(file_inside_zip,longitud,crc));
+      nothing3:=false;
+    end;
+  end else if search_file_from_zip(file_name,'*.dsk',file_inside_zip,longitud,crc,false) then begin
+            repeat
+              stringgrid1.Cells[0,f]:=file_inside_zip;
+              stringgrid1.Cells[1,f]:=inttostr(longitud);
+              inc(f);
+              stringgrid1.RowCount:=stringgrid1.RowCount+1;
+            until not(find_next_file_zip(file_inside_zip,longitud,crc));
+            nothing1:=false;
+           end;
   //Ahora busco los IPF
   if search_file_from_zip(file_name,'*.ipf',file_inside_zip,longitud,crc,false) then begin
     repeat
@@ -113,7 +124,7 @@ if file_extension='ZIP' then begin
     until not(find_next_file_zip(file_inside_zip,longitud,crc));
     nothing2:=false;
   end;
-  if (nothing1 and nothing2) then exit;
+  if (nothing1 and nothing2 and nothing3) then exit;
   stringgrid1.RowCount:=stringgrid1.RowCount-1;
   //Bien, ya tengo los ficheros metidos para verlos, ahora cojo el primero y lo cargo
   if not(search_file_from_zip(file_name,stringgrid1.Cells[0,1],file_inside_zip,file_size,crc,true)) then exit;
@@ -123,7 +134,7 @@ if file_extension='ZIP' then begin
   end_file_name:=file_inside_zip;
   exit;
 end;
-if ((file_extension='DSK') or (file_extension='IPF')) then begin
+if ((file_extension='DSK') or (file_extension='IPF') or (file_extension='D64')) then begin
   if not(read_file_size(file_name,file_size)) then exit;
   getmem(datos_dsk,file_size);
   if not(read_file(file_name,datos_dsk,file_size)) then exit;
@@ -136,12 +147,13 @@ var
   correcto:boolean;
 begin
 correcto:=false;
-if ((file_extension<>'DSK') and (file_extension<>'IPF')) then exit;
+if ((file_extension<>'DSK') and (file_extension<>'IPF') and (file_extension<>'D64')) then exit;
 if file_extension='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
 if file_extension='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
+if file_extension='D64' then correcto:=d64_format(0,file_size,datos_dsk);
 if correcto then begin
     llamadas_maquina.open_file:=file_extension+':'+end_file_name;
-    ResetFDC;
+    if main_vars.tipo_maquina<>3000 then ResetFDC;
     dsk[0].ImageName:=end_file_name;
     load_dsk.Button1Click(self);
 end else begin
@@ -163,6 +175,8 @@ end;
 
 procedure Tload_dsk.FormShow(Sender: TObject);
 begin
+if main_vars.tipo_maquina<>3000 then filelistbox1.Mask:='*.zip;*.dsk;*.ipf'
+  else filelistbox1.Mask:='*.zip;*.d64;*.ipf';
 stringgrid1.ColWidths[0]:=stringgrid1.Width-60;
 stringgrid1.ColWidths[1]:=60;
 stringgrid1.Cells[0,0]:=leng[main_vars.idioma].varios[0];
@@ -172,6 +186,7 @@ Button1.Caption:=leng[main_vars.idioma].mensajes[8];
 case main_vars.tipo_maquina of
   2:DirectoryListBox1.Directory:=Directory.spectrum_disk;
   8,9:DirectoryListBox1.Directory:=Directory.amstrad_disk;
+  3000:DirectoryListBox1.Directory:=Directory.c64_disk;
 end;
 if ((filelistbox1.Count=0) or (ultima_posicion<=0))  then begin
   ultima_posicion:=0;

@@ -9,76 +9,74 @@ procedure cargar_mappyhw;
 
 implementation
 
-type
-  tipo_update_video=procedure;
-
 const
         //Mappy
-        mappy_rom:array[0..3] of tipo_roms=(
+        mappy_rom:array[0..2] of tipo_roms=(
         (n:'mpx_3.1d';l:$2000;p:$a000;crc:$52e6c708),(n:'mp1_2.1c';l:$2000;p:$c000;crc:$a958a61c),
-        (n:'mpx_1.1b';l:$2000;p:$e000;crc:$203766d4),());
-        mappy_proms:array[0..3] of tipo_roms=(
+        (n:'mpx_1.1b';l:$2000;p:$e000;crc:$203766d4));
+        mappy_proms:array[0..2] of tipo_roms=(
         (n:'mp1-5.5b';l:$20;p:0;crc:$56531268),(n:'mp1-6.4c';l:$100;p:$20;crc:$50765082),
-        (n:'mp1-7.5k';l:$100;p:$120;crc:$5396bd78),());
+        (n:'mp1-7.5k';l:$100;p:$120;crc:$5396bd78));
         mappy_chars:tipo_roms=(n:'mp1_5.3b';l:$1000;p:0;crc:$16498b9f);
-        mappy_sprites:array[0..2] of tipo_roms=(
-        (n:'mp1_6.3m';l:$2000;p:0;crc:$f2d9647a),(n:'mp1_7.3n';l:$2000;p:$2000;crc:$757cf2b6),());
+        mappy_sprites:array[0..1] of tipo_roms=(
+        (n:'mp1_6.3m';l:$2000;p:0;crc:$f2d9647a),(n:'mp1_7.3n';l:$2000;p:$2000;crc:$757cf2b6));
         mappy_sound:tipo_roms=(n:'mp1_4.1k';l:$2000;p:$e000;crc:$8182dd5b);
         mappy_sound_prom:tipo_roms=(n:'mp1-3.3m';l:$100;p:0;crc:$16a9166a);
         //Dig Dug 2
-        dd2_rom:array[0..2] of tipo_roms=(
-        (n:'d23_3.1d';l:$4000;p:$8000;crc:$cc155338),(n:'d23_1.1b';l:$4000;p:$c000;crc:$40e46af8),());
-        dd2_proms:array[0..3] of tipo_roms=(
+        dd2_rom:array[0..1] of tipo_roms=(
+        (n:'d23_3.1d';l:$4000;p:$8000;crc:$cc155338),(n:'d23_1.1b';l:$4000;p:$c000;crc:$40e46af8));
+        dd2_proms:array[0..2] of tipo_roms=(
         (n:'d21-5.5b';l:$20;p:0;crc:$9b169db5),(n:'d21-6.4c';l:$100;p:$20;crc:$55a88695),
-        (n:'d21-7.5k';l:$100;p:$120;crc:$9c55feda),());
+        (n:'d21-7.5k';l:$100;p:$120;crc:$9c55feda));
         dd2_chars:tipo_roms=(n:'d21_5.3b';l:$1000;p:0;crc:$afcb4509);
-        dd2_sprites:array[0..2] of tipo_roms=(
-        (n:'d21_6.3m';l:$4000;p:0;crc:$df1f4ad8),(n:'d21_7.3n';l:$4000;p:$4000;crc:$ccadb3ea),());
+        dd2_sprites:array[0..1] of tipo_roms=(
+        (n:'d21_6.3m';l:$4000;p:0;crc:$df1f4ad8),(n:'d21_7.3n';l:$4000;p:$4000;crc:$ccadb3ea));
         dd2_sound:tipo_roms=(n:'d21_4.1k';l:$2000;p:$e000;crc:$737443b1);
         dd2_sound_prom:tipo_roms=(n:'d21-3.3m';l:$100;p:0;crc:$e0074ee2);
         //Super Pacman
-        spacman_rom:array[0..2] of tipo_roms=(
-        (n:'sp1-2.1c';l:$2000;p:$c000;crc:$4bb33d9c),(n:'sp1-1.1b';l:$2000;p:$e000;crc:$846fbb4a),());
-        spacman_proms:array[0..3] of tipo_roms=(
+        spacman_rom:array[0..1] of tipo_roms=(
+        (n:'sp1-2.1c';l:$2000;p:$c000;crc:$4bb33d9c),(n:'sp1-1.1b';l:$2000;p:$e000;crc:$846fbb4a));
+        spacman_proms:array[0..2] of tipo_roms=(
         (n:'superpac.4c';l:$20;p:0;crc:$9ce22c46),(n:'superpac.4e';l:$100;p:$20;crc:$1253c5c1),
-        (n:'superpac.3l';l:$100;p:$120;crc:$d4d7026f),());
+        (n:'superpac.3l';l:$100;p:$120;crc:$d4d7026f));
         spacman_chars:tipo_roms=(n:'sp1-6.3c';l:$1000;p:0;crc:$91c5935c);
         spacman_sprites:tipo_roms=(n:'spv-2.3f';l:$2000;p:0;crc:$670a42f2);
         spacman_sound:tipo_roms=(n:'spc-3.1k';l:$1000;p:$f000;crc:$04445ddb);
         spacman_sound_prom:tipo_roms=(n:'superpac.3m';l:$100;p:0;crc:$ad43688f);
         //The Tower of Druaga
-        todruaga_rom:array[0..2] of tipo_roms=(
-        (n:'td2_3.1d';l:$4000;p:$8000;crc:$fbf16299),(n:'td2_1.1b';l:$4000;p:$c000;crc:$b238d723),());
-        todruaga_proms:array[0..3] of tipo_roms=(
+        todruaga_rom:array[0..1] of tipo_roms=(
+        (n:'td2_3.1d';l:$4000;p:$8000;crc:$fbf16299),(n:'td2_1.1b';l:$4000;p:$c000;crc:$b238d723));
+        todruaga_proms:array[0..2] of tipo_roms=(
         (n:'td1-5.5b';l:$20;p:0;crc:$122cc395),(n:'td1-6.4c';l:$100;p:$20;crc:$8c661d6a),
-        (n:'td1-7.5k';l:$400;p:$120;crc:$a86c74dd),());
+        (n:'td1-7.5k';l:$400;p:$120;crc:$a86c74dd));
         todruaga_chars:tipo_roms=(n:'td1_5.3b';l:$1000;p:0;crc:$d32b249f);
-        todruaga_sprites:array[0..2] of tipo_roms=(
-        (n:'td1_6.3m';l:$2000;p:0;crc:$e827e787),(n:'td1_7.3n';l:$2000;p:$2000;crc:$962bd060),());
+        todruaga_sprites:array[0..1] of tipo_roms=(
+        (n:'td1_6.3m';l:$2000;p:0;crc:$e827e787),(n:'td1_7.3n';l:$2000;p:$2000;crc:$962bd060));
         todruaga_sound:tipo_roms=(n:'td1_4.1k';l:$2000;p:$e000;crc:$ae9d06d9);
         todruaga_sound_prom:tipo_roms=(n:'td1-3.3m';l:$100;p:0;crc:$07104c40);
         //Motos
-        motos_rom:array[0..2] of tipo_roms=(
-        (n:'mo1_3.1d';l:$4000;p:$8000;crc:$1104abb2),(n:'mo1_1.1b';l:$4000;p:$c000;crc:$57b157e2),());
-        motos_proms:array[0..3] of tipo_roms=(
+        motos_rom:array[0..1] of tipo_roms=(
+        (n:'mo1_3.1d';l:$4000;p:$8000;crc:$1104abb2),(n:'mo1_1.1b';l:$4000;p:$c000;crc:$57b157e2));
+        motos_proms:array[0..2] of tipo_roms=(
         (n:'mo1-5.5b';l:$20;p:0;crc:$71972383),(n:'mo1-6.4c';l:$100;p:$20;crc:$730ba7fb),
-        (n:'mo1-7.5k';l:$100;p:$120;crc:$7721275d),());
+        (n:'mo1-7.5k';l:$100;p:$120;crc:$7721275d));
         motos_chars:tipo_roms=(n:'mo1_5.3b';l:$1000;p:0;crc:$5d4a2a22);
-        motos_sprites:array[0..2] of tipo_roms=(
-        (n:'mo1_6.3m';l:$4000;p:0;crc:$2f0e396e),(n:'mo1_7.3n';l:$4000;p:$4000;crc:$cf8a3b86),());
+        motos_sprites:array[0..1] of tipo_roms=(
+        (n:'mo1_6.3m';l:$4000;p:0;crc:$2f0e396e),(n:'mo1_7.3n';l:$4000;p:$4000;crc:$cf8a3b86));
         motos_sound:tipo_roms=(n:'mo1_4.1k';l:$2000;p:$e000;crc:$55e45d21);
         motos_sound_prom:tipo_roms=(n:'mo1-3.3m';l:$100;p:0;crc:$2accdfb4);
 
 var
  snd_int,main_int:boolean;
- scroll_x,mux,io_timer0,io_timer1,sprite_mask:byte;
- update_video_proc:tipo_update_video;
+ mux,io_timer0,io_timer1,sprite_mask:byte;
+ update_video_proc:procedure;
+ scroll_x:word;
 
 procedure draw_sprites_mappy;inline;
 var
-  nchar,color,y:word;
+  color,y:word;
   flipx,flipy:boolean;
-  flipx_v,flipy_v,x,f,atrib,size,a,b,c,d,mix:byte;
+  nchar,flipx_v,flipy_v,x,f,atrib,size,a,b,c,d,mix:byte;
 begin
 for f:=0 to $3f do begin
   if (memoria[$2781+(f*2)] and $2)=0 then begin
@@ -95,7 +93,7 @@ for f:=0 to $3f do begin
     case size of
       0:begin  //16x16
             put_gfx_sprite_mask(nchar,color,flipx,flipy,1,$f,$f);
-            actualiza_gfx_sprite(x,y,5,1);
+            actualiza_gfx_sprite(x,y,3,1);
         end;
       1:begin //16x32
             nchar:=nchar and $fe;
@@ -103,7 +101,7 @@ for f:=0 to $3f do begin
             b:=1 xor flipy_v;
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,false,1,$f,$f,0,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,false,1,$f,$f,0,16);
-            actualiza_gfx_sprite_size(x,y,5,16,32);
+            actualiza_gfx_sprite_size(x,y,3,16,32);
         end;
       2:begin //32x16
             nchar:=nchar and $fd;
@@ -111,7 +109,7 @@ for f:=0 to $3f do begin
             b:=0 xor flipx_v;
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,flipy,1,15,$f,0,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,15,$f,16,0);
-            actualiza_gfx_sprite_size(x,y,5,32,16);
+            actualiza_gfx_sprite_size(x,y,3,32,16);
         end;
       3:begin //32x32
             nchar:=nchar and $fc;
@@ -128,30 +126,19 @@ for f:=0 to $3f do begin
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,15,$f,16,0);
             put_gfx_sprite_mask_diff(nchar+c,color,flipx,flipy,1,15,$f,0,16);
             put_gfx_sprite_mask_diff(nchar+d,color,flipx,flipy,1,15,$f,16,16);
-            actualiza_gfx_sprite_size(x,y,5,32,32);
+            actualiza_gfx_sprite_size(x,y,3,32,32);
          end;
       end;
     end;
   end;
 end;
 
-procedure scroll_mappy(porigen,pdestino:byte;scroll_x:word);inline;
-var
-  long_x:word;
-begin
-scroll_x:=scroll_x and $1ff;
-if ((scroll_x+256)>=480) then long_x:=256-((scroll_x+256)-480)
-  else long_x:=256;
-actualiza_trozo(scroll_x,0,long_x,256,porigen,0,16,long_x,256,pdestino);
-if long_x<480 then actualiza_trozo(0,0,480-long_x,256,porigen,long_x,16,480-long_x,256,pdestino);
-end;
-
 procedure update_video_mappy;
 const
   linea_y:array[0..$1f] of byte=($11,$10,$1f,$1e,$1d,$1c,$1b,$1a,$19,$18,$17,$16,$15,$14,$13,$12,1,0,$f,$e,$d,$c,$b,$a,9,8,7,6,5,4,3,2);
 var
-  x,y,f,color:word;
-  atrib,nchar:byte;
+  f,color:word;
+  x,y,atrib,nchar:byte;
 begin
 for f:=$7ff downto 0 do begin
     if gfx[0].buffer[f] then begin
@@ -160,53 +147,53 @@ for f:=$7ff downto 0 do begin
       color:=(atrib and $3f) shl 2;
       case f of
         0..$77f:begin
-          				x:=59-(f div 32);
-          				y:=f mod 32;
-                  put_gfx(x*8,y*8,nchar,color,2,0);
-                  if (atrib and $40)=0 then put_gfx_block_trans(x*8,y*8,3,8,8)
-                    else put_gfx_mask(x*8,y*8,nchar,color,3,0,$1f,$3f);
+                     x:=59-(f div 32);
+                     y:=f mod 32;
+                     put_gfx(x*8,(y*8)+16,nchar,color,1,0);
+                     if (atrib and $40)=0 then put_gfx_block_trans(x*8,(y*8)+16,2,8,8)
+                        else put_gfx_mask(x*8,(y*8)+16,nchar,color,2,0,$1f,$3f);
                 end;
         $780..$7bf:begin
                       //lineas de abajo
-                			x:=f and $1f;
-              				y:=(f and $3f) shr 5;
-                      put_gfx(linea_y[x]*8,(y+2)*8,nchar,color,1,0);
-                      if (atrib and $40)=0 then put_gfx_block_trans(linea_y[x]*8,(y+2)*8,4,8,8)
-                        else put_gfx_mask(linea_y[x]*8,(y+2)*8,nchar,color,4,0,$1f,$3f);
+                      x:=f and $1f;
+                      y:=(f and $3f) shr 5;
+                      put_gfx(linea_y[x]*8,(y*8)+256+16,nchar,color,1,0);
+                      if (atrib and $40)=0 then put_gfx_block_trans(linea_y[x]*8,(y*8)+256+16,2,8,8)
+                        else put_gfx_mask(linea_y[x]*8,(y*8)+256+16,nchar,color,2,0,$1f,$3f);
                     end;
         $7c0..$7ff:begin
                       //lineas de arriba
-                			x:=f and $1f;
-              				y:=(f and $3f) shr 5;
+                      x:=f and $1f;
+                      y:=(f and $3f) shr 5;
                       put_gfx(linea_y[x]*8,y*8,nchar,color,1,0);
-                      if (atrib and $40)=0 then put_gfx_block_trans(linea_y[x]*8,y*8,4,8,8)
-                        else put_gfx_mask(linea_y[x]*8,y*8,nchar,color,4,0,$1f,$3f);
+                      if (atrib and $40)=0 then put_gfx_block_trans(linea_y[x]*8,y*8,2,8,8)
+                        else put_gfx_mask(linea_y[x]*8,y*8,nchar,color,2,0,$1f,$3f);
                     end;
       end;
       gfx[0].buffer[f]:=false;
     end;
 end;
 //Las lineas de arriba y abajo fijas...
-actualiza_trozo(32,0,224,16,1,0,0,224,16,5);
-actualiza_trozo(32,16,223,16,1,1,272,223,16,5);
+actualiza_trozo(32,0,224,16,1,0,0,224,16,3);
+actualiza_trozo(32,272,224,16,1,0,272,224,16,3);
 //Pantalla principal
-scroll_mappy(2,5,scroll_x);
+scroll__x_part(1,3,scroll_x,0,16,256);
 //Los sprites
 draw_sprites_mappy;
 //Las lineas de arriba y abajo fijas transparentes...
-actualiza_trozo(32,0,224,16,4,0,0,224,16,5);
-actualiza_trozo(32,16,223,16,4,1,272,223,16,5);
+actualiza_trozo(32,0,224,16,2,0,0,224,16,3);
+actualiza_trozo(32,272,224,16,2,0,272,224,16,3);
 //Pantalla principal transparente
-scroll_mappy(3,5,scroll_x);
+scroll__x_part(2,3,scroll_x,0,16,256);
 //final, lo pego todooooo
-actualiza_trozo_final(0,0,224,288,5);
+actualiza_trozo_final(0,0,224,288,3);
 end;
 
 procedure draw_sprites_spacman;
 var
-  nchar,color,y:word;
+  color,y:word;
   flipx,flipy:boolean;
-  flipx_v,flipy_v,x,f,size,a,b,c,d,mix,atrib:byte;
+  nchar,flipx_v,flipy_v,x,f,size,a,b,c,d,mix,atrib:byte;
 begin
 for f:=0 to $3f do begin
   if (memoria[$1f81+(f*2)] and $2)=0 then begin
@@ -223,7 +210,7 @@ for f:=0 to $3f do begin
     case size of
       0:begin  //16x16
             put_gfx_sprite_mask(nchar,color,flipx,flipy,1,$f,$f);
-            actualiza_gfx_sprite(x,y,5,1);
+            actualiza_gfx_sprite(x,y,3,1);
         end;
       1:begin //16x32
             nchar:=nchar and $fe;
@@ -231,7 +218,7 @@ for f:=0 to $3f do begin
             b:=1 xor flipy_v;
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,flipy,1,15,$f,0,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,15,$f,0,16);
-            actualiza_gfx_sprite_size(x,y,5,16,32);
+            actualiza_gfx_sprite_size(x,y,3,16,32);
         end;
       2:begin //32x16
             nchar:=nchar and $fd;
@@ -239,7 +226,7 @@ for f:=0 to $3f do begin
             b:=0 xor flipx_v;
             put_gfx_sprite_mask_diff(nchar+a,color,flipx,flipy,1,15,$f,0,0);
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,15,$f,16,0);
-            actualiza_gfx_sprite_size(x,y,5,32,16);
+            actualiza_gfx_sprite_size(x,y,3,32,16);
         end;
       3:begin //32x32
             nchar:=nchar and $fc;
@@ -256,7 +243,7 @@ for f:=0 to $3f do begin
             put_gfx_sprite_mask_diff(nchar+b,color,flipx,flipy,1,15,$f,16,0);
             put_gfx_sprite_mask_diff(nchar+c,color,flipx,flipy,1,15,$f,0,16);
             put_gfx_sprite_mask_diff(nchar+d,color,flipx,flipy,1,15,$f,16,16);
-            actualiza_gfx_sprite_size(x,y,5,32,32);
+            actualiza_gfx_sprite_size(x,y,3,32,32);
          end;
       end;
     end;
@@ -265,8 +252,8 @@ end;
 
 procedure update_video_spacman;
 var
-  x,y,f,color:word;
-  atrib,nchar:byte;
+  f,color:word;
+  x,y,atrib,nchar:byte;
 begin
 for f:=$3ff downto 0 do begin
     if gfx[0].buffer[f] then begin
@@ -275,46 +262,40 @@ for f:=$3ff downto 0 do begin
       color:=(atrib and $3f) shl 2;
       case f of
         $40..$3bf:begin
-          				x:=31-(f div 32);
-          				y:=f mod 32;
-                  put_gfx(x*8,y*8,nchar,color,2,0);
-                  if (atrib and $40)=0 then put_gfx_block_trans(x*8,y*8,3,8,8)
-                    else put_gfx_mask(x*8,y*8,nchar,color,3,0,$1f,$1f);
+                       x:=31-(f div 32);
+                       y:=f mod 32;
+                       put_gfx(x*8,(y*8)+16,nchar,color,1,0);
+                       if (atrib and $40)=0 then put_gfx_block_trans(x*8,(y*8)+16,2,8,8)
+                          else put_gfx_mask(x*8,(y*8)+16,nchar,color,2,0,$1f,$1f);
                 end;
         $0..$3f:begin
                       //lineas de abajo
-                			x:=31-(f and $1f);
-              				y:=(f and $3f) shr 5;
-                      put_gfx(x*8,(y+2)*8,nchar,color,1,0);
-                      if (atrib and $40)=0 then put_gfx_block_trans(x*8,(y+2)*8,4,8,8)
-                        else put_gfx_mask(x*8,(y+2)*8,nchar,color,4,0,$1f,$1f);
+                      x:=31-(f and $1f);
+                      y:=(f and $3f) shr 5;
+                      put_gfx(x*8,(y*8)+256+16,nchar,color,1,0);
+                      if (atrib and $40)=0 then put_gfx_block_trans(x*8,(y*8)+256+16,2,8,8)
+                        else put_gfx_mask(x*8,(y*8)+256+16,nchar,color,2,0,$1f,$1f);
                     end;
         $3c0..$3ff:begin
                       //lineas de arriba
-                			x:=31-(f and $1f);
-              				y:=(f and $3f) shr 5;
+                      x:=31-(f and $1f);
+                      y:=(f and $3f) shr 5;
                       put_gfx(x*8,y*8,nchar,color,1,0);
-                      if (atrib and $40)=0 then put_gfx_block_trans(x*8,y*8,4,8,8)
-                        else put_gfx_mask(x*8,y*8,nchar,color,4,0,$1f,$1f);
+                      if (atrib and $40)=0 then put_gfx_block_trans(x*8,y*8,2,8,8)
+                        else put_gfx_mask(x*8,y*8,nchar,color,2,0,$1f,$1f);
                     end;
       end;
      gfx[0].buffer[f]:=false;
     end;
 end;
-//Lineas de arriba
-actualiza_trozo(16,0,224,16,1,0,0,224,16,5);
-actualiza_trozo(16,16,224,16,1,0,272,224,16,5);
 //Pantalla principal
-actualiza_trozo(16,0,224,256,2,0,16,224,256,5);
+actualiza_trozo(16,0,224,288,1,0,0,224,288,3);
 //Los sprites
 draw_sprites_spacman;
-//Las lineas de arriba y abajo fijas transparentes...
-actualiza_trozo(16,0,224,16,4,0,0,224,16,5);
-actualiza_trozo(16,16,224,16,4,0,272,224,16,5);
 //Pantalla principal transparente
-actualiza_trozo(16,0,224,256,3,0,16,224,256,5);
+actualiza_trozo(16,0,224,288,2,0,0,224,288,3);
 //final, lo pego todooooo
-actualiza_trozo_final(0,0,224,288,5);
+actualiza_trozo_final(0,0,224,288,3);
 end;
 
 procedure eventos_mappy;
@@ -356,8 +337,8 @@ while EmuStatus=EsRuning do begin
     end;
   end;
   //Dar un poco de tiempo a las CPU's para hacer su trabajo con los IO's
-  if namco_chip[0].reset then timer[io_timer0].enabled:=true;
-  if namco_chip[1].reset then timer[io_timer1].enabled:=true;
+  if namco_chip[0].reset then timers.enabled(io_timer0,true);
+  if namco_chip[1].reset then timers.enabled(io_timer1,true);
   eventos_mappy;
   video_sync;
 end;
@@ -396,14 +377,13 @@ end;
 
 procedure mappy_putbyte(direccion:word;valor:byte);
 begin
-if (direccion>$7fff) then exit;
 case direccion of
   $0..$fff:if memoria[direccion]<>valor then begin
               gfx[0].buffer[direccion and $7ff]:=true;
               memoria[direccion]:=valor;
            end;
   $1000..$27ff,$4040..$43ff:memoria[direccion]:=valor;
-  $3800..$3fff:scroll_x:=255-((direccion and $7ff) shr 3);
+  $3800..$3fff:scroll_x:=256-((direccion and $7ff) shr 3);
   $4000..$403f:begin
                   namco_snd_0.regs[direccion and $3f]:=valor;
                   memoria[direccion]:=valor;
@@ -411,6 +391,7 @@ case direccion of
   $4800..$480f:namcoio_w(0,direccion and $f,valor);
   $4810..$481f:namcoio_w(1,direccion and $f,valor);
   $5000..$500f:mappy_latch(direccion and $0f);
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -424,7 +405,6 @@ end;
 
 procedure sound_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$dfff then exit;
 case direccion of
    $0..$3f:begin
             memoria[$4000+direccion]:=valor;
@@ -432,6 +412,7 @@ case direccion of
            end;
    $40..$3ff:memoria[$4000+direccion]:=valor;
    $2000..$200f:mappy_latch(direccion and $0f);
+   $e000..$ffff:; //ROM
 end;
 end;
 
@@ -443,7 +424,6 @@ end;
 //Super Pacman
 procedure spacman_putbyte(direccion:word;valor:byte);
 begin
-if (direccion>$9fff) then exit;
 case direccion of
   $0..$7ff:if memoria[direccion]<>valor then begin
               gfx[0].buffer[direccion and $3ff]:=true;
@@ -457,6 +437,7 @@ case direccion of
   $4800..$480f:namcoio_w(0,direccion and $f,valor);
   $4810..$481f:namcoio_w(1,direccion and $f,valor);
   $5000..$500f:mappy_latch(direccion and $0f);
+  $a000..$ffff:;  //ROM
 end;
 end;
 
@@ -468,12 +449,12 @@ end;
 
 function inport0_1:byte;
 begin
-inport0_1:=marcade.in2; //p1
+  inport0_1:=marcade.in2; //p1
 end;
 
 function inport0_2:byte;
 begin
-inport0_2:=$0f; //p2
+  inport0_2:=$0f; //p2
 end;
 
 function inport0_3:byte;
@@ -506,16 +487,27 @@ begin
 mux:=data and $1;
 end;
 
+procedure mappy_io(index:byte);
+begin
+if index=0 then begin
+  namco_io_run(0);
+  timers.enabled(io_timer0,false);
+end else begin
+  namco_io_run(1);
+  timers.enabled(io_timer1,false);
+end;
+end;
+
 procedure mappy_io0;
 begin
 namco_io_run(0);
-timer[io_timer0].enabled:=false;
+timers.enabled(io_timer0,false);
 end;
 
 procedure mappy_io1;
 begin
 namco_io_run(1);
-timer[io_timer1].enabled:=false;
+timers.enabled(io_timer1,false);
 end;
 
 //Main
@@ -536,7 +528,6 @@ end;
 function iniciar_mappyhw:boolean;
 const
     pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
                           			24*8+0, 24*8+1, 24*8+2, 24*8+3);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -550,7 +541,7 @@ begin
   if inv then for f:=0 to $fff do memoria_temp[f]:=not(memoria_temp[f]);
   init_gfx(0,8,8,$100);
   gfx_set_desc_data(2,0,16*8,0,4);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+  convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,true,false);
 end;
 
 procedure set_sprites(num,tipo:byte);
@@ -560,7 +551,7 @@ begin
     0:gfx_set_desc_data(4,0,64*8,0,4,8192*8*num,(8192*8*num)+4);
     1:gfx_set_desc_data(2,0,64*8,0,4);
   end;
-  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 
 procedure set_color_lookup(tipo:byte;long_sprites:word);
@@ -586,12 +577,12 @@ begin
 iniciar_mappyhw:=false;
 iniciar_audio(false);
 //Pantallas
-screen_init(1,256,32);
-screen_init(2,480,288);
-screen_init(3,480,288,true);
-screen_init(4,256,32,true);
-screen_init(5,512,512,false,true);
-screen_mod_sprites(5,256,512,255,511);
+screen_init(1,512,288);
+screen_mod_scroll(1,512,256,511,256,256,255);
+screen_init(2,512,288,true);
+screen_mod_scroll(2,512,256,511,256,256,255);
+screen_init(3,512,512,false,true);
+screen_mod_sprites(3,256,512,255,511);
 iniciar_video(224,288);
 //Main CPU
 m6809_0:=cpu_m6809.Create(1536000,264,TCPU_M6809);
@@ -601,8 +592,8 @@ m6809_1.change_ram_calls(sound_getbyte,sound_putbyte);
 m6809_1.init_sound(mappy_sound_update);
 namco_snd_0:=namco_snd_chip.create(8);
 //IO Chips
-io_timer0:=init_timer(m6809_0.numero_cpu,77,mappy_io0,false);
-io_timer1:=init_timer(m6809_0.numero_cpu,77,mappy_io1,false);
+io_timer0:=timers.init(m6809_0.numero_cpu,77,nil,mappy_io,false,0);
+io_timer1:=timers.init(m6809_0.numero_cpu,77,nil,mappy_io,false,1);
 namco_chip[0].in_f[0]:=inport0_0;
 namco_chip[0].in_f[1]:=inport0_1;
 namco_chip[0].in_f[2]:=inport0_2;
@@ -623,19 +614,19 @@ case  main_vars.tipo_maquina of
       namco_chip[0].tipo:=namco_58xx;
       namco_chip[1].tipo:=namco_58xx;
       //cargar roms
-      if not(cargar_roms(@memoria[0],@mappy_rom[0],'mappy.zip',0)) then exit;
+      if not(roms_load(@memoria,mappy_rom)) then exit;
       //Cargar Sound+samples
-      if not(cargar_roms(@mem_snd[0],@mappy_sound,'mappy.zip')) then exit;
-      if not(cargar_roms(namco_snd_0.get_wave_dir,@mappy_sound_prom,'mappy.zip')) then exit;
+      if not(roms_load(@mem_snd,mappy_sound)) then exit;
+      if not(roms_load(namco_snd_0.get_wave_dir,mappy_sound_prom)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@mappy_chars,'mappy.zip')) then exit;
+      if not(roms_load(@memoria_temp,mappy_chars)) then exit;
       set_chars(true);
       //Sprites
-      if not(cargar_roms(@memoria_temp[0],@mappy_sprites[0],'mappy.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,mappy_sprites)) then exit;
       set_sprites(1,0);
       sprite_mask:=$7f;
       //Color lookup
-      if not(cargar_roms(@memoria_temp[0],@mappy_proms[0],'mappy.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,mappy_proms)) then exit;
       set_color_lookup(0,$100);
   end;
   63:begin //Dig-Dug 2
@@ -645,19 +636,19 @@ case  main_vars.tipo_maquina of
       namco_chip[0].tipo:=namco_58xx;
       namco_chip[1].tipo:=namco_56xx;
       //cargar roms
-      if not(cargar_roms(@memoria[0],@dd2_rom[0],'digdug2.zip',0)) then exit;
+      if not(roms_load(@memoria,dd2_rom)) then exit;
       //Cargar Sound+samples
-      if not(cargar_roms(@mem_snd[0],@dd2_sound,'digdug2.zip',1)) then exit;
-      if not(cargar_roms(namco_snd_0.get_wave_dir,@dd2_sound_prom,'digdug2.zip',1)) then exit;
+      if not(roms_load(@mem_snd,dd2_sound)) then exit;
+      if not(roms_load(namco_snd_0.get_wave_dir,dd2_sound_prom)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@dd2_chars,'digdug2.zip',1)) then exit;
+      if not(roms_load(@memoria_temp,dd2_chars)) then exit;
       set_chars(true);
       //Sprites
-      if not(cargar_roms(@memoria_temp[0],@dd2_sprites[0],'digdug2.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,dd2_sprites)) then exit;
       set_sprites(2,0);
       sprite_mask:=$ff;
       //Color lookup
-      if not(cargar_roms(@memoria_temp[0],@dd2_proms[0],'digdug2.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,dd2_proms)) then exit;
       set_color_lookup(0,$100);
   end;
   64:begin //Super Pacman
@@ -667,19 +658,19 @@ case  main_vars.tipo_maquina of
       namco_chip[0].tipo:=namco_56xx;
       namco_chip[1].tipo:=namco_56xx;
       //cargar roms
-      if not(cargar_roms(@memoria[0],@spacman_rom[0],'superpac.zip',0)) then exit;
+      if not(roms_load(@memoria,spacman_rom)) then exit;
       //Cargar Sound+samples
-      if not(cargar_roms(@mem_snd[0],@spacman_sound,'superpac.zip')) then exit;
-      if not(cargar_roms(namco_snd_0.get_wave_dir,@spacman_sound_prom,'superpac.zip')) then exit;
+      if not(roms_load(@mem_snd,spacman_sound)) then exit;
+      if not(roms_load(namco_snd_0.get_wave_dir,spacman_sound_prom)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@spacman_chars,'superpac.zip')) then exit;
+      if not(roms_load(@memoria_temp,spacman_chars)) then exit;
       set_chars(false);
       //Sprites
-      if not(cargar_roms(@memoria_temp[0],@spacman_sprites,'superpac.zip')) then exit;
+      if not(roms_load(@memoria_temp,spacman_sprites)) then exit;
       set_sprites(1,1);
       sprite_mask:=$7f;
       //Color lookup
-      if not(cargar_roms(@memoria_temp[0],@spacman_proms[0],'superpac.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,spacman_proms)) then exit;
       set_color_lookup(1,$100);
   end;
   192:begin //The Tower of Druaga
@@ -689,19 +680,19 @@ case  main_vars.tipo_maquina of
       namco_chip[0].tipo:=namco_58xx;
       namco_chip[1].tipo:=namco_56xx;
       //cargar roms
-      if not(cargar_roms(@memoria[0],@todruaga_rom[0],'todruaga.zip',0)) then exit;
+      if not(roms_load(@memoria,todruaga_rom)) then exit;
       //Cargar Sound+samples
-      if not(cargar_roms(@mem_snd[0],@todruaga_sound,'todruaga.zip')) then exit;
-      if not(cargar_roms(namco_snd_0.get_wave_dir,@todruaga_sound_prom,'todruaga.zip')) then exit;
+      if not(roms_load(@mem_snd,todruaga_sound)) then exit;
+      if not(roms_load(namco_snd_0.get_wave_dir,todruaga_sound_prom)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@todruaga_chars,'todruaga.zip')) then exit;
+      if not(roms_load(@memoria_temp,todruaga_chars)) then exit;
       set_chars(true);
       //Sprites
-      if not(cargar_roms(@memoria_temp[0],@todruaga_sprites[0],'todruaga.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,todruaga_sprites)) then exit;
       set_sprites(1,0);
       sprite_mask:=$7f;
       //Color lookup
-      if not(cargar_roms(@memoria_temp[0],@todruaga_proms[0],'todruaga.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,todruaga_proms)) then exit;
       set_color_lookup(0,$400);
   end;
   193:begin //Motos
@@ -711,19 +702,19 @@ case  main_vars.tipo_maquina of
       namco_chip[0].tipo:=namco_56xx;
       namco_chip[1].tipo:=namco_56xx;
       //cargar roms
-      if not(cargar_roms(@memoria[0],@motos_rom[0],'motos.zip',0)) then exit;
+      if not(roms_load(@memoria,motos_rom)) then exit;
       //Cargar Sound+samples
-      if not(cargar_roms(@mem_snd[0],@motos_sound,'motos.zip')) then exit;
-      if not(cargar_roms(namco_snd_0.get_wave_dir,@motos_sound_prom,'motos.zip')) then exit;
+      if not(roms_load(@mem_snd,motos_sound)) then exit;
+      if not(roms_load(namco_snd_0.get_wave_dir,motos_sound_prom)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@motos_chars,'motos.zip')) then exit;
+      if not(roms_load(@memoria_temp,motos_chars)) then exit;
       set_chars(true);
       //Sprites
-      if not(cargar_roms(@memoria_temp[0],@motos_sprites[0],'motos.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,motos_sprites)) then exit;
       set_sprites(2,0);
       sprite_mask:=$ff;
       //Color lookup
-      if not(cargar_roms(@memoria_temp[0],@motos_proms[0],'motos.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,motos_proms)) then exit;
       set_color_lookup(0,$100);
   end;
 end;
@@ -731,7 +722,7 @@ reset_mappyhw;
 iniciar_mappyhw:=true;
 end;
 
-procedure Cargar_mappyhw;
+procedure cargar_mappyhw;
 begin
 llamadas_maquina.bucle_general:=mappy_principal;
 llamadas_maquina.iniciar:=iniciar_mappyhw;

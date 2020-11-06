@@ -9,24 +9,24 @@ procedure cargar_hypersports;
 
 implementation
 const
-        hypersports_rom:array[0..6] of tipo_roms=(
+        hypersports_rom:array[0..5] of tipo_roms=(
         (n:'c01';l:$2000;p:$4000;crc:$0c720eeb),(n:'c02';l:$2000;p:$6000;crc:$560258e0),
         (n:'c03';l:$2000;p:$8000;crc:$9b01c7e6),(n:'c04';l:$2000;p:$a000;crc:$10d7e9a2),
-        (n:'c05';l:$2000;p:$c000;crc:$b105a8cd),(n:'c06';l:$2000;p:$e000;crc:$1a34a849),());
-        hypersports_char:array[0..4] of tipo_roms=(
+        (n:'c05';l:$2000;p:$c000;crc:$b105a8cd),(n:'c06';l:$2000;p:$e000;crc:$1a34a849));
+        hypersports_char:array[0..3] of tipo_roms=(
         (n:'c26';l:$2000;p:0;crc:$a6897eac),(n:'c24';l:$2000;p:$2000;crc:$5fb230c0),
-        (n:'c22';l:$2000;p:$4000;crc:$ed9271a0),(n:'c20';l:$2000;p:$6000;crc:$183f4324),());
-        hypersports_sprites:array[0..8] of tipo_roms=(
+        (n:'c22';l:$2000;p:$4000;crc:$ed9271a0),(n:'c20';l:$2000;p:$6000;crc:$183f4324));
+        hypersports_sprites:array[0..7] of tipo_roms=(
         (n:'c14';l:$2000;p:0;crc:$c72d63be),(n:'c13';l:$2000;p:$2000;crc:$76565608),
         (n:'c12';l:$2000;p:$4000;crc:$74d2cc69),(n:'c11';l:$2000;p:$6000;crc:$66cbcb4d),
         (n:'c18';l:$2000;p:$8000;crc:$ed25e669),(n:'c17';l:$2000;p:$a000;crc:$b145b39f),
-        (n:'c16';l:$2000;p:$c000;crc:$d7ff9f2b),(n:'c15';l:$2000;p:$e000;crc:$f3d454e6),());
-        hypersports_pal:array[0..3] of tipo_roms=(
+        (n:'c16';l:$2000;p:$c000;crc:$d7ff9f2b),(n:'c15';l:$2000;p:$e000;crc:$f3d454e6));
+        hypersports_pal:array[0..2] of tipo_roms=(
         (n:'c03_c27.bin';l:$20;p:$0;crc:$bc8a5956),(n:'j12_c28.bin';l:$100;p:$20;crc:$2c891d59),
-        (n:'a09_c29.bin';l:$100;p:$120;crc:$811a3f3f),());
+        (n:'a09_c29.bin';l:$100;p:$120;crc:$811a3f3f));
         hypersports_vlm:tipo_roms=(n:'c08';l:$2000;p:$0;crc:$e8f8ea78);
-        hypersports_snd:array[0..2] of tipo_roms=(
-        (n:'c10';l:$2000;p:$0;crc:$3dc1a6ff),(n:'c09';l:$2000;p:$2000;crc:$9b525c3e),());
+        hypersports_snd:array[0..1] of tipo_roms=(
+        (n:'c10';l:$2000;p:$0;crc:$3dc1a6ff),(n:'c09';l:$2000;p:$2000;crc:$9b525c3e));
         hypersports_dip_a:array [0..1] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),());
         hypersports_dip_b:array [0..5] of def_dip=(
@@ -133,7 +133,6 @@ end;
 
 procedure hypersports_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   $1000..$10ff,$3000..$3fff:memoria[direccion]:=valor;
   $1480:main_screen.flip_main_screen:=(valor and $1)<>0;
@@ -144,6 +143,7 @@ case direccion of
                    gfx[0].buffer[direccion and $7ff]:=true;
                    memoria[direccion]:=valor;
                end;
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -160,8 +160,8 @@ procedure hypersports_snd_putbyte(direccion:word;valor:byte);
 var
   changes,offset:integer;
 begin
-if direccion<$4000 then exit;
 case direccion of
+    0..$3fff:; //ROM
     $4000..$4fff:mem_snd[direccion]:=valor;
     $a000:vlm5030_0.data_w(valor);
     $c000..$dfff:begin
@@ -207,7 +207,7 @@ savedata_qsnapshot(data,size);
 size:=dac_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[0],$4000);
+savedata_com_qsnapshot(@memoria,$4000);
 savedata_com_qsnapshot(@mem_snd[$4000],$c000);
 //MISC
 buffer[0]:=byte(irq_ena);
@@ -215,7 +215,7 @@ buffer[1]:=sound_latch;
 buffer[2]:=chip_latch;
 buffer[3]:=last_addr and $ff;
 buffer[4]:=last_addr shr 8;
-savedata_qsnapshot(@buffer[0],5);
+savedata_qsnapshot(@buffer,5);
 freemem(data);
 close_qsnapshot;
 end;
@@ -240,10 +240,10 @@ vlm5030_0.load_snapshot(data);
 loaddata_qsnapshot(data);
 dac_0.load_snapshot(data);
 //MEM
-loaddata_qsnapshot(@memoria[0]);
+loaddata_qsnapshot(@memoria);
 loaddata_qsnapshot(@mem_snd[$4000]);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 irq_ena:=buffer[0]<>0;
 sound_latch:=buffer[1];
 chip_latch:=buffer[2];
@@ -251,7 +251,7 @@ last_addr:=buffer[3] or (buffer[4] shl 8);
 freemem(data);
 close_qsnapshot;
 //end
-fillchar(gfx[0].buffer[0],$800,1);
+fillchar(gfx[0].buffer,$800,1);
 end;
 
 //Main
@@ -286,8 +286,6 @@ var
   rweights,gweights:array[0..3] of single;
   bweights:array[0..2] of single;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3);
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,
@@ -311,30 +309,30 @@ z80_0.init_sound(hypersports_sound_update);
 //Sound Chip
 sn_76496_0:=sn76496_chip.Create(14318180 div 8);
 vlm5030_0:=vlm5030_chip.Create(3579545,$2000,4);
-if not(cargar_roms(vlm5030_0.get_rom_addr,@hypersports_vlm,'hyperspt.zip',1)) then exit;
+if not(roms_load(vlm5030_0.get_rom_addr,hypersports_vlm)) then exit;
 dac_0:=dac_chip.Create(0.80);
-if not(cargar_roms(@memoria[0],@hypersports_rom[0],'hyperspt.zip',0)) then exit;
+if not(roms_load(@memoria,hypersports_rom)) then exit;
 konami1_decode(@memoria[$4000],@mem_opcodes[0],$c000);
 //NV ram
 if read_file_size(Directory.Arcade_nvram+'hypersports.nv',longitud) then read_file(Directory.Arcade_nvram+'hypersports.nv',@memoria[$3800],longitud);
-if not(cargar_roms(@mem_snd[0],@hypersports_snd,'hyperspt.zip',0)) then exit;
+if not(roms_load(@mem_snd,hypersports_snd)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@hypersports_char,'hyperspt.zip',0)) then exit;
+if not(roms_load(@memoria_temp,hypersports_char)) then exit;
 init_gfx(0,8,8,$400);
 gfx_set_desc_data(4,0,16*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@hypersports_sprites[0],'hyperspt.zip',0)) then exit;
+if not(roms_load(@memoria_temp,hypersports_sprites)) then exit;
 init_gfx(1,16,16,$200);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$8000*8+4,$8000*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@hypersports_pal[0],'hyperspt.zip',0)) then exit;
+if not(roms_load(@memoria_temp,hypersports_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances_rg[0],@rweights[0],1000,0,
-			3,@resistances_rg[0],@gweights[0],1000,0,
-			2,@resistances_b[0],@bweights[0],1000,0);
+			3,@resistances_rg,@rweights,1000,0,
+			3,@resistances_rg,@gweights,1000,0,
+			2,@resistances_b,@bweights,1000,0);
 for f:=0 to $1f do begin
 		// red component */
 		bit0:=(memoria_temp[f] shr 0) and $01;

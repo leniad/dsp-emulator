@@ -80,16 +80,14 @@ const
         (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'30k'),(dip_val:$4;dip_name:'40k'),(dip_val:$8;dip_name:'50k'),(dip_val:$c;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Additinoal Bonus';number:4;dip:((dip_val:$0;dip_name:'30k'),(dip_val:$10;dip_name:'40k'),(dip_val:$20;dip_name:'50k'),(dip_val:$30;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$40;dip_name:'Medium'),(dip_val:$80;dip_name:'Hard'),(dip_val:$c0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
-type
-    tipo_tunes_def=procedure(valor:byte);
-    tipo_effects_def=procedure(direccion,valor:byte);
+
 var
  colores_char:array[0..$ff] of byte;
  haz_nmi:boolean;
  npaleta,latch1,latch2,latch3:byte;
  sprite_bank,char_bank:word;
- audio_tunes:tipo_tunes_def;
- audio_effects:tipo_effects_def;
+ audio_tunes:procedure(valor:byte);
+ audio_effects:procedure(direccion,valor:byte);
  //dkong
  tune01,tune08,tune09,tune11:byte;
  effect0,effect1,effect2:byte;
@@ -128,21 +126,21 @@ procedure eventos_dkong;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $F7);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $Fe);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   //P2
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $F7);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $Fe);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   //SYS
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $80) else marcade.in2:=(marcade.in2 and $7f);
   if arcade_input.start[0] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $80) else marcade.in2:=(marcade.in2 and $7f);
 end;
 end;
 
@@ -308,35 +306,35 @@ end;
 
 procedure dkong_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$6000 then exit;
 case direccion of
-        $6000..$6bff,$7000..$73ff:memoria[direccion]:=valor;
-        $7400..$77ff:if memoria[direccion]<>valor then begin
-                        gfx[0].buffer[direccion and $3ff]:=true;
-                        memoria[direccion]:=valor;
-                     end;
-        $7c00:audio_tunes(valor);
-        $7c80:if char_bank<>((valor and 1)*$100) then begin
-                fillchar(gfx[0].buffer[0],$400,1);
-                char_bank:=(valor and 1)*$100;
-              end;
-        $7d00..$7d07:audio_effects(direccion and 7,valor);
-        $7d80:if (valor<>0) then begin  //death
-                  stop_all_samples;
-                  start_sample(0);
-              end;
-        $7e82:main_screen.flip_main_screen:=(valor and 1)=0;
-        $7d83:sprite_bank:=$200*(valor and 1);
-        $7d84:haz_nmi:=(valor=1);
-        $7d85:if (valor and 1)<>0 then copymemory(@memoria[$7000],@memoria[$6900],$400);
-        $7d86:if npaleta<>((npaleta and 2) or (valor and 1)) then begin
-                npaleta:=(npaleta and 2) or (valor and 1);
-                fillchar(gfx[0].buffer[0],$400,1);
-              end;
-        $7d87:if npaleta<>((npaleta and 1) or ((valor and 1) shl 1)) then begin
-                npaleta:=(npaleta and 1) or ((valor and 1) shl 1);
-                fillchar(gfx[0].buffer[0],$400,1);
-              end;
+  0..$5fff:; //ROM
+  $6000..$6bff,$7000..$73ff:memoria[direccion]:=valor;
+  $7400..$77ff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $7c00:audio_tunes(valor);
+  $7c80:if char_bank<>((valor and 1)*$100) then begin
+            fillchar(gfx[0].buffer[0],$400,1);
+            char_bank:=(valor and 1)*$100;
+        end;
+  $7d00..$7d07:audio_effects(direccion and 7,valor);
+  $7d80:if (valor<>0) then begin  //death
+            stop_all_samples;
+            start_sample(0);
+        end;
+  $7e82:main_screen.flip_main_screen:=(valor and 1)=0;
+  $7d83:sprite_bank:=$200*(valor and 1);
+  $7d84:haz_nmi:=(valor=1);
+  $7d85:if (valor and 1)<>0 then copymemory(@memoria[$7000],@memoria[$6900],$400);
+  $7d86:if npaleta<>((npaleta and 2) or (valor and 1)) then begin
+            npaleta:=(npaleta and 2) or (valor and 1);
+            fillchar(gfx[0].buffer[0],$400,1);
+        end;
+  $7d87:if npaleta<>((npaleta and 1) or ((valor and 1) shl 1)) then begin
+            npaleta:=(npaleta and 1) or ((valor and 1) shl 1);
+            fillchar(gfx[0].buffer[0],$400,1);
+        end;
 end;
 end;
 
@@ -350,18 +348,18 @@ procedure eventos_dkong3;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $F7);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $Fe);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   //P2
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $F7);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $Fe);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 or $40) else marcade.in1:=(marcade.in1 and $bf);
@@ -415,41 +413,41 @@ end;
 
 procedure dkong3_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$6000) or ((direccion>$7fff) and (direccion<$a000))) then exit;
 case direccion of
-        $6000..$73ff:memoria[direccion]:=valor;
-        $7400..$77ff:if memoria[direccion]<>valor then begin
-                        gfx[0].buffer[direccion and $3ff]:=true;
-                        memoria[direccion]:=valor;
-                     end;
-        $7c00:latch1:=valor;
-        $7c80:latch2:=valor;
-        $7d00:latch3:=valor;
-        $7d80:if ((valor and $1)<>0) then begin
-                n2a03_0.m6502.change_reset(CLEAR_LINE);
-                n2a03_1.m6502.change_reset(CLEAR_LINE);
-              end else begin
-                  n2a03_0.reset;
-                  n2a03_0.m6502.change_reset(ASSERT_LINE);
-                  n2a03_1.reset;
-                  n2a03_1.m6502.change_reset(ASSERT_LINE);
-              end;
-        $7e81:if char_bank<>((not(valor) and 1)*$100) then begin
-                fillchar(gfx[0].buffer[0],$400,1);
-                char_bank:=(not(valor) and 1)*$100;
-              end;
-        $7e82:main_screen.flip_main_screen:=(valor and 1)=0;
-        $7e83:sprite_bank:=$200*(valor and 1);
-        $7e84:haz_nmi:=(valor=1);
-        $7e85:if (valor and 1)<>0 then copymemory(@memoria[$7000],@memoria[$6900],$400);
-        $7e86:if npaleta<>((npaleta and 2) or (valor and 1)) then begin
-                npaleta:=(npaleta and 2) or (valor and 1);
-                fillchar(gfx[0].buffer[0],$400,1);
-              end;
-        $7e87:if npaleta<>((npaleta and 1) or ((valor and 1) shl 1)) then begin
-                npaleta:=(npaleta and 1) or ((valor and 1) shl 1);
-                fillchar(gfx[0].buffer[0],$400,1);
-              end;
+  0..$5fff,$8000..$9fff:; //ROM
+  $6000..$73ff:memoria[direccion]:=valor;
+  $7400..$77ff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $7c00:latch1:=valor;
+  $7c80:latch2:=valor;
+  $7d00:latch3:=valor;
+  $7d80:if ((valor and $1)<>0) then begin
+          n2a03_0.m6502.change_reset(CLEAR_LINE);
+          n2a03_1.m6502.change_reset(CLEAR_LINE);
+        end else begin
+          n2a03_0.reset;
+          n2a03_0.m6502.change_reset(ASSERT_LINE);
+          n2a03_1.reset;
+          n2a03_1.m6502.change_reset(ASSERT_LINE);
+        end;
+  $7e81:if char_bank<>((not(valor) and 1)*$100) then begin
+          fillchar(gfx[0].buffer[0],$400,1);
+          char_bank:=(not(valor) and 1)*$100;
+        end;
+  $7e82:main_screen.flip_main_screen:=(valor and 1)=0;
+  $7e83:sprite_bank:=$200*(valor and 1);
+  $7e84:haz_nmi:=(valor=1);
+  $7e85:if (valor and 1)<>0 then copymemory(@memoria[$7000],@memoria[$6900],$400);
+  $7e86:if npaleta<>((npaleta and 2) or (valor and 1)) then begin
+          npaleta:=(npaleta and 2) or (valor and 1);
+          fillchar(gfx[0].buffer[0],$400,1);
+        end;
+  $7e87:if npaleta<>((npaleta and 1) or ((valor and 1) shl 1)) then begin
+          npaleta:=(npaleta and 1) or ((valor and 1) shl 1);
+          fillchar(gfx[0].buffer[0],$400,1);
+        end;
 end;
 end;
 
@@ -465,10 +463,10 @@ end;
 
 procedure dkong3_snd1_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$dfff then exit;
-case direccion of
+  case direccion of
     0..$1ff:mem_snd[direccion]:=valor;
     $4000..$4017:n2a03_0.write(direccion,valor);
+    $e000..$ffff:; //ROM
   end;
 end;
 
@@ -483,10 +481,10 @@ end;
 
 procedure dkong3_snd2_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$dfff then exit;
 case direccion of
     0..$1ff:mem_misc[direccion]:=valor;
     $4000..$4017:n2a03_1.write(direccion,valor);
+    $e000..$ffff:; //ROM
   end;
 end;
 
@@ -532,11 +530,11 @@ function iniciar_dkong:boolean;
 var
   memoria_temp:array[0..$5fff] of byte;
 const
-      ps_dkong_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+  ps_dkong_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 		  	  64*16*16+0, 64*16*16+1, 64*16*16+2, 64*16*16+3, 64*16*16+4, 64*16*16+5, 64*16*16+6, 64*16*16+7);
-      ps_dkong3_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+  ps_dkong3_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 		  	  128*16*16+0, 128*16*16+1, 128*16*16+2, 128*16*16+3, 128*16*16+4, 128*16*16+5, 128*16*16+6, 128*16*16+7);
-      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
     			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 
 procedure dkong_char_load(num_char:word);
@@ -557,9 +555,8 @@ begin
 end;
 procedure pal_dkong;
 var
-  ctemp1,ctemp2:byte;
+  f,ctemp1,ctemp2:byte;
   colores:tpaleta;
-  f:word;
 begin
 for f:=0 to 255 do begin
   ctemp1:=memoria_temp[f+$100];
@@ -573,9 +570,8 @@ copymemory(@colores_char[0],@memoria_temp[$200],$100);
 end;
 procedure pal_dkong3;
 var
-  ctemp1,ctemp2:byte;
+  f,ctemp1,ctemp2:byte;
   colores:tpaleta;
-  f:word;
 begin
 for f:=0 to 255 do begin
   ctemp1:=memoria_temp[f];
@@ -600,19 +596,19 @@ case main_vars.tipo_maquina of
         z80_0:=cpu_z80.create(3072000,264);
         z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
         //cargar roms
-        if not(roms_load(@memoria,@dkong_rom,'dkong.zip',sizeof(dkong_rom))) then exit;
+        if not(roms_load(@memoria,dkong_rom)) then exit;
         //samples
         if load_samples('dkong.zip',@dk_samples,num_samples) then z80_0.init_sound(dkong_sound_update);
         audio_tunes:=dkong_tune_sound;
         audio_effects:=dkong_effects_sound;
         //convertir chars
-        if not(roms_load(@memoria_temp,@dkong_char,'dkong.zip',sizeof(dkong_char))) then exit;
+        if not(roms_load(@memoria_temp,dkong_char)) then exit;
         dkong_char_load($100);
         //convertir sprites
-        if not(roms_load(@memoria_temp,@dkong_sprites,'dkong.zip',sizeof(dkong_sprites))) then exit;
+        if not(roms_load(@memoria_temp,dkong_sprites)) then exit;
         dkong_sprites_load($80);
         //poner la paleta
-        if not(roms_load(@memoria_temp,@dkong_pal,'dkong.zip',sizeof(dkong_pal))) then exit;
+        if not(roms_load(@memoria_temp,dkong_pal)) then exit;
         pal_dkong;
         //DIP
         marcade.dswa:=$80;
@@ -623,7 +619,7 @@ case main_vars.tipo_maquina of
         z80_0:=cpu_z80.create(3072000,264);
         z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
         //cargar roms
-        if not(roms_load(@memoria_temp,@dkongjr_rom,'dkongjr.zip',sizeof(dkongjr_rom))) then exit;
+        if not(roms_load(@memoria_temp,dkongjr_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$1000);
         copymemory(@memoria[$3000],@memoria_temp[$1000],$1000);
         copymemory(@memoria[$2000],@memoria_temp[$2000],$800);
@@ -639,13 +635,13 @@ case main_vars.tipo_maquina of
         audio_tunes:=dkongjr_tune_sound;
         audio_effects:=dkongjr_effects_sound;
         //convertir chars
-        if not(roms_load(@memoria_temp,@dkongjr_char,'dkongjr.zip',sizeof(dkongjr_char))) then exit;
+        if not(roms_load(@memoria_temp,dkongjr_char)) then exit;
         dkong_char_load($200);
         //convertir sprites
-        if not(roms_load(@memoria_temp,@dkongjr_sprites,'dkongjr.zip',sizeof(dkongjr_sprites))) then exit;
+        if not(roms_load(@memoria_temp,dkongjr_sprites)) then exit;
         dkong_sprites_load($80);
         //poner la paleta
-        if not(roms_load(@memoria_temp,@dkongjr_pal,'dkongjr.zip',sizeof(dkongjr_pal))) then exit;
+        if not(roms_load(@memoria_temp,dkongjr_pal)) then exit;
         pal_dkong;
         //DIP
         marcade.dswa:=$80;
@@ -656,23 +652,23 @@ case main_vars.tipo_maquina of
         z80_0:=cpu_z80.create(4000000,264);
         z80_0.change_ram_calls(dkong3_getbyte,dkong3_putbyte);
         //cargar roms
-        if not(roms_load(@memoria,@dkong3_rom,'dkong3.zip',sizeof(dkong3_rom))) then exit;
+        if not(roms_load(@memoria,dkong3_rom)) then exit;
         //sound 1
-        if not(roms_load(@mem_snd,@dkong3_snd1,'dkong3.zip',sizeof(dkong3_snd1))) then exit;
+        if not(roms_load(@mem_snd,dkong3_snd1)) then exit;
         n2a03_0:=cpu_n2a03.Create(1789772,264);
         n2a03_0.m6502.change_ram_calls(dkong3_snd1_getbyte,dkong3_snd1_putbyte);
         //sound 2
-        if not(roms_load(@mem_misc,@dkong3_snd2,'dkong3.zip',sizeof(dkong3_snd2))) then exit;
+        if not(roms_load(@mem_misc,dkong3_snd2)) then exit;
         n2a03_1:=cpu_n2a03.Create(1789772,264);
         n2a03_1.m6502.change_ram_calls(dkong3_snd2_getbyte,dkong3_snd2_putbyte);
         //convertir chars
-        if not(roms_load(@memoria_temp,@dkong3_char,'dkong3.zip',sizeof(dkong3_char))) then exit;
+        if not(roms_load(@memoria_temp,dkong3_char)) then exit;
         dkong_char_load($200);
         //convertir sprites
-        if not(roms_load(@memoria_temp,@dkong3_sprites,'dkong3.zip',sizeof(dkong3_sprites))) then exit;
+        if not(roms_load(@memoria_temp,dkong3_sprites)) then exit;
         dkong_sprites_load($100);
         //poner la paleta
-        if not(roms_load(@memoria_temp,@dkong3_pal,'dkong3.zip',sizeof(dkong3_pal))) then exit;
+        if not(roms_load(@memoria_temp,dkong3_pal)) then exit;
         pal_dkong3;
         //DIP
         marcade.dswa:=$0;

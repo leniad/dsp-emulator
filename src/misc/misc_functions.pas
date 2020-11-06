@@ -6,8 +6,8 @@ uses {$IFDEF windows}windows,{$ENDIF}{$ifdef fpc}crc,{$else}
      dialogs,controls;
 
 type
-  TSistema=(StNes,StColecovision,STGb,StChip8,StAmstrad,StAmstradROM,StROM,
-            StSMS,StExport,StSpectrum,StBitmap);
+  TSistema=(StNES,StColecovision,STGb,StChip8,StAmstrad,StAmstradROM,StROM,
+            StSMS,StExport,StSpectrum,StBitmap,StSG1000,StC64);
 
 function extension_fichero(nombre:string):string;
 procedure fix_screen_pos(width,height:word);
@@ -28,7 +28,11 @@ implementation
 uses principal,main_engine;
 
 procedure fix_screen_pos(width,height:word);
+var
+   old_x,old_y:integer;
 begin
+old_x:=principal1.Left;
+old_y:=principal1.Top;
 {$ifdef fpc}
 principal1.BorderStyle:=bsSizeable;
 {$endif}
@@ -52,6 +56,8 @@ principal1.btncfg.left:=(principal1.statusbar1.width div 2)+14+3{$ifndef windows
 principal1.BitBtn8.left:=(principal1.statusbar1.width div 2)+42+13{$ifndef windows}+8{$endif}; //42
 principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+72+22{$ifndef windows}+9{$endif};  //72
 principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+103+29{$ifndef windows}+11{$endif}; //103
+principal1.Left:=old_x;
+principal1.Top:=old_y;
 end;
 
 function bit(data:dword;bitpos:byte):boolean;inline;
@@ -225,13 +231,13 @@ case Sistema of
          opendialog.InitialDir:=Directory.coleco_snap;
          OpenDialog.Filter:='ColecoVision Files (*.col;*.rom;*.csn;*.dsp;*.bin;*.zip)|*.col;*.rom;*.csn;*.dsp;*.bin;*.zip';
        end;
-  Stnes:begin
+  StNES:begin
          opendialog.InitialDir:=Directory.Nes;
          OpenDialog.Filter:='NES Files (*.nes;*zip)|*.nes;*.zip';
        end;
   StSMS:begin
          opendialog.InitialDir:=Directory.sms;
-         OpenDialog.Filter:='SMS Files (*.sms;*.sg;*.zip)|*.sms;*.sg;*.zip';
+         OpenDialog.Filter:='SMS Files (*.sms;*.rom;*.zip)|*.sms;*.rom;*.zip';
        end;
   Stgb:begin
          opendialog.InitialDir:=Directory.GameBoy;
@@ -252,6 +258,14 @@ case Sistema of
   StAmstradROM:begin
          opendialog.InitialDir:=Directory.Amstrad_rom;
          OpenDialog.Filter:='ROM Files (*.rom;*.zip)|*.rom;*.zip';
+       end;
+  StSG1000:begin
+         opendialog.InitialDir:=Directory.sg1000;
+         OpenDialog.Filter:='SMS Files (*.sg;*.zip)|*.sg;*.zip';
+       end;
+  StC64:begin
+         opendialog.InitialDir:=directory.c64_tap;
+         OpenDialog.Filter:='C64 Tape (*.tap;*.wav;*zip;)|*.tap;*.wav;*.zip';
        end;
 end;
 OpenRom:=OpenDialog.execute;
@@ -287,6 +301,10 @@ case Sistema of
          saveDialog.Filter:='Imagen PNG(*.PNG)|*.png|Imagen JPG(*.JPG)|*.jpg|Imagen GIF(*.GIF)|*.gif';
          SaveDialog.FileName:=llamadas_maquina.caption;
          SaveDialog.FilterIndex:=2;
+       end;
+  StNES:begin
+         savedialog.InitialDir:=Directory.amstrad_snap;
+         saveDialog.Filter:='DSP Format (*.DSP)|*.DSP';
        end;
 end;
 SaveRom:=SaveDialog.execute;

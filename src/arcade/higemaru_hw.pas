@@ -67,13 +67,13 @@ if event.arcade then begin
   //P1
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   //P2
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   //System
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.but0[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
@@ -128,8 +128,8 @@ end;
 
 procedure higemaru_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+   0..$7fff:;
    $c800:main_screen.flip_main_screen:=(valor and $80)<>0;
    $c801:ay8910_0.control(valor);
    $c802:ay8910_0.write(valor);
@@ -167,8 +167,6 @@ var
   f:word;
   memoria_temp:array[0..$3fff] of byte;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -187,20 +185,20 @@ z80_0.init_sound(higemaru_sound);
 AY8910_0:=ay8910_chip.create(1500000,AY8910,0.5);
 AY8910_1:=ay8910_chip.create(1500000,AY8910,0.5);
 //cargar ROMS
-if not(roms_load(@memoria,@higemaru_rom,'higemaru.zip',sizeof(higemaru_rom))) then exit;
+if not(roms_load(@memoria,higemaru_rom)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@higemaru_char,'higemaru.zip',sizeof(higemaru_char))) then exit;
+if not(roms_load(@memoria_temp,higemaru_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx_set_desc_data(2,0,16*8,4,0);
-convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir sprites
-if not(roms_load(@memoria_temp,@higemaru_sprites,'higemaru.zip',sizeof(higemaru_sprites))) then exit;
+if not(roms_load(@memoria_temp,higemaru_sprites)) then exit;
 init_gfx(1,16,16,$80);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$80*8*64+4,$80*8*64+0,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //poner la paleta
-if not(roms_load(@memoria_temp,@higemaru_pal,'higemaru.zip',sizeof(higemaru_pal))) then exit;
+if not(roms_load(@memoria_temp,higemaru_pal)) then exit;
 for f:=0 to $1f do begin
   colores[f].r:=($21*((memoria_temp[f] shr 0) and 1))+($47*((memoria_temp[f] shr 1) and 1))+($97*((memoria_temp[f] shr 2) and 1));
   colores[f].g:=($21*((memoria_temp[f] shr 3) and 1))+($47*((memoria_temp[f] shr 4) and 1))+($97*((memoria_temp[f] shr 5) and 1));
@@ -220,7 +218,7 @@ reset_higemaru;
 iniciar_higemaru:=true;
 end;
 
-procedure Cargar_higemaru;
+procedure cargar_higemaru;
 begin
 llamadas_maquina.iniciar:=iniciar_higemaru;
 llamadas_maquina.bucle_general:=higemaru_principal;

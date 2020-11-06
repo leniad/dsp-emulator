@@ -283,34 +283,34 @@ z80_1:=cpu_z80.create(3072000,256);
 z80_1.change_ram_calls(snd_kyugo_hw_getbyte,snd_kyugo_hw_putbyte);
 z80_1.change_io_calls(snd_kyugo_inbyte,snd_kyugo_outbyte);
 z80_1.init_sound(kyugo_hw_despues_instruccion);
-init_timer(z80_1.numero_cpu,3072000/(60*4),kyugo_snd_irq,true);
+timers.init(z80_1.numero_cpu,3072000/(60*4),kyugo_snd_irq,nil,true);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(1536000,AY8910,0.3);
 ay8910_0.change_io_calls(kyugo_porta_r,kyugo_portb_r,nil,nil);
 ay8910_1:=ay8910_chip.create(1536000,AY8910,0.3);
 //cargar roms
-if not(roms_load(@memoria,@repulse_rom,'repulse.zip',sizeof(repulse_rom))) then exit;
+if not(roms_load(@memoria,repulse_rom)) then exit;
 //cargar roms snd
-if not(roms_load(@mem_snd,@repulse_snd,'repulse.zip',sizeof(repulse_snd))) then exit;
+if not(roms_load(@mem_snd,repulse_snd)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@repulse_char,'repulse.zip',sizeof(repulse_char))) then exit;
+if not(roms_load(@memoria_temp,repulse_char)) then exit;
 init_gfx(0,8,8,$100);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8*2,0,4);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,true,false);
 //convertir tiles
-if not(roms_load(@memoria_temp,@repulse_tiles,'repulse.zip',sizeof(repulse_tiles))) then exit;
+if not(roms_load(@memoria_temp,repulse_tiles)) then exit;
 init_gfx(1,8,8,$400);
 gfx_set_desc_data(3,0,8*8,0,$400*8*8,$400*8*8*2);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //convertir sprites
-if not(roms_load(@memoria_temp,@repulse_sprites,'repulse.zip',sizeof(repulse_sprites))) then exit;
+if not(roms_load(@memoria_temp,repulse_sprites)) then exit;
 init_gfx(2,16,16,$400);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(3,0,16*16,0,$400*16*16,$400*16*16*2);
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //paleta
-if not(roms_load(@memoria_temp,@repulse_prom,'repulse.zip',sizeof(repulse_prom))) then exit;
+if not(roms_load(@memoria_temp,repulse_prom)) then exit;
 for f:=0 to $ff do begin
   bit0:=(memoria_temp[f] shr 0) and 1;
   bit1:=(memoria_temp[f] shr 1) and 1;

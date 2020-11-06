@@ -9,16 +9,16 @@ procedure cargar_popeye;
 
 implementation
 const
-        popeye_rom:array[0..4] of tipo_roms=(
+        popeye_rom:array[0..3] of tipo_roms=(
         (n:'tpp2-c_f.7a';l:$2000;p:0;crc:$9af7c821),(n:'tpp2-c_f.7b';l:$2000;p:$2000;crc:$c3704958),
-        (n:'tpp2-c_f.7c';l:$2000;p:$4000;crc:$5882ebf9),(n:'tpp2-c_f.7e';l:$2000;p:$6000;crc:$ef8649ca),());
-        popeye_pal:array[0..4] of tipo_roms=(
+        (n:'tpp2-c_f.7c';l:$2000;p:$4000;crc:$5882ebf9),(n:'tpp2-c_f.7e';l:$2000;p:$6000;crc:$ef8649ca));
+        popeye_pal:array[0..3] of tipo_roms=(
         (n:'tpp2-c.4a';l:$20;p:0;crc:$375e1602),(n:'tpp2-c.3a';l:$20;p:$20;crc:$e950bea1),
-        (n:'tpp2-c.5b';l:$100;p:$40;crc:$c5826883),(n:'tpp2-c.5a';l:$100;p:$140;crc:$c576afba),());
+        (n:'tpp2-c.5b';l:$100;p:$40;crc:$c5826883),(n:'tpp2-c.5a';l:$100;p:$140;crc:$c576afba));
         popeye_char:tipo_roms=(n:'tpp2-v.5n';l:$1000;p:0;crc:$cca61ddd);
-        popeye_sprites:array[0..4] of tipo_roms=(
+        popeye_sprites:array[0..3] of tipo_roms=(
         (n:'tpp2-v.1e';l:$2000;p:0;crc:$0f2cd853),(n:'tpp2-v.1f';l:$2000;p:$2000;crc:$888f3474),
-        (n:'tpp2-v.1j';l:$2000;p:$4000;crc:$7e864668),(n:'tpp2-v.1k';l:$2000;p:$6000;crc:$49e1d170),());
+        (n:'tpp2-v.1j';l:$2000;p:$4000;crc:$7e864668),(n:'tpp2-v.1k';l:$2000;p:$6000;crc:$49e1d170));
         //Dip
         popeye_dip_a:array [0..2] of def_dip=(
         (mask:$f;name:'Coinage';number:9;dip:((dip_val:$8;dip_name:'6 Coin - 1 Credit'),(dip_val:$5;dip_name:'5 Coin - 1 Credit'),(dip_val:$9;dip_name:'4 Coin - 1 Credit'),(dip_val:$a;dip_name:'3 Coin - 1 Credit'),(dip_val:$d;dip_name:'2 Coin - 1 Credit'),(dip_val:$f;dip_name:'1 Coin - 1 Credit'),(dip_val:$e;dip_name:'1 Coin - 2 Credit'),(dip_val:$3;dip_name:'1 Coin - 3 Credit'),(dip_val:$0;dip_name:'Freeplay'),(),(),(),(),(),(),())),
@@ -32,7 +32,6 @@ const
 
 var
   prot0,prot1,prot_shift,palette_bank,scroll_y,dswbit,field:byte;
-  popeye_mem_pal:array[0..$1f] of byte;
   fondo_write:array[0..$1fff] of boolean;
   scroll_x:word;
 
@@ -42,7 +41,7 @@ var
   colores:tcolor;
 begin
   for f:=0 to 15 do begin
-    ctemp4:=popeye_mem_pal[f+$10*valor];
+    ctemp4:=buffer_paleta[f+$10*valor];
 		// red component */
 		ctemp1:=(ctemp4 shr 0) and $01;
 		ctemp2:=(ctemp4 shr 1) and $01;
@@ -59,7 +58,7 @@ begin
 		colores.b:=$31*ctemp1+$47*ctemp2;
     set_pal_color(colores,f);
    end;
-   fillchar(fondo_write[0],$2000,1);
+   fillchar(fondo_write,$2000,1);
 end;
 
 procedure update_video_popeye;inline;
@@ -181,11 +180,11 @@ case direccion of
           palette_bank:=valor;
           cambiar_paleta((valor shr 3) and 1);
         end;
-  $a000..$a7ff:begin
+  $a000..$a7ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
-  $c000..$dfff:begin
+  $c000..$dfff:if memoria[direccion]<>valor then begin
                   fondo_write[direccion and $1fff]:=true;
                   memoria[direccion]:=valor;
                end;
@@ -256,7 +255,7 @@ buffer[4]:=scroll_y;
 buffer[5]:=dswbit;
 buffer[6]:=scroll_x and $ff;
 buffer[7]:=scroll_x shr 8;
-savedata_qsnapshot(@buffer[$0],8);
+savedata_qsnapshot(@buffer,8);
 freemem(data);
 close_qsnapshot;
 end;
@@ -277,7 +276,7 @@ ay8910_0.load_snapshot(data);
 //MEM
 loaddata_qsnapshot(@memoria[$8000]);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 prot0:=buffer[0];
 prot1:=buffer[1];
 prot_shift:=buffer[2];
@@ -287,8 +286,8 @@ dswbit:=buffer[5];
 scroll_x:=buffer[6] or (buffer[7] shl 8);
 freemem(data);
 close_qsnapshot;
-fillchar(fondo_write[$0],$2000,1);
-fillchar(gfx[0].buffer[0],$400,1);
+fillchar(fondo_write,$2000,1);
+fillchar(gfx[0].buffer,$400,1);
 end;
 
 //Main
@@ -342,19 +341,19 @@ z80_0.init_sound(popeye_sound_update);
 ay8910_0:=ay8910_chip.create(2000000,AY8910,1);
 ay8910_0.change_io_calls(popeye_portar,nil,nil,popeye_portbw);
 //cargar roms y decodificarlas
-if not(cargar_roms(@memoria_temp[0],@popeye_rom[0],'popeye.zip',0)) then exit;
+if not(roms_load(@memoria_temp,popeye_rom)) then exit;
 for f:=0 to $7fff do begin
   pos:=bitswap16(f,15,14,13,12,11,10,8,7,6,3,9,5,4,2,1,0);
   memoria[f]:=bitswap8(memoria_temp[pos xor $3f],3,4,2,5,1,6,0,7);
 end;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@popeye_char,'popeye.zip',1)) then exit;
+if not(roms_load(@memoria_temp,popeye_char)) then exit;
 init_gfx(0,16,16,256);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(1,0,8*8,0);
-convert_gfx(0,0,@memoria_temp[$800],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp[$800],@pc_x,@pc_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@popeye_sprites[0],'popeye.zip',0)) then exit;
+if not(roms_load(@memoria_temp,popeye_sprites)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 for f:=0 to 1 do begin
@@ -362,22 +361,22 @@ for f:=0 to 1 do begin
   convert_gfx(1,256*f*16*16,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
 end;
 //poner la paleta chars
-if not(cargar_roms(@memoria_temp[0],@popeye_pal[0],'popeye.zip',0)) then exit;
+if not(roms_load(@memoria_temp,popeye_pal)) then exit;
 for f:=0 to $23f do memoria_temp[f]:=memoria_temp[f] xor $ff;
-copymemory(@popeye_mem_pal[0],@memoria_temp[0],$20);
+for f:=0 to $1f do buffer_paleta[f]:=memoria_temp[f];
 for f:=0 to 15 do begin
-		ctemp4:=f or ((f and 8) shl 1);	// address bits 3 and 4 are tied together */
-		// red component */
+		ctemp4:=f or ((f and 8) shl 1);	// address bits 3 and 4 are tied together
+		// red component
 		ctemp1:=(memoria_temp[ctemp4+$20] shr 0) and $01;
 		ctemp2:=(memoria_temp[ctemp4+$20] shr 1) and $01;
 		ctemp3:=(memoria_temp[ctemp4+$20] shr 2) and $01;
 		colores.r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-		// green component */
+		// green component
 		ctemp1:=(memoria_temp[ctemp4+$20] shr 3) and $01;
 		ctemp2:=(memoria_temp[ctemp4+$20] shr 4) and $01;
 		ctemp3:=(memoria_temp[ctemp4+$20] shr 5) and $01;
 		colores.g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-		// blue component */
+		// blue component
 		ctemp1:=0;
 		ctemp2:=(memoria_temp[ctemp4+$20] shr 6) and $01;
 		ctemp3:=(memoria_temp[ctemp4+$20] shr 7) and $01;
@@ -385,18 +384,18 @@ for f:=0 to 15 do begin
     set_pal_color(colores,16+(2*f)+1);
 end;
 //Poner la paleta sprites
-for f:=0 to $FF do begin
-		// red component */
+for f:=0 to $ff do begin
+		// red component
 		ctemp1:=(memoria_temp[$40+f] shr 0) and $01;
 		ctemp2:=(memoria_temp[$40+f] shr 1) and $01;
 		ctemp3:=(memoria_temp[$40+f] shr 2) and $01;
 		colores.r:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-		// green component */
+		// green component
 		ctemp1:=(memoria_temp[$40+f] shr 3) and $01;
 		ctemp2:=(memoria_temp[$140+f] shr 0) and $01;
 		ctemp3:=(memoria_temp[$140+f] shr 1) and $01;
 		colores.g:=$21*ctemp1+$47*ctemp2+$97*ctemp3;
-		// blue component */
+		// blue component
 		ctemp1:=0;
 		ctemp2:=(memoria_temp[$140+f] shr 2) and $01;
 		ctemp3:=(memoria_temp[$140+f] shr 3) and $01;
@@ -413,7 +412,7 @@ reset_popeye;
 iniciar_popeye:=true;
 end;
 
-procedure Cargar_popeye;
+procedure cargar_popeye;
 begin
 llamadas_maquina.iniciar:=iniciar_popeye;
 llamadas_maquina.bucle_general:=popeye_principal;

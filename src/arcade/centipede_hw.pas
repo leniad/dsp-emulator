@@ -10,11 +10,11 @@ procedure cargar_centipede;
 implementation
 
 const
-        centipede_rom:array[0..4] of tipo_roms=(
+        centipede_rom:array[0..3] of tipo_roms=(
         (n:'136001-407.d1';l:$800;p:$2000;crc:$c4d995eb),(n:'136001-408.e1';l:$800;p:$2800;crc:$bcdebe1b),
-        (n:'136001-409.fh1';l:$800;p:$3000;crc:$66d7b04a),(n:'136001-410.j1';l:$800;p:$3800;crc:$33ce4640),());
-        centipede_chars:array[0..2] of tipo_roms=(
-        (n:'136001-211.f7';l:$800;p:0;crc:$880acfb9),(n:'136001-212.hj7';l:$800;p:$800;crc:$b1397029),());
+        (n:'136001-409.fh1';l:$800;p:$3000;crc:$66d7b04a),(n:'136001-410.j1';l:$800;p:$3800;crc:$33ce4640));
+        centipede_chars:array[0..1] of tipo_roms=(
+        (n:'136001-211.f7';l:$800;p:0;crc:$880acfb9),(n:'136001-212.hj7';l:$800;p:$800;crc:$b1397029));
         //DIP
         centipede_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Lenguage';number:4;dip:((dip_val:$0;dip_name:'English'),(dip_val:$1;dip_name:'German'),(dip_val:$2;dip_name:'French'),(dip_val:$3;dip_name:'Spanish'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -68,19 +68,19 @@ if event.arcade then begin
   //system
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //P1+P2
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.right[0] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
-  if arcade_input.left[0] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
-  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.up[0] then marcade.in2:=(marcade.in2 and $fef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.left[0] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
+  if arcade_input.right[0] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
 end;
 end;
 
@@ -133,9 +133,9 @@ var
   color:tcolor;
   f:byte;
 begin
-	// bit 2 of the output palette RAM is always pulled high, so we ignore */
-	// any palette changes unless the write is to a palette RAM address */
-	// that is actually used */
+	// bit 2 of the output palette RAM is always pulled high, so we ignore
+	// any palette changes unless the write is to a palette RAM address
+	// that is actually used
 	if (pos and 4)<>0 then begin
 		color.r:=$ff*((not(data) shr 0) and 1);
 		color.g:=$ff*((not(data) shr 1) and 1);
@@ -164,10 +164,9 @@ end;
 procedure centipede_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $3fff;
-if direccion>$1fff then exit;
 case direccion of
     0..$3ff:memoria[direccion]:=valor;
-    $400..$7ff:begin  //video+sprites
+    $400..$7ff:if memoria[direccion]<>valor then begin  //video+sprites
                   memoria[direccion]:=valor;
                   gfx[0].buffer[direccion and $3ff]:=true;
                end;
@@ -178,6 +177,7 @@ case direccion of
     $1800:m6502_0.change_irq(CLEAR_LINE);
     $1c07:main_screen.flip_main_screen:=(valor and $80)<>0;
     $2000:; //watchdog
+    $2001..$3fff:; //ROM
 end;
 end;
 
@@ -214,22 +214,22 @@ screen_init(1,256,256);
 screen_init(2,256,256,true,true);
 iniciar_video(240,256);
 //Main CPU
-m6502_0:=cpu_m6502.create(trunc(12096000/8),256,TCPU_M6502);
+m6502_0:=cpu_m6502.create(12096000 div 8,256,TCPU_M6502);
 m6502_0.change_ram_calls(centipede_getbyte,centipede_putbyte);
 m6502_0.init_sound(centipede_sound_update);
 //Sound Chips
-pokey_0:=pokey_chip.create(0,trunc(12096000/8));
+pokey_0:=pokey_chip.create(0,12096000 div 8);
 //cargar roms
-if not(cargar_roms(@memoria[0],@centipede_rom[0],'centiped.zip',0)) then exit;
+if not(roms_load(@memoria,centipede_rom)) then exit;
 //convertir chars y sprites
-if not(cargar_roms(@memoria_temp[0],@centipede_chars,'centiped.zip',0)) then exit;
+if not(roms_load(@memoria_temp,centipede_chars)) then exit;
 init_gfx(0,8,8,$100);
 gfx_set_desc_data(2,0,8*8,$100*8*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@ps_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,true);
 init_gfx(1,8,16,$80);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,$80*16*8,0);
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@ps_y[0],false,true);
+convert_gfx(1,0,@memoria_temp,@pc_x,@ps_y,false,true);
 gfx[1].x:=16;
 gfx[1].y:=8;
 //DIP
@@ -255,7 +255,7 @@ end;
 
 procedure cerrar_centipede;
 begin
-write_file(Directory.Arcade_nvram+'centiped.nv',@nvram[0],$40);
+write_file(Directory.Arcade_nvram+'centiped.nv',@nvram,$40);
 end;
 
 procedure Cargar_centipede;

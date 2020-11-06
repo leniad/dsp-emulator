@@ -189,7 +189,7 @@ case main_vars.tipo_maquina of
           final_y:=292;
           sync_x:=4;
           sync_y:=12;
-          if not(roms_load(sm510_0.get_rom_addr,@gnw_dj101_rom,'gnw_dj101.zip',sizeof(gnw_dj101_rom))) then exit;
+          if not(roms_load(sm510_0.get_rom_addr,gnw_dj101_rom)) then exit;
           copymemory(@gnw_video_array,@gnw_dkongjr_video,sizeof(video_def)*$100);
           //Copiar el fondo al surface 1...
           for f:=0 to 291 do begin
@@ -210,7 +210,7 @@ case main_vars.tipo_maquina of
                       for f:=0 to (gnw_dkongjr_video[row,seg,h].size_y-1) do begin
                         punt2:=gnw_video_form.image2.Picture.Bitmap.ScanLine[f];
                         for g:=0 to (gnw_dkongjr_video[row,seg,h].size_x-1) do begin
-                          if punt2^=$ffff then punt^:=set_trans_color
+                          if punt2^=$ffff then punt^:=SET_TRANS_COLOR
                             else punt^:=punt2^;
                           inc(punt2);
                           inc(punt);
@@ -231,7 +231,7 @@ case main_vars.tipo_maquina of
           final_y:=583;
           sync_x:=10;
           sync_y:=7;
-          if not(roms_load(sm510_0.get_rom_addr,@gnw_jr55_rom,'gnw_jr55.zip',sizeof(gnw_jr55_rom))) then exit;
+          if not(roms_load(sm510_0.get_rom_addr,gnw_jr55_rom)) then exit;
           copymemory(@gnw_video_array,@gnw_dkong2_video,sizeof(video_def)*$100);
           //Copiar el fondo al surface 1...
           for f:=0 to 582 do begin
@@ -252,7 +252,7 @@ case main_vars.tipo_maquina of
                       for f:=0 to (gnw_dkong2_video[row,seg,h].size_y-1) do begin
                         punt2:=gnw_video_form.image2.Picture.Bitmap.ScanLine[f];
                         for g:=0 to (gnw_dkong2_video[row,seg,h].size_x-1) do begin
-                          if punt2^=$ffff then punt^:=set_trans_color
+                          if punt2^=$ffff then punt^:=SET_TRANS_COLOR
                             else punt^:=punt2^;
                           inc(punt2);
                           inc(punt);
@@ -273,7 +273,7 @@ case main_vars.tipo_maquina of
           final_y:=283;
           sync_x:=0;
           sync_y:=0;
-          if not(roms_load(sm510_0.get_rom_addr,@gnw_mw56_rom,'gnw_mw56.zip',sizeof(gnw_mw56_rom))) then exit;
+          if not(roms_load(sm510_0.get_rom_addr,gnw_mw56_rom)) then exit;
           copymemory(@gnw_video_array,@gnw_mariobros_video,sizeof(video_def)*$100);
           //Copiar el fondo al surface 1...
           for f:=0 to 282 do begin
@@ -294,7 +294,7 @@ case main_vars.tipo_maquina of
                       for f:=0 to (gnw_mariobros_video[row,seg,h].size_y-1) do begin
                         punt2:=gnw_video_form.image2.Picture.Bitmap.ScanLine[f];
                         for g:=0 to (gnw_mariobros_video[row,seg,h].size_x-1) do begin
-                          if punt2^=$ffff then punt^:=set_trans_color
+                          if punt2^=$ffff then punt^:=SET_TRANS_COLOR
                             else punt^:=punt2^;
                           inc(punt2);
                           inc(punt);

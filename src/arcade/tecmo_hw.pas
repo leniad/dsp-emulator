@@ -10,36 +10,36 @@ procedure cargar_tecmo;
 implementation
 const
         //Rygar
-        rygar_rom:array[0..3] of tipo_roms=(
+        rygar_rom:array[0..2] of tipo_roms=(
         (n:'5.5p';l:$8000;p:0;crc:$062cd55d),(n:'cpu_5m.bin';l:$4000;p:$8000;crc:$7ac5191b),
-        (n:'cpu_5j.bin';l:$8000;p:$10000;crc:$ed76d606),());
+        (n:'cpu_5j.bin';l:$8000;p:$10000;crc:$ed76d606));
         rygar_char:tipo_roms=(n:'cpu_8k.bin';l:$8000;p:0;crc:$4d482fb6);
-        rygar_tiles1:array[0..4] of tipo_roms=(
+        rygar_tiles1:array[0..3] of tipo_roms=(
         (n:'vid_6p.bin';l:$8000;p:0;crc:$9eae5f8e),(n:'vid_6o.bin';l:$8000;p:$8000;crc:$5a10a396),
-        (n:'vid_6n.bin';l:$8000;p:$10000;crc:$7b12cf3f),(n:'vid_6l.bin';l:$8000;p:$18000;crc:$3cea7eaa),());
-        rygar_tiles2:array[0..4] of tipo_roms=(
+        (n:'vid_6n.bin';l:$8000;p:$10000;crc:$7b12cf3f),(n:'vid_6l.bin';l:$8000;p:$18000;crc:$3cea7eaa));
+        rygar_tiles2:array[0..3] of tipo_roms=(
         (n:'vid_6f.bin';l:$8000;p:0;crc:$9840edd8),(n:'vid_6e.bin';l:$8000;p:$8000;crc:$ff65e074),
-        (n:'vid_6c.bin';l:$8000;p:$10000;crc:$89868c85),(n:'vid_6b.bin';l:$8000;p:$18000;crc:$35389a7b),());
+        (n:'vid_6c.bin';l:$8000;p:$10000;crc:$89868c85),(n:'vid_6b.bin';l:$8000;p:$18000;crc:$35389a7b));
         rygar_adpcm:tipo_roms=(n:'cpu_1f.bin';l:$4000;p:0;crc:$3cc98c5a);
         rygar_sound:tipo_roms=(n:'cpu_4h.bin';l:$2000;p:0;crc:$e4a2fa87);
-        rygar_sprites:array[0..4] of tipo_roms=(
+        rygar_sprites:array[0..3] of tipo_roms=(
         (n:'vid_6k.bin';l:$8000;p:0;crc:$aba6db9e),(n:'vid_6j.bin';l:$8000;p:$8000;crc:$ae1f2ed6),
-        (n:'vid_6h.bin';l:$8000;p:$10000;crc:$46d9e7df),(n:'vid_6g.bin';l:$8000;p:$18000;crc:$45839c9a),());
+        (n:'vid_6h.bin';l:$8000;p:$10000;crc:$46d9e7df),(n:'vid_6g.bin';l:$8000;p:$18000;crc:$45839c9a));
         //Silkworm
-        sw_rom:array[0..2] of tipo_roms=(
-        (n:'silkworm.4';l:$10000;p:0;crc:$a5277cce),(n:'silkworm.5';l:$10000;p:$10000;crc:$a6c7bb51),());
+        sw_rom:array[0..1] of tipo_roms=(
+        (n:'silkworm.4';l:$10000;p:0;crc:$a5277cce),(n:'silkworm.5';l:$10000;p:$10000;crc:$a6c7bb51));
         sw_char:tipo_roms=(n:'silkworm.2';l:$8000;p:0;crc:$e80a1cd9);
-        sw_tiles1:array[0..4] of tipo_roms=(
+        sw_tiles1:array[0..3] of tipo_roms=(
         (n:'silkworm.10';l:$10000;p:0;crc:$8c7138bb),(n:'silkworm.11';l:$10000;p:$10000;crc:$6c03c476),
-        (n:'silkworm.12';l:$10000;p:$20000;crc:$bb0f568f),(n:'silkworm.13';l:$10000;p:$30000;crc:$773ad0a4),());
-        sw_tiles2:array[0..4] of tipo_roms=(
+        (n:'silkworm.12';l:$10000;p:$20000;crc:$bb0f568f),(n:'silkworm.13';l:$10000;p:$30000;crc:$773ad0a4));
+        sw_tiles2:array[0..3] of tipo_roms=(
         (n:'silkworm.14';l:$10000;p:0;crc:$409df64b),(n:'silkworm.15';l:$10000;p:$10000;crc:$6e4052c9),
-        (n:'silkworm.16';l:$10000;p:$20000;crc:$9292ed63),(n:'silkworm.17';l:$10000;p:$30000;crc:$3fa4563d),());
+        (n:'silkworm.16';l:$10000;p:$20000;crc:$9292ed63),(n:'silkworm.17';l:$10000;p:$30000;crc:$3fa4563d));
         sw_adpcm:tipo_roms=(n:'silkworm.1';l:$8000;p:0;crc:$5b553644);
         sw_sound:tipo_roms=(n:'silkworm.3';l:$8000;p:0;crc:$b589f587);
-        sw_sprites:array[0..4] of tipo_roms=(
+        sw_sprites:array[0..3] of tipo_roms=(
         (n:'silkworm.6';l:$10000;p:0;crc:$1138d159),(n:'silkworm.7';l:$10000;p:$10000;crc:$d96214f7),
-        (n:'silkworm.8';l:$10000;p:$20000;crc:$0494b38e),(n:'silkworm.9';l:$10000;p:$30000;crc:$8ce3cdf5),());
+        (n:'silkworm.8';l:$10000;p:$20000;crc:$0494b38e),(n:'silkworm.9';l:$10000;p:$30000;crc:$8ce3cdf5));
         //Dip
         rygar_dip_a:array [0..4] of def_dip=(
         (mask:$3;name:'Coin A';number:4;dip:((dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$3;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -117,9 +117,8 @@ end;
 
 procedure update_video_tecmo;
 var
-        f,color,nchar:word;
-        x,y:word;
-        atrib:byte;
+  f,color,nchar,x,y:word;
+  atrib:byte;
 begin
 //chars
 for f:=0 to $3ff do begin
@@ -164,28 +163,31 @@ draw_sprites(1);
 actualiza_trozo(0,0,256,256,6,48,0,256,256,1);
 draw_sprites(0);
 actualiza_trozo_final(48,16,256,224,1);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_tecmo;
 begin
 if event.arcade then begin
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
+  //P1
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or 1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 or 2) else marcade.in0:=(marcade.in0 and $fd);
-  if arcade_input.down[1] then marcade.in3:=(marcade.in3 or 4) else marcade.in3:=(marcade.in3 and $fb);
-  if arcade_input.up[1] then marcade.in3:=(marcade.in3 or 8) else marcade.in3:=(marcade.in3 and $f7);
-  if arcade_input.left[1] then marcade.in3:=(marcade.in3 or 1) else marcade.in3:=(marcade.in3 and $fe);
-  if arcade_input.right[1] then marcade.in3:=(marcade.in3 or 2) else marcade.in3:=(marcade.in3 and $fd);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or 8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 or 4) else marcade.in0:=(marcade.in0 and $fb);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 or 8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
+  //P2
+  if arcade_input.left[1] then marcade.in3:=(marcade.in3 or 1) else marcade.in3:=(marcade.in3 and $fe);
+  if arcade_input.right[1] then marcade.in3:=(marcade.in3 or 2) else marcade.in3:=(marcade.in3 and $fd);
+  if arcade_input.down[1] then marcade.in3:=(marcade.in3 or 4) else marcade.in3:=(marcade.in3 and $fb);
+  if arcade_input.up[1] then marcade.in3:=(marcade.in3 or 8) else marcade.in3:=(marcade.in3 and $f7);
   if arcade_input.but1[1] then marcade.in4:=(marcade.in4 or $1) else marcade.in4:=(marcade.in4 and $fe);
   if arcade_input.but0[1] then marcade.in4:=(marcade.in4 or $2) else marcade.in4:=(marcade.in4 and $fd);
+  //SYSTEM
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 or 1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 or 2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or 4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or 8) else marcade.in2:=(marcade.in2 and $f7);
 end;
 end;
 
@@ -258,8 +260,8 @@ end;
 
 procedure rygar_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$c000) or ((direccion>$efff) and (direccion<$f800))) then exit;
 case direccion of
+    0..$bfff,$f000..$f7ff:; //ROM
     $c000..$cfff,$e000..$e7ff:memoria[direccion]:=valor;
     $d000..$d7ff:if txt_ram[direccion and $7ff]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
@@ -302,8 +304,8 @@ end;
 
 procedure rygar_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
   case direccion of
+     0..$3fff:; //ROM
      $4000..$47ff:mem_snd[direccion]:=valor;
      $8000:ym3812_0.control(valor);
      $8001:ym3812_0.write(valor);
@@ -342,8 +344,8 @@ end;
 
 procedure sw_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$c000) or ((direccion>$efff) and (direccion<$f800))) then exit;
 case direccion of
+    0..$bfff,$f000..$f7ff:; //ROM
     $c000..$c3ff:if bg_ram[direccion and $3ff]<>valor then begin
                     gfx[3].buffer[direccion and $1ff]:=true;
                     bg_ram[direccion and $3ff]:=valor;
@@ -386,8 +388,8 @@ end;
 
 procedure sw_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
   case direccion of
+     0..$7fff:; //ROM
      $8000..$87ff:mem_snd[direccion]:=valor;
      $a000:ym3812_0.control(valor);
      $a001:ym3812_0.write(valor);
@@ -466,7 +468,7 @@ begin
   init_gfx(0,8,8,num);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 
 procedure sprite_convert(num:word);
@@ -474,7 +476,7 @@ begin
   init_gfx(2,8,8,num);
   gfx[2].trans[0]:=true;
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 
 procedure tile_convert(ngfx:byte;num:word);
@@ -482,13 +484,13 @@ begin
   init_gfx(ngfx,16,16,num);
   gfx[ngfx].trans[0]:=true;
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(ngfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(ngfx,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 
 begin
 iniciar_tecmo:=false;
 iniciar_audio(false);
-screen_init(1,512,256,false,true);
+screen_init(1,512,512,false,true);
 screen_init(2,512,256,true);
 screen_mod_scroll(2,512,256+48,511,256,256,255);
 screen_init(6,256,256,true); //chars
@@ -514,23 +516,23 @@ case main_vars.tipo_maquina of
       z80_1.change_ram_calls(rygar_snd_getbyte,rygar_snd_putbyte);
       //Video
       tipo_video:=0;
-      if not(cargar_roms(@memoria_temp[0],@rygar_rom[0],'rygar.zip',0)) then exit;
-      copymemory(@memoria[0],@memoria_temp[0],$c000);
+      if not(roms_load(@memoria_temp,rygar_rom)) then exit;
+      copymemory(@memoria,@memoria_temp,$c000);
       for f:=0 to $1f do copymemory(@bank_rom[f,0],@memoria_temp[$10000+(f*$800)],$800);
       //cargar sonido
-      if not(cargar_roms(@mem_snd[0],@rygar_sound,'rygar.zip')) then exit;
-      if not(cargar_roms(@mem_adpcm[0],@rygar_adpcm,'rygar.zip')) then exit;
+      if not(roms_load(@mem_snd,rygar_sound)) then exit;
+      if not(roms_load(@mem_adpcm,rygar_adpcm)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@rygar_char,'rygar.zip')) then exit;
+      if not(roms_load(@memoria_temp,rygar_char)) then exit;
       char_convert(1024);
       //Sprites
-      if not(cargar_roms(@memoria_temp[0],@rygar_sprites[0],'rygar.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,rygar_sprites)) then exit;
       sprite_convert(4096);
       //foreground
-      if not(cargar_roms(@memoria_temp[0],@rygar_tiles1[0],'rygar.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,rygar_tiles1)) then exit;
       tile_convert(1,$400);
       //background
-      if not(cargar_roms(@memoria_temp[0],@rygar_tiles2[0],'rygar.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,rygar_tiles2)) then exit;
       tile_convert(3,$400);
       //DIP
       marcade.dswa:=$40;
@@ -545,23 +547,23 @@ case main_vars.tipo_maquina of
       z80_1.change_ram_calls(sw_snd_getbyte,sw_snd_putbyte);
       //Video
       tipo_video:=1;
-      if not(cargar_roms(@memoria_temp[0],@sw_rom[0],'silkworm.zip',0)) then exit;
-      copymemory(@memoria[0],@memoria_temp[0],$10000);
+      if not(roms_load(@memoria_temp,sw_rom)) then exit;
+      copymemory(@memoria,@memoria_temp,$10000);
       for f:=0 to $1f do copymemory(@bank_rom[f,0],@memoria_temp[$10000+(f*$800)],$800);
       //cargar sonido
-      if not(cargar_roms(@mem_snd[0],@sw_sound,'silkworm.zip')) then exit;
-      if not(cargar_roms(@mem_adpcm[0],@sw_adpcm,'silkworm.zip')) then exit;
+      if not(roms_load(@mem_snd,sw_sound)) then exit;
+      if not(roms_load(@mem_adpcm,sw_adpcm)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@sw_char,'silkworm.zip')) then exit;
+      if not(roms_load(@memoria_temp,sw_char)) then exit;
       char_convert($400);
       //Sprites
-      if not(cargar_roms(@memoria_temp[0],@sw_sprites[0],'silkworm.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,sw_sprites)) then exit;
       sprite_convert($2000);
       //background
-      if not(cargar_roms(@memoria_temp[0],@sw_tiles1[0],'silkworm.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,sw_tiles1)) then exit;
       tile_convert(1,$800);
       //foreground
-      if not(cargar_roms(@memoria_temp[0],@sw_tiles2[0],'silkworm.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,sw_tiles2)) then exit;
       tile_convert(3,$800);
       //DIP
       marcade.dswa:=$80;
@@ -574,7 +576,7 @@ reset_tecmo;
 iniciar_tecmo:=true;
 end;
 
-procedure Cargar_tecmo;
+procedure cargar_tecmo;
 begin
 llamadas_maquina.iniciar:=iniciar_tecmo;
 llamadas_maquina.bucle_general:=tecmo_principal;

@@ -116,7 +116,7 @@ object FLoadRom: TFLoadRom
     end
   end
   object RomList: TStringGrid
-    Left = 20
+    Left = 28
     Top = 8
     Width = 249
     Height = 481
@@ -133,8 +133,8 @@ object FLoadRom: TFLoadRom
     OnClick = RomListClick
     OnDblClick = RomListDblClick
     ColWidths = (
-      120
-      120)
+      165
+      64)
     RowHeights = (
       15
       15

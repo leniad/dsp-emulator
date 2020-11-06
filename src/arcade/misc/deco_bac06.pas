@@ -175,7 +175,7 @@ for y:=0 to 15 do begin
   for x:=0 to 15 do begin
     punto:=gfx[ngfx].colores[pos^+color];
     if (punto and $8)=$8 then temp^:=paleta[punto]
-      else temp^:=paleta[max_colores];
+      else temp^:=paleta[MAX_COLORES];
     inc(pos);
     inc(temp);
   end;

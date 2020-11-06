@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$else}main_engine,{$endif}
      misc_functions;
 
-procedure mc8123_decrypt_rom(keyrgn,rom_src,rom_opc:pbyte;numbanks:byte);
+procedure mc8123_decrypt_rom(keyrgn,rom_src,rom_opc:pbyte;size:dword);
 
 implementation
 
@@ -277,36 +277,36 @@ var
   tbl_num:integer;
   ptemp:pbyte;
 begin
-	// pick the translation table from bits fd57 of the address */
-	tbl_num:= (addr and 7) + ((addr and $10) shr 1) + ((addr and $40) shr 2) + ((addr and $100) shr 3) + ((addr and $c00) shr 4) + ((addr and $f000) shr 4) ;
+	// pick the translation table from bits fd57 of the address
+	tbl_num:=(addr and 7)+((addr and $10) shr 1)+((addr and $40) shr 2)+((addr and $100) shr 3)+((addr and $c00) shr 4)+((addr and $f000) shr 4);
   ptemp:=key;
   if opcode then inc(ptemp,tbl_num)
     else inc(ptemp,tbl_num+$1000);
 	mc8123_decrypt:=decrypt(val,ptemp^,opcode);
 end;
 
-procedure mc8123_decrypt_rom(keyrgn,rom_src,rom_opc:pbyte;numbanks:byte);
+procedure mc8123_decrypt_rom(keyrgn,rom_src,rom_opc:pbyte;size:dword);
 var
-  fixed_length,a:word;
+  i,adr:dword;
   decrypted1,rom,key,ptemp:pbyte;
   src:byte;
 begin
-	if numbanks=1 then fixed_length:=$c000
-    else fixed_length:=$8000;
-	getmem(decrypted1,fixed_length);
+	getmem(decrypted1,size);
   ptemp:=decrypted1;
 	rom:=rom_src;
 	key:=keyrgn;
-	for A:=0 to (fixed_length-1) do begin
+	for i:=0 to (size-1) do begin
+    if (i>=$c000) then adr:=(i and $3fff) or $8000
+      else adr:=i;
 		src:=rom^;
 		// decode the opcodes */
-		ptemp^:=mc8123_decrypt(A,src,key,true);
+		ptemp^:=mc8123_decrypt(adr,src,key,true);
 		// decode the data */
-		rom^:=mc8123_decrypt(A,src,key,false);
+		rom^:=mc8123_decrypt(adr,src,key,false);
     inc(rom);
     inc(ptemp);
 	end;
-  copymemory(rom_opc,decrypted1,fixed_length);
+  copymemory(rom_opc,decrypted1,size);
   freemem(decrypted1);
 end;
 

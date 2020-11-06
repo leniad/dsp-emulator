@@ -357,28 +357,4 @@ object ConfigCPC: TConfigCPC
       TabOrder = 2
     end
   end
-  object GroupBox4: TGroupBox
-    Left = 460
-    Top = 87
-    Width = 107
-    Height = 64
-    Caption = 'Tape Motor'
-    TabOrder = 6
-    object RadioButton9: TRadioButton
-      Left = 13
-      Top = 17
-      Width = 71
-      Height = 17
-      Caption = 'Enabled'
-      TabOrder = 0
-    end
-    object RadioButton10: TRadioButton
-      Left = 13
-      Top = 38
-      Width = 72
-      Height = 17
-      Caption = 'Disabled'
-      TabOrder = 1
-    end
-  end
 end

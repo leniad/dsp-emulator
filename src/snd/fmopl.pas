@@ -13,20 +13,20 @@ EG_SH=16;  // 16.16 fixed point (EG timing)              */
 LFO_SH=24;  //  8.24 fixed point (LFO calculations)       */
 TIMER_SH=16;  // 16.16 fixed point (timers calculations)    */
 
-FREQ_MASK=$FFFF;//((1 shl FREQ_SH)-1);
+FREQ_MASK=((1 shl FREQ_SH)-1);
 
 // envelope output entries */
 ENV_BITS=10;
-ENV_LEN=$400;//(1 shl ENV_BITS);
+ENV_LEN=(1 shl ENV_BITS);
 ENV_STEP=(128.0/ENV_LEN);
 
-MAX_ATT_INDEX=$3ff;//((1 shl (ENV_BITS-1))-1); //511*/
+MAX_ATT_INDEX=((1 shl (ENV_BITS-1))-1); //511*/
 MIN_ATT_INDEX=0;
 
 // sinwave entries */
 SIN_BITS=10;
-SIN_LEN=$400;//(1 shl SIN_BITS);
-SIN_MASK=$3ff;//(SIN_LEN-1);
+SIN_LEN=(1 shl SIN_BITS);
+SIN_MASK=(SIN_LEN-1);
 
 TL_RES_LEN=256;	// 8 bits addressing (real chip) */
 
@@ -102,7 +102,7 @@ base_ksl_tab:array[0..(8*16)-1] of double=(
 
 // sustain level table (3dB per step) */
 // 0 - 15: 0, 3, 6, 9,12,15,18,21,24,27,30,33,36,39,42,93 (dB)*/
-sl_tab:array[0..15] of dword=(
+sl_tab:array[0..(16-1)] of dword=(
  trunc( 0* (2.0/ENV_STEP)),trunc( 1* (2.0/ENV_STEP)),trunc( 2* (2.0/ENV_STEP)),trunc(3* (2.0/ENV_STEP) ),trunc(4* (2.0/ENV_STEP) ),trunc(5* (2.0/ENV_STEP) ),trunc(6* (2.0/ENV_STEP) ),trunc( 7* (2.0/ENV_STEP)),
  trunc( 8* (2.0/ENV_STEP)),trunc( 9* (2.0/ENV_STEP)),trunc(10* (2.0/ENV_STEP)),trunc(11* (2.0/ENV_STEP)),trunc(12* (2.0/ENV_STEP)),trunc(13* (2.0/ENV_STEP)),trunc(14* (2.0/ENV_STEP)),trunc(31* (2.0/ENV_STEP))
 );
@@ -206,10 +206,10 @@ eg_rate_shift:array[0..(16+64+16)-1] of byte=(	// Envelope Generator counter shi
 
 // multiple table */
 ML=2;
-base_mul_tab:array[0..15] of double= (
+mul_tab:array[0..15] of byte= (
 // 1/2, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,10,12,12,15,15 */
-   0.50*ML,1.00*ML,2.00*ML,3.00*ML,4.00*ML,5.00*ML,6.00*ML,7.00*ML,
-   8.00*ML,9.00*ML,10.00*ML,10.00*ML,12.00*ML,12.00*ML,15.00*ML,15.00*ML
+   {0.50*ML}1,1*ML,2*ML,3*ML,4*ML,5*ML,6*ML,7*ML,
+   8*ML,9*ML,10*ML,10*ML,12*ML,12*ML,15*ML,15*ML
 );
 
 {  TL_TAB_LEN is calculated as:
@@ -218,7 +218,7 @@ base_mul_tab:array[0..15] of double= (
 *   TL_RES_LEN - sinus resolution (X axis)}
 
 TL_TAB_LEN=(12*2*TL_RES_LEN);
-ENV_QUIET=$180;//(TL_TAB_LEN shr 4);
+ENV_QUIET=TL_TAB_LEN shr 4;
 
 { LFO Amplitude Modulation table (verified on real YM3812)
    27 output levels (triangle waveform); 1 level takes one of: 192, 256 or 448 samples
@@ -431,10 +431,8 @@ type
   pFM_OPL=^FM_OPL;
 
 var
-  SLOT7_1,SLOT7_2,SLOT8_1,SLOT8_2:pOPL_SLOT;
   tl_tab:array[0..(TL_TAB_LEN-1)] of integer;
   ksl_tab:array[0..(8*16)-1] of single;
-  mul_tab:array[0..15] of integer;
 // sin waveform table in 'decibel' scale */
 // four waveforms on OPL2 type chips */
   sin_tab:array[0..(SIN_LEN * 4)-1] of cardinal;
@@ -466,14 +464,12 @@ var
 	o,m:single;
 begin
   for i:=0 to ((8*16)-1) do ksl_tab[i]:=base_ksl_tab[i]/DV;
-  for i:=0 to 15 do mul_tab[i]:=trunc(base_mul_tab[i]);
 	for x:=0 to TL_RES_LEN-1 do begin
-		m:= (1 shl 16) / power(2, (x+1) * (ENV_STEP/4.0) / 8.0);
+		m:=(1 shl 16)/power(2,(x+1)*(ENV_STEP/4.0)/8.0);
 		m:=floor(m);
-
 		// we never reach (1<<16) here due to the (x+1) */
 		// result fits within 16 bits at maximum */
-		n:=word(trunc(m));		// 16 bits here */
+		n:=integer(trunc(m));		// 16 bits here */
 		n:=n shr 4;		// 12 bits here */
 		if (n and 1)<>0 then		// round to nearest */
 			n:= (n shr 1)+1
@@ -496,10 +492,8 @@ begin
 
 		// we never reach zero here due to ((i*2)+1) */
 
-		if (m>0.0) then
-			o:= 8*log10(1.0/m)/log10(2)	// convert to 'decibels' */
-		else
-			o:= 8*log10(-1.0/m)/log10(2);	// convert to 'decibels' */
+		if (m>0.0) then o:= 8*ln(1.0/m)/ln(2)	// convert to 'decibels' */
+		  else o:=8*ln(-1.0/m)/ln(2);	// convert to 'decibels' */
 
 		o:= o / (ENV_STEP/4);
 
@@ -553,12 +547,12 @@ begin
 	// make fnumber -> increment counter table */
 	for i:=0 to 1023 do
 		// opn phase increment counter = 20bit */
-		OPL.fn_tab[i]:=trunc(i * 64 * OPL.freqbase * (1 shl (FREQ_SH-10)) ); // -10 because chip works with 10.10 fixed point, while we use 16.16 */
+		OPL.fn_tab[i]:=trunc(i*64*OPL.freqbase*(1 shl (FREQ_SH-10)) ); // -10 because chip works with 10.10 fixed point, while we use 16.16 */
 
 
 	// Amplitude modulation: 27 output levels (triangle waveform); 1 level takes one of: 192, 256 or 448 samples */
 	// One entry from LFO_AM_TABLE lasts for 64 samples */
-	OPL.lfo_am_inc:=trunc((1.0 / 64.0 ) * (1 shl LFO_SH) * OPL.freqbase);
+	OPL.lfo_am_inc:=trunc((1.0/64.0)*(1 shl LFO_SH)*OPL.freqbase);
 
 	// Vibrato: 8 output levels (triangle waveform); 1 level takes 1024 samples */
 	OPL.lfo_pm_inc:=trunc((1.0 / 1024.0)*(1 shl LFO_SH)*OPL.freqbase);
@@ -672,9 +666,9 @@ begin
 		CH:=OPL.P_CH[c];
 		for s:=0 to 1 do begin
 			// wave table */
-			CH.SLOT[s].wavetable:= 0;
-			CH.SLOT[s].state:= EG_OFF;
-			CH.SLOT[s].volume:= MAX_ATT_INDEX;
+			CH.SLOT[s].wavetable:=0;
+			CH.SLOT[s].state:=EG_OFF;
+			CH.SLOT[s].volume:=MAX_ATT_INDEX;
 		end;
 	end;
 end;
@@ -714,7 +708,7 @@ var
 begin
 	CH:=OPL.P_CH[slot_v shr 1];
 	SLOT:=CH.SLOT[slot_v and 1];
-	SLOT.mul:=byte(mul_tab[v and $0f]);
+	SLOT.mul:=byte(mul_tab[v and $f]);
   if (v and $10)<>0 then SLOT.KSR_m:=0
     else SLOT.KSR_m:=2;
 	SLOT.eg_type:=(v and $20);
@@ -787,9 +781,9 @@ procedure FM_KEYON(SLOT:pOPL_SLOT;key_set:dword);
 begin
 	if (SLOT.key=0) then begin
 		// restart Phase Generator */
-		SLOT.Cnt:=0;
+		SLOT.cnt:=0;
 		// phase -> Attack */
-		SLOT.state:= EG_ATT;
+		SLOT.state:=EG_ATT;
 	end;
 	SLOT.key:=SLOT.key or key_set;
 end;
@@ -797,11 +791,10 @@ end;
 procedure FM_KEYOFF(SLOT:pOPL_SLOT;key_clr:dword);
 begin
 	if (SLOT.key<>0) then begin
-		SLOT.key:=SLOT.key and key_clr;
-
+		SLOT.key:=SLOT.key and not(key_clr);
 		if (SLOT.key=0) then begin
 			// phase -> Release */
-			if (SLOT.state>EG_REL) then SLOT.state:= EG_REL;
+			if (SLOT.state>EG_REL) then SLOT.state:=EG_REL;
 		end;
 	end;
 end;
@@ -809,13 +802,11 @@ end;
 // CSM Key Controll */
 procedure CSMKeyControll(CH:pOPL_CH);
 begin
-	FM_KEYON (CH.SLOT[SLOT1], 4);
-	FM_KEYON (CH.SLOT[SLOT2], 4);
-
+	FM_KEYON (CH.SLOT[SLOT1],4);
+	FM_KEYON (CH.SLOT[SLOT2],4);
 	// The key off should happen exactly one sample later - not implemented correctly yet */
-
-	FM_KEYOFF(CH.SLOT[SLOT1],cardinal(not(4)));
-	FM_KEYOFF(CH.SLOT[SLOT2],cardinal(not(4)));
+	FM_KEYOFF(CH.SLOT[SLOT1],4);
+	FM_KEYOFF(CH.SLOT[SLOT2],4);
 end;
 
 procedure OPLTimerOver(num:byte;OPL:pFM_OPL;c:byte);
@@ -851,7 +842,6 @@ begin
  // adjust bus to 8 bits */
  r:=r and $ff;
  v:=v and $ff;
-
  case (r and $e0) of
 	 $00:case (r and $1f) of // 00-1f:control */
 		    $01:if (OPL.type_ and OPL_TYPE_WAVESEL)<>0 then begin // waveform select enable */
@@ -923,33 +913,33 @@ begin
 					      FM_KEYON(OPL.P_CH[6].SLOT[SLOT1], 2);
 					      FM_KEYON(OPL.P_CH[6].SLOT[SLOT2], 2);
               end else begin
-					      FM_KEYOFF(OPL.P_CH[6].SLOT[SLOT1],cardinal(not(2)));
-					      FM_KEYOFF(OPL.P_CH[6].SLOT[SLOT2],cardinal(not(2)));
+					      FM_KEYOFF(OPL.P_CH[6].SLOT[SLOT1],2);
+					      FM_KEYOFF(OPL.P_CH[6].SLOT[SLOT2],2);
               end;
 				      // HH key on/off */
 				      if (v and $01)<>0 then FM_KEYON(OPL.P_CH[7].SLOT[SLOT1],2)
-				        else FM_KEYOFF(OPL.P_CH[7].SLOT[SLOT1],cardinal(not(2)));
+				        else FM_KEYOFF(OPL.P_CH[7].SLOT[SLOT1],2);
 				      // SD key on/off */
 				      if (v and $08)<>0 then FM_KEYON(OPL.P_CH[7].SLOT[SLOT2],2)
-				        else FM_KEYOFF(OPL.P_CH[7].SLOT[SLOT2],cardinal(not(2)));
+				        else FM_KEYOFF(OPL.P_CH[7].SLOT[SLOT2],2);
 				      // TOM key on/off */
 				      if (v and $04)<>0 then FM_KEYON(OPL.P_CH[8].SLOT[SLOT1], 2)
-				        else FM_KEYOFF(OPL.P_CH[8].SLOT[SLOT1],cardinal(not(2)));
+				        else FM_KEYOFF(OPL.P_CH[8].SLOT[SLOT1],2);
 				      // TOP-CY key on/off */
 				      if (v and $02)<>0 then FM_KEYON (OPL.P_CH[8].SLOT[SLOT2],2)
-				        else FM_KEYOFF(OPL.P_CH[8].SLOT[SLOT2],cardinal(not(2)));
+				        else FM_KEYOFF(OPL.P_CH[8].SLOT[SLOT2],2);
             end	else begin
 				      // BD key off */
-				      FM_KEYOFF(OPL.P_CH[6].SLOT[SLOT1],cardinal(not(2)));
-				      FM_KEYOFF(OPL.P_CH[6].SLOT[SLOT2],cardinal(not(2)));
+				      FM_KEYOFF(OPL.P_CH[6].SLOT[SLOT1],2);
+				      FM_KEYOFF(OPL.P_CH[6].SLOT[SLOT2],2);
 				      // HH key off */
-				      FM_KEYOFF(OPL.P_CH[7].SLOT[SLOT1],cardinal(not(2)));
+				      FM_KEYOFF(OPL.P_CH[7].SLOT[SLOT1],2);
 				      // SD key off */
-				      FM_KEYOFF(OPL.P_CH[7].SLOT[SLOT2],cardinal(not(2)));
+				      FM_KEYOFF(OPL.P_CH[7].SLOT[SLOT2],2);
 				      // TOM key off */
-				      FM_KEYOFF(OPL.P_CH[8].SLOT[SLOT1],cardinal(not(2)));
+				      FM_KEYOFF(OPL.P_CH[8].SLOT[SLOT1],2);
 				      // TOP-CY off */
-				      FM_KEYOFF(OPL.P_CH[8].SLOT[SLOT2],cardinal(not(2)));
+				      FM_KEYOFF(OPL.P_CH[8].SLOT[SLOT2],2);
             end;
             exit;
           end;
@@ -958,17 +948,17 @@ begin
 		      CH:=OPL.P_CH[r and $0f];
 		      if (r and $10)=0 then begin
 		        // a0-a8 */
-			      block_fnum:= (CH.block_fnum and $1f00) or v;
+			      block_fnum:=(CH.block_fnum and $1f00) or v;
           end else begin
 		        // b0-b8 */
 			      block_fnum:= ((v and $1f) shl 8) or (CH.block_fnum and $ff);
 
 			      if (v and $20)<>0 then begin
-				      FM_KEYON (CH.SLOT[SLOT1], 1);
-				      FM_KEYON (CH.SLOT[SLOT2], 1);
+				      FM_KEYON (CH.SLOT[SLOT1],1);
+				      FM_KEYON (CH.SLOT[SLOT2],1);
             end	else begin
-				      FM_KEYOFF(CH.SLOT[SLOT1],cardinal(not(1)));
-				      FM_KEYOFF(CH.SLOT[SLOT2],cardinal(not(1)));
+				      FM_KEYOFF(CH.SLOT[SLOT1],1);
+				      FM_KEYOFF(CH.SLOT[SLOT2],1);
             end;
           end;
 		      // update */
@@ -977,8 +967,8 @@ begin
 
 			      CH.block_fnum:=block_fnum;
 
-			      CH.ksl_base:=word(trunc(ksl_tab[block_fnum shr 6]));
-			      CH.fc:= OPL.fn_tab[block_fnum and $03ff] shr (7-block);
+			      CH.ksl_base:=dword(trunc(ksl_tab[block_fnum shr 6]));
+			      CH.fc:=OPL.fn_tab[block_fnum and $03ff] shr (7-block);
 
 			      // BLK 2,1,0 bits -> bits 3,2,1 of kcode */
 			      CH.kcode:= (CH.block_fnum and $1c00) shr 9;
@@ -1048,6 +1038,7 @@ var
   block_fnum:cardinal;
   fnum_lfo:cardinal;
   lfo_fn_table_index_offset:integer;
+  tmp:single;
 begin
 	OPL.eg_timer:=trunc(OPL.eg_timer+OPL.eg_timer_add);
 
@@ -1060,15 +1051,14 @@ begin
 			CH:=OPL.P_CH[i shr 1];
 			op:=CH.SLOT[i and 1];
 
-			// Envelope Generator */
+			// Envelope Generator
 			case (op.state) of
 			  EG_ATT:begin		// attack phase */
 				        if ((OPL.eg_cnt and ((1 shl op.eg_sh_ar)-1))=0) then begin
-					        op.volume:=op.volume+sshr((not(op.volume)*
-	                        		           (eg_inc[op.eg_sel_ar + ((OPL.eg_cnt shr op.eg_sh_ar) and 7)])
-        			                          ),3);
-                                        //JODER!!! Otra vez la misma historia. En delphi
-                                        //los enteros con signo cuando haces shr PIERDEN EL SIGNO
+                  //JODER!!! Otra vez la misma historia. En delphi
+                  //los enteros con signo cuando haces shr PIERDEN EL SIGNO
+                  tmp:=(not(op.volume)*(eg_inc[op.eg_sel_ar+((OPL.eg_cnt shr op.eg_sh_ar) and 7)]))/8;
+					        op.volume:=trunc(op.volume+tmp);
 					        if (op.volume <= MIN_ATT_INDEX) then begin
 						        op.volume:= MIN_ATT_INDEX;
 						        op.state:= EG_DEC;
@@ -1087,7 +1077,7 @@ begin
                 one can change percusive/non-percussive modes on the fly and
                 the chip will remain in sustain phase - verified on real YM3812 }
 
-				        if (op.eg_type<>0) then begin		// non-percussive mode */
+				        if op.eg_type<>0 then begin		// non-percussive mode */
 									// do nothing */
                 end else begin				// percussive mode */
 					        // during sustain phase chip adds Release Rate (in percussive mode) */
@@ -1117,11 +1107,11 @@ begin
 		op:=CH.SLOT[i and 1];
 
 		// Phase Generator */
-		if (op.vib)<>0 then begin
+		if op.vib<>0 then begin
       block_fnum:= CH.block_fnum;
 			fnum_lfo:=(block_fnum and $0380) shr 7;
-			lfo_fn_table_index_offset:= lfo_pm_table[(OPL.LFO_PM+16*fnum_lfo) and $7f];
-			if (lfo_fn_table_index_offset)<>0 then begin	// LFO phase modulation active */
+			lfo_fn_table_index_offset:= lfo_pm_table[OPL.LFO_PM+16*fnum_lfo];
+			if lfo_fn_table_index_offset<>0 then begin	// LFO phase modulation active */
 				block_fnum:=block_fnum+lfo_fn_table_index_offset;
 				block:=(block_fnum and $1c00) shr 10;
 				op.Cnt:=op.Cnt+(sshr(OPL.fn_tab[block_fnum and $03ff],(7-block))*op.mul);
@@ -1146,7 +1136,7 @@ begin
 	OPL.noise_p:=OPL.noise_p+OPL.noise_f;
 	i:=OPL.noise_p shr FREQ_SH;		// number of events (shifts of the shift register) */
 	OPL.noise_p:=OPL.noise_p and FREQ_MASK;
-	while (i>0) do begin
+	while (i<>0) do begin
      {   UINT32 j;
         j = ( (OPL->noise_rng) ^ (OPL->noise_rng>>14) ^ (OPL->noise_rng>>15) ^ (OPL->noise_rng>>22) ) & 1;
         OPL->noise_rng = (j<<22) | (OPL->noise_rng>>1);
@@ -1158,8 +1148,8 @@ begin
             what is real state of the noise_rng after the reset.
      }
 
-		if (OPL.noise_rng and 1)<>0 then OPL.noise_rng:=OPL.noise_rng xor $800302
-		  else OPL.noise_rng:=OPL.noise_rng shr 1;
+		if (OPL.noise_rng and 1)<>0 then OPL.noise_rng:=OPL.noise_rng xor $800302;
+    OPL.noise_rng:=OPL.noise_rng shr 1;
 
 		i:=i-1;
 	end; //del while!!
@@ -1182,7 +1172,7 @@ var
   tmp:integer;
 begin
   tmp:=integer((phase and not(FREQ_MASK))+pm);
-	p:= (env shl 4)+sin_tab[wave_tab +(sshr(tmp,FREQ_SH) and SIN_MASK) ];
+	p:= (env shl 4)+sin_tab[wave_tab +(sshr(tmp,FREQ_SH) and SIN_MASK)];
 	if (p>=TL_TAB_LEN) then op_calc1:=0
     else op_calc1:=tl_tab[p];
 end;
@@ -1202,37 +1192,39 @@ begin
 	OPL.phase_modulation:=0;
 	// SLOT 1 */
 	SLOT:=CH.SLOT[SLOT1];
-	env:= volume_calc(OPL,SLOT);
-	out_:=SLOT.op1_out[0] + SLOT.op1_out[1];
-	SLOT.op1_out[0]:= SLOT.op1_out[1];
+	env:=volume_calc(OPL,SLOT);
+	out_:=SLOT.op1_out[0]+SLOT.op1_out[1];
+	SLOT.op1_out[0]:=SLOT.op1_out[1];
 	SLOT.connect1^:=SLOT.connect1^+SLOT.op1_out[0];
-	SLOT.op1_out[1]:= 0;
-	if (env < ENV_QUIET ) then begin
-		if (SLOT.FB=0) then out_:= 0;
-		SLOT.op1_out[1]:=op_calc1(SLOT.Cnt, env, (out_ shl SLOT.FB), SLOT.wavetable );
+	SLOT.op1_out[1]:=0;
+	if (env<ENV_QUIET) then begin
+		if (SLOT.FB=0) then out_:=0;
+		SLOT.op1_out[1]:=op_calc1(SLOT.Cnt,env,(out_ shl SLOT.FB),SLOT.wavetable);
 	end;
 	// SLOT 2 */
 	SLOT:=CH.SLOT[SLOT2];
-	env:= volume_calc(OPL,SLOT);
-	if (env<ENV_QUIET ) then
-		OPL.output:=OPL.output+op_calc(SLOT.Cnt, env, OPL.phase_modulation, SLOT.wavetable);
+	env:=volume_calc(OPL,SLOT);
+	if (env<ENV_QUIET) then
+		OPL.output:=OPL.output+op_calc(SLOT.Cnt,env,OPL.phase_modulation,SLOT.wavetable);
 end;
 
 procedure OPL_CALC_RH(OPL:pFM_OPL;noise:cardinal);
 var
-	SLOT:pOPL_SLOT;
+	SLOT,SLOT7_1,SLOT7_2,SLOT8_1,SLOT8_2:pOPL_SLOT;
 	out_:integer;
-	env:cardinal;
-  bit7,bit3,bit2,res1:byte;
-  phase:cardinal;
-	bit5e,bit3e,res2,bit8:byte;
+	env,phase:cardinal;
+  bit7,bit3,bit2,res1,bit5e,bit3e,res2,bit8:byte;
 begin
 	{ Bass Drum (verified on real YM3812):
       - depends on the channel 6 'connect' register:
           when connect = 0 it works the same as in normal (non-rhythm) mode (op1->op2->out)
           when connect = 1 _only_ operator 2 is present on output (op2->out), operator 1 is ignored
       - output sample always is multiplied by 2}
-
+  // rhythm slots */
+  SLOT7_1:=OPL.P_CH[7].SLOT[SLOT1];
+  SLOT7_2:=OPL.P_CH[7].SLOT[SLOT2];
+  SLOT8_1:=OPL.P_CH[8].SLOT[SLOT1];
+  SLOT8_2:=OPL.P_CH[8].SLOT[SLOT2];
 	OPL.phase_modulation:=0;
 	// SLOT 1 */
 	SLOT:=OPL.P_CH[6].SLOT[SLOT1];
@@ -1247,14 +1239,14 @@ begin
 	SLOT.op1_out[1]:=0;
 	if (env<ENV_QUIET) then begin
 		if (SLOT.FB=0) then out_:=0;
-		SLOT.op1_out[1]:= op_calc1(SLOT.Cnt, env, (out_ shl SLOT.FB), SLOT.wavetable );
+		SLOT.op1_out[1]:=op_calc1(SLOT.Cnt, env,out_ shl SLOT.FB,SLOT.wavetable);
 	end;
 
 	// SLOT 2 */
 	SLOT:=OPL.P_CH[6].SLOT[SLOT2];
 	env:=volume_calc(OPL,SLOT);
-	if (env < ENV_QUIET ) then
-		OPL.output:=OPL.output+op_calc(SLOT.Cnt, env,OPL.phase_modulation, SLOT.wavetable) * 2;
+	if (env<ENV_QUIET) then
+		OPL.output:=OPL.output+(op_calc(SLOT.Cnt, env,OPL.phase_modulation,SLOT.wavetable)*2);
 	// Phase generation is based on: */
 	// HH  (13) channel 7->slot 1 combined with channel 8->slot 2 (same combination as TOP CYMBAL but different output phases) */
 	// SD  (16) channel 7->slot 1 */
@@ -1268,24 +1260,24 @@ begin
 	// The following formulas can be well optimized.
   //     I leave them in direct form for now (in case I've missed something).
 
- // High Hat (verified on real YM3812)
+  // High Hat (verified on real YM3812)
 	env:=volume_calc(OPL,SLOT7_1);
 	if (env<ENV_QUIET) then begin
 	 // high hat phase generation:
    //phase = d0 or 234 (based on frequency only)
    //phase = 34 or 2d0 (based on noise)
    // base frequency derived from operator 1 in channel 7
-		bit7:= ((SLOT7_1.Cnt shr FREQ_SH) shr 7) and 1;
-		bit3:= ((SLOT7_1.Cnt shr FREQ_SH) shr 3) and 1;
-		bit2:= ((SLOT7_1.Cnt shr FREQ_SH) shr 2) and 1;
-		res1:= (bit2 xor bit7) or bit3;
+		bit7:=((SLOT7_1.cnt shr FREQ_SH) shr 7) and 1;
+		bit3:=((SLOT7_1.cnt shr FREQ_SH) shr 3) and 1;
+		bit2:=((SLOT7_1.cnt shr FREQ_SH) shr 2) and 1;
+		res1:=(bit2 xor bit7) or bit3;
 		// when res1 = 0 phase = 0x000 | 0xd0;
 		// when res1 = 1 phase = 0x200 | (0xd0>>2);
     if res1<>0 then phase:=($200 or ($d0 shr 2))
       else phase:=$d0;
 		// enable gate based on frequency of operator 2 in channel 8
-		bit5e:=((SLOT8_2.Cnt shr FREQ_SH) shr 5) and 1;
-		bit3e:=((SLOT8_2.Cnt shr FREQ_SH) shr 3) and 1;
+		bit5e:=((SLOT8_2.cnt shr FREQ_SH) shr 5) and 1;
+		bit3e:=((SLOT8_2.cnt shr FREQ_SH) shr 3) and 1;
 		res2:=(bit3e xor bit5e);
 		// when res2 = 0 pass the phase from calculation above (res1);
 		// when res2 = 1 phase = 0x200 | (0xd0>>2);
@@ -1299,8 +1291,9 @@ begin
 		// when phase & 0x200 is clear and noise=0 then phase = 0xd0, ie no change
 			if (noise<>0) then phase:=$d0 shr 2;
 		end;
-		OPL.output:=OPL.output+(op_calc(phase shl FREQ_SH, env, 0, SLOT7_1.wavetable)*2);
+		OPL.output:=OPL.output+(op_calc(phase shl FREQ_SH,env,0,SLOT7_1.wavetable)*2);
 	end;
+
 	// Snare Drum (verified on real YM3812)
 	env:= volume_calc(OPL,SLOT7_2);
 	if (env<ENV_QUIET) then begin
@@ -1315,34 +1308,34 @@ begin
 		// when noisebit = 1 phase ^= 0x100;
 		// in other words: phase ^= (noisebit<<8);
 		if (noise<>0) then phase:=phase xor $100;
-		OPL.output:=OPL.output +(op_calc(phase shl FREQ_SH, env, 0, SLOT7_2.wavetable) * 2);
+		OPL.output:=OPL.output+(op_calc(phase shl FREQ_SH,env,0,SLOT7_2.wavetable)*2);
 	end;
 
 	// Tom Tom (verified on real YM3812) */
-	env:= volume_calc(OPL,SLOT8_1);
-	if ( env<ENV_QUIET ) then
-		OPL.output:=OPL.output+(op_calc(SLOT8_1.Cnt, env, 0, SLOT8_1.wavetable) * 2);
+	env:=volume_calc(OPL,SLOT8_1);
+	if (env<ENV_QUIET) then
+		OPL.output:=OPL.output+(op_calc(SLOT8_1.Cnt,env,0,SLOT8_1.wavetable)*2);
 
 	// Top Cymbal (verified on real YM3812)
 	env:=volume_calc(OPL,SLOT8_2);
 	if (env<ENV_QUIET) then begin
 		// base frequency derived from operator 1 in channel 7
-	  bit7:= ((SLOT7_1.Cnt shr FREQ_SH) shr 7) and 1;
-		bit3:= ((SLOT7_1.Cnt shr FREQ_SH) shr 3) and 1;
-		bit2:= ((SLOT7_1.Cnt shr FREQ_SH) shr 2) and 1;
-		res1:= (bit2 xor bit7) or bit3;
+	  bit7:=((SLOT7_1.Cnt shr FREQ_SH) shr 7) and 1;
+		bit3:=((SLOT7_1.Cnt shr FREQ_SH) shr 3) and 1;
+		bit2:=((SLOT7_1.Cnt shr FREQ_SH) shr 2) and 1;
+		res1:=(bit2 xor bit7) or bit3;
 		// when res1 = 0 phase = 0x000 | 0x100;
 		// when res1 = 1 phase = 0x200 | 0x100;
     if res1<>0 then phase:=$300
       else phase:=$100;
 		// enable gate based on frequency of operator 2 in channel 8
 		bit5e:=((SLOT8_2.Cnt shr FREQ_SH) shr 5) and 1;
-		bit3e:= ((SLOT8_2.Cnt shr FREQ_SH) shr 3) and 1;
-		res2:= (bit3e xor bit5e);
+		bit3e:=((SLOT8_2.Cnt shr FREQ_SH) shr 3) and 1;
+		res2:=(bit3e xor bit5e);
 		// when res2 = 0 pass the phase from calculation above (res1);
 		// when res2 = 1 phase = 0x200 | 0x100;
 		if (res2<>0) then phase:=$300;
-		OPL.output:=OPL.output +(op_calc(phase shl FREQ_SH, env, 0, SLOT8_2.wavetable) * 2);
+		OPL.output:=OPL.output+(op_calc(phase shl FREQ_SH,env,0,SLOT8_2.wavetable)*2);
 	end;
 
 end;

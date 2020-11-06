@@ -50,7 +50,7 @@ type
     CheckBox14: TCheckBox;
     CheckBox15: TCheckBox;
     CheckBox16: TCheckBox;
-    CheckBox17: TCheckBox;
+    CheckBox9: TCheckBox;
     CheckBox2: TCheckBox;
     CheckBox3: TCheckBox;
     CheckBox4: TCheckBox;
@@ -58,7 +58,6 @@ type
     CheckBox6: TCheckBox;
     CheckBox7: TCheckBox;
     CheckBox8: TCheckBox;
-    CheckBox9: TCheckBox;
     ComboBox1: TComboBox;
     ComboBox10: TComboBox;
     ComboBox11: TComboBox;
@@ -501,23 +500,21 @@ begin
   arcade_input.jbut3[1]:=combobox12.ItemIndex;
   arcade_input.jbut4[1]:=combobox13.ItemIndex;
   arcade_input.jbut5[1]:=combobox14.ItemIndex;
-  autofire_general:=checkbox16.Checked;
-  if autofire_general then begin
-    autofire_enabled[0]:=checkbox4.Checked;
-    autofire_enabled[1]:=checkbox5.Checked;
-    autofire_enabled[2]:=checkbox6.Checked;
-    autofire_enabled[3]:=checkbox7.Checked;
-    autofire_enabled[4]:=checkbox8.Checked;
-    autofire_enabled[5]:=checkbox9.Checked;
-    autofire_enabled[6]:=checkbox10.Checked;
-    autofire_enabled[7]:=checkbox11.Checked;
-    autofire_enabled[8]:=checkbox12.Checked;
-    autofire_enabled[9]:=checkbox13.Checked;
-    autofire_enabled[10]:=checkbox14.Checked;
-    autofire_enabled[11]:=checkbox15.Checked;
-    init_autofire;
-  end else for tmp_var:=0 to 11 do autofire_enabled[tmp_var]:=false;
-  for tmp_var:=0 to 11 do autofire_status[tmp_var]:=false;
+  timers.autofire_on:=checkbox16.Checked;
+  if timers.autofire_on then begin
+    timers.autofire_enabled[0]:=checkbox4.Checked;
+    timers.autofire_enabled[1]:=CheckBox4.Checked;
+    timers.autofire_enabled[2]:=CheckBox5.Checked;
+    timers.autofire_enabled[3]:=CheckBox6.Checked;
+    timers.autofire_enabled[4]:=CheckBox7.Checked;
+    timers.autofire_enabled[5]:=CheckBox8.Checked;
+    timers.autofire_enabled[6]:=checkbox10.Checked;
+    timers.autofire_enabled[7]:=checkbox11.Checked;
+    timers.autofire_enabled[8]:=checkbox12.Checked;
+    timers.autofire_enabled[9]:=checkbox13.Checked;
+    timers.autofire_enabled[10]:=checkbox14.Checked;
+    timers.autofire_enabled[11]:=checkbox15.Checked;
+  end else for tmp_var:=0 to 11 do timers.autofire_enabled[tmp_var]:=false;
   close;
 end;
 
@@ -579,19 +576,25 @@ begin
 export_roms;
 end;
 
+
 procedure TMConfig.CheckBox16Click(Sender: TObject);
 begin
-if checkbox16.Checked then begin
-   groupbox8.Enabled:=true;
-   groupbox9.Enabled:=true;
-   autofire_general:=true;
-   init_autofire;
-end else begin
-   groupbox8.Enabled:=false;
-   groupbox9.Enabled:=false;
-   autofire_general:=false;
-   close_autofire;
-end;
+  timers.autofire_on:=checkbox16.Checked;
+  groupbox8.Enabled:=checkbox16.Checked;
+  groupbox9.Enabled:=checkbox16.Checked;
+  checkbox4.Enabled:=checkbox16.Checked;
+  CheckBox4.Enabled:=checkbox16.Checked;
+  CheckBox5.Enabled:=checkbox16.Checked;
+  CheckBox6.Enabled:=checkbox16.Checked;
+  CheckBox7.Enabled:=checkbox16.Checked;
+  CheckBox8.Enabled:=checkbox16.Checked;
+  checkbox10.Enabled:=checkbox16.Checked;
+  checkbox11.Enabled:=checkbox16.Checked;
+  checkbox12.Enabled:=checkbox16.Checked;
+  checkbox13.Enabled:=checkbox16.Checked;
+  checkbox14.Enabled:=checkbox16.Checked;
+  checkbox15.Enabled:=checkbox16.Checked;
+  timers.enabled(timers.autofire_timer,checkbox16.Checked);
 end;
 
 procedure TMConfig.ComboBox1Change(Sender: TObject);
@@ -879,19 +882,19 @@ begin
     combobox13.ItemIndex:=arcade_input.jbut4[1];
     combobox14.ItemIndex:=arcade_input.jbut5[1];
   end;
-  checkbox4.Checked:=autofire_enabled[0];
-  checkbox5.Checked:=autofire_enabled[1];
-  checkbox6.Checked:=autofire_enabled[2];
-  checkbox7.Checked:=autofire_enabled[3];
-  checkbox8.Checked:=autofire_enabled[4];
-  checkbox9.Checked:=autofire_enabled[5];
-  checkbox10.Checked:=autofire_enabled[6];
-  checkbox11.Checked:=autofire_enabled[7];
-  checkbox12.Checked:=autofire_enabled[8];
-  checkbox13.Checked:=autofire_enabled[9];
-  checkbox14.Checked:=autofire_enabled[10];
-  checkbox15.Checked:=autofire_enabled[11];
-  checkbox16.Checked:=autofire_general;
+  checkbox4.Checked:=timers.autofire_enabled[0];
+  CheckBox4.Checked:=timers.autofire_enabled[1];
+  CheckBox5.Checked:=timers.autofire_enabled[2];
+  CheckBox6.Checked:=timers.autofire_enabled[3];
+  CheckBox7.Checked:=timers.autofire_enabled[4];
+  CheckBox8.Checked:=timers.autofire_enabled[5];
+  checkbox10.Checked:=timers.autofire_enabled[6];
+  checkbox11.Checked:=timers.autofire_enabled[7];
+  checkbox12.Checked:=timers.autofire_enabled[8];
+  checkbox13.Checked:=timers.autofire_enabled[9];
+  checkbox14.Checked:=timers.autofire_enabled[10];
+  checkbox15.Checked:=timers.autofire_enabled[11];
+  checkbox16.Checked:=timers.autofire_on;
   CheckBox16Click(self);
   //Player 1
   bitbtn1.Caption:=nombre_tecla(arcade_input.nleft[0]);

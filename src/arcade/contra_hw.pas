@@ -11,10 +11,10 @@ implementation
 const
         contra_rom:array[0..1] of tipo_roms=(
         (n:'633m03.18a';l:$10000;p:$0;crc:$d045e1da),(n:'633i02.17a';l:$10000;p:$10000;crc:$b2f7bd9a));
-        contra_chars:array[0..2] of tipo_roms=(
-        (n:'633e04.7d';l:$40000;p:0;crc:$14ddc542),(n:'633e05.7f';l:$40000;p:$1;crc:$42185044),());
-        contra_chars2:array[0..2] of tipo_roms=(
-        (n:'633e06.16d';l:$40000;p:0;crc:$9cf6faae),(n:'633e07.16f';l:$40000;p:$1;crc:$f2d06638),());
+        contra_chars:array[0..1] of tipo_roms=(
+        (n:'633e04.7d';l:$40000;p:0;crc:$14ddc542),(n:'633e05.7f';l:$40000;p:$1;crc:$42185044));
+        contra_chars2:array[0..1] of tipo_roms=(
+        (n:'633e06.16d';l:$40000;p:0;crc:$9cf6faae),(n:'633e07.16f';l:$40000;p:$1;crc:$f2d06638));
         contra_sound:tipo_roms=(n:'633e01.12a';l:$8000;p:$8000;crc:$d1549255);
         contra_proms:array[0..3] of tipo_roms=(
         (n:'633e08.10g';l:$100;p:0;crc:$9f0949fa),(n:'633e09.12g';l:$100;p:$100;crc:$14ca5e19),
@@ -117,7 +117,7 @@ draw_sprites(1);
 actualiza_trozo(16+ADD_SPRITE,0+ADD_SPRITE,224,256,4,0,40,224,256,PANT_TEMP);
 //El texto empieza en la linea 16 pero hay que pasarlo a la linea 0 de la pantalla VISIBLE
 actualiza_trozo(16,0,224,256,1,0,0,224,256,PANT_TEMP);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_contra;
@@ -129,19 +129,19 @@ if event.arcade then begin
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   //P1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
 end;
 end;
 
@@ -183,9 +183,10 @@ begin
         $15:contra_getbyte:=marcade.dswb;
         $16:contra_getbyte:=marcade.dswc;
         $60..$67:contra_getbyte:=K007121_chip[1].control[direccion and $7];
+        $c00..$cff:contra_getbyte:=buffer_paleta[direccion and $ff];
+        $1000..$2fff,$3800..$5fff,$8000..$ffff:contra_getbyte:=memoria[direccion];
         $3000..$37ff:contra_getbyte:=K007121_chip[0].sprite_ram[direccion and $7ff];
         $6000..$7fff:contra_getbyte:=memoria_rom[banco,direccion and $1fff];
-    else contra_getbyte:=memoria[direccion];
     end;
 end;
 
@@ -205,8 +206,6 @@ end;
 
 procedure contra_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion>$5fff) and (direccion<>$7000)) then exit;
-memoria[direccion]:=valor;
 case direccion of
   $0..$7:if K007121_chip[0].control[direccion]<>valor then begin
             K007121_chip[0].control[direccion]:=valor;
@@ -228,10 +227,21 @@ case direccion of
                 buffer_paleta[direccion and $ff]:=valor;
                 cambiar_color(direccion and $fe);
              end;
-  $2000..$27ff:gfx[0].buffer[$400+(direccion and $3ff)]:=true;
-  $2800..$2fff:gfx[0].buffer[direccion and $3ff]:=true;
+  $1000..$1fff,$3800..$3fff,$4800..$5fff:memoria[direccion]:=valor;
+  $2000..$27ff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[$400+(direccion and $3ff)]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $2800..$2fff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
   $3000..$37ff:K007121_chip[0].sprite_ram[direccion and $7ff]:=valor;
-  $4000..$47ff:gfx[1].buffer[direccion and $3ff]:=true;
+  $4000..$47ff:if memoria[direccion]<>valor then begin
+                  gfx[1].buffer[direccion and $3ff]:=true;
+                  memoria[direccion]:=valor;
+               end;
+  $6000..$6fff,$7001..$ffff:; //ROM
   $7000:begin
           banco:=(valor and $f);
           if banco>$b then banco:=0;
@@ -244,17 +254,17 @@ begin
 case direccion of
   0:sound_getbyte:=sound_latch;
   $2001:sound_getbyte:=ym2151_0.status;
-    else sound_getbyte:=mem_snd[direccion];
+  $6000..$67ff,$8000..$ffff:sound_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure sound_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
-mem_snd[direccion]:=valor;
 case direccion of
   $2000:ym2151_0.reg(valor);
   $2001:YM2151_0.write(valor);
+  $6000..$67ff:mem_snd[direccion]:=valor;
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -272,8 +282,8 @@ begin
  K007121_reset(0);
  K007121_reset(1);
  ym2151_0.reset;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
  marcade.in2:=$ff;
  banco:=0;
  sound_latch:=0;
@@ -324,26 +334,26 @@ m6809_0.init_sound(contra_sound_update);
 //Audio chips
 ym2151_0:=ym2151_chip.create(3579545);
 //cargar roms
-if not(roms_load(@memoria_temp,@contra_rom,'contra.zip',sizeof(contra_rom))) then exit;
+if not(roms_load(@memoria_temp,contra_rom)) then exit;
 //Pongo las ROMs en su banco
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$2000)],$2000);
 for f:=0 to 3 do copymemory(@memoria_rom[8+f,0],@memoria_temp[0+(f*$2000)],$2000);
 //Cargar Sound
-if not(roms_load(@mem_snd,@contra_sound,'contra.zip',sizeof(contra_sound))) then exit;
+if not(roms_load(@mem_snd,contra_sound)) then exit;
 //convertir chars
-if not(cargar_roms16b(@memoria_temp,@contra_chars,'contra.zip',0)) then exit;
+if not(roms_load16b(@memoria_temp,contra_chars)) then exit;
 init_gfx(0,8,8,$4000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
 convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
 //chars 2
-if not(cargar_roms16b(@memoria_temp,@contra_chars2,'contra.zip',0)) then exit;
+if not(roms_load16b(@memoria_temp,contra_chars2)) then exit;
 init_gfx(1,8,8,$4000);
 gfx[1].trans[0]:=true;
 convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,true,false);
 //Color lookup
-if not(roms_load(@memoria_temp,@contra_proms,'contra.zip',sizeof(contra_proms))) then exit;
+if not(roms_load(@memoria_temp,contra_proms)) then exit;
 clut_contra;
 //DIP
 marcade.dswa:=$ff;

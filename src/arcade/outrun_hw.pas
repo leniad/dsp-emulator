@@ -9,22 +9,22 @@ procedure cargar_outrun;
 
 const
         //Outrun
-        outrun_rom:array[0..4] of tipo_roms=(
+        outrun_rom:array[0..3] of tipo_roms=(
         (n:'epr-10380b.133';l:$10000;p:0;crc:$1f6cadad),(n:'epr-10382b.118';l:$10000;p:$1;crc:$c4c3fa1a),
-        (n:'epr-10381b.132';l:$10000;p:$20000;crc:$be8c412b),(n:'epr-10383b.117';l:$10000;p:$20001;crc:$10a2014a),());
-        outrun_sub:array[0..4] of tipo_roms=(
+        (n:'epr-10381b.132';l:$10000;p:$20000;crc:$be8c412b),(n:'epr-10383b.117';l:$10000;p:$20001;crc:$10a2014a));
+        outrun_sub:array[0..3] of tipo_roms=(
         (n:'epr-10327a.76';l:$10000;p:0;crc:$e28a5baf),(n:'epr-10329a.58';l:$10000;p:$1;crc:$da131c81),
-        (n:'epr-10328a.75';l:$10000;p:$20000;crc:$d5ec5e5d),(n:'epr-10330a.57';l:$10000;p:$20001;crc:$ba9ec82a),());
+        (n:'epr-10328a.75';l:$10000;p:$20000;crc:$d5ec5e5d),(n:'epr-10330a.57';l:$10000;p:$20001;crc:$ba9ec82a));
         outrun_sound:tipo_roms=(n:'epr-10187.88';l:$8000;p:0;crc:$a10abaa9);
-        outrun_tiles:array[0..6] of tipo_roms=(
+        outrun_tiles:array[0..5] of tipo_roms=(
         (n:'opr-10268.99';l:$8000;p:0;crc:$95344b04),(n:'opr-10232.102';l:$8000;p:$8000;crc:$776ba1eb),
         (n:'opr-10267.100';l:$8000;p:$10000;crc:$a85bb823),(n:'opr-10231.103';l:$8000;p:$18000;crc:$8908bcbf),
-        (n:'opr-10266.101';l:$8000;p:$20000;crc:$9f6f1a74),(n:'opr-10230.104';l:$8000;p:$28000;crc:$686f5e50),());
-        outrun_sprites:array[0..8] of tipo_roms=(
+        (n:'opr-10266.101';l:$8000;p:$20000;crc:$9f6f1a74),(n:'opr-10230.104';l:$8000;p:$28000;crc:$686f5e50));
+        outrun_sprites:array[0..7] of tipo_roms=(
         (n:'epr-11290.10';l:$10000;p:1;crc:$611f413a),(n:'epr-11294.11';l:$10000;p:$0;crc:$5eb00fc1),
         (n:'epr-11291.17';l:$10000;p:$20001;crc:$3c0797c0),(n:'epr-11295.18';l:$10000;p:$20000;crc:$25307ef8),
         (n:'epr-11292.23';l:$10000;p:$40001;crc:$c29ac34e),(n:'epr-11296.24';l:$10000;p:$40000;crc:$04a437f8),
-        (n:'epr-11293.29';l:$10000;p:$60001;crc:$41f41063),(n:'epr-11297.30';l:$10000;p:$60000;crc:$b6e1fd72),());
+        (n:'epr-11293.29';l:$10000;p:$60001;crc:$41f41063),(n:'epr-11297.30';l:$10000;p:$60000;crc:$b6e1fd72));
 
 type
   tsystem16_info=record
@@ -625,11 +625,11 @@ pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc)
 ym2151_0:=ym2151_chip.create(4000000);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@outrun_rom[0],'outrun.zip',0)) then exit;
+if not(roms_load16w(@rom,outrun_rom)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@outrun_sound,'outrun.zip',1)) then exit;
+if not(roms_load(@mem_snd,outrun_sound)) then exit;
 //convertir tiles
-if not(cargar_roms(@memoria_temp[0],@outrun_tiles[0],'outrun.zip',0)) then exit;
+if not(roms_load(@memoria_temp,outrun_tiles)) then exit;
 init_gfx(0,8,8,$2000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,$20000*8,$10000*8,0);

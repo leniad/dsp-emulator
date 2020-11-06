@@ -10,29 +10,29 @@ procedure cargar_bagman;
 implementation
 const
         //bagman
-        bagman_rom:array[0..6] of tipo_roms=(
+        bagman_rom:array[0..5] of tipo_roms=(
         (n:'e9_b05.bin';l:$1000;p:0;crc:$e0156191),(n:'f9_b06.bin';l:$1000;p:$1000;crc:$7b758982),
         (n:'f9_b07.bin';l:$1000;p:$2000;crc:$302a077b),(n:'k9_b08.bin';l:$1000;p:$3000;crc:$f04293cb),
-        (n:'m9_b09s.bin';l:$1000;p:$4000;crc:$68e83e4f),(n:'n9_b10.bin';l:$1000;p:$5000;crc:$1d6579f7),());
-        bagman_pal:array[0..2] of tipo_roms=(
-        (n:'p3.bin';l:$20;p:0;crc:$2a855523),(n:'r3.bin';l:$20;p:$20;crc:$ae6f1019),());
-        bagman_char:array[0..2] of tipo_roms=(
-        (n:'e1_b02.bin';l:$1000;p:0;crc:$4a0a6b55),(n:'j1_b04.bin';l:$1000;p:$1000;crc:$c680ef04),());
-        bagman_sprites:array[0..2] of tipo_roms=(
-        (n:'c1_b01.bin';l:$1000;p:0;crc:$705193b2),(n:'f1_b03s.bin';l:$1000;p:$1000;crc:$dba1eda7),());
+        (n:'m9_b09s.bin';l:$1000;p:$4000;crc:$68e83e4f),(n:'n9_b10.bin';l:$1000;p:$5000;crc:$1d6579f7));
+        bagman_pal:array[0..1] of tipo_roms=(
+        (n:'p3.bin';l:$20;p:0;crc:$2a855523),(n:'r3.bin';l:$20;p:$20;crc:$ae6f1019));
+        bagman_char:array[0..1] of tipo_roms=(
+        (n:'e1_b02.bin';l:$1000;p:0;crc:$4a0a6b55),(n:'j1_b04.bin';l:$1000;p:$1000;crc:$c680ef04));
+        bagman_sprites:array[0..1] of tipo_roms=(
+        (n:'c1_b01.bin';l:$1000;p:0;crc:$705193b2),(n:'f1_b03s.bin';l:$1000;p:$1000;crc:$dba1eda7));
         //Super Bagman
-        sbagman_rom:array[0..10] of tipo_roms=(
+        sbagman_rom:array[0..9] of tipo_roms=(
         (n:'5.9e';l:$1000;p:0;crc:$1b1d6b0a),(n:'6.9f';l:$1000;p:$1000;crc:$ac49cb82),
         (n:'7.9j';l:$1000;p:$2000;crc:$9a1c778d),(n:'8.9k';l:$1000;p:$3000;crc:$b94fbb73),
         (n:'9.9m';l:$1000;p:$4000;crc:$601f34ba),(n:'10.9n';l:$1000;p:$5000;crc:$5f750918),
         (n:'13.8d';l:$1000;p:$6000;crc:$944a4453),(n:'14.8f';l:$1000;p:$7000;crc:$83b10139),
-        (n:'15.8j';l:$1000;p:$8000;crc:$fe924879),(n:'16.8k';l:$1000;p:$9000;crc:$b77eb1f5),());
-        sbagman_pal:array[0..2] of tipo_roms=(
-        (n:'p3.bin';l:$20;p:0;crc:$2a855523),(n:'r3.bin';l:$20;p:$20;crc:$ae6f1019),());
-        sbagman_char:array[0..2] of tipo_roms=(
-        (n:'2.1e';l:$1000;p:0;crc:$f4d3d4e6),(n:'4.1j';l:$1000;p:$1000;crc:$2c6a510d),());
-        sbagman_sprites:array[0..2] of tipo_roms=(
-        (n:'1.1c';l:$1000;p:0;crc:$a046ff44),(n:'3.1f';l:$1000;p:$1000;crc:$a4422da4),());
+        (n:'15.8j';l:$1000;p:$8000;crc:$fe924879),(n:'16.8k';l:$1000;p:$9000;crc:$b77eb1f5));
+        sbagman_pal:array[0..1] of tipo_roms=(
+        (n:'p3.bin';l:$20;p:0;crc:$2a855523),(n:'r3.bin';l:$20;p:$20;crc:$ae6f1019));
+        sbagman_char:array[0..1] of tipo_roms=(
+        (n:'2.1e';l:$1000;p:0;crc:$f4d3d4e6),(n:'4.1j';l:$1000;p:$1000;crc:$2c6a510d));
+        sbagman_sprites:array[0..1] of tipo_roms=(
+        (n:'1.1c';l:$1000;p:0;crc:$a046ff44),(n:'3.1f';l:$1000;p:$1000;crc:$a4422da4));
         //DIP
         bagman_dip:array [0..6] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$3;dip_name:'2'),(dip_val:$2;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -50,7 +50,8 @@ var
   f,color,nchar:word;
   atrib,gfx_num,x,y:byte;
 begin
-for f:=0 to $3ff do begin
+if video_enable then begin
+  for f:=0 to $3ff do begin
     if gfx[0].buffer[f] then begin
       x:=31-(f div 32);
       y:=f mod 32;
@@ -61,9 +62,9 @@ for f:=0 to $3ff do begin
       put_gfx(x*8,y*8,nchar,color,1,gfx_num);
       gfx[0].buffer[f]:=false;
     end;
-end;
-actualiza_trozo(0,0,256,256,1,0,0,256,256,2);
-for f:=7 downto 0 do begin
+  end;
+  actualiza_trozo(0,0,256,256,1,0,0,256,256,2);
+  for f:=7 downto 0 do begin
     atrib:=memoria[$9800+(f*4)];
     color:=(memoria[$9801+(f*4)] and $1f) shl 2;
     nchar:=(atrib and $3f)+((memoria[$9801+(f*4)] and $20) shl 1);
@@ -73,7 +74,8 @@ for f:=7 downto 0 do begin
       put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,1);
       actualiza_gfx_sprite((x+1) and $ff,(y-1) and $ff,2,1);
     end;
-end;
+  end;
+end else fill_full_screen(2,$3ff);
 actualiza_trozo_final(16,0,224,256,2);
 end;
 
@@ -81,20 +83,20 @@ procedure eventos_bagman;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
 end;
@@ -112,7 +114,7 @@ while EmuStatus=EsRuning do begin
     frame:=frame+z80_0.tframes-z80_0.contador;
     if f=239 then begin
       if irq_enable then z80_0.change_irq(HOLD_LINE);
-      if video_enable then update_video_bagman;
+      update_video_bagman;
     end;
   end;
   eventos_bagman;
@@ -131,8 +133,8 @@ end;
 
 procedure bagman_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$6000) or (direccion>$bfff)) then exit;
 case direccion of
+  0..$5fff,$c000..$ffff:; //ROM
   $6000..$67ff:memoria[direccion]:=valor;
   $9000..$93ff,$9800..$9bff:if memoria[direccion]<>valor then begin
                                 gfx[0].buffer[direccion and $3ff]:=true;
@@ -147,7 +149,7 @@ end;
 
 function bagman_inbyte(puerto:word):byte;
 begin
-if (puerto and $ff)=$c then bagman_inbyte:=ay8910_0.Read;
+  if (puerto and $ff)=$c then bagman_inbyte:=ay8910_0.Read;
 end;
 
 procedure bagman_outbyte(puerto:word;valor:byte);
@@ -181,8 +183,8 @@ begin
  reset_audio;
  irq_enable:=true;
  video_enable:=true;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
  //Reset PAL
  bagman_pal16r6_w(0,1);	// pin 2
  bagman_pal16r6_w(1,1);	// pin 3
@@ -214,14 +216,14 @@ procedure conv_chars(num_gfx:byte);
 begin
   init_gfx(num_gfx,8,8,$200);
   gfx_set_desc_data(2,0,8*8,0,512*8*8);
-  convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(num_gfx,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 procedure conv_sprites;
 begin
   init_gfx(1,16,16,$80);
   gfx[1].trans[0]:=true;
   gfx_set_desc_data(2,0,32*8,0,128*16*16);
-  convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+  convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 begin
 iniciar_bagman:=false;
@@ -239,21 +241,21 @@ ay8910_0.change_io_calls(bagman_portar,bagman_portbr,nil,nil);
 case main_vars.tipo_maquina of
   171:begin  //bagman
         //cargar roms
-        if not(cargar_roms(@memoria[0],@bagman_rom[0],'bagman.zip',0)) then exit;
+        if not(roms_load(@memoria,bagman_rom)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@bagman_char,'bagman.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,bagman_char)) then exit;
         conv_chars(0);
         conv_sprites;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@bagman_sprites,'bagman.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,bagman_sprites)) then exit;
         conv_chars(2);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@bagman_pal[0],'bagman.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,bagman_pal)) then exit;
      end;
   172:begin  //Super Bagman
         //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@sbagman_rom[0],'sbagman.zip',0)) then exit;
-        copymemory(@memoria[0],@memoria_temp[0],$6000);
+        if not(roms_load(@memoria_temp,sbagman_rom)) then exit;
+        copymemory(@memoria[0],@memoria_temp,$6000);
         copymemory(@memoria[$c000],@memoria_temp[$6000],$e00);
         copymemory(@memoria[$fe00],@memoria_temp[$6e00],$200);
         copymemory(@memoria[$d000],@memoria_temp[$7000],$400);
@@ -265,35 +267,35 @@ case main_vars.tipo_maquina of
         copymemory(@memoria[$f000],@memoria_temp[$9000],$e00);
         copymemory(@memoria[$ce00],@memoria_temp[$9e00],$200);
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@sbagman_char,'sbagman.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,sbagman_char)) then exit;
         conv_chars(0);
         conv_sprites;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@sbagman_sprites,'sbagman.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,sbagman_sprites)) then exit;
         conv_chars(2);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@sbagman_pal[0],'sbagman.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,sbagman_pal)) then exit;
      end;
 end;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances_rg[0],@rweights[0],470,0,
-			3,@resistances_rg[0],@gweights[0],470,0,
-			2,@resistances_b[0],@bweights[0],470,0);
+			3,@resistances_rg,@rweights,470,0,
+			3,@resistances_rg,@gweights,470,0,
+			2,@resistances_b,@bweights,470,0);
 for f:=0 to $3f do begin
 		// red component */
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
-		colores[f].r:=combine_3_weights(@rweights[0], bit0, bit1, bit2);
+		colores[f].r:=combine_3_weights(@rweights,bit0,bit1,bit2);
 		// green component */
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
-		colores[f].g:=combine_3_weights(@gweights[0], bit0, bit1, bit2);
+		colores[f].g:=combine_3_weights(@gweights,bit0,bit1,bit2);
 		// blue component */
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
-		colores[f].b:=combine_2_weights(@bweights[0], bit0, bit1);
+		colores[f].b:=combine_2_weights(@bweights,bit0,bit1);
 end;
 set_pal(colores,$40);
 //DIP

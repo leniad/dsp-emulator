@@ -4,7 +4,7 @@ object ConfigSP: TConfigSP
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Configurar'
-  ClientHeight = 395
+  ClientHeight = 480
   ClientWidth = 504
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,12 +22,12 @@ object ConfigSP: TConfigSP
     Left = 7
     Top = 6
     Width = 488
-    Height = 331
+    Height = 395
     Caption = 'Spectrum'
     TabOrder = 2
     object GroupBox2: TGroupBox
       Left = 61
-      Top = 263
+      Top = 335
       Width = 361
       Height = 49
       Caption = 'ROM'
@@ -139,10 +139,10 @@ object ConfigSP: TConfigSP
       end
     end
     object GroupBox11: TGroupBox
-      Left = 130
+      Left = 125
       Top = 151
       Width = 348
-      Height = 106
+      Height = 178
       Caption = 'Audio'
       TabOrder = 4
       object GroupBox8: TGroupBox
@@ -181,14 +181,14 @@ object ConfigSP: TConfigSP
         end
       end
       object GroupBox10: TGroupBox
-        Left = 267
-        Top = 15
+        Left = 163
+        Top = 103
         Width = 78
         Height = 66
         Caption = 'Tape Audio'
         TabOrder = 1
         object RadioButton21: TRadioButton
-          Left = 10
+          Left = 13
           Top = 17
           Width = 62
           Height = 17
@@ -207,8 +207,8 @@ object ConfigSP: TConfigSP
         end
       end
       object GroupBox9: TGroupBox
-        Left = 137
-        Top = 13
+        Left = 163
+        Top = 16
         Width = 124
         Height = 66
         Caption = 'Speaker Oversample'
@@ -226,6 +226,32 @@ object ConfigSP: TConfigSP
           Left = 13
           Top = 40
           Width = 69
+          Height = 17
+          Caption = 'Disabled'
+          TabOrder = 1
+          OnKeyUp = FormKeyUp
+        end
+      end
+      object GroupBox13: TGroupBox
+        Left = 17
+        Top = 99
+        Width = 78
+        Height = 66
+        Caption = 'Turbo Sound'
+        TabOrder = 3
+        object RadioButton26: TRadioButton
+          Left = 10
+          Top = 17
+          Width = 62
+          Height = 17
+          Caption = 'Enabled'
+          TabOrder = 0
+          OnKeyUp = FormKeyUp
+        end
+        object RadioButton27: TRadioButton
+          Left = 10
+          Top = 40
+          Width = 63
           Height = 17
           Caption = 'Disabled'
           TabOrder = 1
@@ -366,8 +392,8 @@ object ConfigSP: TConfigSP
     end
   end
   object Button1: TButton
-    Left = 77
-    Top = 343
+    Left = 85
+    Top = 423
     Width = 89
     Height = 33
     Caption = 'OK'
@@ -376,8 +402,8 @@ object ConfigSP: TConfigSP
     OnKeyUp = FormKeyUp
   end
   object Button2: TButton
-    Left = 287
-    Top = 343
+    Left = 295
+    Top = 423
     Width = 89
     Height = 33
     Caption = 'CANCELAR'

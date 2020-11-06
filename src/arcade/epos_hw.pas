@@ -9,18 +9,18 @@ procedure cargar_epos_hw;
 implementation
 const
         //The Glob
-        theglob_rom:array[0..8] of tipo_roms=(
+        theglob_rom:array[0..7] of tipo_roms=(
         (n:'globu10.bin';l:$1000;p:0;crc:$08fdb495),(n:'globu9.bin';l:$1000;p:$1000;crc:$827cd56c),
         (n:'globu8.bin';l:$1000;p:$2000;crc:$d1219966),(n:'globu7.bin';l:$1000;p:$3000;crc:$b1649da7),
         (n:'globu6.bin';l:$1000;p:$4000;crc:$b3457e67),(n:'globu5.bin';l:$1000;p:$5000;crc:$89d582cd),
-        (n:'globu4.bin';l:$1000;p:$6000;crc:$7ee9fdeb),(n:'globu11.bin';l:$800;p:$7000;crc:$9e05dee3),());
+        (n:'globu4.bin';l:$1000;p:$6000;crc:$7ee9fdeb),(n:'globu11.bin';l:$800;p:$7000;crc:$9e05dee3));
         theglob_pal:tipo_roms=(n:'82s123.u66';l:$20;p:0;crc:$f4f6ddc5);
         //Super Glob
-        superglob_rom:array[0..8] of tipo_roms=(
+        superglob_rom:array[0..7] of tipo_roms=(
         (n:'u10';l:$1000;p:0;crc:$c0141324),(n:'u9';l:$1000;p:$1000;crc:$58be8128),
         (n:'u8';l:$1000;p:$2000;crc:$6d088c16),(n:'u7';l:$1000;p:$3000;crc:$b2768203),
         (n:'u6';l:$1000;p:$4000;crc:$976c8f46),(n:'u5';l:$1000;p:$5000;crc:$340f5290),
-        (n:'u4';l:$1000;p:$6000;crc:$173bd589),(n:'u11';l:$800;p:$7000;crc:$d45b740d),());
+        (n:'u4';l:$1000;p:$6000;crc:$173bd589),(n:'u11';l:$800;p:$7000;crc:$d45b740d));
 
 var
  palette:byte;
@@ -28,10 +28,8 @@ var
 
 procedure update_video_epos;inline;
 var
-  f:word;
-  x,y:word;
+  f,x,y,temp:word;
   atrib:byte;
-  temp:word;
 begin
 for f:=0 to $7fff do begin
   if buffer[f] then begin
@@ -55,13 +53,13 @@ if event.arcade then begin
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   //system
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
 end;
 end;
 
@@ -88,16 +86,19 @@ end;
 
 function epos_getbyte(direccion:word):byte;
 begin
-epos_getbyte:=memoria[direccion];
+  epos_getbyte:=memoria[direccion];
 end;
 
 procedure epos_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$7800 then exit;
 case direccion of
-  $8000..$ffff:buffer[direccion and $7fff]:=true;
+  0..$77ff:;
+  $7800..$7fff:memoria[direccion]:=valor;
+  $8000..$ffff:if memoria[direccion]<>valor then begin
+                  buffer[direccion and $7fff]:=true;
+                  memoria[direccion]:=valor;
+               end;
 end;
-memoria[direccion]:=valor;
 end;
 
 function epos_inbyte(puerto:word):byte;
@@ -130,17 +131,17 @@ begin
  z80_0.reset;
  AY8910_0.reset;
  reset_audio;
- marcade.in0:=$FF;
+ marcade.in0:=$ff;
  marcade.in1:=$be;
  palette:=0;
 end;
 
 function iniciar_epos_hw:boolean;
 var
-      colores:tpaleta;
-      f:word;
-      memoria_temp:array[0..$1f] of byte;
-      bit0,bit1,bit2:byte;
+  colores:tpaleta;
+  f:word;
+  memoria_temp:array[0..$1f] of byte;
+  bit0,bit1,bit2:byte;
 begin
 iniciar_epos_hw:=false;
 iniciar_audio(false);
@@ -152,19 +153,19 @@ z80_0.change_ram_calls(epos_getbyte,epos_putbyte);
 z80_0.change_io_calls(epos_inbyte,epos_outbyte);
 z80_0.init_sound(epos_despues_instruccion);
 //Sound Chips
-AY8910_0:=ay8910_chip.create(2750000,AY8910,1);
+AY8910_0:=ay8910_chip.create(687500,AY8910,1);
 case main_vars.tipo_maquina of
   94:begin
       //cargar roms
-      if not(cargar_roms(@memoria[0],@theglob_rom[0],'theglob.zip',0)) then exit;
+      if not(roms_load(@memoria,theglob_rom)) then exit;
       //poner la paleta y clut
-      if not(cargar_roms(@memoria_temp[0],@theglob_pal,'theglob.zip')) then exit;
+      if not(roms_load(@memoria_temp,theglob_pal)) then exit;
   end;
   95:begin
       //cargar roms
-      if not(cargar_roms(@memoria[0],@superglob_rom[0],'suprglob.zip',0)) then exit;
+      if not(roms_load(@memoria,superglob_rom)) then exit;
       //poner la paleta y clut
-      if not(cargar_roms(@memoria_temp[0],@theglob_pal,'suprglob.zip')) then exit;
+      if not(roms_load(@memoria_temp,theglob_pal)) then exit;
   end;
 end;
 for f:=0 to $1f do begin

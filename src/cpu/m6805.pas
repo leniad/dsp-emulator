@@ -108,7 +108,7 @@ r.cc.n:=false;
 r.cc.z:=false;
 r.cc.c:=false;
 self.opcode:=false;
-r.pc:=self.getword($FFFE);
+r.pc:=self.getword($fffe);
 r.a:=0;
 r.x:=0;
 self.contador:=0;
@@ -578,7 +578,7 @@ case instruccion of
       end;
 end; //del case
 self.contador:=self.contador+ciclos_6805[instruccion]+self.estados_demas;
-update_timer(ciclos_6805[instruccion]+self.estados_demas,self.numero_cpu);
+timers.update(ciclos_6805[instruccion]+self.estados_demas,self.numero_cpu);
 end; //del while
 end;
 

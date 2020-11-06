@@ -9,11 +9,11 @@ procedure cargar_foodf;
 
 implementation
 const
-        foodf_rom:array[0..8] of tipo_roms=(
+        foodf_rom:array[0..7] of tipo_roms=(
         (n:'136020-301.8c';l:$2000;p:1;crc:$dfc3d5a8),(n:'136020-302.9c';l:$2000;p:$0;crc:$ef92dc5c),
         (n:'136020-303.8d';l:$2000;p:$4001;crc:$64b93076),(n:'136020-204.9d';l:$2000;p:$4000;crc:$ea596480),
         (n:'136020-305.8e';l:$2000;p:$8001;crc:$e6cff1b1),(n:'136020-306.9e';l:$2000;p:$8000;crc:$95159a3e),
-        (n:'136020-307.8f';l:$2000;p:$c001;crc:$17828dbb),(n:'136020-208.9f';l:$2000;p:$c000;crc:$608690c9),());
+        (n:'136020-307.8f';l:$2000;p:$c001;crc:$17828dbb),(n:'136020-208.9f';l:$2000;p:$c000;crc:$608690c9));
         foodf_char:tipo_roms=(n:'136020-109.6lm';l:$2000;p:0;crc:$c13c90eb);
         foodf_sprites:array[0..1] of tipo_roms=(
         (n:'136020-110.4e';l:$2000;p:0;crc:$8870e3d6),(n:'136020-111.4d';l:$2000;p:$2000;crc:$84372edf));
@@ -74,19 +74,20 @@ scroll__x(1,2,248);
 draw_sprites(0);
 draw_sprites(1);
 actualiza_trozo_final(0,0,256,224,2);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_foodf;inline;
+procedure eventos_foodf;
 begin
+if main_vars.service1 then marcade.in0:=(marcade.in0 and $ff7f) else marcade.in0:=(marcade.in0 or $80);
 if event.arcade then begin
   //system
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
 end;
 end;
 
@@ -110,8 +111,8 @@ while EmuStatus=EsRuning do begin
         end;
     end;
  end;
- analog_data[1]:=analog.y[0];
- analog_data[5]:=analog.x[0];
+ analog_data[1]:=analog.c[0].y[0];
+ analog_data[5]:=analog.c[0].x[0];
  eventos_foodf;
  video_sync;
 end;
@@ -166,7 +167,7 @@ procedure foodf_putword(direccion:dword;valor:word);
 begin
 case direccion of
     0..$3fffff:case (direccion and $1ffff) of
-                  0..$ffff:exit;
+                  0..$ffff:; //ROM
                   $14000..$17fff:ram[(direccion and $fff) shr 1]:=valor;
                   $18000..$1bfff:ram2[(direccion and $fff) shr 1]:=valor;
                   $1c000..$1ffff:sprite_ram[(direccion and $ff) shr 1]:=valor;
@@ -211,7 +212,7 @@ begin
  pokey_1.reset;
  pokey_2.reset;
  reset_audio;
- marcade.in0:=$FF;
+ marcade.in0:=$ffff;
  analog_select:=0;
 end;
 
@@ -233,25 +234,26 @@ screen_mod_scroll(1,256,256,255,256,256,255);
 screen_init(2,256,256,false,true);
 iniciar_video(256,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(trunc(12096000/2),259);
+m68000_0:=cpu_m68000.create(12096000 div 2,259);
 m68000_0.change_ram16_calls(foodf_getword,foodf_putword);
 m68000_0.init_sound(foodf_sound_update);
 //Init Analog
-init_analog(m68000_0.numero_cpu,m68000_0.clock,100,10,$7f,$ff,0,true);
+init_analog(m68000_0.numero_cpu,m68000_0.clock);
+analog_0(100,10,$7f,$ff,0,true);
 //Sound Chips
 pokey_0:=pokey_chip.create(0,trunc(12096000/2/10));
 pokey_0.change_pot(foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r,foodf_pot_r);
 pokey_1:=pokey_chip.create(1,trunc(12096000/2/10));
 pokey_2:=pokey_chip.create(2,trunc(12096000/2/10));
 //cargar roms
-if not(cargar_roms16w(@rom,@foodf_rom,'foodf.zip',0)) then exit;
+if not(roms_load16w(@rom,foodf_rom)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@foodf_char,'foodf.zip',sizeof(foodf_char))) then exit;
+if not(roms_load(@memoria_temp,foodf_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx_set_desc_data(2,0,8*16,0,4);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //convertir sprites
-if not(roms_load(@memoria_temp,@foodf_sprites,'foodf.zip',sizeof(foodf_sprites))) then exit;
+if not(roms_load(@memoria_temp,foodf_sprites)) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(2,0,8*32,$100*8*32,0);
@@ -266,7 +268,7 @@ marcade.dswa:=$0;
 marcade.dswa_val:=@foodf_dip;
 //NVRAM
 if read_file_size(Directory.Arcade_nvram+'foodf.nv',longitud) then read_file(Directory.Arcade_nvram+'foodf.nv',@nvram,longitud)
-  else if not(roms_load(@nvram,@foodf_nvram,'foodf.zip',sizeof(foodf_nvram))) then exit;
+  else if not(roms_load(@nvram,foodf_nvram)) then exit;
 //final
 reset_foodf;
 iniciar_foodf:=true;

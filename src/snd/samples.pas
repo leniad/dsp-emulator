@@ -26,6 +26,7 @@ type
              audio:array[0..MAX_SAMPLES] of ptipo_audio;
              tsample_use:array[0..MAX_CHANNELS] of boolean;
              tsample_reserved:array[0..MAX_CHANNELS] of integer;
+             amp:single;
         end;
   pnom_sample=^tipo_nombre_samples;
   ptipo_samples=^tipo_samples;
@@ -34,8 +35,8 @@ var
   samples_loaded:boolean;
 
 function convert_wav(source:pbyte;var data:pword;source_long:dword;var long:dword):boolean;
-function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte):boolean;
-function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean):boolean;
+function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte;amp:single=1):boolean;
+function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean;amp:single=1):boolean;
 procedure start_sample(num:byte);
 procedure samples_update;
 procedure stop_sample(num:byte);
@@ -176,7 +177,7 @@ freemem(chunk);
 freemem(fmt_info);
 end;
 
-function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean):boolean;
+function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean;amp:single=1):boolean;
 var
   sample_pos:byte;
 begin
@@ -193,6 +194,7 @@ end;
 //Inicializo el sample
 getmem(data_samples.audio[sample_pos],sizeof(tipo_audio));
 data_samples.audio[sample_pos].pos:=0;
+data_samples.amp:=amp;
 data_samples.audio[sample_pos].playing:=false;
 getmem(data_samples.audio[sample_pos].data,longitud*2);
 //cargar datos sample
@@ -208,7 +210,7 @@ end;
 load_samples_raw:=true;
 end;
 
-function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte):boolean;
+function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte;amp:single=1):boolean;
 var
   nsamples,f:byte;
   ptemp:pbyte;
@@ -247,6 +249,7 @@ repeat
 until nsamples=num_samples;
 freemem(ptemp);
 data_samples.num_samples:=num_samples;
+data_samples.amp:=amp;
 //Inicializar solor los necesarios...
 for f:=0 to MAX_CHANNELS do data_samples.tsample_reserved[f]:=-1;
 if (nsamples-1)>MAX_CHANNELS then nsamples:=MAX_CHANNELS;
@@ -335,7 +338,7 @@ for f:=0 to (data_samples.num_samples-1) do begin
     ptemp:=data_samples.audio[f].data;
     inc(ptemp,data_samples.audio[f].pos);
     data_samples.audio[f].pos:=data_samples.audio[f].pos+1;
-    tsample[data_samples.audio[f].tsample,sound_status.posicion_sonido]:=smallint(ptemp^);
+    tsample[data_samples.audio[f].tsample,sound_status.posicion_sonido]:=trunc(smallint(ptemp^)*data_samples.amp);
     if data_samples.audio[f].pos=data_samples.audio[f].long then begin
       if data_samples.audio[f].loop then begin
         data_samples.audio[f].pos:=0;

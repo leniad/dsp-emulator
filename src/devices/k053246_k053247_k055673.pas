@@ -118,7 +118,7 @@ begin
   self.dy:=dy;
   init_gfx(1,16,16,self.rom_size div 128);
   gfx_set_desc_data(4,0,8*128,0,1,2,3);
-  convert_gfx(1,0,self.rom,@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,self.rom,@ps_x,@ps_y,false,false);
   gfx[1].trans[0]:=true;
   gfx[1].alpha[$f]:=true;
 end;
@@ -167,23 +167,6 @@ begin
 					  else tempcode:=tempcode+(yoffset[(y+ya) and 7]);
 					fy:=flipy;
 				end;
-
-{				if (gx_objzbuf && gx_shdzbuf) /* GX uses a custom draw function */
-				{
-					if (nozoom) { zw = zh = 0x10; }
-
-{					zdrawgfxzoom32GP(
-							bitmap, cliprect,
-							tempcode,
-							color,
-							fx,fy,
-							sx,sy,
-							zw << 12, zh << 12, alpha, drawmode, zcode, pri,
-							gx_objzbuf, gx_shdzbuf
-							);
-
-				}
-{				else /* Non-GX using regular pdrawgfx */ }
 
         if not(nozoom) then begin
            put_gfx_sprite_zoom_alpha(tempcode,color shl 4,fx,fy,1,zoomx,zoomy);

@@ -78,6 +78,7 @@ begin
 	else
   if ((self.prog=0) and (valor<>0)) then begin
 		case (self.opcode shr 2) of
+      MCS48_EXPANDER_OP_READ:;
 			MCS48_EXPANDER_OP_WRITE:begin
 				self.p[self.opcode and 3]:=self.p2 and $f;
 				self.write(self.opcode and 3,self.p[self.opcode and 3]);

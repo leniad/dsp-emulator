@@ -16,7 +16,7 @@ const
         (n:'bdu-01a.5e';l:$8000;p:0;crc:$a8f98f22),(n:'bdu-02a.6e';l:$10000;p:$8000;crc:$7bef96e8),
         (n:'bdu-03a.8e';l:$10000;p:$18000;crc:$4089e157),(n:'bd-04.9e';l:$10000;p:$28000;crc:$ed6af6ec),
         (n:'bd-05.10e';l:$10000;p:$38000;crc:$ae59b72e));
-        blktiger_char: tipo_roms=(n:'bd-15.2n';l:$8000;p:0;crc:$70175d78);
+        blktiger_char:tipo_roms=(n:'bd-15.2n';l:$8000;p:0;crc:$70175d78);
         blktiger_sprites:array[0..3] of tipo_roms=(
         (n:'bd-08.5a';l:$10000;p:0;crc:$e2f17438),(n:'bd-07.4a';l:$10000;p:$10000;crc:$5fccbd27),
         (n:'bd-10.9a';l:$10000;p:$20000;crc:$fc33ccc6),(n:'bd-09.8a';l:$10000;p:$30000;crc:$f449de01));
@@ -39,8 +39,8 @@ const
         (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- scroll_ram:array[0..$3FFF] of byte;
- memoria_rom:array [0..$F,$0..$3FFF] of byte;
+ scroll_ram:array[0..$3fff] of byte;
+ memoria_rom:array[0..$f,$0..$3fff] of byte;
  banco_rom,soundlatch,i8751_latch,z80_latch,timer_hs,mask_x,mask_y,shl_row:byte;
  mask_sx,mask_sy,scroll_x,scroll_y,scroll_bank:word;
  bg_on,ch_on,spr_on:boolean;
@@ -53,10 +53,9 @@ var
     sx,sy,pos,atrib:word;
     flip_x:boolean;
 begin
-//atributo de las tiles
-//80 --> flip x
-//40+20+10+8 --> Color
-//4+2+1 --> Numero tile
+//Para que el fondo de la pantalla 4 se vea negro, tengo que hacerlo asi... Rellenar
+//la pantalla final y todo el fondo con transparencias...
+fill_full_screen(4,$400);
 if bg_on then begin
   pos_x:=(scroll_x and mask_sx) shr 4;
   pos_y:=(scroll_y and mask_sy) shr 4;
@@ -71,23 +70,14 @@ if bg_on then begin
     if (gfx[2].buffer[pos shr 1] or buffer_color[color+$20]) then begin
       nchar:=scroll_ram[pos]+((atrib and $7) shl 8);
       flip_x:=(atrib and $80)<>0;
-      put_gfx_flip(x*16,y*16,nchar,color shl 4,1,2,flip_x,false);
+      put_gfx_trans_flip(x*16,y*16,nchar,color shl 4,1,2,flip_x,false);
       if split_table[color]<>0 then put_gfx_trans_flip_alt(x*16,y*16,nchar,color shl 4,2,2,flip_x,false,split_table[color])
         else put_gfx_block_trans(x*16,y*16,2,16,16);
       gfx[2].buffer[pos shr 1]:=false;
     end;
   end;
   scroll_x_y(1,4,scroll_x and $f,scroll_y and $f);
-end else fill_full_screen(4,$3ff);
-//cuatro bytes
-// 0 --> codigo sprite
-// 1 --> Atributo
-//          $80+$40+$20 resto codigo sprite
-//          $10 posicion x
-//          $8 flip x
-//          $4+$2+$1 color sprite
-// 2 --> Y
-// 3 --> X
+end;
 if spr_on then begin
   for f:=$7f downto 0 do begin
     atrib:=buffer_sprites[$1+(f*4)];
@@ -96,10 +86,10 @@ if spr_on then begin
     x:=buffer_sprites[$3+(f*4)]+(atrib and $10) shl 4;
     y:=buffer_sprites[$2+(f*4)];
     put_gfx_sprite(nchar,color+$200,(atrib and 8)<>0,false,1);
-    actualiza_gfx_sprite_over(x,y,4,1,2,scroll_x and $f,scroll_y and $f);
+    actualiza_gfx_sprite(x,y,4,1);
   end;
 end;
-//Caracteres
+if bg_on then scroll_x_y(2,4,scroll_x and $f,scroll_y and $f);
 if ch_on then begin
   for f:=$0 to $3ff do begin
    atrib:=memoria[$d400+f];
@@ -115,7 +105,7 @@ if ch_on then begin
   actualiza_trozo(0,0,256,256,3,0,0,256,256,4);
 end;
 actualiza_trozo_final(0,16,256,224,4);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_blktiger;
@@ -170,10 +160,10 @@ while EmuStatus=EsRuning do begin
     if f=239 then begin
       z80_0.change_irq(HOLD_LINE);
       copymemory(@buffer_sprites,@memoria[$fe00],$200);
+      update_video_blktiger;
     end;
   end;
   eventos_blktiger;
-  update_video_blktiger;
   {$ifdef speed_debug}
   QueryPerformanceCounter(cont2);
   principal1.statusbar1.panels[2].text:=inttostr(cont2-cont1);
@@ -189,7 +179,7 @@ case direccion of
   $8000..$bfff:blktiger_getbyte:=memoria_rom[banco_rom,(direccion and $3fff)];
   $c000..$cfff:blktiger_getbyte:=scroll_ram[scroll_bank+(direccion and $fff)];
   $d800..$dfff:blktiger_getbyte:=buffer_paleta[direccion and $7ff];
-  //$f3a1:blktiger_getbyte:=3;
+  //$f3a1:blktiger_getbyte:=4;
 end;
 end;
 
@@ -212,8 +202,8 @@ end;
 
 procedure blktiger_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+        0..$bfff:; //ROM
         $c000..$cfff:if scroll_ram[scroll_bank+(direccion and $fff)]<>valor then begin
                           scroll_ram[scroll_bank+(direccion and $fff)]:=valor;
                           gfx[2].buffer[(scroll_bank+(direccion and $fff)) shr 1]:=true;
@@ -233,7 +223,7 @@ end;
 
 function blktiger_inbyte(puerto:word):byte;
 begin
-case (puerto and $FF) of
+case (puerto and $ff) of
   0:blktiger_inbyte:=marcade.in0;
   1:blktiger_inbyte:=marcade.in1;
   2:blktiger_inbyte:=marcade.in2;
@@ -241,15 +231,15 @@ case (puerto and $FF) of
   4:blktiger_inbyte:=marcade.dswb;
   5:blktiger_inbyte:=$1; //Freeze?
   7:blktiger_inbyte:=i8751_latch;  //Proteccion
-  else blktiger_inbyte:=$FF;
+  else blktiger_inbyte:=$ff;
 end;
 end;
 
 procedure blktiger_outbyte(puerto:word;valor:byte);
 begin
-case (puerto and $FF) of
+case (puerto and $ff) of
   0:soundlatch:=valor;
-  1:banco_rom:=valor and $F;
+  1:banco_rom:=valor and $f;
   4:begin
       if ch_on<>((valor and $80)=0) then begin
          ch_on:=(valor and $80)=0;
@@ -308,16 +298,14 @@ begin
     0..$7fff,$c000..$c7ff:blksnd_getbyte:=mem_snd[direccion];
     $c800:blksnd_getbyte:=soundlatch;
     $e000:blksnd_getbyte:=ym2203_0.status;
-    $e001:blksnd_getbyte:=ym2203_0.read;
     $e002:blksnd_getbyte:=ym2203_1.status;
-    $e003:blksnd_getbyte:=ym2203_1.read;
   end;
 end;
 
 procedure blksnd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $c000..$c7ff:mem_snd[direccion]:=valor;
   $e000:ym2203_0.Control(valor);
   $e001:ym2203_0.write(valor);
@@ -339,8 +327,8 @@ end;
 
 procedure blktiger_sound_update;
 begin
-  ym2203_0.Update;
-  ym2203_1.Update;
+  ym2203_0.update;
+  ym2203_1.update;
 end;
 
 procedure snd_irq(irqstate:byte);
@@ -353,7 +341,7 @@ begin
 if ((memoria[$e204]=2) and (memoria[$e205]=0) and (memoria[$e206]=0)) then begin
     load_hi('blktiger.hi',@memoria[$e200],80);
     copymemory(@memoria[$e1e0],@memoria[$e200],8);
-    timer[timer_hs].enabled:=false;
+    timers.enabled(timer_hs,false);
 end;
 end;
 
@@ -456,9 +444,9 @@ freemem(data);
 close_qsnapshot;
 //END
 for f:=0 to $3ff do cambiar_color(f);
-fillchar(buffer_color[0],$400,1);
-fillchar(gfx[0].buffer[0],$400,1);
-fillchar(gfx[2].buffer[0],$4000,1);
+fillchar(buffer_color,$400,1);
+fillchar(gfx[0].buffer,$400,1);
+fillchar(gfx[2].buffer,$4000,1);
 end;
 
 //Main
@@ -475,9 +463,9 @@ begin
  scroll_bank:=0;
  scroll_x:=0;
  scroll_y:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  mask_x:=$70;
  mask_y:=$30;
  shl_row:=7;
@@ -525,30 +513,30 @@ ym2203_0:=ym2203_chip.create(3579545,0.15,0.15);
 ym2203_0.change_irq_calls(snd_irq);
 ym2203_1:=ym2203_chip.create(3579545,0.15,0.15);
 //Timers
-timer_hs:=init_timer(z80_0.numero_cpu,10000,blk_hi_score,true);
+timer_hs:=timers.init(z80_0.numero_cpu,10000,blk_hi_score,nil,true);
 //cargar roms
-if not(roms_load(@memoria_temp,@blktiger_rom,'blktiger.zip',sizeof(blktiger_rom))) then exit;
+if not(roms_load(@memoria_temp,blktiger_rom)) then exit;
 //poner las roms y los bancos de rom
 copymemory(@memoria,@memoria_temp,$8000);
 for f:=0 to 15 do copymemory(@memoria_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //sonido
-if not(roms_load(@mem_snd,@blktiger_snd,'blktiger.zip',sizeof(blktiger_snd))) then exit;
+if not(roms_load(@mem_snd,blktiger_snd)) then exit;
 //MCU ROM
-if not(roms_load(mcs51_0.get_rom_addr,@blktiger_mcu,'blktiger.zip',sizeof(blktiger_mcu))) then exit;
+if not(roms_load(mcs51_0.get_rom_addr,blktiger_mcu)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@blktiger_char,'blktiger.zip',sizeof(blktiger_char))) then exit;
+if not(roms_load(@memoria_temp,blktiger_char)) then exit;
 init_gfx(0,8,8,2048);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
 convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir sprites
-if not(roms_load(@memoria_temp,@blktiger_sprites,'blktiger.zip',sizeof(blktiger_sprites))) then exit;
+if not(roms_load(@memoria_temp,blktiger_sprites)) then exit;
 init_gfx(1,16,16,$800);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,32*16,$800*32*16+4,$800*32*16+0,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(roms_load(@memoria_temp,@blktiger_tiles,'blktiger.zip',sizeof(blktiger_tiles))) then exit;
+if not(roms_load(@memoria_temp,blktiger_tiles)) then exit;
 init_gfx(2,16,16,$800);
 gfx[2].trans[15]:=true;
 gfx[2].trans_alt[0,15]:=true;

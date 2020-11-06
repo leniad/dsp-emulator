@@ -108,14 +108,14 @@ if event.arcade then begin
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //P2
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //system
@@ -170,8 +170,8 @@ end;
 
 procedure vulgus_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$a000 then exit;
 case direccion of
+   0..$9fff:;
    $c800:sound_command:=valor;
    $c802:scroll_x:=(scroll_x and $ff00) or valor;
    $c803:scroll_y:=(scroll_y and $ff00) or valor;
@@ -204,8 +204,8 @@ end;
 
 procedure vulgus_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$2000 then exit;
 case direccion of
+  0..$1fff:;
   $4000..$47ff:mem_snd[direccion]:=valor;
   $8000:ay8910_0.Control(valor);
   $8001:ay8910_0.Write(valor);
@@ -216,8 +216,8 @@ end;
 
 procedure vulgus_sound_update;
 begin
-  ay8910_0.Update;
-  ay8910_1.Update;
+  ay8910_0.update;
+  ay8910_1.update;
 end;
 
 procedure vulgus_snd_irq;
@@ -274,33 +274,33 @@ z80_1:=cpu_z80.create(3000000,256);
 z80_1.change_ram_calls(vulgus_snd_getbyte,vulgus_snd_putbyte);
 z80_1.init_sound(vulgus_sound_update);
 //IRQ Sound CPU
-init_timer(z80_1.numero_cpu,3000000/(8*60),vulgus_snd_irq,true);
+timers.init(z80_1.numero_cpu,3000000/(8*60),vulgus_snd_irq,nil,true);
 //Sound Chips
 ay8910_0:=ay8910_chip.create(1500000,AY8910,0.5);
 ay8910_1:=ay8910_chip.create(1500000,AY8910,0.5);
 //cargar y desencriptar las ROMS
-if not(roms_load(@memoria,@vulgus_rom,'vulgus.zip',sizeof(vulgus_rom))) then exit;
+if not(roms_load(@memoria,vulgus_rom)) then exit;
 //cargar ROMS sonido
-if not(roms_load(@mem_snd,@vulgus_snd_rom,'vulgus.zip',sizeof(vulgus_snd_rom))) then exit;
+if not(roms_load(@mem_snd,vulgus_snd_rom)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@vulgus_char,'vulgus.zip',sizeof(vulgus_char))) then exit;
+if not(roms_load(@memoria_temp,vulgus_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
 convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //convertir sprites
-if not(roms_load(@memoria_temp,@vulgus_sprites,'vulgus.zip',sizeof(vulgus_sprites))) then exit;
+if not(roms_load(@memoria_temp,vulgus_sprites)) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //tiles
-if not(roms_load(@memoria_temp,@vulgus_tiles,'vulgus.zip',sizeof(vulgus_tiles))) then exit;
+if not(roms_load(@memoria_temp,vulgus_tiles)) then exit;
 init_gfx(2,16,16,$200);
 gfx_set_desc_data(3,0,32*8,0,$4000*8,$4000*8*2);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //poner la paleta
-if not(roms_load(@memoria_temp,@vulgus_pal,'vulgus.zip',sizeof(vulgus_pal))) then exit;
+if not(roms_load(@memoria_temp,vulgus_pal)) then exit;
 for f:=0 to 255 do begin
   bit0:=(memoria_temp[f] shr 0) and $01;
   bit1:=(memoria_temp[f] shr 1) and $01;

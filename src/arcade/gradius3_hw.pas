@@ -10,24 +10,24 @@ procedure cargar_gradius3;
 implementation
 const
         //gradius3
-        gradius3_rom:array[0..2] of tipo_roms=(
-        (n:'945_r13.f15';l:$20000;p:0;crc:$cffd103f),(n:'945_r12.e15';l:$20000;p:$1;crc:$0b968ef6),());
-        gradius3_rom_sub:array[0..8] of tipo_roms=(
+        gradius3_rom:array[0..1] of tipo_roms=(
+        (n:'945_r13.f15';l:$20000;p:0;crc:$cffd103f),(n:'945_r12.e15';l:$20000;p:$1;crc:$0b968ef6));
+        gradius3_rom_sub:array[0..7] of tipo_roms=(
         (n:'945_m09.r17';l:$20000;p:0;crc:$b4a6df25),(n:'945_m08.n17';l:$20000;p:$1;crc:$74e981d2),
         (n:'945_l06b.r11';l:$20000;p:$40000;crc:$83772304),(n:'945_l06a.n11';l:$20000;p:$40001;crc:$e1fd75b6),
         (n:'945_l07c.r15';l:$20000;p:$80000;crc:$c1e399b6),(n:'945_l07a.n15';l:$20000;p:$80001;crc:$96222d04),
-        (n:'945_l07d.r13';l:$20000;p:$c0000;crc:$4c16d4bd),(n:'945_l07b.n13';l:$20000;p:$c0001;crc:$5e209d01),());
+        (n:'945_l07d.r13';l:$20000;p:$c0000;crc:$4c16d4bd),(n:'945_l07b.n13';l:$20000;p:$c0001;crc:$5e209d01));
         gradius3_sound:tipo_roms=(n:'945_r05.d9';l:$10000;p:0;crc:$c8c45365);
-        gradius3_sprites_1:array[0..2] of tipo_roms=(
-        (n:'945_a02.l3';l:$80000;p:0;crc:$4dfffd74),(n:'945_a01.h3';l:$80000;p:2;crc:$339d6dd2),());
-        gradius3_sprites_2:array[0..8] of tipo_roms=(
+        gradius3_sprites_1:array[0..1] of tipo_roms=(
+        (n:'945_a02.l3';l:$80000;p:0;crc:$4dfffd74),(n:'945_a01.h3';l:$80000;p:2;crc:$339d6dd2));
+        gradius3_sprites_2:array[0..7] of tipo_roms=(
         (n:'945_l04a.k6';l:$20000;p:$100000;crc:$884e21ee),(n:'945_l04c.m6';l:$20000;p:$100001;crc:$45bcd921),
         (n:'945_l03a.e6';l:$20000;p:$100002;crc:$a67ef087),(n:'945_l03c.h6';l:$20000;p:$100003;crc:$a56be17a),
         (n:'945_l04b.k8';l:$20000;p:$180000;crc:$843bc67d),(n:'945_l04d.m8';l:$20000;p:$180001;crc:$0a98d08e),
-        (n:'945_l03b.e8';l:$20000;p:$180002;crc:$933e68b9),(n:'945_l03d.h8';l:$20000;p:$180003;crc:$f375e87b),());
-        gradius3_k007232:array[0..3] of tipo_roms=(
+        (n:'945_l03b.e8';l:$20000;p:$180002;crc:$933e68b9),(n:'945_l03d.h8';l:$20000;p:$180003;crc:$f375e87b));
+        gradius3_k007232:array[0..2] of tipo_roms=(
         (n:'945_a10.b15';l:$40000;p:0;crc:$1d083e10),(n:'945_l11a.c18';l:$20000;p:$40000;crc:$6043f4eb),
-        (n:'945_l11b.c20';l:$20000;p:$60000;crc:$89ea3baf),());
+        (n:'945_l11b.c20';l:$20000;p:$60000;crc:$89ea3baf));
         //DIP
         gradius3_dip_a:array [0..1] of def_dip=(
         (mask:$f;name:'Coinage';number:16;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'2C 3C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'))),());
@@ -119,17 +119,17 @@ begin
 if event.arcade then begin
   //P1
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //P2
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $Fd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
@@ -207,24 +207,24 @@ end;
 
 procedure gradius3_putword(direccion:dword;valor:word);
 begin
-if direccion<$40000 then exit;
 case direccion of
-    $040000..$043fff:ram[(direccion and $3fff) shr 1]:=valor;
-    $080000..$080fff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
+    0..$3ffff:; //ROM
+    $40000..$43fff:ram[(direccion and $3fff) shr 1]:=valor;
+    $80000..$80fff:if buffer_paleta[(direccion and $fff) shr 1]<>valor then begin
                         buffer_paleta[(direccion and $fff) shr 1]:=valor;
                         cambiar_color_gradius3((direccion and $fff) shr 1,valor);
                    end;
-    $0c0000:begin
+    $c0000:begin
               valor:=valor shr 8;
               priority:=(valor and $4)<>0;
               if (valor and $8)<>0 then m68000_1.change_halt(CLEAR_LINE)
                 else m68000_1.change_halt(ASSERT_LINE);
 		          irqA_mask:=(valor and $20)<>0;
             end;
-    $0d8000:if (irqB_mask and 4)<>0 then m68000_1.irq[4]:=HOLD_LINE;
-    $0e0000:; //wd
-    $0e8000:sound_latch:=valor shr 8;
-    $0f0000:z80_0.change_irq(HOLD_LINE);
+    $d8000:if (irqB_mask and 4)<>0 then m68000_1.irq[4]:=HOLD_LINE;
+    $e0000:; //wd
+    $e8000:sound_latch:=valor shr 8;
+    $f0000:z80_0.change_irq(HOLD_LINE);
     $100000..$103fff:ram_share[(direccion and $3fff) shr 1]:=valor;
     $14c000..$153fff:begin
                         direccion:=(direccion-$14c000) shr 1;
@@ -233,7 +233,7 @@ case direccion of
                      end;
     $180000..$19ffff:if ram_gfx[(direccion and $1ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
-                        k052109_0.recalc_char:=true;
+                        k052109_0.recalc_chars(((direccion and $1ffff) shr 1) div 16);
                      end;
   end;
 end;
@@ -255,8 +255,8 @@ end;
 
 procedure gradius3_putword_sub(direccion:dword;valor:word);
 begin
-if direccion<$100000 then exit;
 case direccion of
+    0..$fffff:; //ROM
     $100000..$103fff:ram_sub[(direccion and $3fff) shr 1]:=valor;
     $140000:irqB_mask:=(valor shr 8) and $7;
     $200000..$203fff:ram_share[(direccion and $3fff) shr 1]:=valor;
@@ -267,7 +267,7 @@ case direccion of
                      end;
     $280000..$29ffff:if ram_gfx[(direccion and $1ffff) shr 1]<>(((valor and $ff) shl 8)+(valor shr 8)) then begin
                         ram_gfx[(direccion and $1ffff) shr 1]:=((valor and $ff) shl 8)+(valor shr 8);
-                        k052109_0.recalc_char:=true;
+                        k052109_0.recalc_chars(((direccion and $1ffff) shr 1) div 16);
                      end;
     $2c0000..$2c000f:k051960_0.k051937_write((direccion and $f) shr 1,valor and $ff);
     $2c0800..$2c0fff:k051960_0.write((direccion and $7ff) shr 1,valor and $ff);
@@ -287,8 +287,8 @@ end;
 
 procedure gradius3_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$f000 then exit;
 case direccion of
+  0..$efff:; //ROM
   $f000:k007232_0.set_bank(valor and 3,(valor shr 2) and 3);
   $f020..$f02d:k007232_0.write(direccion and $f,valor);
   $f030:ym2151_0.reg(valor);
@@ -314,9 +314,9 @@ begin
  ym2151_0.reset;
  k051960_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  sound_latch:=0;
  irqA_mask:=false;
  irqB_mask:=0;
@@ -335,10 +335,10 @@ screen_init(4,1024,1024,false,true);
 iniciar_video(320,224,true);
 iniciar_audio(true);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@gradius3_rom[0],'gradius3.zip',0)) then exit;
-if not(cargar_roms16w(@rom_sub[0],@gradius3_rom_sub[0],'gradius3.zip',0)) then exit;
+if not(roms_load16w(@rom,gradius3_rom)) then exit;
+if not(roms_load16w(@rom_sub,gradius3_rom_sub)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@gradius3_sound,'gradius3.zip',1)) then exit;
+if not(roms_load(@mem_snd,gradius3_sound)) then exit;
 //Main CPU
 m68000_0:=cpu_m68000.create(10000000,256);
 m68000_0.change_ram16_calls(gradius3_getword,gradius3_putword);
@@ -351,13 +351,13 @@ z80_0.init_sound(gradius3_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k007232_rom,$80000);
-if not(cargar_roms(k007232_rom,@gradius3_k007232,'gradius3.zip',0)) then exit;
+if not(roms_load(k007232_rom,gradius3_k007232)) then exit;
 k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,gradius3_k007232_cb,true);
 //Iniciar video
 k052109_0:=k052109_chip.create(1,2,3,gradius3_cb,pbyte(@ram_gfx[0]),$20000);
 getmem(sprite_rom,$200000);
-if not(cargar_roms32b(sprite_rom,@gradius3_sprites_1,'gradius3.zip',0)) then exit;
-if not(cargar_roms32b_b(sprite_rom,@gradius3_sprites_2,'gradius3.zip',0)) then exit;
+if not(roms_load32b(sprite_rom,gradius3_sprites_1)) then exit;
+if not(roms_load32b_b(sprite_rom,gradius3_sprites_2)) then exit;
 k051960_0:=k051960_chip.create(4,sprite_rom,$200000,gradius3_sprite_cb,1);
 layer_colorbase[0]:=0;
 layer_colorbase[1]:=32;

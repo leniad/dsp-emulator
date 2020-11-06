@@ -10,46 +10,43 @@ procedure cargar_ninjakid2;
 implementation
 const
         //Ninja Kid II
-        ninjakid2_rom:array[0..5] of tipo_roms=(
+        ninjakid2_rom:array[0..4] of tipo_roms=(
         (n:'nk2_01.rom';l:$8000;p:0;crc:$3cdbb906),(n:'nk2_02.rom';l:$8000;p:$8000;crc:$b5ce9a1a),
         (n:'nk2_03.rom';l:$8000;p:$10000;crc:$ad275654),(n:'nk2_04.rom';l:$8000;p:$18000;crc:$e7692a77),
-        (n:'nk2_05.rom';l:$8000;p:$20000;crc:$5dac9426),());
+        (n:'nk2_05.rom';l:$8000;p:$20000;crc:$5dac9426));
         ninjakid2_snd_rom:tipo_roms=(n:'nk2_06.rom';l:$10000;p:0;crc:$d3a18a79);
         ninjakid2_fgtiles:tipo_roms=(n:'nk2_12.rom';l:$8000;p:0;crc:$db5657a9);
-        ninjakid2_sprites:array[0..2] of tipo_roms=(
-        (n:'nk2_08.rom';l:$10000;p:0;crc:$1b79c50a),(n:'nk2_07.rom';l:$10000;p:$10000;crc:$0be5cd13),());
-        ninjakid2_bgtiles:array[0..2] of tipo_roms=(
-        (n:'nk2_11.rom';l:$10000;p:0;crc:$41a714b3),(n:'nk2_10.rom';l:$10000;p:$10000;crc:$c913c4ab),());
+        ninjakid2_sprites:array[0..1] of tipo_roms=(
+        (n:'nk2_08.rom';l:$10000;p:0;crc:$1b79c50a),(n:'nk2_07.rom';l:$10000;p:$10000;crc:$0be5cd13));
+        ninjakid2_bgtiles:array[0..1] of tipo_roms=(
+        (n:'nk2_11.rom';l:$10000;p:0;crc:$41a714b3),(n:'nk2_10.rom';l:$10000;p:$10000;crc:$c913c4ab));
         ninjakid2_snd_key:tipo_roms=(n:'ninjakd2.key';l:$2000;p:0;crc:$ec25318f);
         //Ark Area
-        aarea_rom:array[0..5] of tipo_roms=(
+        aarea_rom:array[0..4] of tipo_roms=(
         (n:'arkarea.008';l:$8000;p:0;crc:$1ce1b5b9),(n:'arkarea.009';l:$8000;p:$8000;crc:$db1c81d1),
         (n:'arkarea.010';l:$8000;p:$10000;crc:$5a460dae),(n:'arkarea.011';l:$8000;p:$18000;crc:$63f022c9),
-        (n:'arkarea.012';l:$8000;p:$20000;crc:$3c4c65d5),());
+        (n:'arkarea.012';l:$8000;p:$20000;crc:$3c4c65d5));
         aarea_snd_rom:tipo_roms=(n:'arkarea.013';l:$8000;p:0;crc:$2d409d58);
         aarea_fgtiles:tipo_roms=(n:'arkarea.004';l:$8000;p:0;crc:$69e36af2);
-        aarea_sprites:array[0..3] of tipo_roms=(
+        aarea_sprites:array[0..2] of tipo_roms=(
         (n:'arkarea.007';l:$10000;p:0;crc:$d5684a27),(n:'arkarea.006';l:$10000;p:$10000;crc:$2c0567d6),
-        (n:'arkarea.005';l:$10000;p:$20000;crc:$9886004d),());
-        aarea_bgtiles:array[0..3] of tipo_roms=(
+        (n:'arkarea.005';l:$10000;p:$20000;crc:$9886004d));
+        aarea_bgtiles:array[0..2] of tipo_roms=(
         (n:'arkarea.003';l:$10000;p:0;crc:$6f45a308),(n:'arkarea.002';l:$10000;p:$10000;crc:$051d3482),
-        (n:'arkarea.001';l:$10000;p:$20000;crc:$09d11ab7),());
+        (n:'arkarea.001';l:$10000;p:$20000;crc:$09d11ab7));
         //Mutant Night
-        mnight_rom:array[0..5] of tipo_roms=(
+        mnight_rom:array[0..4] of tipo_roms=(
         (n:'mn6-j19.bin';l:$8000;p:0;crc:$56678d14),(n:'mn5-j17.bin';l:$8000;p:$8000;crc:$2a73f88e),
         (n:'mn4-j16.bin';l:$8000;p:$10000;crc:$c5e42bb4),(n:'mn3-j14.bin';l:$8000;p:$18000;crc:$df6a4f7a),
-        (n:'mn2-j12.bin';l:$8000;p:$20000;crc:$9c391d1b),());
+        (n:'mn2-j12.bin';l:$8000;p:$20000;crc:$9c391d1b));
         mnight_snd_rom:tipo_roms=(n:'mn1-j7.bin';l:$10000;p:0;crc:$a0782a31);
         mnight_fgtiles:tipo_roms=(n:'mn10-b10.bin';l:$8000;p:0;crc:$37b8221f);
-        mnight_sprites:array[0..3] of tipo_roms=(
+        mnight_sprites:array[0..2] of tipo_roms=(
         (n:'mn7-e11.bin';l:$10000;p:0;crc:$4883059c),(n:'mn8-e12.bin';l:$10000;p:$10000;crc:$02b91445),
-        (n:'mn9-e14.bin';l:$10000;p:$20000;crc:$9f08d160),());
-        mnight_bgtiles:array[0..3] of tipo_roms=(
+        (n:'mn9-e14.bin';l:$10000;p:$20000;crc:$9f08d160));
+        mnight_bgtiles:array[0..2] of tipo_roms=(
         (n:'mn11-b20.bin';l:$10000;p:0;crc:$4d37e0f4),(n:'mn12-b22.bin';l:$10000;p:$10000;crc:$b22cbbd3),
-        (n:'mn13-b23.bin';l:$10000;p:$20000;crc:$65714070),());
-
-type
-  tipo_update_background=procedure;
+        (n:'mn13-b23.bin';l:$10000;p:$20000;crc:$65714070));
 
 var
   rom_bank:array[0..7,0..$3fff] of byte;
@@ -59,7 +56,7 @@ var
   scroll_x,scroll_y:word;
   bg_enable,sprite_overdraw:boolean;
   pant_sprites_tmp:array[0..$3ffff] of byte;
-  update_background:tipo_update_background;
+  update_background:procedure;
 
 procedure bg_ninjakid2;
 var
@@ -79,7 +76,7 @@ for f:=0 to $3ff do begin
 end;
 end;
 
-procedure bg_arkarea;
+procedure bg_upl;
 var
   f,color,nchar:word;
   x,y,atrib:byte;
@@ -97,7 +94,7 @@ for f:=0 to $3ff do begin
 end;
 end;
 
-procedure put_gfx_sprite_nkid2(nchar:dword;color:word;flipx,flipy:boolean;pos_x,pos_y:word);inline;
+procedure put_gfx_sprite_upl(nchar:dword;color:word;flipx,flipy:boolean;pos_x,pos_y:word);inline;
 var
   x,y:byte;
   pos_temp:dword;
@@ -115,7 +112,7 @@ if flipx then begin
       else pos_temp:=(pos_y+y)*512+pos_x+15;
     for x:=15 downto 0 do begin
       if post^<>15 then temp^:=paleta[gfx[2].colores[post^+color+$100]]
-        else temp^:=paleta[max_colores];
+        else temp^:=paleta[MAX_COLORES];
       pant_sprites_tmp[pos_temp]:=color and $ff;
       pos_temp:=pos_temp-1;
       dec(post);
@@ -133,7 +130,7 @@ end else begin
         else pos_temp:=(pos_y+y)*512+pos_x;
     for x:=0 to 15 do begin
       if pos^<>15 then temp^:=paleta[gfx[2].colores[pos^+color+$100]]
-        else temp^:=paleta[max_colores];
+        else temp^:=paleta[MAX_COLORES];
       pant_sprites_tmp[pos_temp]:=color and $ff;
       pos_temp:=pos_temp+1;
       inc(temp);
@@ -154,7 +151,7 @@ var
   pos_pixels:pword;
 begin
 if not(sprite_overdraw) then begin
-  fill_full_screen(4,max_colores);
+  fill_full_screen(4,MAX_COLORES);
   fillchar(pant_sprites_tmp[0],512*256,0);
 end else begin
   for sy:=0 to 255 do begin
@@ -164,7 +161,7 @@ end else begin
 			for sx:=0 to 255 do begin
 				if (pant_sprites_tmp[tf]=$f0) then begin
           pant_sprites_tmp[tf]:=0;
-          pos_pixels^:=paleta[max_colores];
+          pos_pixels^:=paleta[MAX_COLORES];
         end;
         tf:=tf+1;
         inc(pos_pixels);
@@ -193,7 +190,7 @@ repeat
     for y:=0 to big do begin
 					for x:=0 to big do begin
 						tile:=nchar xor (x shl 0) xor (y shl 1);
-            put_gfx_sprite_nkid2(tile,color,flipx,flipy,sx+16*x,sy+16*y);
+            put_gfx_sprite_upl(tile,color,flipx,flipy,sx+16*x,sy+16*y);
             actualiza_trozo(0,0,gfx[2].x,gfx[2].y,PANT_SPRITES,sx+16*x,sy+16*y,gfx[2].x,gfx[2].y,4);
             num_sprites:=num_sprites+1;
 					end;
@@ -203,7 +200,7 @@ repeat
 until num_sprites=96;
 end;
 
-procedure update_video_ninjakid2;inline;
+procedure update_video_upl;inline;
 var
   f,color,nchar:word;
   x,y,atrib:byte;
@@ -234,7 +231,7 @@ actualiza_trozo_final(0,32,256,192,3);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
-procedure eventos_ninjakid2;
+procedure eventos_upl;
 begin
 if event.arcade then begin
   //P1
@@ -259,7 +256,7 @@ if event.arcade then begin
 end;
 end;
 
-procedure ninjakid2_principal;
+procedure upl_principal;
 var
   frame_m,frame_s:single;
   f:byte;
@@ -277,28 +274,11 @@ while EmuStatus=EsRuning do begin
     frame_s:=frame_s+z80_1.tframes-z80_1.contador;
     if f=223 then begin
       z80_0.change_irq(HOLD_LINE);
-      update_video_ninjakid2;
+      update_video_upl;
     end;
   end;
-  eventos_ninjakid2;
+  eventos_upl;
   video_sync;
-end;
-end;
-
-//Ninja Kid II
-function ninjakid2_getbyte(direccion:word):byte;
-begin
-case direccion of
-  0..$7fff,$d800..$f9ff:ninjakid2_getbyte:=memoria[direccion];
-  $8000..$bfff:ninjakid2_getbyte:=rom_bank[rom_nbank,direccion and $3fff];
-  $c000:ninjakid2_getbyte:=marcade.in0;
-  $c001:ninjakid2_getbyte:=marcade.in1;
-  $c002:ninjakid2_getbyte:=marcade.in2;
-  $c003:ninjakid2_getbyte:=$6f;
-  $c004:ninjakid2_getbyte:=$f9;
-  $c800:ninjakid2_getbyte:=buffer_paleta[direccion and $7ff];
-  $d000..$d7ff:ninjakid2_getbyte:=fg_data[direccion and $7ff];
-  $fa00..$ffff:ninjakid2_getbyte:=buffer_sprites[direccion-$fa00];
 end;
 end;
 
@@ -320,60 +300,27 @@ begin
   end;
 end;
 
-procedure ninjakid2_putbyte(direccion:word;valor:byte);
+//Generic
+function upl_getbyte(direccion:word):byte;
 begin
-if direccion<$c000 then exit;
 case direccion of
-   $c200:sound_latch:=valor;
-   $c201:begin
-            if (valor and $10)<>0 then z80_1.reset;
-            main_screen.flip_main_screen:=(valor and $80)<>0;
-         end;
-   $c202:rom_nbank:=valor and $7;
-   $c203:sprite_overdraw:=(valor and $1)<>0;
-   $c208:scroll_x:=(scroll_x and $ff00) or valor;
-   $c209:scroll_x:=(scroll_x and $00ff) or ((valor and $1) shl 8);
-   $c20a:scroll_y:=(scroll_y and $ff00) or valor;
-   $c20b:scroll_y:=(scroll_y and $00ff) or ((valor and $1) shl 8);
-   $c20c:bg_enable:=(valor and $1)<>0;
-   $c800..$cdff:if buffer_paleta[direccion and $7ff]<>valor then begin
-                    buffer_paleta[direccion and $7ff]:=valor;
-                    cambiar_color(direccion and $7fe);
-                end;
-   $d000..$d7ff:if fg_data[direccion and $7ff]<>valor then begin
-                    fg_data[direccion and $7ff]:=valor;
-                    gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
-                end;
-   $d800..$dfff:if memoria[direccion]<>valor then begin
-                    gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
-                    memoria[direccion]:=valor;
-                end;
-   $e000..$f9ff:memoria[direccion]:=valor;
-   $fa00..$ffff:buffer_sprites[direccion-$fa00]:=valor;
+  0..$7fff,$c000..$d9ff,$e000..$e7ff:upl_getbyte:=memoria[direccion];
+  $8000..$bfff:upl_getbyte:=rom_bank[rom_nbank,direccion and $3fff];
+  $da00..$dfff:upl_getbyte:=buffer_sprites[direccion-$da00];
+  $e800..$efff:upl_getbyte:=fg_data[direccion and $7ff];
+  $f000..$f5ff:upl_getbyte:=buffer_paleta[direccion and $7ff];
+  $f800:upl_getbyte:=marcade.in0;
+  $f801:upl_getbyte:=marcade.in1;
+  $f802:upl_getbyte:=marcade.in2;
+  $f803:upl_getbyte:=marcade.in3;
+  $f804:upl_getbyte:=$ff;
 end;
 end;
 
-//Ark Area
-function aarea_getbyte(direccion:word):byte;
+procedure upl_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$7fff,$c000..$d9ff,$e000..$e7ff:aarea_getbyte:=memoria[direccion];
-  $8000..$bfff:aarea_getbyte:=rom_bank[rom_nbank,direccion and $3fff];
-  $da00..$dfff:aarea_getbyte:=buffer_sprites[direccion-$da00];
-  $e800..$efff:aarea_getbyte:=fg_data[direccion and $7ff];
-  $f000..$f5ff:aarea_getbyte:=buffer_paleta[direccion and $7ff];
-  $f800:aarea_getbyte:=marcade.in0;
-  $f801:aarea_getbyte:=marcade.in1;
-  $f802:aarea_getbyte:=marcade.in2;
-  $f803:aarea_getbyte:=marcade.in3;
-  $f804:aarea_getbyte:=$ff;
-end;
-end;
-
-procedure aarea_putbyte(direccion:word;valor:byte);
-begin
-if (direccion<$c000) then exit;
-case direccion of
+   0..$bfff:;
    $c000..$d9ff:memoria[direccion]:=valor;
    $da00..$dfff:buffer_sprites[direccion-$da00]:=valor;
    $e000..$e7ff:if memoria[direccion]<>valor then begin
@@ -403,7 +350,56 @@ case direccion of
 end;
 end;
 
-//Sound
+//Ninja Kid II
+function ninjakid2_getbyte(direccion:word):byte;
+begin
+case direccion of
+  0..$7fff,$d800..$f9ff:ninjakid2_getbyte:=memoria[direccion];
+  $8000..$bfff:ninjakid2_getbyte:=rom_bank[rom_nbank,direccion and $3fff];
+  $c000:ninjakid2_getbyte:=marcade.in0;
+  $c001:ninjakid2_getbyte:=marcade.in1;
+  $c002:ninjakid2_getbyte:=marcade.in2;
+  $c003:ninjakid2_getbyte:=$6f;
+  $c004:ninjakid2_getbyte:=$f9;
+  $c800:ninjakid2_getbyte:=buffer_paleta[direccion and $7ff];
+  $d000..$d7ff:ninjakid2_getbyte:=fg_data[direccion and $7ff];
+  $fa00..$ffff:ninjakid2_getbyte:=buffer_sprites[direccion-$fa00];
+end;
+end;
+
+procedure ninjakid2_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+   0..$bfff:;
+   $c200:sound_latch:=valor;
+   $c201:begin
+            if (valor and $10)<>0 then z80_1.reset;
+            main_screen.flip_main_screen:=(valor and $80)<>0;
+         end;
+   $c202:rom_nbank:=valor and $7;
+   $c203:sprite_overdraw:=(valor and $1)<>0;
+   $c208:scroll_x:=(scroll_x and $ff00) or valor;
+   $c209:scroll_x:=(scroll_x and $00ff) or ((valor and $1) shl 8);
+   $c20a:scroll_y:=(scroll_y and $ff00) or valor;
+   $c20b:scroll_y:=(scroll_y and $00ff) or ((valor and $1) shl 8);
+   $c20c:bg_enable:=(valor and $1)<>0;
+   $c800..$cdff:if buffer_paleta[direccion and $7ff]<>valor then begin
+                    buffer_paleta[direccion and $7ff]:=valor;
+                    cambiar_color(direccion and $7fe);
+                end;
+   $d000..$d7ff:if fg_data[direccion and $7ff]<>valor then begin
+                    fg_data[direccion and $7ff]:=valor;
+                    gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
+                end;
+   $d800..$dfff:if memoria[direccion]<>valor then begin
+                    gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
+                    memoria[direccion]:=valor;
+                end;
+   $e000..$f9ff:memoria[direccion]:=valor;
+   $fa00..$ffff:buffer_sprites[direccion-$fa00]:=valor;
+end;
+end;
+
 function ninjakid2_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -414,26 +410,35 @@ case direccion of
 end;
 end;
 
-procedure ninjakid2_snd_putbyte(direccion:word;valor:byte);
+//Sound
+function upl_snd_getbyte(direccion:word):byte;
 begin
-if direccion<$c000 then exit;
 case direccion of
+  $0..$c7ff:upl_snd_getbyte:=mem_snd[direccion];
+  $e000:upl_snd_getbyte:=sound_latch;
+end;
+end;
+
+procedure upl_snd_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+  0..$bfff:;
   $c000..$c7ff:mem_snd[direccion]:=valor;
   $f000:;  //PCM
 end;
 end;
 
-function ninjakid2_snd_inbyte(puerto:word):byte;
+function upl_snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $00:ninjakid2_snd_inbyte:=ym2203_0.status;
-  $01:ninjakid2_snd_inbyte:=ym2203_0.Read;
-  $80:ninjakid2_snd_inbyte:=ym2203_1.status;
-  $81:ninjakid2_snd_inbyte:=ym2203_1.Read;
+  $00:upl_snd_inbyte:=ym2203_0.status;
+  $01:upl_snd_inbyte:=ym2203_0.Read;
+  $80:upl_snd_inbyte:=ym2203_1.status;
+  $81:upl_snd_inbyte:=ym2203_1.Read;
 end;
 end;
 
-procedure ninjakid2_snd_outbyte(puerto:word;valor:byte);
+procedure upl_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $00:ym2203_0.Control(valor);
@@ -443,19 +448,18 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure snd_irq(irqstate:byte);
+procedure upl_snd_irq(irqstate:byte);
 begin
   z80_1.change_irq(irqstate);
 end;
 
-procedure ninjakid2_sound_update;
+procedure upl_sound_update;
 begin
   ym2203_0.Update;
   ym2203_1.Update;
 end;
 
-//Main
-procedure reset_ninjakid2;
+procedure reset_upl;
 begin
  z80_0.reset;
  z80_0.im0:=$d7;  //rst 10
@@ -463,9 +467,9 @@ begin
  YM2203_0.reset;
  YM2203_1.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  rom_nbank:=0;
  bg_enable:=false;
  sprite_overdraw:=false;
@@ -474,7 +478,7 @@ begin
  scroll_y:=0;
 end;
 
-function iniciar_ninjakid2:boolean;
+function iniciar_upl:boolean;
 var
   f:byte;
   memoria_temp:array[0..$2ffff] of byte;
@@ -504,20 +508,20 @@ begin
 end;
 procedure extract_char;
 begin
-  lineswap_gfx_roms($8000,@memoria_temp[0],13);
+  lineswap_gfx_roms($8000,@memoria_temp,13);
   init_gfx(0,8,8,$400);
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp,@pt_x,@pt_y,false,false);
 end;
 procedure extract_gr2(size:dword;num:byte;size_gr:word);
 begin
-  lineswap_gfx_roms(size,@memoria_temp[0],14);
+  lineswap_gfx_roms(size,@memoria_temp,14);
   init_gfx(num,16,16,size_gr);
   gfx_set_desc_data(4,0,128*8,0,1,2,3);
-  convert_gfx(num,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+  convert_gfx(num,0,@memoria_temp,@pt_x,@pt_y,false,false);
 end;
 begin
-iniciar_ninjakid2:=false;
+iniciar_upl:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
 screen_init(2,512,512);
@@ -528,92 +532,90 @@ screen_init(4,512,256,true);
 iniciar_video(256,192);
 //Main CPU
 z80_0:=cpu_z80.create(6000000,256);
+z80_0.change_ram_calls(upl_getbyte,upl_putbyte);
 //Sound CPU
 z80_1:=cpu_z80.create(5000000,256);
-z80_1.change_ram_calls(ninjakid2_snd_getbyte,ninjakid2_snd_putbyte);
-z80_1.change_io_calls(ninjakid2_snd_inbyte,ninjakid2_snd_outbyte);
-z80_1.init_sound(ninjakid2_sound_update);
+z80_1.change_ram_calls(upl_snd_getbyte,upl_snd_putbyte);
+z80_1.change_io_calls(upl_snd_inbyte,upl_snd_outbyte);
+z80_1.init_sound(upl_sound_update);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
-ym2203_0.change_irq_calls(snd_irq);
+ym2203_0.change_irq_calls(upl_snd_irq);
 ym2203_1:=ym2203_chip.create(1500000,0.5,0.1);
+//Video
+update_background:=bg_upl;
 case main_vars.tipo_maquina of
   120:begin
-        update_background:=bg_ninjakid2;
         z80_0.change_ram_calls(ninjakid2_getbyte,ninjakid2_putbyte);
+        z80_1.change_ram_calls(ninjakid2_snd_getbyte,upl_snd_putbyte);
+        update_background:=bg_ninjakid2;
         //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@ninjakid2_rom[0],'ninjakd2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ninjakid2_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
         //cargar ROMS sonido y desencriptar
-        if not(cargar_roms(@mem_snd[0],@ninjakid2_snd_rom,'ninjakd2.zip',1)) then exit;
-        if not(cargar_roms(@mem_key[0],@ninjakid2_snd_key,'ninjakd2.zip',1)) then exit;
-        mc8123_decrypt_rom(@mem_key[0],@mem_snd[0],@mem_snd_opc[0],0);
+        if not(roms_load(@mem_snd,ninjakid2_snd_rom)) then exit;
+        if not(roms_load(@mem_key,ninjakid2_snd_key)) then exit;
+        mc8123_decrypt_rom(@mem_key,@mem_snd,@mem_snd_opc,$8000);
         //convertir fg
-        if not(cargar_roms(@memoria_temp[0],@ninjakid2_fgtiles,'ninjakd2.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,ninjakid2_fgtiles)) then exit;
         extract_char;
         //convertir bg
-        if not(cargar_roms(@memoria_temp[0],@ninjakid2_bgtiles[0],'ninjakd2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ninjakid2_bgtiles)) then exit;
         extract_gr2($20000,1,$400);
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@ninjakid2_sprites[0],'ninjakd2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ninjakid2_sprites)) then exit;
         extract_gr2($20000,2,$400);
   end;
   121:begin
-        update_background:=bg_arkarea;
         marcade.in3:=$ef;
-        z80_0.change_ram_calls(aarea_getbyte,aarea_putbyte);
         //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@aarea_rom[0],'arkarea.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,aarea_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
         //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@aarea_snd_rom,'arkarea.zip',1)) then exit;
-        copymemory(@mem_snd_opc[0],@mem_snd[0],$8000);
+        if not(roms_load(@mem_snd,aarea_snd_rom)) then exit;
         //convertir fg
-        if not(cargar_roms(@memoria_temp[0],@aarea_fgtiles,'arkarea.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,aarea_fgtiles)) then exit;
         extract_char;
         //convertir bg
-        if not(cargar_roms(@memoria_temp[0],@aarea_bgtiles[0],'arkarea.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,aarea_bgtiles)) then exit;
         extract_gr2($30000,1,$600);
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@aarea_sprites[0],'arkarea.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,aarea_sprites)) then exit;
         extract_gr2($30000,2,$600);
       end;
   122:begin
-        update_background:=bg_arkarea;
         marcade.in3:=$cf;
-        z80_0.change_ram_calls(aarea_getbyte,aarea_putbyte);
         //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@mnight_rom[0],'mnight.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,mnight_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 7 do copymemory(@rom_bank[f,0],@memoria_temp[(f*$4000)+$8000],$4000);
         //cargar ROMS sonido
-        if not(cargar_roms(@mem_snd[0],@mnight_snd_rom,'mnight.zip',1)) then exit;
-        copymemory(@mem_snd_opc[0],@mem_snd[0],$8000);
+        if not(roms_load(@mem_snd,mnight_snd_rom)) then exit;
         //convertir fg
-        if not(cargar_roms(@memoria_temp[0],@mnight_fgtiles,'mnight.zip',1)) then exit;
+        if not(roms_load(@memoria_temp,mnight_fgtiles)) then exit;
         extract_char;
         //convertir bg
-        if not(cargar_roms(@memoria_temp[0],@mnight_bgtiles[0],'mnight.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,mnight_bgtiles)) then exit;
         extract_gr2($30000,1,$600);
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@mnight_sprites[0],'mnight.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,mnight_sprites)) then exit;
         extract_gr2($30000,2,$600);
       end;
 end;
 gfx[0].trans[15]:=true;
 gfx[2].trans[15]:=true;
 //final
-reset_ninjakid2;
-iniciar_ninjakid2:=true;
+reset_upl;
+iniciar_upl:=true;
 end;
 
-procedure Cargar_ninjakid2;
+procedure cargar_ninjakid2;
 begin
-llamadas_maquina.iniciar:=iniciar_ninjakid2;
-llamadas_maquina.bucle_general:=ninjakid2_principal;
-llamadas_maquina.reset:=reset_ninjakid2;
+llamadas_maquina.iniciar:=iniciar_upl;
+llamadas_maquina.bucle_general:=upl_principal;
+llamadas_maquina.reset:=reset_upl;
 llamadas_maquina.fps_max:=59.61;
 end;
 

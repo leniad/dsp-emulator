@@ -126,14 +126,12 @@ var
 procedure YM_2151Init(num:byte;clock:dword);
 function YM_2151ReadStatus(num:byte):byte;
 procedure YM_2151ResetChip(num:byte);
-procedure YM_2151WriteReg(num:byte;r,v:integer);
+procedure YM_2151WriteReg(num,r,v:byte);
 function YM_2151UpdateOne(num:byte):pinteger;
 procedure YM_2151Close(num:byte);
 //timers
-procedure timer_a_exec_0;
-procedure timer_b_exec_0;
-procedure timer_a_exec_1;
-procedure timer_b_exec_1;
+procedure timer_a_exec(index:byte);
+procedure timer_b_exec(index:byte);
 
 implementation
 const
@@ -146,27 +144,27 @@ const
   EG_SH=16;  // 16.16 fixed point (envelope generator timing) */
   LFO_SH=10;  // 22.10 fixed point (LFO calculations)       */
   TIMER_SH=16;  // 16.16 fixed point (timers calculations)    */
-  FREQ_MASK=((1 shl FREQ_SH)-1);
+  FREQ_MASK=$FFFF; //((1 shl FREQ_SH)-1);
   ENV_BITS=10;
-  ENV_LEN=(1 shl ENV_BITS);
-  ENV_STEP=(128.0/ENV_LEN);
-  MAX_ATT_INDEX=(ENV_LEN-1); // 1023 */
-  MIN_ATT_INDEX=(0);			// 0 */
+  ENV_LEN=$400; //(1 shl ENV_BITS);
+  ENV_STEP=0.125;//(128.0/ENV_LEN);
+  MAX_ATT_INDEX=$3FF;//(ENV_LEN-1); // 1023 */
+  MIN_ATT_INDEX=0;			// 0 */
   EG_ATT=4;
   EG_DEC=3;
   EG_SUS=2;
   EG_REL=1;
   EG_OFF=0;
   SIN_BITS=10;
-  SIN_LEN=(1 shl SIN_BITS);
-  SIN_MASK=(SIN_LEN-1);
+  SIN_LEN=$400; //(1 shl SIN_BITS);
+  SIN_MASK=$3FF; //(SIN_LEN-1);
   TL_RES_LEN=256; // 8 bits addressing (real chip) */
   {  TL_TAB_LEN is calculated as:
 *   13 - sinus amplitude bits     (Y axis)
 *   2  - sinus sign bit           (Y axis)
 *   TL_RES_LEN - sinus resolution (X axis)}
   TL_TAB_LEN=(13*2*TL_RES_LEN);
-  ENV_QUIET=(TL_TAB_LEN shr 3);
+  ENV_QUIET=832; //(TL_TAB_LEN shr 3);
   RATE_STEPS=8;
   eg_inc:array[0..(19*RATE_STEPS)-1] of byte=(
 //cycle:0 1  2 3  4 5  6 7*/
@@ -401,7 +399,7 @@ var
 	o,m:single;
 begin
 	for x:=0 to TL_RES_LEN-1 do begin
-		m:= (1 shl 16) / power(2, (x+1) * (ENV_STEP/4.0) / 8.0);
+		m:= (1 shl 16) / power(2,(x+1)*(ENV_STEP/4.0) / 8.0);
 		m:=floor(m);
 
 		// we never reach (1<<16) here due to the (x+1) */
@@ -511,10 +509,10 @@ begin
   end;
 end;
 
-procedure KEY_ON(num:byte;n_op:byte;key_set:byte);inline;
+procedure KEY_ON(num:byte;n_op:byte;key_set:byte);
 var
 	chip:pYM2151;
-  tmp:integer;
+  tmp:single;
   op:pYM2151Operator;
 begin
     chip:=FM2151[num];
@@ -522,8 +520,8 @@ begin
 		if (op.key=0) then begin
 			op.phase:=0;			// clear phase */
 			op.state:=EG_ATT;		// KEY ON = attack */
-      tmp:=(not(op.volume)*(eg_inc[(op.eg_sel_ar+((chip.eg_cnt shr op.eg_sh_ar) and 7)) mod 152])) div 16;
-			op.volume:=op.volume+tmp;
+      tmp:=(not(op.volume)*(eg_inc[op.eg_sel_ar+((chip.eg_cnt shr op.eg_sh_ar) and 7)]))/16;
+			op.volume:=trunc(op.volume+tmp);
 			if (op.volume<=MIN_ATT_INDEX) then begin
 				op.volume:= MIN_ATT_INDEX;
 				op.state:= EG_DEC;
@@ -532,10 +530,10 @@ begin
 		op.key:=op.key or key_set;
 end;
 
-procedure KEY_OFF(op:pYM2151Operator;key_clr:dword);inline;
+procedure KEY_OFF(op:pYM2151Operator;key_clr:cardinal);
 begin
 		if (op.key<>0) then begin
-			op.key:=op.key and key_clr;
+			op.key:=op.key and not(key_clr);
 			if (op.key=0) then begin
 				if (op.state>EG_REL) then op.state:= EG_REL;// KEY OFF =release */
 			end;
@@ -548,16 +546,16 @@ var
 begin
   chip:=FM2151[num];
 	if (v and $08)<>0 then KEY_ON (num,n_op,1) // M1 */
-	  else KEY_OFF(chip.oper[n_op+0],cardinal(not(1)));
+	  else KEY_OFF(chip.oper[n_op+0],1);
 
 	if (v and $20)<>0 then KEY_ON (num,n_op+1, 1) // M2 */
-	  else KEY_OFF(chip.oper[n_op+1],cardinal(not(1)));
+	  else KEY_OFF(chip.oper[n_op+1],1);
 
 	if (v and $10)<>0 then KEY_ON (num,n_op+2, 1) // C1 */
-	  else KEY_OFF(chip.oper[n_op+2],cardinal(not(1)));
+	  else KEY_OFF(chip.oper[n_op+2],1);
 
 	if (v and $40)<>0 then KEY_ON (num,n_op+3, 1) // C2 */
-	  else KEY_OFF(chip.oper[n_op+3],cardinal(not(1)));
+	  else KEY_OFF(chip.oper[n_op+3],1);
 end;
 
 procedure set_connect(num,op:byte;cha,v:integer);inline;
@@ -594,10 +592,10 @@ begin
 	2:begin
 		// M1-----------------+-C2---OUT */
 		//      C1---MEM---M2-+          */
-		om1.connect:=addr(chip.c2);
-		oc1.connect:=addr(chip.mem);
-		om2.connect:=addr(chip.c2);
-		om1.mem_connect:=addr(chip.m2);
+		om1.connect:=@chip.c2;
+		oc1.connect:=@chip.mem;
+		om2.connect:=@chip.c2;
+		om1.mem_connect:=@chip.m2;
 		end;
 	3:begin
 		// M1---C1---MEM------+-C2---OUT */
@@ -666,7 +664,7 @@ begin
 for f:=0 to 3 do begin
   op:=chip.oper[n_op+f];
 	v:= kc shr op.ks;
-	if ((op.ar+v)<32+62) then begin
+	if ((op.ar+v)<(32+62)) then begin
 		op.eg_sh_ar:=eg_rate_shift[(op.ar+v) and $7f];
 		op.eg_sel_ar:=eg_rate_select[(op.ar+v) and $7f];
 	end else begin
@@ -683,7 +681,7 @@ end;
 end;
 
 // write a register on YM2151 chip number 'n' */
-procedure YM_2151WriteReg(num:byte;r,v:integer);
+procedure YM_2151WriteReg(num,r,v:byte);
 var
 	chip:pYM2151;
 	op,op2,op3,op4:pYM2151Operator;
@@ -726,22 +724,22 @@ begin
 	            if ((oldstate=2) and (addr(chip.IRQ_Handler)<>nil)) then chip.irq_handler(CLEAR_LINE);
             end;
 			      if (v and $02)<>0 then begin	// load and start timer B */
-					    if not(timer[chip.timer_B].enabled) then begin
-						    timer[chip.timer_B].time_final:=chip.timer_B_time[chip.timer_B_index];
-                timer[chip.timer_B].enabled:=true;
+					    if not(timers.timer[chip.timer_B].enabled) then begin
+						    timers.timer[chip.timer_B].time_final:=chip.timer_B_time[chip.timer_B_index];
+                timers.enabled(chip.timer_B,true);
     						chip.timer_B_index_old:=chip.timer_B_index;
               end;
 			      end else begin		// stop timer B */
-					    timer[chip.timer_B].enabled:=false;
+					    timers.enabled(chip.timer_B,false);
             end;
 			      if (v and $01)<>0 then begin	// load and start timer A */
-					    if not(timer[chip.timer_a].enabled) then begin
-						    timer[chip.timer_a].time_final:=chip.timer_a_time[chip.timer_a_index];
-                timer[chip.timer_a].enabled:=true;
+					    if not(timers.timer[chip.timer_a].enabled) then begin
+						    timers.timer[chip.timer_a].time_final:=chip.timer_a_time[chip.timer_a_index];
+                timers.enabled(chip.timer_a,true);
     						chip.timer_a_index_old:=chip.timer_a_index;
               end;
 			      end else begin 		// stop timer A */
-					    timer[chip.timer_a].enabled:=false;
+					    timers.enabled(chip.timer_a,false);
             end;
 			end;
 		$18:begin	// LFO frequency */
@@ -901,7 +899,6 @@ begin
     getmem(FM2151[num].oper[f],sizeof(YM2151Operator));
     fillchar(FM2151[num].oper[f]^,sizeof(YM2151Operator),0);
   end;
-	init_tables();
 	FM2151[num].clock:=clock;
 	//rate = clock/64;*/
 	FM2151[num].sampfreq:=FREQ_BASE_AUDIO;	// avoid division by 0 in init_chip_tables()
@@ -909,17 +906,10 @@ begin
 	FM2151[num].lfo_timer_add:=trunc((1 shl LFO_SH)*(clock/64.0)/FM2151[num].sampfreq);
 	FM2151[num].eg_timer_add:=trunc((1 shl EG_SH)*(clock/64.0)/FM2151[num].sampfreq);
 	FM2151[num].eg_timer_overflow:=(3)*(1 shl EG_SH);
-  case num of
-    0:begin
-        FM2151[num].timer_a:=init_timer(sound_status.cpu_num,1,timer_a_exec_0,false);
-        FM2151[num].timer_b:=init_timer(sound_status.cpu_num,1,timer_b_exec_0,false);
-    end;
-    1:begin
-        FM2151[num].timer_a:=init_timer(sound_status.cpu_num,1,timer_a_exec_1,false);
-        FM2151[num].timer_b:=init_timer(sound_status.cpu_num,1,timer_b_exec_1,false);
-    end;
-  end;
+  FM2151[num].timer_a:=timers.init(sound_status.cpu_num,1,nil,timer_a_exec,false,num);
+  FM2151[num].timer_b:=timers.init(sound_status.cpu_num,1,nil,timer_b_exec,false,num);
 	YM_2151ResetChip(num);
+  init_tables();
 end;
 
 procedure YM_2151Close(num:byte);
@@ -973,8 +963,8 @@ begin
 	YM_2151WriteReg(num,$1b,0);	// only because of CT1, CT2 output pins */
 	YM_2151WriteReg(num,$18,0);	// set LFO frequency */
 	for i:=$20 to $ff do YM_2151WriteReg(num,i,0);	// set the operators */
-  timer[chip.timer_a].enabled:=false;
-  timer[chip.timer_b].enabled:=false;
+  timers.enabled(chip.timer_a,false);
+  timers.enabled(chip.timer_b,false);
   chip.irqlinestate:=0;
 end;
 
@@ -991,8 +981,7 @@ end;
 
 function op_calc1(OP:pYM2151Operator;env:dword;pm:integer):integer;
 var
-	p:dword;
-	i:longint;
+	p,i:integer;
 begin
 	i:=(OP.phase and not(FREQ_MASK))+pm;
 	p:=(env shl 3)+sin_tab[sshr(i,FREQ_SH) and SIN_MASK];
@@ -1062,7 +1051,7 @@ var
 	op,op2,op3,op4:pYM2151Operator;
 	env,AM,noiseout:dword;
   chip:pYM2151;
-  _out,h:longint;
+  _out:longint;
 begin
   chip:=FM2151[num];
   AM:=0;
@@ -1079,8 +1068,6 @@ begin
 	if (op.ams<>0) then AM:=chip.lfa shl (op.ams-1);
 	env:=volume_calc(op,AM);
   _out:=op.fb_out_prev+op.fb_out_curr;
-  if _out>32767 then _out:=32767
-    else if _out<-32768 then _out:=-32768;
   op.fb_out_prev:=op.fb_out_curr;
   // algorithm 5 */
   if (op.connect=nil) then begin
@@ -1106,10 +1093,8 @@ begin
     if (chip.noise_rng and $10000)<>0 then chip.chanout[7]:=chip.chanout[7]+integer(noiseout)
       else chip.chanout[7]:=chip.chanout[7]-integer(noiseout); // bit 16 -> output */
 	end	else begin
-		if (env<ENV_QUIET) then begin
-      h:=op_calc(op4,env,chip.c2);
-      chip.chanout[7]:=chip.chanout[7]+h;
-    end;
+		if (env<ENV_QUIET) then
+      chip.chanout[7]:=chip.chanout[7]+op_calc(op4,env,chip.c2);
 	end;
   // M1 */
 	op.mem_value:=chip.mem;
@@ -1119,8 +1104,8 @@ procedure advance_eg(num:byte);
 var
 	op:pYM2151Operator;
   chip:pYM2151;
-  n_op,i:byte;
-  tmp:integer;
+  i,n_op:byte;
+  tmp:single;
 begin
   chip:=FM2151[num];
 	chip.eg_timer:=chip.eg_timer+chip.eg_timer_add;
@@ -1134,9 +1119,9 @@ begin
       op:=chip.oper[n_op];	// CH 0 M1 */
 			case (op.state) of
 			  EG_ATT:begin	// attack phase */
-				        if ((chip.eg_cnt and dword((1 shl op.eg_sh_ar)-1))=0) then begin
-                  tmp:=(not(op.volume)*(eg_inc[(op.eg_sel_ar+((chip.eg_cnt shr op.eg_sh_ar) and 7)) mod 152])) div 16;
-					        op.volume:=op.volume+tmp;
+				        if ((chip.eg_cnt and ((1 shl op.eg_sh_ar)-1))=0) then begin
+                  tmp:=(not(op.volume)*(eg_inc[op.eg_sel_ar+((chip.eg_cnt shr op.eg_sh_ar) and 7)]))/16;
+					        op.volume:=trunc(op.volume+tmp);
 					        if (op.volume<=MIN_ATT_INDEX) then begin
 						        op.volume:=MIN_ATT_INDEX;
 						        op.state:=EG_DEC;
@@ -1144,15 +1129,14 @@ begin
                 end;
               end;
 			  EG_DEC:begin	// decay phase */
-				        if ((chip.eg_cnt and dword((1 shl op.eg_sh_d1r)-1))=0) then begin
-                  tmp:=eg_inc[(op.eg_sel_d1r+((chip.eg_cnt shr op.eg_sh_d1r) and 7)) mod 152];
-					        op.volume:=op.volume+tmp;
-					        if (cardinal(op.volume)>=op.d1l) then op.state:=EG_SUS;
+				        if ((chip.eg_cnt and ((1 shl op.eg_sh_d1r)-1))=0) then begin
+					        op.volume:=op.volume+eg_inc[op.eg_sel_d1r+((chip.eg_cnt shr op.eg_sh_d1r) and 7)];
+					        if (op.volume>=op.d1l) then op.state:=EG_SUS;
                 end;
                end;
 			  EG_SUS:begin	// sustain phase */
-				        if ((chip.eg_cnt and dword((1 shl op.eg_sh_d2r)-1))=0) then begin
-					        op.volume:=op.volume+eg_inc[(op.eg_sel_d2r+((chip.eg_cnt shr op.eg_sh_d2r) and 7)) mod 152];
+				        if ((chip.eg_cnt and ((1 shl op.eg_sh_d2r)-1))=0) then begin
+					        op.volume:=op.volume+eg_inc[op.eg_sel_d2r+((chip.eg_cnt shr op.eg_sh_d2r) and 7)];
 					        if (op.volume>=MAX_ATT_INDEX) then begin
 						        op.volume:=MAX_ATT_INDEX;
 						        op.state:=EG_OFF;
@@ -1161,8 +1145,8 @@ begin
               end;
 
 			  EG_REL:begin	// release phase */
-				        if ((chip.eg_cnt and dword((1 shl op.eg_sh_rr)-1))=0) then begin
-					        op.volume:=op.volume + eg_inc[(op.eg_sel_rr + ((chip.eg_cnt shr op.eg_sh_rr) and 7)) mod 152];
+				        if ((chip.eg_cnt and ((1 shl op.eg_sh_rr)-1))=0) then begin
+					        op.volume:=op.volume + eg_inc[op.eg_sel_rr+((chip.eg_cnt shr op.eg_sh_rr) and 7)];
 					        if (op.volume>=MAX_ATT_INDEX) then begin
 						        op.volume:=MAX_ATT_INDEX;
 						        op.state:=EG_OFF;
@@ -1277,10 +1261,10 @@ begin
         else mod_ind:=mod_ind shl (op.pms-5);
 			if (mod_ind<>0) then begin
 				kc_channel:=op.kc_i+cardinal(mod_ind);
-				op.phase:=op.phase+cardinal(sshr(((chip.freq[kc_channel+op.dt2]+cardinal(op.dt1))*op.mul),1));
-        op2.phase:=op2.phase+cardinal(sshr(((chip.freq[kc_channel+op2.dt2]+cardinal(op2.dt1))*op2.mul),1));
-        op3.phase:=op3.phase+cardinal(sshr(((chip.freq[kc_channel+op3.dt2]+cardinal(op3.dt1))*op3.mul),1));
-        op4.phase:=op4.phase+cardinal(sshr(((chip.freq[kc_channel+op4.dt2]+cardinal(op4.dt1))*op4.mul),1));
+				op.phase:=op.phase+sshr(((chip.freq[kc_channel+op.dt2]+op.dt1)*op.mul),1);
+        op2.phase:=op2.phase+sshr(((chip.freq[kc_channel+op2.dt2]+op2.dt1)*op2.mul),1);
+        op3.phase:=op3.phase+sshr(((chip.freq[kc_channel+op3.dt2]+op3.dt1)*op3.mul),1);
+        op4.phase:=op4.phase+sshr(((chip.freq[kc_channel+op4.dt2]+op4.dt1)*op4.mul),1);
 			end	else begin		// phase modulation from LFO is equal to zero */
 				op.phase:=op.phase+op.freq;
 				op2.phase:=op2.phase+op2.freq;
@@ -1318,7 +1302,7 @@ begin
       i:=32;
 			while (i<>0) do begin
         op:=chip.oper[n_op];	// CH 0 M1 */
-				KEY_OFF(op,cardinal(not(2)));
+				KEY_OFF(op,2);
 				n_op:=n_op+1;
         i:=i-1;
 			end;
@@ -1354,20 +1338,20 @@ begin
 
 		outl:=chip.chanout[0] and chip.pan[0];
 		outr:=chip.chanout[0] and chip.pan[1];
-		outl:=outl+(chip.chanout[1] and integer(chip.pan[2]));
-		outr:=outr+(chip.chanout[1] and integer(chip.pan[3]));
-		outl:=outl+(chip.chanout[2] and integer(chip.pan[4]));
-		outr:=outr+(chip.chanout[2] and integer(chip.pan[5]));
-		outl:=outl+(chip.chanout[3] and integer(chip.pan[6]));
-		outr:=outr+(chip.chanout[3] and integer(chip.pan[7]));
-		outl:=outl+(chip.chanout[4] and integer(chip.pan[8]));
-		outr:=outr+(chip.chanout[4] and integer(chip.pan[9]));
-		outl:=outl+(chip.chanout[5] and integer(chip.pan[10]));
-		outr:=outr+(chip.chanout[5] and integer(chip.pan[11]));
-		outl:=outl+(chip.chanout[6] and integer(chip.pan[12]));
-		outr:=outr+(chip.chanout[6] and integer(chip.pan[13]));
-		outl:=outl+(chip.chanout[7] and integer(chip.pan[14]));
-		outr:=outr+(chip.chanout[7] and integer(chip.pan[15]));
+		outl:=outl+(chip.chanout[1] and chip.pan[2]);
+		outr:=outr+(chip.chanout[1] and chip.pan[3]);
+		outl:=outl+(chip.chanout[2] and chip.pan[4]);
+		outr:=outr+(chip.chanout[2] and chip.pan[5]);
+		outl:=outl+(chip.chanout[3] and chip.pan[6]);
+		outr:=outr+(chip.chanout[3] and chip.pan[7]);
+		outl:=outl+(chip.chanout[4] and chip.pan[8]);
+		outr:=outr+(chip.chanout[4] and chip.pan[9]);
+		outl:=outl+(chip.chanout[5] and chip.pan[10]);
+		outr:=outr+(chip.chanout[5] and chip.pan[11]);
+		outl:=outl+(chip.chanout[6] and chip.pan[12]);
+		outr:=outr+(chip.chanout[6] and chip.pan[13]);
+		outl:=outl+(chip.chanout[7] and chip.pan[14]);
+		outr:=outr+(chip.chanout[7] and chip.pan[15]);
 		if (outl>MAXOUT) then outl:=MAXOUT
 			else if (outl<MINOUT) then outl:=MINOUT;
 		if (outr>MAXOUT) then outr:=MAXOUT
@@ -1380,13 +1364,13 @@ begin
 end;
 
 //Timers
-procedure timer_a_exec_0;
+procedure timer_a_exec(index:byte);
 var
   chip:pYM2151;
   oldstate:integer;
 begin
-chip:=FM2151[0];
-timer[chip.timer_a].time_final:=chip.timer_A_time[chip.timer_A_index ];
+chip:=FM2151[index];
+timers.timer[chip.timer_a].time_final:=chip.timer_A_time[chip.timer_A_index ];
 chip.timer_A_index_old:=chip.timer_A_index;
 if (chip.irq_enable and $04)<>0 then begin
 		chip.status:=chip.status or 1;
@@ -1398,13 +1382,13 @@ if (chip.irq_enable and $80)<>0 then
 		chip.csm_req:=2;		// request KEY ON / KEY OFF sequence */
 end;
 
-procedure timer_b_exec_0;
+procedure timer_b_exec(index:byte);
 var
   chip:pYM2151;
   oldstate:integer;
 begin
-chip:=FM2151[0];
-timer[chip.timer_b].time_final:=chip.timer_b_time[chip.timer_b_index];
+chip:=FM2151[index];
+timers.timer[chip.timer_b].time_final:=chip.timer_b_time[chip.timer_b_index];
 chip.timer_b_index_old:=chip.timer_b_index;
 if (chip.irq_enable and $08)<>0 then begin
 		chip.status:=chip.status or 2;
@@ -1413,40 +1397,5 @@ if (chip.irq_enable and $08)<>0 then begin
   	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(ASSERT_LINE);
 end;
 end;
-
-procedure timer_a_exec_1;
-var
-  chip:pYM2151;
-  oldstate:integer;
-begin
-chip:=FM2151[1];
-timer[chip.timer_a].time_final:=chip.timer_A_time[chip.timer_A_index ];
-chip.timer_A_index_old:=chip.timer_A_index;
-if (chip.irq_enable and $04)<>0 then begin
-		chip.status:=chip.status or 1;
-		oldstate:=chip.irqlinestate;
-  	chip.irqlinestate:=chip.irqlinestate or 1;
-  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(ASSERT_LINE);
-end;
-if (chip.irq_enable and $80)<>0 then
-		chip.csm_req:=2;		// request KEY ON / KEY OFF sequence */
-end;
-
-procedure timer_b_exec_1;
-var
-  chip:pYM2151;
-  oldstate:integer;
-begin
-chip:=FM2151[1];
-timer[chip.timer_b].time_final:=chip.timer_b_time[chip.timer_b_index];
-chip.timer_b_index_old:=chip.timer_b_index;
-if (chip.irq_enable and $08)<>0 then begin
-		chip.status:=chip.status or 2;
-		oldstate:=chip.irqlinestate;
-  	chip.irqlinestate:=chip.irqlinestate or 2;
-  	if ((oldstate=0) and (addr(chip.irq_handler)<>nil)) then chip.irq_handler(ASSERT_LINE);
-end;
-end;
-
 
 end.

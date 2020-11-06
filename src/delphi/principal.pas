@@ -99,7 +99,7 @@ type
     Psychic51: TMenuItem;
     Brazil1: TMenuItem;
     M680001: TMenuItem;
-    TerraCre1: TMenuItem;
+    TerraCreHW1: TMenuItem;
     KungFuM1: TMenuItem;
     ShootOut1: TMenuItem;
     Vigilante1: TMenuItem;
@@ -392,6 +392,43 @@ type
     AtariSystem11: TMenuItem;
     peterpak1: TMenuItem;
     Gaunt21: TMenuItem;
+    WilliamsHW1: TMenuItem;
+    Defender1: TMenuItem;
+    ddragon_sh1: TMenuItem;
+    Mayday1: TMenuItem;
+    Colony71: TMenuItem;
+    Bosconian1: TMenuItem;
+    SG10001: TMenuItem;
+    SegaSystemE1: TMenuItem;
+    HangOnJr1: TMenuItem;
+    SlapShooter1: TMenuItem;
+    FantasyZone21: TMenuItem;
+    OpaOpa1: TMenuItem;
+    tetrisse1: TMenuItem;
+    transformer1: TMenuItem;
+    riddleofp1: TMenuItem;
+    Route16HW1: TMenuItem;
+    Route161: TMenuItem;
+    SpeakandRescue1: TMenuItem;
+    gwarrior1: TMenuItem;
+    Salamander1: TMenuItem;
+    BadLands1: TMenuItem;
+    indydoom1: TMenuItem;
+    MarbleMadness1: TMenuItem;
+    TerraCre1: TMenuItem;
+    Amazon1: TMenuItem;
+    GalivanHW1: TMenuItem;
+    Galivan1: TMenuItem;
+    Dangar1: TMenuItem;
+    LastDuelHW1: TMenuItem;
+    LastDuel1: TMenuItem;
+    MadGear1: TMenuItem;
+    leds20111: TMenuItem;
+    c641: TMenuItem;
+    Gigas1: TMenuItem;
+    Gigasm21: TMenuItem;
+    Omega1: TMenuItem;
+    pbillrd1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -443,12 +480,11 @@ if not((Message.Msg=WM_SYSCOMMAND) and (Message.WParam=SC_KEYMENU)) then inherit
 end;
 
 procedure Tprincipal1.FormCreate(Sender: TObject);
-var
-  f:byte;
 begin
 //SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
 //SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
 Init_sdl_lib;
+timers:=timer_eng.create;
 EmuStatus:=EsStoped;
 main_vars.cadena_dir:='\';
 directory.Base:=extractfiledir(application.ExeName)+'\';
@@ -529,7 +565,7 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
-if @llamadas_maquina.close<>nil then llamadas_maquina.close;
+if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
@@ -537,6 +573,7 @@ QueryPerformanceFrequency(cont_micro);
 valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
 main_vars.driver_ok:=false;
 if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
+timers.autofire_init;
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
   principal1.timer1.Enabled:=false;
@@ -553,8 +590,6 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn14.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
 end else begin
-  if autofire_general then init_autofire
-    else close_autofire;
   principal1.timer1.Enabled:=true;
   if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
   QueryPerformanceCounter(cont_sincroniza);
@@ -648,8 +683,6 @@ Windows.SetFocus(child.Handle);
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);
-var
-  f:byte;
 begin
 timer1.Enabled:=false;
 EmuStatus:=EsPause;

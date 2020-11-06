@@ -10,35 +10,35 @@ procedure cargar_taitosj;
 implementation
 const
         //Elevator Action
-        elevator_rom:array[0..8] of tipo_roms=(
+        elevator_rom:array[0..7] of tipo_roms=(
         (n:'ea-ic69.bin';l:$1000;p:0;crc:$24e277ef),(n:'ea-ic68.bin';l:$1000;p:$1000;crc:$13702e39),
         (n:'ea-ic67.bin';l:$1000;p:$2000;crc:$46f52646),(n:'ea-ic66.bin';l:$1000;p:$3000;crc:$e22fe57e),
         (n:'ea-ic65.bin';l:$1000;p:$4000;crc:$c10691d7),(n:'ea-ic64.bin';l:$1000;p:$5000;crc:$8913b293),
-        (n:'ea-ic55.bin';l:$1000;p:$6000;crc:$1cabda08),(n:'ea-ic54.bin';l:$1000;p:$7000;crc:$f4647b4f),());
-        elevator_sonido:array[0..2] of tipo_roms=(
-        (n:'ea-ic70.bin';l:$1000;p:0;crc:$6d5f57cb),(n:'ea-ic71.bin';l:$1000;p:$1000;crc:$f0a769a1),());
+        (n:'ea-ic55.bin';l:$1000;p:$6000;crc:$1cabda08),(n:'ea-ic54.bin';l:$1000;p:$7000;crc:$f4647b4f));
+        elevator_sonido:array[0..1] of tipo_roms=(
+        (n:'ea-ic70.bin';l:$1000;p:0;crc:$6d5f57cb),(n:'ea-ic71.bin';l:$1000;p:$1000;crc:$f0a769a1));
         elevator_mcu:tipo_roms=(n:'ba3.11';l:$800;p:0;crc:$9ce75afc);
-        elevator_char:array[0..8] of tipo_roms=(
+        elevator_char:array[0..7] of tipo_roms=(
         (n:'ea-ic1.bin';l:$1000;p:0;crc:$bbbb3fba),(n:'ea-ic2.bin';l:$1000;p:$1000;crc:$639cc2fd),
         (n:'ea-ic3.bin';l:$1000;p:$2000;crc:$61317eea),(n:'ea-ic4.bin';l:$1000;p:$3000;crc:$55446482),
         (n:'ea-ic5.bin';l:$1000;p:$4000;crc:$77895c0f),(n:'ea-ic6.bin';l:$1000;p:$5000;crc:$9a1b6901),
-        (n:'ea-ic7.bin';l:$1000;p:$6000;crc:$839112ec),(n:'ea-ic8.bin';l:$1000;p:$7000;crc:$db7ff692),());
+        (n:'ea-ic7.bin';l:$1000;p:$6000;crc:$839112ec),(n:'ea-ic8.bin';l:$1000;p:$7000;crc:$db7ff692));
         elevator_prom:tipo_roms=(n:'eb16.22';l:$100;p:0;crc:$b833b5ea);
         //Jungle King
-        junglek_rom:array[0..9] of tipo_roms=(
+        junglek_rom:array[0..8] of tipo_roms=(
         (n:'kn21-1.bin';l:$1000;p:0;crc:$45f55d30),(n:'kn22-1.bin';l:$1000;p:$1000;crc:$07cc9a21),
         (n:'kn43.bin';l:$1000;p:$2000;crc:$a20e5a48),(n:'kn24.bin';l:$1000;p:$3000;crc:$19ea7f83),
         (n:'kn25.bin';l:$1000;p:$4000;crc:$844365ea),(n:'kn46.bin';l:$1000;p:$5000;crc:$27a95fd5),
         (n:'kn47.bin';l:$1000;p:$6000;crc:$5c3199e0),(n:'kn28.bin';l:$1000;p:$7000;crc:$194a2d09),
-        (n:'kn60.bin';l:$1000;p:$8000;crc:$1a9c0a26),());
-        junglek_sonido:array[0..3] of tipo_roms=(
+        (n:'kn60.bin';l:$1000;p:$8000;crc:$1a9c0a26));
+        junglek_sonido:array[0..2] of tipo_roms=(
         (n:'kn37.bin';l:$1000;p:0;crc:$dee7f5d4),(n:'kn38.bin';l:$1000;p:$1000;crc:$bffd3d21),
-        (n:'kn59-1.bin';l:$1000;p:$2000;crc:$cee485fc),());
-        junglek_char:array[0..8] of tipo_roms=(
+        (n:'kn59-1.bin';l:$1000;p:$2000;crc:$cee485fc));
+        junglek_char:array[0..7] of tipo_roms=(
         (n:'kn29.bin';l:$1000;p:0;crc:$8f83c290),(n:'kn30.bin';l:$1000;p:$1000;crc:$89fd19f1),
         (n:'kn51.bin';l:$1000;p:$2000;crc:$70e8fc12),(n:'kn52.bin';l:$1000;p:$3000;crc:$bcbac1a3),
         (n:'kn53.bin';l:$1000;p:$4000;crc:$b946c87d),(n:'kn34.bin';l:$1000;p:$5000;crc:$320db2e1),
-        (n:'kn55.bin';l:$1000;p:$6000;crc:$70aef58f),(n:'kn56.bin';l:$1000;p:$7000;crc:$932eb667),());
+        (n:'kn55.bin';l:$1000;p:$6000;crc:$70aef58f),(n:'kn56.bin';l:$1000;p:$7000;crc:$932eb667));
         junglek_prom:tipo_roms=(n:'eb16.22';l:$100;p:0;crc:$b833b5ea);
         //Misc
         voltable:array[0..$ff] of byte=(
@@ -59,8 +59,6 @@ const
       	$6a,$69,$69,$69,$68,$68,$68,$68,$68,$67,$67,$67,$66,$66,$66,$66,
       	$65,$65,$65,$65,$64,$64,$64,$64,$64,$63,$63,$63,$63,$62,$62,$62);
         //Graphics
-        pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-        pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
         ps_x:array[0..15] of dword=(7, 6, 5, 4, 3, 2, 1, 0,
   	  	8*8+7, 8*8+6, 8*8+5, 8*8+4, 8*8+3, 8*8+2, 8*8+1, 8*8+0);
         ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -88,26 +86,26 @@ var
 procedure conv_chars1;inline;
 begin
   gfx_set_desc_data(3,0,8*8,512*8*8,256*8*8,0);
-  convert_gfx(0,0,@memoria[$9000],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria[$9000],@ps_x,@ps_y,false,false);
   //sprites
   gfx_set_desc_data(3,0,32*8,128*16*16,64*16*16,0);
-  convert_gfx(1,0,@memoria[$9000],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(1,0,@memoria[$9000],@ps_x,@ps_y,false,false);
 end;
 
 procedure conv_chars2;inline;
 begin
   //Chars 2
   gfx_set_desc_data(3,0,8*8,512*8*8,256*8*8,0);
-  convert_gfx(2,0,@memoria[$a800],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(2,0,@memoria[$a800],@ps_x,@ps_y,false,false);
   //sprites
   gfx_set_desc_data(3,0,32*8,128*16*16,64*16*16,0);
-  convert_gfx(3,0,@memoria[$a800],@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(3,0,@memoria[$a800],@ps_x,@ps_y,false,false);
 end;
 
 function get_sprite_xy(offs:word;sx,sy:pbyte;sprite_offset:byte):boolean;
 begin
-	sx^:=memoria[$d100+sprite_offset+offs+0]-1;
-	sy^:=240-memoria[$d100+sprite_offset+offs+1];
+	sx^:=memoria[$d100+sprite_offset+offs+0]+1;
+	sy^:=240-memoria[$d100+sprite_offset+offs+1]-2;
 	get_sprite_xy:=(sy^)<240;
 end;
 
@@ -140,6 +138,7 @@ procedure update_video_taitosj;
 var
   color_back,color_mid,color_front,gfx_back,gfx_mid,gfx_front,nchar,layer:byte;
   f,x,y:word;
+  scroll_def:array[0..31] of word;
 begin
 if rechars1 then begin
   conv_chars1;
@@ -191,29 +190,23 @@ for f:=0 to 3 do begin
     1:if (video_mode and $10)<>0 then begin
           x:=scroll[0];
           x:=(x and $f8)+((x+3) and 7)+8;
-          scroll__y_part2(1,4,8,@scroll_y,x,scroll[1]);
-          {for y:=0 to 31 do begin
-            scr_y:=scroll_y[y]+scroll[1];
-            scroll__y_part(1,4,scr_y,x,y*8,8);
-          end;}
+          //Ordena los scrolls de la Y!!!
+          for y:=0 to 31 do scroll_def[y]:=scroll_y[(y+(x div 8)) mod 32];
+          scroll__y_part2(1,4,8,@scroll_def,x,scroll[1]);
       end;
     2:if (video_mode and $20)<>0 then begin
           x:=scroll[2];
           x:=(x and $f8)+((x+1) and 7)+10;
-          scroll__y_part2(2,4,8,@scroll_y[32],x,scroll[3]);
-          {for y:=0 to 31 do begin
-            scr_y:=scroll_y[32+y]+scroll[3];
-            scroll__y_part(2,4,scr_y,x,y*8,8);
-          end;}
+          //Ordena los scrolls de la Y!!!
+          for y:=0 to 31 do scroll_def[y]:=scroll_y[32+((y+(x div 8)) mod 32)];
+          scroll__y_part2(2,4,8,@scroll_def,x,scroll[3]);
       end;
     3:if (video_mode and $40)<>0 then begin
           x:=scroll[4];
           x:=(x and $f8)+((x-1) and 7)+12;
-          scroll__y_part2(3,4,8,@scroll_y[64],x,scroll[5]);
-          {for y:=0 to 31 do begin
-            scr_y:=scroll_y[64+y]+scroll[5];
-            scroll__y_part(3,4,scr_y,x,y*8,8);
-          end;}
+          //Ordena los scrolls de la Y!!!
+          for y:=0 to 31 do scroll_def[y]:=scroll_y[64+((y+(x div 8)) mod 32)];
+          scroll__y_part2(3,4,8,@scroll_def,x,scroll[5]);
       end;
   end;
 end;
@@ -649,7 +642,7 @@ z80_1:=cpu_z80.create(3000000,256);
 z80_1.change_ram_calls(taitosj_snd_getbyte,taitosj_snd_putbyte);
 z80_1.init_sound(taitosj_sound_update);
 //IRQ sonido
-init_timer(z80_1.numero_cpu,3000000/(6000000/(4*16*16*10*16)),taitosj_snd_irq,true);
+timers.init(z80_1.numero_cpu,3000000/(6000000/(4*16*16*10*16)),taitosj_snd_irq,nil,true);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(1500000,AY8910,0.15);
 ay8910_0.change_io_calls(ay0_porta_read,ay0_portb_read,nil,nil);
@@ -664,20 +657,20 @@ case main_vars.tipo_maquina of
   185:begin  //Elevator Action
         z80_0.change_ram_calls(taitosj_mcu_getbyte,taitosj_mcu_putbyte);
         //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@elevator_rom[0],'elevator.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,elevator_rom)) then exit;
         //Poner roms en sus bancos
         copymemory(@memoria[0],@memoria_temp[0],$6000);
         copymemory(@memoria_rom[0,0],@memoria_temp[$6000],$2000);
         copymemory(@memoria_rom[1,0],@memoria_temp[$6000],$1000);
         copymemory(@memoria_rom[1,$1000],@memoria_temp[$8000],$1000);
         //cargar roms sonido
-        if not(cargar_roms(@mem_snd[0],@elevator_sonido[0],'elevator.zip',0)) then exit;
+        if not(roms_load(@mem_snd,elevator_sonido)) then exit;
         //MCU CPU
-        if not(cargar_roms(@mcu_mem[0],@elevator_mcu,'elevator.zip')) then exit;
+        if not(roms_load(@mcu_mem,elevator_mcu)) then exit;
         m6805_0:=cpu_m6805.create(3000000,$100,tipo_m68705);
         m6805_0.change_ram_calls(mcu_taitosj_getbyte,mcu_taitosj_putbyte);
         //cargar chars
-        if not(cargar_roms(@gfx_rom[0],@elevator_char[0],'elevator.zip',0)) then exit;
+        if not(roms_load(@gfx_rom,elevator_char)) then exit;
         //crear gfx
         init_gfx(0,8,8,256);
         gfx[0].trans[0]:=true;
@@ -688,21 +681,21 @@ case main_vars.tipo_maquina of
         init_gfx(3,16,16,64);
         gfx[3].trans[0]:=true;
         //Calculo de prioridades
-        if not(cargar_roms(@memoria_temp[0],@elevator_prom,'elevator.zip')) then exit;
+        if not(roms_load(@memoria_temp,elevator_prom)) then exit;
       end;
   189:begin //Jungle King
         z80_0.change_ram_calls(taitosj_nomcu_getbyte,taitosj_nomcu_putbyte);
         //cargar roms
-        if not(cargar_roms(@memoria_temp[0],@junglek_rom[0],'junglek.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,junglek_rom)) then exit;
         //Poner roms en sus bancos
         copymemory(@memoria[0],@memoria_temp[0],$6000);
         copymemory(@memoria_rom[0,0],@memoria_temp[$6000],$2000);
         copymemory(@memoria_rom[1,0],@memoria_temp[$6000],$1000);
         copymemory(@memoria_rom[1,$1000],@memoria_temp[$8000],$1000);
         //cargar roms sonido
-        if not(cargar_roms(@mem_snd[0],@junglek_sonido[0],'junglek.zip',0)) then exit;
+        if not(roms_load(@mem_snd,junglek_sonido)) then exit;
         //cargar chars
-        if not(cargar_roms(@gfx_rom[0],@junglek_char[0],'junglek.zip',0)) then exit;
+        if not(roms_load(@gfx_rom,junglek_char)) then exit;
         //crear gfx
         init_gfx(0,8,8,256);
         gfx[0].trans[0]:=true;
@@ -713,7 +706,7 @@ case main_vars.tipo_maquina of
         init_gfx(3,16,16,64);
         gfx[3].trans[0]:=true;
         //Calculo de prioridades
-        if not(cargar_roms(@memoria_temp[0],@junglek_prom,'junglek.zip')) then exit;
+        if not(roms_load(@memoria_temp,junglek_prom)) then exit;
   end;
 end;
 for i:=0 to $1f do begin

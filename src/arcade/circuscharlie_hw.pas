@@ -9,21 +9,21 @@ procedure cargar_circusc;
 
 implementation
 const
-        circusc_rom:array[0..5] of tipo_roms=(
+        circusc_rom:array[0..4] of tipo_roms=(
         (n:'380_s05.3h';l:$2000;p:$6000;crc:$48feafcf),(n:'380_r04.4h';l:$2000;p:$8000;crc:$c283b887),
         (n:'380_r03.5h';l:$2000;p:$a000;crc:$e90c0e86),(n:'380_q02.6h';l:$2000;p:$c000;crc:$4d847dc6),
-        (n:'380_q01.7h';l:$2000;p:$e000;crc:$18c20adf),());
-        circusc_snd:array[0..2] of tipo_roms=(
-        (n:'380_l14.5c';l:$2000;p:0;crc:$607df0fb),(n:'380_l15.7c';l:$2000;p:$2000;crc:$a6ad30e1),());
-        circusc_char:array[0..2] of tipo_roms=(
-        (n:'380_j12.4a';l:$2000;p:0;crc:$56e5b408),(n:'380_j13.5a';l:$2000;p:$2000;crc:$5aca0193),());
-        circusc_sprites:array[0..6] of tipo_roms=(
+        (n:'380_q01.7h';l:$2000;p:$e000;crc:$18c20adf));
+        circusc_snd:array[0..1] of tipo_roms=(
+        (n:'380_l14.5c';l:$2000;p:0;crc:$607df0fb),(n:'380_l15.7c';l:$2000;p:$2000;crc:$a6ad30e1));
+        circusc_char:array[0..1] of tipo_roms=(
+        (n:'380_j12.4a';l:$2000;p:0;crc:$56e5b408),(n:'380_j13.5a';l:$2000;p:$2000;crc:$5aca0193));
+        circusc_sprites:array[0..5] of tipo_roms=(
         (n:'380_j06.11e';l:$2000;p:0;crc:$df0405c6),(n:'380_j07.12e';l:$2000;p:$2000;crc:$23dfe3a6),
         (n:'380_j08.13e';l:$2000;p:$4000;crc:$3ba95390),(n:'380_j09.14e';l:$2000;p:$6000;crc:$a9fba85a),
-        (n:'380_j10.15e';l:$2000;p:$8000;crc:$0532347e),(n:'380_j11.16e';l:$2000;p:$a000;crc:$e1725d24),());
-        circusc_pal:array[0..3] of tipo_roms=(
+        (n:'380_j10.15e';l:$2000;p:$8000;crc:$0532347e),(n:'380_j11.16e';l:$2000;p:$a000;crc:$e1725d24));
+        circusc_pal:array[0..2] of tipo_roms=(
         (n:'380_j18.2a';l:$20;p:0;crc:$10dd4eaa),(n:'380_j17.7b';l:$100;p:$20;crc:$13989357),
-        (n:'380_j16.10c';l:$100;p:$120;crc:$c244f2aa),());
+        (n:'380_j16.10c';l:$100;p:$120;crc:$c244f2aa));
         //Dip
         circusc_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
@@ -44,8 +44,7 @@ var
 procedure update_video_circusc;inline;
 var
   x,y,atrib:byte;
-  f:word;
-  nchar,color:word;
+  f,nchar,color:word;
 begin
 for f:=0 to $3ff do begin
     if gfx[0].buffer[f] then begin
@@ -144,7 +143,6 @@ end;
 
 procedure circusc_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$5fff then exit;
 case direccion of
   $0..$3ff:case (direccion and $7) of
               0:main_screen.flip_main_screen:=(valor and 1)<>0;
@@ -159,6 +157,7 @@ case direccion of
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
+  $6000..$ffff:; //ROM
 end;
 end;
 
@@ -174,8 +173,8 @@ end;
 
 procedure circusc_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
 case direccion of
+  0..$3fff:; //ROM
   $4000..$5fff:mem_snd[$4000+(direccion and $3ff)]:=valor;
   $a000..$bfff:case (direccion and $7) of
                 0:sound_latch:=valor;
@@ -202,9 +201,9 @@ begin
  sn_76496_1.reset;
  dac_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  irq_ena:=false;
  sound_latch:=0;
  scroll_x:=0;
@@ -244,23 +243,23 @@ sn_76496_0:=sn76496_chip.Create(1789772);
 sn_76496_1:=sn76496_chip.Create(1789772);
 dac_0:=dac_chip.Create;
 //cargar roms y desencriptarlas
-if not(cargar_roms(@memoria[0],@circusc_rom[0],'circusc.zip',0)) then exit;
+if not(roms_load(@memoria,circusc_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$a000);
 //roms sonido
-if not(cargar_roms(@mem_snd[0],@circusc_snd[0],'circusc.zip',0)) then exit;
+if not(roms_load(@mem_snd,circusc_snd)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@circusc_char[0],'circusc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,circusc_char)) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,true,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@circusc_sprites[0],'circusc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,circusc_sprites)) then exit;
 init_gfx(1,16,16,384);
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@circusc_pal[0],'circusc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,circusc_pal)) then exit;
 for f:=0 to $1f do begin
     bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;

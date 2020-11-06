@@ -10,15 +10,15 @@ procedure cargar_combatsc;
 implementation
 
 const
-        combatsc_rom:array[0..2] of tipo_roms=(
-        (n:'611g01.rom';l:$10000;p:$0;crc:$857ffffe),(n:'611g02.rom';l:$20000;p:$10000;crc:$9ba05327),());
-        combatsc_proms:array[0..4] of tipo_roms=(
+        combatsc_rom:array[0..1] of tipo_roms=(
+        (n:'611g01.rom';l:$10000;p:$0;crc:$857ffffe),(n:'611g02.rom';l:$20000;p:$10000;crc:$9ba05327));
+        combatsc_proms:array[0..3] of tipo_roms=(
         (n:'611g06.h14';l:$100;p:0;crc:$f916129a),(n:'611g05.h15';l:$100;p:$100;crc:$207a7b07),
-        (n:'611g10.h6';l:$100;p:$200;crc:$f916129a),(n:'611g09.h7';l:$100;p:$300;crc:$207a7b07),());
-        combatsc_chars:array[0..2] of tipo_roms=(
-        (n:'611g07.rom';l:$40000;p:0;crc:$73b38720),(n:'611g08.rom';l:$40000;p:$1;crc:$46e7d28c),());
-        combatsc_chars2:array[0..2] of tipo_roms=(
-        (n:'611g11.rom';l:$40000;p:0;crc:$69687538),(n:'611g12.rom';l:$40000;p:$1;crc:$9c6bf898),());
+        (n:'611g10.h6';l:$100;p:$200;crc:$f916129a),(n:'611g09.h7';l:$100;p:$300;crc:$207a7b07));
+        combatsc_chars:array[0..1] of tipo_roms=(
+        (n:'611g07.rom';l:$40000;p:0;crc:$73b38720),(n:'611g08.rom';l:$40000;p:$1;crc:$46e7d28c));
+        combatsc_chars2:array[0..1] of tipo_roms=(
+        (n:'611g11.rom';l:$40000;p:0;crc:$69687538),(n:'611g12.rom';l:$40000;p:$1;crc:$9c6bf898));
         combatsc_sound:tipo_roms=(n:'611g03.rom';l:$8000;p:$0;crc:$2a544db5);
         combatsc_upd:tipo_roms=(n:'611g04.rom';l:$20000;p:0;crc:$2987e158);
         combatsc_dip_a:array [0..2] of def_dip=(
@@ -32,7 +32,7 @@ const
         (mask:$10;name:'Flip Screen';number:2;dip:((dip_val:$10;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- memoria_rom:array[0..9,0..$3FFF] of byte;
+ memoria_rom:array[0..9,0..$3fff] of byte;
  video_circuit,bank_rom,prot_0,prot_1,vreg,sound_latch:byte;
  page_ram:array[0..1,0..$1fff] of byte;
  scroll_ram:array[0..1,0..$3f] of word;
@@ -53,10 +53,8 @@ var
 procedure draw_chip(chip,pant1,pant2:byte);inline;
 begin
 if (K007121_chip[chip].control[1] and 2)<>0 then begin
-    //for f:=0 to 31 do begin
     scroll__x_part2(pant1,5,8,@scroll_ram[1,0]);
     scroll__x_part2(pant2,5,8,@scroll_ram[1,0]);
-    //end;
   end else begin
     scroll_x_y(pant1,5,K007121_chip[chip].control[0] or ((K007121_chip[chip].control[1] and 1) shl 8),K007121_chip[chip].control[2]);
     scroll_x_y(pant2,5,K007121_chip[chip].control[0] or ((K007121_chip[chip].control[1] and 1) shl 8),K007121_chip[chip].control[2]);
@@ -135,7 +133,6 @@ end else begin
 end;
 //Text
 if (K007121_chip[0].control[$1] and 8)<>0 then scroll__x_part2(6,5,8,@scroll_ram[0,32]);
-//for f:=0 to 31 do scroll__x_part(6,5,scroll_ram[0,32+f],0,f*8,8);
 //Crop
 if (K007121_chip[0].control[$3] and $40)<>0 then begin
   for f:=0 to $1f do begin
@@ -144,7 +141,7 @@ if (K007121_chip[0].control[$3] and $40)<>0 then begin
   end;
 end;
 actualiza_trozo_final(0,16,256,224,5);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_combatsc;
@@ -232,7 +229,6 @@ end;
 
 procedure combatsc_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   $0..$7:begin
             K007121_chip[video_circuit].control[direccion]:=valor;
@@ -247,7 +243,6 @@ case direccion of
   $20..$5f:scroll_ram[video_circuit,direccion-$20]:=valor;
   $200:prot_0:=valor;
   $201:prot_1:=valor;
-
   $40c:vreg:=valor;
   $410:begin
         priority:=(valor and $20)<>0;
@@ -275,6 +270,7 @@ case direccion of
           end;
         end;
        end;
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -290,8 +286,8 @@ end;
 
 procedure sound_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$7fff then exit;
 case direccion of
+    0..$7fff:; //ROM
     $8000..$87ff:mem_snd[direccion]:=valor;
     $9000:upd7759_0.start_w(valor and $2);
     $a000:upd7759_0.port_w(valor);
@@ -318,8 +314,8 @@ begin
  K007121_reset(0);
  K007121_reset(1);
  marcade.in0:=$ff;
- marcade.in1:=$5f;
- marcade.in2:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ef;
  video_circuit:=0;
  bank_rom:=0;
  prot_0:=0;
@@ -377,28 +373,28 @@ z80_0.init_sound(combatsc_sound_update);
 //Audio chips
 ym2203_0:=ym2203_chip.create(3000000,0.2);
 upd7759_0:=upd7759_chip.create(640000,0.7);
-if not(cargar_roms(upd7759_0.get_rom_addr,@combatsc_upd,'combatsc.zip')) then exit;
+if not(roms_load(upd7759_0.get_rom_addr,combatsc_upd)) then exit;
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@combatsc_rom[0],'combatsc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,combatsc_rom)) then exit;
 //Pongo las ROMs en su banco
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
 for f:=0 to 7 do copymemory(@memoria_rom[f,0],@memoria_temp[$10000+(f*$4000)],$4000);
 for f:=0 to 1 do copymemory(@memoria_rom[8+f,0],@memoria_temp[0+(f*$4000)],$4000);
 //Cargar Sound
-if not(cargar_roms(@mem_snd[0],@combatsc_sound,'combatsc.zip',1)) then exit;
+if not(roms_load(@mem_snd,combatsc_sound)) then exit;
 //convertir chars
-if not(cargar_roms16b(@memoria_temp[0],@combatsc_chars[0],'combatsc.zip',0)) then exit;
+if not(roms_load16b(@memoria_temp,combatsc_chars)) then exit;
 init_gfx(0,8,8,$4000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //chars 2
-if not(cargar_roms16b(@memoria_temp[0],@combatsc_chars2[0],'combatsc.zip',0)) then exit;
+if not(roms_load16b(@memoria_temp,combatsc_chars2)) then exit;
 init_gfx(1,8,8,$4000);
 gfx[1].trans[0]:=true;
-convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //Color lookup
-if not(cargar_roms(@memoria_temp[0],@combatsc_proms,'combatsc.zip',0)) then exit;
+if not(roms_load(@memoria_temp,combatsc_proms)) then exit;
 clut_combatsc;
 reset_combatsc;
 //DIP

@@ -9,16 +9,16 @@ procedure cargar_jailbreak;
 
 implementation
 const
-        jailbreak_rom:array[0..2] of tipo_roms=(
-        (n:'507p03.11d';l:$4000;p:$8000;crc:$a0b88dfd),(n:'507p02.9d';l:$4000;p:$c000;crc:$444b7d8e),());
-        jailbreak_char:array[0..2] of tipo_roms=(
-        (n:'507l08.4f';l:$4000;p:0;crc:$e3b7a226),(n:'507j09.5f';l:$4000;p:$4000;crc:$504f0912),());
-        jailbreak_sprites:array[0..4] of tipo_roms=(
+        jailbreak_rom:array[0..1] of tipo_roms=(
+        (n:'507p03.11d';l:$4000;p:$8000;crc:$a0b88dfd),(n:'507p02.9d';l:$4000;p:$c000;crc:$444b7d8e));
+        jailbreak_char:array[0..1] of tipo_roms=(
+        (n:'507l08.4f';l:$4000;p:0;crc:$e3b7a226),(n:'507j09.5f';l:$4000;p:$4000;crc:$504f0912));
+        jailbreak_sprites:array[0..3] of tipo_roms=(
         (n:'507j04.3e';l:$4000;p:0;crc:$0d269524),(n:'507j05.4e';l:$4000;p:$4000;crc:$27d4f6f4),
-        (n:'507j06.5e';l:$4000;p:$8000;crc:$717485cb),(n:'507j07.3f';l:$4000;p:$c000;crc:$e933086f),());
-        jailbreak_pal:array[0..4] of tipo_roms=(
+        (n:'507j06.5e';l:$4000;p:$8000;crc:$717485cb),(n:'507j07.3f';l:$4000;p:$c000;crc:$e933086f));
+        jailbreak_pal:array[0..3] of tipo_roms=(
         (n:'507j10.1f';l:$20;p:0;crc:$f1909605),(n:'507j11.2f';l:$20;p:$20;crc:$f70bb122),
-        (n:'507j13.7f';l:$100;p:$40;crc:$d4fe5c97),(n:'507j12.6f';l:$100;p:$140;crc:$0266c7db),());
+        (n:'507j13.7f';l:$100;p:$40;crc:$d4fe5c97),(n:'507j12.6f';l:$100;p:$140;crc:$0266c7db));
         jailbreak_vlm:tipo_roms=(n:'507l01.8c';l:$4000;p:$0;crc:$0c8a3605);
         //Dip
         jailbreak_dip_a:array [0..2] of def_dip=(
@@ -74,16 +74,16 @@ begin
 if event.arcade then begin
   //P1
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   //P2
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   //SYS
@@ -133,7 +133,6 @@ end;
 
 procedure jailbreak_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
   $0..$fff:if memoria[direccion]<>valor then begin
               gfx[0].buffer[direccion and $7ff]:=true;
@@ -160,6 +159,7 @@ case direccion of
 	         vlm5030_0.set_rst((valor shr 2 ) and 1 );
         end;
   $5000:vlm5030_0.data_w(valor);
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -170,7 +170,7 @@ end;
 
 procedure jailbreak_sound;
 begin
-  sn_76496_0.Update;
+  sn_76496_0.update;
   vlm5030_0.update;
 end;
 
@@ -181,9 +181,9 @@ begin
  sn_76496_0.reset;
  vlm5030_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  irq_ena:=false;
  nmi_ena:=false;
  scroll_dir:=false;
@@ -195,8 +195,6 @@ var
     f:word;
     memoria_temp:array[0..$ffff] of byte;
 const
-    pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-    pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
     ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
 			32*8+0*4, 32*8+1*4, 32*8+2*4, 32*8+3*4, 32*8+4*4, 32*8+5*4, 32*8+6*4, 32*8+7*4);
     ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
@@ -216,30 +214,30 @@ m6809_0.init_sound(jailbreak_sound);
 sn_76496_0:=sn76496_chip.Create(18432000 div 12);
 //cargar rom sonido
 vlm5030_0:=vlm5030_chip.Create(3579545,$4000,2);
-if not(cargar_roms(@memoria_temp[0],@jailbreak_vlm,'jailbrek.zip')) then exit;
-for f:=0 to $1fff do memoria_temp[f]:=memoria_temp[f+$2000];
-copymemory(vlm5030_0.get_rom_addr,@memoria_temp[0],$4000);
+if not(roms_load(@memoria_temp,jailbreak_vlm)) then exit;
+copymemory(@memoria_temp[$2000],@memoria_temp[0],$2000);
+copymemory(vlm5030_0.get_rom_addr,@memoria_temp,$4000);
 //NMI sonido
-init_timer(m6809_0.numero_cpu,1536000/480,jailbreak_snd_nmi,true);
+timers.init(m6809_0.numero_cpu,1536000/480,jailbreak_snd_nmi,nil,true);
 //cargar roms y desencriptarlas
-if not(cargar_roms(@memoria[0],@jailbreak_rom[0],'jailbrek.zip',0)) then exit;
+if not(roms_load(@memoria,jailbreak_rom)) then exit;
 konami1_decode(@memoria[$8000],@mem_opcodes[0],$8000);
 //mem_opcodes[$9a7c and $7fff]:=$20;  //inmune
 //mem_opcodes[$9aee and $7fff]:=$39;
 //mem_opcodes[$9b4b and $7fff]:=$20;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@jailbreak_char[0],'jailbrek.zip',0)) then exit;
+if not(roms_load(@memoria_temp,jailbreak_char)) then exit;
 init_gfx(0,8,8,1024);
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@jailbreak_sprites[0],'jailbrek.zip',0)) then exit;
+if not(roms_load(@memoria_temp,jailbreak_sprites)) then exit;
 init_gfx(1,16,16,512);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@jailbreak_pal[0],'jailbrek.zip',0)) then exit;
+if not(roms_load(@memoria_temp,jailbreak_pal)) then exit;
 for f:=0 to $1f do begin
   colores[f].r:=((memoria_temp[f] and $f) shl 4) or (memoria_temp[f] and $f);
   colores[f].g:=((memoria_temp[f] shr 4) shl 4) or (memoria_temp[f] shr 4);

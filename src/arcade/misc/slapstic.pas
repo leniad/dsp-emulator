@@ -74,6 +74,30 @@ const
 	    addplus2:(mask:UNKNOWN;value:UNKNOWN);
 	    add3:(mask:UNKNOWN;value:UNKNOWN));
 
+  slapstic103:slapstic_data=(
+	    // basic banking */
+	    bankstart:3;                             // starting bank */
+	    bank:($0040,$0050,$0060,$0070);          // bank select values */
+	    // alternate banking */
+	    alt1:(mask:$007f;value:$002d);         // 1st mask/value in sequence */
+	    alt2:(mask:$3fff;value:$3d14);           // 2nd mask/value in sequence */
+	    alt3:(mask:$3ffc;value:$3d24);           // 3rd mask/value in sequence */
+	    alt4:(mask:$3fcf;value:$0040);           // 4th mask/value in sequence */
+	    altshift:0;                              // shift to get bank from 3rd */
+	    // bitwise banking */
+	    bit1:(mask:$3ff0;value:$34c0);           // 1st mask/value in sequence */
+	    bit2c0:(mask:$3ff3;value:$34c0);         // clear bit 0 value */
+	    bit2s0:(mask:$3ff3;value:$34c1);         //   set bit 0 value */
+	    bit2c1:(mask:$3ff3;value:$34c2);         // clear bit 1 value */
+	    bit2s1:(mask:$3ff3;value:$34c3);         //   set bit 1 value */
+	    bit3:(mask:$3ff8;value:$34d0);           // final mask/value in sequence */
+	    // additive banking */
+	    add1:(mask:UNKNOWN;value:UNKNOWN);
+	    add2:(mask:UNKNOWN;value:UNKNOWN);
+	    addplus1:(mask:UNKNOWN;value:UNKNOWN);
+	    addplus2:(mask:UNKNOWN;value:UNKNOWN);
+	    add3:(mask:UNKNOWN;value:UNKNOWN));
+
   slapstic104:slapstic_data=(
 	    // basic banking */
 	    bankstart:3;                             // starting bank */
@@ -91,6 +115,30 @@ const
 	    bit2c1:(mask:$3ff3;value:$3d92);         // clear bit 1 value */
 	    bit2s1:(mask:$3ff3;value:$3d93);         //   set bit 1 value */
 	    bit3:(mask:$3ff8;value:$3da0);           // final mask/value in sequence */
+	    // additive banking */
+	    add1:(mask:UNKNOWN;value:UNKNOWN);
+	    add2:(mask:UNKNOWN;value:UNKNOWN);
+	    addplus1:(mask:UNKNOWN;value:UNKNOWN);
+	    addplus2:(mask:UNKNOWN;value:UNKNOWN);
+	    add3:(mask:UNKNOWN;value:UNKNOWN));
+
+  slapstic105:slapstic_data=(
+	    // basic banking */
+	    bankstart:3;                             // starting bank */
+	    bank:($0010,$0014,$0018,$001c);          // bank select values */
+	    // alternate banking */
+	    alt1:(mask:$007f;value:$003d);         // 1st mask/value in sequence */
+	    alt2:(mask:$3fff;value:$0092);           // 2nd mask/value in sequence */
+	    alt3:(mask:$3ffc;value:$00a4);           // 3rd mask/value in sequence */
+	    alt4:(mask:$3ff3;value:$0010);           // 4th mask/value in sequence */
+	    altshift:0;                              // shift to get bank from 3rd */
+	    // bitwise banking */
+	    bit1:(mask:$3ff0;value:$35b0);           // 1st mask/value in sequence */
+	    bit2c0:(mask:$3ff3;value:$35b0);         // clear bit 0 value */
+	    bit2s0:(mask:$3ff3;value:$35b1);         //   set bit 0 value */
+	    bit2c1:(mask:$3ff3;value:$35b2);         // clear bit 1 value */
+	    bit2s1:(mask:$3ff3;value:$35b3);         //   set bit 1 value */
+	    bit3:(mask:$3ff8;value:$35c0);           // final mask/value in sequence */
 	    // additive banking */
 	    add1:(mask:UNKNOWN;value:UNKNOWN);
 	    add2:(mask:UNKNOWN;value:UNKNOWN);
@@ -150,9 +198,12 @@ constructor slapstic_type.create(num:byte;is_68k:boolean);
 begin
   case num of
     101:self.slapstic:=slapstic101;
+    103:self.slapstic:=slapstic103;
     104:self.slapstic:=slapstic104;
+    105:self.slapstic:=slapstic105;
     106:self.slapstic:=slapstic106;
     107:self.slapstic:=slapstic107;
+    else halt(0);
   end;
   self.access_68k:=is_68k;
   self.reset;
@@ -214,9 +265,9 @@ if (offset=$0000) then begin
    self.state:=ENABLED;
 end else begin// otherwise, use the state machine
     case self.state of
-         // DISABLED state: everything is ignored except a reset */
+      // DISABLED state: everything is ignored except a reset */
 	    DISABLED:;
-	            // ENABLED state: the chip has been activated and is ready for a bankswitch */
+      // ENABLED state: the chip has been activated and is ready for a bankswitch */
 	    ENABLED:begin
 	              if MATCHES_MASK_VALUE(offset,self.slapstic.bit1) then begin
                     // check for request to enter bitwise state */

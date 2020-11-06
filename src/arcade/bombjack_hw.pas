@@ -80,7 +80,7 @@ for f:=0 to 24 do begin
    end;
 end;
 actualiza_trozo_final(16,0,224,256,3);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_bombjack;inline;
@@ -175,8 +175,8 @@ end;
 
 procedure bombjack_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$8000) or ((direccion>$bfff) and (direccion<$e000))) then exit;
 case direccion of
+        0..$7fff,$c000..$dfff:; //ROM
         $8000..$8fff,$9820..$987f:memoria[direccion]:=valor;
         $9000..$97ff:if memoria[direccion]<>valor then begin
                         gfx[0].buffer[direccion and $3ff]:=true;
@@ -216,8 +216,8 @@ end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$2000 then exit;
 case direccion of
+  0..$1fff:; //ROM
   $4000..$43ff:mem_snd[direccion]:=valor;
 end;
 end;
@@ -269,8 +269,8 @@ buffer[0]:=numero_fondo;
 buffer[1]:=sound_latch;
 buffer[2]:=byte(fondo_activo);
 buffer[3]:=byte(nmi_vblank);
-savedata_qsnapshot(@buffer[0],4);
-savedata_com_qsnapshot(@buffer_paleta[0],$100*2);
+savedata_qsnapshot(@buffer,4);
+savedata_com_qsnapshot(@buffer_paleta,$100*2);
 freemem(data);
 close_qsnapshot;
 end;
@@ -304,7 +304,7 @@ numero_fondo:=buffer[0];
 sound_latch:=buffer[1];
 fondo_activo:=buffer[2]<>0;
 nmi_vblank:=buffer[3]<>0;
-loaddata_qsnapshot(@buffer_paleta[0]);
+loaddata_qsnapshot(@buffer_paleta);
 freemem(data);
 close_qsnapshot;
 for f:=0 to $7f do cambiar_color(f*2);
@@ -361,25 +361,25 @@ ay8910_0:=ay8910_chip.create(1500000,AY8910,0.13);
 ay8910_1:=ay8910_chip.create(1500000,AY8910,0.13);
 ay8910_2:=ay8910_chip.create(1500000,AY8910,0.13);
 //cargar roms
-if not(roms_load(@memoria,@bombjack_rom,'bombjack.zip',sizeof(bombjack_rom))) then exit;
+if not(roms_load(@memoria,bombjack_rom)) then exit;
 //cargar roms sonido
-if not(roms_load(@mem_snd,@bombjack_sonido,'bombjack.zip',sizeof(bombjack_sonido))) then exit;
+if not(roms_load(@mem_snd,bombjack_sonido)) then exit;
 //informacion adicional de las tiles
-if not(roms_load(@memoria_fondo,@bombjack_tiles,'bombjack.zip',sizeof(bombjack_tiles))) then exit;
+if not(roms_load(@memoria_fondo,bombjack_tiles)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@bombjack_char,'bombjack.zip',sizeof(bombjack_char))) then exit;
+if not(roms_load(@memoria_temp,bombjack_char)) then exit;
 init_gfx(0,8,8,512);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0*8,512*8*8,512*2*8*8);
 convert_gfx(0,0,@memoria_temp,@pt_x,@pt_y,true,false);
 //convertir chars16
-if not(roms_load(@memoria_temp,@bombjack_char16,'bombjack.zip',sizeof(bombjack_char16))) then exit;
+if not(roms_load(@memoria_temp,bombjack_char16)) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,32*8,0,1024*8*8,1024*2*8*8);
 convert_gfx(1,0,@memoria_temp,@pt_x,@pt_y,true,false);
 //sprites
-if not(roms_load(@memoria_temp,@bombjack_sprites,'bombjack.zip',sizeof(bombjack_sprites))) then exit;
+if not(roms_load(@memoria_temp,bombjack_sprites)) then exit;
 init_gfx(2,16,16,128);
 gfx[2].trans[0]:=true;
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,true,false);

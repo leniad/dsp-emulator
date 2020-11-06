@@ -43,7 +43,7 @@ const
         (mask:$c;name:'Game Time';number:4;dip:((dip_val:$c;dip_name:'Slow'),(dip_val:$8;dip_name:'Normal'),(dip_val:$4;dip_name:'Fast'),(dip_val:$0;dip_name:'Very Fast'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'20k 70k+'),(dip_val:$20;dip_name:'30k 80k+'),(dip_val:$10;dip_name:'20k 80k'),(dip_val:$0;dip_name:'30k 80k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Lives';number:4;dip:((dip_val:$c0;dip_name:'3'),(dip_val:$80;dip_name:'4'),(dip_val:$40;dip_name:'6'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        CPU_SYNC=20;
+        XAIN_DIV=4;
 
 var
  main_rom,sub_rom:array[0..1,0..$3FFF] of byte;
@@ -191,7 +191,7 @@ case xain_pri of
     end;
 end;
 actualiza_trozo_final(0,8,256,240,4);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_xain;inline;
@@ -220,8 +220,9 @@ end;
 
 procedure xain_principal;
 var
-  f,sync:word;
+  f,l:word;
   frame_m,frame_s,frame_snd,frame_mcu:single;
+  h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
@@ -229,33 +230,32 @@ frame_s:=m6809_1.tframes;
 frame_snd:=m6809_2.tframes;
 frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRuning do begin
-  sync:=0;
-  for f:=0 to (271*CPU_SYNC) do begin
-    //main
-    m6809_0.run(frame_m);
-    frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
-    //sub
-    m6809_1.run(frame_s);
-    frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
-    //snd
-    m6809_2.run(frame_snd);
-    frame_snd:=frame_snd+m6809_2.tframes-m6809_2.contador;
-    //mcu
-    m6805_0.run(frame_mcu);
-    frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
+  for f:=0 to 271 do begin
+    for h:=1 to XAIN_DIV do begin
+      //main
+      m6809_0.run(frame_m);
+      frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
+      //sub
+      m6809_1.run(frame_s);
+      frame_s:=frame_s+m6809_1.tframes-m6809_1.contador;
+      //snd
+      m6809_2.run(frame_snd);
+      frame_snd:=frame_snd+m6809_2.tframes-m6809_2.contador;
+      //mcu
+      m6805_0.run(frame_mcu);
+      frame_mcu:=frame_mcu+m6805_0.tframes-m6805_0.contador;
+    end;
     //video
-    if (f mod CPU_SYNC)=0 then begin
-      case xain_scanline[sync] of
-        $8:begin
-              vblank:=0;
+    case xain_scanline[f] of
+        $8:vblank:=0;
+        $f7:vblank:=$20;
+        $f8:begin
+              m6809_0.change_nmi(ASSERT_LINE);
               update_video_xain;
             end;
-        $f7:vblank:=$20;
-        $f8:m6809_0.change_nmi(ASSERT_LINE);
-      end;
-      if ((xain_scanline[sync] and $f)=8) then m6809_0.change_firq(ASSERT_LINE);
-      sync:=sync+1;
     end;
+    if f<>0 then l:=f-1 else l:=271;
+    if (((xain_scanline[l] and $8)=0) and ((xain_scanline[f] and $8)<>0)) then m6809_0.change_firq(ASSERT_LINE);
   end;
   eventos_xain;
   video_sync;
@@ -287,7 +287,6 @@ end;
 procedure mcu_xain_hw_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7ff;
-if direccion>$7f then exit;
 case direccion of
   0:port_a_out:=valor;
 	1:begin
@@ -310,6 +309,7 @@ case direccion of
 	5:ddr_b:=valor;
 	6:ddr_c:=valor;
   $10..$7f:mcu_mem[direccion]:=valor;
+  $80..$7ff:; //ROM
 end;
 end;
 
@@ -325,14 +325,14 @@ begin
                 mcu_ready:=true;
                 xain_getbyte:=from_mcu;
               end;
-        $3a05:xain_getbyte:=$c7+mcu_status_r+vblank; //VBlank
+        $3a05:xain_getbyte:=$c7 or mcu_status_r or vblank; //VBlank
         $3a06:begin
                 mcu_ready:=true;
 	              mcu_accept:=true;
                 m6805_0.irq_request(0,CLEAR_LINE);
                 xain_getbyte:=$ff;
               end;
-        $4000..$7fff:xain_getbyte:=main_rom[banco_main,direccion and $3FFF]
+        $4000..$7fff:xain_getbyte:=main_rom[banco_main,direccion and $3fff]
     end;
 end;
 
@@ -356,7 +356,6 @@ end;
 
 procedure xain_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
         0..$1fff,$3800..$397f:memoria[direccion]:=valor;
         $2000..$27ff:if memoria[direccion]<>valor then begin
@@ -406,6 +405,7 @@ case direccion of
                         buffer_paleta[direccion and $3ff]:=valor;
                         cambiar_color(direccion and $1ff);
                      end;
+        $4000..$ffff:; //ROM
 end;
 end;
 
@@ -420,12 +420,12 @@ end;
 
 procedure xain_sub_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   0..$1fff:memoria[direccion]:=valor;
   $2000:m6809_0.change_irq(ASSERT_LINE);
   $2800:m6809_1.change_irq(CLEAR_LINE);
   $3000:banco_sub:=valor and 1;
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -439,13 +439,13 @@ end;
 
 procedure xain_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$4000 then exit;
 case direccion of
   0..$7ff:mem_snd[direccion]:=valor;
   $2800:ym2203_0.Control(valor);
   $2801:ym2203_0.Write(valor);
   $3000:ym2203_1.Control(valor);
   $3001:ym2203_1.Write(valor);
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -472,8 +472,8 @@ begin
  reset_audio;
  banco_main:=0;
  banco_sub:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
  soundlatch:=0;
  vblank:=0;
  xain_pri:=0;
@@ -519,55 +519,55 @@ screen_init(4,512,512,false,true);
 screen_mod_sprites(4,256,256,$ff,$ff);
 iniciar_video(256,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1500000,272*XAIN_DIV,TCPU_M6809);
 m6809_0.change_ram_calls(xain_getbyte,xain_putbyte);
 //Sub CPU
-m6809_1:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_1:=cpu_m6809.Create(1500000,272*XAIN_DIV,TCPU_M6809);
 m6809_1.change_ram_calls(xain_sub_getbyte,xain_sub_putbyte);
 //Sound CPU
-m6809_2:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
+m6809_2:=cpu_m6809.Create(1500000,272*XAIN_DIV,TCPU_M6809);
 m6809_2.change_ram_calls(xain_snd_getbyte,xain_snd_putbyte);
 m6809_2.init_sound(xain_sound_update);
 //MCU CPU
-m6805_0:=cpu_m6805.create(3000000,272*CPU_SYNC,tipo_m68705);
+m6805_0:=cpu_m6805.create(3000000,272*XAIN_DIV,tipo_m68705);
 m6805_0.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3000000);
 ym2203_0.change_irq_calls(snd_irq);
 ym2203_1:=ym2203_chip.create(3000000);
 //Main roms
-if not(roms_load(@memoria_temp,@xain_rom,'xsleena.zip',sizeof(xain_rom))) then exit;
+if not(roms_load(@memoria_temp,xain_rom)) then exit;
 //Pongo las ROMs en su banco
-copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
+copymemory(@memoria[$8000],@memoria_temp,$8000);
 for f:=0 to 1 do copymemory(@main_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Sub roms
-if not(roms_load(@memoria_temp,@xain_sub,'xsleena.zip',sizeof(xain_sub))) then exit;
+if not(roms_load(@memoria_temp,xain_sub)) then exit;
 //Pongo las ROMs en su banco
-copymemory(@mem_misc[$8000],@memoria_temp[$0],$8000);
+copymemory(@mem_misc[$8000],@memoria_temp,$8000);
 for f:=0 to 1 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //Cargar Sound
-if not(roms_load(@mem_snd,@xain_snd,'xsleena.zip',sizeof(xain_snd))) then exit;
+if not(roms_load(@mem_snd,xain_snd)) then exit;
 //Cargar MCU
-if not(roms_load(@mcu_mem,@xain_mcu,'xsleena.zip',sizeof(xain_mcu))) then exit;
+if not(roms_load(@mcu_mem,xain_mcu)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@xain_char,'xsleena.zip',sizeof(xain_char))) then exit;
+if not(roms_load(@memoria_temp,xain_char)) then exit;
 init_gfx(0,8,8,$400);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,2,4,6);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //convertir sprites
-if not(roms_load(@memoria_temp,@xain_sprites,'xsleena.zip',sizeof(xain_sprites))) then exit;
+if not(roms_load(@memoria_temp,xain_sprites)) then exit;
 init_gfx(1,16,16,$800);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$8000*4*8+0,$8000*4*8+4,0,4);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir tiles1
-if not(roms_load(@memoria_temp,@xain_tiles1,'xsleena.zip',sizeof(xain_tiles1))) then exit;
+if not(roms_load(@memoria_temp,xain_tiles1)) then exit;
 init_gfx(2,16,16,$800);
 gfx[2].trans[0]:=true;
 convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //convertir tiles2
-if not(roms_load(@memoria_temp,@xain_tiles2,'xsleena.zip',sizeof(xain_tiles2))) then exit;
+if not(roms_load(@memoria_temp,xain_tiles2)) then exit;
 init_gfx(3,16,16,$800);
 gfx[3].trans[0]:=true;
 convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
@@ -584,7 +584,7 @@ reset_xain;
 iniciar_xain:=true;
 end;
 
-procedure Cargar_xain;
+procedure cargar_xain;
 begin
 llamadas_maquina.iniciar:=iniciar_xain;
 llamadas_maquina.bucle_general:=xain_principal;

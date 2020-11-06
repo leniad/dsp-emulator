@@ -10,9 +10,9 @@ procedure cargar_spaceinv;
 implementation
 
 const
-        spaceinv_rom:array[0..4] of tipo_roms=(
+        spaceinv_rom:array[0..3] of tipo_roms=(
         (n:'invaders.h';l:$800;p:0;crc:$734f5ad8),(n:'invaders.g';l:$800;p:$800;crc:$6bfaca4a),
-        (n:'invaders.f';l:$800;p:$1000;crc:$0ccead96),(n:'invaders.e';l:$800;p:$1800;crc:$14e538b0),());
+        (n:'invaders.f';l:$800;p:$1000;crc:$0ccead96),(n:'invaders.e';l:$800;p:$1800;crc:$14e538b0));
         num_samples=9;
         spaceinv_samples:array[0..(num_samples-1)] of tipo_nombre_samples=(
         (nombre:'1.wav'),(nombre:'2.wav'),(nombre:'3.wav'),(nombre:'4.wav'),(nombre:'5.wav'),
@@ -232,7 +232,7 @@ z80_0:=cpu_z80.create(1996800,262);
 z80_0.change_io_calls(spaceinv_inbyte,spaceinv_outbyte);
 z80_0.change_ram_calls(spaceinv_getbyte,spaceinv_putbyte);
 //cargar roms
-if not(cargar_roms(@memoria[0],@spaceinv_rom[0],'invaders.zip',0)) then exit;
+if not(roms_load(@memoria,spaceinv_rom)) then exit;
 //Sound
 if (load_samples('invaders.zip',@spaceinv_samples[0],num_samples)) then z80_0.init_sound(spaceinv_sound_update);
 //DIP

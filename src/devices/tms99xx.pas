@@ -8,16 +8,20 @@ uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
 
   type
     irq_type=procedure(int:boolean);
+    read_mem_type=function(direccion:word):byte;
+    write_mem_type=procedure(direccion:word;valor:byte);
     tms99xx_chip=class
-        constructor create(pant:byte;irq_call:irq_type);
+        constructor create(pant:byte;irq_call:irq_type;read_mem:read_mem_type=nil;write_mem:write_mem_type=nil);
         destructor free;
       public
         regs:array[0..$f] of byte;
         fgcolor,bgcolor,modo_video,status_reg,buffer:byte;
         addr,TMS9918A_VRAM_SIZE,color,pattern,nametbl,spriteattribute,spritepattern,colormask,patternmask:word;
         vdp_mode,int,segundo_byte:boolean;
-        memory:array[0..$3FFF] of byte;
+        mem:array[0..$3fff] of byte;
         pant:byte;
+        read_m:read_mem_type;
+        write_m:write_mem_type;
         procedure reset;
         procedure refresh(linea:word);
         function vram_r:byte;
@@ -54,6 +58,9 @@ const
     PIXELS_LEFT_BORDER_VISIBLES_TEXT=19;
     LINEAS_TOP_BORDE=27;
 
+var
+    chips_total:integer=-1;
+
 procedure tms99xx_chip.change_irq(irq_call:irq_type);
 begin
   self.IRQ_Handler:=irq_call;
@@ -66,7 +73,7 @@ var
 begin
   temp:=data;
   copymemory(temp,@self.regs[0],$10);inc(temp,$10);
-  copymemory(temp,@self.memory[0],$4000);inc(temp,$4000);
+  copymemory(temp,@self.mem[0],$4000);inc(temp,$4000);
   buffer[0]:=self.modo_video;
   buffer[1]:=self.status_reg;
   buffer[2]:=self.buffer;
@@ -97,7 +104,7 @@ var
 begin
   temp:=data;
   copymemory(@self.regs[0],temp,$10);inc(temp,$10);
-  copymemory(@self.memory[0],temp,$4000);inc(temp,$4000);
+  copymemory(@self.mem[0],temp,$4000);inc(temp,$4000);
   self.modo_video:=temp^;inc(temp);
   self.status_reg:=temp^;inc(temp);
   self.buffer:=temp^;inc(temp);
@@ -139,17 +146,28 @@ begin
   self.colormask:=$3fff;
   self.patternmask:=$3fff;
   self.int:=false;
-  self.TMS9918A_VRAM_SIZE:=$3FFF;
-  fillchar(self.memory[0],$4000,0);
+  self.TMS9918A_VRAM_SIZE:=$3fff;
+  fillchar(self.mem[0],$4000,0);
   self.vdp_mode:=false;
   paleta[0]:=0;
 end;
 
 destructor tms99xx_chip.free;
 begin
+chips_total:=chips_total-1;
 end;
 
-constructor tms99xx_chip.create(pant:byte;irq_call:irq_type);
+function read_mem_0(direccion:word):byte;
+begin
+  read_mem_0:=tms_0.mem[direccion and tms_0.TMS9918A_VRAM_SIZE];
+end;
+
+procedure write_mem_0(direccion:word;valor:byte);
+begin
+  tms_0.mem[direccion and tms_0.TMS9918A_VRAM_SIZE]:=valor;
+end;
+
+constructor tms99xx_chip.create(pant:byte;irq_call:irq_type;read_mem:read_mem_type=nil;write_mem:write_mem_type=nil);
 const
     tms992X_palete:array[0..15, 0..2] of byte =(
      (0,0,0),(0,0,0),(33, 200, 66),(94, 220, 120),
@@ -160,6 +178,7 @@ var
   f:byte;
   colores:tpaleta;
 begin
+chips_total:=chips_total+1;
 //poner la paleta
 for f:=0 to 15 do begin
   colores[f].r:=tms992X_palete[f,0];
@@ -167,6 +186,17 @@ for f:=0 to 15 do begin
   colores[f].b:=tms992X_palete[f,2];
 end;
 set_pal(colores,16);
+if @read_mem<>nil then begin
+    self.read_m:=read_mem;
+    self.write_m:=write_mem;
+end else begin
+  case chips_total of
+    0:begin
+        self.read_m:=read_mem_0;
+        self.write_m:=write_mem_0;
+    end;
+  end;
+end;
 self.pant:=pant;
 self.IRQ_Handler:=irq_call;
 self.reset;
@@ -179,7 +209,7 @@ begin
 b:=((self.regs[1] and $20)<>0) and ((self.status_reg and $80)<>0);
 if b<>self.int then begin
     self.int:=b;
-    if @self.IRQ_Handler<>nil then self.IRQ_Handler(self.INT);
+    if @self.IRQ_Handler<>nil then self.IRQ_Handler(b);
 end;
 end;
 
@@ -200,7 +230,7 @@ begin
   num_sprites:=0;
   fifth_encountered:=false;
   for sprattr:=0 to 31 do begin
-      spr_y:=self.memory[self.spriteattribute+(sprattr*4)];
+      spr_y:=self.read_m(self.spriteattribute+(sprattr*4));
       self.FifthSprite:=sprattr;
       // Stop processing sprites */
       if (spr_y=208) then break;
@@ -209,9 +239,9 @@ begin
       spr_y:=spr_y+1;
       // is sprite enabled on this line? */
       if ((spr_y<=linea) and (linea<(spr_y+sprite_height))) then begin
-         spr_x:=self.memory[self.spriteattribute+(sprattr*4)+1];
-         sprcode:=self.memory[self.spriteattribute+(sprattr*4)+2];
-         sprcol:=self.memory[self.spriteattribute+(sprattr*4)+3];
+         spr_x:=self.read_m(self.spriteattribute+(sprattr*4)+1);
+         sprcode:=self.read_m(self.spriteattribute+(sprattr*4)+2);
+         sprcol:=self.read_m(self.spriteattribute+(sprattr*4)+3);
          if (sprite_size=16) then pataddr:=self.spritepattern+(sprcode and $fc)*8
             else pataddr:=self.spritepattern+sprcode*8;
          num_sprites:=num_sprites+1;
@@ -220,9 +250,9 @@ begin
 	          fifth_encountered:=true;
 	          break;
          end;
-	  if (sprite_mag<>0) then pataddr:=pataddr+(((linea-spr_y) and $1F) shr 1)
-	     else pataddr:=pataddr+((linea-spr_y) and $0F );
-	  pattern:=self.memory[pataddr];
+	  if (sprite_mag<>0) then pataddr:=pataddr+(((linea-spr_y) and $1f) shr 1)
+	     else pataddr:=pataddr+((linea-spr_y) and $f);
+	  pattern:=self.read_m(pataddr);
 	  if (sprcol and $80)<>0 then spr_x:=spr_x-32;
 	  sprcol:=sprcol and $0f;
 	  for s:=0 to ((sprite_size-1) div 8) do begin
@@ -250,7 +280,7 @@ begin
           end; //del for z
           pattern:=pattern shl 1;
         end; //del for de la i
-	      pattern:=self.memory[pataddr+16];
+	      pattern:=self.read_m(pataddr+16);
         if sprite_mag<>0 then spr_x:=spr_x+16
           else spr_x:=spr_x+8;
     end; //del for de la s
@@ -259,7 +289,7 @@ begin
 	// Update sprite overflow bits */
   if (self.status_reg and $40)=0 then begin
     self.status_reg:=(self.status_reg and $e0) or self.FifthSprite;
-				if (fifth_encountered and ((self.status_reg  and $80)=0)) then self.status_reg:=self.status_reg or $40;
+    if (fifth_encountered and ((self.status_reg  and $80)=0)) then self.status_reg:=self.status_reg or $40;
   end;
 end;
 
@@ -274,13 +304,13 @@ begin //256x192 --> Caracteres de 8x8
  inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES);
  name_base:=self.NameTbl+((linea div 8)*32);
  for x:=0 to 31 do begin
-     charcode:=self.memory[name_base];
+     charcode:=self.read_m(name_base);
      name_base:=name_base+1;
      patternptr:=self.pattern+(charcode shl 3)+(linea and 7);
-     bc:=self.memory[self.color+(charcode shr 3)];
+     bc:=self.read_m(self.color+(charcode shr 3));
      fc:=bc shr 4;
      bc:=bc and $f;
-     K:=self.memory[patternptr];
+     K:=self.read_m(patternptr);
      if (k and $80)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
      if (k and $40)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
      if (k and $20)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
@@ -306,9 +336,9 @@ begin //240x192 --> Caracteres de 6x8
  bc:=self.bgcolor;
  name_base:=self.Nametbl+((linea div 8)*40);
  for x:=0 to 39 do begin
-     s:=self.pattern+(self.memory[name_base] shl 3)+(linea and 7);
+     s:=self.pattern+(self.read_m(name_base) shl 3)+(linea and 7);
      name_base:=name_base+1;
-     k:=self.memory[s];
+     k:=self.read_m(s);
      if (k and $80)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
      if (k and $40)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
      if (k and $20)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
@@ -332,10 +362,10 @@ begin //240x192 --> Caracteres de 6x8
  bc:=self.bgcolor;
  name_base:=self.Nametbl+((linea div 8)*40);
  for x:=0 to 39 do begin
-     charcode:=(self.memory[name_base]+(linea shr 6)*256) and self.patternmask;
+     charcode:=(self.read_m(name_base)+(linea shr 6)*256) and self.patternmask;
      name_base:=name_base+1;
      patternptr:=self.pattern+(charcode shl 3)+(linea and 7);
-     pattern:=self.memory[patternptr];
+     pattern:=self.read_m(patternptr);
      if (pattern and $80)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
      if (pattern and $40)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
      if (pattern and $20)<>0 then ptemp^:=paleta[FC] else ptemp^:=paleta[BC];inc(ptemp);
@@ -357,14 +387,14 @@ begin //256x192 --> Caracteres de 8x8
  inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES);
  name_base:=self.NameTbl+((linea div 8)*32);
  for x:=0 to 31 do begin
-     charcode:=self.memory[name_base]+(linea shr 6)*256;
+     charcode:=self.read_m(name_base)+(linea shr 6)*256;
      name_base:=name_base+1;
      colour:=charcode and self.colormask;
      pattern:=charcode and self.patternmask;
      patternptr:=self.pattern+(colour*8)+(linea and 7);
      colourptr:=self.color+(pattern*8)+(linea and 7);
-     pattern:=self.memory[patternptr];
-     bc:=self.memory[colourptr];
+     pattern:=self.read_m(patternptr);
+     bc:=self.read_m(colourptr);
      fc:=bc shr 4;
      bc:=bc and $F;
      if (pattern and $80)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
@@ -390,11 +420,11 @@ begin //256x192 --> Caracteres de 4x4 en dos bloques
  inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES);
  name_base:=self.nametbl+((linea div 8)*32);
  for x:=0 to 31 do begin
-     charcode:=self.memory[name_base];
+     charcode:=self.read_m(name_base);
      name_base:=name_base+1;
      colorptr:=self.pattern+(charcode*8)+((linea shr 2) and 7);
-     FC:=self.memory[colorptr] shr 4;
-     BG:=self.memory[colorptr] and $f;
+     FC:=self.read_m(colorptr) shr 4;
+     BG:=self.read_m(colorptr) and $f;
      ptemp^:=paleta[fc];inc(ptemp); //(x+0)
      ptemp^:=paleta[fc];inc(ptemp); //(x+1)
      ptemp^:=paleta[fc];inc(ptemp); //(x+2)
@@ -439,11 +469,11 @@ begin //256x192 --> Caracteres de 4x4 en dos bloques
  inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES);
  name_base:=self.nametbl+((linea div 8)*32);
  for x:=0 to 31 do begin
-     charcode:=self.memory[name_base];
+     charcode:=self.read_m(name_base);
      name_base:=name_base+1;
      colorptr:=self.pattern+(((charcode+((linea shr 2) and 7)+((linea shr 6) shl 8)) and self.patternmask) shl 3);
-     FC:=self.memory[colorptr] shr 4;
-     BG:=self.memory[colorptr] and $f;
+     FC:=self.read_m(colorptr) shr 4;
+     BG:=self.read_m(colorptr) and $f;
      ptemp^:=paleta[fc];inc(ptemp); //(x+0)
      ptemp^:=paleta[fc];inc(ptemp); //(x+1)
      ptemp^:=paleta[fc];inc(ptemp); //(x+2)
@@ -482,7 +512,7 @@ begin
   //ESPERO UNA LINEA FISICA
   //Pantalla apagada, solo pinto el color de fondo
   if (self.regs[1] and $40)=0 then begin
-    single_line(0,linea,self.bgcolor,PIXELS_VISIBLES_TOTAL,self.pant);
+    single_line(0,linea,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
     if linea=192 then begin
                 self.status_reg:=self.status_reg or $80;
                 self.exec_interrupt;
@@ -504,17 +534,20 @@ begin
                if ((self.regs[1] and $50)=$40) then draw_sprites(linea)
                 else self.FifthSprite:=$1f;
             end;
+     192:begin
+            single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+            self.status_reg:=self.status_reg or $80;
+         end;
      193:begin //Borde inferior (1) y activar las IRQs
-              single_line(0,linea+LINEAS_TOP_BORDE,self.bgcolor,PIXELS_VISIBLES_TOTAL,self.pant);
-              self.status_reg:=self.status_reg or $80;
+              single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
               self.exec_interrupt;
          end;
      //Borde inferior (23)
-     192,194..215:single_line(0,linea+LINEAS_TOP_BORDE,self.bgcolor,PIXELS_VISIBLES_TOTAL,self.pant);
+     194..215:single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
      //Lineas no dibujadas sincronismos (3+3+13)
      216..234:;
      //Borde superior (27)
-     235..261:single_line(0,linea-235,self.bgcolor,PIXELS_VISIBLES_TOTAL,self.pant);
+     235..261:single_line(0,linea-235,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
   end;
 end;
 
@@ -568,9 +601,9 @@ begin
      5:tms.spriteattribute:=(val*128) and tms.TMS9918A_VRAM_SIZE;
      6:tms.spritepattern:=(val*2048) and tms.TMS9918A_VRAM_SIZE;
      7: begin
-       tms.fgcolor:=Val shr 4;
-       if tms.bgcolor<>(Val and $0F) then begin
-          tms.bgcolor:=(Val and $0F);
+       tms.fgcolor:=val shr 4;
+       if tms.bgcolor<>(val and $f) then begin
+          tms.bgcolor:=(val and $f);
           if tms.bgcolor=0 then paleta[0]:=0
             else paleta[0]:=paleta[tms.bgcolor];
           //El color de fondo es transparente. La pantalla se pinta
@@ -602,7 +635,7 @@ Byte #1		1(CR)	?	?	?	?	R2	R1	R0
 CR --> Si es 1 cambiar registro
 	VX --> Valor (1 byte)
 	RX --> Registro
-CR --> 0 cambiar direccion L/E (ver mas abajo la descripcion)
+  CR --> 0 cambiar direccion L/E (ver mas abajo la descripcion)
 }
 if not(self.segundo_byte) then begin
   self.addr:=((self.addr and $ff00) or valor) and self.tms9918A_VRAM_SIZE;
@@ -610,10 +643,10 @@ if not(self.segundo_byte) then begin
 end else begin
   self.segundo_byte:=false;
   self.addr:=((self.addr and $ff) or (valor shl 8)) and self.tms9918A_VRAM_SIZE;
-  case (valor and $C0) of
+  case (valor and $c0) of
     $80:change_reg(self,valor and $7,self.addr and $ff);
     $00:begin
-          self.buffer:=self.memory[self.addr];
+          self.buffer:=self.read_m(self.addr);
           self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;
           self.segundo_byte:=false;
           self.espera_read:=true;
@@ -633,7 +666,7 @@ function tms99xx_chip.vram_r:byte;  //ReadDataPort
 begin
   //Si el bit R/W esta a 1 (escritura) que hago???
   vram_r:=self.buffer;
-  self.buffer:=self.memory[self.addr];
+  self.buffer:=self.read_m(self.addr);
   self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;
   self.segundo_byte:=false;
 end;
@@ -641,14 +674,14 @@ end;
 procedure tms99xx_chip.vram_w(valor:byte);
 begin
 if not(self.espera_read) then begin
-   self.memory[self.addr]:=valor;
+   self.write_m(self.addr,valor);
    self.buffer:=valor;
    self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;
    self.segundo_byte:=false;
 end else begin
-   self.buffer:=self.memory[self.addr];
+   self.buffer:=self.read_m(self.addr);
    self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;
-   self.memory[self.addr]:=valor;
+   self.write_m(self.addr,valor);
 end;
 end;
 

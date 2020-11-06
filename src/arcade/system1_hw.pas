@@ -184,7 +184,7 @@ if (system1_videomode and $10)<>0 then begin
   exit;
 end;
 //Actualizar sprites
-fillword(@sprites_final_screen[0],$10000,0);
+fillword(@sprites_final_screen,$10000,0);
 if memoria[$d000]<>$ff then draw_sprites;
 //Pintarlo todo
 for y:=0 to 255 do begin
@@ -271,8 +271,8 @@ end;
 
 procedure system1_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$9fff:mem_snd[(direccion and $7ff)+$8000]:=valor;
   $a000..$bfff:sn_76496_0.Write(valor);
   $c000..$dfff:sn_76496_1.Write(valor);

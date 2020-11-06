@@ -10,24 +10,24 @@ procedure cargar_pang;
 implementation
 const
         //Pang
-        pang_rom:array[0..2] of tipo_roms=(
-        (n:'pang6.bin';l:$8000;p:0;crc:$68be52cd),(n:'pang7.bin';l:$20000;p:$10000;crc:$4a2e70f6),());
+        pang_rom:array[0..1] of tipo_roms=(
+        (n:'pang6.bin';l:$8000;p:0;crc:$68be52cd),(n:'pang7.bin';l:$20000;p:$10000;crc:$4a2e70f6));
         pang_oki:tipo_roms=(n:'bb1.bin';l:$20000;p:0;crc:$c52e5b8e);
-        pang_sprites:array[0..2] of tipo_roms=(
-        (n:'bb10.bin';l:$20000;p:0;crc:$fdba4f6e),(n:'bb9.bin';l:$20000;p:$20000;crc:$39f47a63),());
-        pang_char:array[0..4] of tipo_roms=(
+        pang_sprites:array[0..1] of tipo_roms=(
+        (n:'bb10.bin';l:$20000;p:0;crc:$fdba4f6e),(n:'bb9.bin';l:$20000;p:$20000;crc:$39f47a63));
+        pang_char:array[0..3] of tipo_roms=(
         (n:'pang_09.bin';l:$20000;p:0;crc:$3a5883f5),(n:'bb3.bin';l:$20000;p:$20000;crc:$79a8ed08),
-        (n:'pang_11.bin';l:$20000;p:$80000;crc:$166a16ae),(n:'bb5.bin';l:$20000;p:$a0000;crc:$2fb3db6c),());
+        (n:'pang_11.bin';l:$20000;p:$80000;crc:$166a16ae),(n:'bb5.bin';l:$20000;p:$a0000;crc:$2fb3db6c));
         //Super Pang
-        spang_rom:array[0..3] of tipo_roms=(
+        spang_rom:array[0..2] of tipo_roms=(
         (n:'spe_06.rom';l:$8000;p:0;crc:$1af106fb),(n:'spe_07.rom';l:$20000;p:$10000;crc:$208b5f54),
-        (n:'spe_08.rom';l:$20000;p:$30000;crc:$2bc03ade),());
+        (n:'spe_08.rom';l:$20000;p:$30000;crc:$2bc03ade));
         spang_oki:tipo_roms=(n:'spe_01.rom';l:$20000;p:0;crc:$2d19c133);
-        spang_sprites:array[0..2] of tipo_roms=(
-        (n:'spj10_2k.bin';l:$20000;p:0;crc:$eedd0ade),(n:'spj09_1k.bin';l:$20000;p:$20000;crc:$04b41b75),());
-        spang_char:array[0..4] of tipo_roms=(
+        spang_sprites:array[0..1] of tipo_roms=(
+        (n:'spj10_2k.bin';l:$20000;p:0;crc:$eedd0ade),(n:'spj09_1k.bin';l:$20000;p:$20000;crc:$04b41b75));
+        spang_char:array[0..3] of tipo_roms=(
         (n:'spe_02.rom';l:$20000;p:0;crc:$63c9dfd2),(n:'03.f2';l:$20000;p:$20000;crc:$3ae28bc1),
-        (n:'spe_04.rom';l:$20000;p:$80000;crc:$9d7b225b),(n:'05.g2';l:$20000;p:$a0000;crc:$4a060884),());
+        (n:'spe_04.rom';l:$20000;p:$80000;crc:$9d7b225b),(n:'05.g2';l:$20000;p:$a0000;crc:$4a060884));
         spang_eeprom:tipo_roms=(n:'eeprom-spang.bin';l:$80;p:0;crc:$deae1291);
 
 var
@@ -73,22 +73,22 @@ procedure eventos_pang;
 begin
 if event.arcade then begin
   //IN1
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   //IN2
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   //IN0
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
 end;
@@ -153,8 +153,8 @@ end;
 
 procedure pang_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+  0..$bfff:;
   $c000..$c7ff:if buffer_paleta[(direccion and $7ff)+pal_bank]<>valor then begin
                   buffer_paleta[(direccion and $7ff)+pal_bank]:=valor;
                   cambiar_color((direccion and $7fe)+pal_bank);
@@ -212,9 +212,9 @@ begin
  reset_audio;
  oki_6295_0.reset;
  eeprom_0.reset;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  rom_nbank:=0;
  video_bank:=0;
  pal_bank:=0;
@@ -228,8 +228,6 @@ var
   memoria_temp:array[0..$4ffff] of byte;
   ptemp,mem_temp2,mem_temp3,mem_temp4:pbyte;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3);
-    pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
 			32*8+0, 32*8+1, 32*8+2, 32*8+3, 33*8+0, 33*8+1, 33*8+2, 33*8+3);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -240,7 +238,7 @@ begin
   init_gfx(0,8,8,$8000);
   gfx[0].trans[15]:=true;
   gfx_set_desc_data(4,0,16*8,$8000*16*8+4,$8000*16*8+0,4,0);
-  convert_gfx(0,0,ptemp,@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,ptemp,@ps_x[0],@ps_y[0],false,false);
 end;
 
 procedure convert_sprites;
@@ -273,9 +271,9 @@ getmem(mem_temp2,$50000);
 getmem(mem_temp3,$50000);
 case main_vars.tipo_maquina of
   119:begin  //Pang
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@pang_oki,'pang.zip',1)) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,pang_oki)) then exit;
         //Cargar roms, desencriptar y poner en su sitio las ROMS
-        if not(cargar_roms(@memoria_temp[0],@pang_rom[0],'pang.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,pang_rom)) then exit;
         kabuki_mitchell_decode(@memoria_temp[0],mem_temp2,mem_temp3,8,$01234567,$76543210,$6548,$24);
         copymemory(@memoria[0],mem_temp2,$8000);
         copymemory(@mem_dat[0],mem_temp3,$8000);
@@ -283,16 +281,16 @@ case main_vars.tipo_maquina of
         for f:=0 to 7 do copymemory(@mem_rom_dat[f,0],@mem_temp3[$10000+(f*$4000)],$4000);
         //convertir chars
         fillchar(ptemp^,$100000,$ff);
-        if not(cargar_roms(ptemp,@pang_char[0],'pang.zip',0)) then exit;
+        if not(roms_load(ptemp,pang_char)) then exit;
         convert_chars;
         //convertir sprites
-        if not(cargar_roms(ptemp,@pang_sprites[0],'pang.zip',0)) then exit;
+        if not(roms_load(ptemp,pang_sprites)) then exit;
         convert_sprites;
       end;
   183:begin  //Super Pang
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@spang_oki,'spang.zip',1)) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,spang_oki)) then exit;
         //Cargar roms, desencriptar y poner en su sitio las ROMS
-        if not(cargar_roms(@memoria_temp[0],@spang_rom[0],'spang.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spang_rom)) then exit;
         kabuki_mitchell_decode(@memoria_temp[0],mem_temp2,mem_temp3,$10,$45670123,$45670123,$5852,$43);
         copymemory(@memoria[0],mem_temp2,$8000);
         copymemory(@mem_dat[0],mem_temp3,$8000);
@@ -300,15 +298,15 @@ case main_vars.tipo_maquina of
         for f:=0 to $f do copymemory(@mem_rom_dat[f,0],@mem_temp3[$10000+(f*$4000)],$4000);
         //convertir chars
         fillchar(ptemp^,$100000,$ff);
-        if not(cargar_roms(ptemp,@spang_char[0],'spang.zip',0)) then exit;
+        if not(roms_load(ptemp,spang_char)) then exit;
         convert_chars;
         //convertir sprites
-        if not(cargar_roms(ptemp,@spang_sprites[0],'spang.zip',0)) then exit;
+        if not(roms_load(ptemp,spang_sprites)) then exit;
         convert_sprites;
         //load eeprom si no lo esta ya...
         mem_temp4:=eeprom_0.get_rom_addr;
         inc(mem_temp4);
-        if mem_temp4^<>0 then if not(cargar_roms(eeprom_0.get_rom_addr,@spang_eeprom,'spang.zip',1)) then exit;
+        if mem_temp4^<>0 then if not(roms_load(eeprom_0.get_rom_addr,spang_eeprom)) then exit;
       end;
 end;
 freemem(mem_temp3);

@@ -131,6 +131,7 @@ end else begin  //fichero normal
     getmem(spec_rom.datos_rom,file_size);
     if not(read_file(nombre,spec_rom.datos_rom,file_size)) then exit;
     spec_rom.hay_rom:=true;
+    spec_rom.rom_size:=file_size;
     nombre:=extractfilename(nombre);
     exit;
   end else begin
@@ -215,10 +216,10 @@ if extension='TZX' then begin
   getmem(tzx_header,sizeof(ttzx_header));
   copymemory(tzx_header,temp,10);
   inc(temp,10);
+  g:=10;
   if tzx_header.minor<10 then load_spec.label3.Caption:='TZX Spectrum Tape v'+inttostr(tzx_header.major)+'.0'+inttostr(tzx_header.minor)
     else load_spec.label3.Caption:='TZX Spectrum Tape v'+inttostr(tzx_header.major)+'.'+inttostr(tzx_header.minor);
   freemem(tzx_header);
-  g:=0;
   salida:=false;
   while (not(hay_imagen) and (g<file_size)) do begin
     f:=temp^;
@@ -482,7 +483,6 @@ case rom_crc of
           //Si el modelo no es Sepctrum 16k o 48k, hay que cambiarlo...
           if ((main_vars.tipo_maquina<>0) and (main_vars.tipo_maquina<>5)) then spectrum_change_model(0);
           copymemory(@memoria[0],spec_rom.datos_rom,$4000);
-          interface2.hay_if2:=false;
    end;
 end;
 end;
@@ -495,6 +495,7 @@ if ((datos=nil) and not(spec_rom.hay_rom)) then exit;
 rom_cambiada_48:=false;
 cinta:=false;
 resultado:=false;
+interface2.hay_if2:=false;
 if spec_rom.hay_rom then begin
   spectrum_load_test_rom;
   llamadas_maquina.reset;

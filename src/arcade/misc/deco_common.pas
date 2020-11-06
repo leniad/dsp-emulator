@@ -131,8 +131,8 @@ end;
 
 procedure deco16_double_snd_putbyte(direccion:dword;valor:byte);
 begin
-if direccion<$10000 then exit;
 case direccion of
+  0..$ffff:; //ROM
   $100000:ym2203_0.Control(valor);
   $100001:ym2203_0.Write(valor);
   $110000:ym2151_0.reg(valor);
@@ -161,7 +161,7 @@ begin
   ym2151_0:=ym2151_chip.create(sound_clock div 9);
   ym2151_0.change_port_func(sound_bank);
   ym2151_0.change_irq_func(deco16_snd_irq);
-  oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH,2);
+  oki_6295_0:=snd_okim6295.Create(sound_clock div 32,OKIM6295_PIN7_HIGH,1);
 end;
 
 procedure deco16_snd_simple_reset;
@@ -185,8 +185,8 @@ end;
 
 procedure deco16_simple_snd_putbyte(direccion:dword;valor:byte);
 begin
-if direccion<$10000 then exit;
 case direccion of
+  0..$ffff:; //ROM
   $110000:ym2151_0.reg(valor);
   $110001:ym2151_0.write(valor);
   $120000..$120001:oki_6295_0.write(valor);

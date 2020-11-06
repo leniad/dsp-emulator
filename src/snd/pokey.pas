@@ -200,6 +200,7 @@ type
         procedure potgo;
 
   end;
+  procedure pokey_update_internal(index:byte);
   procedure pokey0_update_internal;
   procedure pokey1_update_internal;
   procedure pokey2_update_internal;
@@ -441,11 +442,7 @@ begin
 	//self.clock_period = attotime::from_hz(clock());
   self.number:=num;
   self.buf_pos:=0;
-  case num of
-    0:init_timer(sound_status.cpu_num,sound_status.cpu_clock/clock,pokey0_update_internal,true);
-    1:init_timer(sound_status.cpu_num,sound_status.cpu_clock/clock,pokey1_update_internal,true);
-    2:init_timer(sound_status.cpu_num,sound_status.cpu_clock/clock,pokey2_update_internal,true);
-  end;
+  timers.init(sound_status.cpu_num,sound_status.cpu_clock/clock,nil,pokey_update_internal,true,num);
 	// Setup channels */
 	for i:=0 to (POKEY_CHANNELS-1) do begin
 		//self.channel[i].parent = this;
@@ -824,6 +821,18 @@ begin
   self.output_:=sum;
 end;
 
+procedure pokey_update_internal(index:byte);
+var
+  chip:pokey_chip;
+begin
+  case index of
+    0:chip:=pokey_0;
+    1:chip:=pokey_1;
+    2:chip:=pokey_2;
+  end;
+  chip.step_one_clock;
+  chip.update_internal;
+end;
 
 procedure pokey0_update_internal;
 begin

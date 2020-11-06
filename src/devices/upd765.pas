@@ -3,6 +3,7 @@
 interface
 uses sysutils,{$IFDEF WINDOWS}windows,{$ENDIF}dialogs;
 
+procedure WriteFDCMotor(value:byte);
 procedure WriteFDCData(value:byte);
 function ReadFDCStatus:byte;
 function ReadFDCData:byte;
@@ -12,7 +13,7 @@ implementation
 uses principal,disk_file_format;
 
 var
-  FloppyMotor:byte;
+  FloppyMotor:boolean;
   FDCCurrDrv:byte;
   ExecCmdPhase:boolean;
   ResultPhase:boolean;
@@ -32,6 +33,11 @@ var
   SeekTrack:boolean;
   bytes_in_cmd: array[0..31] of byte = (
   1,1,9,3,2,9,9,2,1,9,2,1,9,6,1,3,1,9,1,1,1,1,1,1,1,9,1,1,1,1,9,1);
+
+procedure WriteFDCMotor(value:byte);
+begin
+  FloppyMotor:=value<>0;
+end;
 
 procedure GetRes7;
 begin
@@ -70,7 +76,7 @@ while (index_count<>2) do begin
 		if (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector=FDCCommand[4]) then begin
 			if (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].track=FDCCommand[2]) then begin
 				if (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].head=FDCCommand[3]) then begin
-					//if (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size=FDCCommand[5]) then begin
+					if (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size=FDCCommand[5]) then begin
 						if (FDCCommand[4]=FDCCommand[6]) then st1:=st1 or $80;// set end of cylinder */
             st1:=st1 or (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status1 and $20);
             st2:=st2 or (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].status1 and $60);
@@ -81,7 +87,7 @@ while (index_count<>2) do begin
             st1:=st1 or $80;
             exit;
           end;
-				//end;
+				end;
 			end else begin
 				st1:=st1 or $4; //NEC765_ST1_NO_DATA
 				st2:=st2 or $10; //NEC765_ST2_WRONG_CYLINDER
@@ -141,12 +147,10 @@ if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actu
   if (dsk[FDCCurrDrv].cont_multi>=(dsk[FDCCurrDrv].max_multi-1)) then dsk[FDCCurrDrv].cont_multi:=0
      else inc(dsk[FDCCurrDrv].cont_multi);
   FDCDataPointer:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].posicion_data+(dsk[FDCCurrDrv].cont_multi*(1 shl (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size+7)));
-  FDCDataLength:=1 shl (FDCCommand[5]+7);
 end else begin
   FDCDataPointer:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].posicion_data;
-  FDCDataLength:=1 shl (FDCCommand[5]+7);
-  //FDCDataLength:=dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].data_length;
 end;
+FDCDataLength:=1 shl (FDCCommand[5]+7);
 if FDCCommand[5]=0 then begin
   FDCDataLength:=FDCCommand[8];
   if FDCDataLength>$80 then FDCDataLength:=$80;
@@ -259,63 +263,61 @@ case (FDCCommand[0] and $1f) of
           end else read_sector;
         end;
      7:begin // Recalibrate
-      st0:=$20;
-      st1:=0;
-      st2:=0;
-      fdc_get_drive;
-      StatusRegister:=$80;
-      SeekTrack:=true;
-      if not(dsk[FDCCurrDrv].abierto) then st0:=st0 or $48
-        else seek_track(0);
-      ExecCmdPhase:=FALSE;
-      end;
+          st0:=$20;
+          st1:=0;
+          st2:=0;
+          fdc_get_drive;
+          StatusRegister:=$80;
+          SeekTrack:=true;
+          if not(dsk[FDCCurrDrv].abierto) then st0:=st0 or $48
+            else seek_track(0);
+          ExecCmdPhase:=FALSE;
+       end;
      8:begin // Sense Interrupt
-      FDCResPointer:=0;
-      st0:=st0 and $f8;
-      if SeekTrack then begin
-        st0:=st0 or $20;
-        FDCResCounter:=2;
-        SeekTrack:=FALSE;
-        FDCResult[1]:=dsk[FDCCurrDrv].track_actual;
-        FDCResult[0]:=st0;
-      end else begin
-        st0:=$80;
-        FDCResCounter:=1;
-        FDCResult[0]:=st0;
-      end;
-      StatusRegister:=$d0;
-      ExecCmdPhase:=FALSE;
-      ResultPhase:=TRUE;
-      end;
+          FDCResPointer:=0;
+          st0:=st0 and $f8;
+          if SeekTrack then begin
+            st0:=st0 or $20;
+            FDCResCounter:=2;
+            SeekTrack:=false;
+            FDCResult[1]:=dsk[FDCCurrDrv].track_actual;
+            FDCResult[0]:=st0;
+          end else begin
+            st0:=$80;
+            FDCResCounter:=1;
+            FDCResult[0]:=st0;
+          end;
+          StatusRegister:=$d0;
+          ExecCmdPhase:=FALSE;
+          ResultPhase:=TRUE;
+        end;
      10:begin // read ID of next sector
-      st0:=0;
-      st1:=0;
-      st2:=0;
-      fdc_get_drive;
-      if not(dsk[FDCCurrDrv].abierto) then begin
-        st0:=$48;
-        getres7;
-      end else if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector=0 then begin
-                  //Esto es para que 'Tomahawk' de +3 funcione, por ejemplo
-                  st1:=1;
-                  getres7;
-                  FDCResult[3]:=dsk[FDCCurrDrv].track_actual;
-                  FDCResult[4]:=0;
-                  FDCResult[5]:=0;
-                  FDCResult[6]:=0;
-               end else begin
-                          //Esto es fundamental, por ejemplo para 'Tintin on the Moon'
-                          if (dsk[FDCCurrDrv].sector_actual+1)>dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector then
-                            dsk[FDCCurrDrv].sector_actual:=0;
-                          getres7;
-                          inc(dsk[FDCCurrDrv].sector_actual);
-                        end;
-      end;
+          st0:=0;
+          st1:=0;
+          st2:=0;
+          fdc_get_drive;
+          if not(dsk[FDCCurrDrv].abierto) then begin
+            st0:=$48;
+            getres7;
+          end else if dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector=0 then begin
+                      //Esto es para que 'Tomahawk' de +3 funcione, por ejemplo
+                      st1:=1;
+                      getres7;
+                      FDCResult[3]:=dsk[FDCCurrDrv].track_actual;
+                      FDCResult[4]:=0;
+                      FDCResult[5]:=0;
+                      FDCResult[6]:=0;
+                   end else begin
+                      //Esto es fundamental, por ejemplo para 'Tintin on the Moon'
+                      if (dsk[FDCCurrDrv].sector_actual+1)>dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].number_sector then dsk[FDCCurrDrv].sector_actual:=0;
+                        getres7;
+                        inc(dsk[FDCCurrDrv].sector_actual);
+                   end;
+        end;
      15:begin // SEEK
           fdc_get_drive;
           StatusRegister:=$80;
           SeekTrack:=TRUE;
-          //st2:=st2 and $fd;
           st0:=$20;
           st1:=0;
           st2:=0;
@@ -405,22 +407,24 @@ begin
             exit;
           end;
           if FDCCounter>=(1 shl (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size+7)) then begin
-            //Para la emulacion de speedlock en Amstrad y de algunos de titus...
-            st0:=$40;
-            st1:=$4;
-            st2:=0;
-            GetRes7;
-            exit;
+              //Para la emulacion de speedlock en Amstrad y de algunos de titus...
+              st0:=$40;
+              st1:=$4;
+              st2:=0;
+              GetRes7;
+              exit;
           end else begin
-            inc(ret,fdcdatapointer);
-            FDCExecReadCommand:=ret^;
+              inc(ret,fdcdatapointer);
+              FDCExecReadCommand:=ret^;
           end;
           inc(FDCDataPointer);
           inc(FDCCounter);
           if (FDCCounter=FDCDataLength) then begin
             if ((FDCCommand[4]=FDCCommand[6]) or read_data_stop) then begin
-              st0:=st0 or $40;
-              GetRes7;
+                st0:=st0 or $40;
+                //No puedo almacenar mas de 6304bytes... Para el 'defender of the crown' amstrad
+                if (dsk[FDCCurrDrv].Tracks[dsk[FDCCurrDrv].cara_actual,dsk[FDCCurrDrv].track_actual].sector[dsk[FDCCurrDrv].sector_actual].sector_size>5) then st1:=$20;
+                GetRes7;
             end else begin
               inc(FDCCommand[4]);
               read_sector;
@@ -450,7 +454,7 @@ end;
 
 procedure ResetFDC;
 begin
-    FloppyMotor:=0;
+    FloppyMotor:=false;
     FDCPointer:=0;
     ExecCmdPhase:=false;
     ResultPhase:=false;
@@ -522,10 +526,10 @@ if contador_status>$10 then begin
   if seektrack then begin
     contador_read_status:=contador_read_status+1;
     if contador_read_status>$20 then begin
-      StatusRegister:=$80;
+      StatusRegister:=$c0;
       if contador_read_status>$40 then contador_read_status:=0;
     end else StatusRegister:=$50;
-    SeekTrack:=FALSE;
+    SeekTrack:=false;
   end else begin
     StatusRegister:=$f0;
     st0:=(st0 and $3f) or $40;

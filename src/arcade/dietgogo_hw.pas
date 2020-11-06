@@ -10,13 +10,13 @@ procedure cargar_dietgo;
 
 implementation
 const
-        dietgo_rom:array[0..2] of tipo_roms=(
-        (n:'jy00-2.h4';l:$40000;p:1;crc:$014dcf62),(n:'jy01-2.h5';l:$40000;p:$0;crc:$793ebd83),());
+        dietgo_rom:array[0..1] of tipo_roms=(
+        (n:'jy00-2.h4';l:$40000;p:1;crc:$014dcf62),(n:'jy01-2.h5';l:$40000;p:$0;crc:$793ebd83));
         dietgo_sound:tipo_roms=(n:'jy02.m14';l:$10000;p:$0;crc:$4e3492a5);
         dietgo_char:tipo_roms=(n:'may00';l:$100000;p:0;crc:$234d1f8d);
         dietgo_oki:tipo_roms=(n:'may03';l:$80000;p:0;crc:$b6e42bae);
-        dietgo_sprites:array[0..2] of tipo_roms=(
-        (n:'may01';l:$100000;p:0;crc:$2da57d04),(n:'may02';l:$100000;p:$1;crc:$3a66a713),());
+        dietgo_sprites:array[0..1] of tipo_roms=(
+        (n:'may01';l:$100000;p:0;crc:$2da57d04),(n:'may02';l:$100000;p:$1;crc:$3a66a713));
         dietgo_dip_a:array [0..7] of def_dip=(
         (mask:$0007;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'3 Coin - 1 Credit'),(dip_val:$1;dip_name:'2 Coin - 1 Credit'),(dip_val:$7;dip_name:'1 Coin - 1 Credit'),(dip_val:$6;dip_name:'1 Coin - 2 Credit'),(dip_val:$5;dip_name:'1 Coin - 3 Credit'),(dip_val:$4;dip_name:'1 Coin - 4 Credit'),(dip_val:$3;dip_name:'1 Coin - 5 Credit'),(dip_val:$2;dip_name:'1 Coin - 6 Credit'),(),(),(),(),(),(),(),())),
         (mask:$0038;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'3 Coin - 1 Credit'),(dip_val:$8;dip_name:'2 Coin - 1 Credit'),(dip_val:$38;dip_name:'1 Coin - 1 Credit'),(dip_val:$30;dip_name:'1 Coin - 2 Credit'),(dip_val:$28;dip_name:'1 Coin - 3 Credit'),(dip_val:$20;dip_name:'1 Coin - 4 Credit'),(dip_val:$18;dip_name:'1 Coin - 5 Credit'),(dip_val:$10;dip_name:'1 Coin - 6 Credit'),(),(),(),(),(),(),(),())),
@@ -147,8 +147,8 @@ end;
 
 procedure dietgo_putword(direccion:dword;valor:word);
 begin
-if direccion<$80000 then exit;
 case direccion of
+  0..$7ffff:; //ROM
   $200000..$20000f:deco16ic_0.control_w((direccion and $f) shr 1,valor);
   $210000..$210fff:begin
                       deco16ic_0.pf1.data[(direccion and $fff) shr 1]:=valor;
@@ -197,8 +197,6 @@ end;
 
 function iniciar_dietgo:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
-  pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
   pt_x:array[0..15] of dword=(256,257,258,259,260,261,262,263,
   0, 1, 2, 3, 4, 5, 6, 7);
   pt_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -225,34 +223,34 @@ deco16_snd_simple_init(32220000 div 12,32220000,sound_bank_rom);
 getmem(memoria_temp,$200000);
 getmem(memoria_temp_rom,$80000);
 //cargar roms
-if not(cargar_roms16w(memoria_temp_rom,@dietgo_rom[0],'dietgo.zip',0)) then exit;
-deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode[0],@rom_data[0],$e9ba,$01,$19,$80000);
+if not(roms_load16w(memoria_temp_rom,dietgo_rom)) then exit;
+deco102_decrypt_cpu(memoria_temp_rom,@rom_opcode,@rom_data,$e9ba,$01,$19,$80000);
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@dietgo_sound,'dietgo.zip',1)) then exit;
+if not(roms_load(@mem_snd,dietgo_sound)) then exit;
 //OKI rom
-if not(cargar_roms(memoria_temp,@dietgo_oki,'dietgo.zip',1)) then exit;
+if not(roms_load(memoria_temp,dietgo_oki)) then exit;
 ptemp:=memoria_temp;
 copymemory(@oki_rom[0],ptemp,$40000);
 inc(ptemp,$40000);
 copymemory(@oki_rom[1],ptemp,$40000);
 //convertir chars
-if not(cargar_roms(memoria_temp,@dietgo_char,'dietgo.zip',1)) then exit;
+if not(roms_load(memoria_temp,dietgo_char)) then exit;
 deco56_decrypt_gfx(memoria_temp,$100000);
 init_gfx(0,8,8,$8000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,16*8,$8000*16*8+8,$8000*16*8+0,8,0);
-convert_gfx(0,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,memoria_temp,@pt_x[8],@pt_y,false,false);
 //Tiles
 init_gfx(1,16,16,$2000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*16,$2000*32*16+8,$2000*32*16+0,8,0);
-convert_gfx(1,0,memoria_temp,@pt_x[0],@pt_y[0],false,false);
+convert_gfx(1,0,memoria_temp,@pt_x,@pt_y,false,false);
 //Sprites
-if not(cargar_roms16b(memoria_temp,@dietgo_sprites[0],'dietgo.zip',0)) then exit;
+if not(roms_load16b(memoria_temp,dietgo_sprites)) then exit;
 init_gfx(2,16,16,$4000);
 gfx[2].trans[0]:=true;
 gfx_set_desc_data(4,0,32*32,24,8,16,0);
-convert_gfx(2,0,memoria_temp,@ps_x[0],@ps_y[0],false,false);
+convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
 //Proteccion deco104
 main_deco104:=cpu_deco_104.create;
 main_deco104.SET_INTERFACE_SCRAMBLE_INTERLEAVE;

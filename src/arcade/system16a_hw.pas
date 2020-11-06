@@ -1,94 +1,95 @@
 unit system16a_hw;
 
 interface
+//{$DEFINE MDAC=1}
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     ppi8255,sound_engine,ym_2151,fd1089,dialogs;//,mcs48,dac
+     ppi8255,sound_engine,ym_2151,fd1089,dialogs{$IFDEF MDAC},mcs48,dac{$ENDIF};
 
 procedure cargar_system16a;
 
 implementation
 const
         //Shinobi
-        shinobi_rom:array[0..4] of tipo_roms=(
+        shinobi_rom:array[0..3] of tipo_roms=(
         (n:'epr-12010.43';l:$10000;p:0;crc:$7df7f4a2),(n:'epr-12008.26';l:$10000;p:$1;crc:$f5ae64cd),
-        (n:'epr-12011.42';l:$10000;p:$20000;crc:$9d46e707),(n:'epr-12009.25';l:$10000;p:$20001;crc:$7961d07e),());
+        (n:'epr-12011.42';l:$10000;p:$20000;crc:$9d46e707),(n:'epr-12009.25';l:$10000;p:$20001;crc:$7961d07e));
         shinobi_sound:tipo_roms=(n:'epr-11267.12';l:$8000;p:0;crc:$dd50b745);
         shinobi_n7751:tipo_roms=(n:'7751.bin';l:$400;p:0;crc:$6a9534fc);
         shinobi_n7751_data:tipo_roms=(n:'epr-11268.1';l:$8000;p:0;crc:$6d7966da);
-        shinobi_tiles:array[0..3] of tipo_roms=(
+        shinobi_tiles:array[0..2] of tipo_roms=(
         (n:'epr-11264.95';l:$10000;p:0;crc:$46627e7d),(n:'epr-11265.94';l:$10000;p:$10000;crc:$87d0f321),
-        (n:'epr-11266.93';l:$10000;p:$20000;crc:$efb4af87),());
-        shinobi_sprites:array[0..8] of tipo_roms=(
+        (n:'epr-11266.93';l:$10000;p:$20000;crc:$efb4af87));
+        shinobi_sprites:array[0..7] of tipo_roms=(
         (n:'epr-11290.10';l:$10000;p:1;crc:$611f413a),(n:'epr-11294.11';l:$10000;p:$0;crc:$5eb00fc1),
         (n:'epr-11291.17';l:$10000;p:$20001;crc:$3c0797c0),(n:'epr-11295.18';l:$10000;p:$20000;crc:$25307ef8),
         (n:'epr-11292.23';l:$10000;p:$40001;crc:$c29ac34e),(n:'epr-11296.24';l:$10000;p:$40000;crc:$04a437f8),
-        (n:'epr-11293.29';l:$10000;p:$60001;crc:$41f41063),(n:'epr-11297.30';l:$10000;p:$60000;crc:$b6e1fd72),());
+        (n:'epr-11293.29';l:$10000;p:$60001;crc:$41f41063),(n:'epr-11297.30';l:$10000;p:$60000;crc:$b6e1fd72));
         //Alex Kidd
-        alexkid_rom:array[0..4] of tipo_roms=(
+        alexkid_rom:array[0..3] of tipo_roms=(
         (n:'epr-10447.43';l:$10000;p:0;crc:$29e87f71),(n:'epr-10445.26';l:$10000;p:$1;crc:$25ce5b6f),
-        (n:'epr-10448.42';l:$10000;p:$20000;crc:$05baedb5),(n:'epr-10446.25';l:$10000;p:$20001;crc:$cd61d23c),());
+        (n:'epr-10448.42';l:$10000;p:$20000;crc:$05baedb5),(n:'epr-10446.25';l:$10000;p:$20001;crc:$cd61d23c));
         alexkid_sound:tipo_roms=(n:'epr-10434.12';l:$8000;p:0;crc:$77141cce);
-        alexkid_tiles:array[0..3] of tipo_roms=(
+        alexkid_tiles:array[0..2] of tipo_roms=(
         (n:'epr-10431.95';l:$8000;p:0;crc:$a7962c39),(n:'epr-10432.94';l:$8000;p:$8000;crc:$db8cd24e),
-        (n:'epr-10433.93';l:$8000;p:$10000;crc:$e163c8c2),());
-        alexkid_sprites:array[0..8] of tipo_roms=(
+        (n:'epr-10433.93';l:$8000;p:$10000;crc:$e163c8c2));
+        alexkid_sprites:array[0..7] of tipo_roms=(
         (n:'epr-10437.10';l:$8000;p:1;crc:$522f7618),(n:'epr-10441.11';l:$8000;p:$0;crc:$74e3a35c),
         (n:'epr-10438.17';l:$8000;p:$10001;crc:$738a6362),(n:'epr-10442.18';l:$8000;p:$10000;crc:$86cb9c14),
         (n:'epr-10439.23';l:$8000;p:$20001;crc:$b391aca7),(n:'epr-10443.24';l:$8000;p:$20000;crc:$95d32635),
-        (n:'epr-10440.29';l:$8000;p:$30001;crc:$23939508),(n:'epr-10444.30';l:$8000;p:$30000;crc:$82115823),());
+        (n:'epr-10440.29';l:$8000;p:$30001;crc:$23939508),(n:'epr-10444.30';l:$8000;p:$30000;crc:$82115823));
         //Fantasy Zone
-        fantzone_rom:array[0..6] of tipo_roms=(
+        fantzone_rom:array[0..5] of tipo_roms=(
         (n:'epr-7385a.43';l:$8000;p:0;crc:$4091af42),(n:'epr-7382a.26';l:$8000;p:$1;crc:$77d67bfd),
         (n:'epr-7386a.42';l:$8000;p:$10000;crc:$b0a67cd0),(n:'epr-7383a.25';l:$8000;p:$10001;crc:$5f79b2a9),
-        (n:'epr-7387.41';l:$8000;p:$20000;crc:$0acd335d),(n:'epr-7384.24';l:$8000;p:$20001;crc:$fd909341),());
+        (n:'epr-7387.41';l:$8000;p:$20000;crc:$0acd335d),(n:'epr-7384.24';l:$8000;p:$20001;crc:$fd909341));
         fantzone_sound:tipo_roms=(n:'epr-7535a.12';l:$8000;p:0;crc:$bc1374fa);
-        fantzone_tiles:array[0..3] of tipo_roms=(
+        fantzone_tiles:array[0..2] of tipo_roms=(
         (n:'epr-7388.95';l:$8000;p:0;crc:$8eb02f6b),(n:'epr-7389.94';l:$8000;p:$8000;crc:$2f4f71b8),
-        (n:'epr-7390.93';l:$8000;p:$10000;crc:$d90609c6),());
-        fantzone_sprites:array[0..6] of tipo_roms=(
+        (n:'epr-7390.93';l:$8000;p:$10000;crc:$d90609c6));
+        fantzone_sprites:array[0..5] of tipo_roms=(
         (n:'epr-7392.10';l:$8000;p:1;crc:$5bb7c8b6),(n:'epr-7396.11';l:$8000;p:$0;crc:$74ae4b57),
         (n:'epr-7393.17';l:$8000;p:$10001;crc:$14fc7e82),(n:'epr-7397.18';l:$8000;p:$10000;crc:$e05a1e25),
-        (n:'epr-7394.23';l:$8000;p:$20001;crc:$531ca13f),(n:'epr-7398.24';l:$8000;p:$20000;crc:$68807b49),());
+        (n:'epr-7394.23';l:$8000;p:$20001;crc:$531ca13f),(n:'epr-7398.24';l:$8000;p:$20000;crc:$68807b49));
         //Alien Syndrome
-        alien_rom:array[0..6] of tipo_roms=(
+        alien_rom:array[0..5] of tipo_roms=(
         (n:'epr-10804.43';l:$8000;p:0;crc:$23f78b83),(n:'epr-10802.26';l:$8000;p:$1;crc:$996768bd),
         (n:'epr-10805.42';l:$8000;p:$10000;crc:$53d7fe50),(n:'epr-10803.25';l:$8000;p:$10001;crc:$0536dd33),
-        (n:'epr-10732.41';l:$8000;p:$20000;crc:$c5712bfc),(n:'epr-10729.24';l:$8000;p:$20001;crc:$3e520e30),());
+        (n:'epr-10732.41';l:$8000;p:$20000;crc:$c5712bfc),(n:'epr-10729.24';l:$8000;p:$20001;crc:$3e520e30));
         alien_key:tipo_roms=(n:'317-0037.key';l:$2000;p:0;crc:$49e882e5);
         alien_sound:tipo_roms=(n:'epr-10705.12';l:$8000;p:0;crc:$777b749e);
-        alien_tiles:array[0..3] of tipo_roms=(
+        alien_tiles:array[0..2] of tipo_roms=(
         (n:'epr-10739.95';l:$10000;p:0;crc:$a29ec207),(n:'epr-10740.94';l:$10000;p:$10000;crc:$47f93015),
-        (n:'epr-10741.93';l:$10000;p:$20000;crc:$4970739c),());
-        alien_sprites:array[0..8] of tipo_roms=(
+        (n:'epr-10741.93';l:$10000;p:$20000;crc:$4970739c));
+        alien_sprites:array[0..7] of tipo_roms=(
         (n:'epr-10709.10';l:$10000;p:1;crc:$addf0a90),(n:'epr-10713.11';l:$10000;p:$0;crc:$ececde3a),
         (n:'epr-10710.17';l:$10000;p:$20001;crc:$992369eb),(n:'epr-10714.18';l:$10000;p:$20000;crc:$91bf42fb),
         (n:'epr-10711.23';l:$10000;p:$40001;crc:$29166ef6),(n:'epr-10715.24';l:$10000;p:$40000;crc:$a7c57384),
-        (n:'epr-10712.29';l:$10000;p:$60001;crc:$876ad019),(n:'epr-10716.30';l:$10000;p:$60000;crc:$40ba1d48),());
+        (n:'epr-10712.29';l:$10000;p:$60001;crc:$876ad019),(n:'epr-10716.30';l:$10000;p:$60000;crc:$40ba1d48));
         //WB3
-        wb3_rom:array[0..4] of tipo_roms=(
+        wb3_rom:array[0..3] of tipo_roms=(
         (n:'epr-12120.43';l:$10000;p:0;crc:$cbd8c99b),(n:'epr-12118.26';l:$10000;p:$1;crc:$e9a3280c),
-        (n:'epr-12121.42';l:$10000;p:$20000;crc:$5e44c0a9),(n:'epr-12119.25';l:$10000;p:$20001;crc:$01ed3ef9),());
+        (n:'epr-12121.42';l:$10000;p:$20000;crc:$5e44c0a9),(n:'epr-12119.25';l:$10000;p:$20001;crc:$01ed3ef9));
         wb3_key:tipo_roms=(n:'317-0086.key';l:$2000;p:0;crc:$ec480b80);
         wb3_sound:tipo_roms=(n:'epr-12089.12';l:$8000;p:0;crc:$8321eb0b);
-        wb3_tiles:array[0..3] of tipo_roms=(
+        wb3_tiles:array[0..2] of tipo_roms=(
         (n:'epr-12086.95';l:$10000;p:0;crc:$45b949df),(n:'epr-12087.94';l:$10000;p:$10000;crc:$6f0396b7),
-        (n:'epr-12088.83';l:$10000;p:$20000;crc:$ba8c0749),());
-        wb3_sprites:array[0..8] of tipo_roms=(
+        (n:'epr-12088.83';l:$10000;p:$20000;crc:$ba8c0749));
+        wb3_sprites:array[0..7] of tipo_roms=(
         (n:'epr-12090.10';l:$10000;p:1;crc:$aeeecfca),(n:'epr-12094.11';l:$10000;p:$0;crc:$615e4927),
         (n:'epr-12091.17';l:$10000;p:$20001;crc:$8409a243),(n:'epr-12095.18';l:$10000;p:$20000;crc:$e774ec2c),
         (n:'epr-12092.23';l:$10000;p:$40001;crc:$5c2f0d90),(n:'epr-12096.24';l:$10000;p:$40000;crc:$0cd59d6e),
-        (n:'epr-12093.29';l:$10000;p:$60001;crc:$4891e7bb),(n:'epr-12097.30';l:$10000;p:$60000;crc:$e645902c),());
+        (n:'epr-12093.29';l:$10000;p:$60001;crc:$4891e7bb),(n:'epr-12097.30';l:$10000;p:$60000;crc:$e645902c));
         //Tetris
-        tetris_rom:array[0..2] of tipo_roms=(
-        (n:'xepr12201.rom';l:$8000;p:1;crc:$343c0670),(n:'xepr12200.rom';l:$8000;p:$0;crc:$0b694740),());
+        tetris_rom:array[0..1] of tipo_roms=(
+        (n:'xepr12201.rom';l:$8000;p:1;crc:$343c0670),(n:'xepr12200.rom';l:$8000;p:$0;crc:$0b694740));
         tetris_key:tipo_roms=(n:'317-0093.key';l:$2000;p:0;crc:$e0064442);
         tetris_sound:tipo_roms=(n:'epr-12205.rom';l:$8000;p:0;crc:$6695dc99);
-        tetris_tiles:array[0..3] of tipo_roms=(
+        tetris_tiles:array[0..2] of tipo_roms=(
         (n:'epr-12202.rom';l:$10000;p:0;crc:$2f7da741),(n:'epr-12203.rom';l:$10000;p:$10000;crc:$a6e58ec5),
-        (n:'epr-12204.rom';l:$10000;p:$20000;crc:$0ae98e23),());
-        tetris_sprites:array[0..2] of tipo_roms=(
-        (n:'epr-12169.b1';l:$8000;p:1;crc:$dacc6165),(n:'epr-12170.b5';l:$8000;p:$0;crc:$87354e42),());
+        (n:'epr-12204.rom';l:$10000;p:$20000;crc:$0ae98e23));
+        tetris_sprites:array[0..1] of tipo_roms=(
+        (n:'epr-12169.b1';l:$8000;p:1;crc:$dacc6165),(n:'epr-12170.b5';l:$8000;p:$0;crc:$87354e42));
         //Dip
         system16a_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$7;dip_name:'4C/1C'),(dip_val:$8;dip_name:'3C/1C'),(dip_val:$9;dip_name:'2C/1C'),(dip_val:$5;dip_name:'2C/1C 5C/3C 6C/4C'),(dip_val:$4;dip_name:'2C/1C 4C/3C'),(dip_val:$f;dip_name:'1C/1C'),(dip_val:$3;dip_name:'1C/1C 5C/6C'),(dip_val:$2;dip_name:'1C/1C 4C/5C'),(dip_val:$1;dip_name:'1C/1C 2C/3C'),(dip_val:$6;dip_name:'2C/3C'),(dip_val:$e;dip_name:'1C/2C'),(dip_val:$d;dip_name:'1C/3C'),(dip_val:$c;dip_name:'1C/4C'),(dip_val:$b;dip_name:'1C/5C'),(dip_val:$a;dip_name:'1C/6C'),(dip_val:$0;dip_name:'Free Play (if Coin B too) or 1C/1C'))),
@@ -325,45 +326,45 @@ for f:=$0 to $6ff do begin
   end;
 end;
 //Lo pongo todo con prioridades, falta scrollrow y scrollcol!!
-scroll_x_y(4,7,scroll_x1,scroll_y1);
+scroll_x_y(4,7,scroll_x1,scroll_y1); //0
 draw_sprites(0);
-scroll_x_y(3,7,scroll_x1,scroll_y1);
-scroll_x_y(6,7,scroll_x2,scroll_y2);
+scroll_x_y(3,7,scroll_x1,scroll_y1); //1
 draw_sprites(1);
-scroll_x_y(5,7,scroll_x2,scroll_y2);
+scroll_x_y(6,7,scroll_x2,scroll_y2); //2
+scroll_x_y(5,7,scroll_x2,scroll_y2);  //2
 draw_sprites(2);
-actualiza_trozo(192,0,320,224,2,0,0,320,224,7);
+actualiza_trozo(192,0,320,224,2,0,0,320,224,7); //4
 draw_sprites(3);
-actualiza_trozo(192,0,320,224,1,0,0,320,224,7);
+actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //8
 //Y lo pinto a la pantalla principal
 actualiza_trozo_final(0,0,320,224,7);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_system16a;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $eF) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $bF) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $ff7f) else marcade.in1:=(marcade.in1 or $80);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
   //P2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $eF) else marcade.in2:=(marcade.in2 or $10);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
-  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $bF) else marcade.in2:=(marcade.in2 or $40);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $ffdf) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $ffef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $ff7f) else marcade.in2:=(marcade.in2 or $80);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $ffbf) else marcade.in2:=(marcade.in2 or $40);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $fffb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or $1);
   //Service
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
 end;
 end;
 
@@ -375,7 +376,9 @@ begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-//frame_s_sub:=main_mcs48.tframes;
+{$IFDEF MDAC}
+frame_s_sub:=mcs48_0.tframes;
+{$ENDIF}
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
      //main
@@ -384,9 +387,11 @@ while EmuStatus=EsRuning do begin
      //sound
      z80_0.run(frame_s);
      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+     {$IFDEF MDAC}
      //sound sub cpu
-     //main_mcs48.run(frame_s_sub);
-     //frame_s_sub:=frame_s_sub+main_mcs48.tframes-main_mcs48.contador;
+     mcs48_0.run(frame_s_sub);
+     frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
+     {$ENDIF}
      if f=223 then begin
        m68000_0.irq[4]:=HOLD_LINE;
        update_video_system16a;
@@ -422,7 +427,7 @@ function system16a_getword_fd1089(direccion:dword):word;
 begin
 case direccion of
     0..$3fffff:if m68000_0.opcode then system16a_getword_fd1089:=rom[(direccion and $3ffff) shr 1]
-      else system16a_getword_fd1089:=rom_data[(direccion and $3ffff) shr 1];
+                  else system16a_getword_fd1089:=rom_data[(direccion and $3ffff) shr 1];
     $400000..$7fffff:case (direccion and $7ffff) of
                         $00000..$0ffff:system16a_getword_fd1089:=tile_ram[(direccion and $7fff) shr 1];
                         $10000..$1ffff:system16a_getword_fd1089:=char_ram[(direccion and $fff) shr 1];
@@ -563,12 +568,9 @@ end;
 end;
 
 procedure system16a_putword(direccion:dword;valor:word);
-var
-  dir2:dword;
 begin
-if direccion<$400000 then exit;
-dir2:=direccion shr 1;
 case direccion of
+    0..$3ffff:;
     $400000..$7fffff:case (direccion and $7ffff) of
                         $00000..$0ffff:begin
                                         tile_ram[(direccion and $7fff) shr 1]:=valor;
@@ -675,39 +677,47 @@ end;
 procedure system16a_sound_act;
 begin
   ym2151_0.update;
-  //dac_0.update;
+  {$IFDEF MDAC}
+  dac_0.update;
+  {$ENDIF}
 end;
 
 procedure ym2151_snd_port(valor:byte);
 begin
-{if (valor and $1)<>0 then main_mcs48.change_reset(CLEAR_LINE)
-  else main_mcs48.change_reset(ASSERT_LINE);
-if (valor and $2)<>0 then main_mcs48.change_irq(CLEAR_LINE)
-  else main_mcs48.change_irq(ASSERT_LINE);}
+{$IFDEF MDAC}
+if (valor and $1)<>0 then mcs48_0.change_reset(CLEAR_LINE)
+  else mcs48_0.change_reset(ASSERT_LINE);
+if (valor and $2)<>0 then mcs48_0.change_irq(CLEAR_LINE)
+  else mcs48_0.change_irq(ASSERT_LINE);
+{$ENDIF}
 end;
 
 //Sub sound cpu
 function system16a_sound_inport(puerto:word):byte;
 begin
-{case puerto of
+{$IFDEF MDAC}
+case puerto of
   MCS48_PORT_BUS:system16a_sound_inport:=n7751_data[n7751_rom_address];
   MCS48_PORT_T1:system16a_sound_inport:=0;
-  MCS48_PORT_P2:system16a_sound_inport:=$80 or ((n7751_command and $07) shl 4) or (main_mcs48.i8243.p2_r and $f)
-end;}
+  MCS48_PORT_P2:system16a_sound_inport:=$80 or ((n7751_command and $07) shl 4) or (mcs48_0.i8243.p2_r and $f)
+end;
+{$ENDIF}
 end;
 
 procedure system16a_sound_outport(puerto:word;valor:byte);
 begin
-{case puerto of
+{$IFDEF MDAC}
+case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);
-  MCS48_PORT_P2:main_mcs48.i8243.p2_w(valor and $f);
-  MCS48_PORT_PROG:main_mcs48.i8243.prog_w(valor);
-end;}
+  MCS48_PORT_P2:mcs48_0.i8243.p2_w(valor and $f);
+  MCS48_PORT_PROG:mcs48_0.i8243.prog_w(valor);
+end;
+{$ENDIF}
 end;
 
-procedure n7751_rom_offset_w(valor:byte;puerto:word);
+procedure n7751_rom_offset_w(puerto:word;valor:byte);
 var
-  mask,newdata:integer;
+  mask,newdata:word;
 begin
 	// P4 - address lines 0-3
 	// P5 - address lines 4-7
@@ -727,11 +737,13 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  pia8255_0.reset;
- //if main_vars.tipo_maquina=114 then main_mcs48.reset;
+ {$IFDEF MDAC}
+ if main_vars.tipo_maquina=114 then mcs48_0.reset;
+ {$ENDIF}
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
+ marcade.in2:=$ffff;
  for f:=0 to $f do sprite_bank[f]:=f;
  screen_enabled:=true;
  fillchar(tile_buffer[0],$800*8,1);
@@ -792,30 +804,32 @@ pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
 //Timers
 ym2151_0:=ym2151_chip.create(4000000);
-//ym2151_0.change_port_func(ym2151_snd_port);
+ym2151_0.change_port_func(ym2151_snd_port);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@system16a_dip_a;
 case main_vars.tipo_maquina of
   114:begin  //Shinobi
+        {$IFDEF MDAC}
         //Creo el segundo chip de sonido
-        {main_mcs48:=cpu_mcs48.create(6000000,262,N7751);
-        main_mcs48.change_io_calls(system16a_sound_inport,system16a_sound_outport);
-        main_mcs48.i8243.change_calls(nil,n7751_rom_offset_w);
-        if not(cargar_roms(main_mcs48.get_rom_addr,@shinobi_n7751,'shinobi.zip')) then exit;
-        if not(cargar_roms(@n7751_data[0],@shinobi_n7751_data,'shinobi.zip')) then exit;
-        dac_0:=dac_chip.Create(1);}
+        mcs48_0:=cpu_mcs48.create(6000000,262,N7751);
+        mcs48_0.change_io_calls(system16a_sound_inport,system16a_sound_outport);
+        mcs48_0.i8243.change_calls(nil,n7751_rom_offset_w);
+        if not(roms_load(mcs48_0.get_rom_addr,shinobi_n7751)) then exit;
+        if not(roms_load(@n7751_data,shinobi_n7751_data)) then exit;
+        dac_0:=dac_chip.Create(1);
+        {$ENDIF}
         //Main CPU
         m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@shinobi_rom[0],'shinobi.zip',0)) then exit;
+        if not(roms_load16w(@rom,shinobi_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@shinobi_sound,'shinobi.zip')) then exit;
+        if not(roms_load(@mem_snd,shinobi_sound)) then exit;
         //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@shinobi_tiles[0],'shinobi.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,shinobi_tiles)) then exit;
         convert_chars(2);
         //Cargar ROM de los sprites y recolocarlos
-        if not(cargar_roms16b(@memoria_temp[0],@shinobi_sprites[0],'shinobi.zip',0)) then exit;
+        if not(roms_load16b(@memoria_temp,shinobi_sprites)) then exit;
         for f:=0 to 7 do begin
           copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
           copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
@@ -833,14 +847,14 @@ case main_vars.tipo_maquina of
   115:begin //Alex Kid
         m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@alexkid_rom[0],'alexkidd.zip',0)) then exit;
+        if not(roms_load16w(@rom,alexkid_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@alexkid_sound,'alexkidd.zip')) then exit;
+        if not(roms_load(@mem_snd,alexkid_sound)) then exit;
         //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@alexkid_tiles[0],'alexkidd.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,alexkid_tiles)) then exit;
         convert_chars(1);
         //Cargar ROM de los sprites
-        if not(cargar_roms16b(@sprite_rom[0],@alexkid_sprites[0],'alexkidd.zip',0)) then exit;
+        if not(roms_load16b(@sprite_rom,alexkid_sprites)) then exit;
         s16_info.s_banks:=4;
         marcade.dswb:=$fc;
         marcade.dswb_val:=@alexkidd_dip_b;
@@ -848,14 +862,14 @@ case main_vars.tipo_maquina of
   116:begin //Fantasy Zone
         m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@fantzone_rom[0],'fantzone.zip',0)) then exit;
+        if not(roms_load16w(@rom,fantzone_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@fantzone_sound,'fantzone.zip')) then exit;
+        if not(roms_load(@mem_snd,fantzone_sound)) then exit;
         //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@fantzone_tiles[0],'fantzone.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,fantzone_tiles)) then exit;
         convert_chars(1);
         //Cargar ROM de los sprites
-        if not(cargar_roms16b(@sprite_rom[0],@fantzone_sprites[0],'fantzone.zip',0)) then exit;
+        if not(roms_load16b(@sprite_rom,fantzone_sprites)) then exit;
         s16_info.s_banks:=4;
         marcade.dswb:=$fc;
         marcade.dswb_val:=@fantzone_dip_b;
@@ -863,17 +877,17 @@ case main_vars.tipo_maquina of
   186:begin //Alien Syndrome
         m68000_0.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
         //cargar roms
-        if not(cargar_roms16w(@memoria_temp[0],@alien_rom[0],'aliensyn.zip',0)) then exit;
+        if not(roms_load16w(@memoria_temp,alien_rom)) then exit;
         //Decode fd1089
-        if not(cargar_roms(@fd1089_key[0],@alien_key,'aliensyn.zip')) then exit;
-        fd1089_decrypt($40000,@memoria_temp[0],@rom[0],@rom_data[0],@fd1089_key[0],fd_typeB);
+        if not(roms_load(@fd1089_key,alien_key)) then exit;
+        fd1089_decrypt($40000,@memoria_temp,@rom,@rom_data,@fd1089_key,fd_typeB);
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@alien_sound,'aliensyn.zip')) then exit;
+        if not(roms_load(@mem_snd,alien_sound)) then exit;
         //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@alien_tiles[0],'aliensyn.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,alien_tiles)) then exit;
         convert_chars(2);
         //Cargar ROM de los sprites y recolocarlos
-        if not(cargar_roms16b(@memoria_temp[0],@alien_sprites[0],'aliensyn.zip',0)) then exit;
+        if not(roms_load16b(@memoria_temp,alien_sprites)) then exit;
         for f:=0 to 7 do begin
           copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
           copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
@@ -891,17 +905,17 @@ case main_vars.tipo_maquina of
   187:begin //WB3
         m68000_0.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
         //cargar roms
-        if not(cargar_roms16w(@memoria_temp[0],@wb3_rom[0],'wb3.zip',0)) then exit;
+        if not(roms_load16w(@memoria_temp,wb3_rom)) then exit;
         //Decode fd1089
-        if not(cargar_roms(@fd1089_key[0],@wb3_key,'wb3.zip',1)) then exit;
-        fd1089_decrypt($40000,@memoria_temp[0],@rom[0],@rom_data[0],@fd1089_key[0],fd_typeA);
+        if not(roms_load(@fd1089_key,wb3_key)) then exit;
+        fd1089_decrypt($40000,@memoria_temp,@rom,@rom_data,@fd1089_key,fd_typeA);
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@wb3_sound,'wb3.zip')) then exit;
+        if not(roms_load(@mem_snd,wb3_sound)) then exit;
         //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@wb3_tiles[0],'wb3.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,wb3_tiles)) then exit;
         convert_chars(2);
         //Cargar ROM de los sprites y recolocarlos
-        if not(cargar_roms16b(@memoria_temp[0],@wb3_sprites[0],'wb3.zip',0)) then exit;
+        if not(roms_load16b(@memoria_temp,wb3_sprites)) then exit;
         for f:=0 to 7 do begin
           copymemory(@sprite_rom[0],@memoria_temp[0],$10000);
           copymemory(@sprite_rom[$40000],@memoria_temp[$10000],$10000);
@@ -919,14 +933,14 @@ case main_vars.tipo_maquina of
   198:begin //Tetris
         m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@tetris_rom[0],'tetris.zip',0)) then exit;
+        if not(roms_load16w(@rom,tetris_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@tetris_sound,'tetris.zip')) then exit;
+        if not(roms_load(@mem_snd,tetris_sound)) then exit;
         //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@tetris_tiles[0],'tetris.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,tetris_tiles)) then exit;
         convert_chars(2);
         //Cargar ROM de los sprites
-        if not(cargar_roms16b(@sprite_rom[0],@tetris_sprites[0],'tetris.zip',0)) then exit;
+        if not(roms_load16b(@sprite_rom,tetris_sprites)) then exit;
         s16_info.s_banks:=1;
         marcade.dswb:=$30;
         marcade.dswb_val:=@tetris_dip_b;

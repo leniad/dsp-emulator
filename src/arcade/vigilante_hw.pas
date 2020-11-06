@@ -9,18 +9,18 @@ procedure cargar_vigilante;
 
 implementation
 const
-        vigilante_rom:array[0..2] of tipo_roms=(
-        (n:'VG_A-8H-E.ic55';l:$8000;p:0;crc:$0d4e6866),(n:'VG_A-8L-A.ic57';l:$10000;p:$8000;crc:$690d812f),());
-        vigilante_chars:array[0..2] of tipo_roms=(
-        (n:'VG_B-4F-.ic34';l:$10000;p:0;crc:$01579d20),(n:'VG_B-4J-.ic35';l:$10000;p:$10000;crc:$4f5872f0),());
-        vigilante_sprites:array[0..4] of tipo_roms=(
+        vigilante_rom:array[0..1] of tipo_roms=(
+        (n:'VG_A-8H-E.ic55';l:$8000;p:0;crc:$0d4e6866),(n:'VG_A-8L-A.ic57';l:$10000;p:$8000;crc:$690d812f));
+        vigilante_chars:array[0..1] of tipo_roms=(
+        (n:'VG_B-4F-.ic34';l:$10000;p:0;crc:$01579d20),(n:'VG_B-4J-.ic35';l:$10000;p:$10000;crc:$4f5872f0));
+        vigilante_sprites:array[0..3] of tipo_roms=(
         (n:'VG_B-6L-.ic62';l:$20000;p:0;crc:$fbe9552d),(n:'VG_B-6K-.ic61';l:$20000;p:$20000;crc:$ae09d5c0),
-        (n:'VG_B-6P-.ic64';l:$20000;p:$40000;crc:$afb77461),(n:'VG_B-6N-.ic63';l:$20000;p:$60000;crc:$5065cd35),());
+        (n:'VG_B-6P-.ic64';l:$20000;p:$40000;crc:$afb77461),(n:'VG_B-6N-.ic63';l:$20000;p:$60000;crc:$5065cd35));
         vigilante_dac:tipo_roms=(n:'VG_A-4D-.ic26';l:$10000;p:0;crc:$9b85101d);
         vigilante_sound:tipo_roms=(n:'VG_A-5J-.ic37';l:$10000;p:0;crc:$10582b2d);
-        vigilante_tiles:array[0..3] of tipo_roms=(
+        vigilante_tiles:array[0..2] of tipo_roms=(
         (n:'VG_B-1D-.ic2';l:$10000;p:$00000;crc:$81b1ee5c),(n:'VG_B-1F-.ic3';l:$10000;p:$10000;crc:$d0d33673),
-        (n:'VG_B-1H-.ic4';l:$10000;p:$20000;crc:$aae81695),());
+        (n:'VG_B-1H-.ic4';l:$10000;p:$20000;crc:$aae81695));
 var
  rom_bank:array[0..3,0..$3fff] of byte;
  banco_rom,sound_latch,rear_color:byte;
@@ -39,13 +39,13 @@ begin
 if not(rear_disable) then begin
  if rear_ch_color then begin
     for i:=0 to 15 do begin
-		    ccolor.r:=(buffer_paleta[$400+16*rear_color+i] shl 3) and $FF;
-		    ccolor.g:=(buffer_paleta[$500+16*rear_color+i] shl 3) and $FF;
-		    ccolor.b:=(buffer_paleta[$600+16*rear_color+i] shl 3) and $FF;
+		    ccolor.r:=(buffer_paleta[$400+16*rear_color+i] shl 3) and $ff;
+		    ccolor.g:=(buffer_paleta[$500+16*rear_color+i] shl 3) and $ff;
+		    ccolor.b:=(buffer_paleta[$600+16*rear_color+i] shl 3) and $ff;
         set_pal_color(ccolor,512+i);
-		    ccolor.r:=(buffer_paleta[$400+16*rear_color+32+i] shl 3) and $FF;
-		    ccolor.g:=(buffer_paleta[$500+16*rear_color+32+i] shl 3) and $FF;
-		    ccolor.b:=(buffer_paleta[$600+16*rear_color+32+i] shl 3) and $FF;
+		    ccolor.r:=(buffer_paleta[$400+16*rear_color+32+i] shl 3) and $ff;
+		    ccolor.g:=(buffer_paleta[$500+16*rear_color+32+i] shl 3) and $ff;
+		    ccolor.b:=(buffer_paleta[$600+16*rear_color+32+i] shl 3) and $ff;
         set_pal_color(ccolor,512+i+16);
 	  end;
     nchar:=0;
@@ -61,7 +61,7 @@ if not(rear_disable) then begin
     rear_ch_color:=false;
  end;
  scroll__x(4,3,rear_scroll-(378+16*8));
-end;
+end else fill_full_screen(3,$400);
 //chars
 for f:=0 to $7ff do begin
   color:=memoria[$d001+(f*2)] and $f;
@@ -69,7 +69,7 @@ for f:=0 to $7ff do begin
       x:=f mod 64;
       y:=f div 64;
       nchar:=memoria[$d000+(f*2)]+((memoria[$d001+(f*2)] and $f0) shl 4);
-      if ((color>=4) or rear_disable) then put_gfx(x*8,y*8,nchar,(color shl 4)+256,1,0)
+      if (color>=4) then put_gfx(x*8,y*8,nchar,(color shl 4)+256,1,0)
         else put_gfx_trans(x*8,y*8,nchar,(color shl 4)+256,1,0);
       if (color and $c)=$c then put_gfx_trans_alt(x*8,y*8,nchar,(color shl 4)+256,2,0,1)
         else put_gfx_block_trans(x*8,y*8,2,8,8);
@@ -91,12 +91,13 @@ for f:=0 to $17 do begin
         if flip_y then c:=nchar+(h-1-i)
 			    else c:=nchar+i;
         put_gfx_sprite(c,color,(atrib and $40)<>0,flip_y,1);
-        actualiza_gfx_sprite_over(x,y+(16*i),3,1,2,scroll_x,0);
+        actualiza_gfx_sprite(x,y+(16*i),3,1);
       end;
 end;
+scroll__x(2,3,scroll_x);
 actualiza_trozo(128,0,256,48,1,128,0,256,48,3);
 actualiza_trozo_final(128,0,256,256,3);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_vigilante;
@@ -169,14 +170,14 @@ end;
 
 procedure vigilante_putbyte(direccion:word;valor:byte);
 begin
-if (direccion<$c000) then exit;
 case direccion of
+    0..$bfff:;
     $c020..$c0df,$e000..$efff:memoria[direccion]:=valor;
     $c800..$cfff:if buffer_paleta[direccion and $7ff]<>valor then begin
                     buffer_paleta[direccion and $7ff]:=valor;
                     cambiar_color(direccion and $7ff);
                  end;
-    $d000..$dfff:begin
+    $d000..$dfff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[(direccion and $fff) shr 1]:=true;
                     memoria[direccion]:=valor;
                  end;
@@ -289,6 +290,11 @@ begin
  banco_rom:=0;
  rear_ch_color:=true;
  sample_addr:=0;
+ sound_latch:=0;
+ rear_color:=0;
+ rear_scroll:=0;
+ scroll_x:=0;
+ rear_disable:=true;
 end;
 
 function iniciar_vigilante:boolean;
@@ -304,7 +310,6 @@ const
   pt_x:array[0..31] of dword=(0*8+1, 0*8,  1*8+1, 1*8, 2*8+1, 2*8, 3*8+1, 3*8, 4*8+1, 4*8, 5*8+1, 5*8,
 	6*8+1, 6*8, 7*8+1, 7*8, 8*8+1, 8*8, 9*8+1, 9*8, 10*8+1, 10*8, 11*8+1, 11*8,
 	12*8+1, 12*8, 13*8+1, 13*8, 14*8+1, 14*8, 15*8+1, 15*8);
-  pt_y:array[0..0] of dword=(0);
   pc_x:array[0..7] of dword=(0,1,2,3, 64+0,64+1,64+2,64+3);
   pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
 var
@@ -331,28 +336,28 @@ z80_1:=cpu_z80.create(3579645,256);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(snd_despues_instruccion);
-init_timer(z80_1.numero_cpu,3579645/(128*55),vigilante_snd_irq,true);
+timers.init(z80_1.numero_cpu,3579645/(128*55),vigilante_snd_irq,nil,true);
 //sound chips
 dac_0:=dac_chip.Create;
 ym2151_0:=ym2151_chip.create(3579645);
 ym2151_0.change_irq_func(ym2151_snd_irq);
 //cargar roms y rom en bancos
-if not(cargar_roms(@memoria_temp,@vigilante_rom,'vigilant.zip',0)) then exit;
+if not(roms_load(@memoria_temp,vigilante_rom)) then exit;
 copymemory(@memoria[0],@memoria_temp[0],$8000);
 for f:=0 to 3 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$4000)],$4000);
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@vigilante_sound,'vigilant.zip',1)) then exit;
-if not(cargar_roms(@mem_dac[0],@vigilante_dac,'vigilant.zip',1)) then exit;
+if not(roms_load(@mem_snd,vigilante_sound)) then exit;
+if not(roms_load(@mem_dac,vigilante_dac)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@vigilante_chars[0],'vigilant.zip',0)) then exit;
+if not(roms_load(@memoria_temp,vigilante_chars)) then exit;
 init_gfx(0,8,8,4096);
 gfx[0].trans[0]:=true;
 for f:=0 to 7 do gfx[0].trans_alt[1,f]:=true;
 gfx_set_desc_data(4,0,128,64*1024*8,(64*1024*8)+4,0,4);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //sprites
 getmem(mem_load,$80000);
-if not(cargar_roms(mem_load,@vigilante_sprites[0],'vigilant.zip',0)) then exit;
+if not(roms_load(mem_load,vigilante_sprites)) then exit;
 copymemory(@memoria_temp[0],@mem_load[0],$10000);
 copymemory(@memoria_temp[$20000],@mem_load[$10000],$10000);
 copymemory(@memoria_temp[$10000],@mem_load[$20000],$10000);
@@ -365,12 +370,12 @@ freemem(mem_load);
 init_gfx(1,16,16,4096);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,$40*8,$40000*8,$40000*8+4,0,4);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //tiles
-if not(cargar_roms(@memoria_temp[0],@vigilante_tiles[0],'vigilant.zip',0)) then exit;
+if not(roms_load(@memoria_temp,vigilante_tiles)) then exit;
 init_gfx(2,32,1,3*512*8);
 gfx_set_desc_data(4,0,16*8,0,2,4,6);
-convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@pt_x,@pc_y,false,false);
 //final
 reset_vigilante;
 iniciar_vigilante:=true;

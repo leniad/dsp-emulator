@@ -9,12 +9,12 @@ procedure cargar_arabian;
 implementation
 const
         //arabian
-        arabian_rom:array[0..4] of tipo_roms=(
+        arabian_rom:array[0..3] of tipo_roms=(
         (n:'ic1rev2.87';l:$2000;p:0;crc:$5e1c98b8),(n:'ic2rev2.88';l:$2000;p:$2000;crc:$092f587e),
-        (n:'ic3rev2.89';l:$2000;p:$4000;crc:$15145f23),(n:'ic4rev2.90';l:$2000;p:$6000;crc:$32b77b44),());
-        arabian_gfx:array[0..4] of tipo_roms=(
+        (n:'ic3rev2.89';l:$2000;p:$4000;crc:$15145f23),(n:'ic4rev2.90';l:$2000;p:$6000;crc:$32b77b44));
+        arabian_gfx:array[0..3] of tipo_roms=(
         (n:'tvg-91.ic84';l:$2000;p:0;crc:$c4637822),(n:'tvg-92.ic85';l:$2000;p:$2000;crc:$f7c6866d),
-        (n:'tvg-93.ic86';l:$2000;p:$4000;crc:$71acd48d),(n:'tvg-94.ic87';l:$2000;p:$6000;crc:$82160b9a),());
+        (n:'tvg-93.ic86';l:$2000;p:$4000;crc:$71acd48d),(n:'tvg-94.ic87';l:$2000;p:$6000;crc:$82160b9a));
         arabian_mcu:tipo_roms=(n:'sun-8212.ic3';l:$800;p:0;crc:$8869611e);
         //Dip
         arabian_dip_a:array [0..5] of def_dip=(
@@ -42,7 +42,7 @@ begin
 for x:=0 to 255 do
   for y:=0 to 255 do
     punt[y+((255-x)*256)]:=paleta[(video_ram[y*256+x]+(video_control shl 8))];
-putpixel(0,0,$10000,@punt[0],1);
+putpixel(0,0,$10000,@punt,1);
 actualiza_trozo(11,0,234,256,1,0,0,234,256,pant_temp);
 end;
 
@@ -53,7 +53,7 @@ if event.arcade then begin
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $F7);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
   //in2
   if arcade_input.but0[0] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
   //in3
@@ -180,8 +180,8 @@ end;
 
 procedure arabian_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$bfff:video_ram_w(direccion,valor); //pant
   $d000..$dfff:memoria[$d000+(direccion and $7ff)]:=valor;
   $e000..$efff:begin  //blitter
@@ -397,11 +397,11 @@ mb88xx_0.change_io_calls(mcu_port_k_r,mcu_port_o_w,nil,mcu_port_p_w,mcu_port_r_r
 ay8910_0:=ay8910_chip.create(1500000,AY8910,0.5);
 ay8910_0.change_io_calls(nil,nil,arabian_portaw,arabian_portbw);
 //cargar roms
-if not(cargar_roms(@memoria[0],@arabian_rom[0],'arabian.zip',0)) then exit;
+if not(roms_load(@memoria,arabian_rom)) then exit;
 //Cargar MCU
-if not(cargar_roms(mb88xx_0.get_rom_addr,@arabian_mcu,'arabian.zip',1)) then exit;
+if not(roms_load(mb88xx_0.get_rom_addr,arabian_mcu)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@arabian_gfx,'arabian.zip',0)) then exit;
+if not(roms_load(@memoria_temp,arabian_gfx)) then exit;
 convert_gfx_arabian;
 create_palette;
 marcade.dswa:=$06;

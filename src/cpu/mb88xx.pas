@@ -55,7 +55,6 @@ type
           //    cpu_irq_callback irqcallback;
           rom:array[0..$7ff] of byte;
           ram:array[0..$7f] of byte;
-          io:array[0..7] of byte;
           //Functions
           procedure update_pio_enable(newpio:byte);
           procedure increment_timer;
@@ -289,19 +288,16 @@ while self.contador<maximo do begin
   case instruccion of
     $00:r.st:=1; //nop
     $01:begin //outO
-           if @self.port_o<>nil then self.port_o(pla(r,r.a,r.cf))
-              else self.io[MB88_PORTO]:=pla(r,r.a,r.cf);
+           if @self.port_o<>nil then self.port_o(pla(r,r.a,r.cf));
            r.st:=1;
         end;
     $02:begin //outP
-           if @self.port_p_w<>nil then self.port_p_w(r.a)
-            else self.io[MB88_PORTP]:=r.a;
+           if @self.port_p_w<>nil then self.port_p_w(r.a);
            r.st:=1;
         end;
     $03:begin //outR
            arg:=r.y;
-           if @self.port_r_w<>nil then self.port_r_w(arg and 3,r.a)
-            else self.io[MB88_PORTR0+(arg and 3)]:=r.a;
+           if @self.port_r_w<>nil then self.port_r_w(arg and 3,r.a);
 				   r.st:=1;
         end;
     $04:begin //tay
@@ -375,20 +371,18 @@ while self.contador<maximo do begin
           r.st:=r.zf xor 1;
 				end;
     $10:begin // daa ZCS:.xx
-				  if (((r.cf and 1)<>0) or (r.a>9)) then r.a:=r.a+6;
-				  update_st_c(r.a);
+				  if ((r.cf<>0) or (r.a>9)) then r.a:=r.a+6;
+				  r.st:=update_st_c(r.a);
 				  r.cf:=r.st xor 1;
 				  r.a:=r.a and $0f;
 				end;
     $12:begin //inK
-           if @self.port_k<>nil then r.a:=self.port_k and $f
-            else r.a:=self.io[MB88_PORTK] and $f;
+           if @self.port_k<>nil then r.a:=self.port_k and $f;
            r.zf:=update_zf(r.a);
            r.st:=1;
         end;
     $13:begin // inR
-           if @self.port_r_r<>nil then r.a:=self.port_r_r(r.y and 3) and $f
-            else r.a:=self.io[MB88_PORTR0+(r.y and $3)] and $f;
+           if @self.port_r_r<>nil then r.a:=self.port_r_r(r.y and 3) and $f;
            r.zf:=update_zf(r.a);
            r.st:=1;
 				end;
@@ -464,10 +458,8 @@ while self.contador<maximo do begin
            r.st:=r.zf xor 1;
         end;
     $20:begin // setR ZCS:...
-          if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4)
-            else arg:=self.io[MB88_PORTR0+(r.y div 4)];
-          if @self.port_r_w<>nil then self.port_r_w(r.y div 4,arg or not(1 shl (r.y mod 4)))
-            else self.io[MB88_PORTR0+(r.y div 4)]:=arg or not(1 shl (r.y mod 4));
+          if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4);
+          if @self.port_r_w<>nil then self.port_r_w(r.y div 4,arg or not(1 shl (r.y mod 4)));
 				  r.st:=1;
 				end;
     $21:begin  //setc
@@ -475,10 +467,8 @@ while self.contador<maximo do begin
            r.st:=1;
         end;
     $22:begin // rstR ZCS:...
-          if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4)
-            else arg:=self.io[MB88_PORTR0+(r.y div 4)];
-          if @self.port_r_w<>nil then self.port_r_w(r.y div 4,arg and not(1 shl (r.y mod 4)))
-            else self.io[MB88_PORTR0+(r.y div 4)]:=arg and not(1 shl (r.y mod 4));
+          if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4);
+          if @self.port_r_w<>nil then self.port_r_w(r.y div 4,arg and not(1 shl (r.y mod 4)));
           r.st:=1;
 				end;
     $23:begin  //rstc
@@ -486,8 +476,7 @@ while self.contador<maximo do begin
            r.st:=1;
         end;
     $24:begin //tstr
-           if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4) and $f
-            else arg:=self.io[MB88_PORTR0+(r.y div 4)] and $f;
+           if @self.port_r_r<>nil then arg:=self.port_r_r(r.y div 4) and $f;
 				   if (arg and (1 shl (r.y mod 4)))<>0 then r.st:=0
             else r.st:=1;
         end;
@@ -554,24 +543,19 @@ while self.contador<maximo do begin
 				   r.st:=1;
         end;
     $40..$43:begin  //setD
-           if @self.port_r_r<>nil then arg:=self.port_r_r(0) and $f
-            else arg:=self.io[MB88_PORTR0] and $f;
+           if @self.port_r_r<>nil then arg:=self.port_r_r(0) and $f;
            arg:=arg or (1 shl (instruccion and 3));
-           if @self.port_r_w<>nil then self.port_r_w(0,arg)
-            else self.io[MB88_PORTR0]:=arg;
+           if @self.port_r_w<>nil then self.port_r_w(0,arg);
            r.st:=1;
         end;
     $44..$47:begin  //rstD
-           if @self.port_r_r<>nil then arg:=self.port_r_r(0) and $f
-            else arg:=self.io[MB88_PORTR0] and $f;
+           if @self.port_r_r<>nil then arg:=self.port_r_r(0) and $f;
            arg:=arg and (not (1 shl (instruccion and 3)));
-           if @self.port_r_w<>nil then self.port_r_w(0,arg)
-            else self.io[MB88_PORTR0]:=arg;
+           if @self.port_r_w<>nil then self.port_r_w(0,arg);
            r.st:=1;
         end;
     $48,$49,$4a,$4b:begin // tstD ZCS:..x
-            if @self.port_r_r<>nil then arg:=self.port_r_r(2)
-              else arg:=self.io[MB88_PORTR2];
+            if @self.port_r_r<>nil then arg:=self.port_r_r(2);
 				    if (arg and (1 shl (instruccion and 3)))<>0 then r.st:=0
               else r.st:=1;
 				end;
@@ -658,7 +642,7 @@ while self.contador<maximo do begin
   end;
 tempb:=timming+self.update_pio(timming);
 self.contador:=self.contador+tempb;
-update_timer(tempb,self.numero_cpu);
+timers.update(tempb,self.numero_cpu);
 end;
 end;
 

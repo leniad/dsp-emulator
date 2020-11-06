@@ -10,7 +10,6 @@ type
         destructor free;
     public
         rmrd_line:byte;
-        recalc_char:boolean;
         scroll_x:array[1..2,0..$ff] of word;
         scroll_y:array[1..2,0..$1ff] of word;
         scroll_tipo:array[1..2] of byte;
@@ -30,6 +29,7 @@ type
         procedure set_rmrd_line(state:byte);
         function get_rmrd_line:byte;
         procedure draw_layer(layer,final_screen:byte);
+        procedure recalc_chars(num:dword);
     private
         ram:array[0..$5fff] of byte;
         tileflip_enable,romsubbank,scrollctrl:byte;
@@ -40,7 +40,6 @@ type
         char_size,char_mask:dword;
         k052109_cb:t_k052109_cb;
         video_buffer:array[0..3,0..$7ff] of boolean;
-        procedure recalc_chars;
         procedure update_all_tile(layer:byte);
         procedure calc_scroll_1;
         procedure calc_scroll_2;
@@ -61,7 +60,6 @@ begin
   self.pant[1]:=pant2;
   self.pant[2]:=pant3;
   self.k052109_cb:=call_back;
-  self.recalc_char:=false;
   self.char_rom:=rom;
   self.char_size:=rom_size;
   self.char_mask:=(rom_size div 32)-1;
@@ -345,20 +343,18 @@ if ((self.scrollctrl and $18)=$10) then begin
 	end;
 end;
 
-procedure k052109_chip.recalc_chars;
+procedure k052109_chip.recalc_chars(num:dword);
 const
   pc_x_ram:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
   pc_y_ram:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
 begin
-  self.recalc_char:=false;
   gfx_set_desc_data(4,0,8*32,0,1,2,3);
-  convert_gfx(0,0,self.char_rom,@pc_x_ram[0],@pc_y_ram[0],false,false);
+  convert_gfx_single(0,0,self.char_rom,@pc_x_ram,@pc_y_ram,false,false,num);
   self.clean_video_buffer;
 end;
 
 procedure k052109_chip.draw_tiles;
 begin
-  if self.recalc_char then recalc_chars;
   self.calc_scroll_1;
   self.calc_scroll_2;
   self.update_all_tile(0);

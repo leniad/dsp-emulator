@@ -94,7 +94,7 @@ if event.arcade then begin
   //P1
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
@@ -106,7 +106,7 @@ if event.arcade then begin
   //P2
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
@@ -155,8 +155,8 @@ end;
 
 procedure commando_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+   0..$bfff:; //ROM
    $c800:sound_command:=valor;
    $c804:begin
             if (valor and $10)<>0 then z80_1.change_reset(ASSERT_LINE)
@@ -189,8 +189,8 @@ end;
 
 procedure commando_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
 case direccion of
+  0..$3fff:; //ROM
   $4000..$47ff:mem_snd[direccion]:=valor;
   $8000:ym2203_0.Control(valor);
   $8001:ym2203_0.Write(valor);
@@ -219,9 +219,9 @@ begin
  YM2203_0.reset;
  YM2203_1.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  scroll_x:=0;
  scroll_y:=0;
  sound_command:=0;
@@ -257,35 +257,35 @@ z80_1:=cpu_z80.create(3000000,256);
 z80_1.change_ram_calls(commando_snd_getbyte,commando_snd_putbyte);
 z80_1.init_sound(commando_sound_update);
 //IRQ Sound CPU
-init_timer(z80_1.numero_cpu,3000000/(4*60),commando_snd_irq,true);
+timers.init(z80_1.numero_cpu,3000000/(4*60),commando_snd_irq,nil,true);
 //Sound Chips
-YM2203_0:=ym2203_chip.create(1500000);
-YM2203_1:=ym2203_chip.create(1500000);
+YM2203_0:=ym2203_chip.create(1500000,0.4);
+YM2203_1:=ym2203_chip.create(1500000,0.4);
 //cargar y desencriptar las ROMS
-if not(roms_load(@memoria,@commando_rom,'commando.zip',sizeof(commando_rom))) then exit;
+if not(roms_load(@memoria,commando_rom)) then exit;
 memoria_dec[0]:=memoria[0];
 for f:=1 to $bfff do memoria_dec[f]:=bitswap8(memoria[f],3,2,1,4,7,6,5,0);
 //cargar ROMS sonido
-if not(roms_load(@mem_snd,@commando_snd_rom,'commando.zip',sizeof(commando_snd_rom))) then exit;
+if not(roms_load(@mem_snd,commando_snd_rom)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@commando_char,'commando.zip',sizeof(commando_char))) then exit;
+if not(roms_load(@memoria_temp,commando_char)) then exit;
 init_gfx(0,8,8,1024);
 gfx[0].trans[3]:=true;
 gfx_set_desc_data(2,0,16*8,4,0);
 convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //convertir sprites
-if not(roms_load(@memoria_temp,@commando_sprites,'commando.zip',sizeof(commando_sprites))) then exit;
+if not(roms_load(@memoria_temp,commando_sprites)) then exit;
 init_gfx(1,16,16,768);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,64*8,$c000*8+4,$c000*8+0,4,0);
 convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //tiles
-if not(roms_load(@memoria_temp,@commando_tiles,'commando.zip',sizeof(commando_tiles))) then exit;
+if not(roms_load(@memoria_temp,commando_tiles)) then exit;
 init_gfx(2,16,16,1024);
 gfx_set_desc_data(3,0,32*8,0,$8000*8,$8000*8*2);
 convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,true);
 //poner la paleta
-if not(roms_load(@memoria_temp,@commando_pal,'commando.zip',sizeof(commando_pal))) then exit;
+if not(roms_load(@memoria_temp,commando_pal)) then exit;
 for f:=0 to 255 do begin
   colores[f].r:=pal4bit(memoria_temp[f]);
   colores[f].g:=pal4bit(memoria_temp[f+$100]);
@@ -307,7 +307,7 @@ reset_commando;
 iniciar_commando:=true;
 end;
 
-procedure Cargar_commando;
+procedure cargar_commando;
 begin
 llamadas_maquina.iniciar:=iniciar_commando;
 llamadas_maquina.bucle_general:=commando_principal;

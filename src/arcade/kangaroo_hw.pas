@@ -86,7 +86,7 @@ begin
       sy:=sy+2;
      end;
 	end;
-putpixel(0,0,$20000,@punt[0],1);
+putpixel(0,0,$20000,@punt,1);
 actualiza_trozo(8,0,240,512,1,0,0,240,512,PANT_TEMP);
 end;
 
@@ -209,8 +209,8 @@ end;
 
 procedure kangaroo_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$6000 then exit;
 case direccion of
+  0..$5fff:;
   $8000..$bfff:videoram_write((direccion and $3fff),valor,video_control[8]);
   $e000..$e3ff:memoria[direccion]:=valor;
   $e800..$ebff:begin
@@ -235,8 +235,8 @@ end;
 
 procedure kangaroo_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$1000 then exit;
 case direccion of
+  0..$fff:;
   $4000..$4fff:mem_snd[$4000+(direccion and $3ff)]:=valor;
   $7000..$7fff:ay8910_0.write(valor);
   $8000..$8fff:ay8910_0.control(valor);
@@ -346,11 +346,11 @@ z80_1.init_sound(kangaroo_sound_update);
 //Sound chip
 ay8910_0:=ay8910_chip.create(10000000 div 8,AY8910,0.5);
 //cargar roms
-if not(roms_load(@memoria,@kangaroo_rom,'kangaroo.zip',sizeof(kangaroo_rom))) then exit;
+if not(roms_load(@memoria,kangaroo_rom)) then exit;
 //cargar roms snd
-if not(roms_load(@mem_snd,@kangaroo_sound,'kangaroo.zip',sizeof(kangaroo_sound))) then exit;
+if not(roms_load(@mem_snd,kangaroo_sound)) then exit;
 //cargar gfx
-if not(roms_load(@mem_temp,@kangaroo_gfx,'kangaroo.zip',sizeof(kangaroo_gfx))) then exit;
+if not(roms_load(@mem_temp,kangaroo_gfx)) then exit;
 copymemory(@gfx_data[0,0],@mem_temp[0],$2000);
 copymemory(@gfx_data[1,0],@mem_temp[$2000],$2000);
 for f:=0 to 7 do begin
@@ -368,7 +368,7 @@ reset_kangaroo;
 iniciar_kangaroo:=true;
 end;
 
-procedure Cargar_Kangaroo;
+procedure cargar_kangaroo;
 begin
 llamadas_maquina.iniciar:=iniciar_kangaroo;
 llamadas_maquina.bucle_general:=kangaroo_principal;

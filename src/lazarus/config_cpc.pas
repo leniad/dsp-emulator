@@ -99,7 +99,7 @@ begin
       5:configcpc.Edit5.Text:=file_name;
       6:configcpc.Edit6.Text:=file_name;
     end;
-    cpc_rom_slot[number]:=file_name;
+    cpc_rom[number].name:=file_name;
   end;
 end;
 
@@ -114,7 +114,7 @@ begin
     5:configcpc.Edit5.Text:='';
     6:configcpc.Edit6.Text:='';
   end;
-  cpc_rom_slot[number]:='';
+  cpc_rom[number].name:='';
 end;
 
 procedure Tconfigcpc.FormShow(Sender: TObject);
@@ -138,12 +138,12 @@ begin
        end;
      end;
  end;
- Edit1.Text:=cpc_rom_slot[1];
- Edit2.Text:=cpc_rom_slot[2];
- Edit3.Text:=cpc_rom_slot[3];
- Edit4.Text:=cpc_rom_slot[4];
- Edit5.Text:=cpc_rom_slot[5];
- Edit6.Text:=cpc_rom_slot[6];
+ Edit1.Text:=cpc_rom[1].name;
+ Edit2.Text:=cpc_rom[2].name;
+ Edit3.Text:=cpc_rom[3].name;
+ Edit4.Text:=cpc_rom[4].name;
+ Edit5.Text:=cpc_rom[5].name;
+ Edit6.Text:=cpc_rom[6].name;
  //Lenslock
 groupbox7.Enabled:=true;
 radiobutton12.Enabled:=true;

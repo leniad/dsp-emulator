@@ -22,24 +22,24 @@ const
         (0,1),(2,3),(4,5),(6,7),(8,9),(10,11),(12,13),(14,15),
         (16,17),(18,19),(20,21),(22,23),(24,25),(26,27),(28,29),(30,31));
         //P47
-        p47_rom:array[0..2] of tipo_roms=(
-        (n:'p47us3.bin';l:$20000;p:0;crc:$022e58b8),(n:'p47us1.bin';l:$20000;p:$1;crc:$ed926bd8),());
-        p47_sound:array[0..2] of tipo_roms=(
-        (n:'p47j_9.bin';l:$10000;p:0;crc:$ffcf318e),(n:'p47j_19.bin';l:$10000;p:$1;crc:$adb8c12e),());
-        p47_scr0:array[0..3] of tipo_roms=(
+        p47_rom:array[0..1] of tipo_roms=(
+        (n:'p47us3.bin';l:$20000;p:0;crc:$022e58b8),(n:'p47us1.bin';l:$20000;p:$1;crc:$ed926bd8));
+        p47_sound:array[0..1] of tipo_roms=(
+        (n:'p47j_9.bin';l:$10000;p:0;crc:$ffcf318e),(n:'p47j_19.bin';l:$10000;p:$1;crc:$adb8c12e));
+        p47_scr0:array[0..2] of tipo_roms=(
         (n:'p47j_5.bin';l:$20000;p:0;crc:$fe65b65c),(n:'p47j_6.bin';l:$20000;p:$20000;crc:$e191d2d2),
-        (n:'p47j_7.bin';l:$20000;p:$40000;crc:$f77723b7),());
-        p47_scr1:array[0..3] of tipo_roms=(
+        (n:'p47j_7.bin';l:$20000;p:$40000;crc:$f77723b7));
+        p47_scr1:array[0..2] of tipo_roms=(
         (n:'p47j_23.bin';l:$20000;p:0;crc:$6e9bc864),(n:'p47j_23.bin';l:$20000;p:$20000;crc:$6e9bc864),
-        (n:'p47j_12.bin';l:$20000;p:$40000;crc:$5268395f),());
+        (n:'p47j_12.bin';l:$20000;p:$40000;crc:$5268395f));
         p47_scr2:tipo_roms=(n:'p47us16.bin';l:$10000;p:0;crc:$5a682c8f);
-        p47_sprites:array[0..4] of tipo_roms=(
+        p47_sprites:array[0..3] of tipo_roms=(
         (n:'p47j_27.bin';l:$20000;p:0;crc:$9e2bde8e),(n:'p47j_18.bin';l:$20000;p:$20000;crc:$29d8f676),
-        (n:'p47j_26.bin';l:$20000;p:$40000;crc:$4d07581a),(n:'p47j_26.bin';l:$20000;p:$60000;crc:$4d07581a),());
-        p47_oki1:array[0..2] of tipo_roms=(
-        (n:'p47j_20.bin';l:$20000;p:0;crc:$2ed53624),(n:'p47j_21.bin';l:$20000;p:$20000;crc:$6f56b56d),());
-        p47_oki2:array[0..2] of tipo_roms=(
-        (n:'p47j_10.bin';l:$20000;p:0;crc:$b9d79c1e),(n:'p47j_11.bin';l:$20000;p:$20000;crc:$fa0d1887),());
+        (n:'p47j_26.bin';l:$20000;p:$40000;crc:$4d07581a),(n:'p47j_26.bin';l:$20000;p:$60000;crc:$4d07581a));
+        p47_oki1:array[0..1] of tipo_roms=(
+        (n:'p47j_20.bin';l:$20000;p:0;crc:$2ed53624),(n:'p47j_21.bin';l:$20000;p:$20000;crc:$6f56b56d));
+        p47_oki2:array[0..1] of tipo_roms=(
+        (n:'p47j_10.bin';l:$20000;p:0;crc:$b9d79c1e),(n:'p47j_11.bin';l:$20000;p:$20000;crc:$fa0d1887));
         p47_pri:tipo_roms=(n:'p-47.14m';l:$200;p:0;crc:$1d877538);
         p47_dip:array [0..7] of def_dip=(
         (mask:$0003;name:'Lives';number:4;dip:((dip_val:$2;dip_name:'2'),(dip_val:$3;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -50,11 +50,11 @@ const
         (mask:$4000;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$4000;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8000;name:'Invulnerability';number:2;dip:((dip_val:$8000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Rod-Land
-        rodland_rom:array[0..4] of tipo_roms=(
+        rodland_rom:array[0..3] of tipo_roms=(
         (n:'rl_02.rom';l:$20000;p:0;crc:$c7e00593),(n:'rl_01.rom';l:$20000;p:$1;crc:$2e748ca1),
-        (n:'rl_03.rom';l:$10000;p:$40000;crc:$62fdf6d7),(n:'rl_04.rom';l:$10000;p:$40001;crc:$44163c86),());
-        rodland_sound:array[0..2] of tipo_roms=(
-        (n:'rl_05.rom';l:$10000;p:0;crc:$c1617c28),(n:'rl_06.rom';l:$10000;p:$1;crc:$663392b2),());
+        (n:'rl_03.rom';l:$10000;p:$40000;crc:$62fdf6d7),(n:'rl_04.rom';l:$10000;p:$40001;crc:$44163c86));
+        rodland_sound:array[0..1] of tipo_roms=(
+        (n:'rl_05.rom';l:$10000;p:0;crc:$c1617c28),(n:'rl_06.rom';l:$10000;p:$1;crc:$663392b2));
         rodland_scr0:tipo_roms=(n:'rl_23.rom';l:$80000;p:0;crc:$ac60e771);
         rodland_scr1:tipo_roms=(n:'rl_18.rom';l:$80000;p:0;crc:$f3b30ca6);
         rodland_scr2:tipo_roms=(n:'rl_19.bin';l:$20000;p:0;crc:$124d7e8f);
@@ -71,24 +71,24 @@ const
         (mask:$3800;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$2000;dip_name:'3C 1C'),(dip_val:$1000;dip_name:'2C 1C'),(dip_val:$3800;dip_name:'1C 1C'),(dip_val:$1800;dip_name:'1C 2C'),(dip_val:$2800;dip_name:'1C 3C'),(dip_val:$800;dip_name:'1C 4C'),(dip_val:$3000;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
         (mask:$4000;name:'Demo Sounds';number:2;dip:((dip_val:$4000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //saint dragon
-        stdragon_rom:array[0..2] of tipo_roms=(
-        (n:'jsd-02.bin';l:$20000;p:0;crc:$cc29ab19),(n:'jsd-01.bin';l:$20000;p:$1;crc:$67429a57),());
-        stdragon_sound:array[0..2] of tipo_roms=(
-        (n:'jsd-05.bin';l:$10000;p:0;crc:$8c04feaa),(n:'jsd-06.bin';l:$10000;p:$1;crc:$0bb62f3a),());
-        stdragon_scr0:array[0..4] of tipo_roms=(
+        stdragon_rom:array[0..1] of tipo_roms=(
+        (n:'jsd-02.bin';l:$20000;p:0;crc:$cc29ab19),(n:'jsd-01.bin';l:$20000;p:$1;crc:$67429a57));
+        stdragon_sound:array[0..1] of tipo_roms=(
+        (n:'jsd-05.bin';l:$10000;p:0;crc:$8c04feaa),(n:'jsd-06.bin';l:$10000;p:$1;crc:$0bb62f3a));
+        stdragon_scr0:array[0..3] of tipo_roms=(
         (n:'jsd-11.bin';l:$20000;p:0;crc:$2783b7b1),(n:'jsd-12.bin';l:$20000;p:$20000;crc:$89466ab7),
-        (n:'jsd-13.bin';l:$20000;p:$40000;crc:$9896ae82),(n:'jsd-14.bin';l:$20000;p:$60000;crc:$7e8da371),());
-        stdragon_scr1:array[0..4] of tipo_roms=(
+        (n:'jsd-13.bin';l:$20000;p:$40000;crc:$9896ae82),(n:'jsd-14.bin';l:$20000;p:$60000;crc:$7e8da371));
+        stdragon_scr1:array[0..3] of tipo_roms=(
         (n:'jsd-15.bin';l:$20000;p:0;crc:$e296bf59),(n:'jsd-16.bin';l:$20000;p:$20000;crc:$d8919c06),
-        (n:'jsd-17.bin';l:$20000;p:$40000;crc:$4f7ad563),(n:'jsd-18.bin';l:$20000;p:$60000;crc:$1f4da822),());
+        (n:'jsd-17.bin';l:$20000;p:$40000;crc:$4f7ad563),(n:'jsd-18.bin';l:$20000;p:$60000;crc:$1f4da822));
         stdragon_scr2:tipo_roms=(n:'jsd-19.bin';l:$10000;p:0;crc:$25ce807d);
-        stdragon_sprites:array[0..4] of tipo_roms=(
+        stdragon_sprites:array[0..3] of tipo_roms=(
         (n:'jsd-20.bin';l:$20000;p:0;crc:$2c6e93bb),(n:'jsd-21.bin';l:$20000;p:$20000;crc:$864bcc61),
-        (n:'jsd-22.bin';l:$20000;p:$40000;crc:$44fe2547),(n:'jsd-23.bin';l:$20000;p:$60000;crc:$6b010e1a),());
-        stdragon_oki1:array[0..2] of tipo_roms=(
-        (n:'jsd-09.bin';l:$20000;p:0;crc:$e366bc5a),(n:'jsd-10.bin';l:$20000;p:$20000;crc:$4a8f4fe6),());
-        stdragon_oki2:array[0..2] of tipo_roms=(
-        (n:'jsd-07.bin';l:$20000;p:0;crc:$6a48e979),(n:'jsd-08.bin';l:$20000;p:$20000;crc:$40704962),());
+        (n:'jsd-22.bin';l:$20000;p:$40000;crc:$44fe2547),(n:'jsd-23.bin';l:$20000;p:$60000;crc:$6b010e1a));
+        stdragon_oki1:array[0..1] of tipo_roms=(
+        (n:'jsd-09.bin';l:$20000;p:0;crc:$e366bc5a),(n:'jsd-10.bin';l:$20000;p:$20000;crc:$4a8f4fe6));
+        stdragon_oki2:array[0..1] of tipo_roms=(
+        (n:'jsd-07.bin';l:$20000;p:0;crc:$6a48e979),(n:'jsd-08.bin';l:$20000;p:$20000;crc:$40704962));
         stdragon_pri:tipo_roms=(n:'prom.14m';l:$200;p:0;crc:$1d877538);
         stdragon_dip:array [0..7] of def_dip=(
         (mask:$0003;name:'Lives';number:4;dip:((dip_val:$2;dip_name:'2'),(dip_val:$3;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -138,7 +138,7 @@ for f:=0 to $ff do begin
 			y:=(ram[pos_sprite+6]+obj_ram[pos_obj+$2]) and $1ff;
 			flipx:=(atrib and $40)<>0;
 			flipy:=(atrib and $80)<>0;
-			// sprite code is displaced as well */
+			// sprite code is displaced as well
 			nchar:=((ram[pos_sprite+7]+obj_ram[pos_obj+$3]) and $fff)+((sprite_bank and 1) shl 12);
 			color:=(atrib and $f) shl 4;
       put_gfx_sprite(nchar and $fff,768+color,flipx,flipy,3);
@@ -265,24 +265,24 @@ procedure eventos_megasys1;
 begin
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
   //COIN
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
-  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $fffe) else marcade.in2:=(marcade.in2 or $1);
+  if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $fffd) else marcade.in2:=(marcade.in2 or $2);
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $ffbf) else marcade.in2:=(marcade.in2 or $40);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $ff7f) else marcade.in2:=(marcade.in2 or $80);
 end;
 end;
 
@@ -321,9 +321,9 @@ begin
 case direccion of
   $0..$5ffff:if (mcu_hs and (((mcu_hs_ram[4] shl 6) and $3ffc0)=(direccion and $3ffc0))) then megasys1_a_getword:=$835d
                 else megasys1_a_getword:=rom[direccion shr 1];
-  $80000:megasys1_a_getword:=$ff00 or marcade.in2;
-  $80002:megasys1_a_getword:=$0000 or marcade.in0;
-  $80004:megasys1_a_getword:=$ff00 or marcade.in1;
+  $80000:megasys1_a_getword:=marcade.in2;
+  $80002:megasys1_a_getword:=marcade.in0;
+  $80004:megasys1_a_getword:=marcade.in1;
   $80006:megasys1_a_getword:=marcade.dswa;
   $80008:megasys1_a_getword:=sound_latch2;
   $84000..$843ff:megasys1_a_getword:=vregs_ram[(direccion and $3ff) shr 1];
@@ -382,7 +382,7 @@ end;
 procedure megasys1_a_putword(direccion:dword;valor:word);
 begin
 case direccion of
-    0..$23fef,$23ffa..$5ffff:exit;
+    0..$23fef,$23ffa..$5ffff:;
     $23ff0..$23ff9:begin
                       mcu_hs_ram[(direccion and $f) shr 1]:=valor;
                       if (((mcu_hs_ram[0]=0) and (mcu_hs_ram[1]=$0055) and (mcu_hs_ram[2]=$00aa) and (mcu_hs_ram[3]=$00ff)) and (((direccion and $f) shr 1)=4)) then mcu_hs:=true
@@ -470,7 +470,7 @@ end;
 procedure megasys1_snd_a_putword(direccion:dword;valor:word);
 begin
 case direccion of
-  0..$1ffff:exit;
+  0..$1ffff:;
   $60000:sound_latch2:=valor;
   $80000:ym2151_0.reg(valor);
   $80002:ym2151_0.write(valor);
@@ -503,9 +503,9 @@ begin
  oki_6295_0.reset;
  oki_6295_1.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$ff;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
+ marcade.in2:=$ffff;
  sound_latch:=0;
  sound_latch2:=0;
  sprite_bank:=0;
@@ -575,7 +575,6 @@ end;
 function iniciar_megasys1:boolean;
 const
   pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-  pc_y:array[0..7] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8);
   ps_x:array[0..15] of dword=(8*8*4*0+0,8*8*4*0+4,8*8*4*0+8,8*8*4*0+12,8*8*4*0+16,8*8*4*0+20,8*8*4*0+24,8*8*4*0+28,
 		8*8*4*2+0,8*8*4*2+4,8*8*4*2+8,8*8*4*2+12,8*8*4*2+16,8*8*4*2+20,8*8*4*2+24,8*8*4*2+28);
   ps_y:array[0..15] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8,
@@ -589,7 +588,7 @@ begin
   init_gfx(ngfx,8,8,num);
   gfx[ngfx].trans[15]:=true;
   gfx_set_desc_data(4,0,8*8*4,0,1,2,3);
-  convert_gfx(ngfx,0,memoria_temp,@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(ngfx,0,memoria_temp,@pc_x[0],@ps_y[0],false,false);
 end;
 procedure convert_sprites(ngfx:byte;num:dword);
 begin
@@ -704,26 +703,26 @@ ym2151_0.change_irq_func(snd_irq);
 case main_vars.tipo_maquina of
   138:begin //P-47
         //cargar roms
-        if not(cargar_roms16w(@rom[0],@p47_rom,'p47.zip',0)) then exit;
+        if not(roms_load16w(@rom,p47_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms16w(@rom_snd[0],@p47_sound,'p47.zip',0)) then exit;
+        if not(roms_load16w(@rom_snd,p47_sound)) then exit;
         //OKI Sounds
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@p47_oki1,'p47.zip',0)) then exit;
-        if not(cargar_roms(oki_6295_1.get_rom_addr,@p47_oki2,'p47.zip',0)) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,p47_oki1)) then exit;
+        if not(roms_load(oki_6295_1.get_rom_addr,p47_oki2)) then exit;
         //scroll 0
-        if not(cargar_roms(memoria_temp,@p47_scr0,'p47.zip',0)) then exit;
+        if not(roms_load(memoria_temp,p47_scr0)) then exit;
         convert_chars(0,$4000);
         //scroll 1
-        if not(cargar_roms(memoria_temp,@p47_scr1,'p47.zip',0)) then exit;
+        if not(roms_load(memoria_temp,p47_scr1)) then exit;
         convert_chars(1,$4000);
         //scroll 2
-        if not(cargar_roms(memoria_temp,@p47_scr2,'p47.zip',1)) then exit;
+        if not(roms_load(memoria_temp,p47_scr2)) then exit;
         convert_chars(2,$1000);
         //Sprites
-        if not(cargar_roms(memoria_temp,@p47_sprites,'p47.zip',0)) then exit;
+        if not(roms_load(memoria_temp,p47_sprites)) then exit;
         convert_sprites(3,$1000);
         //Prioridades
-        if not(cargar_roms(@mem_prom[0],@p47_pri,'p47.zip',1)) then exit;
+        if not(roms_load(@mem_prom,p47_pri)) then exit;
         convert_pri;
         //DIP
         marcade.dswa:=$ffff;
@@ -731,30 +730,30 @@ case main_vars.tipo_maquina of
       end;
   139:begin  //Rodland
         //cargar roms
-        if not(cargar_roms16w(memoria_w,@rodland_rom,'rodland.zip',0)) then exit;
-        decript_rodland(@rom[0],memoria_w);
+        if not(roms_load16w(memoria_w,rodland_rom)) then exit;
+        decript_rodland(@rom,memoria_w);
         ptemp:=memoria_w;
         inc(ptemp,$20000);
         copymemory(@rom[$20000],ptemp,$20000);
         //cargar sonido
-        if not(cargar_roms16w(@rom_snd[0],@rodland_sound,'rodland.zip',0)) then exit;
+        if not(roms_load16w(@rom_snd,rodland_sound)) then exit;
         //OKI Sounds
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@rodland_oki1,'rodland.zip')) then exit;
-        if not(cargar_roms(oki_6295_1.get_rom_addr,@rodland_oki2,'rodland.zip')) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,rodland_oki1)) then exit;
+        if not(roms_load(oki_6295_1.get_rom_addr,rodland_oki2)) then exit;
         //scroll 0 y ordenar
-        if not(cargar_roms(memoria_temp,@rodland_scr0,'rodland.zip')) then exit;
+        if not(roms_load(memoria_temp,rodland_scr0)) then exit;
         convert_chars(0,$4000);
         //scroll 1
-        if not(cargar_roms(memoria_temp,@rodland_scr1,'rodland.zip')) then exit;
+        if not(roms_load(memoria_temp,rodland_scr1)) then exit;
         convert_chars(1,$4000);
         //scroll 2
-        if not(cargar_roms(memoria_temp,@rodland_scr2,'rodland.zip')) then exit;
+        if not(roms_load(memoria_temp,rodland_scr2)) then exit;
         convert_chars(2,$1000);
         //Sprites
-        if not(cargar_roms(memoria_temp,@rodland_sprites,'rodland.zip')) then exit;
+        if not(roms_load(memoria_temp,rodland_sprites)) then exit;
         convert_sprites(3,$1000);
         //Prioridades
-        if not(cargar_roms(@mem_prom[0],@rodland_pri,'rodland.zip')) then exit;
+        if not(roms_load(@mem_prom,rodland_pri)) then exit;
         convert_pri;
         //DIP
         marcade.dswa:=$bfff;
@@ -762,28 +761,28 @@ case main_vars.tipo_maquina of
       end;
   140:begin //Saint Dragon
         //cargar roms
-        if not(cargar_roms16w(memoria_w,@stdragon_rom[0],'stdragon.zip',0)) then exit;
-        decript_phantasm(@rom[0],memoria_w);
+        if not(roms_load16w(memoria_w,stdragon_rom)) then exit;
+        decript_phantasm(@rom,memoria_w);
         //rom[$00045e div 2]:=$0098;	// protection
         //cargar sonido
-        if not(cargar_roms16w(@rom_snd[0],@stdragon_sound,'stdragon.zip',0)) then exit;
+        if not(roms_load16w(@rom_snd,stdragon_sound)) then exit;
         //OKI Sounds
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@stdragon_oki1,'stdragon.zip',0)) then exit;
-        if not(cargar_roms(oki_6295_1.get_rom_addr,@stdragon_oki2,'stdragon.zip',0)) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,stdragon_oki1)) then exit;
+        if not(roms_load(oki_6295_1.get_rom_addr,stdragon_oki2)) then exit;
         //scroll 0
-        if not(cargar_roms(memoria_temp,@stdragon_scr0,'stdragon.zip',0)) then exit;
+        if not(roms_load(memoria_temp,stdragon_scr0)) then exit;
         convert_chars(0,$4000);
         //scroll 1
-        if not(cargar_roms(memoria_temp,@stdragon_scr1,'stdragon.zip',0)) then exit;
+        if not(roms_load(memoria_temp,stdragon_scr1)) then exit;
         convert_chars(1,$4000);
         //scroll 2
-        if not(cargar_roms(memoria_temp,@stdragon_scr2,'stdragon.zip')) then exit;
+        if not(roms_load(memoria_temp,stdragon_scr2)) then exit;
         convert_chars(2,$1000);
         //Sprites
-        if not(cargar_roms(memoria_temp,@stdragon_sprites,'stdragon.zip',0)) then exit;
+        if not(roms_load(memoria_temp,stdragon_sprites)) then exit;
         convert_sprites(3,$1000);
         //Prioridades
-        if not(cargar_roms(@mem_prom[0],@stdragon_pri,'stdragon.zip')) then exit;
+        if not(roms_load(@mem_prom,stdragon_pri)) then exit;
         convert_pri;
         marcade.dswa:=$ffbf;
         marcade.dswa_val:=@stdragon_dip;
@@ -796,12 +795,12 @@ reset_megasys1;
 iniciar_megasys1:=true;
 end;
 
-procedure Cargar_megasys1;
+procedure cargar_megasys1;
 begin
 llamadas_maquina.iniciar:=iniciar_megasys1;
 llamadas_maquina.bucle_general:=megasys1_principal;
 llamadas_maquina.reset:=reset_megasys1;
-llamadas_maquina.fps_max:=56.18;
+llamadas_maquina.fps_max:=56.191350;
 end;
 
 end.

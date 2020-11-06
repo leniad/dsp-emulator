@@ -15,9 +15,6 @@ type
       posicion_dentro_zip:integer;
       nombre_zip,file_mask:string;
     end;
-type tfile_data=record
-      sms_bios_enabled,sms_is_pal:boolean;
-    end;
 
 //Hi Score
 procedure save_hi(nombre:string;posicion:pbyte;longitud:dword);
@@ -41,10 +38,9 @@ procedure decompress_zlib(in_buffer:pointer;in_size:integer;var out_buffer:point
 
 var
   zip_find_files_data:tzip_find_files;
-  file_data:tfile_data;
 
 implementation
-uses spectrum_misc,principal,amstrad_cpc;
+uses spectrum_misc,principal,amstrad_cpc,sms;
 
 //Hi-score
 procedure save_hi(nombre:string;posicion:pbyte;longitud:dword);
@@ -94,6 +90,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.GameBoy:=fich_ini.readString('Dir','GameBoy',directory.Base+'gameboy'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Chip8:=fich_ini.readString('Dir','Chip8',directory.Base+'chip8'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.sms:=fich_ini.readString('Dir','SMS',directory.Base+'sms'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.SG1000:=fich_ini.readString('Dir','SG1000',directory.Base+'sg1000'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Coleco_snap:=fich_ini.readString('Dir','ColecoSnap',directory.Base+'coleco'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.spectrum_48:=fich_ini.ReadString('Dir','spectrum_rom_48',directory.Base+'roms'+main_vars.cadena_dir+'spectrum.zip');
   Directory.spectrum_128:=fich_ini.ReadString('Dir','spectrum_rom_128',directory.Base+'roms'+main_vars.cadena_dir+'spec128.zip');
@@ -105,6 +102,8 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.amstrad_disk:=fich_ini.readString('dir','ams_dsk',directory.Base+'dsk'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.amstrad_snap:=fich_ini.readString('dir','ams_snap',directory.Base+'snap'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.amstrad_rom:=fich_ini.readString('dir','Amstrad_ROM_dir',directory.Base+'snap'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.c64_tap:=fich_ini.readString('dir','c64_tap',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.c64_disk:=fich_ini.readString('dir','c64_disk',directory.Base+'c64'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
   if main_vars.idioma>max_idiomas then main_vars.idioma:=1;
@@ -135,15 +134,14 @@ if fileexists(directory.Base+'dsp.ini') then begin
   var_spectrum.audio_load:=(fich_ini.ReadInteger('spectrum','audioload',0)=1);
   var_spectrum.audio_128k:=fich_ini.ReadInteger('spectrum','audio_128k',0);
   var_spectrum.speaker_oversample:=(fich_ini.ReadInteger('spectrum','beeperoversample',0)=1);
+  var_spectrum.turbo_sound:=(fich_ini.ReadInteger('spectrum','turbo_sound',0)=1);
   ulaplus.enabled:=(fich_ini.ReadInteger('spectrum','ulaplus',0)=1);
   //Configuracion CPC
-  for f:=0 to 6 do cpc_rom_slot[f]:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
+  for f:=0 to 6 do cpc_rom[f].name:=fich_ini.readString('cpc','rom_dir_'+inttostr(f),'');
   cpc_ga.cpc_model:=fich_ini.ReadInteger('cpc','cpcmodel',0);
   cpc_ga.ram_exp:=fich_ini.ReadInteger('cpc','cpcramexp',0);
-  cpc_ppi.use_motor:=(fich_ini.ReadInteger('cpc','cpcmotor',0))<>0;
   //Configuracion SMS
-  file_data.sms_is_pal:=(fich_ini.ReadInteger('sms','is_pal',1)=1);
-  file_data.sms_bios_enabled:=(fich_ini.ReadInteger('sms','bios_enabled',0)=1);
+  sms_model:=fich_ini.ReadInteger('sms','model',1);
   //Teclas
   arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',KEYBOARD_UP) and $ff;
   arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
@@ -182,19 +180,19 @@ if fileexists(directory.Base+'dsp.ini') then begin
   arcade_input.jbut4[1]:=fich_ini.ReadInteger('keyboard','jbut4_1',4) and $ff;
   arcade_input.jbut5[1]:=fich_ini.ReadInteger('keyboard','jbut5_1',5) and $ff;
   //Autofire
-  autofire_enabled[0]:=fich_ini.ReadInteger('keyboard','autofire_p1_but0',0)<>0;
-  autofire_enabled[1]:=fich_ini.ReadInteger('keyboard','autofire_p1_but1',0)<>0;
-  autofire_enabled[2]:=fich_ini.ReadInteger('keyboard','autofire_p1_but2',0)<>0;
-  autofire_enabled[3]:=fich_ini.ReadInteger('keyboard','autofire_p1_but3',0)<>0;
-  autofire_enabled[4]:=fich_ini.ReadInteger('keyboard','autofire_p1_but4',0)<>0;
-  autofire_enabled[5]:=fich_ini.ReadInteger('keyboard','autofire_p1_but5',0)<>0;
-  autofire_enabled[6]:=fich_ini.ReadInteger('keyboard','autofire_p2_but0',0)<>0;
-  autofire_enabled[7]:=fich_ini.ReadInteger('keyboard','autofire_p2_but1',0)<>0;
-  autofire_enabled[8]:=fich_ini.ReadInteger('keyboard','autofire_p2_but2',0)<>0;
-  autofire_enabled[9]:=fich_ini.ReadInteger('keyboard','autofire_p2_but3',0)<>0;
-  autofire_enabled[10]:=fich_ini.ReadInteger('keyboard','autofire_p2_but4',0)<>0;
-  autofire_enabled[11]:=fich_ini.ReadInteger('keyboard','autofire_p2_but5',0)<>0;
-  autofire_general:=fich_ini.ReadInteger('keyboard','autofire_general',0)=0;
+  timers.autofire_enabled[0]:=fich_ini.ReadInteger('keyboard','autofire_p1_but0',0)<>0;
+  timers.autofire_enabled[1]:=fich_ini.ReadInteger('keyboard','autofire_p1_but1',0)<>0;
+  timers.autofire_enabled[2]:=fich_ini.ReadInteger('keyboard','autofire_p1_but2',0)<>0;
+  timers.autofire_enabled[3]:=fich_ini.ReadInteger('keyboard','autofire_p1_but3',0)<>0;
+  timers.autofire_enabled[4]:=fich_ini.ReadInteger('keyboard','autofire_p1_but4',0)<>0;
+  timers.autofire_enabled[5]:=fich_ini.ReadInteger('keyboard','autofire_p1_but5',0)<>0;
+  timers.autofire_enabled[6]:=fich_ini.ReadInteger('keyboard','autofire_p2_but0',0)<>0;
+  timers.autofire_enabled[7]:=fich_ini.ReadInteger('keyboard','autofire_p2_but1',0)<>0;
+  timers.autofire_enabled[8]:=fich_ini.ReadInteger('keyboard','autofire_p2_but2',0)<>0;
+  timers.autofire_enabled[9]:=fich_ini.ReadInteger('keyboard','autofire_p2_but3',0)<>0;
+  timers.autofire_enabled[10]:=fich_ini.ReadInteger('keyboard','autofire_p2_but4',0)<>0;
+  timers.autofire_enabled[11]:=fich_ini.ReadInteger('keyboard','autofire_p2_but5',0)<>0;
+  timers.autofire_on:=fich_ini.ReadInteger('keyboard','autofire_general',0)<>0;
   //tipo y numero joystick
   arcade_input.use_key[0]:=fich_ini.ReadInteger('keyboard','use_keyb_0',0)=0;
   arcade_input.use_key[1]:=fich_ini.ReadInteger('keyboard','use_keyb_1',0)=0;
@@ -215,6 +213,7 @@ end else begin
   Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
   Directory.Coleco_snap:=directory.Base+'coleco'+main_vars.cadena_dir;
   Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
+  Directory.sg1000:=directory.base+'sg1000'+main_vars.cadena_dir;
   Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
   Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
   Directory.arcade_list_roms[0]:=directory.base+'roms'+main_vars.cadena_dir;
@@ -231,6 +230,8 @@ end else begin
   Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
   Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
   Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
+  Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
+  Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
   sound_status.calidad_audio:=1;
@@ -247,14 +248,13 @@ end else begin
   mouse.tipo:=0;
   ulaplus.enabled:=true;
   var_spectrum.speaker_oversample:=false;
+  var_spectrum.turbo_sound:=false;
   //Configuracion CPC
-  for f:=0 to 6 do cpc_rom_slot[f]:='';
+  for f:=0 to 6 do cpc_rom[f].name:='';
   cpc_ga.cpc_model:=0;
   cpc_ga.ram_exp:=0;
-  cpc_ppi.use_motor:=false;
   //Configuracion basica SMS
-  file_data.sms_is_pal:=false;
-  file_data.sms_bios_enabled:=true;
+  sms_model:=0;
   //Teclas
   arcade_input.nup[0]:=KEYBOARD_UP;
   arcade_input.ndown[0]:=KEYBOARD_DOWN;
@@ -296,19 +296,19 @@ end else begin
   arcade_input.use_key[1]:=true;
   arcade_input.num_joystick[0]:=0;
   arcade_input.num_joystick[1]:=0;
-  autofire_enabled[0]:=false;
-  autofire_enabled[1]:=false;
-  autofire_enabled[2]:=false;
-  autofire_enabled[3]:=false;
-  autofire_enabled[4]:=false;
-  autofire_enabled[5]:=false;
-  autofire_enabled[6]:=false;
-  autofire_enabled[7]:=false;
-  autofire_enabled[8]:=false;
-  autofire_enabled[9]:=false;
-  autofire_enabled[10]:=false;
-  autofire_enabled[11]:=false;
-  autofire_general:=false;
+  timers.autofire_enabled[0]:=false;
+  timers.autofire_enabled[1]:=false;
+  timers.autofire_enabled[2]:=false;
+  timers.autofire_enabled[3]:=false;
+  timers.autofire_enabled[4]:=false;
+  timers.autofire_enabled[5]:=false;
+  timers.autofire_enabled[6]:=false;
+  timers.autofire_enabled[7]:=false;
+  timers.autofire_enabled[8]:=false;
+  timers.autofire_enabled[9]:=false;
+  timers.autofire_enabled[10]:=false;
+  timers.autofire_enabled[11]:=false;
+  timers.autofire_on:=false;
   //Joystick calibration
   for f:=0 to NUM_PLAYERS do begin
     arcade_input.joy_left[f]:=0;
@@ -321,6 +321,7 @@ if ((directory.Nes='') or (directory.Nes=main_vars.cadena_dir)) then Directory.N
 if ((Directory.GameBoy='') or (directory.GameBoy=main_vars.cadena_dir)) then Directory.GameBoy:=directory.base+'gameboy'+main_vars.cadena_dir;
 if ((Directory.Chip8='') or (directory.Chip8=main_vars.cadena_dir)) then Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
 if ((Directory.sms='') or (directory.sms=main_vars.cadena_dir)) then Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
+if ((Directory.sg1000='') or (directory.sg1000=main_vars.cadena_dir)) then Directory.sg1000:=directory.base+'sg1000'+main_vars.cadena_dir;
 if ((Directory.coleco_snap='') or (directory.coleco_snap=main_vars.cadena_dir)) then Directory.coleco_snap:=directory.base+'coleco'+main_vars.cadena_dir;
 if ((Directory.spectrum_image='') or (directory.spectrum_image=main_vars.cadena_dir)) then Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
 if ((Directory.qsnapshot='') or (directory.qsnapshot=main_vars.cadena_dir)) then Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
@@ -338,6 +339,8 @@ if ((Directory.amstrad_tap='') or (directory.amstrad_tap=main_vars.cadena_dir)) 
 if ((Directory.amstrad_disk='') or (directory.amstrad_disk=main_vars.cadena_dir)) then Directory.amstrad_disk:=directory.base+'dsk'+main_vars.cadena_dir;
 if ((Directory.amstrad_snap='') or (directory.amstrad_snap=main_vars.cadena_dir)) then Directory.amstrad_snap:=directory.base+'snap'+main_vars.cadena_dir;
 if ((Directory.amstrad_rom='') or( directory.amstrad_rom=main_vars.cadena_dir)) then Directory.amstrad_rom:=directory.base+'snap'+main_vars.cadena_dir;
+if ((Directory.c64_tap='') or( directory.c64_tap=main_vars.cadena_dir)) then Directory.c64_tap:=directory.base+'c64'+main_vars.cadena_dir;
+if ((Directory.c64_disk='') or( directory.c64_disk=main_vars.cadena_dir)) then Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
 end;
 
 function test_dir(cadena:string):string;
@@ -368,6 +371,7 @@ fich_ini.Writestring('dir','dir_samples',test_dir(Directory.Arcade_samples));
 fich_ini.Writestring('dir','nes',test_dir(Directory.Nes));
 fich_ini.Writestring('dir','chip8',test_dir(Directory.Chip8));
 fich_ini.Writestring('dir','sms',test_dir(Directory.sms));
+fich_ini.Writestring('dir','sg1000',test_dir(Directory.sg1000));
 fich_ini.Writestring('dir','qsnapshot',test_dir(Directory.qsnapshot));
 fich_ini.Writestring('dir','GameBoy',test_dir(Directory.GameBoy));
 fich_ini.Writestring('dir','ColecoSnap',test_dir(Directory.coleco_snap));
@@ -382,6 +386,8 @@ fich_ini.Writestring('dir','ams_tap',test_dir(Directory.amstrad_tap));
 fich_ini.Writestring('dir','ams_dsk',test_dir(Directory.amstrad_disk));
 fich_ini.Writestring('dir','ams_snap',test_dir(Directory.amstrad_snap));
 fich_ini.Writestring('dir','ams_rom',test_dir(Directory.amstrad_rom));
+fich_ini.Writestring('dir','c64_tap',test_dir(Directory.c64_tap));
+fich_ini.Writestring('dir','c64_disk',test_dir(Directory.c64_disk));
 //Config general
 fich_ini.WriteInteger('dsp','sonido',sound_status.calidad_audio);
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
@@ -397,16 +403,15 @@ fich_ini.WriteInteger('spectrum','border',borde.tipo);
 fich_ini.WriteInteger('spectrum','tipo_mouse',mouse.tipo);
 fich_ini.WriteInteger('spectrum','audioload',byte(var_spectrum.audio_load));
 fich_ini.WriteInteger('spectrum','beeperoversample',byte(var_spectrum.speaker_oversample));
+fich_ini.WriteInteger('spectrum','turbo_sound',byte(var_spectrum.turbo_sound));
 fich_ini.WriteInteger('spectrum','audio_128k',var_spectrum.audio_128k);
 fich_ini.WriteInteger('spectrum','ulaplus',byte(ulaplus.enabled));
 //Configuracion CPC
-for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom_slot[f]);
+for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom[f].name);
 fich_ini.WriteInteger('cpc','cpcmodel',cpc_ga.cpc_model);
 fich_ini.WriteInteger('cpc','cpcramexp',cpc_ga.ram_exp);
-fich_ini.WriteInteger('cpc','cpcmotor',byte(cpc_ppi.use_motor));
 //Config SMS
-fich_ini.WriteInteger('sms','is_pal',byte(file_data.sms_is_pal));
-fich_ini.WriteInteger('sms','bios_enabled',byte(file_data.sms_bios_enabled));
+fich_ini.WriteInteger('sms','model',sms_model);
 //Teclas P1
 fich_ini.WriteInteger('keyboard','up_0',arcade_input.nup[0]);
 fich_ini.WriteInteger('keyboard','down_0',arcade_input.ndown[0]);
@@ -447,19 +452,19 @@ fich_ini.WriteInteger('keyboard','jbut3_1',arcade_input.jbut3[1]);
 fich_ini.WriteInteger('keyboard','jbut4_1',arcade_input.jbut4[1]);
 fich_ini.WriteInteger('keyboard','jbut5_1',arcade_input.jbut5[1]);
 //Autofire
-fich_ini.WriteInteger('keyboard','autofire_p1_but0',byte(autofire_enabled[0]));
-fich_ini.WriteInteger('keyboard','autofire_p1_but1',byte(autofire_enabled[1]));
-fich_ini.WriteInteger('keyboard','autofire_p1_but2',byte(autofire_enabled[2]));
-fich_ini.WriteInteger('keyboard','autofire_p1_but3',byte(autofire_enabled[3]));
-fich_ini.WriteInteger('keyboard','autofire_p1_but4',byte(autofire_enabled[4]));
-fich_ini.WriteInteger('keyboard','autofire_p1_but5',byte(autofire_enabled[5]));
-fich_ini.WriteInteger('keyboard','autofire_p2_but0',byte(autofire_enabled[6]));
-fich_ini.WriteInteger('keyboard','autofire_p2_but1',byte(autofire_enabled[7]));
-fich_ini.WriteInteger('keyboard','autofire_p2_but2',byte(autofire_enabled[8]));
-fich_ini.WriteInteger('keyboard','autofire_p2_but3',byte(autofire_enabled[9]));
-fich_ini.WriteInteger('keyboard','autofire_p2_but4',byte(autofire_enabled[10]));
-fich_ini.WriteInteger('keyboard','autofire_p2_but5',byte(autofire_enabled[11]));
-fich_ini.WriteInteger('keyboard','autofire_general',byte(not(autofire_general)));
+fich_ini.WriteInteger('keyboard','autofire_p1_but0',byte(timers.autofire_enabled[0]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but1',byte(timers.autofire_enabled[1]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but2',byte(timers.autofire_enabled[2]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but3',byte(timers.autofire_enabled[3]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but4',byte(timers.autofire_enabled[4]));
+fich_ini.WriteInteger('keyboard','autofire_p1_but5',byte(timers.autofire_enabled[5]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but0',byte(timers.autofire_enabled[6]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but1',byte(timers.autofire_enabled[7]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but2',byte(timers.autofire_enabled[8]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but3',byte(timers.autofire_enabled[9]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but4',byte(timers.autofire_enabled[10]));
+fich_ini.WriteInteger('keyboard','autofire_p2_but5',byte(timers.autofire_enabled[11]));
+fich_ini.WriteInteger('keyboard','autofire_general',byte(timers.autofire_on));
 //tipo y numero joystick
 fich_ini.WriteInteger('keyboard','use_keyb_0',byte(not(arcade_input.use_key[0])));
 fich_ini.WriteInteger('keyboard','use_keyb_1',byte(not(arcade_input.use_key[1])));

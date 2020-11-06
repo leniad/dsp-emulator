@@ -33,10 +33,8 @@ type
 var
   ym2203_0,ym2203_1:ym2203_chip;
 
-procedure ym2203_0_timer1;
-procedure ym2203_0_timer2;
-procedure ym2203_1_timer1;
-procedure ym2203_1_timer2;
+procedure ym2203_timer1(index:byte);
+procedure ym2203_timer2(index:byte);
 procedure ym2203_0_init_timer_a(count:single);
 procedure ym2203_0_init_timer_b(count:single);
 procedure ym2203_1_init_timer_a(count:single);
@@ -70,17 +68,15 @@ begin
   self.opn.ST.IRQ_Handler:=nil;
   self.timer_adjust:=sound_status.cpu_clock/self.OPN.ST.clock;
   self.chip_number:=chips_total;
+  self.timer1:=timers.init(sound_status.cpu_num,1,nil,ym2203_timer1,false,chips_total);
+  self.timer2:=timers.init(sound_status.cpu_num,1,nil,ym2203_timer2,false,chips_total);
   case chips_total of
     0:begin
-        self.timer1:=init_timer(sound_status.cpu_num,1,ym2203_0_timer1,false);
-        self.timer2:=init_timer(sound_status.cpu_num,1,ym2203_0_timer2,false);
         self.OPN.ST.TIMER_set_a:=ym2203_0_init_timer_a;
         self.OPN.ST.TIMER_set_b:=ym2203_0_init_timer_b;
         self.OPN.ST.SSG_Clock_change:=change_ay_clock_0;
     end;
     1:begin
-        self.timer1:=init_timer(sound_status.cpu_num,1,ym2203_1_timer1,false);
-        self.timer2:=init_timer(sound_status.cpu_num,1,ym2203_1_timer2,false);
         self.OPN.ST.TIMER_set_a:=ym2203_1_init_timer_a;
         self.OPN.ST.TIMER_set_b:=ym2203_1_init_timer_b;
         self.OPN.ST.SSG_Clock_change:=change_ay_clock_1;
@@ -394,40 +390,35 @@ begin
   self.write_int(1,data);
 end;
 
-procedure ym2203_0_timer1;
+procedure ym2203_timer1(index:byte);
+var
+  chip:ym2203_chip;
 begin
-  TimerAOver(ym2203_0.OPN.ST);
-  if (ym2203_0.OPN.ST.mode and $80)<>0 then begin
+  case index of
+    0:chip:=ym2203_0;
+    1:chip:=ym2203_1;
+  end;
+  TimerAOver(chip.OPN.ST);
+  if (chip.OPN.ST.mode and $80)<>0 then begin
 			// CSM mode auto key on */
-			CSMKeyControll(ym2203_0.OPN.p_ch[2]);
+			CSMKeyControll(chip.OPN.p_ch[2]);
   end;
 end;
 
-procedure ym2203_0_timer2;
+procedure ym2203_timer2(index:byte);
 begin
-  TimerBOver(ym2203_0.OPN.ST);
-end;
-
-procedure ym2203_1_timer1;
-begin
-  TimerAOver(ym2203_1.OPN.ST);
-  if (ym2203_1.OPN.ST.mode and $80)<>0 then begin
-			// CSM mode auto key on */
-			CSMKeyControll(ym2203_1.OPN.p_ch[2]);
+  case index of
+    0:TimerBOver(ym2203_0.OPN.ST);
+    1:TimerBOver(ym2203_1.OPN.ST);
   end;
-end;
-
-procedure ym2203_1_timer2;
-begin
-  TimerBOver(ym2203_1.OPN.ST);
 end;
 
 procedure change_timer_status(timer_num:byte;timer_adjust:single);
 begin
-  if timer_adjust=0 then timer[timer_num].enabled:=false
+  if timer_adjust=0 then timers.enabled(timer_num,false)
     else begin
-      timer[timer_num].enabled:=true;
-      timer[timer_num].time_final:=timer_adjust;
+      timers.enabled(timer_num,true);
+      timers.timer[timer_num].time_final:=timer_adjust;
     end;
 end;
 

@@ -10,26 +10,26 @@ procedure cargar_irem_m62;
 implementation
 const
         //Kung-Fu Master
-        kungfum_rom:array[0..2] of tipo_roms=(
-        (n:'a-4e-c.bin';l:$4000;p:0;crc:$b6e2d083),(n:'a-4d-c.bin';l:$4000;p:$4000;crc:$7532918e),());
-        kungfum_pal:array[0..7] of tipo_roms=(
+        kungfum_rom:array[0..1] of tipo_roms=(
+        (n:'a-4e-c.bin';l:$4000;p:0;crc:$b6e2d083),(n:'a-4d-c.bin';l:$4000;p:$4000;crc:$7532918e));
+        kungfum_pal:array[0..6] of tipo_roms=(
         (n:'g-1j-.bin';l:$100;p:0;crc:$668e6bca),(n:'g-1f-.bin';l:$100;p:$100;crc:$964b6495),
         (n:'g-1h-.bin';l:$100;p:$200;crc:$550563e1),(n:'b-1m-.bin';l:$100;p:$300;crc:$76c05a9c),
         (n:'b-1n-.bin';l:$100;p:$400;crc:$23f06b99),(n:'b-1l-.bin';l:$100;p:$500;crc:$35e45021),
-        (n:'b-5f-.bin';l:$20;p:$600;crc:$7a601c3d),());
-        kungfum_char:array[0..3] of tipo_roms=(
+        (n:'b-5f-.bin';l:$20;p:$600;crc:$7a601c3d));
+        kungfum_char:array[0..2] of tipo_roms=(
         (n:'g-4c-a.bin';l:$2000;p:0;crc:$6b2cc9c8),(n:'g-4d-a.bin';l:$2000;p:$2000;crc:$c648f558),
-        (n:'g-4e-a.bin';l:$2000;p:$4000;crc:$fbe9276e),());
-        kungfum_sound:array[0..3] of tipo_roms=(
+        (n:'g-4e-a.bin';l:$2000;p:$4000;crc:$fbe9276e));
+        kungfum_sound:array[0..2] of tipo_roms=(
         (n:'a-3e-.bin';l:$2000;p:$a000;crc:$58e87ab0),(n:'a-3f-.bin';l:$2000;p:$c000;crc:$c81e31ea),
-        (n:'a-3h-.bin';l:$2000;p:$e000;crc:$d99fb995),());
-        kungfum_sprites:array[0..12] of tipo_roms=(
+        (n:'a-3h-.bin';l:$2000;p:$e000;crc:$d99fb995));
+        kungfum_sprites:array[0..11] of tipo_roms=(
         (n:'b-4k-.bin';l:$2000;p:0;crc:$16fb5150),(n:'b-4f-.bin';l:$2000;p:$2000;crc:$67745a33),
         (n:'b-4l-.bin';l:$2000;p:$4000;crc:$bd1c2261),(n:'b-4h-.bin';l:$2000;p:$6000;crc:$8ac5ed3a),
         (n:'b-3n-.bin';l:$2000;p:$8000;crc:$28a213aa),(n:'b-4n-.bin';l:$2000;p:$a000;crc:$d5228df3),
         (n:'b-4m-.bin';l:$2000;p:$c000;crc:$b16de4f2),(n:'b-3m-.bin';l:$2000;p:$e000;crc:$eba0d66b),
         (n:'b-4c-.bin';l:$2000;p:$10000;crc:$01298885),(n:'b-4e-.bin';l:$2000;p:$12000;crc:$c77b87d4),
-        (n:'b-4d-.bin';l:$2000;p:$14000;crc:$6a70615f),(n:'b-4a-.bin';l:$2000;p:$16000;crc:$6189d626),());
+        (n:'b-4d-.bin';l:$2000;p:$14000;crc:$6a70615f),(n:'b-4a-.bin';l:$2000;p:$16000;crc:$6189d626));
         //Dip
         kungfum_dip_a:array [0..4] of def_dip=(
         (mask:$1;name:'Difficulty';number:2;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -46,90 +46,86 @@ const
         (mask:$40;name:'Invulnerability (Cheat)';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Service';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Spelunker
-        spl_rom:array[0..4] of tipo_roms=(
+        spl_rom:array[0..3] of tipo_roms=(
         (n:'spra.4e';l:$4000;p:0;crc:$cf811201),(n:'spra.4d';l:$4000;p:$4000;crc:$bb4faa4f),
-        (n:'sprm.7c';l:$4000;p:$8000;crc:$fb6197e2),(n:'sprm.7b';l:$4000;p:$c000;crc:$26bb25a4),());
-        spl_pal:array[0..7] of tipo_roms=(
+        (n:'sprm.7c';l:$4000;p:$8000;crc:$fb6197e2),(n:'sprm.7b';l:$4000;p:$c000;crc:$26bb25a4));
+        spl_pal:array[0..6] of tipo_roms=(
         (n:'sprm.2k';l:$100;p:0;crc:$fd8fa991),(n:'sprm.2j';l:$100;p:$100;crc:$0e3890b4),
         (n:'sprm.2h';l:$100;p:$200;crc:$0478082b),(n:'sprb.1m';l:$100;p:$300;crc:$8d8cccad),
         (n:'sprb.1n';l:$100;p:$400;crc:$c40e1cb2),(n:'sprb.1l';l:$100;p:$500;crc:$3ec46248),
-        (n:'sprb.5p';l:$20;p:$600;crc:$746c6238),());
-        spl_char:array[0..3] of tipo_roms=(
+        (n:'sprb.5p';l:$20;p:$600;crc:$746c6238));
+        spl_char:array[0..2] of tipo_roms=(
         (n:'sprm.4p';l:$4000;p:0;crc:$4dfe2e63),(n:'sprm.4l';l:$4000;p:$4000;crc:$239f2cd4),
-        (n:'sprm.4m';l:$4000;p:$8000;crc:$d6d07d70),());
-        spl_sound:array[0..2] of tipo_roms=(
-        (n:'spra.3d';l:$4000;p:$8000;crc:$4110363c),(n:'spra.3f';l:$4000;p:$c000;crc:$67a9d2e6),());
-        spl_sprites:array[0..6] of tipo_roms=(
+        (n:'sprm.4m';l:$4000;p:$8000;crc:$d6d07d70));
+        spl_sound:array[0..1] of tipo_roms=(
+        (n:'spra.3d';l:$4000;p:$8000;crc:$4110363c),(n:'spra.3f';l:$4000;p:$c000;crc:$67a9d2e6));
+        spl_sprites:array[0..5] of tipo_roms=(
         (n:'sprb.4k';l:$4000;p:0;crc:$e7f0e861),(n:'sprb.4f';l:$4000;p:$4000;crc:$32663097),
         (n:'sprb.3p';l:$4000;p:$8000;crc:$8fbaf373),(n:'sprb.4p';l:$4000;p:$c000;crc:$37069b76),
-        (n:'sprb.4c';l:$4000;p:$10000;crc:$cfe46a88),(n:'sprb.4e';l:$4000;p:$14000;crc:$11c48979),());
-        spl_tiles:array[0..6] of tipo_roms=(
+        (n:'sprb.4c';l:$4000;p:$10000;crc:$cfe46a88),(n:'sprb.4e';l:$4000;p:$14000;crc:$11c48979));
+        spl_tiles:array[0..5] of tipo_roms=(
         (n:'sprm.1d';l:$4000;p:0;crc:$4ef7ae89),(n:'sprm.1e';l:$4000;p:$4000;crc:$a3755180),
         (n:'sprm.3c';l:$4000;p:$8000;crc:$b4008e6a),(n:'sprm.3b';l:$4000;p:$c000;crc:$f61cf012),
-        (n:'sprm.1c';l:$4000;p:$10000;crc:$58b21c76),(n:'sprm.1b';l:$4000;p:$14000;crc:$a95cb3e5),());
+        (n:'sprm.1c';l:$4000;p:$10000;crc:$58b21c76),(n:'sprm.1b';l:$4000;p:$14000;crc:$a95cb3e5));
         //Spelunker II
-        spl2_rom:array[0..5] of tipo_roms=(
+        spl2_rom:array[0..4] of tipo_roms=(
         (n:'sp2-a.4e';l:$4000;p:0;crc:$96c04bbb),(n:'sp2-a.4d';l:$4000;p:$4000;crc:$cb38c2ff),
         (n:'sp2-r.7d';l:$8000;p:$8000;crc:$558837ea),(n:'sp2-r.7c';l:$8000;p:$10000;crc:$4b380162),
-        (n:'sp2-r.7b';l:$4000;p:$18000;crc:$7709a1fe),());
-        spl2_pal:array[0..7] of tipo_roms=(
+        (n:'sp2-r.7b';l:$4000;p:$18000;crc:$7709a1fe));
+        spl2_pal:array[0..6] of tipo_roms=(
         (n:'sp2-r.1k';l:$200;p:0;crc:$31c1bcdc),(n:'sp2-r.2k';l:$100;p:$200;crc:$1cf5987e),
         (n:'sp2-r.2j';l:$100;p:$300;crc:$1acbe2a5),(n:'sp2-b.1m';l:$100;p:$400;crc:$906104c7),
         (n:'sp2-b.1n';l:$100;p:$500;crc:$5a564c06),(n:'sp2-b.1l';l:$100;p:$600;crc:$8f4a2e3c),
-        (n:'sp2-b.5p';l:$20;p:$700;crc:$cd126f6a),());
-        spl2_char:array[0..3] of tipo_roms=(
+        (n:'sp2-b.5p';l:$20;p:$700;crc:$cd126f6a));
+        spl2_char:array[0..2] of tipo_roms=(
         (n:'sp2-r.4l';l:$4000;p:0;crc:$6a4b2d8b),(n:'sp2-r.4m';l:$4000;p:$4000;crc:$e1368b61),
-        (n:'sp2-r.4p';l:$4000;p:$8000;crc:$fc138e13),());
-        spl2_sound:array[0..2] of tipo_roms=(
-        (n:'sp2-a.3d';l:$4000;p:$8000;crc:$839ec7e2),(n:'sp2-a.3f';l:$4000;p:$c000;crc:$ad3ce898),());
-        spl2_sprites:array[0..6] of tipo_roms=(
+        (n:'sp2-r.4p';l:$4000;p:$8000;crc:$fc138e13));
+        spl2_sound:array[0..1] of tipo_roms=(
+        (n:'sp2-a.3d';l:$4000;p:$8000;crc:$839ec7e2),(n:'sp2-a.3f';l:$4000;p:$c000;crc:$ad3ce898));
+        spl2_sprites:array[0..5] of tipo_roms=(
         (n:'sp2-b.4k';l:$4000;p:0;crc:$6cb67a17),(n:'sp2-b.4f';l:$4000;p:$4000;crc:$e4a1166f),
         (n:'sp2-b.3n';l:$4000;p:$8000;crc:$f59e8b76),(n:'sp2-b.4n';l:$4000;p:$c000;crc:$fa65bac9),
-        (n:'sp2-b.4c';l:$4000;p:$10000;crc:$1caf7013),(n:'sp2-b.4e';l:$4000;p:$14000;crc:$780a463b),());
-        spl2_tiles:array[0..3] of tipo_roms=(
+        (n:'sp2-b.4c';l:$4000;p:$10000;crc:$1caf7013),(n:'sp2-b.4e';l:$4000;p:$14000;crc:$780a463b));
+        spl2_tiles:array[0..2] of tipo_roms=(
         (n:'sp2-r.1d';l:$8000;p:0;crc:$c19fa4c9),(n:'sp2-r.3b';l:$8000;p:$8000;crc:$366604af),
-        (n:'sp2-r.1b';l:$8000;p:$10000;crc:$3a0c4d47),());
+        (n:'sp2-r.1b';l:$8000;p:$10000;crc:$3a0c4d47));
         //Lode Runner
-        ldrun_rom:array[0..4] of tipo_roms=(
+        ldrun_rom:array[0..3] of tipo_roms=(
         (n:'lr-a-4e';l:$2000;p:0;crc:$5d7e2a4d),(n:'lr-a-4d';l:$2000;p:$2000;crc:$96f20473),
-        (n:'lr-a-4b';l:$2000;p:$4000;crc:$b041c4a9),(n:'lr-a-4a';l:$2000;p:$6000;crc:$645e42aa),());
-        ldrun_pal:array[0..7] of tipo_roms=(
+        (n:'lr-a-4b';l:$2000;p:$4000;crc:$b041c4a9),(n:'lr-a-4a';l:$2000;p:$6000;crc:$645e42aa));
+        ldrun_pal:array[0..6] of tipo_roms=(
         (n:'lr-e-3m';l:$100;p:0;crc:$53040416),(n:'lr-e-3l';l:$100;p:$100;crc:$67786037),
         (n:'lr-e-3n';l:$100;p:$200;crc:$5b716837),(n:'lr-b-1m';l:$100;p:$300;crc:$4bae1c25),
         (n:'lr-b-1n';l:$100;p:$400;crc:$9cd3db94),(n:'lr-b-1l';l:$100;p:$500;crc:$08d8cf9a),
-        (n:'lr-b-5p';l:$20;p:$600;crc:$e01f69e2),());
-        ldrun_char:array[0..3] of tipo_roms=(
+        (n:'lr-b-5p';l:$20;p:$600;crc:$e01f69e2));
+        ldrun_char:array[0..2] of tipo_roms=(
         (n:'lr-e-2d';l:$2000;p:0;crc:$24f9b58d),(n:'lr-e-2j';l:$2000;p:$2000;crc:$43175e08),
-        (n:'lr-e-2f';l:$2000;p:$4000;crc:$e0317124),());
-        ldrun_sound:array[0..2] of tipo_roms=(
-        (n:'lr-a-3f';l:$2000;p:$c000;crc:$7a96accd),(n:'lr-a-3h';l:$2000;p:$e000;crc:$3f7f3939),());
-        ldrun_sprites:array[0..3] of tipo_roms=(
+        (n:'lr-e-2f';l:$2000;p:$4000;crc:$e0317124));
+        ldrun_sound:array[0..1] of tipo_roms=(
+        (n:'lr-a-3f';l:$2000;p:$c000;crc:$7a96accd),(n:'lr-a-3h';l:$2000;p:$e000;crc:$3f7f3939));
+        ldrun_sprites:array[0..2] of tipo_roms=(
         (n:'lr-b-4k';l:$2000;p:0;crc:$8141403e),(n:'lr-b-3n';l:$2000;p:$2000;crc:$55154154),
-        (n:'lr-b-4c';l:$2000;p:$4000;crc:$924e34d0),());
+        (n:'lr-b-4c';l:$2000;p:$4000;crc:$924e34d0));
         //Lode Runner II
-        ldrun2_rom:array[0..6] of tipo_roms=(
+        ldrun2_rom:array[0..5] of tipo_roms=(
         (n:'lr2-a-4e.a';l:$2000;p:0;crc:$22313327),(n:'lr2-a-4d';l:$2000;p:$2000;crc:$ef645179),
         (n:'lr2-a-4a.a';l:$2000;p:$4000;crc:$b11ddf59),(n:'lr2-a-4a';l:$2000;p:$6000;crc:$470cc8a1),
-        (n:'lr2-h-1c.a';l:$2000;p:$8000;crc:$7ebcadbc),(n:'lr2-h-1d.a';l:$2000;p:$a000;crc:$64cbb7f9),());
-        ldrun2_pal:array[0..7] of tipo_roms=(
+        (n:'lr2-h-1c.a';l:$2000;p:$8000;crc:$7ebcadbc),(n:'lr2-h-1d.a';l:$2000;p:$a000;crc:$64cbb7f9));
+        ldrun2_pal:array[0..6] of tipo_roms=(
         (n:'lr2-h-3m';l:$100;p:0;crc:$2c5d834b),(n:'lr2-h-3l';l:$100;p:$100;crc:$3ae69aca),
         (n:'lr2-h-3n';l:$100;p:$200;crc:$2b28aec5),(n:'lr2-b-1m';l:$100;p:$300;crc:$4ec9bb3d),
         (n:'lr2-b-1n';l:$100;p:$400;crc:$1daf1fa4),(n:'lr2-b-1l';l:$100;p:$500;crc:$c8fb708a),
-        (n:'lr2-b-5p';l:$20;p:$600;crc:$e01f69e2),());
-        ldrun2_char:array[0..3] of tipo_roms=(
+        (n:'lr2-b-5p';l:$20;p:$600;crc:$e01f69e2));
+        ldrun2_char:array[0..2] of tipo_roms=(
         (n:'lr2-h-1e';l:$2000;p:0;crc:$9d63a8ff),(n:'lr2-h-1j';l:$2000;p:$2000;crc:$40332bbd),
-        (n:'lr2-h-1h';l:$2000;p:$4000;crc:$9404727d),());
-        ldrun2_sound:array[0..3] of tipo_roms=(
+        (n:'lr2-h-1h';l:$2000;p:$4000;crc:$9404727d));
+        ldrun2_sound:array[0..2] of tipo_roms=(
         (n:'lr2-a-3e';l:$2000;p:$a000;crc:$853f3898),(n:'lr2-a-3f';l:$2000;p:$c000;crc:$7a96accd),
-        (n:'lr2-a-3h';l:$2000;p:$e000;crc:$2a0e83ca),());
-        ldrun2_sprites:array[0..6] of tipo_roms=(
+        (n:'lr2-a-3h';l:$2000;p:$e000;crc:$2a0e83ca));
+        ldrun2_sprites:array[0..5] of tipo_roms=(
         (n:'lr2-b-4k';l:$2000;p:0;crc:$79909871),(n:'lr2-b-4f';l:$2000;p:$2000;crc:$06ba1ef4),
         (n:'lr2-b-3n';l:$2000;p:$4000;crc:$3cc5893f),(n:'lr2-b-4n';l:$2000;p:$6000;crc:$49c12f42),
-        (n:'lr2-b-4c';l:$2000;p:$8000;crc:$fbe6d24c),(n:'lr2-b-4e';l:$2000;p:$a000;crc:$75172d1f),());
-
-type
-    tipo_update_video_m62=procedure;
-    tipo_calc_nchar_spelunker=function(color:byte):word;
+        (n:'lr2-b-4c';l:$2000;p:$8000;crc:$fbe6d24c),(n:'lr2-b-4e';l:$2000;p:$a000;crc:$75172d1f));
 
 var
  sound_command,val_port1,val_port2,ldrun_color,sprites_sp:byte;
@@ -139,8 +135,8 @@ var
  mem_rom2:array[0..15,0..$fff] of byte;
  rom_bank,rom_bank2,pal_bank,ldrun2_banksw:byte;
  bankcontrol:array[0..1] of byte;
- update_video_m62:tipo_update_video_m62;
- calc_nchar_sp:tipo_calc_nchar_spelunker;
+ update_video_m62:procedure;
+ calc_nchar_sp:function(color:byte):word;
 
 procedure draw_sprites(pos,col,col_mask,pri_mask,pri:byte);inline;
 var
@@ -323,8 +319,8 @@ end;
 
 procedure kungfum_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+    0..$7fff:;
     $a000:scroll_x:=(scroll_x and $100) or valor;
     $b000:scroll_x:=(scroll_x and $ff) or ((valor and 1) shl 8);
     $c000..$c0ff,$e000..$efff:memoria[direccion]:=valor;
@@ -489,7 +485,6 @@ end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   $0..$ff:m6800_0.m6803_internal_reg_w(direccion,valor);
   $800..$8ff:case direccion and $3 of
@@ -497,6 +492,7 @@ case direccion of
                   1:msm_5205_0.data_w(valor);
                   2:msm_5205_1.data_w(valor);
                end;
+  $4000..$ffff:;
 end;
 end;
 
@@ -571,9 +567,9 @@ begin
  ay8910_1.reset;
  msm_5205_0.reset;
  msm_5205_1.reset;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  rom_bank:=0;
  rom_bank2:=0;
  pal_bank:=0;
@@ -589,8 +585,8 @@ end;
 
 function iniciar_irem_m62:boolean;
 var
-      f,x:word;
-      memoria_temp:array[0..$1ffff] of byte;
+  f,x:word;
+  memoria_temp:array[0..$1ffff] of byte;
 const
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
@@ -724,18 +720,18 @@ case main_vars.tipo_maquina of
         //video
         update_video_m62:=update_video_kungfum;
         //cargar roms
-        if not(cargar_roms(@memoria[0],@kungfum_rom[0],'kungfum.zip',0)) then exit;
+        if not(roms_load(@memoria,kungfum_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@kungfum_sound[0],'kungfum.zip',0)) then exit;
+        if not(roms_load(@mem_snd,kungfum_sound)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@kungfum_char[0],'kungfum.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,kungfum_char)) then exit;
         make_chars(1024,0);
         gfx[0].trans[0]:=true;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@kungfum_sprites[0],'kungfum.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,kungfum_sprites)) then exit;
         make_sprites(1024);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@kungfum_pal[0],'kungfum.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,kungfum_pal)) then exit;
         cargar_paleta;
         copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
         marcade.dswa_val:=@kungfum_dip_a;
@@ -751,22 +747,22 @@ case main_vars.tipo_maquina of
         calc_nchar_sp:=calc_nchar_splunker;
         sprites_sp:=1;
         //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@spl_rom[0],'spelunkr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@spl_sound[0],'spelunkr.zip',0)) then exit;
+        if not(roms_load(@mem_snd,spl_sound)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@spl_char[0],'spelunkr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl_char)) then exit;
         make_chars_spl;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@spl_sprites[0],'spelunkr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl_sprites)) then exit;
         make_sprites($400);
         //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@spl_tiles[0],'spelunkr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl_tiles)) then exit;
         make_chars(4096,2);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@spl_pal[0],'spelunkr.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl_pal)) then exit;
         cargar_paleta;
         copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
      end;
@@ -780,23 +776,23 @@ case main_vars.tipo_maquina of
         calc_nchar_sp:=calc_nchar_splunker2;
         sprites_sp:=2;
         //cargar roms y ponerlas en sus bancos (2)
-        if not(cargar_roms(@memoria_temp[0],@spl2_rom[0],'spelunk2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl2_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 15 do copymemory(@mem_rom2[f,0],@memoria_temp[$8000+(f*$1000)],$1000);
         for f:=0 to 3 do copymemory(@mem_rom[f,0],@memoria_temp[$18000+(f*$1000)],$1000);
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@spl2_sound[0],'spelunk2.zip',0)) then exit;
+        if not(roms_load(@mem_snd,spl2_sound)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@spl2_char[0],'spelunk2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl2_char)) then exit;
         make_chars_spl;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@spl2_sprites[0],'spelunk2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl2_sprites)) then exit;
         make_sprites($400);
         //convertir tiles
-        if not(cargar_roms(@memoria_temp[0],@spl2_tiles[0],'spelunk2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl2_tiles)) then exit;
         make_chars(4096,2);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@spl2_pal[0],'spelunk2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,spl2_pal)) then exit;
         cargar_paleta_spl2;
         copymemory(@memoria_sprites[0],@memoria_temp[$700],$20);
      end;
@@ -809,18 +805,18 @@ case main_vars.tipo_maquina of
         update_video_m62:=update_video_ldrun;
         ldrun_color:=$0c;
         //cargar roms
-        if not(cargar_roms(@memoria[0],@ldrun_rom[0],'ldrun.zip',0)) then exit;
+        if not(roms_load(@memoria,ldrun_rom)) then exit;
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@ldrun_sound[0],'ldrun.zip',0)) then exit;
+        if not(roms_load(@mem_snd,ldrun_sound)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@ldrun_char[0],'ldrun.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ldrun_char)) then exit;
         make_chars($400,0);
         gfx[0].trans[0]:=true;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@ldrun_sprites[0],'ldrun.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ldrun_sprites)) then exit;
         make_sprites($100);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@ldrun_pal[0],'ldrun.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ldrun_pal)) then exit;
         cargar_paleta;
         copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
      end;
@@ -833,20 +829,20 @@ case main_vars.tipo_maquina of
         update_video_m62:=update_video_ldrun;
         ldrun_color:=$04;
         //cargar roms y ponerlas en sus bancos
-        if not(cargar_roms(@memoria_temp[0],@ldrun2_rom[0],'ldrun2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ldrun2_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
         for f:=0 to 1 do copymemory(@mem_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
         //cargar sonido
-        if not(cargar_roms(@mem_snd[0],@ldrun2_sound[0],'ldrun2.zip',0)) then exit;
+        if not(roms_load(@mem_snd,ldrun2_sound)) then exit;
         //convertir chars
-        if not(cargar_roms(@memoria_temp[0],@ldrun2_char[0],'ldrun2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ldrun2_char)) then exit;
         make_chars($400,0);
         gfx[0].trans[0]:=true;
         //convertir sprites
-        if not(cargar_roms(@memoria_temp[0],@ldrun2_sprites[0],'ldrun2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ldrun2_sprites)) then exit;
         make_sprites($200);
         //poner la paleta
-        if not(cargar_roms(@memoria_temp[0],@ldrun2_pal[0],'ldrun2.zip',0)) then exit;
+        if not(roms_load(@memoria_temp,ldrun2_pal)) then exit;
         cargar_paleta;
         copymemory(@memoria_sprites[0],@memoria_temp[$600],$20);
      end;

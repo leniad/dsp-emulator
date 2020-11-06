@@ -10,33 +10,33 @@ procedure cargar_skykid;
 implementation
 const
         //Sky Kid
-        skykid_rom:array[0..3] of tipo_roms=(
+        skykid_rom:array[0..2] of tipo_roms=(
         (n:'sk2_2.6c';l:$4000;p:$0;crc:$ea8a5822),(n:'sk1-1c.6b';l:$4000;p:$4000;crc:$7abe6c6c),
-        (n:'sk1_3.6d';l:$4000;p:$8000;crc:$314b8765),());
+        (n:'sk1_3.6d';l:$4000;p:$8000;crc:$314b8765));
         skykid_char:tipo_roms=(n:'sk1_6.6l';l:$2000;p:0;crc:$58b731b9);
         skykid_tiles:tipo_roms=(n:'sk1_5.7e';l:$2000;p:0;crc:$c33a498e);
-        skykid_sprites:array[0..2] of tipo_roms=(
-        (n:'sk1_8.10n';l:$4000;p:0;crc:$44bb7375),(n:'sk1_7.10m';l:$4000;p:$4000;crc:$3454671d),());
-        skykid_mcu:array[0..2] of tipo_roms=(
-        (n:'sk2_4.3c';l:$2000;p:$8000;crc:$a460d0e0),(n:'cus63-63a1.mcu';l:$1000;p:$f000;crc:$6ef08fb3),());
-        skykid_prom:array[0..5] of tipo_roms=(
+        skykid_sprites:array[0..1] of tipo_roms=(
+        (n:'sk1_8.10n';l:$4000;p:0;crc:$44bb7375),(n:'sk1_7.10m';l:$4000;p:$4000;crc:$3454671d));
+        skykid_mcu:array[0..1] of tipo_roms=(
+        (n:'sk2_4.3c';l:$2000;p:$8000;crc:$a460d0e0),(n:'cus63-63a1.mcu';l:$1000;p:$f000;crc:$6ef08fb3));
+        skykid_prom:array[0..4] of tipo_roms=(
         (n:'sk1-1.2n';l:$100;p:$0;crc:$0218e726),(n:'sk1-2.2p';l:$100;p:$100;crc:$fc0d5b85),
         (n:'sk1-3.2r';l:$100;p:$200;crc:$d06b620b),(n:'sk1-4.5n';l:$200;p:$300;crc:$c697ac72),
-        (n:'sk1-5.6n';l:$200;p:$500;crc:$161514a4),());
+        (n:'sk1-5.6n';l:$200;p:$500;crc:$161514a4));
         //Dragon Buster
-        drgnbstr_rom:array[0..3] of tipo_roms=(
+        drgnbstr_rom:array[0..2] of tipo_roms=(
         (n:'db1_2b.6c';l:$4000;p:$0;crc:$0f11cd17),(n:'db1_1.6b';l:$4000;p:$4000;crc:$1c7c1821),
-        (n:'db1_3.6d';l:$4000;p:$8000;crc:$6da169ae),());
+        (n:'db1_3.6d';l:$4000;p:$8000;crc:$6da169ae));
         drgnbstr_char:tipo_roms=(n:'db1_6.6l';l:$2000;p:0;crc:$c080b66c);
         drgnbstr_tiles:tipo_roms=(n:'db1_5.7e';l:$2000;p:0;crc:$28129aed);
-        drgnbstr_sprites:array[0..2] of tipo_roms=(
-        (n:'db1_8.10n';l:$4000;p:0;crc:$11942c61),(n:'db1_7.10m';l:$4000;p:$4000;crc:$cc130fe2),());
-        drgnbstr_mcu:array[0..2] of tipo_roms=(
-        (n:'db1_4.3c';l:$2000;p:$8000;crc:$8a0b1fc1),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a),());
-        drgnbstr_prom:array[0..5] of tipo_roms=(
+        drgnbstr_sprites:array[0..1] of tipo_roms=(
+        (n:'db1_8.10n';l:$4000;p:0;crc:$11942c61),(n:'db1_7.10m';l:$4000;p:$4000;crc:$cc130fe2));
+        drgnbstr_mcu:array[0..1] of tipo_roms=(
+        (n:'db1_4.3c';l:$2000;p:$8000;crc:$8a0b1fc1),(n:'cus60-60a1.mcu';l:$1000;p:$f000;crc:$076ea82a));
+        drgnbstr_prom:array[0..4] of tipo_roms=(
         (n:'db1-1.2n';l:$100;p:$0;crc:$3f8cce97),(n:'db1-2.2p';l:$100;p:$100;crc:$afe32436),
         (n:'db1-3.2r';l:$100;p:$200;crc:$c95ff576),(n:'db1-4.5n';l:$200;p:$300;crc:$b2180c21),
-        (n:'db1-5.6n';l:$200;p:$500;crc:$5e2b3f74),());
+        (n:'db1-5.6n';l:$200;p:$500;crc:$5e2b3f74));
 
 var
  rom_bank:array[0..1,0..$1fff] of byte;
@@ -209,7 +209,7 @@ end;
 procedure skykid_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  $0..$1fff,$a002..$ffff:exit;
+  $0..$1fff,$a002..$ffff:; //ROM
   $2000..$2fff:if memoria[direccion]<>valor then begin
                   gfx[2].buffer[direccion and $7ff]:=true;
                   memoria[direccion]:=valor;
@@ -258,7 +258,7 @@ case direccion of
                   irq_enable_mcu:=not(BIT(direccion and $3fff,13));
                   if not(irq_enable_mcu) then m6800_0.change_irq(CLEAR_LINE);
                end;
-  $8000..$bfff,$f000..$ffff:exit;
+  $8000..$bfff,$f000..$ffff:; //ROM
   $c000..$cfff:mem_snd[direccion]:=valor;
 end;
 end;
@@ -318,7 +318,6 @@ var
   memoria_temp:array[0..$ffff] of byte;
 const
     pc_x:array[0..7] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3 );
-    pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8, 8*8+1, 8*8+2, 8*8+3,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -345,21 +344,21 @@ namco_snd_0:=namco_snd_chip.create(8,true);
 case  main_vars.tipo_maquina of
     123:begin
           //cargar roms
-          if not(cargar_roms(@memoria_temp[0],@skykid_rom[0],'skykid.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,skykid_rom)) then exit;
           //Pongo las ROMs en su banco
           copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
           for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
           //Cargar MCU
-          if not(cargar_roms(@mem_snd[0],@skykid_mcu[0],'skykid.zip',0)) then exit;
+          if not(roms_load(@mem_snd,skykid_mcu)) then exit;
           //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@skykid_char,'skykid.zip',1)) then exit;
+          if not(roms_load(@memoria_temp,skykid_char)) then exit;
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+          convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
           //sprites
           fillchar(memoria_temp[0],$10000,0);
-          if not(cargar_roms(@memoria_temp[0],@skykid_sprites[0],'skykid.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,skykid_sprites)) then exit;
           // unpack the third sprite ROM
           for f:=0 to $1fff do begin
           		memoria_temp[f+$4000+$4000]:=memoria_temp[f+$4000];		// sprite set #1, plane 3
@@ -368,33 +367,33 @@ case  main_vars.tipo_maquina of
           end;
           init_gfx(1,16,16,$200);
           gfx_set_desc_data(3,0,64*8,$200*64*8+4,0,4);
-          convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+          convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
           //tiles
-          if not(cargar_roms(@memoria_temp[0],@skykid_tiles,'skykid.zip')) then exit;
+          if not(roms_load(@memoria_temp,skykid_tiles)) then exit;
           init_gfx(2,8,8,$200);
           gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+          convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
           //Paleta
-          if not(cargar_roms(@memoria_temp[0],@skykid_prom[0],'skykid.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,skykid_prom)) then exit;
           screen_flip:=false;
     end;
     194:begin
           //cargar roms
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_rom[0],'drgnbstr.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,drgnbstr_rom)) then exit;
           //Pongo las ROMs en su banco
           copymemory(@memoria[$8000],@memoria_temp[$0],$8000);
           for f:=0 to 1 do copymemory(@rom_bank[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
           //Cargar MCU
-          if not(cargar_roms(@mem_snd[0],@drgnbstr_mcu[0],'drgnbstr.zip',0)) then exit;
+          if not(roms_load(@mem_snd,drgnbstr_mcu)) then exit;
           //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_char,'drgnbstr.zip')) then exit;
+          if not(roms_load(@memoria_temp,drgnbstr_char)) then exit;
           init_gfx(0,8,8,$200);
           gfx[0].trans[0]:=true;
           gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+          convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
           //sprites
           fillchar(memoria_temp[0],$10000,0);
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_sprites[0],'drgnbstr.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,drgnbstr_sprites)) then exit;
           // unpack the third sprite ROM
           for f:=0 to $1fff do begin
           		memoria_temp[f+$4000+$4000]:=memoria_temp[f+$4000];		// sprite set #1, plane 3
@@ -403,14 +402,14 @@ case  main_vars.tipo_maquina of
           end;
           init_gfx(1,16,16,$200);
           gfx_set_desc_data(3,0,64*8,$200*64*8+4,0,4);
-          convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+          convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
           //tiles
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_tiles,'drgnbstr.zip')) then exit;
+          if not(roms_load(@memoria_temp,drgnbstr_tiles)) then exit;
           init_gfx(2,8,8,$200);
           gfx_set_desc_data(2,0,16*8,0,4);
-          convert_gfx(2,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
+          convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
           //Paleta
-          if not(cargar_roms(@memoria_temp[0],@drgnbstr_prom[0],'drgnbstr.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,drgnbstr_prom)) then exit;
           screen_flip:=true;
     end;
 end;

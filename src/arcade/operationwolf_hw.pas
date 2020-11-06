@@ -12,9 +12,9 @@ var
 
 implementation
 const
-        opwolf_rom:array[0..4] of tipo_roms=(
+        opwolf_rom:array[0..3] of tipo_roms=(
         (n:'b20-05-02.40';l:$10000;p:0;crc:$3ffbfe3a),(n:'b20-03-02.30';l:$10000;p:$1;crc:$fdabd8a5),
-        (n:'b20-04.39';l:$10000;p:$20000;crc:$216b4838),(n:'b20-20.29';l:$10000;p:$20001;crc:$d244431a),());
+        (n:'b20-04.39';l:$10000;p:$20000;crc:$216b4838),(n:'b20-20.29';l:$10000;p:$20001;crc:$d244431a));
         opwolf_sound:tipo_roms=(n:'b20-07.10';l:$10000;p:0;crc:$45c7ace3);
         opwolf_char:tipo_roms=(n:'b20-13.13';l:$80000;p:0;crc:$f6acdab1);
         opwolf_sprites:tipo_roms=(n:'b20-14.72';l:$80000;p:0;crc:$89f889e5);
@@ -298,7 +298,6 @@ end;
 
 function iniciar_opwolf:boolean;
 const
-  pc_x:array[0..7] of dword=(2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4);
   pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
   ps_x:array[0..15] of dword=(2*4, 3*4, 0*4, 1*4, 6*4, 7*4, 4*4, 5*4, 10*4, 11*4, 8*4, 9*4, 14*4, 15*4, 12*4, 13*4);
   ps_y:array[0..15] of dword=(0*64, 1*64, 2*64, 3*64, 4*64, 5*64, 6*64, 7*64, 8*64, 9*64, 10*64, 11*64, 12*64, 13*64, 14*64, 15*64);
@@ -329,27 +328,27 @@ ym2151_0.change_irq_func(ym2151_snd_irq);
 msm_5205_0:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_0);
 msm_5205_1:=MSM5205_chip.create(384000,MSM5205_S48_4B,1,snd_adpcm_1);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@opwolf_rom[0],'opwolf.zip',0)) then exit;
+if not(roms_load16w(@rom,opwolf_rom)) then exit;
 //cargar sonido+ponerlas en su banco+adpcm
-if not(cargar_roms(@memoria_temp[0],@opwolf_sound,'opwolf.zip',1)) then exit;
+if not(roms_load(@memoria_temp,opwolf_sound)) then exit;
 copymemory(@mem_snd[0],@memoria_temp[0],$4000);
 copymemory(@bank_sound[0,0],@memoria_temp[$0],$4000);
 copymemory(@bank_sound[1,0],@memoria_temp[$4000],$4000);
 copymemory(@bank_sound[2,0],@memoria_temp[$8000],$4000);
 copymemory(@bank_sound[3,0],@memoria_temp[$c000],$4000);
-if not(cargar_roms(@adpcm[0],@opwolf_adpcm,'opwolf.zip',1)) then exit;
+if not(roms_load(@adpcm,opwolf_adpcm)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@opwolf_char,'opwolf.zip',1)) then exit;
+if not(roms_load(@memoria_temp,opwolf_char)) then exit;
 init_gfx(0,8,8,$4000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@opwolf_sprites,'opwolf.zip',1)) then exit;
+if not(roms_load(@memoria_temp,opwolf_sprites)) then exit;
 init_gfx(1,16,16,$1000);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //final
 show_mouse_cursor;
 reset_opwolf;

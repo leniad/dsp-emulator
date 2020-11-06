@@ -7,6 +7,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 const
   TCPU_M6801=1;
   TCPU_M6803=3;
+  TCPU_M6808=8;
   TCPU_HD63701=10;
 
 type
@@ -83,23 +84,23 @@ const
   //E8 95 E9
   direc_680x:array[0..$ff] of byte=(
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-     $f,$f,$f,$f, 0, 0, 0,$f, 0, 0,$f,$f, 0, 0, 0, 0,  //00
+     $f, 0,$f,$f, 0, 0, 0,$f, 0, 0,$f,$f, 0, 0, 0, 0,  //00
       0, 0, 0, 0,$f,$f, 0, 0, 0, 0,$f, 0,$f,$f,$f,$f,  //10
-      1,$f,$f, 1, 1,$1, 1, 1,$f,$f, 1, 1,$f, 1, 1,$f,  //20
+      1,$f, 1, 1, 1,$1, 1, 1,$f,$f, 1, 1,$f, 1, 1,$f,  //20
      $f, 0, 0, 0, 0,$f, 0, 0, 0, 0, 0, 0, 0, 0,$f,$f,  //30
       0,$f,$f, 0, 0,$f,$f,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //40
       0,$f,$f, 0, 0,$f,$f,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //50
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-     $f, 1, 1,$f, 6,$f, 6,$f,$f,$f, 6, 1, 6, 6, 4, 4,  //60
-     $f, 1, 1, 8, 8,$f,$f,$f, 8,$f, 8,$f, 8, 8, 3, 3,  //70
+      4, 1, 1,$f, 6,$f, 6,$f,$f,$f, 6, 1, 6, 6, 4, 4,  //60
+     $f, 1, 1, 8, 8,$f, 8,$f, 8,$f, 8,$f, 8, 8, 3, 3,  //70
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       1, 1, 1, 2, 1,$f, 1,$f, 1, 1, 1, 1, 2, 1, 2,$f,  //80
-      5, 5,$f,$a, 5, 5, 5,$b, 5,$f, 5, 5,$a,$f,$f,$f,  //90
+      5, 5, 5,$a, 5, 5, 5,$b, 5, 5, 5, 5,$a,$f,$f,$f,  //90
       6, 6,$f, 9, 6,$f, 6, 4,$f,$f, 6, 6,$f, 4, 9,$f,  //a0
      $f, 8,$f, 7,$f,$f, 8, 3,$f,$f, 8, 8,$f, 3,$f,$f,  //b0
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       1, 1,$f, 2, 1, 1, 1,$f, 1,$f, 1, 1, 2,$f, 2,$f,  //c0
-     $f, 5,$f,$a, 5,$f, 5,$b,$f,$f, 5, 5,$a,$b,$a,$b,  //d0
+      5, 5,$f,$a, 5,$f, 5,$b, 5,$f, 5, 5,$a,$b,$a,$b,  //d0
      $f, 4,$f, 9, 6,$f, 6, 4, 4, 4, 6, 6, 9, 4, 9,$f,  //e0
      $f,$f,$f, 7,$f,$f, 8, 3,$f,$f,$f,$f, 7, 3, 7, 3); //f0
 
@@ -346,15 +347,16 @@ constructor cpu_m6800.create(clock:dword;frames_div:word;tipo_cpu:byte);
 begin
 getmem(self.r,sizeof(reg_m6800));
 fillchar(self.r^,sizeof(reg_m6800),0);
-self.numero_cpu:=cpu_main_init(clock div 4);
-self.clock:=clock div 4;
+clock:=clock div 4;
+self.numero_cpu:=cpu_main_init(clock);
+self.clock:=clock;
 self.tipo_cpu:=tipo_cpu;
 case tipo_cpu of
-  TCPU_M6801,TCPU_M6803:copymemory(@estados_t[0],@ciclos_6803[0],$100);
+  TCPU_M6801,TCPU_M6803,TCPU_M6808:copymemory(@estados_t[0],@ciclos_6803[0],$100);
   TCPU_HD63701:copymemory(@estados_t[0],@ciclos_63701[0],$100);
     else MessageDlg('Tipo M680X desconocido', mtInformation,[mbOk], 0)
 end;
-self.tframes:=(clock/4/frames_div)/llamadas_maquina.fps_max;
+self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 self.out_port1:=nil;
 self.out_port2:=nil;
 self.out_port3:=nil;
@@ -766,6 +768,7 @@ case direc_680x[instruccion] of
  $f:MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc-1,10), mtInformation,[mbOk], 0);
 end;
 case instruccion of
+  $01:; //nop
   $04:begin //lsrd
         r.cc.n:=false;
         r.cc.c:=(r.d.w and $1)<>0;
@@ -849,6 +852,7 @@ case instruccion of
        r.d.a:=tempw;
       end;
   $20:r.pc:=r.pc+shortint(numero);
+  $22:if not(r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bhi
   $23:if (r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bls
   $24:if not(r.cc.c) then r.pc:=r.pc+shortint(numero);  //bcc
   $25:if r.cc.c then r.pc:=r.pc+shortint(numero);  //bcs
@@ -909,6 +913,11 @@ case instruccion of
        r.cc.v:=false;
        r.cc.c:=false;
       end;
+  $60:begin //neg
+      tempb:=self.getbyte(posicion);
+      tempb:=self.neg8(tempb);
+	    self.putbyte(posicion,tempb);
+  end;
   $61:begin  //aim_ix - HD63701YO
        tempw:=r.x+self.getbyte(r.pc);
        r.pc:=r.pc+1;
@@ -953,7 +962,7 @@ case instruccion of
        tempb:=self.lsr8(numero);
        self.putbyte(posicion,tempb);
       end;
-  $66:begin //ror
+  $66,$76:begin //ror
        tempb:=self.ror8(numero);
        self.putbyte(posicion,tempb);
       end;
@@ -988,7 +997,7 @@ case instruccion of
       end;
   $80,$90,$a0:r.d.a:=self.sub8(r.d.a,numero);  //suba
   $81,$91,$a1,$b1:self.sub8(r.d.a,numero); //cmpa
-  $82:r.d.a:=self.sbc8(r.d.a,numero);  //sbca
+  $82,$92:r.d.a:=self.sbc8(r.d.a,numero);  //sbca
   $83,$93,$a3,$b3:begin //subd
        templ:=r.d.w-numerow;
        r.cc.z:=((templ and $ffff)=0);
@@ -1012,7 +1021,7 @@ case instruccion of
        self.putbyte(posicion,r.d.a);
       end;
   $88,$98:r.d.a:=self.eor8(r.d.a,numero);  //eora
-  $89:r.d.a:=self.adc8(r.d.a,numero);  //adca
+  $89,$99:r.d.a:=self.adc8(r.d.a,numero);  //adca
   $8a,$9a,$aa,$ba:r.d.a:=self.or8(r.d.a,numero);  //ora
   $8b,$9b,$ab,$bb:r.d.a:=self.add8(r.d.a,numero);  //adda
   $8c,$9c:begin //cpmx solo 6801/03
@@ -1036,7 +1045,7 @@ case instruccion of
        r.cc.z:=(numerow=0);
        r.cc.n:=(numerow and $8000)<>0;
       end;
-  $c0:r.d.b:=self.sub8(r.d.b,numero); //subb
+  $c0,$d0:r.d.b:=self.sub8(r.d.b,numero); //subb
   $c1,$d1,$e1:self.sub8(r.d.b,numero); //cmpb
   $c3,$d3,$e3,$f3:begin  //addd
        templ:=r.d.w+numerow;
@@ -1060,7 +1069,7 @@ case instruccion of
        r.cc.n:=(r.d.b and $80)<>0;
        self.putbyte(posicion,r.d.b);
       end;
-  $c8,$e8:r.d.b:=self.eor8(r.d.b,numero);  //eorb
+  $c8,$d8,$e8:r.d.b:=self.eor8(r.d.b,numero);  //eorb
   $e9:r.d.b:=self.adc8(r.d.b,numero);  //adcb
   $ca,$da,$ea:r.d.b:=self.or8(r.d.b,numero);  //orb
   $cb,$db,$eb:r.d.b:=self.add8(r.d.b,numero); //addb
@@ -1091,7 +1100,7 @@ case instruccion of
 end; //del case
 tempb:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempb;
-update_timer(tempb,self.numero_cpu);
+timers.update(tempb,self.numero_cpu);
 if self.tipo_cpu=TCPU_HD63701 then begin
   self.ctd.l:=self.ctd.l+tempb;
   if (self.ctd.l>=self.timer_next) then self.check_timer_event;

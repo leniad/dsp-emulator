@@ -14,17 +14,17 @@ type
         tfunction_1f98=procedure(valor:byte);
 const
         //Super Contra
-        scontra_rom:array[0..2] of tipo_roms=(
-        (n:'775-e02.k11';l:$10000;p:0;crc:$a61c0ead),(n:'775-e03.k13';l:$10000;p:$10000;crc:$00b02622),());
+        scontra_rom:array[0..1] of tipo_roms=(
+        (n:'775-e02.k11';l:$10000;p:0;crc:$a61c0ead),(n:'775-e03.k13';l:$10000;p:$10000;crc:$00b02622));
         scontra_sound:tipo_roms=(n:'775-c01.bin';l:$8000;p:0;crc:$0ced785a);
-        scontra_tiles:array[0..12] of tipo_roms=(
+        scontra_tiles:array[0..11] of tipo_roms=(
         (n:'775-a07a.bin';l:$20000;p:0;crc:$e716bdf3),(n:'775-a07e.bin';l:$20000;p:1;crc:$0986e3a5),
         (n:'775-a08a.bin';l:$20000;p:2;crc:$3ddd11a4),(n:'775-a08e.bin';l:$20000;p:3;crc:$1007d963),
         (n:'775-f07c.bin';l:$10000;p:$80000;crc:$b0b30915),(n:'775-f07g.bin';l:$10000;p:$80001;crc:$fbed827d),
         (n:'775-f08c.bin';l:$10000;p:$80002;crc:$53abdaec),(n:'775-f08g.bin';l:$10000;p:$80003;crc:$3df85a6e),
         (n:'775-f07d.bin';l:$10000;p:$c0000;crc:$f184be8e),(n:'775-f07h.bin';l:$10000;p:$c0001;crc:$7b56c348),
-        (n:'775-f08d.bin';l:$10000;p:$c0002;crc:$102dcace),(n:'775-f08h.bin';l:$10000;p:$c0003;crc:$ad9d7016),());
-        scontra_sprites:array[0..16] of tipo_roms=(
+        (n:'775-f08d.bin';l:$10000;p:$c0002;crc:$102dcace),(n:'775-f08h.bin';l:$10000;p:$c0003;crc:$ad9d7016));
+        scontra_sprites:array[0..15] of tipo_roms=(
         (n:'775-a05a.bin';l:$10000;p:0;crc:$a0767045),(n:'775-a05e.bin';l:$10000;p:1;crc:$2f656f08),
         (n:'775-a06a.bin';l:$10000;p:2;crc:$77a34ad0),(n:'775-a06e.bin';l:$10000;p:3;crc:$8a910c94),
         (n:'775-a05b.bin';l:$10000;p:$40000;crc:$ab8ad4fd),(n:'775-a05f.bin';l:$10000;p:$40001;crc:$1c0eb1b6),
@@ -32,35 +32,35 @@ const
         (n:'775-f05c.bin';l:$10000;p:$80000;crc:$5647761e),(n:'775-f05g.bin';l:$10000;p:$80001;crc:$a1692cca),
         (n:'775-f06c.bin';l:$10000;p:$80002;crc:$5ee6f3c1),(n:'775-f06g.bin';l:$10000;p:$80003;crc:$2645274d),
         (n:'775-f05d.bin';l:$10000;p:$c0000;crc:$ad676a6f),(n:'775-f05h.bin';l:$10000;p:$c0001;crc:$3f925bcf),
-        (n:'775-f06d.bin';l:$10000;p:$c0002;crc:$c8b764fa),(n:'775-f06h.bin';l:$10000;p:$c0003;crc:$d6595f59),());
-        scontra_k007232:array[0..8] of tipo_roms=(
+        (n:'775-f06d.bin';l:$10000;p:$c0002;crc:$c8b764fa),(n:'775-f06h.bin';l:$10000;p:$c0003;crc:$d6595f59));
+        scontra_k007232:array[0..7] of tipo_roms=(
         (n:'775-a04a.bin';l:$10000;p:$0;crc:$7efb2e0f),(n:'775-a04b.bin';l:$10000;p:$10000;crc:$f41a2b33),
         (n:'775-a04c.bin';l:$10000;p:$20000;crc:$e4e58f14),(n:'775-a04d.bin';l:$10000;p:$30000;crc:$d46736f6),
         (n:'775-f04e.bin';l:$10000;p:$40000;crc:$fbf7e363),(n:'775-f04f.bin';l:$10000;p:$50000;crc:$b031ef2d),
-        (n:'775-f04g.bin';l:$10000;p:$60000;crc:$ee107bbb),(n:'775-f04h.bin';l:$10000;p:$70000;crc:$fb0fab46),());
+        (n:'775-f04g.bin';l:$10000;p:$60000;crc:$ee107bbb),(n:'775-f04h.bin';l:$10000;p:$70000;crc:$fb0fab46));
         //Gang Busters
-        gbusters_rom:array[0..2] of tipo_roms=(
-        (n:'878n02.k13';l:$10000;p:0;crc:$51697aaa),(n:'878j03.k15';l:$10000;p:$10000;crc:$3943a065),());
+        gbusters_rom:array[0..1] of tipo_roms=(
+        (n:'878n02.k13';l:$10000;p:0;crc:$51697aaa),(n:'878j03.k15';l:$10000;p:$10000;crc:$3943a065));
         gbusters_sound:tipo_roms=(n:'878h01.f8';l:$8000;p:0;crc:$96feafaa);
-        gbusters_tiles:array[0..2] of tipo_roms=(
-        (n:'878c07.h27';l:$40000;p:0;crc:$eeed912c),(n:'878c08.k27';l:$40000;p:2;crc:$4d14626d),());
-        gbusters_sprites:array[0..2] of tipo_roms=(
-        (n:'878c05.h5';l:$40000;p:0;crc:$01f4aea5),(n:'878c06.k5';l:$40000;p:2;crc:$edfaaaaf),());
+        gbusters_tiles:array[0..1] of tipo_roms=(
+        (n:'878c07.h27';l:$40000;p:0;crc:$eeed912c),(n:'878c08.k27';l:$40000;p:2;crc:$4d14626d));
+        gbusters_sprites:array[0..1] of tipo_roms=(
+        (n:'878c05.h5';l:$40000;p:0;crc:$01f4aea5),(n:'878c06.k5';l:$40000;p:2;crc:$edfaaaaf));
         gbusters_k007232:tipo_roms=(n:'878c04.d5';l:$40000;p:0;crc:$9e982d1c);
         //Thunder Cross
-        thunderx_rom:array[0..2] of tipo_roms=(
-        (n:'873-s02.k13';l:$10000;p:0;crc:$6619333a),(n:'873-s03.k15';l:$10000;p:$10000;crc:$2aec2699),());
+        thunderx_rom:array[0..1] of tipo_roms=(
+        (n:'873-s02.k13';l:$10000;p:0;crc:$6619333a),(n:'873-s03.k15';l:$10000;p:$10000;crc:$2aec2699));
         thunderx_sound:tipo_roms=(n:'873-f01.f8';l:$8000;p:0;crc:$ea35ffa3);
-        thunderx_tiles:array[0..8] of tipo_roms=(
+        thunderx_tiles:array[0..7] of tipo_roms=(
         (n:'873c06a.f6';l:$10000;p:0;crc:$0e340b67),(n:'873c06c.f5';l:$10000;p:1;crc:$ef0e72cd),
         (n:'873c07a.f4';l:$10000;p:2;crc:$a8aab84f),(n:'873c07c.f3';l:$10000;p:3;crc:$2521009a),
         (n:'873c06b.e6';l:$10000;p:$40000;crc:$97ad202e),(n:'873c06d.e5';l:$10000;p:$40001;crc:$8393d42e),
-        (n:'873c07b.e4';l:$10000;p:$40002;crc:$12a2b8ba),(n:'873c07d.e3';l:$10000;p:$40003;crc:$fae9f965),());
-        thunderx_sprites:array[0..8] of tipo_roms=(
+        (n:'873c07b.e4';l:$10000;p:$40002;crc:$12a2b8ba),(n:'873c07d.e3';l:$10000;p:$40003;crc:$fae9f965));
+        thunderx_sprites:array[0..7] of tipo_roms=(
         (n:'873c04a.f11';l:$10000;p:0;crc:$f7740bf3),(n:'873c04c.f10';l:$10000;p:1;crc:$5dacbd2b),
         (n:'873c05a.f9';l:$10000;p:2;crc:$d73e107d),(n:'873c05c.f8';l:$10000;p:3;crc:$59903200),
         (n:'873c04b.e11';l:$10000;p:$40000;crc:$9ac581da),(n:'873c04d.e10';l:$10000;p:$40001;crc:$44a4668c),
-        (n:'873c05b.e9';l:$10000;p:$40002;crc:$81059b99),(n:'873c05d.e8';l:$10000;p:$40003;crc:$7fa3d7df),());
+        (n:'873c05b.e9';l:$10000;p:$40002;crc:$81059b99),(n:'873c05d.e8';l:$10000;p:$40003;crc:$7fa3d7df));
         //DIP
         scontra_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$02;dip_name:'4C 1C'),(dip_val:$05;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$04;dip_name:'3C 2C'),(dip_val:$01;dip_name:'4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$03;dip_name:'3C 4C'),(dip_val:$07;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$06;dip_name:'2C 5C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$09;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
@@ -205,15 +205,15 @@ if (valor and $1)<>0 then k052109_0.set_rmrd_line(ASSERT_LINE)
    else k052109_0.set_rmrd_line(CLEAR_LINE);
 if (((valor and 4)<>0) and ((latch_1f98 and 4)=0)) then begin
    calculate_collisions;
-   timer[thunderx_timer].enabled:=true;
+   timers.enabled(thunderx_timer,true);
 end;
 latch_1f98:=valor;
 end;
 
 procedure thunderx_firq;
 begin
-     konami_0.change_firq(HOLD_LINE);
-     timer[thunderx_timer].enabled:=false;
+  konami_0.change_firq(HOLD_LINE);
+  timers.enabled(thunderx_timer,false);
 end;
 
 procedure thunderx_cb(layer,bank:word;var code:dword;var color:word;var flags:word;var priority:word);
@@ -363,7 +363,6 @@ end;
 
 procedure thunderx_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$5fff then exit;
 case direccion of
     $0..$3fff:case direccion of
                    $1f80:video_bank_call(valor);
@@ -387,6 +386,7 @@ case direccion of
                     if (latch_1f98 and 2)<>0 then ram_bank[2,direccion]:=valor;
                  end else ram_bank[bank0_bank,direccion]:=valor;
             end;
+    $6000..$ffff:; //ROM
 end;
 end;
 
@@ -407,8 +407,8 @@ end;
 
 procedure thunderx_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$87ff:mem_snd[direccion]:=valor;
   $c000:ym2151_0.reg(valor);
   $c001:ym2151_0.write(valor);
@@ -432,8 +432,8 @@ end;
 
 procedure scontra_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$87ff:mem_snd[direccion]:=valor;
   $b000..$b00d:k007232_0.write(direccion and $f,valor);
   $c000:ym2151_0.reg(valor);
@@ -492,7 +492,7 @@ case main_vars.tipo_maquina of
      222:begin //Super contra
             call_function_1f98:=scontra_1f98_call;
             //cargar roms y ponerlas en su sitio...
-            if not(cargar_roms(@temp_mem[0],@scontra_rom[0],'scontra.zip',0)) then exit;
+            if not(roms_load(@temp_mem,scontra_rom)) then exit;
             copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
             for f:=0 to 3 do begin
                 copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
@@ -500,22 +500,22 @@ case main_vars.tipo_maquina of
             end;
             for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
             //cargar sonido
-            if not(cargar_roms(@mem_snd[0],@scontra_sound,'scontra.zip',1)) then exit;
+            if not(roms_load(@mem_snd,scontra_sound)) then exit;
             //Sound CPU
             z80_0.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
             z80_0.init_sound(scontra_sound_update);
             //Sound Chips
             ym2151_0:=ym2151_chip.create(3579545);
             getmem(k007232_rom,$80000);
-            if not(cargar_roms(k007232_rom,@scontra_k007232[0],'scontra.zip',0)) then exit;
+            if not(roms_load(k007232_rom,scontra_k007232)) then exit;
             k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,scontra_k007232_cb);
             //Iniciar video
             video_bank_call:=scontra_videobank;
             getmem(tiles_rom,$100000);
-            if not(cargar_roms32b_b(tiles_rom,@scontra_tiles,'scontra.zip',0)) then exit;
+            if not(roms_load32b_b(tiles_rom,scontra_tiles)) then exit;
             k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$100000);
             getmem(sprite_rom,$100000);
-            if not(cargar_roms32b_b(sprite_rom,@scontra_sprites,'scontra.zip',0)) then exit;
+            if not(roms_load32b_b(sprite_rom,scontra_sprites)) then exit;
             k051960_0:=k051960_chip.create(4,sprite_rom,$100000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;
@@ -529,7 +529,7 @@ case main_vars.tipo_maquina of
             konami_0.change_set_lines(thunderx_bank);
             call_function_1f98:=scontra_1f98_call;
             //cargar roms y ponerlas en su sitio...
-            if not(cargar_roms(@temp_mem[0],@gbusters_rom[0],'gbusters.zip',0)) then exit;
+            if not(roms_load(@temp_mem,gbusters_rom)) then exit;
             copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
             for f:=0 to 3 do begin
                 copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
@@ -537,22 +537,22 @@ case main_vars.tipo_maquina of
             end;
             for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
             //cargar sonido
-            if not(cargar_roms(@mem_snd[0],@gbusters_sound,'gbusters.zip',1)) then exit;
+            if not(roms_load(@mem_snd,gbusters_sound)) then exit;
             //Sound CPU
             z80_0.change_ram_calls(scontra_snd_getbyte,scontra_snd_putbyte);
             z80_0.init_sound(scontra_sound_update);
             //Sound Chips
             ym2151_0:=ym2151_chip.create(3579545);
             getmem(k007232_rom,$40000);
-            if not(cargar_roms(k007232_rom,@gbusters_k007232,'gbusters.zip',1)) then exit;
+            if not(roms_load(k007232_rom,gbusters_k007232)) then exit;
             k007232_0:=k007232_chip.create(3579545,k007232_rom,$40000,0.20,scontra_k007232_cb);
             //Iniciar video
             video_bank_call:=gbusters_videobank;
             getmem(tiles_rom,$80000);
-            if not(cargar_roms32b(tiles_rom,@gbusters_tiles,'gbusters.zip',0)) then exit;
+            if not(roms_load32b(tiles_rom,gbusters_tiles)) then exit;
             k052109_0:=k052109_chip.create(1,2,3,gbusters_cb,tiles_rom,$80000);
             getmem(sprite_rom,$80000);
-            if not(cargar_roms32b(sprite_rom,@gbusters_sprites,'gbusters.zip',0)) then exit;
+            if not(roms_load32b(sprite_rom,gbusters_sprites)) then exit;
             k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;
@@ -566,7 +566,7 @@ case main_vars.tipo_maquina of
             konami_0.change_set_lines(thunderx_bank);
             call_function_1f98:=thunderx_1f98_call;
             //cargar roms y ponerlas en su sitio...
-            if not(cargar_roms(@temp_mem[0],@thunderx_rom[0],'thunderx.zip',0)) then exit;
+            if not(roms_load(@temp_mem,thunderx_rom)) then exit;
             copymemory(@memoria[$8000],@temp_mem[$8000],$8000);
             for f:=0 to 3 do begin
                 copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
@@ -574,9 +574,9 @@ case main_vars.tipo_maquina of
             end;
             for f:=8 to $f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
             //Despues de calcular las colisiones hay que llamar a FIRQ, pero hay que retrasarla 100T o se cuelga...
-            thunderx_timer:=init_timer(konami_0.numero_cpu,100,thunderx_firq,false);
+            thunderx_timer:=timers.init(konami_0.numero_cpu,100,thunderx_firq,nil,false);
             //cargar sonido
-            if not(cargar_roms(@mem_snd[0],@thunderx_sound,'thunderx.zip',1)) then exit;
+            if not(roms_load(@mem_snd,thunderx_sound)) then exit;
             //Sound CPU
             z80_0.change_ram_calls(thunderx_snd_getbyte,thunderx_snd_putbyte);
             z80_0.init_sound(thunderx_sound_update);
@@ -585,10 +585,10 @@ case main_vars.tipo_maquina of
             //Iniciar video
             video_bank_call:=thunderx_videobank;
             getmem(tiles_rom,$80000);
-            if not(cargar_roms32b_b(tiles_rom,@thunderx_tiles,'thunderx.zip',0)) then exit;
+            if not(roms_load32b_b(tiles_rom,thunderx_tiles)) then exit;
             k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$80000);
             getmem(sprite_rom,$80000);
-            if not(cargar_roms32b_b(sprite_rom,@thunderx_sprites,'thunderx.zip',0)) then exit;
+            if not(roms_load32b_b(sprite_rom,thunderx_sprites)) then exit;
             k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;

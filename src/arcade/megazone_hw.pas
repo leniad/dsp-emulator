@@ -9,18 +9,18 @@ procedure cargar_megazone;
 
 implementation
 const
-        megazone_rom:array[0..5] of tipo_roms=(
+        megazone_rom:array[0..4] of tipo_roms=(
         (n:'319i07.bin';l:$2000;p:$6000;crc:$94b22ea8),(n:'319i06.bin';l:$2000;p:$8000;crc:$0468b619),
         (n:'319i05.bin';l:$2000;p:$a000;crc:$ac59000c),(n:'319i04.bin';l:$2000;p:$c000;crc:$1e968603),
-        (n:'319i03.bin';l:$2000;p:$e000;crc:$0888b803),());
-        megazone_char:array[0..2] of tipo_roms=(
-        (n:'319e12.bin';l:$2000;p:0;crc:$e0fb7835),(n:'319e13.bin';l:$2000;p:$2000;crc:$3d8f3743),());
-        megazone_sprites:array[0..4] of tipo_roms=(
+        (n:'319i03.bin';l:$2000;p:$e000;crc:$0888b803));
+        megazone_char:array[0..1] of tipo_roms=(
+        (n:'319e12.bin';l:$2000;p:0;crc:$e0fb7835),(n:'319e13.bin';l:$2000;p:$2000;crc:$3d8f3743));
+        megazone_sprites:array[0..3] of tipo_roms=(
         (n:'319e11.bin';l:$2000;p:0;crc:$965a7ff6),(n:'319e09.bin';l:$2000;p:$2000;crc:$5eaa7f3e),
-        (n:'319e10.bin';l:$2000;p:$4000;crc:$7bb1aeee),(n:'319e08.bin';l:$2000;p:$6000;crc:$6add71b1),());
-        megazone_pal:array[0..3] of tipo_roms=(
+        (n:'319e10.bin';l:$2000;p:$4000;crc:$7bb1aeee),(n:'319e08.bin';l:$2000;p:$6000;crc:$6add71b1));
+        megazone_pal:array[0..2] of tipo_roms=(
         (n:'319b18.a16';l:$20;p:$0;crc:$23cb02af),(n:'319b16.c6';l:$100;p:$20;crc:$5748e933),
-        (n:'319b17.a11';l:$100;p:$120;crc:$1fbfce73),());
+        (n:'319b17.a11';l:$100;p:$120;crc:$1fbfce73));
         megazone_snd:tipo_roms=(n:'319e02.bin';l:$2000;p:$0;crc:$d5d45edb);
         megazone_snd_sub:tipo_roms=(n:'319e01.bin';l:$1000;p:$0;crc:$ed5725a0);
         megazone_dip_a:array [0..1] of def_dip=(
@@ -87,26 +87,26 @@ procedure eventos_megazone;
 begin
 if event.arcade then begin
   //marcade.in1
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.left[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
   if arcade_input.right[0] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.down[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //marcade.in2
-  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
-  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   if arcade_input.but2[1] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
   //service
-  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
 end;
 end;
 
@@ -152,7 +152,6 @@ end;
 
 procedure megazone_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$4000 then exit;
 case direccion of
   $0..$1,$800:; //Coin counter + Watchdog
   $5:main_screen.flip_main_screen:=(valor and $1)<>0;
@@ -168,6 +167,7 @@ case direccion of
           memoria[direccion]:=valor;
       end;
   $3000..$33ff,$3800..$3fff:memoria[direccion]:=valor;
+  $4000..$ffff:; //ROM
 end;
 end;
 
@@ -186,8 +186,8 @@ end;
 
 procedure megazone_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$2000 then exit;
 case direccion of
+  0..$1fff:; //ROM
   $2000:mcs48_0.change_irq(ASSERT_LINE);
   $4000:sound_latch:=valor;
   $a000,$c000,$c001:; //NMI+Watch Dog
@@ -197,7 +197,7 @@ end;
 
 function megazone_sound_inbyte(puerto:word):byte;
 begin
-if (puerto and $ff)<3 then megazone_sound_inbyte:=ay8910_0.Read;
+if (puerto and $ff)<3 then megazone_sound_inbyte:=ay8910_0.read;
 end;
 
 procedure megazone_sound_outbyte(puerto:word;valor:byte);
@@ -311,29 +311,29 @@ ay8910_0:=ay8910_chip.create(14318000 div 8,AY8910,0.3);
 ay8910_0.change_io_calls(megazone_portar,nil,nil,megazone_portbw);
 dac_0:=dac_chip.Create(0.5);
 //cargar roms
-if not(cargar_roms(@memoria[0],@megazone_rom[0],'megazone.zip',0)) then exit;
+if not(roms_load(@memoria,megazone_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$c000);
 //Cargar roms sound
-if not(cargar_roms(@mem_snd[0],@megazone_snd,'megazone.zip',1)) then exit;
-if not(cargar_roms(@mem_snd_sub[0],@megazone_snd_sub,'megazone.zip',1)) then exit;
+if not(roms_load(@mem_snd,megazone_snd)) then exit;
+if not(roms_load(@mem_snd_sub,megazone_snd_sub)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@megazone_char,'megazone.zip',0)) then exit;
+if not(roms_load(@memoria_temp,megazone_char)) then exit;
 init_gfx(0,8,8,$200);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],true,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,true,false);
 //sprites
-if not(cargar_roms(@memoria_temp[0],@megazone_sprites[0],'megazone.zip',0)) then exit;
+if not(roms_load(@memoria_temp,megazone_sprites)) then exit;
 init_gfx(1,16,16,$100);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,64*8,$4000*8+4,$4000*8+0,4,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],true,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 //paleta
-if not(cargar_roms(@memoria_temp[0],@megazone_pal[0],'megazone.zip',0)) then exit;
+if not(roms_load(@memoria_temp,megazone_pal)) then exit;
 compute_resistor_weights(0,	255, -1.0,
-			3,@resistances_rg[0],@rweights[0],1000,0,
-			3,@resistances_rg[0],@gweights[0],1000,0,
-			2,@resistances_b[0],@bweights[0],1000,0);
+			3,@resistances_rg,@rweights,1000,0,
+			3,@resistances_rg,@gweights,1000,0,
+			2,@resistances_b,@bweights,1000,0);
 for f:=0 to $1f do begin
 		// red component */
 		bit0:=(memoria_temp[f] shr 0) and $01;
@@ -365,7 +365,7 @@ reset_megazone;
 iniciar_megazone:=true;
 end;
 
-procedure Cargar_megazone;
+procedure cargar_megazone;
 begin
 llamadas_maquina.iniciar:=iniciar_megazone;
 llamadas_maquina.bucle_general:=megazone_principal;

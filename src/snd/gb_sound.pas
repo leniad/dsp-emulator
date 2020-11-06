@@ -407,7 +407,6 @@ end;
 procedure gameboy_sound_update;
 var
   left,right,sample,mode4_mask:integer;
-  //	stream_sample_t sample, left, right, mode4_mask;
 begin
 		left:=0;
     right:=0;

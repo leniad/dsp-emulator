@@ -10,33 +10,33 @@ procedure cargar_ddragon3;
 implementation
 const
         //Double Dragon 3
-        ddragon3_rom:array[0..2] of tipo_roms=(
-        (n:'30a14-0.ic78';l:$40000;p:1;crc:$f42fe016),(n:'30a15-0.ic79';l:$20000;p:$0;crc:$ad50e92c),());
+        ddragon3_rom:array[0..1] of tipo_roms=(
+        (n:'30a14-0.ic78';l:$40000;p:1;crc:$f42fe016),(n:'30a15-0.ic79';l:$20000;p:$0;crc:$ad50e92c));
         ddragon3_sound:tipo_roms=(n:'30a13-0.ic43';l:$10000;p:0;crc:$1e974d9b);
         ddragon3_oki:tipo_roms=(n:'30j-8.ic73';l:$80000;p:0;crc:$c3ad40f3);
-        ddragon3_sprites:array[0..8] of tipo_roms=(
+        ddragon3_sprites:array[0..7] of tipo_roms=(
         (n:'30j-3.ic9';l:$80000;p:0;crc:$b3151871),(n:'30a12-0.ic8';l:$10000;p:$80000;crc:$20d64bea),
         (n:'30j-2.ic11';l:$80000;p:$100000;crc:$41c6fb08),(n:'30a11-0.ic10';l:$10000;p:$180000;crc:$785d71b0),
         (n:'30j-1.ic13';l:$80000;p:$200000;crc:$67a6f114),(n:'30a10-0.ic12';l:$10000;p:$280000;crc:$15e43d12),
-        (n:'30j-0.ic15';l:$80000;p:$300000;crc:$f15dafbe),(n:'30a9-0.ic14';l:$10000;p:$380000;crc:$5a47e7a4),());
-        ddragon3_bg:array[0..4] of tipo_roms=(
+        (n:'30j-0.ic15';l:$80000;p:$300000;crc:$f15dafbe),(n:'30a9-0.ic14';l:$10000;p:$380000;crc:$5a47e7a4));
+        ddragon3_bg:array[0..3] of tipo_roms=(
         (n:'30j-7.ic4';l:$40000;p:0;crc:$89d58d32),(n:'30j-6.ic5';l:$40000;p:$1;crc:$9bf1538e),
-        (n:'30j-5.ic6';l:$40000;p:$80000;crc:$8f671a62),(n:'30j-4.ic7';l:$40000;p:$80001;crc:$0f74ea1c),());
+        (n:'30j-5.ic6';l:$40000;p:$80000;crc:$8f671a62),(n:'30j-4.ic7';l:$40000;p:$80001;crc:$0f74ea1c));
         //Combat tribe
-        ctribe_rom:array[0..3] of tipo_roms=(
+        ctribe_rom:array[0..2] of tipo_roms=(
         (n:'28a16-2.ic26';l:$20000;p:1;crc:$c46b2e63),(n:'28a15-2.ic25';l:$20000;p:$0;crc:$3221c755),
-        (n:'28j17-0.104';l:$10000;p:$40001;crc:$8c2c6dbd),());
+        (n:'28j17-0.104';l:$10000;p:$40001;crc:$8c2c6dbd));
         ctribe_sound:tipo_roms=(n:'28a10-0.ic89';l:$8000;p:0;crc:$4346de13);
-        ctribe_oki:array[0..2] of tipo_roms=(
-        (n:'28j9-0.ic83';l:$20000;p:0;crc:$f92a7f4a),(n:'28j8-0.ic82';l:$20000;p:$20000;crc:$1a3a0b39),());
-        ctribe_sprites:array[0..8] of tipo_roms=(
+        ctribe_oki:array[0..1] of tipo_roms=(
+        (n:'28j9-0.ic83';l:$20000;p:0;crc:$f92a7f4a),(n:'28j8-0.ic82';l:$20000;p:$20000;crc:$1a3a0b39));
+        ctribe_sprites:array[0..7] of tipo_roms=(
         (n:'28j3-0.ic77';l:$80000;p:0;crc:$1ac2a461),(n:'28a14-0.ic60';l:$10000;p:$80000;crc:$972faddb),
         (n:'28j2-0.ic78';l:$80000;p:$100000;crc:$8c796707),(n:'28a13-0.ic61';l:$10000;p:$180000;crc:$eb3ab374),
         (n:'28j1-0.ic97';l:$80000;p:$200000;crc:$1c9badbd),(n:'28a12-0.ic85';l:$10000;p:$280000;crc:$c602ac97),
-        (n:'28j0-0.ic98';l:$80000;p:$300000;crc:$ba73c49e),(n:'28a11-0.ic86';l:$10000;p:$380000;crc:$4da1d8e5),());
-        ctribe_bg:array[0..4] of tipo_roms=(
+        (n:'28j0-0.ic98';l:$80000;p:$300000;crc:$ba73c49e),(n:'28a11-0.ic86';l:$10000;p:$380000;crc:$4da1d8e5));
+        ctribe_bg:array[0..3] of tipo_roms=(
         (n:'28j7-0.ic11';l:$40000;p:0;crc:$a8b773f1),(n:'28j6-0.ic13';l:$40000;p:$1;crc:$617530fc),
-        (n:'28j5-0.ic12';l:$40000;p:$80000;crc:$cef0a821),(n:'28j4-0.ic14';l:$40000;p:$80001;crc:$b84fda09),());
+        (n:'28j5-0.ic12';l:$40000;p:$80000;crc:$cef0a821),(n:'28j4-0.ic14';l:$40000;p:$80001;crc:$b84fda09));
         //DIP
         ddragon3_dip_a:array [0..9] of def_dip=(
         (mask:$3;name:'Coinage';number:4;dip:((dip_val:$0;dip_name:'3C 1C'),(dip_val:$1;dip_name:'2C 1C'),(dip_val:$3;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -62,12 +62,9 @@ const
         (mask:$200;name:'Players';number:2;dip:((dip_val:$200;dip_name:'2'),(dip_val:0;dip_name:'3'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$1000;name:'Flip Screen';number:2;dip:((dip_val:$1000;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-type
-    tipo_update_dd3_hw=procedure;
-
 var
- video_update_dd3:tipo_update_dd3_hw;
- events_update_dd3:tipo_update_dd3_hw;
+ video_update_dd3:procedure;
+ events_update_dd3:procedure;
  vreg,bg_tilebase,fg_scrollx,fg_scrolly,bg_scrollx,bg_scrolly:word;
  mem_oki:array[0..$7ffff] of byte;
  rom:array[0..$3ffff] of word;
@@ -139,7 +136,7 @@ for f:=$0 to $3ff do begin
   end;
 end;
 fill_full_screen(3,$600);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure update_video_ddragon3;inline;
@@ -184,10 +181,10 @@ procedure eventos_ddragon3;
 begin
 if event.arcade then begin
   //p1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
@@ -202,8 +199,8 @@ if event.arcade then begin
   if arcade_input.but2[1] then marcade.in0:=(marcade.in0 and $bfff) else marcade.in0:=(marcade.in0 or $4000);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $7fff) else marcade.in0:=(marcade.in0 or $8000);
   //system
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
 end;
 end;
 
@@ -211,10 +208,10 @@ procedure eventos_ctribe;
 begin
 if event.arcade then begin
   //p1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or 1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or 2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or 4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or 8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
@@ -222,10 +219,10 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
   //p2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or 1);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or 2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or 4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or 8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $ffdf) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
@@ -298,8 +295,8 @@ function ddragon3_getword(direccion:dword):word;
 begin
 case direccion of
     0..$7ffff:ddragon3_getword:=rom[direccion shr 1];
-    $080000..$080fff:ddragon3_getword:=fg_ram[(direccion and $fff) shr 1];
-    $082000..$0827ff:ddragon3_getword:=bg_ram[(direccion and $7ff) shr 1];
+    $80000..$80fff:ddragon3_getword:=fg_ram[(direccion and $fff) shr 1];
+    $82000..$827ff:ddragon3_getword:=bg_ram[(direccion and $7ff) shr 1];
     $100000:ddragon3_getword:=marcade.in0;
     $100002:ddragon3_getword:=marcade.in1;
     $100004:ddragon3_getword:=marcade.dswa;
@@ -326,17 +323,17 @@ end;
 
 procedure ddragon3_putword(direccion:dword;valor:word);
 begin
-if direccion<$80000 then exit;
 case direccion of
-    $080000..$080fff:if fg_ram[(direccion and $fff) shr 1]<>valor then begin
+    0..$7ffff:; //ROM
+    $80000..$80fff:if fg_ram[(direccion and $fff) shr 1]<>valor then begin
                     fg_ram[(direccion and $fff) shr 1]:=valor;
                     gfx[0].buffer[$400+((direccion and $fff) shr 2)]:=true;
                   end;
-    $082000..$0827ff:if bg_ram[(direccion and $7ff) shr 1]<>valor then begin
+    $82000..$827ff:if bg_ram[(direccion and $7ff) shr 1]<>valor then begin
                     bg_ram[(direccion and $7ff) shr 1]:=valor;
                     gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                   end;
-    $0c0000..$0c000f:ddragon3_scroll_io((direccion and $f) shr 1,valor);
+    $c0000..$c000f:ddragon3_scroll_io((direccion and $f) shr 1,valor);
     $100000..$10000f:ddragon3_io_w((direccion and $f) shr 1,valor);
     $140000..$1405ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                     buffer_paleta[(direccion and $7ff) shr 1]:=valor;
@@ -359,8 +356,8 @@ end;
 
 procedure ddragon3_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+  0..$bfff:; //ROM
   $c000..$c7ff:mem_snd[direccion]:=valor;
   $c800:ym2151_0.reg(valor);
   $c801:ym2151_0.write(valor);
@@ -374,11 +371,11 @@ function ctribe_getword(direccion:dword):word;
 begin
 case direccion of
     0..$7ffff:ctribe_getword:=rom[direccion shr 1];
-    $080000..$080fff:ctribe_getword:=fg_ram[(direccion and $fff) shr 1];
-    $081000..$081fff:ctribe_getword:=buffer_sprites_w[(direccion and $fff) shr 1];
-    $082000..$0827ff:ctribe_getword:=bg_ram[(direccion and $7ff) shr 1];
-    $082800..$082fff:ctribe_getword:=ram2[(direccion and $7ff) shr 1];
-    $0c0000..$0c000f:case ((direccion and $f) shr 1) of
+    $80000..$80fff:ctribe_getword:=fg_ram[(direccion and $fff) shr 1];
+    $81000..$81fff:ctribe_getword:=buffer_sprites_w[(direccion and $fff) shr 1];
+    $82000..$827ff:ctribe_getword:=bg_ram[(direccion and $7ff) shr 1];
+    $82800..$82fff:ctribe_getword:=ram2[(direccion and $7ff) shr 1];
+    $c0000..$c000f:case ((direccion and $f) shr 1) of
                         0:ctribe_getword:=fg_scrollx;
                         1:ctribe_getword:=fg_scrolly;
                         2:ctribe_getword:=bg_scrollx;
@@ -412,19 +409,19 @@ end;
 
 procedure ctribe_putword(direccion:dword;valor:word);
 begin
-if direccion<$80000 then exit;
 case direccion of
-    $080000..$080fff:if fg_ram[(direccion and $fff) shr 1]<>valor then begin
+    0..$7ffff:; //ROM
+    $80000..$80fff:if fg_ram[(direccion and $fff) shr 1]<>valor then begin
                     fg_ram[(direccion and $fff) shr 1]:=valor;
                     gfx[0].buffer[$400+((direccion and $fff) shr 2)]:=true;
                   end;
     $81000..$81fff:buffer_sprites_w[(direccion and $fff) shr 1]:=valor;
-    $082000..$0827ff:if bg_ram[(direccion and $7ff) shr 1]<>valor then begin
+    $82000..$827ff:if bg_ram[(direccion and $7ff) shr 1]<>valor then begin
                     bg_ram[(direccion and $7ff) shr 1]:=valor;
                     gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                   end;
-    $082800..$082fff:ram2[(direccion and $7ff) shr 1]:=valor;
-    $0c0000..$0c000f:ddragon3_scroll_io((direccion and $f) shr 1,valor);
+    $82800..$82fff:ram2[(direccion and $7ff) shr 1]:=valor;
+    $c0000..$c000f:ddragon3_scroll_io((direccion and $f) shr 1,valor);
     $100000..$1005ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
                     buffer_paleta[(direccion and $7ff) shr 1]:=valor;
                     cambiar_color_ctribe((direccion and $7ff) shr 1,valor);
@@ -446,8 +443,8 @@ end;
 
 procedure ctribe_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:; //ROM
   $8000..$87ff:mem_snd[direccion]:=valor;
   $8800:ym2151_0.reg(valor);
   $8801:ym2151_0.write(valor);
@@ -619,22 +616,22 @@ getmem(memoria_temp,$400000);
 case main_vars.tipo_maquina of
   196:begin //DDW 3
         //Cargar ADPCM ROMS
-        if not(cargar_roms(@mem_oki,@ddragon3_oki,'ddragon3.zip')) then exit;
+        if not(roms_load(@mem_oki,ddragon3_oki)) then exit;
         copymemory(oki_6295_0.get_rom_addr,@mem_oki,$40000);
         //cargar roms
         m68000_0.change_ram16_calls(ddragon3_getword,ddragon3_putword);
-        if not(cargar_roms16w(@rom,@ddragon3_rom,'ddragon3.zip',0)) then exit;
+        if not(roms_load16w(@rom,ddragon3_rom)) then exit;
         //cargar sonido
         z80_0.change_ram_calls(ddragon3_snd_getbyte,ddragon3_snd_putbyte);
-        if not(cargar_roms(@mem_snd,@ddragon3_sound,'ddragon3.zip')) then exit;
+        if not(roms_load(@mem_snd,ddragon3_sound)) then exit;
         //convertir background
-        if not(cargar_roms16w(pword(memoria_temp),@ddragon3_bg,'ddragon3.zip',0)) then exit;
+        if not(roms_load16w(pword(memoria_temp),ddragon3_bg)) then exit;
         init_gfx(0,16,16,$2000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,64*8,8,0,$80000*8+8,$80000*8+0);
         convert_gfx(0,0,memoria_temp,@pt_x,@pt_y,false,false);
         //convertir sprites
-        if not(cargar_roms(memoria_temp,@ddragon3_sprites,'ddragon3.zip',0)) then exit;
+        if not(roms_load(memoria_temp,ddragon3_sprites)) then exit;
         init_gfx(1,16,16,$8000);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,0,$100000*8,$100000*8*2,$100000*8*3);
@@ -647,21 +644,21 @@ case main_vars.tipo_maquina of
   end;
   232:begin
         //Cargar ADPCM ROMS
-        if not(cargar_roms(oki_6295_0.get_rom_addr,@ctribe_oki,'ctribe.zip',0)) then exit;
+        if not(roms_load(oki_6295_0.get_rom_addr,ctribe_oki)) then exit;
         //cargar roms
         m68000_0.change_ram16_calls(ctribe_getword,ctribe_putword);
-        if not(cargar_roms16w(@rom,@ctribe_rom,'ctribe.zip',0)) then exit;
+        if not(roms_load16w(@rom,ctribe_rom)) then exit;
         //cargar sonido
         z80_0.change_ram_calls(ctribe_snd_getbyte,ctribe_snd_putbyte);
-        if not(cargar_roms(@mem_snd,@ctribe_sound,'ctribe.zip')) then exit;
+        if not(roms_load(@mem_snd,ctribe_sound)) then exit;
         //convertir background
-        if not(cargar_roms16w(pword(memoria_temp),@ctribe_bg,'ctribe.zip',0)) then exit;
+        if not(roms_load16w(pword(memoria_temp),ctribe_bg)) then exit;
         init_gfx(0,16,16,$2000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,64*8,8,0,$80000*8+8,$80000*8+0);
         convert_gfx(0,0,memoria_temp,@pt_x,@pt_y,false,false);
         //convertir sprites
-        if not(cargar_roms(memoria_temp,@ctribe_sprites,'ctribe.zip',0)) then exit;
+        if not(roms_load(memoria_temp,ctribe_sprites)) then exit;
         init_gfx(1,16,16,$8000);
         gfx[1].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,0,$100000*8,$100000*8*2,$100000*8*3);

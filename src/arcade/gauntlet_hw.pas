@@ -9,10 +9,10 @@ procedure cargar_gauntlet;
 
 implementation
 const
-        gauntlet_rom:array[0..6] of tipo_roms=(
+        gauntlet_rom:array[0..5] of tipo_roms=(
         (n:'136041-507.9a';l:$8000;p:0;crc:$8784133f),(n:'136041-508.9b';l:$8000;p:$1;crc:$2843bde3),
         (n:'136037-205.10a';l:$4000;p:$38000;crc:$6d99ed51),(n:'136037-206.10b';l:$4000;p:$38001;crc:$545ead91),
-        (n:'136041-609.7a';l:$8000;p:$40000;crc:$5b4ee415),(n:'136041-610.7b';l:$8000;p:$40001;crc:$41f5c9e2),());
+        (n:'136041-609.7a';l:$8000;p:$40000;crc:$5b4ee415),(n:'136041-610.7b';l:$8000;p:$40001;crc:$41f5c9e2));
         gauntlet_sound:array[0..1] of tipo_roms=(
         (n:'136037-120.16r';l:$4000;p:$4000;crc:$6ee7f3cc),(n:'136037-119.16s';l:$8000;p:$8000;crc:$fa19861f));
         gauntlet_char:tipo_roms=(n:'136037-104.6p';l:$4000;p:0;crc:$6c276a1d);
@@ -25,11 +25,11 @@ const
         (n:'74s472-136037-101.7u';l:$200;p:0;crc:$2964f76f),(n:'74s472-136037-102.5l';l:$200;p:$200;crc:$4d4fec6c),
         (n:'74s287-136037-103.4r';l:$100;p:$400;crc:$6c5ccf08));
         //Gauntlet II
-        gauntlet2_rom:array[0..8] of tipo_roms=(
+        gauntlet2_rom:array[0..7] of tipo_roms=(
         (n:'136037-1307.9a';l:$8000;p:0;crc:$46fe8743),(n:'136037-1308.9b';l:$8000;p:$1;crc:$276e15c4),
         (n:'136043-1105.10a';l:$4000;p:$38000;crc:$45dfda47),(n:'136043-1106.10b';l:$4000;p:$38001;crc:$343c029c),
         (n:'136043-1109.7a';l:$8000;p:$40000;crc:$58a0a9a3),(n:'136043-1110.7b';l:$8000;p:$40001;crc:$658f0da8),
-        (n:'136043-1121.6a';l:$8000;p:$50000;crc:$ae301bba),(n:'136043-1122.6b';l:$8000;p:$50001;crc:$e94aaa8a),());
+        (n:'136043-1121.6a';l:$8000;p:$50000;crc:$ae301bba),(n:'136043-1122.6b';l:$8000;p:$50001;crc:$e94aaa8a));
         gauntlet2_sound:array[0..1] of tipo_roms=(
         (n:'136043-1120.16r';l:$4000;p:$4000;crc:$5c731006),(n:'136043-1119.16s';l:$8000;p:$8000;crc:$dc3591e7));
         gauntlet2_char:tipo_roms=(n:'136043-1104.6p';l:$2000;p:0;crc:$1343cf6f);
@@ -77,6 +77,7 @@ const
 	        special_entry:(0,0,0,0);  // mask for the special value */
 	        specialvalue:0;           // resulting value to indicate "special" */
         );
+        CPU_SYNC=4;
 
 var
  rom:array[0..$3ffff] of word;
@@ -85,7 +86,7 @@ var
  ram2:array[0..$5fff] of word;
  eeprom_ram:array[0..$7ff] of byte;
  write_eeprom,sound_to_main_ready,main_to_sound_ready:boolean;
- cpu_sync,rom_bank,vblank,sound_to_main_data,main_to_sound_data:byte;
+ rom_bank,vblank,sound_to_main_data,main_to_sound_data:byte;
  scroll_x,sound_reset_val:word;
 
 procedure update_video_gauntlet;inline;
@@ -132,7 +133,7 @@ for f:=0 to $fff do begin
 end;
 scroll_x_y(3,5,scroll_x,scroll_y);
 actualiza_trozo(0,0,512,256,1,0,0,512,256,5);
-atari_mo_0.draw(scroll_x,scroll_y,0);
+atari_mo_0.draw(scroll_x,scroll_y,-1);
 scroll_x_y(4,5,scroll_x,scroll_y);
 actualiza_trozo(0,0,512,256,2,0,0,512,256,5);
 actualiza_trozo_final(0,0,336,240,5);
@@ -165,32 +166,32 @@ end;
 procedure gauntlet_principal;
 var
   frame_m,frame_s:single;
-  f,sound_irq:word;
+  f:word;
+  h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
 while EmuStatus=EsRuning do begin
- sound_irq:=0;
- for f:=0 to (262*cpu_sync)-1 do begin
-  //main
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //sound
-  m6502_0.run(frame_s);
-  frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
-  if f=(239*cpu_sync) then begin  //VBLANK
+ for f:=0 to 261 do begin
+    for h:=1 to CPU_SYNC do begin
+      //main
+      m68000_0.run(frame_m);
+      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+      //sound
+      m6502_0.run(frame_s);
+      frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
+    end;
+    case f of
+      0,64,128,192,256:m6502_0.change_irq(CLEAR_LINE);
+      32,96,160,224:m6502_0.change_irq(ASSERT_LINE);
+      239:begin  //VBLANK
           update_video_gauntlet;
           vblank:=$0;
           m68000_0.irq[4]:=ASSERT_LINE;
-    end else if f=(261*cpu_sync) then vblank:=$40;
-  if (f mod cpu_sync)=0 then begin
-    case sound_irq of
-      0,64,128,192,256:m6502_0.change_irq(CLEAR_LINE);
-      32,96,160,224:m6502_0.change_irq(ASSERT_LINE);
+        end;
+      261:vblank:=$40;
     end;
-    sound_irq:=sound_irq+1;
-  end;
  end;
  eventos_gauntlet;
  video_sync;
@@ -244,6 +245,7 @@ var
   old:word;
 begin
 case direccion of
+    0..$37fff,$40000..$7ffff:; //ROM
     $38000..$3ffff:rom_bank:=slapstic_0.slapstic_tweak((direccion and $7fff) shr 1); //Slaptic!!
     $800000..$801fff:ram[(direccion and $1fff) shr 1]:=valor;
     $802000..$802fff:if write_eeprom then begin  //eeprom
@@ -324,7 +326,6 @@ end;
 
 procedure gauntlet_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
      0..$fff:mem_snd[direccion]:=valor;
      $1000..$100f:begin //sound_response_w
@@ -347,6 +348,7 @@ case direccion of
      $1811:ym2151_0.write(valor);
      $1820..$182f:; //tms5220_device, data_w
      $1830..$183f:m6502_0.change_irq(CLEAR_LINE); //sound_irq_ack_w
+     $4000..$ffff:; //ROM
 end;
 end;
 
@@ -422,15 +424,11 @@ screen_mod_scroll(4,512,512,511,512,256,511);
 //Final
 screen_init(5,512,512,false,true);
 iniciar_video(336,240);
-case main_vars.tipo_maquina of
-  236:cpu_sync:=10;
-  245:cpu_sync:=25;
-end;
 //Main CPU
-m68000_0:=cpu_m68000.create(14318180 div 2,262*cpu_sync,TCPU_68010);
+m68000_0:=cpu_m68000.create(14318180 div 2,262*CPU_SYNC,TCPU_68010);
 m68000_0.change_ram16_calls(gauntlet_getword,gauntlet_putword);
 //Sound CPU
-m6502_0:=cpu_m6502.create(14318180 div 8,262*cpu_sync,TCPU_M6502);
+m6502_0:=cpu_m6502.create(14318180 div 8,262*CPU_SYNC,TCPU_M6502);
 m6502_0.change_ram_calls(gauntlet_snd_getbyte,gauntlet_snd_putbyte);
 m6502_0.init_sound(gauntlet_sound_update);
 //Sound Chips
@@ -442,18 +440,18 @@ case main_vars.tipo_maquina of
         //Slapstic
         slapstic_0:=slapstic_type.create(107,true);
         //cargar roms
-        if not(cargar_roms16w(@memoria_temp,@gauntlet_rom,'gauntlet2p.zip',0)) then exit;
+        if not(roms_load16w(@memoria_temp,gauntlet_rom)) then exit;
         load_and_change_roms;
         //cargar sonido
-        if not(roms_load(@mem_snd,@gauntlet_sound,'gauntlet2p.zip',sizeof(gauntlet_sound))) then exit;
+        if not(roms_load(@mem_snd,gauntlet_sound)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@gauntlet_char,'gauntlet2p.zip',sizeof(gauntlet_char))) then exit;
+        if not(roms_load(@memoria_temp,gauntlet_char)) then exit;
         init_gfx(0,8,8,$400);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,0,16*8,0,4);
         convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
         //convertir fondo
-        if not(roms_load(@memoria_temp,@gauntlet_back,'gauntlet2p.zip',sizeof(gauntlet_back))) then exit;
+        if not(roms_load(@memoria_temp,gauntlet_back)) then exit;
         for f:=0 to $3ffff do memoria_temp[f]:=not(memoria_temp[f]);
         init_gfx(1,8,8,$2000);
         gfx[1].trans[0]:=true;
@@ -470,18 +468,18 @@ case main_vars.tipo_maquina of
         //Slapstic
         slapstic_0:=slapstic_type.create(106,true);
         //cargar roms
-        if not(cargar_roms16w(@memoria_temp,@gauntlet2_rom,'gaunt2.zip',0)) then exit;
+        if not(roms_load16w(@memoria_temp,gauntlet2_rom)) then exit;
         load_and_change_roms;
         //cargar sonido
-        if not(roms_load(@mem_snd,@gauntlet2_sound,'gaunt2.zip',sizeof(gauntlet2_sound))) then exit;
+        if not(roms_load(@mem_snd,gauntlet2_sound)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@gauntlet2_char,'gaunt2.zip',sizeof(gauntlet2_char))) then exit;
+        if not(roms_load(@memoria_temp,gauntlet2_char)) then exit;
         init_gfx(0,8,8,$400);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(2,0,16*8,0,4);
         convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
         //convertir fondo
-        if not(roms_load(@memoria_temp,@gauntlet2_back,'gaunt2.zip',sizeof(gauntlet2_back))) then exit;
+        if not(roms_load(@memoria_temp,gauntlet2_back)) then exit;
         for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]);
         init_gfx(1,8,8,$3000);
         gfx[1].trans[0]:=true;

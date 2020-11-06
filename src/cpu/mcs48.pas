@@ -94,11 +94,11 @@ const
   ciclos_mcs48:array[0..$ff] of byte=(
 //0 1 2 3 4 5 6 7 8 9 a b c d e f
   1,0,0,2,2,1,0,1,2,2,2,0,0,0,0,0, //00
-  1,1,2,0,2,1,2,1,1,1,1,1,1,1,1,1, //10
+  1,1,2,2,2,1,2,1,1,1,1,1,1,1,1,1, //10
   0,0,0,2,2,0,2,1,1,1,1,1,1,1,1,1, //20
   0,0,2,0,2,0,2,1,0,2,2,0,2,2,2,2, //30
   0,0,1,2,2,0,2,1,1,1,1,1,1,1,1,1, //40
-  0,0,2,2,2,1,2,0,1,1,1,1,1,1,1,1, //50
+  0,0,2,2,2,1,2,1,1,1,1,1,1,1,1,1, //50
   0,0,1,0,2,0,0,1,1,1,1,1,1,1,1,1, //60
   0,0,2,0,2,1,2,1,1,1,1,1,1,1,1,1, //70
   2,2,0,2,2,1,2,0,0,0,0,0,0,0,0,0, //80
@@ -106,7 +106,7 @@ const
   1,1,0,2,2,1,0,0,1,1,1,1,1,1,1,1, //a0
   2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,2, //b0
   0,0,0,0,2,1,2,0,1,1,1,1,1,1,1,1, //c0
-  0,0,2,0,2,1,0,1,1,1,1,1,1,1,1,1, //d0
+  0,0,2,2,2,1,0,1,1,1,1,1,1,1,1,1, //d0
   0,0,0,2,2,1,2,1,2,2,2,2,2,2,2,2, //e0
   1,1,2,0,2,1,2,1,1,1,1,1,1,1,1,1);//f0
 
@@ -220,7 +220,7 @@ begin
 	//confirmed from interrupt logic description
 	self.irq_in_progress:=false;
 	self.timer_overflow:=false;
-  //if self.chip_type=N7751 then self.i8243.reset;
+  if self.chip_type=N7751 then self.i8243.reset;
 end;
 
 function cpu_mcs48.test_r(valor:byte):byte;
@@ -257,7 +257,7 @@ begin
 	// generate high-to-low transition on PROG line */
   if addr(self.out_port)<>nil then self.out_port(MCS48_PORT_PROG,0);
 	// put data on low 4 bits of P2
-	if (operation<>0) then begin
+	if (operation<>MCS48_EXPANDER_OP_READ) then begin
     self.r.p2:=(self.r.p2 and $f0) or (self.r.a and $f);
     self.port_w(2,self.r.p2);
   end else self.r.a:=self.port_r(2) or $0f;
@@ -429,7 +429,6 @@ if self.pedir_reset<>CLEAR_LINE then begin
 end;
 self.update_regptr;
 estados_demas:=self.check_irqs;
-if (self.timecount_enabled<>0) then burn_cycles(estados_demas);
 r.old_pc:=r.pc;
 instruccion:=self.read_rom(r.pc);
 r.pc:=r.pc+1;
@@ -437,9 +436,8 @@ self.opcode:=false;
 case instruccion of
   $00:; //nop
   $03:begin //add_a_n
-        tempb:=self.read_rom(r.pc);
+        self.add(self.read_rom(r.pc));
         r.pc:=r.pc+1;
-        self.add(tempb);
       end;
   $04,$24,$44,$64,$84,$a4,$c4,$e4:begin  //jmp_XX
         tempb:=self.read_rom(r.pc);
@@ -462,6 +460,10 @@ case instruccion of
         tempb:=self.read_rom(r.pc);
         r.pc:=r.pc+1;
         if ((r.a and 1)<>0) then r.pc:=((r.pc-1) and $f00) or tempb;
+      end;
+  $13:begin //addc_a_n
+        self.addc(self.read_rom(r.pc));
+        r.pc:=r.pc+1;
       end;
   $14,$34,$54,$74,$94,$b4,$d4,$f4:begin //call_XX
         tempb:=self.read_rom(r.pc);
@@ -597,6 +599,16 @@ case instruccion of
         tempb:=self.read_rom(r.pc);
         r.pc:=r.pc+1;
         if (self.test_r(1)<>0) then r.pc:=((r.pc-1) and $f00) or tempb;
+      end;
+  $57:begin //da_a
+        	if (((self.r.a and $0f)>$09) or self.r.psw.a) then begin
+		          self.r.a:=self.r.a+$06;
+		          if ((self.r.a and $f0)=$0) then self.r.psw.c:=true;
+	        end;
+	        if (((self.r.a and $f0)>$90) or self.r.psw.c) then begin
+		        self.r.a:=self.r.a+$60;
+		        self.r.psw.c:=true;
+	        end else self.r.psw.c:=false;
       end;
   $58:r.a:=r.a and r.r0^; //anl_a_r0
   $59:r.a:=r.a and r.r1^; //anl_a_r1
@@ -785,6 +797,11 @@ case instruccion of
         r.pc:=r.pc+1;
         if ((r.a and $40)<>0) then r.pc:=((r.pc-1) and $f00) or tempb;
       end;
+  $d3:begin  //xrl_a_n
+        tempb:=self.read_rom(r.pc);
+        r.pc:=r.pc+1;
+        r.a:=r.a xor tempb;
+      end;
   $d5:begin  //sel_rb1
         r.psw.b:=true;
         self.update_regptr;
@@ -889,7 +906,7 @@ end;
 tempb:=ciclos_mcs48[instruccion]+estados_demas;
 self.contador:=self.contador+tempb;
 if (self.timecount_enabled<>0) then burn_cycles(tempb);
-update_timer(tempb,self.numero_cpu);
+timers.update(tempb,self.numero_cpu);
 end;
 end;
 

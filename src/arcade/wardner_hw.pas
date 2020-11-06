@@ -9,32 +9,42 @@ procedure cargar_wardnerhw;
 
 implementation
 const
-        wardner_rom:array[0..4] of tipo_roms=(
+        wardner_rom:array[0..3] of tipo_roms=(
         (n:'wardner.17';l:$8000;p:0;crc:$c5dd56fd),(n:'b25-18.rom';l:$10000;p:$8000;crc:$9aab8ee2),
-        (n:'b25-19.rom';l:$10000;p:$18000;crc:$95b68813),(n:'wardner.20';l:$8000;p:$28000;crc:$347f411b),());
+        (n:'b25-19.rom';l:$10000;p:$18000;crc:$95b68813),(n:'wardner.20';l:$8000;p:$28000;crc:$347f411b));
         wardner_snd_rom:tipo_roms=(n:'b25-16.rom';l:$8000;p:0;crc:$e5202ff8);
-        wardner_char:array[0..3] of tipo_roms=(
+        wardner_char:array[0..2] of tipo_roms=(
         (n:'wardner.07';l:$4000;p:0;crc:$1392b60d),(n:'wardner.06';l:$4000;p:$4000;crc:$0ed848da),
-        (n:'wardner.05';l:$4000;p:$8000;crc:$79792c86),());
-        wardner_sprites:array[0..4] of tipo_roms=(
+        (n:'wardner.05';l:$4000;p:$8000;crc:$79792c86));
+        wardner_sprites:array[0..3] of tipo_roms=(
         (n:'b25-01.rom';l:$10000;p:0;crc:$42ec01fb),(n:'b25-02.rom';l:$10000;p:$10000;crc:$6c0130b7),
-        (n:'b25-03.rom';l:$10000;p:$20000;crc:$b923db99),(n:'b25-04.rom';l:$10000;p:$30000;crc:$8059573c),());
-        wardner_fg_tiles:array[0..4] of tipo_roms=(
+        (n:'b25-03.rom';l:$10000;p:$20000;crc:$b923db99),(n:'b25-04.rom';l:$10000;p:$30000;crc:$8059573c));
+        wardner_fg_tiles:array[0..3] of tipo_roms=(
         (n:'b25-12.rom';l:$8000;p:0;crc:$15d08848),(n:'b25-15.rom';l:$8000;p:$8000;crc:$cdd2d408),
-        (n:'b25-14.rom';l:$8000;p:$10000;crc:$5a2aef4f),(n:'b25-13.rom';l:$8000;p:$18000;crc:$be21db2b),());
-        wardner_bg_tiles:array[0..4] of tipo_roms=(
+        (n:'b25-14.rom';l:$8000;p:$10000;crc:$5a2aef4f),(n:'b25-13.rom';l:$8000;p:$18000;crc:$be21db2b));
+        wardner_bg_tiles:array[0..3] of tipo_roms=(
         (n:'b25-08.rom';l:$8000;p:0;crc:$883ccaa3),(n:'b25-11.rom';l:$8000;p:$8000;crc:$d6ebd510),
-        (n:'b25-10.rom';l:$8000;p:$10000;crc:$b9a61e81),(n:'b25-09.rom';l:$8000;p:$18000;crc:$585411b7),());
-        wardner_mcu_rom:array[0..8] of tipo_roms=(
+        (n:'b25-10.rom';l:$8000;p:$10000;crc:$b9a61e81),(n:'b25-09.rom';l:$8000;p:$18000;crc:$585411b7));
+        wardner_mcu_rom:array[0..7] of tipo_roms=(
         (n:'82s137.1d';l:$400;p:0;crc:$cc5b3f53),(n:'82s137.1e';l:$400;p:$400;crc:$47351d55),
         (n:'82s137.3d';l:$400;p:$800;crc:$70b537b9),(n:'82s137.3e';l:$400;p:$c00;crc:$6edb2de8),
         (n:'82s131.3b';l:$200;p:$1000;crc:$9dfffaff),(n:'82s131.3a';l:$200;p:$1200;crc:$712bad47),
-        (n:'82s131.2a';l:$200;p:$1400;crc:$ac843ca6),(n:'82s131.1a';l:$200;p:$1600;crc:$50452ff8),());
+        (n:'82s131.2a';l:$200;p:$1400;crc:$ac843ca6),(n:'82s131.1a';l:$200;p:$1600;crc:$50452ff8));
+        wardner_dip_a:array [0..5] of def_dip=(
+        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$1;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$30;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'2C 1C'),(dip_val:$40;dip_name:'1C 3C'),(dip_val:$80;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        wardner_dip_b:array [0..3] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$3;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'30k 80k 50k+'),(dip_val:$4;dip_name:'50k 100k 50k+'),(dip_val:$8;dip_name:'30k'),(dip_val:$c;dip_name:'50k'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'1'),(dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  mem_rom:array[0..7,0..$7fff] of byte;
  rom_bank:byte;
- rom_ena,int_enable,wardner_dsp_BIO,dsp_execute:boolean;
+ int_enable,wardner_dsp_BIO,dsp_execute,video_ena:boolean;
  txt_ram:array[0..$7ff] of word;
  bg_ram:array[0..$1fff] of word;
  fg_ram:array[0..$fff] of word;
@@ -43,10 +53,9 @@ var
 
 procedure draw_sprites(priority:word);inline;
 var
-  f:word;
-  atrib,x,y:word;
+  f,nchar,atrib,x,y:word;
   flipx,flipy:boolean;
-  nchar,color:word;
+  color:byte;
 begin
 for f:=0 to $1ff do begin
   atrib:=memoria[$8002+(f shl 3)]+(memoria[$8003+(f shl 3)] shl 8);
@@ -57,7 +66,7 @@ for f:=0 to $1ff do begin
     color:=atrib and $3f;
     x:=(memoria[$8004+(f shl 3)]+(memoria[$8005+(f shl 3)] shl 8)) shr 7;
     flipx:=(atrib and $100)<>0;
-    if flipx then x:=x-14;		// should really be 15 */
+    if flipx then x:=x-14;		// should really be 15
     flipy:=(atrib and $200)<>0;
     put_gfx_sprite(nchar,color shl 4,flipx,flipy,3);
     actualiza_gfx_sprite(x-32,y-16,4,3);
@@ -67,63 +76,73 @@ end;
 
 procedure update_video_wardner;inline;
 var
-        f,color,nchar:word;
-        x,y:word;
-        atrib:word;
+  f,nchar,x,y,atrib:word;
+  color:byte;
 begin
-for f:=$7ff downto 0 do begin
-  //Chars
-  atrib:=txt_ram[f];
-  color:=(atrib and $F800) shr 11;
-  if (gfx[0].buffer[f] or buffer_color[color]) then begin
-    x:=(f and $3f) shl 3;
-    y:=(f shr 6) shl 3;
-    nchar:=atrib and $7ff;
-    put_gfx_trans(x,y,nchar,(color shl 3)+$600,1,0);
-    gfx[0].buffer[f]:=false;
+if video_ena then begin
+  for f:=$7ff downto 0 do begin
+    //Chars
+    atrib:=txt_ram[f];
+    color:=(atrib and $f800) shr 11;
+    if (gfx[0].buffer[f] or buffer_color[color]) then begin
+      x:=(f and $3f) shl 3;
+      y:=(f shr 6) shl 3;
+      nchar:=atrib and $7ff;
+      put_gfx_trans(x,y,nchar,(color shl 3)+$600,1,0);
+      gfx[0].buffer[f]:=false;
+    end;
   end;
-end;
-for f:=0 to $fff do begin
-    atrib:=bg_ram[f+bg_bank];
-    color:=(atrib and $F000) shr 12;
-    if (gfx[2].buffer[f+bg_bank] or buffer_color[color+$30]) then begin
-      //background
-      x:=(f and $3f) shl 3;
-      y:=(f shr 6) shl 3;
-      nchar:=atrib and $fff;
-      put_gfx(x,y,nchar,(color shl 4)+$400,3,2);
-      gfx[2].buffer[f+bg_bank]:=false;
-    end;
-    atrib:=fg_ram[f];
-    color:=(atrib and $F000) shr 12;
-    if (gfx[1].buffer[f] or buffer_color[color+$20]) then begin
-      //foreground
-      x:=(f and $3f) shl 3;
-      y:=(f shr 6) shl 3;
-      nchar:=(atrib and $fff)+fg_bank;
-      put_gfx_trans(x,y,nchar and $fff,(color shl 4)+$500,2,1);
-      gfx[1].buffer[f]:=false;
-    end;
-end;
-scroll_x_y(3,4,bg_scroll_x+55,bg_scroll_y+30);
-draw_sprites($400);
-scroll_x_y(2,4,fg_scroll_x+55,fg_scroll_y+30);
-draw_sprites($800);
-scroll_x_y(1,4,512-txt_scroll_x-55,256-txt_scroll_y-30);
-draw_sprites($c00);
+  for f:=0 to $fff do begin
+      atrib:=bg_ram[f+bg_bank];
+      color:=(atrib and $f000) shr 12;
+      if (gfx[2].buffer[f+bg_bank] or buffer_color[color+$30]) then begin
+        //background
+        x:=(f and $3f) shl 3;
+        y:=(f shr 6) shl 3;
+        nchar:=atrib and $fff;
+        put_gfx(x,y,nchar,(color shl 4)+$400,3,2);
+        gfx[2].buffer[f+bg_bank]:=false;
+      end;
+      atrib:=fg_ram[f];
+      color:=(atrib and $f000) shr 12;
+      if (gfx[1].buffer[f] or buffer_color[color+$20]) then begin
+        //foreground
+        x:=(f and $3f) shl 3;
+        y:=(f shr 6) shl 3;
+        nchar:=(atrib and $fff)+fg_bank;
+        put_gfx_trans(x,y,nchar and $fff,(color shl 4)+$500,2,1);
+        gfx[1].buffer[f]:=false;
+      end;
+  end;
+  scroll_x_y(3,4,bg_scroll_x+55,bg_scroll_y+30);
+  draw_sprites($400);
+  scroll_x_y(2,4,fg_scroll_x+55,fg_scroll_y+30);
+  draw_sprites($800);
+  scroll_x_y(1,4,512-txt_scroll_x-55,256-txt_scroll_y-30);
+  draw_sprites($c00);
+end else fill_full_screen(4,$800);
 actualiza_trozo_final(0,0,320,240,4);
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure eventos_wardner;
 begin
 if event.arcade then begin
-  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $F7);
+  //P1
   if arcade_input.up[0] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.down[0] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
-  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
+  if arcade_input.left[0] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
+  if arcade_input.right[0] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.but1[0] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
+  if arcade_input.but0[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
+  //P2
+  if arcade_input.up[1] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.down[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 or $4) else marcade.in2:=(marcade.in2 and $fb);
+  if arcade_input.right[1] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
+  if arcade_input.but1[1] then marcade.in2:=(marcade.in2 or $10) else marcade.in2:=(marcade.in2 and $ef);
+  if arcade_input.but0[1] then marcade.in2:=(marcade.in2 or $20) else marcade.in2:=(marcade.in2 and $df);
+  //SYS
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
@@ -204,9 +223,7 @@ end;
 
 procedure wardner_dsp_bio_w(valor:word);
 begin
-  if (valor and $8000)<>0 then begin
-		wardner_dsp_BIO:=false;
-	end;
+  if (valor and $8000)<>0 then wardner_dsp_BIO:=false;
 	if (valor=0) then begin
 		if dsp_execute then begin
       z80_0.change_halt(CLEAR_LINE);
@@ -231,8 +248,8 @@ end;
 
 procedure wardner_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:;
   $8000..$807f,$c800..$cfff:mem_snd[direccion]:=valor;
   $c000..$c7ff:memoria[direccion]:=valor;
 end;
@@ -260,8 +277,12 @@ function wardner_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$7fff:wardner_getbyte:=memoria[direccion];
-  $8000..$ffff:if rom_ena then wardner_getbyte:=mem_rom[rom_bank,direccion and $7fff]
-                  else wardner_getbyte:=memoria[direccion];
+  $8000..$ffff:if rom_bank=0 then begin
+                case (direccion and $7fff) of
+                  0..$1fff,$3000..$7fff:wardner_getbyte:=memoria[direccion];
+                  $2000..$2fff:wardner_getbyte:=buffer_paleta[direccion and $fff];
+                end;
+               end else wardner_getbyte:=mem_rom[rom_bank,direccion and $7fff];
 end;
 end;
 
@@ -277,36 +298,37 @@ begin
   numero:=numero shr 1;
   set_pal_color(color,numero);
   case numero of
-    1024..1279:buffer_color[((numero shr 4) and $f)+$30]:=true;
-    1280..1535:buffer_color[((numero shr 4) and $f)+$20]:=true;
-    1536..1791:buffer_color[(numero shr 3) and $1f]:=true;
+    $400..$4ff:buffer_color[((numero shr 4) and $f)+$30]:=true;
+    $500..$5ff:buffer_color[((numero shr 4) and $f)+$20]:=true;
+    $600..$6ff:buffer_color[(numero shr 3) and $1f]:=true;
   end;
 end;
 
 procedure wardner_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$7000 then exit;
 case direccion of
+  0..$6fff:;
   $7000..$7fff:memoria[direccion]:=valor;
-  $8000..$ffff:if rom_ena then exit
-                  else begin
-                          case direccion of
-                            $a000..$adff:if buffer_paleta[direccion and $fff]<>valor then begin
-                                          buffer_paleta[direccion and $fff]:=valor;
-                                          cambiar_color(direccion and $ffe);
-                                       end;
-                          end;
-                          memoria[direccion]:=valor;
-                        end;
+  $8000..$ffff:if rom_bank=0 then begin
+                  case (direccion and $7fff) of
+                    0..$fff,$4000..$47ff:memoria[direccion]:=valor;
+                    $1000..$1fff,$3000..$3fff,$4800..$7fff:;
+                    $2000..$2fff:if buffer_paleta[direccion and $fff]<>valor then begin
+                                    buffer_paleta[direccion and $fff]:=valor;
+                                    cambiar_color(direccion and $ffe);
+                                 end;
+                  end;
+                end;
 end;
 end;
 
 function wardner_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $50:wardner_inbyte:=1;
-  $52,$56:wardner_inbyte:=0;
+  $50:wardner_inbyte:=marcade.dswa;
+  $52:wardner_inbyte:=marcade.dswb;
   $54:wardner_inbyte:=marcade.in1;
+  $56:wardner_inbyte:=marcade.in2;
   $58:wardner_inbyte:=marcade.in0;
   $60:wardner_inbyte:=txt_ram[txt_offs] and $ff;
   $61:wardner_inbyte:=txt_ram[txt_offs] shr 8;
@@ -338,29 +360,28 @@ case (puerto and $ff) of
   $33:fg_scroll_y:=(fg_scroll_y and $00ff) or ((valor and $1) shl 8);
   $34:fg_offs:=(fg_offs and $ff00) or valor;
   $35:fg_offs:=(fg_offs and $00ff) or ((valor and $f) shl 8);
-  $5a:case valor of
-        $00:begin	// This means assert the INT line to the DSP */
+  $5a:case (valor and $f) of
+        $0:begin
 	            tms32010_0.change_halt(CLEAR_LINE);
               z80_0.change_halt(ASSERT_LINE);
               tms32010_0.change_irq(ASSERT_LINE);
 	          end;
-	      $01:begin	// This means inhibit the INT line to the DSP */
+	      $1:begin
               tms32010_0.change_irq(CLEAR_LINE);
 	            tms32010_0.change_halt(ASSERT_LINE);
             end;
       end;
-  $5c:case valor of
+  $5c:case (valor and $f) of
 		    $4:int_enable:=false;
 		    $5:int_enable:=true;
-		    $6,$7:;
-		    $8:bg_bank:=$0000;
+		    $6:main_screen.flip_main_screen:=false;
+        $7:main_screen.flip_main_screen:=true;
+        $8:bg_bank:=0;
         $9:bg_bank:=$1000;
-		    $a:fg_bank:=$0000;
+		    $a:fg_bank:=0;
         $b:fg_bank:=$1000;
-        //$c,$d:;//MessageDlg('Mierda DSP!!', mtInformation,[mbOk], 0);
-        //twincobr_dsp(machine, 1); break;	 /* Enable the INT line to the DSP */
-        //case 0x000d: twincobr_dsp(machine, 0); break;	 /* Inhibit the INT line to the DSP */
-        //$e,$f:halt(0);//MessageDlg('Mierda Pantalla on/off', mtInformation,[mbOk], 0);// twincobr_display(0); break; /* Turn display off */
+        $c:video_ena:=false;
+        $d:video_ena:=true;
 	    end;
   $60:if (txt_ram[txt_offs] and $ff)<>valor then begin
           txt_ram[txt_offs]:=(txt_ram[txt_offs] and $ff00) or valor;
@@ -386,10 +407,7 @@ case (puerto and $ff) of
         fg_ram[fg_offs]:=(fg_ram[fg_offs] and $ff) or (valor shl 8);
         gfx[1].buffer[fg_offs]:=true;
       end;
-  $70:begin
-        rom_ena:=(valor<>0);
-        rom_bank:=valor;
-      end;
+  $70:rom_bank:=valor;
 end;
 end;
 
@@ -406,22 +424,23 @@ begin
  tms32010_0.reset;
  ym3812_0.reset;
  reset_audio;
- txt_scroll_x:=457;
- txt_scroll_y:=226;
+ txt_scroll_x:=0;
+ txt_scroll_y:=0;
  bg_scroll_x:=0;
  bg_scroll_y:=0;
  fg_scroll_x:=0;
  fg_scroll_y:=0;
  marcade.in0:=0;
  marcade.in1:=0;
+ marcade.in2:=0;
  rom_bank:=0;
- rom_ena:=true;
  txt_offs:=0;
  bg_offs:=0;
  fg_offs:=0;
  bg_bank:=0;
  fg_bank:=0;
  int_enable:=false;
+ video_ena:=true;
  wardner_dsp_BIO:=false;
  dsp_execute:=false;
  main_ram_seg:=0;
@@ -454,7 +473,7 @@ z80_0:=cpu_z80.create(24000000 div 4,286);
 z80_0.change_ram_calls(wardner_getbyte,wardner_putbyte);
 z80_0.change_io_calls(wardner_inbyte,wardner_outbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(3500000,286);
+z80_1:=cpu_z80.create(14000000 div 4,286);
 z80_1.change_ram_calls(wardner_snd_getbyte,wardner_snd_putbyte);
 z80_1.change_io_calls(wardner_snd_inbyte,wardner_snd_outbyte);
 z80_1.init_sound(wardner_sound_update);
@@ -462,50 +481,53 @@ z80_1.init_sound(wardner_sound_update);
 tms32010_0:=cpu_tms32010.create(14000000,286);
 tms32010_0.change_io_calls(wardner_BIO_r,nil,wardner_dsp_r,nil,nil,nil,nil,nil,nil,wardner_dsp_addrsel_w,wardner_dsp_w,nil,wardner_dsp_bio_w,nil,nil,nil,nil);
 //Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,3500000);
+ym3812_0:=ym3812_chip.create(YM3812_FM,14000000 div 4);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
-if not(cargar_roms(@memoria_temp[0],@wardner_rom[0],'wardner.zip',0)) then exit;
+if not(roms_load(@memoria_temp,wardner_rom)) then exit;
 //Mover las ROMS a su sitio
 copymemory(@memoria,@memoria_temp[$0],$8000);
 for f:=0 to 3 do copymemory(@mem_rom[f+2,0],@memoria_temp[$8000+(f*$8000)],$8000);
 copymemory(@mem_rom[7,0],@memoria_temp[$28000],$8000);
 //cargar ROMS sonido
-if not(cargar_roms(@mem_snd[0],@wardner_snd_rom,'wardner.zip',1)) then exit;
+if not(roms_load(@mem_snd,wardner_snd_rom)) then exit;
 //cargar ROMS MCU y organizarlas
-if not(cargar_roms(@memoria_temp[0],@wardner_mcu_rom[0],'wardner.zip',0)) then exit;
-for f:=0 to $3ff do begin
+if not(roms_load(@memoria_temp,wardner_mcu_rom)) then exit;
+for f:=0 to $3ff do
    rom[f]:=(((memoria_temp[f] and $f) shl 4+(memoria_temp[f+$400] and $f)) shl 8) or
                     (memoria_temp[f+$800] and $f) shl 4+(memoria_temp[f+$c00] and $f);
-end;
-for f:=0 to $1ff do begin
+for f:=0 to $1ff do
    //1024-2047
    rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1200] and $f)) shl 8) or
                         (memoria_temp[f+$1400] and $f) shl 4+(memoria_temp[f+$1600] and $f);
-end;
 copymemory(tms32010_0.get_rom_addr,@rom[0],$1000);
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@wardner_char[0],'wardner.zip',0)) then exit;
+if not(roms_load(@memoria_temp,wardner_char)) then exit;
 init_gfx(0,8,8,2048);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,0*2048*8*8,1*2048*8*8,2*2048*8*8);
-convert_gfx(0,0,@memoria_temp[0],@ps_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,false,false);
 //convertir tiles fg
-if not(cargar_roms(@memoria_temp[0],@wardner_fg_tiles[0],'wardner.zip',0)) then exit;
+if not(roms_load(@memoria_temp,wardner_fg_tiles)) then exit;
 init_gfx(1,8,8,4096);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8,0*4096*8*8,1*4096*8*8,2*4096*8*8,3*4096*8*8);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@pc_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@pc_y,false,false);
 //convertir tiles bg
-if not(cargar_roms(@memoria_temp[0],@wardner_bg_tiles[0],'wardner.zip',0)) then exit;
+if not(roms_load(@memoria_temp,wardner_bg_tiles)) then exit;
 init_gfx(2,8,8,4096);
-convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@pc_y[0],false,false);
+convert_gfx(2,0,@memoria_temp,@ps_x,@pc_y,false,false);
 //convertir tiles sprites
-if not(cargar_roms(@memoria_temp[0],@wardner_sprites[0],'wardner.zip',0)) then exit;
+if not(roms_load(@memoria_temp,wardner_sprites)) then exit;
 init_gfx(3,16,16,2048);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0*2048*32*8,1*2048*32*8,2*2048*32*8,3*2048*32*8);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
+//DIP
+marcade.dswa:=1;
+marcade.dswb:=0;
+marcade.dswa_val:=@wardner_dip_a;
+marcade.dswb_val:=@wardner_dip_b;
 //final
 reset_wardnerhw;
 iniciar_wardnerhw:=true;

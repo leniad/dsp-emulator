@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,controls_engine,ay_8910,sysutils,gfx_engine,upd765,cargar_dsk,forms,
      dialogs,rom_engine,misc_functions,main_engine,pal_engine,sound_engine,
-     tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc;
+     tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc,timer_engine;
 
 const
   pantalla_alto=312;
@@ -30,14 +30,13 @@ type
               lineas_total,lineas_borde,lineas_visible,pixel_visible:word;
               regs:array[0..31] of byte;
               reg:byte;
-
               h_ctr,r_ctr,v_ctr,h_syn,h_syn_ctr,v_syn,v_syn_ctr:word;
            end;
   tcpc_ga=packed record
-              pen,video_mode:byte;
+              pen,nvideo,video_mode:byte;
               pal:array[0..16] of byte;
               lines_count,lines_sync,rom_selected:byte;
-              rom_low,rom_high:boolean;
+              change_video,rom_low,rom_high:boolean;
               marco:array[0..3] of byte;
               marco_latch,cpc_model,ram_exp:byte;
            end;
@@ -47,24 +46,27 @@ type
               tape_motor:boolean;
               ay_control,keyb_line:byte;
               keyb_val:array[0..9] of byte;
-              use_motor:boolean;
+           end;
+  tcpc_rom=packed record
+              data:array[0..$3fff] of byte;
+              enabled:boolean;
+              name:string;
            end;
 
 var
     cpc_mem:array[0..31,0..$3fff] of byte;
-    cpc_rom:array[0..15,0..$3fff] of byte;
-    cpc_rom_slot:array[0..15] of string;
-    cpc_low_rom:array[0..$3fff] of byte;
+    cpc_rom:array[0..16] of tcpc_rom;
     cpc_crt:^tcpc_crt;
     cpc_ga:tcpc_ga;
     cpc_ppi:tcpc_ppi;
+    tape_timer:byte;
 
 procedure cargar_amstrad_CPC;
 procedure cpc_load_roms;
 //GA
 procedure write_ga(val:byte);
 //PAL
-procedure write_pal(puerto:word;val:byte);
+procedure write_ram(puerto:word;val:byte);
 //CRT
 procedure cpc_calcular_dir_scr;
 procedure cpc_calc_crt;
@@ -94,7 +96,23 @@ var
 
 procedure eventos_cpc;
 begin
-if event.keyboard then begin
+if event.arcade then begin
+  //P1
+  if arcade_input.up[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $fe) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or 1);
+  if arcade_input.down[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $fd) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or 2);
+  if arcade_input.left[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $fb) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or 4);
+  if arcade_input.right[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $f7) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $8);
+  if arcade_input.but0[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $ef) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $10);
+  if arcade_input.but1[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $df) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $20);
+  //P2
+  if arcade_input.up[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fe) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 1);
+  if arcade_input.down[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fd) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 2);
+  if arcade_input.left[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fb) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 4);
+  if arcade_input.right[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $f7) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 8);
+  if arcade_input.but0[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $ef) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $10);
+  if arcade_input.but1[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $df) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $20);
+end else begin
+ if event.keyboard then begin
 //Line 0
   if keyboard[KEYBOARD_UP] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fe) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $1);
   if keyboard[KEYBOARD_RIGHT] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fd) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $2);
@@ -120,6 +138,7 @@ if event.keyboard then begin
         if cinta_tzx.play_tape then tape_window1.fStopCinta(nil)
           else tape_window1.fPlayCinta(nil);
       end;
+      keyboard[KEYBOARD_F1]:=false;
   end;
   if keyboard[KEYBOARD_N1] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $df) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $20);
   if keyboard[KEYBOARD_N2] then cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] and $bf) else cpc_ppi.keyb_val[1]:=(cpc_ppi.keyb_val[1] or $40);
@@ -190,43 +209,29 @@ if event.keyboard then begin
 //Line 9
   //JOY UP,JOY DOWN,JOY LEFT,JOY RIGHT,FIRE1,FIRE2 --> Arcade
   if keyboard[KEYBOARD_BACKSPACE] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $7f) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $80);
-
-end;
-if event.arcade then begin
-  //P1
-  if arcade_input.up[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $fe) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or 1);
-  if arcade_input.down[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $fd) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or 2);
-  if arcade_input.left[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $fb) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or 4);
-  if arcade_input.right[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $f7) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $8);
-  if arcade_input.but0[0] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $ef) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $10);
-  //P2
-  if arcade_input.up[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fe) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 1);
-  if arcade_input.down[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fd) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 2);
-  if arcade_input.left[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $fb) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 4);
-  if arcade_input.right[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $f7) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 8);
-  if arcade_input.but0[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $ef) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $10);
+ end;
 end;
 end;
 
 procedure amstrad_ga_exec;
 begin
-cpc_ga.lines_count:=(cpc_ga.lines_count+1) mod 53;
+cpc_ga.lines_count:=cpc_ga.lines_count+1;
 //Estoy en un VSYNC?
 if (cpc_ga.lines_sync>0) then begin
   //SI --> Compruebo si llevo dos lineas desde la generacion del VSYNC
   cpc_ga.lines_sync:=cpc_ga.lines_sync-1;
   if (cpc_ga.lines_sync=0) then begin
     //Si el contador es mayor de 32 lineas, genero IRQ
-    if (cpc_ga.lines_count>=32) then z80_0.change_irq(ASSERT_LINE);
+    if (cpc_ga.lines_count>=32) then z80_0.change_irq(ASSERT_LINE)
+      else z80_0.change_irq(CLEAR_LINE);
     //Borro el contador...
     cpc_ga.lines_count:=0;
   end;
-end else begin
-  //Compruebo si llevo 52 lineas
-  if (cpc_ga.lines_count=52) then begin
-    cpc_ga.lines_count:=0;
-    z80_0.change_irq(ASSERT_LINE);
-  end;
+end;
+//Compruebo si llevo 52 lineas
+if (cpc_ga.lines_count=52) then begin
+  cpc_ga.lines_count:=0;
+  z80_0.change_irq(ASSERT_LINE);
 end;
 end;
 
@@ -266,7 +271,7 @@ end;
 procedure actualiza_linea(linea:word);
 var
  x,borde,addr:word;
- marco,val,p1,p2,p3,p4,p5,p6,p7,p8:byte;
+ val,p1,p2,p3,p4,p5,p6,p7,p8:byte;
  temp1,temp2,temp3,temp4,temp5,temp6:byte;
  ptemp:pword;
 begin
@@ -275,9 +280,9 @@ addr:=cpc_crt.scr_line_dir[linea];
 x:=0;
 while (x<cpc_crt.char_total) do begin
   if (x<cpc_crt.pixel_visible) then begin
-    marco:=addr shr 14;
-    val:=cpc_mem[cpc_ga.marco[marco and $3],addr and $3fff];
-    addr:=(addr+1) and $ffff;
+    //IMPORTANTE: La memoria de video SIEMPRE esta en los 64K mapeados... Por ejemplo Thunder Cats
+    val:=cpc_mem[addr shr 14,addr and $3fff];
+    addr:=addr+1;
     case cpc_ga.video_mode of
       0:begin
           // 1 5 3 7    0 4 2 6
@@ -359,7 +364,7 @@ end;
 
 procedure draw_line;
 begin
-single_line(0,(linea_crt+cpc_crt.lineas_borde) mod pantalla_alto,cpc_ga.pal[$10],pantalla_largo,1);
+single_line(0,(linea_crt+cpc_crt.lineas_borde) mod pantalla_alto,paleta[cpc_ga.pal[$10]],pantalla_largo,1);
 if (linea_crt<cpc_crt.lineas_visible) then actualiza_linea(linea_crt);
 //Vsync
 {if cpc_crt.vsync_activo then begin
@@ -392,11 +397,11 @@ end;
 function cpc_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$3fff:if cpc_ga.rom_low then cpc_getbyte:=cpc_low_rom[direccion]
+  0..$3fff:if cpc_ga.rom_low then cpc_getbyte:=cpc_rom[16].data[direccion]//cpc_low_rom[direccion]
             else cpc_getbyte:=cpc_mem[cpc_ga.marco[0],direccion];
   $4000..$7fff:cpc_getbyte:=cpc_mem[cpc_ga.marco[1],direccion and $3fff];
   $8000..$bfff:cpc_getbyte:=cpc_mem[cpc_ga.marco[2],direccion and $3fff];
-  $c000..$ffff:if cpc_ga.rom_high then cpc_getbyte:=cpc_rom[cpc_ga.rom_selected,direccion and $3fff]
+  $c000..$ffff:if cpc_ga.rom_high then cpc_getbyte:=cpc_rom[cpc_ga.rom_selected].data[direccion and $3fff]
                 else cpc_getbyte:=cpc_mem[cpc_ga.marco[3],direccion and $3fff];
 end;
 end;
@@ -406,25 +411,7 @@ begin
 cpc_mem[cpc_ga.marco[direccion shr 14],direccion and $3fff]:=valor;
 end;
 
-procedure write_ga(val:byte);
-begin
-case (val shr 6) of
-     $0:if (val and $10)=0 then cpc_ga.pen:=val and 15 //Select pen
-                else cpc_ga.pen:=$10; //Border
-     $1:cpc_ga.pal[cpc_ga.pen]:=val and 31;    //Change pen colour
-     $2:begin   //ROM banking and mode switch
-            cpc_ga.video_mode:=val and 3;
-            cpc_ga.rom_low:=(val and 4)=0;
-            cpc_ga.rom_high:=(val and 8)=0;
-            if (val and $10)<>0 then begin
-               cpc_ga.lines_count:=0;
-               z80_0.change_irq(CLEAR_LINE);
-            end;
-        end;
-end;
-end;
-
-procedure write_pal(puerto:word;val:byte);
+procedure write_ram(puerto:word;val:byte);
 var
   pagina:byte;
 begin
@@ -438,29 +425,54 @@ begin
     exit;
   end;
 end;}
-if (val shr 6)=3 then begin
    //bits 5,4 y 3 --> indican el banco de 64K
    //bits 2, 1 y 0 --> funcion
    cpc_ga.marco[0]:=0;
    cpc_ga.marco[1]:=1;
    cpc_ga.marco[2]:=2;
    cpc_ga.marco[3]:=3;
-   pagina:=((val shr 3) and 7)*4;
+   if main_vars.tipo_maquina<>9 then exit;
+   if cpc_ga.ram_exp=1 then pagina:=(((val shr 3) and 7)+1)*4
+    else pagina:=4;
    case (val and 7) of
-        1:cpc_ga.marco[3]:=7+pagina;
+        1:cpc_ga.marco[3]:=3+pagina;
         2:begin
-               cpc_ga.marco[0]:=4+pagina;
-               cpc_ga.marco[1]:=5+pagina;
-               cpc_ga.marco[2]:=6+pagina;
-               cpc_ga.marco[3]:=7+pagina;
+               cpc_ga.marco[0]:=0+pagina;
+               cpc_ga.marco[1]:=1+pagina;
+               cpc_ga.marco[2]:=2+pagina;
+               cpc_ga.marco[3]:=3+pagina;
           end;
         3:begin
                cpc_ga.marco[1]:=3;
-               cpc_ga.marco[3]:=7+pagina;
+               cpc_ga.marco[3]:=3+pagina;
           end;
-        4..7:cpc_ga.marco[1]:=pagina+(val and 3)+4;
+        4:cpc_ga.marco[1]:=0+pagina;
+        5:cpc_ga.marco[1]:=1+pagina;
+        6:cpc_ga.marco[1]:=2+pagina;
+        7:cpc_ga.marco[1]:=3+pagina;
    end;
    cpc_ga.marco_latch:=val and 7;
+end;
+
+procedure write_ga(val:byte);
+begin
+case (val shr 6) of
+     $0:if (val and $10)=0 then cpc_ga.pen:=val and $f //Select pen
+                else cpc_ga.pen:=$10; //Border
+     $1:cpc_ga.pal[cpc_ga.pen]:=val and $1f;    //Change pen colour
+     $2:begin   //ROM banking and mode switch
+            if (cpc_ga.video_mode<>(val and 3)) then begin
+              cpc_ga.nvideo:=val and 3;
+              cpc_ga.change_video:=true;
+            end;
+            cpc_ga.rom_low:=(val and 4)=0;
+            cpc_ga.rom_high:=(val and 8)=0;
+            if (val and $10)<>0 then begin
+               cpc_ga.lines_count:=0;
+               z80_0.change_irq(CLEAR_LINE);
+            end;
+        end;
+     3:write_ram(0,val);
 end;
 end;
 
@@ -493,40 +505,58 @@ if cpc_crt.lineas_visible<cpc_crt.lineas_total then cpc_crt.lineas_borde:=(panta
    else cpc_crt.lineas_borde:=0;
 end;
 
-procedure write_crtc(port:word;val:byte);
+procedure write_crtc(port:byte;val:byte);
 begin
-  case ((port and $100) shr 8) of
-    $0:cpc_crt.reg:=val and 31;
-    $1:if cpc_crt.regs[cpc_crt.reg]<>val then begin
+  case (port and $3) of
+    $0:cpc_crt.reg:=val;
+    $1:if ((cpc_crt.regs[cpc_crt.reg]<>val) and (cpc_crt.reg<16)) then begin
           cpc_crt.regs[cpc_crt.reg]:=val;
           cpc_calc_crt;
           cpc_calcular_dir_scr;
         end;
+    $2,$3:; //Sin uso
   end;
 end;
 
 procedure cpc_outbyte(puerto:word;valor:byte);
 begin
-if (puerto and $8000)=0 then write_pal(puerto,valor);
-if (puerto and $c000)=$4000 then write_ga(valor)
-  else if (puerto and $4200)=0 then write_crtc(puerto,valor)
-    else if (puerto and $2000)=0 then cpc_ga.rom_selected:=valor and $f
-      else if (puerto and $1000)=0 then exit //printer
-        else if (puerto and $0800)=0 then pia8255_0.write((puerto and $300) shr 8,valor)
-          else if (puerto and $0581)=$101 then WriteFDCData(valor);
+//Se pueden seleccionar multiples dispositivos EXCEPTO GA y CRTC
+//if (puerto and $c000)=$4000 then write_ga(valor)
+//  else if (puerto and $4000)=0 then write_crtc(puerto shr 8,valor);
+if (puerto and $c000)=$4000 then write_ga(valor);
+if (puerto and $4000)=0 then write_crtc(puerto shr 8,valor);
+if (puerto and $2000)=0 then begin
+  if cpc_rom[valor and $f].enabled then cpc_ga.rom_selected:=valor and $f
+    else cpc_ga.rom_selected:=0;
+end;
+if (puerto and $1000)=0 then exit; //printer
+if (puerto and $0800)=0 then pia8255_0.write((puerto and $300) shr 8,valor);
+if (puerto and $0400)=0 then begin //Expansion
+  //puerto and $20=0 Serial
+  //puerto and $40=0 Reserved
+  if (puerto and $80)=0 then begin //FDC
+    case (puerto and $101) of
+      $0,1:WriteFDCMotor(valor); //FDC Motor
+      $100,$101:WriteFDCData(valor); //FDC Data
+    end;
+  end
+end;
 end;
 
-function read_crtc(port:word):byte;
+function read_crtc(port:byte):byte;
 var
   res:byte;
 begin
-res:=$ff;
-if ((port and $100) shr 8)=0 then
-  case cpc_crt.reg of
-    10:res:=cpc_crt.regs[cpc_crt.reg] and $1f;
-    12,13:res:=0;
-    11,14..17:res:=cpc_crt.regs[cpc_crt.reg];
-  end;
+res:=0;
+case (port and 3) of
+  0,1,2:; //Write only
+  3:case cpc_crt.reg of
+        //10:res:=cpc_crt.regs[cpc_crt.reg] and $1f;
+        //12,13:res:=0;
+        //11,14..17:res:=cpc_crt.regs[cpc_crt.reg];
+        12..17:res:=cpc_crt.regs[cpc_crt.reg];
+      end;
+end;
 read_crtc:=res;
 end;
 
@@ -535,10 +565,19 @@ var
   res:byte;
 begin
 res:=$FF;
-if (puerto and $4200)=$200 then res:=read_crtc(puerto)
-  else if (puerto and $0800)=0 then res:=pia8255_0.read((puerto and $300) shr 8)
-    else if (puerto and $0581)=$100 then res:=ReadFDCStatus
-      else if (puerto and $0581)=$101 then res:=ReadFDCData;
+if (puerto and $4000)=0 then res:=read_crtc(puerto shr 8);
+if (puerto and $0800)=0 then res:=pia8255_0.read((puerto and $300) shr 8);
+if (puerto and $0400)=0 then begin //Expansion
+  //puerto and $20=0 Serial
+  //puerto and $40=0 Reserved
+  if (puerto and $80)=0 then begin //FDC
+    case (puerto and $101) of
+      $0,1:; //Not used
+      $100:res:=ReadFDCStatus; //FDC Main status
+      $101:res:=ReadFDCData //FDC Read data
+    end;
+  end;
+end;
 cpc_inbyte:=res;
 end;
 
@@ -587,18 +626,11 @@ procedure port_c_write(valor:byte);
 begin
 cpc_ppi.ay_control:=((valor and $c0) shr 6);
 update_ay;
-if cpc_ppi.tape_motor<>((valor and $10)<>0) then begin
-  cpc_ppi.tape_motor:=(valor and $10)<>0;
-  if (cinta_tzx.cargada and cpc_ppi.use_motor) then begin
-    if not(cpc_ppi.tape_motor) then begin
-      main_screen.rapido:=false;
-      tape_window1.fStopCinta(nil);
-    end else begin
-      main_screen.rapido:=true;
-      tape_window1.fPlayCinta(nil);
-      if not(cinta_tzx.play_once) then cinta_tzx.play_once:=true;
-    end;
-  end;
+if cinta_tzx.cargada then begin
+  if (valor and $10)<>0 then begin
+    cpc_ppi.tape_motor:=true;
+    timers.enabled(tape_timer,true);
+  end else cpc_ppi.tape_motor:=false;
 end;
 cpc_ppi.keyb_line:=valor and $f;
 cpc_ppi.port_c_write_latch:=valor;
@@ -643,17 +675,17 @@ begin
   end;
   cpc_crt.h_ctr:=(cpc_crt.h_ctr+1) and $ff;
   if (cpc_crt.h_ctr=(cpc_crt.regs[0]+1)) then begin // Horiz. Total
-    cpc_crt.h_ctr:=0;
-    if (cpc_crt.v_syn_ctr>0) then begin
-      cpc_crt.v_syn_ctr:=cpc_crt.v_syn_ctr-1;
-      if (cpc_crt.v_syn_ctr=0) then cpc_crt.v_syn:=0;
-    end;
-    cpc_crt.r_ctr:=(cpc_crt.r_ctr+1) and $1f;
-    if (cpc_crt.r_ctr=((cpc_crt.regs[9] and $1f)+1)) then begin // Raster Total
-      cpc_crt.r_ctr:=0;
-      cpc_crt.v_ctr:=(cpc_crt.v_ctr+1) and $7f;
-      if (cpc_crt.v_ctr=((cpc_crt.regs[4]and $7f)+1)) then cpc_crt.v_ctr:=0; // Verti. Total
-    end;
+      cpc_crt.h_ctr:=0;
+      if (cpc_crt.v_syn_ctr>0) then begin
+          cpc_crt.v_syn_ctr:=cpc_crt.v_syn_ctr-1;
+          if (cpc_crt.v_syn_ctr=0) then cpc_crt.v_syn:=0;
+      end;
+      cpc_crt.r_ctr:=(cpc_crt.r_ctr+1) and $1f;
+      if (cpc_crt.r_ctr=((cpc_crt.regs[9] and $1f)+1)) then begin // Raster Total
+          cpc_crt.r_ctr:=0;
+          cpc_crt.v_ctr:=(cpc_crt.v_ctr+1) and $7f;
+          if (cpc_crt.v_ctr=((cpc_crt.regs[4]and $7f)+1)) then cpc_crt.v_ctr:=0; // Verti. Total
+      end;
   end;
   if ((cpc_crt.h_syn=0) and (cpc_crt.h_ctr=cpc_crt.regs[2])) then begin //Horiz. Sync Pos.
     cpc_crt.h_syn:=1;
@@ -666,15 +698,19 @@ begin
     if cpc_crt.v_syn_ctr=0 then cpc_crt.v_syn_ctr:=16;
   end;
   //Vsync
-  if (cpc_crt.v_syn<>old_v_syn) then begin
-    if cpc_crt.v_syn<>0 then cpc_ga.lines_sync:=3;
+  if ((cpc_crt.v_syn<>old_v_syn) and (cpc_ga.lines_sync=0)) then begin
+    if cpc_crt.v_syn<>0 then cpc_ga.lines_sync:=2;
   end;
   //Hsync
   if (cpc_crt.h_syn<>old_h_syn) then begin
      if cpc_crt.h_syn<>0 then begin
-      amstrad_ga_exec;
-      draw_line;
-      linea_crt:=(linea_crt+1) mod 312;
+        amstrad_ga_exec;
+        draw_line;
+        linea_crt:=(linea_crt+1) mod 312;
+        if cpc_ga.change_video then begin
+          cpc_ga.video_mode:=cpc_ga.nvideo;
+          cpc_ga.change_video:=false;
+        end;
      end;
   end;
 end;
@@ -683,16 +719,12 @@ procedure amstrad_despues_instruccion(estados_t:word);
 var
    f,est_final:byte;
 begin
-//z80_0.get_safe_pc=$bc77
-if cinta_tzx.cargada and cinta_tzx.play_tape then begin
-   cinta_tzx.estados:=cinta_tzx.estados+estados_t;
-   play_cinta_tzx;
-end;
 //Añadir tiempos de espera...
 est_final:=(estados_t+3) and $fc;
 z80_0.contador:=z80_0.contador+(est_final-estados_t);
 //Clock a el video...
 for f:=1 to (est_final div 4) do clock_crt;
+if (cinta_tzx.cargada and cinta_tzx.play_tape) then play_cinta_tzx(estados_t);
 end;
 
 function amstrad_tapes:boolean;
@@ -749,6 +781,7 @@ begin
         tape_window1.BitBtn2.Enabled:=false;
         cinta_tzx.play_tape:=false;
         llamadas_maquina.open_file:=extension+': '+nombre_file;
+        cpc_ppi.tape_motor:=false;
      end else begin
         MessageDlg('Error cargando cinta/CSW/WAV.'+chr(10)+chr(13)+'Error loading tape/CSW/WAV.', mtInformation,[mbOk], 0);
         llamadas_maquina.open_file:='';
@@ -793,6 +826,21 @@ begin
   while configcpc.Showing do application.ProcessMessages;
 end;
 
+procedure tape_timer_exec;
+begin
+if cpc_ppi.tape_motor then begin //Poner en marcha la cinta
+  if not(cinta_tzx.play_tape) then begin
+    main_screen.rapido:=true;
+    tape_window1.fPlayCinta(nil);
+    if not(cinta_tzx.play_once) then cinta_tzx.play_once:=true;
+  end;
+end else begin //Pararla
+  main_screen.rapido:=false;
+  timers.enabled(tape_timer,false);
+  if cinta_tzx.play_tape then tape_window1.fStopCinta(nil);
+end;
+end;
+
 //Main
 procedure cpc_reset;
 begin
@@ -818,6 +866,8 @@ begin
   cpc_ga.marco[2]:=2;
   cpc_ga.marco[3]:=3;
   cpc_ga.marco_latch:=0;
+  cpc_ga.change_video:=false;
+  cpc_ga.nvideo:=0;
   //cpc_ga.cpc_model; no lo toco
   //CRT
   fillchar(cpc_crt^,sizeof(tcpc_crt),0);
@@ -853,91 +903,104 @@ var
   long:integer;
   cadena:string;
 begin
+for f:=0 to 15 do cpc_rom[f].enabled:=false;
 if cpc_ga.cpc_model=4 then begin
-  cadena:=file_name_only(changefileext(extractfilename(cpc_rom_slot[0]),''));
-  if extension_fichero(cpc_rom_slot[0])='ZIP' then tempb:=carga_rom_zip(cpc_rom_slot[0],cadena+'.ROM',@memoria_temp[0],$4000,0,false)
+  cadena:=file_name_only(changefileext(extractfilename(cpc_rom[0].name),''));
+  if extension_fichero(cpc_rom[0].name)='ZIP' then tempb:=carga_rom_zip(cpc_rom[0].name,cadena+'.ROM',@memoria_temp[0],$4000,0,false)
     else begin
-      tempb:=read_file(cpc_rom_slot[0],@memoria_temp[0],long);
+      tempb:=read_file(cpc_rom[0].name,@memoria_temp[0],long);
       if long<>$4000 then tempb:=false;
     end;
   if not(tempb) then begin
     MessageDlg('ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
     cpc_ga.cpc_model:=0;
-    if not(roms_load(@memoria_temp,@cpc6128_rom,'cpc6128.zip',sizeof(cpc6128_rom))) then exit;
+    if not(roms_load(@memoria_temp,cpc6128_rom)) then exit;
   end;
-  if main_vars.tipo_maquina<>7 then if not(roms_load(@cpc_rom[7,0],@ams_rom,'cpc6128.zip',sizeof(ams_rom))) then exit;
+  if main_vars.tipo_maquina<>7 then begin
+    if not(roms_load(@cpc_rom[7].data,ams_rom)) then exit;
+    cpc_rom[7].enabled:=true;
+  end;
+  cpc_rom[0].enabled:=true;
 end else begin
   case main_vars.tipo_maquina of
     7:begin
       tempb:=false;
       case cpc_ga.cpc_model of
         0:tempb:=true;
-        1:if not(roms_load(@memoria_temp,@cpc464f_rom,'cpc464.zip',sizeof(cpc464f_rom))) then begin
+        1:if not(roms_load(@memoria_temp,cpc464f_rom)) then begin
             MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
         end;
-        2:if not(roms_load(@memoria_temp,@cpc464sp_rom,'cpc464.zip',sizeof(cpc464sp_rom))) then begin
+        2:if not(roms_load(@memoria_temp,cpc464sp_rom)) then begin
             MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
         end;
-        3:if not(roms_load(@memoria_temp,@cpc464d_rom,'cpc464.zip',sizeof(cpc464d_rom))) then begin
+        3:if not(roms_load(@memoria_temp,cpc464d_rom)) then begin
             MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
         end;
       end;
-      if tempb then if not(roms_load(@memoria_temp,@cpc464_rom,'cpc464.zip',sizeof(cpc464_rom))) then exit;
-      fillchar(cpc_rom[7,0],$4000,0);
+      if tempb then if not(roms_load(@memoria_temp,cpc464_rom)) then exit;
+      cpc_rom[0].enabled:=true;
     end;
     8:begin
-      if not(roms_load(@cpc_rom[7,0],@ams_rom,'cpc664.zip',sizeof(ams_rom))) then exit;
-      if not(roms_load(@memoria_temp,@cpc664_rom,'cpc664.zip',sizeof(cpc664_rom))) then exit;
+      if not(roms_load(@cpc_rom[7].data,ams_rom)) then exit;
+      cpc_rom[7].enabled:=true;
+      if not(roms_load(@memoria_temp,cpc664_rom)) then exit;
       cpc_ga.cpc_model:=0;
+      cpc_rom[0].enabled:=true;
     end;
     9:begin
-      if not(roms_load(@cpc_rom[7,0],@ams_rom,'cpc6128.zip',sizeof(ams_rom))) then exit;
+      if not(roms_load(@cpc_rom[7].data[0],ams_rom)) then exit;
+      cpc_rom[7].enabled:=true;
       tempb:=false;
       case cpc_ga.cpc_model of
         0:tempb:=true;
-        1:if not(roms_load(@memoria_temp,@cpc6128f_rom,'cpc6128.zip',sizeof(cpc6128f_rom))) then begin
+        1:if not(roms_load(@memoria_temp,cpc6128f_rom)) then begin
             MessageDlg('French ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
           end;
-        2:if not(roms_load(@memoria_temp,@cpc6128sp_rom,'cpc6128.zip',sizeof(cpc6128sp_rom))) then begin
+        2:if not(roms_load(@memoria_temp,cpc6128sp_rom)) then begin
             MessageDlg('Spanish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
           end;
-        3:if not(roms_load(@memoria_temp,@cpc6128d_rom,'cpc6128.zip',sizeof(cpc6128d_rom))) then begin
+        3:if not(roms_load(@memoria_temp,cpc6128d_rom)) then begin
             MessageDlg('Danish ROM not found. Loading UK ROM...', mtInformation,[mbOk], 0);
             cpc_ga.cpc_model:=0;
             tempb:=true;
           end;
       end;
-      if tempb then if not(roms_load(@memoria_temp,@cpc6128_rom,'cpc6128.zip',sizeof(cpc6128_rom))) then exit;
+      if tempb then if not(roms_load(@memoria_temp,cpc6128_rom)) then exit;
+      cpc_rom[0].enabled:=true;
     end;
   end;
 end;
-copymemory(@cpc_low_rom[0],@memoria_temp[0],$4000);
-copymemory(@cpc_rom[0,0],@memoria_temp[$4000],$4000);
+//copymemory(@cpc_low_rom,@memoria_temp,$4000);
+copymemory(@cpc_rom[16].data,@memoria_temp,$4000);
+copymemory(@cpc_rom[0].data,@memoria_temp[$4000],$4000);
 //Cargar las roms de los slots, comprimidas o no...
 for f:=1 to 6 do begin
-  if cpc_rom_slot[f]<>'' then begin
-    cadena:=file_name_only(changefileext(extractfilename(cpc_rom_slot[f]),''));
-    if extension_fichero(cpc_rom_slot[f])='ZIP' then tempb:=carga_rom_zip(cpc_rom_slot[f],cadena+'.ROM',@cpc_rom[f,0],$4000,0,false)
+  if cpc_rom[f].name<>'' then begin
+    cadena:=file_name_only(changefileext(extractfilename(cpc_rom[f].name),''));
+    if extension_fichero(cpc_rom[f].name)='ZIP' then tempb:=carga_rom_zip(cpc_rom[f].name,cadena+'.ROM',@cpc_rom[f].data,$4000,0,false)
       else begin
-        tempb:=read_file(cpc_rom_slot[f],@cpc_rom[f,0],long);
-        if long<>$4000 then tempb:=false;
+        tempb:=read_file(cpc_rom[f].name,@cpc_rom[f].data,long);
+        if long<>$4000 then tempb:=false
+          else cpc_rom[f].enabled:=true;
       end;
-    if not(tempb) then begin
-      MessageDlg('Error loading ROM on slot '+inttostr(f)+'...', mtInformation,[mbOk], 0);
-      fillchar(cpc_rom[f,0],$4000,0);
-    end;
-  end else fillchar(cpc_rom[f,0],$4000,0);
+    if not(tempb) then MessageDlg('Error loading ROM on slot '+inttostr(f)+'...', mtInformation,[mbOk],0);
+  end;
 end;
+end;
+
+procedure cpc_stop_tape;
+begin
+cpc_ppi.tape_motor:=false;
 end;
 
 function iniciar_cpc:boolean;
@@ -965,6 +1028,7 @@ z80_0.change_io_calls(cpc_inbyte,cpc_outbyte);
 z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80);
 z80_0.init_sound(amstrad_sound_update);
 tape_sound_channel:=init_channel;
+tape_timer:=timers.init(z80_0.numero_cpu,100,tape_timer_exec,nil,false);
 //El CPC lee el teclado el puerto A del AY, pero el puerto B esta unido al A
 //por lo que hay programas que usan el B!!! (Bestial Warrior por ejemplo)
 //Esto tengo que revisarlo
@@ -974,6 +1038,8 @@ pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
 cpc_load_roms;
 cpc_reset;
+TZX_CLOCK:=4000;
+cinta_tzx.tape_stop:=cpc_stop_tape;
 iniciar_cpc:=true;
 end;
 

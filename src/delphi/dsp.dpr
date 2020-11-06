@@ -173,7 +173,6 @@ uses
   dec0_hw in '..\arcade\dec0_hw.pas',
   hu6280 in '..\cpu\hu6280.pas',
   cavemanninja_hw in '..\arcade\cavemanninja_hw.pas',
-  tumblepop_hw in '..\arcade\tumblepop_hw.pas',
   deco_decr in '..\arcade\misc\deco_decr.pas',
   funkyjet_hw in '..\arcade\funkyjet_hw.pas',
   superburgertime_hw in '..\arcade\superburgertime_hw.pas',
@@ -284,7 +283,27 @@ uses
   slapstic in '..\arcade\misc\slapstic.pas',
   snk_hw in '..\arcade\snk_hw.pas',
   atari_system1 in '..\arcade\atari_system1.pas',
-  atari_mo in '..\arcade\misc\atari_mo.pas';
+  atari_mo in '..\arcade\misc\atari_mo.pas',
+  williams_hw in '..\arcade\williams_hw.pas',
+  pia6821 in '..\devices\pia6821.pas',
+  taito_cchip in '..\arcade\misc\taito_cchip.pas',
+  upd7810 in '..\cpu\upd7810.pas',
+  upd7810_tables in '..\cpu\upd7810_tables.pas',
+  sg1000 in '..\consolas\sg1000.pas',
+  systeme_hw in '..\arcade\systeme_hw.pas',
+  route16_hw in '..\arcade\route16_hw.pas',
+  k005289 in '..\snd\k005289.pas',
+  badlands_hw in '..\arcade\badlands_hw.pas',
+  nb1412_m2 in '..\arcade\misc\nb1412_m2.pas',
+  galivan_hw in '..\arcade\galivan_hw.pas',
+  lastduel_hw in '..\arcade\lastduel_hw.pas',
+  commodore64 in '..\ordenadores\commodore64.pas',
+  mos6526 in '..\ordenadores\misc\mos6526.pas',
+  mos6566 in '..\ordenadores\misc\mos6566.pas',
+  mos6526_old in '..\ordenadores\misc\mos6526_old.pas',
+  sid_sound in '..\snd\sid_sound.pas',
+  sid_tables in '..\snd\sid_tables.pas',
+  d64_file_format in '..\misc\d64_file_format.pas';
 
 {$R *.res}
 

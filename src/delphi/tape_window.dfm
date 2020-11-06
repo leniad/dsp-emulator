@@ -53,8 +53,8 @@ object tape_window1: Ttape_window1
     Height = 45
     TabOrder = 0
     object BitBtn1: TBitBtn
-      Left = 40
-      Top = 4
+      Left = 49
+      Top = 5
       Width = 37
       Height = 37
       Glyph.Data = {

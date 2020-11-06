@@ -10,44 +10,62 @@ procedure cargar_rallyxh;
 implementation
 const
         //Jungler
-        jungler_rom:array[0..4] of tipo_roms=(
+        jungler_rom:array[0..3] of tipo_roms=(
         (n:'jungr1';l:$1000;p:0;crc:$5bd6ad15),(n:'jungr2';l:$1000;p:$1000;crc:$dc99f1e3),
-        (n:'jungr3';l:$1000;p:$2000;crc:$3dcc03da),(n:'jungr4';l:$1000;p:$3000;crc:$f92e9940),());
-        jungler_pal:array[0..2] of tipo_roms=(
-        (n:'18s030.8b';l:$20;p:0;crc:$55a7e6d1),(n:'tbp24s10.9d';l:$100;p:$20;crc:$d223f7b8),());
-        jungler_char:array[0..2] of tipo_roms=(
-        (n:'5k';l:$800;p:0;crc:$924262bf),(n:'5m';l:$800;p:$800;crc:$131a08ac),());
+        (n:'jungr3';l:$1000;p:$2000;crc:$3dcc03da),(n:'jungr4';l:$1000;p:$3000;crc:$f92e9940));
+        jungler_pal:array[0..1] of tipo_roms=(
+        (n:'18s030.8b';l:$20;p:0;crc:$55a7e6d1),(n:'tbp24s10.9d';l:$100;p:$20;crc:$d223f7b8));
+        jungler_char:array[0..1] of tipo_roms=(
+        (n:'5k';l:$800;p:0;crc:$924262bf),(n:'5m';l:$800;p:$800;crc:$131a08ac));
         jungler_sound:tipo_roms=(n:'1b';l:$1000;p:0;crc:$f86999c3);
         jungler_dots:tipo_roms=(n:'82s129.10g';l:$100;p:0;crc:$c59c51b7);
+        jungler_dip:array [0..4] of def_dip=(
+        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$1;dip_name:'4C 1C'),(dip_val:$2;dip_name:'3C 1C'),(dip_val:$3;dip_name:'2C 1C'),(dip_val:$0;dip_name:'4C 3C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$8;dip_name:'4C 1C'),(dip_val:$10;dip_name:'3C 1C'),(dip_val:$18;dip_name:'2C 1C'),(dip_val:$0;dip_name:'4C 3C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$40;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'255 Lives';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Rally X
-        rallyx_rom:array[0..4] of tipo_roms=(
+        rallyx_rom:array[0..3] of tipo_roms=(
         (n:'1b';l:$1000;p:0;crc:$5882700d),(n:'rallyxn.1e';l:$1000;p:$1000;crc:$ed1eba2b),
-        (n:'rallyxn.1h';l:$1000;p:$2000;crc:$4f98dd1c),(n:'rallyxn.1k';l:$1000;p:$3000;crc:$9aacccf0),());
-        rallyx_pal:array[0..2] of tipo_roms=(
-        (n:'rx-1.11n';l:$20;p:0;crc:$c7865434),(n:'rx-7.8p';l:$100;p:$20;crc:$834d4fda),());
+        (n:'rallyxn.1h';l:$1000;p:$2000;crc:$4f98dd1c),(n:'rallyxn.1k';l:$1000;p:$3000;crc:$9aacccf0));
+        rallyx_pal:array[0..1] of tipo_roms=(
+        (n:'rx-1.11n';l:$20;p:0;crc:$c7865434),(n:'rx-7.8p';l:$100;p:$20;crc:$834d4fda));
         rallyx_char:tipo_roms=(n:'8e';l:$1000;p:0;crc:$277c1de5);
         rallyx_sound:tipo_roms=(n:'rx-5.3p';l:$100;p:0;crc:$4bad7017);
         rallyx_dots:tipo_roms=(n:'rx1-6.8m';l:$100;p:0;crc:$3c16f62c);
         rallyx_samples:tipo_nombre_samples=(nombre:'bang.wav');
         //New Rally X
-        nrallyx_rom:array[0..4] of tipo_roms=(
+        nrallyx_rom:array[0..3] of tipo_roms=(
         (n:'nrx_prg1.1d';l:$1000;p:0;crc:$ba7de9fc),(n:'nrx_prg2.1e';l:$1000;p:$1000;crc:$eedfccae),
-        (n:'nrx_prg3.1k';l:$1000;p:$2000;crc:$b4d5d34a),(n:'nrx_prg4.1l';l:$1000;p:$3000;crc:$7da5496d),());
-        nrallyx_pal:array[0..2] of tipo_roms=(
-        (n:'nrx1-1.11n';l:$20;p:0;crc:$a0a49017),(n:'nrx1-7.8p';l:$100;p:$20;crc:$4e46f485),());
-        nrallyx_char:array[0..2] of tipo_roms=(
-        (n:'nrx_chg1.8e';l:$800;p:0;crc:$1fff38a4),(n:'nrx_chg2.8d';l:$800;p:$800;crc:$85d9fffd),());
+        (n:'nrx_prg3.1k';l:$1000;p:$2000;crc:$b4d5d34a),(n:'nrx_prg4.1l';l:$1000;p:$3000;crc:$7da5496d));
+        nrallyx_pal:array[0..1] of tipo_roms=(
+        (n:'nrx1-1.11n';l:$20;p:0;crc:$a0a49017),(n:'nrx1-7.8p';l:$100;p:$20;crc:$4e46f485));
+        nrallyx_char:array[0..1] of tipo_roms=(
+        (n:'nrx_chg1.8e';l:$800;p:0;crc:$1fff38a4),(n:'nrx_chg2.8d';l:$800;p:$800;crc:$85d9fffd));
         nrallyx_sound:tipo_roms=(n:'rx1-5.3p';l:$100;p:0;crc:$4bad7017);
         nrallyx_dots:tipo_roms=(n:'rx1-6.8m';l:$100;p:0;crc:$3c16f62c);
+        //Dip
+        rallyx_dip_a:array [0..1] of def_dip=(
+        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$1;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        rallyx_dip_b:array [0..3] of def_dip=(
+        (mask:$c0;name:'Coinage';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$80;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Difficulty';number:8;dip:((dip_val:$10;dip_name:'1 Car, Medium'),(dip_val:$28;dip_name:'1 Car, Hard'),(dip_val:$0;dip_name:'2 Car, Easy'),(dip_val:$18;dip_name:'2 Car, Medium'),(dip_val:$30;dip_name:'2 Car, Hard'),(dip_val:$8;dip_name:'3 Car, Easy'),(dip_val:$20;dip_name:'3 Car, Medium'),(dip_val:$38;dip_name:'3 Car, Hard'),(),(),(),(),(),(),(),())),
+        (mask:$6;name:'Bonus Life';number:3;dip:((dip_val:$2;dip_name:'15k-20k-10k-15k-20k-10k-15k-20k'),(dip_val:$4;dip_name:'30k-40k-20k-30k-40k-20k-30k-40k'),(dip_val:$6;dip_name:'40k-60k-30k-40k-60k-30k-50k-60k'),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        nrallyx_dip_b:array [0..3] of def_dip=(
+        (mask:$c0;name:'Coinage';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$80;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Difficulty';number:8;dip:((dip_val:$10;dip_name:'1 Car, Medium'),(dip_val:$28;dip_name:'1 Car, Hard'),(dip_val:$18;dip_name:'2 Car, Medium'),(dip_val:$30;dip_name:'2 Car, Hard'),(dip_val:$0;dip_name:'3 Car, Easy'),(dip_val:$20;dip_name:'3 Car, Medium'),(dip_val:$38;dip_name:'3 Car, Hard'),(dip_val:$8;dip_name:'4 Car, Easy'),(),(),(),(),(),(),(),())),
+        (mask:$6;name:'Bonus Life';number:3;dip:((dip_val:$2;dip_name:'20k/80k-20k-20k/80k'),(dip_val:$4;dip_name:'20k/100k-40k-20k/100k'),(dip_val:$6;dip_name:'20k/120k-60k-20k/120k'),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
 var
  last,scroll_x,scroll_y:byte;
  hacer_int:boolean;
 
 //jungler
-procedure update_video_jungler;inline;
+procedure update_video_jungler;
 var
   f,nchar,y,x,color:word;
   h,atrib:byte;
+  flipx,flipy:boolean;
 begin
 //Backgorund (256x256)
 for f:=0 to $3ff do begin
@@ -57,7 +75,9 @@ for f:=0 to $3ff do begin
     atrib:=memoria[$8c00+f];
     color:=(atrib and $3f) shl 2;
     nchar:=memoria[$8400+f];
-    put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $40)=0,(atrib and $80)<>0);
+    flipx:=(atrib and $40)=0;
+    flipy:=(atrib and $80)<>0;
+    put_gfx_flip(x*8,y*8,nchar,color,1,0,flipx,flipy);
     gfx[0].buffer[f]:=false;
   end;
 end;
@@ -68,17 +88,29 @@ for f:=$f downto $a do begin
     nchar:=atrib shr 2;
     color:=(memoria[$8801+(f*2)] and $3f) shl 2;
     x:=(memoria[$8001+(f*2)]+((memoria[$8801+(f*2)] and $80) shl 1));
-    y:=memoria[$8800+(f*2)];
-    if x>272 then x:=272 else x:=272-x;
-    put_gfx_sprite_mask(nchar,color,(atrib and 1)=0,(atrib and 2)=0,1,0,$f);
+    if main_screen.flip_main_screen then begin
+      y:=242-memoria[$8800+(f*2)];
+      flipx:=(atrib and 1)<>0;
+      flipy:=(atrib and 2)<>0;
+    end else begin
+      y:=memoria[$8800+(f*2)];
+      if x>272 then x:=272 else x:=272-x;
+      flipx:=(atrib and 1)=0;
+      flipy:=(atrib and 2)=0;
+    end;
+    put_gfx_sprite_mask(nchar,color,flipx,flipy,1,0,$f);
     actualiza_gfx_sprite(x,y-1,4,1);
 end;
 //Disparos
 for f:=$14 to $20 do begin
-    y:=memoria[$8820+f];
     nchar:=(memoria[$a000+f] and $7) xor 7;
     x:=284-(memoria[$8020+f]+((memoria[$a000+f] xor $ff) and $8) shl 5);
     if x>288 then x:=x and $ff;
+    if main_screen.flip_main_screen then begin
+      y:=242-memoria[$8820+f];
+    end else begin
+      y:=memoria[$8820+f];
+    end;
     put_gfx_sprite(nchar,16,false,false,2);
     actualiza_gfx_sprite(x,y,4,2);
 end;
@@ -107,15 +139,22 @@ end;
 procedure eventos_jungler;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
+  //P1
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P2
+  if arcade_input.up[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
+  //DSW
+  if arcade_input.down[0] then marcade.in2:=(marcade.in2 and $7f) else marcade.in2:=(marcade.in2 or $80);
 end;
 end;
 
@@ -150,19 +189,19 @@ case direccion of
   $a000:jungler_getbyte:=marcade.in0;
   $a080:jungler_getbyte:=marcade.in1;
   $a100:jungler_getbyte:=marcade.in2;
-  $a180:jungler_getbyte:=$b7;
+  $a180:jungler_getbyte:=marcade.dswa;
 end;
 end;
 
 procedure jungler_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
-    $8000..$83ff,$8800..$8bff:begin
+    0..$7fff:; //ROM
+    $8000..$83ff,$8800..$8bff:if memoria[direccion]<>valor then begin
                   gfx[2].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
-    $8400..$87ff,$8c00..$8fff:begin
+    $8400..$87ff,$8c00..$8fff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
@@ -179,7 +218,7 @@ case direccion of
                             last:=valor;
                          end;
                        1:hacer_int:=valor<>0;
-                       3:main_screen.flip_main_screen:=not(valor<>0);
+                       3:main_screen.flip_main_screen:=valor=0;
                     end;
                  end;
 end;
@@ -188,12 +227,12 @@ end;
 //Rally X
 procedure update_video_rallyx;inline;
 var
-  f,nchar,y,x,color:word;
-  h,atrib:byte;
+  pos,f,nchar,y,x,color:word;
+  atrib:byte;
 begin
 //Backgorund (256x256)
 for f:=0 to $3ff do begin
-  if gfx[0].buffer[f] then begin
+  if gfx[0].buffer[f+$400] then begin
     y:=f div 32;
     x:=f mod 32;
     atrib:=memoria[$8c00+f];
@@ -202,7 +241,7 @@ for f:=0 to $3ff do begin
     put_gfx_flip(x*8,y*8,nchar,color,1,0,(atrib and $40)=0,(atrib and $80)<>0);
     if (atrib and $20)=0 then put_gfx_block_trans(x*8,y*8,3,8,8)
       else put_gfx_flip(x*8,y*8,nchar,color,3,0,(atrib and $40)=0,(atrib and $80)<>0);
-    gfx[0].buffer[f]:=false;
+    gfx[0].buffer[f+$400]:=false;
   end;
 end;
 scroll_x_y(1,4,scroll_x-3,scroll_y);
@@ -218,21 +257,17 @@ for f:=$f downto $a do begin
 end;
 scroll_x_y(3,4,scroll_x-3,scroll_y);
 //Foreground  (solo 256x64)
-f:=$20;
-while f<$3ff do begin
-for h:=0 to 7 do begin
-  if gfx[2].buffer[f] then begin
-    y:=f div 32;
-    x:=f mod 8;
-    atrib:=memoria[$8800+f];
-    color:=(atrib and $3f) shl 2;
-    nchar:=memoria[$8000+f];
-    put_gfx_flip(x*8,y*8,nchar,color,2,0,(atrib and $40)=0,(atrib and $80)<>0);
-    gfx[2].buffer[f]:=false;
+for x:=0 to 7 do begin
+  for y:=0 to 31 do begin
+	    pos:=x+(y shl 5);
+      if gfx[0].buffer[pos] then begin
+        atrib:=memoria[$8800+pos];
+        nchar:=memoria[$8000+pos];
+        color:=(atrib and $3f) shl 2;
+        put_gfx_flip(x*8,y*8,nchar,color,2,0,(atrib and $40)=0,(atrib and $80)<>0);
+        gfx[0].buffer[pos]:=false;
+      end;
   end;
-  f:=f+1;
- end;
- f:=f+24;
 end;
 actualiza_trozo(32,0,32,256,2,224,0,32,256,4);
 actualiza_trozo(0,0,32,256,2,256,0,32,256,4);
@@ -252,15 +287,22 @@ end;
 procedure eventos_rallyx;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  //P1
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //P2
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
 end;
 
@@ -290,21 +332,17 @@ begin
 case direccion of
   0..$3fff,$8000..$8fff,$9800..$9fff:rallyx_getbyte:=memoria[direccion];
   $a000:rallyx_getbyte:=marcade.in0;
-  $a080:rallyx_getbyte:=marcade.in1;
-  $a100:rallyx_getbyte:=marcade.in2;
+  $a080:rallyx_getbyte:=marcade.in1 or marcade.dswa;
+  $a100:rallyx_getbyte:=marcade.dswb;
 end;
 end;
 
 procedure rallyx_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
 case direccion of
-  $8000..$83ff,$8800..$8bff:begin
-                  gfx[2].buffer[direccion and $3ff]:=true;
-                  memoria[direccion]:=valor;
-               end;
-  $8400..$87ff,$8c00..$8fff:begin
-                  gfx[0].buffer[direccion and $3ff]:=true;
+  0..$3fff:; //ROM
+  $8000..$8fff:if memoria[direccion]<>valor then begin
+                  gfx[0].buffer[direccion and $7ff]:=true;
                   memoria[direccion]:=valor;
                end;
   $9800..$9fff,$a000..$a00f:memoria[direccion]:=valor;
@@ -322,7 +360,7 @@ case direccion of
                           hacer_int:=(valor<>0);
                           if not(hacer_int) then z80_0.change_irq(CLEAR_LINE);
                       end;
-                    3:main_screen.flip_main_screen:=valor<>0;
+                    3:main_screen.flip_main_screen:=(valor<>0);
                   end;
                end;
   end;
@@ -346,21 +384,21 @@ end;
 procedure reset_rallyxh;
 begin
  z80_0.reset;
+ marcade.in0:=$ff;
  case main_vars.tipo_maquina of
   29:begin
-        marcade.in2:=$FF;
+        marcade.in1:=$ff;
+        marcade.in2:=$ff;
         konamisnd_0.reset;
   end;
   50,70:begin
-        marcade.in2:=$cb;
+        marcade.in1:=$fe;
         namco_snd_0.reset;
         reset_samples;
   end;
  end;
  reset_audio;
  last:=0;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
  hacer_int:=false;
  scroll_x:=0;
  scroll_y:=0;
@@ -379,9 +417,6 @@ const
  			24*8+0, 24*8+1, 24*8+2, 24*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3);
    ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
  			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
-   pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
-   pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-   pd_x:array[0..3] of dword=(0*8, 1*8, 2*8, 3*8);
    pd_y:array[0..3] of dword=(0*32, 1*32, 2*32, 3*32);
 
 procedure cargar_chars(tipo:byte);
@@ -394,7 +429,7 @@ begin
    gfx[0].trans[3]:=true;
    gfx_set_desc_data(2,0,16*8,0,4);
  end;
- convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+ convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 
 procedure cargar_sprites(tipo:byte);
@@ -403,10 +438,10 @@ begin
  gfx[1].trans[0]:=true;
  if tipo=1 then begin
    gfx_set_desc_data(2,0,64*8,4,0);
-   convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+   convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
  end else begin
    gfx_set_desc_data(2,0,64*8,0,4);
-   convert_gfx(1,0,@memoria_temp[0],@ps_rx[0],@ps_y[0],false,false);
+   convert_gfx(1,0,@memoria_temp,@ps_rx,@ps_y,false,false);
  end;
 end;
 
@@ -415,7 +450,7 @@ begin
  init_gfx(2,4,4,8);
  gfx[2].trans[3]:=true;
  gfx_set_desc_data(2,0,16*8,6,7);
- convert_gfx(2,0,@memoria_temp[0],@pd_x[0],@pd_y[0],false,false)
+ convert_gfx(2,0,@memoria_temp,@ps_y,@pd_y,false,false)
 end;
 
 begin
@@ -438,47 +473,54 @@ begin
          z80_0.change_ram_calls(jungler_getbyte,jungler_putbyte);
          //Sound Chip
          konamisnd_0:=konamisnd_chip.create(1,TIPO_JUNGLER,1789772,$100);
-         if not(cargar_roms(@konamisnd_0.memoria[0],@jungler_sound,'jungler.zip',1)) then exit;
+         if not(roms_load(@konamisnd_0.memoria,jungler_sound)) then exit;
          //cargar roms
-         if not(cargar_roms(@memoria[0],@jungler_rom[0],'jungler.zip',0)) then exit;
+         if not(roms_load(@memoria,jungler_rom)) then exit;
          //convertir chars
-         if not(cargar_roms(@memoria_temp[0],@jungler_char[0],'jungler.zip',0)) then exit;
+         if not(roms_load(@memoria_temp,jungler_char)) then exit;
          cargar_chars(1);
          //convertir sprites
          cargar_sprites(1);
          //Y ahora el'disparo'
-         if not(cargar_roms(@memoria_temp[0],@jungler_dots,'jungler.zip',1)) then exit;
+         if not(roms_load(@memoria_temp,jungler_dots)) then exit;
          cargar_disparo;
          //poner la paleta
-         if not(cargar_roms(@memoria_temp[0],@jungler_pal[0],'jungler.zip',0)) then exit;
+         if not(roms_load(@memoria_temp,jungler_pal)) then exit;
+         //DIP
+         marcade.dswa:=$bf;
+         marcade.dswa_val:=@jungler_dip;
    end;
    50:begin //rallyx
          z80_0.change_ram_calls(rallyx_getbyte,rallyx_putbyte);
          z80_0.change_io_calls(nil,rallyx_outbyte);
-          z80_0.init_sound(rallyx_playsound);
+         z80_0.init_sound(rallyx_playsound);
          //cargar roms
-         if not(cargar_roms(@memoria[0],@rallyx_rom[0],'rallyx.zip',0)) then exit;
+         if not(roms_load(@memoria,rallyx_rom)) then exit;
          //cargar sonido y samples
          namco_snd_0:=namco_snd_chip.create(3);
-         if not(cargar_roms(namco_snd_0.get_wave_dir,@rallyx_sound,'rallyx.zip',1)) then exit;
+         if not(roms_load(namco_snd_0.get_wave_dir,rallyx_sound)) then exit;
          load_samples('rallyx.zip',@rallyx_samples,1);
          //convertir chars
-         if not(cargar_roms(@memoria_temp[0],@rallyx_char,'rallyx.zip',1)) then exit;
+         if not(roms_load(@memoria_temp,rallyx_char)) then exit;
          cargar_chars(0);
          //convertir sprites
          cargar_sprites(0);
          //Y ahora el'disparo'
-         if not(cargar_roms(@memoria_temp[0],@rallyx_dots,'rallyx.zip',1)) then exit;
+         if not(roms_load(@memoria_temp,rallyx_dots)) then exit;
          cargar_disparo;
          //poner la paleta
-         if not(cargar_roms(@memoria_temp[0],@rallyx_pal[0],'rallyx.zip',0)) then exit;
+         if not(roms_load(@memoria_temp,rallyx_pal)) then exit;
+         marcade.dswa:=$1;
+         marcade.dswb:=$cb;
+         marcade.dswa_val:=@rallyx_dip_a;
+         marcade.dswb_val:=@rallyx_dip_b;
       end;
    70:begin  //new rally x
          z80_0.change_ram_calls(rallyx_getbyte,rallyx_putbyte);
          z80_0.change_io_calls(nil,rallyx_outbyte);
          z80_0.init_sound(rallyx_playsound);
          //cargar roms y ordenarlas
-         if not(cargar_roms(@memoria_temp[0],@nrallyx_rom[0],'nrallyx.zip',0)) then exit;
+         if not(roms_load(@memoria_temp,nrallyx_rom)) then exit;
          copymemory(@memoria[$0],@memoria_temp[$0],$800);
          copymemory(@memoria[$1000],@memoria_temp[$800],$800);
          copymemory(@memoria[$800],@memoria_temp[$1000],$800);
@@ -489,18 +531,22 @@ begin
          copymemory(@memoria[$3800],@memoria_temp[$3800],$800);
          //cargar sonido y samples
          namco_snd_0:=namco_snd_chip.create(3);
-         if not(cargar_roms(namco_snd_0.get_wave_dir,@nrallyx_sound,'nrallyx.zip',1)) then exit;
+         if not(roms_load(namco_snd_0.get_wave_dir,nrallyx_sound)) then exit;
          load_samples('rallyx.zip',@rallyx_samples,1);
          //convertir chars
-         if not(cargar_roms(@memoria_temp[0],@nrallyx_char[0],'nrallyx.zip',0)) then exit;
+         if not(roms_load(@memoria_temp,nrallyx_char)) then exit;
          cargar_chars(0);
          //convertir sprites
          cargar_sprites(0);
          //Y ahora el'disparo'
-         if not(cargar_roms(@memoria_temp[0],@nrallyx_dots,'nrallyx.zip',1)) then exit;
+         if not(roms_load(@memoria_temp,nrallyx_dots)) then exit;
          cargar_disparo;
          //poner la paleta
-         if not(cargar_roms(@memoria_temp[0],@nrallyx_pal[0],'nrallyx.zip',0)) then exit;
+         if not(roms_load(@memoria_temp,nrallyx_pal)) then exit;
+         marcade.dswa:=$1;
+         marcade.dswb:=$c3;
+         marcade.dswa_val:=@rallyx_dip_a;
+         marcade.dswb_val:=@nrallyx_dip_b;
       end;
  end;
  for f:=0 to 31 do begin

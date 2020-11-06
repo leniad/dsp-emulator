@@ -9,8 +9,8 @@ procedure cargar_snowbros;
 
 implementation
 const
-        snowbros_rom:array[0..2] of tipo_roms=(
-        (n:'sn6.bin';l:$20000;p:0;crc:$4899ddcf),(n:'sn5.bin';l:$20000;p:$1;crc:$ad310d3f),());
+        snowbros_rom:array[0..1] of tipo_roms=(
+        (n:'sn6.bin';l:$20000;p:0;crc:$4899ddcf),(n:'sn5.bin';l:$20000;p:$1;crc:$ad310d3f));
         snowbros_char:tipo_roms=(n:'sbros-1.41';l:$80000;p:0;crc:$16f06b3a);
         snowbros_sound:tipo_roms=(n:'sbros-4.29';l:$8000;p:0;crc:$e6eab4e4);
         //Dip
@@ -35,7 +35,7 @@ var
 
 procedure update_video_snowbros;inline;
 begin
-pandora_update_video(1,0);
+pandora_0.update_video(1,0);
 actualiza_trozo_final(0,16,256,224,1);
 end;
 
@@ -103,7 +103,7 @@ case direccion of
     $500002:snowbros_getword:=marcade.in2+marcade.dswb;
     $500004:snowbros_getword:=marcade.in0;
     $600000..$6001ff:snowbros_getword:=buffer_paleta[(direccion and $1ff) shr 1];
-    $700000..$701fff:snowbros_getword:=pandora.sprite_ram[(direccion and $1fff) shr 1]
+    $700000..$701fff:snowbros_getword:=pandora_0.spriteram_r16(direccion and $1fff);
 end;
 end;
 
@@ -119,8 +119,8 @@ end;
 
 procedure snowbros_putword(direccion:dword;valor:word);
 begin
-if direccion<$40000 then exit;
 case direccion of
+    0..$3ffff:; //ROM
     $100000..$103fff:ram[(direccion and $3fff) shr 1]:=valor;
     $200000,$702000..$7022ff:exit;
     $400000:main_screen.flip_main_screen:=(valor and $8000)=0;
@@ -132,7 +132,7 @@ case direccion of
                       buffer_paleta[(direccion and $1ff) shr 1]:=valor;
                       cambiar_color(valor,(direccion and $1ff) shr 1);
                    end;
-    $700000..$701fff:pandora.sprite_ram[(direccion and $1fff) shr 1]:=valor and $ff;
+    $700000..$701fff:pandora_0.spriteram_w16((direccion and $1fff),valor and $ff);
     $800000:m68000_0.irq[4]:=CLEAR_LINE;
     $900000:m68000_0.irq[3]:=CLEAR_LINE;
     $a00000:m68000_0.irq[2]:=CLEAR_LINE;
@@ -181,7 +181,7 @@ procedure reset_snowbros;
 begin
  m68000_0.reset;
  z80_0.reset;
- pandora_reset;
+ pandora_0.reset;
  ym3812_0.reset;
  reset_audio;
  marcade.in0:=$ff00;
@@ -212,22 +212,20 @@ z80_0.change_ram_calls(snowbros_snd_getbyte,snowbros_snd_putbyte);
 z80_0.change_io_calls(snowbros_snd_inbyte,snowbros_snd_outbyte);
 z80_0.init_sound(snowbros_sound_act);
 //pandora
-pandora.mask_nchar:=$fff;
-pandora.color_offset:=0;
-pandora.clear_screen:=true;
+pandora_0:=pandora_gfx.create($fff,0,true);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
-if not(cargar_roms16w(@rom[0],@snowbros_rom[0],'snowbros.zip',0)) then exit;
+if not(roms_load16w(@rom,snowbros_rom)) then exit;
 //cargar sonido
-if not(cargar_roms(@mem_snd[0],@snowbros_sound,'snowbros.zip')) then exit;
+if not(roms_load(@mem_snd,snowbros_sound)) then exit;
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@snowbros_char,'snowbros.zip')) then exit;
+if not(roms_load(@memoria_temp,snowbros_char)) then exit;
 init_gfx(0,16,16,$1000);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(4,0,32*32,0,1,2,3);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //DIP
 marcade.dswa:=$fe;
 marcade.dswb:=$ff;

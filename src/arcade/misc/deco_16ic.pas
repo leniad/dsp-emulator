@@ -47,7 +47,7 @@ constructor type_pf.create(pant:byte;col_bank:byte;call_bank:tipo_deco16ic_bank)
 begin
 self.pant:=pant;
 screen_init(pant,1024,512,true);
-screen_mod_scroll(pant,1024,512,1023,512,256,511);
+screen_mod_scroll(pant,1024,1024,1023,512,512,511);
 self.color_bank:=col_bank;
 self.call_bank:=call_bank;
 end;
@@ -104,14 +104,14 @@ if pos=6 then begin
     screen_mod_scroll(self.pf1.pant,512,512,511,256,256,255);
     self.pf1.is_8x8:=true;
   end else begin  //16x16
-    screen_mod_scroll(self.pf1.pant,1024,512,1023,512,256,511);
+    screen_mod_scroll(self.pf1.pant,1024,1024,1023,512,512,511);
     self.pf1.is_8x8:=false;
   end;
   if (valor and $8000)<>0 then begin //8x8
     screen_mod_scroll(self.pf2.pant,512,512,511,256,256,255);
     self.pf2.is_8x8:=true;
   end else begin //16x16
-    screen_mod_scroll(self.pf2.pant,1024,512,1023,512,256,511);
+    screen_mod_scroll(self.pf2.pant,1024,1024,1023,512,512,511);
     self.pf2.is_8x8:=false;
   end;
 end;
@@ -164,7 +164,6 @@ case (self.control[6] and $60) of
         cols:=8 shl (self.control[5] and $7);
         atrib:=1024 div cols;
         scroll__y_part2(self.pf1.pant,screen,atrib,@self.pf1.rowscroll[$200],self.control[1],self.control[2]);
-        //for f:=0 to cols-1 do scroll__y_part(self.pf1.pant,screen,self.control[2]+self.pf1.rowscroll[f+$200],self.control[1],f*atrib,atrib);
   end;
   $40:begin //row_scroll
         rows:=512 shr ((self.control[5] shr 3) and $f);
@@ -173,7 +172,6 @@ case (self.control[6] and $60) of
             atrib:=256 div rows;
         end else atrib:=512 div rows;
         scroll__x_part2(self.pf1.pant,screen,atrib,@self.pf1.rowscroll[0],self.control[1],self.control[2]);
-        //for f:=0 to rows-1 do scroll__x_part(self.pf1.pant,screen,self.control[1]+self.pf1.rowscroll[f],self.control[2],f*atrib,atrib);
   end;
   $60:halt(0); //col & row scroll
 end;
@@ -224,7 +222,6 @@ case ((self.control[6] shr 8) and $60) of
         cols:=8 shl ((self.control[5] shr 8) and $7);
         atrib:=1024 div cols;
         scroll__y_part2(self.pf2.pant,screen,atrib,@self.pf2.rowscroll[$200],self.control[3],self.control[4]);
-        //for f:=0 to cols-1 do scroll__y_part(self.pf2.pant,screen,self.control[4]+self.pf2.rowscroll[f+$200],self.control[3],f*atrib,atrib);
   end;
   $40:begin //row_scroll
         rows:=512 shr (((self.control[5] shr 8) shr 3) and $f);

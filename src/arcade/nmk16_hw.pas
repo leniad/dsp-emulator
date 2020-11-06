@@ -10,16 +10,16 @@ procedure cargar_nmk16;
 implementation
 const
         //Saboten Bombers
-        sbombers_rom:array[0..2] of tipo_roms=(
-        (n:'ic76.sb1';l:$40000;p:0;crc:$b2b0b2cf),(n:'ic75.sb2';l:$40000;p:$1;crc:$367e87b7),());
+        sbombers_rom:array[0..1] of tipo_roms=(
+        (n:'ic76.sb1';l:$40000;p:0;crc:$b2b0b2cf),(n:'ic75.sb2';l:$40000;p:$1;crc:$367e87b7));
         sbombers_char:tipo_roms=(n:'ic35.sb3';l:$10000;p:0;crc:$eb7bc99d);
         sbombers_char2:tipo_roms=(n:'ic32.sb4';l:$200000;p:0;crc:$24c62205);
         sbombers_sprites:tipo_roms=(n:'ic100.sb5';l:$200000;p:0;crc:$b20f166e);
         sbombers_adpcm1:tipo_roms=(n:'ic30.sb6';l:$100000;p:0;crc:$288407af);
         sbombers_adpcm2:tipo_roms=(n:'ic27.sb7';l:$100000;p:0;crc:$43e33a7e);
         //Bomb Jack Twin
-        bjtwin_rom:array[0..2] of tipo_roms=(
-        (n:'93087-1.bin';l:$20000;p:0;crc:$93c84e2d),(n:'93087-2.bin';l:$20000;p:$1;crc:$30ff678a),());
+        bjtwin_rom:array[0..1] of tipo_roms=(
+        (n:'93087-1.bin';l:$20000;p:0;crc:$93c84e2d),(n:'93087-2.bin';l:$20000;p:$1;crc:$30ff678a));
         bjtwin_char:tipo_roms=(n:'93087-3.bin';l:$10000;p:0;crc:$aa13df7c);
         bjtwin_char2:tipo_roms=(n:'93087-4.bin';l:$100000;p:0;crc:$8a4f26d0);
         bjtwin_sprites:tipo_roms=(n:'93087-5.bin';l:$100000;p:0;crc:$bb06245d);
@@ -28,8 +28,8 @@ const
 
 var
  rom:array[0..$3ffff] of word;
- ram:array[0..$ffff] of byte;
- bg_ram:array[0..$fff] of byte;
+ ram:array[0..$7fff] of word;
+ bg_ram:array[0..$7ff] of word;
  bg_bank:byte;
  adpcm_rom:array[0..1] of pbyte;
  nmk112_bank:array[0..7] of byte;
@@ -67,16 +67,16 @@ var
   atrib:byte;
 begin
 	for f:=0 to $ff do begin
-    atrib:=ram[$8001+(f*8)];
+    atrib:=ram[$4000+(f*4)];
 		if (atrib and $01)<>0 then begin
       pri:=(atrib and $c0) shr 6;
 			if (pri<>priority) then continue;
-			sx:=((ram[$8008+(f*8)] shl 8)+ram[$8009+(f*8)])+128;// 4
-			sy:=(ram[$800c+(f*8)] shl 8)+ram[$800d+(f*8)];  //6
-			code:=((ram[$8006+(f*8)] shl 8)+(ram[$8007+(f*8)])) and $3fff;  // 3
-			color:=((ram[$800e+(f*8)] shl 8)+ram[$800f+(f*8)]) shl 4;  //7
-			w:=ram[$8003+(f*8)] and $0f;  //1
-			h:=(ram[$8003+(f*8)] and $f0) shr 4;  //1
+			sx:=ram[$4004+(f*4)]+128;// 4
+			sy:=ram[$4006+(f*4)];  //6
+			code:=ram[$4003+(f*4)] and $3fff;  // 3
+			color:=ram[$4007+(f*4)] shl 4;  //7
+			w:=ram[$4001+(f*4)] and $0f;  //1
+			h:=(ram[$4001+(f*4)] and $f0) shr 4;  //1
 			yy:=h;
       while (yy>=0) do begin
 				x:=sx;
@@ -102,7 +102,7 @@ var
 begin
 //foreground
 for f:=$0 to $7ff do begin
-  atrib:=(bg_ram[f*2] shl 8) or bg_ram[(f*2)+1];
+  atrib:=bg_ram[f];
   color:=(atrib and $f000) shr 12;
   if (gfx[0].buffer[f] or buffer_color[color]) then begin
     x:=f div 32;
@@ -176,8 +176,8 @@ case direccion of
     $84000:sbombers_getword:=oki_6295_0.read;
     $84010:sbombers_getword:=oki_6295_1.read;
     $88000..$887ff:sbombers_getword:=buffer_paleta[(direccion and $7ff) shr 1];
-    $9c000..$9dfff:sbombers_getword:=(bg_ram[direccion and $fff] shl 8) or bg_ram[(direccion+1) and $fff];
-    $f0000..$fffff:sbombers_getword:=(ram[direccion and $ffff] shl 8) or ram[(direccion+1) and $ffff];
+    $9c000..$9dfff:sbombers_getword:=bg_ram[(direccion and $fff) shr 1];
+    $f0000..$fffff:sbombers_getword:=ram[(direccion and $ffff) shr 1];
 end;
 end;
 
@@ -213,14 +213,10 @@ case direccion of
                    end;
     $94000:bg_bank:=valor and $ff;
     $9c000..$9dfff:begin
-                      bg_ram[direccion and $fff]:=valor shr 8;
-                      bg_ram[(direccion+1) and $fff]:=valor and $ff;
+                      bg_ram[(direccion and $fff) shr 1]:=valor;
                       gfx[0].buffer[(direccion and $fff) shr 1]:=true;
                    end;
-    $f0000..$fffff:begin
-                      ram[direccion and $ffff]:=valor shr 8;
-                      ram[(direccion+1) and $ffff]:=valor and $ff;
-                    end;
+    $f0000..$fffff:ram[(direccion and $ffff) shr 1]:=valor;
   end;
 end;
 
@@ -259,8 +255,6 @@ var
       mem_char:pbyte;
       memoria_temp:array[0..$ffff] of byte;
 const
-  pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
-  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
   ps_x:array[0..15] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4,
                         			16*32+0*4, 16*32+1*4, 16*32+2*4, 16*32+3*4, 16*32+4*4, 16*32+5*4, 16*32+6*4, 16*32+7*4);
   ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
@@ -348,14 +342,14 @@ procedure convert_chars;
 begin
   init_gfx(0,8,8,$800);
   gfx_set_desc_data(4,0,32*8,0,1,2,3);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+  convert_gfx(0,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 procedure convert_sprites(num:word);
 begin
   init_gfx(2,16,16,num);
   gfx[2].trans[15]:=true;
   gfx_set_desc_data(4,0,32*32,0,1,2,3);
-  convert_gfx(2,0,mem_char,@ps_x[0],@ps_y[0],false,false);
+  convert_gfx(2,0,mem_char,@ps_x,@ps_y,false,false);
 end;
 begin
 iniciar_nmk16:=false;
@@ -375,45 +369,45 @@ oki_6295_1:=snd_okim6295.Create(16000000 div 4,OKIM6295_PIN7_LOW);
 getmem(adpcm_rom[0],$100000);
 getmem(adpcm_rom[1],$100000);
 //Sound timer
-init_timer(0,10000000/112,sound_irq,true);
+timers.init(0,10000000/112,sound_irq,nil,true);
 //Iniciar Maquinas
 case main_vars.tipo_maquina of
   69:begin
       //cargar roms
-      if not(cargar_roms16w(@rom[0],@sbombers_rom[0],'sabotenb.zip',0)) then exit;
+      if not(roms_load16w(@rom,sbombers_rom)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@sbombers_char,'sabotenb.zip',1)) then exit;
+      if not(roms_load(@memoria_temp,sbombers_char)) then exit;
       //Cargar sound roms
-      if not(cargar_roms(adpcm_rom[0],@sbombers_adpcm1,'sabotenb.zip',1)) then exit;
-      if not(cargar_roms(adpcm_rom[1],@sbombers_adpcm2,'sabotenb.zip',1)) then exit;
+      if not(roms_load(adpcm_rom[0],sbombers_adpcm1)) then exit;
+      if not(roms_load(adpcm_rom[1],sbombers_adpcm2)) then exit;
       convert_chars;
       getmem(mem_char,$200000);
-      if not(cargar_roms(mem_char,@sbombers_char2,'sabotenb.zip',1)) then exit;
+      if not(roms_load(mem_char,sbombers_char2)) then exit;
       decode_gfx(mem_char,$200000);
       init_gfx(1,8,8,$10000);
-      convert_gfx(1,0,mem_char,@pc_x[0],@pc_y[0],false,false);
+      convert_gfx(1,0,mem_char,@ps_x,@ps_y,false,false);
       //convertir sprites
-      if not(cargar_roms_swap_word(mem_char,@sbombers_sprites,'sabotenb.zip',1)) then exit;
+      if not(roms_load_swap_word(mem_char,sbombers_sprites)) then exit;
       decode_sprites(mem_char,$200000);
       convert_sprites($4000);
       freemem(mem_char);
   end;
   71:begin
       //cargar roms
-      if not(cargar_roms16w(@rom[0],@bjtwin_rom[0],'bjtwin.zip',0)) then exit;
+      if not(roms_load16w(@rom,bjtwin_rom)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@bjtwin_char,'bjtwin.zip',1)) then exit;
+      if not(roms_load(@memoria_temp,bjtwin_char)) then exit;
       //Cargar sound roms
-      if not(cargar_roms(adpcm_rom[0],@bjtwin_adpcm1,'bjtwin.zip',1)) then exit;
-      if not(cargar_roms(adpcm_rom[1],@bjtwin_adpcm2,'bjtwin.zip',1)) then exit;
+      if not(roms_load(adpcm_rom[0],bjtwin_adpcm1)) then exit;
+      if not(roms_load(adpcm_rom[1],bjtwin_adpcm2)) then exit;
       convert_chars;
       getmem(mem_char,$100000);
-      if not(cargar_roms(mem_char,@bjtwin_char2,'bjtwin.zip',1)) then exit;
+      if not(roms_load(mem_char,bjtwin_char2)) then exit;
       decode_gfx(mem_char,$100000);
       init_gfx(1,8,8,$8000);
-      convert_gfx(1,0,mem_char,@pc_x[0],@pc_y[0],false,false);
+      convert_gfx(1,0,mem_char,@ps_x,@ps_y,false,false);
       //convertir sprites
-      if not(cargar_roms_swap_word(mem_char,@bjtwin_sprites,'bjtwin.zip',1)) then exit;
+      if not(roms_load_swap_word(mem_char,bjtwin_sprites)) then exit;
       decode_sprites(mem_char,$100000);
       convert_sprites($2000);
       freemem(mem_char);

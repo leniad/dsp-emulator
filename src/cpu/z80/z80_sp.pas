@@ -45,8 +45,8 @@ end;
 
 function cpu_z80_sp.spec_inbyte(posicion:word):byte;
 begin
-spec_inbyte:=self.in_port(posicion);
 self.retraso_puerto(posicion);
+spec_inbyte:=self.in_port(posicion);
 end;
 
 procedure cpu_z80_sp.spec_putbyte(posicion:word;valor:byte);
@@ -71,25 +71,25 @@ self.r.halt_opcode:=false;
 if not(r.iff1) then exit; //se esta ejecutando otra
 r.r:=((r.r+1) and $7f) or (r.r and $80);
 dec(r.sp,2);
-self.putbyte(r.sp+1,r.pc shr 8);
-self.putbyte(r.sp,r.pc and $ff);
+self.spec_putbyte(r.sp+1,r.pc shr 8);
+self.spec_putbyte(r.sp,r.pc and $ff);
 r.IFF2:= false;
 r.IFF1:= False;
 Case r.im of
         0:begin //12t
               r.pc:= $38;
-              self.contador:=self.contador+12;
+              self.contador:=self.contador+6; //12 En total -6 de guardar SP
             end;
         1:begin //13t
               r.pc:= $38;
-              self.contador:=self.contador+13;
+              self.contador:=self.contador+7; //13 en total -6 de guardar SP
             end;
         2:begin //19t
                 if self.daisy then posicion:=z80daisy_ack
                     else posicion:=self.im2_lo;
                 posicion:=posicion or (r.i shl 8);
-                r.pc:=self.getbyte(posicion)+(self.getbyte(posicion+1) shl 8);
-                self.contador:=self.contador+19;
+                r.pc:=self.spec_getbyte(posicion)+(self.spec_getbyte(posicion+1) shl 8);
+                self.contador:=self.contador+7; //19 en total -12 de guardar SP y coger PC
         end;
 end;
 r.wz:=r.pc;
@@ -107,13 +107,13 @@ var
 begin
 irq_temp:=false;
 while self.contador<maximo do begin
-pcontador:=self.contador;
 self.r.ppc:=self.r.pc;
 if not(self.after_ei) then begin
   if self.daisy then irq_temp:=z80daisy_state;
   if (irq_temp or (self.pedir_irq<>CLEAR_LINE)) then self.call_irq;
 end else self.after_ei:=false;
 if self.r.halt_opcode then r.pc:=r.pc-1;
+pcontador:=self.contador;
 self.retraso(r.pc);inc(self.contador,4);
 instruccion:=self.getbyte(r.pc);
 r.pc:=r.pc+1;
@@ -1074,7 +1074,7 @@ case instruccion of
   end; {del case}
   cantidad_t:=self.contador-pcontador;
   spectrum_despues_instruccion(cantidad_t);
-  update_timer(cantidad_t,self.numero_cpu);
+  timers.update(cantidad_t,self.numero_cpu);
 end; {del while}
 end;
 
@@ -1201,8 +1201,8 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);self.contador:=self.contador+1;
                 bit_8(0,temp);
-                r.f.bit5:=(r.wz and $20)<>0;
-                r.f.bit3:=(r.wz and 8)<>0;
+                r.f.bit5:=(r.wz and $2000)<>0;
+                r.f.bit3:=(r.wz and $800)<>0;
             end;
         $47:bit_8(0,r.a); {bit 0,A >8t<}
         $48:bit_8(1,r.bc.h); {bit 1,B >8t<}
@@ -1215,8 +1215,8 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);self.contador:=self.contador+1;
                 bit_8(1,temp);
-                r.f.bit5:=(r.wz and $20)<>0;
-                r.f.bit3:=(r.wz and 8)<>0;
+                r.f.bit5:=(r.wz and $2000)<>0;
+                r.f.bit3:=(r.wz and $800)<>0;
             end;
         $4f:bit_8(1,r.a); {bit 1,A >8t<}
         $50:bit_8(2,r.bc.h); {bit 2,B >8t<}
@@ -1229,8 +1229,8 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);self.contador:=self.contador+1;
                 bit_8(2,temp);
-                r.f.bit5:=(r.wz and $20)<>0;
-                r.f.bit3:=(r.wz and 8)<>0;
+                r.f.bit5:=(r.wz and $2000)<>0;
+                r.f.bit3:=(r.wz and $800)<>0;
             end;
         $57:bit_8(2,r.a); {bit 2,A >8t<}
         $58:bit_8(3,r.bc.h); {bit 3,B >8t<}
@@ -1243,8 +1243,8 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);self.contador:=self.contador+1;
                 bit_8(3,temp);
-                r.f.bit5:=(r.wz and $20)<>0;
-                r.f.bit3:=(r.wz and 8)<>0;
+                r.f.bit5:=(r.wz and $2000)<>0;
+                r.f.bit3:=(r.wz and $800)<>0;
             end;
         $5f:bit_8(3,r.a); {bit 3,A >8t<}
         $60:bit_8(4,r.bc.h); {bit 4,B >8t<}
@@ -1257,8 +1257,8 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);self.contador:=self.contador+1;
                 bit_8(4,temp);
-                r.f.bit5:=(r.wz and $20)<>0;
-                r.f.bit3:=(r.wz and 8)<>0;
+                r.f.bit5:=(r.wz and $2000)<>0;
+                r.f.bit3:=(r.wz and $800)<>0;
             end;
         $67:bit_8(4,r.a); {bit 4,A >8t<}
         $68:bit_8(5,r.bc.h); {bit 5,B >8t<}
@@ -1271,8 +1271,8 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);self.contador:=self.contador+1;
                 bit_8(5,temp);
-                r.f.bit5:=(r.wz and $20)<>0;
-                r.f.bit3:=(r.wz and 8)<>0;
+                r.f.bit5:=(r.wz and $2000)<>0;
+                r.f.bit3:=(r.wz and $800)<>0;
             end;
         $6f:bit_8(5,r.a); {bit 5,A >8t<}
         $70:bit_8(6,r.bc.h); {bit 6,B >8t<}
@@ -1285,8 +1285,8 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);self.contador:=self.contador+1;
                 bit_8(6,temp);
-                r.f.bit5:=(r.wz and $20)<>0;
-                r.f.bit3:=(r.wz and 8)<>0;
+                r.f.bit5:=(r.wz and $2000)<>0;
+                r.f.bit3:=(r.wz and $800)<>0;
             end;
         $77:bit_8(6,r.a);  {bit 6,A >8t<}
         $78:bit_7(r.bc.h); {bit 7,B >8t<}
@@ -1299,8 +1299,8 @@ case instruccion of
                 temp:=spec_getbyte(r.hl.w);
                 self.retraso(r.hl.w);self.contador:=self.contador+1;
                 bit_7(temp);
-                r.f.bit5:=(r.wz and $20)<>0;
-                r.f.bit3:=(r.wz and 8)<>0;
+                r.f.bit5:=(r.wz and $2000)<>0;
+                r.f.bit3:=(r.wz and $800)<>0;
             end;
         $7f:bit_7(r.a); {bit 7,A >8t<}
         $80:r.bc.h:=(r.bc.h and $fe); {res 0,B >8t<}
@@ -1501,12 +1501,13 @@ end;
 procedure cpu_z80_sp.exec_dd_fd_sp(tipo:boolean);
 var
  instruccion,temp:byte;
- temp2:word;
+ temp2,temp_cont:word;
  registro:pparejas;
  posicion:parejas;
 begin
 if tipo then registro:=@r.ix else registro:=@r.iy;
 temp2:=registro.w;
+temp_cont:=self.contador;
 self.retraso(r.pc);self.contador:=self.contador+4;
 instruccion:=self.getbyte(r.pc);
 r.pc:=r.pc+1;
@@ -1834,7 +1835,7 @@ case instruccion of
         $77:begin {ld (IX+d),A >19t<}
                 temp2:=temp2+shortint(spec_getbyte(r.pc));
                 r.wz:=temp2;
-                self.retraso(r.pc);inc(self.contador); 
+                self.retraso(r.pc);inc(self.contador);
                 self.retraso(r.pc);inc(self.contador);
                 self.retraso(r.pc);inc(self.contador); 
                 self.retraso(r.pc);inc(self.contador); 
@@ -1894,7 +1895,7 @@ case instruccion of
                 r.wz:=temp2;
                 self.retraso(r.pc);inc(self.contador); 
                 self.retraso(r.pc);inc(self.contador);
-                self.retraso(r.pc);inc(self.contador); 
+                self.retraso(r.pc);inc(self.contador);
                 self.retraso(r.pc);inc(self.contador); 
                 self.retraso(r.pc);inc(self.contador); 
                 r.pc:=r.pc+1;
@@ -2022,6 +2023,7 @@ case instruccion of
                 cp_a(temp);
         end;
         $cb:self.exec_dd_cb_sp(tipo);
+        $dd,$fd:self.exec_dd_fd_sp(tipo);
         $e1:begin
                 self.retraso(r.sp);inc(self.contador,3);
                 self.retraso(r.sp+1);inc(self.contador,3);
@@ -2051,7 +2053,10 @@ case instruccion of
               inc(self.contador,2);
               r.sp:=registro.w;
             end;
-        else dec(r.pc);
+        else begin
+              dec(r.pc);
+              self.contador:=temp_cont;
+             end;
 end;
 end;
 
@@ -3700,7 +3705,6 @@ case instruccion of
                 r.f.z:=(r.bc.h=0);
                 r.f.bit5:=(r.bc.h and $20)<>0;
                 r.f.bit3:=(r.bc.h and 8)<>0;
-                r.f.z:=(r.bc.h and $80)<>0;
                 if r.bc.h<>0 then begin
                   self.retraso(r.hl.w);self.contador:=self.contador+1;
                   self.retraso(r.hl.w);self.contador:=self.contador+1;

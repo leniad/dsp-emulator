@@ -51,11 +51,13 @@ cinta_tzx.play_tape:=true;
 cinta_tzx.estados:=0;
 BitBtn1.Enabled:=false;
 BitBtn2.Enabled:=true;
+if addr(cinta_tzx.tape_start)<>nil then cinta_tzx.tape_start;
 sync_all;
 end;
 
 procedure Ttape_window1.cerrar_cinta(Sender: TObject);
 begin
+if addr(cinta_tzx.tape_stop)<>nil then cinta_tzx.tape_stop;
 close;
 end;
 
@@ -76,6 +78,14 @@ begin
 tape_window1.Left:=SCREEN_DIF+principal1.Left+principal1.Width;
 tape_window1.top:=principal1.top;
 //Varios
+stringgrid1.ColWidths[0]:=stringgrid1.Width-100;
+stringgrid1.ColWidths[1]:=100;
+stringgrid1.ColCount:=2;
+//stringgrid1.ColWidths[2]:=60;
+stringgrid2.ColWidths[0]:=stringgrid1.Width-100;
+stringgrid2.ColWidths[1]:=100;
+stringgrid2.ColCount:=2;
+//stringgrid2.ColWidths[2]:=60;
 tape_window1.StringGrid2.cells[0,0]:=leng[main_vars.idioma].varios[0];  //nombre
 tape_window1.StringGrid2.cells[1,0]:=leng[main_vars.idioma].varios[1];  //longitud
 //tape_window1.StringGrid2.cells[2,0]:='CRC';  //CRC
@@ -98,15 +108,18 @@ tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
 main_vars.mensaje_principal:='';
 main_screen.rapido:=false;
+if addr(cinta_tzx.tape_stop)<>nil then cinta_tzx.tape_stop;
 sync_all;
 end;
 
 procedure Ttape_window1.StringGrid1Click(Sender: TObject);
 begin
-cinta_tzx.grupo:=false;
-cinta_tzx.indice_cinta:=cinta_tzx.indice_select[tape_window1.stringgrid1.Selection.Top];
-siguiente_bloque_tzx;
-sync_all;
+if not(cinta_tzx.click_falso) then begin
+   cinta_tzx.grupo:=false;
+   cinta_tzx.indice_cinta:=cinta_tzx.indice_select[tape_window1.stringgrid1.Selection.Top];
+   siguiente_bloque_tzx;
+   sync_all;
+end;
 end;
 
 procedure Ttape_window1.StringGrid1DblClick(Sender: TObject);

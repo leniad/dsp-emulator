@@ -31,7 +31,7 @@ type
             tframes:single;
             procedure change_ram_calls(getbyte:tgetbyte;putbyte:tputbyte);
             procedure change_despues_instruccion(despues_instruccion:tdespues_instruccion);
-            procedure init_sound(update_call:exec_type);
+            procedure init_sound(update_call:exec_type_simple);
             procedure change_halt(status:byte);
             procedure change_reset(status:byte);
             function get_halt:byte;
@@ -114,7 +114,7 @@ begin
   self.despues_instruccion:=despues_instruccion;
 end;
 
-procedure cpu_class.init_sound(update_call:exec_type);
+procedure cpu_class.init_sound(update_call:exec_type_simple);
 begin
 sound_engine_init(self.numero_cpu,self.clock,update_call);
 end;

@@ -10,17 +10,17 @@ procedure cargar_simpsons;
 
 implementation
 const
-        simpsons_rom:array[0..4] of tipo_roms=(
+        simpsons_rom:array[0..3] of tipo_roms=(
         (n:'072-g02.16c';l:$20000;p:0;crc:$580ce1d6),(n:'072-p01.17c';l:$20000;p:$20000;crc:$07ceeaea),
-        (n:'072-013.13c';l:$20000;p:$40000;crc:$8781105a),(n:'072-012.15c';l:$20000;p:$60000;crc:$244f9289),());
+        (n:'072-013.13c';l:$20000;p:$40000;crc:$8781105a),(n:'072-012.15c';l:$20000;p:$60000;crc:$244f9289));
         simpsons_sound:tipo_roms=(n:'072-g03.6g';l:$20000;p:0;crc:$76c1850c);
-        simpsons_tiles:array[0..2] of tipo_roms=(
-        (n:'072-b07.18h';l:$80000;p:0;crc:$ba1ec910),(n:'072-b06.16h';l:$80000;p:2;crc:$cf2bbcab),());
-        simpsons_sprites:array[0..4] of tipo_roms=(
+        simpsons_tiles:array[0..1] of tipo_roms=(
+        (n:'072-b07.18h';l:$80000;p:0;crc:$ba1ec910),(n:'072-b06.16h';l:$80000;p:2;crc:$cf2bbcab));
+        simpsons_sprites:array[0..3] of tipo_roms=(
         (n:'072-b08.3n';l:$100000;p:0;crc:$7de500ad),(n:'072-b09.8n';l:$100000;p:2;crc:$aa085093),
-        (n:'072-b10.12n';l:$100000;p:4;crc:$577dbd53),(n:'072-b11.16l';l:$100000;p:6;crc:$55fab05d),());
-        simpsons_k053260:array[0..2] of tipo_roms=(
-        (n:'072-d05.1f';l:$100000;p:0;crc:$1397a73b),(n:'072-d04.1d';l:$40000;p:$100000;crc:$78778013),());
+        (n:'072-b10.12n';l:$100000;p:4;crc:$577dbd53),(n:'072-b11.16l';l:$100000;p:6;crc:$55fab05d));
+        simpsons_k053260:array[0..1] of tipo_roms=(
+        (n:'072-d05.1f';l:$100000;p:0;crc:$1397a73b),(n:'072-d04.1d';l:$40000;p:$100000;crc:$78778013));
         simpsons_eeprom:tipo_roms=(n:'simpsons2p.12c.nv';l:$80;p:0;crc:$fbac4e30);
 
 var
@@ -52,7 +52,7 @@ end;
 
 procedure simpsons_sprites_firq;
 begin
-timer[sprite_timer].enabled:=false;
+timers.enabled(sprite_timer,false);
 if firq_enabled then konami_0.change_firq(HOLD_LINE);
 end;
 
@@ -125,17 +125,27 @@ end;
 
 procedure simpsons_objdma;inline;
 var
-	f:byte;
-	dst:pword;
+	dst,src:pword;
+  inac,count:integer;
 begin
 	dst:=k053246_0.k053247_get_ram;
-  fillchar(dst^,$800*2,0);
-  for f:=0 to $ff do begin
-		if ((sprite_ram[f*8] and $80ff)<>0) then begin
-			copymemory(dst,@sprite_ram[f*8],$10);
+  src:=@sprite_ram[0];
+  inac:=256;
+  count:=256;
+	repeat
+		if (((src^ and $8000)<>0) and ((src^ and $ff)<>0)) then begin
+			copymemory(dst,src,$10);
 			inc(dst,8);
+			inac:=inac-1;
 		end;
-	end;
+		inc(src,8);
+    count:=count-1;
+	until (count=0);
+	if (inac<>0) then repeat
+      dst^:=0;
+      inc(dst,8);
+      inac:=inac-1;
+  until (inac=0);
 end;
 
 procedure simpsons_principal;
@@ -158,7 +168,7 @@ while EmuStatus=EsRuning do begin
                     if k052109_0.is_irq_enabled then konami_0.change_irq(HOLD_LINE);
                     if k053246_0.is_irq_enabled then begin
                        simpsons_objdma;
-                       timer[sprite_timer].enabled:=true;
+                       timers.enabled(sprite_timer,true);
                     end;
                     update_video_simpsons;
                   end;
@@ -222,7 +232,6 @@ procedure simpsons_putbyte(direccion:word;valor:byte);
 var
    tempw:word;
 begin
-if direccion>$5fff then exit;
 case direccion of
     0..$fff:if bank0_bank=1 then begin
                 if buffer_paleta[direccion]<>valor then begin
@@ -258,6 +267,7 @@ case direccion of
                                    else sprite_ram[tempw]:=(sprite_ram[tempw] and $ff) or (valor shl 8);
                               end;
     $4000..$5fff:memoria[direccion]:=valor;
+    $6000..$ffff:; //ROM
 end;
 end;
 
@@ -279,20 +289,20 @@ end;
 
 procedure simpsons_nmi;
 begin
-timer[snd_timer].enabled:=false;
+timers.enabled(snd_timer,false);
 z80_0.change_nmi(CLEAR_LINE);
 end;
 
 procedure simpsons_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+  0..$bfff:; //ROM
   $f000..$f7ff:mem_snd[direccion]:=valor;
   $f800:ym2151_0.reg(valor);
   $f801:ym2151_0.write(valor);
   $fa00:begin
              z80_0.change_nmi(ASSERT_LINE);
-             timer[snd_timer].enabled:=true;
+             timers.enabled(snd_timer,true);
         end;
   $fc00..$fc2f:k053260_0.write(direccion and $3f,valor);
   $fe00:sound_bank:=valor and $7;
@@ -352,12 +362,12 @@ screen_init(4,1024,1024,false,true);
 iniciar_video(288,224,true);
 iniciar_audio(true);
 //cargar roms y ponerlas en su sitio...
-if not(cargar_roms(@temp_mem[0],@simpsons_rom[0],'simpsons.zip',0)) then exit;
+if not(roms_load(@temp_mem,simpsons_rom)) then exit;
 copymemory(@memoria[$8000],@temp_mem[$78000],$8000);
 for f:=0 to $3f do copymemory(@rom_bank[f,0],@temp_mem[f*$2000],$2000);
 //cargar sonido
-if not(cargar_roms(@temp_mem[0],@simpsons_sound,'simpsons.zip',1)) then exit;
-copymemory(@mem_snd[0],@temp_mem[0],$8000);
+if not(roms_load(@temp_mem,simpsons_sound)) then exit;
+copymemory(@mem_snd,@temp_mem,$8000);
 for f:=0 to 7 do copymemory(@sound_rom_bank[f,0],@temp_mem[f*$4000],$4000);
 //Main CPU
 konami_0:=cpu_konami.create(3000000,256);
@@ -367,26 +377,26 @@ konami_0.change_set_lines(simpsons_bank);
 z80_0:=cpu_z80.create(3579545,256);
 z80_0.change_ram_calls(simpsons_snd_getbyte,simpsons_snd_putbyte);
 z80_0.init_sound(simpsons_sound_update);
-snd_timer:=init_timer(z80_0.numero_cpu,90,simpsons_nmi,false);
+snd_timer:=timers.init(z80_0.numero_cpu,90,simpsons_nmi,nil,false);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(3579545);
 getmem(k053260_rom,$140000);
-if not(cargar_roms(k053260_rom,@simpsons_k053260,'simpsons.zip',0)) then exit;
+if not(roms_load(k053260_rom,simpsons_k053260)) then exit;
 k053260_0:=tk053260_chip.create(3579545,k053260_rom,$140000,0.70);
 //eeprom
 eepromser_init(ER5911,8);
-if not(cargar_roms(@temp_mem[0],@simpsons_eeprom,'simpsons.zip',1)) then exit;
-eepromser_load_data(@temp_mem[0],$80);
+if not(roms_load(@temp_mem,simpsons_eeprom)) then exit;
+eepromser_load_data(@temp_mem,$80);
 //Prioridades
 k053251_0:=k053251_chip.create;
 //Iniciar video
 getmem(tiles_rom,$100000);
-if not(cargar_roms32b(tiles_rom,@simpsons_tiles,'simpsons.zip',0)) then exit;
+if not(roms_load32b(tiles_rom,simpsons_tiles)) then exit;
 k052109_0:=k052109_chip.create(1,2,3,simpsons_cb,tiles_rom,$100000);
 getmem(sprite_rom,$400000);
-if not(cargar_roms64b(sprite_rom,@simpsons_sprites,'simpsons.zip',0)) then exit;
+if not(roms_load64b(sprite_rom,simpsons_sprites)) then exit;
 k053246_0:=k053246_chip.create(4,simpsons_sprite_cb,sprite_rom,$400000);
-sprite_timer:=init_timer(konami_0.numero_cpu,90,simpsons_sprites_firq,false);
+sprite_timer:=timers.init(konami_0.numero_cpu,90,simpsons_sprites_firq,nil,false);
 k053246_0.k053247_start(0,16);
 //final
 reset_simpsons;

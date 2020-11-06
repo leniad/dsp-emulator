@@ -304,18 +304,18 @@ ay8910_0:=ay8910_chip.create(1789750,AY8910,0.3);
 ay8910_0.change_io_calls(junofrst_portar,nil,nil,junofrst_portbw);
 dac_0:=dac_chip.Create(0.5);
 //cargar roms
-if not(roms_load(@memoria,@junofrst_rom,'junofrst.zip',sizeof(junofrst_rom))) then exit;
+if not(roms_load(@memoria,junofrst_rom)) then exit;
 konami1_decode(@memoria[$a000],@mem_opcodes,$6000);
-if not(roms_load(@memoria_temp,@junofrst_bank_rom,'junofrst.zip',sizeof(junofrst_bank_rom))) then exit;
+if not(roms_load(@memoria_temp,junofrst_bank_rom)) then exit;
 konami1_decode(@memoria_temp,@memoria_temp_bank,$c000);
 for f:=0 to $f do begin
   copymemory(@rom_bank[f,0],@memoria_temp[f*$1000],$1000);
   copymemory(@rom_bank_dec[f,0],@memoria_temp_bank[f*$1000],$1000);
 end;
-if not(roms_load(@blit_mem,@junofrst_blit,'junofrst.zip',sizeof(junofrst_blit))) then exit;
+if not(roms_load(@blit_mem,junofrst_blit)) then exit;
 //Cargar roms sound
-if not(roms_load(@mem_snd,@junofrst_sound,'junofrst.zip',sizeof(junofrst_sound))) then exit;
-if not(roms_load(@mem_snd_sub,@junofrst_sound_sub,'junofrst.zip',sizeof(junofrst_sound_sub))) then exit;
+if not(roms_load(@mem_snd,junofrst_sound)) then exit;
+if not(roms_load(@mem_snd_sub,junofrst_sound_sub)) then exit;
 //DIP
 marcade.dswa:=$ff;
 marcade.dswb:=$7b;

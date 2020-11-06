@@ -10,45 +10,45 @@ procedure cargar_twincobra;
 implementation
 const
         //Twin Cobra
-        twincobr_rom:array[0..4] of tipo_roms=(
+        twincobr_rom:array[0..3] of tipo_roms=(
         (n:'b30-01';l:$10000;p:0;crc:$07f64d13),(n:'b30-03';l:$10000;p:$1;crc:$41be6978),
-        (n:'tc15';l:$8000;p:$20000;crc:$3a646618),(n:'tc13';l:$8000;p:$20001;crc:$d7d1e317),());
+        (n:'tc15';l:$8000;p:$20000;crc:$3a646618),(n:'tc13';l:$8000;p:$20001;crc:$d7d1e317));
         twincobr_snd_rom:tipo_roms=(n:'tc12';l:$8000;p:0;crc:$e37b3c44);
-        twincobr_char:array[0..3] of tipo_roms=(
+        twincobr_char:array[0..2] of tipo_roms=(
         (n:'tc11';l:$4000;p:0;crc:$0a254133),(n:'tc03';l:$4000;p:$4000;crc:$e9e2d4b1),
-        (n:'tc04';l:$4000;p:$8000;crc:$a599d845),());
-        twincobr_sprites:array[0..4] of tipo_roms=(
+        (n:'tc04';l:$4000;p:$8000;crc:$a599d845));
+        twincobr_sprites:array[0..3] of tipo_roms=(
         (n:'tc20';l:$10000;p:0;crc:$cb4092b8),(n:'tc19';l:$10000;p:$10000;crc:$9cb8675e),
-        (n:'tc18';l:$10000;p:$20000;crc:$806fb374),(n:'tc17';l:$10000;p:$30000;crc:$4264bff8),());
-        twincobr_fg_tiles:array[0..4] of tipo_roms=(
+        (n:'tc18';l:$10000;p:$20000;crc:$806fb374),(n:'tc17';l:$10000;p:$30000;crc:$4264bff8));
+        twincobr_fg_tiles:array[0..3] of tipo_roms=(
         (n:'tc01';l:$10000;p:0;crc:$15b3991d),(n:'tc02';l:$10000;p:$10000;crc:$d9e2e55d),
-        (n:'tc06';l:$10000;p:$20000;crc:$13daeac8),(n:'tc05';l:$10000;p:$30000;crc:$8cc79357),());
-        twincobr_bg_tiles:array[0..4] of tipo_roms=(
+        (n:'tc06';l:$10000;p:$20000;crc:$13daeac8),(n:'tc05';l:$10000;p:$30000;crc:$8cc79357));
+        twincobr_bg_tiles:array[0..3] of tipo_roms=(
         (n:'tc07';l:$8000;p:0;crc:$b5d48389),(n:'tc08';l:$8000;p:$8000;crc:$97f20fdc),
-        (n:'tc09';l:$8000;p:$10000;crc:$170c01db),(n:'tc10';l:$8000;p:$18000;crc:$44f5accd),());
-        twincobr_mcu_rom:array[0..2] of tipo_roms=(
-        (n:'dsp_22.bin';l:$800;p:0;crc:$79389a71),(n:'dsp_21.bin';l:$800;p:$1;crc:$2d135376),());
+        (n:'tc09';l:$8000;p:$10000;crc:$170c01db),(n:'tc10';l:$8000;p:$18000;crc:$44f5accd));
+        twincobr_mcu_rom:array[0..1] of tipo_roms=(
+        (n:'dsp_22.bin';l:$800;p:0;crc:$79389a71),(n:'dsp_21.bin';l:$800;p:$1;crc:$2d135376));
         //Flying Shark
-        fshark_rom:array[0..2] of tipo_roms=(
-        (n:'b02_18-1.m8';l:$10000;p:0;crc:$04739e02),(n:'b02_17-1.p8';l:$10000;p:$1;crc:$fd6ef7a8),());
+        fshark_rom:array[0..1] of tipo_roms=(
+        (n:'b02_18-1.m8';l:$10000;p:0;crc:$04739e02),(n:'b02_17-1.p8';l:$10000;p:$1;crc:$fd6ef7a8));
         fshark_snd_rom:tipo_roms=(n:'b02_16.l5';l:$8000;p:0;crc:$cdd1a153);
-        fshark_char:array[0..3] of tipo_roms=(
+        fshark_char:array[0..2] of tipo_roms=(
         (n:'b02_07-1.h11';l:$4000;p:0;crc:$e669f80e),(n:'b02_06-1.h10';l:$4000;p:$4000;crc:$5e53ae47),
-        (n:'b02_05-1.h8';l:$4000;p:$8000;crc:$a8b05bd0),());
-        fshark_sprites:array[0..4] of tipo_roms=(
+        (n:'b02_05-1.h8';l:$4000;p:$8000;crc:$a8b05bd0));
+        fshark_sprites:array[0..3] of tipo_roms=(
         (n:'b02_01.d15';l:$10000;p:0;crc:$2234b424),(n:'b02_02.d16';l:$10000;p:$10000;crc:$30d4c9a8),
-        (n:'b02_03.d17';l:$10000;p:$20000;crc:$64f3d88f),(n:'b02_04.d20';l:$10000;p:$30000;crc:$3b23a9fc),());
-        fshark_fg_tiles:array[0..4] of tipo_roms=(
+        (n:'b02_03.d17';l:$10000;p:$20000;crc:$64f3d88f),(n:'b02_04.d20';l:$10000;p:$30000;crc:$3b23a9fc));
+        fshark_fg_tiles:array[0..3] of tipo_roms=(
         (n:'b02_12.h20';l:$8000;p:0;crc:$733b9997),(n:'b02_15.h24';l:$8000;p:$8000;crc:$8b70ef32),
-        (n:'b02_14.h23';l:$8000;p:$10000;crc:$f711ba7d),(n:'b02_13.h21';l:$8000;p:$18000;crc:$62532cd3),());
-        fshark_bg_tiles:array[0..4] of tipo_roms=(
+        (n:'b02_14.h23';l:$8000;p:$10000;crc:$f711ba7d),(n:'b02_13.h21';l:$8000;p:$18000;crc:$62532cd3));
+        fshark_bg_tiles:array[0..3] of tipo_roms=(
         (n:'b02_08.h13';l:$8000;p:0;crc:$ef0cf49c),(n:'b02_11.h18';l:$8000;p:$8000;crc:$f5799422),
-        (n:'b02_10.h16';l:$8000;p:$10000;crc:$4bd099ff),(n:'b02_09.h15';l:$8000;p:$18000;crc:$230f1582),());
-        fshark_mcu_rom:array[0..8] of tipo_roms=(
+        (n:'b02_10.h16';l:$8000;p:$10000;crc:$4bd099ff),(n:'b02_09.h15';l:$8000;p:$18000;crc:$230f1582));
+        fshark_mcu_rom:array[0..7] of tipo_roms=(
         (n:'82s137-1.mcu';l:$400;p:0;crc:$cc5b3f53),(n:'82s137-2.mcu';l:$400;p:$400;crc:$47351d55),
         (n:'82s137-3.mcu';l:$400;p:$800;crc:$70b537b9),(n:'82s137-4.mcu';l:$400;p:$c00;crc:$6edb2de8),
         (n:'82s137-5.mcu';l:$400;p:$1000;crc:$f35b978a),(n:'82s137-6.mcu';l:$400;p:$1400;crc:$0459e51b),
-        (n:'82s137-7.mcu';l:$400;p:$1800;crc:$cbf3184b),(n:'82s137-8.mcu';l:$400;p:$1c00;crc:$8246a05c),());
+        (n:'82s137-7.mcu';l:$400;p:$1800;crc:$cbf3184b),(n:'82s137-8.mcu';l:$400;p:$1c00;crc:$8246a05c));
 
 var
  rom:array[0..$17fff] of word;
@@ -233,6 +233,7 @@ end;
 procedure twincobr_putword(direccion:dword;valor:word);
 begin
 case direccion of
+  0..$2ffff:;
   $30000..$33fff:ram[(direccion and $3fff) shr 1]:=valor;
   $3ffe0..$3ffef:;
   $40000..$40fff:sprite_ram[(direccion and $fff) shr 1]:=valor;
@@ -300,13 +301,15 @@ end;
 
 function twincobr_snd_getbyte(direccion:word):byte;
 begin
-twincobr_snd_getbyte:=mem_snd[direccion];
+if direccion<$8800 then twincobr_snd_getbyte:=mem_snd[direccion];
 end;
 
 procedure twincobr_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
+case direccion of
+  0..$7fff:;
+  $8000..$87ff:mem_snd[direccion]:=valor;
+end;
 end;
 
 function twincobr_snd_inbyte(puerto:word):byte;
@@ -420,7 +423,6 @@ var
     temp_rom:array[0..$fff] of word;
     f:word;
 const
-    pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
     pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
@@ -430,7 +432,7 @@ begin
   init_gfx(0,8,8,2048);
   gfx[0].trans[0]:=true;
   gfx_set_desc_data(3,0,8*8,0*2048*8*8,1*2048*8*8,2*2048*8*8);
-  convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+  convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,false,true);
 end;
 
 procedure convert_tiles(ngfx:byte;ntiles:word);
@@ -438,7 +440,7 @@ begin
 init_gfx(ngfx,8,8,ntiles);
 gfx[ngfx].trans[0]:=true;
 gfx_set_desc_data(4,0,8*8,0*ntiles*8*8,1*ntiles*8*8,2*ntiles*8*8,3*ntiles*8*8);
-convert_gfx(ngfx,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(ngfx,0,@memoria_temp,@ps_x,@pc_y,false,true);
 end;
 
 procedure convert_sprites;
@@ -446,7 +448,7 @@ begin
 init_gfx(3,16,16,2048);
 gfx[3].trans[0]:=true;
 gfx_set_desc_data(4,0,32*8,0*2048*32*8,1*2048*32*8,2*2048*32*8,3*2048*32*8);
-convert_gfx(3,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,true);
 end;
 
 begin
@@ -477,33 +479,33 @@ ym3812_0.change_irq_calls(snd_irq);
 case main_vars.tipo_maquina of
     146:begin
           //cargar roms
-          if not(cargar_roms16w(@rom[0],@twincobr_rom[0],'twincobr.zip',0)) then exit;
+          if not(roms_load16w(@rom,twincobr_rom)) then exit;
           //cargar ROMS sonido
-          if not(cargar_roms(@mem_snd[0],@twincobr_snd_rom,'twincobr.zip',1)) then exit;
+          if not(roms_load(@mem_snd,twincobr_snd_rom)) then exit;
           //cargar ROMS MCU
-          if not(cargar_roms16b(tms32010_0.get_rom_addr,@twincobr_mcu_rom[0],'twincobr.zip',0)) then exit;
+          if not(roms_load16b(tms32010_0.get_rom_addr,twincobr_mcu_rom)) then exit;
           //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@twincobr_char[0],'twincobr.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,twincobr_char)) then exit;
           convert_chars;
           //convertir tiles fg
-          if not(cargar_roms(@memoria_temp[0],@twincobr_fg_tiles[0],'twincobr.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,twincobr_fg_tiles)) then exit;
           convert_tiles(1,8192);
           //convertir tiles bg
-          if not(cargar_roms(@memoria_temp[0],@twincobr_bg_tiles[0],'twincobr.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,twincobr_bg_tiles)) then exit;
           convert_tiles(2,4096);
           //convertir tiles sprites
-          if not(cargar_roms(@memoria_temp[0],@twincobr_sprites[0],'twincobr.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,twincobr_sprites)) then exit;
           convert_sprites;
           dswa:=0;
           dswb:=0;
     end;
     147:begin
           //cargar roms
-          if not(cargar_roms16w(@rom[0],@fshark_rom[0],'fshark.zip',0)) then exit;
+          if not(roms_load16w(@rom,fshark_rom)) then exit;
           //cargar ROMS sonido
-          if not(cargar_roms(@mem_snd[0],@fshark_snd_rom,'fshark.zip',1)) then exit;
+          if not(roms_load(@mem_snd,fshark_snd_rom)) then exit;
           //cargar ROMS MCU
-          if not(cargar_roms(@memoria_temp[0],@fshark_mcu_rom[0],'fshark.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,fshark_mcu_rom)) then exit;
           for f:=0 to $3ff do begin
             temp_rom[f]:=(((memoria_temp[f] and $f) shl 4+(memoria_temp[f+$400] and $f)) shl 8) or
               (memoria_temp[f+$800] and $f) shl 4+(memoria_temp[f+$c00] and $f);
@@ -512,18 +514,18 @@ case main_vars.tipo_maquina of
              temp_rom[f+$400]:=(((memoria_temp[f+$1000] and $f) shl 4+(memoria_temp[f+$1400] and $f)) shl 8) or
               (memoria_temp[f+$1800] and $f) shl 4+(memoria_temp[f+$1c00] and $f);
           end;
-          copymemory(tms32010_0.get_rom_addr,@temp_rom[0],$1000);
+          copymemory(tms32010_0.get_rom_addr,@temp_rom,$1000);
           //convertir chars
-          if not(cargar_roms(@memoria_temp[0],@fshark_char[0],'fshark.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,fshark_char)) then exit;
           convert_chars;
           //convertir tiles fg
-          if not(cargar_roms(@memoria_temp[0],@fshark_fg_tiles[0],'fshark.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,fshark_fg_tiles)) then exit;
           convert_tiles(1,4096);
           //convertir tiles bg
-          if not(cargar_roms(@memoria_temp[0],@fshark_bg_tiles[0],'fshark.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,fshark_bg_tiles)) then exit;
           convert_tiles(2,4096);
           //convertir tiles sprites
-          if not(cargar_roms(@memoria_temp[0],@fshark_sprites[0],'fshark.zip',0)) then exit;
+          if not(roms_load(@memoria_temp,fshark_sprites)) then exit;
           convert_sprites;
           dswa:=1;
           dswb:=$80;

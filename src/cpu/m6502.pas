@@ -1,5 +1,7 @@
 unit M6502;
 
+{$define DEBUG}
+
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,dialogs,sysutils,timer_engine,cpu_misc;
@@ -16,8 +18,8 @@ type
         end;
         preg_m6502=^reg_m6502;
         cpu_m6502=class(cpu_class)
-            constructor Create(clock:dword;frames_div:word;cpu_type:byte);
-            destructor Free;
+            constructor create(clock:dword;frames_div:word;cpu_type:byte);
+            destructor free;
           public
             after_ei:boolean;
             tipo_cpu:byte;
@@ -25,6 +27,8 @@ type
             procedure run(maximo:single);
             procedure change_io_calls(in_port0,in_port1:cpu_inport_call);
             function get_internal_r:preg_m6502;
+            function save_snapshot(data:pbyte):word;
+            procedure load_snapshot(data:pbyte);
           private
             //Internal Regs
             r:preg_m6502;
@@ -58,14 +62,15 @@ const
        $d,$a, 1,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //80
        $d,$b, 0,$b,8, 8,9,9,0, 6,0,6,2, 4,5,5,  //90
         1,$a, 1, 0,7, 7,7,0,0, 1,0,0,2, 2,2,0,  //A0
-       $d,$b, 0, 0,8, 8,9,0,0, 6,0,0,5, 5,6,0,  //B0
+       $d,$b, 0,$b,8, 8,9,0,0, 6,0,0,5, 5,6,0,  //B0
         1,$a, 1,$a,7, 7,7,0,0, 1,0,0,2, 2,2,2,  //C0
-       $d,$b, 0,$b,8, 8,8,0,0, 6,0,6,5, 5,4,5,  //D0
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //D0
         1,$a, 1,$a,7, 7,7,0,0, 1,0,1,2, 2,2,2,  //E0
-       $d,$b, 0,$b,8, 8,8,0,0, 6,0,6,5, 5,4,5); //F0
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5); //F0
 
         estados_t:array[0..1,0..255] of byte=((
         //M6502 + NES
+      //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  e
         7, 6, 1, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6,
         2, 5, 1, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
         6, 6, 1, 8, 3, 3, 5, 5, 4, 2, 2, 2, 4, 4, 6, 6,
@@ -78,8 +83,8 @@ const
         2, 6, 1, 6, 4, 4, 4, 4, 2, 5, 2, 5, 5, 5, 5, 5,
         2, 6, 2, 6, 3, 3, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4,
         2, 5, 1, 5, 4, 4, 4, 4, 2, 4, 2, 4, 4, 4, 4, 4,
-        2, 6, 2, 7, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6,
-        2, 5, 1, 7, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
+        2, 6, 2, 8, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6,
+        2, 5, 1, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
         2, 6, 2, 7, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6,
         2, 5, 1, 7, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7),(
         //DECO16
@@ -101,7 +106,7 @@ const
         2, 5, 2, 2, 2, 4, 6, 2, 2, 4, 4, 2, 2, 4, 7, 2));
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 
-constructor cpu_m6502.Create(clock:dword;frames_div:word;cpu_type:byte);
+constructor cpu_m6502.create(clock:dword;frames_div:word;cpu_type:byte);
 begin
 getmem(self.r,sizeof(reg_m6502));
 fillchar(self.r^,sizeof(reg_m6502),0);
@@ -113,7 +118,7 @@ self.in_port0:=nil;
 self.in_port1:=nil;
 end;
 
-destructor cpu_m6502.Free;
+destructor cpu_m6502.free;
 begin
 freemem(self.r);
 end;
@@ -127,6 +132,34 @@ end;
 function cpu_m6502.get_internal_r:preg_m6502;
 begin
   get_internal_r:=self.r;
+end;
+
+function cpu_m6502.save_snapshot(data:pbyte):word;
+var
+  temp:pbyte;
+  buffer:array[0..2] of byte;
+  size:word;
+begin
+  temp:=data;
+  copymemory(temp,self.r,sizeof(reg_m6502));
+  inc(temp,sizeof(reg_m6502));size:=sizeof(reg_m6502);
+  buffer[0]:=byte(self.after_ei);
+  buffer[1]:=self.tipo_cpu;
+  buffer[2]:=byte(self.read_dummy);
+  copymemory(temp,@buffer[0],3);
+  save_snapshot:=size+3;
+end;
+
+procedure cpu_m6502.load_snapshot(data:pbyte);
+var
+  temp:pbyte;
+begin
+  temp:=data;
+  copymemory(self.r,temp,sizeof(reg_m6502));
+  inc(temp,sizeof(reg_m6502));
+  self.after_ei:=temp^<>0;inc(temp);
+  self.tipo_cpu:=temp^;inc(temp);
+  self.read_dummy:=temp^<>0;
 end;
 
 procedure pon_pila(r:preg_m6502;valor:byte);inline;
@@ -408,6 +441,7 @@ case instruccion of
             r.p.z:=(r.a=0);
             r.p.n:=(r.a and $80)<>0;
           end;
+      $02,$42:self.r.pc:=self.r.pc-1; //kil
       $03,$07,$0f,$13,$17,$1b,$1f:begin //SLO
             tempb:=self.getbyte(posicion);
             self.putbyte(posicion,tempb); // <-- Fallo de la CPU
@@ -731,6 +765,12 @@ case instruccion of
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
           end;
+      $b3:begin //LAX
+            r.a:=self.getbyte(posicion);
+            r.x:=r.a;
+            r.p.z:=(r.a=0);
+            r.p.n:=(r.a and $80)<>0;
+          end;
       $B8:begin  //CLV
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.o_v:=false;
@@ -771,38 +811,48 @@ case instruccion of
             r.p.n:=(tempb and $80)<>0;
             self.putbyte(posicion,tempb);
            end;
-      $C8:begin  //INY
+      $c8:begin  //INY
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.y:=r.y+1;
              r.p.z:=(r.y=0);
              r.p.n:=(r.y and $80)<>0;
            end;
-      $CA:begin  //DEX
+      $ca:begin  //DEX
              self.getbyte(r.pc);  // <-- Fallo CPU
              r.x:=r.x-1;
              r.p.z:=(r.x=0);
              r.p.n:=(r.x and $80)<>0;
            end;
-      $D0:if not(r.p.z) then begin   //BNE si z false
+      $d0:if not(r.p.z) then begin   //BNE si z false
               if ((r.pc+shortint(numero)) and $ff00)<>(r.pc and $ff00) then self.estados_demas:=self.estados_demas+2
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
           end;
-      $D8:begin  //CLD
+      $d7:begin
+            tempb:=self.getbyte(posicion);
+            self.putbyte(posicion,tempb); // <-- Fallo CPU
+            tempb:=tempb-1;
+            self.putbyte(posicion,tempb);
+            tempw:=self.r.a-tempb;
+            r.p.c:=(tempw and $100)=0;
+            r.p.z:=(tempw and $ff)=0;
+            r.p.n:=(tempw and $80)<>0;
+          end;
+      $d8:begin  //CLD
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.dec:=false;
           end;
-      $E0,$e4,$ec:begin  //CPX
+      $e0,$e4,$ec:begin  //CPX
               tempw:=r.x-self.getbyte(posicion);
               r.p.c:=(tempw and $100)=0;
               r.p.z:=(tempw and $ff)=0;
               r.p.n:=(tempw and $80)<>0;
           end;
-      $E1,$e5,$e9,$eb,$ed,$f1,$f5,$f9,$fd:begin  //SBC
+      $e1,$e5,$e9,$eb,$ed,$f1,$f5,$f9,$fd:begin  //SBC
               numero:=self.getbyte(posicion);
               sbc(self.r,numero,self.tipo_cpu);
           end;
-      $e3,$ef,$f3,$fb,$ff:begin  //ISB
+      $e3,$ef,$f3,$f7,$fb,$ff:begin  //ISB
              tempb:=self.getbyte(posicion);
              self.putbyte(posicion,tempb);
              tempb:=tempb+1;
@@ -832,12 +882,14 @@ case instruccion of
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.dec:=true;
           end;
+      {$ifdef DEBUG}
       else
         MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+      {$endif}
 end; //del case!!
 tempw:=estados_t[self.tipo_cpu and $1,instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
-update_timer(self.contador-old_contador,self.numero_cpu);
+timers.update(self.contador-old_contador,self.numero_cpu);
 if @self.despues_instruccion<>nil then self.despues_instruccion(tempw);
 end; //del while!!
 end;

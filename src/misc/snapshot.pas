@@ -43,6 +43,21 @@ type
     numero:byte;
     datos:array[0..$3fff] of byte;
   end;
+  tmain_block=packed record
+      nombre:array[0..3] of ansichar;
+      longitud:dword;
+      unused:array[0..1] of byte;
+  end;
+  tmain_header=packed record
+      magic:array[0..3] of ansichar;
+      version:word;
+      unused:array[0..3] of byte;
+  end;
+
+const
+  SIZE_MH=sizeof(tmain_header);
+  SIZE_BLK=sizeof(tmain_block);
+
 
 //Spectrum
 function abrir_sna(datos:pbyte;long:integer):boolean;
@@ -61,9 +76,11 @@ function grabar_amstrad_sna(nombre:string):boolean;
 //Coleco
 function abrir_coleco_snapshot(data:pbyte;long:dword):boolean;
 function grabar_coleco_snapshot(nombre:string):boolean;
+//NES
+function grabar_nes_snapshot(nombre:string):boolean;
 
 implementation
-uses spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,coleco,principal,main_engine;
+uses spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,coleco,principal,main_engine,nes;
 
 procedure spectrum_change_model(model:byte);
 begin
@@ -373,13 +390,13 @@ var
   sp_regs:^tsp_regs;
 begin
 abrir_sp:=false;
-//Puede ser 16K o 48K
-if sp_regs.long<16385 then spectrum_change_model(5)
-   else spectrum_change_model(0);
 spec_z80_reg:=spec_z80.get_internal_r;
 getmem(sp_regs,38);
 copymemory(sp_regs,datos,38);inc(datos,38);
 if ((sp_regs.nombre<>'SP') or ((sp_regs.long+38)<long))then exit;
+//Puede ser 16K o 48K
+if sp_regs.long<16385 then spectrum_change_model(5)
+   else spectrum_change_model(0);
 copymemory(@memoria[sp_regs.pos],datos,sp_regs.long);
 spec_z80_reg.bc.w:=sp_regs.bc;
 spec_z80_reg.de.w:=sp_regs.de;
@@ -1287,14 +1304,15 @@ case cpc_ga.cpc_model of
       copymemory(ptemp,cpc_chunk,8);
       inc(ptemp,8);
       inc(long,8);
-      copymemory(ptemp,@cpc_low_rom[0],$4000);
+      //copymemory(ptemp,@cpc_low_rom[0],$4000);
+      copymemory(ptemp,@cpc_rom[16].data,$4000);
       freemem(cpc_chunk);
       inc(ptemp,$4000);
       inc(long,$4000);
   end;
 end;
 for f:=1 to 6 do begin
-  if cpc_rom_slot[f]<>'' then begin
+  if cpc_rom[f].enabled then begin
     getmem(cpc_chunk,sizeof(tcpc_chunk));
     cpc_chunk.name:='ROM';
     cpc_chunk.name[3]:=ansichar(chr(48+f));
@@ -1302,7 +1320,7 @@ for f:=1 to 6 do begin
     copymemory(ptemp,cpc_chunk,8);
     inc(ptemp,8);
     inc(long,8);
-    copymemory(ptemp,@cpc_rom[f,0],$4000);
+    copymemory(ptemp,@cpc_rom[f].data,$4000);
     freemem(cpc_chunk);
     inc(ptemp,$4000);
     inc(long,$4000);
@@ -1404,7 +1422,7 @@ cpc_ga.pen:=cpc_sna.ga_pen;
 copymemory(@cpc_ga.pal[0],@cpc_sna.ga_pal[0],17);
 write_ga($80+(cpc_sna.ga_conf and $3f));
 //RAM
-write_pal(0,cpc_sna.ram_config);
+write_ram(0,cpc_sna.ram_config);
 //CRT
 cpc_crt.reg:=cpc_sna.crt_index and $1f;
 for f:=0 to 17 do cpc_crt.regs[f]:=cpc_sna.crt_regs[f];
@@ -1509,9 +1527,10 @@ case cpc_sna.version of
               freemem(mem_temp);
            end;
            if ((cpc_chunk.name[0]='R') and (cpc_chunk.name[1]='O') and (cpc_chunk.name[2]='M')) then
-                copymemory(@cpc_rom[strtoint(cpc_chunk.name[3]),0],data,$4000);
+                copymemory(@cpc_rom[strtoint(cpc_chunk.name[3])].data,data,$4000);
            if cpc_chunk.name='LROM' then begin
-                copymemory(@cpc_low_rom[0],data,$4000);
+                //copymemory(@cpc_low_rom[0],data,$4000);
+                copymemory(@cpc_rom[16].data,data,$4000);
                 cpc_ga.cpc_model:=4;
            end;
            if cpc_chunk.name='LOCL' then cpc_ga.cpc_model:=data^;
@@ -1528,18 +1547,6 @@ abrir_sna_cpc:=true;
 end;
 
 //Coleco .CSN o .DSP
-type
-  tcoleco_header=packed record
-      magic:array[0..3] of ansichar;
-      version:word;
-      unused:array[0..3] of byte;
-  end;
-  tcoleco_block=packed record
-      nombre:array[0..3] of ansichar;
-      longitud:dword;
-      unused:array[0..1] of byte;
-  end;
-
 function abrir_coleco_snapshot(data:pbyte;long:dword):boolean;
 type
   ttms_v1=record
@@ -1594,12 +1601,12 @@ var
   z80_v1:^tz80_v1;
   z80_v2:^tz80_v2;
   z80_v2_ext:^tz80_v2_ext;
-  coleco_header:^tcoleco_header;
-  coleco_block:^tcoleco_block;
+  coleco_header:^tmain_header;
+  coleco_block:^tmain_block;
 begin
 abrir_coleco_snapshot:=false;
-getmem(coleco_header,sizeof(tcoleco_header));
-copymemory(coleco_header,data,10);
+getmem(coleco_header,SIZE_MH);
+copymemory(coleco_header,data,SIZE_MH);
 //Todos las cabeceras tienen 10bytes
 if coleco_header.magic<>'CLSN' then begin
   freemem(coleco_header);
@@ -1610,7 +1617,7 @@ if ((coleco_header.version<>1) and (coleco_header.version<>2) and (coleco_header
    freemem(coleco_header);
    exit;
 end;
-getmem(coleco_block,sizeof(tcoleco_block));
+getmem(coleco_block,sizeof(tmain_block));
 inc(data,10);
 longitud:=10;
 while longitud<long do begin
@@ -1723,7 +1730,7 @@ while longitud<long do begin
             tms_0.bgcolor:=tms_v1.nbgcolor;
             tms_0.int:=tms_v1.int;
             tms_0.TMS9918A_VRAM_SIZE:=tms_v1.TMS9918A_VRAM_SIZE;
-            copymemory(@tms_0.memory[0],@tms_v1.memory[0],$4000);
+            copymemory(@tms_0.mem[0],@tms_v1.memory[0],$4000);
             freemem(tms_v1);
         end;
       $220:tms_0.load_snapshot(ptemp);
@@ -1745,67 +1752,73 @@ end;
 function grabar_coleco_snapshot(nombre:string):boolean;
 var
   longitud,comprimido,long2:integer;
-  coleco_header:^tcoleco_header;
-  coleco_block:^tcoleco_block;
+  coleco_header:^tmain_header;
+  coleco_block:^tmain_block;
   pdata,ptemp,ptemp2,ptemp3:pbyte;
 begin
-getmem(coleco_header,sizeof(tcoleco_header));
-fillchar(coleco_header^,sizeof(tcoleco_header),0);
+getmem(coleco_header,SIZE_MH);
+fillchar(coleco_header^,SIZE_MH,0);
 coleco_header.magic:='CLSN';
 coleco_header.version:=$220;
 getmem(pdata,$30000);
 ptemp:=pdata;
 //Cabecera
-copymemory(ptemp,coleco_header,10);
-inc(ptemp,10);longitud:=10;
-getmem(coleco_block,sizeof(tcoleco_block));
-fillchar(coleco_block^,sizeof(tcoleco_block),0);
+copymemory(ptemp,coleco_header,SIZE_MH);
+inc(ptemp,SIZE_MH);longitud:=SIZE_MH;
+getmem(coleco_block,SIZE_BLK);
+fillchar(coleco_block^,SIZE_BLK,0);
 //Coleco RAM
 coleco_block.nombre:='CRAM';
 ptemp2:=ptemp;
-inc(ptemp2,10);
+inc(ptemp2,SIZE_BLK);
 compress_zlib(@memoria[$2000],$e000,ptemp2,comprimido);
 coleco_block.longitud:=comprimido;
-copymemory(ptemp,coleco_block,10);
-inc(ptemp,10);inc(longitud,10);
+copymemory(ptemp,coleco_block,SIZE_BLK);
+inc(ptemp,SIZE_BLK);inc(longitud,SIZE_BLK);
 inc(ptemp,comprimido);inc(longitud,comprimido);
 //TMS9918
-fillchar(coleco_block^,sizeof(tcoleco_block),0);
+fillchar(coleco_block^,SIZE_BLK,0);
 coleco_block.nombre:='TMSR';
 ptemp2:=ptemp;
-inc(ptemp2,10);
+inc(ptemp2,SIZE_BLK);
 getmem(ptemp3,$5000);
 long2:=tms_0.save_snapshot(ptemp3);
 compress_zlib(ptemp3,long2,ptemp2,comprimido);
 freemem(ptemp3);
 coleco_block.longitud:=comprimido;
-copymemory(ptemp,coleco_block,10);
-inc(ptemp,10);inc(longitud,10);
+copymemory(ptemp,coleco_block,SIZE_BLK);
+inc(ptemp,SIZE_BLK);inc(longitud,SIZE_BLK);
 inc(ptemp,comprimido);inc(longitud,comprimido);
 //Z80
-fillchar(coleco_block^,sizeof(tcoleco_block),0);
+fillchar(coleco_block^,SIZE_BLK,0);
 coleco_block.nombre:='Z80R';
 ptemp2:=ptemp;
-inc(ptemp2,10);
+inc(ptemp2,SIZE_BLK);
 comprimido:=z80_0.save_snapshot(ptemp2);
 coleco_block.longitud:=comprimido;
-copymemory(ptemp,coleco_block,10);
-inc(ptemp,10);inc(longitud,10);
+copymemory(ptemp,coleco_block,SIZE_BLK);
+inc(ptemp,SIZE_BLK);inc(longitud,SIZE_BLK);
 inc(ptemp,comprimido);inc(longitud,comprimido);
 //Sound
-fillchar(coleco_block^,sizeof(tcoleco_block),0);
+fillchar(coleco_block^,SIZE_BLK,0);
 coleco_block.nombre:='7649';
 ptemp2:=ptemp;
-inc(ptemp2,10);
+inc(ptemp2,SIZE_BLK);
 comprimido:=sn_76496_0.save_snapshot(ptemp2);
 coleco_block.longitud:=comprimido;
-copymemory(ptemp,coleco_block,10);
-longitud:=longitud+10+comprimido;
+copymemory(ptemp,coleco_block,SIZE_BLK);
+longitud:=longitud+SIZE_BLK+comprimido;
 //Final
 freemem(coleco_header);
 freemem(coleco_block);
 grabar_coleco_snapshot:=write_file(nombre,pdata,longitud);
 freemem(pdata);
+end;
+
+//NES
+function grabar_nes_snapshot(nombre:string):boolean;
+begin
+grabar_nes_snapshot:=false;
 end;
 
 end.

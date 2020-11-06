@@ -129,7 +129,7 @@ while not(salir) do begin
   end;
 end;
 dibujar:=false;
-actualiza_trozo_final(0,0,400,400,1);
+actualiza_trozo_final(0,40,400,320,1);
 end;
 
 procedure eventos_as;
@@ -279,8 +279,8 @@ var
 begin
 iniciar_as:=false;
 iniciar_audio(false);
-screen_init(1,400,400);
-iniciar_video(400,400);
+screen_init(1,400,400,false,true);
+iniciar_video(400,320);
 //Main CPU
 m6502_0:=cpu_m6502.create(1512000,300,TCPU_M6502);
 case main_vars.tipo_maquina of
@@ -289,9 +289,9 @@ case main_vars.tipo_maquina of
         m6502_0.init_sound(as_sound);
         asteroid_sound_init;
         //Timers
-        init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);
+        timers.init(0,1512000/(12096000/4096/12),as_snd_nmi,nil,true);
         //cargar roms
-        if not(roms_load(@memoria,@as_rom,'asteroid.zip',sizeof(as_rom))) then exit;
+        if not(roms_load(@memoria,as_rom)) then exit;
         //samples
         hay_samples:=load_samples('asteroid.zip',@as_samples,3);
         //dip
@@ -302,9 +302,9 @@ case main_vars.tipo_maquina of
         m6502_0.change_ram_calls(getbyte_llander,putbyte_llander);
         //m6502_0.init_sound(as_sound);
         //Timers
-        init_timer(0,1512000/(12096000/4096/12),as_snd_nmi,true);
+        timers.init(0,1512000/(12096000/4096/12),as_snd_nmi,nil,true);
         //cargar roms
-        if not(roms_load(@memoria,@llander_rom,'llander.zip',sizeof(llander_rom))) then exit;
+        if not(roms_load(@memoria,llander_rom)) then exit;
         //samples
         //hay_samples:=load_samples('asteroid.zip',@as_samples,3);
         //dip

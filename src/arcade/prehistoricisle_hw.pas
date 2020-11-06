@@ -9,8 +9,8 @@ procedure cargar_prehisle;
 
 implementation
 const
-        prehisle_rom:array[0..2] of tipo_roms=(
-        (n:'gt-e2.2h';l:$20000;p:0;crc:$7083245a),(n:'gt-e3.3h';l:$20000;p:$1;crc:$6d8cdf58),());
+        prehisle_rom:array[0..1] of tipo_roms=(
+        (n:'gt-e2.2h';l:$20000;p:0;crc:$7083245a),(n:'gt-e3.3h';l:$20000;p:$1;crc:$6d8cdf58));
         prehisle_char:tipo_roms=(n:'gt15.b15';l:$8000;p:0;crc:$ac652412);
         prehisle_fondo_rom:tipo_roms=(n:'gt.11';l:$10000;p:0;crc:$b4f0fcf0);
         prehisle_fondo1:tipo_roms=(n:'pi8914.b14';l:$40000;p:0;crc:$207d6187);
@@ -35,7 +35,7 @@ const
 var
  rom:array[0..$1ffff] of word;
  ram,back_ram:array[0..$1fff] of word;
- fondo_rom:array[0..$ffff] of byte;
+ fondo_rom:array[0..$7fff] of word;
  video_ram:array[0..$3ff] of word;
  invert_controls,sound_latch,vblank_val:byte;
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
@@ -58,7 +58,7 @@ for f:=0 to $ff do begin
 end;
 end;
 
-procedure update_video_prehisle;inline;
+procedure update_video_prehisle;
 var
   f,color,pos,x,y,sx,sy,nchar,atrib:word;
 begin
@@ -69,7 +69,7 @@ for f:=$0 to $120 do begin
   sx:=x+((scroll_x1 and $3FF0) shr 4);
   sy:=y+((scroll_y1 and $1f0) shr 4);
   pos:=(sy and $1f)+((sx and $3ff) shl 5);
-  atrib:=(fondo_rom[pos shl 1] shl 8)+fondo_rom[1+(pos shl 1)];
+  atrib:=fondo_rom[pos];
   color:=atrib shr 12;
   if (gfx[2].buffer[pos] or buffer_color[color+$10]) then begin
     nchar:=atrib and $7ff;
@@ -199,8 +199,8 @@ end;
 
 procedure prehisle_putword(direccion:dword;valor:word);
 begin
-if direccion<$40000 then exit;
 case direccion of
+    0..$3ffff:; //ROM
     $70000..$73fff:ram[(direccion and $3fff) shr 1]:=valor;
     $90000..$907ff:if video_ram[(direccion and $7ff) shr 1]<>valor then begin
                       video_ram[(direccion and $7ff) shr 1]:=valor;
@@ -305,14 +305,13 @@ end;
 
 function iniciar_prehisle:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 4, 8, 12, 16, 20, 24, 28);
-  pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
   ps_x:array[0..15] of dword=(0,4,8,12,16,20,24,28,
 		0+64*8,4+64*8,8+64*8,12+64*8,16+64*8,20+64*8,24+64*8,28+64*8);
   ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 		8*32, 9*32, 10*32, 11*32, 12*32, 13*32, 14*32, 15*32 );
 var
-  memoria_temp:pbyte;
+  ptempb,memoria_temp:pbyte;
+  tempw,f:word;
 begin
 iniciar_prehisle:=false;
 iniciar_audio(false);
@@ -339,30 +338,39 @@ ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
 ym3812_0.change_irq_calls(snd_irq);
 upd7759_0:=upd7759_chip.create(640000,0.9);
 //cargar roms
-if not(cargar_roms16w(@rom,@prehisle_rom,'prehisle.zip',0)) then exit;
+if not(roms_load16w(@rom,prehisle_rom)) then exit;
 //cargar sonido
-if not(roms_load(@mem_snd,@prehisle_sound,'prehisle.zip',sizeof(prehisle_sound))) then exit;
-if not(roms_load(upd7759_0.get_rom_addr,@prehisle_upd,'prehisle.zip',sizeof(prehisle_upd))) then exit;
+if not(roms_load(@mem_snd,prehisle_sound)) then exit;
+if not(roms_load(upd7759_0.get_rom_addr,prehisle_upd)) then exit;
 //convertir chars
-if not(roms_load(memoria_temp,@prehisle_char,'prehisle.zip',sizeof(prehisle_char))) then exit;
+if not(roms_load(memoria_temp,prehisle_char)) then exit;
 init_gfx(0,8,8,1024);
 gfx_set_desc_data(4,0,32*8,0,1,2,3);
-convert_gfx(0,0,memoria_temp,@pc_x,@pc_y,false,false);
+convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,false);
 gfx[0].trans[15]:=true;
 //sprites
-if not(roms_load(memoria_temp,@prehisle_sprites,'prehisle.zip',sizeof(prehisle_sprites))) then exit;
+if not(roms_load(memoria_temp,prehisle_sprites)) then exit;
 init_gfx(1,16,16,$1400);
 gfx[1].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
 convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
 //fondo 1
-if not(roms_load(@fondo_rom,@prehisle_fondo_rom,'prehisle.zip',sizeof(prehisle_fondo_rom))) then exit;
-if not(roms_load(memoria_temp,@prehisle_fondo1,'prehisle.zip',sizeof(prehisle_fondo1))) then exit;
+if not(roms_load(memoria_temp,prehisle_fondo_rom)) then exit;
+//Lo transformo en word...
+ptempb:=memoria_temp;
+for f:=0 to $7fff do begin
+  tempw:=ptempb^ shl 8;
+  inc(ptempb);
+  tempw:=tempw or ptempb^;
+  inc(ptempb);
+  fondo_rom[f]:=tempw;
+end;
+if not(roms_load(memoria_temp,prehisle_fondo1)) then exit;
 init_gfx(2,16,16,$800);
 gfx_set_desc_data(4,0,128*8,0,1,2,3);
 convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
 //fondo2
-if not(roms_load(memoria_temp,@prehisle_fondo2,'prehisle.zip',sizeof(prehisle_fondo2))) then exit;
+if not(roms_load(memoria_temp,prehisle_fondo2)) then exit;
 init_gfx(3,16,16,$800);
 gfx[3].trans[15]:=true;
 gfx_set_desc_data(4,0,128*8,0,1,2,3);

@@ -208,7 +208,7 @@ procedure volfied_timer;
 implementation
 procedure volfied_init_cchip(num:byte);
 begin
-  cc_timer:=init_timer(num,1,volfied_timer,false);
+  cc_timer:=timers.init(num,1,volfied_timer,nil,false);
 end;
 
 function volfied_cchip_ram_r(direccion:word):word;
@@ -274,13 +274,13 @@ begin
 			current_cmd:=valor;
 			// Palette request cmd - verified to take around 122242 68000 cycles to complete
 			if ((current_cmd>=$1) and (current_cmd<$12)) then begin
-        timer[cc_timer].time_final:=122242;
-        timer[cc_timer].enabled:=true;
+        timers.timer[cc_timer].time_final:=122242;
+        timers.enabled(cc_timer,true);
 			end
 			// Unknown cmd - verified to take around 105500 68000 cycles to complete
 			  else if ((current_cmd>=$81) and (current_cmd<$92)) then begin
-          timer[cc_timer].time_final:=105500;
-          timer[cc_timer].enabled:=true;
+          timers.timer[cc_timer].time_final:=105500;
+          timers.enabled(cc_timer,true);
         end else begin
 				  //logerror("unknown cchip cmd %02x\n", data);
 				  current_cmd:=0;
@@ -317,7 +317,7 @@ procedure volfied_timer;
 var
   i:byte;
 begin
-timer[cc_timer].enabled:=false;
+timers.enabled(cc_timer,false);
 // Palette commands - palette data written to bank 0: $10 - $af
 if ((current_cmd>=$1) and (current_cmd<$12)) then begin
   for i:=0 to $4f do begin

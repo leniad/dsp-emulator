@@ -10,38 +10,38 @@ procedure cargar_sf_hw;
 implementation
 const
         //Tiger Heli
-        tigerh_rom:array[0..3] of tipo_roms=(
+        tigerh_rom:array[0..2] of tipo_roms=(
         (n:'0.4';l:$4000;p:0;crc:$4be73246),(n:'1.4';l:$4000;p:$4000;crc:$aad04867),
-        (n:'2.4';l:$4000;p:$8000;crc:$4843f15c),());
+        (n:'2.4';l:$4000;p:$8000;crc:$4843f15c));
         tigerh_snd:tipo_roms=(n:'a47_03.12d';l:$2000;p:0;crc:$d105260f);
         tigerh_mcu:tipo_roms=(n:'a47_14.6a';l:$800;p:0;crc:$4042489f);
-        tigerh_pal:array[0..3] of tipo_roms=(
+        tigerh_pal:array[0..2] of tipo_roms=(
         (n:'82s129.12q';l:$100;p:0;crc:$2c69350d),(n:'82s129.12m';l:$100;p:$100;crc:$7142e972),
-        (n:'82s129.12n';l:$100;p:$200;crc:$25f273f2),());
-        tigerh_char:array[0..2] of tipo_roms=(
-        (n:'a47_05.6f';l:$2000;p:0;crc:$c5325b49),(n:'a47_04.6g';l:$2000;p:$2000;crc:$cd59628e),());
-        tigerh_sprites:array[0..4] of tipo_roms=(
+        (n:'82s129.12n';l:$100;p:$200;crc:$25f273f2));
+        tigerh_char:array[0..1] of tipo_roms=(
+        (n:'a47_05.6f';l:$2000;p:0;crc:$c5325b49),(n:'a47_04.6g';l:$2000;p:$2000;crc:$cd59628e));
+        tigerh_sprites:array[0..3] of tipo_roms=(
         (n:'a47_13.8j';l:$4000;p:0;crc:$739a7e7e),(n:'a47_12.6j';l:$4000;p:$4000;crc:$c064ecdb),
-        (n:'a47_11.8h';l:$4000;p:$8000;crc:$744fae9b),(n:'a47_10.6h';l:$4000;p:$c000;crc:$e1cf844e),());
-        tigerh_tiles:array[0..4] of tipo_roms=(
+        (n:'a47_11.8h';l:$4000;p:$8000;crc:$744fae9b),(n:'a47_10.6h';l:$4000;p:$c000;crc:$e1cf844e));
+        tigerh_tiles:array[0..3] of tipo_roms=(
         (n:'a47_09.4m';l:$4000;p:0;crc:$31fae8a8),(n:'a47_08.6m';l:$4000;p:$4000;crc:$e539af2b),
-        (n:'a47_07.6n';l:$4000;p:$8000;crc:$02fdd429),(n:'a47_06.6p';l:$4000;p:$c000;crc:$11fbcc8c),());
+        (n:'a47_07.6n';l:$4000;p:$8000;crc:$02fdd429),(n:'a47_06.6p';l:$4000;p:$c000;crc:$11fbcc8c));
         //Slap Fight
-        sf_rom:array[0..2] of tipo_roms=(
-        (n:'a77_00.8p';l:$8000;p:0;crc:$674c0e0f),(n:'a77_01.8n';l:$8000;p:$8000;crc:$3c42e4a7),());
+        sf_rom:array[0..1] of tipo_roms=(
+        (n:'a77_00.8p';l:$8000;p:0;crc:$674c0e0f),(n:'a77_01.8n';l:$8000;p:$8000;crc:$3c42e4a7));
         sf_snd:tipo_roms=(n:'a77_02.12d';l:$2000;p:0;crc:$87f4705a);
         sf_mcu:tipo_roms=(n:'a77_13.6a';l:$800;p:0;crc:$a70c81d9);
-        sf_pal:array[0..3] of tipo_roms=(
+        sf_pal:array[0..2] of tipo_roms=(
         (n:'21_82s129.12q';l:$100;p:0;crc:$a0efaf99),(n:'20_82s129.12m';l:$100;p:$100;crc:$a56d57e5),
-        (n:'19_82s129.12n';l:$100;p:$200;crc:$5cbf9fbf),());
-        sf_char:array[0..2] of tipo_roms=(
-        (n:'a77_04.6f';l:$2000;p:0;crc:$2ac7b943),(n:'a77_03.6g';l:$2000;p:$2000;crc:$33cadc93),());
-        sf_sprites:array[0..4] of tipo_roms=(
+        (n:'19_82s129.12n';l:$100;p:$200;crc:$5cbf9fbf));
+        sf_char:array[0..1] of tipo_roms=(
+        (n:'a77_04.6f';l:$2000;p:0;crc:$2ac7b943),(n:'a77_03.6g';l:$2000;p:$2000;crc:$33cadc93));
+        sf_sprites:array[0..3] of tipo_roms=(
         (n:'a77_12.8j';l:$8000;p:0;crc:$8545d397),(n:'a77_11.7j';l:$8000;p:$8000;crc:$b1b7b925),
-        (n:'a77_10.8h';l:$8000;p:$10000;crc:$422d946b),(n:'a77_09.7h';l:$8000;p:$18000;crc:$587113ae),());
-        sf_tiles:array[0..4] of tipo_roms=(
+        (n:'a77_10.8h';l:$8000;p:$10000;crc:$422d946b),(n:'a77_09.7h';l:$8000;p:$18000;crc:$587113ae));
+        sf_tiles:array[0..3] of tipo_roms=(
         (n:'a77_08.6k';l:$8000;p:0;crc:$b6358305),(n:'a77_07.6m';l:$8000;p:$8000;crc:$e92d9d60),
-        (n:'a77_06.6n';l:$8000;p:$10000;crc:$5faeeea3),(n:'a77_05.6p';l:$8000;p:$18000;crc:$974e2ea9),());
+        (n:'a77_06.6n';l:$8000;p:$10000;crc:$5faeeea3),(n:'a77_05.6p';l:$8000;p:$18000;crc:$974e2ea9));
 
 var
  scroll_y:word;
@@ -316,7 +316,7 @@ case direccion of
 end;
 end;
 
-function ay8910_porta_0:byte; 
+function ay8910_porta_0:byte;
 begin
   ay8910_porta_0:=marcade.in0;
 end;
@@ -386,10 +386,9 @@ var
       bit0,bit1,bit2,bit3:byte;
       memoria_temp:array[0..$1ffff] of byte;
 const
-      pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
       pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7, 8,
-			9, 10 ,11, 12, 13, 14, 15);
+      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+       8, 9, 10 ,11, 12, 13, 14, 15);
       ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
 procedure make_chars(num:word);
@@ -397,20 +396,20 @@ begin
 init_gfx(0,8,8,num);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,0*8*8,num*8*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+convert_gfx(0,0,@memoria_temp,@ps_x,@pc_y,false,true);
 end;
 procedure make_tiles(num:word);
 begin
   init_gfx(1,8,8,num);
   gfx_set_desc_data(4,0,8*8,num*8*8*0,num*8*8*1,num*8*8*2,num*8*8*3);
-  convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,true);
+  convert_gfx(1,0,@memoria_temp,@ps_x,@pc_y,false,true);
 end;
 procedure make_sprites(num:word);
 begin
   init_gfx(2,16,16,num);
   gfx[2].trans[0]:=true;
   gfx_set_desc_data(4,0,32*8,num*32*8*0,num*32*8*1,num*32*8*2,num*32*8*3);
-  convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,true);
+  convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 end;
 
 begin
@@ -439,58 +438,58 @@ ay8910_1.change_io_calls(ay8910_porta_1,ay8910_portb_1,nil,nil);
 case main_vars.tipo_maquina of
   98:begin
       //SND CPU
-      init_timer(z80_1.numero_cpu,3000000/360,sf_sound_nmi,true);
+      timers.init(z80_1.numero_cpu,3000000/360,sf_sound_nmi,nil,true);
       //MCU CPU
       m6805_0.change_ram_calls(mcu_tigerh_hw_getbyte,mcu_tigerh_hw_putbyte);
       tiles_mask:=$7;
       sprite_mask:=$40;
       //cargar roms
-      if not(cargar_roms(@memoria[0],@tigerh_rom[0],'tigerh.zip',0)) then exit;
+      if not(roms_load(@memoria,tigerh_rom)) then exit;
       copymemory(@rom[0,0],@memoria[$8000],$4000);
       copymemory(@rom[1,0],@memoria[$8000],$4000);
       //cargar roms snd
-      if not(cargar_roms(@mem_snd[0],@tigerh_snd,'tigerh.zip',1)) then exit;
+      if not(roms_load(@mem_snd,tigerh_snd)) then exit;
       //cargar roms mcu
-      if not(cargar_roms(@mcu_ram[0],@tigerh_mcu,'tigerh.zip',1)) then exit;
+      if not(roms_load(@mcu_ram,tigerh_mcu)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@tigerh_char[0],'tigerh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,tigerh_char)) then exit;
       make_chars($400);
       //convertir tiles
-      if not(cargar_roms(@memoria_temp[0],@tigerh_tiles[0],'tigerh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,tigerh_tiles)) then exit;
       make_tiles($800);
       //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@tigerh_sprites[0],'tigerh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,tigerh_sprites)) then exit;
       make_sprites($200);
       //Poner colores
-      if not(cargar_roms(@memoria_temp[0],@tigerh_pal[0],'tigerh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,tigerh_pal)) then exit;
   end;
   99:begin
       //SND CPU
-      init_timer(z80_1.numero_cpu,3000000/180,sf_sound_nmi,true);
+      timers.init(z80_1.numero_cpu,3000000/180,sf_sound_nmi,nil,true);
       //MCU CPU
       m6805_0.change_ram_calls(mcu_sf_hw_getbyte,mcu_sf_hw_putbyte);
       tiles_mask:=$f;
       sprite_mask:=$c0;
       //cargar roms
-      if not(cargar_roms(@memoria_temp[0],@sf_rom[0],'slapfigh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,sf_rom)) then exit;
       copymemory(@memoria[0],@memoria_temp[0],$8000);
       copymemory(@rom[0,0],@memoria_temp[$8000],$4000);
       copymemory(@rom[1,0],@memoria_temp[$c000],$4000);
       //cargar roms snd
-      if not(cargar_roms(@mem_snd[0],@sf_snd,'slapfigh.zip',1)) then exit;
+      if not(roms_load(@mem_snd,sf_snd)) then exit;
       //cargar roms mcu
-      if not(cargar_roms(@mcu_ram[0],@sf_mcu,'slapfigh.zip',1)) then exit;
+      if not(roms_load(@mcu_ram,sf_mcu)) then exit;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@sf_char[0],'slapfigh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,sf_char)) then exit;
       make_chars($400);
       //convertir tiles
-      if not(cargar_roms(@memoria_temp[0],@sf_tiles[0],'slapfigh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,sf_tiles)) then exit;
       make_tiles($1000);
       //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@sf_sprites[0],'slapfigh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,sf_sprites)) then exit;
       make_sprites($400);
       //Poner colores
-      if not(cargar_roms(@memoria_temp[0],@sf_pal[0],'slapfigh.zip',0)) then exit;
+      if not(roms_load(@memoria_temp,sf_pal)) then exit;
   end;
 end;
 for f:=0 to $ff do begin

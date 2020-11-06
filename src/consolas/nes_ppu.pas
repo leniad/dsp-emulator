@@ -9,12 +9,14 @@ type
   tnes_ppu=packed record
       control1,control2,status,sprite_ram_pos:byte;
       sprite_ram:array[0..$ff] of byte;
-      pos_bg,pos_spt,sprite0_hit_pos:byte;
-      dir_first,chr_rom,sprite0_hit,sprite_over_flow,disable_chr,enable_write:boolean;
-      mem:array [0..$3fff] of byte;
-      mem_single:array [0..1,0..$fff] of byte;
-      address_temp,address:word;
-      mirror,buffer_read,tile_x_offset:byte;
+      sprite_size,pos_bg,pos_spt:byte;
+      sprite0_hit_pos:single;
+      dir_first,sprite0_hit,sprite_over_flow,disable_chr,write_chr:boolean;
+      name_table:array [0..3,0..$3ff] of byte;
+      chr:array[0..3,0..$fff] of byte;
+      pal_ram:array[0..$1f] of byte;
+      linea,address_temp,address:word;
+      open_bus,mirror,buffer_read,tile_x_offset:byte;
       dot_line_trans:array[0..((33*8)-1)] of byte;  //012345-- --> sprites
                                                     //-------7 --> Background
   end;
@@ -25,19 +27,21 @@ procedure ppu_linea(nes_linea:word);
 function ppu_read:byte;
 procedure ppu_write(valor:byte);
 procedure nes_init_palette;
-procedure ppu_end_linea;
+procedure ppu_end_y_coarse;
 
 const
   MIRROR_HORIZONTAL=1;
   MIRROR_VERTICAL=2;
-  //MIRROR_SINGLE=3;
-  //MIRROR_SINGLE_1=4;
+  MIRROR_LOW=3;
+  MIRROR_HIGH=4;
   MIRROR_FOUR_SCREEN=5;
-  MIRROR_HIGH=6;
-  MIRROR_LOW=7;
+  MIRROR_MAP95=6;
+  MIRROR_MAP243=7;
+  MIRROR_MAP139=8;
   //Los sprites se evaluan desde 64 al 255 (PPU T), convertidos en CPU T --> 21.333 al 85 o lo que es lo mismo aprox 8T por sprite
   //Como el sprite 0 siempre se evalua el primero, si hay un hit sera desde el 21.333 al 29
   PPU_PIXEL_TIMING=((128*2)/3)/256;
+  MIRROR_TYPES:array [1..8,0..3] of byte=((0,0,1,1),(0,1,0,1),(0,0,0,0),(1,1,1,1),(0,1,2,3),(1,1,0,0),(0,0,0,1),(0,1,1,1));
 
 var
   ppu_nes:^tnes_ppu;
@@ -48,48 +52,36 @@ uses nes,nes_mappers;
 
 function ppu_read_mem(address:word):byte;
 begin
-case address of
-  $0..$1fff:if not(ppu_nes.disable_chr) then ppu_read_mem:=ppu_nes.mem[address]
-              else ppu_read_mem:=address and $ff;
-  $2000..$3eff:case ppu_nes.mirror of
-                    MIRROR_HORIZONTAL:case (address and $c00) of
-                                        $000,$400:ppu_read_mem:=ppu_nes.mem[$2000+(address and $3ff)];
-                                        $800,$c00:ppu_read_mem:=ppu_nes.mem[$2800+(address and $3ff)];
-                                      end;
-                    MIRROR_VERTICAL:case (address and $c00) of
-                                        $000,$800:ppu_read_mem:=ppu_nes.mem[$2000+(address and $3ff)];
-                                        $400,$c00:ppu_read_mem:=ppu_nes.mem[$2400+(address and $3ff)];
-                                      end;
-                    MIRROR_LOW:ppu_read_mem:=ppu_nes.mem[$2000+(address and $3ff)];
-                    MIRROR_HIGH:ppu_read_mem:=ppu_nes.mem[$2800+(address and $3ff)];
-                    MIRROR_FOUR_SCREEN:ppu_read_mem:=ppu_nes.mem[$2000+(address and $fff)];
-                  end;
-  $3f00..$3fff:ppu_read_mem:=ppu_nes.mem[(ppu_nes.address and $1F)+$3f00]; //Palete
+case (address and $3fff) of
+  $0..$1fff:if not(ppu_nes.disable_chr) then ppu_read_mem:=ppu_nes.chr[mapper_nes.chr_map[(address shr 12) and 1],address and $fff]
+            else ppu_read_mem:=address and $ff;
+  $2000..$3eff:ppu_read_mem:=ppu_nes.name_table[MIRROR_TYPES[ppu_nes.mirror,(address shr 10) and 3],address and $3ff];
+  $3f00..$3fff:ppu_read_mem:=ppu_nes.pal_ram[address and $1f]; //Palete
 end;
 end;
 
-procedure putsprites(nes_linea:word;pri:byte;var nsprites:byte);
+procedure putsprites(nes_linea:word;pri:byte);
 var
-  f,x,size,pos_x,pos_y,punto,tempb1,tempb2:byte;
+  f,x,pos_x,pos_y,punto,tempb1,tempb2,nsprites:byte;
   num_char,atrib,temp,def_y:byte;
   flipx,flipy:boolean;
   pos_linea:word;
   ptemp:pword;
 begin
+nsprites:=0;
 for f:=0 to 63 do begin
  pos_y:=ppu_nes.sprite_ram[f*4];
  if (((ppu_nes.sprite_ram[(f*4)+2] and $20)<>pri) or (pos_y>239)) then continue;
  pos_x:=ppu_nes.sprite_ram[(f*4)+3];
- size:=8 shl ((ppu_nes.control1 and $20) shr 5);
  pos_linea:=nes_linea-(pos_y+1);
- if (pos_linea<size) then begin
+if (pos_linea<ppu_nes.sprite_size) then begin
    nsprites:=nsprites+1;
    if nsprites=9 then exit;
    atrib:=(ppu_nes.sprite_ram[(f*4)+2] and $3) shl 2;
    flipx:=(ppu_nes.sprite_ram[(f*4)+2] and $40)=$40;
    flipy:=(ppu_nes.sprite_ram[(f*4)+2] and $80)=$80;
    num_char:=ppu_nes.sprite_ram[(f*4)+1];
-   if size=8 then begin //8x8
+   if ppu_nes.sprite_size=8 then begin //8x8
       temp:=ppu_nes.pos_spt;
       if flipy then def_y:=7-(pos_linea and 7)
         else def_y:=pos_linea and 7;
@@ -104,27 +96,28 @@ for f:=0 to 63 do begin
       end;
    end;
    ptemp:=punbuf;
-   tempb1:=ppu_nes.mem[(temp*$1000)+(num_char*16)+def_y];
-   tempb2:=ppu_nes.mem[(temp*$1000)+(num_char*16)+8+def_y];
+   tempb1:=ppu_read_mem((temp*$1000)+(num_char*16)+def_y);
    if @mapper_nes.ppu_read<>nil then mapper_nes.ppu_read((temp*$1000)+(num_char*16)+def_y);
+   tempb2:=ppu_read_mem((temp*$1000)+(num_char*16)+8+def_y);
+   if @mapper_nes.ppu_read<>nil then mapper_nes.ppu_read((temp*$1000)+(num_char*16)+8+def_y);
    if flipx then begin
         for x:=0 to 7 do begin
           punto:=(((tempb1 and (1 shl x)) shr x) and 1)+((((tempb2 and (1 shl x)) shr x) and 1) shl 1);
           if punto=0 then ptemp^:=paleta[max_colores]
             else begin
+              //Sprite 0 Hit
+              if (((pos_x+x)<>255) and (f=0) and ((ppu_nes.dot_line_trans[pos_x+x] and $3f)<>0) and ((ppu_nes.status and $40)=0)) then begin
+                ppu_nes.sprite0_hit:=true;
+                ppu_nes.sprite0_hit_pos:=nsprites*8*PPU_PIXEL_TIMING;
+              end;
               if (((ppu_nes.control2 and $4)=0) and ((pos_x+x)<8)) then begin
                 ptemp^:=paleta[max_colores];
               end else begin
                  if ((ppu_nes.dot_line_trans[pos_x+x] and $3f)>=f) then begin
-                    ptemp^:=paleta[ppu_nes.mem[$3f10+punto+atrib] and $3f];
+                    ptemp^:=paleta[ppu_read_mem($3f10+punto+atrib) and $3f];
                     ppu_nes.dot_line_trans[pos_x+x]:=(ppu_nes.dot_line_trans[pos_x+x] and $80) or f;
                  end else
                     ptemp^:=paleta[max_colores];
-                 end;
-                 //Sprite 0 Hit
-                 if (((pos_x+x)<>255) and (pos_x<>255) and (f=0) and ((ppu_nes.dot_line_trans[pos_x+x] and $80)<>0) and not(ppu_nes.sprite0_hit)) then begin
-                   ppu_nes.sprite0_hit:=true;
-                   ppu_nes.sprite0_hit_pos:=round((pos_x+x)*PPU_PIXEL_TIMING);
                  end;
             end;
           inc(ptemp);
@@ -135,18 +128,18 @@ for f:=0 to 63 do begin
           punto:=(((tempb1 and (1 shl x)) shr x) and 1)+((((tempb2 and (1 shl x)) shr x) and 1) shl 1);
           if punto=0 then ptemp^:=paleta[max_colores]
             else begin
+              //Sprite 0 Hit
+              if (((pos_x+(7-x))<>255) and (f=0) and ((ppu_nes.dot_line_trans[pos_x+(7-x)] and $3f)<>0) and ((ppu_nes.status and $40)=0)) then begin
+                 ppu_nes.sprite0_hit:=true;
+                 ppu_nes.sprite0_hit_pos:=nsprites*8*PPU_PIXEL_TIMING;;
+              end;
               if (((ppu_nes.control2 and $4)=0) and ((pos_x+(7-x))<8)) then begin
                 ptemp^:=paleta[max_colores];
               end else begin
                 if ((ppu_nes.dot_line_trans[pos_x+(7-x)] and $3f)>=f) then begin //Prioridad sprite/sprite
-                  ptemp^:=paleta[ppu_nes.mem[$3f10+punto+atrib] and $3f];
+                  ptemp^:=paleta[ppu_read_mem($3f10+punto+atrib) and $3f];
                   ppu_nes.dot_line_trans[pos_x+(7-x)]:=(ppu_nes.dot_line_trans[pos_x+(7-x)] and $80) or f;
                 end else ptemp^:=paleta[max_colores];
-              end;
-              //Sprite 0 Hit
-              if (((pos_x+(7-x))<>255) and (pos_x<>255) and (f=0) and ((ppu_nes.dot_line_trans[pos_x+(7-x)] and $80)<>0) and not(ppu_nes.sprite0_hit)) then begin
-                 ppu_nes.sprite0_hit:=true;
-                 ppu_nes.sprite0_hit_pos:=round((pos_x+(7-x))*PPU_PIXEL_TIMING);
               end;
             end;
           inc(ptemp);
@@ -158,9 +151,23 @@ for f:=0 to 63 do begin
 end;
 end;
 
-procedure putbackground(nes_line:byte);
+function set_emphasis(pal_tmp:word):word;
+begin
+if ((ppu_nes.control2 and $80)<>0) then begin //Azul
+   pal_tmp:=(pal_tmp and $ce7f);
+end;
+if ((ppu_nes.control2 and $40)<>0) then begin //Verde
+   pal_tmp:=(pal_tmp and $cff9);
+end;
+if ((ppu_nes.control2 and $20)<>0) then begin //rojo
+   pal_tmp:=(pal_tmp and $fe79);
+end;
+set_emphasis:=pal_tmp;
+end;
+
+procedure putbackground;
 var
-    AttribTable,PatternAdr,AttribVal,Tiles,Col,x,TileYOffset:integer;
+    AttribTable,PatternAdr,AttribVal,tiles,Col,x,TileYOffset:integer;
     ptemp:pword;
     pos_x:word;
 begin
@@ -168,7 +175,6 @@ begin
     ptemp:=punbuf;
     pos_x:=0;
     TileYOffset:=(ppu_nes.address and $7000) shr 12;
-    // Draw 32 tiles (31 + 1 de scroll)
     if ((ppu_nes.address and $40)=0) then begin
       if ((ppu_nes.address and $2)=0) then AttribVal:=(ppu_read_mem(AttribTable) and $3) shl 2
         else AttribVal:=ppu_read_mem(AttribTable) and $C;
@@ -176,8 +182,8 @@ begin
       if ((ppu_nes.address and $2)=0) then AttribVal:=(ppu_read_mem(AttribTable) and $30) shr 2
         else AttribVal:=(ppu_read_mem(AttribTable) and $C0) shr 4;
     end;
-    for Tiles:=32 downto 0 do begin
-        PatternAdr:=(ppu_nes.pos_bg*$1000)+(ppu_read_mem($2000+(ppu_nes.address and $FFF))*$10)+TileYOffset;
+    for tiles:=33 downto 0 do begin
+        PatternAdr:=(ppu_nes.pos_bg*$1000)+(ppu_read_mem($2000+(ppu_nes.address and $fff))*$10)+TileYOffset;
         if @mapper_nes.ppu_read<>nil then mapper_nes.ppu_read(PatternAdr);
         // Draw tile line
         for x:=7 downto 0 do begin
@@ -186,14 +192,14 @@ begin
               ptemp^:=paleta[max_colores];
               ppu_nes.dot_line_trans[pos_x]:=ppu_nes.dot_line_trans[pos_x] and $7f;
             end else begin
-              ptemp^:=paleta[ppu_nes.mem[$3f00+Col+AttribVal] and $3f];
+              ptemp^:=set_emphasis(paleta[ppu_read_mem($3f00+Col+AttribVal) and $3f]);
               ppu_nes.dot_line_trans[pos_x]:=ppu_nes.dot_line_trans[pos_x] or $80;
             end;
             inc(ptemp);
             pos_x:=pos_x+1;
         end;
         //los bits 0,1,2,3,4 son la X
-        if (ppu_nes.address and $1F)=$1F then begin
+        if (ppu_nes.address and $1f)=$1f then begin
             //Cuando llega a 31 --> bit 10 cambia
             AttribTable:=(AttribTable xor $400)-$8;
             ppu_nes.address:=ppu_nes.address xor $41F;
@@ -217,28 +223,26 @@ begin
         inc(ptemp,ppu_nes.tile_x_offset);
         for x:=0 to 7 do begin
           ppu_nes.dot_line_trans[x]:=ppu_nes.dot_line_trans[x] and $7f;
-          ptemp^:=paleta[ppu_nes.mem[$3f00]];
+          ptemp^:=set_emphasis(paleta[ppu_read_mem($3f00)]);
           inc(ptemp);
         end;
     end;
     putpixel(0,0,256+ppu_nes.tile_x_offset,punbuf,1);
 end;
 
-procedure ppu_end_linea;
+procedure ppu_end_y_coarse;
 var
-  newfinescroll:word;
+  tmp:word;
 begin
-//increment loopy_v to next row of tiles
-newfinescroll:=(ppu_nes.address and $7000)+$1000;
-ppu_nes.address:=ppu_nes.address and not($7000);
-//reset the fine scroll bits and increment tile address to next row
-if (newfinescroll>$7000) then ppu_nes.address:=ppu_nes.address+32
-  else ppu_nes.address:=ppu_nes.address+newfinescroll; //increment the fine scroll
-if (((ppu_nes.address shr 5) and $1f)=30) then begin
-  //if incrementing loopy_v to the next row pushes us into the next
-  //nametable, zero the "row" bits and go to next nametable
-  ppu_nes.address:=ppu_nes.address and not($3e0);
-  ppu_nes.address:=ppu_nes.address xor $800;
+if (ppu_nes.control2 and $18)<>0 then begin
+  ppu_nes.address:=ppu_nes.address+$1000;
+  if (ppu_nes.address and $8000)<>0 then begin
+    tmp:=(ppu_nes.address and $03e0)+$20;
+    ppu_nes.address:=ppu_nes.address and $7c1f;
+    // handle bizarro scrolling rollover at the 30th (not 32nd) vertical tile
+    if (tmp=$03c0) then ppu_nes.address:=ppu_nes.address xor $0800 else ppu_nes.address:=ppu_nes.address or (tmp and $03e0);
+  end;
+  ppu_nes.address:=(ppu_nes.address and $7be0) or (ppu_nes.address_temp and $41f);
 end;
 end;
 
@@ -250,7 +254,7 @@ begin
 nsprites:=0;
 for f:=0 to 63 do begin
     pos_y:=ppu_nes.sprite_ram[f*4];
-    if (pos_y>239) then continue;
+    if ((pos_y=255) or (pos_y=240)) then continue;
     size:=8 shl ((ppu_nes.control1 and $20) shr 5);
     pos_linea:=nes_linea-(pos_y+1);
     if (pos_linea<size) then begin
@@ -265,73 +269,69 @@ end;
 
 procedure ppu_linea(nes_linea:word);
 var
-  nsprites:byte;
+  fondo_pal:word;
 begin
-single_line(0,nes_linea,ppu_nes.mem[$3f00],256,2);
+fondo_pal:=set_emphasis(paleta[ppu_read_mem($3f00)]);
+single_line(0,nes_linea,fondo_pal,256,2);
 fillchar(ppu_nes.dot_line_trans[0],264,$3f);
-nsprites:=0;
-if (ppu_nes.control2 and $18)<>0 then sprite_line_overflow(nes_linea);
-if (ppu_nes.control2 and $8)<>0 then putbackground(nes_linea);
-if (ppu_nes.control2 and $10)<>0 then putsprites(nes_linea,$20,nsprites);
-if (ppu_nes.control2 and $8)<>0 then begin
-  actualiza_trozo(ppu_nes.tile_x_offset,0,256,1,1,0,nes_linea,256,1,2);
-  if (@llamadas_nes.line_counter<>nil) then llamadas_nes.line_counter;
-end;
-if (ppu_nes.control2 and $10)<>0 then putsprites(nes_linea,$0,nsprites);
+//Si los sprites O el fondo estan activos, hay sprite overflow
+//Evalua los sprites DE LA LINEA SIGUIENTE!! Los sprites de la linea 0 se carga
+//en la 261 PERO NO SE EVALUA NADA
+if (ppu_nes.control2 and $18)<>0 then sprite_line_overflow(nes_linea+1);
+if (ppu_nes.control2 and $8)<>0 then putbackground;
+if (ppu_nes.control2 and $10)<>0 then putsprites(nes_linea,$20);
+if (ppu_nes.control2 and $8)<>0 then actualiza_trozo(ppu_nes.tile_x_offset,0,256,1,1,0,nes_linea,256,1,2);
+if (ppu_nes.control2 and $10)<>0 then putsprites(nes_linea,$0);
+//Si los sprites o el fondo estan desactivados, no hay sprite 0 hit
+if (ppu_nes.control2 and $18)<>$18 then ppu_nes.sprite0_hit:=false;
 end;
 
 function ppu_read:byte;
 var
   ret:byte;
 begin
-ret:=ppu_nes.buffer_read;
+//Proteccion del mapper 185!!!
+if ppu_nes.disable_chr then ret:=ppu_nes.address and $ff
+  else ret:=ppu_nes.buffer_read;
 ppu_nes.buffer_read:=ppu_read_mem(ppu_nes.address);
-if (ppu_nes.control1 and $4)=$4 then ppu_nes.address:=(ppu_nes.address+32) and $3fff
-  else ppu_nes.address:=(ppu_nes.address+1) and $3fff;
+if ((ppu_nes.linea>=240) or ((ppu_nes.control2 and $18)=0)) then begin
+  if (ppu_nes.control1 and $4)<>0 then ppu_nes.address:=(ppu_nes.address+32) and $7fff
+    else ppu_nes.address:=(ppu_nes.address+1) and $7fff;
+end else begin
+  //X fina
+  if (ppu_nes.address and $1F)=$1F then ppu_nes.address:=ppu_nes.address xor $41f
+    else ppu_nes.address:=ppu_nes.address+1;
+  //Y fina
+  ppu_end_y_coarse;
+end;
 ppu_read:=ret;
 end;
 
 procedure ppu_write(valor:byte);
 begin
-case ppu_nes.address of
-  $0..$1fff:if not(ppu_nes.disable_chr) then ppu_nes.mem[ppu_nes.address]:=valor;
-  $2000..$3eff:case ppu_nes.mirror of
-                    MIRROR_HORIZONTAL:case (ppu_nes.address and $c00) of
-                                        $000,$400:begin
-                                                    ppu_nes.mem[$2000+(ppu_nes.address and $3ff)]:=valor;
-                                                    ppu_nes.mem[$2400+(ppu_nes.address and $3ff)]:=valor;
-                                                  end;
-                                        $800,$c00:begin
-                                                    ppu_nes.mem[$2800+(ppu_nes.address and $3ff)]:=valor;
-                                                    ppu_nes.mem[$2c00+(ppu_nes.address and $3ff)]:=valor;
-                                                  end;
-                                      end;
-                    MIRROR_VERTICAL:case (ppu_nes.address and $c00) of
-                                        $000,$800:begin
-                                                    ppu_nes.mem[$2000+(ppu_nes.address and $3ff)]:=valor;
-                                                    ppu_nes.mem[$2800+(ppu_nes.address and $3ff)]:=valor;
-                                                  end;
-                                        $400,$c00:begin
-                                                    ppu_nes.mem[$2400+(ppu_nes.address and $3ff)]:=valor;
-                                                    ppu_nes.mem[$2c00+(ppu_nes.address and $3ff)]:=valor;
-                                                  end;
-                                      end;
-                    MIRROR_LOW:ppu_nes.mem[$2000+(ppu_nes.address and $3ff)]:=valor;
-                    MIRROR_HIGH:ppu_nes.mem[$2800+(ppu_nes.address and $3ff)]:=valor;
-                    MIRROR_FOUR_SCREEN:ppu_nes.mem[$2000+(ppu_nes.address and $fff)]:=valor;
-               end;
+case (ppu_nes.address and $3fff) of
+  $0..$1fff:if (not(ppu_nes.disable_chr) and ppu_nes.write_chr) then ppu_nes.chr[mapper_nes.chr_map[(ppu_nes.address shr 12) and 1],ppu_nes.address and $fff]:=valor;
+  $2000..$3eff:ppu_nes.name_table[MIRROR_TYPES[ppu_nes.mirror,(ppu_nes.address shr 10) and 3],ppu_nes.address and $3ff]:=valor;
   $3f00..$3fff:case (ppu_nes.address and $1f) of //Palete
                     0,$10:begin
-                        ppu_nes.mem[$3f00]:=valor;ppu_nes.mem[$3f04]:=valor;
-                        ppu_nes.mem[$3f08]:=valor;ppu_nes.mem[$3f0c]:=valor;
-                        ppu_nes.mem[$3f10]:=valor;ppu_nes.mem[$3f14]:=valor;
-                        ppu_nes.mem[$3f18]:=valor;ppu_nes.mem[$3f1c]:=valor;
+                        ppu_nes.pal_ram[0]:=valor;ppu_nes.pal_ram[$04]:=valor;
+                        ppu_nes.pal_ram[$8]:=valor;ppu_nes.pal_ram[$0c]:=valor;
+                        ppu_nes.pal_ram[$10]:=valor;ppu_nes.pal_ram[$14]:=valor;
+                        ppu_nes.pal_ram[$18]:=valor;ppu_nes.pal_ram[$1c]:=valor;
                     end;
-                    else ppu_nes.mem[(ppu_nes.address and $1f)+$3f00]:=valor;
+                    else ppu_nes.pal_ram[ppu_nes.address and $1f]:=valor;
                   end;
 end;
-if (ppu_nes.control1 and $4)<>0 then ppu_nes.address:=(ppu_nes.address+32) and $3fff
-  else ppu_nes.address:=(ppu_nes.address+1) and $3fff;
+if ((ppu_nes.linea>=240) or ((ppu_nes.control2 and $18)=0)) then begin
+  if (ppu_nes.control1 and $4)<>0 then ppu_nes.address:=(ppu_nes.address+32) and $7fff
+    else ppu_nes.address:=(ppu_nes.address+1) and $7fff;
+end else begin
+  //X fina
+  if (ppu_nes.address and $1F)=$1F then ppu_nes.address:=ppu_nes.address xor $41f
+    else ppu_nes.address:=ppu_nes.address+1;
+  //Y fina
+  ppu_end_y_coarse;
+end;
 end;
 
 procedure ppu_dma_spr(direccion:byte);
@@ -352,10 +352,18 @@ ppu_nes.control2:=0;
 ppu_nes.status:=0;
 ppu_nes.sprite_ram_pos:=0;
 ppu_nes.address:=0;
-if not(ppu_nes.chr_rom) then fillchar(ppu_nes.mem[$0],$2000,0);
+ppu_nes.address_temp:=0;
 ppu_nes.dir_first:=false;
 ppu_nes.sprite0_hit:=false;
+ppu_nes.sprite_over_flow:=false;
+ppu_nes.sprite_size:=8;
+ppu_nes.pos_bg:=0;
+ppu_nes.pos_spt:=1;
+ppu_nes.sprite0_hit_pos:=0;
 ppu_nes.disable_chr:=false;
+ppu_nes.buffer_read:=random(256);
+ppu_nes.tile_x_offset:=0;
+fillchar(ppu_nes.dot_line_trans[0],(33*8)-1,0);
 end;
 
 procedure nes_init_palette;

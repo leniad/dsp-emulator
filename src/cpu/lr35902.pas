@@ -460,11 +460,11 @@ if not(self.after_ei) then begin
     end;
 end;
 self.after_ei:=false;
-if not(self.halt) then begin
- oldpc:=r.pc;
- instruccion:=self.getbyte(r.pc);
- r.pc:=r.pc+1;
- case instruccion of
+if self.halt then r.pc:=r.pc-1;
+oldpc:=r.pc;
+instruccion:=self.getbyte(r.pc);
+r.pc:=r.pc+1;
+case instruccion of
   $00:; //nop
   $01:begin //ld bc,nnnn
         r.bc.w:=read_word(r.pc);
@@ -1426,14 +1426,13 @@ if not(self.halt) then begin
         r.pc:=$38;
       end;
     else MessageDlg('Instruccion desconocida LR35902. PC= '+inttohex(oldpc,4)+' - '+inttohex(instruccion,2), mtInformation,[mbOk], 0);
- end; //Del case
-end;
+end; //Del case
 tempw:=gb_t[instruccion]+self.estados_demas;
 for tempb:=1 to (tempw div 4) do begin
   self.despues_instruccion(tempw);
   self.contador:=self.contador+4;
 end;
-update_timer(self.contador-old_contador,self.numero_cpu);
+timers.update(self.contador-old_contador,self.numero_cpu);
 end; //Del while
 end;
 

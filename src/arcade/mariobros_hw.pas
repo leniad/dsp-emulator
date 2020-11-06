@@ -9,16 +9,16 @@ procedure cargar_mario;
 
 implementation
 const
-        mario_rom:array[0..4] of tipo_roms=(
+        mario_rom:array[0..3] of tipo_roms=(
         (n:'tma1-c-7f_f.7f';l:$2000;p:0;crc:$c0c6e014),(n:'tma1-c-7e_f.7e';l:$2000;p:$2000;crc:$94fb60d6),
-        (n:'tma1-c-7d_f.7d';l:$2000;p:$4000;crc:$dcceb6c1),(n:'tma1-c-7c_f.7c';l:$1000;p:$f000;crc:$4a63d96b),());
+        (n:'tma1-c-7d_f.7d';l:$2000;p:$4000;crc:$dcceb6c1),(n:'tma1-c-7c_f.7c';l:$1000;p:$f000;crc:$4a63d96b));
         mario_pal:tipo_roms=(n:'tma1-c-4p_1.4p';l:$200;p:0;crc:$8187d286);
-        mario_char:array[0..2] of tipo_roms=(
-        (n:'tma1-v-3f.3f';l:$1000;p:0;crc:$28b0c42c),(n:'tma1-v-3j.3j';l:$1000;p:$1000;crc:$0c8cc04d),());
-        mario_sprites:array[0..6] of tipo_roms=(
+        mario_char:array[0..1] of tipo_roms=(
+        (n:'tma1-v-3f.3f';l:$1000;p:0;crc:$28b0c42c),(n:'tma1-v-3j.3j';l:$1000;p:$1000;crc:$0c8cc04d));
+        mario_sprites:array[0..5] of tipo_roms=(
         (n:'tma1-v-7m.7m';l:$1000;p:0;crc:$22b7372e),(n:'tma1-v-7n.7n';l:$1000;p:$1000;crc:$4f3a1f47),
         (n:'tma1-v-7p.7p';l:$1000;p:$2000;crc:$56be6ccd),(n:'tma1-v-7s.7s';l:$1000;p:$3000;crc:$56f1d613),
-        (n:'tma1-v-7t.7t';l:$1000;p:$4000;crc:$641f0008),(n:'tma1-v-7u.7u';l:$1000;p:$5000;crc:$7baf5309),());
+        (n:'tma1-v-7t.7t';l:$1000;p:$4000;crc:$641f0008),(n:'tma1-v-7u.7u';l:$1000;p:$5000;crc:$7baf5309));
         num_samples=29;
         mario_samples:array[0..(num_samples-1)] of tipo_nombre_samples=(
         (nombre:'mario_run.wav';restart:true),(nombre:'luigi_run.wav';restart:true),(nombre:'skid.wav';restart:true),(nombre:'bite_death.wav'),(nombre:'death.wav'),
@@ -30,7 +30,7 @@ const
         mario_dip_a:array [0..4] of def_dip=(
         (mask:$3;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$1;dip_name:'4'),(dip_val:$2;dip_name:'5'),(dip_val:$3;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Coinage';number:4;dip:((dip_val:$4;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$8;dip_name:'1C 2C'),(dip_val:$c;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'20k Only'),(dip_val:$10;dip_name:'30k Only'),(dip_val:$20;dip_name:'40k Only'),(dip_val:$30;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'20K'),(dip_val:$10;dip_name:'30K'),(dip_val:$20;dip_name:'40K'),(dip_val:$30;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$0;dip_name:'Easy'),(dip_val:$80;dip_name:'Medium'),(dip_val:$40;dip_name:'Hard'),(dip_val:$c0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
  haz_nmi:boolean;
@@ -38,9 +38,8 @@ var
 
 procedure update_video_mario;inline;
 var
-  f:word;
   atrib:byte;
-  x,y,color,nchar:word;
+  f,x,y,color,nchar:word;
 begin
 //Poner chars
 for f:=$3ff downto 0 do begin
@@ -73,13 +72,13 @@ begin
 if main_vars.service1 then marcade.in0:=(marcade.in0 or $80) else marcade.in0:=(marcade.in0 and $7f);
 if event.arcade then begin
   //P1
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $Fe);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.but0[0] then marcade.in0:=marcade.in0 or $10 else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
   //P2
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $Fe);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
   if arcade_input.but0[1] then marcade.in1:=marcade.in1 or $10 else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
@@ -120,8 +119,8 @@ end;
 
 procedure mario_putbyte(direccion:word;valor:byte);
 begin
-if ((direccion<$6000) or (direccion>$efff)) then exit;
 case direccion of
+    0..$5fff,$f000..$ffff:; //ROM
     $6000..$73ff:memoria[direccion]:=valor;
     $7400..$77ff:if memoria[direccion]<>valor then begin
                     gfx[0].buffer[direccion and $3ff]:=true;
@@ -168,7 +167,7 @@ case direccion of
     $7e84:haz_nmi:=(valor and 1)<>0;
     $7e85:if (valor and 1)<>0 then copymemory(@memoria[$7000],@memoria[$6900],$400);
     $7f00..$7f07:case (direccion and 7) of
-                      0:begin  //death cuando pasa de 0 a 1 mordisco, cuando pasa de 1 a 0 muerte
+                      0:begin  //cuando pasa de 0 a 1 mordisco, cuando pasa de 1 a 0 muerte
                           if ((death_val=0) and ((valor and 1)=1)) then start_sample(3);
                           if ((death_val=1) and ((valor and 1)=0)) then start_sample(4);
                           death_val:=valor and 1;
@@ -232,23 +231,23 @@ iniciar_video(256,224);
 z80_0:=cpu_z80.create(4000000,264);
 z80_0.change_ram_calls(mario_getbyte,mario_putbyte);
 //cargar roms
-if not(cargar_roms(@memoria[0],@mario_rom[0],'mario.zip',0)) then exit;
+if not(roms_load(@memoria,mario_rom)) then exit;
 //samples
-if load_samples('mario.zip',@mario_samples[0],num_samples) then z80_0.init_sound(mario_sound_update);
+if load_samples('mario.zip',@mario_samples,num_samples) then z80_0.init_sound(mario_sound_update);
 //convertir chars
-if not(cargar_roms(@memoria_temp[0],@mario_char[0],'mario.zip',0)) then exit;
+if not(roms_load(@memoria_temp,mario_char)) then exit;
 init_gfx(0,8,8,512);
 gfx_set_desc_data(2,0,8*8,512*8*8,0);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
 //convertir sprites
-if not(cargar_roms(@memoria_temp[0],@mario_sprites[0],'mario.zip',0)) then exit;
+if not(roms_load(@memoria_temp,mario_sprites)) then exit;
 init_gfx(1,16,16,256);
 gfx[1].trans[0]:=true;
 gfx_set_desc_data(3,0,16*8,2*256*16*16,256*16*16,0);
-convert_gfx(1,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //poner la paleta
-if not(cargar_roms(@memoria_temp[0],@mario_pal,'mario.zip')) then exit;
-for f:=0 to 511 do begin
+if not(roms_load(@memoria_temp,mario_pal)) then exit;
+for f:=0 to $1ff do begin
     bit0:=(memoria_temp[f] shr 5) and 1;
     bit1:=(memoria_temp[f] shr 6) and 1;
     bit2:=(memoria_temp[f] shr 7) and 1;
@@ -261,7 +260,7 @@ for f:=0 to 511 do begin
     bit1:=(memoria_temp[f] shr 1) and 1;
     colores[f].b:=not($55*bit0+$aa*bit1);
 end;
-set_pal(colores,512);
+set_pal(colores,$200);
 //DIP
 marcade.dswa:=0;
 marcade.dswa_val:=@mario_dip_a;

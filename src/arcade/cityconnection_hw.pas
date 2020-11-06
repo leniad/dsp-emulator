@@ -103,8 +103,8 @@ if event.arcade then begin
   //P1
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
@@ -112,8 +112,8 @@ if event.arcade then begin
   //P2
   if arcade_input.up[1] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.down[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.right[1] then marcade.in2:=(marcade.in2 and $fb) else marcade.in2:=(marcade.in2 or $4);
+  if arcade_input.left[1] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.but0[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
   //SYS
@@ -181,7 +181,6 @@ end;
 
 procedure citycon_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$3fff then exit;
 case direccion of
   0..$fff,$2800..$28ff:memoria[direccion]:=valor;
   $1000..$1fff:if memoria[direccion]<>valor then begin
@@ -207,6 +206,7 @@ case direccion of
                   buffer_paleta[direccion and $7ff]:=valor;
                   cambiar_color(direccion and $7fe);
                end;
+  $4000..$ffff:;
 end;
 end;
 
@@ -214,6 +214,7 @@ function scitycon_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$fff,$8000..$ffff:scitycon_getbyte:=mem_snd[direccion];
+  $4000:scitycon_getbyte:=ay8910_0.Read;
   $6000:scitycon_getbyte:=ym2203_0.status;
   $6001:scitycon_getbyte:=ym2203_0.Read;
 end;
@@ -221,13 +222,13 @@ end;
 
 procedure scitycon_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
   0..$fff:mem_snd[direccion]:=valor;
   $4000:ay8910_0.Control(valor);
   $4001:ay8910_0.Write(valor);
   $6000:ym2203_0.Control(valor);
   $6001:ym2203_0.Write(valor);
+  $8000..$ffff:; //ROM
 end;
 end;
 
@@ -266,8 +267,8 @@ savedata_com_qsnapshot(data,size);
 size:=AY8910_0.save_snapshot(data);
 savedata_qsnapshot(data,size);
 //MEM
-savedata_com_qsnapshot(@memoria[0],$4000);
-savedata_com_qsnapshot(@mem_snd[0],$8000);
+savedata_com_qsnapshot(@memoria,$4000);
+savedata_com_qsnapshot(@mem_snd,$8000);
 //MISC
 buffer[0]:=fondo;
 buffer[1]:=soundlatch;
@@ -276,8 +277,8 @@ buffer[3]:=scroll_x and $ff;
 buffer[4]:=scroll_x shr 8;
 buffer[5]:=byte(cambia_fondo);
 savedata_qsnapshot(@buffer[0],6);
-savedata_com_qsnapshot(@lines_color_look[0],$100);
-savedata_com_qsnapshot(@buffer_paleta[0],$500*2);
+savedata_com_qsnapshot(@lines_color_look,$100);
+savedata_com_qsnapshot(@buffer_paleta,$500*2);
 freemem(data);
 close_qsnapshot;
 end;
@@ -301,17 +302,17 @@ ym2203_0.load_snapshot(data);
 loaddata_qsnapshot(data);
 AY8910_0.load_snapshot(data);
 //MEM
-loaddata_qsnapshot(@memoria[0]);
-loaddata_qsnapshot(@mem_snd[0]);
+loaddata_qsnapshot(@memoria);
+loaddata_qsnapshot(@mem_snd);
 //MISC
-loaddata_qsnapshot(@buffer[0]);
+loaddata_qsnapshot(@buffer);
 fondo:=buffer[0];
 soundlatch:=buffer[1];
 soundlatch2:=buffer[2];
 scroll_x:=buffer[3] or (scroll_x shl 8);
 cambia_fondo:=buffer[5]<>0;
-loaddata_qsnapshot(@lines_color_look[0]);
-loaddata_qsnapshot(@buffer_paleta[0]);
+loaddata_qsnapshot(@lines_color_look);
+loaddata_qsnapshot(@buffer_paleta);
 freemem(data);
 close_qsnapshot;
 //END
@@ -327,9 +328,9 @@ begin
  ay8910_0.reset;
  reset_audio;
  fillchar(lines_color_look[0],$100,0);
- marcade.in0:=$FF;
+ marcade.in0:=$ff;
  marcade.in1:=$80;
- marcade.in2:=$FF;
+ marcade.in2:=$ff;
  fondo:=0;
  soundlatch:=0;
  soundlatch2:=0;
@@ -359,7 +360,7 @@ iniciar_video(240,224);
 m6809_0:=cpu_m6809.Create(8000000,$100,TCPU_MC6809);
 m6809_0.change_ram_calls(citycon_getbyte,citycon_putbyte);
 //Sound CPU
-m6809_1:=cpu_m6809.Create(2000000 div 3,$100,TCPU_MC6809E); //???
+m6809_1:=cpu_m6809.Create(8000000 div 12,$100,TCPU_MC6809E); //???
 m6809_1.change_ram_calls(scitycon_getbyte,scitycon_putbyte);
 m6809_1.init_sound(citycon_sound_update);
 //Sound Chip
@@ -367,25 +368,25 @@ ym2203_0:=ym2203_chip.create(20000000 div 16,0.2,0.4);
 ym2203_0.change_io_calls(citycon_porta,citycon_portb,nil,nil);
 ay8910_0:=ay8910_chip.create(20000000 div 16,AY8910,0.40);
 //cargar roms
-if not(roms_load(@memoria,@citycon_rom,'citycon.zip',sizeof(citycon_rom))) then exit;
+if not(roms_load(@memoria,citycon_rom)) then exit;
 //Cargar Sound
-if not(roms_load(@mem_snd,@citycon_sonido,'citycon.zip',sizeof(citycon_sonido))) then exit;
+if not(roms_load(@mem_snd,citycon_sonido)) then exit;
 //convertir chars
-if not(roms_load(@memoria_temp,@citycon_char,'citycon.zip',sizeof(citycon_char))) then exit;
+if not(roms_load(@memoria_temp,citycon_char)) then exit;
 init_gfx(0,8,8,256);
 gfx[0].trans[0]:=true;
 gfx_set_desc_data(2,0,8*8,4,0);
 convert_gfx(0,0,@memoria_temp,@pc_x,@ps_y,false,false);
 //tiles
-if not(roms_load(@memoria_temp,@citycon_tiles,'citycon.zip',sizeof(citycon_tiles))) then exit;
+if not(roms_load(@memoria_temp,citycon_tiles)) then exit;
 init_gfx(1,8,8,3072);
 for f:=0 to $b do begin
   gfx_set_desc_data(4,12,8*8,4+($1000*f*8),0+($1000*f*8),($c000+($1000*f))*8+4,($c000+($1000*f))*8+0);
   convert_gfx(1,$100*8*8*f,@memoria_temp,@pc_x,@ps_y,false,false);
 end;
-if not(roms_load(@memoria_fondo,@citycon_fondo,'citycon.zip',sizeof(citycon_fondo))) then exit;
+if not(roms_load(@memoria_fondo,citycon_fondo)) then exit;
 //sprites
-if not(roms_load(@memoria_temp,@citycon_sprites,'citycon.zip',sizeof(citycon_sprites))) then exit;
+if not(roms_load(@memoria_temp,citycon_sprites)) then exit;
 init_gfx(2,8,16,256);
 gfx[2].trans[0]:=true;
 for f:=0 to 1 do begin

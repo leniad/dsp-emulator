@@ -3,35 +3,37 @@ unit karnov_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     ym_2203,ym_3812,m6502,sound_engine;
+     ym_2203,ym_3812,m6502,sound_engine,mcs51;
 
 procedure cargar_karnov;
 
 implementation
 const
         //Karnov
-        karnov_rom:array[0..6] of tipo_roms=(
-        (n:'dn08-6';l:$10000;p:0;crc:$4c60837f),(n:'dn11-6';l:$10000;p:$1;crc:$cd4abb99),
-        (n:'dn07-';l:$10000;p:$20000;crc:$fc14291b),(n:'dn10-';l:$10000;p:$20001;crc:$a4a34e37),
-        (n:'dn06-5';l:$10000;p:$40000;crc:$29d64e42),(n:'dn09-5';l:$10000;p:$40001;crc:$072d7c49),());
-        karnov_sound:tipo_roms=(n:'dn05-5';l:$8000;p:$8000;crc:$fa1a31a8);
-        karnov_char:tipo_roms=(n:'dn00-';l:$8000;p:$0;crc:$0ed77c6d);
+        karnov_rom:array[0..5] of tipo_roms=(
+        (n:'dn08-6.j15';l:$10000;p:0;crc:$4c60837f),(n:'dn11-6.j20';l:$10000;p:$1;crc:$cd4abb99),
+        (n:'dn07-.j14';l:$10000;p:$20000;crc:$fc14291b),(n:'dn10-.j18';l:$10000;p:$20001;crc:$a4a34e37),
+        (n:'dn06-5.j13';l:$10000;p:$40000;crc:$29d64e42),(n:'dn09-5.j17';l:$10000;p:$40001;crc:$072d7c49));
+        karnov_mcu:tipo_roms=(n:'dn-5.k14';l:$1000;p:$0;crc:$d056de4e);
+        karnov_sound:tipo_roms=(n:'dn05-5.f3';l:$8000;p:$8000;crc:$fa1a31a8);
+        karnov_char:tipo_roms=(n:'dn00-.c5';l:$8000;p:$0;crc:$0ed77c6d);
         karnov_tiles:array[0..3] of tipo_roms=(
-        (n:'dn04-';l:$10000;p:0;crc:$a9121653),(n:'dn01-';l:$10000;p:$10000;crc:$18697c9e),
-        (n:'dn03-';l:$10000;p:$20000;crc:$90d9dd9c),(n:'dn02-';l:$10000;p:$30000;crc:$1e04d7b9));
+        (n:'dn04-.d18';l:$10000;p:0;crc:$a9121653),(n:'dn01-.c15';l:$10000;p:$10000;crc:$18697c9e),
+        (n:'dn03-.d15';l:$10000;p:$20000;crc:$90d9dd9c),(n:'dn02-.c18';l:$10000;p:$30000;crc:$1e04d7b9));
         karnov_sprites:array[0..7] of tipo_roms=(
-        (n:'dn12-';l:$10000;p:$00000;crc:$9806772c),(n:'dn14-5';l:$8000;p:$10000;crc:$ac9e6732),
-        (n:'dn13-';l:$10000;p:$20000;crc:$a03308f9),(n:'dn15-5';l:$8000;p:$30000;crc:$8933fcb8),
-        (n:'dn16-';l:$10000;p:$40000;crc:$55e63a11),(n:'dn17-5';l:$8000;p:$50000;crc:$b70ae950),
-        (n:'dn18-';l:$10000;p:$60000;crc:$2ad53213),(n:'dn19-5';l:$8000;p:$70000;crc:$8fd4fa40));
+        (n:'dn12-.f8';l:$10000;p:$00000;crc:$9806772c),(n:'dn14-5.f11';l:$8000;p:$10000;crc:$ac9e6732),
+        (n:'dn13-.f9';l:$10000;p:$20000;crc:$a03308f9),(n:'dn15-5.f12';l:$8000;p:$30000;crc:$8933fcb8),
+        (n:'dn16-.f13';l:$10000;p:$40000;crc:$55e63a11),(n:'dn17-5.f15';l:$8000;p:$50000;crc:$b70ae950),
+        (n:'dn18-.f16';l:$10000;p:$60000;crc:$2ad53213),(n:'dn19-5.f18';l:$8000;p:$70000;crc:$8fd4fa40));
         karnov_proms:array[0..1] of tipo_roms=(
-        (n:'karnprom.21';l:$400;p:$0;crc:$aab0bb93),(n:'karnprom.20';l:$400;p:$400;crc:$02f78ffb));
+        (n:'dn-21.k8';l:$400;p:$0;crc:$aab0bb93),(n:'dn-20.l6';l:$400;p:$400;crc:$02f78ffb));
         //Chelnov
-        chelnov_rom:array[0..6] of tipo_roms=(
+        chelnov_rom:array[0..5] of tipo_roms=(
         (n:'ee08-e.j16';l:$10000;p:0;crc:$8275cc3a),(n:'ee11-e.j19';l:$10000;p:$1;crc:$889e40a0),
-        (n:'a-j14.bin';l:$10000;p:$20000;crc:$51465486),(n:'a-j18.bin';l:$10000;p:$20001;crc:$d09dda33),
-        (n:'ee06-e.j13';l:$10000;p:$40000;crc:$55acafdb),(n:'ee09-e.j17';l:$10000;p:$40001;crc:$303e252c),());
+        (n:'ee07.j14';l:$10000;p:$20000;crc:$51465486),(n:'ee10.j18';l:$10000;p:$20001;crc:$d09dda33),
+        (n:'ee06-e.j13';l:$10000;p:$40000;crc:$55acafdb),(n:'ee09-e.j17';l:$10000;p:$40001;crc:$303e252c));
         chelnov_sound:tipo_roms=(n:'ee05-.f3';l:$8000;p:$8000;crc:$6a8936b4);
+        chelnov_mcu:tipo_roms=(n:'ee-e.k14';l:$1000;p:$0;crc:$b7045395);
         chelnov_char:tipo_roms=(n:'ee00-e.c5';l:$8000;p:$0;crc:$e06e5c6b);
         chelnov_tiles:array[0..3] of tipo_roms=(
         (n:'ee04-.d18';l:$10000;p:0;crc:$96884f95),(n:'ee01-.c15';l:$10000;p:$10000;crc:$f4b54057),
@@ -62,148 +64,13 @@ const
         (mask:$c00;name:'Difficulty';number:4;dip:((dip_val:$800;dip_name:'Easy'),(dip_val:$c00;dip_name:'Normal'),(dip_val:$400;dip_name:'Hard'),(dip_val:0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$1000;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$1000;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
-type
- t_i8751_w=procedure (valor:word);
 var
  rom:array[0..$2ffff] of word;
  ram:array[0..$1fff] of word;
  sprite_ram,sprite_ram2:array[0..$7ff] of word;
  background_ram,video_ram:array[0..$3ff] of word;
- sound_latch,i8751_coin_mask,i8751_level:byte;
- i8751_command_queue,i8751_coin_pending,i8751_return,scroll_x,scroll_y:word;
- i8751_latch,i8751_needs_ack:boolean;
- i8751_write_proc:t_i8751_w;
-
-procedure karnov_i8751_w(valor:word);
-begin
-// Pending coin operations may cause protection commands to be queued */
-if i8751_needs_ack then begin
-   i8751_command_queue:=valor;
-   exit;
-end;
-i8751_return:=0;
-if (valor=$100) then i8751_return:=$56b;
-if ((valor and $f00)=$300) then i8751_return:=(valor and $ff)*$12; // Player sprite mapping */
-// I'm not sure the ones marked ^ appear in the right order */
-if (valor=$400) then i8751_return:=$4000; // Get The Map... */
-if (valor=$402) then i8751_return:=$40a6; // Ancient Ruins */
-if (valor=$403) then i8751_return:=$4054; // Forest... */
-if (valor=$404) then i8751_return:=$40de; // ^Rocky hills */
-if (valor=$405) then i8751_return:=$4182; // Sea */
-if (valor=$406) then i8751_return:=$41ca; // Town */
-if (valor=$407) then i8751_return:=$421e; // Desert */
-if (valor=$401) then i8751_return:=$4138; // ^Whistling wind */
-if (valor=$408) then i8751_return:=$4276; // ^Heavy Gates */
-m68000_0.irq[6]:=HOLD_LINE; // Signal main cpu task is complete */
-i8751_needs_ack:=true;
-end;
-
-procedure chelnov_i8751_w(valor:word);
-begin
-// Pending coin operations may cause protection commands to be queued */
-if i8751_needs_ack then begin
-   i8751_command_queue:=valor;
-   exit;
-end;
-i8751_return:=0;
-if (valor=$200) then i8751_return:=$7736;
-if (valor=$100) then i8751_return:=$71c;
-if ((valor and $e000)=$6000) then begin
-   if (valor and $1000)<>0 then i8751_return:=((valor and $0f)+((valor shr 4) and $0f))*((valor shr 8) and $0f)
-      else i8751_return:=(valor and $0f)*(((valor shr 8) and $0f)+((valor shr 4) and $0f));
-end;
-if ((valor and $f000)=$1000) then i8751_level:=1;  // Level 1
-if ((valor and $f000)=$2000) then i8751_level:=i8751_level+1;  // Level Increment
-if ((valor and $f000)=$3000) then begin
-   // Sprite table mapping */
-   case i8751_level of
-        1:begin // Level 1, Sprite mapping tables */
-                case (valor and $ff) of
-                     0..2:i8751_return:=0;
-                     3..7:i8751_return:=1;
-                     8..$b:i8751_return:=2;
-                     $c..$f:i8751_return:=3;
-                     $10..$18:i8751_return:=4;
-                     $19..$1a:i8751_return:=5;
-                     $1b..$21:i8751_return:=6;
-                     $22..$27:i8751_return:=7;
-                       else i8751_return:=8;
-                end;
-          end;
-	2:begin // Level 2, Sprite mapping tables, all sets are the same
-                case (valor and $ff) of
-                     0..2:i8751_return:=0;
-                     3..8:i8751_return:=1;
-                     9..$10:i8751_return:=2;
-                     $11..$1a:i8751_return:=3;
-                     $1b..$20:i8751_return:=4;
-                     $21..$27:i8751_return:=5;
-                        else i8751_return:=6;
-                 end;
-          end;
-	3:begin // Level 3, Sprite mapping tables, all sets are the same
-                 case (valor and $ff) of
-                      0..4:i8751_return:=0;
-                      5..8:i8751_return:=1;
-                      9..$c:i8751_return:=2;
-                      $d..$10:i8751_return:=3;
-                      $11..$1a:i8751_return:=4;
-                      $1b:i8751_return:=5;
-                      $1c..$21:i8751_return:=6;
-                      $22..$26:i8751_return:=7;
-                         else i8751_return:=8;
-                  end;
-          end;
-	4:begin // Level 4, Sprite mapping tables, all sets are the same
-                   case (valor and $ff) of
-                        0..3:i8751_return:=0;
-                        4..$b:i8751_return:=1;
-                        $c..$e:i8751_return:=2;
-                        $f..$18:i8751_return:=3;
-                        $19..$1b:i8751_return:=4;
-                        $1c..$21:i8751_return:=5;
-                        $22..$28:i8751_return:=6;
-                           else i8751_return:=7;
-                   end;
-          end;
-	5:begin // Level 5, Sprite mapping tables, all sets are the same
-                   case (valor and $ff) of
-                        0..6:i8751_return:=0;
-                        7..$d:i8751_return:=1;
-                        $e..$13:i8751_return:=2;
-                        $14..$19:i8751_return:=3;
-                        $1a..$22:i8751_return:=4;
-                        $23..$26:i8751_return:=5;
-                           else i8751_return:=6;
-                   end;
-          end;
-	6:begin //Level 6, Sprite mapping tables, all sets are the same
-                   case (valor and $ff) of
-                        0..2:i8751_return:=0;
-                        3..$a:i8751_return:=1;
-                        $b..$10:i8751_return:=2;
-                        $11..$16:i8751_return:=3;
-                        $17..$1c:i8751_return:=4;
-                        $1d..$23:i8751_return:=5;
-                            else i8751_return:=6;
-                   end;
-          end;
-	7:begin // Level 7, Sprite mapping tables, all sets are the same
-                   case (valor and $ff) of
-                        0..4:i8751_return:=0;
-                        5..$a:i8751_return:=1;
-                        $b..$10:i8751_return:=2;
-                        $11..$19:i8751_return:=3;
-                        $1a..$20:i8751_return:=4;
-                        $21..$26:i8751_return:=5;
-                            else i8751_return:=6;
-                   end;
-          end;
-   end;
-end;
-m68000_0.irq[6]:=HOLD_LINE;
-i8751_needs_ack:=true;
-end;
+ sound_latch,mcu_p0,mcu_p1,mcu_p2:byte;
+ scroll_x,scroll_y,maincpu_to_mcu,mcu_to_maincpu:word;
 
 procedure eventos_karnov;
 begin
@@ -227,13 +94,14 @@ if event.arcade then begin
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
   //Coin
-  if main_vars.tipo_maquina=219 then begin
-     if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
-     if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  end else begin
-     if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $df) else marcade.in2:=(marcade.in2 or $20);
-     if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $bf) else marcade.in2:=(marcade.in2 or $40);
-  end;
+  if arcade_input.coin[1] then begin
+    marcade.in2:=(marcade.in2 and $df);
+    mcs51_0.change_irq0(ASSERT_LINE);
+  end else marcade.in2:=(marcade.in2 or $20);
+  if arcade_input.coin[0] then begin
+    marcade.in2:=(marcade.in2 and $bf);
+    mcs51_0.change_irq0(ASSERT_LINE);
+   end else marcade.in2:=(marcade.in2 or $40);
 end;
 end;
 
@@ -287,14 +155,14 @@ for f:=0 to $1ff do begin
     y:=(y+16) and $1ff;
     x:=(256-x) and $1ff;
     y:=(256-y) and $1ff;
-    // Y Flip determines order of multi-sprite */
+    // Y Flip determines order of multi-sprite
     if (extra and fy) then begin
        nchar2:=nchar;
        nchar:=nchar+1;
     end else nchar2:=nchar+1;
     put_gfx_sprite(nchar,(color shl 4)+256,fx,fy,2);
     actualiza_gfx_sprite(x,y,3,2);
-    // 1 more sprite drawn underneath */
+    // 1 more sprite drawn underneath
     if extra then begin
        put_gfx_sprite(nchar2,(color shl 4)+256,fx,fy,2);
        actualiza_gfx_sprite(x,y+16,3,2);
@@ -304,42 +172,28 @@ actualiza_trozo(0,0,256,256,1,0,0,256,256,3);
 actualiza_trozo_final(0,8,256,240,3);
 end;
 
-procedure karnov_i8751_interrupt;
-begin
-if (marcade.in2=i8751_coin_mask) then i8751_latch:=true;
-if ((marcade.in2<>i8751_coin_mask) and i8751_latch) then begin
-   if i8751_needs_ack then begin
-      // i8751 is busy - queue the command
-      i8751_coin_pending:=marcade.in2 or $8000;
-   end else begin
-       i8751_return:=marcade.in2 or $8000;
-       m68000_0.irq[6]:=HOLD_LINE;
-       i8751_needs_ack:=true;
-   end;
-   i8751_latch:=false;
-end;
-end;
-
 procedure karnov_principal;
 var
-  frame_m,frame_s:single;
+  frame_m,frame_s,frame_mcu:single;
   f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=m6502_0.tframes;
+frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
    m68000_0.run(frame_m);
    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
    m6502_0.run(frame_s);
    frame_s:=frame_s+m6502_0.tframes-m6502_0.contador;
+   mcs51_0.run(frame_mcu);
+   frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
    case f of
       30:marcade.in1:=marcade.in1 and $7f;
       247:begin
             marcade.in1:=marcade.in1 or $80;
-            karnov_i8751_interrupt;
-            m68000_0.irq[7]:=HOLD_LINE;
+            m68000_0.irq[7]:=ASSERT_LINE;
             update_video_karnov;
           end;
    end;
@@ -349,20 +203,6 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function karnov_control_r(direccion:byte):word;
-var
-   ret:word;
-begin
-ret:=$ffff;
-case (direccion shl 1) of
-     0:ret:=marcade.in0;
-     2:ret:=marcade.in1; //Start buttons & VBL
-     4:ret:=marcade.dswa; //dsw
-     6:ret:=i8751_return; //i8751 return values
-end;
-karnov_control_r:=ret;
-end;
-
 function karnov_getword(direccion:dword):word;
 begin
 case direccion of
@@ -370,64 +210,24 @@ case direccion of
   $60000..$63fff:karnov_getword:=ram[(direccion and $3fff) shr 1];
   $80000..$80fff:karnov_getword:=sprite_ram[(direccion and $fff) shr 1];
   $a0000..$a07ff:karnov_getword:=video_ram[(direccion and $7ff) shr 1];
-  $c0000..$c0007:karnov_getword:=karnov_control_r((direccion and $7) shr 1);
-end;
-end;
-
-procedure karnov_control_w(direccion,valor:word);
-begin
-// Mnemonics filled in from the schematics, brackets are my comments */
-case (direccion shl 1) of
-     0:begin // SECLR (Interrupt ack for Level 6 i8751 interrupt)
-           m68000_0.irq[6]:=CLEAR_LINE;
-	   if i8751_needs_ack then begin
-	      // If a command and coin insert happen at once, then the i8751 will queue the coin command until the previous command is ACK'd */
-	      if (i8751_coin_pending<>0) then begin
-	          i8751_return:=i8751_coin_pending;
-		        m68000_0.irq[6]:=HOLD_LINE;
-		        i8751_coin_pending:=0;
-	      end else if (i8751_command_queue<>0) then begin
-	                  // Pending control command - just write it back as SECREQ
-			              i8751_needs_ack:=false;
-			              karnov_control_w(3,$ffff);
-			              i8751_command_queue:=0;
-	               end else begin
-			              i8751_needs_ack:=false;
-				         end;
-           end;
-       end;
-     2:begin // SONREQ (Sound CPU byte)
-          sound_latch:=valor and $ff;
-	        m6502_0.change_nmi(PULSE_LINE);
-       end;
-     4:copymemory(@sprite_ram2,@sprite_ram,$800*2); // DM (DMA to buffer spriteram)
-     6:i8751_write_proc(valor); // SECREQ (Interrupt & Data to i8751)
-     8:begin //HSHIFT (9 bits) - Top bit indicates video flip
-          scroll_x:=valor and $1ff;
-	        main_screen.flip_main_screen:=(valor shr 15)<>0;
-       end;
-     $a:scroll_y:=valor and $1ff; // VSHIFT
-     $c:begin // SECR (Reset i8751)
-          i8751_needs_ack:=false;
-	        i8751_coin_pending:=0;
-	        i8751_command_queue:=0;
-	        i8751_return:=0;
-        end;
-     $e:m68000_0.irq[7]:=CLEAR_LINE; // INTCLR (Interrupt ack for Level 7 vbl interrupt) */
+  $c0000:karnov_getword:=marcade.in0;
+  $c0002:karnov_getword:=marcade.in1;
+  $c0004:karnov_getword:=marcade.dswa;
+  $c0006:karnov_getword:=mcu_to_maincpu;
 end;
 end;
 
 procedure karnov_putword(direccion:dword;valor:word);
 begin
-if direccion<$60000 then exit;
 case direccion of
+  0..$5ffff:; //ROM
   $60000..$63fff:ram[(direccion and $3fff) shr 1]:=valor;
   $80000..$80fff:sprite_ram[(direccion and $fff) shr 1]:=valor;
-  $a0000..$a0fff:begin
+  $a0000..$a0fff:if video_ram[(direccion and $7ff) shr 1]<>valor then begin
                       video_ram[(direccion and $7ff) shr 1]:=valor;
                       gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                  end;
-  $a1000..$a17ff:begin
+  $a1000..$a17ff:if background_ram[(direccion and $7ff) shr 1]<>valor then begin
                       background_ram[(direccion and $7ff) shr 1]:=valor;
                       gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
                  end;
@@ -437,7 +237,22 @@ case direccion of
 	                    background_ram[direccion and $3ff]:=valor;
                       gfx[1].buffer[direccion and $3ff]:=true;
                  end;
-  $c0000..$c000f:karnov_control_w((direccion and $f) shr 1,valor);
+  $c0000:m68000_0.irq[6]:=CLEAR_LINE;
+  $c0002:begin
+            sound_latch:=valor and $ff;
+	          m6502_0.change_nmi(PULSE_LINE);
+         end;
+  $c0004:copymemory(@sprite_ram2,@sprite_ram,$800*2);
+  $c0006:begin
+            maincpu_to_mcu:=valor;
+	          mcs51_0.change_irq1(ASSERT_LINE);
+         end;
+  $c0008:begin
+            scroll_x:=valor and $1ff;
+	          main_screen.flip_main_screen:=(valor shr 15)<>0;
+         end;
+  $c000a:scroll_y:=valor and $1ff;
+  $c000e:m68000_0.irq[7]:=CLEAR_LINE;
 end;
 end;
 
@@ -451,20 +266,58 @@ end;
 
 procedure karnov_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$7fff then exit;
 case direccion of
   $0..$5ff:mem_snd[direccion]:=valor;
   $1000:ym2203_0.Control(valor);
   $1001:ym2203_0.Write(valor);
   $1800:ym3812_0.control(valor);
   $1801:ym3812_0.write(valor);
+  $8000..$ffff:; //ROM
 end;
 end;
 
 procedure karnov_sound_update;
 begin
   ym3812_0.update;
-  ym2203_0.Update;
+  ym2203_0.update;
+end;
+
+function in_port0:byte;
+begin
+  in_port0:=mcu_p0;
+end;
+
+function in_port1:byte;
+begin
+  in_port1:=mcu_p1;
+end;
+
+function in_port3:byte;
+begin
+  //COIN
+  in_port3:=marcade.in2;
+end;
+
+procedure out_port0(valor:byte);
+begin
+  mcu_p0:=valor;
+end;
+
+procedure out_port1(valor:byte);
+begin
+  mcu_p1:=valor;
+end;
+
+procedure out_port2(valor:byte);
+begin
+  if (((mcu_p2 and 1)<>0) and ((valor and 1)=0)) then mcs51_0.change_irq0(CLEAR_LINE);
+  if (((mcu_p2 and 2)<>0) and ((valor and 2)=0)) then mcs51_0.change_irq1(CLEAR_LINE);
+  if (((mcu_p2 and 4)<>0) and ((valor and 4)=0)) then m68000_0.irq[6]:=ASSERT_LINE;
+  if (((mcu_p2 and $10)<>0) and ((valor and $10)=0)) then mcu_p0:=maincpu_to_mcu shr 0;
+  if (((mcu_p2 and $20)<>0) and ((valor and $20)=0)) then mcu_p1:=maincpu_to_mcu shr 8;
+  if (((mcu_p2 and $40)<>0) and ((valor and $40)=0)) then mcu_to_maincpu:=(mcu_to_maincpu and $ff00) or (mcu_p0 shl 0);
+  if (((mcu_p2 and $80)<>0) and ((valor and $80)=0)) then mcu_to_maincpu:=(mcu_to_maincpu and $00ff) or (mcu_p1 shl 8);
+	mcu_p2:=valor;
 end;
 
 procedure snd_irq(irqstate:byte);
@@ -476,26 +329,24 @@ end;
 procedure reset_karnov;
 begin
  m68000_0.reset;
+ mcs51_0.reset;
  m6502_0.reset;
  ym3812_0.reset;
  ym2203_0.reset;
  reset_audio;
- marcade.in0:=$FFFF;
+ marcade.in0:=$ffff;
  marcade.in1:=$7f;
- if main_vars.tipo_maquina=219 then marcade.in2:=$7
-   else marcade.in2:=$e0;
+ marcade.in2:=$ff;
  sound_latch:=0;
- i8751_latch:=false;
- i8751_return:=0;
- i8751_needs_ack:=false;
- i8751_coin_pending:=0;
- i8751_command_queue:=0;
- i8751_level:=0;
+ mcu_p0:=0;
+ mcu_p1:=0;
+ mcu_p2:=0;
+ mcu_to_maincpu:=0;
+ maincpu_to_mcu:=0;
 end;
 
 function iniciar_karnov:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7);
   ps_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
 			0, 1, 2, 3, 4, 5, 6, 7);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -505,23 +356,20 @@ var
   f:word;
   ctemp1,ctemp2,ctemp3,ctemp4:byte;
   colores:tpaleta;
-
 procedure convert_chars;
 begin
-init_gfx(0,8,8,$400);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,$6000*8,$4000*8,$2000*8);
-convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@ps_y[0],false,false);
+  init_gfx(0,8,8,$400);
+  gfx[0].trans[0]:=true;
+  gfx_set_desc_data(3,0,8*8,$6000*8,$4000*8,$2000*8);
+  convert_gfx(0,0,@memoria_temp,@ps_x[8],@ps_y,false,false);
 end;
-
 procedure convert_tiles(num_gfx,mul:byte);
 begin
-init_gfx(num_gfx,16,16,$800*mul);
-gfx[num_gfx].trans[0]:=true;
-gfx_set_desc_data(4,0,16*16,($30000*mul)*8,0,($10000*mul)*8,($20000*mul)*8);
-convert_gfx(num_gfx,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+  init_gfx(num_gfx,16,16,$800*mul);
+  gfx[num_gfx].trans[0]:=true;
+  gfx_set_desc_data(4,0,16*16,($30000*mul)*8,0,($10000*mul)*8,($20000*mul)*8);
+  convert_gfx(num_gfx,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
-
 begin
 iniciar_karnov:=false;
 iniciar_audio(false);
@@ -537,55 +385,57 @@ m68000_0.change_ram16_calls(karnov_getword,karnov_putword);
 m6502_0:=cpu_m6502.create(1500000,256,TCPU_M6502);
 m6502_0.change_ram_calls(karnov_snd_getbyte,karnov_snd_putbyte);
 m6502_0.init_sound(karnov_sound_update);
+//MCU
+mcs51_0:=cpu_mcs51.create(8000000,256);
+mcs51_0.change_io_calls(in_port0,in_port1,nil,in_port3,out_port0,out_port1,out_port2,nil);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3526_FM,3000000);
 ym3812_0.change_irq_calls(snd_irq);
 ym2203_0:=ym2203_chip.create(1500000,0.25,0.25);
 case main_vars.tipo_maquina of
   219:begin  //Karnov
+        //MCU ROM
+        if not(roms_load(mcs51_0.get_rom_addr,karnov_mcu)) then exit;
         //cargar roms
-        if not(cargar_roms16w(@rom,@karnov_rom,'karnov.zip',0)) then exit;
+        if not(roms_load16w(@rom,karnov_rom)) then exit;
         //cargar sonido
-        if not(roms_load(@mem_snd,@karnov_sound,'karnov.zip',sizeof(karnov_sound))) then exit;
+        if not(roms_load(@mem_snd,karnov_sound)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@karnov_char,'karnov.zip',sizeof(karnov_char))) then exit;
+        if not(roms_load(@memoria_temp,karnov_char)) then exit;
         convert_chars;
         //tiles
-        if not(roms_load(@memoria_temp,@karnov_tiles,'karnov.zip',sizeof(karnov_tiles))) then exit;
+        if not(roms_load(@memoria_temp,karnov_tiles)) then exit;
         convert_tiles(1,1);
         //sprites
-        if not(roms_load(@memoria_temp,@karnov_sprites,'karnov.zip',sizeof(karnov_sprites))) then exit;
+        if not(roms_load(@memoria_temp,karnov_sprites)) then exit;
         convert_tiles(2,2);
         //Paleta
-        if not(roms_load(@memoria_temp,@karnov_proms,'karnov.zip',sizeof(karnov_proms))) then exit;
+        if not(roms_load(@memoria_temp,karnov_proms)) then exit;
         //DIP
         marcade.dswa:=$ffbf;
         marcade.dswa_val:=@karnov_dip;
-        i8751_coin_mask:=$7;
-        i8751_write_proc:=karnov_i8751_w;
       end;
-  220:begin  //Karnov
+  220:begin  //Chelnov
+        //MCU ROM
+        if not(roms_load(mcs51_0.get_rom_addr,chelnov_mcu)) then exit;
         //cargar roms
-        if not(cargar_roms16w(@rom,@chelnov_rom,'chelnov.zip',0)) then exit;
+        if not(roms_load16w(@rom,chelnov_rom)) then exit;
         //cargar sonido
-        if not(roms_load(@mem_snd,@chelnov_sound,'chelnov.zip',sizeof(chelnov_sound))) then exit;
+        if not(roms_load(@mem_snd,chelnov_sound)) then exit;
         //convertir chars
-        if not(roms_load(@memoria_temp,@chelnov_char,'chelnov.zip',sizeof(chelnov_char))) then exit;
+        if not(roms_load(@memoria_temp,chelnov_char)) then exit;
         convert_chars;
         //tiles
-        if not(roms_load(@memoria_temp,@chelnov_tiles,'chelnov.zip',sizeof(chelnov_tiles))) then exit;
+        if not(roms_load(@memoria_temp,chelnov_tiles)) then exit;
         convert_tiles(1,1);
         //sprites
-        if not(roms_load(@memoria_temp,@chelnov_sprites,'chelnov.zip',sizeof(chelnov_sprites))) then exit;
+        if not(roms_load(@memoria_temp,chelnov_sprites)) then exit;
         convert_tiles(2,2);
         //Paleta
-        if not(roms_load(@memoria_temp,@chelnov_proms,'chelnov.zip',sizeof(chelnov_proms))) then exit;
+        if not(roms_load(@memoria_temp,chelnov_proms)) then exit;
         //DIP
         marcade.dswa:=$ff7f;
         marcade.dswa_val:=@chelnov_dip;
-        i8751_coin_mask:=$e0;
-        rom[$062a shr 1]:=$4e71;  // hangs waiting on i8751 int
-        i8751_write_proc:=chelnov_i8751_w;
       end;
 end;
 //poner la paleta
@@ -615,7 +465,7 @@ reset_karnov;
 iniciar_karnov:=true;
 end;
 
-procedure Cargar_karnov;
+procedure cargar_karnov;
 begin
 llamadas_maquina.bucle_general:=karnov_principal;
 llamadas_maquina.iniciar:=iniciar_karnov;

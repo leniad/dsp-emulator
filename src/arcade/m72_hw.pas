@@ -10,46 +10,46 @@ procedure cargar_irem_m72;
 implementation
 const
         //Rtype
-        rtype_rom:array[0..4] of tipo_roms=(
+        rtype_rom:array[0..3] of tipo_roms=(
         (n:'rt_r-h0-b.1b';l:$10000;p:1;crc:$591c7754),(n:'rt_r-l0-b.3b';l:$10000;p:$0;crc:$a1928df0),
-        (n:'rt_r-h1-b.1c';l:$10000;p:$20001;crc:$a9d71eca),(n:'rt_r-l1-b.3c';l:$10000;p:$20000;crc:$0df3573d),());
-        rtype_char:array[0..4] of tipo_roms=(
+        (n:'rt_r-h1-b.1c';l:$10000;p:$20001;crc:$a9d71eca),(n:'rt_r-l1-b.3c';l:$10000;p:$20000;crc:$0df3573d));
+        rtype_char:array[0..3] of tipo_roms=(
         (n:'rt_b-a0.3c';l:$8000;p:0;crc:$4e212fb0),(n:'rt_b-a1.3d';l:$8000;p:$8000;crc:$8a65bdff),
-        (n:'rt_b-a2.3a';l:$8000;p:$10000;crc:$5a4ae5b9),(n:'rt_b-a3.3e';l:$8000;p:$18000;crc:$73327606),());
-        rtype_char2:array[0..4] of tipo_roms=(
+        (n:'rt_b-a2.3a';l:$8000;p:$10000;crc:$5a4ae5b9),(n:'rt_b-a3.3e';l:$8000;p:$18000;crc:$73327606));
+        rtype_char2:array[0..3] of tipo_roms=(
         (n:'rt_b-b0.3j';l:$8000;p:0;crc:$a7b17491),(n:'rt_b-b1.3k';l:$8000;p:$8000;crc:$b9709686),
-        (n:'rt_b-b2.3h';l:$8000;p:$10000;crc:$433b229a),(n:'rt_b-b3.3f';l:$8000;p:$18000;crc:$ad89b072),());
-        irem_m72_sprites:array[0..12] of tipo_roms=(
+        (n:'rt_b-b2.3h';l:$8000;p:$10000;crc:$433b229a),(n:'rt_b-b3.3f';l:$8000;p:$18000;crc:$ad89b072));
+        irem_m72_sprites:array[0..11] of tipo_roms=(
         (n:'rt_r-00.1h';l:$10000;p:0;crc:$dad53bc0),(n:'rt_r-01.1j';l:$8000;p:$10000;crc:$5e441e7f),
         (n:'rt_r-01.1j';l:$8000;p:$18000;crc:$5e441e7f),(n:'rt_r-10.1k';l:$10000;p:$20000;crc:$d6a66298),
         (n:'rt_r-11.1l';l:$8000;p:$30000;crc:$791df4f8),(n:'rt_r-11.1l';l:$8000;p:$38000;crc:$791df4f8),
         (n:'rt_r-20.3h';l:$10000;p:$40000;crc:$fc247c8a),(n:'rt_r-21.3j';l:$8000;p:$50000;crc:$ed793841),
         (n:'rt_r-21.3j';l:$8000;p:$58000;crc:$ed793841),(n:'rt_r-30.3k';l:$10000;p:$60000;crc:$eb02a1cb),
-        (n:'rt_r-31.3l';l:$8000;p:$70000;crc:$8558355d),(n:'rt_r-31.3l';l:$8000;p:$78000;crc:$8558355d),());
+        (n:'rt_r-31.3l';l:$8000;p:$70000;crc:$8558355d),(n:'rt_r-31.3l';l:$8000;p:$78000;crc:$8558355d));
         //Hammering Harry
-        hharry_rom:array[0..4] of tipo_roms=(
+        hharry_rom:array[0..3] of tipo_roms=(
         (n:'a-h0-v.rom';l:$20000;p:1;crc:$c52802a5),(n:'a-l0-v.rom';l:$20000;p:$0;crc:$f463074c),
-        (n:'a-h1-0.rom';l:$10000;p:$60001;crc:$3ae21335),(n:'a-l1-0.rom';l:$10000;p:$60000;crc:$bc6ac5f9),());
-        hharry_char:array[0..4] of tipo_roms=(
+        (n:'a-h1-0.rom';l:$10000;p:$60001;crc:$3ae21335),(n:'a-l1-0.rom';l:$10000;p:$60000;crc:$bc6ac5f9));
+        hharry_char:array[0..3] of tipo_roms=(
         (n:'hh_a0.rom';l:$20000;p:0;crc:$c577ba5f),(n:'hh_a1.rom';l:$20000;p:$20000;crc:$429d12ab),
-        (n:'hh_a2.rom';l:$20000;p:$40000;crc:$b5b163b0),(n:'hh_a3.rom';l:$20000;p:$60000;crc:$8ef566a1),());
-        hharry_sprites:array[0..4] of tipo_roms=(
+        (n:'hh_a2.rom';l:$20000;p:$40000;crc:$b5b163b0),(n:'hh_a3.rom';l:$20000;p:$60000;crc:$8ef566a1));
+        hharry_sprites:array[0..3] of tipo_roms=(
         (n:'hh_00.rom';l:$20000;p:0;crc:$ec5127ef),(n:'hh_10.rom';l:$20000;p:$20000;crc:$def65294),
-        (n:'hh_20.rom';l:$20000;p:$40000;crc:$bb0d6ad4),(n:'hh_30.rom';l:$20000;p:$60000;crc:$4351044e),());
+        (n:'hh_20.rom';l:$20000;p:$40000;crc:$bb0d6ad4),(n:'hh_30.rom';l:$20000;p:$60000;crc:$4351044e));
         hharry_snd:tipo_roms=(n:'a-sp-0.rom';l:$10000;p:0;crc:$80e210e7);
         hharry_dac:tipo_roms=(n:'a-v0-0.rom';l:$20000;p:0;crc:$faaacaff);
         //R-Type 2
-        rtype2_rom:array[0..4] of tipo_roms=(
+        rtype2_rom:array[0..3] of tipo_roms=(
         (n:'rt2-a-h0-d.54';l:$20000;p:1;crc:$d8ece6f4),(n:'rt2-a-l0-d.60';l:$20000;p:$0;crc:$32cfb2e4),
-        (n:'rt2-a-h1-d.53';l:$20000;p:$40001;crc:$4f6e9b15),(n:'rt2-a-l1-d.59';l:$20000;p:$40000;crc:$0fd123bf),());
-        rtype2_char:array[0..8] of tipo_roms=(
+        (n:'rt2-a-h1-d.53';l:$20000;p:$40001;crc:$4f6e9b15),(n:'rt2-a-l1-d.59';l:$20000;p:$40000;crc:$0fd123bf));
+        rtype2_char:array[0..7] of tipo_roms=(
         (n:'ic50.7s';l:$20000;p:0;crc:$f3f8736e),(n:'ic51.7u';l:$20000;p:$20000;crc:$b4c543af),
         (n:'ic56.8s';l:$20000;p:$40000;crc:$4cb80d66),(n:'ic57.8u';l:$20000;p:$60000;crc:$bee128e0),
         (n:'ic65.9r';l:$20000;p:$80000;crc:$2dc9c71a),(n:'ic66.9u';l:$20000;p:$a0000;crc:$7533c428),
-        (n:'ic63.9m';l:$20000;p:$c0000;crc:$a6ad67f2),(n:'ic64.9p';l:$20000;p:$e0000;crc:$3686d555),());
-        rtype2_sprites:array[0..4] of tipo_roms=(
+        (n:'ic63.9m';l:$20000;p:$c0000;crc:$a6ad67f2),(n:'ic64.9p';l:$20000;p:$e0000;crc:$3686d555));
+        rtype2_sprites:array[0..3] of tipo_roms=(
         (n:'ic31.6l';l:$20000;p:0;crc:$2cd8f913),(n:'ic21.4l';l:$20000;p:$20000;crc:$5033066d),
-        (n:'ic32.6m';l:$20000;p:$40000;crc:$ec3a0450),(n:'ic22.4m';l:$20000;p:$60000;crc:$db6176fc),());
+        (n:'ic32.6m';l:$20000;p:$40000;crc:$ec3a0450),(n:'ic22.4m';l:$20000;p:$60000;crc:$db6176fc));
         rtype2_snd:tipo_roms=(n:'ic17.4f';l:$10000;p:0;crc:$73ffecb4);
         rtype2_dac:tipo_roms=(n:'ic14.4c';l:$20000;p:0;crc:$637172d5);
 
@@ -142,7 +142,7 @@ for f:=0 to $fff do begin
         gfx[0].buffer[f]:=false;
       end;
 end;
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure paint_video_rtype(linea_o,linea_d:word);
@@ -181,18 +181,18 @@ end;
 procedure eventos_irem_m72;
 begin
 if event.arcade then begin
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffbf) else marcade.in0:=(marcade.in0 or $40);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ff7f) else marcade.in0:=(marcade.in0 or $80);
   //marcade.in1
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fffe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $fffd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $fffb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
 end;
 end;
 
@@ -253,7 +253,7 @@ end;
 procedure irem_m72_putbyte(direccion:dword;valor:byte);
 begin
 case direccion of
-  0..$3ffff,$ffff0..$fffff:exit;
+  0..$3ffff,$ffff0..$fffff:;
   $40000..$43fff:ram[direccion and $3fff]:=valor;  //ram 1
   $c0000..$c03ff:spriteram[direccion and $3ff]:=valor; //ram 7
   $c8000..$c8bff:begin //ram 0
@@ -282,7 +282,7 @@ case puerto of
   0:begin
       sound_latch:=valor and $ff;
       snd_irq_vector:=snd_irq_vector and $df;
-      timer[timer_sound].enabled:=true;
+      timers.enabled(timer_sound,true);
     end;
   2:begin
       if (valor and $10)=0 then z80_0.change_reset(ASSERT_LINE)
@@ -312,8 +312,8 @@ end;
 function irem_m72_inword(puerto:dword):word;
 begin
   case puerto of
-    0:irem_m72_inword:=$ff00+marcade.in0;
-    2:irem_m72_inword:=$ff00+marcade.in1;
+    0:irem_m72_inword:=$ff00 or marcade.in0;
+    2:irem_m72_inword:=$ff00 or marcade.in1;
     4:irem_m72_inword:=$fdfb;
   end;
 end;
@@ -390,7 +390,7 @@ end;
 procedure hharry_putbyte(direccion:dword;valor:byte);
 begin
 case direccion of
-  0..$7ffff,$ffff0..$fffff:exit;
+  0..$7ffff,$ffff0..$fffff:;
   $a0000..$a3fff:ram[direccion and $3fff]:=valor;  //ram 1
   $c0000..$c03ff:spriteram[direccion and $3ff]:=valor; //ram 7
   $c8000..$c8bff:begin //ram 0
@@ -418,7 +418,7 @@ case puerto of
   0:begin
       sound_latch:=valor and $ff;
       snd_irq_vector:=snd_irq_vector and $df;
-      timer[timer_sound].enabled:=true;
+      timers.enabled(timer_sound,true);
     end;
   2:video_off:=(valor and $08)<>0;
   4:begin //DMA
@@ -449,8 +449,8 @@ end;
 function in_io(puerto:word):word;
 begin
   case puerto of
-    0:in_io:=$ff00+marcade.in0;
-    2:in_io:=$ff00+marcade.in1;
+    0:in_io:=$ff00 or marcade.in0;
+    2:in_io:=$ff00 or marcade.in1;
     4:in_io:=$fdbf;
   end;
 end;
@@ -510,7 +510,7 @@ for f:=0 to $fff do begin
         gfx[0].buffer[f]:=false;
       end;
 end;
-fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
 
 procedure paint_video_rtype2(linea_o,linea_d:word);
@@ -543,7 +543,7 @@ end;
 procedure rtype2_putbyte(direccion:dword;valor:byte);
 begin
 case direccion of
-  0..$7ffff,$ffff0..$fffff:exit;
+  0..$7ffff,$ffff0..$fffff:;
   $b0000..$b0001:copymemory(@buffer_sprites[0],@spriteram[0],$400); //DMA
   $bc000..$bc001:m72_raster_irq_position:=valor+64;
   $c0000..$c03ff:spriteram[direccion and $3ff]:=valor; //ram 7
@@ -573,7 +573,7 @@ case puerto of
   0:begin
       sound_latch:=valor and $ff;
       snd_irq_vector:=snd_irq_vector and $df;
-      timer[timer_sound].enabled:=true;
+      timers.enabled(timer_sound,true);
     end;
   2:video_off:=(valor and $08)<>0;
   $40:begin
@@ -600,8 +600,8 @@ end;
 function rtype2_in_io(puerto:word):word;
 begin
   case puerto of
-    0:rtype2_in_io:=$ff00+marcade.in0;
-    2:rtype2_in_io:=$ff00+marcade.in1;
+    0:rtype2_in_io:=marcade.in0;
+    2:rtype2_in_io:=marcade.in1;
     4:rtype2_in_io:=$f7ff;
   end;
 end;
@@ -628,7 +628,7 @@ begin
 z80_0.im0:=snd_irq_vector;
 if snd_irq_vector=$ff then z80_0.change_irq(CLEAR_LINE)
   else z80_0.change_irq(ASSERT_LINE);
-timer[timer_sound].enabled:=false;
+timers.enabled(timer_sound,false);
 end;
 
 function irem_m72_snd_getbyte(direccion:word):byte;
@@ -656,7 +656,7 @@ case (puerto and $ff) of
   $1:ym2151_0.write(valor);
   $6:begin
       snd_irq_vector:=snd_irq_vector or $20;
-      timer[timer_sound].enabled:=true;
+      timers.enabled(timer_sound,true);
     end;
 end;
 end;
@@ -691,7 +691,7 @@ case (puerto and $ff) of
       end;
   $83:begin
       snd_irq_vector:=snd_irq_vector or $20;
-      timer[timer_sound].enabled:=true;
+      timers.enabled(timer_sound,true);
     end;
 end;
 end;
@@ -700,7 +700,7 @@ procedure ym2151_snd_irq(irqstate:byte);
 begin
   if irqstate=1 then snd_irq_vector:=snd_irq_vector and $ef
     else snd_irq_vector:=snd_irq_vector or $10;
-  timer[timer_sound].enabled:=true;
+  timers.enabled(timer_sound,true);
 end;
 
 procedure rtype2_perodic_int;
@@ -729,8 +729,8 @@ begin
   190,191:dac_0.reset;
  end;
  reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
  scroll_x1:=0;
  scroll_x2:=0;
  scroll_y1:=0;
@@ -742,13 +742,11 @@ begin
  sample_addr:=0;
  fillchar(irq_base[0],5,0);
  irq_pos:=0;
- timer[timer_sound].enabled:=false;
+ timers.enabled(timer_sound,false);
 end;
 
 function iniciar_irem_m72:boolean;
 const
-  pc_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
-  pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 );
   ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7);
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
@@ -775,14 +773,14 @@ nec_0:=cpu_nec.create(8000000,284,NEC_V30);
 //Sound CPU
 z80_0:=cpu_z80.create(3579545,284);
 z80_0.change_ram_calls(irem_m72_snd_getbyte,irem_m72_snd_putbyte);
-timer_sound:=init_timer(z80_0.numero_cpu,1,sound_irq_ack,true);
+timer_sound:=timers.init(z80_0.numero_cpu,1,sound_irq_ack,nil,true);
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   87:begin //R-Type
       //Main CPU
       nec_0.change_ram_calls(irem_m72_getbyte,irem_m72_putbyte);
       nec_0.change_io_calls16(irem_m72_inword,irem_m72_outword);
-      if not(cargar_roms16b(@rom[0],@rtype_rom[0],'rtype.zip',0)) then exit;
+      if not(roms_load16b(@rom,rtype_rom)) then exit;
       //Sound
       z80_0.change_io_calls(irem_m72_snd_inbyte,irem_m72_snd_outbyte);
       z80_0.init_sound(irem_m72_sound_update);
@@ -790,80 +788,80 @@ case main_vars.tipo_maquina of
       update_video_irem_m72:=update_video_rtype;
       paint_video_irem_m72:=paint_video_rtype;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@rtype_char[0],'rtype.zip',0)) then exit;
+      if not(roms_load(memoria_temp,rtype_char)) then exit;
       init_gfx(0,8,8,$1000);
       gfx[0].trans[0]:=true;
       gfx_set_desc_data(4,0,8*8,$18000*8,$10000*8,$8000*8,0*8);
-      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+      convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,false);
       //chars 2
-      if not(cargar_roms(@memoria_temp[0],@rtype_char2[0],'rtype.zip',0)) then exit;
+      if not(roms_load(memoria_temp,rtype_char2)) then exit;
       init_gfx(1,8,8,$1000);
       gfx[1].trans[0]:=true;
-      convert_gfx(1,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+      convert_gfx(1,0,memoria_temp,@ps_x,@ps_y,false,false);
       //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@irem_m72_sprites[0],'rtype.zip',0)) then exit;
+      if not(roms_load(memoria_temp,irem_m72_sprites)) then exit;
       init_gfx(2,16,16,$1000);
       gfx[2].trans[0]:=true;
       gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
-      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+      convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
     end;
   190:begin //Hammerin' Harry
       //Main CPU
       nec_0.change_ram_calls(hharry_getbyte,hharry_putbyte);
       nec_0.change_io_calls16(hharry_inword,hharry_outword);
       nec_0.change_io_calls(hharry_inbyte,hharry_outbyte);
-      if not(cargar_roms16b(@rom[0],@hharry_rom[0],'hharry.zip',0)) then exit;
+      if not(roms_load16b(@rom,hharry_rom)) then exit;
       //Sound
-      if not(cargar_roms(@mem_snd[0],@hharry_snd,'hharry.zip')) then exit;
+      if not(roms_load(@mem_snd,hharry_snd)) then exit;
       z80_0.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
-      init_timer(z80_0.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
+      timers.init(z80_0.numero_cpu,3579645/(128*55),rtype2_perodic_int,nil,true);
       z80_0.init_sound(rtype2_sound_update);
       dac_0:=dac_chip.Create;
-      if not(cargar_roms(@mem_dac[0],@hharry_dac,'hharry.zip')) then exit;
+      if not(roms_load(@mem_dac,hharry_dac)) then exit;
       //video
       update_video_irem_m72:=update_video_hharry;
       paint_video_irem_m72:=paint_video_hharry;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@hharry_char[0],'hharry.zip',0)) then exit;
+      if not(roms_load(memoria_temp,hharry_char)) then exit;
       init_gfx(0,8,8,$4000);
       gfx[0].trans[0]:=true;
       gfx_set_desc_data(4,0,8*8,$18000*8*4,$10000*8*4,$8000*8*4,0*8);
-      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+      convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,false);
       //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@hharry_sprites[0],'hharry.zip',0)) then exit;
+      if not(roms_load(memoria_temp,hharry_sprites)) then exit;
       init_gfx(2,16,16,$1000);
       gfx[2].trans[0]:=true;
       gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
-      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+      convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
     end;
     191:begin //R-Type 2
       //Main CPU
       nec_0.change_ram_calls(rtype2_getbyte,rtype2_putbyte);
       nec_0.change_io_calls16(rtype2_inword,rtype2_outword);
       nec_0.change_io_calls(rtype2_inbyte,rtype2_outbyte);
-      if not(cargar_roms16b(@rom[0],@rtype2_rom[0],'rtype2.zip',0)) then exit;
+      if not(roms_load16b(@rom,rtype2_rom)) then exit;
       //Sound
-      if not(cargar_roms(@mem_snd[0],@rtype2_snd,'rtype2.zip')) then exit;
+      if not(roms_load(@mem_snd,rtype2_snd)) then exit;
       z80_0.change_io_calls(rtype2_snd_inbyte,rtype2_snd_outbyte);
-      init_timer(z80_0.numero_cpu,3579645/(128*55),rtype2_perodic_int,true);
+      timers.init(z80_0.numero_cpu,3579645/(128*55),rtype2_perodic_int,nil,true);
       z80_0.init_sound(rtype2_sound_update);
       dac_0:=dac_chip.Create;
-      if not(cargar_roms(@mem_dac[0],@rtype2_dac,'rtype2.zip')) then exit;
+      if not(roms_load(@mem_dac,rtype2_dac)) then exit;
       //video
       update_video_irem_m72:=update_video_rtype2;
       paint_video_irem_m72:=paint_video_rtype2;
       //convertir chars
-      if not(cargar_roms(@memoria_temp[0],@rtype2_char[0],'rtype2.zip',0)) then exit;
+      if not(roms_load(memoria_temp,rtype2_char)) then exit;
       init_gfx(0,8,8,$8000);
       gfx[0].trans[0]:=true;
       gfx_set_desc_data(4,0,8*8,$18000*8*4*2,$10000*8*4*2,$8000*8*4*2,0*8);
-      convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+      convert_gfx(0,0,memoria_temp,@ps_x,@ps_y,false,false);
       //convertir sprites
-      if not(cargar_roms(@memoria_temp[0],@rtype2_sprites[0],'rtype2.zip',0)) then exit;
+      if not(roms_load(memoria_temp,rtype2_sprites)) then exit;
       init_gfx(2,16,16,$1000);
       gfx[2].trans[0]:=true;
       gfx_set_desc_data(4,0,32*8,$60000*8,$40000*8,$20000*8,0);
-      convert_gfx(2,0,@memoria_temp[0],@ps_x[0],@ps_y[0],false,false);
+      convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
     end;
 end;
 //Sound Chips
