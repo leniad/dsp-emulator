@@ -379,7 +379,7 @@ end;
 procedure tms99xx_chip.draw_mode2(linea:byte);
 var
   x,fc,bc:byte;
-  name_base,colour,pattern,patternptr,colourptr,charcode:word;
+  name_base,pattern,patternptr,colorptr,charcode:word;
   ptemp:pword;
 begin //256x192 --> Caracteres de 8x8
  ptemp:=punbuf;
@@ -389,14 +389,12 @@ begin //256x192 --> Caracteres de 8x8
  for x:=0 to 31 do begin
      charcode:=self.read_m(name_base)+(linea shr 6)*256;
      name_base:=name_base+1;
-     colour:=charcode and self.colormask;
-     pattern:=charcode and self.patternmask;
-     patternptr:=self.pattern+(colour*8)+(linea and 7);
-     colourptr:=self.color+(pattern*8)+(linea and 7);
+     patternptr:=self.pattern+((charcode and self.patternmask)*8)+(linea and 7);
+     colorptr:=self.color+((charcode and self.colormask)*8)+(linea and 7);
      pattern:=self.read_m(patternptr);
-     bc:=self.read_m(colourptr);
+     bc:=self.read_m(colorptr);
      fc:=bc shr 4;
-     bc:=bc and $F;
+     bc:=bc and $f;
      if (pattern and $80)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
      if (pattern and $40)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
      if (pattern and $20)<>0 then ptemp^:=paleta[fc] else ptemp^:=paleta[bc];inc(ptemp);
@@ -423,8 +421,8 @@ begin //256x192 --> Caracteres de 4x4 en dos bloques
      charcode:=self.read_m(name_base);
      name_base:=name_base+1;
      colorptr:=self.pattern+(charcode*8)+((linea shr 2) and 7);
-     FC:=self.read_m(colorptr) shr 4;
-     BG:=self.read_m(colorptr) and $f;
+     fc:=self.read_m(colorptr) shr 4;
+     bg:=self.read_m(colorptr) and $f;
      ptemp^:=paleta[fc];inc(ptemp); //(x+0)
      ptemp^:=paleta[fc];inc(ptemp); //(x+1)
      ptemp^:=paleta[fc];inc(ptemp); //(x+2)
@@ -446,8 +444,8 @@ begin //240x192 --> Caracteres de 6x8
  fillword(ptemp,PIXELS_LEFT_BORDER_VISIBLES_TEXT,paleta[self.bgcolor]);
  inc(ptemp,PIXELS_LEFT_BORDER_VISIBLES_TEXT);
  for x:=0 to 39 do begin
-     FC:=self.fgcolor;
-     BC:=self.bgcolor;
+     fc:=self.fgcolor;
+     bc:=self.bgcolor;
      ptemp^:=paleta[fc];inc(ptemp); //(x+0)
      ptemp^:=paleta[fc];inc(ptemp); //(x+1)
      ptemp^:=paleta[fc];inc(ptemp); //(x+2)
@@ -472,8 +470,8 @@ begin //256x192 --> Caracteres de 4x4 en dos bloques
      charcode:=self.read_m(name_base);
      name_base:=name_base+1;
      colorptr:=self.pattern+(((charcode+((linea shr 2) and 7)+((linea shr 6) shl 8)) and self.patternmask) shl 3);
-     FC:=self.read_m(colorptr) shr 4;
-     BG:=self.read_m(colorptr) and $f;
+     fc:=self.read_m(colorptr) shr 4;
+     bg:=self.read_m(colorptr) and $f;
      ptemp^:=paleta[fc];inc(ptemp); //(x+0)
      ptemp^:=paleta[fc];inc(ptemp); //(x+1)
      ptemp^:=paleta[fc];inc(ptemp); //(x+2)
@@ -533,17 +531,19 @@ begin
                putpixel(0,linea+LINEAS_TOP_BORDE,PIXELS_VISIBLES_TOTAL,punbuf,self.pant);
                if ((self.regs[1] and $50)=$40) then draw_sprites(linea)
                 else self.FifthSprite:=$1f;
+               //if linea=191 then self.status_reg:=self.status_reg or $80;
             end;
      192:begin
             single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
             self.status_reg:=self.status_reg or $80;
+            self.exec_interrupt;
          end;
-     193:begin //Borde inferior (1) y activar las IRQs
-              single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
-              self.exec_interrupt;
-         end;
+    // 193:begin //Borde inferior (1) y activar las IRQs
+    //          single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+    //          self.exec_interrupt;
+    //     end;
      //Borde inferior (23)
-     194..215:single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
+     193..215:single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
      //Lineas no dibujadas sincronismos (3+3+13)
      216..234:;
      //Borde superior (27)
@@ -581,6 +581,8 @@ begin
      1:begin
         tms.exec_interrupt;
         tms.modo_video:=(tms.Regs[0] and 2) or ((tms.Regs[1] and $10) shr 4) or ((tms.Regs[1] and 8) shr 1);
+        if (val and $80)<>0 then tms.TMS9918A_VRAM_SIZE:=$3fff
+           else tms.TMS9918A_VRAM_SIZE:=$fff;
        end;
      2:tms.NameTbl:=(val*1024) and tms.TMS9918A_VRAM_SIZE;
      3:begin
@@ -621,7 +623,7 @@ begin
   register_r:=self.status_reg;
   self.status_reg:=self.FifthSprite;
   self.segundo_byte:=false;
-  self.exec_interrupt;
+  self.exec_interrupt; //Limpio la IRQ...
 end;
 
 //http://bifi.msxnet.org/msxnet/tech/tms9918a.txt
@@ -644,7 +646,7 @@ end else begin
   self.segundo_byte:=false;
   self.addr:=((self.addr and $ff) or (valor shl 8)) and self.tms9918A_VRAM_SIZE;
   case (valor and $c0) of
-    $80:change_reg(self,valor and $7,self.addr and $ff);
+    $80:change_reg(self,valor and $f,self.addr and $ff);
     $00:begin
           self.buffer:=self.read_m(self.addr);
           self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;

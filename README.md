@@ -1,4 +1,12 @@
 ﻿# DSP Emulator status #
+<b>13/11/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +TMS99XX: Fixed video mode 2
+-Coleco
+    +Added Mega Cart support: ROM pagination
+    +Added Super Game Module supprt: More RAM and AY8912
+    +Added support for Boxxle and Black Onix (missing EEPROM)
+</pre>
 <b>06/11/20 - DSP Emulator 0.18b2 Final. Almost three years have passed since the last update! Updated Win32 binary and source code.
 The executables for Linux and Mac this time are not compiled, if someone needs them let me know..</b><br>
 Many, many changes. The most important are:<br><pre>

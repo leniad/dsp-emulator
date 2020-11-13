@@ -1613,7 +1613,7 @@ if coleco_header.magic<>'CLSN' then begin
   exit;
 end;
 reset_coleco;
-if ((coleco_header.version<>1) and (coleco_header.version<>2) and (coleco_header.version<>$1002) and (coleco_header.version<>$220)) then begin
+if ((coleco_header.version<>1) and (coleco_header.version<>2) and (coleco_header.version<>$1002) and (coleco_header.version<>$220) and (coleco_header.version<>$300)) then begin
    freemem(coleco_header);
    exit;
 end;
@@ -1624,9 +1624,10 @@ while longitud<long do begin
   copymemory(coleco_block,data,10);
   inc(data,10);inc(longitud,10);
   if coleco_block.nombre='CRAM' then begin
-    getmem(ptemp,$e000);
+    getmem(ptemp,$10000);
     decompress_zlib(data,coleco_block.longitud,pointer(ptemp),descomprimido);
-    copymemory(@memoria[$2000],ptemp,$e000);
+    if coleco_header.version=$300 then copymemory(@memoria[0],ptemp,descomprimido)
+      else copymemory(@memoria[$2000],ptemp,descomprimido);
     freemem(ptemp);
   end;
   if coleco_block.nombre='Z80R' then begin
@@ -1706,7 +1707,7 @@ while longitud<long do begin
           z80_0.load_snapshot(ptemp2);
           freemem(ptemp2);
         end;
-      $220:z80_0.load_snapshot(data); //Version 2.20
+      $220,$300:z80_0.load_snapshot(data); //Version 2.20 y 3.0
     end;
   end;
   if coleco_block.nombre='TMSR' then begin
@@ -1733,7 +1734,7 @@ while longitud<long do begin
             copymemory(@tms_0.mem[0],@tms_v1.memory[0],$4000);
             freemem(tms_v1);
         end;
-      $220:tms_0.load_snapshot(ptemp);
+      $220,$300:tms_0.load_snapshot(ptemp);
     end;
     freemem(ptemp);
     tms_0.change_irq(coleco_interrupt);
@@ -1741,7 +1742,14 @@ while longitud<long do begin
     if tms_0.bgcolor=0 then paleta[0]:=0
       else paleta[0]:=paleta[tms_0.bgcolor];
   end;
+  if coleco_block.nombre='MISC' then begin
+    getmem(ptemp,$100000);
+    decompress_zlib(data,coleco_block.longitud,pointer(ptemp),descomprimido);
+    copymemory(@tcoleco,ptemp,descomprimido);
+    freemem(ptemp);
+  end;
   if coleco_block.nombre='7649' then sn_76496_0.load_snapshot(data);
+  if coleco_block.nombre='AY89' then ay8910_0.load_snapshot(data);
   inc(data,coleco_block.longitud);inc(longitud,coleco_block.longitud);
 end;
 freemem(coleco_header);
@@ -1759,8 +1767,8 @@ begin
 getmem(coleco_header,SIZE_MH);
 fillchar(coleco_header^,SIZE_MH,0);
 coleco_header.magic:='CLSN';
-coleco_header.version:=$220;
-getmem(pdata,$30000);
+coleco_header.version:=$300;
+getmem(pdata,$100000);
 ptemp:=pdata;
 //Cabecera
 copymemory(ptemp,coleco_header,SIZE_MH);
@@ -1771,7 +1779,29 @@ fillchar(coleco_block^,SIZE_BLK,0);
 coleco_block.nombre:='CRAM';
 ptemp2:=ptemp;
 inc(ptemp2,SIZE_BLK);
-compress_zlib(@memoria[$2000],$e000,ptemp2,comprimido);
+compress_zlib(@memoria[$0],$10000,ptemp2,comprimido);
+coleco_block.longitud:=comprimido;
+copymemory(ptemp,coleco_block,SIZE_BLK);
+inc(ptemp,SIZE_BLK);inc(longitud,SIZE_BLK);
+inc(ptemp,comprimido);inc(longitud,comprimido);
+//MISC
+fillchar(coleco_block^,SIZE_BLK,0);
+coleco_block.nombre:='MISC';
+ptemp2:=ptemp;
+inc(ptemp2,SIZE_BLK);
+ptemp3:=@tcoleco;
+long2:=sizeof(tcoleco_machine);
+compress_zlib(ptemp3,long2,ptemp2,comprimido);
+coleco_block.longitud:=comprimido;
+copymemory(ptemp,coleco_block,SIZE_BLK);
+inc(ptemp,SIZE_BLK);inc(longitud,SIZE_BLK);
+inc(ptemp,comprimido);inc(longitud,comprimido);
+//AY8912
+fillchar(coleco_block^,SIZE_BLK,0);
+coleco_block.nombre:='AY89';
+ptemp2:=ptemp;
+inc(ptemp2,SIZE_BLK);
+comprimido:=ay8910_0.save_snapshot(ptemp2);
 coleco_block.longitud:=comprimido;
 copymemory(ptemp,coleco_block,SIZE_BLK);
 inc(ptemp,SIZE_BLK);inc(longitud,SIZE_BLK);
