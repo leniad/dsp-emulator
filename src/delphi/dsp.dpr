@@ -303,7 +303,8 @@ uses
   mos6526_old in '..\ordenadores\misc\mos6526_old.pas',
   sid_sound in '..\snd\sid_sound.pas',
   sid_tables in '..\snd\sid_tables.pas',
-  d64_file_format in '..\misc\d64_file_format.pas';
+  d64_file_format in '..\misc\d64_file_format.pas',
+  armedf_hw in '..\arcade\armedf_hw.pas';
 
 {$R *.res}
 

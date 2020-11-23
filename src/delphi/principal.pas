@@ -429,6 +429,8 @@ type
     Gigasm21: TMenuItem;
     Omega1: TMenuItem;
     pbillrd1: TMenuItem;
+    ArmedFHW1: TMenuItem;
+    ArmedF1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

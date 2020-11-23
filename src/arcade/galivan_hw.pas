@@ -252,10 +252,7 @@ end;
 function galivan_snd_inbyte(puerto:word):byte;
 begin
   case (puerto and $ff) of
-  4:begin
-      sound_latch:=0;
-      galivan_snd_inbyte:=0;
-    end;
+  4:sound_latch:=0;
   6:galivan_snd_inbyte:=sound_latch;
   end;
 end;

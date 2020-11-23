@@ -185,7 +185,6 @@ end;
 
 function exedexes_snd_getbyte(direccion:word):byte;
 begin
-
 case direccion of
   0..$47ff:exedexes_snd_getbyte:=mem_snd[direccion];
   $6000:exedexes_snd_getbyte:=sound_command;
@@ -253,9 +252,8 @@ const
 			24*16, 25*16, 26*16, 27*16, 28*16, 29*16, 30*16, 31*16);
 procedure poner_bg;
 var
-  f:word;
-  x,y,atrib,pos:word;
-  nchar,color:word;
+  f,pos,color:word;
+  x,y,atrib,nchar:byte;
   flipx,flipy:boolean;
 begin
 for f:=0 to $fff do begin
@@ -272,9 +270,8 @@ end;
 end;
 procedure poner_fg;
 var
-  f:word;
-  x,y,pos:word;
-  nchar:word;
+  f,pos:word;
+  x,y,nchar:byte;
 begin
 for f:=0 to $1fff do begin
   x:=f div 128;

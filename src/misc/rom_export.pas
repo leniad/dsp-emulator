@@ -2563,6 +2563,14 @@ const
         (n:'pb.5';l:$4000;p:$4000;crc:$9dfccbd3),(n:'pb.6';l:$4000;p:$8000;crc:$b5c3f6f6),
         (n:'10619.3r';l:$2000;p:0;crc:$3296b9d9),(n:'10621.3m';l:$2000;p:$4000;crc:$3dca8e4b),
         (n:'10620.3n';l:$2000;p:$8000;crc:$ee76b079),());
+        armedf:array[0..14] of tipo_roms=(
+        (n:'06.3d';l:$10000;p:0;crc:$0f9015e2),(n:'01.3f';l:$10000;p:$1;crc:$816ff7c5),
+        (n:'07.5d';l:$10000;p:$20000;crc:$5b3144a5),(n:'02.4f';l:$10000;p:$20001;crc:$fa10c29d),
+        (n:'af_08.rom';l:$10000;p:$40000;crc:$d1d43600),(n:'af_03.rom';l:$10000;p:$40001;crc:$bbe1fe2d),
+        (n:'af_10.rom';l:$10000;p:0;crc:$c5eacb87),(n:'09.11c';l:$8000;p:0;crc:$5c6993d5),
+        (n:'af_14.rom';l:$10000;p:0;crc:$8c5dc5a7),(n:'af_13.rom';l:$10000;p:$10000;crc:$136a58a3),
+        (n:'af_04.rom';l:$10000;p:0;crc:$44d3af4f),(n:'af_05.rom';l:$10000;p:$10000;crc:$92076cab),
+        (n:'af_11.rom';l:$20000;p:0;crc:$b46c473c),(n:'af_12.rom';l:$20000;p:$20000;crc:$23cb6bfe),());
 
 implementation
 uses principal,init_games;

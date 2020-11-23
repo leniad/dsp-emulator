@@ -1,10 +1,15 @@
 ﻿# DSP Emulator status #
+<b>23/11/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-Armed F HW
+    +Added Armed F driver with sound
+</pre>
+<img src='https://i.ibb.co/wwKDKzy/Armed-F.jpg'><br><br>
 <b>13/11/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +TMS99XX: Fixed video mode 2
 -Coleco
     +Added Mega Cart support: ROM pagination
-    +Added Super Game Module supprt: More RAM and AY8912
+    +Added Super Game Module support: More RAM and AY8912
     +Added support for Boxxle and Black Onix (missing EEPROM)
 </pre>
 <img src='https://i.ibb.co/Kbdy6Dh/dragon.jpg'>

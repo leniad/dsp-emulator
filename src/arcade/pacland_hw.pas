@@ -35,8 +35,7 @@ var
 procedure cambiar_paleta;inline;
 var
   colores:tpaleta;
-  f:byte;
-  bit0,bit1,bit2,bit3,tmp:byte;
+  f,bit0,bit1,bit2,bit3,tmp:byte;
 begin
 for f:=0 to $ff do begin
   tmp:=pal_proms[palette_bank*$100+f];
@@ -276,7 +275,6 @@ end;
 
 procedure pacland_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$9fff then exit;
 case direccion of
   $0..$fff:if memoria[direccion]<>valor then begin
               gfx[0].buffer[direccion shr 1]:=true;
@@ -299,7 +297,7 @@ case direccion of
             fillchar(gfx[0].buffer[0],$800,1);
             fillchar(gfx[1].buffer[0],$800,1);
         end;
-  $4000..$5fff:exit;
+  $4000..$5fff,$a000..$ffff:;
   $6800..$6bff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $7000..$7fff:begin
                    irq_enable:=(direccion and $800)=0;
@@ -331,7 +329,7 @@ case direccion of
                   irq_enable_mcu:=((direccion and $2000)=0);
                   if not(irq_enable_mcu) then m6800_0.change_irq(CLEAR_LINE);
                end;
-  $8000..$bfff,$f000..$ffff:exit;
+  $8000..$bfff,$f000..$ffff:;
   $c000..$c7ff:mem_snd[direccion]:=valor;
 end;
 end;
@@ -436,7 +434,7 @@ reset_pacland;
 iniciar_pacland:=true;
 end;
 
-procedure Cargar_pacland;
+procedure cargar_pacland;
 begin
 llamadas_maquina.iniciar:=iniciar_pacland;
 llamadas_maquina.bucle_general:=pacland_principal;

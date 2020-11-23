@@ -2861,6 +2861,13 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object ArmedFHW1: TMenuItem
+            Caption = 'Armed F HW'
+            object ArmedF1: TMenuItem
+              Caption = 'Armed F'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'
