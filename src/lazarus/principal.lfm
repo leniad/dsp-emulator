@@ -3258,6 +3258,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object MenuItem38: TMenuItem
+            Caption = 'Armed F HW'
+            object armedf1: TMenuItem
+              Caption = 'Armed F'
+              OnClick = CambiarMaquina
+            end
+            object terraforce1: TMenuItem
+              Caption = 'Terra Force'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object MenuItem11: TMenuItem
           Caption = '80x86'

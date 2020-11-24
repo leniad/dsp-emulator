@@ -229,6 +229,9 @@ type
     c641: TMenuItem;
     gigas1: TMenuItem;
     gigasm21: TMenuItem;
+    MenuItem38: TMenuItem;
+    armedf1: TMenuItem;
+    terraforce1: TMenuItem;
     pbillrd1: TMenuItem;
     omega1: TMenuItem;
     Salamander1: TMenuItem;

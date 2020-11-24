@@ -10,6 +10,9 @@ procedure cargar_sg;
 implementation
 uses principal;
 
+var
+  ram_8k,mid_8k_ram:boolean;
+
 procedure eventos_sg;
 begin
 if event.arcade then begin
@@ -60,8 +63,9 @@ end;
 procedure sg_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$7fff:; //ROM
-  $8000..$bfff:memoria[direccion]:=valor;
+  0..$1fff,$4000..$7fff,$a000..$bfff:; //ROM
+  $2000..$3fff:if ram_8k then memoria[direccion]:=valor;
+  $8000..$9fff:if mid_8k_ram then memoria[direccion]:=valor;
   $c000..$ffff:memoria[$c000+(direccion and $1fff)]:=valor;
 end;
 end;
@@ -113,7 +117,7 @@ function abrir_sg:boolean;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
-  longitud,crc:integer;
+  longitud,crc_val:integer;
 begin
   if not(OpenRom(StSG1000,RomFile)) then begin
     abrir_sg:=true;
@@ -124,9 +128,9 @@ begin
   abrir_sg:=false;
   extension:=extension_fichero(RomFile);
   if extension='ZIP' then begin
-    if not(search_file_from_zip(RomFile,'*.sg',nombre_file,longitud,crc,true)) then exit;
+    if not(search_file_from_zip(RomFile,'*.sg',nombre_file,longitud,crc_val,true)) then exit;
     getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
+    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc_val,true)) then begin
       freemem(datos);
       exit;
     end;
@@ -143,6 +147,15 @@ begin
   //Abrirlo
   extension:=extension_fichero(nombre_file);
   if extension='SG' then copymemory(@memoria,datos,longitud);
+  ram_8k:=false;
+  mid_8k_ram:=false;
+  crc_val:=calc_crc(datos,longitud);
+  case crc_val of
+    //BomberMan Super (2), King's Valley, Knightmare, Legend of Kage, Rally X, Road Fighter, Tank Battalion, Twinbee, YieAr KungFu II
+    $69fc1494,$ce5648c3,$223397a1,$281d2888,$2e7166d5,$306d5f78,$29e047cc,$5cbd1163,$c550b4f0,$fc87463c:ram_8k:=true;
+    //Castle, Othello (2)
+    $92f29d6,$af4f14bc,$1d1a0ca3:mid_8k_ram:=true;
+  end;
   llamadas_maquina.open_file:=nombre_file;
   abrir_sg:=true;
   reset_sg;
@@ -176,12 +189,14 @@ end;
 
 procedure cargar_sg;
 begin
+principal1.BitBtn10.Glyph:=nil;
+principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);
 principal1.BitBtn10.OnClick:=principal1.fLoadCartucho;
 llamadas_maquina.iniciar:=iniciar_sg;
 llamadas_maquina.bucle_general:=sg_principal;
 llamadas_maquina.reset:=reset_sg;
 llamadas_maquina.cartuchos:=abrir_sg;
-llamadas_maquina.fps_max:=59.722938;
+llamadas_maquina.fps_max:=59.922743;
 end;
 
 end.

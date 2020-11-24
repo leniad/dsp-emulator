@@ -47,7 +47,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=286;
+  GAMES_CONT=287;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -327,6 +327,7 @@ const
   (name:'Omega';year:'1986';snd:1;hi:false;zip:'omega';grid:273;company:'Nihon System';rom:@omega),
   (name:'Perfect Billard';year:'1987';snd:1;hi:false;zip:'pbillrd';grid:274;company:'Nihon System';rom:@pbillrd),
   (name:'Armed F';year:'1988';snd:1;hi:false;zip:'armedf';grid:275;company:'Nichibutsu';rom:@armedf),
+  (name:'Terra Force';year:'1987';snd:1;hi:false;zip:'terraf';grid:276;company:'Nichibutsu';rom:@terraf),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -631,6 +632,7 @@ case numero of
   273:principal1.CambiarMaquina(principal1.omega1);
   274:principal1.CambiarMaquina(principal1.pbillrd1);
   275:principal1.CambiarMaquina(principal1.armedf1);
+  276:principal1.CambiarMaquina(principal1.terraforce1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -923,6 +925,7 @@ principal1.gigasm21.Checked:=false;
 principal1.omega1.Checked:=false;
 principal1.pbillrd1.Checked:=false;
 principal1.armedf1.Checked:=false;
+principal1.terraforce1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1155,7 +1158,7 @@ case tmaquina of
   262:cargar_badlands;
   266,267:cargar_galivan;
   268,269,270:cargar_lastduel;
-  275:cargar_armedf;
+  275,276:cargar_armedf;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2277,6 +2280,10 @@ end;
 if sender=principal1.armedf1 then begin
   tipo:=275;
   principal1.armedf1.Checked:=true;
+end;
+if sender=principal1.terraforce1 then begin
+  tipo:=276;
+  principal1.terraforce1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

@@ -94,6 +94,7 @@ end;
 procedure sms_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
+  0..$7fff:;
   $8000..$bfff:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[mapper_sms.slot2_bank,direccion and $3fff]:=valor;
   $c000..$fffb:mapper_sms.ram[direccion and $1fff]:=valor;
   $fffc..$ffff:begin

@@ -2867,6 +2867,10 @@ object principal1: Tprincipal1
               Caption = 'Armed F'
               OnClick = CambiarMaquina
             end
+            object TerraForce1: TMenuItem
+              Caption = 'Terra Force'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object NEC1: TMenuItem

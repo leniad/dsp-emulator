@@ -2571,6 +2571,15 @@ const
         (n:'af_14.rom';l:$10000;p:0;crc:$8c5dc5a7),(n:'af_13.rom';l:$10000;p:$10000;crc:$136a58a3),
         (n:'af_04.rom';l:$10000;p:0;crc:$44d3af4f),(n:'af_05.rom';l:$10000;p:$10000;crc:$92076cab),
         (n:'af_11.rom';l:$20000;p:0;crc:$b46c473c),(n:'af_12.rom';l:$20000;p:$20000;crc:$23cb6bfe),());
+        terraf:array[0..15] of tipo_roms=(
+        (n:'8.6e';l:$10000;p:0;crc:$fd58fa06),(n:'3.6h';l:$10000;p:$1;crc:$54823a7d),
+        (n:'7.4e';l:$10000;p:$20000;crc:$fde8de7e),(n:'2.4h';l:$10000;p:$20001;crc:$db987414),
+        (n:'6.3e';l:$10000;p:$40000;crc:$a5bb8c3b),(n:'1.3h';l:$10000;p:$40001;crc:$d2de6d28),
+        (n:'11.17k';l:$10000;p:0;crc:$4407d475),(n:'10.11c';l:$4000;p:0;crc:$ac705812),
+        (n:'9.11e';l:$8000;p:0;crc:$bc6f7cbc),(n:'15.8a';l:$10000;p:0;crc:$2144d8e0),
+        (n:'14.6a';l:$10000;p:$10000;crc:$744f5c9e),(n:'5.15h';l:$10000;p:0;crc:$25d23dfd),
+        (n:'4.13h';l:$10000;p:$10000;crc:$b9b0fe27),(n:'12.7d';l:$10000;p:0;crc:$2d1f2ceb),
+        (n:'13.9d';l:$10000;p:$1;crc:$1d2f92d6),());
 
 implementation
 uses principal,init_games;

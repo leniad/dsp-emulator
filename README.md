@@ -1,4 +1,13 @@
 ﻿# DSP Emulator status #
+<b>25/11/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-SG-1000
+    +Added two mappers. Almost 100% compatibility now
+-Armed F HW
+    +Added Terra Force driver with sound
+</pre>
+<img src='https://i.ibb.co/bsBmfcc/Terra-Force.jpg'>
+<img src='https://i.ibb.co/DQr1WRB/kings.jpg'>
+<img src='https://i.ibb.co/Dtnt3dP/yakf2.jpg'><br><br>
 <b>23/11/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -Armed F HW
     +Added Armed F driver with sound

@@ -232,12 +232,12 @@ begin
   for sprattr:=0 to 31 do begin
       spr_y:=self.read_m(self.spriteattribute+(sprattr*4));
       self.FifthSprite:=sprattr;
-      // Stop processing sprites */
+      // Stop processing sprites
       if (spr_y=208) then break;
       if (spr_y>$e0) then spr_y:=spr_y-256;
-      // vert pos 255 is displayed on the first line of the screen */
+      // vert pos 255 is displayed on the first line of the screen
       spr_y:=spr_y+1;
-      // is sprite enabled on this line? */
+      // is sprite enabled on this line?
       if ((spr_y<=linea) and (linea<(spr_y+sprite_height))) then begin
          spr_x:=self.read_m(self.spriteattribute+(sprattr*4)+1);
          sprcode:=self.read_m(self.spriteattribute+(sprattr*4)+2);
@@ -245,7 +245,7 @@ begin
          if (sprite_size=16) then pataddr:=self.spritepattern+(sprcode and $fc)*8
             else pataddr:=self.spritepattern+sprcode*8;
          num_sprites:=num_sprites+1;
-         // Fifth sprite encountered? */
+         // Fifth sprite encountered?
          if (num_sprites=5) then begin
 	          fifth_encountered:=true;
 	          break;
@@ -260,14 +260,14 @@ begin
           if sprite_mag<>0 then colission_index:=spr_x+(i*2)+32
             else colission_index:=spr_x+i+32;
           for z:=0 to sprite_mag do begin
-            // Check if pixel should be drawn */
+            // Check if pixel should be drawn
 		        if (pattern and $80)<>0 then begin
 		          if ((colission_index>=32) and (colission_index<32+256)) then begin
-		            // Check for colission */
+		            // Check for colission
  		            if (spr_drawn[colission_index]<>0) then self.status_reg:=self.status_reg or $20;
 		            spr_drawn[colission_index]:=spr_drawn[colission_index] or $01;
  		            if (sprcol<>0) then begin
-                  // Has another sprite already drawn here? */
+                  // Has another sprite already drawn here?
 			            if ((spr_drawn[colission_index] and $02)=0) then begin
 			              spr_drawn[colission_index]:=spr_drawn[colission_index] or $02;
                     punbuf^:=paleta[sprcol];
@@ -538,11 +538,6 @@ begin
             self.status_reg:=self.status_reg or $80;
             self.exec_interrupt;
          end;
-    // 193:begin //Borde inferior (1) y activar las IRQs
-    //          single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
-    //          self.exec_interrupt;
-    //     end;
-     //Borde inferior (23)
      193..215:single_line(0,linea+LINEAS_TOP_BORDE,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
      //Lineas no dibujadas sincronismos (3+3+13)
      216..234:;

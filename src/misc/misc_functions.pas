@@ -261,7 +261,7 @@ case Sistema of
        end;
   StSG1000:begin
          opendialog.InitialDir:=Directory.sg1000;
-         OpenDialog.Filter:='SMS Files (*.sg;*.zip)|*.sg;*.zip';
+         OpenDialog.Filter:='SG-1000 Files (*.sg;*.zip)|*.sg;*.zip';
        end;
   StC64:begin
          opendialog.InitialDir:=directory.c64_tap;
