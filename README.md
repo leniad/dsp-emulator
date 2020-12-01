@@ -7,7 +7,7 @@
     +Added Codemasters mapper
 -Sega Master System
     +Added cart enable/disable
-    +Driver stop and warning if no BIOS present
+    +Driver stop and warning if no BIOS present
 -Armed F HW
     +Added driver for Crazy Climber 2
     +Added driver for Legion
