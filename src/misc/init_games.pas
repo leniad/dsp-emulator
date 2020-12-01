@@ -5,7 +5,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   //Computer
   spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,commodore64,
   //Console
-  nes,coleco,gb,sms,sg1000,
+  nes,coleco,gb,sms,sg1000,sega_gg,
   //Arcade
   phoenix_hw,bombjack_hw,pacman_hw,mysteriousstones_hw,donkeykong_hw,
   greenberet_hw,blacktiger_hw,commando_hw,gng_hw,mikie_hw,shaolinsroad_hw,
@@ -47,7 +47,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=287;
+  GAMES_CONT=290;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -328,6 +328,8 @@ const
   (name:'Perfect Billard';year:'1987';snd:1;hi:false;zip:'pbillrd';grid:274;company:'Nihon System';rom:@pbillrd),
   (name:'Armed F';year:'1988';snd:1;hi:false;zip:'armedf';grid:275;company:'Nichibutsu';rom:@armedf),
   (name:'Terra Force';year:'1987';snd:1;hi:false;zip:'terraf';grid:276;company:'Nichibutsu';rom:@terraf),
+  (name:'Crazy Climber 2';year:'1988';snd:1;hi:false;zip:'cclimbr2';grid:277;company:'Nichibutsu';rom:@cclimbr2),
+  (name:'Legion - Spinner-87';year:'1987';snd:1;hi:false;zip:'legion';grid:278;company:'Nichibutsu';rom:@legion),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -336,6 +338,7 @@ const
   (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-'),
   (name:'Sega Master System';year:'1986';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_),
   (name:'SC-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega'),
+  (name:'Sega GameGear';year:'1990';snd:1;hi:false;zip:'';grid:1006;company:'Sega'),
   //G&W
   (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),
   (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55),
@@ -633,12 +636,15 @@ case numero of
   274:principal1.CambiarMaquina(principal1.pbillrd1);
   275:principal1.CambiarMaquina(principal1.armedf1);
   276:principal1.CambiarMaquina(principal1.terraforce1);
+  277:principal1.CambiarMaquina(principal1.crazyclimber21);
+  278:principal1.CambiarMaquina(principal1.legion1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
   1003:principal1.CambiarMaquina(principal1.CHIP81);
   1004:principal1.CambiarMaquina(principal1.SegaMS1);
   1005:principal1.CambiarMaquina(principal1.SG10001);
+  1006:principal1.CambiarMaquina(principal1.SegaGG1);
   2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
   2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
   2002:principal1.CambiarMaquina(principal1.MarioBros1);
@@ -926,6 +932,8 @@ principal1.omega1.Checked:=false;
 principal1.pbillrd1.Checked:=false;
 principal1.armedf1.Checked:=false;
 principal1.terraforce1.Checked:=false;
+principal1.crazyclimber21.Checked:=false;
+principal1.legion1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -933,6 +941,7 @@ principal1.GameBoy1.Checked:=false;
 principal1.chip81.checked:=false;
 principal1.segams1.checked:=false;
 principal1.sg10001.checked:=false;
+principal1.segagg1.checked:=false;
 //gnw
 principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
@@ -986,7 +995,7 @@ case driver of
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
   10..999:principal1.BitBtn8.enabled:=true;  //Arcade
-  1000,1002,1003,1005:begin //NES, Chip8, Gameboy, GBC y SC-1000
+  1000,1002,1003,1005,1006:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true;
           principal1.BitBtn11.visible:=false;
@@ -1158,7 +1167,7 @@ case tmaquina of
   262:cargar_badlands;
   266,267:cargar_galivan;
   268,269,270:cargar_lastduel;
-  275,276:cargar_armedf;
+  275,276,277,278:cargar_armedf;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1166,6 +1175,7 @@ case tmaquina of
   1003:Cargar_chip8;
   1004:Cargar_SMS;
   1005:Cargar_sg;
+  1006:Cargar_gg;
   //gnw
   2000..2002:cargar_gnw_510;
 end;
@@ -2285,6 +2295,14 @@ if sender=principal1.terraforce1 then begin
   tipo:=276;
   principal1.terraforce1.Checked:=true;
 end;
+if sender=principal1.crazyclimber21 then begin
+  tipo:=277;
+  principal1.crazyclimber21.Checked:=true;
+end;
+if sender=principal1.legion1 then begin
+  tipo:=278;
+  principal1.legion1.Checked:=true;
+end;
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;
@@ -2309,6 +2327,10 @@ end;
 if sender=principal1.sg10001 then begin
   tipo:=1005;
   principal1.sg10001.Checked:=true;
+end;
+if sender=principal1.segagg1 then begin
+  tipo:=1006;
+  principal1.segagg1.Checked:=true;
 end;
 //GNW
 if sender=principal1.DonkeyKongjr1 then begin

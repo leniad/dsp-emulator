@@ -231,6 +231,9 @@ type
     gigasm21: TMenuItem;
     MenuItem38: TMenuItem;
     armedf1: TMenuItem;
+    crazyclimber21: TMenuItem;
+    Legion1: TMenuItem;
+    segagg1: TMenuItem;
     terraforce1: TMenuItem;
     pbillrd1: TMenuItem;
     omega1: TMenuItem;

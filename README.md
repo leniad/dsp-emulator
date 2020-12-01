@@ -1,4 +1,22 @@
 ﻿# DSP Emulator status #
+<b>01/12/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-Sega VDP
+    +Fixed IRQ generation
+-Sega GameGear
+    +Added driver with sound
+    +Added Codemasters mapper
+-Sega Master System
+    +Added cart enable/disable
+    +Driver stop and warning if no BIOS present
+-Armed F HW
+    +Added driver for Crazy Climber 2
+    +Added driver for Legion
+</pre>
+<img src='https://i.ibb.co/0cy0d0J/cclimber2.jpg'>
+<img src='https://i.ibb.co/v3rFCPQ/legion.jpg'><br>
+<img src='https://i.ibb.co/j3J1Q23/sonic.jpg'>
+<img src='https://i.ibb.co/X8XvmNn/street-rage.jpg'>
+<img src='https://i.ibb.co/L6cGmQg/jedi.jpg'><br><br>
 <b>25/11/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -SG-1000
     +Added two mappers. Almost 100% compatibility now

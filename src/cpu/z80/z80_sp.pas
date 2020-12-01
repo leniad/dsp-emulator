@@ -405,8 +405,8 @@ case instruccion of
                 spec_putbyte(r.hl.w,temp);
             end;
         $37:begin  {scf >4t<}
-                r.f.bit5:=(r.a and $20)<>0;
-                r.f.bit3:=(r.a and 8)<>0;
+                r.f.bit5:=((r.a and $20)<>0) or r.f.bit5;
+                r.f.bit3:=((r.a and 8)<>0) or r.f.bit3;
                 r.f.c:=true;
                 r.f.h:=false;
                 r.f.n:=false;
@@ -446,8 +446,8 @@ case instruccion of
                 r.pc:=r.pc+1;
             end;
         $3f:begin   {ccf >4t<}
-                r.f.bit5:=(r.a and $20)<>0;
-                r.f.bit3:=(r.a and 8)<>0;
+                r.f.bit5:=((r.a and $20)<>0) or r.f.bit5;
+                r.f.bit3:=((r.a and 8)<>0) or r.f.bit3;
                 r.f.h:=r.f.c;
                 r.f.n:=false;
                 r.f.c:=not(r.f.c);

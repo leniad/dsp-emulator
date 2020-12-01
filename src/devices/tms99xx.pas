@@ -5,7 +5,6 @@ interface
 uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
      main_engine,pal_engine;
 
-
   type
     irq_type=procedure(int:boolean);
     read_mem_type=function(direccion:word):byte;
@@ -16,7 +15,7 @@ uses gfx_engine,{$IFDEF WINDOWS}windows,{$endif}
       public
         regs:array[0..$f] of byte;
         fgcolor,bgcolor,modo_video,status_reg,buffer:byte;
-        addr,TMS9918A_VRAM_SIZE,color,pattern,nametbl,spriteattribute,spritepattern,colormask,patternmask:word;
+        addr,color,pattern,nametbl,spriteattribute,spritepattern,colormask,patternmask:word;
         vdp_mode,int,segundo_byte:boolean;
         mem:array[0..$3fff] of byte;
         pant:byte;
@@ -57,6 +56,7 @@ const
     PIXELS_LEFT_BORDER_VISIBLES=13;
     PIXELS_LEFT_BORDER_VISIBLES_TEXT=19;
     LINEAS_TOP_BORDE=27;
+    TMS9918A_VRAM_SIZE=$3fff;
 
 var
     chips_total:integer=-1;
@@ -93,7 +93,7 @@ begin
   buffer[24]:=self.bgcolor;
   buffer[25]:=self.FifthSprite;
   buffer[26]:=byte(self.espera_read);
-  copymemory(@buffer[27],@self.TMS9918A_VRAM_SIZE,2);
+  //copymemory(@buffer[27],@TMS9918A_VRAM_SIZE,2);
   copymemory(temp,@buffer[0],29);
   save_snapshot:=$10+$4000+29;
 end;
@@ -124,7 +124,7 @@ begin
   self.bgcolor:=temp^;inc(temp);
   self.FifthSprite:=temp^;inc(temp);
   self.espera_read:=temp^<>0;inc(temp);
-  copymemory(@self.TMS9918A_VRAM_SIZE,temp,2);
+  //copymemory(@self.TMS9918A_VRAM_SIZE,temp,2);
 end;
 
 procedure tms99xx_chip.reset;
@@ -146,7 +146,6 @@ begin
   self.colormask:=$3fff;
   self.patternmask:=$3fff;
   self.int:=false;
-  self.TMS9918A_VRAM_SIZE:=$3fff;
   fillchar(self.mem[0],$4000,0);
   self.vdp_mode:=false;
   paleta[0]:=0;
@@ -159,12 +158,12 @@ end;
 
 function read_mem_0(direccion:word):byte;
 begin
-  read_mem_0:=tms_0.mem[direccion and tms_0.TMS9918A_VRAM_SIZE];
+  read_mem_0:=tms_0.mem[direccion and TMS9918A_VRAM_SIZE];
 end;
 
 procedure write_mem_0(direccion:word;valor:byte);
 begin
-  tms_0.mem[direccion and tms_0.TMS9918A_VRAM_SIZE]:=valor;
+  tms_0.mem[direccion and TMS9918A_VRAM_SIZE]:=valor;
 end;
 
 constructor tms99xx_chip.create(pant:byte;irq_call:irq_type;read_mem:read_mem_type=nil;write_mem:write_mem_type=nil);
@@ -556,7 +555,7 @@ end;
 //change register
 procedure change_reg(tms:tms99xx_chip;addr,Val:byte);
 const
-  Mask:array[0..7] of byte=($07,$fb,$0f,$ff,$07,$7f,$07,$ff);
+  Mask:array[0..7] of byte=($ff,$fb,$0f,$ff,$07,$7f,$07,$ff);
 begin
   val:=val and mask[addr];
   tms.regs[addr]:=Val;
@@ -564,39 +563,37 @@ begin
      0:begin
           tms.vdp_mode:=(val and 4)<>0;
 	        if (val and 2)<>0 then begin
-			      tms.color:=((tms.Regs[3] and $80)*64) and tms.TMS9918A_VRAM_SIZE;
-			      tms.pattern:=((tms.Regs[4] and 4)*2048) and tms.TMS9918A_VRAM_SIZE;
+			      tms.color:=((tms.Regs[3] and $80)*64) and TMS9918A_VRAM_SIZE;
+			      tms.pattern:=((tms.Regs[4] and 4)*2048) and TMS9918A_VRAM_SIZE;
             update_table_masks(tms);
 		      end else begin
-			      tms.color:=(tms.Regs[3]*64) and tms.TMS9918A_VRAM_SIZE;
-			      tms.pattern:=(tms.Regs[4]*2048) and tms.TMS9918A_VRAM_SIZE;
+			      tms.color:=(tms.Regs[3]*64) and TMS9918A_VRAM_SIZE;
+			      tms.pattern:=(tms.Regs[4]*2048) and TMS9918A_VRAM_SIZE;
           end;
           tms.modo_video:=(tms.Regs[0] and 2) or ((tms.Regs[1] and $10) shr 4) or ((tms.Regs[1] and 8) shr 1);
        end;
      1:begin
         tms.exec_interrupt;
         tms.modo_video:=(tms.Regs[0] and 2) or ((tms.Regs[1] and $10) shr 4) or ((tms.Regs[1] and 8) shr 1);
-        if (val and $80)<>0 then tms.TMS9918A_VRAM_SIZE:=$3fff
-           else tms.TMS9918A_VRAM_SIZE:=$fff;
        end;
-     2:tms.NameTbl:=(val*1024) and tms.TMS9918A_VRAM_SIZE;
+     2:tms.NameTbl:=(val*1024) and TMS9918A_VRAM_SIZE;
      3:begin
         if (tms.Regs[0] and 2)<>0 then begin
-            tms.color:=((val and $80)*64) and tms.TMS9918A_VRAM_SIZE;
+            tms.color:=((val and $80)*64) and TMS9918A_VRAM_SIZE;
             update_table_masks(tms);
         end else begin
-            tms.color:=(val*64) and tms.TMS9918A_VRAM_SIZE;
+            tms.color:=(val*64) and TMS9918A_VRAM_SIZE;
         end;
 		    tms.patternmask:=(tms.Regs[4] and 3)*256 or (tms.colormask and 255);
        end;
      4:if (tms.Regs[0] and 2)<>0 then begin
-            tms.pattern:=((val and 4)*2048) and tms.TMS9918A_VRAM_SIZE;
+            tms.pattern:=((val and 4)*2048) and TMS9918A_VRAM_SIZE;
             update_table_masks(tms);
         end else begin
-            tms.pattern:=(val*2048) and tms.TMS9918A_VRAM_SIZE;
+            tms.pattern:=(val*2048) and TMS9918A_VRAM_SIZE;
         end;
-     5:tms.spriteattribute:=(val*128) and tms.TMS9918A_VRAM_SIZE;
-     6:tms.spritepattern:=(val*2048) and tms.TMS9918A_VRAM_SIZE;
+     5:tms.spriteattribute:=(val*128) and TMS9918A_VRAM_SIZE;
+     6:tms.spritepattern:=(val*2048) and TMS9918A_VRAM_SIZE;
      7: begin
        tms.fgcolor:=val shr 4;
        if tms.bgcolor<>(val and $f) then begin
@@ -635,16 +632,16 @@ CR --> Si es 1 cambiar registro
   CR --> 0 cambiar direccion L/E (ver mas abajo la descripcion)
 }
 if not(self.segundo_byte) then begin
-  self.addr:=((self.addr and $ff00) or valor) and self.tms9918A_VRAM_SIZE;
+  self.addr:=((self.addr and $ff00) or valor) and TMS9918A_VRAM_SIZE;
   self.segundo_byte:=true;
 end else begin
   self.segundo_byte:=false;
-  self.addr:=((self.addr and $ff) or (valor shl 8)) and self.tms9918A_VRAM_SIZE;
+  self.addr:=((self.addr and $ff) or (valor shl 8)) and TMS9918A_VRAM_SIZE;
   case (valor and $c0) of
     $80:change_reg(self,valor and $f,self.addr and $ff);
     $00:begin
           self.buffer:=self.read_m(self.addr);
-          self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;
+          self.addr:=(self.addr+1) and TMS9918A_VRAM_SIZE;
           self.segundo_byte:=false;
           self.espera_read:=true;
         end;
@@ -664,7 +661,7 @@ begin
   //Si el bit R/W esta a 1 (escritura) que hago???
   vram_r:=self.buffer;
   self.buffer:=self.read_m(self.addr);
-  self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;
+  self.addr:=(self.addr+1) and TMS9918A_VRAM_SIZE;
   self.segundo_byte:=false;
 end;
 
@@ -673,11 +670,11 @@ begin
 if not(self.espera_read) then begin
    self.write_m(self.addr,valor);
    self.buffer:=valor;
-   self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;
+   self.addr:=(self.addr+1) and TMS9918A_VRAM_SIZE;
    self.segundo_byte:=false;
 end else begin
    self.buffer:=self.read_m(self.addr);
-   self.addr:=(self.addr+1) and self.tms9918A_VRAM_SIZE;
+   self.addr:=(self.addr+1) and TMS9918A_VRAM_SIZE;
    self.write_m(self.addr,valor);
 end;
 end;

@@ -7,8 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, principal, acercade, LoadRom, config_general, redefine,
-  cargar_dsk, tape_window, cargar_spec, lenslock, config, arcade_config, 
+  Forms, principal, acercade, LoadRom, config_general, redefine, cargar_dsk,
+  tape_window, cargar_spec, lenslock, config, arcade_config,
   joystick_calibration, config_sms, config_cpc, gnw_video, misc_functions;
 
 {$IFDEF WINDOWS}

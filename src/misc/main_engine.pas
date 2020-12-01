@@ -43,6 +43,7 @@ type
             Chip8:string;
             sms:string;
             sg1000:string;
+            gg:string;
             //Coleco
             coleco_snap:string;
             //Dirs Arcade

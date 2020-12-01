@@ -432,6 +432,9 @@ type
     ArmedFHW1: TMenuItem;
     ArmedF1: TMenuItem;
     TerraForce1: TMenuItem;
+    CrazyClimber21: TMenuItem;
+    Legion1: TMenuItem;
+    SegaGG1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

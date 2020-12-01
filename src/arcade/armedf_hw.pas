@@ -36,6 +36,35 @@ const
         (n:'5.15h';l:$10000;p:0;crc:$25d23dfd),(n:'4.13h';l:$10000;p:$10000;crc:$b9b0fe27));
         terraf_sprites:array[0..1] of tipo_roms=(
         (n:'12.7d';l:$10000;p:0;crc:$2d1f2ceb),(n:'13.9d';l:$10000;p:$10000;crc:$1d2f92d6));
+        //Crazy Climber 2
+        cclimbr2_rom:array[0..5] of tipo_roms=(
+        (n:'4.bin';l:$10000;p:0;crc:$7922ea14),(n:'1.bin';l:$10000;p:$1;crc:$2ac7ed67),
+        (n:'6.bin';l:$10000;p:$20000;crc:$7905c992),(n:'5.bin';l:$10000;p:$20001;crc:$47be6c1e),
+        (n:'3.bin';l:$10000;p:$40000;crc:$1fb110d6),(n:'2.bin';l:$10000;p:$40001;crc:$0024c15b));
+        cclimbr2_sound:array[0..1] of tipo_roms=(
+        (n:'11.bin';l:$4000;p:0;crc:$fe0175be),(n:'12.bin';l:$8000;p:$4000;crc:$5ddf18f2));
+        cclimbr2_nb1414:tipo_roms=(n:'9.bin';l:$4000;p:0;crc:$740d260f);
+        cclimbr2_char:tipo_roms=(n:'10.bin';l:$8000;p:0;crc:$7f475266);
+        cclimbr2_bg:array[0..1] of tipo_roms=(
+        (n:'17.bin';l:$10000;p:0;crc:$e24bb2d7),(n:'18.bin';l:$10000;p:$10000;crc:$56834554));
+        cclimbr2_fg:array[0..1] of tipo_roms=(
+        (n:'7.bin';l:$10000;p:0;crc:$cbdd3906),(n:'8.bin';l:$10000;p:$10000;crc:$b2a613c0));
+        cclimbr2_sprites:array[0..3] of tipo_roms=(
+        (n:'15.bin';l:$10000;p:$00000;crc:$4bf838be),(n:'13.bin';l:$10000;p:$20000;crc:$6b6ec999),
+        (n:'16.bin';l:$10000;p:$10000;crc:$21a265c5),(n:'14.bin';l:$10000;p:$30000;crc:$f426a4ad));
+        //Legion
+        legion_rom:array[0..3] of tipo_roms=(
+        (n:'lg1.bin';l:$10000;p:1;crc:$c4aeb724),(n:'lg3.bin';l:$10000;p:$0;crc:$777e4935),
+        (n:'legion.1b';l:$10000;p:$20001;crc:$c306660a),(n:'legion.1d';l:$10000;p:$20000;crc:$c2e45e1e));
+        legion_sound:array[0..1] of tipo_roms=(
+        (n:'legion.1h';l:$4000;p:0;crc:$2ca4f7f0),(n:'legion.1i';l:$8000;p:$4000;crc:$79f4a827));
+        legion_nb1414:tipo_roms=(n:'lg7.bin';l:$4000;p:0;crc:$533e2b58);
+        legion_char:tipo_roms=(n:'lg8.bin';l:$8000;p:0;crc:$e0596570);
+        legion_bg:tipo_roms=(n:'legion.1l';l:$10000;p:0;crc:$29b8adaa);
+        legion_fg:array[0..1] of tipo_roms=(
+        (n:'legion.1e';l:$10000;p:0;crc:$a9d70faf),(n:'legion.1f';l:$8000;p:$18000;crc:$f018313b));
+        legion_sprites:array[0..1] of tipo_roms=(
+        (n:'legion.1k';l:$10000;p:0;crc:$ff5a0db9),(n:'legion.1j';l:$10000;p:$10000;crc:$bae220c8));
 
 var
  sprite_mask,sprite_num,video_reg,scroll_fg_x,scroll_fg_y,scroll_bg_x,scroll_bg_y:word;
@@ -43,8 +72,9 @@ var
  ram:array[0..$63ff] of word;
  ram_txt:array[0..$fff] of byte;
  ram_bg,ram_fg,ram_clut,ram_sprites:array[0..$7ff] of word;
- sound_latch,frame:byte;
+ size_x,size_y,irq_level,sound_latch,frame,sprite_offset:byte;
  update_video:procedure;
+ calc_pos_txt:function(x,y:byte):word;
 
 procedure armedf_put_gfx_sprite(nchar:dword;color:word;flipx,flipy:boolean;ngfx,clut:byte);inline;
 var
@@ -101,7 +131,7 @@ begin
     color:=(atrib shr 8) and $1f;
     clut:=atrib and $7f;
     sx:=buffer_sprites_w[(f*4)+3] and $1ff;
-    sy:=128+240-(buffer_sprites_w[(f*4)+0] and $1ff);
+    sy:=sprite_offset+240-(buffer_sprites_w[(f*4)+0] and $1ff);
     armedf_put_gfx_sprite(nchar and sprite_mask,(color shl 4)+$200,flip_x,flip_y,3,clut);
     actualiza_gfx_sprite(sx,sy,5,3);
   end;
@@ -161,6 +191,16 @@ fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 copymemory(@buffer_sprites_w[0],@ram_sprites[0],$1000*2);
 end;
 
+function calc_pos_terraf(x,y:byte):word;
+begin
+  calc_pos_terraf:=32*(31-y)+(x and $1f)+$800*(x div 32);
+end;
+
+function calc_pos_legion(x,y:byte):word;
+begin
+  calc_pos_legion:=(x and $1f)*32+y+$800*(x div 32);
+end;
+
 procedure update_video_terraf;
 var
   f,nchar,atrib,pos:word;
@@ -169,7 +209,7 @@ begin
 for f:=0 to $7ff do begin
  x:=f div 32;
  y:=f mod 32;
- pos:=32*(31-y)+(x and $1f)+$800*(x div 32);
+ pos:=calc_pos_txt(x,y);
  if pos<$12 then begin
     atrib:=0;
     nchar:=0;
@@ -197,7 +237,8 @@ if (video_reg and $400)<>0 then scroll_x_y(4,5,scroll_fg_x,scroll_fg_y);
 if (video_reg and $200)<>0 then draw_sprites(1);
 if (video_reg and $100)<>0 then scroll__x(2,5,512-128);
 if (video_reg and $200)<>0 then draw_sprites(0);
-actualiza_trozo_final(96,8,320,240,5);
+//actualiza_trozo_final(96,8,320,240,5);
+actualiza_trozo_final(96+size_x,8+size_y,320-(size_x shl 1),240-(size_y shl 1),5);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 copymemory(@buffer_sprites_w[0],@ram_sprites[0],$1000*2);
 end;
@@ -246,7 +287,7 @@ while EmuStatus=EsRuning do begin
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
     case f of
     247:begin
-          m68000_0.irq[1]:=ASSERT_LINE;
+          m68000_0.irq[irq_level]:=ASSERT_LINE;
           update_video;
         end;
     end;
@@ -375,7 +416,7 @@ case direccion of
     $7c002:scroll_bg_x:=valor;
     $7c004:scroll_bg_y:=valor;
     $7c00a:sound_latch:=((valor and $7f) shl 1) or 1;
-    $7c00e:m68000_0.irq[1]:=CLEAR_LINE;
+    $7c00e:m68000_0.irq[irq_level]:=CLEAR_LINE;
 end;
 end;
 
@@ -414,6 +455,14 @@ end;
 procedure armedf_snd_irq;
 begin
   z80_0.change_irq(HOLD_LINE);
+end;
+
+procedure cclimb2_snd_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+  0..$bfff:;
+  $c000..$ffff:mem_snd[direccion]:=valor;
+end;
 end;
 
 procedure armedf_sound_update;
@@ -476,8 +525,10 @@ procedure conv_sprites(num:word);
 begin
 init_gfx(3,16,16,num);
 gfx_set_desc_data(4,0,64*8,0,1,2,3);
-if main_vars.tipo_maquina=276 then convert_gfx(3,0,@memoria_temp,@ps_x_terraf,@ps_y,false,false)
-   else convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
+case main_vars.tipo_maquina of
+  275,277:convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
+  276,278:convert_gfx(3,0,@memoria_temp,@ps_x_terraf,@ps_y,false,false)
+end;
 end;
 begin
 iniciar_armedf:=false;
@@ -492,8 +543,17 @@ screen_mod_scroll(3,1024,512,1023,512,256,511);
 screen_init(4,1024,512,true);
 screen_mod_scroll(4,1024,512,1023,512,256,511);
 screen_init(5,512,512,false,true);
-if main_vars.tipo_maquina=275 then main_screen.rol90_screen:=true;
-iniciar_video(320,240);
+if ((main_vars.tipo_maquina=275) or (main_vars.tipo_maquina=278)) then main_screen.rol90_screen:=true;
+size_x:=0;
+size_y:=0;
+case main_vars.tipo_maquina of
+  275,276:iniciar_video(320,240);
+  277,278:begin
+            iniciar_video(288,224);
+            size_x:=16;
+            size_y:=8;
+          end;
+end;
 //Main CPU
 m68000_0:=cpu_m68000.create(8000000,256);
 //Sound CPU
@@ -503,9 +563,14 @@ z80_0.change_io_calls(armedf_snd_in,armedf_snd_out);
 z80_0.init_sound(armedf_sound_update);
 timers.init(z80_0.numero_cpu,4000000/(4000000/512),armedf_snd_irq,nil,true);
 //Sound Chips
-ym3812_0:=ym3812_chip.create(YM3812_FM,4000000,0.6);
+if (main_vars.tipo_maquina=278) then ym3812_0:=ym3812_chip.create(YM3526_FM,4000000,0.6)
+  else ym3812_0:=ym3812_chip.create(YM3812_FM,4000000,0.6);
 dac_0:=dac_chip.create(1);
 dac_1:=dac_chip.create(1);
+irq_level:=1;
+sprite_offset:=$80;
+calc_pos_txt:=calc_pos_terraf;
+update_video:=update_video_terraf;
 case main_vars.tipo_maquina of
   275:begin //Armed F
             m68000_0.change_ram16_calls(armedf_getword,armedf_putword);
@@ -558,9 +623,71 @@ case main_vars.tipo_maquina of
             marcade.dswa:=$ffcf;
             marcade.dswb:=$ff3f;
             //Misc
-            update_video:=update_video_terraf;
             sprite_mask:=$3ff;
             sprite_num:=$80-1;
+  end;
+  277:begin //Crazy Climber 2
+            m68000_0.change_ram16_calls(terraf_getword,terraf_putword);
+            //nb1414
+            nb1414m4_0:=tnb1414_m4.create(@ram_txt[0]);
+            if not(roms_load(nb1414m4_0.get_internal_rom,cclimbr2_nb1414)) then exit;
+            //cargar roms
+            if not(roms_load16w(@rom,cclimbr2_rom)) then exit;
+            //cargar sonido
+            z80_0.change_ram_calls(armedf_snd_getbyte,cclimb2_snd_putbyte);
+            if not(roms_load(@mem_snd,cclimbr2_sound)) then exit;
+            //convertir chars
+            if not(roms_load(@memoria_temp,cclimbr2_char)) then exit;
+            conv_chars($400);
+            //convertir bg
+            if not(roms_load(@memoria_temp,cclimbr2_bg)) then exit;
+            conv_tiles($400,1);
+            //convertir fg
+            if not(roms_load(@memoria_temp,cclimbr2_fg)) then exit;
+            conv_tiles($400,2);
+            //convertir sprites
+            if not(roms_load(@memoria_temp,cclimbr2_sprites)) then exit;
+            conv_sprites($800);
+            //DIP
+            marcade.dswa:=$ffdf;
+            marcade.dswb:=$ffff;
+            //Misc
+            sprite_mask:=$7ff;
+            sprite_num:=$200-1;
+            irq_level:=2;
+            sprite_offset:=0;
+  end;
+  278:begin //Legion
+            m68000_0.change_ram16_calls(terraf_getword,terraf_putword);
+            //nb1414
+            nb1414m4_0:=tnb1414_m4.create(@ram_txt[0]);
+            if not(roms_load(nb1414m4_0.get_internal_rom,legion_nb1414)) then exit;
+            //cargar roms
+            if not(roms_load16w(@rom,legion_rom)) then exit;
+            //cargar sonido
+            z80_0.change_ram_calls(armedf_snd_getbyte,cclimb2_snd_putbyte);
+            if not(roms_load(@mem_snd,legion_sound)) then exit;
+            //convertir chars
+            if not(roms_load(@memoria_temp,legion_char)) then exit;
+            conv_chars($400);
+            //convertir bg
+            if not(roms_load(@memoria_temp,legion_bg)) then exit;
+            conv_tiles($400,1);
+            //convertir fg
+            if not(roms_load(@memoria_temp,legion_fg)) then exit;
+            conv_tiles($400,2);
+            //convertir sprites
+            if not(roms_load(@memoria_temp,legion_sprites)) then exit;
+            conv_sprites($400);
+            //DIP
+            marcade.dswa:=$ffdf;
+            marcade.dswb:=$ffff;
+            //Misc
+            calc_pos_txt:=calc_pos_legion;
+            sprite_mask:=$3ff;
+            sprite_num:=$80-1;
+            irq_level:=2;
+            sprite_offset:=0;
   end;
 end;
 //final

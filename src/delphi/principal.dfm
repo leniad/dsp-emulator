@@ -2871,6 +2871,14 @@ object principal1: Tprincipal1
               Caption = 'Terra Force'
               OnClick = CambiarMaquina
             end
+            object CrazyClimber21: TMenuItem
+              Caption = 'Crazy Climber 2'
+              OnClick = CambiarMaquina
+            end
+            object Legion1: TMenuItem
+              Caption = 'Legion - Spinner-87'
+              OnClick = CambiarMaquina
+            end
           end
         end
         object NEC1: TMenuItem
@@ -2925,6 +2933,10 @@ object principal1: Tprincipal1
         end
         object SG10001: TMenuItem
           Caption = 'SG-1000'
+          OnClick = CambiarMaquina
+        end
+        object SegaGG1: TMenuItem
+          Caption = 'Sega GameGear'
           OnClick = CambiarMaquina
         end
       end

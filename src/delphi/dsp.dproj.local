@@ -481,6 +481,7 @@
     <Transaction>2020/10/10 18:19:38.000.356,=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2020/10/10 18:20:04.000.927,D:\Datos\dsp\src\delphi\Unit1.pas=D:\Datos\dsp\src\misc\d64_file_format.pas</Transaction>
     <Transaction>2020/11/23 17:23:35.000.249,=D:\Datos\dsp\src\arcade\armedf_hw.pas</Transaction>
-    <Transaction>2020/11/24 18:42:17.862,=D:\Datos\dsp\src\arcade\misc\nb1414_m4.pas</Transaction>
+    <Transaction>2020/11/24 18:42:17.000.862,=D:\Datos\dsp\src\arcade\misc\nb1414_m4.pas</Transaction>
+    <Transaction>2020/11/30 18:40:02.000.513,=D:\Datos\dsp\src\consolas\sega_gg.pas</Transaction>
   </Transactions>
 </BorlandProject>

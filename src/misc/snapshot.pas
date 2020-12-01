@@ -1730,7 +1730,6 @@ while longitud<long do begin
             tms_0.fgcolor:=tms_v1.nFGColor;
             tms_0.bgcolor:=tms_v1.nbgcolor;
             tms_0.int:=tms_v1.int;
-            tms_0.TMS9918A_VRAM_SIZE:=tms_v1.TMS9918A_VRAM_SIZE;
             copymemory(@tms_0.mem[0],@tms_v1.memory[0],$4000);
             freemem(tms_v1);
         end;

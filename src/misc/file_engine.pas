@@ -91,6 +91,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.Chip8:=fich_ini.readString('Dir','Chip8',directory.Base+'chip8'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.sms:=fich_ini.readString('Dir','SMS',directory.Base+'sms'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.SG1000:=fich_ini.readString('Dir','SG1000',directory.Base+'sg1000'+main_vars.cadena_dir)+main_vars.cadena_dir;
+  Directory.gg:=fich_ini.readString('Dir','gg',directory.Base+'gg'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.Coleco_snap:=fich_ini.readString('Dir','ColecoSnap',directory.Base+'coleco'+main_vars.cadena_dir)+main_vars.cadena_dir;
   Directory.spectrum_48:=fich_ini.ReadString('Dir','spectrum_rom_48',directory.Base+'roms'+main_vars.cadena_dir+'spectrum.zip');
   Directory.spectrum_128:=fich_ini.ReadString('Dir','spectrum_rom_128',directory.Base+'roms'+main_vars.cadena_dir+'spec128.zip');
@@ -214,6 +215,7 @@ end else begin
   Directory.Coleco_snap:=directory.Base+'coleco'+main_vars.cadena_dir;
   Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
   Directory.sg1000:=directory.base+'sg1000'+main_vars.cadena_dir;
+  Directory.gg:=directory.base+'gg'+main_vars.cadena_dir;
   Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
   Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
   Directory.arcade_list_roms[0]:=directory.base+'roms'+main_vars.cadena_dir;
@@ -322,6 +324,7 @@ if ((Directory.GameBoy='') or (directory.GameBoy=main_vars.cadena_dir)) then Dir
 if ((Directory.Chip8='') or (directory.Chip8=main_vars.cadena_dir)) then Directory.Chip8:=directory.base+'chip8'+main_vars.cadena_dir;
 if ((Directory.sms='') or (directory.sms=main_vars.cadena_dir)) then Directory.sms:=directory.base+'sms'+main_vars.cadena_dir;
 if ((Directory.sg1000='') or (directory.sg1000=main_vars.cadena_dir)) then Directory.sg1000:=directory.base+'sg1000'+main_vars.cadena_dir;
+if ((Directory.gg='') or (directory.gg=main_vars.cadena_dir)) then Directory.gg:=directory.base+'gg'+main_vars.cadena_dir;
 if ((Directory.coleco_snap='') or (directory.coleco_snap=main_vars.cadena_dir)) then Directory.coleco_snap:=directory.base+'coleco'+main_vars.cadena_dir;
 if ((Directory.spectrum_image='') or (directory.spectrum_image=main_vars.cadena_dir)) then Directory.spectrum_image:=directory.base+'gif'+main_vars.cadena_dir;
 if ((Directory.qsnapshot='') or (directory.qsnapshot=main_vars.cadena_dir)) then Directory.qsnapshot:=directory.base+'qsnap'+main_vars.cadena_dir;
@@ -372,6 +375,7 @@ fich_ini.Writestring('dir','nes',test_dir(Directory.Nes));
 fich_ini.Writestring('dir','chip8',test_dir(Directory.Chip8));
 fich_ini.Writestring('dir','sms',test_dir(Directory.sms));
 fich_ini.Writestring('dir','sg1000',test_dir(Directory.sg1000));
+fich_ini.Writestring('dir','gg',test_dir(Directory.gg));
 fich_ini.Writestring('dir','qsnapshot',test_dir(Directory.qsnapshot));
 fich_ini.Writestring('dir','GameBoy',test_dir(Directory.GameBoy));
 fich_ini.Writestring('dir','ColecoSnap',test_dir(Directory.coleco_snap));

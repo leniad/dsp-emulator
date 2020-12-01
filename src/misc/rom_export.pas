@@ -2580,6 +2580,24 @@ const
         (n:'14.6a';l:$10000;p:$10000;crc:$744f5c9e),(n:'5.15h';l:$10000;p:0;crc:$25d23dfd),
         (n:'4.13h';l:$10000;p:$10000;crc:$b9b0fe27),(n:'12.7d';l:$10000;p:0;crc:$2d1f2ceb),
         (n:'13.9d';l:$10000;p:$1;crc:$1d2f92d6),());
+        cclimbr2:array[0..18] of tipo_roms=(
+        (n:'4.bin';l:$10000;p:0;crc:$7922ea14),(n:'1.bin';l:$10000;p:$1;crc:$2ac7ed67),
+        (n:'6.bin';l:$10000;p:$20000;crc:$7905c992),(n:'5.bin';l:$10000;p:$20001;crc:$47be6c1e),
+        (n:'3.bin';l:$10000;p:$40000;crc:$1fb110d6),(n:'2.bin';l:$10000;p:$40001;crc:$0024c15b),
+        (n:'11.bin';l:$4000;p:0;crc:$fe0175be),(n:'12.bin';l:$8000;p:$4000;crc:$5ddf18f2),
+        (n:'9.bin';l:$4000;p:0;crc:$740d260f),(n:'10.bin';l:$8000;p:0;crc:$7f475266),
+        (n:'17.bin';l:$10000;p:0;crc:$e24bb2d7),(n:'18.bin';l:$10000;p:$10000;crc:$56834554),
+        (n:'7.bin';l:$10000;p:0;crc:$cbdd3906),(n:'8.bin';l:$10000;p:$10000;crc:$b2a613c0),
+        (n:'15.bin';l:$10000;p:0;crc:$4bf838be),(n:'13.bin';l:$10000;p:$10000;crc:$6b6ec999),
+        (n:'16.bin';l:$10000;p:$20000;crc:$21a265c5),(n:'14.bin';l:$10000;p:$30000;crc:$f426a4ad),());
+        legion:array[0..13] of tipo_roms=(
+        (n:'lg1.bin';l:$10000;p:0;crc:$c4aeb724),(n:'lg3.bin';l:$10000;p:$1;crc:$777e4935),
+        (n:'legion.1b';l:$10000;p:$20000;crc:$c306660a),(n:'legion.1d';l:$10000;p:$20001;crc:$c2e45e1e),
+        (n:'legion.1h';l:$4000;p:0;crc:$2ca4f7f0),(n:'legion.1i';l:$8000;p:$4000;crc:$79f4a827),
+        (n:'lg7.bin';l:$4000;p:0;crc:$533e2b58),(n:'lg8.bin';l:$8000;p:0;crc:$e0596570),
+        (n:'legion.1l';l:$10000;p:0;crc:$29b8adaa),(n:'legion.1e';l:$10000;p:0;crc:$a9d70faf),
+        (n:'legion.1f';l:$8000;p:$10000;crc:$f018313b),(n:'legion.1k';l:$10000;p:0;crc:$ff5a0db9),
+        (n:'legion.1j';l:$10000;p:$10000;crc:$bae220c8),());
 
 implementation
 uses principal,init_games;

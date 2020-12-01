@@ -9,7 +9,7 @@ procedure cargar_sms;
 
 type
   tmapper_sms=record
-      rom:array[0..255,0..$3fff] of byte;
+      rom:array[0..63,0..$3fff] of byte;
       ram:array[0..$1fff] of byte;
       bios:array[0..$3fff] of byte;
       ram_slot2:array[0..1,0..$3fff] of byte;
@@ -33,7 +33,7 @@ implementation
 uses principal,config_sms;
 
 var
-  io_enabled,bios_enabled:boolean;
+  cart_enabled,io_enabled,bios_enabled:boolean;
   old_3f:byte;
 
 procedure eventos_sms;
@@ -81,9 +81,11 @@ end;
 function sms_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$3fff:if bios_enabled then sms_getbyte:=mapper_sms.bios[direccion]
-              else if direccion<$400 then sms_getbyte:=mapper_sms.rom[0,direccion]
-                else sms_getbyte:=mapper_sms.rom[mapper_sms.slot0,direccion];
+  0..$3fff:if bios_enabled then sms_getbyte:=mapper_sms.bios[direccion and $1fff]
+              else if cart_enabled then begin
+                      if direccion<$400 then sms_getbyte:=mapper_sms.rom[0,direccion]
+                        else sms_getbyte:=mapper_sms.rom[mapper_sms.slot0,direccion];
+                   end else sms_getbyte:=$ff;
   $4000..$7fff:sms_getbyte:=mapper_sms.rom[mapper_sms.slot1,direccion and $3fff];
   $8000..$bfff:if mapper_sms.slot2_ram then sms_getbyte:=mapper_sms.ram_slot2[mapper_sms.slot2_bank,direccion and $3fff]
                   else sms_getbyte:=mapper_sms.rom[mapper_sms.slot2,direccion and $3fff];
@@ -230,6 +232,7 @@ procedure memory_control(valor:byte);
 begin
   bios_enabled:=(valor and 8)=0;
   io_enabled:=(valor and 4)=0;
+  cart_enabled:=(valor and $e0)<>$e0;
 end;
 
 procedure sms_outbyte(puerto:word;valor:byte);
@@ -312,6 +315,7 @@ for f:=0 to (mapper_sms.max-1) do begin
       copymemory(@mapper_sms.rom[f,0],ptemp,$4000);
       inc(ptemp,$4000);
 end;
+if mapper_sms.max<=0 then mapper_sms.max:=1;
 abrir_cartucho_sms_bios:=true;
 end;
 
@@ -325,6 +329,7 @@ begin
  mapper_sms.slot2_ram:=false;
  bios_enabled:=true;
  io_enabled:=true;
+ cart_enabled:=true;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  mapper_sms.slot0:=0;
@@ -371,8 +376,8 @@ begin
   //Abrirlo
   extension:=extension_fichero(nombre_file);
   z80_0.change_ram_calls(sms_getbyte,sms_putbyte);
-  if extension='SMS' then resultado:=abrir_cartucho_sms(datos,longitud)
-    else if extension='ROM' then resultado:=abrir_cartucho_sms_bios(datos,longitud);
+  if (extension='SMS') then resultado:=abrir_cartucho_sms(datos,longitud)
+     else if extension='ROM' then resultado:=abrir_cartucho_sms_bios(datos,longitud);
   if resultado then begin
     llamadas_maquina.open_file:=nombre_file;
     abrir_sms:=true;
@@ -381,7 +386,7 @@ begin
       $58fa27c6,$a577ce46,$29822980,$ea5c3a6f,$8813514b,$b9664ae1:begin //Codemasters
           z80_0.change_ram_calls(sms_getbyte_no_sega,sms_putbyte_codemasters);
       end;
-      $565c799f,$dbbf4dd1,$18fb98a3,$97d03541,$8bf3de3,$89b79e77,$60d6a7c:begin //Korean
+      $565c799f,$dbbf4dd1,$18fb98a3,$97d03541,$89b79e77,$60d6a7c:begin //Korean $8bf3de3
           z80_0.change_ram_calls(sms_getbyte_no_sega,sms_putbyte_korean);
       end;
       $a67f2a5c:begin //4pack
@@ -423,6 +428,7 @@ end;
 function iniciar_sms:boolean;
 var
   dir:string;
+  load_rom_res:boolean;
 begin
 iniciar_sms:=false;
 //Mapper
@@ -435,7 +441,7 @@ if sms_model=0 then begin
   screen_init(1,284,294);
   iniciar_video(284,294);
   z80_0:=cpu_z80.create(CLOCK_PAL,LINES_PAL);
-  carga_rom_zip(dir+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
+  load_rom_res:=carga_rom_zip(dir+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
   //VDP
   vdp_0:=vdp_chip.create(1,sms_interrupt,z80_0.numero_cpu,read_memory,write_memory);
   vdp_0.video_pal(0);
@@ -448,13 +454,18 @@ end else begin
   screen_init(1,284,243);
   iniciar_video(284,243);
   z80_0:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
-  if sms_model=1 then carga_rom_zip(dir+'sms.zip',sms_bios_j.n,@mapper_sms.bios[0],sms_bios_j.l,sms_bios_j.crc,false)
-    else carga_rom_zip(dir+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
+  if sms_model=1 then load_rom_res:=carga_rom_zip(dir+'sms.zip',sms_bios_j.n,@mapper_sms.bios[0],sms_bios_j.l,sms_bios_j.crc,false)
+    else load_rom_res:=carga_rom_zip(dir+'sms.zip',sms_bios.n,@mapper_sms.bios[0],sms_bios.l,sms_bios.crc,false);
   //VDP
   vdp_0:=vdp_chip.create(1,sms_interrupt,z80_0.numero_cpu,read_memory,write_memory);
   vdp_0.video_ntsc(0);
   sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
   //ym2413_0:=ym2413_chip.create(YM3812_FM,CLOCK_NTSC);
+end;
+vdp_0.set_gg(false);
+if not(load_rom_res) then begin
+   MessageDlg('Error: BIOS ROM no encontrada.'+chr(10)+chr(13)+'Error: BIOS ROM not found.', mtInformation,[mbOk], 0);
+   exit;
 end;
 //Main CPU
 z80_0.change_ram_calls(sms_getbyte,sms_putbyte);

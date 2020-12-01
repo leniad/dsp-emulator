@@ -45,11 +45,12 @@ const
         procedure video_pal(mode:byte);
         procedure video_ntsc(mode:byte);
         procedure set_hpos(estados:word);
+        procedure set_gg(is_gg:boolean);
       private
         SMS_IRQ_Handler:procedure(int:boolean);
-        hint,display_disabled:boolean;
+        gg_set,hint,display_disabled:boolean;
         current_pal:array[0..31] of word;
-        cram:array[0..63] of byte;
+        cram:array[0..$3f] of byte; //GG tiene 64 bytes de CRAM
         addr_mode,cram_mask,reg8tmp,reg9tmp:byte;
         line_counter,sprite_count,sprite_zoom:byte;
         sprite_x:array[0..7] of integer;
@@ -60,6 +61,7 @@ const
         procedure draw_sprites;
         procedure draw_mode_sms(linea:word);
         procedure video_change;
+        procedure cram_write(valor:byte);
     end;
 
 var
@@ -86,7 +88,6 @@ begin
   self.tms.reset;
   self.tms.regs[$a]:=$ff;
   self.tms.regs[2]:=$e;
-  self.cram_mask:=$1f;
   self.video_mode:=0;
   self.hpos:=0;
   self.reg8tmp:=0;
@@ -124,22 +125,52 @@ begin
 end;
 
 constructor vdp_chip.create(pant:byte;irq_call:irq_type;cpu_num:byte;read_mem:read_mem_type=nil;write_mem:write_mem_type=nil;trans:boolean=false);
-var
-  f:byte;
-  colores:tpaleta;
 begin
 chips_total:=chips_total+1;
-for f:=0 to 63 do begin
-    colores[f+16].r:=pal2bit(f and $3);
-    colores[f+16].g:=pal2bit((f and $c) shr 2);
-    colores[f+16].b:=pal2bit((f and $30) shr 4);
-end;
-set_pal(colores,64+16);
 self.trans:=trans;
+self.set_gg(false);
 self.tms:=tms99xx_chip.create(pant,irq_call,read_mem,write_mem);
 self.SMS_IRQ_Handler:=irq_call;
 self.irq_timer:=timers.init(cpu_num,228-27,nil,irq_set,false,chips_total);
 self.reset;
+end;
+
+procedure vdp_chip.set_gg(is_gg:boolean);
+const
+    tms992X_palete:array[0..15, 0..2] of byte =(
+     (0,0,0),(0,0,0),(33, 200, 66),(94, 220, 120),
+	  (84, 85, 237),(125, 118, 252),(212, 82, 77),(66, 235, 245),
+    (252, 85, 84),(255, 121, 120),(212, 193, 84),(230, 206, 128),
+	  (33, 176, 59),(201, 91, 186),(204, 204, 204),(255,255,255));
+var
+  f:word;
+  colores:tpaleta;
+begin
+for f:=0 to 15 do begin
+  colores[f].r:=tms992X_palete[f,0];
+  colores[f].g:=tms992X_palete[f,1];
+  colores[f].b:=tms992X_palete[f,2];
+end;
+//OJO!!! Los 16 primeros colores son del TMS!!!
+if is_gg then begin
+    self.cram_mask:=$3f;
+    for f:=0 to 4095 do begin
+        colores[f+16].r:=pal4bit(f and $f);
+        colores[f+16].g:=pal4bit((f and $f0) shr 4);
+        colores[f+16].b:=pal4bit((f and $f00) shr 8);
+    end;
+    set_pal(colores,4096+16);
+    self.gg_set:=true;
+end else begin
+    self.cram_mask:=$1f;
+    for f:=0 to 63 do begin
+        colores[f+16].r:=pal2bit(f and $3);
+        colores[f+16].g:=pal2bit((f and $c) shr 2);
+        colores[f+16].b:=pal2bit((f and $30) shr 4);
+    end;
+    set_pal(colores,64+16);
+    self.gg_set:=false;
+end;
 end;
 
 procedure vdp_chip.select_sprites(linea:word);
@@ -392,6 +423,20 @@ end else begin
   self.line_counter:=self.tms.regs[$a];
   self.reg9tmp:=self.tms.regs[9];
 end;
+//Esto es independiente de quien pinta la pantalla, si no los Simpsons se queda en bucle!
+if linea=self.Y_PIXELS then begin
+  //La señal de que estoy en el final del frame hay que ponerla antes que ejecute la IRQ
+  //sino 'Zool' se para... Ademas la bandera no la pongo inmediatamente, si no Spiderman no funciona
+  //Ademas no importa si va a ejecutar la IRQ, hay que poner la señal
+  timers.enabled(self.irq_timer,true);
+end else if (linea=self.Y_PIXELS+1) then begin
+      //OJO!! Tengo que comprobar que sigue activa la IRQ antes de lanzarla!!
+      //Outrun la quita para hacer la carretera...
+      if (((self.tms.regs[1] and $20)<>0) and ((self.tms.status_reg and $80)<>0)) then begin
+          if @self.SMS_IRQ_Handler<>nil then self.SMS_IRQ_Handler(true);
+          self.tms.int:=true;
+      end;
+end;
 if self.tms.vdp_mode then begin
   if linea<self.Y_PIXELS then begin //Visible
       if not(self.display_disabled) then begin
@@ -408,20 +453,6 @@ if self.tms.vdp_mode then begin
       end else begin
           self.select_sprites(linea);
           single_line(0,linea+self.LINEAS_TOP_BORDE,paleta[self.current_pal[$10+self.tms.regs[7] and $f]],PIXELS_VISIBLES_TOTAL,self.tms.pant);
-      end;
-  end else if linea=self.Y_PIXELS then begin
-      single_line(0,linea+self.LINEAS_TOP_BORDE,paleta[self.current_pal[$10+self.tms.regs[7] and $f]],PIXELS_VISIBLES_TOTAL,self.tms.pant);
-      //La señal de que estoy en el final del frame hay que ponerla antes que ejecute la IRQ
-      //sino 'Zool' se para... Ademas la bandera no la pongo inmediatamente, si no Spiderman no funciona
-      //Ademas no importa si va a ejecutar la IRQ, hay que poner la señal
-      timers.enabled(self.irq_timer,true);
-  end else if (linea=self.Y_PIXELS+1) then begin //borde inferior
-      single_line(0,linea+self.LINEAS_TOP_BORDE,paleta[self.current_pal[$10+self.tms.regs[7] and $f]],PIXELS_VISIBLES_TOTAL,self.tms.pant);
-      //OJO!! Tengo que comprobar que sigue activa la IRQ antes de lanzarla!!
-      //Outrun la quita para hacer la carretera...
-      if (((self.tms.regs[1] and $20)<>0) and ((self.tms.status_reg and $80)<>0)) then begin
-          if @self.SMS_IRQ_Handler<>nil then self.SMS_IRQ_Handler(true);
-          self.tms.int:=true;
       end;
   end else if linea<self.LINEA_BORDE_DOWN then begin //Resto borde inferior
       single_line(0,linea+self.LINEAS_TOP_BORDE,paleta[self.current_pal[$10+self.tms.regs[7] and $f]],PIXELS_VISIBLES_TOTAL,self.tms.pant);
@@ -513,21 +544,27 @@ begin
   vram_r:=self.tms.vram_r;
 end;
 
-procedure cram_write(vdp:vdp_chip;valor:byte);
+procedure vdp_chip.cram_write(valor:byte);
 var
-   address:word;
+   address,tempb:byte;
+   color:word;
 begin
-address:=vdp.tms.addr and vdp.cram_mask;
-if (vdp.cram[address]<>valor) then begin
-   vdp.CRAM[address]:=valor;
-   vdp.current_pal[address]:=(vdp.cram[address] and $3f)+$10;
+address:=self.tms.addr and self.cram_mask;
+if (self.cram[address]<>valor) then begin
+   self.cram[address]:=valor;
+   //Le añado 16 para evitar machacar la paleta del TMS!!
+   if self.gg_set then begin
+         tempb:=address and $fe;
+         color:=(((self.cram[tempb+1] and $f) shl 8) or self.cram[tempb])+$10;
+         self.current_pal[address shr 1]:=color;
+     end else self.current_pal[address]:=(valor and $3f)+$10;
 end;
 end;
 
 procedure vdp_chip.vram_w(valor:byte);
 begin
   if self.addr_mode=3 then begin
-    cram_write(self,valor);
+    self.cram_write(valor);
     self.tms.buffer:=valor;
     self.tms.addr:=(self.tms.addr+1) and $3fff;
     self.tms.segundo_byte:=false;

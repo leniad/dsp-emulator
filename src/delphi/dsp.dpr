@@ -305,7 +305,8 @@ uses
   sid_tables in '..\snd\sid_tables.pas',
   d64_file_format in '..\misc\d64_file_format.pas',
   armedf_hw in '..\arcade\armedf_hw.pas',
-  nb1414_m4 in '..\arcade\misc\nb1414_m4.pas';
+  nb1414_m4 in '..\arcade\misc\nb1414_m4.pas',
+  sega_gg in '..\consolas\sega_gg.pas';
 
 {$R *.res}
 
