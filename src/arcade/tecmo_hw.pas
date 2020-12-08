@@ -419,12 +419,12 @@ if ((adpcm_pos>=adpcm_end) or	(adpcm_pos>$7fff)) then begin
   msm_5205_0.reset_w(1);
   exit;
 end;
-if (adpcm_data and $100)=0 then begin
+if (adpcm_data<>$100) then begin
 		msm_5205_0.data_w(adpcm_data and $0f);
-    adpcm_pos:=adpcm_pos+1;
 		adpcm_data:=$100;
 end	else begin
 		adpcm_data:=mem_adpcm[adpcm_pos];
+    adpcm_pos:=adpcm_pos+1;
     msm_5205_0.data_w((adpcm_data and $f0) shr 4);
 end;
 end;
@@ -498,22 +498,21 @@ screen_init(6,256,256,true); //chars
 screen_init(7,512,256,true);
 screen_mod_scroll(7,512,256+48,511,256,256,255);
 iniciar_video(256,224);
-//Main CPU
-z80_0:=cpu_z80.create(6000000,$100);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,$100);
 z80_1.init_sound(snd_sound_play);
 //Sound Chip
 msm_5205_0:=MSM5205_chip.create(400000,MSM5205_S48_4B,0.5,snd_adpcm);
-ym3812_0:=ym3812_chip.create(YM3526_FM,4000000);
-ym3812_0.change_irq_calls(snd_irq);
 //cargar roms
 case main_vars.tipo_maquina of
   26:begin
       //Main
+      z80_0:=cpu_z80.create(6000000,$100);
       z80_0.change_ram_calls(rygar_getbyte,rygar_putbyte);
       //Sound
       z80_1.change_ram_calls(rygar_snd_getbyte,rygar_snd_putbyte);
+      ym3812_0:=ym3812_chip.create(YM3526_FM,4000000);
+      ym3812_0.change_irq_calls(snd_irq);
       //Video
       tipo_video:=0;
       if not(roms_load(@memoria_temp,rygar_rom)) then exit;
@@ -542,9 +541,12 @@ case main_vars.tipo_maquina of
   end;
   97:begin  //Silk Worm
       //Main
+      z80_0:=cpu_z80.create(8000000,$100);
       z80_0.change_ram_calls(sw_getbyte,sw_putbyte);
       //Sound
       z80_1.change_ram_calls(sw_snd_getbyte,sw_snd_putbyte);
+      ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
+      ym3812_0.change_irq_calls(snd_irq);
       //Video
       tipo_video:=1;
       if not(roms_load(@memoria_temp,sw_rom)) then exit;
@@ -581,6 +583,7 @@ begin
 llamadas_maquina.iniciar:=iniciar_tecmo;
 llamadas_maquina.bucle_general:=tecmo_principal;
 llamadas_maquina.reset:=reset_tecmo;
+llamadas_maquina.fps_max:=59.185608;
 end;
 
 end.

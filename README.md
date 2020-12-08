@@ -1,4 +1,15 @@
 ﻿# DSP Emulator status #
+<b>08/12/20 - DSP Emulator 0.18b3 WIP. Win32, macOS64 and source update.<br><pre>
+-Added macOS 64bits WIP compilation, tested on v10.15 and v11.0
+-NES
+    +Changes on mapper 5, fixes PRG mapping
+-Tecmo HW
+    +Fixed small bug on ADPCM
+    +Fixed FPS
+    +Silkworm:
+        -Fixed sound chip, it's a YM3812
+        -Fixed Z80 clock
+</pre><br><br>
 <b>01/12/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -Sega VDP
     +Fixed IRQ generation

@@ -308,6 +308,7 @@ begin
           llamadas_nes.line_ack:=mapper_4_line;
         end;
       5:begin
+          llamadas_nes.read_expansion:=mapper_5_read_extended;
           llamadas_nes.write_expansion:=mapper_5_write_extended;
           llamadas_nes.write_rom:=mapper_5_write_rom;
           llamadas_nes.read_rom:=mapper_5_read_rom;

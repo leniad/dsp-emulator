@@ -25,6 +25,7 @@ type
   nes_mmc5=packed record
               regs:array[0..$30] of byte;
               ram:array[0..$3ff] of byte;
+              mul1,mul2:byte;
            end;
   tnes_mapper=packed record
               prg:array[0..31,0..$3fff] of byte;
@@ -138,6 +139,7 @@ procedure mapper_142_write_rom(direccion:word;valor:byte);
 procedure mapper_142_irq(estados_t:word);
 procedure mapper_212_write_rom(direccion:word;valor:byte);
 function mapper_212_read_exp(direccion:word):byte;
+function mapper_5_read_extended(direccion:word):byte;
 procedure mapper_5_write_extended(direccion:word;valor:byte);
 procedure mapper_5_write_rom(direccion:word;valor:byte);
 function mapper_5_read_rom(direccion:word):byte;
@@ -398,13 +400,13 @@ end;
 procedure mapper_5_update_prg;
 begin
 case (mapper_nes.mm5.regs[0] and 3) of
-  0:set_prg_32(mapper_nes.mm5.regs[$17] and $7f); //32k
+  0:set_prg_32((mapper_nes.mm5.regs[$17] and $7f) shr 2); //32k
   1:begin //16k+16k
-      set_prg_16($8000,mapper_nes.mm5.regs[$15] and $7f);
-      set_prg_16($c000,mapper_nes.mm5.regs[$17] and $7f);
+      set_prg_16($8000,(mapper_nes.mm5.regs[$15] and $7f) shr 1);
+      set_prg_16($c000,(mapper_nes.mm5.regs[$17] and $7f) shr 1);
     end;
   2:begin //16k+8k+8k
-      set_prg_16($8000,mapper_nes.mm5.regs[$15] and $7f);
+      set_prg_16($8000,(mapper_nes.mm5.regs[$15] and $7f) shr 1);
       set_prg_8($c000,mapper_nes.mm5.regs[$16] and $7f);
       set_prg_8($e000,mapper_nes.mm5.regs[$17] and $7f);
     end;
@@ -420,37 +422,80 @@ end;
 procedure mapper_5_update_chr;
 begin
 case (mapper_nes.mm5.regs[1] and 3) of
-  0:set_chr_8(mapper_nes.mm5.regs[$27]);  //8k
-  1:begin //4k
-      set_chr_4(0,mapper_nes.mm5.regs[$23]);
-      set_chr_4($1000,mapper_nes.mm5.regs[$27]);
-    end;
-  2:begin //2k
-      set_chr_2(0,mapper_nes.mm5.regs[$21]);
-      set_chr_2($800,mapper_nes.mm5.regs[$23]);
-      set_chr_2($1000,mapper_nes.mm5.regs[$25]);
-      set_chr_2($1800,mapper_nes.mm5.regs[$27]);
-    end;
-  3:begin //1k
-      set_chr_1(0,mapper_nes.mm5.regs[$20]);
-      set_chr_1($400,mapper_nes.mm5.regs[$21]);
-      set_chr_1($800,mapper_nes.mm5.regs[$22]);
-      set_chr_1($c00,mapper_nes.mm5.regs[$23]);
-      set_chr_1($1000,mapper_nes.mm5.regs[$24]);
-      set_chr_1($1400,mapper_nes.mm5.regs[$25]);
-      set_chr_1($1800,mapper_nes.mm5.regs[$26]);
-      set_chr_1($1c00,mapper_nes.mm5.regs[$27]);
-    end;
+    0:set_chr_8(mapper_nes.mm5.regs[$27]);  //8k
+    1:begin //4k
+        set_chr_4(0,mapper_nes.mm5.regs[$23]);
+        set_chr_4($1000,mapper_nes.mm5.regs[$27]);
+      end;
+    2:begin //2k
+        set_chr_2(0,mapper_nes.mm5.regs[$21]);
+        set_chr_2($800,mapper_nes.mm5.regs[$23]);
+        set_chr_2($1000,mapper_nes.mm5.regs[$25]);
+        set_chr_2($1800,mapper_nes.mm5.regs[$27]);
+      end;
+    3:begin //1k
+        set_chr_1(0,mapper_nes.mm5.regs[$20]);
+        set_chr_1($400,mapper_nes.mm5.regs[$21]);
+        set_chr_1($800,mapper_nes.mm5.regs[$22]);
+        set_chr_1($c00,mapper_nes.mm5.regs[$23]);
+        set_chr_1($1000,mapper_nes.mm5.regs[$24]);
+        set_chr_1($1400,mapper_nes.mm5.regs[$25]);
+        set_chr_1($1800,mapper_nes.mm5.regs[$26]);
+        set_chr_1($1c00,mapper_nes.mm5.regs[$27]);
+      end;
+end;
+end;
+
+procedure mapper_5_update_chr_high;
+begin
+  case (mapper_nes.mm5.regs[1] and 3) of
+      0:set_chr_8(mapper_nes.mm5.regs[$2b]);  //8k
+      1:begin //4k
+          set_chr_4(0,mapper_nes.mm5.regs[$2b]);
+          set_chr_4($1000,mapper_nes.mm5.regs[$2b]);
+        end;
+      2:begin //2k
+         set_chr_2(0,mapper_nes.mm5.regs[$29]);
+         set_chr_2($800,mapper_nes.mm5.regs[$2b]);
+         set_chr_2($1000,mapper_nes.mm5.regs[$29]);
+         set_chr_2($1800,mapper_nes.mm5.regs[$2b]);
+        end;
+      3:begin //1k
+          set_chr_1(0,mapper_nes.mm5.regs[$28]);
+          set_chr_1($400,mapper_nes.mm5.regs[$29]);
+          set_chr_1($800,mapper_nes.mm5.regs[$2a]);
+          set_chr_1($c00,mapper_nes.mm5.regs[$2b]);
+          set_chr_1($1000,mapper_nes.mm5.regs[$28]);
+          set_chr_1($1400,mapper_nes.mm5.regs[$29]);
+          set_chr_1($1800,mapper_nes.mm5.regs[$2a]);
+          set_chr_1($1c00,mapper_nes.mm5.regs[$2b]);
+        end;
+  end;
+end;
+
+function mapper_5_read_extended(direccion:word):byte;
+begin
+case direccion of
+  5205:mapper_5_read_extended:=(mapper_nes.mm5.mul1*mapper_nes.mm5.mul2) and $ff;
+  5206:mapper_5_read_extended:=(mapper_nes.mm5.mul1*mapper_nes.mm5.mul2) shr 8;
 end;
 end;
 
 procedure mapper_5_write_extended(direccion:word;valor:byte);
 begin
 case direccion of
-  $5100..$512b:mapper_nes.mm5.regs[direccion and $3f]:=valor;
+  $5100..$5112,$5118..$511f,$512c..$5130:mapper_nes.mm5.regs[direccion and $3f]:=valor;
+  $5113..$5117:begin
+                  mapper_nes.mm5.regs[direccion and $3f]:=valor;
+                  mapper_5_update_prg;
+               end;
+  $5120..$512b:begin
+                  mapper_nes.mm5.regs[direccion and $3f]:=valor;
+                  mapper_5_update_chr;
+               end;
+  $5205:mapper_nes.mm5.mul1:=valor;
+  $5206:mapper_nes.mm5.mul2:=valor;
 end;
-mapper_5_update_prg;
-mapper_5_update_chr;
 end;
 
 procedure mapper_5_write_rom(direccion:word;valor:byte);
@@ -2250,6 +2295,8 @@ begin
         set_prg_16($c000,mapper_nes.last_prg-1);
         mapper_nes.prg_ram_writeble:=true;
         mapper_nes.prg_ram_enable:=true;
+        mapper_nes.mm5.mul1:=$ff;
+        mapper_nes.mm5.mul2:=$ff;
       end;
     7,15,145,148,149,150,184,243:set_prg_32(0);
     9:begin
