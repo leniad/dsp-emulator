@@ -159,9 +159,9 @@
         <BRCC_Defines>WINDOWS;$(BRCC_Defines)</BRCC_Defines>
         <VerInfo_AutoGenVersion>false</VerInfo_AutoGenVersion>
         <VerInfo_AutoIncVersion>true</VerInfo_AutoIncVersion>
-        <VerInfo_Build>704</VerInfo_Build>
+        <VerInfo_Build>709</VerInfo_Build>
         <VerInfo_Locale>3082</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Leniad;FileVersion=0.18.3.704;InternalName=;LegalCopyright=Leniad;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.18;Comments=;ProgramID=;FileDescription=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Leniad;FileVersion=0.18.3.709;InternalName=;LegalCopyright=Leniad;LegalTrademarks=;OriginalFilename=;ProductName=DSP Emulator;ProductVersion=0.18;Comments=;ProgramID=;FileDescription=</VerInfo_Keys>
         <VerInfo_Release>3</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
@@ -1543,11 +1543,7 @@
         <DCCReference Include="..\snd\crazyclimber_hw_dac.pas"/>
         <DCCReference Include="..\arcade\returnofinvaders_hw.pas"/>
         <DCCReference Include="..\cpu\sm510.pas"/>
-        <DCCReference Include="gnw_video.pas">
-            <Form>gnw_video_form</Form>
-        </DCCReference>
         <DCCReference Include="..\gnw\gnw_510.pas"/>
-        <DCCReference Include="..\gnw\gnw_const.pas"/>
         <DCCReference Include="..\devices\m6845.pas"/>
         <DCCReference Include="..\arcade\tetris_atari_hw.pas"/>
         <DCCReference Include="..\arcade\misc\slapstic.pas"/>
@@ -1577,6 +1573,9 @@
         <DCCReference Include="..\arcade\armedf_hw.pas"/>
         <DCCReference Include="..\arcade\misc\nb1414_m4.pas"/>
         <DCCReference Include="..\consolas\sega_gg.pas"/>
+        <DCCReference Include="..\gnw\gnw_dkjr_const.pas"/>
+        <DCCReference Include="..\gnw\gnw_dkong2_const.pas"/>
+        <DCCReference Include="..\gnw\gnw_mariobros_const.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

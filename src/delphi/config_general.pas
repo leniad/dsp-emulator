@@ -1036,12 +1036,12 @@ begin
     if tmp_var<>main_screen.video_mode then begin
       if main_vars.driver_ok then begin
         if tmp_var=6 then pasar_pantalla_completa
-        else begin
-          main_screen.old_video_mode:=main_screen.video_mode;
-        main_screen.video_mode:=tmp_var;
-        cambiar_video;
+          else begin
+            main_screen.old_video_mode:=main_screen.video_mode;
+            main_screen.video_mode:=tmp_var;
+            cambiar_video;
+          end;
       end;
-end;
     end;
   end;
   main_vars.auto_exec:=checkbox2.Checked;

@@ -9,7 +9,7 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, principal, acercade, LoadRom, config_general, redefine, cargar_dsk,
   tape_window, cargar_spec, lenslock, config, arcade_config,
-  joystick_calibration, config_sms, config_cpc, gnw_video, misc_functions;
+  joystick_calibration, config_sms, config_cpc, misc_functions;
 
 {$IFDEF WINDOWS}
 {$IFDEF CPU32}
@@ -23,21 +23,19 @@ begin
   Application.Title:='DSP Emulator';
   Application.Initialize;
   Application.CreateForm(Tprincipal1, principal1);
-  Application.CreateForm(Tload_spec, load_spec);
-  Application.CreateForm(Tredefine1, redefine1);
-  Application.CreateForm(Tlenslock1, lenslock1);
   Application.CreateForm(Ttape_window1, tape_window1);
-  Application.CreateForm(TMConfig, MConfig);
-  Application.CreateForm(TConfigSP, ConfigSP);
+  Application.CreateForm(Tlenslock1, lenslock1);
   Application.CreateForm(TAboutbox, Aboutbox);
-  Application.CreateForm(Tload_dsk, load_dsk);
-  Application.CreateForm(TFLoadRom, FLoadRom);
   Application.CreateForm(Tconfig_arcade, config_arcade);
-  Application.CreateForm(Tjoy_calibration, joy_calibration);
-  Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(Tconfigcpc, configcpc);
-  Application.CreateForm(Tgnw_video_form, gnw_video_form);
-  Application.CreateForm(Tgnw_video_form, gnw_video_form);
+  Application.CreateForm(TConfigSP, ConfigSP);
+  Application.CreateForm(TFLoadRom, FLoadRom);
+  Application.CreateForm(Tjoy_calibration, joy_calibration);
+  Application.CreateForm(Tload_dsk, load_dsk);
+  Application.CreateForm(Tload_spec, load_spec);
+  Application.CreateForm(TMConfig, MConfig);
+  Application.CreateForm(Tredefine1, redefine1);
+  Application.CreateForm(TSMSConfig, SMSConfig);
   Application.Run;
 end.
 

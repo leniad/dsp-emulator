@@ -233,6 +233,7 @@ type
     armedf1: TMenuItem;
     crazyclimber21: TMenuItem;
     Legion1: TMenuItem;
+    Panel2: TPanel;
     segagg1: TMenuItem;
     terraforce1: TMenuItem;
     pbillrd1: TMenuItem;
@@ -427,7 +428,6 @@ type
     Z801: TMenuItem;
     Ordenadores8bits1: TMenuItem;
     N3X1: TMenuItem;
-    Panel2: TPanel;
     Panel3: TPanel;
     ScanLines2X1: TMenuItem;
     ScanLines1: TMenuItem;

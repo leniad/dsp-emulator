@@ -984,6 +984,7 @@ case driver of
           principal1.Panel2.visible:=true;
           principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
           principal1.BitBtn10.enabled:=(driver<>7); //Disco
+          principal1.BitBtn10.visible:=true;  //Disco
           principal1.BitBtn11.visible:=true; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
@@ -991,23 +992,23 @@ case driver of
           principal1.Panel2.visible:=true;
           principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
           principal1.BitBtn10.visible:=true; //Disco
+          principal1.BitBtn10.enabled:=true;
           principal1.BitBtn11.visible:=true; //Save Snapshot
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
   10..999:principal1.BitBtn8.enabled:=true;  //Arcade
   1000,1002,1003,1005,1006:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
           principal1.Panel2.visible:=true;
-          principal1.BitBtn10.visible:=true;
-          principal1.BitBtn11.visible:=false;
+          principal1.BitBtn10.visible:=true; //Cartucho
        end;
   1001:begin //Coleco
           principal1.Panel2.visible:=true;
-          principal1.BitBtn10.visible:=true; //Disco
+          principal1.BitBtn10.visible:=true; //Cartuho
           principal1.BitBtn11.visible:=true; //Load Snapshot
        end;
   1004:begin //SMS
           principal1.Panel2.visible:=true;
-          principal1.BitBtn10.visible:=true; //Disco
+          principal1.BitBtn10.visible:=true; //Cartucho
           principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
        end;
   2000..2002:; //G&W

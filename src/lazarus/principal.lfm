@@ -1,19 +1,20 @@
 object principal1: Tprincipal1
-  Left = 314
-  Height = 206
-  Top = 242
-  Width = 341
+  Left = 483
+  Height = 448
+  Top = 186
+  Width = 426
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
   ActiveControl = Panel1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 186
-  ClientWidth = 341
+  ClientHeight = 423
+  ClientWidth = 426
+  DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
-  Font.Height = -11
+  Font.Height = -14
   Font.Name = 'Sans'
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
@@ -24,29 +25,29 @@ object principal1: Tprincipal1
   LCLVersion = '2.0.10.0'
   object Panel1: TPanel
     Left = 0
-    Height = 34
+    Height = 42
     Top = 0
-    Width = 341
+    Width = 426
     Align = alTop
-    ClientHeight = 34
-    ClientWidth = 341
+    ClientHeight = 42
+    ClientWidth = 426
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -11
+    Font.Height = -14
     Font.Name = 'Sans'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     ParentFont = False
     TabOrder = 0
     object BitBtn2: TBitBtn
-      Left = 5
-      Height = 32
+      Left = 6
+      Height = 40
       Hint = 'Reset'
       Top = 1
-      Width = 32
+      Width = 40
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -123,14 +124,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn3: TBitBtn
-      Left = 46
-      Height = 32
+      Left = 58
+      Height = 40
       Hint = 'Play'
       Top = 1
-      Width = 32
+      Width = 40
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -143,15 +144,15 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn5: TBitBtn
-      Left = 96
-      Height = 32
+      Left = 120
+      Height = 40
       Hint = 'Slow'
       Top = 1
-      Width = 32
+      Width = 40
       BorderSpacing.Left = 1
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -228,14 +229,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn6: TBitBtn
-      Left = 136
-      Height = 32
+      Left = 170
+      Height = 40
       Hint = 'Fastest'
       Top = 1
-      Width = 32
+      Width = 40
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -312,14 +313,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object btncfg: TBitBtn
-      Left = 176
-      Height = 32
+      Left = 220
+      Height = 40
       Hint = 'Config DSP'
       Top = 1
-      Width = 32
+      Width = 40
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -396,14 +397,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn19: TBitBtn
-      Left = 296
-      Height = 32
+      Left = 370
+      Height = 40
       Hint = 'Save Image'
       Top = 1
-      Width = 32
+      Width = 40
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -482,14 +483,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn8: TBitBtn
-      Left = 216
-      Height = 32
+      Left = 270
+      Height = 40
       Hint = 'Config Dip Switch'
       Top = 1
-      Width = 32
+      Width = 40
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -559,14 +560,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn13: TBitBtn
-      Left = 256
-      Height = 32
+      Left = 320
+      Height = 40
       Hint = 'Change Driver'
       Top = 1
-      Width = 32
+      Width = 40
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -649,17 +650,17 @@ object principal1: Tprincipal1
     end
   end
   object GroupBox1: TGroupBox
-    Left = 416
-    Height = 325
-    Top = 56
-    Width = 323
+    Left = 520
+    Height = 406
+    Top = 70
+    Width = 404
     Caption = 'CINTA'
-    ClientHeight = 307
-    ClientWidth = 319
+    ClientHeight = 384
+    ClientWidth = 400
     Color = clBtnFace
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -11
+    Font.Height = -14
     Font.Name = 'Tahoma'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
@@ -668,27 +669,27 @@ object principal1: Tprincipal1
     TabOrder = 1
     Visible = False
     object Label1: TLabel
-      Left = 48
-      Height = 13
-      Top = 53
-      Width = 213
+      Left = 60
+      Height = 16
+      Top = 66
+      Width = 266
       Alignment = taCenter
       AutoSize = False
-      Font.Height = -13
+      Font.Height = -16
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentColor = False
       ParentFont = False
     end
     object Label2: TLabel
-      Left = 45
-      Height = 13
-      Top = 306
-      Width = 185
+      Left = 56
+      Height = 16
+      Top = 382
+      Width = 231
       Alignment = taCenter
       AutoSize = False
       Font.Color = clRed
-      Font.Height = -13
+      Font.Height = -16
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentColor = False
@@ -696,16 +697,16 @@ object principal1: Tprincipal1
     end
     object StringGrid1: TStringGrid
       Cursor = crHandPoint
-      Left = 15
-      Height = 194
-      Top = 113
-      Width = 288
+      Left = 19
+      Height = 242
+      Top = 141
+      Width = 360
       ColCount = 4
-      DefaultColWidth = 10
-      DefaultRowHeight = 15
+      DefaultColWidth = 12
+      DefaultRowHeight = 19
       FixedCols = 0
       FixedRows = 0
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'MS Sans Serif'
       Options = [goVertLine, goHorzLine, goRowSelect]
       ParentFont = False
@@ -717,11 +718,11 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object Edit1: TEdit
-      Left = 15
-      Height = 24
-      Top = 67
-      Width = 289
-      Font.Height = -13
+      Left = 19
+      Height = 28
+      Top = 84
+      Width = 361
+      Font.Height = -16
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
       ParentFont = False
@@ -730,15 +731,15 @@ object principal1: Tprincipal1
       TabOrder = 2
     end
     object StringGrid2: TStringGrid
-      Left = 16
-      Height = 20
-      Top = 93
-      Width = 288
+      Left = 20
+      Height = 25
+      Top = 116
+      Width = 360
       ColCount = 4
-      DefaultColWidth = 10
-      DefaultRowHeight = 15
+      DefaultColWidth = 12
+      DefaultRowHeight = 19
       FixedCols = 0
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'MS Sans Serif'
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRowMoving, goRowSelect]
       ParentFont = False
@@ -748,28 +749,28 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object Panel3: TPanel
-      Left = 8
-      Height = 41
-      Top = 12
-      Width = 296
-      ClientHeight = 41
-      ClientWidth = 296
+      Left = 10
+      Height = 51
+      Top = 15
+      Width = 370
+      ClientHeight = 51
+      ClientWidth = 370
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
       ParentFont = False
       TabOrder = 3
       object BitBtn15: TBitBtn
-        Left = 40
-        Height = 37
+        Left = 50
+        Height = 46
         Top = 2
-        Width = 37
+        Width = 46
         Font.CharSet = ANSI_CHARSET
         Font.Color = clBlack
-        Font.Height = -11
+        Font.Height = -14
         Font.Name = 'Tahoma'
         Font.Pitch = fpVariable
         Font.Quality = fqDraft
@@ -841,13 +842,13 @@ object principal1: Tprincipal1
         TabOrder = 0
       end
       object BitBtn16: TBitBtn
-        Left = 132
-        Height = 37
+        Left = 165
+        Height = 46
         Top = 2
-        Width = 37
+        Width = 46
         Font.CharSet = ANSI_CHARSET
         Font.Color = clBlack
-        Font.Height = -11
+        Font.Height = -14
         Font.Name = 'Tahoma'
         Font.Pitch = fpVariable
         Font.Quality = fqDraft
@@ -919,13 +920,13 @@ object principal1: Tprincipal1
         TabOrder = 1
       end
       object BitBtn17: TBitBtn
-        Left = 217
-        Height = 37
+        Left = 271
+        Height = 46
         Top = 2
-        Width = 37
+        Width = 46
         Font.CharSet = ANSI_CHARSET
         Font.Color = clBlack
-        Font.Height = -11
+        Font.Height = -14
         Font.Name = 'Tahoma'
         Font.Pitch = fpVariable
         Font.Quality = fqDraft
@@ -1034,33 +1035,132 @@ object principal1: Tprincipal1
       end
     end
   end
-  object Panel2: TPanel
-    Left = 8
-    Height = 133
-    Top = 34
-    Width = 333
-    Align = alRight
-    Anchors = [akTop, akBottom]
-    ClientHeight = 133
-    ClientWidth = 333
+  object Panel5: TPanel
+    Left = 0
+    Height = 24
+    Top = 399
+    Width = 426
+    Align = alBottom
+    ClientHeight = 24
+    ClientWidth = 426
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
-    Font.Height = -11
+    Font.Height = -14
     Font.Name = 'Sans'
     Font.Pitch = fpVariable
     Font.Quality = fqDraft
     ParentFont = False
     TabOrder = 2
-    Visible = False
-    object BitBtn9: TBitBtn
-      Left = 64
-      Height = 32
-      Hint = 'Open Snapshot'
-      Top = 8
-      Width = 32
+    object Image1: TImage
+      Left = 395
+      Height = 24
+      Top = 0
+      Width = 31
+      Anchors = [akRight, akBottom]
+      Center = True
+      Picture.Data = {
+        07544269746D6170E6040000424DE60400000000000036000000280000001400
+        00000F0000000100200000000000B00400000000000000000000000000000000
+        0000FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+        FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+        FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00181C18001010
+        1000080808000808080008080800080808000000000000000000000000000000
+        00000000000000000000080C08001010100010101000181C1800FF00FF00FF00
+        FF00FF00FF00FF00FF00080C08003938390094969400ADAAAD00A5A2A5009C9E
+        9C00DEDBDE00D6D7D600CECFCE00CECFCE00CECFCE00DEDBDE006B6D6B00393C
+        390042414200080C0800FF00FF00FF00FF00FF00FF00FF00FF00101010003134
+        310094969400393C3900393C3900292C2900DEDBDE00D6D7D600FFFFFF00FFFF
+        FF00FFFFFF00CECBCE006365630039383900393C390010101000FF00FF00FF00
+        FF00FF00FF00FF00FF0010101000313431009C9E9C0031343100313431002120
+        2100DEDFDE00DEDBDE00C6C3C600C6C3C600C6C3C600CECFCE00636563003938
+        3900393C390010101000FF00FF00FF00FF00FF00FF00FF00FF0010101000393C
+        3900393C39003938390031343100313431003130310031303100313031003130
+        31003130310031303100393C390042414200393C390010101000FF00FF00FF00
+        FF00FF00FF00FF00FF0010101000424142002928290010141000101410001014
+        1000101410001014100010141000101410001014100010141000101410002928
+        29004241420010101000FF00FF00FF00FF00FF00FF00FF00FF00101010002928
+        29008C8E8C00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF008C8E8C002928290010101000FF00FF00FF00
+        FF00FF00FF00FF00FF0010101000292829008C8A8C00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008C8A
+        8C002928290010101000FF00FF00FF00FF00FF00FF00FF00FF00101010002928
+        29008C8A8C00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF008C8A8C002928290010101000FF00FF00FF00
+        FF00FF00FF00FF00FF0010101000212421008C8A8C00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008C8A
+        8C002928290010101000FF00FF00FF00FF00FF00FF00FF00FF00101410003130
+        310094929400FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00949294002928290010101000FF00FF00FF00
+        FF00FF00FF00FF00FF00080C0800393C390021202100181C1800181C1800181C
+        1800181C1800181C1800181C1800181C1800181C1800181C1800181C18002120
+        210042414200080C0800FF00FF00FF00FF00FF00FF00FF00FF00181C18001010
+        1000101410001014100010141000101410001014100010141000101410001014
+        10001014100010141000101410001014100010101000181C1800FF00FF00FF00
+        FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+        FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
+        FF00FF00FF00FF00FF00FF00FF00FF00FF00
+      }
+      Transparent = True
+      Visible = False
+    end
+    object StatusBar1: TStatusBar
+      Left = 0
+      Height = 26
+      Top = -2
+      Width = 391
+      Align = alNone
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
+      Font.Name = 'Sans'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      Panels = <      
+        item
+          Alignment = taCenter
+          Width = 75
+        end      
+        item
+          Alignment = taCenter
+          Width = 125
+        end      
+        item
+          Width = 210
+        end>
+      ParentFont = False
+      SimpleText = 'hey'
+      SimplePanel = False
+    end
+  end
+  object Panel2: TPanel
+    Left = 0
+    Height = 357
+    Top = 42
+    Width = 400
+    Align = alLeft
+    Anchors = [akTop, akLeft, akRight]
+    ClientHeight = 357
+    ClientWidth = 400
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -14
+    Font.Name = 'Sans'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentFont = False
+    TabOrder = 3
+    Visible = False
+    object BitBtn9: TBitBtn
+      Left = 104
+      Height = 45
+      Hint = 'Open Snapshot'
+      Top = 2
+      Width = 45
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -1173,14 +1273,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn10: TBitBtn
-      Left = 120
-      Height = 32
+      Left = 152
+      Height = 45
       Hint = 'Open Disk'
-      Top = 8
-      Width = 32
+      Top = 2
+      Width = 45
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -1293,14 +1393,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn11: TBitBtn
-      Left = 176
-      Height = 32
+      Left = 203
+      Height = 45
       Hint = 'Save Snapshot'
-      Top = 8
-      Width = 32
+      Top = 2
+      Width = 45
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -1413,14 +1513,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn12: TBitBtn
-      Left = 224
-      Height = 32
+      Left = 253
+      Height = 45
       Hint = 'Poke Memory'
-      Top = 8
-      Width = 32
+      Top = 2
+      Width = 45
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -1533,14 +1633,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn14: TBitBtn
-      Left = 272
-      Height = 32
+      Left = 303
+      Height = 45
       Hint = 'Fast Load'
-      Top = 8
-      Width = 32
+      Top = 2
+      Width = 45
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -1653,14 +1753,14 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn1: TBitBtn
-      Left = 11
-      Height = 32
+      Left = 55
+      Height = 45
       Hint = 'Config'
-      Top = 8
-      Width = 32
+      Top = 2
+      Width = 45
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
-      Font.Height = -11
+      Font.Height = -14
       Font.Name = 'Sans'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
@@ -1752,108 +1852,9 @@ object principal1: Tprincipal1
       TabStop = False
     end
   end
-  object Panel5: TPanel
-    Left = 0
-    Height = 19
-    Top = 167
-    Width = 341
-    Align = alBottom
-    ClientHeight = 19
-    ClientWidth = 341
-    Font.CharSet = ANSI_CHARSET
-    Font.Color = clBlack
-    Font.Height = -11
-    Font.Name = 'Sans'
-    Font.Pitch = fpVariable
-    Font.Quality = fqDraft
-    ParentFont = False
-    TabOrder = 3
-    object Image1: TImage
-      Left = 316
-      Height = 19
-      Top = 0
-      Width = 25
-      Anchors = [akRight, akBottom]
-      Center = True
-      Picture.Data = {
-        07544269746D6170E6040000424DE60400000000000036000000280000001400
-        00000F0000000100200000000000B00400000000000000000000000000000000
-        0000FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
-        FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
-        FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00181C18001010
-        1000080808000808080008080800080808000000000000000000000000000000
-        00000000000000000000080C08001010100010101000181C1800FF00FF00FF00
-        FF00FF00FF00FF00FF00080C08003938390094969400ADAAAD00A5A2A5009C9E
-        9C00DEDBDE00D6D7D600CECFCE00CECFCE00CECFCE00DEDBDE006B6D6B00393C
-        390042414200080C0800FF00FF00FF00FF00FF00FF00FF00FF00101010003134
-        310094969400393C3900393C3900292C2900DEDBDE00D6D7D600FFFFFF00FFFF
-        FF00FFFFFF00CECBCE006365630039383900393C390010101000FF00FF00FF00
-        FF00FF00FF00FF00FF0010101000313431009C9E9C0031343100313431002120
-        2100DEDFDE00DEDBDE00C6C3C600C6C3C600C6C3C600CECFCE00636563003938
-        3900393C390010101000FF00FF00FF00FF00FF00FF00FF00FF0010101000393C
-        3900393C39003938390031343100313431003130310031303100313031003130
-        31003130310031303100393C390042414200393C390010101000FF00FF00FF00
-        FF00FF00FF00FF00FF0010101000424142002928290010141000101410001014
-        1000101410001014100010141000101410001014100010141000101410002928
-        29004241420010101000FF00FF00FF00FF00FF00FF00FF00FF00101010002928
-        29008C8E8C00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF008C8E8C002928290010101000FF00FF00FF00
-        FF00FF00FF00FF00FF0010101000292829008C8A8C00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008C8A
-        8C002928290010101000FF00FF00FF00FF00FF00FF00FF00FF00101010002928
-        29008C8A8C00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF008C8A8C002928290010101000FF00FF00FF00
-        FF00FF00FF00FF00FF0010101000212421008C8A8C00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008C8A
-        8C002928290010101000FF00FF00FF00FF00FF00FF00FF00FF00101410003130
-        310094929400FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00949294002928290010101000FF00FF00FF00
-        FF00FF00FF00FF00FF00080C0800393C390021202100181C1800181C1800181C
-        1800181C1800181C1800181C1800181C1800181C1800181C1800181C18002120
-        210042414200080C0800FF00FF00FF00FF00FF00FF00FF00FF00181C18001010
-        1000101410001014100010141000101410001014100010141000101410001014
-        10001014100010141000101410001014100010101000181C1800FF00FF00FF00
-        FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
-        FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00FF00
-        FF00FF00FF00FF00FF00FF00FF00FF00FF00
-      }
-      Transparent = True
-      Visible = False
-    end
-    object StatusBar1: TStatusBar
-      Left = 0
-      Height = 21
-      Top = -2
-      Width = 313
-      Align = alNone
-      Anchors = [akLeft, akBottom]
-      AutoSize = False
-      Font.CharSet = ANSI_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'Sans'
-      Font.Pitch = fpVariable
-      Font.Quality = fqDraft
-      Panels = <      
-        item
-          Alignment = taCenter
-          Width = 60
-        end      
-        item
-          Alignment = taCenter
-          Width = 100
-        end      
-        item
-          Width = 168
-        end>
-      ParentFont = False
-      SimpleText = 'hey'
-      SimplePanel = False
-    end
-  end
   object MainMenu1: TMainMenu
-    Left = 120
-    Top = 96
+    Left = 150
+    Top = 120
     object Archivo1: TMenuItem
       Caption = 'Archivo'
       object LstRoms: TMenuItem
@@ -3367,8 +3368,8 @@ object principal1: Tprincipal1
   object ImageList2: TImageList
     Height = 32
     Width = 32
-    Left = 72
-    Top = 96
+    Left = 90
+    Top = 120
     Bitmap = {
       4C69070000002000000020000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -4272,28 +4273,28 @@ object principal1: Tprincipal1
   object Timer1: TTimer
     Enabled = False
     OnTimer = Timer1Timer
-    Left = 208
-    Top = 96
+    Left = 260
+    Top = 120
   end
   object Timer2: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer2Timer
-    Left = 240
-    Top = 96
+    Left = 300
+    Top = 120
   end
   object Timer4: TTimer
     Enabled = False
     Interval = 300
     OnTimer = Timer4Timer
-    Left = 304
-    Top = 96
+    Left = 380
+    Top = 120
   end
   object Timer3: TTimer
     Enabled = False
     Interval = 500
     OnTimer = Timer3Timer
-    Left = 268
-    Top = 96
+    Left = 335
+    Top = 120
   end
 end

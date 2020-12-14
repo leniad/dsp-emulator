@@ -2,13 +2,20 @@
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     sm510,main_engine,controls_engine,rom_engine,sound_engine,gnw_const,
-     gnw_video,gfx_engine,pal_engine,graphics;
+     sm510,main_engine,controls_engine,rom_engine,sound_engine,
+     gfx_engine,pal_engine;//,graphics,sysutils;
+
+type
+  video_def=record
+      id:byte;
+      pos_x,pos_y:word;
+      size_x,size_y:word;
+  end;
 
 procedure cargar_gnw_510;
 
 implementation
-uses principal;
+uses principal,gnw_dkjr_const,gnw_dkong2_const,gnw_mariobros_const;
 
 const
         gnw_jr55_rom:tipo_roms=(n:'jr55_cms54c_kms560';l:$1000;p:$0;crc:$46aed0ae);
@@ -23,7 +30,7 @@ var
   draw_video:boolean;
   final_x,final_y:word;
   sync_x,sync_y:byte;
-
+  gnw_video_array:array[0..3,0..15,0..3] of video_def;
 
 procedure update_video_gnw510;
 var
@@ -169,6 +176,8 @@ var
   punt,punt2:pword;
   f,g:word;
   row,seg,h:byte;
+  //fichero:textfile;
+  //cont:integer;
 begin
 iniciar_gnw_510:=false;
 iniciar_audio(false);
@@ -191,31 +200,18 @@ case main_vars.tipo_maquina of
           sync_y:=12;
           if not(roms_load(sm510_0.get_rom_addr,gnw_dj101_rom)) then exit;
           copymemory(@gnw_video_array,@gnw_dkongjr_video,sizeof(video_def)*$100);
+          punt:=@dkjr_back[0];
           //Copiar el fondo al surface 1...
           for f:=0 to 291 do begin
-              punt:=gnw_video_form.dkong_jr_back.Picture.Bitmap.ScanLine[f];
               putpixel(0,f,430,punt,1);
+              inc(punt,430);
           end;
-          //Convierto todos los graficos
           for row:=0 to 3 do begin
             for seg:=0 to 15 do begin
               for h:=0 to 3 do begin
                   if (gnw_dkongjr_video[row,seg,h].size_y<>0) then begin
-                      //Limpiar la imagen y poner el formato de pixel 16bits
-                      gnw_video_form.image2.Picture:=nil;
-                      gnw_video_form.image2.Picture.Bitmap.PixelFormat:=pf16bit;
-                      gnw_video_form.dkong_jr_images.getbitmap(gnw_dkongjr_video[row,seg,h].id,gnw_video_form.image2.Picture.Bitmap);
-                      getmem(lcd_video_data[gnw_dkongjr_video[row,seg,h].id],gnw_dkongjr_video[row,seg,h].size_x*gnw_dkongjr_video[row,seg,h].size_y*2);
-                      punt:=lcd_video_data[gnw_dkongjr_video[row,seg,h].id];
-                      for f:=0 to (gnw_dkongjr_video[row,seg,h].size_y-1) do begin
-                        punt2:=gnw_video_form.image2.Picture.Bitmap.ScanLine[f];
-                        for g:=0 to (gnw_dkongjr_video[row,seg,h].size_x-1) do begin
-                          if punt2^=$ffff then punt^:=SET_TRANS_COLOR
-                            else punt^:=punt2^;
-                          inc(punt2);
-                          inc(punt);
-                        end;
-                      end;
+                    getmem(lcd_video_data[gnw_dkongjr_video[row,seg,h].id],gnw_dkongjr_video[row,seg,h].size_x*gnw_dkongjr_video[row,seg,h].size_y*2);
+                    copymemory(lcd_video_data[gnw_dkongjr_video[row,seg,h].id],dkjr_video[gnw_dkongjr_video[row,seg,h].id],gnw_dkongjr_video[row,seg,h].size_x*gnw_dkongjr_video[row,seg,h].size_y*2);
                   end;
               end;
             end;
@@ -233,31 +229,18 @@ case main_vars.tipo_maquina of
           sync_y:=7;
           if not(roms_load(sm510_0.get_rom_addr,gnw_jr55_rom)) then exit;
           copymemory(@gnw_video_array,@gnw_dkong2_video,sizeof(video_def)*$100);
+          punt:=@dkong2_back[0];
           //Copiar el fondo al surface 1...
           for f:=0 to 582 do begin
-              punt:=gnw_video_form.dkong2_back.Picture.Bitmap.ScanLine[f];
               putpixel(0,f,430,punt,1);
+              inc(punt,430);
           end;
-          //Convierto todos los graficos
           for row:=0 to 3 do begin
             for seg:=0 to 15 do begin
               for h:=0 to 3 do begin
                   if (gnw_dkong2_video[row,seg,h].size_y<>0) then begin
-                      //Limpiar la imagen y poner el formato de pixel 16bits
-                      gnw_video_form.image2.Picture:=nil;
-                      gnw_video_form.image2.Picture.Bitmap.PixelFormat:=pf16bit;
-                      gnw_video_form.dkong2_images.getbitmap(gnw_dkong2_video[row,seg,h].id,gnw_video_form.image2.Picture.Bitmap);
-                      getmem(lcd_video_data[gnw_dkong2_video[row,seg,h].id],gnw_dkong2_video[row,seg,h].size_x*gnw_dkong2_video[row,seg,h].size_y*2);
-                      punt:=lcd_video_data[gnw_dkong2_video[row,seg,h].id];
-                      for f:=0 to (gnw_dkong2_video[row,seg,h].size_y-1) do begin
-                        punt2:=gnw_video_form.image2.Picture.Bitmap.ScanLine[f];
-                        for g:=0 to (gnw_dkong2_video[row,seg,h].size_x-1) do begin
-                          if punt2^=$ffff then punt^:=SET_TRANS_COLOR
-                            else punt^:=punt2^;
-                          inc(punt2);
-                          inc(punt);
-                        end;
-                      end;
+                    getmem(lcd_video_data[gnw_dkong2_video[row,seg,h].id],gnw_dkong2_video[row,seg,h].size_x*gnw_dkong2_video[row,seg,h].size_y*2);
+                    copymemory(lcd_video_data[gnw_dkong2_video[row,seg,h].id],dkong2_video[gnw_dkong2_video[row,seg,h].id],gnw_dkong2_video[row,seg,h].size_x*gnw_dkong2_video[row,seg,h].size_y*2);
                   end;
               end;
             end;
@@ -275,35 +258,68 @@ case main_vars.tipo_maquina of
           sync_y:=0;
           if not(roms_load(sm510_0.get_rom_addr,gnw_mw56_rom)) then exit;
           copymemory(@gnw_video_array,@gnw_mariobros_video,sizeof(video_def)*$100);
+          punt:=@mario_back[0];
           //Copiar el fondo al surface 1...
           for f:=0 to 282 do begin
+              putpixel(0,f,865,punt,1);
+              inc(punt,865);
+          end;
+          {cont:=0;
+          assign(fichero,'d:\datos\fichero.txt');
+          rewrite(fichero);
+          writeln(fichero,'mario_back:array[0..] of word=(');
+          //Copiar el fondo al surface 1...
+          {for f:=0 to 282 do begin
               punt:=gnw_video_form.mariobros_back.Picture.Bitmap.ScanLine[f];
               putpixel(0,f,865,punt,1);
+              for g:=0 to 864 do begin
+                write(fichero,'$'+inttohex(punt^,4)+',');
+                inc(punt);
+                cont:=cont+1;
+                if cont=42 then begin
+                  cont:=0;
+                  writeln(fichero,'');
+                end;
+              end;
           end;
+          writeln(fichero,');');
+          closefile(fichero); }
+          {cont:=0;
+          assign(fichero,'d:\datos\fichero.txt');
+          rewrite(fichero);
           //Convierto todos los graficos
           for row:=0 to 3 do begin
             for seg:=0 to 15 do begin
               for h:=0 to 3 do begin
-                  if (gnw_mariobros_video[row,seg,h].size_y<>0) then begin
+                  if (gnw_dkong2_video[row,seg,h].size_y<>0) then begin
+                      write(fichero,'dkong2_'+inttostr(gnw_dkong2_video[row,seg,h].id)+':array[0..'+inttostr((gnw_dkong2_video[row,seg,h].size_x*gnw_dkong2_video[row,seg,h].size_y)-1)+'] of word=(');
                       //Limpiar la imagen y poner el formato de pixel 16bits
                       gnw_video_form.image2.Picture:=nil;
                       gnw_video_form.image2.Picture.Bitmap.PixelFormat:=pf16bit;
-                      gnw_video_form.mariobros_images.getbitmap(gnw_mariobros_video[row,seg,h].id,gnw_video_form.image2.Picture.Bitmap);
-                      getmem(lcd_video_data[gnw_mariobros_video[row,seg,h].id],gnw_mariobros_video[row,seg,h].size_x*gnw_mariobros_video[row,seg,h].size_y*2);
-                      punt:=lcd_video_data[gnw_mariobros_video[row,seg,h].id];
-                      for f:=0 to (gnw_mariobros_video[row,seg,h].size_y-1) do begin
+                      gnw_video_form.dkong2_images.getbitmap(gnw_dkong2_video[row,seg,h].id,gnw_video_form.image2.Picture.Bitmap);
+                      getmem(lcd_video_data[gnw_dkong2_video[row,seg,h].id],gnw_dkong2_video[row,seg,h].size_x*gnw_dkong2_video[row,seg,h].size_y*2);
+                      punt:=lcd_video_data[gnw_dkong2_video[row,seg,h].id];
+                      for f:=0 to (gnw_dkong2_video[row,seg,h].size_y-1) do begin
                         punt2:=gnw_video_form.image2.Picture.Bitmap.ScanLine[f];
-                        for g:=0 to (gnw_mariobros_video[row,seg,h].size_x-1) do begin
+                        for g:=0 to (gnw_dkong2_video[row,seg,h].size_x-1) do begin
                           if punt2^=$ffff then punt^:=SET_TRANS_COLOR
                             else punt^:=punt2^;
+                          write(fichero,'$'+inttohex(punt^,4)+',');
+                          cont:=cont+1;
+                          if cont=41 then begin
+                            cont:=0;
+                            writeln(fichero,'');
+                          end;
                           inc(punt2);
                           inc(punt);
                         end;
                       end;
                   end;
+                  writeln(fichero,');');
               end;
             end;
           end;
+          closefile(fichero);}
   end;
 end;
 reset_gnw_510;

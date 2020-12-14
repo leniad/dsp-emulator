@@ -131,7 +131,7 @@ type
     RadioButton9: TRadioButton;
     RadioGroup1: TRadioGroup;
     RadioGroup2: TRadioGroup;
-    RadioGroup3: TRadioGroup;
+    GroupBox5: TRadioGroup;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
@@ -449,7 +449,7 @@ begin
   split_dirs(D4.Text);
   Directory.Arcade_hi:=D5.Text;
   if d5.Text[length(d5.Text)]<>main_vars.cadena_dir then Directory.Arcade_hi:=Directory.Arcade_hi+main_vars.cadena_dir;
-  Directory.Arcade_hi:=D6.Text;
+  Directory.qsnapshot:=D6.Text;
   if d6.Text[length(d6.Text)]<>main_vars.cadena_dir then Directory.qsnapshot:=Directory.qsnapshot+main_vars.cadena_dir;
   if radiobutton5.Checked then tmp_var:=0
     else if radiobutton6.Checked then tmp_var:=1
@@ -470,23 +470,29 @@ begin
     sound_status.calidad_audio:=tmp_var;
     principal1.CambiaAudio(nil);
   end;
-  if radiobutton16.Checked then tmp_var:=1
-    else if radiobutton17.Checked then tmp_var:=2
-      else if radiobutton18.Checked then tmp_var:=3
-        else if radiobutton19.Checked then tmp_var:=4
-          else if radiobutton20.Checked then tmp_var:=5;
-  if tmp_var<>main_screen.video_mode then begin
-    main_screen.video_mode:=tmp_var;
-    principal1.CambiarVideo(nil);
+  if groupbox5.Enabled then begin
+    if radiobutton16.Checked then tmp_var:=1
+      else if radiobutton17.Checked then tmp_var:=2
+        else if radiobutton18.Checked then tmp_var:=3
+          else if radiobutton19.Checked then tmp_var:=4
+            else if radiobutton20.Checked then tmp_var:=5;
+    if tmp_var<>main_screen.video_mode then begin
+      if main_vars.driver_ok then begin
+        if tmp_var=6 then pasar_pantalla_completa
+          else begin
+            main_screen.old_video_mode:=main_screen.video_mode;
+            main_screen.video_mode:=tmp_var;
+            cambiar_video;
+          end;
+      end;
+    end;
   end;
   main_vars.auto_exec:=checkbox2.Checked;
   main_vars.show_crc_error:=checkbox1.Checked;
   main_vars.center_screen:=checkbox3.Checked;
-  main_vars.x11:=checkbox4.Checked;
 //Arreglar entradas arcade
   arcade_input.use_key[0]:=radiobutton1.Checked;
   arcade_input.use_key[1]:=radiobutton3.Checked;
-  arcade_input.num_joystick[0]:=combobox1.ItemIndex;
   arcade_input.num_joystick[1]:=combobox2.ItemIndex;
   arcade_input.jbut0[0]:=combobox3.ItemIndex;
   arcade_input.jbut1[0]:=combobox4.ItemIndex;
@@ -503,11 +509,11 @@ begin
   timers.autofire_on:=checkbox16.Checked;
   if timers.autofire_on then begin
     timers.autofire_enabled[0]:=checkbox4.Checked;
-    timers.autofire_enabled[1]:=CheckBox4.Checked;
-    timers.autofire_enabled[2]:=CheckBox5.Checked;
-    timers.autofire_enabled[3]:=CheckBox6.Checked;
-    timers.autofire_enabled[4]:=CheckBox7.Checked;
-    timers.autofire_enabled[5]:=CheckBox8.Checked;
+    timers.autofire_enabled[1]:=checkbox5.Checked;
+    timers.autofire_enabled[2]:=checkbox6.Checked;
+    timers.autofire_enabled[3]:=checkbox7.Checked;
+    timers.autofire_enabled[4]:=checkbox8.Checked;
+    timers.autofire_enabled[5]:=checkbox9.Checked;
     timers.autofire_enabled[6]:=checkbox10.Checked;
     timers.autofire_enabled[7]:=checkbox11.Checked;
     timers.autofire_enabled[8]:=checkbox12.Checked;

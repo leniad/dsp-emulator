@@ -299,8 +299,8 @@ object MConfig: TMConfig
         end
       end
       object GroupBox6: TGroupBox
-        Left = 6
-        Top = 249
+        Left = 3
+        Top = 252
         Width = 378
         Height = 80
         Caption = 'Misc'

@@ -1,4 +1,13 @@
 ﻿# DSP Emulator status #
+<b>14/12/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-Lazarus
+    +Cosmetical changes (icons, objects size...)
+    +Fixed change screen size from options menu
+-Game & Watch
+    +Finaly find a solution to compile under Lazarus
+-Amstrad CPC
+    +You can load disks again... Opps!
+</pre><br><br>
 <b>08/12/20 - DSP Emulator 0.18b3 WIP. Win32, macOS64 and source update.<br><pre>
 -Added macOS 64bits WIP compilation, tested on v10.15 and v11.0
 -NES

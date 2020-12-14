@@ -275,9 +275,7 @@ uses
   crazyclimber_hw_dac in '..\snd\crazyclimber_hw_dac.pas',
   returnofinvaders_hw in '..\arcade\returnofinvaders_hw.pas',
   sm510 in '..\cpu\sm510.pas',
-  gnw_video in 'gnw_video.pas' {gnw_video_form},
   gnw_510 in '..\gnw\gnw_510.pas',
-  gnw_const in '..\gnw\gnw_const.pas',
   m6845 in '..\devices\m6845.pas',
   tetris_atari_hw in '..\arcade\tetris_atari_hw.pas',
   slapstic in '..\arcade\misc\slapstic.pas',
@@ -306,7 +304,10 @@ uses
   d64_file_format in '..\misc\d64_file_format.pas',
   armedf_hw in '..\arcade\armedf_hw.pas',
   nb1414_m4 in '..\arcade\misc\nb1414_m4.pas',
-  sega_gg in '..\consolas\sega_gg.pas';
+  sega_gg in '..\consolas\sega_gg.pas',
+  gnw_dkjr_const in '..\gnw\gnw_dkjr_const.pas',
+  gnw_dkong2_const in '..\gnw\gnw_dkong2_const.pas',
+  gnw_mariobros_const in '..\gnw\gnw_mariobros_const.pas';
 
 {$R *.res}
 
@@ -327,6 +328,5 @@ begin
   Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(TConfigCPC, ConfigCPC);
-  Application.CreateForm(Tgnw_video_form, gnw_video_form);
   Application.Run;
 end.
