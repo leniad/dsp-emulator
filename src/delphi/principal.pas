@@ -435,6 +435,8 @@ type
     CrazyClimber21: TMenuItem;
     Legion1: TMenuItem;
     SegaGG1: TMenuItem;
+    aso1: TMenuItem;
+    Firetrap1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

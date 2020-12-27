@@ -137,7 +137,6 @@ procedure pio_int_main(state:byte);
 function pio_read_porta:byte;
 function pio_read_portb:byte;
 
-
 implementation
 uses tap_tzx,snapshot,config;
 

@@ -320,12 +320,22 @@ abrir_cartucho_sms_bios:=true;
 end;
 
 procedure reset_sms;
+var
+  z80_r:npreg_z80;
 begin
  z80_0.reset;
  sn_76496_0.reset;
  vdp_0.reset;
  //ym2413_0.reset;
  reset_audio;
+ z80_r:=z80_0.get_internal_r;
+ z80_r.sp:=$dfeb;
+ z80_r.bc.w:=$ff3c;
+ z80_r.bc2.w:=$300;
+ z80_r.de2.w:=$c73c;
+ z80_r.hl.w:=$2;
+ z80_r.hl2.w:=$c739;
+ z80_r.a:=$14;
  mapper_sms.slot2_ram:=false;
  bios_enabled:=true;
  io_enabled:=true;

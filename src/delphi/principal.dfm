@@ -2102,6 +2102,10 @@ object principal1: Tprincipal1
               Caption = 'T.N.K III'
               OnClick = CambiarMaquina
             end
+            object aso1: TMenuItem
+              Caption = 'ASO - Armored Scrum Object'
+              OnClick = CambiarMaquina
+            end
           end
           object SegaSystemE1: TMenuItem
             Caption = 'Sega System E'
@@ -2158,6 +2162,11 @@ object principal1: Tprincipal1
               Caption = 'Ufo Robo Dangar'
               OnClick = CambiarMaquina
             end
+          end
+          object Firetrap1: TMenuItem
+            Caption = 'Fire Trap'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
           end
         end
         object M65021: TMenuItem

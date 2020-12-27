@@ -307,7 +307,8 @@ uses
   sega_gg in '..\consolas\sega_gg.pas',
   gnw_dkjr_const in '..\gnw\gnw_dkjr_const.pas',
   gnw_dkong2_const in '..\gnw\gnw_dkong2_const.pas',
-  gnw_mariobros_const in '..\gnw\gnw_mariobros_const.pas';
+  gnw_mariobros_const in '..\gnw\gnw_mariobros_const.pas',
+  firetrap_hw in '..\arcade\firetrap_hw.pas';
 
 {$R *.res}
 

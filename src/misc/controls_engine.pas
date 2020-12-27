@@ -148,7 +148,7 @@ type
         circle:boolean;
     end;
     def_analog=record
-        c:array[0..2] of def_analog_control;
+        c:array[0..4] of def_analog_control;
         cpu:byte;
         clock:dword;
     end;
@@ -174,6 +174,8 @@ procedure init_analog(cpu:byte;cpu_clock:integer);
 procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted:boolean=false);
 procedure analog_1(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_2(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
+procedure analog_3(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
+procedure analog_4(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 
 implementation
 uses principal;
@@ -698,6 +700,46 @@ for f:=0 to NUM_PLAYERS do begin
 end;
 end;
 
+procedure analog_read_3;
+var
+  f:byte;
+begin
+for f:=0 to NUM_PLAYERS do begin
+  if arcade_input.but2[f] then begin
+    analog.c[3].val[f]:=analog.c[3].val[f]+analog.c[3].delta;
+    if analog.c[3].val[f]>analog.c[3].max_val then analog.c[3].val[f]:=analog.c[3].max_val;
+  end;
+  if analog.c[3].return_center then begin
+    if not(arcade_input.but2[f]) then begin
+      if analog.c[3].val[f]>analog.c[3].min_val then begin
+          analog.c[3].val[f]:=analog.c[3].val[f]-analog.c[3].delta;
+          if analog.c[3].val[f]<analog.c[3].min_val then analog.c[3].val[f]:=analog.c[3].min_val;
+      end;
+    end;
+  end;
+end;
+end;
+
+procedure analog_read_4;
+var
+  f:byte;
+begin
+for f:=0 to NUM_PLAYERS do begin
+  if arcade_input.but3[f] then begin
+    analog.c[4].val[f]:=analog.c[4].val[f]+analog.c[4].delta;
+    if analog.c[4].val[f]>analog.c[4].max_val then analog.c[4].val[f]:=analog.c[4].max_val;
+  end;
+  if analog.c[4].return_center then begin
+    if not(arcade_input.but3[f]) then begin
+      if analog.c[4].val[f]>analog.c[4].min_val then begin
+          analog.c[4].val[f]:=analog.c[4].val[f]-analog.c[4].delta;
+          if analog.c[4].val[f]<analog.c[4].min_val then analog.c[4].val[f]:=analog.c[4].min_val;
+      end;
+    end;
+  end;
+end;
+end;
+
 procedure init_analog(cpu:byte;cpu_clock:integer);
 begin
 analog.cpu:=cpu;
@@ -744,6 +786,30 @@ analog.c[2].max_val:=max_val;
 analog.c[2].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[2].val[f]:=min_val;
 analog.c[2].return_center:=return_center;
+end;
+
+procedure analog_3(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
+var
+   f:byte;
+begin
+timers.init(analog.cpu,analog.clock/((4250000/analog.clock)*sensitivity),analog_read_3,nil,true);
+analog.c[3].delta:=port_delta;
+analog.c[3].max_val:=max_val;
+analog.c[3].min_val:=min_val;
+for f:=0 to NUM_PLAYERS do analog.c[3].val[f]:=min_val;
+analog.c[3].return_center:=return_center;
+end;
+
+procedure analog_4(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
+var
+   f:byte;
+begin
+timers.init(analog.cpu,analog.clock/((4250000/analog.clock)*sensitivity),analog_read_4,nil,true);
+analog.c[4].delta:=port_delta;
+analog.c[4].max_val:=max_val;
+analog.c[4].min_val:=min_val;
+for f:=0 to NUM_PLAYERS do analog.c[4].val[f]:=min_val;
+analog.c[4].return_center:=return_center;
 end;
 
 end.

@@ -1,4 +1,20 @@
 ﻿# DSP Emulator status #
+<b>27/12/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-Lazarus
+    +More cosmetical changes
+    +Fixed 'no sound' option
+-General
+    +CPU
+        -Z80: Fixed a stupid bug on IRQ
+-SNK
+    +Fixed rotation buttons
+    +ASO - Armored Scrum Object: Added driver with sound
+-Fire Trap
+    +Added driver with sound
+</pre>
+<img src='https://i.ibb.co/tbPFC5s/ASO.jpg'><img src='https://i.ibb.co/7k0tR07/FireTrap.jpg'><br>
+Merry Christmas and happy new year!!
+<img src='https://i.ibb.co/ZMswJ6h/santa.gif'><br><br>
 <b>14/12/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -Lazarus
     +Cosmetical changes (icons, objects size...)

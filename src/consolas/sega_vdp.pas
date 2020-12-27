@@ -295,9 +295,9 @@ function get_name_table_row(vdp:vdp_chip;row:word):word;
 var
   tempw:word;
 begin
-  if vdp.Y_PIXELS=192 then tempw:=((row shr 3) shl 6) and (((vdp.tms.regs[2] and 1) shl 10) or $3bff)
+if ((vdp.Y_PIXELS=192) and not(vdp.gg_set)) then tempw:=((row shr 3) shl 6) and (((vdp.tms.regs[2] and 1) shl 10) or $3bff)
     else tempw:=((row shr 3) shl 6);
-  get_name_table_row:=tempw;
+get_name_table_row:=tempw;
 end;
 
 procedure vdp_chip.draw_mode_sms(linea:word);

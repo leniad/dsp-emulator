@@ -2598,6 +2598,28 @@ const
         (n:'legion.1l';l:$10000;p:0;crc:$29b8adaa),(n:'legion.1e';l:$10000;p:0;crc:$a9d70faf),
         (n:'legion.1f';l:$8000;p:$10000;crc:$f018313b),(n:'legion.1k';l:$10000;p:0;crc:$ff5a0db9),
         (n:'legion.1j';l:$10000;p:$10000;crc:$bae220c8),());
+        aso:array[0..17] of tipo_roms=(
+        (n:'p1.8d';l:$4000;p:0;crc:$84981f3c),(n:'p2.7d';l:$4000;p:$4000;crc:$cfe912a6),
+        (n:'p3.5d';l:$4000;p:$8000;crc:$39a666d2),(n:'p4.3d';l:$4000;p:0;crc:$a4122355),
+        (n:'p5.2d';l:$4000;p:$4000;crc:$9879e506),(n:'p6.1d';l:$4000;p:$8000;crc:$c0bfdf1f),
+        (n:'p7.4f';l:$4000;p:0;crc:$dbc19736),(n:'p8.3f';l:$4000;p:$4000;crc:$537726a9),
+        (n:'p9.2f';l:$4000;p:$8000;crc:$aef5a4f4),(n:'p14.1h';l:$2000;p:0;crc:$8baa2253),
+        (n:'p10.14h';l:$8000;p:0;crc:$00dff996),(n:'p11.11h';l:$8000;p:0;crc:$7feac86c),
+        (n:'p12.9h';l:$8000;p:$8000;crc:$6895990b),(n:'p13.8h';l:$8000;p:$c000;crc:$87a81ce1),
+        (n:'mb7122h.12f';l:$400;p:0;crc:$5b0a0059),(n:'mb7122h.13f';l:$400;p:$400;crc:$37e28dd8),
+        (n:'mb7122h.14f';l:$400;p:$800;crc:$c3fd1dd3),());
+        firetrap:array[0..22] of tipo_roms=(
+        (n:'di-02.4a';l:$8000;p:0;crc:$3d1e4bf7),(n:'di-01.3a';l:$8000;p:$8000;crc:$9bbae38b),
+        (n:'di-00-a.2a';l:$8000;p:$10000;crc:$f39e2cf4),(n:'di-17.10j';l:$8000;p:0;crc:$8605f6b9),
+        (n:'di-18.12j';l:$8000;p:$8000;crc:$49508c93),(n:'di-12.16h';l:$1000;p:0;crc:$6340a4d7),
+        (n:'di-03.17c';l:$2000;p:0;crc:$46721930),(n:'di-06.3e';l:$8000;p:$0;crc:$441d9154),
+        (n:'di-04.2e';l:$8000;p:$8000;crc:$8e6e7eec),(n:'di-07.6e';l:$8000;p:$10000;crc:$ef0a7e23),
+        (n:'di-05.4e';l:$8000;p:$18000;crc:$ec080082),(n:'di-09.3j';l:$8000;p:$0;crc:$d11e28e8),
+        (n:'di-08.2j';l:$8000;p:$8000;crc:$c32a21d8),(n:'di-11.6j';l:$8000;p:$10000;crc:$6424d5c3),
+        (n:'di-10.4j';l:$8000;p:$18000;crc:$9b89300a),(n:'di-16.17h';l:$8000;p:$0;crc:$0de055d7),
+        (n:'di-13.13h';l:$8000;p:$8000;crc:$869219da),(n:'di-14.14h';l:$8000;p:$10000;crc:$6b65812e),
+        (n:'di-15.15h';l:$8000;p:$18000;crc:$3e27f77d),(n:'firetrap.3b';l:$100;p:$0;crc:$8bb45337),
+        (n:'firetrap.4b';l:$100;p:$100;crc:$d5abfc64),(n:'firetrap.1a';l:$100;p:$200;crc:$d67f3514),());
 
 implementation
 uses principal,init_games;

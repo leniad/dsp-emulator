@@ -179,7 +179,6 @@ end;
 spec_z80.contador:=spec_z80.contador+estados;
 end;
 
-
 function spec48_getbyte(direccion:word):byte;
 begin
 if spec_16k then spec48_getbyte:=memoria[direccion and $7fff]

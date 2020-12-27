@@ -217,17 +217,10 @@ begin
   end;
 end;
 
-procedure write_sound_command(valor:byte);inline;
-begin
-  sound_latch:=valor;
-  z80pio_astb_w(0,false);
-	z80pio_astb_w(0,true);
-end;
-
 procedure starforce_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+        0..$7fff:;
         $8000..$8fff,$9800..$987f,$b800..$bbff:memoria[direccion]:=valor;
         $9000..$97ff:if memoria[direccion]<>valor then begin
                         gfx[0].buffer[direccion and $3ff]:=true;
@@ -268,7 +261,11 @@ case direccion of
                      end;
         $d000:main_screen.flip_main_screen:=(valor and 1)<>0;
         $d002:z80_0.change_irq(CLEAR_LINE);
-        $d004:write_sound_command(valor);
+        $d004:begin
+                sound_latch:=valor;
+                z80pio_astb_w(0,false);
+	              z80pio_astb_w(0,true);
+              end;
 end;
 end;
 
@@ -281,8 +278,8 @@ end;
 
 procedure snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$2000 then exit;
 case direccion of
+  0..$1fff:;
   $4000..$43ff:mem_snd[direccion]:=valor;
   $8000:sn_76496_0.Write(valor);
   $9000:sn_76496_1.Write(valor);
@@ -434,7 +431,7 @@ z80pio_close(0);
 z80ctc_close(0);
 end;
 
-procedure Cargar_starforce;
+procedure cargar_starforce;
 begin
 llamadas_maquina.iniciar:=iniciar_starforce;
 llamadas_maquina.bucle_general:=starforce_principal;

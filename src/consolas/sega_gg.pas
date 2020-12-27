@@ -174,7 +174,13 @@ var
 begin
  z80_0.reset;
  z80_r:=z80_0.get_internal_r;
- z80_r.sp:=$dff0;
+ z80_r.sp:=$dfeb;
+ z80_r.bc.w:=$ff3c;
+ z80_r.bc2.w:=$300;
+ z80_r.de2.w:=$c73c;
+ z80_r.hl.w:=$2;
+ z80_r.hl2.w:=$c739;
+ z80_r.a:=$14;
  sn_76496_0.reset;
  vdp_0.reset;
  reset_audio;

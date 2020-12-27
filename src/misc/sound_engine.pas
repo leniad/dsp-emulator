@@ -222,7 +222,6 @@ for f:=0 to sound_status.canales_usados do begin
   waveOutWrite(sound_status.audio[f],@cab_audio[f][sound_status.num_buffer],sizeof(WAVEHDR));
   fillchar(tsample[f],LONG_MAX_AUDIO*sizeof(smallint),0);
   {$endif}
-  end;
 end;
 {$ifdef fpc}
 if main_screen.rapido then SDL_ClearQueuedAudio(sound_device);
@@ -240,6 +239,7 @@ for f:=0 to sound_status.canales_usados do fillchar(tsample[f],LONG_MAX_AUDIO*si
 sound_status.num_buffer:=sound_status.num_buffer+1;
 if sound_status.num_buffer=MAX_AUDIO_BUFFER then sound_status.num_buffer:=0;
 {$endif}
+end;
 sound_status.posicion_sonido:=0;
 end;
 

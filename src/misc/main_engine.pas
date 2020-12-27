@@ -221,8 +221,8 @@ procedure cambiar_video;
 procedure uses_sdl_window;
 begin
 case main_vars.tipo_maquina of
-     0..9,1000..1003,3000:begin
-             fix_screen_pos(400,120);
+     0..9,1000..1006,3000:begin
+             fix_screen_pos(400,100);
              principal1.Panel2.width:=400;
              principal1.Panel2.height:=55;
              {principal1.Panel2.Align:=alLeft;

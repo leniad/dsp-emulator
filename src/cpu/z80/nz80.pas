@@ -696,8 +696,8 @@ var
   estados_t:byte;
 begin
 call_irq:=0;
-self.r.halt_opcode:=false;
 if not(r.iff1) then exit; //se esta ejecutando otra
+self.r.halt_opcode:=false;
 r.r:=((r.r+1) and $7f) or (r.r and $80);
 if @self.raised_z80<>nil then estados_t:=self.raised_z80
   else estados_t:=0;
@@ -748,7 +748,8 @@ procedure cpu_z80.run(maximo:single);
 var
  instruccion,temp:byte;
  posicion:parejas;
- ban_temp:band_z80;
+ ban_temp
+ :band_z80;
  irq_temp:boolean;
  cantidad_t:word;
  pestados:integer;

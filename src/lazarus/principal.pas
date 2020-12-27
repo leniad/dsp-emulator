@@ -233,6 +233,8 @@ type
     armedf1: TMenuItem;
     crazyclimber21: TMenuItem;
     Legion1: TMenuItem;
+    aso1: TMenuItem;
+    firetrap1: TMenuItem;
     Panel2: TPanel;
     segagg1: TMenuItem;
     terraforce1: TMenuItem;

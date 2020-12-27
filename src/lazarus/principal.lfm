@@ -1393,7 +1393,7 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn11: TBitBtn
-      Left = 203
+      Left = 202
       Height = 45
       Hint = 'Save Snapshot'
       Top = 2
@@ -1513,7 +1513,7 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn12: TBitBtn
-      Left = 253
+      Left = 252
       Height = 45
       Hint = 'Poke Memory'
       Top = 2
@@ -1633,7 +1633,7 @@ object principal1: Tprincipal1
       TabStop = False
     end
     object BitBtn14: TBitBtn
-      Left = 303
+      Left = 302
       Height = 45
       Hint = 'Fast Load'
       Top = 2
@@ -2544,6 +2544,10 @@ object principal1: Tprincipal1
               Caption = 'T.N.K'
               OnClick = CambiarMaquina
             end
+            object aso1: TMenuItem
+              Caption = 'ASO - Armored Scrum Object'
+              OnClick = CambiarMaquina
+            end
           end
           object segasysteme1: TMenuItem
             Caption = 'Sega System E'
@@ -2597,6 +2601,10 @@ object principal1: Tprincipal1
               Caption = 'Ufo Robo Dangar'
               OnClick = CambiarMaquina
             end
+          end
+          object firetrap1: TMenuItem
+            Caption = 'Fire Trap'
+            OnClick = CambiarMaquina
           end
         end
         object M65021: TMenuItem
@@ -3328,6 +3336,7 @@ object principal1: Tprincipal1
         end
         object sg10001: TMenuItem
           Caption = 'SG-1000'
+          OnClick = CambiarMaquina
         end
         object segagg1: TMenuItem
           Caption = 'Sega GameGear'
