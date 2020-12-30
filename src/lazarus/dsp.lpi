@@ -14,7 +14,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="18"/>
       <RevisionNr Value="2"/>
-      <BuildNr Value="1245"/>
+      <BuildNr Value="1247"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.18"/>
     </VersionInfo>
@@ -57,8 +57,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="684"/>
-        <CursorPos Y="704"/>
+        <TopLine Value="690"/>
+        <CursorPos Y="710"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -419,8 +419,8 @@
       <Unit40>
         <Filename Value="..\misc\init_games.pas"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="633"/>
-        <CursorPos X="44" Y="643"/>
+        <TopLine Value="642"/>
+        <CursorPos X="53" Y="653"/>
         <UsageCount Value="63"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -911,122 +911,122 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="759" TopLine="740"/>
+        <Caret Line="771" TopLine="743"/>
       </Position1>
       <Position2>
         <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="760" TopLine="740"/>
+        <Caret Line="772" TopLine="744"/>
       </Position2>
       <Position3>
         <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="761" TopLine="740"/>
+        <Caret Line="773" TopLine="745"/>
       </Position3>
       <Position4>
         <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="762" TopLine="740"/>
+        <Caret Line="774" TopLine="746"/>
       </Position4>
       <Position5>
-        <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="765" TopLine="740"/>
+        <Filename Value="..\consolas\sega_vdp.pas"/>
+        <Caret Line="432" Column="15" TopLine="416"/>
       </Position5>
       <Position6>
-        <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="770" TopLine="742"/>
+        <Filename Value="..\consolas\sega_vdp.pas"/>
+        <Caret Line="123" Column="79" TopLine="119"/>
       </Position6>
       <Position7>
-        <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="771" TopLine="743"/>
+        <Filename Value="..\consolas\sega_vdp.pas"/>
+        <Caret Line="477" Column="35" TopLine="459"/>
       </Position7>
       <Position8>
-        <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="772" TopLine="744"/>
+        <Filename Value="..\consolas\sega_vdp.pas"/>
+        <Caret Line="316" Column="15" TopLine="296"/>
       </Position8>
       <Position9>
-        <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="773" TopLine="745"/>
+        <Filename Value="..\consolas\sega_vdp.pas"/>
+        <Caret Line="319" Column="24" TopLine="296"/>
       </Position9>
       <Position10>
-        <Filename Value="..\misc\file_engine.pas"/>
-        <Caret Line="774" TopLine="746"/>
+        <Filename Value="..\consolas\sega_vdp.pas"/>
+        <Caret Line="320" Column="47" TopLine="296"/>
       </Position10>
       <Position11>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="432" Column="15" TopLine="416"/>
+        <Caret Line="337" Column="64" TopLine="310"/>
       </Position11>
       <Position12>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="123" Column="79" TopLine="119"/>
+        <Caret Line="344" Column="21" TopLine="316"/>
       </Position12>
       <Position13>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="477" Column="35" TopLine="459"/>
+        <Caret Line="321" Column="31" TopLine="304"/>
       </Position13>
       <Position14>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="316" Column="15" TopLine="296"/>
       </Position14>
       <Position15>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="319" Column="24" TopLine="296"/>
+        <Caret Line="93" Column="15" TopLine="65"/>
       </Position15>
       <Position16>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="320" Column="47" TopLine="296"/>
+        <Caret Line="321" Column="31" TopLine="293"/>
       </Position16>
       <Position17>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="337" Column="64" TopLine="310"/>
+        <Caret Line="498" Column="23" TopLine="497"/>
       </Position17>
       <Position18>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="344" Column="21" TopLine="316"/>
+        <Caret Line="518" Column="65" TopLine="494"/>
       </Position18>
       <Position19>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="321" Column="31" TopLine="304"/>
+        <Caret Line="470" Column="10" TopLine="449"/>
       </Position19>
       <Position20>
         <Filename Value="..\consolas\sega_vdp.pas"/>
+        <Caret Line="472" Column="33" TopLine="467"/>
       </Position20>
       <Position21>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="93" Column="15" TopLine="65"/>
+        <Caret Line="495" Column="9" TopLine="479"/>
       </Position21>
       <Position22>
         <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="321" Column="31" TopLine="293"/>
+        <Caret Line="448" Column="26" TopLine="432"/>
       </Position22>
       <Position23>
-        <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="498" Column="23" TopLine="497"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="702" TopLine="682"/>
       </Position23>
       <Position24>
-        <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="518" Column="65" TopLine="494"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="703" TopLine="683"/>
       </Position24>
       <Position25>
-        <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="470" Column="10" TopLine="449"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="704" TopLine="684"/>
       </Position25>
       <Position26>
-        <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="472" Column="33" TopLine="467"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="705" TopLine="685"/>
       </Position26>
       <Position27>
-        <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="495" Column="9" TopLine="479"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="706" TopLine="686"/>
       </Position27>
       <Position28>
-        <Filename Value="..\consolas\sega_vdp.pas"/>
-        <Caret Line="448" Column="26" TopLine="432"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="707" TopLine="686"/>
       </Position28>
       <Position29>
         <Filename Value="principal.pas"/>
-        <Caret Line="702" TopLine="682"/>
+        <Caret Line="708" TopLine="688"/>
       </Position29>
       <Position30>
         <Filename Value="principal.pas"/>
-        <Caret Line="703" TopLine="683"/>
+        <Caret Line="709" TopLine="689"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

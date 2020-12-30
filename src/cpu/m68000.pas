@@ -1663,7 +1663,9 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                         tempw:=smallint(self.getword(r.pc.l));
                         r.pc.l:=r.pc.l+2;
                         r.sp.l:=r.sp.l-4;
-                        self.putword(r.sp.l,0);
+                        //Extiendo el signo si hace falta!!
+                        if (tempw and $8000)<>0 then self.putword(r.sp.l,$ffff)
+                          else self.putword(r.sp.l,0);
                         self.putword(r.sp.l+2,tempw);
                         end;
                    $39:begin  // xxx.L

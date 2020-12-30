@@ -2620,6 +2620,39 @@ const
         (n:'di-13.13h';l:$8000;p:$8000;crc:$869219da),(n:'di-14.14h';l:$8000;p:$10000;crc:$6b65812e),
         (n:'di-15.15h';l:$8000;p:$18000;crc:$3e27f77d),(n:'firetrap.3b';l:$100;p:$0;crc:$8bb45337),
         (n:'firetrap.4b';l:$100;p:$100;crc:$d5abfc64),(n:'firetrap.1a';l:$100;p:$200;crc:$d67f3514),());
+        puzz3x3:array[0..15] of tipo_roms=(
+        (n:'1.bin';l:$20000;p:0;crc:$e9c39ee7),(n:'2.bin';l:$20000;p:$1;crc:$524963be),
+        (n:'3.bin';l:$80000;p:0;crc:$53c2aa6a),(n:'4.bin';l:$80000;p:1;crc:$fb0b76fd),
+        (n:'5.bin';l:$80000;p:2;crc:$b6c1e108),(n:'6.bin';l:$80000;p:3;crc:$47cb0e8e),
+        (n:'7.bin';l:$20000;p:0;crc:$45b1f58b),(n:'8.bin';l:$20000;p:1;crc:$c0d404a7),
+        (n:'9.bin';l:$20000;p:2;crc:$6b303aa9),(n:'10.bin';l:$20000;p:3;crc:$6d0107bc),
+        (n:'11.bin';l:$20000;p:0;crc:$e124c0b5),(n:'12.bin';l:$20000;p:1;crc:$ae4a8707),
+        (n:'13.bin';l:$20000;p:2;crc:$f06925d1),(n:'14.bin';l:$20000;p:3;crc:$07252636),
+        (n:'15.bin';l:$80000;p:0;crc:$d3aff355),());
+        casanova:array[0..20] of tipo_roms=(
+        (n:'casanova.u7';l:$40000;p:1;crc:$869c2bf2),(n:'casanova.u8';l:$40000;p:$0;crc:$9df77f4b),
+        (n:'casanova.u23';l:$80000;p:0;crc:$4bd4e5b1),(n:'casanova.u25';l:$80000;p:1;crc:$5461811b),
+        (n:'casanova.u27';l:$80000;p:2;crc:$dd178379),(n:'casanova.u29';l:$80000;p:3;crc:$36469f9e),
+        (n:'casanova.u81';l:$80000;p:$200000;crc:$9eafd37d),(n:'casanova.u83';l:$80000;p:$200001;crc:$9d4ce407),
+        (n:'casanova.u85';l:$80000;p:$200002;crc:$113c6e3a),(n:'casanova.u87';l:$80000;p:$200003;crc:$61bd80f8),
+        (n:'casanova.u45';l:$80000;p:0;crc:$530d78bc),(n:'casanova.u43';l:$80000;p:1;crc:$1462d7d6),
+        (n:'casanova.u41';l:$80000;p:2;crc:$95f67e82),(n:'casanova.u39';l:$80000;p:3;crc:$97d4095a),
+        (n:'casanova.u54';l:$80000;p:0;crc:$e60bf0db),(n:'casanova.u52';l:$80000;p:1;crc:$708f779c),
+        (n:'casanova.u50';l:$80000;p:2;crc:$c73b5e98),(n:'casanova.u48';l:$80000;p:3;crc:$af9f59c5),
+        (n:'casanova.su2';l:$80000;p:0;crc:$84a8320e),(n:'casanova.su3';l:$40000;p:$80000;crc:$334a2d1a),());
+        k31945:array[0..7] of tipo_roms=(
+        (n:'prg-1.u51';l:$80000;p:1;crc:$6b345f27),(n:'prg-2.u52';l:$80000;p:$0;crc:$ce09b98c),
+        (n:'m16m-1.u62';l:$200000;p:0;crc:$0b9a6474),(n:'m16m-2.u63';l:$200000;p:2;crc:$368a8c2e),
+        (n:'m16m-3.u61';l:$200000;p:0;crc:$32fc80dd),(n:'snd-1.su7';l:$80000;p:0;crc:$bbb7f0ff),
+        (n:'snd-2.su4';l:$80000;p:0;crc:$47e3952e),());
+        flagrall:array[0..14] of tipo_roms=(
+        (n:'11_u34.bin';l:$40000;p:1;crc:$24dd439d),(n:'12_u35.bin';l:$40000;p:$0;crc:$373b71a5),
+        (n:'1_u5.bin';l:$80000;p:0;crc:$9377704b),(n:'5_u6.bin';l:$80000;p:1;crc:$1ac0bd0c),
+        (n:'2_u7.bin';l:$80000;p:2;crc:$5f6db2b3),(n:'6_u8.bin';l:$80000;p:3;crc:$79e4643c),
+        (n:'3_u58.bin';l:$40000;p:$200000;crc:$c913df7d),(n:'4_u59.bin';l:$40000;p:$200001;crc:$cb192384),
+        (n:'7_u60.bin';l:$40000;p:$200002;crc:$f187a7bf),(n:'8_u61.bin';l:$40000;p:$200003;crc:$b73fa441),
+        (n:'10_u102.bin';l:$80000;p:0;crc:$b1fd3279),(n:'9_u103.bin';l:$80000;p:$80000;crc:$01e6d654),
+        (n:'13_su4.bin';l:$80000;p:0;crc:$7b0630b3),(n:'14_su6.bin';l:$40000;p:$80000;crc:$593b038f),());
 
 implementation
 uses principal,init_games;

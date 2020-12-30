@@ -1,16 +1,16 @@
 object principal1: Tprincipal1
-  Left = 483
-  Height = 448
-  Top = 186
-  Width = 426
+  Left = 440
+  Height = 271
+  Top = 370
+  Width = 447
   HorzScrollBar.Visible = False
   VertScrollBar.Visible = False
   ActiveControl = Panel1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 423
-  ClientWidth = 426
+  ClientHeight = 246
+  ClientWidth = 447
   DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -27,10 +27,10 @@ object principal1: Tprincipal1
     Left = 0
     Height = 42
     Top = 0
-    Width = 426
+    Width = 447
     Align = alTop
     ClientHeight = 42
-    ClientWidth = 426
+    ClientWidth = 447
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -14
@@ -1038,11 +1038,11 @@ object principal1: Tprincipal1
   object Panel5: TPanel
     Left = 0
     Height = 24
-    Top = 399
-    Width = 426
+    Top = 222
+    Width = 447
     Align = alBottom
     ClientHeight = 24
-    ClientWidth = 426
+    ClientWidth = 447
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -14
@@ -1052,7 +1052,7 @@ object principal1: Tprincipal1
     ParentFont = False
     TabOrder = 2
     object Image1: TImage
-      Left = 395
+      Left = 416
       Height = 24
       Top = 0
       Width = 31
@@ -1136,13 +1136,13 @@ object principal1: Tprincipal1
   end
   object Panel2: TPanel
     Left = 0
-    Height = 357
+    Height = 180
     Top = 42
-    Width = 400
+    Width = 421
     Align = alLeft
     Anchors = [akTop, akLeft, akRight]
-    ClientHeight = 357
-    ClientWidth = 400
+    ClientHeight = 180
+    ClientWidth = 421
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
     Font.Height = -14
@@ -3282,6 +3282,28 @@ object principal1: Tprincipal1
             end
             object Legion1: TMenuItem
               Caption = 'Legion'
+              OnClick = CambiarMaquina
+            end
+          end
+          object MenuItem39: TMenuItem
+            Caption = '3x3 Puzzle HW'
+            object puzzle3x31: TMenuItem
+              Caption = '3x3 Puzzle'
+              OnClick = CambiarMaquina
+            end
+            object casanova1: TMenuItem
+              Caption = 'Casanova'
+              OnClick = CambiarMaquina
+            end
+          end
+          object MenuItem40: TMenuItem
+            Caption = '1945k III HW'
+            object N1945K32: TMenuItem
+              Caption = '1945k III'
+              OnClick = CambiarMaquina
+            end
+            object flagrall1: TMenuItem
+              Caption = '96 Flag Rally'
               OnClick = CambiarMaquina
             end
           end

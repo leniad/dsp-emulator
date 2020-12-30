@@ -235,6 +235,12 @@ type
     Legion1: TMenuItem;
     aso1: TMenuItem;
     firetrap1: TMenuItem;
+    MenuItem39: TMenuItem;
+    casanova1: TMenuItem;
+    MenuItem40: TMenuItem;
+    flagrall1: TMenuItem;
+    N1945K32: TMenuItem;
+    puzzle3x31: TMenuItem;
     Panel2: TPanel;
     segagg1: TMenuItem;
     terraforce1: TMenuItem;

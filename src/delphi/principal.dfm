@@ -2889,6 +2889,28 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object puzzle3x3HW: TMenuItem
+            Caption = '3x3 Puzzle HW'
+            object puzzle3x31: TMenuItem
+              Caption = '3x3 Puzzle'
+              OnClick = CambiarMaquina
+            end
+            object Casanova1: TMenuItem
+              Caption = 'Casanova'
+              OnClick = CambiarMaquina
+            end
+          end
+          object N1945KIII1: TMenuItem
+            Caption = '1945k III HW'
+            object N1945K32: TMenuItem
+              Caption = '1945k III'
+              OnClick = CambiarMaquina
+            end
+            object flagrall1: TMenuItem
+              Caption = '96 Flag Rally'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'

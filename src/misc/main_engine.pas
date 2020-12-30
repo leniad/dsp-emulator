@@ -98,6 +98,7 @@ type
 procedure iniciar_video(x,y:word;alpha:boolean=false);
 procedure close_video;
 procedure cambiar_video;
+procedure change_video_size(x,y:word);
 procedure pasar_pantalla_completa;
 procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false);
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
@@ -291,6 +292,18 @@ pantalla[0]:=SDL_GetWindowSurface(window_render);
 //Si el video el *2 necesito una temporal
 if pantalla[PANT_DOBLE]<>nil then SDL_FreeSurface(pantalla[PANT_DOBLE]);
 pantalla[PANT_DOBLE]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);
+end;
+
+procedure change_video_size(x,y:word);
+begin
+if main_screen.rot90_screen or main_screen.rol90_screen then begin
+    p_final[0].x:=y;
+    p_final[0].y:=x;
+end else begin
+    p_final[0].x:=x;
+    p_final[0].y:=y;
+end;
+cambiar_video;
 end;
 
 procedure iniciar_video(x,y:word;alpha:boolean=false);

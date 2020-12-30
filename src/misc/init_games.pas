@@ -32,7 +32,8 @@ uses sysutils,main_engine,rom_engine,rom_export,
   trackandfield_hw,hypersports_hw,megazone_hw,spacefirebird_hw,ajax_hw,
   vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
-  badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw;
+  badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
+  hw_1945k3;
 
 type
   tgame_desc=record
@@ -47,7 +48,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=292;
+  GAMES_CONT=296;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -332,6 +333,10 @@ const
   (name:'Legion - Spinner-87';year:'1987';snd:1;hi:false;zip:'legion';grid:278;company:'Nichibutsu';rom:@legion),
   (name:'ASO - Armored Scrum Object';year:'1985';snd:1;hi:false;zip:'aso';grid:279;company:'SNK';rom:@aso),
   (name:'Fire Trap';year:'1986';snd:1;hi:false;zip:'firetrap';grid:280;company:'Woodplace Inc.';rom:@firetrap),
+  (name:'3x3 Puzzle';year:'1998';snd:1;hi:false;zip:'3x3puzzl';grid:281;company:'Ace Enterprise';rom:@puzz3x3),
+  (name:'Casanova';year:'199?';snd:1;hi:false;zip:'casanova';grid:282;company:'Promat';rom:@casanova),
+  (name:'1945k III';year:'2000';snd:1;hi:false;zip:'1945kiii';grid:283;company:'Oriental Soft';rom:@k31945),
+  (name:'96 Flag Rally';year:'2000';snd:1;hi:false;zip:'flagrall';grid:284;company:'Promat';rom:@flagrall),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -642,6 +647,10 @@ case numero of
   278:principal1.CambiarMaquina(principal1.legion1);
   279:principal1.CambiarMaquina(principal1.aso1);
   280:principal1.CambiarMaquina(principal1.firetrap1);
+  281:principal1.CambiarMaquina(principal1.puzzle3x31);
+  282:principal1.CambiarMaquina(principal1.casanova1);
+  283:principal1.CambiarMaquina(principal1.N1945K32);
+  284:principal1.CambiarMaquina(principal1.flagrall1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -940,6 +949,10 @@ principal1.crazyclimber21.Checked:=false;
 principal1.legion1.Checked:=false;
 principal1.aso1.Checked:=false;
 principal1.firetrap1.Checked:=false;
+principal1.puzzle3x31.Checked:=false;
+principal1.casanova1.Checked:=false;
+principal1.N1945K32.Checked:=false;
+principal1.flagrall1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1176,6 +1189,8 @@ case tmaquina of
   268,269,270:cargar_lastduel;
   275,276,277,278:cargar_armedf;
   280:cargar_firetrap;
+  281,282:cargar_puzz3x3;
+  283,284:cargar_k31945;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2318,6 +2333,22 @@ end;
 if sender=principal1.firetrap1 then begin
   tipo:=280;
   principal1.firetrap1.Checked:=true;
+end;
+if sender=principal1.puzzle3x31 then begin
+  tipo:=281;
+  principal1.puzzle3x31.Checked:=true;
+end;
+if sender=principal1.casanova1 then begin
+  tipo:=282;
+  principal1.casanova1.Checked:=true;
+end;
+if sender=principal1.N1945K32 then begin
+  tipo:=283;
+  principal1.N1945K32.Checked:=true;
+end;
+if sender=principal1.flagrall1 then begin
+  tipo:=284;
+  principal1.flagrall1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

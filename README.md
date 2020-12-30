@@ -1,4 +1,18 @@
 ﻿# DSP Emulator status #
+<b>30/12/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -M68000: Fixed sign in opcode pea.w
+    +Video: Added a function to change video resolution on execution time
+-3x3 Puzzle HW
+    +3x3 Puzzle: Added driver with sound
+    +Casanova: Added driver with sound
+-1945k III HW
+    +1945k III: Added driver with sound
+    +96 Flag Rally: Added driver with sound
+</pre>
+<img src='https://i.ibb.co/RTvMTWp/3x3-Puzzle.jpg'><img src='https://i.ibb.co/tXhw2Fw/Casanova.jpg'><br>
+<img src='https://i.ibb.co/9ZHffKf/1945k-III.jpg'><img src='https://i.ibb.co/Zg1p5m2/96-Flag-Rally.jpg'><br><br>
 <b>27/12/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -Lazarus
     +More cosmetical changes
