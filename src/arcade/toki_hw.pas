@@ -116,7 +116,7 @@ if event.arcade then begin
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $0008);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $0010);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $0020);
-  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $0100);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $0100);
   if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $0200);
   if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $0400);
   if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $0800);
@@ -124,8 +124,8 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fff7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $ffef) else marcade.in1:=(marcade.in1 or $10);
 end;
 end;
 
@@ -195,15 +195,15 @@ case direccion of
                     buffer_paleta[(direccion and $7ff) shr 1]:=valor;
                     cambiar_color(valor,((direccion and $7ff) shr 1));
                  end;
-  $6e800..$6efff:begin
+  $6e800..$6efff:if ram[(direccion and $ffff) shr 1]<>valor then begin
                     ram[(direccion and $ffff) shr 1]:=valor;
                     gfx[2].buffer[(direccion and $7ff) shr 1]:=true;
                  end;
-  $6f000..$6f7ff:begin
+  $6f000..$6f7ff:if ram[(direccion and $ffff) shr 1]<>valor then begin
                     ram[(direccion and $ffff) shr 1]:=valor;
                     gfx[3].buffer[(direccion and $7ff) shr 1]:=true;
                  end;
-  $6f800..$6ffff:begin
+  $6f800..$6ffff:if ram[(direccion and $ffff) shr 1]<>valor then begin
                     ram[(direccion and $ffff) shr 1]:=valor;
                     gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
                  end;
@@ -238,8 +238,7 @@ case direccion of
   $4008:toki_snd_getbyte:=ym3812_0.status;
   $4010:toki_snd_getbyte:=sound_latch[0];
   $4011:toki_snd_getbyte:=sound_latch[1];
-  $4012:if sub2main_pending then toki_snd_getbyte:=1
-          else toki_snd_getbyte:=0;
+  $4012:toki_snd_getbyte:=byte(sub2main_pending);
   $4013:toki_snd_getbyte:=marcade.in2;
   $6000:toki_snd_getbyte:=oki_6295_0.read;
   $8000..$ffff:toki_snd_getbyte:=sound_rom[snd_bank,direccion and $7fff];

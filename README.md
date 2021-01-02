@@ -1,4 +1,10 @@
 ﻿# DSP Emulator status #
+<b>02/01/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-Blood Bros HW
+    +Blood Bros.: Added driver with sound
+    +Sky Smasher: Added driver with sound
+</pre>
+<img src='https://i.ibb.co/qYtR8zM/Blood-Bros.jpg'><img src='https://i.ibb.co/QcjZ5vR/Sky-Smasher.jpg'><br><br>
 <b>30/12/20 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +CPU

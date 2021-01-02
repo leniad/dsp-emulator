@@ -208,7 +208,7 @@ case direccion of
   0..$1fff:if z80_1.opcode then cabal_snd_getbyte:=decrypt[direccion]
               else cabal_snd_getbyte:=mem_snd[direccion];
   $2000..$27ff,$8000..$ffff:cabal_snd_getbyte:=mem_snd[direccion];
-  $4009:cabal_snd_getbyte:=ym2151_0.status;
+  $4008:cabal_snd_getbyte:=ym2151_0.status;
   $4010:cabal_snd_getbyte:=sound_latch[0];
   $4011:cabal_snd_getbyte:=sound_latch[1];
   $4012:cabal_snd_getbyte:=byte(sub2main_pending);
@@ -223,7 +223,8 @@ case direccion of
   $2000..$27ff:mem_snd[direccion]:=valor;
   $4001,$4002:;
   $4003:seibu_update_irq_lines(RST18_CLEAR);
-  $4005,$4006:seibu_adpcm_adr_w(0,(direccion and 1) xor 1,valor);
+  $4005:seibu_adpcm_adr_w(0,0,valor);
+  $4006:seibu_adpcm_adr_w(0,1,valor);
   $4008:ym2151_0.reg(valor);
   $4009:ym2151_0.write(valor);
   $4018:sub2main[0]:=valor;

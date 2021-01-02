@@ -2653,6 +2653,18 @@ const
         (n:'7_u60.bin';l:$40000;p:$200002;crc:$f187a7bf),(n:'8_u61.bin';l:$40000;p:$200003;crc:$b73fa441),
         (n:'10_u102.bin';l:$80000;p:0;crc:$b1fd3279),(n:'9_u103.bin';l:$80000;p:$80000;crc:$01e6d654),
         (n:'13_su4.bin';l:$80000;p:0;crc:$7b0630b3),(n:'14_su6.bin';l:$40000;p:$80000;crc:$593b038f),());
+        bloodbros:array[0..10] of tipo_roms=(
+        (n:'2.u021.7n';l:$20000;p:1;crc:$204dca6e),(n:'1.u022.8n';l:$20000;p:$0;crc:$ac6719e7),
+        (n:'4.u023.7l';l:$10000;p:$40001;crc:$fd951c2c),(n:'3.u024.8l';l:$10000;p:$40000;crc:$18d3c460),
+        (n:'bb_07.u1016.6a';l:$10000;p:0;crc:$411b94e8),(n:'bb_05.u061.6f';l:$10000;p:0;crc:$04ba6d19),
+        (n:'bb_06.u063.6d';l:$10000;p:$10000;crc:$7092e35b),(n:'blood_bros_bk__=c=1990_tad_corp.u064.4d';l:$100000;p:0;crc:$1aa87ee6),
+        (n:'blood_bros_obj__=c=1990_tad_corp.u078.2n';l:$100000;p:0;crc:$d27c3952),(n:'bb_08.u095.5a';l:$20000;p:0;crc:$deb1b975),());
+        skysmash:array[0..10] of tipo_roms=(
+        (n:'rom5';l:$20000;p:0;crc:$867f9897),(n:'rom6';l:$20000;p:$1;crc:$e9c1d308),
+        (n:'rom7';l:$20000;p:$40000;crc:$d209db4d),(n:'rom8';l:$20000;p:$40001;crc:$d3646728),
+        (n:'rom2';l:$10000;p:0;crc:$75b194cf),(n:'rom3';l:$10000;p:0;crc:$fbb241be),
+        (n:'rom4';l:$10000;p:$10000;crc:$ad3cde81),(n:'rom9';l:$100000;p:0;crc:$b0a5eecf),
+        (n:'rom10';l:$80000;p:0;crc:$1bbcda5d),(n:'rom1';l:$20000;p:0;crc:$e69986f6),());
 
 implementation
 uses principal,init_games;

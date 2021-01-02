@@ -2911,6 +2911,17 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object BloodBrosHW1: TMenuItem
+            Caption = 'Blood Bros HW'
+            object BloodBros1: TMenuItem
+              Caption = 'Blood Bros.'
+              OnClick = CambiarMaquina
+            end
+            object SkySmasher1: TMenuItem
+              Caption = 'Sky Smasher'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'

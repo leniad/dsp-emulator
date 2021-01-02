@@ -33,7 +33,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
-  hw_1945k3;
+  hw_1945k3,bloodbros_hw;
 
 type
   tgame_desc=record
@@ -48,7 +48,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=296;
+  GAMES_CONT=298;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -337,6 +337,8 @@ const
   (name:'Casanova';year:'199?';snd:1;hi:false;zip:'casanova';grid:282;company:'Promat';rom:@casanova),
   (name:'1945k III';year:'2000';snd:1;hi:false;zip:'1945kiii';grid:283;company:'Oriental Soft';rom:@k31945),
   (name:'96 Flag Rally';year:'2000';snd:1;hi:false;zip:'flagrall';grid:284;company:'Promat';rom:@flagrall),
+  (name:'Blood Bros.';year:'1990';snd:1;hi:false;zip:'bloodbro';grid:285;company:'TAD Corporation';rom:@bloodbros),
+  (name:'Sky Smasher';year:'1990';snd:1;hi:false;zip:'skysmash';grid:286;company:'Nihon System';rom:@skysmash),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -651,6 +653,8 @@ case numero of
   282:principal1.CambiarMaquina(principal1.casanova1);
   283:principal1.CambiarMaquina(principal1.N1945K32);
   284:principal1.CambiarMaquina(principal1.flagrall1);
+  285:principal1.CambiarMaquina(principal1.bloodbros1);
+  286:principal1.CambiarMaquina(principal1.skysmasher1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -953,6 +957,8 @@ principal1.puzzle3x31.Checked:=false;
 principal1.casanova1.Checked:=false;
 principal1.N1945K32.Checked:=false;
 principal1.flagrall1.Checked:=false;
+principal1.bloodbros1.Checked:=false;
+principal1.skysmasher1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1191,6 +1197,7 @@ case tmaquina of
   280:cargar_firetrap;
   281,282:cargar_puzz3x3;
   283,284:cargar_k31945;
+  285,286:cargar_bloodbros;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2349,6 +2356,14 @@ end;
 if sender=principal1.flagrall1 then begin
   tipo:=284;
   principal1.flagrall1.Checked:=true;
+end;
+if sender=principal1.bloodbros1 then begin
+  tipo:=285;
+  principal1.bloodbros1.Checked:=true;
+end;
+if sender=principal1.skysmasher1 then begin
+  tipo:=286;
+  principal1.skysmasher1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

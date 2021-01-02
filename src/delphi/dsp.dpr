@@ -310,7 +310,8 @@ uses
   gnw_mariobros_const in '..\gnw\gnw_mariobros_const.pas',
   firetrap_hw in '..\arcade\firetrap_hw.pas',
   hw_3x3puzzle in '..\arcade\hw_3x3puzzle.pas',
-  hw_1945k3 in '..\arcade\hw_1945k3.pas';
+  hw_1945k3 in '..\arcade\hw_1945k3.pas',
+  bloodbros_hw in '..\arcade\bloodbros_hw.pas';
 
 {$R *.res}
 

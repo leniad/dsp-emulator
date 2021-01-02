@@ -239,6 +239,9 @@ type
     casanova1: TMenuItem;
     MenuItem40: TMenuItem;
     flagrall1: TMenuItem;
+    MenuItem41: TMenuItem;
+    bloodbros1: TMenuItem;
+    skysmasher1: TMenuItem;
     N1945K32: TMenuItem;
     puzzle3x31: TMenuItem;
     Panel2: TPanel;

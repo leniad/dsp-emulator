@@ -443,6 +443,9 @@ type
     N1945KIII1: TMenuItem;
     N1945K32: TMenuItem;
     flagrall1: TMenuItem;
+    BloodBrosHW1: TMenuItem;
+    BloodBros1: TMenuItem;
+    SkySmasher1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
