@@ -1,4 +1,29 @@
 ﻿# DSP Emulator status #
+<b>10/01/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-Gameboy/Gameboy Color review
+    +Fixed mapper MBC1
+    +Added MBC1 collection version (fixes 'Bomberman Collection', 'Mortal Combat I&II', '4 in 1 Vol II', etc)
+    +Fixed mapper MBC2
+    +Added mapper MBC3
+    +Added partial MBC7
+    +Fixed cartridge load (fixes cartridges bigger than 4Mb)
+    +Fixed cartridge default start values (fixes 'Dragon's Lair - The Legend' and many others)
+    +Fixed OAM DMA, dont add aditional CPU cycles and dont draw sprites if its running
+    +Fixed CGB DMA, change the counter values when running (fixes 'Turok - Rage Wars', 'Aliens - Thanatos Encounter' and many others)
+    +Fixed CBG DMA start/stop info and cancel option (fixes 'Championship Motocross 2001' and others)
+    +Fixed CGB sprite/BG priority (fixes graphis in '007 - The World is Not Enough' intro)
+    +Fixed CBG sprite tranparency
+    +Added sprite draw order (fixes 'Boy and His Blob, A - Rescue of Princess Blobette')
+    +Added a basic serial IRQ (makes 'Mortal Kombat' run)
+    +Added STAT IRQ blocking (makes 'Altered Space', 'Pinball Fantasies', 'Pinball Dreams' and many others run)
+    +Fixed controls (fixes 'Konami GB Collection Volume 1')
+    +Fixed BIOS disable... Ouch! Never gets enabled again after boot!
+</pre>
+<img src='https://i.ibb.co/fSXQ5HJ/007.jpg'><img src='https://i.ibb.co/S02H0G8/alien.jpg'><img src='https://i.ibb.co/FgqHLQf/tarta.jpg'><br>
+<img src='https://i.ibb.co/HNBLtnN/altered.jpg'><img src='https://i.ibb.co/S02H0G8/alien.jpg'><br>
+<img src='https://i.ibb.co/QpS6Hcs/DL.jpg'><img src='https://i.ibb.co/SQNzFt8/nascar.jpg'><br>
+<img src='https://i.ibb.co/f9XBSvR/Perfect-Dark.jpg'><img src='https://i.ibb.co/2tgpJnp/turok.jpg'><br>
+<img src='https://i.ibb.co/NtFTbKK/xmen.jpg'><br><br>
 <b>02/01/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -Blood Bros HW
     +Blood Bros.: Added driver with sound

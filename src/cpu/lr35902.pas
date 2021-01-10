@@ -443,6 +443,18 @@ if not(self.after_ei) then begin
             self.estados_demas:=20;
           end
         end else begin
+        if (self.serial_ena and self.serial_req) then begin //Serial
+          self.halt:=false;
+          if self.ime then begin
+            self.ime:=false;
+            self.serial_req:=false;
+            r.sp:=r.sp-2;
+            self.putbyte(r.sp,r.pc and $ff);
+            self.putbyte(r.sp+1,r.pc shr 8);
+            r.pc:=$58;
+            self.estados_demas:=20;
+          end
+          end else begin
             if (self.joystick_ena and self.joystick_req) then begin //Joystick
               self.halt:=false;
               if self.ime then begin
@@ -458,6 +470,7 @@ if not(self.after_ei) then begin
         end;
       end;
     end;
+  end;
 end;
 self.after_ei:=false;
 if self.halt then r.pc:=r.pc-1;
@@ -473,7 +486,7 @@ case instruccion of
   $02:self.putbyte(r.bc.w,r.a);  //ld (bc),a
   $03:r.bc.w:=r.bc.w+1; //inc bc
   $04:r.bc.h:=inc_8bit(r.bc.h); //inc b
-  $05:r.bc.h:=dec_8bit(r.bc.h); //dec b
+    $05:r.bc.h:=dec_8bit(r.bc.h); //dec b
   $06:begin //ld b,nn
         r.bc.h:=self.getbyte(r.pc);
         r.pc:=r.pc+1;
@@ -1429,7 +1442,7 @@ case instruccion of
 end; //Del case
 tempw:=gb_t[instruccion]+self.estados_demas;
 for tempb:=1 to (tempw div 4) do begin
-  self.despues_instruccion(tempw);
+  self.despues_instruccion(4);
   self.contador:=self.contador+4;
 end;
 timers.update(self.contador-old_contador,self.numero_cpu);

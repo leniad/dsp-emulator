@@ -29,6 +29,7 @@ type
             opcode:boolean;
             numero_cpu:byte;
             tframes:single;
+            estados_demas:word;
             procedure change_ram_calls(getbyte:tgetbyte;putbyte:tputbyte);
             procedure change_despues_instruccion(despues_instruccion:tdespues_instruccion);
             procedure init_sound(update_call:exec_type_simple);
@@ -44,7 +45,6 @@ type
             pedir_nmi,nmi_state:byte;
             pedir_irq,pedir_firq:byte;
             despues_instruccion:tdespues_instruccion;
-            estados_demas:word;
             //Llamadas a RAM
             getbyte:tgetbyte;
             putbyte:tputbyte;
