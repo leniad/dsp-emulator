@@ -7,17 +7,17 @@
     +Added mapper MBC3
     +Added partial MBC7
     +Fixed cartridge load (fixes cartridges bigger than 4Mb)
-    +Fixed cartridge default start values (fixes 'Dragon's Lair - The Legend' and many others)
-    +Fixed OAM DMA, dont add aditional CPU cycles and dont draw sprites if its running
-    +Fixed CGB DMA, change the counter values when running (fixes 'Turok - Rage Wars', 'Aliens - Thanatos Encounter' and many others)
-    +Fixed CBG DMA start/stop info and cancel option (fixes 'Championship Motocross 2001' and others)
-    +Fixed CGB sprite/BG priority (fixes graphis in '007 - The World is Not Enough' intro)
-    +Fixed CBG sprite tranparency
-    +Added sprite draw order (fixes 'Boy and His Blob, A - Rescue of Princess Blobette')
-    +Added a basic serial IRQ (makes 'Mortal Kombat' run)
-    +Added STAT IRQ blocking (makes 'Altered Space', 'Pinball Fantasies', 'Pinball Dreams' and many others run)
-    +Fixed controls (fixes 'Konami GB Collection Volume 1')
-    +Fixed BIOS disable... Ouch! Never gets enabled again after boot!
+    +Fixed cartridge default start values (fixes 'Dragon's Lair - The Legend' and many others)
+    +Fixed OAM DMA, dont add aditional CPU cycles and dont draw sprites if its running
+    +Fixed CGB DMA, change the counter values when running (fixes 'Turok - Rage Wars', 'Aliens - Thanatos Encounter' and many others)
+    +Fixed CBG DMA start/stop info and cancel option (fixes 'Championship Motocross 2001' and others)
+    +Fixed CGB sprite/BG priority (fixes graphis in '007 - The World is Not Enough' intro)
+    +Fixed CBG sprite tranparency
+    +Added sprite draw order (fixes 'Boy and His Blob, A - Rescue of Princess Blobette')
+    +Added a basic serial IRQ (makes 'Mortal Kombat' run)
+    +Added STAT IRQ blocking (makes 'Altered Space', 'Pinball Fantasies', 'Pinball Dreams' and many others run)
+    +Fixed controls (fixes 'Konami GB Collection Volume 1')
+    +Fixed BIOS disable... Ouch! Never gets enabled again after boot!
 </pre>
 <img src='https://i.ibb.co/fSXQ5HJ/007.jpg'> <img src='https://i.ibb.co/S02H0G8/alien.jpg'> <img src='https://i.ibb.co/FgqHLQf/tarta.jpg'><br>
 <img src='https://i.ibb.co/HNBLtnN/altered.jpg'> <img src='https://i.ibb.co/QpS6Hcs/DL.jpg'><br>
