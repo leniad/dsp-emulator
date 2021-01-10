@@ -19,11 +19,10 @@
     +Fixed controls (fixes 'Konami GB Collection Volume 1')
     +Fixed BIOS disable... Ouch! Never gets enabled again after boot!
 </pre>
-<img src='https://i.ibb.co/fSXQ5HJ/007.jpg'><img src='https://i.ibb.co/S02H0G8/alien.jpg'><img src='https://i.ibb.co/FgqHLQf/tarta.jpg'><br>
-<img src='https://i.ibb.co/HNBLtnN/altered.jpg'><img src='https://i.ibb.co/S02H0G8/alien.jpg'><br>
-<img src='https://i.ibb.co/QpS6Hcs/DL.jpg'><img src='https://i.ibb.co/SQNzFt8/nascar.jpg'><br>
-<img src='https://i.ibb.co/f9XBSvR/Perfect-Dark.jpg'><img src='https://i.ibb.co/2tgpJnp/turok.jpg'><br>
-<img src='https://i.ibb.co/NtFTbKK/xmen.jpg'><br><br>
+<img src='https://i.ibb.co/fSXQ5HJ/007.jpg'> <img src='https://i.ibb.co/S02H0G8/alien.jpg'> <img src='https://i.ibb.co/FgqHLQf/tarta.jpg'><br>
+<img src='https://i.ibb.co/HNBLtnN/altered.jpg'> <img src='https://i.ibb.co/QpS6Hcs/DL.jpg'><br>
+<img src='https://i.ibb.co/SQNzFt8/nascar.jpg'> <img src='https://i.ibb.co/f9XBSvR/Perfect-Dark.jpg'><br>
+<img src='https://i.ibb.co/2tgpJnp/turok.jpg'> <img src='https://i.ibb.co/NtFTbKK/xmen.jpg'><br><br>
 <b>02/01/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -Blood Bros HW
     +Blood Bros.: Added driver with sound
