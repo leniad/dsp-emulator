@@ -307,6 +307,7 @@ end else begin
           color.r:=$21*((valor shr 2) and 1)+$47*((valor shr 3) and 1)+$97*((valor shr 4) and 1);
           color.g:=$21*((valor shr 5) and 1)+$47*((valor shr 6) and 1)+$97*((valor shr 7) and 1);
           set_pal_color(color,ulaplus.last_reg+16);
+          fillchar(var_spectrum.buffer_video[0],6144,1);
         end;
       1:ulaplus.activa:=(valor and 1)<>0;
     end;

@@ -33,7 +33,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
-  hw_1945k3,bloodbros_hw;
+  hw_1945k3,bloodbros_hw,baraduke_hw;
 
 type
   tgame_desc=record
@@ -48,7 +48,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=298;
+  GAMES_CONT=303;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -339,6 +339,11 @@ const
   (name:'96 Flag Rally';year:'2000';snd:1;hi:false;zip:'flagrall';grid:284;company:'Promat';rom:@flagrall),
   (name:'Blood Bros.';year:'1990';snd:1;hi:false;zip:'bloodbro';grid:285;company:'TAD Corporation';rom:@bloodbros),
   (name:'Sky Smasher';year:'1990';snd:1;hi:false;zip:'skysmash';grid:286;company:'Nihon System';rom:@skysmash),
+  (name:'Baraduke';year:'1985';snd:1;hi:false;zip:'baraduke';grid:287;company:'Namco';rom:@baraduke),
+  (name:'Metro-Cross';year:'1985';snd:1;hi:false;zip:'metrocrs';grid:288;company:'Namco';rom:@metrocross),
+  (name:'The Return of Ishtar';year:'1986';snd:1;hi:false;zip:'roishtar';grid:289;company:'Namco';rom:@roishtar),
+  (name:'Genpei ToumaDen';year:'1986';snd:1;hi:false;zip:'genpeitd';grid:290;company:'Namco';rom:@genpeitd),
+  (name:'Wonder Momo';year:'1987';snd:1;hi:false;zip:'wndrmomo';grid:291;company:'Namco';rom:@wndrmomo),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -655,6 +660,11 @@ case numero of
   284:principal1.CambiarMaquina(principal1.flagrall1);
   285:principal1.CambiarMaquina(principal1.bloodbros1);
   286:principal1.CambiarMaquina(principal1.skysmasher1);
+  287:principal1.CambiarMaquina(principal1.baraduke1);
+  288:principal1.CambiarMaquina(principal1.metrocross1);
+  289:principal1.CambiarMaquina(principal1.returnishtar1);
+  290:principal1.CambiarMaquina(principal1.genpeitd1);
+  291:principal1.CambiarMaquina(principal1.wndrmomo1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -959,6 +969,11 @@ principal1.N1945K32.Checked:=false;
 principal1.flagrall1.Checked:=false;
 principal1.bloodbros1.Checked:=false;
 principal1.skysmasher1.Checked:=false;
+principal1.baraduke1.Checked:=false;
+principal1.MetroCross1.Checked:=false;
+principal1.returnishtar1.Checked:=false;
+principal1.genpeitd1.Checked:=false;
+principal1.wndrmomo1.Checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1121,7 +1136,7 @@ case tmaquina of
   119,183:Cargar_Pang;
   120,121,122:Cargar_ninjakid2;
   123,194:Cargar_skykid;
-  124,125,126:Cargar_system86;
+  124,125,126,289,290,291:Cargar_system86;
   127:Cargar_rocnrope;
   128:Cargar_kyugo_hw;
   129,130:Cargar_tnzs;
@@ -1198,6 +1213,7 @@ case tmaquina of
   281,282:cargar_puzz3x3;
   283,284:cargar_k31945;
   285,286:cargar_bloodbros;
+  287,288:cargar_baraduke;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2364,6 +2380,26 @@ end;
 if sender=principal1.skysmasher1 then begin
   tipo:=286;
   principal1.skysmasher1.Checked:=true;
+end;
+if sender=principal1.baraduke1 then begin
+  tipo:=287;
+  principal1.baraduke1.Checked:=true;
+end;
+if sender=principal1.metrocross1 then begin
+  tipo:=288;
+  principal1.metrocross1.Checked:=true;
+end;
+if sender=principal1.returnishtar1 then begin
+  tipo:=289;
+  principal1.returnishtar1.Checked:=true;
+end;
+if sender=principal1.genpeitd1 then begin
+  tipo:=290;
+  principal1.genpeitd1.Checked:=true;
+end;
+if sender=principal1.wndrmomo1 then begin
+  tipo:=291;
+  principal1.wndrmomo1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

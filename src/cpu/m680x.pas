@@ -89,7 +89,7 @@ const
       1,$f, 1, 1, 1,$1, 1, 1,$f,$f, 1, 1,$f, 1, 1,$f,  //20
      $f, 0, 0, 0, 0,$f, 0, 0, 0, 0, 0, 0, 0, 0,$f,$f,  //30
       0,$f,$f, 0, 0,$f,$f,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //40
-      0,$f,$f, 0, 0,$f,$f,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //50
+      0,$f,$f, 0, 0,$f, 0,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //50
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       4, 1, 1,$f, 6,$f, 6,$f,$f,$f, 6, 1, 6, 6, 4, 4,  //60
      $f, 1, 1, 8, 8,$f, 8,$f, 8,$f, 8,$f, 8, 8, 3, 3,  //70
@@ -102,7 +102,7 @@ const
       1, 1,$f, 2, 1, 1, 1,$f, 1,$f, 1, 1, 2,$f, 2,$f,  //c0
       5, 5,$f,$a, 5,$f, 5,$b, 5,$f, 5, 5,$a,$b,$a,$b,  //d0
      $f, 4,$f, 9, 6,$f, 6, 4, 4, 4, 6, 6, 9, 4, 9,$f,  //e0
-     $f,$f,$f, 7,$f,$f, 8, 3,$f,$f,$f,$f, 7, 3, 7, 3); //f0
+     $f,$f,$f, 7,$f,$f, 8, 3,$f,$f, 8,$f, 7, 3, 7, 3); //f0
 
   ciclos_6803:array[0..$ff] of byte=(
     	 // 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
@@ -901,6 +901,7 @@ case instruccion of
   $50:r.d.b:=self.neg8(r.d.b); //negb
   $53:r.d.b:=self.com8(r.d.b); //comb
   $54:r.d.b:=self.lsr8(r.d.b); //lsrb
+  $56:r.d.b:=self.ror8(r.d.b); //rorb
   $58:r.d.b:=self.asl8(r.d.b); //aslb
   $59:r.d.b:=self.rol8(r.d.b); //rolb
   $5a:r.d.b:=self.dec8(r.d.b); //decb
@@ -1071,7 +1072,7 @@ case instruccion of
       end;
   $c8,$d8,$e8:r.d.b:=self.eor8(r.d.b,numero);  //eorb
   $e9:r.d.b:=self.adc8(r.d.b,numero);  //adcb
-  $ca,$da,$ea:r.d.b:=self.or8(r.d.b,numero);  //orb
+  $ca,$da,$ea,$fa:r.d.b:=self.or8(r.d.b,numero);  //orb
   $cb,$db,$eb:r.d.b:=self.add8(r.d.b,numero); //addb
   $cc,$dc,$ec,$fc:begin  //ldd 6803 Only
        r.d.w:=numerow;

@@ -46,7 +46,7 @@ const
         XAIN_DIV=4;
 
 var
- main_rom,sub_rom:array[0..1,0..$3FFF] of byte;
+ main_rom,sub_rom:array[0..1,0..$3fff] of byte;
  banco_main,banco_sub,soundlatch,xain_pri,vblank:byte;
  scroll_x_p1,scroll_y_p1,scroll_x_p0,scroll_y_p0:word;
  xain_scanline:array[0..271] of word;

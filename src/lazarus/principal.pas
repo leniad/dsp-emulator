@@ -241,6 +241,12 @@ type
     flagrall1: TMenuItem;
     MenuItem41: TMenuItem;
     bloodbros1: TMenuItem;
+    MenuItem42: TMenuItem;
+    baraduke1: TMenuItem;
+    genpeitd1: TMenuItem;
+    wndrmomo1: TMenuItem;
+    returnishtar1: TMenuItem;
+    metrocross1: TMenuItem;
     skysmasher1: TMenuItem;
     N1945K32: TMenuItem;
     puzzle3x31: TMenuItem;

@@ -47,7 +47,7 @@ const
   GB_CLOCK=4194304;
 
 var
- scroll_x,scroll_y,stat,linea_actual,lcd_control,bg_pal,sprt0_pal,sprt1_pal:byte;
+ scroll_x,stat,linea_actual,lcd_control,bg_pal,sprt0_pal,sprt1_pal:byte;
  tcontrol,tmodulo,mtimer,prog_timer,ly_compare,window_x,window_y:byte;
  wram_bank:array[0..7,0..$fff] of byte;
  vram_bank:array[0..1,0..$1fff] of byte;
@@ -55,9 +55,10 @@ var
  bios_rom:array[0..$8ff] of byte;
  bgc_pal,spc_pal:array[0..$3f] of word;
  sprites_ord:array[0..9] of byte;
+ scroll_y:array[0..$fff] of byte;
  enable_bios,rom_exist,bgcolor_inc,spcolor_inc,lcd_ena,hdma_ena:boolean;
- irq_ena,joystick,vram_nbank,wram_nbank,bgcolor_index,spcolor_index:byte;
- dma_src,dma_dst:word;
+ scroll_y_last,irq_ena,joystick,vram_nbank,wram_nbank,bgcolor_index,spcolor_index:byte;
+ scroll_y_pos,dma_src,dma_dst:word;
  nombre_rom:string;
  estado_2,oam_dma,haz_dma,hay_nvram,cartucho_cargado:boolean;
  oam_dma_pos,hdma_size,gb_timer,sprites_time:byte;
@@ -190,7 +191,7 @@ var
   tile_mid:boolean;
   ptemp:pword;
 begin
-  linea_pant:=linea_actual+scroll_y;
+  linea_pant:=linea_actual+scroll_y[0];
   bg_addr:=$1800+((lcd_control and $8) shl 7);
   tile_mid:=(lcd_control and $10)=0;
   tile_addr:=$1000*byte(tile_mid); //Cuidado! Tiene signo despues
@@ -203,7 +204,8 @@ begin
     ptemp:=punbuf;
     for x:=7 downto 0 do begin
       pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-      if ((pval<>0) or ((bg_prio[f*8+(7-x)] and $40)=0)) then ptemp^:=paleta[pval]
+      //Prioridad con los sprites
+      if ((pval<>0) and ((bg_prio[f*8+(7-x)] and $40)=0)) then ptemp^:=paleta[pval]
         else ptemp^:=paleta[MAX_COLORES];
       inc(ptemp);
     end; //del for x
@@ -238,7 +240,9 @@ begin
     ptemp:=punbuf;
     for x:=7 downto 0 do begin
       pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-      ptemp^:=paleta[pval];
+      //Prioridad con los sprites!
+      if (bg_prio[f*8+(7-x)] and $40)=0 then ptemp^:=paleta[pval]
+        else ptemp^:=paleta[MAX_COLORES];
       inc(ptemp);
     end; //del for x
     putpixel(f*8,0,8,punbuf,1);
@@ -247,7 +251,11 @@ begin
 end;
 
 procedure update_video_gb;
+var
+  f:byte;
 begin
+for f:=scroll_y_pos to 113 do scroll_y[f]:=scroll_y_last;
+scroll_y_pos:=0;
 single_line(7,linea_actual,paleta[0],160,2);
 if lcd_ena then begin
   fillchar(bg_prio[0],$100,$3f);
@@ -393,11 +401,11 @@ var
   tile_mid:boolean;
   ptemp:pword;
 begin
-  linea_pant:=linea_actual+scroll_y;
   bg_addr:=$1800+((lcd_control and $8) shl 7);
   tile_mid:=(lcd_control and $10)=0;
   tile_addr:=$1000*byte(tile_mid); //Cuidado! Tiene signo despues
   for f:=0 to 31 do begin
+    linea_pant:=linea_actual+scroll_y[round(f*3.5625)];
     if tile_mid then n2:=shortint(vram_bank[0,bg_addr+(f+((linea_pant div 8)*32) and $3ff)])
       else n2:=byte(vram_bank[0,bg_addr+(f+((linea_pant div 8)*32) and $3ff)]);
     atrib:=vram_bank[1,bg_addr+(f+((linea_pant div 8)*32) and $3ff)];
@@ -411,18 +419,27 @@ begin
     if (atrib and $20)<>0 then begin
       for x:=0 to 7 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-        if (((atrib and $80)<>0) and (pval<>0)) then bg_prio[f*8+x]:=bg_prio[f*8+x] or $80;
-        //Si es transparente o hay un sprite debajo...
-        if ((pval<>0) or ((bg_prio[f*8+x] and $40)=0)) then ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff]
-          else ptemp^:=paleta[MAX_COLORES];
+        //Ignorar la prioridad de los sprites!
+        if (((atrib and $80)<>0) and (pval<>0)) then begin
+          bg_prio[f*8+x]:=bg_prio[f*8+x] or $80;
+          ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff];
+        end else begin
+          //Si es transparente o hay un sprite debajo...
+          if ((pval<>0) or ((bg_prio[f*8+x] and $40)=0)) then ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff]
+            else ptemp^:=paleta[MAX_COLORES];
+        end;
         inc(ptemp);
       end;
     end else begin  //Flipx
       for x:=7 downto 0 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-        if (((atrib and $80)<>0) and (pval<>0)) then bg_prio[f*8+(7-x)]:=bg_prio[f*8+(7-x)] or $80;
-        if ((pval<>0) or ((bg_prio[f*8+(7-x)] and $40)=0)) then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
-          else ptemp^:=paleta[MAX_COLORES];
+        if (((atrib and $80)<>0) and (pval<>0)) then begin
+          bg_prio[f*8+(7-x)]:=bg_prio[f*8+(7-x)] or $80;
+          ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff];
+        end else begin
+          if ((pval<>0) or ((bg_prio[f*8+(7-x)] and $40)=0)) then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+            else ptemp^:=paleta[MAX_COLORES];
+        end;
         inc(ptemp);
       end;
     end;
@@ -463,13 +480,15 @@ begin
     if (atrib and $20)<>0 then begin
       for x:=0 to 7 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-        ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff];
+        if (bg_prio[f*8+x] and $40)=0 then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+          else ptemp^:=paleta[MAX_COLORES];
         inc(ptemp);
       end;
     end else begin
       for x:=7 downto 0 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-        ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff];
+        if (bg_prio[f*8+(7-x)] and $40)=0 then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+          else ptemp^:=paleta[MAX_COLORES];
         inc(ptemp);
       end;
     end;
@@ -480,7 +499,11 @@ begin
 end;
 
 procedure update_video_gbc;
+var
+  f:byte;
 begin
+for f:=scroll_y_pos to 113 do scroll_y[f]:=scroll_y_last;
+scroll_y_pos:=0;
 single_line(7,linea_actual,paleta[bgc_pal[0] and $7fff],160,2);
 if lcd_ena then begin
   if (lcd_control and 1)=0 then begin //bg and window loses priority
@@ -536,7 +559,8 @@ var
 begin
 case direccion of
   $00:leer_io:=joystick;
-  $01,$02:leer_io:=$7f; //Serial
+  $01:leer_io:=$ff;
+  $02:leer_io:=$7f; //Serial
   $04:leer_io:=mtimer;
   $05:leer_io:=prog_timer;
   $06:leer_io:=tmodulo;
@@ -554,7 +578,7 @@ case direccion of
   $30..$3f:leer_io:=gb_wave_r(direccion-$30); //Sound Wav
   $40:leer_io:=lcd_control;
   $41:leer_io:=$80 or stat;
-  $42:leer_io:=scroll_y;
+  $42:leer_io:=scroll_y_last;
   $43:leer_io:=scroll_x;
   $44:leer_io:=linea_actual;
   $45:leer_io:=ly_compare;
@@ -614,7 +638,12 @@ case direccion of
         lcd_ena:=(valor and $80)<>0;
       end;
   $41:stat:=(stat and $7) or (valor and $f8);
-  $42:scroll_y:=valor;
+  $42:begin
+        addrs:=lr35902_0.contador div 4;
+        for f:=scroll_y_pos to (addrs-1) do scroll_y[f]:=valor;
+        scroll_y_pos:=addrs;
+        scroll_y_last:=valor;
+      end;
   $43:scroll_x:=valor;
   $44:;
   $45:ly_compare:=valor;
@@ -700,7 +729,7 @@ case direccion of
   $30..$3f:leer_io_gbc:=gb_wave_r(direccion and $f); //Sound Wav
   $40:leer_io_gbc:=lcd_control;
   $41:leer_io_gbc:=$80 or stat;
-  $42:leer_io_gbc:=scroll_y;
+  $42:leer_io_gbc:=scroll_y_last;
   $43:leer_io_gbc:=scroll_x;
   $44:leer_io_gbc:=linea_actual;
   $45:leer_io_gbc:=ly_compare;
@@ -793,7 +822,12 @@ case direccion of
         lcd_ena:=(valor and $80)<>0;
       end;
   $41:stat:=(stat and $7) or (valor and $f8);
-  $42:scroll_y:=valor;
+  $42:begin
+        addrs:=(lr35902_0.contador shr lr35902_0.speed) div 4;
+        for f:=scroll_y_pos to (addrs-1) do scroll_y[f]:=valor;
+        scroll_y_pos:=addrs;
+        scroll_y_last:=valor;
+      end;
   $43:scroll_x:=valor;
   $44:;
   $45:ly_compare:=valor;
@@ -997,7 +1031,7 @@ if oam_dma then begin
   if oam_dma_pos>=160 then oam_dma:=false;
 end;
 if lr35902_0.changed_speed then begin
-  lr35902_0.tframes:=((GB_CLOCK shl lr35902_0.speed)/154)/llamadas_maquina.fps_max;
+  lr35902_0.tframes:=round(((GB_CLOCK shl lr35902_0.speed)/154)/llamadas_maquina.fps_max);
   sound_engine_change_clock(GB_CLOCK shl lr35902_0.speed);
   lr35902_0.changed_speed:=false;
 end;
@@ -1060,7 +1094,9 @@ begin
  reset_audio;
  gameboy_sound_reset;
  scroll_x:=0;
- scroll_y:=0;
+ fillchar(scroll_y[0],1000,0);
+ scroll_y_pos:=0;
+ scroll_y_last:=0;
  stat:=0;
  tmodulo:=0;
  mtimer:=0;

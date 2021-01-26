@@ -1,4 +1,25 @@
 ﻿# DSP Emulator status #
+<b>26/01/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -M6800: Added opcodes $56 and $fa
+-Gameboy/Gameboy Color
+    +Better Y scroll
+    +Better sprites/backgorund priorities
+-Baraduke HW
+    +Baraduke: Added driver with sound
+    +Moto-Cross: Added driver with sound
+-Namco System 86 HW
+    +Rewrite sprite system
+    +Removed video hacks
+    +Added dipswitches
+    +The Return of Ishtar: Added driver with sound
+    +Genpei ToumaDen: Added driver with sound
+    +Wonder Momo: Added driver with sound
+</pre>
+<img src='https://i.ibb.co/VDY2nwC/Baraduke.jpg'> <img src='https://i.ibb.co/j4SqBnf/Metro.jpg'><br>
+<img src='https://i.ibb.co/MGW3zJL/return.jpg'> <img src='https://i.ibb.co/G0PmKfx/Genpei.jpg'><br>
+<img src='https://i.ibb.co/sVsFRWv/Wonder.jpg'><br><br>
 <b>10/01/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -Gameboy/Gameboy Color review
     +Fixed mapper MBC1

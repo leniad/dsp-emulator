@@ -244,11 +244,10 @@ begin
          if (sprite_size=16) then pataddr:=self.spritepattern+(sprcode and $fc)*8
             else pataddr:=self.spritepattern+sprcode*8;
          num_sprites:=num_sprites+1;
-         // Fifth sprite encountered?
-         if (num_sprites=5) then begin
-	          fifth_encountered:=true;
-	          break;
-         end;
+         //El quinto sprite no lo pinto pero lo evaluo
+         if (num_sprites=5) then fifth_encountered:=true;
+         //En el sexto me salgo
+	       if (num_sprites=6) then break;
 	  if (sprite_mag<>0) then pataddr:=pataddr+(((linea-spr_y) and $1f) shr 1)
 	     else pataddr:=pataddr+((linea-spr_y) and $f);
 	  pattern:=self.read_m(pataddr);
@@ -269,8 +268,10 @@ begin
                   // Has another sprite already drawn here?
 			            if ((spr_drawn[colission_index] and $02)=0) then begin
 			              spr_drawn[colission_index]:=spr_drawn[colission_index] or $02;
-                    punbuf^:=paleta[sprcol];
-                    putpixel(colission_index-32+PIXELS_LEFT_BORDER_VISIBLES,linea+LINEAS_TOP_BORDE,1,punbuf,self.pant);
+                    if not(fifth_encountered) then begin
+                      punbuf^:=paleta[sprcol];
+                      putpixel(colission_index-32+PIXELS_LEFT_BORDER_VISIBLES,linea+LINEAS_TOP_BORDE,1,punbuf,self.pant);
+                    end;
                   end;
                 end; //del if sprcol
               end; //del colision

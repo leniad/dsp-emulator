@@ -58,8 +58,7 @@ procedure put_gfx_sprite_alpha(nchar:dword;color:word;flipx,flipy:boolean;ngfx:b
 //Sprites Update
 procedure actualiza_gfx_sprite_zoom_alpha(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 procedure actualiza_gfx_sprite(pos_x,pos_y:word;dest,ngfx:byte);
-procedure actualiza_gfx_sprite_size(pos_x,pos_y:word;dest:byte;x_size,y_size:word);
-procedure actualiza_gfx_sprite_size_pos(pos_x,pos_y:word;dest:byte;x_size,y_size,ipos_x,ipos_y:word);
+procedure actualiza_gfx_sprite_size(pos_x,pos_y:word;dest:byte;x_size,y_size:word;ipos_x:word=0;ipos_y:word=0);
 procedure actualiza_gfx_sprite_zoom(pos_x,pos_y:word;dest,ngfx:byte;zx,zy:single);
 procedure actualiza_gfx_sprite_alpha(pos_x,pos_y:word;dest,ngfx:byte);
 //Scroll
@@ -1036,34 +1035,12 @@ for y:=0 to (gfx[ngfx].y-1) do begin
 end;
 end;
 
-procedure actualiza_gfx_sprite_size_pos(pos_x,pos_y:word;dest:byte;x_size,y_size,ipos_x,ipos_y:word);
+procedure actualiza_gfx_sprite_size(pos_x,pos_y:word;dest:byte;x_size,y_size:word;ipos_x:word=0;ipos_y:word=0);
 var
   origen,destino:libsdl_rect;
 begin
 origen.x:=ipos_x;
 origen.y:=ipos_y;
-origen.w:=x_size;
-origen.h:=y_size;
-pos_x:=pos_x and p_final[dest].sprite_mask_x;
-destino.x:=pos_x+ADD_SPRITE;
-pos_y:=pos_y and p_final[dest].sprite_mask_y;
-destino.y:=pos_y+ADD_SPRITE;
-destino.w:=x_size;
-destino.h:=y_size;
-SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
-if (pos_x+origen.w>p_final[dest].sprite_end_x) or (pos_y+origen.h>p_final[dest].sprite_end_y) then begin
-  if (pos_x+origen.w)>p_final[dest].sprite_end_x then destino.x:=ADD_SPRITE-(p_final[dest].sprite_end_x-pos_x);
-  if (pos_y+origen.h)>p_final[dest].sprite_end_y then destino.y:=ADD_SPRITE-(p_final[dest].sprite_end_y-pos_y);
-  SDL_UpperBlit(pantalla[PANT_SPRITES],@origen,pantalla[dest],@destino);
-end;
-end;
-
-procedure actualiza_gfx_sprite_size(pos_x,pos_y:word;dest:byte;x_size,y_size:word);
-var
-  origen,destino:libsdl_rect;
-begin
-origen.x:=0;
-origen.y:=0;
 origen.w:=x_size;
 origen.h:=y_size;
 pos_x:=pos_x and p_final[dest].sprite_mask_x;

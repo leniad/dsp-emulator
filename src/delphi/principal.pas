@@ -446,6 +446,12 @@ type
     BloodBrosHW1: TMenuItem;
     BloodBros1: TMenuItem;
     SkySmasher1: TMenuItem;
+    BaradukeHW1: TMenuItem;
+    Baraduke1: TMenuItem;
+    MetroCross1: TMenuItem;
+    returnishtar1: TMenuItem;
+    genpeitd1: TMenuItem;
+    wndrmomo1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

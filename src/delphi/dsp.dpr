@@ -311,7 +311,8 @@ uses
   firetrap_hw in '..\arcade\firetrap_hw.pas',
   hw_3x3puzzle in '..\arcade\hw_3x3puzzle.pas',
   hw_1945k3 in '..\arcade\hw_1945k3.pas',
-  bloodbros_hw in '..\arcade\bloodbros_hw.pas';
+  bloodbros_hw in '..\arcade\bloodbros_hw.pas',
+  baraduke_hw in '..\arcade\baraduke_hw.pas';
 
 {$R *.res}
 

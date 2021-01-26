@@ -2361,6 +2361,18 @@ object principal1: Tprincipal1
               Caption = 'Sky Kid Deluxe'
               OnClick = CambiarMaquina
             end
+            object returnishtar1: TMenuItem
+              Caption = 'The Return of Ishtar'
+              OnClick = CambiarMaquina
+            end
+            object genpeitd1: TMenuItem
+              Caption = 'Genpei ToumaDen'
+              OnClick = CambiarMaquina
+            end
+            object wndrmomo1: TMenuItem
+              Caption = 'Wonder Momo'
+              OnClick = CambiarMaquina
+            end
           end
           object RocnRope1: TMenuItem
             Caption = 'Roc'#39'n Rope'
@@ -2408,6 +2420,18 @@ object principal1: Tprincipal1
             end
             object Colony71: TMenuItem
               Caption = 'Colony 7'
+              OnClick = CambiarMaquina
+            end
+          end
+          object BaradukeHW1: TMenuItem
+            Caption = 'Baraduke HW'
+            GroupIndex = 1
+            object Baraduke1: TMenuItem
+              Caption = 'Baraduke'
+              OnClick = CambiarMaquina
+            end
+            object MetroCross1: TMenuItem
+              Caption = 'Metro-Cross'
               OnClick = CambiarMaquina
             end
           end
