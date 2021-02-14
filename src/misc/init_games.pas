@@ -33,7 +33,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
-  hw_1945k3,bloodbros_hw,baraduke_hw;
+  hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw;
 
 type
   tgame_desc=record
@@ -48,7 +48,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=303;
+  GAMES_CONT=304;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -344,6 +344,7 @@ const
   (name:'The Return of Ishtar';year:'1986';snd:1;hi:false;zip:'roishtar';grid:289;company:'Namco';rom:@roishtar),
   (name:'Genpei ToumaDen';year:'1986';snd:1;hi:false;zip:'genpeitd';grid:290;company:'Namco';rom:@genpeitd),
   (name:'Wonder Momo';year:'1987';snd:1;hi:false;zip:'wndrmomo';grid:291;company:'Namco';rom:@wndrmomo),
+  (name:'Altered Beast';year:'1988';snd:1;hi:false;zip:'altbeast';grid:292;company:'Sega';rom:@altbeast),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -665,6 +666,7 @@ case numero of
   289:principal1.CambiarMaquina(principal1.returnishtar1);
   290:principal1.CambiarMaquina(principal1.genpeitd1);
   291:principal1.CambiarMaquina(principal1.wndrmomo1);
+  292:principal1.CambiarMaquina(principal1.AlteredBeast1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -974,6 +976,7 @@ principal1.MetroCross1.Checked:=false;
 principal1.returnishtar1.Checked:=false;
 principal1.genpeitd1.Checked:=false;
 principal1.wndrmomo1.Checked:=false;
+principal1.AlteredBeast1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1214,6 +1217,7 @@ case tmaquina of
   283,284:cargar_k31945;
   285,286:cargar_bloodbros;
   287,288:cargar_baraduke;
+  292:cargar_system16b;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2400,6 +2404,10 @@ end;
 if sender=principal1.wndrmomo1 then begin
   tipo:=291;
   principal1.wndrmomo1.Checked:=true;
+end;
+if sender=principal1.AlteredBeast1 then begin
+  tipo:=292;
+  principal1.AlteredBeast1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

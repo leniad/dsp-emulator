@@ -1581,6 +1581,7 @@
         <DCCReference Include="..\arcade\hw_1945k3.pas"/>
         <DCCReference Include="..\arcade\bloodbros_hw.pas"/>
         <DCCReference Include="..\arcade\baraduke_hw.pas"/>
+        <DCCReference Include="..\arcade\system16b_hw.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

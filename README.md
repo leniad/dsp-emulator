@@ -1,4 +1,12 @@
 ﻿# DSP Emulator status #
+<b>14/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -M68000: Fixed TAS opcode
+-Sega System 16B HW
+    +Altered Beast: Initial driver
+</pre>
+<img src='https://i.ibb.co/1R3GTt2/Altered-Beast-1.jpg'> <img src='https://i.ibb.co/prjZ7j4/Altered-Beast-2.jpg'><br><br>
 <b>26/01/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +CPU

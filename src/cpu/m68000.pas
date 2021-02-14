@@ -1963,14 +1963,14 @@ case (instruccion shr 12) of //cojo solo el primer nibble
   	            r.cc.z:=(templ=0);
               end;
           $2b:begin // # tas
-                if (dir shr 3)<>0 then self.contador:=self.contador+10+calc_ea_t_bw(dir)
+                if (dir shr 3)<>0 then self.contador:=self.contador+4+calc_ea_t_bw(dir)
                   else self.contador:=self.contador+4;
-                tempb:=r.d[dir].l0;
+                tempb:=self.leerdir_b(dir);
                 r.cc.z:=(tempb=0);
                 r.cc.n:=(tempb and $80)<>0;
                 r.cc.v:=false;
                 r.cc.c:=false;
-                r.d[dir].l0:=tempb or $80;
+                self.ponerdir_b2(dir,tempb or $80);
               end;
           $32:begin // # movem.w  bits dir son origen m-->r
                 tempw:=self.getword(r.pc.l);

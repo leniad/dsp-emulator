@@ -312,7 +312,8 @@ uses
   hw_3x3puzzle in '..\arcade\hw_3x3puzzle.pas',
   hw_1945k3 in '..\arcade\hw_1945k3.pas',
   bloodbros_hw in '..\arcade\bloodbros_hw.pas',
-  baraduke_hw in '..\arcade\baraduke_hw.pas';
+  baraduke_hw in '..\arcade\baraduke_hw.pas',
+  system16b_hw in '..\arcade\system16b_hw.pas';
 
 {$R *.res}
 

@@ -216,7 +216,7 @@ begin
             data_7:=sprite_ram[(f*$8)+$7]+1;
             sprite_ram[(f*$8)+$7]:=data_7;
 						pixels:=(sprite_rom[(spritedata+(data_7 and $7fff)) shl 1] shl 8)+sprite_rom[((spritedata+(data_7 and $7fff)) shl 1)+1];
-						// draw four pixels */
+						// draw four pixels
 						pix:=(pixels shr 12) and $f;
             system16a_draw_pixel(x,y,pix,color,sprpri);
 						pix:=(pixels shr 8) and $f;
@@ -226,7 +226,7 @@ begin
 						pix:=(pixels shr 0) and $f;
             system16a_draw_pixel(x+3,y,pix,color,sprpri);
             x:=x+4;
-						// stop if the last pixel in the group was 0xf */
+						// stop if the last pixel in the group was 0xf
 						if (pix=15) then break;
 					end;
 				end else begin

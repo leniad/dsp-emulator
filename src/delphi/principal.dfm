@@ -2652,6 +2652,13 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object SegaSystem16BHW1: TMenuItem
+            Caption = 'Sega System 16B HW'
+            object AlteredBeast1: TMenuItem
+              Caption = 'Altered Beast'
+              OnClick = CambiarMaquina
+            end
+          end
           object SNK68kHW1: TMenuItem
             Caption = 'SNK 68k HW'
             object pow1: TMenuItem

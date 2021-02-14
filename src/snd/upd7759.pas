@@ -42,8 +42,9 @@ const
   upd7759_state_table:array[0..15] of integer=( -1, -1, 0, 0, 1, 2, 2, 3, -1, -1, 0, 0, 1, 2, 2, 3);
 
 type
+  tcall_drq=procedure(drq:byte);
   upd7759_chip=class(snd_chip_class)
-       constructor create(clock:integer;amp:single);
+       constructor create(clock:integer;amp:single;call_drq:tcall_drq=nil);
        destructor free;
     public
        procedure update;
@@ -87,6 +88,7 @@ type
     	 rom:pbyte;						// pointer to ROM data or NULL for slave mode */
        resample_pos:single;
        resample_inc:single;
+       drq_call:tcall_drq;
        procedure update_adpcm(data:integer);
        procedure advance_state;
   end;
@@ -96,8 +98,9 @@ var
 
 implementation
 
-constructor upd7759_chip.create(clock:integer;amp:single);
+constructor upd7759_chip.create(clock:integer;amp:single;call_drq:tcall_drq=nil);
 begin
+  self.drq_call:=call_drq;
 	// compute the stepping rate based on the chip's clock speed */
 	self.step:=4*FRAC_ONE;
 	// compute the clock period */
@@ -395,7 +398,7 @@ var
   clocks_this_time,clocks_left:integer;
   step,pos:dword;
   out_:integer;
-  num_samples:byte;
+  num_samples,old_drq:byte;
 begin
 	clocks_left:=self.clocks_left;
   step:=self.step;
@@ -421,7 +424,11 @@ begin
 				// if we're out of clocks, time to handle the next state */
 				if (clocks_left=0) then begin
 					// advance one state; if we hit idle, bail */
+          old_drq:=self.drq;
 					self.advance_state;
+          if old_drq<>self.drq then begin
+            if @self.drq_call<>nil then self.drq_call(self.drq);
+          end;
 					if (self.state=STATE_IDLE) then break;
 					// reimport the variables that we cached */
 					clocks_left:=self.clocks_left;

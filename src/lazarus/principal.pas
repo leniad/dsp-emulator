@@ -244,6 +244,8 @@ type
     MenuItem42: TMenuItem;
     baraduke1: TMenuItem;
     genpeitd1: TMenuItem;
+    MenuItem43: TMenuItem;
+    alteredbeast1: TMenuItem;
     wndrmomo1: TMenuItem;
     returnishtar1: TMenuItem;
     metrocross1: TMenuItem;
