@@ -325,19 +325,23 @@ begin
 end;
 
 function cpu_mcs51.iram_r(pos:byte):byte;
+var
+  res:byte;
 begin
+  res:=$ff;
   case pos of
-    $0..$7f,ADDR_SP,ADDR_ACC,ADDR_PSW,ADDR_B,ADDR_DPL,ADDR_DPH,ADDR_TCON,ADDR_TMOD,ADDR_IE,ADDR_IP:iram_r:=self.ram[pos];
-    ADDR_P0:if self.rwm then iram_r:=self.ram[ADDR_P0]
-            else if @self.in_port0<>nil then iram_r:=self.ram[ADDR_P0] and self.in_port0;
-    ADDR_P1:if self.rwm then iram_r:=self.ram[ADDR_P1]
-            else if @self.in_port1<>nil then iram_r:=self.ram[ADDR_P1] and self.in_port1;
-    ADDR_P2:if self.rwm then iram_r:=self.ram[ADDR_P2]
-            else if @self.in_port2<>nil then iram_r:=self.ram[ADDR_P2] and self.in_port2;
-    ADDR_P3:if self.rwm then iram_r:=self.ram[ADDR_P3]
-            else if @self.in_port3<>nil then iram_r:=self.ram[ADDR_P3] and self.in_port3;
+    $0..$7f,ADDR_SP,ADDR_ACC,ADDR_PSW,ADDR_B,ADDR_DPL,ADDR_DPH,ADDR_TCON,ADDR_TMOD,ADDR_IE,ADDR_IP:res:=self.ram[pos];
+    ADDR_P0:if self.rwm then res:=self.ram[ADDR_P0]
+            else if @self.in_port0<>nil then res:=self.ram[ADDR_P0] and self.in_port0;
+    ADDR_P1:if self.rwm then res:=self.ram[ADDR_P1]
+            else if @self.in_port1<>nil then res:=self.ram[ADDR_P1] and self.in_port1;
+    ADDR_P2:if self.rwm then res:=self.ram[ADDR_P2]
+            else if @self.in_port2<>nil then res:=self.ram[ADDR_P2] and self.in_port2;
+    ADDR_P3:if self.rwm then res:=self.ram[ADDR_P3]
+            else if @self.in_port3<>nil then res:=self.ram[ADDR_P3] and self.in_port3;
       else MessageDlg('Num CPU '+inttostr(self.numero_cpu)+' iram_r desconocida: '+inttohex(pos,2)+' desconocida. PC='+inttohex(r.pc-1,10), mtInformation,[mbOk], 0);
   end;
+  iram_r:=res;
 end;
 
 procedure cpu_mcs51.update_timer_t0(cycles:byte);
@@ -543,7 +547,7 @@ begin
 	//If All Inerrupts Disabled or no pending abort..
   if get_bit(self.ram[ADDR_IE],7)<>0 then int_mask:=self.ram[ADDR_IE]
     else int_mask:=$00;
-  // mask out interrupts not enabled */
+  // mask out interrupts not enabled
   ints:=ints and int_mask;
 	if (ints=0) then begin
       evalue_irq:=0;
@@ -822,10 +826,19 @@ case instruccion of
         data:=self.rom[r.pc];
         r.pc:=r.pc+1;            //Grab data
 	      self.ram[ADDR_ACC]:=self.ram[ADDR_ACC] or data; //Set ACC to value of ACC Logical OR with Data
+        self.calc_parity:=true;
+      end;
+  $45:begin
+        pos:=self.rom[r.pc];
+        r.pc:=r.pc+1;            //Grab data
+        data:=self.IRAM_R(pos);
+        self.ram[ADDR_ACC]:=self.ram[ADDR_ACC] or data;
+        self.calc_parity:=true;
       end;
   $48..$4f:begin //orl_a_r
         data:=self.r_reg(instruccion and $7); //Grab data from R0 - R7
 	      self.ram[ADDR_ACC]:=self.ram[ADDR_ACC] or data; //Set ACC to value of ACC Logical OR with Data
+        self.calc_parity:=true;
       end;
   $50:begin //jnc
         tempb:=self.rom[r.pc];
@@ -984,6 +997,7 @@ case instruccion of
 	      //A gets lo bits, B gets hi bits of result
 	      self.ram[ADDR_B]:=(tempw and $ff00) shr 8;
 	      self.ram[ADDR_ACC]:=tempw and $00ff;
+        self.calc_parity:=true;
 	      //Set flags
 	      r.psw.o:=(tempw and $100)<>0;      //Set/Clear Overflow Flag if result > 255
 	      r.psw.c:=false;                              //Carry Flag always cleared
@@ -1019,7 +1033,6 @@ case instruccion of
 	      //Set carry flag to 1 if 1st compare value is < 2nd compare value
         r.psw.c:=self.ram[ADDR_ACC]<tempb;
         self.ram[ADDR_psw]:=self.dame_pila;
-        self.calc_parity:=true;
       end;
   $b8..$bf:begin //cjne_r_byte
         tempb:=self.rom[r.pc]; //Grab data
@@ -1063,6 +1076,7 @@ case instruccion of
 	      data:=self.iram_r(pos);     //Grab data
 	      tempb:=self.ram[ADDR_ACC];  //Hold value of ACC
 	      self.ram[ADDR_ACC]:=data;   //Sets ACC to data
+        self.calc_parity:=true;
         self.iram_w(pos,tempb);     //Sets data address to old value of ACC
       end;
   $c8..$cf:begin //xch_a_r
@@ -1120,6 +1134,11 @@ case instruccion of
 	       self.ram[ADDR_ACC]:=tempb;  //Store 8 bit result of addtion in ACC
          self.calc_parity:=true;
       end;
+  $e2,$e3:begin //movx_a_ir
+        tempw:=(self.iram_r(ADDR_P2) shl 8)+R_REG(instruccion and $1);
+        self.ram[ADDR_ACC]:=self.getbyte(tempw);
+        self.calc_parity:=true;
+      end;
   $e4:begin  //clr_a
         self.ram[ADDR_ACC]:=0;
         self.calc_parity:=true;
@@ -1142,6 +1161,10 @@ case instruccion of
           //uint32_t addr = ERAM_ADDR(DPTR, 0xFFFF);
           tempw:=(self.iram_r(ADDR_DPH) shl 8)+self.iram_r(ADDR_DPL);
 	        self.putbyte(tempw,self.ram[ADDR_ACC]);               //Store ACC to External DATA memory address pointed to by DPTR
+      end;
+  $f2,$f3:begin //movx_ir_a
+          tempw:=(self.iram_r(ADDR_P2) shl 8)+R_REG(instruccion and $1);
+	        self.putbyte(tempw,self.ram[ADDR_ACC]);
       end;
   $f4:begin //cpl_a
         data:=not(self.ram[ADDR_ACC]) and $ff;

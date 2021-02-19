@@ -5,6 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      sound_engine;
 
 const
+  CLOCK_UPD=640000;
   FRAC_BITS=20;
   FRAC_ONE=(1 shl FRAC_BITS);
   FRAC_MASK=(FRAC_ONE-1);
@@ -44,7 +45,7 @@ const
 type
   tcall_drq=procedure(drq:byte);
   upd7759_chip=class(snd_chip_class)
-       constructor create(clock:integer;amp:single;call_drq:tcall_drq=nil);
+       constructor create(amp:single;slave:byte=1;call_drq:tcall_drq=nil);
        destructor free;
     public
        procedure update;
@@ -65,7 +66,6 @@ type
   	   reset_pin:byte;						// current state of the RESET line */
   	   start:byte;						// current state of the START line */
   	   drq:byte;						// current state of the DRQ line */
-    	 //void (*drqcallback)(device_t *device, int param);			/* drq callback */
     	 // internal state machine */
   	   state:byte;						// current overall chip state */
     	 clocks_left:integer;				// number of clocks left in this state */
@@ -80,11 +80,12 @@ type
        first_valid_header:byte;			// did we get our first valid header yet? */
        offset:dword;						// current ROM offset */
        repeat_offset:dword;				// current ROM repeat offset */
+       start_delay:dword;
     	 // ADPCM processing */
        adpcm_state:shortint;				// ADPCM state index */
     	 adpcm_data:byte;					// current byte of ADPCM data */
        sample:integer;						// current sample value */
-    	 // ROM access */
+    	 // ROM access
     	 rom:pbyte;						// pointer to ROM data or NULL for slave mode */
        resample_pos:single;
        resample_inc:single;
@@ -98,22 +99,19 @@ var
 
 implementation
 
-constructor upd7759_chip.create(clock:integer;amp:single;call_drq:tcall_drq=nil);
+constructor upd7759_chip.create(amp:single;slave:byte=1;call_drq:tcall_drq=nil);
 begin
-  self.drq_call:=call_drq;
-	// compute the stepping rate based on the chip's clock speed */
+	// compute the stepping rate based on the chip's clock speed
 	self.step:=4*FRAC_ONE;
-	// compute the clock period */
-	//chip->clock_period = ATTOTIME_IN_HZ(device->clock());
-	// compute the ROM base or allocate a timer */
-	getmem(self.rom,$20000);
+	// compute the ROM base or allocate a timer
+	if slave=1 then getmem(self.rom,$20000);
 	// set the DRQ callback */
-	//chip->drqcallback = intf->drqcallback;
-	// assume /RESET and /START are both high */
+	self.drq_call:=call_drq;
+	// assume /RESET and /START are both high
 	self.reset_pin:=1;
 	self.start:=1;
-  self.resample_inc:=clock/4/FREQ_BASE_AUDIO;
-	// toggle the reset line to finish the reset */
+  self.resample_inc:=CLOCK_UPD/4/FREQ_BASE_AUDIO;
+	// toggle the reset line to finish the reset
   self.tsample_num:=init_channel;
   self.amp:=amp;
 	self.reset;
@@ -121,14 +119,14 @@ end;
 
 destructor upd7759_chip.free;
 begin
-freemem(self.rom);
+if self.rom<>nil then freemem(self.rom);
+self.rom:=nil;
 end;
 
 procedure upd7759_chip.reset;
 begin
 	self.pos               := 0;
-	self.fifo_in           := 0;
-	self.drq               := 0;
+	//self.fifo_in           := 0;
 	self.state             := STATE_IDLE;
 	self.clocks_left       := 0;
 	self.nibbles_left      := 0;
@@ -145,9 +143,7 @@ begin
 	self.adpcm_state       := 0;
 	self.adpcm_data        := 0;
 	self.sample            := 0;
-{	/* turn off any timer */
-	if (chip.timer)
-		timer_adjust_oneshot(chip.timer, attotime_never, 0);}
+  self.drq:=0;
 end;
 
 function upd7759_chip.get_rom_addr:pbyte;
@@ -180,7 +176,6 @@ begin
       end;
 		// Start state: we begin here as soon as a sample is triggered */
 		STATE_START:begin
-        self.resample_pos:=0;
 			  if self.rom<>nil then self.req_sample:=self.fifo_in
           else self.req_sample:=$10;
 		  	{ 35+ cycles after we get here, the /DRQ goes low
@@ -190,7 +185,7 @@ begin
              * Depending on the state the self was in just before the /MD was set to 0 (reset, standby
              * or just-finished-playing-previous-sample) this number can range from 35 up to ~24000).
              * It also varies slightly from test to test, but not much - a few cycles at most.) }
-	  		self.clocks_left:=70;	// 35 - breaks cotton */
+	  		self.clocks_left:=70+self.start_delay;	// 35 - breaks cotton */
   			self.state:=STATE_FIRST_REQ;
       end;
 		// First request state: issue a request for the first byte */
@@ -226,7 +221,7 @@ begin
 			if self.rom<>nil then begin
         ptemp:=self.rom;
         inc(ptemp,self.req_sample*2+5);
-        self.offset:=ptemp^ shl 9
+        self.offset:=ptemp^ shl 9 //sample_offset_shift!!!!!
       end else self.offset:=self.fifo_in shl 9;
 			self.drq:=1;
 			// 44 cycles later, we will latch this value and request another byte */
@@ -415,7 +410,7 @@ begin
 			// advance by the number of clocks/output sample */
 			pos:=pos+step;
 			// handle clocks, but only in standalone mode */
-			while ((self.rom<>nil) and (pos>=FRAC_ONE)) do begin
+			while (pos>=FRAC_ONE) do begin
 				clocks_this_time:=pos shr FRAC_BITS;
 				if (clocks_this_time>clocks_left) then clocks_this_time:=clocks_left;
 				// clock once */

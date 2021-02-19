@@ -117,7 +117,7 @@ function abrir_sg:boolean;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
-  longitud,crc_val:integer;
+  crc_val,longitud:integer;
 begin
   if not(OpenRom(StSG1000,RomFile)) then begin
     abrir_sg:=true;
@@ -150,7 +150,7 @@ begin
   ram_8k:=false;
   mid_8k_ram:=false;
   crc_val:=calc_crc(datos,longitud);
-  case crc_val of
+  case dword(crc_val) of
     //BomberMan Super (2), King's Valley, Knightmare, Legend of Kage, Rally X, Road Fighter, Tank Battalion, Twinbee, YieAr KungFu II
     $69fc1494,$ce5648c3,$223397a1,$281d2888,$2e7166d5,$306d5f78,$29e047cc,$5cbd1163,$c550b4f0,$fc87463c:ram_8k:=true;
     //Castle, Othello (2)

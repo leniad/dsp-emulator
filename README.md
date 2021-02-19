@@ -1,4 +1,16 @@
 ﻿# DSP Emulator status #
+<b>19/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -MCS51: Added opcodes $45,$e2,$e3,$f2 and $f3
+    +uPD7759: Added slave chip type
+-Sega System 16B HW
+    +Added MCU, sound, sprites and controls
+    +Fixed chars and tiles
+        -Altered Beast: Driver with sound
+        -Golden Axe: Initial driver
+</pre>
+<img src='https://i.ibb.co/BqJ7h6z/Altered-Beast-1.jpg'> <img src='https://i.ibb.co/cJZ8tGN/Altered-Beast-2.jpg'><br><br>
 <b>14/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +CPU

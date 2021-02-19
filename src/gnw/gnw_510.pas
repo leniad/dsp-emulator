@@ -173,8 +173,8 @@ end;
 
 function iniciar_gnw_510:boolean;
 var
-  punt,punt2:pword;
-  f,g:word;
+  punt:pword;
+  f:word;
   row,seg,h:byte;
   //fichero:textfile;
   //cont:integer;

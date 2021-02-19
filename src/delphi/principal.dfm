@@ -2658,6 +2658,10 @@ object principal1: Tprincipal1
               Caption = 'Altered Beast'
               OnClick = CambiarMaquina
             end
+            object GoldenAxe1: TMenuItem
+              Caption = 'Golden Axe'
+              OnClick = CambiarMaquina
+            end
           end
           object SNK68kHW1: TMenuItem
             Caption = 'SNK 68k HW'

@@ -2731,6 +2731,14 @@ const
         (n:'epr-11682.b6';l:$20000;p:$40000;crc:$e3f77c5e),(n:'epr-11679.b3';l:$20000;p:$80001;crc:$14dcc245),
         (n:'epr-11683.b7';l:$20000;p:$80000;crc:$f9a60f06),(n:'epr-11680.b4';l:$20000;p:$c0001;crc:$f43dcdec),
         (n:'epr-11684.b8';l:$20000;p:$c0000;crc:$b20c0edb),());
+         goldnaxe:array[0..14] of tipo_roms=(
+        (n:'epr-12545.ic2';l:$40000;p:0;crc:$a97c4e4d),(n:'epr-12544.ic1';l:$40000;p:$1;crc:$5e38f668),
+        (n:'epr-12390.ic8';l:$8000;p:0;crc:$399fc5f5),(n:'mpr-12384.ic6';l:$20000;p:$8000;crc:$6218d8e7),
+        (n:'317-0123a.c2';l:$1000;p:0;crc:$cf19e7d4),(n:'epr-12385.ic19';l:$20000;p:0;crc:$b8a4e7e0),
+        (n:'epr-12386.ic20';l:$20000;p:$20000;crc:$25d7d779),(n:'epr-12387.ic21';l:$20000;p:$40000;crc:$c7fcadf3),
+        (n:'mpr-12378.ic9';l:$40000;p:1;crc:$119e5a82),(n:'mpr-12379.ic12';l:$40000;p:$0;crc:$1a0e8c57),
+        (n:'mpr-12380.ic10';l:$40000;p:$80001;crc:$bb2c0853),(n:'mpr-12381.ic13';l:$40000;p:$80000;crc:$81ba6ecc),
+        (n:'mpr-12382.ic11';l:$40000;p:$100001;crc:$81601c6f),(n:'mpr-12383.ic14';l:$40000;p:$100000;crc:$5dbacf7a),());
 
 implementation
 uses principal,init_games;

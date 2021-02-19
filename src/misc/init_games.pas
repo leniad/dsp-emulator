@@ -48,7 +48,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=304;
+  GAMES_CONT=305;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -345,6 +345,7 @@ const
   (name:'Genpei ToumaDen';year:'1986';snd:1;hi:false;zip:'genpeitd';grid:290;company:'Namco';rom:@genpeitd),
   (name:'Wonder Momo';year:'1987';snd:1;hi:false;zip:'wndrmomo';grid:291;company:'Namco';rom:@wndrmomo),
   (name:'Altered Beast';year:'1988';snd:1;hi:false;zip:'altbeast';grid:292;company:'Sega';rom:@altbeast),
+  (name:'Golden Axe';year:'1988';snd:1;hi:false;zip:'goldnaxe';grid:293;company:'Sega';rom:@goldnaxe),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -667,6 +668,7 @@ case numero of
   290:principal1.CambiarMaquina(principal1.genpeitd1);
   291:principal1.CambiarMaquina(principal1.wndrmomo1);
   292:principal1.CambiarMaquina(principal1.AlteredBeast1);
+  293:principal1.CambiarMaquina(principal1.Goldenaxe1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -977,6 +979,7 @@ principal1.returnishtar1.Checked:=false;
 principal1.genpeitd1.Checked:=false;
 principal1.wndrmomo1.Checked:=false;
 principal1.AlteredBeast1.checked:=false;
+principal1.goldenaxe1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1217,7 +1220,7 @@ case tmaquina of
   283,284:cargar_k31945;
   285,286:cargar_bloodbros;
   287,288:cargar_baraduke;
-  292:cargar_system16b;
+  292,293:cargar_system16b;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2408,6 +2411,10 @@ end;
 if sender=principal1.AlteredBeast1 then begin
   tipo:=292;
   principal1.AlteredBeast1.Checked:=true;
+end;
+if sender=principal1.Goldenaxe1 then begin
+  tipo:=293;
+  principal1.Goldenaxe1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

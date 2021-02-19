@@ -443,7 +443,7 @@ z80_0.init_sound(snk68_sound_update);
 //Sound Chips
 ym3812_0:=ym3812_chip.create(YM3812_FM,4000000);
 ym3812_0.change_irq_calls(snd_irq);
-upd7759_0:=upd7759_chip.create(640000,0.5);
+upd7759_0:=upd7759_chip.create(0.5);
 case main_vars.tipo_maquina of
   136:begin //POW
         m68000_0.change_ram16_calls(pow_getword,pow_putword);

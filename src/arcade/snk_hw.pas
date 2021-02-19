@@ -300,7 +300,7 @@ end;
 
 procedure update_video_aso;
 var
-  g,atrib,color:byte;
+  g,color:byte;
   x,y,f,nchar,pos:word;
   col:integer;
 begin

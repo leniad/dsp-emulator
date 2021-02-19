@@ -663,7 +663,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(@mem_snd,tmnt_sound)) then exit;
         //Sound Chips
         ym2151_0:=ym2151_chip.create(3579545);
-        upd7759_0:=upd7759_chip.create(640000,0.6);
+        upd7759_0:=upd7759_chip.create(0.6);
         getmem(k007232_rom,$20000);
         if not(roms_load(k007232_rom,tmnt_k007232)) then exit;
         k007232_0:=k007232_chip.create(3579545,k007232_rom,$20000,0.20,tmnt_k007232_cb);
