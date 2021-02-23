@@ -2662,6 +2662,14 @@ object principal1: Tprincipal1
               Caption = 'Golden Axe'
               OnClick = CambiarMaquina
             end
+            object DynamiteDux1: TMenuItem
+              Caption = 'Dynamite Dux'
+              OnClick = CambiarMaquina
+            end
+            object eswat1: TMenuItem
+              Caption = 'ESwat - Cyber Police'
+              OnClick = CambiarMaquina
+            end
           end
           object SNK68kHW1: TMenuItem
             Caption = 'SNK 68k HW'

@@ -1,4 +1,25 @@
 ﻿# DSP Emulator status #
+<b>23/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-Renewed preview images (Thanks to Francisco José Martí Terrón)
+-General
+    +CPU
+        -MCS51: Added halt line
+    +ROMS export: Fixed many ROMs sets (Thanks to Francisco José Martí Terrón)
+-Commodore 64
+    +Added PRG and T64 file support (added by chuso gar)
+-Sega System 16B HW
+    +Fixed dipswitches
+    +Fixed video cache
+    +Fixed sprite colors
+    +Added memory overlap
+    +Added 315-5248 and 315-5250
+    +Added more operations to 315-5195
+        -Dynamite Dux: Added driver with sound
+        -Golden Axe: Driver working, due problems with i8751/M68000 using predecoded version
+        -ESwat - Cyber Police: Added driver with sound, due the lack of FD1094 emulation using predecoded version
+</pre>
+<img src='https://i.ibb.co/sV7p4Gg/ddux.jpg'> <img src='https://i.ibb.co/SmTHK9B/Golden-Axe.jpg'><br>
+<img src='https://i.ibb.co/685rNxJ/eswat.jpg'><br><br>
 <b>19/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +CPU

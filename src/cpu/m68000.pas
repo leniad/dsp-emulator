@@ -1433,7 +1433,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
 	            r.cc.v:=((((templ xor templ2) and (templ3 xor templ2)) shr 24) and $80)<>0;
 	            r.cc.c:=((((templ and templ3) or (not(templ2) and (templ or templ3))) shr 23) and $100)<>0;
             end;
-        else MessageDlg('Instruccion $0: '+inttohex((instruccion shr 6) and $3f,10)+' - '+inttohex(r.pc.l,10), mtInformation,[mbOk], 0);
+        else MessageDlg('Instruccion $0: '+inttohex((instruccion shr 6) and $3f,10)+' - '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
       end;
    $1:begin  //+++++++++++++++ move.b
         tempb:=self.leerdir_b(dir);

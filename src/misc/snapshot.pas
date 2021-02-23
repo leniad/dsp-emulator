@@ -78,9 +78,12 @@ function abrir_coleco_snapshot(data:pbyte;long:dword):boolean;
 function grabar_coleco_snapshot(nombre:string):boolean;
 //NES
 function grabar_nes_snapshot(nombre:string):boolean;
+//C64
+function abrir_prg(data:pbyte;long:dword):boolean;
+function abrir_t64(data:pbyte;long:dword):boolean;
 
 implementation
-uses spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,coleco,principal,main_engine,nes;
+uses spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,coleco,principal,main_engine,nes,commodore64;
 
 procedure spectrum_change_model(model:byte);
 begin
@@ -1849,5 +1852,67 @@ function grabar_nes_snapshot(nombre:string):boolean;
 begin
 grabar_nes_snapshot:=false;
 end;
+
+//C64
+//PRG
+function abrir_prg(data:pbyte;long:dword):boolean;
+var
+   posi,hi,lo:integer;
+   punt:integer;
+begin
+	abrir_prg:=false;
+	//lo:=(self.reg2.tod_sec and $0f)+1;
+	//hi:= self.reg2.tod_sec shr 4;
+	lo:=data[0];
+	hi:=data[1];
+	punt:=$801;
+	punt:=(hi shl 8) or (lo);
+  //MessageDlg('HI: '+inttostr(hi), mtInformation,[mbOk], 0);
+  //MessageDlg('LO: '+inttostr(lo), mtInformation,[mbOk], 0);
+  //MessageDlg('PUNT: '+inttostr(punt), mtInformation,[mbOk], 0);
+  inc(data,2);
+  for posi:=0 to (long-2) do begin
+    c64_putbyte(punt+posi, data[0]);
+    //copymemory(@memoria,data,);
+    inc(data,1);
+    //freemem(ptemp);
+  end;
+	abrir_prg:=true;
+end;
+
+//T64
+function abrir_t64(data:pbyte;long:dword):boolean;
+var
+   posi,hi,lo:integer;
+   punt,posFiche:integer;
+begin
+	abrir_t64:=false;
+  inc(data,32+32+2);
+  lo:=data[0];
+	hi:=data[1];
+	punt:=$801;
+	punt:=(hi shl 8) or (lo);
+  inc(data,2);
+  //MessageDlg('HI: '+inttostr(hi), mtInformation,[mbOk], 0);
+  //MessageDlg('LO: '+inttostr(lo), mtInformation,[mbOk], 0);
+  //MessageDlg('PUNT: '+inttostr(punt), mtInformation,[mbOk], 0);
+  inc(data,4);
+  lo:=data[0];
+	hi:=data[1];
+  inc(data,2);
+  posFiche:=(hi shl 8) or (lo);
+  posFiche:=posFiche-(32+32+2+2+4+2);
+  //MessageDlg('posFiche: '+inttostr(posFiche), mtInformation,[mbOk], 0);
+  inc(data,posFiche);
+  //punt:= data[0] shl 1;
+  for posi:=0 to (long) do begin
+    c64_putbyte(punt+posi, data[0]);
+    //copymemory(@memoria,data,);
+    inc(data,1);
+    //freemem(ptemp);
+  end;
+	abrir_t64:=true;
+end;
+
 
 end.

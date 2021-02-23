@@ -628,6 +628,10 @@ var
 begin
 self.contador:=0;
 while self.contador<maximo do begin
+if self.pedir_halt<>CLEAR_LINE then begin
+  self.contador:=trunc(maximo);
+  exit;
+end;
 //Calcular la paridad si cambia r.a
 if self.calc_parity then begin
   tempb:=0;

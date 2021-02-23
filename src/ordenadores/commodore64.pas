@@ -10,6 +10,8 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      {$IFDEF CIA_OLD}mos6526_old{$ELSE}mos6526{$ENDIF};
 
 procedure cargar_c64;
+//Para los snapshots
+procedure c64_putbyte(direccion:word;valor:byte);
 
 var
     char_rom:array[0..$fff] of byte;
@@ -18,7 +20,7 @@ var
     c64_keyboard,c64_keyboard_i:array[0..7] of byte;
 
 implementation
-uses tap_tzx;
+uses tap_tzx,snapshot;
 
 const
   c64_kernel:tipo_roms=(n:'901227-03.u4';l:$2000;p:$0;crc:$dbe3e7c7);
@@ -422,7 +424,9 @@ begin
   extension:=extension_fichero(nombre_zip);
   if extension='ZIP' then begin
          if not(search_file_from_zip(nombre_zip,'*.tap',nombre_file,file_size,crc,false)) then
-          if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then exit;
+           if not(search_file_from_zip(nombre_zip,'*.prg',nombre_file,file_size,crc,false)) then
+	           if not(search_file_from_zip(nombre_zip,'*.t64',nombre_file,file_size,crc,false)) then
+               if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then exit;
          getmem(datos,file_size);
          if not(load_file_from_zip(nombre_zip,nombre_file,datos,file_size,crc,true)) then begin
             freemem(datos);
@@ -440,6 +444,14 @@ begin
   c64_tapes:=true;
   if extension='TAP' then resultado:=abrir_c64_tap(datos,file_size);
   if extension='WAV' then resultado:=abrir_wav(datos,file_size);
+  if extension='PRG' then begin
+      es_cinta:=false;
+      resultado:=abrir_prg(datos,file_size);
+   end;
+  if extension='T64' then begin
+     es_cinta:=false;
+     resultado:=abrir_t64(datos,file_size);
+   end;
   if es_cinta then begin
      if resultado then begin
         tape_window1.edit1.Text:=nombre_file;

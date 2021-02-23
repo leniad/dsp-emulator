@@ -455,6 +455,8 @@ type
     SegaSystem16BHW1: TMenuItem;
     AlteredBeast1: TMenuItem;
     GoldenAxe1: TMenuItem;
+    DynamiteDux1: TMenuItem;
+    eswat1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
