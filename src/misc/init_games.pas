@@ -48,7 +48,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=307;
+  GAMES_CONT=309;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -250,7 +250,7 @@ const
   (name:'Vulgus';year:'1984';snd:1;hi:false;zip:'vulgus';grid:195;company:'Capcom';rom:@vulgus),
   (name:'Double Dragon 3 - The Rosetta Stone';year:'1990';snd:1;hi:false;zip:'ddragon3';grid:196;company:'Technos';rom:@ddragon3),
   (name:'Block Out';year:'1990';snd:1;hi:false;zip:'blockout';grid:197;company:'Technos';rom:@blockout),
-  (name:'Tetris';year:'1988';snd:1;hi:false;zip:'tetris';grid:198;company:'Sega';rom:@tetris),
+  (name:'Tetris (Sega)';year:'1988';snd:1;hi:false;zip:'tetris';grid:198;company:'Sega';rom:@tetris),
   (name:'Food Fight';year:'1982';snd:1;hi:false;zip:'foodf';grid:199;company:'Atari';rom:@foodf),
   (name:'Snap Jack';year:'1982';snd:1;hi:false;zip:'snapjack';grid:200;company:'Universal';rom:@snapjack),
   (name:'Cosmic Avenger';year:'1981';snd:1;hi:false;zip:'cavenger';grid:201;company:'Universal';rom:@cavenger),
@@ -269,7 +269,7 @@ const
   (name:'Teenage Mutant Ninja Turtles';year:'1989';snd:1;hi:false;zip:'tmnt';grid:214;company:'Konami';rom:@tmnt),
   (name:'Sunset Riders';year:'1991';snd:1;hi:false;zip:'ssriders';grid:215;company:'Konami';rom:@ssriders),
   (name:'Gradius III';year:'1991';snd:1;hi:false;zip:'gradius3';grid:216;company:'Konami';rom:@gradius3),
-  (name:'Space Invaders';year:'1978';snd:2;hi:false;zip:'invaders';grid:217;company:'Taito';rom:@spaceinv),
+  (name:'Space Invaders';year:'1978';snd:2;hi:false;zip:'invaders';grid:217;company:'Taito';rom:@spaceinv;samples:@spaceinv_samples),
   (name:'Centipede';year:'1980';snd:1;hi:false;zip:'centiped';grid:218;company:'Atari';rom:@centipede),
   (name:'Karnov';year:'1987';snd:1;hi:false;zip:'karnov';grid:219;company:'Data East';rom:@karnov),
   (name:'Chelnov';year:'1987';snd:1;hi:false;zip:'chelnov';grid:220;company:'Data East';rom:@chelnov),
@@ -292,7 +292,7 @@ const
   (name:'Sauro';year:'1987';snd:1;hi:false;zip:'sauro';grid:237;company:'Tecfri';rom:@sauro),
   (name:'Crazy Climber';year:'1980';snd:1;hi:false;zip:'cclimber';grid:238;company:'Nichibutsu';rom:@cclimber),
   (name:'Return of the Invaders';year:'1985';snd:1;hi:false;zip:'retofinv';grid:239;company:'Taito';rom:@retofinv),
-  (name:'Tetris';year:'1988';snd:1;hi:false;zip:'atetris';grid:240;company:'Atari Games';rom:@tetris_atari),
+  (name:'Tetris (Atari)';year:'1988';snd:1;hi:false;zip:'atetris';grid:240;company:'Atari Games';rom:@tetris_atari),
   (name:'Ikari Warriors';year:'1986';snd:1;hi:false;zip:'ikari';grid:241;company:'SNK';rom:@ikari),
   (name:'Athena';year:'1986';snd:1;hi:false;zip:'athena';grid:242;company:'SNK';rom:@athena),
   (name:'T.N.K III';year:'1986';snd:1;hi:false;zip:'tnk3';grid:243;company:'SNK';rom:@tnk3),
@@ -302,12 +302,12 @@ const
   (name:'Double Dragon (SpeedHack)';year:'1987';snd:1;hi:false;zip:'ddragon';grid:247;company:'Taito';rom:@ddragon),
   (name:'Mayday';year:'1980';snd:1;hi:false;zip:'mayday';grid:248;company:'Williams';rom:@mayday),
   (name:'Colony 7';year:'1981';snd:1;hi:false;zip:'colony7';grid:249;company:'Williams';rom:@colony7),
-  (name:'Bosconian';year:'1981';snd:1;hi:false;zip:'bosco';grid:250;company:'Namco';rom:@bosco),
+  (name:'Bosconian';year:'1981';snd:3;hi:false;zip:'bosco';grid:250;company:'Namco';rom:@bosco),
   (name:'HangOn Jr.';year:'1985';snd:1;hi:false;zip:'hangonjr';grid:251;company:'Sega';rom:@hangonjr),
   (name:'Slap Shooter';year:'1986';snd:1;hi:false;zip:'slapshtr';grid:252;company:'Sega';rom:@slapshtr),
   (name:'Fantasy Zone II: The Tears of Opa-Opa';year:'1988';snd:1;hi:false;zip:'fantzn2';grid:253;company:'Sega';rom:@fantzn2),
   (name:'Opa Opa';year:'1987';snd:1;hi:false;zip:'opaopa';grid:254;company:'Sega';rom:@opaopa),
-  (name:'Tetris';year:'1988';snd:1;hi:false;zip:'tetrisse';grid:255;company:'Sega';rom:@tetrisse),
+  (name:'Tetris (Sega System E)';year:'1988';snd:1;hi:false;zip:'tetrisse';grid:255;company:'Sega';rom:@tetrisse),
   (name:'Transformer';year:'1986';snd:1;hi:false;zip:'transfrm';grid:256;company:'Sega';rom:@transfrm),
   (name:'Riddle of Pythagoras';year:'1986';snd:1;hi:false;zip:'ridleofp';grid:257;company:'Sega';rom:@ridleofp),
   (name:'Route 16';year:'1981';snd:1;hi:false;zip:'route16';grid:258;company:'Sun Electronics';rom:@route16),
@@ -348,6 +348,8 @@ const
   (name:'Golden Axe';year:'1989';snd:1;hi:false;zip:'goldnaxe';grid:293;company:'Sega';rom:@goldnaxe),
   (name:'Dynamite Dux';year:'1988';snd:1;hi:false;zip:'ddux1';grid:294;company:'Sega';rom:@ddux),
   (name:'E-Swat - Cyber Police';year:'1989';snd:1;hi:false;zip:'eswat';grid:295;company:'Sega';rom:@eswat),
+  (name:'Passing Shot';year:'1988';snd:1;hi:false;zip:'passsht';grid:296;company:'Sega';rom:@passsht),
+  (name:'Aurail';year:'1990';snd:1;hi:false;zip:'aurail';grid:297;company:'Sega';rom:@aurail),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -673,6 +675,8 @@ case numero of
   293:principal1.CambiarMaquina(principal1.Goldenaxe1);
   294:principal1.CambiarMaquina(principal1.DynamiteDux1);
   295:principal1.CambiarMaquina(principal1.eswat1);
+  296:principal1.CambiarMaquina(principal1.passingshot1);
+  297:principal1.CambiarMaquina(principal1.aurail1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -986,6 +990,8 @@ principal1.AlteredBeast1.checked:=false;
 principal1.goldenaxe1.checked:=false;
 principal1.dynamitedux1.checked:=false;
 principal1.eswat1.checked:=false;
+principal1.passingshot1.checked:=false;
+principal1.aurail1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1226,7 +1232,7 @@ case tmaquina of
   283,284:cargar_k31945;
   285,286:cargar_bloodbros;
   287,288:cargar_baraduke;
-  292,293,294,295:cargar_system16b;
+  292,293,294,295,296,297:cargar_system16b;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2429,6 +2435,14 @@ end;
 if sender=principal1.eswat1 then begin
   tipo:=295;
   principal1.eswat1.Checked:=true;
+end;
+if sender=principal1.passingshot1 then begin
+  tipo:=296;
+  principal1.passingshot1.Checked:=true;
+end;
+if sender=principal1.aurail1 then begin
+  tipo:=297;
+  principal1.aurail1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

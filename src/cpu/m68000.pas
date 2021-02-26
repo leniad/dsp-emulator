@@ -2556,7 +2556,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.v:=true;
                   end;
               end else begin
-                  MessageDlg('Mierda! Division por 0'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+                  MessageDlg('Mierda! Division por 0 '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
               end;
            end;
         $4:case ((dir shr 3) and $7) of
@@ -2675,7 +2675,7 @@ case (instruccion shr 12) of //cojo solo el primer nibble
 		                end else r.cc.v:=true;
                   end;
               end else begin
-                  MessageDlg('Mierda! Division por 0'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+                  MessageDlg('Mierda! Division por 0 '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
               end;
            end;
       end;  //del case $8

@@ -11,8 +11,8 @@ implementation
 const
         //Tiger Heli
         tigerh_rom:array[0..2] of tipo_roms=(
-        (n:'0.4';l:$4000;p:0;crc:$4be73246),(n:'1.4';l:$4000;p:$4000;crc:$aad04867),
-        (n:'2.4';l:$4000;p:$8000;crc:$4843f15c));
+        (n:'a47_00-1.8p';l:$4000;p:0;crc:$4be73246),(n:'a47_01-1.8n';l:$4000;p:$4000;crc:$aad04867),
+        (n:'a47_02-1.8k';l:$4000;p:$8000;crc:$4843f15c));
         tigerh_snd:tipo_roms=(n:'a47_03.12d';l:$2000;p:0;crc:$d105260f);
         tigerh_mcu:tipo_roms=(n:'a47_14.6a';l:$800;p:0;crc:$4042489f);
         tigerh_pal:array[0..2] of tipo_roms=(

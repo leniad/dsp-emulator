@@ -1,4 +1,24 @@
 ﻿# DSP Emulator status #
+<b>26/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -MCS51:
+            +clean the code
+            +Fixed carry in opcodes $B8 to $BF
+            +Fixed IRQs
+    +ROMS export: Fixed many ROMs sets and added samples, again
+-Ajax: Fixed ROM names
+-Slap Fight: Fixed ROM names
+-Sega System 16B HW
+    +Small fix to memory mapper
+    +When using i8751, the M68000 don't have access to 315-5195
+    +Removed i8751/M68000 hack
+    +Added dipswitches
+        -Golden Axe: Fixed remaining issues with i8751
+        -Passing Shot: Added driver with sound, due the lack of FD1094 emulation using predecoded version
+        -Aurail: Added driver with sound
+</pre>
+<img src='https://i.ibb.co/d4KG1Mr/passingshot.jpg'> <img src='https://i.ibb.co/b3mqHPb/Aurail.jpg'><br><br>
 <b>23/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -Renewed preview images (Thanks to Francisco José Martí Terrón)
 -General

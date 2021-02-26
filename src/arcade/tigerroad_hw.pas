@@ -14,11 +14,11 @@ const
         (n:'tre_02.6j';l:$20000;p:0;crc:$c394add0),(n:'tre_04.6k';l:$20000;p:$1;crc:$73bfbf4a));
         tigeroad_sound:tipo_roms=(n:'tru_05.12k';l:$8000;p:0;crc:$f9a7c9bf);
         tigeroad_char:tipo_roms=(n:'tr_01.10d';l:$8000;p:0;crc:$74a9f08c);
-        tigeroad_fondo:array[0..8] of tipo_roms=(
+        tigeroad_fondo:array[0..7] of tipo_roms=(
         (n:'tr-01a.3f';l:$20000;p:0;crc:$a8aa2e59),(n:'tr-04a.3h';l:$20000;p:$20000;crc:$8863a63c),
         (n:'tr-02a.3j';l:$20000;p:$40000;crc:$1a2c5f89),(n:'tr-05.3l';l:$20000;p:$60000;crc:$5bf453b3),
         (n:'tr-03a.2f';l:$20000;p:$80000;crc:$1e0537ea),(n:'tr-06a.2h';l:$20000;p:$a0000;crc:$b636c23a),
-        (n:'tr-07a.2j';l:$20000;p:$c0000;crc:$5f907d4d),(n:'tr_08.2l';l:$20000;p:$e0000;crc:$adee35e2),());
+        (n:'tr-07a.2j';l:$20000;p:$c0000;crc:$5f907d4d),(n:'tr_08.2l';l:$20000;p:$e0000;crc:$adee35e2));
         tigeroad_fondo_rom:tipo_roms=(n:'tr_13.7l';l:$8000;p:0;crc:$a79be1eb);
         tigeroad_sprites:array[0..3] of tipo_roms=(
         (n:'tr-09a.3b';l:$20000;p:0;crc:$3d98ad1e),(n:'tr-10a.2b';l:$20000;p:$20000;crc:$8f6f03d7),

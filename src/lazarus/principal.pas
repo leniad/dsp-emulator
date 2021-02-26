@@ -246,6 +246,11 @@ type
     genpeitd1: TMenuItem;
     MenuItem43: TMenuItem;
     alteredbeast1: TMenuItem;
+    goldenaxe1: TMenuItem;
+    dynamitedux1: TMenuItem;
+    eswat1: TMenuItem;
+    aurail1: TMenuItem;
+    passingshot1: TMenuItem;
     wndrmomo1: TMenuItem;
     returnishtar1: TMenuItem;
     metrocross1: TMenuItem;

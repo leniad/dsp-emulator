@@ -2670,6 +2670,14 @@ object principal1: Tprincipal1
               Caption = 'ESwat - Cyber Police'
               OnClick = CambiarMaquina
             end
+            object PassingShot1: TMenuItem
+              Caption = 'Passing Shot'
+              OnClick = CambiarMaquina
+            end
+            object Aurail1: TMenuItem
+              Caption = 'Aurail'
+              OnClick = CambiarMaquina
+            end
           end
           object SNK68kHW1: TMenuItem
             Caption = 'SNK 68k HW'

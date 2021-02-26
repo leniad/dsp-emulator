@@ -35,10 +35,10 @@ const
         (n:'770c10-a.a7';l:$10000;p:0;crc:$e45ec094),(n:'770c10-b.a6';l:$10000;p:$10000;crc:$349db7d3),
         (n:'770c10-c.a5';l:$10000;p:$20000;crc:$71cb1f05),(n:'770c10-d.a4';l:$10000;p:$30000;crc:$e8ab1844));
         ajax_k007232_2:array[0..7] of tipo_roms=(
-        (n:'770c06.f4';l:$10000;p:0;crc:$8cccd9e0),(n:'770c07.h4';l:$10000;p:$10000;crc:$0af2fedd),
-        (n:'770c06.f4';l:$10000;p:$20000;crc:$7471f24a),(n:'770c07.h4';l:$10000;p:$30000;crc:$a58be323),
-        (n:'770c06.f4';l:$10000;p:$40000;crc:$dd553541),(n:'770c07.h4';l:$10000;p:$50000;crc:$3f78bd0f),
-        (n:'770c06.f4';l:$10000;p:$60000;crc:$078c51b2),(n:'770c07.h4';l:$10000;p:$70000;crc:$7300c2e1));
+        (n:'770c11-a.c6';l:$10000;p:0;crc:$8cccd9e0),(n:'770c11-b.c5';l:$10000;p:$10000;crc:$0af2fedd),
+        (n:'770c11-c.c4';l:$10000;p:$20000;crc:$7471f24a),(n:'770c11-d.c3';l:$10000;p:$30000;crc:$a58be323),
+        (n:'770c11-e.b7';l:$10000;p:$40000;crc:$dd553541),(n:'770c11-f.b6';l:$10000;p:$50000;crc:$3f78bd0f),
+        (n:'770c11-g.b5';l:$10000;p:$60000;crc:$078c51b2),(n:'770c11-h.b4';l:$10000;p:$70000;crc:$7300c2e1));
         //DIP
         ajax_dip_a:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$02;dip_name:'4C 1C'),(dip_val:$05;dip_name:'3C 1C'),(dip_val:$08;dip_name:'2C 1C'),(dip_val:$04;dip_name:'3C 2C'),(dip_val:$01;dip_name:'4C 3C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$03;dip_name:'3C 4C'),(dip_val:$07;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$06;dip_name:'2C 5C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0a;dip_name:'1C 6C'),(dip_val:$09;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),
