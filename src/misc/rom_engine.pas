@@ -20,6 +20,7 @@ function roms_load16b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load16w(sitio:pword;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load32b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load32b_b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
+function roms_load32dw(sitio:pdword;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load64b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load_swap_word(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load64b_b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
@@ -225,6 +226,48 @@ for f:=0 to (roms_size-1) do begin
     freemem(mem_temp);
 end;
 roms_load32b_b:=true;
+end;
+
+function roms_load32dw(sitio:pdword;const ctipo_roms:array of tipo_roms):boolean;
+var
+  ptemp:pdword;
+  ptemp2,mem_temp:pbyte;
+  h,valor:dword;
+  f,roms_size:word;
+  nombre_zip,dir:string;
+begin
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
+roms_load32dw:=false;
+roms_size:=sizeof(ctipo_roms) div sizeof(tipo_roms);
+for f:=0 to (roms_size-1) do begin
+    //Cargo los datos en tipo byte
+    getmem(mem_temp,ctipo_roms[f].l);
+    dir:=directory.arcade_list_roms[find_rom_multiple_dirs(nombre_zip)];
+    if ctipo_roms[f].crc<>0 then if not(carga_rom_zip_crc(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc)) then
+      if not(carga_rom_zip(dir+nombre_zip,ctipo_roms[f].n,mem_temp,ctipo_roms[f].l,ctipo_roms[f].crc,true)) then exit;
+    //Y ahora los pongo como word
+    ptemp2:=mem_temp;
+    ptemp:=sitio;
+    inc(ptemp,ctipo_roms[f].p shr 2);
+    for h:=0 to (ctipo_roms[f].l-1) do begin
+      valor:=ptemp^;
+      case (ctipo_roms[f].p and $3) of
+        0:ptemp^:=ptemp2^ or (valor and $ffffff00);
+        1:ptemp^:=(ptemp2^ shl 8) or (valor and $ffff00ff);
+        2:ptemp^:=(ptemp2^ shl 16) or (valor and $ff00ffff);
+        3:ptemp^:=(ptemp2^ shl 24) or (valor and $00ffffff);
+      end;
+      inc(ptemp2);
+      inc(ptemp);
+    end;
+    freemem(mem_temp);
+end;
+roms_load32dw:=true;
 end;
 
 function roms_load64b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;

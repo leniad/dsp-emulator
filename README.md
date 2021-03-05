@@ -1,4 +1,13 @@
 ﻿# DSP Emulator status #
+<b>05/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -M68000: Added reset line procedure
+    +Added Sega 315-5195 as a device
+-Outrun HW
+    +Enhanced driver only missing: partial road, digital sound and controls
+</pre>
+<img src='https://i.ibb.co/4VZGbtv/Outrun-1.jpg'> <img src='https://i.ibb.co/fvp9PQL/Outrun-2.jpg'><br><br>
 <b>26/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +CPU

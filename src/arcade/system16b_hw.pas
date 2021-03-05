@@ -3,7 +3,7 @@
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     sound_engine,ym_2151,dialogs,upd7759,mcs51;
+     sound_engine,ym_2151,dialogs,upd7759,mcs51,sega_315_5195;
 
 procedure cargar_system16b;
 
@@ -154,14 +154,12 @@ var
  s16_info:tsystem16_info;
  s16_screen:array[0..7] of byte;
  screen_enabled:boolean;
- sound_latch:byte;
- from_sound:byte;
- tile_bank:array[0..1] of byte;
  sound_bank:array[0..$f,0..$3fff] of byte;
  sound_bank_num:byte;
- s315_5195_regs:array[0..$1f] of byte;
- s315_5195_dirs_start:array[0..7] of dword;
- s315_5195_dirs_end:array[0..7] of dword;
+ sound_latch:byte;
+
+ tile_bank:array[0..1] of byte;
+
  s315_5248_regs:array[0..1] of word;
  s315_5250_regs:array[0..$f] of word;
  s315_5250_bit:byte;
@@ -172,72 +170,6 @@ var
  region2_write:procedure(direccion:dword;valor:word);
  sound_bank_calc:function(valor:byte):byte;
 
-procedure s315_5195_set_map;
-var
-  f:byte;
-const
-  size:array[0..3] of dword=($10000,$20000,$80000,$200000);
-begin
-for f:=0 to 7 do begin
-  s315_5195_dirs_start[f]:=s315_5195_regs[$11+(f*2)] shl 16;
-  s315_5195_dirs_end[f]:=s315_5195_dirs_start[f]+size[s315_5195_regs[$10+(f*2)] and $3];
-end;
-end;
-
-function s315_5195_read_reg(dir:byte):byte;
-var
-  res:byte;
-begin
-  res:=$ff;
-  case dir of
-    0,1:res:=s315_5195_regs[dir];
-    2:if (s315_5195_regs[2] and 3)=3 then res:=0
-        else res:=$f;
-    3:res:=from_sound;
-  end;
-  s315_5195_read_reg:=res;
-end;
-
-procedure s315_5195_write_reg(dir,valor:byte);
-var
-  old_val:byte;
-  addr:dword;
-  res:word;
-begin
-  old_val:=s315_5195_regs[dir];
-  s315_5195_regs[dir]:=valor;
-  case dir of
-    2:if ((old_val xor valor) and 3)<>0 then begin
-        if (valor and 3)=3 then m68000_0.change_reset(ASSERT_LINE)
-          else m68000_0.change_reset(CLEAR_LINE);
-      end;
-    3:begin
-        sound_latch:=valor;
-        z80_0.change_irq(ASSERT_LINE);
-      end;
-    4:if ((valor>0) and (valor<$f)) then m68000_0.irq[(not(valor) and 7)]:=HOLD_LINE;
-    5:case valor of
-      1:begin
-          addr:=(s315_5195_regs[$a] shl 17) or (s315_5195_regs[$b] shl 9) or (s315_5195_regs[$c] shl 1);
-          res:=(s315_5195_regs[0] shl 8) or s315_5195_regs[1];
-          m68000_0.putword_(addr,res);
-        end;
-      2:begin
-          addr:=(s315_5195_regs[7] shl 17) or (s315_5195_regs[8] shl 9) or (s315_5195_regs[9] shl 1);
-          res:=m68000_0.getword_(addr);
-          s315_5195_regs[0]:=res shr 8;
-          s315_5195_regs[1]:=res and $ff;
-        end;
-    end;
-    7,8,9,$a,$b,$c:; //write latch
-    $10..$19,$1c..$1f:if old_val<>valor then s315_5195_set_map;
-    $1a..$1b:if old_val<>valor then begin
-                s315_5195_set_map;
-                fillchar(tile_buffer,$8000,0); //Si cambia el origen de las pantallas lo pinto todo otra vez!
-             end;
-  end;
-end;
-
 procedure draw_sprites(pri:byte);
 var
   f,sprpri,vzoom,hzoom:byte;
@@ -245,15 +177,17 @@ var
   pitch:integer;
   spritedata:dword;
   hide,flip:boolean;
-procedure system16b_draw_pixel(x,y,pix:word);
+procedure system16b_draw_pixel(x,y,pix:word);inline;
 var
   punt:word;
+  xf:integer;
 begin
+  xf:=x-$bd+6;
   //only draw if onscreen, not 0 or 15
-	if ((x<512) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
+	if ((xf>=0) and (xf<512) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
       if (pix and $3f0)=$3f0 then punt:=paleta[$800] //Shadow/Hi
         else punt:=paleta[pix+$400]; //Normal
-      putpixel(x+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
+      putpixel(xf+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
 	end;
 end;
 begin
@@ -270,7 +204,7 @@ begin
     bank:=sprite_bank[(sprite_ram[(f*$8)+4] shr 8) and $f];
     // if hidden, or top greater than/equal to bottom, or invalid bank, punt
 		if (hide or (top>=bottom) or (bank=255)) then continue;
-		xpos:=(sprite_ram[(f*$8)+1] and $1ff)-$bd+6;
+		xpos:=sprite_ram[(f*$8)+1] and $1ff;
 		pitch:=shortint(sprite_ram[(f*$8)+2] and $ff);
 		color:=(sprite_ram[(f*$8)+4] and $3f) shl 4;
     flip:=(sprite_ram[(f*$8)+2] and $100)<>0;
@@ -560,25 +494,24 @@ end;
 standar_s16_io_r:=res;
 end;
 
-procedure change_pal(direccion:word);inline;
+procedure change_pal(direccion,valor:word);inline;
 var
-	r,g,b,val:word;
+	r,g,b:byte;
   color:tcolor;
 begin
-  val:=buffer_paleta[direccion];
 	//     byte 0    byte 1
 	//  sBGR BBBB GGGG RRRR
 	//  x000 4321 4321 4321
-	r:=((val shr 12) and $01) or ((val shl 1) and $1e);
-	g:=((val shr 13) and $01) or ((val shr 3) and $1e);
-	b:=((val shr 14) and $01) or ((val shr 7) and $1e);
+	r:=((valor shr 12) and $01) or ((valor shl 1) and $1e);
+	g:=((valor shr 13) and $01) or ((valor shr 3) and $1e);
+	b:=((valor shr 14) and $01) or ((valor shr 7) and $1e);
   //normal
   color.r:=s16_info.normal[r];
   color.g:=s16_info.normal[g];
   color.b:=s16_info.normal[b];
   set_pal_color(color,direccion);
   //shadow
-  if (val and $8000)<>0 then begin
+  if (valor and $8000)<>0 then begin
     color.r:=s16_info.shadow[r];
     color.g:=s16_info.shadow[g];
     color.b:=s16_info.shadow[b];
@@ -758,48 +691,49 @@ var
   zona:boolean;
 begin
 zona:=false;
-if ((direccion>=s315_5195_dirs_start[0]) and (direccion<s315_5195_dirs_end[0])) then begin
+if ((direccion>=s315_5195_0.dirs_start[0]) and (direccion<s315_5195_0.dirs_end[0])) then begin
   //Esta zona no se puede solapar!!!!
   system16b_getword:=region0_read(direccion);
   exit;
 end;
-if ((direccion>=s315_5195_dirs_start[1]) and (direccion<s315_5195_dirs_end[1])) then begin
+if ((direccion>=s315_5195_0.dirs_start[1]) and (direccion<s315_5195_0.dirs_end[1])) then begin
   if @region1_read<>nil then system16b_getword:=region1_read(direccion);
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[2]) and (direccion<s315_5195_dirs_end[2])) then begin
+if ((direccion>=s315_5195_0.dirs_start[2]) and (direccion<s315_5195_0.dirs_end[2])) then begin
   if @region2_read<>nil then system16b_getword:=region2_read(direccion);
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[3]) and (direccion<s315_5195_dirs_end[3])) then begin
+if ((direccion>=s315_5195_0.dirs_start[3]) and (direccion<s315_5195_0.dirs_end[3])) then begin
   system16b_getword:=ram[(direccion and $ffff) shr 1]; //RAM
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[4]) and (direccion<s315_5195_dirs_end[4])) then begin
+if ((direccion>=s315_5195_0.dirs_start[4]) and (direccion<s315_5195_0.dirs_end[4])) then begin
   system16b_getword:=sprite_ram[(direccion and $7ff) shr 1]; //Object RAM
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[5]) and (direccion<s315_5195_dirs_end[5])) then begin
+if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5])) then begin
   case direccion and $1ffff of //Text/Tile RAM
     0..$ffff:system16b_getword:=tile_ram[(direccion and $ffff) shr 1];
     $10000..$1ffff:system16b_getword:=char_ram[(direccion and $fff) shr 1];
   end;
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[6]) and (direccion<s315_5195_dirs_end[6])) then begin
+if ((direccion>=s315_5195_0.dirs_start[6]) and (direccion<s315_5195_0.dirs_end[6])) then begin
   system16b_getword:=buffer_paleta[(direccion and $fff) shr 1]; //Color RAM
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[7]) and (direccion<s315_5195_dirs_end[7])) then begin
+if ((direccion>=s315_5195_0.dirs_start[7]) and (direccion<s315_5195_0.dirs_end[7])) then begin
   system16b_getword:=standar_s16_io_r((direccion shr 1) and $1fff); //IO Read
   zona:=true;
 end;
-if not(zona) then system16b_getword:=s315_5195_read_reg((direccion shr 1) and $1f);
+if not(zona) then system16b_getword:=s315_5195_0.read_reg((direccion shr 1) and $1f);
 end;
 
 procedure system16b_putword(direccion:dword;valor:word);
 var
   zona:boolean;
+  tempd:dword;
 begin
 {Region 0 - Program ROM
  Region 3 - 68000 work RAM
@@ -812,91 +746,111 @@ begin
  Se pueden solapar las zonas (excepto la 0), tiene prioridad la mas alta (por ejemplo ESwat)
  }
 zona:=false;
-if ((direccion>=s315_5195_dirs_start[0]) and (direccion<s315_5195_dirs_end[0])) then begin
+if ((direccion>=s315_5195_0.dirs_start[0]) and (direccion<s315_5195_0.dirs_end[0])) then begin
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[1]) and (direccion<s315_5195_dirs_end[1])) then begin
+if ((direccion>=s315_5195_0.dirs_start[1]) and (direccion<s315_5195_0.dirs_end[1])) then begin
   if @region1_write<>nil then region1_write(direccion,valor);
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[2]) and (direccion<s315_5195_dirs_end[2])) then begin
+if ((direccion>=s315_5195_0.dirs_start[2]) and (direccion<s315_5195_0.dirs_end[2])) then begin
   if @region2_write<>nil then region2_write(direccion,valor);
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[3]) and (direccion<s315_5195_dirs_end[3])) then begin
+if ((direccion>=s315_5195_0.dirs_start[3]) and (direccion<s315_5195_0.dirs_end[3])) then begin
   ram[(direccion and $ffff) shr 1]:=valor; //RAM
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[4]) and (direccion<s315_5195_dirs_end[4])) then begin
+if ((direccion>=s315_5195_0.dirs_start[4]) and (direccion<s315_5195_0.dirs_end[4])) then begin
   sprite_ram[(direccion and $7ff) shr 1]:=valor; //Object RAM
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[5]) and (direccion<s315_5195_dirs_end[5])) then begin
+if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5])) then begin
   case direccion and $1ffff of
       0..$ffff:begin
                   direccion:=(direccion and $ffff) shr 1;
-                  tile_ram[direccion]:=valor;
-                  tile_buffer[direccion]:=true;
+                  if tile_ram[direccion]<>valor then begin
+                    tile_ram[direccion]:=valor;
+                    tile_buffer[direccion]:=true;
+                  end;
                end;
       $10000..$1ffff:begin
-                  char_ram[(direccion and $fff) shr 1]:=valor;
-                  gfx[0].buffer[(direccion and $fff) shr 1]:=true;
-                  test_screen_change((direccion and $fff) shr 1);
+                  direccion:=(direccion and $fff) shr 1;
+                  if char_ram[direccion]<>valor then begin
+                    char_ram[direccion]:=valor;
+                    gfx[0].buffer[direccion]:=true;
+                    test_screen_change(direccion);
+                  end;
                end;
   end;
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[6]) and (direccion<s315_5195_dirs_end[6])) then begin
-  buffer_paleta[(direccion and $fff) shr 1]:=valor;
-  change_pal((direccion and $fff) shr 1);
+if ((direccion>=s315_5195_0.dirs_start[6]) and (direccion<s315_5195_0.dirs_end[6])) then begin
+  direccion:=(direccion and $fff) shr 1;
+  if buffer_paleta[direccion]<>valor then begin
+    buffer_paleta[direccion]:=valor;
+    change_pal(direccion,valor);
+  end;
   zona:=true;
 end;
-if ((direccion>=s315_5195_dirs_start[7]) and (direccion<s315_5195_dirs_end[7])) then begin
+if ((direccion>=s315_5195_0.dirs_start[7]) and (direccion<s315_5195_0.dirs_end[7])) then begin
   case ((direccion and $1fff) shr 1) of //IO
     0:screen_enabled:=(valor and $20)<>0;
   end;
 zona:=true;
 end;
-if not(zona) then s315_5195_write_reg((direccion shr 1) and $1f,valor and $ff);
+if not(zona) then begin
+  tempd:=s315_5195_0.dirs_start[5];
+  s315_5195_0.write_reg((direccion shr 1) and $1f,valor and $ff);
+  if tempd<>s315_5195_0.dirs_start[5] then fillchar(tile_buffer,$8000,0);
+end;
 end;
 
 procedure system16b_putword_mcu(direccion:dword;valor:word);
 begin
 //Cuando hay un i8751 el M68000 no tiene acceso directo al 315-5195!!
 //Por ejemplo GoldenAxe solo espera que el i8751 toque el direccionamiento o se vuelve loco!
-if ((direccion>=s315_5195_dirs_start[0]) and (direccion<s315_5195_dirs_end[0])) then begin
+if ((direccion>=s315_5195_0.dirs_start[0]) and (direccion<s315_5195_0.dirs_end[0])) then begin
 end;
-if ((direccion>=s315_5195_dirs_start[1]) and (direccion<s315_5195_dirs_end[1])) then begin
+if ((direccion>=s315_5195_0.dirs_start[1]) and (direccion<s315_5195_0.dirs_end[1])) then begin
   if @region1_write<>nil then region1_write(direccion,valor);
 end;
-if ((direccion>=s315_5195_dirs_start[2]) and (direccion<s315_5195_dirs_end[2])) then begin
+if ((direccion>=s315_5195_0.dirs_start[2]) and (direccion<s315_5195_0.dirs_end[2])) then begin
   if @region2_write<>nil then region2_write(direccion,valor);
 end;
-if ((direccion>=s315_5195_dirs_start[3]) and (direccion<s315_5195_dirs_end[3])) then begin
+if ((direccion>=s315_5195_0.dirs_start[3]) and (direccion<s315_5195_0.dirs_end[3])) then begin
   ram[(direccion and $ffff) shr 1]:=valor; //RAM
 end;
-if ((direccion>=s315_5195_dirs_start[4]) and (direccion<s315_5195_dirs_end[4])) then begin
+if ((direccion>=s315_5195_0.dirs_start[4]) and (direccion<s315_5195_0.dirs_end[4])) then begin
   sprite_ram[(direccion and $7ff) shr 1]:=valor; //Object RAM
 end;
-if ((direccion>=s315_5195_dirs_start[5]) and (direccion<s315_5195_dirs_end[5])) then begin
+if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5])) then begin
   case direccion and $1ffff of
       0..$ffff:begin
                   direccion:=(direccion and $ffff) shr 1;
-                  tile_ram[direccion]:=valor;
-                  tile_buffer[direccion]:=true;
+                  if tile_ram[direccion]<>valor then begin
+                    tile_ram[direccion]:=valor;
+                    tile_buffer[direccion]:=true;
+                  end;
                end;
       $10000..$1ffff:begin
-                  char_ram[(direccion and $fff) shr 1]:=valor;
-                  gfx[0].buffer[(direccion and $fff) shr 1]:=true;
-                  test_screen_change((direccion and $fff) shr 1);
+                  direccion:=(direccion and $fff) shr 1;
+                  if char_ram[direccion]<>valor then begin
+                    char_ram[direccion]:=valor;
+                    gfx[0].buffer[direccion]:=true;
+                    test_screen_change(direccion);
+                  end;
                end;
   end;
 end;
-if ((direccion>=s315_5195_dirs_start[6]) and (direccion<s315_5195_dirs_end[6])) then begin
-  buffer_paleta[(direccion and $fff) shr 1]:=valor;
-  change_pal((direccion and $fff) shr 1);
+if ((direccion>=s315_5195_0.dirs_start[6]) and (direccion<s315_5195_0.dirs_end[6])) then begin
+  direccion:=(direccion and $fff) shr 1;
+  if buffer_paleta[direccion]<>valor then begin
+    buffer_paleta[direccion]:=valor;
+    change_pal(direccion,valor);
+  end;
 end;
-if ((direccion>=s315_5195_dirs_start[7]) and (direccion<s315_5195_dirs_end[7])) then begin
+if ((direccion>=s315_5195_0.dirs_start[7]) and (direccion<s315_5195_0.dirs_end[7])) then begin
   case ((direccion and $1fff) shr 1) of //IO
     0:screen_enabled:=(valor and $20)<>0;
   end;
@@ -941,6 +895,12 @@ end;
 system16b_snd_inbyte:=res;
 end;
 
+procedure system16b_snd_irq(valor:byte);
+begin
+  sound_latch:=valor;
+  z80_0.change_irq(ASSERT_LINE);
+end;
+
 function system16b_sound_5704(valor:byte):byte;
 begin
   system16b_sound_5704:=valor and $f;
@@ -975,12 +935,16 @@ end;
 
 function system16b_mcu_getbyte(direccion:word):byte;
 begin
-  system16b_mcu_getbyte:=s315_5195_read_reg(direccion and $1f);
+  system16b_mcu_getbyte:=s315_5195_0.read_reg(direccion and $1f);
 end;
 
 procedure system16b_mcu_putbyte(direccion:word;valor:byte);
+var
+  tempd:dword;
 begin
-  s315_5195_write_reg(direccion and $1f,valor);
+  tempd:=s315_5195_0.dirs_start[5];
+  s315_5195_0.write_reg(direccion and $1f,valor);
+  if tempd<>s315_5195_0.dirs_start[5] then fillchar(tile_buffer,$8000,0);
 end;
 
 function in_port1:byte;
@@ -1005,8 +969,7 @@ var
   f:byte;
 begin
  //Debo poner el direccionamiento antes del reset de la CPU!!!
- for f:=0 to $1f do s315_5195_regs[f]:=0;
- s315_5195_set_map;
+ s315_5195_0.reset;
  m68000_0.reset;
  z80_0.reset;
  mcs51_0.reset;
@@ -1026,12 +989,10 @@ begin
  end else for f:=0 to $f do sprite_bank[f]:=f;
  screen_enabled:=true;
  fillchar(tile_buffer[0],$8000,1);
- sound_latch:=0;
- from_sound:=0;
  tile_bank[0]:=0;
  tile_bank[1]:=1;
  sound_bank_num:=0;
-
+ sound_latch:=0;
  s315_5250_bit:=0;
 end;
 
@@ -1082,6 +1043,8 @@ z80_0:=cpu_z80.create(5000000,262);
 z80_0.change_ram_calls(system16b_snd_getbyte,system16b_snd_putbyte);
 z80_0.change_io_calls(system16b_snd_inbyte,system16b_snd_outbyte);
 z80_0.init_sound(system16b_sound_act);
+//Memory Mapper
+s315_5195_0:=t315_5195.create(m68000_0,z80_0,system16b_snd_irq);
 //MCU
 mcs51_0:=cpu_mcs51.create(8000000,262);
 mcs51_0.change_ram_calls(system16b_mcu_getbyte,system16b_mcu_putbyte);

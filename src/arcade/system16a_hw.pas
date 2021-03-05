@@ -774,7 +774,6 @@ end;
 
 begin
 iniciar_system16a:=false;
-if main_vars.tipo_maquina=198 then if MessageDlg('Warning! This driver uses a predecrypted ROMS from "http://www.pinballzone.com/tech/fd1094/index.htm" due the lack of FD1094 emulation and you need to download them. Do you want to continue?', mtWarning, [mbYes]+[mbNo],0)=7 then exit;
 iniciar_audio(false);
 //text
 screen_init(1,512,256,true);

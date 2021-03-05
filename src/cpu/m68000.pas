@@ -48,6 +48,7 @@ type
                 cc:band_m68000;
         end;
         preg_m68000=^reg_m68000;
+        treset_call=procedure;
         cpu_m68000=class(cpu_class)
             constructor create(clock:dword;frames_div:word;tipo:byte=0);
             destructor free;
@@ -62,6 +63,7 @@ type
             procedure run(maximo:single);
             function get_internal_r:preg_m68000;
             procedure change_ram16_calls(getword:tgetword;putword:tputword);
+            procedure change_reset_call(reset_call:treset_call);
             function save_snapshot(data:pbyte):word;
             procedure load_snapshot(data:pbyte);
             function getbyte(addr:dword):byte;
@@ -71,6 +73,7 @@ type
             ea:dword;
             prefetch:boolean;
             temp:dparejas;
+            reset_call:treset_call;
             procedure poner_band(pila:word);
             function getword(addr:dword):word;
             procedure putword(addr:dword;val:word);
@@ -138,6 +141,7 @@ self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 self.tipo:=tipo;
+self.reset_call:=nil;
 end;
 
 destructor cpu_m68000.free;
@@ -146,6 +150,11 @@ if Self.r<>nil then begin
   freemem(self.r);
   self.r:=nil;
 end;
+end;
+
+procedure cpu_m68000.change_reset_call(reset_call:treset_call);
+begin
+  self.reset_call:=reset_call;
 end;
 
 function cpu_m68000.getword(addr:dword):word;
@@ -2237,7 +2246,9 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     if r.cc.s then begin
                       self.prefetch:=false;
                       self.contador:=self.contador+40;
-                    end else MessageDlg('Mierda error de privilegio reset'+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+                      if @self.reset_call<>nil then self.reset_call
+                        else MessageDlg('Mierda llamada a reset sin funcion '+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+                    end else MessageDlg('Mierda error de privilegio reset '+inttostr(r.pc.l), mtInformation,[mbOk], 0);
                   end;
               $31:self.contador:=self.contador+4; // # nop
               $32:begin // # stop

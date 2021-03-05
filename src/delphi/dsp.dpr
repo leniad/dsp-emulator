@@ -313,7 +313,8 @@ uses
   hw_1945k3 in '..\arcade\hw_1945k3.pas',
   bloodbros_hw in '..\arcade\bloodbros_hw.pas',
   baraduke_hw in '..\arcade\baraduke_hw.pas',
-  system16b_hw in '..\arcade\system16b_hw.pas';
+  system16b_hw in '..\arcade\system16b_hw.pas',
+  sega_315_5195 in '..\arcade\misc\sega_315_5195.pas';
 
 {$R *.res}
 
