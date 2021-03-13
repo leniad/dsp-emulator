@@ -163,16 +163,14 @@ end;
 
 procedure borde_128_full(linea:word);
 var
-        linea_actual:word;
-        ptemp:pword;
-        f:word;
-        posicion:dword;
+  ptemp:pword;
+  f:word;
+  posicion:dword;
 begin
-if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<14) or (linea>302)) then exit;
+if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<14) or (linea>296)) then exit;
 fillchar(borde.buffer[linea*228+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
 borde.posicion:=spec_z80.contador-228;
 if linea=14 then exit;
-linea_actual:=linea-15;
 ptemp:=punbuf;
 posicion:=(linea-1)*228;
 //24t borde iqz --> 48 pixels
@@ -182,8 +180,9 @@ for f:=203 to 227 do begin
   ptemp^:=paleta[borde.buffer[posicion+f]];
   inc(ptemp);
 end;
-putpixel(0,linea_actual,48,punbuf,1);
-actualiza_trozo_simple(0,linea_actual,48,1,1);
+putpixel(0,linea-15,48,punbuf,1);
+actualiza_trozo_simple(0,linea-15,48,1,1);
+if linea=296 then exit;
 //24t borde der --> 48 pixels
 ptemp:=punbuf;
 posicion:=linea*228;
@@ -193,8 +192,8 @@ for f:=128 to 151 do begin
   ptemp^:=paleta[borde.buffer[posicion+f]];
   inc(ptemp);
 end;
-putpixel(304,linea_actual,48,punbuf,1);
-actualiza_trozo_simple(304,linea_actual,48,1,1);
+putpixel(304,linea-15,48,punbuf,1);
+actualiza_trozo_simple(304,linea-15,48,1,1);
 if ((linea>62) and (linea<255)) then exit;
 //128t Centro pantalla --> 256 pixels
 ptemp:=punbuf;
@@ -204,8 +203,8 @@ for f:=0 to 127 do begin
     ptemp^:=paleta[borde.buffer[posicion+f]];
     inc(ptemp);
 end;
-putpixel(48,linea_actual,256,punbuf,1);
-actualiza_trozo_simple(48,linea_actual,256,1,1);
+putpixel(48,linea-15,256,punbuf,1);
+actualiza_trozo_simple(48,linea-15,256,1,1);
 end;
 
 procedure spectrum128_main;

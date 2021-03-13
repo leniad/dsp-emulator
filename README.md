@@ -1,4 +1,24 @@
 ﻿# DSP Emulator status #
+<b>13/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +Sound
+        -Sega PCM: Added sound chip
+-Spectrum
+    +Fixed low border size, was 8 pixels too long (Thanks to Francisco José Martí Terrón)
+    +Fixed fast speed and no border draw, now don't draw any border
+-Amstrad CPC
+    +Resize screen size, it was too big, now it's 384x272 pixels (Thanks to Francisco José Martí Terrón)
+-Sega Master System
+    +Fixed zip ROM load (Thanks to Francisco José Martí Terrón)
+-Sega GameGear
+    +Fixed zip ROM load (Thanks to Francisco José Martí Terrón)
+-Outrun HW
+    +Added road
+    +Added Sega PCM
+    +Added controls
+    +Added DIP switches
+</pre>
+<img src='https://i.ibb.co/RcKQtpX/Outrun-1.jpg'> <img src='https://i.ibb.co/GJmTSdT/Outrun-2.jpg'><br><br>
 <b>05/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +CPU

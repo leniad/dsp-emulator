@@ -70,12 +70,13 @@ procedure scroll__y(porigen,pdestino:byte;scroll_y:word);
 procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_y:pword;scroll_x:word=0;scroll_y:word=0);
 procedure scroll_xy_part(porigen,pdestino:byte;long_bloque_x,long_bloque_y:word;posicion_x,posicion_y:pword;scroll_x,scroll_y:word);
 //Basic draw functions
-procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);
+procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);inline;
+procedure putpixel_alpha(x,y:word;cantidad:dword;pixel:pdword;sitio:byte);inline;
 procedure single_line(x,y,color,longitud:word;pant:byte);
 procedure draw_line(x0,y0,x1,y1:integer;color:word;pant:byte);
 //Screen functions
-procedure fill_full_screen(screen:byte;color:word);
-procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);
+procedure fill_full_screen(screen:byte;color:word);inline;
+procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);inline;
 //Misc
 procedure fillword(dest:pword;cantidad:cardinal;valor:word);
 
@@ -402,6 +403,7 @@ punt:=pantalla[sitio].pixels;
 inc(punt,(y*pantalla[sitio].w)+x);
 copymemory(punt,punbuf_alpha,cantidad shl 2);
 end;
+
 
 procedure put_gfx(pos_x,pos_y,nchar,color:word;screen,ngfx:byte);
 var
@@ -1163,6 +1165,15 @@ begin
 punt:=pantalla[sitio].pixels;
 inc(punt,((y*pantalla[sitio].pitch) shr 1)+x);
 copymemory(punt,pixel,cantidad shl 1);
+end;
+
+procedure putpixel_alpha(x,y:word;cantidad:dword;pixel:pdword;sitio:byte);inline;
+var
+   punt:pdword;
+begin
+punt:=pantalla[sitio].pixels;
+inc(punt,((y*pantalla[sitio].pitch) shr 2)+x);
+copymemory(punt,pixel,cantidad shl 2);
 end;
 
 //Draw lines

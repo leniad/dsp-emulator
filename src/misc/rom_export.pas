@@ -1874,20 +1874,23 @@ const
         (n:'b20-07.10';l:$10000;p:0;crc:$45c7ace3),(n:'b20-13.13';l:$80000;p:0;crc:$f6acdab1),
         (n:'b20-14.72';l:$80000;p:0;crc:$89f889e5),(n:'b20-08.21';l:$80000;p:0;crc:$f3e19c64),());
         //Outrun
-        outrun:array[0..25] of tipo_roms=(
+        outrun:array[0..31] of tipo_roms=(
         (n:'epr-10380b.133';l:$10000;p:0;crc:$1f6cadad),(n:'epr-10382b.118';l:$10000;p:$1;crc:$c4c3fa1a),
         (n:'epr-10381b.132';l:$10000;p:$20000;crc:$be8c412b),(n:'epr-10383b.117';l:$10000;p:$20001;crc:$10a2014a),
         (n:'epr-10327a.76';l:$10000;p:0;crc:$e28a5baf),(n:'epr-10329a.58';l:$10000;p:$1;crc:$da131c81),
         (n:'epr-10328a.75';l:$10000;p:$20000;crc:$d5ec5e5d),(n:'epr-10330a.57';l:$10000;p:$20001;crc:$ba9ec82a),
-        (n:'epr-10187.88';l:$8000;p:0;crc:$a10abaa9),(n:'opr-10268.99';l:$8000;p:0;crc:$95344b04),
-        (n:'opr-10232.102';l:$8000;p:$8000;crc:$776ba1eb),(n:'opr-10267.100';l:$8000;p:$10000;crc:$a85bb823),
-        (n:'opr-10231.103';l:$8000;p:$18000;crc:$8908bcbf),(n:'opr-10266.101';l:$8000;p:$20000;crc:$9f6f1a74),
-        (n:'opr-10230.104';l:$8000;p:$28000;crc:$686f5e50),(n:'mpr-10371.9';l:$20000;p:0;crc:$7cc86208),
-        (n:'mpr-10373.10';l:$20000;p:$1;crc:$b0d26ac9),(n:'mpr-10375.11';l:$20000;p:$2;crc:$59b60bd7),
-        (n:'mpr-10377.12';l:$20000;p:$3;crc:$17a1b04a),(n:'opr-10185.11';l:$8000;p:$8000;crc:$22794426),
+        (n:'opr-10268.99';l:$8000;p:0;crc:$95344b04),(n:'opr-10232.102';l:$8000;p:$8000;crc:$776ba1eb),
+        (n:'opr-10267.100';l:$8000;p:$10000;crc:$a85bb823),(n:'opr-10231.103';l:$8000;p:$18000;crc:$8908bcbf),
+        (n:'opr-10266.101';l:$8000;p:$20000;crc:$9f6f1a74),(n:'opr-10230.104';l:$8000;p:$28000;crc:$686f5e50),
+        (n:'mpr-10371.9';l:$20000;p:0;crc:$7cc86208),(n:'mpr-10373.10';l:$20000;p:$1;crc:$b0d26ac9),
+        (n:'mpr-10375.11';l:$20000;p:$2;crc:$59b60bd7),(n:'mpr-10377.12';l:$20000;p:$3;crc:$17a1b04a),
         (n:'mpr-10372.13';l:$20000;p:$80000;crc:$b557078c),(n:'mpr-10374.14';l:$20000;p:$80001;crc:$8051e517),
         (n:'mpr-10376.15';l:$20000;p:$80002;crc:$f3b8f318),(n:'mpr-10378.16';l:$20000;p:$80003;crc:$a1062984),
-        (n:'opr-10186.47';l:$8000;p:0;crc:$22794426),());
+        (n:'opr-10186.47';l:$8000;p:0;crc:$22794426),(n:'opr-10185.11';l:$8000;p:$8000;crc:$22794426),
+        (n:'opr-10193.66';l:$8000;p:$0000;crc:$bcd10dde),(n:'opr-10192.67';l:$8000;p:$10000;crc:$770f1270),
+        (n:'opr-10191.68';l:$8000;p:$20000;crc:$20a284ab),(n:'opr-10190.69';l:$8000;p:$30000;crc:$7cab70e2),
+        (n:'opr-10189.70';l:$8000;p:$40000;crc:$01366b54),(n:'opr-10188.71';l:$8000;p:$50000;crc:$bad30ad9),
+        (n:'epr-10187.88';l:$8000;p:0;crc:$a10abaa9),());
         //Elevator Action
         elevator:array[0..20] of tipo_roms=(
         (n:'ea-ic69.bin';l:$1000;p:0;crc:$24e277ef),(n:'ea-ic68.bin';l:$1000;p:$1000;crc:$13702e39),
@@ -2800,7 +2803,7 @@ var
   rom_data:tgame_desc;
   rom_file:ptipo_roms;
   sample_file:ptsample_file;
-  nombre_fichero:string;
+  nombre_fichero,change_name:string;
   indice:byte;
 begin
 if not(SaveRom(StExport,nombre_fichero,indice)) then exit;
@@ -2836,10 +2839,11 @@ for f:=1 to games_cont do begin
   if rom_data.zip<>'' then begin
     if ((rom_data.grid=5) or (rom_data.grid=3)) then continue;
     writeln(fichero,'  <game name="'+rom_data.zip+'">');
+    change_name:=StringReplace(rom_data.name,'&','&amp;',[rfReplaceAll, rfIgnoreCase]);
     case rom_data.grid of
       0:writeln(fichero,'   <description>Spectrum 16K/48K</description>');
       2:writeln(fichero,'   <description>Spectrum +2A/+3</description>');
-      else writeln(fichero,'   <description>'+rom_data.name+'</description>');
+      else writeln(fichero,'   <description>'+change_name+'</description>');
     end;
     writeln(fichero,'   <year>'+rom_data.year+'</year>');
     writeln(fichero,'   <manufacturer>'+rom_data.company+'</manufacturer>');

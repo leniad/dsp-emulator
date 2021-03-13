@@ -62,6 +62,7 @@ const
         MGUNSTICK=1;
         MKEMPSTON=2;
         MAMX=3;
+        BORDE_HIGH=40;
 
 type
   tmouse_spectrum=record
@@ -173,23 +174,22 @@ procedure borde_normal(linea:word);
 var
         linea_actual:word;
 begin
-if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<15) or (linea>302)) then exit;
+if ((main_screen.rapido and ((linea and 7)<>0)) or (borde.tipo=0) or (linea<16) or (linea>295)) then exit;
 if borde.buffer[linea]=borde.color then exit;
 //poner_linea:=true;
 borde.buffer[linea]:=borde.color;
-linea_actual:=linea-15;
+linea_actual:=linea-16;
 case linea of
-        15..62,255..302:begin
+        16..63,256..295:begin
                           single_line(0,linea_actual,paleta[borde.color],352,1);
                           actualiza_trozo_simple(0,linea_actual,352,1,1);
                         end;
-        63..254:begin
+        64..255:begin
                     single_line(0,linea_actual,paleta[borde.color],48,1);
                     actualiza_trozo_simple(0,linea_actual,48,1,1);
                     single_line(304,linea_actual,paleta[borde.color],48,1);
                     actualiza_trozo_simple(304,linea_actual,48,1,1);
                 end;
-        else exit;
 end;
 end;
 
@@ -492,8 +492,8 @@ var_spectrum.fastload:=true;
 cinta_tzx.play_tape:=false;
 tape_window1.BitBtn1.Enabled:=true;
 tape_window1.BitBtn2.Enabled:=false;
-screen_init(1,352,288);
-iniciar_video(352,288);
+screen_init(1,352,280,false,true);
+iniciar_video(352,280);
 //Direccion atributos
 for f:=0 to 191 do var_spectrum.atrib_scr[f]:=6144+(32*(f div 8));
 //Paleta general

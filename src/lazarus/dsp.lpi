@@ -14,7 +14,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="18"/>
       <RevisionNr Value="2"/>
-      <BuildNr Value="1255"/>
+      <BuildNr Value="1256"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.18"/>
     </VersionInfo>

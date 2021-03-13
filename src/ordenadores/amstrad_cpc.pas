@@ -7,7 +7,6 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc,timer_engine;
 
 const
-  pantalla_alto=312;
   cpc464_rom:tipo_roms=(n:'cpc464.rom';l:$8000;p:0;crc:$40852f25);
   cpc464f_rom:tipo_roms=(n:'cpc464f.rom';l:$8000;p:0;crc:$17893d60);
   cpc464sp_rom:tipo_roms=(n:'cpc464sp.rom';l:$8000;p:0;crc:$338daf2d);
@@ -88,7 +87,8 @@ const
         $000000,$0000FF,$008000,$0080FF,
         $800080,$80FF80,$80FF00,$80FFFF,
         $800000,$8000FF,$808000,$8080FF);
-  pantalla_largo=400;
+  pantalla_largo=384;
+  pantalla_alto=272;
 
 var
    tape_sound_channel:byte;
@@ -111,8 +111,7 @@ if event.arcade then begin
   if arcade_input.right[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $f7) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or 8);
   if arcade_input.but0[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $ef) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $10);
   if arcade_input.but1[1] then cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] and $df) else cpc_ppi.keyb_val[6]:=(cpc_ppi.keyb_val[6] or $20);
-end else begin
- if event.keyboard then begin
+end else if event.keyboard then begin
 //Line 0
   if keyboard[KEYBOARD_UP] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fe) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $1);
   if keyboard[KEYBOARD_RIGHT] then cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] and $fd) else cpc_ppi.keyb_val[0]:=(cpc_ppi.keyb_val[0] or $2);
@@ -209,7 +208,6 @@ end else begin
 //Line 9
   //JOY UP,JOY DOWN,JOY LEFT,JOY RIGHT,FIRE1,FIRE2 --> Arcade
   if keyboard[KEYBOARD_BACKSPACE] then cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] and $7f) else cpc_ppi.keyb_val[9]:=(cpc_ppi.keyb_val[9] or $80);
- end;
 end;
 end;
 
@@ -706,7 +704,7 @@ begin
      if cpc_crt.h_syn<>0 then begin
         amstrad_ga_exec;
         draw_line;
-        linea_crt:=(linea_crt+1) mod 312;
+        linea_crt:=(linea_crt+1) mod pantalla_alto;
         if cpc_ga.change_video then begin
           cpc_ga.video_mode:=cpc_ga.nvideo;
           cpc_ga.change_video:=false;

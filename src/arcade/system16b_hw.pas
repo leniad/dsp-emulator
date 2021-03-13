@@ -107,7 +107,7 @@ const
         goldnaxe_dip_b:array [0..3] of def_dip=(
         (mask:$1;name:'Credits Needed';number:2;dip:((dip_val:$1;dip_name:'1 Credit To Start'),(dip_val:$0;dip_name:'2 Credit To Start'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$3c;name:'Difficulty';number:8;dip:((dip_val:$0;dip_name:'Special'),(dip_val:$14;dip_name:'Easiast'),(dip_val:$1c;dip_name:'Easier'),(dip_val:$34;dip_name:'Easy'),(dip_val:$3c;dip_name:'Normal'),(dip_val:$38;dip_name:'Hard'),(dip_val:$2c;dip_name:'Harder'),(dip_val:$28;dip_name:'Hardest'),(),(),(),(),(),(),(),())),());
+        (mask:$3c;name:'Difficulty';number:8;dip:((dip_val:$0;dip_name:'Special'),(dip_val:$14;dip_name:'Easiest'),(dip_val:$1c;dip_name:'Easier'),(dip_val:$34;dip_name:'Easy'),(dip_val:$3c;dip_name:'Normal'),(dip_val:$38;dip_name:'Hard'),(dip_val:$2c;dip_name:'Harder'),(dip_val:$28;dip_name:'Hardest'),(),(),(),(),(),(),(),())),());
         ddux_dip_b:array [0..4] of def_dip=(
         (mask:$1;name:'Demo Sounds';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$6;name:'Difficulty';number:4;dip:((dip_val:$4;dip_name:'Easy'),(dip_val:$6;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -139,6 +139,9 @@ type
     	normal,shadow,hilight:array[0..31] of byte;
       s_banks,t_banks:byte;
       mb_type:byte;
+      s16_screen:array[0..7] of byte;
+      screen_enabled:boolean;
+      tile_bank:array[0..1] of byte;
    end;
 
 var
@@ -152,13 +155,9 @@ var
  sprite_rom:array[0..$fffff] of word;
  sprite_bank:array[0..$f] of byte;
  s16_info:tsystem16_info;
- s16_screen:array[0..7] of byte;
- screen_enabled:boolean;
  sound_bank:array[0..$f,0..$3fff] of byte;
  sound_bank_num:byte;
  sound_latch:byte;
-
- tile_bank:array[0..1] of byte;
 
  s315_5248_regs:array[0..1] of word;
  s315_5250_regs:array[0..$f] of word;
@@ -310,7 +309,7 @@ procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);
 var
   pos,f,nchar,color,data,x,y:word;
 begin
-  pos:=s16_screen[num]*$800;
+  pos:=s16_info.s16_screen[num]*$800;
   for f:=$0 to $7ff do begin
     data:=tile_ram[pos+f];
     color:=(data shr 6) and $7f;
@@ -318,7 +317,7 @@ begin
       x:=((f and $3f) shl 3)+px;
       y:=((f shr 6) shl 3)+py;
       nchar:=data and $1fff;
-      nchar:=tile_bank[nchar div $1000]*$1000+(nchar mod $1000);
+      nchar:=s16_info.tile_bank[nchar div $1000]*$1000+(nchar mod $1000);
       if trans then begin
         put_gfx_trans(x,y,nchar,color shl 3,scr,0);
         if (data and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,scr+1,0)
@@ -336,7 +335,7 @@ procedure update_video_system16b;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib,scroll_y1,scroll_y2:word;
 begin
-if not(screen_enabled) then begin
+if not(s16_info.screen_enabled) then begin
   actualiza_trozo_final(0,0,320,224,7);
   fill_full_screen(7,$1000);
   exit;
@@ -364,7 +363,7 @@ for f:=$0 to $6ff do begin
   if (gfx[0].buffer[f] or buffer_color[color]) then begin
     x:=(f and $3f) shl 3;
     y:=(f shr 6) shl 3;
-    nchar:=tile_bank[0]*$1000+(atrib and $1ff);
+    nchar:=s16_info.tile_bank[0]*$1000+(atrib and $1ff);
     put_gfx_trans(x,y,nchar,color shl 3,1,0);
     if (nchar and $8000)<>0 then put_gfx_trans(x,y,nchar,color shl 3,2,0)
       else put_gfx_block_trans(x,y,2,8,8);
@@ -532,46 +531,46 @@ begin
 if direccion=$740 then begin
           //Foreground
           tmp:=(char_ram[$740] shr 12) and $f;
-          if tmp<>s16_screen[4] then begin
-            s16_screen[4]:=tmp;
+          if tmp<>s16_info.s16_screen[4] then begin
+            s16_info.s16_screen[4]:=tmp;
             fillchar(tile_buffer[$800*tmp],$800,1);
           end;
           tmp:=(char_ram[$740] shr 8) and $f;
-          if tmp<>s16_screen[5] then begin
-            s16_screen[5]:=tmp;
+          if tmp<>s16_info.s16_screen[5] then begin
+            s16_info.s16_screen[5]:=tmp;
             fillchar(tile_buffer[$800*tmp],$800,1);
           end;
           tmp:=(char_ram[$740] shr 4) and $f;
-          if tmp<>s16_screen[6] then begin
-            s16_screen[6]:=tmp;
+          if tmp<>s16_info.s16_screen[6] then begin
+            s16_info.s16_screen[6]:=tmp;
             fillchar(tile_buffer[$800*tmp],$800,1);
           end;
           tmp:=char_ram[$740] and $f;
-          if tmp<>s16_screen[7] then begin
-            s16_screen[7]:=tmp;
+          if tmp<>s16_info.s16_screen[7] then begin
+            s16_info.s16_screen[7]:=tmp;
             fillchar(tile_buffer[$800*tmp],$800,1);
           end;
 end;
 if direccion=$741 then begin
           //Background
           tmp:=(char_ram[$741] shr 12) and $f;
-          if tmp<>s16_screen[0] then begin
-            s16_screen[0]:=tmp;
+          if tmp<>s16_info.s16_screen[0] then begin
+            s16_info.s16_screen[0]:=tmp;
             fillchar(tile_buffer[$800*tmp],$800,1);
           end;
           tmp:=(char_ram[$741] shr 8) and $f;
-          if tmp<>s16_screen[1] then begin
-            s16_screen[1]:=tmp;
+          if tmp<>s16_info.s16_screen[1] then begin
+            s16_info.s16_screen[1]:=tmp;
             fillchar(tile_buffer[$800*tmp],$800,1);
           end;
           tmp:=(char_ram[$741] shr 4) and $f;
-          if tmp<>s16_screen[2] then begin
-            s16_screen[2]:=tmp;
+          if tmp<>s16_info.s16_screen[2] then begin
+            s16_info.s16_screen[2]:=tmp;
             fillchar(tile_buffer[$800*tmp],$800,1);
           end;
           tmp:=char_ram[$741] and $f;
-          if tmp<>s16_screen[3] then begin
-            s16_screen[3]:=tmp;
+          if tmp<>s16_info.s16_screen[3] then begin
+            s16_info.s16_screen[3]:=tmp;
             fillchar(tile_buffer[$800*tmp],$800,1);
           end;
 end;
@@ -672,7 +671,7 @@ case (direccion and $1800) of
         $b,$f:s315_5250_regs[11]:=valor; //write to sound
   end;
   $1000:begin
-          tile_bank[direccion and 1]:=(valor and 7) and s16_info.t_banks; //Tile bank!
+          s16_info.tile_bank[direccion and 1]:=(valor and 7) and s16_info.t_banks; //Tile bank!
           fillchar(tile_buffer,$8000,1);
         end;
 end;
@@ -680,8 +679,8 @@ end;
 
 procedure region2_5704_write(direccion:dword;valor:word);
 begin
-  if tile_bank[(direccion and 3) shr 1]<>(valor and 7) then begin//Tile bank!
-    tile_bank[(direccion and 3) shr 1]:=(valor and 7) and s16_info.t_banks;
+  if s16_info.tile_bank[(direccion and 3) shr 1]<>(valor and 7) then begin//Tile bank!
+    s16_info.tile_bank[(direccion and 3) shr 1]:=(valor and 7) and s16_info.t_banks;
     fillchar(tile_buffer,$8000,1);
   end;
 end;
@@ -795,7 +794,7 @@ if ((direccion>=s315_5195_0.dirs_start[6]) and (direccion<s315_5195_0.dirs_end[6
 end;
 if ((direccion>=s315_5195_0.dirs_start[7]) and (direccion<s315_5195_0.dirs_end[7])) then begin
   case ((direccion and $1fff) shr 1) of //IO
-    0:screen_enabled:=(valor and $20)<>0;
+    0:s16_info.screen_enabled:=(valor and $20)<>0;
   end;
 zona:=true;
 end;
@@ -852,7 +851,7 @@ if ((direccion>=s315_5195_0.dirs_start[6]) and (direccion<s315_5195_0.dirs_end[6
 end;
 if ((direccion>=s315_5195_0.dirs_start[7]) and (direccion<s315_5195_0.dirs_end[7])) then begin
   case ((direccion and $1fff) shr 1) of //IO
-    0:screen_enabled:=(valor and $20)<>0;
+    0:s16_info.screen_enabled:=(valor and $20)<>0;
   end;
 end;
 end;
@@ -987,10 +986,10 @@ begin
   sprite_bank[13]:=1;
   sprite_bank[14]:=0;
  end else for f:=0 to $f do sprite_bank[f]:=f;
- screen_enabled:=true;
+ s16_info.screen_enabled:=false;
  fillchar(tile_buffer[0],$8000,1);
- tile_bank[0]:=0;
- tile_bank[1]:=1;
+ s16_info.tile_bank[0]:=0;
+ s16_info.tile_bank[1]:=1;
  sound_bank_num:=0;
  sound_latch:=0;
  s315_5250_bit:=0;

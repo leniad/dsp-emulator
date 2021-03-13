@@ -367,7 +367,7 @@ begin
   extension:=extension_fichero(RomFile);
   if extension='ZIP' then begin
     if not(search_file_from_zip(RomFile,'*.sms',nombre_file,longitud,crc,true)) then
-      if not(search_file_from_zip(RomFile,'*.rom',nombre_file,longitud,crc,true)) then
+      if not(search_file_from_zip(RomFile,'*.rom',nombre_file,longitud,crc,true)) then exit;
     getmem(datos,longitud);
     if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
       freemem(datos);

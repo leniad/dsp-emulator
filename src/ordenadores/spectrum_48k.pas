@@ -28,8 +28,8 @@ var
   spec_z80_reg:npreg_z80;
   poner_linea:boolean;
 begin
-if ((linea<64) or (linea>255)) then exit
-  else linea:=linea-64;
+if ((linea<56) or (linea>247)) then exit
+  else linea:=linea-56;
 poner_linea:=false;
 pos_video:=(linea and $f8) shl 2;
 spec_z80_reg:=spec_z80.get_internal_r;
@@ -84,16 +84,16 @@ end;
 
 procedure borde_48_full(linea:word);
 var
-  f,linea_actual:word;
+  f:word;
   ptemp:pword;
   posicion:dword;
 begin
-//Si lo pongo antes no rellena la linea 15!!!!
-if ((main_screen.rapido and ((linea and 7)<>0)) or (linea<15) or (linea>303)) then exit;
+if (main_screen.rapido and ((linea and 7)<>0) or (borde.tipo=0) or (linea<15) or (linea>296)) then exit;
 fillchar(borde.buffer[linea*224+borde.posicion],spec_z80.contador-borde.posicion,borde.color);
 borde.posicion:=spec_z80.contador-224;
+//El borde izquierdo lo rellena en la linea siguiente!!! Para que la linea 16 o la linea 295 (princio y
+//final) tengan borde, tengo que dejar que entre.
 if linea=15 then exit;
-linea_actual:=linea-16;
 //24t borde iqz --> 48pixels
 ptemp:=punbuf;
 posicion:=(linea-1)*224;
@@ -103,9 +103,12 @@ for f:=200 to 223 do begin
   ptemp^:=paleta[borde.buffer[posicion+f]];
   inc(ptemp);
 end;
-putpixel(0,linea_actual,48,punbuf,1);
-actualiza_trozo_simple(0,linea_actual,48,1,1);
+putpixel(0,linea-16,48,punbuf,1);
+actualiza_trozo_simple(0,linea-16,48,1,1);
+//Como el es borde izquierdo, si estoy en la linea 296 me salgo, ya no hay resto de borde
+if linea=296 then exit;
 //24t borde der --> 48 pixels
+//Pongo los datos donde tocan, el borde izquierdo los coje de la linea anterior
 posicion:=linea*224;
 ptemp:=punbuf;
 for f:=128 to 151 do begin
@@ -114,8 +117,8 @@ for f:=128 to 151 do begin
   ptemp^:=paleta[borde.buffer[posicion+f]];
   inc(ptemp);
 end;
-putpixel(304,linea_actual,48,punbuf,1);
-actualiza_trozo_simple(304,linea_actual,48,1,1);
+putpixel(304,linea-16,48,punbuf,1);
+actualiza_trozo_simple(304,linea-16,48,1,1);
 //128t Centro pantalla --> 256 pixels
 if ((linea>63) and (linea<256)) then exit;
 ptemp:=punbuf;
@@ -125,8 +128,8 @@ for f:=0 to 127 do begin
     ptemp^:=paleta[borde.buffer[posicion+f]];
     inc(ptemp);
 end;
-putpixel(48,linea_actual,256,punbuf,1);
-actualiza_trozo_simple(48,linea_actual,256,1,1);
+putpixel(48,linea-16,256,punbuf,1);
+actualiza_trozo_simple(48,linea-16,256,1,1);
 end;
 
 procedure spectrum48_main;

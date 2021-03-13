@@ -13,7 +13,7 @@ type
                 x:word;  //ancho
                 y:word;  //alto
                 trans:boolean;  //¿es transparente?
-                final_mix:boolean;
+                final_mix,alpha:boolean;
                 sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word;
                 scroll:scroll_tipo;
         end;

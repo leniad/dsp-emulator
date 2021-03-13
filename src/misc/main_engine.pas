@@ -100,7 +100,7 @@ procedure close_video;
 procedure cambiar_video;
 procedure change_video_size(x,y:word);
 procedure pasar_pantalla_completa;
-procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false);
+procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false;alpha:boolean=false);
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
 procedure screen_mod_sprites(num:byte;sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word);
 //Update final screen
@@ -352,7 +352,8 @@ for f:=1 to MAX_PANT_VISIBLE do
     end;
     if p_final[f].scroll.mask_x=0 then p_final[f].scroll.mask_x:=$ffff;
     if p_final[f].scroll.mask_y=0 then p_final[f].scroll.mask_y:=$ffff;
-    pantalla[f]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,16,0,0,0,0);
+    if p_final[f].alpha then pantalla[f]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,32,$ff,$ff00,$ff0000,$ff000000)
+      else pantalla[f]:=SDL_CreateRGBSurface(0,p_final[f].x,p_final[f].y,16,0,0,0,0);
     //Y si son transparentes las creo
     if p_final[f].trans then SDL_Setcolorkey(pantalla[f],1,SET_TRANS_COLOR);
 end;
@@ -360,12 +361,13 @@ sdl_showcursor(0);
 end;
 
 //funciones de creacion de pantallas de video
-procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false);
+procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false;alpha:boolean=false);
 begin
   p_final[num].x:=x;
   p_final[num].y:=y;
   p_final[num].trans:=trans;
   p_final[num].final_mix:=final_mix;
+  p_final[num].alpha:=alpha;
 end;
 
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
