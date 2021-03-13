@@ -4,7 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}file_engine,
      lr35902,main_engine,controls_engine,gfx_engine,timer_engine,dialogs,
      sysutils,gb_sound,rom_engine,misc_functions,pal_engine,gb_mappers,
-     sound_engine;
+     sound_engine,config_gb,forms;
 
 type
   tgameboy=record
@@ -35,12 +35,15 @@ procedure cargar_gb;
 var
   ram_enable:boolean;
   gb_head:^tgb_head;
+  gb_palette:byte;
 
 implementation
 uses principal;
 
 const
-  color_pal:array[0..3] of tcolor=((r:$ff;g:$ff;b:$ff),(r:$aa;g:$aa;b:$aa),(r:$55;g:$55;b:$55),(r:0;g:0;b:0));
+  color_pal:array[0..1,0..3] of tcolor=(
+  ((r:$9b;g:$bc;b:$0f),(r:$8b;g:$ac;b:$0f),(r:$30;g:$62;b:$30),(r:$0f;g:$38;b:$0f)),
+  ((r:$ff;g:$ff;b:$ff),(r:$aa;g:$aa;b:$aa),(r:$55;g:$55;b:$55),(r:0;g:0;b:0)));
   gb_rom:tipo_roms=(n:'dmg_boot.bin';l:$100;p:0;crc:$59c8598e);
   gbc_rom:array[0..1] of tipo_roms=(
   (n:'gbc_boot.1';l:$100;p:0;crc:$779ea374),(n:'gbc_boot.2';l:$700;p:$200;crc:$f741807d));
@@ -667,24 +670,24 @@ case direccion of
       end;
   $47:begin
         bg_pal:=valor;
-        set_pal_color(color_pal[(valor shr 0) and $3],0);
-        set_pal_color(color_pal[(valor shr 2) and $3],1);
-        set_pal_color(color_pal[(valor shr 4) and $3],2);
-        set_pal_color(color_pal[(valor shr 6) and $3],3);
+        set_pal_color(color_pal[gb_palette,(valor shr 0) and $3],0);
+        set_pal_color(color_pal[gb_palette,(valor shr 2) and $3],1);
+        set_pal_color(color_pal[gb_palette,(valor shr 4) and $3],2);
+        set_pal_color(color_pal[gb_palette,(valor shr 6) and $3],3);
       end;
   $48:begin //sprt0
         sprt0_pal:=valor;
-        set_pal_color(color_pal[(valor shr 0) and $3],4);
-        set_pal_color(color_pal[(valor shr 2) and $3],5);
-        set_pal_color(color_pal[(valor shr 4) and $3],6);
-        set_pal_color(color_pal[(valor shr 6) and $3],7);
+        set_pal_color(color_pal[gb_palette,(valor shr 0) and $3],4);
+        set_pal_color(color_pal[gb_palette,(valor shr 2) and $3],5);
+        set_pal_color(color_pal[gb_palette,(valor shr 4) and $3],6);
+        set_pal_color(color_pal[gb_palette,(valor shr 6) and $3],7);
       end;
   $49:begin
         sprt1_pal:=valor;
-        set_pal_color(color_pal[(valor shr 0) and $3],8);
-        set_pal_color(color_pal[(valor shr 2) and $3],9);
-        set_pal_color(color_pal[(valor shr 4) and $3],10);
-        set_pal_color(color_pal[(valor shr 6) and $3],11);
+        set_pal_color(color_pal[gb_palette,(valor shr 0) and $3],8);
+        set_pal_color(color_pal[gb_palette,(valor shr 2) and $3],9);
+        set_pal_color(color_pal[gb_palette,(valor shr 4) and $3],10);
+        set_pal_color(color_pal[gb_palette,(valor shr 6) and $3],11);
       end;
   $4a:window_y:=valor;
   $4b:window_x:=valor;
@@ -1435,6 +1438,26 @@ getmem(gb_head,sizeof(tgb_head));
 iniciar_gb:=abrir_gb;
 end;
 
+procedure gb_config_call;
+begin
+  configgb.show;
+  while configgb.Showing do application.ProcessMessages;
+  if not(gameboy.is_gbc) then begin
+    set_pal_color(color_pal[gb_palette,(bg_pal shr 0) and $3],0);
+    set_pal_color(color_pal[gb_palette,(bg_pal shr 2) and $3],1);
+    set_pal_color(color_pal[gb_palette,(bg_pal shr 4) and $3],2);
+    set_pal_color(color_pal[gb_palette,(bg_pal shr 6) and $3],3);
+    set_pal_color(color_pal[gb_palette,(sprt0_pal shr 0) and $3],4);
+    set_pal_color(color_pal[gb_palette,(sprt0_pal shr 2) and $3],5);
+    set_pal_color(color_pal[gb_palette,(sprt0_pal shr 4) and $3],6);
+    set_pal_color(color_pal[gb_palette,(sprt0_pal shr 6) and $3],7);
+    set_pal_color(color_pal[gb_palette,(sprt1_pal shr 0) and $3],8);
+    set_pal_color(color_pal[gb_palette,(sprt1_pal shr 2) and $3],9);
+    set_pal_color(color_pal[gb_palette,(sprt1_pal shr 4) and $3],10);
+    set_pal_color(color_pal[gb_palette,(sprt1_pal shr 6) and $3],11);
+  end;
+end;
+
 procedure Cargar_gb;
 begin
 principal1.BitBtn10.Glyph:=nil;
@@ -1447,6 +1470,7 @@ llamadas_maquina.reset:=reset_gb;
 llamadas_maquina.fps_max:=59.727500569605832763727500569606;
 llamadas_maquina.cartuchos:=abrir_gb;
 cartucho_cargado:=false;
+llamadas_maquina.configurar:=gb_config_call;
 end;
 
 end.

@@ -315,7 +315,8 @@ uses
   baraduke_hw in '..\arcade\baraduke_hw.pas',
   system16b_hw in '..\arcade\system16b_hw.pas',
   sega_315_5195 in '..\arcade\misc\sega_315_5195.pas',
-  sega_pcm in '..\snd\sega_pcm.pas';
+  sega_pcm in '..\snd\sega_pcm.pas',
+  config_gb in 'config_gb.pas' {configgb};
 
 {$R *.res}
 
@@ -336,5 +337,6 @@ begin
   Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(TConfigCPC, ConfigCPC);
+  Application.CreateForm(Tconfiggb, configgb);
   Application.Run;
 end.

@@ -40,7 +40,7 @@ var
   zip_find_files_data:tzip_find_files;
 
 implementation
-uses spectrum_misc,principal,amstrad_cpc,sms;
+uses spectrum_misc,principal,amstrad_cpc,sms,gb;
 
 //Hi-score
 procedure save_hi(nombre:string;posicion:pbyte;longitud:dword);
@@ -143,6 +143,8 @@ if fileexists(directory.Base+'dsp.ini') then begin
   cpc_ga.ram_exp:=fich_ini.ReadInteger('cpc','cpcramexp',0);
   //Configuracion SMS
   sms_model:=fich_ini.ReadInteger('sms','model',1);
+  //Configuracion GB
+  gb_palette:=fich_ini.ReadInteger('gb','palette',0);
   //Teclas
   arcade_input.nup[0]:=fich_ini.ReadInteger('keyboard','up_0',KEYBOARD_UP) and $ff;
   arcade_input.ndown[0]:=fich_ini.ReadInteger('keyboard','down_0',KEYBOARD_DOWN) and $ff;
@@ -257,6 +259,8 @@ end else begin
   cpc_ga.ram_exp:=0;
   //Configuracion basica SMS
   sms_model:=0;
+  //Config GB
+  gb_palette:=0;
   //Teclas
   arcade_input.nup[0]:=KEYBOARD_UP;
   arcade_input.ndown[0]:=KEYBOARD_DOWN;
@@ -416,6 +420,8 @@ fich_ini.WriteInteger('cpc','cpcmodel',cpc_ga.cpc_model);
 fich_ini.WriteInteger('cpc','cpcramexp',cpc_ga.ram_exp);
 //Config SMS
 fich_ini.WriteInteger('sms','model',sms_model);
+//Config GB
+fich_ini.WriteInteger('gb','palette',gb_palette);
 //Teclas P1
 fich_ini.WriteInteger('keyboard','up_0',arcade_input.nup[0]);
 fich_ini.WriteInteger('keyboard','down_0',arcade_input.ndown[0]);

@@ -1,4 +1,10 @@
 ﻿# DSP Emulator status #
+<b>13/03/21 - Second update today! DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-GameBoy/Gameboy Color HW
+    +Now you can choose between original GB green palette and GB pocket BW (Thanks to Francisco José Martí Terrón)
+-Amstrad CPC
+    +Fixed screen flickering (Thanks to Francisco José Martí Terrón)
+</pre>
 <b>13/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +Sound

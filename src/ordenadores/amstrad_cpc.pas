@@ -361,8 +361,11 @@ end;
 end;
 
 procedure draw_line;
+var
+  lineat:word;
 begin
-single_line(0,(linea_crt+cpc_crt.lineas_borde) mod pantalla_alto,paleta[cpc_ga.pal[$10]],pantalla_largo,1);
+lineat:=(linea_crt+cpc_crt.lineas_borde) mod 312;
+if lineat<pantalla_alto then single_line(0,lineat,paleta[cpc_ga.pal[$10]],pantalla_largo,1);
 if (linea_crt<cpc_crt.lineas_visible) then actualiza_linea(linea_crt);
 //Vsync
 {if cpc_crt.vsync_activo then begin
@@ -704,7 +707,7 @@ begin
      if cpc_crt.h_syn<>0 then begin
         amstrad_ga_exec;
         draw_line;
-        linea_crt:=(linea_crt+1) mod pantalla_alto;
+        linea_crt:=(linea_crt+1) mod 312;
         if cpc_ga.change_video then begin
           cpc_ga.video_mode:=cpc_ga.nvideo;
           cpc_ga.change_video:=false;

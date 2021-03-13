@@ -325,7 +325,7 @@ object ConfigCPC: TConfigCPC
     end
   end
   object GroupBox3: TGroupBox
-    Left = 335
+    Left = 327
     Top = 8
     Width = 107
     Height = 77
