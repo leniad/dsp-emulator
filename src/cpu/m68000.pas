@@ -2246,9 +2246,8 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     if r.cc.s then begin
                       self.prefetch:=false;
                       self.contador:=self.contador+40;
-                      if @self.reset_call<>nil then self.reset_call
-                        else MessageDlg('Mierda llamada a reset sin funcion '+inttostr(r.pc.l), mtInformation,[mbOk], 0);
-                    end else MessageDlg('Mierda error de privilegio reset '+inttostr(r.pc.l), mtInformation,[mbOk], 0);
+                      if @self.reset_call<>nil then self.reset_call;
+                    end else MessageDlg('Mierda error de privilegio reset '+inttohex(r.ppc.l,10), mtInformation,[mbOk], 0);
                   end;
               $31:self.contador:=self.contador+4; // # nop
               $32:begin // # stop

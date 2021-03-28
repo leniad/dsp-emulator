@@ -21,8 +21,7 @@ const
         dkong_sprites:array[0..3] of tipo_roms=(
         (n:'l_4m_b.bin';l:$800;p:0;crc:$59f8054d),(n:'l_4n_b.bin';l:$800;p:$800;crc:$672e4714),
         (n:'l_4r_b.bin';l:$800;p:$1000;crc:$feaa59ee),(n:'l_4s_b.bin';l:$800;p:$1800;crc:$20f2ef7e));
-        num_samples=25;
-        dk_samples:array[0..(num_samples-1)] of tipo_nombre_samples=(
+        dk_samples:array[0..24] of tipo_nombre_samples=(
         (nombre:'death.wav'),(nombre:'tune01.wav'),(nombre:'tune02.wav'),
         (nombre:'tune03.wav';restart:true),(nombre:'tune04.wav';restart:false;loop:true),
         (nombre:'tune05.wav'),(nombre:'tune06.wav'),(nombre:'tune07.wav'),
@@ -49,8 +48,7 @@ const
         dkongjr_sprites:array[0..3] of tipo_roms=(
         (n:'v_7c.bin';l:$800;p:0;crc:$dc7f4164),(n:'v_7d.bin';l:$800;p:$800;crc:$0ce7dcf6),
         (n:'v_7e.bin';l:$800;p:$1000;crc:$24d1ff17),(n:'v_7f.bin';l:$800;p:$1800;crc:$0f8c083f));
-        num_samples_jr=22;
-        dkjr_samples:array[0..(num_samples_jr-1)] of tipo_nombre_samples=(
+        dkjr_samples:array[0..21] of tipo_nombre_samples=(
         (nombre:'death.wav'),(nombre:'tune01.wav';restart:false;loop:true),
         (nombre:'tune02.wav'),(nombre:'tune03.wav'),(nombre:'tune04.wav'),
         (nombre:'tune05.wav'),(nombre:'tune06.wav'),(nombre:'tune07.wav'),
@@ -598,7 +596,7 @@ case main_vars.tipo_maquina of
         //cargar roms
         if not(roms_load(@memoria,dkong_rom)) then exit;
         //samples
-        if load_samples('dkong.zip',@dk_samples,num_samples) then z80_0.init_sound(dkong_sound_update);
+        if load_samples(dk_samples) then z80_0.init_sound(dkong_sound_update);
         audio_tunes:=dkong_tune_sound;
         audio_effects:=dkong_effects_sound;
         //convertir chars
@@ -631,7 +629,7 @@ case main_vars.tipo_maquina of
         copymemory(@memoria[$5000],@memoria_temp[$5000],$800);
         copymemory(@memoria[$1800],@memoria_temp[$5800],$800);
         //samples
-        if load_samples('dkongjr.zip',@dkjr_samples,num_samples_jr) then z80_0.init_sound(dkong_sound_update);
+        if load_samples(dkjr_samples) then z80_0.init_sound(dkong_sound_update);
         audio_tunes:=dkongjr_tune_sound;
         audio_effects:=dkongjr_effects_sound;
         //convertir chars

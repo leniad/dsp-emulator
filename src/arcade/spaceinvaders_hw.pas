@@ -13,8 +13,7 @@ const
         spaceinv_rom:array[0..3] of tipo_roms=(
         (n:'invaders.h';l:$800;p:0;crc:$734f5ad8),(n:'invaders.g';l:$800;p:$800;crc:$6bfaca4a),
         (n:'invaders.f';l:$800;p:$1000;crc:$0ccead96),(n:'invaders.e';l:$800;p:$1800;crc:$14e538b0));
-        num_samples=9;
-        spaceinv_samples:array[0..(num_samples-1)] of tipo_nombre_samples=(
+        spaceinv_samples:array[0..8] of tipo_nombre_samples=(
         (nombre:'1.wav'),(nombre:'2.wav'),(nombre:'3.wav'),(nombre:'4.wav'),(nombre:'5.wav'),
         (nombre:'6.wav'),(nombre:'7.wav'),(nombre:'8.wav'),(nombre:'9.wav'));
         //DIP
@@ -234,7 +233,7 @@ z80_0.change_ram_calls(spaceinv_getbyte,spaceinv_putbyte);
 //cargar roms
 if not(roms_load(@memoria,spaceinv_rom)) then exit;
 //Sound
-if (load_samples('invaders.zip',@spaceinv_samples[0],num_samples)) then z80_0.init_sound(spaceinv_sound_update);
+if (load_samples(spaceinv_samples)) then z80_0.init_sound(spaceinv_sound_update);
 //DIP
 marcade.dswa:=0;
 marcade.dswa_val:=@spaceinv_dip;

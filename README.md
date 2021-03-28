@@ -1,4 +1,23 @@
 ﻿# DSP Emulator status #
+<b>28/03/21 - Last update before stable version. DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
+-General
+    +Samples: simplified samples loading functions
+-Suna 8 HW
+    +Added DIP switches
+    +Fixed sound clock
+        -Hard Head
+            +Fixed DAC samples
+            +Fixed FPS
+        -Hard Head 2
+            +Fixed ROM decode
+            +Fixed video (only remains palette color problem)
+            +Added DAC samples
+-Tiger Road HW
+    +Added DIP switches
+-Outrun
+    +Fixed gear button
+</pre>
+<img src='https://i.ibb.co/3vsqcdv/hh2-1.jpg'> <img src='https://i.ibb.co/233KTxs/hh2-2.jpg'><br><br>
 <b>13/03/21 - Second update today! DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -GameBoy/Gameboy Color HW
     +Now you can choose between original GB green palette and GB pocket BW (Thanks to Francisco José Martí Terrón)

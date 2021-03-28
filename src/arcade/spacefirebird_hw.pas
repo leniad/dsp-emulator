@@ -20,8 +20,7 @@ const
         spacefb_bullet:tipo_roms=(n:'4i.vid';l:$100;p:0;crc:$528e8533);
         spacefb_mcu:tipo_roms=(n:'ic20.snd';l:$400;p:0;crc:$1c8670b3);
         spacefb_prom:tipo_roms=(n:'mb7051.3n';l:$20;p:0;crc:$465d07af);
-        num_samples=4;
-        spacefb_samples:array[0..(num_samples-1)] of tipo_nombre_samples=(
+        spacefb_samples:array[0..3] of tipo_nombre_samples=(
         (nombre:'ekilled.wav';restart:true),(nombre:'explode1.wav'),(nombre:'explode2.wav'),(nombre:'shipfire.wav';restart:true));
         //Dip
         spacefb_dip:array [0..4] of def_dip=(
@@ -375,7 +374,7 @@ if not(roms_load(@memoria,spacefb_rom)) then exit;
 //Cargar MCU
 if not(roms_load(@mem_snd_mcu,spacefb_mcu)) then exit;
 //Sound
-load_samples('spacefb.zip',@spacefb_samples,num_samples);
+load_samples(spacefb_samples);
 dac_0:=dac_chip.Create(0.5);
 //Cargar GFX and proms
 if not(roms_load(@gfx1,spacefb_gfx)) then exit;

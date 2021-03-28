@@ -506,11 +506,11 @@
     <Transaction>2021/03/01 13:12:25.000.822,D:\dsp\src\delphi\Unit1.pas=D:\dsp\src\arcade\misc\sega_315_5195.pas</Transaction>
     <Transaction>2021/03/07 18:39:29.000.118,=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
     <Transaction>2021/03/07 18:40:03.000.154,D:\Datos\dsp\src\snd\sega_pcm.pas=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
-    <Transaction>2021/03/13 18:04:28.197,=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
-    <Transaction>2021/03/13 18:08:11.381,D:\Datos\dsp\src\delphi\config_gb.dfm=D:\Datos\dsp\src\delphi\Unit1.dfm</Transaction>
-    <Transaction>2021/03/13 18:08:11.381,D:\Datos\dsp\src\delphi\config_gb.pas=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
-    <Transaction>2021/03/13 18:22:06.362,=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
-    <Transaction>2021/03/13 18:22:42.131,D:\Datos\dsp\src\delphi\config_gb.dfm=D:\Datos\dsp\src\delphi\Unit1.dfm</Transaction>
-    <Transaction>2021/03/13 18:22:42.131,D:\Datos\dsp\src\delphi\config_gb.pas=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
+    <Transaction>2021/03/13 18:04:28.000.197,=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
+    <Transaction>2021/03/13 18:08:11.000.381,D:\Datos\dsp\src\delphi\config_gb.dfm=D:\Datos\dsp\src\delphi\Unit1.dfm</Transaction>
+    <Transaction>2021/03/13 18:08:11.000.381,D:\Datos\dsp\src\delphi\config_gb.pas=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
+    <Transaction>2021/03/13 18:22:06.000.362,=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
+    <Transaction>2021/03/13 18:22:42.000.131,D:\Datos\dsp\src\delphi\config_gb.dfm=D:\Datos\dsp\src\delphi\Unit1.dfm</Transaction>
+    <Transaction>2021/03/13 18:22:42.000.131,D:\Datos\dsp\src\delphi\config_gb.pas=D:\Datos\dsp\src\delphi\Unit1.pas</Transaction>
   </Transactions>
 </BorlandProject>

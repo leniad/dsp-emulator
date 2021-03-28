@@ -2,12 +2,13 @@ unit suna8_hw;
 
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
-     nz80,main_engine,controls_engine,gfx_engine,timer_engine,ym_3812,ay_8910,
-     rom_engine,misc_functions,pal_engine,sound_engine;
+     nz80,main_engine,controls_engine,timer_engine,ym_3812,ay_8910,
+     rom_engine,misc_functions,pal_engine,sound_engine,dac,gfx_engine;
 
 procedure cargar_suna_hw;
 
 implementation
+
 const
         //Hard Head
         hardhead_rom:array[0..7] of tipo_roms=(
@@ -34,20 +35,42 @@ const
         (n:'hrd-hd7';l:$10000;p:$60000;crc:$992ce8cb),(n:'hrd-hd8';l:$10000;p:$70000;crc:$359597a4));
         hardhead2_pcm:tipo_roms=(n:'hrd-hd15';l:$10000;p:0;crc:$bcbd88c3);
         hardhead2_sound:tipo_roms=(n:'hrd-hd14';l:$8000;p:0;crc:$79a3be51);
+        //DIPS
+        hardhead_dip_a:array [0..4] of def_dip=(
+        (mask:$1;name:'Demo Sounds';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$e;name:'Bonus Life';number:8;dip:((dip_val:$e;dip_name:'No Bonus'),(dip_val:$c;dip_name:'10K'),(dip_val:$a;dip_name:'20K'),(dip_val:$8;dip_name:'50K'),(dip_val:$6;dip_name:'50K+'),(dip_val:$4;dip_name:'100K 50K+'),(dip_val:$2;dip_name:'100K 100K+'),(dip_val:$0;dip_name:'200K 100K+'),(),(),(),(),(),(),(),())),
+        (mask:$70;name:'Coinage';number:8;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$10;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$30;dip_name:'2C 1C'),(dip_val:$70;dip_name:'1C 1C'),(dip_val:$60;dip_name:'1C 2C'),(dip_val:$50;dip_name:'1C 3C'),(dip_val:$40;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Invulnerability';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        hardhead_dip_b:array [0..5] of def_dip=(
+        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Cabinet';number:2;dip:((dip_val:$2;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Play Together';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$4;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Lives';number:4;dip:((dip_val:$18;dip_name:'2'),(dip_val:$10;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$e0;name:'Difficulty';number:8;dip:((dip_val:$e0;dip_name:'Easiest'),(dip_val:$c0;dip_name:'Very Easy'),(dip_val:$a0;dip_name:'Easy'),(dip_val:$80;dip_name:'Moderate'),(dip_val:$60;dip_name:'Normal'),(dip_val:$40;dip_name:'Harder'),(dip_val:$20;dip_name:'Very Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),())),());
+        hardhead2_dip_a:array [0..3] of def_dip=(
+        (mask:$7;name:'Coinage';number:8;dip:((dip_val:$0;dip_name:'5C 1C'),(dip_val:$1;dip_name:'4C 1C'),(dip_val:$2;dip_name:'3C 1C'),(dip_val:$3;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Difficulty';number:8;dip:((dip_val:$38;dip_name:'Easiest'),(dip_val:$30;dip_name:'Very Easy'),(dip_val:$28;dip_name:'Easy'),(dip_val:$20;dip_name:'Moderate'),(dip_val:$18;dip_name:'Normal'),(dip_val:$10;dip_name:'Harder'),(dip_val:$8;dip_name:'Very Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        hardhead2_dip_b:array [0..5] of def_dip=(
+        (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Cabinet';number:2;dip:((dip_val:$2;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Play Together';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$4;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Bonus Life';number:8;dip:((dip_val:$38;dip_name:'No Bonus'),(dip_val:$30;dip_name:'10K'),(dip_val:$28;dip_name:'30K'),(dip_val:$18;dip_name:'50K 50K+'),(dip_val:$20;dip_name:'50K'),(dip_val:$10;dip_name:'100K 50K+'),(dip_val:$8;dip_name:'100K 100K+'),(dip_val:$0;dip_name:'200K 100K+'),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$80;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$40;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
 var
  rom_bank:array[0..$f,0..$3fff] of byte;
- suna_dac:array[0..$ffff] of word;
+ suna_dac:array[0..$ffff] of smallint;
  mem_opcodes:array[0..$7fff] of byte;
  ram_bank:array[0..1,0..$17ff] of byte;
  sprite_bank:array[0..$3fff] of byte;
  banco_rom,banco_sprite,banco_ram:byte;
- soundlatch,soundlatch2,protection_val,hardhead_ip:byte;
- rear_scroll,scroll_x:word;
+ soundlatch,soundlatch2,protection_val,hardhead_ip,vblank:byte;
  haz_nmi:boolean;
  dac_timer,dac_tsample:byte;
  //DAC
  dac_play,dac_sample,dac_index:byte;
- dac_value,dac_pos:word;
+ dac_value:smallint;
+ dac_pos:word;
 
 //Hard Head
 procedure update_video_hardhead;inline;
@@ -81,7 +104,7 @@ for f:=0 to $bf do begin
     end;
     if (bank and $40)<>0 then x:=x-$100;
 		y:=($100-y-(dimy shl 3)) and $ff;
-		// Multi Sprite */
+		// Multi Sprite
     if ((nchar and $c0)=$c0) then begin
       mx:=mx+$10;
       x:=mx;
@@ -192,13 +215,13 @@ var
 begin
 case direccion of
   0..$7fff,$c000..$d7ff,$e000..$ffff:hardhead_getbyte:=memoria[direccion];
-  $d800..$d9ff:hardhead_getbyte:=buffer_paleta[direccion and $1ff];
   $8000..$bfff:hardhead_getbyte:=rom_bank[banco_rom,(direccion and $3fff)];
-  $da00:case hardhead_ip of //DIP's
+  $d800..$d9ff:hardhead_getbyte:=buffer_paleta[direccion and $1ff];
+  $da00:case hardhead_ip of
           0:hardhead_getbyte:=marcade.in0;
           1:hardhead_getbyte:=marcade.in1;
-          2:hardhead_getbyte:=$f6;
-          3:hardhead_getbyte:=$77;
+          2:hardhead_getbyte:=marcade.dswa;
+          3:hardhead_getbyte:=marcade.dswb;
         end;
   $da80:hardhead_getbyte:=soundlatch2;
   $dd80..$ddff:begin  //proteccion
@@ -215,7 +238,7 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(dir:word);inline;
+procedure cambiar_color(dir:word);
 var
   tmp_color:byte;
   color:tcolor;
@@ -225,7 +248,7 @@ begin
   color.g:=pal4bit(tmp_color);
   tmp_color:=buffer_paleta[dir+1];
   color.b:=pal4bit(tmp_color shr 4);
-  set_pal_color(color,(dir and $1ff) shr 1);
+  set_pal_color(color,dir shr 1);
 end;
 
 procedure hardhead_putbyte(direccion:word;valor:byte);
@@ -240,7 +263,7 @@ case direccion of
     $da00:hardhead_ip:=valor;
     $da80:banco_rom:=valor and $f;
     $db00:soundlatch:=valor;
-    $db80:; //Flip Screen
+    $db80:main_screen.flip_main_screen:=(valor and 4)<>0;
     $dd80..$ddff:if (valor and $80)<>0 then	protection_val:=valor //proteccion
                     else protection_val:=direccion and 1;
 end;
@@ -269,7 +292,7 @@ case direccion of
 end;
 end;
 
-procedure snd_despues_instruccion;
+procedure hardhead_play_sound;
 begin
   ym3812_0.update;
   ay8910_0.update;
@@ -313,25 +336,22 @@ begin
 end;
 
 //Hard Head 2
-procedure update_video_hardhead2;inline;
+procedure update_video_hardhead2;
 var
-  x,y,nchar,bank,code:word;
-  f,ty,tx:byte;
-  addr,gfxbank,colorbank:word;
-  dimx,dimy,srcx,srcy,srcpg:word;
-  mx:word;
-  color:word;
+  bank,code,sy,y,dimx,dimy,f,ty,tx,attr,tile,srcx,srcy,srcpg:byte;
+  gfxbank,nchar,addr,colorbank,sx,x,mx,color:word;
   flipx,flipy,multisprite,tile_flipx,tile_flipy:boolean;
-  sx,sy,attr,tile:word;
 begin
-	mx:=0;	// multisprite x counter
+  mx:=0;
+  colorbank:=0;
+  fill_full_screen(1,$ff);
 	for f:=0 to $bf do begin
-		y:=sprite_bank[$1d00+(f shl 2)];
-		code:=sprite_bank[$1d01+(f shl 2)];
-		x:=sprite_bank[$1d02+(f shl 2)];
-		bank:=sprite_bank[$1d03+(f shl 2)];
-    srcx:=(nchar and $f) shl 1;
-    // Newer, more complex hardware (not finished yet!) */
+		y:=sprite_bank[$1d00+(f*4)];
+		code:=sprite_bank[$1d01+(f*4)];
+		x:=sprite_bank[$1d02+(f*4)];
+		bank:=sprite_bank[$1d03+(f*4)];
+    flipx:=false;
+    flipy:=false;
     case (code and $c0) of
 			$c0:begin
     				dimx:=4;
@@ -339,7 +359,6 @@ begin
     				srcx:=(code and $e)*2;
             srcy:=0;
     				flipx:=(code and $1)<>0;
-    				flipy:=false;
     				gfxbank:=bank and $1f;
     				srcpg:=(code shr 4) and 3;
 				  end;
@@ -348,8 +367,6 @@ begin
             dimy:=32;
     				srcx:=(code and $f)*2;
             srcy:=0;
-    				flipx:=false;
-    				flipy:=false;
     				gfxbank:=bank and $1f;
     				srcpg:=(code shr 4) and 3;
           end;
@@ -361,25 +378,24 @@ begin
     				flipx:=(code and $01)<>0;
     				flipy:=(bank and $10)<>0;
     				srcy:=(((bank and $80) shr 4)+(bank and $04)+((not(bank) shr 4) and 2))*2;
-    				srcpg:=(code shr 4) and 7;
-    				gfxbank:=(bank and $3)+(srcpg and 4);	// brickzn: 06,a6,a2,b2->6. starfigh: 01->01,4->0
+    				srcpg:=((code shr 4) and 3)+4;
+    				gfxbank:=bank and $3;
+            gfxbank:=gfxbank+4;   // brickzn: 06,a6,a2,b2->6
     				colorbank:=(bank and 8) shr 3;
 				  end;
 			else begin
     				dimx:=2;
             dimy:=2;
     				srcx:=(code and $f)*2;
-    				flipx:=false;
-    				flipy:=false;
-    				gfxbank:=bank and $03;
     				srcy:=(((bank and $80) shr 4)+(bank and $04)+((not(bank) shr 4) and 3))*2;
     				srcpg:=(code shr 4) and 3;
+            gfxbank:=bank and $03;
           end;
 			end;
 			multisprite:=(((code and $80)<>0) and ((bank and $80)<>0));
       if (bank and $40)<>0 then x:=x-$100;
-  		y:= ($100 - y - dimy*8 ) and $ff;
-  		// Multi Sprite */
+  		y:=($100-y-dimy*8) and $ff;
+  		// Multi Sprite
   		if multisprite then	begin
       	mx:=mx+dimx*8;
         x:=mx;
@@ -389,49 +405,59 @@ begin
   		gfxbank:=gfxbank*$400;
   		for ty:=0 to dimy-1 do begin
   			for tx:=0 to dimx-1 do begin
-  				addr:=(srcpg * $20 * $20);
+  				addr:=(srcpg*$20*$20);
           if flipx then addr:=addr+((srcx+(dimx-tx-1)) and $1f)*$20
-            else addr:=addr+((srcx +tx) and $1f)*$20;
+            else addr:=addr+((srcx+tx) and $1f)*$20;
           if flipy then addr:=addr+((srcy+(dimy-ty-1)) and $1f)
             else addr:=addr+((srcy+ty) and $1f);
+	  			tile:=sprite_bank[addr*2+0];
           attr:=sprite_bank[addr*2+1];
-	  			tile:=(sprite_bank[addr*2+0]+(attr and $3)*$100+gfxbank) and $3fff;
-          color:=((attr shr 2) and $f) or colorbank;
   				tile_flipx:=(attr and $40)<>0;
 	  			tile_flipy:=(attr and $80)<>0;
 				  sx:=x+tx*8;
-			  	sy:=y+ty*8;
+			  	sy:=(y+ty*8) and $ff;
   				if (flipx) then	tile_flipx:=not(tile_flipx);
 	  			if (flipy) then	tile_flipy:=not(tile_flipy);
-          put_gfx_sprite(tile,color,tile_flipx,tile_flipy,0);
+          color:=(((attr shr 2) and $f) xor colorbank);//+$10*palettebank;
+          nchar:=tile+(attr and $3)*$100+gfxbank;
+          put_gfx_sprite(nchar,color shl 4,tile_flipx,tile_flipy,0);
           actualiza_gfx_sprite(sx,sy,1,0);
         end;
      end;
   end;
-actualiza_trozo(0,16,256,224,1,0,0,256,224,0);
+actualiza_trozo_final(0,16,256,224,1);
 end;
 
 procedure hardhead2_principal;
 var
-  frame_m,frame_s:single;
+  frame_m,frame_s,frame_dac:single;
   f:byte;
 begin
-init_controls(false,true,true,false);
+init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
+frame_dac:=z80_2.tframes;
 while EmuStatus=EsRuning do begin
- for f:=0 to 1 do begin
-  //Main CPU
-  z80_0.run(frame_m);
-  frame_m:=frame_m+z80_0.tframes-z80_0.contador;
-  if f=0 then z80_0.change_irq(HOLD_LINE)
-    else z80_0.change_nmi(PULSE_LINE);
-  //Sound CPU
-  z80_1.run(frame_s);
-  frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-  z80_1.change_irq(HOLD_LINE);
+ for f:=0 to 255 do begin
+    //Main CPU
+    z80_0.run(frame_m);
+    frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+    //Sound CPU
+    z80_1.run(frame_s);
+    frame_s:=frame_s+z80_1.tframes-z80_1.contador;
+    //Sound DAC
+    z80_2.run(frame_dac);
+    frame_dac:=frame_dac+z80_2.tframes-z80_2.contador;
+    case f of
+        22:vblank:=0;
+        111:if haz_nmi then z80_0.change_nmi(PULSE_LINE);
+        239:begin
+              z80_0.change_irq(HOLD_LINE);
+              update_video_hardhead2;
+              vblank:=$40;
+            end;
+    end;
  end;
-  update_video_hardhead2;
   eventos_suna_hw;
   video_sync;
 end;
@@ -443,7 +469,12 @@ case direccion of
   0..$7fff:if z80_0.opcode then hardhead2_getbyte:=mem_opcodes[direccion]
               else hardhead2_getbyte:=memoria[direccion];
   $8000..$bfff:hardhead2_getbyte:=rom_bank[banco_rom,direccion and $3fff];
-  $c000..$c003,$c080:hardhead2_getbyte:=$ff;
+  $c000:hardhead2_getbyte:=marcade.in0;
+  $c001:hardhead2_getbyte:=marcade.in1;
+  $c002:hardhead2_getbyte:=marcade.dswa;
+  $c003:hardhead2_getbyte:=marcade.dswb;
+  $c080:hardhead2_getbyte:=$bf or vblank;
+  $c600..$c7ff:hardhead2_getbyte:=buffer_paleta[direccion-$c600];
   $c800..$dfff:hardhead2_getbyte:=ram_bank[banco_ram,direccion-$c800];
   $e000..$ffff:hardhead2_getbyte:=sprite_bank[banco_sprite*$2000+(direccion and $1fff)];
 end;
@@ -451,17 +482,25 @@ end;
 
 procedure hardhead2_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$c000 then exit;
 case direccion of
+  0..$bfff:;
   $c200:banco_sprite:=(valor shr 1) and 1;
   $c280,$c28c:banco_rom:=valor and $f;
+  $c300:main_screen.flip_main_screen:=(valor and 1)<>0;
   $c380:haz_nmi:=(valor and 1)<>0;
+  $c400:; //leds
   $c500:soundlatch:=valor;
-  $c508:banco_sprite:=0;
   $c507,$c556,$c560:banco_ram:=1;
+  $c508:banco_sprite:=0;
   $c522,$c528,$c533:banco_ram:=0;
   $c50f:banco_sprite:=1;
-  $c600..$c7ff:cambiar_color(direccion and $fffe);
+  $c600..$c7ff:begin
+                  direccion:=direccion-$c600;
+                  if buffer_paleta[direccion]<>valor then begin
+                    buffer_paleta[direccion]:=valor;
+                    cambiar_color(direccion and $1fe);
+                  end;
+               end;
   $c800..$dfff:ram_bank[banco_ram,direccion-$c800]:=valor;
   $e000..$ffff:sprite_bank[banco_sprite*$2000+(direccion and $1fff)]:=valor;
 end;
@@ -470,18 +509,61 @@ end;
 function hardhead2_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
+  0..$bfff,$e000..$e7ff:hardhead2_snd_getbyte:=mem_snd[direccion];
   $f800:hardhead2_snd_getbyte:=soundlatch;
-  else hardhead2_snd_getbyte:=mem_snd[direccion];
 end;
 end;
 
 procedure hardhead2_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
-mem_snd[direccion]:=valor;
 case direccion of
+  0..$bfff:;
+  $c000:ym3812_0.control(valor);
+  $c001:ym3812_0.write(valor);
+  $c002:ay8910_0.control(valor);
+  $c003:ay8910_0.write(valor);
+  $e000..$e7ff:mem_snd[direccion]:=valor;
   $f000:soundlatch2:=valor;
 end;
+end;
+
+function hardhead2_dac_getbyte(direccion:word):byte;
+begin
+hardhead2_dac_getbyte:=mem_misc[direccion];
+end;
+
+procedure hardhead2_dac_putbyte(direccion:word;valor:byte);
+begin
+end;
+
+function hardhead2_dac_inbyte(puerto:word):byte;
+begin
+  if (puerto and $ff)=0 then hardhead2_dac_inbyte:=soundlatch2;
+end;
+
+procedure hardhead2_dac_outbyte(puerto:word;valor:byte);
+begin
+  case (puerto and $ff) of
+    0:dac_0.data8_w(valor);
+    1:dac_1.data8_w(valor);
+    2:dac_2.data8_w(valor);
+    3:dac_3.data8_w(valor);
+  end;
+end;
+
+procedure hardhead2_snd(status:byte);
+begin
+  z80_1.change_irq(status);
+end;
+
+procedure hardhead2_play_sound;
+begin
+  ym3812_0.update;
+  ay8910_0.update;
+  dac_0.update;
+  dac_1.update;
+  dac_2.update;
+  dac_3.update;
 end;
 
 //Main
@@ -491,6 +573,12 @@ begin
  z80_1.reset;
  ay8910_0.reset;
  ym3812_0.reset;
+ if main_vars.tipo_maquina=68 then begin
+   dac_0.reset;
+   dac_1.reset;
+   dac_2.reset;
+   dac_3.reset;
+ end;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -504,6 +592,10 @@ begin
  dac_value:=0;
  dac_index:=0;
  dac_pos:=0;
+ banco_sprite:=0;
+ banco_ram:=0;
+ haz_nmi:=false;
+ vblank:=0;
 end;
 
 function iniciar_suna_hw:boolean;
@@ -511,13 +603,14 @@ const
   pc_x:array[0..7] of dword=(3,2,1,0,11,10,9,8);
   pc_y:array[0..7] of dword=(0*16,1*16,2*16,3*16,4*16,5*16,6*16,7*16);
   swaptable_hh:array[0..7] of byte=(1,1,0,1,1,1,1,0);
+  swaptable_data_hh2:array[0..7] of byte=(1,1,0,1,0,1,1,0);
   swaptable_lines_hh2:array[0..79] of byte=(
-			1,1,1,1,0,0,1,1,    0,0,0,0,0,0,0,0,	// 8000-ffff not used
+			1,1,1,1,0,0,1,1,    0,0,0,0,0,0,0,0,    // 8000-ffff not used
 			1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,
 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 			1,1,0,0,0,0,0,0,1,1,0,0,1,1,0,0);
-  swaptable_hh2:array[0..31] of byte=(
+  swaptable_opcodes_hh2:array[0..31] of byte=(
 			1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,
 			1,1,0,1,1,1,1,1,1,1,1,1,0,1,0,0);
 	xortable_hh2:array[0..31] of byte=(
@@ -526,7 +619,6 @@ const
 var
   f,addr:dword;
   valor,table:byte;
-  tempw:word;
   mem_final:array[0..$4ffff] of byte;
   memoria_temp:array[0..$7ffff] of byte;
 begin
@@ -534,6 +626,7 @@ iniciar_suna_hw:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
 iniciar_video(256,224);
+//iniciar_video(512,512);
 case main_vars.tipo_maquina of
   67:begin
         //Main CPU
@@ -542,11 +635,11 @@ case main_vars.tipo_maquina of
         //Sound CPU
         z80_1:=cpu_z80.create(3000000,256);
         z80_1.change_ram_calls(hardhead_snd_getbyte,hardhead_snd_putbyte);
-        z80_1.init_sound(snd_despues_instruccion);
+        z80_1.init_sound(hardhead_play_sound);
         timers.init(z80_1.numero_cpu,3000000/(60*4),hardhead_snd,nil,true);
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(2000000,AY8910,0.8);
+        ay8910_0:=ay8910_chip.create(1500000,AY8910,0.8);
         ay8910_0.change_io_calls(nil,nil,hardhead_portaw,hardhead_portbw);
         //Y para el DAC 8Khz
         dac_timer:=timers.init(z80_1.numero_cpu,3000000/8000,dac_sound,nil,false);
@@ -563,10 +656,8 @@ case main_vars.tipo_maquina of
         if not(roms_load(@memoria_temp,hardhead_dac)) then exit;
         //Convierto los samples
         for f:=0 to $7fff do begin
-          tempw:=((memoria_temp[f] and $f))*$100;
-          suna_dac[f*2]:=tempw;
-          tempw:=((memoria_temp[f] shr 4))*$100;
-          suna_dac[(f*2)+1]:=tempw;
+          suna_dac[f*2]:=shortint((((memoria_temp[f] and $f) shl 4) xor $80))*$100;
+          suna_dac[(f*2)+1]:=shortint(((memoria_temp[f] and $f0) xor $80))*$100;
         end;
         dac_tsample:=init_channel;
         //convertir sprites e invertirlos, solo hay sprites!!
@@ -576,27 +667,45 @@ case main_vars.tipo_maquina of
         gfx[0].trans[15]:=true;
         gfx_set_desc_data(4,0,8*8*2,$20000*8+0,$20000*8+4,0,4);
         convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+        //DIP
+        marcade.dswa:=$fc;
+        marcade.dswb:=$77;
+        marcade.dswa_val:=@hardhead_dip_a;
+        marcade.dswb_val:=@hardhead_dip_b;
      end;
      68:begin
         //Main CPU
-        z80_0:=cpu_z80.create(6000000,2);
+        z80_0:=cpu_z80.create(6000000,256);
         z80_0.change_ram_calls(hardhead2_getbyte,hardhead2_putbyte);
         //Sound CPU
-        z80_1:=cpu_z80.create(3000000,2);
+        z80_1:=cpu_z80.create(6000000,256);
         z80_1.change_ram_calls(hardhead2_snd_getbyte,hardhead2_snd_putbyte);
-        z80_1.init_sound(snd_despues_instruccion);
+        z80_1.init_sound(hardhead2_play_sound);
+        //cargar sonido
+        if not(roms_load(@mem_snd,hardhead2_sound)) then exit;
+        //DAC CPU
+        z80_2:=cpu_z80.create(6000000,256);
+        z80_2.change_ram_calls(hardhead2_dac_getbyte,hardhead2_dac_putbyte);
+        z80_2.change_io_calls(hardhead2_dac_inbyte,hardhead2_dac_outbyte);
+        if not(roms_load(@mem_misc,hardhead2_pcm)) then exit;
         //sound chips
         ym3812_0:=ym3812_chip.create(YM3812_FM,3000000);
-        ay8910_0:=ay8910_chip.create(2000000,AY8910,0.3);
+        ym3812_0.change_irq_calls(hardhead2_snd);
+        ay8910_0:=ay8910_chip.create(1500000,AY8910,0.3);
+        dac_0:=dac_chip.create(1);
+        dac_1:=dac_chip.create(1);
+        dac_2:=dac_chip.create(1);
+        dac_3:=dac_chip.create(1);
         //cargar roms
         if not(roms_load(@memoria_temp,hardhead2_rom)) then exit;
         //desencriptarlas
         //Primero muevo los datos a su sitio
+        copymemory(@mem_final,@memoria_temp,$50000);
         for f:=0 to $4ffff do begin
             addr:=f;
         		if (swaptable_lines_hh2[(f and $ff000) shr 12])<>0 then
         			addr:=(addr and $f0000) or BITSWAP16(addr,15,14,13,12,11,10,9,8,6,7,5,4,3,2,1,0);
-        		mem_final[f]:=memoria_temp[addr];
+        		memoria_temp[f]:=mem_final[addr];
         end;
         //Pongo los bancos ROM
         for f:=0 to $f do copymemory(@rom_bank[f,0],@memoria_temp[$10000+(f*$4000)],$4000);
@@ -605,24 +714,26 @@ case main_vars.tipo_maquina of
       		table:=(f and 1) or ((f and $400) shr 9) or ((f and $7000) shr 10);
       		valor:=memoria_temp[f];
       		valor:=BITSWAP8(valor,7,6,5,3,4,2,1,0) xor $41 xor xortable_hh2[table];
-      		if (swaptable_hh2[table])<>0 then valor:=BITSWAP8(valor,5,6,7,4,3,2,1,0);
+      		if (swaptable_opcodes_hh2[table])<>0 then valor:=BITSWAP8(valor,5,6,7,4,3,2,1,0);
       		mem_opcodes[f]:=valor;
         end;
         //Y despues los datos
         for f:=0 to $7fff do begin
-		      if (swaptable_hh2[(f and $7000) shr 12])<>0 then memoria[f]:=BITSWAP8(memoria_temp[f],5,6,7,4,3,2,1,0) xor $41
+		      if (swaptable_data_hh2[(f and $7000) shr 12])<>0 then memoria[f]:=BITSWAP8(memoria_temp[f],5,6,7,4,3,2,1,0) xor $41
             else memoria[f]:=memoria_temp[f];
         end;
-        //cargar sonido
-        if not(roms_load(@mem_snd,hardhead2_sound)) then exit;
-        if not(roms_load(@suna_dac,hardhead2_pcm)) then exit;
         //convertir sprites e invertirlos, solo hay sprites!!
         if not(roms_load(@memoria_temp,hardhead2_sprites)) then exit;
         for f:=0 to $7ffff do memoria_temp[f]:=not(memoria_temp[f]);
         init_gfx(0,8,8,$4000);
         gfx[0].trans[15]:=true;
         gfx_set_desc_data(4,0,8*8*2,$40000*8+0,$40000*8+4,0,4);
-        convert_gfx(0,0,@memoria_temp[0],@pc_x[0],@pc_y[0],false,false);
+        convert_gfx(0,0,@memoria_temp,@pc_x,@pc_y,false,false);
+        //DIP
+        marcade.dswa:=$5f;
+        marcade.dswb:=$F7;
+        marcade.dswa_val:=@hardhead2_dip_a;
+        marcade.dswb_val:=@hardhead2_dip_b;
      end;
 end;
 //final
@@ -633,7 +744,10 @@ end;
 procedure Cargar_suna_hw;
 begin
 case main_vars.tipo_maquina of
-  67:llamadas_maquina.bucle_general:=hardhead_principal;
+  67:begin
+        llamadas_maquina.bucle_general:=hardhead_principal;
+        llamadas_maquina.fps_max:=59.1;
+     end;
   68:llamadas_maquina.bucle_general:=hardhead2_principal;
 end;
 llamadas_maquina.iniciar:=iniciar_suna_hw;

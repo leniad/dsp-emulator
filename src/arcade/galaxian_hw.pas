@@ -24,8 +24,7 @@ const
         galaxian_char:array[0..1] of tipo_roms=(
         (n:'1h.bin';l:$800;p:0;crc:$39fb43a4),(n:'1k.bin';l:$800;p:$800;crc:$7e3f56a2));
         galaxian_pal:tipo_roms=(n:'6l.bpr';l:$20;p:0;crc:$c3ac9467);
-        galaxian_num_samples=9;
-        galaxian_samples:array[0..(galaxian_num_samples-1)] of tipo_nombre_samples=(
+        galaxian_samples:array[0..8] of tipo_nombre_samples=(
         (nombre:'fire.wav'),(nombre:'death.wav'),(nombre:'back1.wav'),(nombre:'back2.wav'),(nombre:'back3.wav'),
         (nombre:'kill.wav';restart:true),(nombre:'coin.wav'),(nombre:'music.wav'),(nombre:'extra.wav'));
         //Jump Bug
@@ -1078,7 +1077,7 @@ case main_vars.tipo_maquina of
       //cargar roms
       if not(roms_load(@memoria,galaxian_rom)) then exit;
       //cargar samples
-      if load_samples('galaxian.zip',@galaxian_samples,galaxian_num_samples) then z80_0.init_sound(galaxian_despues_instruccion);
+      if load_samples(galaxian_samples) then z80_0.init_sound(galaxian_despues_instruccion);
       //convertir chars &sprites
       if not(roms_load(@memoria_temp,galaxian_char)) then exit;
       convert_chars(256);
@@ -1116,7 +1115,7 @@ case main_vars.tipo_maquina of
           else ctemp1:=ctemp2;
 		    memoria[f]:=ctemp1;
       end;
-      if load_samples('mooncrst.zip',@mooncrst_samples,5) then z80_0.init_sound(galaxian_despues_instruccion);
+      if load_samples(mooncrst_samples) then z80_0.init_sound(galaxian_despues_instruccion);
       //convertir chars & sprites
       if not(roms_load(@memoria_temp,mooncrst_char)) then exit;
       convert_chars(512);

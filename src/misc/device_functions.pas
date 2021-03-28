@@ -216,6 +216,14 @@ if dac_1<>nil then begin
   dac_1.free;
   dac_1:=nil;
 end;
+if dac_2<>nil then begin
+  dac_2.free;
+  dac_2:=nil;
+end;
+if dac_3<>nil then begin
+  dac_3.free;
+  dac_3:=nil;
+end;
 if msm_5205_0<>nil then begin
   msm_5205_0.free;
   msm_5205_0:=nil;

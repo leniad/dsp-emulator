@@ -124,15 +124,6 @@ self.clock:=clock div 15;
 self.tframes:=(clock/15/frames_div)/llamadas_maquina.fps_max;
 self.in_port:=nil;
 self.out_port:=nil;
-self.r.a:=0;
-self.timer:=0;
-self.prescaler:=0;
-self.t1_history:=0;
-self.feature_mask:=0;
-self.dbbi:=0;
-self.dbbo:=0;
-self.pedir_irq:=CLEAR_LINE;
-self.update_regptr;
 self.chip_type:=chip_type;
 case chip_type of
   I8035:begin
@@ -202,6 +193,15 @@ end;
 
 procedure cpu_mcs48.reset;
 begin
+  self.r.a:=0;
+  self.timer:=0;
+  self.prescaler:=0;
+  self.t1_history:=0;
+  self.feature_mask:=0;
+  self.dbbi:=0;
+  self.dbbo:=0;
+  self.pedir_irq:=CLEAR_LINE;
+  self.update_regptr;
 	self.r.pc:=0;
   self.pon_pila(8);
 	self.r.a11:=0;
@@ -220,6 +220,7 @@ begin
 	//confirmed from interrupt logic description
 	self.irq_in_progress:=false;
 	self.timer_overflow:=false;
+  self.change_reset(CLEAR_LINE);
   if self.chip_type=N7751 then self.i8243.reset;
 end;
 

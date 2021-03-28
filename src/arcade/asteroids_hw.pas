@@ -293,7 +293,7 @@ case main_vars.tipo_maquina of
         //cargar roms
         if not(roms_load(@memoria,as_rom)) then exit;
         //samples
-        hay_samples:=load_samples('asteroid.zip',@as_samples,3);
+        hay_samples:=load_samples(as_samples);
         //dip
         marcade.dswa:=$84;
         marcade.dswa_val:=@asteroids_dip_a;

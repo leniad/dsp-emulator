@@ -22,8 +22,7 @@ const
         galaga_sound:tipo_roms=(n:'prom-1.1d';l:$100;p:0;crc:$7a2815b4);
         galaga_sprites:array[0..1] of tipo_roms=(
         (n:'gg1_11.4d';l:$1000;p:0;crc:$ad447c80),(n:'gg1_10.4f';l:$1000;p:$1000;crc:$dd6f1afc));
-        num_samples_galaga=2;
-        galaga_samples:array[0..(num_samples_galaga-1)] of tipo_nombre_samples=(
+        galaga_samples:array[0..1] of tipo_nombre_samples=(
         (nombre:'bang.wav'),(nombre:'init.wav'));
         //Dig Dug
         digdug_rom:array[0..3] of tipo_roms=(
@@ -64,8 +63,7 @@ const
         xevious_bg_tiles:array[0..2] of tipo_roms=(
         (n:'xvi_9.2a';l:$1000;p:0;crc:$57ed9879),(n:'xvi_10.2b';l:$2000;p:$1000;crc:$ae3ba9e5),
         (n:'xvi_11.2c';l:$1000;p:$3000;crc:$31e244dd));
-        num_samples_xevious=2;
-        xevious_samples:array[0..(num_samples_xevious-1)] of tipo_nombre_samples=(
+        xevious_samples:array[0..1] of tipo_nombre_samples=(
         (nombre:'explo2.wav'),(nombre:'explo1.wav'));
         //Bosconian
         bosco_rom:array[0..3] of tipo_roms=(
@@ -84,8 +82,7 @@ const
         bosco_52xx:array[0..2] of tipo_roms=(
         (n:'bos1_9.5n';l:$1000;p:$0;crc:$09acc978),(n:'bos1_10.5m';l:$1000;p:$1000;crc:$e571e959),
         (n:'bos1_11.5k';l:$1000;p:$2000;crc:$17ac9511));
-        num_samples_bosco=3;
-        bosco_samples:array[0..(num_samples_bosco-1)] of tipo_nombre_samples=(
+        bosco_samples:array[0..2] of tipo_nombre_samples=(
         (nombre:'bigbang.wav'),(nombre:'midbang.wav'),(nombre:'shot.wav';restart:true;loop:false));
         MAX_STARS=252;
 
@@ -1107,7 +1104,7 @@ case main_vars.tipo_maquina of
           namco_06xx_init(0,IO51XX,NONE,NONE,IO54XX,namco_06xx_nmi);
           //Namco 54xx
           if not(namcoio_54xx_init('galaga.zip')) then exit;
-          load_samples('galaga.zip',@galaga_samples,num_samples_galaga);
+          load_samples(galaga_samples);
           //cargar roms
           if not(roms_load(@memoria,galaga_rom)) then exit;
           if not(roms_load(@mem_snd,galaga_sub)) then exit;
@@ -1210,7 +1207,7 @@ case main_vars.tipo_maquina of
           if not(namcoio_50xx_init(0,'xevious.zip')) then exit;
           if not(namcoio_54xx_init('xevious.zip')) then exit;
           z80_0.init_sound(galaga_sound_update);
-          load_samples('xevious.zip',@xevious_samples,num_samples_xevious);
+          load_samples(xevious_samples);
           //Sound
           namco_snd_0:=namco_snd_chip.create(3);
           //cargar roms
@@ -1284,7 +1281,7 @@ case main_vars.tipo_maquina of
           if not(namcoio_50xx_init(1,'bosco.zip')) then exit;
           if not(namcoio_54xx_init('bosco.zip')) then exit;
           z80_0.init_sound(galaga_sound_update);
-          load_samples('bosco.zip',@bosco_samples,num_samples_bosco,0.25);
+          load_samples(bosco_samples,0.25);
           //Sound
           namco_snd_0:=namco_snd_chip.create(3);
           //cargar roms

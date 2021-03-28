@@ -28,14 +28,13 @@ type
              tsample_reserved:array[0..MAX_CHANNELS] of integer;
              amp:single;
         end;
-  pnom_sample=^tipo_nombre_samples;
   ptipo_samples=^tipo_samples;
 var
   data_samples:ptipo_samples;
   samples_loaded:boolean;
 
 function convert_wav(source:pbyte;var data:pword;source_long:dword;var long:dword):boolean;
-function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte;amp:single=1):boolean;
+function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1):boolean;
 function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean;amp:single=1):boolean;
 procedure start_sample(num:byte);
 procedure samples_update;
@@ -46,6 +45,7 @@ procedure stop_all_samples;
 function sample_status(num:byte):boolean;
 
 implementation
+uses init_games;
 
 type
   theader=packed record
@@ -210,50 +210,55 @@ end;
 load_samples_raw:=true;
 end;
 
-function load_samples(nombre_zip:string;nombre_samples:pnom_sample;num_samples:byte;amp:single=1):boolean;
+function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1):boolean;
 var
-  nsamples,f:byte;
+  f,sample_size:word;
   ptemp:pbyte;
   longitud,crc:integer;
+  nombre_zip:string;
 begin
+for f:=1 to GAMES_CONT do begin
+  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+    nombre_zip:=GAMES_DESC[f].zip+'.zip';
+    break;
+  end;
+end;
 load_samples:=false;
-nsamples:=0;
 //Inicializo los samples
 getmem(data_samples,sizeof(tipo_samples));
 //Inicializo un buffer
 getmem(ptemp,$100000);
-repeat
-    if not(load_file_from_zip(Directory.Arcade_samples+nombre_zip,nombre_samples.nombre,ptemp,longitud,crc,false)) then begin
+sample_size:=sizeof(nombre_samples) div sizeof(tipo_nombre_samples);
+for f:=0 to (sample_size-1) do begin
+    if not(load_file_from_zip(Directory.Arcade_samples+nombre_zip,nombre_samples[f].nombre,ptemp,longitud,crc,false)) then begin
         freemem(data_samples);
         data_samples:=nil;
         freemem(ptemp);
         exit;
     end;
     //Inicializo el sample
-    getmem(data_samples.audio[nsamples],sizeof(tipo_audio));
-    data_samples.audio[nsamples].data:=nil;
-    data_samples.audio[nsamples].pos:=0;
-    data_samples.audio[nsamples].playing:=false;
+    getmem(data_samples.audio[f],sizeof(tipo_audio));
+    data_samples.audio[f].data:=nil;
+    data_samples.audio[f].pos:=0;
+    data_samples.audio[f].playing:=false;
     //cargar datos wav
-    if not(convert_wav(ptemp,data_samples.audio[nsamples].data,longitud,data_samples.audio[nsamples].long)) then begin
-      MessageDlg('Error loading sample file: '+'"'+nombre_samples.nombre+'"', mtError,[mbOk], 0);
+    if not(convert_wav(ptemp,data_samples.audio[f].data,longitud,data_samples.audio[f].long)) then begin
+      MessageDlg('Error loading sample file: '+'"'+nombre_samples[f].nombre+'"', mtError,[mbOk], 0);
       freemem(data_samples);
       data_samples:=nil;
       freemem(ptemp);
       exit;
     end;
-    data_samples.audio[nsamples].restart:=nombre_samples.restart;
-    data_samples.audio[nsamples].loop:=nombre_samples.loop;
-    inc(nombre_samples);
-    inc(nsamples);
-until nsamples=num_samples;
+    data_samples.audio[f].restart:=nombre_samples[f].restart;
+    data_samples.audio[f].loop:=nombre_samples[f].loop;
+end;
 freemem(ptemp);
-data_samples.num_samples:=num_samples;
+data_samples.num_samples:=sample_size;
 data_samples.amp:=amp;
 //Inicializar solor los necesarios...
 for f:=0 to MAX_CHANNELS do data_samples.tsample_reserved[f]:=-1;
-if (nsamples-1)>MAX_CHANNELS then nsamples:=MAX_CHANNELS;
-for f:=0 to (nsamples-1) do begin
+if (sample_size-1)>MAX_CHANNELS then sample_size:=MAX_CHANNELS;
+for f:=0 to (sample_size-1) do begin
   data_samples.tsample_reserved[f]:=init_channel;
   data_samples.tsample_use[f]:=false;
 end;

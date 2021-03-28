@@ -66,7 +66,7 @@ var
  adc_select,sound_latch:byte;
  road_gfx:array[0..(((256*2+1)*512)-1)] of byte;
  pcm_rom:array[0..$5ffff] of byte;
- gear_hi:boolean;
+ push_gear,gear_hi:boolean;
 
 implementation
 
@@ -485,15 +485,18 @@ begin
 if event.arcade then begin
   //Service
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.but2[0] then begin
-      gear_hi:=not(gear_hi);
-      if gear_hi then begin
-        marcade.in0:=marcade.in0 or $10;
-        main_vars.mensaje_principal:='Gear Hi';
-      end else begin
-        marcade.in0:=marcade.in0 and $ef;
-        main_vars.mensaje_principal:='Gear Lo';
+  if arcade_input.but2[0] then push_gear:=true else begin
+      if push_gear then begin
+        gear_hi:=not(gear_hi);
+        if gear_hi then begin
+          marcade.in0:=marcade.in0 or $10;
+          main_vars.mensaje_principal:='Gear Hi';
+        end else begin
+          marcade.in0:=marcade.in0 and $ef;
+          main_vars.mensaje_principal:='Gear Lo';
+        end;
       end;
+      push_gear:=false;
   end;
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
@@ -901,6 +904,7 @@ begin
  sound_latch:=0;
  gear_hi:=false;
  main_vars.mensaje_principal:='Gear Lo';
+ push_gear:=false;
 end;
 
 function iniciar_outrun:boolean;

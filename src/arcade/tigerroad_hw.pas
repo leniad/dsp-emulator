@@ -37,6 +37,25 @@ const
         f1dream_sprites:array[0..3] of tipo_roms=(
         (n:'03b_06.bin';l:$10000;p:0;crc:$5e54e391),(n:'02b_05.bin';l:$10000;p:$10000;crc:$cdd119fd),
         (n:'03d_08.bin';l:$10000;p:$20000;crc:$811f2e22),(n:'02d_07.bin';l:$10000;p:$30000;crc:$aa9a1233));
+        tigeroad_dip_a:array [0..8] of def_dip=(
+        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$300;name:'Lives';number:4;dip:((dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'4'),(dip_val:$100;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$400;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$400;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1800;name:'Bonus Life';number:4;dip:((dip_val:$1800;dip_name:'20K 70K 70K'),(dip_val:$1000;dip_name:'20K 80K 80K'),(dip_val:$800;dip_name:'30K 80K 80K'),(dip_val:$0;dip_name:'30K 90K 90K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$6000;name:'Difficulty';number:4;dip:((dip_val:$2000;dip_name:'Very Easy (Level 0)'),(dip_val:$4000;dip_name:'Easy (Level 10)'),(dip_val:$6000;dip_name:'Normal (Level 20)'),(dip_val:$0;dip_name:'Difficult (Level 30)'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8000;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$8000;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        f1dream_dip_a:array [0..9] of def_dip=(
+        (mask:$7;name:'Coin A';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$1;dip_name:'3C 1C'),(dip_val:$2;dip_name:'2C 1C'),(dip_val:$7;dip_name:'1C 1C'),(dip_val:$6;dip_name:'1C 2C'),(dip_val:$5;dip_name:'1C 3C'),(dip_val:$4;dip_name:'1C 4C'),(dip_val:$3;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Flip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$300;name:'Lives';number:4;dip:((dip_val:$300;dip_name:'3'),(dip_val:$200;dip_name:'4'),(dip_val:$100;dip_name:'5'),(dip_val:$0;dip_name:'7'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$400;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$400;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$1800;name:'F1 Up Point';number:4;dip:((dip_val:$1800;dip_name:'12'),(dip_val:$1000;dip_name:'16'),(dip_val:$800;dip_name:'18'),(dip_val:$0;dip_name:'20'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2000;name:'Difficulty';number:2;dip:((dip_val:$2000;dip_name:'Normal'),(dip_val:$0;dip_name:'Difficult'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4000;name:'Version';number:2;dip:((dip_val:$0;dip_name:'World'),(dip_val:$4000;dip_name:'Japan'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8000;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$8000;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  scroll_x,scroll_y,mask_sprite,mask_back:word;
@@ -108,16 +127,24 @@ end;
 procedure eventos_tigeroad;
 begin
 if event.arcade then begin
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  //P1 P2
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fffe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fffb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fff7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ffef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ffdf) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.right[1] then marcade.in0:=(marcade.in0 and $feff) else marcade.in0:=(marcade.in0 or $100);
+  if arcade_input.left[1] then marcade.in0:=(marcade.in0 and $fdff) else marcade.in0:=(marcade.in0 or $200);
+  if arcade_input.down[1] then marcade.in0:=(marcade.in0 and $fbff) else marcade.in0:=(marcade.in0 or $400);
+  if arcade_input.up[1] then marcade.in0:=(marcade.in0 and $f7ff) else marcade.in0:=(marcade.in0 or $800);
+  if arcade_input.but0[1] then marcade.in0:=(marcade.in0 and $efff) else marcade.in0:=(marcade.in0 or $1000);
+  if arcade_input.but1[1] then marcade.in0:=(marcade.in0 and $dfff) else marcade.in0:=(marcade.in0 or $2000);
+  //System
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $feff) else marcade.in1:=(marcade.in1 or $100);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $fdff) else marcade.in1:=(marcade.in1 or $200);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $bfff) else marcade.in1:=(marcade.in1 or $4000);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7fff) else marcade.in1:=(marcade.in1 or $8000);
 end;
 end;
 
@@ -147,6 +174,28 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
+function tigeroad_getword(direccion:dword):word;
+var
+  tempw:word;
+begin
+case direccion of
+  0..$3ffff:tigeroad_getword:=rom[direccion shr 1];
+  $fe4000:tigeroad_getword:=marcade.in0;
+  $fe4002:tigeroad_getword:=marcade.in1;
+  $fe4004:tigeroad_getword:=marcade.dswa;
+  $fe0800..$fe1807:begin
+                      tempw:=direccion-$fe0800;
+                      tigeroad_getword:=sprite_ram[tempw shr 1];
+                   end;
+  $fec000..$fec7ff:tigeroad_getword:=video_ram[(direccion and $7ff) shr 1];
+  $ff8200..$ff867f:begin
+                      tempw:=direccion-$ff8200;
+                      tigeroad_getword:=buffer_paleta[tempw shr 1];
+                   end;
+  $ffc000..$ffffff:tigeroad_getword:=ram[(direccion and $3fff) shr 1];
+end;
+end;
+
 procedure cambiar_color(tmp_color,numero:word);inline;
 var
   color:tcolor;
@@ -159,28 +208,6 @@ begin
     0..$ff:pintar_fondo:=true;
     512..575:buffer_color[(numero shr 2) and $f]:=true;
   end;
-end;
-
-function tigeroad_getword(direccion:dword):word;
-var
-  tempw:word;
-begin
-case direccion of
-  0..$3ffff:tigeroad_getword:=rom[direccion shr 1];
-  $fe4000:tigeroad_getword:=$ff00 or marcade.in0;
-  $fe4002:tigeroad_getword:=(marcade.in1 shl 8) or $ff;
-  $fe4004:tigeroad_getword:=(marcade.in2 shl 8) or $ff;
-  $fe0800..$fe1807:begin
-                      tempw:=direccion-$fe0800;
-                      tigeroad_getword:=sprite_ram[tempw shr 1];
-                   end;
-  $fec000..$fec7ff:tigeroad_getword:=video_ram[(direccion and $7ff) shr 1];
-  $ff8200..$ff867f:begin
-                      tempw:=direccion-$ff8200;
-                      tigeroad_getword:=buffer_paleta[tempw shr 1];
-                   end;
-  $ffc000..$ffffff:tigeroad_getword:=ram[(direccion and $3fff) shr 1];
-end;
 end;
 
 procedure tigeroad_putword(direccion:dword;valor:word);
@@ -380,15 +407,10 @@ begin
  z80_0.reset;
  ym2203_0.reset;
  ym2203_1.reset;
+ if main_vars.tipo_maquina<>52 then mcs51_0.reset;
  reset_audio;
- marcade.in0:=$ff;
- marcade.in1:=$ff;
- if main_vars.tipo_maquina=52 then begin
-  marcade.in2:=$fb;
- end else begin
-  marcade.in2:=$bb;
-  mcs51_0.reset;
- end;
+ marcade.in0:=$ffff;
+ marcade.in1:=$ffff;
  scroll_x:=0;
  scroll_y:=0;
  pintar_fondo:=true;
@@ -478,6 +500,9 @@ case main_vars.tipo_maquina of
         //sprites
         if not(roms_load(memoria_temp,tigeroad_sprites)) then exit;
         tiger_road_sprites($1000);
+        //DIP
+        marcade.dswa:=$fbff;
+        marcade.dswa_val:=@tigeroad_dip_a;
      end;
   53:begin
         m68000_0.change_ram16_calls(tigeroad_getword,f1dream_putword);
@@ -500,6 +525,9 @@ case main_vars.tipo_maquina of
         //sprites
         if not(roms_load(memoria_temp,f1dream_sprites)) then exit;
         tiger_road_sprites($800);
+        //DIP
+        marcade.dswa:=$bbff;
+        marcade.dswa_val:=@f1dream_dip_a;
      end;
 end;
 //final

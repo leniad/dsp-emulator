@@ -337,7 +337,7 @@ begin
 		// various address bits are pulled high because the mcu doesn't drive them
 		// the 3 upper address bits (p2.0, p2.1, p2.2) are connected to a14 to a16
 		address:=$e3e01 or ((direccion and $700) shl 6) or ((direccion and $ff) shl 1);
-    res:=m68000_0.getbyte(address);
+    res:=bionicc_getword(address);
 	end;
 	mcu_ext_ram_read:=res;
 end;
@@ -349,7 +349,7 @@ begin
   if ((mcu_p3 and $20)=0) then begin
     direccion:=direccion and $7ff;
 		address:=$e3e01 or ((direccion and $700) shl 6) or ((direccion and $ff) shl 1);
-    m68000_0.putbyte(address,valor);
+    bionicc_putword(address,valor);
   end;
 end;
 

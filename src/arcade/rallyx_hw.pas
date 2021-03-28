@@ -499,7 +499,7 @@ begin
          //cargar sonido y samples
          namco_snd_0:=namco_snd_chip.create(3);
          if not(roms_load(namco_snd_0.get_wave_dir,rallyx_sound)) then exit;
-         load_samples('rallyx.zip',@rallyx_samples,1);
+         load_samples(rallyx_samples);
          //convertir chars
          if not(roms_load(@memoria_temp,rallyx_char)) then exit;
          cargar_chars(0);
@@ -532,7 +532,7 @@ begin
          //cargar sonido y samples
          namco_snd_0:=namco_snd_chip.create(3);
          if not(roms_load(namco_snd_0.get_wave_dir,nrallyx_sound)) then exit;
-         load_samples('rallyx.zip',@rallyx_samples,1);
+         load_samples(rallyx_samples);
          //convertir chars
          if not(roms_load(@memoria_temp,nrallyx_char)) then exit;
          cargar_chars(0);

@@ -22,7 +22,7 @@ type
       amp:single;
   end;
 var
-  dac_0,dac_1:dac_chip;
+  dac_0,dac_1,dac_2,dac_3:dac_chip;
 
 implementation
 
