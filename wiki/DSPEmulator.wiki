@@ -76,8 +76,7 @@ In the main screen of the emulator you can press some buttons<br>
 - Border: You can choose line by line emulation, pixel by pixel emulation (slowly but more exact) or disable border emulation (fastest).<br>
 - LensLok: The window showing the protection is automatically activated when detecting a tape/disc having this protection, also automatically selects the appropriate game. You can force the display/hide the LensLok protection window, also within the window you can select the game if is not detected correctly.<br>
 - Spectrum 48K issue: Choose Spectrum issue 2 or 3<br>
-- Joystick: Joystick is emulated with the redefinable keys or external joystick.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;You can choose joystick type:<br>
+- Joystick: emulated with the redefinable keys or external joystick. You can choose joystick type:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Kempston<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Cursor/Protek<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Sinclair 1/Interface 2<br>
@@ -85,25 +84,25 @@ In the main screen of the emulator you can press some buttons<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Fuller<br>
 - Gunstick/Lightgun: The mouse is used as Gunstick, and left button is used as fire.<br>
 - AMX Mouse/Kempston Mouse: Use the mouse and the buttons.<br>
-- ULA+: Enable/disable ULA+ extended colors. Supported since 0.9b3 version.<br>
+- ULA+: Enable/disable ULA+ extended colors.<br>
 - AY8912 sound: Set the type of channels sound: mono, stereo ABC or stereo ACB<br>
 - Tape loading sound: Enable/disable the sound of the tape when loading.<br>
 - Speaker filter: Enable/disable filter to reduce the noise in speaker emulation.<br>
 - Speaker oversample: Quality of speaker emulation<br>
 - Turbo Sound: Add a second AY-8912<br><br>
 Other features<br>
-&nbsp;&nbsp;&nbsp;&nbsp;- Keyboard: Corresponds with the PC keyboard keys, also set some special keys:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Keyboard: Besides the standar keys mapped, there are some special keys:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Simbol Shift: Shift key (left or right)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Caps Shift: Control key (left or right)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Keys on extended models, mapped according to its function<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_spectrum.jpg" width="25%" height="25%"></img><br>
-- Virtual Tapes: Can load ZIP, TAP, TZX, PZX, WAV and CSW. Fully working spectrum load schemes (bleepload, alkatraz, original rom...). <br>
-&nbsp;With the mouse you can move inside virtual tape and select the start position. Tape begin to play when detects - LOAD "" - and stop when reaches the final.<br>
+- Virtual Tapes: Support 'TAP', 'TZX', 'PZX', 'WAV' and 'CSW' (Version 1 and 2), ZIP compressed or not. Fully working spectrum load schemes (bleepload, alkatraz, original rom...)<br>
+&nbsp;With the mouse you can move inside virtual tape and select the start position. Tape begin to play when detects 'LOAD ""' command or you can press start/stop buttons on tape window. Tape stop when reaches the end of the tape and rewinds to tape beginning.<br>
 &nbsp;If inside the ZIP file there is a ROM file, emulator load first ROM file and then loads then virtual tape.<br>
 &nbsp;Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
-- Snapshots: you can load Z80, DSP, SNA, SZX, ZX and SP. And you can save in SZX, Z80, DSP and SNA format.<br>
-- Audio: Spectrum beeper and in modern Spectrum revisions there is a AY-8912.<br>
-- Floppy disk: Emulated all NEC-765 functions but write operations. Supports IPF, DSK and 'extended' DSK formats.<br>
+- Snapshots: you can load 'Z80', 'DSP', 'SNA', 'SZX', 'ZX' and 'SP'. And you can save in 'SZX', 'Z80', 'DSP' and 'SNA' formats.<br>
+- Audio: Emulated beeper. On Spectrum 128K revisions there is an AY-8912.<br>
+- Floppy disk: Emulated all NEC-765 functions but write operations. Supports 'IPF', 'DSK' and 'extended DSK' formats.<br>
 - To do:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Contented IO is not working at 100%.<br><br>
 <b>Amstrad CPC 464,664 and 6128</b><br>
@@ -115,16 +114,17 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Dk'tronics compatible: 512Kb of extra RAM<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Extension of 4Mb (not working)<br>
 - LensLok: The window showing the protection is automatically activated when detecting a tape/disc having this protection, also automatically selects the appropriate game. You can force the display/hide the LensLok protection window, also within the window you can select the game if is not detected correctly.<br>
-- Keyboard: Mapped all keys in a similar position than the CPC. Special cases:<br>
+- Keyboard: Besides the standar keys mapped, there are some special keys:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- F0..F9 CPC function keys are emulated using the numbers on the PC keypad<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The shift key on the CPC: Mapped on both shift keys (left or right) on the PC keyboard<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The 'point' button next to the function in the CPC is also mapped into the 'point' PC keypad<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The 'Enter' key on the numeric keypad PC works also as 'Enter' in the emulation CPC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_cpc.png" width="25%" height="25%"></img><br>
 - Joystick: Emulated with the redefinable keys or external joystick.<br>
-- Virtual Tape: you can load ZIP, CDT, WAV and CSW. Work the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
-- Sound: All version have the AY-8912 chip<br>
-- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports IPF, DSK and 'extended' DSK formats.<br>
+- Virtual Tape: support 'CDT', 'WAV' and 'CSW', ZIP compressed or not. Work the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
+&nbsp;Start/stop tape motor commands also start/stop tape.<br>
+- Sound: All version support the AY-8912<br>
+- Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports 'IPF', 'DSK' and 'extended DSK' formats.<br>
 - Snapshots: Support load/save 'SNA' format<br>
 - To do:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Some disk protections are not working (a few left)<br>
@@ -133,7 +133,7 @@ Other features<br>
 <hr>
 <b>NES</b><br>
 <hr>
-- Cartridge: Supports '.nes' ROM format, ZIP compressed or not.<br>
+- Cartridge: Supports 'NES' file format, ZIP compressed or not.<br>
 - Keys: Use the redefined keys or external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key).<br>
@@ -150,7 +150,7 @@ Other features<br>
 - Keys: Use the redefined keys or the external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key).<br>
-- Cartridges: Supports cartridges '.gb' and '.gbc', ZIP compressed or not.<br>
+- Cartridges: Supports 'GB' and 'GBC' file format, ZIP compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers supported are MBC0, MBC1, MBC2, MBC3, MBC5 and HuC-1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Partial Mapper: MBC7<br>
 - To Do<br>
@@ -180,7 +180,7 @@ Other features<br>
     D 0 E F     Z X C V</pre>
 - Sound: basic sound mono supported<br>
 - Video: Supports 64x32 format from Chip8, 64x64 from Chip8 Hires and 128x64 from SuperChip8<br>
-- Files: Supports '.CH8' y '.BIN' formats<br>
+- Files: Supports 'CH8' y 'BIN' file format<br>
 - To do<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
 <b>Sega Master System</b><br>
@@ -189,21 +189,21 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Europe/Australia PAL<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Japan/Korea NTSC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- USA/Brazil NTSC<br>
-- Keys: Use the redefined keys or the external joystick<br>
+- Keys: Use the redefined keys or the external joystick, support 2 players<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'START' uses start player 1 (by default is mapped as the '1' key).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'PAUSE' uses F1 key<br>
 - Sound: Sound chip SN-76496 implemented<br>
-- Cartridges: Supports cartridges 'SMS', ZIP compressed or not.<br>
+- Cartridges: Supports 'SMS' file format, ZIP compressed or not.<br>
 - Video: Supports all video special SMS video modes, and all the original. Supports NTSC and PAL.<br>
 - To do<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
 <b>SG-1000</b><br>
-- Keys: Use the redefined keys or the external joystick<br>
+- Keys: Use the redefined keys or the external joystick, support 2 players<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'START' uses start player 1 (by default is mapped as the '1' key).<br>
 - Sound: Sound chip SN-76496 implemented<br>
-- Cartridges: Supports cartridges 'SG', ZIP compressed or not.<br>
+- Cartridges: Supports 'SG' file format, ZIP compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports up to tree types, with almost 100% compatibility<br>
 - To do<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
@@ -211,8 +211,9 @@ Other features<br>
 - Keys: Use the redefined keys or the external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'START' uses start player 1 (by default is mapped as the '1' key).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- 'PAUSE' uses F1 key<br>
 - Sound: Sound chip SN-76496 implemented<br>
-- Cartridges: Supports cartridges 'GG', ZIP compressed or not.<br>
+- Cartridges: Supports 'GG' file format, ZIP compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports two types, with almost 100% compatibility<br>
 - To do<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
