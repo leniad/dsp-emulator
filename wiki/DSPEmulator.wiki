@@ -20,7 +20,7 @@ The emulator includes inside the ZIP (not in WIP versions) the ROMS for Spectrum
     F8  --> Save quick Snapshot 2
     F9  --> Load quick Snapshot 1
     F10 --> Load quick Snapshot 2
-    F11 --> Changes emulation speed from 25%, 50%, 75% and 100%</pre><br>
+    F11 --> Changes emulation speed from 25%, 50%, 75% and 100%</pre>
 In some arcade drivers you can load/save two quick snapshots<br><br>
 - Keys for both players are redefinable, and you can select an external joystick for any player and up to 6 buttons per player<br>
 By default keys are<br><pre>
@@ -33,7 +33,7 @@ By default keys are<br><pre>
     Start player 1    --> Key '1'
     Start player 2    --> Key '2'
     Insert coin 1     --> Key '5'
-    Insert Coin 2     --> Key '6'</pre><br>
+    Insert Coin 2     --> Key '6'</pre>
 Any other control is not defined. You can redefine it in the main configuration menu.<br>
 You can select autofire for all players buttons<br><br>
 - Spectrum/Amstrad basic keys:<br><pre>
@@ -226,7 +226,7 @@ You can download all the samples from the emulator page<br>
 Look at the arcade systems list to know which systems use samples.<br><br>
 <b>2.3.2 Emulated Systems</b><hr><br><pre>
 Name                       | ROM          | Completed  | Notes
--------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 Phoenix                    | PHOENIX.ZIP  |      99    | Phoenix HW
                                                        | Basic analogic sound
 Pleiads                    | PLEAIDS.ZIP  |      80    | Phoenix HW
@@ -545,14 +545,13 @@ Dynamite Dux               | DDUX1.ZIP    |     100    | Sega System 16B
 E-Swat - Cyber Police      | ESWAT.ZIP    |     100    | Sega System 16B
 Passing Shot               | PASSSHT.ZIP  |     100    | Sega System 16B
 Aurail                     | AURAIL.ZIP   |     100    | Sega System 16B
-
--------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 Total: 287</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
-If you want to add another language, edit any file with the extension '.lng' in the 'LNG' directory, rename it with the name of the language and send it to me to add it to the next version.<br>
+If you want to add another language, download old languaje files and edit any file with the extension '.lng', rename it with the language name and send it to me, to add it to the next version.<br>
 If you make any improvements to any driver, processor, main code, etc. or add drivers, please send the changes to me, so they can be added to the main code.<br>
-If you use part of the code of the emulator for any non commercial purpose, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)<br><br>
+If you use part of the code of the emulator for any <b>non commercial purpose</b>, you only need to add in the documentation/source something like 'Z80 core written by Leniad'. And please send me a email to see the written program. :-)<br><br>
 <b>4-. Acknowledgments</b><br>
 <hr>
 - First, of course, the MAME team. Without them, this emulator never had existed, thanks to distribute the source code to help many people, people like me. (And of course the 'MAME guru' Nicola Salmoria).<br>
