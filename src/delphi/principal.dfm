@@ -423,7 +423,7 @@ object principal1: Tprincipal1
     end
     object BitBtn19: TBitBtn
       Left = 299
-      Top = 1
+      Top = 0
       Width = 38
       Height = 38
       Hint = 'Save Image'

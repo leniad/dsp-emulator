@@ -357,7 +357,7 @@ const
   (name:'GameBoy Color';year:'198X';snd:1;hi:false;zip:'gbcolor';grid:1002;company:'Nintendo';rom:@gbcolor),
   (name:'CHIP 8';year:'197X';snd:1;hi:false;zip:'';grid:1003;company:'-'),
   (name:'Sega Master System';year:'1986';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_),
-  (name:'SC-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega'),
+  (name:'SG-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega'),
   (name:'Sega GameGear';year:'1990';snd:1;hi:false;zip:'';grid:1006;company:'Sega'),
   //G&W
   (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),

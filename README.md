@@ -1,4 +1,20 @@
 ﻿# DSP Emulator status #
+<b>10/04/21 - DSP Emulator 0.19 released<br>
+Windows 32bits and 64bits, Linux 64bits, MacOS X 64bits and source updated. Updated Wiki.<br><pre>
+All changes on previous 0.18b3 release and
+-General
+    +Preview picture
+        -Cosmetical changes: bigger with black background and scaled picture
+        -Added picture to Spectrum Plus 2A, SG-1000 and GameGear. Split GameBoy and GameBoy color pictures
+-Gameboy/Gameboy Color
+    +Better drawing priorities, still not perfect
+    +Window: fixed priorities with sprites (Look at 'Prehistorik Man')
+    +Fixed controls order reading (Fixes new version of 'Robocop' - Thanks to Neville)
+    +Small fix to serial (Fixes 'Lunar Lander', 'Hyper Dunk' and many others)
+-Suna 8 HW
+    +Hard Head 2
+        -Fixed palette
+</pre>
 <b>28/03/21 - Last update before stable version. DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +Samples: simplified samples loading functions
@@ -20,23 +36,23 @@
 <img src='https://i.ibb.co/3vsqcdv/hh2-1.jpg'> <img src='https://i.ibb.co/233KTxs/hh2-2.jpg'><br><br>
 <b>13/03/21 - Second update today! DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -GameBoy/Gameboy Color HW
-    +Now you can choose between original GB green palette and GB pocket BW (Thanks to Francisco José Martí Terrón)
+    +Now you can choose between original GB green palette and GB pocket BW (Thanks to Neville)
 -Amstrad CPC
-    +Fixed screen flickering (Thanks to Francisco José Martí Terrón)
+    +Fixed screen flickering (Thanks to Neville)
 </pre>
 <b>13/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
 -General
     +Sound
         -Sega PCM: Added sound chip
 -Spectrum
-    +Fixed low border size, was 8 pixels too long (Thanks to Francisco José Martí Terrón)
+    +Fixed low border size, was 8 pixels too long (Thanks to Neville)
     +Fixed fast speed and no border draw, now don't draw any border
 -Amstrad CPC
-    +Resize screen size, it was too big, now it's 384x272 pixels (Thanks to Francisco José Martí Terrón)
+    +Resize screen size, it was too big, now it's 384x272 pixels (Thanks to Neville)
 -Sega Master System
-    +Fixed zip ROM load (Thanks to Francisco José Martí Terrón)
+    +Fixed zip ROM load (Thanks to Neville)
 -Sega GameGear
-    +Fixed zip ROM load (Thanks to Francisco José Martí Terrón)
+    +Fixed zip ROM load (Thanks to Neville)
 -Outrun HW
     +Added road
     +Added Sega PCM
@@ -74,11 +90,11 @@
 </pre>
 <img src='https://i.ibb.co/d4KG1Mr/passingshot.jpg'> <img src='https://i.ibb.co/b3mqHPb/Aurail.jpg'><br><br>
 <b>23/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--Renewed preview images (Thanks to Francisco José Martí Terrón)
+-Renewed preview images (Thanks to Neville)
 -General
     +CPU
         -MCS51: Added halt line
-    +ROMS export: Fixed many ROMs sets (Thanks to Francisco José Martí Terrón)
+    +ROMS export: Fixed many ROMs sets (Thanks to Neville)
 -Commodore 64
     +Added PRG and T64 file support (added by chuso gar)
 -Sega System 16B HW

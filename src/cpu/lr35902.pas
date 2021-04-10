@@ -474,6 +474,21 @@ if not(self.after_ei) then begin
 end;
 self.after_ei:=false;
 if self.halt then r.pc:=r.pc-1;
+{if r.pc=$518a then begin
+  r.pc:=0;
+  r.pc:=$518a;
+  //50ee
+end;
+if r.pc=$57e6 then begin
+  r.pc:=0;
+  r.pc:=$57e6;
+  //50ee
+end;
+if r.pc=$4064 then begin
+  r.pc:=0;
+  r.pc:=$4064;
+  //50ee
+end;}
 oldpc:=r.pc;
 instruccion:=self.getbyte(r.pc);
 r.pc:=r.pc+1;

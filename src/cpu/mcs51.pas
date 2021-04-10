@@ -585,7 +585,6 @@ begin
               tempb:=set_bit(self.ram[ADDR_TCON],1,0);
               self.iram_w(ADDR_TCON,tempb);
             end;
-            if self.pedir_irq0=HOLD_LINE then self.pedir_irq0:=CLEAR_LINE;
       			// indicate we took the external IRQ */
 		 	      //if (mcs51_state->irq_callback != NULL) then (*mcs51_state->irq_callback)(mcs51_state->device, 0);
           end;
@@ -600,7 +599,6 @@ begin
               tempb:=SET_BIT(self.ram[ADDR_TCON],3,0);
               self.iram_w(ADDR_TCON,tempb);
             end;
-            if self.pedir_irq1=HOLD_LINE then self.pedir_irq1:=CLEAR_LINE;
 			      // indicate we took the external IRQ */
 			      //if (mcs51_state->irq_callback != NULL) then (*mcs51_state->irq_callback)(mcs51_state->device, 1);
           end;
@@ -650,10 +648,12 @@ end;
 if (self.pedir_irq0<>CLEAR_LINE) then begin
     tempb:=SET_BIT(self.ram[ADDR_TCON],1,1);
     self.iram_w(ADDR_TCON,tempb);
+    self.pedir_irq0:=CLEAR_LINE;
 end;
 if (self.pedir_irq1<>CLEAR_LINE) then begin
     tempb:=SET_BIT(self.ram[ADDR_TCON],3,1);
     self.iram_w(ADDR_TCON,tempb);
+    self.pedir_irq1:=CLEAR_LINE;
 end;
 estados_demas:=self.evalue_irq;
 self.opcode:=true;

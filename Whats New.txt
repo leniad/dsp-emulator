@@ -1,289 +1,140 @@
 What's New!!! DSP Emulator
 
-DSP 0.18b2 06/11/20
-**********
-- General
-   + Lazarus 
-       - With the latest version you can compile for OSX, small corrections to make it works
-       - Fixed 11Khz and 22Khz sound
-       - Corrected sound distortion
-   + Sound Engine
-       - K005289: Added sound chip
-       - YM2203/YM2151/YM3812: Fixed (finally!) the FM sound, improves a lot Shinobi, Rastan, Ghost'n Goblins, Snow Bros...
-   + Timer Engine
-       - Rewriting engine (converted to classes)
-       - Supports timers with parameters
-       - Autofire: Improved and simplified
-   + Control Engine
-       - Improved the analog control system
-           - Changed and simplified the initialize the system
-           - Added two analog buttons
-           - Added inverted controls
-           - Added an option so that the values are always increased/decreased and do not stop at the maximum/minimum they continue in a circular fashion
-   + CPU engines
-       + M68000: On pre-increment and post-increment addresses, if the destination is A7 it is increased/decreased by 2
-       + M6502
-           - Added snapshot features
-           - Added opcode $B3
-       + M6809
-           - Added opcode $2f
-           - Simplified and unified opcodes $10XX and $11XX
-       + HD6309
-           - Separate driver from M6809
-           - Added opcode $10A6
-       + M680X
-           - Added CPU M6808
-           - Starting to implement various internal timers
-           - Added opcode $01, $22, $60, $76, $92, $99, $d0 and $d8
-       + MCS48: Added opcodes $13, $57 and $d3
-       + MSC51
-           - Added opcodes $00, $35, $44, $48..$4f, $61, $71, $91, $98..$9f, $a3, $a4, $a8..$af, $b8..$bf, $c5, $c8..$cf, $e0 and $f0
-           - Fixed opcode 'da A'
-       + N2A03
-           - Better initialised internal registers
-           - Implemented DPCM IRQs
-           - Implemented the weight of each sound channel
-           - Improved sound resampling
-       + UPD7810: Added CPU
-       + Z80
-           - Corrected W register
-           - Fixed flags in 'adc' and 'sbc' opcodes
-           - Fixed opcodes $dddd and $ddfd
-           - Fixed bit3 and bit5 flags in 'BIT X' opcodes
-           - Fixed Z flag in 'OTIR' opcode (ouch!)
-   + PIA6821: Added device
-   + K052109: Added GFX dynamic change, instead of all at once, only updates the GFX that change (driver 'Graduis III')
-   + UPD765
-       - Added motor on/off
-       - Added an exception if the sector has more than 6304 bytes (Corrects Amstrad 'Defender of the Crown' protection)
-   + DSK
-       - Improved image conversion
-       - Expanded to 64 tracks
-   + Namco 06XX and 5XXX: Added more chips simultaneously
-   + TAP/TZX
-       - Increased maximum tape size
-       - Added two functions start-tape and stop-tape to perform actions
-       - TZX:
-           + If a group of objects is defined, but not closed at the end of the tape, it is automatically closed
-           + Fixed a false click on Lazarus that prevented the tape from stopping when it reached the end
-           + Fixed jump, block call and return blocks
-           + Added control of the initial pulse value
-       - TAP: Fixed default data type and block name
-   + Taito C-Chip: Added device, not working at 100%
-   + GFX/Video engine
-       - Improved partial Y-scroll
-       - Added a feature to update only one specific GFX
-       - Kaneko Pandora: Converted to classes
-       - Sega VDP
-          + Added the possibility of multiple VDPs
-          + Added functions to perform read/write of internal memory externally
-          + Transparency control
-          + Corrected the internal counter IRQ generation
-          + Fixed IRQ generation at the end of the frame
-          + Fixed the sprites at the top of the screen
-          + Improved NTSC/PAL video modes
-   + ROMs: Simplified ROM loading functions
-- Spectrum
-   + Corrected and simplified the 'floating bus' in 48k and 128k, working at 100%
-   + Corrected the T-states that an IRQ takes
-   + Corrected the priorities of the IN function
-   + Fixed Kempston Joystick
-   + Fixed the stereo sound with AY8912
-   + Added 'Turbo Sound' device, a second AY8912
-- Amstrad CPC
-   + When an OUT is made, several devices can be called at the same time, except GA and CRTC
-   + Implemented tape start/stop motor automatically, removed hacks
-   + Improved ROM mapping system
-   + Fixed GA line counter, IRQs execution and VBLANK lines
-   + Fixed the origin of the video memory in CPC128, always the first 64Kb, without RAM mapping
-   + Improved memory RAM mapping
-   + Corrected the writing in register 3 of the CRT
-- Commodore 64
-   + Added initial driver!
-       - Video
-           + Some problems with sprites
-           + Timing problems
-       - SID audio, sounds distorted but pretty good!
-       - Supports two joysticks and keyboard
-       - Cassette tapes, they work but some loaders do not load
-       - Disk not supported (yet)
-- NES
-   + Fixed openbus (Fix 'Paper Boy')
-   + Improved controls
-   + Supported a cartridge with trainer
-   + Added mapper 13, 15, 18, 21, 22, 23, 25, 32, 33, 34, 41, 42, 48, 57, 58, 64, 65, 69, 70, 73, 75, 76, 79, 85, 87, 88, 89,
-                  95, 105, 113, 116, 132, 133, 137, 138, 139, 141, 142, 143, 145, 146, 148, 149, 150, 152, 154, 172, 173, 184,
-                  206, 212, 213, 221 and 243
-   + Corrected mapper 1, 4, 6, 9 and 221
-   + Fixed sprite hit 0
-   + Fixed video mirrors, solve problems in many games! Also added specific mirrors for some mappers
-   + Added RGB emphasis
-   + Fixed the fine Y-scroll (Fix 'Indiana Jones III')
-   + Initials snapshots support
-- Sega Master System
-   + Separate BIOS load in regions (Europe, USA and Japan)
-   + Problems with BIOS on/off have been solved
-   + Added the 'Pause' key (F1) needed for some games
-   + Separate mappers
-        - Sega mapper
-             + Fixed the first $100 bytes, they are always from the bank 0
-             + Added RAM banks when slot2 is in RAM mode
-        - 4 Pack: Separate mapper
-        - Korean: Separate mapper
-        - Codemaster: Separate mapper
-        - Ciborg-Z: Added mapper for Ciborg-Z, Knightmare II, Penguin and Street Master
-        - Nemesis: Added specific mapper
-   + Added the OI disconnection
-   + Corrected ROM loading
-- SG-1000
-   + Separate SMS driver
-- Asteroids HW
-   + Changed the video resolution to 400x320
-- Atari System 1
-   + Added background graphics
-   + Added sprites
-   + Problems with the palette and sound
-   + Missing controls and background/sprite priority
-   + Indiana Jones and the Temple of Doom: added driver
-   + Marble Madness: added driver
-- Badlands
-   + Added driver with sound
-- Bagman HW
-   + Fixed when video output is disconnected
-- Bionic Commando 
-   + Added MCU, removed the simulation
-   + Added 2nd player controls
-- BreakThru HW
-   + Added dipswitches
-   + Simplified video
-- CPS1
-   + Converted the ROM to 16bits
-- Double Dragon HW
-   + Corrected the synchronization of the CPUs
-   + Added dipswitches
-   + Added a driver/hack modifying the sprites CPU speed
-   + Double Dragon: Updated ROMS
-- Express Raider
-   + Added quick snapshots
-- Gaelco HW
-   + Simplified video
-   + Big Karnak: Fixed video priorities, although they are not at 100%
-- Galaga HW
-   + Simplified mapping of CPU2 and CPU3
-   + Bosco: Added driver with sound
-- Galivan HW
-   + Cosmo Police Galivan: added driver with sound
-   + Ufo Robo Dangar: added driver with sound
-- Gauntlet HW
-   + Corrected and simplified the synchronization of the CPUs
-- Gunsmoke HW
-   + Gunsmoke: Sprite buffer added
-   + 1943: Added the MCU, removed the patches
-- Heavy Unit
-   + Added dipswitches
-- Ironhorse
-   + Corrected FPS
-- JR Pacman
-   + Corrected sprite position
-- Karnov HW
-   + Added MCU, removed all hacks
-- Last Duel HW
-   + Added drivers with sound: Last Duel, Mad Gear and Led Storm Rally 2011
-- Legendary Wings HW
-   + Added dipswitches
-- Legend of Kage
-   + Added dipswitches
-   + Added the disconnection of the video
-- Mappy HW
-   + Simplified video
-- Mikie
-   + Added dipswitches
-   + Added 2nd player controls
-- Mysterious Stones
-   + Added quick snapshots
-- Nemesis HW
-   + Fixed colors
-   + Added K005289 sound
-   + Corrected video
-   + GX400: Added VLM sound
-   + Galactic Warriors: Added driver
-   + Salamander: Added driver
-- NMK16 HW
-   + Converted RAM to 16bits
-- Pacman HW
-   + Corrected the position of the sprites
-   + Crush Roller: Emulated protection
-- Popeye
-   + Standardized palette
-- Prehistoric Isle in 1930
-   + Simplified access to RAM
-- Rastan
-   + Updated ROMs
-- Rally X HW
-   + Added dipswitches
-   + Added screen rotation
-   + Added 2nd player controls
-- Renegade
-   + Corrected sprite position
-   + Improved IRQ management
-- Return of Invaders
-   + Updated ROMs, updated palette conversion
-   + Corrected position of the sprites
-   + Added screen rotation
-- Rock'n Rope
-   + Added dipswitches
-   + Added screen rotation
-   + Fixed IRQ generation
-- Route 16 HW
-   + Route 16: Added driver with sound
-   + Speak & Rescue: Added driver with basic sound
-- Shootout
-   + Fixed FPS
-   + Added dipswitches and 2nd player controls
-   + Video review, corrected priority issues
-- The Simpsons
-   + Fixed sprites DMA
-- SNK 68 HW
-   + RAM converted to 16bits
-- SNK HW
-   + Improved synchronization of CPUs
-- Solomon's Key
-   + Added dipswitches
-   + Added screen rotation
-- Street Fighter
-   + Converted RAM to 16bits
-   + Updated ROMS
-   + Optimized the scroll
-   + Added dipswitches
-- Suna 8 HW
-   + Added DAC sound
-- Superburger Time
-   + Merging the driver with the Tumble Pop
-- Sega System E
-   + Added drivers with sound: Hang On Jr., Slap Shooter, Fantasy Zone II, Opa-Opa, Tetris, Transformer and Riddle of Pythagoras
-- Taito SJ HW
-   + Corrected the position of the sprites
-   + Improved scrolls
-- Tehkan Worldcup
-   + Improved CPUs synchronization
-- TerraCresta HW
-   + Soldier Girl Amazon: Added driver with sound
-- The New Zealand Story HW
-   + Corrected CPUs synchronization
-- Tiger Road HW
-   + Tiger Road: Updated ROMs
-   + F1 Dream: Added the original MCU
-- Time Pilot 84
-   + Added dipswitches
-   + Added 2nd player controls
-- Tutankhamun
-   + Added dipswitches
-- Wardner
-   + Added dipswitches
-- Williams HW
-   + Problems with sound
-   + Defender: Added driver
-   + May Day: Added driver
-   + Colony 7: Added driver
-- Xain'd Sleena
-   + Corrected CPUs synchronization
+DSP 0.19 08/04/21
+********
+-Lazarus
+    +Cosmetical changes (icons, objects size...)
+    +Fixed screen size change from options menu
+    +Fixed 'no sound' option
+-General
+    +Samples: simplified samples loading functions
+    +Preview Images: Cosmetical changes (Thanks to Neville)
+    +Sound
+        -Sega PCM: Added sound chip
+        -uPD7759: Added slave chip type
+    +CPU
+        -M68000:
+            +Fixed TAS opcode 
+            +Added reset line procedure
+            +Fixed sign in opcode PEA.W
+        -MCS51:
+            +Clean the code
+            +Fixed carry in opcodes $B8 to $BF
+            +Added halt line
+            +Added opcodes $45,$e2,$e3,$f2 and $f3
+        -M6800: Added opcodes $56 and $fa
+        -Z80: Fixed a stupid bug on IRQ
+    +ROMS export: Fixed all ROMs sets and added samples info (Thanks to Neville)
+    +Added Sega 315-5195 as a device
+    +Video
+        -Added a function to change video resolution on execution time
+        -SEGA VDP: Fixed IRQ generation
+        -TMS99XX: Fixed video mode 2
+-Spectrum
+    +Fixed low border size, was 8 pixels too long (Thanks to Neville)
+    +Fixed fast speed and no border draw, now don't draw any border
+-Amstrad CPC
+    +Resize screen size, it was too big, now it's 384x272 pixels (Thanks to Neville)
+    +You can load disks again... Opps!
+-Commodore 64
+    +Added PRG and T64 file support (added by chuso gar)
+-Coleco
+    +Added Mega Cart support: ROM pagination
+    +Added Super Game Module support: More RAM and AY8912
+    +Added support for Boxxle and Black Onix (missing EEPROM)
+-GameBoy/Gameboy Color HW
+    +Now you can choose between original GB green palette and GB pocket BW (Thanks to Neville)
+    +Better Y scroll
+    +Better sprites/backgorund priorities in GB
+    +Fixed mapper MBC1
+    +Added MBC1 collection version (fixes 'Bomberman Collection', 'Mortal Combat I&II', '4 in 1 Vol II', etc)
+    +Fixed mapper MBC2
+    +Added mapper MBC3
+    +Added partial mapper MBC7
+    +Fixed cartridge load (fixes cartridges bigger than 4Mb)
+    +Fixed mappers default start values (fixes 'Dragon's Lair - The Legend' and many others)
+    +Fixed OAM DMA, dont add aditional CPU cycles and dont draw sprites if its running
+    +Fixed CGB DMA, change the counter values when running (fixes 'Turok - Rage Wars', 'Aliens - Thanatos Encounter' and many others)
+    +Fixed CBG DMA start/stop info and cancel option (fixes 'Championship Motocross 2001' and others)
+    +Fixed CGB sprite/BG priority (fixes graphis in '007 - The World is Not Enough' intro)
+    +Fixed CBG sprite tranparency
+    +Added sprite draw order in GB (fixes 'Boy and His Blob, A - Rescue of Princess Blobette')
+    +Added a basic serial IRQ (makes 'Mortal Kombat', 'Hyper Dunk' and many others run)
+    +Added STAT IRQ blocking (makes 'Altered Space', 'Pinball Fantasies', 'Pinball Dreams' and many others run)
+    +Fixed controls (fixes 'Konami GB Collection Volume 1')
+    +Fixed BIOS disable... Ouch! Never gets enabled again after boot!
+-Game & Watch
+    +Finaly find a solution to compile under Lazarus
+-Sega GameGear
+    +Added driver with sound
+    +Added Codemasters mapper
+-Sega Master System
+    +Added cart enable/disable
+    +Driver stop and warning if no BIOS files are present
+-SG-1000
+    +Split driver from SMS
+    +Added two mappers. Almost 100% compatibility now
+-1945k III HW
+    +1945k III: Added driver with sound
+    +96 Flag Rally: Added driver with sound
+-3x3 Puzzle HW
+    +3x3 Puzzle: Added driver with sound
+    +Casanova: Added driver with sound
+-Ajax
+    +Fixed ROM names
+-Armed F HW
+    +Armed F: Added driver with sound
+    +Terra Force: Added driver with sound
+    +Crazy Climber 2:Added driver with sound
+    +Legion - Spinner-87: Added driver with sound
+-Baraduke HW
+    +Baraduke: Added driver with sound
+    +Moto-Cross: Added driver with sound
+-Blood Bros HW
+    +Blood Bros.: Added driver with sound
+    +Sky Smasher: Added driver with sound
+-Fire Trap
+    +Added driver with sound
+-Namco System 86 HW
+    +Rewrite sprite system
+    +Removed video hacks
+    +Added dipswitches
+        -The Return of Ishtar: Added driver with sound
+        -Genpei ToumaDen: Added driver with sound
+        -Wonder Momo: Added driver with sound
+-Outrun
+    +Enhanced driver
+    +Added road
+    +Added Sega PCM
+    +Added controls
+    +Added DIP switches
+-Sega System 16B HW
+    +Altered Beast: Driver with sound
+    +Golden Axe: Added driver with sound
+    +Dynamite Dux: Added driver with sound
+    +ESwat - Cyber Police: Added driver with sound, due the lack of FD1094 emulation using predecoded version
+    +Passing Shot: Added driver with sound, due the lack of FD1094 emulation using predecoded version
+    +Aurail: Added driver with sound
+-Slap Fight
+    +Fixed ROM names
+-SNK
+    +Fixed rotation buttons
+    +ASO - Armored Scrum Object: Added driver with sound
+-Suna 8 HW
+    +Added DIP switches
+    +Fixed sound clock
+        -Hard Head
+            +Fixed DAC samples
+            +Fixed FPS
+        -Hard Head 2
+            +Fixed ROM decode
+            +Fixed video
+            +Added DAC samples
+-Tecmo HW
+    +Fixed small bug on ADPCM
+    +Fixed FPS
+    +Silkworm:
+        -Fixed sound chip, it's a YM3812
+        -Fixed Z80 clock
+-Tiger Road HW
+    +Added DIP switches

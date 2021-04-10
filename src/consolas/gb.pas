@@ -186,7 +186,7 @@ for f:=0 to 9 do begin
 end;
 end;
 
-procedure update_bg;
+procedure update_bg(prio:byte);
 var
   tile_addr,bg_addr:word;
   f,x,tile_val1,tile_val2,y,pval,linea_pant:byte;
@@ -208,8 +208,13 @@ begin
     for x:=7 downto 0 do begin
       pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
       //Prioridad con los sprites
-      if ((pval<>0) and ((bg_prio[f*8+(7-x)] and $40)=0)) then ptemp^:=paleta[pval]
-        else ptemp^:=paleta[MAX_COLORES];
+      case prio of
+        0:ptemp^:=paleta[pval];
+        1:if ((pval<>0) and ((bg_prio[f*8+(7-x)] and $40)<>0)) then ptemp^:=paleta[pval]
+            else ptemp^:=paleta[MAX_COLORES];
+        2:if ((pval<>0) and ((bg_prio[f*8+(7-x)] and $40)=0)) then ptemp^:=paleta[pval]
+            else ptemp^:=paleta[MAX_COLORES];
+      end;
       inc(ptemp);
     end; //del for x
     putpixel(f*8,0,8,punbuf,1);
@@ -221,7 +226,7 @@ begin
   end else actualiza_trozo(0,0,256,1,1,7,linea_actual,256,1,2);
 end;
 
-procedure update_window;
+procedure update_window(prio:byte);
 var
   tile_addr,bg_addr:word;
   f,x,tile_val1,tile_val2,y,pval,linea_pant:byte;
@@ -244,8 +249,13 @@ begin
     for x:=7 downto 0 do begin
       pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
       //Prioridad con los sprites!
-      if (bg_prio[f*8+(7-x)] and $40)=0 then ptemp^:=paleta[pval]
-        else ptemp^:=paleta[MAX_COLORES];
+      case prio of
+        0:ptemp^:=paleta[pval]; //Abajo del todo
+        1:if (bg_prio[(f*8+(7-x)-(256-scroll_x)+window_x-7) and $ff] and $40)<>0 then ptemp^:=paleta[pval]
+            else ptemp^:=paleta[MAX_COLORES];
+        2:if (bg_prio[(f*8+(7-x)-(256-scroll_x)+window_x-7) and $ff] and $40)=0 then ptemp^:=paleta[pval]
+            else ptemp^:=paleta[MAX_COLORES];
+      end;
       inc(ptemp);
     end; //del for x
     putpixel(f*8,0,8,punbuf,1);
@@ -262,15 +272,23 @@ scroll_y_pos:=0;
 single_line(7,linea_actual,paleta[0],160,2);
 if lcd_ena then begin
   fillchar(bg_prio[0],$100,$3f);
+  if (lcd_control and 1)<>0 then begin
+    update_bg(0);
+    if (lcd_control and $20)<>0 then update_window(0);
+  end;
   if (((lcd_control and 2)<>0) and not(oam_dma)) then begin
     get_active_sprites;
     draw_sprites($80);
   end;
   if (lcd_control and 1)<>0 then begin
-    update_bg;
-    if (lcd_control and $20)<>0 then update_window;
+    update_bg(1);
+    if (lcd_control and $20)<>0 then update_window(1);
   end;
   if (((lcd_control and 2)<>0)and not(oam_dma)) then draw_sprites(0);
+  if (lcd_control and 1)<>0 then begin
+    update_bg(2);
+    if (lcd_control and $20)<>0 then update_window(2);
+  end;
 end;
 end;
 
@@ -395,7 +413,7 @@ for f:=0 to 9 do begin
 end;
 end;
 
-procedure update_bg_gbc;
+procedure update_bg_gbc(prio:byte);
 var
   tile_addr,bg_addr:word;
   f,atrib,tile_bank,tile_pal:byte;
@@ -428,8 +446,13 @@ begin
           ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff];
         end else begin
           //Si es transparente o hay un sprite debajo...
-          if ((pval<>0) or ((bg_prio[f*8+x] and $40)=0)) then ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff]
-            else ptemp^:=paleta[MAX_COLORES];
+          case prio of
+            0:ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff];
+            1:if ((pval<>0) and ((bg_prio[f*8+x] and $40)<>0)) then ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff]
+              else ptemp^:=paleta[MAX_COLORES];
+            2:if ((pval<>0) and ((bg_prio[f*8+x] and $40)=0)) then ptemp^:=paleta[(bgc_pal[pval+tile_pal]) and $7fff]
+              else ptemp^:=paleta[MAX_COLORES];
+          end;
         end;
         inc(ptemp);
       end;
@@ -440,8 +463,13 @@ begin
           bg_prio[f*8+(7-x)]:=bg_prio[f*8+(7-x)] or $80;
           ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff];
         end else begin
-          if ((pval<>0) or ((bg_prio[f*8+(7-x)] and $40)=0)) then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
-            else ptemp^:=paleta[MAX_COLORES];
+          case prio of
+            0:ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff];
+            1:if ((pval<>0) and ((bg_prio[f*8+(7-x)] and $40)<>0)) then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+                else ptemp^:=paleta[MAX_COLORES];
+            2:if ((pval<>0) and ((bg_prio[f*8+(7-x)] and $40)=0)) then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+                else ptemp^:=paleta[MAX_COLORES];
+          end;
         end;
         inc(ptemp);
       end;
@@ -455,7 +483,7 @@ begin
   end else actualiza_trozo(0,0,256,1,1,7,linea_actual,256,1,2);
 end;
 
-procedure update_window_gbc;
+procedure update_window_gbc(prio:byte);
 var
   tile_addr,bg_addr:word;
   f,atrib,tile_bank,tile_pal:byte;
@@ -483,15 +511,25 @@ begin
     if (atrib and $20)<>0 then begin
       for x:=0 to 7 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-        if (bg_prio[f*8+x] and $40)=0 then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
-          else ptemp^:=paleta[MAX_COLORES];
+        case prio of
+          0:ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff];
+          1:if (bg_prio[f*8+x] and $40)<>0 then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+              else ptemp^:=paleta[MAX_COLORES];
+          2:if (bg_prio[f*8+x] and $40)=0 then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+              else ptemp^:=paleta[MAX_COLORES];
+        end;
         inc(ptemp);
       end;
     end else begin
       for x:=7 downto 0 do begin
         pval:=((tile_val1 shr x) and $1)+(((tile_val2 shr x) and $1) shl 1);
-        if (bg_prio[f*8+(7-x)] and $40)=0 then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
-          else ptemp^:=paleta[MAX_COLORES];
+        case prio of
+          0:ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff];
+          1:if (bg_prio[(f*8+(7-x)-(256-scroll_x)+window_x-7) and $ff] and $40)<>0 then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+              else ptemp^:=paleta[MAX_COLORES];
+          2:if (bg_prio[(f*8+(7-x)-(256-scroll_x)+window_x-7) and $ff] and $40)=0 then ptemp^:=paleta[bgc_pal[pval+tile_pal] and $7fff]
+              else ptemp^:=paleta[MAX_COLORES];
+        end;
         inc(ptemp);
       end;
     end;
@@ -510,8 +548,8 @@ scroll_y_pos:=0;
 single_line(7,linea_actual,paleta[bgc_pal[0] and $7fff],160,2);
 if lcd_ena then begin
   if (lcd_control and 1)=0 then begin //bg and window loses priority
-    update_bg_gbc;
-    if (lcd_control and $20)<>0 then update_window_gbc;
+    update_bg_gbc(0);
+    if (lcd_control and $20)<>0 then update_window_gbc(0);
     if (((lcd_control and 2)<>0) and not(oam_dma)) then begin
       fillchar(bg_prio[0],$100,$3f);
       get_active_sprites_gbc;
@@ -520,13 +558,16 @@ if lcd_ena then begin
     end;
   end else begin
     fillchar(bg_prio[0],$100,$3f);
+    update_bg_gbc(0);
     if (((lcd_control and 2)<>0) and not(oam_dma)) then begin
       get_active_sprites_gbc;
       draw_sprites_gbc($80);
     end;
-    update_bg_gbc;
-    if (lcd_control and $20)<>0 then update_window_gbc;
+    update_bg_gbc(1);
+    if (lcd_control and $20)<>0 then update_window_gbc(1);
     if (((lcd_control and 2)<>0) and not(oam_dma)) then draw_sprites_gbc($0);
+    update_bg_gbc(2);
+    if (lcd_control and $20)<>0 then update_window_gbc(2);
   end;
 end;
 end;
@@ -561,9 +602,14 @@ var
   tempb:byte;
 begin
 case direccion of
-  $00:leer_io:=joystick;
-  $01:leer_io:=$ff;
-  $02:leer_io:=$7f; //Serial
+  $00:begin
+        //Es muy importante este orden!!! Por ejemplo Robocop Rev1 no funciona si no es asi
+        if (joystick and $10)=0 then joystick:=(joystick or $f) and (marcade.in0 or $f0);
+        if (joystick and $20)=0 then joystick:=(joystick or $f) and ((marcade.in0 shr 4) or $f0);
+        leer_io:=joystick;
+      end;
+  $01:leer_io:=0;
+  $02:leer_io:=$7e; //Serial
   $04:leer_io:=mtimer;
   $05:leer_io:=prog_timer;
   $06:leer_io:=tmodulo;
@@ -606,12 +652,7 @@ var
   addrs:word;
 begin
 case direccion of
-  $00:begin
-          joystick:=$cf or valor;
-          if (valor and $20)=0 then joystick:=joystick and ((marcade.in0 shr 4) or $f0);
-          if (valor and $10)=0 then joystick:=joystick and (marcade.in0 or $f0);
-          io_ram[0]:=joystick;
-      end;
+  $00:joystick:=$cf or (valor and $30);
   $01:; //Serial
   $02:if (valor and $81)=$81 then lr35902_0.serial_req:=true;
   $04:mtimer:=0;
@@ -712,8 +753,13 @@ var
   tempb:byte;
 begin
 case direccion of
-  $00:leer_io_gbc:=joystick;
-  $01,$02:leer_io_gbc:=$7f; //Serial
+  $00:begin
+        if (joystick and $10)=0 then joystick:=(joystick or $f) and (marcade.in0 or $f0);
+        if (joystick and $20)=0 then joystick:=(joystick or $f) and ((marcade.in0 shr 4) or $f0);
+        leer_io_gbc:=joystick;
+      end;
+  $01:leer_io_gbc:=0;
+  $02:leer_io_gbc:=$7e; //Serial
   $04:leer_io_gbc:=mtimer;
   $05:leer_io_gbc:=prog_timer;
   $06:leer_io_gbc:=tmodulo;
@@ -789,12 +835,7 @@ var
 begin
 io_ram[direccion]:=valor;
 case direccion of
-  $00:begin
-          joystick:=$cf or valor;
-          if (valor and $20)=0 then joystick:=joystick and ((marcade.in0 shr 4) or $f0);
-          if (valor and $10)=0 then joystick:=joystick and (marcade.in0 or $f0);
-          io_ram[0]:=joystick;
-      end;
+  $00:joystick:=$cf or (valor and $30);
   $01:; //Serial
   $02:if (valor and $81)=$81 then lr35902_0.serial_req:=true;
   $04:mtimer:=0;
@@ -945,7 +986,7 @@ case direccion of
   $8000..$9fff:gb_getbyte:=vram_bank[vram_nbank,direccion and $1fff];
   $a000..$bfff:if @gb_mapper.ext_ram_getbyte<>nil then gb_getbyte:=gb_mapper.ext_ram_getbyte(direccion);
   $c000..$cfff,$e000..$efff:gb_getbyte:=wram_bank[0,direccion and $fff];
-  $d000..$dfff,$f000..$fdff:gb_getbyte:=wram_bank[wram_nbank,direccion and $fff];
+  $d000..$dfff,$f000..$fdff:gb_getbyte:=wram_bank[1,direccion and $fff];
   $fe00..$fe9f:gb_getbyte:=sprt_ram[direccion and $ff];
   $fea0..$feff:if not(gameboy.is_gbc) then gb_getbyte:=0
                   else begin
@@ -965,7 +1006,7 @@ case direccion of
   $8000..$9fff:vram_bank[vram_nbank,direccion and $1fff]:=valor;
   $a000..$bfff:if @gb_mapper.ext_ram_putbyte<>nil then gb_mapper.ext_ram_putbyte(direccion,valor);
   $c000..$cfff,$e000..$efff:wram_bank[0,direccion and $fff]:=valor;
-  $d000..$dfff,$f000..$fdff:wram_bank[wram_nbank,direccion and $fff]:=valor;
+  $d000..$dfff,$f000..$fdff:wram_bank[1,direccion and $fff]:=valor;
   $fe00..$fe9f:sprt_ram[direccion and $ff]:=valor;
   $fea0..$feff:if gameboy.is_gbc then begin
                   case (direccion and $ff) of

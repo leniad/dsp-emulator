@@ -8,8 +8,6 @@ uses
 
 type
   TFLoadRom = class(TForm)
-    GroupBox1: TGroupBox;
-    ImgPreview: TImage;
     gpxrominfo: TGroupBox;
     RomList: TStringGrid;
     BitBtn3: TBitBtn;
@@ -20,9 +18,10 @@ type
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
-    Label7: TLabel;
     Label9: TLabel;
     Label10: TLabel;
+    Panel1: TPanel;
+    ImgPreview: TImage;
     procedure RomListDblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
@@ -55,11 +54,15 @@ if games_desc[orden_games[Floadrom.RomList.Selection.Top]].hi then FLoadRom.labe
       else FLoadRom.label6.caption:='NO';
 //En el caso de las consolas es especial prefiero poner una imagen fija
 case games_desc[orden_games[Floadrom.RomList.Selection.Top]].grid of
+  3:dir:='plus2a.png';
   1000:dir:='nes.png';
   1001:dir:='coleco.png';
-  1002:dir:='gb.png';
+  1002:if games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip='gbcolor' then dir:='gbc.png'
+        else dir:='gb.png';
   1003:dir:='chip8.png';
   1004:dir:='sms.png';
+  1005:dir:='sg1000.png';
+  1006:dir:='gg.png';
   else dir:=games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip+'.png';
 end;
 if FileExists(Directory.Preview+dir) then Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+dir)
@@ -130,7 +133,7 @@ with RomList do begin
       Floadrom.RomList.Selection:=myRect;
       pos_grid:=f-14;
       if pos_grid<=0 then pos_grid:=1;
-      if pos_grid>(games_cont-28) then pos_grid:=games_cont-28;
+      if pos_grid>(games_cont-26) then pos_grid:=games_cont-26;
       Floadrom.RomList.TopRow:=pos_grid;
     end;
     Cells[0,f]:=games_desc[orden_games[f]].name;

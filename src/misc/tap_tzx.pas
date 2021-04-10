@@ -1917,4 +1917,3 @@ abrir_c64_tap:=true;
 end;
 
 end.
-

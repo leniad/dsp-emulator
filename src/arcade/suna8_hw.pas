@@ -338,14 +338,14 @@ end;
 //Hard Head 2
 procedure update_video_hardhead2;
 var
-  bank,code,sy,y,dimx,dimy,f,ty,tx,attr,tile,srcx,srcy,srcpg:byte;
+  bank,code,sy,y,dimx,dimy,f,ty,tx,attr,srcx,srcy,srcpg:byte;
   gfxbank,nchar,addr,colorbank,sx,x,mx,color:word;
   flipx,flipy,multisprite,tile_flipx,tile_flipy:boolean;
 begin
   mx:=0;
-  colorbank:=0;
   fill_full_screen(1,$ff);
 	for f:=0 to $bf do begin
+    colorbank:=0;
 		y:=sprite_bank[$1d00+(f*4)];
 		code:=sprite_bank[$1d01+(f*4)];
 		x:=sprite_bank[$1d02+(f*4)];
@@ -399,18 +399,15 @@ begin
   		if multisprite then	begin
       	mx:=mx+dimx*8;
         x:=mx;
-      end else begin
-        mx:=x;
-      end;
+      end else mx:=x;
   		gfxbank:=gfxbank*$400;
   		for ty:=0 to dimy-1 do begin
   			for tx:=0 to dimx-1 do begin
-  				addr:=(srcpg*$20*$20);
+  				addr:=srcpg*$20*$20;
           if flipx then addr:=addr+((srcx+(dimx-tx-1)) and $1f)*$20
             else addr:=addr+((srcx+tx) and $1f)*$20;
           if flipy then addr:=addr+((srcy+(dimy-ty-1)) and $1f)
             else addr:=addr+((srcy+ty) and $1f);
-	  			tile:=sprite_bank[addr*2+0];
           attr:=sprite_bank[addr*2+1];
   				tile_flipx:=(attr and $40)<>0;
 	  			tile_flipy:=(attr and $80)<>0;
@@ -419,7 +416,7 @@ begin
   				if (flipx) then	tile_flipx:=not(tile_flipx);
 	  			if (flipy) then	tile_flipy:=not(tile_flipy);
           color:=(((attr shr 2) and $f) xor colorbank);//+$10*palettebank;
-          nchar:=tile+(attr and $3)*$100+gfxbank;
+          nchar:=sprite_bank[addr*2+0]+(attr and $3)*$100+gfxbank;
           put_gfx_sprite(nchar,color shl 4,tile_flipx,tile_flipy,0);
           actualiza_gfx_sprite(sx,sy,1,0);
         end;
