@@ -1,11 +1,11 @@
 <h1>DSP Emulator v0.19 by Leniad 2001-2021</h1><br>
-Well, this is just another emulator... but, what's the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
+Well, this is just another emulator... but, where is the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
-There ara versions available for Windows 32/64-bit, Linux 32/64-bit, and MacOS 64-bit.<br><br>
+There are versions available for Windows 32/64-bit, Linux 64-bit, and MacOS 64-bit.<br><br>
 <b>1-. Emulator</b>
 <hr>
 - Can natively handle ZIP format. You can load ROMS, tapes, snapshots or disks from a ZIP files.<br>
-- For any version the library SDL v2.X is needed.  For Windows you can download it from the same website emulator or the official website 'www.libsdl.org'. If not present the emulator warns and can not start.<br>
+- For any version the library SDL v2.X is needed.  For Windows you can download it from the same website of the emulator or from the official website 'www.libsdl.org'. If not present the emulator warns and can not start.<br>
 - For Linux and MacOS you need SDL Mixer v2.X library too<br><br>
 The emulator includes inside the ZIP (not in WIP versions) the ROMS for Spectrum 48K/128K/+3 (and variants), Amstrad CPC 464/664/6128, Commodore 64 and Coleco.<br><br>
 <b>IS NOT ALLOWED DISTRIBUTE THIS EMULATOR WITH COPYRIGHTED ROMS</b><br><br>
@@ -21,7 +21,7 @@ The emulator includes inside the ZIP (not in WIP versions) the ROMS for Spectrum
     F9  --> Load quick Snapshot 1
     F10 --> Load quick Snapshot 2
     F11 --> Changes emulation speed from 25%, 50%, 75% and 100%</pre><br>
-In some arcade drivers can save/load two quick snapshots<br><br>
+In some arcade drivers you can load/save two quick snapshots<br><br>
 - Keys for both players are redefinable, and you can select an external joystick for any player and up to 6 buttons per player<br>
 By default keys are<br><pre>
     Player 1 Up       --> Key 'Cursor UP'
@@ -35,7 +35,7 @@ By default keys are<br><pre>
     Insert coin 1     --> Key '5'
     Insert Coin 2     --> Key '6'</pre><br>
 Any other control is not defined. You can redefine it in the main configuration menu.<br>
-You can select autofire in all players buttons<br><br>
+You can select autofire for all players buttons<br><br>
 - Spectrum/Amstrad basic keys:<br><pre>
     F1 --> Play/Stop tape
     F4 --> Save snapshot
@@ -89,8 +89,8 @@ In the main screen of the emulator you can press some buttons<br>
 - AY8912 sound: Set the type of channels sound: mono, stereo ABC or stereo ACB<br>
 - Tape loading sound: Enable/disable the sound of the tape when loading.<br>
 - Speaker filter: Enable/disable filter to reduce the noise in speaker emulation.<br>
-- Speaker oversample: Quality of speaker emulation<br><br>
-- Turbo Sound: Add a second AY-8912<br>
+- Speaker oversample: Quality of speaker emulation<br>
+- Turbo Sound: Add a second AY-8912<br><br>
 Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Keyboard: Corresponds with the PC keyboard keys, also set some special keys:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Simbol Shift: Shift key (left or right)<br>
@@ -150,7 +150,7 @@ Other features<br>
 - Keys: Use the redefined keys or the external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'START' uses start player 1 (by default is mapped as the '1' key).<br>
-- Cartridges: Supports cartridges '.gb' and '.gbc', compressed or not.<br>
+- Cartridges: Supports cartridges '.gb' and '.gbc', ZIP compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers supported are MBC0, MBC1, MBC2, MBC3, MBC5 and HuC-1<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Partial Mapper: MBC7<br>
 - To Do<br>
@@ -164,8 +164,8 @@ Other features<br>
 - Keys: Joystick is emulated with the redefinable keys or external joystick (the secondary joystick does not have keys assigned). Does not support (still) the special joysticks.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;The numbers on the keyboard from '1' to '0' emulate the number keys.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Keys 'Q' and 'W' emulate the keys '*' and '#'<br>
-- Cartridges: It supports the standard game cartridges (not expansion cartridges) with 'ROM' and 'COL' file extension compressed or not<br>
-- Sound: Support the sound AY-8912 chip<br>
+- Cartridges: supports game cartridges with 'ROM' and 'COL' file extension, ZIP compressed or not<br>
+- Sound: Support the sound SN-76496 chip<br>
 - Snapshot: Load/save snapshots with my own format. When the snapshot is loaded includes the ROM cartridge, so they are independent and can be loaded without the original cartridge.<br>
 - Support Super Game Card y Mega Cart<br><br>
 
@@ -185,7 +185,7 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
 <b>Sega Master System</b><br>
 <hr>
-- ROM: ROM: It is required for emulation. Depending on the location of the console you can choose<br>
+- ROM: It is required for emulation. Depending on the location of the console you can choose<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Europe/Australia PAL<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Japan/Korea NTSC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- USA/Brazil NTSC<br>
@@ -193,7 +193,7 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'START' uses start player 1 (by default is mapped as the '1' key).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'PAUSE' uses F1 key<br>
-- Sound: Sound chip SN76496 implemented<br>
+- Sound: Sound chip SN-76496 implemented<br>
 - Cartridges: Supports cartridges 'SMS', ZIP compressed or not.<br>
 - Video: Supports all video special SMS video modes, and all the original. Supports NTSC and PAL.<br>
 - To do<br>
@@ -202,7 +202,7 @@ Other features<br>
 - Keys: Use the redefined keys or the external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'START' uses start player 1 (by default is mapped as the '1' key).<br>
-- Sound: Sound chip SN76496 implemented<br>
+- Sound: Sound chip SN-76496 implemented<br>
 - Cartridges: Supports cartridges 'SG', ZIP compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports up to tree types, with almost 100% compatibility<br>
 - To do<br>
@@ -211,7 +211,7 @@ Other features<br>
 - Keys: Use the redefined keys or the external joystick<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'SELECT' uses coin 1 (by default is mapped as key '5')<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- 'START' uses start player 1 (by default is mapped as the '1' key).<br>
-- Sound: Sound chip SN76496 implemented<br>
+- Sound: Sound chip SN-76496 implemented<br>
 - Cartridges: Supports cartridges 'GG', ZIP compressed or not.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports two types, with almost 100% compatibility<br>
 - To do<br>
