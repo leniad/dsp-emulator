@@ -1,4 +1,20 @@
 ﻿# DSP Emulator status #
+<b>22/04/21 - DSP Emulator 0.20WIP1. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -LR35902
+            +Add 4T when take an IRQ and comes from HALT
+-Gameboy/Gameboy Color
+    +Fixed background/window/sprites prorities. Finally understood how it works and renders the screen and objects
+    +Fixed window line draw (Fixes 'Star Trek', 'Marblemadness', 'International Karate' and many others)
+    +Fixed stupid bug in Gamboy Color video RAM
+    +Fixed Gameboy Color background color (Fixes 'Yoda Stories')
+    +Fixed sprite/sprite priority
+    +Fixed when LCD is disabled, LCD-stat is 0
+    +DMA - Fixed data origin 
+</pre>
+<img src='https://i.ibb.co/p2X10Tc/karate.jpg'> <img src='https://i.ibb.co/k2mwrPG/startrek.jpg'><br>
+<img src='https://i.ibb.co/JtgQtNG/Yoda.jpg'><br><br>
 <b>10/04/21 - DSP Emulator 0.19 released<br>
 Windows 32bits and 64bits, Linux 64bits, MacOS X 64bits and source updated. Updated Wiki.<br><pre>
 All changes on previous 0.18b3 release and

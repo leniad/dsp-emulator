@@ -304,7 +304,6 @@ case Sistema of
          savedialog.InitialDir:=Directory.spectrum_image;
          saveDialog.Filter:='Imagen PNG(*.PNG)|*.png|Imagen JPG(*.JPG)|*.jpg|Imagen GIF(*.GIF)|*.gif';
          SaveDialog.FileName:=StringReplace(llamadas_maquina.caption,':',' ',[rfReplaceAll, rfIgnoreCase]);
-         SaveDialog.FilterIndex:=2;
        end;
   StNES:begin
          savedialog.InitialDir:=Directory.amstrad_snap;

@@ -1,14 +1,14 @@
 object configgb: Tconfiggb
-  Left = 710
+  Left = 335
   Height = 240
-  Top = 369
+  Top = 194
   Width = 320
   Caption = 'Config GB/GBC'
   ClientHeight = 240
   ClientWidth = 320
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.0.10.0'
+  LCLVersion = '2.0.12.0'
   object GroupBox7: TGroupBox
     Left = 27
     Height = 81

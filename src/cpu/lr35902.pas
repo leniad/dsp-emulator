@@ -408,6 +408,7 @@ self.estados_demas:=0;
 old_contador:=self.contador;
 if not(self.after_ei) then begin
     if (self.vblank_ena and self.vblank_req) then begin //Vblank
+      if self.halt then self.estados_demas:=4;
       self.halt:=false;
       if self.ime then begin
         self.ime:=false;
@@ -416,10 +417,11 @@ if not(self.after_ei) then begin
         self.putbyte(r.sp,r.pc and $ff);
         self.putbyte(r.sp+1,r.pc shr 8);
         r.pc:=$40;
-        self.estados_demas:=20;
+        self.estados_demas:=self.estados_demas+20;
       end;
     end else begin
       if (self.lcdstat_ena and self.lcdstat_req) then begin //STAT
+        if self.halt then self.estados_demas:=4;
         self.halt:=false;
         if self.ime then begin
           self.ime:=false;
@@ -428,10 +430,11 @@ if not(self.after_ei) then begin
           self.putbyte(r.sp,r.pc and $ff);
           self.putbyte(r.sp+1,r.pc shr 8);
           r.pc:=$48;
-          self.estados_demas:=20;
+          self.estados_demas:=self.estados_demas+20;
         end;
       end else begin
         if (self.timer_ena and self.timer_req) then begin //Timers
+          if self.halt then self.estados_demas:=4;
           self.halt:=false;
           if self.ime then begin
             self.ime:=false;
@@ -440,10 +443,11 @@ if not(self.after_ei) then begin
             self.putbyte(r.sp,r.pc and $ff);
             self.putbyte(r.sp+1,r.pc shr 8);
             r.pc:=$50;
-            self.estados_demas:=20;
+            self.estados_demas:=self.estados_demas+20;
           end
         end else begin
         if (self.serial_ena and self.serial_req) then begin //Serial
+          if self.halt then self.estados_demas:=4;
           self.halt:=false;
           if self.ime then begin
             self.ime:=false;
@@ -452,10 +456,11 @@ if not(self.after_ei) then begin
             self.putbyte(r.sp,r.pc and $ff);
             self.putbyte(r.sp+1,r.pc shr 8);
             r.pc:=$58;
-            self.estados_demas:=20;
+            self.estados_demas:=self.estados_demas+20;
           end
           end else begin
             if (self.joystick_ena and self.joystick_req) then begin //Joystick
+              if self.halt then self.estados_demas:=4;
               self.halt:=false;
               if self.ime then begin
                 self.ime:=false;
@@ -464,7 +469,7 @@ if not(self.after_ei) then begin
                 self.putbyte(r.sp,r.pc and $ff);
                 self.putbyte(r.sp+1,r.pc shr 8);
                 r.pc:=$60;
-                self.estados_demas:=20;
+                self.estados_demas:=self.estados_demas+20;
               end;
             end;
         end;
@@ -474,21 +479,6 @@ if not(self.after_ei) then begin
 end;
 self.after_ei:=false;
 if self.halt then r.pc:=r.pc-1;
-{if r.pc=$518a then begin
-  r.pc:=0;
-  r.pc:=$518a;
-  //50ee
-end;
-if r.pc=$57e6 then begin
-  r.pc:=0;
-  r.pc:=$57e6;
-  //50ee
-end;
-if r.pc=$4064 then begin
-  r.pc:=0;
-  r.pc:=$4064;
-  //50ee
-end;}
 oldpc:=r.pc;
 instruccion:=self.getbyte(r.pc);
 r.pc:=r.pc+1;

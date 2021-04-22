@@ -35,20 +35,20 @@ uses gb;
 
 { Tconfiggb }
 
-procedure Tconfiggb.FormShow(Sender: TObject);
-begin
-case gb_palette of
-  0:radiobutton1.Checked:=true;
-  1:radiobutton2.Checked:=true;
-end;
-end;
-
 procedure Tconfiggb.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState
   );
 begin
 case key of
     13:button1Click(nil);
     27:button2click(nil);
+end;
+end;
+
+procedure Tconfiggb.FormShow(Sender: TObject);
+begin
+case gb_palette of
+  0:radiobutton1.Checked:=true;
+  1:radiobutton2.Checked:=true;
 end;
 end;
 

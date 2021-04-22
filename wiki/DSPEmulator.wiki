@@ -97,9 +97,9 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Keys on extended models, mapped according to its function<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_spectrum.jpg" width="25%" height="25%"></img><br>
 - Virtual Tapes: Support 'TAP', 'TZX', 'PZX', 'WAV' and 'CSW' (Version 1 and 2), ZIP compressed or not. Fully working spectrum load schemes (bleepload, alkatraz, original rom...)<br>
-&nbsp;With the mouse you can move inside virtual tape and select the start position. Tape begin to play when detects 'LOAD ""' command or you can press start/stop buttons on tape window. Tape stop when reaches the end of the tape and rewinds to tape beginning.<br>
-&nbsp;If inside the ZIP file there is a ROM file, emulator load first ROM file and then loads then virtual tape.<br>
-&nbsp;Also, if inside the ZIP is a .SCR image, it's used as a preview.<br>
+&nbsp;With the mouse you can move inside virtual tape and select the start position. Tape begin to play when detects 'LOAD ""' command or you can press start/stop buttons on tape window. Tape stop when reaches the end of the tape and rewinds to the beginning.<br>
+&nbsp;If inside the ZIP file there is a 'ROM' file, emulator load first ROM file and then loads then virtual tape.<br>
+&nbsp;Also, if inside the ZIP is a 'SCR' image file, it's used as a preview.<br>
 - Snapshots: you can load 'Z80', 'DSP', 'SNA', 'SZX', 'ZX' and 'SP'. And you can save in 'SZX', 'Z80', 'DSP' and 'SNA' formats.<br>
 - Audio: Emulated beeper. On Spectrum 128K revisions there is an AY-8912.<br>
 - Floppy disk: Emulated all NEC-765 functions but write operations. Supports 'IPF', 'DSK' and 'extended DSK' formats.<br>
@@ -121,8 +121,8 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- The 'Enter' key on the numeric keypad PC works also as 'Enter' in the emulation CPC<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="pc_cpc.png" width="25%" height="25%"></img><br>
 - Joystick: Emulated with the redefinable keys or external joystick.<br>
-- Virtual Tape: support 'CDT', 'WAV' and 'CSW', ZIP compressed or not. Work the classical loading squemes (bleepload, alkatraz, SpeedLock ...). Use the mouse to move inside the virtual tape and select the starting position.<br>
-&nbsp;Start/stop tape motor commands also start/stop tape.<br>
+- Virtual Tape: support 'CDT', 'WAV' and 'CSW', ZIP compressed or not. Work the classical loading squemes (bleepload, alkatraz, SpeedLock ...)<br>
+&nbsp;Use the mouse to move inside the virtual tape and select the starting position. Start/stop tape motor commands also start/stop tape.<br>
 - Sound: All version support the AY-8912<br>
 - Floppy disk: Emulated the functions of the NEC-765, just missing writing functions. Supports 'IPF', 'DSK' and 'extended DSK' formats.<br>
 - Snapshots: Support load/save 'SNA' format<br>

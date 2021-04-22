@@ -136,7 +136,8 @@ with RomList do begin
       if pos_grid>(games_cont-26) then pos_grid:=games_cont-26;
       Floadrom.RomList.TopRow:=pos_grid;
     end;
-    Cells[0,f]:=games_desc[orden_games[f]].name;
+    if games_desc[orden_games[f]].grid>1999 then Cells[0,f]:=games_desc[orden_games[f]].name+' - Game & Watch'
+      else Cells[0,f]:=games_desc[orden_games[f]].name;
     if games_desc[orden_games[f]].zip='' then cells[1,f]:='N/A'
       else begin
         test:=directory.arcade_list_roms[find_rom_multiple_dirs(games_desc[orden_games[f]].zip+'.zip')];
