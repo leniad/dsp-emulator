@@ -63,7 +63,7 @@ var
  scroll_y_last,irq_ena,joystick,vram_nbank,wram_nbank,bgcolor_index,spcolor_index:byte;
  scroll_y_pos,dma_src,dma_dst:word;
  nombre_rom:string;
- estado_2,oam_dma,haz_dma,hay_nvram,cartucho_cargado:boolean;
+ oam_dma,haz_dma,hay_nvram,cartucho_cargado:boolean;
  oam_dma_pos,hdma_size,gb_timer,sprites_time:byte;
  gameboy:tgameboy;
 
@@ -622,13 +622,9 @@ case direccion of
   $49:leer_io:=sprt1_pal;
   $4a:leer_io:=window_y;
   $4b:leer_io:=window_x;
-  $80..$fe:leer_io:=io_ram[direccion];  //high memory
+  //$80..$fe:leer_io:=io_ram[direccion];  //high memory
   $ff:leer_io:=irq_ena;
-  else begin
-    //MessageDlg('IO desconocida leer pos= '+inttohex(direccion and $ff,2), mtInformation,[mbOk], 0);
-    //leer_io:=$ff;
-    leer_io:=io_ram[direccion];
-  end;
+  else leer_io:=io_ram[direccion];
 end;
 end;
 
@@ -721,7 +717,7 @@ case direccion of
   $4a:window_y:=valor;
   $4b:window_x:=valor;
   $50:enable_bios:=false;  //disable ROM
-  $80..$fe:io_ram[direccion]:=valor;  //high memory
+  //$80..$fe:io_ram[direccion]:=valor;  //high memory
   $ff:begin  //irq enable
         irq_ena:=valor;
         lr35902_0.vblank_ena:=(valor and $1)<>0;
@@ -959,7 +955,6 @@ init_controls(false,false,false,true);
 frame_m:=lr35902_0.tframes;
 while EmuStatus=EsRuning do begin
   for linea_actual:=0 to 153 do begin
-    estado_2:=false;
     lr35902_0.run(frame_m);
     frame_m:=frame_m+lr35902_0.tframes-lr35902_0.contador;
     if linea_actual<144 then gameboy.video_render;  //Modos 2-3-0
@@ -1028,35 +1023,34 @@ end;
 if not(lcd_ena) then exit;
 //Si la linea es 144 y el LCD está en ON --> VBLANK
 //Haaaaaack, si no lo hace en la 146 SML2 no funciona...
-if ((linea_actual=146) and (lr35902_0.contador=4)) then lr35902_0.vblank_req:=true;
+if ((linea_actual=146) and (lr35902_0.contador=8)) then lr35902_0.vblank_req:=true;
 //CUIDADO! Cuando se activa la IRQ en la linea del LCD ya no se aceptan más IRQ en la misma linea!!
 //Esto se llama STAT IRQ glitch
 case lr35902_0.contador of
-  0..79:if not(estado_2) then begin
-          estado_2:=true;
+  8:begin
           //LY compare
           if linea_actual=ly_compare then begin
             lcd_compare:=(stat and $40)<>0;
             stat:=stat or $4;
           end else stat:=stat and $fb;
           case linea_actual of
-            0..143:begin //Modo 2 y testeo --> Mode 2 OAM interrupt
-                     lcd_mode:=((stat and $20)<>0) and ((stat and 3)<>2) and ((stat and $4)=0);
+            0..143:if ((stat and 3)<>2) then begin //Modo 2
+                     lcd_mode:=(stat and $20)<>0;
                      stat:=(stat and $fc) or $2;
                    end;
-            144:begin
+            144:if ((stat and 3)<>1) then begin
                   //Modo 1
-                  lcd_mode:=((stat and $10)<>0) and ((stat and 3)<>1) and ((stat and $4)=0);
+                  lcd_mode:=(stat and $10)<>0;
                   stat:=(stat and $fc) or $1;
                 end;
           end;
         end;
-  80..251:if (linea_actual<144) then begin //Modo 3
-             lcd_mode:=(((stat and 3)<>3) and ((stat and $20)<>0) and ((stat and $4)=0) and ((stat and $10)=0));
+  88:if ((linea_actual<144) and ((stat and 3)<>3)) then begin //Modo 3
+             lcd_mode:=((stat and $20)<>0) and ((stat and $10)=0);
              stat:=(stat and $fc) or $3;
           end;
   252..600:if ((linea_actual<144) and ((sprites_time+252)>=lr35902_0.contador) and ((stat and 3)<>0)) then begin //Modo 0
-                lcd_mode:=((stat and $8)<>0) and ((stat and 3)<>0) and ((stat and $20)=0) and ((stat and $4)=0);
+                lcd_mode:=((stat and $8)<>0) and ((stat and $20)=0);
                 stat:=stat and $fc;
            end;
 end;
@@ -1082,30 +1076,28 @@ if lr35902_0.changed_speed then begin
 end;
 if not(lcd_ena) then exit;
 contador:=lr35902_0.contador shr lr35902_0.speed;
-if ((linea_actual=144) and (lr35902_0.contador=4)) then lr35902_0.vblank_req:=true;  //int 40!!
+if ((linea_actual=144) and (contador=8)) then lr35902_0.vblank_req:=true;  //int 40!!
 case contador of
-    0..79:if not(estado_2) then begin
+    8:begin
             haz_dma:=false;
-            estado_2:=true;
             //LY compare
             if linea_actual=ly_compare then begin
                lcd_compare:=(stat and $40)<>0;
                stat:=stat or $4;
             end else stat:=stat and $fb;
             case linea_actual of
-              0..143:begin
-                     lcd_mode:=((stat and $20)<>0) and ((stat and 3)<>2) and ((stat and $4)=0);
+              0..143:if ((stat and 3)<>2) then begin //Mode 2
+                     lcd_mode:=(stat and $20)<>0;
                      stat:=(stat and $fc) or $2;
                    end;
-              144:begin
-                  //Status 1
-                  lcd_mode:=((stat and $10)<>0) and ((stat and 3)<>1) and ((stat and $4)=0);
+              144:if ((stat and 3)<>1) then begin
+                  lcd_mode:=((stat and $10)<>0);
                   stat:=(stat and $fc) or $1;
                 end;
             end;
           end;
-  80..251:if linea_actual<144 then begin //Modo 3
-             lcd_mode:=(((stat and 3)<>3) and ((stat and $20)<>0) and ((stat and $4)=0) and ((stat and $10)=0));
+  88:if ((linea_actual<144) and ((stat and 3)<>3)) then begin //Modo 3
+             lcd_mode:=((stat and $20)<>0) and ((stat and $10)=0);
              stat:=(stat and $fc) or $3;
           end;
   252..600:if (linea_actual<144) then begin
@@ -1116,14 +1108,15 @@ case contador of
                   lr35902_0.contador:=lr35902_0.contador+8;
                   haz_dma:=true;
               end;
-              if (((sprites_time+252)>=contador) and ((stat and 3)<>0)) then begin   //H-Blank
-                lcd_mode:=((stat and $8)<>0) and ((stat and 3)<>0) and ((stat and $20)=0) and ((stat and $40)=0);
+              if (((sprites_time+252)>=contador) and ((stat and 3)<>0)) then begin   //Modo 0
+                lcd_mode:=((stat and $8)<>0) and ((stat and $20)=0);
                 stat:=stat and $fc;
               end;
            end;
 end;
 lr35902_0.lcdstat_req:=lr35902_0.lcdstat_req or lcd_compare or lcd_mode;
 end;
+
 
 //Sonido and timers
 procedure gb_main_timer;
@@ -1143,6 +1136,20 @@ begin
  gameboy_sound_reset;
  scroll_x:=0;
  fillchar(scroll_y[0],$ff,0);
+ fillchar(io_ram[0],$ff,0);
+ //io_ram[128]:=$e0; //3e
+ //io_ram[129]:=$46; //df
+ //io_ram[130]:=$3e; //e0
+ //io_ram[131]:=$28; //46
+ //io_ram[132]:=$3d; //3e
+ //io_ram[133]:=$20; //28
+ //io_ram[134]:=$fd; //3d
+ //io_ram[135]:=$c9; //20
+ //io_ram[136]:=$fd;
+ //io_ram[137]:=$c9;
+ fillchar(sprt_ram[0],$ff,0);
+ fillchar(bgc_pal[0],$ff,0);
+ fillchar(bgc_pal[0],$ff,0);
  scroll_y_pos:=0;
  scroll_y_last:=0;
  stat:=0;
@@ -1164,6 +1171,21 @@ begin
  oam_dma_pos:=0;
  oam_dma:=false;
  window_y_draw:=0;
+ bg_pal:=0;
+ sprt0_pal:=0;
+ sprt1_pal:=0;
+ window_x:=0;
+ window_y:=0;
+
+ {
+ tcontrol:byte;
+ bgc_pal,spc_pal:array[0..$3f] of word;
+ enable_bios,rom_exist,bgcolor_inc,spcolor_inc,hdma_ena:boolean;
+ bgcolor_index,spcolor_index:byte;
+ dma_src,dma_dst:word;
+ gb_timer,sprites_time:byte;}
+
+
  if not(rom_exist) then begin
    enable_bios:=false;
    lr_reg.pc:=$100;

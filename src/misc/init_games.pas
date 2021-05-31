@@ -5,7 +5,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   //Computer
   spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,commodore64,
   //Console
-  nes,coleco,gb,sms,sg1000,sega_gg,
+  nes,coleco,gb,sms,sg1000,sega_gg,super_cassette_vision,
   //Arcade
   phoenix_hw,bombjack_hw,pacman_hw,mysteriousstones_hw,donkeykong_hw,
   greenberet_hw,blacktiger_hw,commando_hw,gng_hw,mikie_hw,shaolinsroad_hw,
@@ -33,7 +33,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
-  hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw;
+  hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw;
 
 type
   tgame_desc=record
@@ -48,7 +48,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=309;
+  GAMES_CONT=311;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -350,6 +350,7 @@ const
   (name:'E-Swat - Cyber Police';year:'1989';snd:1;hi:false;zip:'eswat';grid:295;company:'Sega';rom:@eswat),
   (name:'Passing Shot';year:'1988';snd:1;hi:false;zip:'passsht';grid:296;company:'Sega';rom:@passsht),
   (name:'Aurail';year:'1990';snd:1;hi:false;zip:'aurail';grid:297;company:'Sega';rom:@aurail),
+  (name:'Hellfire';year:'1989';snd:1;hi:false;zip:'hellfire';grid:298;company:'Toaplan';rom:@hellfire),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -359,6 +360,7 @@ const
   (name:'Sega Master System';year:'1986';snd:1;hi:false;zip:'sms';grid:1004;company:'Sega';rom:@sms_),
   (name:'SG-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega'),
   (name:'Sega GameGear';year:'1990';snd:1;hi:false;zip:'';grid:1006;company:'Sega'),
+  (name:'Super Cassette Vision';year:'1984';snd:1;hi:false;zip:'scv';grid:1007;company:'Epoch';rom:@scv),
   //G&W
   (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),
   (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55),
@@ -677,6 +679,7 @@ case numero of
   295:principal1.CambiarMaquina(principal1.eswat1);
   296:principal1.CambiarMaquina(principal1.passingshot1);
   297:principal1.CambiarMaquina(principal1.aurail1);
+  298:principal1.CambiarMaquina(principal1.hellfire1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -684,6 +687,7 @@ case numero of
   1004:principal1.CambiarMaquina(principal1.SegaMS1);
   1005:principal1.CambiarMaquina(principal1.SG10001);
   1006:principal1.CambiarMaquina(principal1.SegaGG1);
+  1007:principal1.CambiarMaquina(principal1.SCV1);
   2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
   2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
   2002:principal1.CambiarMaquina(principal1.MarioBros1);
@@ -992,6 +996,7 @@ principal1.dynamitedux1.checked:=false;
 principal1.eswat1.checked:=false;
 principal1.passingshot1.checked:=false;
 principal1.aurail1.checked:=false;
+principal1.hellfire1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1000,6 +1005,7 @@ principal1.chip81.checked:=false;
 principal1.segams1.checked:=false;
 principal1.sg10001.checked:=false;
 principal1.segagg1.checked:=false;
+principal1.scv1.checked:=false;
 //gnw
 principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
@@ -1055,7 +1061,7 @@ case driver of
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
   10..999:principal1.BitBtn8.enabled:=true;  //Arcade
-  1000,1003,1005,1006:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
+  1000,1003,1005,1006,1007:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
        end;
@@ -1238,6 +1244,7 @@ case tmaquina of
   285,286:cargar_bloodbros;
   287,288:cargar_baraduke;
   292,293,294,295,296,297:cargar_system16b;
+  298:cargar_toaplan1;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1246,6 +1253,7 @@ case tmaquina of
   1004:Cargar_SMS;
   1005:Cargar_sg;
   1006:Cargar_gg;
+  1007:Cargar_scv;
   //gnw
   2000..2002:cargar_gnw_510;
 end;
@@ -2449,6 +2457,10 @@ if sender=principal1.aurail1 then begin
   tipo:=297;
   principal1.aurail1.Checked:=true;
 end;
+if sender=principal1.hellfire1 then begin
+  tipo:=298;
+  principal1.hellfire1.Checked:=true;
+end;
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;
@@ -2477,6 +2489,10 @@ end;
 if sender=principal1.segagg1 then begin
   tipo:=1006;
   principal1.segagg1.Checked:=true;
+end;
+if sender=principal1.scv1 then begin
+  tipo:=1007;
+  principal1.scv1.Checked:=true;
 end;
 //GNW
 if sender=principal1.DonkeyKongjr1 then begin

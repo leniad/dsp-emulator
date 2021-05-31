@@ -224,14 +224,16 @@ for f:=0 to sound_status.canales_usados do begin
   {$endif}
 end;
 {$ifdef fpc}
-if main_screen.rapido then SDL_ClearQueuedAudio(sound_device);
-for h:=0 to (sound_status.sample_final-1) do begin
-    j:=0;
-    for f:=0 to sound_status.canales_usados do j:=j+tsample[f,h];
-    j:=j div (sound_status.canales_usados+1);
-    if j<-32767 then j:=-32767
-       else if j>32768 then j:=32768;
-    sample_final[h]:=j;
+if (sound_status.canales_usados<>-1) then begin
+   if main_screen.rapido then SDL_ClearQueuedAudio(sound_device);
+   for h:=0 to (sound_status.sample_final-1) do begin
+       j:=0;
+       for f:=0 to sound_status.canales_usados do j:=j+tsample[f,h];
+       j:=j div (sound_status.canales_usados+1);
+       if j<-32767 then j:=-32767
+          else if j>32768 then j:=32768;
+       sample_final[h]:=j;
+   end;
 end;
 SDL_QueueAudio(sound_device,@sample_final[0],sound_status.sample_final*sizeof(smallint));
 for f:=0 to sound_status.canales_usados do fillchar(tsample[f],LONG_MAX_AUDIO*sizeof(integer),0);

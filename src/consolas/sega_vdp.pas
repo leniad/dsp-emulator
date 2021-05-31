@@ -138,10 +138,10 @@ end;
 procedure vdp_chip.set_gg(is_gg:boolean);
 const
     tms992X_palete:array[0..15, 0..2] of byte =(
-     (0,0,0),(0,0,0),(33, 200, 66),(94, 220, 120),
-	  (84, 85, 237),(125, 118, 252),(212, 82, 77),(66, 235, 245),
-    (252, 85, 84),(255, 121, 120),(212, 193, 84),(230, 206, 128),
-	  (33, 176, 59),(201, 91, 186),(204, 204, 204),(255,255,255));
+    (0,0,0),(0,0,0),(0, 160, 0),(0, 238, 0),
+	  (0, 0, 98),(0, 0, 238),(78, 0, 0),(0, 238, 238),
+    (160, 0, 0),(238, 0, 0),(78, 78, 0),(238, 238, 0),
+	  (0, 78, 0),(238, 0, 238),(78, 78, 98),(238,238,238));
 var
   f:word;
   colores:tpaleta;
@@ -423,21 +423,21 @@ end else begin
   self.line_counter:=self.tms.regs[$a];
   self.reg9tmp:=self.tms.regs[9];
 end;
-//Esto es independiente de quien pinta la pantalla, si no los Simpsons se queda en bucle!
-if linea=self.Y_PIXELS then begin
+if self.tms.vdp_mode then begin
+  //Esto solo en modo SMS! Si no Nemesis se para. Los Simpsons no funcionan en JAP!
+  if linea=(self.Y_PIXELS) then begin
   //La señal de que estoy en el final del frame hay que ponerla antes que ejecute la IRQ
   //sino 'Zool' se para... Ademas la bandera no la pongo inmediatamente, si no Spiderman no funciona
   //Ademas no importa si va a ejecutar la IRQ, hay que poner la señal
-  timers.enabled(self.irq_timer,true);
-end else if (linea=self.Y_PIXELS+1) then begin
+           timers.enabled(self.irq_timer,true);
+  end else if (linea=self.Y_PIXELS+1) then begin
       //OJO!! Tengo que comprobar que sigue activa la IRQ antes de lanzarla!!
       //Outrun la quita para hacer la carretera...
       if (((self.tms.regs[1] and $20)<>0) and ((self.tms.status_reg and $80)<>0)) then begin
           if @self.SMS_IRQ_Handler<>nil then self.SMS_IRQ_Handler(true);
           self.tms.int:=true;
       end;
-end;
-if self.tms.vdp_mode then begin
+  end;
   if linea<self.Y_PIXELS then begin //Visible
       if not(self.display_disabled) then begin
           fillword(@priority_selected[0],256,0);

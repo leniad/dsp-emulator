@@ -1296,6 +1296,7 @@ case instruccion of
         r.pc:=read_word(r.sp);
         r.sp:=r.sp+2;
         self.ime:=true;
+        self.after_ei:=true;
       end;
   $DA:if r.f.c then begin  //  JP C,nnnn
         r.pc:=read_word(r.pc);

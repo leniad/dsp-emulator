@@ -1,4 +1,20 @@
 ﻿# DSP Emulator status #
+<b>31/05/21 - DSP Emulator 0.20WIP2. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -UPD78XX
+            +Added sub CPU 7801
+            +Added many opcodes, and fix others
+-Sega Master System
+    +Fixed IRQ in SMS video mode (Fixes 'Nemesis', 'The Simpsons - Bart vs. the Space Mutants', etc)
+    +Fixed memory initialization with value $f0 (Fixes 'Alibaba and 40 Thieves', 'Micro Xevious', etc)
+    +Change palette of TMS video mode
+-Super Cassette Vision
+    +Added preliminary console driver (to fix CPU 78XX and enhance Taito CChip!)
+-Toaplan 1
+    +Added preliminary driver for the system
+        -Hellfire: Basic driver
+</pre><br><br>
 <b>22/04/21 - DSP Emulator 0.20WIP1. Win32 and source update.<br><pre>
 -General
     +CPU

@@ -250,6 +250,9 @@ type
     dynamitedux1: TMenuItem;
     eswat1: TMenuItem;
     aurail1: TMenuItem;
+    MenuItem44: TMenuItem;
+    Hellfire1: TMenuItem;
+    scv1: TMenuItem;
     passingshot1: TMenuItem;
     wndrmomo1: TMenuItem;
     returnishtar1: TMenuItem;

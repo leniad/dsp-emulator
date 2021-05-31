@@ -459,6 +459,9 @@ type
     eswat1: TMenuItem;
     PassingShot1: TMenuItem;
     Aurail1: TMenuItem;
+    oaplan1HW1: TMenuItem;
+    Hellfire1: TMenuItem;
+    scv1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

@@ -315,8 +315,10 @@ uses
   baraduke_hw in '..\arcade\baraduke_hw.pas',
   system16b_hw in '..\arcade\system16b_hw.pas',
   sega_315_5195 in '..\arcade\misc\sega_315_5195.pas',
-  sega_pcm in '..\snd\sega_pcm.pas',
-  config_gb in 'config_gb.pas' {configgb};
+  sega_pcm in '..\snd\sega_pcm.pas' {config_gb in 'config_gb.pas' {configgb},
+  config_gb in 'config_gb.pas' {configgb},
+  toaplan1_hw in '..\arcade\toaplan1_hw.pas',
+  super_cassette_vision in '..\consolas\super_cassette_vision.pas';
 
 {$R *.res}
 

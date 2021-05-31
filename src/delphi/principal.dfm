@@ -2973,6 +2973,13 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object oaplan1HW1: TMenuItem
+            Caption = 'Toaplan 1 HW'
+            object Hellfire1: TMenuItem
+              Caption = 'Hellfire'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object NEC1: TMenuItem
           Caption = '80x86'
@@ -3030,6 +3037,10 @@ object principal1: Tprincipal1
         end
         object SegaGG1: TMenuItem
           Caption = 'Sega GameGear'
+          OnClick = CambiarMaquina
+        end
+        object scv1: TMenuItem
+          Caption = 'Super Cassette Vision'
           OnClick = CambiarMaquina
         end
       end

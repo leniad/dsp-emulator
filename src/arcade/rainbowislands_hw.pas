@@ -1,9 +1,11 @@
 unit rainbowislands_hw;
 
+//{$DEFINE MCU=1}
+
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_2151,
-     taitosnd,rom_engine,pal_engine,sound_engine,rainbow_cchip,taito_cchip;
+     taitosnd,rom_engine,pal_engine,sound_engine{$IFDEF MCU},taito_cchip{$ELSE IF},rainbow_cchip{$ENDIF};
 
 procedure cargar_rainbow;
 
@@ -22,7 +24,7 @@ const
         (n:'b39-01.19';l:$10000;p:0;crc:$50690880),(n:'b39-02.20';l:$10000;p:$1;crc:$4dead71f),
         (n:'b39-03.21';l:$10000;p:$20000;crc:$4a4cb785),(n:'b39-04.22';l:$10000;p:$20001;crc:$4caa53bd),
         (n:'b22-03.23';l:$20000;p:$40000;crc:$3ebb0fb8),(n:'b22-04.24';l:$20000;p:$40001;crc:$91625e7f));
-        rainbow_cchip_eeprom:tipo_roms=(n:'cchip_b22-15.53';l:$2000;p:0;crc:$08c588a6);
+        {$IFDEF MCU}rainbow_cchip_eeprom:tipo_roms=(n:'cchip_b22-15.53';l:$2000;p:0;crc:$08c588a6);{$ENDIF}
         //DIP
         rainbow_dip1:array [0..2] of def_dip=(
         (mask:$30;name:'Coin A';number:4;dip:((dip_val:$10;dip_name:'ModeA 2C-1C/ModeB 3C-1C'),(dip_val:$30;dip_name:'ModeAB 1C-1C'),(dip_val:$0;dip_name:'ModeA 2C-3C/ModeB 4C-1C'),(dip_val:$20;dip_name:'ModeA 1C-2C/ModeB 2C-1C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -34,7 +36,7 @@ const
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$10;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Languaje';number:2;dip:((dip_val:$0;dip_name:'English'),(dip_val:$40;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Coin Mode';number:2;dip:((dip_val:$80;dip_name:'Mode A (Japan)'),(dip_val:$0;dip_name:'Mode B (World)'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        CPU_DIV=1;
+        CPU_MUL=2;
 
 var
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
@@ -111,29 +113,29 @@ end;
 procedure rainbow_principal;
 var
   frame_m,frame_s,frame_mcu:single;
-  f,h:byte;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=tc0140syt_0.z80.tframes;
-frame_mcu:=cchip_0.upd7810.tframes;
+{$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-    for h:=1 to CPU_DIV do begin
-        //Main CPU
-        m68000_0.run(frame_m);
-        frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-        //Sound CPU
-        tc0140syt_0.z80.run(frame_s);
-        frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
-        //MCU
-        //cchip_0.upd7810.run(frame_mcu);
-        //frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
-    end;
+    //Main CPU
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+    //Sound CPU
+    tc0140syt_0.z80.run(frame_s);
+    frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
+    //MCU
+    {$IFDEF MCU}
+    cchip_0.upd7810.run(frame_mcu);
+    frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
+    {$ENDIF}
     if f=239 then begin
         update_video_rainbow;
         m68000_0.irq[4]:=HOLD_LINE;
-        //cchip_0.set_int;
+        {$IFDEF MCU}cchip_0.set_int;{$ENDIF}
     end;
  end;
  eventos_rainbow;
@@ -150,10 +152,13 @@ case direccion of
   $390000..$390002:rainbow_getword:=marcade.dswa;
   $3b0000..$3b0002:rainbow_getword:=marcade.dswb;
   $3e0002:if m68000_0.access_8bits_hi_dir then rainbow_getword:=tc0140syt_0.comm_r;
+  {$IFDEF MCU}
+  $800000..$8007ff:rainbow_getword:=cchip_0.mem_r((direccion and $7ff) shr 1);
+  $800800..$800fff:rainbow_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);
+  {$ELSE IF}
   $800000..$8007ff:rainbow_getword:=rbisland_cchip_ram_r(direccion and $7ff);
   $800802:rainbow_getword:=rbisland_cchip_ctrl_r;
-  //$800000..$8007ff:rainbow_getword:=cchip_0.mem_r((direccion and $7ff) shr 1);
-  //$800800..$800fff:rainbow_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);
+  {$ENDIF}
   $c00000..$c0ffff:rainbow_getword:=ram2[(direccion and $ffff) shr 1];
   $d00000..$d03fff:rainbow_getword:=ram3[(direccion and $3fff) shr 1];
 end;
@@ -184,11 +189,14 @@ case direccion of
       $3a0000:spritebank:=(valor and $e0) shr 5;
       $3e0000:tc0140syt_0.port_w(valor and $ff);
       $3e0002:tc0140syt_0.comm_w(valor and $ff);
+      {$IFDEF MCU}
+      $800000..$8007ff:cchip_0.mem_w((direccion and $7ff) shr 1,valor);
+      $800800..$800fff:cchip_0.asic_w((direccion and $7ff) shr 1,valor);
+      {$ELSE IF}
       $800000..$8007ff:rbisland_cchip_ram_w(direccion and $7ff,valor);
       $800802:rbisland_cchip_ctrl_w;
       $800c00:rbisland_cchip_bank_w(valor);
-      //$800000..$8007ff:cchip_0.mem_w((direccion and $7ff) shr 1,valor);
-      //$800800..$800fff:cchip_0.asic_w((direccion and $7ff) shr 1,valor);
+      {$ENDIF}
       $c00000..$c03fff:begin
                       ram2[(direccion and $ffff) shr 1]:=valor;
                       gfx[0].buffer[(direccion and $3fff) shr 2]:=true;
@@ -270,7 +278,7 @@ begin
  m68000_0.reset;
  tc0140syt_0.reset;
  ym2151_0.reset;
- //cchip_0.reset;
+ {$IFDEF MCU}cchip_0.reset;{$ENDIF}
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$fc;
@@ -317,10 +325,10 @@ screen_mod_scroll(2,512,512,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(320,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256*CPU_DIV);
+m68000_0:=cpu_m68000.create(8000000,256);
 m68000_0.change_ram16_calls(rainbow_getword,rainbow_putword);
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256*CPU_DIV);
+tc0140syt_0:=tc0140syt_chip.create(4000000,256);
 tc0140syt_0.z80.change_ram_calls(rainbow_snd_getbyte,rainbow_snd_putbyte);
 tc0140syt_0.z80.init_sound(sound_instruccion);
 //Sound Chips
@@ -332,11 +340,14 @@ getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   179:begin
          //MCU
+         {$IFDEF MCU}
+         cchip_0:=cchip_chip.create(12000000*CPU_MUL,256);
+         cchip_0.change_ad(rainbow_80000d);
+         cchip_0.change_in(rainbow_800007,rainbow_800009,rainbow_80000c,nil,nil);
+         if not(roms_load(cchip_0.get_eeprom_dir,rainbow_cchip_eeprom)) then exit;
+         {$ELSE IF}
          rbisland_init_cchip(m68000_0.numero_cpu,0);
-         //cchip_0:=cchip_chip.create(12000000,256*CPU_DIV);
-         //cchip_0.change_ad(rainbow_80000d);
-         //cchip_0.change_in(rainbow_800007,rainbow_800009,rainbow_80000c,nil,nil);
-         //if not(roms_load(cchip_0.get_eeprom_dir,rainbow_cchip_eeprom)) then exit;
+         {$ENDIF}
          if not(roms_load16w(@rom,rainbow_rom)) then exit;
          //cargar sonido+ponerlas en su banco
          ptemp:=memoria_temp;

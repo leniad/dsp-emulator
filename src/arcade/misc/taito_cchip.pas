@@ -154,7 +154,7 @@ var
 begin
   dir:=directory.arcade_list_roms[find_rom_multiple_dirs('cchip.zip')];
   carga_rom_zip(dir+'cchip.zip',tcchip_rom.n,@self.cchip_rom,tcchip_rom.l,tcchip_rom.crc,false);
-  self.upd7810:=cpu_upd7810.create(clock,frame);
+  self.upd7810:=cpu_upd7810.create(clock,frame,CPU_7810);
   self.upd7810.change_ram_calls(cchip_getbyte,cchip_putbyte);
   self.upd7810.change_an(an_0,an_1,an_2,an_3,an_4,an_5,an_6,an_7);
   self.upd7810.change_in(ca_cb,cb_cb,cc_cb,cd_cb,cf_cb);

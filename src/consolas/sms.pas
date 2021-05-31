@@ -309,8 +309,9 @@ begin
 //cargar roms
 ptemp:=data;
 if (long mod $4000)=512 then inc(ptemp,512);
-mapper_sms.max:=long div $4000;
+mapper_sms.max:=(long div $4000)-1;
 copymemory(@mapper_sms.bios[0],ptemp,$4000);
+inc(ptemp,$4000);
 for f:=0 to (mapper_sms.max-1) do begin
       copymemory(@mapper_sms.rom[f,0],ptemp,$4000);
       inc(ptemp,$4000);
@@ -347,6 +348,8 @@ begin
  mapper_sms.slot2:=2 mod mapper_sms.max;
  mapper_sms.slot3:=0;
  mapper_sms.slot2_bank:=0;
+ //Alibaba confia en este inicio de la RAM!!!
+ fillchar(mapper_sms.ram[0],$2000,$f0);
 end;
 
 function abrir_sms:boolean;
@@ -386,12 +389,15 @@ begin
   //Abrirlo
   extension:=extension_fichero(nombre_file);
   z80_0.change_ram_calls(sms_getbyte,sms_putbyte);
-  if (extension='SMS') then resultado:=abrir_cartucho_sms(datos,longitud)
+  crc_val:=calc_crc(datos,longitud);
+  case crc_val of
+    $81c3476b:resultado:=abrir_cartucho_sms_bios(datos,longitud);
+    else if (extension='SMS') then resultado:=abrir_cartucho_sms(datos,longitud)
      else if extension='ROM' then resultado:=abrir_cartucho_sms_bios(datos,longitud);
+  end;
   if resultado then begin
     llamadas_maquina.open_file:=nombre_file;
     abrir_sms:=true;
-    crc_val:=calc_crc(datos,longitud);
     case crc_val of
       $58fa27c6,$a577ce46,$29822980,$ea5c3a6f,$8813514b,$b9664ae1:begin //Codemasters
           z80_0.change_ram_calls(sms_getbyte_no_sega,sms_putbyte_codemasters);
@@ -402,7 +408,7 @@ begin
       $a67f2a5c:begin //4pack
           z80_0.change_ram_calls(sms_getbyte_no_sega,sms_putbyte_4_pack);
       end;
-      $a05258f5,$9195c34c,$83f0eede,$5ac99fc4,$445525e2,$f89af3cc,$77efe84a:begin //Cyborg-Z, Knightmare II, Penguin, Street Master
+      $0a77fa5e,$a05258f5,$9195c34c,$83f0eede,$5ac99fc4,$445525e2,$f89af3cc,$77efe84a,$6965ed9:begin //Cyborg-Z, Knightmare II, Penguin, Street Master
         z80_0.change_ram_calls(sms_getbyte_cyborgz,sms_putbyte_cyborgz);
       end;
       $e316c06d:begin //Nemesis

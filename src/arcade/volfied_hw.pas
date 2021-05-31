@@ -1,9 +1,11 @@
 unit volfied_hw;
 
+//{$DEFINE MCU=1}
+
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_2203,taitosnd,rom_engine,
-     pal_engine,sound_engine,taito_cchip,volfied_cchip;
+     pal_engine,sound_engine{$IFDEF MCU},taito_cchip{$ELSE IF},volfied_cchip{$ENDIF};
 
 procedure cargar_volfied;
 
@@ -21,7 +23,7 @@ const
         (n:'c04-15.1';l:$20000;p:$40000;crc:$7c50b978),(n:'c04-17.3';l:$20000;p:$40001;crc:$c62fdeb8),
         (n:'c04-10.15';l:$10000;p:$80000;crc:$429b6b49),(n:'c04-09.14';l:$10000;p:$80001;crc:$c78cf057),
         (n:'c04-10.15';l:$10000;p:$a0000;crc:$429b6b49),(n:'c04-09.14';l:$10000;p:$a0001;crc:$c78cf057));
-        cchip_eeprom:tipo_roms=(n:'cchip_c04-23';l:$2000;p:0;crc:$46b0b479);
+        {$IFDEF MCU}cchip_eeprom:tipo_roms=(n:'cchip_c04-23';l:$2000;p:0;crc:$46b0b479);{$ENDIF}
         //DIP
         volfied_dip1:array [0..5] of def_dip=(
         (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$1;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -34,7 +36,7 @@ const
         (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Medium'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$70;name:'Lives';number:4;dip:((dip_val:$70;dip_name:'3'),(dip_val:$60;dip_name:'4'),(dip_val:$50;dip_name:'5'),(dip_val:$40;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Languaje';number:2;dip:((dip_val:$0;dip_name:'English'),(dip_val:$80;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        CPU_DIV=1;
+        CPU_MUL=3;
 
 var
  video_mask,video_ctrl:word;
@@ -106,29 +108,29 @@ end;
 procedure volfied_principal;
 var
   frame_m,frame_s,frame_mcu:single;
-  f,h:word;
+  f:word;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=tc0140syt_0.z80.tframes;
-//frame_mcu:=cchip_0.upd7810.tframes;
+{$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
 while EmuStatus=EsRuning do begin
     for f:=0 to $ff do begin
-      for h:=1 to CPU_DIV do begin
-        //Main CPU
-        m68000_0.run(frame_m);
-        frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-        //Sound CPU
-        tc0140syt_0.z80.run(frame_s);
-        frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
-        //MCU
-        //cchip_0.upd7810.run(frame_mcu);
-        //frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
-      end;
+      //Main CPU
+      m68000_0.run(frame_m);
+      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+      //Sound CPU
+      tc0140syt_0.z80.run(frame_s);
+      frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
+      //MCU
+      {$IFDEF MCU}
+      cchip_0.upd7810.run(frame_mcu);
+      frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
+      {$ENDIF}
       if f=247 then begin
         update_video_volfied;
         m68000_0.irq[4]:=HOLD_LINE;
-        //cchip_0.set_int;
+        {$IFDEF MCU}cchip_0.set_int;{$ENDIF}
       end;
     end;
  eventos_volfied;
@@ -147,10 +149,13 @@ case direccion of
   $500000..$503fff:volfied_getword:=buffer_paleta[(direccion and $3fff) shr 1];
   $d00000:volfied_getword:=$60;
   $e00002:if m68000_0.access_8bits_hi_dir then volfied_getword:=tc0140syt_0.comm_r;
+  {$IFDEF MCU}
+  $f00000..$f007ff:volfied_getword:=cchip_0.mem_r((direccion and $7ff) shr 1);
+  $f00800..$f00fff:volfied_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);
+  {$ELSE IF}
   $f00000..$f007ff:volfied_getword:=volfied_cchip_ram_r(direccion and $7ff);
-	$f00802:volfied_getword:=volfied_cchip_ctrl_r;
-  //$f00000..$f007ff:volfied_getword:=cchip_0.mem_r((direccion and $7ff) shr 1);
-  //$f00800..$f00fff:volfied_getword:=cchip_0.asic_r((direccion and $7ff) shr 1);
+  $f00802:volfied_getword:=volfied_cchip_ctrl_r;
+  {$ENDIF}
 end;
 end;
 
@@ -180,11 +185,15 @@ case direccion of
       $d00000:video_ctrl:=valor;
       $e00000:tc0140syt_0.port_w(valor and $ff);
       $e00002:tc0140syt_0.comm_w(valor and $ff);
+      {$IFDEF MCU}
+      $f00000..$f007ff:cchip_0.mem_w((direccion and $7ff) shr 1,valor and $ff);
+      $f00800..$f00fff:cchip_0.asic_w((direccion and $7ff) shr 1,valor and $ff);
+      {$ELSE IF}
       $f00000..$f007ff:volfied_cchip_ram_w(direccion and $7ff,valor);
       $f00802:volfied_cchip_ctrl_w(valor);
       $f00c00:volfied_cchip_bank_w(valor);
-      //$f00000..$f007ff:cchip_0.mem_w((direccion and $7ff) shr 1,valor and $ff);
-      //$f00800..$f00fff:cchip_0.asic_w((direccion and $7ff) shr 1,valor and $ff);
+      {$ENDIF}
+
 end;
 end;
 
@@ -256,8 +265,11 @@ begin
  m68000_0.reset;
  tc0140syt_0.reset;
  ym2203_0.reset;
+ {$IFDEF MCU}
+ cchip_0.reset;
+ {$ELSE IF}
  volfied_cchip_reset;
- //cchip_0.reset;
+ {$ENDIF}
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$fc;
@@ -281,10 +293,10 @@ screen_init(1,248,512);
 screen_init(2,512,512,false,true);
 iniciar_video(240,320);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256*CPU_DIV);
+m68000_0:=cpu_m68000.create(8000000,256);
 m68000_0.change_ram16_calls(volfied_getword,volfied_putword);
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256*CPU_DIV);
+tc0140syt_0:=tc0140syt_chip.create(4000000,256);
 tc0140syt_0.z80.change_ram_calls(volfied_snd_getbyte,volfied_snd_putbyte);
 tc0140syt_0.z80.init_sound(volfied_update_sound);
 //Sound Chips
@@ -292,11 +304,14 @@ ym2203_0:=ym2203_chip.create(4000000,4);
 ym2203_0.change_io_calls(volfied_dipa,volfied_dipb,nil,nil);
 ym2203_0.change_irq_calls(snd_irq);
 //MCU
+{$IFDEF MCU}
+cchip_0:=cchip_chip.create(10000000*CPU_MUL,256);
+cchip_0.change_ad(volfied_f0000d);
+cchip_0.change_in(volfied_f00007,volfied_f00009,volfied_f0000c,nil,nil);
+if not(roms_load(cchip_0.get_eeprom_dir,cchip_eeprom)) then exit;
+{$ELSE IF}
 volfied_init_cchip(m68000_0.numero_cpu);
-//cchip_0:=cchip_chip.create(10000000,256*CPU_DIV);
-//cchip_0.change_ad(volfied_f0000d);
-//cchip_0.change_in(volfied_f00007,volfied_f00009,volfied_f0000c,nil,nil);
-//if not(roms_load(cchip_0.get_eeprom_dir,cchip_eeprom)) then exit;
+{$ENDIF}
 //ROMS
 if not(roms_load16w(@rom,volfied_rom)) then exit;
 if not(roms_load16w(@rom2,volfied_rom2)) then exit;
