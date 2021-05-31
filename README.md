@@ -13,7 +13,7 @@
     +Added preliminary console driver (to fix CPU 78XX and enhance Taito CChip!)
 -Toaplan 1
     +Added preliminary driver for the system
-        -Hellfire: Basic driver
+        -Hellfire: Basic driver 
 </pre><br><br>
 <b>22/04/21 - DSP Emulator 0.20WIP1. Win32 and source update.<br><pre>
 -General
