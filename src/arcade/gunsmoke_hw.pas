@@ -1,6 +1,7 @@
 unit gunsmoke_hw;
 
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,timer_engine,rom_engine,
      pal_engine,sound_engine,mcs51;
@@ -490,27 +491,27 @@ end;
 
 function in_port0:byte;
 begin
-  in_port0:=cpu_to_mcu;
+  in_port0:=cpu_to_mcu;
 end;
 
 function in_port1:byte;
 begin
-  in_port1:=linea;
+  in_port1:=linea;
 end;
 
 function in_port2:byte;
 begin
-  in_port2:=audiocpu_to_mcu;
+  in_port2:=audiocpu_to_mcu;
 end;
 
 procedure out_port0(valor:byte);
 begin
-  mcu_p0:=valor;
+  mcu_p0:=valor;
 end;
 
 procedure out_port2(valor:byte);
 begin
-  mcu_p2:=valor;
+  mcu_p2:=valor;
 end;
 
 procedure out_port3(valor:byte);
@@ -598,7 +599,6 @@ init_gfx(ngfx,32,32,512);
 gfx_set_desc_data(4,0,256*8,512*256*8+4,512*256*8+0,4,0);
 convert_gfx(ngfx,0,@memoria_temp,@pt_x,@pt_y,false,true);
 end;
-
 begin
 iniciar_gunsmokehw:=false;
 iniciar_audio(false);
@@ -778,5 +778,4 @@ if main_vars.tipo_maquina=80 then begin
   llamadas_maquina.fps_max:=59.63;
 end else llamadas_maquina.bucle_general:=hw1943_principal;
 end;
-
 end.

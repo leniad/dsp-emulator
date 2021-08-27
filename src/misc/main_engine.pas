@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.20WIP2';
+        DSP_VERSION='0.20WIP3';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;

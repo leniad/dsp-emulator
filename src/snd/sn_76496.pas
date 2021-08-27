@@ -17,10 +17,11 @@ type
       procedure change_clock(clock:dword);
     private
     	UpdateStep:dword;
-    	VolTable:array[0..15] of integer;	// volume table
-    	Registers:array[0..7] of integer;	// registers
+    	VolTable:array[0..15] of single;	// volume table
+    	Registers:array[0..7] of word;	// registers
     	LastRegister:byte;	// last register written
-    	Volume,Period,Count:array [0..3] of integer;		// volume of voice 0-2 and noise
+    	Volume:array [0..3] of single;
+      Period,Count:array [0..3] of integer;		// volume of voice 0-2 and noise
       Output:array [0..3] of byte;
     	RNG:cardinal;		// noise generator      */
     	NoiseFB:integer;		// noise feedback mask */
@@ -57,10 +58,11 @@ end;
 type
     tsn76496=packed record
         UpdateStep:dword;
-        VolTable:array[0..15] of integer;
-        Registers:array[0..7] of integer;
+        VolTable:array[0..15] of single;
+        Registers:array[0..7] of word;
         LastRegister:byte;
-        Volume,Period,Count:array [0..3] of integer;
+        Volume:array [0..3] of single;
+        Period,Count:array [0..3] of integer;
         Output:array [0..3] of byte;
         RNG:cardinal;
         NoiseFB:integer;
@@ -78,10 +80,10 @@ var
 begin
   getmem(sn76496,sizeof(tsn76496));
   sn76496.UpdateStep:=self.UpdateStep;
-  copymemory(@sn76496.VolTable,@self.VolTable,16*4);
-  copymemory(@sn76496.Registers,@self.Registers,8*4);
+  copymemory(@sn76496.VolTable,@self.VolTable,16*sizeof(single));
+  copymemory(@sn76496.Registers,@self.Registers,8*2);
   sn76496.LastRegister:=self.LastRegister;
-  copymemory(@sn76496.Volume,@self.Volume,4*4);
+  copymemory(@sn76496.Volume,@self.Volume,4*sizeof(single));
   copymemory(@sn76496.Period,@self.Period,4*4);
   copymemory(@sn76496.Count,@self.Count,4*4);
   copymemory(@sn76496.Output,@self.Output,4);
@@ -99,10 +101,10 @@ begin
   getmem(sn76496,sizeof(tsn76496));
   copymemory(sn76496,data,REGS_SIZE);
   self.UpdateStep:=sn76496.UpdateStep;
-  copymemory(@self.VolTable,@sn76496.VolTable,16*4);
-  copymemory(@self.Registers,@sn76496.Registers,8*4);
+  copymemory(@self.VolTable,@sn76496.VolTable,16*sizeof(single));
+  copymemory(@self.Registers,@sn76496.Registers,8*2);
   self.LastRegister:=sn76496.LastRegister;
-  copymemory(@self.Volume,@sn76496.Volume,4*4);
+  copymemory(@self.Volume,@sn76496.Volume,4*sizeof(single));
   copymemory(@self.Period,@sn76496.Period,4*4);
   copymemory(@self.Count,@sn76496.Count,4*4);
   copymemory(@self.Output,@sn76496.Output,4);
@@ -193,8 +195,8 @@ begin
   // build volume table (2dB per step) */
   for i:=0 to 14 do begin
     // limit volume to avoid clipping */
-    if (out_sn>(MAX_OUTPUT/3)) then self.VolTable[i]:=round(MAX_OUTPUT/3)
-      else self.VolTable[i]:=round(out_sn);
+    if (out_sn>(MAX_OUTPUT/3)) then self.VolTable[i]:=MAX_OUTPUT/3
+      else self.VolTable[i]:=out_sn;
     out_sn:=out_sn/1.258925412;	// = 10 ^ (2/20) = 2dB */
   end;
   self.VolTable[15]:=0;

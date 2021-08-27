@@ -2189,10 +2189,21 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object BurgerTime1: TMenuItem
-            Caption = 'Burger Time'
+          object BurgerTimeHW1: TMenuItem
+            Caption = 'Burger Time HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object BurgerTime1: TMenuItem
+              Caption = 'Burger Time'
+              OnClick = CambiarMaquina
+            end
+            object lnc1: TMenuItem
+              Caption = 'Lock'#39'n'#39'Chase'
+              OnClick = CambiarMaquina
+            end
+            object mmonkey1: TMenuItem
+              Caption = 'Minky Monkey'
+              OnClick = CambiarMaquina
+            end
           end
           object ExpressRaider1: TMenuItem
             Caption = 'Express Raider'

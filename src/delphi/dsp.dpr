@@ -1,5 +1,4 @@
 program dsp;
-
 uses
   Forms,
   coleco in '..\CONSOLAS\coleco.pas',
@@ -321,7 +320,6 @@ uses
   super_cassette_vision in '..\consolas\super_cassette_vision.pas';
 
 {$R *.res}
-
 begin
   Application.Initialize;
   Application.Title:='DSP Emulator';

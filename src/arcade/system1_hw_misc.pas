@@ -6,7 +6,7 @@ uses main_engine,gfx_engine,nz80,sn_76496,controls_engine,sega_decrypt,
 
 function iniciar_system1:boolean;
 procedure system1_principal;
-procedure reset_system1;
+procedure cambiar_color_system1(valor:byte;pos:word);
 
 implementation
 uses system1_hw;
@@ -233,9 +233,9 @@ while EmuStatus=EsRuning do begin
     if f=223 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video;
+      eventos_system1;
     end;
   end;
-  eventos_system1;
   video_sync;
 end;
 end;
@@ -245,15 +245,15 @@ begin
 case direccion of
   $0..$7fff:if z80_0.opcode then system1_getbyte:=mem_dec[direccion]
               else system1_getbyte:=memoria[direccion];
+  $8000..$d7ff,$de00..$dfff:system1_getbyte:=memoria[direccion];
   $d800..$ddff:system1_getbyte:=buffer_paleta[direccion and $7ff];
   $e000..$efff:system1_getbyte:=bg_ram[direccion and $fff];
   $f000..$f3ff:system1_getbyte:=mix_collide[direccion and $3f] or $7e or (mix_collide_summary shl 7);
   $f800..$fbff:system1_getbyte:=sprite_collide[direccion and $3ff] or $7e or (sprite_collide_summary shl 7);
-  else system1_getbyte:=memoria[direccion];
 end;
 end;
 
-procedure cambiar_color(valor:byte;pos:word);inline;
+procedure cambiar_color_system1(valor:byte;pos:word);
 var
   color:tcolor;
 begin
@@ -267,17 +267,19 @@ procedure system1_putbyte(direccion:word;valor:byte);
 var
   pos_bg:word;
 begin
-if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+        0..$bfff:;
+        $c000..$d7ff,$de00..$dfff:memoria[direccion]:=valor;
         $d800..$ddff:if buffer_paleta[direccion and $7ff]<>valor then begin
-                        cambiar_color(valor,direccion and $7ff);
+                        cambiar_color_system1(valor,direccion and $7ff);
                         buffer_paleta[direccion and $7ff]:=valor;
                      end;
         $e000..$efff:begin
                         pos_bg:=direccion and $fff;
-                        bg_ram[pos_bg]:=valor;
-                        bg_ram_w[pos_bg shr 1]:=true;
+                        if bg_ram[pos_bg]<>valor then begin
+                          bg_ram[pos_bg]:=valor;
+                          bg_ram_w[pos_bg shr 1]:=true;
+                        end;
                      end;
         $f000..$f3ff:mix_collide[direccion and $3f]:=0;
         $f400..$f7ff:mix_collide_summary:=0;
@@ -334,40 +336,16 @@ begin
   system1_videomode:=valor;
 end;
 
-//Main
-procedure reset_system1;
+//Z80 delay
+procedure system1_delay(estados_t:word);
+var
+  est_final:byte;
 begin
-case main_vars.tipo_maquina of
-  27,35,36,153,155:z80pio_reset(0);
-  152,154:pia8255_0.reset;
-end;
-sn_76496_0.reset;
-sn_76496_1.reset;
-z80_0.reset;
-z80_1.reset;
-reset_audio;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-sound_latch:=0;
-mix_collide_summary:=0;
-sprite_collide_summary:=0;
-scroll_x:=0;
-scroll_y:=0;
-system1_videomode:=0;
-//Clear all
-fillchar(bg_ram,$4000,0);
-fillchar(bg_ram_w,$2000,0);
-fillchar(sprites_final_screen,$20000,0);
-fillchar(final_screen[0,0],8*$10000*2,0);
-fillchar(bgpixmaps,4,0);
-sprite_offset:=0;
-yscroll:=0;
-fillchar(xscroll,$20*2,0);
-fillchar(sprite_collide,$400,0);
-fillchar(mix_collide,$40,0);
+est_final:=((estados_t div 5)+byte((estados_t mod 5)<>0))*5;
+z80_0.contador:=z80_0.contador+(est_final-estados_t);
 end;
 
+//Main
 function iniciar_system1:boolean;
 var
   memoria_temp:array[0..$ffff] of byte;
@@ -393,7 +371,6 @@ end;
 //Main CPU
 z80_0:=cpu_z80.create(4000000,260);
 z80_0.change_ram_calls(system1_getbyte,system1_putbyte);
-z80_0.change_misc_calls(system1_delay,nil);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.init_sound(system1_sound_update);
@@ -404,6 +381,7 @@ sn_76496_1:=sn76496_chip.Create(4000000);
 sprite_num_banks:=1;
 case main_vars.tipo_maquina of
   27:begin //Pitfall II
+      z80_0.change_misc_calls(system1_delay,nil);
       //cargar roms
       if not(roms_load(@memoria,pitfall2_rom)) then exit;
       decrypt_sega(@memoria,@mem_dec,0); //Sega Decypt
@@ -559,10 +537,10 @@ case main_vars.tipo_maquina of
     z80pio_init(0,nil,nil,system1_pio_porta_write,system1_pio_porta_nmi,nil,system1_pio_portb_write,nil);
   end;
 end;
-
-mask_char:=$7ff;
 char_screen:=1;
-reset_system1;
+sprite_offset:=0;
+mask_char:=$7ff;
+llamadas_maquina.reset;
 iniciar_system1:=true;
 end;
 

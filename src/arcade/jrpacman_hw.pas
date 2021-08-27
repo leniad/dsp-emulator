@@ -169,7 +169,7 @@ end;
 procedure jrpacman_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-        $0..$3fff,$8000..$dfff:exit;
+        $0..$3fff,$8000..$dfff:;
         $4000..$47ff:if memoria[direccion]<>valor then begin
                         clean_tiles(direccion and $7ff);
                         memoria[direccion]:=valor;
@@ -291,7 +291,7 @@ for f:=0 to 79 do begin
         a:=a+1;
     end;
 end;
-//cargar sonido & iniciar_sonido
+//cargar & iniciar sonido
 if not(roms_load(namco_snd_0.get_wave_dir,jrpacman_sound)) then exit;
 //convertir chars
 if not(roms_load(@memoria_temp,jrpacman_char)) then exit;

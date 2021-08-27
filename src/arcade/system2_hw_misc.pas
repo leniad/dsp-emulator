@@ -7,7 +7,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 function iniciar_system2:boolean;
 procedure system2_principal;
-procedure reset_system2;
+procedure cambiar_color_system2(numero:byte;pos:word);
 
 var
   bg_ram_bank,rom_bank:byte;
@@ -70,7 +70,7 @@ var
   x_temp:word;
 begin
 for f:=0 to 7 do update_backgroud(f);
-x_temp:=(((bg_ram[$7c0] or (bg_ram[$7c1] shl 8)) div 2) and $ff)-256+5;
+x_temp:=(((bg_ram[$7c0] or (bg_ram[$7c1] shl 8)) shr 1) and $ff)-256+5;
 fillword(@xscroll[0],32,x_temp);
 yscroll:=bg_ram[$7ba];
 update_video_system1;
@@ -81,7 +81,7 @@ var
   f:byte;
 begin
 for f:=0 to 7 do update_backgroud(f);
-for f:=0 to $1f do xscroll[f]:=(((bg_ram[$7c0+f*2] or (bg_ram[$7c1+f*2] shl 8)) div 2) and $ff)-256+5;
+for f:=0 to $1f do xscroll[f]:=(((bg_ram[$7c0+f*2] or (bg_ram[$7c1+f*2] shl 8)) shr 1) and $ff)-256+5;
 yscroll:=bg_ram[$7ba];
 update_video_system1;
 end;
@@ -121,15 +121,15 @@ case direccion of
               else system2_getbyte:=memoria[direccion];
   $8000..$bfff:if z80_0.opcode then system2_getbyte:=roms_dec[rom_bank,direccion and $3fff] //Banked ROMS
                   else system2_getbyte:=roms[rom_bank,direccion and $3fff];
+  $c000..$d7ff:system2_getbyte:=memoria[direccion];
   $d800..$dfff:system2_getbyte:=buffer_paleta[direccion and $7ff];
   $e000..$efff:system2_getbyte:=bg_ram[$1000*bg_ram_bank+(direccion and $fff)]; //banked bg
   $f000..$f3ff:system2_getbyte:=mix_collide[direccion and $3f] or $7e or (mix_collide_summary shl 7);
   $f800..$fbff:system2_getbyte:=sprite_collide[direccion and $3ff] or $7e or (sprite_collide_summary shl 7);
-  else system2_getbyte:=memoria[direccion];
 end;
 end;
 
-procedure cambiar_color(numero:byte;pos:word);inline;
+procedure cambiar_color_system2(numero:byte;pos:word);
 var
   color:tcolor;
 begin
@@ -143,23 +143,25 @@ procedure system2_putbyte(direccion:word;valor:byte);
 var
   pos_bg:word;
 begin
-if direccion<$c000 then exit;
-memoria[direccion]:=valor;
 case direccion of
+        0..$bfff:;
+        $c000..$d7ff:memoria[direccion]:=valor;
         $d800..$dfff:if buffer_paleta[direccion and $7ff]<>valor then begin
                         buffer_paleta[direccion and $7ff]:=valor;
-                        cambiar_color(valor,direccion and $7ff);
+                        cambiar_color_system2(valor,direccion and $7ff);
                      end;
         $e000..$efff:begin
                         pos_bg:=$1000*bg_ram_bank+(direccion and $fff);
-                        bg_ram[pos_bg]:=valor;
-                        if ((pos_bg=$0740) or (pos_bg=$0742) or (pos_bg=$0744) or (pos_bg=$0746)) then begin
-                          fillchar(bg_ram_w[$400],$1c00,1);
-                          bgpixmaps[0]:=bg_ram[$740] and 7;
-                          bgpixmaps[1]:=bg_ram[$742] and 7;
-                          bgpixmaps[2]:=bg_ram[$744] and 7;
-                          bgpixmaps[3]:=bg_ram[$746] and 7;
-                        end else bg_ram_w[pos_bg shr 1]:=true;
+                        if bg_ram[pos_bg]<>valor then begin
+                          bg_ram[pos_bg]:=valor;
+                          if ((pos_bg=$0740) or (pos_bg=$0742) or (pos_bg=$0744) or (pos_bg=$0746)) then begin
+                            fillchar(bg_ram_w[$400],$1c00,1);
+                            bgpixmaps[0]:=bg_ram[$740] and 7;
+                            bgpixmaps[1]:=bg_ram[$742] and 7;
+                            bgpixmaps[2]:=bg_ram[$744] and 7;
+                            bgpixmaps[3]:=bg_ram[$746] and 7;
+                          end else bg_ram_w[pos_bg shr 1]:=true;
+                        end;
                      end;
         $f000..$f3ff:mix_collide[direccion and $3f]:=0;
         $f400..$f7ff:mix_collide_summary:=0;
@@ -169,27 +171,6 @@ end;
 end;
 
 //Main
-procedure reset_system2;
-begin
-pia8255_0.reset;
-sn_76496_0.reset;
-sn_76496_1.reset;
-z80_0.reset;
-z80_1.reset;
-reset_audio;
-marcade.in0:=$ff;
-marcade.in1:=$ff;
-marcade.in2:=$ff;
-rom_bank:=0;
-bg_ram_bank:=0;
-sound_latch:=0;
-mix_collide_summary:=0;
-sprite_collide_summary:=0;
-scroll_x:=0;
-scroll_y:=0;
-system1_videomode:=0;
-end;
-
 function iniciar_system2:boolean;
 var
   memoria_temp:array[0..$3ffff] of byte;
@@ -211,7 +192,6 @@ iniciar_video(256,224);
 z80_0:=cpu_z80.create(4000000,260);
 z80_0.change_ram_calls(system2_getbyte,system2_putbyte);
 z80_0.change_io_calls(system1_inbyte_ppi,system1_outbyte_ppi);
-z80_0.change_misc_calls(system1_delay,nil);
 //Sound CPU
 z80_1:=cpu_z80.create(4000000,260);
 z80_1.change_ram_calls(system1_snd_getbyte_ppi,system1_snd_putbyte);
@@ -291,7 +271,7 @@ sprite_num_banks:=4;
 char_screen:=0;
 sprite_offset:=7;
 mask_char:=$fff;
-reset_system2;
+llamadas_maquina.reset;
 iniciar_system2:=true;
 end;
 

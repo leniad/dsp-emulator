@@ -26,7 +26,7 @@ type
 var
   joy_calibration: Tjoy_calibration;
   salir:boolean;
-  cent_x,cent_y,max_x,max_y:integer;
+  cent_x,cent_y,max_x,max_y:array[0..NUM_PLAYERS] of integer;
   joy_ax0,joy_ax1,joy_ax0_cent,joy_ax1_cent:array[0..NUM_PLAYERS] of integer;
 
 procedure bucle_joystick(numero:byte);
@@ -40,8 +40,8 @@ var
   sdl_event:libSDL_Event;
   tempi,temp_x,temp_y:integer;
 begin
-joy_calibration.label1.caption:=inttostr(cent_x);
-joy_calibration.label2.caption:=inttostr(cent_y);
+joy_calibration.label1.caption:=inttostr(cent_x[numero]);
+joy_calibration.label2.caption:=inttostr(cent_y[numero]);
 salir:=false;
 while not(salir) do begin
   while SDL_PollEvent(@sdl_event)=0 do begin
@@ -51,21 +51,21 @@ while not(salir) do begin
   SDL_JoystickUpdate;
   if sdl_event.type_=libSDL_JOYAXISMOTION then begin
     tempi:=SDL_JoystickGetAxis(joystick_def[numero],0);
-    if abs(tempi)>abs(max_x) then max_x:=tempi;
-    cent_x:=tempi;
+    if abs(tempi)>abs(max_x[numero]) then max_x[numero]:=tempi;
+    cent_x[numero]:=tempi;
     joy_calibration.label1.caption:=inttostr(tempi);
     tempi:=SDL_JoystickGetAxis(joystick_def[numero],1);
-    if abs(tempi)>abs(max_y) then max_y:=tempi;
-    cent_y:=tempi;
+    if abs(tempi)>abs(max_y[numero]) then max_y[numero]:=tempi;
+    cent_y[numero]:=tempi;
     joy_calibration.label2.caption:=inttostr(tempi);
   end;
 end;
-temp_x:=(abs(max_x)-abs(cent_x)) div 2;
-temp_y:=(abs(max_y)-abs(cent_y)) div 2;
-arcade_input.joy_left[numero]:=cent_x-abs(temp_x);
-arcade_input.joy_right[numero]:=cent_x+abs(temp_x);
-arcade_input.joy_up[numero]:=cent_y-abs(temp_y);
-arcade_input.joy_down[numero]:=cent_y+abs(temp_y);
+temp_x:=(abs(max_x[numero])-abs(cent_x[numero])) div 2;
+temp_y:=(abs(max_y[numero])-abs(cent_y[numero])) div 2;
+arcade_input.joy_left[numero]:=cent_x[numero]-abs(temp_x);
+arcade_input.joy_right[numero]:=cent_x[numero]+abs(temp_x);
+arcade_input.joy_up[numero]:=cent_y[numero]-abs(temp_y);
+arcade_input.joy_down[numero]:=cent_y[numero]+abs(temp_y);
 joy_calibration.close;
 end;
 

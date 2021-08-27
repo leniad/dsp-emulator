@@ -722,10 +722,10 @@ var
 begin
 //Añadir tiempos de espera...
 est_final:=(estados_t+3) and $fc;
+if (cinta_tzx.cargada and cinta_tzx.play_tape) then play_cinta_tzx(estados_t);
 z80_0.contador:=z80_0.contador+(est_final-estados_t);
 //Clock a el video...
 for f:=1 to (est_final div 4) do clock_crt;
-if (cinta_tzx.cargada and cinta_tzx.play_tape) then play_cinta_tzx(estados_t);
 end;
 
 function amstrad_tapes:boolean;

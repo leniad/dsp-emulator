@@ -84,7 +84,7 @@ type
     Pooyan1: TMenuItem;
     Jungler1: TMenuItem;
     CityCon1: TMenuItem;
-    BurgerTime1: TMenuItem;
+    BurgerTimeHW1: TMenuItem;
     ExpressRaider1: TMenuItem;
     SuperBasketball1: TMenuItem;
     LadyBug_menu: TMenuItem;
@@ -462,6 +462,9 @@ type
     oaplan1HW1: TMenuItem;
     Hellfire1: TMenuItem;
     scv1: TMenuItem;
+    BurgerTime1: TMenuItem;
+    lnc1: TMenuItem;
+    mmonkey1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

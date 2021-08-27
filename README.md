@@ -1,4 +1,22 @@
 ﻿# DSP Emulator status #
+<b>27/08/21 - After some exhausting and time-consuming real life, here comes a new little update. DSP Emulator 0.20WIP3. Win32 and source update.<br><pre>
+-General
+    +Joystick: Some changes to enhance configuration
+-Commodore 64
+    +Snapshots: Initial support for VSF (Vice Snapshot File)
+-Burguer Time HW
+    +Code cleaning
+    +Burguer Time: Update decryption, more speed
+    +Lock'N'Chase: Added driver with sound
+    +Minky Monkey: Added driver with sound
+-Mario Bros.
+    +Added quick snapshots
+-Sega System 1/System 2
+    +Fixed slowdowns and clean code
+    +Added quick snapshots
+    +Enhanced video buffer, more speed
+</pre><br>
+<img src='https://i.ibb.co/2dhK7yY/lnc.png'> <img src='https://i.ibb.co/BNhzcvg/mmonkey.png'><br><br>
 <b>31/05/21 - DSP Emulator 0.20WIP2. Win32 and source update.<br><pre>
 -General
     +CPU

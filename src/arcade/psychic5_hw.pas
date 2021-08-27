@@ -165,30 +165,6 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
-if event.arcade then begin
-  marcade.in0:=$ff;
-  marcade.in1:=$ff;
-  marcade.in2:=$ff;
-  //P1
-  if arcade_input.left[0] then marcade.in1:=marcade.in1 and $fd;
-  if arcade_input.right[0] then marcade.in1:=marcade.in1 and $fe;
-  if arcade_input.up[0] then marcade.in1:=marcade.in1 and $f7;
-  if arcade_input.but0[0] then marcade.in1:=marcade.in1 and $ef;
-  if arcade_input.but1[0] then marcade.in1:=marcade.in1 and $df;
-  if arcade_input.down[0] then marcade.in1:=marcade.in1 and $fb;
-  //P2
-  if arcade_input.left[1] then marcade.in2:=marcade.in2 and $fd;
-  if arcade_input.right[1] then marcade.in2:=marcade.in2 and $fe;
-  if arcade_input.up[1] then marcade.in2:=marcade.in2 and $f7;
-  if arcade_input.but0[1] then marcade.in2:=marcade.in2 and $ef;
-  if arcade_input.but1[1] then marcade.in2:=marcade.in2 and $df;
-  if arcade_input.down[1] then marcade.in2:=marcade.in2 and $fb;
-  //SYSTEM
-  if arcade_input.start[0] then marcade.in0:=marcade.in0 and $fe;
-  if arcade_input.start[1] then marcade.in0:=marcade.in0 and $fd;
-  if arcade_input.coin[0] then marcade.in0:=marcade.in0 and $bf;
-  if arcade_input.coin[1] then marcade.in0:=marcade.in0 and $7f;
-end;
 end;
 
 procedure psychic5_principal;

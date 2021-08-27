@@ -309,7 +309,7 @@ loaddata_qsnapshot(@buffer);
 fondo:=buffer[0];
 soundlatch:=buffer[1];
 soundlatch2:=buffer[2];
-scroll_x:=buffer[3] or (scroll_x shl 8);
+scroll_x:=buffer[3] or (buffer[4] shl 8);
 cambia_fondo:=buffer[5]<>0;
 loaddata_qsnapshot(@lines_color_look);
 loaddata_qsnapshot(@buffer_paleta);

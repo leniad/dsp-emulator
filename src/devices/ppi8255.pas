@@ -1,6 +1,7 @@
 unit ppi8255;
 
 interface
+{$IFDEF WINDOWS}uses windows;{$ENDIF}
 
 type
   tread_port_8255=function:byte;
@@ -15,6 +16,8 @@ type
       procedure write(port,data:byte);
       function get_port(port:byte):byte;
       procedure set_port(port,data:byte);
+      function save_snapshot(data:pbyte):word;
+      procedure load_snapshot(data:pbyte);
     private
 		  group_a_mode,group_b_mode:byte;
 	    port_a_dir,port_b_dir,port_ch_dir,port_cl_dir:boolean;
@@ -44,6 +47,59 @@ end;
 
 destructor pia8255_chip.free;
 begin
+end;
+
+function pia8255_chip.save_snapshot(data:pbyte):word;
+var
+  buffer:array[0..26] of byte;
+begin
+  buffer[0]:=group_a_mode;
+  buffer[1]:=group_b_mode;
+  buffer[2]:=byte(port_a_dir);
+  buffer[3]:=byte(port_b_dir);
+  buffer[4]:=byte(port_ch_dir);
+  buffer[5]:=byte(port_cl_dir);
+  buffer[6]:=byte(obf_a);
+  buffer[7]:=byte(obf_b);
+  buffer[8]:=byte(ibf_a);
+  buffer[9]:=byte(ibf_b);
+  buffer[10]:=byte(inte_a);
+  buffer[11]:=byte(inte_b);
+  buffer[12]:=byte(inte_1);
+  buffer[13]:=byte(inte_2);
+  buffer[14]:=control;
+  copymemory(@buffer[15],@in_mask[0],3);
+  copymemory(@buffer[18],@read_val[0],3);
+  copymemory(@buffer[21],@latch[0],3);
+  copymemory(@buffer[24],@output_val[0],3);
+  copymemory(data,@buffer[0],27);
+  save_snapshot:=27;
+end;
+
+procedure pia8255_chip.load_snapshot(data:pbyte);
+var
+  buffer:array[0..26] of byte;
+begin
+  copymemory(@buffer[0],data,27);
+  group_a_mode:=buffer[0];
+  group_b_mode:=buffer[1];
+  port_a_dir:=buffer[2]<>0;
+  port_b_dir:=buffer[3]<>0;
+  port_ch_dir:=buffer[4]<>0;
+  port_cl_dir:=buffer[5]<>0;
+  obf_a:=buffer[6]<>0;
+  obf_b:=buffer[7]<>0;
+  ibf_a:=buffer[8]<>0;
+  ibf_b:=buffer[9]<>0;
+  inte_a:=buffer[10]<>0;
+  inte_b:=buffer[11]<>0;
+  inte_1:=buffer[12]<>0;
+  inte_2:=buffer[13]<>0;
+  control:=buffer[14];
+  copymemory(@in_mask[0],@buffer[15],3);
+  copymemory(@read_val[0],@buffer[18],3);
+  copymemory(@latch[0],@buffer[21],3);
+  copymemory(@output_val[0],@buffer[24],3);
 end;
 
 procedure pia8255_chip.change_ports(pread_port_a,pread_port_b,pread_port_c:tread_port_8255;pwrite_port_a,pwrite_port_b,pwrite_port_c:twrite_port_8255);

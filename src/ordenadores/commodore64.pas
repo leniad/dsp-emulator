@@ -426,7 +426,8 @@ begin
          if not(search_file_from_zip(nombre_zip,'*.tap',nombre_file,file_size,crc,false)) then
            if not(search_file_from_zip(nombre_zip,'*.prg',nombre_file,file_size,crc,false)) then
 	           if not(search_file_from_zip(nombre_zip,'*.t64',nombre_file,file_size,crc,false)) then
-               if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then exit;
+               if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then
+                  if not(search_file_from_zip(nombre_zip,'*.vsf',nombre_file,file_size,crc,false)) then exit;
          getmem(datos,file_size);
          if not(load_file_from_zip(nombre_zip,nombre_file,datos,file_size,crc,true)) then begin
             freemem(datos);
@@ -451,6 +452,10 @@ begin
   if extension='T64' then begin
      es_cinta:=false;
      resultado:=abrir_t64(datos,file_size);
+   end;
+  if extension='VSF' then begin
+     es_cinta:=false;
+     resultado:=abrir_vsf(datos,file_size);
    end;
   if es_cinta then begin
      if resultado then begin

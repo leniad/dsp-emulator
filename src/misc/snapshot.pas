@@ -3,7 +3,7 @@ unit snapshot;
 interface
 uses {$IFDEF windows}windows,{$ENDIF}
      sysutils,spectrum_misc,ay_8910,dialogs,nz80,z80_sp,forms,file_engine,
-     init_games,ppi8255,tms99xx,pal_engine,sn_76496;
+     init_games,ppi8255,tms99xx,pal_engine,sn_76496,m6502;
 
 type
   tszx_header=packed record
@@ -81,6 +81,7 @@ function grabar_nes_snapshot(nombre:string):boolean;
 //C64
 function abrir_prg(data:pbyte;long:dword):boolean;
 function abrir_t64(data:pbyte;long:dword):boolean;
+function abrir_vsf(data:pbyte;long:dword):boolean;
 
 implementation
 uses spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,coleco,principal,main_engine,nes,commodore64;
@@ -1914,5 +1915,99 @@ begin
 	abrir_t64:=true;
 end;
 
+//VSF
+const
+  VSF_HEAD=22;
+type
+tvsf_header=packed record
+    magic:array[0..18] of ansichar;
+    vmajor,vminor:byte;
+    machinename:array[0..15] of ansichar;
+    version_magic:array[0..12] of ansichar;
+    version_major,version_minor,version_micro,version_zero:byte;
+    svnversion:dword;
+end;
+
+tvsf_block_head=packed record
+    modulename:array[0..15] of ansichar;
+    vmajor,vminor:byte;
+    size_:dword;
+end;
+
+tvsf_maincpu=packed record
+    clk:dword;
+    ac,xr,yr,sp:byte;
+    pc:word;
+    st:byte;
+    lastopcode,irqclk,nmiclk,none1,none2:dword;
+end;
+
+tvsf_c64mem=packed record
+    cpudata,cpudir,exrom,game:byte;
+end;
+
+function abrir_vsf(data:pbyte;long:dword):boolean;
+var
+  vsf_header:^tvsf_header;
+  vsf_block_head:^tvsf_block_head;
+  vsf_maincpu:^tvsf_maincpu;
+  vsf_c64mem:^tvsf_c64mem;
+  c64_cpu:preg_m6502;
+  posicion:dword;
+begin
+abrir_vsf:=false;
+getmem(vsf_header,sizeof(tvsf_header));
+copymemory(vsf_header,data,sizeof(tvsf_header));
+inc(data,sizeof(tvsf_header));
+posicion:=sizeof(tvsf_header);
+if copy(vsf_header.magic,1,18)<>'VICE Snapshot File' then begin
+  freemem(vsf_header);
+  exit;
+end;
+if copy(vsf_header.machinename,1,3)<>'C64' then begin
+  freemem(vsf_header);
+  exit;
+end;
+freemem(vsf_header);
+getmem(vsf_block_head,VSF_HEAD);
+while posicion<>long do begin
+  copymemory(vsf_block_head,data,VSF_HEAD);
+  inc(data,VSF_HEAD);
+  if copy(vsf_block_head.modulename,1,7)='MAINCPU' then begin
+    getmem(vsf_maincpu,sizeof(tvsf_maincpu));
+    copymemory(vsf_maincpu,data,sizeof(tvsf_maincpu));
+    c64_cpu:=m6502_0.get_internal_r;
+    c64_cpu.a:=vsf_maincpu.ac;
+    c64_cpu.x:=vsf_maincpu.xr;
+    c64_cpu.y:=vsf_maincpu.yr;
+    c64_cpu.sp:=vsf_maincpu.sp;
+    c64_cpu.pc:=vsf_maincpu.pc;
+    c64_cpu.p.n:=(vsf_maincpu.sp and $80)<>0;
+    c64_cpu.p.o_v:=(vsf_maincpu.sp and $40)<>0;
+    c64_cpu.p.dec:=(vsf_maincpu.sp and 8)<>0;
+    c64_cpu.p.int:=(vsf_maincpu.sp and 4)<>0;
+    c64_cpu.p.z:=(vsf_maincpu.sp and 2)<>0;
+    c64_cpu.p.c:=(vsf_maincpu.sp and 1)<>0;
+    inc(data,vsf_block_head.size_-VSF_HEAD);
+    inc(posicion,vsf_block_head.size_);
+  end else
+  if copy(vsf_block_head.modulename,1,6)='C64MEM' then begin
+    getmem(vsf_c64mem,sizeof(tvsf_c64mem));
+    copymemory(vsf_c64mem,data,sizeof(tvsf_c64mem));
+    inc(data,sizeof(tvsf_c64mem));
+    c64_putbyte(0,vsf_c64mem.cpudata);
+    c64_putbyte(1,vsf_c64mem.cpudir);
+    copymemory(@memoria,data,$10000);
+    inc(data,vsf_block_head.size_-VSF_HEAD-sizeof(tvsf_c64mem));
+    inc(posicion,vsf_block_head.size_);
+  end else begin
+  //if copy(vsf_block_head.modulename,1,7)='C64CART' then begin
+    inc(data,vsf_block_head.size_-VSF_HEAD);
+    inc(posicion,vsf_block_head.size_);
+  end;
+end;
+freemem(vsf_block_head);
+abrir_vsf:=true;
+end;
 
 end.

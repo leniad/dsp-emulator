@@ -666,7 +666,7 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="799"/>
-        <CursorPos X="27" Y="816"/>
+        <CursorPos X="57" Y="816"/>
         <UsageCount Value="23"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
@@ -1015,7 +1015,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <BreakPoints Count="4">
+    <BreakPoints Count="3">
       <Item1>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
@@ -1036,13 +1036,6 @@
         <Source Value="gnw_video.pas"/>
         <Line Value="45"/>
       </Item3>
-      <Item4>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="..\cpu\upd7810.pas"/>
-        <Line Value="816"/>
-      </Item4>
     </BreakPoints>
     <Exceptions Count="11">
       <Item1>

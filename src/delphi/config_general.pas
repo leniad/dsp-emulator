@@ -32,7 +32,6 @@ type
     GroupBox2: TGroupBox;
     RadioButton3: TRadioButton;
     RadioButton4: TRadioButton;
-    ComboBox2: TComboBox;
     BitBtn5: TBitBtn;
     BitBtn6: TBitBtn;
     BitBtn7: TBitBtn;
@@ -106,11 +105,8 @@ type
     CheckBox2: TCheckBox;
     CheckBox1: TCheckBox;
     CheckBox3: TCheckBox;
-    Button8: TButton;
     ROM: TTabSheet;
     BitBtn21: TBitBtn;
-    RadioButton24: TRadioButton;
-    RadioButton23: TRadioButton;
     GroupBox7: TGroupBox;
     RadioButton22: TRadioButton;
     RadioButton21: TRadioButton;
@@ -144,6 +140,11 @@ type
     CheckBox15: TCheckBox;
     CheckBox16: TCheckBox;
     SpeedButton4: TSpeedButton;
+    GroupBox10: TGroupBox;
+    ComboBox2: TComboBox;
+    RadioButton23: TRadioButton;
+    Button8: TButton;
+    RadioButton24: TRadioButton;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -506,10 +507,10 @@ begin
     combobox12.Visible:=false;
     combobox13.Visible:=false;
     combobox14.Visible:=false;
-    radiobutton21.enabled:=false;
-    radiobutton22.enabled:=false;
-    radiobutton23.enabled:=false;
-    radiobutton24.enabled:=false;
+    //radiobutton21.enabled:=false;
+    //radiobutton22.enabled:=false;
+    //radiobutton23.enabled:=false;
+    //radiobutton24.enabled:=false;
   end else begin
     radiobutton2.enabled:=true;
     if arcade_input.use_key[0] then begin
@@ -532,8 +533,8 @@ begin
       combobox9.Visible:=false;
       combobox10.Visible:=false;
       combobox11.Visible:=false;
-      radiobutton21.enabled:=false;
-      radiobutton22.enabled:=false;
+      //radiobutton21.enabled:=false;
+      //radiobutton22.enabled:=false;
     end else begin
       radiobutton1.Checked:=false;
       radiobutton2.Checked:=true;
@@ -555,14 +556,14 @@ begin
       combobox10.Visible:=true;
       combobox11.Visible:=true;
       bitbtn7.enabled:=true;
-      if SDL_JoystickNumHats(joystick_def[0])<>0 then begin
+      {if SDL_JoystickNumHats(joystick_def[0])<>0 then begin
         radiobutton21.Enabled:=true;
         radiobutton22.Enabled:=true;
       end else begin
         radiobutton21.Enabled:=false;
         radiobutton22.Enabled:=true;
         radiobutton22.Checked:=true;
-      end;
+      end;}
     end;
     radiobutton4.enabled:=true;
     if arcade_input.use_key[1] then begin
@@ -585,8 +586,8 @@ begin
       combobox12.Visible:=false;
       combobox13.Visible:=false;
       combobox14.Visible:=false;
-      radiobutton23.enabled:=false;
-      radiobutton24.enabled:=false;
+      //radiobutton23.enabled:=false;
+      //radiobutton24.enabled:=false;
     end else begin
       radiobutton3.Checked:=false;
       radiobutton4.Checked:=true;
@@ -607,20 +608,20 @@ begin
       combobox12.Visible:=true;
       combobox13.Visible:=true;
       combobox14.Visible:=true;
-      if SDL_JoystickNumHats(joystick_def[1])<>0 then begin
+      {if SDL_JoystickNumHats(joystick_def[1])<>0 then begin
         radiobutton23.Enabled:=true;
         radiobutton24.Enabled:=true;
       end else begin
         radiobutton23.Enabled:=false;
         radiobutton24.Enabled:=true;
         radiobutton24.Checked:=true;
-      end;
+      end;}
     end;
     combobox1.Clear;
     combobox2.Clear;
     for f:=0 to (event.num_joysticks-1) do begin
-      combobox1.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f])));
-      combobox2.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f])));
+      combobox1.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f]))+'-'+inttohex(f,1));
+      combobox2.Items.Add(extract_joy_name(SDL_JoystickName(joystick_def[f]))+'-'+inttohex(f,1));
     end;
     combobox1.Enabled:=true;
     combobox1.ItemIndex:=arcade_input.num_joystick[0];
@@ -730,18 +731,18 @@ begin
   combobox10.Visible:=false;
   combobox11.Visible:=false;
   button7.Enabled:=false;
-  radiobutton21.Enabled:=false;
-  radiobutton22.Enabled:=false;
+  //radiobutton21.Enabled:=false;
+  //radiobutton22.Enabled:=false;
 end;
 
 procedure TMConfig.RadioButton21Click(Sender: TObject);
 begin
-  bitbtn7.Enabled:=false;
+  button7.Enabled:=false;
 end;
 
 procedure TMConfig.RadioButton22Click(Sender: TObject);
 begin
- bitbtn7.Enabled:=true;
+ button7.Enabled:=true;
 end;
 
 procedure TMConfig.RadioButton2Click(Sender: TObject);
@@ -764,14 +765,14 @@ begin
   combobox10.Visible:=true;
   combobox11.Visible:=true;
   button7.Enabled:=true;
-  if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
+  {if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
     radiobutton21.Enabled:=true;
     radiobutton22.Enabled:=true;
   end else begin
     radiobutton21.Enabled:=false;
     radiobutton22.Enabled:=true;
     radiobutton22.Checked:=true;
-  end;
+  end;}
 end;
 
 procedure TMConfig.RadioButton3Click(Sender: TObject);
@@ -891,25 +892,27 @@ procedure TMConfig.Button7Click(Sender: TObject);
 begin
 joy_calibration.show;
 bucle_joystick(0);
+while joy_calibration.Showing do application.ProcessMessages;
 end;
 
 procedure TMConfig.Button8Click(Sender: TObject);
 begin
 joy_calibration.show;
 bucle_joystick(1);
+while joy_calibration.Showing do application.ProcessMessages;
 end;
 
 procedure TMConfig.ComboBox1Change(Sender: TObject);
 begin
   arcade_input.num_joystick[0]:=combobox1.ItemIndex;
-  if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
+  {if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
     radiobutton21.Enabled:=true;
     radiobutton22.Enabled:=true;
   end else begin
     radiobutton21.Enabled:=false;
     radiobutton22.Enabled:=true;
     radiobutton22.Checked:=true;
-  end;
+  end;}
 end;
 
 procedure TMConfig.BitBtn20Click(Sender: TObject);

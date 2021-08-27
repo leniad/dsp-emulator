@@ -1,5 +1,4 @@
 unit init_games;
-
 interface
 uses sysutils,main_engine,rom_engine,rom_export,
   //Computer
@@ -34,7 +33,6 @@ uses sysutils,main_engine,rom_engine,rom_export,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw;
-
 type
   tgame_desc=record
               name,year:string;
@@ -48,7 +46,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=311;
+  GAMES_CONT=313;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -351,6 +349,8 @@ const
   (name:'Passing Shot';year:'1988';snd:1;hi:false;zip:'passsht';grid:296;company:'Sega';rom:@passsht),
   (name:'Aurail';year:'1990';snd:1;hi:false;zip:'aurail';grid:297;company:'Sega';rom:@aurail),
   (name:'Hellfire';year:'1989';snd:1;hi:false;zip:'hellfire';grid:298;company:'Toaplan';rom:@hellfire),
+  (name:'Lock''n''Chase';year:'1981';snd:1;hi:false;zip:'lnc';grid:299;company:'Deco';rom:@lnc),
+  (name:'Minky Monkey';year:'1982';snd:1;hi:false;zip:'mmonkey';grid:300;company:'Deco';rom:@mmonkey),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -365,19 +365,15 @@ const
   (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),
   (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55),
   (name:'Mario Bros';year:'1983';snd:1;hi:false;zip:'gnw_mw56';grid:2002;company:'Nintendo';rom:@gnw_mw56));
-
 var
   orden_games:array[1..GAMES_CONT] of word;
-
 procedure load_game(numero:word);
 procedure todos_false;
 procedure menus_false(driver:word);
 procedure cargar_maquina(tmaquina:word);
 function tipo_cambio_maquina(sender:TObject):word;
-
 implementation
 uses principal;
-
 procedure load_game(numero:word);
 begin
 case numero of
@@ -680,6 +676,8 @@ case numero of
   296:principal1.CambiarMaquina(principal1.passingshot1);
   297:principal1.CambiarMaquina(principal1.aurail1);
   298:principal1.CambiarMaquina(principal1.hellfire1);
+  299:principal1.CambiarMaquina(principal1.lnc1);
+  300:principal1.CambiarMaquina(principal1.mmonkey1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -693,7 +691,6 @@ case numero of
   2002:principal1.CambiarMaquina(principal1.MarioBros1);
 end;
 end;
-
 procedure todos_false;
 begin
 //Computer
@@ -997,6 +994,8 @@ principal1.eswat1.checked:=false;
 principal1.passingshot1.checked:=false;
 principal1.aurail1.checked:=false;
 principal1.hellfire1.checked:=false;
+principal1.lnc1.checked:=false;
+principal1.mmonkey1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1011,7 +1010,6 @@ principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
 principal1.MarioBros1.checked:=false;
 end;
-
 procedure menus_false(driver:word);
 begin
 principal1.BitBtn1.visible:=false; //Configurar ordenador/consola
@@ -1083,7 +1081,6 @@ case driver of
   2000..2002:; //G&W
 end;
 end;
-
 procedure cargar_maquina(tmaquina:word);
 begin
 case tmaquina of
@@ -1114,7 +1111,7 @@ case tmaquina of
   28:Cargar_pooyan;
   29,50,70:Cargar_rallyxh;
   30:Cargar_citycon;
-  31:Cargar_btime;
+  31,299,300:Cargar_btime;
   32:Cargar_expraid;
   33:Cargar_sbasketb;
   34,200,201:Cargar_ladybug;
@@ -1258,7 +1255,6 @@ case tmaquina of
   2000..2002:cargar_gnw_510;
 end;
 end;
-
 function tipo_cambio_maquina(sender:TObject):word;
 var
   tipo,f:word;
@@ -2461,6 +2457,14 @@ if sender=principal1.hellfire1 then begin
   tipo:=298;
   principal1.hellfire1.Checked:=true;
 end;
+if sender=principal1.lnc1 then begin
+  tipo:=299;
+  principal1.lnc1.Checked:=true;
+end;
+if sender=principal1.mmonkey1 then begin
+  tipo:=300;
+  principal1.mmonkey1.Checked:=true;
+end;
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;
@@ -2517,5 +2521,4 @@ end;
 //Dar el numero de maquina emulada
 tipo_cambio_maquina:=tipo;
 end;
-
 end.

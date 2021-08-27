@@ -367,7 +367,9 @@ case main_vars.tipo_maquina of
       end;
   180:begin
          //MCU
+         {$IFNDEF MCU}
          rbisland_init_cchip(m68000_0.numero_cpu,1);
+         {$ENDIF}
          if not(roms_load16w(@rom,rainbowe_rom)) then exit;
          //cargar sonido+ponerlas en su banco
          ptemp:=memoria_temp;

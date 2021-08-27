@@ -31,8 +31,8 @@ type
 	tm_out_rdy_func=procedure(state:boolean);
   tm_out_int_func=procedure(state:byte);
   tipo_z80pio_port=record
-		m_mode:integer;					// mode register
-		m_next_control_word:integer;	// next control word
+		m_mode:byte;					// mode register
+		m_next_control_word:byte;	// next control word
 		m_input:byte;				// input latch
 		m_output:byte;				// output latch
 		m_ior:byte;				// input/output register

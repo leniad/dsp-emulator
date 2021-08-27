@@ -265,7 +265,7 @@ case Sistema of
        end;
   StC64:begin
          opendialog.InitialDir:=directory.c64_tap;
-         OpenDialog.Filter:='C64 Tape or Snapshot (*.prg;*.t64;*.tap;*.wav;*zip)|*.prg;*.t64;*.tap;*.wav;*.zip';
+         OpenDialog.Filter:='C64 Tape or Snapshot (*.prg;*.t64;*.tap;*.wav;*.vsf;*.zip)|*.prg;*.t64;*.tap;*.wav;*.vsf;*.zip';
        end;
   StGG:begin
          opendialog.InitialDir:=Directory.gg;

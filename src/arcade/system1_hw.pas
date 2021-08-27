@@ -3,7 +3,7 @@ unit system1_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      system1_hw_misc,system2_hw_misc,nz80,main_engine,gfx_engine,sn_76496,
-     controls_engine,pal_engine,ppi8255,z80pio;
+     controls_engine,pal_engine,ppi8255,z80pio,qsnapshot,sound_engine;
 
 procedure cargar_system1;
 //Video
@@ -22,8 +22,6 @@ procedure system1_port_c_write(valor:byte);
 //Sound
 procedure system1_sound_update;
 procedure system1_sound_irq;
-//delay
-procedure system1_delay(estados_t:word);
 
 const
   system1_dip_credit:array [0..2] of def_dip=(
@@ -183,8 +181,8 @@ if (system1_videomode and $10)<>0 then begin
   fill_full_screen(0,$800);
   exit;
 end;
-//Actualizar sprites
 fillword(@sprites_final_screen,$10000,0);
+//Actualizar sprites
 if memoria[$d000]<>$ff then draw_sprites;
 //Pintarlo todo
 for y:=0 to 255 do begin
@@ -281,8 +279,8 @@ end;
 
 procedure system1_sound_update;
 begin
-  sn_76496_0.Update;
-  sn_76496_1.Update;
+  sn_76496_0.update;
+  sn_76496_1.update;
 end;
 
 procedure system1_sound_irq;
@@ -336,20 +334,176 @@ begin //sound_controlw
   bg_ram_bank:=(valor shr 1) and $3;
 end;
 
-//Z80 delay
-procedure system1_delay(estados_t:word);
-var
-  est_final:byte;
-begin
-est_final:=((estados_t div 5)+byte((estados_t mod 5)<>0))*5;
-z80_0.contador:=z80_0.contador+(est_final-estados_t);
-end;
-
 //Main
 procedure cerrar_system1;
 begin
 case main_vars.tipo_maquina of
   27,35,36,153,155:z80pio_close(0);
+end;
+end;
+
+procedure reset_system1;
+begin
+case main_vars.tipo_maquina of
+  27,35,36,153,155:z80pio_reset(0);
+  37,151,152,154:pia8255_0.reset;
+end;
+sn_76496_0.reset;
+sn_76496_1.reset;
+z80_0.reset;
+z80_1.reset;
+reset_audio;
+marcade.in0:=$ff;
+marcade.in1:=$ff;
+marcade.in2:=$ff;
+sound_latch:=0;
+mix_collide_summary:=0;
+sprite_collide_summary:=0;
+scroll_x:=0;
+scroll_y:=0;
+system1_videomode:=0;
+//System 2
+rom_bank:=0;
+bg_ram_bank:=0;
+//Clear all
+fillchar(bg_ram,$4000,0);
+fillchar(bg_ram_w,$2000,0);
+fillchar(sprites_final_screen,$20000,0);
+fillchar(final_screen[0,0],8*$10000*2,0);
+fillchar(bgpixmaps,4,0);
+yscroll:=0;
+fillchar(xscroll,$20*2,0);
+fillchar(sprite_collide,$400,0);
+fillchar(mix_collide,$40,0);
+end;
+
+procedure system1_qsave(nombre:string);
+var
+  data:pbyte;
+  size:word;
+  buffer:array[0..9] of byte;
+  f:byte;
+begin
+case main_vars.tipo_maquina of
+  27:open_qsnapshot_save('pitfall2'+nombre);
+  35:open_qsnapshot_save('teddybb'+nombre);
+  36:open_qsnapshot_save('wonderboy'+nombre);
+  37:open_qsnapshot_save('wbml'+nombre);
+  151:open_qsnapshot_save('choplifter'+nombre);
+  152:open_qsnapshot_save('viking'+nombre);
+  153:open_qsnapshot_save('sninja'+nombre);
+  154:open_qsnapshot_save('upanddown'+nombre);
+  155:open_qsnapshot_save('flicky'+nombre);
+end;
+getmem(data,2000);
+//CPU1
+size:=z80_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//CPU2
+size:=z80_1.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND
+size:=sn_76496_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+size:=sn_76496_1.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//PIA
+if ((main_vars.tipo_maquina=37) or (main_vars.tipo_maquina=151) or (main_vars.tipo_maquina=152) or (main_vars.tipo_maquina=154)) then begin
+  size:=pia8255_0.save_snapshot(data);
+  savedata_qsnapshot(data,size);
+end;
+//MEM
+savedata_com_qsnapshot(@memoria[$c000],$1800);
+savedata_com_qsnapshot(@mem_snd[$8000],$800);
+savedata_com_qsnapshot(@bg_ram[0],$4000);
+savedata_com_qsnapshot(@sprites_final_screen[0],$10000*2);
+for f:=0 to 7 do savedata_com_qsnapshot(@final_screen[0,f],$10000*2);
+savedata_com_qsnapshot(@bgpixmaps[0],4);
+savedata_com_qsnapshot(@xscroll[0],$20*2);
+savedata_com_qsnapshot(@sprite_collide,$400);;
+savedata_com_qsnapshot(@mix_collide,$40);
+savedata_com_qsnapshot(@memoria_sprites,$20000);
+savedata_com_qsnapshot(@buffer_paleta,$800*2);
+//MISC
+buffer[0]:=sound_latch;
+buffer[1]:=bg_ram_bank;
+buffer[2]:=rom_bank;
+buffer[3]:=mix_collide_summary;
+buffer[4]:=sprite_collide_summary;
+buffer[5]:=scroll_x;
+buffer[6]:=scroll_y;
+buffer[7]:=system1_videomode;
+buffer[8]:=yscroll and $ff;
+buffer[9]:=yscroll shr 8;
+savedata_qsnapshot(@buffer,10);
+freemem(data);
+close_qsnapshot;
+end;
+
+procedure system1_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..9] of byte;
+  f:word;
+begin
+case main_vars.tipo_maquina of
+  27:if not(open_qsnapshot_load('pitfall2'+nombre)) then exit;
+  35:if not(open_qsnapshot_load('teddybb'+nombre)) then exit;
+  36:if not(open_qsnapshot_load('wonderboy'+nombre)) then exit;
+  37:if not(open_qsnapshot_load('wbml'+nombre)) then exit;
+  151:if not(open_qsnapshot_load('choplifter'+nombre)) then exit;
+  152:if not(open_qsnapshot_load('viking'+nombre)) then exit;
+  153:if not(open_qsnapshot_load('sninja'+nombre)) then exit;
+  154:if not(open_qsnapshot_load('upanddown'+nombre)) then exit;
+  155:if not(open_qsnapshot_load('flicky'+nombre)) then exit;
+end;
+getmem(data,2000);
+//CPU1
+loaddata_qsnapshot(data);
+z80_0.load_snapshot(data);
+//CPU2
+loaddata_qsnapshot(data);
+z80_1.load_snapshot(data);
+//SND
+loaddata_qsnapshot(data);
+sn_76496_0.load_snapshot(data);
+loaddata_qsnapshot(data);
+sn_76496_1.load_snapshot(data);
+//PIA
+if ((main_vars.tipo_maquina=37) or (main_vars.tipo_maquina=151) or (main_vars.tipo_maquina=152) or (main_vars.tipo_maquina=154)) then begin
+  loaddata_qsnapshot(data);
+  pia8255_0.load_snapshot(data);
+end;
+//MEM
+loaddata_qsnapshot(@memoria[$c000]);
+loaddata_qsnapshot(@mem_snd[$8000]);
+loaddata_qsnapshot(@bg_ram[0]);
+loaddata_qsnapshot(@sprites_final_screen[0]);
+for f:=0 to 7 do loaddata_qsnapshot(@final_screen[0,f]);
+loaddata_qsnapshot(@bgpixmaps[0]);
+loaddata_qsnapshot(@xscroll[0]);
+loaddata_qsnapshot(@sprite_collide);
+loaddata_qsnapshot(@mix_collide);
+loaddata_qsnapshot(@memoria_sprites);
+loaddata_qsnapshot(@buffer_paleta);
+//MISC
+loaddata_qsnapshot(@buffer);
+sound_latch:=buffer[0];
+bg_ram_bank:=buffer[1];
+rom_bank:=buffer[2];
+mix_collide_summary:=buffer[3];
+sprite_collide_summary:=buffer[4];
+scroll_x:=buffer[5];
+scroll_y:=buffer[6];
+system1_videomode:=buffer[7];
+yscroll:=buffer[8];
+yscroll:=yscroll or (buffer[9] shl 8);
+freemem(data);
+close_qsnapshot;
+fillchar(bg_ram_w[$0],$2000,1);
+case main_vars.tipo_maquina of
+  27,35,36,152,153,154,155:for f:=0 to $7ff do cambiar_color_system1(buffer_paleta[f],f);
+  37,151:for f:=0 to $7ff do cambiar_color_system2(buffer_paleta[f],f);
 end;
 end;
 
@@ -359,14 +513,15 @@ case main_vars.tipo_maquina of
   27,35,36,152,153,154,155:begin
         llamadas_maquina.iniciar:=iniciar_system1;
         llamadas_maquina.bucle_general:=system1_principal;
-        llamadas_maquina.reset:=reset_system1;
      end;
   37,151:begin
         llamadas_maquina.iniciar:=iniciar_system2;
         llamadas_maquina.bucle_general:=system2_principal;
-        llamadas_maquina.reset:=reset_system2;
      end;
 end;
+llamadas_maquina.reset:=reset_system1;
+llamadas_maquina.save_qsnap:=system1_qsave;
+llamadas_maquina.load_qsnap:=system1_qload;
 llamadas_maquina.close:=cerrar_system1;
 llamadas_maquina.fps_max:=60.096154;
 end;

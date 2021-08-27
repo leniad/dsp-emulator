@@ -3,7 +3,7 @@ unit mariobros_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,samples,rom_engine,
-     pal_engine,sound_engine;
+     pal_engine,sound_engine,qsnapshot;
 
 procedure cargar_mario;
 
@@ -206,18 +206,70 @@ begin
  skid_val:=0;
 end;
 
+procedure mario_qsave(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..5] of byte;
+  size:word;
+begin
+open_qsnapshot_save('mario'+nombre);
+getmem(data,20000);
+//CPU
+size:=z80_0.save_snapshot(data);
+savedata_qsnapshot(data,size);
+//SND
+//MEM
+savedata_com_qsnapshot(@memoria[$6000],$1800);
+//MISC
+buffer[0]:=byte(haz_nmi);
+buffer[1]:=gfx_bank;
+buffer[2]:=palette_bank;
+buffer[3]:=scroll_y;
+buffer[4]:=death_val;
+buffer[5]:=skid_val;
+savedata_qsnapshot(@buffer[0],6);
+freemem(data);
+close_qsnapshot;
+end;
+
+procedure mario_qload(nombre:string);
+var
+  data:pbyte;
+  buffer:array[0..5] of byte;
+begin
+if not(open_qsnapshot_load('mario'+nombre)) then exit;
+getmem(data,20000);
+//CPU
+loaddata_qsnapshot(data);
+z80_0.load_snapshot(data);
+//SND
+//MEM
+loaddata_qsnapshot(@memoria[$6000]);
+//MISC
+loaddata_qsnapshot(@buffer);
+haz_nmi:=buffer[0]<>0;
+gfx_bank:=buffer[1];
+palette_bank:=buffer[2];
+scroll_y:=buffer[3];
+death_val:=buffer[4];
+skid_val:=buffer[5];
+freemem(data);
+close_qsnapshot;
+fillchar(gfx[0].buffer[0],$400,1);
+end;
+
 function iniciar_mario:boolean;
 var
-      colores:tpaleta;
-      f:word;
-      bit0,bit1,bit2:byte;
-      memoria_temp:array[0..$5fff] of byte;
+  colores:tpaleta;
+  f:word;
+  bit0,bit1,bit2:byte;
+  memoria_temp:array[0..$5fff] of byte;
 const
-      pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
-      pc_y:array[0..7] of dword=(7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8);
-      ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
+  pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
+  pc_y:array[0..7] of dword=(7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8);
+  ps_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			256*16*8+0, 256*16*8+1, 256*16*8+2, 256*16*8+3, 256*16*8+4, 256*16*8+5, 256*16*8+6, 256*16*8+7);
-      ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
+  ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
 iniciar_mario:=false;
@@ -273,6 +325,8 @@ begin
 llamadas_maquina.iniciar:=iniciar_mario;
 llamadas_maquina.bucle_general:=mario_principal;
 llamadas_maquina.reset:=reset_mario;
+llamadas_maquina.save_qsnap:=mario_qsave;
+llamadas_maquina.load_qsnap:=mario_qload;
 llamadas_maquina.fps_max:=59.185606;
 end;
 

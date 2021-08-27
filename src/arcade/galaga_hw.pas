@@ -532,7 +532,8 @@ procedure digdug_sound_update;
 begin
   namco_snd_0.update;
 end;
-
+
+
 //Xevious
 procedure draw_sprites_xevious;
 var
