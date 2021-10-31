@@ -31,6 +31,7 @@ unit m68000;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      sysutils,dialogs,cpu_misc,timer_engine,vars_hide,main_engine;
+
 type
         band_m68000=record
                 t,s,i,x,n,z,v,c:boolean;
@@ -89,11 +90,14 @@ type
             //EA
             function leerdir_ea(dir:byte):dword;
         end;
+
 var
     m68000_0,m68000_1:cpu_m68000;
+
 const
   TCPU_68000=0;
   TCPU_68010=1;
+
 implementation
 const
   m68ki_shift_8_table:array[0..64] of byte=(
@@ -125,6 +129,7 @@ const
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff,
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff);
   addr_mask=$fffffe;
+
 constructor cpu_m68000.create(clock:dword;frames_div:word;tipo:byte=0);
 begin
 getmem(self.r,sizeof(reg_m68000));
@@ -135,6 +140,7 @@ self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 self.tipo:=tipo;
 self.reset_call:=nil;
 end;
+
 destructor cpu_m68000.free;
 begin
 if Self.r<>nil then begin
@@ -142,6 +148,7 @@ if Self.r<>nil then begin
   self.r:=nil;
 end;
 end;
+
 procedure cpu_m68000.change_reset_call(reset_call:treset_call);
 begin
   self.reset_call:=reset_call;
