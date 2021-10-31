@@ -1,5 +1,4 @@
 unit pacman_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
@@ -8,6 +7,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure cargar_pacman;
 
 implementation
+
 const
         //Pacman
         pacman_rom:array[0..3] of tipo_roms=(
@@ -34,6 +34,14 @@ const
         crush_sprites:tipo_roms=(n:'maketrax.5f';l:$1000;p:0;crc:$aea79f55);
         crush_pal:array[0..1] of tipo_roms=(
         (n:'82s123.7f';l:$20;p:0;crc:$2fc650bd),(n:'2s140.4a';l:$100;p:$20;crc:$63efb927));
+        //Ms Pac Man Twin
+        mspactwin_rom:tipo_roms=(n:'m27256.bin';l:$8000;p:0;crc:$77a99184);
+        mspactwin_char:array[0..1] of tipo_roms=(
+        (n:'4__2716.5d';l:$800;p:0;crc:$483c1d1c),(n:'2__2716.5g';l:$800;p:$800;crc:$c08d73a2));
+        mspactwin_sprites:array[0..1] of tipo_roms=(
+        (n:'3__2516.5f';l:$800;p:$0;crc:$22b0188a),(n:'1__2516.5j';l:$800;p:$800;crc:$0a8c46a0));
+        mspactwin_pal:array[0..1] of tipo_roms=(
+        (n:'mb7051.8h';l:$20;p:0;crc:$ff344446),(n:'82s129.4a';l:$100;p:$20;crc:$a8202d0d));
         //DIP
         pacman_dip_a:array [0..5] of def_dip=(
         (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -48,7 +56,7 @@ const
         mspacman_dip:array [0..4] of def_dip=(
         (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$4;dip_name:'2'),(dip_val:$8;dip_name:'3'),(dip_val:$c;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
-        (mask:$30;name:'Bonus Life';number:3;dip:((dip_val:$0;dip_name:'10000'),(dip_val:$10;dip_name:'15000'),(dip_val:$20;dip_name:'20000'),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'10000'),(dip_val:$10;dip_name:'15000'),(dip_val:$20;dip_name:'20000'),(dip_val:$30;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Difficulty';number:2;dip:((dip_val:$40;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         crush_dip_a:array [0..4] of def_dip=(
         (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -57,14 +65,22 @@ const
         (mask:$20;name:'Teleport Holes';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         crush_dip_b:array [0..1] of def_dip=(
         (mask:$10;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$10;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        mspactwin_dip_a:array [0..3] of def_dip=(
+        (mask:$3;name:'Coinage';number:4;dip:((dip_val:$3;dip_name:'2C 1C'),(dip_val:$1;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$4;dip_name:'2'),(dip_val:$8;dip_name:'3'),(dip_val:$c;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'10000'),(dip_val:$10;dip_name:'15000'),(dip_val:$20;dip_name:'20000'),(dip_val:$30;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        mspactwin_dip_b:array [0..1] of def_dip=(
+        (mask:$10;name:'Jama';number:2;dip:((dip_val:$10;dip_name:'Slow'),(dip_val:$0;dip_name:'Fast'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        mspactwin_dip_c:array [0..1] of def_dip=(
+        (mask:$80;name:'Skip Screen';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  irq_vblank,dec_enable,croller_disable_protection:boolean;
  rom_decode:array[0..$bfff] of byte;
  read_events:procedure;
- croller_counter,croller_offset:byte;
+ croller_counter,croller_offset,unk_latch:byte;
 
-procedure update_video_pacman;
+procedure update_video_pacman;inline;
 var
   color,offs:word;
   nchar,f,sx,sy,atrib,x,y:byte;
@@ -119,16 +135,16 @@ begin
 if event.arcade then begin
   //in 0
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   //in 1
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
   if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.but0[0] then begin
@@ -176,10 +192,10 @@ while EmuStatus=EsRuning do begin
   for f:=0 to 263 do begin
     z80_0.run(frame);
     frame:=frame+z80_0.tframes-z80_0.contador;
-    if f=223 then begin
-      if irq_vblank then z80_0.change_irq(HOLD_LINE);
-      update_video_pacman;
-    end;
+    //Si no pinto la pantalla aqui, Ms Pac Man Twin no hace el efecto de la pantalla...
+    //Los timings del Z80 estan bien, supongo que es correcto (parece que no hay daños colaterales!)
+    if f=95 then update_video_pacman;
+    if ((f=223) and irq_vblank) then z80_0.change_irq(ASSERT_LINE);
   end;
   read_events;
   video_sync;
@@ -208,13 +224,16 @@ begin
 direccion:=direccion and $7fff;
 case direccion of
         0..$3fff:; //ROM
-        $4000..$47ff,$6000..$67ff:begin
+        $4000..$47ff,$6000..$67ff:if memoria[(direccion and $7ff)+$4000]<>valor then begin
                         memoria[(direccion and $7ff)+$4000]:=valor;
                         gfx[0].buffer[direccion and $3ff]:=true;
                      end;
         $4c00..$4fff,$6c00..$6fff:memoria[(direccion and $3ff)+$4c00]:=valor;
         $5000..$5fff,$7000..$7fff:case (direccion and $ff) of
-                        0:irq_vblank:=valor<>0;
+                        0:begin
+                            irq_vblank:=valor<>0;
+                            if not(irq_vblank) then z80_0.change_irq(CLEAR_LINE);
+                          end;
                         1:namco_snd_0.enabled:=valor<>0;
                         3:main_screen.flip_main_screen:=(valor and 1)<>0;
                         $40..$5f:namco_snd_0.regs[direccion and $1f]:=valor;
@@ -308,7 +327,10 @@ begin
 direccion:=direccion and $7fff;
 case direccion of
         $5000..$5fff,$7000..$7fff:case (direccion and $ff) of
-                        0:irq_vblank:=valor<>0;
+                        0:begin
+                            irq_vblank:=valor<>0;
+                            if not(irq_vblank) then z80_0.change_irq(CLEAR_LINE);
+                          end;
                         1:namco_snd_0.enabled:=valor<>0;
                         3:main_screen.flip_main_screen:=(valor and 1)<>0;
                         4:case valor of //proteccion
@@ -334,16 +356,61 @@ case direccion of
 end;
 end;
 
+//Ms Pac Man Twin
+function mspactwin_getbyte(direccion:word):byte;
+begin
+case direccion of
+        $0..$3fff,$8000..$bfff:if z80_0.opcode then mspactwin_getbyte:=rom_decode[direccion]
+                                  else mspactwin_getbyte:=memoria[direccion];
+        $6000..$67ff:if z80_0.opcode then mspactwin_getbyte:=rom_decode[(direccion and $1fff)+$2000]
+                                  else mspactwin_getbyte:=memoria[(direccion and $1fff)+$2000];
+        $4000..$47ff,$c000..$c7ff:mspactwin_getbyte:=memoria[(direccion and $7ff)+$4000];
+        $4800..$4bff,$6800..$6bff,$c800..$cbff:mspactwin_getbyte:=0;
+        $4c00..$4fff,$6c00..$6fff,$cc00..$cfff,$ec00..$efff:mspactwin_getbyte:=memoria[(direccion and $3ff)+$4c00];
+        $5000..$5fff,$7000..$7fff,$d000..$dfff,$f000..$ffff:case (direccion and $ff) of
+                                    $00..$3f:mspactwin_getbyte:=marcade.in0 or marcade.dswb;
+                                    $40..$7f:mspactwin_getbyte:=marcade.in1 or marcade.dswc;
+                                    $80..$bf:mspactwin_getbyte:=marcade.dswa;
+                                    $c0..$ff:mspactwin_getbyte:=unk_latch;
+                                  end;
+end;
+end;
+
+procedure mspactwin_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+  0..$3fff,$6000..$67ff,$8000..$bfff:;
+  $4000..$47ff,$c000..$c7ff:if memoria[(direccion and $7ff)+$4000]<>valor then begin
+                                  memoria[(direccion and $7ff)+$4000]:=valor;
+                                  gfx[0].buffer[direccion and $3ff]:=true;
+                            end;
+  $4c00..$4fff,$6c00..$6fff,$cc00..$cfff,$ec00..$efff:memoria[(direccion and $3ff)+$4c00]:=valor;
+  $5000..$5fff,$7000..$7fff,$d000..$dfff,$f000..$ffff:case (direccion and $ff) of
+                              0:begin
+                                  irq_vblank:=valor<>0;
+                                  if not(irq_vblank) then z80_0.change_irq(CLEAR_LINE);
+                                end;
+                              1:namco_snd_0.enabled:=valor<>0;
+                              3:main_screen.flip_main_screen:=(valor and 1)<>0;
+                              $40..$5f:namco_snd_0.regs[direccion and $1f]:=valor;
+                              $60..$6f:memoria[(direccion and $ff)+$5000]:=valor;
+                              $80..$bf:unk_latch:=valor;
+                              $c0..$ff:; //WD
+                            end;
+end;
+end;
+
 procedure pacman_qsave(nombre:string);
 var
   data:pbyte;
   size:word;
-  buffer:array[0..4] of byte;
+  buffer:array[0..5] of byte;
 begin
 case main_vars.tipo_maquina of
   10:open_qsnapshot_save('pacman'+nombre);
   88:open_qsnapshot_save('mspacman'+nombre);
   234:open_qsnapshot_save('crushroller'+nombre);
+  305:open_qsnapshot_save('mspactwin'+nombre);
 end;
 getmem(data,2000);
 //CPU
@@ -361,7 +428,8 @@ buffer[1]:=byte(dec_enable);
 buffer[2]:=croller_counter;
 buffer[3]:=croller_offset;
 buffer[4]:=byte(croller_disable_protection);
-savedata_qsnapshot(@buffer,5);
+buffer[5]:=unk_latch;
+savedata_qsnapshot(@buffer,6);
 freemem(data);
 close_qsnapshot;
 end;
@@ -369,12 +437,13 @@ end;
 procedure pacman_qload(nombre:string);
 var
   data:pbyte;
-  buffer:array[0..4] of byte;
+  buffer:array[0..5] of byte;
 begin
 case main_vars.tipo_maquina of
   10:if not(open_qsnapshot_load('pacman'+nombre)) then exit;
   88:if not(open_qsnapshot_load('mspacman'+nombre)) then exit;
   234:if not(open_qsnapshot_load('crushroller'+nombre)) then exit;
+  305:if not(open_qsnapshot_load('mspactwin'+nombre)) then exit;
 end;
 getmem(data,2000);
 //CPU
@@ -393,6 +462,7 @@ dec_enable:=buffer[1]<>0;
 croller_counter:=buffer[2];
 croller_offset:=buffer[3];
 croller_disable_protection:=buffer[4]<>0;
+unk_latch:=buffer[5];
 freemem(data);
 close_qsnapshot;
 fillchar(gfx[0].buffer,$400,1);
@@ -411,6 +481,7 @@ begin
  croller_counter:=0;
  croller_offset:=0;
  croller_disable_protection:=false;
+ unk_latch:=0;
 end;
 
 procedure mspacman_install_patches;
@@ -426,7 +497,6 @@ begin
 		rom_decode[$0C20+i]:=rom_decode[$8120+i];
 		rom_decode[$0E58+i]:=rom_decode[$8168+i];
 		rom_decode[$0EA8+i]:=rom_decode[$8198+i];
-
 		rom_decode[$1000+i]:=rom_decode[$8020+i];
 		rom_decode[$1008+i]:=rom_decode[$8010+i];
 		rom_decode[$1288+i]:=rom_decode[$8098+i];
@@ -437,7 +507,6 @@ begin
 		rom_decode[$16F8+i]:=rom_decode[$81C8+i];
 		rom_decode[$19A8+i]:=rom_decode[$80A8+i];
 		rom_decode[$19B8+i]:=rom_decode[$81A8+i];
-
 		rom_decode[$2060+i]:=rom_decode[$8148+i];
 		rom_decode[$2108+i]:=rom_decode[$8018+i];
 		rom_decode[$21A0+i]:=rom_decode[$81A0+i];
@@ -469,7 +538,7 @@ var
   colores:tpaleta;
   f:word;
   bit0,bit1,bit2:byte;
-  memoria_temp:array[0..$ffff] of byte;
+  memoria_temp:array[0..$7fff] of byte;
   rweights,gweights,bweights:array[0..2] of single;
 const
   ps_x:array[0..15] of dword=(8*8, 8*8+1, 8*8+2, 8*8+3, 16*8+0, 16*8+1, 16*8+2, 16*8+3,
@@ -583,6 +652,43 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@crush_dip_a;
         marcade.dswb_val:=@crush_dip_b;
      end;
+     305:begin  //MS Pacman Twin
+        z80_0.change_ram_calls(mspactwin_getbyte,mspactwin_putbyte);
+        //cargar y desencriptar roms
+        if not(roms_load(@memoria_temp,mspactwin_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$4000);
+        copymemory(@memoria[$8000],@memoria_temp[$4000],$4000);
+	      for f:=0 to $1fff do begin
+          // decode opcode
+		      rom_decode[f*2]:=BITSWAP8(memoria[f*2],4,5,6,7,0,1,2,3);
+		      rom_decode[(f*2)+1]:=BITSWAP8(memoria[(f*2)+1] xor $9a,6,4,5,7,2,0,3,1);
+		      rom_decode[$8000+(f*2)]:=BITSWAP8(memoria[$8000+(f*2)],4,5,6,7,0,1,2,3);
+		      rom_decode[$8001+(f*2)]:=BITSWAP8(memoria[$8001+(f*2)] xor $9a,6,4,5,7,2,0,3,1);
+      		// decode operand
+	      	memoria[f*2]:=BITSWAP8(memoria[f*2],0,1,2,3,4,5,6,7);
+		      memoria[(f*2)+1]:=BITSWAP8(memoria[(f*2)+1] xor $a3,2,4,6,3,7,0,5,1);
+		      memoria[$8000+(f*2)]:=BITSWAP8(memoria[$8000+(f*2)],0,1,2,3,4,5,6,7);
+		      memoria[$8001+(f*2)]:=BITSWAP8(memoria[$8001+(f*2)] xor $a3,2,4,6,3,7,0,5,1);
+	      end;
+        //cargar sonido & iniciar_sonido
+        if not(roms_load(namco_snd_0.get_wave_dir,pacman_sound)) then exit;
+        //convertir chars
+        if not(roms_load(@memoria_temp,mspactwin_char)) then exit;
+        conv_chars;
+        //convertir sprites
+        if not(roms_load(@memoria_temp,mspactwin_sprites)) then exit;
+        conv_sprites;
+        //poner la paleta
+        if not(roms_load(@memoria_temp,mspactwin_pal)) then exit;
+        //DIP
+        read_events:=eventos_mspacman;
+        marcade.dswa:=$c9;
+        marcade.dswa_val:=@mspactwin_dip_a;
+        marcade.dswb:=$10;
+        marcade.dswb_val:=@mspactwin_dip_b;
+        marcade.dswc:=$80;
+        marcade.dswc_val:=@mspactwin_dip_c;
+     end;
 end;
 compute_resistor_weights(0,	255, -1.0,
 			3,@resistances,@rweights,0,0,
@@ -623,5 +729,4 @@ llamadas_maquina.fps_max:=60.6060606060;
 llamadas_maquina.save_qsnap:=pacman_qsave;
 llamadas_maquina.load_qsnap:=pacman_qload;
 end;
-
 end.

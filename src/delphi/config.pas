@@ -83,13 +83,15 @@ begin
 if ((main_vars.tipo_maquina=0) or (main_vars.tipo_maquina=5)) then begin
     if var_spectrum.issue2 then radiobutton1.Checked:=true else radiobutton2.Checked:=true;
     groupbox8.Enabled:=false;
-    groupbox13.Enabled:=false;
     radiobutton14.Enabled:=false;
     radiobutton15.Enabled:=false;
     radiobutton16.Enabled:=false;
     groupbox3.Enabled:=true;
     radiobutton1.Enabled:=true;
     radiobutton2.Enabled:=true;
+    groupbox13.Enabled:=false;
+    radiobutton26.Enabled:=false;
+    radiobutton27.Enabled:=false;
 end else begin
     groupbox3.Enabled:=false;
     radiobutton1.Enabled:=false;
@@ -98,6 +100,9 @@ end else begin
     radiobutton14.Enabled:=true;
     radiobutton15.Enabled:=true;
     radiobutton16.Enabled:=true;
+    groupbox13.Enabled:=true;
+    radiobutton26.Enabled:=true;
+    radiobutton27.Enabled:=true;
 end;
   //Las otras opciones
   if var_spectrum.tipo_joy=JKEMPSTON then radiobutton3.checked:=true

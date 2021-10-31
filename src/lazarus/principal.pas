@@ -75,7 +75,7 @@ type
     BubbleBobble1: TMenuItem;
     Jungler1: TMenuItem;
     AsteroidsHW1: TMenuItem;
-    BurgerTime1: TMenuItem;
+    bt1: TMenuItem;
     ExpressRaider1: TMenuItem;
     gng1: TMenuItem;
     CityCon1: TMenuItem;
@@ -252,6 +252,15 @@ type
     aurail1: TMenuItem;
     MenuItem44: TMenuItem;
     Hellfire1: TMenuItem;
+    BurgerTime1: TMenuItem;
+    lnc1: TMenuItem;
+    karatechamp1: TMenuItem;
+    mspactwin1: TMenuItem;
+    twineagle1: TMenuItem;
+    thunderl1: TMenuItem;
+    thundercade1: TMenuItem;
+    Setahw1: TMenuItem;
+    mmonkey1: TMenuItem;
     scv1: TMenuItem;
     passingshot1: TMenuItem;
     wndrmomo1: TMenuItem;

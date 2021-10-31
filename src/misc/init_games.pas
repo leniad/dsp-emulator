@@ -32,7 +32,8 @@ uses sysutils,main_engine,rom_engine,rom_export,
   vendetta_hw,gauntlet_hw,sauro_hw,crazyclimber_hw,returnofinvaders_hw,gnw_510,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
-  hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw;
+  hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
+  seta_hw;
 type
   tgame_desc=record
               name,year:string;
@@ -46,7 +47,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=313;
+  GAMES_CONT=318;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -351,6 +352,11 @@ const
   (name:'Hellfire';year:'1989';snd:1;hi:false;zip:'hellfire';grid:298;company:'Toaplan';rom:@hellfire),
   (name:'Lock''n''Chase';year:'1981';snd:1;hi:false;zip:'lnc';grid:299;company:'Deco';rom:@lnc),
   (name:'Minky Monkey';year:'1982';snd:1;hi:false;zip:'mmonkey';grid:300;company:'Deco';rom:@mmonkey),
+  (name:'Karate Champ';year:'1984';snd:1;hi:false;zip:'kchamp';grid:301;company:'Data East';rom:@karatechamp),
+  (name:'Thundercade';year:'1987';snd:1;hi:false;zip:'tndrcade';grid:302;company:'Seta';rom:@tndrcade),
+  (name:'Twin Eagle - Revenge Joe''s Brother';year:'1988';snd:1;hi:false;zip:'twineagl';grid:303;company:'Seta';rom:@twineagl),
+  (name:'Thunder & Lightning';year:'1990';snd:1;hi:false;zip:'thunderl';grid:304;company:'Seta';rom:@thunderl),
+  (name:'Ms Pac Man Twin';year:'1992';snd:1;hi:false;zip:'mspactwin';grid:305;company:'Susilu';rom:@mspactwin),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -678,6 +684,11 @@ case numero of
   298:principal1.CambiarMaquina(principal1.hellfire1);
   299:principal1.CambiarMaquina(principal1.lnc1);
   300:principal1.CambiarMaquina(principal1.mmonkey1);
+  301:principal1.CambiarMaquina(principal1.karatechamp1);
+  302:principal1.CambiarMaquina(principal1.thundercade1);
+  303:principal1.CambiarMaquina(principal1.twineagle1);
+  304:principal1.CambiarMaquina(principal1.thunderl1);
+  305:principal1.CambiarMaquina(principal1.mspactwin1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -996,6 +1007,11 @@ principal1.aurail1.checked:=false;
 principal1.hellfire1.checked:=false;
 principal1.lnc1.checked:=false;
 principal1.mmonkey1.checked:=false;
+principal1.karatechamp1.checked:=false;
+principal1.thundercade1.checked:=false;
+principal1.twineagle1.checked:=false;
+principal1.thunderl1.checked:=false;
+principal1.mspactwin1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1090,7 +1106,7 @@ case tmaquina of
   7,8,9:Cargar_amstrad_CPC;
   3000:Cargar_c64;
   //arcade
-  10,88,234:Cargar_Pacman;
+  10,88,234,305:Cargar_Pacman;
   11,202:Cargar_Phoenix;
   12:Cargar_MS;
   13:Cargar_bombjack;
@@ -1242,6 +1258,8 @@ case tmaquina of
   287,288:cargar_baraduke;
   292,293,294,295,296,297:cargar_system16b;
   298:cargar_toaplan1;
+  301:cargar_karatechamp;
+  302,303,304:cargar_seta;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2464,6 +2482,26 @@ end;
 if sender=principal1.mmonkey1 then begin
   tipo:=300;
   principal1.mmonkey1.Checked:=true;
+end;
+if sender=principal1.karatechamp1 then begin
+  tipo:=301;
+  principal1.karatechamp1.Checked:=true;
+end;
+if sender=principal1.thundercade1 then begin
+  tipo:=302;
+  principal1.thundercade1.Checked:=true;
+end;
+if sender=principal1.twineagle1 then begin
+  tipo:=303;
+  principal1.twineagle1.Checked:=true;
+end;
+if sender=principal1.thunderl1 then begin
+  tipo:=304;
+  principal1.thunderl1.Checked:=true;
+end;
+if sender=principal1.mspactwin1 then begin
+  tipo:=305;
+  principal1.mspactwin1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

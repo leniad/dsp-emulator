@@ -1,5 +1,4 @@
 unit outrun_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
@@ -39,7 +38,6 @@ const
         (mask:$30;name:'Time Adjust';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$30;dip_name:'Normal'),(dip_val:$10;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$80;dip_name:'Easy'),(dip_val:$c0;dip_name:'Normal'),(dip_val:$40;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
         CPU_SYNC=4;
-
 type
   tsystem16_info=record
     	normal,shadow,hilight:array[0..31] of byte;
@@ -53,7 +51,6 @@ type
       buffer:array[0..$7ff] of word;
       xoff:word;
    end;
-
 var
  rom,rom2:array[0..$2ffff] of word;
  ram,ram2:array[0..$3fff] of word;
@@ -72,7 +69,7 @@ implementation
 
 procedure draw_sprites(pri:byte);inline;
 var
-  f,sprpri:byte;
+  f,sprpri,g:byte;
   xpos,vzoom,hzoom,top,addr,bank,pix,data_7,color,height:word;
   x,y,ydelta,ytarget,xacc,yacc,pitch,xdelta:integer;
   pixels,spritedata:dword;
@@ -134,62 +131,15 @@ begin
             data_7:=sprite_ram[(f*$8)+$7]+1;
             sprite_ram[(f*$8)+$7]:=data_7;
 						pixels:=sprite_rom[spritedata+data_7];
-						pix:=(pixels shr 28) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
+            for g:=7 downto 0 do begin
+						  pix:=(pixels shr (g*4)) and $f;
+              while (xacc<$200) do begin
+                system16b_draw_pixel(x,y,pix or color);
+                x:=x+xdelta;
+                xacc:=xacc+hzoom;
+              end;
+              xacc:=xacc-$200;
             end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 24) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 20) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 16) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 12) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 8) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 4) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 0) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
 						if (pixels and $f0)=$f0 then break;
 					end;
 				end else begin
@@ -201,62 +151,15 @@ begin
             data_7:=sprite_ram[(f*$8)+$7]-1;
             sprite_ram[(f*$8)+$7]:=data_7;
 						pixels:=sprite_rom[spritedata+data_7];
-						pix:=(pixels shr 0) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
+            for g:=0 to 7 do begin
+						  pix:=(pixels shr (g*4)) and $f;
+              while (xacc<$200) do begin
+                system16b_draw_pixel(x,y,pix or color);
+                x:=x+xdelta;
+                xacc:=xacc+hzoom;
+              end;
+              xacc:=xacc-$200;
             end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 4) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 8) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 12) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 16) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 20) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 24) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
-            pix:=(pixels shr 28) and $f;
-            while (xacc<$200) do begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+xdelta;
-              xacc:=xacc+hzoom;
-            end;
-            xacc:=xacc-$200;
 						if (pixels and $0f000000)=$0f000000 then break;
 					end;
 			 	end; //del flip
@@ -1035,7 +938,7 @@ reset_outrun;
 iniciar_outrun:=true;
 end;
 
-procedure Cargar_outrun;
+procedure cargar_outrun;
 begin
 llamadas_maquina.iniciar:=iniciar_outrun;
 llamadas_maquina.bucle_general:=outrun_principal;

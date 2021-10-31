@@ -78,7 +78,7 @@ type
           procedure or_a(valor:byte);
           procedure xor_a(valor:byte);
           procedure cp_a(valor:byte);
-          function sra_8(valor:byte):byte;
+          procedure sra_8(reg:pbyte);
           procedure sla_8(reg:pbyte);
           procedure sll_8(reg:pbyte);
           procedure srl_8(reg:pbyte);
@@ -282,20 +282,17 @@ begin
  r.f.c:=(r.a-valor)<0;
 end;
 
-function cpu_z80.sra_8(valor:byte):byte;
-var
-  tempb:byte;
+procedure cpu_z80.sra_8(reg:pbyte);
 begin
- r.f.c:=(valor and $1)<>0;
- tempb:=(valor shr 1) or (valor and $80);
+ r.f.c:=(reg^ and $1)<>0;
+ reg^:=(reg^ shr 1) or (reg^ and $80);
  r.f.h:=false;
  r.f.n:=false;
- r.f.p_v:=paridad[tempb];
- r.f.s:=(tempb and $80)<>0;
- r.f.z:=(tempb=0);
- r.f.bit5:=(tempb and $20)<>0;
- r.f.bit3:=(tempb and 8)<>0;
- sra_8:=tempb;
+ r.f.p_v:=paridad[reg^];
+ r.f.s:=(reg^ and $80)<>0;
+ r.f.z:=(reg^=0);
+ r.f.bit5:=(reg^ and $20)<>0;
+ r.f.bit3:=(reg^ and 8)<>0;
 end;
 
 procedure cpu_z80.sla_8(reg:pbyte);
@@ -1589,24 +1586,24 @@ case instruccion of
         $03:rlc_8(@r.de.l); {rlc E}
         $04:rlc_8(@r.hl.h); {rlc H}
         $05:rlc_8(@r.hl.l); {rlc L}
-        $06:begin
+        $06:begin {rlc (HL)}
                 temp:=self.getbyte(r.hl.w);
-                rlc_8(@temp); {rlc (HL)}
+                rlc_8(@temp);
                 self.putbyte(r.hl.w,temp);
             end;
         $07:rlc_8(@r.a); {rlc A}
-        $08:rrc_8(@r.bc.h); {rlc B}
-        $09:rrc_8(@r.bc.l); {rlc C}
-        $0a:rrc_8(@r.de.h); {rlc D}
-        $0b:rrc_8(@r.de.l); {rlc E}
-        $0c:rrc_8(@r.hl.h); {rlc H}
-        $0d:rrc_8(@r.hl.l); {rlc L}
-        $0e:begin
+        $08:rrc_8(@r.bc.h); {rrc B}
+        $09:rrc_8(@r.bc.l); {rrc C}
+        $0a:rrc_8(@r.de.h); {rrc D}
+        $0b:rrc_8(@r.de.l); {rrc E}
+        $0c:rrc_8(@r.hl.h); {rrc H}
+        $0d:rrc_8(@r.hl.l); {rrc L}
+        $0e:begin {rrc (HL)}
                 temp:=self.getbyte(r.hl.w);
-                rrc_8(@temp); {rlc (HL)}
+                rrc_8(@temp);
                 self.putbyte(r.hl.w,temp);
             end;
-        $0f:rrc_8(@r.a); {rlc A}
+        $0f:rrc_8(@r.a); {rrc A}
         $10:rl_8(@r.bc.h); {rl B}
         $11:rl_8(@r.bc.l); {rl C}
         $12:rl_8(@r.de.h); {rl D}
@@ -1637,23 +1634,24 @@ case instruccion of
         $23:sla_8(@r.de.l); {sla E}
         $24:sla_8(@r.hl.h); {sla H}
         $25:sla_8(@r.hl.l); {sla L}
-        $26:begin
+        $26:begin {sla (HL)}
                 temp:=self.getbyte(r.hl.w);
-                sla_8(@temp); {sla (HL)}
+                sla_8(@temp);
                 self.putbyte(r.hl.w,temp);
             end;
         $27:sla_8(@r.a); {sla A}
-        $28:r.bc.h:=sra_8(r.bc.h); //sra B
-        $29:r.bc.l:=sra_8(r.bc.l); //sra C
-        $2a:r.de.h:=sra_8(r.de.h); //sra D
-        $2b:r.de.l:=sra_8(r.de.l); //sra E
-        $2c:r.hl.h:=sra_8(r.hl.h); //sra H
-        $2d:r.hl.l:=sra_8(r.hl.l); //sra L
+        $28:sra_8(@r.bc.h); //sra B
+        $29:sra_8(@r.bc.l); //sra C
+        $2a:sra_8(@r.de.h); //sra D
+        $2b:sra_8(@r.de.l); //sra E
+        $2c:sra_8(@r.hl.h); //sra H
+        $2d:sra_8(@r.hl.l); //sra L
         $2e:begin //sra (HL)
-                temp:=sra_8(self.getbyte(r.hl.w));
+                temp:=self.getbyte(r.hl.w);
+                sra_8(@temp);
                 self.putbyte(r.hl.w,temp);
             end;
-        $2f:r.a:=sra_8(r.a); //sra A
+        $2f:sra_8(@r.a); //sra A
         $30:sll_8(@r.bc.h); {sll B}
         $31:sll_8(@r.bc.l); {sll C}
         $32:sll_8(@r.de.h); {sll D}
@@ -2467,35 +2465,43 @@ case instruccion of
                 self.putbyte(temp2,r.a);
             end;
         $28:begin //ld B,sra (IX+d)
-                r.bc.h:=sra_8(self.getbyte(temp2));
+                r.bc.h:=self.getbyte(temp2);
+                sra_8(@r.bc.h);
                 self.putbyte(temp2,r.bc.h);
             end;
         $29:begin //ld C,sra (IX+d)
-                r.bc.l:=sra_8(self.getbyte(temp2));
+                r.bc.l:=self.getbyte(temp2);
+                sra_8(@r.bc.l);
                 self.putbyte(temp2,r.bc.l);
             end;
         $2a:begin //ld D,sra (IX+d)
-                r.de.h:=sra_8(self.getbyte(temp2));
+                r.de.h:=self.getbyte(temp2);
+                sra_8(@r.de.h);
                 self.putbyte(temp2,r.de.h);
             end;
         $2b:begin //ld E,sra (IX+d)
-                r.de.l:=sra_8(self.getbyte(temp2));
+                r.de.l:=self.getbyte(temp2);
+                sra_8(@r.de.l);
                 self.putbyte(temp2,r.de.l);
             end;
         $2c:begin //ld H,sra (IX+d)
-                r.hl.h:=sra_8(self.getbyte(temp2));
+                r.hl.h:=self.getbyte(temp2);
+                sra_8(@r.hl.h);
                 self.putbyte(temp2,r.hl.h);
             end;
         $2d:begin //ld L,sra (IX+d)
-                r.hl.l:=sra_8(self.getbyte(temp2));
+                r.hl.l:=self.getbyte(temp2);
+                sra_8(@r.hl.l);
                 self.putbyte(temp2,r.hl.l);
             end;
         $2e:begin  //sra (IX+d)
-                tempb:=sra_8(self.getbyte(temp2));
+                tempb:=self.getbyte(temp2);
+                sra_8(@tempb);
                 self.putbyte(temp2,tempb);
             end;
         $2f:begin {ld A,sra (IX+d)}
-                r.a:=sra_8(self.getbyte(temp2));
+                r.a:=self.getbyte(temp2);
+                sra_8(@r.a);
                 self.putbyte(temp2,r.a);
             end;
         $30:begin {ld B,sll (IX+d)}

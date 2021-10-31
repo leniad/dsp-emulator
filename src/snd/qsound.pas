@@ -222,4 +222,4 @@ begin
   qsound_state.tsample:=init_channel;
 end;
 
-end.
+end.

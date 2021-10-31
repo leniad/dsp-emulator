@@ -12,7 +12,6 @@ object lenslock1: Tlenslock1
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poDesigned
   OnClose = FormClose
   OnShow = FormShow

@@ -137,8 +137,8 @@ end;
 
 procedure pooyan_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+    0..$7fff:;
     $8000..$87ff:begin
                     gfx[0].buffer[direccion and $3ff]:=true;
                     memoria[direccion]:=valor;

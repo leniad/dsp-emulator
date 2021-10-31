@@ -53,8 +53,8 @@ for f:=$1f downto 0 do begin
   atrib:=memoria[$9801+(f*4)];
   if ((atrib and $30) shr 4)=prioridad then begin
     nchar:=memoria[$9800+(f*4)];
-    y:=memoria[$9803+(f*4)];
     x:=memoria[$9802+(f*4)];
+    y:=memoria[$9803+(f*4)];
     color:=(atrib and 7) shl 3+320;
     if (nchar and $c0)<>$c0 then begin
       put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,1);
@@ -120,7 +120,8 @@ end;
 draw_sprites(0);
 scroll_x_y(2,1,x3,y3);
 draw_sprites(1);
-scroll_x_y(4,1,x2,y1);
+//OJO!! Que esta version no usa x2 o y2!!!
+scroll_x_y(4,1,x1,y1);
 draw_sprites(2);
 scroll_x_y(5,1,x1,y1);
 draw_sprites(3);

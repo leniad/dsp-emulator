@@ -131,7 +131,6 @@ begin
 spec_z80.contador:=spec_z80.contador+4;
 end;
 
-
 procedure spectrum3_main;
 begin
 init_controls(true,true,true,false);

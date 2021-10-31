@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.20WIP3';
+        DSP_VERSION='0.20WIP4';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -397,7 +397,8 @@ var
 begin
 if not(main_screen.pantalla_completa) then begin
   main_screen.old_video_mode:=main_screen.video_mode;
-  main_screen.video_mode:=6;
+  if p_final[0].y>300 then main_screen.video_mode:=7
+    else main_screen.video_mode:=6;
   principal1.n1x1.Checked:=false;
   principal1.n2x1.Checked:=false;
   principal1.scanlines1.Checked:=false;
@@ -406,7 +407,8 @@ if not(main_screen.pantalla_completa) then begin
   principal1.FullScreen1.Checked:=true;
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
-  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
+  //window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN_DESKTOP);
+  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,800,600,libSDL_WINDOW_FULLSCREEN_DESKTOP);
   main_screen.pantalla_completa:=true;
 end else begin
   main_screen.video_mode:=main_screen.old_video_mode;
@@ -679,12 +681,12 @@ end else if main_screen.flip_main_x then begin
                   end;
 case main_screen.video_mode of
   0:exit;
-  1,6:begin
+  1:begin
       origen.w:=pantalla[PANT_TEMP].w;
       origen.h:=pantalla[PANT_TEMP].h;
       pant_final:=PANT_TEMP;
     end;
-  2:begin
+  2,7:begin
         for i:=0 to p_final[0].y-1 do begin
           punt:=pantalla[PANT_TEMP].pixels;
           inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
@@ -738,7 +740,7 @@ case main_screen.video_mode of
         origen.h:=p_final[0].y*2;
         pant_final:=PANT_DOBLE;
     end;
-  5:begin
+  5,6:begin
         for i:=0 to p_final[0].y-1 do begin
            punt:=pantalla[PANT_TEMP].pixels;
            inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);

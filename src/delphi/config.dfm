@@ -146,7 +146,7 @@ object ConfigSP: TConfigSP
       Caption = 'Audio'
       TabOrder = 4
       object GroupBox8: TGroupBox
-        Left = 11
+        Left = 3
         Top = 15
         Width = 120
         Height = 78
@@ -154,7 +154,7 @@ object ConfigSP: TConfigSP
         TabOrder = 0
         object RadioButton14: TRadioButton
           Left = 13
-          Top = 17
+          Top = 12
           Width = 65
           Height = 17
           Caption = 'Mono'

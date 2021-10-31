@@ -170,8 +170,8 @@ end;
 
 procedure popeye_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+  0..$7fff:;
   $8000..$8bff,$8c04..$8fff:memoria[direccion]:=valor;
   $8c00:scroll_x:=(scroll_x and $ff00) or valor;
   $8c01:scroll_y:=valor;

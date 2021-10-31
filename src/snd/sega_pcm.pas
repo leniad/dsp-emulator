@@ -61,7 +61,6 @@ function tsega_pcm.read(dir:word):byte;
 begin
   read:=self.ram[dir and $7ff];
 end;
-
 procedure tsega_pcm.write(dir:word;valor:byte);
 begin
   self.ram[dir and $7ff]:=valor;
@@ -118,10 +117,10 @@ begin
         else sega_pcm_0.low[f]:=addr and $ff;
 		end;
   end; //del chnnel
-  if sega_pcm_0.outl<-32767 then sega_pcm_0.outl:=-32768
-    else if sega_pcm_0.outl>32768 then sega_pcm_0.outl:=32767;
-  if sega_pcm_0.outr<-32767 then sega_pcm_0.outr:=-32768
-    else if sega_pcm_0.outr>32768 then sega_pcm_0.outr:=32767;
+  if sega_pcm_0.outl<-32767 then sega_pcm_0.outl:=-32767
+    else if sega_pcm_0.outl>32767 then sega_pcm_0.outl:=32767;
+  if sega_pcm_0.outr<-32767 then sega_pcm_0.outr:=-32767
+    else if sega_pcm_0.outr>32767 then sega_pcm_0.outr:=32767;
 end;
 
 end.

@@ -267,9 +267,9 @@ begin
  vlm5030_0.reset;
  dac_0.reset;
  reset_audio;
- marcade.in0:=$FF;
- marcade.in1:=$FF;
- marcade.in2:=$FF;
+ marcade.in0:=$ff;
+ marcade.in1:=$ff;
+ marcade.in2:=$ff;
  irq_ena:=false;
  sound_latch:=0;
  chip_latch:=0;

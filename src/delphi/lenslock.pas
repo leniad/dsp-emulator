@@ -85,17 +85,17 @@ case main_vars.tipo_maquina of
   2,3:spec_a_pantalla(@memoria_3[var_spectrum.pantalla_128k,0],imagen1);
   7,8,9:begin
           cargar_bmp;
-          x:=200;
+          x:=192;
           case lenslok.indice of
-            1:y:=135;
-            5:y:=110;
-            7:y:=120;
+            1:y:=115;
+            5:y:=90;
+            7:y:=100;
           end;
         end;
 end;
 for i:=0 to 15 do begin
   if decode_lenslok[lenslok.indice,i]<>0 then noffset:=round((57*decode_lenslok[lenslok.indice,i])/100)
-    else noffset:=round((57*101) div 100);
+    else noffset:=(57*101) div 100;
   StretchBlt(imagen1.canvas.handle, i, 0,1, 32,imagen1.Canvas.Handle,x+noffset,y+1, 1, 21-2, SRCCOPY);
 end;
 StretchBlt(image_to_show.canvas.handle,0,0,127,57,imagen1.Canvas.Handle,0,0, 16, 32, SRCCOPY);

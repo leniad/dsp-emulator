@@ -1,4 +1,41 @@
 ﻿# DSP Emulator status #
+<b>31/10/21 - DSP Emulator 0.20WIP4. Win32 and source update.<br><pre>
+-General
+    +Seta Sprites: Added new device
+    +CPU
+        -M6502
+            +Added M65CE02 CPU type. Added many specific opcodes
+    +Lens Lock
+        -Fixed Amstrad decode mode
+    +Seta X1-010
+        -Added new sound device
+-Spectrum
+    +Spectrum 16K/48K fixed screen timings
+-Dec0 HW
+    +Super Real Darwin: Inverted coin input
+-Karate Champ
+    +Added driver with sound
+-Pacman HW
+    +Enhance IRQs
+    +Ms Pac Man Twin
+        -Added driver with sound
+-Renegade
+    +Fixed dipswitches
+-Seta HW
+    +Thundercade
+        -Added driver with sound
+    +Twin Eagle
+        -Added driver with sound
+    +Thunder & Lightning
+        -Added driver with sound
+-StarForce
+    +Fixed X scroll in background
+-The New Zealand Story HW
+    +Rewrited video system, now uses Seta Sprite device
+</pre><br>
+<img src="https://i.ibb.co/1v0t051/Karate-Champ.png"> <img src="https://i.ibb.co/LCjkcSF/Ms-Pac-Man-Twin.png"><br>
+<img src="https://i.ibb.co/THTbTq6/Thunder-Lightning.png" > <img src="https://i.ibb.co/3WdcDhH/Thundercade.png" ><br>
+<img src="https://i.ibb.co/2d2z7vQ/Twin-Eagle.png"><br><br>
 <b>27/08/21 - After some exhausting and time-consuming real life, here comes a new little update. DSP Emulator 0.20WIP3. Win32 and source update.<br><pre>
 -General
     +Joystick: Some changes to enhance configuration

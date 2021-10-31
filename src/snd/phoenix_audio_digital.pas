@@ -235,7 +235,7 @@ end;
 for i:=0 to (sound_status.long_sample-1) do begin
     sum:=noise(FREQ_BASE_AUDIO) div 2;
     if sum>32767 then sum:=32767
-      else if sum<-32768 then sum:=-32768;
+      else if sum<-32767 then sum:=-32767;
     tsample[noise_state.tsample,i]:=sum;
 end;
 end;

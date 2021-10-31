@@ -317,7 +317,11 @@ uses
   sega_pcm in '..\snd\sega_pcm.pas' {config_gb in 'config_gb.pas' {configgb},
   config_gb in 'config_gb.pas' {configgb},
   toaplan1_hw in '..\arcade\toaplan1_hw.pas',
-  super_cassette_vision in '..\consolas\super_cassette_vision.pas';
+  super_cassette_vision in '..\consolas\super_cassette_vision.pas',
+  karatechamp_hw in '..\arcade\karatechamp_hw.pas',
+  seta_sprites in '..\arcade\misc\seta_sprites.pas',
+  seta_hw in '..\arcade\seta_hw.pas',
+  x1_010 in '..\snd\x1_010.pas';
 
 {$R *.res}
 begin

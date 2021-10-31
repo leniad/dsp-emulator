@@ -443,7 +443,7 @@ var
 function video_mult:byte;
 begin
   case main_screen.video_mode of
-    2,4:video_mult:=2;
+    2,4,6:video_mult:=2;
     5:video_mult:=3;
     else video_mult:=1;
   end;

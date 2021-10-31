@@ -1,12 +1,9 @@
 ﻿unit system16b_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ym_2151,dialogs,upd7759,mcs51,sega_315_5195;
-
 procedure cargar_system16b;
-
 implementation
 const
         //Altered Beast
@@ -133,7 +130,6 @@ const
         (mask:$20;name:'Difficulty';number:2;dip:((dip_val:$20;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Controller';number:2;dip:((dip_val:$40;dip_name:'1 Player Side'),(dip_val:$0;dip_name:'2 Players Side'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Special Function Mode';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-
 type
   tsystem16_info=record
     	normal,shadow,hilight:array[0..31] of byte;
@@ -143,7 +139,6 @@ type
       screen_enabled:boolean;
       tile_bank:array[0..1] of byte;
    end;
-
 var
  rom:array[0..$3ffff] of word;
  rom2:array[0..$1ffff] of word;
@@ -158,7 +153,6 @@ var
  sound_bank:array[0..$f,0..$3fff] of byte;
  sound_bank_num:byte;
  sound_latch:byte;
-
  s315_5248_regs:array[0..1] of word;
  s315_5250_regs:array[0..$f] of word;
  s315_5250_bit:byte;
@@ -171,7 +165,7 @@ var
 
 procedure draw_sprites(pri:byte);
 var
-  f,sprpri,vzoom,hzoom:byte;
+  g,f,sprpri,vzoom,hzoom:byte;
   bottom,top,xacc,xpos,addr,bank,x,y,pix,data_7,pixels,color:word;
   pitch:integer;
   spritedata:dword;
@@ -235,29 +229,13 @@ begin
             sprite_ram[(f*$8)+$7]:=data_7;
 						pixels:=sprite_rom[spritedata+data_7];
 						// draw four pixels
-						pix:=(pixels shr 12) and $f;
-            xacc:=(xacc and $3f)+hzoom;
-            if xacc<$40 then begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+1;
-            end;
-						pix:=(pixels shr 8) and $f;
-            xacc:=(xacc and $3f)+hzoom;
-            if xacc<$40 then begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+1;
-            end;
-						pix:=(pixels shr 4) and $f;
-            xacc:=(xacc and $3f)+hzoom;
-            if xacc<$40 then begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+1;
-            end;
-						pix:=(pixels shr 0) and $f;
-            xacc:=(xacc and $3f)+hzoom;
-            if xacc<$40 then begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+1;
+            for g:=3 downto 0 do begin
+						  pix:=(pixels shr (g*4)) and $f;
+              xacc:=(xacc and $3f)+hzoom;
+              if xacc<$40 then begin
+                system16b_draw_pixel(x,y,pix or color);
+                x:=x+1;
+              end;
             end;
 						// stop if the last pixel in the group was 0xf
 						if (pix=15) then break;
@@ -272,29 +250,13 @@ begin
             sprite_ram[(f*$8)+$7]:=data_7;
 						pixels:=sprite_rom[spritedata+data_7];
 						// draw four pixels
-						pix:=(pixels shr 0) and $f;
-            xacc:=(xacc and $3f)+hzoom;
-            if xacc<$40 then begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+1;
-            end;
-						pix:=(pixels shr 4) and $f;
-            xacc:=(xacc and $3f)+hzoom;
-            if xacc<$40 then begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+1;
-            end;
-						pix:=(pixels shr 8) and $f;
-            xacc:=(xacc and $3f)+hzoom;
-            if xacc<$40 then begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+1;
-            end;
-						pix:=(pixels shr 12) and $f;
-            xacc:=(xacc and $3f)+hzoom;
-            if xacc<$40 then begin
-              system16b_draw_pixel(x,y,pix or color);
-              x:=x+1;
+            for g:=0 to 3 do begin
+						  pix:=(pixels shr (g*4)) and $f;
+              xacc:=(xacc and $3f)+hzoom;
+              if xacc<$40 then begin
+                system16b_draw_pixel(x,y,pix or color);
+                x:=x+1;
+              end;
             end;
 						// stop if the last pixel in the group was 0xf
 						if (pix=15) then break;
@@ -877,7 +839,6 @@ procedure system16b_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$f7ff then mem_snd[direccion]:=valor;
 end;
-
 function system16b_snd_inbyte(puerto:word):byte;
 var
   res:byte;
@@ -1263,5 +1224,4 @@ end;
 llamadas_maquina.reset:=reset_system16b;
 llamadas_maquina.fps_max:=60.05439;
 end;
-
 end.

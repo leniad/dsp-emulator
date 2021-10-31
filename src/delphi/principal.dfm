@@ -7,8 +7,8 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 292
-  ClientWidth = 370
+  ClientHeight = 266
+  ClientWidth = 366
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -42,7 +42,6 @@ object principal1: Tprincipal1
     0001FF800001FF800001FF800001FF800001FFC00001FF800003FE000007FC00
     000FF800001FF800003FF800007FF80000FFF80001FFF80003FFFFFFFFFF}
   Menu = MainMenu1
-  OldCreateOrder = False
   Position = poDesigned
   ShowHint = True
   OnClose = FormClose
@@ -52,7 +51,7 @@ object principal1: Tprincipal1
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 370
+    Width = 366
     Height = 42
     Align = alTop
     TabOrder = 0
@@ -586,10 +585,10 @@ object principal1: Tprincipal1
     end
   end
   object Panel2: TPanel
-    Left = 321
+    Left = 317
     Top = 42
     Width = 49
-    Height = 231
+    Height = 205
     Align = alRight
     TabOrder = 1
     Visible = False
@@ -1229,16 +1228,16 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 273
-    Width = 370
+    Top = 247
+    Width = 366
     Height = 19
     Align = alBottom
     TabOrder = 2
     DesignSize = (
-      370
+      366
       19)
     object Image1: TImage
-      Left = 345
+      Left = 341
       Top = 0
       Width = 25
       Height = 19
@@ -1533,6 +1532,10 @@ object principal1: Tprincipal1
             end
             object CrushRoller1: TMenuItem
               Caption = 'Crush Roller'
+              OnClick = CambiarMaquina
+            end
+            object mspactwin1: TMenuItem
+              Caption = 'Ms Pac Man Twin'
               OnClick = CambiarMaquina
             end
           end
@@ -2165,6 +2168,11 @@ object principal1: Tprincipal1
           end
           object Firetrap1: TMenuItem
             Caption = 'Fire Trap'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
+          object KarateChamp1: TMenuItem
+            Caption = 'Karate Champ'
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
@@ -2988,6 +2996,21 @@ object principal1: Tprincipal1
             Caption = 'Toaplan 1 HW'
             object Hellfire1: TMenuItem
               Caption = 'Hellfire'
+              OnClick = CambiarMaquina
+            end
+          end
+          object SetaHW1: TMenuItem
+            Caption = 'Seta HW'
+            object thundercade1: TMenuItem
+              Caption = 'Thundercade'
+              OnClick = CambiarMaquina
+            end
+            object twineagle1: TMenuItem
+              Caption = 'Twin Eagle'
+              OnClick = CambiarMaquina
+            end
+            object thunderl1: TMenuItem
+              Caption = 'Thunder && Lightning'
               OnClick = CambiarMaquina
             end
           end

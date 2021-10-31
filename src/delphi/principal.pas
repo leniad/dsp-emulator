@@ -465,6 +465,12 @@ type
     BurgerTime1: TMenuItem;
     lnc1: TMenuItem;
     mmonkey1: TMenuItem;
+    KarateChamp1: TMenuItem;
+    SetaHW1: TMenuItem;
+    thundercade1: TMenuItem;
+    twineagle1: TMenuItem;
+    thunderl1: TMenuItem;
+    mspactwin1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

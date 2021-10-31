@@ -124,8 +124,8 @@ if event.arcade then begin
   if arcade_input.but0[1] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
   if arcade_input.but1[1] then marcade.in1:=marcade.in1 and $df else marcade.in1:=marcade.in1 or $20;
   //i8751
-  if arcade_input.coin[0] then marcade.in2:=marcade.in2 and $df else marcade.in2:=marcade.in2 or $20;
-  if arcade_input.coin[1] then marcade.in2:=marcade.in2 and $bf else marcade.in2:=marcade.in2 or $40;
+  if arcade_input.coin[1] then marcade.in2:=marcade.in2 and $df else marcade.in2:=marcade.in2 or $20;
+  if arcade_input.coin[0] then marcade.in2:=marcade.in2 and $bf else marcade.in2:=marcade.in2 or $40;
 end;
 end;
 
@@ -385,6 +385,8 @@ if not(roms_load(@memoria_temp,srd_rom)) then exit;
 copymemory(@rom[4,0],@memoria_temp[0],$4000);
 copymemory(@rom[5,0],@memoria_temp[$4000],$4000);
 copymemory(@memoria[$8000],@memoria_temp[$8000],$8000);
+//Cheat!
+//memoria[$96e4]:=$39;
 copymemory(@rom[0,0],@memoria_temp[$10000],$4000);
 copymemory(@rom[1,0],@memoria_temp[$14000],$4000);
 copymemory(@rom[2,0],@memoria_temp[$18000],$4000);

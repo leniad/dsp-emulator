@@ -348,7 +348,7 @@ screen_init(3,256,256,true); //Chars
 screen_init(4,512,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,256,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(6000000,256,TCPU_MC6809);
 m6809_0.change_ram_calls(gng_getbyte,gng_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(3000000,256);

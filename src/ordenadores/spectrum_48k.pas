@@ -28,8 +28,8 @@ var
   spec_z80_reg:npreg_z80;
   poner_linea:boolean;
 begin
-if ((linea<56) or (linea>247)) then exit
-  else linea:=linea-56;
+if ((linea<64) or (linea>255)) then exit
+  else linea:=linea-64;
 poner_linea:=false;
 pos_video:=(linea and $f8) shl 2;
 spec_z80_reg:=spec_z80.get_internal_r;
@@ -239,7 +239,8 @@ end else begin //Resto
       end;
     end;
     //kempston
-    if (((puerto and $20)=0) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then temp:=var_spectrum.joy_val;
+    if (((puerto and $20)=0) and (var_spectrum.tipo_joy=JKEMPSTON) and (mouse.tipo<>MAMX)) then
+      temp:=var_spectrum.joy_val;
     //fuller
     if (((puerto and $7f)=$7f) and (var_spectrum.tipo_joy=JFULLER)) then temp:=var_spectrum.joy_val;
     //ula plus

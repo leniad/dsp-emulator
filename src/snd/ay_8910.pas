@@ -125,7 +125,6 @@ end;
 
 destructor ay8910_chip.free;
 begin
-
 end;
 
 function ay8910_chip.save_snapshot(data:pbyte):word;
@@ -514,13 +513,13 @@ begin
     lOut3:=trunc((VolC * self.VolC)/STEP);
     temp2:=trunc(((VolA * self.VolA)/STEP)+((VolB * self.VolB)/STEP)+((VolC * self.VolC)/STEP));
     if lout1>32767 then lout1:=32767
-      else if lout1<-32768 then lout1:=-32768;
+      else if lout1<-32767 then lout1:=-32767;
     if lout2>32767 then lout2:=32767
-      else if lout2<-32768 then lout2:=-32768;
+      else if lout2<-32767 then lout2:=-32767;
     if lout3>32767 then lout3:=32767
-      else if lout3<-32768 then lout3:=-32768;
+      else if lout3<-32767 then lout3:=-32767;
     if temp2>32767 then temp2:=32767
-      else if temp2<-32768 then temp2:=-32768;
+      else if temp2<-32767 then temp2:=-32767;
     salida_ay[0]:=trunc(temp2*self.amp);
     salida_ay[1]:=trunc(lout1*self.amp);
     salida_ay[2]:=trunc(lout2*self.amp);

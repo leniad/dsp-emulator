@@ -1,5 +1,4 @@
 unit m68000;
-
 {
 06/01/09 - Version 1.0 - Aqui empieza todo!!
 15/02/10 - Version 2.0 - Renovado el emulador
@@ -29,11 +28,9 @@ unit m68000;
 07/11/17   Añadido roxl.w
 15/07/20   Añadido move.w opcode $32 direccionamiento $3b
 }
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      sysutils,dialogs,cpu_misc,timer_engine,vars_hide,main_engine;
-
 type
         band_m68000=record
                 t,s,i,x,n,z,v,c:boolean;
@@ -92,14 +89,11 @@ type
             //EA
             function leerdir_ea(dir:byte):dword;
         end;
-
 var
     m68000_0,m68000_1:cpu_m68000;
-
 const
   TCPU_68000=0;
   TCPU_68010=1;
-
 implementation
 const
   m68ki_shift_8_table:array[0..64] of byte=(
@@ -130,9 +124,7 @@ const
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff,
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff,
 	$ffffffff, $ffffffff, $ffffffff, $ffffffff, $ffffffff);
-
   addr_mask=$fffffe;
-
 constructor cpu_m68000.create(clock:dword;frames_div:word;tipo:byte=0);
 begin
 getmem(self.r,sizeof(reg_m68000));
@@ -143,7 +135,6 @@ self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 self.tipo:=tipo;
 self.reset_call:=nil;
 end;
-
 destructor cpu_m68000.free;
 begin
 if Self.r<>nil then begin
@@ -151,7 +142,6 @@ if Self.r<>nil then begin
   self.r:=nil;
 end;
 end;
-
 procedure cpu_m68000.change_reset_call(reset_call:treset_call);
 begin
   self.reset_call:=reset_call;
@@ -3443,7 +3433,6 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.z:=(tempw=0);
                     r.cc.v:=false;
                  end;
-
          $10,$14:begin //++++++ asr.l
                     self.contador:=self.contador+8;
                     templ:=r.d[orig].l;
@@ -3653,5 +3642,4 @@ timers.update(self.contador-pcontador,self.numero_cpu);
 self.prefetch:=true;
 end;  //del while
 end;
-
 end.

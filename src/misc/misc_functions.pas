@@ -199,7 +199,7 @@ end;
 function mul_video:byte;
 begin
 case main_screen.video_mode of
-   2,4:mul_video:=2;
+   2,4,6:mul_video:=2;
    5:mul_video:=3;
    else mul_video:=1;
 end;

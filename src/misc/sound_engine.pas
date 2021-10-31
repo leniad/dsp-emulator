@@ -231,7 +231,7 @@ if (sound_status.canales_usados<>-1) then begin
        for f:=0 to sound_status.canales_usados do j:=j+tsample[f,h];
        j:=j div (sound_status.canales_usados+1);
        if j<-32767 then j:=-32767
-          else if j>32768 then j:=32768;
+          else if j>32767 then j:=32767;
        sample_final[h]:=j;
    end;
 end;

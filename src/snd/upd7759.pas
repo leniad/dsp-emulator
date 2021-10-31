@@ -442,4 +442,4 @@ begin
   if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=trunc(out_*self.amp);
 end;
 
-end.
+end.

@@ -3,7 +3,7 @@ unit thenewzealandstory_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,pal_engine,
-     sound_engine;
+     sound_engine,seta_sprites;
 
 procedure cargar_tnzs;
 
@@ -49,100 +49,14 @@ const
         CPU_SYNC=64;
 
 var
- main_bank,misc_bank,sound_latch,bg_flag:byte;
+ main_bank,misc_bank,sound_latch:byte;
  main_rom:array[0..7,0..$3fff] of byte;
  sub_rom:array[0..3,0..$1fff] of byte;
- obj_control:array[0..3] of byte;
- flip_screen:boolean;
-
-procedure update_background;inline;
-var
-  ctrl2,column,tot,scrolly,x,y,atrib:byte;
-  upperbits,scrollx:word;
-  i,nchar,color,sx,sy:word;
-  flipx,flipy,trans:boolean;
-  nchar_p,color_p,atrib_p:word;
-begin
-  trans:=(bg_flag and $80)=0;
-  if trans then fill_full_screen(1,$1f0);
-	ctrl2:=obj_control[1];
-  tot:=ctrl2 and $1f;
-  if tot=0 then exit;
-	i:=((ctrl2 xor (not(ctrl2) shl 1)) and $40)*$20;
-  nchar_p:=$c400+i;
-  atrib_p:=$d400+i;
-  color_p:=$d600+i;
-	if (tot=1) then tot:=16;
-	upperbits:=obj_control[2]+(obj_control[3] shl 8);
-	for column:=0 to (tot-1) do begin
-		scrollx:=memoria[$f204+(column*16)]-((upperbits and $01) shl 8);
-    if flip_screen then scrolly:=memoria[$f200+(column*16)]+1
-     else scrolly:=256-(memoria[$f200+(column*16)]+1);
-		for y:=0 to 15 do begin
-			for x:=0 to 1 do begin
-				i:=32*(column xor 8)+2*y+x;
-        atrib:=memoria[atrib_p+i];
-				nchar:=(memoria[nchar_p+i]+((atrib and $3f) shl 8)) and $1fff;
-				color:=(memoria[color_p+i] and $f8) shl 1;
-				sx:=x*16;
-        if flip_screen then begin
-          sy:=238-(y*16);
-          flipx:=(atrib and $80)=0;
-          flipy:=(atrib and $40)=0;
-        end else begin
-          flipx:=(atrib and $80)<>0;
-				  flipy:=(atrib and $40)<>0;
-          sy:=y*16;
-        end;
-        if trans then begin
-          put_gfx_sprite(nchar,color,flipx,flipy,0);
-          actualiza_gfx_sprite(sx+scrollx,sy+scrolly+2,1,0);
-        end else begin
-          put_gfx_flip(sx+scrollx,sy+scrolly+2,nchar,color,1,0,flipx,flipy);
-        end;
-			end;
-		end;
-		upperbits:=upperbits shr 1;
-	end;
-end;
-
-procedure draw_sprites;inline;
-var
-  ctrl2,atrib,sy:byte;
-  nchar,color,sx,i:word;
-  flipx,flipy:boolean;
-  char_pointer,x_pointer,ctrl_pointer,color_pointer:word;
-begin
-	ctrl2:=obj_control[1];
-	i:=((ctrl2 xor (not(ctrl2) shl 1)) and $40)*$20;
-  char_pointer:=$c000+i;
-  x_pointer:=$c200+i;
-  ctrl_pointer:=$d000+i;
-  color_pointer:=$d200+i;
-	// Draw all 512 sprites */
-	for i:=$1ff downto 0 do begin
-    atrib:=memoria[ctrl_pointer+i];
-		nchar:=(memoria[char_pointer+i]+((atrib and $3f) shl 8)) and $1fff;
-		color:=(memoria[color_pointer+i] and $f8) shl 1;
-		sx:=(memoria[x_pointer+i]-((memoria[color_pointer+i] and 1) shl 8)) and $1ff;
-    if flip_screen then begin
-      sy:=(memoria[$f000+i]+2) and $ff;
-      flipx:=(atrib and $80)=0;
-      flipy:=(atrib and $40)=0;
-    end else begin
-      sy:=((240-memoria[$f000+i])+2) and $ff;
-      flipx:=(atrib and $80)<>0;
-		  flipy:=(atrib and $40)<>0;
-    end;
-    put_gfx_sprite(nchar,color,flipx,flipy,0);
-    actualiza_gfx_sprite(sx,sy,1,0);
-	end;
-end;
 
 procedure update_video_tnzs;inline;
 begin
-update_background;
-draw_sprites;
+if (seta_sprite0.bg_flag and $80)=0 then fill_full_screen(1,$1f0);
+seta_sprite0.draw_sprites;
 actualiza_trozo_final(0,16,256,224,1);
 end;
 
@@ -174,9 +88,8 @@ end;
 
 procedure tnzs_principal;
 var
-  f:word;
   frame_m,frame_s,frame_misc:single;
-  h:byte;
+  f,h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
@@ -199,19 +112,9 @@ while EmuStatus=EsRuning do begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
       update_video_tnzs;
+      seta_sprite0.tnzs_eof;
     end;
   end;
-	if (not(obj_control[1]) and $20)<>0 then begin
-		if (obj_control[1] and $40)<>0 then begin
-      copymemory(@memoria[$c000],@memoria[$c800],$400);
-      copymemory(@memoria[$d000],@memoria[$d800],$400);
-		end else begin
-      copymemory(@memoria[$c800],@memoria[$c000],$400);
-      copymemory(@memoria[$d800],@memoria[$d000],$400);
-		end;
-    copymemory(@memoria[$c400],@memoria[$cc00],$400);
-    copymemory(@memoria[$d400],@memoria[$dc00],$400);
-	end;
   eventos_tnzs;
   video_sync;
 end;
@@ -220,8 +123,13 @@ end;
 function tnzs_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7fff,$c000..$f2ff:tnzs_getbyte:=memoria[direccion];
+  0..$7fff,$e000..$efff:tnzs_getbyte:=memoria[direccion];
   $8000..$bfff:tnzs_getbyte:=main_rom[main_bank,direccion and $3fff];
+  $c000..$cfff:tnzs_getbyte:=seta_sprite0.spritelow[direccion and $fff];
+  $d000..$dfff:tnzs_getbyte:=seta_sprite0.spritehigh[direccion and $fff];
+  $f000..$f2ff:tnzs_getbyte:=seta_sprite0.spritey[direccion and $3ff];
+  $f300..$f3ff:tnzs_getbyte:=seta_sprite0.control[direccion and $3];
+  $f400:tnzs_getbyte:=seta_sprite0.bg_flag;
 end;
 end;
 
@@ -230,12 +138,12 @@ begin
 case direccion of
    0..$7fff:; //ROM
    $8000..$bfff:if main_bank<2 then main_rom[main_bank,direccion and $3fff]:=valor;
-   $c000..$f2ff:memoria[direccion]:=valor;
-   $f300..$f3ff:begin
-                    obj_control[direccion and $3]:=valor;
-                    if (direccion and $3)=0 then flip_screen:=(valor and $40)<>0;
-                 end;
-   $f400:bg_flag:=valor;
+   $c000..$cfff:seta_sprite0.spritelow[direccion and $fff]:=valor;
+   $d000..$dfff:seta_sprite0.spritehigh[direccion and $fff]:=valor;
+   $e000..$efff:memoria[direccion]:=valor;
+   $f000..$f2ff:seta_sprite0.spritey[direccion and $3ff]:=valor;
+   $f300..$f3ff:seta_sprite0.control[direccion and $3]:=valor;
+   $f400:seta_sprite0.bg_flag:=valor;
    $f600:begin
           if (valor and $10)<>0 then z80_1.change_reset(CLEAR_LINE)
             else z80_1.change_reset(ASSERT_LINE);
@@ -354,9 +262,8 @@ end;
 
 procedure insectorx_principal;
 var
-  f:word;
   frame_m,frame_misc:single;
-  h:byte;
+  f,h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
@@ -375,19 +282,9 @@ while EmuStatus=EsRuning do begin
       z80_0.change_irq(HOLD_LINE);
       z80_1.change_irq(HOLD_LINE);
       update_video_tnzs;
+      seta_sprite0.tnzs_eof;
     end;
   end;
-	if (not(obj_control[1]) and $20)<>0 then begin
-		if (obj_control[1] and $40)<>0 then begin
-      copymemory(@memoria[$c000],@memoria[$c800],$400);
-      copymemory(@memoria[$d000],@memoria[$d800],$400);
-		end else begin
-      copymemory(@memoria[$c800],@memoria[$c000],$400);
-      copymemory(@memoria[$d800],@memoria[$d000],$400);
-		end;
-    copymemory(@memoria[$c400],@memoria[$cc00],$400);
-    copymemory(@memoria[$d400],@memoria[$dc00],$400);
-	end;
   eventos_insectorx;
   video_sync;
 end;
@@ -396,8 +293,12 @@ end;
 function insectorx_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7fff,$c000..$f2ff:insectorx_getbyte:=memoria[direccion];
+  0..$7fff,$e000..$efff:insectorx_getbyte:=memoria[direccion];
   $8000..$bfff:insectorx_getbyte:=main_rom[main_bank,direccion and $3fff];
+  $c000..$cfff:insectorx_getbyte:=seta_sprite0.spritelow[direccion and $fff];
+  $d000..$dfff:insectorx_getbyte:=seta_sprite0.spritehigh[direccion and $fff];
+  $f000..$f2ff:insectorx_getbyte:=seta_sprite0.spritey[direccion and $3ff];
+  $f300..$f3ff:insectorx_getbyte:=seta_sprite0.control[direccion and $3];
   $f800..$fbff:insectorx_getbyte:=buffer_paleta[direccion and $3ff];
 end;
 end;
@@ -407,12 +308,12 @@ begin
 case direccion of
    0..$7fff:; //ROM
    $8000..$bfff:if main_bank<2 then main_rom[main_bank,direccion and $3fff]:=valor;
-   $c000..$f2ff:memoria[direccion]:=valor;
-   $f300..$f3ff:begin
-                    obj_control[direccion and $3]:=valor;
-                    if (direccion and $3)=0 then flip_screen:=(valor and $40)<>0;
-                 end;
-   $f400:bg_flag:=valor;
+   $c000..$cfff:seta_sprite0.spritelow[direccion and $fff]:=valor;
+   $d000..$dfff:seta_sprite0.spritehigh[direccion and $fff]:=valor;
+   $e000..$efff:memoria[direccion]:=valor;
+   $f000..$f2ff:seta_sprite0.spritey[direccion and $3ff]:=valor;
+   $f300..$f3ff:seta_sprite0.control[direccion and $3]:=valor;
+   $f400:seta_sprite0.bg_flag:=valor;
    $f600:begin
           if (valor and $10)<>0 then z80_1.change_reset(CLEAR_LINE)
             else z80_1.change_reset(ASSERT_LINE);
@@ -464,7 +365,7 @@ end;
 
 procedure tnzs_sound_update;
 begin
-  ym2203_0.Update;
+  ym2203_0.update;
 end;
 
 //Main
@@ -475,6 +376,7 @@ begin
  if main_vars.tipo_maquina=129 then z80_2.reset;
  YM2203_0.reset;
  reset_audio;
+ seta_sprite0.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
@@ -486,7 +388,7 @@ function iniciar_tnzs:boolean;
 var
   f:byte;
   memoria_temp:array[0..$1ffff] of byte;
-  mem_temp:pbyte;
+  ptemp:pbyte;
 const
     pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
@@ -505,6 +407,10 @@ iniciar_video(256,224);
 z80_0:=cpu_z80.create(6000000,$100*CPU_SYNC);
 //Misc CPU
 z80_1:=cpu_z80.create(6000000,$100*CPU_SYNC);
+//Video chips
+seta_sprite0:=tseta_sprites.create(0,1,$800 div $40,$1fff);
+//Sound Chips
+ym2203_0:=ym2203_chip.create(3000000,2);
 case main_vars.tipo_maquina of
   129:begin   //TNZS
         z80_0.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
@@ -516,7 +422,6 @@ case main_vars.tipo_maquina of
         z80_2.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
         z80_2.init_sound(tnzs_sound_update);
         //Sound Chips
-        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_irq_calls(snd_irq);
         //cargar roms
         if not(roms_load(@memoria_temp,tnzs_rom)) then exit;
@@ -529,13 +434,13 @@ case main_vars.tipo_maquina of
         //cargar ROMS sonido
         if not(roms_load(@mem_snd,tnzs_audio)) then exit;
         //convertir chars
-        getmem(mem_temp,$100000);
-        if not(roms_load(mem_temp,tnzs_gfx)) then exit;
+        getmem(ptemp,$100000);
+        if not(roms_load(ptemp,tnzs_gfx)) then exit;
         init_gfx(0,16,16,$2000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,32*8,$2000*32*8*3,$2000*32*8*2,$2000*32*8,0);
-        convert_gfx(0,0,mem_temp,@pt_x,@pt_y,false,false);
-        freemem(mem_temp);
+        convert_gfx(0,0,ptemp,@pt_x,@pt_y,false,false);
+        freemem(ptemp);
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;
         marcade.dswa_val:=@tnzs_dip_a;
@@ -548,7 +453,6 @@ case main_vars.tipo_maquina of
         z80_1.init_sound(tnzs_sound_update);
         z80_1.change_ram_calls(insectorx_misc_getbyte,insectorx_misc_putbyte);
         //Sound chip
-        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
         //cargar roms
         if not(roms_load(@memoria_temp,insectorx_rom)) then exit;
@@ -559,13 +463,13 @@ case main_vars.tipo_maquina of
         copymemory(@mem_misc,@memoria_temp,$8000);
         for f:=0 to 3 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
         //convertir chars
-        getmem(mem_temp,$100000);
-        if not(roms_load(mem_temp,insectorx_gfx)) then exit;
+        getmem(ptemp,$100000);
+        if not(roms_load(ptemp,insectorx_gfx)) then exit;
         init_gfx(0,16,16,$2000);
         gfx[0].trans[0]:=true;
         gfx_set_desc_data(4,0,64*8,8,0,$2000*64*8+8,$2000*64*8+0);
-        convert_gfx(0,0,mem_temp,@pt2_x,@pt2_y,false,false);
-        freemem(mem_temp);
+        convert_gfx(0,0,ptemp,@pt2_x,@pt2_y,false,false);
+        freemem(ptemp);
         marcade.dswa:=$fe;
         marcade.dswb:=$ff;
         marcade.dswa_val:=@insectorx_dip_a;

@@ -257,7 +257,8 @@ procedure reset_route16_hw;
 begin
  z80_0.reset;
  z80_1.reset;
- AY8910_0.reset;
+ ay8910_0.reset;
+ dac_0.reset;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;

@@ -1,11 +1,8 @@
 unit M6502;
-
 {$define DEBUG}
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,dialogs,sysutils,timer_engine,cpu_misc;
-
 type
         band_m6502=record
                 n,o_v,t,brk,dec,int,z,c:boolean;
@@ -15,6 +12,9 @@ type
                 a,x,y:byte;
                 sp:byte;
                 p:band_m6502;
+                //M65CE02
+                z:byte;
+                b:word;
         end;
         preg_m6502=^reg_m6502;
         cpu_m6502=class(cpu_class)
@@ -43,13 +43,32 @@ const
   TCPU_M6502=0;
   TCPU_DECO16=1;
   TCPU_NES=2;
-
+  TCPU_M65C02=3;
 var
   m6502_0,m6502_1:cpu_m6502;
 
 implementation
+
 const
-        tipo_dir:array[0..255] of byte=(
+        tipo_dir_m65c02:array[0..255] of byte=(
+      //0  1  2  3 4  5 6 7 8  9 a b c  d e f
+        0,$a, 0,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //00
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //10
+        0,$a, 0,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //20
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //30
+        0,$a, 0,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //40
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //50
+        0,$a, 0,$a,7, 7,7,7,0, 1,0,1,0, 2,2,2,  //60
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //70
+       $d,$a, 1,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //80
+       $d,$b,$e,$b,8, 8,9,9,0, 6,0,6,2, 4,5,5,  //90
+        1,$a, 1, 0,7, 7,7,0,0, 1,0,0,2, 2,2,0,  //A0
+       $d,$b,$e,$b,8, 8,9,0,0, 6,0,0,5, 5,6,0,  //B0
+        1,$a, 1,$a,7, 7,7,0,0, 1,0,0,2, 2,2,2,  //C0
+       $d,$b,$e,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //D0
+        1,$a, 1,$a,7, 7,7,0,0, 1,0,1,2, 2,2,2,  //E0
+       $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5); //F0
+       tipo_dir_m6502:array[0..255] of byte=(
       //0  1  2  3 4  5 6 7 8  9 a b c  d e f
         0,$a, 0,$a,7, 7,7,7,0, 1,0,1,2, 2,2,2,  //00
        $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5,  //10
@@ -68,7 +87,7 @@ const
         1,$a, 1,$a,7, 7,7,0,0, 1,0,1,2, 2,2,2,  //E0
        $d,$b, 0,$b,8, 8,8,8,0, 6,0,6,5, 5,4,5); //F0
 
-        estados_t:array[0..1,0..255] of byte=((
+        estados_t_m6502:array[0..255] of byte=(
         //M6502 + NES
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  e
         7, 6, 1, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6,
@@ -86,8 +105,9 @@ const
         2, 6, 2, 8, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6,
         2, 5, 1, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
         2, 6, 2, 7, 3, 3, 5, 5, 2, 2, 2, 2, 4, 4, 6, 6,
-        2, 5, 1, 7, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7),(
+        2, 5, 1, 7, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7);
         //DECO16
+        estados_t_deco16:array[0..255] of byte=(
         7, 6, 2, 2, 2, 3, 5, 2, 3, 2, 2, 2, 4, 4, 6, 2,  //0
         2, 5, 2, 2, 2, 4, 6, 2, 2, 4, 2, 2, 4, 4, 7, 2,  //1
         6, 6, 2, 2, 3, 3, 5, 2, 4, 2, 2, 2, 4, 4, 6, 2,  //2
@@ -103,8 +123,11 @@ const
         2, 6, 2, 2, 3, 3, 5, 2, 2, 2, 2, 2, 4, 4, 6, 2,  //c
         2, 5, 2, 2, 2, 4, 6, 2, 2, 4, 3, 2, 2, 4, 7, 2,  //d
         2, 6, 2, 2, 3, 3, 5, 2, 2, 2, 2, 2, 4, 4, 6, 2,  //e
-        2, 5, 2, 2, 2, 4, 6, 2, 2, 4, 4, 2, 2, 4, 7, 2));
+        2, 5, 2, 2, 2, 4, 6, 2, 2, 4, 4, 2, 2, 4, 7, 2);
       //0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+
+var
+  tipo_dir,estados_t:array[0..$ff] of byte;
 
 constructor cpu_m6502.create(clock:dword;frames_div:word;cpu_type:byte);
 begin
@@ -113,6 +136,20 @@ fillchar(self.r^,sizeof(reg_m6502),0);
 self.numero_cpu:=cpu_main_init(clock);
 self.clock:=clock;
 self.tipo_cpu:=cpu_type;
+case cpu_type of
+  TCPU_M6502,TCPU_NES:begin
+    copymemory(@tipo_dir,@tipo_dir_m6502,$100);
+    copymemory(@estados_t,@estados_t_m6502,$100);
+  end;
+  TCPU_DECO16:begin
+    copymemory(@tipo_dir,@tipo_dir_m6502,$100);
+    copymemory(@estados_t,@estados_t_deco16,$100);
+  end;
+  TCPU_M65C02:begin
+    copymemory(@tipo_dir,@tipo_dir_m65c02,$100);
+    copymemory(@estados_t,@estados_t_m6502,$100);
+  end;
+end;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 self.in_port0:=nil;
 self.in_port1:=nil;
@@ -191,13 +228,14 @@ end;
 procedure cpu_m6502.reset;
 begin
 case self.tipo_cpu of
-  TCPU_M6502,TCPU_NES:r.pc:=self.getbyte($FFFC)+(self.getbyte($FFFD) shl 8);
+  TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.getbyte($FFFC)+(self.getbyte($FFFD) shl 8);
   TCPU_DECO16:r.pc:=self.getbyte($FFF1)+(self.getbyte($FFF0) shl 8);
 end;
 r.a:=0;
 r.x:=0;
 r.y:=0;
 r.sp:=$FD;
+r.z:=0;
 self.contador:=0;
 r.p.n:=false;
 r.p.o_v:=false;
@@ -225,7 +263,7 @@ self.putbyte($100+r.sp,(dame_pila(self.r) and $df));
 r.sp:=r.sp-1;
 r.p.int:=true;
 case self.tipo_cpu of
-  TCPU_M6502,TCPU_NES:r.pc:=self.getbyte($FFFA)+(self.getbyte($FFFB) shl 8);
+  TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.getbyte($FFFA)+(self.getbyte($FFFB) shl 8);
   TCPU_DECO16:r.pc:=self.getbyte($FFF7)+(self.getbyte($FFF6) shl 8);
 end;
 call_nmi:=7;
@@ -247,7 +285,7 @@ self.putbyte($100+r.sp,(dame_pila(self.r) and $df));
 r.sp:=r.sp-1;
 r.p.int:=true;
 case self.tipo_cpu of
-  TCPU_M6502,TCPU_NES:r.pc:=self.getbyte($FFFE)+(self.getbyte($FFFF) shl 8);
+  TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.getbyte($FFFE)+(self.getbyte($FFFF) shl 8);
   TCPU_DECO16:r.pc:=self.getbyte($FFF3)+(self.getbyte($FFF2) shl 8);
 end;
 call_irq:=7;
@@ -332,8 +370,10 @@ end;
 r.ppc:=r.pc;
 self.read_dummy:=false;
 if not(self.after_ei) then begin
-  if (self.pedir_nmi<>CLEAR_LINE) then self.estados_demas:=self.call_nmi
-    else if (self.pedir_irq<>CLEAR_LINE) then self.estados_demas:=self.call_irq
+  if (self.pedir_nmi<>CLEAR_LINE) then
+  self.estados_demas:=self.call_nmi
+    else if (self.pedir_irq<>CLEAR_LINE) then
+    self.estados_demas:=self.call_irq
       else self.estados_demas:=0;
 end;
 self.after_ei:=false;
@@ -419,6 +459,15 @@ case tipo_dir[instruccion] of
                 numero:=self.getbyte(r.pc);
                 r.pc:=r.pc+1;
             end;
+        $0e:if self.tipo_cpu=TCPU_M65C02 then begin //Exclusivo del EC
+                tempb:=self.getbyte(r.pc);
+                r.pc:=r.pc+1;
+                posicion:=self.getbyte(self.r.b+tempb) or (self.getbyte((self.r.b+tempb+1) and $ff) shl 8);
+                posicion:=posicion+self.r.z;
+            end{$ifdef DEBUG}
+              else
+                MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+               {$endif}
 end;                // del tipo de direccionamiento
 case instruccion of
       $00:begin  //brk
@@ -432,7 +481,7 @@ case instruccion of
             r.p.int:=true;
             r.p.brk:=true;
             case self.tipo_cpu of
-              TCPU_M6502,TCPU_NES:r.pc:=self.getbyte($FFFE)+(self.getbyte($FFFF) shl 8);
+              TCPU_M6502,TCPU_NES,TCPU_M65C02:r.pc:=self.getbyte($FFFE)+(self.getbyte($FFFF) shl 8);
               TCPU_DECO16:r.pc:=self.getbyte($FFF3)+(self.getbyte($FFF2) shl 8);
             end;
           end;
@@ -452,7 +501,12 @@ case instruccion of
             r.p.n:=(r.a and $80)<>0;
             self.putbyte(posicion,tempb);
           end;
-      $04,$0c,$14,$1a,$1c,$34,$3a,$3c,$44,$54,$5a,$5c,$64,$74,$7a,$7c,$80,$82,$89,$c2,$d4,$da,$dc,$e2,$ea,$f4,$fa,$fc:self.getbyte(r.pc);  // <-- Fallo CPU NOP
+      $04,$0c,$14,$1c,$3a,$3c,$44,$54,$5c,$7c,$82,$89,$c2,$d4,$dc,$e2,$f4,$fc://if self.tipo_cpu=TCPU_M65C02 then
+          {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif};
+          //else self.getbyte(r.pc);  // <-- Fallo CPU NOP
+      $ea:; //nop
       $06,$0e,$16,$1e:begin //asl
                 tempb:=self.getbyte(posicion);
                 self.putbyte(posicion,tempb); // <-- Fallo de la CPU
@@ -489,6 +543,16 @@ case instruccion of
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
           end;
+      $1a:if self.tipo_cpu=TCPU_M65C02 then begin  //inc a
+             self.r.a:=self.r.a+1;
+             r.p.z:=(self.r.a=0);
+             r.p.n:=(self.r.a and $80)<>0;
+           end else begin
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif}
+           end;
       $18:begin //CLC
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.c:=false;
@@ -554,6 +618,17 @@ case instruccion of
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
           end;
+      $34:if self.tipo_cpu=TCPU_M65C02 then begin  //BIT
+            numero:=self.getbyte(posicion);
+            r.p.z:=(r.a and numero)=0;
+            r.p.n:=(numero and $80)<>0;
+            r.p.o_v:=(numero and $40)<>0;
+          end else begin
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif}
+          end;
       $38:begin  //SEC
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.c:=true;
@@ -603,16 +678,15 @@ case instruccion of
              r.p.z:=(r.a=0);
              r.p.n:=false;
           end;
-      $4b:case self.tipo_cpu of
-            TCPU_M6502,TCPU_NES:begin //alr
-                                  r.p.c:=(r.a and $1)<>0;
-                                  r.a:=r.a and self.getbyte(posicion);
-                                  r.p.c:=(r.a and $1)<>0;
-                                  r.a:=r.a shr 1;
-                                  r.p.z:=(r.a=0);
-                                  r.p.n:=false;
-                                end;
-            TCPU_DECO16:if @self.in_port1<>nil then r.a:=self.in_port1;
+      $4b:if self.tipo_cpu=TCPU_DECO16 then
+            if @self.in_port1<>nil then r.a:=self.in_port1
+          else begin //alr
+              r.p.c:=(r.a and $1)<>0;
+              r.a:=r.a and self.getbyte(posicion);
+              r.p.c:=(r.a and $1)<>0;
+              r.a:=r.a shr 1;
+              r.p.z:=(r.a=0);
+              r.p.n:=false;
           end;
       $4c:r.pc:=posicion; //JMP absoluto
       $50:if not(r.p.o_v) then begin  //BVC salta si Overflow false
@@ -624,6 +698,16 @@ case instruccion of
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.int:=false;
             self.after_ei:=true;
+          end;
+      $5a:if self.tipo_cpu=TCPU_M65C02 then begin  //PHY
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.putbyte($100+r.sp,r.y);
+            r.sp:=r.sp-1;
+          end else begin
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif}
           end;
       $60:begin  //RTS
              r.sp:=r.sp+1;
@@ -696,7 +780,27 @@ case instruccion of
             r.p.int:=true;
             self.after_ei:=true;
           end;
-      $81,$85,$8d,$91,$95,$99,$9d:self.putbyte(posicion,r.a); //STA
+      $7a:if self.tipo_cpu=TCPU_M65C02 then begin //ply
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            r.sp:=r.sp+1;
+            r.y:=self.getbyte($100+r.sp);
+            r.p.z:=(r.y=0);
+            r.p.n:=(r.y and $80)<>0;
+          end else begin
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif}
+          end;
+      $80:if self.tipo_cpu=TCPU_M65C02 then begin //bra
+            r.pc:=r.pc+shortint(numero);
+          end else begin
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif}
+          end;
+      $81,$85,$8d,$91,$92,$95,$99,$9d:self.putbyte(posicion,r.a); //STA
       $83,$87,$8f,$97:self.putbyte(posicion,r.a and r.x); //sax
       $84,$8c,$94:self.putbyte(posicion,r.y); //STY
       $86,$8e,$96:self.putbyte(posicion,r.x); //STX
@@ -733,6 +837,11 @@ case instruccion of
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.sp:=r.x;
           end;
+      $64,$74,$9c,$9e:if self.tipo_cpu=TCPU_M65C02 then self.putbyte(posicion,0) //stz
+                else
+                {$ifdef DEBUG}
+                MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+                {$endif};
       $A0,$a4,$ac,$b4,$bc:begin //LDY
              r.y:=self.getbyte(posicion);
              r.p.z:=(r.y=0);
@@ -765,6 +874,15 @@ case instruccion of
                 else self.estados_demas:=self.estados_demas+1;
               r.pc:=r.pc+shortint(numero);
           end;
+      $b2:if self.tipo_cpu=TCPU_M65C02 then begin //LDA
+            r.a:=self.getbyte(posicion);
+            r.p.z:=(r.a=0);
+            r.p.n:=(r.a and $80)<>0;
+          end else begin
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif};
+          end;
       $b3:begin //LAX
             r.a:=self.getbyte(posicion);
             r.x:=r.a;
@@ -787,7 +905,7 @@ case instruccion of
             r.p.z:=(tempw and $ff)=0;
             r.p.n:=(tempw and $80)<>0;
            end;
-      $c1,$c5,$c9,$cd,$d1,$d5,$d9,$dd:begin  //CMA
+      $c1,$c5,$c9,$cd,$d1,$d2,$d5,$d9,$dd:begin  //CMA
              tempw:=r.a-self.getbyte(posicion);
              r.p.c:=(tempw and $100)=0;
              r.p.z:=(tempw and $ff)=0;
@@ -842,6 +960,16 @@ case instruccion of
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.dec:=false;
           end;
+      $da:if self.tipo_cpu=TCPU_M65C02 then begin  //PHX
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            self.putbyte($100+r.sp,r.x);
+            r.sp:=r.sp-1;
+          end else begin
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif}
+          end;
       $e0,$e4,$ec:begin  //CPX
               tempw:=r.x-self.getbyte(posicion);
               r.p.c:=(tempw and $100)=0;
@@ -882,16 +1010,27 @@ case instruccion of
             self.getbyte(r.pc);  // <-- Fallo CPU
             r.p.dec:=true;
           end;
+      $fa:if self.tipo_cpu=TCPU_M65C02 then begin //plx
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            r.sp:=r.sp+1;
+            r.x:=self.getbyte($100+r.sp);
+            r.p.z:=(r.x=0);
+            r.p.n:=(r.x and $80)<>0;
+          end else begin
+            self.getbyte(r.pc);  // <-- Fallo CPU
+            {$ifdef DEBUG}
+            MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
+            {$endif}
+          end;
       {$ifdef DEBUG}
       else
         MessageDlg('CPU: '+inttohex(self.numero_cpu,1)+' Instruccion: $'+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.ppc,4), mtInformation,[mbOk], 0)
       {$endif}
 end; //del case!!
-tempw:=estados_t[self.tipo_cpu and $1,instruccion]+self.estados_demas;
+tempw:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempw;
 timers.update(self.contador-old_contador,self.numero_cpu);
 if @self.despues_instruccion<>nil then self.despues_instruccion(tempw);
 end; //del while!!
 end;
-
 end.

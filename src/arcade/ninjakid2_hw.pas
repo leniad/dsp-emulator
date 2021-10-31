@@ -47,6 +47,8 @@ const
         mnight_bgtiles:array[0..2] of tipo_roms=(
         (n:'mn11-b20.bin';l:$10000;p:0;crc:$4d37e0f4),(n:'mn12-b22.bin';l:$10000;p:$10000;crc:$b22cbbd3),
         (n:'mn13-b23.bin';l:$10000;p:$20000;crc:$65714070));
+        //Atomic Robo-Kid
+
 
 var
   rom_bank:array[0..7,0..$3fff] of byte;
