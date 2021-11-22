@@ -22,7 +22,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '2.2.0.1'
+  LCLVersion = '2.2.0.2'
   object Panel1: TPanel
     Left = 0
     Height = 42
@@ -2393,6 +2393,10 @@ object principal1: Tprincipal1
               Caption = 'Mutant Night'
               OnClick = CambiarMaquina
             end
+            object robokid1: TMenuItem
+              Caption = 'Atomic Robo-Kid'
+              OnClick = CambiarMaquina
+            end
           end
           object Repulse1: TMenuItem
             Caption = 'Repulse'
@@ -2406,6 +2410,10 @@ object principal1: Tprincipal1
             end
             object InsectorX1: TMenuItem
               Caption = 'Insector X'
+              OnClick = CambiarMaquina
+            end
+            object exterm1: TMenuItem
+              Caption = 'Extermination'
               OnClick = CambiarMaquina
             end
           end

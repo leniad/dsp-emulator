@@ -3,7 +3,7 @@ unit thenewzealandstory_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,pal_engine,
-     sound_engine,seta_sprites;
+     sound_engine,seta_sprites,mcs48;
 
 procedure cargar_tnzs;
 
@@ -46,12 +46,40 @@ const
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$3;dip_name:'Medium'),(dip_val:$2;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$8;dip_name:'40k 240k 200k+'),(dip_val:$c;dip_name:'60k 360k 300k+'),(dip_val:$4;dip_name:'100k 500k 400k+'),(dip_val:$0;dip_name:'150k 650k 500k+'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'1'),(dip_val:$10;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        //Extermination
+        extrmatn_rom:array[0..1] of tipo_roms=(
+        (n:'b06-05.11c';l:$10000;p:0;crc:$918e1fe3),(n:'b06-06.9c';l:$10000;p:$10000;crc:$8842e105));
+        extrmatn_sub:tipo_roms=(n:'b06-19.4e';l:$10000;p:0;crc:$8de43ed9);
+        extrmatn_mcu:tipo_roms=(n:'b06__14.1g';l:$800;p:0;crc:$28907072);
+        extrmatn_gfx:array[0..3] of tipo_roms=(
+        (n:'b06-01.13a';l:$20000;p:0;crc:$d2afbf7e),(n:'b06-02.10a';l:$20000;p:$20000;crc:$e0c2757a),
+        (n:'b06-03.7a';l:$20000;p:$40000;crc:$ee80ab9d),(n:'b06-04.4a';l:$20000;p:$60000;crc:$3697ace4));
+        extrmatn_pal:array[0..1] of tipo_roms=(
+        (n:'b06-09.15f';l:$200;p:0;crc:$f388b361),(n:'b06-08.17f';l:$200;p:$200;crc:$10c9aac3));
+        extrmatn_dip_a:array [0..3] of def_dip=(
+        (mask:$2;name:'Flip_Screen';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$10;dip_name:'2C 1C'),(dip_val:$30;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$20;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$40;dip_name:'2C 1C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$0;dip_name:'2C 3C'),(dip_val:$80;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        extrmatn_dip_b:array [0..2] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$2;dip_name:'Easy'),(dip_val:$3;dip_name:'Medium'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Damage Multiplier';number:4;dip:((dip_val:$c0;dip_name:'*1'),(dip_val:$80;dip_name:'*1.5'),(dip_val:$40;dip_name:'*2'),(dip_val:$0;dip_name:'*3'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        //Arkanoid II
+        {arknoid2_rom:tipo_roms=(n:'b08__05.11c';l:$10000;p:0;crc:$136edf9d);
+        arknoid2_sub:tipo_roms=(n:'b08__13.3e';l:$10000;p:0;crc:$e8035ef1);
+        arknoid2_mcu:tipo_roms=(n:'b53-09.u46';l:$800;p:0;crc:$a4bfce19);
+        arknoid2_gfx:array[0..3] of tipo_roms=(
+        (n:'b08-01.13a';l:$20000;p:0;crc:$2ccc86b4),(n:'b08-02.10a';l:$20000;p:$20000;crc:$056a985f),
+        (n:'b08-03.7a';l:$20000;p:$40000;crc:$274a795f),(n:'b08-04.4a';l:$20000;p:$60000;crc:$9754f703));
+        arknoid2_pal:array[0..1] of tipo_roms=(
+        (n:'b08-08.15f';l:$200;p:0;crc:$a4f7ebd9),(n:'b08-07.16f';l:$200;p:$200;crc:$ea34d9f7));}
         CPU_SYNC=64;
 
 var
  main_bank,misc_bank,sound_latch:byte;
  main_rom:array[0..7,0..$3fff] of byte;
  sub_rom:array[0..3,0..$1fff] of byte;
+ //MCU
+ input_select:byte;
 
 procedure update_video_tnzs;inline;
 begin
@@ -293,37 +321,20 @@ end;
 function insectorx_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$7fff,$e000..$efff:insectorx_getbyte:=memoria[direccion];
-  $8000..$bfff:insectorx_getbyte:=main_rom[main_bank,direccion and $3fff];
-  $c000..$cfff:insectorx_getbyte:=seta_sprite0.spritelow[direccion and $fff];
-  $d000..$dfff:insectorx_getbyte:=seta_sprite0.spritehigh[direccion and $fff];
-  $f000..$f2ff:insectorx_getbyte:=seta_sprite0.spritey[direccion and $3ff];
-  $f300..$f3ff:insectorx_getbyte:=seta_sprite0.control[direccion and $3];
   $f800..$fbff:insectorx_getbyte:=buffer_paleta[direccion and $3ff];
+  else insectorx_getbyte:=tnzs_getbyte(direccion);
 end;
 end;
 
 procedure insectorx_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-   0..$7fff:; //ROM
-   $8000..$bfff:if main_bank<2 then main_rom[main_bank,direccion and $3fff]:=valor;
-   $c000..$cfff:seta_sprite0.spritelow[direccion and $fff]:=valor;
-   $d000..$dfff:seta_sprite0.spritehigh[direccion and $fff]:=valor;
-   $e000..$efff:memoria[direccion]:=valor;
-   $f000..$f2ff:seta_sprite0.spritey[direccion and $3ff]:=valor;
-   $f300..$f3ff:seta_sprite0.control[direccion and $3]:=valor;
-   $f400:seta_sprite0.bg_flag:=valor;
-   $f600:begin
-          if (valor and $10)<>0 then z80_1.change_reset(CLEAR_LINE)
-            else z80_1.change_reset(ASSERT_LINE);
-	        main_bank:=valor and $07;
-        end;
    $f800..$fbff:if buffer_paleta[direccion and $3ff]<>valor then begin
           buffer_paleta[direccion and $3ff]:=valor;
           cambiar_color(direccion and $3fe);
         end;
-   end;
+   else tnzs_putbyte(direccion,valor);
+end;
 end;
 
 function insectorx_misc_getbyte(direccion:word):byte;
@@ -363,6 +374,118 @@ begin
   insectorx_portb_r:=marcade.dswb;
 end;
 
+//Extermination
+procedure eventos_extrmatn;
+begin
+if event.arcade then begin
+  //marcade.in0
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
+  //marcade.in1
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
+  //marcade.in2
+  if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $1) else marcade.in2:=(marcade.in2 and $fe);
+  if arcade_input.coin[1] then marcade.in2:=(marcade.in2 or $2) else marcade.in2:=(marcade.in2 and $fd);
+end;
+end;
+
+procedure extrmatn_principal_mcu;
+var
+  frame_m,frame_misc,frame_mcu:single;
+  f,h:byte;
+begin
+init_controls(false,false,false,true);
+frame_m:=z80_0.tframes;
+frame_misc:=z80_1.tframes;
+frame_mcu:=mcs48_0.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to $ff do begin
+    for h:=1 to CPU_SYNC do begin
+      //main
+      z80_0.run(frame_m);
+      frame_m:=frame_m+z80_0.tframes-z80_0.contador;
+      //sub
+      z80_1.run(frame_misc);
+      frame_misc:=frame_misc+z80_1.tframes-z80_1.contador;
+      //sound sub cpu
+      mcs48_0.run(frame_mcu);
+      frame_mcu:=frame_mcu+mcs48_0.tframes-mcs48_0.contador;
+    end;
+    if f=239 then begin
+      z80_0.change_irq(HOLD_LINE);
+      z80_1.change_irq(HOLD_LINE);
+      update_video_tnzs;
+      seta_sprite0.tnzs_eof;
+    end;
+  end;
+  eventos_extrmatn;
+  video_sync;
+end;
+end;
+
+function extrmatn_misc_getbyte(direccion:word):byte;
+begin
+  case direccion of
+    0..$7fff,$d000..$dfff:extrmatn_misc_getbyte:=mem_misc[direccion];
+    $8000..$9fff:extrmatn_misc_getbyte:=sub_rom[misc_bank,direccion and $1fff];
+    $b000:extrmatn_misc_getbyte:=ym2203_0.status;
+    $b001:extrmatn_misc_getbyte:=ym2203_0.Read;
+    $c000:extrmatn_misc_getbyte:=mcs48_0.upi41_master_r(0);
+    $c001:extrmatn_misc_getbyte:=mcs48_0.upi41_master_r(1);
+    $e000..$efff:extrmatn_misc_getbyte:=memoria[direccion];
+    $f000..$f003:;
+  end;
+end;
+
+procedure extrmatn_misc_putbyte(direccion:word;valor:byte);
+begin
+case direccion of
+  0..$9fff:; //ROM
+  $a000:begin
+          misc_bank:=valor and $3;
+          if (valor and $4)<>0 then mcs48_0.change_reset(PULSE_LINE);
+        end;
+  $b000:ym2203_0.Control(valor);
+  $b001:ym2203_0.Write(valor);
+  $c000:mcs48_0.upi41_master_w(0,valor);
+  $c001:mcs48_0.upi41_master_w(1,valor);
+  $d000..$dfff:mem_misc[direccion]:=valor;
+  $e000..$efff:memoria[direccion]:=valor;
+end;
+end;
+
+function extrmatn_mcu_inport(puerto:word):byte;
+begin
+case puerto of
+  MCS48_PORT_P1:case input_select of
+                    $a:extrmatn_mcu_inport:=$ff;
+                    $c:extrmatn_mcu_inport:=marcade.in0;
+                    $d:extrmatn_mcu_inport:=marcade.in1;
+                end;
+  MCS48_PORT_P2:extrmatn_mcu_inport:=$ff;
+  MCS48_PORT_T0:extrmatn_mcu_inport:=marcade.in2 and 1;
+  MCS48_PORT_T1:extrmatn_mcu_inport:=(marcade.in2 shr 1) and 1;
+end;
+end;
+
+procedure extrmatn_mcu_outport(puerto:word;valor:byte);
+begin
+case puerto of
+  MCS48_PORT_P2:input_select:=valor and $f;
+end;
+end;
+
 procedure tnzs_sound_update;
 begin
   ym2203_0.update;
@@ -373,22 +496,28 @@ procedure reset_tnzs;
 begin
  z80_0.reset;
  z80_1.reset;
- if main_vars.tipo_maquina=129 then z80_2.reset;
- YM2203_0.reset;
- reset_audio;
- seta_sprite0.reset;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
  marcade.in2:=$ff;
+ if main_vars.tipo_maquina=129 then z80_2.reset;
+ if main_vars.tipo_maquina=306 then begin
+  mcs48_0.reset;
+  marcade.in2:=0;
+ end;
+ YM2203_0.reset;
+ reset_audio;
+ seta_sprite0.reset;
  main_bank:=0;
  misc_bank:=0;
+ input_select:=0;
 end;
 
 function iniciar_tnzs:boolean;
 var
-  f:byte;
+  f,tempw:word;
   memoria_temp:array[0..$1ffff] of byte;
   ptemp:pbyte;
+  colores:tpaleta;
 const
     pt_x:array[0..15] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
 			8*8+0, 8*8+1, 8*8+2, 8*8+3, 8*8+4, 8*8+5, 8*8+6, 8*8+7);
@@ -402,13 +531,15 @@ begin
 iniciar_tnzs:=false;
 iniciar_audio(false);
 screen_init(1,512,256,false,true);
+if main_vars.tipo_maquina=306 then main_screen.rol90_screen:=true;
 iniciar_video(256,224);
 //Main CPU
 z80_0:=cpu_z80.create(6000000,$100*CPU_SYNC);
 //Misc CPU
 z80_1:=cpu_z80.create(6000000,$100*CPU_SYNC);
 //Video chips
-seta_sprite0:=tseta_sprites.create(0,1,$800 div $40,$1fff);
+if main_vars.tipo_maquina=306 then seta_sprite0:=tseta_sprites.create(0,1,$800 div $40,$fff)
+  else seta_sprite0:=tseta_sprites.create(0,1,$800 div $40,$1fff);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(3000000,2);
 case main_vars.tipo_maquina of
@@ -475,6 +606,47 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@insectorx_dip_a;
         marcade.dswb_val:=@insectorx_dip_b;
   end;
+  306:begin   //Extermination
+        //Main CPU
+        z80_0.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
+        //Misc CPU
+        z80_1.init_sound(tnzs_sound_update);
+        z80_1.change_ram_calls(extrmatn_misc_getbyte,extrmatn_misc_putbyte);
+        //MCU
+        mcs48_0:=cpu_mcs48.create(6000000,$100*CPU_SYNC,I8042);
+        if not(roms_load(mcs48_0.get_rom_addr,extrmatn_mcu)) then exit;
+        mcs48_0.change_io_calls(extrmatn_mcu_inport,extrmatn_mcu_outport);
+        //Sound chip
+        ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
+        //cargar roms
+        if not(roms_load(@memoria_temp,extrmatn_rom)) then exit;
+        copymemory(@memoria,@memoria_temp,$8000);
+        for f:=0 to 5 do copymemory(@main_rom[f+2,0],@memoria_temp[$8000+(f*$4000)],$4000);
+        //cargar ROMS misc
+        if not(roms_load(@memoria_temp,extrmatn_sub)) then exit;
+        copymemory(@mem_misc,@memoria_temp,$8000);
+        for f:=0 to 3 do copymemory(@sub_rom[f,0],@memoria_temp[$8000+(f*$2000)],$2000);
+        //convertir chars
+        getmem(ptemp,$100000);
+        if not(roms_load(ptemp,extrmatn_gfx)) then exit;
+        init_gfx(0,16,16,$1000);
+        gfx[0].trans[0]:=true;
+        gfx_set_desc_data(4,0,32*8,$1000*32*8*3,$1000*32*8*2,$1000*32*8,0);
+        convert_gfx(0,0,ptemp,@pt_x,@pt_y,false,false);
+        freemem(ptemp);
+        marcade.dswa:=$ff;
+        marcade.dswb:=$ff;
+        marcade.dswa_val:=@extrmatn_dip_a;
+        marcade.dswb_val:=@extrmatn_dip_b;
+        if not(roms_load(@memoria_temp,extrmatn_pal)) then exit;
+        for f:=0 to $1ff do begin
+          tempw:=(memoria_temp[f] shl 8) or memoria_temp[f+512];
+		      colores[f].r:=pal5bit(tempw shr 10);
+		      colores[f].g:=pal5bit(tempw shr 5);
+		      colores[f].b:=pal5bit(tempw shr 0);
+        end;
+        set_pal(colores,$200);
+  end;
 end;
 //final
 reset_tnzs;
@@ -483,12 +655,14 @@ end;
 
 procedure Cargar_tnzs;
 begin
+llamadas_maquina.fps_max:=60;
 case main_vars.tipo_maquina of
   129:begin
         llamadas_maquina.fps_max:=59.15;
         llamadas_maquina.bucle_general:=tnzs_principal;
   end;
   130:llamadas_maquina.bucle_general:=insectorx_principal;
+  306:llamadas_maquina.bucle_general:=extrmatn_principal_mcu;
 end;
 llamadas_maquina.iniciar:=iniciar_tnzs;
 llamadas_maquina.reset:=reset_tnzs;

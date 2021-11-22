@@ -471,6 +471,8 @@ type
     twineagle1: TMenuItem;
     thunderl1: TMenuItem;
     mspactwin1: TMenuItem;
+    exterm1: TMenuItem;
+    robokid1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

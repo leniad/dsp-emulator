@@ -255,6 +255,8 @@ type
     BurgerTime1: TMenuItem;
     lnc1: TMenuItem;
     karatechamp1: TMenuItem;
+    exterm1: TMenuItem;
+    robokid1: TMenuItem;
     mspactwin1: TMenuItem;
     twineagle1: TMenuItem;
     thunderl1: TMenuItem;

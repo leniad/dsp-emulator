@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.20WIP4';
+        DSP_VERSION='0.20WIP5';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -290,6 +290,9 @@ end;
 SDL_SetWindowSize(window_render,x,y);
 if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
 pantalla[0]:=SDL_GetWindowSurface(window_render);
+//Cambio la temporal tambien...
+if pantalla[PANT_TEMP]<>nil then SDL_FreeSurface(pantalla[PANT_TEMP]);
+pantalla[PANT_TEMP]:=SDL_CreateRGBSurface(0,p_final[0].x,p_final[0].y,16,0,0,0,0);
 //Si el video el *2 necesito una temporal
 if pantalla[PANT_DOBLE]<>nil then SDL_FreeSurface(pantalla[PANT_DOBLE]);
 pantalla[PANT_DOBLE]:=SDL_CreateRGBSurface(0,x*3,y*3,16,0,0,0,0);

@@ -7,8 +7,8 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 266
-  ClientWidth = 366
+  ClientHeight = 240
+  ClientWidth = 362
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -51,10 +51,11 @@ object principal1: Tprincipal1
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 366
+    Width = 362
     Height = 42
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 364
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -585,13 +586,15 @@ object principal1: Tprincipal1
     end
   end
   object Panel2: TPanel
-    Left = 317
+    Left = 313
     Top = 42
     Width = 49
-    Height = 205
+    Height = 179
     Align = alRight
     TabOrder = 1
     Visible = False
+    ExplicitLeft = 315
+    ExplicitHeight = 192
     object BitBtn9: TBitBtn
       Left = 4
       Top = 44
@@ -1228,16 +1231,18 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 247
-    Width = 366
+    Top = 221
+    Width = 362
     Height = 19
     Align = alBottom
     TabOrder = 2
+    ExplicitTop = 234
+    ExplicitWidth = 364
     DesignSize = (
-      366
+      362
       19)
     object Image1: TImage
-      Left = 341
+      Left = 337
       Top = 0
       Width = 25
       Height = 19
@@ -1927,6 +1932,10 @@ object principal1: Tprincipal1
               Caption = 'Mutant Night'
               OnClick = CambiarMaquina
             end
+            object robokid1: TMenuItem
+              Caption = 'Atomic Robo-Kid'
+              OnClick = CambiarMaquina
+            end
           end
           object Repulse1: TMenuItem
             Caption = 'Repulse'
@@ -1942,6 +1951,10 @@ object principal1: Tprincipal1
             end
             object InsectorX1: TMenuItem
               Caption = 'Insector X'
+              OnClick = CambiarMaquina
+            end
+            object exterm1: TMenuItem
+              Caption = 'Extermination'
               OnClick = CambiarMaquina
             end
           end

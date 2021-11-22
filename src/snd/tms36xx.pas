@@ -1,39 +1,41 @@
 unit tms36xx;
 
 interface
-uses sound_engine;
+uses {$IFDEF WINDOWS}windows,{$ENDIF}sound_engine,timer_engine;
 
 type
   TMS36XX_type=record
-	  samplerate:integer; 	// from Machine->sample_rate */
-	  basefreq:integer;		// chip's base frequency */
-	  octave:integer; 		// octave select of the TMS3615 */
-	  speed:integer;			// speed of the tune */
-	  tune_counter:integer;	// tune counter */
-	  note_counter:integer;	// note counter */
-	  voices:integer; 		// active voices */
-	  shift:integer;			// shift toggles between 0 and 6 to allow decaying voices */
-	  vol:array[0..12-1] of integer;		// (decaying) volume of harmonics notes */
-	  vol_counter:array[0..12-1] of integer;// volume adjustment counter */
-	  decay:array[0..12-1] of integer;		// volume adjustment rate - dervied from decay */
-	  counter:array[0..12-1] of integer;	// tone frequency counter */
-	  frequency:array[0..12-1] of integer;	// tone frequency */
-	  output:integer; 		// output signal bits */
-	  enable:integer; 		// mask which harmoics */
-	  tune_num:integer;		// tune currently playing */
-	  tune_ofs:integer;		// note currently playing */
-	  tune_max:integer;		// end of tune */
+	  samplerate:integer; 	// from Machine->sample_rate
+	  basefreq:integer;		// chip's base frequency
+	  octave:integer; 		// octave select of the TMS3615
+	  speed:integer;			// speed of the tune
+	  tune_counter:integer;	// tune counter
+	  note_counter:integer;	// note counter
+	  voices:integer; 		// active voices
+	  shift:integer;			// shift toggles between 0 and 6 to allow decaying voices
+	  vol:array[0..12-1] of integer;		// (decaying) volume of harmonics notes
+	  vol_counter:array[0..12-1] of integer;// volume adjustment counter
+	  decay:array[0..12-1] of integer;		// volume adjustment rate - dervied from decay
+	  counter:array[0..12-1] of integer;	// tone frequency counter
+	  frequency:array[0..12-1] of integer;	// tone frequency
+	  output:integer; 		// output signal bits
+	  enable:integer; 		// mask which harmoics
+	  tune_num:integer;		// tune currently playing
+	  tune_ofs:integer;		// note currently playing
+	  tune_max:integer;		// end of tune
+    audio_out:single;
     tsample:byte;
   end;
   ptms36xx=^tms36xx_type;
 
 var
   tms_chip:ptms36xx;
-  tunes:array[0..4,0..(96*6)-1] of integer;
+  tunes:array[1..4,0..(96*6)-1] of integer;
 
 procedure tms36xx_sound_update;
-procedure tms36xx_start(clock:integer;speed:extended;pdecay:pextended);
+procedure tms36xx_start(clock:integer;speed:extended;pdecay:psingle);
 procedure mm6221aa_tune_w(tune:integer);
+procedure tms36xx_note_w(octave,note:integer);
 procedure tms36xx_close;
 
 implementation
@@ -101,7 +103,6 @@ const
 	D_1,	D_2,	D_3,	0,		0,		0,
 	G_1,	G_2,	G_3,	0,		0,		0,
 	Ax_1,	Ax_2,	Ax_3,	0,		0,		0,
-
 	D_2,	D_3,	D_4,	0,		0,		0,
 	G_2,	G_3,	G_4,	0,		0,		0,
 	A_2,	A_3,	A_4,	0,		0,		0,
@@ -114,7 +115,6 @@ const
 	D_1,	D_2,	D_3,	0,		0,		0,
 	G_1,	G_2,	G_3,	0,		0,		0,
 	Ax_1,	Ax_2,	Ax_3,	0,		0,		0,
-
 	D_3,	D_4,	D_5,	0,		0,		0,
 	Cx_3,	Cx_4,	Cx_5,	0,		0,		0,
 	D_3,	D_4,	D_5,	0,		0,		0,
@@ -127,7 +127,6 @@ const
 	D_1,	D_2,	D_3,	0,		0,		0,
 	G_1,	G_2,	G_3,	0,		0,		0,
 	Ax_1,	Ax_2,	Ax_3,	0,		0,		0,
-
 	D_2,	D_3,	D_4,	0,		0,		0,
 	G_2,	G_3,	G_4,	0,		0,		0,
 	A_2,	A_3,	A_4,	0,		0,		0,
@@ -141,112 +140,97 @@ const
 	G_1,	G_2,	G_3,	0,		0,		0,
 	0,		0,		0,		0,		0,		0);
 
-  tune3_d:array[0..(96*6)-1] of byte = (
+  tune3_d:array[0..(96*6)-1] of byte=(
 	A_2,	A_3,	A_4,	D_1,	 D_2,	  D_3,
 	0,		0,		0,		0,		 0, 	  0,
 	A_2,	A_3,	A_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	A_2,	A_3,	A_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	A_2,	A_3,	A_4,	A_1,	 A_2,	  A_3,
 	0,		0,		0,		0,		 0, 	  0,
 	G_2,	G_3,	G_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	F_2,	F_3,	F_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	F_2,	F_3,	F_4,	F_1,	 F_2,	  F_3,
 	0,		0,		0,		0,		 0, 	  0,
 	E_2,	E_3,	E_4,	F_1,	 F_2,	  F_3,
 	0,		0,		0,		0,		 0, 	  0,
 	D_2,	D_3,	D_4,	F_1,	 F_2,	  F_3,
 	0,		0,		0,		0,		 0, 	  0,
-
 	D_2,	D_3,	D_4,	A_1,	 A_2,	  A_3,
 	0,		0,		0,		0,		 0, 	  0,
 	F_2,	F_3,	F_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	A_2,	A_3,	A_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	D_3,	D_4,	D_5,	D_1,	 D_2,	  D_3,
 	0,		0,		0,		0,		 0, 	  0,
 	0,		0,		0,		D_1,	 D_2,	  D_3,
 	0,		0,		0,		F_1,	 F_2,	  F_3,
 	0,		0,		0,		A_1,	 A_2,	  A_3,
 	0,		0,		0,		D_2,	 D_2,	  D_2,
-
 	D_3,	D_4,	D_5,	D_1,	 D_2,	  D_3,
 	0,		0,		0,		0,		 0, 	  0,
 	C_3,	C_4,	C_5,	0,		 0, 	  0,
 	0,		0,		0, 	  0,		 0, 	  0,
 	Ax_2,	Ax_3,	Ax_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	Ax_2,	Ax_3,	Ax_4,	Ax_1,	 Ax_2,   Ax_3,
 	0,		0,		0,		0,		 0, 	  0,
 	A_2,	A_3,	A_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	G_2,	G_3,	G_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	G_2,	G_3,	G_4,	G_1,	 G_2,	  G_3,
 	0,		0,		0,		0,		 0, 	  0,
 	A_2,	A_3,	A_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	Ax_2,	Ax_3,	Ax_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	A_2,	A_3,	A_4,	A_1,	 A_2,	  A_3,
 	0,		0,		0,		0,		 0, 	  0,
 	Ax_2,	Ax_3,	Ax_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	A_2,	A_3,	A_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	Cx_3,	Cx_4,	Cx_5,	A_1,	 A_2,	  A_3,
 	0,		0,		0,		0,		 0, 	  0,
 	Ax_2,	Ax_3,	Ax_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	A_2,	A_3,	A_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	A_2,	A_3,	A_4,	F_1,	 F_2,	  F_3,
 	0,		0,		0,		0,		 0, 	  0,
 	G_2,	G_3,	G_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	F_2,	F_3,	F_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	F_2,	F_3,	F_4,	D_1,	 D_2,	  D_3,
 	0,		0,		0,		0,		 0, 	  0,
 	E_2,	E_3,	E_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	D_2,	D_3,	D_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	E_2,	E_3,	E_4,	E_1,	 E_2,	  E_3,
 	0,		0,		0,		0,		 0, 	  0,
 	E_2,	E_3,	E_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	E_2,	E_3,	E_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
-
 	E_2,	E_3,	E_4,	Ax_1,	 Ax_2,   Ax_3,
 	0,		0,		0,		0,		 0, 	  0,
 	F_2,	F_3,	F_4,	0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
 	E_2,	E_3,	E_4,	F_1,	 F_2,	  F_3,
 	0,		0,		0,		0,		 0, 	  0,
-
 	D_2,	D_3,	D_4,	D_1,	 D_2,	  D_3,
 	0,		0,		0,		0,		 0, 	  0,
 	F_2,	F_3,	F_4,	A_1,	 A_2,	  A_3,
 	0,		0,		0,		0,		 0, 	  0,
 	A_2,	A_3,	A_4,	F_1,	 F_2,	  F_3,
 	0,		0,		0,		0,		 0, 	  0,
-
 	D_3,	D_4,	D_5,	D_1,	 D_2,	  D_3,
 	0,		0,		0,		0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0,
@@ -254,8 +238,8 @@ const
 	0,		0,		0,		0,		 0, 	  0,
 	0,		0,		0,		0,		 0, 	  0);
 
-  tune4_d:array [0..(13*6)-1] of byte = (
-//  16'     8'      5 1/3'  4'      2 2/3'  2'      */
+  tune4_d:array [0..(13*6)-1] of byte=(
+// 16'   8'   5 1/3'  4   2 2/3' 2'
 	B_0,	B_1,	Dx_2,	B_2,	Dx_3,	B_3,
 	C_1,	C_2,	E_2,	C_3,	E_3,	C_4,
 	Cx_1,	Cx_2,	F_2,	Cx_3,	F_3,	Cx_4,
@@ -364,15 +348,15 @@ end;
 
 procedure DECAY(voice:integer);inline;
 begin
-	if (tms_chip.vol[voice] > VMIN )	then begin
-		// decay of first voice */
+	if (tms_chip.vol[voice]>VMIN)	then begin
+		// decay of first voice
 		tms_chip.vol_counter[voice]:=tms_chip.vol_counter[voice]-tms_chip.decay[voice];
-		while (tms_chip.vol_counter[voice]<= 0 ) do begin
-			tms_chip.vol_counter[voice]:=tms_chip.vol_counter[voice]+FREQ_BASE_AUDIO;//samplerate;
-      tms_chip.vol[voice]:=tms_chip.vol[voice]-1;
-			if( tms_chip.vol[voice]<= VMIN ) then begin
-				tms_chip.frequency[voice]:= 0;
-				tms_chip.vol[voice]:= VMIN;
+		while (tms_chip.vol_counter[voice]<=0) do begin
+			tms_chip.vol_counter[voice]:=tms_chip.vol_counter[voice]+tms_chip.samplerate;
+     tms_chip.vol[voice]:=tms_chip.vol[voice]-1;
+			if (tms_chip.vol[voice]<=VMIN) then begin
+				tms_chip.frequency[voice]:=0;
+				tms_chip.vol[voice]:=VMIN;
 				break;
 			end;
 		end;
@@ -381,46 +365,45 @@ end;
 
 procedure RESTART(voice:integer);inline;
 var
-  temp:extended;
+  temp:single;
 begin
 	if (tunes[tms_chip.tune_num,tms_chip.tune_ofs*6+voice]<>0) then begin
     temp:=tunes[tms_chip.tune_num,tms_chip.tune_ofs*6+voice]*(tms_chip.basefreq shl tms_chip.octave)/FSCALE;
     tms_chip.frequency[tms_chip.shift+voice]:=round(temp);
-		tms_chip.vol[tms_chip.shift+voice]:= VMAX;
+		tms_chip.vol[tms_chip.shift+voice]:=VMAX;
 	end;
 end;
 
-function TONE(voice:integer):integer;inline;
+function TONE(voice:integer):integer;
 begin
   tone:=0;
-	if (((tms_chip.enable and (1 shl voice))<>0) and (tms_chip.frequency[voice]<>0)) then begin
-		// first note */
+	if (((tms_chip.enable and (1 shl voice))<>0) and (tms_chip.frequency[voice]<>0)) then begin // first note
 		tms_chip.counter[voice]:=tms_chip.counter[voice]-tms_chip.frequency[voice];
 		while (tms_chip.counter[voice]<=0) do begin
-			tms_chip.counter[voice]:=tms_chip.counter[voice]+FREQ_BASE_AUDIO;//= samplerate;
+			tms_chip.counter[voice]:=tms_chip.counter[voice]+tms_chip.samplerate;
 			tms_chip.output:=tms_chip.output xor (1 shl voice);
 		end;
-		if (tms_chip.output and tms_chip.enable and (1 shl voice)) <>0 then tone:=tms_chip.vol[voice];
+		if (tms_chip.output and tms_chip.enable and (1 shl voice))<>0 then tone:=tms_chip.vol[voice];
 	end;
 end;
 
-procedure tms36xx_sound_update;
+procedure tms36xx_internal_update;
 var
   n,sum:integer;
   f:byte;
 begin
-    // no tune played? */
+    // no tune played?
 	if ((tms_chip.tune_num=0) or (tms_chip.voices=0)) then begin
-		tsample[tms_chip.tsample,sound_status.posicion_sonido]:=0;
+		tms_chip.audio_out:=0;
     exit;
   end;
-  // decay the twelve voices */
+  // decay the twelve voices
   for f:=0 to 11 do DECAY(f);
-  // musical note timing */
+  // musical note timing
   tms_chip.tune_counter:=tms_chip.tune_counter-tms_chip.speed;
-  if (tms_chip.tune_counter <= 0 ) then begin
-    n:=trunc((-tms_chip.tune_counter/FREQ_BASE_AUDIO)+1);
-    tms_chip.tune_counter:=tms_chip.tune_counter+(n*FREQ_BASE_AUDIO);//samplerate;
+  if (tms_chip.tune_counter<=0) then begin
+    n:=trunc((-tms_chip.tune_counter/tms_chip.samplerate)+1);
+    tms_chip.tune_counter:=tms_chip.tune_counter+(n*tms_chip.samplerate);
     tms_chip.note_counter:=tms_chip.note_counter-n;
     if (tms_chip.note_counter<=0) then begin
       tms_chip.note_counter:=tms_chip.note_counter+VMAX;
@@ -433,43 +416,50 @@ begin
       end;
     end;
   end;
-  // update the twelve voices */
+  // update the twelve voices
   sum:=0;
   for f:=0 to 11 do sum:=sum+TONE(f);
-  tsample[tms_chip.tsample,sound_status.posicion_sonido]:=trunc(sum/tms_chip.voices);
+  tms_chip.audio_out:=sum/tms_chip.voices;
+end;
+
+procedure tms36xx_sound_update;
+begin
+  tsample[tms_chip.tsample,sound_status.posicion_sonido]:=trunc(tms_chip.audio_out);
 end;
 
 procedure mm6221aa_tune_w(tune:integer);
 begin
-    // which tune? */
+    // which tune?
     tune:=tune and 3;
     if (tune=tms_chip.tune_num) then exit;
-    tms_chip.tune_num:= tune;
-    tms_chip.tune_ofs:= 0;
-    tms_chip.tune_max:= 96; // fixed for now */
+    tms_chip.tune_num:=tune;
+    tms_chip.tune_ofs:=0;
+    tms_chip.tune_max:=96; // fixed for now
 end;
 
 procedure tms36xx_reset_counters;
+var
+  f:byte;
 begin
-    tms_chip.tune_counter:= 0;
-    tms_chip.note_counter:= 0;
-	  fillchar(tms_chip.vol_counter[0],sizeof(tms_chip.vol_counter),0);
-	  fillchar(tms_chip.counter[0],sizeof(tms_chip.counter),0);
+    tms_chip.tune_counter:=0;
+    tms_chip.note_counter:=0;
+    for f:=0 to 11 do begin
+      tms_chip.vol_counter[f]:=0;
+	    tms_chip.counter[f]:=0;
+    end;
 end;
 
 procedure tms36xx_note_w(octave,note:integer);
 begin
 	octave:=octave and 3;
 	note:=note and 15;
-
 	if (note > 12) then exit;
-
-	// play a single note from 'tune 4', a list of the 13 tones */
+	// play a single note from 'tune 4', a list of the 13 tones
 	tms36xx_reset_counters;
 	tms_chip.octave:= octave;
   tms_chip.tune_num:=4;
-	tms_chip.tune_ofs:= note;
-	tms_chip.tune_max:= note + 1;
+	tms_chip.tune_ofs:=note;
+	tms_chip.tune_max:=note+1;
 end;
 
 procedure tms3617_enable(enable:integer);
@@ -477,27 +467,27 @@ var
   i,bits:integer;
 begin
   bits:= 0;
-	// duplicate the 6 voice enable bits */
-  enable:= (enable and $3f) or ((enable and $3f) shl 6);
+	// duplicate the 6 voice enable bits
+  enable:=(enable and $3f) or ((enable and $3f) shl 6);
 	if (enable=tms_chip.enable) then exit;
-
-    for i:=0 to 5 do begin
-		  if (enable and (1 shl i))<>0 then bits:=bits+2;	// each voice has two instances */
-    end;
-	// set the enable mask and number of active voices */
-	tms_chip.enable:= enable;
-  tms_chip.voices:= bits;
+  for i:=0 to 5 do begin
+    if (enable and (1 shl i))<>0 then bits:=bits+2;	// each voice has two instances
+  end;
+	// set the enable mask and number of active voices
+	tms_chip.enable:=enable;
+  tms_chip.voices:=bits;
 end;
 
-procedure tms36xx_start(clock:integer;speed:extended;pdecay:pextended);
+procedure tms36xx_start(clock:integer;speed:extended;pdecay:psingle);
 var
 	j,f:integer;
 	enable:integer;
-  p:pextended;
-  temp:extended;
+  p:psingle;
+  temp:single;
 begin
   //Primero las tablas
-  fillchar(tunes[0][0],sizeof(tunes),0);
+  for f:=0 to 3 do
+      for j:=0 to ((96*6)-1) do tunes[f,j]:=0;
   //tune 1
   for f:=0 to 191 do begin
    case tune1_d[f] of
@@ -571,7 +561,9 @@ begin
     getmem(tms_chip,sizeof(tms36xx_type));
     fillchar(tms_chip^,sizeof(tms36xx_type),0);
   end;
-	tms_chip.samplerate:=FREQ_BASE_AUDIO;
+	tms_chip.samplerate:=clock*64;
+  //Timer para rellenar sonido
+  timers.init(sound_status.cpu_num,sound_status.cpu_clock/tms_chip.samplerate,tms36xx_internal_update,nil,true);
 	tms_chip.basefreq:=clock;
 	enable:=0;
    for j:=0 to 5 do begin
@@ -583,8 +575,7 @@ begin
 		end;
     inc(p);
 	end;
-  temp:=VMAX/speed;
-	if (speed>0) then tms_chip.speed:=trunc(temp)
+	if (speed>0) then tms_chip.speed:=trunc(VMAX/speed)
     else tms_chip.speed:=VMAX;
 	tms3617_enable(enable);
   tms_chip.tsample:=init_channel;

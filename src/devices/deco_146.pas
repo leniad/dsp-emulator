@@ -1090,8 +1090,10 @@ destructor cpu_deco_146.Free;
 begin
 end;
 
-procedure cpu_deco_146.reset;
-var
+
+procedure cpu_deco_146.reset;
+
+var
   i:byte;
 begin
 	self.region_selects[0]:=0;

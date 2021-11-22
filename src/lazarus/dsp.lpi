@@ -15,7 +15,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="20"/>
-      <BuildNr Value="1269"/>
+      <RevisionNr Value="5"/>
+      <BuildNr Value="1277"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.20"/>
     </VersionInfo>
@@ -41,11 +42,11 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="93">
+    <Units Count="94">
       <Unit0>
         <Filename Value="dsp.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="8"/>
         <CursorPos Y="37"/>
         <UsageCount Value="200"/>
@@ -181,11 +182,12 @@
         <ComponentName Value="Aboutbox"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="1"/>
         <TopLine Value="11"/>
         <CursorPos X="28" Y="15"/>
         <UsageCount Value="200"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit16>
       <Unit17>
         <Filename Value="loadrom.pas"/>
@@ -405,12 +407,11 @@
       </Unit38>
       <Unit39>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="676"/>
-        <CursorPos X="53" Y="690"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="684"/>
+        <CursorPos X="52" Y="695"/>
         <UsageCount Value="63"/>
         <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit39>
       <Unit40>
         <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
@@ -651,6 +652,7 @@
         <EditorIndex Value="-1"/>
         <CursorPos X="19" Y="39"/>
         <UsageCount Value="27"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit67>
       <Unit68>
         <Filename Value="..\arcade\misc\taito_cchip.pas"/>
@@ -658,6 +660,7 @@
         <TopLine Value="115"/>
         <CursorPos X="70" Y="131"/>
         <UsageCount Value="19"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit68>
       <Unit69>
         <Filename Value="..\cpu\upd7810.pas"/>
@@ -665,6 +668,7 @@
         <TopLine Value="799"/>
         <CursorPos X="57" Y="816"/>
         <UsageCount Value="23"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit69>
       <Unit70>
         <Filename Value="..\arcade\rainbowislands_hw.pas"/>
@@ -836,6 +840,7 @@
         <TopLine Value="119"/>
         <CursorPos X="34" Y="137"/>
         <UsageCount Value="16"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit91>
       <Unit92>
         <Filename Value="..\arcade\misc\volfied_cchip.pas"/>
@@ -845,12 +850,36 @@
         <UsageCount Value="9"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit92>
+      <Unit93>
+        <Filename Value="..\ordenadores\spectrum_48k.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="35"/>
+        <CursorPos X="38" Y="45"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit93>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="5" HistoryIndex="4">
       <Position1>
         <Filename Value="principal.pas"/>
         <Caret Column="34"/>
       </Position1>
+      <Position2>
+        <Filename Value="acercade.pas"/>
+        <Caret Line="15" Column="28" TopLine="11"/>
+      </Position2>
+      <Position3>
+        <Filename Value="..\ordenadores\spectrum_48k.pas"/>
+        <Caret Line="131" TopLine="119"/>
+      </Position3>
+      <Position4>
+        <Filename Value="..\ordenadores\spectrum_48k.pas"/>
+        <Caret Line="45" Column="38" TopLine="35"/>
+      </Position4>
+      <Position5>
+        <Filename Value="principal.pas"/>
+        <Caret Column="34"/>
+      </Position5>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

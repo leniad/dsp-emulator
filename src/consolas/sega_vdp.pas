@@ -35,7 +35,7 @@ const
         irq_timer,linea_back,video_mode,hpos,hpos_temp:byte;
         VIDEO_VISIBLE_Y_TOTAL,VIDEO_Y_TOTAL:word;
         tms:tms99xx_chip;
-        trans,is_pal:boolean;
+        gg_set,trans,is_pal:boolean;
         procedure refresh(linea:word);
         procedure reset;
         function vram_r:byte;
@@ -48,7 +48,7 @@ const
         procedure set_gg(is_gg:boolean);
       private
         SMS_IRQ_Handler:procedure(int:boolean);
-        gg_set,hint,display_disabled:boolean;
+        hint,display_disabled:boolean;
         current_pal:array[0..31] of word;
         cram:array[0..$3f] of byte; //GG tiene 64 bytes de CRAM
         addr_mode,cram_mask,reg8tmp,reg9tmp:byte;
@@ -430,7 +430,7 @@ if self.tms.vdp_mode then begin
   //sino 'Zool' se para... Ademas la bandera no la pongo inmediatamente, si no Spiderman no funciona
   //Ademas no importa si va a ejecutar la IRQ, hay que poner la señal
            timers.enabled(self.irq_timer,true);
-  end else if (linea=self.Y_PIXELS+1) then begin
+  end else if (linea>=self.Y_PIXELS+1) then begin
       //OJO!! Tengo que comprobar que sigue activa la IRQ antes de lanzarla!!
       //Outrun la quita para hacer la carretera...
       if (((self.tms.regs[1] and $20)<>0) and ((self.tms.status_reg and $80)<>0)) then begin

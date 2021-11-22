@@ -16,7 +16,7 @@ object Aboutbox: TAboutbox
   Font.Pitch = fpVariable
   Font.Quality = fqDraft
   OnShow = FormShow
-  LCLVersion = '2.0.8.0'
+  LCLVersion = '2.2.0.1'
   object Panel1: TPanel
     Left = 10
     Height = 188
@@ -163,7 +163,6 @@ object Aboutbox: TAboutbox
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
-      ParentColor = False
       ParentFont = False
     end
     object Copyright: TLabel
@@ -171,14 +170,13 @@ object Aboutbox: TAboutbox
       Height = 17
       Top = 100
       Width = 177
-      Caption = 'Copyright Leniad 2002-2020'
+      Caption = 'Copyright Leniad 2002-2021'
       Font.CharSet = ANSI_CHARSET
       Font.Color = clBlack
       Font.Height = -14
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
-      ParentColor = False
       ParentFont = False
     end
     object Label1: TLabel
@@ -192,7 +190,6 @@ object Aboutbox: TAboutbox
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
-      ParentColor = False
       ParentFont = False
     end
     object Label2: TLabel
@@ -207,7 +204,6 @@ object Aboutbox: TAboutbox
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
-      ParentColor = False
       ParentFont = False
     end
     object Label3: TLabel
@@ -222,7 +218,6 @@ object Aboutbox: TAboutbox
       Font.Name = 'Tahoma'
       Font.Pitch = fpVariable
       Font.Quality = fqDraft
-      ParentColor = False
       ParentFont = False
     end
     object Image1: TImage

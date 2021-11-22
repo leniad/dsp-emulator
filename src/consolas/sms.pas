@@ -1,6 +1,6 @@
 unit sms;
-
 interface
+
 uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sega_vdp,sn_76496,sysutils,dialogs,
      rom_engine,misc_functions,sound_engine,file_engine,forms;
@@ -21,6 +21,7 @@ type
 var
   mapper_sms:^tmapper_sms;
   sms_model:byte;
+
 const
   CLOCK_NTSC=3579545;
   CLOCK_PAL=3546895;
@@ -440,7 +441,6 @@ end;
 procedure sms_grabar_snapshot;
 begin
 end;
-
 function iniciar_sms:boolean;
 var
   dir:string;
@@ -499,7 +499,6 @@ begin
 if mapper_sms<>nil then freemem(mapper_sms);
 mapper_sms:=nil;
 end;
-
 procedure cargar_sms;
 begin
 principal1.BitBtn10.Glyph:=nil;

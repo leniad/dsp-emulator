@@ -1,10 +1,9 @@
 unit system16a_hw;
 
 interface
-//{$DEFINE MDAC=1}
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     ppi8255,sound_engine,ym_2151,fd1089,dialogs{$IFDEF MDAC},mcs48,dac{$ENDIF};
+     ppi8255,sound_engine,ym_2151,fd1089,dialogs,mcs48,dac;
 
 procedure cargar_system16a;
 
@@ -38,6 +37,8 @@ const
         (n:'epr-10438.17';l:$8000;p:$10001;crc:$738a6362),(n:'epr-10442.18';l:$8000;p:$10000;crc:$86cb9c14),
         (n:'epr-10439.23';l:$8000;p:$20001;crc:$b391aca7),(n:'epr-10443.24';l:$8000;p:$20000;crc:$95d32635),
         (n:'epr-10440.29';l:$8000;p:$30001;crc:$23939508),(n:'epr-10444.30';l:$8000;p:$30000;crc:$82115823));
+        alexkid_n7751_data:array[0..1] of tipo_roms=(
+        (n:'epr-10435.1';l:$8000;p:0;crc:$ad89f6e3),(n:'epr-10436.2';l:$8000;p:$8000;crc:$96c76613));
         //Fantasy Zone
         fantzone_rom:array[0..5] of tipo_roms=(
         (n:'epr-7385a.43';l:$8000;p:0;crc:$4091af42),(n:'epr-7382a.26';l:$8000;p:$1;crc:$77d67bfd),
@@ -66,6 +67,9 @@ const
         (n:'epr-10710.17';l:$10000;p:$20001;crc:$992369eb),(n:'epr-10714.18';l:$10000;p:$20000;crc:$91bf42fb),
         (n:'epr-10711.23';l:$10000;p:$40001;crc:$29166ef6),(n:'epr-10715.24';l:$10000;p:$40000;crc:$a7c57384),
         (n:'epr-10712.29';l:$10000;p:$60001;crc:$876ad019),(n:'epr-10716.30';l:$10000;p:$60000;crc:$40ba1d48));
+        alien_n7751_data:array[0..2] of tipo_roms=(
+        (n:'epr-10706.1';l:$8000;p:0;crc:$aa114acc),(n:'epr-10707.2';l:$8000;p:$8000;crc:$800c1d82),
+        (n:'epr-10708.4';l:$8000;p:$10000;crc:$5921ef52));
         //WB3
         wb3_rom:array[0..3] of tipo_roms=(
         (n:'epr-12120.43';l:$10000;p:0;crc:$cbd8c99b),(n:'epr-12118.26';l:$10000;p:$1;crc:$e9a3280c),
@@ -127,6 +131,7 @@ const
         tetris_dip_b:array [0..2] of def_dip=(
         (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Difficulty';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$30;dip_name:'Normal'),(dip_val:$10;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        CPU_SYNC=4;
 
 type
   tsystem16_info=record
@@ -144,12 +149,12 @@ var
  sprite_ram:array[0..$3ff] of word;
  sprite_rom:array[0..$7ffff] of byte;
  sprite_bank:array[0..$f] of byte;
- n7751_data:array[0..$7fff]of byte;
+ n7751_data:array[0..$17fff]of byte;
  s16_info:tsystem16_info;
  s16_screen:array[0..7] of byte;
  screen_enabled:boolean;
- sound_latch,n7751_command:byte;
- n7751_rom_address:word;
+ n7751_numroms,sound_latch,n7751_command:byte;
+ n7751_rom_address:dword;
 
 //Cada sprite 16bytes (8 words)
 //parte alta byte 0
@@ -188,7 +193,7 @@ begin
     if sprpri<>pri then continue;
     bank:=sprite_bank[(sprite_ram[(f*$8)+4] shr 4) and $7];
     top:=(sprite_ram[f*$8] and $ff)+1;
-    // if hidden, or top greater than/equal to bottom, or invalid bank, punt */
+    // if hidden, or top greater than/equal to bottom, or invalid bank, punt
 		if ((top>=bottom) or (bank=255)) then continue;
 		xpos:=(sprite_ram[(f*$8)+1] and $1ff)-$bd;
 		pitch:=smallint(sprite_ram[(f*$8)+2]);
@@ -196,11 +201,11 @@ begin
 		color:=((sprite_ram[(f*$8)+4] shr 8) and $3f) shl 4;
 		// initialize the end address to the start address */
     sprite_ram[(f*$8)+$7]:=addr;
-		// clamp to within the memory region size */
+		// clamp to within the memory region size
 		spritedata:=$8000*(bank mod s16_info.s_banks);
-		// loop from top to bottom */
+		// loop from top to bottom
 		for y:=top to (bottom-1) do begin
-			// advance a row */
+			// advance a row
 			addr:=addr+pitch;
 			// skip drawing if not within the cliprect
 			if (y<=256) then begin
@@ -230,8 +235,8 @@ begin
 						if (pix=15) then break;
 					end;
 				end else begin
-				// flipped case */
-					// start at the word after because we predecrement below */
+				// flipped case
+					// start at the word after because we predecrement below
           sprite_ram[(f*$8)+$7]:=addr+1;
 					x:=xpos;
           while ((xpos-x) and $1ff)<>1 do begin
@@ -248,7 +253,7 @@ begin
 						pix:=(pixels shr 12) and $f;
             system16a_draw_pixel(x+3,y,pix,color,sprpri);
             x:=x+4;
-						// stop if the last pixel in the group was 0xf */
+						// stop if the last pixel in the group was 0xf
 						if (pix=15) then break;
 					end;
 				end;
@@ -368,34 +373,62 @@ if event.arcade then begin
 end;
 end;
 
-procedure system16a_principal;
+procedure system16a_principal_adpcm;
 var
   frame_m,frame_s,frame_s_sub:single;
   f:word;
+  h:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
-{$IFDEF MDAC}
 frame_s_sub:=mcs48_0.tframes;
-{$ENDIF}
 while EmuStatus=EsRuning do begin
   for f:=0 to 261 do begin
+     for h:=1 to CPU_SYNC do begin
+        //main
+        m68000_0.run(frame_m);
+        frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+        //sound
+        z80_0.run(frame_s);
+        frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+        //sound sub cpu
+        mcs48_0.run(frame_s_sub);
+        frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
+     end;
+     if f=223 then begin
+       m68000_0.irq[4]:=HOLD_LINE;
+       update_video_system16a;
+     end;
+  end;
+  eventos_system16a;
+  video_sync;
+end;
+end;
+
+procedure system16a_principal;
+var
+  frame_m,frame_s,frame_s_sub:single;
+  f:word;
+  h:byte;
+begin
+init_controls(false,false,false,true);
+frame_m:=m68000_0.tframes;
+frame_s:=z80_0.tframes;
+while EmuStatus=EsRuning do begin
+  for f:=0 to 261 do begin
+    for h:=1 to CPU_SYNC do begin
      //main
      m68000_0.run(frame_m);
      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
      //sound
      z80_0.run(frame_s);
      frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-     {$IFDEF MDAC}
-     //sound sub cpu
-     mcs48_0.run(frame_s_sub);
-     frame_s_sub:=frame_s_sub+mcs48_0.tframes-mcs48_0.contador;
-     {$ENDIF}
-     if f=223 then begin
+    end;
+    if f=223 then begin
        m68000_0.irq[4]:=HOLD_LINE;
        update_video_system16a;
-     end;
+    end;
   end;
   eventos_system16a;
   video_sync;
@@ -415,37 +448,12 @@ case (direccion and $3000) of
           6,7:res:=marcade.in2; //P2
        end;
   $2000:case (direccion and $3) of
-                  0,1:res:=marcade.dswa; //DSW1
-                  2,3:res:=marcade.dswb; //DSW2
-               end;
+          0,1:res:=marcade.dswa; //DSW1
+          2,3:res:=marcade.dswb; //DSW2
+        end;
   else res:=$ffff;
 end;
 standar_s16_io_r:=res;
-end;
-
-function system16a_getword_fd1089(direccion:dword):word;
-begin
-case direccion of
-    0..$3fffff:if m68000_0.opcode then system16a_getword_fd1089:=rom[(direccion and $3ffff) shr 1]
-                  else system16a_getword_fd1089:=rom_data[(direccion and $3ffff) shr 1];
-    $400000..$7fffff:case (direccion and $7ffff) of
-                        $00000..$0ffff:system16a_getword_fd1089:=tile_ram[(direccion and $7fff) shr 1];
-                        $10000..$1ffff:system16a_getword_fd1089:=char_ram[(direccion and $fff) shr 1];
-                        $40000..$7ffff:system16a_getword_fd1089:=sprite_ram[(direccion and $7ff) shr 1];
-                          else system16a_getword_fd1089:=$ffff;
-                     end;
-    $800000..$bfffff:case (direccion and $fffff) of
-                        $40000..$7ffff:system16a_getword_fd1089:=buffer_paleta[(direccion and $fff) shr 1];
-                          else system16a_getword_fd1089:=$ffff;
-                     end;
-    $c00000..$ffffff:case (direccion and $7ffff) of
-                        $00000..$0ffff:system16a_getword_fd1089:=tile_ram[(direccion and $7fff) shr 1];
-                        $10000..$1ffff:system16a_getword_fd1089:=char_ram[(direccion and $fff) shr 1];
-                        $40000..$5ffff:system16a_getword_fd1089:=standar_s16_io_r(direccion and $3fff);  //misc_io
-                        $60000..$6ffff:system16a_getword_fd1089:=$ffff;  //watch dog
-                        $70000..$7ffff:system16a_getword_fd1089:=ram[(direccion and $3fff) shr 1];
-    end;
-end;
 end;
 
 function system16a_getword(direccion:dword):word;
@@ -469,6 +477,15 @@ case direccion of
                         $60000..$6ffff:system16a_getword:=$ffff;  //watch dog
                         $70000..$7ffff:system16a_getword:=ram[(direccion and $3fff) shr 1];
     end;
+end;
+end;
+
+function system16a_getword_fd1089(direccion:dword):word;
+begin
+case direccion of
+    0..$3fffff:if m68000_0.opcode then system16a_getword_fd1089:=rom[(direccion and $3ffff) shr 1]
+                  else system16a_getword_fd1089:=rom_data[(direccion and $3ffff) shr 1];
+    else system16a_getword_fd1089:=system16a_getword(direccion);
 end;
 end;
 
@@ -522,11 +539,11 @@ var
   color:tcolor;
   r,g,b:integer;
 begin
-	// get the new value */
+	// get the new value
   val:=buffer_paleta[direccion];
-	//     byte 0    byte 1 */
-	//  sBGR BBBB GGGG RRRR */
-	//  x000 4321 4321 4321 */
+	//     byte 0    byte 1
+	//  sBGR BBBB GGGG RRRR
+	//  x000 4321 4321 4321
 	r:=((val shr 12) and $01) or ((val shl 1) and $1e);
 	g:=((val shr 13) and $01) or ((val shr 3) and $1e);
 	b:=((val shr 14) and $01) or ((val shr 7) and $1e);
@@ -650,9 +667,23 @@ case (puerto and $ff) of
               0:ym2151_0.reg(valor);
               1:ym2151_0.write(valor);
            end;
+  $80..$bf:;
+end;
+end;
+
+procedure system16a_snd_outbyte_adpcm(puerto:word;valor:byte);
+begin
+case (puerto and $ff) of
+  $00..$3f:case (puerto and 1) of
+              0:ym2151_0.reg(valor);
+              1:ym2151_0.write(valor);
+           end;
   $80..$bf:begin
               n7751_rom_address:=n7751_rom_address and $3fff;
 	            n7751_rom_address:=n7751_rom_address or ((valor and 1) shl 14);
+              if (((valor and $4)=0) and (n7751_numroms>=2)) then n7751_rom_address:=n7751_rom_address or $08000;
+              if (((valor and $8)=0) and (n7751_numroms>=3)) then n7751_rom_address:=n7751_rom_address or $10000;
+              if (((valor and $10)=0) and (n7751_numroms>=4)) then n7751_rom_address:=n7751_rom_address or $18000;
               n7751_command:=valor shr 5;
            end;
 end;
@@ -674,50 +705,47 @@ if (valor and $80)<>0 then z80_0.change_nmi(CLEAR_LINE)
   else z80_0.change_nmi(ASSERT_LINE);
 end;
 
-procedure system16a_sound_act;
+procedure system16a_sound_adpcm;
 begin
   ym2151_0.update;
-  {$IFDEF MDAC}
   dac_0.update;
-  {$ENDIF}
+end;
+
+procedure system16a_sound_update;
+begin
+  ym2151_0.update;
 end;
 
 procedure ym2151_snd_port(valor:byte);
 begin
-{$IFDEF MDAC}
 if (valor and $1)<>0 then mcs48_0.change_reset(CLEAR_LINE)
   else mcs48_0.change_reset(ASSERT_LINE);
 if (valor and $2)<>0 then mcs48_0.change_irq(CLEAR_LINE)
   else mcs48_0.change_irq(ASSERT_LINE);
-{$ENDIF}
 end;
 
 //Sub sound cpu
 function system16a_sound_inport(puerto:word):byte;
 begin
-{$IFDEF MDAC}
 case puerto of
   MCS48_PORT_BUS:system16a_sound_inport:=n7751_data[n7751_rom_address];
   MCS48_PORT_T1:system16a_sound_inport:=0;
-  MCS48_PORT_P2:system16a_sound_inport:=$80 or ((n7751_command and $07) shl 4) or (mcs48_0.i8243.p2_r and $f)
+  MCS48_PORT_P2:system16a_sound_inport:=$80 or ((n7751_command and $07) shl 4) or (mcs48_0.i8243.p2_r and $f);
 end;
-{$ENDIF}
 end;
 
 procedure system16a_sound_outport(puerto:word;valor:byte);
 begin
-{$IFDEF MDAC}
 case puerto of
   MCS48_PORT_P1:dac_0.data8_w(valor);
   MCS48_PORT_P2:mcs48_0.i8243.p2_w(valor and $f);
   MCS48_PORT_PROG:mcs48_0.i8243.prog_w(valor);
 end;
-{$ENDIF}
 end;
 
 procedure n7751_rom_offset_w(puerto:word;valor:byte);
 var
-  mask,newdata:word;
+  mask,newdata:dword;
 begin
 	// P4 - address lines 0-3
 	// P5 - address lines 4-7
@@ -737,9 +765,7 @@ begin
  z80_0.reset;
  ym2151_0.reset;
  pia8255_0.reset;
- {$IFDEF MDAC}
- if main_vars.tipo_maquina=114 then mcs48_0.reset;
- {$ENDIF}
+ if ((main_vars.tipo_maquina=114) or (main_vars.tipo_maquina=115) or (main_vars.tipo_maquina=186)) then mcs48_0.reset;
  reset_audio;
  marcade.in0:=$ffff;
  marcade.in1:=$ffff;
@@ -792,32 +818,36 @@ screen_mod_scroll(6,1024,512,1023,512,256,511);
 screen_init(7,512,256,false,true);
 iniciar_video(320,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(10000000,262);
+m68000_0:=cpu_m68000.create(10000000,262*CPU_SYNC);
 //Sound CPU
-z80_0:=cpu_z80.create(4000000,262);
+z80_0:=cpu_z80.create(4000000,262*CPU_SYNC);
 z80_0.change_ram_calls(system16a_snd_getbyte,system16a_snd_putbyte);
-z80_0.change_io_calls(system16a_snd_inbyte,system16a_snd_outbyte);
-z80_0.init_sound(system16a_sound_act);
 //PPI 825
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(nil,nil,nil,ppi8255_wporta,ppi8255_wportb,ppi8255_wportc);
-//Timers
-ym2151_0:=ym2151_chip.create(4000000);
-ym2151_0.change_port_func(ym2151_snd_port);
+if ((main_vars.tipo_maquina=114) or (main_vars.tipo_maquina=115) or (main_vars.tipo_maquina=186)) then begin
+  z80_0.change_io_calls(system16a_snd_inbyte,system16a_snd_outbyte_adpcm);
+  z80_0.init_sound(system16a_sound_adpcm);
+  ym2151_0:=ym2151_chip.create(4000000);
+  ym2151_0.change_port_func(ym2151_snd_port);
+  //Creo el segundo chip de sonido
+  mcs48_0:=cpu_mcs48.create(6000000,262*CPU_SYNC,N7751);
+  mcs48_0.change_io_calls(system16a_sound_inport,system16a_sound_outport);
+  mcs48_0.i8243.change_calls(nil,n7751_rom_offset_w);
+  dac_0:=dac_chip.Create(1);
+end else begin
+  z80_0.change_io_calls(system16a_snd_inbyte,system16a_snd_outbyte);
+  z80_0.init_sound(system16a_sound_update);
+  ym2151_0:=ym2151_chip.create(4000000);
+end;
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@system16a_dip_a;
 case main_vars.tipo_maquina of
   114:begin  //Shinobi
-        {$IFDEF MDAC}
-        //Creo el segundo chip de sonido
-        mcs48_0:=cpu_mcs48.create(6000000,262,N7751);
-        mcs48_0.change_io_calls(system16a_sound_inport,system16a_sound_outport);
-        mcs48_0.i8243.change_calls(nil,n7751_rom_offset_w);
+        n7751_numroms:=1;
         if not(roms_load(mcs48_0.get_rom_addr,shinobi_n7751)) then exit;
         if not(roms_load(@n7751_data,shinobi_n7751_data)) then exit;
-        dac_0:=dac_chip.Create(1);
-        {$ENDIF}
         //Main CPU
         m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
@@ -844,6 +874,9 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@shinobi_dip_b;
   end;
   115:begin //Alex Kid
+        n7751_numroms:=2;
+        if not(roms_load(mcs48_0.get_rom_addr,shinobi_n7751)) then exit;
+        if not(roms_load(@n7751_data,alexkid_n7751_data)) then exit;
         m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
         if not(roms_load16w(@rom,alexkid_rom)) then exit;
@@ -874,6 +907,9 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@fantzone_dip_b;
   end;
   186:begin //Alien Syndrome
+        n7751_numroms:=3;
+        if not(roms_load(mcs48_0.get_rom_addr,shinobi_n7751)) then exit;
+        if not(roms_load(@n7751_data,alien_n7751_data)) then exit;
         m68000_0.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
         //cargar roms
         if not(roms_load16w(@memoria_temp,alien_rom)) then exit;
@@ -972,7 +1008,10 @@ end;
 procedure Cargar_system16a;
 begin
 llamadas_maquina.iniciar:=iniciar_system16a;
-llamadas_maquina.bucle_general:=system16a_principal;
+case  main_vars.tipo_maquina of
+  114,115,186:llamadas_maquina.bucle_general:=system16a_principal_adpcm;
+  else llamadas_maquina.bucle_general:=system16a_principal;
+end;
 llamadas_maquina.reset:=reset_system16a;
 end;
 

@@ -10,23 +10,23 @@ procedure cargar_starforce;
 implementation
 const
         starforce_rom:array[0..1] of tipo_roms=(
-        (n:'starforc.3';l:$4000;p:0;crc:$8ba27691),(n:'starforc.2';l:$4000;p:$4000;crc:$0fc4d2d6));
+        (n:'3.3p';l:$4000;p:0;crc:$8ba27691),(n:'2.3mn';l:$4000;p:$4000;crc:$0fc4d2d6));
         starforce_fg:array[0..2] of tipo_roms=(
-        (n:'starforc.7';l:$1000;p:0;crc:$f4803339),(n:'starforc.8';l:$1000;p:$1000;crc:$96979684),
-        (n:'starforc.9';l:$1000;p:$2000;crc:$eead1d5c));
+        (n:'7.2fh';l:$1000;p:0;crc:$f4803339),(n:'8.3fh';l:$1000;p:$1000;crc:$96979684),
+        (n:'9.3fh';l:$1000;p:$2000;crc:$eead1d5c));
         starforce_bg1:array[0..2] of tipo_roms=(
-        (n:'starforc.15';l:$2000;p:0;crc:$c3bda12f),(n:'starforc.14';l:$2000;p:$2000;crc:$9e9384fe),
-        (n:'starforc.13';l:$2000;p:$4000;crc:$84603285));
+        (n:'15.10jk';l:$2000;p:0;crc:$c3bda12f),(n:'14.9jk';l:$2000;p:$2000;crc:$9e9384fe),
+        (n:'13.8jk';l:$2000;p:$4000;crc:$84603285));
         starforce_bg2:array[0..2] of tipo_roms=(
-        (n:'starforc.12';l:$2000;p:0;crc:$fdd9e38b),(n:'starforc.11';l:$2000;p:$2000;crc:$668aea14),
-        (n:'starforc.10';l:$2000;p:$4000;crc:$c62a19c1));
+        (n:'12.10de';l:$2000;p:0;crc:$fdd9e38b),(n:'11.9de';l:$2000;p:$2000;crc:$668aea14),
+        (n:'10.8de';l:$2000;p:$4000;crc:$c62a19c1));
         starforce_bg3:array[0..2] of tipo_roms=(
-        (n:'starforc.18';l:$1000;p:0;crc:$6455c3ad),(n:'starforc.17';l:$1000;p:$1000;crc:$68c60d0f),
-        (n:'starforc.16';l:$1000;p:$2000;crc:$ce20b469));
-        starforce_sound:tipo_roms=(n:'starforc.1';l:$2000;p:0;crc:$2735bb22);
+        (n:'18.10pq';l:$1000;p:0;crc:$6455c3ad),(n:'17.9pq';l:$1000;p:$1000;crc:$68c60d0f),
+        (n:'16.8pq';l:$1000;p:$2000;crc:$ce20b469));
+        starforce_sound:tipo_roms=(n:'1.3hj';l:$2000;p:0;crc:$2735bb22);
         starforce_sprites:array[0..2] of tipo_roms=(
-        (n:'starforc.6';l:$4000;p:0;crc:$5468a21d),(n:'starforc.5';l:$4000;p:$4000;crc:$f71717f8),
-        (n:'starforc.4';l:$4000;p:$8000;crc:$dd9d68a4));
+        (n:'6.10lm';l:$4000;p:0;crc:$5468a21d),(n:'5.9lm';l:$4000;p:$4000;crc:$f71717f8),
+        (n:'4.8lm';l:$4000;p:$8000;crc:$dd9d68a4));
         //DIP
         starforce_dipa:array [0..5] of def_dip=(
         (mask:$3;name:'Coin A';number:4;dip:((dip_val:$1;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(dip_val:$2;dip_name:'1C 2C'),(dip_val:$3;dip_name:'1C 3C'),(),(),(),(),(),(),(),(),(),(),(),())),

@@ -1,5 +1,4 @@
 unit samples;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      dialogs,sysutils,sound_engine,file_engine,main_engine;
@@ -7,6 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 const
   MAX_SAMPLES=30;
   MAX_CHANNELS=6;
+
 type
   tipo_nombre_samples=record
       nombre:string;
@@ -29,6 +29,7 @@ type
              amp:single;
         end;
   ptipo_samples=^tipo_samples;
+
 var
   data_samples:ptipo_samples;
   samples_loaded:boolean;

@@ -1,6 +1,6 @@
 unit phoenix_hw;
-
 interface
+//{$DEFINE PHOENIX_DEBUG}
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms36xx,phoenix_audio_digital,
      rom_engine,pal_engine,sound_engine;
@@ -8,9 +8,8 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 procedure cargar_phoenix;
 
 implementation
-
 var
- banco_pal,scroll_y,banco:byte;
+ banco_pal,scroll_y,banco,sound_latch_b:byte;
  mem_video:array[0..1,0..$fff] of byte;
 
 const
@@ -177,13 +176,14 @@ while EmuStatus=EsRuning do begin
         255:marcade.dswa:=marcade.dswa or $80;
     end;
   end;
-  //phoenix_audio_update;
   eventos_phoenix;
   video_sync;
 end;
 end;
 
 procedure pleiads_putbyte(direccion:word;valor:byte);
+var
+  pitch,note:byte;
 begin
 direccion:=direccion and $7fff;
 case direccion of
@@ -213,11 +213,14 @@ case direccion of
                   end;
                end;
   $5800..$5bff:scroll_y:=valor;
-  $6000..$63ff:;//phoenix_wsound_a(valor);
-  $6800..$6bff:begin
-                  //phoenix_wsound_b(valor);
-                  //mm6221aa_tune_w(valor shr 6);
-               end;
+  $6000..$63ff:;//analog
+  $6800..$6bff:{$IFDEF PHOENIX_DEBUG}if (valor<>sound_latch_b) then begin
+                    note:=valor and 15;
+	                  pitch:=(valor shr 6) and 3;
+	                  if (pitch=3) then pitch:=2;  // 2 and 3 are the same
+	                  tms36xx_note_w(pitch,note);
+	                  sound_latch_b:=valor;
+               end{$ENDIF};
 end;
 end;
 
@@ -233,8 +236,6 @@ z80_0.reset;
 scroll_y:=0;
 banco_pal:=0;
 marcade.in0:=$ff;
-fillchar(mem_video[0,0],$1000,0);
-fillchar(mem_video[1,0],$1000,0);
 if main_vars.tipo_maquina=11 then phoenix_audio_reset;
 end;
 
@@ -246,8 +247,8 @@ var
 const
       pc_x:array[0..7] of dword=(7, 6, 5, 4, 3, 2, 1, 0);
       pc_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-      phoenix_dec:array[0..5] of extended=(0.5,0,0,1.05,0,0);
-      pleiads_dec:array[0..5] of extended=(0.33,0.33,0,0.33,0,0.33);
+      phoenix_dec:array[0..5] of single=(0.5,0,0,1.05,0,0);
+      pleiads_dec:array[0..5] of single=(0.33,0.33,0,0.33,0,0.33);
 begin
 phoenix_iniciar:=false;
 iniciar_audio(false);
@@ -286,7 +287,7 @@ case main_vars.tipo_maquina of
   202:begin //Pleiads
         z80_0.change_ram_calls(phoenix_getbyte,pleiads_putbyte);
         //Chip sonido
-        tms36xx_start(247,0.21,@pleiads_dec);
+        tms36xx_start(247,0,@pleiads_dec);
         //phoenix_audio_start;
         //cargar roms
         if not(roms_load(@memoria,pleiads_rom)) then exit;
@@ -320,13 +321,11 @@ set_pal(colores,256);
 phoenix_reset;
 phoenix_iniciar:=true;
 end;
-
 procedure phoenix_cerrar;
 begin
 tms36xx_close;
 if main_vars.tipo_maquina=11 then phoenix_audio_cerrar;
 end;
-
 procedure cargar_phoenix;
 begin
 llamadas_maquina.iniciar:=phoenix_iniciar;

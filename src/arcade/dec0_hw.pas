@@ -103,11 +103,9 @@ var
  ram1:array[0..$fff] of word;
  ram2:array[0..$1fff] of word;
  sound_latch,prioridad,hippodrm_lsb:byte;
- proc_update_video:procedure;
  //HU 6280
- robocop_mcu_rom:array[0..$1ff] of byte;
  mcu_ram,mcu_shared_ram:array[0..$1fff] of byte;
- hippo_mcu_rom:array[0..$ffff] of byte;
+ mcu_rom:array[0..$ffff] of byte;
  //8751
  i8751_return,i8751_command:word;
  i8751_ports:array[0..3] of byte;
@@ -241,7 +239,7 @@ while EmuStatus=EsRuning do begin
    case f of
       255:begin
             m68000_0.irq[6]:=HOLD_LINE;
-            proc_update_video;
+            update_video_baddudes;
             marcade.in1:=marcade.in1 or $80;
           end;
       263:marcade.in1:=marcade.in1 and $7f;
@@ -273,7 +271,7 @@ while EmuStatus=EsRuning do begin
       255:begin
             m68000_0.irq[6]:=HOLD_LINE;
             h6280_0.set_irq_line(0,HOLD_LINE);
-            proc_update_video;
+            update_video_hippo;
             marcade.in1:=marcade.in1 or $80;
           end;
       263:marcade.in1:=marcade.in1 and $7f;
@@ -304,7 +302,7 @@ while EmuStatus=EsRuning do begin
    case f of
       255:begin
             m68000_0.irq[6]:=HOLD_LINE;
-            proc_update_video;
+            update_video_robocop;
             marcade.in1:=marcade.in1 or $80;
           end;
       263:marcade.in1:=marcade.in1 and $7f;
@@ -493,7 +491,7 @@ end;
 function robocop_mcu_getbyte(direccion:dword):byte;
 begin
 case direccion of
-  $1e00..$1fff:robocop_mcu_getbyte:=robocop_mcu_rom[direccion and $1ff];
+  $1e00..$1fff:robocop_mcu_getbyte:=mcu_rom[direccion and $1ff];
   $1f0000..$1f1fff:robocop_mcu_getbyte:=mcu_ram[direccion and $1fff];
   $1f2000..$1f3fff:robocop_mcu_getbyte:=mcu_shared_ram[direccion and $1fff];
 end;
@@ -515,7 +513,7 @@ var
   tempw:word;
 begin
 case direccion of
-  0..$ffff:hippo_mcu_getbyte:=hippo_mcu_rom[direccion];
+  0..$ffff:hippo_mcu_getbyte:=mcu_rom[direccion];
   $180000..$1800ff:hippo_mcu_getbyte:=mcu_shared_ram[direccion and $ff];
   $1807ff:hippo_mcu_getbyte:=$ff;
   $1d0000..$1d00ff:case hippodrm_lsb of //protecction
@@ -640,7 +638,7 @@ case main_vars.tipo_maquina of
         //MCU
         h6280_0:=cpu_h6280.create(21477200 div 16,264);
         h6280_0.change_ram_calls(robocop_mcu_getbyte,robocop_mcu_putbyte);
-        if not(roms_load(@robocop_mcu_rom,robocop_mcu)) then exit;
+        if not(roms_load(@mcu_rom,robocop_mcu)) then exit;
         //OKI rom
         if not(roms_load(oki_6295_0.get_rom_addr,robocop_oki)) then exit;
         //convertir chars
@@ -655,7 +653,6 @@ case main_vars.tipo_maquina of
         //sprites
         if not(roms_load(@memoria_temp,robocop_sprites)) then exit;
         convert_tiles(3,$1000);
-        proc_update_video:=update_video_robocop;
         //Dip
         marcade.dswa:=$ff7f;
         marcade.dswa_val:=@robocop_dip;
@@ -688,7 +685,6 @@ case main_vars.tipo_maquina of
         //sprites
         if not(roms_load(@memoria_temp,baddudes_sprites)) then exit;
         convert_tiles(3,$1000);
-        proc_update_video:=update_video_baddudes;
         //Dip
         marcade.dswa:=$ffff;
         marcade.dswa_val:=@baddudes_dip;
@@ -702,12 +698,12 @@ case main_vars.tipo_maquina of
         //MCU+decrypt
         h6280_0:=cpu_h6280.create(21477200 div 16,264);
         h6280_0.change_ram_calls(hippo_mcu_getbyte,hippo_mcu_putbyte);
-        if not(roms_load(@hippo_mcu_rom,hippo_mcu)) then exit;
-        for f:=0 to $ffff do hippo_mcu_rom[f]:=bitswap8(hippo_mcu_rom[f],0,6,5,4,3,2,1,7);
-        hippo_mcu_rom[$189]:=$60; // RTS prot area
-	      hippo_mcu_rom[$1af]:=$60; // RTS prot area
-	      hippo_mcu_rom[$1db]:=$60; // RTS prot area
-	      hippo_mcu_rom[$21a]:=$60; // RTS prot area
+        if not(roms_load(@mcu_rom,hippo_mcu)) then exit;
+        for f:=0 to $ffff do mcu_rom[f]:=bitswap8(mcu_rom[f],0,6,5,4,3,2,1,7);
+        mcu_rom[$189]:=$60; // RTS prot area
+	      mcu_rom[$1af]:=$60; // RTS prot area
+	      mcu_rom[$1db]:=$60; // RTS prot area
+	      mcu_rom[$21a]:=$60; // RTS prot area
         //OKI rom
         if not(roms_load(oki_6295_0.get_rom_addr,hippo_oki)) then exit;
         //convertir chars
@@ -722,7 +718,6 @@ case main_vars.tipo_maquina of
         //sprites
         if not(roms_load(@memoria_temp,hippo_sprites)) then exit;
         convert_tiles(3,$1000);
-        proc_update_video:=update_video_hippo;
         //Dip
         marcade.dswa:=$ffff;
         marcade.dswa_val:=@hippo_dip;

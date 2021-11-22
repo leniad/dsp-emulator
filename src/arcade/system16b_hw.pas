@@ -758,7 +758,7 @@ if ((direccion>=s315_5195_0.dirs_start[7]) and (direccion<s315_5195_0.dirs_end[7
   case ((direccion and $1fff) shr 1) of //IO
     0:s16_info.screen_enabled:=(valor and $20)<>0;
   end;
-zona:=true;
+  zona:=true;
 end;
 if not(zona) then begin
   tempd:=s315_5195_0.dirs_start[5];
@@ -839,6 +839,7 @@ procedure system16b_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$f7ff then mem_snd[direccion]:=valor;
 end;
+
 function system16b_snd_inbyte(puerto:word):byte;
 var
   res:byte;

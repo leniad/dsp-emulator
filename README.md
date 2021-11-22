@@ -1,4 +1,28 @@
 ﻿# DSP Emulator status #
+<b>22/11/21 - DSP Emulator 0.20WIP5. Win32 and source update.<br><pre>
+-General
+    +CPU
+        -MCS48
+            +Added I8042 CPU type
+            +Fixed IRQs
+            +Added opcodes $02,$08,$22,$35,$40,$41,$60,$61,$65,$86,$89,$8a,$90,$c7 and $d6
+            +Fixed opcodes $10,$11 and $57
+    +Sega GameGear
+        -Added Master System video compatibility
+        -Added CodeMasters Mapper extra RAM
+-NinjaKid II HW
+    +Added dipswitches
+    +NinjaKid II: Added PCM sound
+    +Atomic RoboKid: Added driver with sound
+-StarForce
+    +Updated ROMs names
+-Sega System 16a
+    +Added PCM sound
+-The New Zealand Story HW
+    +Extermination: Added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/sVXs8Cj/Extermination.png"> <img src="https://i.ibb.co/ysdpg20/Atomic-Robo-kid.png"><br>
+<img src="https://i.ibb.co/Qj0Y1Y3/castle.png"> <img src="https://i.ibb.co/nnjPJ4r/outrun-europa.png"><br><br>
 <b>31/10/21 - DSP Emulator 0.20WIP4. Win32 and source update.<br><pre>
 -General
     +Seta Sprites: Added new device
@@ -11,7 +35,7 @@
         -Added new sound device
 -Spectrum
     +Spectrum 16K/48K fixed screen timings
--Dec0 HW
+-Dec8 HW
     +Super Real Darwin: Inverted coin input
 -Karate Champ
     +Added driver with sound

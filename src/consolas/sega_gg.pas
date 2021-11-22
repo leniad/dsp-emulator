@@ -44,7 +44,8 @@ while EmuStatus=EsRuning do begin
       frame:=frame+z80_0.tframes-z80_0.contador;
       vdp_0.refresh(f);
   end;
-  actualiza_trozo(61,51,160,144,1,0,0,160,144,PANT_TEMP);
+  if vdp_0.gg_set then actualiza_trozo(61,51,160,144,1,0,0,160,144,PANT_TEMP)
+    else actualiza_trozo(0,0,284,243,1,0,0,284,243,PANT_TEMP);
   eventos_gg;
   video_sync;
 end;
@@ -99,12 +100,28 @@ begin
   end;
 end;
 
+function gg_getbyte_codemasters(direccion:word):byte;
+begin
+case direccion of
+  0..$3fff:gg_getbyte_codemasters:=mapper_sms.rom[mapper_sms.slot0,direccion];
+  $4000..$7fff:gg_getbyte_codemasters:=mapper_sms.rom[mapper_sms.slot1,direccion and $3fff];
+  $8000..$9fff:gg_getbyte_codemasters:=mapper_sms.rom[mapper_sms.slot2,direccion and $3fff];
+  $a000..$bfff:if mapper_sms.slot2_ram then gg_getbyte_codemasters:=mapper_sms.ram_slot2[0,direccion and $1fff]
+                  else gg_getbyte_codemasters:=mapper_sms.rom[mapper_sms.slot2,direccion and $3fff];
+  $c000..$ffff:gg_getbyte_codemasters:=mapper_sms.ram[direccion and $1fff];
+end;
+end;
+
 procedure gg_putbyte_codemasters(direccion:word;valor:byte);
 begin
 case direccion of
   0:mapper_sms.slot0:=valor mod mapper_sms.max; //mapper slot 0
-  $4000:mapper_sms.slot1:=valor mod mapper_sms.max; //mapper slot 1
+  $4000:begin //mapper slot 1
+          mapper_sms.slot1:=(valor and $7f) mod mapper_sms.max;
+          mapper_sms.slot2_ram:=(valor and $80)<>0;
+        end;
   $8000:mapper_sms.slot2:=valor mod mapper_sms.max; //mapper slot 2
+  $a000..$bfff:if mapper_sms.slot2_ram then mapper_sms.ram_slot2[0,direccion and $1fff]:=valor;
   $c000..$ffff:mapper_sms.ram[direccion and $1fff]:=valor;
 end;
 end;
@@ -239,14 +256,27 @@ begin
   extension:=extension_fichero(nombre_file);
   z80_0.change_ram_calls(gg_getbyte,gg_putbyte);
   resultado:=abrir_cartucho_gg(datos,longitud);
-  vdp_0.set_gg(true);
   if resultado then begin
     llamadas_maquina.open_file:=nombre_file;
     abrir_gg:=true;
     crc_val:=calc_crc(datos,longitud);
     case crc_val of
-      $9fa727a0,$fb481971,$d9a7f170,$6caa625b,$152f0dcc,$72981057:begin //Codemasters
-          z80_0.change_ram_calls(gg_getbyte,gg_putbyte_codemasters);
+      $5e53c7f7,$dbe8895c,$f7c524f6,$c888222b,$aa140c9c,$8813514b,$9fa727a0,$fb481971,$d9a7f170,
+      $76c5bdfb,$c1756bee,$6caa625b,$152f0dcc,$72981057:begin //Codemasters
+          z80_0.change_ram_calls(gg_getbyte_codemasters,gg_putbyte_codemasters);
+      end;
+    end;
+    case crc_val of
+      $e5f789b9,$9942b69b,$5877b10d,$59840fd6,$aa140c9c,$c8381def,$c888222b,$76c5bdfb,$1d93246e,
+      $ce97efe8,$a2f9c7af,$3382d73f,$1eab89d,$f037ec00,$2aa12d7e,$189931e,$86e5b455,$45f058d6,
+      $311d2863,$ba6344fc,$1c6c149c,$9c76fb3a,$56201996,$4902b7a2,$fb481971,$9fa727a0,$10dbbef4,
+      $bd1cc7df,$8230384e,$da8e95a9,$6f8e46cf,$7bb81e3d,$44fbe8f6,$3b627808,$18086b70,$8813514b:if vdp_0.gg_set then begin
+                  vdp_0.set_gg(false);
+                  change_video_size(284,243);
+                end;
+      else if not(vdp_0.gg_set) then begin
+            vdp_0.set_gg(true);
+            change_video_size(160,144);
       end;
     end;
     reset_gg;
@@ -287,6 +317,8 @@ z80_0:=cpu_z80.create(CLOCK_NTSC,LINES_NTSC);
 //VDP
 vdp_0:=vdp_chip.create(1,gg_interrupt,z80_0.numero_cpu,read_memory,write_memory);
 vdp_0.video_ntsc(0);
+//Lo pongo temporalmente, hasta que compruebe que no está en modo SMS
+vdp_0.set_gg(true);
 sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
 //Main CPU
 z80_0.change_ram_calls(gg_getbyte,gg_putbyte);

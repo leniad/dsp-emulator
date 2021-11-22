@@ -31,7 +31,7 @@ type
             r:preg_h6280;
             clocks_per_cycle:byte;
             timer_status:byte;
-            timer_load,timer_value:integer;
+            timer_load,timer_value:dword;
             irq_pending:byte;
             irq_state:array[0..2] of byte;
             io_buffer,irq_mask:byte;
@@ -112,7 +112,7 @@ begin
 	case (posicion and 1) of
 		0:begin // Counter preload */
 			  self.timer_load:=((valor and 127)+1)*1024;
-        self.timer_value:=((valor and 127)+1)*1024;
+        self.timer_value:=self.timer_load;
       end;
 		1:begin // Counter enable */
 			  if (valor and 1)<>0 then begin // stop -> start causes reload */

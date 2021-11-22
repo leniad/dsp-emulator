@@ -244,14 +244,14 @@ procedure phoenix_wsound_a(valor:byte);
 begin
 sound_latch_a:=valor;
 //form1.statusbar1.panels[2].text:=inttostr(valor and $f);
-phoenix_sound[0].frec:=valor and $F;
+phoenix_sound[0].frec:=valor and $f;
 phoenix_sound[0].vol:=(valor and $30) shr 4;
 phoenix_sound[0].activa:=phoenix_sound[0].frec<$f;
 end;
 
 procedure phoenix_wsound_b(valor:byte);
 begin
-phoenix_sound[1].frec:=valor and $F;
+phoenix_sound[1].frec:=valor and $f;
 phoenix_sound[1].vol:=(valor and $10) shr 4;
 phoenix_sound[1].activa:=phoenix_sound[0].frec<$f;
 end;

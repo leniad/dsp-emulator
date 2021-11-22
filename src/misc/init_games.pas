@@ -47,7 +47,7 @@ type
             end;
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=318;
+  GAMES_CONT=320;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -165,19 +165,19 @@ const
   (name:'Street Fighter II'': Champion Edition';year:'1992';snd:1;hi:false;zip:'sf2ce';grid:111;company:'Capcom';rom:@sf2ce),
   (name:'Cadillacs and Dinosaurs';year:'1992';snd:1;hi:false;zip:'dino';grid:112;company:'Capcom';rom:@dino),
   (name:'The Punisher';year:'1993';snd:1;hi:false;zip:'punisher';grid:113;company:'Capcom';rom:@punisher),
-  (name:'Shinobi';year:'1987';snd:4;hi:false;zip:'shinobi';grid:114;company:'Sega';rom:@shinobi),
-  (name:'Alex Kidd';year:'1986';snd:4;hi:false;zip:'alexkidd';grid:115;company:'Sega';rom:@alexkidd),
-  (name:'Fantasy Zone';year:'1986';snd:4;hi:false;zip:'fantzone';grid:116;company:'Sega';rom:@fantzone),
+  (name:'Shinobi';year:'1987';snd:1;hi:false;zip:'shinobi';grid:114;company:'Sega';rom:@shinobi),
+  (name:'Alex Kidd';year:'1986';snd:1;hi:false;zip:'alexkidd';grid:115;company:'Sega';rom:@alexkidd),
+  (name:'Fantasy Zone';year:'1986';snd:1;hi:false;zip:'fantzone';grid:116;company:'Sega';rom:@fantzone),
   (name:'Time Pilot ''84';year:'1984';snd:1;hi:false;zip:'tp84';grid:117;company:'Konami';rom:@tp84),
   (name:'Tutankham';year:'1982';snd:1;hi:false;zip:'tutankhm';grid:118;company:'Konami';rom:@tutankhm),
   (name:'Pang';year:'1989';snd:4;hi:false;zip:'pang';grid:119;company:'Capcom';rom:@pang),
-  (name:'Ninja Kid II';year:'1987';snd:4;hi:false;zip:'ninjakd2';grid:120;company:'UPL';rom:@ninjakd2),
+  (name:'Ninja Kid II';year:'1987';snd:1;hi:false;zip:'ninjakd2';grid:120;company:'UPL';rom:@ninjakd2),
   (name:'Ark Area';year:'1988';snd:1;hi:false;zip:'arkarea';grid:121;company:'UPL';rom:@arkarea),
   (name:'Mutant Night';year:'1987';snd:1;hi:false;zip:'mnight';grid:122;company:'UPL';rom:@mnight),
   (name:'Sky Kid';year:'1985';snd:1;hi:false;zip:'skykid';grid:123;company:'Namco';rom:@skykid),
-  (name:'Rolling Thunder';year:'1986';snd:4;hi:false;zip:'rthunder';grid:124;company:'Namco';rom:@rthunder),
-  (name:'Hopping Mappy';year:'1986';snd:4;hi:false;zip:'hopmappy';grid:125;company:'Namco';rom:@hopmappy),
-  (name:'Sky Kid Deluxe';year:'1986';snd:4;hi:false;zip:'skykiddx';grid:126;company:'Namco';rom:@skykiddx),
+  (name:'Rolling Thunder';year:'1986';snd:1;hi:false;zip:'rthunder';grid:124;company:'Namco';rom:@rthunder),
+  (name:'Hopping Mappy';year:'1986';snd:1;hi:false;zip:'hopmappy';grid:125;company:'Namco';rom:@hopmappy),
+  (name:'Sky Kid Deluxe';year:'1986';snd:1;hi:false;zip:'skykiddx';grid:126;company:'Namco';rom:@skykiddx),
   (name:'Roc''n Rope';year:'1983';snd:1;hi:false;zip:'rocnrope';grid:127;company:'Konami';rom:@rocnrope),
   (name:'Repulse';year:'1985';snd:1;hi:false;zip:'repulse';grid:128;company:'Sega';rom:@repulse),
   (name:'The NewZealand Story';year:'1988';snd:1;hi:false;zip:'tnzs';grid:129;company:'Taito';rom:@tnzs),
@@ -301,7 +301,7 @@ const
   (name:'Double Dragon (SpeedHack)';year:'1987';snd:1;hi:false;zip:'ddragon';grid:247;company:'Taito';rom:@ddragon),
   (name:'Mayday';year:'1980';snd:1;hi:false;zip:'mayday';grid:248;company:'Williams';rom:@mayday),
   (name:'Colony 7';year:'1981';snd:1;hi:false;zip:'colony7';grid:249;company:'Williams';rom:@colony7),
-  (name:'Bosconian';year:'1981';snd:3;hi:false;zip:'bosco';grid:250;company:'Namco';rom:@bosco),
+  (name:'Bosconian';year:'1981';snd:3;hi:false;zip:'bosco';grid:250;company:'Namco';rom:@bosco;samples:@bosco_samples),
   (name:'HangOn Jr.';year:'1985';snd:1;hi:false;zip:'hangonjr';grid:251;company:'Sega';rom:@hangonjr),
   (name:'Slap Shooter';year:'1986';snd:1;hi:false;zip:'slapshtr';grid:252;company:'Sega';rom:@slapshtr),
   (name:'Fantasy Zone II: The Tears of Opa-Opa';year:'1988';snd:1;hi:false;zip:'fantzn2';grid:253;company:'Sega';rom:@fantzn2),
@@ -357,6 +357,8 @@ const
   (name:'Twin Eagle - Revenge Joe''s Brother';year:'1988';snd:1;hi:false;zip:'twineagl';grid:303;company:'Seta';rom:@twineagl),
   (name:'Thunder & Lightning';year:'1990';snd:1;hi:false;zip:'thunderl';grid:304;company:'Seta';rom:@thunderl),
   (name:'Ms Pac Man Twin';year:'1992';snd:1;hi:false;zip:'mspactwin';grid:305;company:'Susilu';rom:@mspactwin),
+  (name:'Extermination';year:'1987';snd:1;hi:false;zip:'extrmatn';grid:306;company:'Taito';rom:@extrmatn),
+  (name:'Atomic Robo-kid';year:'1988';snd:1;hi:false;zip:'robokid';grid:307;company:'UPL';rom:@robokid),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -689,6 +691,8 @@ case numero of
   303:principal1.CambiarMaquina(principal1.twineagle1);
   304:principal1.CambiarMaquina(principal1.thunderl1);
   305:principal1.CambiarMaquina(principal1.mspactwin1);
+  306:principal1.CambiarMaquina(principal1.exterm1);
+  307:principal1.CambiarMaquina(principal1.robokid1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1012,6 +1016,8 @@ principal1.thundercade1.checked:=false;
 principal1.twineagle1.checked:=false;
 principal1.thunderl1.checked:=false;
 principal1.mspactwin1.checked:=false;
+principal1.exterm1.checked:=false;
+principal1.robokid1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1176,12 +1182,12 @@ case tmaquina of
   117:Cargar_tp84;
   118:Cargar_Tutankham;
   119,183:Cargar_Pang;
-  120,121,122:Cargar_ninjakid2;
+  120,121,122,307:Cargar_ninjakid2;
   123,194:Cargar_skykid;
   124,125,126,289,290,291:Cargar_system86;
   127:Cargar_rocnrope;
   128:Cargar_kyugo_hw;
-  129,130:Cargar_tnzs;
+  129,130,306:Cargar_tnzs;
   131:Cargar_pacland;
   132:Cargar_mario;
   133:Cargar_solomon;
@@ -2502,6 +2508,14 @@ end;
 if sender=principal1.mspactwin1 then begin
   tipo:=305;
   principal1.mspactwin1.Checked:=true;
+end;
+if sender=principal1.exterm1 then begin
+  tipo:=306;
+  principal1.exterm1.Checked:=true;
+end;
+if sender=principal1.robokid1 then begin
+  tipo:=307;
+  principal1.robokid1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

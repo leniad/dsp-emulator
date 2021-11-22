@@ -593,6 +593,7 @@ end;
 procedure update_ay;inline;
 begin
 case cpc_ppi.ay_control of
+  0:cpc_ppi.port_a_read_latch:=$ff;
   1:cpc_ppi.port_a_read_latch:=ay8910_0.read;
   2:ay8910_0.write(cpc_ppi.port_a_write_latch);
   3:ay8910_0.control(cpc_ppi.port_a_write_latch);
