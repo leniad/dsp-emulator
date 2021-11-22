@@ -7,9 +7,9 @@
             +Fixed IRQs
             +Added opcodes $02,$08,$22,$35,$40,$41,$60,$61,$65,$86,$89,$8a,$90,$c7 and $d6
             +Fixed opcodes $10,$11 and $57
-    +Sega GameGear
-        -Added Master System video compatibility
-        -Added CodeMasters Mapper extra RAM
+-Sega GameGear
+    +Added Master System video compatibility
+    +Added CodeMasters Mapper extra RAM
 -NinjaKid II HW
     +Added dipswitches
     +NinjaKid II: Added PCM sound
