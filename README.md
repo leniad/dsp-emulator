@@ -1,13 +1,13 @@
 ﻿# DSP Emulator status #
 <b>20/02/22 - DSP Emulator 0.20WIP6. Win32 and source update.<br>
-Happy 20th aniversary!
-More than 200.000 code lines
-More than 300 arcade games
-10 8bits computers
-8 home consoles
-19 CPUs emulated
-29 sound chips
-And more to come!
+Happy 20th aniversary!<br>
+More than 200.000 code lines<br>
+More than 300 arcade games<br>
+10 8bits computers<br>
+8 home consoles<br>
+19 CPUs emulated<br>
+29 sound chips<br>
+And more to come!<br>
 <pre>
 -General
     +Updated SDL library to 2.0.20
