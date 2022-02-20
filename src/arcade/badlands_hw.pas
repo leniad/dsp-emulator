@@ -370,7 +370,7 @@ convert_gfx(1,0,@memoria_temp,@pc_x,@ps_y,false,false);
 atari_mo_0:=tatari_mo.create(nil,@ram[$1000 shr 1],badlands_mo_config,3,336+8,240+8);
 //Init Analog
 init_analog(m68000_0.numero_cpu,m68000_0.clock);
-analog_0(50,10,$0,$ff,$0,false,true,true);
+analog_0(50,10,$0,$ff,$0,false,true,true,true);
 //final
 reset_badlands;
 iniciar_badlands:=true;

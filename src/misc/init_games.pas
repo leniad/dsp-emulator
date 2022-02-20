@@ -1,5 +1,7 @@
 unit init_games;
+
 interface
+
 uses sysutils,main_engine,rom_engine,rom_export,
   //Computer
   spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,commodore64,
@@ -33,7 +35,8 @@ uses sysutils,main_engine,rom_engine,rom_export,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
-  seta_hw;
+  seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw;
+
 type
   tgame_desc=record
               name,year:string;
@@ -45,9 +48,10 @@ type
               rom:ptipo_roms;
               samples:ptsample_file;
             end;
+
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=320;
+  GAMES_CONT=329;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -359,6 +363,14 @@ const
   (name:'Ms Pac Man Twin';year:'1992';snd:1;hi:false;zip:'mspactwin';grid:305;company:'Susilu';rom:@mspactwin),
   (name:'Extermination';year:'1987';snd:1;hi:false;zip:'extrmatn';grid:306;company:'Taito';rom:@extrmatn),
   (name:'Atomic Robo-kid';year:'1988';snd:1;hi:false;zip:'robokid';grid:307;company:'UPL';rom:@robokid),
+  (name:'Mr. Do''s Castle';year:'1983';snd:1;hi:false;zip:'docastle';grid:308;company:'Universal';rom:@docastle),
+  (name:'Do! Run Run';year:'1984';snd:1;hi:false;zip:'dorunrun';grid:309;company:'Universal';rom:@dorunrun),
+  (name:'Mr. Do''s Wild Ride';year:'1984';snd:1;hi:false;zip:'dowild';grid:310;company:'Universal';rom:@dowild),
+  (name:'Jumping Jack';year:'1984';snd:1;hi:false;zip:'jjack';grid:311;company:'Universal';rom:@jjack),
+  (name:'Kick Rider';year:'1984';snd:1;hi:false;zip:'kickridr';grid:312;company:'Universal';rom:@kickridr),
+  (name:'Indoor Soccer';year:'1985';snd:1;hi:false;zip:'idsoccer';grid:313;company:'Universal';rom:@idsoccer),
+  (name:'Crystal Castles';year:'1983';snd:1;hi:false;zip:'ccastles';grid:314;company:'Atari';rom:@ccastles),
+  (name:'Flower';year:'1986';snd:1;hi:false;zip:'flower';grid:315;company:'Clarue';rom:@flower),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -369,19 +381,24 @@ const
   (name:'SG-1000';year:'1985';snd:1;hi:false;zip:'';grid:1005;company:'Sega'),
   (name:'Sega GameGear';year:'1990';snd:1;hi:false;zip:'';grid:1006;company:'Sega'),
   (name:'Super Cassette Vision';year:'1984';snd:1;hi:false;zip:'scv';grid:1007;company:'Epoch';rom:@scv),
+  (name:'Sega Genesis/Megadrive';year:'1988';snd:1;hi:false;zip:'';grid:1008;company:'Sega'),
   //G&W
   (name:'Dokey Kong Jr';year:'1983';snd:1;hi:false;zip:'gnw_dj101';grid:2000;company:'Nintendo';rom:@gnw_dj101),
   (name:'Dokey Kong II';year:'1983';snd:1;hi:false;zip:'gnw_jr55';grid:2001;company:'Nintendo';rom:@gnw_jr55),
   (name:'Mario Bros';year:'1983';snd:1;hi:false;zip:'gnw_mw56';grid:2002;company:'Nintendo';rom:@gnw_mw56));
+
 var
   orden_games:array[1..GAMES_CONT] of word;
+
 procedure load_game(numero:word);
 procedure todos_false;
 procedure menus_false(driver:word);
 procedure cargar_maquina(tmaquina:word);
 function tipo_cambio_maquina(sender:TObject):word;
+
 implementation
 uses principal;
+
 procedure load_game(numero:word);
 begin
 case numero of
@@ -693,6 +710,14 @@ case numero of
   305:principal1.CambiarMaquina(principal1.mspactwin1);
   306:principal1.CambiarMaquina(principal1.exterm1);
   307:principal1.CambiarMaquina(principal1.robokid1);
+  308:principal1.CambiarMaquina(principal1.mrdocastle1);
+  309:principal1.CambiarMaquina(principal1.dorunrun1);
+  310:principal1.CambiarMaquina(principal1.dowild1);
+  311:principal1.CambiarMaquina(principal1.jjack1);
+  312:principal1.CambiarMaquina(principal1.kickrider1);
+  313:principal1.CambiarMaquina(principal1.idsoccer1);
+  314:principal1.CambiarMaquina(principal1.ccastles1);
+  315:principal1.CambiarMaquina(principal1.flower1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -701,11 +726,13 @@ case numero of
   1005:principal1.CambiarMaquina(principal1.SG10001);
   1006:principal1.CambiarMaquina(principal1.SegaGG1);
   1007:principal1.CambiarMaquina(principal1.SCV1);
+  1008:principal1.CambiarMaquina(principal1.genesis1);
   2000:principal1.CambiarMaquina(principal1.DonkeyKongjr1);
   2001:principal1.CambiarMaquina(principal1.DonkeyKongII1);
   2002:principal1.CambiarMaquina(principal1.MarioBros1);
 end;
 end;
+
 procedure todos_false;
 begin
 //Computer
@@ -1018,6 +1045,14 @@ principal1.thunderl1.checked:=false;
 principal1.mspactwin1.checked:=false;
 principal1.exterm1.checked:=false;
 principal1.robokid1.checked:=false;
+principal1.mrdocastle1.checked:=false;
+principal1.dorunrun1.checked:=false;
+principal1.dowild1.checked:=false;
+principal1.jjack1.checked:=false;
+principal1.kickrider1.checked:=false;
+principal1.idsoccer1.checked:=false;
+principal1.ccastles1.checked:=false;
+principal1.flower1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1027,11 +1062,13 @@ principal1.segams1.checked:=false;
 principal1.sg10001.checked:=false;
 principal1.segagg1.checked:=false;
 principal1.scv1.checked:=false;
+principal1.genesis1.checked:=false;
 //gnw
 principal1.DonkeyKongjr1.checked:=false;
 principal1.DonkeyKongII1.checked:=false;
 principal1.MarioBros1.checked:=false;
 end;
+
 procedure menus_false(driver:word);
 begin
 principal1.BitBtn1.visible:=false; //Configurar ordenador/consola
@@ -1081,7 +1118,7 @@ case driver of
           principal1.BitBtn9.visible:=true; //Load Snapshot
        end;
   10..999:principal1.BitBtn8.enabled:=true;  //Arcade
-  1000,1003,1005,1006,1007:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
+  1000,1003,1005,1006,1007,1008:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
        end;
@@ -1103,6 +1140,7 @@ case driver of
   2000..2002:; //G&W
 end;
 end;
+
 procedure cargar_maquina(tmaquina:word);
 begin
 case tmaquina of
@@ -1266,6 +1304,9 @@ case tmaquina of
   298:cargar_toaplan1;
   301:cargar_karatechamp;
   302,303,304:cargar_seta;
+  308,309,310,311,312,313:cargar_mrdocastle;
+  314:cargar_ccastles;
+  315:cargar_flower;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -1275,10 +1316,12 @@ case tmaquina of
   1005:Cargar_sg;
   1006:Cargar_gg;
   1007:Cargar_scv;
+  1008:Cargar_genesis;
   //gnw
   2000..2002:cargar_gnw_510;
 end;
 end;
+
 function tipo_cambio_maquina(sender:TObject):word;
 var
   tipo,f:word;
@@ -2517,6 +2560,38 @@ if sender=principal1.robokid1 then begin
   tipo:=307;
   principal1.robokid1.Checked:=true;
 end;
+if sender=principal1.mrdocastle1 then begin
+  tipo:=308;
+  principal1.mrdocastle1.Checked:=true;
+end;
+if sender=principal1.dorunrun1 then begin
+  tipo:=309;
+  principal1.dorunrun1.Checked:=true;
+end;
+if sender=principal1.dowild1 then begin
+  tipo:=310;
+  principal1.dowild1.Checked:=true;
+end;
+if sender=principal1.jjack1 then begin
+  tipo:=311;
+  principal1.jjack1.Checked:=true;
+end;
+if sender=principal1.kickrider1 then begin
+  tipo:=312;
+  principal1.kickrider1.Checked:=true;
+end;
+if sender=principal1.idsoccer1 then begin
+  tipo:=313;
+  principal1.idsoccer1.Checked:=true;
+end;
+if sender=principal1.ccastles1 then begin
+  tipo:=314;
+  principal1.ccastles1.Checked:=true;
+end;
+if sender=principal1.flower1 then begin
+  tipo:=315;
+  principal1.flower1.Checked:=true;
+end;
 //consolas
 if sender=principal1.NES1 then begin
   tipo:=1000;
@@ -2550,6 +2625,10 @@ if sender=principal1.scv1 then begin
   tipo:=1007;
   principal1.scv1.Checked:=true;
 end;
+if sender=principal1.genesis1 then begin
+  tipo:=1008;
+  principal1.genesis1.Checked:=true;
+end;
 //GNW
 if sender=principal1.DonkeyKongjr1 then begin
   tipo:=2000;
@@ -2573,4 +2652,5 @@ end;
 //Dar el numero de maquina emulada
 tipo_cambio_maquina:=tipo;
 end;
+
 end.

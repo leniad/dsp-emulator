@@ -321,7 +321,13 @@ uses
   karatechamp_hw in '..\arcade\karatechamp_hw.pas',
   seta_sprites in '..\arcade\misc\seta_sprites.pas',
   seta_hw in '..\arcade\seta_hw.pas',
-  x1_010 in '..\snd\x1_010.pas';
+  x1_010 in '..\snd\x1_010.pas',
+  genesis in '..\consolas\genesis.pas',
+  sega_315_5313 in '..\consolas\sega_315_5313.pas',
+  mrdocastle_hw in '..\arcade\mrdocastle_hw.pas',
+  crystalcastles_hw in '..\arcade\crystalcastles_hw.pas',
+  flower_hw in '..\arcade\flower_hw.pas',
+  flower_audio in '..\snd\flower_audio.pas';
 
 {$R *.res}
 begin

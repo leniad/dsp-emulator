@@ -249,22 +249,19 @@ end;
 end;
 
 //Burger Time
-function dec_btime(dir:word):byte;inline;
-var
-  val:byte;
-begin
-val:=memoria[dir];
-if m6502_0.opcode and had_written then begin
-    had_written:=false;
-    if((dir and $104)=$104) then val:=bitswap8(val,6,5,3,4,2,7,1,0);
-end;
-dec_btime:=val;
-end;
-
 function getbyte_btime(direccion:word):byte;
+var
+  tempb:byte;
 begin
 case direccion of
-  0..$7ff,$b000..$ffff:getbyte_btime:=dec_btime(direccion);
+  0..$7ff,$b000..$ffff:begin
+                          tempb:=memoria[direccion];
+                          if m6502_0.opcode and had_written then begin
+                            had_written:=false;
+                            if((direccion and $104)=$104) then tempb:=bitswap8(tempb,6,5,3,4,2,7,1,0);
+                          end;
+                          getbyte_btime:=tempb;
+                       end;
   $1000..$13ff:getbyte_btime:=video_ram[direccion and $3ff];
   $1400..$17ff:getbyte_btime:=video_ram2[direccion and $3ff];
   //OJO! Esto lo quiere SIN ordenar!!!
@@ -354,16 +351,11 @@ end;
 end;
 
 //Lock'n'chase
-function dec_lnc(dir:word):byte;inline;
-begin
-if m6502_0.opcode then dec_lnc:=bitswap8(memoria[dir],7,5,6,4,3,2,1,0)
-  else dec_lnc:=memoria[dir];
-end;
-
 function getbyte_lnc(direccion:word):byte;
 begin
 case direccion of
-  0..$3bff,$b000..$b1ff,$c000..$ffff:getbyte_lnc:=dec_lnc(direccion);
+  0..$3bff,$b000..$b1ff,$c000..$ffff:if m6502_0.opcode then getbyte_lnc:=bitswap8(memoria[direccion],7,5,6,4,3,2,1,0)
+                                        else getbyte_lnc:=memoria[direccion];
   $3c00..$3fff:getbyte_lnc:=video_ram[direccion and $3ff];
   //OJO! Esto lo quiere SIN ordenar!!!
   $7c00..$7fff:getbyte_lnc:=memoria[direccion];
@@ -693,6 +685,7 @@ end;
 reset_btime;
 iniciar_btime:=true;
 end;
+
 procedure Cargar_btime;
 begin
 llamadas_maquina.iniciar:=iniciar_btime;

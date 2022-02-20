@@ -161,26 +161,6 @@ if event.arcade then begin
 end;
 end;
 
-procedure eventos_mspacman;
-begin
-if event.arcade then begin
-  //in 0
-  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
-  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
-  //in 1
-  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
-  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
-end;
-end;
-
 procedure pacman_principal;
 var
   frame:single;
@@ -253,6 +233,26 @@ begin
 end;
 
 //MS Pacman
+procedure eventos_mspacman;
+begin
+if event.arcade then begin
+  //in 0
+  if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
+  if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  //in 1
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.start[0] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
+end;
+end;
+
 function mspacman_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -695,17 +695,17 @@ compute_resistor_weights(0,	255, -1.0,
 			3,@resistances,@gweights,0,0,
 			2,@resistances[1],@bweights,0,0);
 for f:=0 to $1f do begin
-		// red component */
+		// red component
 		bit0:=(memoria_temp[f] shr 0) and $01;
 		bit1:=(memoria_temp[f] shr 1) and $01;
 		bit2:=(memoria_temp[f] shr 2) and $01;
 		colores[f].r:=combine_3_weights(@rweights, bit0, bit1, bit2);
-		// green component */
+		// green component
 		bit0:=(memoria_temp[f] shr 3) and $01;
 		bit1:=(memoria_temp[f] shr 4) and $01;
 		bit2:=(memoria_temp[f] shr 5) and $01;
 		colores[f].g:=combine_3_weights(@gweights, bit0, bit1, bit2);
-		// blue component */
+		// blue component
 		bit0:=(memoria_temp[f] shr 6) and $01;
 		bit1:=(memoria_temp[f] shr 7) and $01;
 		colores[f].b:=combine_2_weights(@bweights, bit0, bit1);

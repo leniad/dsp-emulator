@@ -387,7 +387,7 @@ var
   d1l_tab:array[0..15] of dword;
   salida_fm:array[0..2] of integer;
 
-function sshr(num:int64;fac:byte):int64;
+function sshr(num:int64;fac:byte):int64;inline;
 begin
   if num<0 then sshr:=-(abs(num) shr fac)
     else sshr:=num shr fac;

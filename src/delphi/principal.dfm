@@ -55,7 +55,6 @@ object principal1: Tprincipal1
     Height = 42
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 364
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -593,8 +592,6 @@ object principal1: Tprincipal1
     Align = alRight
     TabOrder = 1
     Visible = False
-    ExplicitLeft = 315
-    ExplicitHeight = 192
     object BitBtn9: TBitBtn
       Left = 4
       Top = 44
@@ -1236,8 +1233,6 @@ object principal1: Tprincipal1
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 234
-    ExplicitWidth = 364
     DesignSize = (
       362
       19)
@@ -1874,6 +1869,34 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object MrDoCasttleHW1: TMenuItem
+            Caption = 'Mr Do Casttle HW'
+            GroupIndex = 1
+            object MrDoCastle1: TMenuItem
+              Caption = 'Mr. Do'#39's Castle'
+              OnClick = CambiarMaquina
+            end
+            object DoRunRun1: TMenuItem
+              Caption = 'Do! Run Run'
+              OnClick = CambiarMaquina
+            end
+            object dowild1: TMenuItem
+              Caption = 'Mr. Do'#39's Wild Ride'
+              OnClick = CambiarMaquina
+            end
+            object jjack1: TMenuItem
+              Caption = 'Jumping Jack'
+              OnClick = CambiarMaquina
+            end
+            object KickRider1: TMenuItem
+              Caption = 'Kick Rider'
+              OnClick = CambiarMaquina
+            end
+            object idsoccer1: TMenuItem
+              Caption = 'Indoor Soccer'
+              OnClick = CambiarMaquina
+            end
+          end
           object EposHardware1: TMenuItem
             Caption = 'Epos HW'
             GroupIndex = 1
@@ -2189,6 +2212,11 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object Flower1: TMenuItem
+            Caption = 'Flower'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2248,6 +2276,11 @@ object principal1: Tprincipal1
           end
           object TetrisAtari1: TMenuItem
             Caption = 'Tetris (Atari)'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
+          object ccastles1: TMenuItem
+            Caption = 'Clystal Castles'
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
@@ -3088,6 +3121,10 @@ object principal1: Tprincipal1
         end
         object scv1: TMenuItem
           Caption = 'Super Cassette Vision'
+          OnClick = CambiarMaquina
+        end
+        object genesis1: TMenuItem
+          Caption = 'Sega Genesis/Megadrive'
           OnClick = CambiarMaquina
         end
       end

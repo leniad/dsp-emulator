@@ -218,7 +218,7 @@ m6502_0:=cpu_m6502.create(12096000 div 8,256,TCPU_M6502);
 m6502_0.change_ram_calls(centipede_getbyte,centipede_putbyte);
 m6502_0.init_sound(centipede_sound_update);
 //Sound Chips
-pokey_0:=pokey_chip.create(0,12096000 div 8);
+pokey_0:=pokey_chip.create(12096000 div 8);
 //cargar roms
 if not(roms_load(@memoria,centipede_rom)) then exit;
 //convertir chars y sprites

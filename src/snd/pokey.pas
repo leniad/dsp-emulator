@@ -135,7 +135,7 @@ type
   end;
 
   pokey_chip=class(snd_chip_class)
-        constructor Create(num:byte;clock:dword);
+        constructor create(clock:dword);
         destructor free;
         procedure update;
         procedure reset;
@@ -188,7 +188,6 @@ type
         poly9:array[0..$1ff] of dword;
         poly17:array[0..$1ffff] of dword;
         voltab:array[0..$10000] of dword;
-
         procedure step_one_clock;
 	      //procedure step_keyboard;
 
@@ -205,10 +204,12 @@ type
   procedure pokey1_update_internal;
   procedure pokey2_update_internal;
 
-var
-  pokey_0,pokey_1,pokey_2:pokey_chip;
+var
+  pokey_0,pokey_1,pokey_2:pokey_chip;
 
 implementation
+var
+  chips_total:integer=-1;
 
 procedure pokey_chip.change_pot(pot0,pot1,pot2,pot3,pot4,pot5,pot6,pot7:single_pot);
 begin
@@ -435,14 +436,14 @@ begin
 	end;
 end;
 
-constructor pokey_chip.Create(num:byte;clock:dword);
+constructor pokey_chip.Create(clock:dword);
 var
   i:integer;
 begin
-	//self.clock_period = attotime::from_hz(clock());
-  self.number:=num;
+  chips_total:=chips_total+1;
+  self.number:=chips_total;
   self.buf_pos:=0;
-  timers.init(sound_status.cpu_num,sound_status.cpu_clock/clock,nil,pokey_update_internal,true,num);
+  timers.init(sound_status.cpu_num,sound_status.cpu_clock/clock,nil,pokey_update_internal,true,self.number);
 	// Setup channels */
 	for i:=0 to (POKEY_CHANNELS-1) do begin
 		//self.channel[i].parent = this;
@@ -517,6 +518,7 @@ var
   i:byte;
 begin
 for i:=0 to (POKEY_CHANNELS-1) do self.channel[i].free;
+chips_total:=chips_total-1;
 end;
 
 function pokey_chip.read(offset:word):byte;
@@ -700,12 +702,10 @@ begin
     end;
   end;
 end;
-
 procedure pokey_chip.write(offset:word;data:byte);
 begin
   self.write_internal(offset,data);
 end;
-
 procedure pokey_chip.process_channel(ch:integer);
 begin
 	if (((self.channel[ch].AUDC and NOTPOLY5)<>0) or ((self.poly5[self.p5] and 1)<>0)) then begin
@@ -731,7 +731,6 @@ begin
 	end;
 	synchronize(SYNC_POT,upd,self.number);
 end;
-
 
 procedure pokey_chip.step_one_clock;
 var
@@ -851,11 +850,9 @@ begin
   pokey_2.step_one_clock;
   pokey_2.update_internal;
 end;
-
 procedure pokey_chip.update;
 begin
   tsample[self.tsample_num,sound_status.posicion_sonido]:=self.output_;
   if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=self.output_;
 end;
-
 end.

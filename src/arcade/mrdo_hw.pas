@@ -21,13 +21,25 @@ const
         (n:'r8-08.bin';l:$1000;p:0;crc:$dbdc9ffa),(n:'n8-07.bin';l:$1000;p:$1000;crc:$4b9973db));
         mrdo_sprites:array[0..1] of tipo_roms=(
         (n:'h5-05.bin';l:$1000;p:0;crc:$e1218cc5),(n:'k5-06.bin';l:$1000;p:$1000;crc:$b1f68b04));
+        //Dip
+        mrdo_dip_a:array [0..6] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$3;dip_name:'Easy'),(dip_val:$2;dip_name:'Medium'),(dip_val:$1;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Rack Test (Cheat)';number:2;dip:((dip_val:$4;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Special';number:2;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$10;name:'Extra';number:2;dip:((dip_val:$10;dip_name:'Easy'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$20;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'2'),(dip_val:$c0;dip_name:'3'),(dip_val:$80;dip_name:'4'),(dip_val:$40;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        mrdo_dip_b:array [0..2] of def_dip=(
+        (mask:$f0;name:'Coin A';number:11;dip:((dip_val:$60;dip_name:'4C 1C'),(dip_val:$80;dip_name:'3C 1C'),(dip_val:$a0;dip_name:'2C 1C'),(dip_val:$70;dip_name:'3C 2C'),(dip_val:$f0;dip_name:'1C 1C'),(dip_val:$90;dip_name:'2C 3C'),(dip_val:$e0;dip_name:'1C 2C'),(dip_val:$d0;dip_name:'1C 3C'),(dip_val:$c0;dip_name:'1C 4C'),(dip_val:$b0;dip_name:'1C 5C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),())),
+        (mask:$0f;name:'Coin B';number:11;dip:((dip_val:$06;dip_name:'4C 1C'),(dip_val:$08;dip_name:'3C 1C'),(dip_val:$0a;dip_name:'2C 1C'),(dip_val:$07;dip_name:'3C 2C'),(dip_val:$0f;dip_name:'1C 1C'),(dip_val:$09;dip_name:'2C 3C'),(dip_val:$0e;dip_name:'1C 2C'),(dip_val:$0d;dip_name:'1C 3C'),(dip_val:$0c;dip_name:'1C 4C'),(dip_val:$0b;dip_name:'1C 5C'),(dip_val:$0;dip_name:'Free Play'),(),(),(),(),())),());
+
 var
-  scroll_x,scroll_y:byte;
+  scroll_x,scroll_y,prot:byte;
 
 procedure update_video_mrdo;inline;
 var
-  f,x,y,color,nchar:word;
-  atrib:byte;
+  f,color,nchar:word;
+  x,y,atrib:byte;
 begin
 for f:=$0 to $3ff do begin
   x:=f div 32;
@@ -81,6 +93,7 @@ end;
 procedure eventos_mrdo;
 begin
 if event.arcade then begin
+  //p1
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
@@ -88,6 +101,12 @@ if event.arcade then begin
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
+  //p2
+  if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
+  if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.coin[0] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
@@ -126,8 +145,8 @@ case direccion of
         end;
   $a000:mrdo_getbyte:=marcade.in0;
   $a001:mrdo_getbyte:=marcade.in1;
-  $a002:mrdo_getbyte:=$df;
-  $a003:mrdo_getbyte:=$ff;
+  $a002:mrdo_getbyte:=marcade.dswa;
+  $a003:mrdo_getbyte:=marcade.dswb;
 end;
 end;
 
@@ -135,11 +154,11 @@ procedure mrdo_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
    0..$7fff:;
-   $8000..$87ff:begin
+   $8000..$87ff:if memoria[direccion]<>valor then begin
                      gfx[1].buffer[direccion and $3ff]:=true;
                      memoria[direccion]:=valor;
                 end;
-   $8800..$8fff:begin
+   $8800..$8fff:if memoria[direccion]<>valor then begin
                      gfx[0].buffer[direccion and $3ff]:=true;
                      memoria[direccion]:=valor;
                 end;
@@ -170,6 +189,7 @@ begin
  marcade.in2:=$ff;
  scroll_x:=0;
  scroll_y:=0;
+ prot:=$ff;
 end;
 
 function iniciar_mrdo:boolean;
@@ -184,8 +204,7 @@ const
 			16*16, 18*16, 20*16, 22*16, 24*16, 26*16, 28*16, 30*16);
 procedure calc_paleta;
 var
-  pot:array[0..15] of single;
-	weight:array[0..15] of byte;
+  weight,pot:array[0..15] of single;
   par:single;
   f,a1,a2,bits0,bits1:byte;
   colores:tpaleta;
@@ -194,10 +213,10 @@ const
 	R2=120;
 	R3=100;
 	R4=75;
-	pull=220;
-	potadjust=0.7;	// diode voltage drop */
+	PULL=220;
+	POTADJUST=0.7;	// diode voltage drop
 begin
-	for f:=$0f downto 0 do begin
+	for f:=$f downto 0 do begin
 		par:=0;
 		if (f and 1)<>0 then par:=par+(1.0/R1);
 		if (f and 2)<>0 then par:=par+(1.0/R2);
@@ -205,29 +224,30 @@ begin
 		if (f and 8)<>0 then par:=par+(1.0/R4);
 		if (par<>0) then begin
 			par:=1/par;
-			pot[f]:=pull/(pull+par)-potadjust;
+			pot[f]:=PULL/(PULL+par)-POTADJUST;
 		end	else pot[f]:=0;
-		weight[f]:=trunc($ff*pot[f]/pot[$0f]);
+		weight[f]:=$ff*pot[f]/pot[$f];
+    if weight[f]<0 then weight[f]:=0;
 	end;
   for f:=0 to $ff do begin
 		a1:=((f shr 3) and $1c)+(f and $03)+$20;
 		a2:=((f shr 0) and $1c)+(f and $03);
 		bits0:=(memoria_temp[a1] shr 0) and $03;
 		bits1:=(memoria_temp[a2] shr 0) and $03;
-		colores[f].r:=weight[bits0 + (bits1 shl 2)];
+		colores[f].r:=trunc(weight[bits0+(bits1 shl 2)]);
     bits0:=(memoria_temp[a1] shr 2) and $03;
 		bits1:=(memoria_temp[a2] shr 2) and $03;
-		colores[f].g:=weight[bits0 + (bits1 shl 2)];
+		colores[f].g:=trunc(weight[bits0 + (bits1 shl 2)]);
     bits0:=(memoria_temp[a1] shr 4) and $03;
 		bits1:=(memoria_temp[a2] shr 4) and $03;
-		colores[f].b:=weight[bits0+(bits1 shl 2)];
+		colores[f].b:=trunc(weight[bits0+(bits1 shl 2)]);
   end;
   set_pal(colores,$100);
   //CLUT sprites
   for f:=0 to $3f do begin
 		bits0:=memoria_temp[($40+(f and $1f))];
-		if (f and $20)<>0 then bits0:=bits0 shr 4		// high 4 bits are for sprite color n + 8 */
-  		else bits0:=bits0 and $0f;	// low 4 bits are for sprite color n */
+		if (f and $20)<>0 then bits0:=bits0 shr 4		// high 4 bits are for sprite color n + 8
+  		else bits0:=bits0 and $0f;	// low 4 bits are for sprite color n
     gfx[2].colores[f]:=bits0+((bits0 and $0c) shl 3);
 	end;
 end;
@@ -272,6 +292,11 @@ convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 //poner la paleta
 if not(roms_load(@memoria_temp,mrdo_pal)) then exit;
 calc_paleta;
+//dip
+marcade.dswa:=$df;
+marcade.dswb:=$ff;
+marcade.dswa_val:=@mrdo_dip_a;
+marcade.dswb_val:=@mrdo_dip_b;
 //final
 reset_mrdo;
 iniciar_mrdo:=true;

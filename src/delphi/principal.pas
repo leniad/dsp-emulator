@@ -473,6 +473,16 @@ type
     mspactwin1: TMenuItem;
     exterm1: TMenuItem;
     robokid1: TMenuItem;
+    genesis1: TMenuItem;
+    MrDoCasttleHW1: TMenuItem;
+    MrDoCastle1: TMenuItem;
+    DoRunRun1: TMenuItem;
+    dowild1: TMenuItem;
+    jjack1: TMenuItem;
+    KickRider1: TMenuItem;
+    idsoccer1: TMenuItem;
+    ccastles1: TMenuItem;
+    Flower1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

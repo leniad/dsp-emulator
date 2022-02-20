@@ -380,7 +380,7 @@ case main_vars.tipo_maquina of
         for f:=0 to 7 do copymemory(@memoria_rom[f,0],@mem_temp[$8000+(f*$4000)],$4000);
         //Init Analog
         init_analog(z80_0.numero_cpu,z80_0.clock);
-        analog_0(100,4,$80,$e0,$20,true,false,true);
+        analog_0(100,4,$80,$e0,$20,true,false,true,true);
         analog_1(100,20,$ff,0,true);
         //DIP
         marcade.dswa_val:=@systeme_dip_a;
@@ -448,7 +448,7 @@ case main_vars.tipo_maquina of
         for f:=0 to 7 do copymemory(@memoria_rom[f,0],@mem_temp[$8000+(f*$4000)],$4000);
         //Init Analog
         init_analog(z80_0.numero_cpu,z80_0.clock);
-        analog_0(60,35,$3ff,$fff,0,false,false,true);
+        analog_0(60,35,$3ff,$fff,0,false,false,true,true);
         //DIP
         marcade.dswa_val:=@systeme_dip_a;
         marcade.dswb_val:=@ridleofp_dip_b;

@@ -22,7 +22,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '2.2.0.2'
+  LCLVersion = '2.2.0.4'
   object Panel1: TPanel
     Left = 0
     Height = 42
@@ -2342,6 +2342,33 @@ object principal1: Tprincipal1
             Caption = 'Mr. Do!'
             OnClick = CambiarMaquina
           end
+          object mrdocastlehw: TMenuItem
+            Caption = 'Mr Do Casttle HW'
+            object MrDoCastle1: TMenuItem
+              Caption = 'Mr. Do''s Castle'
+              OnClick = CambiarMaquina
+            end
+            object DoRunRun1: TMenuItem
+              Caption = 'Do! Run Run'
+              OnClick = CambiarMaquina
+            end
+            object dowild1: TMenuItem
+              Caption = 'Mr. Do''s Wild Ride'
+              OnClick = CambiarMaquina
+            end
+            object jjack1: TMenuItem
+              Caption = 'Jumping Jack'
+              OnClick = CambiarMaquina
+            end
+            object KickRider1: TMenuItem
+              Caption = 'Kick Rider'
+              OnClick = CambiarMaquina
+            end
+            object idsoccer1: TMenuItem
+              Caption = 'Indoor Soccer'
+              OnClick = CambiarMaquina
+            end
+          end
           object MenuItem8: TMenuItem
             Caption = 'Epos HW'
             object theglob1: TMenuItem
@@ -2621,6 +2648,10 @@ object principal1: Tprincipal1
             Caption = 'Karate Champ'
             OnClick = CambiarMaquina
           end
+          object flower1: TMenuItem
+            Caption = 'Flower'
+            OnClick = CambiarMaquina
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2673,6 +2704,10 @@ object principal1: Tprincipal1
           end
           object tetrisatari1: TMenuItem
             Caption = 'Tetris (Atari)'
+            OnClick = CambiarMaquina
+          end
+          object ccastles1: TMenuItem
+            Caption = 'Clystal Castles'
             OnClick = CambiarMaquina
           end
         end
@@ -3475,6 +3510,10 @@ object principal1: Tprincipal1
         end
         object scv1: TMenuItem
           Caption = 'Super Cassette Vision'
+          OnClick = CambiarMaquina
+        end
+        object genesis1: TMenuItem
+          Caption = 'Genesis/Megadrive'
           OnClick = CambiarMaquina
         end
       end

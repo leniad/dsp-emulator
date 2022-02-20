@@ -803,8 +803,14 @@ end;
 procedure Cargar_gaelco_hw;
 begin
 case main_vars.tipo_maquina of
-  78:llamadas_maquina.bucle_general:=bigk_principal;
-  101,173,174:llamadas_maquina.bucle_general:=thoop_principal;
+  78:begin
+        llamadas_maquina.bucle_general:=bigk_principal;
+        llamadas_maquina.fps_max:=60;
+      end;
+  101,173,174:begin
+        llamadas_maquina.bucle_general:=thoop_principal;
+        llamadas_maquina.fps_max:=57.42;
+  end;
 end;
 llamadas_maquina.iniciar:=iniciar_gaelco_hw;
 llamadas_maquina.reset:=reset_gaelco_hw;

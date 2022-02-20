@@ -37,7 +37,7 @@ procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
 //GFX put
 procedure put_gfx(pos_x,pos_y,nchar,color:word;screen,ngfx:byte);
-procedure put_gfx_mask(pos_x,pos_y,nchar,color:word;screen,ngfx,trans,mask:byte);
+procedure put_gfx_mask(pos_x,pos_y,nchar,color:word;screen,ngfx,trans,mask:word);
 procedure put_gfx_mask_flip(pos_x,pos_y,nchar,color:word;screen,ngfx,trans,mask:byte;flipx,flipy:boolean);
 procedure put_gfx_trans(pos_x,pos_y,nchar,color:word;screen,ngfx:byte);
 procedure put_gfx_trans_alt(pos_x,pos_y,nchar,color:word;screen,ngfx,index:byte);
@@ -510,7 +510,7 @@ fillword(punbuf,size_x,paleta[color]);
 for y:=0 to (size_y-1) do putpixel_gfx_int(pos_x,pos_y+y,size_x,screen);
 end;
 
-procedure put_gfx_mask(pos_x,pos_y,nchar,color:word;screen,ngfx,trans,mask:byte);
+procedure put_gfx_mask(pos_x,pos_y,nchar,color:word;screen,ngfx,trans,mask:word);
 var
   x,y:byte;
   temp:pword;

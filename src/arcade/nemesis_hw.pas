@@ -1,19 +1,15 @@
 unit nemesis_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ay_8910,vlm_5030,k005289,ym_2151,k007232;
-
 procedure cargar_nemesis;
-
 implementation
 type
   tipo_sprite=record
                 width,height,char_type:byte;
                 mask:word;
               end;
-
 const
         nemesis_rom:array[0..7] of tipo_roms=(
         (n:'456-d01.12a';l:$8000;p:0;crc:$35ff1aaa),(n:'456-d05.12c';l:$8000;p:$1;crc:$23155faa),
@@ -68,7 +64,6 @@ const
                                                 (width:8;height:8;char_type:0;mask:$7ff),(width:16;height:8;char_type:6;mask:$3ff),(width:8;height:16;char_type:3;mask:$3ff),(width:16;height:16;char_type:1;mask:$1ff));
         pal_look:array[0..$1f] of byte=(0,1,2,4,5,6,8,9,11,13,15,18,20,22,25,28,33,36,41,46,51,57,64,73,
                                         80,91,104,120,142,168,204,255);
-
 var
  rom:array[0..$3ffff] of word;
  ram3,bios_rom,char_ram:array[0..$7fff] of word;
@@ -89,7 +84,6 @@ var
  char_8_16:array[0..$3ff] of boolean;
  char_32_32:array[0..$7f] of boolean;
  char_64_64:array[0..$1f] of boolean;
-
 procedure char_calc;
 var
   f:word;
@@ -135,7 +129,6 @@ begin
     char_64_64[f]:=false;
   end;
 end;
-
 procedure draw_sprites;
 var
   f,pri,idx,num_gfx:byte;
@@ -171,7 +164,6 @@ for pri:=0 to $ff do begin  //prioridad
   end;
 end;
 end;
-
 procedure update_video_nemesis;
 var
   f,x,y,nchar,color:word;
@@ -244,7 +236,6 @@ scroll__x_part2(8,9,1,@scroll_x1);
 actualiza_trozo_final(0,16,256,224,9);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
-
 procedure eventos_nemesis;
 begin
 if event.arcade then begin
@@ -271,7 +262,6 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 or $40) else marcade.in2:=(marcade.in2 and $ffbf);
 end;
 end;
-
 procedure cambiar_color(tmp_color,numero:word);inline;
 var
   bit1,bit2,bit3:byte;
@@ -286,7 +276,6 @@ begin
   set_pal_color(color,numero);
   buffer_color[numero shr 4]:=true;
 end;
-
 function ay0_porta_read:byte;
 var
   res:byte;
@@ -294,24 +283,21 @@ begin
   res:=round((z80_0.contador+(linea*z80_0.tframes))/1024) and $2f;
   ay0_porta_read:=res or $d0 or $20;
 end;
-
 procedure ay8910_k005289_1(valor:byte);
 begin
   k005289_0.control_A_w(valor);
 end;
-
 procedure ay8910_k005289_2(valor:byte);
 begin
-  k005289_0.control_B_w(valor);
-end;
 
+  k005289_0.control_B_w(valor);
+end;
 procedure sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
   k005289_0.update;
 end;
-
 //Nemesis
 procedure nemesis_principal;
 var
@@ -337,7 +323,6 @@ while EmuStatus=EsRuning do begin
  video_sync;
 end;
 end;
-
 function nemesis_getword(direccion:dword):word;
 begin
 case direccion of
@@ -359,7 +344,6 @@ case direccion of
   $60000..$67fff:nemesis_getword:=ram2[(direccion and $7fff) shr 1];
 end;
 end;
-
 procedure nemesis_putword(direccion:dword;valor:word);
 var
   dir:word;
@@ -438,7 +422,6 @@ case direccion of
   $60000..$67fff:ram2[(direccion and $7fff) shr 1]:=valor;
 end;
 end;
-
 function nemesis_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -448,7 +431,6 @@ case direccion of
   $e205:nemesis_snd_getbyte:=ay8910_1.Read;
 end;
 end;
-
 procedure nemesis_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -464,7 +446,6 @@ case direccion of
   $e405:ay8910_1.Write(valor);
 end;
 end;
-
 //GX400
 procedure eventos_gx400;
 begin
@@ -495,7 +476,6 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in2:=marcade.in2 and $bf;
 end;
 end;
-
 procedure gx400_principal;
 var
   frame_m,frame_s:single;
@@ -526,7 +506,6 @@ while EmuStatus=EsRuning do begin
  video_sync;
 end;
 end;
-
 function gx400_getword(direccion:dword):word;
 begin
 case direccion of
@@ -552,7 +531,6 @@ case direccion of
   $80000..$bffff:gx400_getword:=rom[(direccion and $3ffff) shr 1];
 end;
 end;
-
 procedure gx400_putword(direccion:dword;valor:word);
 var
   dir:word;
@@ -636,7 +614,6 @@ case direccion of
   $60000..$7ffff:ram4[(direccion and $1ffff) shr 1]:=valor;
 end;
 end;
-
 function gx400_snd_getbyte(direccion:word):byte;
 var
   ptemp:pbyte;
@@ -654,7 +631,6 @@ case direccion of
   $e205:gx400_snd_getbyte:=ay8910_1.Read;
 end;
 end;
-
 procedure gx400_snd_putbyte(direccion:word;valor:byte);
 var
   ptemp:pbyte;
@@ -682,7 +658,6 @@ case direccion of
   $e405:ay8910_1.Write(valor);
 end;
 end;
-
 function ay0_porta_read_gx400:byte;
 var
   res:byte;
@@ -690,7 +665,6 @@ begin
   res:=round((z80_0.contador+(linea*z80_0.tframes))/1024) and $2f;
   ay0_porta_read_gx400:=res or $d0 or ($20*vlm5030_0.get_bsy);
 end;
-
 procedure sound_update_gx400;
 begin
   ay8910_0.update;
@@ -698,7 +672,6 @@ begin
   vlm5030_0.update;
   k005289_0.update;
 end;
-
 //Salamander
 function salamander_getword(direccion:dword):word;
 begin
@@ -720,7 +693,6 @@ case direccion of
   $190000..$191fff:salamander_getword:=ram1[(direccion and $1fff) shr 1];
 end;
 end;
-
 procedure cambiar_color_salamander(numero:word);inline;
 var
   color:tcolor;
@@ -734,7 +706,6 @@ begin
   set_pal_color(color,numero);
   buffer_color[numero shr 4]:=true;
 end;
-
 procedure salamander_putword(direccion:dword;valor:word);
 var
   dir:word;
@@ -815,7 +786,6 @@ case direccion of
                  end;
 end;
 end;
-
 function salamander_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -829,7 +799,6 @@ case direccion of
         end;
 end;
 end;
-
 procedure salamander_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -845,7 +814,6 @@ case direccion of
         end;
 end;
 end;
-
 procedure nemesis_k007232_cb_0(valor:byte);
 begin
   k007232_0.set_volume(0,(valor shr 4)*$11,0);
@@ -858,7 +826,6 @@ begin
   k007232_0.update;
   vlm5030_0.update;
 end;
-
 //Main
 procedure reset_nemesis;
 begin
@@ -904,7 +871,6 @@ begin
  fillchar(char_32_32,$80,1);
  fillchar(char_64_64,$20,1);
 end;
-
 function iniciar_nemesis:boolean;
 var
   f:byte;
@@ -994,13 +960,11 @@ for f:=0 to 7 do gfx[f].trans[0]:=true;
 reset_nemesis;
 iniciar_nemesis:=true;
 end;
-
 procedure cerrar_nemesis;
 begin
 if k007232_1_rom<>nil then freemem(k007232_1_rom);
 k007232_1_rom:=nil;
 end;
-
 procedure Cargar_nemesis;
 begin
 llamadas_maquina.iniciar:=iniciar_nemesis;
@@ -1012,5 +976,4 @@ end;
 llamadas_maquina.reset:=reset_nemesis;
 llamadas_maquina.fps_max:=60.60606060606060;
 end;
-
 end.

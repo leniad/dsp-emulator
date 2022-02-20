@@ -890,7 +890,7 @@ if not(roms_load(@pcm_rom,outrun_pcm)) then exit;
 for f:=0 to 5 do copymemory(@pcm_rom[$8000+(f*$10000)],@pcm_rom[0+(f*$10000)],$8000);
 //Controls
 init_analog(m68000_0.numero_cpu,m68000_0.clock);
-analog_0(100,4,$80,$e0,$20,true,false,true);
+analog_0(100,4,$80,$e0,$20,true,false,true,true);
 analog_1(100,20,$ff,0,true);
 analog_2(100,20,$ff,0,true);
 //convertir tiles

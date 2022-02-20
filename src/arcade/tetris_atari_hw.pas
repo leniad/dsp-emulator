@@ -204,9 +204,9 @@ m6502_0.init_sound(tetris_sound_update);
 //Slapstic
 slapstic_0:=slapstic_type.create(101,false);
 //Sound Chip
-pokey_0:=pokey_chip.create(0,1789772);
+pokey_0:=pokey_chip.create(1789772);
 pokey_0.change_all_pot(tetris_pokey_0);
-pokey_1:=pokey_chip.create(1,1789772);
+pokey_1:=pokey_chip.create(1789772);
 pokey_1.change_all_pot(tetris_pokey_1);
 //nv_ram
 if read_file_size(Directory.Arcade_nvram+'tetrisa.nv',longitud) then read_file(Directory.Arcade_nvram+'tetrisa.nv',@nv_ram[0],longitud)

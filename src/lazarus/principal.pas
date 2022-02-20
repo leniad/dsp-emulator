@@ -256,6 +256,16 @@ type
     lnc1: TMenuItem;
     karatechamp1: TMenuItem;
     exterm1: TMenuItem;
+    genesis1: TMenuItem;
+    DoRunRun1: TMenuItem;
+    dowild1: TMenuItem;
+    jjack1: TMenuItem;
+    KickRider1: TMenuItem;
+    idsoccer1: TMenuItem;
+    ccastles1: TMenuItem;
+    flower1: TMenuItem;
+    MrDoCastle1: TMenuItem;
+    mrdocastlehw: TMenuItem;
     robokid1: TMenuItem;
     mspactwin1: TMenuItem;
     twineagle1: TMenuItem;

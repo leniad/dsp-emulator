@@ -1,4 +1,36 @@
 ﻿# DSP Emulator status #
+<b>20/02/22 - DSP Emulator 0.20WIP6. Win32 and source update.<br>
+Happy 20th aniversary!
+More than 200.000 code lines
+More than 300 arcade games
+10 8bits computers
+8 home consoles
+19 CPUs emulated
+29 sound chips
+And more to come!
+<pre>
+-General
+    +Updated SDL library to 2.0.20
+    +Analog control: Addded selection of X or Y axis inverted
+-Genesis/Megadrive
+    +Started a new driver
+-Mr Do!
+    +Fixed colors
+    +Added dipswitch
+-Crystal Castles: Added driver with sound
+-Flower: Added driver with sound
+-Mr Do Castle Hardware
+    +Mr Do Castle: Added driver with sound
+    +Do! Run Run: Added driver with sound
+    +Mr Do Wild Ride: Added driver with sound
+    +Jumping Jack: Added driver with sound
+    +Kick Rider: Added driver with sound
+    +Indoor Soccer: Added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/YRpBMZn/ccastles.png"> <img src="https://i.ibb.co/QK4H7bL/Flower.png"><br>
+<img src="https://i.ibb.co/bL1nPyV/docastle.png"> <img src="https://i.ibb.co/5vCDj3Q/dorunrun.png"><br>
+<img src="https://i.ibb.co/PCfncpm/dowild.png"> <img src="https://i.ibb.co/cx19TTm/jjack.png"><br>
+<img src="https://i.ibb.co/SN4wrdn/kickrider.png"> <img src="https://i.ibb.co/G9hgj0n/insoccer.png"><br><br>
 <b>22/11/21 - DSP Emulator 0.20WIP5. Win32 and source update.<br><pre>
 -General
     +CPU

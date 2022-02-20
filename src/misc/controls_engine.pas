@@ -146,6 +146,7 @@ type
         delta,mid_val,max_val,min_val:integer;
         return_center:boolean;
         circle:boolean;
+        inverted_x,inverted_y:boolean;
     end;
     def_analog=record
         c:array[0..4] of def_analog_control;
@@ -171,7 +172,7 @@ procedure show_mouse_cursor;
 procedure hide_mouse_cursor;
 //Analog
 procedure init_analog(cpu:byte;cpu_clock:integer);
-procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted:boolean=false);
+procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted_x:boolean=false;inverted_y:boolean=false);
 procedure analog_1(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_2(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_3(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
@@ -529,133 +530,129 @@ var
   f:byte;
 begin
 for f:=0 to NUM_PLAYERS do begin
-  //EJE Y
-  if arcade_input.up[f] then begin
-    analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].delta;
-    if analog.c[0].circle then begin
-      if analog.c[0].y[f]>analog.c[0].max_val then analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].max_val;
-    end else begin
-      if analog.c[0].y[f]>analog.c[0].max_val then analog.c[0].y[f]:=analog.c[0].max_val;
+    //EJE Y
+  if analog.c[0].inverted_y then begin
+     if arcade_input.down[f] then begin
+        analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].delta;
+        if analog.c[0].circle then begin
+          if analog.c[0].y[f]>analog.c[0].max_val then analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].max_val;
+        end else begin
+          if analog.c[0].y[f]>analog.c[0].max_val then analog.c[0].y[f]:=analog.c[0].max_val;
+        end;
+     end;
+    if arcade_input.up[f] then begin
+        analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].delta;
+        if analog.c[0].circle then begin
+          if analog.c[0].y[f]<analog.c[0].min_val then analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].max_val;
+        end else begin
+          if analog.c[0].y[f]<analog.c[0].min_val then analog.c[0].y[f]:=analog.c[0].min_val;
+        end;
     end;
-  end;
-  if arcade_input.down[f] then begin
-    analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].delta;
-    if analog.c[0].circle then begin
-      if analog.c[0].y[f]<analog.c[0].min_val then analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].max_val;
-    end else begin
-      if analog.c[0].y[f]<analog.c[0].min_val then analog.c[0].y[f]:=analog.c[0].min_val;
-    end;
-  end;
-  if analog.c[0].return_center then begin
-    if not(arcade_input.up[f]) then begin
-      if analog.c[0].y[f]>analog.c[0].mid_val then begin
+    if analog.c[0].return_center then begin
+      if not(arcade_input.down[f]) then begin
+        if analog.c[0].y[f]>analog.c[0].mid_val then begin
           analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].delta;
           if analog.c[0].y[f]<analog.c[0].mid_val then analog.c[0].y[f]:=analog.c[0].mid_val;
+        end;
       end;
-    end;
-    if not(arcade_input.down[f]) then begin
-      if analog.c[0].y[f]<analog.c[0].mid_val then begin
+      if not(arcade_input.up[f]) then begin
+        if analog.c[0].y[f]<analog.c[0].mid_val then begin
           analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].delta;
           if analog.c[0].y[f]>analog.c[0].mid_val then analog.c[0].y[f]:=analog.c[0].mid_val;
+        end;
+      end;
+    end;
+  end else begin
+    if arcade_input.up[f] then begin
+      analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].delta;
+      if analog.c[0].circle then begin
+        if analog.c[0].y[f]>analog.c[0].max_val then analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].max_val;
+      end else begin
+        if analog.c[0].y[f]>analog.c[0].max_val then analog.c[0].y[f]:=analog.c[0].max_val;
+      end;
+    end;
+    if arcade_input.down[f] then begin
+      analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].delta;
+      if analog.c[0].circle then begin
+        if analog.c[0].y[f]<analog.c[0].min_val then analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].max_val;
+      end else begin
+        if analog.c[0].y[f]<analog.c[0].min_val then analog.c[0].y[f]:=analog.c[0].min_val;
+      end;
+    end;
+    if analog.c[0].return_center then begin
+      if not(arcade_input.up[f]) then begin
+        if analog.c[0].y[f]>analog.c[0].mid_val then begin
+          analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].delta;
+          if analog.c[0].y[f]<analog.c[0].mid_val then analog.c[0].y[f]:=analog.c[0].mid_val;
+        end;
+      end;
+      if not(arcade_input.down[f]) then begin
+        if analog.c[0].y[f]<analog.c[0].mid_val then begin
+          analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].delta;
+          if analog.c[0].y[f]>analog.c[0].mid_val then analog.c[0].y[f]:=analog.c[0].mid_val;
+        end;
       end;
     end;
   end;
   //EJE X
-  if arcade_input.left[f] then begin
-    analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].delta;
-    if analog.c[0].circle then begin
-      if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].max_val;
-    end else begin
-      if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].max_val;
-    end;
-  end;
-  if arcade_input.right[f] then begin
-    analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].delta;
-    if analog.c[0].circle then begin
-      if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].max_val;
-    end else begin
-      if analog.c[0].x[f]<analog.c[0].min_val then analog.c[0].x[f]:=analog.c[0].min_val;
-    end;
-  end;
-  if analog.c[0].return_center then begin
-    if not(arcade_input.left[f]) then
-      if analog.c[0].x[f]>analog.c[0].mid_val then begin
-        analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].delta;
-        if analog.c[0].x[f]<analog.c[0].mid_val then analog.c[0].x[f]:=analog.c[0].mid_val;
-      end;
-    if not(arcade_input.right[f]) then
-      if analog.c[0].x[f]<analog.c[0].mid_val then begin
-        analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].delta;
-        if analog.c[0].x[f]>analog.c[0].mid_val then analog.c[0].x[f]:=analog.c[0].mid_val;
-      end;
-  end;
-end;
-end;
-
-procedure analog_read_0_inverted;
-var
-  f:byte;
-begin
-for f:=0 to NUM_PLAYERS do begin
-  //EJE Y
-  if arcade_input.down[f] then begin
-    analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].delta;
-    if analog.c[0].circle then begin
-      if analog.c[0].y[f]>analog.c[0].max_val then analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].max_val;
-    end else begin
-      if analog.c[0].y[f]>analog.c[0].max_val then analog.c[0].y[f]:=analog.c[0].max_val;
-    end;
-  end;
-  if arcade_input.up[f] then begin
-    analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].delta;
-    if analog.c[0].circle then begin
-      if analog.c[0].y[f]<analog.c[0].min_val then analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].max_val;
-    end else begin
-      if analog.c[0].y[f]<analog.c[0].min_val then analog.c[0].y[f]:=analog.c[0].min_val;
-    end;
-  end;
-  if analog.c[0].return_center then begin
-    if not(arcade_input.down[f]) then begin
-      if analog.c[0].y[f]>analog.c[0].mid_val then begin
-          analog.c[0].y[f]:=analog.c[0].y[f]-analog.c[0].delta;
-          if analog.c[0].y[f]<analog.c[0].mid_val then analog.c[0].y[f]:=analog.c[0].mid_val;
+  if analog.c[0].inverted_x then begin
+    if arcade_input.right[f] then begin
+      analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].delta;
+      if analog.c[0].circle then begin
+        if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].max_val;
+      end else begin
+        if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].max_val;
       end;
     end;
-    if not(arcade_input.up[f]) then begin
-      if analog.c[0].y[f]<analog.c[0].mid_val then begin
-          analog.c[0].y[f]:=analog.c[0].y[f]+analog.c[0].delta;
-          if analog.c[0].y[f]>analog.c[0].mid_val then analog.c[0].y[f]:=analog.c[0].mid_val;
+    if arcade_input.left[f] then begin
+      analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].delta;
+      if analog.c[0].circle then begin
+        if analog.c[0].x[f]<analog.c[0].min_val then analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].max_val;
+      end else begin
+        if analog.c[0].x[f]<analog.c[0].min_val then analog.c[0].x[f]:=analog.c[0].min_val;
       end;
     end;
-  end;
-  //EJE X
-  if arcade_input.right[f] then begin
-    analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].delta;
-    if analog.c[0].circle then begin
-      if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].max_val;
-    end else begin
-      if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].max_val;
+    if analog.c[0].return_center then begin
+      if not(arcade_input.right[f]) then
+        if analog.c[0].x[f]>analog.c[0].mid_val then begin
+          analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].delta;
+          if analog.c[0].x[f]<analog.c[0].mid_val then analog.c[0].x[f]:=analog.c[0].mid_val;
+        end;
+      if not(arcade_input.left[f]) then
+        if analog.c[0].x[f]<analog.c[0].mid_val then begin
+          analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].delta;
+          if analog.c[0].x[f]>analog.c[0].mid_val then analog.c[0].x[f]:=analog.c[0].mid_val;
+        end;
     end;
-  end;
-  if arcade_input.left[f] then begin
-    analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].delta;
-    if analog.c[0].circle then begin
-      if analog.c[0].x[f]<analog.c[0].min_val then analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].max_val;
-    end else begin
-      if analog.c[0].x[f]<analog.c[0].min_val then analog.c[0].x[f]:=analog.c[0].min_val;
+  end else begin
+    if arcade_input.left[f] then begin
+      analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].delta;
+      if analog.c[0].circle then begin
+        if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].max_val;
+      end else begin
+        if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].max_val;
+      end;
     end;
-  end;
-  if analog.c[0].return_center then begin
-    if not(arcade_input.right[f]) then
-      if analog.c[0].x[f]>analog.c[0].mid_val then begin
-        analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].delta;
-        if analog.c[0].x[f]<analog.c[0].mid_val then analog.c[0].x[f]:=analog.c[0].mid_val;
+    if arcade_input.right[f] then begin
+      analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].delta;
+      if analog.c[0].circle then begin
+        if analog.c[0].x[f]>analog.c[0].max_val then analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].max_val;
+      end else begin
+        if analog.c[0].x[f]<analog.c[0].min_val then analog.c[0].x[f]:=analog.c[0].min_val;
       end;
-    if not(arcade_input.left[f]) then
-      if analog.c[0].x[f]<analog.c[0].mid_val then begin
-        analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].delta;
-        if analog.c[0].x[f]>analog.c[0].mid_val then analog.c[0].x[f]:=analog.c[0].mid_val;
-      end;
+    end;
+    if analog.c[0].return_center then begin
+      if not(arcade_input.left[f]) then
+        if analog.c[0].x[f]>analog.c[0].mid_val then begin
+          analog.c[0].x[f]:=analog.c[0].x[f]-analog.c[0].delta;
+          if analog.c[0].x[f]<analog.c[0].mid_val then analog.c[0].x[f]:=analog.c[0].mid_val;
+        end;
+      if not(arcade_input.right[f]) then
+        if analog.c[0].x[f]<analog.c[0].mid_val then begin
+          analog.c[0].x[f]:=analog.c[0].x[f]+analog.c[0].delta;
+          if analog.c[0].x[f]>analog.c[0].mid_val then analog.c[0].x[f]:=analog.c[0].mid_val;
+        end;
+    end;
   end;
 end;
 end;
@@ -746,12 +743,13 @@ analog.cpu:=cpu;
 analog.clock:=cpu_clock;
 end;
 
-procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted:boolean=false);
+procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted_x:boolean=false;inverted_y:boolean=false);
 var
    f:byte;
 begin
-if inverted then timers.init(analog.cpu,analog.clock/((4250000/analog.clock)*sensitivity),analog_read_0_inverted,nil,true)
-  else timers.init(analog.cpu,analog.clock/((4250000/analog.clock)*sensitivity),analog_read_0,nil,true);
+timers.init(analog.cpu,analog.clock/((4250000/analog.clock)*sensitivity),analog_read_0,nil,true);
+analog.c[0].inverted_x:=inverted_x;
+analog.c[0].inverted_y:=inverted_y;
 analog.c[0].delta:=port_delta;
 analog.c[0].mid_val:=mid_val;
 analog.c[0].max_val:=max_val;

@@ -98,7 +98,6 @@ type
           function adc_hl(valor:word):word;
           function sbc_hl(valor:word):word;
         private
-          //z80t,z80t_cb,z80t_dd,z80t_ddcb,z80t_ed,z80t_ex:array[0..$ff] of byte;
           raised_z80:type_raised;
           function call_nmi:byte;
           function call_irq:byte;
@@ -754,6 +753,10 @@ begin
 irq_temp:=false;
 self.contador:=0;
 while self.contador<maximo do begin
+if self.pedir_halt<>CLEAR_LINE then begin
+  self.contador:=trunc(maximo);
+  exit;
+end;
 pestados:=self.contador;
 if self.pedir_reset<>CLEAR_LINE then begin
   temp:=self.pedir_reset;
@@ -774,10 +777,6 @@ if not(self.after_ei) then begin
   end;
 end;
 self.after_ei:=false;
-if self.pedir_halt<>CLEAR_LINE then begin
-  self.contador:=trunc(maximo);
-  exit;
-end;
 if self.r.halt_opcode then r.pc:=r.pc-1;
 self.opcode:=true;
 instruccion:=self.getbyte(r.pc);

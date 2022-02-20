@@ -433,7 +433,7 @@ m6502_0.change_ram_calls(gauntlet_snd_getbyte,gauntlet_snd_putbyte);
 m6502_0.init_sound(gauntlet_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(14318180 div 4);
-pokey_0:=pokey_chip.create(0,14318180 div 8);
+pokey_0:=pokey_chip.create(14318180 div 8);
 //TMS5220
 case main_vars.tipo_maquina of
   236:begin //Gauntlet

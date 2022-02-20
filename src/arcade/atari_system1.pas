@@ -509,7 +509,7 @@ m6502_0.init_sound(atari_sys1_sound_update);
 //Sound Chips
 ym2151_0:=ym2151_chip.create(14318180 div 4);
 ym2151_0.change_irq_func(ym2151_snd_irq);
-pokey_0:=pokey_chip.create(0,14318180 div 8);
+pokey_0:=pokey_chip.create(14318180 div 8);
 //convertir chars
 if not(roms_load(@memoria_temp,atari_sys1_char)) then exit;
 init_gfx(0,8,8,$200);
