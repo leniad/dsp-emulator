@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m680x,main_engine,controls_engine,ay_8910,gfx_engine,timer_engine,
      sn_76496,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_knjoe;
+function iniciar_knjoe:boolean;
 
 implementation
 const
@@ -68,7 +68,7 @@ scroll__x(1,2,scroll_x);
 for i:=0 to 3 do begin
 		for f:=$1f downto 0 do begin
 			offs:=pribase[i]+(f*4);
-      y:=memoria[offs];
+      y:=memoria[offs]+1;
       x:=memoria[offs+3];
       atrib:=memoria[offs+1];
 			nchar:=(memoria[offs+2]+((atrib and $10) shl 5)+((atrib and $20) shl 3)) and spr_mask[sprite_bank];
@@ -278,6 +278,9 @@ const
 			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
   pc_y:array[0..7] of dword=(7*8, 6*8, 5*8, 4*8, 3*8, 2*8, 1*8, 0*8);
 begin
+llamadas_maquina.bucle_general:=knjoe_principal;
+llamadas_maquina.reset:=reset_knjoe;
+llamadas_maquina.fps_max:=55;
 iniciar_knjoe:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
@@ -357,14 +360,6 @@ marcade.dswb_val:=@knjoe_dip_b;
 //final
 reset_knjoe;
 iniciar_knjoe:=true;
-end;
-
-procedure Cargar_knjoe;
-begin
-llamadas_maquina.iniciar:=iniciar_knjoe;
-llamadas_maquina.bucle_general:=knjoe_principal;
-llamadas_maquina.reset:=reset_knjoe;
-llamadas_maquina.fps_max:=55;
 end;
 
 end.

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,pal_engine,
      sound_engine;
 
-procedure cargar_higemaru;
+function iniciar_higemaru:boolean;
 
 implementation
 const
@@ -172,6 +172,8 @@ const
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
 begin
+llamadas_maquina.bucle_general:=higemaru_principal;
+llamadas_maquina.reset:=reset_higemaru;
 iniciar_higemaru:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -216,13 +218,6 @@ marcade.dswb_val:=@higemaru_dip_b;
 //final
 reset_higemaru;
 iniciar_higemaru:=true;
-end;
-
-procedure cargar_higemaru;
-begin
-llamadas_maquina.iniciar:=iniciar_higemaru;
-llamadas_maquina.bucle_general:=higemaru_principal;
-llamadas_maquina.reset:=reset_higemaru;
 end;
 
 end.

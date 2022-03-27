@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,timer_engine,rom_engine,
      pal_engine,sound_engine,mcs51;
 
-procedure cargar_gunsmokehw;
+function iniciar_gunsmokehw:boolean;
 
 implementation
 const
@@ -603,11 +603,14 @@ begin
 iniciar_gunsmokehw:=false;
 iniciar_audio(false);
 screen_init(3,256,256,true);
+llamadas_maquina.reset:=reset_gunsmokehw;
 case main_vars.tipo_maquina of
   80:begin
       screen_init(1,256,512,false,true);
       screen_init(2,256,512);
       screen_mod_scroll(2,256,256,255,512,256,511);
+      llamadas_maquina.bucle_general:=gunsmokehw_principal;
+      llamadas_maquina.fps_max:=59.63;
      end;
   82,83:begin
       screen_init(1,256,512);
@@ -615,6 +618,7 @@ case main_vars.tipo_maquina of
       screen_init(2,256,512,true);
       screen_mod_scroll(2,256,256,255,512,256,511);
       screen_init(4,256,512,false,true);
+      llamadas_maquina.bucle_general:=hw1943_principal;
   end;
 end;
 iniciar_video(224,256);
@@ -769,13 +773,4 @@ reset_gunsmokehw;
 iniciar_gunsmokehw:=true;
 end;
 
-procedure Cargar_gunsmokehw;
-begin
-llamadas_maquina.iniciar:=iniciar_gunsmokehw;
-llamadas_maquina.reset:=reset_gunsmokehw;
-if main_vars.tipo_maquina=80 then begin
-  llamadas_maquina.bucle_general:=gunsmokehw_principal;
-  llamadas_maquina.fps_max:=59.63;
-end else llamadas_maquina.bucle_general:=hw1943_principal;
-end;
 end.

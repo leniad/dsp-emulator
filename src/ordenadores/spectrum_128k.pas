@@ -16,13 +16,12 @@ var
    paginacion_activa:boolean;
    linea:word;
 
-procedure Cargar_Spectrum128K;
+function iniciar_128k:boolean;
 procedure spectrum128_main;
 function spec128_getbyte(direccion:word):byte;
 procedure spec128_putbyte(direccion:word;valor:byte);
 function spec128_inbyte(puerto:word):byte;
 procedure spec128_outbyte(puerto:word;valor:byte);
-function iniciar_128k:boolean;
 procedure spec128k_reset;
 procedure spec128_retraso_memoria(direccion:word);
 procedure spec128_retraso_puerto(puerto:word);
@@ -39,10 +38,13 @@ begin
 spec128_lg:=mouse.lg_val;
 end;
 
-procedure cargar_Spectrum128K;
+function iniciar_128k:boolean;
+var
+ f:dword;
+ h:byte;
+ mem_temp:array[0..$7fff] of byte;
 begin
 principal1.panel2.Visible:=true;
-llamadas_maquina.iniciar:=iniciar_128k;
 llamadas_maquina.bucle_general:=spectrum128_main;
 llamadas_maquina.reset:=spec128k_reset;
 llamadas_maquina.cintas:=spectrum_tapes;
@@ -50,14 +52,6 @@ llamadas_maquina.grabar_snapshot:=grabar_spec;
 llamadas_maquina.fps_max:=17734475/5/70908;
 llamadas_maquina.close:=spec_cerrar_comun;
 llamadas_maquina.configurar:=spectrum_config;
-end;
-
-function iniciar_128k:boolean;
-var
- f:dword;
- h:byte;
- mem_temp:array[0..$7fff] of byte;
-begin
 iniciar_128k:=false;
 //Iniciar el Z80 y pantalla
 if not(spec_comun(17734475 div 5)) then exit;

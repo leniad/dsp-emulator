@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,misc_functions,m6502;
 
-procedure cargar_btime;
+function iniciar_btime:boolean;
 
 implementation
 const
@@ -573,6 +573,9 @@ for f:=0 to $1f do begin
 end;
 end;
 begin
+llamadas_maquina.bucle_general:=principal_btime;
+llamadas_maquina.reset:=reset_btime;
+llamadas_maquina.fps_max:=57.444855;
 iniciar_btime:=false;
 iniciar_audio(false);
 screen_init(1,256,256); //Fondo
@@ -686,11 +689,4 @@ reset_btime;
 iniciar_btime:=true;
 end;
 
-procedure Cargar_btime;
-begin
-llamadas_maquina.iniciar:=iniciar_btime;
-llamadas_maquina.bucle_general:=principal_btime;
-llamadas_maquina.reset:=reset_btime;
-llamadas_maquina.fps_max:=57.444855;
-end;
 end.

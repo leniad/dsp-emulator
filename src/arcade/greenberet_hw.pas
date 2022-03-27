@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,timer_engine,
      rom_engine,file_engine,pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_gberet;
+function iniciar_gberet:boolean;
 
 implementation
 const
@@ -284,6 +284,11 @@ begin
  rom_bank:=0;
 end;
 
+procedure cerrar_gberet;
+begin
+  if main_vars.tipo_maquina=17 then save_hi('gberet.hi',@memoria[$d900],60);
+end;
+
 function iniciar_gberet:boolean;
 var
       colores:tpaleta;
@@ -308,6 +313,12 @@ begin
   convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=gberet_principal;
+llamadas_maquina.close:=cerrar_gberet;
+llamadas_maquina.reset:=reset_gberet;
+llamadas_maquina.fps_max:=60.60606060;
+llamadas_maquina.save_qsnap:=gberet_qsave;
+llamadas_maquina.load_qsnap:=gberet_qload;
 iniciar_gberet:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
@@ -374,22 +385,6 @@ marcade.dswc_val:=@gberet_dip_c;
 //final
 reset_gberet;
 iniciar_gberet:=true;
-end;
-
-procedure cerrar_gberet;
-begin
-if main_vars.tipo_maquina=17 then save_hi('gberet.hi',@memoria[$d900],60);
-end;
-
-procedure cargar_gberet;
-begin
-llamadas_maquina.iniciar:=iniciar_gberet;
-llamadas_maquina.bucle_general:=gberet_principal;
-llamadas_maquina.close:=cerrar_gberet;
-llamadas_maquina.reset:=reset_gberet;
-llamadas_maquina.fps_max:=60.60606060;
-llamadas_maquina.save_qsnap:=gberet_qsave;
-llamadas_maquina.load_qsnap:=gberet_qload;
 end;
 
 end.

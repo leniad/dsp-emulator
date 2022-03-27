@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,namco_snd,samples,rom_engine,
      pal_engine,konami_snd,sound_engine;
 
-procedure cargar_rallyxh;
+function iniciar_rallyxh:boolean;
 
 implementation
 const
@@ -454,6 +454,14 @@ begin
 end;
 
 begin
+ case main_vars.tipo_maquina of
+   29:llamadas_maquina.bucle_general:=jungler_principal;
+   50,70:begin
+           llamadas_maquina.bucle_general:=rallyx_principal;
+           llamadas_maquina.fps_max:=60.606060606060;
+         end;
+ end;
+ llamadas_maquina.reset:=reset_rallyxh;
  iniciar_rallyxh:=false;
  iniciar_audio(false);
  if main_vars.tipo_maquina=29 then main_screen.rol90_screen:=true;
@@ -532,7 +540,7 @@ begin
          //cargar sonido y samples
          namco_snd_0:=namco_snd_chip.create(3);
          if not(roms_load(namco_snd_0.get_wave_dir,nrallyx_sound)) then exit;
-         load_samples(rallyx_samples);
+         load_samples(rallyx_samples,1,true,'rallyx.zip');
          //convertir chars
          if not(roms_load(@memoria_temp,nrallyx_char)) then exit;
          cargar_chars(0);
@@ -564,19 +572,6 @@ begin
  //final
  reset_rallyxh;
  iniciar_rallyxh:=true;
-end;
-
-procedure Cargar_rallyxh;
-begin
- case main_vars.tipo_maquina of
-   29:llamadas_maquina.bucle_general:=jungler_principal;
-   50,70:begin
-           llamadas_maquina.bucle_general:=rallyx_principal;
-           llamadas_maquina.fps_max:=60.606060606060;
-         end;
- end;
- llamadas_maquina.iniciar:=iniciar_rallyxh;
- llamadas_maquina.reset:=reset_rallyxh;
 end;
 
 end.

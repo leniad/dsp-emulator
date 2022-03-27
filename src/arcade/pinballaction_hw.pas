@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,
      pal_engine,sound_engine,timer_engine;
 
-procedure cargar_pinballaction;
+function iniciar_pinballaction:boolean;
 
 const
         pinballaction_rom:array[0..2] of tipo_roms=(
@@ -95,13 +95,13 @@ procedure eventos_pinballaction;
 begin
 if event.arcade then begin
   //Player 1
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.but3[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
   //Player 2
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $10) else marcade.in1:=(marcade.in1 and $ef);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.but3[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
   //System
@@ -174,11 +174,11 @@ begin
 case direccion of
     0..$7fff:;
     $8000..$cfff,$e000..$e07f:memoria[direccion]:=valor;
-    $d000..$d7ff:begin //chars
+    $d000..$d7ff:if memoria[direccion]<>valor then begin //chars
                     memoria[direccion]:=valor;
                     gfx[0].buffer[direccion and $3ff]:=true;
                  end;
-    $d800..$dfff:begin //tiles
+    $d800..$dfff:if memoria[direccion]<>valor then begin //tiles
                     memoria[direccion]:=valor;
                     gfx[1].buffer[direccion and $3ff]:=true;
                  end;
@@ -268,6 +268,8 @@ const
 var
   memoria_temp:array[0..$ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=pinballaction_principal;
+llamadas_maquina.reset:=reset_pinballaction;
 iniciar_pinballaction:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -322,13 +324,6 @@ marcade.dswb:=$0;
 marcade.dswb_val:=@pinballaction_dipb;
 reset_pinballaction;
 iniciar_pinballaction:=true;
-end;
-
-procedure Cargar_pinballaction;
-begin
-llamadas_maquina.iniciar:=iniciar_pinballaction;
-llamadas_maquina.bucle_general:=pinballaction_principal;
-llamadas_maquina.reset:=reset_pinballaction;
 end;
 
 end.

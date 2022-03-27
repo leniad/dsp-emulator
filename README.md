@@ -1,4 +1,55 @@
 ﻿# DSP Emulator status #
+<b>27/03/22 - DSP Emulator 0.20WIP7. Win32 and source update.<br>
+<pre>
+-General
+    +Simplified drivers initialization
+    +Deco BAC06
+        -Added video buffer
+        -Fixed sprite RAM size
+        -Fixed row & col scroll
+    +Samples
+        -Now you can specify the source file (fixes sample load from 'New Rally X')
+    +CPU
+        -M68000
+            +Added opcode 'ror.w' (fixes E-Swat)
+        -M6800
+            +Fixed opcodes LSR, ROR, LSRD, ASLD, DAA, BHI and BLS
+            +Fixed flags from RTI (Fixes 'Knockle Joe')
+-Act Fancer
+    +Updated ROMs
+-Contra
+    +Fixed Sound CPU clock
+-Deco 0 HW
+    +Fixed many graphics issues
+    +Changed FPS, adjusted lines
+        -Sly Spy: Added driver with sound
+        -Bouder Dash I/II: Added driver with sound
+-Epos HW
+    +The Glob: Added dip switches
+    +Superglob: Added dip switches
+-Megazone
+    +Fixed CPU clock
+    +Fixed scroll
+    +Updated ROMs names
+-Pengo
+    +Added dip switches
+-Popeye
+    +Fixed CPU NMI
+-Route 16 HW
+    +Fixed DAC reset
+-Slapfigth HW
+    +Removed sprites buffer
+    +Added dip switches and P2 controls
+    +Fixed video lines
+    +Fixed IRQ generation
+    +Fixed CPU memory map
+    +Added sound CPU reset
+-TNZS HW
+    +Fixed YM2203 init
+-Twin Cobra HW
+    +Added dip switches
+</pre><br>
+<img src="https://i.ibb.co/syqg8Vf/SlySpy.png"> <img src="https://i.ibb.co/zn24jhn/Boulder-Dash-I-II.png"><br><br>
 <b>20/02/22 - DSP Emulator 0.20WIP6. Win32 and source update.<br>
 Happy 20th aniversary!<br>
 More than 200.000 code lines<br>

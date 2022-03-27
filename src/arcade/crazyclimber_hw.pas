@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,crazyclimber_hw_dac;
 
-procedure cargar_cclimber;
+function iniciar_cclimber:boolean;
 
 implementation
 const
@@ -291,6 +291,8 @@ const
     resistances_rg:array[0..2] of integer=(1000,470,220);
     resistances_b:array[0..1] of integer=(470,220);
 begin
+llamadas_maquina.bucle_general:=cclimber_principal;
+llamadas_maquina.reset:=reset_cclimber;
 iniciar_cclimber:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -358,13 +360,6 @@ marcade.dswb_val:=@cclimber_dip_b;
 //final
 reset_cclimber;
 iniciar_cclimber:=true;
-end;
-
-procedure cargar_cclimber;
-begin
-llamadas_maquina.iniciar:=iniciar_cclimber;
-llamadas_maquina.bucle_general:=cclimber_principal;
-llamadas_maquina.reset:=reset_cclimber;
 end;
 
 end.

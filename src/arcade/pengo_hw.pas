@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,sega_decrypt;
 
-procedure cargar_pengo;
+function iniciar_pengo:boolean;
 
 implementation
 const
@@ -19,6 +19,17 @@ const
         pengo_sound:tipo_roms=(n:'pr1635.51';l:$100;p:0;crc:$c29dea27);
         pengo_sprites:array[0..1] of tipo_roms=(
         (n:'ep1640.92';l:$2000;p:$0;crc:$d7eec6cd),(n:'ep1695.105';l:$2000;p:$4000;crc:$5bfd26e9));
+        pengo_dip_a:array [0..6] of def_dip=(
+        (mask:$1;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'30K'),(dip_val:$1;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$4;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$4;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$18;name:'Lives';number:4;dip:((dip_val:$18;dip_name:'2'),(dip_val:$10;dip_name:'3'),(dip_val:$8;dip_name:'4'),(dip_val:$0;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$20;name:'Rack Test';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$c0;dip_name:'Easy'),(dip_val:$80;dip_name:'Medium'),(dip_val:$40;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        pengo_dip_b:array [0..2] of def_dip=(
+        (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$08;dip_name:'3C 1C'),(dip_val:$04;dip_name:'2C 1C'),(dip_val:$09;dip_name:'2C 1C/5C 3C'),(dip_val:$05;dip_name:'2C 1C/4C 3C'),(dip_val:$0c;dip_name:'1C 1C'),(dip_val:$0d;dip_name:'1C 1C/5C 6C'),(dip_val:$03;dip_name:'1C 1C/4C 5C'),(dip_val:$0b;dip_name:'1C 2C/2C 3C'),(dip_val:$02;dip_name:'1C 2C'),(dip_val:$07;dip_name:'1C 2C/5C 11C'),(dip_val:$0f;dip_name:'1C 3C/4C 9C'),(dip_val:$0a;dip_name:'1C 3C'),(dip_val:$06;dip_name:'1C 4C'),(dip_val:$0e;dip_name:'1C 5C'),(dip_val:$01;dip_name:'1C 6C'))),
+        (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$80;dip_name:'3C 1C'),(dip_val:$40;dip_name:'2C 1C'),(dip_val:$90;dip_name:'2C 1C/5C 3C'),(dip_val:$50;dip_name:'2C 1C/4C 3C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$d0;dip_name:'1C 1C/5C 6C'),(dip_val:$30;dip_name:'1C 1C/4C 5C'),(dip_val:$b0;dip_name:'1C 2C/2C 3C'),(dip_val:$20;dip_name:'1C 2C'),(dip_val:$70;dip_name:'1C 2C/5C 11C'),(dip_val:$f0;dip_name:'1C 3C/4C 9C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$60;dip_name:'1C 4C'),(dip_val:$e0;dip_name:'1C 5C'),(dip_val:$10;dip_name:'1C 6C'))),());
+
 var
  irq_enable:boolean;
  rom_opcode:array[0..$7fff] of byte;
@@ -100,8 +111,8 @@ case direccion of
    0..$7fff:if z80_0.opcode then pengo_getbyte:=rom_opcode[direccion]
                else pengo_getbyte:=memoria[direccion];
    $8000..$8fff:pengo_getbyte:=memoria[direccion];
-   $9000..$903f:pengo_getbyte:=$cc;
-   $9040..$907f:pengo_getbyte:=$b0;
+   $9000..$903f:pengo_getbyte:=marcade.dswb;
+   $9040..$907f:pengo_getbyte:=marcade.dswa;
    $9080..$90bf:pengo_getbyte:=marcade.in1;
    $90c0..$90ff:pengo_getbyte:=marcade.in0;
 end;
@@ -132,6 +143,7 @@ case direccion of
              gfx_bank:=valor and $1;
              fillchar(gfx[0].buffer,$400,1);
          end;
+   $9070:; //watchdog
 end;
 end;
 
@@ -169,6 +181,9 @@ const
   pc_x:array[0..7] of dword=(8*8+0, 8*8+1, 8*8+2, 8*8+3, 0, 1, 2, 3);
   resistances:array[0..2] of integer=(1000,470,220);
 begin
+llamadas_maquina.bucle_general:=pengo_principal;
+llamadas_maquina.reset:=reset_pengo;
+llamadas_maquina.fps_max:=18432000/3/384/264;
 iniciar_pengo:=false;
 iniciar_audio(false);
 screen_init(1,224,288);
@@ -176,7 +191,7 @@ screen_init(2,224,288,false,true);
 screen_mod_sprites(2,256,512,$ff,$1ff);
 iniciar_video(224,288);
 //Main CPU
-z80_0:=cpu_z80.create(3072000,264);
+z80_0:=cpu_z80.create(18432000 div 6,264);
 z80_0.change_ram_calls(pengo_getbyte,pengo_putbyte);
 z80_0.init_sound(pengo_sound_update);
 //cargar roms
@@ -227,17 +242,14 @@ for f:=0 to 255 do begin
   gfx[0].colores[f+$100]:=(memoria_temp[$20+f] and $f)+$10;
   gfx[1].colores[f+$100]:=(memoria_temp[$20+f] and $f)+$10;
 end;
+//DIP
+marcade.dswa:=$b0;
+marcade.dswb:=$cc;
+marcade.dswa_val:=@pengo_dip_a;
+marcade.dswb_val:=@pengo_dip_b;
 //final
 reset_pengo;
 iniciar_pengo:=true;
-end;
-
-procedure cargar_pengo;
-begin
-llamadas_maquina.iniciar:=iniciar_pengo;
-llamadas_maquina.bucle_general:=pengo_principal;
-llamadas_maquina.reset:=reset_pengo;
-llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

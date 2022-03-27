@@ -7,8 +7,8 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 240
-  ClientWidth = 362
+  ClientHeight = 227
+  ClientWidth = 360
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -51,10 +51,11 @@ object principal1: Tprincipal1
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 362
+    Width = 360
     Height = 42
     Align = alTop
     TabOrder = 0
+    ExplicitWidth = 362
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -585,13 +586,15 @@ object principal1: Tprincipal1
     end
   end
   object Panel2: TPanel
-    Left = 313
+    Left = 311
     Top = 42
     Width = 49
-    Height = 179
+    Height = 166
     Align = alRight
     TabOrder = 1
     Visible = False
+    ExplicitLeft = 313
+    ExplicitHeight = 179
     object BitBtn9: TBitBtn
       Left = 4
       Top = 44
@@ -1228,16 +1231,18 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 221
-    Width = 362
+    Top = 208
+    Width = 360
     Height = 19
     Align = alBottom
     TabOrder = 2
+    ExplicitTop = 221
+    ExplicitWidth = 362
     DesignSize = (
-      362
+      360
       19)
     object Image1: TImage
-      Left = 337
+      Left = 335
       Top = 0
       Width = 25
       Height = 19
@@ -2801,6 +2806,14 @@ object principal1: Tprincipal1
             end
             object Hippo1: TMenuItem
               Caption = 'Hippodrome'
+              OnClick = CambiarMaquina
+            end
+            object SlySpy1: TMenuItem
+              Caption = 'Sly Spy'
+              OnClick = CambiarMaquina
+            end
+            object bdash1: TMenuItem
+              Caption = 'Boulder Dash I/II'
               OnClick = CambiarMaquina
             end
           end

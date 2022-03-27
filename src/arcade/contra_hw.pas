@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      hd6309,m6809,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,konami_video,sound_engine;
 
-procedure cargar_contra;
+function iniciar_contra:boolean;
 
 implementation
 const
@@ -31,9 +31,10 @@ const
         contra_dip_c:array [0..2] of def_dip=(
         (mask:$1;name:'Flip Screen';number:2;dip:((dip_val:$1;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$8;name:'Sound Mode';number:2;dip:((dip_val:$0;dip_name:'Mono'),(dip_val:$8;dip_name:'Stereo'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        CPU_SYNC=4;
 
 var
- memoria_rom:array[0..$b,0..$1FFF] of byte;
+ memoria_rom:array[0..$b,0..$1fff] of byte;
  banco,sound_latch:byte;
 
 procedure draw_sprites(bank:byte);inline;
@@ -147,7 +148,7 @@ end;
 
 procedure contra_principal;
 var
-  f:byte;
+  f,h:byte;
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
@@ -155,12 +156,14 @@ frame_m:=hd6309_0.tframes;
 frame_s:=m6809_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to $ff do begin
-    //Main
-    hd6309_0.run(frame_m);
-    frame_m:=frame_m+hd6309_0.tframes-hd6309_0.contador;
-    //SND
-    m6809_0.run(frame_s);
-    frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
+    for h:=1 to CPU_SYNC do begin
+      //Main
+      hd6309_0.run(frame_m);
+      frame_m:=frame_m+hd6309_0.tframes-hd6309_0.contador;
+      //SND
+      m6809_0.run(frame_s);
+      frame_s:=frame_s+m6809_0.tframes-m6809_0.contador;
+    end;
     if f=239 then begin
       if (K007121_chip[0].control[$07] and $2)<>0 then hd6309_0.change_irq(HOLD_LINE);
       update_video_contra;
@@ -314,6 +317,8 @@ end;
 end;
 
 begin
+llamadas_maquina.bucle_general:=contra_principal;
+llamadas_maquina.reset:=reset_contra;
 iniciar_contra:=false;
 iniciar_audio(true);
 //Pantallas
@@ -325,10 +330,10 @@ screen_mod_scroll(3,256,256,255,256,256,255);
 screen_init(4,512,256,false,true);
 iniciar_video(224,280);
 //Main CPU
-hd6309_0:=cpu_hd6309.create(24000000 div 8,$100,TCPU_HD6309E);
+hd6309_0:=cpu_hd6309.create(24000000 div 8,$100*CPU_SYNC,TCPU_HD6309E);
 hd6309_0.change_ram_calls(contra_getbyte,contra_putbyte);
 //Sound CPU
-m6809_0:=cpu_m6809.Create(24000000 div 8,$100,TCPU_MC6809E);
+m6809_0:=cpu_m6809.Create(3579545 div 2,$100*CPU_SYNC,TCPU_MC6809E);
 m6809_0.change_ram_calls(sound_getbyte,sound_putbyte);
 m6809_0.init_sound(contra_sound_update);
 //Audio chips
@@ -364,13 +369,6 @@ marcade.dswb_val:=@contra_dip_b;
 marcade.dswc_val:=@contra_dip_c;
 reset_contra;
 iniciar_contra:=true;
-end;
-
-procedure Cargar_contra;
-begin
-llamadas_maquina.iniciar:=iniciar_contra;
-llamadas_maquina.bucle_general:=contra_principal;
-llamadas_maquina.reset:=reset_contra;
 end;
 
 end.

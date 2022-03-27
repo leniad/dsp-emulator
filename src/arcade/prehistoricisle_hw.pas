@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ym_3812,nz80,upd7759,sound_engine;
 
-procedure cargar_prehisle;
+function iniciar_prehisle:boolean;
 
 implementation
 const
@@ -37,7 +37,7 @@ var
  ram,back_ram:array[0..$1fff] of word;
  fondo_rom:array[0..$7fff] of word;
  video_ram:array[0..$3ff] of word;
- invert_controls,sound_latch,vblank_val:byte;
+ invert_controls,sound_latch:byte;
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
 
 procedure poner_sprites(prioridad:boolean);inline;
@@ -152,9 +152,9 @@ while EmuStatus=EsRuning do begin
    z80_0.run(frame_s);
    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
    case f of
-    21:vblank_val:=$0;
+    21:marcade.dswb:=marcade.dswb and $7f;
     239:begin
-          vblank_val:=$80;
+          marcade.dswb:=marcade.dswb or $80;
           m68000_0.irq[4]:=HOLD_LINE;
           update_video_prehisle;
         end;
@@ -178,7 +178,7 @@ case direccion of
   $e0020:prehisle_getword:=marcade.in2;  //COIN
   $e0040:prehisle_getword:=marcade.in0 xor invert_controls;  //P1
   $e0042:prehisle_getword:=marcade.dswa;
-  $e0044:prehisle_getword:=marcade.dswb or vblank_val;
+  $e0044:prehisle_getword:=marcade.dswb;
 end;
 end;
 
@@ -300,7 +300,6 @@ begin
  scroll_x2:=0;
  scroll_y2:=0;
  sound_latch:=0;
- vblank_val:=0;
 end;
 
 function iniciar_prehisle:boolean;
@@ -313,6 +312,8 @@ var
   ptempb,memoria_temp:pbyte;
   tempw,f:word;
 begin
+llamadas_maquina.bucle_general:=prehisle_principal;
+llamadas_maquina.reset:=reset_prehisle;
 iniciar_prehisle:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
@@ -384,13 +385,6 @@ marcade.dswb_val:=@prehisle_dip_b;
 freemem(memoria_temp);
 reset_prehisle;
 iniciar_prehisle:=true;
-end;
-
-procedure cargar_prehisle;
-begin
-llamadas_maquina.iniciar:=iniciar_prehisle;
-llamadas_maquina.bucle_general:=prehisle_principal;
-llamadas_maquina.reset:=reset_prehisle;
 end;
 
 end.

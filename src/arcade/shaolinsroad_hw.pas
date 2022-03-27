@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_shaolin;
+function iniciar_shaolin:boolean;
 
 implementation
 const
@@ -238,6 +238,10 @@ const
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
     resistances:array[0..3] of integer=(2200,1000,470,220);
 begin
+llamadas_maquina.bucle_general:=shaolin_principal;
+llamadas_maquina.reset:=reset_shaolin;
+llamadas_maquina.save_qsnap:=shaolin_qsave;
+llamadas_maquina.load_qsnap:=shaolin_qload;
 iniciar_shaolin:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -310,15 +314,6 @@ marcade.dswc_val:=@shaolin_dip_c;
 //final
 reset_shaolin;
 iniciar_shaolin:=true;
-end;
-
-procedure Cargar_shaolin;
-begin
-llamadas_maquina.iniciar:=iniciar_shaolin;
-llamadas_maquina.bucle_general:=shaolin_principal;
-llamadas_maquina.reset:=reset_shaolin;
-llamadas_maquina.save_qsnap:=shaolin_qsave;
-llamadas_maquina.load_qsnap:=shaolin_qload;
 end;
 
 end.

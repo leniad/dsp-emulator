@@ -166,7 +166,7 @@ case direccion of
     $180002..$180003:wwfsstar_getword:=marcade.dswb;
     $180004..$180005:wwfsstar_getword:=marcade.in0;
     $180006..$180007:wwfsstar_getword:=marcade.in1;
-    $180008..$180009:wwfsstar_getword:=marcade.in2+vblank;
+    $180008..$180009:wwfsstar_getword:=marcade.in2 or vblank;
     $1c0000..$1c3fff:wwfsstar_getword:=ram[(direccion and $3fff) shr 1];
 end;
 end;

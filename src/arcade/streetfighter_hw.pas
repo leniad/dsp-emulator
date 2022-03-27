@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,timer_engine,msm5205;
 
-procedure cargar_sfighter;
+function iniciar_sfighter:boolean;
 
 implementation
 const
@@ -260,13 +260,13 @@ begin
 case direccion of
     0..$4ffff:; //ROM
     $800000..$800fff:if ram1[(direccion and $fff) shr 1]<>valor then begin
-                    ram1[(direccion and $fff) shr 1]:=valor;
-                    gfx[0].buffer[(direccion and $fff) shr 1]:=true;
-                   end;
+                        ram1[(direccion and $fff) shr 1]:=valor;
+                        gfx[0].buffer[(direccion and $fff) shr 1]:=true;
+                     end;
     $b00000..$b007ff:if buffer_paleta[(direccion and $7ff) shr 1]<>valor then begin
-                      buffer_paleta[(direccion and $7ff) shr 1]:=valor;
-                      cambiar_color(valor,(direccion and $7ff) shr 1);
-                   end;
+                        buffer_paleta[(direccion and $7ff) shr 1]:=valor;
+                        cambiar_color(valor,(direccion and $7ff) shr 1);
+                     end;
     $c00016,$c00010:;
     $c00014:if valor<>scroll_fg then begin
               if abs((scroll_fg and $fff0)-(valor and $fff0))>$f then fg_paint:=true;
@@ -278,7 +278,10 @@ case direccion of
           end;
     $c0001a:begin
               main_screen.flip_main_screen:=(valor and $4)<>0;
-              char_act:=(valor and $8)<>0;
+              if char_act<>((valor and $8)<>0) then begin
+                char_act:=(valor and $8)<>0;
+                if char_act then fillchar(gfx[0].buffer,$800,1);
+              end;
               bg_act:=(valor and $20)<>0;
               fg_act:=(valor and $40)<>0;
               sp_act:=(valor and $80)<>0;
@@ -325,7 +328,7 @@ end;
 
 function sf_misc_inbyte(puerto:word):byte;
 begin
-if (puerto and $ff)=1 then sf_misc_inbyte:=soundlatch;
+  if (puerto and $ff)=1 then sf_misc_inbyte:=soundlatch;
 end;
 
 procedure sf_misc_outbyte(puerto:word;valor:byte);
@@ -396,6 +399,8 @@ var
   memoria_temp,ptemp:pbyte;
   f:byte;
 begin
+llamadas_maquina.bucle_general:=sfighter_principal;
+llamadas_maquina.reset:=reset_sfighter;
 iniciar_sfighter:=false;
 iniciar_audio(true);
 screen_init(1,512,512,false,true);
@@ -465,13 +470,6 @@ marcade.dswb_val:=@sfighter_dip_b;
 freemem(memoria_temp);
 reset_sfighter;
 iniciar_sfighter:=true;
-end;
-
-procedure cargar_sfighter;
-begin
-llamadas_maquina.iniciar:=iniciar_sfighter;
-llamadas_maquina.bucle_general:=sfighter_principal;
-llamadas_maquina.reset:=reset_sfighter;
 end;
 
 end.

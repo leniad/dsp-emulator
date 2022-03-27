@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2203,rom_engine,
      pal_engine,sound_engine,timer_engine,oki6295;
 
-procedure cargar_lastduel;
+function iniciar_lastduel:boolean;
 
 implementation
 const
@@ -514,6 +514,8 @@ begin
   convert_gfx(3,0,@memoria_temp,@ps_x,@pt_y,false,true);
 end;
 begin
+llamadas_maquina.bucle_general:=lastduel_principal;
+llamadas_maquina.reset:=reset_lastduel;
 iniciar_lastduel:=false;
 iniciar_audio(false);
 screen_init(1,512,512,true);
@@ -629,13 +631,6 @@ ym2203_1:=ym2203_chip.create(3579545);
 //final
 reset_lastduel;
 iniciar_lastduel:=true;
-end;
-
-procedure cargar_lastduel;
-begin
-llamadas_maquina.iniciar:=iniciar_lastduel;
-llamadas_maquina.bucle_general:=lastduel_principal;
-llamadas_maquina.reset:=reset_lastduel;
 end;
 
 end.

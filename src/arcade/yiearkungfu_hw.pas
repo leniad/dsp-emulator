@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
      timer_engine,rom_engine,pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_yiear;
+function iniciar_yiear:boolean;
 
 implementation
 const
@@ -241,6 +241,11 @@ const
     ps_y:array[0..15] of dword=(0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
 	  32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
 begin
+llamadas_maquina.bucle_general:=yiear_principal;
+llamadas_maquina.reset:=reset_yiear;
+llamadas_maquina.fps_max:=60.58;
+llamadas_maquina.save_qsnap:=yiear_qsave;
+llamadas_maquina.load_qsnap:=yiear_qload;
 iniciar_yiear:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -297,16 +302,6 @@ marcade.dswc_val:=@yiear_dip_c;
 //final
 reset_yiear;
 iniciar_yiear:=true;
-end;
-
-procedure cargar_yiear;
-begin
-llamadas_maquina.iniciar:=iniciar_yiear;
-llamadas_maquina.bucle_general:=yiear_principal;
-llamadas_maquina.reset:=reset_yiear;
-llamadas_maquina.fps_max:=60.58;
-llamadas_maquina.save_qsnap:=yiear_qsave;
-llamadas_maquina.load_qsnap:=yiear_qload;
 end;
 
 end.

@@ -295,7 +295,7 @@ begin
   dpcm.bits_left:=8;
   dpcm.irq:=(dpcm.regs[0] and $80)<>0;
   dpcm.enabled:=true;
-  dpcm.output:=0;
+  //dpcm.output:=0;
 end;
 
 // WRITE REGISTER VALUE */
@@ -619,7 +619,7 @@ begin
       end;
       if (self.apu.dpcm.length=0) then begin
           self.apu.dpcm.enabled:=false; // Fixed * Proper DPCM channel ENABLE/DISABLE flag behaviour*/
-          self.apu.dpcm.output:=0; // Fixed * DPCM DAC resets itself when restarted
+          //self.apu.dpcm.output:=0; // Fixed * DPCM DAC resets itself when restarted
           if (self.apu.dpcm.regs[0] and $40)<>0 then begin  //Loop
 					    apu_dpcmreset(self.apu.dpcm);
           end else begin // Final - IRQ Generator

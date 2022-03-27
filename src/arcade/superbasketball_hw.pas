@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
      dac,rom_engine,pal_engine,konami_decrypt,sound_engine,qsnapshot;
 
-procedure cargar_sbasketb;
+function iniciar_sbasketb:boolean;
 
 implementation
 const
@@ -182,9 +182,9 @@ case direccion of
     $c000..$dfff:begin
                   offset:=direccion and $1fff;
                   changes:=offset xor last_addr;
-                  // A4 VLM5030 ST pin */
+                  // A4 VLM5030 ST pin
                   if (changes and $10)<>0 then vlm5030_0.set_st((offset and $10) shr 4);
-                  // A5 VLM5030 RST pin */
+                  // A5 VLM5030 RST pin
                   if (changes and $20)<>0 then vlm5030_0.set_rst((offset and $20) shr 5);
                   last_addr:=offset;
                  end;
@@ -310,6 +310,10 @@ const
     ps_y:array[0..15] of dword=(0*4*16, 1*4*16,  2*4*16,  3*4*16,  4*4*16,  5*4*16,  6*4*16,  7*4*16,
 			8*4*16, 9*4*16, 10*4*16, 11*4*16, 12*4*16, 13*4*16, 14*4*16, 15*4*16);
 begin
+llamadas_maquina.bucle_general:=sbasketb_principal;
+llamadas_maquina.reset:=reset_sbasketb;
+llamadas_maquina.save_qsnap:=sbasketb_qsave;
+llamadas_maquina.load_qsnap:=sbasketb_qload;
 iniciar_sbasketb:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -364,15 +368,6 @@ marcade.dswb_val:=@sbasketb_dip_b;
 //final
 reset_sbasketb;
 iniciar_sbasketb:=true;
-end;
-
-procedure Cargar_sbasketb;
-begin
-llamadas_maquina.iniciar:=iniciar_sbasketb;
-llamadas_maquina.bucle_general:=sbasketb_principal;
-llamadas_maquina.reset:=reset_sbasketb;
-llamadas_maquina.save_qsnap:=sbasketb_qsave;
-llamadas_maquina.load_qsnap:=sbasketb_qload;
 end;
 
 end.

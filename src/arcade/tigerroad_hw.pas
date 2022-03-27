@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,mcs51,main_engine,controls_engine,gfx_engine,nz80,ym_2203,rom_engine,
      pal_engine,sound_engine,misc_functions;
 
-procedure cargar_tigeroad;
+function iniciar_tigeroad:boolean;
 
 implementation
 const
@@ -175,23 +175,15 @@ end;
 end;
 
 function tigeroad_getword(direccion:dword):word;
-var
-  tempw:word;
 begin
 case direccion of
   0..$3ffff:tigeroad_getword:=rom[direccion shr 1];
   $fe4000:tigeroad_getword:=marcade.in0;
   $fe4002:tigeroad_getword:=marcade.in1;
   $fe4004:tigeroad_getword:=marcade.dswa;
-  $fe0800..$fe1807:begin
-                      tempw:=direccion-$fe0800;
-                      tigeroad_getword:=sprite_ram[tempw shr 1];
-                   end;
+  $fe0800..$fe1807:tigeroad_getword:=sprite_ram[(direccion-$fe0800) shr 1];
   $fec000..$fec7ff:tigeroad_getword:=video_ram[(direccion and $7ff) shr 1];
-  $ff8200..$ff867f:begin
-                      tempw:=direccion-$ff8200;
-                      tigeroad_getword:=buffer_paleta[tempw shr 1];
-                   end;
+  $ff8200..$ff867f:tigeroad_getword:=buffer_paleta[(direccion-$ff8200) shr 1];
   $ffc000..$ffffff:tigeroad_getword:=ram[(direccion and $3fff) shr 1];
 end;
 end;
@@ -217,10 +209,7 @@ var
 begin
 case direccion of
   $0..$3ffff:; //ROM
-  $fe0800..$fe1807:begin
-                      tempw:=direccion-$fe0800;
-                      sprite_ram[tempw shr 1]:=valor;
-                   end;
+  $fe0800..$fe1807:sprite_ram[(direccion-$fe0800) shr 1]:=valor;
   $fe4000:begin  //video control
              bank:=(valor shr 10) and $1;
              if (fondo_bank<>bank) then begin
@@ -300,10 +289,7 @@ var
 begin
 case direccion of
   $0..$3ffff:; //ROM
-  $fe0800..$fe1807:begin
-                      tempw:=direccion-$fe0800;
-                      sprite_ram[tempw shr 1]:=valor;
-                   end;
+  $fe0800..$fe1807:sprite_ram[(direccion-$fe0800) shr 1]:=valor;
   $fe4000:begin  //video control
              bank:=(valor shr 10) and $1;
           	 if (fondo_bank<>bank) then begin
@@ -463,6 +449,8 @@ convert_gfx(2,0,memoria_temp,@ps_x,@ps_y,false,false);
 end;
 
 begin
+llamadas_maquina.reset:=reset_tigeroad;
+llamadas_maquina.fps_max:=60.08;
 iniciar_tigeroad:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -485,6 +473,7 @@ ym2203_1:=ym2203_chip.create(3579545,0.5,1);
 getmem(memoria_temp,$100000);
 case main_vars.tipo_maquina of
   52:begin
+        llamadas_maquina.bucle_general:=tigeroad_principal;
         m68000_0.change_ram16_calls(tigeroad_getword,tigeroad_putword);
         if not(roms_load16w(@rom,tigeroad_rom)) then exit;
         if not(roms_load(@mem_snd,tigeroad_sound)) then exit;
@@ -505,6 +494,7 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@tigeroad_dip_a;
      end;
   53:begin
+        llamadas_maquina.bucle_general:=f1dream_principal;
         m68000_0.change_ram16_calls(tigeroad_getword,f1dream_putword);
         if not(roms_load16w(@rom,f1dream_rom)) then exit;
         if not(roms_load(@mem_snd,f1dream_sound)) then exit;
@@ -534,17 +524,6 @@ end;
 freemem(memoria_temp);
 reset_tigeroad;
 iniciar_tigeroad:=true;
-end;
-
-procedure Cargar_tigeroad;
-begin
-llamadas_maquina.iniciar:=iniciar_tigeroad;
-case main_vars.tipo_maquina of
-  52:llamadas_maquina.bucle_general:=tigeroad_principal;
-  53:llamadas_maquina.bucle_general:=f1dream_principal;
-end;
-llamadas_maquina.reset:=reset_tigeroad;
-llamadas_maquina.fps_max:=60.08;
 end;
 
 end.

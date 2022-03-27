@@ -60,7 +60,7 @@ var
     cpc_ppi:tcpc_ppi;
     tape_timer:byte;
 
-procedure cargar_amstrad_CPC;
+function iniciar_cpc:boolean;
 procedure cpc_load_roms;
 //GA
 procedure write_ga(val:byte);
@@ -1005,11 +1005,27 @@ begin
 cpc_ppi.tape_motor:=false;
 end;
 
+procedure cpc_close;
+begin
+if cpc_crt<>nil then freemem(cpc_crt);
+clear_disk(0);
+clear_disk(1);
+cpc_crt:=nil;
+end;
+
 function iniciar_cpc:boolean;
 var
   f:byte;
   colores:tpaleta;
 begin
+llamadas_maquina.bucle_general:=cpc_main;
+llamadas_maquina.reset:=cpc_reset;
+llamadas_maquina.fps_max:=50.080128205;
+llamadas_maquina.close:=cpc_close;
+llamadas_maquina.cintas:=amstrad_tapes;
+llamadas_maquina.cartuchos:=amstrad_loaddisk;
+llamadas_maquina.grabar_snapshot:=grabar_amstrad;
+llamadas_maquina.configurar:=cpc_config_call;
 principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
 iniciar_cpc:=false;
@@ -1043,27 +1059,6 @@ cpc_reset;
 TZX_CLOCK:=4000;
 cinta_tzx.tape_stop:=cpc_stop_tape;
 iniciar_cpc:=true;
-end;
-
-procedure cpc_close;
-begin
-if cpc_crt<>nil then freemem(cpc_crt);
-clear_disk(0);
-clear_disk(1);
-cpc_crt:=nil;
-end;
-
-procedure Cargar_amstrad_CPC;
-begin
-llamadas_maquina.iniciar:=iniciar_cpc;
-llamadas_maquina.bucle_general:=cpc_main;
-llamadas_maquina.reset:=cpc_reset;
-llamadas_maquina.fps_max:=50.080128205;
-llamadas_maquina.close:=cpc_close;
-llamadas_maquina.cintas:=amstrad_tapes;
-llamadas_maquina.cartuchos:=amstrad_loaddisk;
-llamadas_maquina.grabar_snapshot:=grabar_amstrad;
-llamadas_maquina.configurar:=cpc_config_call;
 end;
 
 end.

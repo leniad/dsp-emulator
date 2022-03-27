@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ym_2203,ym_3812,
      m680x,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_bublbobl;
+function iniciar_bublbobl:boolean;
 
 implementation
 const
@@ -341,6 +341,9 @@ const
   pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
   pc_y:array[0..7] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16);
 begin
+llamadas_maquina.bucle_general:=bublbobl_principal;
+llamadas_maquina.reset:=reset_bublbobl;
+llamadas_maquina.fps_max:=59.185606;
 iniciar_bublbobl:=false;
 iniciar_audio(false);
 screen_init(1,512,256,false,true);
@@ -391,14 +394,6 @@ marcade.dswb_val:=@bublbobl_dip_b;
 //final
 reset_bublbobl;
 iniciar_bublbobl:=true;
-end;
-
-procedure Cargar_bublbobl;
-begin
-llamadas_maquina.iniciar:=iniciar_bublbobl;
-llamadas_maquina.bucle_general:=bublbobl_principal;
-llamadas_maquina.reset:=reset_bublbobl;
-llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

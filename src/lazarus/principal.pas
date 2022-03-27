@@ -264,6 +264,8 @@ type
     idsoccer1: TMenuItem;
     ccastles1: TMenuItem;
     flower1: TMenuItem;
+    slyspy1: TMenuItem;
+    bdash1: TMenuItem;
     MrDoCastle1: TMenuItem;
     mrdocastlehw: TMenuItem;
     robokid1: TMenuItem;

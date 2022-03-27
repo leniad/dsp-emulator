@@ -5,14 +5,14 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ym_3812,ym_2203,oki6295,m6502,sound_engine,hu6280,deco_bac06;
 
-procedure cargar_actfancer;
+function iniciar_actfancer:boolean;
 
 implementation
 const
         //Act Fancer
         actfancer_rom:array[0..2] of tipo_roms=(
-        (n:'fe08-2.bin';l:$10000;p:0;crc:$0d36fbfa),(n:'fe09-2.bin';l:$10000;p:$10000;crc:$27ce2bb1),
-        (n:'10';l:$10000;p:$20000;crc:$cabad137));
+        (n:'fe08-3.bin';l:$10000;p:0;crc:$35f1999d),(n:'fe09-3.bin';l:$10000;p:$10000;crc:$d21416ca),
+        (n:'fe10-3.bin';l:$10000;p:$20000;crc:$85535fcc));
         actfancer_char:array[0..1] of tipo_roms=(
         (n:'15';l:$10000;p:0;crc:$a1baf21e),(n:'16';l:$10000;p:$10000;crc:$22e64730));
         actfancer_sound:tipo_roms=(n:'17-1';l:$8000;p:$8000;crc:$289ad106);
@@ -43,12 +43,12 @@ var
 
 procedure update_video_actfancer;inline;
 begin
-bac06_0.tile_1.update_pf(1,false,false);
-bac06_0.tile_2.update_pf(0,true,false);
-bac06_0.tile_1.show_pf;
-bac06_0.draw_sprites(0,0,2);
-bac06_0.tile_2.show_pf;
-actualiza_trozo_final(0,8,256,240,7);
+  bac06_0.tile_1.update_pf(1,false,false);
+  bac06_0.tile_2.update_pf(0,true,false);
+  bac06_0.tile_1.show_pf;
+  bac06_0.draw_sprites(0,0,2);
+  bac06_0.tile_2.show_pf;
+  actualiza_trozo_final(0,8,256,240,7);
 end;
 
 procedure eventos_actfancer;
@@ -168,8 +168,10 @@ case direccion of
   $62000..$63fff:begin
                       if (direccion and 1)<>0 then tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $00ff) or (valor shl 8)
                         else tempw:=(bac06_0.tile_1.data[(direccion and $1fff) shr 1] and $ff00) or valor;
-                      bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=tempw;
-                      gfx[1].buffer[(direccion and $1fff) shr 1]:=true;
+                      if bac06_0.tile_1.data[(direccion and $1fff) shr 1]<>tempw then begin
+                        bac06_0.tile_1.data[(direccion and $1fff) shr 1]:=tempw;
+                        bac06_0.tile_1.buffer[(direccion and $1fff) shr 1]:=true;
+                      end;
                    end;
   $70000..$70007:begin
                       if (direccion and 1)<>0 then tempw:=(bac06_0.tile_2.control_0[(direccion and 7) shr 1] and $00ff) or (valor shl 8)
@@ -184,8 +186,10 @@ case direccion of
   $72000..$727ff:begin
                       if (direccion and 1)<>0 then tempw:=(bac06_0.tile_2.data[(direccion and $7ff) shr 1] and $00ff) or (valor shl 8)
                         else tempw:=(bac06_0.tile_2.data[(direccion and $7ff) shr 1] and $ff00) or valor;
-                      bac06_0.tile_2.data[(direccion and $7ff) shr 1]:=tempw;
-                      gfx[0].buffer[(direccion and $7ff) shr 1]:=true;
+                      if bac06_0.tile_2.data[(direccion and $7ff) shr 1]<>tempw then begin
+                        bac06_0.tile_2.data[(direccion and $7ff) shr 1]:=tempw;
+                        bac06_0.tile_2.buffer[(direccion and $7ff) shr 1]:=true;
+                      end;
                    end;
   $100000..$1007ff:buffer_sprites[direccion and $7ff]:=valor;
   $110000:bac06_0.update_sprite_data(@buffer_sprites);
@@ -255,12 +259,14 @@ end;
 function iniciar_actfancer:boolean;
 const
   pt_x:array[0..15] of dword=(16*8+0, 16*8+1, 16*8+2, 16*8+3, 16*8+4, 16*8+5, 16*8+6, 16*8+7,
-			0, 1, 2, 3, 4, 5, 6, 7);
+			                        0, 1, 2, 3, 4, 5, 6, 7);
   pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
-			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
+			                        8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 var
   memoria_temp:array[0..$7ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=actfancer_principal;
+llamadas_maquina.reset:=reset_actfancer;
 iniciar_actfancer:=false;
 iniciar_audio(false);
 //El video se inicia en el chip bac06!!!
@@ -276,7 +282,7 @@ m6502_0.init_sound(actfancer_sound_update);
 ym3812_0:=ym3812_chip.create(YM3812_FM,3000000,0.9);
 ym3812_0.change_irq_calls(snd_irq);
 ym2203_0:=ym2203_chip.create(15000000,0.5,0.9);
-oki_6295_0:=snd_okim6295.Create(1000000,OKIM6295_PIN7_HIGH,0.85);
+oki_6295_0:=snd_okim6295.Create(1024188,OKIM6295_PIN7_HIGH,0.85);
 case main_vars.tipo_maquina of
   165:begin  //Act Fancer
         //cargar roms
@@ -313,13 +319,6 @@ end;
 //final
 reset_actfancer;
 iniciar_actfancer:=true;
-end;
-
-procedure Cargar_actfancer;
-begin
-llamadas_maquina.bucle_general:=actfancer_principal;
-llamadas_maquina.iniciar:=iniciar_actfancer;
-llamadas_maquina.reset:=reset_actfancer;
 end;
 
 end.

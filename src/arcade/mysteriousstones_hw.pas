@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_ms;
+function iniciar_ms:boolean;
 
 implementation
 const
@@ -321,6 +321,11 @@ const
     resistances_rg:array[0..2] of integer=(4700,3300,1500);
 	  resistances_b:array[0..1] of integer=(3300,1500);
 begin
+llamadas_maquina.bucle_general:=principal_ms;
+llamadas_maquina.reset:=reset_ms;
+llamadas_maquina.fps_max:=12000000/2/384/272;
+llamadas_maquina.save_qsnap:=ms_qsave;
+llamadas_maquina.load_qsnap:=ms_qload;
 iniciar_ms:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
@@ -373,16 +378,6 @@ marcade.dswb_val:=@ms_dip_b;
 //final
 reset_ms;
 iniciar_ms:=true;
-end;
-
-procedure cargar_ms;
-begin
-llamadas_maquina.iniciar:=iniciar_ms;
-llamadas_maquina.bucle_general:=principal_ms;
-llamadas_maquina.reset:=reset_ms;
-llamadas_maquina.fps_max:=((12000000/256)/3)/272;
-llamadas_maquina.save_qsnap:=ms_qsave;
-llamadas_maquina.load_qsnap:=ms_qload;
 end;
 
 end.

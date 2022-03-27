@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,
      pal_engine,sound_engine,misc_functions;
 
-procedure cargar_shootout;
+function iniciar_shootout:boolean;
 
 implementation
 const
@@ -50,7 +50,7 @@ begin
   -----x--    horizontal flip
   ------x-    flicker
   -------x    enable}
-for f:=0 to $7f do begin
+for f:=$7f downto 0 do begin
   atrib:=memoria[$19fd-(f*4)];
   if (((atrib and $1)<>0) and ((atrib and 8)=prioridad)) then begin
     if (bflicker or ((atrib and $2)=0)) then begin
@@ -260,6 +260,9 @@ const
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8, 8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
     pt_x:array[0..7] of dword=(($4000*8)+0, ($4000*8)+1, ($4000*8)+2, ($4000*8)+3, 0, 1, 2, 3);
 begin
+llamadas_maquina.bucle_general:=principal_shootout;
+llamadas_maquina.reset:=reset_shootout;
+llamadas_maquina.fps_max:=12000000/2/384/262;
 iniciar_shootout:=false;
 iniciar_audio(false);
 //Chars trans
@@ -331,14 +334,6 @@ marcade.dswb_val:=@shootout_dip_b;
 //final
 reset_shootout;
 iniciar_shootout:=true;
-end;
-
-procedure cargar_shootout;
-begin
-llamadas_maquina.iniciar:=iniciar_shootout;
-llamadas_maquina.bucle_general:=principal_shootout;
-llamadas_maquina.reset:=reset_shootout;
-llamadas_maquina.fps_max:=12000000/2/384/262;
 end;
 
 end.

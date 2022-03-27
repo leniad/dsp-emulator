@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms36xx,phoenix_audio_digital,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_phoenix;
+function phoenix_iniciar:boolean;
 
 implementation
 var
@@ -232,11 +232,17 @@ end;
 //Main
 procedure phoenix_reset;
 begin
-z80_0.reset;
-scroll_y:=0;
-banco_pal:=0;
-marcade.in0:=$ff;
-if main_vars.tipo_maquina=11 then phoenix_audio_reset;
+  z80_0.reset;
+  scroll_y:=0;
+  banco_pal:=0;
+  marcade.in0:=$ff;
+  if main_vars.tipo_maquina=11 then phoenix_audio_reset;
+end;
+
+procedure phoenix_cerrar;
+begin
+  tms36xx_close;
+  if main_vars.tipo_maquina=11 then phoenix_audio_cerrar;
 end;
 
 function phoenix_iniciar:boolean;
@@ -250,6 +256,9 @@ const
       phoenix_dec:array[0..5] of single=(0.5,0,0,1.05,0,0);
       pleiads_dec:array[0..5] of single=(0.33,0.33,0,0.33,0,0.33);
 begin
+llamadas_maquina.close:=phoenix_cerrar;
+llamadas_maquina.reset:=phoenix_reset;
+llamadas_maquina.fps_max:=61.035156;
 phoenix_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -262,6 +271,7 @@ z80_0:=cpu_z80.create(5500000,256);
 z80_0.init_sound(phoenix_sound_update);
 case main_vars.tipo_maquina of
   11:begin //Phoenix
+        llamadas_maquina.bucle_general:=phoenix_principal;
         z80_0.change_ram_calls(phoenix_getbyte,phoenix_putbyte);
         //Chip sonido
         tms36xx_start(372,0.21,@phoenix_dec);
@@ -285,6 +295,7 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@phoenix_dip_a;
   end;
   202:begin //Pleiads
+        llamadas_maquina.bucle_general:=pleiads_principal;
         z80_0.change_ram_calls(phoenix_getbyte,pleiads_putbyte);
         //Chip sonido
         tms36xx_start(247,0,@pleiads_dec);
@@ -320,22 +331,6 @@ set_pal(colores,256);
 //final
 phoenix_reset;
 phoenix_iniciar:=true;
-end;
-procedure phoenix_cerrar;
-begin
-tms36xx_close;
-if main_vars.tipo_maquina=11 then phoenix_audio_cerrar;
-end;
-procedure cargar_phoenix;
-begin
-llamadas_maquina.iniciar:=phoenix_iniciar;
-case main_vars.tipo_maquina of
-  11:llamadas_maquina.bucle_general:=phoenix_principal;
-  202:llamadas_maquina.bucle_general:=pleiads_principal;
-end;
-llamadas_maquina.close:=phoenix_cerrar;
-llamadas_maquina.reset:=phoenix_reset;
-llamadas_maquina.fps_max:=61.035156;
 end;
 
 end.

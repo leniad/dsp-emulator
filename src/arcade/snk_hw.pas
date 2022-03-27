@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_3812,timer_engine,sysutils;
 
-procedure cargar_snk;
+function iniciar_snk:boolean;
 
 implementation
 uses principal;
@@ -533,7 +533,7 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-function hardflags_check(num:byte):byte;
+function hardflags_check(num:byte):byte;inline;
 var
   x,y,dx,dy:word;
   ret:byte;
@@ -549,7 +549,7 @@ begin
   hardflags_check:=ret;
 end;
 
-function hardflags_check8(num:byte):byte;
+function hardflags_check8(num:byte):byte;inline;
 begin
 	hardflags_check8:=
 		(hardflags_check(num+0) shl 0) or (hardflags_check(num+1) shl 1) or
@@ -621,12 +621,12 @@ case direccion of
           hf_posx:=(hf_posx and $ff) or ((valor and $80) shl 1);
 	        hf_posy:=(hf_posy and $ff) or ((valor and $40) shl 2);
         end;
-  $d000..$dfff:begin  //bg
+  $d000..$dfff:if bg_ram[direccion and $7ff]<>valor then begin  //bg
                   bg_ram[direccion and $7ff]:=valor;
                   gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
                end;
   $e000..$f7ff:memoria[direccion]:=valor;
-  $f800..$ffff:begin
+  $f800..$ffff:if txt_ram[direccion and $7ff]<>valor then begin
                   txt_ram[direccion and $7ff]:=valor;
                   gfx[0].buffer[direccion and $7ff]:=true;
                end;
@@ -670,12 +670,12 @@ case direccion of
           hf_posx:=(hf_posx and $ff) or ((valor and $80) shl 1);
 	        hf_posy:=(hf_posy and $ff) or ((valor and $40) shl 2);
         end;
-  $d000..$dfff:begin //bg
+  $d000..$dfff:if bg_ram[direccion and $7ff]<>valor then begin //bg
                   bg_ram[direccion and $7ff]:=valor;
                   gfx[1].buffer[(direccion and $7ff) shr 1]:=true;
                end;
   $e000..$f7ff:memoria[direccion]:=valor;
-  $f800..$ffff:begin  //tx
+  $f800..$ffff:if txt_ram[direccion and $7ff]<>valor then begin  //tx
                   txt_ram[direccion and $7ff]:=valor;
                   gfx[0].buffer[direccion and $7ff]:=true;
                end;
@@ -756,11 +756,11 @@ case direccion of
         end;
   $d800..$dfff:memoria[direccion]:=valor; //share
   $e000..$e7ff:sprite_ram[direccion and $7ff]:=valor; //sprites
-  $e800..$f7ff:begin //bg_ram
+  $e800..$f7ff:if bg_ram[direccion-$e800]<>valor then begin //bg_ram
                   bg_ram[direccion-$e800]:=valor;
                   gfx[1].buffer[(direccion-$e800) shr 1]:=true;
                end;
-  $f800..$ffff:begin //txt_ram
+  $f800..$ffff:if txt_ram[direccion and $7ff]<>valor then begin //txt_ram
                   txt_ram[direccion and $7ff]:=valor;
                   gfx[0].buffer[direccion and $7ff]:=true;
                end;
@@ -789,11 +789,11 @@ case direccion of
   $c000:z80_1.change_nmi(CLEAR_LINE); //snk_cpuB_nmi_ack_w
   $c800..$cfff:memoria[direccion+$1000]:=valor;
   $d000..$d7ff:sprite_ram[direccion and $7ff]:=valor; //sprites
-  $d800..$e7ff:begin //bg_ram
+  $d800..$e7ff:if bg_ram[direccion-$d800]<>valor then begin //bg_ram
                   bg_ram[direccion-$d800]:=valor;
                   gfx[1].buffer[(direccion-$d800) shr 1]:=true;
                end;
-  $f800..$ffff:begin //tx_ram
+  $f800..$ffff:if txt_ram[direccion and $7ff]<>valor then begin //tx_ram
                   txt_ram[direccion and $7ff]:=valor;
                   gfx[0].buffer[direccion and $7ff]:=true;
                end;
@@ -846,11 +846,11 @@ case direccion of
 	$cb00:scroll_y:=(scroll_y and $100) or valor;  //snk_bg_scrolly_w
 	$cc00:scroll_x:=(scroll_x and $100) or valor;  //snk_bg_scrollx_w
   $d000..$d7ff:sprite_ram[direccion and $7ff]:=valor; //sprites
-  $d800..$f7ff:begin //bg_ram
+  $d800..$f7ff:if bg_ram[direccion-$d800]<>valor then begin //bg_ram
                   bg_ram[direccion-$d800]:=valor;
                   gfx[1].buffer[(direccion-$d800) shr 1]:=true;
                end;
-  $f800..$ffff:begin //txt_ram
+  $f800..$ffff:if txt_ram[direccion and $7ff]<>valor then begin //txt_ram
                   txt_ram[direccion and $7ff]:=valor;
                   gfx[0].buffer[direccion and $7ff]:=true;
                end;
@@ -878,12 +878,12 @@ case direccion of
   0..$bfff:;
   $c000,$c700:z80_1.change_nmi(CLEAR_LINE); //snk_cpuB_nmi_ack_w
   $c800..$cfff:sprite_ram[direccion and $7ff]:=valor; //sprites
-  $d000..$efff:begin //bg_ram
+  $d000..$efff:if bg_ram[direccion-$d000]<>valor then begin //bg_ram
                   bg_ram[direccion-$d000]:=valor;
                   gfx[1].buffer[(direccion-$d000) shr 1]:=true;
                end;
   $f000..$f7ff:mem_misc[direccion]:=valor;
-  $f800..$ffff:begin //tx_ram
+  $f800..$ffff:if txt_ram[direccion and $7ff]<>valor then begin //tx_ram
                   txt_ram[direccion and $7ff]:=valor;
                   gfx[0].buffer[direccion and $7ff]:=true;
                end;
@@ -1128,6 +1128,8 @@ set_pal(colores,$400);
 end;
 
 begin
+llamadas_maquina.bucle_general:=snk_principal;
+llamadas_maquina.reset:=reset_snk;
 iniciar_snk:=false;
 iniciar_audio(false);
 screen_init(1,288,288,true);
@@ -1351,13 +1353,6 @@ end;
 //final
 reset_snk;
 iniciar_snk:=true;
-end;
-
-procedure Cargar_snk;
-begin
-llamadas_maquina.iniciar:=iniciar_snk;
-llamadas_maquina.bucle_general:=snk_principal;
-llamadas_maquina.reset:=reset_snk;
 end;
 
 end.

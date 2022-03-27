@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,timer_engine,ym_3812,ay_8910,
      rom_engine,misc_functions,pal_engine,sound_engine,dac,gfx_engine;
 
-procedure cargar_suna_hw;
+function iniciar_suna_hw:boolean;
 
 implementation
 
@@ -167,8 +167,8 @@ if event.arcade then begin
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or 1);
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or 4);
   if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or 8);
-  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
-  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
+  if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
+  if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.start[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   if arcade_input.coin[0] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
   //P2
@@ -176,8 +176,8 @@ if event.arcade then begin
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or 1);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or 4);
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or 8);
-  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
-  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
+  if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
+  if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
@@ -619,13 +619,15 @@ var
   mem_final:array[0..$4ffff] of byte;
   memoria_temp:array[0..$7ffff] of byte;
 begin
+llamadas_maquina.reset:=reset_suna_hw;
 iniciar_suna_hw:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
 iniciar_video(256,224);
-//iniciar_video(512,512);
 case main_vars.tipo_maquina of
   67:begin
+        llamadas_maquina.bucle_general:=hardhead_principal;
+        llamadas_maquina.fps_max:=59.1;
         //Main CPU
         z80_0:=cpu_z80.create(6000000,256);
         z80_0.change_ram_calls(hardhead_getbyte,hardhead_putbyte);
@@ -671,6 +673,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@hardhead_dip_b;
      end;
      68:begin
+        llamadas_maquina.bucle_general:=hardhead2_principal;
         //Main CPU
         z80_0:=cpu_z80.create(6000000,256);
         z80_0.change_ram_calls(hardhead2_getbyte,hardhead2_putbyte);
@@ -736,19 +739,6 @@ end;
 //final
 reset_suna_hw;
 iniciar_suna_hw:=true;
-end;
-
-procedure Cargar_suna_hw;
-begin
-case main_vars.tipo_maquina of
-  67:begin
-        llamadas_maquina.bucle_general:=hardhead_principal;
-        llamadas_maquina.fps_max:=59.1;
-     end;
-  68:llamadas_maquina.bucle_general:=hardhead2_principal;
-end;
-llamadas_maquina.iniciar:=iniciar_suna_hw;
-llamadas_maquina.reset:=reset_suna_hw;
 end;
 
 end.

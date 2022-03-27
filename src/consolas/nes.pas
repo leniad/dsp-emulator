@@ -166,7 +166,6 @@ begin
   if not(mapper_nes.prg_ram_enable) then exit;
   memoria[direccion]:=valor;
 end;
-
 function prg_ram_read(direccion:word):byte;
 begin
   if not(mapper_nes.prg_ram_enable) then prg_ram_read:=ppu_nes.open_bus

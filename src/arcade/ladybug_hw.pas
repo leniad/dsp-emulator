@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,sn_76496,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,misc_functions;
 
-procedure cargar_ladybug;
+function iniciar_ladybug:boolean;
 
 implementation
 const
@@ -242,6 +242,8 @@ const
   pss_y:array[0..7] of dword=(7*16, 6*16, 5*16, 4*16, 3*16, 2*16, 1*16, 0*16);
   resistances:array[0..1] of integer=(470,220);
 begin
+llamadas_maquina.bucle_general:=ladybug_principal;
+llamadas_maquina.reset:=reset_ladybug;
 iniciar_ladybug:=false;
 iniciar_audio(false);
 screen_init(1,256,256,false,true);
@@ -371,13 +373,6 @@ end;
 //final
 reset_ladybug;
 iniciar_ladybug:=true;
-end;
-
-procedure Cargar_ladybug;
-begin
-llamadas_maquina.iniciar:=iniciar_ladybug;
-llamadas_maquina.bucle_general:=ladybug_principal;
-llamadas_maquina.reset:=reset_ladybug;
 end;
 
 end.

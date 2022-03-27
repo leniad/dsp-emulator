@@ -35,7 +35,7 @@ var
   samples_loaded:boolean;
 
 function convert_wav(source:pbyte;var data:pword;source_long:dword;var long:dword):boolean;
-function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1):boolean;
+function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1;parent:boolean=false;name:string=''):boolean;
 function load_samples_raw(sample_data:pword;longitud:dword;restart,loop:boolean;amp:single=1):boolean;
 procedure start_sample(num:byte);
 procedure samples_update;
@@ -211,17 +211,21 @@ end;
 load_samples_raw:=true;
 end;
 
-function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1):boolean;
+function load_samples(const nombre_samples:array of tipo_nombre_samples;amp:single=1;parent:boolean=false;name:string=''):boolean;
 var
   f,sample_size:word;
   ptemp:pbyte;
   longitud,crc:integer;
   nombre_zip:string;
 begin
-for f:=1 to GAMES_CONT do begin
-  if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
-    nombre_zip:=GAMES_DESC[f].zip+'.zip';
-    break;
+if parent then begin
+    nombre_zip:=name;
+end else begin
+  for f:=1 to GAMES_CONT do begin
+    if GAMES_DESC[f].grid=main_vars.tipo_maquina then begin
+      nombre_zip:=GAMES_DESC[f].zip+'.zip';
+      break;
+    end;
   end;
 end;
 load_samples:=false;

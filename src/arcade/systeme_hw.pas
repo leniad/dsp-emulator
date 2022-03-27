@@ -5,7 +5,7 @@ uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sega_vdp,sn_76496,rom_engine,sound_engine,
      ppi8255,mc8123;
 
-procedure cargar_systeme;
+function iniciar_systeme:boolean;
 
 implementation
 
@@ -349,6 +349,9 @@ var
   mem_key:array [0..$1fff] of byte;
   f:byte;
 begin
+llamadas_maquina.bucle_general:=systeme_principal;
+llamadas_maquina.reset:=reset_systeme;
+llamadas_maquina.fps_max:=59.922738;
 iniciar_systeme:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=257 then main_screen.rot90_screen:=true;
@@ -458,14 +461,6 @@ end;
 //final
 reset_systeme;
 iniciar_systeme:=true;
-end;
-
-procedure cargar_systeme;
-begin
-llamadas_maquina.iniciar:=iniciar_systeme;
-llamadas_maquina.bucle_general:=systeme_principal;
-llamadas_maquina.reset:=reset_systeme;
-llamadas_maquina.fps_max:=59.922738;
 end;
 
 end.

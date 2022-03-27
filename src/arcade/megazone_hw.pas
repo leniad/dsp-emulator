@@ -10,19 +10,19 @@ procedure cargar_megazone;
 implementation
 const
         megazone_rom:array[0..4] of tipo_roms=(
-        (n:'319i07.bin';l:$2000;p:$6000;crc:$94b22ea8),(n:'319i06.bin';l:$2000;p:$8000;crc:$0468b619),
-        (n:'319i05.bin';l:$2000;p:$a000;crc:$ac59000c),(n:'319i04.bin';l:$2000;p:$c000;crc:$1e968603),
-        (n:'319i03.bin';l:$2000;p:$e000;crc:$0888b803));
+        (n:'319_l07.11h';l:$2000;p:$6000;crc:$73b616ca),(n:'319_l06.9h';l:$2000;p:$8000;crc:$0ced03f9),
+        (n:'319_l05.8h';l:$2000;p:$a000;crc:$9dc3b5a1),(n:'319_l04.7h';l:$2000;p:$c000;crc:$785b983d),
+        (n:'319_l03.6h';l:$2000;p:$e000;crc:$a5318686));
+        megazone_snd:tipo_roms=(n:'319e02.6d';l:$2000;p:$0;crc:$d5d45edb);
+        megazone_snd_sub:tipo_roms=(n:'319e01.3a';l:$1000;p:$0;crc:$ed5725a0);
         megazone_char:array[0..1] of tipo_roms=(
-        (n:'319e12.bin';l:$2000;p:0;crc:$e0fb7835),(n:'319e13.bin';l:$2000;p:$2000;crc:$3d8f3743));
+        (n:'319_g12.8c';l:$2000;p:0;crc:$07b8b24b),(n:'319_g13.10c';l:$2000;p:$2000;crc:$3d8f3743));
         megazone_sprites:array[0..3] of tipo_roms=(
-        (n:'319e11.bin';l:$2000;p:0;crc:$965a7ff6),(n:'319e09.bin';l:$2000;p:$2000;crc:$5eaa7f3e),
-        (n:'319e10.bin';l:$2000;p:$4000;crc:$7bb1aeee),(n:'319e08.bin';l:$2000;p:$6000;crc:$6add71b1));
+        (n:'319e11.3e';l:$2000;p:0;crc:$965a7ff6),(n:'319e09.2e';l:$2000;p:$2000;crc:$5eaa7f3e),
+        (n:'319e10.3d';l:$2000;p:$4000;crc:$7bb1aeee),(n:'319e08.2d';l:$2000;p:$6000;crc:$6add71b1));
         megazone_pal:array[0..2] of tipo_roms=(
         (n:'319b18.a16';l:$20;p:$0;crc:$23cb02af),(n:'319b16.c6';l:$100;p:$20;crc:$5748e933),
         (n:'319b17.a11';l:$100;p:$120;crc:$1fbfce73));
-        megazone_snd:tipo_roms=(n:'319e02.bin';l:$2000;p:$0;crc:$d5d45edb);
-        megazone_snd_sub:tipo_roms=(n:'319e01.bin';l:$1000;p:$0;crc:$ed5725a0);
         megazone_dip_a:array [0..1] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$2;dip_name:'4C 1C'),(dip_val:$5;dip_name:'3C 1C'),(dip_val:$8;dip_name:'2C 1C'),(dip_val:$4;dip_name:'3C 2C'),(dip_val:$1;dip_name:'4C 3C'),(dip_val:$f;dip_name:'1C 1C'),(dip_val:$3;dip_name:'3C 4C'),(dip_val:$7;dip_name:'2C 3C'),(dip_val:$e;dip_name:'1C 2C'),(dip_val:$6;dip_name:'2C 5C'),(dip_val:$d;dip_name:'1C 3C'),(dip_val:$c;dip_name:'1C 4C'),(dip_val:$b;dip_name:'1C 5C'),(dip_val:$a;dip_name:'1C 6C'),(dip_val:$9;dip_name:'1C 7C'),(dip_val:$0;dip_name:'Free Play'))),());
         megazone_dip_b:array [0..5] of def_dip=(
@@ -40,8 +40,8 @@ var
 
 procedure update_video_megazone;
 var
-    x,y,atrib:byte;
-    f,nchar,color:word;
+    x,y,atrib,color:byte;
+    f,nchar:word;
 begin
 for f:=$3ff downto 0 do begin
  if gfx[0].buffer[f] then begin
@@ -157,12 +157,12 @@ case direccion of
   $5:main_screen.flip_main_screen:=(valor and $1)<>0;
   $7:irq_enable:=(valor and 1)<>0;
   $1000:scroll_y:=valor;
-  $1800:scroll_x:=valor;
-  $2000..$23ff,$2800..$2bff:begin
+  $1800:scroll_x:=255-valor;
+  $2000..$23ff,$2800..$2bff:if memoria[direccion]<>valor then begin
           gfx[0].buffer[direccion and $3ff]:=true;
           memoria[direccion]:=valor;
       end;
-  $2400..$27ff,$2c00..$2fff:begin
+  $2400..$27ff,$2c00..$2fff:if memoria[direccion]<>valor then begin
           gfx[1].buffer[direccion and $3ff]:=true;
           memoria[direccion]:=valor;
       end;
@@ -279,9 +279,9 @@ const
     pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
     pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
     ps_x:array[0..15] of dword=(0, 1, 2, 3, 8*8+0, 8*8+1, 8*8+2, 8*8+3,
-			16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
+			            16*8+0, 16*8+1, 16*8+2, 16*8+3, 24*8+0, 24*8+1, 24*8+2, 24*8+3);
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8 ,
-		32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
+		              32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
     resistances_rg:array[0..2] of integer=(1000,470,220);
     resistances_b:array[0..1] of integer=(470,220);
 begin
@@ -295,7 +295,7 @@ screen_init(3,256,288,false,true);
 screen_mod_sprites(3,256,512,255,511);
 iniciar_video(224,288);
 //Main CPU
-m6809_0:=cpu_m6809.Create(18432000 div 9,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 12,$100,TCPU_M6809);
 m6809_0.change_ram_calls(megazone_getbyte,megazone_putbyte);
 //Sound CPU
 z80_0:=cpu_z80.create(18432000 div 6,$100);
@@ -309,7 +309,7 @@ mcs48_0.change_io_calls(megazone_sound2_inport,megazone_sound2_outport);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(14318000 div 8,AY8910,0.3);
 ay8910_0.change_io_calls(megazone_portar,nil,nil,megazone_portbw);
-dac_0:=dac_chip.Create(0.5);
+dac_0:=dac_chip.Create(0.6);
 //cargar roms
 if not(roms_load(@memoria,megazone_rom)) then exit;
 konami1_decode(@memoria[$6000],@mem_opcodes[0],$c000);
@@ -370,6 +370,7 @@ begin
 llamadas_maquina.iniciar:=iniciar_megazone;
 llamadas_maquina.bucle_general:=megazone_principal;
 llamadas_maquina.reset:=reset_megazone;
+llamadas_maquina.fps_max:=60.60606060606;
 end;
 
 end.

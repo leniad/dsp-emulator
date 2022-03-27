@@ -4,7 +4,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,ppi8255,sound_engine,ym_2151,sega_315_5195,sega_pcm;
 
-procedure cargar_outrun;
+function iniciar_outrun:boolean;
 
 const
         //Outrun
@@ -646,12 +646,16 @@ if ((direccion>=s315_5195_0.dirs_start[1]) and (direccion<s315_5195_0.dirs_end[1
   case direccion and $1ffff of
       0..$ffff:begin
                   direccion:=(direccion and $ffff) shr 1;
-                  tile_ram[direccion]:=valor;
-                  tile_buffer[direccion]:=true;
+                  if tile_ram[direccion]<>valor then begin
+                    tile_ram[direccion]:=valor;
+                    tile_buffer[direccion]:=true;
+                  end;
                end;
       $10000..$1ffff:begin
-                  char_ram[(direccion and $fff) shr 1]:=valor;
-                  gfx[0].buffer[(direccion and $fff) shr 1]:=true;
+                  if char_ram[(direccion and $fff) shr 1]<>valor then begin
+                    char_ram[(direccion and $fff) shr 1]:=valor;
+                    gfx[0].buffer[(direccion and $fff) shr 1]:=true;
+                  end;
                   test_screen_change((direccion and $fff) shr 1);
                end;
   end;
@@ -841,6 +845,8 @@ begin
 	fillchar(road_gfx[256*2*512],3,512);
 end;
 begin
+llamadas_maquina.bucle_general:=outrun_principal;
+llamadas_maquina.reset:=reset_outrun;
 iniciar_outrun:=false;
 iniciar_audio(true);
 //Text
@@ -936,13 +942,6 @@ end;
 //final
 reset_outrun;
 iniciar_outrun:=true;
-end;
-
-procedure cargar_outrun;
-begin
-llamadas_maquina.iniciar:=iniciar_outrun;
-llamadas_maquina.bucle_general:=outrun_principal;
-llamadas_maquina.reset:=reset_outrun;
 end;
 
 end.

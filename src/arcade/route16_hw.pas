@@ -4,7 +4,7 @@ interface
 uses nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,pal_engine,
      sound_engine,dac;
 
-procedure cargar_route16_hw;
+function iniciar_route16_hw:boolean;
 
 implementation
 const
@@ -258,7 +258,7 @@ begin
  z80_0.reset;
  z80_1.reset;
  ay8910_0.reset;
- dac_0.reset;
+ if main_vars.tipo_maquina=259 then dac_0.reset;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
@@ -272,6 +272,9 @@ var
   colores:tpaleta;
   f:byte;
 begin
+llamadas_maquina.bucle_general:=route16_hw_principal;
+llamadas_maquina.reset:=reset_route16_hw;
+llamadas_maquina.fps_max:=57;
 iniciar_route16_hw:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -330,14 +333,6 @@ set_pal(colores,8);
 //final
 reset_route16_hw;
 iniciar_route16_hw:=true;
-end;
-
-procedure cargar_route16_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_route16_hw;
-llamadas_maquina.bucle_general:=route16_hw_principal;
-llamadas_maquina.reset:=reset_route16_hw;
-llamadas_maquina.fps_max:=57;
 end;
 
 end.

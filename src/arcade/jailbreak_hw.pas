@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,sn_76496,vlm_5030,gfx_engine,
      timer_engine,rom_engine,pal_engine,konami_decrypt,sound_engine;
 
-procedure cargar_jailbreak;
+function iniciar_jailbreak:boolean;
 
 implementation
 const
@@ -200,6 +200,9 @@ const
     ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 			16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32);
 begin
+llamadas_maquina.bucle_general:=jailbreak_principal;
+llamadas_maquina.reset:=reset_jailbreak;
+llamadas_maquina.fps_max:=60.606060606060;
 iniciar_jailbreak:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
@@ -258,14 +261,6 @@ marcade.dswc_val:=@jailbreak_dip_c;
 //final
 reset_jailbreak;
 iniciar_jailbreak:=true;
-end;
-
-procedure Cargar_jailbreak;
-begin
-llamadas_maquina.iniciar:=iniciar_jailbreak;
-llamadas_maquina.bucle_general:=jailbreak_principal;
-llamadas_maquina.reset:=reset_jailbreak;
-llamadas_maquina.fps_max:=60.606060606060;
 end;
 
 end.

@@ -28,6 +28,16 @@ const
         (n:'tc09';l:$8000;p:$10000;crc:$170c01db),(n:'tc10';l:$8000;p:$18000;crc:$44f5accd));
         twincobr_mcu_rom:array[0..1] of tipo_roms=(
         (n:'dsp_22.bin';l:$800;p:0;crc:$79389a71),(n:'dsp_21.bin';l:$800;p:$1;crc:$2d135376));
+        twincobr_dip_a:array [0..4] of def_dip=(
+        (mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$30;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 2C'),(dip_val:$40;dip_name:'1C 3C'),(dip_val:$80;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        twincobr_dip_b:array [0..4] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$3;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'50K 200K 150K+'),(dip_val:$4;dip_name:'70K 270K 200K+'),(dip_val:$8;dip_name:'50K'),(dip_val:$c;dip_name:'100K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'2'),(dip_val:$0;dip_name:'3'),(dip_val:$20;dip_name:'4'),(dip_val:$10;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Dip Switch Display';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
         //Flying Shark
         fshark_rom:array[0..1] of tipo_roms=(
         (n:'b02_18-1.m8';l:$10000;p:0;crc:$04739e02),(n:'b02_17-1.p8';l:$10000;p:$1;crc:$fd6ef7a8));
@@ -49,11 +59,21 @@ const
         (n:'82s137-3.mcu';l:$400;p:$800;crc:$70b537b9),(n:'82s137-4.mcu';l:$400;p:$c00;crc:$6edb2de8),
         (n:'82s137-5.mcu';l:$400;p:$1000;crc:$f35b978a),(n:'82s137-6.mcu';l:$400;p:$1400;crc:$0459e51b),
         (n:'82s137-7.mcu';l:$400;p:$1800;crc:$cbf3184b),(n:'82s137-8.mcu';l:$400;p:$1c00;crc:$8246a05c));
+        fshark_dip_a:array [0..5] of def_dip=(
+        (mask:$1;name:'Cabinet';number:2;dip:((dip_val:$1;dip_name:'Upright'),(dip_val:$0;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),(mask:$2;name:'Flip Screen';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$2;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Demo Sounds';number:2;dip:((dip_val:$8;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Coin A';number:4;dip:((dip_val:$30;dip_name:'4C 1C'),(dip_val:$20;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$0;dip_name:'1C 1C'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Coin B';number:4;dip:((dip_val:$0;dip_name:'1C 2C'),(dip_val:$40;dip_name:'1C 3C'),(dip_val:$80;dip_name:'1C 4C'),(dip_val:$c0;dip_name:'1C 6C'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        fshark_dip_b:array [0..5] of def_dip=(
+        (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$3;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'50K 200K 150K+'),(dip_val:$4;dip_name:'70K 270K 200K+'),(dip_val:$8;dip_name:'50K'),(dip_val:$c;dip_name:'100K'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'2'),(dip_val:$0;dip_name:'3'),(dip_val:$20;dip_name:'1'),(dip_val:$10;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$40;name:'Dip Switch Display';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$40;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$80;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  rom:array[0..$17fff] of word;
  ram,bg_ram:array[0..$1fff] of word;
- vsync,dswa,dswb:byte;
  display_on,int_enable,twincobr_dsp_BIO,dsp_execute:boolean;
  txt_ram,sprite_ram:array[0..$7ff] of word;
  fg_ram:array[0..$fff] of word;
@@ -138,14 +158,14 @@ begin
 if event.arcade then begin
   //P1
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 or $4) else marcade.in0:=(marcade.in0 and $fb);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $F7);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 or $8) else marcade.in0:=(marcade.in0 and $f7);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 or $1) else marcade.in0:=(marcade.in0 and $fe);
   if arcade_input.down[0] then marcade.in0:=(marcade.in0 or $2) else marcade.in0:=(marcade.in0 and $fd);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 or $20) else marcade.in0:=(marcade.in0 and $df);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 or $10) else marcade.in0:=(marcade.in0 and $ef);
   //P1
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $4) else marcade.in1:=(marcade.in1 and $fb);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $F7);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $8) else marcade.in1:=(marcade.in1 and $f7);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.down[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
@@ -179,9 +199,9 @@ while EmuStatus=EsRuning do begin
     tms32010_0.run(frame_mcu);
     frame_mcu:=frame_mcu+tms32010_0.tframes-tms32010_0.contador;
     case f of
-      0:vsync:=0;
+      0:marcade.in2:=marcade.in2 and $7f;
       240:begin
-            vsync:=$80;
+            marcade.in2:=marcade.in2 or $80;
             if int_enable then begin
                 m68000_0.irq[4]:=HOLD_LINE;
                 int_enable:=false;
@@ -203,11 +223,11 @@ case direccion of
   $30000..$33fff:twincobr_getword:=ram[(direccion and $3fff) shr 1];
   $40000..$40fff:twincobr_getword:=sprite_ram[(direccion and $fff) shr 1];
   $50000..$50dff:twincobr_getword:=buffer_paleta[(direccion and $fff) shr 1];
-  $78000:twincobr_getword:=dswa;
-  $78002:twincobr_getword:=dswb;
+  $78000:twincobr_getword:=marcade.dswa;
+  $78002:twincobr_getword:=marcade.dswb;
   $78004:twincobr_getword:=marcade.in0;
   $78006:twincobr_getword:=marcade.in1;
-  $78008:twincobr_getword:=vsync or marcade.in2;
+  $78008:twincobr_getword:=marcade.in2;
   $7e000:twincobr_getword:=txt_ram[txt_offs];
   $7e002:twincobr_getword:=bg_ram[bg_offs+bg_bank];
   $7e004:twincobr_getword:=fg_ram[fg_offs];
@@ -283,15 +303,15 @@ case direccion of
             $0e:display_on:=false;
             $0f:display_on:=true;
          end;
-  $7e000:begin
+  $7e000:if txt_ram[txt_offs]<>valor then begin
             txt_ram[txt_offs]:=valor;
             gfx[0].buffer[txt_offs]:=true;
          end;
-  $7e002:begin
+  $7e002:if bg_ram[bg_offs+bg_bank]<>valor then begin
             bg_ram[bg_offs+bg_bank]:=valor;
             gfx[2].buffer[bg_offs+bg_bank]:=true;
          end;
-  $7e004:begin
+  $7e004:if fg_ram[fg_offs]<>valor then begin
             fg_ram[fg_offs]:=valor;
             gfx[1].buffer[fg_offs]:=true;
          end;
@@ -318,8 +338,8 @@ case (puerto and $ff) of
   0:twincobr_snd_inbyte:=ym3812_0.status;
   $10:twincobr_snd_inbyte:=marcade.in2;
   $20,$30:twincobr_snd_inbyte:=0;
-  $40:twincobr_snd_inbyte:=dswa;
-  $50:twincobr_snd_inbyte:=dswb;
+  $40:twincobr_snd_inbyte:=marcade.dswa;
+  $50:twincobr_snd_inbyte:=marcade.dswb;
 end;
 end;
 
@@ -410,7 +430,6 @@ begin
  fg_bank:=0;
  int_enable:=false;
  display_on:=true;
- vsync:=0;
  twincobr_dsp_BIO:=false;
  dsp_execute:=false;
  main_ram_seg:=0;
@@ -496,8 +515,10 @@ case main_vars.tipo_maquina of
           //convertir tiles sprites
           if not(roms_load(@memoria_temp,twincobr_sprites)) then exit;
           convert_sprites;
-          dswa:=0;
-          dswb:=0;
+          marcade.dswa:=0;
+          marcade.dswb:=0;
+          marcade.dswa_val:=@twincobr_dip_a;
+          marcade.dswb_val:=@twincobr_dip_b;
     end;
     147:begin
           //cargar roms
@@ -527,8 +548,10 @@ case main_vars.tipo_maquina of
           //convertir tiles sprites
           if not(roms_load(@memoria_temp,fshark_sprites)) then exit;
           convert_sprites;
-          dswa:=1;
-          dswb:=$80;
+          marcade.dswa:=1;
+          marcade.dswb:=$80;
+          marcade.dswa_val:=@fshark_dip_a;
+          marcade.dswb_val:=@fshark_dip_b;
     end;
 end;
 //final

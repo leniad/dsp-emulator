@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_3812,oki6295,
      seibu_sound,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_bloodbros;
+function iniciar_bloodbros:boolean;
 
 implementation
 const
@@ -366,6 +366,9 @@ begin
   convert_gfx(num,0,memoria_temp,@ps_x,@ps_y,false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=bloodbros_principal;
+llamadas_maquina.reset:=reset_bloodbros;
+llamadas_maquina.fps_max:=59.389999;
 iniciar_bloodbros:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -446,14 +449,6 @@ end;
 freemem(memoria_temp);
 reset_bloodbros;
 iniciar_bloodbros:=true;
-end;
-
-procedure cargar_bloodbros;
-begin
-llamadas_maquina.iniciar:=iniciar_bloodbros;
-llamadas_maquina.bucle_general:=bloodbros_principal;
-llamadas_maquina.reset:=reset_bloodbros;
-llamadas_maquina.fps_max:=59.389999;
 end;
 
 end.

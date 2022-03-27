@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,pal_engine,
      sound_engine,seta_sprites,mcs48;
 
-procedure cargar_tnzs;
+function iniciar_tnzs:boolean;
 
 implementation
 const
@@ -528,6 +528,7 @@ const
     pt2_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
       16*16, 17*16, 18*16, 19*16, 20*16, 21*16, 22*16, 23*16);
 begin
+llamadas_maquina.reset:=reset_tnzs;
 iniciar_tnzs:=false;
 iniciar_audio(false);
 screen_init(1,512,256,false,true);
@@ -540,10 +541,10 @@ z80_1:=cpu_z80.create(6000000,$100*CPU_SYNC);
 //Video chips
 if main_vars.tipo_maquina=306 then seta_sprite0:=tseta_sprites.create(0,1,$800 div $40,$fff)
   else seta_sprite0:=tseta_sprites.create(0,1,$800 div $40,$1fff);
-//Sound Chips
-ym2203_0:=ym2203_chip.create(3000000,2);
 case main_vars.tipo_maquina of
   129:begin   //TNZS
+        llamadas_maquina.fps_max:=59.15;
+        llamadas_maquina.bucle_general:=tnzs_principal;
         z80_0.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
         //Misc CPU
         z80_1.change_ram_calls(tnzs_misc_getbyte,tnzs_misc_putbyte);
@@ -553,6 +554,7 @@ case main_vars.tipo_maquina of
         z80_2.change_io_calls(tnzs_snd_inbyte,tnzs_snd_outbyte);
         z80_2.init_sound(tnzs_sound_update);
         //Sound Chips
+        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_irq_calls(snd_irq);
         //cargar roms
         if not(roms_load(@memoria_temp,tnzs_rom)) then exit;
@@ -578,12 +580,14 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@tnzs_dip_b;
   end;
   130:begin   //Insector X
+        llamadas_maquina.bucle_general:=insectorx_principal;
         //Main CPU
         z80_0.change_ram_calls(insectorx_getbyte,insectorx_putbyte);
         //Misc CPU
         z80_1.init_sound(tnzs_sound_update);
         z80_1.change_ram_calls(insectorx_misc_getbyte,insectorx_misc_putbyte);
         //Sound chip
+        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
         //cargar roms
         if not(roms_load(@memoria_temp,insectorx_rom)) then exit;
@@ -607,6 +611,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@insectorx_dip_b;
   end;
   306:begin   //Extermination
+        llamadas_maquina.bucle_general:=extrmatn_principal_mcu;
         //Main CPU
         z80_0.change_ram_calls(tnzs_getbyte,tnzs_putbyte);
         //Misc CPU
@@ -617,6 +622,7 @@ case main_vars.tipo_maquina of
         if not(roms_load(mcs48_0.get_rom_addr,extrmatn_mcu)) then exit;
         mcs48_0.change_io_calls(extrmatn_mcu_inport,extrmatn_mcu_outport);
         //Sound chip
+        ym2203_0:=ym2203_chip.create(3000000,2);
         ym2203_0.change_io_calls(insectorx_porta_r,insectorx_portb_r,nil,nil);
         //cargar roms
         if not(roms_load(@memoria_temp,extrmatn_rom)) then exit;
@@ -651,21 +657,6 @@ end;
 //final
 reset_tnzs;
 iniciar_tnzs:=true;
-end;
-
-procedure Cargar_tnzs;
-begin
-llamadas_maquina.fps_max:=60;
-case main_vars.tipo_maquina of
-  129:begin
-        llamadas_maquina.fps_max:=59.15;
-        llamadas_maquina.bucle_general:=tnzs_principal;
-  end;
-  130:llamadas_maquina.bucle_general:=insectorx_principal;
-  306:llamadas_maquina.bucle_general:=extrmatn_principal_mcu;
-end;
-llamadas_maquina.iniciar:=iniciar_tnzs;
-llamadas_maquina.reset:=reset_tnzs;
 end;
 
 end.

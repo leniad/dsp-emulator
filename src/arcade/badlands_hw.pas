@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,atari_mo,file_engine;
 
-procedure cargar_badlands;
+function iniciar_badlands:boolean;
 
 implementation
 const
@@ -58,7 +58,7 @@ var
  ram:array[0..$fff] of word;
  eeprom_ram:array[0..$fff] of byte;
  sound_rom:array[0..3,0..$fff] of byte;
- pedal1,pedal2,vblank,sound_bank,playfield_tile_bank,soundlatch,mainlatch:byte;
+ pedal1,pedal2,sound_bank,playfield_tile_bank,soundlatch,mainlatch:byte;
  write_eeprom,main_pending,sound_pending:boolean;
  pant_bl:array [0..((512*256)-1)] of word;
 
@@ -162,9 +162,9 @@ while EmuStatus=EsRuning do begin
       239:begin  //VBLANK
           update_video_badlands;
           m68000_0.irq[1]:=ASSERT_LINE;
-          vblank:=$40;
+          marcade.in1:=marcade.in1 or $40;
         end;
-      261:vblank:=0;
+      261:marcade.in1:=marcade.in1 and $bf;
     end;
  end;
  if (marcade.in2 and 1)=0 then pedal1:=pedal1-1;
@@ -180,7 +180,7 @@ case direccion of
     0..$3ffff:badlands_getword:=rom[direccion shr 1];
     $fc0000..$fc1fff:badlands_getword:=$feff or ($100*byte(sound_pending));
     $fd0000..$fd1fff:badlands_getword:=$ff00 or eeprom_ram[(direccion and $1fff) shr 1];
-    $fe4000..$fe5fff:badlands_getword:=marcade.in1 or vblank; //in1
+    $fe4000..$fe5fff:badlands_getword:=marcade.in1; //in1
     $fe6000:badlands_getword:=$ff00 or analog.c[0].x[0]; //in2
     $fe6002:badlands_getword:=$ff00 or analog.c[0].x[1]; //in3
     $fe6004:badlands_getword:=pedal1; //pedal1
@@ -312,9 +312,16 @@ begin
  mainlatch:=0;
  playfield_tile_bank:=0;
  sound_bank:=0;
- vblank:=0;
  pedal1:=$80;
  pedal2:=$80;
+end;
+
+procedure cerrar_badlands;
+var
+  nombre:string;
+begin
+  nombre:='badlands.nv';
+  write_file(Directory.Arcade_nvram+nombre,@eeprom_ram,$1000);
 end;
 
 function iniciar_badlands:boolean;
@@ -328,6 +335,10 @@ const
   pc_y:array[0..7] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8);
   ps_y:array[0..7] of dword=(0*8, 8*8, 16*8, 24*8, 32*8, 40*8, 48*8, 56*8);
 begin
+llamadas_maquina.bucle_general:=badlands_principal;
+llamadas_maquina.reset:=reset_badlands;
+llamadas_maquina.close:=cerrar_badlands;
+llamadas_maquina.fps_max:=59.922743;
 iniciar_badlands:=false;
 iniciar_audio(true);
 //Chars
@@ -374,23 +385,6 @@ analog_0(50,10,$0,$ff,$0,false,true,true,true);
 //final
 reset_badlands;
 iniciar_badlands:=true;
-end;
-
-procedure cerrar_badlands;
-var
-  nombre:string;
-begin
-nombre:='badlands.nv';
-write_file(Directory.Arcade_nvram+nombre,@eeprom_ram,$1000);
-end;
-
-procedure cargar_badlands;
-begin
-llamadas_maquina.iniciar:=iniciar_badlands;
-llamadas_maquina.bucle_general:=badlands_principal;
-llamadas_maquina.reset:=reset_badlands;
-llamadas_maquina.close:=cerrar_badlands;
-llamadas_maquina.fps_max:=59.922743;
 end;
 
 end.

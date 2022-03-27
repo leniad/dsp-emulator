@@ -5,22 +5,24 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,dac,ym_2151,rom_engine,
      pal_engine,sound_engine,timer_engine;
 
-procedure cargar_vigilante;
+function iniciar_vigilante:boolean;
 
 implementation
+
 const
         vigilante_rom:array[0..1] of tipo_roms=(
-        (n:'VG_A-8H-E.ic55';l:$8000;p:0;crc:$0d4e6866),(n:'VG_A-8L-A.ic57';l:$10000;p:$8000;crc:$690d812f));
+        (n:'vg_a-8h-e.ic55';l:$8000;p:0;crc:$0d4e6866),(n:'vg_a-8l-a.ic57';l:$10000;p:$8000;crc:$690d812f));
         vigilante_chars:array[0..1] of tipo_roms=(
-        (n:'VG_B-4F-.ic34';l:$10000;p:0;crc:$01579d20),(n:'VG_B-4J-.ic35';l:$10000;p:$10000;crc:$4f5872f0));
+        (n:'vg_b-4f-.ic34';l:$10000;p:0;crc:$01579d20),(n:'vg_b-4j-.ic35';l:$10000;p:$10000;crc:$4f5872f0));
         vigilante_sprites:array[0..3] of tipo_roms=(
-        (n:'VG_B-6L-.ic62';l:$20000;p:0;crc:$fbe9552d),(n:'VG_B-6K-.ic61';l:$20000;p:$20000;crc:$ae09d5c0),
-        (n:'VG_B-6P-.ic64';l:$20000;p:$40000;crc:$afb77461),(n:'VG_B-6N-.ic63';l:$20000;p:$60000;crc:$5065cd35));
-        vigilante_dac:tipo_roms=(n:'VG_A-4D-.ic26';l:$10000;p:0;crc:$9b85101d);
-        vigilante_sound:tipo_roms=(n:'VG_A-5J-.ic37';l:$10000;p:0;crc:$10582b2d);
+        (n:'vg_b-6l-.ic62';l:$20000;p:0;crc:$fbe9552d),(n:'vg_b-6k-.ic61';l:$20000;p:$20000;crc:$ae09d5c0),
+        (n:'vg_b-6p-.ic64';l:$20000;p:$40000;crc:$afb77461),(n:'vg_b-6n-.ic63';l:$20000;p:$60000;crc:$5065cd35));
+        vigilante_dac:tipo_roms=(n:'vg_a-4d-.ic26';l:$10000;p:0;crc:$9b85101d);
+        vigilante_sound:tipo_roms=(n:'vg_a-5j-.ic37';l:$10000;p:0;crc:$10582b2d);
         vigilante_tiles:array[0..2] of tipo_roms=(
-        (n:'VG_B-1D-.ic2';l:$10000;p:$00000;crc:$81b1ee5c),(n:'VG_B-1F-.ic3';l:$10000;p:$10000;crc:$d0d33673),
-        (n:'VG_B-1H-.ic4';l:$10000;p:$20000;crc:$aae81695));
+        (n:'vg_b-1d-.ic2';l:$10000;p:$00000;crc:$81b1ee5c),(n:'vg_b-1f-.ic3';l:$10000;p:$10000;crc:$d0d33673),
+        (n:'vg_b-1h-.ic4';l:$10000;p:$20000;crc:$aae81695));
+
 var
  rom_bank:array[0..3,0..$3fff] of byte;
  banco_rom,sound_latch,rear_color:byte;
@@ -266,7 +268,7 @@ begin
   snd_irq_set(2+irqstate);
 end;
 
-procedure vigilante_snd_irq;
+procedure vigilante_snd_nmi;
 begin
   z80_1.change_nmi(PULSE_LINE);
 end;
@@ -317,6 +319,9 @@ var
   memoria_temp:array[0..$7ffff] of byte;
   mem_load:pbyte;
 begin
+llamadas_maquina.bucle_general:=vigilante_principal;
+llamadas_maquina.reset:=reset_vigilante;
+llamadas_maquina.fps_max:=55;
 iniciar_vigilante:=false;
 iniciar_audio(true);
 screen_init(1,512,256,true);
@@ -336,7 +341,7 @@ z80_1:=cpu_z80.create(3579645,256);
 z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(snd_despues_instruccion);
-timers.init(z80_1.numero_cpu,3579645/(128*55),vigilante_snd_irq,nil,true);
+timers.init(z80_1.numero_cpu,3579645/(128*55),vigilante_snd_nmi,nil,true);
 //sound chips
 dac_0:=dac_chip.Create;
 ym2151_0:=ym2151_chip.create(3579645);
@@ -379,14 +384,6 @@ convert_gfx(2,0,@memoria_temp,@pt_x,@pc_y,false,false);
 //final
 reset_vigilante;
 iniciar_vigilante:=true;
-end;
-
-procedure Cargar_vigilante;
-begin
-llamadas_maquina.iniciar:=iniciar_vigilante;
-llamadas_maquina.bucle_general:=vigilante_principal;
-llamadas_maquina.reset:=reset_vigilante;
-llamadas_maquina.fps_max:=55;
 end;
 
 end.

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m680x,main_engine,controls_engine,ay_8910,gfx_engine,
      msm5205,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_irem_m62;
+function iniciar_irem_m62:boolean;
 
 implementation
 const
@@ -679,6 +679,9 @@ begin
 end;
 
 begin
+llamadas_maquina.bucle_general:=irem_m62_principal;
+llamadas_maquina.reset:=reset_irem_m62;
+llamadas_maquina.fps_max:=55;
 iniciar_irem_m62:=false;
 fillchar(memoria_temp[0],$20000,0);
 iniciar_audio(false);
@@ -850,14 +853,6 @@ end;
 //final
 reset_irem_m62;
 iniciar_irem_m62:=true;
-end;
-
-procedure cargar_irem_m62;
-begin
-llamadas_maquina.iniciar:=iniciar_irem_m62;
-llamadas_maquina.bucle_general:=irem_m62_principal;
-llamadas_maquina.reset:=reset_irem_m62;
-llamadas_maquina.fps_max:=55;
 end;
 
 end.

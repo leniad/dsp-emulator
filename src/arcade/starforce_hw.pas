@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,z80pio,z80daisy,main_engine,controls_engine,gfx_engine,sn_76496,
      z80ctc,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_starforce;
+function iniciar_starforce:boolean;
 
 implementation
 const
@@ -340,6 +340,12 @@ begin
  marcade.in2:=0;
 end;
 
+procedure cerrar_starforce;
+begin
+  z80pio_close(0);
+  z80ctc_close(0);
+end;
+
 function iniciar_starforce:boolean;
 const
   pbs_x:array[0..31] of dword=(0, 1, 2, 3, 4, 5, 6, 7,
@@ -353,6 +359,9 @@ const
 var
   memoria_temp:array[0..$ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=starforce_principal;
+llamadas_maquina.close:=cerrar_starforce;
+llamadas_maquina.reset:=reset_starforce;
 iniciar_starforce:=false;
 iniciar_audio(false);
 screen_init(1,256,256,false,true);
@@ -424,20 +433,6 @@ marcade.dswc:=0;
 marcade.dswc_val:=@starforce_dipc;
 reset_starforce;
 iniciar_starforce:=true;
-end;
-
-procedure cerrar_starforce;
-begin
-z80pio_close(0);
-z80ctc_close(0);
-end;
-
-procedure cargar_starforce;
-begin
-llamadas_maquina.iniciar:=iniciar_starforce;
-llamadas_maquina.bucle_general:=starforce_principal;
-llamadas_maquina.close:=cerrar_starforce;
-llamadas_maquina.reset:=reset_starforce;
 end;
 
 end.

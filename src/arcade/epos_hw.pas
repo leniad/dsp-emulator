@@ -4,7 +4,7 @@ interface
 uses nz80,main_engine,controls_engine,gfx_engine,ay_8910,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_epos_hw;
+function iniciar_epos_hw:boolean;
 
 implementation
 const
@@ -21,6 +21,12 @@ const
         (n:'u8';l:$1000;p:$2000;crc:$6d088c16),(n:'u7';l:$1000;p:$3000;crc:$b2768203),
         (n:'u6';l:$1000;p:$4000;crc:$976c8f46),(n:'u5';l:$1000;p:$5000;crc:$340f5290),
         (n:'u4';l:$1000;p:$6000;crc:$173bd589),(n:'u11';l:$800;p:$7000;crc:$d45b740d));
+        theglob_dip:array [0..5] of def_dip=(
+        (mask:$1;name:'Coinage';number:2;dip:((dip_val:$0;dip_name:'1C 1C'),(dip_val:$1;dip_name:'1C 2C'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$50;name:'Lives';number:4;dip:((dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$40;dip_name:'5'),(dip_val:$50;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$26;name:'Difficulty';number:8;dip:((dip_val:$0;dip_name:'1'),(dip_val:$2;dip_name:'2'),(dip_val:$20;dip_name:'3'),(dip_val:$22;dip_name:'4'),(dip_val:$4;dip_name:'5'),(dip_val:$6;dip_name:'6'),(dip_val:$24;dip_name:'7'),(dip_val:$26;dip_name:'8'),(),(),(),(),(),(),(),())),
+        (mask:$8;name:'Bonus Life';number:2;dip:((dip_val:$0;dip_name:'10K + Difficulty * 10K'),(dip_val:$8;dip_name:'90K + Difficulty * 10K'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
  palette:byte;
@@ -104,7 +110,7 @@ end;
 function epos_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
-  $00:epos_inbyte:=0; //DSW
+  $00:epos_inbyte:=marcade.dswa; //DSW
 	$01:epos_inbyte:=marcade.in1; //SYSTEM
 	$02:epos_inbyte:=marcade.in0; //INPUTS
 	$03:epos_inbyte:=0;
@@ -120,7 +126,7 @@ case (puerto and $ff) of
 end;
 end;
 
-procedure epos_despues_instruccion;
+procedure epos_sound_update;
 begin
   ay8910_0.update;
 end;
@@ -129,11 +135,12 @@ end;
 procedure reset_epos_hw;
 begin
  z80_0.reset;
- AY8910_0.reset;
+ ay8910_0.reset;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$be;
  palette:=0;
+ fillchar(buffer,$8000,1);
 end;
 
 function iniciar_epos_hw:boolean;
@@ -143,6 +150,8 @@ var
   memoria_temp:array[0..$1f] of byte;
   bit0,bit1,bit2:byte;
 begin
+llamadas_maquina.bucle_general:=epos_hw_principal;
+llamadas_maquina.reset:=reset_epos_hw;
 iniciar_epos_hw:=false;
 iniciar_audio(false);
 screen_init(1,241,272);
@@ -151,7 +160,7 @@ iniciar_video(236,272);
 z80_0:=cpu_z80.create(2750000,241);
 z80_0.change_ram_calls(epos_getbyte,epos_putbyte);
 z80_0.change_io_calls(epos_inbyte,epos_outbyte);
-z80_0.init_sound(epos_despues_instruccion);
+z80_0.init_sound(epos_sound_update);
 //Sound Chips
 AY8910_0:=ay8910_chip.create(687500,AY8910,1);
 case main_vars.tipo_maquina of
@@ -160,12 +169,18 @@ case main_vars.tipo_maquina of
       if not(roms_load(@memoria,theglob_rom)) then exit;
       //poner la paleta y clut
       if not(roms_load(@memoria_temp,theglob_pal)) then exit;
+      //DIP
+      marcade.dswa:=0;
+      marcade.dswa_val:=@theglob_dip;
   end;
   95:begin
       //cargar roms
       if not(roms_load(@memoria,superglob_rom)) then exit;
       //poner la paleta y clut
       if not(roms_load(@memoria_temp,theglob_pal)) then exit;
+      //DIP
+      marcade.dswa:=0;
+      marcade.dswa_val:=@theglob_dip;
   end;
 end;
 for f:=0 to $1f do begin
@@ -185,13 +200,6 @@ set_pal(colores,$20);
 //final
 reset_epos_hw;
 iniciar_epos_hw:=true;
-end;
-
-procedure Cargar_epos_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_epos_hw;
-llamadas_maquina.bucle_general:=epos_hw_principal;
-llamadas_maquina.reset:=reset_epos_hw;
 end;
 
 end.

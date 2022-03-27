@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,msm5205,ym_3812,rom_engine,
      pal_engine,sound_engine;
 
-procedure cargar_tecmo;
+function iniciar_tecmo:boolean;
 
 implementation
 const
@@ -488,6 +488,9 @@ begin
 end;
 
 begin
+llamadas_maquina.bucle_general:=tecmo_principal;
+llamadas_maquina.reset:=reset_tecmo;
+llamadas_maquina.fps_max:=59.185608;
 iniciar_tecmo:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
@@ -576,14 +579,6 @@ case main_vars.tipo_maquina of
 end;
 reset_tecmo;
 iniciar_tecmo:=true;
-end;
-
-procedure cargar_tecmo;
-begin
-llamadas_maquina.iniciar:=iniciar_tecmo;
-llamadas_maquina.bucle_general:=tecmo_principal;
-llamadas_maquina.reset:=reset_tecmo;
-llamadas_maquina.fps_max:=59.185608;
 end;
 
 end.

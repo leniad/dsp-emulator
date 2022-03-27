@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,ym_2203,ym_3812,gfx_engine,
      rom_engine,pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_expraid;
+function iniciar_expraid:boolean;
 
 implementation
 const
@@ -366,6 +366,11 @@ var
   f,offs:byte;
   memoria_temp:array[0..$2ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=principal_expraid;
+llamadas_maquina.reset:=reset_expraid;
+llamadas_maquina.fps_max:=59.637405;
+llamadas_maquina.save_qsnap:=expraid_qsave;
+llamadas_maquina.load_qsnap:=expraid_qload;
 iniciar_expraid:=false;
 iniciar_audio(false);
 screen_init(1,512,256,false,true);
@@ -437,16 +442,6 @@ marcade.dswb_val:=@expraid_dip_b;
 //final
 reset_expraid;
 iniciar_expraid:=true;
-end;
-
-procedure Cargar_expraid;
-begin
-llamadas_maquina.iniciar:=iniciar_expraid;
-llamadas_maquina.bucle_general:=principal_expraid;
-llamadas_maquina.reset:=reset_expraid;
-llamadas_maquina.fps_max:=59.637405;
-llamadas_maquina.save_qsnap:=expraid_qsave;
-llamadas_maquina.load_qsnap:=expraid_qload;
 end;
 
 end.

@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,kabuki_decript,qsound,rom_engine,misc_functions,pal_engine,
      sound_engine,eeprom;
 
-procedure cargar_cps1;
+function iniciar_cps1:boolean;
 
 implementation
 type
@@ -929,6 +929,13 @@ begin
 	end;
 end;
 
+procedure cerrar_cps1;
+begin
+case main_vars.tipo_maquina of
+  112..113:qsound_close;
+end;
+end;
+
 function iniciar_cps1:boolean;
 var
   memoria_temp,ptemp:pbyte;
@@ -989,6 +996,10 @@ begin
 end;
 
 begin
+llamadas_maquina.bucle_general:=cps1_principal;
+llamadas_maquina.close:=cerrar_cps1;
+llamadas_maquina.reset:=reset_cps1;
+llamadas_maquina.fps_max:=59.61;
 iniciar_cps1:=false;
 //8x8
 screen_init(1,448,248,true,false);
@@ -1348,22 +1359,6 @@ end;
 freemem(memoria_temp);
 reset_cps1;
 iniciar_cps1:=true;
-end;
-
-procedure cerrar_cps1;
-begin
-case main_vars.tipo_maquina of
-  112..113:qsound_close;
-end;
-end;
-
-procedure cargar_cps1;
-begin
-llamadas_maquina.iniciar:=iniciar_cps1;
-llamadas_maquina.bucle_general:=cps1_principal;
-llamadas_maquina.close:=cerrar_cps1;
-llamadas_maquina.reset:=reset_cps1;
-llamadas_maquina.fps_max:=59.61;
 end;
 
 end.

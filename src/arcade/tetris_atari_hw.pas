@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,pokey,slapstic,file_engine;
 
-procedure cargar_tetris;
+function iniciar_tetris:boolean;
 
 implementation
 const
@@ -173,15 +173,20 @@ end;
 //Main
 procedure reset_tetris;
 begin
-m6502_0.reset;
-slapstic_0.reset;
-pokey_0.reset;
-pokey_1.reset;
-marcade.in0:=$40;
-marcade.in1:=0;
-rom_bank:=slapstic_0.current_bank and 1;
-copymemory(@memoria[$4000],@rom_mem[1,0],$4000);
-nvram_write_enable:=false;
+  m6502_0.reset;
+  slapstic_0.reset;
+  pokey_0.reset;
+  pokey_1.reset;
+  marcade.in0:=$40;
+  marcade.in1:=0;
+  rom_bank:=slapstic_0.current_bank and 1;
+  copymemory(@memoria[$4000],@rom_mem[1,0],$4000);
+  nvram_write_enable:=false;
+end;
+
+procedure cerrar_tetris;
+begin
+  write_file(Directory.Arcade_nvram+'tetris.nv',@nv_ram[0],$200);
 end;
 
 function iniciar_tetris:boolean;
@@ -192,6 +197,9 @@ var
   memoria_temp:array[0..$ffff] of byte;
   longitud:integer;
 begin
+llamadas_maquina.bucle_general:=principal_tetris;
+llamadas_maquina.reset:=reset_tetris;
+llamadas_maquina.close:=cerrar_tetris;
 iniciar_tetris:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
@@ -227,20 +235,6 @@ marcade.dswa_val:=@tetris_dip_a;
 //final
 reset_tetris;
 iniciar_tetris:=true;
-end;
-
-procedure cerrar_tetris;
-begin
-write_file(Directory.Arcade_nvram+'tetris.nv',@nv_ram[0],$200);
-end;
-
-
-procedure Cargar_tetris;
-begin
-llamadas_maquina.iniciar:=iniciar_tetris;
-llamadas_maquina.bucle_general:=principal_tetris;
-llamadas_maquina.reset:=reset_tetris;
-llamadas_maquina.close:=cerrar_tetris;
 end;
 
 end.

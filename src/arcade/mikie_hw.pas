@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_mikie;
+function iniciar_mikie:boolean;
 
 implementation
 const
@@ -287,6 +287,11 @@ const
   pc_y:array[0..7] of dword=(0*4*8, 1*4*8, 2*4*8, 3*4*8, 4*4*8, 5*4*8, 6*4*8, 7*4*8);
   resistances:array[0..3] of integer=(2200,1000,470,220);
 begin
+llamadas_maquina.bucle_general:=mikie_principal;
+llamadas_maquina.reset:=reset_mikie;
+llamadas_maquina.save_qsnap:=mikie_qsave;
+llamadas_maquina.load_qsnap:=mikie_qload;
+llamadas_maquina.fps_max:=60.59;
 iniciar_mikie:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -366,16 +371,6 @@ marcade.dswc_val:=@mikie_dip_c;
 //final
 reset_mikie;
 iniciar_mikie:=true;
-end;
-
-procedure cargar_mikie;
-begin
-llamadas_maquina.iniciar:=iniciar_mikie;
-llamadas_maquina.bucle_general:=mikie_principal;
-llamadas_maquina.reset:=reset_mikie;
-llamadas_maquina.save_qsnap:=mikie_qsave;
-llamadas_maquina.load_qsnap:=mikie_qload;
-llamadas_maquina.fps_max:=60.59;
 end;
 
 end.

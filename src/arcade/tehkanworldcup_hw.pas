@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,msm5205,rom_engine,
      pal_engine,sound_engine;
 
-procedure cargar_tehkanwc;
+function iniciar_tehkanwc:boolean;
 
 implementation
 const
@@ -334,6 +334,8 @@ const
 var
   memoria_temp:array[0..$ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=tehkanwc_principal;
+llamadas_maquina.reset:=reset_tehkanwc;
 iniciar_tehkanwc:=false;
 iniciar_audio(false);
 screen_init(1,512,256);
@@ -396,13 +398,6 @@ marcade.dswc:=$f;
 marcade.dswc_val:=@tehkanwc_dipc;
 reset_tehkanwc;
 iniciar_tehkanwc:=true;
-end;
-
-procedure Cargar_tehkanwc;
-begin
-llamadas_maquina.iniciar:=iniciar_tehkanwc;
-llamadas_maquina.bucle_general:=tehkanwc_principal;
-llamadas_maquina.reset:=reset_tehkanwc;
 end;
 
 end.

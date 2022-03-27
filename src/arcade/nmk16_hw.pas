@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,timer_engine,oki6295,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_nmk16;
+function iniciar_nmk16:boolean;
 
 implementation
 const
@@ -71,12 +71,12 @@ begin
 		if (atrib and $01)<>0 then begin
       pri:=(atrib and $c0) shr 6;
 			if (pri<>priority) then continue;
-			sx:=ram[$4004+(f*4)]+128;// 4
-			sy:=ram[$4006+(f*4)];  //6
-			code:=ram[$4003+(f*4)] and $3fff;  // 3
-			color:=ram[$4007+(f*4)] shl 4;  //7
-			w:=ram[$4001+(f*4)] and $0f;  //1
-			h:=(ram[$4001+(f*4)] and $f0) shr 4;  //1
+			sx:=ram[$4004+(f*4)]+128;
+			sy:=ram[$4006+(f*4)];
+			code:=ram[$4003+(f*4)] and $3fff;
+			color:=ram[$4007+(f*4)] shl 4;
+			w:=ram[$4001+(f*4)] and $0f;
+			h:=(ram[$4001+(f*4)] and $f0) shr 4;
 			yy:=h;
       while (yy>=0) do begin
 				x:=sx;
@@ -212,7 +212,7 @@ case direccion of
                       cambiar_color(valor,(direccion and $7ff) shr 1);
                    end;
     $94000:bg_bank:=valor and $ff;
-    $9c000..$9dfff:begin
+    $9c000..$9dfff:if bg_ram[(direccion and $fff) shr 1]<>valor then begin
                       bg_ram[(direccion and $fff) shr 1]:=valor;
                       gfx[0].buffer[(direccion and $fff) shr 1]:=true;
                    end;
@@ -249,6 +249,15 @@ begin
   bank_nmk112(f,0);
  end;
 end;
+
+procedure cerrar_nmk16;
+begin
+if adpcm_rom[0]<>nil then freemem(adpcm_rom[0]);
+if adpcm_rom[1]<>nil then freemem(adpcm_rom[1]);
+adpcm_rom[0]:=nil;
+adpcm_rom[1]:=nil;
+end;
+
 
 function iniciar_nmk16:boolean;
 var
@@ -352,6 +361,10 @@ begin
   convert_gfx(2,0,mem_char,@ps_x,@ps_y,false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=nmk16_principal;
+llamadas_maquina.close:=cerrar_nmk16;
+llamadas_maquina.reset:=reset_nmk16;
+llamadas_maquina.fps_max:=56;
 iniciar_nmk16:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=71 then main_screen.rol90_screen:=true;
@@ -417,23 +430,5 @@ end;
 reset_nmk16;
 iniciar_nmk16:=true;
 end;
-
-procedure cerrar_nmk16;
-begin
-if adpcm_rom[0]<>nil then freemem(adpcm_rom[0]);
-if adpcm_rom[1]<>nil then freemem(adpcm_rom[1]);
-adpcm_rom[0]:=nil;
-adpcm_rom[1]:=nil;
-end;
-
-procedure Cargar_nmk16;
-begin
-llamadas_maquina.iniciar:=iniciar_nmk16;
-llamadas_maquina.bucle_general:=nmk16_principal;
-llamadas_maquina.close:=cerrar_nmk16;
-llamadas_maquina.reset:=reset_nmk16;
-llamadas_maquina.fps_max:=56;
-end;
-
 
 end.

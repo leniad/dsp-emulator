@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_2151,
      msm5205,taitosnd,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_rastan;
+function iniciar_rastan:boolean;
 
 implementation
 const
@@ -164,12 +164,12 @@ case direccion of
       $380000:spritebank:=(valor and $e0) shr 5;
       $3e0000:tc0140syt_0.port_w(valor and $ff);
       $3e0002:tc0140syt_0.comm_w(valor and $ff);
-      $c00000..$c03fff:begin
+      $c00000..$c03fff:if ram2[(direccion and $ffff) shr 1]<>valor then begin
                       ram2[(direccion and $ffff) shr 1]:=valor;
                       gfx[0].buffer[(direccion and $3fff) shr 2]:=true;
                    end;
       $c04000..$c07fff,$c0c000..$c0ffff:ram2[(direccion and $ffff) shr 1]:=valor;
-      $c08000..$c0bfff:begin
+      $c08000..$c0bfff:if ram2[(direccion and $ffff) shr 1]<>valor then begin
                       ram2[(direccion and $ffff) shr 1]:=valor;
                       gfx[0].buffer[((direccion and $3fff) shr 2)+$1000]:=true;
                    end;
@@ -266,6 +266,8 @@ const
 var
   memoria_temp:array[0..$7ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=rastan_principal;
+llamadas_maquina.reset:=reset_rastan;
 iniciar_rastan:=false;
 iniciar_audio(false);
 screen_init(1,512,512);
@@ -312,13 +314,6 @@ convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 //final
 reset_rastan;
 iniciar_rastan:=true;
-end;
-
-procedure Cargar_rastan;
-begin
-llamadas_maquina.iniciar:=iniciar_rastan;
-llamadas_maquina.bucle_general:=rastan_principal;
-llamadas_maquina.reset:=reset_rastan;
 end;
 
 end.

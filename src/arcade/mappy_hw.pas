@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,gfx_engine,namco_snd,namcoio_56xx_58xx,
      timer_engine,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_mappyhw;
+function iniciar_mappyhw:boolean;
 
 implementation
 
@@ -574,6 +574,9 @@ begin
   for f:=0 to (long_sprites-1) do gfx[1].colores[f]:=(memoria_temp[f+$120] and $0f);
 end;
 begin
+llamadas_maquina.bucle_general:=mappy_principal;
+llamadas_maquina.reset:=reset_mappyhw;
+llamadas_maquina.fps_max:=60.6060606060;
 iniciar_mappyhw:=false;
 iniciar_audio(false);
 //Pantallas
@@ -720,14 +723,6 @@ case  main_vars.tipo_maquina of
 end;
 reset_mappyhw;
 iniciar_mappyhw:=true;
-end;
-
-procedure cargar_mappyhw;
-begin
-llamadas_maquina.bucle_general:=mappy_principal;
-llamadas_maquina.iniciar:=iniciar_mappyhw;
-llamadas_maquina.reset:=reset_mappyhw;
-llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

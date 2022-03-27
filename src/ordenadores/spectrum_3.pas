@@ -17,7 +17,6 @@ var
    paginacion_especial,disk_present:boolean;
    linea:word;
 
-procedure Cargar_Spectrum3;
 function iniciar_3:boolean;
 procedure spec3_reset;
 function spectrum3_loaddisk:boolean;
@@ -32,28 +31,6 @@ procedure spec3_retraso_puerto(puerto:word);
 
 implementation
 uses tap_tzx,spectrum_misc;
-
-procedure Cargar_Spectrum3;
-begin
-case main_vars.tipo_maquina of
-  2:begin
-      llamadas_maquina.cartuchos:=spectrum3_loaddisk;
-      disk_present:=true;
-  end;
-  3:begin
-      llamadas_maquina.cartuchos:=nil;
-      disk_present:=false;
-  end;
-end;
-llamadas_maquina.iniciar:=iniciar_3;
-llamadas_maquina.bucle_general:=spectrum3_main;
-llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.cintas:=spectrum_tapes;
-llamadas_maquina.reset:=spec3_reset;
-llamadas_maquina.grabar_snapshot:=grabar_spec;
-llamadas_maquina.fps_max:=17734475/5/70908;
-llamadas_maquina.configurar:=spectrum_config;
-end;
 
 function spectrum3_loaddisk:boolean;
 begin
@@ -74,6 +51,23 @@ var
   h:byte;
   mem_temp:array[0..$ffff] of byte;
 begin
+case main_vars.tipo_maquina of
+  2:begin
+      llamadas_maquina.cartuchos:=spectrum3_loaddisk;
+      disk_present:=true;
+  end;
+  3:begin
+      llamadas_maquina.cartuchos:=nil;
+      disk_present:=false;
+  end;
+end;
+llamadas_maquina.bucle_general:=spectrum3_main;
+llamadas_maquina.close:=spec_cerrar_comun;
+llamadas_maquina.cintas:=spectrum_tapes;
+llamadas_maquina.reset:=spec3_reset;
+llamadas_maquina.grabar_snapshot:=grabar_spec;
+llamadas_maquina.fps_max:=17734475/5/70908;
+llamadas_maquina.configurar:=spectrum_config;
 iniciar_3:=false;
 //Iniciar el Z80 y pantalla
 if not(spec_comun(17734475 div 5)) then exit;

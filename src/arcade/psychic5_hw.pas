@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,pal_engine,
      sound_engine,qsnapshot;
 
-procedure cargar_psychic5;
+function iniciar_psychic5:boolean;
 
 implementation
 const
@@ -457,6 +457,11 @@ const
     ps_y:array[0..15] of dword=(0*8, 4*8, 8*8, 12*8, 16*8, 20*8, 24*8, 28*8,
         32*8, 36*8, 40*8, 44*8, 48*8, 52*8, 56*8, 60*8);
 begin
+llamadas_maquina.bucle_general:=psychic5_principal;
+llamadas_maquina.reset:=reset_psychic5;
+llamadas_maquina.fps_max:=54.001512;
+llamadas_maquina.save_qsnap:=psychic5_qsave;
+llamadas_maquina.load_qsnap:=psychic5_qload;
 iniciar_psychic5:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -508,16 +513,6 @@ marcade.dswb_val:=@psychic5_dip_b;
 //final
 reset_psychic5;
 iniciar_psychic5:=true;
-end;
-
-procedure Cargar_psychic5;
-begin
-llamadas_maquina.iniciar:=iniciar_psychic5;
-llamadas_maquina.bucle_general:=psychic5_principal;
-llamadas_maquina.reset:=reset_psychic5;
-llamadas_maquina.fps_max:=54.001512;
-llamadas_maquina.save_qsnap:=psychic5_qsave;
-llamadas_maquina.load_qsnap:=psychic5_qload;
 end;
 
 end.

@@ -7,7 +7,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 
 // {$define speed_debug}
 
-procedure cargar_blktiger;
+function iniciar_blktiger:boolean;
 
 implementation
 {$ifdef speed_debug}uses principal,sysutils;{$endif}
@@ -476,6 +476,11 @@ begin
  spr_on:=true;
 end;
 
+procedure cerrar_blktiger;
+begin
+save_hi('blktiger.hi',@memoria[$e200],80);
+end;
+
 function iniciar_blktiger:boolean;
 var
   f:word;
@@ -486,6 +491,11 @@ const
   ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
 begin
+llamadas_maquina.bucle_general:=blktiger_principal;
+llamadas_maquina.close:=cerrar_blktiger;
+llamadas_maquina.reset:=reset_blktiger;
+llamadas_maquina.save_qsnap:=blktiger_qsave;
+llamadas_maquina.load_qsnap:=blktiger_qload;
 iniciar_blktiger:=false;
 iniciar_audio(false);
 //Background
@@ -553,21 +563,6 @@ marcade.dswb_val:=@blktiger_dip_b;
 //final
 reset_blktiger;
 iniciar_blktiger:=true;
-end;
-
-procedure cerrar_blktiger;
-begin
-save_hi('blktiger.hi',@memoria[$e200],80);
-end;
-
-procedure cargar_blktiger;
-begin
-llamadas_maquina.iniciar:=iniciar_blktiger;
-llamadas_maquina.bucle_general:=blktiger_principal;
-llamadas_maquina.close:=cerrar_blktiger;
-llamadas_maquina.reset:=reset_blktiger;
-llamadas_maquina.save_qsnap:=blktiger_qsave;
-llamadas_maquina.load_qsnap:=blktiger_qload;
 end;
 
 end.

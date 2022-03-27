@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,ym_2203,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine,qsnapshot;
 
-procedure cargar_gng;
+function iniciar_gng:boolean;
 
 implementation
 const
@@ -336,6 +336,11 @@ const
     pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=gng_principal;
+llamadas_maquina.reset:=reset_gng;
+llamadas_maquina.fps_max:=59.59;
+llamadas_maquina.save_qsnap:=gng_qsave;
+llamadas_maquina.load_qsnap:=gng_qload;
 iniciar_gng:=false;
 iniciar_audio(false);
 //Background
@@ -402,16 +407,6 @@ marcade.dswb_val:=@gng_dip_b;
 //final
 reset_gng;
 iniciar_gng:=true;
-end;
-
-procedure cargar_gng;
-begin
-llamadas_maquina.iniciar:=iniciar_gng;
-llamadas_maquina.bucle_general:=gng_principal;
-llamadas_maquina.reset:=reset_gng;
-llamadas_maquina.fps_max:=59.59;
-llamadas_maquina.save_qsnap:=gng_qsave;
-llamadas_maquina.load_qsnap:=gng_qload;
 end;
 
 end.

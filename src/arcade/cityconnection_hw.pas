@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,ay_8910,ym_2203,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_citycon;
+function iniciar_citycon:boolean;
 
 implementation
 const
@@ -150,7 +150,8 @@ end;
 function citycon_getbyte(direccion:word):byte;
 begin
   case direccion of
-        0..$20ff,$2800..$28ff,$4000..$ffff:citycon_getbyte:=memoria[direccion];
+        0..$1fff,$2800..$28ff,$4000..$ffff:citycon_getbyte:=memoria[direccion];
+        $2000..$20ff:citycon_getbyte:=lines_color_look[direccion and $ff];
         $3000:if main_screen.flip_main_screen then citycon_getbyte:=marcade.in2
                 else citycon_getbyte:=marcade.in0;
         $3001:citycon_getbyte:=marcade.dswa+marcade.in1;
@@ -184,13 +185,10 @@ begin
 case direccion of
   0..$fff,$2800..$28ff:memoria[direccion]:=valor;
   $1000..$1fff:if memoria[direccion]<>valor then begin
-                gfx[0].buffer[direccion and $fff]:=true;
-                memoria[direccion]:=valor;
+                  gfx[0].buffer[direccion and $fff]:=true;
+                  memoria[direccion]:=valor;
                end;
-  $2000..$20ff:begin
-                lines_color_look[direccion and $ff]:=valor;
-                memoria[direccion]:=valor;
-               end;
+  $2000..$20ff:lines_color_look[direccion and $ff]:=valor;
   $3000:begin
           if fondo<>(valor shr 4) then begin
             fondo:=valor shr 4;
@@ -348,6 +346,10 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
             8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=citycon_principal;
+llamadas_maquina.reset:=reset_citycon;
+llamadas_maquina.save_qsnap:=citycon_qsave;
+llamadas_maquina.load_qsnap:=citycon_qload;
 iniciar_citycon:=false;
 iniciar_audio(false);
 screen_init(1,1024,256,true);
@@ -401,15 +403,6 @@ marcade.dswb_val:=@citycon_dip_b;
 //final
 reset_citycon;
 iniciar_citycon:=true;
-end;
-
-procedure Cargar_citycon;
-begin
-llamadas_maquina.iniciar:=iniciar_citycon;
-llamadas_maquina.bucle_general:=citycon_principal;
-llamadas_maquina.reset:=reset_citycon;
-llamadas_maquina.save_qsnap:=citycon_qsave;
-llamadas_maquina.load_qsnap:=citycon_qload;
 end;
 
 end.

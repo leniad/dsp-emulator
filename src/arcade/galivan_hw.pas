@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,dac,rom_engine,pal_engine,
      sound_engine,timer_engine,ym_3812;
 
-procedure cargar_galivan;
+function iniciar_galivan:boolean;
 
 implementation
 const
@@ -251,10 +251,10 @@ end;
 
 function galivan_snd_inbyte(puerto:word):byte;
 begin
-  case (puerto and $ff) of
+case (puerto and $ff) of
   4:sound_latch:=0;
   6:galivan_snd_inbyte:=sound_latch;
-  end;
+end;
 end;
 
 procedure galivan_snd_outbyte(puerto:word;valor:byte);
@@ -345,6 +345,8 @@ begin
   end;
 end;
 begin
+llamadas_maquina.bucle_general:=galivan_principal;
+llamadas_maquina.reset:=reset_galivan;
 iniciar_galivan:=false;
 iniciar_audio(false);
 screen_init(1,2048,2048);
@@ -450,13 +452,6 @@ put_bg;
 //final
 reset_galivan;
 iniciar_galivan:=true;
-end;
-
-procedure cargar_galivan;
-begin
-llamadas_maquina.iniciar:=iniciar_galivan;
-llamadas_maquina.bucle_general:=galivan_principal;
-llamadas_maquina.reset:=reset_galivan;
 end;
 
 end.

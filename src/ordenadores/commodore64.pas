@@ -9,7 +9,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      tape_window,sid_sound,cargar_dsk,forms,
      {$IFDEF CIA_OLD}mos6526_old{$ELSE}mos6526{$ENDIF};
 
-procedure cargar_c64;
+function iniciar_c64:boolean;
 //Para los snapshots
 procedure c64_putbyte(direccion:word;valor:byte);
 
@@ -345,58 +345,6 @@ begin
   sid_0.update;
 end;
 
-function iniciar_c64:boolean;
-begin
-  iniciar_c64:=false;
-  iniciar_audio(true);
-  //Total 5--> 504x312
-  //Linea --> 76 HBLANK
-  //          48 Borde
-  //           7 Borde 38 cols o visible si 40 cols
-  //         304 Siempre visible
-  //           9 Borde 38 cols o visible si 40 cols
-  //          37 Borde
-  //          23 HBLANK
-  //          -----> Total Visible --> 405 pixels
-  // Lineas Verticales
-  //  15 VBLANK
-  //  35 Borde
-  //   4 Borde 38 cols o visible si 40 cols
-  // 192 visible
-  //   4 Borde 30 cols o visible si 40 cols
-  //  49 Borde
-  //  12 VBLANK
-  //  ---------> Total visible  284
-  screen_init(1,384,270);
-  iniciar_video(384,270);
-  m6502_0:=cpu_m6502.create(985248,312,TCPU_M6502);
-  m6502_0.change_ram_calls(c64_getbyte,c64_putbyte);
-  m6502_0.change_despues_instruccion(c64_despues_instruccion);
-  m6502_0.init_sound(c64_sound_update);
-  if not(roms_load(@kernel_rom,c64_kernel)) then exit;
-  if not(roms_load(@basic_rom,c64_basic)) then exit;
-  if not(roms_load(@char_rom,c64_char)) then exit;
-  //CIA
-  {$IFDEF CIA_OLD}
-  mos6526_0:=mos6526_chip.create(985248);
-  mos6526_0.change_calls(nil,cia1_portb_r,nil,nil,c64_cia_irq);
-  mos6526_1:=mos6526_chip.create(985248);
-  mos6526_1.change_calls(nil,nil,cia2_porta_w,cia2_portb_w,c64_nmi);
-  {$ELSE}
-  mos6526_0:=mos6526_chip.create(985248);
-  mos6526_0.change_calls(nil,nil,nil,nil,c64_cia_irq,c64_nmi);
-  {$ENDIF}
-  //VIDEO
-  mos6566_0:=mos6566_chip.create(985248);
-  mos6566_0.change_calls(c64_vic_irq);
-  sid_0:=sid_chip.create(985248,TYPE_6581);
-  c64_reset;
-  iniciar_c64:=true;
-  TZX_CLOCK:=985248 div 1000;
-  cinta_tzx.tape_start:=c64_tape_start;
-  cinta_tzx.tape_stop:=c64_tape_stop;
-end;
-
 procedure c64_cerrar;
 begin
 
@@ -475,15 +423,62 @@ begin
   change_caption;
 end;
 
-procedure cargar_c64;
+function iniciar_c64:boolean;
 begin
-  llamadas_maquina.iniciar:=iniciar_c64;
   llamadas_maquina.bucle_general:=c64_principal;
   llamadas_maquina.close:=c64_cerrar;
   llamadas_maquina.reset:=c64_reset;
   llamadas_maquina.fps_max:=985248/(312*63);
   llamadas_maquina.cintas:=c64_tapes;
   llamadas_maquina.cartuchos:=c64_loaddisk;
+  iniciar_c64:=false;
+  iniciar_audio(true);
+  //Total 5--> 504x312
+  //Linea --> 76 HBLANK
+  //          48 Borde
+  //           7 Borde 38 cols o visible si 40 cols
+  //         304 Siempre visible
+  //           9 Borde 38 cols o visible si 40 cols
+  //          37 Borde
+  //          23 HBLANK
+  //          -----> Total Visible --> 405 pixels
+  // Lineas Verticales
+  //  15 VBLANK
+  //  35 Borde
+  //   4 Borde 38 cols o visible si 40 cols
+  // 192 visible
+  //   4 Borde 30 cols o visible si 40 cols
+  //  49 Borde
+  //  12 VBLANK
+  //  ---------> Total visible  284
+  screen_init(1,384,270);
+  iniciar_video(384,270);
+  m6502_0:=cpu_m6502.create(985248,312,TCPU_M6502);
+  m6502_0.change_ram_calls(c64_getbyte,c64_putbyte);
+  m6502_0.change_despues_instruccion(c64_despues_instruccion);
+  m6502_0.init_sound(c64_sound_update);
+  if not(roms_load(@kernel_rom,c64_kernel)) then exit;
+  if not(roms_load(@basic_rom,c64_basic)) then exit;
+  if not(roms_load(@char_rom,c64_char)) then exit;
+  //CIA
+  {$IFDEF CIA_OLD}
+  mos6526_0:=mos6526_chip.create(985248);
+  mos6526_0.change_calls(nil,cia1_portb_r,nil,nil,c64_cia_irq);
+  mos6526_1:=mos6526_chip.create(985248);
+  mos6526_1.change_calls(nil,nil,cia2_porta_w,cia2_portb_w,c64_nmi);
+  {$ELSE}
+  mos6526_0:=mos6526_chip.create(985248);
+  mos6526_0.change_calls(nil,nil,nil,nil,c64_cia_irq,c64_nmi);
+  {$ENDIF}
+  //VIDEO
+  mos6566_0:=mos6566_chip.create(985248);
+  mos6566_0.change_calls(c64_vic_irq);
+  sid_0:=sid_chip.create(985248,TYPE_6581);
+  c64_reset;
+  iniciar_c64:=true;
+  TZX_CLOCK:=985248 div 1000;
+  cinta_tzx.tape_start:=c64_tape_start;
+  cinta_tzx.tape_stop:=c64_tape_stop;
 end;
 
 end.

@@ -3194,6 +3194,14 @@ object principal1: Tprincipal1
               Caption = 'Hippodrome'
               OnClick = CambiarMaquina
             end
+            object slyspy1: TMenuItem
+              Caption = 'SlySpy'
+              OnClick = CambiarMaquina
+            end
+            object bdash1: TMenuItem
+              Caption = 'Boulder Dash I/II'
+              OnClick = CambiarMaquina
+            end
           end
           object tumblep1: TMenuItem
             Caption = 'Tumblepop'

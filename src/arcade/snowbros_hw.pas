@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_3812,
      rom_engine,pal_engine,kaneco_pandora,sound_engine;
 
-procedure cargar_snowbros;
+function iniciar_snowbros:boolean;
 
 implementation
 const
@@ -35,8 +35,8 @@ var
 
 procedure update_video_snowbros;inline;
 begin
-pandora_0.update_video(1,0);
-actualiza_trozo_final(0,16,256,224,1);
+  pandora_0.update_video(1,0);
+  actualiza_trozo_final(0,16,256,224,1);
 end;
 
 procedure eventos_snowbros;
@@ -199,6 +199,9 @@ const
 var
   memoria_temp:array[0..$7ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=snowbros_principal;
+llamadas_maquina.reset:=reset_snowbros;
+llamadas_maquina.fps_max:=57.5;
 iniciar_snowbros:=false;
 iniciar_audio(false);
 screen_init(1,512,512,true,true);
@@ -234,14 +237,6 @@ marcade.dswb_val:=@snowbros_dip_b;
 //final
 reset_snowbros;
 iniciar_snowbros:=true;
-end;
-
-procedure Cargar_snowbros;
-begin
-llamadas_maquina.iniciar:=iniciar_snowbros;
-llamadas_maquina.bucle_general:=snowbros_principal;
-llamadas_maquina.reset:=reset_snowbros;
-llamadas_maquina.fps_max:=57.5;
 end;
 
 end.

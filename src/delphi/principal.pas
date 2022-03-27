@@ -483,6 +483,8 @@ type
     idsoccer1: TMenuItem;
     ccastles1: TMenuItem;
     Flower1: TMenuItem;
+    SlySpy1: TMenuItem;
+    bdash1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -623,11 +625,11 @@ if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquin
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
-QueryPerformanceFrequency(cont_micro);
-valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
 main_vars.driver_ok:=false;
 if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
 timers.autofire_init;
+QueryPerformanceFrequency(cont_micro);
+valor_sync:=(1/llamadas_maquina.fps_max)*cont_micro;
 if not(main_vars.driver_ok) then begin
   EmuStatus:=EsStoped;
   principal1.timer1.Enabled:=false;

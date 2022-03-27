@@ -5,8 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,gfx_engine,ym_3812,ym_2203,rom_engine,
      pal_engine,sound_engine;
 
-//main
-procedure cargar_brkthru;
+function iniciar_brkthru:boolean;
 
 implementation
 const
@@ -414,6 +413,9 @@ begin
 end;
 
 begin
+llamadas_maquina.bucle_general:=brkthru_principal;
+llamadas_maquina.reset:=reset_brkthru;
+llamadas_maquina.fps_max:=57.444885;
 iniciar_brkthru:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -507,14 +509,6 @@ set_pal(colores,$100);
 //final
 reset_brkthru;
 iniciar_brkthru:=true;
-end;
-
-procedure Cargar_brkthru;
-begin
-llamadas_maquina.iniciar:=iniciar_brkthru;
-llamadas_maquina.bucle_general:=brkthru_principal;
-llamadas_maquina.reset:=reset_brkthru;
-llamadas_maquina.fps_max:=57.444885;
 end;
 
 end.

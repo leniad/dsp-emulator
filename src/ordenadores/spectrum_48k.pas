@@ -1,5 +1,4 @@
 unit spectrum_48k;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,z80_sp,misc_functions,graphics,controls_engine,dialogs,lenguaje,
@@ -9,13 +8,15 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 var
     rom_cambiada_48:boolean=false;
 
-procedure Cargar_Spectrum48K;
+function iniciar_48k:boolean;
 procedure spec48_putbyte(direccion:word;valor:byte);
 procedure spec48_outbyte(puerto:word;valor:byte);
 procedure borde_48_full(linea:word);
 
 implementation
+
 uses tap_tzx,spectrum_misc;
+
 var
     spec_16k:boolean;
     linea:word;
@@ -156,7 +157,7 @@ end;
 
 procedure spec48_retraso_memoria(direccion:word);
 begin
-if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+var_spectrum.retraso[linea*224+spec_z80.contador];
+  if (direccion and $c000)=$4000 then spec_z80.contador:=spec_z80.contador+var_spectrum.retraso[linea*224+spec_z80.contador];
 end;
 
 procedure spec48_retraso_puerto(puerto:word);
@@ -322,7 +323,7 @@ end;
 
 procedure spec48k_reset;
 begin
-reset_misc;
+  reset_misc;
 end;
 
 function iniciar_48k:boolean;
@@ -333,6 +334,16 @@ var
   pos:integer;
   cadena:string;
 begin
+if main_vars.tipo_maquina=0 then spec_16k:=false
+  else spec_16k:=true;
+llamadas_maquina.bucle_general:=spectrum48_main;
+llamadas_maquina.cintas:=spectrum_tapes;
+llamadas_maquina.reset:=spec48k_reset;
+llamadas_maquina.grabar_snapshot:=grabar_spec;
+llamadas_maquina.fps_max:=3500000/69888;
+llamadas_maquina.close:=spec_cerrar_comun;
+llamadas_maquina.configurar:=spectrum_config;
+interface2.hay_if2:=false;
 iniciar_48k:=false;
 //Iniciar el Z80 y pantalla
 if not(spec_comun(14000000 div 4)) then exit;
@@ -361,21 +372,6 @@ for h:=0 to 191 do begin
 end;
 spec48k_reset;
 iniciar_48k:=true;
-end;
-
-procedure Cargar_Spectrum48K;
-begin
-if main_vars.tipo_maquina=0 then spec_16k:=false
-  else spec_16k:=true;
-llamadas_maquina.iniciar:=iniciar_48k;
-llamadas_maquina.bucle_general:=spectrum48_main;
-llamadas_maquina.cintas:=spectrum_tapes;
-llamadas_maquina.reset:=spec48k_reset;
-llamadas_maquina.grabar_snapshot:=grabar_spec;
-llamadas_maquina.fps_max:=3500000/69888;
-llamadas_maquina.close:=spec_cerrar_comun;
-llamadas_maquina.configurar:=spectrum_config;
-interface2.hay_if2:=false;
 end;
 
 end.

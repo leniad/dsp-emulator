@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,seibu_sound,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_cabal;
+function iniciar_cabal:boolean;
 
 implementation
 const
@@ -261,6 +261,11 @@ begin
  marcade.in2:=$fc;
 end;
 
+procedure cerrar_cabal;
+begin
+  seibu_adpcm_close;
+end;
+
 function iniciar_cabal:boolean;
 const
   pc_x:array[0..7] of dword=(3, 2, 1, 0, 8+3, 8+2, 8+1, 8+0);
@@ -276,6 +281,10 @@ const
 var
   memoria_temp:array[0..$7ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=cabal_principal;
+llamadas_maquina.close:=cerrar_cabal;
+llamadas_maquina.reset:=reset_cabal;
+llamadas_maquina.fps_max:=59.60;
 iniciar_cabal:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -324,20 +333,6 @@ marcade.dswa_val:=@cabal_dip_a;
 //final
 reset_cabal;
 iniciar_cabal:=true;
-end;
-
-procedure cerrar_cabal;
-begin
-seibu_adpcm_close;
-end;
-
-procedure Cargar_cabal;
-begin
-llamadas_maquina.iniciar:=iniciar_cabal;
-llamadas_maquina.bucle_general:=cabal_principal;
-llamadas_maquina.close:=cerrar_cabal;
-llamadas_maquina.reset:=reset_cabal;
-llamadas_maquina.fps_max:=59.60;
 end;
 
 end.

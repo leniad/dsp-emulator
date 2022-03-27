@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pokey,
      pal_engine,sound_engine,slapstic,ym_2151,atari_mo,file_engine;
 
-procedure cargar_gauntlet;
+function iniciar_gauntlet:boolean;
 
 implementation
 const
@@ -382,6 +382,17 @@ begin
  write_eeprom:=false;
 end;
 
+procedure cerrar_gauntlet;
+var
+  nombre:string;
+begin
+case main_vars.tipo_maquina of
+  236:nombre:='gauntlet.nv';
+  245:nombre:='gaunt2.nv';
+end;
+write_file(Directory.Arcade_nvram+nombre,@eeprom_ram,$800);
+end;
+
 function iniciar_gauntlet:boolean;
 var
   memoria_temp:array[0..$7ffff] of byte;
@@ -411,6 +422,10 @@ begin
   copymemory(@slapstic_rom[3,0],@memoria_temp[$3e000],$2000);
 end;
 begin
+llamadas_maquina.bucle_general:=gauntlet_principal;
+llamadas_maquina.reset:=reset_gauntlet;
+llamadas_maquina.close:=cerrar_gauntlet;
+llamadas_maquina.fps_max:=59.922743;
 iniciar_gauntlet:=false;
 iniciar_audio(true);
 //Chars
@@ -504,26 +519,6 @@ end;
 //final
 reset_gauntlet;
 iniciar_gauntlet:=true;
-end;
-
-procedure cerrar_gauntlet;
-var
-  nombre:string;
-begin
-case main_vars.tipo_maquina of
-  236:nombre:='gauntlet.nv';
-  245:nombre:='gaunt2.nv';
-end;
-write_file(Directory.Arcade_nvram+nombre,@eeprom_ram,$800);
-end;
-
-procedure Cargar_gauntlet;
-begin
-llamadas_maquina.iniciar:=iniciar_gauntlet;
-llamadas_maquina.bucle_general:=gauntlet_principal;
-llamadas_maquina.reset:=reset_gauntlet;
-llamadas_maquina.close:=cerrar_gauntlet;
-llamadas_maquina.fps_max:=59.922743;
 end;
 
 end.

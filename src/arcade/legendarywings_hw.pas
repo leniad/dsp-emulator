@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,msm5205,
      rom_engine,pal_engine,sound_engine,timer_engine;
 
-procedure cargar_hlwings;
+function iniciar_lwings:boolean;
 
 implementation
 const
@@ -538,6 +538,7 @@ begin
   convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 end;
 begin
+llamadas_maquina.reset:=reset_lwings;
 iniciar_lwings:=false;
 iniciar_audio(false);
 //final 1  512x512 (por sprites)
@@ -571,6 +572,7 @@ ym2203_0:=ym2203_chip.create(1500000,0.10,0.20);
 ym2203_1:=ym2203_chip.create(1500000,0.10,0.20);
 case main_vars.tipo_maquina of
   59:begin
+        llamadas_maquina.bucle_general:=lwings_principal;
         //Main CPU
         z80_0:=cpu_z80.create(6000000,256);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
@@ -595,6 +597,8 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@lwings_dip_b;
      end;
   60:begin
+        llamadas_maquina.bucle_general:=lwings_principal;
+        llamadas_maquina.fps_max:=55.37;
         //Main CPU
         z80_0:=cpu_z80.create(3000000,256);
         z80_0.change_ram_calls(lwings_getbyte,lwings_putbyte);
@@ -619,6 +623,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@sectionz_dip_b;
       end;
   61:begin
+        llamadas_maquina.bucle_general:=trojan_principal;
         //Main CPU
         z80_0:=cpu_z80.create(3000000,256);
         z80_0.change_ram_calls(lwings_getbyte,trojan_putbyte);
@@ -667,20 +672,6 @@ end;
 //final
 reset_lwings;
 iniciar_lwings:=true;
-end;
-
-procedure Cargar_hlwings;
-begin
-case main_vars.tipo_maquina of
-  59:llamadas_maquina.bucle_general:=lwings_principal;
-  60:begin
-      llamadas_maquina.bucle_general:=lwings_principal;
-      llamadas_maquina.fps_max:=55.37;
-     end;
-  61:llamadas_maquina.bucle_general:=trojan_principal;
-end;
-llamadas_maquina.iniciar:=iniciar_lwings;
-llamadas_maquina.reset:=reset_lwings;
 end;
 
 end.

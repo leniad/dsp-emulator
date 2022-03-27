@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2203,dac,rom_engine,
      pal_engine,sound_engine,qsnapshot,timer_engine,nb1412_m2,ym_3812;
 
-procedure cargar_terracre;
+function iniciar_terracre:boolean;
 
 implementation
 const
@@ -433,6 +433,10 @@ begin
   convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 end;
 begin
+llamadas_maquina.bucle_general:=terracre_principal;
+llamadas_maquina.reset:=reset_terracre;
+llamadas_maquina.save_qsnap:=terracre_qsave;
+llamadas_maquina.load_qsnap:=terracre_qload;
 iniciar_terracre:=false;
 iniciar_audio(false);
 screen_init(1,512,1024);
@@ -522,15 +526,6 @@ set_pal(colores,$100);
 //final
 reset_terracre;
 iniciar_terracre:=true;
-end;
-
-procedure cargar_terracre;
-begin
-llamadas_maquina.iniciar:=iniciar_terracre;
-llamadas_maquina.bucle_general:=terracre_principal;
-llamadas_maquina.reset:=reset_terracre;
-llamadas_maquina.save_qsnap:=terracre_qsave;
-llamadas_maquina.load_qsnap:=terracre_qload;
 end;
 
 end.

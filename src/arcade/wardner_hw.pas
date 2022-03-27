@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms32010,ym_3812,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_wardnerhw;
+function iniciar_wardnerhw:boolean;
 
 implementation
 const
@@ -189,7 +189,7 @@ end;
 
 function wardner_dsp_r:word;
 begin
-	// DSP can read data from main CPU RAM via DSP IO port 1 */
+	// DSP can read data from main CPU RAM via DSP IO port 1
 	case main_ram_seg of
 		$7000,$8000,$a000:wardner_dsp_r:=memoria[main_ram_seg+(dsp_addr_w+0)] or
         								   (memoria[main_ram_seg+(dsp_addr_w+1)] shl 8);
@@ -199,7 +199,7 @@ end;
 
 procedure wardner_dsp_w(valor:word);
 begin
-  // Data written to main CPU RAM via DSP IO port 1 */
+  // Data written to main CPU RAM via DSP IO port 1
 	dsp_execute:=false;
 	case main_ram_seg of
 		$7000:begin
@@ -381,7 +381,14 @@ case (puerto and $ff) of
 		    $a:fg_bank:=0;
         $b:fg_bank:=$1000;
         $c:video_ena:=false;
-        $d:video_ena:=true;
+        $d:begin
+              if not(video_ena) then begin
+                fillchar(gfx[0].buffer,$800,1);
+                fillchar(gfx[1].buffer,$1000,1);
+                fillchar(gfx[2].buffer,$2000,1);
+              end;
+              video_ena:=true;
+           end;
 	    end;
   $60:if (txt_ram[txt_offs] and $ff)<>valor then begin
           txt_ram[txt_offs]:=(txt_ram[txt_offs] and $ff00) or valor;
@@ -458,6 +465,9 @@ const
     ps_y:array[0..15] of dword=(0*16, 1*16, 2*16, 3*16, 4*16, 5*16, 6*16, 7*16,
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
 begin
+llamadas_maquina.bucle_general:=wardnerhw_principal;
+llamadas_maquina.reset:=reset_wardnerhw;
+llamadas_maquina.fps_max:=(14000000/2)/(446*286);
 iniciar_wardnerhw:=false;
 iniciar_audio(false);
 screen_init(1,512,256,true);
@@ -531,14 +541,6 @@ marcade.dswb_val:=@wardner_dip_b;
 //final
 reset_wardnerhw;
 iniciar_wardnerhw:=true;
-end;
-
-procedure Cargar_wardnerhw;
-begin
-llamadas_maquina.iniciar:=iniciar_wardnerhw;
-llamadas_maquina.bucle_general:=wardnerhw_principal;
-llamadas_maquina.reset:=reset_wardnerhw;
-llamadas_maquina.fps_max:=(14000000/2)/(446*286);
 end;
 
 end.

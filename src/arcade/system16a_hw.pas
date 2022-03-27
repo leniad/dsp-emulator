@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ppi8255,sound_engine,ym_2151,fd1089,dialogs,mcs48,dac;
 
-procedure cargar_system16a;
+function iniciar_system16a:boolean;
 
 implementation
 const
@@ -589,11 +589,11 @@ begin
 case direccion of
     0..$3ffff:;
     $400000..$7fffff:case (direccion and $7ffff) of
-                        $00000..$0ffff:begin
+                        $00000..$0ffff:if tile_ram[(direccion and $7fff) shr 1]<>valor then begin
                                         tile_ram[(direccion and $7fff) shr 1]:=valor;
                                         test_tile_buffer((direccion and $7fff) shr 1);
                                        end;
-                        $10000..$1ffff:begin
+                        $10000..$1ffff:if char_ram[(direccion and $fff) shr 1]<>valor then begin
                                           char_ram[(direccion and $fff) shr 1]:=valor;
                                           gfx[0].buffer[(direccion and $fff) shr 1]:=true;
                                           test_screen_change((direccion and $fff) shr 1);
@@ -607,13 +607,15 @@ case direccion of
                                        end;
                    end;
     $c00000..$ffffff:case (direccion and $7ffff) of
-                        $00000..$0ffff:begin
+                        $00000..$0ffff:if tile_ram[(direccion and $7fff) shr 1]<>valor then begin
                                         tile_ram[(direccion and $7fff) shr 1]:=valor;
                                         test_tile_buffer((direccion and $7fff) shr 1);
                                        end;
                         $10000..$1ffff:begin
-                                          char_ram[(direccion and $fff) shr 1]:=valor;
-                                          gfx[0].buffer[(direccion and $fff) shr 1]:=true;
+                                          if char_ram[(direccion and $fff) shr 1]<>valor then begin
+                                            char_ram[(direccion and $fff) shr 1]:=valor;
+                                            gfx[0].buffer[(direccion and $fff) shr 1]:=true;
+                                          end;
                                           test_screen_change((direccion and $fff) shr 1);
                                        end;
                         $40000..$5ffff:standard_io_w(direccion and $3fff,valor);  //misc_io
@@ -799,6 +801,7 @@ convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
 
 begin
+llamadas_maquina.reset:=reset_system16a;
 iniciar_system16a:=false;
 iniciar_audio(false);
 //text
@@ -845,6 +848,7 @@ marcade.dswa:=$ff;
 marcade.dswa_val:=@system16a_dip_a;
 case main_vars.tipo_maquina of
   114:begin  //Shinobi
+        llamadas_maquina.bucle_general:=system16a_principal_adpcm;
         n7751_numroms:=1;
         if not(roms_load(mcs48_0.get_rom_addr,shinobi_n7751)) then exit;
         if not(roms_load(@n7751_data,shinobi_n7751_data)) then exit;
@@ -874,6 +878,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@shinobi_dip_b;
   end;
   115:begin //Alex Kid
+        llamadas_maquina.bucle_general:=system16a_principal_adpcm;
         n7751_numroms:=2;
         if not(roms_load(mcs48_0.get_rom_addr,shinobi_n7751)) then exit;
         if not(roms_load(@n7751_data,alexkid_n7751_data)) then exit;
@@ -892,6 +897,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@alexkidd_dip_b;
   end;
   116:begin //Fantasy Zone
+        llamadas_maquina.bucle_general:=system16a_principal;
         m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
         if not(roms_load16w(@rom,fantzone_rom)) then exit;
@@ -907,6 +913,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@fantzone_dip_b;
   end;
   186:begin //Alien Syndrome
+        llamadas_maquina.bucle_general:=system16a_principal_adpcm;
         n7751_numroms:=3;
         if not(roms_load(mcs48_0.get_rom_addr,shinobi_n7751)) then exit;
         if not(roms_load(@n7751_data,alien_n7751_data)) then exit;
@@ -938,6 +945,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@aliensynd_dip_b;
   end;
   187:begin //WB3
+        llamadas_maquina.bucle_general:=system16a_principal;
         m68000_0.change_ram16_calls(system16a_getword_fd1089,system16a_putword);
         //cargar roms
         if not(roms_load16w(@memoria_temp,wb3_rom)) then exit;
@@ -966,6 +974,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@wb3_dip_b;
   end;
   198:begin //Tetris
+        llamadas_maquina.bucle_general:=system16a_principal;
         m68000_0.change_ram16_calls(system16a_getword,system16a_putword);
         //cargar roms
         if not(roms_load16w(@rom,tetris_rom)) then exit;
@@ -1003,16 +1012,6 @@ end;
 //final
 reset_system16a;
 iniciar_system16a:=true;
-end;
-
-procedure Cargar_system16a;
-begin
-llamadas_maquina.iniciar:=iniciar_system16a;
-case  main_vars.tipo_maquina of
-  114,115,186:llamadas_maquina.bucle_general:=system16a_principal_adpcm;
-  else llamadas_maquina.bucle_general:=system16a_principal;
-end;
-llamadas_maquina.reset:=reset_system16a;
 end;
 
 end.

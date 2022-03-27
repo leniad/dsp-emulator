@@ -5,8 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,gfx_engine,ym_2203,rom_engine,
      pal_engine,sound_engine;
 
-//main
-procedure cargar_ironhorse;
+function iniciar_ironhorse:boolean;
 
 implementation
 const
@@ -271,6 +270,9 @@ const
   pc_x:array[0..7] of dword=(0*4, 1*4, 2*4, 3*4, 4*4, 5*4, 6*4, 7*4);
   pc_y:array[0..7] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32);
 begin
+llamadas_maquina.bucle_general:=ironhorse_principal;
+llamadas_maquina.reset:=reset_ironhorse;
+llamadas_maquina.fps_max:=61;
 iniciar_ironhorse:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -323,14 +325,6 @@ marcade.dswc_val:=@ironhorse_dip_c;
 //final
 reset_ironhorse;
 iniciar_ironhorse:=true;
-end;
-
-procedure Cargar_ironhorse;
-begin
-llamadas_maquina.iniciar:=iniciar_ironhorse;
-llamadas_maquina.bucle_general:=ironhorse_principal;
-llamadas_maquina.reset:=reset_ironhorse;
-llamadas_maquina.fps_max:=61;
 end;
 
 end.

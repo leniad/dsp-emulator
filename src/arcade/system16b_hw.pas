@@ -1,10 +1,15 @@
 ﻿unit system16b_hw;
+
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ym_2151,dialogs,upd7759,mcs51,sega_315_5195;
-procedure cargar_system16b;
+
+function iniciar_system16b:boolean;
+
 implementation
+
 const
         //Altered Beast
         altbeast_rom:array[0..1] of tipo_roms=(
@@ -130,6 +135,7 @@ const
         (mask:$20;name:'Difficulty';number:2;dip:((dip_val:$20;dip_name:'Normal'),(dip_val:$0;dip_name:'Hard'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Controller';number:2;dip:((dip_val:$40;dip_name:'1 Player Side'),(dip_val:$0;dip_name:'2 Players Side'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Special Function Mode';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
 type
   tsystem16_info=record
     	normal,shadow,hilight:array[0..31] of byte;
@@ -139,6 +145,7 @@ type
       screen_enabled:boolean;
       tile_bank:array[0..1] of byte;
    end;
+
 var
  rom:array[0..$3ffff] of word;
  rom2:array[0..$1ffff] of word;
@@ -740,8 +747,8 @@ if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5
                   if char_ram[direccion]<>valor then begin
                     char_ram[direccion]:=valor;
                     gfx[0].buffer[direccion]:=true;
-                    test_screen_change(direccion);
                   end;
+                  test_screen_change(direccion);
                end;
   end;
   zona:=true;
@@ -799,8 +806,8 @@ if ((direccion>=s315_5195_0.dirs_start[5]) and (direccion<s315_5195_0.dirs_end[5
                   if char_ram[direccion]<>valor then begin
                     char_ram[direccion]:=valor;
                     gfx[0].buffer[direccion]:=true;
-                    test_screen_change(direccion);
                   end;
+                  test_screen_change(direccion);
                end;
   end;
 end;
@@ -978,6 +985,12 @@ gfx_set_desc_data(3,0,8*8,n*$10000*8,n*$8000*8,0);
 convert_gfx(0,0,memoria_temp,@pt_x,@pt_y,false,false);
 end;
 begin
+case main_vars.tipo_maquina of
+  292,293,294:llamadas_maquina.bucle_general:=system16b_principal_mcu;
+  295,296,297:llamadas_maquina.bucle_general:=system16b_principal;
+end;
+llamadas_maquina.reset:=reset_system16b;
+llamadas_maquina.fps_max:=60.05439;
 iniciar_system16b:=false;
 iniciar_audio(false);
 //text
@@ -1215,14 +1228,4 @@ reset_system16b;
 iniciar_system16b:=true;
 end;
 
-procedure Cargar_system16b;
-begin
-llamadas_maquina.iniciar:=iniciar_system16b;
-case main_vars.tipo_maquina of
-  292,293,294:llamadas_maquina.bucle_general:=system16b_principal_mcu;
-  295,296,297:llamadas_maquina.bucle_general:=system16b_principal;
-end;
-llamadas_maquina.reset:=reset_system16b;
-llamadas_maquina.fps_max:=60.05439;
-end;
 end.

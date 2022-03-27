@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,konami_snd,sound_engine;
 
-procedure cargar_tutankham;
+function iniciar_tutankham:boolean;
 
 implementation
 const
@@ -39,8 +39,7 @@ var
 
 procedure update_video_tutankham;inline;
 var
-  y,x:word;
-  effx,yscroll,effy,vrambyte,shifted:byte;
+  x,y,effx,yscroll,effy,vrambyte,shifted:byte;
   punt:array[0..$ffff] of word;
 begin
 for y:=0 to 255 do begin
@@ -174,6 +173,8 @@ var
   f:byte;
   memoria_temp:array[0..$efff] of byte;
 begin
+llamadas_maquina.bucle_general:=tutankham_principal;
+llamadas_maquina.reset:=reset_tutankham;
 iniciar_tutankham:=false;
 iniciar_audio(false);
 //Pantallas
@@ -197,13 +198,6 @@ marcade.dswb_val:=@tutan_dip_b;
 //final
 reset_tutankham;
 iniciar_tutankham:=true;
-end;
-
-procedure Cargar_tutankham;
-begin
-llamadas_maquina.iniciar:=iniciar_tutankham;
-llamadas_maquina.bucle_general:=tutankham_principal;
-llamadas_maquina.reset:=reset_tutankham;
 end;
 
 end.

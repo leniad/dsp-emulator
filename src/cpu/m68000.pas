@@ -27,6 +27,7 @@ unit m68000;
 12/10/14   Revisados los opcodes $Exxx
 07/11/17   Añadido roxl.w
 15/07/20   Añadido move.w opcode $32 direccionamiento $3b
+13/03/22   Añadido ror.w
 }
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
@@ -3324,6 +3325,16 @@ case (instruccion shr 12) of //cojo solo el primer nibble
                     r.cc.x:=r.cc.c;
                     r.cc.v:=false;
                   end;
+               $6:begin //ror.w añadida 13/03/2022 E-swat
+                    self.contador:=self.contador+8;
+                    tempw:=self.leerdir_w(dir);
+                    tempw2:=(tempw shr 1) or ((tempw and 1) shl 15);
+                    self.ponerdir_w2(dir,tempw2);
+                    r.cc.c:=(tempw and 1)<>0;
+                    r.cc.n:=(tempw2 and $8000)<>0;
+                    r.cc.v:=false;
+                    r.cc.z:=(tempw2=0);
+                 end;
                $7:begin //rol.w
                     self.contador:=self.contador+8;
                     tempw:=self.leerdir_w(dir);

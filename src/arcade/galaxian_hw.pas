@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      rom_engine,file_engine,pal_engine,sound_engine,ppi8255,misc_functions,
      konami_snd;
 
-procedure cargar_hgalaxian;
+function iniciar_hgalaxian:boolean;
 
 implementation
 
@@ -1008,6 +1008,11 @@ begin
  end;
 end;
 
+procedure cerrar_hgalaxian;
+begin
+if main_vars.tipo_maquina=14 then save_hi('frogger.hi',@memoria[$83f1],10);
+end;
+
 function iniciar_hgalaxian:boolean;
 var
   colores:tpaleta;
@@ -1038,6 +1043,19 @@ begin
   convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 begin
+case main_vars.tipo_maquina of
+  143..145:begin
+      llamadas_maquina.bucle_general:=frogger_principal;
+      eventos_hardware_galaxian:=eventos_scramble;
+      calc_nchar:=galaxian_calc_nchar;
+      calc_sprite:=galaxian_calc_sprite;
+      draw_stars:=stars_jumpbug;
+      galaxian_update_video:=update_video_hgalaxian;
+  end;
+end;
+llamadas_maquina.close:=cerrar_hgalaxian;
+llamadas_maquina.reset:=reset_hgalaxian;
+llamadas_maquina.fps_max:=60.6060606060;
 iniciar_hgalaxian:=false;
 iniciar_audio(false);
 screen_init(1,256,512,true,true);
@@ -1047,6 +1065,12 @@ iniciar_video(224,256);
 z80_0:=cpu_z80.create(3072000,256);
 case main_vars.tipo_maquina of
   14:begin  //frogger
+      llamadas_maquina.bucle_general:=frogger_principal;
+      eventos_hardware_galaxian:=eventos_frogger;
+      calc_nchar:=nil;
+      calc_sprite:=nil;
+      draw_stars:=nil;
+      galaxian_update_video:=update_video_frogger;
       //Main CPU
       z80_0.change_ram_calls(frogger_getbyte,frogger_putbyte);
       //Sound
@@ -1072,6 +1096,12 @@ case main_vars.tipo_maquina of
       if not(roms_load(@memoria_temp,frogger_pal)) then exit;
   end;
   47:begin  //galaxian
+      llamadas_maquina.bucle_general:=hgalaxian_principal;
+      eventos_hardware_galaxian:=eventos_galaxian;
+      calc_nchar:=galaxian_calc_nchar;
+      calc_sprite:=galaxian_calc_sprite;
+      draw_stars:=stars_galaxian;
+      galaxian_update_video:=update_video_hgalaxian;
       //funciones Z80
       z80_0.change_ram_calls(galaxian_getbyte,galaxian_putbyte);
       //cargar roms
@@ -1085,6 +1115,12 @@ case main_vars.tipo_maquina of
       if not(roms_load(@memoria_temp,galaxian_pal)) then exit;
   end;
   48:begin //Jump Bug
+      llamadas_maquina.bucle_general:=hgalaxian_principal;
+      eventos_hardware_galaxian:=eventos_jumpbug;
+      calc_nchar:=jumpbug_calc_nchar;
+      calc_sprite:=jumpbug_calc_sprite;
+      draw_stars:=stars_jumpbug;
+      galaxian_update_video:=update_video_hgalaxian;
       //funciones Z80
       z80_0.change_ram_calls(jumpbug_getbyte,jumpbug_putbyte);
       //chip de sonido
@@ -1101,6 +1137,12 @@ case main_vars.tipo_maquina of
       if not(roms_load(@memoria_temp,jumpbug_pal)) then exit;
   end;
   49:begin  //mooncrst
+      llamadas_maquina.bucle_general:=hgalaxian_principal;
+      eventos_hardware_galaxian:=eventos_galaxian;
+      calc_nchar:=mooncrst_calc_nchar;
+      calc_sprite:=mooncrst_calc_sprite;
+      draw_stars:=stars_galaxian;
+      galaxian_update_video:=update_video_hgalaxian;
       //funciones Z80
       z80_0.change_ram_calls(mooncrst_getbyte,mooncrst_putbyte);
       //cargar roms
@@ -1250,61 +1292,6 @@ end;
 //final
 reset_hgalaxian;
 iniciar_hgalaxian:=true;
-end;
-
-procedure cerrar_hgalaxian;
-begin
-if main_vars.tipo_maquina=14 then save_hi('frogger.hi',@memoria[$83f1],10);
-end;
-
-procedure cargar_hgalaxian;
-begin
-case main_vars.tipo_maquina of
-  14:begin
-      llamadas_maquina.bucle_general:=frogger_principal;
-      eventos_hardware_galaxian:=eventos_frogger;
-      calc_nchar:=nil;
-      calc_sprite:=nil;
-      draw_stars:=nil;
-      galaxian_update_video:=update_video_frogger;
-     end;
-  47:begin
-      llamadas_maquina.bucle_general:=hgalaxian_principal;
-      eventos_hardware_galaxian:=eventos_galaxian;
-      calc_nchar:=galaxian_calc_nchar;
-      calc_sprite:=galaxian_calc_sprite;
-      draw_stars:=stars_galaxian;
-      galaxian_update_video:=update_video_hgalaxian;
-     end;
-  48:begin
-      llamadas_maquina.bucle_general:=hgalaxian_principal;
-      eventos_hardware_galaxian:=eventos_jumpbug;
-      calc_nchar:=jumpbug_calc_nchar;
-      calc_sprite:=jumpbug_calc_sprite;
-      draw_stars:=stars_jumpbug;
-      galaxian_update_video:=update_video_hgalaxian;
-  end;
-  49:begin
-      llamadas_maquina.bucle_general:=hgalaxian_principal;
-      eventos_hardware_galaxian:=eventos_galaxian;
-      calc_nchar:=mooncrst_calc_nchar;
-      calc_sprite:=mooncrst_calc_sprite;
-      draw_stars:=stars_galaxian;
-      galaxian_update_video:=update_video_hgalaxian;
-  end;
-  143..145:begin
-      llamadas_maquina.bucle_general:=frogger_principal;
-      eventos_hardware_galaxian:=eventos_scramble;
-      calc_nchar:=galaxian_calc_nchar;
-      calc_sprite:=galaxian_calc_sprite;
-      draw_stars:=stars_jumpbug;
-      galaxian_update_video:=update_video_hgalaxian;
-  end;
-end;
-llamadas_maquina.iniciar:=iniciar_hgalaxian;
-llamadas_maquina.close:=cerrar_hgalaxian;
-llamadas_maquina.reset:=reset_hgalaxian;
-llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

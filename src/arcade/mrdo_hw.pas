@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      pal_engine,sound_engine;
 
-procedure cargar_mrdo;
+function iniciar_mrdo:boolean;
 
 implementation
 const
@@ -252,6 +252,9 @@ begin
 	end;
 end;
 begin
+llamadas_maquina.bucle_general:=mrdo_principal;
+llamadas_maquina.reset:=reset_mrdo;
+llamadas_maquina.fps_max:=59.94323742;
 iniciar_mrdo:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -300,14 +303,6 @@ marcade.dswb_val:=@mrdo_dip_b;
 //final
 reset_mrdo;
 iniciar_mrdo:=true;
-end;
-
-procedure Cargar_mrdo;
-begin
-llamadas_maquina.iniciar:=iniciar_mrdo;
-llamadas_maquina.bucle_general:=mrdo_principal;
-llamadas_maquina.reset:=reset_mrdo;
-llamadas_maquina.fps_max:=59.94323742;
 end;
 
 end.

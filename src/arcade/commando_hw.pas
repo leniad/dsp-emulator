@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,misc_functions,
      rom_engine,pal_engine,sound_engine,timer_engine;
 
-procedure cargar_commando;
+function iniciar_commando:boolean;
 
 implementation
 const
@@ -242,6 +242,8 @@ const
     pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=commando_principal;
+llamadas_maquina.reset:=reset_commando;
 iniciar_commando:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
@@ -305,13 +307,6 @@ marcade.dswb_val:=@commando_dip_b;
 //final
 reset_commando;
 iniciar_commando:=true;
-end;
-
-procedure cargar_commando;
-begin
-llamadas_maquina.iniciar:=iniciar_commando;
-llamadas_maquina.bucle_general:=commando_principal;
-llamadas_maquina.reset:=reset_commando;
 end;
 
 end.

@@ -4,7 +4,7 @@ interface
 uses asteroids_hw_audio,m6502,main_engine,controls_engine,gfx_engine,
      timer_engine,samples,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_as;
+function iniciar_as:boolean;
 
 implementation
 const
@@ -277,6 +277,9 @@ var
   colores:tpaleta;
   f:byte;
 begin
+llamadas_maquina.bucle_general:=principal_as;
+llamadas_maquina.reset:=reset_as;
+llamadas_maquina.fps_max:=12096000/4096/12/4;
 iniciar_as:=false;
 iniciar_audio(false);
 screen_init(1,400,400,false,true);
@@ -322,14 +325,6 @@ set_pal(colores,16);
 //final
 reset_as;
 iniciar_as:=true;
-end;
-
-procedure cargar_as;
-begin
-llamadas_maquina.iniciar:=iniciar_as;
-llamadas_maquina.bucle_general:=principal_as;
-llamadas_maquina.reset:=reset_as;
-llamadas_maquina.fps_max:=12096000/4096/12/4;
 end;
 
 end.

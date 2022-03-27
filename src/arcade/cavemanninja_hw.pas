@@ -6,7 +6,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      oki6295,sound_engine,hu6280,deco_16ic,deco_common,deco_104,deco_146,
      misc_functions;
 
-procedure cargar_cninja;
+function iniciar_cninja:boolean;
 
 implementation
 const
@@ -472,6 +472,9 @@ begin
   convert_gfx(3,0,memoria_temp,@ps_x,@ps_y,false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=cninja_principal;
+llamadas_maquina.reset:=reset_cninja;
+llamadas_maquina.fps_max:=58;
 iniciar_cninja:=false;
 iniciar_audio(false);
 case main_vars.tipo_maquina of
@@ -626,14 +629,6 @@ end;
 freemem(memoria_temp);
 reset_cninja;
 iniciar_cninja:=true;
-end;
-
-procedure Cargar_cninja;
-begin
-llamadas_maquina.bucle_general:=cninja_principal;
-llamadas_maquina.iniciar:=iniciar_cninja;
-llamadas_maquina.reset:=reset_cninja;
-llamadas_maquina.fps_max:=58;
 end;
 
 end.

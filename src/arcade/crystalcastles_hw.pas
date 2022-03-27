@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,pokey,file_engine;
 
-procedure cargar_ccastles;
+function iniciar_ccastles:boolean;
 
 implementation
 const
@@ -62,7 +62,6 @@ for y:=0 to 15 do begin
   pos_y:=pos_y+dir;
 end;
 end;
-
 begin
 if (outlatch[1] and $10)<>0 then flip:=$ff
   else flip:=0;
@@ -325,6 +324,11 @@ begin
   marcade.in1:=$df;
 end;
 
+procedure close_ccastles;
+begin
+  write_file(Directory.Arcade_nvram+'ccastles.nv',@memoria[$9000],$100);
+end;
+
 function iniciar_ccastles:boolean;
 var
   memoria_temp:array[0..$ffff] of byte;
@@ -335,6 +339,10 @@ const
 			8*16, 9*16, 10*16, 11*16, 12*16, 13*16, 14*16, 15*16);
     resistances:array[0..2] of integer=(22000,10000,4700);
 begin
+llamadas_maquina.bucle_general:=principal_ccastles;
+llamadas_maquina.reset:=reset_ccastles;
+llamadas_maquina.fps_max:=61.035156;
+llamadas_maquina.close:=close_ccastles;
 iniciar_ccastles:=false;
 iniciar_audio(false);
 screen_init(1,320,256);
@@ -375,20 +383,6 @@ if read_file_size(Directory.Arcade_nvram+'ccastles.nv',longitud) then read_file(
 //final
 reset_ccastles;
 iniciar_ccastles:=true;
-end;
-
-procedure close_ccastles;
-begin
-write_file(Directory.Arcade_nvram+'ccastles.nv',@memoria[$9000],$100);
-end;
-
-procedure cargar_ccastles;
-begin
-llamadas_maquina.iniciar:=iniciar_ccastles;
-llamadas_maquina.bucle_general:=principal_ccastles;
-llamadas_maquina.reset:=reset_ccastles;
-llamadas_maquina.fps_max:=61.035156;
-llamadas_maquina.close:=close_ccastles;
 end;
 
 end.

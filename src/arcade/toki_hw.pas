@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_3812,oki6295,
      seibu_sound,rom_engine,pal_engine,sound_engine,misc_functions;
 
-procedure cargar_toki;
+function iniciar_toki:boolean;
 
 implementation
 const
@@ -311,6 +311,9 @@ var
    f:dword;
    memoria_temp2:array[0..$1ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=toki_principal;
+llamadas_maquina.reset:=reset_toki;
+llamadas_maquina.fps_max:=59.61;
 iniciar_toki:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -374,14 +377,6 @@ marcade.dswa_val:=@toki_dip;
 freemem(memoria_temp);
 reset_toki;
 iniciar_toki:=true;
-end;
-
-procedure Cargar_toki;
-begin
-llamadas_maquina.iniciar:=iniciar_toki;
-llamadas_maquina.bucle_general:=toki_principal;
-llamadas_maquina.reset:=reset_toki;
-llamadas_maquina.fps_max:=59.61;
 end;
 
 end.

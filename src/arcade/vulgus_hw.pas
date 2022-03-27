@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,pal_engine,
      sound_engine,timer_engine;
 
-procedure cargar_vulgus;
+function iniciar_vulgus:boolean;
 
 implementation
 const
@@ -259,6 +259,9 @@ const
     pt_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=vulgus_principal;
+llamadas_maquina.reset:=reset_vulgus;
+llamadas_maquina.fps_max:=59.59;
 iniciar_vulgus:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
@@ -336,14 +339,6 @@ marcade.dswb_val:=@vulgus_dip_b;
 //final
 reset_vulgus;
 iniciar_vulgus:=true;
-end;
-
-procedure Cargar_vulgus;
-begin
-llamadas_maquina.iniciar:=iniciar_vulgus;
-llamadas_maquina.bucle_general:=vulgus_principal;
-llamadas_maquina.reset:=reset_vulgus;
-llamadas_maquina.fps_max:=59.59;
 end;
 
 end.

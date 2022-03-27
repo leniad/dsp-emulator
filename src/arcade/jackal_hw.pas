@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine;
 
-procedure cargar_jackal;
+function iniciar_jackal:boolean;
 
 implementation
 const
@@ -294,6 +294,8 @@ const
     ps_y:array[0..15] of dword=(0*32, 1*32, 2*32, 3*32, 4*32, 5*32, 6*32, 7*32,
 			16*32, 17*32, 18*32, 19*32, 20*32, 21*32, 22*32, 23*32);
 begin
+llamadas_maquina.bucle_general:=jackal_principal;
+llamadas_maquina.reset:=reset_jackal;
 iniciar_jackal:=false;
 iniciar_audio(true);
 //Pantallas
@@ -354,13 +356,6 @@ marcade.dswc_val:=@jackal_dip_c;
 //final
 reset_jackal;
 iniciar_jackal:=true;
-end;
-
-procedure Cargar_jackal;
-begin
-llamadas_maquina.iniciar:=iniciar_jackal;
-llamadas_maquina.bucle_general:=jackal_principal;
-llamadas_maquina.reset:=reset_jackal;
 end;
 
 end.

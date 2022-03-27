@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,ay_8910,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine,qsnapshot;
 
-procedure cargar_sonson;
+function iniciar_sonson:boolean;
 
 implementation
 const
@@ -133,7 +133,7 @@ procedure sonson_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   $0..$fff,$2020..$207f:memoria[direccion]:=valor;
-  $1000..$17ff:begin
+  $1000..$17ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
                end;
@@ -268,6 +268,10 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=sonson_principal;
+llamadas_maquina.reset:=reset_sonson;
+llamadas_maquina.save_qsnap:=sonson_qsave;
+llamadas_maquina.load_qsnap:=sonson_qload;
 iniciar_sonson:=false;
 iniciar_audio(false);
 screen_init(1,256,256,false,true);
@@ -321,15 +325,6 @@ marcade.dswb_val:=@sonson_dip_b;
 //final
 reset_sonson;
 iniciar_sonson:=true;
-end;
-
-procedure Cargar_sonson;
-begin
-llamadas_maquina.iniciar:=iniciar_sonson;
-llamadas_maquina.bucle_general:=sonson_principal;
-llamadas_maquina.reset:=reset_sonson;
-llamadas_maquina.save_qsnap:=sonson_qsave;
-llamadas_maquina.load_qsnap:=sonson_qload;
 end;
 
 end.

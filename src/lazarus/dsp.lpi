@@ -16,7 +16,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="20"/>
       <RevisionNr Value="5"/>
-      <BuildNr Value="1285"/>
+      <BuildNr Value="1287"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.20"/>
     </VersionInfo>
@@ -57,6 +57,7 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <CursorPos X="34"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -180,13 +181,11 @@
         <ComponentName Value="Aboutbox"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <TopLine Value="11"/>
         <CursorPos X="28" Y="15"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
         <Filename Value="loadrom.pas"/>
@@ -406,10 +405,11 @@
       </Unit38>
       <Unit39>
         <Filename Value="..\misc\init_games.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="709"/>
-        <CursorPos X="44" Y="720"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="712"/>
+        <CursorPos X="44" Y="723"/>
         <UsageCount Value="63"/>
+        <Loaded Value="True"/>
       </Unit39>
       <Unit40>
         <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
@@ -887,7 +887,7 @@
         <Loaded Value="True"/>
       </Unit97>
     </Units>
-    <JumpHistory Count="4" HistoryIndex="3">
+    <JumpHistory Count="6" HistoryIndex="5">
       <Position1>
         <Filename Value="principal.pas"/>
         <Caret Column="34"/>
@@ -903,6 +903,14 @@
       <Position4>
         <Filename Value="..\arcade\mrdocastle_hw.pas"/>
       </Position4>
+      <Position5>
+        <Filename Value="acercade.pas"/>
+        <Caret Line="15" Column="28" TopLine="11"/>
+      </Position5>
+      <Position6>
+        <Filename Value="principal.pas"/>
+        <Caret Column="34"/>
+      </Position6>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>

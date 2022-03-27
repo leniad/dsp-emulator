@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      konami_snd,sound_engine;
 
-procedure cargar_timepilot;
+function timepilot_iniciar:boolean;
 
 implementation
 const
@@ -110,6 +110,7 @@ case direccion of
                 $340..$35f,$3c0..$3df:timepilot_getbyte:=marcade.in2;
                 $360..$37f,$3e0..$3ff:timepilot_getbyte:=$ff; //dsw2
                end;
+  else timepilot_getbyte:=$ff;
 end;
 end;
 
@@ -166,6 +167,8 @@ var
   f,bit0,bit1,bit2,bit3,bit4:byte;
   memoria_temp:array[0..$3fff] of byte;
 begin
+llamadas_maquina.bucle_general:=timepilot_principal;
+llamadas_maquina.reset:=timepilot_reset;
 timepilot_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -223,13 +226,6 @@ for f:=0 to $7f do gfx[0].colores[f]:=(memoria_temp[$140+f] and $f)+$10;
 //Final
 timepilot_reset;
 timepilot_iniciar:=true;
-end;
-
-procedure Cargar_timepilot;
-begin
-llamadas_maquina.iniciar:=timepilot_iniciar;
-llamadas_maquina.bucle_general:=timepilot_principal;
-llamadas_maquina.reset:=timepilot_reset;
 end;
 
 end.

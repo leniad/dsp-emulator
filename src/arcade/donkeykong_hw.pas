@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,samples,rom_engine,
      pal_engine,sound_engine,n2a03;
 
-procedure cargar_dkong;
+function iniciar_dkong:boolean;
 
 implementation
 const
@@ -452,7 +452,7 @@ end;
 function dkong3_snd1_getbyte(direccion:word):byte;
 begin
   case direccion of
-    $0..$1ff,$e000..$ffff:dkong3_snd1_getbyte:=mem_snd[direccion];
+    $0..$7ff,$e000..$ffff:dkong3_snd1_getbyte:=mem_snd[direccion];
     $4000..$4015:dkong3_snd1_getbyte:=n2a03_0.read(direccion);
     $4016:dkong3_snd1_getbyte:=latch1;
     $4017:dkong3_snd1_getbyte:=latch2;
@@ -462,7 +462,7 @@ end;
 procedure dkong3_snd1_putbyte(direccion:word;valor:byte);
 begin
   case direccion of
-    0..$1ff:mem_snd[direccion]:=valor;
+    0..$7ff:mem_snd[direccion]:=valor;
     $4000..$4017:n2a03_0.write(direccion,valor);
     $e000..$ffff:; //ROM
   end;
@@ -471,7 +471,7 @@ end;
 function dkong3_snd2_getbyte(direccion:word):byte;
 begin
   case direccion of
-    $0..$1ff,$e000..$ffff:dkong3_snd2_getbyte:=mem_misc[direccion];
+    $0..$7ff,$e000..$ffff:dkong3_snd2_getbyte:=mem_misc[direccion];
     $4000..$4015,$4017:dkong3_snd2_getbyte:=n2a03_1.read(direccion);
     $4016:dkong3_snd2_getbyte:=latch3;
   end;
@@ -480,7 +480,7 @@ end;
 procedure dkong3_snd2_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
-    0..$1ff:mem_misc[direccion]:=valor;
+    0..$7ff:mem_misc[direccion]:=valor;
     $4000..$4017:n2a03_1.write(direccion,valor);
     $e000..$ffff:; //ROM
   end;
@@ -583,6 +583,8 @@ copymemory(@colores_char[0],@memoria_temp[$400],$100);
 end;
 
 begin
+llamadas_maquina.reset:=reset_dkong;
+llamadas_maquina.fps_max:=60.6060606060606060;
 iniciar_dkong:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -590,6 +592,7 @@ screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 case main_vars.tipo_maquina of
   15:begin //Donkey Kong
+        llamadas_maquina.bucle_general:=dkong_principal;
         //Main CPU
         z80_0:=cpu_z80.create(3072000,264);
         z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
@@ -613,6 +616,7 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@dk_dip_a;
      end;
  168:begin //Donkey Kong Jr.
+        llamadas_maquina.bucle_general:=dkong_principal;
         //Main CPU
         z80_0:=cpu_z80.create(3072000,264);
         z80_0.change_ram_calls(dkong_getbyte,dkong_putbyte);
@@ -646,6 +650,7 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@dk_dip_a;
      end;
  169:begin //Donkey Kong 3
+        llamadas_maquina.bucle_general:=dkong3_principal;
         //Main CPU
         z80_0:=cpu_z80.create(4000000,264);
         z80_0.change_ram_calls(dkong3_getbyte,dkong3_putbyte);
@@ -678,17 +683,6 @@ end;
 //final
 reset_dkong;
 iniciar_dkong:=true;
-end;
-
-procedure cargar_dkong;
-begin
-llamadas_maquina.iniciar:=iniciar_dkong;
-llamadas_maquina.reset:=reset_dkong;
-llamadas_maquina.fps_max:=60.6060606060606060;
-case main_vars.tipo_maquina of
-  15,168:llamadas_maquina.bucle_general:=dkong_principal;
-  169:llamadas_maquina.bucle_general:=dkong3_principal;
-end;
 end;
 
 end.

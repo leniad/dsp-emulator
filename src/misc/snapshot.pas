@@ -102,19 +102,19 @@ case model of
   0,5:begin //Spectrum 48k y Spectrum 16k
       if model=0 then main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum48K1)
         else main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum16K1);
-      Cargar_Spectrum48K;
+      llamadas_maquina.iniciar:=iniciar_48k;
     end;
   1,4:begin //Spectrum 128k y Spectrum +2
       if model=1 then main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum128K1)
         else main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum21);
-      Cargar_Spectrum128K;
+      llamadas_maquina.iniciar:=iniciar_128k;
     end;
   2,3:begin //Spectrum +3 y Spectrum +2A
       if model=2 then begin
         main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum31);
         principal1.BitBtn10.Enabled:=true;
       end else main_vars.tipo_maquina:=tipo_cambio_maquina(principal1.Spectrum2A1);
-      Cargar_Spectrum3;
+      llamadas_maquina.iniciar:=iniciar_3;
     end;
 end;
 llamadas_maquina.iniciar;

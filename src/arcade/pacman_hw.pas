@@ -4,7 +4,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      misc_functions,pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_pacman;
+function iniciar_pacman:boolean;
 
 implementation
 
@@ -560,6 +560,11 @@ begin
   convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 begin
+llamadas_maquina.bucle_general:=pacman_principal;
+llamadas_maquina.reset:=reset_pacman;
+llamadas_maquina.fps_max:=60.6060606060;
+llamadas_maquina.save_qsnap:=pacman_qsave;
+llamadas_maquina.load_qsnap:=pacman_qload;
 iniciar_pacman:=false;
 iniciar_audio(false);
 screen_init(1,224,288);
@@ -720,13 +725,4 @@ reset_pacman;
 iniciar_pacman:=true;
 end;
 
-procedure cargar_pacman;
-begin
-llamadas_maquina.iniciar:=iniciar_pacman;
-llamadas_maquina.bucle_general:=pacman_principal;
-llamadas_maquina.reset:=reset_pacman;
-llamadas_maquina.fps_max:=60.6060606060;
-llamadas_maquina.save_qsnap:=pacman_qsave;
-llamadas_maquina.load_qsnap:=pacman_qload;
-end;
 end.

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,ym_3812,m6809,
      oki6295,gaelco_hw_decrypt,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_gaelco_hw;
+function iniciar_gaelco_hw:boolean;
 
 implementation
 const
@@ -650,6 +650,14 @@ begin
   convert_gfx(1,0,memoria_temp,@pt_x,@pt_y,false,false);
 end;
 begin
+case main_vars.tipo_maquina of
+  78:llamadas_maquina.bucle_general:=bigk_principal;
+  101,173,174:begin
+        llamadas_maquina.bucle_general:=thoop_principal;
+        llamadas_maquina.fps_max:=57.42;
+  end;
+end;
+llamadas_maquina.reset:=reset_gaelco_hw;
 iniciar_gaelco_hw:=false;
 iniciar_audio(false);
 if main_vars.tipo_maquina=78 then pants:=15
@@ -798,22 +806,6 @@ freemem(memoria_temp);
 //final
 reset_gaelco_hw;
 iniciar_gaelco_hw:=true;
-end;
-
-procedure Cargar_gaelco_hw;
-begin
-case main_vars.tipo_maquina of
-  78:begin
-        llamadas_maquina.bucle_general:=bigk_principal;
-        llamadas_maquina.fps_max:=60;
-      end;
-  101,173,174:begin
-        llamadas_maquina.bucle_general:=thoop_principal;
-        llamadas_maquina.fps_max:=57.42;
-  end;
-end;
-llamadas_maquina.iniciar:=iniciar_gaelco_hw;
-llamadas_maquina.reset:=reset_gaelco_hw;
 end;
 
 end.

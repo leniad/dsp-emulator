@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,sn_76496,timer_engine,ppi8255,samples;
 
-procedure cargar_zaxxon;
+function iniciar_zaxxon:boolean;
 
 implementation
 const
@@ -658,6 +658,8 @@ set_pal(colores,size);
 for f:=0 to $ff do buffer_paleta[f]:=memoria_temp[$100+f];
 end;
 begin
+llamadas_maquina.reset:=reset_zaxxon;
+llamadas_maquina.fps_max:=59.999408;
 iniciar_zaxxon:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -668,6 +670,7 @@ iniciar_video(224,256);
 z80_0:=cpu_z80.create(3041250,264);
 case main_vars.tipo_maquina of
   175:begin  //Congo
+        llamadas_maquina.bucle_general:=congo_principal;
         z80_0.change_ram_calls(congo_getbyte,congo_putbyte);
         //Sound
         z80_1:=cpu_z80.create(4000000,264);
@@ -704,6 +707,7 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@zaxxon_dip_b;
      end;
   188:begin  //Zaxxon
+        llamadas_maquina.bucle_general:=zaxxon_principal;
         z80_0.change_ram_calls(zaxxon_getbyte,zaxxon_putbyte);
         pia8255_0:=pia8255_chip.create;
         pia8255_0.change_ports(nil,nil,nil,ppi8255_zaxxon_wporta,ppi8255_zaxxon_wportb,ppi8255_zaxxon_wportc);
@@ -734,17 +738,6 @@ end;
 //final
 reset_zaxxon;
 iniciar_zaxxon:=true;
-end;
-
-procedure Cargar_zaxxon;
-begin
-llamadas_maquina.iniciar:=iniciar_zaxxon;
-case main_vars.tipo_maquina of
-  175:llamadas_maquina.bucle_general:=congo_principal;
-  188:llamadas_maquina.bucle_general:=zaxxon_principal;
-end;
-llamadas_maquina.reset:=reset_zaxxon;
-llamadas_maquina.fps_max:=59.999408;
 end;
 
 end.

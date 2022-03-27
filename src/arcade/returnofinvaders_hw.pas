@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,m6805,rom_engine,pal_engine,
      timer_engine,sound_engine,sn_76496,misc_functions;
 
-procedure cargar_retofinv;
+function iniciar_retofinv:boolean;
 
 implementation
 const
@@ -146,7 +146,7 @@ end;
 procedure principal_retofinv;
 var
   frame_m,frame_sub,frame_s,frame_mcu:single;
-  f:word;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
@@ -375,6 +375,9 @@ var
   f:word;
   memoria_temp:array[0..$7fff] of byte;
 begin
+llamadas_maquina.bucle_general:=principal_retofinv;
+llamadas_maquina.reset:=reset_retofinv;
+llamadas_maquina.fps_max:=60.58;
 iniciar_retofinv:=false;
 iniciar_audio(false);
 screen_init(1,224,288,true);
@@ -449,14 +452,6 @@ marcade.dswc_val:=@retofinv_dip_c;
 //final
 reset_retofinv;
 iniciar_retofinv:=true;
-end;
-
-procedure Cargar_retofinv;
-begin
-llamadas_maquina.iniciar:=iniciar_retofinv;
-llamadas_maquina.bucle_general:=principal_retofinv;
-llamadas_maquina.reset:=reset_retofinv;
-llamadas_maquina.fps_max:=60.58;
 end;
 
 end.

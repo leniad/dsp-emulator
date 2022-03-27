@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6502,m6809,main_engine,controls_engine,gfx_engine,m6805,ym_3812,
      rom_engine,pal_engine,sound_engine,msm5205;
 
-procedure cargar_renegade;
+function iniciar_renegade:boolean;
 
 implementation
 const
@@ -436,6 +436,8 @@ var
   f:byte;
   memoria_temp:array[0..$5ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=principal_renegade;
+llamadas_maquina.reset:=reset_renegade;
 iniciar_renegade:=false;
 iniciar_audio(false);
 screen_init(1,1024,256);
@@ -508,13 +510,6 @@ marcade.dswb_val:=@renegade_dip_b;
 //final
 reset_renegade;
 iniciar_renegade:=true;
-end;
-
-procedure cargar_renegade;
-begin
-llamadas_maquina.iniciar:=iniciar_renegade;
-llamadas_maquina.bucle_general:=principal_renegade;
-llamadas_maquina.reset:=reset_renegade;
 end;
 
 end.

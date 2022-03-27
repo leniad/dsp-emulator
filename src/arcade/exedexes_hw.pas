@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,sn_76496,ay_8910,
      rom_engine,pal_engine,sound_engine,timer_engine;
 
-procedure cargar_exedexes_hw;
+function iniciar_exedexes_hw:boolean;
 
 implementation
 const
@@ -163,7 +163,10 @@ begin
 case direccion of
   0..$bfff:; //ROM
   $c800:sound_command:=valor;
-  $c804:chon:=(valor and $80)<>0;
+  $c804:if chon<>((valor and $80)<>0) then begin
+            chon:=(valor and $80)<>0;
+            if chon then fillchar(gfx[0].buffer,$400,1);
+        end;
   $d000..$d7ff:if memoria[direccion]<>valor then begin
                   gfx[0].buffer[direccion and $3ff]:=true;
                   memoria[direccion]:=valor;
@@ -282,6 +285,8 @@ for f:=0 to $1fff do begin
 end;
 end;
 begin
+llamadas_maquina.bucle_general:=exedexes_hw_principal;
+llamadas_maquina.reset:=reset_exedexes_hw;
 iniciar_exedexes_hw:=false;
 iniciar_audio(false);
 screen_init(1,2048,2048);
@@ -355,13 +360,6 @@ marcade.dswb_val:=@exedexes_dip_b;
 //final
 reset_exedexes_hw;
 iniciar_exedexes_hw:=true;
-end;
-
-procedure Cargar_exedexes_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_exedexes_hw;
-llamadas_maquina.bucle_general:=exedexes_hw_principal;
-llamadas_maquina.reset:=reset_exedexes_hw;
 end;
 
 end.

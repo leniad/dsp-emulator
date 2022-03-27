@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      konami_snd,sound_engine;
 
-procedure cargar_pooyan;
+function iniciar_pooyan:boolean;
 
 implementation
 const
@@ -190,6 +190,8 @@ const
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
 
 begin
+llamadas_maquina.bucle_general:=pooyan_principal;
+llamadas_maquina.reset:=reset_pooyan;
 iniciar_pooyan:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -235,13 +237,6 @@ marcade.dswb_val:=@pooyan_dip_b;
 //final
 reset_pooyan;
 iniciar_pooyan:=true;
-end;
-
-procedure Cargar_pooyan;
-begin
-llamadas_maquina.iniciar:=iniciar_pooyan;
-llamadas_maquina.bucle_general:=pooyan_principal;
-llamadas_maquina.reset:=reset_pooyan;
 end;
 
 end.

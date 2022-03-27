@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,ay_8910,pal_engine,
      sound_engine,qsnapshot;
 
-procedure cargar_kangaroo;
+function iniciar_kangaroo:boolean;
 
 implementation
 const
@@ -331,6 +331,11 @@ var
   f:word;
   mem_temp:array[0..$3fff] of byte;
 begin
+llamadas_maquina.bucle_general:=kangaroo_principal;
+llamadas_maquina.reset:=reset_kangaroo;
+llamadas_maquina.fps_max:=60.096154;
+llamadas_maquina.save_qsnap:=kangaroo_qsave;
+llamadas_maquina.load_qsnap:=kangaroo_qload;
 iniciar_kangaroo:=false;
 iniciar_audio(false);
 screen_init(1,256,512);
@@ -366,16 +371,6 @@ marcade.dswb_val:=@kangaroo_dipb;
 //final
 reset_kangaroo;
 iniciar_kangaroo:=true;
-end;
-
-procedure cargar_kangaroo;
-begin
-llamadas_maquina.iniciar:=iniciar_kangaroo;
-llamadas_maquina.bucle_general:=kangaroo_principal;
-llamadas_maquina.reset:=reset_kangaroo;
-llamadas_maquina.fps_max:=60.096154;
-llamadas_maquina.save_qsnap:=kangaroo_qsave;
-llamadas_maquina.load_qsnap:=kangaroo_qload;
 end;
 
 end.

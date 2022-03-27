@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine,flower_audio;
 
-procedure cargar_flower;
+function flower_iniciar:boolean;
 
 implementation
 const
@@ -291,6 +291,9 @@ var
   colores:tpaleta;
   f:word;
 begin
+llamadas_maquina.bucle_general:=flower_principal;
+llamadas_maquina.reset:=flower_reset;
+llamadas_maquina.fps_max:=60.6060606060606;
 flower_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,288,224,true);
@@ -358,14 +361,6 @@ marcade.dswb_val:=@flower_dipb;
 //final
 flower_reset;
 flower_iniciar:=true;
-end;
-
-procedure cargar_flower;
-begin
-llamadas_maquina.iniciar:=flower_iniciar;
-llamadas_maquina.bucle_general:=flower_principal;
-llamadas_maquina.reset:=flower_reset;
-llamadas_maquina.fps_max:=60.6060606060606;
 end;
 
 end.

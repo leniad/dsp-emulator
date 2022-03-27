@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_bombjack;
+function bombjack_iniciar:boolean;
 
 implementation
 const
@@ -342,6 +342,10 @@ const
 var
   memoria_temp:array[0..$5fff] of byte;
 begin
+llamadas_maquina.bucle_general:=bombjack_principal;
+llamadas_maquina.reset:=bombjack_reset;
+llamadas_maquina.save_qsnap:=bombjack_qsave;
+llamadas_maquina.load_qsnap:=bombjack_qload;
 bombjack_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256); //Fondo
@@ -396,15 +400,6 @@ marcade.dswb_val:=@bombjack_dipb;
 //final
 bombjack_reset;
 bombjack_iniciar:=true;
-end;
-
-procedure cargar_bombjack;
-begin
-llamadas_maquina.iniciar:=bombjack_iniciar;
-llamadas_maquina.bucle_general:=bombjack_principal;
-llamadas_maquina.reset:=bombjack_reset;
-llamadas_maquina.save_qsnap:=bombjack_qsave;
-llamadas_maquina.load_qsnap:=bombjack_qload;
 end;
 
 end.

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,sn_76496,gfx_engine,dac,rom_engine,
      pal_engine,konami_decrypt,sound_engine;
 
-procedure cargar_circusc;
+function iniciar_circusc:boolean;
 
 implementation
 const
@@ -223,6 +223,8 @@ const
     ps_y:array[0..15] of dword=(0*4*16, 1*4*16, 2*4*16, 3*4*16, 4*4*16, 5*4*16, 6*4*16, 7*4*16,
 			8*4*16, 9*4*16, 10*4*16, 11*4*16, 12*4*16, 13*4*16, 14*4*16, 15*4*16);
 begin
+llamadas_maquina.bucle_general:=circusc_principal;
+llamadas_maquina.reset:=reset_circusc;
 iniciar_circusc:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -287,13 +289,6 @@ marcade.dswb_val:=@circusc_dip_b;
 //final
 reset_circusc;
 iniciar_circusc:=true;
-end;
-
-procedure Cargar_circusc;
-begin
-llamadas_maquina.iniciar:=iniciar_circusc;
-llamadas_maquina.bucle_general:=circusc_principal;
-llamadas_maquina.reset:=reset_circusc;
 end;
 
 end.

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ay_8910,bagman_pal;
 
-procedure cargar_bagman;
+function iniciar_bagman:boolean;
 
 implementation
 const
@@ -142,7 +142,10 @@ case direccion of
                             end;
   $a000:irq_enable:=(valor and 1)<>0;
   $a001..$a002:main_screen.flip_main_screen:=(valor and 1)<>1;
-  $a003:video_enable:=(valor and 1)<>0;
+  $a003:if video_enable<>((valor and 1)<>0) then begin
+          video_enable:=(valor and 1)<>0;
+          if video_enable then fillchar(gfx[0].buffer,$400,1);
+        end;
   $a800..$a805:bagman_pal16r6_w(direccion and $7,valor);
 end;
 end;
@@ -226,6 +229,9 @@ begin
   convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,true,false);
 end;
 begin
+llamadas_maquina.bucle_general:=bagman_principal;
+llamadas_maquina.reset:=reset_bagman;
+llamadas_maquina.fps_max:=60.6060606060;
 iniciar_bagman:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -304,14 +310,6 @@ marcade.dswa_val:=@bagman_dip;
 //final
 reset_bagman;
 iniciar_bagman:=true;
-end;
-
-procedure Cargar_bagman;
-begin
-llamadas_maquina.iniciar:=iniciar_bagman;
-llamadas_maquina.bucle_general:=bagman_principal;
-llamadas_maquina.reset:=reset_bagman;
-llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

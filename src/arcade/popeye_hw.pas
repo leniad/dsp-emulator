@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,
      misc_functions,pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_popeye;
+function iniciar_popeye:boolean;
 
 implementation
 const
@@ -34,6 +34,7 @@ var
   prot0,prot1,prot_shift,palette_bank,scroll_y,dswbit,field:byte;
   fondo_write:array[0..$1fff] of boolean;
   scroll_x:word;
+  nmi_enabled:boolean;
 
 procedure cambiar_paleta(valor:byte);inline;
 var
@@ -132,7 +133,6 @@ end;
 procedure popeye_principal;
 var
   frame:single;
-  main_z80_reg:npreg_z80;
   f:word;
 begin
 init_controls(false,false,false,true);
@@ -143,11 +143,8 @@ while EmuStatus=EsRuning do begin
       frame:=frame+z80_0.tframes-z80_0.contador;
       if f=479 then begin
           update_video_popeye;
-          main_z80_reg:=z80_0.get_internal_r;
-          if (main_z80_reg.i and 1)<>0 then begin
-            z80_0.change_nmi(PULSE_LINE);
-            field:=field xor $10;
-          end;
+          if nmi_enabled then z80_0.change_nmi(ASSERT_LINE);
+          field:=field xor $10;
       end;
   end;
   eventos_popeye;
@@ -211,6 +208,19 @@ begin
 case (puerto and $ff) of
   0:ay8910_0.control(valor);
   1:ay8910_0.write(valor);
+end;
+end;
+
+procedure popeye_nmi_clear(estados_t:word);
+var
+  main_z80_reg:npreg_z80;
+  temp_nmi:boolean;
+begin
+main_z80_reg:=z80_0.get_internal_r;
+temp_nmi:=(main_z80_reg.i and 1)<>0;
+if nmi_enabled<>temp_nmi then begin
+  nmi_enabled:=temp_nmi;
+  if not(temp_nmi) then z80_0.change_nmi(CLEAR_LINE);
 end;
 end;
 
@@ -309,6 +319,7 @@ begin
  field:=0;
  cambiar_paleta(0);
  fillchar(fondo_write[0],$2000,1);
+ nmi_enabled:=true;
 end;
 
 function iniciar_popeye:boolean;
@@ -325,6 +336,10 @@ const
   pc_x:array[0..15] of dword=(7,7, 6,6, 5,5, 4,4, 3,3, 2,2, 1,1, 0,0);
   pc_y:array[0..15] of dword=(0*8,0*8, 1*8,1*8, 2*8,2*8, 3*8,3*8, 4*8,4*8, 5*8,5*8, 6*8,6*8, 7*8,7*8);
 begin
+llamadas_maquina.bucle_general:=popeye_principal;
+llamadas_maquina.reset:=reset_popeye;
+llamadas_maquina.save_qsnap:=popeye_qsave;
+llamadas_maquina.load_qsnap:=popeye_qload;
 iniciar_popeye:=false;
 iniciar_audio(false);
 screen_init(1,512,512);
@@ -336,6 +351,7 @@ iniciar_video(512,448);
 z80_0:=cpu_z80.create(4000000,512);
 z80_0.change_ram_calls(popeye_getbyte,popeye_putbyte);
 z80_0.change_io_calls(popeye_inbyte,popeye_outbyte);
+z80_0.change_despues_instruccion(popeye_nmi_clear);
 z80_0.init_sound(popeye_sound_update);
 //Audio chips
 ay8910_0:=ay8910_chip.create(2000000,AY8910,1);
@@ -410,15 +426,6 @@ marcade.dswb_val:=@popeye_dip_b;
 //final
 reset_popeye;
 iniciar_popeye:=true;
-end;
-
-procedure cargar_popeye;
-begin
-llamadas_maquina.iniciar:=iniciar_popeye;
-llamadas_maquina.bucle_general:=popeye_principal;
-llamadas_maquina.reset:=reset_popeye;
-llamadas_maquina.save_qsnap:=popeye_qsave;
-llamadas_maquina.load_qsnap:=popeye_qload;
 end;
 
 end.

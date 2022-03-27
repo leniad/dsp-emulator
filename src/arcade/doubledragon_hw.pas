@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      hd6309,m680x,m6809,nz80,ym_2151,msm5205,main_engine,controls_engine,
      gfx_engine,oki6295,rom_engine,pal_engine,sound_engine;
 
-procedure cargar_ddragon;
+function iniciar_ddragon:boolean;
 
 implementation
 const
@@ -652,6 +652,12 @@ begin
   convert_gfx(2,0,@memoria_temp,@pt_x,@pt_y,false,false);
 end;
 begin
+case main_vars.tipo_maquina of
+  92,247:llamadas_maquina.bucle_general:=ddragon_principal;
+  96:llamadas_maquina.bucle_general:=ddragon2_principal;
+end;
+llamadas_maquina.reset:=reset_ddragon;
+llamadas_maquina.fps_max:=6000000/384/272;
 iniciar_ddragon:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -753,17 +759,6 @@ for f:=$e8 to $ff do ddragon_scanline[f+$10]:=f+$100; //E8,E9,EA,EB,...,FC,FD,FE
 //final
 reset_ddragon;
 iniciar_ddragon:=true;
-end;
-
-procedure Cargar_ddragon;
-begin
-case main_vars.tipo_maquina of
-  92,247:llamadas_maquina.bucle_general:=ddragon_principal;
-  96:llamadas_maquina.bucle_general:=ddragon2_principal;
-end;
-llamadas_maquina.iniciar:=iniciar_ddragon;
-llamadas_maquina.reset:=reset_ddragon;
-llamadas_maquina.fps_max:=6000000/384/272;
 end;
 
 end.

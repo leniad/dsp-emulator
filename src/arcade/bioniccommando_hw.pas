@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,mcs51,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine;
 
-procedure cargar_bionicc;
+function iniciar_bionicc:boolean;
 
 implementation
 const
@@ -385,6 +385,8 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
           8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=bionicc_principal;
+llamadas_maquina.reset:=reset_bionicc;
 iniciar_bionicc:=false;
 iniciar_audio(false);
 //Pantallas
@@ -451,13 +453,6 @@ marcade.dswa_val:=@bionicc_dip;
 //final
 reset_bionicc;
 iniciar_bionicc:=true;
-end;
-
-procedure Cargar_bionicc;
-begin
-llamadas_maquina.iniciar:=iniciar_bionicc;
-llamadas_maquina.bucle_general:=bionicc_principal;
-llamadas_maquina.reset:=reset_bionicc;
 end;
 
 end.

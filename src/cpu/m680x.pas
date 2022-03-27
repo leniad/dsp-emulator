@@ -15,7 +15,7 @@ type
                 h,i,n,z,v,c:boolean;
         end;
         reg_m6800=record
-                pc,sp:word;
+                pc,sp,oldpc,oldpc2:word;
                 cc:band_m6800;
                 d:parejas680X;
                 wai:boolean;
@@ -192,6 +192,7 @@ begin
    r.cc.n:=false;
    r.cc.c:=(valor and 1)<>0;
    r.cc.z:=(tempb=0);
+   r.cc.v:=r.cc.n xor r.cc.c;
    lsr8:=tempb;
 end;
 
@@ -257,6 +258,7 @@ begin
    r.cc.c:=(valor and $1)<>0;
    r.cc.z:=(tempb=0);
    r.cc.n:=(tempb and $80)<>0;
+   r.cc.v:=r.cc.n xor r.cc.c;
    ror8:=tempb;
 end;
 
@@ -476,8 +478,8 @@ temp:=byte(r.cc.c);
 temp:=temp or (byte(r.cc.v) shl 1);
 temp:=temp or (byte(r.cc.z) shl 2);
 temp:=temp or (byte(r.cc.n) shl 3);
-temp:=temp or (byte(r.cc.v) shl 4);;
-coger_band:=temp or (byte(r.cc.v) shl 5);;
+temp:=temp or (byte(r.cc.i) shl 4);
+coger_band:=temp or (byte(r.cc.h) shl 5);
 end;
 
 //OCI -> fff4
@@ -534,12 +536,14 @@ case direccion of
       end;
   $14:ret:=self.ram_ctrl;
   $40..$ff:ret:=self.internal_ram[direccion];
-    else MessageDlg('Read Port 680X desconocido. Port='+inttohex(direccion,2), mtInformation,[mbOk], 0)
+    else MessageDlg('Read Port 680X desconocido. Port='+inttohex(direccion,2)+' - '+inttohex(self.r.oldpc2,10), mtInformation,[mbOk], 0)
 end;
 m6803_internal_reg_r:=ret;
 end;
 
 procedure cpu_m6800.m6803_internal_reg_w(direccion:word;valor:byte);
+var
+  tempw:word;
 begin
 self.internal_ram[direccion]:=valor;
 case direccion of
@@ -621,12 +625,12 @@ case direccion of
         if not(r.cc.i) then if ((self.tcsr and (TCSR_EOCI or TCSR_OCF))=(TCSR_EOCI or TCSR_OCF)) then call_int($fff4);
       end;
   $09:begin
-			  self.latch09:=valor;	// 6301 only */
+			  self.latch09:=valor;	// 6301 only
   			self.ctd.wl:=$fff8;
   			//TOH = CTH;
   			self.MODIFIED_counters;
 			end;
-	$0a:begin	// 6301 only */
+	$0a:begin	// 6301 only
   			self.ctd.wl:=(self.latch09 shl 8)+valor;
   			//TOH = CTH;
   			self.MODIFIED_counters;
@@ -655,7 +659,7 @@ end;
 
 procedure cpu_m6800.check_timer_event;
 begin
-	// OCI */
+	// OCI
 	if (self.ctd.l>=self.ocd.l) then begin
 		self.ocd.wh:=self.ocd.wh+$1;	// next IRQ point
     self.pending_tcsr:=self.pending_tcsr or TCSR_OCF;
@@ -663,7 +667,7 @@ begin
 		//MODIFIED_tcsr;
 		if (not(r.cc.i) and ((self.tcsr and TCSR_EOCI)<>0)) then self.call_int($fff4);
 	end;
-	// set next event */
+	// set next event
 	//timer_next = (OCD - r.cdt < TOD - CTD) ? OCD : TOD;
   self.timer_next:=self.ocd.l;
 end;
@@ -690,6 +694,8 @@ if (self.pedir_halt<>CLEAR_LINE) then begin
   exit;
 end;
 self.estados_demas:=0;
+self.r.oldpc2:=self.r.oldpc;
+self.r.oldpc:=self.r.pc;
 //comprobar irq's
 if (self.pedir_nmi<>CLEAR_LINE) then begin
   if self.nmi_state=CLEAR_LINE then self.estados_demas:=self.call_int($fffc);
@@ -765,23 +771,26 @@ case direc_680x[instruccion] of
       posicion:=self.getbyte(r.pc);
       r.pc:=r.pc+1;
      end;
- $f:MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc-1,10), mtInformation,[mbOk], 0);
+ $f:MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
 end;
 case instruccion of
   $01:; //nop
   $04:begin //lsrd
         r.cc.n:=false;
-        r.cc.c:=(r.d.w and $1)<>0;
-        r.d.w:=r.d.w shr 1;
-        r.cc.z:=(r.d.w=0);
+        tempw:=r.d.w;
+        r.cc.c:=(tempw and $1)<>0;
+        tempw:=tempw shr 1;
+        r.cc.z:=(tempw=0);
+        r.cc.v:=r.cc.n xor r.cc.c;
+        r.d.w:=tempw;
       end;
   $05:begin  //asld
         templ:=r.d.w shl 1;
         r.cc.n:=(templ and $8000)<>0;
-        r.cc.z:=(templ=0);
+        r.cc.z:=((templ and $ffff)=0);
         r.cc.c:=(templ and $10000)<>0;
         r.cc.v:=((r.d.w xor r.d.w xor templ xor (templ shr 1)) and $8000)<>0;
-	r.d.w:=templ;
+	      r.d.w:=templ;
       end;
   $06:self.poner_band(r.d.a); //tap
   $08:begin  //inx
@@ -839,7 +848,8 @@ case instruccion of
        tempw2:=tempw+r.d.a;
        r.cc.z:=(tempw2 and $ff)=0;
        r.cc.n:=(tempw2 and $80)<>0;
-       r.cc.c:=(tempw2 and $100)<>0;
+       r.cc.c:=r.cc.c or ((tempw2 and $100)<>0);
+       r.cc.v:=false;
        r.d.a:=tempw2;
       end;
   $1b:begin //aba
@@ -852,8 +862,8 @@ case instruccion of
        r.d.a:=tempw;
       end;
   $20:r.pc:=r.pc+shortint(numero);
-  $22:if not(r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bhi
-  $23:if (r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bls
+  $22:if not(r.cc.c and r.cc.z) then r.pc:=r.pc+shortint(numero);  //bhi
+  $23:if (r.cc.c and r.cc.z) then r.pc:=r.pc+shortint(numero);  //bls
   $24:if not(r.cc.c) then r.pc:=r.pc+shortint(numero);  //bcc
   $25:if r.cc.c then r.pc:=r.pc+shortint(numero);  //bcs
   $26:if not(r.cc.z) then r.pc:=r.pc+shortint(numero);  //bne

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,sn_76496,main_engine,controls_engine,gfx_engine,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_tp84;
+function iniciar_tp84:boolean;
 
 implementation
 const
@@ -271,6 +271,8 @@ const
 			32*8, 33*8, 34*8, 35*8, 36*8, 37*8, 38*8, 39*8);
     resistances:array[0..3] of integer=(1000,470,220,100);
 begin
+llamadas_maquina.bucle_general:=tp84_principal;
+llamadas_maquina.reset:=reset_tp84;
 iniciar_tp84:=false;
 iniciar_audio(false);
 //Pantallas
@@ -352,13 +354,6 @@ marcade.dswb_val:=@tp84_dip_b;
 //final
 reset_tp84;
 iniciar_tp84:=true;
-end;
-
-procedure Cargar_tp84;
-begin
-llamadas_maquina.iniciar:=iniciar_tp84;
-llamadas_maquina.bucle_general:=tp84_principal;
-llamadas_maquina.reset:=reset_tp84;
 end;
 
 end.

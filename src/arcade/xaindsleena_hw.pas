@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m6805,ym_2203,main_engine,controls_engine,gfx_engine,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_xain;
+function iniciar_xain:boolean;
 
 implementation
 const
@@ -43,7 +43,7 @@ const
         (mask:$c;name:'Game Time';number:4;dip:((dip_val:$c;dip_name:'Slow'),(dip_val:$8;dip_name:'Normal'),(dip_val:$4;dip_name:'Fast'),(dip_val:$0;dip_name:'Very Fast'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Bonus Life';number:4;dip:((dip_val:$30;dip_name:'20k 70k+'),(dip_val:$20;dip_name:'30k 80k+'),(dip_val:$10;dip_name:'20k 80k'),(dip_val:$0;dip_name:'30k 80k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c0;name:'Lives';number:4;dip:((dip_val:$c0;dip_name:'3'),(dip_val:$80;dip_name:'4'),(dip_val:$40;dip_name:'6'),(dip_val:$0;dip_name:'Infinite'),(),(),(),(),(),(),(),(),(),(),(),())),());
-        XAIN_DIV=4;
+        CPU_SYNC=4;
 
 var
  main_rom,sub_rom:array[0..1,0..$3fff] of byte;
@@ -231,7 +231,7 @@ frame_snd:=m6809_2.tframes;
 frame_mcu:=m6805_0.tframes;
 while EmuStatus=EsRuning do begin
   for f:=0 to 271 do begin
-    for h:=1 to XAIN_DIV do begin
+    for h:=1 to CPU_SYNC do begin
       //main
       m6809_0.run(frame_m);
       frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
@@ -508,6 +508,9 @@ const
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 	  8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=xain_principal;
+llamadas_maquina.reset:=reset_xain;
+llamadas_maquina.fps_max:=6000000/384/272;
 iniciar_xain:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -519,17 +522,17 @@ screen_init(4,512,512,false,true);
 screen_mod_sprites(4,256,256,$ff,$ff);
 iniciar_video(256,240);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1500000,272*XAIN_DIV,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
 m6809_0.change_ram_calls(xain_getbyte,xain_putbyte);
 //Sub CPU
-m6809_1:=cpu_m6809.Create(1500000,272*XAIN_DIV,TCPU_M6809);
+m6809_1:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
 m6809_1.change_ram_calls(xain_sub_getbyte,xain_sub_putbyte);
 //Sound CPU
-m6809_2:=cpu_m6809.Create(1500000,272*XAIN_DIV,TCPU_M6809);
+m6809_2:=cpu_m6809.Create(1500000,272*CPU_SYNC,TCPU_M6809);
 m6809_2.change_ram_calls(xain_snd_getbyte,xain_snd_putbyte);
 m6809_2.init_sound(xain_sound_update);
 //MCU CPU
-m6805_0:=cpu_m6805.create(3000000,272*XAIN_DIV,tipo_m68705);
+m6805_0:=cpu_m6805.create(3000000,272*CPU_SYNC,tipo_m68705);
 m6805_0.change_ram_calls(mcu_xain_hw_getbyte,mcu_xain_hw_putbyte);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3000000);
@@ -582,14 +585,6 @@ marcade.dswb_val:=@xain_dip_b;
 //final
 reset_xain;
 iniciar_xain:=true;
-end;
-
-procedure cargar_xain;
-begin
-llamadas_maquina.iniciar:=iniciar_xain;
-llamadas_maquina.bucle_general:=xain_principal;
-llamadas_maquina.reset:=reset_xain;
-llamadas_maquina.fps_max:=6000000/384/272;
 end;
 
 end.
