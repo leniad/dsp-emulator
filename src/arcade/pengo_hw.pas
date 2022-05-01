@@ -1,12 +1,9 @@
 unit pengo_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,sega_decrypt;
-
 function iniciar_pengo:boolean;
-
 implementation
 const
         pengo_rom:array[0..7] of tipo_roms=(
@@ -29,12 +26,10 @@ const
         pengo_dip_b:array [0..2] of def_dip=(
         (mask:$0f;name:'Coin A';number:16;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$08;dip_name:'3C 1C'),(dip_val:$04;dip_name:'2C 1C'),(dip_val:$09;dip_name:'2C 1C/5C 3C'),(dip_val:$05;dip_name:'2C 1C/4C 3C'),(dip_val:$0c;dip_name:'1C 1C'),(dip_val:$0d;dip_name:'1C 1C/5C 6C'),(dip_val:$03;dip_name:'1C 1C/4C 5C'),(dip_val:$0b;dip_name:'1C 2C/2C 3C'),(dip_val:$02;dip_name:'1C 2C'),(dip_val:$07;dip_name:'1C 2C/5C 11C'),(dip_val:$0f;dip_name:'1C 3C/4C 9C'),(dip_val:$0a;dip_name:'1C 3C'),(dip_val:$06;dip_name:'1C 4C'),(dip_val:$0e;dip_name:'1C 5C'),(dip_val:$01;dip_name:'1C 6C'))),
         (mask:$f0;name:'Coin B';number:16;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$80;dip_name:'3C 1C'),(dip_val:$40;dip_name:'2C 1C'),(dip_val:$90;dip_name:'2C 1C/5C 3C'),(dip_val:$50;dip_name:'2C 1C/4C 3C'),(dip_val:$c0;dip_name:'1C 1C'),(dip_val:$d0;dip_name:'1C 1C/5C 6C'),(dip_val:$30;dip_name:'1C 1C/4C 5C'),(dip_val:$b0;dip_name:'1C 2C/2C 3C'),(dip_val:$20;dip_name:'1C 2C'),(dip_val:$70;dip_name:'1C 2C/5C 11C'),(dip_val:$f0;dip_name:'1C 3C/4C 9C'),(dip_val:$a0;dip_name:'1C 3C'),(dip_val:$60;dip_name:'1C 4C'),(dip_val:$e0;dip_name:'1C 5C'),(dip_val:$10;dip_name:'1C 6C'))),());
-
 var
  irq_enable:boolean;
  rom_opcode:array[0..$7fff] of byte;
  colortable_bank,gfx_bank,pal_bank:byte;
-
 procedure update_video_pengo;inline;
 var
   x,y,f,color,nchar,offs:word;
@@ -66,7 +61,6 @@ for f:=7 downto 0 do begin
 end;
 actualiza_trozo_final(0,0,224,288,2);
 end;
-
 procedure eventos_pengo;
 begin
 if event.arcade then begin
@@ -83,7 +77,6 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
 end;
 end;
-
 procedure pengo_principal;
 var
   frame:single;
@@ -104,7 +97,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 function pengo_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -117,7 +109,6 @@ case direccion of
    $90c0..$90ff:pengo_getbyte:=marcade.in0;
 end;
 end;
-
 procedure pengo_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -146,12 +137,10 @@ case direccion of
    $9070:; //watchdog
 end;
 end;
-
 procedure pengo_sound_update;
 begin
   namco_snd_0.update;
 end;
-
 //Main
 procedure reset_pengo;
 begin
@@ -165,7 +154,6 @@ begin
  pal_bank:=0;
  colortable_bank:=0;
 end;
-
 function iniciar_pengo:boolean;
 var
   colores:tpaleta;
@@ -251,5 +239,4 @@ marcade.dswb_val:=@pengo_dip_b;
 reset_pengo;
 iniciar_pengo:=true;
 end;
-
 end.

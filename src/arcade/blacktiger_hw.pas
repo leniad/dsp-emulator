@@ -136,7 +136,7 @@ end;
 procedure blktiger_principal;
 var
   frame_m,frame_s,frame_mcu:single;
-  f:byte;
+  f:word;
   {$ifdef speed_debug}cont1,cont2:int64;{$endif}
 begin
 init_controls(false,false,false,true);
@@ -147,7 +147,7 @@ while EmuStatus=EsRuning do begin
   {$ifdef speed_debug}
   QueryPerformanceCounter(cont1);
   {$endif}
-  for f:=0 to $ff do begin
+  for f:=0 to 261 do begin
     //Main CPU
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -157,7 +157,7 @@ while EmuStatus=EsRuning do begin
     //MCU
     mcs51_0.run(frame_mcu);
     frame_mcu:=frame_mcu+mcs51_0.tframes-mcs51_0.contador;
-    if f=239 then begin
+    if f=245 then begin
       z80_0.change_irq(HOLD_LINE);
       copymemory(@buffer_sprites,@memoria[$fe00],$200);
       update_video_blktiger;
@@ -496,6 +496,7 @@ llamadas_maquina.close:=cerrar_blktiger;
 llamadas_maquina.reset:=reset_blktiger;
 llamadas_maquina.save_qsnap:=blktiger_qsave;
 llamadas_maquina.load_qsnap:=blktiger_qload;
+llamadas_maquina.fps_max:=24000000/4/384/262;
 iniciar_blktiger:=false;
 iniciar_audio(false);
 //Background
@@ -508,15 +509,15 @@ screen_init(3,256,256,true); //Chars
 screen_init(4,512,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-z80_0:=cpu_z80.create(6000000,256);
+z80_0:=cpu_z80.create(6000000,262);
 z80_0.change_ram_calls(blktiger_getbyte,blktiger_putbyte);
 z80_0.change_io_calls(blktiger_inbyte,blktiger_outbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(3579545,256);
+z80_1:=cpu_z80.create(3579545,262);
 z80_1.change_ram_calls(blksnd_getbyte,blksnd_putbyte);
 z80_1.init_sound(blktiger_sound_update);
 //MCU
-mcs51_0:=cpu_mcs51.create(6000000,256);
+mcs51_0:=cpu_mcs51.create(24000000 div 3,262);
 mcs51_0.change_io_calls(in_port0,nil,nil,nil,out_port0,nil,nil,nil);
 //Sound Chip
 ym2203_0:=ym2203_chip.create(3579545,0.15,0.15);

@@ -1,12 +1,9 @@
 unit exedexes_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,sn_76496,ay_8910,
      rom_engine,pal_engine,sound_engine,timer_engine;
-
 function iniciar_exedexes_hw:boolean;
-
 implementation
 const
         exedexes_rom:array[0..2] of tipo_roms=(
@@ -37,12 +34,10 @@ const
         (mask:$38;name:'Coin B';number:8;dip:((dip_val:$0;dip_name:'4C 1C'),(dip_val:$8;dip_name:'3C 1C'),(dip_val:$10;dip_name:'2C 1C'),(dip_val:$38;dip_name:'1C 1C'),(dip_val:$30;dip_name:'1C 2C'),(dip_val:$28;dip_name:'1C 3C'),(dip_val:$20;dip_name:'1C 4C'),(dip_val:$18;dip_name:'1C 5C'),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Allow Continue';number:2;dip:((dip_val:$0;dip_name:'No'),(dip_val:$40;dip_name:'Yes'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$0;dip_name:'Off'),(dip_val:$80;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-
 var
  scroll_x,scroll_y,scroll_bg:word;
  sound_command:byte;
  sc2on,sc1on,objon,chon:boolean;
-
 procedure draw_sprites(pri:byte);inline;
 var
   f,color,nchar,x,y:word;
@@ -61,7 +56,6 @@ begin
 		end;
   end;
 end;
-
 procedure update_video_exedexes;inline;
 var
   f,color,nchar,x,y:word;
@@ -90,7 +84,6 @@ end;
 actualiza_trozo_final(16,0,224,256,4);
 copymemory(@buffer_sprites,@memoria[$f000],$1000);
 end;
-
 procedure eventos_exedexes;
 begin
 if event.arcade then begin
@@ -112,7 +105,6 @@ if event.arcade then begin
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $7f) else marcade.in0:=(marcade.in0 or $80);
 end;
 end;
-
 procedure exedexes_hw_principal;
 var
   f:byte;
@@ -145,7 +137,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 function exedexes_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -157,7 +148,6 @@ case direccion of
   $c004:exedexes_getbyte:=marcade.dswb;
 end;
 end;
-
 procedure exedexes_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -185,7 +175,6 @@ case direccion of
   $e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
-
 function exedexes_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -193,7 +182,6 @@ case direccion of
   $6000:exedexes_snd_getbyte:=sound_command;
 end;
 end;
-
 procedure exedexes_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -205,19 +193,16 @@ case direccion of
   $8003:sn_76496_1.Write(valor);
 end;
 end;
-
 procedure exedexes_snd_irq;
 begin
   z80_1.change_irq(HOLD_LINE);
 end;
-
 procedure exedexes_sound;
 begin
   ay8910_0.update;
   sn_76496_0.Update;
   sn_76496_1.Update;
 end;
-
 //Main
 procedure reset_exedexes_hw;
 begin
@@ -236,7 +221,6 @@ begin
  sc1on:=true;
  objon:=true;
 end;
-
 function iniciar_exedexes_hw:boolean;
 var
     colores:tpaleta;
@@ -361,5 +345,4 @@ marcade.dswb_val:=@exedexes_dip_b;
 reset_exedexes_hw;
 iniciar_exedexes_hw:=true;
 end;
-
 end.

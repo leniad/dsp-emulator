@@ -15,8 +15,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="20"/>
-      <RevisionNr Value="5"/>
-      <BuildNr Value="1287"/>
+      <RevisionNr Value="8"/>
+      <BuildNr Value="1289"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.20"/>
     </VersionInfo>
@@ -50,6 +50,7 @@
         <TopLine Value="8"/>
         <CursorPos Y="37"/>
         <UsageCount Value="200"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit0>
       <Unit1>
         <Filename Value="principal.pas"/>
@@ -62,6 +63,7 @@
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit1>
       <Unit2>
         <Filename Value="..\ordenadores\spectrum_misc.pas"/>
@@ -186,6 +188,7 @@
         <CursorPos X="28" Y="15"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
         <Filename Value="loadrom.pas"/>
@@ -406,10 +409,11 @@
       <Unit39>
         <Filename Value="..\misc\init_games.pas"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="712"/>
-        <CursorPos X="44" Y="723"/>
+        <TopLine Value="717"/>
+        <CursorPos X="51" Y="730"/>
         <UsageCount Value="63"/>
         <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit39>
       <Unit40>
         <Filename Value="..\ordenadores\amstrad_cpc.pas"/>
@@ -854,6 +858,7 @@
         <TopLine Value="35"/>
         <CursorPos X="38" Y="45"/>
         <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit93>
       <Unit94>
         <Filename Value="..\arcade\flower_hw.pas"/>
@@ -861,6 +866,7 @@
         <CursorPos X="39" Y="5"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit94>
       <Unit95>
         <Filename Value="..\snd\flower_audio.pas"/>
@@ -869,6 +875,7 @@
         <CursorPos X="59" Y="152"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit95>
       <Unit96>
         <Filename Value="..\arcade\outrun_hw.pas"/>
@@ -885,6 +892,7 @@
         <CursorPos Y="519"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit97>
     </Units>
     <JumpHistory Count="6" HistoryIndex="5">

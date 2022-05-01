@@ -1,6 +1,7 @@
 unit starforce_hw; //Senjyo
 
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,z80pio,z80daisy,main_engine,controls_engine,gfx_engine,sn_76496,
      z80ctc,rom_engine,pal_engine,sound_engine;
@@ -8,10 +9,11 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
 function iniciar_starforce:boolean;
 
 implementation
+
 const
         starforce_rom:array[0..1] of tipo_roms=(
         (n:'3.3p';l:$4000;p:0;crc:$8ba27691),(n:'2.3mn';l:$4000;p:$4000;crc:$0fc4d2d6));
-        starforce_fg:array[0..2] of tipo_roms=(
+        starforce_char:array[0..2] of tipo_roms=(
         (n:'7.2fh';l:$1000;p:0;crc:$f4803339),(n:'8.3fh';l:$1000;p:$1000;crc:$96979684),
         (n:'9.3fh';l:$1000;p:$2000;crc:$eead1d5c));
         starforce_bg1:array[0..2] of tipo_roms=(
@@ -39,12 +41,57 @@ const
         (mask:$38;name:'Difficulty';number:6;dip:((dip_val:$0;dip_name:'Easyest'),(dip_val:$8;dip_name:'Easy'),(dip_val:$10;dip_name:'Medium'),(dip_val:$18;dip_name:'Difficult'),(dip_val:$20;dip_name:'Hard'),(dip_val:$28;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),())),());
         starforce_dipc:array [0..1] of def_dip=(
         (mask:$1;name:'Inmunnity';number:2;dip:((dip_val:$1;dip_name:'On'),(dip_val:$0;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        //Senjyo
+        senjyo_rom:array[0..3] of tipo_roms=(
+        (n:'08m_05t.bin';l:$2000;p:0;crc:$b1f3544d),(n:'08k_04t.bin';l:$2000;p:$2000;crc:$e34468a8),
+        (n:'08j_03t.bin';l:$2000;p:$4000;crc:$c33aedee),(n:'08f_02t.bin';l:$2000;p:$6000;crc:$0ef4db9e));
+        senjyo_sound:tipo_roms=(n:'02h_01t.bin';l:$2000;p:0;crc:$c1c24455);
+        senjyo_char:array[0..2] of tipo_roms=(
+        (n:'08h_08b.bin';l:$1000;p:0;crc:$0c875994),(n:'08f_07b.bin';l:$1000;p:$1000;crc:$497bea8e),
+        (n:'08d_06b.bin';l:$1000;p:$2000;crc:$4ef69b00));
+        senjyo_bg1:array[0..1] of tipo_roms=(
+        (n:'05n_16m.bin';l:$1000;p:0;crc:$0d3e00fb),(n:'05k_15m.bin';l:$2000;p:$2000;crc:$93442213));
+        senjyo_bg2:array[0..1] of tipo_roms=(
+        (n:'07n_18m.bin';l:$1000;p:0;crc:$d50fced3),(n:'07k_17m.bin';l:$2000;p:$2000;crc:$10c3a5f0));
+        senjyo_bg3:array[0..1] of tipo_roms=(
+        (n:'09n_20m.bin';l:$1000;p:0;crc:$54cb8126),(n:'09k_19m.bin';l:$2000;p:$1000;crc:$373e047c));
+        senjyo_sprites:array[0..5] of tipo_roms=(
+        (n:'08p_13b.bin';l:$2000;p:0;crc:$40127efd),(n:'08s_14b.bin';l:$2000;p:$2000;crc:$42648ffa),
+        (n:'08m_11b.bin';l:$2000;p:$4000;crc:$ccc4680b),(n:'08n_12b.bin';l:$2000;p:$6000;crc:$742fafed),
+        (n:'08j_09b.bin';l:$2000;p:$8000;crc:$1ee63b5c),(n:'08k_10b.bin';l:$2000;p:$a000;crc:$a9f41ec9));
+        senjyo_dipb:array [0..2] of def_dip=(
+        (mask:$2;name:'Bonus Life';number:2;dip:((dip_val:$2;dip_name:'100k'),(dip_val:$0;dip_name:'None'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
+        (mask:$c0;name:'Difficulty';number:4;dip:((dip_val:$80;dip_name:'Easy'),(dip_val:$40;dip_name:'Medium'),(dip_val:$0;dip_name:'Hard'),(dip_val:$c0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
+        senjyo_dipc:array [0..1] of def_dip=(
+        (mask:$f;name:'Disable Enemy Fire';number:2;dip:((dip_val:$f;dip_name:'On'),(dip_val:$0;dip_name:'Off'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        //Baluba
+        baluba_rom:array[0..1] of tipo_roms=(
+        (n:'0';l:$4000;p:0;crc:$0e2ebe32),(n:'1';l:$4000;p:$4000;crc:$cde97076));
+        baluba_char:array[0..2] of tipo_roms=(
+        (n:'15';l:$1000;p:0;crc:$3dda0d84),(n:'16';l:$1000;p:$1000;crc:$3ebc79d8),
+        (n:'17';l:$1000;p:$2000;crc:$c4430deb));
+        baluba_bg1:array[0..2] of tipo_roms=(
+        (n:'9';l:$2000;p:0;crc:$90f88c43),(n:'10';l:$2000;p:$2000;crc:$ab117070),
+        (n:'11';l:$2000;p:$4000;crc:$e13b44b0));
+        baluba_bg2:array[0..2] of tipo_roms=(
+        (n:'12';l:$2000;p:0;crc:$a6541c8d),(n:'13';l:$2000;p:$2000;crc:$afccdd18),
+        (n:'14';l:$2000;p:$4000;crc:$69542e65));
+        baluba_bg3:array[0..2] of tipo_roms=(
+        (n:'8';l:$1000;p:0;crc:$31e97ef9),(n:'7';l:$1000;p:$1000;crc:$5915c5e2),
+        (n:'6';l:$1000;p:$2000;crc:$ad6881da));
+        baluba_sound:tipo_roms=(n:'2';l:$2000;p:0;crc:$441fbc64);
+        baluba_sprites:array[0..2] of tipo_roms=(
+        (n:'5';l:$4000;p:0;crc:$3b6b6e96),(n:'4';l:$4000;p:$4000;crc:$dd954124),
+        (n:'3';l:$4000;p:$8000;crc:$7ac24983));
 
 var
- x1,x2,x3:word;
- y1,y2,y3,sound_latch:byte;
+ scroll_x:array[0..2] of word;
+ scroll_y:array[0..2] of byte;
+ sound_latch:byte;
+ draw_video:procedure;
+ char_scroll:array[0..$1f] of word;
 
-procedure draw_sprites(prioridad:byte);inline;
+procedure draw_sprites_starforce(prioridad:byte);inline;
 var
   nchar,x,y,color,f:word;
   atrib:byte;
@@ -57,52 +104,56 @@ for f:=$1f downto 0 do begin
     y:=memoria[$9803+(f*4)];
     color:=(atrib and 7) shl 3+320;
     if (nchar and $c0)<>$c0 then begin
-      put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,1);
-      actualiza_gfx_sprite(x,y,1,1);
-    end else begin
-      put_gfx_sprite(nchar and $7f,color,(atrib and $80)<>0,(atrib and $40)<>0,2);
-      actualiza_gfx_sprite(x,y,1,2);
+      put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,4);
+      actualiza_gfx_sprite(x,y,5,4);
+    end else begin //Big
+      put_gfx_sprite_diff(((nchar and $7f) shl 2)+2,color,(atrib and $80)<>0,(atrib and $40)<>0,4,0,0);
+      put_gfx_sprite_diff(((nchar and $7f) shl 2)+0,color,(atrib and $80)<>0,(atrib and $40)<>0,4,16,0);
+      put_gfx_sprite_diff(((nchar and $7f) shl 2)+3,color,(atrib and $80)<>0,(atrib and $40)<>0,4,0,16);
+      put_gfx_sprite_diff(((nchar and $7f) shl 2)+1,color,(atrib and $80)<>0,(atrib and $40)<>0,4,16,16);
+      actualiza_gfx_sprite_size(x,y,5,32,32);
     end;
   end;
 end;
 end;
 
 procedure update_video_starforce;inline;
-var
-  f,color,nchar:word;
-  x,y,atrib:byte;
 const
   color_code:array[0..7] of byte=(0,2,4,6,1,3,5,7);
+var
+  nchar,f:word;
+  stripe,pen,color,x,y,atrib:byte;
+  count:integer;
 begin
+//No usa stripe de fondo ni radar!
 for f:=0 to $1ff do begin
+      //bg1
+      nchar:=memoria[$b000+f];
+      color:=color_code[((nchar and $e0) shr 5)];
+      if (gfx[1].buffer[f] or buffer_color[color+$18]) then begin
+        x:=31-(f div 16);
+        y:=f mod 16;
+        put_gfx_trans(x*16,y*16,nchar,(color shl 3)+64,1,1);
+        gfx[1].buffer[f]:=false;
+      end;
+      //bg2
+      atrib:=memoria[$a800+f];
+      color:=(atrib and $e0) shr 5;
+      if (gfx[2].buffer[f] or buffer_color[color+$10]) then begin
+        x:=31-(f div 16);
+        y:=f mod 16;
+        put_gfx_trans(x*16,y*16,atrib,(color shl 3)+128,2,2);
+        gfx[2].buffer[f]:=false;
+      end;
       //bg3
       atrib:=memoria[$a000+f];
       color:=(atrib and $e0) shr 5;
       if (gfx[3].buffer[f] or buffer_color[color+8])then begin
         x:=31-(f div 16);
         y:=f mod 16;
-        nchar:=atrib+512;
-        put_gfx(x*16,y*16,nchar,(color shl 3)+192,2,3);
+        nchar:=atrib and $7f;
+        put_gfx(x*16,y*16,nchar,(color shl 3)+192,3,3);
         gfx[3].buffer[f]:=false;
-      end;
-      //bg2
-      atrib:=memoria[$a800+f];
-      color:=(atrib and $e0) shr 5;
-      if (gfx[4].buffer[f] or buffer_color[color+$10]) then begin
-        x:=31-(f div 16);
-        y:=f mod 16;
-        nchar:=atrib+256;
-        put_gfx_trans(x*16,y*16,nchar,(color shl 3)+128,4,3);
-        gfx[4].buffer[f]:=false;
-      end;
-      //bg1
-      nchar:=memoria[$b000+f];
-      color:=color_code[((nchar and $e0) shr 5)];
-      if (gfx[5].buffer[f] or buffer_color[color+$18]) then begin
-        x:=31-(f div 16);
-        y:=f mod 16;
-        put_gfx_trans(x*16,y*16,nchar,(color shl 3)+64,5,3);
-        gfx[5].buffer[f]:=false;
       end;
 end;
 //chars
@@ -113,20 +164,139 @@ for f:=0 to $3ff do begin
       x:=31-(f div 32);
       y:=f mod 32;
       nchar:=memoria[$9000+f]+((atrib and $10) shl 4);
-      put_gfx_trans(x*8,y*8,nchar,color shl 3,3,0);
+      put_gfx_trans_flip(x*8,y*8,nchar,color shl 3,4,0,(atrib and $80)<>0,false);
       gfx[0].buffer[f]:=false;
     end;
 end;
-draw_sprites(0);
-scroll_x_y(2,1,x3,y3);
-draw_sprites(1);
-//OJO!! Que esta version no usa x2 o y2!!!
-scroll_x_y(4,1,x1,y1);
-draw_sprites(2);
-scroll_x_y(5,1,x1,y1);
-draw_sprites(3);
-actualiza_trozo(0,0,256,256,3,0,0,256,256,1);
-actualiza_trozo_final(16,0,224,256,1);
+draw_sprites_starforce(0);
+scroll_x_y(3,5,256-scroll_x[2],scroll_y[2]); //bg3
+draw_sprites_starforce(1);
+//OJO!! Que esta version no los valores del scroll2!!!
+scroll_x_y(2,5,256-scroll_x[0],scroll_y[0]); //bg2
+draw_sprites_starforce(2);
+scroll_x_y(1,5,256-scroll_x[0],scroll_y[0]); //bg1
+draw_sprites_starforce(3);
+actualiza_trozo(0,0,256,256,4,0,0,256,256,5);  //chars
+actualiza_trozo_final(16,0,224,256,5);
+fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
+end;
+
+procedure draw_sprites_senjyo(prioridad:byte);inline;
+var
+  nchar,color,f:word;
+  x,y,atrib:byte;
+begin
+for f:=$1f downto 0 do begin
+  atrib:=memoria[$9801+(f*4)];
+  if ((atrib and $30) shr 4)=prioridad then begin
+    nchar:=memoria[$9800+(f*4)];
+    x:=memoria[$9802+(f*4)];
+    y:=memoria[$9803+(f*4)];
+    color:=(atrib and 7) shl 3+320;
+    if (nchar and $80)=0 then begin
+      put_gfx_sprite(nchar,color,(atrib and $80)<>0,(atrib and $40)<>0,4);
+      actualiza_gfx_sprite(x,y,5,4);
+    end else begin //Big
+      put_gfx_sprite_diff(((nchar and $7f) shl 2)+2,color,(atrib and $80)<>0,(atrib and $40)<>0,4,0,0);
+      put_gfx_sprite_diff(((nchar and $7f) shl 2)+0,color,(atrib and $80)<>0,(atrib and $40)<>0,4,16,0);
+      put_gfx_sprite_diff(((nchar and $7f) shl 2)+3,color,(atrib and $80)<>0,(atrib and $40)<>0,4,0,16);
+      put_gfx_sprite_diff(((nchar and $7f) shl 2)+1,color,(atrib and $80)<>0,(atrib and $40)<>0,4,16,16);
+      actualiza_gfx_sprite_size(x,y,5,32,32);
+    end;
+  end;
+end;
+end;
+
+procedure update_video_senjyo;
+var
+  sx,sy,nchar,f:word;
+  stripe,pen,x,y,color,atrib:byte;
+  count:integer;
+  temp:pword;
+begin
+//Fondo
+stripe:=memoria[$9e27]+1;
+if stripe=0 then fill_full_screen(5,0)
+  else begin
+          pen:=0;
+		      count:=0;
+          for y:=0 to 255 do begin
+            single_line(0+ADD_SPRITE,y+ADD_SPRITE,paleta[384+pen],$100,5);
+			      count:=count+$10;
+			      if (count>=stripe) then begin
+				      pen:=(pen+1) and $0f;
+				      count:=count-stripe;
+			      end;
+          end;
+		    end;
+for f:=0 to $1ff do begin
+  //bg1 512x256
+  nchar:=memoria[$b000+f];
+  color:=(nchar and $70) shr 4;
+  if (gfx[1].buffer[f] or buffer_color[color+$18]) then begin
+    x:=31-(f div 16);
+    y:=f mod 16;
+    put_gfx_trans(x*16,y*16,nchar,(color shl 3)+$40,1,1);
+    gfx[1].buffer[f]:=false;
+  end;
+end;
+for f:=0 to $2ff do begin
+  //bg2 768x256
+  atrib:=memoria[$a800+f];
+  color:=(atrib and $e0) shr 5;
+  if (gfx[2].buffer[f] or buffer_color[color+$10]) then begin
+    x:=48-(f div 16);
+    y:=f mod 16;
+    put_gfx_trans(x*16,y*16,atrib,(color shl 3)+$80,2,2);
+    gfx[2].buffer[f]:=false;
+  end
+end;
+for f:=0 to $37f do begin
+  //bg3 896x256
+  atrib:=memoria[$a000+f];
+  color:=(atrib and $e0) shr 5;
+  if (gfx[3].buffer[f] or buffer_color[color+8])then begin
+    x:=56-(f div 16);
+    y:=f mod 16;
+    nchar:=atrib and $7f;
+    put_gfx_trans(x*16,y*16,nchar,(color shl 3)+$c0,3,3);
+    gfx[3].buffer[f]:=false;
+  end;
+end;
+//chars
+for f:=0 to $3ff do begin
+    atrib:=memoria[$9400+f];
+    color:=atrib and $7;
+    if (gfx[0].buffer[f] or buffer_color[color]) then begin
+      x:=31-(f div 32);
+      y:=f mod 32;
+      nchar:=memoria[$9000+f]+((atrib and $10) shl 4);
+      if y>=24 then put_gfx_flip(x*8,y*8,nchar,color shl 3,4,0,(atrib and $80)<>0,false)
+        else put_gfx_trans_flip(x*8,y*8,nchar,color shl 3,4,0,(atrib and $80)<>0,false);
+      gfx[0].buffer[f]:=false;
+    end;
+end;
+draw_sprites_senjyo(0);
+scroll_x_y(3,5,scroll_x[2],scroll_y[2]); //bg3
+draw_sprites_senjyo(1);
+scroll_x_y(2,5,scroll_x[1],scroll_y[1]); //bg2
+draw_sprites_senjyo(2);
+scroll_x_y(1,5,scroll_x[0],scroll_y[0]); //bg1
+draw_sprites_senjyo(3);
+scroll__x_part2(4,5,8,@char_scroll[0]);  //chars
+//Radar
+for f:=0 to $3ff do begin
+    temp:=punbuf;
+		for x:=0 to 7 do begin
+			if (memoria[$b800+f] and (1 shl x))<>0 then begin
+				sy:=(8*(f mod 8)+x)+256;
+				sx:=224-(((f and $1ff) div 8));
+        punbuf^:=paleta[$200 or ((f shr 9) and 1)]; //Si es <$200 el color $200 si es mayor $201
+        putpixel(sx,sy,1,punbuf,5);
+      end;
+    end;
+end;
+actualiza_trozo_final(16,0,224,256,5);
 fillchar(buffer_color[0],MAX_COLOR_BUFFER,0);
 end;
 
@@ -171,7 +341,7 @@ while EmuStatus=EsRuning do begin
       frame_s:=frame_s+z80_1.tframes-z80_1.contador;
       if f=239 then begin
         z80_0.change_irq(ASSERT_LINE);
-        update_video_starforce;
+        draw_video;
       end;
   end;
   eventos_starforce;
@@ -193,22 +363,22 @@ case direccion of
 end;
 end;
 
-procedure cambiar_color(numero:word);inline;
+procedure cambiar_color(numero:word);
 var
   i,c,data:byte;
   color:tcolor;
 begin
-  data:=buffer_paleta[numero and $1ff];
+  data:=buffer_paleta[numero];
   i:= (data shr 6) and $03;
 	c:=(data shl 2) and $0c;
-	if (c<>0) then c:=c or i;
-	color.r:=c*$11;
+	if (c<>0) then color.r:=pal4bit(c or i)
+    else color.r:=0;
 	c:=(data shr 0) and $0c;
-	if (c<>0) then c:=c or i;
-	color.g:=c*$11;
+	if (c<>0) then color.g:=pal4bit(c or i)
+    else color.g:=0;
 	c:= (data shr 2) and $0c;
-	if (c<>0) then c:=c or i;
-	color.b:=c*$11;
+	if (c<>0) then color.b:=pal4bit(c or i)
+	  else color.b:=0;
   set_pal_color(color,numero);
   case numero of
     0..63:buffer_color[numero shr 3]:=true;
@@ -233,31 +403,29 @@ case direccion of
                      end;
         $9e00..$9e3f:begin
                         case (direccion and $3f) of
-                          $20:x3:=(x3 and $100) or not(valor);
-                          $21:x3:=(x3 and $ff) or ((valor and 1) shl 8);
-                          $25:if main_screen.flip_main_screen then y3:=not(valor)
-                                else y3:=valor;
-                          $28:x2:=(x2 and $100) or not(valor);
-                          $29:x2:=(x2 and $ff) or ((valor and 1) shl 8);
-                          $2d:if main_screen.flip_main_screen then y2:=not(valor)
-                                else y2:=valor;
-                          $30:x1:=(x1 and $100) or not(valor);
-                          $31:x1:=(x1 and $ff) or ((valor and 1) shl 8);
-                          $35:if main_screen.flip_main_screen then y1:=not(valor)
-                                else y1:=valor;
+                          0..$1f:char_scroll[direccion and $1f]:=not(valor);
+                          $20:scroll_x[2]:=(scroll_x[2] and $300) or valor;
+                          $21:scroll_x[2]:=(scroll_x[2] and $ff) or ((valor and 3) shl 8);
+                          $25:scroll_y[2]:=valor;
+                          $28:scroll_x[1]:=(scroll_x[1] and $300) or valor;
+                          $29:scroll_x[1]:=(scroll_x[1] and $ff) or ((valor and 3) shl 8);
+                          $2d:scroll_y[1]:=valor;
+                          $30:scroll_x[0]:=(scroll_x[0] and $100) or valor;
+                          $31:scroll_x[0]:=(scroll_x[0] and $ff) or ((valor and 1) shl 8);
+                          $35:scroll_y[0]:=valor;
                         end;
                         memoria[direccion]:=valor;
                      end;
-        $a000..$a7ff:if memoria[direccion]<>valor then begin
+        $a000..$a7ff:if memoria[direccion]<>valor then begin //bg3
                         gfx[3].buffer[direccion and $7ff]:=true;
                         memoria[direccion]:=valor;
                      end;
-        $a800..$afff:if memoria[direccion]<>valor then begin
-                        gfx[4].buffer[direccion and $7ff]:=true;
+        $a800..$afff:if memoria[direccion]<>valor then begin //bg2
+                        gfx[2].buffer[direccion and $7ff]:=true;
                         memoria[direccion]:=valor;
                      end;
-        $b000..$b7ff:if memoria[direccion]<>valor then begin
-                        gfx[5].buffer[direccion and $7ff]:=true;
+        $b000..$b7ff:if memoria[direccion]<>valor then begin //bg1
+                        gfx[1].buffer[direccion and $7ff]:=true;
                         memoria[direccion]:=valor;
                      end;
         $d000:main_screen.flip_main_screen:=(valor and 1)<>0;
@@ -327,17 +495,21 @@ end;
 //Main
 procedure reset_starforce;
 begin
+ z80_0.reset;
+ z80_1.reset;
  z80pio_reset(0);
  z80ctc_reset(0);
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
- z80_0.reset;
- z80_1.reset;
  reset_audio;
  marcade.in0:=0;
  marcade.in1:=0;
  marcade.in2:=0;
+ fillword(@scroll_x,3,0);
+ fillchar(scroll_y,3,0);
+ sound_latch:=0;
+ fillword(@char_scroll,$20,0);
 end;
 
 procedure cerrar_starforce;
@@ -358,20 +530,47 @@ const
 			80*8, 81*8, 82*8, 83*8, 84*8, 85*8, 86*8, 87*8);
 var
   memoria_temp:array[0..$ffff] of byte;
+  color:tcolor;
+procedure decode_char(tiles:word);
+begin
+init_gfx(0,8,8,tiles);
+gfx[0].trans[0]:=true;
+gfx_set_desc_data(3,0,8*8,0,tiles*8*8,2*tiles*8*8);
+convert_gfx(0,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
+end;
+procedure decode_bg(gfx_num:byte;tiles:word);
+begin
+init_gfx(gfx_num,16,16,tiles);
+gfx[gfx_num].trans[0]:=true;
+gfx_set_desc_data(3,0,32*8,0,tiles*16*16,2*tiles*16*16);
+convert_gfx(gfx_num,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
+end;
 begin
 llamadas_maquina.bucle_general:=starforce_principal;
 llamadas_maquina.close:=cerrar_starforce;
 llamadas_maquina.reset:=reset_starforce;
 iniciar_starforce:=false;
 iniciar_audio(false);
-screen_init(1,256,256,false,true);
-screen_init(2,512,256); //bg3
-screen_mod_scroll(2,512,256,511,256,256,255);
-screen_init(3,256,256,true); //chars
-screen_init(4,512,256,true); //bg2
-screen_mod_scroll(4,512,256,511,256,256,255);
-screen_init(5,512,256,true); //bg1
-screen_mod_scroll(5,512,256,511,256,256,255);
+screen_init(1,512,256,true); //bg1
+screen_mod_scroll(1,512,256,511,256,256,255);
+case main_vars.tipo_maquina of
+  25,320:begin
+        screen_init(2,512,256,true); //bg2
+        screen_mod_scroll(2,512,256,511,256,256,255);
+        screen_init(3,512,256); //bg3
+        screen_mod_scroll(3,512,256,511,256,256,255);
+        screen_init(4,256,256,true); //chars
+  end;
+  319:begin
+        screen_init(2,768,256,true); //bg2
+        screen_mod_scroll(2,768,256,1023,256,256,255);
+        screen_init(3,896,256,true); //bg3
+        screen_mod_scroll(3,896,256,1023,256,256,255);
+        screen_init(4,256,256,true); //chars
+        screen_mod_scroll(4,256,256,255,256,256,255);
+      end;
+end;
+screen_init(5,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
 z80_0:=cpu_z80.create(4000000,$100);
@@ -390,47 +589,104 @@ z80daisy_init(Z80_PIO_TYPE,Z80_CTC_TYPE);
 sn_76496_0:=sn76496_chip.Create(2000000);
 sn_76496_1:=sn76496_chip.Create(2000000);
 sn_76496_2:=sn76496_chip.Create(2000000);
-//cargar roms
-if not(roms_load(@memoria,starforce_rom)) then exit;
-//cargar sonido
-if not(roms_load(@mem_snd,starforce_sound)) then exit;
-//convertir chars
-if not(roms_load(@memoria_temp,starforce_fg)) then exit;
-init_gfx(0,8,8,512);
-gfx[0].trans[0]:=true;
-gfx_set_desc_data(3,0,8*8,0,512*8*8,2*512*8*8);
-convert_gfx(0,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
-//big sprites
-if not(roms_load(@memoria_temp,starforce_sprites)) then exit;
-init_gfx(2,32,32,128);
-gfx[2].trans[0]:=true;
-gfx_set_desc_data(3,0,128*8,0,128*32*32,2*128*32*32);
-convert_gfx(2,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
-//sprites
-init_gfx(1,16,16,512);
-gfx[1].trans[0]:=true;
-gfx_set_desc_data(3,0,32*8,0,512*16*16,2*512*16*16);
-convert_gfx(1,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
-//bg1
-if not(roms_load(@memoria_temp,starforce_bg1)) then exit;
-init_gfx(3,16,16,768);
-gfx[3].trans[0]:=true;
-gfx_set_desc_data(3,3,32*8,0,256*16*16,2*256*16*16);
-convert_gfx(3,0,@memoria_temp,@pbs_x,@pbs_y,true,false);
-//bg2
-if not(roms_load(@memoria_temp,starforce_bg2)) then exit;
-convert_gfx(3,256*16*16,@memoria_temp,@pbs_x,@pbs_y,true,false);
-//bg3
-if not(roms_load(@memoria_temp,starforce_bg3)) then exit;
-gfx_set_desc_data(3,3,32*8,0,128*16*16,2*128*16*16);
-convert_gfx(3,512*16*16,@memoria_temp,@pbs_x,@pbs_y,true,false);
-//DIP
-marcade.dswa:=$c0;
-marcade.dswa_val:=@starforce_dipa;
-marcade.dswb:=0;
-marcade.dswb_val:=@starforce_dipb;
-marcade.dswc:=0;
-marcade.dswc_val:=@starforce_dipc;
+case main_vars.tipo_maquina of
+  25:begin  //Star Force
+        draw_video:=update_video_starforce;
+        //cargar roms
+        if not(roms_load(@memoria,starforce_rom)) then exit;
+        //cargar sonido
+        if not(roms_load(@mem_snd,starforce_sound)) then exit;
+        //chars
+        if not(roms_load(@memoria_temp,starforce_char)) then exit;
+        decode_char($200);
+        //bg1
+        if not(roms_load(@memoria_temp,starforce_bg1)) then exit;
+        decode_bg(1,$100);
+        //bg2
+        if not(roms_load(@memoria_temp,starforce_bg2)) then exit;
+        decode_bg(2,$100);
+        //bg3
+        if not(roms_load(@memoria_temp,starforce_bg3)) then exit;
+        decode_bg(3,$80);
+        //sprites
+        if not(roms_load(@memoria_temp,starforce_sprites)) then exit;
+        decode_bg(4,$200);
+        //DIP
+        marcade.dswa:=$c0;
+        marcade.dswa_val:=@starforce_dipa;
+        marcade.dswb:=0;
+        marcade.dswb_val:=@starforce_dipb;
+        marcade.dswc:=0;
+        marcade.dswc_val:=@starforce_dipc;
+  end;
+  319:begin //Senjyo
+        draw_video:=update_video_senjyo;
+        //cargar roms
+        if not(roms_load(@memoria,senjyo_rom)) then exit;
+        //cargar sonido
+        if not(roms_load(@mem_snd,senjyo_sound)) then exit;
+        //convertir chars
+        if not(roms_load(@memoria_temp,senjyo_char)) then exit;
+        decode_char($200);
+        //bg1
+        if not(roms_load(@memoria_temp,senjyo_bg1)) then exit;
+        copymemory(@memoria_temp[$4000],@memoria_temp[$3000],$1000);
+        decode_bg(1,$100);
+        //bg2
+        if not(roms_load(@memoria_temp,senjyo_bg2)) then exit;
+        copymemory(@memoria_temp[$4000],@memoria_temp[$3000],$1000);
+        decode_bg(2,$100);
+        //bg3
+        if not(roms_load(@memoria_temp,senjyo_bg3)) then exit;
+        decode_bg(3,$80);
+        //sprites
+        if not(roms_load(@memoria_temp,senjyo_sprites)) then exit;
+        decode_bg(4,$200);
+        //DIP
+        marcade.dswa:=$c0;
+        marcade.dswa_val:=@starforce_dipa;
+        marcade.dswb:=$43;
+        marcade.dswb_val:=@senjyo_dipb;
+        marcade.dswc:=0;
+        marcade.dswc_val:=@senjyo_dipc;
+      end;
+  320:begin  //Baluba
+        draw_video:=update_video_starforce;
+        //cargar roms
+        if not(roms_load(@memoria,baluba_rom)) then exit;
+        //cargar sonido
+        if not(roms_load(@mem_snd,baluba_sound)) then exit;
+        //chars
+        if not(roms_load(@memoria_temp,baluba_char)) then exit;
+        decode_char($200);
+        //bg1
+        if not(roms_load(@memoria_temp,baluba_bg1)) then exit;
+        decode_bg(1,$100);
+        //bg2
+        if not(roms_load(@memoria_temp,baluba_bg2)) then exit;
+        decode_bg(2,$100);
+        //bg3
+        if not(roms_load(@memoria_temp,baluba_bg3)) then exit;
+        decode_bg(3,$80);
+        //sprites
+        if not(roms_load(@memoria_temp,baluba_sprites)) then exit;
+        decode_bg(4,$200);
+        //DIP
+        marcade.dswa:=$c0;
+        marcade.dswa_val:=@starforce_dipa;
+        marcade.dswb:=0;
+        marcade.dswb_val:=@starforce_dipb;
+  end;
+end;
+//Paleta radar
+color.r:=$ff;
+color.g:=0;
+color.b:=0;
+set_pal_color(color,$200);
+color.r:=$ff;
+color.g:=$ff;
+color.b:=0;
+set_pal_color(color,$201);
 reset_starforce;
 iniciar_starforce:=true;
 end;

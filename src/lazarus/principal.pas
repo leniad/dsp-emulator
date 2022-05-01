@@ -264,6 +264,10 @@ type
     idsoccer1: TMenuItem;
     ccastles1: TMenuItem;
     flower1: TMenuItem;
+    StarForce1: TMenuItem;
+    baluba1: TMenuItem;
+    senjyo1: TMenuItem;
+    spdodgeb1: TMenuItem;
     slyspy1: TMenuItem;
     bdash1: TMenuItem;
     MrDoCastle1: TMenuItem;
@@ -472,7 +476,7 @@ type
     PitfallII1: TMenuItem;
     System11: TMenuItem;
     Tecmo1: TMenuItem;
-    StarForce1: TMenuItem;
+    SenjyoHW: TMenuItem;
     Pacmanhw1: TMenuItem;
     PhoenixHW: TMenuItem;
     Z801: TMenuItem;

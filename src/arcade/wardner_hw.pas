@@ -1,12 +1,9 @@
 unit wardner_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,tms32010,ym_3812,
      rom_engine,pal_engine,sound_engine;
-
 function iniciar_wardnerhw:boolean;
-
 implementation
 const
         wardner_rom:array[0..3] of tipo_roms=(
@@ -40,7 +37,6 @@ const
         (mask:$3;name:'Difficulty';number:4;dip:((dip_val:$1;dip_name:'Easy'),(dip_val:$0;dip_name:'Normal'),(dip_val:$2;dip_name:'Hard'),(dip_val:$3;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$c;name:'Bonus Life';number:4;dip:((dip_val:$0;dip_name:'30k 80k 50k+'),(dip_val:$4;dip_name:'50k 100k 50k+'),(dip_val:$8;dip_name:'30k'),(dip_val:$c;dip_name:'50k'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$30;dip_name:'1'),(dip_val:$0;dip_name:'3'),(dip_val:$10;dip_name:'4'),(dip_val:$20;dip_name:'5'),(),(),(),(),(),(),(),(),(),(),(),())),());
-
 var
  mem_rom:array[0..7,0..$7fff] of byte;
  rom_bank:byte;
@@ -50,7 +46,6 @@ var
  fg_ram:array[0..$fff] of word;
  txt_offs,bg_offs,fg_offs,bg_bank,fg_bank,main_ram_seg,dsp_addr_w:word;
  txt_scroll_x,txt_scroll_y,bg_scroll_x,bg_scroll_y,fg_scroll_x,fg_scroll_y:word;
-
 procedure draw_sprites(priority:word);inline;
 var
   f,nchar,atrib,x,y:word;
@@ -73,7 +68,6 @@ for f:=0 to $1ff do begin
   end;
 end;
 end;
-
 procedure update_video_wardner;inline;
 var
   f,nchar,x,y,atrib:word;
@@ -124,7 +118,6 @@ end else fill_full_screen(4,$800);
 actualiza_trozo_final(0,0,320,240,4);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
-
 procedure eventos_wardner;
 begin
 if event.arcade then begin
@@ -149,7 +142,6 @@ if event.arcade then begin
   if arcade_input.start[1] then marcade.in0:=(marcade.in0 or $40) else marcade.in0:=(marcade.in0 and $bf);
 end;
 end;
-
 procedure wardnerhw_principal;
 var
   f:word;
@@ -186,7 +178,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 function wardner_dsp_r:word;
 begin
 	// DSP can read data from main CPU RAM via DSP IO port 1
@@ -196,7 +187,6 @@ begin
       else wardner_dsp_r:=0;
 	end;
 end;
-
 procedure wardner_dsp_w(valor:word);
 begin
   // Data written to main CPU RAM via DSP IO port 1
@@ -213,14 +203,12 @@ begin
 						end;
 	end;
 end;
-
 procedure wardner_dsp_addrsel_w(valor:word);
 begin
   main_ram_seg:=valor and $e000;
 	dsp_addr_w:=(valor and $7ff) shl 1;
 	if (main_ram_seg=$6000) then main_ram_seg:=$7000;
 end;
-
 procedure wardner_dsp_bio_w(valor:word);
 begin
   if (valor and $8000)<>0 then wardner_dsp_BIO:=false;
@@ -232,12 +220,10 @@ begin
 		wardner_dsp_BIO:=true;
 	end;
 end;
-
 function wardner_BIO_r:boolean;
 begin
   wardner_BIO_r:=wardner_dsp_BIO;
 end;
-
 function wardner_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -245,7 +231,6 @@ case direccion of
   $c000..$c7ff:wardner_snd_getbyte:=memoria[direccion];
 end;
 end;
-
 procedure wardner_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -254,12 +239,10 @@ case direccion of
   $c000..$c7ff:memoria[direccion]:=valor;
 end;
 end;
-
 function wardner_snd_inbyte(puerto:word):byte;
 begin
 if (puerto and $ff)=0 then wardner_snd_inbyte:=ym3812_0.status;
 end;
-
 procedure wardner_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -267,12 +250,10 @@ case (puerto and $ff) of
   $1:ym3812_0.write(valor);
 end;
 end;
-
 procedure snd_irq(irqstate:byte);
 begin
   z80_1.change_irq(irqstate);
 end;
-
 function wardner_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -285,7 +266,6 @@ case direccion of
                end else wardner_getbyte:=mem_rom[rom_bank,direccion and $7fff];
 end;
 end;
-
 procedure cambiar_color(numero:word);inline;
 var
   tmp_color:word;
@@ -303,7 +283,6 @@ begin
     $600..$6ff:buffer_color[(numero shr 3) and $1f]:=true;
   end;
 end;
-
 procedure wardner_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -321,7 +300,6 @@ case direccion of
                 end;
 end;
 end;
-
 function wardner_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
@@ -338,7 +316,6 @@ case (puerto and $ff) of
   $65:wardner_inbyte:=fg_ram[fg_offs] shr 8;
 end;
 end;
-
 procedure wardner_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -417,12 +394,10 @@ case (puerto and $ff) of
   $70:rom_bank:=valor;
 end;
 end;
-
 procedure wardner_sound_update;
 begin
   ym3812_0.update;
 end;
-
 //Main
 procedure reset_wardnerhw;
 begin
@@ -453,7 +428,6 @@ begin
  main_ram_seg:=0;
  dsp_addr_w:=0;
 end;
-
 function iniciar_wardnerhw:boolean;
 var
     f:word;
@@ -542,5 +516,4 @@ marcade.dswb_val:=@wardner_dip_b;
 reset_wardnerhw;
 iniciar_wardnerhw:=true;
 end;
-
 end.

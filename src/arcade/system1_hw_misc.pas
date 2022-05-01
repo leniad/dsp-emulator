@@ -381,7 +381,7 @@ sn_76496_1:=sn76496_chip.Create(4000000);
 sprite_num_banks:=1;
 case main_vars.tipo_maquina of
   27:begin //Pitfall II
-      z80_0.change_misc_calls(system1_delay,nil);
+      z80_0.change_misc_calls(system1_delay);
       //cargar roms
       if not(roms_load(@memoria,pitfall2_rom)) then exit;
       decrypt_sega(@memoria,@mem_dec,0); //Sega Decypt

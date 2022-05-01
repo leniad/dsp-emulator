@@ -1,6 +1,7 @@
 unit m680x;
 
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,dialogs,sysutils,timer_engine,vars_hide,cpu_misc;
 
@@ -30,20 +31,28 @@ type
               procedure run(maximo:single);
               procedure reset;
               procedure change_io_calls(in_port1,in_port2,in_port3,in_port4:cpu_inport_call;out_port1,out_port2,out_port3,out_port4:cpu_outport_call);
+              procedure change_iox_calls(in_port5,in_port6:cpu_inport_call;out_port5,out_port6:cpu_outport_call);
               //M6803
               function m6803_internal_reg_r(direccion:word):byte;
               procedure m6803_internal_reg_w(direccion:word;valor:byte);
+              //M63701
+              function hd6301y_internal_reg_r(direccion:word):byte;
+              procedure hd6301y_internal_reg_w(direccion:word;valor:byte);
             private
               r:preg_m6800;
-              in_port1,in_port2,in_port3,in_port4:cpu_inport_call;
-              out_port1,out_port2,out_port3,out_port4:cpu_outport_call;
-              port1_ddr,port2_ddr,port3_ddr,port4_ddr:byte;
-              port1_data,port2_data,port3_data,port4_data:byte;
+              in_port:array[0..3] of cpu_inport_call;
+              in_portx:array[0..1] of cpu_inport_call;
+              out_port:array[0..3] of cpu_outport_call;
+              out_portx:array[0..1] of cpu_outport_call;
+              port_ddr:array[0..3] of byte;
+              portx_ddr:array[0..1] of byte;
+              port_data:array[0..3] of byte;
+              portx_data:array[0..1] of byte;
               ram_ctrl,trcsr,tdr,tcsr,tipo_cpu,latch09,pending_tcsr:byte;
               timer_next:longword;
               ctd,ocd:dparejas;
               tx:integer;
-              trcsr_read:boolean;
+              port2_written,trcsr_read:boolean;
               estados_t:array[0..$ff] of byte;
               procedure putword(direccion:word;valor:word);
               function getword(direccion:word):word;
@@ -56,16 +65,18 @@ type
               function call_int(dir:word):byte;
               procedure MODIFIED_counters;
               procedure check_timer_event;
+              procedure write_port2;
+              procedure write_port2_301;
               //Opcodes
               function neg8(valor:byte):byte;
               function com8(valor:byte):byte;
               function lsr8(valor:byte):byte;
               function asl8(valor:byte):byte;
+              function ror8(valor:byte):byte;
               function rol8(valor:byte):byte;
               function dec8(valor:byte):byte;
               function inc8(valor:byte):byte;
               procedure tst8(valor:byte);
-              function ror8(valor:byte):byte;
               function sub8(valor1,valor2:byte):byte;
               function sbc8(valor1,valor2:byte):byte;
               function and8(valor1,valor2:byte):byte;
@@ -79,8 +90,8 @@ var
   m6800_0:cpu_m6800;
 
 implementation
-const
 
+const
   //E8 95 E9
   direc_680x:array[0..$ff] of byte=(
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -88,7 +99,7 @@ const
       0, 0, 0, 0,$f,$f, 0, 0, 0, 0,$f, 0,$f,$f,$f,$f,  //10
       1,$f, 1, 1, 1,$1, 1, 1,$f,$f, 1, 1,$f, 1, 1,$f,  //20
      $f, 0, 0, 0, 0,$f, 0, 0, 0, 0, 0, 0, 0, 0,$f,$f,  //30
-      0,$f,$f, 0, 0,$f,$f,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //40
+      0,$f,$f, 0, 0,$f, 0,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //40
       0,$f,$f, 0, 0,$f, 0,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //50
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       4, 1, 1,$f, 6,$f, 6,$f,$f,$f, 6, 1, 6, 6, 4, 4,  //60
@@ -150,7 +161,6 @@ const
   M6800_TRCSR_TIE=$04; // Transmit Interrupt Enable
   M6800_TRCSR_TE=$02; // Transmit Enable
   M6800_TRCSR_WU=$01; // Wake Up
-
   TCSR_OLVL=$01;
   TCSR_IEDG=$02;
   TCSR_ETOI=$04;
@@ -345,6 +355,15 @@ begin
   add8:=tempw;
 end;
 
+function ret_in_ff:byte;
+begin
+  ret_in_ff:=$ff;
+end;
+
+procedure ret_out_ff(valor:byte);
+begin
+end;
+
 constructor cpu_m6800.create(clock:dword;frames_div:word;tipo_cpu:byte);
 begin
 getmem(self.r,sizeof(reg_m6800));
@@ -359,19 +378,23 @@ case tipo_cpu of
     else MessageDlg('Tipo M680X desconocido', mtInformation,[mbOk], 0)
 end;
 self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
-self.out_port1:=nil;
-self.out_port2:=nil;
-self.out_port3:=nil;
-self.out_port4:=nil;
-self.in_port1:=nil;
-self.in_port2:=nil;
-self.in_port3:=nil;
-self.in_port4:=nil;
+self.out_port[0]:=ret_out_ff;
+self.out_port[1]:=ret_out_ff;
+self.out_port[2]:=ret_out_ff;
+self.out_port[3]:=ret_out_ff;
+self.out_portx[0]:=ret_out_ff;
+self.out_portx[1]:=ret_out_ff;
+self.in_port[0]:=ret_in_ff;
+self.in_port[1]:=ret_in_ff;
+self.in_port[2]:=ret_in_ff;
+self.in_port[3]:=ret_in_ff;
+self.in_portx[0]:=ret_in_ff;
+self.in_portx[1]:=ret_in_ff;
 end;
 
 destructor cpu_m6800.free;
 begin
-freemem(self.r);
+  freemem(self.r);
 end;
 
 procedure cpu_m6800.reset;
@@ -391,10 +414,10 @@ self.change_nmi(CLEAR_LINE);
 self.change_irq(CLEAR_LINE);
 self.change_reset(CLEAR_LINE);
 r.wai:=false;
-self.port1_ddr:=0;
-self.port2_ddr:=0;
-self.port3_ddr:=0;
-self.port4_ddr:=0;
+self.port_ddr[0]:=0;
+self.port_ddr[1]:=0;
+self.port_ddr[2]:=0;
+self.port_ddr[3]:=0;
 self.tcsr:=0;
 self.ram_ctrl:=$40;
 self.tcsr:=M6800_TRCSR_TDRE;
@@ -402,18 +425,27 @@ self.ctd.l:=0;
 self.ocd.l:=$ffff;
 self.trcsr_read:=false;
 self.pending_tcsr:=0;
+self.port2_written:=false;
 end;
 
 procedure cpu_m6800.change_io_calls(in_port1,in_port2,in_port3,in_port4:cpu_inport_call;out_port1,out_port2,out_port3,out_port4:cpu_outport_call);
 begin
-  self.in_port1:=in_port1;
-  self.in_port2:=in_port2;
-  self.in_port3:=in_port3;
-  self.in_port4:=in_port4;
-  self.out_port1:=out_port1;
-  self.out_port2:=out_port2;
-  self.out_port3:=out_port3;
-  self.out_port4:=out_port4;
+  if @in_port1<>nil then self.in_port[0]:=in_port1;
+  if @in_port2<>nil then self.in_port[1]:=in_port2;
+  if @in_port3<>nil then self.in_port[2]:=in_port3;
+  if @in_port4<>nil then self.in_port[3]:=in_port4;
+  if @out_port1<>nil then self.out_port[0]:=out_port1;
+  if @out_port2<>nil then self.out_port[1]:=out_port2;
+  if @out_port3<>nil then self.out_port[2]:=out_port3;
+  if @out_port4<>nil then self.out_port[3]:=out_port4;
+end;
+
+procedure cpu_m6800.change_iox_calls(in_port5,in_port6:cpu_inport_call;out_port5,out_port6:cpu_outport_call);
+begin
+  if @in_port5<>nil then self.in_portx[0]:=in_port5;
+  if @in_port6<>nil then self.in_portx[1]:=in_port6;
+  if @out_port5<>nil then self.out_portx[0]:=out_port5;
+  if @out_port6<>nil then self.out_portx[1]:=out_port6;
 end;
 
 procedure cpu_m6800.putword(direccion:word;valor:word);
@@ -509,36 +541,57 @@ function cpu_m6800.m6803_internal_reg_r(direccion:word):byte;
 var
   ret:byte;
 begin
+ret:=$ff;
 case direccion of
-  $00:ret:=self.port1_ddr;
-  $01:ret:=self.port2_ddr;
-  $02:if @self.in_port1<>nil then ret:=(self.in_port1 and (self.port1_ddr xor $ff)) or (self.port1_data and self.port1_ddr);
-  $03:if @self.in_port2<>nil then ret:=(self.in_port2 and (self.port2_ddr xor $ff)) or (self.port2_data and self.port2_ddr);
-  $04:ret:=self.port3_ddr;
-  $05:ret:=self.port4_ddr;
-  $06:if @self.in_port3<>nil then ret:=(self.in_port3 and (self.port3_ddr xor $ff)) or (self.port3_data and self.port3_ddr);
-  $07:if @self.in_port4<>nil then ret:=(self.in_port4 and (self.port4_ddr xor $ff)) or (self.port4_data and self.port4_ddr);
-  $08:begin
+  $00:;
+  $01:;
+  $02:if (self.port_ddr[0]=$ff) then ret:=port_data[0] //p1_data_r
+	      else ret:=(self.in_port[0] and (self.port_ddr[0] xor $ff)) or (self.port_data[0] and self.port_ddr[0]);
+  $03:if (self.port_ddr[1]=$ff) then ret:=port_data[1] //p2_data_r
+	      else ret:=(self.in_port[1] and (self.port_ddr[1] xor $ff)) or (self.port_data[1] and self.port_ddr[1]);
+  $04:;
+  $05:;
+  $06:if (self.port_ddr[2]=$ff) then ret:=port_data[2] //p3_data_r
+	      else ret:=(self.in_port[2] and (self.port_ddr[2] xor $ff)) or (self.port_data[2] and self.port_ddr[2]);
+  $07:if (self.port_ddr[3]=$ff) then ret:=port_data[3] //p4_data_r
+	      else ret:=(self.in_port[3] and (self.port_ddr[3] xor $ff)) or (self.port_data[3] and self.port_ddr[3]);
+  $08:begin //tcsr_r
         ret:=self.tcsr;
         self.pending_tcsr:=0;
       end;
-  $0b:begin
+  $0b:begin  //ocrh_r
 			  if (self.pending_tcsr and TCSR_OCF)=0 then self.tcsr:=self.tcsr and not(TCSR_OCF);
   			ret:=self.ocd.h0;
       end;
-  $0c:begin
+  $0c:begin //ocrl_r
 			  if (self.pending_tcsr and TCSR_OCF)=0 then self.tcsr:=self.tcsr and not(TCSR_OCF);
   			ret:=self.ocd.l0;
       end;
-  $11:begin
+  $11:begin //sci_trcsr_r
 			  self.trcsr_read:=true;
 			  ret:=self.trcsr;
       end;
-  $14:ret:=self.ram_ctrl;
+  $14:ret:=self.ram_ctrl; //rcr_r
   $40..$ff:ret:=self.internal_ram[direccion];
     else MessageDlg('Read Port 680X desconocido. Port='+inttohex(direccion,2)+' - '+inttohex(self.r.oldpc2,10), mtInformation,[mbOk], 0)
 end;
 m6803_internal_reg_r:=ret;
+end;
+
+procedure cpu_m6800.write_port2;
+var
+  data,ddr:byte;
+begin
+if not(port2_written) then exit;
+	data:=port_data[1];
+	ddr:=self.port_ddr[1] and $1f;
+	if ((ddr<>$1f) and (ddr<>0)) then	data:= (port_data[1] and ddr) or (ddr xor $ff);
+	if (self.trcsr and M6800_TRCSR_TE)<>0 then begin
+		data:=(data and $ef) or (tx shl 4);
+		ddr:=ddr or $10;
+	end;
+	data:=data and $1f;
+	out_port[1](data);
 end;
 
 procedure cpu_m6800.m6803_internal_reg_w(direccion:word;valor:byte);
@@ -547,104 +600,94 @@ var
 begin
 self.internal_ram[direccion]:=valor;
 case direccion of
-  $00:if (self.port1_ddr<>valor) then begin
-				self.port1_ddr:=valor;
-				if (self.port1_ddr=$ff) then	begin
-          if @self.out_port1<>nil then self.out_port1(self.port1_data);
-        end else begin
-          if @self.out_port1<>nil then self.out_port1((self.port1_data and self.port1_ddr) or (self.in_port1 and (self.port1_ddr xor $ff)));
-        end;
+  $00:if (self.port_ddr[0]<>valor) then begin //p1_ddr_w
+				self.port_ddr[0]:=valor;
+				self.out_port[0]((self.port_data[0] and self.port_ddr[0]) or (self.in_port[0] and (self.port_ddr[0] xor $ff)));
       end;
-  $01:if (self.port2_ddr<>valor) then begin
-        self.port2_ddr:=valor;
-				if (self.port2_ddr=$ff) then	begin
-          if @self.out_port2<>nil then self.out_port2(self.port2_data);
-        end else begin
-          if @self.out_port2<>nil then self.out_port2((self.port2_data and self.port2_ddr) or (self.in_port2 and (self.port2_ddr xor $ff)));
-        end;
+  $01:if (self.port_ddr[1]<>valor) then begin //p2_ddr_w
+        self.port_ddr[1]:=valor;
+        self.write_port2;
 			end;
-  $02:begin
-  			self.port1_data:=valor;
-  			if (self.port1_ddr=$ff) then begin
-	  			if @self.out_port1<>nil then self.out_port1(self.port1_data);
-  			end else begin
-          if @self.out_port1<>nil then self.out_port1((self.port1_data and self.port1_ddr) or (self.in_port1 and (self.port1_ddr xor $ff)));
-        end;
+  $02:begin //p1_data_w
+  			self.port_data[0]:=valor;
+	      self.out_port[0]((self.port_data[0] and self.port_ddr[0]) or (self.in_port[0] and (self.port_ddr[0] xor $ff)));
       end;
-  $03:begin
-	  		if (self.trcsr and M6800_TRCSR_TE)<>0 then begin
-		  		self.port2_data:=(valor and $ef) or (self.tx shl 4);
-			  end else begin
-				  self.port2_data:=valor;
-  			end;
-	  		if (self.port2_ddr=$ff) then	begin
-            if @self.out_port2<>nil then self.out_port2(self.port2_data);
-          end else begin
-            if @self.out_port2<>nil then self.out_port2((self.port2_data and self.port2_ddr) or (self.in_port2 and (self.port2_ddr xor $ff)));
-          end;
+  $03:begin //p2_data_w
+	  		self.port_data[1]:=valor;
+	      self.port2_written:=true;
+	      self.write_port2;
       end;
-  $04:if (self.port3_ddr<>valor) then begin
-				self.port3_ddr:=valor;
-				if (self.port3_ddr=$ff) then	begin
-          if @self.out_port3<>nil then self.out_port3(self.port3_data);
-        end else begin
-          if @self.out_port3<>nil then self.out_port3((self.port3_data and self.port3_ddr) or (self.in_port3 and (self.port3_ddr xor $ff)));
-        end;
+  $04:if (self.port_ddr[2]<>valor) then begin //p3_ddr_w
+				self.port_ddr[2]:=valor;
+				self.out_port[2]((self.port_data[2] and self.port_ddr[2]) or (self.in_port[2] and (self.port_ddr[2] xor $ff)));
       end;
-  $05:if (self.port4_ddr<>valor) then begin
-        self.port4_ddr:=valor;
-				if (self.port4_ddr=$ff) then	begin
-          if @self.out_port4<>nil then self.out_port4(self.port4_data);
-        end else begin
-          if @self.out_port4<>nil then self.out_port4((self.port4_data and self.port4_ddr) or (self.in_port4 and (self.port4_ddr xor $ff)));
-        end;
+  $05:if (self.port_ddr[3]<>valor) then begin //p4_ddr_w
+        self.port_ddr[3]:=valor;
+				self.out_port[3]((self.port_data[3] and self.port_ddr[3]) or (self.in_port[3] and (self.port_ddr[3] xor $ff)));
 			end;
-  $06:begin
-  			self.port3_data:=valor;
-  			if (self.port3_ddr=$ff) then begin
-	  			if @self.out_port3<>nil then self.out_port3(self.port3_data);
-  			end else begin
-          if @self.out_port3<>nil then self.out_port3((self.port3_data and self.port3_ddr) or (self.in_port3 and (self.port3_ddr xor $ff)));
-        end;
+  $06:begin  //p3_data_w
+  			//if (m_pending_isf_clear)
+	      {
+		      LOGPORT("Cleared IS3\n");
+		      m_p3csr &= ~M6801_P3CSR_IS3_FLAG;
+		      m_pending_isf_clear = false;
+	      }
+	      //if (m_p3csr & M6801_P3CSR_OSS)
+	      {
+		      set_os3(ASSERT_LINE);
+	      }
+        self.port_data[2]:=valor;
+        self.out_port[2]((self.port_data[2] and self.port_ddr[2]) or (self.in_port[2] and (self.port_ddr[2] xor $ff)));
+	      //if (m_p3csr & M6801_P3CSR_OSS)
+	      {
+		      set_os3(CLEAR_LINE);
+	      }
       end;
-  $07:begin
-	  		if (self.trcsr and M6800_TRCSR_TE)<>0 then begin
-		  		self.port4_data:=(valor and $ef) or (self.tx shl 4);
-			  end else begin
-				  self.port4_data:=valor;
-  			end;
-	  		if (self.port4_ddr=$ff) then	begin
-            if @self.out_port4<>nil then self.out_port4(self.port4_data);
-          end else begin
-            if @self.out_port4<>nil then self.out_port4((self.port4_data and self.port4_ddr) or (self.in_port4 and (self.port4_ddr xor $ff)));
-          end;
+  $07:begin //p4_data_w
+	  		self.port_data[3]:=valor;
+	  		self.out_port[3]((self.port_data[3] and self.port_ddr[3]) or (self.in_port[3] and (self.port_ddr[3] xor $ff)));
       end;
-  $08:begin
-        self.tcsr:=valor;
+  $08:begin //tcsr_w
+        self.tcsr:=(valor and $1f) or (self.tcsr and $e0);
         self.pending_tcsr:=self.pending_tcsr and self.tcsr;
+        //modified_tcsr();
         if not(r.cc.i) then if ((self.tcsr and (TCSR_EOCI or TCSR_OCF))=(TCSR_EOCI or TCSR_OCF)) then call_int($fff4);
       end;
-  $09:begin
+  $09:begin //ch_w
 			  self.latch09:=valor;	// 6301 only
   			self.ctd.wl:=$fff8;
   			//TOH = CTH;
   			self.MODIFIED_counters;
 			end;
-	$0a:begin	// 6301 only
+	$0a:begin	//ch_l 6301 only
   			self.ctd.wl:=(self.latch09 shl 8)+valor;
   			//TOH = CTH;
   			self.MODIFIED_counters;
       end;
-  $0b:if self.ocd.h0<>valor then begin
-   			self.ocd.h0:=valor;
-  			self.MODIFIED_counters;
-			end;
-  $0c:if self.ocd.l0<>valor then begin
-  			self.ocd.l0:=valor;
-  			self.MODIFIED_counters;
-			end;
-  $11:self.trcsr:=(self.trcsr and $e0) or (valor and $1f);
-  $13:begin
+  $0b:begin //ocrh_w
+        //if (!(m_pending_tcsr & TCSR_OCF))
+	      {
+		      m_tcsr &= ~TCSR_OCF;
+		      modified_tcsr();
+	      }
+        if self.ocd.h0<>valor then begin //ocrh_w
+   			  self.ocd.h0:=valor;
+  			  self.MODIFIED_counters;
+			  end;
+      end;
+  $0c:begin //ocrl_w
+        //if (!(m_pending_tcsr & TCSR_OCF))
+	      {
+		      m_tcsr &= ~TCSR_OCF;
+		      modified_tcsr();
+	      }
+        if self.ocd.l0<>valor then begin
+  			  self.ocd.l0:=valor;
+  			  self.MODIFIED_counters;
+			  end;
+      end;
+  $11:self.trcsr:=(self.trcsr and $e0) or (valor and $1f); //sci_trcsr_w
+  $13:begin //sci_tdr_w
         if self.trcsr_read then begin
   				self.trcsr_read:=false;
   				self.trcsr:=self.trcsr and not(M6800_TRCSR_TDRE);
@@ -652,8 +695,121 @@ case direccion of
 			  self.tdr:=valor;
       end;
   $14:self.ram_ctrl:=valor;
-  $12,$15,$40..$ff:exit;
+  $12,$15,$40..$ff:;
   else MessageDlg('Write Port 680X desconocido. Port='+inttohex(direccion,2)+' PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0)
+end;
+end;
+
+function cpu_m6800.hd6301y_internal_reg_r(direccion:word):byte;
+var
+  ret:byte;
+begin
+ret:=$ff;
+case direccion of
+  $00:;
+  $01:;
+  $02:if (self.port_ddr[0]=$ff) then ret:=port_data[0] //p1_data_r
+	      else ret:=(self.in_port[0] and (self.port_ddr[0] xor $ff)) or (self.port_data[0] and self.port_ddr[0]);
+  $03:if (self.port_ddr[1]=$ff) then ret:=port_data[1] //p2_data_r
+	      else ret:=(self.in_port[1] and (self.port_ddr[1] xor $ff)) or (self.port_data[1] and self.port_ddr[1]);
+  $04:;
+  $05:;
+  $06:if (self.port_ddr[2]=$ff) then ret:=port_data[2] //p3_data_r
+	      else ret:=(self.in_port[2] and (self.port_ddr[2] xor $ff)) or (self.port_data[2] and self.port_ddr[2]);
+  $07:if (self.port_ddr[3]=$ff) then ret:=port_data[3] //p4_data_r
+	      else ret:=(self.in_port[3] and (self.port_ddr[3] xor $ff)) or (self.port_data[3] and self.port_ddr[3]);
+  $08:begin //tcsr_r
+        ret:=self.tcsr;
+        self.pending_tcsr:=0;
+      end;
+  $09:begin
+        //if (!(m_pending_tcsr & TCSR_TOF) && !machine().side_effects_disabled())
+	      {
+		      m_tcsr &= ~TCSR_TOF;
+		      modified_tcsr();
+	      }
+	      ret:=self.ctd.h0;
+      end;
+  $15:ret:=self.in_portx[0]; //p5_data_r
+  $17:if (self.portx_ddr[1]=$ff) then ret:=portx_data[1] //p6_data_r
+	      else ret:=(self.in_portx[1] and (self.portx_ddr[1] xor $ff)) or (self.portx_data[1] and self.portx_ddr[1]);
+  $40..$ff:ret:=self.internal_ram[direccion];
+    else MessageDlg('Read Port 6370X desconocido. Port='+inttohex(direccion,2)+' - '+inttohex(self.r.oldpc2,10), mtInformation,[mbOk], 0)
+end;
+hd6301y_internal_reg_r:=ret;
+end;
+
+procedure cpu_m6800.write_port2_301;
+var
+  data,ddr:byte;
+begin
+	if not(port2_written) then exit;
+	ddr:=self.port_ddr[1];
+	//if (self.tcsr2 and TCSR2_OE1)<>0 then ddr:=ddr2 or $02;
+	//if (m_tcsr2 and TCSR2_OE2)<>0 then ddr:=ddr or $20;
+	data:= (self.port_data[1] and ddr) or (ddr xor $ff);
+	if (self.trcsr and M6800_TRCSR_TE)<>0 then begin
+		data:=(data and $ef) or (self.tx shl 4);
+		ddr:=ddr or $10;
+	end;
+	//if ((self.tcsr3 and $0c)<>0) then begin
+	//	data:=(data and $bf) or (self.tout3 shl 6);
+	//	ddr:=ddr or $40;
+	//end;
+	self.out_port[1](data);
+end;
+
+procedure cpu_m6800.hd6301y_internal_reg_w(direccion:word;valor:byte);
+var
+  tempw:word;
+begin
+self.internal_ram[direccion]:=valor;
+case direccion of
+  $00:if (self.port_ddr[0]<>valor) then begin //p1_ddr_w
+				self.port_ddr[0]:=valor;
+				self.out_port[0]((self.port_data[0] and self.port_ddr[0]) or (self.in_port[0] and (self.port_ddr[0] xor $ff)));
+      end;
+  $01:if (self.port_ddr[1]<>valor) then begin //p2_ddr_w
+        self.port_ddr[1]:=valor;
+        self.write_port2;
+			end;
+  $06:begin  //p3_data_w
+  			//if (m_pending_isf_clear)
+	      {
+		      LOGPORT("Cleared IS3\n");
+		      m_p3csr &= ~M6801_P3CSR_IS3_FLAG;
+		      m_pending_isf_clear = false;
+	      }
+	      //if (m_p3csr & M6801_P3CSR_OSS)
+	      {
+		      set_os3(ASSERT_LINE);
+	      }
+        self.port_data[2]:=valor;
+        self.out_port[2]((self.port_data[2] and self.port_ddr[2]) or (self.in_port[2] and (self.port_ddr[2] xor $ff)));
+	      //if (m_p3csr & M6801_P3CSR_OSS)
+	      {
+		      set_os3(CLEAR_LINE);
+	      }
+      end;
+  $15:begin //p5_data_w
+        self.portx_data[0]:=valor;
+	      self.out_portx[0]((self.portx_data[0] and self.portx_ddr[0]) or (self.portx_ddr[0] xor $ff));
+      end;
+  $16:if (self.portx_ddr[1]<>valor) then begin //p6_ddr_w
+		      self.portx_ddr[1]:=valor;
+          self.out_portx[1]((self.portx_data[1] and self.portx_ddr[1]) or (self.portx_ddr[1] xor $ff));
+      end;
+  $17:begin //p6_data_w
+        //clear_pending_isf();
+        self.portx_data[1]:=valor;
+	      self.out_portx[1]((self.portx_data[1] and self.portx_ddr[1]) or (self.portx_ddr[1] xor $ff));
+      end;
+  $20:if (self.portx_ddr[0]<>valor) then begin //p5_ddr_w
+		      self.portx_ddr[0]:=valor;
+          self.out_portx[0]((self.portx_data[0] and self.portx_ddr[0]) or (self.portx_ddr[0] xor $ff));
+      end;
+  $40..$ff:;
+  else MessageDlg('Write Port 6370X desconocido. Port='+inttohex(direccion,2)+' PC='+inttohex(r.pc,10), mtInformation,[mbOk], 0)
 end;
 end;
 
@@ -833,11 +989,11 @@ case instruccion of
        r.cc.z:=(r.d.a=0);
        r.cc.n:=(r.d.a and $80)<>0;
       end;
-  $18:begin //XGDX 63701
+  $18:if self.tipo_cpu=TCPU_HD63701 then begin  //XGDX 63701YO
        tempw:=r.x;
        r.x:=r.d.w;
        r.d.w:=tempw;
-      end;
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
   $19:begin //daa
        tempb:=r.d.a and $f0;  //msn
        tempb2:=r.d.a and $f;  //lsn
@@ -862,8 +1018,8 @@ case instruccion of
        r.d.a:=tempw;
       end;
   $20:r.pc:=r.pc+shortint(numero);
-  $22:if not(r.cc.c and r.cc.z) then r.pc:=r.pc+shortint(numero);  //bhi
-  $23:if (r.cc.c and r.cc.z) then r.pc:=r.pc+shortint(numero);  //bls
+  $22:if not(r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bhi
+  $23:if (r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero);  //bls
   $24:if not(r.cc.c) then r.pc:=r.pc+shortint(numero);  //bcc
   $25:if r.cc.c then r.pc:=r.pc+shortint(numero);  //bcs
   $26:if not(r.cc.z) then r.pc:=r.pc+shortint(numero);  //bne
@@ -896,6 +1052,7 @@ case instruccion of
   $40:r.d.a:=self.neg8(r.d.a);  //nega
   $43:r.d.a:=self.com8(r.d.a);  //coma
   $44:r.d.a:=self.lsr8(r.d.a);  //lsra
+  $46:r.d.a:=self.ror8(r.d.a);  //rora
   $48:r.d.a:=self.asl8(r.d.a); //asla
   $49:r.d.a:=self.rol8(r.d.a); //rola
   $4a:r.d.a:=self.dec8(r.d.a);  //deca
@@ -929,7 +1086,7 @@ case instruccion of
       tempb:=self.neg8(tempb);
 	    self.putbyte(posicion,tempb);
   end;
-  $61:begin  //aim_ix - HD63701YO
+  $61:if self.tipo_cpu=TCPU_HD63701 then begin  //aim_ix - HD63701YO
        tempw:=r.x+self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) and numero;
@@ -937,8 +1094,8 @@ case instruccion of
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
-      end;
-  $62:begin //OIM - HD63701YO
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+  $62:if self.tipo_cpu=TCPU_HD63701 then begin //OIM - HD63701YO
        tempw:=r.x+self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) or numero;
@@ -946,8 +1103,8 @@ case instruccion of
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
-      end;
-  $71:begin  //aim - HD63701YO
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+  $71:if self.tipo_cpu=TCPU_HD63701 then begin  //aim - HD63701YO
        tempw:=self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) and numero;
@@ -955,8 +1112,8 @@ case instruccion of
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
-      end;
-  $72:begin //oim - HD63701
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+  $72:if self.tipo_cpu=TCPU_HD63701 then begin //oim - HD63701
        tempw:=self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) or numero;
@@ -964,7 +1121,7 @@ case instruccion of
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
-      end;
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
   $73:begin //com
        tempb:=self.com8(numero);
        self.putbyte(posicion,tempb);
@@ -985,14 +1142,14 @@ case instruccion of
        tempb:=self.dec8(numero);
        self.putbyte(posicion,tempb);
       end;
-  $6b:begin  // TIM HD63701YO
+  $6b:if self.tipo_cpu=TCPU_HD63701 then begin  // TIM HD63701YO
        tempw:=r.x+self.getbyte(r.pc);
        r.pc:=r.pc+1;
        tempb:=self.getbyte(tempw) and numero;
        r.cc.v:=false;
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
-      end;
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
   $6c,$7c:begin //inc
        tempb:=self.inc8(numero);
        self.putbyte(posicion,tempb);

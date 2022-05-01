@@ -35,7 +35,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
-  seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw;
+  seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw;
 
 type
   tgame_desc=record
@@ -51,7 +51,7 @@ type
 
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=331;
+  GAMES_CONT=334;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -373,6 +373,9 @@ const
   (name:'Flower';year:'1986';snd:1;hi:false;zip:'flower';grid:315;company:'Clarue';rom:@flower),
   (name:'SlySpy';year:'1989';snd:1;hi:false;zip:'slyspy';grid:316;company:'Data East';rom:@slyspy),
   (name:'Boulder Dash I-II';year:'1990';snd:1;hi:false;zip:'bouldash';grid:317;company:'Data East';rom:@bouldash),
+  (name:'Super Dodge Ball';year:'1987';snd:1;hi:false;zip:'spdodgeb';grid:318;company:'Technos';rom:@sdodgeball),
+  (name:'Senjyo';year:'1983';snd:1;hi:false;zip:'senjyo';grid:319;company:'Tehkan';rom:@senjyo),
+  (name:'Baluba-louk no Densetsu';year:'1986';snd:1;hi:false;zip:'baluba';grid:320;company:'Able Corp, Ltd.';rom:@baluba),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -722,6 +725,9 @@ case numero of
   315:principal1.CambiarMaquina(principal1.flower1);
   316:principal1.CambiarMaquina(principal1.slyspy1);
   317:principal1.CambiarMaquina(principal1.bdash1);
+  318:principal1.CambiarMaquina(principal1.spdodgeb1);
+  319:principal1.CambiarMaquina(principal1.senjyo1);
+  320:principal1.CambiarMaquina(principal1.baluba1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1059,6 +1065,9 @@ principal1.ccastles1.checked:=false;
 principal1.flower1.checked:=false;
 principal1.slyspy1.checked:=false;
 principal1.bdash1.checked:=false;
+principal1.spdodgeb1.checked:=false;
+principal1.senjyo1.checked:=false;
+principal1.baluba1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1171,7 +1180,7 @@ case tmaquina of
   22:llamadas_maquina.iniciar:=iniciar_yiear;
   23,233:llamadas_maquina.iniciar:=iniciar_as;
   24:llamadas_maquina.iniciar:=iniciar_sonson;
-  25:llamadas_maquina.iniciar:=iniciar_starforce;
+  25,319,320:llamadas_maquina.iniciar:=iniciar_starforce;
   26,97:llamadas_maquina.iniciar:=iniciar_tecmo;
   27,35,36,37,151,152,153,154,155:Cargar_system1; //Este lo dejo!!
   28:llamadas_maquina.iniciar:=iniciar_pooyan;
@@ -1219,7 +1228,7 @@ case tmaquina of
   93:llamadas_maquina.iniciar:=iniciar_mrdo;
   94,95:llamadas_maquina.iniciar:=iniciar_epos_hw;
   98,99:Cargar_sf_hw;
-  100:Cargar_lk_hw;
+  100:llamadas_maquina.iniciar:=iniciar_lk_hw;
   102:llamadas_maquina.iniciar:=iniciar_cabal;
   103,104,105,106,107,108,109,110,111,112,113:llamadas_maquina.iniciar:=iniciar_cps1;
   114,115,116,186,187,198:llamadas_maquina.iniciar:=iniciar_system16a;
@@ -1228,14 +1237,14 @@ case tmaquina of
   119,183:cargar_Pang;
   120,121,122,307:cargar_ninjakid2;
   123,194:Cargar_skykid;
-  124,125,126,289,290,291:Cargar_system86;
-  127:Cargar_rocnrope;
-  128:Cargar_kyugo_hw;
+  124,125,126,289,290,291:llamadas_maquina.iniciar:=iniciar_system86;
+  127:llamadas_maquina.iniciar:=iniciar_rocnrope;
+  128:llamadas_maquina.iniciar:=iniciar_kyugo_hw;
   129,130,306:llamadas_maquina.iniciar:=iniciar_tnzs;
   131:Cargar_pacland;
-  132:Cargar_mario;
-  133:Cargar_solomon;
-  134:Cargar_combatsc;
+  132:llamadas_maquina.iniciar:=iniciar_mario;
+  133:llamadas_maquina.iniciar:=iniciar_solomon;
+  134:llamadas_maquina.iniciar:=iniciar_combatsc;
   135:Cargar_hvyunit;
   136,137,149,150:Cargar_snk68;
   138,139,140:Cargar_megasys1;
@@ -1255,7 +1264,7 @@ case tmaquina of
   175,188:llamadas_maquina.iniciar:=iniciar_zaxxon;
   176:llamadas_maquina.iniciar:=iniciar_kangaroo;
   177:llamadas_maquina.iniciar:=iniciar_bionicc;
-  178:Cargar_wwfsstar;
+  178:llamadas_maquina.iniciar:=iniciar_wwfsstar;
   179,180:Cargar_rainbow;
   181:Cargar_volfied;
   182:Cargar_opwolf;
@@ -1312,7 +1321,8 @@ case tmaquina of
   302,303,304:cargar_seta;
   308,309,310,311,312,313:cargar_mrdocastle;
   314:llamadas_maquina.iniciar:=iniciar_ccastles;
-  315:llamadas_maquina.iniciar:=flower_iniciar;
+  315:llamadas_maquina.iniciar:=iniciar_flower;
+  318:llamadas_maquina.iniciar:=iniciar_sdodgeball;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2605,6 +2615,18 @@ end;
 if sender=principal1.bdash1 then begin
   tipo:=317;
   principal1.bdash1.Checked:=true;
+end;
+if sender=principal1.spdodgeb1 then begin
+  tipo:=318;
+  principal1.spdodgeb1.Checked:=true;
+end;
+if sender=principal1.senjyo1 then begin
+  tipo:=319;
+  principal1.senjyo1.Checked:=true;
+end;
+if sender=principal1.baluba1 then begin
+  tipo:=320;
+  principal1.baluba1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

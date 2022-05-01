@@ -340,23 +340,23 @@ begin
 	cmd:=ram[$18fc shr 1];
 	case cmd of
 		$100b:begin
-			// read twice in a row, first result discarded? */
-			// data is always == 0x75c */
-			ssriders_protection_r:=$0064;
-    end;
-		$6003:ssriders_protection_r:=data and $000f; // start of level */
+			      // read twice in a row, first result discarded?
+			      // data is always == 0x75c
+			      ssriders_protection_r:=$0064;
+          end;
+		$6003:ssriders_protection_r:=data and $000f; // start of level
 		$6004:ssriders_protection_r:=data and $001f;
 		$6000:ssriders_protection_r:=data and $0001;
 		$0000:ssriders_protection_r:=data and $00ff;
 		$6007:ssriders_protection_r:=data and $00ff;
 		$8abc:begin
-			// collision table */
-			data:=-ram[$1818 shr 1];
-			data:=(((data div 8)-4) and $1f)*$40;
-      //0x1040c8 is the x scroll buffer, avoids stutter on slopes + scrolling (and it's actually more logical as HW pov)
-			data:=data+((((ram[$1cb0 shr 1]+ram[$00c8 shr 1])-6) div 8+12) and $3f);
-			ssriders_protection_r:=data;
-    end;
+			      // collision table
+			      data:=-ram[$1818 shr 1];
+			      data:=(((data div 8)-4) and $1f)*$40;
+            //0x1040c8 is the x scroll buffer, avoids stutter on slopes + scrolling (and it's actually more logical as HW pov)
+			      data:=data+((((ram[$1cb0 shr 1]+ram[$00c8 shr 1])-6) div 8+12) and $3f);
+			      ssriders_protection_r:=data;
+          end;
 		else ssriders_protection_r:=$ffff;
   end;
 end;
@@ -407,7 +407,7 @@ var
   i,f:byte;
 begin
 	if (direccion=1) then begin
-		//create sprite priority attributes */
+		//create sprite priority attributes
 		hardware_pri:=1;
     logical_pri:=1;
 		for f:=1 to 8 do begin//; logical_pri < 0x100; logical_pri <<= 1)

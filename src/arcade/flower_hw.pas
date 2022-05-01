@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine,flower_audio;
 
-function flower_iniciar:boolean;
+function iniciar_flower:boolean;
 
 implementation
 const
@@ -280,7 +280,7 @@ marcade.in1:=$ff;
 marcade.in2:=7;
 end;
 
-function flower_iniciar:boolean;
+function iniciar_flower:boolean;
 const
       pc_x:array[0..15] of dword=(0, 1, 2, 3, 8+0, 8+1, 8+2, 8+3,
           8*8*2+0,8*8*2+1,8*8*2+2, 8*8*2+3,8*8*2+8,8*8*2+9,8*8*2+10,8*8*2+11);
@@ -294,7 +294,7 @@ begin
 llamadas_maquina.bucle_general:=flower_principal;
 llamadas_maquina.reset:=flower_reset;
 llamadas_maquina.fps_max:=60.6060606060606;
-flower_iniciar:=false;
+iniciar_flower:=false;
 iniciar_audio(false);
 screen_init(1,288,224,true);
 screen_init(2,256,256);
@@ -360,7 +360,7 @@ marcade.dswb:=$9d;
 marcade.dswb_val:=@flower_dipb;
 //final
 flower_reset;
-flower_iniciar:=true;
+iniciar_flower:=true;
 end;
 
 end.

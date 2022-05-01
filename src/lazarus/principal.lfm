@@ -2131,9 +2131,20 @@ object principal1: Tprincipal1
             Caption = 'Commando'
             OnClick = CambiarMaquina
           end
-          object StarForce1: TMenuItem
-            Caption = 'Star Force'
-            OnClick = CambiarMaquina
+          object SenjyoHW: TMenuItem
+            Caption = 'Senjyo HW'
+            object senjyo1: TMenuItem
+              Caption = 'Senjyo'
+              OnClick = CambiarMaquina
+            end
+            object StarForce1: TMenuItem
+              Caption = 'Star Force'
+              OnClick = CambiarMaquina
+            end
+            object baluba1: TMenuItem
+              Caption = 'Baluba-louk no Densetsu'
+              OnClick = CambiarMaquina
+            end
           end
           object Tecmo1: TMenuItem
             Caption = 'Tecmo HW'
@@ -2708,6 +2719,10 @@ object principal1: Tprincipal1
           end
           object ccastles1: TMenuItem
             Caption = 'Clystal Castles'
+            OnClick = CambiarMaquina
+          end
+          object spdodgeb1: TMenuItem
+            Caption = 'Super Dodgeball'
             OnClick = CambiarMaquina
           end
         end

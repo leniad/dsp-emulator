@@ -115,21 +115,21 @@ end;
 
 procedure commando_principal;
 var
-  f:byte;
+  f:word;
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 261 do begin
     //main
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
     //snd
     z80_1.run(frame_s);
     frame_s:=frame_s+z80_1.tframes-z80_1.contador;
-    if f=239 then begin
+    if f=245 then begin
       z80_0.change_irq(HOLD_LINE);
       update_video_commando;
     end;
@@ -244,6 +244,7 @@ const
 begin
 llamadas_maquina.bucle_general:=commando_principal;
 llamadas_maquina.reset:=reset_commando;
+llamadas_maquina.fps_max:=12000000/2/384/262;
 iniciar_commando:=false;
 iniciar_audio(false);
 screen_init(1,512,512,false,true);
@@ -252,10 +253,10 @@ screen_mod_scroll(2,512,256,511,512,256,511);
 screen_init(3,256,256,true);
 iniciar_video(224,256);
 //Main CPU
-z80_0:=cpu_z80.create(4000000,256);
+z80_0:=cpu_z80.create(3000000,262);
 z80_0.change_ram_calls(commando_getbyte,commando_putbyte);
 //Sound CPU
-z80_1:=cpu_z80.create(3000000,256);
+z80_1:=cpu_z80.create(3000000,262);
 z80_1.change_ram_calls(commando_snd_getbyte,commando_snd_putbyte);
 z80_1.init_sound(commando_sound_update);
 //IRQ Sound CPU

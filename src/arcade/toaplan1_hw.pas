@@ -4,9 +4,7 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,ym_3812,
      pal_engine,sound_engine;
-
 procedure cargar_toaplan1;
-
 implementation
 const
         //Hellfire
@@ -19,7 +17,6 @@ const
         hellfire_sprite:array[0..3] of tipo_roms=(
         (n:'b90_11.10';l:$20000;p:0;crc:$c33e543c),(n:'b90_10.9';l:$20000;p:$1;crc:$35fd1092),
         (n:'b90_09.8';l:$20000;p:$40000;crc:$cf01009e),(n:'b90_08.7';l:$20000;p:$40001;crc:$3404a5e3));
-
 var
  rom:array[0..$1ffff] of word;
  ram:array[0..$3fff] of word;
@@ -30,7 +27,6 @@ var
  sprite_ram:array[0..$3ff] of word;
  sprite_ram_size:array[0..$3f] of word;
  int_enable:boolean;
-
 procedure update_video_toaplan1;
 var
   f,nchar,atrib,color:word;
@@ -67,7 +63,6 @@ actualiza_trozo_final(0,0,320,240,18);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 //copymemory(@buffer_sprites_w[0],@ram_sprites[0],$1000*2);
 end;
-
 procedure eventos_toaplan1;
 begin
 if event.arcade then begin
@@ -93,7 +88,6 @@ if event.arcade then begin
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $ffbf) else marcade.in1:=(marcade.in1 or $40);
 end;
 end;
-
 procedure toaplan1_principal;
 var
   frame_m,frame_s:single;
@@ -123,7 +117,6 @@ while EmuStatus=EsRuning do begin
  video_sync;
 end;
 end;
-
 function toaplan1_getword(direccion:dword):word;
 var
   layer:byte;
@@ -155,7 +148,6 @@ case direccion of
     $140006:toaplan1_getword:=sprite_ram_size[(spriteram_offs and $7f) shr 1];
 end;
 end;
-
 procedure cambiar_color(pos,data:word);
 var
   color:tcolor;
@@ -170,7 +162,6 @@ begin
     $600..$7ff:buffer_color[((pos and $1ff) shr 4)+$40]:=true; //bg
   end;
 end;
-
 procedure toaplan1_putword(direccion:dword;valor:word);
 var
   layer:byte;
@@ -217,13 +208,11 @@ case direccion of
             end;
 end;
 end;
-
 //Sound
 function toaplan1_snd_getbyte(direccion:word):byte;
 begin
    toaplan1_snd_getbyte:=mem_snd[direccion];
 end;
-
 procedure toaplan1_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -231,7 +220,6 @@ case direccion of
   $8000..$87ff:mem_snd[direccion]:=valor;
 end;
 end;
-
 function toaplan1_snd_in(puerto:word):byte;
 begin
 case (puerto and $ff) of
@@ -241,7 +229,6 @@ case (puerto and $ff) of
   $71:toaplan1_snd_in:=ym3812_0.read;
 end;
 end;
-
 procedure toaplan1_snd_out(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -250,13 +237,11 @@ case (puerto and $ff) of
   $71:ym3812_0.write(valor);
 end;
 end;
-
 procedure toaplan1_snd_irq(irqstate:byte);
 begin
   if irqstate=0 then z80_0.change_irq(CLEAR_LINE)
     else z80_0.change_irq(ASSERT_LINE);
 end;
-
 procedure cclimb2_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -264,12 +249,10 @@ case direccion of
   $c000..$ffff:mem_snd[direccion]:=valor;
 end;
 end;
-
 procedure toaplan1_sound_update;
 begin
   ym3812_0.update;
 end;
-
 //Main
 procedure reset_toaplan1;
 begin
@@ -284,7 +267,6 @@ begin
  x_offset:=0;
  y_offset:=0;
 end;
-
 function iniciar_toaplan1:boolean;
 var
   memoria_temp:array[0..$7ffff] of byte;
@@ -359,7 +341,6 @@ end;
 reset_toaplan1;
 iniciar_toaplan1:=true;
 end;
-
 procedure Cargar_toaplan1;
 begin
 llamadas_maquina.iniciar:=iniciar_toaplan1;
@@ -367,5 +348,4 @@ llamadas_maquina.bucle_general:=toaplan1_principal;
 llamadas_maquina.reset:=reset_toaplan1;
 llamadas_maquina.fps_max:=57.613171;
 end;
-
 end.

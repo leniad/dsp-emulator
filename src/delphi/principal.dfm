@@ -46,7 +46,6 @@ object principal1: Tprincipal1
   ShowHint = True
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object Panel1: TPanel
     Left = 0
@@ -55,7 +54,6 @@ object principal1: Tprincipal1
     Height = 42
     Align = alTop
     TabOrder = 0
-    ExplicitWidth = 362
     object BitBtn2: TBitBtn
       Left = 10
       Top = 1
@@ -593,8 +591,6 @@ object principal1: Tprincipal1
     Align = alRight
     TabOrder = 1
     Visible = False
-    ExplicitLeft = 313
-    ExplicitHeight = 179
     object BitBtn9: TBitBtn
       Left = 4
       Top = 44
@@ -1236,8 +1232,6 @@ object principal1: Tprincipal1
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 221
-    ExplicitWidth = 362
     DesignSize = (
       360
       19)
@@ -1621,10 +1615,21 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
-          object StarForce1: TMenuItem
-            Caption = 'Star Force'
+          object SenjyoHW1: TMenuItem
+            Caption = 'Senjyo HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object Senjyo1: TMenuItem
+              Caption = 'Senjyo'
+              OnClick = CambiarMaquina
+            end
+            object StarForce1: TMenuItem
+              Caption = 'Star Force'
+              OnClick = CambiarMaquina
+            end
+            object Baluba1: TMenuItem
+              Caption = 'Baluba-louk no Densetsu'
+              OnClick = CambiarMaquina
+            end
           end
           object ecmoHardware1: TMenuItem
             Caption = 'Tecmo HW'
@@ -2286,6 +2291,11 @@ object principal1: Tprincipal1
           end
           object ccastles1: TMenuItem
             Caption = 'Clystal Castles'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
+          object spdodgeb1: TMenuItem
+            Caption = 'Super Dodge Ball'
             GroupIndex = 1
             OnClick = CambiarMaquina
           end

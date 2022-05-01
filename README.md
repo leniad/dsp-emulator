@@ -1,4 +1,58 @@
 ﻿# DSP Emulator status #
+<b>01/05/22 - DSP Emulator 0.20WIP8. Win32 and source update.<br>
+<pre>
+-General
+    +ROMs export
+        -Fixed Sly Spy ROMs info (Thanks to Neville)
+    +CPU
+        -Z80
+            +Added M1 raise signal (read opcode)
+        -M6800
+            +Added HD63701Y0 CPU
+            +Fixed internal read/write registers
+            +Fixed opcodes BHI and BLS (ouch!)
+            +Added opcode RORA
+-Amstrad CPC
+    +Speed up video
+    +Dandanator added initial support
+-Black Tiger
+    +Fixed MCU CPU clock
+    +Added video HW specs
+-Commando
+    +Fixed main CPU clock
+    +Added video HW specs
+-Ghost'n Goblins
+    +Added video HW specs
+-Gun.Smoke HW
+    +Added video HW specs
+-The Legend of Kage
+    +Rewrited video driver
+        -Fixed proirity BG/FG/Sprites
+        -Fixed disable screen
+-Outrun (Thanks to Neville)
+    +Fixed palette
+    +Fixed shadows
+-Senjyo HW (called StarForce before)
+    +Fixed video buffer
+    +Added BG stripe and radar
+    +Added char flip
+    +Added Senjyo driver with sound
+    +Added Baluba-louk no Densetsu driver with sound
+-Super Dodgeball
+    +Added driver with sound
+-Sega System 16A HW (Thanks to Neville)
+    +Fixed palette
+    +Fixed shadows
+-Sega System 16B HW (Thanks to Neville)
+    +Fixed palette
+    +Fixed shadows
+</pre><br>
+<img src="https://i.ibb.co/pbCwPBB/alien-new.png"> <img src="https://i.ibb.co/yykkKdT/alien-old.png"><br>
+<img src="https://i.ibb.co/0F2cVnD/ddux-new.png"> <img src="https://i.ibb.co/RSjvvYx/ddux-old.png"><br>
+<img src="https://i.ibb.co/R7QD992/outrun-new.png"> <img src="https://i.ibb.co/pwW4hDV/outrun-old.png"><br>
+<img src="https://i.ibb.co/yNWN6Dq/baluba.png"> <img src="https://i.ibb.co/w6F4Wjc/dandanator.png"><br>
+<img src="https://i.ibb.co/7tc3krp/legend.png"> <img src="https://i.ibb.co/yd1TJv8/Senjyo.png"><br>
+<img src="https://i.ibb.co/N6bCFj9/superdb.png"><br><br>
 <b>27/03/22 - DSP Emulator 0.20WIP7. Win32 and source update.<br>
 <pre>
 -General

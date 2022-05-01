@@ -1,12 +1,9 @@
 unit system16a_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ppi8255,sound_engine,ym_2151,fd1089,dialogs,mcs48,dac;
-
 function iniciar_system16a:boolean;
-
 implementation
 const
         //Shinobi
@@ -132,13 +129,11 @@ const
         (mask:$2;name:'Demo Sounds';number:2;dip:((dip_val:$2;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$30;name:'Difficulty';number:4;dip:((dip_val:$20;dip_name:'Easy'),(dip_val:$30;dip_name:'Normal'),(dip_val:$10;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),());
         CPU_SYNC=4;
-
 type
   tsystem16_info=record
     	normal,shadow,hilight:array[0..31] of byte;	//RGB translations for hilighted pixels
       s_banks:byte;
    end;
-
 var
  rom,rom_data:array[0..$1ffff] of word;
  ram:array[0..$1fff] of word;
@@ -155,7 +150,6 @@ var
  screen_enabled:boolean;
  n7751_numroms,sound_latch,n7751_command:byte;
  n7751_rom_address:dword;
-
 //Cada sprite 16bytes (8 words)
 //parte alta byte 0
 procedure draw_sprites(pri:byte);
@@ -166,25 +160,23 @@ var
   xpos,addr,bank,x,y,pix,data_7,pixels,color:word;
   pitch:integer;
   spritedata:dword;
-
-procedure system16a_draw_pixel(x,y,pix,color:word;pri:byte);
-const
-  pal_cons:array[0..3] of word=(0,$c00,$400,$1400);
+procedure system16a_draw_pixel(x,y,pix:word);
 var
-  punt:word;
+  punt,punt2,temp1,temp2,temp3:word;
 begin
-  //color segun la prioridad:
-  //0 --> $0
-  //1 --> $400
-  //2 --> $400+$800
-  //3 --> $400+$800+$800
   //only draw if onscreen, not 0 or 15
-	if ((x<512) and (pix<>0) and (pix<>15)) then begin
-      punt:=paleta[color+pix+pal_cons[pri]];
+	if ((x<512) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
+      if (pix and $3f0)=$3f0 then begin //Shadow
+          punt:=getpixel(x+ADD_SPRITE,y+ADD_SPRITE,7);
+          punt2:=paleta[$1000];
+          temp1:=(((punt and $f800)+(punt2 and $f800)) shr 1) and $f800;
+          temp2:=(((punt and $7e0)+(punt2 and $7e0)) shr 1) and $7e0;
+          temp3:=(((punt and $1f)+(punt2 and $1f)) shr 1) and $1f;
+          punt:=temp1 or temp2 or temp3;
+      end else punt:=paleta[pix+$400]; //Normal
       putpixel(x+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
 	end;
 end;
-
 begin
   for f:=0 to $7f do begin
     bottom:=(sprite_ram[f*$8] shr 8)+1;
@@ -223,13 +215,13 @@ begin
 						pixels:=(sprite_rom[(spritedata+(data_7 and $7fff)) shl 1] shl 8)+sprite_rom[((spritedata+(data_7 and $7fff)) shl 1)+1];
 						// draw four pixels
 						pix:=(pixels shr 12) and $f;
-            system16a_draw_pixel(x,y,pix,color,sprpri);
+            system16a_draw_pixel(x,y,pix or color);
 						pix:=(pixels shr 8) and $f;
-            system16a_draw_pixel(x+1,y,pix,color,sprpri);
+            system16a_draw_pixel(x+1,y,pix or color);
 						pix:=(pixels shr 4) and $f;
-            system16a_draw_pixel(x+2,y,pix,color,sprpri);
+            system16a_draw_pixel(x+2,y,pix or color);
 						pix:=(pixels shr 0) and $f;
-            system16a_draw_pixel(x+3,y,pix,color,sprpri);
+            system16a_draw_pixel(x+3,y,pix or color);
             x:=x+4;
 						// stop if the last pixel in the group was 0xf
 						if (pix=15) then break;
@@ -245,13 +237,13 @@ begin
 						pixels:=(sprite_rom[(spritedata+(data_7 and $7fff)) shl 1] shl 8)+sprite_rom[((spritedata+(data_7 and $7fff)) shl 1)+1];
 						// draw four pixels */
 						pix:=(pixels shr 0) and $f;
-            system16a_draw_pixel(x,y,pix,color,sprpri);
+            system16a_draw_pixel(x,y,pix or color);
 						pix:=(pixels shr 4) and $f;
-            system16a_draw_pixel(x+1,y,pix,color,sprpri);
+            system16a_draw_pixel(x+1,y,pix or color);
 						pix:=(pixels shr 8) and $f;
-            system16a_draw_pixel(x+2,y,pix,color,sprpri);
+            system16a_draw_pixel(x+2,y,pix or color);
 						pix:=(pixels shr 12) and $f;
-            system16a_draw_pixel(x+3,y,pix,color,sprpri);
+            system16a_draw_pixel(x+3,y,pix or color);
             x:=x+4;
 						// stop if the last pixel in the group was 0xf
 						if (pix=15) then break;
@@ -261,7 +253,6 @@ begin
 		end;
 	end;
 end;
-
 procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);inline;
 var
   pos,f,nchar,color,data:word;
@@ -289,7 +280,6 @@ begin
     pos:=pos+1;
   end;
 end;
-
 procedure update_video_system16a;inline;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib:word;
@@ -345,7 +335,6 @@ actualiza_trozo(192,0,320,224,1,0,0,320,224,7); //8
 actualiza_trozo_final(0,0,320,224,7);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
-
 procedure eventos_system16a;
 begin
 if event.arcade then begin
@@ -372,7 +361,6 @@ if event.arcade then begin
   if arcade_input.coin[1] then marcade.in0:=(marcade.in0 and $fffd) else marcade.in0:=(marcade.in0 or $2);
 end;
 end;
-
 procedure system16a_principal_adpcm;
 var
   frame_m,frame_s,frame_s_sub:single;
@@ -405,7 +393,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 procedure system16a_principal;
 var
   frame_m,frame_s,frame_s_sub:single;
@@ -434,7 +421,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 function standar_s16_io_r(direccion:word):word;inline;
 var
   res:word;
@@ -455,7 +441,6 @@ case (direccion and $3000) of
 end;
 standar_s16_io_r:=res;
 end;
-
 function system16a_getword(direccion:dword):word;
 begin
 case direccion of
@@ -479,7 +464,6 @@ case direccion of
     end;
 end;
 end;
-
 function system16a_getword_fd1089(direccion:dword):word;
 begin
 case direccion of
@@ -488,7 +472,6 @@ case direccion of
     else system16a_getword_fd1089:=system16a_getword(direccion);
 end;
 end;
-
 procedure test_screen_change(direccion:word);
 begin
 if direccion=$74e then begin
@@ -532,7 +515,6 @@ if direccion=$74f then begin
           end;
 end;
 end;
-
 procedure change_pal(direccion:word);inline;
 var
 	val:word;
@@ -565,7 +547,6 @@ begin
   //Buffer
   buffer_color[(direccion shr 3) and $7f]:=true;
 end;
-
 procedure test_tile_buffer(direccion:word);inline;
 var
   num_scr,f:byte;
@@ -576,14 +557,12 @@ begin
   for f:=0 to 7 do
     if s16_screen[f]=num_scr then tile_buffer[(f shl 11)+pos]:=true;
 end;
-
 procedure standard_io_w(direccion,valor:word);inline;
 begin
 case (direccion and $3000) of
 		$0:pia8255_0.write((direccion shr 1) and $3,valor and $ff);
 end;
 end;
-
 procedure system16a_putword(direccion:dword;valor:word);
 begin
 case direccion of
@@ -626,7 +605,6 @@ case direccion of
                      end;
   end;
 end;
-
 function system16a_snd_getbyte(direccion:word):byte;
 var
   res:byte;
@@ -641,12 +619,10 @@ case direccion of
 end;
 system16a_snd_getbyte:=res;
 end;
-
 procedure system16a_snd_putbyte(direccion:word;valor:byte);
 begin
 if direccion>$f7ff then mem_snd[direccion]:=valor;
 end;
-
 function system16a_snd_inbyte(puerto:word):byte;
 var
   res:byte;
@@ -661,7 +637,6 @@ case (puerto and $ff) of
 end;
 system16a_snd_inbyte:=res;
 end;
-
 procedure system16a_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -672,7 +647,6 @@ case (puerto and $ff) of
   $80..$bf:;
 end;
 end;
-
 procedure system16a_snd_outbyte_adpcm(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -690,34 +664,28 @@ case (puerto and $ff) of
            end;
 end;
 end;
-
 procedure ppi8255_wporta(valor:byte);
 begin
   sound_latch:=valor;
 end;
-
 procedure ppi8255_wportb(valor:byte);
 begin
   screen_enabled:=(valor and $10)<>0;
 end;
-
 procedure ppi8255_wportc(valor:byte);
 begin
 if (valor and $80)<>0 then z80_0.change_nmi(CLEAR_LINE)
   else z80_0.change_nmi(ASSERT_LINE);
 end;
-
 procedure system16a_sound_adpcm;
 begin
   ym2151_0.update;
   dac_0.update;
 end;
-
 procedure system16a_sound_update;
 begin
   ym2151_0.update;
 end;
-
 procedure ym2151_snd_port(valor:byte);
 begin
 if (valor and $1)<>0 then mcs48_0.change_reset(CLEAR_LINE)
@@ -725,7 +693,6 @@ if (valor and $1)<>0 then mcs48_0.change_reset(CLEAR_LINE)
 if (valor and $2)<>0 then mcs48_0.change_irq(CLEAR_LINE)
   else mcs48_0.change_irq(ASSERT_LINE);
 end;
-
 //Sub sound cpu
 function system16a_sound_inport(puerto:word):byte;
 begin
@@ -735,7 +702,6 @@ case puerto of
   MCS48_PORT_P2:system16a_sound_inport:=$80 or ((n7751_command and $07) shl 4) or (mcs48_0.i8243.p2_r and $f);
 end;
 end;
-
 procedure system16a_sound_outport(puerto:word;valor:byte);
 begin
 case puerto of
@@ -744,7 +710,6 @@ case puerto of
   MCS48_PORT_PROG:mcs48_0.i8243.prog_w(valor);
 end;
 end;
-
 procedure n7751_rom_offset_w(puerto:word;valor:byte);
 var
   mask,newdata:dword;
@@ -757,7 +722,6 @@ begin
 	newdata:=(valor shl (4*puerto)) and mask;
 	n7751_rom_address:=(n7751_rom_address and not(mask)) or newdata;
 end;
-
 //Main
 procedure reset_system16a;
 var
@@ -778,7 +742,6 @@ begin
  sound_latch:=0;
  n7751_rom_address:=0;
 end;
-
 function iniciar_system16a:boolean;
 var
   f:word;
@@ -786,9 +749,8 @@ var
   weights:array[0..1,0..5] of single;
   i0,i1,i2,i3,i4:integer;
 const
-  resistances_normal:array[0..5] of integer=(900, 2000, 1000, 1000 div 2,1000 div 4, 0);
+  resistances_normal:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2,1000 div 4, 0);
 	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
-
 procedure convert_chars(n:byte);
 const
   pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
@@ -799,7 +761,6 @@ gfx[0].trans[0]:=true;
 gfx_set_desc_data(3,0,8*8,n*$10000*8,n*$8000*8,0);
 convert_gfx(0,0,@memoria_temp[0],@pt_x[0],@pt_y[0],false,false);
 end;
-
 begin
 llamadas_maquina.reset:=reset_system16a;
 iniciar_system16a:=false;
@@ -1013,5 +974,4 @@ end;
 reset_system16a;
 iniciar_system16a:=true;
 end;
-
 end.

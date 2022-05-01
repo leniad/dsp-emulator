@@ -76,14 +76,20 @@ var
   hide,flip:boolean;
 procedure system16b_draw_pixel(x,y,pix:word);inline;
 var
-  punt:word;
+  punt,punt2,temp1,temp2,temp3:word;
   xf:integer;
 begin
   xf:=x-$bd+6;
   //only draw if onscreen, not 0 or 15
 	if ((xf>=0) and (xf<320) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
-      if (pix and $400f)=$400a then punt:=paleta[$1000] //Shadow/Hi
-        else punt:=paleta[(pix and $7ff)+$800]; //Normal quitando la activando las sombras
+      if (pix and $400f)=$400a then begin //Shadow
+          punt:=getpixel(xf+ADD_SPRITE,y+ADD_SPRITE,7);
+          punt2:=paleta[$1000];
+          temp1:=(((punt and $f800)+(punt2 and $f800)) shr 1) and $f800;
+          temp2:=(((punt and $7e0)+(punt2 and $7e0)) shr 1) and $7e0;
+          temp3:=(((punt and $1f)+(punt2 and $1f)) shr 1) and $1f;
+          punt:=temp1 or temp2 or temp3;
+      end else punt:=paleta[(pix and $7ff)+$800]; //Normal
       putpixel(xf+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
 	end;
 end;
@@ -823,7 +829,7 @@ var
 const
   pt_x:array[0..7] of dword=(0, 1, 2, 3, 4, 5, 6, 7 );
   pt_y:array[0..7] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8);
-  resistances_normal:array[0..5] of integer=(900, 2000, 1000, 1000 div 2,1000 div 4, 0);
+  resistances_normal:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2,1000 div 4, 0);
 	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
 procedure decode_road;
 var

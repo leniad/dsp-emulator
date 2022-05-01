@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m6805,main_engine,controls_engine,gfx_engine,ym_2203,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_lk_hw;
+function iniciar_lk_hw:boolean;
 
 implementation
 const
@@ -40,12 +40,13 @@ var
  mem_data:array[0..$3fff] of byte;
  sound_cmd,color_bnk:byte;
  bg_bank,fg_bank:word;
- snd_nmi,prioridad_fg,pant_enable:boolean;
+ snd_nmi,pant_enable,prioridad_fg:boolean;
  //mcu
  mcu_mem:array[0..$7ff] of byte;
  port_c_in,port_c_out,port_b_out,port_b_in,port_a_in,port_a_out:byte;
  ddr_a,ddr_b,ddr_c:byte;
- mcu_sent,from_main,main_sent,from_mcu:byte;
+ from_main,from_mcu:byte;
+ main_sent,mcu_sent:boolean;
 
 procedure draw_sprites(prio:byte);inline;
 var
@@ -86,47 +87,41 @@ var
   x,y:byte;
   f,nchar:word;
 begin
-if pant_enable then begin
-  for f:=0 to $3ff do begin
+for f:=0 to $3ff do begin
+  x:=f mod 32;
+  y:=f div 32;
+  //char
+  if gfx[0].buffer[f] then begin
+    nchar:=memoria[$f400+f];
+    put_gfx_trans(x*8,y*8,nchar,$110,1,0);
+    gfx[0].buffer[f]:=false;
+  end;
+  if pant_enable then begin
     //BG
     if gfx[0].buffer[$400+f] then begin
-      x:=f mod 32;
-      y:=f div 32;
       nchar:=memoria[$fc00+f]+bg_bank;
       put_gfx(x*8,y*8,nchar,$300+color_bnk,2,0);
       gfx[0].buffer[$400+f]:=false;
     end;
     //FG
     if gfx[0].buffer[$800+f] then begin
-      x:=f mod 32;
-      y:=f div 32;
       nchar:=memoria[$f800+f]+fg_bank;
       put_gfx_trans(x*8,y*8,nchar,$200+color_bnk,3,0);
       gfx[0].buffer[$800+f]:=false;
     end;
   end;
-  scroll_x_y(2,4,scroll_val[4]+5,scroll_val[5]);
-  if prioridad_fg then begin
-    scroll_x_y(3,4,scroll_val[2]+3,scroll_val[3]);
-    draw_sprites(0);
-  end else begin
-    draw_sprites(0);
-    scroll_x_y(3,4,scroll_val[2]+3,scroll_val[3]);
-  end;
-end else begin //BG y FG ocultas
-  fill_full_screen(4,$400);
+end;
+if pant_enable then scroll_x_y(2,4,scroll_val[4]+5,scroll_val[5])
+  else fill_full_screen(4,$400);
+if prioridad_fg then begin
+  draw_sprites($80);
+  if pant_enable then scroll_x_y(3,4,scroll_val[2]+3,scroll_val[3]);
   draw_sprites(0);
+end else begin
+  draw_sprites(0);
+  if pant_enable then scroll_x_y(3,4,scroll_val[2]+3,scroll_val[3]);
+  draw_sprites($80);
 end;
-for f:=0 to $3ff do begin
-  if gfx[0].buffer[f] then begin
-    x:=f mod 32;
-    y:=f div 32;
-    nchar:=memoria[$f400+f];
-    put_gfx_trans(x*8,y*8,nchar,$110,1,0);
-    gfx[0].buffer[f]:=false;
-  end;
-end;
-draw_sprites($80);
 scroll_x_y(1,4,scroll_val[0]+1,scroll_val[1]);
 actualiza_trozo_final(16,16,240,224,4);
 end;
@@ -195,7 +190,7 @@ case direccion of
   $e800..$efff:lk_getbyte:=buffer_paleta[direccion and $7ff];
   $f061:lk_getbyte:=$ff;
   $f062:begin
-          mcu_sent:=0;
+          mcu_sent:=false;
 	        lk_getbyte:=from_mcu;
         end;
   $f080:lk_getbyte:=marcade.dswa;
@@ -206,10 +201,10 @@ case direccion of
   $f086:lk_getbyte:=marcade.in2;
   $f087:begin
             res:=0;
-          	// bit 0 = when 1, mcu is ready to receive data from main cpu */
-          	// bit 1 = when 1, mcu has sent data to the main cpu */
-          	if (main_sent=0) then res:=res or $01;
-          	if (mcu_sent<>0) then res:=res or $02;
+          	// bit 0 = when 1, mcu is ready to receive data from main cpu
+          	// bit 1 = when 1, mcu has sent data to the main cpu
+          	if not(main_sent) then res:=res or $01;
+          	if mcu_sent then res:=res or $02;
             lk_getbyte:=res;
         end;
   $f0c0..$f0c5:lk_getbyte:=scroll_val[direccion and $7];
@@ -269,17 +264,17 @@ case direccion of
                           fillchar(gfx[0].buffer[$400],$800,1);
                         end;
                       end;
-                    2:pant_enable:=(valor and $f0)<>0;
+                    2:pant_enable:=(valor and $f0)=$f0;
                   end;
                end;
   $f060:if not(snd_nmi) then begin
           sound_cmd:=valor;
           z80_1.change_nmi(ASSERT_LINE);
-          snd_nmi:=false;
+          snd_nmi:=true;
         end;
   $f062:begin
           from_main:=valor;
-	        main_sent:=1;
+	        main_sent:=true;
           m6805_0.irq_request(0,ASSERT_LINE);
         end;
   $f0c0..$f0c5:scroll_val[direccion and $7]:=valor;
@@ -342,8 +337,8 @@ case direccion of
 	1:mcu_lk_hw_getbyte:=(port_b_out and ddr_b) or (port_b_in and not(ddr_b));
 	2:begin
       port_c_in:=0;
-    	if (main_sent<>0) then port_c_in:=port_c_in or $01;
-    	if (mcu_sent=0) then port_c_in:=port_c_in or $02;
+    	if main_sent then port_c_in:=port_c_in or $01;
+    	if not(mcu_sent) then port_c_in:=port_c_in or $02;
     	mcu_lk_hw_getbyte:=(port_c_out and ddr_c) or (port_c_in and not(ddr_c));
     end;
   3..$7ff:mcu_lk_hw_getbyte:=mcu_mem[direccion];
@@ -358,12 +353,12 @@ case direccion of
 	1:begin
       if (((ddr_b and $02)<>0) and ((not(valor) and $02)<>0) and ((port_b_out and $02)<>0)) then begin
     		port_a_in:=from_main;
-    		if (main_sent<>0) then m6805_0.irq_request(0,CLEAR_LINE);
-    		main_sent:=0;
+    		if main_sent then m6805_0.irq_request(0,CLEAR_LINE);
+    		main_sent:=false;
     	end;
     	if (((ddr_b and $04)<>0) and ((valor and $04)<>0) and ((not(port_b_out) and $04)<>0)) then begin
     		from_mcu:=port_a_out;
-    		mcu_sent:=1;
+    		mcu_sent:=true;
     	end;
     	port_b_out:=valor;
     end;
@@ -405,8 +400,8 @@ begin
  pant_enable:=false;
  bg_bank:=0;
  fg_bank:=0;
- prioridad_fg:=false;
  snd_nmi:=false;
+ prioridad_fg:=false;
  //mcu
  port_a_in:=0;
  port_a_out:=0;
@@ -417,8 +412,8 @@ begin
  port_c_in:=0;
  port_c_out:=0;
  ddr_c:=0;
- mcu_sent:=0;
- main_sent:=0;
+ mcu_sent:=false;
+ main_sent:=false;
  from_main:=0;
  from_mcu:=0;
 end;
@@ -432,6 +427,8 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
     128+0*8, 128+1*8, 128+2*8, 128+3*8, 128+4*8, 128+5*8, 128+6*8, 128+7*8);
 begin
+llamadas_maquina.bucle_general:=lk_hw_principal;
+llamadas_maquina.reset:=reset_lk_hw;
 iniciar_lk_hw:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -485,13 +482,6 @@ marcade.dswb_val:=@lk_dip_b;
 marcade.dswc_val:=@lk_dip_c;
 reset_lk_hw;
 iniciar_lk_hw:=true;
-end;
-
-procedure Cargar_lk_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_lk_hw;
-llamadas_maquina.bucle_general:=lk_hw_principal;
-llamadas_maquina.reset:=reset_lk_hw;
 end;
 
 end.

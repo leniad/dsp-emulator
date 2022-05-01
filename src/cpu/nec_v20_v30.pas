@@ -148,6 +148,24 @@ const
     SS=2;
     DS0=3;
 
+function inbyte_ff(direccion:word):byte;
+begin
+  inbyte_ff:=$ff;
+end;
+
+function inword_ff(direccion:dword):word;
+begin
+  inword_ff:=$ffff;
+end;
+
+procedure outbyte_ff(direccion:word;valor:byte);
+begin
+end;
+
+procedure outword_ff(direccion:dword;valor:word);
+begin
+end;
+
 constructor cpu_nec.create(clock:dword;frames_div:word;tipo:byte);
 begin
 getmem(self.r,sizeof(reg_nec));
@@ -163,10 +181,10 @@ case tipo of
           self.tipo_cpu:=tipo;
       end;
   end;
-self.inbyte:=nil;
-self.outbyte:=nil;
-self.inword:=nil;
-self.outword:=nil;
+self.inbyte:=inbyte_ff;
+self.outbyte:=outbyte_ff;
+self.inword:=inword_ff;
+self.outword:=outword_ff;
 end;
 
 destructor cpu_nec.free;
@@ -212,14 +230,14 @@ end;
 
 procedure cpu_nec.change_io_calls(inbyte:tgetbyte;outbyte:tputbyte);
 begin
-  self.inbyte:=inbyte;
-  self.outbyte:=outbyte;
+  if @inbyte<>nil then self.inbyte:=inbyte;
+  if @outbyte<>nil then self.outbyte:=outbyte;
 end;
 
 procedure cpu_nec.change_io_calls16(inword:tgetword;outword:tputword);
 begin
-  self.inword:=inword;
-  self.outword:=outword;
+  if @inword<>nil then self.inword:=inword;
+  if @outword<>nil then self.outword:=outword;
 end;
 
 function cpu_nec.GetEA(ModRM:byte):dword;

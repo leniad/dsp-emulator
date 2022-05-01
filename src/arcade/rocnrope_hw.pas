@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,konami_decrypt,konami_snd,sound_engine;
 
-procedure cargar_rocnrope;
+function iniciar_rocnrope:boolean;
 
 implementation
 const
@@ -159,7 +159,6 @@ case direccion of
   $8087:begin
           irq_ena:=(valor and $1)<>0;
           if not(irq_ena) then m6809_0.change_irq(CLEAR_LINE);
-
         end;
   $8100:konamisnd_0.sound_latch:=valor;
   $8182..$818d:memoria[$fff2+(direccion-$8182)]:=valor;
@@ -193,13 +192,15 @@ const
   resistances_rg:array[0..2] of integer=(1000,470,220);
   resistances_b:array [0..1] of integer=(470,220);
 begin
+llamadas_maquina.bucle_general:=rocnrope_principal;
+llamadas_maquina.reset:=reset_rocnrope;
 iniciar_rocnrope:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
 screen_init(2,256,256,false,true);
 iniciar_video(224,256);
 //Main CPU
-m6809_0:=cpu_m6809.Create(1536000,$100,TCPU_M6809);
+m6809_0:=cpu_m6809.Create(18432000 div 3 div 4,$100,TCPU_M6809);
 m6809_0.change_ram_calls(rocnrope_getbyte,rocnrope_putbyte);
 //Sound Chip
 konamisnd_0:=konamisnd_chip.create(4,TIPO_TIMEPLT,1789772,$100);
@@ -255,13 +256,6 @@ marcade.dswc_val:=@rocnrope_dip_c;
 //final
 reset_rocnrope;
 iniciar_rocnrope:=true;
-end;
-
-procedure cargar_rocnrope;
-begin
-llamadas_maquina.iniciar:=iniciar_rocnrope;
-llamadas_maquina.bucle_general:=rocnrope_principal;
-llamadas_maquina.reset:=reset_rocnrope;
 end;
 
 end.

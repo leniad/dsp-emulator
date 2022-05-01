@@ -121,21 +121,21 @@ end;
 
 procedure gng_principal;
 var
-  f:byte;
+  f:word;
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
 frame_m:=m6809_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 261 do begin
     //Main CPU
     m6809_0.run(frame_m);
     frame_m:=frame_m+m6809_0.tframes-m6809_0.contador;
     //Sound CPU
     z80_0.run(frame_s);
     frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-    if f=239 then begin
+    if f=245 then begin
         update_video_gng;
         m6809_0.change_irq(HOLD_LINE);
     end;
@@ -338,7 +338,7 @@ const
 begin
 llamadas_maquina.bucle_general:=gng_principal;
 llamadas_maquina.reset:=reset_gng;
-llamadas_maquina.fps_max:=59.59;
+llamadas_maquina.fps_max:=12000000/2/384/262;
 llamadas_maquina.save_qsnap:=gng_qsave;
 llamadas_maquina.load_qsnap:=gng_qload;
 iniciar_gng:=false;
@@ -353,10 +353,10 @@ screen_init(3,256,256,true); //Chars
 screen_init(4,512,256,false,true); //Final
 iniciar_video(256,224);
 //Main CPU
-m6809_0:=cpu_m6809.Create(6000000,256,TCPU_MC6809);
+m6809_0:=cpu_m6809.Create(6000000,262,TCPU_MC6809);
 m6809_0.change_ram_calls(gng_getbyte,gng_putbyte);
 //Sound CPU
-z80_0:=cpu_z80.create(3000000,256);
+z80_0:=cpu_z80.create(3000000,262);
 z80_0.change_ram_calls(sound_getbyte,sound_putbyte);
 z80_0.init_sound(gng_sound_update);
 //IRQ Sound CPU

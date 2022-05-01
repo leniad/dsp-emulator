@@ -324,7 +324,7 @@ sn_76496_0:=sn76496_chip.Create(CLOCK_NTSC);
 z80_0.change_ram_calls(gg_getbyte,gg_putbyte);
 z80_0.change_io_calls(gg_inbyte,gg_outbyte);
 z80_0.init_sound(gg_sound_update);
-z80_0.change_misc_calls(gg_set_hpos,nil);
+z80_0.change_misc_calls(gg_set_hpos);
 //final
 mapper_sms.max:=1;
 abrir_gg;

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      hd6309,nz80,main_engine,controls_engine,gfx_engine,
      rom_engine,pal_engine,konami_video,ym_2203,upd7759,sound_engine;
 
-procedure cargar_combatsc;
+function iniciar_combatsc:boolean;
 
 implementation
 
@@ -348,6 +348,8 @@ for chip:=0 to 1 do begin
 end;
 end;
 begin
+llamadas_maquina.bucle_general:=combatsc_principal;
+llamadas_maquina.reset:=reset_combatsc;
 iniciar_combatsc:=false;
 iniciar_audio(false);
 //Pantallas
@@ -405,13 +407,6 @@ marcade.dswa_val:=@combatsc_dip_a;
 marcade.dswb_val:=@combatsc_dip_b;
 marcade.dswc_val:=@combatsc_dip_c;
 iniciar_combatsc:=true;
-end;
-
-procedure Cargar_combatsc;
-begin
-llamadas_maquina.iniciar:=iniciar_combatsc;
-llamadas_maquina.bucle_general:=combatsc_principal;
-llamadas_maquina.reset:=reset_combatsc;
 end;
 
 end.

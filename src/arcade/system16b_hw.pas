@@ -170,7 +170,7 @@ var
  region2_write:procedure(direccion:dword;valor:word);
  sound_bank_calc:function(valor:byte):byte;
 
-procedure draw_sprites(pri:byte);
+procedure draw_sprites(pri:byte);inline;
 var
   g,f,sprpri,vzoom,hzoom:byte;
   bottom,top,xacc,xpos,addr,bank,x,y,pix,data_7,pixels,color:word;
@@ -179,14 +179,20 @@ var
   hide,flip:boolean;
 procedure system16b_draw_pixel(x,y,pix:word);inline;
 var
-  punt:word;
+  punt,punt2,temp1,temp2,temp3:word;
   xf:integer;
 begin
   xf:=x-$bd+6;
   //only draw if onscreen, not 0 or 15
 	if ((xf>=0) and (xf<512) and ((pix and $f)<>0) and ((pix and $f)<>15)) then begin
-      if (pix and $3f0)=$3f0 then punt:=paleta[$800] //Shadow/Hi
-        else punt:=paleta[pix+$400]; //Normal
+      if (pix and $3f0)=$3f0 then begin //Shadow
+          punt:=getpixel(xf+ADD_SPRITE,y+ADD_SPRITE,7);
+          punt2:=paleta[$800];
+          temp1:=(((punt and $f800)+(punt2 and $f800)) shr 1) and $f800;
+          temp2:=(((punt and $7e0)+(punt2 and $7e0)) shr 1) and $7e0;
+          temp3:=(((punt and $1f)+(punt2 and $1f)) shr 1) and $1f;
+          punt:=temp1 or temp2 or temp3;
+      end else punt:=paleta[pix+$400]; //Normal
       putpixel(xf+ADD_SPRITE,y+ADD_SPRITE,1,@punt,7);
 	end;
 end;
@@ -274,7 +280,7 @@ begin
 	end;
 end;
 
-procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);
+procedure draw_tiles(num:byte;px,py:word;scr:byte;trans:boolean);inline;
 var
   pos,f,nchar,color,data,x,y:word;
 begin
@@ -300,7 +306,7 @@ begin
   end;
 end;
 
-procedure update_video_system16b;
+procedure update_video_system16b;inline;
 var
   f,nchar,color,scroll_x1,scroll_x2,x,y,atrib,scroll_y1,scroll_y2:word;
 begin
@@ -972,7 +978,7 @@ var
   weights:array[0..1,0..5] of single;
   i0,i1,i2,i3,i4:integer;
 const
-  resistances_normal:array[0..5] of integer=(900, 2000, 1000, 1000 div 2,1000 div 4, 0);
+  resistances_normal:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2,1000 div 4, 0);
 	resistances_sh:array[0..5] of integer=(3900, 2000, 1000, 1000 div 2, 1000 div 4, 470);
 procedure convert_chars(n:byte);
 const

@@ -1,12 +1,9 @@
 unit solomonkey_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ay_8910,gfx_engine,rom_engine,
      pal_engine,sound_engine,timer_engine;
-
-procedure cargar_solomon;
-
+function iniciar_solomon:boolean;
 implementation
 const
         solomon_rom:array[0..2] of tipo_roms=(
@@ -32,11 +29,9 @@ const
         (mask:$c;name:'Time Speed';number:4;dip:((dip_val:$8;dip_name:'Slow'),(dip_val:$0;dip_name:'Normal'),(dip_val:$4;dip_name:'Faster'),(dip_val:$c;dip_name:'Fastest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$10;name:'Extra';number:2;dip:((dip_val:$0;dip_name:'Normal'),(dip_val:$10;dip_name:'Difficult'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$e0;name:'Bonus Life';number:8;dip:((dip_val:$0;dip_name:'30K 200K 500K'),(dip_val:$80;dip_name:'100K 300K 800K'),(dip_val:$40;dip_name:'30K 200K'),(dip_val:$c0;dip_name:'100K 300K'),(dip_val:$20;dip_name:'30K'),(dip_val:$a0;dip_name:'100K'),(dip_val:$60;dip_name:'200K'),(dip_val:$e0;dip_name:'None'),(),(),(),(),(),(),(),())),());
-
 var
  sound_latch:byte;
  nmi_enable:boolean;
-
 procedure update_video_solomon;inline;
 var
   f,color,nchar,x,y:word;
@@ -79,7 +74,6 @@ end;
 actualiza_trozo_final(0,16,256,224,3);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
-
 procedure eventos_solomon;
 begin
 if event.arcade then begin
@@ -104,7 +98,6 @@ if event.arcade then begin
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 or $8) else marcade.in2:=(marcade.in2 and $f7);
 end;
 end;
-
 procedure solomon_principal;
 var
   f:byte;
@@ -130,7 +123,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 //Main
 function solomon_getbyte(direccion:word):byte;
 var
@@ -152,7 +144,6 @@ case direccion of
   $e606:;
 end;
 end;
-
 procedure cambiar_color(dir:word);inline;
 var
   tmp_color:byte;
@@ -170,7 +161,6 @@ begin
     $80..$ff:buffer_color[((dir shr 4) and $7)+8]:=true;
   end;
 end;
-
 procedure solomon_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -194,23 +184,24 @@ case direccion of
             sound_latch:=valor;
             z80_1.change_nmi(PULSE_LINE);
          end;
-   $f000..$ffff:exit;
+   $f000..$ffff:;
 end;
 end;
-
 //Sound
 function solomon_snd_getbyte(direccion:word):byte;
 begin
-if direccion=$8000 then solomon_snd_getbyte:=sound_latch
- else solomon_snd_getbyte:=mem_snd[direccion];
+case direccion of
+  0..$47ff:solomon_snd_getbyte:=mem_snd[direccion];
+  $8000:solomon_snd_getbyte:=sound_latch;
 end;
-
+end;
 procedure solomon_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$4000 then exit;
-mem_snd[direccion]:=valor;
+case direccion of
+  0..$3fff:;
+  $4000..$47ff:mem_snd[direccion]:=valor;
 end;
-
+end;
 procedure solomon_snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -222,19 +213,16 @@ case (puerto and $ff) of
 	$31:ay8910_2.write(valor);
 end;
 end;
-
 procedure solomon_snd_irq;
 begin
   z80_1.change_irq(HOLD_LINE);
 end;
-
 procedure solomon_sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
   ay8910_2.update;
 end;
-
 //Main
 procedure reset_solomon;
 begin
@@ -250,7 +238,6 @@ begin
  sound_latch:=0;
  nmi_enable:=true;
 end;
-
 function iniciar_solomon:boolean;
 var
     memoria_temp:array[0..$13fff] of byte;
@@ -262,6 +249,8 @@ const
     ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
 begin
+llamadas_maquina.bucle_general:=solomon_principal;
+llamadas_maquina.reset:=reset_solomon;
 iniciar_solomon:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -314,12 +303,4 @@ marcade.dswb_val:=@solomon_dip_b;
 reset_solomon;
 iniciar_solomon:=true;
 end;
-
-procedure Cargar_solomon;
-begin
-llamadas_maquina.iniciar:=iniciar_solomon;
-llamadas_maquina.bucle_general:=solomon_principal;
-llamadas_maquina.reset:=reset_solomon;
-end;
-
 end.

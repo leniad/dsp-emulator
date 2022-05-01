@@ -105,8 +105,8 @@ const
         (mask:$40;name:'Screen Stop';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- scroll_y,scroll_bg:word;
- linea,scroll_x,sound_command,rom_bank,sprite3bank:byte;
+ linea,scroll_y,scroll_bg:word;
+ scroll_x,sound_command,rom_bank,sprite3bank:byte;
  bg2on,bg1on,objon,chon,bgpaint,bgpaint2:boolean;
  rom_mem:array[0..7,0..$3fff] of byte;
  tiles_pos:array[0..$ffff] of byte;
@@ -278,14 +278,14 @@ end;
 
 procedure gunsmokehw_principal;
 var
-  f:byte;
+  f:word;
   frame_m,frame_s:single;
 begin
 init_controls(false,false,false,true);
 frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 while EmuStatus=EsRuning do begin
-  for f:=0 to $ff do begin
+  for f:=0 to 261 do begin
     //Main CPU
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -388,7 +388,7 @@ frame_m:=z80_0.tframes;
 frame_s:=z80_1.tframes;
 frame_mcu:=mcs51_0.tframes;
 while EmuStatus=EsRuning do begin
-  for linea:=0 to $ff do begin
+  for linea:=0 to 261 do begin
     //Main CPU
     z80_0.run(frame_m);
     frame_m:=frame_m+z80_0.tframes-z80_0.contador;
@@ -601,6 +601,7 @@ convert_gfx(ngfx,0,@memoria_temp,@pt_x,@pt_y,false,true);
 end;
 begin
 iniciar_gunsmokehw:=false;
+llamadas_maquina.fps_max:=12000000/2/384/262;
 iniciar_audio(false);
 screen_init(3,256,256,true);
 llamadas_maquina.reset:=reset_gunsmokehw;
@@ -623,8 +624,9 @@ case main_vars.tipo_maquina of
 end;
 iniciar_video(224,256);
 //Sound CPU
-z80_1:=cpu_z80.create(3000000,256);
-timers.init(z80_1.numero_cpu,3000000/(60*4),gunsmoke_snd_irq,nil,true);
+z80_1:=cpu_z80.create(3000000,262);
+//El ultimo divisor de 2 lo pongo para ajustarlo al reloj de la CPU de sonido
+timers.init(z80_1.numero_cpu,384*262/4/2,gunsmoke_snd_irq,nil,true);
 z80_1.init_sound(gunsmoke_sound_update);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(1500000,0.14,0.22);
@@ -632,7 +634,7 @@ ym2203_1:=ym2203_chip.create(1500000,0.14,0.22);
 case main_vars.tipo_maquina of
   80:begin
        //Main CPU
-       z80_0:=cpu_z80.create(3000000,256);
+       z80_0:=cpu_z80.create(3000000,262);
        z80_0.change_ram_calls(gunsmoke_getbyte,gunsmoke_putbyte);
        //cargar roms y ponerlas en su sitio
        if not(roms_load(@memoria_temp,gunsmoke_rom)) then exit;
@@ -668,7 +670,7 @@ case main_vars.tipo_maquina of
   end;
   82:begin
        //Main CPU
-       z80_0:=cpu_z80.create(6000000,256);
+       z80_0:=cpu_z80.create(6000000,262);
        z80_0.change_ram_calls(hw1943_getbyte,hw1943_putbyte);
        //cargar roms y ponerlas en su sitio
        if not(roms_load(@memoria_temp,hw1943_rom)) then exit;
@@ -678,7 +680,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(6000000,256);
+       mcs51_0:=cpu_mcs51.create(6000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars
@@ -715,7 +717,7 @@ case main_vars.tipo_maquina of
      end;
      83:begin
        //Main CPU
-       z80_0:=cpu_z80.create(6000000,256);
+       z80_0:=cpu_z80.create(6000000,262);
        z80_0.change_ram_calls(hw1943_getbyte,hw1943_putbyte);
        //cargar roms y ponerlas en su sitio
        if not(roms_load(@memoria_temp,hw1943kai_rom)) then exit;
@@ -725,7 +727,7 @@ case main_vars.tipo_maquina of
        z80_1.change_ram_calls(hw1943_snd_getbyte,hw1943_snd_putbyte);
        if not(roms_load(@mem_snd,hw1943kai_snd_rom)) then exit;
        //cargar MCU
-       mcs51_0:=cpu_mcs51.create(6000000,256);
+       mcs51_0:=cpu_mcs51.create(6000000,262);
        mcs51_0.change_io_calls(in_port0,in_port1,in_port2,nil,out_port0,nil,out_port2,out_port3);
        if not(roms_load(mcs51_0.get_rom_addr,hw1943_mcu)) then exit;
        //convertir chars

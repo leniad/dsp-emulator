@@ -1,12 +1,9 @@
 unit slapfight_hw;
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,pal_engine,
      m6805,sound_engine,timer_engine;
-
 procedure cargar_sf_hw;
-
 implementation
 const
         //Tiger Heli
@@ -76,7 +73,6 @@ var
  portc_in,portc_out,portb_out,portb_in,porta_in,porta_out,ddra,ddrb,ddrc:byte;
  from_main,from_mcu:byte;
  mcu_sent,main_sent:boolean;
-
 procedure update_video_sf_hw;inline;
 var
   f,x,y,color,nchar:word;
@@ -117,7 +113,6 @@ end;
 actualiza_trozo(16,224,239,280,1,0,0,240,239,3);
 actualiza_trozo_final(0,0,239,280,3);
 end;
-
 procedure eventos_sf_hw;
 begin
 if event.arcade then begin
@@ -141,7 +136,6 @@ if event.arcade then begin
   if arcade_input.coin[1] then marcade.in1:=(marcade.in1 and $7f) else marcade.in1:=(marcade.in1 or $80);
 end;
 end;
-
 procedure sf_hw_principal;
 var
   f:word;
@@ -170,7 +164,6 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
-
 //Tiger Heli
 function mcu_tigerh_hw_getbyte(direccion:word):byte;
 begin
@@ -187,7 +180,6 @@ case direccion of
   3..$7ff:mcu_tigerh_hw_getbyte:=mcu_ram[direccion];
 end;
 end;
-
 procedure mcu_tigerh_hw_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7ff;
@@ -217,7 +209,6 @@ case direccion of
   $80..$7ff:;
 end;
 end;
-
 //Slap Fight
 function sf_getbyte(direccion:word):byte;
 begin
@@ -230,7 +221,6 @@ case direccion of
         end;
 end;
 end;
-
 procedure sf_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -255,7 +245,6 @@ case direccion of
                end;
 end;
 end;
-
 function sf_inbyte(puerto:word):byte;
 var
   res:byte;
@@ -270,7 +259,6 @@ begin
     slapfight_status_state:=(slapfight_status_state+1) mod 3;
   end;
 end;
-
 procedure sf_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -305,7 +293,6 @@ case direccion of
   3..$7ff:mcu_sf_hw_getbyte:=mcu_ram[direccion];
 end;
 end;
-
 procedure mcu_sf_hw_putbyte(direccion:word;valor:byte);
 begin
 direccion:=direccion and $7ff;
@@ -333,7 +320,6 @@ case direccion of
   $80..$7ff:;
 end;
 end;
-
 //Sound
 function snd_sf_hw_getbyte(direccion:word):byte;
 begin
@@ -344,7 +330,6 @@ case direccion of
   $c800..$cfff:snd_sf_hw_getbyte:=memoria[direccion];
 end;
 end;
-
 procedure snd_sf_hw_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -358,38 +343,31 @@ case direccion of
   $d000..$ffff:mem_snd[direccion]:=valor;
 end;
 end;
-
 function ay8910_porta_0:byte;
 begin
   ay8910_porta_0:=marcade.in0;
 end;
-
 function ay8910_portb_0:byte;
 begin
   ay8910_portb_0:=marcade.in1;
 end;
-
 function ay8910_porta_1:byte;
 begin
   ay8910_porta_1:=marcade.dswa;
 end;
-
 function ay8910_portb_1:byte;
 begin
   ay8910_portb_1:=marcade.dswb;
 end;
-
 procedure sf_hw_sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
 end;
-
 procedure sf_sound_nmi;
 begin
   if sound_nmi then z80_1.change_nmi(PULSE_LINE);
 end;
-
 //Main
 procedure reset_sf_hw;
 begin
@@ -423,7 +401,6 @@ begin
  from_main:=0;
  from_mcu:=0;
 end;
-
 function iniciar_sf_hw:boolean;
 var
   colores:tpaleta;
@@ -456,7 +433,6 @@ begin
   gfx_set_desc_data(4,0,32*8,num*32*8*0,num*32*8*1,num*32*8*2,num*32*8*3);
   convert_gfx(2,0,@memoria_temp,@ps_x,@ps_y,false,true);
 end;
-
 begin
 iniciar_sf_hw:=false;
 iniciar_audio(false);
@@ -568,7 +544,6 @@ set_pal(colores,$100);
 reset_sf_hw;
 iniciar_sf_hw:=true;
 end;
-
 procedure Cargar_sf_hw;
 begin
 llamadas_maquina.bucle_general:=sf_hw_principal;
@@ -576,5 +551,4 @@ llamadas_maquina.iniciar:=iniciar_sf_hw;
 llamadas_maquina.reset:=reset_sf_hw;
 llamadas_maquina.fps_max:=36000000/6/388/270;
 end;
-
 end.

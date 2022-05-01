@@ -96,10 +96,10 @@ if (bg_control and 1)<>0 then begin  //fondo activo?
 		    9,15:clip_x:=sx1;
 		    11,13:clip_w:=sx1;
 		  end;
-      fill_full_screen(4,0);
+      fill_full_screen(4,$800);
       actualiza_trozo((scroll_x+clip_y) and $1ff,((768-scroll_y)+clip_x) and $3ff,clip_h,clip_w,3,clip_y,clip_x,clip_h,clip_w,4);
   end;
-end else fill_full_screen(4,0);
+end else fill_full_screen(4,$800);
 //sprites
 if not(title_screen) then begin
  for f:=0 to $5f do begin

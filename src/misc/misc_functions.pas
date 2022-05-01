@@ -249,7 +249,7 @@ case Sistema of
        end;
   StAmstrad:begin
          opendialog.InitialDir:=directory.amstrad_tap;
-         OpenDialog.Filter:='CPC Tape or Snapshot (*.cdt;*.tzx;*.csw;*.wav;*.sna;*zip;)|*.cdt;*.tzx;*.csw;*.wav;*.sna;*.zip';
+         OpenDialog.Filter:='CPC Tape / Snapshot / ROM (*.rom;*.cdt;*.tzx;*.csw;*.wav;*.sna;*zip;)|*.rom;*.cdt;*.tzx;*.csw;*.wav;*.sna;*.zip';
        end;
   StROM:begin
          opendialog.InitialDir:=Directory.arcade_list_roms[0];

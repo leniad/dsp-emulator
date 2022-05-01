@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,samples,rom_engine,
      pal_engine,sound_engine,qsnapshot;
 
-procedure cargar_mario;
+function iniciar_mario:boolean;
 
 implementation
 const
@@ -80,8 +80,8 @@ if event.arcade then begin
   if arcade_input.right[1] then marcade.in1:=(marcade.in1 or $1) else marcade.in1:=(marcade.in1 and $fe);
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 or $2) else marcade.in1:=(marcade.in1 and $fd);
   if arcade_input.but0[1] then marcade.in1:=marcade.in1 or $10 else marcade.in1:=(marcade.in1 and $ef);
-  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
-  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 or $40) else marcade.in1:=(marcade.in1 and $bf);
+  if arcade_input.coin[1] then marcade.in1:=(marcade.in1 or $20) else marcade.in1:=(marcade.in1 and $df);
+  if arcade_input.coin[0] then marcade.in1:=(marcade.in1 or $40) else marcade.in1:=(marcade.in1 and $bf);
 end;
 end;
 
@@ -272,6 +272,11 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
 			8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=mario_principal;
+llamadas_maquina.reset:=reset_mario;
+llamadas_maquina.save_qsnap:=mario_qsave;
+llamadas_maquina.load_qsnap:=mario_qload;
+llamadas_maquina.fps_max:=59.185606;
 iniciar_mario:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -318,16 +323,6 @@ marcade.dswa_val:=@mario_dip_a;
 //final
 reset_mario;
 iniciar_mario:=true;
-end;
-
-procedure Cargar_mario;
-begin
-llamadas_maquina.iniciar:=iniciar_mario;
-llamadas_maquina.bucle_general:=mario_principal;
-llamadas_maquina.reset:=reset_mario;
-llamadas_maquina.save_qsnap:=mario_qsave;
-llamadas_maquina.load_qsnap:=mario_qload;
-llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

@@ -488,7 +488,7 @@ end;
 z80_0.change_ram_calls(sms_getbyte,sms_putbyte);
 z80_0.change_io_calls(sms_inbyte,sms_outbyte);
 z80_0.init_sound(sms_sound_update);
-z80_0.change_misc_calls(sms_set_hpos,nil);
+z80_0.change_misc_calls(sms_set_hpos);
 //final
 mapper_sms.max:=1;
 abrir_sms;

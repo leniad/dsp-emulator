@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,ym_2151,rom_engine,
      pal_engine,sound_engine,oki6295;
 
-procedure cargar_wwfsstar;
+function iniciar_wwfsstar:boolean;
 
 implementation
 const
@@ -38,7 +38,7 @@ var
  rom:array[0..$1ffff] of word;
  fg_ram,bg_ram:array[0..$7ff] of word;
  ram:array[0..$1fff] of word;
- vblank,sound_latch:byte;
+ sound_latch:byte;
 
 procedure update_video_wwfsstar;inline;
 var
@@ -145,9 +145,9 @@ while EmuStatus=EsRuning do begin
             m68000_0.irq[5]:=ASSERT_LINE;
             m68000_0.irq[6]:=ASSERT_LINE;
             update_video_wwfsstar;
-            vblank:=1;
+            marcade.in2:=marcade.in2 or 1;
           end;
-      271:vblank:=0;
+      271:marcade.in2:=marcade.in2 and $fe;
     end;
  end;
  eventos_wwfsstar;
@@ -166,7 +166,7 @@ case direccion of
     $180002..$180003:wwfsstar_getword:=marcade.dswb;
     $180004..$180005:wwfsstar_getword:=marcade.in0;
     $180006..$180007:wwfsstar_getword:=marcade.in1;
-    $180008..$180009:wwfsstar_getword:=marcade.in2 or vblank;
+    $180008..$180009:wwfsstar_getword:=marcade.in2;
     $1c0000..$1c3fff:wwfsstar_getword:=ram[(direccion and $3fff) shr 1];
 end;
 end;
@@ -261,7 +261,6 @@ begin
  scroll_x:=0;
  scroll_y:=0;
  sound_latch:=0;
- vblank:=0;
 end;
 
 function iniciar_wwfsstar:boolean;
@@ -274,6 +273,9 @@ const
   ps_y:array[0..15] of dword=(0*8, 1*8, 2*8, 3*8, 4*8, 5*8, 6*8, 7*8,
           8*8, 9*8, 10*8, 11*8, 12*8, 13*8, 14*8, 15*8);
 begin
+llamadas_maquina.bucle_general:=wwfsstar_principal;
+llamadas_maquina.reset:=reset_wwfsstar;
+llamadas_maquina.fps_max:=57.444853;
 iniciar_wwfsstar:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -325,14 +327,6 @@ marcade.dswb_val:=@wwfsstar_dip_b;
 freemem(memoria_temp);
 reset_wwfsstar;
 iniciar_wwfsstar:=true;
-end;
-
-procedure Cargar_wwfsstar;
-begin
-llamadas_maquina.iniciar:=iniciar_wwfsstar;
-llamadas_maquina.bucle_general:=wwfsstar_principal;
-llamadas_maquina.reset:=reset_wwfsstar;
-llamadas_maquina.fps_max:=57.444853;
 end;
 
 end.

@@ -1,16 +1,12 @@
 ﻿unit gfx_engine;
-
 {$ifdef fpc}{$asmmode intel}{$endif}
-
 interface
 uses lib_sdl2,{$IFDEF windows}windows,{$ENDIF}
      pal_engine,vars_hide;
-
 const
   MAX_GFX=8;
   ADD_SPRITE=64;
   MAX_COLOR_BUFFER=$200;
-
 type
   gfx_tipo=record
     x,y:byte;
@@ -24,12 +20,10 @@ type
     elements:dword;
   end;
   pgfx=^gfx_tipo;
-
 var
   gfx:array[0..MAX_GFX-1] of gfx_tipo;
   buffer_sprites:array[0..$1fff] of byte;
   buffer_sprites_w:array[0..$fff] of word;
-
 //GFX
 procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
 procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
@@ -71,6 +65,7 @@ procedure scroll__y_part2(porigen,pdestino:byte;long_bloque_x:word;posicion_y:pw
 procedure scroll_xy_part(porigen,pdestino:byte;long_bloque_x,long_bloque_y:word;posicion_x,posicion_y:pword;scroll_x,scroll_y:word);
 //Basic draw functions
 procedure putpixel(x,y:word;cantidad:dword;pixel:pword;sitio:byte);inline;
+function getpixel(x,y:word;sitio:byte):word;inline;
 procedure putpixel_alpha(x,y:word;cantidad:dword;pixel:pdword;sitio:byte);inline;
 procedure single_line(x,y,color,longitud:word;pant:byte);
 procedure draw_line(x0,y0,x1,y1:integer;color:word;pant:byte);
@@ -79,10 +74,8 @@ procedure fill_full_screen(screen:byte;color:word);inline;
 procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);inline;
 //Misc
 procedure fillword(dest:pword;cantidad:cardinal;valor:word);
-
 implementation
 uses main_engine;
-
 //GFX
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
 begin
@@ -98,7 +91,6 @@ begin
   des_gfx.long_sprites:=size;
   des_gfx.banks:=banks;
 end;
-
 procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
 var
   f:word;
@@ -114,7 +106,6 @@ begin
   for f:=0 to MAX_COLORES-1 do gfx[num].colores[f]:=f;
   getmem(gfx[num].datos,num_elements*x_size*y_size);
 end;
-
 function GetBit(bit_nbr:dword;buffer:pbyte):byte;inline;
 var
   oct_nbr:dword;
@@ -124,7 +115,6 @@ oct_nbr:=bit_nbr shr 3;
 bit_n:=bit_nbr and 7;
 getbit:=(buffer[oct_nbr] shr (7-bit_n)) and 1;
 end;
-
 procedure Rotatel(n:dword;ngfx:pgfx;increment:dword);
 var
   y,cojo_la_x:byte;
@@ -144,7 +134,6 @@ for cojo_la_x:=(ngfx.x-1) downto 0 do
   end;
 copymemory(pos,@t[0],long);
 end;
-
 procedure Rotater(n:dword;ngfx:pgfx;increment:dword);
 var
   cojo_la_y,y_final:byte;
@@ -164,7 +153,6 @@ for y_final:=0 to (ngfx.x-1) do
   end;
 copymemory(pos,@t[0],long);
 end;
-
 procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
 var
   n,elements:dword;
@@ -200,7 +188,6 @@ for n:=0 to elements do begin
   if rol90 then Rotatel(n,ngfx,increment);
 end;
 end;
-
 procedure convert_gfx_single(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean;n:dword);
 var
   oct,b0,o,i,bit_pixel:byte;
@@ -229,7 +216,6 @@ end; //del o
 if rot90 then Rotater(n,ngfx,increment);
 if rol90 then Rotatel(n,ngfx,increment);
 end;
-
 //Scroll functions
 procedure scroll_x_y(porigen,pdestino:byte;scroll_x,scroll_y:word;diff_x:word=0;diff_y:word=0;adj_x:word=0;adj_y:word=0);
 var
@@ -382,7 +368,6 @@ while (pos_y<p_final[porigen].scroll.max_y) do begin
   pos_y:=pos_y+long_bloque_y;
 end;
 end;
-
 //put pixel especial interno solo para los gfx...
 procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);inline;
 var
@@ -403,7 +388,6 @@ punt:=pantalla[sitio].pixels;
 inc(punt,(y*pantalla[sitio].w)+x);
 copymemory(punt,punbuf_alpha,cantidad shl 2);
 end;
-
 
 procedure put_gfx(pos_x,pos_y,nchar,color:word;screen,ngfx:byte);
 var
@@ -531,7 +515,6 @@ for y:=0 to (gfx[ngfx].y-1) do begin
   putpixel_gfx_int(pos_x,pos_y+y,gfx[ngfx].x,screen);
 end;
 end;
-
 procedure put_gfx_mask_flip(pos_x,pos_y,nchar,color:word;screen,ngfx,trans,mask:byte;flipx,flipy:boolean);
 var
   x,y,py,cant_x,cant_y,punto:byte;
@@ -1167,6 +1150,15 @@ inc(punt,((y*pantalla[sitio].pitch) shr 1)+x);
 copymemory(punt,pixel,cantidad shl 1);
 end;
 
+function getpixel(x,y:word;sitio:byte):word;inline;
+var
+   punt:pword;
+begin
+punt:=pantalla[sitio].pixels;
+inc(punt,((y*pantalla[sitio].pitch) shr 1)+x);
+getpixel:=punt^;
+end;
+
 procedure putpixel_alpha(x,y:word;cantidad:dword;pixel:pdword;sitio:byte);inline;
 var
    punt:pdword;
@@ -1236,5 +1228,4 @@ procedure fill_full_screen(screen:byte;color:word);inline;
 begin
 fillword(pantalla[screen].pixels,pantalla[screen].w*pantalla[screen].h,paleta[color]);
 end;
-
 end.

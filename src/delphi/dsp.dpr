@@ -327,7 +327,8 @@ uses
   mrdocastle_hw in '..\arcade\mrdocastle_hw.pas',
   crystalcastles_hw in '..\arcade\crystalcastles_hw.pas',
   flower_hw in '..\arcade\flower_hw.pas',
-  flower_audio in '..\snd\flower_audio.pas';
+  flower_audio in '..\snd\flower_audio.pas',
+  superdodgeball_hw in '..\arcade\superdodgeball_hw.pas';
 
 {$R *.res}
 begin

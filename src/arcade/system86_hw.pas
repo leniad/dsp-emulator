@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,ym_2151,
      rom_engine,pal_engine,sound_engine;
 
-procedure cargar_system86;
+function iniciar_system86:boolean;
 
 implementation
 const
@@ -383,9 +383,9 @@ case direccion of
            end;
   $4000..$43ff:namco_snd_0.namcos1_cus30_w(direccion and $3ff,valor);
   $4400..$5fff:begin
-      memoria[direccion]:=valor;
-      if direccion=$5ff2 then copy_sprites:=true;
-  end;
+                  memoria[direccion]:=valor;
+                  if direccion=$5ff2 then copy_sprites:=true;
+               end;
   $8400:m6809_0.change_irq(CLEAR_LINE);
   $8800..$8fff:if tile_bank<>((direccion shr 10) and 1) then begin
                   tile_bank:=(direccion shr 10) and 1;
@@ -498,7 +498,7 @@ case direccion of
   0..$5fff,$8000..$ffff:system86_putbyte(direccion,valor);
   $6000..$7fff:case ((direccion and $1e00) shr 9) of
                     0,1,2,3:namco_63701x_w((direccion and $1e00) shr 9,valor);
-		    4:rom_nbank:=valor and $1f;
+		                4:rom_nbank:=valor and $1f;
                end;
 end;
 end;
@@ -620,9 +620,9 @@ case direccion of
                   gfx[1].buffer[direccion shr 1]:=true;
                end;
   $4000..$5fff:begin  //sprite ram
-              memoria[direccion]:=valor;
-              if direccion=$5ff2 then copy_sprites:=true;
-           end;
+                  memoria[direccion]:=valor;
+                  if direccion=$5ff2 then copy_sprites:=true;
+               end;
   $8800:m6809_1.change_irq(CLEAR_LINE);
   $8000..$87ff,$8801..$ffff:;
 end;
@@ -643,9 +643,9 @@ procedure wndrmomo_sub_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   $2000..$3fff:begin  //sprite ram
-              memoria[$4000+(direccion and $1fff)]:=valor;
-              if direccion=$3ff2 then copy_sprites:=true;
-           end;
+                  memoria[$4000+(direccion and $1fff)]:=valor;
+                  if direccion=$3ff2 then copy_sprites:=true;
+               end;
   $4000..$5fff:if memoria[$0+(direccion and $1fff)]<>valor then begin  //video 1 ram
                   memoria[$0+(direccion and $1fff)]:=valor;
                   gfx[0].buffer[(direccion and $1fff) shr 1]:=true;
@@ -681,6 +681,12 @@ begin
  for f:=0 to 3 do prior[f]:=0;
  tile_bank:=0;
  copy_sprites:=false;
+end;
+
+procedure cerrar_system86;
+begin
+  if ((main_vars.tipo_maquina=124) or (main_vars.tipo_maquina=290) or (main_vars.tipo_maquina=291)) then
+    namco_63701x_close;
 end;
 
 function iniciar_system86:boolean;
@@ -747,6 +753,10 @@ begin
   bank_sprites:=num div 8;
 end;
 begin
+llamadas_maquina.bucle_general:=system86_principal;
+llamadas_maquina.close:=cerrar_system86;
+llamadas_maquina.reset:=reset_system86;
+llamadas_maquina.fps_max:=60.606060;
 iniciar_system86:=false;
 iniciar_audio(false);
 screen_init(1,512,256,true);
@@ -995,20 +1005,6 @@ copymemory(@nchar_prom[0],@memoria_temp[$1400],$20);
 freemem(memoria_temp);
 reset_system86;
 iniciar_system86:=true;
-end;
-
-procedure cerrar_system86;
-begin
-if ((main_vars.tipo_maquina=124) or (main_vars.tipo_maquina=290) or (main_vars.tipo_maquina=291)) then namco_63701x_close;
-end;
-
-procedure Cargar_system86;
-begin
-llamadas_maquina.iniciar:=iniciar_system86;
-llamadas_maquina.bucle_general:=system86_principal;
-llamadas_maquina.close:=cerrar_system86;
-llamadas_maquina.reset:=reset_system86;
-llamadas_maquina.fps_max:=60.606060;
 end;
 
 end.

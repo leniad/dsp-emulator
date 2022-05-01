@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,ay_8910,rom_engine,
      pal_engine,sound_engine,timer_engine;
 
-procedure cargar_kyugo_hw;
+function iniciar_kyugo_hw:boolean;
 
 implementation
 const
@@ -142,8 +142,8 @@ end;
 
 procedure kyugo_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$8000 then exit;
 case direccion of
+    0..$7fff:;
     $8000..$8fff:if memoria[direccion]<>valor then begin
                     gfx[1].buffer[direccion and $7ff]:=true;
                     memoria[direccion]:=valor;
@@ -194,8 +194,8 @@ end;
 
 procedure snd_kyugo_hw_putbyte(direccion:word;valor:byte);
 begin
-if (direccion<$8000) then exit;
 case direccion of
+  0..$7fff:;
   $a000..$a7ff:memoria[direccion+$5000]:=valor;
 end;
 end;
@@ -230,7 +230,7 @@ begin
   z80_1.change_irq(HOLD_LINE);
 end;
 
-procedure kyugo_hw_despues_instruccion;
+procedure kyugo_snd_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
@@ -267,6 +267,8 @@ const
   ps_y:array[0..15] of dword=(0*8,  1*8,  2*8,  3*8,  4*8,  5*8,  6*8,  7*8,
 	  16*8, 17*8, 18*8, 19*8, 20*8, 21*8, 22*8, 23*8);
 begin
+llamadas_maquina.bucle_general:=kyugo_hw_principal;
+llamadas_maquina.reset:=reset_kyugo_hw;
 iniciar_kyugo_hw:=false;
 iniciar_audio(false);
 screen_init(1,256,512,true);
@@ -282,7 +284,7 @@ z80_0.change_io_calls(nil,kyugo_outbyte);
 z80_1:=cpu_z80.create(3072000,256);
 z80_1.change_ram_calls(snd_kyugo_hw_getbyte,snd_kyugo_hw_putbyte);
 z80_1.change_io_calls(snd_kyugo_inbyte,snd_kyugo_outbyte);
-z80_1.init_sound(kyugo_hw_despues_instruccion);
+z80_1.init_sound(kyugo_snd_update);
 timers.init(z80_1.numero_cpu,3072000/(60*4),kyugo_snd_irq,nil,true);
 //Sound Chip
 ay8910_0:=ay8910_chip.create(1536000,AY8910,0.3);
@@ -331,13 +333,6 @@ end;
 set_pal(colores,$100);
 reset_kyugo_hw;
 iniciar_kyugo_hw:=true;
-end;
-
-procedure Cargar_kyugo_hw;
-begin
-llamadas_maquina.iniciar:=iniciar_kyugo_hw;
-llamadas_maquina.bucle_general:=kyugo_hw_principal;
-llamadas_maquina.reset:=reset_kyugo_hw;
 end;
 
 end.

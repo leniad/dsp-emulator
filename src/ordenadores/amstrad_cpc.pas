@@ -51,6 +51,16 @@ type
               enabled:boolean;
               name:string;
            end;
+  tcpc_dandanator=packed record
+              enabled:boolean;
+              rom:array[0..31,0..$3fff] of byte;
+              fd_count:byte;
+              zone0_ena,zone1_ena,halted,wait_ret:boolean;
+              zone0_seg,zone1_seg,zone0_rom,zone1_rom:byte;
+              follow_rom:byte;
+              follow_rom_ena:boolean;
+              wait_data:byte;
+           end;
 
 var
     cpc_mem:array[0..31,0..$3fff] of byte;
@@ -58,6 +68,7 @@ var
     cpc_crt:^tcpc_crt;
     cpc_ga:tcpc_ga;
     cpc_ppi:tcpc_ppi;
+    cpc_dandanator:tcpc_dandanator;
     tape_timer:byte;
 
 function iniciar_cpc:boolean;
@@ -268,14 +279,14 @@ end;
 
 procedure actualiza_linea(linea:word);
 var
- x,borde,addr:word;
+ x,borde,addr,temp1,temp2,temp3,pal1,pal2:word;
  val,p1,p2,p3,p4,p5,p6,p7,p8:byte;
- temp1,temp2,temp3,temp4,temp5,temp6:byte;
  ptemp:pword;
 begin
 borde:=(pantalla_largo-cpc_crt.pixel_visible) shr 1;
 addr:=cpc_crt.scr_line_dir[linea];
 x:=0;
+ptemp:=punbuf;
 while (x<cpc_crt.char_total) do begin
   if (x<cpc_crt.pixel_visible) then begin
     //IMPORTANTE: La memoria de video SIEMPRE esta en los 64K mapeados... Por ejemplo Thunder Cats
@@ -286,7 +297,6 @@ while (x<cpc_crt.char_total) do begin
           // 1 5 3 7    0 4 2 6
           p1:=((val and 2) shl 2) or ((val and $20) shr 3) or ((val and 8) shr 2) or ((val and $80) shr 7);
           p2:=((val and 1) shl 3) or ((val and $10) shr 2) or ((val and 4) shr 1) or ((val and $40) shr 6);
-          ptemp:=punbuf;
           ptemp^:=paleta[cpc_ga.pal[p1]];
           inc(ptemp);
           ptemp^:=paleta[cpc_ga.pal[p1]];
@@ -294,6 +304,7 @@ while (x<cpc_crt.char_total) do begin
           ptemp^:=paleta[cpc_ga.pal[p2]];
           inc(ptemp);
           ptemp^:=paleta[cpc_ga.pal[p2]];
+          inc(ptemp);
       end;
       1:begin
           // 3 7      2 6      1 5      0 4
@@ -301,7 +312,6 @@ while (x<cpc_crt.char_total) do begin
           p2:=((val and $40) shr 6)+((val and $4) shr 1);
           p3:=((val and $20) shr 5)+((val and $2) shr 0);
           p4:=((val and $10) shr 4)+((val and 1) shl 1);
-          ptemp:=punbuf;
           ptemp^:=paleta[cpc_ga.pal[p1]];
           inc(ptemp);
           ptemp^:=paleta[cpc_ga.pal[p2]];
@@ -309,6 +319,7 @@ while (x<cpc_crt.char_total) do begin
           ptemp^:=paleta[cpc_ga.pal[p3]];
           inc(ptemp);
           ptemp^:=paleta[cpc_ga.pal[p4]];
+          inc(ptemp);
         end;
       2:begin
           // 7 6 5 4 3 2 1 0
@@ -320,44 +331,40 @@ while (x<cpc_crt.char_total) do begin
           p6:=((val and $4) shr 2);
           p7:=((val and $2) shr 1);
           p8:=((val and $1) shr 0);
-          ptemp:=punbuf;
-          temp1:=(paleta[cpc_ga.pal[p1]] and $f800) shr 11;
-          temp2:=(paleta[cpc_ga.pal[p1]] and $7e0) shr 5;
-          temp3:=paleta[cpc_ga.pal[p1]] and $1f;
-          temp4:=(paleta[cpc_ga.pal[p2]] and $f800) shr 11;
-          temp5:=(paleta[cpc_ga.pal[p2]] and $7e0) shr 5;
-          temp6:=paleta[cpc_ga.pal[p2]] and $1f;
-          ptemp^:=(((temp1+temp4) shr 1) shl 11) or (((temp2+temp5) shr 1) shl 5) or ((temp3+temp6) shr 1);
+          pal1:=paleta[cpc_ga.pal[p1]];
+          pal2:=paleta[cpc_ga.pal[p2]];
+          temp1:=(((pal1 and $f800)+(pal2 and $f800)) shr 1) and $f800;
+          temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
+          temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
+          ptemp^:=temp1 or temp2 or temp3;
           inc(ptemp);
-          temp1:=(paleta[cpc_ga.pal[p3]] and $f800) shr 11;
-          temp2:=(paleta[cpc_ga.pal[p3]] and $7e0) shr 5;
-          temp3:=paleta[cpc_ga.pal[p3]] and $1f;
-          temp4:=(paleta[cpc_ga.pal[p4]] and $f800) shr 11;
-          temp5:=(paleta[cpc_ga.pal[p4]] and $7e0) shr 5;
-          temp6:=paleta[cpc_ga.pal[p4]] and $1f;
-          ptemp^:=(((temp1+temp4) shr 1) shl 11) or (((temp2+temp5) shr 1) shl 5) or ((temp3+temp6) shr 1);
+          pal1:=paleta[cpc_ga.pal[p3]];
+          pal2:=paleta[cpc_ga.pal[p4]];
+          temp1:=(((pal1 and $f800)+(pal2 and $f800)) shr 1) and $f800;
+          temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
+          temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
+          ptemp^:=temp1 or temp2 or temp3;
           inc(ptemp);
-          temp1:=(paleta[cpc_ga.pal[p5]] and $f800) shr 11;
-          temp2:=(paleta[cpc_ga.pal[p5]] and $7e0) shr 5;
-          temp3:=paleta[cpc_ga.pal[p5]] and $1f;
-          temp4:=(paleta[cpc_ga.pal[p6]] and $f800) shr 11;
-          temp5:=(paleta[cpc_ga.pal[p6]] and $7e0) shr 5;
-          temp6:=paleta[cpc_ga.pal[p6]] and $1f;
-          ptemp^:=(((temp1+temp4) shr 1) shl 11) or (((temp2+temp5) shr 1) shl 5) or ((temp3+temp6) shr 1);
+          pal1:=paleta[cpc_ga.pal[p5]];
+          pal2:=paleta[cpc_ga.pal[p6]];
+          temp1:=(((pal1 and $f800)+(pal2 and $f800)) shr 1) and $f800;
+          temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
+          temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
+          ptemp^:=temp1 or temp2 or temp3;
           inc(ptemp);
-          temp1:=(paleta[cpc_ga.pal[p7]] and $f800) shr 11;
-          temp2:=(paleta[cpc_ga.pal[p7]] and $7e0) shr 5;
-          temp3:=paleta[cpc_ga.pal[p7]] and $1f;
-          temp4:=(paleta[cpc_ga.pal[p8]] and $f800) shr 11;
-          temp5:=(paleta[cpc_ga.pal[p8]] and $7e0) shr 5;
-          temp6:=paleta[cpc_ga.pal[p8]] and $1f;
-          ptemp^:=(((temp1+temp4) shr 1) shl 11) or (((temp2+temp5) shr 1) shl 5) or ((temp3+temp6) shr 1);
+          pal1:=paleta[cpc_ga.pal[p7]];
+          pal2:=paleta[cpc_ga.pal[p8]];
+          temp1:=(((pal1 and $f800)+(pal2 and $f800)) shr 1) and $f800;
+          temp2:=(((pal1 and $7e0)+(pal2 and $7e0)) shr 1) and $7e0;
+          temp3:=(((pal1 and $1f)+(pal2 and $1f)) shr 1) and $1f;
+          ptemp^:=temp1 or temp2 or temp3;
+          inc(ptemp);
       end;
     end;
-    putpixel(x+borde,linea+cpc_crt.lineas_borde,4,punbuf,1);
   end;
   x:=x+4;
 end;
+putpixel(borde,linea+cpc_crt.lineas_borde,cpc_crt.pixel_visible,punbuf,1);
 end;
 
 procedure draw_line;
@@ -398,12 +405,18 @@ end;
 function cpc_getbyte(direccion:word):byte;
 begin
 case direccion of
-  0..$3fff:if cpc_ga.rom_low then cpc_getbyte:=cpc_rom[16].data[direccion]//cpc_low_rom[direccion]
-            else cpc_getbyte:=cpc_mem[cpc_ga.marco[0],direccion];
-  $4000..$7fff:cpc_getbyte:=cpc_mem[cpc_ga.marco[1],direccion and $3fff];
-  $8000..$bfff:cpc_getbyte:=cpc_mem[cpc_ga.marco[2],direccion and $3fff];
-  $c000..$ffff:if cpc_ga.rom_high then cpc_getbyte:=cpc_rom[cpc_ga.rom_selected].data[direccion and $3fff]
-                else cpc_getbyte:=cpc_mem[cpc_ga.marco[3],direccion and $3fff];
+  0..$3fff:if (not(cpc_dandanator.follow_rom_ena) and  cpc_dandanator.enabled and cpc_dandanator.zone0_ena and (cpc_dandanator.zone0_seg=0)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone0_rom,direccion]
+            else if cpc_ga.rom_low then begin
+                  if not(cpc_dandanator.follow_rom_ena) then cpc_getbyte:=cpc_rom[16].data[direccion]
+                    else cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.follow_rom,direccion];
+                 end else cpc_getbyte:=cpc_mem[cpc_ga.marco[0],direccion];
+  $4000..$7fff:if (cpc_dandanator.enabled and cpc_dandanator.zone1_ena and (cpc_dandanator.zone1_seg=0)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone1_rom,direccion and $3fff]
+                  else cpc_getbyte:=cpc_mem[cpc_ga.marco[1],direccion and $3fff];
+  $8000..$bfff:if (cpc_dandanator.enabled and cpc_dandanator.zone0_ena and (cpc_dandanator.zone0_seg=1)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone0_rom,direccion and $3fff]
+                else cpc_getbyte:=cpc_mem[cpc_ga.marco[2],direccion and $3fff];
+  $c000..$ffff:if (cpc_dandanator.enabled and cpc_dandanator.zone1_ena and (cpc_dandanator.zone1_seg=1)) then cpc_getbyte:=cpc_dandanator.rom[cpc_dandanator.zone1_rom,direccion and $3fff]
+                  else if cpc_ga.rom_high then cpc_getbyte:=cpc_rom[cpc_ga.rom_selected].data[direccion and $3fff]
+                          else cpc_getbyte:=cpc_mem[cpc_ga.marco[3],direccion and $3fff];
 end;
 end;
 
@@ -729,6 +742,133 @@ z80_0.contador:=z80_0.contador+(est_final-estados_t);
 for f:=1 to (est_final div 4) do clock_crt;
 end;
 
+procedure amstrad_m1_detect(opcode:byte);
+var
+  z80:npreg_z80;
+begin
+if (cpc_dandanator.halted or not(cpc_dandanator.enabled)) then exit;
+if (cpc_dandanator.wait_ret and (opcode=$c9)) then begin
+  cpc_dandanator.zone0_seg:=(cpc_dandanator.wait_data and $4) shr 2;
+  cpc_dandanator.zone1_seg:=(cpc_dandanator.wait_data and $8) shr 3;
+  cpc_dandanator.zone0_ena:=(cpc_dandanator.wait_data and $1)=0;
+  cpc_dandanator.zone1_ena:=(cpc_dandanator.wait_data and $2)=0;
+  cpc_dandanator.halted:=(cpc_dandanator.wait_data and $20)<>0;
+  if (cpc_dandanator.wait_data and $10)<>0 then cpc_dandanator.follow_rom_ena:=true;
+  cpc_dandanator.wait_ret:=false;
+end;
+if (cpc_dandanator.wait_ret or cpc_dandanator.halted) then exit;
+if opcode=$fd then cpc_dandanator.fd_count:=cpc_dandanator.fd_count+1;
+if ((cpc_dandanator.fd_count=2) and (opcode<>$fd)) then begin
+      z80:=z80_0.get_internal_r;
+      case opcode of
+        $70:begin //reg B Zone0
+              cpc_dandanator.zone0_rom:=z80.bc.h and $1f;
+              cpc_dandanator.zone0_ena:=(z80.bc.h and $20)=0;
+            end;
+        $71:begin //reg C Zone1
+              cpc_dandanator.zone1_rom:=z80.bc.l and $1f;
+              cpc_dandanator.zone1_ena:=(z80.bc.l and $20)=0;
+            end;
+        $77:begin //reg A config
+              if (z80.a and $80)<>0 then begin
+                if (z80.a and $40)=0 then begin
+                    cpc_dandanator.zone0_seg:=(z80.a and $4) shr 2;
+                    cpc_dandanator.zone1_seg:=(z80.a and $8) shr 3;
+                    cpc_dandanator.zone0_ena:=(z80.a and $1)=0;
+                    cpc_dandanator.zone1_ena:=(z80.a and $2)=0;
+                    cpc_dandanator.halted:=(z80.a and $20)<>0;
+                end else begin
+                    cpc_dandanator.wait_ret:=true;
+                    cpc_dandanator.wait_data:=z80.a;
+                end;
+              end else begin
+                cpc_dandanator.follow_rom:=28+((z80.a and $18) shr 3)
+              end;
+            end
+      end;
+end;
+if opcode<>$fd then cpc_dandanator.fd_count:=0;
+end;
+
+procedure cpc_reset;
+begin
+  z80_0.reset;
+  ay8910_0.reset;
+  pia8255_0.reset;
+  reset_audio;
+  if cinta_tzx.cargada then cinta_tzx.play_once:=false;
+  cinta_tzx.value:=0;
+  ResetFDC;
+  linea_crt:=0;
+  //Init GA
+  cpc_ga.pen:=0;
+  cpc_ga.video_mode:=0;
+  fillchar(cpc_ga.pal[0],16,0);
+  cpc_ga.lines_count:=0;
+  cpc_ga.lines_sync:=0;
+  cpc_ga.rom_selected:=0;
+  cpc_ga.rom_low:=true;
+  cpc_ga.rom_high:=true;
+  cpc_ga.marco[0]:=0;
+  cpc_ga.marco[1]:=1;
+  cpc_ga.marco[2]:=2;
+  cpc_ga.marco[3]:=3;
+  cpc_ga.marco_latch:=0;
+  cpc_ga.change_video:=false;
+  cpc_ga.nvideo:=0;
+  //cpc_ga.cpc_model; no lo toco
+  //CRT
+  fillchar(cpc_crt^,sizeof(tcpc_crt),0);
+  cpc_crt.char_altura:=1;
+  cpc_crt.lineas_total:=1;
+  cpc_crt.regs[0]:=63;
+  cpc_crt.regs[1]:=40;
+  cpc_crt.regs[2]:=46;
+  cpc_crt.regs[3]:=142;
+  cpc_crt.regs[4]:=38;
+  cpc_crt.regs[5]:=0;
+  cpc_crt.regs[6]:=25;
+  cpc_crt.regs[7]:=30;
+  cpc_crt.regs[8]:=0;
+  cpc_crt.regs[9]:=7;
+  cpc_crt.regs[10]:=0;
+  cpc_crt.regs[11]:=0;
+  cpc_crt.regs[12]:=48;
+  cpc_crt.regs[13]:=0;
+  cpc_crt.regs[14]:=192;
+  cpc_calc_crt;
+  cpc_calcular_dir_scr;
+  //PPI
+  fillchar(cpc_ppi,sizeof(tcpc_ppi),0);
+  fillchar(cpc_ppi.keyb_val[0],10,$FF);
+  //Dandanator
+  cpc_dandanator.halted:=false;
+  cpc_dandanator.wait_ret:=false;
+  cpc_dandanator.zone0_ena:=true;
+  cpc_dandanator.zone1_ena:=false;
+  cpc_dandanator.zone0_seg:=0;
+  cpc_dandanator.zone1_seg:=0;
+  cpc_dandanator.zone0_rom:=0;
+  cpc_dandanator.zone1_rom:=0;
+  cpc_dandanator.follow_rom_ena:=false;
+end;
+
+function abrir_dandanator(datos:pbyte;file_size:integer):boolean;
+var
+  f:byte;
+  ptemp:pbyte;
+begin
+  abrir_dandanator:=false;
+  if file_size>524288 then exit;
+  ptemp:=datos;
+  for f:=0 to (file_size div 16384) do begin
+    copymemory(@cpc_dandanator.rom[f,0],ptemp,$4000);
+    inc(ptemp,$4000);
+  end;
+  cpc_dandanator.enabled:=true;
+  abrir_dandanator:=true;
+end;
+
 function amstrad_tapes:boolean;
 var
   datos:pbyte;
@@ -740,13 +880,15 @@ begin
     amstrad_tapes:=true;
     exit;
   end;
+  cpc_dandanator.enabled:=false;
   amstrad_tapes:=false;
   extension:=extension_fichero(nombre_zip);
   if extension='ZIP' then begin
          if not(search_file_from_zip(nombre_zip,'*.cdt',nombre_file,file_size,crc,false)) then
             if not(search_file_from_zip(nombre_zip,'*.tzx',nombre_file,file_size,crc,false)) then
               if not(search_file_from_zip(nombre_zip,'*.csw',nombre_file,file_size,crc,false)) then
-                if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then exit;
+                if not(search_file_from_zip(nombre_zip,'*.rom',nombre_file,file_size,crc,false)) then
+                  if not(search_file_from_zip(nombre_zip,'*.wav',nombre_file,file_size,crc,false)) then exit;
          getmem(datos,file_size);
          if not(load_file_from_zip(nombre_zip,nombre_file,datos,file_size,crc,true)) then begin
             freemem(datos);
@@ -765,6 +907,17 @@ begin
   if ((extension='CDT') or (extension='TZX')) then resultado:=abrir_tzx(datos,file_size);
   if extension='CSW' then resultado:=abrir_csw(datos,file_size);
   if extension='WAV' then resultado:=abrir_wav(datos,file_size);
+  if extension='ROM' then begin
+    resultado:=abrir_dandanator(datos,file_size);
+    es_cinta:=false;
+    if resultado then begin
+        llamadas_maquina.open_file:='ROM: '+nombre_file;
+        cpc_reset;
+      end else begin
+        MessageDlg('Error cargando ROM.'+chr(10)+chr(13)+'Error loading the ROM.', mtInformation,[mbOk], 0);
+        llamadas_maquina.open_file:='';
+      end;
+  end;
   if extension='SNA' then begin
       resultado:=abrir_sna_cpc(datos,file_size);
       es_cinta:=false;
@@ -844,59 +997,6 @@ end;
 end;
 
 //Main
-procedure cpc_reset;
-begin
-  z80_0.reset;
-  ay8910_0.reset;
-  pia8255_0.reset;
-  reset_audio;
-  if cinta_tzx.cargada then cinta_tzx.play_once:=false;
-  cinta_tzx.value:=0;
-  ResetFDC;
-  linea_crt:=0;
-  //Init GA
-  cpc_ga.pen:=0;
-  cpc_ga.video_mode:=0;
-  fillchar(cpc_ga.pal[0],16,0);
-  cpc_ga.lines_count:=0;
-  cpc_ga.lines_sync:=0;
-  cpc_ga.rom_selected:=0;
-  cpc_ga.rom_low:=true;
-  cpc_ga.rom_high:=true;
-  cpc_ga.marco[0]:=0;
-  cpc_ga.marco[1]:=1;
-  cpc_ga.marco[2]:=2;
-  cpc_ga.marco[3]:=3;
-  cpc_ga.marco_latch:=0;
-  cpc_ga.change_video:=false;
-  cpc_ga.nvideo:=0;
-  //cpc_ga.cpc_model; no lo toco
-  //CRT
-  fillchar(cpc_crt^,sizeof(tcpc_crt),0);
-  cpc_crt.char_altura:=1;
-  cpc_crt.lineas_total:=1;
-  cpc_crt.regs[0]:=63;
-  cpc_crt.regs[1]:=40;
-  cpc_crt.regs[2]:=46;
-  cpc_crt.regs[3]:=142;
-  cpc_crt.regs[4]:=38;
-  cpc_crt.regs[5]:=0;
-  cpc_crt.regs[6]:=25;
-  cpc_crt.regs[7]:=30;
-  cpc_crt.regs[8]:=0;
-  cpc_crt.regs[9]:=7;
-  cpc_crt.regs[10]:=0;
-  cpc_crt.regs[11]:=0;
-  cpc_crt.regs[12]:=48;
-  cpc_crt.regs[13]:=0;
-  cpc_crt.regs[14]:=192;
-  cpc_calc_crt;
-  cpc_calcular_dir_scr;
-  //PPI
-  fillchar(cpc_ppi,sizeof(tcpc_ppi),0);
-  fillchar(cpc_ppi.keyb_val[0],10,$FF);
-end;
-
 procedure cpc_load_roms;
 var
   f:byte;
@@ -1043,7 +1143,7 @@ set_pal(colores,32);
 z80_0:=cpu_z80.create(4000000,1);
 z80_0.change_ram_calls(cpc_getbyte,cpc_putbyte);
 z80_0.change_io_calls(cpc_inbyte,cpc_outbyte);
-z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80);
+z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80,amstrad_m1_detect);
 z80_0.init_sound(amstrad_sound_update);
 tape_sound_channel:=init_channel;
 tape_timer:=timers.init(z80_0.numero_cpu,100,tape_timer_exec,nil,false);
