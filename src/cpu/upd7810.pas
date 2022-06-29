@@ -10,8 +10,8 @@ type
   end;
   nreg_upd7810=packed record
         psw:band_upd7810;
-        va,bc,de,hl,bc2,de2,hl2:parejas;
-        ea:word;
+        va,bc,de,hl,va2,bc2,de2,hl2:parejas;
+        ea,ea2:word;
   end;
   upd7810_cb=function:byte;
   upd7810_cb_2=procedure(valor:byte);
@@ -67,17 +67,48 @@ type
                 procedure ZHC_ADD(after,before:word;carry:boolean);
                 function dame_band:byte;
                 procedure poner_band(valor:byte);
-                procedure EQI_A;
-                procedure NEI_A;
-                procedure ANI_A;
-                procedure XRI_A;
-                procedure GTI_A;
-                procedure OFFI_X_xx(reg:pbyte);
-                procedure ONI_A;
-                procedure ORI_A;
+                procedure EQI_X(reg:pbyte);
+                procedure NEI_X(reg:pbyte);
+                procedure ANI_X(reg:pbyte);
+                procedure XRI_X(reg:pbyte);
+                procedure OFFI_X(reg:pbyte);
+                procedure ONI_X(reg:pbyte);
+                procedure ORI_X(reg:pbyte);
                 procedure SUI_X(reg:pbyte);
                 procedure ACI_X(reg:pbyte);
-                procedure ADI_X_xx(reg:pbyte);
+                procedure ADI_X(reg:pbyte);
+                procedure LTI_X(reg:pbyte);
+                procedure ADD_X_A(reg:pbyte);
+                procedure ADC_X_A(reg:pbyte);
+                procedure SUB_X_A(reg:pbyte);
+                procedure XRA_A_X(reg:pbyte);
+                procedure XRA_X_A(reg:pbyte);
+                procedure ORA_A_X(reg:pbyte);
+                procedure GTA_A_X(reg:pbyte);
+                procedure ADD_A_X(reg:pbyte);
+                procedure ADC_A_X(reg:pbyte);
+                procedure SUB_A_X(reg:pbyte);
+                procedure NEA_A_X(reg:pbyte);
+                procedure NEA_X_A(reg:pbyte);
+                procedure EQA_A_X(reg:pbyte);
+                procedure LTA_A_X(reg:pbyte);
+                procedure GTI_X(reg:pbyte);
+                procedure SBI_X(reg:pbyte);
+                procedure ADINC_X(reg:pbyte);
+                procedure ANA_X_A(reg:pbyte);
+                procedure OFFA_A_X(reg:pbyte);
+                procedure SBB_X_A(reg:pbyte);
+                procedure SUINB_X(reg:pbyte);
+                procedure SUBNB_A_X(reg:pbyte);
+                procedure SBB_A_X(reg:pbyte);
+                procedure ADDNC_X_A(reg:pbyte);
+                procedure ORA_X_A(reg:pbyte);
+                procedure SUBNB_X_A(reg:pbyte);
+                procedure ONA_A_X(reg:pbyte);
+                procedure GTA_X_A(reg:pbyte);
+                procedure LTA_X_A(reg:pbyte);
+                procedure EQA_X_A(reg:pbyte);
+                procedure ADDNC_A_X(reg:pbyte);
             end;
 
 const
@@ -94,7 +125,7 @@ var
 implementation
 
 const
-  INTNMI  = $0001;
+  INTFNMI = $0001;
   INTFT0  = $0002;
   INTFT1  = $0004;
   INTF1   = $0008;
@@ -116,12 +147,18 @@ const
   UPD7810_PORTF=4;
 
 constructor cpu_upd7810.create(clock:dword;frames_div:single;cpu:byte);
+var
+  divisor:byte;
 begin
+  case cpu of
+    CPU_7810:divisor:=3;
+    CPU_7801:divisor:=2;
+  end;
   getmem(self.r,sizeof(nreg_upd7810));
   fillchar(self.r^,sizeof(nreg_upd7810),0);
-  self.numero_cpu:=cpu_main_init(clock div 3);
-  self.clock:=clock div 3;
-  self.tframes:=(clock/3/frames_div)/llamadas_maquina.fps_max;
+  self.numero_cpu:=cpu_main_init(clock div divisor);
+  self.clock:=clock div divisor;
+  self.tframes:=(clock/divisor/frames_div)/llamadas_maquina.fps_max;
   self.cpu_type:=cpu;
   pa_in_cb:=nil;
   pb_in_cb:=nil;
@@ -300,7 +337,7 @@ procedure cpu_upd7810.set_input_line(irqline,state:byte);
 begin
 	case irqline of
 	  INPUT_LINE_NMI:begin // NMI is falling edge sensitive
-		                if ((self.nmi=CLEAR_LINE) and (state=ASSERT_LINE)) then self.irr:=self.irr or INTNMI;
+		                if ((self.nmi=CLEAR_LINE) and (state=ASSERT_LINE)) then self.irr:=self.irr or INTFNMI;
 		                self.nmi:=state;
                    end;
 	  UPD7810_INTF1:begin // INT1 is rising edge sensitive
@@ -322,16 +359,16 @@ var
 	vector:word;
 	irqline:integer;
 begin
+  // global interrupt disable?
+	if not(self.iff) and ((self.irr and INTFNMI)=0) then exit;
   vector:=0;
   irqline:=0;
-	// global interrupt disable?
-	if not(self.iff) and ((self.irr and INTNMI)=0) then exit;
 	// check the interrupts in priority sequence
-	if (self.irr and INTNMI)<>0 then begin
+	if (self.irr and INTFNMI)<>0 then begin
 		// Nonmaskable interrupt
 		irqline:=INPUT_LINE_NMI;
 		vector:=$0004;
-		self.irr:=self.irr and not(INTNMI);
+		self.irr:=self.irr and not(INTFNMI);
 	end else
 	  if (((self.irr and INTFT0)<>0) and ((self.mkl and $02)=0)) then begin
 		  vector:=$0008;
@@ -339,7 +376,7 @@ begin
 	  end else
 	    if (((self.irr and INTFT1)<>0) and ((self.mkl and $04)=0)) then begin
 		    vector:=$0008;
-		    if (self.mkl and $2)<>0 then self.irr:=self.irr and not(INTF1);
+		    if (self.mkl and $2)<>0 then self.irr:=self.irr and not(INTFT1);
 	    end else
 	      if (((self.irr and INTF1)<>0) and ((self.mkl and $08)=0)) then begin
 		      irqline:=UPD7810_INTF1;
@@ -467,33 +504,33 @@ var
    vector:word;
    irqline:integer;
 begin
+  // global interrupt disable?
+	if not(self.iff) then exit;
   vector:=0;
   irqline:=0;
-	// global interrupt disable?
-	if not(self.iff) then exit;
-	if (((self.irr and INTFT0)<>0) and ((self.mkl and $01)=0)) then begin
+	if (((self.irr and INTF0)<>0) and ((self.mkl and $01)=0)) then begin
 	   vector:=$0004;
-           irqline:=UPD7810_INTF0;
-	   self.irr:=self.irr and not(INTFT0);
-	end else
-	    if (((self.irr and INTFT0)<>0) and ((self.mkl and $02)=0)) then begin
-	       vector:=$0008;
-	       self.irr:=self.irr and not(INTF0);
-	    end else
-	      if (((self.irr and INTF1)<>0) and ((self.mkl and $04)=0)) then begin
-		      irqline:=UPD7810_INTF1;
-		      vector:=$0010;
-		      self.irr:=self.irr and not(INTF1);
-	      end else
-	        if (((self.irr and INTF2)<>0) and ((self.mkl and $8)=0)) then begin
-		        irqline:=UPD7810_INTF2;
-		        vector:=$0020;
-		        self.irr:=self.irr and not(INTF2);
-	        end else
-	          if (((self.irr and INTFST)<>0) and ((self.mkl and $10)=0)) then begin
-		          vector:=$0040;
-		          self.irr:=self.irr and not(INTFST);
-	          end;
+     irqline:=UPD7810_INTF0;
+	   self.irr:=self.irr and not(INTF0);
+	end;
+  if (((self.irr and INTFT0)<>0) and ((self.mkl and $02)=0)) then begin
+      vector:=$0008;
+      self.irr:=self.irr and not(INTFT0);
+  end;
+  if (((self.irr and INTF1)<>0) and ((self.mkl and $04)=0)) then begin
+      irqline:=UPD7810_INTF1;
+      vector:=$0010;
+      self.irr:=self.irr and not(INTF1);
+  end;
+  if (((self.irr and INTF2)<>0) and ((self.mkl and $8)=0)) then begin
+      irqline:=UPD7810_INTF2;
+      vector:=$0020;
+      self.irr:=self.irr and not(INTF2);
+  end;
+  if (((self.irr and INTFST)<>0) and ((self.mkl and $10)=0)) then begin
+      vector:=$0040;
+      self.irr:=self.irr and not(INTFST);
+  end;
 	if (vector<>0) then begin
 		// acknowledge external IRQ
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -525,7 +562,7 @@ begin
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 			  //m_to_func(TO);
 			  // Reload the timer
-			  self.ovc0:=8*(self.tm.l+((self.tm.h and $0f) shl 8));
+			  self.ovc0:=self.ovc0+(8*(self.tm.l+((self.tm.h and $0f) shl 8)));
 		  end;
   end;
 end;
@@ -612,17 +649,17 @@ begin
 	case port of
 	  UPD7810_PORTA:begin
 		                self.pa_out:=valor;
-		                valor:=(valor and not(self.ma)) or self.ma; // NS20031401
+		                valor:=(valor and not(self.ma)) or ($ff and self.ma); // NS20031401
 		                if addr(self.pa_out_cb)<>nil then self.pa_out_cb(valor);
                   end;
 	  UPD7810_PORTB:begin
 		                self.pb_out:=valor;
-		                valor:=(valor and not(self.mb)) or self.mb; // NS20031401
+		                valor:=(valor and not(self.mb)) or ($ff and self.mb); // NS20031401
 		                if addr(self.pb_out_cb)<>nil then self.pb_out_cb(valor);
 		              end;
 	  UPD7810_PORTC:begin
 		                self.pc_out:=valor;
-		                valor:=(valor and not(self.mc)) or self.mc; // NS20031401
+		                valor:=(valor and not(self.mc)) or ($ff and self.mc); // NS20031401
                     if (self.mcc and $01)<>0 then begin // PC0 = TxD output */
                         valor:=valor and not($01);
                         if (self.txd and 1)<>0 then valor:=valor or $01;
@@ -680,54 +717,324 @@ begin
   end;
 end;
 
-procedure cpu_upd7810.EQI_A;
+procedure cpu_upd7810.ADDNC_A_X(reg:pbyte);
 var
   tempb:byte;
 begin
-  tempb:=self.r.va.l-self.getbyte(self.pc);
-  self.pc:=self.pc+1;
-  ZHC_SUB(tempb,self.r.va.l,false);
-  //SKIP_Z
-  if self.r.psw.zf then self.r.psw.sk:=true;
+	tempb:=self.r.va.l+reg^;
+	self.ZHC_ADD(tempb,self.r.va.l,false);
+	self.r.va.l:=tempb;
+	if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
 end;
 
-procedure cpu_upd7810.NEI_A;
+procedure cpu_upd7810.EQA_X_A(reg:pbyte);
 var
-	tempb:byte;
+  tempb:byte;
 begin
-  tempb:=self.r.va.l-self.getbyte(self.pc);
-  self.pc:=self.pc+1;
-  ZHC_SUB(tempb,self.r.va.l,false);
-  //SKIP_NZ;
-  if not(self.r.psw.zf) then self.r.psw.sk:=true;
+	tempb:=reg^-self.r.va.l;
+	self.ZHC_SUB(tempb,reg^,false);
+  if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
 end;
 
-procedure cpu_upd7810.ANI_A;
+procedure cpu_upd7810.LTA_X_A(reg:pbyte);
+var
+  tempb:byte;
 begin
-  self.r.va.l:=self.r.va.l and self.getbyte(self.pc);
-  self.pc:=self.pc+1;
-  self.r.psw.zf:=(self.r.va.l=0);
+  tempb:=reg^-self.r.va.l;
+  self.ZHC_SUB(tempb,reg^,false);
+  if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
 end;
 
-procedure cpu_upd7810.XRI_A;
-begin
-  self.r.va.l:=self.r.va.l xor self.getbyte(self.pc);
-  self.pc:=self.pc+1;
-  self.r.psw.zf:=(self.r.va.l=0);
-end;
-
-procedure cpu_upd7810.GTI_A;
+procedure cpu_upd7810.GTA_X_A(reg:pbyte);
 var
   tempw:word;
 begin
-  tempw:=self.r.va.l-self.getbyte(self.pc)-1;
-  self.pc:=self.pc+1;
-  ZHC_SUB(tempw,self.r.va.l,false);
-  //SKIP_NC;
-  if not(self.r.psw.cy) then self.r.psw.sk:=true;
+	tempw:=reg^-self.r.va.l-1;
+	self.ZHC_SUB(tempw,reg^,false);
+	if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
 end;
 
-procedure cpu_upd7810.OFFI_X_xx(reg:pbyte);
+procedure cpu_upd7810.ONA_A_X(reg:pbyte);
+begin
+	if (self.r.va.l and reg^)<>0 then begin
+    self.r.psw.zf:=false;
+    self.r.psw.sk:=true;
+  end else self.r.psw.zf:=true;
+end;
+
+procedure cpu_upd7810.SUBNB_X_A(reg:pbyte);
+var
+  tempb:byte;
+begin
+	tempb:=reg^-self.r.va.l;
+	self.ZHC_SUB(tempb,reg^,false);
+	reg^:=tempb;
+	if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+end;
+
+procedure cpu_upd7810.ORA_X_A(reg:pbyte);
+begin
+  reg^:=reg^ or self.r.va.l;
+  self.r.psw.zf:=(reg^=0);
+end;
+
+procedure cpu_upd7810.ADDNC_X_A(reg:pbyte);
+var
+  tempb:byte;
+begin
+	tempb:=reg^+self.r.va.l;
+	self.ZHC_ADD(tempb,reg^,false);
+	reg^:=tempb;
+	if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+end;
+
+procedure cpu_upd7810.SBB_A_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+	tempb:=self.r.va.l-reg^-byte(self.r.psw.cy);
+	self.ZHC_SUB(tempb,self.r.va.l,self.r.psw.cy);
+	self.r.va.l:=tempb;
+end;
+
+procedure cpu_upd7810.SUBNB_A_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+	tempb:=self.r.va.l-reg^;
+	self.ZHC_SUB(tempb,self.r.va.l,false);
+	self.r.va.l:=tempb;
+	if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+end;
+
+procedure cpu_upd7810.SUINB_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+	tempb:=reg^-self.getbyte(self.pc);
+  self.pc:=self.pc+1;
+	self.ZHC_SUB(tempb,reg^,false);
+	reg^:=tempb;
+	if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+end;
+
+procedure cpu_upd7810.SBB_X_A(reg:pbyte);
+var
+  tempb:byte;
+begin
+	tempb:=reg^-self.r.va.l-byte(self.r.psw.cy);
+	self.ZHC_SUB(tempb,reg^,self.r.psw.cy);
+	reg^:=tempb;
+end;
+
+procedure cpu_upd7810.OFFA_A_X(reg:pbyte);
+begin
+	if (self.r.va.l and reg^)<>0 then self.r.psw.zf:=false
+	  else begin
+		  self.r.psw.zf:=true;
+      self.r.psw.sk:=true;
+    end;
+end;
+
+procedure cpu_upd7810.ANA_X_A(reg:pbyte);
+begin
+	reg^:=reg^ and self.r.va.l;
+  self.r.psw.zf:=(reg^=0); //SET_Z
+end;
+
+procedure cpu_upd7810.ADINC_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=reg^+self.getbyte(self.pc);
+  self.pc:=self.pc+1;
+	self.ZHC_ADD(tempb,reg^,false);
+	reg^:=tempb;
+	if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+end;
+
+procedure cpu_upd7810.SBI_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=reg^-self.getbyte(self.pc)-byte(self.r.psw.cy);
+  self.pc:=self.pc+1;
+	self.ZHC_SUB(tempb,reg^,self.r.psw.cy);
+	reg^:=tempb;
+end;
+
+procedure cpu_upd7810.GTI_X(reg:pbyte);
+var
+  tempw:word;
+begin
+  tempw:=reg^-self.getbyte(self.pc)-1;
+  self.pc:=self.pc+1;
+	self.ZHC_SUB(tempw,reg^,false);
+	if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+end;
+
+procedure cpu_upd7810.LTA_A_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+	tempb:=self.r.va.l-reg^;
+	self.ZHC_SUB(tempb,self.r.va.l,false);
+	if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+end;
+
+procedure cpu_upd7810.EQA_A_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=self.r.va.l-reg^;
+  self.ZHC_SUB(tempb,self.r.va.l,false);
+  if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+end;
+
+procedure cpu_upd7810.NEA_A_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=self.r.va.l-reg^;
+  self.ZHC_SUB(tempb,self.r.va.l,false);
+  if not(self.r.psw.zf) then self.r.psw.sk:=true;
+end;
+
+procedure cpu_upd7810.NEA_X_A(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=reg^-self.r.va.l;
+  self.ZHC_SUB(tempb,reg^,false);
+  if not(self.r.psw.zf) then self.r.psw.sk:=true;
+end;
+
+procedure cpu_upd7810.SUB_A_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=self.r.va.l-reg^;
+  self.ZHC_SUB(tempb,self.r.va.l,false);
+  self.r.va.l:=tempb;
+end;
+
+procedure cpu_upd7810.ADC_A_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=self.r.va.l+reg^+byte(self.r.psw.cy);
+  self.ZHC_ADD(tempb,self.r.va.l,self.r.psw.cy);
+  self.r.va.l:=tempb;
+end;
+
+procedure cpu_upd7810.ADD_A_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=self.r.va.l+reg^;
+  self.ZHC_ADD(tempb,self.r.va.l,false);
+  self.r.va.l:=tempb;
+end;
+
+procedure cpu_upd7810.GTA_A_X(reg:pbyte);
+var
+  tempw:word;
+begin
+  tempw:=self.r.va.l-reg^-1;
+  self.ZHC_SUB(tempw,self.r.va.l,false);
+  if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+end;
+
+procedure cpu_upd7810.ORA_A_X(reg:pbyte);
+begin
+  self.r.va.l:=self.r.va.l or reg^;
+  self.r.psw.zf:=(self.r.va.l=0);
+end;
+
+procedure cpu_upd7810.XRA_A_X(reg:pbyte);
+begin
+  self.r.va.l:=self.r.va.l xor reg^;
+  self.r.psw.zf:=(self.r.va.l=0);
+end;
+
+procedure cpu_upd7810.XRA_X_A(reg:pbyte);
+begin
+  self.r.va.l:=reg^ xor self.r.va.l;
+  self.r.psw.zf:=(reg^=0);
+end;
+
+procedure cpu_upd7810.SUB_X_A(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=reg^-self.r.va.l;
+  self.ZHC_SUB(tempb,reg^,false);
+  reg^:=tempb;
+end;
+
+procedure cpu_upd7810.ADC_X_A(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=reg^+self.r.va.l+byte(self.r.psw.cy);
+  self.ZHC_ADD(tempb,reg^,self.r.psw.cy);
+  reg^:=tempb;
+end;
+
+procedure cpu_upd7810.ADD_X_A(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=reg^+self.r.va.l;
+  self.ZHC_ADD(tempb,reg^,false);
+  reg^:=tempb;
+end;
+
+procedure cpu_upd7810.LTI_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+	tempb:=reg^-self.getbyte(self.pc);
+  self.pc:=self.pc+1;
+	self.ZHC_SUB(tempb,reg^,false);
+	if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+end;
+
+procedure cpu_upd7810.EQI_X(reg:pbyte);
+var
+  tempb:byte;
+begin
+  tempb:=reg^-self.getbyte(self.pc);
+  self.pc:=self.pc+1;
+  self.ZHC_SUB(tempb,reg^,false);
+  if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+end;
+
+procedure cpu_upd7810.NEI_X(reg:pbyte);
+var
+	tempb:byte;
+begin
+  tempb:=reg^-self.getbyte(self.pc);
+  self.pc:=self.pc+1;
+  self.ZHC_SUB(tempb,reg^,false);
+  if not(self.r.psw.zf) then self.r.psw.sk:=true; //SKIP_NZ;
+end;
+
+procedure cpu_upd7810.ANI_X(reg:pbyte);
+begin
+  reg^:=reg^ and self.getbyte(self.pc);
+  self.pc:=self.pc+1;
+  self.r.psw.zf:=(reg^=0);
+end;
+
+procedure cpu_upd7810.XRI_X(reg:pbyte);
+begin
+  reg^:=reg^ xor self.getbyte(self.pc);
+  self.pc:=self.pc+1;
+  self.r.psw.zf:=(reg^=0);
+end;
+
+procedure cpu_upd7810.OFFI_X(reg:pbyte);
 var
   tempb:byte;
 begin
@@ -736,20 +1043,20 @@ begin
   if ((reg^ and tempb)=0) then self.r.psw.sk:=true;
 end;
 
-procedure cpu_upd7810.ONI_A;
+procedure cpu_upd7810.ONI_X(reg:pbyte);
 var
   tempb:byte;
 begin
   tempb:=self.getbyte(self.pc);
   self.pc:=self.pc+1;
-  if ((self.r.va.l and tempb)<>0) then self.r.psw.sk:=true;
+  if ((reg^ and tempb)<>0) then self.r.psw.sk:=true;
 end;
 
-procedure cpu_upd7810.ORI_A;
+procedure cpu_upd7810.ORI_X(reg:pbyte);
 begin
-  self.r.va.l:=self.r.va.l or self.getbyte(self.pc);
+  reg^:=reg^ or self.getbyte(self.pc);
   self.pc:=self.pc+1;
-  self.r.psw.zf:=(self.r.va.l=0);
+  self.r.psw.zf:=(reg^=0);
 end;
 
 procedure cpu_upd7810.SUI_X(reg:pbyte);
@@ -758,7 +1065,7 @@ var
 begin
   tempb:=reg^-self.getbyte(self.pc);
   self.pc:=self.pc+1;
-  ZHC_SUB(tempb,reg^,false);
+  self.ZHC_SUB(tempb,reg^,false);
   reg^:=tempb;
 end;
 
@@ -772,7 +1079,7 @@ begin
   reg^:=tempb;
 end;
 
-procedure cpu_upd7810.ADI_X_xx(reg:pbyte);
+procedure cpu_upd7810.ADI_X(reg:pbyte);
 var
   tempb:byte;
 begin
@@ -784,7 +1091,7 @@ end;
 
 procedure cpu_upd7810.run(maximo:single);
 var
-  instruccion,tempb:byte;
+  instruccion,tempb,l,h,adj:byte;
   tempw:word;
   booltemp:boolean;
 begin
@@ -793,6 +1100,7 @@ while self.contador<maximo do begin
   self.ppc:=self.pc;
   instruccion:=self.getbyte(self.pc);
   self.pc:=self.pc+1;
+  tempb:=self.getbyte(self.pc); //Para las instrucciones de 2bytes!!
   //clear L1 or L0??
   case instruccion of
     $34,$6f:self.r.psw.l1:=false;
@@ -803,38 +1111,76 @@ while self.contador<maximo do begin
       end;
   end;
   //Calcular cuanto tarda el opcode
-  case instruccion of
+  if self.cpu_type=CPU_7801 then begin
+    case instruccion of
+      $48:self.estados_demas:=ops_7801_48[tempb].t;
+      $4c:self.estados_demas:=ops_7801_4c[tempb].t;
+      $4d:self.estados_demas:=ops_7801_4d[tempb].t;
+      $60:self.estados_demas:=8;
+      $64:self.estados_demas:=ops_7801_64[tempb].t;
+      $70:self.estados_demas:=ops_7801_70[tempb].t;
+      $74:self.estados_demas:=ops_7801_74[tempb].t;
+        else self.estados_demas:=main_7801_ops[instruccion].t;
+    end;
+  end else begin
+    case instruccion of
       $48:self.estados_demas:=ops_48[tempb].t;
       $4c:self.estados_demas:=ops_4c[tempb].t;
       $4d:self.estados_demas:=ops_4d[tempb].t;
-      $60:self.estados_demas:=ops_60[tempb].t;
+      $60:self.estados_demas:=8;
       $64:self.estados_demas:=ops_64[tempb].t;
       $70:self.estados_demas:=ops_70[tempb].t;
       $74:self.estados_demas:=ops_74[tempb].t;
         else self.estados_demas:=main_ops[instruccion].t;
+    end;
   end;
+  self.handle_timers_7801(self.estados_demas);
   if (self.r.psw.sk and (instruccion<>$72)) then begin
    //Skip, no hacer nada!
-   tempb:=self.getbyte(self.pc);
-   case instruccion of
+   if self.cpu_type=CPU_7801 then begin
+    case instruccion of
+      $48:self.pc:=self.pc+(ops_7801_48[tempb].s-1);
+      $4c:self.pc:=self.pc+(ops_7801_4c[tempb].s-1);
+      $4d:self.pc:=self.pc+(ops_7801_4d[tempb].s-1);
+      $60:self.pc:=self.pc+1;
+      $64:self.pc:=self.pc+(ops_7801_64[tempb].s-1);
+      $70:self.pc:=self.pc+(ops_70[tempb].s-1);
+      $74:self.pc:=self.pc+(ops_7801_74[tempb].s-1);
+        else self.pc:=self.pc+(main_7801_ops[instruccion].s-1);
+    end;
+   end else begin
+    case instruccion of
       $48:self.pc:=self.pc+(ops_48[tempb].s-1);
       $4c:self.pc:=self.pc+(ops_4c[tempb].s-1);
       $4d:self.pc:=self.pc+(ops_4d[tempb].s-1);
-      $60:self.pc:=self.pc+(ops_60[tempb].s-1);
+      $60:self.pc:=self.pc+1;
       $64:self.pc:=self.pc+(ops_64[tempb].s-1);
       $70:self.pc:=self.pc+(ops_70[tempb].s-1);
       $74:self.pc:=self.pc+(ops_74[tempb].s-1);
         else self.pc:=self.pc+(main_ops[instruccion].s-1);
+    end;
    end;
    self.r.psw.sk:=false;
   end else begin
    case instruccion of
     $0:; //nop
+    $1:if self.cpu_type=CPU_7801 then begin //HALT
+        self.contador:=trunc(maximo);
+        self.pc:=self.pc-1;
+       end else MessageDlg('Instruccion: $1 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+    $2:self.sp:=self.sp+1; //INX_SP
     $4:begin //LXI_S
-          self.sp:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
-          self.pc:=self.pc+2;
+        self.sp:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+        self.pc:=self.pc+2;
        end;
-    $7:self.ANI_A;
+    $5:begin //ANIW_wa
+        tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+        tempb:=self.getbyte(tempw) and self.getbyte(self.pc+1);
+        self.pc:=self.pc+2;
+        self.putbyte(tempw,tempb);
+        self.r.psw.zf:=(tempb=0);
+       end;
+    $7:self.ANI_X(@self.r.va.l);  //ANI_A
     $8:if self.cpu_type=CPU_7801 then begin  //RET
         self.pc:=self.getbyte(self.sp) or (self.getbyte(self.sp+1) shl 8);
         self.sp:=self.sp+2;
@@ -845,19 +1191,36 @@ while self.contador<maximo do begin
     $d:self.r.va.l:=self.r.de.l; //MOV_A_E
     $e:self.r.va.l:=self.r.hl.h; //MOV_A_H
     $f:self.r.va.l:=self.r.hl.l; //MOV_A_L
+    $10:begin //EXA
+          tempw:=self.r.ea;self.r.ea:=self.r.ea2;self.r.ea2:=tempw;
+	        tempw:=self.r.va.w;self.r.va.w:=self.r.va2.w;self.r.va2.w:=tempw;
+        end;
     $11:begin //EXX
           tempw:=self.r.bc.w;self.r.bc.w:=self.r.bc2.w;self.r.bc2.w:=tempw;
           tempw:=self.r.de.w;self.r.de.w:=self.r.de2.w;self.r.de2.w:=tempw;
           tempw:=self.r.hl.w;self.r.hl.w:=self.r.hl2.w;self.r.hl2.w:=tempw;
         end;
+    $12:self.r.bc.w:=self.r.bc.w+1; //INX_BC
     $13:self.r.bc.w:=self.r.bc.w-1; //DCX_BC
     $14:begin //LXI_B
           self.r.bc.l:=self.getbyte(self.pc);
           self.r.bc.h:=self.getbyte(self.pc+1);
           self.pc:=self.pc+2;
         end;
-    $16:self.XRI_A;
-    $17:self.ORI_A;
+    $15:begin //ORIW_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          tempb:=self.getbyte(tempw) or self.getbyte(self.pc+1);
+          self.pc:=self.pc+2;
+          self.putbyte(tempw,tempb);
+          self.r.psw.zf:=(tempb=0); //SET_Z
+        end;
+    $16:self.XRI_X(@self.r.va.l);  //XRI_A
+    $17:self.ORI_X(@self.r.va.l);  //ORI_A
+    $18:if self.cpu_type=CPU_7801 then begin //RETS
+          self.pc:=self.getbyte(self.sp) or (self.getbyte(self.sp+1) shl 8);
+          self.sp:=self.sp+2;
+          self.r.psw.sk:=true; // skip one instruction
+        end else MessageDlg('Instruccion: $18 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $19:if self.cpu_type=CPU_7801 then begin //STM_7801
           // Set the timer flip/fliop
           self.to_:=1;
@@ -877,44 +1240,68 @@ while self.contador<maximo do begin
 	        tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
           self.pc:=self.pc+1;
           tempb:=self.getbyte(tempw);
-	        ZHC_ADD(tempb+1,tempb,false);
+	        ZHC_ADD((tempb+1) and $ff,tempb,false);
 	        self.putbyte(tempw,tempb+1);
 	        if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
 	        self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $20 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+    $21:if self.cpu_type=CPU_7801 then begin //TABLE
+          tempw:=self.pc+self.r.va.l+1;
+	        self.r.bc.l:=self.getbyte(tempw);
+          self.r.bc.h:=self.getbyte(tempw+1);
+        end else MessageDlg('Instruccion: $21 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+    $22:self.r.de.w:=self.r.de.w+1; //INX_DE
+    $23:self.r.de.w:=self.r.de.w-1; //DCX_DE
     $24:begin //LXI_D_w
           self.r.de.l:=self.getbyte(self.pc);
           self.r.de.h:=self.getbyte(self.pc+1);
           self.pc:=self.pc+2;
         end;
-    $27:self.GTI_A;
+    $25:begin //GTIW_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          l:=self.getbyte(tempw);
+          tempw:=l-self.getbyte(self.pc+1)-1;
+          self.pc:=self.pc+2;
+	        self.ZHC_SUB(tempw,l,false);
+          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+        end;
+    $26:self.ADINC_X(@self.r.va.l);  //ADINC_A
+    $27:self.GTI_X(@self.r.va.l); //GTI_A
     $28:if self.cpu_type=CPU_7801 then begin //LDAW_wa
           tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
           self.pc:=self.pc+1;
 	        self.r.va.l:=self.getbyte(tempw);
-        end;
+        end else MessageDlg('Instruccion: $28 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+    $29:self.r.va.l:=self.getbyte(self.r.bc.w); //LDAX_B
+    $2a:self.r.va.l:=self.getbyte(self.r.de.w); //LDAX_D
     $2b:self.r.va.l:=self.getbyte(self.r.hl.w); //LDAX_H
+    $2c:begin //LDAX_Dp
+          self.r.va.l:=self.getbyte(self.r.de.w);
+          self.r.de.w:=self.r.de.w+1;
+        end;
     $2d:begin //LDAX_Hp
           self.r.va.l:=self.getbyte(self.r.hl.w);
           self.r.hl.w:=self.r.hl.w+1;
         end;
-    $30:if self.cpu_type=CPU_7810 then begin //DCRW_wa
+    $2e:begin //LDAX_Dm
+          self.r.va.l:=self.getbyte(self.r.de.w);
+          self.r.de.w:=self.r.de.w-1;
+        end;
+    $2f:begin //LDAX_Hm
+          self.r.va.l:=self.getbyte(self.r.hl.w);
+          self.r.hl.w:=self.r.hl.w-1;
+        end;
+    $30:if ((self.cpu_type=CPU_7801) or (self.cpu_type=CPU_7810)) then  begin //DCRW_wa
+          booltemp:=self.r.psw.cy;
           tempw:=(self.r.va.h shl 8)+self.getbyte(self.pc);
           self.pc:=self.pc+1;
-          tempb:=self.getbyte(tempw);
-	        ZHC_SUB(tempb-1,tempb,false);
-          self.putbyte(tempw,tempb-1);
+          l:=self.getbyte(tempw);
+          tempb:=l-1;
+	        ZHC_SUB(tempb,l,false);
+          self.putbyte(tempw,tempb);
 	        if self.r.psw.cy then self.r.psw.sk:=true;
-        end else if self.cpu_type=CPU_7801 then begin
-            booltemp:=self.r.psw.cy;
-            tempw:=(self.r.va.h shl 8)+self.getbyte(self.pc);
-            self.pc:=self.pc+1;
-            tempb:=self.getbyte(tempw);
-	          ZHC_SUB(tempb-1,tempb,false);
-            self.putbyte(tempw,tempb-1);
-	          if self.r.psw.cy then self.r.psw.sk:=true;
-            self.r.psw.cy:=booltemp;
-              end else MessageDlg('Instruccion: $30 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+        end else MessageDlg('Instruccion: $30 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $31:begin //BLOCK
           self.putbyte(self.r.de.w,self.getbyte(self.r.hl.w));
           self.r.de.w:=self.r.de.w+1;
@@ -927,6 +1314,7 @@ while self.contador<maximo do begin
             end;
           end;
     $32:self.r.hl.w:=self.r.hl.w+1; //INX_HL
+    $33:self.r.hl.w:=self.r.hl.w-1; //DCX_HL
     $34:begin //LXI_H
            if self.r.psw.l0 then begin // overlay active?
               self.pc:=self.pc+2;
@@ -937,15 +1325,30 @@ while self.contador<maximo do begin
 	            self.r.psw.l0:=true;
            end;
         end;
-    $36:begin  //SUINB_A_xx
+    $35:begin //LTIW_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          l:=self.getbyte(tempw);
+          tempb:=l-self.getbyte(self.pc+1);
+          self.pc:=self.pc+2;
+	        self.ZHC_SUB(tempb,l,false);
+	        if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+        end;
+    $36:begin  //SUINB_A
           self.SUI_X(@self.r.va.l);
           if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+        end;
+    $37:begin //LTI_A
+          tempb:=self.r.va.l-self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+	        self.ZHC_SUB(tempb,self.r.va.l,false);
+          if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
         end;
     $38:if self.cpu_type=CPU_7801 then begin //STAW_wa
            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
            self.pc:=self.pc+1;
            self.putbyte(tempw,self.r.va.l);
         end else MessageDlg('Instruccion: $38 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+    $39:self.putbyte(self.r.bc.w,self.r.va.l); //STAX_B
     $3a:self.putbyte(self.r.de.w,self.r.va.l); //STAX_D
     $3b:self.putbyte(self.r.hl.w,self.r.va.l); //STAX_H
     $3c:begin  //STAX_Dp
@@ -956,6 +1359,14 @@ while self.contador<maximo do begin
           self.putbyte(self.r.hl.w,self.r.va.l);
           self.r.hl.w:=self.r.hl.w+1;
         end;
+    $3e:begin  //STAX_Dm
+          self.putbyte(self.r.de.w,self.r.va.l);
+          self.r.de.w:=self.r.de.w-1;
+        end;
+    $3f:begin //STAX_Hm
+          self.putbyte(self.r.hl.w,self.r.va.l);
+          self.r.hl.w:=self.r.hl.w-1;
+        end;
     $40:if self.cpu_type=CPU_7810 then begin //CALL
             tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
             self.pc:=self.pc+2;
@@ -965,52 +1376,56 @@ while self.contador<maximo do begin
             self.putbyte(self.sp,self.pc and $ff);
             self.pc:=tempw;
           end else MessageDlg('Instruccion: $40 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $41:if self.cpu_type=CPU_7810 then begin //INR_A
+    $41:if ((self.cpu_type=CPU_7801) or (self.cpu_type=CPU_7810)) then begin //INR_A
+          booltemp:=self.r.psw.cy;
           tempb:=self.r.va.l+1;
 	        ZHC_ADD(tempb,self.r.va.l,false);
           self.r.va.l:=tempb;
 	        if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-        end else if self.cpu_type=CPU_7801 then begin
-            booltemp:=self.r.psw.cy;
-            tempb:=self.r.va.l+1;
-	          ZHC_ADD(tempb,self.r.va.l,false);
-            self.r.va.l:=tempb;
-	          if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-            self.r.psw.cy:=booltemp;
-              end else MessageDlg('Instruccion: $41 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $42:if self.cpu_type=CPU_7810 then begin //INR_B
+          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+        end else MessageDlg('Instruccion: $41 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+    $42:if ((self.cpu_type=CPU_7801) or (self.cpu_type=CPU_7810)) then begin //INR_B
+          booltemp:=self.r.psw.cy;
           tempb:=self.r.bc.h+1;
 	        ZHC_ADD(tempb,self.r.bc.h,false);
           self.r.bc.h:=tempb;
 	        if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-        end else if self.cpu_type=CPU_7801 then begin
-            booltemp:=self.r.psw.cy;
-            tempb:=self.r.bc.h+1;
-	          ZHC_ADD(tempb,self.r.bc.h,false);
-            self.r.bc.h:=tempb;
-	          if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-            self.r.psw.cy:=booltemp;
-              end else MessageDlg('Instruccion: $42 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $43:if self.cpu_type=CPU_7810 then begin //INR_C
+          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+        end else MessageDlg('Instruccion: $42 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+    $43:if ((self.cpu_type=CPU_7801) or (self.cpu_type=CPU_7810)) then begin //INR_C
+          booltemp:=self.r.psw.cy;
           tempb:=self.r.bc.l+1;
 	        ZHC_ADD(tempb,self.r.bc.l,false);
           self.r.bc.l:=tempb;
 	        if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-        end else if self.cpu_type=CPU_7801 then begin
-            booltemp:=self.r.psw.cy;
-            tempb:=self.r.bc.l+1;
-	          ZHC_ADD(tempb,self.r.bc.l,false);
-            self.r.bc.l:=tempb;
-	          if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-            self.r.psw.cy:=booltemp;
-              end else MessageDlg('Instruccion: $43 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
+        end else MessageDlg('Instruccion: $43 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $44:if self.cpu_type=CPU_7810 then begin //LXI_EA
           self.r.ea:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
           self.pc:=self.pc+2;
+        end else if self.cpu_type=CPU_7801 then begin //CALL_w
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.sp:=self.sp-1;
+            self.putbyte(self.sp,self.pc shr 8);
+            self.sp:=self.sp-1;
+            self.putbyte(self.sp,self.pc and $ff);
+            self.pc:=tempw;
         end else MessageDlg('Instruccion: $44 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $46:self.ADI_X_xx(@self.r.va.l);
-    $47:self.ONI_A;
+    $45:begin  //ONIW_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          tempb:=self.getbyte(self.pc+1);
+          self.pc:=self.pc+2;
+	        self.r.psw.sk:=(self.getbyte(tempw) and tempb)<>0;
+        end;
+    $46:self.ADI_X(@self.r.va.l); //ADI_A
+    $47:self.ONI_X(@self.r.va.l); //ONI_A
     $48:self.opcode_48; //opc_48
+    $49:begin //MVIX_BC_xx
+          tempb:=self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+          self.putbyte(self.r.bc.w,tempb);
+        end;
     $4a:begin //MVIX_DE_xx
           tempb:=self.getbyte(self.pc);
           self.pc:=self.pc+1;
@@ -1034,55 +1449,132 @@ while self.contador<maximo do begin
           self.r.hl.w:=self.r.hl2.w;
           self.r.hl2.w:=tempw;
         end else MessageDlg('Instruccion: $50 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $51:if self.cpu_type=CPU_7810 then begin //DCR_A
+    $51:if ((self.cpu_type=CPU_7810) or (self.cpu_type=CPU_7801)) then begin //DCR_A
+          booltemp:=self.r.psw.cy;
           tempb:=self.r.va.l-1;
 	        ZHC_SUB(tempb,self.r.va.l,false);
 	        self.r.va.l:=tempb;
           if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $51 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $52:if self.cpu_type=CPU_7810 then begin //DCR_B
+    $52:if ((self.cpu_type=CPU_7810) or (self.cpu_type=CPU_7801)) then begin //DCR_B
+          booltemp:=self.r.psw.cy;
           tempb:=self.r.bc.h-1;
 	        ZHC_SUB(tempb,self.r.bc.h,false);
 	        self.r.bc.h:=tempb;
           if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-        end else if self.cpu_type=CPU_7801 then begin
-          booltemp:=self.r.psw.cy;
-	        tempb:=self.r.bc.h-1;
-	        ZHC_SUB(tempb,self.r.bc.h,false);
-	        self.r.bc.h:=tempb;
-          if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-	        self.r.psw.cy:=booltemp;
+          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $52 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $53:if self.cpu_type=CPU_7810 then begin //DCR_C
+    $53:if ((self.cpu_type=CPU_7810) or (self.cpu_type=CPU_7801)) then begin //DCR_C
+          booltemp:=self.r.psw.cy;
           tempb:=self.r.bc.l-1;
 	        ZHC_SUB(tempb,self.r.bc.l,false);
 	        self.r.bc.l:=tempb;
           if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-        end else if self.cpu_type=CPU_7801 then begin
-          booltemp:=self.r.psw.cy;
-	        tempb:=self.r.bc.l-1;
-	        ZHC_SUB(tempb,self.r.bc.l,false);
-	        self.r.bc.l:=tempb;
-          if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
-	        self.r.psw.cy:=booltemp;
+          if self.cpu_type=CPU_7801 then self.r.psw.cy:=booltemp;
         end else MessageDlg('Instruccion: $53 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $54:self.pc:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8); //jmp_w
-    $57:self.OFFI_x_xx(@self.r.va.l);
+    $55:begin //OFFIW_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          tempb:=self.getbyte(self.pc+1);
+          self.pc:=self.pc+2;
+          self.r.psw.sk:=(self.getbyte(tempw) and tempb)=0;
+        end;
+    $56:self.ACI_X(@self.r.va.l);  //ACI_A
+    $57:self.OFFI_x(@self.r.va.l); //OFFI_A
+    $58:begin //BIT_0_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+          tempb:=self.getbyte(tempw);
+          self.r.psw.sk:=(tempb and $1)<>0;
+        end;
+    $59:begin //BIT_1_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+          tempb:=self.getbyte(tempw);
+          self.r.psw.sk:=(tempb and $2)<>0;
+        end;
+    $5a:begin //BIT_2_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+          tempb:=self.getbyte(tempw);
+          self.r.psw.sk:=(tempb and $4)<>0;
+        end;
+    $5b:begin //BIT_3_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+          tempb:=self.getbyte(tempw);
+          self.r.psw.sk:=(tempb and $8)<>0;
+        end;
+    $5c:begin //BIT_4_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+          tempb:=self.getbyte(tempw);
+          self.r.psw.sk:=(tempb and $10)<>0;
+        end;
+    $5d:begin //BIT_5_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+          tempb:=self.getbyte(tempw);
+          self.r.psw.sk:=(tempb and $20)<>0;
+        end;
     $5e:begin //BIT_6_wa
           tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
           self.pc:=self.pc+1;
           tempb:=self.getbyte(tempw);
-          if (tempb and $40)<>0 then self.r.psw.sk:=true;
+          self.r.psw.sk:=(tempb and $40)<>0;
+        end;
+    $5f:begin //BIT_7_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          self.pc:=self.pc+1;
+          tempb:=self.getbyte(tempw);
+          self.r.psw.sk:=(tempb and $80)<>0;
         end;
     $60:self.opcode_60;  //opc_60
+    $61:begin //DAA
+          l:=self.r.va.l and $0f;
+          h:=self.r.va.l shr 4;
+          adj:=0;
+          booltemp:=self.r.psw.cy;
+	        if not(self.r.psw.hc) then begin
+		        if (l<10) then begin
+			        if not((h<10) and not(self.r.psw.cy)) then adj:=$60;
+		        end else begin
+			        if ((h<9) and not(self.r.psw.cy)) then adj:=$06
+			          else adj:=$66;
+		        end;
+          end else if (l<3) then begin
+		        if ((h<10) and not(self.r.psw.cy)) then adj:=$06
+		          else adj:=$66;
+	        end;
+	        tempb:=self.r.va.l+adj;
+	        self.ZHC_ADD(tempb,self.r.va.l,self.r.psw.cy);
+	        self.r.psw.cy:=self.r.psw.cy or booltemp;
+	        self.r.va.l:=tempb;
+        end;
     $62:begin //RETI
           self.pc:=self.getbyte(self.sp) or (self.getbyte(self.sp+1) shl 8);
           self.poner_band(self.getbyte(self.sp+2));
           self.sp:=self.sp+3;
         end;
+    $63:if self.cpu_type=CPU_7801 then begin //CALB
+          self.sp:=self.sp-1;
+	        self.putbyte(self.sp,self.pc shr 8);
+          self.sp:=self.sp-1;
+	        self.putbyte(self.sp,self.pc and $ff);
+	        self.pc:=self.r.bc.w;
+        end else MessageDlg('Instruccion: $63 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $64:self.opcode_64;  //opc_64
-    $66:self.SUI_X(@self.r.va.l);
-    $67:self.NEI_A;
+    $65:begin //NEIW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            l:=self.getbyte(tempw);
+            tempb:=l-self.getbyte(self.pc+1);
+            self.pc:=self.pc+2;
+	          self.ZHC_SUB(tempb,l,false);
+	          if not(self.r.psw.zf) then self.r.psw.sk:=true; //SKIP_NZ
+        end;
+    $66:self.SUI_X(@self.r.va.l); //SUI_A
+    $67:self.NEI_X(@self.r.va.l); //NEI_A
     $68:begin //MVI_V_xx
          self.r.va.h:=self.getbyte(self.pc);
          self.pc:=self.pc+1;
@@ -1114,9 +1606,12 @@ while self.contador<maximo do begin
           self.r.hl.h:=self.getbyte(self.pc);
           self.pc:=self.pc+1;
         end;
-    $6f:begin //MVI_L_xx
-          self.r.hl.l:=self.getbyte(self.pc);
-          self.pc:=self.pc+1;
+    $6f:if self.r.psw.l0 then begin //MVI_L_xx
+            self.pc:=self.pc+1;
+        end else begin
+            self.r.hl.l:=self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+	          self.r.psw.l0:=true;
         end;
     $70:self.opcode_70;  //opc_70
     $71:begin  //MVIW_wa_xx
@@ -1125,10 +1620,31 @@ while self.contador<maximo do begin
           self.pc:=self.pc+2;
           self.putbyte(tempw,tempb);
         end;
+    $73:if self.cpu_type=CPU_7801 then begin //JB
+          self.pc:=self.r.bc.w;
+        end else MessageDlg('Instruccion: $73 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $74:self.opcode_74;  //opc_74
-    $77:self.EQI_A;
+    $75:begin //EQIW_wa
+          tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+          l:=self.getbyte(tempw);
+          tempb:=l-self.getbyte(self.pc+1);
+          self.pc:=self.pc+2;
+          self.ZHC_SUB(tempb,l,false);
+          if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+        end;
+    $76:self.SBI_X(@self.r.va.l); //SBI_A_xx
+    $77:self.EQI_X(@self.r.va.l); //EQI_A
+    $78..$7f:begin //CALF
+          tempw:=(($8+(instruccion and $7)) shl 8) or self.getbyte(self.pc);
+	        self.pc:=self.pc+1;
+          self.sp:=self.sp-1;
+          self.putbyte(self.sp,self.pc shr 8);
+          self.sp:=self.sp-1;
+          self.putbyte(self.sp,self.pc and $ff);
+	        self.pc:=tempw;
+        end;
     $80..$9f:begin  //CALT
-	        tempw:=$80+2*(instruccion and $1f);
+                tempw:=$80+2*(instruccion and $1f);
                 self.sp:=self.sp-1;
                 self.putbyte(self.sp,self.pc shr 8);
                 self.sp:=self.sp-1;
@@ -1158,8 +1674,7 @@ while self.contador<maximo do begin
                             self.sp:=self.sp+2;
                         end;
                     $a4:begin //POP_EA
-                            self.r.ea:=self.getbyte(self.sp);
-                            self.r.ea:=self.r.ea or (self.getbyte(self.sp+1) shl 8);
+                            self.r.ea:=self.getbyte(self.sp) or (self.getbyte(self.sp+1) shl 8);
                             self.sp:=self.sp+2;
                         end;
                     $a6:self.r.ea:=self.r.de.w; //DMOV_EA_DE
@@ -1207,8 +1722,15 @@ while self.contador<maximo do begin
                         end;
                     else MessageDlg('Instruccion CPU 7810: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
                 end;
-        end else MessageDlg('Instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $c0..$ff:self.pc:=self.pc+(shortint(instruccion shl 2) div 4); //jr
+            end else begin //CALT
+                        tempw:=$80+2*(instruccion and $3f);
+                        self.sp:=self.sp-1;
+                        self.putbyte(self.sp,self.pc shr 8);
+                        self.sp:=self.sp-1;
+                        self.putbyte(self.sp,self.pc and $ff);
+	                      self.pc:=self.getbyte(tempw) or (self.getbyte(tempw+1) shl 8);
+                      end;
+    $c0..$ff:self.pc:=self.pc+(shortint(instruccion shl 2) shr 2); //JR
       else MessageDlg('Instruccion: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
    end;
   end;
@@ -1216,7 +1738,7 @@ while self.contador<maximo do begin
      self.handle_timers_7810(self.estados_demas);
      self.take_irq_7810;
   end else if self.cpu_type=CPU_7801 then begin
-     self.handle_timers_7801(self.estados_demas);
+     //self.handle_timers_7801(self.estados_demas);
      self.take_irq_7801;
   end;
   self.iff:=self.iff_pending;
@@ -1227,15 +1749,31 @@ end;
 
 procedure cpu_upd7810.opcode_48;
 var
-  instruccion,tempb:byte;
+  instruccion,tempb,tempb2:byte;
   tempw:word;
 begin
   instruccion:=self.getbyte(self.pc);
   self.pc:=self.pc+1;
   case instruccion of
+      $0:if self.cpu_type=CPU_7801 then begin //SKIT_F0
+            if (self.irr and INTF0)<>0 then self.r.psw.sk:=true;
+	          self.irr:=self.irr and not(INTF0);
+         end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
       $1:if self.cpu_type=CPU_7801 then begin //SKIT_FT0
             if (self.irr and INTFT0)<>0 then self.r.psw.sk:=true;
 	          self.irr:=self.irr and not(INTFT0);
+         end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $2:if self.cpu_type=CPU_7801 then begin //SKIT_F1
+            if (self.irr and INTF1)<>0 then self.r.psw.sk:=true;
+	          self.irr:=self.irr and not(INTF1);
+         end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $3:if self.cpu_type=CPU_7801 then begin //SKIT_F2
+            if (self.irr and INTF2)<>0 then self.r.psw.sk:=true;
+	          self.irr:=self.irr and not(INTF2);
+         end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $4:if self.cpu_type=CPU_7801 then begin //SKIT_FST
+            if (self.irr and INTFST)<>0 then self.r.psw.sk:=true;
+	          self.irr:=self.irr and not(INTFST);
          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
       $7:if self.cpu_type=CPU_7810 then begin //SLLC_C
             self.r.psw.cy:=(self.r.bc.l and $80)<>0;
@@ -1279,6 +1817,7 @@ begin
             self.iff_pending:=false;
           end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
       $2a:self.r.psw.cy:=false; //CLC
+      $2b:self.r.psw.cy:=true; //STC
       $2e:if self.cpu_type=CPU_7801 then begin //PUSH_DE
             self.sp:=self.sp-1;
             self.putbyte(self.sp,self.r.de.h);
@@ -1291,10 +1830,25 @@ begin
                     self.r.de.h:=self.getbyte(self.sp+1);
                     self.sp:=self.sp+2;
                  end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $30:if self.cpu_type=CPU_7801 then begin //RLL_A
+            tempb:=byte(self.r.psw.cy);
+            self.r.psw.cy:=(self.r.va.l and $80)<>0;
+	          self.r.va.l:=(self.r.va.l shl 1) or tempb;
+          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
       $31:begin //RLR_A
             tempb:=byte(self.r.psw.cy) shl 7;
             self.r.psw.cy:=(self.r.va.l and 1)<>0;
 	          self.r.va.l:=(self.r.va.l shr 1) or tempb;
+          end;
+      $32:if self.cpu_type=CPU_7801 then begin //RLL_C
+            tempb:=byte(self.r.psw.cy);
+            self.r.psw.cy:=(self.r.bc.l and $80)<>0;
+	          self.r.bc.l:=(self.r.bc.l shl 1) or tempb;
+          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $33:begin //RLR_C
+            tempb:=byte(self.r.psw.cy) shl 7;
+            self.r.psw.cy:=(self.r.bc.l and 1)<>0;
+	          self.r.bc.l:=(self.r.bc.l shr 1) or tempb;
           end;
       $34:if self.cpu_type=CPU_7801 then begin //SLL_A
             self.r.psw.cy:=(self.r.va.l and $80)<>0;
@@ -1308,6 +1862,28 @@ begin
             self.r.psw.cy:=(self.r.va.l and 1)<>0;
 	          self.r.va.l:=self.r.va.l shr 1;
           end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $36:if self.cpu_type=CPU_7801 then begin //SLL_C
+            self.r.psw.cy:=(self.r.bc.l and $80)<>0;
+	          self.r.bc.l:=self.r.bc.l shl 1;
+          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $37:if self.cpu_type=CPU_7801 then begin //SLR_C
+            self.r.psw.cy:=(self.r.bc.l and $1)<>0;
+	          self.r.bc.l:=self.r.bc.l shr 1;
+          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $38:begin //RLD
+            tempb:=self.getbyte(self.r.hl.w);
+            tempb2:=(tempb shl 4) or (self.r.va.l and $f);
+            self.r.va.l:=(self.r.va.l and $f0) or (tempb shr 4);
+            self.putbyte(self.r.hl.w,tempb2);
+          end;
+      $39:begin //RRD
+            tempb:=self.getbyte(self.r.hl.w);
+	          tempb2:=(self.r.va.l shl 4) or (tempb shr 4);
+	          self.r.va.l:=(self.r.va.l and $f0) or (tempb and $0f);
+	          self.putbyte(self.r.hl.w,tempb2);
+          end;
+      $3a:if self.cpu_type=CPU_7810 then self.r.va.l:=not(self.r.va.l)+1  //NEGA
+            else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
       $3e:if self.cpu_type=CPU_7801 then begin //PUSH_HL
             self.sp:=self.sp-1;
             self.putbyte(self.sp,self.r.hl.h);
@@ -1319,8 +1895,6 @@ begin
              self.r.hl.h:=self.getbyte(self.sp+1);
              self.sp:=self.sp+2;
          end else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-      $3a:if self.cpu_type=CPU_7810 then self.r.va.l:=not(self.r.va.l)+1  //NEGA
-            else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
       $40..$ff:if self.cpu_type=CPU_7810 then begin
                   case instruccion of
                     $82:self.r.ea:=self.getbyte(self.r.de.w) or (self.getbyte(self.r.de.w+1) shl 8); //LDEAX_D
@@ -1344,7 +1918,6 @@ begin
       else MessageDlg('Instruccion 48: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
 end;
-
 procedure cpu_upd7810.opcode_4c;
 var
   instruccion:byte;
@@ -1370,7 +1943,6 @@ begin
       else MessageDlg('Instruccion 4C: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
 end;
-
 procedure cpu_upd7810.opcode_4d;
 var
   instruccion:byte;
@@ -1383,17 +1955,14 @@ begin
     $c2:self.write_port(UPD7810_PORTC,self.r.va.l); //MOV_PC_A
     $c3:if self.cpu_type=CPU_7801 then self.mkl:=self.r.va.l //MOV_MKL_A
           else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $c4:if self.cpu_type=CPU_7801 then begin
-          if self.mb<>self.r.va.l then begin //MOV_MB_A
+    $c4:if self.cpu_type=CPU_7801 then begin //MOV_MB_A
+          if self.mb<>self.r.va.l then begin
             self.mb:=self.r.va.l;
             self.write_port(UPD7810_PORTB,self.pb_out);
           end;
         end else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $c5:if self.cpu_type=CPU_7801 then begin
-          if self.mc<>self.r.va.l then begin //MOV_MC_A
-            self.mc:=self.r.va.l;
-            self.write_port(UPD7810_PORTC,self.pc_out);
-          end;
+    $c5:if self.cpu_type=CPU_7801 then begin //MOV_MC_A
+          self.mc:=$84 or (self.r.va.l and $3);
         end else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $c6:if self.cpu_type=CPU_7801 then self.tm.l:=self.r.va.l //MOV_TM0_A
           else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
@@ -1401,26 +1970,26 @@ begin
           else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $d0:if self.cpu_type=CPU_7810 then self.mm:=self.r.va.l //MOV_MM_A
           else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $d2:if self.cpu_type=CPU_7810 then begin
-          if self.ma<>self.r.va.l then begin //MOV_MA_A
+    $d2:if self.cpu_type=CPU_7810 then begin //MOV_MA_A
+          if self.ma<>self.r.va.l then begin
             self.ma:=self.r.va.l;
             self.write_port(UPD7810_PORTA,self.pa_out);
           end;
         end else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $d3:if self.cpu_type=CPU_7810 then begin
-          if self.mb<>self.r.va.l then begin //MOV_MB_A
+    $d3:if self.cpu_type=CPU_7810 then begin //MOV_MB_A
+          if self.mb<>self.r.va.l then begin
             self.mb:=self.r.va.l;
             self.write_port(UPD7810_PORTB,self.pb_out);
           end;
           end else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $d4:if self.cpu_type=CPU_7810 then begin
-          if self.mc<>self.r.va.l then begin //MOV_MC_A
+    $d4:if self.cpu_type=CPU_7810 then begin //MOV_MC_A
+          if self.mc<>self.r.va.l then begin
             self.mc:=self.r.va.l;
             self.write_port(UPD7810_PORTC,self.pc_out);
           end;
           end else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
-    $d7:if self.cpu_type=CPU_7810 then begin
-           if self.mf<>self.r.va.l then begin //MOV_MF_A
+    $d7:if self.cpu_type=CPU_7810 then begin  //MOV_MF_A
+           if self.mf<>self.r.va.l then begin
             self.mf:=self.r.va.l;
             self.write_port(UPD7810_PORTF,self.pf_out);
            end;
@@ -1428,111 +1997,268 @@ begin
     else MessageDlg('Instruccion 4D: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
 end;
-
 procedure cpu_upd7810.opcode_60;
 var
   instruccion:byte;
   tempb:byte;
+  tempw:word;
 begin
   instruccion:=self.getbyte(self.pc);
   self.pc:=self.pc+1;
   case instruccion of
-      $11,$91:begin //XRA_A_A
-            self.r.va.l:=self.r.va.l xor self.r.va.l;
-            self.r.psw.zf:=(self.r.va.l=0);
+      $08:self.ANA_X_A(@self.r.va.h);
+      $09:self.ANA_X_A(@self.r.va.l);
+      $0a:self.ANA_X_A(@self.r.bc.h);
+      $0b:self.ANA_X_A(@self.r.bc.l);
+      $0c:self.ANA_X_A(@self.r.de.h);
+      $0d:self.ANA_X_A(@self.r.de.l);
+      $0e:self.ANA_X_A(@self.r.hl.h);
+      $0f:self.ANA_X_A(@self.r.hl.l);
+      $10:self.XRA_X_A(@self.r.va.h);
+      $11,$91:self.XRA_X_A(@self.r.va.l);
+      $12:self.XRA_X_A(@self.r.bc.h);
+      $13:self.XRA_X_A(@self.r.bc.l);
+      $14:self.XRA_X_A(@self.r.de.h);
+      $15:self.XRA_X_A(@self.r.de.l);
+      $16:self.XRA_X_A(@self.r.hl.h);
+      $17:self.XRA_X_A(@self.r.hl.l);
+      $18:self.ORA_X_A(@self.r.va.h);
+      $19:self.ORA_X_A(@self.r.va.l);
+      $1a:self.ORA_X_A(@self.r.bc.h);
+      $1b:self.ORA_X_A(@self.r.bc.l);
+      $1c:self.ORA_X_A(@self.r.de.h);
+      $1d:self.ORA_X_A(@self.r.de.l);
+      $1e:self.ORA_X_A(@self.r.hl.h);
+      $1f:self.ORA_X_A(@self.r.hl.l);
+      $20:self.ADDNC_X_A(@self.r.va.h);
+      $21:self.ADDNC_X_A(@self.r.va.l);
+      $22:self.ADDNC_X_A(@self.r.bc.h);
+      $23:self.ADDNC_X_A(@self.r.bc.l);
+      $24:self.ADDNC_X_A(@self.r.de.h);
+      $25:self.ADDNC_X_A(@self.r.de.l);
+      $26:self.ADDNC_X_A(@self.r.hl.h);
+      $27:self.ADDNC_X_A(@self.r.hl.l);
+      $28:self.GTA_X_A(@self.r.va.h);
+      $29:self.GTA_X_A(@self.r.va.l);
+      $2a:self.GTA_X_A(@self.r.bc.h);
+      $2b:self.GTA_X_A(@self.r.bc.l);
+      $2c:self.GTA_X_A(@self.r.de.h);
+      $2d:self.GTA_X_A(@self.r.de.l);
+      $2e:self.GTA_X_A(@self.r.hl.h);
+      $2f:self.GTA_X_A(@self.r.hl.l);
+      $30:self.SUBNB_X_A(@self.r.va.h);
+      $31:self.SUBNB_X_A(@self.r.va.l);
+      $32:self.SUBNB_X_A(@self.r.bc.h);
+      $33:self.SUBNB_X_A(@self.r.bc.l);
+      $34:self.SUBNB_X_A(@self.r.de.h);
+      $35:self.SUBNB_X_A(@self.r.de.l);
+      $36:self.SUBNB_X_A(@self.r.hl.h);
+      $37:self.SUBNB_X_A(@self.r.hl.l);
+      $38:self.LTA_X_A(@self.r.va.h);
+      $39:self.LTA_X_A(@self.r.va.l);
+      $3a:self.LTA_X_A(@self.r.bc.h);
+      $3b:self.LTA_X_A(@self.r.bc.l);
+      $3c:self.LTA_X_A(@self.r.de.h);
+      $3d:self.LTA_X_A(@self.r.de.l);
+      $3e:self.LTA_X_A(@self.r.hl.h);
+      $3f:self.LTA_X_A(@self.r.hl.l);
+      $40:self.ADD_X_A(@self.r.va.h);   //ADD_V_A
+      $41,$c1:self.ADD_X_A(@self.r.va.l);  //ADD_A_A
+      $42:self.ADD_X_A(@self.r.bc.h);  //ADD_B_A
+      $43:self.ADD_X_A(@self.r.bc.l);  //ADD_C_A
+      $44:self.ADD_X_A(@self.r.de.h);  //ADD_D_A
+      $45:self.ADD_X_A(@self.r.de.l);  //ADD_E_A
+      $46:self.ADD_X_A(@self.r.hl.h); //ADD_H_A
+      $47:self.ADD_X_A(@self.r.hl.l); //ADD_L_A
+      $50:self.ADC_X_A(@self.r.va.h);
+      $51:self.ADC_X_A(@self.r.va.l);
+      $52:self.ADC_X_A(@self.r.bc.h);
+      $53:self.ADC_X_A(@self.r.bc.l);
+      $54:self.ADC_X_A(@self.r.de.h);
+      $55:self.ADC_X_A(@self.r.de.l);
+      $56:self.ADC_X_A(@self.r.hl.h);
+      $57:self.ADC_X_A(@self.r.hl.l);
+      $60:self.SUB_X_A(@self.r.va.h); //SUB_V_A
+      $61:self.SUB_X_A(@self.r.va.l); //SUB_A_A
+      $62:self.SUB_X_A(@self.r.bc.h); //SUB_B_A
+      $63:self.SUB_X_A(@self.r.bc.l); //SUB_C_A
+      $64:self.SUB_X_A(@self.r.de.h); //SUB_D_A
+      $65:self.SUB_X_A(@self.r.de.l); //SUB_E_A
+      $66:self.SUB_X_A(@self.r.hl.h); //SUB_H_A
+      $67:self.SUB_X_A(@self.r.hl.l); //SUB_L_A
+      $68:self.NEA_X_A(@self.r.va.h);
+      $69:self.NEA_X_A(@self.r.va.l);
+      $6a:self.NEA_X_A(@self.r.bc.h);
+      $6b:self.NEA_X_A(@self.r.bc.l);
+      $6c:self.NEA_X_A(@self.r.de.h);
+      $6d:self.NEA_X_A(@self.r.de.l);
+      $6e:self.NEA_X_A(@self.r.hl.h);
+      $6f:self.NEA_X_A(@self.r.hl.l);
+      $70:self.SBB_X_A(@self.r.va.h);
+      $71:self.SBB_X_A(@self.r.va.l);
+      $72:self.SBB_X_A(@self.r.bc.h);
+      $73:self.SBB_X_A(@self.r.bc.l);
+      $74:self.SBB_X_A(@self.r.de.h);
+      $75:self.SBB_X_A(@self.r.de.l);
+      $76:self.SBB_X_A(@self.r.hl.h);
+      $77:self.SBB_X_A(@self.r.hl.l);
+      $78:self.EQA_X_A(@self.r.va.h);
+      $79:self.EQA_X_A(@self.r.va.l);
+      $7a:self.EQA_X_A(@self.r.bc.h);
+      $7b:self.EQA_X_A(@self.r.bc.l);
+      $7c:self.EQA_X_A(@self.r.de.h);
+      $7d:self.EQA_X_A(@self.r.de.l);
+      $7e:self.EQA_X_A(@self.r.hl.h);
+      $7f:self.EQA_X_A(@self.r.hl.l);
+      $88:begin   //ANA_A_V
+            self.r.va.l:=self.r.va.l and self.r.va.h;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
           end;
-      $1a:begin //ORA_B_A
-            self.r.bc.h:=self.r.bc.h or self.r.va.l;
-	          self.r.psw.zf:=(self.r.bc.h=0);
+      $89:begin
+            self.r.va.l:=self.r.va.l and self.r.va.l;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
           end;
-      $40:begin  //ADD_V_A
-            tempb:=self.r.va.h+self.r.va.l;
-	          ZHC_ADD(tempb,self.r.va.h,false);
-	          self.r.va.h:=tempb;
+      $8a:begin
+            self.r.va.l:=self.r.va.l and self.r.bc.h;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
           end;
-      $41,$c1:begin  //ADD_A_A
-            tempb:=self.r.va.l+self.r.va.l;
-	          ZHC_ADD(tempb,self.r.va.l,false);
-	          self.r.va.l:=tempb;
+      $8b:begin
+            self.r.va.l:=self.r.va.l and self.r.bc.l;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
           end;
-      $42:begin  //ADD_B_A
-            tempb:=self.r.bc.h+self.r.va.l;
-	          ZHC_ADD(tempb,self.r.bc.h,false);
-	          self.r.bc.h:=tempb;
+      $8c:begin
+            self.r.va.l:=self.r.va.l and self.r.de.h;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
           end;
-      $43:begin  //ADD_C_A
-            tempb:=self.r.bc.l+self.r.va.l;
-	          ZHC_ADD(tempb,self.r.bc.l,false);
-	          self.r.bc.l:=tempb;
+      $8d:begin
+            self.r.va.l:=self.r.va.l and self.r.de.l;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
           end;
-      $44:begin  //ADD_D_A
-            tempb:=self.r.de.h+self.r.va.l;
-	          ZHC_ADD(tempb,self.r.de.h,false);
-	          self.r.de.h:=tempb;
+      $8e:begin
+            self.r.va.l:=self.r.va.l and self.r.hl.h;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
           end;
-      $45:begin  //ADD_E_A
-            tempb:=self.r.de.l+self.r.va.l;
-	          ZHC_ADD(tempb,self.r.de.l,false);
-	          self.r.de.l:=tempb;
+      $8f:begin
+            self.r.va.l:=self.r.va.l and self.r.hl.l;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
           end;
-      $46:begin  //ADD_H_A
-            tempb:=self.r.hl.h+self.r.va.l;
-	          ZHC_ADD(tempb,self.r.hl.h,false);
-	          self.r.hl.h:=tempb;
-          end;
-      $47:begin  //ADD_L_A
-            tempb:=self.r.hl.l+self.r.va.l;
-	          ZHC_ADD(tempb,self.r.hl.l,false);
-	          self.r.hl.l:=tempb;
-          end;
-      $93:begin //XRA_A_C
-            self.r.va.l:=self.r.va.l xor self.r.bc.l;
-            self.r.psw.zf:=(self.r.va.l=0);
-          end;
-      $9a:begin //ORA_A_B
-            self.r.va.l:=self.r.va.l or self.r.bc.h;
-            self.r.psw.zf:=(self.r.va.l=0);
-          end;
-      $9b:begin //ORA_A_C
-            self.r.va.l:=self.r.va.l or self.r.bc.l;
-            self.r.psw.zf:=(self.r.va.l=0);
-          end;
-      $9e:begin //ORA_A_H
-            self.r.va.l:=self.r.va.l or self.r.hl.h;
-            self.r.psw.zf:=(self.r.va.l=0);
-          end;
-      $c2:begin //ADD_A_B
-            tempb:=self.r.va.l+self.r.bc.h;
-	          ZHC_ADD(tempb,self.r.va.l,false);
-	          self.r.va.l:=tempb;
-          end;
-      $c3:begin //ADD_A_C
-            tempb:=self.r.va.l+self.r.bc.l;
-	          ZHC_ADD(tempb,self.r.va.l,false);
-	          self.r.va.l:=tempb;
-          end;
-      $c7:begin //ADD_A_L
-            tempb:=self.r.va.l+self.r.hl.l;
-	          ZHC_ADD(tempb,self.r.va.l,false);
-            self.r.va.l:=tempb;
-          end;
-      $d2:begin  //ADC_A_B
-            tempb:=self.r.va.l+self.r.bc.h+byte(self.r.psw.cy);
-	          ZHC_ADD(tempb,self.r.va.l,self.r.psw.cy);
-	          self.r.va.l:=tempb;
-          end;
-      $ea:begin //NEA_A_B
-            tempb:=self.r.va.l-self.r.bc.h;
-	          ZHC_SUB(tempb,self.r.va.l,false);
-            if not(self.r.psw.zf) then self.r.psw.sk:=true;
-          end;
+      $90:self.XRA_A_X(@self.r.va.h);
+      $92:self.XRA_A_X(@self.r.bc.h);
+      $93:self.XRA_A_X(@self.r.bc.l); //XRA_A_C
+      $94:self.XRA_A_X(@self.r.de.h);
+      $95:self.XRA_A_X(@self.r.de.l);
+      $96:self.XRA_A_X(@self.r.hl.h);
+      $97:self.XRA_A_X(@self.r.hl.l);
+      $98:self.ORA_A_X(@self.r.va.h);
+      $99:self.ORA_A_X(@self.r.va.l);
+      $9a:self.ORA_A_X(@self.r.bc.h);  //ORA_A_B
+      $9b:self.ORA_A_X(@self.r.bc.l);  //ORA_A_C
+      $9c:self.ORA_A_X(@self.r.de.h);
+      $9d:self.ORA_A_X(@self.r.de.l);
+      $9e:self.ORA_A_X(@self.r.hl.h); //ORA_A_H
+      $9f:self.ORA_A_X(@self.r.hl.l); //ORA_A_L
+      $a0:self.ADDNC_A_X(@self.r.va.h);
+      $a1:self.ADDNC_A_X(@self.r.va.l);
+      $a2:self.ADDNC_A_X(@self.r.bc.h);
+      $a3:self.ADDNC_A_X(@self.r.bc.l);
+      $a4:self.ADDNC_A_X(@self.r.de.h);
+      $a5:self.ADDNC_A_X(@self.r.de.l);
+      $a6:self.ADDNC_A_X(@self.r.hl.h);
+      $a7:self.ADDNC_A_X(@self.r.hl.l);
+      $a8:self.GTA_A_X(@self.r.va.h);  //GTA_A_V
+      $a9:self.GTA_A_X(@self.r.va.l); //GTA_A_A
+      $aa:self.GTA_A_X(@self.r.bc.h); //GTA_A_B
+      $ab:self.GTA_A_X(@self.r.bc.l); //GTA_A_C
+      $ac:self.GTA_A_X(@self.r.de.h); //GTA_A_D
+      $ad:self.GTA_A_X(@self.r.de.l); //GTA_A_E
+      $ae:self.GTA_A_X(@self.r.hl.h); //GTA_A_H
+      $af:self.GTA_A_X(@self.r.hl.l); //GTA_A_L
+      $b0:self.SUBNB_A_X(@self.r.va.h);
+      $b1:self.SUBNB_A_X(@self.r.va.l);
+      $b2:self.SUBNB_A_X(@self.r.bc.h);
+      $b3:self.SUBNB_A_X(@self.r.bc.l);
+      $b4:self.SUBNB_A_X(@self.r.de.h);
+      $b5:self.SUBNB_A_X(@self.r.de.l);
+      $b6:self.SUBNB_A_X(@self.r.hl.h);
+      $b7:self.SUBNB_A_X(@self.r.hl.l);
+      $b8:self.LTA_A_X(@self.r.va.h);
+      $b9:self.LTA_A_X(@self.r.va.l);
+      $ba:self.LTA_A_X(@self.r.bc.h);
+      $bb:self.LTA_A_X(@self.r.bc.l);
+      $bc:self.LTA_A_X(@self.r.de.h);
+      $bd:self.LTA_A_X(@self.r.de.l);
+      $be:self.LTA_A_X(@self.r.hl.h);
+      $bf:self.LTA_A_X(@self.r.hl.l);
+      $c0:self.ADD_A_X(@self.r.va.h);
+      $c2:self.ADD_A_X(@self.r.bc.h);  //ADD_A_B
+      $c3:self.ADD_A_X(@self.r.bc.l); //ADD_A_C
+      $c4:self.ADD_A_X(@self.r.de.h); //ADD_A_D
+      $c5:self.ADD_A_X(@self.r.de.l); //ADD_A_E
+      $c6:self.ADD_A_X(@self.r.hl.h); //ADD_A_H
+      $c7:self.ADD_A_X(@self.r.hl.l); //ADD_A_L
+      $c8:self.ONA_A_X(@self.r.va.h);
+      $c9:self.ONA_A_X(@self.r.va.l);
+      $ca:self.ONA_A_X(@self.r.bc.h);
+      $cb:self.ONA_A_X(@self.r.bc.l);
+      $cc:self.ONA_A_X(@self.r.de.h);
+      $cd:self.ONA_A_X(@self.r.de.l);
+      $ce:self.ONA_A_X(@self.r.hl.h);
+      $cf:self.ONA_A_X(@self.r.hl.l);
+      $d0:self.ADC_A_X(@self.r.va.h);
+      $d1:self.ADC_A_X(@self.r.va.l);
+      $d2:self.ADC_A_X(@self.r.bc.h);  //ADC_A_B
+      $d3:self.ADC_A_X(@self.r.bc.l);  //ADC_A_B
+      $d4:self.ADC_A_X(@self.r.de.h);
+      $d5:self.ADC_A_X(@self.r.de.l);
+      $d6:self.ADC_A_X(@self.r.hl.h);
+      $d7:self.ADC_A_X(@self.r.hl.l);
+      $d8:self.OFFA_A_X(@self.r.va.h);
+      $d9:self.OFFA_A_X(@self.r.va.l);
+      $da:self.OFFA_A_X(@self.r.bc.h);
+      $db:self.OFFA_A_X(@self.r.bc.l);
+      $dc:self.OFFA_A_X(@self.r.de.h);
+      $dd:self.OFFA_A_X(@self.r.de.l);
+      $de:self.OFFA_A_X(@self.r.hl.h);
+      $df:self.OFFA_A_X(@self.r.hl.l);
+      $e0:self.SUB_A_X(@self.r.va.h);
+      $e1:self.SUB_A_X(@self.r.va.l);
+      $e2:self.SUB_A_X(@self.r.bc.h);  //SUB_A_B
+      $e3:self.SUB_A_X(@self.r.bc.l); //SUB_A_C
+      $e4:self.SUB_A_X(@self.r.de.h);
+      $e5:self.SUB_A_X(@self.r.de.l);
+      $e6:self.SUB_A_X(@self.r.hl.h);
+      $e7:self.SUB_A_X(@self.r.hl.l);
+      $e8:self.NEA_A_X(@self.r.va.h);
+      $e9:self.NEA_A_X(@self.r.va.l);
+      $ea:self.NEA_A_X(@self.r.bc.h);  //NEA_A_B
+      $eb:self.NEA_A_X(@self.r.bc.l);
+      $ec:self.NEA_A_X(@self.r.de.h);
+      $ed:self.NEA_A_X(@self.r.de.l);
+      $ee:self.NEA_A_X(@self.r.hl.h);
+      $ef:self.NEA_A_X(@self.r.hl.l);
+      $f0:self.SBB_A_X(@self.r.va.h);
+      $f1:self.SBB_A_X(@self.r.va.l);
+      $f2:self.SBB_A_X(@self.r.bc.h);
+      $f3:self.SBB_A_X(@self.r.bc.l);
+      $f4:self.SBB_A_X(@self.r.de.h);
+      $f5:self.SBB_A_X(@self.r.de.l);
+      $f6:self.SBB_A_X(@self.r.hl.h);
+      $f7:self.SBB_A_X(@self.r.hl.l);
+      $f8:self.EQA_A_X(@self.r.va.h);  //EQA_A_V
+      $f9:self.EQA_A_X(@self.r.va.l);
+      $fa:self.EQA_A_X(@self.r.bc.h);  //EQA_A_B
+      $fb:self.EQA_A_X(@self.r.bc.l); //EQA_A_C
+      $fc:self.EQA_A_X(@self.r.de.h); //EQA_A_D
+      $fd:self.EQA_A_X(@self.r.de.l); //EQA_A_E
+      $fe:self.EQA_A_X(@self.r.hl.h); //EQA_A_H
+      $ff:self.EQA_A_X(@self.r.hl.l); //EQA_A_L
       else MessageDlg('Instruccion 60: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
 end;
-
 procedure cpu_upd7810.opcode_64;
 var
-  instruccion,tempb:byte;
+  instruccion,tempb,portt:byte;
+  tempw:word;
 begin
  instruccion:=self.getbyte(self.pc);
  self.pc:=self.pc+1;
@@ -1574,46 +2300,102 @@ begin
   end;
  end else if self.cpu_type=CPU_7801 then begin
               case instruccion of
+                  $8:self.ANI_X(@self.r.va.h);
+                  $9:self.ANI_X(@self.r.va.l);
+                  $a:self.ANI_X(@self.r.bc.h);
+                  $b:self.ANI_X(@self.r.bc.l);
+                  $c:self.ANI_X(@self.r.de.h);
+                  $d:self.ANI_X(@self.r.de.l);
+                  $e:self.ANI_X(@self.r.hl.h);
+                  $f:self.ANI_X(@self.r.hl.l);
+                  $10:self.XRI_X(@self.r.va.h);
+                  $11:self.XRI_X(@self.r.va.l);
+                  $12:self.XRI_X(@self.r.bc.h);
+                  $13:self.XRI_X(@self.r.bc.l);
+                  $14:self.XRI_X(@self.r.de.h);
+                  $15:self.XRI_X(@self.r.de.l);
+                  $16:self.XRI_X(@self.r.hl.h);
+                  $17:self.XRI_X(@self.r.hl.l);
+                  $18:self.ORI_X(@self.r.va.h);
+                  $19:self.ORI_X(@self.r.va.l);
+                  $1a:self.ORI_X(@self.r.bc.h);
+                  $1b:self.ORI_X(@self.r.bc.l);
+                  $1c:self.ORI_X(@self.r.de.h);
+                  $1d:self.ORI_X(@self.r.de.l);
+                  $1e:self.ORI_X(@self.r.hl.h);
+                  $1f:self.ORI_X(@self.r.hl.l);
                   $20:begin //ADINC_V_xx
-                        self.ADI_X_xx(@self.r.va.h);
+                        self.ADI_X(@self.r.va.h);
                         if not(self.r.psw.cy) then self.r.psw.sk:=true;
                       end;
                   $21:begin //ADINC_A_xx
-                        self.ADI_X_xx(@self.r.va.l);
+                        self.ADI_X(@self.r.va.l);
                         if not(self.r.psw.cy) then self.r.psw.sk:=true;
                       end;
                   $22:begin //ADINC_B_xx
-                        self.ADI_X_xx(@self.r.bc.h);
+                        self.ADI_X(@self.r.bc.h);
                         if not(self.r.psw.cy) then self.r.psw.sk:=true;
                       end;
                   $23:begin //ADINC_C_xx
-                        self.ADI_X_xx(@self.r.bc.l);
+                        self.ADI_X(@self.r.bc.l);
                         if not(self.r.psw.cy) then self.r.psw.sk:=true;
                       end;
                   $24:begin //ADINC_D_xx
-                        self.ADI_X_xx(@self.r.de.h);
+                        self.ADI_X(@self.r.de.h);
                         if not(self.r.psw.cy) then self.r.psw.sk:=true;
                       end;
                   $25:begin //ADINC_E_xx
-                        self.ADI_X_xx(@self.r.de.l);
+                        self.ADI_X(@self.r.de.l);
                         if not(self.r.psw.cy) then self.r.psw.sk:=true;
                       end;
                   $26:begin //ADINC_H_xx
-                        self.ADI_X_xx(@self.r.hl.h);
+                        self.ADI_X(@self.r.hl.h);
                         if not(self.r.psw.cy) then self.r.psw.sk:=true;
                       end;
                   $27:begin //ADINC_L_xx
-                        self.ADI_X_xx(@self.r.hl.l);
+                        self.ADI_X(@self.r.hl.l);
                         if not(self.r.psw.cy) then self.r.psw.sk:=true;
                       end;
-                  $40:self.ADI_X_xx(@self.r.va.h);
-                  $41:self.ADI_X_xx(@self.r.va.l);
-                  $42:self.ADI_X_xx(@self.r.bc.h);
-                  $43:self.ADI_X_xx(@self.r.bc.l);
-                  $44:self.ADI_X_xx(@self.r.de.h);
-                  $45:self.ADI_X_xx(@self.r.de.l);
-                  $46:self.ADI_X_xx(@self.r.hl.h);
-                  $47:self.ADI_X_xx(@self.r.hl.l);
+                  $28:self.GTI_X(@self.r.va.h);
+                  $29:self.GTI_X(@self.r.va.l);
+                  $2a:self.GTI_X(@self.r.bc.h);
+                  $2b:self.GTI_X(@self.r.bc.l);
+                  $2c:self.GTI_X(@self.r.de.h);
+                  $2d:self.GTI_X(@self.r.de.l);
+                  $2e:self.GTI_X(@self.r.hl.h);
+                  $2f:self.GTI_X(@self.r.hl.l);
+                  $30:self.SUINB_X(@self.r.va.h);
+                  $31:self.SUINB_X(@self.r.va.l);
+                  $32:self.SUINB_X(@self.r.bc.h);
+                  $33:self.SUINB_X(@self.r.bc.l);
+                  $34:self.SUINB_X(@self.r.de.h);
+                  $35:self.SUINB_X(@self.r.de.l);
+                  $36:self.SUINB_X(@self.r.hl.h);
+                  $37:self.SUINB_X(@self.r.hl.l);
+                  $38:self.LTI_X(@self.r.va.h);
+                  $39:self.LTI_X(@self.r.va.l);
+                  $3a:self.LTI_X(@self.r.bc.h);
+                  $3b:self.LTI_X(@self.r.bc.l);
+                  $3c:self.LTI_X(@self.r.de.h);
+                  $3d:self.LTI_X(@self.r.de.l);
+                  $3e:self.LTI_X(@self.r.hl.h);
+                  $3f:self.LTI_X(@self.r.hl.l);
+                  $40:self.ADI_X(@self.r.va.h);
+                  $41:self.ADI_X(@self.r.va.l);
+                  $42:self.ADI_X(@self.r.bc.h);
+                  $43:self.ADI_X(@self.r.bc.l);
+                  $44:self.ADI_X(@self.r.de.h);
+                  $45:self.ADI_X(@self.r.de.l);
+                  $46:self.ADI_X(@self.r.hl.h);
+                  $47:self.ADI_X(@self.r.hl.l);
+                  $48:self.ONI_X(@self.r.va.h);
+                  $49:self.ONI_X(@self.r.va.l);
+                  $4a:self.ONI_X(@self.r.bc.h);
+                  $4b:self.ONI_X(@self.r.bc.l);
+                  $4c:self.ONI_X(@self.r.de.h);
+                  $4d:self.ONI_X(@self.r.de.l);
+                  $4e:self.ONI_X(@self.r.hl.h);
+                  $4f:self.ONI_X(@self.r.hl.l);
                   $50:self.ACI_X(@self.r.va.h);
                   $51:self.ACI_X(@self.r.va.l);
                   $52:self.ACI_X(@self.r.bc.h);
@@ -1622,24 +2404,60 @@ begin
                   $55:self.ACI_X(@self.r.de.l);
                   $56:self.ACI_X(@self.r.hl.h);
                   $57:self.ACI_X(@self.r.hl.l);
-                  $58:self.OFFI_x_xx(@self.r.va.h);
-                  $59:self.OFFI_x_xx(@self.r.va.l);
-                  $5a:self.OFFI_x_xx(@self.r.bc.h);
-                  $5b:self.OFFI_x_xx(@self.r.bc.l);
-                  $5c:self.OFFI_x_xx(@self.r.de.h);
-                  $5d:self.OFFI_x_xx(@self.r.de.l);
-                  $5e:self.OFFI_x_xx(@self.r.hl.h);
-                  $5f:self.OFFI_x_xx(@self.r.hl.l);
-                  $8b:begin //ANI_MKL_xx
-                        tempb:=self.getbyte(self.pc);
+                  $58:self.OFFI_X(@self.r.va.h);
+                  $59:self.OFFI_X(@self.r.va.l);
+                  $5a:self.OFFI_X(@self.r.bc.h);
+                  $5b:self.OFFI_X(@self.r.bc.l);
+                  $5c:self.OFFI_X(@self.r.de.h);
+                  $5d:self.OFFI_X(@self.r.de.l);
+                  $5e:self.OFFI_X(@self.r.hl.h);
+                  $5f:self.OFFI_X(@self.r.hl.l);
+                  $60:self.SUI_X(@self.r.va.h);
+                  $61:self.SUI_X(@self.r.va.l);
+                  $62:self.SUI_X(@self.r.bc.h);
+                  $63:self.SUI_X(@self.r.bc.l);
+                  $64:self.SUI_X(@self.r.de.h);
+                  $65:self.SUI_X(@self.r.de.l);
+                  $66:self.SUI_X(@self.r.hl.h);
+                  $67:self.SUI_X(@self.r.hl.l);
+                  $68:self.NEI_X(@self.r.va.h);
+                  $69:self.NEI_X(@self.r.va.l);
+                  $6a:self.NEI_X(@self.r.bc.h);
+                  $6b:self.NEI_X(@self.r.bc.l);
+                  $6c:self.NEI_X(@self.r.de.h);
+                  $6d:self.NEI_X(@self.r.de.l);
+                  $6e:self.NEI_X(@self.r.hl.h);
+                  $6f:self.NEI_X(@self.r.hl.l);
+                  $70:self.SBI_X(@self.r.va.h);
+                  $71:self.SBI_X(@self.r.va.l);
+                  $72:self.SBI_X(@self.r.bc.h);
+                  $73:self.SBI_X(@self.r.bc.l);
+                  $74:self.SBI_X(@self.r.de.h);
+                  $75:self.SBI_X(@self.r.de.l);
+                  $76:self.SBI_X(@self.r.hl.h);
+                  $77:self.SBI_X(@self.r.hl.l);
+                  $78:self.EQI_X(@self.r.va.h);
+                  $79:self.EQI_X(@self.r.va.l);
+                  $7a:self.EQI_X(@self.r.bc.h);
+                  $7b:self.EQI_X(@self.r.bc.l);
+                  $7c:self.EQI_X(@self.r.de.h);
+                  $7d:self.EQI_X(@self.r.de.l);
+                  $7e:self.EQI_X(@self.r.hl.h);
+                  $7f:self.EQI_X(@self.r.hl.l);
+                  $8a:begin //ANI_PC_xx
+                        tempb:=self.read_port(UPD7810_PORTC) and self.getbyte(self.pc);
                         self.pc:=self.pc+1;
-	                      self.mkl:=self.mkl and tempb;
+                        self.write_port(UPD7810_PORTC,tempb);
+                        self.r.psw.zf:=(tempb=0); //SET_Z
+                      end;
+                  $8b:begin //ANI_MKL_xx
+	                      self.mkl:=self.mkl and self.getbyte(self.pc);
+                        self.pc:=self.pc+1;
                         self.r.psw.zf:=(self.mkl=0);
                       end;
                   $93:begin //XRI_MKL_xx
-                        tempb:=self.getbyte(self.pc);
+	                      self.mkl:=self.mkl xor self.getbyte(self.pc);
                         self.pc:=self.pc+1;
-	                      self.mkl:=self.mkl xor tempb;
                         self.r.psw.zf:=(self.mkl=0);
                       end;
                   $9a:begin //ORI_PC_xx
@@ -1648,25 +2466,45 @@ begin
                         self.write_port(UPD7810_PORTC,tempb);
                         self.r.psw.zf:=(tempb=0);
                       end;
+                  $9b:begin //ORI_MKL
+                        self.mkl:=self.mkl or self.getbyte(self.pc);
+                        self.pc:=self.pc+1;
+                        self.r.psw.zf:=(self.mkl=0);
+                      end;
+                  $a8:begin //GTI_PA
+                        portt:=self.read_port(UPD7810_PORTA);
+                        tempw:=portt-self.getbyte(self.pc)-1;
+                        self.pc:=self.pc+1;
+	                      self.ZHC_SUB(tempw,portt,false);
+                        if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+                      end;
+                  $ca:begin //ONI_PC_xx
+                        portt:=self.read_port(UPD7810_PORTC);
+                        tempb:=self.getbyte(self.pc);
+                        self.pc:=self.pc+1;
+	                      if (portt and tempb)<>0 then self.r.psw.sk:=true;
+                      end;
                   $cb:begin //ONI_MKL_xx
                         tempb:=self.getbyte(self.pc);
                         self.pc:=self.pc+1;
                         if (self.mkl and tempb)<>0 then self.r.psw.sk:=true;
                       end;
                   $da:begin //OFFI_PC_xx
-                        tempb:=self.read_port(UPD7810_PORTC);
-                        self.OFFI_x_xx(@tempb);
+                        portt:=self.read_port(UPD7810_PORTC);
+                        tempb:=self.getbyte(self.pc);
+                        self.pc:=self.pc+1;
+                        if (portt and tempb)=0 then self.r.psw.sk:=true;
                       end;
-                  $db:self.OFFI_x_xx(@self.mkl); //OFFI_MKL_xx
+                  $db:self.OFFI_X(@self.mkl); //OFFI_MKL_xx
                   else MessageDlg('Instruccion 64: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
               end;
           end else MessageDlg('Instruccion 64: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
 end;
-
 procedure cpu_upd7810.opcode_70;
 var
   instruccion:byte;
   tempw:word;
+  tempb:byte;
 begin
   instruccion:=self.getbyte(self.pc);
   self.pc:=self.pc+1;
@@ -1687,6 +2525,18 @@ begin
             self.pc:=self.pc+2;
             self.putbyte(tempw,self.r.bc.l);
             self.putbyte(tempw+1,self.r.bc.h);
+          end;
+      $1f:begin //LBCD_w
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.r.bc.l:=self.getbyte(tempw);
+            self.r.bc.h:=self.getbyte(tempw+1);
+          end;
+      $2e:begin //SDED_w
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.putbyte(tempw,self.r.de.l);
+            self.putbyte(tempw+1,self.r.de.h);
           end;
       $2f:begin//LDED_w
             tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
@@ -1710,7 +2560,12 @@ begin
 	          tempw:=self.r.ea+self.r.va.l;
 	          ZHC_ADD(tempw,self.r.ea,false);
 	          self.r.ea:=tempw;
-          end else MessageDlg('Instruccion 70: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.pc,10), mtInformation,[mbOk], 0);
+          end else MessageDlg('Instruccion 70: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+      $68:begin //MOV_V_w
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.r.va.h:=self.getbyte(tempw);
+          end;
       $69:begin //MOV_A_w
             tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
             self.pc:=self.pc+2;
@@ -1726,6 +2581,31 @@ begin
             self.pc:=self.pc+2;
             self.r.bc.l:=self.getbyte(tempw);
           end;
+      $6c:begin //MOV_D_w
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.r.de.h:=self.getbyte(tempw);
+          end;
+      $6d:begin //MOV_E_w
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.r.de.l:=self.getbyte(tempw);
+          end;
+      $6e:begin //MOV_H_w
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.r.hl.h:=self.getbyte(tempw);
+          end;
+      $6f:begin //MOV_L_w
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.r.hl.l:=self.getbyte(tempw);
+          end;
+      $78:begin //MOV_w_V
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.putbyte(tempw,self.r.va.h);
+          end;
       $79:begin //MOV_w_A
             tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
             self.pc:=self.pc+2;
@@ -1736,29 +2616,437 @@ begin
             self.pc:=self.pc+2;
             self.putbyte(tempw,self.r.bc.h);
           end;
-      else MessageDlg('Instruccion 70: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.pc,10), mtInformation,[mbOk], 0);
+      $7b:begin //MOV_w_C
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.putbyte(tempw,self.r.bc.l);
+          end;
+      $7c:begin //MOV_w_D
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.putbyte(tempw,self.r.de.h);
+          end;
+      $7d:begin //MOV_w_E
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.putbyte(tempw,self.r.de.l);
+          end;
+      $7e:begin //MOV_w_H
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.putbyte(tempw,self.r.hl.h);
+          end;
+      $7f:begin //MOV_w_L
+            tempw:=self.getbyte(self.pc) or (self.getbyte(self.pc+1) shl 8);
+            self.pc:=self.pc+2;
+            self.putbyte(tempw,self.r.hl.l);
+          end;
+      $89:begin //ANAX_B
+            self.r.va.l:=self.r.va.l and self.getbyte(self.r.bc.w);
+            self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $8a:begin //ANAX_D
+            self.r.va.l:=self.r.va.l and self.getbyte(self.r.de.w);
+            self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $8b:begin //ANAX_H
+            self.r.va.l:=self.r.va.l and self.getbyte(self.r.hl.w);
+            self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $8d:begin //ANAX_Hp
+            self.r.va.l:=self.r.va.l and self.getbyte(self.r.hl.w);
+            self.r.hl.w:=self.r.hl.w+1;
+            self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $91:begin //XRAX_B
+            self.r.va.l:=self.r.va.l xor self.getbyte(self.r.bc.w);
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $92:begin //XRAX_D
+            self.r.va.l:=self.r.va.l xor self.getbyte(self.r.de.w);
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $93:begin //XRAX_H
+            self.r.va.l:=self.r.va.l xor self.getbyte(self.r.hl.w);
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $99:begin //ORAX_B
+            self.r.va.l:=self.r.va.l or self.getbyte(self.r.bc.w);
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $9a:begin //ORAX_D
+            self.r.va.l:=self.r.va.l or self.getbyte(self.r.de.w);
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $9b:begin //ORAX_H
+            self.r.va.l:=self.r.va.l or self.getbyte(self.r.hl.w);
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $9c:begin //ORAX_Dp
+            self.r.va.l:=self.r.va.l or self.getbyte(self.r.de.w);
+            self.r.de.w:=self.r.de.w+1;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $9d:begin //ORAX_Hp
+            self.r.va.l:=self.r.va.l or self.getbyte(self.r.hl.w);
+            self.r.hl.w:=self.r.hl.w+1;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $9e:begin //ORAX_Dm
+            self.r.va.l:=self.r.va.l or self.getbyte(self.r.de.w);
+            self.r.de.w:=self.r.de.w-1;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $9f:begin //ORAX_Hm
+            self.r.va.l:=self.r.va.l or self.getbyte(self.r.hl.w);
+            self.r.hl.w:=self.r.hl.w-1;
+	          self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+          end;
+      $a2:begin //ADDNCX_D
+            tempb:=self.r.va.l+self.getbyte(self.r.de.w);
+	          self.ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $a3:begin //ADDNCX_H
+            tempb:=self.r.va.l+self.getbyte(self.r.hl.w);
+	          self.ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $aa:begin //GTAX_D
+            tempw:=self.r.va.l-self.getbyte(self.r.de.w)-1;
+	          self.ZHC_SUB(tempw,self.r.va.l,false);
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $ab:begin //GTAX_H
+            tempw:=self.r.va.l-self.getbyte(self.r.hl.w)-1;
+	          self.ZHC_SUB(tempw,self.r.va.l,false);
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $ac:begin //GTAX_Dp
+            tempw:=self.r.va.l-self.getbyte(self.r.de.w)-1;
+            self.r.de.w:=self.r.de.w+1;
+	          self.ZHC_SUB(tempw,self.r.va.l,false);
+            if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $b1:begin //SUBNBX_B
+            tempb:=self.r.va.l-self.getbyte(self.r.bc.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $b2:begin //SUBNBX_D
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $b3:begin //SUBNBX_H
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC
+          end;
+      $b4:begin //SUBNBX_Dp
+             tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	           self.r.de.w:=self.r.de.w+1;
+	           self.ZHC_SUB(tempb,self.r.va.l,false);
+	           self.r.va.l:=tempb;
+             if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+          end;
+      $b5:begin //SUBNBX_Hp
+             tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	           self.r.hl.w:=self.r.hl.w+1;
+	           self.ZHC_SUB(tempb,self.r.va.l,false);
+	           self.r.va.l:=tempb;
+             if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+          end;
+      $b6:begin //SUBNBX_Dm
+             tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	           self.r.de.w:=self.r.de.w-1;
+	           self.ZHC_SUB(tempb,self.r.va.l,false);
+	           self.r.va.l:=tempb;
+             if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+          end;
+      $b7:begin //SUBNBX_Hm
+             tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+             self.r.hl.w:=self.r.hl.w-1;
+	           self.ZHC_SUB(tempb,self.r.va.l,false);
+             self.r.va.l:=tempb;
+             if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+          end;
+      $b9:begin //LTAX_B
+             tempb:=self.r.va.l-self.getbyte(self.r.bc.w);
+	            ZHC_SUB(tempb,self.r.va.l,false);
+	            if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+          end;
+      $ba:begin //LTAX_D
+              tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	            ZHC_SUB(tempb,self.r.va.l,false);
+	            if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+          end;
+      $bb:begin //LTAX_H
+              tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	            ZHC_SUB(tempb,self.r.va.l,false);
+	            if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+          end;
+      $bc:begin //LTAX_Dp
+              tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+              self.r.de.w:=self.r.de.w+1;
+	            self.ZHC_SUB(tempb,self.r.va.l,false);
+	            if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+          end;
+      $c1:begin //ADDX_B
+              tempb:=self.r.va.l+self.getbyte(self.r.bc.w);
+	            ZHC_ADD(tempb,self.r.va.l,false);
+	            self.r.va.l:=tempb;
+          end;
+      $c2:begin //ADDX_D
+              tempb:=self.r.va.l+self.getbyte(self.r.de.w);
+	            ZHC_ADD(tempb,self.r.va.l,false);
+	            self.r.va.l:=tempb;
+          end;
+      $c3:begin  //ADDX_H
+            tempb:=self.r.va.l+self.getbyte(self.r.hl.w);
+	          ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $c4:begin //ADDX_Dp
+            tempb:=self.r.va.l+self.getbyte(self.r.de.w);
+            self.r.de.w:=self.r.de.w+1;
+	          self.ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $c5:begin //ADDX_Hp
+            tempb:=self.r.va.l+self.getbyte(self.r.hl.w);
+            self.r.hl.w:=self.r.hl.w+1;
+	          ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $c6:begin //ADDX_Dm
+            tempb:=self.r.va.l+self.getbyte(self.r.de.w);
+            self.r.de.w:=self.r.de.w-1;
+	          self.ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $c7:begin //ADDX_Hm
+            tempb:=self.r.va.l+self.getbyte(self.r.hl.w);
+            self.r.hl.w:=self.r.hl.w-1;
+	          self.ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $ca:begin //ONAX_D
+            if (self.r.va.l and self.getbyte(self.r.de.w))<>0 then begin
+              self.r.psw.zf:=false;
+              self.r.psw.sk:=true;
+            end else self.r.psw.zf:=true;
+          end;
+      $cb:begin //ONAX_H
+            if (self.r.va.l and self.getbyte(self.r.hl.w))<>0 then begin
+              self.r.psw.zf:=false;
+              self.r.psw.sk:=true;
+            end else self.r.psw.zf:=true;
+          end;
+      $d2:begin //ADCX_D
+            tempb:=self.r.va.l+self.getbyte(self.r.de.w)+byte(self.r.psw.cy);
+	          ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $d3:begin //ADCX_H
+            tempb:=self.r.va.l+self.getbyte(self.r.hl.w)+byte(self.r.psw.cy);
+	          ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $d5:begin //ADCX_Hp
+            tempb:=self.r.va.l+self.getbyte(self.r.hl.w)+byte(self.r.psw.cy);
+            self.r.hl.w:=self.r.hl.w+1;
+	          self.ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $d6:begin //ADCX_Dm
+            tempb:=self.r.va.l+self.getbyte(self.r.de.w)+byte(self.r.psw.cy);
+            self.r.de.w:=self.r.de.w-1;
+	          ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $d7:begin //ADCX_Hm
+            tempb:=self.r.va.l+self.getbyte(self.r.hl.w)+byte(self.r.psw.cy);
+            self.r.hl.w:=self.r.hl.w-1;
+	          ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $d9:begin //OFFAX_B
+            if (self.r.va.l and self.getbyte(self.r.bc.w))<>0 then self.r.psw.zf:=false
+              else begin
+                self.r.psw.zf:=true;
+                self.r.psw.sk:=true;
+              end;
+          end;
+      $da:begin //OFFAX_D
+            if (self.r.va.l and self.getbyte(self.r.de.w))<>0 then self.r.psw.zf:=false
+              else begin
+                self.r.psw.zf:=true;
+                self.r.psw.sk:=true;
+              end;
+          end;
+      $db:begin //OFFAX_H
+            if (self.r.va.l and self.getbyte(self.r.hl.w))<>0 then self.r.psw.zf:=false
+              else begin
+                self.r.psw.zf:=true;
+                self.r.psw.sk:=true;
+              end;
+          end;
+      $e1:begin //SUBX_B
+            tempb:=self.r.va.l-self.getbyte(self.r.bc.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $e2:begin //SUBX_D
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $e3:begin //SUBX_H
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+          end;
+      $e4:begin //SUBX_Dp
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          self.r.de.w:=self.r.de.w+1;
+          end;
+      $e5:begin //SUBX_Hp
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          self.r.hl.w:=self.r.hl.w+1;
+          end;
+      $e6:begin //SUBX_Dm
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          self.r.de.w:=self.r.de.w-1;
+          end;
+      $e7:begin //SUBX_Hm
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          self.r.hl.w:=self.r.hl.w-1;
+          end;
+      $e9:begin //NEAX_B
+            tempb:=self.r.va.l-self.getbyte(self.r.bc.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+          	if not(self.r.psw.zf) then self.r.psw.sk:=true; //SKIP_NZ
+          end;
+      $ea:begin //NEAX_D
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+          	if not(self.r.psw.zf) then self.r.psw.sk:=true; //SKIP_NZ
+          end;
+      $eb:begin //NEAX_H
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+          	if not(self.r.psw.zf) then self.r.psw.sk:=true; //SKIP_NZ
+          end;
+      $ec:begin //NEAX_Dp
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+            self.r.de.w:=self.r.de.w+1;
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+          	if not(self.r.psw.zf) then self.r.psw.sk:=true; //SKIP_NZ
+          end;
+      $ed:begin //NEAX_Hp
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+            self.r.hl.w:=self.r.hl.w+1;
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+          	if not(self.r.psw.zf) then self.r.psw.sk:=true; //SKIP_NZ
+          end;
+      $f2:begin //SBBX_D
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w)-byte(self.r.psw.cy);
+	          self.ZHC_SUB(tempb,self.r.va.l,self.r.psw.cy);
+	          self.r.va.l:=tempb;
+          end;
+      $f3:begin //SBBX_H
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w)-byte(self.r.psw.cy);
+	          self.ZHC_SUB(tempb,self.r.va.l,self.r.psw.cy);
+	          self.r.va.l:=tempb;
+          end;
+      $f4:begin //SBBX_Dp
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w)-byte(self.r.psw.cy);
+            self.r.de.w:=self.r.de.w+1;
+	          self.ZHC_SUB(tempb,self.r.va.l,self.r.psw.cy);
+	          self.r.va.l:=tempb;
+          end;
+      $f7:begin //SBBX_Hm
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w)-byte(self.r.psw.cy);
+            self.r.hl.w:=self.r.hl.w-1;
+	          self.ZHC_SUB(tempb,self.r.va.l,self.r.psw.cy);
+	          self.r.va.l:=tempb;
+          end;
+      $f9:begin //EQAX_B
+            tempb:=self.r.va.l-self.getbyte(self.r.bc.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+          end;
+      $fa:begin //EQAX_D
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+          end;
+      $fb:begin //EQAX_H
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+          end;
+      $fc:begin //EQAX_Dp
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	          self.r.de.w:=self.r.de.w+1;
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+            if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+          end;
+      $fd:begin //EQAX_Hp
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+            self.r.hl.w:=self.r.hl.w+1;
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+            if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+          end;
+      $fe:begin //EQAX_Dm
+            tempb:=self.r.va.l-self.getbyte(self.r.de.w);
+	          self.r.de.w:=self.r.de.w-1;
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+            if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+          end;
+      $ff:begin //EQAX_Hm
+            tempb:=self.r.va.l-self.getbyte(self.r.hl.w);
+	          self.r.hl.w:=self.r.hl.w-1;
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+            if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+          end;
+      else MessageDlg('Instruccion 70: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
 end;
-
 procedure cpu_upd7810.opcode_74;
 var
   instruccion:byte;
   tempw:word;
+  tempb:byte;
 begin
  instruccion:=self.getbyte(self.pc);
  self.pc:=self.pc+1;
  if self.cpu_type=CPU_7810 then begin
   case instruccion of
-     $9:self.ANI_A;
-     $11:self.XRI_A;
-     $19:self.ORI_A;
-     $29:self.GTI_A;
-     $41:self.ADI_X_xx(@self.r.va.l);
-     $49:self.ONI_A;
-     $59:self.OFFI_x_xx(@self.r.va.l);
+     $9:self.ANI_X(@self.r.va.l);
+     $11:self.XRI_X(@self.r.va.l);
+     $19:self.ORI_X(@self.r.va.l);
+     $29:self.GTI_X(@self.r.va.l);
+     $41:self.ADI_X(@self.r.va.l);
+     $49:self.ONI_X(@self.r.va.l);
+     $59:self.OFFI_X(@self.r.va.l);
      $61:self.SUI_X(@self.r.va.l);
-     $69:self.NEI_A;
-     $79:self.EQI_A;
+     $69:self.NEI_X(@self.r.va.l);
+     $79:self.EQI_X(@self.r.va.l);
      $c6:begin //DADD_EA_DE
            tempw:=self.r.ea+self.r.de.w;
 	         ZHC_ADD(tempw,self.r.ea,false);
@@ -1769,9 +3057,114 @@ begin
            ZHC_ADD(tempw,self.r.ea,false);
            self.r.ea:=tempw;
          end;
-      else MessageDlg('Instruccion 74: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.pc,10), mtInformation,[mbOk], 0);
+      else MessageDlg('Instruccion 74: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
   end;
- end else MessageDlg('Instruccion 74: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.pc,10), mtInformation,[mbOk], 0);
+ end else begin
+  case instruccion of
+    $88:begin //ANAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            self.r.va.l:=self.r.va.l and self.getbyte(tempw);
+            self.r.psw.zf:=(self.r.va.l=0);
+        end;
+    $90:begin //XRAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            self.r.va.l:=self.r.va.l xor self.getbyte(tempw);
+            self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+        end;
+    $98:begin //ORAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            self.r.va.l:=self.r.va.l or self.getbyte(tempw);
+            self.r.psw.zf:=(self.r.va.l=0); //SET_Z
+        end;
+    $a0:begin //ADDNCW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            tempb:=self.r.va.l+self.getbyte(tempw);
+	          self.ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+        end;
+    $a8:begin //GTAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            tempb:=self.getbyte(tempw);
+            tempw:=self.r.va.l-tempb-1;
+	          self.ZHC_SUB(tempw,self.r.va.l,false);
+	          if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+        end;
+    $b0:begin //SUBNBW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            tempb:=self.r.va.l-self.getbyte(tempw);
+	          ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+            if not(self.r.psw.cy) then self.r.psw.sk:=true; //SKIP_NC;
+        end;
+    $b8:begin //LTAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            tempb:=self.r.va.l-self.getbyte(tempw);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+            if self.r.psw.cy then self.r.psw.sk:=true;  //SKIP_CY
+        end;
+    $c0:begin //ADDW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            tempb:=self.r.va.l+self.getbyte(tempw);
+            ZHC_ADD(tempb,self.r.va.l,false);
+            self.r.va.l:=tempb;
+         end;
+    $c8:begin //ONAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            if (self.r.va.l and self.getbyte(tempw))<>0 then begin
+              self.r.psw.zf:=false;
+              self.r.psw.sk:=true;
+            end else self.r.psw.zf:=true;
+        end;
+    $d0:begin //ADCW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            tempb:=self.r.va.l+getbyte(tempw)+byte(self.r.psw.cy);
+            ZHC_ADD(tempb,self.r.va.l,self.r.psw.cy);
+            self.r.va.l:=tempb;
+        end;
+    $d8:begin //OFFAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+	          if (self.r.va.l and self.getbyte(tempw))<>0 then self.r.psw.zf:=false
+	          else begin
+              self.r.psw.zf:=true;
+              self.r.psw.sk:=true;
+            end;
+        end;
+    $e0:begin //SUBW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+	          tempb:=self.r.va.l-self.getbyte(tempw);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
+        end;
+    $e8:begin //NEAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            tempb:=self.r.va.l-self.getbyte(tempw);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+            if not(self.r.psw.zf) then self.r.psw.sk:=true; //SKIP_NZ;
+        end;
+    $f8:begin //EQAW_wa
+            tempw:=(self.r.va.h shl 8) or self.getbyte(self.pc);
+            self.pc:=self.pc+1;
+            tempb:=self.r.va.l-self.getbyte(tempw);
+	          self.ZHC_SUB(tempb,self.r.va.l,false);
+            if self.r.psw.zf then self.r.psw.sk:=true; //SKIP_Z
+        end;
+    else MessageDlg('Instruccion 74: '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
+  end;
+ end;
 end;
 
 end.

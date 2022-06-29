@@ -12,11 +12,9 @@ object ConfigCPC: TConfigCPC
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poDesktopCenter
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 8
@@ -355,6 +353,30 @@ object ConfigCPC: TConfigCPC
       Caption = '4Mb'
       Enabled = False
       TabOrder = 2
+    end
+  end
+  object GroupBox4: TGroupBox
+    Left = 460
+    Top = 87
+    Width = 107
+    Height = 64
+    Caption = 'Monitor'
+    TabOrder = 6
+    object RadioButton9: TRadioButton
+      Left = 13
+      Top = 15
+      Width = 71
+      Height = 17
+      Caption = 'Color'
+      TabOrder = 0
+    end
+    object RadioButton10: TRadioButton
+      Left = 13
+      Top = 38
+      Width = 72
+      Height = 17
+      Caption = 'Green'
+      TabOrder = 1
     end
   end
 end

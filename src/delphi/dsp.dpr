@@ -275,7 +275,6 @@ uses
   returnofinvaders_hw in '..\arcade\returnofinvaders_hw.pas',
   sm510 in '..\cpu\sm510.pas',
   gnw_510 in '..\gnw\gnw_510.pas',
-  m6845 in '..\devices\m6845.pas',
   tetris_atari_hw in '..\arcade\tetris_atari_hw.pas',
   slapstic in '..\arcade\misc\slapstic.pas',
   snk_hw in '..\arcade\snk_hw.pas',
@@ -328,7 +327,8 @@ uses
   crystalcastles_hw in '..\arcade\crystalcastles_hw.pas',
   flower_hw in '..\arcade\flower_hw.pas',
   flower_audio in '..\snd\flower_audio.pas',
-  superdodgeball_hw in '..\arcade\superdodgeball_hw.pas';
+  superdodgeball_hw in '..\arcade\superdodgeball_hw.pas',
+  upd1771 in '..\snd\upd1771.pas';
 
 {$R *.res}
 begin

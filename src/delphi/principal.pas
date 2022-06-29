@@ -1,6 +1,7 @@
 unit principal;
 //{$SetPeFlags $20}
 interface
+
 uses
   lib_sdl2,Windows,SysUtils,Forms,graphics,uchild,Classes,Dialogs,StdCtrls,ExtCtrls,
   Buttons,Grids,ComCtrls,Menus,ImgList,Controls,messages,System.ImageList,
@@ -11,6 +12,7 @@ uses
   controls_engine,LoadRom,config_general,timer_engine,misc_functions,
   //other...
   vars_hide;
+
 type
   Tprincipal1 = class(TForm)
     MainMenu1: TMainMenu;
@@ -522,14 +524,18 @@ var
   Child:TfrChild;
   //Misc Vars
   tipo_new:word;
+
 implementation
+
 uses acercade,file_engine,poke_memoria,lenslock,spectrum_misc,tap_tzx;
 {$R *.dfm}
+
 //Para evitar que cuando se pulsa ALT se vaya al menu añado esta funcion...
 procedure Tprincipal1.WndProc(var Message:TMessage);
 begin
 if not((Message.Msg=WM_SYSCOMMAND) and (Message.WParam=SC_KEYMENU)) then inherited WndProc(Message);
 end;
+
 procedure Tprincipal1.FormCreate(Sender: TObject);
 begin
 //SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
@@ -547,6 +553,7 @@ leer_idioma;
 principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
 end;
+
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
 begin
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
@@ -562,6 +569,7 @@ end else begin //Play
   if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
 end;
 end;
+
 procedure Tprincipal1.CambiarMaquina(Sender:TObject);
 var
   tipo:word;
@@ -579,6 +587,7 @@ if main_vars.tipo_maquina<>tipo then begin
   timer3.Enabled:=true;
 end;
 end;
+
 procedure Tprincipal1.Timer1Timer(Sender: TObject);
 var
   velocidad:word;
@@ -589,6 +598,7 @@ statusbar1.panels[1].text:=leng[main_vars.idioma].mensajes[0]+': '+inttostr(velo
 statusbar1.Panels[2].Text:=main_vars.mensaje_principal;
 main_vars.frames_sec:=0;
 end;
+
 procedure Tprincipal1.Timer2Timer(Sender: TObject);
 var
   tipo:word;
@@ -608,6 +618,7 @@ if not(main_vars.auto_exec) then begin
 end;
 load_game(tipo);
 end;
+
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
@@ -642,6 +653,7 @@ end else begin
   principal1.ejecutar1click(nil);
 end;
 end;
+
 procedure Tprincipal1.Timer4Timer(Sender: TObject);
 begin
 timer4.Enabled:=false;
@@ -678,12 +690,14 @@ if sound_status.hay_tsonido then begin
 end;
 Windows.SetFocus(child.Handle);
 end;
+
 procedure Tprincipal1.Reset1Click(Sender: TObject);
 begin
 main_vars.mensaje_principal:='';
 if @llamadas_maquina.reset<>nil then llamadas_maquina.reset;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
+
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
 timer1.Enabled:=false;
@@ -693,10 +707,12 @@ aboutbox.show;
 while aboutbox.Showing do application.ProcessMessages;
 timer4.Enabled:=true;
 end;
+
 procedure Tprincipal1.Salir1Click(Sender: TObject);
 begin
 close;
 end;
+
 procedure Tprincipal1.IdiomaClick(Sender: TObject);
 var
   tmp_idioma:byte;
@@ -712,6 +728,7 @@ if main_vars.idioma<>tmp_idioma then begin
 end;
 if child<>nil then Windows.SetFocus(child.Handle);
 end;
+
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
 timer1.Enabled:=false;
@@ -721,6 +738,7 @@ FLoadRom.Show;
 while FLoadRom.Showing do application.ProcessMessages;
 Windows.SetFocus(child.Handle);
 end;
+
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 timer1.Enabled:=false;
@@ -737,6 +755,7 @@ SDL_Quit;
 close_sdl_lib;
 halt(0);
 end;
+
 procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
 begin
 timer1.Enabled:=false;
@@ -745,6 +764,7 @@ EmuStatus:=EsPause;
 if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
 timer4.Enabled:=true;
 end;
+
 procedure Tprincipal1.fPoke(Sender: TObject);
 begin
 //Pausa1Click(nil);
@@ -754,6 +774,7 @@ iniciar_BBDD_poke;
 buscar_BBDD;
 //Ejecutar1click(nil);
 end;
+
 procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
 timer1.Enabled:=false;
@@ -763,6 +784,7 @@ MConfig.Show;
 while MConfig.Showing do application.ProcessMessages;
 timer4.enabled:=true;
 end;
+
 procedure Tprincipal1.fSaveGif(Sender: TObject);
 var
   r:integer;
@@ -843,6 +865,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
 end;
 timer4.Enabled:=true;
 end;
+
 procedure Tprincipal1.ffastload(Sender: TObject);
 begin
 var_spectrum.fastload:=not(var_spectrum.fastload);
@@ -851,18 +874,21 @@ if var_spectrum.fastload then principal1.imagelist2.GetBitmap(0,principal1.BitBt
   else imagelist2.GetBitmap(1,principal1.BitBtn14.Glyph);
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
+
 procedure Tprincipal1.fSlow(Sender: TObject);
 begin
 main_vars.vactual:=(main_vars.vactual+1) and 3;
 valor_sync:=(1/(llamadas_maquina.fps_max/(main_vars.vactual+1)))*cont_micro;
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
+
 procedure Tprincipal1.fFast(Sender: TObject);
 begin
 main_screen.rapido:=not(main_screen.rapido);
 QueryPerformanceCounter(cont_sincroniza);
 if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
+
 procedure Tprincipal1.CambiarVideo(Sender: TObject);
 var
   nuevo:byte;
@@ -880,6 +906,7 @@ if main_vars.driver_ok then begin
       end;
 end;
 end;
+
 procedure Tprincipal1.fLoadCartucho(Sender: TObject);
 begin
 timer1.Enabled:=false;
@@ -889,6 +916,7 @@ if @llamadas_maquina.cartuchos<>nil then
   if not(llamadas_maquina.cartuchos) then MessageDlg('ROM/Cartucho/Snapshot no valido'+chr(10)+chr(13)+'ROM/Cartrigde/Snapshot not valid',mtError,[mbOk],0);
 timer4.Enabled:=true;
 end;
+
 procedure Tprincipal1.fLoadCinta(Sender: TObject);
 begin
 timer1.Enabled:=false;
@@ -898,6 +926,7 @@ if @llamadas_maquina.cintas<>nil then
   if not(llamadas_maquina.cintas) then MessageDlg('Cinta/Snapshot no valido'+chr(10)+chr(13)+'Tape/Snapshot not valid',mtError,[mbOk],0);
 timer4.Enabled:=true;
 end;
+
 procedure Tprincipal1.fConfigurar(Sender: TObject);
 begin
 if (@llamadas_maquina.configurar=nil) then begin
@@ -910,4 +939,5 @@ EmuStatus:=EsPause;
 llamadas_maquina.configurar;
 timer4.Enabled:=true;
 end;
+
 end.

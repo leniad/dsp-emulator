@@ -24,7 +24,8 @@ const
         (n:'b39-01.19';l:$10000;p:0;crc:$50690880),(n:'b39-02.20';l:$10000;p:$1;crc:$4dead71f),
         (n:'b39-03.21';l:$10000;p:$20000;crc:$4a4cb785),(n:'b39-04.22';l:$10000;p:$20001;crc:$4caa53bd),
         (n:'b22-03.23';l:$20000;p:$40000;crc:$3ebb0fb8),(n:'b22-04.24';l:$20000;p:$40001;crc:$91625e7f));
-        {$IFDEF MCU}rainbow_cchip_eeprom:tipo_roms=(n:'cchip_b22-15.53';l:$2000;p:0;crc:$08c588a6);{$ENDIF}
+        {$IFDEF MCU}rainbow_cchip_eeprom:tipo_roms=(n:'cchip_b22-15.53';l:$2000;p:0;crc:$08c588a6);
+        rainbowe_cchip_eeprom:tipo_roms=(n:'cchip_b39-05.53';l:$2000;p:0;crc:$397735e3);{$ENDIF}
         //DIP
         rainbow_dip1:array [0..2] of def_dip=(
         (mask:$30;name:'Coin A';number:4;dip:((dip_val:$10;dip_name:'ModeA 2C-1C/ModeB 3C-1C'),(dip_val:$30;dip_name:'ModeAB 1C-1C'),(dip_val:$0;dip_name:'ModeA 2C-3C/ModeB 4C-1C'),(dip_val:$20;dip_name:'ModeA 1C-2C/ModeB 2C-1C'),(),(),(),(),(),(),(),(),(),(),(),())),
@@ -36,7 +37,7 @@ const
         (mask:$30;name:'Lives';number:4;dip:((dip_val:$10;dip_name:'1'),(dip_val:$0;dip_name:'2'),(dip_val:$30;dip_name:'3'),(dip_val:$20;dip_name:'4'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$40;name:'Languaje';number:2;dip:((dip_val:$0;dip_name:'English'),(dip_val:$40;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Coin Mode';number:2;dip:((dip_val:$80;dip_name:'Mode A (Japan)'),(dip_val:$0;dip_name:'Mode B (World)'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        CPU_MUL=2;
+        CPU_SYNC=1;
 
 var
  scroll_x1,scroll_y1,scroll_x2,scroll_y2:word;
@@ -113,7 +114,7 @@ end;
 procedure rainbow_principal;
 var
   frame_m,frame_s,frame_mcu:single;
-  f:byte;
+  h,f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
@@ -121,17 +122,19 @@ frame_s:=tc0140syt_0.z80.tframes;
 {$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
 while EmuStatus=EsRuning do begin
  for f:=0 to $ff do begin
-    //Main CPU
-    m68000_0.run(frame_m);
-    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-    //Sound CPU
-    tc0140syt_0.z80.run(frame_s);
-    frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
-    //MCU
-    {$IFDEF MCU}
-    cchip_0.upd7810.run(frame_mcu);
-    frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
-    {$ENDIF}
+    for h:=1 to CPU_SYNC do begin
+      //Main CPU
+      m68000_0.run(frame_m);
+      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+      //Sound CPU
+      tc0140syt_0.z80.run(frame_s);
+      frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
+      //MCU
+      {$IFDEF MCU}
+      cchip_0.upd7810.run(frame_mcu);
+      frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
+      {$ENDIF}
+    end;
     if f=239 then begin
         update_video_rainbow;
         m68000_0.irq[4]:=HOLD_LINE;
@@ -281,7 +284,7 @@ begin
  {$IFDEF MCU}cchip_0.reset;{$ENDIF}
  reset_audio;
  marcade.in0:=$ff;
- marcade.in1:=$fc;
+ marcade.in1:=0;//$fc;
  marcade.in2:=$ff;
  marcade.in3:=$ff;
  sound_bank:=0;
@@ -325,10 +328,10 @@ screen_mod_scroll(2,512,512,511,512,256,511);
 screen_init(3,512,512,false,true);
 iniciar_video(320,224);
 //Main CPU
-m68000_0:=cpu_m68000.create(8000000,256);
+m68000_0:=cpu_m68000.create(8000000,256*CPU_SYNC);
 m68000_0.change_ram16_calls(rainbow_getword,rainbow_putword);
 //Sound CPU
-tc0140syt_0:=tc0140syt_chip.create(4000000,256);
+tc0140syt_0:=tc0140syt_chip.create(4000000,256*CPU_SYNC);
 tc0140syt_0.z80.change_ram_calls(rainbow_snd_getbyte,rainbow_snd_putbyte);
 tc0140syt_0.z80.init_sound(sound_instruccion);
 //Sound Chips
@@ -341,7 +344,7 @@ case main_vars.tipo_maquina of
   179:begin
          //MCU
          {$IFDEF MCU}
-         cchip_0:=cchip_chip.create(12000000*CPU_MUL,256);
+         cchip_0:=cchip_chip.create(12000000,256*CPU_SYNC);
          cchip_0.change_ad(rainbow_80000d);
          cchip_0.change_in(rainbow_800007,rainbow_800009,rainbow_80000c,nil,nil);
          if not(roms_load(cchip_0.get_eeprom_dir,rainbow_cchip_eeprom)) then exit;
@@ -367,7 +370,12 @@ case main_vars.tipo_maquina of
       end;
   180:begin
          //MCU
-         {$IFNDEF MCU}
+         {$IFDEF MCU}
+         cchip_0:=cchip_chip.create(12000000,256*CPU_SYNC);
+         cchip_0.change_ad(rainbow_80000d);
+         cchip_0.change_in(rainbow_800007,rainbow_800009,rainbow_80000c,nil,nil);
+         if not(roms_load(cchip_0.get_eeprom_dir,rainbow_cchip_eeprom)) then exit;
+         {$ELSE IF}
          rbisland_init_cchip(m68000_0.numero_cpu,1);
          {$ENDIF}
          if not(roms_load16w(@rom,rainbowe_rom)) then exit;

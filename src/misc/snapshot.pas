@@ -1430,8 +1430,9 @@ write_ram(0,cpc_sna.ram_config);
 //CRT
 cpc_crt.reg:=cpc_sna.crt_index and $1f;
 for f:=0 to 17 do cpc_crt.regs[f]:=cpc_sna.crt_regs[f];
-cpc_calc_crt;
-cpc_calcular_dir_scr;
+if cpc_crt.regs[1]<50 then cpc_crt.pixel_visible:=cpc_crt.regs[1]*8
+  else cpc_crt.pixel_visible:=49*8;
+cpc_crt.char_total:=(cpc_crt.regs[0]+1)*8;
 //ROM
 cpc_outbyte($df00,cpc_sna.rom_config);
 //PIA a,b,c,control

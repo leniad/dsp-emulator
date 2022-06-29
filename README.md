@@ -1,4 +1,37 @@
 ﻿# DSP Emulator status #
+<b>29/06/22 - DSP Emulator 0.20WIP9. Win32 and source update.<br>
+<pre>
+-General
+    +Updated SDL library to 2.0.22
+    +CPU
+        -UPD78XX
+            +Added many, many opcodes and fixed many others
+            +Added UPD7801 opcode timing tables
+            +Fixed IRQs
+            +Fixed outports
+-Amstrad CPC
+    +Rewrited CRT video emulation
+    +Added green monitor option
+    +Fixed scroll hardware 
+-Super Cassete Vision
+    +Added video emulation
+    +Added Sound
+    +Added input
+    +Added ROM banking
+    +Everything moves slow... And I dont know why...
+</pre><br>
+<img src="https://i.ibb.co/4mPpzSG/007-after.png"> <img src="https://i.ibb.co/KKL0dMs/007-before.png"><br>
+<img src="https://i.ibb.co/twRdZ1T/actionf-after.png"> <img src="https://i.ibb.co/G9GP1GS/actionf-before.png"><br>
+<img src="https://i.ibb.co/gZQztF4/indy-after.png"> <img src="https://i.ibb.co/ypP0KgM/indy-before.png"><br>
+<img src="https://i.ibb.co/k1zBkFr/prof2-after.png"> <img src="https://i.ibb.co/7CYr8QC/prof2-before.png"><br>
+<img src="https://i.ibb.co/ZL3mxSw/rastan-after.png"> <img src="https://i.ibb.co/gjFBf4g/rastan-before.png"><br>
+<img src="https://i.ibb.co/9qwKFxd/rick2-after.png"> <img src="https://i.ibb.co/tX7LPNF/rick2-before.png"><br>
+<img src="https://i.ibb.co/RpYZDH5/scauldron-after.png"> <img src="https://i.ibb.co/2nGSkfs/scauldron-before.png"><br>
+<img src="https://i.ibb.co/h87xtth/xyp-after.png"> <img src="https://i.ibb.co/ZKPdGxV/xyp-before.png"><br>
+<img src="https://i.ibb.co/PcmnGKC/scv-db.png"> <img src="https://i.ibb.co/r0fkxgj/scv-dragons.png"><br>
+<img src="https://i.ibb.co/ZTwdqg2/scv-kungfu.png"> <img src="https://i.ibb.co/g967ZMt/scv-mappy.png"><br>
+<img src="https://i.ibb.co/NsvDYxP/scv-monster.png"> <img src="https://i.ibb.co/16r4ysL/scv-polepos2.png"><br>
+<img src="https://i.ibb.co/t3fXqTV/scv-prowr.png"><br><br>
 <b>01/05/22 - DSP Emulator 0.20WIP8. Win32 and source update.<br>
 <pre>
 -General

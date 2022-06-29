@@ -1,10 +1,12 @@
 ﻿unit amstrad_cpc;
 
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,controls_engine,ay_8910,sysutils,gfx_engine,upd765,cargar_dsk,forms,
      dialogs,rom_engine,misc_functions,main_engine,pal_engine,sound_engine,
-     tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc,timer_engine;
+     tape_window,file_engine,ppi8255,lenguaje,disk_file_format,config_cpc,
+     timer_engine;
 
 const
   cpc464_rom:tipo_roms=(n:'cpc464.rom';l:$8000;p:0;crc:$40852f25);
@@ -17,19 +19,32 @@ const
   cpc6128sp_rom:tipo_roms=(n:'cpc6128sp.rom';l:$8000;p:0;crc:$2fa2e7d6);
   cpc6128d_rom:tipo_roms=(n:'cpc6128d.rom';l:$8000;p:0;crc:$4704685a);
   ams_rom:tipo_roms=(n:'amsdos.rom';l:$4000;p:0;crc:$1fe22ecd);
+  cpc_paleta:array[0..31] of dword=(
+        $808080,$808080,$00FF80,$FFFF80,
+        $000080,$FF0080,$008080,$FF8080,
+        $FF0080,$FFFF80,$FFFF00,$FFFFFF,
+        $FF0000,$FF00FF,$FF8000,$FF80FF,
+        $000080,$00FF80,$00FF00,$00FFFF,
+        $000000,$0000FF,$008000,$0080FF,
+        $800080,$80FF80,$80FF00,$80FFFF,
+        $800000,$8000FF,$808000,$8080FF);
+  cpc_green:array[0..31] of byte=(
+        13,13,19,25,1,7,10,16,7,25,24,26,6,8,15,17,1,19,
+        18,20,0,2,9,11,4,22,21,23,3,5,12,14);
+  GREENFRAQ=(255 shl 16)/26;
 
 type
   tcpc_crt=packed record
-              char_hsync,char_total,hsync_time_ocurre:word;
-              char_altura:byte;
-              vsync_lines,vsync_cont:byte;
-              vsync_activo,hsync_activo:boolean;
-              vsync_linea_ocurre:word;
-              scr_line_dir:array[0..4095] of dword;
-              lineas_total,lineas_borde,lineas_visible,pixel_visible:word;
+              char_total,pixel_visible:word;
               regs:array[0..31] of byte;
               reg:byte;
-              h_ctr,r_ctr,v_ctr,h_syn,h_syn_ctr,v_syn,v_syn_ctr:word;
+              //otro
+              was_hsync,was_vsync,line_is_visible:boolean;
+              character_counter,hsync_counter,vsync_counter:byte;
+              state_hsync,is_in_adjustment_period,state_vsync:boolean;
+              state_row_address,adj_count:byte;
+              end_of_line_address,state_refresh_address,line_address,linea_crt:word;
+              color_monitor:boolean;
            end;
   tcpc_ga=packed record
               pen,nvideo,video_mode:byte;
@@ -65,11 +80,12 @@ type
 var
     cpc_mem:array[0..31,0..$3fff] of byte;
     cpc_rom:array[0..16] of tcpc_rom;
-    cpc_crt:^tcpc_crt;
+    cpc_crt:tcpc_crt;
     cpc_ga:tcpc_ga;
     cpc_ppi:tcpc_ppi;
     cpc_dandanator:tcpc_dandanator;
     tape_timer:byte;
+    cpc_line:word;
 
 function iniciar_cpc:boolean;
 procedure cpc_load_roms;
@@ -77,33 +93,22 @@ procedure cpc_load_roms;
 procedure write_ga(val:byte);
 //PAL
 procedure write_ram(puerto:word;val:byte);
-//CRT
-procedure cpc_calcular_dir_scr;
-procedure cpc_calc_crt;
 //Main CPU
 procedure cpc_outbyte(puerto:word;valor:byte);
 //PPI 8255
 procedure port_c_write(valor:byte);
 
 implementation
+
 uses principal,tap_tzx,snapshot;
 
 const
-  cpc_paleta:array[0..31] of dword=(
-        $808080,$808080,$00FF80,$FFFF80,
-        $000080,$FF0080,$008080,$FF8080,
-        $FF0080,$FFFF80,$FFFF00,$FFFFFF,
-        $FF0000,$FF00FF,$FF8000,$FF80FF,
-        $000080,$00FF80,$00FF00,$00FFFF,
-        $000000,$0000FF,$008000,$0080FF,
-        $800080,$80FF80,$80FF00,$80FFFF,
-        $800000,$8000FF,$808000,$8080FF);
-  pantalla_largo=384;
-  pantalla_alto=272;
+  PANTALLA_LARGO=400;//384;
+  PANTALLA_ALTO=312;//272;
+  PANTALLA_VSYNC=16;
 
 var
    tape_sound_channel:byte;
-   linea_crt:word;
 
 procedure eventos_cpc;
 begin
@@ -224,74 +229,45 @@ end;
 
 procedure amstrad_ga_exec;
 begin
-cpc_ga.lines_count:=cpc_ga.lines_count+1;
-//Estoy en un VSYNC?
+//Esto hay que revisarlo... No está bien!! JameBond007 y Saboteur II
+//Compruebo si llevo 52 lineas
+if (cpc_ga.lines_count>=52) then begin
+  cpc_ga.lines_count:=0;
+  z80_0.change_irq(ASSERT_LINE);
+end;
+//Estoy en un pre-VSYNC?
 if (cpc_ga.lines_sync>0) then begin
   //SI --> Compruebo si llevo dos lineas desde la generacion del VSYNC
   cpc_ga.lines_sync:=cpc_ga.lines_sync-1;
   if (cpc_ga.lines_sync=0) then begin
     //Si el contador es mayor de 32 lineas, genero IRQ
-    if (cpc_ga.lines_count>=32) then z80_0.change_irq(ASSERT_LINE)
-      else z80_0.change_irq(CLEAR_LINE);
-    //Borro el contador...
+    if (cpc_ga.lines_count>=32) then z80_0.change_irq(ASSERT_LINE);
     cpc_ga.lines_count:=0;
+    //exit; //Si pongo esto Saboteur II funciona, pero el resto va peor (aparece un linea en DL2)
   end;
 end;
-//Compruebo si llevo 52 lineas
-if (cpc_ga.lines_count=52) then begin
-  cpc_ga.lines_count:=0;
-  z80_0.change_irq(ASSERT_LINE);
-end;
+cpc_ga.lines_count:=cpc_ga.lines_count+1;
 end;
 
-{Registros 6845
-0 --> Numero de caracteres largo TOTAL (MENOS UNO)
-      En el CPC 63
-1 --> El ancho en caracteres VISIBLES de una fila.
-2 --> Caracter en el que se produce el HSYNC
-3 --> 4bits lo: Numero de caracteres que tarda el HSYNC
-      4bits hi: Numero de caracteres que tarda el VSYNC
-4 --> La altura en caracteres TOTAL de la pantalla +1
-      En el CPC 38+1
-5 --> Numero de lineas que faltan para completar la pantalla cuando termina un frame
-      en el CPC 0
-6 --> La altura en caracteres VISIBLES de la pantalla.
-7 --> Numero de caracter en el que tiene que ocurrir el VSYNC
-9 --> Numero de lineas por caracter (menos una), cuantas lineas necesito para dibujar un caracter
-      Fijo a 7+1
-
-Altura TOTAL= R4*(R9+1) = 39*8 = 312 lineas
-Ancho TOTAL = (R0+1)*8 = 64*8 = 512 pixels}
-
-procedure cpc_calcular_dir_scr;
+procedure actualiza_linea;
 var
-  ma,addr,x,y:word;
-begin
-ma:=cpc_crt.regs[13] or ((cpc_crt.regs[12] and $3f) shl 8);
-for x:=0 to (cpc_crt.regs[4] and $7f) do begin //  altura total en chars
-  for y:=0 to (cpc_crt.regs[9] and $1f) do begin //altura char en lineas
-    addr:=(((ma and $3ff) shl 1)+((ma and $3000) shl 2)+(y*$800)) and $ffff;
-    cpc_crt.scr_line_dir[y+(x*cpc_crt.char_altura)]:=addr;
-  end;
-  ma:=ma+cpc_crt.regs[1];
-end;
-end;
-
-procedure actualiza_linea(linea:word);
-var
- x,borde,addr,temp1,temp2,temp3,pal1,pal2:word;
+ addr,x,borde,temp1,temp2,temp3,pal1,pal2:word;
  val,p1,p2,p3,p4,p5,p6,p7,p8:byte;
  ptemp:pword;
 begin
-borde:=(pantalla_largo-cpc_crt.pixel_visible) shr 1;
-addr:=cpc_crt.scr_line_dir[linea];
+borde:=(PANTALLA_LARGO-cpc_crt.pixel_visible) shr 1;
+addr:=((cpc_crt.line_address and $3ff) shl 1) or
+							((cpc_crt.state_row_address and $7) shl 11) or
+							((cpc_crt.line_address and $3000) shl 2);
 x:=0;
 ptemp:=punbuf;
 while (x<cpc_crt.char_total) do begin
   if (x<cpc_crt.pixel_visible) then begin
     //IMPORTANTE: La memoria de video SIEMPRE esta en los 64K mapeados... Por ejemplo Thunder Cats
     val:=cpc_mem[addr shr 14,addr and $3fff];
-    addr:=addr+1;
+    //Con esto se hace el scroll por hardware...
+    if (addr and $7ff)=$7ff then addr:=addr and $f800
+      else addr:=addr+1;
     case cpc_ga.video_mode of
       0:begin
           // 1 5 3 7    0 4 2 6
@@ -364,26 +340,7 @@ while (x<cpc_crt.char_total) do begin
   end;
   x:=x+4;
 end;
-putpixel(borde,linea+cpc_crt.lineas_borde,cpc_crt.pixel_visible,punbuf,1);
-end;
-
-procedure draw_line;
-var
-  lineat:word;
-begin
-lineat:=(linea_crt+cpc_crt.lineas_borde) mod 312;
-if lineat<pantalla_alto then single_line(0,lineat,paleta[cpc_ga.pal[$10]],pantalla_largo,1);
-if (linea_crt<cpc_crt.lineas_visible) then actualiza_linea(linea_crt);
-//Vsync
-{if cpc_crt.vsync_activo then begin
-  cpc_crt.vsync_activo:=not(cpc_crt.vsync_cont=0);
-  cpc_crt.vsync_cont:=cpc_crt.vsync_cont-1;
-end;
-if (linea_crt=cpc_crt.vsync_linea_ocurre) then begin
-  cpc_crt.vsync_cont:=cpc_crt.vsync_lines-1;
-  cpc_ga.lines_sync:=3;
-  cpc_crt.vsync_activo:=true;
-end;}
+putpixel(borde,cpc_line,cpc_crt.pixel_visible,punbuf,1);
 end;
 
 procedure cpc_main;
@@ -396,7 +353,7 @@ while EmuStatus=EsRuning do begin
   z80_0.run(frame);
   frame:=frame+z80_0.tframes-z80_0.contador;
   eventos_cpc;
-  actualiza_trozo_simple(0,0,pantalla_largo,pantalla_alto,1);
+  actualiza_trozo(0,0,PANTALLA_LARGO,PANTALLA_ALTO-PANTALLA_VSYNC,1,0,0,PANTALLA_LARGO,PANTALLA_ALTO-PANTALLA_VSYNC,PANT_TEMP);
   video_sync;
 end;
 end;
@@ -475,10 +432,10 @@ case (val shr 6) of
                 else cpc_ga.pen:=$10; //Border
      $1:cpc_ga.pal[cpc_ga.pen]:=val and $1f;    //Change pen colour
      $2:begin   //ROM banking and mode switch
-            if (cpc_ga.video_mode<>(val and 3)) then begin
+            //if (cpc_ga.video_mode<>(val and 3)) then begin
               cpc_ga.nvideo:=val and 3;
               cpc_ga.change_video:=true;
-            end;
+            //end;
             cpc_ga.rom_low:=(val and 4)=0;
             cpc_ga.rom_high:=(val and 8)=0;
             if (val and $10)<>0 then begin
@@ -490,44 +447,27 @@ case (val shr 6) of
 end;
 end;
 
-procedure cpc_calc_crt;
-var
-  char_hsync:word;
-begin
-//altura char por linea
-cpc_crt.char_altura:=(cpc_crt.regs[9] and $1f)+1;
-//IMPORTANTE: El ancho de los chars SIEMPRE es 8 para calcular el resto de valores
-//chars totales
-cpc_crt.char_total:=(cpc_crt.regs[0]+1)*8;
-//char en el que ocurre el hsync (ocurre en el paso a '0' de la señal)
-char_hsync:=cpc_crt.regs[2]*8;
-//Total pixels por linea
-if cpc_crt.regs[1]<48 then cpc_crt.pixel_visible:=cpc_crt.regs[1]*8
-  else cpc_crt.pixel_visible:=48*8;
-if cpc_crt.pixel_visible>pantalla_largo then cpc_crt.pixel_visible:=pantalla_largo;
-if cpc_crt.pixel_visible>char_hsync then cpc_crt.pixel_visible:=char_hsync;
-//Linea donde ocurre el vsync
-cpc_crt.vsync_linea_ocurre:=(cpc_crt.regs[7] and $7f)*cpc_crt.char_altura;
-//lineas visibles
-if (cpc_crt.regs[6] and $7f)<39 then cpc_crt.lineas_visible:=(cpc_crt.regs[6] and $7f)*cpc_crt.char_altura
-  else cpc_crt.lineas_visible:=39*cpc_crt.char_altura;
-if cpc_crt.lineas_visible>pantalla_alto then cpc_crt.lineas_visible:=pantalla_alto;
-if cpc_crt.lineas_visible>cpc_crt.vsync_linea_ocurre then cpc_crt.lineas_visible:=cpc_crt.vsync_linea_ocurre;
-//lineas totales del video incluyendo las visibles
-cpc_crt.lineas_total:=((cpc_crt.regs[4] and $7f)+1)*cpc_crt.char_altura;
-if cpc_crt.lineas_visible<cpc_crt.lineas_total then cpc_crt.lineas_borde:=(pantalla_alto-cpc_crt.lineas_visible) shr 1
-   else cpc_crt.lineas_borde:=0;
-end;
-
 procedure write_crtc(port:byte;val:byte);
+const
+  masks:array[0..$f] of byte=($ff,$ff,$ff,$ff,$7f,$1f,$7f,$7f,$ff,$1f,$7f,$1f,$3f,$ff,$3f,$ff);
 begin
   case (port and $3) of
-    $0:cpc_crt.reg:=val;
-    $1:if ((cpc_crt.regs[cpc_crt.reg]<>val) and (cpc_crt.reg<16)) then begin
-          cpc_crt.regs[cpc_crt.reg]:=val;
-          cpc_calc_crt;
-          cpc_calcular_dir_scr;
-        end;
+    $0:cpc_crt.reg:=val and $1f;
+    $1:if (cpc_crt.regs[cpc_crt.reg]<>val) then begin
+          cpc_crt.regs[cpc_crt.reg]:=val and masks[cpc_crt.reg];
+          case cpc_crt.reg of
+            0:cpc_crt.char_total:=(cpc_crt.regs[0]+1)*8;
+            1:if cpc_crt.regs[1]<50 then cpc_crt.pixel_visible:=cpc_crt.regs[1]*8
+                else cpc_crt.pixel_visible:=49*8;
+            5:if cpc_crt.adj_count<>0 then begin
+                cpc_crt.is_in_adjustment_period:=false;
+                cpc_crt.line_address:=(cpc_crt.regs[12] shl 8) or cpc_crt.regs[13];
+                cpc_crt.state_refresh_address:=cpc_crt.line_address;
+                cpc_crt.linea_crt:=0;
+                cpc_crt.adj_count:=0;
+              end;
+          end;
+    end;
     $2,$3:; //Sin uso
   end;
 end;
@@ -535,10 +475,10 @@ end;
 procedure cpc_outbyte(puerto:word;valor:byte);
 begin
 //Se pueden seleccionar multiples dispositivos EXCEPTO GA y CRTC
-//if (puerto and $c000)=$4000 then write_ga(valor)
-//  else if (puerto and $4000)=0 then write_crtc(puerto shr 8,valor);
-if (puerto and $c000)=$4000 then write_ga(valor);
-if (puerto and $4000)=0 then write_crtc(puerto shr 8,valor);
+if (puerto and $c000)=$4000 then write_ga(valor)
+  else if (puerto and $4000)=0 then write_crtc(puerto shr 8,valor);
+//if (puerto and $c000)=$4000 then write_ga(valor);
+//if (puerto and $4000)=0 then write_crtc(puerto shr 8,valor);
 if (puerto and $2000)=0 then begin
   if cpc_rom[valor and $f].enabled then cpc_ga.rom_selected:=valor and $f
     else cpc_ga.rom_selected:=0;
@@ -563,7 +503,8 @@ var
 begin
 res:=0;
 case (port and 3) of
-  0,1,2:; //Write only
+  0,1:; //Write only
+  2:res:=$80;
   3:case cpc_crt.reg of
         //10:res:=cpc_crt.regs[cpc_crt.reg] and $1f;
         //12,13:res:=0;
@@ -578,7 +519,7 @@ function cpc_inbyte(puerto:word):byte;
 var
   res:byte;
 begin
-res:=$FF;
+res:=$ff;
 if (puerto and $4000)=0 then res:=read_crtc(puerto shr 8);
 if (puerto and $0800)=0 then res:=pia8255_0.read((puerto and $300) shr 8);
 if (puerto and $0400)=0 then begin //Expansion
@@ -598,8 +539,8 @@ end;
 function amstrad_raised_z80:byte;
 begin
   cpc_ga.lines_count:=cpc_ga.lines_count and $1f;
-  amstrad_raised_z80:=0;
   z80_0.change_irq(CLEAR_LINE);
+  amstrad_raised_z80:=0;
 end;
 
 //PPI 8255
@@ -628,7 +569,7 @@ end;
 // bit 7 cassete data
 function port_b_read:byte;
 begin
-port_b_read:=$7e or (cinta_tzx.value shl 1) or cpc_crt.v_syn;//}byte(cpc_crt.vsync_activo);
+  port_b_read:=$7e or (cinta_tzx.value shl 1) or byte(cpc_crt.state_vsync);
 end;
 
 procedure port_a_write(valor:byte);
@@ -660,74 +601,108 @@ end;
 //Sound
 procedure amstrad_sound_update;
 begin
-tsample[tape_sound_channel,sound_status.posicion_sonido]:=(cinta_tzx.value*$20)*byte(cinta_tzx.play_tape);
-ay8910_0.update;
+  tsample[tape_sound_channel,sound_status.posicion_sonido]:=(cinta_tzx.value*$20)*byte(cinta_tzx.play_tape);
+  ay8910_0.update;
 end;
 
-procedure clock_crt;
-var
-   old_h_syn,old_v_syn:word;
+{Registros 6845
+0 --> Numero de caracteres largo TOTAL (MENOS UNO)
+      En el CPC 63
+1 --> El ancho en caracteres VISIBLES de una fila.
+2 --> Caracter en el que se produce el HSYNC
+3 --> 4bits lo: Numero de caracteres que tarda el HSYNC
+      4bits hi: Numero de caracteres que tarda el VSYNC
+4 --> La altura en caracteres TOTAL de la pantalla +1
+      En el CPC 38+1
+5 --> Numero de lineas que faltan para completar la pantalla cuando termina un frame
+      en el CPC 0
+6 --> La altura en caracteres VISIBLES de la pantalla.
+7 --> Numero de caracter en el que tiene que ocurrir el VSYNC
+9 --> Numero de lineas por caracter (menos una), cuantas lineas necesito para dibujar un caracter
+      Fijo a 7+1
+Altura TOTAL= R4*(R9+1) = 39*8 = 312 lineas
+Ancho TOTAL = (R0+1)*8 = 64*8 = 512 pixels}
+
+procedure adjust;
 begin
-   old_h_syn:=cpc_crt.h_syn;
-   old_v_syn:=cpc_crt.v_syn;
-  //h_syn_ctr --> Cuantos CHARS son necesarios para el HBLANK, durante este periodo el HBLANK esta activo
-  //              Se decrementa cada vez hasta 0 y entonces se desactiva el HBLANK
-  //              El valor se coje del REG[3] (los cuatro bits de abajo), y si es 0 se coje 16
-  //v_syn_ctr --> Cuantas LINEAS necesita el VBLANK, durante este periodo el VBLANK esta activo
-  //              Se decrementa hasta 0 y entonces VBLANK 0
-  //              El valor se coje del REG[3] (los cuatro bits de arriba), y si es 0 se coje 16
-  //h_sync --> HBLANK activo
-  //v_sync --> VBLANK activo
-  //h_ctr --> Cantidad de chars que llevo, si son iguales al REG[0]+1 !! lo pongo a 0.
-  //          Miro el control vertical (v_syn_ctr), si es mayor que 0, le resto 1 y miro si es cero, de serlo desactivo VBLANK
-  //          Le sumo uno al raster control (r_ctr). Compruebo si es igual al REG[9]+1 !!, de serlo pongo a 0 el r_ctr y sumo uno al control vertical, comparo v_ctr al REG[4]+1 !! y de ser igual pongo a 0 el v_ctr
-  //v_ctr --> Control vertical
-  //r_ctr --> Control raster
-  //Al terminar todo miro si ha cambiado el estado del v_sync o del h_sync (guardandome antes de las operaciones el valor) y de ser asi, llamo a la funcion correspondiente
-  if (cpc_crt.h_syn_ctr>0) then begin
-    cpc_crt.h_syn_ctr:=cpc_crt.h_syn_ctr-1;
-    if (cpc_crt.h_syn_ctr=0) then cpc_crt.h_syn:=0;
+  if (cpc_crt.adj_count=cpc_crt.regs[5]) then begin
+			cpc_crt.is_in_adjustment_period:=false;
+      cpc_crt.line_address:=(cpc_crt.regs[12] shl 8) or cpc_crt.regs[13];
+      cpc_crt.state_refresh_address:=cpc_crt.line_address;
+      cpc_crt.linea_crt:=0;
+      cpc_crt.adj_count:=0; //IMPORTANTE: lo debo poner a 0, por si modifican el reg5!!!
+      cpc_crt.line_is_visible:=true;
+  end else cpc_crt.adj_count:=cpc_crt.adj_count+1;
+end;
+
+procedure do_end_of_line;
+var
+  tempb:byte;
+begin
+  //draw_line
+  single_line(0,cpc_line,paleta[cpc_ga.pal[$10]],PANTALLA_LARGO,1);
+  if cpc_crt.line_is_visible then actualiza_linea;
+  cpc_line:=(cpc_line+1) mod 312;
+  //Importante este orden!! O 'titus de fox' no va...
+  if cpc_crt.state_vsync then begin
+      tempb:=cpc_crt.regs[3] shr 4;
+      if tempb=0 then tempb:=16;
+      cpc_crt.vsync_counter:=cpc_crt.vsync_counter+1;
+      if cpc_crt.vsync_counter=tempb then cpc_crt.state_vsync:=false;
   end;
-  cpc_crt.h_ctr:=(cpc_crt.h_ctr+1) and $ff;
-  if (cpc_crt.h_ctr=(cpc_crt.regs[0]+1)) then begin // Horiz. Total
-      cpc_crt.h_ctr:=0;
-      if (cpc_crt.v_syn_ctr>0) then begin
-          cpc_crt.v_syn_ctr:=cpc_crt.v_syn_ctr-1;
-          if (cpc_crt.v_syn_ctr=0) then cpc_crt.v_syn:=0;
-      end;
-      cpc_crt.r_ctr:=(cpc_crt.r_ctr+1) and $1f;
-      if (cpc_crt.r_ctr=((cpc_crt.regs[9] and $1f)+1)) then begin // Raster Total
-          cpc_crt.r_ctr:=0;
-          cpc_crt.v_ctr:=(cpc_crt.v_ctr+1) and $7f;
-          if (cpc_crt.v_ctr=((cpc_crt.regs[4]and $7f)+1)) then cpc_crt.v_ctr:=0; // Verti. Total
-      end;
+  if (cpc_crt.regs[4]>=cpc_crt.regs[7]) then begin
+    if (cpc_crt.linea_crt=cpc_crt.regs[7]) then begin
+      cpc_crt.state_vsync:=true;
+      cpc_crt.vsync_counter:=0;
+    end;
   end;
-  if ((cpc_crt.h_syn=0) and (cpc_crt.h_ctr=cpc_crt.regs[2])) then begin //Horiz. Sync Pos.
-    cpc_crt.h_syn:=1;
-    cpc_crt.h_syn_ctr:=cpc_crt.regs[3] and $f;
-    if cpc_crt.h_syn_ctr=0 then cpc_crt.h_syn_ctr:=16;
+  if cpc_crt.is_in_adjustment_period then adjust
+    else begin
+      if (cpc_crt.state_row_address=cpc_crt.regs[9]) then begin
+          cpc_crt.state_row_address:=0;
+					cpc_crt.line_address:=cpc_crt.end_of_line_address;
+					if (cpc_crt.linea_crt=cpc_crt.regs[4]) then begin
+              cpc_crt.is_in_adjustment_period:=true;
+              cpc_crt.adj_count:=0;
+              adjust;
+					end else begin
+            cpc_crt.linea_crt:=(cpc_crt.linea_crt+1) and $7f;
+          end;
+      end else cpc_crt.state_row_address:=(cpc_crt.state_row_address+1) and $1f;
+      if cpc_crt.linea_crt=cpc_crt.regs[6] then cpc_crt.line_is_visible:=false;
   end;
-  if ((cpc_crt.v_syn=0) and (cpc_crt.v_ctr=(cpc_crt.regs[7] and $7f))) then begin // Verti. Sync Pos.
-    cpc_crt.v_syn:=1;
-    cpc_crt.v_syn_ctr:=cpc_crt.regs[3] shr 4;
-    if cpc_crt.v_syn_ctr=0 then cpc_crt.v_syn_ctr:=16;
+  if (not(cpc_crt.was_vsync) and cpc_crt.state_vsync) then cpc_ga.lines_sync:=2;
+  if (cpc_crt.was_vsync and not(cpc_crt.state_vsync)) then cpc_line:=0;
+end;
+
+procedure clock_alt;
+begin
+  if cpc_crt.state_hsync then begin
+    cpc_crt.hsync_counter:=cpc_crt.hsync_counter+1;
+    if cpc_crt.hsync_counter=(cpc_crt.regs[3] and $f) then cpc_crt.state_hsync:=false;
   end;
-  //Vsync
-  if ((cpc_crt.v_syn<>old_v_syn) and (cpc_ga.lines_sync=0)) then begin
-    if cpc_crt.v_syn<>0 then cpc_ga.lines_sync:=2;
+  if (cpc_crt.regs[0]>=cpc_crt.regs[2]) then begin
+    if (cpc_crt.character_counter=cpc_crt.regs[2]) then begin
+      cpc_crt.hsync_counter:=0;
+      cpc_crt.state_hsync:=true;
+    end;
   end;
-  //Hsync
-  if (cpc_crt.h_syn<>old_h_syn) then begin
-     if cpc_crt.h_syn<>0 then begin
-        amstrad_ga_exec;
-        draw_line;
-        linea_crt:=(linea_crt+1) mod 312;
-        if cpc_ga.change_video then begin
-          cpc_ga.video_mode:=cpc_ga.nvideo;
-          cpc_ga.change_video:=false;
-        end;
-     end;
+  if (cpc_crt.character_counter=cpc_crt.regs[1]) then cpc_crt.end_of_line_address:=cpc_crt.state_refresh_address
+    else cpc_crt.state_refresh_address:=(cpc_crt.state_refresh_address+1) and $3fff;
+  if (cpc_crt.character_counter=cpc_crt.regs[0]) then begin
+      do_end_of_line;
+      cpc_crt.character_counter:=0;
+      cpc_crt.state_refresh_address:=cpc_crt.line_address;
+  end else cpc_crt.character_counter:=cpc_crt.character_counter+1;
+  if (cpc_crt.was_hsync and not(cpc_crt.state_hsync)) then amstrad_ga_exec;
+  if (not(cpc_crt.was_hsync) and cpc_crt.state_hsync) then begin
+    if cpc_ga.change_video then begin
+        cpc_ga.video_mode:=cpc_ga.nvideo;
+        cpc_ga.change_video:=false;
+    end;
   end;
+  cpc_crt.was_vsync:=cpc_crt.state_vsync;
+  cpc_crt.was_hsync:=cpc_crt.state_hsync;
 end;
 
 procedure amstrad_despues_instruccion(estados_t:word);
@@ -739,7 +714,7 @@ est_final:=(estados_t+3) and $fc;
 if (cinta_tzx.cargada and cinta_tzx.play_tape) then play_cinta_tzx(estados_t);
 z80_0.contador:=z80_0.contador+(est_final-estados_t);
 //Clock a el video...
-for f:=1 to (est_final div 4) do clock_crt;
+for f:=1 to (est_final div 4) do clock_alt;
 end;
 
 procedure amstrad_m1_detect(opcode:byte);
@@ -799,7 +774,6 @@ begin
   if cinta_tzx.cargada then cinta_tzx.play_once:=false;
   cinta_tzx.value:=0;
   ResetFDC;
-  linea_crt:=0;
   //Init GA
   cpc_ga.pen:=0;
   cpc_ga.video_mode:=0;
@@ -817,30 +791,9 @@ begin
   cpc_ga.change_video:=false;
   cpc_ga.nvideo:=0;
   //cpc_ga.cpc_model; no lo toco
-  //CRT
-  fillchar(cpc_crt^,sizeof(tcpc_crt),0);
-  cpc_crt.char_altura:=1;
-  cpc_crt.lineas_total:=1;
-  cpc_crt.regs[0]:=63;
-  cpc_crt.regs[1]:=40;
-  cpc_crt.regs[2]:=46;
-  cpc_crt.regs[3]:=142;
-  cpc_crt.regs[4]:=38;
-  cpc_crt.regs[5]:=0;
-  cpc_crt.regs[6]:=25;
-  cpc_crt.regs[7]:=30;
-  cpc_crt.regs[8]:=0;
-  cpc_crt.regs[9]:=7;
-  cpc_crt.regs[10]:=0;
-  cpc_crt.regs[11]:=0;
-  cpc_crt.regs[12]:=48;
-  cpc_crt.regs[13]:=0;
-  cpc_crt.regs[14]:=192;
-  cpc_calc_crt;
-  cpc_calcular_dir_scr;
   //PPI
   fillchar(cpc_ppi,sizeof(tcpc_ppi),0);
-  fillchar(cpc_ppi.keyb_val[0],10,$FF);
+  fillchar(cpc_ppi.keyb_val[0],10,$ff);
   //Dandanator
   cpc_dandanator.halted:=false;
   cpc_dandanator.wait_ret:=false;
@@ -851,6 +804,22 @@ begin
   cpc_dandanator.zone0_rom:=0;
   cpc_dandanator.zone1_rom:=0;
   cpc_dandanator.follow_rom_ena:=false;
+  //CRT
+  fillchar(cpc_crt.regs,$20,0);
+  cpc_crt.linea_crt:=0;
+  cpc_crt.was_hsync:=false;
+  cpc_crt.was_vsync:=false;
+  cpc_crt.character_counter:=0;
+  cpc_crt.hsync_counter:=0;
+  cpc_crt.vsync_counter:=0;
+  cpc_crt.state_hsync:=false;
+  cpc_crt.state_vsync:=false;
+  cpc_crt.is_in_adjustment_period:=false;
+  cpc_crt.state_row_address:=0;
+  cpc_crt.line_is_visible:=false;
+  cpc_crt.end_of_line_address:=0;
+  cpc_crt.state_refresh_address:=0;
+  cpc_crt.line_address:=0;
 end;
 
 function abrir_dandanator(datos:pbyte;file_size:integer):boolean;
@@ -1107,10 +1076,8 @@ end;
 
 procedure cpc_close;
 begin
-if cpc_crt<>nil then freemem(cpc_crt);
 clear_disk(0);
 clear_disk(1);
-cpc_crt:=nil;
 end;
 
 function iniciar_cpc:boolean;
@@ -1130,14 +1097,21 @@ principal1.BitBtn10.Glyph:=nil;
 principal1.ImageList2.GetBitmap(3,principal1.BitBtn10.Glyph);
 iniciar_cpc:=false;
 iniciar_audio(false);
-screen_init(1,pantalla_largo,pantalla_alto);
-iniciar_video(pantalla_largo,pantalla_alto);
+screen_init(1,PANTALLA_LARGO,PANTALLA_ALTO);
+iniciar_video(PANTALLA_LARGO,PANTALLA_ALTO-PANTALLA_VSYNC);
 //Inicializar dispositivos
-getmem(cpc_crt,sizeof(tcpc_crt));
-for f:=0 to 31 do begin
-  colores[f].r:=cpc_paleta[f] shr 16;
-  colores[f].g:=(cpc_paleta[f] shr 8) and $FF;
-  colores[f].b:=cpc_paleta[f] and $FF;
+if cpc_crt.color_monitor then begin
+  for f:=0 to 31 do begin
+    colores[f].r:=cpc_paleta[f] shr 16;
+    colores[f].g:=(cpc_paleta[f] shr 8) and $ff;
+    colores[f].b:=cpc_paleta[f] and $ff;
+  end;
+end else begin
+  for f:=0 to 31 do begin
+    colores[f].r:=0;
+    colores[f].b:=0;
+    colores[f].g:=(trunc(cpc_green[f]*GREENFRAQ) shr 16) and $ff;
+  end;
 end;
 set_pal(colores,32);
 z80_0:=cpu_z80.create(4000000,1);
@@ -1154,6 +1128,7 @@ ay8910_0:=ay8910_chip.create(1000000,AY8910,1);
 ay8910_0.change_io_calls(cpc_porta_read,cpc_porta_read,nil,nil);
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
+//m6845_0:=chip_m6845.create(HD6845S,cpc_bus_cycle1,cpc_bus_cycle2);
 cpc_load_roms;
 cpc_reset;
 TZX_CLOCK:=4000;

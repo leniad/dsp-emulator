@@ -36,7 +36,6 @@ const
         (mask:$c;name:'Difficulty';number:4;dip:((dip_val:$8;dip_name:'Easy'),(dip_val:$c;dip_name:'Medium'),(dip_val:$4;dip_name:'Hard'),(dip_val:$0;dip_name:'Hardest'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$70;name:'Lives';number:4;dip:((dip_val:$70;dip_name:'3'),(dip_val:$60;dip_name:'4'),(dip_val:$50;dip_name:'5'),(dip_val:$40;dip_name:'6'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Languaje';number:2;dip:((dip_val:$0;dip_name:'English'),(dip_val:$80;dip_name:'Japanese'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
-        CPU_MUL=3;
 
 var
  video_mask,video_ctrl:word;
@@ -108,7 +107,7 @@ end;
 procedure volfied_principal;
 var
   frame_m,frame_s,frame_mcu:single;
-  f:word;
+  f:byte;
 begin
 init_controls(false,false,false,true);
 frame_m:=m68000_0.tframes;
@@ -116,17 +115,17 @@ frame_s:=tc0140syt_0.z80.tframes;
 {$IFDEF MCU}frame_mcu:=cchip_0.upd7810.tframes;{$ENDIF}
 while EmuStatus=EsRuning do begin
     for f:=0 to $ff do begin
-      //Main CPU
-      m68000_0.run(frame_m);
-      frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-      //Sound CPU
-      tc0140syt_0.z80.run(frame_s);
-      frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
-      //MCU
-      {$IFDEF MCU}
-      cchip_0.upd7810.run(frame_mcu);
-      frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
-      {$ENDIF}
+        //Main CPU
+        m68000_0.run(frame_m);
+        frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+        //Sound CPU
+        tc0140syt_0.z80.run(frame_s);
+        frame_s:=frame_s+tc0140syt_0.z80.tframes-tc0140syt_0.z80.contador;
+        //MCU
+        {$IFDEF MCU}
+        cchip_0.upd7810.run(frame_mcu);
+        frame_mcu:=frame_mcu+cchip_0.upd7810.tframes-cchip_0.upd7810.contador;
+        {$ENDIF}
       if f=247 then begin
         update_video_volfied;
         m68000_0.irq[4]:=HOLD_LINE;
@@ -305,7 +304,8 @@ ym2203_0.change_io_calls(volfied_dipa,volfied_dipb,nil,nil);
 ym2203_0.change_irq_calls(snd_irq);
 //MCU
 {$IFDEF MCU}
-cchip_0:=cchip_chip.create(10000000*CPU_MUL,256);
+//?????????? Tengo que poner 4Mhz mas... En teoria son 10Mhz, pero si lo pongo hae cosas raras...
+cchip_0:=cchip_chip.create(14000000,256);
 cchip_0.change_ad(volfied_f0000d);
 cchip_0.change_in(volfied_f00007,volfied_f00009,volfied_f0000c,nil,nil);
 if not(roms_load(cchip_0.get_eeprom_dir,cchip_eeprom)) then exit;

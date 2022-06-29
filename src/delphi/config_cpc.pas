@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.StdCtrls,misc_functions,file_engine,main_engine;
+  Vcl.StdCtrls,misc_functions,file_engine,main_engine,pal_engine;
 
 type
   TConfigCPC = class(TForm)
@@ -51,6 +51,9 @@ type
     RadioButton8: TRadioButton;
     Edit7: TEdit;
     Button15: TButton;
+    GroupBox4: TGroupBox;
+    RadioButton9: TRadioButton;
+    RadioButton10: TRadioButton;
     procedure Button15Click(Sender: TObject);
     procedure Button13Click(Sender: TObject);
     procedure Button14Click(Sender: TObject);
@@ -83,6 +86,9 @@ uses amstrad_cpc,lenslock;
 {$R *.dfm}
 
 procedure TConfigCPC.Button13Click(Sender: TObject);
+var
+  f:byte;
+  colores:tpaleta;
 begin
 if radiobutton1.Checked then cpc_ga.cpc_model:=0
   else if radiobutton2.Checked then cpc_ga.cpc_model:=1
@@ -91,10 +97,25 @@ if radiobutton1.Checked then cpc_ga.cpc_model:=0
         else if radiobutton8.Checked then cpc_ga.cpc_model:=4;
 cpc_load_roms;
 lenslok.activo:=radiobutton12.Checked;
+cpc_crt.color_monitor:=radiobutton9.Checked;
 if radiobutton5.Checked then cpc_ga.ram_exp:=0
   else if radiobutton6.Checked then cpc_ga.ram_exp:=1
     else if radiobutton7.Checked then cpc_ga.ram_exp:=2;
 if lenslok.activo then lenslock1.Show;
+if cpc_crt.color_monitor then begin
+  for f:=0 to 31 do begin
+    colores[f].r:=cpc_paleta[f] shr 16;
+    colores[f].g:=(cpc_paleta[f] shr 8) and $ff;
+    colores[f].b:=cpc_paleta[f] and $ff;
+  end;
+end else begin
+  for f:=0 to 31 do begin
+    colores[f].r:=0;
+    colores[f].b:=0;
+    colores[f].g:=(trunc(cpc_green[f]*GREENFRAQ) shr 16) and $ff;
+  end;
+end;
+set_pal(colores,32);
 configcpc.Close;
 end;
 
@@ -228,6 +249,8 @@ case cpc_ga.ram_exp of
   1:radiobutton6.Checked:=true;
   2:radiobutton7.Checked:=true;
 end;
+if cpc_crt.color_monitor then radiobutton9.Checked:=true
+  else radiobutton10.Checked:=true;
 end;
 
 procedure TConfigCPC.Button10Click(Sender: TObject);
