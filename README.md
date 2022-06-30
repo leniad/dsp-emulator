@@ -12,7 +12,7 @@
 -Amstrad CPC
     +Rewrited CRT video emulation
     +Added green monitor option
-    +Fixed scroll hardware 
+    +Fixed hardware scroll
 -Super Cassete Vision
     +Added video emulation
     +Added Sound
