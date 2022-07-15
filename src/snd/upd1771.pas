@@ -81,11 +81,11 @@ end;
 
 constructor upd1771_chip.create(clock:integer;amp:single);
 begin
-  self.clock:=clock div 4;
+  self.clock:=clock;
   self.amp:=amp;
   self.tsample_num:=init_channel;
-  self.timer:=timers.init(sound_status.cpu_num,51.2,ack_callback,nil,false,0);
-  timers.init(sound_status.cpu_num,(sound_status.cpu_clock/FREQ_BASE_AUDIO)*sound_status.cpu_clock/self.clock,internal_update,nil,true,0);
+  self.timer:=timers.init(sound_status.cpu_num,512,ack_callback,nil,false,0);
+  timers.init(sound_status.cpu_num,sound_status.cpu_clock/(self.clock/4),internal_update,nil,true,0);
   self.reset;
 end;
 

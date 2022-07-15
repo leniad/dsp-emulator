@@ -28,6 +28,7 @@ type
                 procedure change_in(ca,cb,cc,cd,cf:upd7810_cb_3);
                 procedure change_out(ca,cb,cc,cd,cf:upd7810_cb_2);
                 procedure set_input_line(irqline,state:byte);
+                procedure set_input_line_7801(irqline,state:byte);
               private
                 cpu_type:byte;
                 ppc,pc,sp:word;
@@ -354,6 +355,26 @@ begin
   end;
 end;
 
+procedure cpu_upd7810.set_input_line_7801(irqline,state:byte);
+begin
+	case irqline of
+	  UPD7810_INTF0:begin // INT0 is level sensitive
+		                if (state=ASSERT_LINE) then self.irr:=self.irr or INTF0
+                      else self.irr:=self.irr and INTF0;
+                   end;
+	  UPD7810_INTF1:begin //INT1 is rising edge sensitive
+		                if ((self.int1=CLEAR_LINE) and (state=ASSERT_LINE)) then self.irr:=self.irr or INTF1;
+		                self.int1:=state;
+                  end;
+	  UPD7810_INTF2:begin //INT2 is rising or falling edge sensitive
+		                if (self.mkl and $20)<>0 then begin
+			                if ((self.int2=CLEAR_LINE) and (state=ASSERT_LINE)) then self.irr:=self.irr or INTF2;
+                    end else if ((self.int2=ASSERT_LINE) and (state=CLEAR_LINE)) then self.irr:=self.irr or INTF2;
+                    self.int2:=state;
+                  end;
+  end;
+end;
+
 procedure cpu_upd7810.take_irq_7810;
 var
 	vector:word;
@@ -562,7 +583,7 @@ begin
         //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 			  //m_to_func(TO);
 			  // Reload the timer
-			  self.ovc0:=self.ovc0+(8*(self.tm.l+((self.tm.h and $0f) shl 8)));
+			  self.ovc0:=8*(self.tm.l+((self.tm.h and $0f) shl 8));
 		  end;
   end;
 end;
@@ -697,7 +718,7 @@ begin
 	  UPD7810_PORTD:begin
 		                self.pd_out:=valor;
                     case (self.mm and $07) of
-		                    $00:valor:=self.pd_in; // PD input mode, PF port mode
+		                    $00:valor:=$ff; // PD input mode, PF port mode
                         $01:valor:=self.pd_out; // PD output mode, PF port mode
 		                      else exit; // PD extension mode, PF port/extension mode
 		                end;
@@ -705,7 +726,7 @@ begin
                   end;
 	  UPD7810_PORTF:begin
                     self.pf_out:=valor;
-                    valor:=(valor and not(self.mf)) or (self.pf_in and self.mf);
+                    valor:=(valor and not(self.mf)) or ($ff and self.mf);
 		                case (self.mm and $06) of
 		                  $00:; // PD input/output mode, PF port mode */
 		                  $02:valor:=valor or $0f; //PD extension mode, PF0-3 extension mode, PF4-7 port mode */
@@ -1134,7 +1155,7 @@ while self.contador<maximo do begin
         else self.estados_demas:=main_ops[instruccion].t;
     end;
   end;
-  self.handle_timers_7801(self.estados_demas);
+  //self.handle_timers_7801(self.estados_demas);
   if (self.r.psw.sk and (instruccion<>$72)) then begin
    //Skip, no hacer nada!
    if self.cpu_type=CPU_7801 then begin
@@ -1227,7 +1248,7 @@ while self.contador<maximo do begin
           //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	        //m_to_func(self.to_);
 	        // Reload the timer
-	        self.ovc0:=16*(self.tm.l+((self.tm.h and $f) shl 8));
+	        self.ovc0:=8*(self.tm.l+((self.tm.h and $f) shl 8));
         end else MessageDlg('Instruccion: $19 desconocida. PC='+inttohex(self.ppc,10), mtInformation,[mbOk], 0);
     $1a:self.r.bc.h:=self.r.va.l; //MOV_B_A
     $1b:self.r.bc.l:=self.r.va.l; //MOV_C_A
@@ -1738,7 +1759,7 @@ while self.contador<maximo do begin
      self.handle_timers_7810(self.estados_demas);
      self.take_irq_7810;
   end else if self.cpu_type=CPU_7801 then begin
-     //self.handle_timers_7801(self.estados_demas);
+     self.handle_timers_7801(self.estados_demas);
      self.take_irq_7801;
   end;
   self.iff:=self.iff_pending;
@@ -2847,6 +2868,11 @@ begin
               self.r.psw.zf:=false;
               self.r.psw.sk:=true;
             end else self.r.psw.zf:=true;
+          end;
+      $d1:begin //ADCX_B
+            tempb:=self.r.va.l+self.getbyte(self.r.bc.w)+byte(self.r.psw.cy);
+	          ZHC_ADD(tempb,self.r.va.l,false);
+	          self.r.va.l:=tempb;
           end;
       $d2:begin //ADCX_D
             tempb:=self.r.va.l+self.getbyte(self.r.de.w)+byte(self.r.psw.cy);

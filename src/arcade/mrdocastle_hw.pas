@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,sn_76496,gfx_engine,rom_engine,
      pal_engine,sound_engine,msm5205;
 
-procedure cargar_mrdocastle;
+function iniciar_mrdocastle:boolean;
 
 implementation
 const
@@ -528,6 +528,9 @@ begin
   convert_gfx(1,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=mrdocastle_principal;
+llamadas_maquina.reset:=reset_mrdocastle;
+llamadas_maquina.fps_max:=59.659092;
 iniciar_mrdocastle:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -705,14 +708,6 @@ set_pal(colores,512);
 //final
 reset_mrdocastle;
 iniciar_mrdocastle:=true;
-end;
-
-procedure Cargar_mrdocastle;
-begin
-llamadas_maquina.iniciar:=iniciar_mrdocastle;
-llamadas_maquina.bucle_general:=mrdocastle_principal;
-llamadas_maquina.reset:=reset_mrdocastle;
-llamadas_maquina.fps_max:=59.659092;
 end;
 
 end.

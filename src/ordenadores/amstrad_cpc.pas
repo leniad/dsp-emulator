@@ -28,10 +28,15 @@ const
         $000000,$0000FF,$008000,$0080FF,
         $800080,$80FF80,$80FF00,$80FFFF,
         $800000,$8000FF,$808000,$8080FF);
-  cpc_green:array[0..31] of byte=(
-        13,13,19,25,1,7,10,16,7,25,24,26,6,8,15,17,1,19,
-        18,20,0,2,9,11,4,22,21,23,3,5,12,14);
-  GREENFRAQ=(255 shl 16)/26;
+  green_classic:array[0..31] of single=(
+        0.5647, 0.5647, 0.7529, 0.9412,
+        0.1882, 0.3765, 0.4706, 0.6588,
+        0.3765, 0.9412, 0.9098, 0.9725,
+        0.3451, 0.4078, 0.6275, 0.6902,
+        0.1882, 0.7529, 0.7216, 0.7843,
+        0.1569, 0.2196, 0.4392, 0.5020,
+        0.2824, 0.8471, 0.8157, 0.8784,
+        0.2510, 0.3137, 0.5333, 0.5961);
 
 type
   tcpc_crt=packed record
@@ -40,7 +45,7 @@ type
               reg:byte;
               //otro
               was_hsync,was_vsync,line_is_visible:boolean;
-              character_counter,hsync_counter,vsync_counter:byte;
+              bright,character_counter,hsync_counter,vsync_counter:byte;
               state_hsync,is_in_adjustment_period,state_vsync:boolean;
               state_row_address,adj_count:byte;
               end_of_line_address,state_refresh_address,line_address,linea_crt:word;
@@ -231,7 +236,7 @@ procedure amstrad_ga_exec;
 begin
 //Esto hay que revisarlo... No está bien!! JameBond007 y Saboteur II
 //Compruebo si llevo 52 lineas
-if (cpc_ga.lines_count>=52) then begin
+if (cpc_ga.lines_count=52) then begin
   cpc_ga.lines_count:=0;
   z80_0.change_irq(ASSERT_LINE);
 end;
@@ -245,6 +250,10 @@ if (cpc_ga.lines_sync>0) then begin
     cpc_ga.lines_count:=0;
     //exit; //Si pongo esto Saboteur II funciona, pero el resto va peor (aparece un linea en DL2)
   end;
+end;
+if cpc_ga.change_video then begin
+  cpc_ga.video_mode:=cpc_ga.nvideo;
+  cpc_ga.change_video:=false;
 end;
 cpc_ga.lines_count:=cpc_ga.lines_count+1;
 end;
@@ -695,12 +704,6 @@ begin
       cpc_crt.state_refresh_address:=cpc_crt.line_address;
   end else cpc_crt.character_counter:=cpc_crt.character_counter+1;
   if (cpc_crt.was_hsync and not(cpc_crt.state_hsync)) then amstrad_ga_exec;
-  if (not(cpc_crt.was_hsync) and cpc_crt.state_hsync) then begin
-    if cpc_ga.change_video then begin
-        cpc_ga.video_mode:=cpc_ga.nvideo;
-        cpc_ga.change_video:=false;
-    end;
-  end;
   cpc_crt.was_vsync:=cpc_crt.state_vsync;
   cpc_crt.was_hsync:=cpc_crt.state_hsync;
 end;
@@ -1084,6 +1087,7 @@ function iniciar_cpc:boolean;
 var
   f:byte;
   colores:tpaleta;
+  temps:single;
 begin
 llamadas_maquina.bucle_general:=cpc_main;
 llamadas_maquina.reset:=cpc_reset;
@@ -1109,8 +1113,12 @@ if cpc_crt.color_monitor then begin
 end else begin
   for f:=0 to 31 do begin
     colores[f].r:=0;
-    colores[f].b:=0;
-    colores[f].g:=(trunc(cpc_green[f]*GREENFRAQ) shr 16) and $ff;
+    temps:=0.01*0*green_classic[f]*255;
+    if temps>255 then temps:=255;
+    colores[f].b:=trunc(temps);
+    temps:=green_classic[f]*255*(1+(cpc_crt.bright/4));
+    if temps>255 then temps:=255;
+    colores[f].g:=trunc(temps);
   end;
 end;
 set_pal(colores,32);

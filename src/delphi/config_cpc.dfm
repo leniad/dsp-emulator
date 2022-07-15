@@ -299,14 +299,14 @@ object ConfigCPC: TConfigCPC
     OnClick = Button14Click
   end
   object GroupBox7: TGroupBox
-    Left = 335
+    Left = 327
     Top = 87
-    Width = 107
+    Width = 98
     Height = 64
     Caption = 'LensLok'
     TabOrder = 4
     object RadioButton12: TRadioButton
-      Left = 13
+      Left = 16
       Top = 17
       Width = 71
       Height = 17
@@ -314,7 +314,7 @@ object ConfigCPC: TConfigCPC
       TabOrder = 0
     end
     object RadioButton13: TRadioButton
-      Left = 13
+      Left = 16
       Top = 38
       Width = 72
       Height = 17
@@ -325,14 +325,14 @@ object ConfigCPC: TConfigCPC
   object GroupBox3: TGroupBox
     Left = 327
     Top = 8
-    Width = 107
+    Width = 98
     Height = 77
     Caption = 'RAM Expansion'
     TabOrder = 5
     object RadioButton5: TRadioButton
       Left = 16
       Top = 17
-      Width = 113
+      Width = 73
       Height = 17
       Caption = 'Disabled'
       TabOrder = 0
@@ -340,7 +340,7 @@ object ConfigCPC: TConfigCPC
     object RadioButton6: TRadioButton
       Left = 16
       Top = 38
-      Width = 113
+      Width = 62
       Height = 16
       Caption = '512Kb'
       TabOrder = 1
@@ -348,7 +348,7 @@ object ConfigCPC: TConfigCPC
     object RadioButton7: TRadioButton
       Left = 16
       Top = 56
-      Width = 112
+      Width = 64
       Height = 17
       Caption = '4Mb'
       Enabled = False
@@ -356,10 +356,10 @@ object ConfigCPC: TConfigCPC
     end
   end
   object GroupBox4: TGroupBox
-    Left = 460
-    Top = 87
-    Width = 107
-    Height = 64
+    Left = 431
+    Top = 8
+    Width = 147
+    Height = 103
     Caption = 'Monitor'
     TabOrder = 6
     object RadioButton9: TRadioButton
@@ -369,14 +369,36 @@ object ConfigCPC: TConfigCPC
       Height = 17
       Caption = 'Color'
       TabOrder = 0
+      OnClick = RadioButton9Click
     end
     object RadioButton10: TRadioButton
       Left = 13
-      Top = 38
+      Top = 35
       Width = 72
       Height = 17
       Caption = 'Green'
       TabOrder = 1
+      OnClick = RadioButton10Click
+    end
+    object GroupBox5: TGroupBox
+      Left = 2
+      Top = 55
+      Width = 143
+      Height = 45
+      Caption = 'Brillo/Brightness'
+      TabOrder = 2
+      object TrackBar1: TTrackBar
+        Left = 1
+        Top = 12
+        Width = 140
+        Height = 28
+        Max = 4
+        Min = 1
+        Position = 1
+        ShowSelRange = False
+        TabOrder = 0
+        TickMarks = tmTopLeft
+      end
     end
   end
 end

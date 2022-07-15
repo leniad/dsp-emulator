@@ -1,4 +1,26 @@
 ﻿# DSP Emulator status #
+<b>15/07/22 - DSP Emulator 0.20Final. Updated Windows (32 & 64), Linux (64), OSX (64) and source update.<br>
+<pre>
+-General
+    +Changed transparent color (fixes 'Thunder & Lightning' sprites)
+    +CPU
+        -UPD78XX
+            +UPD7801
+                -Fixed IRQs
+                -Fixed timers
+-Amstrad CPC
+    +Fixed green monitor palette
+    +Added green monitor brightness
+-Coleco
+    +Fixed snapshot loading
+-Super Cassete Vision
+    +Fixed remain issues
+    +Fixed BASIC Nyuumon RAM 
+-Ninja Kid II HW
+    +Fixed sound init
+-Seta HW
+    +Thunder & Lightning: added protection
+</pre><br><br>
 <b>29/06/22 - DSP Emulator 0.20WIP9. Win32 and source update.<br>
 <pre>
 -General

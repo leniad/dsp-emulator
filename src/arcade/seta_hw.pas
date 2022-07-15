@@ -3,9 +3,9 @@ unit seta_hw;
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
-     sound_engine,m6502,seta_sprites,ym_2203,ym_3812,x1_010;
+     sound_engine,m6502,seta_sprites,ym_2203,ym_3812,x1_010,misc_functions;
 
-procedure cargar_seta;
+function iniciar_seta:boolean;
 
 implementation
 const
@@ -88,6 +88,9 @@ var
  rom_snd:array[0..$f,0..$3fff] of byte;
  sound_latch0,sound_latch1,snd_bank:byte;
  control_data:word;
+ //Thunder & lighting
+ thunderl_protection_reg:word;
+
 
 procedure update_video_seta_sprites;
 begin
@@ -478,7 +481,7 @@ case direccion of
     $b00004:thunderl_getword:=(marcade.in2 and $f) or marcade.dswa;
     $b00008:thunderl_getword:=$ffff; //p3
     $b0000a:thunderl_getword:=$ffff; //p4
-    $b0000c:thunderl_getword:=$dd;
+    $b0000c:thunderl_getword:=thunderl_protection_reg;
     $c00000:thunderl_getword:=ram[$4000];
     $d00000..$d005ff:thunderl_getword:=seta_sprite0.spritey[(direccion and $fff) shr 1];
     $d00600..$d00607:thunderl_getword:=seta_sprite0.control[(direccion and $7) shr 1];
@@ -489,13 +492,26 @@ end;
 end;
 
 procedure thunderl_putword(direccion:dword;valor:word);
+var
+  addr:dword;
 begin
 case direccion of
     0..$ffff:;
     $100000..$103fff:x1_010_0.write16((direccion and $3fff) shr 1,valor); //x10
     $200000:m68000_0.irq[2]:=CLEAR_LINE;
     $300000:;
-    $400000..$40ffff:; //proteccion
+    $400000..$41ffff:begin //proteccion
+                       addr:=direccion and $1ffff;
+                       thunderl_protection_reg:=
+		                    (bit_n(addr,2) shl 0)
+		                    or ((BIT_n(addr, 2) and BIT_n(not(addr), 3)) shl 1)
+		                    or ((BIT_n(addr, 2) or BIT_n(not(addr), 6)) shl 2)
+		                    or ((BIT_n(addr, 2) or BIT_n(not(addr), 6) or BIT_n(not(addr), 8)) shl 3)
+		                    or ((BIT_n(addr, 3) and BIT_n(not(addr), 11) and BIT_n(addr, 15)) shl 4)
+		                    or ((BIT_n(addr, 6) and BIT_n(addr, 13)) shl 5)
+		                    or (((BIT_n(addr, 6) and BIT_n(addr, 13)) or BIT_n(not(addr), 16)) shl 6)
+		                    or ((((BIT_n(addr, 6) and BIT_n(addr, 13)) or BIT_n(not(addr), 16)) and (BIT_n(addr, 2) or BIT_n(not(addr), 6) or BIT_n(not(addr), 8))) shl 7);
+                     end;
     $500000..$500001:; //coin lockout
     $700000..$7003ff:if buffer_paleta[(direccion and $3ff) shr 1]<>valor then begin
                       buffer_paleta[(direccion and $3ff) shr 1]:=valor;
@@ -539,6 +555,7 @@ begin
  scroll_x:=0;
  scroll_y:=0;
  vram_control:=0;
+ thunderl_protection_reg:=0;
 end;
 
 function iniciar_seta:boolean;
@@ -565,6 +582,15 @@ begin
 end;
 
 begin
+llamadas_maquina.reset:=reset_seta;
+case main_vars.tipo_maquina of
+  302:llamadas_maquina.bucle_general:=seta_principal_snd_cpu;
+  303:begin
+        llamadas_maquina.bucle_general:=seta_principal_snd_cpu;
+        llamadas_maquina.fps_max:=57.42;
+      end;
+  304:llamadas_maquina.bucle_general:=seta_principal;
+end;
 iniciar_seta:=false;
 iniciar_audio(false);
 //Pantallas
@@ -664,20 +690,6 @@ freemem(ptemp);
 //final
 reset_seta;
 iniciar_seta:=true;
-end;
-
-procedure cargar_seta;
-begin
-llamadas_maquina.iniciar:=iniciar_seta;
-llamadas_maquina.reset:=reset_seta;
-case main_vars.tipo_maquina of
-  302:llamadas_maquina.bucle_general:=seta_principal_snd_cpu;
-  303:begin
-        llamadas_maquina.bucle_general:=seta_principal_snd_cpu;
-        llamadas_maquina.fps_max:=57.42;
-      end;
-  304:llamadas_maquina.bucle_general:=seta_principal;
-end;
 end;
 
 end.

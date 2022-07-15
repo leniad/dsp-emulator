@@ -513,7 +513,8 @@ begin
     single_line(0,linea,paleta[self.bgcolor],PIXELS_VISIBLES_TOTAL,self.pant);
     if linea=192 then begin
                 self.status_reg:=self.status_reg or $80;
-                self.exec_interrupt;
+                self.int:=(self.regs[1] and $20)<>0;
+                if @self.IRQ_Handler<>nil then self.IRQ_Handler(self.int);
     end;
     exit;
   end;

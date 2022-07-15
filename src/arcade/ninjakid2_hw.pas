@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,ym_2203,gfx_engine,rom_engine,
      pal_engine,mc8123,sound_engine,timer_engine,dac;
 
-procedure cargar_ninjakid2;
+function iniciar_upl:boolean;
 
 implementation
 
@@ -794,6 +794,9 @@ begin
   end;
 end;
 begin
+llamadas_maquina.bucle_general:=upl_principal;
+llamadas_maquina.reset:=reset_upl;
+llamadas_maquina.fps_max:=59.61;
 iniciar_upl:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);  //FG
@@ -815,6 +818,9 @@ z80_0.change_ram_calls(upl_getbyte,upl_putbyte);
 z80_1:=cpu_z80.create(5000000,256);
 z80_1.change_ram_calls(upl_snd_getbyte,upl_snd_putbyte);
 z80_1.change_io_calls(upl_snd_inbyte,upl_snd_outbyte);
+//Que no se me olvide!!! Primero la CPU de sonido y luego el chip de audio!!!!
+if main_vars.tipo_maquina=120 then z80_1.init_sound(ninjakid2_sound_update)
+  else z80_1.init_sound(upl_sound_update);
 //Sound Chips
 ym2203_0:=ym2203_chip.create(1500000,0.5,0.1);
 ym2203_0.change_irq_calls(upl_snd_irq);
@@ -831,7 +837,6 @@ case main_vars.tipo_maquina of
   120:begin
         z80_0.change_ram_calls(ninjakid2_getbyte,ninjakid2_putbyte);
         z80_1.change_ram_calls(ninjakid2_snd_getbyte,ninjakid2_snd_putbyte);
-        z80_1.init_sound(ninjakid2_sound_update);
         update_background:=bg_ninjakid2;
         //cargar roms y ponerlas en sus bancos
         if not(roms_load(@memoria_temp,ninjakid2_rom)) then exit;
@@ -860,7 +865,6 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@ninjakid2_dip_b;
   end;
   121:begin
-        z80_1.init_sound(upl_sound_update);
         //cargar roms y ponerlas en sus bancos
         if not(roms_load(@memoria_temp,aarea_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
@@ -882,7 +886,6 @@ case main_vars.tipo_maquina of
         marcade.dswa_val:=@aarea_dip_a;
       end;
   122:begin
-        z80_1.init_sound(upl_sound_update);
         //cargar roms y ponerlas en sus bancos
         if not(roms_load(@memoria_temp,mnight_rom)) then exit;
         copymemory(@memoria[0],@memoria_temp[0],$8000);
@@ -905,7 +908,6 @@ case main_vars.tipo_maquina of
         marcade.dswb_val:=@mnight_dip_b;
       end;
   307:begin  //Atomic Robo-kid
-        z80_1.init_sound(upl_sound_update);
         sprite_color:=$200;
         fg_color:=$300;
         xshift:=1;
@@ -952,14 +954,6 @@ gfx[2].trans[15]:=true;
 //final
 reset_upl;
 iniciar_upl:=true;
-end;
-
-procedure cargar_ninjakid2;
-begin
-llamadas_maquina.iniciar:=iniciar_upl;
-llamadas_maquina.bucle_general:=upl_principal;
-llamadas_maquina.reset:=reset_upl;
-llamadas_maquina.fps_max:=59.61;
 end;
 
 end.

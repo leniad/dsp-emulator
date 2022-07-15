@@ -6,7 +6,9 @@ unit coleco;
 21/08/15 Cambiados los controles y la NMI
          La memoria no hay que iniciarla a 0... sino hay juegos que fallan!
 12/11/20 Añado Super Game Card y Mega Cart
+14/07/22 Modificado el snapshot a la version 3.01, por las modificaciones del SN76496
 }
+
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,lenguaje,main_engine,controls_engine,tms99xx,sn_76496,sysutils,dialogs,

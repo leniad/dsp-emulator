@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,timer_engine,ym_3812;
 
-procedure cargar_sauro;
+function iniciar_sauro:boolean;
 
 implementation
 const
@@ -247,6 +247,9 @@ const
 			                          $18000*8+2*4*16,$10000*8+2*4*16,$8000*8+2*4*16,0+2*4*16,
                                 $18000*8+3*4*16,$10000*8+3*4*16,$8000*8+3*4*16,0+3*4*16);
 begin
+llamadas_maquina.bucle_general:=sauro_principal;
+llamadas_maquina.reset:=reset_sauro;
+llamadas_maquina.fps_max:=55.72;
 iniciar_sauro:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -303,14 +306,6 @@ marcade.dswb_val:=@sauro_dip_b;
 //final
 reset_sauro;
 iniciar_sauro:=true;
-end;
-
-procedure Cargar_sauro;
-begin
-llamadas_maquina.iniciar:=iniciar_sauro;
-llamadas_maquina.bucle_general:=sauro_principal;
-llamadas_maquina.reset:=reset_sauro;
-llamadas_maquina.fps_max:=55.72;
 end;
 
 end.

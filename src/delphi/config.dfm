@@ -12,11 +12,9 @@ object ConfigSP: TConfigSP
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object GroupBox1: TGroupBox
     Left = 7
@@ -154,7 +152,7 @@ object ConfigSP: TConfigSP
         TabOrder = 0
         object RadioButton14: TRadioButton
           Left = 13
-          Top = 12
+          Top = 15
           Width = 65
           Height = 17
           Caption = 'Mono'
@@ -188,7 +186,7 @@ object ConfigSP: TConfigSP
         Caption = 'Tape Audio'
         TabOrder = 1
         object RadioButton21: TRadioButton
-          Left = 13
+          Left = 10
           Top = 17
           Width = 62
           Height = 17
@@ -356,8 +354,8 @@ object ConfigSP: TConfigSP
         object RadioButton20: TRadioButton
           Left = 13
           Top = 82
-          Width = 73
-          Height = 14
+          Width = 62
+          Height = 15
           Caption = 'AMX'
           TabOrder = 3
           OnKeyUp = FormKeyUp

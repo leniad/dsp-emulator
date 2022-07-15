@@ -9,14 +9,7 @@ type
       constructor Create(clock:dword;amp:single=1);
       destructor free;
     public
-      procedure Write(data:byte);
-      procedure update;
-      procedure reset;
-      function save_snapshot(data:pbyte):word;
-      procedure load_snapshot(data:pbyte);
-      procedure change_clock(clock:dword);
-    private
-    	UpdateStep:dword;
+      UpdateStep:dword;
     	VolTable:array[0..15] of single;	// volume table
     	Registers:array[0..7] of word;	// registers
     	LastRegister:byte;	// last register written
@@ -25,6 +18,13 @@ type
       Output:array [0..3] of byte;
     	RNG:cardinal;		// noise generator      */
     	NoiseFB:integer;		// noise feedback mask */
+      procedure Write(data:byte);
+      procedure update;
+      procedure reset;
+      function save_snapshot(data:pbyte):word;
+      procedure load_snapshot(data:pbyte);
+      procedure change_clock(clock:dword);
+    private
       procedure set_gain(gain:integer);
       procedure resample;
  end;

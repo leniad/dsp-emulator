@@ -177,7 +177,6 @@ end;
 
 procedure williams_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$dfff then exit;
 case direccion of
   $0..$bfff:memoria[direccion]:=valor;
   $c000..$cfff:case ram_bank of
@@ -196,6 +195,7 @@ case direccion of
                   $1..$f:;
                end;
   $d000..$dfff:ram_bank:=valor and $f;
+  $e000..$ffff:;
 end;
 end;
 
@@ -210,10 +210,10 @@ end;
 
 procedure williams_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion>$afff then exit;
 case direccion of
   0..$7f:m6800_0.internal_ram[direccion]:=valor;
   $400..$403,$8400..$8403:pia6821_2.write(direccion and $3,valor);
+  $b000..$ffff:;
 end;
 end;
 
@@ -338,7 +338,7 @@ pia1_timer:=timers.init(m6809_0.numero_cpu,100,pia1_timer_off,nil,false);
 pia6821_2:=pia6821_chip.Create;
 pia6821_2.change_in_out(nil,nil,snd_write_dac,nil);
 pia6821_2.change_irq(snd_irq,snd_irq);
-pia2_timer:=timers.init(m6800_0.numero_cpu,1000,pia2_sound_command,nil,false);
+pia2_timer:=timers.init(m6800_0.numero_cpu,100,pia2_sound_command,nil,false);
 //Sound Chip
 dac_0:=dac_chip.Create;
 marcade.dswa:=0;

@@ -107,8 +107,8 @@ begin
   end;
   lt:=trunc((self.OPL.output shl 1)*self.amp);
   // limit check */
-  if lt>$7fff then lt:=$7fff;
-  if lt<-$7fff then lt:=-$7fff;
+  if lt>$7fff then lt:=$7fff
+   else if lt<-$7fff then lt:=-$7fff;
   tsample[self.tsample_num,sound_status.posicion_sonido]:=lt;
   if sound_status.stereo then tsample[self.tsample_num,sound_status.posicion_sonido+1]:=lt;
   // store to sound buffer */

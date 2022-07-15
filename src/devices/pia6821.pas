@@ -20,7 +20,7 @@ pia6821_chip=class
       procedure cb1_w(state:boolean);
       procedure portb_w(valor:byte);
     private
-      ctl_a,ctl_b,ddr_a,ddr_b,in_a,in_b,port_a_z_mask,out_a,out_b:byte;
+      a_input_overrides_output_mask,ctl_a,ctl_b,ddr_a,ddr_b,in_a,in_b,port_a_z_mask,out_a,out_b:byte;
       logged_ca1_not_connected,in_ca1_pushed,logged_ca2_not_connected,in_ca2_pushed,in_ca1,in_ca2,irq_a1,irq_a2,irq_b1,irq_b2:boolean;
       out_ca2,out_cb2,out_ca2_needs_pulled,in_a_pushed,in_b_pushed,logged_port_a_not_connected,logged_port_b_not_connected:boolean;
       out_cb2_needs_pulled,last_out_cb2_z,out_a_needs_pulled,out_b_needs_pulled:boolean;
@@ -117,6 +117,7 @@ end;
 
 procedure pia6821_chip.reset;
 begin
+  self.a_input_overrides_output_mask:=0;
   self.logged_ca1_not_connected:=false;
   self.in_ca1_pushed:=false;
   self.logged_ca2_not_connected:=false;
@@ -156,6 +157,9 @@ begin
   self.out_b_needs_pulled:=false;
   if addr(self.irqa_handler)<>nil then self.irqa_handler(false);
   if addr(self.irqb_handler)<>nil then self.irqb_handler(false);
+  if addr(self.out_a_handler)<>nil then self.out_a_handler($ff);
+  if addr(self.ca2_handler)<>nil then self.ca2_handler(true);
+  //if (addr(self.out_b_handler)<>nil and addr(self.ts_
 end;
 
 function pia6821_chip.ddr_a_r:byte;
@@ -176,7 +180,7 @@ begin
 	new_state:=(self.irq_a1 and irq1_enabled(self.ctl_a)) or (self.irq_a2 and irq2_enabled(self.ctl_a));
 	if (new_state<>self.irq_a_state) then begin
 		self.irq_a_state:=new_state;
-		if (addr(irqa_handler)<>nil) then irqa_handler(self.irq_a_state);
+		if (addr(irqa_handler)<>nil) then self.irqa_handler(self.irq_a_state);
 	end;
 	// then do IRQ B
 	new_state:=(self.irq_b1 and irq1_enabled(self.ctl_b)) or (self.irq_b2 and irq2_enabled(self.ctl_b));
@@ -188,12 +192,10 @@ end;
 
 procedure pia6821_chip.set_out_ca2(data:boolean);
 begin
-  if (data<>self.out_ca2) then begin
-     self.out_ca2:=data;
-     // send to output function
-     if (addr(self.ca2_handler)<>nil) then self.ca2_handler(self.out_ca2)
-        else self.out_ca2_needs_pulled:=true;
-  end;
+  self.out_ca2:=data;
+  // send to output function
+  if (addr(self.ca2_handler)<>nil) then self.ca2_handler(self.out_ca2)
+    else self.out_ca2_needs_pulled:=true;
 end;
 
 procedure pia6821_chip.ca1_w(state:boolean);
@@ -205,7 +207,7 @@ begin
 		// update externals
 		update_interrupts;
 		// CA2 is configured as output and in read strobe mode and cleared by a CA1 transition
-		if(c2_output(self.ctl_a) and c2_strobe_mode(self.ctl_a) and strobe_c1_reset(self.ctl_a)) then set_out_ca2(true);
+		if(c2_output(self.ctl_a) and c2_strobe_mode(self.ctl_a) and strobe_c1_reset(self.ctl_a) and not(self.out_ca2)) then set_out_ca2(true);
 	end;
 	// set the new value for CA1
 	self.in_ca1:=state;
@@ -262,16 +264,16 @@ begin
 			port_a_data:=self.in_a;
 		end else begin
 			// mark all pins disconnected
-			self.port_a_z_mask:=$ff;
+			port_a_data:=$ff;
 			if (not(self.logged_port_a_not_connected) and (self.ddr_a<>$ff)) then self.logged_port_a_not_connected:=true;
 		end;
-        end;
+  end;
 	// - connected pins are always read
 	// - disconnected pins read the output buffer in output mode
 	// - disconnected pins are HI in input mode
-	ret:=(not(self.port_a_z_mask) and port_a_data) or
-	     (self.port_a_z_mask and self.ddr_a and self.out_a) or
-	     (self.port_a_z_mask and not(self.ddr_a));
+	ret:=(not(self.ddr_a) and port_a_data)  // input pins
+		or (self.ddr_a and self.out_a and not(self.a_input_overrides_output_mask))  // normal output pins
+		or (self.ddr_a and port_a_data and self.a_input_overrides_output_mask);  // overridden output pins
 	get_in_a_value:=ret;
 end;
 
@@ -287,7 +289,7 @@ begin
 	// CA2 is configured as output and in read strobe mode
 	if (c2_output(self.ctl_a) and c2_strobe_mode(self.ctl_a)) then begin
 		// this will cause a transition low
-		set_out_ca2(false);
+		if self.out_ca2 then set_out_ca2(false);
 		// if the CA2 strobe is cleared by the E, reset it right away
 		if (strobe_e_reset(self.ctl_a)) then set_out_ca2(true);
 	end;
@@ -322,7 +324,7 @@ end;
 
 function pia6821_chip.cb2_output_z:boolean;
 begin
-	cb2_output_z:=c2_output(self.ctl_b);
+	cb2_output_z:=not(c2_output(self.ctl_b));
 end;
 
 procedure pia6821_chip.set_out_cb2(data:boolean);
@@ -414,7 +416,7 @@ procedure pia6821_chip.port_a_w(valor:byte);
 begin
 	// buffer the output value
 	self.out_a:=valor;
-        self.send_to_out_a_func;
+  self.send_to_out_a_func;
 end;
 
 function pia6821_chip.get_out_a_value:byte;
@@ -444,26 +446,32 @@ begin
 		// DDR changed, call the callback again
 		self.ddr_a:=valor;
 		self.logged_port_a_not_connected:=false;
-                self.send_to_out_a_func;
+    self.send_to_out_a_func;
 	end;
 end;
 
 procedure pia6821_chip.control_a_w(valor:byte);
 var
-  temp:boolean;
+  ca2_was_output,tempb2:boolean;
 begin
 	// bit 7 and 6 are read only
 	valor:=valor and $3f;
-	// update the control register
-	self.ctl_a:=valor;
+  // update the control register
+	ca2_was_output:=c2_output(self.ctl_a);
+  self.ctl_a:=valor;
 	// CA2 is configured as output
 	if (c2_output(self.ctl_a)) then begin
-		if (c2_set_mode(self.ctl_a)) then // set/reset mode - bit value determines the new output
-			temp:=c2_set(self.ctl_a)
-		else	// strobe mode - output is always high unless strobed
-			temp:=true;
-		set_out_ca2(temp);
-	end;
+		if (c2_set_mode(self.ctl_a)) then begin // set/reset mode - bit value determines the new output
+			tempb2:=c2_set(self.ctl_a);
+      if (not(ca2_was_output) or (self.out_ca2<>tempb2)) then set_out_ca2(tempb2);
+		end else begin	// strobe mode - output is always high unless strobed
+      if (not(ca2_was_output) or not(self.out_ca2)) then self.set_out_ca2(true); // strobe mode - output is always high unless strobed
+    end;
+	end else begin
+    if ca2_was_output then begin
+		  if addr(self.ca2_handler)<>nil then self.ca2_handler(true);
+    end;
+  end;
 	// update externals
 	self.update_interrupts;
 end;
@@ -491,10 +499,10 @@ begin
      self.send_to_out_b_func;
      // CB2 in write strobe mode
      if (c2_strobe_mode(self.ctl_b)) then begin
-          // this will cause a transition low
-	  self.set_out_cb2(false);
-	  // if the CB2 strobe is cleared by the E, reset it right away
-          if (strobe_e_reset(self.ctl_b)) then set_out_cb2(true);
+        // this will cause a transition low
+	      self.set_out_cb2(false);
+	      // if the CB2 strobe is cleared by the E, reset it right away
+        if (strobe_e_reset(self.ctl_b)) then set_out_cb2(true);
      end;
 end;
 
@@ -502,9 +510,9 @@ procedure pia6821_chip.ddr_b_w(valor:byte);
 begin
      if (self.ddr_b<>valor) then begin
         // DDR changed, call the callback again
-	self.ddr_b:=valor;
-	self.logged_port_b_not_connected:=false;
-	self.send_to_out_b_func;
+	      self.ddr_b:=valor;
+	      self.logged_port_b_not_connected:=false;
+	      self.send_to_out_b_func;
      end;
 end;
 

@@ -305,7 +305,7 @@ ym2203_0.change_irq_calls(snd_irq);
 //MCU
 {$IFDEF MCU}
 //?????????? Tengo que poner 4Mhz mas... En teoria son 10Mhz, pero si lo pongo hae cosas raras...
-cchip_0:=cchip_chip.create(14000000,256);
+cchip_0:=cchip_chip.create(10000000,256);
 cchip_0.change_ad(volfied_f0000d);
 cchip_0.change_in(volfied_f00007,volfied_f00009,volfied_f0000c,nil,nil);
 if not(roms_load(cchip_0.get_eeprom_dir,cchip_eeprom)) then exit;

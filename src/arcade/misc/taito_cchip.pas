@@ -158,7 +158,7 @@ begin
   self.upd7810.change_ram_calls(cchip_getbyte,cchip_putbyte);
   self.upd7810.change_an(an_0,an_1,an_2,an_3,an_4,an_5,an_6,an_7);
   self.upd7810.change_in(ca_cb,cb_cb,cc_cb,cd_cb,cf_cb);
-  cchip_timer:=timers.init(self.upd7810.numero_cpu,100,clear_irq,nil,false);
+  cchip_timer:=timers.init(self.upd7810.numero_cpu,10,clear_irq,nil,false);
 end;
 
 destructor cchip_chip.free;

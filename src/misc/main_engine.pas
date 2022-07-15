@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.20WIP9';
+        DSP_VERSION='0.20F';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -223,7 +223,7 @@ procedure cambiar_video;
 procedure uses_sdl_window;
 begin
 case main_vars.tipo_maquina of
-     0..9,1000..1006,3000:begin
+     0..9,1000..1008,2000..2002,3000:begin
              fix_screen_pos(400,100);
              principal1.Panel2.width:=400;
              principal1.Panel2.height:=55;

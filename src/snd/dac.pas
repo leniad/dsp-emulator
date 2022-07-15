@@ -69,12 +69,12 @@ end;
 
 procedure dac_chip.data8_w(data:byte);
 begin
-	self.output:=(data*32767) div 255;
+	self.output:=data shl 7;
 end;
 
 procedure dac_chip.signed_data8_w(data:byte);
 begin
-	self.output:=(data-$80)*32767 div 128;
+	self.output:=(data-$80) shl 7;
 end;
 
 procedure dac_chip.data16_w(data:word);

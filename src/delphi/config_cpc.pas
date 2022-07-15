@@ -1,11 +1,10 @@
 unit config_cpc;
-
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.StdCtrls,misc_functions,file_engine,main_engine,pal_engine;
+  Vcl.StdCtrls,misc_functions,file_engine,main_engine,pal_engine, Vcl.ComCtrls;
 
 type
   TConfigCPC = class(TForm)
@@ -54,6 +53,8 @@ type
     GroupBox4: TGroupBox;
     RadioButton9: TRadioButton;
     RadioButton10: TRadioButton;
+    GroupBox5: TGroupBox;
+    TrackBar1: TTrackBar;
     procedure Button15Click(Sender: TObject);
     procedure Button13Click(Sender: TObject);
     procedure Button14Click(Sender: TObject);
@@ -71,6 +72,8 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Button1Click(Sender: TObject);
+    procedure RadioButton9Click(Sender: TObject);
+    procedure RadioButton10Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -82,13 +85,13 @@ var
 
 implementation
 uses amstrad_cpc,lenslock;
-
 {$R *.dfm}
 
 procedure TConfigCPC.Button13Click(Sender: TObject);
 var
   f:byte;
   colores:tpaleta;
+  temps:single;
 begin
 if radiobutton1.Checked then cpc_ga.cpc_model:=0
   else if radiobutton2.Checked then cpc_ga.cpc_model:=1
@@ -109,10 +112,15 @@ if cpc_crt.color_monitor then begin
     colores[f].b:=cpc_paleta[f] and $ff;
   end;
 end else begin
+  cpc_crt.bright:=trackbar1.position;
   for f:=0 to 31 do begin
     colores[f].r:=0;
-    colores[f].b:=0;
-    colores[f].g:=(trunc(cpc_green[f]*GREENFRAQ) shr 16) and $ff;
+    temps:=0.01*0*green_classic[f]*255;
+    if temps>255 then temps:=255;
+    colores[f].b:=trunc(temps);
+    temps:=green_classic[f]*255*(1+(cpc_crt.bright/4));
+    if temps>255 then temps:=255;
+    colores[f].g:=trunc(temps);
   end;
 end;
 set_pal(colores,32);
@@ -249,8 +257,28 @@ case cpc_ga.ram_exp of
   1:radiobutton6.Checked:=true;
   2:radiobutton7.Checked:=true;
 end;
-if cpc_crt.color_monitor then radiobutton9.Checked:=true
-  else radiobutton10.Checked:=true;
+trackbar1.Position:=cpc_crt.bright;
+if cpc_crt.color_monitor then begin
+  radiobutton9.Checked:=true;
+  groupbox5.Enabled:=false;
+  trackbar1.Enabled:=false;
+end else begin
+  radiobutton10.Checked:=true;
+  groupbox5.Enabled:=true;
+  trackbar1.Enabled:=true;
+end;
+end;
+
+procedure TConfigCPC.RadioButton10Click(Sender: TObject);
+begin
+  trackbar1.Enabled:=true;
+  groupbox5.Enabled:=true;
+end;
+
+procedure TConfigCPC.RadioButton9Click(Sender: TObject);
+begin
+  trackbar1.Enabled:=false;
+  groupbox5.Enabled:=false;
 end;
 
 procedure TConfigCPC.Button10Click(Sender: TObject);

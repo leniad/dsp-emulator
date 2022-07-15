@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,ym_3812,
      pal_engine,sound_engine,dac,timer_engine,nb1414_m4;
 
-procedure cargar_armedf;
+function iniciar_armedf:boolean;
 
 implementation
 const
@@ -531,6 +531,9 @@ case main_vars.tipo_maquina of
 end;
 end;
 begin
+llamadas_maquina.bucle_general:=armedf_principal;
+llamadas_maquina.reset:=reset_armedf;
+llamadas_maquina.fps_max:=59.082012;
 iniciar_armedf:=false;
 iniciar_audio(false);
 //Pantallas
@@ -693,14 +696,6 @@ end;
 //final
 reset_armedf;
 iniciar_armedf:=true;
-end;
-
-procedure Cargar_armedf;
-begin
-llamadas_maquina.iniciar:=iniciar_armedf;
-llamadas_maquina.bucle_general:=armedf_principal;
-llamadas_maquina.reset:=reset_armedf;
-llamadas_maquina.fps_max:=59.082012;
 end;
 
 end.

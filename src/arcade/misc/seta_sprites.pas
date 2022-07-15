@@ -1,7 +1,7 @@
 unit seta_sprites;
 
 interface
-uses {$IFDEF WINDOWS}windows,{$ENDIF}
+uses {$IFDEF WINDOWS}windows,{$ELSE IF}main_engine,{$ENDIF}
      gfx_engine;
 
 type

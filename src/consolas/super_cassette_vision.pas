@@ -282,10 +282,10 @@ while EmuStatus=EsRuning do begin
       upd7810_0.run(frame);
       frame:=frame+upd7810_0.tframes-upd7810_0.contador;
       case f of
-        0:upd7810_0.set_input_line(UPD7810_INTF2,CLEAR_LINE);
+        0:upd7810_0.set_input_line_7801(UPD7810_INTF2,CLEAR_LINE);
         239:begin
               update_video_svc;
-              upd7810_0.set_input_line(UPD7810_INTF2,ASSERT_LINE);
+              upd7810_0.set_input_line_7801(UPD7810_INTF2,ASSERT_LINE);
             end;
       end;
   end;
@@ -494,8 +494,8 @@ if (extension2='0') then begin
                   copymemory(datos,datos2,longitud);
                 end;
       $7978c4a6:begin  //star speeder
-                  copymemory(@datos2[$8000],datos2,$8000);
-                  copymemory(datos2,datos,$2000);
+                  copymemory(@datos2[$8000],@datos2[0],$8000);
+                  copymemory(@datos2[0],@datos[0],$2000);
                   copymemory(@datos2[$2000],datos,$2000);
                   copymemory(@datos2[$4000],datos,$2000);
                   copymemory(@datos2[$6000],datos,$2000);
@@ -513,8 +513,8 @@ end;
 freemem(datos);
 //Tiene RAM?
 case crc of
-  $5971940f:ram_bank2:=true; //Dragon Slayer
-  $cc4fb04d,$84005c4c:ram_bank:=true; //pop & chips y Shougi Nyuumon
+  $5971940f,$84005c4c,$ca965c2b:ram_bank2:=true; //Dragon Slayer, Shougi Nyuumon, BASIC Nyuumon
+  $cc4fb04d:ram_bank:=true; //pop & chips
   $cb69903d,$5b3a04e0:upd7810_0.change_ram_calls(polepos2_getbyte,polepos2_putbyte); //Pole Position II
 end;
 if resultado then begin

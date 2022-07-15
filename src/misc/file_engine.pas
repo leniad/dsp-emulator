@@ -143,6 +143,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   cpc_ga.cpc_model:=fich_ini.ReadInteger('cpc','cpcmodel',0);
   cpc_ga.ram_exp:=fich_ini.ReadInteger('cpc','cpcramexp',0);
   cpc_crt.color_monitor:=fich_ini.ReadInteger('cpc','cpccolor',1)=1;
+  cpc_crt.bright:=fich_ini.ReadInteger('cpc','cpcbright',1);
   //Configuracion SMS
   sms_model:=fich_ini.ReadInteger('sms','model',1);
   //Configuracion GB
@@ -261,6 +262,7 @@ end else begin
   cpc_ga.cpc_model:=0;
   cpc_ga.ram_exp:=0;
   cpc_crt.color_monitor:=true;
+  cpc_crt.bright:=1;
   //Configuracion basica SMS
   sms_model:=0;
   //Config GB
@@ -425,6 +427,7 @@ for f:=0 to 6 do fich_ini.WriteString('cpc','rom_dir_'+inttostr(f),cpc_rom[f].na
 fich_ini.WriteInteger('cpc','cpcmodel',cpc_ga.cpc_model);
 fich_ini.WriteInteger('cpc','cpcramexp',cpc_ga.ram_exp);
 fich_ini.WriteInteger('cpc','cpccolor',byte(cpc_crt.color_monitor));
+fich_ini.WriteInteger('cpc','cpcbright',cpc_crt.bright);
 //Config SMS
 fich_ini.WriteInteger('sms','model',sms_model);
 //Config GB

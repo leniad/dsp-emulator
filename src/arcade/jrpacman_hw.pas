@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,namco_snd,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine;
 
-procedure cargar_jrpacman;
+function iniciar_jrpacman:boolean;
 
 implementation
 
@@ -207,7 +207,7 @@ end;
 
 procedure jrpacman_outbyte(puerto:word;valor:byte);
 begin
-if (puerto and $FF)=0 then z80_0.im2_lo:=valor;
+if (puerto and $ff)=0 then z80_0.im2_lo:=valor;
 end;
 
 //Main
@@ -269,6 +269,9 @@ const
   (count:$01B0;val:$01),(count:$0001;val:$00),(count:$0002;val:$01),(count:$00AD;val:$00),
   (count:$0031;val:$01),(count:$005C;val:$00),(count:$0005;val:$01),(count:$604E;val:$00));
 begin
+llamadas_maquina.bucle_general:=jrpacman_principal;
+llamadas_maquina.reset:=reset_jrpacman;
+llamadas_maquina.fps_max:=60.6060606060;
 iniciar_jrpacman:=false;
 iniciar_audio(false);
 screen_init(1,432,288,true);
@@ -342,14 +345,6 @@ marcade.dswc_val:=@jrpacman_dip_c;
 //final
 reset_jrpacman;
 iniciar_jrpacman:=true;
-end;
-
-procedure cargar_jrpacman;
-begin
-llamadas_maquina.iniciar:=iniciar_jrpacman;
-llamadas_maquina.bucle_general:=jrpacman_principal;
-llamadas_maquina.reset:=reset_jrpacman;
-llamadas_maquina.fps_max:=60.6060606060;
 end;
 
 end.

@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      ym_2203,ym_3812,m6502,sound_engine,mcs51;
 
-procedure cargar_karnov;
+function iniciar_karnov:boolean;
 
 implementation
 const
@@ -234,8 +234,10 @@ case direccion of
   $a1800..$a1fff:begin
                       direccion:=(direccion and $7ff) shr 1;
                       direccion:=((direccion and $1f) shl 5) or ((direccion and $3e0) shr 5);
-	                    background_ram[direccion and $3ff]:=valor;
-                      gfx[1].buffer[direccion and $3ff]:=true;
+                      if background_ram[direccion and $3ff]<>valor then begin
+	                      background_ram[direccion and $3ff]:=valor;
+                        gfx[1].buffer[direccion and $3ff]:=true;
+                      end;
                  end;
   $c0000:m68000_0.irq[6]:=CLEAR_LINE;
   $c0002:begin
@@ -249,7 +251,7 @@ case direccion of
          end;
   $c0008:begin
             scroll_x:=valor and $1ff;
-	          main_screen.flip_main_screen:=(valor shr 15)<>0;
+	          main_screen.flip_main_screen:=(valor and $8000)<>0;
          end;
   $c000a:scroll_y:=valor and $1ff;
   $c000e:m68000_0.irq[7]:=CLEAR_LINE;
@@ -371,6 +373,8 @@ begin
   convert_gfx(num_gfx,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=karnov_principal;
+llamadas_maquina.reset:=reset_karnov;
 iniciar_karnov:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -463,13 +467,6 @@ set_pal(colores,$400);
 //final
 reset_karnov;
 iniciar_karnov:=true;
-end;
-
-procedure cargar_karnov;
-begin
-llamadas_maquina.bucle_general:=karnov_principal;
-llamadas_maquina.iniciar:=iniciar_karnov;
-llamadas_maquina.reset:=reset_karnov;
 end;
 
 end.

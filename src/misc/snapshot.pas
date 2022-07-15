@@ -1598,6 +1598,16 @@ type
       contador:dword;
       im2_lo,im0:byte;
   end;
+  tsn76496_v1=packed record
+      UpdateStep:dword;
+    	VolTable:array[0..15] of integer;
+    	Registers:array[0..7] of integer;
+    	LastRegister:byte;
+    	Volume,Period,Count:array [0..3] of integer;
+      Output:array [0..3] of byte;
+    	RNG:cardinal;
+    	NoiseFB:integer;
+  end;
 var
   ptemp,ptemp2,ptemp3:pbyte;
   longitud,descomprimido:integer;
@@ -1606,8 +1616,10 @@ var
   z80_v1:^tz80_v1;
   z80_v2:^tz80_v2;
   z80_v2_ext:^tz80_v2_ext;
+  sn76496_v1:^tsn76496_v1;
   coleco_header:^tmain_header;
   coleco_block:^tmain_block;
+  tempb:byte;
 begin
 abrir_coleco_snapshot:=false;
 getmem(coleco_header,SIZE_MH);
@@ -1618,7 +1630,7 @@ if coleco_header.magic<>'CLSN' then begin
   exit;
 end;
 reset_coleco;
-if ((coleco_header.version<>1) and (coleco_header.version<>2) and (coleco_header.version<>$1002) and (coleco_header.version<>$220) and (coleco_header.version<>$300)) then begin
+if ((coleco_header.version<>1) and (coleco_header.version<>2) and (coleco_header.version<>$1002) and (coleco_header.version<>$220) and (coleco_header.version<>$300) and (coleco_header.version<>$301)) then begin
    freemem(coleco_header);
    exit;
 end;
@@ -1631,8 +1643,10 @@ while longitud<long do begin
   if coleco_block.nombre='CRAM' then begin
     getmem(ptemp,$10000);
     decompress_zlib(data,coleco_block.longitud,pointer(ptemp),descomprimido);
-    if coleco_header.version=$300 then copymemory(@memoria[0],ptemp,descomprimido)
-      else copymemory(@memoria[$2000],ptemp,descomprimido);
+    case coleco_header.version of
+      $300,$301:copymemory(@memoria[0],ptemp,descomprimido)
+        else copymemory(@memoria[$2000],ptemp,descomprimido);
+    end;
     freemem(ptemp);
   end;
   if coleco_block.nombre='Z80R' then begin
@@ -1712,7 +1726,7 @@ while longitud<long do begin
           z80_0.load_snapshot(ptemp2);
           freemem(ptemp2);
         end;
-      $220,$300:z80_0.load_snapshot(data); //Version 2.20 y 3.0
+      $220,$300,$301:z80_0.load_snapshot(data); //Version 2.20 y 3.0
     end;
   end;
   if coleco_block.nombre='TMSR' then begin
@@ -1738,7 +1752,7 @@ while longitud<long do begin
             copymemory(@tms_0.mem[0],@tms_v1.memory[0],$4000);
             freemem(tms_v1);
         end;
-      $220,$300:tms_0.load_snapshot(ptemp);
+      $220,$300,$301:tms_0.load_snapshot(ptemp);
     end;
     freemem(ptemp);
     tms_0.change_irq(coleco_interrupt);
@@ -1752,7 +1766,27 @@ while longitud<long do begin
     copymemory(@tcoleco,ptemp,descomprimido);
     freemem(ptemp);
   end;
-  if coleco_block.nombre='7649' then sn_76496_0.load_snapshot(data);
+  if coleco_block.nombre='7649' then begin
+    case coleco_header.version of
+      $301:sn_76496_0.load_snapshot(data);
+        else begin
+            sn_76496_0.UpdateStep:=sizeof(tsn76496_v1);
+            getmem(sn76496_v1,sizeof(tsn76496_v1));
+            copymemory(sn76496_v1,data,sizeof(tsn76496_v1));
+            sn_76496_0.UpdateStep:=sn76496_v1.UpdateStep;
+            for tempb:=0 to 15 do sn_76496_0.VolTable[tempb]:=sn76496_v1.VolTable[tempb];
+            for tempb:=0 to 7 do sn_76496_0.Registers[tempb]:=sn76496_v1.Registers[tempb];
+            sn_76496_0.LastRegister:=sn76496_v1.LastRegister;
+            for tempb:=0 to 3 do sn_76496_0.Volume[tempb]:=sn76496_v1.Volume[tempb];
+            for tempb:=0 to 3 do sn_76496_0.Count[tempb]:=sn76496_v1.Count[tempb];
+            for tempb:=0 to 3 do sn_76496_0.Period[tempb]:=sn76496_v1.Period[tempb];
+            for tempb:=0 to 3 do sn_76496_0.Output[tempb]:=sn76496_v1.Output[tempb];
+            sn_76496_0.RNG:=sn76496_v1.RNG;
+            sn_76496_0.NoiseFB:=sn76496_v1.NoiseFB;
+            freemem(sn76496_v1);
+        end;
+    end;
+  end;
   if coleco_block.nombre='AY89' then ay8910_0.load_snapshot(data);
   inc(data,coleco_block.longitud);inc(longitud,coleco_block.longitud);
 end;
@@ -1771,7 +1805,7 @@ begin
 getmem(coleco_header,SIZE_MH);
 fillchar(coleco_header^,SIZE_MH,0);
 coleco_header.magic:='CLSN';
-coleco_header.version:=$300;
+coleco_header.version:=$301;
 getmem(pdata,$100000);
 ptemp:=pdata;
 //Cabecera

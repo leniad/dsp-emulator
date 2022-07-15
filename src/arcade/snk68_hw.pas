@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,ym_3812,nz80,upd7759,sound_engine;
 
-procedure cargar_snk68;
+function iniciar_snk68:boolean;
 
 implementation
 const
@@ -278,7 +278,7 @@ case direccion of
             fg_tile_offset:=(valor and $70) shl 4;
             sprite_flip:=(valor and 4)<>0;
          end;
-    $100000..$101fff:begin
+    $100000..$101fff:if video_ram[(direccion and $fff) shr 1]<>valor then begin
                         video_ram[(direccion and $fff) shr 1]:=valor;
                         gfx[0].buffer[(direccion and $fff) div 4]:=true;
                      end;
@@ -368,7 +368,7 @@ case direccion of
             else protection:=0;
     $c0000:sprite_flip:=(valor and $4)<>0;
     $100000..$107fff:sprite_ram[(direccion and $7fff) shr 1]:=valor;
-    $200000..$201fff:begin
+    $200000..$201fff:if video_ram[(direccion and $fff) shr 1]<>valor then begin
                         video_ram[(direccion and $fff) shr 1]:=valor;
                         gfx[0].buffer[(direccion and $fff) div 4]:=true;
                      end;
@@ -425,6 +425,9 @@ begin
 end;
 
 begin
+llamadas_maquina.bucle_general:=snk68_principal;
+llamadas_maquina.reset:=reset_snk68;
+llamadas_maquina.fps_max:=59.185606;
 iniciar_snk68:=false;
 iniciar_audio(false);
 screen_init(1,256,256,true);
@@ -522,14 +525,6 @@ end;
 freemem(memoria_temp);
 reset_snk68;
 iniciar_snk68:=true;
-end;
-
-procedure Cargar_snk68;
-begin
-llamadas_maquina.iniciar:=iniciar_snk68;
-llamadas_maquina.bucle_general:=snk68_principal;
-llamadas_maquina.reset:=reset_snk68;
-llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

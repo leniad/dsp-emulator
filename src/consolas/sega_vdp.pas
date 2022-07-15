@@ -194,7 +194,7 @@ begin
 	    parse_line:=byte(linea-1);
       //--bb bbbb 0iii iii0
 			sprite_y:=self.tms.read_m(sprite_base+sprite_index);
-			if ((self.Y_PIXELS=192) and (sprite_y=$d0)) then break;
+			if ((self.Y_PIXELS=192) and (sprite_y=$d0)) then exit;
 			if ((self.sprite_zoom>1) and (self.sprite_count<8)) then begin
         parse_line:=parse_line shr 1;
         sprite_y:=sprite_y shr 1;

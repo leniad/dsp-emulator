@@ -1139,7 +1139,7 @@ case driver of
        end;
   1001:begin //Coleco
           principal1.Panel2.visible:=true;
-          principal1.BitBtn10.visible:=true; //Cartuho
+          principal1.BitBtn10.visible:=true; //Cartcuho
           principal1.BitBtn11.visible:=true; //Load Snapshot
        end;
   1002:begin
@@ -1235,7 +1235,7 @@ case tmaquina of
   117:llamadas_maquina.iniciar:=iniciar_tp84;
   118:llamadas_maquina.iniciar:=iniciar_tutankham;
   119,183:cargar_Pang;
-  120,121,122,307:cargar_ninjakid2;
+  120,121,122,307:llamadas_maquina.iniciar:=iniciar_upl;
   123,194:Cargar_skykid;
   124,125,126,289,290,291:llamadas_maquina.iniciar:=iniciar_system86;
   127:llamadas_maquina.iniciar:=iniciar_rocnrope;
@@ -1246,12 +1246,12 @@ case tmaquina of
   133:llamadas_maquina.iniciar:=iniciar_solomon;
   134:llamadas_maquina.iniciar:=iniciar_combatsc;
   135:Cargar_hvyunit;
-  136,137,149,150:Cargar_snk68;
+  136,137,149,150:llamadas_maquina.iniciar:=iniciar_snk68;
   138,139,140:Cargar_megasys1;
   141:llamadas_maquina.iniciar:=timepilot_iniciar;
   142:llamadas_maquina.iniciar:=iniciar_pengo;
   146,147:Cargar_twincobra;
-  148:Cargar_JrPacman;
+  148:llamadas_maquina.iniciar:=iniciar_jrpacman;
   156,157,158,316,317:llamadas_maquina.iniciar:=iniciar_dec0;
   160:Cargar_funkyjet;
   159,161:Cargar_supbtime;
@@ -1286,7 +1286,7 @@ case tmaquina of
   216:Cargar_gradius3;
   217:Cargar_spaceinv;
   218:Cargar_centipede;
-  219,220:Cargar_karnov;
+  219,220:llamadas_maquina.iniciar:=iniciar_karnov;
   221:Cargar_aliens;
   222,223,224:Cargar_thunderx;
   225:cargar_simpsons;
@@ -1297,7 +1297,7 @@ case tmaquina of
   230:Cargar_ajax;
   235:Cargar_vendetta;
   236,245:llamadas_maquina.iniciar:=iniciar_gauntlet;
-  237:Cargar_sauro;
+  237:llamadas_maquina.iniciar:=iniciar_sauro;
   238:llamadas_maquina.iniciar:=iniciar_cclimber;
   239:llamadas_maquina.iniciar:=iniciar_retofinv;
   240:llamadas_maquina.iniciar:=iniciar_tetris;
@@ -1309,7 +1309,7 @@ case tmaquina of
   262:llamadas_maquina.iniciar:=iniciar_badlands;
   266,267:llamadas_maquina.iniciar:=iniciar_galivan;
   268,269,270:llamadas_maquina.iniciar:=iniciar_lastduel;
-  275,276,277,278:cargar_armedf;
+  275,276,277,278:llamadas_maquina.iniciar:=iniciar_armedf;
   280:cargar_firetrap;
   281,282:cargar_puzz3x3;
   283,284:cargar_k31945;
@@ -1318,8 +1318,8 @@ case tmaquina of
   292,293,294,295,296,297:llamadas_maquina.iniciar:=iniciar_system16b;
   298:cargar_toaplan1;
   301:cargar_karatechamp;
-  302,303,304:cargar_seta;
-  308,309,310,311,312,313:cargar_mrdocastle;
+  302,303,304:llamadas_maquina.iniciar:=iniciar_seta;
+  308,309,310,311,312,313:llamadas_maquina.iniciar:=iniciar_mrdocastle;
   314:llamadas_maquina.iniciar:=iniciar_ccastles;
   315:llamadas_maquina.iniciar:=iniciar_flower;
   318:llamadas_maquina.iniciar:=iniciar_sdodgeball;

@@ -1,5 +1,6 @@
 unit principal;
 //{$SetPeFlags $20}
+{$DEFINE FINAL}
 interface
 
 uses
@@ -538,8 +539,12 @@ end;
 
 procedure Tprincipal1.FormCreate(Sender: TObject);
 begin
-//SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
-//SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
+{$IFDEF WINDOWS}
+{$IFDEF FINAL}
+SetPriorityClass(GetCurrentProcess, NORMAL_PRIORITY_CLASS);
+SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_HIGHEST);
+{$ENDIF}
+{$ENDIF}
 Init_sdl_lib;
 timers:=timer_eng.create;
 EmuStatus:=EsStoped;
