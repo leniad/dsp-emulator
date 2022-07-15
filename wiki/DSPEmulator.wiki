@@ -1,4 +1,4 @@
-<h1>DSP Emulator v0.19 by Leniad 2001-2021</h1><br>
+<h1>DSP Emulator v0.20 by Leniad 2001-2022</h1><br>
 Well, this is just another emulator... but, where is the difference? This is a pascal open source emulator using Delphi/Lazarus environment. There are not many emulators in pascal...<br>
 Yes, its open source, you can compile it yourself. But you cannot use it for commercial purposes.<br>
 There are versions available for Windows 32/64-bit, Linux 64-bit, and MacOS 64-bit.<br><br>
@@ -217,6 +217,19 @@ Other features<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Mappers: Supports two types, with almost 100% compatibility<br>
 - To do<br>
 &nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br><br>
+<b>Super Cassete Vision</b><br>
+- Keys: Use the redefined keys or the external joystick for both joysticks<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The numbers on the keyboard from '1' to '0' emulate the number keys.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Key 'Q' emulates 'Cl'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Key 'W' emulates 'En'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Key 'P' emulates 'pause'<br>
+- Sound: UPD-1771 emulated<br>
+- Cartridges: Supports all known cartridges (some of them are bad dumps!)<br>
+- To do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Snapshots<br>
+&nbsp;&nbsp;&nbsp;&nbsp;- Enhance sound<br><br>
+<b>Sega Genesis/Megadrive</b><br>
+- Initial driver<br><br>
 <b>2.3 Arcade</b><br>
 <hr>
 <b>2.3.1 Samples</b><hr>
@@ -236,6 +249,7 @@ Bombjack                   | BOMBJACK.ZIP |     100    |
 Pac-man                    | PACMAN.ZIP   |     100    | Pac-man HW
 Ms. Pac-man                | MSPACMAN.ZIP |     100    | Pac-man HW
 Crush Roller               | CRUSH.ZIP    |     100    | Pac-man HW
+Ms Pac Man Twin            | MSPACTWIN.ZIP|     100    | Pac-man HW
 Mysterious Stones          | MYSTSTON.ZIP |     100    |
 Frogger                    | FROGGER.ZIP  |     100    | Galaxian HW
 Galaxian                   | GALAXIAN.ZIP |      95    | Galaxian HW
@@ -262,7 +276,9 @@ Yie Ar Kung-Fu             | YIEAR.ZIP    |     100    |
 Son Son                    | SONSON.ZIP   |     100    |
 Asteroids                  | ASTEROID.ZIP |     100    | Analog sound and samples
 Lunar Lander               | LLANDER.ZIP  |      50    | No sound and graphic issues
-Star Force                 | STARFORC.ZIP |     100    | 
+Star Force                 | STARFORC.ZIP |     100    | Senjyo HW
+Senjyo                     | SENJYO.ZIP   |     100    | Senjyo HW
+Baluba-louk no Densetsu    | BALUBA.ZIP   |     100    | Senjyo HW
 Rygar                      | RYGAR.ZIP    |     100    | Tecmo HW
 Silk Worm                  | SILKWORM.ZIP |     100    | Tecmo HW
 Pitfall II                 | PITFALL2.ZIP |     100    | Sega System 1 HW
@@ -281,7 +297,9 @@ Rally X                    | RALLYX.ZIP   |     100    | Rally X HW
 New Rally X                | NRALLYX.ZIP  |     100    | Rally X HW
                                                        | Explosion sound using samples
 City Connection            | CITYCON.ZIP  |     100    |
-Burger Time                | BTIME.ZIP    |     100    |
+Burger Time                | BTIME.ZIP    |     100    | Burger Time HW
+Lock'N'Chase               | LNC.ZIP      |     100    | Burger Time HW
+Minky Monkey               | MMONKEY.ZIP  |     100    | Burger Time HW
 Express Raider             | EXPRRAID.ZIP |     100    |
 Super Basketball           | SBASKETB.ZIP |     100    |
 Lady Bug                   | LADYBUG.ZIP  |     100    | Lady Bug HW
@@ -319,8 +337,8 @@ Street Fighter             | SF.ZIP       |     100    |
 Galaga                     | GALAGA.ZIP   |     100    | Galaga HW
                                                        | Partial sound using samples
 DigDug                     | DIGDUG.ZIP   |     100    | Galaga HW
-Xevious                    | XEVIOUS.ZIP  |      90    | Galaga HW
-                                                       | Partial sound using samples, scroll and sound issues
+Xevious                    | XEVIOUS.ZIP  |     100    | Galaga HW
+                                                       | Partial sound using samples
 Bosconian                  | BOSCO.ZIP    |     100    | Galaga HW
 Xain'd Sleena              | XSLEENA.ZIP  |     100    |
 Hard Head                  | HARDHEAD.ZIP |     100    | Suna HW
@@ -373,24 +391,19 @@ Street Fighter II'         |
                                                        | Missing some control, missing scroll row
 Cadillacs and Dinosaurs    | DINO.ZIP     |     100    | Capcom Play System 1 - CPS1
 The Punisher               | PUNISHER.ZIP |     100    | Capcom Play System 1 - CPS1
-Shinobi                    | SHINOBI.ZIP  |      95    | Sega System 16A
-                                                       | Missing PCM sound
-Alex Kidd                  | ALEXKIDD.ZIP |      95    | Sega System 16A
-                                                       | Missing PCM sound
-Fantasy Zone               | FANTZONE.ZIP |      95    | Sega System 16A
-                                                       | Missing PCM sound
-Alien Syndrome             | ALIENSYN.ZIP |      95    | Sega System 16A
-                                                       | Missing PCM sound
-Wonder Boy III             | WB3.ZIP      |      95    | Sega System 16A
-                                                       | Missing PCM sound
+Shinobi                    | SHINOBI.ZIP  |     100    | Sega System 16A
+Alex Kidd                  | ALEXKIDD.ZIP |     100    | Sega System 16A
+Fantasy Zone               | FANTZONE.ZIP |     100    | Sega System 16A
+Alien Syndrome             | ALIENSYN.ZIP |     100    | Sega System 16A
+Wonder Boy III             | WB3.ZIP      |     100    | Sega System 16A
 Time Pilot '84             | TP84.ZIP     |     100    |
 Tutankham                  | TUTANKHM.ZIP |     100    |
-Pang                       | PANG.ZIP     |      95    | Falta YM2413
-Super Pang                 | SPANG.ZIP    |      95    | Falta YM2413
-Ninja Kid II               | NINJAKD2.ZIP |      95    | UPL HW
-                                                       | Missing PCM sound
+Pang                       | PANG.ZIP     |      95    | Missing YM2413
+Super Pang                 | SPANG.ZIP    |      95    | Missing YM2413
+Ninja Kid II               | NINJAKD2.ZIP |     100    | UPL HW
 Ark Area                   | ARKAREA.ZIP  |     100    | UPL HW
 Mutant Night               | MNIGHT.ZIP   |     100    | UPL HW
+Atomic Robo-kid            | ROBOKID.ZIP  |     100    | UPL HW
 Sky Kid                    | SKYKID.ZIP   |     100    | Sky Kid HW
 Dragon Buster              | DRGNBSTR.ZIP |     100    | Sky Kid HW
 Rolling Thunder            | RTHUNDER.ZIP |     100    | Namco System 86 HW
@@ -403,6 +416,7 @@ Roc'n Rope                 | ROCNROPE.ZIP |     100    |
 Repulse                    | REPULSE.ZIP  |     100    |
 The NewZealand Story       | TNZS.ZIP     |     100    | The NewZealand Story HW
 Insector X                 | INSECTX.ZIP  |     100    | The NewZealand Story HW
+Extermination              | EXTRMATN.ZIP |     100    | The NewZealand Story HW
 Pacland                    | PACLAND.ZIP  |     100    |
 Mario Bros.                | MARIO.ZIP    |     100    | Full sound using samples
 Solomon Key                | SOLOMON.ZIP  |     100    |
@@ -423,6 +437,8 @@ Jr. Pac-Man                | JRPACMAN.ZIP |     100    |
 Robocop                    | ROBOCOP.ZIP  |     100    | Deco0 HW
 Baddudes vs. DragonNinja   | BADDUDES.ZIP |     100    | Deco0 HW
 Hippodrome                 | HIPPODRM.ZIP |     100    | Deco0 HW
+SlySpy                     | SLYSPY.ZIP   |     100    | Deco0 HW
+Boulder Dash I-II          | BOULDASH.ZIP |     100    | Deco0 HW
 Tumble Pop                 | TUMBLEP.ZIP  |     100    |
 Funky Jet                  | FUNKYJET.ZIP |     100    |
 Super Burger Time          | SUPBTIME.ZIP |     100    |
@@ -546,8 +562,23 @@ Dynamite Dux               | DDUX1.ZIP    |     100    | Sega System 16B
 E-Swat - Cyber Police      | ESWAT.ZIP    |     100    | Sega System 16B
 Passing Shot               | PASSSHT.ZIP  |     100    | Sega System 16B
 Aurail                     | AURAIL.ZIP   |     100    | Sega System 16B
+Hellfire                   | HELLFIRE.ZIP |      50    | Toaplan 1 System
+Karate Champ               | KCHAMP.ZIP   |     100    |
+Thundercade                | TNDRCADE.ZIP |     100    | Seta HW
+Twin Eagle                 |              |            |
+ - Revenge Joe's Brother   | TWINEAGL.ZIP |     100    | Seta HW
+Thunder & Lightning        | THUNDERL.ZIP |     100    | Seta HW
+Mr. Do''s Castle           | DOCASTLE.ZIP |     100    | Mr DoCastle HW
+Do! Run Run                | DORUNRUN.ZIP |     100    | Mr DoCastle HW
+Mr. Do''s Wild Ride        | DOWILD.ZIP   |     100    | Mr DoCastle HW
+Jumping Jack               | JJACK.ZIP    |     100    | Mr DoCastle HW
+Kick Rider                 | KICKRIDR.ZIP |     100    | Mr DoCastle HW
+Indoor Soccer              | IDSOCCER.ZIP |     100    | Mr DoCastle HW
+Crystal Castles            | CCASTLES.ZIP |     100    |
+Flower                     | FLOWER.ZIP   |     100    |
+Super Dodge Ball           | SPDODGEB.ZIP |     100    |
 ------------------------------------------------------------------------------------------------------------------------
-Total: 287</pre>
+Total: 310</pre>
 <b>3-. Contribute/Code distribution</b><br>
 <hr>
 If you want to add another language, download old languaje files and edit any file with the extension '.lng', rename it with the language name and send it to me, to add it to the next version.<br>
