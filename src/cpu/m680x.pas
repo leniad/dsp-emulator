@@ -2,6 +2,7 @@ unit m680x;
 
 interface
 
+{$DEFINE DEBUG=1}
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,dialogs,sysutils,timer_engine,vars_hide,cpu_misc;
 
@@ -16,7 +17,7 @@ type
                 h,i,n,z,v,c:boolean;
         end;
         reg_m6800=record
-                pc,sp,oldpc,oldpc2:word;
+                pc,sp,oldpc:word;
                 cc:band_m6800;
                 d:parejas680X;
                 wai:boolean;
@@ -76,6 +77,7 @@ type
               function rol8(valor:byte):byte;
               function dec8(valor:byte):byte;
               function inc8(valor:byte):byte;
+              function asr8(valor:byte):byte;
               procedure tst8(valor:byte);
               function sub8(valor1,valor2:byte):byte;
               function sbc8(valor1,valor2:byte):byte;
@@ -99,7 +101,7 @@ const
       0, 0, 0, 0,$f,$f, 0, 0, 0, 0,$f, 0,$f,$f,$f,$f,  //10
       1,$f, 1, 1, 1,$1, 1, 1,$f,$f, 1, 1,$f, 1, 1,$f,  //20
      $f, 0, 0, 0, 0,$f, 0, 0, 0, 0, 0, 0, 0, 0,$f,$f,  //30
-      0,$f,$f, 0, 0,$f, 0,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //40
+      0,$f,$f, 0, 0,$f, 0, 0, 0, 0, 0,$f, 0, 0,$f, 0,  //40
       0,$f,$f, 0, 0,$f, 0,$f, 0, 0, 0,$f, 0, 0,$f, 0,  //50
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
       4, 1, 1,$f, 6,$f, 6,$f,$f,$f, 6, 1, 6, 6, 4, 4,  //60
@@ -110,10 +112,10 @@ const
       6, 6,$f, 9, 6,$f, 6, 4,$f,$f, 6, 6,$f, 4, 9,$f,  //a0
      $f, 8,$f, 7,$f,$f, 8, 3,$f,$f, 8, 8,$f, 3,$f,$f,  //b0
  //   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
-      1, 1,$f, 2, 1, 1, 1,$f, 1,$f, 1, 1, 2,$f, 2,$f,  //c0
-      5, 5,$f,$a, 5,$f, 5,$b, 5,$f, 5, 5,$a,$b,$a,$b,  //d0
+      1, 1, 1, 2, 1, 1, 1,$f, 1, 1, 1, 1, 2,$f, 2,$f,  //c0
+      5, 5,$f,$a, 5,$f, 5,$b, 5, 5, 5, 5,$a,$b,$a,$b,  //d0
      $f, 4,$f, 9, 6,$f, 6, 4, 4, 4, 6, 6, 9, 4, 9,$f,  //e0
-     $f,$f,$f, 7,$f,$f, 8, 3,$f,$f, 8,$f, 7, 3, 7, 3); //f0
+      8,$f,$f, 7,$f,$f, 8, 3,$f,$f, 8, 8, 7, 3, 7, 3); //f0
 
   ciclos_6803:array[0..$ff] of byte=(
     	 // 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
@@ -272,6 +274,19 @@ begin
    ror8:=tempb;
 end;
 
+function cpu_m6800.asr8(valor:byte):byte;
+var
+   tempb:byte;
+begin
+   r.cc.c:=(valor and $1)<>0;
+   valor:=(valor shr 1);
+   valor:=valor or ((valor and $40) shl 1);
+   r.cc.z:=(valor=0);
+   r.cc.n:=(valor and $80)<>0;
+   r.cc.v:=r.cc.n xor r.cc.c;
+   asr8:=valor;
+end;
+
 function cpu_m6800.sub8(valor1,valor2:byte):byte;
 var
    tempw:word;
@@ -418,7 +433,6 @@ self.port_ddr[0]:=0;
 self.port_ddr[1]:=0;
 self.port_ddr[2]:=0;
 self.port_ddr[3]:=0;
-self.tcsr:=0;
 self.ram_ctrl:=$40;
 self.tcsr:=M6800_TRCSR_TDRE;
 self.ctd.l:=0;
@@ -573,7 +587,7 @@ case direccion of
       end;
   $14:ret:=self.ram_ctrl; //rcr_r
   $40..$ff:ret:=self.internal_ram[direccion];
-    else MessageDlg('Read Port 680X desconocido. Port='+inttohex(direccion,2)+' - '+inttohex(self.r.oldpc2,10), mtInformation,[mbOk], 0)
+    else MessageDlg('Read Port 680X desconocido. Port='+inttohex(direccion,2)+' - '+inttohex(self.r.oldpc,10), mtInformation,[mbOk], 0)
 end;
 m6803_internal_reg_r:=ret;
 end;
@@ -734,7 +748,7 @@ case direccion of
   $17:if (self.portx_ddr[1]=$ff) then ret:=portx_data[1] //p6_data_r
 	      else ret:=(self.in_portx[1] and (self.portx_ddr[1] xor $ff)) or (self.portx_data[1] and self.portx_ddr[1]);
   $40..$ff:ret:=self.internal_ram[direccion];
-    else MessageDlg('Read Port 6370X desconocido. Port='+inttohex(direccion,2)+' - '+inttohex(self.r.oldpc2,10), mtInformation,[mbOk], 0)
+    else MessageDlg('Read Port 6370X desconocido. Port='+inttohex(direccion,2)+' - '+inttohex(self.r.oldpc,10), mtInformation,[mbOk], 0)
 end;
 hd6301y_internal_reg_r:=ret;
 end;
@@ -850,7 +864,6 @@ if (self.pedir_halt<>CLEAR_LINE) then begin
   exit;
 end;
 self.estados_demas:=0;
-self.r.oldpc2:=self.r.oldpc;
 self.r.oldpc:=self.r.pc;
 //comprobar irq's
 if (self.pedir_nmi<>CLEAR_LINE) then begin
@@ -927,7 +940,7 @@ case direc_680x[instruccion] of
       posicion:=self.getbyte(r.pc);
       r.pc:=r.pc+1;
      end;
- $f:MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+ {$IFDEF DEBUG}$f:MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.pc,10)+' - '+inttohex(r.oldpc,10), mtInformation,[mbOk], 0);{$ENDIF}
 end;
 case instruccion of
   $01:; //nop
@@ -993,7 +1006,7 @@ case instruccion of
        tempw:=r.x;
        r.x:=r.d.w;
        r.d.w:=tempw;
-      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc,10), mtInformation,[mbOk], 0);
   $19:begin //daa
        tempb:=r.d.a and $f0;  //msn
        tempb2:=r.d.a and $f;  //lsn
@@ -1053,6 +1066,7 @@ case instruccion of
   $43:r.d.a:=self.com8(r.d.a);  //coma
   $44:r.d.a:=self.lsr8(r.d.a);  //lsra
   $46:r.d.a:=self.ror8(r.d.a);  //rora
+  $47:r.d.a:=self.asr8(r.d.a);  //asra
   $48:r.d.a:=self.asl8(r.d.a); //asla
   $49:r.d.a:=self.rol8(r.d.a); //rola
   $4a:r.d.a:=self.dec8(r.d.a);  //deca
@@ -1094,7 +1108,7 @@ case instruccion of
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
-      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc,10), mtInformation,[mbOk], 0);
   $62:if self.tipo_cpu=TCPU_HD63701 then begin //OIM - HD63701YO
        tempw:=r.x+self.getbyte(r.pc);
        r.pc:=r.pc+1;
@@ -1103,7 +1117,7 @@ case instruccion of
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
-      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc,10), mtInformation,[mbOk], 0);
   $71:if self.tipo_cpu=TCPU_HD63701 then begin  //aim - HD63701YO
        tempw:=self.getbyte(r.pc);
        r.pc:=r.pc+1;
@@ -1112,7 +1126,7 @@ case instruccion of
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
-      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc,10), mtInformation,[mbOk], 0);
   $72:if self.tipo_cpu=TCPU_HD63701 then begin //oim - HD63701
        tempw:=self.getbyte(r.pc);
        r.pc:=r.pc+1;
@@ -1121,7 +1135,7 @@ case instruccion of
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
        self.putbyte(tempw,tempb);
-      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc,10), mtInformation,[mbOk], 0);
   $73:begin //com
        tempb:=self.com8(numero);
        self.putbyte(posicion,tempb);
@@ -1149,7 +1163,7 @@ case instruccion of
        r.cc.v:=false;
        r.cc.z:=(tempb=0);
        r.cc.n:=(tempb and $80)<>0;
-      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc2,10), mtInformation,[mbOk], 0);
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc,10), mtInformation,[mbOk], 0);
   $6c,$7c:begin //inc
        tempb:=self.inc8(numero);
        self.putbyte(posicion,tempb);
@@ -1213,9 +1227,10 @@ case instruccion of
        r.cc.z:=(numerow=0);
        r.cc.n:=(numerow and $8000)<>0;
       end;
-  $c0,$d0:r.d.b:=self.sub8(r.d.b,numero); //subb
+  $c0,$d0,$f0:r.d.b:=self.sub8(r.d.b,numero); //subb
   $c1,$d1,$e1:self.sub8(r.d.b,numero); //cmpb
-  $c3,$d3,$e3,$f3:begin  //addd
+  $c2:r.d.b:=self.sbc8(r.d.b,numero);  //sbcb
+  $c3,$d3,$e3:begin  //addd
        templ:=r.d.w+numerow;
        r.cc.z:=((templ and $ffff)=0);
        r.cc.n:=(templ and $8000)<>0;
@@ -1238,9 +1253,9 @@ case instruccion of
        self.putbyte(posicion,r.d.b);
       end;
   $c8,$d8,$e8:r.d.b:=self.eor8(r.d.b,numero);  //eorb
-  $e9:r.d.b:=self.adc8(r.d.b,numero);  //adcb
+  $c9,$d9,$e9:r.d.b:=self.adc8(r.d.b,numero);  //adcb
   $ca,$da,$ea,$fa:r.d.b:=self.or8(r.d.b,numero);  //orb
-  $cb,$db,$eb:r.d.b:=self.add8(r.d.b,numero); //addb
+  $cb,$db,$eb,$fb:r.d.b:=self.add8(r.d.b,numero); //addb
   $cc,$dc,$ec,$fc:begin  //ldd 6803 Only
        r.d.w:=numerow;
        r.cc.v:=false;
@@ -1264,7 +1279,15 @@ case instruccion of
        r.cc.z:=(r.x=0);
        r.cc.n:=(r.x and $8000)<>0;
        self.putword(posicion,r.x);
-  end;
+      end;
+   $f3:if self.tipo_cpu<>TCPU_M6808 then begin  //addd
+       templ:=r.d.w+numerow;
+       r.cc.z:=((templ and $ffff)=0);
+       r.cc.n:=(templ and $8000)<>0;
+       r.cc.c:=(templ and $10000)<>0;
+       r.cc.v:=((r.d.w xor numerow xor templ xor (templ shr 1)) and $8000)<>0;
+       r.d.w:=templ;
+      end else MessageDlg('Instruccion M6800 '+inttohex(instruccion,2)+' desconocida. PC='+inttohex(r.oldpc,10)+' - '+inttohex(r.oldpc,10), mtInformation,[mbOk], 0);
 end; //del case
 tempb:=estados_t[instruccion]+self.estados_demas;
 self.contador:=self.contador+tempb;

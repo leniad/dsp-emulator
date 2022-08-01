@@ -6,7 +6,7 @@ uses {$ifdef windows}windows,{$endif}{$ifndef fpc}mmsystem,{$endif}lib_sdl2,time
 const
         MAX_AUDIO_BUFFER=$f;
         MAX_CANALES=9;
-        LONG_MAX_AUDIO=1800;
+        LONG_MAX_AUDIO=3000;  //Tapper necesita esto tan alto...
         FREQ_BASE_AUDIO=44100;
 
 type

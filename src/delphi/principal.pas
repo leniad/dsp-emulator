@@ -1,6 +1,6 @@
 unit principal;
 //{$SetPeFlags $20}
-{$DEFINE FINAL}
+//{$DEFINE FINAL}
 interface
 
 uses
@@ -488,6 +488,11 @@ type
     Senjyo1: TMenuItem;
     StarForce1: TMenuItem;
     Baluba1: TMenuItem;
+    Joust1: TMenuItem;
+    Robotron1: TMenuItem;
+    Stargate1: TMenuItem;
+    MCR1: TMenuItem;
+    tapper1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

@@ -461,7 +461,7 @@ function snd_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
     $0..$3:snd_inbyte:=z80pio_ba_cd_r(0,puerto and $3);
-    $8..$b:snd_inbyte:=z80ctc_r(0,puerto and $3);
+    $8..$b:snd_inbyte:=ctc_0.read(puerto and $3);
 end;
 end;
 
@@ -469,7 +469,7 @@ procedure snd_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
   $0..$3:z80pio_ba_cd_w(0,puerto and $3,valor);
-  $8..$b:z80ctc_w(0,puerto and $3,valor);
+  $8..$b:ctc_0.write(puerto and $3,valor);
 end;
 end;
 
@@ -498,7 +498,7 @@ begin
  z80_0.reset;
  z80_1.reset;
  z80pio_reset(0);
- z80ctc_reset(0);
+ ctc_0.reset;
  sn_76496_0.reset;
  sn_76496_1.reset;
  sn_76496_2.reset;
@@ -515,7 +515,6 @@ end;
 procedure cerrar_starforce;
 begin
   z80pio_close(0);
-  z80ctc_close(0);
 end;
 
 function iniciar_starforce:boolean;
@@ -582,9 +581,10 @@ z80_1.change_ram_calls(snd_getbyte,snd_putbyte);
 z80_1.change_io_calls(snd_inbyte,snd_outbyte);
 z80_1.init_sound(starforce_sound_update);
 //Daisy Chain PIO+CTC
-z80ctc_init(0,z80_1.numero_cpu,2000000,z80_1.clock,NOTIMER_2,pio_int_main,z80ctc_trg01_w);
+ctc_0:=tz80ctc.create(z80_1.numero_cpu,2000000,z80_1.clock,NOTIMER_2,CTC0_TRG01);
+ctc_0.change_calls(pio_int_main);
 z80pio_init(0,pio_int_main,pio_read_porta);
-z80daisy_init(Z80_PIO_TYPE,Z80_CTC_TYPE);
+z80daisy_init(Z80_PIO_TYPE,Z80_CTC0_TYPE);
 //Chip CPU
 sn_76496_0:=sn76496_chip.Create(2000000);
 sn_76496_1:=sn76496_chip.Create(2000000);

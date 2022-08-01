@@ -10,7 +10,8 @@ uses nz80,m68000,konami,k052109,k051960,k007232,k053251,k053260,upd7759,sn_76496
      deco_146,tms99xx,lr35902,mcs51,m680x,konami_snd,ppi8255,oki6295,dac,msm5205,
      mb88xx,hu6280,tms32010,hd6309,eeprom,nec_v20_v30,z80_sp,mcs48,k051316,
      k053246_k053247_k055673,ym_2151,samples,n2a03,namco_snd,deco_bac06,
-     deco_common,deco_16ic,sm510,slapstic;
+     deco_common,deco_16ic,sm510,slapstic,upd7810,upd1771,blitter_williams,
+     pia6821,sega_315_5195,sega_pcm,mos6566,mos6526,z80ctc;
 
 procedure close_all_devices;
 begin
@@ -102,6 +103,10 @@ end;
 if nec_0<>nil then begin
   nec_0.free;
   nec_0:=nil;
+end;
+if upd7810_0<>nil then begin
+  upd7810_0.free;
+  upd7810_0:=nil;
 end;
 if tms32010_0<>nil then begin
     tms32010_0.free;
@@ -244,6 +249,10 @@ if namco_snd_0<>nil then begin
   namco_snd_0.free;
   namco_snd_0:=nil;
 end;
+if upd1771_0<>nil then begin
+  upd1771_0.free;
+  upd1771_0:=nil;
+end;
 close_samples;
 //Konami chips
 if k052109_0<>nil then begin
@@ -330,6 +339,46 @@ end;
 if eeprom_0<>nil then begin
   eeprom_0.free;
   eeprom_0:=nil;
+end;
+if blitter_0<>nil then begin
+  blitter_0.free;
+  blitter_0:=nil;
+end;
+if pia6821_0<>nil then begin
+  pia6821_0.free;
+  pia6821_0:=nil;
+end;
+if pia6821_1<>nil then begin
+  pia6821_1.free;
+  pia6821_1:=nil;
+end;
+if pia6821_2<>nil then begin
+  pia6821_2.free;
+  pia6821_2:=nil;
+end;
+if s315_5195_0<>nil then begin
+  s315_5195_0.free;
+  s315_5195_0:=nil;
+end;
+if sega_pcm_0<>nil then begin
+  sega_pcm_0.free;
+  sega_pcm_0:=nil;
+end;
+if mos6566_0<>nil then begin
+  mos6566_0.free;
+  mos6566_0:=nil;
+end;
+if mos6526_0<>nil then begin
+  mos6526_0.free;
+  mos6526_0:=nil;
+end;
+if mos6526_1<>nil then begin
+  mos6526_1.free;
+  mos6526_1:=nil;
+end;
+if ctc_0<>nil then begin
+  ctc_0.free;
+  ctc_0:=nil;
 end;
 end;
 

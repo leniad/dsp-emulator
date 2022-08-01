@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.20F';
+        DSP_VERSION='0.21WIP1';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -224,23 +224,9 @@ procedure uses_sdl_window;
 begin
 case main_vars.tipo_maquina of
      0..9,1000..1008,2000..2002,3000:begin
-             fix_screen_pos(400,100);
+             fix_screen_pos(400,120);
              principal1.Panel2.width:=400;
              principal1.Panel2.height:=55;
-             {principal1.Panel2.Align:=alLeft;
-             principal1.Panel2.Anchors:=[akTop,akLeft,akRight];
-             principal1.BitBtn1.top:=2;
-             principal1.BitBtn1.left:=55;
-             principal1.BitBtn9.top:=2;
-             principal1.BitBtn9.left:=104;
-             principal1.BitBtn10.top:=2;
-             principal1.BitBtn10.left:=153;
-             principal1.BitBtn11.top:=2;
-             principal1.BitBtn11.left:=203;
-             principal1.BitBtn12.top:=2;
-             principal1.BitBtn12.left:=253;
-             principal1.BitBtn14.top:=2;
-             principal1.BitBtn14.left:=303;}
           end;
      else fix_screen_pos(350,70);
 end;

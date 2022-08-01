@@ -35,7 +35,8 @@ uses sysutils,main_engine,rom_engine,rom_export,
   tetris_atari_hw,snk_hw,atari_system1,williams_hw,systeme_hw,route16_hw,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
-  seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw;
+  seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
+  mcr_hw;
 
 type
   tgame_desc=record
@@ -51,7 +52,7 @@ type
 
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=334;
+  GAMES_CONT=338;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -376,6 +377,10 @@ const
   (name:'Super Dodge Ball';year:'1987';snd:1;hi:false;zip:'spdodgeb';grid:318;company:'Technos';rom:@sdodgeball),
   (name:'Senjyo';year:'1983';snd:1;hi:false;zip:'senjyo';grid:319;company:'Tehkan';rom:@senjyo),
   (name:'Baluba-louk no Densetsu';year:'1986';snd:1;hi:false;zip:'baluba';grid:320;company:'Able Corp, Ltd.';rom:@baluba),
+  (name:'Joust';year:'1982';snd:1;hi:false;zip:'joust';grid:321;company:'Williams';rom:@joust),
+  (name:'Robotron';year:'1982';snd:1;hi:false;zip:'robotron';grid:322;company:'Williams';rom:@robotron),
+  (name:'Stargate';year:'1981';snd:1;hi:false;zip:'stargate';grid:323;company:'Williams';rom:@stargate),
+  (name:'Tapper';year:'1983';snd:1;hi:false;zip:'tapper';grid:324;company:'Bally Midway';rom:@tapper),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -728,6 +733,10 @@ case numero of
   318:principal1.CambiarMaquina(principal1.spdodgeb1);
   319:principal1.CambiarMaquina(principal1.senjyo1);
   320:principal1.CambiarMaquina(principal1.baluba1);
+  321:principal1.CambiarMaquina(principal1.joust1);
+  322:principal1.CambiarMaquina(principal1.robotron1);
+  323:principal1.CambiarMaquina(principal1.stargate1);
+  324:principal1.CambiarMaquina(principal1.tapper1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1068,6 +1077,10 @@ principal1.bdash1.checked:=false;
 principal1.spdodgeb1.checked:=false;
 principal1.senjyo1.checked:=false;
 principal1.baluba1.checked:=false;
+principal1.joust1.checked:=false;
+principal1.robotron1.checked:=false;
+principal1.stargate1.checked:=false;
+principal1.tapper1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1303,7 +1316,7 @@ case tmaquina of
   240:llamadas_maquina.iniciar:=iniciar_tetris;
   241,242,243,279:llamadas_maquina.iniciar:=iniciar_snk;
   244,263,264:Cargar_atari_sys1;
-  246,248,249:Cargar_williams;
+  246,248,249,321,322,323:llamadas_maquina.iniciar:=iniciar_williams;
   251,252,253,254,255,256,257:llamadas_maquina.iniciar:=iniciar_systeme;
   258,259:llamadas_maquina.iniciar:=iniciar_route16_hw;
   262:llamadas_maquina.iniciar:=iniciar_badlands;
@@ -1323,6 +1336,7 @@ case tmaquina of
   314:llamadas_maquina.iniciar:=iniciar_ccastles;
   315:llamadas_maquina.iniciar:=iniciar_flower;
   318:llamadas_maquina.iniciar:=iniciar_sdodgeball;
+  324:llamadas_maquina.iniciar:=iniciar_mcr;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2627,6 +2641,22 @@ end;
 if sender=principal1.baluba1 then begin
   tipo:=320;
   principal1.baluba1.Checked:=true;
+end;
+if sender=principal1.joust1 then begin
+  tipo:=321;
+  principal1.joust1.Checked:=true;
+end;
+if sender=principal1.robotron1 then begin
+  tipo:=322;
+  principal1.robotron1.Checked:=true;
+end;
+if sender=principal1.stargate1 then begin
+  tipo:=323;
+  principal1.stargate1.Checked:=true;
+end;
+if sender=principal1.tapper1 then begin
+  tipo:=324;
+  principal1.tapper1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

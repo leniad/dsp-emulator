@@ -2227,6 +2227,14 @@ object principal1: Tprincipal1
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
+          object MCR1: TMenuItem
+            Caption = 'MCR'
+            GroupIndex = 1
+            object tapper1: TMenuItem
+              Caption = 'Tapper'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2500,6 +2508,18 @@ object principal1: Tprincipal1
             end
             object Colony71: TMenuItem
               Caption = 'Colony 7'
+              OnClick = CambiarMaquina
+            end
+            object Joust1: TMenuItem
+              Caption = 'Joust'
+              OnClick = CambiarMaquina
+            end
+            object Robotron1: TMenuItem
+              Caption = 'Robotron'
+              OnClick = CambiarMaquina
+            end
+            object Stargate1: TMenuItem
+              Caption = 'Stargate'
               OnClick = CambiarMaquina
             end
           end

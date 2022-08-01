@@ -91,6 +91,7 @@ begin
   des_gfx.long_sprites:=size;
   des_gfx.banks:=banks;
 end;
+
 procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
 var
   f:word;
@@ -106,6 +107,7 @@ begin
   for f:=0 to MAX_COLORES-1 do gfx[num].colores[f]:=f;
   getmem(gfx[num].datos,num_elements*x_size*y_size);
 end;
+
 function GetBit(bit_nbr:dword;buffer:pbyte):byte;inline;
 var
   oct_nbr:dword;
@@ -115,6 +117,7 @@ oct_nbr:=bit_nbr shr 3;
 bit_n:=bit_nbr and 7;
 getbit:=(buffer[oct_nbr] shr (7-bit_n)) and 1;
 end;
+
 procedure Rotatel(n:dword;ngfx:pgfx;increment:dword);
 var
   y,cojo_la_x:byte;
@@ -134,6 +137,7 @@ for cojo_la_x:=(ngfx.x-1) downto 0 do
   end;
 copymemory(pos,@t[0],long);
 end;
+
 procedure Rotater(n:dword;ngfx:pgfx;increment:dword);
 var
   cojo_la_y,y_final:byte;
@@ -153,6 +157,7 @@ for y_final:=0 to (ngfx.x-1) do
   end;
 copymemory(pos,@t[0],long);
 end;
+
 procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
 var
   n,elements:dword;

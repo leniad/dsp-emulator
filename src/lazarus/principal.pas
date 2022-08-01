@@ -264,6 +264,11 @@ type
     idsoccer1: TMenuItem;
     ccastles1: TMenuItem;
     flower1: TMenuItem;
+    Joust1: TMenuItem;
+    MenuItem45: TMenuItem;
+    tapper1: TMenuItem;
+    robotron1: TMenuItem;
+    stargate1: TMenuItem;
     StarForce1: TMenuItem;
     baluba1: TMenuItem;
     senjyo1: TMenuItem;

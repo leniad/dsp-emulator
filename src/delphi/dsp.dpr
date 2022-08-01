@@ -328,7 +328,9 @@ uses
   flower_audio in '..\snd\flower_audio.pas',
   superdodgeball_hw in '..\arcade\superdodgeball_hw.pas',
   upd1771 in '..\snd\upd1771.pas',
-  sega_pcm in '..\snd\sega_pcm.pas';
+  sega_pcm in '..\snd\sega_pcm.pas',
+  blitter_williams in '..\arcade\misc\blitter_williams.pas',
+  mcr_hw in '..\arcade\mcr_hw.pas';
 
 {$R *.res}
 begin

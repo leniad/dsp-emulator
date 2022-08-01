@@ -2663,6 +2663,13 @@ object principal1: Tprincipal1
             Caption = 'Flower'
             OnClick = CambiarMaquina
           end
+          object MenuItem45: TMenuItem
+            Caption = 'MCR'
+            object tapper1: TMenuItem
+              Caption = 'Tapper'
+              OnClick = CambiarMaquina
+            end
+          end
         end
         object M65021: TMenuItem
           Caption = 'M6502'
@@ -2897,6 +2904,18 @@ object principal1: Tprincipal1
             end
             object colony71: TMenuItem
               Caption = 'Colony 7'
+              OnClick = CambiarMaquina
+            end
+            object Joust1: TMenuItem
+              Caption = 'Joust'
+              OnClick = CambiarMaquina
+            end
+            object robotron1: TMenuItem
+              Caption = 'Robotron'
+              OnClick = CambiarMaquina
+            end
+            object stargate1: TMenuItem
+              Caption = 'Startgate'
               OnClick = CambiarMaquina
             end
           end

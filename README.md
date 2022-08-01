@@ -1,4 +1,28 @@
 ﻿# DSP Emulator status #
+<b>01/08/22 - DSP Emulator 0.21WIP1. Updated Windows 32 and source update.<br>
+<pre>
+-General
+    +Z80 CTC: converted to class
+    +Added close function to many devices
+    +Sound: Make internal sound buffer bigger
+    +CPU
+        -M6809: Added opcodes $01, $29 and $1X2e
+        -M680X: 
+             + Added opcodes $47,$c2,$c9,$d9,$f0 and $fb
+             + Opcode $f3 is not for M6808
+-Senjyo HW
+    +Update driver to new CTC
+    +Senjyo: Fixed ROMs export size (thanks to okurka)
+-MCR HW
+    +Tapper: added driver with sound
+-Williams HW
+    +Fixed sound
+    +Joust: added driver with sound
+    +Robotron: added driver with sound
+    +Stargate: added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/7ygV8q2/joust.png"> <img src="https://i.ibb.co/QMLz9Cq/Robotron.png"><br>
+<img src="https://i.ibb.co/gzB2Ld8/Stargate.png"> <img src="https://i.ibb.co/WkrhCBH/Tapper.png"><br><br>
 <b>15/07/22 - DSP Emulator 0.20Final. Updated Windows (32 & 64), Linux (64), OSX (64) and source update.<br>
 <pre>
 -General
@@ -318,77 +342,3 @@ All changes on previous 0.18b3 release and
     +Hard Head 2
         -Fixed palette
 </pre>
-<b>28/03/21 - Last update before stable version. DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--General
-    +Samples: simplified samples loading functions
--Suna 8 HW
-    +Added DIP switches
-    +Fixed sound clock
-        -Hard Head
-            +Fixed DAC samples
-            +Fixed FPS
-        -Hard Head 2
-            +Fixed ROM decode
-            +Fixed video (only remains palette color problem)
-            +Added DAC samples
--Tiger Road HW
-    +Added DIP switches
--Outrun
-    +Fixed gear button
-</pre>
-<img src='https://i.ibb.co/3vsqcdv/hh2-1.jpg'> <img src='https://i.ibb.co/233KTxs/hh2-2.jpg'><br><br>
-<b>13/03/21 - Second update today! DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--GameBoy/Gameboy Color HW
-    +Now you can choose between original GB green palette and GB pocket BW (Thanks to Neville)
--Amstrad CPC
-    +Fixed screen flickering (Thanks to Neville)
-</pre>
-<b>13/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--General
-    +Sound
-        -Sega PCM: Added sound chip
--Spectrum
-    +Fixed low border size, was 8 pixels too long (Thanks to Neville)
-    +Fixed fast speed and no border draw, now don't draw any border
--Amstrad CPC
-    +Resize screen size, it was too big, now it's 384x272 pixels (Thanks to Neville)
--Sega Master System
-    +Fixed zip ROM load (Thanks to Neville)
--Sega GameGear
-    +Fixed zip ROM load (Thanks to Neville)
--Outrun HW
-    +Added road
-    +Added Sega PCM
-    +Added controls
-    +Added DIP switches
-</pre>
-<img src='https://i.ibb.co/RcKQtpX/Outrun-1.jpg'> <img src='https://i.ibb.co/GJmTSdT/Outrun-2.jpg'><br><br>
-<b>05/03/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--General
-    +CPU
-        -M68000: Added reset line procedure
-    +Added Sega 315-5195 as a device
--Outrun HW
-    +Enhanced driver only missing: partial road, digital sound and controls
-</pre>
-<img src='https://i.ibb.co/4VZGbtv/Outrun-1.jpg'> <img src='https://i.ibb.co/fvp9PQL/Outrun-2.jpg'><br><br>
-<b>26/02/21 - DSP Emulator 0.18b3 WIP. Win32 and source update.<br><pre>
--General
-    +CPU
-        -MCS51:
-            +clean the code
-            +Fixed carry in opcodes $B8 to $BF
-            +Fixed IRQs
-    +ROMS export: Fixed many ROMs sets and added samples, again
--Ajax: Fixed ROM names
--Slap Fight: Fixed ROM names
--Sega System 16B HW
-    +Small fix to memory mapper
-    +When using i8751, the M68000 don't have access to 315-5195
-    +Removed i8751/M68000 hack
-    +Added dipswitches
-        -Golden Axe: Fixed remaining issues with i8751
-        -Passing Shot: Added driver with sound, due the lack of FD1094 emulation using predecoded version
-        -Aurail: Added driver with sound
-</pre>
-<img src='https://i.ibb.co/d4KG1Mr/passingshot.jpg'> <img src='https://i.ibb.co/b3mqHPb/Aurail.jpg'><br><br>
