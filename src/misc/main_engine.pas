@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.21WIP1';
+        DSP_VERSION='0.21WIP2';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -34,7 +34,7 @@ type
             frames_sec,tipo_maquina:word;
             idioma:integer;
             vactual:byte;
-            service1,driver_ok,auto_exec,show_crc_error,center_screen,x11:boolean;
+            service1,driver_ok,auto_exec,show_crc_error,center_screen,console_init:boolean;
         end;
         TDirectory=record
             Base:string;
@@ -256,7 +256,9 @@ end;
 uses_sdl_window;
 {$else}
 child.clientWidth:=x;
+if child.clientWidth<x then child.clientWidth:=x;  //??????????????
 child.clientHeight:=y;
+if child.clientHeight<y then child.clientHeight:=y;  //??????????????
 x:=child.width;
 if x<310 then x:=310;
 case main_vars.tipo_maquina of
@@ -266,6 +268,7 @@ end;
 fix_screen_pos(x,child.height+70);
 if principal1.Panel2.visible then x:=x-60;
 child.Left:=(x-child.width) div 2;
+principal1.image2.visible:=false;
 {$endif}
 //pongo el nombre de la maquina...
 change_caption;

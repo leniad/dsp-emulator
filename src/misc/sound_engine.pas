@@ -17,7 +17,7 @@ type
           {$endif}
           cpu_clock:dword;
           cpu_num:byte;
-          num_buffer,calidad_audio:byte;
+          num_buffer:byte;
           long_sample,sample_final:word;
           canales_usados:integer;
           stereo,hay_sonido,hay_tsonido:boolean;
@@ -71,7 +71,6 @@ var
 begin
 iniciar_audio:=false;
 sound_status.hay_tsonido:=false;
-sound_status.hay_sonido:=true;
 if stereo_sound then begin
     sound_status.stereo:=true;
     canales:=2;
@@ -83,11 +82,6 @@ fillchar(Format,SizeOf(TWaveFormatEx),0);
 Format.wFormatTag:=WAVE_FORMAT_PCM;
 Format.nChannels:=canales;
 Format.nSamplesPerSec:=FREQ_BASE_AUDIO;
-case sound_status.calidad_audio of
-  0:Format.nSamplesPerSec:=11025;
-  1:Format.nSamplesPerSec:=22050;
-  3:sound_status.hay_sonido:=false;
-end;
 Format.wBitsPerSample:=16;
 Format.nBlockAlign:=Format.nChannels*(Format.wBitsPerSample div 8);
 Format.nAvgBytesPerSec:=Format.nSamplesPerSec*Format.nBlockAlign;
@@ -135,7 +129,6 @@ var
 begin
 iniciar_audio:=false;
 sound_status.hay_tsonido:=false;
-sound_status.hay_sonido:=true;
 //abrir el audio
 if stereo_sound then begin
     sound_status.stereo:=true;
@@ -146,11 +139,6 @@ end else begin
 end;
 sound_status.long_sample:=round(FREQ_BASE_AUDIO/llamadas_maquina.fps_max)*canales;
 audio_rate:=FREQ_BASE_AUDIO;
-case sound_status.calidad_audio of
-  0:audio_rate:=11025;
-  1:audio_rate:=22050;
-  3:sound_status.hay_sonido:=false;
-end;
 sound_status.sample_final:=round(audio_rate/llamadas_maquina.fps_max)*canales;
 wanted.freq:=audio_rate;
 wanted.format:=libAUDIO_S16;
@@ -178,44 +166,10 @@ end;
 
 procedure play_sonido;
 var
-  f{$ifdef fpc},j{$endif}:integer;
-  g,h:word;
+  f{$ifdef fpc},h,j{$endif}:integer;
 begin
 if ((sound_status.hay_tsonido) and (sound_status.hay_sonido)) then begin
 for f:=0 to sound_status.canales_usados do begin
-  h:=0;
-  //Resampleado
-  case sound_status.calidad_audio of
-    0:if sound_status.stereo then begin
-        g:=0;
-        while g<sound_status.long_sample do begin
-          tsample[f,g]:=(tsample[f,h]+tsample[f,h+2]+tsample[f,h+4]+tsample[f,h+6]) shr 2;
-          tsample[f,g+1]:=(tsample[f,h+1]+tsample[f,h+3]+tsample[f,h+5]+tsample[f,h+7]) shr 2;
-          h:=h+8;
-          g:=g+2;
-        end;
-      end else begin
-         for g:=0 to (sound_status.long_sample-1) do begin
-          tsample[f,g]:=(tsample[f,h]+tsample[f,h+1]+tsample[f,h+2]+tsample[f,h+3]) shr 2;
-          h:=h+4;
-         end;
-      end;
-    1:if sound_status.stereo then begin
-          g:=0;
-          while g<sound_status.long_sample do begin
-            tsample[f,g]:=(tsample[f,h]+tsample[f,h+2]) shr 1;
-            tsample[f,g+1]:=(tsample[f,h+1]+tsample[f,h+3]) shr 1;
-            h:=h+4;
-            g:=g+2;
-          end;
-       end else begin
-          for g:=0 to (sound_status.long_sample-1) do begin
-            tsample[f,g]:=(tsample[f,h]+tsample[f,h+1]) shr 1;
-            h:=h+2;
-          end;
-      end;
-    2:;
-  end;
   if @sound_status.filter_call[f]<>nil then sound_status.filter_call[f](f);
   {$ifndef fpc}
   copymemory(cab_audio[f][sound_status.num_buffer].lpData,@tsample[f],sound_status.sample_final*sizeof(smallint));

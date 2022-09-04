@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,konami_decrypt,ay_8910,mcs48,dac;
 
-procedure cargar_junofrst;
+function iniciar_junofrst:boolean;
 
 implementation
 const
@@ -141,13 +141,13 @@ begin
 		src:=((blit_data[2] shl 8) or blit_data[3]) and $fffc;
 		dest:=(blit_data[0] shl 8) or blit_data[1];
 		copy:=blit_data[3] and $01;
-		// 16x16 graphics */
+		// 16x16 graphics
 		for i:=0 to 15 do begin
 			for j:=0 to 15 do begin
 				if (src and 1)<>0 then data:=blit_mem[src shr 1] and $0f
 				  else data:=blit_mem[src shr 1] shr 4;
 				src:=src+1;
-				// if there is a source pixel either copy the pixel or clear the pixel depending on the copy flag */
+				// if there is a source pixel either copy the pixel or clear the pixel depending on the copy flag
 				if (data<>0) then begin
 					if (copy=0) then data:=0;
 					if (dest and 1)<>0 then memoria[dest shr 1]:=(memoria[dest shr 1] and $0f) or (data shl 4)
@@ -163,7 +163,6 @@ procedure junofrst_putbyte(direccion:word;valor:byte);
 var
   color:tcolor;
 begin
-if direccion>$8fff then exit;
 case direccion of
   $0..$7fff,$8100..$8fff:memoria[direccion]:=valor;
   $8000..$800f:begin
@@ -191,6 +190,7 @@ case direccion of
           blit_data[$3]:=valor;
           draw_blitter;
         end;
+  $9000..$ffff:;
 end;
 end;
 
@@ -205,8 +205,8 @@ end;
 
 procedure junofrst_snd_putbyte(direccion:word;valor:byte);
 begin
-if direccion<$1000 then exit;
 case direccion of
+  0..$fff:;
   $2000..$23ff:mem_snd[direccion]:=valor;
   $4000:ay8910_0.Control(valor);
   $4002:ay8910_0.Write(valor);
@@ -283,6 +283,8 @@ var
   f:byte;
   memoria_temp,memoria_temp_bank:array[0..$ffff] of byte;
 begin
+llamadas_maquina.bucle_general:=junofrst_principal;
+llamadas_maquina.reset:=reset_junofrst;
 iniciar_junofrst:=false;
 iniciar_audio(false);
 //Pantallas
@@ -324,13 +326,6 @@ marcade.dswb_val:=@junofrst_dip_b;
 //final
 reset_junofrst;
 iniciar_junofrst:=true;
-end;
-
-procedure Cargar_junofrst;
-begin
-llamadas_maquina.iniciar:=iniciar_junofrst;
-llamadas_maquina.bucle_general:=junofrst_principal;
-llamadas_maquina.reset:=reset_junofrst;
 end;
 
 end.

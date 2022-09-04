@@ -327,7 +327,7 @@ z80_0.init_sound(gg_sound_update);
 z80_0.change_misc_calls(gg_set_hpos);
 //final
 mapper_sms.max:=1;
-abrir_gg;
+if main_vars.console_init then abrir_gg;
 iniciar_gg:=true;
 end;
 

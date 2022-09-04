@@ -12,11 +12,9 @@ object load_spec: Tload_spec
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poDesigned
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object DirectoryListBox1: TDirectoryListBox
     Left = 16

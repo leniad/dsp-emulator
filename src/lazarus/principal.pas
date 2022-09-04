@@ -40,6 +40,7 @@ type
     Edit1: TEdit;
     GroupBox1: TGroupBox;
     Image1: TImage;
+    Image2: TImage;
     ImageList2: TImageList;
     Label1: TLabel;
     Label2: TLabel;
@@ -493,9 +494,7 @@ type
     N2X1: TMenuItem;
     N1X1: TMenuItem;
     SinSonido1: TMenuItem;
-    N441001: TMenuItem;
-    N220501: TMenuItem;
-    N110251: TMenuItem;
+    consonido1: TMenuItem;
     Pausa1: TMenuItem;
     Reset1: TMenuItem;
     StringGrid1: TStringGrid;
@@ -576,6 +575,7 @@ var
   JPG:TJPEGImage;
   imagen1:tbitmap;
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
@@ -588,6 +588,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   if FileExists(nombre) then begin
     r:=application.messagebox(pansichar(leng[main_vars.idioma].mensajes[3]),pansichar(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
+       principal1.Enabled:=true;
        sync_all;
        exit;
     end;
@@ -640,6 +641,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
+principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
@@ -762,11 +764,13 @@ end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 aboutbox.show;
 while aboutbox.Showing do application.ProcessMessages;
+principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
@@ -791,29 +795,35 @@ if @llamadas_maquina.configurar=nil then begin
    sync_all;
    exit;
 end;
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 llamadas_maquina.configurar;
+principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.fLoadCinta(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.cintas)<>nil then
   if not(llamadas_maquina.cintas) then MessageDlg('Cinta/Snapshot no valido'+chr(10)+chr(13)+'Tape/Snapshot not valid', mtError,[mbOk], 0);
+principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.grabar_snapshot)<>nil then llamadas_maquina.grabar_snapshot;
+principal1.Enabled:=true;
 timer4.enabled:=true;
 end;
 
@@ -864,45 +874,45 @@ var
   tmp_audio:byte;
 begin
 if sound_status.hay_tsonido then begin
-   if sender<>nil then tmp_audio:= Tmenuitem(sender).Tag
-      else begin
-           tmp_audio:=sound_status.calidad_audio;
-           sound_status.calidad_audio:=255;
+  if sender<>nil then tmp_audio:=Tmenuitem(sender).Tag
+    else tmp_audio:=byte(sound_status.hay_sonido);
+  case tmp_audio of
+    0:if sound_status.hay_sonido then begin ////No sound
+        SinSonido1.Checked:=true;
+        ConSonido1.Checked:=false;
+        sound_status.hay_sonido:=false;
       end;
-   if tmp_audio<>sound_status.calidad_audio then begin
-      sound_status.calidad_audio:=tmp_audio;
-      if sound_status.calidad_audio=3 then begin
-         SinSonido1.Checked:=true;
-         sound_status.hay_sonido:=false;
+    1:if not(sound_status.hay_sonido) then begin //Sound
+        SinSonido1.Checked:=false;
+        ConSonido1.Checked:=true;
+        sound_status.hay_sonido:=true;
       end;
-      if sound_status.calidad_audio<>3 then begin
-         sound_status.hay_sonido:=true;
-         close_audio;
-         if sound_status.stereo then iniciar_audio(true)
-            else iniciar_audio(false);
-      end;
-   end;
+  end;
 end;
 sync_all;
 end;
 
 procedure Tprincipal1.fLoadCartucho(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.cartuchos)<>nil then
   if not(llamadas_maquina.cartuchos) then MessageDlg('ROM/Cartucho/Snapshot no valido'+chr(10)+chr(13)+'ROM/Cartrigde/Snapshot not valid', mtError,[mbOk], 0);
+principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 FLoadRom.Show;
 while FLoadRom.Showing do application.ProcessMessages;
+principal1.Enabled:=true;
 sync_all;
 end;
 
@@ -930,11 +940,13 @@ end;
 
 procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 MConfig.Show;
 while MConfig.Showing do application.ProcessMessages;
+principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 

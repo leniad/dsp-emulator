@@ -59,7 +59,6 @@ case direccion of
   $c000..$ffff:sg_getbyte:=memoria[$c000+direccion and $1fff];
 end;
 end;
-
 procedure sg_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -69,7 +68,6 @@ case direccion of
   $c000..$ffff:memoria[$c000+(direccion and $1fff)]:=valor;
 end;
 end;
-
 function sg_inbyte(puerto:word):byte;
 begin
   sg_inbyte:=$ff;
@@ -80,7 +78,6 @@ begin
     $df:sg_inbyte:=marcade.in1;
   end;
 end;
-
 procedure sg_outbyte(puerto:word;valor:byte);
 begin
   case (puerto and $ff) of
@@ -90,7 +87,6 @@ begin
     $dc,$df:; //mandos
   end;
 end;
-
 procedure sg_interrupt(int:boolean);
 begin
   if int then z80_0.change_irq(ASSERT_LINE)
@@ -166,8 +162,10 @@ begin
   freemem(datos);
 end;
 
-function iniciar_sg:boolean;
-begin
+
+function iniciar_sg:boolean;
+
+begin
 iniciar_sg:=false;
 iniciar_audio(false);
 screen_init(1,284,243);
@@ -183,11 +181,12 @@ tms_0:=tms99xx_chip.create(1,sg_interrupt);
 sn_76496_0:=sn76496_chip.Create(3579545);
 //final
 reset_sg;
-abrir_sg;
+if main_vars.console_init then abrir_sg;
 iniciar_sg:=true;
 end;
 
-procedure cargar_sg;
+
+procedure cargar_sg;
 begin
 principal1.BitBtn10.Glyph:=nil;
 principal1.imagelist2.GetBitmap(4,principal1.BitBtn10.Glyph);

@@ -413,7 +413,8 @@ colores[0].r:=0;colores[0].g:=0;colores[0].b:=0;
 colores[1].r:=$ff;colores[1].g:=$ff;colores[1].b:=$ff;
 set_pal(colores,2);
 reset_chip8;
-iniciar_chip8:=abrir_chip8;
+if main_vars.console_init then abrir_chip8;
+iniciar_chip8:=true;
 end;
 
 procedure Cargar_chip8;

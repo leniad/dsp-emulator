@@ -1,8 +1,33 @@
 ﻿# DSP Emulator status #
+<b>04/09/22 - DSP Emulator 0.21WIP2. Updated Windows 32 and source update. This release tries to improve general stability.<br>
+<pre>
+-DSP 0.20Final has been repacked with preview images
+-General
+    +Update preview images
+    +New option for consoles, now you can choose if you want start the driver with the window for loading games open or not
+    +Sound options simplified, now you can choose 'enabled' or 'disabled'
+    +Fixed label 'load disk' in console cartridge 'open' icon, now shows 'load game'
+    +If no game is loaded, shows a image, not just an empty window
+    +Fixed window priority, if a option window is active, the window behind is disabled
+    +Added some languaje translations in main config menu
+    +Changed 'Show game list', 'Configure DSP' and 'Save screen' icons
+    +Changed 'Show game list' and 'Configure DSP' position in main window
+    +Sound: removed 11025Hz and 22050Hz sample quality, they are useless!
+    +CPU
+        -M6805: Added opcodes $21, $56, $6a, $7a, $7f and $c1
+-Amstrad CPC
+    +If a CDT tape is loaded and there is no pause block at the beginning, a 2000ms pause is added to the virtual tape
+-Arkanoid
+    +Added driver with sound (Not correct sound chip)
+-Renegade
+    +Fixed input
+    +Fixed sprites
+</pre><br>
+<img src="https://i.ibb.co/y6x0knj/arkanoid.png"><br><br>
 <b>01/08/22 - DSP Emulator 0.21WIP1. Updated Windows 32 and source update.<br>
 <pre>
 -General
-    +Z80 CTC: converted to class
+    +Z80 CTC: converted to classes
     +Added close function to many devices
     +Sound: Make internal sound buffer bigger
     +CPU

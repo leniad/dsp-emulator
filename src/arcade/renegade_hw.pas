@@ -80,7 +80,7 @@ for f:=0 to $3ff do begin
   end;
 end;
 scroll__x(1,3,(scroll_x-scroll_comp) and $3ff);
-for f:=0 to 95 do begin
+for f:=0 to $7f do begin
   y:=224-memoria[$2000+(f*4)];
   if y>=16 then begin
     atrib:=memoria[$2001+(f*4)];
@@ -114,29 +114,6 @@ if event.arcade then begin
   if arcade_input.down[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or 8;
   if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
   if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
-  if arcade_input.start[0] then marcade.in0:=marcade.in0 and $bf else marcade.in0:=marcade.in0 or $40;
-  if arcade_input.start[1] then marcade.in0:=marcade.in0 and $7f else marcade.in0:=marcade.in0 or $80;
-  //p2
-  if arcade_input.right[1] then marcade.in1:=marcade.in1 and $fe else marcade.in1:=marcade.in1 or 1;
-  if arcade_input.left[1] then marcade.in1:=marcade.in1 and $fd else marcade.in1:=marcade.in1 or 2;
-  if arcade_input.up[1] then marcade.in1:=marcade.in1 and $fb else marcade.in1:=marcade.in1 or 4;
-  if arcade_input.down[1] then marcade.in1:=marcade.in1 and $f7 else marcade.in1:=marcade.in1 or 8;
-  if arcade_input.but0[1] then marcade.in1:=marcade.in1 and $ef else marcade.in1:=marcade.in1 or $10;
-  if arcade_input.but1[1] then marcade.in1:=marcade.in1 and $df else marcade.in1:=marcade.in1 or $20;
-  if arcade_input.coin[0] then marcade.in1:=marcade.in1 and $bf else marcade.in1:=marcade.in1 or $40;
-  if arcade_input.coin[1] then marcade.in1:=marcade.in1 and $7f else marcade.in1:=marcade.in1 or $80;
-  //botones 3
-  if arcade_input.but2[0] then marcade.dswb:=marcade.dswb and $fb else marcade.dswb:=marcade.dswb or $4;
-  if arcade_input.but2[1] then marcade.dswb:=marcade.dswb and $f7 else marcade.dswb:=marcade.dswb or $8;
-end;
-if event.arcade then begin
-  //P1
-  if arcade_input.right[0] then marcade.in0:=marcade.in0 and $fe else marcade.in0:=marcade.in0 or 1;
-  if arcade_input.left[0] then marcade.in0:=marcade.in0 and $fd else marcade.in0:=marcade.in0 or 2;
-  if arcade_input.up[0] then marcade.in0:=marcade.in0 and $fb else marcade.in0:=marcade.in0 or 4;
-  if arcade_input.down[0] then marcade.in0:=marcade.in0 and $f7 else marcade.in0:=marcade.in0 or 8;
-  if arcade_input.but0[0] then marcade.in0:=marcade.in0 and $ef else marcade.in0:=marcade.in0 or $10;
-  if arcade_input.but1[0] then marcade.in0:=marcade.in0 and $df else marcade.in0:=marcade.in0 or $20;
   if arcade_input.but2[0] then marcade.dswb:=marcade.dswb and $fb else marcade.dswb:=marcade.dswb or $4;
   if arcade_input.start[0] then marcade.in0:=marcade.in0 and $bf else marcade.in0:=marcade.in0 or $40;
   if arcade_input.start[1] then marcade.in0:=marcade.in0 and $7f else marcade.in0:=marcade.in0 or $80;
@@ -161,7 +138,6 @@ if event.arcade then begin
           m6502_0.change_irq(CLEAR_LINE);
       end;
   end;
-  //botones 3
 end;
 end;
 
@@ -199,20 +175,14 @@ end;
 end;
 
 function getbyte_renegade(direccion:word):byte;
-var
-  ret:byte;
 begin
 case direccion of
-   0..$2fff,$8000..$ffff:getbyte_renegade:=memoria[direccion];
+   0..$1fff,$2800..$2fff,$8000..$ffff:getbyte_renegade:=memoria[direccion];
+   $2000..$27ff:getbyte_renegade:=memoria[$2000+(direccion and $1ff)];
    $3000..$31ff:getbyte_renegade:=buffer_paleta[direccion and $1ff];
    $3800:getbyte_renegade:=marcade.in0;
    $3801:getbyte_renegade:=marcade.in1;
-   $3802:begin
-            ret:=0;
-            if not(main_sent) then ret:=ret or 1;
-		        if not(mcu_sent) then ret:=ret or 2;
-            getbyte_renegade:=marcade.dswb or (ret shl 4);
-         end;
+   $3802:getbyte_renegade:=marcade.dswb or $10*byte(not(main_sent)) or $20*byte(not(mcu_sent));
    $3803:getbyte_renegade:=marcade.dswa;
    $3804:begin
             mcu_sent:=false;
@@ -243,11 +213,12 @@ end;
 procedure putbyte_renegade(direccion:word;valor:byte);
 begin
 case direccion of
-  0..$17ff,$2000..$27ff:memoria[direccion]:=valor;
+  0..$17ff:memoria[direccion]:=valor;
   $1800..$1fff:if memoria[direccion]<>valor then begin
                 gfx[0].buffer[direccion and $3ff]:=true;
                 memoria[direccion]:=valor;
              end;
+  $2000..$27ff:memoria[$2000+(direccion and $1ff)]:=valor;
   $2800..$2fff:if memoria[direccion]<>valor then begin
                 gfx[1].buffer[direccion and $3ff]:=true;
                 memoria[direccion]:=valor;
@@ -331,9 +302,7 @@ case direccion of
   0:renegade_mcu_getbyte:=(port_a_out and ddr_a) or (port_a_in and not(ddr_a));
 	1:renegade_mcu_getbyte:=(port_b_out and ddr_b) or (port_b_in and not(ddr_b));
 	2:begin
-      port_c_in:=0;
-    	if main_sent then port_c_in:=port_c_in or $01;
-    	if not(mcu_sent) then port_c_in:=port_c_in or $02;
+      port_c_in:=$1*byte(main_sent) or $2*byte(not(mcu_sent));
     	renegade_mcu_getbyte:=(port_c_out and ddr_c) or (port_c_in and not(ddr_c));
     end;
   $10..$7ff:renegade_mcu_getbyte:=mcu_mem[direccion];
@@ -386,7 +355,7 @@ begin
 		adpcm_play:=false;
     m6809_0.change_nmi(PULSE_LINE);
 	end else begin
-		data:=adpcm_rom[adpcm_pos div 2];
+		data:=adpcm_rom[adpcm_pos shr 1];
     if (adpcm_pos and 1)<>0 then msm_5205_0.data_w(data and $f)
       else msm_5205_0.data_w(data shr 4);
 		adpcm_pos:=adpcm_pos+1;
@@ -481,7 +450,7 @@ init_gfx(1,16,16,$800);
 for f:=0 to 1 do begin
   gfx_set_desc_data(3,8,64*8,4,$8000*8+0,$8000*8+4);
   convert_gfx(1,f*$400*16*16,@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-  gfx_set_desc_data(3,8,64*8,0,$C000*8+0,$C000*8+4);
+  gfx_set_desc_data(3,8,64*8,0,$c000*8+0,$c000*8+4);
   convert_gfx(1,(f*$400*16*16)+($100*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
   gfx_set_desc_data(3,8,64*8,$4000*8+4,$10000*8+0,$10000*8+4);
   convert_gfx(1,(f*$400*16*16)+($200*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
@@ -495,7 +464,7 @@ gfx[2].trans[0]:=true;
 for f:=0 to 3 do begin
   gfx_set_desc_data(3,16,64*8,4,$8000*8+0,$8000*8+4);
   convert_gfx(2,f*$400*16*16,@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
-  gfx_set_desc_data(3,16,64*8,0,$C000*8+0,$C000*8+4);
+  gfx_set_desc_data(3,16,64*8,0,$c000*8+0,$c000*8+4);
   convert_gfx(2,(f*$400*16*16)+($100*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);
   gfx_set_desc_data(3,16,64*8,$4000*8+4,$10000*8+0,$10000*8+4);
   convert_gfx(2,(f*$400*16*16)+($200*16*16),@memoria_temp[f*$18000],@pt_x,@pt_y,false,false);

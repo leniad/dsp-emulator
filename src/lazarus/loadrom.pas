@@ -69,6 +69,7 @@ case games_desc[orden_games[Floadrom.RomList.Selection.Top]].grid of
   1004:dir:='sms.png';
   1005:dir:='sc1000.png';
   1006:dir:='gg.png';
+  1008:dir:='genesis.png';
   else dir:=games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip+'.png';
 end;
 if FileExists(Directory.Preview+dir) then Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+dir)

@@ -16,7 +16,7 @@
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="21"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1301"/>
+      <BuildNr Value="1304"/>
       <Language Value="040A"/>
       <StringTable CompanyName="Leniad" InternalName="Mi Emulador!" LegalCopyright="Leniad" OriginalFilename="DSP Emulator" ProductName="DSP Emulator" ProductVersion="0.20"/>
     </VersionInfo>
@@ -58,7 +58,8 @@
         <ComponentName Value="principal1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <CursorPos X="34"/>
+        <TopLine Value="544"/>
+        <CursorPos Y="545"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -184,6 +185,7 @@
         <TopLine Value="11"/>
         <CursorPos X="28" Y="15"/>
         <UsageCount Value="200"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit16>
       <Unit17>
         <Filename Value="loadrom.pas"/>
@@ -192,10 +194,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoadRom"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="22"/>
-        <CursorPos X="41" Y="34"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="56"/>
+        <CursorPos X="7" Y="72"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit17>
       <Unit18>
@@ -205,8 +210,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="463"/>
-        <CursorPos X="6" Y="473"/>
+        <TopLine Value="453"/>
+        <CursorPos Y="463"/>
         <UsageCount Value="202"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit18>
@@ -269,12 +274,10 @@
       <Unit26>
         <Filename Value="..\misc\sound_engine.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <CursorPos X="65" Y="9"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="159"/>
+        <CursorPos X="19" Y="169"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit26>
       <Unit27>
         <Filename Value="..\devices\upd765.pas"/>
@@ -492,12 +495,10 @@
       </Unit48>
       <Unit49>
         <Filename Value="..\cpu\z80\nz80.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1569"/>
         <CursorPos Y="1580"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit49>
       <Unit50>
         <Filename Value="..\arcade\karnov_hw.pas"/>
@@ -510,12 +511,10 @@
       </Unit50>
       <Unit51>
         <Filename Value="..\misc\timer_engine.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="139"/>
         <CursorPos Y="155"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit51>
       <Unit52>
         <Filename Value="..\cpu\konami.pas"/>
@@ -580,7 +579,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="24"/>
         <CursorPos X="78" Y="53"/>
-        <UsageCount Value="143"/>
+        <UsageCount Value="144"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit59>
       <Unit60>
@@ -695,7 +694,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="208"/>
         <CursorPos X="22" Y="233"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit73>
       <Unit74>
@@ -820,7 +819,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="36"/>
         <CursorPos Y="49"/>
-        <UsageCount Value="34"/>
+        <UsageCount Value="35"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit89>
       <Unit90>
@@ -871,8 +870,8 @@
       <Unit96>
         <Filename Value="..\arcade\outrun_hw.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="16"/>
-        <CursorPos Y="28"/>
+        <TopLine Value="30"/>
+        <CursorPos Y="42"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit96>
@@ -885,141 +884,137 @@
       </Unit97>
       <Unit98>
         <Filename Value="..\arcade\mcr_hw.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="293"/>
         <CursorPos Y="307"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit98>
       <Unit99>
         <Filename Value="..\snd\ay_8910.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="509"/>
         <CursorPos Y="528"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-        <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit99>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="235" Column="11" TopLine="220"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="516" Column="24" TopLine="505"/>
       </Position1>
       <Position2>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="45" Column="21" TopLine="33"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="858" Column="25" TopLine="839"/>
       </Position2>
       <Position3>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="96" Column="26" TopLine="77"/>
+        <Filename Value="principal.pas"/>
       </Position3>
       <Position4>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="100" Column="64" TopLine="81"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="14" Column="78"/>
       </Position4>
       <Position5>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="101" Column="66" TopLine="82"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="533" Column="34" TopLine="514"/>
       </Position5>
       <Position6>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="229" Column="17" TopLine="216"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="840" Column="81" TopLine="820"/>
       </Position6>
       <Position7>
-        <Filename Value="..\misc\sound_engine.pas"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="945" Column="25" TopLine="926"/>
       </Position7>
       <Position8>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="98" Column="26" TopLine="77"/>
+        <Filename Value="principal.pas"/>
       </Position8>
       <Position9>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="100" Column="64" TopLine="81"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="531" Column="23" TopLine="512"/>
       </Position9>
       <Position10>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="101" Column="66" TopLine="82"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="645" Column="25" TopLine="633"/>
       </Position10>
       <Position11>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="154" Column="34" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="916" Column="25" TopLine="893"/>
       </Position11>
       <Position12>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="140" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="515" Column="25" TopLine="504"/>
       </Position12>
       <Position13>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="141" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="735" Column="39" TopLine="715"/>
       </Position13>
       <Position14>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="142" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="814" Column="25" TopLine="798"/>
       </Position14>
       <Position15>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="147" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="948" Column="34" TopLine="938"/>
       </Position15>
       <Position16>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="148" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="533" Column="26" TopLine="522"/>
       </Position16>
       <Position17>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="149" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="795" Column="32" TopLine="775"/>
       </Position17>
       <Position18>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="154" Column="69" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="804" Column="25" TopLine="782"/>
       </Position18>
       <Position19>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="140" Column="39" TopLine="136"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="883" Column="5" TopLine="876"/>
       </Position19>
       <Position20>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="9" Column="26" TopLine="3"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="892" Column="5" TopLine="881"/>
       </Position20>
       <Position21>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="95" Column="26" TopLine="77"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="883" Column="9" TopLine="871"/>
       </Position21>
       <Position22>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="96" Column="26" TopLine="77"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="882" Column="9" TopLine="870"/>
       </Position22>
       <Position23>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="100" Column="64" TopLine="81"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="881" Column="9" TopLine="869"/>
       </Position23>
       <Position24>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="101" Column="66" TopLine="82"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="548" Column="12" TopLine="536"/>
       </Position24>
       <Position25>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="154" TopLine="135"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="549" Column="12" TopLine="537"/>
       </Position25>
       <Position26>
-        <Filename Value="..\misc\sound_engine.pas"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="556" Column="16" TopLine="537"/>
       </Position26>
       <Position27>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="96" Column="26" TopLine="77"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="795" Column="32" TopLine="788"/>
       </Position27>
       <Position28>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="100" Column="64" TopLine="81"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="802" Column="28" TopLine="788"/>
       </Position28>
       <Position29>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="101" Column="66" TopLine="82"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="952" Column="34" TopLine="935"/>
       </Position29>
       <Position30>
-        <Filename Value="..\misc\sound_engine.pas"/>
-        <Caret Line="152" Column="57" TopLine="139"/>
+        <Filename Value="principal.pas"/>
+        <Caret Line="950" Column="22" TopLine="939"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>

@@ -31,8 +31,6 @@ const
 
 var
  nvram:array[0..$7ff] of byte;
- //video
- //prio:array[0..$1f,0..$1f] of byte;
  //Sonido
  ssio_status:byte;
  ssio_data:array[0..3] of byte;
@@ -45,7 +43,9 @@ var
   pos:pbyte;
   dir_x,dir_y:integer;
   nchar,sx,sy:word;
+  //prio:array[0..$1ff,0..$1ff] of boolean;
 begin
+//fillchar(prio,512*512,0);
 for f:=0 to $7f do begin
   sx:=((memoria[$e803+(f*4)]-3)*2) and $1ff;
   sy:=((241-memoria[$e800+(f*4)])*2) and $1ff;
@@ -72,13 +72,11 @@ for f:=0 to $7f do begin
   for y:=0 to 31 do begin
     temp:=temp2;
     for x:=0 to 31 do begin
-      //prioridad:=prio[((sx+x) and $1ff) div 16,((sy+y) and $1ff) div 16];
-      //if prio[((sx+x) and $1ff) div 16,((sy+y) and $1ff) div 16]<>pri then begin
-      //  temp^:=paleta[MAX_COLORES];
-      //end else begin
-        if (gfx[1].colores[pos^+color] and $7)<>0 then temp^:=paleta[gfx[1].colores[pos^+color]]
-          else temp^:=paleta[MAX_COLORES];
-      //end;
+        //if not(prio[(sx+x) and $1ff,(sy+y) and $1ff]) then begin
+          if (gfx[1].colores[pos^+color] and $7)<>0 then temp^:=paleta[gfx[1].colores[pos^+color]]
+            else temp^:=paleta[MAX_COLORES];
+        //  prio[(sx+x) and $1ff,(sy+y) and $1ff]:=true;
+        //end else temp^:=paleta[MAX_COLORES];
       inc(temp,dir_x);
       inc(pos);
     end;
@@ -90,7 +88,7 @@ end;
 end;
 
 procedure update_video_tapper;
-  var
+var
   x,y,h,atrib2:byte;
   atrib,f,nchar,color:word;
 begin

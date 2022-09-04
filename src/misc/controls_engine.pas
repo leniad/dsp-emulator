@@ -1,6 +1,9 @@
 unit controls_engine;
+
 interface
+
 uses lib_sdl2,main_engine,timer_engine{$ifdef fpc},sound_engine{$endif}{$ifdef windows},windows{$endif},sysutils;
+
 const
   NUM_PLAYERS=2-1;
   KEYBOARD_A=4;
@@ -150,6 +153,7 @@ type
         cpu:byte;
         clock:dword;
     end;
+
 var
     keyboard:array [0..255] of boolean;
     marcade:def_marcade;
@@ -158,6 +162,7 @@ var
     analog:def_analog;
     raton:def_mouse;
     joystick_def:array[0..NUM_PLAYERS] of libsdlp_joystick;
+
 procedure evalue_controls;
 procedure init_controls(evalue_mouse,evalue_keyboard,evalue_joystick,evalue_arcade:boolean);
 procedure open_joystick(player:byte);
@@ -172,11 +177,14 @@ procedure analog_1(sensitivity,port_delta,max_val,min_val:integer;return_center:
 procedure analog_2(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_3(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 procedure analog_4(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
+
 implementation
 uses principal;
+
 var
    keystate:pbyte=nil;
    new_cursor:libsdlP_cursor;
+
 procedure show_mouse_cursor;
 begin
 {$ifndef fpc}
@@ -187,6 +195,7 @@ new_cursor:=sdl_createsystemcursor(3);
 sdl_setcursor(new_cursor);
 sdl_showcursor(1);
 end;
+
 procedure hide_mouse_cursor;
 begin
 if new_cursor<>nil then begin
@@ -195,15 +204,18 @@ if new_cursor<>nil then begin
 end;
 sdl_showcursor(0);
 end;
+
 procedure open_joystick(player:byte);
 begin
   joystick_def[player]:=SDL_JoystickOpen(arcade_input.num_joystick[player]);
 end;
+
 procedure close_joystick(num:byte);
 begin
   SDL_JoystickClose(joystick_def[num]);
   joystick_def[num]:=nil;
 end;
+
 procedure init_controls(evalue_mouse,evalue_keyboard,evalue_joystick,evalue_arcade:boolean);
 var
   f:byte;
@@ -240,6 +252,7 @@ for f:=0 to NUM_PLAYERS do if joystick_def[f]<>nil then close_joystick(arcade_in
 for f:=0 to NUM_PLAYERS do open_joystick(f);
 for f:=0 to NUM_PLAYERS do if joystick_def[f]=nil then arcade_input.use_key[f]:=true;
 end;
+
 procedure evaluar_arcade_basic;
 var
    f:byte;
@@ -255,6 +268,7 @@ for f:=0 to NUM_PLAYERS do begin
     end;
 end;
 end;
+
 procedure evaluar_arcade_keyb(player:byte);
 begin
 if (arcade_input.up[player]<>(keyboard[arcade_input.nup[player]])) then begin
@@ -325,6 +339,7 @@ end else begin
   end;
 end;
 end;
+
 procedure evaluar_arcade_joy(tevent:integer;player:byte);
 var
   valor:integer;
@@ -419,6 +434,7 @@ case tevent of
   end;
 end;
 end;
+
 procedure evalue_controls;
 var
    f:byte;
@@ -433,6 +449,7 @@ begin
     else video_mult:=1;
   end;
 end;
+
 procedure evalue_joy;
 var
    f:byte;
@@ -508,6 +525,7 @@ begin
   //Joy Stick
   if event.ejoystick then evalue_joy;
 end;
+
 procedure analog_read_0;
 var
   f:byte;
@@ -639,6 +657,7 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure analog_read_1;
 var
   f:byte;
@@ -658,6 +677,7 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure analog_read_2;
 var
   f:byte;
@@ -677,6 +697,7 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure analog_read_3;
 var
   f:byte;
@@ -696,6 +717,7 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure analog_read_4;
 var
   f:byte;
@@ -715,11 +737,13 @@ for f:=0 to NUM_PLAYERS do begin
   end;
 end;
 end;
+
 procedure init_analog(cpu:byte;cpu_clock:integer);
 begin
 analog.cpu:=cpu;
 analog.clock:=cpu_clock;
 end;
+
 procedure analog_0(sensitivity,port_delta,mid_val,max_val,min_val:integer;return_center:boolean;circle:boolean=false;inverted_x:boolean=false;inverted_y:boolean=false);
 var
    f:byte;
@@ -738,6 +762,7 @@ for f:=0 to NUM_PLAYERS do begin
 end;
 analog.c[0].return_center:=return_center;
 end;
+
 procedure analog_1(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 var
    f:byte;
@@ -749,6 +774,7 @@ analog.c[1].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[1].val[f]:=min_val;
 analog.c[1].return_center:=return_center;
 end;
+
 procedure analog_2(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 var
    f:byte;
@@ -760,6 +786,7 @@ analog.c[2].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[2].val[f]:=min_val;
 analog.c[2].return_center:=return_center;
 end;
+
 procedure analog_3(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 var
    f:byte;
@@ -771,6 +798,7 @@ analog.c[3].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[3].val[f]:=min_val;
 analog.c[3].return_center:=return_center;
 end;
+
 procedure analog_4(sensitivity,port_delta,max_val,min_val:integer;return_center:boolean);
 var
    f:byte;
@@ -782,4 +810,5 @@ analog.c[4].min_val:=min_val;
 for f:=0 to NUM_PLAYERS do analog.c[4].val[f]:=min_val;
 analog.c[4].return_center:=return_center;
 end;
+
 end.

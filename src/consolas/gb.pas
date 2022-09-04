@@ -1503,7 +1503,8 @@ gameboy_sound_ini(FREQ_BASE_AUDIO);
 hay_nvram:=false;
 //final
 getmem(gb_head,sizeof(tgb_head));
-iniciar_gb:=abrir_gb;
+if main_vars.console_init then abrir_gb;
+iniciar_gb:=true;
 end;
 
 procedure gb_config_call;

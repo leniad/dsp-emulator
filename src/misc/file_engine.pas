@@ -109,17 +109,9 @@ if fileexists(directory.Base+'dsp.ini') then begin
   Directory.Preview:=fich_ini.readString('dir','dir_preview',directory.Base+'preview'+main_vars.cadena_dir)+main_vars.cadena_dir;
   main_vars.idioma:=fich_ini.ReadInteger('dsp','idioma',1);
   if main_vars.idioma>max_idiomas then main_vars.idioma:=1;
-  sound_status.calidad_audio:=fich_ini.ReadInteger('dsp','sonido',1);
-  if sound_status.calidad_audio>3 then sound_status.calidad_audio:=3;
-  case sound_status.calidad_audio of
-    0:principal1.N110251.Checked:=true;
-    1:principal1.N220501.Checked:=true;
-    2:principal1.N441001.Checked:=true;
-    3:begin
-      principal1.SinSonido1.Checked:=true;
-      sound_status.hay_sonido:=false;
-      end;
-  end;
+  sound_status.hay_sonido:=fich_ini.ReadInteger('dsp','sonido_ena',1)=1;
+  if sound_status.hay_sonido then principal1.consonido1.checked:=true
+    else principal1.SinSonido1.Checked:=true;
   main_screen.video_mode:=fich_ini.ReadInteger('dsp','video',1);
   if ((main_screen.video_mode<1) or (main_screen.video_mode>5)) then main_screen.video_mode:=1;
   main_screen.pantalla_completa:=false;
@@ -127,7 +119,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   main_vars.auto_exec:=(fich_ini.ReadInteger('dsp','auto_exec',0)=1);
   main_vars.show_crc_error:=(fich_ini.ReadInteger('dsp','show_crc_error',1)=1);
   main_vars.center_screen:=(fich_ini.ReadInteger('dsp','center_screen',1)=1);
-  main_vars.x11:=(fich_ini.ReadInteger('dsp','x11',0)=1);
+  main_vars.console_init:=(fich_ini.ReadInteger('dsp','console_init',0)=1);
   //configuracion spectrum
   var_spectrum.issue2:=(fich_ini.ReadInteger('spectrum','issue',0)=0);
   var_spectrum.tipo_joy:=fich_ini.ReadInteger('spectrum','joystick',0);
@@ -242,11 +234,11 @@ end else begin
   Directory.c64_disk:=directory.base+'c64'+main_vars.cadena_dir;
   main_vars.idioma:=1;
   main_screen.video_mode:=1;
-  sound_status.calidad_audio:=1;
+  sound_status.hay_sonido:=true;
   main_screen.pantalla_completa:=false;
   main_vars.show_crc_error:=true;
   main_vars.center_screen:=true;
-  main_vars.x11:=false;
+  main_vars.console_init:=true;
   //configuracion basica spectrum
   var_spectrum.audio_128k:=0;
   var_spectrum.audio_load:=true;
@@ -405,13 +397,13 @@ fich_ini.Writestring('dir','ams_rom',test_dir(Directory.amstrad_rom));
 fich_ini.Writestring('dir','c64_tap',test_dir(Directory.c64_tap));
 fich_ini.Writestring('dir','c64_disk',test_dir(Directory.c64_disk));
 //Config general
-fich_ini.WriteInteger('dsp','sonido',sound_status.calidad_audio);
+fich_ini.WriteInteger('dsp','sonido_ena',byte(sound_status.hay_sonido));
 fich_ini.WriteInteger('dsp','video',main_screen.video_mode);
 fich_ini.WriteInteger('dsp','maquina',main_vars.tipo_maquina);
 fich_ini.WriteInteger('dsp','auto_exec',byte(main_vars.auto_exec));
 fich_ini.WriteInteger('dsp','show_crc_error',byte(main_vars.show_crc_error));
 fich_ini.WriteInteger('dsp','center_screen',byte(main_vars.center_screen));
-fich_ini.WriteInteger('dsp','x11',byte(main_vars.x11));
+fich_ini.WriteInteger('dsp','console_init',byte(main_vars.console_init));
 //Config Spectrum
 fich_ini.WriteInteger('spectrum','issue',byte(var_spectrum.issue2));
 fich_ini.WriteInteger('spectrum','joystick',var_spectrum.tipo_joy);

@@ -1,12 +1,9 @@
 unit config_general;
-
 interface
-
 uses
   lib_sdl2,Messages,SysUtils,Variants,Classes,Graphics,Controls,Forms,Dialogs,
   StdCtrls,ExtCtrls,lenguaje,main_engine,ComCtrls,Buttons,controls_engine,
   sound_engine,SHLOBJ,rom_export,timer_engine;
-
 type
   TMConfig = class(TForm)
     Button1: TButton;
@@ -82,8 +79,6 @@ type
     RadioButton10: TRadioButton;
     RadioButton11: TRadioButton;
     GroupBox4: TGroupBox;
-    RadioButton12: TRadioButton;
-    RadioButton13: TRadioButton;
     RadioButton14: TRadioButton;
     RadioButton15: TRadioButton;
     TabSheet4: TTabSheet;
@@ -145,6 +140,7 @@ type
     RadioButton23: TRadioButton;
     Button8: TButton;
     RadioButton24: TRadioButton;
+    CheckBox17: TCheckBox;
     procedure FormShow(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -190,20 +186,24 @@ type
     procedure SpeedButton6Click(Sender: TObject);
     procedure SpeedButton8Click(Sender: TObject);
     procedure CheckBox16Click(Sender: TObject);
+    procedure RadioButton5Click(Sender: TObject);
+    procedure RadioButton11Click(Sender: TObject);
+    procedure RadioButton6Click(Sender: TObject);
+    procedure RadioButton7Click(Sender: TObject);
+    procedure RadioButton8Click(Sender: TObject);
+    procedure RadioButton9Click(Sender: TObject);
+    procedure RadioButton10Click(Sender: TObject);
   private
     { Private declarations }
   public
     { Public declarations }
   end;
-
 var
   MConfig:TMConfig;
   tecla_leida:word;
-
 implementation
 uses principal,redefine, joystick_calibrate;
 {$R *.dfm}
-
 function BrowseForFolder(init_dir,title:string):string;
 var
   browseInfo:tbrowseInfo;
@@ -231,7 +231,6 @@ begin
     if SHGetPathFromIDList(ItemIDList,DisplayName) then BrowseForFolder:=DisplayName;
   end else BrowseForFolder:=remove_last_char(init_dir);
 end;
-
 function nombre_tecla(num:word):string;
 begin
   case num of
@@ -296,7 +295,6 @@ begin
     else nombre_tecla:='N/D';
   end;
 end;
-
 procedure TMConfig.BitBtn10Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -305,7 +303,6 @@ begin
       arcade_input.nbut1[0]:=tecla_leida;
   end;
 end;
-
 procedure TMConfig.BitBtn11Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -314,7 +311,6 @@ begin
     arcade_input.nbut2[0]:=tecla_leida;
   end;
 end;
-
 PROCEDURE TMConfig.BitBtn12Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -323,7 +319,6 @@ BEGIN
     arcade_input.nbut0[1] := tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn13Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -332,7 +327,6 @@ BEGIN
     arcade_input.nbut1[1] := tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn14Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -341,7 +335,6 @@ BEGIN
     arcade_input.nbut2[1] := tecla_leida;
   END;
 END;
-
 procedure TMConfig.BitBtn15Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -350,7 +343,6 @@ begin
     arcade_input.nbut4[0] := tecla_leida;
   END;
 end;
-
 procedure TMConfig.BitBtn16Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -359,7 +351,6 @@ begin
     arcade_input.nbut5[0] := tecla_leida;
   END;
 end;
-
 procedure TMConfig.BitBtn17Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -368,7 +359,6 @@ begin
     arcade_input.nbut3[0] := tecla_leida;
   END;
 end;
-
 procedure TMConfig.BitBtn18Click(Sender: TObject);
 begin
 redefine1.showmodal;
@@ -377,7 +367,6 @@ redefine1.showmodal;
     arcade_input.nbut3[1] := tecla_leida;
   END;
 end;
-
 procedure TMConfig.BitBtn19Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -386,7 +375,6 @@ begin
     arcade_input.nbut4[1]:=tecla_leida;
   END;
 end;
-
 PROCEDURE TMConfig.BitBtn1Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -395,7 +383,6 @@ BEGIN
     arcade_input.nleft[0]:= tecla_leida;
   end;
 end;
-
 procedure TMConfig.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
 begin
   case key of
@@ -403,7 +390,18 @@ begin
     27:button2click(nil);
   end;
 end;
-
+procedure cambiar_texto_idioma(idioma:byte);
+begin
+MConfig.GroupBox3.Caption:=leng[idioma].archivo[1];
+MConfig.button2.Caption:=leng[idioma].mensajes[8];
+MConfig.checkbox2.Caption:=leng[idioma].varios[2];
+MConfig.checkbox1.Caption:=leng[idioma].varios[3];
+MConfig.checkbox3.Caption:=leng[idioma].varios[4];
+MConfig.checkbox17.Caption:=leng[idioma].varios[5];
+MConfig.radiobutton15.Caption:=leng[idioma].opciones[3];
+MConfig.radiobutton14.Caption:=leng[idioma].opciones[5];
+MConfig.groupbox4.Caption:=leng[idioma].opciones[1];
+end;
 procedure TMConfig.FormShow(Sender: TObject);
 var
   f:integer;
@@ -425,8 +423,7 @@ begin
   extract_joy_name:=cadena;
 end;
 begin
-  GroupBox3.Caption:=leng[main_vars.idioma].archivo[1];
-  button2.Caption:=leng[main_vars.idioma].mensajes[8];
+  cambiar_texto_idioma(main_vars.idioma);
   //idioma
   case main_vars.idioma of
     0:radiobutton5.Checked:=true;
@@ -438,13 +435,8 @@ begin
     6:radiobutton11.Checked:=true;
   end;
   //audio
-  radiobutton15.Caption := leng[main_vars.idioma].opciones[3];
-  case sound_status.calidad_audio of
-    0:radiobutton12.Checked:=true;
-    1:radiobutton13.Checked:=true;
-    2:radiobutton14.Checked:=true;
-    3:radiobutton15.Checked:=true;
-  end;
+  if sound_status.hay_sonido then radiobutton14.Checked:=true
+    else radiobutton15.Checked:=true;
   //video
   case main_screen.video_mode of
     0:groupbox5.Enabled:=false;
@@ -460,6 +452,8 @@ begin
   checkbox1.Checked:=main_vars.show_crc_error;
   //Centrar Pantalla
   checkbox3.Checked:=main_vars.center_screen;
+  //Consolas init
+  checkbox17.Checked:=main_vars.console_init;
   //Diretorios
   D1.Text:=Directory.Preview;
   D2.Text:=Directory.Arcade_samples;
@@ -710,7 +704,6 @@ begin
   button5.Caption:=nombre_tecla(arcade_input.nstart[0]);
   button6.Caption:=nombre_tecla(arcade_input.nstart[1]);
 end;
-
 procedure TMConfig.RadioButton1Click(Sender: TObject);
 begin
   bitbtn1.Enabled:=true;
@@ -734,17 +727,14 @@ begin
   //radiobutton21.Enabled:=false;
   //radiobutton22.Enabled:=false;
 end;
-
 procedure TMConfig.RadioButton21Click(Sender: TObject);
 begin
   button7.Enabled:=false;
 end;
-
 procedure TMConfig.RadioButton22Click(Sender: TObject);
 begin
  button7.Enabled:=true;
 end;
-
 procedure TMConfig.RadioButton2Click(Sender: TObject);
 begin
   bitbtn1.Enabled:=false;
@@ -774,7 +764,6 @@ begin
     radiobutton22.Checked:=true;
   end;}
 end;
-
 procedure TMConfig.RadioButton3Click(Sender: TObject);
 begin
   bitbtn5.Enabled:=true;
@@ -795,7 +784,6 @@ begin
   combobox14.Visible:=false;
   button8.Enabled:=false;
 end;
-
 procedure TMConfig.RadioButton4Click(Sender: TObject);
 begin
   bitbtn5.Enabled:=false;
@@ -816,42 +804,34 @@ begin
   combobox14.Visible:=true;
   button8.Enabled:=true;
 end;
-
 procedure TMConfig.SpeedButton1Click(Sender: TObject);
 begin
   d1.Text:=BrowseForFolder(d1.text,label1.Caption);
 end;
-
 procedure TMConfig.SpeedButton2Click(Sender: TObject);
 begin
   d2.Text:=BrowseForFolder(d2.text,label2.Caption);
 end;
-
 procedure TMConfig.SpeedButton4Click(Sender: TObject);
 begin
   d4.Text:=d4.Text+BrowseForFolder(d4.text,label4.Caption);
 end;
-
 procedure TMConfig.SpeedButton5Click(Sender: TObject);
 begin
   d5.Text:=BrowseForFolder(d5.text,label5.Caption);
 end;
-
 procedure TMConfig.SpeedButton6Click(Sender: TObject);
 begin
   d3.Text:=BrowseForFolder(d3.text,label3.Caption);
 end;
-
 procedure TMConfig.SpeedButton8Click(Sender: TObject);
 begin
   d6.Text:=BrowseForFolder(d6.text,label12.Caption);
 end;
-
 procedure TMConfig.Button2Click(Sender: TObject);
 begin
   close;
 end;
-
 procedure TMConfig.Button3Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -860,7 +840,6 @@ begin
     arcade_input.ncoin[0]:=tecla_leida;
   end;
 end;
-
 procedure TMConfig.Button4Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -869,7 +848,6 @@ begin
     arcade_input.ncoin[1]:=tecla_leida;
   end;
 end;
-
 procedure TMConfig.Button5Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -878,7 +856,6 @@ begin
     arcade_input.nstart[0]:=tecla_leida;
   end;
 end;
-
 procedure TMConfig.Button6Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -887,21 +864,18 @@ begin
     arcade_input.nstart[1]:=tecla_leida;
   end;
 end;
-
 procedure TMConfig.Button7Click(Sender: TObject);
 begin
 joy_calibration.show;
 bucle_joystick(0);
 while joy_calibration.Showing do application.ProcessMessages;
 end;
-
 procedure TMConfig.Button8Click(Sender: TObject);
 begin
 joy_calibration.show;
 bucle_joystick(1);
 while joy_calibration.Showing do application.ProcessMessages;
 end;
-
 procedure TMConfig.ComboBox1Change(Sender: TObject);
 begin
   arcade_input.num_joystick[0]:=combobox1.ItemIndex;
@@ -914,7 +888,6 @@ begin
     radiobutton22.Checked:=true;
   end;}
 end;
-
 procedure TMConfig.BitBtn20Click(Sender: TObject);
 begin
 redefine1.showmodal;
@@ -923,7 +896,6 @@ redefine1.showmodal;
     arcade_input.nbut5[1] := tecla_leida;
   END;
 end;
-
 PROCEDURE TMConfig.BitBtn2Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -932,7 +904,6 @@ BEGIN
     arcade_input.nright[0] := tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn3Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -941,7 +912,6 @@ BEGIN
     arcade_input.ndown[0] := tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn4Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -950,7 +920,6 @@ BEGIN
     arcade_input.nup[0] := tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn5Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -959,7 +928,6 @@ BEGIN
     arcade_input.nup[1]:=tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn6Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -968,7 +936,6 @@ BEGIN
     arcade_input.nleft[1]:=tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn7Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -977,7 +944,6 @@ BEGIN
     arcade_input.nright[1] := tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn8Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -986,7 +952,6 @@ BEGIN
     arcade_input.ndown[1]:=tecla_leida;
   END;
 END;
-
 PROCEDURE TMConfig.BitBtn9Click(Sender: TObject);
 BEGIN
   redefine1.showmodal;
@@ -995,7 +960,6 @@ BEGIN
     arcade_input.nbut0[0]:=tecla_leida;
   END;
 END;
-
 procedure TMConfig.Button1Click(Sender: TObject);
 var
   tmp_var:byte;
@@ -1018,18 +982,12 @@ begin
           else if radiobutton9.Checked then tmp_var:=4
             else if radiobutton10.Checked then tmp_var:=5
               else if radiobutton11.Checked then tmp_var:=6;
-  if tmp_var<> main_vars.idioma then begin
+  if tmp_var<>main_vars.idioma then begin
     main_vars.idioma:=tmp_var;
     principal1.IdiomaClick(nil);
   end;
-  if radiobutton12.Checked then tmp_var:=0
-    else if radiobutton13.Checked then tmp_var:=1
-      else if radiobutton14.Checked then tmp_var:=2
-        else if radiobutton15.Checked then tmp_var:=3;
-  if tmp_var<>sound_status.calidad_audio then begin
-    sound_status.calidad_audio:=tmp_var;
-    principal1.CambiaAudio(nil);
-  end;
+  sound_status.hay_sonido:=radiobutton14.Checked;
+  principal1.CambiaAudio(nil);
   if groupbox5.Enabled then begin
     if radiobutton16.Checked then tmp_var:=1
       else if radiobutton17.Checked then tmp_var:=2
@@ -1050,6 +1008,7 @@ begin
   main_vars.auto_exec:=checkbox2.Checked;
   main_vars.show_crc_error:=checkbox1.Checked;
   main_vars.center_screen:=checkbox3.Checked;
+  main_vars.console_init:=checkbox17.Checked;
 //Arreglar entradas arcade
   arcade_input.use_key[0]:=radiobutton1.Checked;
   arcade_input.use_key[1]:=radiobutton3.Checked;
@@ -1083,7 +1042,6 @@ begin
   end else for tmp_var:=0 to 11 do timers.autofire_enabled[tmp_var]:=false;
   close;
 end;
-
 procedure TMConfig.CheckBox16Click(Sender: TObject);
 begin
 timers.autofire_on:=checkbox16.Checked;
@@ -1103,11 +1061,43 @@ checkbox14.Enabled:=checkbox16.Checked;
 checkbox15.Enabled:=checkbox16.Checked;
 timers.enabled(timers.autofire_timer,checkbox16.Checked);
 end;
-
 procedure TMConfig.BitBtn21Click(Sender: TObject);
 begin
 export_roms;
 end;
+procedure TMConfig.RadioButton5Click(Sender: TObject);
+begin
+cambiar_texto_idioma(0);
+end;
+
+procedure TMConfig.RadioButton6Click(Sender: TObject);
+begin
+cambiar_texto_idioma(1);
+end;
+
+procedure TMConfig.RadioButton7Click(Sender: TObject);
+begin
+cambiar_texto_idioma(2);
+end;
+
+procedure TMConfig.RadioButton8Click(Sender: TObject);
+begin
+cambiar_texto_idioma(3);
+end;
+
+procedure TMConfig.RadioButton9Click(Sender: TObject);
+begin
+cambiar_texto_idioma(4);
+end;
+
+procedure TMConfig.RadioButton10Click(Sender: TObject);
+begin
+cambiar_texto_idioma(5);
+end;
+
+procedure TMConfig.RadioButton11Click(Sender: TObject);
+begin
+cambiar_texto_idioma(6);
+end;
 
 end.
-

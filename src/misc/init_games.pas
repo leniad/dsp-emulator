@@ -2,7 +2,7 @@ unit init_games;
 
 interface
 
-uses sysutils,main_engine,rom_engine,rom_export,
+uses sysutils,main_engine,rom_engine,rom_export,lenguaje,
   //Computer
   spectrum_48k,spectrum_128k,spectrum_3,amstrad_cpc,commodore64,
   //Console
@@ -36,7 +36,7 @@ uses sysutils,main_engine,rom_engine,rom_export,
   badlands_hw,galivan_hw,lastduel_hw,armedf_hw,firetrap_hw,hw_3x3puzzle,
   hw_1945k3,bloodbros_hw,baraduke_hw,system16b_hw,toaplan1_hw,karatechamp_hw,
   seta_hw,genesis,mrdocastle_hw,crystalcastles_hw,flower_hw,superdodgeball_hw,
-  mcr_hw;
+  mcr_hw,arkanoid_hw;
 
 type
   tgame_desc=record
@@ -52,7 +52,7 @@ type
 
 const
   SOUND_TIPO:array[0..4] of string=('NO','YES','SAMPLES','YES+SAMPLES','PARTIAL');
-  GAMES_CONT=338;
+  GAMES_CONT=339;
   GAMES_DESC:array[1..GAMES_CONT] of tgame_desc=(
   //Computers
   (name:'Spectrum 48K';year:'1982';snd:1;hi:false;zip:'spectrum';grid:0;company:'Sinclair';rom:@spectrum),
@@ -381,6 +381,7 @@ const
   (name:'Robotron';year:'1982';snd:1;hi:false;zip:'robotron';grid:322;company:'Williams';rom:@robotron),
   (name:'Stargate';year:'1981';snd:1;hi:false;zip:'stargate';grid:323;company:'Williams';rom:@stargate),
   (name:'Tapper';year:'1983';snd:1;hi:false;zip:'tapper';grid:324;company:'Bally Midway';rom:@tapper),
+  (name:'Arkanoid';year:'1986';snd:1;hi:false;zip:'arkanoid';grid:325;company:'Taito';rom:@arkanoid),
   //*** Consoles
   (name:'NES';year:'198X';snd:1;hi:false;zip:'';grid:1000;company:'Nintendo'),
   (name:'ColecoVision';year:'1980';snd:1;hi:false;zip:'coleco';grid:1001;company:'Coleco';rom:@coleco_),
@@ -737,6 +738,7 @@ case numero of
   322:principal1.CambiarMaquina(principal1.robotron1);
   323:principal1.CambiarMaquina(principal1.stargate1);
   324:principal1.CambiarMaquina(principal1.tapper1);
+  325:principal1.CambiarMaquina(principal1.arkanoid1);
   1000:principal1.CambiarMaquina(principal1.NES1);
   1001:principal1.CambiarMaquina(principal1.colecovision1);
   1002:principal1.CambiarMaquina(principal1.Gameboy1);
@@ -1081,6 +1083,7 @@ principal1.joust1.checked:=false;
 principal1.robotron1.checked:=false;
 principal1.stargate1.checked:=false;
 principal1.tapper1.checked:=false;
+principal1.arkanoid1.checked:=false;
 //consolas
 principal1.NES1.Checked:=false;
 principal1.colecovision1.Checked:=false;
@@ -1118,6 +1121,7 @@ principal1.BitBtn11.Enabled:=true;
 principal1.BitBtn12.Enabled:=true;
 principal1.BitBtn14.Enabled:=true;
 principal1.BitBtn8.enabled:=false; //Arcade config
+principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[8];
 case driver of
   0..6:begin
           principal1.Panel2.visible:=true;
@@ -1149,21 +1153,25 @@ case driver of
   1000,1003,1005,1006,1007,1008:begin //NES, Chip8, Gameboy, GBC, SC-1000 y GG
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
+          principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
        end;
   1001:begin //Coleco
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartcuho
           principal1.BitBtn11.visible:=true; //Load Snapshot
+          principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
        end;
   1002:begin
           principal1.BitBtn1.visible:=true;
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
+          principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
        end;
   1004:begin //SMS
           principal1.Panel2.visible:=true;
           principal1.BitBtn10.visible:=true; //Cartucho
           principal1.BitBtn1.visible:=true; //Configurar ordenador/consola
+          principal1.BitBtn10.Hint:=leng[main_vars.idioma].hints[20];
        end;
   2000..2002:; //G&W
 end;
@@ -1286,10 +1294,10 @@ case tmaquina of
   195:llamadas_maquina.iniciar:=iniciar_vulgus;
   196,232:Cargar_ddragon3;
   197:Cargar_blockout;
-  199:Cargar_foodf;
+  199:llamadas_maquina.iniciar:=iniciar_foodf;
   204,205,260,261:Cargar_nemesis;
   206,207:Cargar_pirates;
-  208:Cargar_junofrst;
+  208:llamadas_maquina.iniciar:=iniciar_junofrst;
   209:Cargar_gyruss;
   210:Cargar_boogwing;
   211,271,272,273,274:Cargar_freekick;
@@ -1327,7 +1335,7 @@ case tmaquina of
   281,282:cargar_puzz3x3;
   283,284:cargar_k31945;
   285,286:llamadas_maquina.iniciar:=iniciar_bloodbros;
-  287,288:cargar_baraduke;
+  287,288:llamadas_maquina.iniciar:=iniciar_baraduke;
   292,293,294,295,296,297:llamadas_maquina.iniciar:=iniciar_system16b;
   298:cargar_toaplan1;
   301:cargar_karatechamp;
@@ -1337,6 +1345,7 @@ case tmaquina of
   315:llamadas_maquina.iniciar:=iniciar_flower;
   318:llamadas_maquina.iniciar:=iniciar_sdodgeball;
   324:llamadas_maquina.iniciar:=iniciar_mcr;
+  325:llamadas_maquina.iniciar:=iniciar_arkanoid;
   //consolas
   1000:Cargar_NES;
   1001:Cargar_coleco;
@@ -2657,6 +2666,10 @@ end;
 if sender=principal1.tapper1 then begin
   tipo:=324;
   principal1.tapper1.Checked:=true;
+end;
+if sender=principal1.arkanoid1 then begin
+  tipo:=325;
+  principal1.arkanoid1.Checked:=true;
 end;
 //consolas
 if sender=principal1.NES1 then begin

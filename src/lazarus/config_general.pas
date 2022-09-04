@@ -110,8 +110,6 @@ type
     RadioButton1: TRadioButton;
     RadioButton10: TRadioButton;
     RadioButton11: TRadioButton;
-    RadioButton12: TRadioButton;
-    RadioButton13: TRadioButton;
     RadioButton14: TRadioButton;
     RadioButton15: TRadioButton;
     RadioButton16: TRadioButton;
@@ -462,14 +460,8 @@ begin
     main_vars.idioma:=tmp_var;
     principal1.IdiomaClick(nil);
   end;
-  if radiobutton12.Checked then tmp_var:=0
-    else if radiobutton13.Checked then tmp_var:=1
-      else if radiobutton14.Checked then tmp_var:=2
-        else if radiobutton15.Checked then tmp_var:=3;
-  if tmp_var<>sound_status.calidad_audio then begin
-    sound_status.calidad_audio:=tmp_var;
-    principal1.CambiaAudio(nil);
-  end;
+  sound_status.hay_sonido:=radiobutton14.Checked;
+  principal1.CambiaAudio(nil);
   if groupbox5.Enabled then begin
     if radiobutton16.Checked then tmp_var:=1
       else if radiobutton17.Checked then tmp_var:=2
@@ -658,13 +650,9 @@ begin
     6:radiobutton11.Checked:=true;
   end;
   //audio
-  radiobutton15.Caption := leng[main_vars.idioma].opciones[3];
-  case sound_status.calidad_audio of
-    0:radiobutton12.Checked:=true;
-    1:radiobutton13.Checked:=true;
-    2:radiobutton14.Checked:=true;
-    3:radiobutton15.Checked:=true;
-  end;
+  radiobutton15.Caption:=leng[main_vars.idioma].opciones[3];
+  if sound_status.hay_sonido then radiobutton14.Checked:=true
+    else radiobutton15.Checked:=true;
   //video
   case main_screen.video_mode of
     1:radiobutton16.Checked:=true;

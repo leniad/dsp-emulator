@@ -12,11 +12,9 @@ object FLoadRom: TFLoadRom
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poDesigned
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object gpxrominfo: TGroupBox
     Left = 347
@@ -104,8 +102,8 @@ object FLoadRom: TFLoadRom
     OnClick = RomListClick
     OnDblClick = RomListDblClick
     ColWidths = (
-      209
-      60)
+      193
+      71)
     RowHeights = (
       15
       15

@@ -63,6 +63,7 @@ case games_desc[orden_games[Floadrom.RomList.Selection.Top]].grid of
   1004:dir:='sms.png';
   1005:dir:='sg1000.png';
   1006:dir:='gg.png';
+  1008:dir:='genesis.png';
   else dir:=games_desc[orden_games[Floadrom.RomList.Selection.Top]].zip+'.png';
 end;
 if FileExists(Directory.Preview+dir) then Floadrom.ImgPreview.Picture.LoadFromFile(Directory.Preview+dir)
@@ -136,7 +137,7 @@ with RomList do begin
       if pos_grid>(games_cont-26) then pos_grid:=games_cont-26;
       Floadrom.RomList.TopRow:=pos_grid;
     end;
-    if games_desc[orden_games[f]].grid>1999 then Cells[0,f]:=games_desc[orden_games[f]].name+' - Game & Watch'
+    if ((games_desc[orden_games[f]].grid>1999) and (games_desc[orden_games[f]].grid<3000)) then Cells[0,f]:=games_desc[orden_games[f]].name+' - Game & Watch'
       else Cells[0,f]:=games_desc[orden_games[f]].name;
     if games_desc[orden_games[f]].zip='' then cells[1,f]:='N/A'
       else begin

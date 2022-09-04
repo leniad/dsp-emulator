@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      m6809,m680x,namco_snd,main_engine,controls_engine,gfx_engine,
      rom_engine,pal_engine,misc_functions,sound_engine;
 
-procedure cargar_baraduke;
+function iniciar_baraduke:boolean;
 
 implementation
 const
@@ -365,6 +365,9 @@ begin
   convert_gfx(3,0,@memoria_temp,@ps_x,@ps_y,false,false);
 end;
 begin
+llamadas_maquina.bucle_general:=baraduke_principal;
+llamadas_maquina.reset:=reset_baraduke;
+llamadas_maquina.fps_max:=60.606060;
 iniciar_baraduke:=false;
 iniciar_audio(false);
 screen_init(1,288,224,true);
@@ -448,14 +451,6 @@ set_pal(colores,$800);
 //final
 reset_baraduke;
 iniciar_baraduke:=true;
-end;
-
-procedure Cargar_baraduke;
-begin
-llamadas_maquina.iniciar:=iniciar_baraduke;
-llamadas_maquina.bucle_general:=baraduke_principal;
-llamadas_maquina.reset:=reset_baraduke;
-llamadas_maquina.fps_max:=60.606060;
 end;
 
 end.

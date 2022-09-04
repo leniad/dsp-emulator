@@ -10,11 +10,9 @@ object load_dsk: Tload_dsk
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poDesigned
   OnKeyUp = FileListBox1KeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object Button1: TButton
     Left = 579

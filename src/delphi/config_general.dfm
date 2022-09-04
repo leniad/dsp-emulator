@@ -12,11 +12,9 @@ object MConfig: TMConfig
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poMainFormCenter
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object SpeedButton3: TSpeedButton
     Left = 367
@@ -87,7 +85,8 @@ object MConfig: TMConfig
           Font.Name = 'MS Sans Serif'
           Font.Style = []
           ParentFont = False
-          TabOrder = 0
+          TabOrder = 1
+          OnClick = RadioButton6Click
         end
         object RadioButton5: TRadioButton
           Left = 35
@@ -101,7 +100,8 @@ object MConfig: TMConfig
           Font.Name = 'MS Sans Serif'
           Font.Style = []
           ParentFont = False
-          TabOrder = 1
+          TabOrder = 0
+          OnClick = RadioButton5Click
         end
         object RadioButton7: TRadioButton
           Left = 35
@@ -116,6 +116,7 @@ object MConfig: TMConfig
           Font.Style = []
           ParentFont = False
           TabOrder = 2
+          OnClick = RadioButton7Click
         end
         object RadioButton8: TRadioButton
           Left = 35
@@ -130,6 +131,7 @@ object MConfig: TMConfig
           Font.Style = []
           ParentFont = False
           TabOrder = 3
+          OnClick = RadioButton8Click
         end
         object RadioButton9: TRadioButton
           Left = 35
@@ -144,6 +146,7 @@ object MConfig: TMConfig
           Font.Style = []
           ParentFont = False
           TabOrder = 4
+          OnClick = RadioButton9Click
         end
         object RadioButton10: TRadioButton
           Left = 35
@@ -158,6 +161,7 @@ object MConfig: TMConfig
           Font.Style = []
           ParentFont = False
           TabOrder = 5
+          OnClick = RadioButton10Click
         end
         object RadioButton11: TRadioButton
           Left = 35
@@ -172,14 +176,15 @@ object MConfig: TMConfig
           Font.Style = []
           ParentFont = False
           TabOrder = 6
+          OnClick = RadioButton11Click
         end
       end
       object GroupBox4: TGroupBox
         Left = 181
         Top = 13
-        Width = 203
-        Height = 147
-        Caption = 'Audio'
+        Width = 202
+        Height = 58
+        Caption = 'Sound'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -187,12 +192,12 @@ object MConfig: TMConfig
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 1
-        object RadioButton12: TRadioButton
-          Left = 40
-          Top = 27
+        object RadioButton14: TRadioButton
+          Left = 16
+          Top = 15
           Width = 121
           Height = 17
-          Caption = '11025'
+          Caption = 'Enabled'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -201,12 +206,12 @@ object MConfig: TMConfig
           ParentFont = False
           TabOrder = 0
         end
-        object RadioButton13: TRadioButton
-          Left = 40
-          Top = 51
+        object RadioButton15: TRadioButton
+          Left = 16
+          Top = 35
           Width = 121
           Height = 17
-          Caption = '22050'
+          Caption = 'Disabled'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -215,40 +220,12 @@ object MConfig: TMConfig
           ParentFont = False
           TabOrder = 1
         end
-        object RadioButton14: TRadioButton
-          Left = 40
-          Top = 75
-          Width = 121
-          Height = 17
-          Caption = '44100'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'MS Sans Serif'
-          Font.Style = []
-          ParentFont = False
-          TabOrder = 2
-        end
-        object RadioButton15: TRadioButton
-          Left = 40
-          Top = 98
-          Width = 121
-          Height = 17
-          Caption = 'No sound'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'MS Sans Serif'
-          Font.Style = []
-          ParentFont = False
-          TabOrder = 3
-        end
       end
       object GroupBox5: TGroupBox
         Left = 6
         Top = 165
         Width = 378
-        Height = 81
+        Height = 82
         Caption = 'Video'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -274,20 +251,20 @@ object MConfig: TMConfig
           TabOrder = 1
         end
         object RadioButton18: TRadioButton
-          Left = 195
-          Top = 20
+          Left = 191
+          Top = 23
           Width = 97
-          Height = 14
+          Height = 15
           Caption = 'Scanlines'
-          TabOrder = 2
+          TabOrder = 3
         end
         object RadioButton19: TRadioButton
-          Left = 195
-          Top = 40
+          Left = 191
+          Top = 46
           Width = 97
-          Height = 13
+          Height = 15
           Caption = 'Scanlines 2X'
-          TabOrder = 3
+          TabOrder = 4
         end
         object RadioButton20: TRadioButton
           Left = 35
@@ -295,14 +272,14 @@ object MConfig: TMConfig
           Width = 81
           Height = 17
           Caption = '3X'
-          TabOrder = 4
+          TabOrder = 2
         end
       end
       object GroupBox6: TGroupBox
         Left = 3
         Top = 252
-        Width = 378
-        Height = 80
+        Width = 462
+        Height = 93
         Caption = 'Misc'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -314,31 +291,41 @@ object MConfig: TMConfig
         object CheckBox2: TCheckBox
           Left = 29
           Top = 11
-          Width = 284
-          Height = 17
+          Width = 286
+          Height = 20
           TabStop = False
-          Caption = 'Arrancar driver en inicio / Load driver at start'
+          Caption = 'Arrancar driver en inicio'
           TabOrder = 0
           OnKeyUp = FormKeyUp
         end
         object CheckBox1: TCheckBox
           Left = 29
-          Top = 31
-          Width = 338
-          Height = 17
+          Top = 29
+          Width = 300
+          Height = 24
           TabStop = False
-          Caption = 'Mostar errores CRC de la ROM/Show CRC ROM errors'
+          Caption = 'Mostar errores CRC de la ROM'
           TabOrder = 1
           OnKeyUp = FormKeyUp
         end
         object CheckBox3: TCheckBox
           Left = 29
-          Top = 52
-          Width = 338
-          Height = 17
+          Top = 51
+          Width = 300
+          Height = 20
           TabStop = False
-          Caption = 'Centrar pantalla principal/Center main screen'
+          Caption = 'Centrar pantalla principal'
           TabOrder = 2
+          OnKeyUp = FormKeyUp
+        end
+        object CheckBox17: TCheckBox
+          Left = 29
+          Top = 71
+          Width = 430
+          Height = 20
+          TabStop = False
+          Caption = 'CONSOLA: Cargar juego al principio'
+          TabOrder = 3
           OnKeyUp = FormKeyUp
         end
       end
@@ -477,21 +464,21 @@ object MConfig: TMConfig
         Top = 124
         Width = 354
         Height = 21
-        TabOrder = 0
+        TabOrder = 2
       end
       object d4: TEdit
         Left = 3
         Top = 28
         Width = 354
         Height = 21
-        TabOrder = 1
+        TabOrder = 0
       end
       object d5: TEdit
         Left = 3
         Top = 76
         Width = 354
         Height = 21
-        TabOrder = 2
+        TabOrder = 1
       end
       object d2: TEdit
         Left = 3
@@ -505,14 +492,14 @@ object MConfig: TMConfig
         Top = 266
         Width = 354
         Height = 21
-        TabOrder = 4
+        TabOrder = 5
       end
       object D6: TEdit
         Left = 3
         Top = 213
         Width = 354
         Height = 21
-        TabOrder = 5
+        TabOrder = 4
       end
     end
     object TabSheet3: TTabSheet
@@ -1121,7 +1108,7 @@ object MConfig: TMConfig
         Width = 185
         Height = 209
         Caption = 'Player 1'
-        TabOrder = 0
+        TabOrder = 1
         object CheckBox4: TCheckBox
           Left = 28
           Top = 34
@@ -1163,7 +1150,7 @@ object MConfig: TMConfig
           TabOrder = 4
         end
         object CheckBox9: TCheckBox
-          Left = 28
+          Left = 31
           Top = 145
           Width = 64
           Height = 16
@@ -1177,7 +1164,7 @@ object MConfig: TMConfig
         Width = 185
         Height = 209
         Caption = 'Player 2'
-        TabOrder = 1
+        TabOrder = 2
         object CheckBox10: TCheckBox
           Left = 28
           Top = 34
@@ -1233,7 +1220,7 @@ object MConfig: TMConfig
         Width = 109
         Height = 16
         Caption = 'Enabled/Disabled'
-        TabOrder = 2
+        TabOrder = 0
         OnClick = CheckBox16Click
       end
     end

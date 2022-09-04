@@ -578,5 +578,4 @@ llamadas_maquina.cartuchos:=abrir_scv;
 llamadas_maquina.fps_max:=59.922745;
 end;
 
-
 end.

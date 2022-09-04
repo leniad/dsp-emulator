@@ -31,9 +31,7 @@ type
     NES1: TMenuItem;
     Timer1: TTimer;
     Spectrum128K1: TMenuItem;
-    N110251: TMenuItem;
-    N220501: TMenuItem;
-    N441001: TMenuItem;
+    consonido1: TMenuItem;
     BombJack1: TMenuItem;
     PacmanHW1: TMenuItem;
     Emulacion1: TMenuItem;
@@ -493,6 +491,8 @@ type
     Stargate1: TMenuItem;
     MCR1: TMenuItem;
     tapper1: TMenuItem;
+    Image2: TImage;
+    Arkanoid1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -562,6 +562,7 @@ if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
 leer_idioma;
 principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
+fix_screen_pos(415,325);
 end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
@@ -619,6 +620,8 @@ timer2.Enabled:=false;
 if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
   if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
 Child:=TfrChild.Create(application);
+child.Width:=1;
+child.Height:=1;
 principal1.Caption:=principal1.Caption+DSP_VERSION;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=$ffff;
@@ -679,23 +682,19 @@ var
   tmp_audio:byte;
 begin
 if sound_status.hay_tsonido then begin
-  if sender<>nil then tmp_audio:= Tmenuitem(sender).Tag
-    else begin
-      tmp_audio:=sound_status.calidad_audio;
-      sound_status.calidad_audio:=255;
-    end;
-  if tmp_audio<>sound_status.calidad_audio then begin
-    sound_status.calidad_audio:=tmp_audio;
-    if sound_status.calidad_audio=3 then begin
-      SinSonido1.Checked:=true;
-      sound_status.hay_sonido:=false;
-    end;
-    if sound_status.calidad_audio<>3 then begin
-      sound_status.hay_sonido:=true;
-      close_audio;
-      if sound_status.stereo then iniciar_audio(true)
-        else iniciar_audio(false);
-    end;
+  if sender<>nil then tmp_audio:=Tmenuitem(sender).Tag
+    else tmp_audio:=byte(sound_status.hay_sonido);
+  case tmp_audio of
+    0:if sound_status.hay_sonido then begin ////No sound
+        SinSonido1.Checked:=true;
+        ConSonido1.Checked:=false;
+        sound_status.hay_sonido:=false;
+      end;
+    1:if not(sound_status.hay_sonido) then begin //Sound
+        SinSonido1.Checked:=false;
+        ConSonido1.Checked:=true;
+        sound_status.hay_sonido:=true;
+      end;
   end;
 end;
 Windows.SetFocus(child.Handle);
@@ -710,11 +709,14 @@ end;
 
 procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 aboutbox.show;
 while aboutbox.Showing do application.ProcessMessages;
+principal1.Enabled:=true;
+Windows.SetFocus(child.Handle);
 timer4.Enabled:=true;
 end;
 
@@ -741,11 +743,13 @@ end;
 
 procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 FLoadRom.Show;
 while FLoadRom.Showing do application.ProcessMessages;
+principal1.Enabled:=true;
 Windows.SetFocus(child.Handle);
 end;
 
@@ -768,10 +772,13 @@ end;
 
 procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
+principal1.Enabled:=true;
+Windows.SetFocus(child.Handle);
 timer4.Enabled:=true;
 end;
 
@@ -787,11 +794,14 @@ end;
 
 procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 MConfig.Show;
 while MConfig.Showing do application.ProcessMessages;
+principal1.Enabled:=true;
+Windows.SetFocus(child.Handle);
 timer4.enabled:=true;
 end;
 
@@ -808,6 +818,7 @@ var
   JPG:TJPEGImage;
   imagen1:tbitmap;
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
@@ -820,6 +831,7 @@ if SaveRom(StBitmap,nombre,indice) then begin
   if FileExists(nombre) then begin
     r:=MessageBox(0,pointer(leng[main_vars.idioma].mensajes[3]), pointer(leng[main_vars.idioma].mensajes[6]), MB_YESNO or MB_ICONWARNING);
     if r=IDNO then begin
+      principal1.Enabled:=true;
       Windows.SetFocus(child.Handle);
       exit;
     end;
@@ -873,6 +885,8 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
+principal1.Enabled:=true;
+Windows.SetFocus(child.Handle);
 timer4.Enabled:=true;
 end;
 
@@ -919,21 +933,27 @@ end;
 
 procedure Tprincipal1.fLoadCartucho(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if @llamadas_maquina.cartuchos<>nil then
   if not(llamadas_maquina.cartuchos) then MessageDlg('ROM/Cartucho/Snapshot no valido'+chr(10)+chr(13)+'ROM/Cartrigde/Snapshot not valid',mtError,[mbOk],0);
+principal1.Enabled:=true;
+Windows.SetFocus(child.Handle);
 timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.fLoadCinta(Sender: TObject);
 begin
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if @llamadas_maquina.cintas<>nil then
   if not(llamadas_maquina.cintas) then MessageDlg('Cinta/Snapshot no valido'+chr(10)+chr(13)+'Tape/Snapshot not valid',mtError,[mbOk],0);
+principal1.Enabled:=true;
+Windows.SetFocus(child.Handle);
 timer4.Enabled:=true;
 end;
 
@@ -943,10 +963,13 @@ if (@llamadas_maquina.configurar=nil) then begin
     Windows.SetFocus(child.Handle);
     exit;
 end;
+principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 llamadas_maquina.configurar;
+principal1.Enabled:=true;
+Windows.SetFocus(child.Handle);
 timer4.Enabled:=true;
 end;
 

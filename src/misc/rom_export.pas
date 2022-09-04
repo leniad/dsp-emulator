@@ -3026,6 +3026,12 @@ const
         (n:'tapper_video_fg_3_a5_12-7-83.a5';l:$4000;p:$8000;crc:$818fffd4),(n:'tapper_video_fg_2_a6_12-7-83.a6';l:$4000;p:$c000;crc:$67e37690),
         (n:'tapper_video_fg_5_a3_12-7-83.a3';l:$4000;p:$10000;crc:$800f7c8a),(n:'tapper_video_fg_4_a4_12-7-83.a4';l:$4000;p:$14000;crc:$32674ee6),
         (n:'tapper_video_fg_7_a1_12-7-83.a1';l:$4000;p:$18000;crc:$070b4c81),(n:'tapper_video_fg_6_a2_12-7-83.a2';l:$4000;p:$1c000;crc:$a37aef36),());
+        arkanoid:array[0..9] of tipo_roms=(
+        (n:'a75-01-1.ic17';l:$8000;p:$0;crc:$5bcda3b0),(n:'a75-11.ic16';l:$8000;p:$8000;crc:$eafd7191),
+        (n:'a75__06.ic14';l:$800;p:$0;crc:$0be83647),(n:'a75-03.ic64';l:$8000;p:0;crc:$038b74ba),
+        (n:'a75-04.ic63';l:$8000;p:$8000;crc:$71fae199),(n:'a75-05.ic62';l:$8000;p:$10000;crc:$c76374e2),
+        (n:'a75-07.ic24';l:$200;p:$0;crc:$0af8b289),(n:'a75-08.ic23';l:$200;p:$200;crc:$abb002fb),
+        (n:'a75-09.ic22';l:$200;p:$400;crc:$a7c6c277),());
 
 implementation
 uses principal,init_games;

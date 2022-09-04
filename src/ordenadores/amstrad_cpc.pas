@@ -876,7 +876,8 @@ begin
   resultado:=false;
   es_cinta:=true;
   amstrad_tapes:=true;
-  if ((extension='CDT') or (extension='TZX')) then resultado:=abrir_tzx(datos,file_size);
+  if extension='CDT' then resultado:=abrir_cdt(datos,file_size);
+  if extension='TZX' then resultado:=abrir_tzx(datos,file_size);
   if extension='CSW' then resultado:=abrir_csw(datos,file_size);
   if extension='WAV' then resultado:=abrir_wav(datos,file_size);
   if extension='ROM' then begin

@@ -656,7 +656,7 @@ begin
   getmem(mapper_nes,sizeof(tnes_mapper));
   getmem(ppu_nes,sizeof(tnes_ppu));
   nes_init_palette;
-  abrir_nes;
+  if main_vars.console_init then abrir_nes;
   iniciar_nes:=true;
 end;
 
