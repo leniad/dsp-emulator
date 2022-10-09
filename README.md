@@ -1,4 +1,25 @@
 ﻿# DSP Emulator status #
+<b>09/10/22 - DSP Emulator 0.21WIP3. Updated Windows 32 and source update.<br>
+<pre>
+-General
+    +Update preview images, added images for new drivers
+    +Update SDL library to 2.24.1
+    +Added sort options in game list menu. You can sort computers, Game & Watch, consoles and arcade (and arcade subtypes sport, run & gun, shot, maze, fight and drive)
+    +CPU
+        -Konami CPU: Fixed opcodes $6f, $76 and $7e. Fixes 'The Simpsons', which it's fully playable now.
+    +Konami 052109
+        -Fixed scroll, now 'Ajax' works fine.
+-China Gate
+    +Added driver with sound
+-Side Arms
+    +Added driver with sound
+-Speed Rumbler
+    +Added driver with sound
+</pre><br>
+<img src="https://i.ibb.co/nQLhzkR/sidearms.png"> <img src="https://i.ibb.co/ZL4qdMG/chinagate.png"><br>
+<img src="https://i.ibb.co/HKM5b3X/speedrumbler.png"><br>
+<img src="https://i.ibb.co/DDZvm9x/ajax.png"> <img src="https://i.ibb.co/4J0nfrT/simpsons.png"><br>
+<img src="https://i.ibb.co/smYLSk8/sort-list.png"><br><br>
 <b>04/09/22 - DSP Emulator 0.21WIP2. Updated Windows 32 and source update. This release tries to improve general stability.<br>
 <pre>
 -DSP 0.20Final has been repacked with preview images

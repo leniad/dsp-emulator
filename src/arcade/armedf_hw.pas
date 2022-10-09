@@ -566,10 +566,10 @@ z80_0.change_io_calls(armedf_snd_in,armedf_snd_out);
 z80_0.init_sound(armedf_sound_update);
 timers.init(z80_0.numero_cpu,4000000/(4000000/512),armedf_snd_irq,nil,true);
 //Sound Chips
-if (main_vars.tipo_maquina=278) then ym3812_0:=ym3812_chip.create(YM3526_FM,4000000,0.6)
-  else ym3812_0:=ym3812_chip.create(YM3812_FM,4000000,0.6);
-dac_0:=dac_chip.create(1);
-dac_1:=dac_chip.create(1);
+if (main_vars.tipo_maquina=278) then ym3812_0:=ym3812_chip.create(YM3526_FM,4000000,0.4)
+  else ym3812_0:=ym3812_chip.create(YM3812_FM,4000000,0.4);
+dac_0:=dac_chip.create(2);
+dac_1:=dac_chip.create(2);
 irq_level:=1;
 sprite_offset:=$80;
 calc_pos_txt:=calc_pos_terraf;

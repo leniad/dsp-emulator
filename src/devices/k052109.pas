@@ -271,76 +271,48 @@ end;
 
 procedure k052109_chip.calc_scroll_1;
 var
-  xscroll,yscroll,offs:word;
+  offs:byte;
 begin
 if ((self.scrollctrl and $03)=$02) then begin
-    yscroll:=self.ram[$180c];
-		self.scroll_y[1,0]:=yscroll;
-		for offs:=0 to $ff do begin
-			xscroll:=self.ram[$1a00+(2*(offs and $fff8))]+256*self.ram[$1a00+(2*(offs and $fff8)+1)];
-			xscroll:=xscroll-6;
-      self.scroll_x[1,(offs+yscroll) and $ff]:=xscroll;
-		end;
-    self.scroll_tipo[1]:=0;
-	end else if ((self.scrollctrl and $03)=$03) then begin
-		yscroll:=self.ram[$180c];
-		self.scroll_y[1,0]:=yscroll;
-		for offs:=0 to $ff do begin
-			xscroll:=self.ram[$1a00+(2*offs)]+256*self.ram[$1a00+(2*offs+1)];
-			xscroll:=xscroll-6;
-      self.scroll_x[1,(offs+yscroll) and $ff]:=xscroll;
-		end;
-    self.scroll_tipo[1]:=1;
-	end else if ((self.scrollctrl and $04)=$04) then begin
-		xscroll:=(self.ram[$1a00]+256*self.ram[$1a01])-6;
-    self.scroll_x[1,0]:=xscroll;
-		for offs:=0 to 511 do begin
-			yscroll:=self.ram[$1800+(offs div 8)];
-      self.scroll_y[1,(offs+xscroll) and $1ff]:=yscroll;
-		end;
-    self.scroll_tipo[1]:=2;
-	end else begin
-    self.scroll_x[1,0]:=(self.ram[$1a00]+(self.ram[$1a01] shl 8))-6;
 		self.scroll_y[1,0]:=self.ram[$180c];
-    self.scroll_tipo[1]:=3;
-	end;
+		for offs:=0 to $1f do self.scroll_x[1,offs]:=(self.ram[$1a00+(2*(offs and $fff8))]+256*self.ram[$1a00+(2*(offs and $fff8)+1)])-6;
+    self.scroll_tipo[1]:=0;
+	    end else if ((self.scrollctrl and $03)=$03) then begin
+		        self.scroll_y[1,0]:=self.ram[$180c];
+		        for offs:=0 to $ff do self.scroll_x[1,offs]:=(self.ram[$1a00+(2*offs)]+256*self.ram[$1a00+(2*offs+1)])-6;
+            self.scroll_tipo[1]:=1;
+          end else if ((self.scrollctrl and $04)=$04) then begin
+              self.scroll_x[1,0]:=(self.ram[$1a00]+256*self.ram[$1a01])-6;
+		          for offs:=0 to $3f do self.scroll_y[1,offs]:=self.ram[$1800+offs];
+              self.scroll_tipo[1]:=2;
+	          end else begin
+                  self.scroll_x[1,0]:=(self.ram[$1a00]+(self.ram[$1a01] shl 8))-6;
+		              self.scroll_y[1,0]:=self.ram[$180c];
+                  self.scroll_tipo[1]:=3;
+	              end;
 end;
 
 procedure k052109_chip.calc_scroll_2;
 var
-  xscroll,yscroll,offs:word;
+  offs:byte;
 begin
 if ((self.scrollctrl and $18)=$10) then begin
-    yscroll:=self.ram[$380c];
-		self.scroll_y[2,0]:=yscroll;
-		for offs:=0 to $ff do begin
-			xscroll:=self.ram[$3a00+(2*(offs and $fff8))]+256*self.ram[$3a00+(2*(offs and $fff8)+1)];
-			xscroll:=xscroll-6;
-      self.scroll_x[2,(offs+yscroll) and $ff]:=xscroll;
-		end;
+		self.scroll_y[2,0]:=self.ram[$380c];
+		for offs:=0 to $1f do self.scroll_x[2,offs]:=(self.ram[$3a00+(2*(offs and $fff8))]+256*self.ram[$3a00+(2*(offs and $fff8)+1)])-6;
     self.scroll_tipo[2]:=0;
 	end else if ((self.scrollctrl and $18)=$18) then begin
-    yscroll:=self.ram[$380c];
-		self.scroll_y[2,0]:=yscroll;
-		for offs:=0 to $ff do begin
-			xscroll:=self.ram[$3a00+(2*offs)]+256*self.ram[$3a00+(2*offs+1)];
-			xscroll:=xscroll-6;
-      self.scroll_x[2,(offs+yscroll) and $ff]:=xscroll;
-		end;
-    self.scroll_tipo[2]:=1;
-	end else if ((self.scrollctrl and $20)=$20) then begin
-    xscroll:=(self.ram[$3a00]+256*self.ram[$3a01])-6;
-    self.scroll_x[2,0]:=xscroll;
-		for offs:=0 to 511 do begin
-			yscroll:=self.ram[$3800+(offs div 8)];
-      self.scroll_y[2,(offs+xscroll) and $1ff]:=yscroll;
-		end;
-    self.scroll_tipo[2]:=2;
-	end else begin
-    self.scroll_x[2,0]:=(self.ram[$3a00]+(self.ram[$3a01] shl 8))-6;
-		self.scroll_y[2,0]:=self.ram[$380c];
-    self.scroll_tipo[2]:=3;
-	end;
+		    self.scroll_y[2,0]:=self.ram[$380c];
+		    for offs:=0 to $ff do self.scroll_x[2,offs]:=(self.ram[$3a00+(2*offs)]+256*self.ram[$3a00+(2*offs+1)])-6;
+        self.scroll_tipo[2]:=1;
+	    end else if ((self.scrollctrl and $20)=$20) then begin
+            self.scroll_x[2,0]:=(self.ram[$3a00]+256*self.ram[$3a01])-6;
+		        for offs:=0 to $3f do self.scroll_y[2,offs]:=self.ram[$3800+offs];
+            self.scroll_tipo[2]:=2;
+	        end else begin
+                self.scroll_x[2,0]:=(self.ram[$3a00]+(self.ram[$3a01] shl 8))-6;
+		            self.scroll_y[2,0]:=self.ram[$380c];
+                self.scroll_tipo[2]:=3;
+	            end;
 end;
 
 procedure k052109_chip.recalc_chars(num:dword);
@@ -368,8 +340,9 @@ case layer of
   0:actualiza_trozo(0,0,512,256,self.pant[0],0,0,512,256,final_screen); //Esta es fija
   1,2:begin
       case self.scroll_tipo[layer] of
-        0,1:scroll__x_part2(self.pant[layer],final_screen,1,@self.scroll_x[layer,0]);
-        2:scroll__y_part2(self.pant[layer],final_screen,1,@self.scroll_y[layer,0]);
+        0:scroll__x_part2(self.pant[layer],final_screen,8,@self.scroll_x[layer,0],0,self.scroll_y[layer,0]);
+        1:scroll__x_part2(self.pant[layer],final_screen,1,@self.scroll_x[layer,0],0,self.scroll_y[layer,0]);
+        2:scroll__y_part2(self.pant[layer],final_screen,8,@self.scroll_y[layer],self.scroll_x[layer,0]);
         3:scroll_x_y(self.pant[layer],final_screen,self.scroll_x[layer,0],self.scroll_y[layer,0]);
       end;
     end;

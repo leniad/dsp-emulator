@@ -445,6 +445,8 @@ begin
 	end; //Color_emphasis
   set_pal(colores,64);
 	// color tables are modified at run-time, and are initialized on 'ppu2c0x_reset' */
+  fill_full_screen(PANT_TEMP,$100);
+  actualiza_video;
 end;
 
 end.

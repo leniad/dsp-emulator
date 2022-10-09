@@ -68,6 +68,7 @@ case direccion of
   $c000..$ffff:memoria[$c000+(direccion and $1fff)]:=valor;
 end;
 end;
+
 function sg_inbyte(puerto:word):byte;
 begin
   sg_inbyte:=$ff;
@@ -87,6 +88,7 @@ begin
     $dc,$df:; //mandos
   end;
 end;
+
 procedure sg_interrupt(int:boolean);
 begin
   if int then z80_0.change_irq(ASSERT_LINE)
@@ -142,6 +144,7 @@ begin
   end;
   //Abrirlo
   extension:=extension_fichero(nombre_file);
+  if longitud>49152 then longitud:=49152;
   if extension='SG' then copymemory(@memoria,datos,longitud);
   ram_8k:=false;
   mid_8k_ram:=false;
@@ -162,9 +165,7 @@ begin
   freemem(datos);
 end;
 
-
 function iniciar_sg:boolean;
-
 begin
 iniciar_sg:=false;
 iniciar_audio(false);
@@ -184,7 +185,6 @@ reset_sg;
 if main_vars.console_init then abrir_sg;
 iniciar_sg:=true;
 end;
-
 
 procedure cargar_sg;
 begin

@@ -68,16 +68,16 @@ const
 
 constructor cpu_konami.create(clock:dword;frames_div:word);
 begin
-getmem(self.r,sizeof(reg_m6809));
-fillchar(self.r^,sizeof(reg_m6809),0);
-self.numero_cpu:=cpu_main_init(clock);
-self.clock:=clock;
-self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
+  getmem(self.r,sizeof(reg_m6809));
+  fillchar(self.r^,sizeof(reg_m6809),0);
+  self.numero_cpu:=cpu_main_init(clock);
+  self.clock:=clock;
+  self.tframes:=(clock/frames_div)/llamadas_maquina.fps_max;
 end;
 
 procedure cpu_konami.change_set_lines(tset_lines_call:tset_lines);
 begin
-     self.set_lines_call:=tset_lines_call;
+  self.set_lines_call:=tset_lines_call;
 end;
 
 function cpu_konami.call_irq:byte;
@@ -507,20 +507,20 @@ case instruccion of
      $6b:if not(r.cc.z) then r.pc:=r.pc+smallint(posicion); //lbne 3T
      $6d:if not(r.cc.n) then r.pc:=r.pc+smallint(posicion); //lbpl 3T
      $6e:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+smallint(posicion);//lbge 3T
-     $6f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+smallint(posicion); //lbgt 3T
+     $6f:if ((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+smallint(posicion); //lbgt 3T
      $70:; //brn 3T
      $71:if (r.cc.c or r.cc.z) then r.pc:=r.pc+shortint(numero); //bls 3T
      $72:if r.cc.c then r.pc:=r.pc+shortint(numero); //bcs 3T
      $73:if r.cc.z then r.pc:=r.pc+shortint(numero); //beq 3T
      $75:if r.cc.n then r.pc:=r.pc+shortint(numero); //bmi 3T
-     $76:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//blt 3T
+     $76:if not(not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+shortint(numero);//blt 3T
      $77:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+shortint(numero); //ble 3T
      $78:; //lbrn 3T
      $79:if (r.cc.c or r.cc.z) then r.pc:=r.pc+smallint(posicion); //lbls 3T
      $7a:if r.cc.c then r.pc:=r.pc+smallint(posicion); //lbcs 3T
      $7b:if r.cc.z then r.pc:=r.pc+smallint(posicion); //lbeq 3T
      $7d:if r.cc.n then r.pc:=r.pc+smallint(posicion); //lbmi 3T
-     $7e:if (not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+smallint(posicion);//lblt 3T
+     $7e:if not(not(r.cc.n)=not(r.cc.v)) then r.pc:=r.pc+smallint(posicion);//lblt 3T
      $7f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then r.pc:=r.pc+smallint(posicion); //lble 3T
      $80:begin //clra 2T
             r.d.a:=0;

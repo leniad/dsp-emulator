@@ -267,6 +267,7 @@ type
     flower1: TMenuItem;
     Joust1: TMenuItem;
     MenuItem45: TMenuItem;
+    arkanoid1: TMenuItem;
     tapper1: TMenuItem;
     robotron1: TMenuItem;
     stargate1: TMenuItem;

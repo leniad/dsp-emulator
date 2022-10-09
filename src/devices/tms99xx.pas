@@ -586,7 +586,7 @@ begin
         end else begin
             tms.color:=(val*64) and TMS9918A_VRAM_SIZE;
         end;
-		    tms.patternmask:=(tms.Regs[4] and 3)*256 or (tms.colormask and 255);
+		    //tms.patternmask:=(tms.Regs[4] and 3)*256 or (tms.colormask and 255);
        end;
      4:if (tms.Regs[0] and 2)<>0 then begin
             tms.pattern:=((val and 4)*2048) and TMS9918A_VRAM_SIZE;
@@ -597,18 +597,18 @@ begin
      5:tms.spriteattribute:=(val*128) and TMS9918A_VRAM_SIZE;
      6:tms.spritepattern:=(val*2048) and TMS9918A_VRAM_SIZE;
      7: begin
-       tms.fgcolor:=val shr 4;
-       if tms.bgcolor<>(val and $f) then begin
-          tms.bgcolor:=(val and $f);
-          if tms.bgcolor=0 then paleta[0]:=0
-            else paleta[0]:=paleta[tms.bgcolor];
-          //El color de fondo es transparente. La pantalla se pinta
-          //de la siguiente forma: primero todo el fondo (incluido el borde),
-          //despues los chars, y por ultimo los sprites.
-          //Si hay char con el color 0, es transparente. Yo pongo el color 0
-          //igual que el fondo y emulo el color transparente!
-       end;
-     end;
+          tms.fgcolor:=val shr 4;
+          if tms.bgcolor<>(val and $f) then begin
+            tms.bgcolor:=(val and $f);
+            if tms.bgcolor=0 then paleta[0]:=0
+              else paleta[0]:=paleta[tms.bgcolor];
+            //El color de fondo es transparente. La pantalla se pinta
+            //de la siguiente forma: primero todo el fondo (incluido el borde),
+            //despues los chars, y por ultimo los sprites.
+            //Si hay char con el color 0, es transparente. Yo pongo el color 0
+            //igual que el fondo y emulo el color transparente!
+          end;
+        end;
   end;
 end;
 

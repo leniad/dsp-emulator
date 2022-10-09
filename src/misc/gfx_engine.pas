@@ -1,8 +1,11 @@
 ﻿unit gfx_engine;
 {$ifdef fpc}{$asmmode intel}{$endif}
+
 interface
+
 uses lib_sdl2,{$IFDEF windows}windows,{$ENDIF}
      pal_engine,vars_hide;
+
 const
   MAX_GFX=8;
   ADD_SPRITE=64;
@@ -24,6 +27,7 @@ var
   gfx:array[0..MAX_GFX-1] of gfx_tipo;
   buffer_sprites:array[0..$1fff] of byte;
   buffer_sprites_w:array[0..$fff] of word;
+
 //GFX
 procedure init_gfx(num,x_size,y_size:byte;num_elements:dword);
 procedure convert_gfx(num_gfx:byte;increment:dword;SpriteRom:pbyte;cx,cy:pdword;rot90,rol90:boolean);
@@ -74,8 +78,10 @@ procedure fill_full_screen(screen:byte;color:word);inline;
 procedure putpixel_gfx_int(x,y,cantidad:word;sitio:byte);inline;
 //Misc
 procedure fillword(dest:pword;cantidad:cardinal;valor:word);
+
 implementation
 uses main_engine;
+
 //GFX
 procedure gfx_set_desc_data(bits_pixel,banks:byte;size,p0:dword;p1:dword=0;p2:dword=0;p3:dword=0;p4:dword=0;p5:dword=0;p6:dword=0;p7:dword=0);
 begin

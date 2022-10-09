@@ -493,6 +493,9 @@ type
     tapper1: TMenuItem;
     Image2: TImage;
     Arkanoid1: TMenuItem;
+    SideArms1: TMenuItem;
+    SpeedRumbler1: TMenuItem;
+    ChinaGate1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);

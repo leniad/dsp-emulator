@@ -331,7 +331,10 @@ uses
   sega_pcm in '..\snd\sega_pcm.pas',
   blitter_williams in '..\arcade\misc\blitter_williams.pas',
   mcr_hw in '..\arcade\mcr_hw.pas',
-  arkanoid_hw in '..\arcade\arkanoid_hw.pas';
+  arkanoid_hw in '..\arcade\arkanoid_hw.pas',
+  sidearms_hw in '..\arcade\sidearms_hw.pas',
+  speedrumbler_hw in '..\arcade\speedrumbler_hw.pas',
+  chinagate_hw in '..\arcade\chinagate_hw.pas';
 
 {$R *.res}
 begin
@@ -346,11 +349,11 @@ begin
   Application.CreateForm(TConfigSP, ConfigSP);
   Application.CreateForm(TAboutBox, AboutBox);
   Application.CreateForm(Tload_dsk, load_dsk);
-  Application.CreateForm(TFLoadRom, FLoadRom);
   Application.CreateForm(Tconfig_arcade, config_arcade);
   Application.CreateForm(Tjoy_calibration, joy_calibration);
   Application.CreateForm(TSMSConfig, SMSConfig);
   Application.CreateForm(TConfigCPC, ConfigCPC);
   Application.CreateForm(Tconfiggb, configgb);
+  Application.CreateForm(TFLoadRom, FLoadRom);
   Application.Run;
 end.

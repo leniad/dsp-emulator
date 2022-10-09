@@ -228,7 +228,7 @@ end;
 procedure cpu_m6809.reset;
 begin
 self.opcode:=false;
-r.pc:=self.getword($FFFE);
+r.pc:=self.getword($fffe);
 r.dp:=0;
 self.contador:=0;
 self.pon_pila($50);
@@ -259,7 +259,7 @@ end;
 procedure cpu_m6809.push_sw(reg:word);
 begin
 r.s:=r.s-2;
-self.putbyte(r.s+1,reg and $FF);
+self.putbyte(r.s+1,reg and $ff);
 self.putbyte(r.s,(reg shr 8));
 end;
 
@@ -288,7 +288,7 @@ end;
 procedure cpu_m6809.push_uw(reg:word);
 begin
 r.u:=r.u-2;
-self.putbyte(r.u+1,reg and $FF);
+self.putbyte(r.u+1,reg and $ff);
 self.putbyte(r.u,(reg shr 8));
 end;
 
@@ -324,7 +324,7 @@ end else begin
 end;
 r.cc.i:=true;
 r.cc.f:=true;
-r.pc:=self.getword($FFFC);
+r.pc:=self.getword($fffc);
 if (self.pedir_nmi=PULSE_LINE) then self.pedir_nmi:=CLEAR_LINE;
 if (self.pedir_nmi=ASSERT_LINE) then self.nmi_state:=ASSERT_LINE;
 end;
@@ -346,7 +346,7 @@ end else begin
   self.push_s(self.dame_pila);
   call_irq:=19;
 end;
-r.pc:=self.getword($FFF8);
+r.pc:=self.getword($fff8);
 r.cc.i:=true;
 if self.pedir_irq=HOLD_LINE then self.pedir_irq:=CLEAR_LINE;
 end;
@@ -364,7 +364,7 @@ end else begin
 end;
 r.cc.f:=true;
 r.cc.i:=true;
-r.pc:=self.getword($FFF6);
+r.pc:=self.getword($fff6);
 if self.pedir_firq=HOLD_LINE then self.pedir_firq:=CLEAR_LINE;
 end;
 

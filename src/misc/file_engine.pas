@@ -120,6 +120,7 @@ if fileexists(directory.Base+'dsp.ini') then begin
   main_vars.show_crc_error:=(fich_ini.ReadInteger('dsp','show_crc_error',1)=1);
   main_vars.center_screen:=(fich_ini.ReadInteger('dsp','center_screen',1)=1);
   main_vars.console_init:=(fich_ini.ReadInteger('dsp','console_init',0)=1);
+  main_vars.sort:=fich_ini.ReadInteger('dsp','sort',0);
   //configuracion spectrum
   var_spectrum.issue2:=(fich_ini.ReadInteger('spectrum','issue',0)=0);
   var_spectrum.tipo_joy:=fich_ini.ReadInteger('spectrum','joystick',0);
@@ -239,6 +240,7 @@ end else begin
   main_vars.show_crc_error:=true;
   main_vars.center_screen:=true;
   main_vars.console_init:=true;
+  main_vars.sort:=0;
   //configuracion basica spectrum
   var_spectrum.audio_128k:=0;
   var_spectrum.audio_load:=true;
@@ -404,6 +406,7 @@ fich_ini.WriteInteger('dsp','auto_exec',byte(main_vars.auto_exec));
 fich_ini.WriteInteger('dsp','show_crc_error',byte(main_vars.show_crc_error));
 fich_ini.WriteInteger('dsp','center_screen',byte(main_vars.center_screen));
 fich_ini.WriteInteger('dsp','console_init',byte(main_vars.console_init));
+fich_ini.WriteInteger('dsp','sort',main_vars.sort);
 //Config Spectrum
 fich_ini.WriteInteger('spectrum','issue',byte(var_spectrum.issue2));
 fich_ini.WriteInteger('spectrum','joystick',var_spectrum.tipo_joy);

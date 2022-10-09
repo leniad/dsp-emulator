@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.21WIP2';
+        DSP_VERSION='0.21WIP3';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -35,6 +35,7 @@ type
             idioma:integer;
             vactual:byte;
             service1,driver_ok,auto_exec,show_crc_error,center_screen,console_init:boolean;
+            sort:word;
         end;
         TDirectory=record
             Base:string;
@@ -104,6 +105,7 @@ procedure pasar_pantalla_completa;
 procedure screen_init(num:byte;x,y:word;trans:boolean=false;final_mix:boolean=false;alpha:boolean=false);
 procedure screen_mod_scroll(num:byte;long_x,max_x,mask_x,long_y,max_y,mask_y:word);
 procedure screen_mod_sprites(num:byte;sprite_end_x,sprite_end_y,sprite_mask_x,sprite_mask_y:word);
+procedure actualiza_video;
 //Update final screen
 procedure actualiza_trozo(o_x1,o_y1,o_x2,o_y2:word;sitio:byte;d_x1,d_y1,d_x2,d_y2:word;dest:byte);
 procedure actualiza_trozo_final(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);

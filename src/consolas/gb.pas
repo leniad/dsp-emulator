@@ -961,7 +961,7 @@ while EmuStatus=EsRuning do begin
   end;
   window_y_draw:=0;
   eventos_gb;
-  actualiza_trozo(7,0,160,144,2,0,0,160,144,pant_temp);
+  actualiza_trozo(7,0,160,144,2,0,0,160,144,PANT_TEMP);
   video_sync;
 end;
 end;
@@ -1503,6 +1503,8 @@ gameboy_sound_ini(FREQ_BASE_AUDIO);
 hay_nvram:=false;
 //final
 getmem(gb_head,sizeof(tgb_head));
+fill_full_screen(PANT_TEMP,$100);
+actualiza_video;
 if main_vars.console_init then abrir_gb;
 iniciar_gb:=true;
 end;

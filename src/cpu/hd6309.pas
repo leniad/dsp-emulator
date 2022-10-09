@@ -64,7 +64,7 @@ type
         end;
 
 var
-    hd6309_0:cpu_hd6309;
+    hd6309_0,hd6309_1:cpu_hd6309;
 
 const
     TCPU_HD6309=0;

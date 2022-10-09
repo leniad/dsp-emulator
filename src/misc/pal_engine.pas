@@ -6,7 +6,7 @@ uses {$IFDEF windows}windows,{$ENDIF}lib_sdl2;
 const
     MAX_NETS=3;
     MAX_RES_PER_NET=18;
-    SET_TRANS_COLOR=$FEF7;
+    SET_TRANS_COLOR=$69; //:-)
     MAX_COLORES=$8000;
 type
   tcolor=record
