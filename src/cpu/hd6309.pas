@@ -700,15 +700,15 @@ case instruccion of
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $2c:if (not(r.cc.n)=not(r.cc.v)) then begin //bge
+                $2c:if (r.cc.n=r.cc.v) then begin //bge
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $2d:if not(not(r.cc.n)=not(r.cc.v)) then begin //bnge
+                $2d:if not(r.cc.n=r.cc.v) then begin //bnge
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;
-                $2f:if not((not(r.cc.n)=not(r.cc.v)) and not(r.cc.z)) then begin //ble
+                $2f:if not((r.cc.n=r.cc.v) and not(r.cc.z)) then begin //ble
                       r.pc:=r.pc+smallint(posicion);
                       self.estados_demas:=self.estados_demas+1;
                     end;

@@ -117,6 +117,8 @@ var
   f,h,pos:word;
 begin
 BitBtn1.Caption:=leng[main_vars.idioma].mensajes[8];
+romlist.ColWidths[0]:=romlist.Width-90;
+romlist.ColWidths[1]:=86;
 romlist.ColWidths[2]:=-1;
 romlist.Visible:=true;
 romlist.Cells[0,0]:='Driver Name';
@@ -146,7 +148,7 @@ case main_vars.sort of
       CheckBox5.Checked:=(main_vars.sort and $100)<>0;
       CheckBox6.Checked:=(main_vars.sort and $200)<>0;
       //El orden es importante!!
-      RadioButton5.Checked:=true;
+      radiobutton5.checked:=true;
     end;
 end;
 //Muestro la imagen
@@ -175,6 +177,7 @@ var
   test:string;
   numero:integer;
 begin
+romlist.RowCount:=cantidad+1; //Hay que cotar las de arriba!!!
 numero:=orden_games[f];
 RomList.cells[2,cantidad]:=inttostr(numero);
 if ((GAMES_DESC[numero].grid>1999) and (GAMES_DESC[numero].grid<3000)) then RomList.Cells[0,cantidad]:=GAMES_DESC[numero].name+' - Game & Watch'
@@ -201,7 +204,6 @@ with RomList do begin
       else if (GAMES_DESC[orden_games[f]].tipo and sort)<>0 then poner;
   end;
 end;
-romlist.RowCount:=cantidad;
 for f:=1 to cantidad-1 do begin
     if main_vars.tipo_maquina=GAMES_DESC[strtoint(RomList.cells[2,f])].grid then begin
       myRect.Left:=0;

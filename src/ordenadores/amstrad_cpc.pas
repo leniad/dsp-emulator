@@ -1130,11 +1130,8 @@ z80_0.change_misc_calls(amstrad_despues_instruccion,amstrad_raised_z80,amstrad_m
 z80_0.init_sound(amstrad_sound_update);
 tape_sound_channel:=init_channel;
 tape_timer:=timers.init(z80_0.numero_cpu,100,tape_timer_exec,nil,false);
-//El CPC lee el teclado el puerto A del AY, pero el puerto B esta unido al A
-//por lo que hay programas que usan el B!!! (Bestial Warrior por ejemplo)
-//Esto tengo que revisarlo
-ay8910_0:=ay8910_chip.create(1000000,AY8910,1);
-ay8910_0.change_io_calls(cpc_porta_read,cpc_porta_read,nil,nil);
+ay8910_0:=ay8910_chip.create(1000000,AY8912,1);
+ay8910_0.change_io_calls(cpc_porta_read,nil,nil,nil);
 pia8255_0:=pia8255_chip.create;
 pia8255_0.change_ports(port_a_read,port_b_read,nil,port_a_write,nil,port_c_write);
 //m6845_0:=chip_m6845.create(HD6845S,cpc_bus_cycle1,cpc_bus_cycle2);

@@ -50,6 +50,7 @@ type
     CheckBox14: TCheckBox;
     CheckBox15: TCheckBox;
     CheckBox16: TCheckBox;
+    CheckBox17: TCheckBox;
     CheckBox9: TCheckBox;
     CheckBox2: TCheckBox;
     CheckBox3: TCheckBox;
@@ -80,6 +81,8 @@ type
     D4: TEdit;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
+    GroupBox4: TGroupBox;
     GroupBox6: TGroupBox;
     GroupBox7: TGroupBox;
     GroupBox8: TGroupBox;
@@ -122,14 +125,12 @@ type
     RadioButton22: TRadioButton;
     RadioButton3: TRadioButton;
     RadioButton4: TRadioButton;
+    GroupBox5: TRadioGroup;
     RadioButton5: TRadioButton;
     RadioButton6: TRadioButton;
     RadioButton7: TRadioButton;
     RadioButton8: TRadioButton;
     RadioButton9: TRadioButton;
-    RadioGroup1: TRadioGroup;
-    RadioGroup2: TRadioGroup;
-    GroupBox5: TRadioGroup;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     TabSheet3: TTabSheet;
@@ -169,12 +170,20 @@ type
     procedure ComboBox1Change(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
+    procedure RadioButton10Click(Sender: TObject);
+    procedure RadioButton11Click(Sender: TObject);
     procedure RadioButton1Click(Sender: TObject);
     procedure RadioButton21Change(Sender: TObject);
     procedure RadioButton22Change(Sender: TObject);
     procedure RadioButton2Click(Sender: TObject);
     procedure RadioButton3Click(Sender: TObject);
     procedure RadioButton4Click(Sender: TObject);
+    procedure RadioButton5Change(Sender: TObject);
+    procedure RadioButton5Click(Sender: TObject);
+    procedure RadioButton6Click(Sender: TObject);
+    procedure RadioButton7Click(Sender: TObject);
+    procedure RadioButton8Click(Sender: TObject);
+    procedure RadioButton9Click(Sender: TObject);
   private
     { private declarations }
   public
@@ -616,6 +625,19 @@ begin
   end;
 end;
 
+procedure cambiar_texto_idioma(idioma:byte);
+begin
+MConfig.GroupBox3.Caption:=leng[idioma].archivo[1];
+MConfig.button2.Caption:=leng[idioma].mensajes[8];
+MConfig.checkbox2.Caption:=leng[idioma].varios[2];
+MConfig.checkbox1.Caption:=leng[idioma].varios[3];
+MConfig.checkbox3.Caption:=leng[idioma].varios[4];
+MConfig.checkbox17.Caption:=leng[idioma].varios[5];
+MConfig.radiobutton15.Caption:=leng[idioma].opciones[3];
+MConfig.radiobutton14.Caption:=leng[idioma].opciones[5];
+MConfig.groupbox4.Caption:=leng[idioma].opciones[1];
+end;
+
 procedure TMConfig.FormShow(Sender: TObject);
 var
   f:byte;
@@ -637,8 +659,7 @@ begin
     extract_joy_name:=cadena;
 end;
 begin
-  radiogroup1.Caption:=leng[main_vars.idioma].archivo[1];
-  button2.Caption:=leng[main_vars.idioma].mensajes[8];
+  cambiar_texto_idioma(main_vars.idioma);
   //idioma
   case main_vars.idioma of
     0:radiobutton5.Checked:=true;
@@ -650,7 +671,6 @@ begin
     6:radiobutton11.Checked:=true;
   end;
   //audio
-  radiobutton15.Caption:=leng[main_vars.idioma].opciones[3];
   if sound_status.hay_sonido then radiobutton14.Checked:=true
     else radiobutton15.Checked:=true;
   //video
@@ -763,14 +783,14 @@ begin
       combobox10.Visible:=true;
       combobox11.Visible:=true;
       bitbtn7.enabled:=true;
-      if SDL_JoystickNumHats(joystick_def[0])<>0 then begin
+      {if SDL_JoystickNumHats(joystick_def[0])<>0 then begin
         radiobutton21.Enabled:=true;
         radiobutton22.Enabled:=true;
       end else begin
         radiobutton21.Enabled:=false;
         radiobutton22.Enabled:=true;
         radiobutton22.Checked:=true;
-      end;
+      end;}
     end;
     radiobutton4.enabled:=true;
     if arcade_input.use_key[1] then begin
@@ -919,6 +939,16 @@ begin
   button6.Caption:=nombre_tecla(arcade_input.nstart[1]);
 end;
 
+procedure TMConfig.RadioButton10Click(Sender: TObject);
+begin
+  cambiar_texto_idioma(5);
+end;
+
+procedure TMConfig.RadioButton11Click(Sender: TObject);
+begin
+  cambiar_texto_idioma(6);
+end;
+
 procedure TMConfig.RadioButton1Click(Sender: TObject);
 begin
   bitbtn1.Enabled:=true;
@@ -939,8 +969,8 @@ begin
   combobox10.Visible:=false;
   combobox11.Visible:=false;
   button7.Enabled:=false;
-  radiobutton21.Enabled:=false;
-  radiobutton22.Enabled:=false;
+  //radiobutton21.Enabled:=false;
+  //radiobutton22.Enabled:=false;
 end;
 
 procedure TMConfig.RadioButton21Change(Sender: TObject);
@@ -973,14 +1003,14 @@ begin
   combobox10.Visible:=true;
   combobox11.Visible:=true;
   button7.Enabled:=true;
-  if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
+  {if SDL_JoystickNumHats(joystick_def[arcade_input.num_joystick[0]])<>0 then begin
     radiobutton21.Enabled:=true;
     radiobutton22.Enabled:=true;
   end else begin
     radiobutton21.Enabled:=false;
     radiobutton22.Enabled:=true;
     radiobutton22.Checked:=true;
-  end;
+  end;}
 end;
 
 procedure TMConfig.RadioButton3Click(Sender: TObject);
@@ -1023,6 +1053,36 @@ begin
   combobox13.Visible:=true;
   combobox14.Visible:=true;
   button8.Enabled:=true;
+end;
+
+procedure TMConfig.RadioButton5Change(Sender: TObject);
+begin
+
+end;
+
+procedure TMConfig.RadioButton5Click(Sender: TObject);
+begin
+  cambiar_texto_idioma(0);
+end;
+
+procedure TMConfig.RadioButton6Click(Sender: TObject);
+begin
+  cambiar_texto_idioma(1);
+end;
+
+procedure TMConfig.RadioButton7Click(Sender: TObject);
+begin
+  cambiar_texto_idioma(2);
+end;
+
+procedure TMConfig.RadioButton8Click(Sender: TObject);
+begin
+  cambiar_texto_idioma(3);
+end;
+
+procedure TMConfig.RadioButton9Click(Sender: TObject);
+begin
+  cambiar_texto_idioma(4);
 end;
 
 initialization

@@ -1,10 +1,14 @@
 unit nemesis_hw;
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ay_8910,vlm_5030,k005289,ym_2151,k007232;
-procedure cargar_nemesis;
+
+function iniciar_nemesis:boolean;
+
 implementation
+
 type
   tipo_sprite=record
                 width,height,char_type:byte;
@@ -74,7 +78,7 @@ var
  xscroll_1,xscroll_2:array[0..$1ff] of word;
  yscroll_1,yscroll_2:array[0..$3f] of word;
  video1_ram,video2_ram,color1_ram,color2_ram,sprite_ram:array[0..$7ff] of word;
- screen_par,irq_on,irq2_on,irq4_on,flipx_char,flipy_char:boolean;
+ screen_par,irq_on,irq2_on,irq4_on,flipx_scr,flipy_scr,changed_chr:boolean;
  sound_latch,linea:byte;
  k007232_1_rom:pbyte;
  //char buffer
@@ -84,6 +88,7 @@ var
  char_8_16:array[0..$3ff] of boolean;
  char_32_32:array[0..$7f] of boolean;
  char_64_64:array[0..$1f] of boolean;
+
 procedure char_calc;
 var
   f:word;
@@ -91,44 +96,46 @@ begin
   //8x8 char
   gfx_set_desc_data(4,0,4*8*8,0,1,2,3);
   for f:=0 to $7ff do if char_8_8[f] then begin
-    convert_gfx_single(0,0,@char_ram,@char_x,@char_8_y,flipx_char,flipy_char,f);
+    convert_gfx_single(0,0,@char_ram,@char_x,@char_8_y,false,false,f);
     char_8_8[f]:=false;
   end;
   //16x16
   gfx_set_desc_data(4,1,4*16*16,0,1,2,3);
   for f:=0 to $1ff do if char_16_16[f] then begin
-    convert_gfx_single(1,0,@char_ram,@char_x,@char_16_y,flipx_char,flipy_char,f);
+    convert_gfx_single(1,0,@char_ram,@char_x,@char_16_y,false,false,f);
     char_16_16[f]:=false;
   end;
   //32x16 y 16x32
   gfx_set_desc_data(4,2,4*32*16,0,1,2,3);
-  for f:=0 to $ff do if char_32_16[f] then convert_gfx_single(2,0,@char_ram,@char_x,@char_32_y,flipx_char,flipy_char,f);
+  for f:=0 to $ff do if char_32_16[f] then convert_gfx_single(2,0,@char_ram,@char_x,@char_32_y,false,false,f);
   gfx_set_desc_data(4,5,4*16*32,0,1,2,3);
   for f:=0 to $ff do if char_32_16[f] then begin
-      convert_gfx_single(5,0,@char_ram,@char_x,@char_16_y,flipx_char,flipy_char,f);
+      convert_gfx_single(5,0,@char_ram,@char_x,@char_16_y,false,false,f);
       char_32_16[f]:=false;
   end;
   //8x16 y 16x8
   gfx_set_desc_data(4,3,4*8*16,0,1,2,3);
-  for f:=0 to $3ff do if char_8_16[f] then convert_gfx_single(3,0,@char_ram,@char_x,@char_8_y,flipx_char,flipy_char,f);
+  for f:=0 to $3ff do if char_8_16[f] then convert_gfx_single(3,0,@char_ram,@char_x,@char_8_y,false,false,f);
   gfx_set_desc_data(4,6,4*16*8,0,1,2,3);
   for f:=0 to $3ff do if char_8_16[f] then begin
-      convert_gfx_single(6,0,@char_ram,@char_x,@char_16_y,flipx_char,flipy_char,f);
+      convert_gfx_single(6,0,@char_ram,@char_x,@char_16_y,false,false,f);
       char_8_16[f]:=false;
   end;
   //32x32
   gfx_set_desc_data(4,4,4*32*32,0,1,2,3);
   for f:=0 to $7f do if char_32_32[f] then begin
-    convert_gfx_single(4,0,@char_ram,@char_x,@char_32_y,flipx_char,flipy_char,f);
+    convert_gfx_single(4,0,@char_ram,@char_x,@char_32_y,false,false,f);
     char_32_32[f]:=false;
   end;
   //64x64
   gfx_set_desc_data(4,7,4*64*64,0,1,2,3);
   for f:=0 to $1f do if char_64_64[f] then begin
-    convert_gfx_single(7,0,@char_ram,@char_x,@char_64_y,flipx_char,flipy_char,f);
+    convert_gfx_single(7,0,@char_ram,@char_x,@char_64_y,false,false,f);
     char_64_64[f]:=false;
   end;
+  changed_chr:=false;
 end;
+
 procedure draw_sprites;
 var
   f,pri,idx,num_gfx:byte;
@@ -164,6 +171,7 @@ for pri:=0 to $ff do begin  //prioridad
   end;
 end;
 end;
+
 procedure update_video_nemesis;
 var
   f,x,y,nchar,color:word;
@@ -172,16 +180,18 @@ var
   scroll_x1,scroll_x2:array[0..$ff] of word;
 begin
 fill_full_screen(9,0);
-char_calc;
+if changed_chr then char_calc;
 for f:=0 to $7ff do begin
     //background
     color:=color2_ram[f];
     if (gfx[1].buffer[f] or buffer_color[color and $7f]) then begin
-      x:=f and $3f;
-      y:=f shr 6;
       nchar:=video2_ram[f];
-      flipx:=(color and $80)<>0;
-      flipy:=(nchar and $800)<>0;
+      if flipx_scr then x:=63-(f and $3f)
+        else x:=f and $3f;
+      if flipy_scr then y:=31-(f shr 6)
+        else y:=f shr 6;
+      flipx:=((color and $80)<>0) xor flipx_scr;
+      flipy:=((nchar and $800)<>0) xor flipy_scr;
       for h:=1 to 4 do put_gfx_block_trans(x*8,y*8,h,8,8);
       if (((not(nchar) and $2000)<>0) or ((nchar and $c000)=$4000)) then begin
         if (nchar and $f800)<>0 then put_gfx_flip(x*8,y*8,nchar and $7ff,(color and $7f) shl 4,4,0,flipx,flipy);
@@ -197,11 +207,13 @@ for f:=0 to $7ff do begin
     //foreground
     color:=color1_ram[f];
     if (gfx[0].buffer[f] or buffer_color[color and $7f]) then begin
-      x:=f and $3f;
-      y:=f shr 6;
       nchar:=video1_ram[f];
-      flipx:=(color and $80)<>0;
-      flipy:=(nchar and $800)<>0;
+      if flipx_scr then x:=63-(f and $3f)
+        else x:=f and $3f;
+      if flipy_scr then y:=31-(f shr 6)
+        else y:=f shr 6;
+      flipx:=((color and $80)<>0) xor flipx_scr;
+      flipy:=((nchar and $800)<>0) xor flipy_scr;
       for h:=5 to 8 do put_gfx_block_trans(x*8,y*8,h,8,8);
       if (((not(nchar) and $2000)<>0) or ((nchar and $c000)=$4000)) then begin
         if (nchar and $f800)<>0 then put_gfx_flip(x*8,y*8,nchar and $7ff,(color and $7f) shl 4,8,0,flipx,flipy);
@@ -236,6 +248,7 @@ scroll__x_part2(8,9,1,@scroll_x1);
 actualiza_trozo_final(0,16,256,224,9);
 fillchar(buffer_color,MAX_COLOR_BUFFER,0);
 end;
+
 procedure eventos_nemesis;
 begin
 if event.arcade then begin
@@ -262,6 +275,7 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in2:=(marcade.in2 or $40) else marcade.in2:=(marcade.in2 and $ffbf);
 end;
 end;
+
 procedure cambiar_color(tmp_color,numero:word);inline;
 var
   bit1,bit2,bit3:byte;
@@ -276,6 +290,7 @@ begin
   set_pal_color(color,numero);
   buffer_color[numero shr 4]:=true;
 end;
+
 function ay0_porta_read:byte;
 var
   res:byte;
@@ -283,21 +298,24 @@ begin
   res:=round((z80_0.contador+(linea*z80_0.tframes))/1024) and $2f;
   ay0_porta_read:=res or $d0 or $20;
 end;
+
 procedure ay8910_k005289_1(valor:byte);
 begin
   k005289_0.control_A_w(valor);
 end;
+
 procedure ay8910_k005289_2(valor:byte);
 begin
-
   k005289_0.control_B_w(valor);
 end;
+
 procedure sound_update;
 begin
   ay8910_0.update;
   ay8910_1.update;
   k005289_0.update;
 end;
+
 //Nemesis
 procedure nemesis_principal;
 var
@@ -308,21 +326,22 @@ frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for linea:=0 to $ff do begin
-  //Main CPU
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //Sound CPU
-  z80_0.run(frame_s);
-  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-  if linea=239 then begin
-    update_video_nemesis;
-    if irq_on then m68000_0.irq[1]:=HOLD_LINE;
-  end;
+    //Main CPU
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+    //Sound CPU
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+    if linea=239 then begin
+      update_video_nemesis;
+      if irq_on then m68000_0.irq[1]:=HOLD_LINE;
+    end;
  end;
  eventos_nemesis;
  video_sync;
 end;
 end;
+
 function nemesis_getword(direccion:dword):word;
 begin
 case direccion of
@@ -344,6 +363,7 @@ case direccion of
   $60000..$67fff:nemesis_getword:=ram2[(direccion and $7fff) shr 1];
 end;
 end;
+
 procedure nemesis_putword(direccion:dword;valor:word);
 var
   dir:word;
@@ -360,6 +380,7 @@ case direccion of
                     char_64_64[(direccion and $ffff) div $800]:=true;
                     fillchar(gfx[0].buffer,$800,1);
                     fillchar(gfx[1].buffer,$800,1);
+                    changed_chr:=true;
                  end;
   $50000..$51fff:begin
                     dir:=(direccion and $1fff) shr 1;
@@ -395,33 +416,14 @@ case direccion of
   $5c000:sound_latch:=valor and $ff;
   $5e000:irq_on:=(valor and $ff)<>0;
   $5e004:begin
-            if byte(flipx_char)<>(valor and $1) then begin
-                flipx_char:=(valor and $1)<>0;
-                fillchar(char_8_8,$800,1);
-                fillchar(char_16_16,$200,1);
-                fillchar(char_32_16,$100,1);
-                fillchar(char_8_16,$400,1);
-                fillchar(char_32_32,$80,1);
-                fillchar(char_64_64,$20,1);
-                fillchar(gfx[0].buffer,$800,1);
-                fillchar(gfx[1].buffer,$800,1);
-            end;
+            flipx_scr:=(valor and $1)<>0;
             if (valor and $100)<>0 then z80_0.change_irq(HOLD_LINE);
          end;
-  $5e006:if byte(flipy_char)<>(valor and $1) then begin
-            flipy_char:=(valor and $1)<>0;
-            fillchar(char_8_8,$800,1);
-            fillchar(char_16_16,$200,1);
-            fillchar(char_32_16,$100,1);
-            fillchar(char_8_16,$400,1);
-            fillchar(char_32_32,$80,1);
-            fillchar(char_64_64,$20,1);
-            fillchar(gfx[0].buffer,$800,1);
-            fillchar(gfx[1].buffer,$800,1);
-         end;
+  $5e006:flipy_scr:=(valor and $1)<>0;
   $60000..$67fff:ram2[(direccion and $7fff) shr 1]:=valor;
 end;
 end;
+
 function nemesis_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -431,6 +433,7 @@ case direccion of
   $e205:nemesis_snd_getbyte:=ay8910_1.Read;
 end;
 end;
+
 procedure nemesis_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -446,6 +449,7 @@ case direccion of
   $e405:ay8910_1.Write(valor);
 end;
 end;
+
 //GX400
 procedure eventos_gx400;
 begin
@@ -476,6 +480,7 @@ if event.arcade then begin
   if arcade_input.but1[1] then marcade.in2:=marcade.in2 and $bf;
 end;
 end;
+
 procedure gx400_principal;
 var
   frame_m,frame_s:single;
@@ -485,27 +490,28 @@ frame_m:=m68000_0.tframes;
 frame_s:=z80_0.tframes;
 while EmuStatus=EsRuning do begin
  for linea:=0 to $ff do begin
-  //Main CPU
-  m68000_0.run(frame_m);
-  frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
-  //Sound CPU
-  z80_0.run(frame_s);
-  frame_s:=frame_s+z80_0.tframes-z80_0.contador;
-  case linea of
-    119:if irq4_on then m68000_0.irq[4]:=HOLD_LINE;
-    239:begin
-          update_video_nemesis;
-          if (irq_on and screen_par) then m68000_0.irq[1]:=HOLD_LINE;
-          z80_0.change_nmi(PULSE_LINE);
-        end;
-    255:if irq2_on then m68000_0.irq[2]:=HOLD_LINE;
-  end;
+    //Main CPU
+    m68000_0.run(frame_m);
+    frame_m:=frame_m+m68000_0.tframes-m68000_0.contador;
+    //Sound CPU
+    z80_0.run(frame_s);
+    frame_s:=frame_s+z80_0.tframes-z80_0.contador;
+    case linea of
+      119:if irq4_on then m68000_0.irq[4]:=HOLD_LINE;
+      239:begin
+            update_video_nemesis;
+            if (irq_on and screen_par) then m68000_0.irq[1]:=HOLD_LINE;
+            z80_0.change_nmi(PULSE_LINE);
+          end;
+      255:if irq2_on then m68000_0.irq[2]:=HOLD_LINE;
+    end;
  end;
  screen_par:=not(screen_par);
  eventos_gx400;
  video_sync;
 end;
 end;
+
 function gx400_getword(direccion:dword):word;
 begin
 case direccion of
@@ -531,6 +537,7 @@ case direccion of
   $80000..$bffff:gx400_getword:=rom[(direccion and $3ffff) shr 1];
 end;
 end;
+
 procedure gx400_putword(direccion:dword;valor:word);
 var
   dir:word;
@@ -549,6 +556,7 @@ case direccion of
                     char_64_64[(direccion and $ffff) div $800]:=true;
                     fillchar(gfx[0].buffer,$800,1);
                     fillchar(gfx[1].buffer,$800,1);
+                    changed_chr:=true;
                  end;
   $50000..$51fff:begin
                     dir:=(direccion and $1fff) shr 1;
@@ -586,34 +594,15 @@ case direccion of
   $5e000:irq2_on:=(valor and $1)<>0;
   $5e002:irq_on:=(valor and $1)<>0;
   $5e004:begin
-            if byte(flipx_char)<>(valor and $1) then begin
-                flipx_char:=(valor and $1)<>0;
-                fillchar(char_8_8,$800,1);
-                fillchar(char_16_16,$200,1);
-                fillchar(char_32_16,$100,1);
-                fillchar(char_8_16,$400,1);
-                fillchar(char_32_32,$80,1);
-                fillchar(char_64_64,$20,1);
-                fillchar(gfx[0].buffer,$800,1);
-                fillchar(gfx[1].buffer,$800,1);
-            end;
+            flipx_scr:=(valor and $1)<>0;
             if (valor and $100)<>0 then z80_0.change_irq(HOLD_LINE);
          end;
-   $5e006:if byte(flipy_char)<>(valor and $1) then begin
-            flipy_char:=(valor and $1)<>0;
-            fillchar(char_8_8,$800,1);
-            fillchar(char_16_16,$200,1);
-            fillchar(char_32_16,$100,1);
-            fillchar(char_8_16,$400,1);
-            fillchar(char_32_32,$80,1);
-            fillchar(char_64_64,$20,1);
-            fillchar(gfx[0].buffer,$800,1);
-            fillchar(gfx[1].buffer,$800,1);
-         end;
+  $5e006:flipy_scr:=(valor and $1)<>0;
   $5e00e:irq4_on:=(valor and $100)<>0;
   $60000..$7ffff:ram4[(direccion and $1ffff) shr 1]:=valor;
 end;
 end;
+
 function gx400_snd_getbyte(direccion:word):byte;
 var
   ptemp:pbyte;
@@ -622,15 +611,16 @@ case direccion of
   0..$1fff:gx400_snd_getbyte:=mem_snd[direccion];
   $4000..$7fff:gx400_snd_getbyte:=shared_ram[direccion and $3fff];
   $8000..$87ff:begin
-    ptemp:=vlm5030_0.get_rom_addr;
-    inc(ptemp,direccion and $7ff);
-    gx400_snd_getbyte:=ptemp^;
-  end;
+                  ptemp:=vlm5030_0.get_rom_addr;
+                  inc(ptemp,direccion and $7ff);
+                  gx400_snd_getbyte:=ptemp^;
+               end;
   $e001:gx400_snd_getbyte:=sound_latch;
   $e086:gx400_snd_getbyte:=ay8910_0.Read;
   $e205:gx400_snd_getbyte:=ay8910_1.Read;
 end;
 end;
+
 procedure gx400_snd_putbyte(direccion:word;valor:byte);
 var
   ptemp:pbyte;
@@ -639,10 +629,10 @@ case direccion of
   0..$1fff:;
   $4000..$7fff:shared_ram[direccion and $3fff]:=valor;
   $8000..$87ff:begin
-    ptemp:=vlm5030_0.get_rom_addr;
-    inc(ptemp,direccion and $7ff);
-    ptemp^:=valor;
-  end;
+                  ptemp:=vlm5030_0.get_rom_addr;
+                  inc(ptemp,direccion and $7ff);
+                  ptemp^:=valor;
+               end;
   $a000..$afff:k005289_0.ld1_w(direccion and $fff,valor);
   $c000..$cfff:k005289_0.ld2_w(direccion and $fff,valor);
   $e000:vlm5030_0.data_w(valor);
@@ -658,6 +648,7 @@ case direccion of
   $e405:ay8910_1.Write(valor);
 end;
 end;
+
 function ay0_porta_read_gx400:byte;
 var
   res:byte;
@@ -665,6 +656,7 @@ begin
   res:=round((z80_0.contador+(linea*z80_0.tframes))/1024) and $2f;
   ay0_porta_read_gx400:=res or $d0 or ($20*vlm5030_0.get_bsy);
 end;
+
 procedure sound_update_gx400;
 begin
   ay8910_0.update;
@@ -672,6 +664,7 @@ begin
   vlm5030_0.update;
   k005289_0.update;
 end;
+
 //Salamander
 function salamander_getword(direccion:dword):word;
 begin
@@ -693,6 +686,7 @@ case direccion of
   $190000..$191fff:salamander_getword:=ram1[(direccion and $1fff) shr 1];
 end;
 end;
+
 procedure cambiar_color_salamander(numero:word);inline;
 var
   color:tcolor;
@@ -706,6 +700,7 @@ begin
   set_pal_color(color,numero);
   buffer_color[numero shr 4]:=true;
 end;
+
 procedure salamander_putword(direccion:dword;valor:word);
 var
   dir:word;
@@ -717,31 +712,10 @@ case direccion of
                     buffer_paleta[(direccion and $1fff) shr 1]:=valor and $ff;
                     cambiar_color_salamander((direccion and $1fff) shr 1);
                  end;
-  $a0000:begin //control port
+  $a0000:begin
            irq_on:=(valor and 1)<>0;
-           //flip screen 4
-           if byte(flipx_char)<>(valor and 4) then begin
-                flipx_char:=(valor and 4)<>0;
-                fillchar(char_8_8,$800,1);
-                fillchar(char_16_16,$200,1);
-                fillchar(char_32_16,$100,1);
-                fillchar(char_8_16,$400,1);
-                fillchar(char_32_32,$80,1);
-                fillchar(char_64_64,$20,1);
-                fillchar(gfx[0].buffer,$800,1);
-                fillchar(gfx[1].buffer,$800,1);
-           end;
-           if byte(flipy_char)<>(valor and 8) then begin
-                flipy_char:=(valor and 8)<>0;
-                fillchar(char_8_8,$800,1);
-                fillchar(char_16_16,$200,1);
-                fillchar(char_32_16,$100,1);
-                fillchar(char_8_16,$400,1);
-                fillchar(char_32_32,$80,1);
-                fillchar(char_64_64,$20,1);
-                fillchar(gfx[0].buffer,$800,1);
-                fillchar(gfx[1].buffer,$800,1);
-           end;
+           flipx_scr:=(valor and 4)<>0;
+           flipy_scr:=(valor and 8)<>0;
            if (valor and $800)<>0 then z80_0.change_irq(HOLD_LINE);
          end;
   $c0000:sound_latch:=valor and $ff;
@@ -772,6 +746,7 @@ case direccion of
                     char_64_64[dir div $800]:=true;
                     fillchar(gfx[0].buffer,$800,1);
                     fillchar(gfx[1].buffer,$800,1);
+                    changed_chr:=true;
                  end;
   $180000..$180fff:sprite_ram[(direccion and $fff) shr 1]:=valor;
   $190000..$191fff:begin
@@ -786,6 +761,7 @@ case direccion of
                  end;
 end;
 end;
+
 function salamander_snd_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -799,6 +775,7 @@ case direccion of
         end;
 end;
 end;
+
 procedure salamander_snd_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -814,6 +791,7 @@ case direccion of
         end;
 end;
 end;
+
 procedure nemesis_k007232_cb_0(valor:byte);
 begin
   k007232_0.set_volume(0,(valor shr 4)*$11,0);
@@ -826,6 +804,7 @@ begin
   k007232_0.update;
   vlm5030_0.update;
 end;
+
 //Main
 procedure reset_nemesis;
 begin
@@ -862,15 +841,23 @@ begin
  irq2_on:=false;
  irq4_on:=false;
  screen_par:=false;
- flipy_char:=false;
- flipx_char:=false;
+ flipy_scr:=false;
+ flipx_scr:=false;
  fillchar(char_8_8,$800,1);
  fillchar(char_16_16,$200,1);
  fillchar(char_32_16,$100,1);
  fillchar(char_8_16,$400,1);
  fillchar(char_32_32,$80,1);
  fillchar(char_64_64,$20,1);
+ changed_chr:=true;
 end;
+
+procedure cerrar_nemesis;
+begin
+if k007232_1_rom<>nil then freemem(k007232_1_rom);
+k007232_1_rom:=nil;
+end;
+
 function iniciar_nemesis:boolean;
 var
   f:byte;
@@ -889,6 +876,13 @@ begin
   vlm5030_0:=vlm5030_chip.Create(3579545,$800,2);
 end;
 begin
+llamadas_maquina.close:=cerrar_nemesis;
+case main_vars.tipo_maquina of
+  204,261:llamadas_maquina.bucle_general:=nemesis_principal;
+  205,260:llamadas_maquina.bucle_general:=gx400_principal;
+end;
+llamadas_maquina.reset:=reset_nemesis;
+llamadas_maquina.fps_max:=60.60606060606060;
 iniciar_nemesis:=false;
 iniciar_audio(false);
 for f:=1 to 8 do begin
@@ -960,20 +954,5 @@ for f:=0 to 7 do gfx[f].trans[0]:=true;
 reset_nemesis;
 iniciar_nemesis:=true;
 end;
-procedure cerrar_nemesis;
-begin
-if k007232_1_rom<>nil then freemem(k007232_1_rom);
-k007232_1_rom:=nil;
-end;
-procedure Cargar_nemesis;
-begin
-llamadas_maquina.iniciar:=iniciar_nemesis;
-llamadas_maquina.close:=cerrar_nemesis;
-case main_vars.tipo_maquina of
-  204,261:llamadas_maquina.bucle_general:=nemesis_principal;
-  205,260:llamadas_maquina.bucle_general:=gx400_principal;
-end;
-llamadas_maquina.reset:=reset_nemesis;
-llamadas_maquina.fps_max:=60.60606060606060;
-end;
+
 end.

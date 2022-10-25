@@ -4,11 +4,11 @@ interface
 uses nz80,main_engine,controls_engine,gfx_engine,rom_engine,ay_8910,
      pal_engine,sound_engine,mb88xx;
 
-procedure cargar_arabian;
+function iniciar_arabian:boolean;
 
 implementation
+
 const
-        //arabian
         arabian_rom:array[0..3] of tipo_roms=(
         (n:'ic1rev2.87';l:$2000;p:0;crc:$5e1c98b8),(n:'ic2rev2.88';l:$2000;p:$2000;crc:$092f587e),
         (n:'ic3rev2.89';l:$2000;p:$4000;crc:$15145f23),(n:'ic4rev2.90';l:$2000;p:$6000;crc:$32b77b44));
@@ -108,30 +108,30 @@ var
 begin
   x:=(pos shr 8) shl 2;
 	y:=pos;
-	// get a pointer to the pixels */
+	// get a pointer to the pixels
 	base:=y*256+x;
-	// enable writes to AZ/AR */
+	// enable writes to AZ/AR
 	if (blitter[0] and $08)<>0 then begin
     video_ram[base+0]:=(video_ram[base+0] and $fc) or ((valor and $10) shr 3) or ((valor and $01) shr 0);
 		video_ram[base+1]:=(video_ram[base+1] and $fc) or ((valor and $20) shr 4) or ((valor and $02) shr 1);
 		video_ram[base+2]:=(video_ram[base+2] and $fc) or ((valor and $40) shr 5) or ((valor and $04) shr 2);
 		video_ram[base+3]:=(video_ram[base+3] and $fc) or ((valor and $80) shr 6) or ((valor and $08) shr 3);
 	end;
-	// enable writes to AG/AB */
+	// enable writes to AG/AB
 	if (blitter[0] and $04)<>0 then begin
 		video_ram[base+0]:=(video_ram[base+0] and $f3) or ((valor and $10) shr 1) or ((valor and $01) shl 2);
 		video_ram[base+1]:=(video_ram[base+1] and $f3) or ((valor and $20) shr 2) or ((valor and $02) shl 1);
 		video_ram[base+2]:=(video_ram[base+2] and $f3) or ((valor and $40) shr 3) or ((valor and $04) shl 0);
 		video_ram[base+3]:=(video_ram[base+3] and $f3) or ((valor and $80) shr 4) or ((valor and $08) shr 1);
 	end;
-	// enable writes to BZ/BR */
+	// enable writes to BZ/BR
 	if (blitter[0] and $02)<>0 then begin
 		video_ram[base+0]:=(video_ram[base+0] and $cf) or ((valor and $10) shl 1) or ((valor and $01) shl 4);
 		video_ram[base+1]:=(video_ram[base+1] and $cf) or ((valor and $20) shl 0) or ((valor and $02) shl 3);
     video_ram[base+2]:=(video_ram[base+2] and $cf) or ((valor and $40) shr 1) or ((valor and $04) shl 2);
 		video_ram[base+3]:=(video_ram[base+3] and $cf) or ((valor and $80) shr 2) or ((valor and $08) shl 1);
 	end;
-	// enable writes to BG/BB */
+	// enable writes to BG/BB
 	if (blitter[0] and $01)<>0 then begin
 		video_ram[base+0]:=(video_ram[base+0] and $3f) or ((valor and $10) shl 3) or ((valor and $01) shl 6);
 		video_ram[base+1]:=(video_ram[base+1] and $3f) or ((valor and $20) shl 2) or ((valor and $02) shl 5);
@@ -146,7 +146,7 @@ var
   i,j,p1,p2,p3,p4:byte;
 begin
 	srcdata:=src*4;
-	// loop over X, then Y */
+	// loop over X, then Y
 	for i:=0 to sx do begin
 		for j:=0 to sy do begin
 			p1:=converted_gfx[srcdata];
@@ -157,16 +157,16 @@ begin
       srcdata:=srcdata+1;
 			p4:=converted_gfx[srcdata];
       srcdata:=srcdata+1;
-			// get a pointer to the bitmap */
+			// get a pointer to the bitmap
 			base:=((y+j) and $ff)*256+(x and $ff);
-			// bit 0 means write to upper plane (upper 4 bits of our bitmap) */
+			// bit 0 means write to upper plane (upper 4 bits of our bitmap)
 			if (plane and $01)<>0 then begin
 				if (p4<>8) then video_ram[base+0]:=(video_ram[base+0] and $0f) or (p4 shl 4);
 				if (p3<>8) then video_ram[base+1]:=(video_ram[base+1] and $0f) or (p3 shl 4);
 				if (p2<>8) then video_ram[base+2]:=(video_ram[base+2] and $0f) or (p2 shl 4);
 				if (p1<>8) then video_ram[base+3]:=(video_ram[base+3] and $0f) or (p1 shl 4);
 			end;
-			// bit 2 means write to lower plane (lower 4 bits of our bitmap) */
+			// bit 2 means write to lower plane (lower 4 bits of our bitmap)
 			if (plane and $04)<>0 then begin
 				if (p4<>8) then video_ram[base+0]:=(video_ram[base+0] and $f0) or p4;
 				if (p3<>8) then video_ram[base+1]:=(video_ram[base+1] and $f0) or p3;
@@ -224,7 +224,7 @@ var
   val:byte;
 begin
 	val:=mcu_port_r[port];
-	// RAM mode is enabled */
+	// RAM mode is enabled
 	if (port=0) then val:=val or 4;
 	mcu_port_r_r:=val;
 end;
@@ -381,6 +381,8 @@ for f:=0 to $3fff do begin
 end;
 end;
 begin
+llamadas_maquina.bucle_general:=arabian_principal;
+llamadas_maquina.reset:=reset_arabian;
 iniciar_arabian:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -411,13 +413,6 @@ marcade.dswb_val:=@arabian_dip_b;
 //final
 reset_arabian;
 iniciar_arabian:=true;
-end;
-
-procedure Cargar_arabian;
-begin
-llamadas_maquina.iniciar:=iniciar_arabian;
-llamadas_maquina.bucle_general:=arabian_principal;
-llamadas_maquina.reset:=reset_arabian;
 end;
 
 end.

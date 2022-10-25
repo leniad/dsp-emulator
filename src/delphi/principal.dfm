@@ -53,8 +53,8 @@ object principal1: Tprincipal1
     Width = 348
     Height = 192
     Align = alClient
-    AutoSize = True
     Enabled = False
+    ParentShowHint = False
     Picture.Data = {
       0954506E67496D61676589504E470D0A1A0A0000000D49484452000001E70000
       00EC0802000000C1DFF9740000000467414D410000B18F0BFC61050000000173
@@ -653,6 +653,7 @@ object principal1: Tprincipal1
       822088BE04599B2008A22F41D6260882E84B90B5098220FA12646D822088BE04
       599B2008A22F41D6260882E84BFCFFFE594C5FEDB18D1D0000000049454E44AE
       426082}
+    ShowHint = False
     Stretch = True
     Transparent = True
     ExplicitWidth = 487
@@ -2599,10 +2600,21 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object Repulse1: TMenuItem
-            Caption = 'Repulse'
+          object kyugohw1: TMenuItem
+            Caption = 'Kyugo HW'
             GroupIndex = 1
-            OnClick = CambiarMaquina
+            object Repulse1: TMenuItem
+              Caption = 'Repulse'
+              OnClick = CambiarMaquina
+            end
+            object SRDMission1: TMenuItem
+              Caption = 'S.R.D. Mission'
+              OnClick = CambiarMaquina
+            end
+            object Airwolf1: TMenuItem
+              Caption = 'Airwolf'
+              OnClick = CambiarMaquina
+            end
           end
           object heNewZelandStoryHardware1: TMenuItem
             Caption = 'The New ZealandStory HW'
@@ -2871,6 +2883,11 @@ object principal1: Tprincipal1
           end
           object SideArms1: TMenuItem
             Caption = 'Side Arms'
+            GroupIndex = 1
+            OnClick = CambiarMaquina
+          end
+          object Ambush1: TMenuItem
+            Caption = 'Ambush'
             GroupIndex = 1
             OnClick = CambiarMaquina
           end
@@ -3751,6 +3768,10 @@ object principal1: Tprincipal1
               Caption = 'Thunder && Lightning'
               OnClick = CambiarMaquina
             end
+          end
+          object MagMax1: TMenuItem
+            Caption = 'Mag Max'
+            OnClick = CambiarMaquina
           end
         end
         object NEC1: TMenuItem

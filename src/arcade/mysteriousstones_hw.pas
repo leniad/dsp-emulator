@@ -292,7 +292,6 @@ close_qsnapshot;
 fillchar(gfx[0].buffer,$400,1);
 fillchar(gfx[2].buffer,$1000,1);
 for f:=0 to $1f do cambiar_color(f);
-
 end;
 
 procedure reset_ms;

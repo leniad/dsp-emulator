@@ -87,11 +87,12 @@ const
         (mask:$18;name:'Bonus Life';number:4;dip:((dip_val:$18;dip_name:'30K 200K'),(dip_val:$10;dip_name:'50K 300K'),(dip_val:$8;dip_name:'30K'),(dip_val:$0;dip_name:'50K'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$60;name:'Difficulty';number:4;dip:((dip_val:$60;dip_name:'Easy'),(dip_val:$40;dip_name:'Normal'),(dip_val:$20;dip_name:'Hard'),(dip_val:$0;dip_name:'Very Hard'),(),(),(),(),(),(),(),(),(),(),(),())),
         (mask:$80;name:'Demo Sounds';number:2;dip:((dip_val:$80;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+        layer_colorbase:array[0..2] of byte=(48,0,16);
+
 
 var
  tiles_rom,sprite_rom,k007232_rom:pbyte;
  sound_latch,sprite_colorbase,bank0_bank,rom_bank1,latch_1f98,priority,thunderx_timer:byte;
- layer_colorbase:array[0..2] of byte;
  rom_bank:array[0..$f,0..$1fff] of byte;
  ram_bank:array[0..2,0..$7ff] of byte;
  video_bank_call:tvideo_bank_func;
@@ -142,20 +143,20 @@ for ii:=s0 to (e0-1) do begin
     p1:=(16+5*s1)-5;
     for jj:=s1 to (e1-1) do begin
         p1:=p1+5;
-	if ((ram_bank[2,p1+0] and hm)=0) then continue; // check valid
-	// get area
-	l1:=ram_bank[2,p1+3]-ram_bank[2,p1+1];
-	r1:=ram_bank[2,p1+3]+ram_bank[2,p1+1];
-	t1:=ram_bank[2,p1+4]-ram_bank[2,p1+2];
-	b1:=ram_bank[2,p1+4]+ram_bank[2,p1+2];
-	// overlap check
-	if (l1>=r0) then continue;
-	if (l0>=r1) then continue;
-	if (t1>=b0) then continue;
-	if (t0>=b1) then continue;
-	// set flags
-	ram_bank[2,p0+0]:=(ram_bank[2,p0+0] and $9f) or (ram_bank[2,p1+0] and $04) or $10;
-	ram_bank[2,p1+0]:=(ram_bank[2,p1+0] and $9f) or $10;
+	      if ((ram_bank[2,p1+0] and hm)=0) then continue; // check valid
+	      // get area
+      	l1:=ram_bank[2,p1+3]-ram_bank[2,p1+1];
+      	r1:=ram_bank[2,p1+3]+ram_bank[2,p1+1];
+      	t1:=ram_bank[2,p1+4]-ram_bank[2,p1+2];
+      	b1:=ram_bank[2,p1+4]+ram_bank[2,p1+2];
+      	// overlap check
+      	if (l1>=r0) then continue;
+      	if (l0>=r1) then continue;
+      	if (t1>=b0) then continue;
+      	if (t0>=b1) then continue;
+      	// set flags
+      	ram_bank[2,p0+0]:=(ram_bank[2,p0+0] and $9f) or (ram_bank[2,p1+0] and $04) or $10;
+      	ram_bank[2,p1+0]:=(ram_bank[2,p1+0] and $9f) or $10;
     end;
 end;
 end;
@@ -187,13 +188,13 @@ begin
 	Y0:=(Y0-15) div 5;
 	Y1:=(ram_bank[2,2]-15) div 5;
 	if (ram_bank[2,5]<16) then begin // US Thunder Cross uses this form
-		X0:=(ram_bank[2,5] shl 8)+ram_bank[2,6];
-		X0:=(X0-16) div 5;
-		X1:= (ram_bank[2,7]-16) div 5;
+		  X0:=(ram_bank[2,5] shl 8)+ram_bank[2,6];
+		  X0:=(X0-16) div 5;
+		  X1:= (ram_bank[2,7]-16) div 5;
 	end else begin // Japan Thunder Cross uses this form
-		X0:=(ram_bank[2,5]-16) div 5;
-		X1:=(ram_bank[2,6]-16) div 5;
-        end;
+		  X0:=(ram_bank[2,5]-16) div 5;
+      X1:=(ram_bank[2,6]-16) div 5;
+  end;
 	CM:=ram_bank[2,3];
 	HM:=ram_bank[2,4];
 	run_collisions(X0,Y0,X1,Y1,CM,HM);
@@ -231,8 +232,8 @@ end;
 
 procedure thunderx_sprite_cb(var code:word;var color:word;var pri:word;var shadow:word);
 begin
-// The PROM allows for mixed priorities, where sprites would have */
-// priority over text but not on one or both of the other two planes. */
+// The PROM allows for mixed priorities, where sprites would have
+// priority over text but not on one or both of the other two planes.
 case (color and $30) of
      $0:pri:=0;
      $10:pri:=3;
@@ -258,15 +259,14 @@ if priority<>0 then begin
    k052109_0.draw_layer(2,4);
    k051960_0.draw_sprites(2,-1);
    k052109_0.draw_layer(1,4);
-   k051960_0.draw_sprites(3,-1);
 end else begin
    k052109_0.draw_layer(1,4);
-   k051960_0.draw_sprites(3,-1);
-   k052109_0.draw_layer(2,4);
    k051960_0.draw_sprites(2,-1);
+   k052109_0.draw_layer(2,4);
 end;
 k051960_0.draw_sprites(0,-1);
 k052109_0.draw_layer(0,4);
+k051960_0.draw_sprites(3,-1);
 actualiza_trozo_final(112,16,288,224,4);
 end;
 
@@ -513,10 +513,10 @@ case main_vars.tipo_maquina of
             video_bank_call:=scontra_videobank;
             getmem(tiles_rom,$100000);
             if not(roms_load32b_b(tiles_rom,scontra_tiles)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$100000);
+            k052109_0:=k052109_chip.create(1,2,3,0,thunderx_cb,tiles_rom,$100000);
             getmem(sprite_rom,$100000);
             if not(roms_load32b_b(sprite_rom,scontra_sprites)) then exit;
-            k051960_0:=k051960_chip.create(4,sprite_rom,$100000,thunderx_sprite_cb,2);
+            k051960_0:=k051960_chip.create(4,1,sprite_rom,$100000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;
             marcade.dswa_val:=@scontra_dip_a;
@@ -550,10 +550,10 @@ case main_vars.tipo_maquina of
             video_bank_call:=gbusters_videobank;
             getmem(tiles_rom,$80000);
             if not(roms_load32b(tiles_rom,gbusters_tiles)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,gbusters_cb,tiles_rom,$80000);
+            k052109_0:=k052109_chip.create(1,2,3,0,gbusters_cb,tiles_rom,$80000);
             getmem(sprite_rom,$80000);
             if not(roms_load32b(sprite_rom,gbusters_sprites)) then exit;
-            k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
+            k051960_0:=k051960_chip.create(4,1,sprite_rom,$80000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;
             marcade.dswa_val:=@scontra_dip_a;
@@ -586,10 +586,10 @@ case main_vars.tipo_maquina of
             video_bank_call:=thunderx_videobank;
             getmem(tiles_rom,$80000);
             if not(roms_load32b_b(tiles_rom,thunderx_tiles)) then exit;
-            k052109_0:=k052109_chip.create(1,2,3,thunderx_cb,tiles_rom,$80000);
+            k052109_0:=k052109_chip.create(1,2,3,0,thunderx_cb,tiles_rom,$80000);
             getmem(sprite_rom,$80000);
             if not(roms_load32b_b(sprite_rom,thunderx_sprites)) then exit;
-            k051960_0:=k051960_chip.create(4,sprite_rom,$80000,thunderx_sprite_cb,2);
+            k051960_0:=k051960_chip.create(4,1,sprite_rom,$80000,thunderx_sprite_cb,2);
             //DIP
             marcade.dswa:=$ff;
             marcade.dswa_val:=@scontra_dip_a;
@@ -599,9 +599,6 @@ case main_vars.tipo_maquina of
             marcade.dswc_val:=@gbusters_dip_c;
      end;
 end;
-layer_colorbase[0]:=48;
-layer_colorbase[1]:=0;
-layer_colorbase[2]:=16;
 sprite_colorbase:=32;
 //final
 reset_thunderx;

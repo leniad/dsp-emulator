@@ -32,8 +32,8 @@ type
               ram:array[0..$7ff] of word;
               sorted_list:array[0..$ff] of word;
               z_rejection:integer;
-              procedure k053247_draw_single_sprite_gxcore(code:dword;offs:word;color:word);
-              procedure k053247_draw_yxloop_gx(height,width,ox,oy,code,color,xa,ya:integer;zoomx,zoomy:single;nozoom,mirrorx,mirrory,flipx,flipy:boolean);
+              procedure k053247_draw_single_sprite_gxcore(code:dword;offs:word;color,shadow:word);
+              procedure k053247_draw_yxloop_gx(height,width,ox,oy,code,color,shadow,xa,ya:integer;zoomx,zoomy:single;nozoom,mirrorx,mirrory,flipx,flipy:boolean);
      end;
 
 var
@@ -123,7 +123,7 @@ begin
   gfx[1].alpha[$f]:=true;
 end;
 
-procedure k053246_chip.k053247_draw_yxloop_gx(height,width,ox,oy,code,color,xa,ya:integer;zoomx,zoomy:single;nozoom,mirrorx,mirrory,flipx,flipy:boolean);
+procedure k053246_chip.k053247_draw_yxloop_gx(height,width,ox,oy,code,color,shadow,xa,ya:integer;zoomx,zoomy:single;nozoom,mirrorx,mirrory,flipx,flipy:boolean);
 const
    xoffset:array [0..7] of byte=(0,1,4,5,16,17,20,21);
    yoffset:array [0..7] of byte=(0,2,8,10,32,34,40,42);
@@ -167,20 +167,29 @@ begin
 					  else tempcode:=tempcode+(yoffset[(y+ya) and 7]);
 					fy:=flipy;
 				end;
-
-        if not(nozoom) then begin
-           put_gfx_sprite_zoom_alpha(tempcode,color shl 4,fx,fy,1,zoomx,zoomy);
-           actualiza_gfx_sprite_zoom_alpha(sx and $3ff,sy and $3ff,4,1,zoomx,zoomy);
+        if (shadow shr 10)<>0 then begin
+          if not(nozoom) then begin
+            put_gfx_sprite_zoom_alpha(tempcode,color shl 4,fx,fy,1,zoomx,zoomy);
+            actualiza_gfx_sprite_zoom_alpha(sx and $3ff,sy and $3ff,4,1,zoomx,zoomy);
+          end else begin
+            put_gfx_sprite_alpha(tempcode,color shl 4,fx,fy,1);
+            actualiza_gfx_sprite_alpha(sx and $3ff,sy and $3ff,4,1);
+          end;
         end else begin
-           put_gfx_sprite_alpha(tempcode,color shl 4,fx,fy,1);
-           actualiza_gfx_sprite_alpha(sx and $3ff,sy and $3ff,4,1);
+          if not(nozoom) then begin
+            put_gfx_sprite_zoom(tempcode,color shl 4,fx,fy,1,zoomx,zoomy);
+            actualiza_gfx_sprite_zoom(sx and $3ff,sy and $3ff,4,1,zoomx,zoomy);
+          end else begin
+            put_gfx_sprite(tempcode,color shl 4,fx,fy,1);
+            actualiza_gfx_sprite(sx and $3ff,sy and $3ff,4,1);
+          end;
         end;
-        if (mirrory and (height=1)) then begin  // Simpsons shadows */
+        if (mirrory and (height=1)) then begin  // Simpsons shadows
 					 if not(nozoom) then begin
-              put_gfx_sprite_zoom_alpha(tempcode,color shl 4,fx,fy,1,zoomx,zoomy);
+              put_gfx_sprite_zoom_alpha(tempcode,color shl 4,fx,not(fy),1,zoomx,zoomy);
               actualiza_gfx_sprite_zoom_alpha(sx and $3ff,sy and $3ff,4,1,zoomx,zoomy);
            end else begin
-              put_gfx_sprite_alpha(tempcode,color shl 4,fx,fy,1);
+              put_gfx_sprite_alpha(tempcode,color shl 4,fx,not(fy),1);
               actualiza_gfx_sprite_alpha(sx and $3ff,sy and $3ff,4,1);
            end;
         end;
@@ -188,7 +197,7 @@ begin
 		end; // end of Y loop
 end;
 
-procedure k053246_chip.k053247_draw_single_sprite_gxcore(code:dword;offs:word;color:word);
+procedure k053246_chip.k053247_draw_single_sprite_gxcore(code:dword;offs:word;color,shadow:word);
 var
 		xa,ya,ox,oy:integer;
     scalex,scaley:byte;
@@ -212,7 +221,6 @@ begin
 		// mask off the upper 6 bits of coordinate and zoom registers
 		oy:=self.ram[offs+2] and $3ff;
 		ox:=self.ram[offs+3] and $3ff;
-
     scaley:=self.ram[offs+4];
     if (scaley<>0) then zoomy:=$40/scaley
       else zoomy:=0;
@@ -224,17 +232,13 @@ begin
       zoomx:=zoomy;
       scalex:=scaley;
     end;
-
 		nozoom:=(scalex=$40) and (scaley=$40);
-
 		flipx:=(temp4 and $1000)<>0;
 		flipy:=(temp4 and $2000)<>0;
-
 		temp:=self.ram[offs+6];
 		mirrorx:=(temp and $4000)<>0;
 		if mirrorx then flipx:=false; // only applies to x mirror, proven
 		mirrory:=(temp and $8000)<>0;
-
 		objset1:=self.kx46_regs[5];
 		// for Escape Kids (GX975)
 		if (objset1 and 8)<>0 then begin // Check only "Bit #3 is '1'?"
@@ -252,7 +256,6 @@ begin
       oy:=-oy;
       if (mirrory=0) then flipy:=not(flipy);
     end;}
-
 		k053247_opset:=self.kx47_regs[$c div 2];
 		if (k053247_opset and $40)<>0 then begin
 			wrapsize:=512;
@@ -272,15 +275,13 @@ begin
 		oy:=(-oy-offy) and temp;
 		if (ox>=xwraplim) then ox:=ox-wrapsize;
 		if (oy>=ywraplim) then oy:=oy-wrapsize;
-
 		temp:=(temp4 shr 8) and $0f;
 		width:=1 shl (temp and 3);
 		height:=1 shl ((temp shr 2) and 3);
-
 		ox:=ox-trunc(zoomx*width*8);
 		oy:=oy-trunc(zoomy*height*8);
   	//color:=color and $ffff; // strip attribute flags
-		self.k053247_draw_yxloop_gx(height,width,ox+53-self.dx,oy-6-self.dy,code,color,xa,ya,zoomx,zoomy,nozoom,mirrorx,mirrory,flipx,flipy);
+		self.k053247_draw_yxloop_gx(height,width,ox+53-self.dx,oy-6-self.dy,code,color,shadow,xa,ya,zoomx,zoomy,nozoom,mirrorx,mirrory,flipx,flipy);
 end;
 
 procedure k053246_chip.k053247_update_sprites;
@@ -294,7 +295,7 @@ if (self.z_rejection=-1) then begin
         self.sorted_list[count]:=f*8;
         count:=count+1;
       end;
-	end else begin
+end else begin
 		for f:=0 to $ff do
 			if (((self.ram[f*8] and $8000)<>0) and ((self.ram[f*8] and $ff)<>self.z_rejection)) then begin
         self.sorted_list[count]:=f*8;
@@ -307,7 +308,7 @@ end;
 procedure k053246_chip.k053247_draw_sprites(prio:byte);
 var
   zcode:integer;
-  color,primask,temp,w,y,x,f:word;
+  shadow,color,primask,temp,w,y,x,f:word;
   code:dword;
 begin
   if self.sprite_count=0 then exit;
@@ -322,8 +323,8 @@ begin
 				if (zcode<=code) then begin
 					zcode:=code;
 					sorted_list[x]:=f;
-          f:=temp;
 					sorted_list[y]:=temp;
+          f:=temp;
 				end;
 			end;
 		end;
@@ -338,8 +339,8 @@ begin
 				if (zcode>=code) then begin
 					zcode:=code;
 					sorted_list[x]:=f;
-          f:=temp;
 					sorted_list[y]:=temp;
+          f:=temp;
 				end;
 			end;
 		end;
@@ -348,11 +349,11 @@ begin
 		w:=sorted_list[f];
 		code:=self.ram[w+1] and self.sprite_mask;
     color:=self.ram[w+6];
-    //shadow:=color;
+    shadow:=color;
 		primask:=0;
     self.k053247_cb(code,color,primask);
     if primask<>prio then continue;
-    self.k053247_draw_single_sprite_gxcore(code,w,color);
+    self.k053247_draw_single_sprite_gxcore(code,w,color,shadow);
 	end; // end of sprite-list loop
 end;
 

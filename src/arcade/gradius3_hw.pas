@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,m68000,main_engine,controls_engine,gfx_engine,rom_engine,
      pal_engine,sound_engine,ym_2151,k052109,k051960,k007232;
 
-procedure cargar_gradius3;
+function iniciar_gradius3:boolean;
 
 implementation
 const
@@ -322,8 +322,19 @@ begin
  irqB_mask:=0;
 end;
 
+procedure cerrar_gradius3;
+begin
+if k007232_rom<>nil then freemem(k007232_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+k007232_rom:=nil;
+sprite_rom:=nil;
+end;
+
 function iniciar_gradius3:boolean;
 begin
+llamadas_maquina.close:=cerrar_gradius3;
+llamadas_maquina.reset:=reset_gradius3;
+llamadas_maquina.bucle_general:=gradius3_principal;
 iniciar_gradius3:=false;
 //Pantallas para el K052109
 screen_init(1,512,256,true);
@@ -354,11 +365,11 @@ getmem(k007232_rom,$80000);
 if not(roms_load(k007232_rom,gradius3_k007232)) then exit;
 k007232_0:=k007232_chip.create(3579545,k007232_rom,$80000,0.20,gradius3_k007232_cb,true);
 //Iniciar video
-k052109_0:=k052109_chip.create(1,2,3,gradius3_cb,pbyte(@ram_gfx[0]),$20000);
+k052109_0:=k052109_chip.create(1,2,3,0,gradius3_cb,pbyte(@ram_gfx[0]),$20000);
 getmem(sprite_rom,$200000);
 if not(roms_load32b(sprite_rom,gradius3_sprites_1)) then exit;
 if not(roms_load32b_b(sprite_rom,gradius3_sprites_2)) then exit;
-k051960_0:=k051960_chip.create(4,sprite_rom,$200000,gradius3_sprite_cb,1);
+k051960_0:=k051960_chip.create(4,1,sprite_rom,$200000,gradius3_sprite_cb,1);
 layer_colorbase[0]:=0;
 layer_colorbase[1]:=32;
 layer_colorbase[2]:=48;
@@ -373,22 +384,6 @@ marcade.dswc_val:=@gradius3_dip_c;
 //final
 reset_gradius3;
 iniciar_gradius3:=true;
-end;
-
-procedure cerrar_gradius3;
-begin
-if k007232_rom<>nil then freemem(k007232_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-k007232_rom:=nil;
-sprite_rom:=nil;
-end;
-
-procedure Cargar_gradius3;
-begin
-llamadas_maquina.iniciar:=iniciar_gradius3;
-llamadas_maquina.close:=cerrar_gradius3;
-llamadas_maquina.reset:=reset_gradius3;
-llamadas_maquina.bucle_general:=gradius3_principal;
 end;
 
 end.

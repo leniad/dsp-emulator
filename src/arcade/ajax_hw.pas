@@ -1,13 +1,15 @@
 unit ajax_hw;
 
 interface
+
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,konami,hd6309,main_engine,controls_engine,rom_engine,pal_engine,
      sound_engine,ym_2151,k052109,k051960,k007232,k051316,dialogs;
 
-procedure cargar_ajax;
+function iniciar_ajax:boolean;
 
 implementation
+
 const
         //ajax
         ajax_rom:array[0..1] of tipo_roms=(
@@ -29,7 +31,7 @@ const
         (n:'770c08-c.d10';l:$10000;p:$80002;crc:$28e7088f),(n:'770c08-g.d11';l:$10000;p:$80003;crc:$17da8f6d),
         (n:'770c09-d.c8';l:$10000;p:$c0000;crc:$6f955600),(n:'770c09-h.c9';l:$10000;p:$c0001;crc:$494a9090),
         (n:'770c08-d.c10';l:$10000;p:$c0002;crc:$91591777),(n:'770c08-h.c11';l:$10000;p:$c0003;crc:$d97d4b15));
-        ajax_road:array[0..1] of tipo_roms=(
+        ajax_zoom:array[0..1] of tipo_roms=(
         (n:'770c06.f4';l:$40000;p:0;crc:$d0c592ee),(n:'770c07.h4';l:$40000;p:$40000;crc:$0b399fb1));
         ajax_k007232_1:array[0..3] of tipo_roms=(
         (n:'770c10-a.a7';l:$10000;p:0;crc:$e45ec094),(n:'770c10-b.a6';l:$10000;p:$10000;crc:$349db7d3),
@@ -54,7 +56,7 @@ const
         (mask:$8;name:'Control in 3D Stages';number:2;dip:((dip_val:$8;dip_name:'Normal'),(dip_val:$0;dip_name:'Inverted'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- tiles_rom,sprite_rom,road_rom,k007232_1_rom,k007232_2_rom:pbyte;
+ tiles_rom,sprite_rom,road_rom,k007232_1_rom,k007232_2_rom,zoom_rom:pbyte;
  sound_latch,rom_bank1,rom_bank2:byte;
  sub_firq_enable,prioridad:boolean;
  rom_bank:array[0..11,0..$1fff] of byte;
@@ -84,6 +86,12 @@ if (color and $40)=0 then pri:=5  // A = 2
 color:=16+(color and $f);
 end;
 
+procedure ajax_k051316_cb(var code:word;var color:word;var priority_mask:word);
+begin
+  code:=code or ((color and $07) shl 8);
+	color:=6+((color and $08) shr 3);
+end;
+
 procedure ajax_k007232_cb_0(valor:byte);
 begin
   k007232_0.set_volume(0,(valor shr 4)*$11,0);
@@ -109,7 +117,7 @@ k052109_0.draw_layer(2,5); //B
 k051960_0.draw_sprites(0,-1);
 if prioridad then begin
   k051960_0.draw_sprites(3,-1);
-  //zoom!
+  k051316_0.draw(5);
   k051960_0.draw_sprites(2,-1);
   k051960_0.draw_sprites(5,-1);
   k052109_0.draw_layer(1,5); //A
@@ -117,9 +125,9 @@ if prioridad then begin
 end else begin
   k051960_0.draw_sprites(5,-1);
   k052109_0.draw_layer(1,5); //A
+  k051316_0.draw(5);
   k051960_0.draw_sprites(4,-1);
   k051960_0.draw_sprites(3,-1);
-  //zoom!
   k051960_0.draw_sprites(2,-1);
 end;
 k052109_0.draw_layer(0,5); //F
@@ -128,27 +136,28 @@ end;
 
 procedure eventos_ajax;
 begin
+if main_vars.service1 then marcade.dswc:=(marcade.dswc and $fb) else marcade.dswc:=(marcade.dswc or $4);
 if event.arcade then begin
   //P1
   if arcade_input.left[0] then marcade.in0:=(marcade.in0 and $fe) else marcade.in0:=(marcade.in0 or $1);
-  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $Fd) else marcade.in0:=(marcade.in0 or $2);
+  if arcade_input.right[0] then marcade.in0:=(marcade.in0 and $fd) else marcade.in0:=(marcade.in0 or $2);
   if arcade_input.up[0] then marcade.in0:=(marcade.in0 and $fb) else marcade.in0:=(marcade.in0 or $4);
-  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $F7) else marcade.in0:=(marcade.in0 or $8);
+  if arcade_input.down[0] then marcade.in0:=(marcade.in0 and $f7) else marcade.in0:=(marcade.in0 or $8);
   if arcade_input.but0[0] then marcade.in0:=(marcade.in0 and $ef) else marcade.in0:=(marcade.in0 or $10);
   if arcade_input.but1[0] then marcade.in0:=(marcade.in0 and $df) else marcade.in0:=(marcade.in0 or $20);
   if arcade_input.but2[0] then marcade.in0:=(marcade.in0 and $bf) else marcade.in0:=(marcade.in0 or $40);
   //P2
   if arcade_input.left[1] then marcade.in1:=(marcade.in1 and $fe) else marcade.in1:=(marcade.in1 or $1);
-  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $Fd) else marcade.in1:=(marcade.in1 or $2);
+  if arcade_input.right[1] then marcade.in1:=(marcade.in1 and $fd) else marcade.in1:=(marcade.in1 or $2);
   if arcade_input.up[1] then marcade.in1:=(marcade.in1 and $fb) else marcade.in1:=(marcade.in1 or $4);
-  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $F7) else marcade.in1:=(marcade.in1 or $8);
+  if arcade_input.down[1] then marcade.in1:=(marcade.in1 and $f7) else marcade.in1:=(marcade.in1 or $8);
   if arcade_input.but0[1] then marcade.in1:=(marcade.in1 and $ef) else marcade.in1:=(marcade.in1 or $10);
   if arcade_input.but1[1] then marcade.in1:=(marcade.in1 and $df) else marcade.in1:=(marcade.in1 or $20);
   if arcade_input.but2[1] then marcade.in1:=(marcade.in1 and $bf) else marcade.in1:=(marcade.in1 or $40);
   //System
   if arcade_input.coin[0] then marcade.in2:=(marcade.in2 and $fe) else marcade.in2:=(marcade.in2 or $1);
   if arcade_input.coin[1] then marcade.in2:=(marcade.in2 and $fd) else marcade.in2:=(marcade.in2 or $2);
-  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $F7) else marcade.in2:=(marcade.in2 or $8);
+  if arcade_input.start[0] then marcade.in2:=(marcade.in2 and $f7) else marcade.in2:=(marcade.in2 or $8);
   if arcade_input.start[1] then marcade.in2:=(marcade.in2 and $ef) else marcade.in2:=(marcade.in2 or $10);
 end;
 end;
@@ -215,6 +224,7 @@ begin
   color.r:=pal5bit(valor);
   set_pal_color_alpha(color,pos);
   k052109_0.clean_video_buffer;
+  k051316_0.clean_video_buffer;
 end;
 
 procedure ajax_putbyte(direccion:word;valor:byte);
@@ -246,7 +256,7 @@ function ajax_sub_getbyte(direccion:word):byte;
 begin
 case direccion of
   0..$7ff:ajax_sub_getbyte:=k051316_0.read(direccion);
-  $1000..$17ff:;
+  $1000..$17ff:ajax_sub_getbyte:=k051316_0.rom_read(direccion and $7ff);
   $2000..$3fff:ajax_sub_getbyte:=memoria[direccion];
   $4000..$7fff:ajax_sub_getbyte:=k052109_0.read(direccion and $3fff);
   $8000..$9fff:ajax_sub_getbyte:=rom_sub_bank[rom_bank2,direccion and $1fff];
@@ -258,7 +268,7 @@ procedure ajax_sub_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
   0..$7ff:k051316_0.write(direccion,valor);
-  $800..$807:;
+  $800..$80f:k051316_0.control_w(direccion and $f,valor);
   $1800:begin
             // enable char ROM reading through the video RAM
             if (valor and $40)<>0 then k052109_0.set_rmrd_line(ASSERT_LINE)
@@ -267,7 +277,7 @@ case direccion of
 	          //m_k051316->wraparound_enable(data & 0x20);
 	          // FIRQ control
 	          sub_firq_enable:=(valor and $10)<>0;
-	          // bank # (ROMS G16 and I16) */
+	          // bank # (ROMS G16 and I16)
 	          rom_bank2:=valor and $0f;
         end;
   $2000..$3fff:memoria[direccion]:=valor;
@@ -324,6 +334,7 @@ begin
  k052109_0.reset;
  ym2151_0.reset;
  k051960_0.reset;
+ k051316_0.reset;
  reset_audio;
  marcade.in0:=$ff;
  marcade.in1:=$ff;
@@ -334,11 +345,29 @@ begin
  sub_firq_enable:=false;
 end;
 
+procedure cerrar_ajax;
+begin
+if k007232_1_rom<>nil then freemem(k007232_1_rom);
+if k007232_2_rom<>nil then freemem(k007232_2_rom);
+if sprite_rom<>nil then freemem(sprite_rom);
+if tiles_rom<>nil then freemem(tiles_rom);
+if zoom_rom<>nil then freemem(zoom_rom);
+k007232_1_rom:=nil;
+k007232_2_rom:=nil;
+sprite_rom:=nil;
+tiles_rom:=nil;
+zoom_rom:=nil;
+end;
+
 function iniciar_ajax:boolean;
 var
    temp_mem:array[0..$1ffff] of byte;
    f:byte;
 begin
+llamadas_maquina.close:=cerrar_ajax;
+llamadas_maquina.reset:=reset_ajax;
+llamadas_maquina.bucle_general:=ajax_principal;
+llamadas_maquina.fps_max:=59.185606;
 iniciar_ajax:=false;
 main_screen.rot90_screen:=true;
 //Pantallas para el K052109
@@ -347,7 +376,7 @@ screen_init(2,512,256,true);
 screen_mod_scroll(2,512,512,511,256,256,255);
 screen_init(3,512,256,false);
 screen_mod_scroll(3,512,512,511,256,256,255);
-screen_init(4,512,256,false);
+screen_init(4,512,512,true); //Para el K051316
 screen_mod_scroll(4,512,512,511,512,512,511);
 screen_init(5,1024,1024,false,true);
 iniciar_video(304,224,true);
@@ -385,12 +414,14 @@ k007232_1:=k007232_chip.create(3579545,k007232_2_rom,$80000,0.50,ajax_k007232_cb
 //Iniciar video
 getmem(tiles_rom,$80000);
 if not(roms_load32b_b(tiles_rom,ajax_tiles)) then exit;
-k052109_0:=k052109_chip.create(1,2,3,ajax_cb,tiles_rom,$80000);
+k052109_0:=k052109_chip.create(1,2,3,0,ajax_cb,tiles_rom,$80000);
 getmem(sprite_rom,$100000);
 if not(roms_load32b_b(sprite_rom,ajax_sprites)) then exit;
-k051960_0:=k051960_chip.create(5,sprite_rom,$100000,ajax_sprite_cb,2);
+k051960_0:=k051960_chip.create(5,1,sprite_rom,$100000,ajax_sprite_cb,2);
 k051960_0.change_irqs(ajax_k051960_cb,nil,nil);
-k051316_0:=k051316_chip.create(4,nil,nil,1);
+getmem(zoom_rom,$80000);
+if not(roms_load(zoom_rom,ajax_zoom)) then exit;
+k051316_0:=k051316_chip.create(4,2,ajax_k051316_cb,zoom_rom,$80000,BPP7);
 //DIP
 marcade.dswa:=$ff;
 marcade.dswa_val:=@ajax_dip_a;
@@ -401,27 +432,6 @@ marcade.dswc_val:=@ajax_dip_c;
 //final
 reset_ajax;
 iniciar_ajax:=true;
-end;
-
-procedure cerrar_ajax;
-begin
-if k007232_1_rom<>nil then freemem(k007232_1_rom);
-if k007232_2_rom<>nil then freemem(k007232_2_rom);
-if sprite_rom<>nil then freemem(sprite_rom);
-if tiles_rom<>nil then freemem(tiles_rom);
-k007232_1_rom:=nil;
-k007232_2_rom:=nil;
-sprite_rom:=nil;
-tiles_rom:=nil;
-end;
-
-procedure Cargar_ajax;
-begin
-llamadas_maquina.iniciar:=iniciar_ajax;
-llamadas_maquina.close:=cerrar_ajax;
-llamadas_maquina.reset:=reset_ajax;
-llamadas_maquina.bucle_general:=ajax_principal;
-llamadas_maquina.fps_max:=59.185606;
 end;
 
 end.

@@ -1,13 +1,13 @@
 object FLoadRom: TFLoadRom
-  Left = 653
-  Height = 544
-  Top = 104
-  Width = 846
+  Left = 436
+  Height = 550
+  Top = 212
+  Width = 1028
   BorderIcons = []
   BorderStyle = bsSingle
   Caption = 'Load Rom'
-  ClientHeight = 544
-  ClientWidth = 846
+  ClientHeight = 550
+  ClientWidth = 1028
   DesignTimePPI = 120
   Font.CharSet = ANSI_CHARSET
   Font.Color = clBlack
@@ -17,12 +17,12 @@ object FLoadRom: TFLoadRom
   Font.Quality = fqDraft
   OnKeyUp = FormKeyUp
   OnShow = FormShow
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object BitBtn1: TBitBtn
-    Left = 610
-    Height = 29
-    Top = 490
-    Width = 86
+    Left = 792
+    Height = 45
+    Top = 496
+    Width = 102
     Caption = 'CANCEL'
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
@@ -38,10 +38,10 @@ object FLoadRom: TFLoadRom
     TabStop = False
   end
   object BitBtn3: TBitBtn
-    Left = 440
-    Height = 29
-    Top = 490
-    Width = 86
+    Left = 608
+    Height = 45
+    Top = 496
+    Width = 102
     Caption = 'OK'
     Font.CharSet = ANSI_CHARSET
     Font.Color = clBlack
@@ -57,7 +57,7 @@ object FLoadRom: TFLoadRom
     TabStop = False
   end
   object gpxrominfo: TGroupBox
-    Left = 320
+    Left = 512
     Height = 89
     Top = 8
     Width = 500
@@ -172,11 +172,11 @@ object FLoadRom: TFLoadRom
     end
   end
   object RomList: TStringGrid
-    Left = 8
-    Height = 452
-    Top = 20
+    Left = 208
+    Height = 524
+    Top = 8
     Width = 296
-    ColCount = 2
+    ColCount = 3
     DefaultColWidth = 120
     DefaultRowHeight = 15
     FixedCols = 0
@@ -195,9 +195,9 @@ object FLoadRom: TFLoadRom
     OnDblClick = RomListDblClick
   end
   object Panel1: TPanel
-    Left = 320
+    Left = 512
     Height = 378
-    Top = 105
+    Top = 95
     Width = 502
     ClientHeight = 378
     ClientWidth = 502
@@ -221,6 +221,125 @@ object FLoadRom: TFLoadRom
       Center = True
       Proportional = True
       Stretch = True
+    end
+  end
+  object GroupBox1: TGroupBox
+    Left = 16
+    Height = 424
+    Top = 8
+    Width = 177
+    Caption = 'Sort'
+    ClientHeight = 402
+    ClientWidth = 173
+    TabOrder = 5
+    object RadioButton1: TRadioButton
+      Left = 12
+      Height = 23
+      Top = 25
+      Width = 36
+      Caption = 'All'
+      OnClick = RadioButton1Click
+      TabOrder = 0
+    end
+    object RadioButton2: TRadioButton
+      Left = 12
+      Height = 23
+      Top = 47
+      Width = 92
+      Caption = 'Computers'
+      OnClick = RadioButton2Click
+      TabOrder = 1
+    end
+    object RadioButton3: TRadioButton
+      Left = 12
+      Height = 23
+      Top = 73
+      Width = 78
+      Caption = 'Consoles'
+      OnClick = RadioButton3Click
+      TabOrder = 2
+    end
+    object RadioButton4: TRadioButton
+      Left = 12
+      Height = 23
+      Top = 99
+      Width = 117
+      Caption = 'Game && Watch'
+      OnClick = RadioButton4Click
+      TabOrder = 3
+    end
+    object RadioButton5: TRadioButton
+      Left = 12
+      Height = 23
+      Top = 120
+      Width = 66
+      Caption = 'Arcade'
+      OnClick = RadioButton5Click
+      TabOrder = 4
+    end
+    object GroupBox2: TGroupBox
+      Left = 12
+      Height = 184
+      Top = 152
+      Width = 149
+      Caption = 'Arcade Sub-Type'
+      ClientHeight = 162
+      ClientWidth = 145
+      TabOrder = 5
+      object CheckBox1: TCheckBox
+        Left = 16
+        Height = 23
+        Top = 8
+        Width = 58
+        Caption = 'Sport'
+        OnClick = CheckBox1Click
+        TabOrder = 0
+      end
+      object CheckBox3: TCheckBox
+        Left = 16
+        Height = 23
+        Top = 56
+        Width = 53
+        Caption = 'Shot'
+        OnClick = CheckBox1Click
+        TabOrder = 2
+      end
+      object CheckBox4: TCheckBox
+        Left = 16
+        Height = 23
+        Top = 79
+        Width = 54
+        Caption = 'Maze'
+        OnClick = CheckBox1Click
+        TabOrder = 3
+      end
+      object CheckBox2: TCheckBox
+        Left = 16
+        Height = 23
+        Top = 32
+        Width = 91
+        Caption = 'Run && Gun'
+        OnClick = CheckBox1Click
+        TabOrder = 1
+      end
+      object CheckBox5: TCheckBox
+        Left = 16
+        Height = 23
+        Top = 101
+        Width = 54
+        Caption = 'Fight'
+        OnClick = CheckBox1Click
+        TabOrder = 4
+      end
+      object CheckBox6: TCheckBox
+        Left = 16
+        Height = 23
+        Top = 123
+        Width = 56
+        Caption = 'Drive'
+        OnClick = CheckBox1Click
+        TabOrder = 5
+      end
     end
   end
 end

@@ -1,9 +1,12 @@
 unit config_general;
+
 interface
+
 uses
   lib_sdl2,Messages,SysUtils,Variants,Classes,Graphics,Controls,Forms,Dialogs,
   StdCtrls,ExtCtrls,lenguaje,main_engine,ComCtrls,Buttons,controls_engine,
   sound_engine,SHLOBJ,rom_export,timer_engine;
+
 type
   TMConfig = class(TForm)
     Button1: TButton;
@@ -198,12 +201,15 @@ type
   public
     { Public declarations }
   end;
+
 var
   MConfig:TMConfig;
   tecla_leida:word;
+
 implementation
 uses principal,redefine, joystick_calibrate;
 {$R *.dfm}
+
 function BrowseForFolder(init_dir,title:string):string;
 var
   browseInfo:tbrowseInfo;
@@ -231,6 +237,7 @@ begin
     if SHGetPathFromIDList(ItemIDList,DisplayName) then BrowseForFolder:=DisplayName;
   end else BrowseForFolder:=remove_last_char(init_dir);
 end;
+
 function nombre_tecla(num:word):string;
 begin
   case num of
@@ -295,6 +302,7 @@ begin
     else nombre_tecla:='N/D';
   end;
 end;
+
 procedure TMConfig.BitBtn10Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -303,6 +311,7 @@ begin
       arcade_input.nbut1[0]:=tecla_leida;
   end;
 end;
+
 procedure TMConfig.BitBtn11Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -311,78 +320,88 @@ begin
     arcade_input.nbut2[0]:=tecla_leida;
   end;
 end;
-PROCEDURE TMConfig.BitBtn12Click(Sender: TObject);
-BEGIN
+
+procedure TMConfig.BitBtn12Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn12.Caption := nombre_tecla(tecla_leida);
     arcade_input.nbut0[1] := tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn13Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn13Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida <> $FFFF then begin
     bitbtn13.Caption := nombre_tecla(tecla_leida);
     arcade_input.nbut1[1] := tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn14Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn14Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida <> $FFFF then begin
     bitbtn14.Caption := nombre_tecla(tecla_leida);
     arcade_input.nbut2[1] := tecla_leida;
-  END;
-END;
+  end;
+end;
+
 procedure TMConfig.BitBtn15Click(Sender: TObject);
 begin
   redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida <> $FFFF then begin
     bitbtn15.Caption := nombre_tecla(tecla_leida);
     arcade_input.nbut4[0] := tecla_leida;
-  END;
+  end;
 end;
+
 procedure TMConfig.BitBtn16Click(Sender: TObject);
 begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn16.Caption := nombre_tecla(tecla_leida);
     arcade_input.nbut5[0] := tecla_leida;
-  END;
+  end;
 end;
+
 procedure TMConfig.BitBtn17Click(Sender: TObject);
 begin
   redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida <> $FFFF then begin
     bitbtn17.Caption := nombre_tecla(tecla_leida);
     arcade_input.nbut3[0] := tecla_leida;
-  END;
+  end;
 end;
+
 procedure TMConfig.BitBtn18Click(Sender: TObject);
 begin
 redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida <> $FFFF then begin
     bitbtn18.Caption := nombre_tecla(tecla_leida);
     arcade_input.nbut3[1] := tecla_leida;
-  END;
+  end;
 end;
+
 procedure TMConfig.BitBtn19Click(Sender: TObject);
 begin
   redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida <> $FFFF then begin
     bitbtn19.Caption:= nombre_tecla(tecla_leida);
     arcade_input.nbut4[1]:=tecla_leida;
-  END;
+  end;
 end;
-PROCEDURE TMConfig.BitBtn1Click(Sender: TObject);
-BEGIN
+
+procedure TMConfig.BitBtn1Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn1.Caption:= nombre_tecla(tecla_leida);
     arcade_input.nleft[0]:= tecla_leida;
   end;
 end;
+
 procedure TMConfig.FormKeyUp(Sender:TObject;var Key:word;Shift:TShiftState);
 begin
   case key of
@@ -390,6 +409,7 @@ begin
     27:button2click(nil);
   end;
 end;
+
 procedure cambiar_texto_idioma(idioma:byte);
 begin
 MConfig.GroupBox3.Caption:=leng[idioma].archivo[1];
@@ -402,6 +422,7 @@ MConfig.radiobutton15.Caption:=leng[idioma].opciones[3];
 MConfig.radiobutton14.Caption:=leng[idioma].opciones[5];
 MConfig.groupbox4.Caption:=leng[idioma].opciones[1];
 end;
+
 procedure TMConfig.FormShow(Sender: TObject);
 var
   f:integer;
@@ -704,6 +725,7 @@ begin
   button5.Caption:=nombre_tecla(arcade_input.nstart[0]);
   button6.Caption:=nombre_tecla(arcade_input.nstart[1]);
 end;
+
 procedure TMConfig.RadioButton1Click(Sender: TObject);
 begin
   bitbtn1.Enabled:=true;
@@ -727,14 +749,17 @@ begin
   //radiobutton21.Enabled:=false;
   //radiobutton22.Enabled:=false;
 end;
+
 procedure TMConfig.RadioButton21Click(Sender: TObject);
 begin
   button7.Enabled:=false;
 end;
+
 procedure TMConfig.RadioButton22Click(Sender: TObject);
 begin
  button7.Enabled:=true;
 end;
+
 procedure TMConfig.RadioButton2Click(Sender: TObject);
 begin
   bitbtn1.Enabled:=false;
@@ -764,6 +789,7 @@ begin
     radiobutton22.Checked:=true;
   end;}
 end;
+
 procedure TMConfig.RadioButton3Click(Sender: TObject);
 begin
   bitbtn5.Enabled:=true;
@@ -784,6 +810,7 @@ begin
   combobox14.Visible:=false;
   button8.Enabled:=false;
 end;
+
 procedure TMConfig.RadioButton4Click(Sender: TObject);
 begin
   bitbtn5.Enabled:=false;
@@ -804,34 +831,42 @@ begin
   combobox14.Visible:=true;
   button8.Enabled:=true;
 end;
+
 procedure TMConfig.SpeedButton1Click(Sender: TObject);
 begin
   d1.Text:=BrowseForFolder(d1.text,label1.Caption);
 end;
+
 procedure TMConfig.SpeedButton2Click(Sender: TObject);
 begin
   d2.Text:=BrowseForFolder(d2.text,label2.Caption);
 end;
+
 procedure TMConfig.SpeedButton4Click(Sender: TObject);
 begin
   d4.Text:=d4.Text+BrowseForFolder(d4.text,label4.Caption);
 end;
+
 procedure TMConfig.SpeedButton5Click(Sender: TObject);
 begin
   d5.Text:=BrowseForFolder(d5.text,label5.Caption);
 end;
+
 procedure TMConfig.SpeedButton6Click(Sender: TObject);
 begin
   d3.Text:=BrowseForFolder(d3.text,label3.Caption);
 end;
+
 procedure TMConfig.SpeedButton8Click(Sender: TObject);
 begin
   d6.Text:=BrowseForFolder(d6.text,label12.Caption);
 end;
+
 procedure TMConfig.Button2Click(Sender: TObject);
 begin
   close;
 end;
+
 procedure TMConfig.Button3Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -840,6 +875,7 @@ begin
     arcade_input.ncoin[0]:=tecla_leida;
   end;
 end;
+
 procedure TMConfig.Button4Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -848,6 +884,7 @@ begin
     arcade_input.ncoin[1]:=tecla_leida;
   end;
 end;
+
 procedure TMConfig.Button5Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -856,6 +893,7 @@ begin
     arcade_input.nstart[0]:=tecla_leida;
   end;
 end;
+
 procedure TMConfig.Button6Click(Sender: TObject);
 begin
   redefine1.showmodal;
@@ -864,18 +902,21 @@ begin
     arcade_input.nstart[1]:=tecla_leida;
   end;
 end;
+
 procedure TMConfig.Button7Click(Sender: TObject);
 begin
 joy_calibration.show;
 bucle_joystick(0);
 while joy_calibration.Showing do application.ProcessMessages;
 end;
+
 procedure TMConfig.Button8Click(Sender: TObject);
 begin
 joy_calibration.show;
 bucle_joystick(1);
 while joy_calibration.Showing do application.ProcessMessages;
 end;
+
 procedure TMConfig.ComboBox1Change(Sender: TObject);
 begin
   arcade_input.num_joystick[0]:=combobox1.ItemIndex;
@@ -888,78 +929,88 @@ begin
     radiobutton22.Checked:=true;
   end;}
 end;
+
 procedure TMConfig.BitBtn20Click(Sender: TObject);
 begin
 redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida <> $FFFF then begin
     bitbtn20.Caption := nombre_tecla(tecla_leida);
     arcade_input.nbut5[1] := tecla_leida;
-  END;
+  end;
 end;
-PROCEDURE TMConfig.BitBtn2Click(Sender: TObject);
-BEGIN
+
+procedure TMConfig.BitBtn2Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn2.Caption := nombre_tecla(tecla_leida);
     arcade_input.nright[0] := tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn3Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn3Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn3.Caption := nombre_tecla(tecla_leida);
     arcade_input.ndown[0] := tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn4Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn4Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn4.Caption := nombre_tecla(tecla_leida);
     arcade_input.nup[0] := tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn5Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn5Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn5.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nup[1]:=tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn6Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn6Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn6.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nleft[1]:=tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn7Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn7Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida <> $FFFF THEN BEGIN
+  if tecla_leida <> $FFFF then begin
     bitbtn7.Caption := nombre_tecla(tecla_leida);
     arcade_input.nright[1] := tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn8Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn8Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn8.Caption:=nombre_tecla(tecla_leida);
     arcade_input.ndown[1]:=tecla_leida;
-  END;
-END;
-PROCEDURE TMConfig.BitBtn9Click(Sender: TObject);
-BEGIN
+  end;
+end;
+
+procedure TMConfig.BitBtn9Click(Sender: TObject);
+begin
   redefine1.showmodal;
-  IF tecla_leida<>$FFFF THEN BEGIN
+  if tecla_leida<>$FFFF then begin
     bitbtn9.Caption:=nombre_tecla(tecla_leida);
     arcade_input.nbut0[0]:=tecla_leida;
-  END;
-END;
+  end;
+end;
+
 procedure TMConfig.Button1Click(Sender: TObject);
 var
   tmp_var:byte;
@@ -1042,6 +1093,7 @@ begin
   end else for tmp_var:=0 to 11 do timers.autofire_enabled[tmp_var]:=false;
   close;
 end;
+
 procedure TMConfig.CheckBox16Click(Sender: TObject);
 begin
 timers.autofire_on:=checkbox16.Checked;
@@ -1061,10 +1113,12 @@ checkbox14.Enabled:=checkbox16.Checked;
 checkbox15.Enabled:=checkbox16.Checked;
 timers.enabled(timers.autofire_timer,checkbox16.Checked);
 end;
+
 procedure TMConfig.BitBtn21Click(Sender: TObject);
 begin
 export_roms;
 end;
+
 procedure TMConfig.RadioButton5Click(Sender: TObject);
 begin
 cambiar_texto_idioma(0);

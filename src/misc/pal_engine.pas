@@ -13,7 +13,7 @@ type
                 r,g,b:byte;
                 a:byte;
          end;
-  tpaleta=array[0..max_colores] of tcolor;
+  tpaleta=array[0..MAX_COLORES] of tcolor;
 var
   paleta,buffer_paleta:array[0..MAX_COLORES] of word;
   paleta32,paleta_alpha:array[0..MAX_COLORES] of dword;

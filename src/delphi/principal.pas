@@ -220,7 +220,7 @@ type
     hopmappy1: TMenuItem;
     skykiddx1: TMenuItem;
     RocnRope1: TMenuItem;
-    Repulse1: TMenuItem;
+    kyugohw1: TMenuItem;
     heNewZelandStoryHardware1: TMenuItem;
     tnzs1: TMenuItem;
     InsectorX1: TMenuItem;
@@ -496,6 +496,11 @@ type
     SideArms1: TMenuItem;
     SpeedRumbler1: TMenuItem;
     ChinaGate1: TMenuItem;
+    MagMax1: TMenuItem;
+    Repulse1: TMenuItem;
+    SRDMission1: TMenuItem;
+    Airwolf1: TMenuItem;
+    Ambush1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure Ejecutar1Click(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -566,6 +571,16 @@ leer_idioma;
 principal1.idiomaclick(nil);
 principal1.timer2.Enabled:=true;
 fix_screen_pos(415,325);
+case main_screen.video_mode of
+  1,3,5,6:begin
+        principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
+        principal1.Top:=(screen.Height div 2)-(principal1.Height div 2);
+      end;
+  2,4:begin
+        principal1.Left:=(screen.Width div 2)-principal1.Width;
+        principal1.Top:=(screen.Height div 2)-principal1.Height;
+      end;
+end;
 end;
 
 procedure Tprincipal1.Ejecutar1Click(Sender: TObject);
@@ -754,6 +769,7 @@ FLoadRom.Show;
 while FLoadRom.Showing do application.ProcessMessages;
 principal1.Enabled:=true;
 Windows.SetFocus(child.Handle);
+timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.FormClose(Sender: TObject; var Action: TCloseAction);

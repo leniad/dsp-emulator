@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.21WIP3';
+        DSP_VERSION='0.21WIP4';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -274,11 +274,11 @@ principal1.image2.visible:=false;
 {$endif}
 //pongo el nombre de la maquina...
 change_caption;
+SDL_SetWindowSize(window_render,x,y);
 if main_vars.center_screen then begin
   principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
   principal1.Top:=(screen.Height div 2)-(principal1.Height div 2);
 end;
-SDL_SetWindowSize(window_render,x,y);
 if pantalla[0]<>nil then SDL_FreeSurface(pantalla[0]);
 pantalla[0]:=SDL_GetWindowSurface(window_render);
 //Cambio la temporal tambien...
@@ -818,10 +818,10 @@ end;
 
 procedure reset_dsp;
 begin
-fillchar(paleta[0],max_colores*2,0);
+fillchar(paleta[0],MAX_COLORES*2,0);
 fillchar(memoria[0],$10000,0);
 fillchar(mem_snd[0],$10000,0);
-fillchar(buffer_paleta[0],max_colores*2,1);
+fillchar(buffer_paleta[0],MAX_COLORES*2,1);
 cpu_main_reset;
 llamadas_maquina.cartuchos:=nil;
 llamadas_maquina.cintas:=nil;

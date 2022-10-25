@@ -48,7 +48,7 @@ begin
   gfx_set_desc_data(4,0,8*128,24,16,8,0);
   convert_gfx(1,0,spr_rom,@ps_x[0],@ps_y[0],false,false);
   gfx[1].trans[0]:=true;
-  gfx[1].alpha[$f]:=true;
+  gfx[1].alpha[$f]:=true; //para shadow
 end;
 
 procedure k053245_reset;
@@ -167,7 +167,7 @@ begin
 		if mirrorx then flipx:=false; // documented and confirmed
 		mirrory:=(buffer_ram[offs+6] and $0200)<>0;
 		shadow:=(buffer_ram[offs+6] and $0080)<>0;
-		// the coordinates given are for the *center* of the sprite */
+		// the coordinates given are for the *center* of the sprite
 		ox:=ox-(round(zx*w*16) shr 1);
 		oy:=oy-(round(zy*h*16) shr 1);
 		for y:=0 to (h-1) do begin
@@ -177,7 +177,7 @@ begin
 				c:=code;
 				if mirrorx then begin
 					if (not(flipx) xor (2*x<w)) then begin
-						// mirror left/right */
+						// mirror left/right
 						c:=c+(w-x-1);
 						fx:=true;
 					end else begin
@@ -191,7 +191,7 @@ begin
 				end;
 				if mirrory then begin
 					if (not(flipy) xor (2*y>=h)) then begin
-						// mirror top/bottom */
+						// mirror top/bottom
 						c:=c+(8*(h-y-1));
 						fy:=true;
 					end else begin
@@ -203,9 +203,9 @@ begin
 					  else c:=c+(8*y);
 					fy:=flipy;
 				end;
-				{ the sprite can start at any point in the 8x8 grid, but it must stay */
-				/* in a 64 entries window, wrapping around at the edges. The animation */
-				/* at the end of the saloon level in Sunset Riders breaks otherwise.}
+				{ the sprite can start at any point in the 8x8 grid, but it must stay
+				  in a 64 entries window, wrapping around at the edges. The animation
+				  at the end of the saloon level in Sunset Riders breaks otherwise.}
 				c:=(c and $3f) or (code and not($3f));
         if shadow then begin //alpha
           if ((zx=1) and (zy=1)) then begin

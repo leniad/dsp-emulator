@@ -334,7 +334,9 @@ uses
   arkanoid_hw in '..\arcade\arkanoid_hw.pas',
   sidearms_hw in '..\arcade\sidearms_hw.pas',
   speedrumbler_hw in '..\arcade\speedrumbler_hw.pas',
-  chinagate_hw in '..\arcade\chinagate_hw.pas';
+  chinagate_hw in '..\arcade\chinagate_hw.pas',
+  magmax_hw in '..\arcade\magmax_hw.pas',
+  ambush_hw in '..\arcade\ambush_hw.pas';
 
 {$R *.res}
 begin

@@ -1,4 +1,42 @@
 ﻿# DSP Emulator status #
+<b>25/10/22 - DSP Emulator 0.21WIP4. Updated Windows binary and source update.<br>
+<pre>
+-General
+    +Update preview images, added images for new drivers
+    +Konami K051316
+        -Begin implementation, still WIP
+    +CPU
+        -HD6309: Fixed opcodes $2c, $2d and $2f
+        -Konami CPU
+              +Fixed opcodes $66, $67, $6e, $6f, $76, $77, $7e, $7f, $b4 and $b5
+              +Added opcodes $74, $bc, $be, $c6, $cc, $cd and $ce (Fixes 'The Simpsons', it's playable to the end)
+        -M6809: Fixed opcodes $2c, $2d, $2e and $2f
+    +Konami 053246
+        -Fixed shadows
+    +Sound
+        -AY8910
+              +Added gain per channel
+              +Fixed AY8912 PORTB channel
+-Ajax
+    +Added K051316 video chip
+-Ambush
+    +Added driver with sound
+-Kyugo HW
+    +S.R.D. Mission: Added driver with sound
+    +AirWolf: Added driver with sound
+-Mag Max
+    +Added driver with sound
+-Nemesis HW
+    +Rewrited screen flip, fixes TwinBee
+-The Simpsons
+    +Fixed video settings
+    +Added sprites dma interrupt enable/disable
+-Thunder Cross HW
+    +Fixed sprites priority
+</pre><br>
+<img src="https://i.ibb.co/TgzTxTV/Airwolf.png"> <img src="https://i.ibb.co/PFmVY4f/Ambush.png"><br>
+<img src="https://i.ibb.co/TwdZJMY/magmax.png"> <img src="https://i.ibb.co/yX12fWz/srdmission.png"><br>
+<img src="https://i.ibb.co/pdpvh16/twinbee.png"> <img src="https://i.ibb.co/S332FHp/vendetta.png"><br><br>
 <b>09/10/22 - DSP Emulator 0.21WIP3. Updated Windows 32 and source update.<br>
 <pre>
 -General

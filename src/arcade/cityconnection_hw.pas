@@ -74,7 +74,7 @@ for f:=$fff downto 0 do begin
       color:=(lines_color_look[y2+(y shl 3)] shl 2)+512;
       for x2:=0 to 7 do begin
         if not(gfx[0].trans[pos^]) then temp^:=paleta[pos^+color]
-          else temp^:=paleta[max_colores];
+          else temp^:=paleta[MAX_COLORES];
         inc(temp);
         inc(pos);
       end;

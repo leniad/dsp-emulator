@@ -268,6 +268,14 @@ type
     Joust1: TMenuItem;
     MenuItem45: TMenuItem;
     arkanoid1: TMenuItem;
+    chinagate1: TMenuItem;
+    magmax1: TMenuItem;
+    ambush1: TMenuItem;
+    airwolf1: TMenuItem;
+    srdmission1: TMenuItem;
+    Repulse1: TMenuItem;
+    speedrumbler1: TMenuItem;
+    sidearms1: TMenuItem;
     tapper1: TMenuItem;
     robotron1: TMenuItem;
     stargate1: TMenuItem;
@@ -382,7 +390,7 @@ type
     Solomon1: TMenuItem;
     Timer4: TTimer;
     tnzs1: TMenuItem;
-    Repulse1: TMenuItem;
+    kyugohw1: TMenuItem;
     Pacland1: TMenuItem;
     rocnrope1: TMenuItem;
     skykiddx1: TMenuItem;

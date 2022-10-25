@@ -22,7 +22,7 @@ object principal1: Tprincipal1
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poDesktopCenter
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object Panel1: TPanel
     Left = 0
     Height = 42
@@ -1867,6 +1867,7 @@ object principal1: Tprincipal1
       Width = 350
       Align = alClient
       AutoSize = True
+      Enabled = False
       Picture.Data = {
         07544269746D6170D6450500424DD6450500000000003600000028000000E701
         0000EC0000000100180000000000A04505000000000000000000000000000000
@@ -12670,7 +12671,7 @@ object principal1: Tprincipal1
         0000
       }
       Stretch = True
-      Transparent = True
+      Visible = False
     end
   end
   object MainMenu1: TMainMenu
@@ -13246,9 +13247,20 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
-          object Repulse1: TMenuItem
-            Caption = 'Repulse'
-            OnClick = CambiarMaquina
+          object kyugohw1: TMenuItem
+            Caption = 'Kyugo HW'
+            object Repulse1: TMenuItem
+              Caption = 'Repulse'
+              OnClick = CambiarMaquina
+            end
+            object srdmission1: TMenuItem
+              Caption = 'S.R.D. Mission'
+              OnClick = CambiarMaquina
+            end
+            object airwolf1: TMenuItem
+              Caption = 'Air Wolf'
+              OnClick = CambiarMaquina
+            end
           end
           object MenuItem15: TMenuItem
             Caption = 'The New ZealandStory HW'
@@ -13482,6 +13494,14 @@ object principal1: Tprincipal1
           end
           object arkanoid1: TMenuItem
             Caption = 'Arkanoid'
+            OnClick = CambiarMaquina
+          end
+          object sidearms1: TMenuItem
+            Caption = 'Side Arms'
+            OnClick = CambiarMaquina
+          end
+          object ambush1: TMenuItem
+            Caption = 'Ambush'
             OnClick = CambiarMaquina
           end
         end
@@ -13744,6 +13764,10 @@ object principal1: Tprincipal1
               OnClick = CambiarMaquina
             end
           end
+          object speedrumbler1: TMenuItem
+            Caption = 'The Speed Rumbler'
+            OnClick = CambiarMaquina
+          end
         end
         object MenuItem10: TMenuItem
           Caption = 'HD6309'
@@ -13767,6 +13791,10 @@ object principal1: Tprincipal1
           end
           object Contra1: TMenuItem
             Caption = 'Contra'
+            OnClick = CambiarMaquina
+          end
+          object chinagate1: TMenuItem
+            Caption = 'China Gate'
             OnClick = CambiarMaquina
           end
         end
@@ -14306,6 +14334,10 @@ object principal1: Tprincipal1
               Caption = 'Thunder & Lighning'
               OnClick = CambiarMaquina
             end
+          end
+          object magmax1: TMenuItem
+            Caption = 'Mag Max'
+            OnClick = CambiarMaquina
           end
         end
         object MenuItem11: TMenuItem

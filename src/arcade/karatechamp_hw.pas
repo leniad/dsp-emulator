@@ -4,8 +4,11 @@ interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      sound_engine,ay_8910,timer_engine,dac;
-procedure cargar_karatechamp;
+
+function karatechamp_iniciar:boolean;
+
 implementation
+
 const
     karatechamp_rom:array[0..5] of tipo_roms=(
     (n:'b014.bin';l:$2000;p:0;crc:$0000d1a0),(n:'b015.bin';l:$2000;p:$2000;crc:$03fae67e),
@@ -36,9 +39,11 @@ const
     (mask:$20;name:'Free Play';number:2;dip:((dip_val:$20;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
     (mask:$40;name:'Demo Sounds';number:2;dip:((dip_val:$40;dip_name:'Off'),(dip_val:$0;dip_name:'On'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),
     (mask:$80;name:'Cabinet';number:2;dip:((dip_val:$0;dip_name:'Upright'),(dip_val:$80;dip_name:'Cocktail'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
+
 var
   sound_latch:byte;
   nmi_enable,nmi_enable_sound:boolean;
+
 procedure update_video_karatechamp;
 var
     x,y,atrib,color:byte;
@@ -67,6 +72,7 @@ for f:=0 to $3f do begin
 end;
 actualiza_trozo_final(16,0,224,256,2);
 end;
+
 procedure eventos_karatechamp;
 begin
 if event.arcade then begin
@@ -86,6 +92,7 @@ if event.arcade then begin
   if arcade_input.down[1] then marcade.in1:=marcade.in1 and $7f else marcade.in1:=marcade.in1 or $80;
 end;
 end;
+
 procedure karatechamp_principal;
 var
   frame_m,frame_s:single;
@@ -111,10 +118,12 @@ while EmuStatus=EsRuning do begin
   video_sync;
 end;
 end;
+
 function karatechamp_getbyte(direccion:word):byte;
 begin
 karatechamp_getbyte:=memoria[direccion];
 end;
+
 procedure karatechamp_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -126,6 +135,7 @@ case direccion of
                  end;
 end;
 end;
+
 function karatechamp_inbyte(puerto:word):byte;
 begin
 case (puerto and $ff) of
@@ -136,6 +146,7 @@ case (puerto and $ff) of
   $a8:;
 end;
 end;
+
 procedure karatechamp_outbyte(puerto:word;valor:byte);
 begin
 case (puerto and $ff) of
@@ -150,11 +161,13 @@ case (puerto and $ff) of
       end;
 end;
 end;
+
 //sound
 function karatechamp_getbyte_snd(direccion:word):byte;
 begin
   karatechamp_getbyte_snd:=mem_snd[direccion];
 end;
+
 procedure karatechamp_putbyte_snd(direccion:word;valor:byte);
 begin
 case direccion of
@@ -162,6 +175,7 @@ case direccion of
     $e000..$e2ff:mem_snd[direccion]:=valor;
 end;
 end;
+
 function karatechamp_inbyte_snd(puerto:word):byte;
 begin
 if (puerto and $ff)=$6 then begin
@@ -184,16 +198,19 @@ case (puerto and $ff) of
     end;
 end;
 end;
+
 procedure karatechamp_snd_irq;
 begin
   if nmi_enable_sound then z80_1.change_nmi(ASSERT_LINE);
 end;
+
 procedure karatechamp_sound_update;
 begin
   ay8910_0.Update;
   ay8910_1.Update;
   dac_0.update;
 end;
+
 //Main
 procedure karatechamp_reset;
 begin
@@ -209,6 +226,7 @@ sound_latch:=0;
 marcade.in0:=$ff;
 marcade.in1:=$ff;
 end;
+
 function karatechamp_iniciar:boolean;
 const
   ps_x:array[0..15] of dword=(0,1,2,3,4,5,6,7,
@@ -220,6 +238,8 @@ var
   f:word;
   memoria_temp:array[0..$17fff] of byte;
 begin
+llamadas_maquina.bucle_general:=karatechamp_principal;
+llamadas_maquina.reset:=karatechamp_reset;
 karatechamp_iniciar:=false;
 iniciar_audio(false);
 screen_init(1,256,256);
@@ -274,10 +294,5 @@ marcade.dswa_val:=@karatechamp_dip;
 karatechamp_reset;
 karatechamp_iniciar:=true;
 end;
-procedure cargar_karatechamp;
-begin
-llamadas_maquina.iniciar:=karatechamp_iniciar;
-llamadas_maquina.bucle_general:=karatechamp_principal;
-llamadas_maquina.reset:=karatechamp_reset;
-end;
+
 end.

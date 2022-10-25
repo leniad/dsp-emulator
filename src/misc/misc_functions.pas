@@ -52,13 +52,10 @@ principal1.BitBtn2.left:=(principal1.statusbar1.width div 2)-107-38{$ifdef fpc}-
 principal1.BitBtn3.left:=(principal1.statusbar1.width div 2)-79-28{$ifdef fpc}-7{$endif}; //79
 principal1.BitBtn5.left:=(principal1.statusbar1.width div 2)-47-22{$ifdef fpc}-8{$endif}; //47
 principal1.BitBtn6.left:=(principal1.statusbar1.width div 2)-19-12{$ifdef fpc}-6{$endif}; //19
-
 principal1.BitBtn8.left:=(principal1.statusbar1.width div 2)+14-1{$ifdef fpc}+6{$endif}; //14
 principal1.BitBtn19.left:=(principal1.statusbar1.width div 2)+42+9{$ifdef fpc}+8{$endif}; //42
-
 principal1.btncfg.left:=(principal1.statusbar1.width div 2)+72+22{$ifdef fpc}+9{$endif};  //72
 principal1.BitBtn13.left:=(principal1.statusbar1.width div 2)+103+29{$ifdef fpc}+11{$endif}; //103
-
 principal1.Left:=old_x;
 principal1.Top:=old_y;
 end;

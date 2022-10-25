@@ -5,7 +5,7 @@ uses {$IFDEF WINDOWS}windows,{$ENDIF}
      nz80,mcs51,main_engine,controls_engine,gfx_engine,rom_engine,pal_engine,
      kaneco_pandora,ym_2203,sound_engine,misc_functions;
 
-procedure cargar_hvyunit;
+function iniciar_hvyunit:boolean;
 
 implementation
 const
@@ -389,6 +389,9 @@ var
   ptemp:pbyte;
   f:word;
 begin
+llamadas_maquina.bucle_general:=hvyunit_principal;
+llamadas_maquina.reset:=reset_hvyunit;
+llamadas_maquina.fps_max:=58;
 iniciar_hvyunit:=false;
 iniciar_audio(false);
 screen_init(1,512,512);
@@ -448,14 +451,6 @@ marcade.dswb_val:=@hvyunit_dip_b;
 //reset
 reset_hvyunit;
 iniciar_hvyunit:=true;
-end;
-
-procedure Cargar_hvyunit;
-begin
-llamadas_maquina.iniciar:=iniciar_hvyunit;
-llamadas_maquina.bucle_general:=hvyunit_principal;
-llamadas_maquina.reset:=reset_hvyunit;
-llamadas_maquina.fps_max:=58;
 end;
 
 end.

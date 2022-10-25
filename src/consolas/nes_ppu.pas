@@ -103,7 +103,7 @@ if (pos_linea<ppu_nes.sprite_size) then begin
    if flipx then begin
         for x:=0 to 7 do begin
           punto:=(((tempb1 and (1 shl x)) shr x) and 1)+((((tempb2 and (1 shl x)) shr x) and 1) shl 1);
-          if punto=0 then ptemp^:=paleta[max_colores]
+          if punto=0 then ptemp^:=paleta[MAX_COLORES]
             else begin
               //Sprite 0 Hit
               if (((pos_x+x)<>255) and (f=0) and ((ppu_nes.dot_line_trans[pos_x+x] and $3f)<>0) and ((ppu_nes.status and $40)=0)) then begin
@@ -111,13 +111,13 @@ if (pos_linea<ppu_nes.sprite_size) then begin
                 ppu_nes.sprite0_hit_pos:=nsprites*8*PPU_PIXEL_TIMING;
               end;
               if (((ppu_nes.control2 and $4)=0) and ((pos_x+x)<8)) then begin
-                ptemp^:=paleta[max_colores];
+                ptemp^:=paleta[MAX_COLORES];
               end else begin
                  if ((ppu_nes.dot_line_trans[pos_x+x] and $3f)>=f) then begin
                     ptemp^:=paleta[ppu_read_mem($3f10+punto+atrib) and $3f];
                     ppu_nes.dot_line_trans[pos_x+x]:=(ppu_nes.dot_line_trans[pos_x+x] and $80) or f;
                  end else
-                    ptemp^:=paleta[max_colores];
+                    ptemp^:=paleta[MAX_COLORES];
                  end;
             end;
           inc(ptemp);
@@ -126,7 +126,7 @@ if (pos_linea<ppu_nes.sprite_size) then begin
    end else begin
         for x:=7 downto 0 do begin
           punto:=(((tempb1 and (1 shl x)) shr x) and 1)+((((tempb2 and (1 shl x)) shr x) and 1) shl 1);
-          if punto=0 then ptemp^:=paleta[max_colores]
+          if punto=0 then ptemp^:=paleta[MAX_COLORES]
             else begin
               //Sprite 0 Hit
               if (((pos_x+(7-x))<>255) and (f=0) and ((ppu_nes.dot_line_trans[pos_x+(7-x)] and $3f)<>0) and ((ppu_nes.status and $40)=0)) then begin
@@ -134,12 +134,12 @@ if (pos_linea<ppu_nes.sprite_size) then begin
                  ppu_nes.sprite0_hit_pos:=nsprites*8*PPU_PIXEL_TIMING;;
               end;
               if (((ppu_nes.control2 and $4)=0) and ((pos_x+(7-x))<8)) then begin
-                ptemp^:=paleta[max_colores];
+                ptemp^:=paleta[MAX_COLORES];
               end else begin
                 if ((ppu_nes.dot_line_trans[pos_x+(7-x)] and $3f)>=f) then begin //Prioridad sprite/sprite
                   ptemp^:=paleta[ppu_read_mem($3f10+punto+atrib) and $3f];
                   ppu_nes.dot_line_trans[pos_x+(7-x)]:=(ppu_nes.dot_line_trans[pos_x+(7-x)] and $80) or f;
-                end else ptemp^:=paleta[max_colores];
+                end else ptemp^:=paleta[MAX_COLORES];
               end;
             end;
           inc(ptemp);
@@ -189,7 +189,7 @@ begin
         for x:=7 downto 0 do begin
             Col:=((ppu_read_mem(PatternAdr) and (1 shl x)) shr x)+((ppu_read_mem(PatternAdr+8) and (1 shl x)) shr x)*2;
             if Col=0 then begin
-              ptemp^:=paleta[max_colores];
+              ptemp^:=paleta[MAX_COLORES];
               ppu_nes.dot_line_trans[pos_x]:=ppu_nes.dot_line_trans[pos_x] and $7f;
             end else begin
               ptemp^:=set_emphasis(paleta[ppu_read_mem($3f00+Col+AttribVal) and $3f]);
