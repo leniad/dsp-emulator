@@ -127,7 +127,7 @@ procedure borde_normal(linea:word);
 procedure eventos_spectrum;
 function spec_comun(clock:dword):boolean;
 procedure spec_cerrar_comun;
-function spectrum_tapes:boolean;
+procedure spectrum_tapes;
 procedure grabar_spec;
 procedure reset_misc;
 procedure spectrum_despues_instruccion(estados_t:byte);
@@ -259,7 +259,7 @@ if event.keyboard then begin
   end;
   if ((keyboard[KEYBOARD_F5]) and (main_vars.tipo_maquina=2)) then begin
     clear_disk(0);
-    change_caption;
+    change_caption('');
   end;
   if false then teclado_matriz
     else copymemory(@var_spectrum.key_spec[0],@keyboard[0],256);
@@ -524,11 +524,9 @@ reset_audio;
 var_spectrum.posicion_beeper:=0;
 if cinta_tzx.cargada then begin
   cinta_tzx.play_once:=false;
-  llamadas_maquina.open_file:=cinta_tzx.name;
-end else if dsk[0].abierto then begin
-            llamadas_maquina.open_file:=dsk[0].ImageName;
-         end else llamadas_maquina.open_file:='';
-change_caption;
+  change_caption(cinta_tzx.name);
+end else if dsk[0].abierto then change_caption(dsk[0].ImageName)
+          else change_caption('');
 mouse.lg_val:=$20;
 var_spectrum.flash:=0;
 var_spectrum.irq_pos:=0;
@@ -592,11 +590,10 @@ if main_vars.tipo_maquina=2 then begin
 end;
 end;
 
-function spectrum_tapes:boolean;
+procedure spectrum_tapes;
 begin
 load_spec.show;
 while load_spec.showing do application.HandleMessage;
-spectrum_tapes:=true;
 end;
 
 procedure grabar_spec;
@@ -622,7 +619,7 @@ if SaveRom(StSpectrum,nombre,indice) then begin
           4:correcto:=grabar_sna(nombre);
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0)
-          else Directory.spectrum_tap_snap:=extractfiledir(nombre)+main_vars.cadena_dir;
+          else Directory.spectrum_tap_snap:=ExtractFilePath(nombre);
 end;
 end;
 

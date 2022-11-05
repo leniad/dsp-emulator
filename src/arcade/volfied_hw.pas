@@ -106,7 +106,7 @@ end;
 
 procedure volfied_principal;
 var
-  frame_m,frame_s,frame_mcu:single;
+  frame_m,frame_s{$IFDEF MCU},frame_mcu{$ENDIF}:single;
   f:byte;
 begin
 init_controls(false,false,false,true);

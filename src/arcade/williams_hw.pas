@@ -68,17 +68,15 @@ const
         CPU_SYNC=8;
 
 var
- pia1_timer,pia2_timer,ram_bank,sound_latch:byte;
+ ram_bank,sound_latch,xoff:byte;
  rom_data:array[0..$f,0..$fff] of byte;
  nvram:array[0..$3ff] of byte;
  linea:word;
  palette:array[0..$f] of word;
  pal_lookup:array[0..$ff] of word;
  events_call:procedure;
- xoff:byte;
  //joust
- ram_rom_set:boolean;
- player:boolean;
+ ram_rom_set,player:boolean;
 
 procedure update_video_williams(linea:word);
 var
@@ -91,7 +89,7 @@ for x:=0 to 151 do begin
   puntos[x*2]:=pal_lookup[palette[pix shr 4]];
   puntos[(x*2)+1]:=pal_lookup[palette[pix and $f]];
 end;
-putpixel(0+ADD_SPRITE,linea+ADD_SPRITE,304,@puntos[0],1);
+putpixel(0+ADD_SPRITE,linea+ADD_SPRITE,304,@puntos,1);
 end;
 
 procedure eventos_defender;

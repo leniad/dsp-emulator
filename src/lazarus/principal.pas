@@ -586,7 +586,6 @@ var
 begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if SaveRom(StBitmap,nombre,indice) then begin
   case indice of
@@ -650,7 +649,6 @@ if SaveRom(StBitmap,nombre,indice) then begin
   end;
   imagen1.Free;
 end;
-principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
@@ -658,7 +656,7 @@ procedure Tprincipal1.IdiomaClick(Sender: TObject);
 var
   tmp_idioma:byte;
 begin
-if sender<>nil then tmp_idioma:= Tmenuitem(sender).Tag
+if sender<>nil then tmp_idioma:=Tmenuitem(sender).Tag
   else begin
     tmp_idioma:=main_vars.idioma;
     main_vars.idioma:=255;
@@ -716,7 +714,7 @@ Init_sdl_lib;
 timers:=timer_eng.create;
 status_bitmap:=TBitmap.Create;
 EmuStatus:=EsStoped;
-directory.Base:=extractfiledir(application.ExeName)+main_vars.cadena_dir;
+directory.Base:=ExtractFilePath(application.ExeName);
 {$ifdef darwin}
 //OSX: Subir tres veces el directorio para saber el directorio real...
 cadena:=directory.Base;
@@ -732,7 +730,7 @@ if not DirectoryExists(Directory.Preview) then CreateDir(Directory.Preview);
 if not DirectoryExists(Directory.Arcade_nvram) then CreateDir(Directory.Arcade_nvram);
 if not DirectoryExists(directory.qsnapshot) then CreateDir(directory.qsnapshot);
 leer_idioma;
-principal1.idiomaclick(nil);
+cambiar_idioma(main_vars.idioma);
 principal1.timer2.Enabled:=true;
 end;
 
@@ -775,11 +773,9 @@ procedure Tprincipal1.Acercade1Click(Sender: TObject);
 begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 aboutbox.show;
 while aboutbox.Showing do application.ProcessMessages;
-principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
@@ -806,10 +802,8 @@ if @llamadas_maquina.configurar=nil then begin
 end;
 principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 llamadas_maquina.configurar;
-principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
@@ -817,11 +811,8 @@ procedure Tprincipal1.fLoadCinta(Sender: TObject);
 begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-if addr(llamadas_maquina.cintas)<>nil then
-  if not(llamadas_maquina.cintas) then MessageDlg('Cinta/Snapshot no valido'+chr(10)+chr(13)+'Tape/Snapshot not valid', mtError,[mbOk], 0);
-principal1.Enabled:=true;
+if addr(llamadas_maquina.cintas)<>nil then llamadas_maquina.cintas;
 timer4.Enabled:=true;
 end;
 
@@ -829,10 +820,8 @@ procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
 begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 if addr(llamadas_maquina.grabar_snapshot)<>nil then llamadas_maquina.grabar_snapshot;
-principal1.Enabled:=true;
 timer4.enabled:=true;
 end;
 
@@ -851,8 +840,8 @@ end else begin
    timer1.Enabled:=true;
    SDL_PauseAudioDevice(sound_device,0);
    sync_all;
+   if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
 end;
-if addr(llamadas_maquina.bucle_general)<>nil then llamadas_maquina.bucle_general();
 end;
 
 procedure Tprincipal1.fSlow(Sender: TObject);
@@ -905,11 +894,8 @@ procedure Tprincipal1.fLoadCartucho(Sender: TObject);
 begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
-if addr(llamadas_maquina.cartuchos)<>nil then
-  if not(llamadas_maquina.cartuchos) then MessageDlg('ROM/Cartucho/Snapshot no valido'+chr(10)+chr(13)+'ROM/Cartrigde/Snapshot not valid', mtError,[mbOk], 0);
-principal1.Enabled:=true;
+if addr(llamadas_maquina.cartuchos)<>nil then llamadas_maquina.cartuchos;
 timer4.Enabled:=true;
 end;
 
@@ -917,12 +903,10 @@ procedure Tprincipal1.LstRomsClick(Sender: TObject);
 begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 FLoadRom.Show;
 while FLoadRom.Showing do application.ProcessMessages;
-principal1.Enabled:=true;
-sync_all;
+timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.Salir1Click(Sender: TObject);
@@ -933,10 +917,14 @@ end;
 procedure Tprincipal1.Timer2Timer(Sender: TObject);
 var
   tipo:word;
+  sdl_res:integer;
 begin
 timer2.Enabled:=false;
-if SDL_WasInit(libSDL_INIT_VIDEO)=0 then
-  if (SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO)<0) then halt(0);
+if SDL_WasInit(libSDL_INIT_VIDEO)=0 then sdl_res:=SDL_init(libSDL_INIT_VIDEO or libSDL_INIT_JOYSTICK or libSDL_INIT_NOPARACHUTE or libSDL_INIT_AUDIO);
+if sdl_res<0 then begin
+   MessageDlg('SDL2 Mixer library not found.'+chr(10)+chr(13)+'Please read the documentation!', mtError,[mbOk], 0);
+   halt(0);
+end;
 principal1.Caption:=principal1.Caption+dsp_version;
 tipo:=main_vars.tipo_maquina;
 main_vars.tipo_maquina:=$ffff;
@@ -951,11 +939,9 @@ procedure Tprincipal1.fConfigurar_general(Sender: TObject);
 begin
 principal1.Enabled:=false;
 timer1.Enabled:=false;
-EmuStatusTemp:=EmuStatus;
 EmuStatus:=EsPause;
 MConfig.Show;
 while MConfig.Showing do application.ProcessMessages;
-principal1.Enabled:=true;
 timer4.Enabled:=true;
 end;
 
@@ -966,7 +952,6 @@ if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquin
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
 cargar_maquina(main_vars.tipo_maquina);
-//focus
 main_vars.driver_ok:=false;
 if @llamadas_maquina.iniciar<>nil then main_vars.driver_ok:=llamadas_maquina.iniciar;
 timers.autofire_init;
@@ -986,20 +971,26 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn14.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
 end else begin
-  principal1.timer1.Enabled:=true;
+  timers.autofire_init;
+  EmuStatus:=EsRuning;
   sync_all;
-  principal1.ejecutar1click(nil);
+  principal1.BitBtn3.Glyph:=nil;
+  principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
+  timer1.Enabled:=true;
+  if @llamadas_maquina.bucle_general<>nil then llamadas_maquina.bucle_general;
 end;
 end;
 
 procedure Tprincipal1.Timer4Timer(Sender: TObject);
 begin
 timer4.Enabled:=false;
-if not(main_vars.driver_ok) then exit;
-EmuStatus:=EmuStatusTemp;
-timer1.Enabled:=true;
-sync_all;
-llamadas_maquina.bucle_general;
+if main_vars.driver_ok then begin
+   EmuStatus:=EsRuning;
+   timer1.Enabled:=true;
+   principal1.Enabled:=true;
+   sync_all;
+   llamadas_maquina.bucle_general;
+end;
 end;
 
 initialization

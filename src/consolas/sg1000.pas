@@ -111,36 +111,35 @@ begin
  marcade.in1:=$ff;
 end;
 
-function abrir_sg:boolean;
+procedure abrir_sg;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
   crc_val,longitud:integer;
+  resultado:boolean;
 begin
-  if not(OpenRom(StSG1000,RomFile)) then begin
-    abrir_sg:=true;
-    EmuStatusTemp:=EsRuning;
-    principal1.timer1.Enabled:=true;
-    exit;
-  end;
-  abrir_sg:=false;
+  if not(OpenRom(StSG1000,RomFile)) then exit;
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
-    if not(search_file_from_zip(RomFile,'*.sg',nombre_file,longitud,crc_val,true)) then exit;
-    getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc_val,true)) then begin
-      freemem(datos);
-      exit;
+    if search_file_from_zip(RomFile,'*.sg',nombre_file,longitud,crc_val,true) then begin
+      getmem(datos,longitud);
+      if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc_val,true)) then freemem(datos)
+        else resultado:=true;
     end;
   end else begin
-    if extension<>'SG' then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
-      exit;
+    if extension='SG' then begin
+      if read_file_size(RomFile,longitud) then begin
+        getmem(datos,longitud);
+        if not(read_file(RomFile,datos,longitud)) then freemem(datos)
+          else resultado:=true;
+        nombre_file:=extractfilename(RomFile);
+      end;
     end;
-    nombre_file:=extractfilename(RomFile);
+  end;
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    exit;
   end;
   //Abrirlo
   extension:=extension_fichero(nombre_file);
@@ -149,20 +148,16 @@ begin
   ram_8k:=false;
   mid_8k_ram:=false;
   crc_val:=calc_crc(datos,longitud);
+  freemem(datos);
   case dword(crc_val) of
     //BomberMan Super (2), King's Valley, Knightmare, Legend of Kage, Rally X, Road Fighter, Tank Battalion, Twinbee, YieAr KungFu II
     $69fc1494,$ce5648c3,$223397a1,$281d2888,$2e7166d5,$306d5f78,$29e047cc,$5cbd1163,$c550b4f0,$fc87463c:ram_8k:=true;
     //Castle, Othello (2)
     $92f29d6,$af4f14bc,$1d1a0ca3:mid_8k_ram:=true;
   end;
-  llamadas_maquina.open_file:=nombre_file;
-  abrir_sg:=true;
   reset_sg;
-  EmuStatusTemp:=EsRuning;
-  principal1.timer1.Enabled:=true;
-  change_caption;
+  change_caption(nombre_file);
   Directory.sg1000:=ExtractFilePath(romfile);
-  freemem(datos);
 end;
 
 function iniciar_sg:boolean;

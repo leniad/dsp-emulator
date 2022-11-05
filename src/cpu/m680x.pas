@@ -275,8 +275,6 @@ begin
 end;
 
 function cpu_m6800.asr8(valor:byte):byte;
-var
-   tempb:byte;
 begin
    r.cc.c:=(valor and $1)<>0;
    valor:=(valor shr 1);
@@ -774,8 +772,6 @@ begin
 end;
 
 procedure cpu_m6800.hd6301y_internal_reg_w(direccion:word;valor:byte);
-var
-  tempw:word;
 begin
 self.internal_ram[direccion]:=valor;
 case direccion of
@@ -785,7 +781,7 @@ case direccion of
       end;
   $01:if (self.port_ddr[1]<>valor) then begin //p2_ddr_w
         self.port_ddr[1]:=valor;
-        self.write_port2;
+        self.write_port2_301;
 			end;
   $06:begin  //p3_data_w
   			//if (m_pending_isf_clear)

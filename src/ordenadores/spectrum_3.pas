@@ -19,7 +19,7 @@ var
 
 function iniciar_3:boolean;
 procedure spec3_reset;
-function spectrum3_loaddisk:boolean;
+procedure spectrum3_loaddisk;
 //CPU
 procedure spectrum3_main;
 function spec3_getbyte(direccion:word):byte;
@@ -32,11 +32,10 @@ procedure spec3_retraso_puerto(puerto:word);
 implementation
 uses tap_tzx,spectrum_misc;
 
-function spectrum3_loaddisk:boolean;
+procedure spectrum3_loaddisk;
 begin
 load_dsk.show;
 while load_dsk.Showing do application.ProcessMessages;
-spectrum3_loaddisk:=true;
 end;
 
 function iniciar_3:boolean;

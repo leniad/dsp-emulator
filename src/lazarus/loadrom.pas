@@ -203,24 +203,6 @@ for f:=1 to GAMES_CONT do orden_games[f]:=f;
     end;
   end;
 end;
-//Añado las entradas a la lista
-case main_vars.sort of
-  0:RadioButton1.Checked:=true;
-  2:RadioButton2.Checked:=true;
-  4:RadioButton4.Checked:=true;
-  8:RadioButton3.Checked:=true;
-  1,$10..$ffff:begin
-      CheckBox1.Checked:=(main_vars.sort and $10)<>0;
-      CheckBox2.Checked:=(main_vars.sort and $20)<>0;
-      CheckBox3.Checked:=(main_vars.sort and $40)<>0;
-      CheckBox4.Checked:=(main_vars.sort and $80)<>0;
-      CheckBox5.Checked:=(main_vars.sort and $100)<>0;
-      CheckBox6.Checked:=(main_vars.sort and $200)<>0;
-      //El orden es importante!!
-      radiobutton5.checked:=true;
-    end;
-end;
-//Muestro la imagen
 if not FileExists(Directory.Preview+'preview.png') then begin
    png := TPortableNetworkGraphic.Create;
    ImgPreview.canvas.Brush.Color:=clWhite;
@@ -234,6 +216,37 @@ if not FileExists(Directory.Preview+'preview.png') then begin
    png.SaveToFile(Directory.Preview+'preview.png');
    png.free;
 end;
+//Añado las entradas a la lista
+case main_vars.sort of
+  0:begin
+      RadioButton1.Checked:=true;
+      {$ifdef linux}radiobutton1Click(nil);{$endif}
+    end;
+  2:begin
+      RadioButton2.Checked:=true;
+      {$ifdef linux}radiobutton2Click(nil);{$endif}
+    end;
+  4:begin
+      RadioButton4.Checked:=true;
+      {$ifdef linux}radiobutton4Click(nil);{$endif}
+    end;
+  8:begin
+      RadioButton3.Checked:=true;
+      {$ifdef linux}radiobutton3Click(nil);{$endif}
+    end;
+  1,$10..$ffff:begin
+      CheckBox1.Checked:=(main_vars.sort and $10)<>0;
+      CheckBox2.Checked:=(main_vars.sort and $20)<>0;
+      CheckBox3.Checked:=(main_vars.sort and $40)<>0;
+      CheckBox4.Checked:=(main_vars.sort and $80)<>0;
+      CheckBox5.Checked:=(main_vars.sort and $100)<>0;
+      CheckBox6.Checked:=(main_vars.sort and $200)<>0;
+      //El orden es importante!!
+      radiobutton5.checked:=true;
+      {$ifdef linux}radiobutton5Click(nil);{$endif}
+    end;
+end;
+//Muestro la imagen
 show_picture;
 end;
 
@@ -292,11 +305,9 @@ if not(main_vars.driver_ok) then begin
   principal1.BitBtn6.Enabled:=false;
   principal1.BitBtn19.Enabled:=false;
   principal1.BitBtn8.Enabled:=false;
-  exit;
+  principal1.enabled:=true;
+  sync_all;
 end;
-//setfocus
-EmuStatus:=EmuStatusTemp;
-principal1.timer1.Enabled:=true;
 end;
 
 procedure TFLoadRom.RomListDblClick(Sender: TObject);
@@ -305,8 +316,7 @@ var
 begin
 numero:=GAMES_DESC[StrToInt(RomList.Cells[2,RomList.Selection.Top])].grid;
 //Si es la misma maquina debe continuar, sino que ejecute la nueva
-if main_vars.tipo_maquina<>numero then load_game(numero)
-   else EmuStatus:=EmuStatusTemp;
+if main_vars.tipo_maquina<>numero then load_game(numero);
 floadrom.close;
 end;
 

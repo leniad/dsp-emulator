@@ -7,7 +7,7 @@ uses lib_sdl2,{$IFDEF windows}windows,{$else}LCLType,{$endif}
      gfx_engine,arcade_config,vars_hide,device_functions,timer_engine;
 
 const
-        DSP_VERSION='0.21WIP4';
+        DSP_VERSION='0.21WIP4.1';
         PANT_SPRITES=20;
         PANT_DOBLE=21;
         PANT_AUX=22;
@@ -73,9 +73,9 @@ type
             qsnapshot:string;
         end;
         tllamadas_globales = record
-           iniciar,cintas,cartuchos:function:boolean;
-           bucle_general,reset,close,grabar_snapshot,configurar,acepta_config:procedure;
-           caption,open_file:string;
+           iniciar:function:boolean;
+           cintas,cartuchos,bucle_general,reset,close,grabar_snapshot,configurar,acepta_config:procedure;
+           caption:string;
            fps_max:single;
            save_qsnap,load_qsnap:procedure(nombre:string);
            end;
@@ -94,7 +94,7 @@ type
           dip:array[0..MAX_DIP_VALUES] of def_dip_value;
         end;
         pdef_dip=^def_dip;
-        TEmuStatus=(EsPause, EsRuning, EsStoped);
+        TEmuStatus=(EsPause,EsRuning,EsStoped);
 
 //Video
 procedure iniciar_video(x,y:word;alpha:boolean=false);
@@ -113,7 +113,7 @@ procedure actualiza_trozo_simple(o_x1,o_y1,o_x2,o_y2:word;sitio:byte);
 procedure flip_surface(pant:byte;flipx,flipy:boolean);
 procedure video_sync;
 //misc
-procedure change_caption;
+procedure change_caption(nombre:string);
 procedure reset_dsp;
 //Multidirs
 function find_rom_multiple_dirs(rom_name:string):byte;
@@ -142,7 +142,7 @@ var
         cont_sincroniza:dword;
         cont_micro,valor_sync:single;
         {$endif}
-        EmuStatus,EmuStatusTemp:TEmuStatus;
+        EmuStatus:TEmuStatus;
         //Basic memory...
         memoria,mem_snd,mem_misc:array[0..$ffff] of byte;
 
@@ -273,7 +273,7 @@ child.Left:=(x-child.width) div 2;
 principal1.image2.visible:=false;
 {$endif}
 //pongo el nombre de la maquina...
-change_caption;
+change_caption('');
 SDL_SetWindowSize(window_render,x,y);
 if main_vars.center_screen then begin
   principal1.Left:=(screen.Width div 2)-(principal1.Width div 2);
@@ -391,8 +391,7 @@ var
 begin
 if not(main_screen.pantalla_completa) then begin
   main_screen.old_video_mode:=main_screen.video_mode;
-  if p_final[0].y>300 then main_screen.video_mode:=7
-    else main_screen.video_mode:=6;
+  main_screen.video_mode:=6;
   principal1.n1x1.Checked:=false;
   principal1.n2x1.Checked:=false;
   principal1.scanlines1.Checked:=false;
@@ -401,14 +400,15 @@ if not(main_screen.pantalla_completa) then begin
   principal1.FullScreen1.Checked:=true;
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
-  //window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN_DESKTOP);
-  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,800,600,libSDL_WINDOW_FULLSCREEN_DESKTOP);
+  window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_UNDEFINED,libSDL_WINDOWPOS_UNDEFINED,p_final[0].x,p_final[0].y,libSDL_WINDOW_FULLSCREEN);
+  //window_render:=SDL_CreateWindow('',libSDL_WINDOWPOS_CENTERED,libSDL_WINDOWPOS_CENTERED,640,480,0);
   main_screen.pantalla_completa:=true;
 end else begin
   main_screen.video_mode:=main_screen.old_video_mode;
   SDL_FreeSurface(pantalla[0]);
   SDL_DestroyWindow(window_render);
   {$ifndef fpc}
+  if child<>nil then child.Free;
   Child:=TfrChild.Create(application);
   child.Left:=0;
   child.Top:=0;
@@ -675,12 +675,12 @@ end else if main_screen.flip_main_x then begin
                   end;
 case main_screen.video_mode of
   0:exit;
-  1:begin
+  1,6:begin
       origen.w:=pantalla[PANT_TEMP].w;
       origen.h:=pantalla[PANT_TEMP].h;
       pant_final:=PANT_TEMP;
     end;
-  2,7:begin
+  2:begin
         for i:=0 to p_final[0].y-1 do begin
           punt:=pantalla[PANT_TEMP].pixels;
           inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
@@ -734,7 +734,7 @@ case main_screen.video_mode of
         origen.h:=p_final[0].y*2;
         pant_final:=PANT_DOBLE;
     end;
-  5,6:begin
+  5:begin
         for i:=0 to p_final[0].y-1 do begin
            punt:=pantalla[PANT_TEMP].pixels;
            inc(punt,(i*pantalla[PANT_TEMP].pitch) shr 1);
@@ -765,12 +765,12 @@ SDL_UpperBlit(pantalla[pant_final],@origen,pantalla[0],@origen);
 SDL_UpdateWindowSurface(window_render);
 end;
 
-procedure change_caption;
+procedure change_caption(nombre:string);
 var
   cadena:ansistring;
 begin
-if llamadas_maquina.open_file='' then cadena:=llamadas_maquina.caption
-  else cadena:=llamadas_maquina.caption+' - '+llamadas_maquina.open_file;
+if nombre='' then cadena:=llamadas_maquina.caption
+  else cadena:=llamadas_maquina.caption+' - '+nombre;
 {$IFnDEF fpc}
 child.Caption:=cadena;
 {$Else}
@@ -840,7 +840,6 @@ if ((main_vars.tipo_maquina>9) and (main_vars.tipo_maquina<1000)) then llamadas_
 llamadas_maquina.acepta_config:=nil;
 llamadas_maquina.bucle_general:=nil;
 llamadas_maquina.fps_max:=60;
-llamadas_maquina.open_file:='';
 main_vars.vactual:=0;
 main_vars.mensaje_principal:='';
 main_vars.service1:=false;

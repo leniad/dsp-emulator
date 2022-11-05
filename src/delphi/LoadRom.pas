@@ -152,7 +152,7 @@ case main_vars.sort of
     end;
 end;
 //Muestro la imagen
-if not FileExists(Directory.Preview+'preview.png') then begin
+if not(FileExists(Directory.Preview+'preview.png')) then begin
    ImgPreview.canvas.Brush.Color:=clWhite;
    ImgPreview.canvas.Brush.Style:=bsSolid;
    ImgPreview.canvas.Rectangle(0,0,ImgPreview.Width,ImgPreview.Height);
@@ -228,11 +228,9 @@ if not(main_vars.driver_ok) then begin
     principal1.BitBtn6.Enabled:=false;
     principal1.BitBtn19.Enabled:=false;
     principal1.BitBtn8.Enabled:=false;
-    exit;
+    principal1.enabled:=true;
+    if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 end;
-if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
-EmuStatus:=EmuStatusTemp;
-principal1.timer1.Enabled:=true;
 end;
 
 procedure TFLoadRom.BitBtn3Click(Sender: TObject);

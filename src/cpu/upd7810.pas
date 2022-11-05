@@ -2021,8 +2021,6 @@ end;
 procedure cpu_upd7810.opcode_60;
 var
   instruccion:byte;
-  tempb:byte;
-  tempw:word;
 begin
   instruccion:=self.getbyte(self.pc);
   self.pc:=self.pc+1;

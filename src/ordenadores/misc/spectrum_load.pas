@@ -490,6 +490,7 @@ end;
 procedure spectrum_load_exit;
 var
   resultado,cinta:boolean;
+  cadena:string;
 begin
 if ((datos=nil) and not(spec_rom.hay_rom)) then exit;
 rom_cambiada_48:=false;
@@ -501,7 +502,7 @@ if spec_rom.hay_rom then begin
   llamadas_maquina.reset;
   rom_cambiada_48:=true;
   resultado:=true;
-  llamadas_maquina.open_file:='ROM: '+spec_rom.nombre_rom;
+  cadena:='ROM: '+spec_rom.nombre_rom;
 end;
 if extension='TAP' then begin
   resultado:=abrir_tap(datos,file_size);
@@ -530,7 +531,7 @@ if extension='ZX' then resultado:=abrir_zx(datos,file_size);
 if extension='SZX' then resultado:=abrir_szx(datos,file_size);
 if not(resultado) then begin
   MessageDlg('No es una cinta o un snapshot válido.'+chr(10)+chr(13)+'Not a valid tape or snapshot', mtInformation,[mbOk], 0);
-  llamadas_maquina.open_file:='';
+  cadena:='';
 end else begin
     //Si todo ha ido bien y no hay ROM, devolver la original!
     if not(rom_cambiada_48) then copymemory(@memoria[0],@mem_snd[0],$4000);
@@ -539,12 +540,11 @@ end else begin
       tape_window1.show;
       tape_window1.BitBtn1.Enabled:=true;
       tape_window1.BitBtn2.Enabled:=false;
-      llamadas_maquina.open_file:=extension+': '+nombre;
-      cinta_tzx.name:=llamadas_maquina.open_file;
-    end else begin  //Snap shot
-      change_caption;
+      cadena:=extension+': '+nombre;
+      cinta_tzx.name:=cadena;
+    end else begin  //Snapshot
       main_screen.rapido:=false;
-      llamadas_maquina.open_file:=extension+': '+nombre;
+      cadena:=extension+': '+nombre;
     end;
     Directory.spectrum_tap_snap:=load_spec.FileListBox1.Directory+main_vars.cadena_dir;
     ultima_posicion:=load_spec.filelistbox1.ItemIndex;
@@ -558,7 +558,7 @@ if spec_rom.datos_rom<>nil then begin
   freemem(spec_rom.datos_rom);
   spec_rom.datos_rom:=nil;
 end;
-change_caption;
+change_caption(cadena);
 end;
 
 procedure spectrum_load_close;

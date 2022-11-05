@@ -266,7 +266,6 @@ function pia6821_chip.get_in_a_value:byte;
 var
   port_a_data,ret:byte;
 begin
-	port_a_data:=0;
 	// update the input
 	if (addr(in_a_handler)<>nil) then begin
 		port_a_data:=self.in_a_handler;

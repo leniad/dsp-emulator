@@ -53,7 +53,7 @@ var
   poke_num:byte;
 begin
 {$I-}
-assignfile(fichero,extractfiledir(application.ExeName)+main_vars.cadena_dir+'database.pok');
+assignfile(fichero,ExtractFilePath(application.ExeName)+'database.pok');
 reset(fichero);
 posicion:=0;
 poke_num:=0;

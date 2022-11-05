@@ -219,7 +219,7 @@ begin
  io_gg[6]:=$ff;
 end;
 
-function abrir_gg:boolean;
+procedure abrir_gg;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
@@ -227,38 +227,34 @@ var
   resultado:boolean;
   crc_val:dword;
 begin
-  if not(OpenRom(StGG,RomFile)) then begin
-    abrir_gg:=true;
-    EmuStatusTemp:=EsRuning;
-    principal1.timer1.Enabled:=true;
-    exit;
-  end;
-  abrir_gg:=false;
+  if not(OpenRom(StGG,RomFile)) then exit;
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
-    if not(search_file_from_zip(RomFile,'*.gg',nombre_file,longitud,crc,true)) then exit;
-    getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
-      freemem(datos);
-      exit;
+    if search_file_from_zip(RomFile,'*.gg',nombre_file,longitud,crc,true) then begin
+      getmem(datos,longitud);
+      if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then freemem(datos)
+        else resultado:=true;
     end;
   end else begin
-    if (extension<>'GG') then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
-      exit;
+    if (extension='GG') then begin
+      if read_file_size(RomFile,longitud) then begin
+        getmem(datos,longitud);
+        if not(read_file(RomFile,datos,longitud)) then freemem(datos)
+          else resultado:=true;
+        nombre_file:=extractfilename(RomFile);
+      end;
     end;
-    nombre_file:=extractfilename(RomFile);
+  end;
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    exit;
   end;
   //Abrirlo
   extension:=extension_fichero(nombre_file);
   z80_0.change_ram_calls(gg_getbyte,gg_putbyte);
   resultado:=abrir_cartucho_gg(datos,longitud);
   if resultado then begin
-    llamadas_maquina.open_file:=nombre_file;
-    abrir_gg:=true;
     crc_val:=calc_crc(datos,longitud);
     case crc_val of
       $5e53c7f7,$dbe8895c,$f7c524f6,$c888222b,$aa140c9c,$8813514b,$9fa727a0,$fb481971,$d9a7f170,
@@ -280,13 +276,11 @@ begin
       end;
     end;
     reset_gg;
-    EmuStatusTemp:=EsRuning;
-    principal1.timer1.Enabled:=true;
   end else begin
     MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
-    llamadas_maquina.open_file:='';
+    nombre_file:='';
   end;
-  change_caption;
+  change_caption(nombre_file);
   Directory.gg:=ExtractFilePath(romfile);
   freemem(datos);
 end;

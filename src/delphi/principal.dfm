@@ -7,7 +7,7 @@ object principal1: Tprincipal1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DSP Emulator v'
-  ClientHeight = 253
+  ClientHeight = 248
   ClientWidth = 397
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -51,7 +51,7 @@ object principal1: Tprincipal1
     Left = 0
     Top = 42
     Width = 348
-    Height = 192
+    Height = 187
     Align = alClient
     Enabled = False
     ParentShowHint = False
@@ -1228,7 +1228,7 @@ object principal1: Tprincipal1
     Left = 348
     Top = 42
     Width = 49
-    Height = 192
+    Height = 187
     Align = alRight
     TabOrder = 1
     Visible = False
@@ -1870,7 +1870,7 @@ object principal1: Tprincipal1
   end
   object Panel3: TPanel
     Left = 0
-    Top = 234
+    Top = 229
     Width = 397
     Height = 19
     Align = alBottom

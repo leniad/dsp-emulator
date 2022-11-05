@@ -14,7 +14,7 @@ type
   ptipo_roms=^tipo_roms;
 
 function carga_rom_zip(nombre_zip,nombre_rom:string;donde:pbyte;longitud,crc:integer;warning:boolean):boolean;
-function carga_rom_zip_crc(nombre_zip,nombre_rom:string;donde:pointer;longitud,crc:integer):boolean;
+function carga_rom_zip_crc(nombre_zip,nombre_rom:string;donde:pointer;longitud:integer;crc:dword):boolean;
 function roms_load(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load16b(sitio:pbyte;const ctipo_roms:array of tipo_roms):boolean;
 function roms_load16w(sitio:pword;const ctipo_roms:array of tipo_roms):boolean;
@@ -45,7 +45,7 @@ if ((crc_rom<>crc) and (crc<>0) and warning and main_vars.show_crc_error) then M
 carga_rom_zip:=true;
 end;
 
-function carga_rom_zip_crc(nombre_zip,nombre_rom:string;donde:pointer;longitud,crc:integer):boolean;
+function carga_rom_zip_crc(nombre_zip,nombre_rom:string;donde:pointer;longitud:integer;crc:dword):boolean;
 var
   long_rom:integer;
 begin

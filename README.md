@@ -1,4 +1,17 @@
 ﻿# DSP Emulator status #
+<b>05/11/22 - DSP Emulator 0.21WIP4.1. Quick fix! Updated Windows binary and source update.<br>
+<pre>
+-Lazarus
+    +Fixed image preview error
+    +Fixed linux sort games
+    +Added check for SDL2 Mixer present, needed for linux and MacOS
+-General
+    +Fixed - Emulator stops with no reason (Thanks to Neville)
+    +Better console game files loading, better error handling
+    +Better tape files loading, better error handling
+    +Fixed remembering last open dir for all systems
+    +Better fullscreen mode (Press F6)
+</pre><br><br>
 <b>25/10/22 - DSP Emulator 0.21WIP4. Updated Windows binary and source update.<br>
 <pre>
 -General

@@ -56,7 +56,7 @@ const
         (mask:$8;name:'Control in 3D Stages';number:2;dip:((dip_val:$8;dip_name:'Normal'),(dip_val:$0;dip_name:'Inverted'),(),(),(),(),(),(),(),(),(),(),(),(),(),())),());
 
 var
- tiles_rom,sprite_rom,road_rom,k007232_1_rom,k007232_2_rom,zoom_rom:pbyte;
+ tiles_rom,sprite_rom,k007232_1_rom,k007232_2_rom,zoom_rom:pbyte;
  sound_latch,rom_bank1,rom_bank2:byte;
  sub_firq_enable,prioridad:boolean;
  rom_bank:array[0..11,0..$1fff] of byte;

@@ -9,7 +9,7 @@ function phoenix_iniciar:boolean;
 
 implementation
 var
- banco_pal,scroll_y,banco,sound_latch_b:byte;
+ banco_pal,scroll_y,banco{$IFDEF PHOENIX_DEBUG},sound_latch_b{$ENDIF}:byte;
  mem_video:array[0..1,0..$fff] of byte;
 
 const
@@ -182,8 +182,10 @@ end;
 end;
 
 procedure pleiads_putbyte(direccion:word;valor:byte);
+{$IFDEF PHOENIX_DEBUG}
 var
   pitch,note:byte;
+{$ENDIF}
 begin
 direccion:=direccion and $7fff;
 case direccion of

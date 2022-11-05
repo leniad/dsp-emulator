@@ -1258,15 +1258,15 @@ type
     logo:array[0..$2f] of byte;
   end;
 
-function abrir_gb:boolean;
+procedure abrir_gb;
 const
   main_logo:array[0..$2f] of byte=(
   $CE,$ED,$66,$66,$CC,$0D,$00,$0B,$03,$73,$00,$83,$00,$0C,$00,$0D,
   $00,$08,$11,$1F,$88,$89,$00,$0E,$DC,$CC,$6E,$E6,$DD,$DD,$D9,$99,
   $BB,$BB,$67,$63,$6E,$0E,$EC,$CC,$DD,$DC,$99,$9F,$BB,$B9,$33,$3E);
 var
-  mal:boolean;
-  extension,nombre_file,RomFile,dir:string;
+  mal,resultado:boolean;
+  extension,nombre_file,RomFile,dir,cadena:string;
   datos,ptemp:pbyte;
   longitud,crc:integer;
   f,h:word;
@@ -1274,37 +1274,43 @@ var
   gb_logo:^tgb_logo;
   crc32:dword;
 begin
-  if not(OpenRom(StGb,RomFile)) then begin
-    abrir_gb:=true;
-    exit;
-  end;
+  if not(OpenRom(StGb,RomFile)) then exit;
   getmem(gb_logo,sizeof(tgb_logo));
-  abrir_gb:=false;
   gameboy.read_io:=leer_io;
   gameboy.write_io:=escribe_io;
   gameboy.video_render:=update_video_gb;
   gameboy.is_gbc:=false;
   lr35902_0.change_despues_instruccion(gb_despues_instruccion);
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
     if not(search_file_from_zip(RomFile,'*.gb',nombre_file,longitud,crc,false)) then
-      if not(search_file_from_zip(RomFile,'*.gbc',nombre_file,longitud,crc,false)) then exit;
+      if not(search_file_from_zip(RomFile,'*.gbc',nombre_file,longitud,crc,false)) then begin
+        MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+        exit;
+      end;
     getmem(datos,longitud);
     if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
       freemem(datos);
       freemem(gb_logo);
-      exit;
-    end;
+    end else resultado:=true;
   end else begin
-    if ((extension<>'GB') and (extension<>'GBC')) then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
-      freemem(gb_logo);
+    if ((extension<>'GB') and (extension<>'GBC')) then begin
+      MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
       exit;
     end;
-    nombre_file:=extractfilename(RomFile);
+    if read_file_size(RomFile,longitud) then begin
+      getmem(datos,longitud);
+      if not(read_file(RomFile,datos,longitud)) then begin
+        freemem(datos);
+        freemem(gb_logo);
+      end else resultado:=true;
+      nombre_file:=extractfilename(RomFile);
+    end;
+  end;
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    exit;
   end;
   ptemp:=datos;
   //Comprobar si hay una cabecera extra delante, detras me da igual...
@@ -1451,10 +1457,11 @@ begin
           end;
       else MessageDlg('Mapper '+inttohex(gb_head.cart_type,2)+' no implementado', mtInformation,[mbOk], 0);
   end;
+  cadena:='';
   if not(mal) then begin
     if (gb_head.cgb_flag and $80)<>0 then begin //GameBoy Color
       dir:=directory.arcade_list_roms[find_rom_multiple_dirs('gbcolor.zip')];
-      llamadas_maquina.open_file:=gb_head.title;
+      cadena:=gb_head.title;
       rom_exist:=false;
       if carga_rom_zip(dir+'gbcolor.zip',gbc_rom[0].n,@bios_rom[0],gbc_rom[0].l,gbc_rom[0].crc,false) then
         if rom_exist or carga_rom_zip(dir+'gbcolor.zip',gbc_rom[1].n,@bios_rom[gbc_rom[1].p],gbc_rom[1].l,gbc_rom[1].crc,false) then rom_exist:=true;
@@ -1470,11 +1477,10 @@ begin
     end else begin
       dir:=directory.arcade_list_roms[find_rom_multiple_dirs('gameboy.zip')];
       rom_exist:=carga_rom_zip(dir+'gameboy.zip',gb_rom.n,@bios_rom[0],gb_rom.l,gb_rom.crc,false);
-      llamadas_maquina.open_file:=gb_head.title+gb_head.manu+ansichar(gb_head.cgb_flag);
+      cadena:=gb_head.title+gb_head.manu+ansichar(gb_head.cgb_flag);
     end;
-    abrir_gb:=true;
-  end else llamadas_maquina.open_file:='';
-  change_caption;
+  end;
+  change_caption(cadena);
   cartucho_cargado:=true;
   freemem(datos);
   freemem(gb_logo);

@@ -118,6 +118,7 @@ var
   SDL_MapRGB:function(const format:libsdlp_PixelFormat;r:byte;g:byte;b:byte):Cardinal;cdecl;
   SDL_MapRGBA:function(const format:libsdlp_PixelFormat;r:byte;g:byte;b:byte;a:byte):Cardinal;cdecl;
   SDL_GetKeyboardState:function(numkeys:PInteger):pbyte;cdecl;
+  SDL_SetWindowFullscreen:function(window:libsdlP_Window;flags:Cardinal):LongInt;cdecl;
   {$ifdef fpc}
   SDL_SetError:function(const fmt:PAnsiChar):LongInt;cdecl;
   SDL_GetError:function:PAnsiChar;cdecl;
@@ -196,6 +197,7 @@ end;
 @SDL_CreateWindowFrom:=GetProcAddress(sdl_dll_Handle,'SDL_CreateWindowFrom');
 @SDL_CreateWindow:=GetProcAddress(sdl_dll_Handle,'SDL_CreateWindow');
 @SDL_UpdateWindowSurface:=GetProcAddress(sdl_dll_Handle,'SDL_UpdateWindowSurface');
+@SDL_SetWindowFullscreen:=GetProcAddress(sdl_dll_Handle,'SDL_SetWindowFullscreen');
 //rwops
 @SDL_RWFromFile:=GetProcAddress(sdl_dll_Handle,'SDL_RWFromFile');
 //pixels

@@ -172,7 +172,7 @@ begin
  check_z80_bus_reset;
 end;
 
-function abrir_genesis:boolean;
+procedure abrir_genesis;
 begin
 end;
 

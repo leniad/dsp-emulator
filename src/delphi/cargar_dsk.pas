@@ -145,6 +145,7 @@ end;
 procedure Tload_dsk.FileListBox1DblClick(Sender: TObject);
 var
   correcto:boolean;
+  cadena:string;
 begin
 correcto:=false;
 if ((file_extension<>'DSK') and (file_extension<>'IPF') and (file_extension<>'D64')) then exit;
@@ -152,15 +153,15 @@ if file_extension='DSK' then correcto:=dsk_format(0,file_size,datos_dsk);
 if file_extension='IPF' then correcto:=ipf_format(0,file_size,datos_dsk);
 if file_extension='D64' then correcto:=d64_format(0,file_size,datos_dsk);
 if correcto then begin
-    llamadas_maquina.open_file:=file_extension+':'+end_file_name;
+    cadena:=file_extension+':'+end_file_name;
     if main_vars.tipo_maquina<>3000 then ResetFDC;
     dsk[0].ImageName:=end_file_name;
     load_dsk.Button1Click(self);
 end else begin
   MessageDlg('Error abriendo el disco: "'+end_file_name+'".', mtError,[mbOk], 0);
-  llamadas_maquina.open_file:='';
+  cadena:='';
 end;
-change_caption;
+change_caption(cadena);
 freemem(datos_dsk);
 datos_dsk:=nil;
 end;

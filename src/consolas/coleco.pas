@@ -267,53 +267,54 @@ reset_coleco;
 abrir_cartucho:=true;
 end;
 
-function abrir_coleco:boolean;
+procedure abrir_coleco;
 var
   extension,nombre_file,RomFile:string;
   datos:pbyte;
   longitud,crc:integer;
   resultado:boolean;
 begin
-  if not(OpenRom(StColecovision,Romfile)) then begin
-    abrir_coleco:=true;
-    exit;
-  end;
-  abrir_coleco:=false;
+  if not(OpenRom(StColecovision,Romfile)) then exit;
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
     if not(search_file_from_zip(RomFile,'*.col',nombre_file,longitud,crc,false)) then
       if not(search_file_from_zip(RomFile,'*.rom',nombre_file,longitud,crc,false)) then
         if not(search_file_from_zip(RomFile,'*.bin',nombre_file,longitud,crc,false)) then
           if not(search_file_from_zip(RomFile,'*.csn',nombre_file,longitud,crc,true)) then
-            if not(search_file_from_zip(RomFile,'*.dsp',nombre_file,longitud,crc,true)) then exit;
+            if not(search_file_from_zip(RomFile,'*.dsp',nombre_file,longitud,crc,true)) then begin
+              MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+              exit;
+            end;
     getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
-      freemem(datos);
-      exit;
-    end;
+    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then freemem(datos)
+      else resultado:=true;
   end else begin
-    if ((extension<>'COL') and (extension<>'ROM') and (extension<>'BIN') and (extension<>'CSN') and (extension<>'DSP')) then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
+    if ((extension<>'COL') and (extension<>'ROM') and (extension<>'BIN') and (extension<>'CSN') and (extension<>'DSP')) then begin
+      MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
       exit;
     end;
-    nombre_file:=extractfilename(RomFile);
+    if read_file_size(RomFile,longitud) then begin
+      getmem(datos,longitud);
+      if not(read_file(RomFile,datos,longitud)) then freemem(datos)
+        else resultado:=true;
+      nombre_file:=extractfilename(RomFile);
+    end;
   end;
-abrir_coleco:=true;
-extension:=extension_fichero(nombre_file);
-if ((extension='CSN') or (extension='DSP')) then resultado:=abrir_coleco_snapshot(datos,longitud)
-   else resultado:=abrir_cartucho(datos,longitud);
-freemem(datos);
-if resultado then begin
-  llamadas_maquina.open_file:=nombre_file;
-end else begin
-  MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
-  llamadas_maquina.open_file:='';
-end;
-change_caption;
-directory.coleco_snap:=ExtractFilePath(romfile);
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    exit;
+  end;
+  extension:=extension_fichero(nombre_file);
+  if ((extension='CSN') or (extension='DSP')) then resultado:=abrir_coleco_snapshot(datos,longitud)
+    else resultado:=abrir_cartucho(datos,longitud);
+  freemem(datos);
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    nombre_file:='';
+  end else reset_coleco;
+  change_caption(nombre_file);
+  directory.coleco_snap:=ExtractFilePath(romfile);
 end;
 
 procedure coleco_grabar_snapshot;
@@ -335,7 +336,7 @@ if SaveRom(StColecovision,nombre,indice) then begin
         end;
         if not(correcto) then MessageDlg('No se ha podido guardar el snapshot!',mtError,[mbOk],0);
 end else exit;
-Directory.coleco_snap:=extractfiledir(nombre);
+Directory.coleco_snap:=ExtractFilePath(nombre);
 end;
 
 function iniciar_coleco:boolean;

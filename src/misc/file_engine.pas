@@ -31,7 +31,7 @@ function file_name_only(cadena:string):string;
 function search_file_from_zip(nombre_zip,file_mask:string;var nombre_file:string;var longitud,crc:integer;warning:boolean):boolean;
 function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
 function load_file_from_zip(nombre_zip,nombre_file:string;donde:pbyte;var longitud,crc:integer;warning:boolean):boolean;
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
+function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword):boolean;
 //Parte ZLIB
 procedure compress_zlib(in_buffer:pointer;in_size:integer;out_buffer:pointer;var out_size:integer);
 procedure decompress_zlib(in_buffer:pointer;in_size:integer;var out_buffer:pointer;var out_size:integer);
@@ -651,7 +651,10 @@ if not(FileExists(nombre_zip)) then exit;
   ZipFile.Free;
 {$endif}
 search_file_from_zip:=res;
-if (warning and not(res)) then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+if (warning and not(res)) then begin
+  MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+  principal1.Enabled:=true;
+end;
 end;
 
 function find_next_file_zip(var nombre_file:string;var longitud,crc:integer):boolean;
@@ -753,7 +756,10 @@ begin
   if not(find) then begin
     ZipFile.Close;
     ZipFile.Free;
-    if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+    if warning then begin
+      MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+      principal1.Enabled:=true;
+    end;
     exit;
   end;
   longitud:=ZipFile.FileInfos[f].UncompressedSize;
@@ -775,7 +781,10 @@ begin
   end;
   if not(find) then begin
     ZipFile.Free;
-    if warning then MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+    if warning then begin
+      MessageDlg(leng[main_vars.idioma].errores[0]+' "'+nombre_file+'" '+leng[main_vars.idioma].errores[1]+' '+nombre_zip, mtError,[mbOk], 0);
+      principal1.Enabled:=true;
+    end;
     exit;
   end;
   zfile:=unzOpen(pchar(nombre_zip));
@@ -789,7 +798,7 @@ begin
 load_file_from_zip:=true;
 end;
 
-function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:integer):boolean;
+function load_file_from_zip_crc(nombre_zip:string;donde:pbyte;var longitud:integer;crc:dword):boolean;
 var
   f:word;
   find:boolean;
@@ -805,6 +814,7 @@ begin
   //Si no existe el ZIP -> Error
   if not(FileExists(nombre_zip)) then begin
     MessageDlg(leng[main_vars.idioma].errores[2]+' "'+extractfilename(nombre_zip)+'" ', mtError,[mbOk], 0);
+    principal1.Enabled:=true;
     exit;
   end;
   find:=false;
@@ -812,7 +822,7 @@ begin
   ZipFile:=TZipFile.Create;
   ZipFile.Open(nombre_zip,zmRead);
   for f:=0 to (ZipFile.FileCount-1) do begin
-    if ZipFile.FileInfos[f].CRC32=cardinal(crc) then begin
+    if ZipFile.FileInfos[f].CRC32=crc then begin
       find:=true;
       break;
     end;

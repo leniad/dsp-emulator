@@ -362,42 +362,47 @@ while EmuStatus=EsRuning do begin
 end;
 end;
 
-
 //Main
-function abrir_chip8:boolean;
+procedure abrir_chip8;
 var
   extension,nombre_file,RomFile:string;
   longitud,crc:integer;
   datos:pbyte;
+  resultado:boolean;
 begin
-abrir_chip8:=false;
-if not(OpenRom(StChip8,RomFile)) then exit;
+  if not(OpenRom(StChip8,RomFile)) then exit;
   extension:=extension_fichero(RomFile);
+  resultado:=false;
   if extension='ZIP' then begin
     if not(search_file_from_zip(RomFile,'*.ch8',nombre_file,longitud,crc,false)) then
-      if not(search_file_from_zip(RomFile,'*.bin',nombre_file,longitud,crc,false)) then exit;
+      if not(search_file_from_zip(RomFile,'*.bin',nombre_file,longitud,crc,false)) then begin
+        MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+        exit;
+      end;
     getmem(datos,longitud);
-    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then begin
-      freemem(datos);
-      exit;
-    end;
+    if not(load_file_from_zip(RomFile,nombre_file,datos,longitud,crc,true)) then freemem(datos)
+      else resultado:=true;
   end else begin
-    if ((extension<>'CH8') and (extension<>'BIN')) then exit;
-    if not(read_file_size(RomFile,longitud)) then exit;
-    getmem(datos,longitud);
-    if not(read_file(RomFile,datos,longitud)) then begin
-      freemem(datos);
+    if ((extension<>'CH8') and (extension<>'BIN')) then begin
+      MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
       exit;
     end;
-    nombre_file:=extractfilename(RomFile);
+    if read_file_size(RomFile,longitud) then begin
+      getmem(datos,longitud);
+      if not(read_file(RomFile,datos,longitud)) then freemem(datos)
+        else resultado:=true;
+      nombre_file:=extractfilename(RomFile);
+    end;
+  end;
+  if not(resultado) then begin
+    MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
+    exit;
   end;
   reset_chip8;
-  llamadas_maquina.open_file:=nombre_file;
-  change_caption;
+  change_caption(nombre_file);
   copymemory(@memoria[$200],datos,longitud);
   freemem(datos);
   directory.Chip8:=ExtractFilePath(romfile);
-  abrir_chip8:=true;
 end;
 
 function iniciar_chip8:boolean;
