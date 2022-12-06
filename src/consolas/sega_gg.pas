@@ -8,12 +8,11 @@ uses nz80,{$IFDEF WINDOWS}windows,{$ENDIF}
 procedure cargar_gg;
 
 implementation
-uses principal;
 
+uses principal;
 var
   bios_enabled:boolean;
   io_gg:array[0..6] of byte;
-
 procedure eventos_gg;
 begin
 if event.keyboard then begin
@@ -346,3 +345,4 @@ llamadas_maquina.fps_max:=FPS_NTSC;
 end;
 
 end.
+

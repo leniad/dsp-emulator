@@ -1495,7 +1495,6 @@ iniciar_audio(true);
 screen_init(1,256,1,true);
 screen_init(2,256+166+7,154);  //256 pantalla normal + 166 window + 7 de desplazamiento
 iniciar_video(160,144);
-//iniciar_video(512,512);
 //Main CPU
 lr35902_0:=cpu_lr.Create(GB_CLOCK,154); //154 lineas, 456 estados t por linea
 lr35902_0.change_ram_calls(gb_getbyte,gb_putbyte);
@@ -1511,6 +1510,7 @@ hay_nvram:=false;
 getmem(gb_head,sizeof(tgb_head));
 fill_full_screen(PANT_TEMP,$100);
 actualiza_video;
+reset_gb;
 if main_vars.console_init then abrir_gb;
 iniciar_gb:=true;
 end;

@@ -421,7 +421,6 @@ reset_chip8;
 if main_vars.console_init then abrir_chip8;
 iniciar_chip8:=true;
 end;
-
 procedure Cargar_chip8;
 begin
 principal1.BitBtn10.Glyph:=nil;

@@ -489,6 +489,7 @@ z80_0.init_sound(sms_sound_update);
 z80_0.change_misc_calls(sms_set_hpos);
 //final
 mapper_sms.max:=1;
+reset_sms;
 if main_vars.console_init then abrir_sms;
 iniciar_sms:=true;
 end;

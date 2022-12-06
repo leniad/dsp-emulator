@@ -657,6 +657,8 @@ end;
 procedure Tprincipal1.Timer3Timer(Sender: TObject);
 begin
 timer3.Enabled:=false;
+//Si entro aqui NO debo ejecutar timer4 (puede venir del cambio de driver)
+timer4.Enabled:=false;
 if ((@llamadas_maquina.close<>nil) and main_vars.driver_ok) then llamadas_maquina.close;
 main_vars.tipo_maquina:=tipo_new;
 reset_dsp;
@@ -687,10 +689,10 @@ end else begin
   principal1.BitBtn3.Glyph:=nil;
   principal1.imagelist2.GetBitmap(6,principal1.BitBtn3.Glyph);
   timer1.Enabled:=true;
-  if @llamadas_maquina.bucle_general<>nil then begin
-    if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
-    llamadas_maquina.bucle_general;
-  end;
+  principal1.Enabled:=true;
+  EmuStatus:=EsRuning;
+  if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
+  llamadas_maquina.bucle_general;
 end;
 end;
 
@@ -698,10 +700,10 @@ end;
 procedure Tprincipal1.Timer4Timer(Sender: TObject);
 begin
 timer4.Enabled:=false;
+principal1.Enabled:=true;
+if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
 if main_vars.driver_ok then begin
   EmuStatus:=EsRuning;
-  principal1.Enabled:=true;
-  if not(main_screen.pantalla_completa) then Windows.SetFocus(child.Handle);
   timer1.Enabled:=true;
   llamadas_maquina.bucle_general;
 end;
@@ -793,15 +795,6 @@ SDL_VideoQuit;
 SDL_Quit;
 close_sdl_lib;
 halt(0);
-end;
-
-procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
-begin
-principal1.Enabled:=false;
-timer1.Enabled:=false;
-EmuStatus:=EsPause;
-if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
-timer4.Enabled:=true;
 end;
 
 procedure Tprincipal1.fPoke(Sender: TObject);
@@ -974,6 +967,15 @@ principal1.Enabled:=false;
 timer1.Enabled:=false;
 EmuStatus:=EsPause;
 llamadas_maquina.configurar;
+timer4.Enabled:=true;
+end;
+
+procedure Tprincipal1.fSaveSnapShot(Sender: TObject);
+begin
+principal1.Enabled:=false;
+timer1.Enabled:=false;
+EmuStatus:=EsPause;
+if @llamadas_maquina.grabar_snapshot<>nil then llamadas_maquina.grabar_snapshot;
 timer4.Enabled:=true;
 end;
 

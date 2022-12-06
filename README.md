@@ -1,4 +1,13 @@
 ﻿# DSP Emulator status #
+<b>06/12/22 - DSP Emulator 0.21WIP4.2. Another fix! Updated Windows binary and source update.<br>
+<pre>
+-General
+    +Fixed - Emulator losses focus and keyboard stop working (Thanks to Neville)
+    +Updated SDL library to 2.26.1
+-Coleco
+    +Fire button 1 and 2 switched
+    +Fixed error message loading a cartridge
+</pre><br><br>
 <b>05/11/22 - DSP Emulator 0.21WIP4.1. Quick fix! Updated Windows binary and source update.<br>
 <pre>
 -Lazarus

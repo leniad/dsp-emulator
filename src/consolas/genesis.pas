@@ -200,7 +200,6 @@ for f:=0 to ((longitud-1) shr 1) do begin
   rom[f]:=(rom[f] shr 8) or ((rom[f] and $ff) shl 8);
 end;
 reset_genesis;
-iniciar_genesis:=true;
 end;
 
 procedure cerrar_genesis;

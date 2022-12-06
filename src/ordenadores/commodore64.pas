@@ -1,37 +1,29 @@
 unit commodore64;
-
 //{$DEFINE CIA_OLD}
-
 interface
 uses {$IFDEF WINDOWS}windows,{$ENDIF}
      main_engine,controls_engine,sysutils,dialogs,misc_functions,
      rom_engine,sound_engine,file_engine,m6502,mos6566,gfx_engine,
      tape_window,sid_sound,cargar_dsk,forms,
      {$IFDEF CIA_OLD}mos6526_old{$ELSE}mos6526{$ENDIF};
-
 function iniciar_c64:boolean;
 //Para los snapshots
 procedure c64_putbyte(direccion:word;valor:byte);
-
 var
     char_rom:array[0..$fff] of byte;
     color_ram:array[0..$3ff] of byte;
     cia_nmi,cia_irq,vic_irq,tape_motor:boolean;
     c64_keyboard,c64_keyboard_i:array[0..7] of byte;
-
 implementation
 uses tap_tzx,snapshot;
-
 const
   c64_kernel:tipo_roms=(n:'901227-03.u4';l:$2000;p:$0;crc:$dbe3e7c7);
   c64_basic:tipo_roms=(n:'901226-01.u3';l:$2000;p:$0;crc:$f833d117);
   c64_char:tipo_roms=(n:'901225-01.u5';l:$1000;p:0;crc:$ec4272ee);
-
 var
   kernel_rom,basic_rom:array[0..$1fff] of byte;
   tape_control,port_bits,port_val:byte;
   char_ram,kernel_enabled,basic_enabled,char_enabled:boolean;
-
 procedure eventos_c64;
 begin
 if event.arcade then begin
@@ -135,7 +127,6 @@ if event.keyboard then begin
   if keyboard[KEYBOARD_ESCAPE] then c64_keyboard[7]:=(c64_keyboard[7] and $7f) else c64_keyboard[7]:=(c64_keyboard[7] or $80);
 end;
 end;
-
 procedure c64_principal;
 var
   f:word;
@@ -155,7 +146,6 @@ while EmuStatus=EsRuning do begin
  video_sync;
 end;
 end;
-
 function c64_getbyte(direccion:word):byte;
 begin
 case direccion of
@@ -183,7 +173,6 @@ case direccion of
                   else c64_getbyte:=memoria[direccion];
 end;
 end;
-
 procedure actualiza_mem;
 var
   res:byte;
@@ -203,7 +192,6 @@ kernel_enabled:=(res and 2)<>0;
 basic_enabled:=(res and 3)=3;
 tape_motor:=(port_val and $20)=0;
 end;
-
 procedure c64_putbyte(direccion:word;valor:byte);
 begin
 case direccion of
@@ -234,7 +222,6 @@ case direccion of
     2..$cfff,$e000..$ffff:memoria[direccion]:=valor;
 end;
 end;
-
 {$IFDEF CIA_OLD}
 function cia1_portb_r:byte;
 var
@@ -252,35 +239,29 @@ begin
   if ((mos6526_0.pa and $80)=0) then ret:=ret and c64_keyboard[7];
   cia1_portb_r:=ret;
 end;
-
 procedure cia2_porta_w(valor:byte);
 begin
   mos6566_0.ChangedVA(not(valor) and 3);
 end;
-
 procedure cia2_portb_w(valor:byte);
 begin
 end;
 {$ENDIF}
-
 procedure c64_cia_irq(state:byte);
 begin
   m6502_0.change_irq(state);
   cia_irq:=(state=ASSERT_LINE);
 end;
-
 procedure c64_vic_irq(state:byte);
 begin
   m6502_0.change_irq(state);
   vic_irq:=(state=ASSERT_LINE);
 end;
-
 procedure c64_nmi(state:byte);
 begin
   m6502_0.change_nmi(state);
   cia_nmi:=(state=ASSERT_LINE);
 end;
-
 procedure c64_despues_instruccion(tstates:word);
 begin
   if (cia_irq or vic_irq) then m6502_0.change_irq(ASSERT_LINE);
@@ -301,7 +282,6 @@ begin
   mos6526_0.EmulateLine2(tstates);
   {$ENDIF}
 end;
-
 procedure c64_reset;
 var
   f:byte;
@@ -329,17 +309,14 @@ cia_irq:=false;
 cia_nmi:=false;
 tape_motor:=false;
 end;
-
 procedure c64_tape_start;
 begin
   tape_control:=$0;
 end;
-
 procedure c64_tape_stop;
 begin
   tape_control:=$30;
 end;
-
 procedure c64_sound_update;
 begin
   sid_0.update;
@@ -481,5 +458,4 @@ begin
   cinta_tzx.tape_start:=c64_tape_start;
   cinta_tzx.tape_stop:=c64_tape_stop;
 end;
-
 end.

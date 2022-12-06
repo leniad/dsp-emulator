@@ -1233,7 +1233,7 @@ object principal1: Tprincipal1
     TabOrder = 1
     Visible = False
     ExplicitLeft = 342
-    ExplicitHeight = 183
+    ExplicitHeight = 178
     object BitBtn9: TBitBtn
       Left = 4
       Top = 45
@@ -1875,7 +1875,7 @@ object principal1: Tprincipal1
     Height = 19
     Align = alBottom
     TabOrder = 2
-    ExplicitTop = 225
+    ExplicitTop = 220
     ExplicitWidth = 391
     DesignSize = (
       397
@@ -4956,7 +4956,7 @@ object principal1: Tprincipal1
   end
   object Timer4: TTimer
     Enabled = False
-    Interval = 500
+    Interval = 700
     OnTimer = Timer4Timer
     Left = 232
     Top = 80

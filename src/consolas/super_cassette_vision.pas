@@ -560,6 +560,7 @@ end;
 set_pal(colores,$10);
 //final
 reset_scv;
+if main_vars.console_init then abrir_scv;
 iniciar_scv:=true;
 end;
 

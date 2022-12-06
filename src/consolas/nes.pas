@@ -597,8 +597,8 @@ var
   longitud,crc:integer;
   resultado:boolean;
 begin
-  cartucho_cargado:=false;
   if not(OpenRom(StNes,RomFile)) then exit;
+  cartucho_cargado:=false;
   //Primero, si tengo que guardar la SRAM por que ya he abierto un cartucho
   if sram_present then write_file(cart_name,@memoria[$6000],$2000);
   if @n2a03_0.additional_sound<>nil then n2a03_0.add_more_sound(nil);

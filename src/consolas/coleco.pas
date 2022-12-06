@@ -76,15 +76,15 @@ if event.arcade then begin
    if arcade_input.right[0] then tcoleco.joystick[0]:=(tcoleco.joystick[0] and $fd) else tcoleco.joystick[0]:=(tcoleco.joystick[0] or 2);
    if arcade_input.down[0] then tcoleco.joystick[0]:=(tcoleco.joystick[0] and $fb) else tcoleco.joystick[0]:=(tcoleco.joystick[0] or 4);
    if arcade_input.left[0] then tcoleco.joystick[0]:=(tcoleco.joystick[0] and $f7) else tcoleco.joystick[0]:=(tcoleco.joystick[0] or 8);
-   if arcade_input.but0[0] then tcoleco.joystick[0]:=(tcoleco.joystick[0] and $bf) else tcoleco.joystick[0]:=(tcoleco.joystick[0] or $40);
-   if arcade_input.but1[0] then tcoleco.keypad[0]:=(tcoleco.keypad[0] and $bfff) else tcoleco.keypad[0]:=(tcoleco.keypad[0] or $4000);
+   if arcade_input.but1[0] then tcoleco.joystick[0]:=(tcoleco.joystick[0] and $bf) else tcoleco.joystick[0]:=(tcoleco.joystick[0] or $40);
+   if arcade_input.but0[0] then tcoleco.keypad[0]:=(tcoleco.keypad[0] and $bfff) else tcoleco.keypad[0]:=(tcoleco.keypad[0] or $4000);
    //P2
    if arcade_input.up[1] then tcoleco.joystick[1]:=(tcoleco.joystick[1] and $fe) else tcoleco.joystick[1]:=(tcoleco.joystick[1] or 1);
    if arcade_input.right[1] then tcoleco.joystick[1]:=(tcoleco.joystick[1] and $fd) else tcoleco.joystick[1]:=(tcoleco.joystick[1] or 2);
    if arcade_input.down[1] then tcoleco.joystick[1]:=(tcoleco.joystick[1] and $fb) else tcoleco.joystick[1]:=(tcoleco.joystick[1] or 4);
    if arcade_input.left[1] then tcoleco.joystick[1]:=(tcoleco.joystick[1] and $f7) else tcoleco.joystick[1]:=(tcoleco.joystick[1] or 8);
-   if arcade_input.but0[1] then tcoleco.joystick[1]:=(tcoleco.joystick[1] and $bf) else tcoleco.joystick[1]:=(tcoleco.joystick[1] or $40);
-   if arcade_input.but1[1] then tcoleco.keypad[1]:=(tcoleco.keypad[1] and $bfff) else tcoleco.keypad[1]:=(tcoleco.keypad[1] or $4000);
+   if arcade_input.but1[1] then tcoleco.joystick[1]:=(tcoleco.joystick[1] and $bf) else tcoleco.joystick[1]:=(tcoleco.joystick[1] or $40);
+   if arcade_input.but0[1] then tcoleco.keypad[1]:=(tcoleco.keypad[1] and $bfff) else tcoleco.keypad[1]:=(tcoleco.keypad[1] or $4000);
 end;
 end;
 
@@ -238,6 +238,7 @@ var
 begin
 abrir_cartucho:=false;
 tcoleco.boxxle:=false;
+tcoleco.mega_cart:=false;
 if longitud>32768 then begin
    ptemp:=datos;
    rom_crc32:=calc_crc(datos,longitud);
@@ -249,6 +250,7 @@ if longitud>32768 then begin
           inc(ptemp,$4000);
       end;
       copymemory(@memoria[$8000],@tcoleco.mega_cart_rom[0,0],$4000);
+      abrir_cartucho:=true;
    end else begin //Mega Cart
       tcoleco.mega_cart:=true;
       for f:=0 to tcoleco.mega_cart_size do begin
@@ -257,14 +259,13 @@ if longitud>32768 then begin
       end;
       if not(((tcoleco.mega_cart_rom[tcoleco.mega_cart_size,0]=$55) and (tcoleco.mega_cart_rom[tcoleco.mega_cart_size,1]=$aa)) or ((tcoleco.mega_cart_rom[tcoleco.mega_cart_size,0]=$aa) and (tcoleco.mega_cart_rom[tcoleco.mega_cart_size,1]=$55)) or ((tcoleco.mega_cart_rom[tcoleco.mega_cart_size,0]=$66) and (tcoleco.mega_cart_rom[tcoleco.mega_cart_size,1]=$99))) then exit;
       copymemory(@memoria[$8000],@tcoleco.mega_cart_rom[tcoleco.mega_cart_size,0],$4000);
+      abrir_cartucho:=true;
    end;
 end else begin
     if not(((datos[0]=$55) and (datos[1]=$aa)) or ((datos[0]=$aa) and (datos[1]=$55)) or ((datos[0]=$66) and (datos[1]=$99))) then exit;
     copymemory(@memoria[$8000],datos,longitud);
-    tcoleco.mega_cart:=false;
+    abrir_cartucho:=true;
 end;
-reset_coleco;
-abrir_cartucho:=true;
 end;
 
 procedure abrir_coleco;
@@ -312,7 +313,8 @@ begin
   if not(resultado) then begin
     MessageDlg('Error cargando snapshot/ROM.'+chr(10)+chr(13)+'Error loading the snapshot/ROM.', mtInformation,[mbOk], 0);
     nombre_file:='';
-  end else reset_coleco;
+  end;
+  reset_coleco;
   change_caption(nombre_file);
   directory.coleco_snap:=ExtractFilePath(romfile);
 end;
@@ -359,6 +361,7 @@ sn_76496_0:=sn76496_chip.Create(3579545);
 if not(roms_load(@rom,coleco_bios)) then exit;
 //final
 reset_coleco;
+if main_vars.console_init then abrir_coleco;
 iniciar_coleco:=true;
 end;
 
